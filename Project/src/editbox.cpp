@@ -19,7 +19,7 @@ static void DrawText(EditBox *edit, TTF_Text *text, float x, float y)
 #ifdef TEST_SURFACE_ENGINE
     if (edit->window_surface) {
         /* Flush the renderer so we can draw directly to the window surface */
-        SDL_FlushRenderer(edit->renderer);
+        SDL_FlushRenderer(edit->pRenderer);
         TTF_DrawSurfaceText(text, (int)SDL_roundf(x), (int)SDL_roundf(y), edit->window_surface);
         return;
     }
@@ -91,13 +91,13 @@ static void CancelComposition(EditBox *edit)
 {
     ResetComposition(edit);
 
-    SDL_ClearComposition(edit->window);
+    SDL_ClearComposition(edit->pWindow);
 }
 
 static void DrawComposition(EditBox *edit)
 {
     /* Draw an underline under the composed text */
-    SDL_Renderer *renderer = edit->renderer;
+    SDL_Renderer *pRenderer = edit->pRenderer;
     int font_height = TTF_GetFontHeight(edit->font);
     TTF_SubString **substrings = TTF_GetTextSubStringsForRange(edit->text, edit->composition_start, edit->composition_length, NULL);
     if (substrings) {
@@ -107,7 +107,7 @@ static void DrawComposition(EditBox *edit)
             rect.x += edit->rect.x;
             rect.y += (edit->rect.y + font_height);
             rect.h = 1.0f;
-            SDL_RenderFillRect(renderer, &rect);
+            SDL_RenderFillRect(pRenderer, &rect);
         }
         SDL_free(substrings);
     }
@@ -122,7 +122,7 @@ static void DrawComposition(EditBox *edit)
                 rect.x += edit->rect.x;
                 rect.y += (edit->rect.y + font_height) - 1;
                 rect.h = 1.0f;
-                SDL_RenderFillRect(renderer, &rect);
+                SDL_RenderFillRect(pRenderer, &rect);
             }
             SDL_free(substrings);
         }
@@ -131,7 +131,7 @@ static void DrawComposition(EditBox *edit)
 
 static void DrawCompositionCursor(EditBox *edit)
 {
-    SDL_Renderer *renderer = edit->renderer;
+    SDL_Renderer *pRenderer = edit->pRenderer;
     if (edit->composition_cursor_length == 0) {
         TTF_SubString cursor;
         if (TTF_GetTextSubString(edit->text, edit->composition_start + edit->composition_cursor, &cursor)) {
@@ -145,8 +145,8 @@ static void DrawCompositionCursor(EditBox *edit)
             rect.y += edit->rect.y;
             rect.w = 1.0f;
 
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
-            SDL_RenderFillRect(renderer, &rect);
+            SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
+            SDL_RenderFillRect(pRenderer, &rect);
         }
     }
 }
@@ -231,7 +231,7 @@ static void SaveCandidates(EditBox *edit, const SDL_Event *event)
 
 static void DrawCandidates(EditBox *edit)
 {
-    SDL_Renderer *renderer = edit->renderer;
+    SDL_Renderer *pRenderer = edit->pRenderer;
     SDL_Rect safe_rect;
     SDL_FRect candidates_rect;
     int candidates_w;
@@ -249,7 +249,7 @@ static void DrawCandidates(EditBox *edit)
         return;
     }
 
-    SDL_GetRenderSafeArea(renderer, &safe_rect);
+    SDL_GetRenderSafeArea(pRenderer, &safe_rect);
     TTF_GetTextSize(edit->candidates, &candidates_w, &candidates_h);
     candidates_rect.x = edit->rect.x + cursor.rect.x;
     candidates_rect.y = edit->rect.y + cursor.rect.y + cursor.rect.h + 2.0f;
@@ -263,10 +263,10 @@ static void DrawCandidates(EditBox *edit)
     }
 
     /* Draw the candidate background */
-    SDL_SetRenderDrawColor(renderer, 0xAA, 0xAA, 0xAA, 0xFF);
-    SDL_RenderFillRect(renderer, &candidates_rect);
-    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
-    SDL_RenderRect(renderer, &candidates_rect);
+    SDL_SetRenderDrawColor(pRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
+    SDL_RenderFillRect(pRenderer, &candidates_rect);
+    SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0xFF);
+    SDL_RenderRect(pRenderer, &candidates_rect);
 
     /* Draw the candidates */
     x = candidates_rect.x + 3.0f;
@@ -284,7 +284,7 @@ static void DrawCandidates(EditBox *edit)
                 rect.x += x;
                 rect.y += (y + font_height);
                 rect.h = 1.0f;
-                SDL_RenderFillRect(renderer, &rect);
+                SDL_RenderFillRect(pRenderer, &rect);
             }
             SDL_free(substrings);
         }
@@ -294,13 +294,13 @@ static void DrawCandidates(EditBox *edit)
 static void UpdateTextInputArea(EditBox *edit)
 {
     /* Convert the text input area and cursor into window coordinates */
-    SDL_Renderer *renderer = edit->renderer;
+    SDL_Renderer *pRenderer = edit->pRenderer;
     SDL_FPoint window_edit_rect_min;
     SDL_FPoint window_edit_rect_max;
     SDL_FPoint window_cursor;
-    if (!SDL_RenderCoordinatesToWindow(renderer, edit->rect.x, edit->rect.y, &window_edit_rect_min.x, &window_edit_rect_min.y) ||
-        !SDL_RenderCoordinatesToWindow(renderer, edit->rect.x + edit->rect.w, edit->rect.y + edit->rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) ||
-        !SDL_RenderCoordinatesToWindow(renderer, edit->cursor_rect.x, edit->cursor_rect.y, &window_cursor.x, &window_cursor.y)) {
+    if (!SDL_RenderCoordinatesToWindow(pRenderer, edit->rect.x, edit->rect.y, &window_edit_rect_min.x, &window_edit_rect_min.y) ||
+        !SDL_RenderCoordinatesToWindow(pRenderer, edit->rect.x + edit->rect.w, edit->rect.y + edit->rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) ||
+        !SDL_RenderCoordinatesToWindow(pRenderer, edit->cursor_rect.x, edit->cursor_rect.y, &window_cursor.x, &window_cursor.y)) {
         return;
     }
 
@@ -310,7 +310,7 @@ static void UpdateTextInputArea(EditBox *edit)
     rect.w = (int)SDL_roundf(window_edit_rect_max.x - window_edit_rect_min.x);
     rect.h = (int)SDL_roundf(window_edit_rect_max.y - window_edit_rect_min.y);
     int cursor_offset = (int)SDL_roundf(window_cursor.x - window_edit_rect_min.x);
-    SDL_SetTextInputArea(edit->window, &rect, cursor_offset);
+    SDL_SetTextInputArea(edit->pWindow, &rect, cursor_offset);
 }
 
 static void DrawCursor(EditBox *edit)
@@ -320,20 +320,20 @@ static void DrawCursor(EditBox *edit)
         return;
     }
 
-    SDL_Renderer *renderer = edit->renderer;
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
-    SDL_RenderFillRect(renderer, &edit->cursor_rect);
+    SDL_Renderer *pRenderer = edit->pRenderer;
+    SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
+    SDL_RenderFillRect(pRenderer, &edit->cursor_rect);
 }
 
-EditBox *EditBox_Create(SDL_Window *window, SDL_Renderer *renderer, TTF_TextEngine *engine, TTF_Font *font, const SDL_FRect *rect)
+EditBox *EditBox_Create(SDL_Window *pWindow, SDL_Renderer *pRenderer, TTF_TextEngine *engine, TTF_Font *font, const SDL_FRect *rect)
 {
     EditBox *edit = (EditBox *)SDL_calloc(1, sizeof(*edit));
     if (!edit) {
         return NULL;
     }
 
-    edit->window = window;
-    edit->renderer = renderer;
+    edit->pWindow = pWindow;
+    edit->pRenderer = pRenderer;
     edit->font = font;
     edit->text = TTF_CreateText(engine, font, NULL, 0);
     if (!edit->text) {
@@ -355,7 +355,7 @@ EditBox *EditBox_Create(SDL_Window *window, SDL_Renderer *renderer, TTF_TextEngi
      * This isn't strictly necessary, we can still use the renderer if it's
      * a software renderer targeting an SDL_Surface.
      */
-    edit->window_surface = (SDL_Surface *)SDL_GetPointerProperty(SDL_GetRendererProperties(renderer), SDL_PROP_RENDERER_SURFACE_POINTER, NULL);
+    edit->window_surface = (SDL_Surface *)SDL_GetPointerProperty(SDL_GetRendererProperties(pRenderer), SDL_PROP_RENDERER_SURFACE_POINTER, NULL);
 #endif
 
     /* We support rendering the composition and candidates */
@@ -388,9 +388,9 @@ void EditBox_SetFocus(EditBox *edit, bool focus)
     edit->has_focus = focus;
 
     if (edit->has_focus) {
-        SDL_StartTextInput(edit->window);
+        SDL_StartTextInput(edit->pWindow);
     } else {
-        SDL_StopTextInput(edit->window);
+        SDL_StopTextInput(edit->pWindow);
     }
 }
 
@@ -400,7 +400,7 @@ void EditBox_Draw(EditBox *edit)
         return;
     }
 
-    SDL_Renderer *renderer = edit->renderer;
+    SDL_Renderer *pRenderer = edit->pRenderer;
     float x = edit->rect.x;
     float y = edit->rect.y;
 
@@ -410,13 +410,13 @@ void EditBox_Draw(EditBox *edit)
         TTF_SubString **highlights = TTF_GetTextSubStringsForRange(edit->text, marker, length, NULL);
         if (highlights) {
             int i;
-            SDL_SetRenderDrawColor(renderer, 0xEE, 0xEE, 0x00, 0xFF);
+            SDL_SetRenderDrawColor(pRenderer, 0xEE, 0xEE, 0x00, 0xFF);
             for (i = 0; highlights[i]; ++i) {
                 SDL_FRect rect;
                 SDL_RectToFRect(&highlights[i]->rect, &rect);
                 rect.x += x;
                 rect.y += y;
-                SDL_RenderFillRect(renderer, &rect);
+                SDL_RenderFillRect(pRenderer, &rect);
             }
             SDL_free(highlights);
         }

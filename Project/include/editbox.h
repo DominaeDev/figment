@@ -21,8 +21,8 @@
 #define TEST_SURFACE_ENGINE
 
 typedef struct EditBox {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
+    SDL_Window *pWindow;
+    SDL_Renderer *pRenderer;
     TTF_Font *font;
     TTF_Text *text;
     SDL_FRect rect;
@@ -57,7 +57,7 @@ typedef struct EditBox {
 } EditBox;
 
 
-extern EditBox *EditBox_Create(SDL_Window *window, SDL_Renderer *renderer, TTF_TextEngine *engine, TTF_Font *font, const SDL_FRect *rect);
+extern EditBox *EditBox_Create(SDL_Window *pWindow, SDL_Renderer *pRenderer, TTF_TextEngine *engine, TTF_Font *font, const SDL_FRect *rect);
 extern void EditBox_Destroy(EditBox *edit);
 extern void EditBox_SetFocus(EditBox *edit, bool focus);
 extern void EditBox_Draw(EditBox *edit);

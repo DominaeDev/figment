@@ -96,12 +96,25 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Savepoint.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
+    <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\editbox.cpp" />
+    <ClCompile Include="src\Frame.cpp" />
+    <ClCompile Include="src\HorizontalSizer.cpp" />
+    <ClCompile Include="src\Sizer.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MainFrame.cpp" />
+    <ClCompile Include="src\Panel.cpp" />
     <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\editbox.h" />
+    <ClInclude Include="include\Frame.h" />
+    <ClInclude Include="include\HorizontalSizer.h" />
+    <ClInclude Include="include\Sizer.h" />
+    <ClInclude Include="include\MainFrame.h" />
+    <ClInclude Include="include\Panel.h" />
+    <ClInclude Include="include\Types.h" />
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
