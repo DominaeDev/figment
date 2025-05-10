@@ -18,6 +18,9 @@
     <Filter Include="Source Files\Third-party\SQLiteCpp">
       <UniqueIdentifier>{2d33d23a-af68-4cd7-8729-6d2367369bd8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Third-party\tinyxml2">
+      <UniqueIdentifier>{abfccfd5-f4a0-4eff-8c48-c0fed63d8c8c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -44,5 +47,19 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Backup.cpp">
       <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
+    <ClCompile Include="src\editbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp">
+      <Filter>Source Files\Third-party\tinyxml2</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\editbox.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
+      <Filter>Source Files\Third-party\tinyxml2</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
