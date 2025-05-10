@@ -1,5 +1,4 @@
 #include "HorizontalSizer.h"
-
 #include "Frame.h"
 
 void HorizontalSizer::Layout(SDL_FRect parentRect)
@@ -8,15 +7,15 @@ void HorizontalSizer::Layout(SDL_FRect parentRect)
 	if (count == 0)
 		return;
 
-	float totalWidth = std::max(parentRect.w, 0.0f);
-	float itemWidth = totalWidth / count;
-	float remainingWidth = totalWidth;
+	int totalWidth = (int)ceilf(std::max(parentRect.w, 0.0f));
+	int itemWidth = (int)ceilf((float)totalWidth / count);
+	int remainingWidth = totalWidth;
 	int totalProportion = 0;
 	int numStretch = 0;
 	for (auto& item : _items)
 	{
 		if (item.prop == 0)
-			remainingWidth = std::max(remainingWidth - item.pFrame->GetWidth(), 0.0f);
+			remainingWidth = std::max(remainingWidth - (int)item.pFrame->GetPreferredSize().x, 0);
 		else if (item.prop > 0)
 			totalProportion += item.prop;
 		else
@@ -25,26 +24,26 @@ void HorizontalSizer::Layout(SDL_FRect parentRect)
 	if (totalProportion == 0)
 		totalProportion = 1;
 
-	float x = 0.0f;
+	int x = 0;
 	for (auto& item : _items)
 	{
 		auto& rect = item.pFrame->GetRect();
-		float width = 0;
+		int width = 0;
 		if (item.prop == 0)
-			width = rect.w; // No resize
+			width = (int)item.pFrame->GetPreferredSize().x;
 		else if (item.prop > 0)
-			width = item.prop * remainingWidth / (float)totalProportion;
+			width = (int)(item.prop * remainingWidth / (float)totalProportion);
 		else
-			width = remainingWidth / (float)numStretch;
+			width = (int)(remainingWidth / (float)numStretch);
 
 		if (item.pFrame->GetMinSize().x > 0)
-			width = std::max(width, item.pFrame->GetMinSize().x);
+			width = std::max(width, (int)item.pFrame->GetMinSize().x);
 		if (item.pFrame->GetMaxSize().x > 0)
-			width = std::max(width, item.pFrame->GetMaxSize().x);
+			width = std::min(width, (int)item.pFrame->GetMaxSize().x);
 
 		rect.x = parentRect.x + x;
 		rect.y = parentRect.y;
-		rect.w = width;
+		rect.w = (float)width;
 
 		if ((item.flags & Flag::Expand) != 0)
 			rect.h = parentRect.h;

@@ -36,11 +36,12 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 	int w, h;
 	SDL_GetWindowSizeInPixels(pWindow, &w, &h);
+	SDL_SetWindowMinimumSize(pWindow, 800, 400);
 
 	// Create main frame
 	pMainFrame = new MainFrame();
-	pMainFrame->SetSize((float)w, (float)h);
 	pAppState->pTopFrame = pMainFrame;
+	pMainFrame->SetSize((float)w, (float)h);
 
 	return SDL_APP_CONTINUE;
 }
