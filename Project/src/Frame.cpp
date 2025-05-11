@@ -1,9 +1,6 @@
 #include "Frame.h"
 #include "Sizer.h"
-
-Frame::Frame()
-{
-}
+#include "Utility.h"
 
 Frame::~Frame()
 {
@@ -15,21 +12,16 @@ Frame::~Frame()
 
 void Frame::Update(float fDeltaTime)
 {
-	// Layout
-	if (_pSizer && _bInvalidLayout)
-	{
-		_pSizer->Layout(_rect);
-		_bInvalidLayout = false;
-	}
+	if (_bInvalidLayout)
+		Layout();
 
 	// Update this
 	OnUpdate(fDeltaTime);
 
 	// Update children
 	for (auto& child : _children)
-		child->OnUpdate(fDeltaTime);
+		child->Update(fDeltaTime);
 }
-
 
 void Frame::Render(SDL_Renderer* pRenderer)
 {
@@ -63,45 +55,95 @@ void Frame::Render(SDL_Renderer* pRenderer)
 	}
 }
 
+void Frame::Layout()
+{
+	if (_pSizer)
+		_pSizer->Layout(_rect);
+	else
+	{
+		// Update child positions
+		for (auto& child : _children)
+		{
+			auto& rect = child->GetRect();
+			auto position = child->GetAbsolutePosition();
+			rect.x = position.x;
+			rect.y = position.y;
+		}
+	}
+	_bInvalidLayout = false;
+}
+
+SDL_Color Frame::GetForegroundColor() const
+{
+	if (!ColorIsDefined(_foregroundColor))
+		return _pParent ? _pParent->GetForegroundColor() : SDL_Color();
+	return _foregroundColor;
+}
+
+SDL_Color Frame::GetBackgroundColor() const
+{
+	if (!ColorIsDefined(_backgroundColor))
+		return _pParent ? _pParent->GetBackgroundColor() : SDL_Color();
+	return _backgroundColor;
+
+}
+
 void Frame::ClearBackground(SDL_Renderer* pRenderer)
 {
-	if (_backgroundColor.a == 0)
-		return;
-
-	SDL_SetRenderDrawColor(pRenderer, _backgroundColor.r, _backgroundColor.g, _backgroundColor.b, _backgroundColor.a);
-	SDL_RenderFillRect(pRenderer, &_rect);
+	auto bgColor = GetBackgroundColor();
+	if (ColorIsDefined(bgColor))
+	{
+		SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
+		SDL_RenderFillRect(pRenderer, &_rect);
+	}
 }
 
 void Frame::SetRect(SDL_FRect rect)
 {
-	_rect = rect;
+	SetPosition(rect.x, rect.y);
+	SetSize(rect.w, rect.h);
 	_bInvalidLayout = true;
 	OnSize();
 }
 
 void Frame::SetRect(float x, float y, float width, float height)
 {
-	_rect = SDL_FRect { x, y, width, height };
+	SetPosition(x, y);
+	SetSize(width, height);
 	_bInvalidLayout = true;
 	OnSize();
 }
 
-void Frame::SetPosition(SDL_FPoint position)
+SDL_FPoint Frame::GetAbsolutePosition() const
 {
-	_rect.x = position.x;
-	_rect.y = position.y;
-	OnSize();
+	if (_pParent)
+	{
+		auto position = SDL_FPoint { _pParent->_rect.x, _pParent->_rect.y };
+		position.x += _position.x;
+		position.y += _position.y;
+		return position;
+	}
+
+	return _position;
 }
 
 void Frame::SetPosition(float x, float y)
 {
-	_rect.x = x;
-	_rect.y = y;
+	SetPosition(SDL_FPoint(x, y));
+}
+
+void Frame::SetPosition(SDL_FPoint position)
+{
+	_position = position;
+	position = GetAbsolutePosition();
+	_rect = SDL_FRect(position.x, position.y, _rect.w, _rect.h);
+	_bInvalidLayout = true;
 	OnSize();
 }
 
 void Frame::SetSize(SDL_FPoint size)
 {
+	_size = size;
 	_rect.w = size.x;
 	_rect.h = size.y;
 	_bInvalidLayout = true;
@@ -110,26 +152,23 @@ void Frame::SetSize(SDL_FPoint size)
 
 void Frame::SetSize(float width, float height)
 {
-	_rect.w = width;
-	_rect.h = height;
-	_bInvalidLayout = true;
-	OnSize();
+	SetSize(SDL_FPoint(width, height));
 }
 
-void Frame::SetPreferredSize(SDL_FPoint size)
+void Frame::SetWidth(float width)
 {
-	_preferredSize = size;
+	SetSize(SDL_FPoint(width, _size.y));
 }
 
-void Frame::SetPreferredSize(float width, float height)
+void Frame::SetHeight(float height)
 {
-	_preferredSize.x = width;
-	_preferredSize.y = height;
+	SetSize(SDL_FPoint(_size.x, height));
 }
 
-void Frame::AddChild(Frame* frame)
+void Frame::AddChild(Frame* pFrame)
 {
-	_children.push_back(frame);
+	pFrame->SetParent(this);
+	_children.push_back(pFrame);
 }
 
 bool Frame::RemoveChild(Frame* frame)
@@ -137,6 +176,7 @@ bool Frame::RemoveChild(Frame* frame)
 	auto it = std::find(std::begin(_children), std::end(_children), frame);
 	if (it != std::end(_children))
 	{
+		(*it)->SetParent(nullptr);
 		_children.erase(it);
 		return true;
 	}
@@ -148,4 +188,10 @@ void Frame::SetSizer(Sizer* pSizer)
 	delete _pSizer;
 	_pSizer = pSizer;
 	_bInvalidLayout = true;
+}
+
+void Frame::SetParent(Frame* pParent)
+{
+	_pParent = pParent;
+	SetPosition(_position);
 }

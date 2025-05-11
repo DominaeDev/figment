@@ -7,28 +7,26 @@ MainFrame::MainFrame()
 	SetBackgroundColor(SDL_Color { 255, 255, 255, SDL_ALPHA_OPAQUE });
 
 	auto panel1 = new Panel();
-	panel1->SetBackgroundColor(SDL_Color { 200, 50, 50, SDL_ALPHA_OPAQUE });
+	panel1->SetBackgroundColor(SDL_Color { 200, 50, 50 });
 	panel1->SetSize(200, -1);
 	panel1->SetMinSize(200, -1);
 	AddChild(panel1);
 
 	auto panel2 = new Panel();
-	panel2->SetBackgroundColor(SDL_Color { 50, 200, 50, SDL_ALPHA_OPAQUE });
+	panel2->SetBackgroundColor(SDL_Color { 50, 200, 50 });
+	panel2->SetSize(900, -1);
 	panel2->SetMinSize(500, -1);
-	panel2->SetPreferredSize(900, -1);
 	AddChild(panel2);
 
 	auto panel3 = new Panel();
-	panel3->SetBackgroundColor(SDL_Color { 50, 50, 200, SDL_ALPHA_OPAQUE });
+	panel3->SetBackgroundColor(SDL_Color { 50, 50, 200 });
 	panel3->SetMinSize(200, -1);
 	AddChild(panel3);
 
 	auto child = new Panel();
-	child->SetBackgroundColor(SDL_Color { 200, 200, 50, SDL_ALPHA_OPAQUE });
-	child->SetPosition(0, 100);
-	child->SetMinSize(-1, 200);
-	child->SetSize(2000, 200);
-	child->SetPreferredSize(2000, 200);
+	child->SetBackgroundColor(SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE });
+	child->SetPosition(50, 100);
+	child->SetSize(200, 200);
 	panel2->AddChild(child);
 
 	auto pSizer = new HorizontalSizer();

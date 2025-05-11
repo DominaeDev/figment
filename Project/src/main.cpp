@@ -37,6 +37,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	int w, h;
 	SDL_GetWindowSizeInPixels(pWindow, &w, &h);
 	SDL_SetWindowMinimumSize(pWindow, 800, 400);
+	SDL_SetRenderVSync(pRenderer, 1);
 
 	// Create main frame
 	pMainFrame = new MainFrame();
@@ -64,6 +65,7 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 }
 
 /* This function runs once per frame, and is the heart of the program. */
+
 SDL_AppResult SDL_AppIterate(void* state)
 {
 	AppState* pAppState = static_cast<AppState*>(state);
@@ -84,6 +86,27 @@ SDL_AppResult SDL_AppIterate(void* state)
 	}
 
 	SDL_RenderPresent(pRenderer);
+
+
+#if _DEBUG
+	// Count fps
+	static Uint64 accu = 0;
+    static Uint64 last = 0;
+    static Uint64 past = 0;
+    Uint64 now_ns = SDL_GetTicksNS();
+    Uint64 dt_ns = now_ns - past;
+
+	static char debug_string[32];
+    if (now_ns - last > 999999999) {
+        last = now_ns;
+        SDL_snprintf(debug_string, sizeof(debug_string), "%s %" SDL_PRIu64 " fps", Constants::AppTitle, accu);
+        accu = 0;
+
+		SDL_SetWindowTitle(pWindow, debug_string);
+    }
+    past = now_ns;
+    accu += 1;
+#endif
 
 	return SDL_APP_CONTINUE;  /* carry on with the program! */
 }

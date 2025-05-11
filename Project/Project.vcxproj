@@ -115,6 +115,7 @@
     <ClInclude Include="include\MainFrame.h" />
     <ClInclude Include="include\Panel.h" />
     <ClInclude Include="include\Types.h" />
+    <ClInclude Include="include\Utility.h" />
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
