@@ -123,10 +123,15 @@ void LayoutElement::SetSizer(Sizer* pSizer)
 void LayoutElement::SetParent(LayoutElement* pParent)
 {
 	_pParent = pParent;
-	SetPosition(_position);
+	OnParent();
 }
 
 void LayoutElement::OnSize()
 {
 	_bInvalidLayout = true;
+}
+
+void LayoutElement::OnParent()
+{
+	SetPosition(_position);
 }

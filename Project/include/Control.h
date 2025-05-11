@@ -17,14 +17,18 @@ public:
 	void SetBackgroundColor(SDL_Color color) { _backgroundColor = color; }
 	void SetClipping(bool bEnable) { _bClipping = bEnable; }
 
+	bool GetVisible() { return _bVisible; }
+	void SetVisible(bool bVisible) { _bVisible = bVisible; }
+
 protected:
-	virtual void OnUpdate(float fDeltaTime) = 0;
+	virtual void OnUpdate(float fDeltaTime) {};
 	virtual void OnRender(SDL_Renderer* pRenderer) = 0;
 
 	void ClearBackground(SDL_Renderer* pRenderer);
 
 protected:
-	SDL_Color _foregroundColor;
-	SDL_Color _backgroundColor;
-	bool _bClipping = true;
+	SDL_Color _foregroundColor {};
+	SDL_Color _backgroundColor {};
+	bool _bClipping = false;
+	bool _bVisible = true;
 };

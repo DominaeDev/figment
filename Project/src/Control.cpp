@@ -17,8 +17,10 @@ void Control::Update(float fDeltaTime)
 
 void Control::Render(SDL_Renderer* pRenderer)
 {
-	static SDL_Rect* s_pClippingRect = nullptr;
+	if (!_bVisible)
+		return;
 
+	static SDL_Rect* s_pClippingRect = nullptr;
 	SDL_Rect* lastClippingRect = s_pClippingRect;
 	SDL_Rect clippingRect;
 	if (_bClipping)

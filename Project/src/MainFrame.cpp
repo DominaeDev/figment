@@ -1,9 +1,12 @@
 #include "MainFrame.h"
 #include "Panel.h"
+#include "StaticLabel.h"
 #include "HorizontalSizer.h"
+#include "Constants.h"
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
+	SetForegroundColor(SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE });
 	SetBackgroundColor(SDL_Color { 255, 255, 255, SDL_ALPHA_OPAQUE });
 
 	auto panel1 = new Panel();
@@ -13,7 +16,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	AddChild(panel1);
 
 	auto panel2 = new Panel();
-	panel2->SetBackgroundColor(SDL_Color { 50, 200, 50 });
+//	panel2->SetBackgroundColor(SDL_Color { 50, 200, 50 });
 	panel2->SetSize(900, -1);
 	panel2->SetMinSize(500, -1);
 	AddChild(panel2);
@@ -28,6 +31,10 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	child->SetPosition(50, 100);
 	child->SetSize(200, 200);
 	panel2->AddChild(child);
+
+	auto label = new StaticLabel("Hello, how are you?", FontFace::Default, Constants::DefaultFontSize);
+	label->SetForegroundColor(SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE });
+	panel2->AddChild(label);
 
 	auto pSizer = new HorizontalSizer();
 	pSizer->Add(panel1, -1, Sizer::Expand);

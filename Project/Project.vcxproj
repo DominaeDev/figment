@@ -62,6 +62,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -79,6 +80,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,6 +101,7 @@
     <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\editbox.cpp" />
     <ClCompile Include="src\Control.cpp" />
+    <ClCompile Include="src\Fonts.cpp" />
     <ClCompile Include="src\Frame.cpp" />
     <ClCompile Include="src\HorizontalSizer.cpp" />
     <ClCompile Include="src\LayoutElement.cpp" />
@@ -106,6 +109,8 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MainFrame.cpp" />
     <ClCompile Include="src\Panel.cpp" />
+    <ClCompile Include="src\StaticLabel.cpp" />
+    <ClCompile Include="src\Text.cpp" />
     <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="src\Utility.cpp" />
   </ItemGroup>
@@ -113,6 +118,7 @@
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\editbox.h" />
     <ClInclude Include="include\Control.h" />
+    <ClInclude Include="include\Fonts.h" />
     <ClInclude Include="include\Frame.h" />
     <ClInclude Include="include\HorizontalSizer.h" />
     <ClInclude Include="include\IUpdateable.h" />
@@ -120,6 +126,8 @@
     <ClInclude Include="include\Sizer.h" />
     <ClInclude Include="include\MainFrame.h" />
     <ClInclude Include="include\Panel.h" />
+    <ClInclude Include="include\StaticLabel.h" />
+    <ClInclude Include="include\Text.h" />
     <ClInclude Include="include\Types.h" />
     <ClInclude Include="include\Utility.h" />
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h" />

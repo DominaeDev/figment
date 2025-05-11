@@ -92,6 +92,15 @@
     <ClCompile Include="src\MainFrame.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
+    <ClCompile Include="src\Fonts.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Text.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StaticLabel.cpp">
+      <Filter>Source Files\Utility\Interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\editbox.h">
@@ -132,6 +141,15 @@
     </ClInclude>
     <ClInclude Include="include\IUpdateable.h">
       <Filter>Source Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Fonts.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Text.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StaticLabel.h">
+      <Filter>Source Files\Utility\Interface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

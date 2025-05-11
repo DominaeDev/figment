@@ -50,6 +50,7 @@ protected:
 	void Layout();
 
 	virtual void OnSize();
+	virtual void OnParent();
 
 protected:
 	std::vector<LayoutElement*> _children;
