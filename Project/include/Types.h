@@ -4,12 +4,12 @@
 
 typedef std::u8string String;
 
-class Frame;
+class Control;
 
 struct AppState
 {
     SDL_Window* pWindow;
     SDL_Renderer* pRenderer;
-	Frame* pTopFrame;
+	Control* pTopFrame;
     Uint64 last_step;
 };

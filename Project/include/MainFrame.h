@@ -6,7 +6,7 @@ class Sizer;
 class MainFrame : public Frame
 {
 public:
-	MainFrame();
+	MainFrame(SDL_Window* pWindow);
 	virtual ~MainFrame();
 
 protected:

@@ -20,14 +20,14 @@ public:
 public:
 	virtual void Layout(SDL_FRect parentRect) = 0;
 
-	void Add(Frame* pFrame, int proportion = 0, int flags = Flag::Default, int border = 0);
-	void Remove(Frame* pFrame);
+	void Add(Control* pFrame, int proportion = 0, int flags = Flag::Default, int border = 0);
+	void Remove(Control* pFrame);
 	void Reset();
 
 protected:
 	struct LayoutInfo
 	{
-		Frame* pFrame;
+		Control* pFrame;
 		int prop = 0;
 		int flags = Flag::None;
 		int border = 0;

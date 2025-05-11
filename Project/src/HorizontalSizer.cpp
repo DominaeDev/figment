@@ -1,5 +1,5 @@
 #include "HorizontalSizer.h"
-#include "Frame.h"
+#include "Control.h"
 
 int CeilInt(float f)
 {

@@ -34,15 +34,12 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 	*ppAppState = pAppState;
 
-	int w, h;
-	SDL_GetWindowSizeInPixels(pWindow, &w, &h);
 	SDL_SetWindowMinimumSize(pWindow, 800, 400);
 	SDL_SetRenderVSync(pRenderer, 1);
 
 	// Create main frame
-	pMainFrame = new MainFrame();
+	pMainFrame = new MainFrame(pWindow);
 	pAppState->pTopFrame = pMainFrame;
-	pMainFrame->SetSize((float)w, (float)h);
 
 	return SDL_APP_CONTINUE;
 }
@@ -56,11 +53,11 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 	{
 		return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
 	}
-	else if (event->type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
+	/*else if (event->type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
 	{
 		if (pAppState->pTopFrame != nullptr)
 			pAppState->pTopFrame->SetSize((float)event->window.data1, (float)event->window.data2);
-	}
+	}*/
 	return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 

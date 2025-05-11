@@ -2,7 +2,7 @@
 #include "Panel.h"
 #include "HorizontalSizer.h"
 
-MainFrame::MainFrame()
+MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
 	SetBackgroundColor(SDL_Color { 255, 255, 255, SDL_ALPHA_OPAQUE });
 
