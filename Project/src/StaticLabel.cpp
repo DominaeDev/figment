@@ -1,5 +1,6 @@
 #include "StaticLabel.h"
 #include "Text.h"
+#include "Utility.h"
 
 StaticLabel::StaticLabel(const char* text, FontFace fontFace, double ptSize)
 {
@@ -35,20 +36,17 @@ void StaticLabel::SetText(const char* text)
 	auto fgColor = GetForegroundColor();
 	auto bgColor = GetBackgroundColor();
 
+	if (!ColorIsDefined(fgColor) || !ColorIsDefined(bgColor) || text == nullptr)
+		return;
+
 	ReleaseTexture();
 	
-	_pSurface = TTF_RenderText_LCD_Wrapped(_pFont, text, 0, fgColor, bgColor, 0);
-
+	_pSurface = TTF_RenderText_LCD_Wrapped(_pFont, _pText, 0, fgColor, SDL_Color { bgColor.r, bgColor.g, bgColor.b, 255 }, 0);
 	SetSize((float)_pSurface->w, (float)_pSurface->h);
 }
 
 void StaticLabel::OnRender(SDL_Renderer* pRenderer)
 {
-	auto fgColor = GetForegroundColor();
-	auto bgColor = GetBackgroundColor();
-	
-	ClearBackground(pRenderer);
-
 	if (!_pTexture && _pSurface)
 		_pTexture = SDL_CreateTextureFromSurface(pRenderer, _pSurface);
 

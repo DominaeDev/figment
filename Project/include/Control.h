@@ -21,8 +21,8 @@ public:
 	void SetVisible(bool bVisible) { _bVisible = bVisible; }
 
 protected:
-	virtual void OnUpdate(float fDeltaTime) {};
 	virtual void OnRender(SDL_Renderer* pRenderer) = 0;
+	virtual void OnParent();
 
 	void ClearBackground(SDL_Renderer* pRenderer);
 

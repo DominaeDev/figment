@@ -15,6 +15,13 @@ void Sizer::Remove(Control* pFrame)
 		_items.erase(it);
 }
 
+void Sizer::Layout()
+{
+	LayoutElement::Layout();
+	if (_pParent)
+		OnLayout(_pParent->GetRect());
+}
+
 void Sizer::Reset()
 {
 	_items.clear();

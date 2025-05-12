@@ -11,7 +11,7 @@ class LayoutElement : public IUpdateable
 public:
 	virtual ~LayoutElement();
 
-	virtual void Update(float fDeltaTime) = 0;
+	virtual void Update(float fDeltaTime);
 
 	SDL_FRect& GetRect() { return _rect; }
 	SDL_FPoint GetPosition() const { return _position; }
@@ -43,7 +43,7 @@ public:
 	bool RemoveChild(LayoutElement* pFrame);
 
 	void SetSizer(Sizer* sizer);
-	void InvalidateLayout() { _bInvalidLayout = true; }
+	void InvalidateLayout();
 
 protected:
 	void SetParent(LayoutElement* pParent);
@@ -51,6 +51,7 @@ protected:
 
 	virtual void OnSize();
 	virtual void OnParent();
+	virtual void OnUpdate(float fDeltaTime) {};
 
 protected:
 	std::vector<LayoutElement*> _children;

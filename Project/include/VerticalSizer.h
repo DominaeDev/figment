@@ -2,7 +2,7 @@
 
 #include "Sizer.h"
 
-class HorizontalSizer : public Sizer
+class VerticalSizer : public Sizer
 {
 protected:
 	void OnLayout(SDL_FRect rect) override;

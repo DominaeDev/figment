@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Types.h"
+#include "LayoutElement.h"
 #include <vector>
 
-class Sizer
+class Sizer : public LayoutElement
 {
 public:
 	enum Flag : int {
@@ -18,7 +19,7 @@ public:
 	};
 
 public:
-	virtual void Layout(SDL_FRect parentRect) = 0;
+	void Layout();
 
 	void Add(Control* pFrame, int proportion = 0, int flags = Flag::Default, int border = 0);
 	void Remove(Control* pFrame);
@@ -36,5 +37,8 @@ protected:
 	std::vector<LayoutInfo> _items;
 
 	unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }
+
+	virtual void OnLayout(SDL_FRect rect) = 0;
+	void Update(float fDeltaTime) override {}
 };
 

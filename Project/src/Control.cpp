@@ -41,7 +41,7 @@ void Control::Render(SDL_Renderer* pRenderer)
 	// Draw children
 	for (auto& child : _children)
 	{
-		auto renderable = reinterpret_cast<Control*>(child);
+		auto renderable = dynamic_cast<Control*>(child);
 		if (renderable)
 			renderable->Render(pRenderer);
 	}
@@ -80,5 +80,19 @@ void Control::ClearBackground(SDL_Renderer* pRenderer)
 	{
 		SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(pRenderer, &_rect);
+	}
+}
+
+void Control::OnParent()
+{
+	LayoutElement::OnParent();
+
+	auto pParent = dynamic_cast<Control*>(_pParent);
+	if (pParent)
+	{
+		if (!ColorIsDefined(_foregroundColor))
+			_foregroundColor = pParent->GetForegroundColor();
+		if (!ColorIsDefined(_backgroundColor))
+			_backgroundColor = pParent->GetBackgroundColor();
 	}
 }

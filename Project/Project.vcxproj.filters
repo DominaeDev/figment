@@ -101,6 +101,9 @@
     <ClCompile Include="src\StaticLabel.cpp">
       <Filter>Source Files\Utility\Interface</Filter>
     </ClCompile>
+    <ClCompile Include="src\VerticalSizer.cpp">
+      <Filter>Source Files\Utility\Layout</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\editbox.h">
@@ -150,6 +153,9 @@
     </ClInclude>
     <ClInclude Include="include\StaticLabel.h">
       <Filter>Source Files\Utility\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VerticalSizer.h">
+      <Filter>Source Files\Utility\Layout</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

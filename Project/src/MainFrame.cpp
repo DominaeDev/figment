@@ -2,6 +2,7 @@
 #include "Panel.h"
 #include "StaticLabel.h"
 #include "HorizontalSizer.h"
+#include "VerticalSizer.h"
 #include "Constants.h"
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
@@ -16,13 +17,14 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	AddChild(panel1);
 
 	auto panel2 = new Panel();
-//	panel2->SetBackgroundColor(SDL_Color { 50, 200, 50 });
+	panel2->SetBackgroundColor(SDL_Color { 50, 200, 50 });
 	panel2->SetSize(900, -1);
-	panel2->SetMinSize(500, -1);
+//	panel2->SetMinSize(500, -1);
 	AddChild(panel2);
 
 	auto panel3 = new Panel();
 	panel3->SetBackgroundColor(SDL_Color { 50, 50, 200 });
+	panel3->SetSize(200, -1);
 	panel3->SetMinSize(200, -1);
 	AddChild(panel3);
 
@@ -33,14 +35,37 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	panel2->AddChild(child);
 
 	auto label = new StaticLabel("Hello, how are you?", FontFace::Default, Constants::DefaultFontSize);
-	label->SetForegroundColor(SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE });
+
 	panel2->AddChild(label);
 
 	auto pSizer = new HorizontalSizer();
-	pSizer->Add(panel1, -1, Sizer::Expand);
-	pSizer->Add(panel2, 0, Sizer::Expand | Sizer::All, 8);
-	pSizer->Add(panel3, -1, Sizer::Expand);
+	pSizer->Add(panel1, 0, Sizer::Expand);
+	pSizer->Add(panel2, -1, Sizer::Expand | Sizer::All, 8);
+	pSizer->Add(panel3, 0, Sizer::Expand);
 	SetSizer(pSizer);
+
+	auto panelA = new Panel();
+	panelA->SetBackgroundColor(SDL_Color { 0, 50, 50 });
+	panelA->SetSize(-1, 100);
+	panel1->AddChild(panelA);
+
+	auto panelB = new Panel();
+	panelB->SetBackgroundColor(SDL_Color { 50, 0, 50 });
+	panelB->SetSize(-1, 100);
+	panel1->AddChild(panelB);
+
+	auto panelC = new Panel();
+	panelC->SetBackgroundColor(SDL_Color { 50, 50, 0 });
+	panelC->SetSize(-1, 100);
+	panel1->AddChild(panelC);
+
+	auto pSizer2 = new VerticalSizer();
+	pSizer2->Add(panelA, 0, Sizer::Expand);
+	pSizer2->Add(panelB, -1, Sizer::Expand | Sizer::All, 8);
+	pSizer2->Add(panelC, 0, Sizer::Expand);
+	panel1->SetSizer(pSizer2);
+
+
 }
 
 MainFrame::~MainFrame()

@@ -6,14 +6,12 @@ LayoutElement::~LayoutElement()
 {
 	for (auto& child : _children)
 		delete child;
-
-	delete _pSizer;
 }
 
 void LayoutElement::Layout()
 {
 	if (_pSizer)
-		_pSizer->Layout(_rect);
+		_pSizer->Layout();
 	else
 	{
 		// Update child positions
@@ -115,8 +113,18 @@ bool LayoutElement::RemoveChild(LayoutElement* frame)
 
 void LayoutElement::SetSizer(Sizer* pSizer)
 {
-	delete _pSizer;
-	_pSizer = pSizer;
+	if (_pSizer)
+	{
+		RemoveChild(_pSizer);
+		delete _pSizer;
+	}
+
+	if (pSizer)
+	{
+		_pSizer = pSizer;
+		AddChild(pSizer);
+	}
+	
 	_bInvalidLayout = true;
 }
 
@@ -134,4 +142,16 @@ void LayoutElement::OnSize()
 void LayoutElement::OnParent()
 {
 	SetPosition(_position);
+}
+
+void LayoutElement::Update(float fDeltaTime)
+{
+	OnUpdate(fDeltaTime);
+}
+
+void LayoutElement::InvalidateLayout()
+{ 
+	_bInvalidLayout = true;
+	if (_pSizer)
+		_pSizer->Layout();
 }

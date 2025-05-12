@@ -1,12 +1,12 @@
 #include "HorizontalSizer.h"
 #include "Control.h"
 
-int CeilInt(float f)
+static int CeilInt(float f)
 {
 	return (int)ceilf(f);
 }
 
-void HorizontalSizer::Layout(SDL_FRect parentRect)
+void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 {
 	auto count = GetCount();
 	if (count == 0)
@@ -50,7 +50,7 @@ void HorizontalSizer::Layout(SDL_FRect parentRect)
 		rect.x = parentRect.x + x;
 		rect.y = parentRect.y;
 		rect.w = (float)width;
-		
+
 		if ((item.flags & Flag::Expand) != 0)
 			rect.h = parentRect.h;
 		if ((item.flags & Flag::Up) != 0)
@@ -64,5 +64,5 @@ void HorizontalSizer::Layout(SDL_FRect parentRect)
 
 		x += width;
 		frame.InvalidateLayout();
-	}	
+	}
 }
