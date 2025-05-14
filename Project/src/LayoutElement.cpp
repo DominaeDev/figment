@@ -10,19 +10,17 @@ LayoutElement::~LayoutElement()
 
 void LayoutElement::Layout()
 {
+	// Update child positions
+	for (auto& child : _children)
+	{
+		auto& rect = child->GetRect();
+		auto position = child->GetAbsolutePosition();
+		rect.x = position.x;
+		rect.y = position.y;
+	}
+
 	if (_pSizer)
 		_pSizer->Layout();
-	else
-	{
-		// Update child positions
-		for (auto& child : _children)
-		{
-			auto& rect = child->GetRect();
-			auto position = child->GetAbsolutePosition();
-			rect.x = position.x;
-			rect.y = position.y;
-		}
-	}
 	_bInvalidLayout = false;
 }
 

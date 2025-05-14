@@ -35,8 +35,15 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	panel2->AddChild(child);
 
 	auto label = new StaticLabel("Hello, how are you?", FontFace::Default, Constants::DefaultFontSize);
+	label->SetAlignment(TextAlignment::Middle_Center);
+	label->SetSize(80, 80);
+	label->SetMinSize(-1, 80);
+	label->SetBackgroundColor(SDL_Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
 
 	panel2->AddChild(label);
+	auto pCenterSizer = new VerticalSizer();
+	pCenterSizer->Add(label, 0, Sizer::Expand);
+	panel2->SetSizer(pCenterSizer);
 
 	auto pSizer = new HorizontalSizer();
 	pSizer->Add(panel1, 0, Sizer::Expand);
@@ -46,23 +53,23 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	auto panelA = new Panel();
 	panelA->SetBackgroundColor(SDL_Color { 0, 50, 50 });
-	panelA->SetSize(-1, 100);
+	panelA->SetSize(100, 100);
 	panel1->AddChild(panelA);
 
 	auto panelB = new Panel();
 	panelB->SetBackgroundColor(SDL_Color { 50, 0, 50 });
-	panelB->SetSize(-1, 100);
+	panelB->SetSize(100, 100);
 	panel1->AddChild(panelB);
 
 	auto panelC = new Panel();
 	panelC->SetBackgroundColor(SDL_Color { 50, 50, 0 });
-	panelC->SetSize(-1, 100);
+	panelC->SetSize(100, 100);
 	panel1->AddChild(panelC);
 
 	auto pSizer2 = new VerticalSizer();
-	pSizer2->Add(panelA, 0, Sizer::Expand);
-	pSizer2->Add(panelB, -1, Sizer::Expand | Sizer::All, 8);
-	pSizer2->Add(panelC, 0, Sizer::Expand);
+	pSizer2->Add(panelA, 0, Sizer::AlignLeft);
+	pSizer2->Add(panelB, -1, Sizer::AlignCenterHorizontal | Sizer::All, 8);
+	pSizer2->Add(panelC, 0, Sizer::AlignRight);
 	panel1->SetSizer(pSizer2);
 
 

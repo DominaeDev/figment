@@ -10,12 +10,20 @@ public:
 	enum Flag : int {
 		None	= 0,
 		Expand	= 1 << 0,
-		Up		= 1 << 1,
-		Down	= 1 << 2,
+		Top		= 1 << 1,
+		Bottom	= 1 << 2,
 		Left	= 1 << 3,
 		Right	= 1 << 4,
-		All		= Up | Down | Left | Right,
-		Default = Expand,
+
+		AlignLeft				= 1 << 10,
+		AlignRight				= 1 << 11,
+		AlignTop				= 1 << 12,
+		AlignBottom				= 1 << 13,
+		AlignCenterHorizontal	= 1 << 14,
+		AlignCenterVertical		= 1 << 15,
+
+		All		= Top | Bottom | Left | Right,
+		Default = None,
 	};
 
 public:
@@ -40,5 +48,6 @@ protected:
 
 	virtual void OnLayout(SDL_FRect rect) = 0;
 	void Update(float fDeltaTime) override {}
+
 };
 

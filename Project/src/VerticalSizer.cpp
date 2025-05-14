@@ -47,21 +47,51 @@ void VerticalSizer::OnLayout(SDL_FRect parentRect)
 		if (frame.GetMaxSize().y > 0)
 			height = CeilInt(std::min((float)height, frame.GetMaxSize().y));
 
-		rect.x = parentRect.x;
-		rect.y = parentRect.y + y;
-		rect.h = (float)height;
-		
-		if ((item.flags & Flag::Expand) != 0)
-			rect.w = parentRect.w;
+		SDL_FRect borderRect {
+			parentRect.x,
+			parentRect.y + y,
+			parentRect.w,
+			(float)height,
+		};
 
 		if ((item.flags & Flag::Left) != 0)
-			rect.x = parentRect.x + item.border;
+		{
+			borderRect.x += item.border;
+			borderRect.w -= item.border;
+		}
+		if ((item.flags & Flag::Top) != 0)
+		{
+			borderRect.y += item.border;
+			borderRect.h -= item.border;
+		}
 		if ((item.flags & Flag::Right) != 0)
-			rect.w = std::min(rect.w, parentRect.w - (rect.x - parentRect.x) - item.border);
-		if ((item.flags & Flag::Up) != 0)
-			rect.y = (parentRect.y + y) + item.border;
-		if ((item.flags & Flag::Down) != 0)
-			rect.h = std::min(rect.h, height - (rect.y - (parentRect.y + y)) - item.border);
+			borderRect.w -= item.border;
+		if ((item.flags & Flag::Bottom) != 0)
+			borderRect.h -= item.border;
+
+		rect.x = borderRect.x;
+		rect.y = borderRect.y;
+		rect.h = borderRect.h;
+
+		if ((item.flags & Flag::Expand) != 0)
+		{
+			rect.w = borderRect.w;
+		}
+		else
+		{
+			if ((item.flags & Flag::AlignTop) != 0)
+				rect.y = borderRect.y;
+			else if ((item.flags & Flag::AlignCenterVertical) != 0)
+				rect.y = borderRect.y + (borderRect.h - rect.h) / 2;
+			else if ((item.flags & Flag::AlignBottom) != 0)
+				rect.y = borderRect.y + borderRect.h - rect.h;
+			if ((item.flags & Flag::AlignLeft) != 0)
+				rect.x = borderRect.x;
+			else if ((item.flags & Flag::AlignCenterHorizontal) != 0)
+				rect.x = borderRect.x + (borderRect.w - rect.w) / 2;
+			else if ((item.flags & Flag::AlignRight) != 0)
+				rect.x = borderRect.x + borderRect.w - rect.w;
+		}
 
 		y += height;
 

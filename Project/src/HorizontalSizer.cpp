@@ -47,20 +47,51 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 		if (frame.GetMaxSize().x > 0)
 			width = CeilInt(std::min((float)width, frame.GetMaxSize().x));
 
-		rect.x = parentRect.x + x;
-		rect.y = parentRect.y;
-		rect.w = (float)width;
+		SDL_FRect borderRect {
+			parentRect.x + x,
+			parentRect.y,
+			(float)width,
+			parentRect.h,
+		};
+
+		if ((item.flags & Flag::Left) != 0)
+		{
+			borderRect.x += item.border;
+			borderRect.w -= item.border;
+		}
+		if ((item.flags & Flag::Top) != 0)
+		{
+			borderRect.y += item.border;
+			borderRect.h -= item.border;
+		}
+		if ((item.flags & Flag::Right) != 0)
+			borderRect.w -= item.border;
+		if ((item.flags & Flag::Bottom) != 0)
+			borderRect.h -= item.border;
+
+		rect.x = borderRect.x;
+		rect.y = borderRect.y;
+		rect.w = borderRect.w;
 
 		if ((item.flags & Flag::Expand) != 0)
-			rect.h = parentRect.h;
-		if ((item.flags & Flag::Up) != 0)
-			rect.y = parentRect.y + item.border;
-		if ((item.flags & Flag::Down) != 0)
-			rect.h = std::min(rect.h, parentRect.h - (rect.y - parentRect.y) - item.border);
-		if ((item.flags & Flag::Left) != 0)
-			rect.x = (parentRect.x + x) + item.border;
-		if ((item.flags & Flag::Right) != 0)
-			rect.w = std::min(rect.w, width - (rect.x - (parentRect.x + x)) - item.border);
+		{
+			rect.h = borderRect.h;
+		}
+		else
+		{
+			if ((item.flags & Flag::AlignLeft) != 0)
+				rect.x = borderRect.x;
+			else if ((item.flags & Flag::AlignCenterHorizontal) != 0)
+				rect.x = borderRect.x + (borderRect.w - rect.w) / 2;
+			else if ((item.flags & Flag::AlignRight) != 0)
+				rect.x = borderRect.x + borderRect.w - rect.w;
+			if ((item.flags & Flag::AlignTop) != 0)
+				rect.y = borderRect.y;
+			else if ((item.flags & Flag::AlignCenterVertical) != 0)
+				rect.y = borderRect.y + (borderRect.h - rect.h) / 2;
+			else if ((item.flags & Flag::AlignBottom) != 0)
+				rect.y = borderRect.y + borderRect.h - rect.h;
+		}
 
 		x += width;
 		frame.InvalidateLayout();
