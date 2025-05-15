@@ -96,3 +96,17 @@ void Control::OnParent()
 			_backgroundColor = pParent->GetBackgroundColor();
 	}
 }
+
+bool Control::ProcessEvent(SDL_Event* event)
+{
+	if (OnEvent(event))
+		return true;
+
+	for (auto it = std::begin(_children); it != std::end(_children); ++it)
+	{
+		Control* pControl = dynamic_cast<Control*>(*it);
+		if (pControl && pControl->ProcessEvent(event))
+			return true;
+	}
+	return false;
+}

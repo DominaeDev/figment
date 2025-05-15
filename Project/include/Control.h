@@ -20,9 +20,12 @@ public:
 	bool GetVisible() { return _bVisible; }
 	void SetVisible(bool bVisible) { _bVisible = bVisible; }
 
+	bool ProcessEvent(SDL_Event* event);
+
 protected:
 	virtual void OnRender(SDL_Renderer* pRenderer) = 0;
 	virtual void OnParent();
+	virtual bool OnEvent(SDL_Event* event) { return false; }
 
 	void ClearBackground(SDL_Renderer* pRenderer);
 

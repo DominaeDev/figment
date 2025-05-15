@@ -12,5 +12,7 @@ public:
 	SDL_WindowID GetWindowID() const;
 
 protected:
+	bool OnEvent(SDL_Event* event) override;
+
 	SDL_Window* _pWindow = nullptr;
 };

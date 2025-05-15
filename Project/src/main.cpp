@@ -43,6 +43,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 
 	*ppAppState = pAppState;
+	pAppState->pWindow = pWindow;
 
 	SDL_SetWindowMinimumSize(pWindow, 800, 400);
 	SDL_SetRenderVSync(pRenderer, 1);
@@ -66,6 +67,10 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 	{
 		return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
 	}
+
+	if (pAppState->pTopFrame != nullptr)
+		pAppState->pTopFrame->ProcessEvent(event);
+
 	return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 

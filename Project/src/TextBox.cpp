@@ -8,7 +8,7 @@ TextBox::TextBox(FontFace fontFace, double ptSize)
 {
 	_font = Fonts::GetFont(fontFace, ptSize);
 	_text = TTF_CreateText(Text::GetEngine(), _font, "Hello", 0);
-	has_focus = true;
+	has_focus = false;
 
 	highlight1 = -1;
 	highlight2 = -1;
@@ -857,7 +857,7 @@ void TextBox::Insert(const char* text)
 	SetCursorPosition((int)(_cursor + length));
 }
 
-bool TextBox::HandleEvent(SDL_Event* event)
+bool TextBox::OnEvent(SDL_Event* event)
 {
 	if (!event)
 	{
