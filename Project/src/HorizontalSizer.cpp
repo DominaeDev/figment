@@ -19,7 +19,7 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 	int numStretch = 0;
 	for (auto& item : _items)
 	{
-		if (item.prop == 0)
+		if (item.prop == 0 && item.pFrame != nullptr)
 			remainingWidth = CeilInt(std::max(remainingWidth - item.pFrame->GetWidth(), 0.0f));
 		else if (item.prop > 0)
 			totalProportion += item.prop;
@@ -32,6 +32,12 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 	int x = 0;
 	for (auto& item : _items)
 	{
+		if (item.pFrame == nullptr)
+		{
+			x += CeilInt(remainingWidth / (float)numStretch);
+			continue;
+		}
+
 		auto& frame = *item.pFrame;
 		auto& rect = frame.GetRect();
 		int width = 0;
@@ -96,4 +102,9 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 		x += width;
 		frame.InvalidateLayout();
 	}
+}
+
+void Sizer::AddStretchSpacer()
+{
+	Add(nullptr, -1);
 }

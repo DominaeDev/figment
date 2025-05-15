@@ -4,6 +4,7 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include "AppState.h"
 #include "Types.h"
 #include "Constants.h"
 #include "Fonts.h"
@@ -37,7 +38,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 	}
 
-	AppState* pAppState = (AppState*)SDL_calloc(1, sizeof(AppState));
+	AppState* pAppState = Application::CreateState();
 	if (!pAppState)
 		return SDL_APP_FAILURE;
 

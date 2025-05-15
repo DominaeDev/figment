@@ -30,6 +30,7 @@ public:
 	void Layout();
 
 	void Add(Control* pFrame, int proportion = 0, int flags = Flag::Default, int border = 0);
+	void AddStretchSpacer();
 	void Remove(Control* pFrame);
 	void Reset();
 

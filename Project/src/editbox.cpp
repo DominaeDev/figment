@@ -13,7 +13,6 @@
 
 #define CURSOR_BLINK_INTERVAL_MS    500
 
-
 static void DrawText(EditBox *edit, TTF_Text *text, float x, float y)
 {
 #ifdef TEST_SURFACE_ENGINE

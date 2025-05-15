@@ -1,0 +1,88 @@
+#pragma once
+
+#include "Control.h"
+#include "Fonts.h"
+
+struct SDL_Renderer;
+
+class TextBox : public Control
+{
+public:
+	TextBox(FontFace fontFace, double ptSize);
+	virtual ~TextBox();
+
+	void SetFocus(bool focus);
+	void MoveCursorLeft();
+	void MoveCursorRight();
+	void MoveCursorUp();
+	void MoveCursorDown();
+	void MoveCursorBeginningOfLine();
+	void MoveCursorEndOfLine();
+	void MoveCursorBeginning();
+	void MoveCursorEnd();
+	void Backspace();
+	void BackspaceToBeginning();
+	void DeleteToEnd();
+	void Delete();
+	void SelectAll();
+	bool DeleteHighlight();
+	void Copy();
+	void Cut();
+	void Paste();
+	void Insert(const char* text);
+
+protected:
+	void OnUpdate(float fDeltaTime) override;
+	void OnRender(SDL_Renderer* pRenderer) override;
+
+private:
+	bool HandleEvent(SDL_Event* event);
+	void Draw(SDL_Renderer* pRenderer);
+	void DrawText(TTF_Text* text, float x, float y);
+	void DrawCursor(SDL_Renderer* pRenderer);
+	void DrawCandidates(SDL_Renderer* pRenderer);
+	void DrawComposition(SDL_Renderer* pRenderer);
+	void DrawCompositionCursor(SDL_Renderer* pRenderer);
+	void ClearCandidates();
+	void SaveCandidates(const SDL_Event* event);
+	bool GetHighlightExtents(int* marker, int* length);
+	void HandleComposition(const SDL_TextEditingEvent* event);
+	void CancelComposition();
+	void ResetComposition();
+	void UpdateTextInputArea();
+	void SetCursorPosition(int position);
+	void MoveCursorIndex(int direction);
+	bool HandleMouseDown(float x, float y);
+	bool HandleMouseMotion(float x, float y);
+	bool HandleMouseUp(float x, float y);
+
+
+
+protected:
+	TTF_Font* _font;
+	TTF_Text* _text;
+	bool has_focus;
+
+	/* Cursor support */
+	int _cursor;
+	int _cursor_length;
+	bool _cursor_visible;
+	Uint64 _last_cursor_change;
+	SDL_FRect _cursor_rect;
+
+	/* Highlight support */
+	bool highlighting;
+	int highlight1;
+	int highlight2;
+
+	/* IME composition */
+	int composition_start;
+	int composition_length;
+	int composition_cursor;
+	int composition_cursor_length;
+
+	/* IME candidates */
+	TTF_Text* candidates;
+	int selected_candidate_start;
+	int selected_candidate_length;
+};
