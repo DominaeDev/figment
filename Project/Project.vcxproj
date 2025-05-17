@@ -99,6 +99,7 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
     <ClCompile Include="src\AppState.cpp" />
+    <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\editbox.cpp" />
     <ClCompile Include="src\Control.cpp" />
@@ -114,11 +115,11 @@
     <ClCompile Include="src\Text.cpp" />
     <ClCompile Include="src\TextBox.cpp" />
     <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp" />
-    <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\VerticalSizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\AppState.h" />
+    <ClInclude Include="include\Color.h" />
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\editbox.h" />
     <ClInclude Include="include\Control.h" />
@@ -134,7 +135,6 @@
     <ClInclude Include="include\Text.h" />
     <ClInclude Include="include\TextBox.h" />
     <ClInclude Include="include\Types.h" />
-    <ClInclude Include="include\Utility.h" />
     <ClInclude Include="include\VerticalSizer.h" />
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h" />
   </ItemGroup>

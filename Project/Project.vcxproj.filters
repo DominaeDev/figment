@@ -33,6 +33,12 @@
     <Filter Include="Source Files\Utility\Interface">
       <UniqueIdentifier>{97d6e564-79f4-44e4-83c1-f1f1e7cd70b7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Interface\Controls">
+      <UniqueIdentifier>{629db8c4-47b9-4beb-a0f2-ed7e30cf6b90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Frames">
+      <UniqueIdentifier>{ad99cbed-4053-4284-9125-df5de355b049}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -77,20 +83,11 @@
     <ClCompile Include="src\LayoutElement.cpp">
       <Filter>Source Files\Utility\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utility.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="src\Control.cpp">
       <Filter>Source Files\Utility\Interface</Filter>
     </ClCompile>
     <ClCompile Include="src\Frame.cpp">
       <Filter>Source Files\Utility\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Panel.cpp">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MainFrame.cpp">
-      <Filter>Source Files\Interface</Filter>
     </ClCompile>
     <ClCompile Include="src\Fonts.cpp">
       <Filter>Source Files\Application</Filter>
@@ -98,17 +95,26 @@
     <ClCompile Include="src\Text.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
-    <ClCompile Include="src\StaticLabel.cpp">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClCompile>
     <ClCompile Include="src\VerticalSizer.cpp">
       <Filter>Source Files\Utility\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\TextBox.cpp">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClCompile>
     <ClCompile Include="src\AppState.cpp">
       <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MainFrame.cpp">
+      <Filter>Source Files\Interface\Frames</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Panel.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StaticLabel.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextBox.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Color.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -124,17 +130,11 @@
     <ClInclude Include="include\Types.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="include\MainFrame.h">
-      <Filter>Source Files\Interface</Filter>
-    </ClInclude>
     <ClInclude Include="include\Sizer.h">
       <Filter>Source Files\Utility\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\HorizontalSizer.h">
       <Filter>Source Files\Utility\Layout</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Utility.h">
-      <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\LayoutElement.h">
       <Filter>Source Files\Utility\Layout</Filter>
@@ -143,9 +143,6 @@
       <Filter>Source Files\Utility\Interface</Filter>
     </ClInclude>
     <ClInclude Include="include\Frame.h">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Panel.h">
       <Filter>Source Files\Utility\Interface</Filter>
     </ClInclude>
     <ClInclude Include="include\IUpdateable.h">
@@ -157,17 +154,26 @@
     <ClInclude Include="include\Text.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="include\StaticLabel.h">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClInclude>
     <ClInclude Include="include\VerticalSizer.h">
       <Filter>Source Files\Utility\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="include\TextBox.h">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClInclude>
     <ClInclude Include="include\AppState.h">
       <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MainFrame.h">
+      <Filter>Source Files\Interface\Frames</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Panel.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StaticLabel.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TextBox.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Color.h">
+      <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 #include "Fonts.h"
 #include "Constants.h"
 
-std::map<FontFace, const char*> s_FontFaces {
+std::map<FontFace, const char*> s_FontFilenames {
 	{ FontFace::RobotoRegular,	"./fonts/Notosans.ttf" },
 	{ FontFace::RobotoItalic,	"./fonts/Roboto-Italic.ttf" },
 	{ FontFace::RobotoBold,		"./fonts/Roboto-Medium.ttf" },
@@ -55,5 +55,5 @@ TTF_Font* Fonts::GetFont(FontFace face, double ptSize)
 		}
 	}
 
-	return LoadFont(face, s_FontFaces[face], ptSize);
+	return LoadFont(face, s_FontFilenames[face], ptSize);
 }

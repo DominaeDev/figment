@@ -1,10 +1,8 @@
 #include "Constants.h"
+#include <SDL3/SDL.h>
 
-namespace Constants
-{
-	int WindowWidth = 1200;
-	int WindowHeight = 900;
-	double DefaultFontSize = 14.5;
+int Constants::WindowWidth = 1200;
+int Constants::WindowHeight = 900;
+double Constants::DefaultFontSize = 14.5;
+const char* Constants::AppTitle = "Llama chat";
 
-	const char* AppTitle = "Llama chat";
-}

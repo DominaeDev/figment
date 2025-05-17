@@ -1,6 +1,6 @@
 #include "Control.h"
 #include "Sizer.h"
-#include "Utility.h"
+#include "Color.h"
 
 void Control::Update(float fDeltaTime)
 {
@@ -55,7 +55,7 @@ void Control::Render(SDL_Renderer* pRenderer)
 
 SDL_Color Control::GetForegroundColor() const
 {
-	if (!ColorIsDefined(_foregroundColor))
+	if (!Color::IsDefined(_foregroundColor))
 	{
 		auto frameParent = dynamic_cast<Control*>(_pParent);
 		return frameParent ? frameParent->GetForegroundColor() : SDL_Color();
@@ -65,7 +65,7 @@ SDL_Color Control::GetForegroundColor() const
 
 SDL_Color Control::GetBackgroundColor() const
 {
-	if (!ColorIsDefined(_backgroundColor))
+	if (!Color::IsDefined(_backgroundColor))
 	{
 		auto frameParent = dynamic_cast<Control*>(_pParent);
 		return frameParent ? frameParent->GetBackgroundColor() : SDL_Color();
@@ -76,7 +76,7 @@ SDL_Color Control::GetBackgroundColor() const
 void Control::ClearBackground(SDL_Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
-	if (ColorIsDefined(bgColor))
+	if (Color::IsDefined(bgColor))
 	{
 		SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(pRenderer, &_rect);
@@ -90,9 +90,9 @@ void Control::OnParent()
 	auto pParent = dynamic_cast<Control*>(_pParent);
 	if (pParent)
 	{
-		if (!ColorIsDefined(_foregroundColor))
+		if (!Color::IsDefined(_foregroundColor))
 			_foregroundColor = pParent->GetForegroundColor();
-		if (!ColorIsDefined(_backgroundColor))
+		if (!Color::IsDefined(_backgroundColor))
 			_backgroundColor = pParent->GetBackgroundColor();
 	}
 }

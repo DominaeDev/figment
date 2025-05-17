@@ -11,15 +11,29 @@
 #include "Text.h"
 #include "MainFrame.h"
 
+#define MEMORY_LEAK_CHECK 0
+
+#if defined(_DEBUG) && MEMORY_LEAK_CHECK
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+#endif
+
 /* We will use this renderer to draw into this window every frame. */
 static SDL_Window* pWindow = NULL;
 static SDL_Renderer* pRenderer = NULL;
 
 #define APP_STATE(P) static_cast<AppState*>(P);
 
+
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 {
+#if defined(_DEBUG) && MEMORY_LEAK_CHECK
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+//	_CrtSetBreakAlloc(281);
+#endif
+
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
 		SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
@@ -44,6 +58,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 	*ppAppState = pAppState;
 	pAppState->pWindow = pWindow;
+	pAppState->pRenderer = pRenderer;
 
 	SDL_SetWindowMinimumSize(pWindow, 800, 400);
 	SDL_SetRenderVSync(pRenderer, 1);

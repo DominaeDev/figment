@@ -44,6 +44,7 @@ public:
 
 protected:
 	SDL_FRect GetAlignedRect() const;
+	void OnUpdate(float fDeltaTime) override;
 	void OnRender(SDL_Renderer* pRenderer) override;
 	void OnParent() override;
 
@@ -51,8 +52,12 @@ private:
 	void ReleaseTexture();
 
 	const char* _pText = nullptr;
+	bool _bInvalidated = false;
+
 	TTF_Font* _pFont = nullptr;
 	SDL_Texture* _pTexture = nullptr;
-	SDL_Surface* _pSurface = nullptr;
+	int _textWidth;
+	int _textHeight;
+
 	TextAlignment _alignment = TextAlignment::Default;
 };

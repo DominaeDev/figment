@@ -37,8 +37,7 @@ protected:
 	bool OnEvent(SDL_Event* event) override;
 
 private:
-	void Draw(SDL_Renderer* pRenderer);
-	void DrawText(TTF_Text* text, float x, float y);
+	void DrawText(SDL_Renderer* pRenderer, TTF_Text* pText, float x, float y);
 	void DrawCursor(SDL_Renderer* pRenderer);
 	void DrawCandidates(SDL_Renderer* pRenderer);
 	void DrawComposition(SDL_Renderer* pRenderer);
@@ -49,6 +48,7 @@ private:
 	void HandleComposition(const SDL_TextEditingEvent* event);
 	void CancelComposition();
 	void ResetComposition();
+	void OnMoveCursor(int last);
 	void UpdateTextInputArea();
 	void SetCursorPosition(int position);
 	void MoveCursorIndex(int direction);
@@ -59,21 +59,23 @@ private:
 
 
 protected:
-	TTF_Font* _font;
-	TTF_Text* _text;
-	bool has_focus;
+	TTF_Font* _pFont;
+	TTF_Text* _pText;
+	bool _bFocused;
+
+	SDL_Texture* _pTexture = nullptr;
+	SDL_Surface* _pSurface = nullptr;
 
 	/* Cursor support */
-	int _cursor;
-	int _cursor_length;
+	int _cursor = 0;
 	bool _cursor_visible;
 	Uint64 _last_cursor_change;
 	SDL_FRect _cursor_rect;
 
 	/* Highlight support */
-	bool highlighting;
-	int highlight1;
-	int highlight2;
+	bool _bIsHighlighting;
+	int highlight_start;
+	int highlight_end;
 
 	/* IME composition */
 	int composition_start;
