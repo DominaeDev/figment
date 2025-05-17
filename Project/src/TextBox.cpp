@@ -15,12 +15,6 @@ TextBox::TextBox(FontFace fontFace, double ptSize)
 
 	highlight_start = -1;
 	highlight_end = -1;
-
-	/* Wrap the editbox text within the editbox area */
-	TTF_SetTextWrapWidth(_pText, (int)SDL_floorf(_rect.w));
-
-	/* Show the whitespace when wrapping, so it can be edited */
-	TTF_SetTextWrapWhitespaceVisible(_pText, true);
 }
 
 TextBox::~TextBox()
@@ -77,6 +71,7 @@ void TextBox::OnRender(SDL_Renderer* pRenderer)
 				SDL_RectToFRect(&pHighlights[i]->rect, &rect);
 				rect.x += _rect.x;
 				rect.y += _rect.y;
+				rect.w = std::max(rect.w, 3.0f);
 				SDL_RenderFillRect(pRenderer, &rect);
 			}
 			SDL_free(pHighlights);
@@ -106,7 +101,6 @@ static bool IsShiftDown()
 void TextBox::DrawText(SDL_Renderer* pRenderer, TTF_Text* pText,  float x, float y)
 {
 	auto fgColor = GetForegroundColor();
-
 	TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
 	TTF_DrawRendererText(pText, _rect.x, _rect.y);
 }
@@ -489,6 +483,8 @@ void TextBox::SetCursorPosition(int position)
 	}
 
 	_cursor = position;
+	_cursor_visible = true;
+	_last_cursor_change = SDL_GetTicks();
 }
 
 void TextBox::MoveCursorIndex(int direction)
@@ -1006,4 +1002,9 @@ bool TextBox::OnEvent(SDL_Event* event)
 		break;
 	}
 	return false;
+}
+
+void TextBox::OnSize()
+{
+	TTF_SetTextWrapWidth(_pText, GetWidth());
 }

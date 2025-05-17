@@ -66,6 +66,9 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	// Create TTF text engine
 	pAppState->pTextEngine = Text::InitEngine(pRenderer);
 
+	// Load fonts
+	Fonts::Init();
+
 	// Create main frame
 	auto pMainFrame = new MainFrame(pWindow);
 	pAppState->pTopFrame = pMainFrame;

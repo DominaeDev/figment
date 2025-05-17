@@ -35,6 +35,7 @@ protected:
 	void OnUpdate(float fDeltaTime) override;
 	void OnRender(SDL_Renderer* pRenderer) override;
 	bool OnEvent(SDL_Event* event) override;
+	void OnSize() override;
 
 private:
 	void DrawText(SDL_Renderer* pRenderer, TTF_Text* pText, float x, float y);

@@ -6,34 +6,34 @@
 
 enum class FontFace
 {
-	RobotoRegular,
-	RobotoItalic,
-	RobotoBold,
-
-	NotoSansKR,
-	NotoSansJP,
-	Emoji,
-
-	Default = RobotoRegular,
+	Regular,
+	Italic,
+	Bold,
+	Default = Regular,
 };
 
 class Fonts
 {
 public:
-	static void PreloadFonts();
+	static void Init();
 	static void ReleaseFonts();
 
 	static TTF_Font* GetFont(FontFace, double ptSize);
 
 private:
 	static TTF_Font* LoadFont(FontFace face, const char* filename, double ptSize);
+	static std::list<TTF_Font*> GetFallbackFonts(double ptSize);
+	static TTF_Font* LoadFallbackFont(const char* filename, double ptSize);
 
 private:
 
 	struct Font
 	{
-		TTF_Font* _pFont;
+		TTF_Font* pFont;
+		FontFace face;
 		int size;
 	};
 	static std::map<FontFace, std::list<Font>> s_Fonts;
+
+	static std::list<Font> s_FallbackFonts;
 };
