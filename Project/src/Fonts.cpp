@@ -3,13 +3,13 @@
 #include <vector>
 
 std::map<FontFace, const char*> s_FontFilenames {
-	{ FontFace::Regular,	"./fonts/Notosans.ttf" },
-	{ FontFace::Italic,	"./fonts/Roboto-Italic.ttf" },
+	{ FontFace::Regular,	"./fonts/Nunito-Regular.ttf" },
+	{ FontFace::Italic,		"./fonts/Roboto-Italic.ttf" },
 	{ FontFace::Bold,		"./fonts/Roboto-Medium.ttf" },
 };
 
 std::list<const char*> s_FallbackFontFilenames {
-	{"./fonts/NotoSansJP-Regular.ttf" },
+	{"./fonts/KosugiMaru-Regular.ttf" },
 	{"./fonts/NotoSansKR-Regular.ttf" },
 	{"./fonts/NotoColorEmoji-Regular.ttf" },
 };
@@ -78,7 +78,7 @@ TTF_Font* Fonts::LoadFallbackFont(const char* filename, double ptSize)
 	if (pFont != nullptr)
 	{
 		TTF_SetFontHinting(pFont, TTF_HINTING_LIGHT_SUBPIXEL);
-		TTF_SetFontKerning(pFont, true);
+		TTF_SetFontKerning(pFont, false);
 		s_FallbackFonts.push_back(Font { pFont, FontFace::Default, (int)(ptSize * 10.0) });
 		return pFont;
 	}

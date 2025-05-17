@@ -57,15 +57,19 @@ private:
 	bool HandleMouseMotion(float x, float y);
 	bool HandleMouseUp(float x, float y);
 
-
-
 protected:
 	TTF_Font* _pFont;
 	TTF_Text* _pText;
-	bool _bFocused;
+	bool _bFocused = false;
+	bool _bIBeamCursor = false;
 
 	SDL_Texture* _pTexture = nullptr;
 	SDL_Surface* _pSurface = nullptr;
+
+	int _marginLeft = 8;
+	int _marginTop = 4;
+	int _marginRight = 4;
+	int _marginBottom = 6;
 
 	/* Cursor support */
 	int _cursor = 0;

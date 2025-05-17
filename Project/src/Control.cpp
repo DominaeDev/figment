@@ -46,11 +46,22 @@ void Control::Render(SDL_Renderer* pRenderer)
 			renderable->Render(pRenderer);
 	}
 
+	DrawBorder(pRenderer);
+
 	if (_bClipping)
 	{
 		s_pClippingRect = lastClippingRect;
 		SDL_SetRenderClipRect(pRenderer, s_pClippingRect);
 	}
+}
+
+void Control::DrawBorder(SDL_Renderer* pRenderer)
+{
+	if (!Color::IsDefined(_borderColor))
+		return;
+	
+	SDL_SetRenderDrawColor(pRenderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
+	SDL_RenderRect(pRenderer, &_rect);
 }
 
 SDL_Color Control::GetForegroundColor() const
@@ -73,7 +84,7 @@ SDL_Color Control::GetBackgroundColor() const
 	return _backgroundColor;
 }
 
-void Control::ClearBackground(SDL_Renderer* pRenderer)
+void Control::DrawBackground(SDL_Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
 	if (Color::IsDefined(bgColor))

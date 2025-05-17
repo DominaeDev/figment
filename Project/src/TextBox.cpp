@@ -6,12 +6,19 @@
 
 #define CURSOR_BLINK_INTERVAL_MS    500
 
+static const char* _testString = "Hahaha hello this is me bitch!\n\xE3\x81\xB2\xE3\x82\x89\xE3\x81\x8C\xE3\x81\xAA\x0A\xE3\x82\xAB\xE3\x82\xBF\xE3\x82\xAB\xE3\x83\x8A";
+
 TextBox::TextBox(FontFace fontFace, double ptSize)
 {
+	_borderColor = Color::Black;
 	_pFont = Fonts::GetFont(fontFace, ptSize);
-	_pText = TTF_CreateText(Text::GetEngine(), _pFont, "Hahaha hello this is me bitch!", 0);
+	_pText = TTF_CreateText(Text::GetEngine(), _pFont, nullptr, 0);
+
+	/* Show the whitespace when wrapping, so it can be edited */
+	TTF_SetTextWrapWhitespaceVisible(_pText, true);
 
 	_bFocused = false;
+	_bClipping = true;
 
 	highlight_start = -1;
 	highlight_end = -1;
@@ -40,10 +47,9 @@ void TextBox::OnUpdate(float fDeltaTime)
 		{
 			SDL_FRect cursor_rect;
 			SDL_RectToFRect(&cursor.rect, &cursor_rect);
-			cursor_rect.x += _rect.x;
-			cursor_rect.y += _rect.y;
+			cursor_rect.x += _rect.x + _marginLeft;
+			cursor_rect.y += _rect.y + _marginTop;
 			cursor_rect.w = 1.0f;
-			auto hehe = TTF_GetFontProperties(_pFont);
 			cursor_rect.h = std::max(cursor_rect.h, (float)TTF_GetFontLineSkip(_pFont));
 			SDL_copyp(&_cursor_rect, &cursor_rect);
 
@@ -54,7 +60,7 @@ void TextBox::OnUpdate(float fDeltaTime)
 
 void TextBox::OnRender(SDL_Renderer* pRenderer)
 {
-	ClearBackground(pRenderer);
+	DrawBackground(pRenderer);
 	
 	// Draw highlight(s) 
 	int marker, length;
@@ -63,15 +69,20 @@ void TextBox::OnRender(SDL_Renderer* pRenderer)
 		TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(_pText, marker, length, NULL);
 		if (pHighlights)
 		{
-			int i;
 			SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
-			for (i = 0; pHighlights[i]; ++i)
+			for (int i = 0; pHighlights[i]; ++i)
 			{
 				SDL_FRect rect;
 				SDL_RectToFRect(&pHighlights[i]->rect, &rect);
-				rect.x += _rect.x;
-				rect.y += _rect.y;
+				if (rect.x <= 2)
+				{
+					rect.w += rect.x;
+					rect.x = 0;
+				}
 				rect.w = std::max(rect.w, 3.0f);
+				rect.x += _rect.x + _marginLeft;
+				rect.y += _rect.y + _marginTop;
+
 				SDL_RenderFillRect(pRenderer, &rect);
 			}
 			SDL_free(pHighlights);
@@ -102,7 +113,7 @@ void TextBox::DrawText(SDL_Renderer* pRenderer, TTF_Text* pText,  float x, float
 {
 	auto fgColor = GetForegroundColor();
 	TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
-	TTF_DrawRendererText(pText, _rect.x, _rect.y);
+	TTF_DrawRendererText(pText, _rect.x + _marginLeft, _rect.y + _marginTop);
 }
 
 bool TextBox::GetHighlightExtents(int* marker, int* length)
@@ -352,8 +363,8 @@ void TextBox::DrawCandidates(SDL_Renderer* pRenderer)
 
 	SDL_GetRenderSafeArea(pRenderer, &safe_rect);
 	TTF_GetTextSize(candidates, &candidates_w, &candidates_h);
-	candidates_rect.x = _rect.x + cursor.rect.x;
-	candidates_rect.y = _rect.y + cursor.rect.y + cursor.rect.h + 2.0f;
+	candidates_rect.x = _rect.x + _marginLeft + cursor.rect.x;
+	candidates_rect.y = _rect.y + _marginTop + cursor.rect.y + cursor.rect.h + 2.0f;
 	candidates_rect.w = 1.0f + 2.0f + candidates_w + 2.0f + 1.0f;
 	candidates_rect.h = 1.0f + 2.0f + candidates_h + 2.0f + 1.0f;
 	if ((candidates_rect.x + candidates_rect.w) > safe_rect.w)
@@ -406,8 +417,8 @@ void TextBox::UpdateTextInputArea()
 	SDL_FPoint window_edit_rect_min;
 	SDL_FPoint window_edit_rect_max;
 	SDL_FPoint window_cursor;
-	if (!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x, _rect.y, &window_edit_rect_min.x, &window_edit_rect_min.y) ||
-		!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _rect.w, _rect.y + _rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) ||
+	if (!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft, _rect.y + _marginTop, &window_edit_rect_min.x, &window_edit_rect_min.y) ||
+		!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft + _rect.w, _rect.y + _marginTop + _rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) ||
 		!SDL_RenderCoordinatesToWindow(pRenderer, _cursor_rect.x, _cursor_rect.y, &window_cursor.x, &window_cursor.y))
 	{
 		return;
@@ -609,7 +620,10 @@ void TextBox::MoveCursorEndOfLine()
 		TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
 	{
 		int last_cursor = _cursor;
-		SetCursorPosition(substring.offset + substring.length);
+		int pos = substring.offset + substring.length;
+		if (pos > 0 && pos <= strlen(_pText->text) && _pText->text[pos - 1] == '\n')
+			pos--;
+		SetCursorPosition(pos);
 		OnMoveCursor(last_cursor);
 	}
 }
@@ -695,41 +709,52 @@ bool TextBox::HandleMouseDown(float x, float y)
 		SetFocus(true);
 	}
 
-	/* Set the cursor position */
 	TTF_SubString substring;
-	int textX = (int)SDL_roundf(x - _rect.x);
-	int textY = (int)SDL_roundf(y - _rect.y);
-	if (!TTF_GetTextSubStringForPoint(_pText, textX, textY, &substring))
+	int textX = (int)SDL_roundf(x - _rect.x - _marginLeft);
+	int textY = (int)SDL_roundf(y - _rect.y - _marginTop);
+	if (TTF_GetTextSubStringForPoint(_pText, textX, textY, &substring))
 	{
-		SDL_Log("Couldn't get cursor location: %s", SDL_GetError());
-		return false;
+		if (IsShiftDown())
+		{
+			int last_cursor = _cursor;
+			SetCursorPosition(GetCursorTextIndex(textX, &substring));
+			OnMoveCursor(last_cursor);
+		}
+		else
+		{
+			SetCursorPosition(GetCursorTextIndex(textX, &substring));
+			_bIsHighlighting = true;
+			highlight_start = _cursor;
+			highlight_end = -1;
+		}
 	}
-
-	SetCursorPosition(GetCursorTextIndex(textX, &substring));
-	_bIsHighlighting = true;
-	highlight_start = _cursor;
-	highlight_end = -1;
 
 	return true;
 }
 
 bool TextBox::HandleMouseMotion(float x, float y)
 {
-	if (!_bIsHighlighting)
-		return false;
-
-	/* Set the highlight position */
-	TTF_SubString substring;
-	int textX = (int)SDL_roundf(x - _rect.x);
-	int textY = (int)SDL_roundf(y - _rect.y);
-	if (!TTF_GetTextSubStringForPoint(_pText, textX, textY, &substring))
+	if (_bIsHighlighting)
 	{
-		SDL_Log("Couldn't get cursor location: %s", SDL_GetError());
-		return false;
+		/* Set the highlight position */
+		TTF_SubString substring;
+		int textX = (int)SDL_roundf(x - _rect.x - _marginLeft);
+		int textY = (int)SDL_roundf(y - _rect.y - _marginTop);
+		if (TTF_GetTextSubStringForPoint(_pText, textX, textY, &substring))
+		{
+			SetCursorPosition(GetCursorTextIndex(textX, &substring));
+			highlight_end = _cursor;
+		}
 	}
 
-	SetCursorPosition(GetCursorTextIndex(textX, &substring));
-	highlight_end = _cursor;
+	// Change cursor
+	SDL_FPoint pt = { x, y };
+	bool bInRect = SDL_PointInRectFloat(&pt, &_rect);
+	if (bInRect != _bIBeamCursor)
+	{
+		_bIBeamCursor = bInRect;
+		Application::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
+	}
 
 	return true;
 }
@@ -1006,5 +1031,6 @@ bool TextBox::OnEvent(SDL_Event* event)
 
 void TextBox::OnSize()
 {
-	TTF_SetTextWrapWidth(_pText, GetWidth());
+	int width = std::max((int)GetWidth() - (_marginLeft + _marginRight), 0);
+	TTF_SetTextWrapWidth(_pText, width);
 }

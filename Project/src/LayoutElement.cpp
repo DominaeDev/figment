@@ -1,6 +1,5 @@
 #include "LayoutElement.h"
 #include "Sizer.h"
-#include "Utility.h"
 
 LayoutElement::~LayoutElement()
 {

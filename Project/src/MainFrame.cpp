@@ -5,22 +5,21 @@
 #include "VerticalSizer.h"
 #include "TextBox.h"
 #include "Constants.h"
+#include "Color.h"
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
 	SetForegroundColor(SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE });
-	SetBackgroundColor(SDL_Color { 255, 255, 255, SDL_ALPHA_OPAQUE });
+	SetBackgroundColor(SDL_Color { 30, 30, 30, SDL_ALPHA_OPAQUE });
 
 	auto leftPanel = new Panel();
-	leftPanel->SetBackgroundColor(SDL_Color { 200, 50, 50 });
 	leftPanel->SetSize(200, -1);
 
 	auto centerPanel = new Panel();
-	centerPanel->SetBackgroundColor(SDL_Color { 50, 200, 50 });
-	centerPanel->SetSize(-1, -1);
+	centerPanel->SetBackgroundColor(SDL_Color { 40, 40, 40, SDL_ALPHA_OPAQUE });
+	centerPanel->SetSize(800, -1);
 
 	auto rightPanel = new Panel();
-	rightPanel->SetBackgroundColor(SDL_Color { 50, 50, 200 });
 	rightPanel->SetSize(200, -1);
 	rightPanel->SetMinSize(200, -1);
 
@@ -28,28 +27,32 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	AddChild(centerPanel);
 	AddChild(rightPanel);
 
+	auto pStaticLabel = new StaticLabel("Hello, how are you? iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", FontFace::Default, Constants::DefaultFontSize);
+	pStaticLabel->SetAlignment(TextAlignment::Middle_Center);
+	pStaticLabel->SetSize(80, 80);
+	pStaticLabel->SetMinSize(-1, 80);
+	pStaticLabel->SetBackgroundColor(SDL_Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
+	pStaticLabel->SetVisible(false);
+
 	auto pTextBox = new TextBox(FontFace::Default, Constants::DefaultFontSize);
-	pTextBox->SetSize(300, 200);
-	pTextBox->SetBackgroundColor(SDL_Color { 255, 255, 255, 255 });
+	pTextBox->SetSize(-1, 88);
+	pTextBox->SetBackgroundColor(Color::White);
 	pTextBox->SelectAll();
 	centerPanel->AddChild(pTextBox);
+	centerPanel->AddChild(pStaticLabel);
 
-	auto pLabel = new StaticLabel("Hello, how are you?", FontFace::Default, Constants::DefaultFontSize);
-	pLabel->SetAlignment(TextAlignment::Middle_Center);
-	pLabel->SetSize(80, 80);
-	pLabel->SetMinSize(-1, 80);
-	pLabel->SetBackgroundColor(SDL_Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
-
-	centerPanel->AddChild(pLabel);
-	auto pCenterSizer = new HorizontalSizer();
-	pCenterSizer->Add(pLabel, 0, Sizer::AlignBottom);
+	auto pCenterSizer = new VerticalSizer();
+	pCenterSizer->AddStretchSpacer();
+	pCenterSizer->Add(pTextBox, 0, Sizer::AlignBottom | Sizer::Expand);
 	centerPanel->SetSizer(pCenterSizer);
 
 	auto pTopSizer = new HorizontalSizer();
-	pTopSizer->Add(leftPanel, 0, Sizer::Expand);
-	pTopSizer->Add(centerPanel, -1, Sizer::Expand | Sizer::All, 8);
-	pTopSizer->Add(rightPanel, 0, Sizer::Expand);
+	pTopSizer->Add(leftPanel, -1, Sizer::Expand);
+	pTopSizer->Add(centerPanel, 0, Sizer::Expand | Sizer::Bottom, 8);
+	pTopSizer->Add(rightPanel, -1, Sizer::Expand);
 	SetSizer(pTopSizer);
+
+	pTextBox->SetFocus(true);
 }
 
 MainFrame::~MainFrame()
@@ -62,5 +65,5 @@ void MainFrame::OnUpdate(float fDeltaTime)
 
 void MainFrame::OnRender(SDL_Renderer* pRenderer)
 {
-	ClearBackground(pRenderer);
+	DrawBackground(pRenderer);
 }

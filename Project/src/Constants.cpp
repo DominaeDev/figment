@@ -3,6 +3,6 @@
 
 int Constants::WindowWidth = 1200;
 int Constants::WindowHeight = 900;
-double Constants::DefaultFontSize = 14.5;
+double Constants::DefaultFontSize = 18.5;
 const char* Constants::AppTitle = "Llama chat";
 

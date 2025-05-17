@@ -3,9 +3,11 @@
 #ifndef __Application_h_
 #define __Application_h_
 
+class Frame;
 struct SDL_Window;
 struct SDL_Renderer;
-class Frame;
+struct SDL_Cursor;
+enum SDL_SystemCursor;
 struct TTF_TextEngine;
 
 class Application
@@ -21,11 +23,18 @@ public:
 	};
 
 	static State* CreateState();
+	static void ReleaseState();
+
 	static SDL_Window* GetWindow();
 	static SDL_Renderer* GetRenderer();
 
+	static void SetCursor(SDL_SystemCursor cursor);
+
 private:
 	static State* __appState;
+
+	static SDL_Cursor* _pIBeamCursor;
+
 };
 
 typedef Application::State AppState;

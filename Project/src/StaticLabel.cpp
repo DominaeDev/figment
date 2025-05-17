@@ -97,7 +97,7 @@ void StaticLabel::OnUpdate(float fDeltaTime)
 
 void StaticLabel::OnRender(SDL_Renderer* pRenderer)
 {
-	ClearBackground(pRenderer);
+	DrawBackground(pRenderer);
 
 	if (_pTexture)
 	{

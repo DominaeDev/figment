@@ -2,5 +2,5 @@
 
 void Panel::OnRender(SDL_Renderer* pRenderer)
 {
-	ClearBackground(pRenderer);
+	DrawBackground(pRenderer);
 }
