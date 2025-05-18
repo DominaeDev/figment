@@ -10,8 +10,11 @@
 #include "Fonts.h"
 #include "Text.h"
 #include "MainFrame.h"
+#include "Inference.h"
 
 #define CHECK_MEMORY_LEAKS (defined(_DEBUG) && 1)
+
+#define DEFAULT_MODEL_LOCATION "F:\\AI\\Models\\ana-v1-m7.erp.unc.Q6_K.gguf"
 
 #if CHECK_MEMORY_LEAKS
 	#define _CRTDBG_MAP_ALLOC
@@ -73,6 +76,8 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	auto pMainFrame = new MainFrame(pWindow);
 	pAppState->pTopFrame = pMainFrame;
 
+	Inference::Initialize();
+
 	return SDL_APP_CONTINUE;
 }
 
@@ -84,6 +89,16 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 	if (event->type == SDL_EVENT_QUIT)
 	{
 		return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
+	}
+	if (event->type == SDL_EVENT_KEY_DOWN)
+	{	
+		switch (event->key.key)
+		{
+		case SDLK_F2:
+			if (!Inference::HasLoadedModel())
+				Inference::LoadModel(DEFAULT_MODEL_LOCATION);
+			break;
+		}
 	}
 
 	if (pAppState->pTopFrame != nullptr)
@@ -141,6 +156,8 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 void SDL_AppQuit(void* state, SDL_AppResult result)
 {
+	Inference::Shutdown();
+
 	AppState* pAppState = static_cast<AppState*>(state);
 	delete pAppState->pTopFrame;
 	

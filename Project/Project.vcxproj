@@ -70,7 +70,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;llama.lib;common.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;ggml.lib;llama.lib;common.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,7 +92,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;llama.lib;common.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;ggml.lib;llama.lib;common.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -112,6 +112,7 @@
     <ClCompile Include="src\Fonts.cpp" />
     <ClCompile Include="src\Frame.cpp" />
     <ClCompile Include="src\HorizontalSizer.cpp" />
+    <ClCompile Include="src\Inference.cpp" />
     <ClCompile Include="src\LayoutElement.cpp" />
     <ClCompile Include="src\Sizer.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -135,6 +136,7 @@
     <ClInclude Include="include\Fonts.h" />
     <ClInclude Include="include\Frame.h" />
     <ClInclude Include="include\HorizontalSizer.h" />
+    <ClInclude Include="include\Inference.h" />
     <ClInclude Include="include\IUpdateable.h" />
     <ClInclude Include="include\LayoutElement.h" />
     <ClInclude Include="include\Sizer.h" />

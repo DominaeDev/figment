@@ -8,7 +8,7 @@ class ChatScroll : public Control
 public:
 	ChatScroll(Control* pParent);
 
-	void AddMessage(string message, string speaker);
+	void AddMessage(string name, string message);
 
 protected:
 	void OnUpdate(float fDeltaTime) override {};

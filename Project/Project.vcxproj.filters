@@ -39,6 +39,9 @@
     <Filter Include="Source Files\Interface\Frames">
       <UniqueIdentifier>{ad99cbed-4053-4284-9125-df5de355b049}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Inference">
+      <UniqueIdentifier>{b6a16c68-2efd-46d3-b4b1-42ee978fc28a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -125,6 +128,9 @@
     <ClCompile Include="src\Utility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\Inference.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
@@ -195,6 +201,9 @@
     </ClInclude>
     <ClInclude Include="include\Utility.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Inference.h">
+      <Filter>Source Files\Inference</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

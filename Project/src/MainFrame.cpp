@@ -8,6 +8,7 @@
 #include "Color.h"
 #include "ChatScroll.h"
 #include "Utility.h"
+#include "Inference.h"
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
@@ -33,7 +34,6 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pStaticText->SetVisible(false);
 
 	auto pChatScroll = new ChatScroll(centerPanel);
-	pChatScroll->AddMessage("User", "Hello!");
 
 	auto pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::DefaultFontSize);
 	pTextBox->SetSize(-1, 88);
@@ -53,7 +53,18 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	pTextBox->SetEnterPressedCallback([pChatScroll](string text) {
 		if (!isEmpty(text))
-			pChatScroll->AddMessage("User", text); 
+		{
+			pChatScroll->AddMessage("User", text);
+
+			if (Inference::HasLoadedModel())
+			{
+				string response;
+				if (Inference::SendMessage("User", text, response))
+				{
+					pChatScroll->AddMessage("Bot", response);
+				}
+			}
+		}
 	});
 
 	pTextBox->SetFocus(true);

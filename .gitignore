@@ -3,3 +3,11 @@ Project/x64/
 Project/project.vcxproj.user
 x64/
 Project/fonts/
+Project/ggml.dll
+Project/ggml-base.dll
+Project/cublas64_12.dll
+Project/llama.dll
+Project/ggml-cuda.dll
+Project/cudart64_12.dll
+Project/cublasLt64_12.dll
+Project/ggml-cpu.dll
