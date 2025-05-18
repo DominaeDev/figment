@@ -7,6 +7,7 @@
 #include "Constants.h"
 #include "Color.h"
 #include "ChatScroll.h"
+#include "Utility.h"
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
@@ -50,7 +51,10 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pTopSizer->Add(rightPanel, -1, Sizer::Expand);
 	SetSizer(pTopSizer);
 
-	pTextBox->SetEnterPressedCallback([pChatScroll](string text) {pChatScroll->AddMessage("User", text); });
+	pTextBox->SetEnterPressedCallback([pChatScroll](string text) {
+		if (!isEmpty(text))
+			pChatScroll->AddMessage("User", text); 
+	});
 
 	pTextBox->SetFocus(true);
 }

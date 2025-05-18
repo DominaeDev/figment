@@ -18,4 +18,5 @@ private:
 	string _name;
 	string _message;
 	StaticText* _pStaticText = nullptr;
+	bool _bIgnoreEvent = false;
 };

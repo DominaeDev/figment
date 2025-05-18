@@ -26,3 +26,8 @@ inline string& rtrim(string& s)
 	}).base(), s.end());
 	return s;
 }
+
+inline bool isEmpty(const string& s)
+{
+	return s.size() == 0;
+}

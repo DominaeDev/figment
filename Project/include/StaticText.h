@@ -39,8 +39,11 @@ public:
 	virtual ~StaticText();
 
 	void SetText(string text);
+	string GetText() const { return _text; }
 
 	void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
+
+	TTF_Font* GetFont() const { return _pFont; }
 
 protected:
 	SDL_FRect GetAlignedRect() const;
@@ -51,7 +54,7 @@ protected:
 private:
 	void ReleaseTexture();
 
-	string _text {};
+	string _text;
 	bool _bInvalidated = false;
 
 	TTF_Font* _pFont = nullptr;
