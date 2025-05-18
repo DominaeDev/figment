@@ -65,9 +65,6 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Backup.cpp">
       <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
     </ClCompile>
-    <ClCompile Include="src\editbox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp">
       <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
     </ClCompile>
@@ -107,7 +104,7 @@
     <ClCompile Include="src\Panel.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\StaticLabel.cpp">
+    <ClCompile Include="src\StaticText.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\TextBox.cpp">
@@ -116,11 +113,20 @@
     <ClCompile Include="src\Color.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\VerticalListSizer.cpp">
+      <Filter>Source Files\Utility\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ChatScroll.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ChatMessage.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utility.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\editbox.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
       <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
     </ClInclude>
@@ -166,13 +172,28 @@
     <ClInclude Include="include\Panel.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\StaticLabel.h">
+    <ClInclude Include="include\StaticText.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\TextBox.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\Color.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VerticalListSizer.h">
+      <Filter>Source Files\Utility\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ChatScroll.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StringUtil.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ChatMessage.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>

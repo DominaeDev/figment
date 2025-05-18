@@ -17,12 +17,16 @@ void Sizer::Remove(Control* pFrame)
 
 void Sizer::Layout()
 {
-	LayoutElement::Layout();
-	if (_pParent)
-		OnLayout(_pParent->GetRect());
+	if (_pOwner)
+		OnLayout(_pOwner->GetRect());
 }
 
 void Sizer::Reset()
 {
 	_items.clear();
+}
+
+void Sizer::SetOwner(LayoutElement* pOwner)
+{
+	_pOwner = pOwner;
 }

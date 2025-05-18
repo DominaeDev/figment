@@ -7,6 +7,8 @@
 class Control : public LayoutElement
 {
 public:
+	Control(Control* pParent);
+
 	virtual void Render(SDL_Renderer* pRenderer);
 	virtual void Update(float fDeltaTime) override;
 

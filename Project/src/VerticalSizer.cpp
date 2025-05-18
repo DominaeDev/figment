@@ -101,6 +101,7 @@ void VerticalSizer::OnLayout(SDL_FRect parentRect)
 
 		y += height;
 
-		frame.SetSize(rect.w, rect.h); // Trigger OnSize
+		frame.SetPosition(rect.x - parentRect.x, rect.y - parentRect.y);
+		frame.SetSize(rect.w, rect.h);
 	}	
 }

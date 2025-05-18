@@ -1,14 +1,15 @@
 #include "Frame.h"
 #include <SDL3/SDL.h>
+#include "Utility.h"
 
-Frame::Frame(SDL_Window* pWindow)
+Frame::Frame(SDL_Window* pWindow) : Control(nullptr)
 {
 	_pWindow = pWindow;
 	if (pWindow)
 	{
 		int w, h;
 		SDL_GetWindowSizeInPixels(pWindow, &w, &h);
-		SetSize((float)w, (float)h);
+		SetSize(toF(w), toF(h));
 	}
 }
 

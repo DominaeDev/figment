@@ -11,9 +11,9 @@
 #include "Text.h"
 #include "MainFrame.h"
 
-#define MEMORY_LEAK_CHECK 0
+#define CHECK_MEMORY_LEAKS (defined(_DEBUG) && 1)
 
-#if defined(_DEBUG) && MEMORY_LEAK_CHECK
+#if CHECK_MEMORY_LEAKS
 	#define _CRTDBG_MAP_ALLOC
 	#include <stdlib.h>
 	#include <crtdbg.h>
@@ -29,7 +29,7 @@ static SDL_Renderer* pRenderer = NULL;
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 {
-#if defined(_DEBUG) && MEMORY_LEAK_CHECK
+#if CHECK_MEMORY_LEAKS
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 //	_CrtSetBreakAlloc(281);
 #endif

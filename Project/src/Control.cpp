@@ -2,6 +2,13 @@
 #include "Sizer.h"
 #include "Color.h"
 
+Control::Control(Control* pParent)
+{
+	if (pParent)
+		pParent->AddChild(this);
+	_pParent = pParent;
+}
+
 void Control::Update(float fDeltaTime)
 {
 	if (_bInvalidLayout)

@@ -1,14 +1,15 @@
 #include "Textbox.h"
 #include "Text.h"
 #include "AppState.h"
-#include "Color.h"
 #include <algorithm>
+#include "Color.h"
+#include "Utility.h"
 
 #define CURSOR_BLINK_INTERVAL_MS    500
 
-static const char* _testString = "Hahaha hello this is me bitch!\n\xE3\x81\xB2\xE3\x82\x89\xE3\x81\x8C\xE3\x81\xAA\x0A\xE3\x82\xAB\xE3\x82\xBF\xE3\x82\xAB\xE3\x83\x8A";
+static const char* _testString = "Hee hee, ho ho ho! \n\xE3\x81\xB2\xE3\x82\x89\xE3\x81\x8C\xE3\x81\xAA\x0A\xE3\x82\xAB\xE3\x82\xBF\xE3\x82\xAB\xE3\x83\x8A";
 
-TextBox::TextBox(FontFace fontFace, double ptSize)
+TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : Control(pParent)
 {
 	_borderColor = Color::Black;
 	_pFont = Fonts::GetFont(fontFace, ptSize);
@@ -877,6 +878,10 @@ bool TextBox::OnEvent(SDL_Event* event)
 		return false;
 	}
 
+	bool bCtrl = event->key.mod & SDL_KMOD_CTRL;
+	bool bAlt = event->key.mod & SDL_KMOD_ALT;
+	bool bShift = event->key.mod & SDL_KMOD_SHIFT;
+
 	switch (event->type)
 	{
 	case SDL_EVENT_MOUSE_BUTTON_DOWN:
@@ -897,34 +902,34 @@ bool TextBox::OnEvent(SDL_Event* event)
 		switch (event->key.key)
 		{
 		case SDLK_A:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				SelectAll();
 			}
 			break;
 		case SDLK_C:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				Copy();
 			}
 			break;
 
 		case SDLK_V:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				Paste();
 			}
 			break;
 
 		case SDLK_X:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				Cut();
 			}
 			break;
 
 		case SDLK_LEFT:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				MoveCursorBeginningOfLine();
 			}
@@ -935,7 +940,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			break;
 
 		case SDLK_RIGHT:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				MoveCursorEndOfLine();
 			}
@@ -946,7 +951,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			break;
 
 		case SDLK_UP:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				MoveCursorBeginning();
 			}
@@ -957,7 +962,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			break;
 
 		case SDLK_DOWN:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				MoveCursorEnd();
 			}
@@ -976,7 +981,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			break;
 
 		case SDLK_BACKSPACE:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				BackspaceToBeginning();
 			}
@@ -987,7 +992,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			break;
 
 		case SDLK_DELETE:
-			if (event->key.mod & SDL_KMOD_CTRL)
+			if (bCtrl)
 			{
 				DeleteToEnd();
 			}
@@ -998,7 +1003,17 @@ bool TextBox::OnEvent(SDL_Event* event)
 			break;
 
 		case SDLK_RETURN:
-			Insert("\n");
+			if (bCtrl)
+				Insert("\n");
+			else
+			{
+				if (_pOnEnter) // Invoke
+				{
+					string text(_pText->text);
+					_pOnEnter(trim(text));
+					Clear();
+				}
+			}
 			break;
 
 		case SDLK_ESCAPE:
@@ -1033,4 +1048,18 @@ void TextBox::OnSize()
 {
 	int width = std::max((int)GetWidth() - (_marginLeft + _marginRight), 0);
 	TTF_SetTextWrapWidth(_pText, width);
+}
+
+void TextBox::SetEnterPressedCallback(EnterPressedCallback cb)
+{
+	_pOnEnter = cb;
+}
+
+void TextBox::Clear()
+{
+	TTF_SetTextString(_pText, "", 0);
+	_bIsHighlighting = false;
+	highlight_start = -1;
+	highlight_end = -1;
+	SetCursorPosition(0);
 }

@@ -1,5 +1,6 @@
 #include "HorizontalSizer.h"
 #include "Control.h"
+#include "Utility.h"
 
 static int CeilInt(float f)
 {
@@ -49,9 +50,9 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 			width = CeilInt(remainingWidth / (float)numStretch);
 
 		if (frame.GetMinSize().x > 0)
-			width = CeilInt(std::max((float)width, frame.GetMinSize().x));
+			width = CeilInt(std::max(toF(width), frame.GetMinSize().x));
 		if (frame.GetMaxSize().x > 0)
-			width = CeilInt(std::min((float)width, frame.GetMaxSize().x));
+			width = CeilInt(std::min(toF(width), frame.GetMaxSize().x));
 
 		SDL_FRect borderRect {
 			parentRect.x + x,
@@ -99,8 +100,10 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 				rect.y = borderRect.y + borderRect.h - rect.h;
 		}
 
+		frame.SetPosition(rect.x - parentRect.x, rect.y - parentRect.y);
+		frame.SetSize(rect.w, rect.h);
+
 		x += width;
-		frame.InvalidateLayout();
 	}
 }
 

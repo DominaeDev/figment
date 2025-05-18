@@ -4,7 +4,7 @@
 #include "LayoutElement.h"
 #include <vector>
 
-class Sizer : public LayoutElement
+class Sizer : public IUpdateable
 {
 public:
 	enum Flag : int {
@@ -28,6 +28,7 @@ public:
 
 public:
 	void Layout();
+	void SetOwner(LayoutElement* pOwner);
 
 	void Add(Control* pFrame, int proportion = 0, int flags = Flag::Default, int border = 0);
 	void AddStretchSpacer();
@@ -43,6 +44,7 @@ protected:
 		int border = 0;
 	};
 
+	LayoutElement* _pOwner = nullptr;
 	std::vector<LayoutInfo> _items;
 
 	unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }

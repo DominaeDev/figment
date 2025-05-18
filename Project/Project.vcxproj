@@ -63,6 +63,9 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <AdditionalOptions>/Zc:char8_t- /utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,6 +84,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <AdditionalOptions>/Zc:char8_t- /utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,9 +104,10 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
     <ClCompile Include="src\AppState.cpp" />
+    <ClCompile Include="src\ChatMessage.cpp" />
+    <ClCompile Include="src\ChatScroll.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\Constants.cpp" />
-    <ClCompile Include="src\editbox.cpp" />
     <ClCompile Include="src\Control.cpp" />
     <ClCompile Include="src\Fonts.cpp" />
     <ClCompile Include="src\Frame.cpp" />
@@ -111,17 +117,20 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MainFrame.cpp" />
     <ClCompile Include="src\Panel.cpp" />
-    <ClCompile Include="src\StaticLabel.cpp" />
+    <ClCompile Include="src\StaticText.cpp" />
     <ClCompile Include="src\Text.cpp" />
     <ClCompile Include="src\TextBox.cpp" />
     <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="src\Utility.cpp" />
+    <ClCompile Include="src\VerticalListSizer.cpp" />
     <ClCompile Include="src\VerticalSizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\AppState.h" />
+    <ClInclude Include="include\ChatMessage.h" />
+    <ClInclude Include="include\ChatScroll.h" />
     <ClInclude Include="include\Color.h" />
     <ClInclude Include="include\Constants.h" />
-    <ClInclude Include="include\editbox.h" />
     <ClInclude Include="include\Control.h" />
     <ClInclude Include="include\Fonts.h" />
     <ClInclude Include="include\Frame.h" />
@@ -131,10 +140,13 @@
     <ClInclude Include="include\Sizer.h" />
     <ClInclude Include="include\MainFrame.h" />
     <ClInclude Include="include\Panel.h" />
-    <ClInclude Include="include\StaticLabel.h" />
+    <ClInclude Include="include\StaticText.h" />
+    <ClInclude Include="include\StringUtil.h" />
     <ClInclude Include="include\Text.h" />
     <ClInclude Include="include\TextBox.h" />
     <ClInclude Include="include\Types.h" />
+    <ClInclude Include="include\Utility.h" />
+    <ClInclude Include="include\VerticalListSizer.h" />
     <ClInclude Include="include\VerticalSizer.h" />
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h" />
   </ItemGroup>

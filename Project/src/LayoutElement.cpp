@@ -16,6 +16,7 @@ void LayoutElement::Layout()
 		auto position = child->GetAbsolutePosition();
 		rect.x = position.x;
 		rect.y = position.y;
+		child->Layout();
 	}
 
 	if (_pSizer)
@@ -43,7 +44,7 @@ SDL_FPoint LayoutElement::GetAbsolutePosition() const
 {
 	if (_pParent)
 	{
-		auto position = SDL_FPoint { _pParent->_rect.x, _pParent->_rect.y };
+		auto position = _pParent->GetAbsolutePosition();
 		position.x += _position.x;
 		position.y += _position.y;
 		return position;
@@ -92,8 +93,12 @@ void LayoutElement::SetHeight(float height)
 
 void LayoutElement::AddChild(LayoutElement* pLayoutElement)
 {
-	pLayoutElement->SetParent(this);
-	_children.push_back(pLayoutElement);
+	auto itFind = std::find(std::cbegin(_children), std::cend(_children), pLayoutElement);
+	if (itFind == std::cend(_children))
+	{
+		_children.push_back(pLayoutElement);
+		InvalidateLayout();
+	}
 }
 
 bool LayoutElement::RemoveChild(LayoutElement* frame)
@@ -111,16 +116,11 @@ bool LayoutElement::RemoveChild(LayoutElement* frame)
 void LayoutElement::SetSizer(Sizer* pSizer)
 {
 	if (_pSizer)
-	{
-		RemoveChild(_pSizer);
 		delete _pSizer;
-	}
+	_pSizer = pSizer;
 
 	if (pSizer)
-	{
-		_pSizer = pSizer;
-		AddChild(pSizer);
-	}
+		pSizer->SetOwner(this);
 	
 	_bInvalidLayout = true;
 }

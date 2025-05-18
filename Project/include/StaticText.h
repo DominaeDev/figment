@@ -2,6 +2,7 @@
 
 #include "Control.h"
 #include "Fonts.h"
+#include "Types.h"
 
 enum HorizontalAlignment : unsigned short
 {
@@ -31,14 +32,13 @@ enum TextAlignment : unsigned short
 	Default = Left_Top,
 };
 
-
-class StaticLabel : public Control
+class StaticText : public Control
 {
 public:
-	StaticLabel(const char* text, FontFace fontFace, double ptSize);
-	virtual ~StaticLabel();
+	StaticText(Control* pParent, string text, FontFace fontFace, double ptSize);
+	virtual ~StaticText();
 
-	void SetText(const char* text);
+	void SetText(string text);
 
 	void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
 
@@ -51,7 +51,7 @@ protected:
 private:
 	void ReleaseTexture();
 
-	const char* _pText = nullptr;
+	string _text {};
 	bool _bInvalidated = false;
 
 	TTF_Font* _pFont = nullptr;

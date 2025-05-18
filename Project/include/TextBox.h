@@ -1,21 +1,24 @@
 #pragma once
+#include <functional>
 
 #include "Control.h"
 #include "Fonts.h"
+#include "Types.h"
 
 struct SDL_Renderer;
+
+typedef std::function<void(string)> EnterPressedCallback;
 
 class TextBox : public Control
 {
 public:
-	TextBox(FontFace fontFace, double ptSize);
+	TextBox(Control* pParent, FontFace fontFace, double ptSize);
 	virtual ~TextBox();
 
+	void SetEnterPressedCallback(EnterPressedCallback cb);
+
+	void Clear();
 	void SetFocus(bool focus);
-	void MoveCursorLeft();
-	void MoveCursorRight();
-	void MoveCursorUp();
-	void MoveCursorDown();
 	void MoveCursorBeginningOfLine();
 	void MoveCursorEndOfLine();
 	void MoveCursorBeginning();
@@ -29,7 +32,6 @@ public:
 	void Copy();
 	void Cut();
 	void Paste();
-	void Insert(const char* text);
 
 protected:
 	void OnUpdate(float fDeltaTime) override;
@@ -38,6 +40,8 @@ protected:
 	void OnSize() override;
 
 private:
+	void Insert(const char* text);
+
 	void DrawText(SDL_Renderer* pRenderer, TTF_Text* pText, float x, float y);
 	void DrawCursor(SDL_Renderer* pRenderer);
 	void DrawCandidates(SDL_Renderer* pRenderer);
@@ -53,6 +57,11 @@ private:
 	void UpdateTextInputArea();
 	void SetCursorPosition(int position);
 	void MoveCursorIndex(int direction);
+	void MoveCursorLeft();
+	void MoveCursorRight();
+	void MoveCursorUp();
+	void MoveCursorDown();
+
 	bool HandleMouseDown(float x, float y);
 	bool HandleMouseMotion(float x, float y);
 	bool HandleMouseUp(float x, float y);
@@ -65,6 +74,7 @@ protected:
 
 	SDL_Texture* _pTexture = nullptr;
 	SDL_Surface* _pSurface = nullptr;
+	EnterPressedCallback _pOnEnter = nullptr;
 
 	int _marginLeft = 8;
 	int _marginTop = 4;
