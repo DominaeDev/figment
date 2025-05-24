@@ -10,6 +10,7 @@ struct llama_context;
 struct llama_sampler;
 
 typedef std::function<void(bool)> LoadModelCallback;
+typedef std::function<void(int)> LoadModelProgressCallback;
 
 struct ModelState
 {
@@ -29,7 +30,7 @@ public:
 	void Shutdown();
 	bool HasLoadedModel() const { return _modelState.load().pModel != nullptr; }
 
-	bool LoadModelAsync(string filename, LoadModelCallback onComplete);
+	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool EnqueueMessage(string name, string message, string& outResponse);
 
 private:

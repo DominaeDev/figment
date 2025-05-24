@@ -35,10 +35,19 @@ void LLMInstance::Shutdown()
 	if (_loadThread.get() != nullptr && _loadThread.get()->joinable())
 		_loadThread.get()->join();
 
-	_modelState.load().Release();
+	auto state = _modelState.load();
+	_modelState.exchange(ModelState());
+	state.Release();
 }
 
 typedef std::function<void(ModelState)> __LoadModelCallback;
+static LoadModelProgressCallback __LoadModelProgressCallback = nullptr;
+
+static void OnLoadModelProgress(float progress, void* user_data)
+{
+	if (__LoadModelProgressCallback)
+		__LoadModelProgressCallback(static_cast<int>(progress * 100.0f));
+}
 
 static void __LoadModel(string filename, __LoadModelCallback onComplete)
 {
@@ -48,6 +57,7 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 	// initialize the model
 	llama_model_params model_params = llama_model_default_params();
 	model_params.n_gpu_layers = ngl;
+	model_params.progress_callback = (llama_progress_callback)&OnLoadModelProgress;
 
 	ModelState state;
 	state.pModel = llama_model_load_from_file(filename.c_str(), model_params);
@@ -85,7 +95,7 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 	onComplete(state);
 }
 
-bool LLMInstance::LoadModelAsync(string filename, LoadModelCallback onComplete)
+bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
 {
 	if (IsReady())
 		return false; // Already loaded
@@ -95,14 +105,22 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelCallback onComplete)
 
 	_bLoadingModel = true;
 
+	__LoadModelProgressCallback = onProgress;
+
 	auto pThread = new std::thread(__LoadModel,
 		filename,
-		[this](ModelState result)
+		[this, onComplete](ModelState result)
 		{
 			if (result.bReady)
+			{
 				_modelState.store(result);
+				onComplete(true);
+			}
 			else
+			{
 				result.Release();
+				onComplete(false);
+			}
 		});
 
 	_loadThread.reset(pThread);

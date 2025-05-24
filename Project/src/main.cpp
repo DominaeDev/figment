@@ -95,6 +95,9 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 		case SDLK_F2:
 			static_cast<MainFrame*>(pAppState->pTopFrame)->LoadModel();
 			break;
+		case SDLK_F3:
+			static_cast<MainFrame*>(pAppState->pTopFrame)->UnloadModel();
+			break;
 		}
 	}
 

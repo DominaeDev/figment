@@ -14,6 +14,7 @@ public:
 	virtual ~MainFrame();
 
 	void LoadModel();
+	void UnloadModel();
 
 	static void SetStatusBar(string message);
 	static MainFrame& GetInstance() { return *s_pInstance; }

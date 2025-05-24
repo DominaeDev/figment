@@ -12,6 +12,7 @@
 #include "Utility.h"
 #include "LLMInstance.h"
 #include "AppState.h"
+#include <format>
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -109,9 +110,34 @@ void MainFrame::LoadModel()
 	auto pLLM = Application::GetLLM();
 	if (pLLM && !pLLM->HasLoadedModel())
 	{
-		pLLM->LoadModelAsync(DEFAULT_MODEL_LOCATION, [](bool bOk) {
-			fprintf(stdout, "%s", bOk? "Loaded model OK" : "Failed to load model");
-		});
+		pLLM->LoadModelAsync(DEFAULT_MODEL_LOCATION, 
+			[](int percent) 
+			{
+				SetStatusBar(std::format("Loading model... {0}%", percent));
+			},
+			[](bool bSuccess) 
+			{
+				if (bSuccess)
+				{
+					SetStatusBar("Model loaded");
+					fprintf(stdout, "Loaded model OK");
+				}
+				else
+				{
+					fprintf(stdout, "Failed to load model");
+					SetStatusBar("Failed to load model");
+				}
+			});
+	}
+}
+
+void MainFrame::UnloadModel()
+{
+	auto pLLM = Application::GetLLM();
+	if (pLLM && pLLM->HasLoadedModel())
+	{
+		pLLM->Shutdown();
+		SetStatusBar("Model unloaded");
 	}
 }
 
