@@ -121,6 +121,7 @@
     <ClCompile Include="src\MainFrame.cpp" />
     <ClCompile Include="src\Panel.cpp" />
     <ClCompile Include="src\StaticText.cpp" />
+    <ClCompile Include="src\StatusBar.cpp" />
     <ClCompile Include="src\Text.cpp" />
     <ClCompile Include="src\TextBox.cpp" />
     <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="include\MainFrame.h" />
     <ClInclude Include="include\Panel.h" />
     <ClInclude Include="include\StaticText.h" />
+    <ClInclude Include="include\StatusBar.h" />
     <ClInclude Include="include\StringUtil.h" />
     <ClInclude Include="include\Text.h" />
     <ClInclude Include="include\TextBox.h" />

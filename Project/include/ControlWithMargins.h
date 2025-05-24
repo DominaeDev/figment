@@ -11,10 +11,10 @@ public:
 	void SetMargins(SDL_Rect rect);
 
 protected:
-	int _marginLeft = 8;
-	int _marginTop = 4;
-	int _marginRight = 4;
-	int _marginBottom = 6;
+	int _marginLeft = 0;
+	int _marginTop = 0;
+	int _marginRight = 0;
+	int _marginBottom = 0;
 
 	int HMargin() const { return _marginLeft + _marginRight; }
 	int VMargin() const { return _marginTop + _marginBottom; }

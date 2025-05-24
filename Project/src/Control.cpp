@@ -53,13 +53,17 @@ void Control::Render(SDL_Renderer* pRenderer)
 			renderable->Render(pRenderer);
 	}
 
-	DrawBorder(pRenderer);
-
 	if (_bClipping)
 	{
 		s_pClippingRect = lastClippingRect;
 		SDL_SetRenderClipRect(pRenderer, s_pClippingRect);
 	}
+}
+
+void Control::OnRender(SDL_Renderer* pRenderer)
+{
+	DrawBackground(pRenderer);
+	DrawBorder(pRenderer);
 }
 
 void Control::DrawBorder(SDL_Renderer* pRenderer)

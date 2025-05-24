@@ -137,6 +137,9 @@
     <ClCompile Include="src\ControlWithMargins.cpp">
       <Filter>Source Files\Utility\Interface</Filter>
     </ClCompile>
+    <ClCompile Include="src\StatusBar.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
@@ -216,6 +219,9 @@
     </ClInclude>
     <ClInclude Include="include\ControlWithMargins.h">
       <Filter>Source Files\Utility\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StatusBar.h">
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

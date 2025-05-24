@@ -78,7 +78,7 @@ TTF_Font* Fonts::LoadFallbackFont(const char* filename, double ptSize)
 	if (pFont != nullptr)
 	{
 		TTF_SetFontHinting(pFont, TTF_HINTING_LIGHT_SUBPIXEL);
-		TTF_SetFontKerning(pFont, false);
+		TTF_SetFontKerning(pFont, true);
 		s_FallbackFonts.push_back(Font { pFont, FontFace::Default, (int)(ptSize * 10.0) });
 		return pFont;
 	}

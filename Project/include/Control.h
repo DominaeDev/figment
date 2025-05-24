@@ -26,7 +26,7 @@ public:
 	bool ProcessEvent(SDL_Event* event);
 
 protected:
-	virtual void OnRender(SDL_Renderer* pRenderer) = 0;
+	virtual void OnRender(SDL_Renderer* pRenderer);
 	virtual void OnParent();
 	virtual bool OnEvent(SDL_Event* event) { return false; }
 

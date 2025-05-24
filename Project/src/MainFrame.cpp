@@ -8,9 +8,12 @@
 #include "Constants.h"
 #include "Color.h"
 #include "ChatScroll.h"
+#include "StatusBar.h"
 #include "Utility.h"
 #include "LLMInstance.h"
 #include "AppState.h"
+
+MainFrame* MainFrame::s_pInstance = nullptr;
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
@@ -55,15 +58,12 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	mainSizer->Add(rightPanel, -1, Sizer::Expand);
 	mainArea->SetSizer(mainSizer);
 
-	auto pStatusBar = new StaticText(this, "Hello", FontFace::Default, Constants::StatusBarFontSize, false);
-	pStatusBar->SetSize(this->GetWidth(), 24);
-	pStatusBar->SetForegroundColor(SDL_Color { 200, 200, 200, SDL_ALPHA_OPAQUE });
-	pStatusBar->SetBackgroundColor(SDL_Color { 40, 40, 40, SDL_ALPHA_OPAQUE });
-	pStatusBar->SetMargins(8, 0, 0, 0);
+	// Status bar
+	_pStatusBar = new StatusBar(this);
 
 	auto topSizer = new VerticalSizer();
 	topSizer->Add(mainArea, -1, Sizer::Expand);
-	topSizer->Add(pStatusBar, 0, Sizer::Expand);
+	topSizer->Add(_pStatusBar, 0);
 
 	SetSizer(topSizer);
 	
@@ -84,6 +84,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pTextBox->SetFocus(true);
 
 	InvalidateLayout();
+	s_pInstance = this;
 }
 
 MainFrame::~MainFrame()
@@ -103,6 +104,8 @@ void MainFrame::OnRender(SDL_Renderer* pRenderer)
 
 void MainFrame::LoadModel()
 {
+	SetStatusBar("Loading model...");
+
 	auto pLLM = Application::GetLLM();
 	if (pLLM && !pLLM->HasLoadedModel())
 	{
@@ -110,4 +113,9 @@ void MainFrame::LoadModel()
 			fprintf(stdout, "%s", bOk? "Loaded model OK" : "Failed to load model");
 		});
 	}
+}
+
+void MainFrame::SetStatusBar(string message)
+{
+	s_pInstance->_pStatusBar->SetMessage(message);
 }
