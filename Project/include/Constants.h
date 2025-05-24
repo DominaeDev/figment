@@ -9,4 +9,5 @@ namespace Constants
 	extern int WindowHeight;
 
 	extern double DefaultFontSize;
+	extern double StatusBarFontSize;
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 
-#include "Control.h"
+#include "ControlWithMargins.h"
 #include "Fonts.h"
 #include "Types.h"
 
@@ -9,7 +9,7 @@ struct SDL_Renderer;
 
 typedef std::function<void(string)> EnterPressedCallback;
 
-class TextBox : public Control
+class TextBox : public ControlWithMargins
 {
 public:
 	TextBox(Control* pParent, FontFace fontFace, double ptSize);
@@ -75,11 +75,6 @@ protected:
 	SDL_Texture* _pTexture = nullptr;
 	SDL_Surface* _pSurface = nullptr;
 	EnterPressedCallback _pOnEnter = nullptr;
-
-	int _marginLeft = 8;
-	int _marginTop = 4;
-	int _marginRight = 4;
-	int _marginBottom = 6;
 
 	/* Cursor support */
 	int _cursor = 0;

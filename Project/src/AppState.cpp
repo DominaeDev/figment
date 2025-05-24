@@ -31,6 +31,11 @@ SDL_Renderer* Application::GetRenderer()
 	return __appState ? __appState->pRenderer : nullptr;
 }
 
+LLMInstance* Application::GetLLM()
+{
+	return __appState ? __appState->pLLM : nullptr;
+}
+
 void Application::SetCursor(SDL_SystemCursor cursor)
 {
 	SDL_Cursor* pCursor;

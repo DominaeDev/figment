@@ -9,7 +9,7 @@
 
 static const char* _testString = "Hee hee, ho ho ho! \n\xE3\x81\xB2\xE3\x82\x89\xE3\x81\x8C\xE3\x81\xAA\x0A\xE3\x82\xAB\xE3\x82\xBF\xE3\x82\xAB\xE3\x83\x8A";
 
-TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : Control(pParent)
+TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWithMargins(pParent)
 {
 	_borderColor = Color::Black;
 	_pFont = Fonts::GetFont(fontFace, ptSize);
@@ -23,6 +23,11 @@ TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : Control(p
 
 	highlight_start = -1;
 	highlight_end = -1;
+
+	_marginLeft = 8;
+	_marginTop = 4;
+	_marginRight = 4;
+	_marginBottom = 6;
 }
 
 TextBox::~TextBox()

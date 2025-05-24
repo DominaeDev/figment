@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Control.h"
+#include "ControlWithMargins.h"
 #include "Fonts.h"
 #include "Types.h"
 
@@ -32,30 +32,37 @@ enum TextAlignment : unsigned short
 	Default = Left_Top,
 };
 
-class StaticText : public Control
+class StaticText : public ControlWithMargins
 {
 public:
-	StaticText(Control* pParent, string text, FontFace fontFace, double ptSize);
+	StaticText(Control* pParent, string text, FontFace fontFace, double ptSize, bool bAutoSize = true);
 	virtual ~StaticText();
+
+	TTF_Font* GetFont() const { return _pFont; }
 
 	void SetText(string text);
 	string GetText() const { return _text; }
 
 	void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
 
-	TTF_Font* GetFont() const { return _pFont; }
+	void SetForegroundColor(SDL_Color color) override;
+	void SetBackgroundColor(SDL_Color color) override;
 
 protected:
 	SDL_FRect GetAlignedRect() const;
+	void InvalidateText();
+
 	void OnUpdate(float fDeltaTime) override;
 	void OnRender(SDL_Renderer* pRenderer) override;
 	void OnParent() override;
 
 private:
+	void DrawText();
 	void ReleaseTexture();
 
 	string _text;
 	bool _bInvalidated = false;
+	bool _bAutoSize = true;
 
 	TTF_Font* _pFont = nullptr;
 	SDL_Texture* _pTexture = nullptr;

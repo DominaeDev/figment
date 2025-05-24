@@ -9,6 +9,7 @@ struct SDL_Renderer;
 struct SDL_Cursor;
 enum SDL_SystemCursor;
 struct TTF_TextEngine;
+class LLMInstance;
 
 class Application
 {
@@ -20,6 +21,7 @@ public:
 		Frame* pTopFrame;
 		unsigned __int64 last_step;
 		TTF_TextEngine* pTextEngine;
+		LLMInstance* pLLM;
 	};
 
 	static State* CreateState();
@@ -27,6 +29,7 @@ public:
 
 	static SDL_Window* GetWindow();
 	static SDL_Renderer* GetRenderer();
+	static LLMInstance* GetLLM();
 
 	static void SetCursor(SDL_SystemCursor cursor);
 

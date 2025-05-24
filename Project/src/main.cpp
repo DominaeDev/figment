@@ -10,11 +10,9 @@
 #include "Fonts.h"
 #include "Text.h"
 #include "MainFrame.h"
-#include "Inference.h"
+#include "LLMInstance.h"
 
-#define CHECK_MEMORY_LEAKS (defined(_DEBUG) && 1)
-
-#define DEFAULT_MODEL_LOCATION "F:\\AI\\Models\\ana-v1-m7.erp.unc.Q6_K.gguf"
+#define CHECK_MEMORY_LEAKS (defined(_DEBUG) && 0)
 
 #if CHECK_MEMORY_LEAKS
 	#define _CRTDBG_MAP_ALLOC
@@ -22,12 +20,7 @@
 	#include <crtdbg.h>
 #endif
 
-/* We will use this renderer to draw into this window every frame. */
-static SDL_Window* pWindow = NULL;
-static SDL_Renderer* pRenderer = NULL;
-
 #define APP_STATE(P) static_cast<AppState*>(P);
-
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
@@ -43,6 +36,8 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 	}
 
+	SDL_Window* pWindow;
+	SDL_Renderer* pRenderer;
 	if (!SDL_CreateWindowAndRenderer(Constants::AppTitle, Constants::WindowWidth, Constants::WindowHeight, SDL_WINDOW_RESIZABLE, &pWindow, &pRenderer))
 	{
 		SDL_Log("Couldn't create pWindow/pRenderer: %s", SDL_GetError());
@@ -76,7 +71,10 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	auto pMainFrame = new MainFrame(pWindow);
 	pAppState->pTopFrame = pMainFrame;
 
-	Inference::Initialize();
+	// Instantiate LLM
+	auto pLLM = new LLMInstance();
+	pLLM->Initialize();
+	pAppState->pLLM = pLLM;
 
 	return SDL_APP_CONTINUE;
 }
@@ -84,7 +82,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 /* This function runs when a new event (mouse input, keypresses, etc) occurs. */
 SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 {
-	auto pAppState = APP_STATE(state);
+	AppState* pAppState = static_cast<AppState*>(state);
 
 	if (event->type == SDL_EVENT_QUIT)
 	{
@@ -95,8 +93,7 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 		switch (event->key.key)
 		{
 		case SDLK_F2:
-			if (!Inference::HasLoadedModel())
-				Inference::LoadModel(DEFAULT_MODEL_LOCATION);
+			static_cast<MainFrame*>(pAppState->pTopFrame)->LoadModel();
 			break;
 		}
 	}
@@ -119,6 +116,7 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 	float fDeltaTime = static_cast<float>(delta) / 1000.0f;
 
+	auto pRenderer = pAppState->pRenderer;
 	SDL_SetRenderDrawColor(pRenderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(pRenderer);
 
@@ -145,7 +143,7 @@ SDL_AppResult SDL_AppIterate(void* state)
         SDL_snprintf(title, sizeof(title), "%s %" SDL_PRIu64 " fps", Constants::AppTitle, accu);
         accu = 0;
 
-		SDL_SetWindowTitle(pWindow, title);
+		SDL_SetWindowTitle(pAppState->pWindow, title);
     }
     past = now_ns;
     accu += 1;
@@ -156,13 +154,14 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 void SDL_AppQuit(void* state, SDL_AppResult result)
 {
-	Inference::Shutdown();
-
 	AppState* pAppState = static_cast<AppState*>(state);
 	delete pAppState->pTopFrame;
 	
 	Fonts::ReleaseFonts();
 	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
 	TTF_Quit();
+
+	pAppState->pLLM->Shutdown();
+
 }
 

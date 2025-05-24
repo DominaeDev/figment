@@ -1,15 +1,22 @@
 #include "llama.h"
-#include "Inference.h"
+#include "LLMInstance.h"
 #include <vector>
 
 #pragma comment(lib, "ggml-base.lib")
 
-llama_model* Inference::_pModel = nullptr;
-const llama_vocab* Inference::_pVocab = nullptr;
-llama_context* Inference::_pCtx = nullptr;
-llama_sampler* Inference::_pSampler = nullptr;
+void ModelState::Release()
+{
+	llama_sampler_free(pSampler);
+	llama_free(pCtx);
+	llama_model_free(pModel);
+	pSampler = nullptr;
+	pCtx = nullptr;
+	pModel = nullptr;
+	pVocab = nullptr;
+	bReady = false;
+}
 
-void Inference::Initialize()
+void LLMInstance::Initialize()
 {
 	// only print errors
 	llama_log_set([](enum ggml_log_level level, const char* text, void* /* user_data */) {
@@ -23,14 +30,17 @@ void Inference::Initialize()
 	ggml_backend_load_all();
 }
 
-void Inference::Shutdown()
+void LLMInstance::Shutdown()
 {
-    llama_sampler_free(_pSampler);
-    llama_free(_pCtx);
-    llama_model_free(_pModel);
+	if (_loadThread.get() != nullptr && _loadThread.get()->joinable())
+		_loadThread.get()->join();
+
+	_modelState.load().Release();
 }
 
-bool Inference::LoadModel(string filename)
+typedef std::function<void(ModelState)> __LoadModelCallback;
+
+static void __LoadModel(string filename, __LoadModelCallback onComplete)
 {
 	int ngl = 99;
 	int n_ctx = 2048;
@@ -39,45 +49,88 @@ bool Inference::LoadModel(string filename)
 	llama_model_params model_params = llama_model_default_params();
 	model_params.n_gpu_layers = ngl;
 
-	_pModel = llama_model_load_from_file(filename.c_str(), model_params);
-	if (!_pModel)
+	ModelState state;
+	state.pModel = llama_model_load_from_file(filename.c_str(), model_params);
+	if (!state.pModel)
 	{
 		fprintf(stderr, "%s: error: unable to load model\n", __func__);
-		return false;
+		onComplete(state);
+		return;
 	}
-	_pVocab = llama_model_get_vocab(_pModel);
+		
+	state.pVocab = llama_model_get_vocab(state.pModel);
 
 	// initialize the context
 	llama_context_params ctx_params = llama_context_default_params();
 	ctx_params.n_ctx = n_ctx;
 	ctx_params.n_batch = n_ctx;
 
-	_pCtx = llama_init_from_model(_pModel, ctx_params);
-	if (!_pCtx)
+	state.pCtx = llama_init_from_model(state.pModel, ctx_params);
+	if (!state.pCtx)
 	{
 		fprintf(stderr, "%s: error: failed to create the llama_context\n", __func__);
-		return false;
+		onComplete(state);
+		return;
 	}
 
 	// initialize the sampler
-    _pSampler = llama_sampler_chain_init(llama_sampler_chain_default_params());
-    llama_sampler_chain_add(_pSampler, llama_sampler_init_min_p(0.05f, 1));
-    llama_sampler_chain_add(_pSampler, llama_sampler_init_temp(0.8f));
-    llama_sampler_chain_add(_pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+	llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
+    state.pSampler = llama_sampler_chain_init(sampler_params);
+
+    llama_sampler_chain_add(state.pSampler, llama_sampler_init_min_p(0.05f, 1));			// Min P
+    llama_sampler_chain_add(state.pSampler, llama_sampler_init_temp(0.8f));					// Temperature
+    llama_sampler_chain_add(state.pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));	// Seed
+
+	state.bReady = true;
+	onComplete(state);
+}
+
+bool LLMInstance::LoadModelAsync(string filename, LoadModelCallback onComplete)
+{
+	if (IsReady())
+		return false; // Already loaded
+
+	if (_loadThread.get() != nullptr && _loadThread.get()->joinable())
+		_loadThread.get()->join();
+
+	_bLoadingModel = true;
+
+	auto pThread = new std::thread(__LoadModel,
+		filename,
+		[this](ModelState result)
+		{
+			if (result.bReady)
+				_modelState.store(result);
+			else
+				result.Release();
+		});
+
+	_loadThread.reset(pThread);
 
 	return true;
 }
 
-bool Inference::Generate(const string& prompt, string& outResponse)
+bool LLMInstance::IsReady() const
 {
+	ModelState state = _modelState.load();
+	return state.bReady && state.pModel;
+}
+
+bool LLMInstance::Generate(const string& prompt, string& outResponse)
+{
+	if (!IsReady())
+		return false;
+
     std::string response;
 
-    const bool is_first = llama_kv_self_used_cells(_pCtx) == 0;
+	ModelState state = _modelState.load();
+
+    const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
 
     // tokenize the prompt
-    const int32_t n_prompt_tokens = -llama_tokenize(_pVocab, prompt.c_str(), (int32_t)prompt.size(), NULL, 0, is_first, true);
+    const int32_t n_prompt_tokens = -llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), NULL, 0, is_first, true);
     std::vector<llama_token> prompt_tokens(n_prompt_tokens);
-    if (llama_tokenize(_pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), is_first, true) < 0) {
+    if (llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), is_first, true) < 0) {
         GGML_ABORT("failed to tokenize the prompt\n");
 		return false;
     }
@@ -87,29 +140,29 @@ bool Inference::Generate(const string& prompt, string& outResponse)
     llama_token new_token_id;
     while (true) {
         // check if we have enough space in the context to evaluate this batch
-        int n_ctx = llama_n_ctx(_pCtx);
-        int n_ctx_used = llama_kv_self_used_cells(_pCtx);
+        int n_ctx = llama_n_ctx(state.pCtx);
+        int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
         if (n_ctx_used + batch.n_tokens > n_ctx) {
             printf("\033[0m\n");
             fprintf(stderr, "context size exceeded\n");
 			return false;
         }
 
-        if (llama_decode(_pCtx, batch)) {
+        if (llama_decode(state.pCtx, batch)) {
             GGML_ABORT("failed to decode\n");
         }
 
         // sample the next token
-        new_token_id = llama_sampler_sample(_pSampler, _pCtx, -1);
+        new_token_id = llama_sampler_sample(state.pSampler, state.pCtx, -1);
 
         // is it an end of generation?
-        if (llama_vocab_is_eog(_pVocab, new_token_id)) {
+        if (llama_vocab_is_eog(state.pVocab, new_token_id)) {
             break;
         }
 
         // convert the token to a string, print it and add it to the response
         char buf[256];
-        int n = llama_token_to_piece(_pVocab, new_token_id, buf, sizeof(buf), 0, true);
+        int n = llama_token_to_piece(state.pVocab, new_token_id, buf, sizeof(buf), 0, true);
         if (n < 0) {
             GGML_ABORT("failed to convert token to piece\n");
 			return false;
@@ -127,13 +180,18 @@ bool Inference::Generate(const string& prompt, string& outResponse)
     return true;
 };
 
-bool Inference::SendMessage(string name, string message, string& outResponse)
+bool LLMInstance::EnqueueMessage(string name, string message, string& outResponse)
 {
+	if (!IsReady())
+		return false;
+
+	ModelState state = _modelState.load();
+
 	std::vector<llama_chat_message> messages;
-	std::vector<char> formatted(llama_n_ctx(_pCtx));
+	std::vector<char> formatted(llama_n_ctx(state.pCtx));
 	int prev_len = 0;
 
-	const char* tmpl = llama_model_chat_template(_pModel, /* name */ nullptr);
+	const char* tmpl = llama_model_chat_template(state.pModel, /* name */ nullptr);
 
 	// add the user input to the message list and format it
 	messages.push_back({ _strdup(name.c_str()), _strdup(message.c_str()) });

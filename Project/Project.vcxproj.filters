@@ -128,8 +128,14 @@
     <ClCompile Include="src\Utility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\Inference.cpp">
+    <ClCompile Include="src\LLMInstance.cpp">
       <Filter>Source Files\Inference</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Area.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ControlWithMargins.cpp">
+      <Filter>Source Files\Utility\Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -202,8 +208,14 @@
     <ClInclude Include="include\Utility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\Inference.h">
+    <ClInclude Include="include\LLMInstance.h">
       <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Area.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ControlWithMargins.h">
+      <Filter>Source Files\Utility\Interface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

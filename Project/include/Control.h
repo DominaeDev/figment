@@ -15,8 +15,8 @@ public:
 	SDL_Color GetForegroundColor() const;
 	SDL_Color GetBackgroundColor() const;
 	bool GetClipping() const { return _bClipping; }
-	void SetForegroundColor(SDL_Color color) { _foregroundColor = color; }
-	void SetBackgroundColor(SDL_Color color) { _backgroundColor = color; }
+	virtual void SetForegroundColor(SDL_Color color) { _foregroundColor = color; }
+	virtual void SetBackgroundColor(SDL_Color color) { _backgroundColor = color; }
 	void SetBorderColor(SDL_Color color) { _borderColor = color; }
 	void SetClipping(bool bEnable) { _bClipping = bEnable; }
 

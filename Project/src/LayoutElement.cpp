@@ -28,7 +28,6 @@ void LayoutElement::SetRect(SDL_FRect rect)
 {
 	SetPosition(rect.x, rect.y);
 	SetSize(rect.w, rect.h);
-	_bInvalidLayout = true;
 	OnSize();
 }
 
@@ -36,7 +35,6 @@ void LayoutElement::SetRect(float x, float y, float width, float height)
 {
 	SetPosition(x, y);
 	SetSize(width, height);
-	_bInvalidLayout = true;
 	OnSize();
 }
 
@@ -63,7 +61,6 @@ void LayoutElement::SetPosition(SDL_FPoint position)
 	_position = position;
 	position = GetAbsolutePosition();
 	_rect = SDL_FRect(position.x, position.y, _rect.w, _rect.h);
-	_bInvalidLayout = true;
 	OnSize();
 }
 
@@ -72,7 +69,6 @@ void LayoutElement::SetSize(SDL_FPoint size)
 	_size = size;
 	_rect.w = size.x;
 	_rect.h = size.y;
-	_bInvalidLayout = true;
 	OnSize();
 }
 
@@ -122,7 +118,7 @@ void LayoutElement::SetSizer(Sizer* pSizer)
 	if (pSizer)
 		pSizer->SetOwner(this);
 	
-	_bInvalidLayout = true;
+	InvalidateLayout();
 }
 
 void LayoutElement::SetParent(LayoutElement* pParent)
@@ -133,7 +129,7 @@ void LayoutElement::SetParent(LayoutElement* pParent)
 
 void LayoutElement::OnSize()
 {
-	_bInvalidLayout = true;
+	InvalidateLayout();
 }
 
 void LayoutElement::OnParent()
@@ -149,6 +145,12 @@ void LayoutElement::Update(float fDeltaTime)
 void LayoutElement::InvalidateLayout()
 { 
 	_bInvalidLayout = true;
-	if (_pSizer)
-		_pSizer->Layout();
+}
+
+void LayoutElement::InvalidateParentLayout()
+{
+	if (_pParent != nullptr)
+		_pParent->InvalidateParentLayout();
+	else
+		InvalidateLayout();
 }

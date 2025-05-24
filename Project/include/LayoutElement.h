@@ -47,6 +47,7 @@ public:
 
 protected:
 	void SetParent(LayoutElement* pParent);
+	void InvalidateParentLayout();
 	void Layout();
 
 	virtual void OnSize();

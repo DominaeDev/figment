@@ -70,7 +70,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;ggml.lib;llama.lib;common.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;ggml.lib;llamad.lib;commond.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -104,15 +104,17 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
     <ClCompile Include="src\AppState.cpp" />
+    <ClCompile Include="src\Area.cpp" />
     <ClCompile Include="src\ChatMessage.cpp" />
     <ClCompile Include="src\ChatScroll.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\Control.cpp" />
+    <ClCompile Include="src\ControlWithMargins.cpp" />
     <ClCompile Include="src\Fonts.cpp" />
     <ClCompile Include="src\Frame.cpp" />
     <ClCompile Include="src\HorizontalSizer.cpp" />
-    <ClCompile Include="src\Inference.cpp" />
+    <ClCompile Include="src\LLMInstance.cpp" />
     <ClCompile Include="src\LayoutElement.cpp" />
     <ClCompile Include="src\Sizer.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -128,15 +130,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\AppState.h" />
+    <ClInclude Include="include\Area.h" />
     <ClInclude Include="include\ChatMessage.h" />
     <ClInclude Include="include\ChatScroll.h" />
     <ClInclude Include="include\Color.h" />
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\Control.h" />
+    <ClInclude Include="include\ControlWithMargins.h" />
     <ClInclude Include="include\Fonts.h" />
     <ClInclude Include="include\Frame.h" />
     <ClInclude Include="include\HorizontalSizer.h" />
-    <ClInclude Include="include\Inference.h" />
+    <ClInclude Include="include\LLMInstance.h" />
     <ClInclude Include="include\IUpdateable.h" />
     <ClInclude Include="include\LayoutElement.h" />
     <ClInclude Include="include\Sizer.h" />
