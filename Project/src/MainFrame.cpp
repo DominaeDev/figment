@@ -74,10 +74,9 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 			pChatScroll->AddMessage("User", text);
 
 			auto pLLM = Application::GetLLM();
-			string response;
-			if (pLLM && pLLM->EnqueueMessage("User", text, response))
+			if (pLLM && pLLM->SendMessage("User", text))
 			{
-				pChatScroll->AddMessage("Bot", response);
+				pChatScroll->AddMessage("Bot", "");
 			}
 		}
 	});

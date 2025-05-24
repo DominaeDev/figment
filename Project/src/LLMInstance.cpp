@@ -28,15 +28,19 @@ void LLMInstance::Initialize()
 
 	// load dynamic backends
 	ggml_backend_load_all();
+
+	_atm_bCancelGeneration.store(false);
+	_atm_bGeneratingResponse.store(false);
+	_atm_modelState.store(ModelState());
 }
 
 void LLMInstance::Shutdown()
 {
-	if (_loadThread.get() != nullptr && _loadThread.get()->joinable())
-		_loadThread.get()->join();
+	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+		_workerThread.get()->join();
 
-	auto state = _modelState.load();
-	_modelState.exchange(ModelState());
+	// Clear state and release
+	auto state = _atm_modelState.exchange(ModelState());
 	state.Release();
 }
 
@@ -47,6 +51,17 @@ static void OnLoadModelProgress(float progress, void* user_data)
 {
 	if (__LoadModelProgressCallback)
 		__LoadModelProgressCallback(static_cast<int>(progress * 100.0f));
+}
+
+static std::string stringFromToken(const llama_vocab* pVocab, llama_token token)
+{
+	// convert the token to a string, print it and add it to the response
+	char buf[256];
+	int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
+	if (n < 0)
+		return "";
+
+	return std::string(buf, n);
 }
 
 static void __LoadModel(string filename, __LoadModelCallback onComplete)
@@ -67,7 +82,7 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 		onComplete(state);
 		return;
 	}
-		
+
 	state.pVocab = llama_model_get_vocab(state.pModel);
 
 	// initialize the context
@@ -85,11 +100,11 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 
 	// initialize the sampler
 	llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
-    state.pSampler = llama_sampler_chain_init(sampler_params);
+	state.pSampler = llama_sampler_chain_init(sampler_params);
 
-    llama_sampler_chain_add(state.pSampler, llama_sampler_init_min_p(0.05f, 1));			// Min P
-    llama_sampler_chain_add(state.pSampler, llama_sampler_init_temp(0.8f));					// Temperature
-    llama_sampler_chain_add(state.pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));	// Seed
+	llama_sampler_chain_add(state.pSampler, llama_sampler_init_min_p(0.05f, 1));			// Min P
+	llama_sampler_chain_add(state.pSampler, llama_sampler_init_temp(0.8f));					// Temperature
+	llama_sampler_chain_add(state.pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));	// Seed
 
 	state.bReady = true;
 	onComplete(state);
@@ -100,8 +115,8 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 	if (IsReady())
 		return false; // Already loaded
 
-	if (_loadThread.get() != nullptr && _loadThread.get()->joinable())
-		_loadThread.get()->join();
+	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+		_workerThread.get()->join();
 
 	_bLoadingModel = true;
 
@@ -110,100 +125,216 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 	auto pThread = new std::thread(__LoadModel,
 		filename,
 		[this, onComplete](ModelState result)
+	{
+		if (result.bReady)
 		{
-			if (result.bReady)
-			{
-				_modelState.store(result);
-				onComplete(true);
-			}
-			else
-			{
-				result.Release();
-				onComplete(false);
-			}
-		});
+			_atm_modelState.store(result);
+			onComplete(true);
+		}
+		else
+		{
+			result.Release();
+			onComplete(false);
+		}
+	});
 
-	_loadThread.reset(pThread);
+	_workerThread.reset(pThread);
 
 	return true;
 }
 
 bool LLMInstance::IsReady() const
 {
-	ModelState state = _modelState.load();
+	ModelState state = _atm_modelState.load();
 	return state.bReady && state.pModel;
 }
 
-bool LLMInstance::Generate(const string& prompt, string& outResponse)
+bool LLMInstance::Stop()
 {
-	if (!IsReady())
+	if (!IsReady() || !_atm_bGeneratingResponse.load())
 		return false;
 
-    std::string response;
+	ModelState state = _atm_modelState.load();
+	_atm_bCancelGeneration.store(true);
+	return true;
+}
 
-	ModelState state = _modelState.load();
+void LLMInstance::__Generate(const string& prompt, PartialResultCallback onPartial, GenerationCompleteCallback onComplete)
+{
+	std::string response;
 
-    const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
+	ModelState state = _atm_modelState.load();
 
-    // tokenize the prompt
-    const int32_t n_prompt_tokens = -llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), NULL, 0, is_first, true);
-    std::vector<llama_token> prompt_tokens(n_prompt_tokens);
-    if (llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), is_first, true) < 0) {
-        GGML_ABORT("failed to tokenize the prompt\n");
-		return false;
-    }
+	const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
 
-    // prepare a batch for the prompt
-    llama_batch batch = llama_batch_get_one(prompt_tokens.data(), (int32_t)prompt_tokens.size());
-    llama_token new_token_id;
-    while (true) {
-        // check if we have enough space in the context to evaluate this batch
-        int n_ctx = llama_n_ctx(state.pCtx);
-        int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
-        if (n_ctx_used + batch.n_tokens > n_ctx) {
-            printf("\033[0m\n");
-            fprintf(stderr, "context size exceeded\n");
-			return false;
-        }
+	// tokenize the prompt
+	const int32_t n_prompt_tokens = -llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), NULL, 0, is_first, true);
+	std::vector<llama_token> prompt_tokens(n_prompt_tokens);
+	if (llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), is_first, true) < 0)
+	{
+		onComplete(1, response);
+		return;
+	}
 
-        if (llama_decode(state.pCtx, batch)) {
-            GGML_ABORT("failed to decode\n");
-        }
+	// prepare a batch for the prompt
+	llama_batch batch = llama_batch_get_one(prompt_tokens.data(), (int32_t)prompt_tokens.size());
+	llama_token new_token_id;
+	while (true)
+	{
+		// check if we have enough space in the context to evaluate this batch
+		int n_ctx = llama_n_ctx(state.pCtx);
+		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
+		if (n_ctx_used + batch.n_tokens > n_ctx)
+		{
+			fprintf(stderr, "context size exceeded\n");
+			onComplete(2, response);
+			return;
+		}
 
-        // sample the next token
-        new_token_id = llama_sampler_sample(state.pSampler, state.pCtx, -1);
+		if (llama_decode(state.pCtx, batch))
+		{
+			GGML_ABORT("failed to decode\n");
+		}
 
-        // is it an end of generation?
-        if (llama_vocab_is_eog(state.pVocab, new_token_id)) {
-            break;
-        }
+		// sample the next token
+		new_token_id = llama_sampler_sample(state.pSampler, state.pCtx, -1);
 
-        // convert the token to a string, print it and add it to the response
-        char buf[256];
-        int n = llama_token_to_piece(state.pVocab, new_token_id, buf, sizeof(buf), 0, true);
-        if (n < 0) {
-            GGML_ABORT("failed to convert token to piece\n");
-			return false;
-        }
-        std::string piece(buf, n);
-        printf("%s", piece.c_str());
-        fflush(stdout);
-        response += piece;
+		// is it an end of generation?
+		if (llama_vocab_is_eog(state.pVocab, new_token_id))
+			break;
 
-        // prepare the next batch with the sampled token
-        batch = llama_batch_get_one(&new_token_id, 1);
-    }
+		// convert the token to a string, print it and add it to the response
+		std::string piece = stringFromToken(state.pVocab, new_token_id);
+		if (piece.size() == 0)
+			break; // Error
 
-	outResponse = response;
-    return true;
+		printf("%s", piece.c_str());
+		fflush(stdout);
+
+		_mutex_generatedText.lock();
+		_generatedText += piece;
+		_lastResponse += piece;
+		_mutex_generatedText.unlock();
+
+		response += piece;
+
+		if (onPartial)
+			onPartial(__PartialResult { response, piece });
+
+		if (_atm_bCancelGeneration.load())
+			break; // Cancelled
+
+		// prepare the next batch with the sampled token
+		batch = llama_batch_get_one(&new_token_id, 1);
+	}
+
+	onComplete(0, response);
 };
 
-bool LLMInstance::EnqueueMessage(string name, string message, string& outResponse)
+bool LLMInstance::Generate(const string& prompt)
 {
+	if (!IsReady() || _atm_bGeneratingResponse.load())
+		return false;
+
+	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+		_workerThread.get()->join();
+
+	_atm_bGeneratingResponse.store(true);
+
+	auto pThread = new std::thread(&LLMInstance::__Generate, this, prompt, 
+		[](__PartialResult partial) {
+			// ...
+		},
+		[this](int error, string response) {
+			// ...
+			_atm_bGeneratingResponse.store(false);
+		});
+
+	_workerThread.reset(pThread);
+	return true;
+/*
+
 	if (!IsReady())
 		return false;
 
-	ModelState state = _modelState.load();
+	std::string response;
+
+	ModelState state = _atm_modelState.load();
+
+	const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
+
+	// tokenize the prompt
+	const int32_t n_prompt_tokens = -llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), NULL, 0, is_first, true);
+	std::vector<llama_token> prompt_tokens(n_prompt_tokens);
+	if (llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), is_first, true) < 0)
+	{
+		GGML_ABORT("failed to tokenize the prompt\n");
+		return false;
+	}
+
+	// prepare a batch for the prompt
+	llama_batch batch = llama_batch_get_one(prompt_tokens.data(), (int32_t)prompt_tokens.size());
+	llama_token new_token_id;
+	while (true)
+	{
+		// check if we have enough space in the context to evaluate this batch
+		int n_ctx = llama_n_ctx(state.pCtx);
+		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
+		if (n_ctx_used + batch.n_tokens > n_ctx)
+		{
+			fprintf(stderr, "context size exceeded\n");
+			return false;
+		}
+
+		if (llama_decode(state.pCtx, batch))
+		{
+			GGML_ABORT("failed to decode\n");
+		}
+
+		// sample the next token
+		new_token_id = llama_sampler_sample(state.pSampler, state.pCtx, -1);
+
+		// is it an end of generation?
+		if (llama_vocab_is_eog(state.pVocab, new_token_id))
+			break;
+
+		// convert the token to a string, print it and add it to the response
+		std::string piece = stringFromToken(state.pVocab, new_token_id);
+		if (piece.size() == 0)
+			break; // Error
+
+		printf("%s", piece.c_str());
+		fflush(stdout);
+
+		_mutex_generatedText.lock();
+		_generatedText += piece;
+		_mutex_generatedText.unlock();
+
+		response += piece;
+
+		if (_atm_bCancelGeneration.load())
+			break; // Cancelled
+
+		// prepare the next batch with the sampled token
+		batch = llama_batch_get_one(&new_token_id, 1);
+	}
+
+	outResponse = response;
+	return true;*/
+};
+
+bool LLMInstance::SendMessage(string name, string message)
+{
+	if (!IsReady() || _atm_bGeneratingResponse.load())
+		return false;
+
+	// Reset response
+	_mutex_generatedText.lock();
+	_generatedText.clear();
+	_lastResponse.clear();
+	_mutex_generatedText.unlock();
+
+	ModelState state = _atm_modelState.load();
 
 	std::vector<llama_chat_message> messages;
 	std::vector<char> formatted(llama_n_ctx(state.pCtx));
@@ -230,9 +361,9 @@ bool LLMInstance::EnqueueMessage(string name, string message, string& outRespons
 	std::string prompt(formatted.begin() + prev_len, formatted.begin() + new_len);
 
 	// generate a response
-	if (!Generate(prompt, outResponse))
-		return false;
+	return Generate(prompt);
 
+	/*
 	// add the response to the messages
 	messages.push_back({ "assistant", _strdup(outResponse.c_str()) });
 	prev_len = llama_chat_apply_template(tmpl, messages.data(), messages.size(), false, nullptr, 0);
@@ -241,6 +372,18 @@ bool LLMInstance::EnqueueMessage(string name, string message, string& outRespons
 		fprintf(stderr, "failed to apply the chat template\n");
 		return false;
 	}
-	
+	*/
+}
+
+bool LLMInstance::TryGetResponse(string& result)
+{
+	if (!_atm_bGeneratingResponse.load())
+		return false;
+	if (!_mutex_generatedText.try_lock())
+		return false;
+
+	result = _generatedText;
+	_generatedText.clear();
+	_mutex_generatedText.unlock();
 	return true;
 }

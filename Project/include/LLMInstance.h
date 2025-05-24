@@ -3,6 +3,7 @@
 #include "Types.h"
 #include <functional>
 #include <thread>
+#include <mutex>
 
 struct llama_model;
 struct llama_vocab;
@@ -28,16 +29,37 @@ class LLMInstance
 public:
 	void Initialize();
 	void Shutdown();
-	bool HasLoadedModel() const { return _modelState.load().pModel != nullptr; }
+	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
 
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
-	bool EnqueueMessage(string name, string message, string& outResponse);
+	bool SendMessage(string name, string message);
+	bool Stop();
+
+	bool TryGetResponse(string& result);
 
 private:
+	struct __PartialResult
+	{
+		string response;
+		string piece;
+	};
+
+	typedef std::function<void(__PartialResult)> PartialResultCallback;
+	typedef std::function<void(int, string)> GenerationCompleteCallback;
+	void __Generate(const string& prompt, PartialResultCallback onPartial, GenerationCompleteCallback onComplete);
+
 	bool IsReady() const;
-	bool Generate(const string& prompt, string& outResponse);
+	bool Generate(const string& prompt);
 
 	bool _bLoadingModel = false;
-	std::atomic<ModelState> _modelState {};
-	std::unique_ptr<std::thread> _loadThread;
+
+	std::atomic<ModelState> _atm_modelState {};
+	std::atomic<bool> _atm_bCancelGeneration {};
+	std::atomic<bool> _atm_bGeneratingResponse {};
+
+	std::unique_ptr<std::thread> _workerThread;
+
+	std::mutex _mutex_generatedText;
+	std::string _generatedText;
+	std::string _lastResponse;
 };
