@@ -10,4 +10,5 @@ namespace Constants
 
 	extern double DefaultFontSize;
 	extern double StatusBarFontSize;
+	extern double ChatMessageFontSize;
 }

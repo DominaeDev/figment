@@ -40,8 +40,8 @@ public:
 private:
 	struct __PartialResult
 	{
-		string response;
 		string piece;
+		string fullText;
 	};
 
 	typedef std::function<void(__PartialResult)> __PartialResultCallback;

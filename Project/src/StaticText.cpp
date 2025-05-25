@@ -4,6 +4,7 @@
 #include "Constants.h"
 #include "AppState.h"
 #include "Utility.h"
+#include <algorithm>
 
 StaticText::StaticText(Control* pParent, string text, FontFace fontFace, double ptSize, bool bAutoSize) : ControlWithMargins(pParent),
 	_bAutoSize(bAutoSize)
@@ -12,15 +13,16 @@ StaticText::StaticText(Control* pParent, string text, FontFace fontFace, double 
 
 	// Set text and measure
 	_text = text;
+	InvalidateText();
 
-	if (_pFont && bAutoSize)
+/*	if (_pFont && bAutoSize)
 	{
 		int w, h;
 		if (TTF_GetStringSize(_pFont, _text.c_str(), 0, &w, &h))
 			SetSize(w, h);
 	}
 
-	DrawText();
+	DrawText(); */
 }
 
 StaticText::~StaticText()
@@ -45,6 +47,14 @@ void StaticText::SetText(string text)
 	InvalidateLayout();
 }
 
+void StaticText::SetTextAndResize(string text, int& newWidth, int& newHeight)
+{
+	_text = text;
+	_bInvalidated = false;
+	DrawText(newWidth, newHeight);
+	SetSize(toF(newWidth), toF(newHeight));
+}
+
 void StaticText::InvalidateText()
 {
 	_bInvalidated = true;
@@ -55,7 +65,8 @@ void StaticText::OnUpdate(float fDeltaTime)
 	if (_bInvalidated)
 	{
 		_bInvalidated = false;
-		DrawText();
+		int tmp;
+		DrawText(tmp, tmp);
 	}
 }
 
@@ -70,19 +81,21 @@ void StaticText::OnRender(SDL_Renderer* pRenderer)
 	}
 }
 
-void StaticText::DrawText()
+void StaticText::DrawText(int& newWidth, int& newHeight)
 {
 	auto fgColor = GetForegroundColor();
 	auto bgColor = GetBackgroundColor();
 	ReleaseTexture();
 	auto pRenderer = Application::GetRenderer();
 
+	int maxWidth = std::max(toI(_maxSize.x), 0);
+
 	if (Color::IsDefined(fgColor) && _text.size() > 0)
 	{
 		// Opaque background: Use ClearType
 		if (bgColor.a == 0xFF)
 		{
-			SDL_Surface* pSurface = TTF_RenderText_LCD_Wrapped(_pFont, _text.c_str(), 0, fgColor, bgColor, 0);
+			SDL_Surface* pSurface = TTF_RenderText_LCD_Wrapped(_pFont, _text.c_str(), 0, fgColor, bgColor, maxWidth);
 			if (pSurface)
 			{
 				_textWidth = pSurface->w;
@@ -90,14 +103,16 @@ void StaticText::DrawText()
 				_pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
 				SDL_DestroySurface(pSurface);
 
+				newWidth = _textWidth + HMargin();
+				newHeight = _textHeight + VMargin();
 				if (_bAutoSize)
-					SetSize((float)(_textWidth + HMargin()), (float)(_textHeight + VMargin()));
+					SetSize(toF(newWidth), toF(newHeight));
 			}
 		}
 		else
 		{
 			// Recreate text
-			SDL_Surface* pSurface = TTF_RenderText_Blended_Wrapped(_pFont, _text.c_str(), 0, Color::White, 0);
+			SDL_Surface* pSurface = TTF_RenderText_Blended_Wrapped(_pFont, _text.c_str(), 0, Color::White, maxWidth);
 			if (pSurface)
 			{
 				_textWidth = pSurface->w;
@@ -117,8 +132,11 @@ void StaticText::DrawText()
 
 				SDL_DestroySurface(pColorSurface);
 				SDL_DestroySurface(pSurface);
+
+				newWidth = _textWidth + HMargin();
+				newHeight = _textHeight + VMargin();
 				if (_bAutoSize)
-					SetSize((float)(_textWidth + HMargin()), (float)(_textHeight + VMargin()));
+					SetSize(toF(newWidth), toF(newHeight));
 			}
 		}
 	}
@@ -126,6 +144,8 @@ void StaticText::DrawText()
 	{
 		_textWidth = 0;
 		_textHeight = 0;
+		newWidth = 0;
+		newHeight = 0;
 		if (_bAutoSize)
 			SetSize(0, 0);
 	}

@@ -3,8 +3,7 @@
 #include "Color.h"
 #include "Constants.h"
 #include "Fonts.h"
-#include "AppState.h"
-#include "LLMInstance.h"
+#include "StringUtil.h"
 
 ChatMessage::ChatMessage(Control* pParent, string name, string message) : Control(pParent),
 	_name(name),
@@ -12,27 +11,12 @@ ChatMessage::ChatMessage(Control* pParent, string name, string message) : Contro
 {
 	SetBackgroundColor(SDL_Color { 200, 200, 200, 255 });
 	SetBorderColor(Color::Black);
-	SetSize(-1, 80);
 
+	SetSize(-1, 60);
 	string text = name + ": " + message;
 
-	_pStaticText = new StaticText(this, text, FontFace::Default, Constants::DefaultFontSize);
+	_pStaticText = new StaticText(this, text, FontFace::Default, Constants::ChatMessageFontSize, true);
 	_pStaticText->SetPosition(10, 10);
-}
-
-#define POLL_INTERVAL 0.1f
-
-void ChatMessage::OnUpdate(float fDeltaTime)
-{
-	if (_bListening)
-	{
-		_fListenTimer += fDeltaTime;
-		if (_fListenTimer >= POLL_INTERVAL)
-		{
-			_fListenTimer = 0.0f;
-			Poll();
-		}
-	}
 }
 
 void ChatMessage::OnRender(SDL_Renderer* pRenderer)
@@ -40,28 +24,31 @@ void ChatMessage::OnRender(SDL_Renderer* pRenderer)
 	DrawBackground(pRenderer);
 }
 
-void ChatMessage::StartListening()
+void ChatMessage::SetMessage(const string& text)
 {
-	_bListening = true;
+	int w, h;
+	_pStaticText->SetTextAndResize(trim(text), w, h);
+
+	int currentHeight = GetHeight();
+	if (currentHeight < h + 20)
+	{
+		SetSize(-1, h + 20);
+		InvalidateParentLayout();
+	}
 }
 
-void ChatMessage::StopListening()
+void ChatMessage::AppendMessage(const string& text)
 {
-	_bListening = false;
+	SetMessage(_pStaticText->GetText() + text);
 }
 
-void ChatMessage::Poll()
+void ChatMessage::OnSize()
 {
-	auto pLLM = Application::GetLLM();
-	if (!pLLM)
+	Control::OnSize();
+
+	if (_bIgnoreEvent)
 		return;
 
-	string piece;
-	if (pLLM->TryGetResponse(piece))
-		AppendText(piece);
-}
-
-void ChatMessage::AppendText(const string& text)
-{
-	_pStaticText->SetText(_pStaticText->GetText() + text);
+	if (_pStaticText)
+		_pStaticText->SetMaxSize(GetWidth() - 20, -1);
 }

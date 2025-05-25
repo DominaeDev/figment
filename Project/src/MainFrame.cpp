@@ -10,7 +10,7 @@
 #include "ChatScroll.h"
 #include "ChatMessage.h"
 #include "StatusBar.h"
-#include "Utility.h"
+#include "StringUtil.h"
 #include "LLMInstance.h"
 #include "AppState.h"
 #include <format>
@@ -72,13 +72,13 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pTextBox->SetEnterPressedCallback([pChatScroll](string text) {
 		if (!isEmpty(text))
 		{
-			pChatScroll->AddMessage("User", text);
+			pChatScroll->AddMessage("User", text, true);
 
 			auto pLLM = Application::GetLLM();
 			if (pLLM && pLLM->SendMessage("User", text))
 			{
-				auto pMessage = pChatScroll->AddMessage("Bot", "");
-				pMessage->StartListening();
+				auto pMessage = pChatScroll->AddMessage("Bot", "", false);
+				pChatScroll->StartListening();
 			}
 		}
 	});

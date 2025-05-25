@@ -149,7 +149,7 @@ void LayoutElement::InvalidateLayout()
 
 void LayoutElement::InvalidateParentLayout()
 {
-	if (_pParent != nullptr)
+	if (!_pSizer && _pParent != nullptr)
 		_pParent->InvalidateParentLayout();
 	else
 		InvalidateLayout();

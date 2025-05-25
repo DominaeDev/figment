@@ -3,7 +3,7 @@
 #include "AppState.h"
 #include <algorithm>
 #include "Color.h"
-#include "Utility.h"
+#include "StringUtil.h"
 
 #define CURSOR_BLINK_INTERVAL_MS    500
 

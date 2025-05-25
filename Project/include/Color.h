@@ -7,6 +7,7 @@ namespace Color
 	extern SDL_Color Transparent;
 	extern SDL_Color White;
 	extern SDL_Color Black;
+	extern SDL_Color Debug;
 
 	extern SDL_Color TextForeground;
 	extern SDL_Color TextSelectionForeground;

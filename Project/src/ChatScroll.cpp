@@ -1,6 +1,10 @@
 #include "ChatScroll.h"
 #include "VerticalListSizer.h"
 #include "ChatMessage.h"
+#include "AppState.h"
+#include "LLMInstance.h"
+
+#define POLL_INTERVAL 0.1f
 
 ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 {
@@ -10,9 +14,48 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	SetSizer(pTopSizer);
 }
 
-ChatMessage* ChatScroll::AddMessage(string name, string message)
+ChatMessage* ChatScroll::AddMessage(string name, string message, bool isUser)
 {
 	auto pMessage = new ChatMessage(this, name, message);
 	_pSizer->Add(pMessage, 0, Sizer::Expand);
+
+	_pLastBotMessage = isUser ? nullptr : pMessage;
 	return pMessage;
+}
+
+void ChatScroll::OnUpdate(float fDeltaTime)
+{
+	if (_bListening)
+	{
+		_fListenTimer += fDeltaTime;
+		if (_fListenTimer >= POLL_INTERVAL)
+		{
+			_fListenTimer = 0.0f;
+			Poll();
+		}
+	}
+}
+
+void ChatScroll::StartListening()
+{
+	_bListening = true;
+}
+
+void ChatScroll::StopListening()
+{
+	_bListening = false;
+}
+
+void ChatScroll::Poll()
+{
+	if (!_pLastBotMessage)
+		return;
+
+	auto pLLM = Application::GetLLM();
+	if (!pLLM)
+		return;
+
+	string piece;
+	if (pLLM->TryGetResponse(piece))
+		_pLastBotMessage->AppendMessage(piece);
 }

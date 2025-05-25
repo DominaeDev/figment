@@ -41,6 +41,7 @@ public:
 	TTF_Font* GetFont() const { return _pFont; }
 
 	void SetText(string text);
+	void SetTextAndResize(string text, int& newWidth, int& newHeight);
 	string GetText() const { return _text; }
 
 	void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
@@ -57,7 +58,7 @@ protected:
 	void OnParent() override;
 
 private:
-	void DrawText();
+	void DrawText(int& textWidth, int& textHeight);
 	void ReleaseTexture();
 
 	string _text;

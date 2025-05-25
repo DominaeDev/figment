@@ -5,5 +5,6 @@ int Constants::WindowWidth = 1200;
 int Constants::WindowHeight = 900;
 double Constants::DefaultFontSize = 18.5;
 double Constants::StatusBarFontSize = 14.5;
+double Constants::ChatMessageFontSize = 15.5;
 const char* Constants::AppTitle = "Llama chat";
 

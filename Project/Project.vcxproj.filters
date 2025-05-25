@@ -140,6 +140,9 @@
     <ClCompile Include="src\StatusBar.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\StringUtil.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">

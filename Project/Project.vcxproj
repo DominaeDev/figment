@@ -122,6 +122,7 @@
     <ClCompile Include="src\Panel.cpp" />
     <ClCompile Include="src\StaticText.cpp" />
     <ClCompile Include="src\StatusBar.cpp" />
+    <ClCompile Include="src\StringUtil.cpp" />
     <ClCompile Include="src\Text.cpp" />
     <ClCompile Include="src\TextBox.cpp" />
     <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp" />
