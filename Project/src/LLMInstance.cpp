@@ -1,4 +1,4 @@
-#include "llama.h"
+﻿#include "llama.h"
 #include "LLMInstance.h"
 #include "StringUtil.h"
 
@@ -71,6 +71,7 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 
 	// initialize the model
 	llama_model_params model_params = llama_model_default_params();
+	model_params.use_mlock = true;
 	model_params.n_gpu_layers = ngl;
 	model_params.progress_callback = (llama_progress_callback)&OnLoadModelProgress;
 
@@ -164,6 +165,11 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 	std::string response;
 	std::vector<std::string> stop_words {
 		"<|im_",
+		"<end_of_turn",
+		"<|end",
+		"<EOT>",
+		"_<EOT>",
+		"<｜end▁of▁sentence｜>",
 		"</s>",
 		"### ",
 	};
@@ -212,7 +218,11 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 
 		// is it an end of generation?
 		if (llama_vocab_is_eog(state.pVocab, new_token_id))
+		{
 			running = false; // Halt
+			if (partial.size() > 0)
+				partial.clear();
+		}
 
 		// convert the token to a string, print it and add it to the response
 		std::string str_token = stringFromToken(state.pVocab, new_token_id);
@@ -225,37 +235,46 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 
 		partial += str_token;
 		bool send = true;
+		bool next_token = true;
 
 		// check if there is incomplete UTF-8 character at the end
 		bool incomplete = validate_utf8(partial) < partial.size();
 
-		if (!incomplete)
+		if (incomplete)
+		{
+			// Wait for more
+			send = false;
+		}
+		else
 		{
 			// Process response
 			size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
 			if (stop_pos != std::string::npos)
 			{
-				partial = partial.substr(0, stop_pos); // Erase stop word
+				partial = partial.erase(stop_pos); // Erase stop word
 				running = false; // Halt
-				send = true;
+				next_token = false;
 			}
 			else
 			{
+				// Look for partial stop word - and wait
 				stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
 				if (stop_pos != std::string::npos)
 				{
 					// Wait for more
 					send = false;
+					next_token = true;
 				}
 			}
-		}
-		else
-		{
-			send = false;
 		}
 
 		if (send)
 		{
+			// Clean up incomplete stop tokens
+			size_t stop_pos = partial.find("<|im");
+			if (stop_pos != std::string::npos)
+				partial = partial.erase(stop_pos); // Erase left-over
+
 			// Send piece
 			_mutex_generatedText.lock();
 			_generatedText += partial;
@@ -269,11 +288,9 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 			send = false;
 		}
 
-		if (running)
-		{
-			// prepare the next batch with the sampled token
+		// prepare the next batch with the sampled token
+		if (next_token)
 			batch = llama_batch_get_one(&new_token_id, 1);
-		}
 	}
 
 	onComplete(0, response);
@@ -388,7 +405,15 @@ bool LLMInstance::SendMessage(string name, string message)
 	std::vector<char> formatted(llama_n_ctx(state.pCtx));
 	int prev_len = 0;
 
+
 	const char* tmpl = llama_model_chat_template(state.pModel, /* name */ nullptr);
+//	tmpl = "mistral-v7-tekken";
+//	tmpl = "chatml";
+//	tmpl = "llama2";
+//	tmpl = "llama3";
+//	tmpl = "command-r";
+//	tmpl = "gemma";
+//	tmpl = "deepseek3";
 
 	// add the user input to the message list and format it
 	messages.push_back({ _strdup(name.c_str()), _strdup(message.c_str()) });
