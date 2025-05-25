@@ -3,12 +3,14 @@
 #include "Control.h"
 #include "Types.h"
 
+class ChatMessage;
+
 class ChatScroll : public Control
 {
 public:
 	ChatScroll(Control* pParent);
 
-	void AddMessage(string name, string message);
+	ChatMessage* AddMessage(string name, string message);
 
 protected:
 	void OnUpdate(float fDeltaTime) override {};

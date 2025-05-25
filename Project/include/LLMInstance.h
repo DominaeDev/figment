@@ -44,9 +44,9 @@ private:
 		string piece;
 	};
 
-	typedef std::function<void(__PartialResult)> PartialResultCallback;
-	typedef std::function<void(int, string)> GenerationCompleteCallback;
-	void __Generate(const string& prompt, PartialResultCallback onPartial, GenerationCompleteCallback onComplete);
+	typedef std::function<void(__PartialResult)> __PartialResultCallback;
+	typedef std::function<void(int, string)> __GenerationCompleteCallback;
+	void __Generate(const string& prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
 	bool IsReady() const;
 	bool Generate(const string& prompt);

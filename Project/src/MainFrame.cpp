@@ -8,6 +8,7 @@
 #include "Constants.h"
 #include "Color.h"
 #include "ChatScroll.h"
+#include "ChatMessage.h"
 #include "StatusBar.h"
 #include "Utility.h"
 #include "LLMInstance.h"
@@ -76,7 +77,8 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 			auto pLLM = Application::GetLLM();
 			if (pLLM && pLLM->SendMessage("User", text))
 			{
-				pChatScroll->AddMessage("Bot", "");
+				auto pMessage = pChatScroll->AddMessage("Bot", "");
+				pMessage->StartListening();
 			}
 		}
 	});

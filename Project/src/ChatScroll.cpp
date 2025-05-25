@@ -10,9 +10,9 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	SetSizer(pTopSizer);
 }
 
-void ChatScroll::AddMessage(string name, string message)
+ChatMessage* ChatScroll::AddMessage(string name, string message)
 {
 	auto pMessage = new ChatMessage(this, name, message);
-
 	_pSizer->Add(pMessage, 0, Sizer::Expand);
+	return pMessage;
 }

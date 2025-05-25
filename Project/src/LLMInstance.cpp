@@ -159,9 +159,102 @@ bool LLMInstance::Stop()
 	return true;
 }
 
-void LLMInstance::__Generate(const string& prompt, PartialResultCallback onPartial, GenerationCompleteCallback onComplete)
+static size_t validate_utf8(const std::string& text)
+{
+	size_t len = text.size();
+	if (len == 0) return 0;
+
+	// Check the last few bytes to see if a multi-byte character is cut off
+	for (size_t i = 1; i <= 4 && i <= len; ++i)
+	{
+		unsigned char c = text[len - i];
+		// Check for start of a multi-byte sequence from the end
+		if ((c & 0xE0) == 0xC0)
+		{
+			// 2-byte character start: 110xxxxx
+			// Needs at least 2 bytes
+			if (i < 2) return len - i;
+		}
+		else if ((c & 0xF0) == 0xE0)
+		{
+			// 3-byte character start: 1110xxxx
+			// Needs at least 3 bytes
+			if (i < 3) return len - i;
+		}
+		else if ((c & 0xF8) == 0xF0)
+		{
+			// 4-byte character start: 11110xxx
+			// Needs at least 4 bytes
+			if (i < 4) return len - i;
+		}
+	}
+
+	// If no cut-off multi-byte character is found, return full length
+	return len;
+}
+
+static bool string_ends_with(const std::string_view& str, const std::string_view& suffix)
+{
+	return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+static size_t string_find_partial_stop(const std::string_view& str, const std::string_view& stop)
+{
+	if (!str.empty() && !stop.empty())
+	{
+		const char text_last_char = str.back();
+		for (int64_t char_index = stop.size() - 1; char_index >= 0; char_index--)
+		{
+			if (stop[char_index] == text_last_char)
+			{
+				const auto current_partial = stop.substr(0, char_index + 1);
+				if (string_ends_with(str, current_partial))
+				{
+					return str.size() - char_index - 1;
+				}
+			}
+		}
+	}
+
+	return std::string::npos;
+}
+
+static size_t find_stopping_strings(const std::string& text, const std::vector<std::string>& stop_words, const size_t last_token_size, bool is_full_stop)
+{
+	size_t stop_pos = std::string::npos;
+
+	for (const std::string& word : stop_words)
+	{
+		size_t pos;
+
+		if (is_full_stop)
+		{
+			const size_t tmp = word.size() + last_token_size;
+			const size_t from_pos = text.size() > tmp ? text.size() - tmp : 0;
+
+			pos = text.find(word, from_pos);
+		}
+		else
+		{
+			// otherwise, partial stop
+			pos = string_find_partial_stop(text, word);
+		}
+
+		if (pos != std::string::npos && (stop_pos == std::string::npos || pos < stop_pos))
+		{
+			stop_pos = pos;
+		}
+	}
+
+	return stop_pos;
+}
+
+void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
 	std::string response;
+	std::vector<std::string> stop_words {
+		"<|im_end|>"
+	};
 
 	ModelState state = _atm_modelState.load();
 
@@ -179,8 +272,13 @@ void LLMInstance::__Generate(const string& prompt, PartialResultCallback onParti
 	// prepare a batch for the prompt
 	llama_batch batch = llama_batch_get_one(prompt_tokens.data(), (int32_t)prompt_tokens.size());
 	llama_token new_token_id;
-	while (true)
+	std::string partial;
+	bool running = true;
+	while (running)
 	{
+		if (_atm_bCancelGeneration.load())
+			break; // Cancelled
+
 		// check if we have enough space in the context to evaluate this batch
 		int n_ctx = llama_n_ctx(state.pCtx);
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -201,28 +299,66 @@ void LLMInstance::__Generate(const string& prompt, PartialResultCallback onParti
 
 		// is it an end of generation?
 		if (llama_vocab_is_eog(state.pVocab, new_token_id))
-			break;
+			break; // Halt
 
 		// convert the token to a string, print it and add it to the response
 		std::string piece = stringFromToken(state.pVocab, new_token_id);
 		if (piece.size() == 0)
 			break; // Error
 
+		// Print to console
 		printf("%s", piece.c_str());
 		fflush(stdout);
 
-		_mutex_generatedText.lock();
-		_generatedText += piece;
-		_lastResponse += piece;
-		_mutex_generatedText.unlock();
+		// check if there is incomplete UTF-8 character at the end
+		bool incomplete = validate_utf8(response) < response.size();
+		bool send = true;
 
-		response += piece;
+		if (!incomplete)
+		{
+			// Process response
+			partial += piece;
 
-		if (onPartial)
-			onPartial(__PartialResult { response, piece });
+			if (partial.find('<') != std::string::npos)
+			{
+				int k = 0;
+			}
 
-		if (_atm_bCancelGeneration.load())
-			break; // Cancelled
+			size_t stop_pos = find_stopping_strings(partial, stop_words, piece.size(), true);
+			if (stop_pos != std::string::npos)
+			{
+				partial = piece.substr(0, stop_pos); // Erase stop word
+				running = false; // Halt
+			}
+			else
+			{
+				stop_pos = find_stopping_strings(partial, stop_words, piece.size(), false);
+				if (stop_pos != std::string::npos)
+				{
+					// Wait and see
+					send = false;
+				}
+			}
+		}
+		else
+		{
+			partial += piece;
+		}
+
+		if (send)
+		{
+			// Send piece
+			_mutex_generatedText.lock();
+			_generatedText += piece;
+			_lastResponse += piece;
+			_mutex_generatedText.unlock();
+			response += piece;
+			partial.clear();
+			send = false;
+
+			if (onPartial)
+				onPartial(__PartialResult { response, piece });
+		}
 
 		// prepare the next batch with the sampled token
 		batch = llama_batch_get_one(&new_token_id, 1);
