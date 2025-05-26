@@ -14,6 +14,8 @@
 #include "LLMInstance.h"
 #include "AppState.h"
 #include <format>
+#include "SolidBackgroundRenderer.h"
+#include "RoundedBackgroundRenderer.h"
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -82,6 +84,8 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 			}
 		}
 	});
+
+	pTextBox->SetBackgroundRenderer(new RoundedBackgroundRenderer(5.5f, Color::White));
 
 	pTextBox->SetFocus(true);
 

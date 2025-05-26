@@ -4,12 +4,15 @@
 #include "Constants.h"
 #include "Fonts.h"
 #include "StringUtil.h"
+#include "RoundedBackgroundRenderer.h"
 
 ChatMessage::ChatMessage(Control* pParent, string name, string message) : Control(pParent),
 	_name(name),
 	_message(message)
 {
+	SetBackgroundRenderer(new RoundedBackgroundRenderer(7.f, SDL_Color { 200, 200, 200, 255 }));
 	SetBackgroundColor(SDL_Color { 200, 200, 200, 255 });
+
 	SetBorderColor(Color::Black);
 
 	SetSize(-1, 60);

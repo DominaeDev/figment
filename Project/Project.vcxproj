@@ -116,10 +116,12 @@
     <ClCompile Include="src\HorizontalSizer.cpp" />
     <ClCompile Include="src\LLMInstance.cpp" />
     <ClCompile Include="src\LayoutElement.cpp" />
+    <ClCompile Include="src\RoundedBackgroundRenderer.cpp" />
     <ClCompile Include="src\Sizer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MainFrame.cpp" />
     <ClCompile Include="src\Panel.cpp" />
+    <ClCompile Include="src\SolidBackgroundRenderer.cpp" />
     <ClCompile Include="src\StaticText.cpp" />
     <ClCompile Include="src\StatusBar.cpp" />
     <ClCompile Include="src\StringUtil.cpp" />
@@ -133,6 +135,7 @@
   <ItemGroup>
     <ClInclude Include="include\AppState.h" />
     <ClInclude Include="include\Area.h" />
+    <ClInclude Include="include\BackgroundRenderer.h" />
     <ClInclude Include="include\ChatMessage.h" />
     <ClInclude Include="include\ChatScroll.h" />
     <ClInclude Include="include\Color.h" />
@@ -145,9 +148,11 @@
     <ClInclude Include="include\LLMInstance.h" />
     <ClInclude Include="include\IUpdateable.h" />
     <ClInclude Include="include\LayoutElement.h" />
+    <ClInclude Include="include\RoundedBackgroundRenderer.h" />
     <ClInclude Include="include\Sizer.h" />
     <ClInclude Include="include\MainFrame.h" />
     <ClInclude Include="include\Panel.h" />
+    <ClInclude Include="include\SolidBackgroundRenderer.h" />
     <ClInclude Include="include\StaticText.h" />
     <ClInclude Include="include\StatusBar.h" />
     <ClInclude Include="include\StringUtil.h" />

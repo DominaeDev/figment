@@ -4,10 +4,13 @@
 #include <vector>
 #include "LayoutElement.h"
 
+class BackgroundRenderer;
+
 class Control : public LayoutElement
 {
 public:
 	Control(Control* pParent);
+	virtual ~Control();
 
 	virtual void Render(SDL_Renderer* pRenderer);
 	virtual void Update(float fDeltaTime) override;
@@ -25,6 +28,8 @@ public:
 
 	bool ProcessEvent(SDL_Event* event);
 
+	void SetBackgroundRenderer(BackgroundRenderer* pBGRenderer);
+
 protected:
 	virtual void OnRender(SDL_Renderer* pRenderer);
 	virtual void OnParent();
@@ -39,4 +44,7 @@ protected:
 	SDL_Color _borderColor {};
 	bool _bClipping = false;
 	bool _bVisible = true;
+	
+	// Theming
+	BackgroundRenderer* _pBGRenderer;
 };

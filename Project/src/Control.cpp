@@ -1,12 +1,18 @@
 #include "Control.h"
 #include "Sizer.h"
 #include "Color.h"
+#include "BackgroundRenderer.h"
 
 Control::Control(Control* pParent)
 {
 	if (pParent)
 		pParent->AddChild(this);
 	_pParent = pParent;
+}
+
+Control::~Control()
+{
+	delete _pBGRenderer;
 }
 
 void Control::Update(float fDeltaTime)
@@ -97,6 +103,12 @@ SDL_Color Control::GetBackgroundColor() const
 
 void Control::DrawBackground(SDL_Renderer* pRenderer)
 {
+	if (_pBGRenderer != nullptr)
+	{
+		_pBGRenderer->DrawBackground(pRenderer, _rect);
+		return;
+	}
+
 	auto bgColor = GetBackgroundColor();
 	if (Color::IsDefined(bgColor))
 	{
@@ -131,4 +143,14 @@ bool Control::ProcessEvent(SDL_Event* event)
 			return true;
 	}
 	return false;
+}
+
+void Control::SetBackgroundRenderer(BackgroundRenderer* pBGRenderer)
+{
+	if (_pBGRenderer != nullptr)
+	{
+		delete _pBGRenderer;
+		_pBGRenderer = nullptr;
+	}
+	_pBGRenderer = pBGRenderer;
 }

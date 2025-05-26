@@ -42,6 +42,9 @@
     <Filter Include="Source Files\Inference">
       <UniqueIdentifier>{b6a16c68-2efd-46d3-b4b1-42ee978fc28a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Utility\Interface\Theme">
+      <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -143,6 +146,12 @@
     <ClCompile Include="src\StringUtil.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\SolidBackgroundRenderer.cpp">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RoundedBackgroundRenderer.cpp">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
@@ -225,6 +234,15 @@
     </ClInclude>
     <ClInclude Include="include\StatusBar.h">
       <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BackgroundRenderer.h">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SolidBackgroundRenderer.h">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RoundedBackgroundRenderer.h">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
