@@ -16,6 +16,7 @@
 #include <format>
 #include "SolidBackgroundRenderer.h"
 #include "RoundedBackgroundRenderer.h"
+#include "NineGridBackgroundRenderer.h"
 #include "RoundedBorderRenderer.h"
 
 MainFrame* MainFrame::s_pInstance = nullptr;
@@ -49,7 +50,6 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	auto pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::DefaultFontSize);
 	pTextBox->SetSize(-1, 88);
-	pTextBox->SetBackgroundColor(Color::White);
 	pTextBox->SelectAll();
 
 	auto pCenterSizer = new VerticalSizer();
@@ -86,8 +86,8 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 		}
 	});
 
-	pTextBox->SetBackgroundRenderer(new RoundedBackgroundRenderer(9.f, 1.f, Color::White));
-	pTextBox->SetBorderRenderer(new RoundedBorderRenderer(10.0f, 2.5f, Color::Black));
+//	pTextBox->SetBorderRenderer(new RoundedBorderRenderer(4.5f, 2.5f, Color::Black));
+	pTextBox->SetBackgroundRenderer(new NineGridBackgroundRenderer(10.0f, Color::White, Color::Black));
 
 	pTextBox->SetFocus(true);
 

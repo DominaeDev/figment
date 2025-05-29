@@ -8,6 +8,8 @@ struct SDL_Texture;
 enum class Texture
 {
 	BORDER = 0,
+	BG_9GRID,
+	BORDER_9GRID,
 };
 
 class TextureStore

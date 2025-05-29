@@ -116,6 +116,7 @@
     <ClCompile Include="src\HorizontalSizer.cpp" />
     <ClCompile Include="src\LLMInstance.cpp" />
     <ClCompile Include="src\LayoutElement.cpp" />
+    <ClCompile Include="src\NineGridBackgroundRenderer.cpp" />
     <ClCompile Include="src\RoundedBackgroundRenderer.cpp" />
     <ClCompile Include="src\RoundedBorderRenderer.cpp" />
     <ClCompile Include="src\Sizer.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="include\LLMInstance.h" />
     <ClInclude Include="include\IUpdateable.h" />
     <ClInclude Include="include\LayoutElement.h" />
+    <ClInclude Include="include\NineGridBackgroundRenderer.h" />
     <ClInclude Include="include\RoundedBackgroundRenderer.h" />
     <ClInclude Include="include\RoundedBorderRenderer.h" />
     <ClInclude Include="include\Sizer.h" />

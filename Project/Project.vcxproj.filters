@@ -158,6 +158,9 @@
     <ClCompile Include="src\TextureStore.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
+    <ClCompile Include="src\NineGridBackgroundRenderer.cpp">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
@@ -255,6 +258,9 @@
     </ClInclude>
     <ClInclude Include="include\TextureStore.h">
       <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NineGridBackgroundRenderer.h">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

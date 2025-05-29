@@ -12,7 +12,7 @@ ChatMessage::ChatMessage(Control* pParent, string name, string message) : Contro
 	_name(name),
 	_message(message)
 {
-	SetBackgroundRenderer(new RoundedBackgroundRenderer(7.0f, 0.0f, SDL_Color { 200, 200, 200, 255 }));
+	SetBackgroundRenderer(new RoundedBackgroundRenderer(7.0f, SDL_Color { 200, 200, 200, 255 }));
 	SetBackgroundColor(SDL_Color { 200, 200, 200, 255 });
 
 	SetBorderColor(Color::Black);

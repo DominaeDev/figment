@@ -129,9 +129,9 @@ void RoundedBorderRenderer::RefreshGeometry(SDL_FRect rect)
 	float outerBottom = rect.y + rect.h;
 
 	float innerLeft = rect.x + radius;
-	float innerRight = rect.x + rect.w - radius;
+	float innerRight = rect.x + rect.w - radius - 0.1f;
 	float innerTop = rect.y + radius;
-	float innerBottom = rect.y + rect.h - radius;
+	float innerBottom = rect.y + rect.h - radius - 0.1f;
 
 	// Top
 	AddPoint(innerLeft, outerTop + _thickness, 0.0f, 0.0f, _vertices, color);

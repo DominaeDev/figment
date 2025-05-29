@@ -9,7 +9,7 @@ struct SDL_Vertex;
 class RoundedBackgroundRenderer : public CustomRenderer
 {
 public:
-	RoundedBackgroundRenderer(float radius, float shrink, SDL_Color color);
+	RoundedBackgroundRenderer(float radius, SDL_Color color);
 	
 	void Draw(SDL_Renderer* pRenderer, SDL_FRect rect);
 	void SetColor(SDL_Color color);
@@ -20,7 +20,6 @@ private:
 	SDL_Color _color {};
 	SDL_FRect _lastRect {};
 	float _radius = 0;
-	float _contract = 0;
 
 	std::vector<SDL_Vertex> _vertices {};
 	std::vector<int> _indices {};

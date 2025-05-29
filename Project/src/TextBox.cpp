@@ -11,7 +11,6 @@ static const char* _testString = "Hee hee, ho ho ho! \n\xE3\x81\xB2\xE3\x82\x89\
 
 TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWithMargins(pParent)
 {
-	_borderColor = Color::Black;
 	_pFont = Fonts::GetFont(fontFace, ptSize);
 	_pText = TTF_CreateText(Text::GetEngine(), _pFont, nullptr, 0);
 
@@ -19,7 +18,7 @@ TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWi
 	TTF_SetTextWrapWhitespaceVisible(_pText, true);
 
 	_bFocused = false;
-	_bClipping = true;
+	_bClipping = false;
 
 	highlight_start = -1;
 	highlight_end = -1;

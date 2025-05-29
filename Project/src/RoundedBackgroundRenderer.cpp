@@ -1,9 +1,8 @@
 #include "RoundedBackgroundRenderer.h"
 #include "Utility.h"
 
-RoundedBackgroundRenderer::RoundedBackgroundRenderer(float radius, float contract, SDL_Color color) :
+RoundedBackgroundRenderer::RoundedBackgroundRenderer(float radius, SDL_Color color) :
 	_radius(radius),
-	_contract(contract),
 	_color(color)
 {
 }
@@ -77,7 +76,7 @@ static void AddCorner(float x0, float y0, float x1, float y1, std::vector<SDL_Ve
 
 void RoundedBackgroundRenderer::RefreshGeometry(SDL_FRect rect)
 {
-	float radius = SDL_min(_radius + _contract, SDL_min(rect.w, rect.h) / 2.0f);
+	float radius = SDL_min(_radius, SDL_min(rect.w, rect.h) / 2.0f);
 
 	if (radius <= 0.0f)
 		return;
@@ -96,15 +95,15 @@ void RoundedBackgroundRenderer::RefreshGeometry(SDL_FRect rect)
 	_vertices.reserve(12 + (CORNER_TRIANGLES - 2) * 4);
 	_indices.reserve(3 * (20 + CORNER_TRIANGLES * 4));
 	
-	float outerLeft = rect.x + _contract;
-	float outerRight = rect.x + rect.w - _contract;
-	float outerTop = rect.y + _contract;
-	float outerBottom = rect.y + rect.h - _contract;
+	float outerLeft = rect.x;
+	float outerRight = rect.x + rect.w;
+	float outerTop = rect.y;
+	float outerBottom = rect.y + rect.h;
 
-	float innerLeft = rect.x + radius + _contract;
-	float innerRight = rect.x + rect.w - radius - _contract;
-	float innerTop = rect.y + radius + _contract;
-	float innerBottom = rect.y + rect.h - radius - _contract;
+	float innerLeft = rect.x + radius;
+	float innerRight = rect.x + rect.w - radius;
+	float innerTop = rect.y + radius;
+	float innerBottom = rect.y + rect.h - radius;
 
 	// Center
 	AddPoint(innerLeft, innerBottom, _vertices, color);
