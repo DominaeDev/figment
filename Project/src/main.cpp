@@ -12,22 +12,28 @@
 #include "MainFrame.h"
 #include "LLMInstance.h"
 
-#define CHECK_MEMORY_LEAKS (defined(_DEBUG) && 0)
+#if defined(_DEBUG) && 0
+#define CHECK_MEMORY_LEAKS
+#endif
 
-#if CHECK_MEMORY_LEAKS
+#ifdef CHECK_MEMORY_LEAKS
 	#define _CRTDBG_MAP_ALLOC
 	#include <stdlib.h>
 	#include <crtdbg.h>
 #endif
+
+#define MEMORY_LEAK_ALLOC 0
 
 #define APP_STATE(P) static_cast<AppState*>(P);
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 {
-#if CHECK_MEMORY_LEAKS
+#ifdef CHECK_MEMORY_LEAKS
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-//	_CrtSetBreakAlloc(281);
+#if defined(MEMORY_LEAK_ALLOC) && MEMORY_LEAK_ALLOC > 0
+	_CrtSetBreakAlloc(MEMORY_LEAK_ALLOC);
+#endif
 #endif
 
 	if (!SDL_Init(SDL_INIT_VIDEO))
@@ -38,7 +44,15 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 	SDL_Window* pWindow;
 	SDL_Renderer* pRenderer;
-	if (!SDL_CreateWindowAndRenderer(Constants::AppTitle, Constants::WindowWidth, Constants::WindowHeight, SDL_WINDOW_RESIZABLE, &pWindow, &pRenderer))
+	try
+	{
+		if (!SDL_CreateWindowAndRenderer(Constants::AppTitle, Constants::WindowWidth, Constants::WindowHeight, SDL_WINDOW_RESIZABLE, &pWindow, &pRenderer))
+		{
+			SDL_Log("Couldn't create pWindow/pRenderer: %s", SDL_GetError());
+			return SDL_APP_FAILURE;
+		}
+	}
+	catch (...)
 	{
 		SDL_Log("Couldn't create pWindow/pRenderer: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
@@ -86,6 +100,9 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 
 	if (event->type == SDL_EVENT_QUIT)
 	{
+		auto pLLM = Application::GetLLM();
+		if (pLLM)
+			pLLM->Halt();
 		return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
 	}
 	if (event->type == SDL_EVENT_KEY_DOWN)
@@ -98,6 +115,20 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 		case SDLK_F3:
 			static_cast<MainFrame*>(pAppState->pTopFrame)->UnloadModel();
 			break;
+		case SDLK_F10:
+		{
+			auto pLLM = Application::GetLLM();
+			if (pLLM)
+				pLLM->Halt();
+			break;
+		}
+		case SDLK_F9:
+		{
+			auto pLLM = Application::GetLLM();
+			if (pLLM)
+				pLLM->Resume();
+			break;
+		}
 		}
 	}
 
@@ -164,7 +195,6 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
 	TTF_Quit();
 
-	pAppState->pLLM->Shutdown();
-
+	delete pAppState->pLLM;
 }
 

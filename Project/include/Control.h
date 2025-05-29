@@ -46,5 +46,5 @@ protected:
 	bool _bVisible = true;
 	
 	// Theming
-	BackgroundRenderer* _pBGRenderer;
+	BackgroundRenderer* _pBGRenderer = nullptr;
 };

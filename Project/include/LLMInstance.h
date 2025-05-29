@@ -27,13 +27,18 @@ struct ModelState
 class LLMInstance
 {
 public:
+	~LLMInstance();
+
 	void Initialize();
 	void Shutdown();
 	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
 
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool SendMessage(string name, string message);
-	bool Stop();
+	bool IsGenerating() const;
+	
+	bool Resume();
+	bool Halt();
 
 	bool TryGetResponse(string& result);
 

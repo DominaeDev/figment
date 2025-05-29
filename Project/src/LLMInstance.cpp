@@ -1,19 +1,35 @@
 ﻿#include "llama.h"
+#include "common.h"
 #include "LLMInstance.h"
 #include "StringUtil.h"
 
-#pragma comment(lib, "ggml-base.lib")
+//#pragma comment(lib, "ggml-base.lib")
 
 void ModelState::Release()
 {
-	llama_sampler_free(pSampler);
-	llama_free(pCtx);
-	llama_model_free(pModel);
+	if (pSampler)
+		llama_sampler_free(pSampler);
+	if (pCtx)
+	{
+		llama_kv_self_clear(pCtx);
+		llama_free(pCtx);
+	}
+	if (pModel)
+		llama_model_free(pModel);
+
 	pSampler = nullptr;
 	pCtx = nullptr;
 	pModel = nullptr;
 	pVocab = nullptr;
 	bReady = false;
+}
+
+LLMInstance::~LLMInstance()
+{
+	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+		_workerThread.get()->join();
+
+	Shutdown();
 }
 
 void LLMInstance::Initialize()
@@ -36,8 +52,7 @@ void LLMInstance::Initialize()
 
 void LLMInstance::Shutdown()
 {
-	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
-		_workerThread.get()->join();
+	Halt();
 
 	// Clear state and release
 	auto state = _atm_modelState.exchange(ModelState());
@@ -150,13 +165,27 @@ bool LLMInstance::IsReady() const
 	return state.bReady && state.pModel;
 }
 
-bool LLMInstance::Stop()
+bool LLMInstance::IsGenerating() const
 {
-	if (!IsReady() || !_atm_bGeneratingResponse.load())
+	return _atm_bGeneratingResponse.load();
+}
+
+bool LLMInstance::Resume()
+{
+	if (!IsReady() || IsGenerating())
 		return false;
 
-	ModelState state = _atm_modelState.load();
+	return Generate("");
+}
+
+bool LLMInstance::Halt()
+{
+	if (!IsReady() || !IsGenerating())
+		return false;
+
 	_atm_bCancelGeneration.store(true);
+	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+		_workerThread.get()->join();
 	return true;
 }
 
@@ -186,7 +215,6 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 		onComplete(1, response);
 		return;
 	}
-
 	// prepare a batch for the prompt
 	llama_batch batch = llama_batch_get_one(prompt_tokens.data(), (int32_t)prompt_tokens.size());
 	llama_token new_token_id;
@@ -207,10 +235,11 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 			return;
 		}
 
-		if (llama_decode(state.pCtx, batch))
+		if (batch.n_tokens > 0 && llama_decode(state.pCtx, batch))
 		{
 			fprintf(stderr, "failed to decode\n");
 			onComplete(3, response);
+			return;
 		}
 
 		// sample the next token
@@ -298,12 +327,13 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 
 bool LLMInstance::Generate(const string& prompt)
 {
-	if (!IsReady() || _atm_bGeneratingResponse.load())
+	if (!IsReady() || IsGenerating())
 		return false;
 
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
 		_workerThread.get()->join();
 
+	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(true);
 
 	auto pThread = new std::thread(&LLMInstance::__Generate, this, prompt, 
@@ -390,7 +420,7 @@ bool LLMInstance::Generate(const string& prompt)
 
 bool LLMInstance::SendMessage(string name, string message)
 {
-	if (!IsReady() || _atm_bGeneratingResponse.load())
+	if (!IsReady() || IsGenerating())
 		return false;
 
 	// Reset response
@@ -404,7 +434,6 @@ bool LLMInstance::SendMessage(string name, string message)
 	std::vector<llama_chat_message> messages;
 	std::vector<char> formatted(llama_n_ctx(state.pCtx));
 	int prev_len = 0;
-
 
 	const char* tmpl = llama_model_chat_template(state.pModel, /* name */ nullptr);
 //	tmpl = "mistral-v7-tekken";

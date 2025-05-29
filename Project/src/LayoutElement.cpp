@@ -5,6 +5,8 @@ LayoutElement::~LayoutElement()
 {
 	for (auto& child : _children)
 		delete child;
+
+	delete _pSizer;
 }
 
 void LayoutElement::Layout()
