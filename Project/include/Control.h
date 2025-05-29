@@ -4,7 +4,7 @@
 #include <vector>
 #include "LayoutElement.h"
 
-class BackgroundRenderer;
+class CustomRenderer;
 
 class Control : public LayoutElement
 {
@@ -28,7 +28,8 @@ public:
 
 	bool ProcessEvent(SDL_Event* event);
 
-	void SetBackgroundRenderer(BackgroundRenderer* pBGRenderer);
+	void SetBackgroundRenderer(CustomRenderer* pCustom);
+	void SetBorderRenderer(CustomRenderer* pCustom);
 
 protected:
 	virtual void OnRender(SDL_Renderer* pRenderer);
@@ -46,5 +47,6 @@ protected:
 	bool _bVisible = true;
 	
 	// Theming
-	BackgroundRenderer* _pBGRenderer = nullptr;
+	CustomRenderer* _pBGRenderer = nullptr;
+	CustomRenderer* _pBorderRenderer = nullptr;
 };

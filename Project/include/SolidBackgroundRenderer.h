@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Types.h"
-#include "BackgroundRenderer.h"
+#include "CustomRenderer.h"
 
-class SolidBackgroundRenderer : public BackgroundRenderer
+class SolidBackgroundRenderer : public CustomRenderer
 {
 public:
 	SolidBackgroundRenderer(SDL_Color color);
 	
-	void DrawBackground(SDL_Renderer* pRenderer, SDL_FRect rect);
+	void Draw(SDL_Renderer* pRenderer, SDL_FRect rect);
 	void SetColor(SDL_Color color);
 
 private:

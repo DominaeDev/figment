@@ -161,8 +161,8 @@ void StaticText::OnParent()
 
 Rect StaticText::GetAlignedRect() const
 {
-	int x = _rect.x + _marginLeft;
-	int y = _rect.y + _marginTop;
+	int x = toI(_rect.x + _marginLeft);
+	int y = toI(_rect.y + _marginTop);
 	int w = _textWidth;
 	int h = _textHeight;
 	Rect rect(toF(x), toF(y), toF(w), toF(h));

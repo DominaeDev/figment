@@ -5,11 +5,12 @@
 #include <vector>
 
 struct SDL_Vertex;
+struct SDL_Texture;
 
-class RoundedBackgroundRenderer : public CustomRenderer
+class RoundedBorderRenderer : public CustomRenderer
 {
 public:
-	RoundedBackgroundRenderer(float radius, float shrink, SDL_Color color);
+	RoundedBorderRenderer(float radius, float thickness, SDL_Color color);
 	
 	void Draw(SDL_Renderer* pRenderer, SDL_FRect rect);
 	void SetColor(SDL_Color color);
@@ -19,8 +20,9 @@ private:
 
 	SDL_Color _color {};
 	SDL_FRect _lastRect {};
+	SDL_Texture* _pTexture = nullptr;
+	float _thickness = 0;
 	float _radius = 0;
-	float _contract = 0;
 
 	std::vector<SDL_Vertex> _vertices {};
 	std::vector<int> _indices {};

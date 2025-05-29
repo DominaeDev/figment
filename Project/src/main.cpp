@@ -8,6 +8,7 @@
 #include "Types.h"
 #include "Constants.h"
 #include "Fonts.h"
+#include "TextureStore.h"
 #include "Text.h"
 #include "MainFrame.h"
 #include "LLMInstance.h"
@@ -80,6 +81,9 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 	// Load fonts
 	Fonts::Init();
+
+	// Load textures
+	TextureStore::Init(pRenderer);
 
 	// Create main frame
 	auto pMainFrame = new MainFrame(pWindow);
@@ -191,6 +195,7 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 	AppState* pAppState = static_cast<AppState*>(state);
 	delete pAppState->pTopFrame;
 	
+	TextureStore::Release();
 	Fonts::ReleaseFonts();
 	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
 	TTF_Quit();

@@ -67,6 +67,7 @@ void TextBox::OnUpdate(float fDeltaTime)
 void TextBox::OnRender(SDL_Renderer* pRenderer)
 {
 	DrawBackground(pRenderer);
+	DrawBorder(pRenderer);
 	
 	// Draw highlight(s) 
 	int marker, length;

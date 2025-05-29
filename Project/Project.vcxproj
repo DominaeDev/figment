@@ -46,13 +46,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -70,7 +70,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;ggml.lib;llamad.lib;commond.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;ggml.lib;llamad.lib;commond.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,7 +92,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;ggml.lib;llama.lib;common.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;ggml.lib;llama.lib;common.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -117,6 +117,7 @@
     <ClCompile Include="src\LLMInstance.cpp" />
     <ClCompile Include="src\LayoutElement.cpp" />
     <ClCompile Include="src\RoundedBackgroundRenderer.cpp" />
+    <ClCompile Include="src\RoundedBorderRenderer.cpp" />
     <ClCompile Include="src\Sizer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MainFrame.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="src\StringUtil.cpp" />
     <ClCompile Include="src\Text.cpp" />
     <ClCompile Include="src\TextBox.cpp" />
+    <ClCompile Include="src\TextureStore.cpp" />
     <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\VerticalListSizer.cpp" />
@@ -135,7 +137,7 @@
   <ItemGroup>
     <ClInclude Include="include\AppState.h" />
     <ClInclude Include="include\Area.h" />
-    <ClInclude Include="include\BackgroundRenderer.h" />
+    <ClInclude Include="include\CustomRenderer.h" />
     <ClInclude Include="include\ChatMessage.h" />
     <ClInclude Include="include\ChatScroll.h" />
     <ClInclude Include="include\Color.h" />
@@ -149,6 +151,7 @@
     <ClInclude Include="include\IUpdateable.h" />
     <ClInclude Include="include\LayoutElement.h" />
     <ClInclude Include="include\RoundedBackgroundRenderer.h" />
+    <ClInclude Include="include\RoundedBorderRenderer.h" />
     <ClInclude Include="include\Sizer.h" />
     <ClInclude Include="include\MainFrame.h" />
     <ClInclude Include="include\Panel.h" />
@@ -158,6 +161,7 @@
     <ClInclude Include="include\StringUtil.h" />
     <ClInclude Include="include\Text.h" />
     <ClInclude Include="include\TextBox.h" />
+    <ClInclude Include="include\TextureStore.h" />
     <ClInclude Include="include\Types.h" />
     <ClInclude Include="include\Utility.h" />
     <ClInclude Include="include\VerticalListSizer.h" />

@@ -1,7 +1,7 @@
 #include "Control.h"
 #include "Sizer.h"
 #include "Color.h"
-#include "BackgroundRenderer.h"
+#include "CustomRenderer.h"
 
 Control::Control(Control* pParent)
 {
@@ -74,6 +74,13 @@ void Control::OnRender(SDL_Renderer* pRenderer)
 
 void Control::DrawBorder(SDL_Renderer* pRenderer)
 {
+	// Custom renderer
+	if (_pBorderRenderer)
+	{
+		_pBorderRenderer->Draw(pRenderer, _rect);
+		return;
+	}
+
 	if (!Color::IsDefined(_borderColor))
 		return;
 	
@@ -103,9 +110,10 @@ SDL_Color Control::GetBackgroundColor() const
 
 void Control::DrawBackground(SDL_Renderer* pRenderer)
 {
-	if (_pBGRenderer != nullptr)
+	// Custom renderer
+	if (_pBGRenderer)
 	{
-		_pBGRenderer->DrawBackground(pRenderer, _rect);
+		_pBGRenderer->Draw(pRenderer, _rect);
 		return;
 	}
 
@@ -145,12 +153,22 @@ bool Control::ProcessEvent(SDL_Event* event)
 	return false;
 }
 
-void Control::SetBackgroundRenderer(BackgroundRenderer* pBGRenderer)
+void Control::SetBackgroundRenderer(CustomRenderer* pCustom)
 {
 	if (_pBGRenderer != nullptr)
 	{
 		delete _pBGRenderer;
 		_pBGRenderer = nullptr;
 	}
-	_pBGRenderer = pBGRenderer;
+	_pBGRenderer = pCustom;
+}
+
+void Control::SetBorderRenderer(CustomRenderer* pCustom)
+{
+	if (_pBorderRenderer != nullptr)
+	{
+		delete _pBorderRenderer;
+		_pBorderRenderer = nullptr;
+	}
+	_pBorderRenderer = pCustom;
 }

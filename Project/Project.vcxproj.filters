@@ -152,6 +152,12 @@
     <ClCompile Include="src\RoundedBackgroundRenderer.cpp">
       <Filter>Source Files\Utility\Interface\Theme</Filter>
     </ClCompile>
+    <ClCompile Include="src\RoundedBorderRenderer.cpp">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextureStore.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
@@ -235,7 +241,7 @@
     <ClInclude Include="include\StatusBar.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\BackgroundRenderer.h">
+    <ClInclude Include="include\CustomRenderer.h">
       <Filter>Source Files\Utility\Interface\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\SolidBackgroundRenderer.h">
@@ -243,6 +249,12 @@
     </ClInclude>
     <ClInclude Include="include\RoundedBackgroundRenderer.h">
       <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RoundedBorderRenderer.h">
+      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TextureStore.h">
+      <Filter>Source Files\Application</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
