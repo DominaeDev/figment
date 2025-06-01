@@ -138,3 +138,11 @@ inline bool isEmpty(const std::string& s)
 {
 	return s.size() == 0;
 }
+
+std::string get_filename(const std::string& str)
+{
+	size_t pos = str.find_last_of("\\/");
+	if (pos == std::string::npos)
+		return str;
+	return str.substr(pos + 1);
+}

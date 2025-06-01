@@ -46,12 +46,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -109,6 +109,7 @@
     <ClCompile Include="src\ChatScroll.cpp" />
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\Constants.cpp" />
+    <ClCompile Include="src\ContextBuilder.cpp" />
     <ClCompile Include="src\Control.cpp" />
     <ClCompile Include="src\ControlWithMargins.cpp" />
     <ClCompile Include="src\Fonts.cpp" />
@@ -138,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="include\AppState.h" />
     <ClInclude Include="include\Area.h" />
+    <ClInclude Include="include\ContextBuilder.h" />
     <ClInclude Include="include\CustomRenderer.h" />
     <ClInclude Include="include\ChatMessage.h" />
     <ClInclude Include="include\ChatScroll.h" />

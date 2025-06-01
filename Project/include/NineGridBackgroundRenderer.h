@@ -11,6 +11,7 @@ public:
 	NineGridBackgroundRenderer(float cornerSize, SDL_Color bgColor, SDL_Color borderColor);
 	
 	void Draw(SDL_Renderer* pRenderer, SDL_FRect rect);
+	void SetColors(SDL_Color bgColor, SDL_Color borderColor);
 
 private:
 	float _cornerSize;

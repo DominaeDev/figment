@@ -149,10 +149,15 @@ void LayoutElement::InvalidateLayout()
 	_bInvalidLayout = true;
 }
 
-void LayoutElement::InvalidateParentLayout()
+void LayoutElement::InvalidateParentLayout(bool bRefreshImmediately)
 {
 	if (!_pSizer && _pParent != nullptr)
 		_pParent->InvalidateParentLayout();
 	else
-		InvalidateLayout();
+	{
+		if (bRefreshImmediately && _pSizer)
+			_pSizer->Layout();
+		else
+			InvalidateLayout();
+	}
 }

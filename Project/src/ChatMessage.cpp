@@ -4,21 +4,19 @@
 #include "Constants.h"
 #include "Fonts.h"
 #include "StringUtil.h"
-#include "RoundedBackgroundRenderer.h"
-#include "RoundedBorderRenderer.h"
+#include "NineGridBackgroundRenderer.h"
 #include "Utility.h"
 
-ChatMessage::ChatMessage(Control* pParent, string name, string message) : Control(pParent),
+ChatMessage::ChatMessage(Control* pParent, string name, string message, SDL_Color bgColor) : Control(pParent),
 	_name(name),
 	_message(message)
 {
-	SetBackgroundRenderer(new RoundedBackgroundRenderer(7.0f, SDL_Color { 200, 200, 200, 255 }));
-	SetBackgroundColor(SDL_Color { 200, 200, 200, 255 });
-
-	SetBorderColor(Color::Black);
+	SetBackgroundRenderer(new NineGridBackgroundRenderer(10.0f, bgColor, Color::AddRGB(bgColor, 0.15f) ));
+	SetBackgroundColor(bgColor);
 
 	SetSize(-1, 60);
-	string text = name + ": " + message;
+//	string text = name + ": " + message;
+	string text = message;
 
 	_pStaticText = new StaticText(this, text, FontFace::Default, Constants::ChatMessageFontSize, true);
 	_pStaticText->SetPosition(10, 10);
@@ -37,8 +35,8 @@ void ChatMessage::SetMessage(const string& text)
 	int currentHeight = toI(GetHeight());
 	if (currentHeight < h + 20)
 	{
-		SetSize(-1.0f, toF(h + 20));
-		InvalidateParentLayout();
+		SetSize(GetWidth(), toF(h + 20));
+		InvalidateParentLayout(true);
 	}
 }
 

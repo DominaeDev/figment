@@ -21,3 +21,9 @@ void NineGridBackgroundRenderer::Draw(SDL_Renderer* pRenderer, SDL_FRect rect)
 	SDL_SetTextureColorMod(_pBorderTexture, _borderColor.r, _borderColor.g, _borderColor.b);
 	SDL_RenderTexture9Grid(pRenderer, _pBorderTexture, nullptr, 64.0f, 64.0f, 64.0f, 64.0f, _cornerSize / 20.0f, &expandedRect);
 }
+
+void NineGridBackgroundRenderer::SetColors(SDL_Color bgColor, SDL_Color borderColor)
+{
+	_bgColor = bgColor;
+	_borderColor = borderColor;
+}

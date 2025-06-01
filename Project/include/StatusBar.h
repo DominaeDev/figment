@@ -11,7 +11,9 @@ public:
 	StatusBar(Control* pParent);
 
 	void SetMessage(string message);
+	void SetModelInfo(string modelName, size_t maxCtxSize, size_t usedCtxSize);
 
 private:
-	StaticText* _pStatusText0;
+	StaticText* _pMessage;
+	StaticText* _pModelInfo;
 };

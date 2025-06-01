@@ -8,7 +8,7 @@ class StaticText;
 class ChatMessage : public Control
 {
 public:
-	ChatMessage(Control* pParent, string name, string message);
+	ChatMessage(Control* pParent, string name, string message, SDL_Color bgColor);
 
 	void SetMessage(const string& text);
 	void AppendMessage(const string& text);

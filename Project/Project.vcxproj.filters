@@ -161,6 +161,9 @@
     <ClCompile Include="src\NineGridBackgroundRenderer.cpp">
       <Filter>Source Files\Utility\Interface\Theme</Filter>
     </ClCompile>
+    <ClCompile Include="src\ContextBuilder.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
@@ -261,6 +264,9 @@
     </ClInclude>
     <ClInclude Include="include\NineGridBackgroundRenderer.h">
       <Filter>Source Files\Utility\Interface\Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ContextBuilder.h">
+      <Filter>Source Files\Inference</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

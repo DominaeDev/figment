@@ -1,4 +1,5 @@
 #include "MainFrame.h"
+#include "Utility.h"
 #include "Area.h"
 #include "Panel.h"
 #include "StaticText.h"
@@ -115,7 +116,14 @@ void MainFrame::LoadModel()
 	SetStatusBar("Loading model...");
 
 	auto pLLM = Application::GetLLM();
-	if (pLLM && !pLLM->HasLoadedModel())
+	if (!pLLM)
+		return;
+
+	pLLM->SetStatusCallback([this](LLMStatus status) {
+		_pStatusBar->SetModelInfo(status.modelName, status.allocCtxSize, status.usedCtxSize);
+	});
+
+	if (!pLLM->HasLoadedModel())
 	{
 		pLLM->LoadModelAsync(DEFAULT_MODEL_LOCATION, 
 			[](int percent) 

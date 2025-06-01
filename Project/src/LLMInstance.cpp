@@ -3,8 +3,6 @@
 #include "LLMInstance.h"
 #include "StringUtil.h"
 
-//#pragma comment(lib, "ggml-base.lib")
-
 void ModelState::Release()
 {
 	if (pSampler)
@@ -17,6 +15,7 @@ void ModelState::Release()
 	if (pModel)
 		llama_model_free(pModel);
 
+	delete context_builder;
 	pSampler = nullptr;
 	pCtx = nullptr;
 	pModel = nullptr;
@@ -29,6 +28,7 @@ LLMInstance::~LLMInstance()
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
 		_workerThread.get()->join();
 
+	_statusCallback = nullptr;
 	Shutdown();
 }
 
@@ -57,6 +57,8 @@ void LLMInstance::Shutdown()
 	// Clear state and release
 	auto state = _atm_modelState.exchange(ModelState());
 	state.Release();
+
+	ReportStatus();
 }
 
 typedef std::function<void(ModelState)> __LoadModelCallback;
@@ -122,6 +124,7 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 	llama_sampler_chain_add(state.pSampler, llama_sampler_init_temp(0.8f));					// Temperature
 	llama_sampler_chain_add(state.pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));	// Seed
 
+	state.context_builder = new ContextBuilder();
 	state.bReady = true;
 	onComplete(state);
 }
@@ -140,17 +143,21 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 
 	auto pThread = new std::thread(__LoadModel,
 		filename,
-		[this, onComplete](ModelState result)
+		[this, filename, onComplete](ModelState result)
 	{
 		if (result.bReady)
 		{
 			_atm_modelState.store(result);
+			_modelName = get_filename(filename);
 			onComplete(true);
+			ReportStatus();
 		}
 		else
 		{
 			result.Release();
+			_modelName.clear();
 			onComplete(false);
+			ReportStatus();
 		}
 	});
 
@@ -215,6 +222,10 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 		onComplete(1, response);
 		return;
 	}
+
+	printf("\r\n");
+	fflush(stdout);
+
 	// prepare a batch for the prompt
 	llama_batch batch = llama_batch_get_one(prompt_tokens.data(), (int32_t)prompt_tokens.size());
 	llama_token new_token_id;
@@ -222,9 +233,6 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 	bool running = true;
 	while (running)
 	{
-		if (_atm_bCancelGeneration.load())
-			break; // Cancelled
-
 		// check if we have enough space in the context to evaluate this batch
 		int n_ctx = llama_n_ctx(state.pCtx);
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -258,20 +266,16 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 		if (str_token.size() == 0)
 			break; // Error
 
-		// Print to console
-		printf("%s", str_token.c_str());
-		fflush(stdout);
-
 		partial += str_token;
 		bool send = true;
 		bool next_token = true;
 
 		// check if there is incomplete UTF-8 character at the end
-		bool incomplete = validate_utf8(partial) < partial.size();
+		bool incompleteUtf8 = validate_utf8(partial) < partial.size();
 
-		if (incomplete)
+		if (incompleteUtf8)
 		{
-			// Wait for more
+			// Wait for next token
 			send = false;
 		}
 		else
@@ -280,9 +284,16 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 			size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
 			if (stop_pos != std::string::npos)
 			{
+				std::string stop_word = partial.substr(stop_pos);
+
+				// Print to console
 				partial = partial.erase(stop_pos); // Erase stop word
 				running = false; // Halt
+				send = false;
 				next_token = false;
+
+				printf("%s[%s]", partial.c_str(), stop_word.c_str());
+				fflush(stdout);
 			}
 			else
 			{
@@ -297,8 +308,15 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 			}
 		}
 
+		if (_atm_bCancelGeneration.load())
+			break; // Cancelled
+
 		if (send)
 		{
+			// Print to console
+			printf("%s", str_token.c_str());
+			fflush(stdout);
+
 			// Clean up incomplete stop tokens
 			size_t stop_pos = partial.find("<|im");
 			if (stop_pos != std::string::npos)
@@ -318,8 +336,10 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 		}
 
 		// prepare the next batch with the sampled token
-		if (next_token)
-			batch = llama_batch_get_one(&new_token_id, 1);
+		if (!next_token)
+			break;
+		
+		batch = llama_batch_get_one(&new_token_id, 1);
 	}
 
 	onComplete(0, response);
@@ -343,79 +363,13 @@ bool LLMInstance::Generate(const string& prompt)
 		[this](int error, string response) {
 			// ...
 			_atm_bGeneratingResponse.store(false);
+			ModelState state = _atm_modelState.load();
+			state.context_builder->messages.push_back({ "assistant", response });
+			ReportStatus();
 		});
 
 	_workerThread.reset(pThread);
 	return true;
-/*
-
-	if (!IsReady())
-		return false;
-
-	std::string response;
-
-	ModelState state = _atm_modelState.load();
-
-	const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
-
-	// tokenize the prompt
-	const int32_t n_prompt_tokens = -llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), NULL, 0, is_first, true);
-	std::vector<llama_token> prompt_tokens(n_prompt_tokens);
-	if (llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), is_first, true) < 0)
-	{
-		GGML_ABORT("failed to tokenize the prompt\n");
-		return false;
-	}
-
-	// prepare a batch for the prompt
-	llama_batch batch = llama_batch_get_one(prompt_tokens.data(), (int32_t)prompt_tokens.size());
-	llama_token new_token_id;
-	while (true)
-	{
-		// check if we have enough space in the context to evaluate this batch
-		int n_ctx = llama_n_ctx(state.pCtx);
-		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
-		if (n_ctx_used + batch.n_tokens > n_ctx)
-		{
-			fprintf(stderr, "context size exceeded\n");
-			return false;
-		}
-
-		if (llama_decode(state.pCtx, batch))
-		{
-			GGML_ABORT("failed to decode\n");
-		}
-
-		// sample the next token
-		new_token_id = llama_sampler_sample(state.pSampler, state.pCtx, -1);
-
-		// is it an end of generation?
-		if (llama_vocab_is_eog(state.pVocab, new_token_id))
-			break;
-
-		// convert the token to a string, print it and add it to the response
-		std::string piece = stringFromToken(state.pVocab, new_token_id);
-		if (piece.size() == 0)
-			break; // Error
-
-		printf("%s", piece.c_str());
-		fflush(stdout);
-
-		_mutex_generatedText.lock();
-		_generatedText += piece;
-		_mutex_generatedText.unlock();
-
-		response += piece;
-
-		if (_atm_bCancelGeneration.load())
-			break; // Cancelled
-
-		// prepare the next batch with the sampled token
-		batch = llama_batch_get_one(&new_token_id, 1);
-	}
-
-	outResponse = response;
-	return true;*/
 };
 
 bool LLMInstance::SendMessage(string name, string message)
@@ -431,7 +385,11 @@ bool LLMInstance::SendMessage(string name, string message)
 
 	ModelState state = _atm_modelState.load();
 
-	std::vector<llama_chat_message> messages;
+	// add the user input to the message list and format it
+	state.context_builder->messages.push_back(Message { "user", message });
+
+	std::vector<llama_chat_message> messages = state.context_builder->get_messages();
+
 	std::vector<char> formatted(llama_n_ctx(state.pCtx));
 	int prev_len = 0;
 
@@ -443,9 +401,6 @@ bool LLMInstance::SendMessage(string name, string message)
 //	tmpl = "command-r";
 //	tmpl = "gemma";
 //	tmpl = "deepseek3";
-
-	// add the user input to the message list and format it
-	messages.push_back({ _strdup(name.c_str()), _strdup(message.c_str()) });
 
 	int new_len = llama_chat_apply_template(tmpl, messages.data(), (int32_t)messages.size(), true, formatted.data(), (int32_t)formatted.size());
 	if (new_len > (int)formatted.size())
@@ -464,17 +419,6 @@ bool LLMInstance::SendMessage(string name, string message)
 
 	// generate a response
 	return Generate(prompt);
-
-	/*
-	// add the response to the messages
-	messages.push_back({ "assistant", _strdup(outResponse.c_str()) });
-	prev_len = llama_chat_apply_template(tmpl, messages.data(), messages.size(), false, nullptr, 0);
-	if (prev_len < 0)
-	{
-		fprintf(stderr, "failed to apply the chat template\n");
-		return false;
-	}
-	*/
 }
 
 bool LLMInstance::TryGetResponse(string& result)
@@ -486,4 +430,23 @@ bool LLMInstance::TryGetResponse(string& result)
 	_generatedText.clear();
 	_mutex_generatedText.unlock();
 	return result.size() > 0;
+}
+
+void LLMInstance::ReportStatus()
+{
+	if (!_statusCallback)
+		return;
+
+	ModelState state = _atm_modelState.load();
+
+	if (!state.pModel || !state.pCtx)
+	{
+		_statusCallback(LLMStatus());
+		return;
+	}
+
+	uint32_t allocCtx = llama_n_batch(state.pCtx);
+	uint32_t usedCtx = llama_kv_self_used_cells(state.pCtx);
+
+	_statusCallback(LLMStatus { _modelName, allocCtx, usedCtx });
 }

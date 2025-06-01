@@ -3,6 +3,7 @@
 #include "ChatMessage.h"
 #include "AppState.h"
 #include "LLMInstance.h"
+#include "Color.h"
 
 #define POLL_INTERVAL 0.1f
 
@@ -16,7 +17,11 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 
 ChatMessage* ChatScroll::AddMessage(string name, string message, bool isUser)
 {
-	auto pMessage = new ChatMessage(this, name, message);
+	auto pLLM = Application::GetLLM();
+	
+	SDL_Color color = isUser ? (pLLM && pLLM->IsReady() ? Color::UserMessageBackground : Color::DarkGray) : Color::BotMessageBackground;
+
+	auto pMessage = new ChatMessage(this, name, message, color);
 	_pSizer->Add(pMessage, 0, Sizer::Expand);
 
 	_pLastBotMessage = isUser ? nullptr : pMessage;
