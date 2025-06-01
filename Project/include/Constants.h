@@ -2,6 +2,8 @@
 
 #include "Types.h"
 
+#define DEFAULT_MODEL_LOCATION "M:\\LLM\\SkunkApe-14b_Q6k.unc.gguf"
+
 namespace Constants
 {
 	extern const char* AppTitle;

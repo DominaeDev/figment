@@ -17,8 +17,6 @@ namespace Color
 	extern SDL_Color UserMessageBackground;
 	extern SDL_Color BotMessageBackground;
 
-
-
 	extern bool IsDefined(SDL_Color color);
 	extern SDL_Color WithAlpha(SDL_Color color, Uint8 alpha = 255u);
 

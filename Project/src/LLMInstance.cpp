@@ -1,7 +1,9 @@
 ﻿#include "llama.h"
 #include "common.h"
+#include "chat.h"
 #include "LLMInstance.h"
 #include "StringUtil.h"
+#include "Utility.h"
 
 void ModelState::Release()
 {
@@ -124,7 +126,12 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 	llama_sampler_chain_add(state.pSampler, llama_sampler_init_temp(0.8f));					// Temperature
 	llama_sampler_chain_add(state.pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));	// Seed
 
-	state.context_builder = new ContextBuilder();
+	auto pCtxBuilder = new ContextBuilder();
+	pCtxBuilder->system_prompt = LoadTextFile("characters/system.txt");
+	pCtxBuilder->LoadBot("characters/character.xml");
+	pCtxBuilder->LoadUser("characters/user.xml");
+
+	state.context_builder = pCtxBuilder;
 	state.bReady = true;
 	onComplete(state);
 }
@@ -196,16 +203,17 @@ bool LLMInstance::Halt()
 	return true;
 }
 
-void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
 	std::string response;
 	std::vector<std::string> stop_words {
-		"<|im_",
+		"<|",
+		"<｜"
 		"<end_of_turn",
-		"<|end",
+//		"<|end",
 		"<EOT>",
 		"_<EOT>",
-		"<｜end▁of▁sentence｜>",
+//		"<｜end▁of▁sentence｜>",
 		"</s>",
 		"### ",
 	};
@@ -289,9 +297,13 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 				// Print to console
 				partial = partial.erase(stop_pos); // Erase stop word
 				running = false; // Halt
-				send = false;
 				next_token = false;
 
+				send = partial.size() > 0;
+				if (send)
+				{
+					int k = 0;
+				}
 				printf("%s[%s]", partial.c_str(), stop_word.c_str());
 				fflush(stdout);
 			}
@@ -339,6 +351,7 @@ void LLMInstance::__Generate(const string& prompt, __PartialResultCallback onPar
 		if (!next_token)
 			break;
 		
+//		common_batch_add(batch, new_token_id, 0, llama_tokens {}, false);
 		batch = llama_batch_get_one(&new_token_id, 1);
 	}
 
@@ -364,7 +377,7 @@ bool LLMInstance::Generate(const string& prompt)
 			// ...
 			_atm_bGeneratingResponse.store(false);
 			ModelState state = _atm_modelState.load();
-			state.context_builder->messages.push_back({ "assistant", response });
+			state.context_builder->messages.push_back({ Role::Bot, response });
 			ReportStatus();
 		});
 
@@ -386,20 +399,34 @@ bool LLMInstance::SendMessage(string name, string message)
 	ModelState state = _atm_modelState.load();
 
 	// add the user input to the message list and format it
-	state.context_builder->messages.push_back(Message { "user", message });
+	state.context_builder->messages.push_back(Message { Role::User, message });
 
-	std::vector<llama_chat_message> messages = state.context_builder->get_messages();
+	std::vector<llama_chat_message> messages = state.context_builder->GetMessages();
 
 	std::vector<char> formatted(llama_n_ctx(state.pCtx));
 	int prev_len = 0;
 
-	const char* tmpl = llama_model_chat_template(state.pModel, /* name */ nullptr);
+	/*int32_t nMeta = llama_model_meta_count(state.pModel);
+	char* metaKey = new char[512];
+	char* metaValue = new char[2048];
+	for (int32_t i = 0; i < nMeta; ++i)
+	{
+		if (!llama_model_meta_key_by_index(state.pModel, i, metaKey, 512))
+			continue;
+		if (llama_model_meta_val_str(state.pModel, metaKey, metaValue, 2048))
+			printf("%s = %s\r\n", metaKey, metaValue);
+	}*/
+
+//	const char* tmpl = llama_model_chat_template(state.pModel, nullptr);
+	const char* tmpl = "chatml";
+
 //	tmpl = "mistral-v7-tekken";
 //	tmpl = "chatml";
 //	tmpl = "llama2";
 //	tmpl = "llama3";
 //	tmpl = "command-r";
 //	tmpl = "gemma";
+//	tmpl = "vicuna";
 //	tmpl = "deepseek3";
 
 	int new_len = llama_chat_apply_template(tmpl, messages.data(), (int32_t)messages.size(), true, formatted.data(), (int32_t)formatted.size());
@@ -416,6 +443,13 @@ bool LLMInstance::SendMessage(string name, string message)
 
 	// remove previous messages to obtain the prompt to generate the response
 	std::string prompt(formatted.begin() + prev_len, formatted.begin() + new_len);
+	
+	// Free
+	for (auto& m : messages)
+	{
+		free(const_cast<char*>(m.role));
+		free(const_cast<char*>(m.content));
+	}
 
 	// generate a response
 	return Generate(prompt);

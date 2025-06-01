@@ -1,11 +1,10 @@
 #pragma once
 
-#ifndef __StringUtil_h__
-#define __StringUtil_h__
+#ifndef STRING_UTIL_H__
+#define STRING_UTIL_H__
 
 #include <string>
 #include <vector>
-
 
 extern inline std::string& trim(std::string& s);
 extern std::string& ltrim(std::string& s);

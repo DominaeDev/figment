@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Types.h"
-#include "LayoutElement.h"
-#include <vector>
+#include "IUpdateable.h"
+
+class LayoutElement;
 
 class Sizer : public IUpdateable
 {

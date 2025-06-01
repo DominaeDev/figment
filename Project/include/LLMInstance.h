@@ -66,7 +66,7 @@ private:
 
 	typedef std::function<void(__PartialResult)> __PartialResultCallback;
 	typedef std::function<void(int, string)> __GenerationCompleteCallback;
-	void __Generate(const string& prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	void __Generate(string prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
 	bool Generate(const string& prompt);
 	void ReportStatus();

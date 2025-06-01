@@ -1,7 +1,6 @@
 #pragma once
 
-#include <SDL3/SDL.h>
-#include <vector>
+#include "Types.h"
 #include "IUpdateable.h"
 
 class Sizer;

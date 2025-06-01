@@ -1,6 +1,5 @@
 #include "Fonts.h"
 #include "Constants.h"
-#include <vector>
 
 std::map<FontFace, const char*> s_FontFilenames {
 	{ FontFace::Regular,	"./fonts/Nunito-Regular.ttf" },

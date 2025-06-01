@@ -11,3 +11,4 @@ Project/ggml-cuda.dll
 Project/cudart64_12.dll
 Project/cublasLt64_12.dll
 Project/ggml-cpu.dll
+Project/characters/

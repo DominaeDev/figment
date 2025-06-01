@@ -1,11 +1,12 @@
 #include "ChatMessage.h"
 #include "StaticText.h"
+#include "NineGridBackgroundRenderer.h"
 #include "Color.h"
 #include "Constants.h"
 #include "Fonts.h"
 #include "StringUtil.h"
-#include "NineGridBackgroundRenderer.h"
 #include "Utility.h"
+#include "CustomRenderer.h"
 
 ChatMessage::ChatMessage(Control* pParent, string name, string message, SDL_Color bgColor) : Control(pParent),
 	_name(name),

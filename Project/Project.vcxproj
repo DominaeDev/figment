@@ -46,7 +46,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\tinyxml2;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -103,8 +103,10 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Savepoint.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
+    <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="src\AppState.cpp" />
     <ClCompile Include="src\Area.cpp" />
+    <ClCompile Include="src\Character.cpp" />
     <ClCompile Include="src\ChatMessage.cpp" />
     <ClCompile Include="src\ChatScroll.cpp" />
     <ClCompile Include="src\Color.cpp" />
@@ -131,14 +133,15 @@
     <ClCompile Include="src\Text.cpp" />
     <ClCompile Include="src\TextBox.cpp" />
     <ClCompile Include="src\TextureStore.cpp" />
-    <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\VerticalListSizer.cpp" />
     <ClCompile Include="src\VerticalSizer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h" />
     <ClInclude Include="include\AppState.h" />
     <ClInclude Include="include\Area.h" />
+    <ClInclude Include="include\Character.h" />
     <ClInclude Include="include\ContextBuilder.h" />
     <ClInclude Include="include\CustomRenderer.h" />
     <ClInclude Include="include\ChatMessage.h" />
@@ -170,7 +173,6 @@
     <ClInclude Include="include\Utility.h" />
     <ClInclude Include="include\VerticalListSizer.h" />
     <ClInclude Include="include\VerticalSizer.h" />
-    <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

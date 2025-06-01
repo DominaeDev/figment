@@ -27,9 +27,6 @@
     <Filter Include="Source Files\Utility\Third-party\tinyxml2">
       <UniqueIdentifier>{abfccfd5-f4a0-4eff-8c48-c0fed63d8c8c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Utility\Layout">
-      <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Utility\Interface">
       <UniqueIdentifier>{97d6e564-79f4-44e4-83c1-f1f1e7cd70b7}</UniqueIdentifier>
     </Filter>
@@ -44,6 +41,12 @@
     </Filter>
     <Filter Include="Source Files\Utility\Interface\Theme">
       <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utility\Interface\Layout">
+      <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -71,20 +74,17 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Backup.cpp">
       <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
     </ClCompile>
-    <ClCompile Include="src\Third-party\tinyxml2\tinyxml2.cpp">
-      <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
-    </ClCompile>
     <ClCompile Include="src\Constants.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
     <ClCompile Include="src\Sizer.cpp">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\HorizontalSizer.cpp">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\LayoutElement.cpp">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\Control.cpp">
       <Filter>Source Files\Utility\Interface</Filter>
@@ -99,7 +99,7 @@
       <Filter>Source Files\Application</Filter>
     </ClCompile>
     <ClCompile Include="src\VerticalSizer.cpp">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\AppState.cpp">
       <Filter>Source Files\Application</Filter>
@@ -120,7 +120,7 @@
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\VerticalListSizer.cpp">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\ChatScroll.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
@@ -164,11 +164,14 @@
     <ClCompile Include="src\ContextBuilder.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
+    <ClCompile Include="src\Character.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp">
+      <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Third-party\tinyxml2\tinyxml2.h">
-      <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
-    </ClInclude>
     <ClInclude Include="include\Constants.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
@@ -176,13 +179,13 @@
       <Filter>Source Files\Application</Filter>
     </ClInclude>
     <ClInclude Include="include\Sizer.h">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\HorizontalSizer.h">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\LayoutElement.h">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\Control.h">
       <Filter>Source Files\Utility\Interface</Filter>
@@ -200,7 +203,7 @@
       <Filter>Source Files\Application</Filter>
     </ClInclude>
     <ClInclude Include="include\VerticalSizer.h">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\AppState.h">
       <Filter>Source Files\Application</Filter>
@@ -221,7 +224,7 @@
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\VerticalListSizer.h">
-      <Filter>Source Files\Utility\Layout</Filter>
+      <Filter>Source Files\Utility\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\ChatScroll.h">
       <Filter>Source Files\Interface\Controls</Filter>
@@ -267,6 +270,12 @@
     </ClInclude>
     <ClInclude Include="include\ContextBuilder.h">
       <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Character.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h">
+      <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

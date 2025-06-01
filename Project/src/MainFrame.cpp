@@ -109,8 +109,6 @@ void MainFrame::OnRender(SDL_Renderer* pRenderer)
 	DrawBackground(pRenderer);
 }
 
-#define DEFAULT_MODEL_LOCATION "M:\\Backyard\\ana-v1-m7.erp.unc.Q6_K.gguf"
-
 void MainFrame::LoadModel()
 {
 	SetStatusBar("Loading model...");

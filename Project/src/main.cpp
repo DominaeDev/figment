@@ -13,7 +13,7 @@
 #include "MainFrame.h"
 #include "LLMInstance.h"
 
-#if defined(_DEBUG) && 0
+#if defined(_DEBUG) && 1
 #define CHECK_MEMORY_LEAKS
 #endif
 

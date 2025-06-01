@@ -1,4 +1,5 @@
 #include "Sizer.h"
+#include "LayoutElement.h"
 
 void Sizer::Add(Control* pFrame, int proportion, int flags, int border)
 {

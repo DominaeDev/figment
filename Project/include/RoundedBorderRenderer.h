@@ -2,7 +2,6 @@
 
 #include "Types.h"
 #include "CustomRenderer.h"
-#include <vector>
 
 struct SDL_Vertex;
 struct SDL_Texture;
