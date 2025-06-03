@@ -208,18 +208,20 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 	std::string response;
 	std::vector<std::string> stop_words {
 		"<|",
-		"<｜"
 		"<end_of_turn",
-//		"<|end",
 		"<EOT>",
 		"_<EOT>",
-//		"<｜end▁of▁sentence｜>",
+		"<s>",
 		"</s>",
 		"### ",
+		"<｜"
+//		"<|end",
+//		"<｜end▁of▁sentence｜>",
 	};
 
 	ModelState state = _atm_modelState.load();
 
+	const int32_t maxCtx = llama_n_ctx(state.pCtx);
 	const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
 
 	// tokenize the prompt
@@ -234,8 +236,23 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 	printf("\r\n");
 	fflush(stdout);
 
-	// prepare a batch for the prompt
-	llama_batch batch = llama_batch_get_one(prompt_tokens.data(), (int32_t)prompt_tokens.size());
+	// Prepare a batch for the prompt
+	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
+	int32_t num_tokens = (int32_t)prompt_tokens.size();
+	
+	// Add tokens to batch
+	for (int i = 0; i < num_tokens; ++i) {
+		batch.token[i] = prompt_tokens[i];
+		batch.pos[i] = i;  // Position in sequence
+		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
+		batch.seq_id[i][0] = 0;  // Sequence ID 0
+		batch.logits[i] = false;  // Don't need logits for most tokens
+	}
+	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
+	batch.n_tokens = num_tokens;
+
+	llama_kv_self_clear(state.pCtx);
+
 	llama_token new_token_id;
 	std::string partial;
 	bool running = true;
@@ -355,6 +372,7 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 		batch = llama_batch_get_one(&new_token_id, 1);
 	}
 
+//	llama_batch_free(batch);
 	onComplete(0, response);
 };
 
@@ -385,7 +403,7 @@ bool LLMInstance::Generate(const string& prompt)
 	return true;
 };
 
-bool LLMInstance::SendMessage(string name, string message)
+bool LLMInstance::SendMessage(string name, string message, bool generate)
 {
 	if (!IsReady() || IsGenerating())
 		return false;
@@ -400,6 +418,9 @@ bool LLMInstance::SendMessage(string name, string message)
 
 	// add the user input to the message list and format it
 	state.context_builder->messages.push_back(Message { Role::User, message });
+
+	if (!generate)
+		return true;
 
 	std::vector<llama_chat_message> messages = state.context_builder->GetMessages();
 
@@ -443,7 +464,8 @@ bool LLMInstance::SendMessage(string name, string message)
 
 	// remove previous messages to obtain the prompt to generate the response
 	std::string prompt(formatted.begin() + prev_len, formatted.begin() + new_len);
-	
+	prompt.append("<story>Lea responds...</story><dlg=\"Lea\">"); //!!
+
 	// Free
 	for (auto& m : messages)
 	{
@@ -479,7 +501,7 @@ void LLMInstance::ReportStatus()
 		return;
 	}
 
-	uint32_t allocCtx = llama_n_batch(state.pCtx);
+	uint32_t allocCtx = llama_n_ctx(state.pCtx);
 	uint32_t usedCtx = llama_kv_self_used_cells(state.pCtx);
 
 	_statusCallback(LLMStatus { _modelName, allocCtx, usedCtx });

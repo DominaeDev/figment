@@ -19,6 +19,8 @@
 #include "RoundedBackgroundRenderer.h"
 #include "NineGridBackgroundRenderer.h"
 #include "RoundedBorderRenderer.h"
+#include "CommandParser.h"
+#include "FormatMessage.h"
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -47,14 +49,14 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pStaticText->SetBackgroundColor(SDL_Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
 	pStaticText->SetVisible(false);
 
-	auto pChatScroll = new ChatScroll(centerPanel);
+	_pChatScroll = new ChatScroll(centerPanel);
 
 	auto pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::DefaultFontSize);
 	pTextBox->SetSize(-1, 88);
 	pTextBox->SelectAll();
 
 	auto pCenterSizer = new VerticalSizer();
-	pCenterSizer->Add(pChatScroll, -1, Sizer::Expand);
+	pCenterSizer->Add(_pChatScroll, -1, Sizer::Expand);
 	pCenterSizer->Add(pTextBox, 0, Sizer::AlignBottom | Sizer::Expand);
 	centerPanel->SetSizer(pCenterSizer);
 
@@ -73,18 +75,8 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	SetSizer(topSizer);
 	
-	pTextBox->SetEnterPressedCallback([pChatScroll](string text) {
-		if (!isEmpty(text))
-		{
-			pChatScroll->AddMessage("User", text, true);
-
-			auto pLLM = Application::GetLLM();
-			if (pLLM && pLLM->SendMessage("User", text))
-			{
-				auto pMessage = pChatScroll->AddMessage("Bot", "", false);
-				pChatScroll->StartListening();
-			}
-		}
+	pTextBox->SetEnterPressedCallback([this](string text) {
+		OnCommand(CommandParser::Parse(text));
 	});
 
 //	pTextBox->SetBorderRenderer(new RoundedBorderRenderer(4.5f, 2.5f, Color::Black));
@@ -157,4 +149,32 @@ void MainFrame::UnloadModel()
 void MainFrame::SetStatusBar(string message)
 {
 	s_pInstance->_pStatusBar->SetMessage(message);
+}
+
+void MainFrame::OnCommand(Command cmd)
+{
+	if (cmd.type == CommandType::Invalid)
+		return;
+
+	auto pLLM = Application::GetLLM();
+	if (pLLM)
+	{
+		if (cmd.type == CommandType::Say)
+		{
+			string formatted = FormatMessage(cmd.text, "User");
+			_pChatScroll->AddMessage("User", cmd.text, true);
+			if (pLLM->SendMessage("User", formatted))
+			{
+				printf("%s\n", formatted.c_str());
+				auto pMessage = _pChatScroll->AddMessage("Bot", "", false);
+				_pChatScroll->StartListening();
+			}
+		}
+		else if (cmd.type == CommandType::SystemMessage)
+		{
+			_pChatScroll->AddMessage("System", "<" + cmd.text + ">", true);
+			pLLM->SendMessage("system", cmd.text, false);
+		}
+
+	}
 }

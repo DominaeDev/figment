@@ -110,11 +110,13 @@
     <ClCompile Include="src\ChatMessage.cpp" />
     <ClCompile Include="src\ChatScroll.cpp" />
     <ClCompile Include="src\Color.cpp" />
+    <ClCompile Include="src\CommandParser.cpp" />
     <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\ContextBuilder.cpp" />
     <ClCompile Include="src\Control.cpp" />
     <ClCompile Include="src\ControlWithMargins.cpp" />
     <ClCompile Include="src\Fonts.cpp" />
+    <ClCompile Include="src\FormatMessage.cpp" />
     <ClCompile Include="src\Frame.cpp" />
     <ClCompile Include="src\HorizontalSizer.cpp" />
     <ClCompile Include="src\LLMInstance.cpp" />
@@ -142,6 +144,9 @@
     <ClInclude Include="include\AppState.h" />
     <ClInclude Include="include\Area.h" />
     <ClInclude Include="include\Character.h" />
+    <ClInclude Include="include\ChatSession.h" />
+    <ClInclude Include="include\Command.h" />
+    <ClInclude Include="include\CommandParser.h" />
     <ClInclude Include="include\ContextBuilder.h" />
     <ClInclude Include="include\CustomRenderer.h" />
     <ClInclude Include="include\ChatMessage.h" />
@@ -156,6 +161,7 @@
     <ClInclude Include="include\LLMInstance.h" />
     <ClInclude Include="include\IUpdateable.h" />
     <ClInclude Include="include\LayoutElement.h" />
+    <ClInclude Include="include\FormatMessage.h" />
     <ClInclude Include="include\NineGridBackgroundRenderer.h" />
     <ClInclude Include="include\RoundedBackgroundRenderer.h" />
     <ClInclude Include="include\RoundedBorderRenderer.h" />

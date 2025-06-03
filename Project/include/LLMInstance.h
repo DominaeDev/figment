@@ -47,7 +47,7 @@ public:
 	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
 
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
-	bool SendMessage(string name, string message);
+	bool SendMessage(string name, string message, bool generate = true);
 	bool IsReady() const;
 	bool IsGenerating() const;
 	

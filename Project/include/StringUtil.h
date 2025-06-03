@@ -9,10 +9,13 @@
 extern inline std::string& trim(std::string& s);
 extern std::string& ltrim(std::string& s);
 extern std::string& rtrim(std::string& s);
-
 extern inline std::string trim(const std::string& s);
 extern std::string ltrim(const std::string& s);
 extern std::string rtrim(const std::string& s);
+
+extern std::string lcase(const std::string& s);
+extern std::string ucase(const std::string& s);
+
 
 extern inline bool isEmpty(const std::string& s);
 

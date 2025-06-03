@@ -2,9 +2,11 @@
 
 #include "Frame.h"
 #include "Types.h"
+#include "Command.h"
 
 class Sizer;
 class StatusBar;
+class ChatScroll;
 
 class MainFrame : public Frame
 {
@@ -23,7 +25,9 @@ protected:
 	virtual void OnUpdate(float fDeltaTime) override;
 	virtual void OnRender(SDL_Renderer* pRenderer) override;
 
+	void OnCommand(Command cmd);
+
 private:
 	StatusBar* _pStatusBar;
-	
+	ChatScroll* _pChatScroll;
 };

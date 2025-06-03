@@ -1,4 +1,5 @@
 #include "StringUtil.h"
+#include <algorithm>
 
 size_t validate_utf8(const std::string& text)
 {
@@ -145,4 +146,30 @@ std::string get_filename(const std::string& str)
 	if (pos == std::string::npos)
 		return str;
 	return str.substr(pos + 1);
+}
+
+std::string& lcase(std::string& str)
+{
+	std::transform(std::begin(str), std::end(str), std::begin(str), [](unsigned char c){ return std::tolower(c); });
+	return str;
+}
+
+std::string& ucase(std::string& str)
+{
+	std::transform(std::begin(str), std::end(str), std::begin(str), [](unsigned char c){ return std::tolower(c); });
+	return str;
+}
+
+std::string lcase(const std::string& str)
+{
+	std::string s = str;
+	std::transform(std::begin(str), std::end(str), std::begin(s), [](unsigned char c){ return std::tolower(c); });
+	return s;
+}
+
+std::string ucase(const std::string& str)
+{
+	std::string s = str;
+	std::transform(std::begin(str), std::end(str), std::begin(s), [](unsigned char c){ return std::tolower(c); });
+	return s;
 }
