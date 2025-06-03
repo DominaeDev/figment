@@ -464,7 +464,6 @@ bool LLMInstance::SendMessage(string name, string message, bool generate)
 
 	// remove previous messages to obtain the prompt to generate the response
 	std::string prompt(formatted.begin() + prev_len, formatted.begin() + new_len);
-	prompt.append("<story>Lea responds...</story><dlg=\"Lea\">"); //!!
 
 	// Free
 	for (auto& m : messages)
