@@ -60,7 +60,7 @@ void ChatScroll::Poll()
 	if (!pLLM)
 		return;
 
-	string piece;
-	if (pLLM->TryGetResponse(piece))
-		_pLastBotMessage->AppendMessage(piece);
+	MessagePiece piece;
+	while (pLLM->PollResponse(piece))
+		_pLastBotMessage->AppendMessage(piece.text);
 }

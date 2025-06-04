@@ -4,6 +4,8 @@
 #include "LLMInstance.h"
 #include "StringUtil.h"
 #include "Utility.h"
+#include "Constants.h"
+#include <format>
 
 void ModelState::Release()
 {
@@ -83,15 +85,129 @@ static std::string stringFromToken(const llama_vocab* pVocab, llama_token token)
 	return std::string(buf, n);
 }
 
+size_t validate_utf8(const std::string& text)
+{
+	size_t len = text.size();
+	if (len == 0) return 0;
+
+	// Check the last few bytes to see if a multi-byte character is cut off
+	for (size_t i = 1; i <= 4 && i <= len; ++i)
+	{
+		unsigned char c = text[len - i];
+		// Check for start of a multi-byte sequence from the end
+		if ((c & 0xE0) == 0xC0)
+		{
+			// 2-byte character start: 110xxxxx
+			// Needs at least 2 bytes
+			if (i < 2) return len - i;
+		}
+		else if ((c & 0xF0) == 0xE0)
+		{
+			// 3-byte character start: 1110xxxx
+			// Needs at least 3 bytes
+			if (i < 3) return len - i;
+		}
+		else if ((c & 0xF8) == 0xF0)
+		{
+			// 4-byte character start: 11110xxx
+			// Needs at least 4 bytes
+			if (i < 4) return len - i;
+		}
+	}
+
+	// If no cut-off multi-byte character is found, return full length
+	return len;
+}
+
+size_t string_find_partial_stop(const std::string_view& str, const std::string_view& stop)
+{
+	if (!str.empty() && !stop.empty())
+	{
+		const char text_last_char = str.back();
+		for (int64_t char_index = stop.size() - 1; char_index >= 0; char_index--)
+		{
+			if (stop[char_index] == text_last_char)
+			{
+				const auto current_partial = stop.substr(0, char_index + 1);
+				if (string_ends_with(str, current_partial))
+				{
+					return str.size() - char_index - 1;
+				}
+			}
+		}
+	}
+
+	return std::string::npos;
+}
+
+size_t find_one_of(const std::string& text, const std::vector<std::string>& words)
+{
+	size_t stop_pos = std::string::npos;
+
+	for (const std::string& word : words)
+	{
+		size_t pos = text.find(word);
+		if (pos != std::string::npos && (stop_pos == std::string::npos || pos < stop_pos))
+			stop_pos = pos;
+	}
+
+	return stop_pos;
+}
+
+size_t find_stopping_strings(const std::string& text, const std::vector<std::string>& stop_words, const size_t last_token_size, bool is_full_stop)
+{
+	size_t stop_pos = std::string::npos;
+
+	for (const std::string& word : stop_words)
+	{
+		size_t pos;
+
+		if (is_full_stop)
+		{
+			const size_t tmp = word.size() + last_token_size;
+			const size_t from_pos = text.size() > tmp ? text.size() - tmp : 0;
+
+			pos = text.find(word, from_pos);
+		}
+		else
+		{
+			// otherwise, partial stop
+			pos = string_find_partial_stop(text, word);
+		}
+
+		if (pos != std::string::npos && (stop_pos == std::string::npos || pos < stop_pos))
+		{
+			stop_pos = pos;
+		}
+	}
+
+	return stop_pos;
+}
+
+static void get_tag_and_name(const string& text, string& tag, string& name)
+{
+	size_t pos_equals = text.find('=', 1);
+	if (pos_equals == std::string::npos)
+	{
+		tag = trim(text.substr(1, text.length() - 2));
+		name = "";
+		return;
+	}
+
+	tag = trim(text.substr(1, pos_equals - 1));
+	name = trim(text.substr(pos_equals + 1, text.length() - pos_equals - 2));
+	string_replace_all(name, "\"", "");
+}
+
 static void __LoadModel(string filename, __LoadModelCallback onComplete)
 {
-	int ngl = 99;
-	int n_ctx = 2048;
+	const int ngl = 99;
+	const int n_ctx = 2048;
 
 	// initialize the model
 	llama_model_params model_params = llama_model_default_params();
-	model_params.use_mlock = true;
 	model_params.n_gpu_layers = ngl;
+	model_params.use_mlock = true;
 	model_params.progress_callback = (llama_progress_callback)&OnLoadModelProgress;
 
 	ModelState state;
@@ -203,10 +319,16 @@ bool LLMInstance::Halt()
 	return true;
 }
 
-void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+void process(string& partial, string str_token, bool* bWait, bool* bHalt)
 {
-	std::string response;
-	std::vector<std::string> stop_words {
+	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
+	{
+		*bWait = true;
+		*bHalt = false;
+		return;
+	}
+
+	static std::vector<std::string> stop_words {
 		"<|",
 		"<end_of_turn",
 		"<EOT>",
@@ -214,12 +336,97 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 		"<s>",
 		"</s>",
 		"### ",
-		"<｜"
+		"<｜",
 //		"<|end",
 //		"<｜end▁of▁sentence｜>",
 	};
 
+	static std::vector<std::string> opening_tags {
+		std::format("<{0}=\"", Constants::DialogueTag),
+		std::format("<{0}=\"", Constants::ActionTag),
+		std::format("<{0}=\"", Constants::ThoughtTag),
+		std::format("<{0}>", Constants::NarrationTag),
+	};
+
+	static std::vector<std::string> closing_tags {
+		std::format("</{0}>", Constants::DialogueTag),
+		std::format("</{0}>", Constants::ActionTag),
+		std::format("</{0}>", Constants::ThoughtTag),
+		std::format("</{0}>", Constants::NarrationTag),
+	};
+	static std::vector<std::string> formatting_tags;
+	if (formatting_tags.empty())
+	{
+		formatting_tags.insert(std::end(formatting_tags), std::begin(opening_tags), std::end(opening_tags));
+		formatting_tags.insert(std::end(formatting_tags), std::begin(closing_tags), std::end(closing_tags));
+	}
+
+	// Look for stop word - and halt
+	size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
+	if (stop_pos != std::string::npos)
+	{
+		std::string stop_word = partial.substr(stop_pos);
+
+		// Print to console
+		partial = partial.erase(stop_pos); // Erase stop word
+		*bHalt = true;
+		*bWait = false;
+
+		printf("%s[%s]", partial.c_str(), stop_word.c_str());
+		fflush(stdout);
+		return;
+	}
+
+	// Look for partial stop word - and wait
+	stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
+	if (stop_pos != std::string::npos)
+	{
+		*bHalt = false;
+		*bWait = true;
+		return;
+	}
+
+	// Look for formatting tags
+	size_t fmt_pos = find_one_of(partial, opening_tags);
+	if (fmt_pos != std::string::npos)
+	{
+		// Await end of tag '>', or beginning of a new tag '<' (indicating garbage from the model)
+		if (partial.find_first_of("<>", fmt_pos + 1, 2) == std::string::npos)
+		{
+			*bHalt = false;
+			*bWait = true;
+			return;
+		}
+
+		int k = 0;
+	}
+	else
+	{
+		// Look for partial formatting tags - and wait
+		fmt_pos = find_stopping_strings(partial, formatting_tags, str_token.size(), false);
+		if (fmt_pos != std::string::npos)
+		{
+			*bHalt = false;
+			*bWait = true;
+			return;
+		}
+	}
+
+	*bHalt = false;
+	*bWait = false;
+}
+
+void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+{
+	std::string response;
+
 	ModelState state = _atm_modelState.load();
+	
+	string userName = state.context_builder->participants[0].name;
+	string botName = state.context_builder->participants[1].name;
+
+	GenerationState genState;
+	genState.messageId = ++_messageCounter;
 
 	const int32_t maxCtx = llama_n_ctx(state.pCtx);
 	const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
@@ -255,9 +462,11 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 
 	llama_token new_token_id;
 	std::string partial;
-	bool running = true;
-	while (running)
+	int fail_safe = 0;
+	while (fail_safe++ < 100)
 	{
+		bool next_token = true;
+
 		// check if we have enough space in the context to evaluate this batch
 		int n_ctx = llama_n_ctx(state.pCtx);
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -281,9 +490,8 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 		// is it an end of generation?
 		if (llama_vocab_is_eog(state.pVocab, new_token_id))
 		{
-			running = false; // Halt
-			if (partial.size() > 0)
-				partial.clear();
+			partial.clear();
+			break;
 		}
 
 		// convert the token to a string, print it and add it to the response
@@ -293,86 +501,117 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 
 		partial += str_token;
 		bool send = true;
-		bool next_token = true;
 
 		// check if there is incomplete UTF-8 character at the end
-		bool incompleteUtf8 = validate_utf8(partial) < partial.size();
-
-		if (incompleteUtf8)
-		{
-			// Wait for next token
-			send = false;
-		}
-		else
-		{
-			// Process response
-			size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
-			if (stop_pos != std::string::npos)
-			{
-				std::string stop_word = partial.substr(stop_pos);
-
-				// Print to console
-				partial = partial.erase(stop_pos); // Erase stop word
-				running = false; // Halt
-				next_token = false;
-
-				send = partial.size() > 0;
-				if (send)
-				{
-					int k = 0;
-				}
-				printf("%s[%s]", partial.c_str(), stop_word.c_str());
-				fflush(stdout);
-			}
-			else
-			{
-				// Look for partial stop word - and wait
-				stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
-				if (stop_pos != std::string::npos)
-				{
-					// Wait for more
-					send = false;
-					next_token = true;
-				}
-			}
-		}
+		bool bHalt = false;
+		bool bWait = false;
+		process(partial, str_token, &bWait, &bHalt);
+		next_token &= !bHalt;
+		send &= !bWait;
 
 		if (_atm_bCancelGeneration.load())
 			break; // Cancelled
 
 		if (send)
 		{
-			// Print to console
-			printf("%s", str_token.c_str());
-			fflush(stdout);
-
 			// Clean up incomplete stop tokens
-			size_t stop_pos = partial.find("<|im");
-			if (stop_pos != std::string::npos)
-				partial = partial.erase(stop_pos); // Erase left-over
+//			size_t stop_pos = partial.find("<|im");
+//			if (stop_pos != std::string::npos)
+//				partial = partial.erase(stop_pos); // Erase left-over
+
+			string carryOver;
+			string sendMsg = partial;
+			bool bEndOfMessageType = false;
+
+			// Check and erase formatting tags
+			size_t fmt_start = partial.find('<');
+			if (fmt_start != std::string::npos)
+			{
+				bool bRemove = false;
+				size_t fmt_end = partial.find('>', fmt_start + 1);
+				if (fmt_end != std::string::npos)
+				{
+					string tag, tagName;
+					get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
+
+					if (tagName == userName) // Stop if talking/acting for the user
+						break;
+
+					if (tag == "/dlg" || tag == "/act" || tag == "/narration" || tag == "/thought")
+					{
+						carryOver = partial.substr(fmt_end + 1);
+						partial.erase(fmt_end + 1);
+
+						sendMsg.erase(fmt_start);
+						bEndOfMessageType = true;
+					}
+					else
+					{
+						if (fmt_start > 0)
+						{
+							// Send remainder first
+							carryOver = partial.substr(fmt_start);
+							partial.erase(fmt_start);
+							sendMsg = partial;
+						}
+						else
+						{
+							sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
+							genState.currName = tagName;
+							if (tag == "dlg")
+								genState.msgType = MessageType::Dialogue;
+							else if (tag == "act")
+								genState.msgType = MessageType::Action;
+							else if (tag == "narration")
+								genState.msgType = MessageType::Narration;
+							else if (tag == "thought")
+								genState.msgType = MessageType::Thought;
+						}
+					}
+				}
+			}
+
+			MessageType msgType = genState.msgType;
+			if (msgType == MessageType::Undefined)
+				msgType = MessageType::Dialogue;
 
 			// Send piece
-			_mutex_generatedText.lock();
-			_generatedText += partial;
-			_lastResponse += partial;
-			_mutex_generatedText.unlock();
-			response += partial;
+			if (partial.size() > 0)
+			{
+				_resultMutex.lock();
+				_generatedText += partial;
 
-			onPartial(__PartialResult { partial, response});
+				_resultQueue.push(MessagePiece {
+					genState.messageId,
+					genState.currName,
+					sendMsg,
+					msgType,
+					bEndOfMessageType,
+				});
+				_resultMutex.unlock();
+				response += partial;
+			}
 
-			partial.clear();
+			partial = carryOver;
+			if (bEndOfMessageType)
+				genState.msgType = MessageType::Undefined;
+
 			send = false;
+			fail_safe = 0;
 		}
+
+		// Print to console
+		printf("%s", str_token.c_str());
+		fflush(stdout);
 
 		// prepare the next batch with the sampled token
 		if (!next_token)
-			break;
-		
+			break; // TODO: Carry over?
+
 //		common_batch_add(batch, new_token_id, 0, llama_tokens {}, false);
 		batch = llama_batch_get_one(&new_token_id, 1);
 	}
 
-//	llama_batch_free(batch);
 	onComplete(0, response);
 };
 
@@ -409,10 +648,11 @@ bool LLMInstance::SendMessage(string name, string message, bool generate)
 		return false;
 
 	// Reset response
-	_mutex_generatedText.lock();
+	_resultMutex.lock();
 	_generatedText.clear();
-	_lastResponse.clear();
-	_mutex_generatedText.unlock();
+	while (!_resultQueue.empty())
+		_resultQueue.pop();
+	_resultMutex.unlock();
 
 	ModelState state = _atm_modelState.load();
 
@@ -476,17 +716,6 @@ bool LLMInstance::SendMessage(string name, string message, bool generate)
 	return Generate(prompt);
 }
 
-bool LLMInstance::TryGetResponse(string& result)
-{
-	if (!_mutex_generatedText.try_lock())
-		return false;
-
-	result = _generatedText;
-	_generatedText.clear();
-	_mutex_generatedText.unlock();
-	return result.size() > 0;
-}
-
 void LLMInstance::ReportStatus()
 {
 	if (!_statusCallback)
@@ -504,4 +733,21 @@ void LLMInstance::ReportStatus()
 	uint32_t usedCtx = llama_kv_self_used_cells(state.pCtx);
 
 	_statusCallback(LLMStatus { _modelName, allocCtx, usedCtx });
+}
+
+bool LLMInstance::PollResponse(MessagePiece& piece)
+{
+	if (!_resultMutex.try_lock())
+		return false;
+
+	if (_resultQueue.empty())
+	{
+		_resultMutex.unlock();
+		return false;
+	}
+
+	piece = _resultQueue.front();
+	_resultQueue.pop();
+	_resultMutex.unlock();
+	return true;
 }

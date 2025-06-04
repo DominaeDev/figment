@@ -6,11 +6,16 @@
 
 namespace Constants
 {
-	extern const char* AppTitle;
-	extern int WindowWidth;
-	extern int WindowHeight;
+	extern const char* const AppTitle;
+	extern const int WindowWidth;
+	extern const int WindowHeight;
 
-	extern double DefaultFontSize;
-	extern double StatusBarFontSize;
-	extern double ChatMessageFontSize;
+	extern const double DefaultFontSize;
+	extern const double StatusBarFontSize;
+	extern const double ChatMessageFontSize;
+
+	extern const string DialogueTag;
+	extern const string ActionTag;
+	extern const string NarrationTag;
+	extern const string ThoughtTag;
 }

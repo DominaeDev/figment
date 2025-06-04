@@ -20,7 +20,7 @@
 #include "NineGridBackgroundRenderer.h"
 #include "RoundedBorderRenderer.h"
 #include "CommandParser.h"
-#include "FormatMessage.h"
+#include "Message.h"
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 

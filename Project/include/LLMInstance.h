@@ -2,9 +2,11 @@
 
 #include "Types.h"
 #include "ContextBuilder.h"
+#include "Message.h"
 #include <functional>
 #include <thread>
 #include <mutex>
+#include <queue>
 
 struct llama_model;
 struct llama_vocab;
@@ -23,18 +25,34 @@ struct ModelState
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
 	bool bReady = false;
-
 	ContextBuilder* context_builder = nullptr;
 
 	void Release();
 };
 
+struct GenerationState
+{
+	int messageId = 0;
+	MessageType msgType = MessageType::Undefined;
+	std::string currName {};
+
+	~GenerationState() = default;
+};
 
 struct LLMStatus
 {
 	string modelName;
 	size_t allocCtxSize;
 	size_t usedCtxSize;
+};
+
+struct MessagePiece
+{
+	int messageId;
+	string name {};
+	string text {};
+	MessageType msgType = MessageType::Undefined;
+	bool isComplete = false;
 };
 
 class LLMInstance
@@ -54,9 +72,9 @@ public:
 	bool Resume();
 	bool Halt();
 
-	bool TryGetResponse(string& result);
-
 	void SetStatusCallback(StatusCallback onStatus) { _statusCallback = onStatus; }
+
+	bool PollResponse(MessagePiece& piece);
 private:
 	struct __PartialResult
 	{
@@ -79,9 +97,10 @@ private:
 	std::atomic<bool> _atm_bGeneratingResponse {};
 	std::unique_ptr<std::thread> _workerThread;
 
-	std::mutex _mutex_generatedText;
+	std::mutex _resultMutex;
 	std::string _generatedText;
-	std::string _lastResponse;
-	
+	std::queue<MessagePiece> _resultQueue;
+		
 	StatusCallback _statusCallback = nullptr;
+	int _messageCounter = 0;
 };

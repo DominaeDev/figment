@@ -46,13 +46,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\tinyxml2;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4;$(ProjectDir)\..\Libraries\tinyxml2;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\ggml\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4;$(ProjectDir)\..\Libraries\tinyxml2;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\ggml\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -70,7 +70,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;ggml.lib;llamad.lib;commond.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL3.lib;SDL3_ttf.lib;SDL3_image.lib;llamad.lib;commond.lib;ggmld.lib;ggml-based.lib;ggml-cpud.lib;sqlite3.lib;SQLiteCpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -116,7 +116,7 @@
     <ClCompile Include="src\Control.cpp" />
     <ClCompile Include="src\ControlWithMargins.cpp" />
     <ClCompile Include="src\Fonts.cpp" />
-    <ClCompile Include="src\FormatMessage.cpp" />
+    <ClCompile Include="src\Message.cpp" />
     <ClCompile Include="src\Frame.cpp" />
     <ClCompile Include="src\HorizontalSizer.cpp" />
     <ClCompile Include="src\LLMInstance.cpp" />
@@ -161,7 +161,7 @@
     <ClInclude Include="include\LLMInstance.h" />
     <ClInclude Include="include\IUpdateable.h" />
     <ClInclude Include="include\LayoutElement.h" />
-    <ClInclude Include="include\FormatMessage.h" />
+    <ClInclude Include="include\Message.h" />
     <ClInclude Include="include\NineGridBackgroundRenderer.h" />
     <ClInclude Include="include\RoundedBackgroundRenderer.h" />
     <ClInclude Include="include\RoundedBorderRenderer.h" />

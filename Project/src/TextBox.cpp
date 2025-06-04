@@ -12,7 +12,7 @@ static const char* _testString = "Hee hee, ho ho ho! \n\xE3\x81\xB2\xE3\x82\x89\
 TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWithMargins(pParent)
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);
-	_pText = TTF_CreateText(Text::GetEngine(), _pFont, nullptr, 0);
+	_pText = TTF_CreateText(Text::GetEngine(), _pFont, "", 0);
 
 	/* Show the whitespace when wrapping, so it can be edited */
 	TTF_SetTextWrapWhitespaceVisible(_pText, true);
@@ -1012,10 +1012,9 @@ bool TextBox::OnEvent(SDL_Event* event)
 				Insert("\n");
 			else
 			{
-				if (_pOnEnter) // Invoke
+				if (_pOnEnter && _pText->text) // Invoke
 				{
-					string text(_pText->text);
-					_pOnEnter(trim(text));
+					_pOnEnter(trim(string(_pText->text)));
 					Clear();
 				}
 			}

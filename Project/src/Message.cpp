@@ -1,24 +1,15 @@
-#include "FormatMessage.h"
+#include "Message.h"
+#include "Constants.h"
+
 #include "StringUtil.h"
 #include <cctype>
 #include <vector>
 #include <algorithm>
 #include <format>
 
-enum MsgType
-{
-	Dialogue,
-	QuotedDialogue,
-	Action,
-	Narration,
-	Thought,
-
-	Undefined
-};
-
 struct Span
 {
-	MsgType msgType;
+	MessageType msgType;
 	size_t start;
 	size_t end; // exclusive
 
@@ -61,7 +52,7 @@ static bool in_span(size_t pos, const std::vector<Span>& spans)
 	return false;
 }
 
-static void mark_spans(const std::string s, MsgType type, std::string open, std::string close, std::vector<Span>& spans)
+static void mark_spans(const std::string s, MessageType type, std::string open, std::string close, std::vector<Span>& spans)
 {
 	size_t pos_open = find_next(s, open);
 	while (pos_open != std::string::npos)
@@ -87,7 +78,7 @@ static void mark_spans(const std::string s, MsgType type, std::string open, std:
 	}
 }
 
-static void fill_gaps(const std::string s, MsgType type, std::vector<Span>& spans)
+static void fill_gaps(const std::string s, MessageType type, std::vector<Span>& spans)
 {
 	auto CheckAndAdd = [type, &spans](size_t pos, size_t len) {
 		if (len != 0)
@@ -155,12 +146,12 @@ std::string FormatMessage(std::string message, std::string actorName)
 	std::vector<Span> spans;
 	spans.reserve(64);
 
-	mark_spans(message, MsgType::QuotedDialogue, "\"", "\"", spans);
-	mark_spans(message, MsgType::Action, "*", "*", spans);
-	mark_spans(message, MsgType::Narration, "[", "]", spans);
-	mark_spans(message, MsgType::Thought, "((", "))", spans);
+	mark_spans(message, MessageType::QuotedDialogue, "\"", "\"", spans);
+	mark_spans(message, MessageType::Action, "*", "*", spans);
+	mark_spans(message, MessageType::Narration, "[", "]", spans);
+	mark_spans(message, MessageType::Thought, "((", "))", spans);
 
-	fill_gaps(message, MsgType::Dialogue, spans);
+	fill_gaps(message, MessageType::Dialogue, spans);
 //	trim_spans(message, spans);
 
 	std::string result;
@@ -171,13 +162,13 @@ std::string FormatMessage(std::string message, std::string actorName)
 
 		switch (span.msgType)
 		{
-		case MsgType::QuotedDialogue:
-		case MsgType::Action:
-		case MsgType::Narration:
+		case MessageType::QuotedDialogue:
+		case MessageType::Action:
+		case MessageType::Narration:
 			text.erase(text.length() - 1, 1);
 			text.erase(0, 1);
 			break;
-		case MsgType::Thought:
+		case MessageType::Thought:
 			text.erase(text.length() - 2, 2);
 			text.erase(0, 2);
 			break;
@@ -191,18 +182,18 @@ std::string FormatMessage(std::string message, std::string actorName)
 
 		switch (span.msgType)
 		{
-		case MsgType::QuotedDialogue:
-		case MsgType::Dialogue:
-			result.append(std::format("<dlg=\"{0}\">{1}</dlg>", actorName, text));
+		case MessageType::QuotedDialogue:
+		case MessageType::Dialogue:
+			result.append(std::format("<{0}=\"{1}\">{2}</{0}>", Constants::DialogueTag, actorName, text));
 			break;
-		case MsgType::Action:
-			result.append(std::format("<act=\"{0}\">{1}</act>", actorName, text));
+		case MessageType::Action:
+			result.append(std::format("<{0}=\"{1}\">{2}</{0}>", Constants::ActionTag, actorName, text));
 			break;
-		case MsgType::Thought:
-			result.append(std::format("<mind=\"{0}\">{1}</mind>", actorName, text));
+		case MessageType::Thought:
+			result.append(std::format("<{0}=\"{1}\">{2}</{0}>", Constants::ThoughtTag, actorName, text));
 			break;
-		case MsgType::Narration:
-			result.append(std::format("<story>{0}</story>", text));
+		case MessageType::Narration:
+			result.append(std::format("<{0}>{1}</{0}>", Constants::NarrationTag, text));
 			break;
 		}
 	}

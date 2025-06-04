@@ -176,8 +176,8 @@
     <ClCompile Include="src\CommandParser.cpp">
       <Filter>Source Files\Chat</Filter>
     </ClCompile>
-    <ClCompile Include="src\FormatMessage.cpp">
-      <Filter>Source Files\Utility</Filter>
+    <ClCompile Include="src\Message.cpp">
+      <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -295,8 +295,8 @@
     <ClInclude Include="include\ChatSession.h">
       <Filter>Source Files\Chat</Filter>
     </ClInclude>
-    <ClInclude Include="include\FormatMessage.h">
-      <Filter>Source Files\Utility</Filter>
+    <ClInclude Include="include\Message.h">
+      <Filter>Source Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
