@@ -342,17 +342,17 @@ void process(string& partial, string str_token, bool* bWait, bool* bHalt)
 	};
 
 	static std::vector<std::string> opening_tags {
-		std::format("<{0}=\"", Constants::DialogueTag),
-		std::format("<{0}=\"", Constants::ActionTag),
-		std::format("<{0}=\"", Constants::ThoughtTag),
-		std::format("<{0}>", Constants::NarrationTag),
+		std::format("<{0}=\"", Constants::DialogueTagBegin),
+		std::format("<{0}=\"", Constants::ActionTagBegin),
+		std::format("<{0}=\"", Constants::ThoughtTagBegin),
+		std::format("<{0}>", Constants::NarrationTagBegin),
 	};
 
 	static std::vector<std::string> closing_tags {
-		std::format("</{0}>", Constants::DialogueTag),
-		std::format("</{0}>", Constants::ActionTag),
-		std::format("</{0}>", Constants::ThoughtTag),
-		std::format("</{0}>", Constants::NarrationTag),
+		std::format("<{0}>", Constants::DialogueTagEnd),
+		std::format("<{0}>", Constants::ActionTagEnd),
+		std::format("<{0}>", Constants::ThoughtTagEnd),
+		std::format("<{0}>", Constants::NarrationTagEnd),
 	};
 	static std::vector<std::string> formatting_tags;
 	if (formatting_tags.empty())
@@ -537,7 +537,7 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 					if (tagName == userName) // Stop if talking/acting for the user
 						break;
 
-					if (tag == "/dlg" || tag == "/act" || tag == "/narration" || tag == "/thought")
+					if (tag == Constants::DialogueTagEnd || tag == Constants::ActionTagEnd || tag == Constants::NarrationTagEnd || tag == Constants::ThoughtTagEnd)
 					{
 						carryOver = partial.substr(fmt_end + 1);
 						partial.erase(fmt_end + 1);
@@ -558,13 +558,13 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 						{
 							sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
 							genState.currName = tagName;
-							if (tag == "dlg")
+							if (tag == Constants::DialogueTagBegin)
 								genState.msgType = MessageType::Dialogue;
-							else if (tag == "act")
+							else if (tag == Constants::ActionTagBegin)
 								genState.msgType = MessageType::Action;
-							else if (tag == "narration")
+							else if (tag == Constants::NarrationTagBegin)
 								genState.msgType = MessageType::Narration;
-							else if (tag == "thought")
+							else if (tag == Constants::ThoughtTagBegin)
 								genState.msgType = MessageType::Thought;
 						}
 					}
@@ -594,7 +594,10 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 
 			partial = carryOver;
 			if (bEndOfMessageType)
+			{
 				genState.msgType = MessageType::Undefined;
+				++genState.messageId;
+			}
 
 			send = false;
 			fail_safe = 0;

@@ -11,6 +11,9 @@ enum class MessageType
 	Action,
 	Narration,
 	Thought,
+
+	UserMessage,
+	SystemMessage,
 };
 
 extern std::string FormatMessage(std::string message, std::string actorName);

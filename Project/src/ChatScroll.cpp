@@ -4,6 +4,8 @@
 #include "AppState.h"
 #include "LLMInstance.h"
 #include "Color.h"
+#include "StringUtil.h"
+#include <format>
 
 #define POLL_INTERVAL 0.1f
 
@@ -15,16 +17,13 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	SetSizer(pTopSizer);
 }
 
-ChatMessage* ChatScroll::AddMessage(string name, string message, bool isUser)
+ChatMessage* ChatScroll::AddMessage(string name, string message, MessageType msgType)
 {
-	auto pLLM = Application::GetLLM();
-	
-	SDL_Color color = isUser ? (pLLM && pLLM->IsReady() ? Color::UserMessageBackground : Color::DarkGray) : Color::BotMessageBackground;
-
-	auto pMessage = new ChatMessage(this, name, message, color);
+	auto pMessage = new ChatMessage(this, name, message, msgType);
 	_pSizer->Add(pMessage, 0, Sizer::Expand);
 
-	_pLastBotMessage = isUser ? nullptr : pMessage;
+	bool isBot = !(msgType == MessageType::UserMessage || msgType == MessageType::SystemMessage || msgType == MessageType::Undefined);
+	_pLastBotMessage = isBot ? pMessage : nullptr;
 	return pMessage;
 }
 
@@ -44,6 +43,8 @@ void ChatScroll::OnUpdate(float fDeltaTime)
 void ChatScroll::StartListening()
 {
 	_bListening = true;
+	_messageId = 0;
+	_messageType = MessageType::Undefined;
 }
 
 void ChatScroll::StopListening()
@@ -53,14 +54,32 @@ void ChatScroll::StopListening()
 
 void ChatScroll::Poll()
 {
-	if (!_pLastBotMessage)
-		return;
-
 	auto pLLM = Application::GetLLM();
 	if (!pLLM)
 		return;
 
 	MessagePiece piece;
 	while (pLLM->PollResponse(piece))
-		_pLastBotMessage->AppendMessage(piece.text);
+	{
+		if (!isEmptyOrWhitespace(piece.text))
+		{
+			if (!_pLastBotMessage || piece.messageId != _messageId)
+			{
+				_pLastBotMessage = AddMessage("Bot", piece.text, piece.msgType);
+				_messageId = piece.messageId;
+			}
+			else
+				_pLastBotMessage->AppendMessage(piece.text, piece.isComplete);
+		}
+		else if (_pLastBotMessage && piece.messageId == _messageId)
+		{
+			_pLastBotMessage->AppendMessage(piece.text, piece.isComplete);
+		}
+
+		if (piece.isComplete)
+		{
+			_messageId = 0;
+			_messageType = MessageType::Undefined;
+		}
+	}
 }

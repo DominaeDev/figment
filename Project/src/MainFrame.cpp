@@ -162,17 +162,16 @@ void MainFrame::OnCommand(Command cmd)
 		if (cmd.type == CommandType::Say)
 		{
 			string formatted = FormatMessage(cmd.text, "User");
-			_pChatScroll->AddMessage("User", cmd.text, true);
+			_pChatScroll->AddMessage("User", cmd.text, MessageType::UserMessage);
 			if (pLLM->SendMessage("User", formatted))
 			{
 				printf("%s\n", formatted.c_str());
-				auto pMessage = _pChatScroll->AddMessage("Bot", "", false);
 				_pChatScroll->StartListening();
 			}
 		}
 		else if (cmd.type == CommandType::SystemMessage)
 		{
-			_pChatScroll->AddMessage("System", "<" + cmd.text + ">", true);
+			_pChatScroll->AddMessage("System", "<" + cmd.text + ">", MessageType::SystemMessage);
 			pLLM->SendMessage("system", cmd.text, false);
 		}
 

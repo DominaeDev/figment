@@ -50,6 +50,11 @@ inline bool isEmpty(const std::string& s)
 	return s.size() == 0;
 }
 
+bool isEmptyOrWhitespace(const std::string& s)
+{
+	return s.size() == 0 || s.find_first_not_of(" \t\r\n", 0, 4) == std::string::npos;
+}
+
 std::string get_filename(const std::string& str)
 {
 	size_t pos = str.find_last_of("\\/");

@@ -14,8 +14,12 @@ namespace Constants
 	extern const double StatusBarFontSize;
 	extern const double ChatMessageFontSize;
 
-	extern const string DialogueTag;
-	extern const string ActionTag;
-	extern const string NarrationTag;
-	extern const string ThoughtTag;
+	extern const string DialogueTagBegin;
+	extern const string DialogueTagEnd;
+	extern const string ActionTagBegin;
+	extern const string ActionTagEnd;
+	extern const string NarrationTagBegin;
+	extern const string NarrationTagEnd;
+	extern const string ThoughtTagBegin;
+	extern const string ThoughtTagEnd;
 }

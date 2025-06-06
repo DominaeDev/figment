@@ -184,16 +184,16 @@ std::string FormatMessage(std::string message, std::string actorName)
 		{
 		case MessageType::QuotedDialogue:
 		case MessageType::Dialogue:
-			result.append(std::format("<{0}=\"{1}\">{2}</{0}>", Constants::DialogueTag, actorName, text));
+			result.append(std::format("<{0}=\"{1}\">\"{2}\"<{3}>", Constants::DialogueTagBegin, actorName, text, Constants::DialogueTagEnd));
 			break;
 		case MessageType::Action:
-			result.append(std::format("<{0}=\"{1}\">{2}</{0}>", Constants::ActionTag, actorName, text));
-			break;
-		case MessageType::Thought:
-			result.append(std::format("<{0}=\"{1}\">{2}</{0}>", Constants::ThoughtTag, actorName, text));
+			result.append(std::format("<{0}=\"{1}\">*{2}*<{3}>", Constants::ActionTagBegin, actorName, text, Constants::ActionTagEnd));
 			break;
 		case MessageType::Narration:
-			result.append(std::format("<{0}>{1}</{0}>", Constants::NarrationTag, text));
+			result.append(std::format("<{0}>{1}<{2}>", Constants::NarrationTagBegin, text, Constants::NarrationTagEnd));
+			break;
+		case MessageType::Thought:
+			result.append(std::format("<{0}=\"{1}\">{2}<{3}>", Constants::ThoughtTagBegin, actorName, text, Constants::ThoughtTagEnd));
 			break;
 		}
 	}

@@ -2,6 +2,7 @@
 
 #include "Control.h"
 #include "Types.h"
+#include "Message.h"
 
 class ChatMessage;
 
@@ -10,7 +11,7 @@ class ChatScroll : public Control
 public:
 	ChatScroll(Control* pParent);
 
-	ChatMessage* AddMessage(string name, string message, bool isUser);
+	ChatMessage* AddMessage(string name, string message, MessageType msgType);
 
 	void StartListening();
 	void StopListening();
@@ -24,5 +25,8 @@ protected:
 	ChatMessage* _pLastBotMessage;
 	bool _bListening = false;
 	float _fListenTimer = 0.0f;
+
+	int _messageId = 0;
+	MessageType _messageType = MessageType::Undefined;
 
 };

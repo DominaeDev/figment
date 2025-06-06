@@ -8,18 +8,34 @@
 #include "Utility.h"
 #include "CustomRenderer.h"
 
-ChatMessage::ChatMessage(Control* pParent, string name, string message, SDL_Color bgColor) : Control(pParent),
+ChatMessage::ChatMessage(Control* pParent, string name, string message, MessageType msgType) : Control(pParent),
 	_name(name),
-	_message(message)
+	_message(message),
+	_messageType(msgType)
 {
+	SDL_Color bgColor;
+	switch (msgType)
+	{
+	case MessageType::Dialogue:
+		bgColor = Color::BotMessageBackground;
+		break;
+	case MessageType::Action:
+		bgColor = Color::BotMessageBackground;
+		break;
+	case MessageType::UserMessage:
+		bgColor = Color::UserMessageBackground;
+		break;
+	default:
+		bgColor = Color::DarkGray;
+		break;
+	}
+
 	SetBackgroundRenderer(new NineGridBackgroundRenderer(10.0f, bgColor, Color::AddRGB(bgColor, 0.15f) ));
 	SetBackgroundColor(bgColor);
 
 	SetSize(-1, 60);
-//	string text = name + ": " + message;
-	string text = message;
 
-	_pStaticText = new StaticText(this, text, FontFace::Default, Constants::ChatMessageFontSize, true);
+	_pStaticText = new StaticText(this, message, FontFace::Default, Constants::ChatMessageFontSize, true);
 	_pStaticText->SetPosition(10, 10);
 }
 
@@ -31,8 +47,10 @@ void ChatMessage::OnRender(SDL_Renderer* pRenderer)
 void ChatMessage::SetMessage(const string& text)
 {
 	int w, h;
-	_pStaticText->SetTextAndResize(trim(text), w, h);
+	_message = trim(text);
+	_pStaticText->SetTextAndResize(_message, w, h);
 
+	// Resize
 	int currentHeight = toI(GetHeight());
 	if (currentHeight < h + 20)
 	{
@@ -41,7 +59,7 @@ void ChatMessage::SetMessage(const string& text)
 	}
 }
 
-void ChatMessage::AppendMessage(const string& text)
+void ChatMessage::AppendMessage(const string& text, bool lastPiece)
 {
 	SetMessage(_pStaticText->GetText() + text);
 }
