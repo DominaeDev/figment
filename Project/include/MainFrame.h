@@ -18,6 +18,8 @@ public:
 	void LoadModel();
 	void UnloadModel();
 
+	void StartChat();
+
 	static void SetStatusBar(string message);
 	static MainFrame& GetInstance() { return *s_pInstance; }
 
@@ -26,7 +28,6 @@ protected:
 	virtual void OnRender(SDL_Renderer* pRenderer) override;
 
 	void OnCommand(Command cmd);
-
 private:
 	StatusBar* _pStatusBar;
 	ChatScroll* _pChatScroll;

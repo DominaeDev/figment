@@ -1,17 +1,15 @@
 #pragma once
 
+#include "llama.h"
 #include "Types.h"
 #include "ContextBuilder.h"
 #include "Message.h"
+#include <vector>
 #include <functional>
 #include <thread>
 #include <mutex>
 #include <queue>
 
-struct llama_model;
-struct llama_vocab;
-struct llama_context;
-struct llama_sampler;
 struct LLMStatus;
 
 typedef std::function<void(bool)> LoadModelCallback;
@@ -21,13 +19,30 @@ typedef std::function<void(int)> LoadModelProgressCallback;
 struct ModelState
 {
 	llama_model* pModel = nullptr;
-	const llama_vocab* pVocab = nullptr;
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
-	bool bReady = false;
-	ContextBuilder* context_builder = nullptr;
+	const llama_vocab* pVocab = nullptr;
 
+	bool bReady = false;
 	void Release();
+};
+
+struct LLMMessage {
+    string content;
+	std::vector<int32_t> tokens;
+	int32_t ctx_pos;
+};
+
+struct ChatState
+{
+	bool isInitialized = false;
+	std::vector<int32_t> system_tokens;
+	std::vector<LLMMessage> messages;
+	int32_t current_pos = 0;
+	llama_batch batch;
+
+	Character user;
+	Character bot;
 };
 
 struct GenerationState
@@ -58,9 +73,9 @@ struct MessagePiece
 class LLMInstance
 {
 public:
+	LLMInstance();
 	~LLMInstance();
 
-	void Initialize();
 	void Shutdown();
 	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
 
@@ -71,6 +86,8 @@ public:
 	
 	bool Resume();
 	bool Halt();
+
+	bool InitializeChat(string systemPrompt, std::vector<Message> messages);
 
 	void SetStatusCallback(StatusCallback onStatus) { _statusCallback = onStatus; }
 
@@ -84,7 +101,7 @@ private:
 
 	typedef std::function<void(__PartialResult)> __PartialResultCallback;
 	typedef std::function<void(int, string)> __GenerationCompleteCallback;
-	void __Generate(string prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	void __Generate(string prompt, ChatState chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
 	bool Generate(const string& prompt);
 	void ReportStatus();
@@ -93,6 +110,8 @@ private:
 	bool _bLoadingModel = false;
 	string _modelName {};
 	std::atomic<ModelState> _atm_modelState {};
+	ChatState _chatState {};
+
 	std::atomic<bool> _atm_bCancelGeneration {};
 	std::atomic<bool> _atm_bGeneratingResponse {};
 	std::unique_ptr<std::thread> _workerThread;

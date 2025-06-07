@@ -1,11 +1,11 @@
-﻿#include "llama.h"
+﻿#include "LLMInstance.h"
 #include "common.h"
-#include "chat.h"
-#include "LLMInstance.h"
 #include "StringUtil.h"
 #include "Utility.h"
 #include "Constants.h"
 #include <format>
+
+std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddBOS);
 
 void ModelState::Release()
 {
@@ -19,7 +19,6 @@ void ModelState::Release()
 	if (pModel)
 		llama_model_free(pModel);
 
-	delete context_builder;
 	pSampler = nullptr;
 	pCtx = nullptr;
 	pModel = nullptr;
@@ -27,16 +26,7 @@ void ModelState::Release()
 	bReady = false;
 }
 
-LLMInstance::~LLMInstance()
-{
-	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
-		_workerThread.get()->join();
-
-	_statusCallback = nullptr;
-	Shutdown();
-}
-
-void LLMInstance::Initialize()
+LLMInstance::LLMInstance()
 {
 	// only print errors
 	llama_log_set([](enum ggml_log_level level, const char* text, void* /* user_data */) {
@@ -52,6 +42,15 @@ void LLMInstance::Initialize()
 	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(false);
 	_atm_modelState.store(ModelState());
+}
+
+LLMInstance::~LLMInstance()
+{
+	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+		_workerThread.get()->join();
+
+	_statusCallback = nullptr;
+	Shutdown();
 }
 
 void LLMInstance::Shutdown()
@@ -199,6 +198,132 @@ static void get_tag_and_name(const string& text, string& tag, string& name)
 	string_replace_all(name, "\"", "");
 }
 
+static string apply_chat_template(std::vector<Message> in_messages, llama_context* pCtx, bool add_assistant)
+{
+	int prev_len = 0;
+
+//	const char* tmpl = llama_model_chat_template(state.pModel, nullptr);
+	const char* tmpl = "chatml";
+
+//	tmpl = "mistral-v7-tekken";
+//	tmpl = "chatml";
+//	tmpl = "llama2";
+//	tmpl = "llama3";
+//	tmpl = "command-r";
+//	tmpl = "gemma";
+//	tmpl = "vicuna";
+//	tmpl = "deepseek3";
+
+	std::vector<llama_chat_message> llama_msgs(in_messages.size());
+	for (int i = 0; i < in_messages.size(); ++i)
+	{
+		llama_msgs[i] = llama_chat_message { 
+			in_messages[i].role == Role::System ? _strdup("system") : _strdup(in_messages[i].name.c_str()), 
+			_strdup(in_messages[i].content.c_str())
+		};
+	}
+
+	std::vector<char> formatted(llama_n_ctx(pCtx));
+	int new_len = llama_chat_apply_template(tmpl, llama_msgs.data(), (int32_t)llama_msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
+	if (new_len > (int)formatted.size())
+	{
+		formatted.resize(new_len);
+		new_len = llama_chat_apply_template(tmpl, llama_msgs.data(), (int32_t)llama_msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
+	}
+
+	if (new_len < 0)
+	{
+		fprintf(stderr, "failed to apply the chat template\n");
+		return "";
+	}
+
+	// remove previous messages to obtain the prompt to generate the response
+	string prompt = string(formatted.begin() + prev_len, formatted.begin() + new_len);
+	
+	// Free
+	for (auto& m : llama_msgs)
+	{
+		free(const_cast<char*>(m.role));
+		free(const_cast<char*>(m.content));
+	}
+
+	return prompt;
+}
+
+bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> messages)
+{
+	ModelState state = _atm_modelState.load();
+	if (!state.bReady || !state.pModel)
+		return false;
+
+	_chatState = ChatState();
+	_chatState.user.LoadFromXml("characters/user.xml"); // tmp
+	_chatState.bot.LoadFromXml("characters/character.xml"); // tmp
+
+	string prompt = trim(system_prompt);
+	prompt.append("\n");
+	if (!isEmptyOrWhitespace(_chatState.bot.description))
+	{
+		prompt.append(trim(_chatState.bot.description));
+		prompt.append("\n");
+	}
+
+	// Replace {{char}}, {{user}}
+	auto fnReplaceAll = [](string& str, const string& word, const string& replacement)
+	{
+		auto&& pos = str.find(word);
+		while (pos != std::string::npos)
+		{
+			str.replace(pos, word.length(), replacement);
+			pos = str.find(word, pos + replacement.length());
+		}
+		return str;
+	};
+	fnReplaceAll(prompt, "{{char}}", _chatState.bot.name);
+	fnReplaceAll(prompt, "{{user}}", _chatState.user.name);
+
+	messages.insert(std::begin(messages), Message { Role::System, prompt });
+	prompt = apply_chat_template(messages, state.pCtx, false);
+	
+	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
+	llama_context* pCtx = state.pCtx;
+	std::vector<llama_token> prompt_tokens = __tokenize(state.pModel, prompt, true);
+
+	// tokenize system prompt
+	_chatState.system_tokens = prompt_tokens;
+	_chatState.current_pos = (int32_t)prompt_tokens.size();
+	_chatState.isInitialized = true;
+
+	// Pre-load system prompt into kv cache
+	llama_kv_self_clear(pCtx);
+
+	// Prepare a batch for the prompt
+	int32_t maxCtx = llama_n_ctx(pCtx);
+	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
+	int32_t num_tokens = (int32_t)prompt_tokens.size();
+
+	// Add tokens to batch
+	for (int i = 0; i < num_tokens; ++i) {
+		batch.token[i] = prompt_tokens[i];
+		batch.pos[i] = i;  // Position in sequence
+		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
+		batch.seq_id[i][0] = 0;  // Sequence ID 0
+		batch.logits[i] = false;  // Don't need logits for most tokens
+	}
+	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
+	batch.n_tokens = num_tokens;
+
+	if (batch.n_tokens > 0 && llama_decode(state.pCtx, batch))
+	{
+		fprintf(stderr, "failed to initialize chat\n");
+		llama_batch_free(batch);
+		return false;
+	}
+
+	_chatState.batch = batch; //! not freed
+	return true;
+}
+
 static void __LoadModel(string filename, __LoadModelCallback onComplete)
 {
 	const int ngl = 99;
@@ -242,12 +367,6 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 	llama_sampler_chain_add(state.pSampler, llama_sampler_init_temp(0.8f));					// Temperature
 	llama_sampler_chain_add(state.pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));	// Seed
 
-	auto pCtxBuilder = new ContextBuilder();
-	pCtxBuilder->system_prompt = LoadTextFile("characters/system.txt");
-	pCtxBuilder->LoadBot("characters/character.xml");
-	pCtxBuilder->LoadUser("characters/user.xml");
-
-	state.context_builder = pCtxBuilder;
 	state.bReady = true;
 	onComplete(state);
 }
@@ -292,7 +411,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 bool LLMInstance::IsReady() const
 {
 	ModelState state = _atm_modelState.load();
-	return state.bReady && state.pModel;
+	return state.bReady && state.pModel && _chatState.isInitialized;
 }
 
 bool LLMInstance::IsGenerating() const
@@ -354,6 +473,7 @@ void process(string& partial, string str_token, bool* bWait, bool* bHalt)
 		std::format("<{0}>", Constants::ThoughtTagEnd),
 		std::format("<{0}>", Constants::NarrationTagEnd),
 	};
+
 	static std::vector<std::string> formatting_tags;
 	if (formatting_tags.empty())
 	{
@@ -397,8 +517,6 @@ void process(string& partial, string str_token, bool* bWait, bool* bHalt)
 			*bWait = true;
 			return;
 		}
-
-		int k = 0;
 	}
 	else
 	{
@@ -416,37 +534,40 @@ void process(string& partial, string str_token, bool* bWait, bool* bHalt)
 	*bWait = false;
 }
 
-void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddBOS)
 {
-	std::string response;
+	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
 
-	ModelState state = _atm_modelState.load();
-	
-	string userName = state.context_builder->participants[0].name;
-	string botName = state.context_builder->participants[1].name;
+	std::vector<llama_token> prompt_tokens(1024);
+	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), true, true);
+	if (n_prompt_tokens < 0)
+	{
+		prompt_tokens.resize(-n_prompt_tokens);
+		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddBOS, true) < 0)
+		{
+			// Error
+			return std::vector<llama_token> {};
+		}
+	}
+	else
+	{
+		prompt_tokens.resize(n_prompt_tokens);
+	}
+	return prompt_tokens;
+}
 
-	GenerationState genState;
-	genState.messageId = ++_messageCounter;
-
-	const int32_t maxCtx = llama_n_ctx(state.pCtx);
-	const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
+static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
+{
+	const int32_t maxCtx = llama_n_ctx(pCtx);
+	const bool is_first = llama_kv_self_used_cells(pCtx) == 0;
 
 	// tokenize the prompt
-	const int32_t n_prompt_tokens = -llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), NULL, 0, is_first, true);
-	std::vector<llama_token> prompt_tokens(n_prompt_tokens);
-	if (llama_tokenize(state.pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), is_first, true) < 0)
-	{
-		onComplete(1, response);
-		return;
-	}
-
-	printf("\r\n");
-	fflush(stdout);
+	std::vector<llama_token> prompt_tokens = __tokenize(pModel, prompt, is_first);
 
 	// Prepare a batch for the prompt
 	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
 	int32_t num_tokens = (int32_t)prompt_tokens.size();
-	
+
 	// Add tokens to batch
 	for (int i = 0; i < num_tokens; ++i) {
 		batch.token[i] = prompt_tokens[i];
@@ -458,12 +579,37 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
 	batch.n_tokens = num_tokens;
 
-	llama_kv_self_clear(state.pCtx);
+	out_pBatch = batch;
+	return true;
+}
 
-	llama_token new_token_id;
+void LLMInstance::__Generate(string prompt, ChatState chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+{
+	std::string response;
+
+	ModelState state = _atm_modelState.load();
+	
+	string userName = chatState.user.name;
+	string botName = chatState.bot.name;
+
+	GenerationState genState;
+	genState.messageId = ++_messageCounter;
+
+	const int32_t maxCtx = llama_n_ctx(state.pCtx);
+	const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
+
+	llama_batch batch;
+	if (!__init_batch(state.pModel, state.pCtx, prompt, batch))
+	{
+		onComplete(1, response);
+		return;
+	}
+
+	int32_t position = batch.n_tokens;
+
+	llama_token sampled_token;
 	std::string partial;
-	int fail_safe = 0;
-	while (fail_safe++ < 100)
+	while (true)
 	{
 		bool next_token = true;
 
@@ -474,6 +620,7 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 		{
 			fprintf(stderr, "context size exceeded\n");
 			onComplete(2, response);
+			llama_batch_free(batch);
 			return;
 		}
 
@@ -481,21 +628,22 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 		{
 			fprintf(stderr, "failed to decode\n");
 			onComplete(3, response);
+			llama_batch_free(batch);
 			return;
 		}
 
 		// sample the next token
-		new_token_id = llama_sampler_sample(state.pSampler, state.pCtx, -1);
+		sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);
 
 		// is it an end of generation?
-		if (llama_vocab_is_eog(state.pVocab, new_token_id))
+		if (llama_vocab_is_eog(state.pVocab, sampled_token))
 		{
 			partial.clear();
 			break;
 		}
 
 		// convert the token to a string, print it and add it to the response
-		std::string str_token = stringFromToken(state.pVocab, new_token_id);
+		std::string str_token = stringFromToken(state.pVocab, sampled_token);
 		if (str_token.size() == 0)
 			break; // Error
 
@@ -600,7 +748,6 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 			}
 
 			send = false;
-			fail_safe = 0;
 		}
 
 		// Print to console
@@ -611,9 +758,13 @@ void LLMInstance::__Generate(string prompt, __PartialResultCallback onPartial, _
 		if (!next_token)
 			break; // TODO: Carry over?
 
-//		common_batch_add(batch, new_token_id, 0, llama_tokens {}, false);
-		batch = llama_batch_get_one(&new_token_id, 1);
+//		batch.token[0] = sampled_token;
+//		batch.n_tokens = 1;
+		position++;
+		batch = llama_batch_get_one(&sampled_token, 1);
 	}
+
+//	llama_batch_free(batch);
 
 	onComplete(0, response);
 };
@@ -629,7 +780,7 @@ bool LLMInstance::Generate(const string& prompt)
 	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(true);
 
-	auto pThread = new std::thread(&LLMInstance::__Generate, this, prompt, 
+	auto pThread = new std::thread(&LLMInstance::__Generate, this, prompt, _chatState,
 		[](__PartialResult partial) {
 			// ...
 		},
@@ -637,7 +788,7 @@ bool LLMInstance::Generate(const string& prompt)
 			// ...
 			_atm_bGeneratingResponse.store(false);
 			ModelState state = _atm_modelState.load();
-			state.context_builder->messages.push_back({ Role::Bot, response });
+//			state.context_builder->messages.push_back({ Role::Bot, response });
 			ReportStatus();
 		});
 
@@ -660,60 +811,14 @@ bool LLMInstance::SendMessage(string name, string message, bool generate)
 	ModelState state = _atm_modelState.load();
 
 	// add the user input to the message list and format it
-	state.context_builder->messages.push_back(Message { Role::User, message });
+//	state.context_builder->messages.push_back(Message { Role::User, message });
 
 	if (!generate)
 		return true;
 
-	std::vector<llama_chat_message> messages = state.context_builder->GetMessages();
+	std::vector<Message> messages { Message { Role::User, message, name } };
 
-	std::vector<char> formatted(llama_n_ctx(state.pCtx));
-	int prev_len = 0;
-
-	/*int32_t nMeta = llama_model_meta_count(state.pModel);
-	char* metaKey = new char[512];
-	char* metaValue = new char[2048];
-	for (int32_t i = 0; i < nMeta; ++i)
-	{
-		if (!llama_model_meta_key_by_index(state.pModel, i, metaKey, 512))
-			continue;
-		if (llama_model_meta_val_str(state.pModel, metaKey, metaValue, 2048))
-			printf("%s = %s\r\n", metaKey, metaValue);
-	}*/
-
-//	const char* tmpl = llama_model_chat_template(state.pModel, nullptr);
-	const char* tmpl = "chatml";
-
-//	tmpl = "mistral-v7-tekken";
-//	tmpl = "chatml";
-//	tmpl = "llama2";
-//	tmpl = "llama3";
-//	tmpl = "command-r";
-//	tmpl = "gemma";
-//	tmpl = "vicuna";
-//	tmpl = "deepseek3";
-
-	int new_len = llama_chat_apply_template(tmpl, messages.data(), (int32_t)messages.size(), true, formatted.data(), (int32_t)formatted.size());
-	if (new_len > (int)formatted.size())
-	{
-		formatted.resize(new_len);
-		new_len = llama_chat_apply_template(tmpl, messages.data(), (int32_t)messages.size(), true, formatted.data(), (int32_t)formatted.size());
-	}
-	if (new_len < 0)
-	{
-		fprintf(stderr, "failed to apply the chat template\n");
-		return false;
-	}
-
-	// remove previous messages to obtain the prompt to generate the response
-	std::string prompt(formatted.begin() + prev_len, formatted.begin() + new_len);
-
-	// Free
-	for (auto& m : messages)
-	{
-		free(const_cast<char*>(m.role));
-		free(const_cast<char*>(m.content));
-	}
+	string prompt = apply_chat_template(messages, state.pCtx, true);
 
 	// generate a response
 	return Generate(prompt);

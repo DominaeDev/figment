@@ -21,7 +21,6 @@ struct Message {
 class ContextBuilder
 {
 public:
-
 	std::vector<llama_chat_message> GetMessages() const;
 
 	bool LoadUser(string filename);

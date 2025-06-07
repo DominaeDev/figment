@@ -120,12 +120,14 @@ void MainFrame::LoadModel()
 			{
 				SetStatusBar(std::format("Loading model... {0}%", percent));
 			},
-			[](bool bSuccess) 
+			[this](bool bSuccess) 
 			{
 				if (bSuccess)
 				{
 					SetStatusBar("Model loaded");
 					fprintf(stdout, "Loaded model OK");
+
+					StartChat();
 				}
 				else
 				{
@@ -143,6 +145,16 @@ void MainFrame::UnloadModel()
 	{
 		pLLM->Shutdown();
 		SetStatusBar("Model unloaded");
+	}
+}
+
+void MainFrame::StartChat()
+{
+	auto pLLM = Application::GetLLM();
+	if (pLLM && pLLM->HasLoadedModel())
+	{
+		string system_prompt = LoadTextFile("characters/system.txt");
+		pLLM->InitializeChat(system_prompt, {});
 	}
 }
 

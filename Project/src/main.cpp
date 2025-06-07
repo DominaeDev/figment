@@ -91,7 +91,6 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 	// Instantiate LLM
 	auto pLLM = new LLMInstance();
-	pLLM->Initialize();
 	pAppState->pLLM = pLLM;
 
 	return SDL_APP_CONTINUE;
