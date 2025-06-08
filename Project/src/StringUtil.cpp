@@ -98,3 +98,14 @@ bool string_ends_with(const std::string_view& str, const std::string_view& suffi
 {
 	return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
+
+std::string& replace_all(std::string& str, const std::string& find, const std::string& replace)
+{
+	auto&& pos = str.find(find);
+	while (pos != std::string::npos)
+	{
+		str.replace(pos, find.length(), replace);
+		pos = str.find(find, pos + replace.length());
+	}
+	return str;
+}

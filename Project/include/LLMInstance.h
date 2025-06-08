@@ -41,6 +41,8 @@ struct ChatState
 	int32_t message_count = 0;
 	llama_batch batch {};
 
+	std::vector<Message> prev_messages;
+
 	Character user;
 	Character bot;
 };

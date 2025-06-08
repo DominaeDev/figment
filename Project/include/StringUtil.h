@@ -24,4 +24,6 @@ extern bool string_ends_with(const std::string_view& str, const std::string_view
 
 extern std::string get_filename(const std::string& str);
 
+extern std::string& replace_all(std::string& str, const std::string& find, const std::string& replace);
+
 #endif
