@@ -21,7 +21,6 @@ struct ModelState
 	llama_model* pModel = nullptr;
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
-	const llama_vocab* pVocab = nullptr;
 
 	bool bReady = false;
 	void Release();
@@ -39,7 +38,8 @@ struct ChatState
 	std::vector<int32_t> system_tokens;
 	std::vector<LLMMessage> messages;
 	int32_t current_pos = 0;
-	llama_batch batch;
+	int32_t message_count = 0;
+	llama_batch batch {};
 
 	Character user;
 	Character bot;
@@ -80,7 +80,7 @@ public:
 	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
 
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
-	bool SendMessage(string name, string message, bool generate = true);
+	bool SendMessage(Role role, string message, bool generate = true);
 	bool IsReady() const;
 	bool IsGenerating() const;
 	
@@ -101,7 +101,7 @@ private:
 
 	typedef std::function<void(__PartialResult)> __PartialResultCallback;
 	typedef std::function<void(int, string)> __GenerationCompleteCallback;
-	void __Generate(string prompt, ChatState chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	void __Generate(string prompt, ChatState* chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
 	bool Generate(const string& prompt);
 	void ReportStatus();

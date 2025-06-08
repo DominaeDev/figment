@@ -4,8 +4,10 @@
 #include "Utility.h"
 #include "Constants.h"
 #include <format>
+#include <algorithm>
 
 std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddBOS);
+bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 
 void ModelState::Release()
 {
@@ -22,7 +24,6 @@ void ModelState::Release()
 	pSampler = nullptr;
 	pCtx = nullptr;
 	pModel = nullptr;
-	pVocab = nullptr;
 	bReady = false;
 }
 
@@ -198,6 +199,26 @@ static void get_tag_and_name(const string& text, string& tag, string& name)
 	string_replace_all(name, "\"", "");
 }
 
+static void apply_names(string& prompt, string userName, string botName)
+{
+	// Replace {{char}}, {{user}}
+	auto fnReplaceAll = [](string& str, const string& word, const string& replacement)
+	{
+		auto&& pos = str.find(word);
+		while (pos != std::string::npos)
+		{
+			str.replace(pos, word.length(), replacement);
+			pos = str.find(word, pos + replacement.length());
+		}
+		return str;
+	};
+
+	fnReplaceAll(prompt, "{{user}}", userName);
+	fnReplaceAll(prompt, "{{char}}", botName);
+	fnReplaceAll(prompt, ">assistant", ">" + botName);
+	fnReplaceAll(prompt, "ASSISTANT", botName);
+}
+
 static string apply_chat_template(std::vector<Message> in_messages, llama_context* pCtx, bool add_assistant)
 {
 	int prev_len = 0;
@@ -214,13 +235,25 @@ static string apply_chat_template(std::vector<Message> in_messages, llama_contex
 //	tmpl = "vicuna";
 //	tmpl = "deepseek3";
 
+	static const char* SYSTEM_NAME = "system";
+	static const char* USER_NAME = "{{user}}";
+	static const char* BOT_NAME = "{{char}}";
+
 	std::vector<llama_chat_message> llama_msgs(in_messages.size());
 	for (int i = 0; i < in_messages.size(); ++i)
 	{
-		llama_msgs[i] = llama_chat_message { 
-			in_messages[i].role == Role::System ? _strdup("system") : _strdup(in_messages[i].name.c_str()), 
-			_strdup(in_messages[i].content.c_str())
-		};
+		auto& msg = in_messages[i];
+		if (msg.role == Role::System)
+		{
+			llama_msgs[i] = llama_chat_message { SYSTEM_NAME, msg.content.c_str() };
+		}
+		else
+		{
+			llama_msgs[i] = llama_chat_message { 
+				msg.name.empty() ? (msg.role == Role::User ? USER_NAME : BOT_NAME) : msg.name.c_str(), 
+				msg.content.c_str() 
+			};
+		}
 	}
 
 	std::vector<char> formatted(llama_n_ctx(pCtx));
@@ -239,13 +272,6 @@ static string apply_chat_template(std::vector<Message> in_messages, llama_contex
 
 	// remove previous messages to obtain the prompt to generate the response
 	string prompt = string(formatted.begin() + prev_len, formatted.begin() + new_len);
-	
-	// Free
-	for (auto& m : llama_msgs)
-	{
-		free(const_cast<char*>(m.role));
-		free(const_cast<char*>(m.content));
-	}
 
 	return prompt;
 }
@@ -261,30 +287,17 @@ bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> mess
 	_chatState.bot.LoadFromXml("characters/character.xml"); // tmp
 
 	string prompt = trim(system_prompt);
-	prompt.append("\n");
 	if (!isEmptyOrWhitespace(_chatState.bot.description))
 	{
-		prompt.append(trim(_chatState.bot.description));
 		prompt.append("\n");
+		prompt.append(trim(_chatState.bot.description));
 	}
-
-	// Replace {{char}}, {{user}}
-	auto fnReplaceAll = [](string& str, const string& word, const string& replacement)
-	{
-		auto&& pos = str.find(word);
-		while (pos != std::string::npos)
-		{
-			str.replace(pos, word.length(), replacement);
-			pos = str.find(word, pos + replacement.length());
-		}
-		return str;
-	};
-	fnReplaceAll(prompt, "{{char}}", _chatState.bot.name);
-	fnReplaceAll(prompt, "{{user}}", _chatState.user.name);
 
 	messages.insert(std::begin(messages), Message { Role::System, prompt });
 	prompt = apply_chat_template(messages, state.pCtx, false);
-	
+
+	apply_names(prompt, _chatState.user.name, _chatState.bot.name);
+
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 	llama_context* pCtx = state.pCtx;
 	std::vector<llama_token> prompt_tokens = __tokenize(state.pModel, prompt, true);
@@ -297,30 +310,24 @@ bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> mess
 	// Pre-load system prompt into kv cache
 	llama_kv_self_clear(pCtx);
 
-	// Prepare a batch for the prompt
-	int32_t maxCtx = llama_n_ctx(pCtx);
-	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
-	int32_t num_tokens = (int32_t)prompt_tokens.size();
-
-	// Add tokens to batch
-	for (int i = 0; i < num_tokens; ++i) {
-		batch.token[i] = prompt_tokens[i];
-		batch.pos[i] = i;  // Position in sequence
-		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;  // Sequence ID 0
-		batch.logits[i] = false;  // Don't need logits for most tokens
+	if (_chatState.batch.token != nullptr)
+	{
+		llama_batch_free(_chatState.batch);
+		_chatState.batch = llama_batch {};
 	}
-	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
-	batch.n_tokens = num_tokens;
 
-	if (batch.n_tokens > 0 && llama_decode(state.pCtx, batch))
+	// Prepare a batch for the prompt
+	if (!__init_batch(state.pModel, state.pCtx, prompt, _chatState.batch))
+		return false;
+
+	if (_chatState.batch.n_tokens > 0 && llama_decode(state.pCtx, _chatState.batch))
 	{
 		fprintf(stderr, "failed to initialize chat\n");
-		llama_batch_free(batch);
+		llama_batch_free(_chatState.batch);
+		_chatState.batch = llama_batch {};
 		return false;
 	}
 
-	_chatState.batch = batch; //! not freed
 	return true;
 }
 
@@ -343,8 +350,6 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 		onComplete(state);
 		return;
 	}
-
-	state.pVocab = llama_model_get_vocab(state.pModel);
 
 	// initialize the context
 	llama_context_params ctx_params = llama_context_default_params();
@@ -534,16 +539,16 @@ void process(string& partial, string str_token, bool* bWait, bool* bHalt)
 	*bWait = false;
 }
 
-std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddBOS)
+std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddSpecial)
 {
 	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
 
 	std::vector<llama_token> prompt_tokens(1024);
-	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), true, true);
+	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true);
 	if (n_prompt_tokens < 0)
 	{
 		prompt_tokens.resize(-n_prompt_tokens);
-		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddBOS, true) < 0)
+		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true) < 0)
 		{
 			// Error
 			return std::vector<llama_token> {};
@@ -583,30 +588,38 @@ static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt
 	return true;
 }
 
-void LLMInstance::__Generate(string prompt, ChatState chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+void LLMInstance::__Generate(string prompt, ChatState* pChatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
 	std::string response;
 
 	ModelState state = _atm_modelState.load();
 	
+	ChatState& chatState = *pChatState;
+	llama_batch& batch = chatState.batch;
+
 	string userName = chatState.user.name;
 	string botName = chatState.bot.name;
+
+	MessageType msgType = MessageType::Undefined;
 
 	GenerationState genState;
 	genState.messageId = ++_messageCounter;
 
-	const int32_t maxCtx = llama_n_ctx(state.pCtx);
-	const bool is_first = llama_kv_self_used_cells(state.pCtx) == 0;
+	int32_t& current_pos = _chatState.current_pos;
+	int32_t n_batch  = llama_n_batch(state.pCtx);
 
-	llama_batch batch;
-	if (!__init_batch(state.pModel, state.pCtx, prompt, batch))
-	{
-		onComplete(1, response);
-		return;
-	}
+	string assistant_prefix = apply_chat_template({}, state.pCtx, true);
 
-	int32_t position = batch.n_tokens;
+	int32_t n_past = chatState.current_pos;
 
+	auto prompt_tokens = __tokenize(state.pModel, prompt + "\n" + assistant_prefix, false);
+
+	for (int i = 0; i < prompt_tokens.size(); ++i)
+		common_batch_add(batch, prompt_tokens[i], current_pos + i, { 0 }, false);
+	batch.logits[current_pos + prompt_tokens.size() - 1] = true;
+
+
+	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 	llama_token sampled_token;
 	std::string partial;
 	while (true)
@@ -620,30 +633,41 @@ void LLMInstance::__Generate(string prompt, ChatState chatState, __PartialResult
 		{
 			fprintf(stderr, "context size exceeded\n");
 			onComplete(2, response);
-			llama_batch_free(batch);
 			return;
 		}
 
-		if (batch.n_tokens > 0 && llama_decode(state.pCtx, batch))
+		const int32_t n_tokens = std::min(n_batch, batch.n_tokens - current_pos);
+		llama_batch batch_view = {
+			n_tokens,
+			batch.token + current_pos,
+			nullptr,
+			batch.pos + current_pos,
+			batch.n_seq_id + current_pos,
+			batch.seq_id + current_pos,
+			batch.logits + current_pos,
+		};
+
+		if (batch_view.n_tokens > 0 && llama_decode(state.pCtx, batch_view))
 		{
 			fprintf(stderr, "failed to decode\n");
 			onComplete(3, response);
-			llama_batch_free(batch);
 			return;
 		}
+
+		current_pos += batch_view.n_tokens;
 
 		// sample the next token
 		sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);
 
 		// is it an end of generation?
-		if (llama_vocab_is_eog(state.pVocab, sampled_token))
+		if (llama_vocab_is_eog(pVocab, sampled_token))
 		{
 			partial.clear();
 			break;
 		}
 
 		// convert the token to a string, print it and add it to the response
-		std::string str_token = stringFromToken(state.pVocab, sampled_token);
+		std::string str_token = stringFromToken(pVocab, sampled_token);
 		if (str_token.size() == 0)
 			break; // Error
 
@@ -682,8 +706,8 @@ void LLMInstance::__Generate(string prompt, ChatState chatState, __PartialResult
 					string tag, tagName;
 					get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
-					if (tagName == userName) // Stop if talking/acting for the user
-						break;
+					if (tagName == userName) 
+						break; // Stop if talking/acting for the user
 
 					if (tag == Constants::DialogueTagEnd || tag == Constants::ActionTagEnd || tag == Constants::NarrationTagEnd || tag == Constants::ThoughtTagEnd)
 					{
@@ -707,19 +731,18 @@ void LLMInstance::__Generate(string prompt, ChatState chatState, __PartialResult
 							sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
 							genState.currName = tagName;
 							if (tag == Constants::DialogueTagBegin)
-								genState.msgType = MessageType::Dialogue;
+								msgType = MessageType::Dialogue;
 							else if (tag == Constants::ActionTagBegin)
-								genState.msgType = MessageType::Action;
+								msgType = MessageType::Action;
 							else if (tag == Constants::NarrationTagBegin)
-								genState.msgType = MessageType::Narration;
+								msgType = MessageType::Narration;
 							else if (tag == Constants::ThoughtTagBegin)
-								genState.msgType = MessageType::Thought;
+								msgType = MessageType::Thought;
 						}
 					}
 				}
 			}
 
-			MessageType msgType = genState.msgType;
 			if (msgType == MessageType::Undefined)
 				msgType = MessageType::Dialogue;
 
@@ -743,7 +766,7 @@ void LLMInstance::__Generate(string prompt, ChatState chatState, __PartialResult
 			partial = carryOver;
 			if (bEndOfMessageType)
 			{
-				genState.msgType = MessageType::Undefined;
+				msgType = MessageType::Undefined;
 				++genState.messageId;
 			}
 
@@ -758,13 +781,15 @@ void LLMInstance::__Generate(string prompt, ChatState chatState, __PartialResult
 		if (!next_token)
 			break; // TODO: Carry over?
 
+		common_batch_add(batch, sampled_token, current_pos, { 0 }, true);
+//		current_pos++;
 //		batch.token[0] = sampled_token;
 //		batch.n_tokens = 1;
-		position++;
-		batch = llama_batch_get_one(&sampled_token, 1);
+//		batch = llama_batch_get_one(&sampled_token, 1);
 	}
 
-//	llama_batch_free(batch);
+	// Remove full response from cache (re-added, with formatting, next generation)
+	llama_kv_self_seq_rm(state.pCtx, 0, n_past, -1);
 
 	onComplete(0, response);
 };
@@ -780,7 +805,9 @@ bool LLMInstance::Generate(const string& prompt)
 	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(true);
 
-	auto pThread = new std::thread(&LLMInstance::__Generate, this, prompt, _chatState,
+	printf("\n%s", prompt.c_str());
+
+	auto pThread = new std::thread(&LLMInstance::__Generate, this, prompt, &_chatState,
 		[](__PartialResult partial) {
 			// ...
 		},
@@ -796,7 +823,7 @@ bool LLMInstance::Generate(const string& prompt)
 	return true;
 };
 
-bool LLMInstance::SendMessage(string name, string message, bool generate)
+bool LLMInstance::SendMessage(Role role, string message, bool generate)
 {
 	if (!IsReady() || IsGenerating())
 		return false;
@@ -810,15 +837,13 @@ bool LLMInstance::SendMessage(string name, string message, bool generate)
 
 	ModelState state = _atm_modelState.load();
 
-	// add the user input to the message list and format it
-//	state.context_builder->messages.push_back(Message { Role::User, message });
-
 	if (!generate)
 		return true;
+	
+	std::vector<Message> messages { Message { role, message } };
 
-	std::vector<Message> messages { Message { Role::User, message, name } };
-
-	string prompt = apply_chat_template(messages, state.pCtx, true);
+	string prompt = apply_chat_template(messages, state.pCtx, false);
+	apply_names(prompt, _chatState.user.name, _chatState.bot.name);
 
 	// generate a response
 	return Generate(prompt);
