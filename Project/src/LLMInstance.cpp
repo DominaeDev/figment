@@ -813,6 +813,7 @@ bool LLMInstance::Generate(const string& prompt)
 			_atm_bGeneratingResponse.store(false);
 			ModelState state = _atm_modelState.load();
 
+			_chatState.prev_messages.clear();
 			_chatState.prev_messages.push_back(Message { Role::Bot, response });
 			ReportStatus();
 		});
