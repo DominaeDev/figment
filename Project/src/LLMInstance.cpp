@@ -286,21 +286,23 @@ bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> mess
 
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 	llama_context* pCtx = state.pCtx;
-	std::vector<llama_token> prompt_tokens = __tokenize(state.pModel, prompt, true);
 
-	// tokenize system prompt
-	_chatState.system_tokens = prompt_tokens;
-	_chatState.current_pos = (int32_t)prompt_tokens.size();
+	// Tokenize system prompt
+	_chatState.system_tokens = __tokenize(state.pModel, prompt, true);
+	_chatState.current_pos = (int32_t)_chatState.system_tokens.size();
 	_chatState.isInitialized = true;
+
+	// Tokenize assistant prefix
+	string assistant_prefix = apply_chat_template({}, state.pCtx, true);
+	replace_all(assistant_prefix, "assistant", _chatState.bot.name);
+	replace_all(assistant_prefix, "ASSISTANT", _chatState.bot.name);
+	_chatState.assistant_tokens = __tokenize(state.pModel, assistant_prefix, false);
 
 	// Pre-load system prompt into kv cache
 	llama_kv_self_clear(pCtx);
 
 	if (_chatState.batch.token != nullptr)
-	{
 		llama_batch_free(_chatState.batch);
-		_chatState.batch = llama_batch {};
-	}
 
 	// Prepare a batch for the prompt
 	if (!__init_batch(state.pModel, state.pCtx, prompt, _chatState.batch))
@@ -598,13 +600,10 @@ void LLMInstance::__Generate(string prompt, ChatState* pChatState, __PartialResu
 	int32_t n_batch  = llama_n_batch(state.pCtx);
 
 	auto prompt_tokens = __tokenize(state.pModel, prompt, false);
-	int32_t pos_post_prompt = chatState.current_pos + prompt_tokens.size();
+	int32_t pos_post_prompt = chatState.current_pos + (int32_t)prompt_tokens.size();
 
-	string assistant_prefix = apply_chat_template({}, state.pCtx, true);
-	replace_all(assistant_prefix, "assistant", botName);
-	replace_all(assistant_prefix, "ASSISTANT", botName);
-	auto prefix_tokens = __tokenize(state.pModel, assistant_prefix, false);
-	prompt_tokens.insert(std::end(prompt_tokens), std::begin(prefix_tokens), std::end(prefix_tokens));
+	// Insert assistant tokens
+	prompt_tokens.insert(std::end(prompt_tokens), std::begin(chatState.assistant_tokens), std::end(chatState.assistant_tokens));
 
 	for (int i = 0; i < prompt_tokens.size(); ++i)
 		common_batch_add(batch, prompt_tokens[i], current_pos + i, { 0 }, false);

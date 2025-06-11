@@ -36,6 +36,7 @@ struct ChatState
 {
 	bool isInitialized = false;
 	std::vector<int32_t> system_tokens;
+	std::vector<int32_t> assistant_tokens;
 	std::vector<LLMMessage> messages;
 	int32_t current_pos = 0;
 	int32_t message_count = 0;
