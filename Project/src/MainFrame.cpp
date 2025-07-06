@@ -94,6 +94,8 @@ MainFrame::~MainFrame()
 
 void MainFrame::OnUpdate(float fDeltaTime)
 {
+	if (_bAutomation)
+		RunAutomation();
 }
 
 void MainFrame::OnRender(SDL_Renderer* pRenderer)
@@ -184,4 +186,64 @@ void MainFrame::OnCommand(Command cmd)
 			pLLM->SendMessage(Role::System, cmd.text, false);
 		}
 	}
+}
+
+void MainFrame::EnableAutomation(bool bEnable)
+{
+	_bAutomation = bEnable;
+}
+
+static std::vector<std::string> split(std::string s, const std::string& delimiter)
+{
+	std::vector<std::string> tokens;
+	size_t pos = 0;
+	std::string token;
+	while ((pos = s.find(delimiter)) != std::string::npos)
+	{
+		token = s.substr(0, pos);
+		tokens.push_back(token);
+		s.erase(0, pos + delimiter.length());
+	}
+	tokens.push_back(s);
+
+	return tokens;
+}
+
+void MainFrame::RunAutomation()
+{
+	auto pLLM = Application::GetLLM();
+	if (!pLLM)
+		return;
+
+	if (!pLLM->HasLoadedModel())
+	{
+		if (!pLLM->IsLoadingModel())
+			LoadModel();
+		return;
+	}
+
+	if (!pLLM->IsReady() || pLLM->IsGenerating())
+		return;
+
+	if (_autoQueue.empty())
+	{
+		string text = LoadTextFile("resources/debug_script.txt");
+		auto lines = split(text, "\r\n");
+		for (auto& line : lines)
+			_autoQueue.push(line);
+	}
+
+	if (_autoQueue.empty())
+	{
+		_bAutomation = false;
+		return;
+	}
+
+	string message = _autoQueue.front();
+	_autoQueue.pop();
+
+	string formatted = FormatMessage(message, "{{user}}");
+	_pChatScroll->AddMessage("User", message, MessageType::UserMessage);
+	if (pLLM->SendMessage(Role::User, formatted))
+		_pChatScroll->StartListening();
 }

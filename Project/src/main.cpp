@@ -118,6 +118,12 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 		case SDLK_F3:
 			static_cast<MainFrame*>(pAppState->pTopFrame)->UnloadModel();
 			break;
+		case SDLK_F5:
+			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutomation(true);
+			break;
+		case SDLK_F6:
+			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutomation(false);
+			break;
 		case SDLK_F10:
 		{
 			auto pLLM = Application::GetLLM();

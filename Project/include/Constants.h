@@ -22,4 +22,7 @@ namespace Constants
 	extern const string NarrationTagEnd;
 	extern const string ThoughtTagBegin;
 	extern const string ThoughtTagEnd;
+
+	extern const int MaxMessageTokens;
+	extern const float ContextWindowSize;
 }

@@ -544,6 +544,16 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 	*bWait = false;
 }
 
+static void refresh_block_positions(ChatState& chat)
+{
+	size_t pos = chat.system_tokens.size();
+	for (auto& block : chat.blocks)
+	{
+		block.ctx_pos = (int32_t)pos;
+		pos += block.tokens.size();
+	}
+}
+
 std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddSpecial)
 {
 	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
@@ -597,21 +607,22 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 {
 	// Load state
 	ModelState state = _atm_modelState.load();
-	ChatState& chatState = *pChatState;
-	llama_batch& batch = chatState.batch;
+	ChatState& chat = *pChatState;
+	llama_batch& batch = chat.batch;
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 
-	string userName = chatState.user.name;
-	string botName = chatState.bot.name;
+	string userName = chat.user.name;
+	string botName = chat.bot.name;
 
 	GenerationState genState;
 	genState.messageId = ++_messageCounter;
 
 	// Prepare prompt
-	int32_t& current_pos = chatState.current_pos;
+	int32_t& current_pos = chat.current_pos;
 	current_pos = llama_kv_self_used_cells(state.pCtx);
 	int32_t start_pos = current_pos;
 	int32_t n_batch  = llama_n_batch(state.pCtx);
+	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 
 	std::vector<llama_token> prompt_tokens;
 
@@ -623,7 +634,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	int32_t user_pos = start_pos;
 
 	// Re-insert previous response (reformatted)
-	for (auto it = std::rbegin(chatState.blocks); it != std::rend(chatState.blocks); ++it)
+	for (auto it = std::rbegin(chat.blocks); it != std::rend(chat.blocks); ++it)
 	{
 		auto& lastBlock = *it;
 		if (lastBlock.cached)
@@ -634,15 +645,14 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 
 		lastBlock.content = lastResponse;
 		lastBlock.tokens = lastTokens;
-		lastBlock.ctx_pos = start_pos;
+		//lastBlock.ctx_pos = start_pos;
 		lastBlock.cached = true;
 
 		prompt_tokens.insert(std::begin(prompt_tokens), std::cbegin(lastTokens), std::cend(lastTokens));
 		user_pos = start_pos + (int32_t)lastTokens.size();
 	}
-//	messages.insert(std::begin(messages), std::cbegin(chatState.prev_messages), std::cend(chatState.prev_messages));
 
-	chatState.blocks.push_back(LLMMessageBlock {
+	chat.blocks.push_back(LLMMessageBlock {
 		/*role*/ Role::User,
 		/*content*/ userPrompt,
 		/*tokens*/ userTokens,
@@ -652,8 +662,14 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 
 	int32_t pos_pre_response = start_pos + (int32_t)prompt_tokens.size();
 
+	if (pos_pre_response + Constants::MaxMessageTokens > ctx_size)
+	{
+		return;
+	}
+	refresh_block_positions(chat);
+
 	// Append assistant tokens
-	prompt_tokens.insert(std::end(prompt_tokens), std::begin(chatState.assistant_tokens), std::end(chatState.assistant_tokens));
+	prompt_tokens.insert(std::end(prompt_tokens), std::begin(chat.assistant_tokens), std::end(chat.assistant_tokens));
 
 	// Append to batch
 	for (int i = 0; i < prompt_tokens.size(); ++i)
@@ -686,9 +702,8 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 		};
 
 		// check if we have enough space in the context to evaluate this batch
-		int n_ctx = llama_n_ctx(state.pCtx);
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
-		if (n_ctx_used + n_tokens > n_ctx)
+		if (n_ctx_used + n_tokens > ctx_size)
 		{
 			fprintf(stderr, "context size exceeded\n");
 			onComplete(2, response);
@@ -720,6 +735,9 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 
 		partial += str_token;
 		sampled_tokens.push_back(sampled_token);
+		
+		if (current_pos >= ctx_size)
+			break; // Max limit reached
 
 		bool send = true;
 
@@ -822,7 +840,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 		// Print to console
 		printf("%s", str_token.c_str());
 
-		common_batch_add(batch, sampled_token, current_pos, { 0 }, true); //?
+		common_batch_add(batch, sampled_token, current_pos, { 0 }, true);
 
 		// prepare the next batch with the sampled token
 		if (!next_token)
@@ -834,9 +852,9 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	// Remove full response from cache (re-added, with formatting, next generation)
 	llama_kv_self_seq_rm(state.pCtx, 0, pos_pre_response, -1);
 	batch.n_tokens = pos_pre_response;
-	chatState.current_pos = pos_pre_response;
+	chat.current_pos = pos_pre_response;
 
-	chatState.blocks.push_back(LLMMessageBlock {
+	chat.blocks.push_back(LLMMessageBlock {
 		/*role*/ Role::Bot,
 		/*content*/ response,
 		/*tokens*/ sampled_tokens,

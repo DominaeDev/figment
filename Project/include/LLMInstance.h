@@ -83,7 +83,7 @@ public:
 
 	void Shutdown();
 	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
-
+	bool IsLoadingModel() const { return _bLoadingModel; }
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool SendMessage(Role role, string message, bool generate = true);
 	bool IsReady() const;
