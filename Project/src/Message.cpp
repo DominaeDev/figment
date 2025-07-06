@@ -54,6 +54,9 @@ static bool in_span(size_t pos, const std::vector<Span>& spans)
 
 static void mark_spans(const std::string s, MessageType type, std::string open, std::string close, std::vector<Span>& spans)
 {
+	if (open.size() > s.size())
+		return;
+
 	size_t pos_open = find_next(s, open);
 	while (pos_open != std::string::npos)
 	{

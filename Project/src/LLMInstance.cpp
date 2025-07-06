@@ -48,7 +48,12 @@ LLMInstance::LLMInstance()
 LLMInstance::~LLMInstance()
 {
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+	{
+		printf(">> Releasing. Waiting on worker thread ");
+		fflush(stdout);
 		_workerThread.get()->join();
+		printf(">> Done!\r\n");
+	}
 
 	_statusCallback = nullptr;
 	Shutdown();
@@ -262,6 +267,11 @@ static string apply_chat_template(std::vector<Message> in_messages, llama_contex
 	return prompt;
 }
 
+static string apply_chat_template(Message msg, llama_context* pCtx, bool add_assistant)
+{
+	return apply_chat_template(std::vector<Message> { msg }, pCtx, add_assistant);
+}
+
 bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> messages)
 {
 	ModelState state = _atm_modelState.load();
@@ -292,8 +302,8 @@ bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> mess
 	_chatState.current_pos = (int32_t)_chatState.system_tokens.size();
 	_chatState.isInitialized = true;
 
-	// Tokenize assistant prefix
-	string assistant_prefix = apply_chat_template({}, state.pCtx, true);
+	// Prepare assistant prelude
+	string assistant_prefix = apply_chat_template(std::vector<Message>{}, state.pCtx, true);
 	replace_all(assistant_prefix, "assistant", _chatState.bot.name);
 	replace_all(assistant_prefix, "ASSISTANT", _chatState.bot.name);
 	_chatState.assistant_tokens = __tokenize(state.pModel, assistant_prefix, false);
@@ -370,7 +380,12 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 		return false; // Already loaded
 
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+	{
+		printf(">> Loading. Waiting on worker thread ");
+		fflush(stdout);
 		_workerThread.get()->join();
+		printf(">> Done!\r\n");
+	}
 
 	_bLoadingModel = true;
 
@@ -417,7 +432,7 @@ bool LLMInstance::Resume()
 	if (!IsReady() || IsGenerating())
 		return false;
 
-	return Generate("");
+	return Generate(Message { Role::User, "" }); //! @fix
 }
 
 bool LLMInstance::Halt()
@@ -427,11 +442,16 @@ bool LLMInstance::Halt()
 
 	_atm_bCancelGeneration.store(true);
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+	{
+		printf(">> Halting. Waiting on worker thread ");
+		fflush(stdout);
 		_workerThread.get()->join();
+		printf(">> Done!\r\n");
+	}
 	return true;
 }
 
-void process(string& partial, string str_token, bool* bWait, bool* bHalt)
+static void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word)
 {
 	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
 	{
@@ -478,15 +498,12 @@ void process(string& partial, string str_token, bool* bWait, bool* bHalt)
 	size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
 	if (stop_pos != std::string::npos)
 	{
-		std::string stop_word = partial.substr(stop_pos);
+		stop_word = partial.substr(stop_pos);
 
 		// Print to console
 		partial = partial.erase(stop_pos); // Erase stop word
 		*bHalt = true;
 		*bWait = false;
-
-		printf("%s[%s]", partial.c_str(), stop_word.c_str());
-		fflush(stdout);
 		return;
 	}
 
@@ -576,42 +593,83 @@ static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt
 	return true;
 }
 
-void LLMInstance::__Generate(string prompt, ChatState* pChatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
-	std::string response;
-	std::string message;
-
+	// Load state
 	ModelState state = _atm_modelState.load();
-	
 	ChatState& chatState = *pChatState;
 	llama_batch& batch = chatState.batch;
+	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 
 	string userName = chatState.user.name;
 	string botName = chatState.bot.name;
 
-	MessageType msgType = MessageType::Undefined;
-
 	GenerationState genState;
 	genState.messageId = ++_messageCounter;
 
-	int32_t& current_pos = _chatState.current_pos;
+	// Prepare prompt
+	int32_t& current_pos = chatState.current_pos;
 	current_pos = llama_kv_self_used_cells(state.pCtx);
-
+	int32_t start_pos = current_pos;
 	int32_t n_batch  = llama_n_batch(state.pCtx);
 
-	auto prompt_tokens = __tokenize(state.pModel, prompt, false);
-	int32_t pos_post_prompt = chatState.current_pos + (int32_t)prompt_tokens.size();
+	std::vector<llama_token> prompt_tokens;
 
-	// Insert assistant tokens
+	// Insert user prompt
+	string userPrompt = apply_chat_template(msg, state.pCtx, false);
+	apply_names(userPrompt, userName, botName);
+	auto userTokens = __tokenize(state.pModel, userPrompt, false);
+	prompt_tokens.insert(std::begin(prompt_tokens), std::cbegin(userTokens), std::cend(userTokens));
+	int32_t user_pos = start_pos;
+
+	// Re-insert previous response (reformatted)
+	for (auto it = std::rbegin(chatState.blocks); it != std::rend(chatState.blocks); ++it)
+	{
+		auto& lastBlock = *it;
+		if (lastBlock.cached)
+			break;
+
+		string lastResponse = apply_chat_template(Message { lastBlock.role, lastBlock.content }, state.pCtx, false);
+		auto lastTokens = __tokenize(state.pModel, lastResponse, false);
+
+		lastBlock.content = lastResponse;
+		lastBlock.tokens = lastTokens;
+		lastBlock.ctx_pos = start_pos;
+		lastBlock.cached = true;
+
+		prompt_tokens.insert(std::begin(prompt_tokens), std::cbegin(lastTokens), std::cend(lastTokens));
+		user_pos = start_pos + (int32_t)lastTokens.size();
+	}
+//	messages.insert(std::begin(messages), std::cbegin(chatState.prev_messages), std::cend(chatState.prev_messages));
+
+	chatState.blocks.push_back(LLMMessageBlock {
+		/*role*/ Role::User,
+		/*content*/ userPrompt,
+		/*tokens*/ userTokens,
+		/*ctx_pos*/ user_pos,
+		/* cached */ true,
+	});
+
+	int32_t pos_pre_response = start_pos + (int32_t)prompt_tokens.size();
+
+	// Append assistant tokens
 	prompt_tokens.insert(std::end(prompt_tokens), std::begin(chatState.assistant_tokens), std::end(chatState.assistant_tokens));
 
+	// Append to batch
 	for (int i = 0; i < prompt_tokens.size(); ++i)
 		common_batch_add(batch, prompt_tokens[i], current_pos + i, { 0 }, false);
 	batch.logits[current_pos + prompt_tokens.size() - 1] = true;
 
-	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
+	std::vector<llama_token> sampled_tokens;
+
 	llama_token sampled_token;
 	std::string partial;
+	std::string stop_word;
+	std::string response;
+	MessageType msgType = MessageType::Undefined;
+
+	printf("BEGIN GENERATION\r\n");
+
 	while (true)
 	{
 		bool next_token = true;
@@ -661,12 +719,14 @@ void LLMInstance::__Generate(string prompt, ChatState* pChatState, __PartialResu
 			break; // Error
 
 		partial += str_token;
+		sampled_tokens.push_back(sampled_token);
+
 		bool send = true;
 
 		// check if there is incomplete UTF-8 character at the end
 		bool bHalt = false;
 		bool bWait = false;
-		process(partial, str_token, &bWait, &bHalt);
+		process(partial, str_token, &bWait, &bHalt, stop_word);
 		next_token &= !bHalt;
 		send &= !bWait;
 
@@ -675,11 +735,6 @@ void LLMInstance::__Generate(string prompt, ChatState* pChatState, __PartialResu
 
 		if (send)
 		{
-			// Clean up incomplete stop tokens
-//			size_t stop_pos = partial.find("<|im");
-//			if (stop_pos != std::string::npos)
-//				partial = partial.erase(stop_pos); // Erase left-over
-
 			string carryOver;
 			string sendMsg = partial;
 			bool bEndOfMessageType = false;
@@ -738,7 +793,7 @@ void LLMInstance::__Generate(string prompt, ChatState* pChatState, __PartialResu
 			// Send piece
 			if (partial.size() > 0)
 			{
-				_resultMutex.lock();
+				std::lock_guard<std::mutex> lock(_resultMutex);
 				_generatedText += partial;
 
 				_resultQueue.push(MessagePiece {
@@ -748,7 +803,6 @@ void LLMInstance::__Generate(string prompt, ChatState* pChatState, __PartialResu
 					msgType,
 					bEndOfMessageType,
 				});
-				_resultMutex.unlock();
 				response += partial;
 
 				if (onPartial)
@@ -767,53 +821,62 @@ void LLMInstance::__Generate(string prompt, ChatState* pChatState, __PartialResu
 
 		// Print to console
 		printf("%s", str_token.c_str());
-		fflush(stdout);
 
-		common_batch_add(batch, sampled_token, current_pos, { 0 }, true);
+		common_batch_add(batch, sampled_token, current_pos, { 0 }, true); //?
 
 		// prepare the next batch with the sampled token
 		if (!next_token)
 			break; // TODO: Carry over?
-
-//		current_pos++;
-//		batch.token[0] = sampled_token;
-//		batch.n_tokens = 1;
-//		batch = llama_batch_get_one(&sampled_token, 1);
 	}
 
+	fflush(stdout);
+
 	// Remove full response from cache (re-added, with formatting, next generation)
-	llama_kv_self_seq_rm(state.pCtx, 0, pos_post_prompt, -1);
-	chatState.current_pos = pos_post_prompt;
-	batch.n_tokens = pos_post_prompt;
+	llama_kv_self_seq_rm(state.pCtx, 0, pos_pre_response, -1);
+	batch.n_tokens = pos_pre_response;
+	chatState.current_pos = pos_pre_response;
+
+	chatState.blocks.push_back(LLMMessageBlock {
+		/*role*/ Role::Bot,
+		/*content*/ response,
+		/*tokens*/ sampled_tokens,
+		/*ctx_pos*/ pos_pre_response,
+		/*cached*/ false,
+	});
+
+	printf("\r\nEND OF GENERATION\r\n[%s](%s)\r\n", response.c_str(), stop_word.c_str());
 
 	onComplete(0, response);
 };
 
-bool LLMInstance::Generate(const string& prompt)
+bool LLMInstance::Generate(Message msg)
 {
 	if (!IsReady() || IsGenerating())
 		return false;
 
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+	{
+		_atm_bCancelGeneration.store(true);
+		printf(">> Waiting on worker thread");
+		fflush(stdout);
 		_workerThread.get()->join();
+		printf(">> Done!\r\n");
+	}
 
 	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(true);
 
-	printf("\n%s", prompt.c_str());
-
-	auto pThread = new std::thread(&LLMInstance::__Generate, this, prompt, &_chatState,
+	auto pThread = new std::thread(&LLMInstance::__Generate, this, msg, &_chatState,
 		[](__PartialResult partial) {
 			// ...
-			int k = 0;
 		},
 		[this](int error, string response) {
 			// ...
-			_atm_bGeneratingResponse.store(false);
 			ModelState state = _atm_modelState.load();
-
 			_chatState.prev_messages.clear();
 			_chatState.prev_messages.push_back(Message { Role::Bot, response });
+
+			_atm_bGeneratingResponse.store(false);
 			ReportStatus();
 		});
 
@@ -826,26 +889,24 @@ bool LLMInstance::SendMessage(Role role, string message, bool generate)
 	if (!IsReady() || IsGenerating())
 		return false;
 
-	// Reset response
-	_resultMutex.lock();
+	// Clear response queue
+	{
+		printf(">> Waiting on mutex ");
+		fflush(stdout);
+		std::lock_guard lock(_resultMutex);
+		while (!_resultQueue.empty())
+			_resultQueue.pop();
+		printf(">> Done!\r\n");
+	}
 	_generatedText.clear();
-	while (!_resultQueue.empty())
-		_resultQueue.pop();
-	_resultMutex.unlock();
 
 	ModelState state = _atm_modelState.load();
 
-	if (!generate)
+	if (!generate) //! @fix
 		return true;
 	
-	std::vector<Message> messages { Message { role, message } };
-	messages.insert(std::begin(messages), std::cbegin(_chatState.prev_messages), std::cend(_chatState.prev_messages));
-
-	string prompt = apply_chat_template(messages, state.pCtx, false);
-	apply_names(prompt, _chatState.user.name, _chatState.bot.name);
-
 	// generate a response
-	return Generate(prompt);
+	return Generate( Message { role, message });
 }
 
 void LLMInstance::ReportStatus()
@@ -869,17 +930,14 @@ void LLMInstance::ReportStatus()
 
 bool LLMInstance::PollResponse(MessagePiece& piece)
 {
-	if (!_resultMutex.try_lock())
+	std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
+	if(!lock.owns_lock())
 		return false;
 
 	if (_resultQueue.empty())
-	{
-		_resultMutex.unlock();
 		return false;
-	}
 
 	piece = _resultQueue.front();
 	_resultQueue.pop();
-	_resultMutex.unlock();
 	return true;
 }

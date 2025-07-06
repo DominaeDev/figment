@@ -26,10 +26,12 @@ struct ModelState
 	void Release();
 };
 
-struct LLMMessage {
+struct LLMMessageBlock {
+	Role role;
     string content;
 	std::vector<int32_t> tokens;
 	int32_t ctx_pos;
+	bool cached = false;
 };
 
 struct ChatState
@@ -37,7 +39,7 @@ struct ChatState
 	bool isInitialized = false;
 	std::vector<int32_t> system_tokens;
 	std::vector<int32_t> assistant_tokens;
-	std::vector<LLMMessage> messages;
+	std::vector<LLMMessageBlock> blocks;
 	int32_t current_pos = 0;
 	int32_t message_count = 0;
 	llama_batch batch {};
@@ -95,6 +97,11 @@ public:
 	void SetStatusCallback(StatusCallback onStatus) { _statusCallback = onStatus; }
 
 	bool PollResponse(MessagePiece& piece);
+
+private:
+	bool Generate(Message msg);
+	void ReportStatus();
+
 private:
 	struct __PartialResult
 	{
@@ -104,10 +111,8 @@ private:
 
 	typedef std::function<void(__PartialResult)> __PartialResultCallback;
 	typedef std::function<void(int, string)> __GenerationCompleteCallback;
-	void __Generate(string prompt, ChatState* chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	void __Generate(Message msg, ChatState* chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
-	bool Generate(const string& prompt);
-	void ReportStatus();
 
 private:
 	bool _bLoadingModel = false;
