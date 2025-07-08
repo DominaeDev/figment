@@ -24,5 +24,5 @@ namespace Constants
 	extern const string ThoughtTagEnd;
 
 	extern const int MaxMessageTokens;
-	extern const float ContextWindowSize;
+	extern const float ContextWindowSizeRatio;
 }

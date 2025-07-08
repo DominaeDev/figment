@@ -544,7 +544,7 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 	*bWait = false;
 }
 
-static void refresh_block_positions(ChatState& chat)
+static void adjust_block_positions(ChatState& chat)
 {
 	size_t pos = chat.system_tokens.size();
 	for (auto& block : chat.blocks)
@@ -621,7 +621,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	int32_t& current_pos = chat.current_pos;
 	current_pos = llama_kv_self_used_cells(state.pCtx);
 	int32_t start_pos = current_pos;
-	int32_t n_batch  = llama_n_batch(state.pCtx);
+	int32_t n_batch = llama_n_batch(state.pCtx);
 	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 
 	std::vector<llama_token> prompt_tokens;
@@ -645,7 +645,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 
 		lastBlock.content = lastResponse;
 		lastBlock.tokens = lastTokens;
-		//lastBlock.ctx_pos = start_pos;
+		lastBlock.ctx_pos = start_pos; // is overwritten later
 		lastBlock.cached = true;
 
 		prompt_tokens.insert(std::begin(prompt_tokens), std::cbegin(lastTokens), std::cend(lastTokens));
@@ -660,13 +660,45 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 		/* cached */ true,
 	});
 
-	int32_t pos_pre_response = start_pos + (int32_t)prompt_tokens.size();
-
-	if (pos_pre_response + Constants::MaxMessageTokens > ctx_size)
+	// Shift context
+	if (current_pos + (int32_t)prompt_tokens.size() + Constants::MaxMessageTokens > ctx_size)
 	{
-		return;
+		size_t keep_tokens = static_cast<int32_t>(ctx_size * Constants::ContextWindowSizeRatio) - (int32_t)prompt_tokens.size();
+		
+		size_t total = 0;
+		int32_t first_to_keep = (int32_t)chat.blocks.size() - 1;
+		for (; first_to_keep >= 0; --first_to_keep)
+		{
+			if (total + chat.blocks[first_to_keep].tokens.size() >= keep_tokens)
+				break;
+			total += (int32_t)chat.blocks[first_to_keep].tokens.size();
+		}
+		size_t shift_amount = 0;
+		for (int32_t i = 0; i < first_to_keep; ++i)
+			shift_amount += chat.blocks[i].tokens.size();
+		chat.blocks.erase(std::cbegin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
+
+		int32_t pos_remove_begin = (int32_t)chat.system_tokens.size();
+		int32_t pos_remove_end = pos_remove_begin + shift_amount;
+
+		bool removed = llama_kv_self_seq_rm(state.pCtx, 0, pos_remove_begin, pos_remove_end);
+		llama_kv_self_seq_add(state.pCtx, 0, (llama_pos)pos_remove_end, -1, -(llama_pos)shift_amount); // shift up
+
+		start_pos -= (int32_t)shift_amount;
+		current_pos -= (int32_t)shift_amount;
+
+		// Shift batch
+		for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
+		{
+			batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
+			batch.logits[i] = false;  // Don't need logits for most tokens
+		}
+		batch.n_tokens = batch.n_tokens - shift_amount;
 	}
-	refresh_block_positions(chat);
+
+	adjust_block_positions(chat);
+
+	int32_t pos_pre_response = start_pos + (int32_t)prompt_tokens.size();
 
 	// Append assistant tokens
 	prompt_tokens.insert(std::end(prompt_tokens), std::begin(chat.assistant_tokens), std::end(chat.assistant_tokens));

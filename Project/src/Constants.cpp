@@ -21,4 +21,4 @@ string const Constants::ThoughtTagEnd = "/thought";
 
 // Generation constants
 const int Constants::MaxMessageTokens = 512;
-const float Constants::ContextWindowSize = 0.75f;
+const float Constants::ContextWindowSizeRatio = 0.5f;
