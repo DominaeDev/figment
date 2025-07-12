@@ -1,0 +1,11 @@
+root		::= (dlg | act | narrate | thought | ws)+ end?
+
+dlg			::= "<talk=\"" name "\">\"" text "\"</talk>"
+act			::= "<act=\"" name "\">*" text "*</act>"
+thought		::= "<thought=\"" name "\">" text "</thought>"
+narrate		::= "<narrator>" text "</narrator>"
+text		::= [^\t\n<>\"*]*
+ws			::= [ \t\n]
+
+name		::= ##NAME_PATTERN##
+end			::= ( "<|im_end|>" | "</s>" | "<s>" | "<end_of_turn>" | "<EOT>" | "_<EOT>" | "###" | "<｜end▁of▁sentence｜>" )

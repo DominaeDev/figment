@@ -13,7 +13,7 @@
 struct LLMStatus;
 
 typedef std::function<void(bool)> LoadModelCallback;
-typedef std::function<void(LLMStatus)> StatusCallback;
+//typedef std::function<void(LLMStatus)> StatusCallback;
 typedef std::function<void(int)> LoadModelProgressCallback;
 
 struct ModelState
@@ -23,6 +23,7 @@ struct ModelState
 	llama_sampler* pSampler = nullptr;
 
 	bool bReady = false;
+	bool bInvalid = false;
 	void Release();
 };
 
@@ -62,8 +63,10 @@ struct GenerationState
 struct LLMStatus
 {
 	string modelName;
-	size_t allocCtxSize;
-	size_t usedCtxSize;
+	size_t allocCtxSize = 0;
+	size_t usedCtxSize = 0;
+	bool bReady = false;
+	bool bInvalid = false;
 };
 
 struct MessagePiece
@@ -94,13 +97,11 @@ public:
 
 	bool InitializeChat(string systemPrompt, std::vector<Message> messages);
 
-	void SetStatusCallback(StatusCallback onStatus) { _statusCallback = onStatus; }
-
 	bool PollResponse(MessagePiece& piece);
+	LLMStatus GetStatus() const;
 
 private:
 	bool Generate(Message msg);
-	void ReportStatus();
 
 private:
 	struct __PartialResult
@@ -109,10 +110,17 @@ private:
 		string fullText;
 	};
 
-	typedef std::function<void(__PartialResult)> __PartialResultCallback;
-	typedef std::function<void(int, string)> __GenerationCompleteCallback;
-	void __Generate(Message msg, ChatState* chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	enum InternalError : int {
+		NoError = 0,
+		ContextFull = 1,
+		DecodeError = 2,
+		SamplerError = 3,
+		GrammarError = 4,
+	};
 
+	typedef std::function<void(__PartialResult)> __PartialResultCallback;
+	typedef std::function<void(InternalError, string)> __GenerationCompleteCallback;
+	void __Generate(Message msg, ChatState* chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
 private:
 	bool _bLoadingModel = false;
@@ -128,6 +136,7 @@ private:
 	std::string _generatedText;
 	std::queue<MessagePiece> _resultQueue;
 		
-	StatusCallback _statusCallback = nullptr;
+//	StatusCallback _statusCallback = nullptr;
+	LLMStatus _lastStatus {};
 	int _messageCounter = 0;
 };

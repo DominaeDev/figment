@@ -96,6 +96,11 @@ void MainFrame::OnUpdate(float fDeltaTime)
 {
 	if (_bAutomation)
 		RunAutomation();
+	
+	// Poll llm status
+	_fpollingCounter += fDeltaTime;
+	if (_fpollingCounter > 0.1f)
+		PollStatus();
 }
 
 void MainFrame::OnRender(SDL_Renderer* pRenderer)
@@ -110,10 +115,6 @@ void MainFrame::LoadModel()
 	auto pLLM = Application::GetLLM();
 	if (!pLLM)
 		return;
-
-	pLLM->SetStatusCallback([this](LLMStatus status) {
-		_pStatusBar->SetModelInfo(status.modelName, status.allocCtxSize, status.usedCtxSize);
-	});
 
 	if (!pLLM->HasLoadedModel())
 	{
@@ -246,4 +247,24 @@ void MainFrame::RunAutomation()
 	_pChatScroll->AddMessage("User", message, MessageType::UserMessage);
 	if (pLLM->SendMessage(Role::User, formatted))
 		_pChatScroll->StartListening();
+}
+
+void MainFrame::PollStatus()
+{
+	auto pLLM = Application::GetLLM();
+	if (pLLM)
+	{
+		auto status = pLLM->GetStatus();
+		if (status.bInvalid)
+		{
+			pLLM->Shutdown();
+			_bAutomation = false;
+			_pStatusBar->SetMessage("Error occurred. Model unloaded.");
+			_pStatusBar->SetModelInfo("", 0, 0);
+			return;
+		}
+
+		if (status.bReady)
+			_pStatusBar->SetModelInfo(status.modelName, status.allocCtxSize, status.usedCtxSize);
+	}
 }

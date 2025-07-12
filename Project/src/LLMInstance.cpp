@@ -25,6 +25,7 @@ void ModelState::Release()
 	pCtx = nullptr;
 	pModel = nullptr;
 	bReady = false;
+	bInvalid = false;
 }
 
 LLMInstance::LLMInstance()
@@ -55,7 +56,6 @@ LLMInstance::~LLMInstance()
 		printf(">> Done!\r\n");
 	}
 
-	_statusCallback = nullptr;
 	Shutdown();
 }
 
@@ -66,8 +66,6 @@ void LLMInstance::Shutdown()
 	// Clear state and release
 	auto state = _atm_modelState.exchange(ModelState());
 	state.Release();
-
-	ReportStatus();
 }
 
 typedef std::function<void(ModelState)> __LoadModelCallback;
@@ -282,6 +280,33 @@ bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> mess
 	_chatState.user.LoadFromXml("characters/user.xml"); // tmp
 	_chatState.bot.LoadFromXml("characters/character.xml"); // tmp
 
+	// Initialize sampler + grammar
+	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
+
+	// Init sampler chain
+	if (state.pSampler == nullptr)
+	{
+		llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
+		llama_sampler* pSampler = llama_sampler_chain_init(sampler_params);
+
+		// Load grammar
+		string grammar = LoadTextFile("./resources/default_grammar.gbnf");
+		replace_all(grammar, "##NAME_PATTERN##", "(\"" + _chatState.bot.name + "\")");
+		auto grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
+		if (grammar_sampler)
+			printf("Grammar loaded\r\n");
+
+		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
+		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(1.5f));							// Temperature
+		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
+		if (grammar_sampler) llama_sampler_chain_add(pSampler, grammar_sampler);					// Grammar
+		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
+
+		state.pSampler = pSampler;
+		_atm_modelState.store(state);
+	}
+
+	// Init system prompt
 	string prompt = trim(system_prompt);
 	if (!isEmptyOrWhitespace(_chatState.bot.description))
 	{
@@ -294,7 +319,6 @@ bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> mess
 
 	apply_names(prompt, _chatState.user.name, _chatState.bot.name);
 
-	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 	llama_context* pCtx = state.pCtx;
 
 	// Tokenize system prompt
@@ -362,15 +386,9 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 		return;
 	}
 
-	// initialize the sampler
-	llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
-	state.pSampler = llama_sampler_chain_init(sampler_params);
-
-	llama_sampler_chain_add(state.pSampler, llama_sampler_init_min_p(0.05f, 1));			// Min P
-	llama_sampler_chain_add(state.pSampler, llama_sampler_init_temp(0.8f));					// Temperature
-	llama_sampler_chain_add(state.pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));	// Seed
-
 	state.bReady = true;
+	state.bInvalid = false;
+
 	onComplete(state);
 }
 
@@ -400,14 +418,12 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 			_atm_modelState.store(result);
 			_modelName = get_filename(filename);
 			onComplete(true);
-			ReportStatus();
 		}
 		else
 		{
 			result.Release();
 			_modelName.clear();
 			onComplete(false);
-			ReportStatus();
 		}
 	});
 
@@ -419,7 +435,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 bool LLMInstance::IsReady() const
 {
 	ModelState state = _atm_modelState.load();
-	return state.bReady && state.pModel && _chatState.isInitialized;
+	return state.bReady && !state.bInvalid && state.pModel && _chatState.isInitialized;
 }
 
 bool LLMInstance::IsGenerating() const
@@ -679,7 +695,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 		chat.blocks.erase(std::cbegin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
 
 		int32_t pos_remove_begin = (int32_t)chat.system_tokens.size();
-		int32_t pos_remove_end = pos_remove_begin + shift_amount;
+		int32_t pos_remove_end = pos_remove_begin + (int32_t)shift_amount;
 
 		bool removed = llama_kv_self_seq_rm(state.pCtx, 0, pos_remove_begin, pos_remove_end);
 		llama_kv_self_seq_add(state.pCtx, 0, (llama_pos)pos_remove_end, -1, -(llama_pos)shift_amount); // shift up
@@ -693,7 +709,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 			batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
 			batch.logits[i] = false;  // Don't need logits for most tokens
 		}
-		batch.n_tokens = batch.n_tokens - shift_amount;
+		batch.n_tokens = batch.n_tokens - (int32_t)shift_amount;
 	}
 
 	adjust_block_positions(chat);
@@ -718,6 +734,8 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 
 	printf("BEGIN GENERATION\r\n");
 
+	llama_sampler_reset(state.pSampler);
+
 	while (true)
 	{
 		bool next_token = true;
@@ -737,21 +755,32 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
 		if (n_ctx_used + n_tokens > ctx_size)
 		{
-			fprintf(stderr, "context size exceeded\n");
-			onComplete(2, response);
+			onComplete(InternalError::ContextFull, "context size exceeded");
 			return;
 		}
+		
 		if (batch_view.n_tokens > 0 && llama_decode(state.pCtx, batch_view))
 		{
-			fprintf(stderr, "failed to decode\n");
-			onComplete(3, response);
+			onComplete(InternalError::DecodeError, "llama_decode returned error");
 			return;
 		}
 
 		current_pos += batch_view.n_tokens;
 
 		// sample the next token
-		sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);
+		try
+		{
+			sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);
+//			llama_sampler_accept(state.pSampler, sampled_token); // redundant
+		}
+		catch (const std::runtime_error& e)
+		{
+			if (strstr(e.what(), "Unexpected empty grammar stack") != 0)
+				onComplete(InternalError::GrammarError, e.what());
+			else
+				onComplete(InternalError::SamplerError, e.what());
+			return;
+		}
 
 		// is it an end of generation?
 		if (llama_vocab_is_eog(pVocab, sampled_token))
@@ -896,7 +925,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 
 	printf("\r\nEND OF GENERATION\r\n[%s](%s)\r\n", response.c_str(), stop_word.c_str());
 
-	onComplete(0, response);
+	onComplete(InternalError::NoError, response);
 };
 
 bool LLMInstance::Generate(Message msg)
@@ -920,14 +949,21 @@ bool LLMInstance::Generate(Message msg)
 		[](__PartialResult partial) {
 			// ...
 		},
-		[this](int error, string response) {
+		[this](InternalError error, string response) {
 			// ...
 			ModelState state = _atm_modelState.load();
-			_chatState.prev_messages.clear();
-			_chatState.prev_messages.push_back(Message { Role::Bot, response });
-
+			if (error == InternalError::NoError)
+			{
+				_chatState.prev_messages.clear();
+				_chatState.prev_messages.push_back(Message { Role::Bot, response });
+			}
+			else
+			{
+				printf("\r\n>> Internal error: (%d) %s\r\n", error, response.c_str());
+				state.bInvalid = true; // Invalidate state
+				_atm_modelState.store(state);
+			}
 			_atm_bGeneratingResponse.store(false);
-			ReportStatus();
 		});
 
 	_workerThread.reset(pThread);
@@ -959,23 +995,20 @@ bool LLMInstance::SendMessage(Role role, string message, bool generate)
 	return Generate( Message { role, message });
 }
 
-void LLMInstance::ReportStatus()
+LLMStatus LLMInstance::GetStatus() const
 {
-	if (!_statusCallback)
-		return;
-
 	ModelState state = _atm_modelState.load();
 
-	if (!state.pModel || !state.pCtx)
+	LLMStatus status {};
+	if (state.pModel && state.pCtx)
 	{
-		_statusCallback(LLMStatus());
-		return;
+		status.modelName = _modelName;
+		status.allocCtxSize = llama_n_ctx(state.pCtx);
+		status.usedCtxSize = llama_kv_self_used_cells(state.pCtx);
+		status.bReady = state.bReady;
+		status.bInvalid = state.bInvalid;
 	}
-
-	uint32_t allocCtx = llama_n_ctx(state.pCtx);
-	uint32_t usedCtx = llama_kv_self_used_cells(state.pCtx);
-
-	_statusCallback(LLMStatus { _modelName, allocCtx, usedCtx });
+	return status;
 }
 
 bool LLMInstance::PollResponse(MessagePiece& piece)

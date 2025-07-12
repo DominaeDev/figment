@@ -31,10 +31,12 @@ protected:
 
 	void OnCommand(Command cmd);
 	void RunAutomation();
+	void PollStatus();
 
 private:
 	StatusBar* _pStatusBar;
 	ChatScroll* _pChatScroll;
 	bool _bAutomation;
 	std::queue<string> _autoQueue;
+	float _fpollingCounter = 0.0f;
 };

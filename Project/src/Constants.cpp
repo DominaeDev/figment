@@ -10,12 +10,12 @@ double const Constants::StatusBarFontSize = 14.5;
 double const Constants::ChatMessageFontSize = 15.5;
 
 // Commands
-string const Constants::DialogueTagBegin = "speak";
-string const Constants::DialogueTagEnd = "/speak";
+string const Constants::DialogueTagBegin = "talk";
+string const Constants::DialogueTagEnd = "/talk";
 string const Constants::ActionTagBegin = "act";
 string const Constants::ActionTagEnd = "/act";
-string const Constants::NarrationTagBegin = "narration";
-string const Constants::NarrationTagEnd = "/narration";
+string const Constants::NarrationTagBegin = "narrator";
+string const Constants::NarrationTagEnd = "/narrator";
 string const Constants::ThoughtTagBegin = "thought";
 string const Constants::ThoughtTagEnd = "/thought";
 
