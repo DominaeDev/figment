@@ -64,7 +64,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
-      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>/Zc:char8_t- /utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -112,7 +112,6 @@
     <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\CommandParser.cpp" />
     <ClCompile Include="src\Constants.cpp" />
-    <ClCompile Include="src\ContextBuilder.cpp" />
     <ClCompile Include="src\Control.cpp" />
     <ClCompile Include="src\ControlWithMargins.cpp" />
     <ClCompile Include="src\Fonts.cpp" />
@@ -147,7 +146,6 @@
     <ClInclude Include="include\ChatSession.h" />
     <ClInclude Include="include\Command.h" />
     <ClInclude Include="include\CommandParser.h" />
-    <ClInclude Include="include\ContextBuilder.h" />
     <ClInclude Include="include\CustomRenderer.h" />
     <ClInclude Include="include\ChatMessage.h" />
     <ClInclude Include="include\ChatScroll.h" />

@@ -2,8 +2,8 @@
 
 #include "llama.h"
 #include "Types.h"
-#include "ContextBuilder.h"
 #include "Message.h"
+#include "Character.h"
 #include <vector>
 #include <functional>
 #include <thread>
@@ -13,8 +13,8 @@
 struct LLMStatus;
 
 typedef std::function<void(bool)> LoadModelCallback;
-//typedef std::function<void(LLMStatus)> StatusCallback;
 typedef std::function<void(int)> LoadModelProgressCallback;
+typedef std::vector<Message> Messages;
 
 struct ModelState
 {
@@ -45,7 +45,7 @@ struct ChatState
 	int32_t message_count = 0;
 	llama_batch batch {};
 
-	std::vector<Message> prev_messages;
+	Messages prev_messages;
 
 	Character user;
 	Character bot;
@@ -94,7 +94,7 @@ public:
 	bool Resume();
 	bool Halt();
 
-	bool InitializeChat(string systemPrompt, std::vector<Message> messages);
+	bool InitializeChat(string systemPrompt, Messages messages);
 	
 	bool SendMessage(Role role, string message);
 	bool PushMessage(Role role, string message);
@@ -102,8 +102,11 @@ public:
 	bool PollResponse(MessagePiece& piece);
 	LLMStatus GetStatus() const;
 
+	bool DumpContext(string filename) const;
+
 private:
-	bool Generate(Message msg);
+	void ClearResponseQueue();
+	void CancelWorkerThread();
 
 private:
 	struct __PartialResult
@@ -122,6 +125,7 @@ private:
 
 	typedef std::function<void(__PartialResult)> __PartialResultCallback;
 	typedef std::function<void(InternalError, string)> __GenerationCompleteCallback;
+	
 	void __Generate(Message msg, ChatState* chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
 private:
@@ -135,10 +139,8 @@ private:
 	std::unique_ptr<std::thread> _workerThread;
 
 	std::mutex _resultMutex;
-	std::string _generatedText;
 	std::queue<MessagePiece> _resultQueue;
 		
-//	StatusCallback _statusCallback = nullptr;
 	LLMStatus _lastStatus {};
 	int _messageCounter = 0;
 };

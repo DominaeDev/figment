@@ -94,7 +94,7 @@ MainFrame::~MainFrame()
 
 void MainFrame::OnUpdate(float fDeltaTime)
 {
-	if (_bAutomation)
+	if (_bAutoChat)
 		RunAutomation();
 	
 	// Poll llm status
@@ -156,7 +156,7 @@ void MainFrame::StartChat()
 	auto pLLM = Application::GetLLM();
 	if (pLLM && pLLM->HasLoadedModel())
 	{
-		string system_prompt = LoadTextFile("characters/system.txt");
+		string system_prompt = ReadTextFile("characters/system.txt").value_or("");
 		pLLM->InitializeChat(system_prompt, {});
 	}
 }
@@ -189,9 +189,9 @@ void MainFrame::OnCommand(Command cmd)
 	}
 }
 
-void MainFrame::EnableAutomation(bool bEnable)
+void MainFrame::EnableAutoChat(bool bEnable)
 {
-	_bAutomation = bEnable;
+	_bAutoChat = bEnable;
 }
 
 static std::vector<std::string> split(std::string s, const std::string& delimiter)
@@ -228,15 +228,15 @@ void MainFrame::RunAutomation()
 
 	if (_autoQueue.empty())
 	{
-		string text = LoadTextFile("resources/debug_script.txt");
-		auto lines = split(text, "\r\n");
+		string text = ReadTextFile("resources/debug_script.txt").value_or("");
+		auto lines = split(text, "\n");
 		for (auto& line : lines)
 			_autoQueue.push(line);
 	}
 
 	if (_autoQueue.empty())
 	{
-		_bAutomation = false;
+		_bAutoChat = false;
 		return;
 	}
 
@@ -258,7 +258,7 @@ void MainFrame::PollStatus()
 		if (status.bInvalid)
 		{
 			pLLM->Shutdown();
-			_bAutomation = false;
+			_bAutoChat = false;
 			_pStatusBar->SetMessage("Error occurred. Model unloaded.");
 			_pStatusBar->SetModelInfo("", 0, 0);
 			return;

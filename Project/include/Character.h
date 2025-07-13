@@ -2,10 +2,11 @@
 
 #include "Types.h"
 
-struct CharacterProperty {
+struct CharacterProperty 
+{
 	string key;
-	string label;
 	string value;
+	string label;
 };
 
 class Character

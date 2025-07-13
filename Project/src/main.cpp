@@ -119,11 +119,18 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 			static_cast<MainFrame*>(pAppState->pTopFrame)->UnloadModel();
 			break;
 		case SDLK_F5:
-			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutomation(true);
+			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutoChat(true);
 			break;
 		case SDLK_F6:
-			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutomation(false);
+			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutoChat(false);
 			break;
+		case SDLK_F9:
+		{
+			auto pLLM = Application::GetLLM();
+			if (pLLM)
+				pLLM->Resume();
+			break;
+		}
 		case SDLK_F10:
 		{
 			auto pLLM = Application::GetLLM();
@@ -131,11 +138,11 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 				pLLM->Halt();
 			break;
 		}
-		case SDLK_F9:
+		case SDLK_F11:
 		{
 			auto pLLM = Application::GetLLM();
 			if (pLLM)
-				pLLM->Resume();
+				pLLM->DumpContext("prompt.txt");
 			break;
 		}
 		}

@@ -27,7 +27,7 @@ bool Character::LoadFromXml(string filename)
 	{
 		string gender = pGender->GetText();
 		if (!gender.empty())
-			properties.push_back(CharacterProperty { "gender", "Gender", gender });
+			properties.push_back(CharacterProperty { "gender", gender, "Gender" });
 	}
 
 	return !name.empty();

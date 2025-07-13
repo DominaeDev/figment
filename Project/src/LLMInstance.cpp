@@ -81,14 +81,14 @@ static std::string stringFromToken(const llama_vocab* pVocab, llama_token token)
 {
 	// convert the token to a string, print it and add it to the response
 	char buf[256];
-	int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
+	int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, false);
 	if (n < 0)
 		return "";
 
 	return std::string(buf, n);
 }
 
-size_t validate_utf8(const std::string& text)
+size_t validate_utf8(const string& text)
 {
 	size_t len = text.size();
 	if (len == 0) return 0;
@@ -140,28 +140,28 @@ size_t string_find_partial_stop(const std::string_view& str, const std::string_v
 		}
 	}
 
-	return std::string::npos;
+	return string::npos;
 }
 
-size_t find_one_of(const std::string& text, const std::vector<std::string>& words)
+size_t find_one_of(const string& text, const std::vector<string>& words)
 {
-	size_t stop_pos = std::string::npos;
+	size_t stop_pos = string::npos;
 
-	for (const std::string& word : words)
+	for (const string& word : words)
 	{
 		size_t pos = text.find(word);
-		if (pos != std::string::npos && (stop_pos == std::string::npos || pos < stop_pos))
+		if (pos != string::npos && (stop_pos == string::npos || pos < stop_pos))
 			stop_pos = pos;
 	}
 
 	return stop_pos;
 }
 
-size_t find_stopping_strings(const std::string& text, const std::vector<std::string>& stop_words, const size_t last_token_size, bool is_full_stop)
+size_t find_stopping_strings(const string& text, const std::vector<string>& stop_words, const size_t last_token_size, bool is_full_stop)
 {
-	size_t stop_pos = std::string::npos;
+	size_t stop_pos = string::npos;
 
-	for (const std::string& word : stop_words)
+	for (const string& word : stop_words)
 	{
 		size_t pos;
 
@@ -178,7 +178,7 @@ size_t find_stopping_strings(const std::string& text, const std::vector<std::str
 			pos = string_find_partial_stop(text, word);
 		}
 
-		if (pos != std::string::npos && (stop_pos == std::string::npos || pos < stop_pos))
+		if (pos != string::npos && (stop_pos == string::npos || pos < stop_pos))
 		{
 			stop_pos = pos;
 		}
@@ -190,7 +190,7 @@ size_t find_stopping_strings(const std::string& text, const std::vector<std::str
 static void get_tag_and_name(const string& text, string& tag, string& name)
 {
 	size_t pos_equals = text.find('=', 1);
-	if (pos_equals == std::string::npos)
+	if (pos_equals == string::npos)
 	{
 		tag = trim(text.substr(1, text.length() - 2));
 		name = "";
@@ -208,7 +208,7 @@ static void apply_names(string& prompt, string userName, string botName)
 	replace_all(prompt, "{{char}}", botName);
 }
 
-static string apply_chat_template(std::vector<Message> in_messages, llama_context* pCtx, bool add_assistant)
+static string apply_chat_template(Messages in_messages, llama_context* pCtx, bool add_assistant)
 {
 	int prev_len = 0;
 
@@ -267,10 +267,10 @@ static string apply_chat_template(std::vector<Message> in_messages, llama_contex
 
 static string apply_chat_template(Message msg, llama_context* pCtx, bool add_assistant)
 {
-	return apply_chat_template(std::vector<Message> { msg }, pCtx, add_assistant);
+	return apply_chat_template(Messages { msg }, pCtx, add_assistant);
 }
 
-bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> messages)
+bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 {
 	ModelState state = _atm_modelState.load();
 	if (!state.bReady || !state.pModel)
@@ -290,7 +290,7 @@ bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> mess
 		llama_sampler* pSampler = llama_sampler_chain_init(sampler_params);
 
 		// Load grammar
-		string grammar = LoadTextFile("./resources/default_grammar.gbnf");
+		string grammar = ReadTextFile("./resources/default_grammar.gbnf").value_or("");
 		replace_all(grammar, "##NAME_PATTERN##", "(\"" + _chatState.bot.name + "\")");
 		auto grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
 		if (grammar_sampler)
@@ -327,7 +327,7 @@ bool LLMInstance::InitializeChat(string system_prompt, std::vector<Message> mess
 	_chatState.isInitialized = true;
 
 	// Prepare assistant prelude
-	string assistant_prefix = apply_chat_template(std::vector<Message>{}, state.pCtx, true);
+	string assistant_prefix = apply_chat_template(Messages{}, state.pCtx, true);
 	replace_all(assistant_prefix, "assistant", _chatState.bot.name);
 	replace_all(assistant_prefix, "ASSISTANT", _chatState.bot.name);
 	_chatState.assistant_tokens = __tokenize(state.pModel, assistant_prefix, false);
@@ -447,8 +447,7 @@ bool LLMInstance::Resume()
 {
 	if (!IsReady() || IsGenerating())
 		return false;
-
-	return Generate(Message { Role::User, "" }); //! @fix
+	return false; // Todo
 }
 
 bool LLMInstance::Halt()
@@ -456,14 +455,7 @@ bool LLMInstance::Halt()
 	if (!IsReady() || !IsGenerating())
 		return false;
 
-	_atm_bCancelGeneration.store(true);
-	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
-	{
-		printf(">> Halting. Waiting on worker thread ");
-		fflush(stdout);
-		_workerThread.get()->join();
-		printf(">> Done!\r\n");
-	}
+	CancelWorkerThread();
 	return true;
 }
 
@@ -476,7 +468,7 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 		return;
 	}
 
-	static std::vector<std::string> stop_words {
+	static std::vector<string> stop_words {
 		"<|",
 		"<end_of_turn",
 		"<EOT>",
@@ -489,21 +481,21 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 //		"<｜end▁of▁sentence｜>",
 	};
 
-	static std::vector<std::string> opening_tags {
+	static std::vector<string> opening_tags {
 		std::format("<{0}=\"", Constants::DialogueTagBegin),
 		std::format("<{0}=\"", Constants::ActionTagBegin),
 		std::format("<{0}=\"", Constants::ThoughtTagBegin),
 		std::format("<{0}>", Constants::NarrationTagBegin),
 	};
 
-	static std::vector<std::string> closing_tags {
+	static std::vector<string> closing_tags {
 		std::format("<{0}>", Constants::DialogueTagEnd),
 		std::format("<{0}>", Constants::ActionTagEnd),
 		std::format("<{0}>", Constants::ThoughtTagEnd),
 		std::format("<{0}>", Constants::NarrationTagEnd),
 	};
 
-	static std::vector<std::string> formatting_tags;
+	static std::vector<string> formatting_tags;
 	if (formatting_tags.empty())
 	{
 		formatting_tags.insert(std::end(formatting_tags), std::begin(opening_tags), std::end(opening_tags));
@@ -512,7 +504,7 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 
 	// Look for stop word - and halt
 	size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
-	if (stop_pos != std::string::npos)
+	if (stop_pos != string::npos)
 	{
 		stop_word = partial.substr(stop_pos);
 
@@ -525,7 +517,7 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 
 	// Look for partial stop word - and wait
 	stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
-	if (stop_pos != std::string::npos)
+	if (stop_pos != string::npos)
 	{
 		*bHalt = false;
 		*bWait = true;
@@ -534,10 +526,10 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 
 	// Look for formatting tags
 	size_t fmt_pos = find_one_of(partial, opening_tags);
-	if (fmt_pos != std::string::npos)
+	if (fmt_pos != string::npos)
 	{
 		// Await end of tag '>', or beginning of a new tag '<' (indicating garbage from the model)
-		if (partial.find_first_of("<>", fmt_pos + 1, 2) == std::string::npos)
+		if (partial.find_first_of("<>", fmt_pos + 1, 2) == string::npos)
 		{
 			*bHalt = false;
 			*bWait = true;
@@ -548,7 +540,7 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 	{
 		// Look for partial formatting tags - and wait
 		fmt_pos = find_stopping_strings(partial, formatting_tags, str_token.size(), false);
-		if (fmt_pos != std::string::npos)
+		if (fmt_pos != string::npos)
 		{
 			*bHalt = false;
 			*bWait = true;
@@ -624,14 +616,7 @@ bool LLMInstance::PushMessage(Role role, string message)
 	if (!IsReady() || IsGenerating())
 		return false;
 
-	ChatState& chat = _chatState;
-
-	string userName = chat.user.name;
-	string botName = chat.bot.name;
-
-	apply_names(message, userName, botName);
-
-	chat.blocks.push_back(LLMMessageBlock {
+	_chatState.blocks.push_back(LLMMessageBlock {
 		/*role*/ role,
 		/*content*/ message,
 		/*tokens*/ {},
@@ -679,6 +664,8 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 			continue;
 
 		string lastResponse = apply_chat_template(Message { lastBlock.role, lastBlock.content }, state.pCtx, false);
+		apply_names(lastResponse, userName, botName);
+
 		auto lastTokens = __tokenize(state.pModel, lastResponse, false);
 
 		lastBlock.content = lastResponse;
@@ -750,9 +737,9 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	std::vector<llama_token> sampled_tokens;
 
 	llama_token sampled_token;
-	std::string partial;
-	std::string stop_word;
-	std::string response;
+	string partial;
+	string stop_word;
+	string response;
 	MessageType msgType = MessageType::Undefined;
 
 	printf("BEGIN GENERATION\r\n");
@@ -813,7 +800,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 		}
 
 		// convert the token to a string, print it and add it to the response
-		std::string str_token = stringFromToken(pVocab, sampled_token);
+		string str_token = stringFromToken(pVocab, sampled_token);
 		if (str_token.size() == 0)
 			break; // Error
 
@@ -843,11 +830,11 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 
 			// Check and erase formatting tags
 			size_t fmt_start = partial.find('<');
-			if (fmt_start != std::string::npos)
+			if (fmt_start != string::npos)
 			{
 				bool bRemove = false;
 				size_t fmt_end = partial.find('>', fmt_start + 1);
-				if (fmt_end != std::string::npos)
+				if (fmt_end != string::npos)
 				{
 					string tag, tagName;
 					get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
@@ -896,7 +883,6 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 			if (partial.size() > 0)
 			{
 				std::lock_guard<std::mutex> lock(_resultMutex);
-				_generatedText += partial;
 
 				_resultQueue.push(MessagePiece {
 					genState.messageId,
@@ -951,7 +937,30 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	onComplete(InternalError::NoError, response);
 };
 
-bool LLMInstance::Generate(Message msg)
+void LLMInstance::CancelWorkerThread()
+{
+	_atm_bCancelGeneration.store(true);
+
+	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+	{
+		printf(">> Halting. Waiting on worker thread ");
+		fflush(stdout);
+		_workerThread.get()->join();
+		printf(">> Done!\r\n");
+	}
+}
+
+void LLMInstance::ClearResponseQueue()
+{
+	printf(">> Waiting on mutex ");
+	fflush(stdout);
+	std::lock_guard lock(_resultMutex);
+	while (!_resultQueue.empty())
+		_resultQueue.pop();
+	printf(">> Done!\r\n");
+}
+
+bool LLMInstance::SendMessage(Role role, string message)
 {
 	if (!IsReady() || IsGenerating())
 		return false;
@@ -965,16 +974,10 @@ bool LLMInstance::Generate(Message msg)
 		printf(">> Done!\r\n");
 	}
 
-	if (msg.role == Role::System)
-	{
-		PushMessage(msg, &_chatState);
-		return true;
-	}
-
 	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(true);
 
-	auto pThread = new std::thread(&LLMInstance::__Generate, this, msg, &_chatState,
+	auto pThread = new std::thread(&LLMInstance::__Generate, this, Message { role, message }, &_chatState,
 		[](__PartialResult partial) {
 			// ...
 		},
@@ -997,26 +1000,6 @@ bool LLMInstance::Generate(Message msg)
 
 	_workerThread.reset(pThread);
 	return true;
-};
-
-bool LLMInstance::SendMessage(Role role, string message)
-{
-	if (!IsReady() || IsGenerating())
-		return false;
-
-	// Clear response queue
-	{
-		printf(">> Waiting on mutex ");
-		fflush(stdout);
-		std::lock_guard lock(_resultMutex);
-		while (!_resultQueue.empty())
-			_resultQueue.pop();
-		printf(">> Done!\r\n");
-	}
-	_generatedText.clear();
-
-	// generate a response
-	return Generate( Message { role, message });
 }
 
 LLMStatus LLMInstance::GetStatus() const
@@ -1047,4 +1030,57 @@ bool LLMInstance::PollResponse(MessagePiece& piece)
 	piece = _resultQueue.front();
 	_resultQueue.pop();
 	return true;
+}
+
+bool LLMInstance::DumpContext(string filename) const
+{
+	if (!IsReady())
+		return false;
+
+	ModelState state = _atm_modelState.load();
+	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
+
+	auto fnTokenStr = [pVocab](llama_token token) -> string {
+		if (token == llama_vocab_bos(pVocab))
+			return "<BOS>";
+		else if (token == llama_vocab_eos(pVocab))
+			return "<EOS>";
+		else if (token == llama_vocab_eot(pVocab))
+			return "<EOT>";
+		else if (token == llama_vocab_sep(pVocab))
+			return "<SEP>";
+		else if (token == llama_vocab_pad(pVocab))
+			return "<PAD>";
+		else if (token == llama_vocab_nl(pVocab))
+			return "<NL>\r\n";
+		else
+		{
+			char buf[256];
+			int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
+			if (n < 0)
+				return "<UNK>";
+			else
+				return string(buf, n);
+		}
+	};
+
+	const llama_batch& batch = _chatState.batch;
+
+	// Detokenize the batched tokens
+	string result;
+	result.reserve(batch.n_tokens * 4); // Rough estimate for string size
+
+	for (int32_t i = 0; i < batch.n_tokens; ++i)
+		result.append(fnTokenStr(batch.token[i]));
+
+	for (auto& block : _chatState.blocks)
+	{
+		if (block.cached)
+			continue;
+
+		for (int32_t i = 0; i < block.tokens.size(); ++i)
+			result.append(fnTokenStr(block.tokens[i]));
+	}
+
+	return WriteTextFile(filename, result, false);
 }

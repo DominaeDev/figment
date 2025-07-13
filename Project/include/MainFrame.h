@@ -24,7 +24,7 @@ public:
 	static void SetStatusBar(string message);
 	static MainFrame& GetInstance() { return *s_pInstance; }
 	
-	void EnableAutomation(bool bEnable);
+	void EnableAutoChat(bool bEnable);
 protected:
 	virtual void OnUpdate(float fDeltaTime) override;
 	virtual void OnRender(SDL_Renderer* pRenderer) override;
@@ -36,7 +36,7 @@ protected:
 private:
 	StatusBar* _pStatusBar;
 	ChatScroll* _pChatScroll;
-	bool _bAutomation;
+	bool _bAutoChat;
 	std::queue<string> _autoQueue;
 	float _fpollingCounter = 0.0f;
 };

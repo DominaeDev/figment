@@ -14,3 +14,18 @@ typedef SDL_FRect Rect;
 class Control;
 class LayoutElement;
 class Sizer;
+
+struct llama_chat_message;
+
+enum class Role
+{
+	System,
+	User,
+	Bot,
+};
+
+struct Message {
+	Role role;
+    string content;
+    string name;
+};
