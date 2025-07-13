@@ -13,7 +13,7 @@
 #include "MainFrame.h"
 #include "LLMInstance.h"
 
-#if defined(_DEBUG) && 1
+#if defined(_DEBUG)
 #define CHECK_MEMORY_LEAKS
 #endif
 
@@ -199,12 +199,12 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 {
 	AppState* pAppState = static_cast<AppState*>(state);
 	delete pAppState->pTopFrame;
+	delete pAppState->pLLM;
 	
 	TextureStore::Release();
 	Fonts::ReleaseFonts();
 	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
 	TTF_Quit();
 
-	delete pAppState->pLLM;
 }
 

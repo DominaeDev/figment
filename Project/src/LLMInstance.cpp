@@ -619,6 +619,28 @@ static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt
 	return true;
 }
 
+bool LLMInstance::PushMessage(Role role, string message)
+{
+	if (!IsReady() || IsGenerating())
+		return false;
+
+	ChatState& chat = _chatState;
+
+	string userName = chat.user.name;
+	string botName = chat.bot.name;
+
+	apply_names(message, userName, botName);
+
+	chat.blocks.push_back(LLMMessageBlock {
+		/*role*/ role,
+		/*content*/ message,
+		/*tokens*/ {},
+		/*ctx_pos*/ 0,
+		/* cached */ false,
+	});
+	return true;
+}
+
 void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
 	// Load state
@@ -650,11 +672,11 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	int32_t user_pos = start_pos;
 
 	// Re-insert previous response (reformatted)
-	for (auto it = std::rbegin(chat.blocks); it != std::rend(chat.blocks); ++it)
+	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
 	{
 		auto& lastBlock = *it;
 		if (lastBlock.cached)
-			break;
+			continue;
 
 		string lastResponse = apply_chat_template(Message { lastBlock.role, lastBlock.content }, state.pCtx, false);
 		auto lastTokens = __tokenize(state.pModel, lastResponse, false);
@@ -669,7 +691,7 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	}
 
 	chat.blocks.push_back(LLMMessageBlock {
-		/*role*/ Role::User,
+		/*role*/ msg.role,
 		/*content*/ userPrompt,
 		/*tokens*/ userTokens,
 		/*ctx_pos*/ user_pos,
@@ -717,7 +739,8 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	int32_t pos_pre_response = start_pos + (int32_t)prompt_tokens.size();
 
 	// Append assistant tokens
-	prompt_tokens.insert(std::end(prompt_tokens), std::begin(chat.assistant_tokens), std::end(chat.assistant_tokens));
+	if (msg.role == Role::User)
+		prompt_tokens.insert(std::end(prompt_tokens), std::begin(chat.assistant_tokens), std::end(chat.assistant_tokens));
 
 	// Append to batch
 	for (int i = 0; i < prompt_tokens.size(); ++i)
@@ -942,6 +965,12 @@ bool LLMInstance::Generate(Message msg)
 		printf(">> Done!\r\n");
 	}
 
+	if (msg.role == Role::System)
+	{
+		PushMessage(msg, &_chatState);
+		return true;
+	}
+
 	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(true);
 
@@ -970,7 +999,7 @@ bool LLMInstance::Generate(Message msg)
 	return true;
 };
 
-bool LLMInstance::SendMessage(Role role, string message, bool generate)
+bool LLMInstance::SendMessage(Role role, string message)
 {
 	if (!IsReady() || IsGenerating())
 		return false;
@@ -986,11 +1015,6 @@ bool LLMInstance::SendMessage(Role role, string message, bool generate)
 	}
 	_generatedText.clear();
 
-	ModelState state = _atm_modelState.load();
-
-	if (!generate) //! @fix
-		return true;
-	
 	// generate a response
 	return Generate( Message { role, message });
 }

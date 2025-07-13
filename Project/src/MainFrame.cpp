@@ -183,8 +183,8 @@ void MainFrame::OnCommand(Command cmd)
 		}
 		else if (cmd.type == CommandType::SystemMessage)
 		{
-			_pChatScroll->AddMessage("System", "<" + cmd.text + ">", MessageType::SystemMessage);
-			pLLM->SendMessage(Role::System, cmd.text, false);
+			if (pLLM->PushMessage(Role::System, cmd.text))
+				_pChatScroll->AddMessage("System", "<" + cmd.text + ">", MessageType::SystemMessage);
 		}
 	}
 }

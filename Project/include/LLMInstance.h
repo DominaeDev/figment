@@ -88,7 +88,6 @@ public:
 	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
 	bool IsLoadingModel() const { return _bLoadingModel; }
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
-	bool SendMessage(Role role, string message, bool generate = true);
 	bool IsReady() const;
 	bool IsGenerating() const;
 	
@@ -96,6 +95,9 @@ public:
 	bool Halt();
 
 	bool InitializeChat(string systemPrompt, std::vector<Message> messages);
+	
+	bool SendMessage(Role role, string message);
+	bool PushMessage(Role role, string message);
 
 	bool PollResponse(MessagePiece& piece);
 	LLMStatus GetStatus() const;
