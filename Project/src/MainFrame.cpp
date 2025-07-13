@@ -128,13 +128,13 @@ void MainFrame::LoadModel()
 				if (bSuccess)
 				{
 					SetStatusBar("Model loaded");
-					fprintf(stdout, "Loaded model OK");
+					DebugPrintLn("Loaded model OK");
 
 					StartChat();
 				}
 				else
 				{
-					fprintf(stdout, "Failed to load model");
+					DebugPrintLn("Failed to load model");
 					SetStatusBar("Failed to load model");
 				}
 			});
@@ -156,7 +156,13 @@ void MainFrame::StartChat()
 	auto pLLM = Application::GetLLM();
 	if (pLLM && pLLM->HasLoadedModel())
 	{
-		string system_prompt = ReadTextFile("characters/system.txt").value_or("");
+		string system_prompt = ReadTextFile("./resources/prompt_system.txt").value_or("");
+		if (system_prompt.empty())
+			DebugPrintLn(">> WARNING: No system prompt!");
+		string formatting_spec = ReadTextFile("./resources/prompt_formatting.txt").value_or("");
+		if (formatting_spec.empty())
+			DebugPrintLn(">> WARNING: No formatting spec!");
+		replace(system_prompt, "##FORMATTING_SPEC##", formatting_spec);
 		pLLM->InitializeChat(system_prompt, {});
 	}
 }

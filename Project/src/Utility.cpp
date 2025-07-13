@@ -86,3 +86,17 @@ string NormalizeNewlines(string&& text)
 {
 	return NormalizeNewlines(text); // rvo
 }
+
+void DebugPrint(string message)
+{
+	if (message.empty())
+		return;
+
+	printf(message.c_str());
+	fflush(stdout);
+}
+
+void DebugPrintLn(string message)
+{
+	DebugPrint(message + "\r\n");
+}

@@ -21,6 +21,7 @@ struct ModelState
 	llama_model* pModel = nullptr;
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
+	llama_sampler* pGrammar = nullptr;
 
 	bool bReady = false;
 	bool bInvalid = false;

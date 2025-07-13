@@ -22,6 +22,7 @@ void ModelState::Release()
 		llama_model_free(pModel);
 
 	pSampler = nullptr;
+	pGrammar = nullptr; // Freed by chain
 	pCtx = nullptr;
 	pModel = nullptr;
 	bReady = false;
@@ -50,10 +51,9 @@ LLMInstance::~LLMInstance()
 {
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
 	{
-		printf(">> Releasing. Waiting on worker thread ");
-		fflush(stdout);
+		DebugPrint(">> Releasing. Waiting on worker thread ");
 		_workerThread.get()->join();
-		printf(">> Done!\r\n");
+		DebugPrintLn(">> Done!");
 	}
 
 	Shutdown();
@@ -290,11 +290,11 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_sampler* pSampler = llama_sampler_chain_init(sampler_params);
 
 		// Load grammar
-		string grammar = ReadTextFile("./resources/default_grammar.gbnf").value_or("");
+		string grammar = ReadTextFile("./resources/formatting_grammar.gbnf").value_or("");
 		replace_all(grammar, "##NAME_PATTERN##", "(\"" + _chatState.bot.name + "\")");
 		auto grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
 		if (grammar_sampler)
-			printf("Grammar loaded\r\n");
+			DebugPrintLn("Grammar loaded");
 
 		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
 		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(1.5f));							// Temperature
@@ -303,6 +303,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
 
 		state.pSampler = pSampler;
+		state.pGrammar = grammar_sampler;
 		_atm_modelState.store(state);
 	}
 
@@ -310,8 +311,11 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 	string prompt = trim(system_prompt);
 	if (!isEmptyOrWhitespace(_chatState.bot.description))
 	{
-		prompt.append("\n");
+		string persona;
+		persona.reserve(_chatState.bot.description.size() + 20);
+		prompt.append("# About {{char}}:\n");
 		prompt.append(trim(_chatState.bot.description));
+		replace(prompt, "##CHARACTER_INFO##", persona);
 	}
 
 	messages.insert(std::begin(messages), Message { Role::System, prompt });
@@ -328,8 +332,8 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 
 	// Prepare assistant prelude
 	string assistant_prefix = apply_chat_template(Messages{}, state.pCtx, true);
-	replace_all(assistant_prefix, "assistant", _chatState.bot.name);
-	replace_all(assistant_prefix, "ASSISTANT", _chatState.bot.name);
+	replace(assistant_prefix, "assistant", _chatState.bot.name);
+	replace(assistant_prefix, "ASSISTANT", _chatState.bot.name);
 	_chatState.assistant_tokens = __tokenize(state.pModel, assistant_prefix, false);
 
 	// Pre-load system prompt into kv cache
@@ -399,10 +403,9 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
 	{
-		printf(">> Loading. Waiting on worker thread ");
-		fflush(stdout);
+		DebugPrint(">> Loading. Waiting on worker thread ");
 		_workerThread.get()->join();
-		printf(">> Done!\r\n");
+		DebugPrintLn(">> Done!");
 	}
 
 	_bLoadingModel = true;
@@ -742,9 +745,10 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 	string response;
 	MessageType msgType = MessageType::Undefined;
 
-	printf("BEGIN GENERATION\r\n");
+	DebugPrintLn(">> BEGIN GENERATION");
 
-	llama_sampler_reset(state.pSampler);
+	if (state.pGrammar)
+		llama_sampler_reset(state.pGrammar);
 
 	while (true)
 	{
@@ -781,7 +785,6 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 		try
 		{
 			sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);
-//			llama_sampler_accept(state.pSampler, sampled_token); // redundant
 		}
 		catch (const std::runtime_error& e)
 		{
@@ -932,7 +935,9 @@ void LLMInstance::__Generate(Message msg, ChatState* pChatState, __PartialResult
 		/*cached*/ false,
 	});
 
-	printf("\r\nEND OF GENERATION\r\n[%s](%s)\r\n", response.c_str(), stop_word.c_str());
+	DebugPrintLn();
+	DebugPrintLn();
+	DebugPrintLn(std::format("END OF GENERATION\r\n[{}]({})", response.c_str(), stop_word.c_str()));
 
 	onComplete(InternalError::NoError, response);
 };
@@ -943,21 +948,19 @@ void LLMInstance::CancelWorkerThread()
 
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
 	{
-		printf(">> Halting. Waiting on worker thread ");
-		fflush(stdout);
+		DebugPrint(">> Halting. Waiting on worker thread ");
 		_workerThread.get()->join();
-		printf(">> Done!\r\n");
+		DebugPrintLn(">> Done!");
 	}
 }
 
 void LLMInstance::ClearResponseQueue()
 {
-	printf(">> Waiting on mutex ");
-	fflush(stdout);
+	DebugPrintLn(">> Waiting on mutex ");
 	std::lock_guard lock(_resultMutex);
 	while (!_resultQueue.empty())
 		_resultQueue.pop();
-	printf(">> Done!\r\n");
+	DebugPrintLn(">> Done!");
 }
 
 bool LLMInstance::SendMessage(Role role, string message)
@@ -968,10 +971,9 @@ bool LLMInstance::SendMessage(Role role, string message)
 	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
 	{
 		_atm_bCancelGeneration.store(true);
-		printf(">> Waiting on worker thread");
-		fflush(stdout);
+		DebugPrint(">> Waiting on worker thread");
 		_workerThread.get()->join();
-		printf(">> Done!\r\n");
+		DebugPrintLn(">> Done!");
 	}
 
 	_atm_bCancelGeneration.store(false);
@@ -1052,7 +1054,7 @@ bool LLMInstance::DumpContext(string filename) const
 		else if (token == llama_vocab_pad(pVocab))
 			return "<PAD>";
 		else if (token == llama_vocab_nl(pVocab))
-			return "<NL>\r\n";
+			return "\r\n";
 		else
 		{
 			char buf[256];

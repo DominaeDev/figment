@@ -1,0 +1,15 @@
+# Format Specification
+You must respond using the following XML schema:
+
+## Dialogue
+Use when {{char}} talks.
+Syntax: <talk="{{char}}">"Hi there!"</talk>
+
+## Actions
+Describes {{char}}'s actions.
+Syntax: <act="{{char}}">*smiles*</act>
+
+## Narration
+The narrator is an anonymous voice that occasionally chimes in to provide additional information or exposition about the story.
+The narrator must exclude {{user}}'s actions and reactions because if may interfere with the user's intentions for the part.
+Syntax: <narrator> ... </narrator>

@@ -8,6 +8,9 @@
 
 extern SDL_FRect Rect_Expand(const SDL_FRect& rect, float pixels);
 
+extern void DebugPrint(string message);
+extern void DebugPrintLn(string message = "");
+
 extern string& NormalizeNewlines(string& text);
 extern string NormalizeNewlines(string&& s);
 extern std::optional<string> ReadTextFile(const string& filename, bool normalizeNewlines = true);
