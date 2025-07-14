@@ -206,6 +206,12 @@ void MainFrame::OnCommand(Command cmd)
 			if (pLLM->Instigate(Responder::Narrator, MessageType::Narration, 1))
 				_pChatScroll->StartListening();
 			break;
+		case CommandType::Revert:
+		{
+			int n = atoi(cmd.text.c_str());
+			pLLM->RemoveMessages(std::max(n, 1));
+			break;
+		}
 		case CommandType::Reset:
 			pLLM->Restart();
 			break;

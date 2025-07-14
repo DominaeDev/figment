@@ -524,6 +524,7 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 		"</s>",
 		"### ",
 		"<｜",
+		"\r\r",
 //		"<|end",
 //		"<｜end▁of▁sentence｜>",
 	};
@@ -691,21 +692,21 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Tokenize uncached messages
 	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
 	{
-		auto& lastBlock = *it;
-		if (lastBlock.cached)
+		auto& block = *it;
+		if (block.cached)
 			continue;
 
-		string lastResponse = apply_chat_template(Message { lastBlock.role, lastBlock.content }, state.pCtx, false);
-		apply_names(lastResponse, userName, botName);
+		string content = apply_chat_template(Message { block.role, block.content }, state.pCtx, false);
+		apply_names(content, userName, botName);
 
-		auto lastTokens = __tokenize(state.pModel, lastResponse, false);
+		auto lastTokens = __tokenize(state.pModel, content, false);
 
-		lastBlock.content = lastResponse;
-		lastBlock.tokens = lastTokens;
-		lastBlock.ctx_pos = 0; // assigned later
-		lastBlock.cached = true;
+		block.content = content;
+		block.tokens = lastTokens;
+		block.ctx_pos = 0; // assigned later
+		block.cached = true;
 
-		prompt_tokens.insert(std::begin(prompt_tokens), std::cbegin(lastTokens), std::cend(lastTokens));
+		prompt_tokens.insert(std::end(prompt_tokens), std::cbegin(lastTokens), std::cend(lastTokens));
 	}
 
 	// Shift context window
@@ -1050,6 +1051,7 @@ bool LLMInstance::SendMessage(Role role, string message)
 	_atm_bCancelGeneration.store(false);
 
 	PushMessage(role, message);
+
 	PrepareArguments prepareArgs {
 		/*chat state*/ &_chatState,
 		/*responder */ Responder::Bot,
@@ -1095,6 +1097,39 @@ bool LLMInstance::PushMessage(Role role, string message)
 		/* cached */ false,
 	});
 	return true;
+}
+
+int LLMInstance::RemoveMessages(int numMessages)
+{
+	if (!IsReady() || IsGenerating() || numMessages == 0)
+		return 0;
+
+	int32_t newSize = std::max((int32_t)_chatState.blocks.size() - numMessages, 0);
+	int32_t& current_pos = _chatState.current_pos;
+
+	if (newSize > 0)
+	{
+		auto& block = _chatState.blocks[newSize - 1];
+		if (block.cached)
+			current_pos = std::min(current_pos, block.ctx_pos + (int32_t)block.tokens.size());
+		else
+			current_pos = std::min(current_pos, block.ctx_pos);
+	}
+	else
+	{
+		current_pos = (int32_t)_chatState.system_tokens.size();
+	}
+	
+	// Update batch
+	_chatState.batch.n_tokens = current_pos;
+
+	// Clear kv cache
+	ModelState state = _atm_modelState.load();
+	llama_kv_self_seq_rm(state.pCtx, 0, current_pos, -1);
+
+	int removed = (int32_t)_chatState.blocks.size() - newSize;
+	_chatState.blocks.resize((size_t)newSize);
+	return removed;
 }
 
 bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messageCount)

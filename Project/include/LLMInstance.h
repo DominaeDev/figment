@@ -101,6 +101,7 @@ public:
 	
 	bool SendMessage(Role role, string message);
 	bool PushMessage(Role role, string message);
+	int RemoveMessages(int numMessages = 1);
 	bool Instigate(Responder responder, MessageType msgType, int messageCount = 0);
 	bool Restart();
 

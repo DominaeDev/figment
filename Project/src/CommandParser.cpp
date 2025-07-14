@@ -13,7 +13,8 @@ static _Cmd s_Commands[] {
 	{ "talk",		CommandType::InstigateDialogue},
 	{ "narrate",	CommandType::Narrate },
 	{ "reset",		CommandType::Reset },
-//	{ "undo",		CommandType::UndoMessage },
+	{ "revert",		CommandType::Revert },
+	{ "retry",		CommandType::Regenerate },
 };
 
 Command CommandParser::Parse(string text)

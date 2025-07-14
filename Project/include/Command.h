@@ -7,11 +7,12 @@ enum class CommandType
 	Invalid,
 	Say,
 	SystemMessage,
-	UndoMessage,
 	PassTurn,
 	InstigateDialogue,
 	Narrate,
 	Reset,
+	Revert,
+	Regenerate,
 };
 
 struct Command
