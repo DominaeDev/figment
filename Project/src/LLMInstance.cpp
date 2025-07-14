@@ -225,6 +225,7 @@ static string apply_chat_template(Messages in_messages, llama_context* pCtx, boo
 //	tmpl = "deepseek3";
 
 	static const char* SYSTEM_NAME = "system";
+	static const char* NARRATOR_NAME = "Narrator";
 	static const char* USER_NAME = "{{user}}";
 	static const char* BOT_NAME = "{{char}}";
 
@@ -235,6 +236,10 @@ static string apply_chat_template(Messages in_messages, llama_context* pCtx, boo
 		if (msg.role == Role::System)
 		{
 			llama_msgs[i] = llama_chat_message { SYSTEM_NAME, msg.content.c_str() };
+		}
+		else if (msg.role == Role::Narrator)
+		{
+			llama_msgs[i] = llama_chat_message { NARRATOR_NAME, msg.content.c_str() };
 		}
 		else
 		{
@@ -300,7 +305,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
 		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(1.5f));							// Temperature
 		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
-		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
+		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(0xc0c0c0));				// Seed
 
 		state.pSampler = pSampler;
 		state.pGrammar = grammar_sampler;
@@ -1158,11 +1163,11 @@ bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messag
 
 	string prependMsg;
 	if (msgType == MessageType::Dialogue)
-		prependMsg = std::format("<{}=\"{}\">", Constants::DialogueTagBegin, responderName);
+		prependMsg = std::format("<{}=\"{}\">\"", Constants::DialogueTagBegin, responderName);
 	if (msgType == MessageType::Action)
-		prependMsg = std::format("<{}=\"{}\">", Constants::ActionTagBegin, responderName);
+		prependMsg = std::format("<{}=\"{}\">*", Constants::ActionTagBegin, responderName);
 	if (msgType == MessageType::Thought)
-		prependMsg = std::format("<{}=\"{}\">", Constants::ThoughtTagBegin, responderName);
+		prependMsg = std::format("<{}=\"{}\">(", Constants::ThoughtTagBegin, responderName);
 	else if (msgType == MessageType::Narration)
 		prependMsg = std::format("<{}>", Constants::NarrationTagBegin);
 
@@ -1271,12 +1276,38 @@ bool LLMInstance::DumpContext(string filename) const
 			continue;
 
 		result.append("[");
-		for (int32_t i = 0; i < block.tokens.size(); ++i)
+		if (!block.tokens.empty())
 		{
-			result.append(fnTokenStr(block.tokens[i]));
+			for (int32_t i = 0; i < block.tokens.size(); ++i)
+				result.append(fnTokenStr(block.tokens[i]));
+		}
+		else
+		{
+			result.append(block.content);
 		}
 		result.append("]\r\n");
 	}
 
 	return WriteTextFile(filename, result, false);
+}
+
+bool LLMInstance::Reseed(uint32_t seed)
+{
+	if (!IsReady() || IsGenerating())
+		return false;
+
+	ModelState state = _atm_modelState.load();
+	if (!state.bReady || !state.pModel)
+		return false;
+
+	llama_sampler* pChain = state.pSampler;
+	int n = llama_sampler_chain_n(pChain);
+	llama_sampler* pDistSampler = llama_sampler_chain_get(pChain, n - 1);
+	if (pDistSampler)
+	{
+		llama_sampler_chain_remove(pChain, n - 1);
+		llama_sampler_chain_add(pChain, llama_sampler_init_dist(seed));
+		return true;
+	}
+	return false;
 }

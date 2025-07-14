@@ -15,6 +15,7 @@ static _Cmd s_Commands[] {
 	{ "reset",		CommandType::Reset },
 	{ "revert",		CommandType::Revert },
 	{ "retry",		CommandType::Regenerate },
+	{ "reseed",		CommandType::Reseed },
 };
 
 Command CommandParser::Parse(string text)
@@ -23,8 +24,17 @@ Command CommandParser::Parse(string text)
 	if (text.empty())
 		return Command { CommandType::Invalid };
 
+	if (text == "...") // Shorthand
+		return Command { CommandType::InstigateDialogue };
+
 	if (text[0] != '/')
 		return Command { CommandType::Say, text };
+
+	if (string_begins_with(text, "//")) // Shorthand
+	{
+		string payload = trim(text.substr(2));
+		return Command { CommandType::SystemMessage, payload };
+	}
 
 	size_t pos_begin = text.find(' ');
 	string command;

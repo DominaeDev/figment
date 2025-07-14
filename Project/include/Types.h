@@ -20,6 +20,7 @@ struct llama_chat_message;
 enum class Role
 {
 	System,
+	Narrator,
 	User,
 	Bot,
 };

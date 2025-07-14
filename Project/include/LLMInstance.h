@@ -104,6 +104,7 @@ public:
 	int RemoveMessages(int numMessages = 1);
 	bool Instigate(Responder responder, MessageType msgType, int messageCount = 0);
 	bool Restart();
+	bool Reseed(uint32_t seed = 0xFFFFFFFF);
 
 	bool PollResponse(MessagePiece& piece);
 	LLMStatus GetStatus() const;

@@ -13,6 +13,7 @@ enum class CommandType
 	Reset,
 	Revert,
 	Regenerate,
+	Reseed,
 };
 
 struct Command

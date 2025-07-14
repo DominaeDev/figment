@@ -178,48 +178,70 @@ void MainFrame::OnCommand(Command cmd)
 		return;
 
 	auto pLLM = Application::GetLLM();
-	if (pLLM)
+	if (!pLLM)
+		return;
+
+	switch (cmd.type)
 	{
-		switch (cmd.type)
+	case CommandType::Say:
+	{
+		string formatted = FormatMessage(cmd.text, "{{user}}");
+		_pChatScroll->AddMessage("User", cmd.text, MessageType::UserMessage);
+		if (pLLM->SendMessage(Role::User, formatted))
+			_pChatScroll->StartListening();
+		break;
+	}
+	case CommandType::SystemMessage:
+		if (pLLM->PushMessage(Role::System, cmd.text))
+			_pChatScroll->AddMessage("System", "<" + cmd.text + ">", MessageType::SystemMessage);
+		break;
+	case CommandType::InstigateDialogue:
+		if (pLLM->Instigate(Responder::Bot, MessageType::Dialogue, 1))
+			_pChatScroll->StartListening();
+		break;
+	case CommandType::PassTurn:
+		if (pLLM->Instigate(Responder::Bot, MessageType::Undefined, 0))
+			_pChatScroll->StartListening();
+		break;
+	case CommandType::Narrate:
+		if (cmd.text.empty())
 		{
-		case CommandType::Say:
-		{
-			string formatted = FormatMessage(cmd.text, "{{user}}");
-			_pChatScroll->AddMessage("User", cmd.text, MessageType::UserMessage);
-			if (pLLM->SendMessage(Role::User, formatted))
-				_pChatScroll->StartListening();
-			break;
-		}
-		case CommandType::SystemMessage:
-			if (pLLM->PushMessage(Role::System, cmd.text))
-				_pChatScroll->AddMessage("System", "<" + cmd.text + ">", MessageType::SystemMessage);
-			break;
-		case CommandType::InstigateDialogue:
-			if (pLLM->Instigate(Responder::Bot, MessageType::Dialogue, 1))
-				_pChatScroll->StartListening();
-			break;
-		case CommandType::PassTurn:
-			if (pLLM->Instigate(Responder::Bot, MessageType::Undefined, 0))
-				_pChatScroll->StartListening();
-			break;
-		case CommandType::Narrate:
 			if (pLLM->Instigate(Responder::Narrator, MessageType::Narration, 1))
 				_pChatScroll->StartListening();
-			break;
-		case CommandType::Revert:
+		}
+		else
 		{
-			int n = atoi(cmd.text.c_str());
-			pLLM->RemoveMessages(std::max(n, 1));
-			break;
+			string text = FormatMessage("["+cmd.text+"]", "");
+			if (pLLM->PushMessage(Role::Narrator, text))
+				_pChatScroll->AddMessage("Narrator", cmd.text, MessageType::Narration);
 		}
-		case CommandType::Regenerate:
-			if (pLLM->RemoveMessages(1) && pLLM->Instigate(Responder::Bot, MessageType::Undefined, 0))
-				_pChatScroll->StartListening();
-			break;
-		case CommandType::Reset:
-			pLLM->Restart();
-			break;
-		}
+		break;
+	case CommandType::Revert:
+	{
+		int n = atoi(cmd.text.c_str());
+		pLLM->RemoveMessages(std::max(n, 1));
+		break;
+	}
+	case CommandType::Regenerate:
+		if (pLLM->RemoveMessages(1) && pLLM->Instigate(Responder::Bot, MessageType::Undefined, 0))
+			_pChatScroll->StartListening();
+		break;
+	case CommandType::Reset:
+	{
+		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
+		if (seed != 0)
+			pLLM->Reseed(seed);
+		pLLM->Restart();
+		break;
+	}
+	case CommandType::Reseed:
+	{
+		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
+		if (seed == 0)
+			seed = 0xFFFFFFFF;
+		pLLM->Reseed(seed);
+		break;
+	}
 	}
 }
 
