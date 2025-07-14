@@ -196,7 +196,7 @@ std::string FormatMessage(std::string message, std::string actorName)
 			result.append(std::format("<{0}>{1}<{2}>", Constants::NarrationTagBegin, text, Constants::NarrationTagEnd));
 			break;
 		case MessageType::Thought:
-			result.append(std::format("<{0}=\"{1}\">{2}<{3}>", Constants::ThoughtTagBegin, actorName, text, Constants::ThoughtTagEnd));
+			result.append(std::format("<{0}=\"{1}\">({2})<{3}>", Constants::ThoughtTagBegin, actorName, text, Constants::ThoughtTagEnd));
 			break;
 		}
 	}

@@ -47,7 +47,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	SDL_Renderer* pRenderer;
 	try
 	{
-		if (!SDL_CreateWindowAndRenderer(Constants::AppTitle, Constants::WindowWidth, Constants::WindowHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED, &pWindow, &pRenderer))
+		if (!SDL_CreateWindowAndRenderer(Constants::AppTitle, Constants::WindowWidth, Constants::WindowHeight, SDL_WINDOW_RESIZABLE, &pWindow, &pRenderer))
 		{
 			SDL_Log("Couldn't create pWindow/pRenderer: %s", SDL_GetError());
 			return SDL_APP_FAILURE;
@@ -75,7 +75,9 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 	SDL_SetWindowMinimumSize(pWindow, 800, 400);
 	SDL_SetRenderVSync(pRenderer, 1);
-
+#if !_DEBUG
+	SDL_MaximizeWindow(pWindow);
+#endif
 	// Create TTF text engine
 	pAppState->pTextEngine = Text::InitEngine(pRenderer);
 
@@ -103,9 +105,7 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 
 	if (event->type == SDL_EVENT_QUIT)
 	{
-		auto pLLM = Application::GetLLM();
-		if (pLLM)
-			pLLM->Halt();
+		Application::GetLLM()->Halt();
 		return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
 	}
 	if (event->type == SDL_EVENT_KEY_DOWN)
@@ -125,26 +125,14 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutoChat(false);
 			break;
 		case SDLK_F9:
-		{
-			auto pLLM = Application::GetLLM();
-			if (pLLM)
-				pLLM->Resume();
+			Application::GetLLM()->Resume();
 			break;
-		}
 		case SDLK_F10:
-		{
-			auto pLLM = Application::GetLLM();
-			if (pLLM)
-				pLLM->Halt();
+			Application::GetLLM()->Halt();
 			break;
-		}
 		case SDLK_F11:
-		{
-			auto pLLM = Application::GetLLM();
-			if (pLLM)
-				pLLM->DumpContext("prompt.txt");
+			Application::GetLLM()->DumpContext("prompt.txt");
 			break;
-		}
 		}
 	}
 
@@ -212,6 +200,5 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 	Fonts::ReleaseFonts();
 	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
 	TTF_Quit();
-
 }
 

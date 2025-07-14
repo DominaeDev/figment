@@ -2,7 +2,7 @@
 
 #include "Types.h"
 
-#define DEFAULT_MODEL_LOCATION "M:\\LLM\\ana-v1-m7.erp.unc.Q6_K.gguf"
+#define DEFAULT_MODEL_LOCATION "M:\\LLM\\default_model.gguf"
 
 namespace Constants
 {

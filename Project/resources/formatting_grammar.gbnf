@@ -1,9 +1,14 @@
-root		::= (dlg | act | narrate | thought | ws)+ end?
+root		::= stub? (dlg | act | narrate | think | ws)+ end?
 
 dlg			::= "<talk=\"" name "\">\"" text "\"</talk>"
 act			::= "<act=\"" name "\">*" text "*</act>"
-thought		::= "<thought=\"" name "\">" text "</thought>"
 narrate		::= "<narrator>" text "</narrator>"
+think		::= "<think=\"" name "\">" text "</think>"
+stub		::= ("\"" text "\"</talk>") |
+				("*" text "*</act>") |
+				(text "</narrator>") |
+				("(" text ")</think>")
+
 text		::= [^\t\n<>\"*]*
 ws			::= [ \t\n]
 

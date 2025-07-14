@@ -8,6 +8,9 @@ enum class CommandType
 	Say,
 	SystemMessage,
 	UndoMessage,
+	PassTurn,
+	InstigateDialogue,
+	Narrate,
 	Reset,
 };
 

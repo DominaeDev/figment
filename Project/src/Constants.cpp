@@ -16,8 +16,8 @@ string const Constants::ActionTagBegin = "act";
 string const Constants::ActionTagEnd = "/act";
 string const Constants::NarrationTagBegin = "narrator";
 string const Constants::NarrationTagEnd = "/narrator";
-string const Constants::ThoughtTagBegin = "thought";
-string const Constants::ThoughtTagEnd = "/thought";
+string const Constants::ThoughtTagBegin = "think";
+string const Constants::ThoughtTagEnd = "/think";
 
 // Generation constants
 const int Constants::MaxMessageTokens = 512;

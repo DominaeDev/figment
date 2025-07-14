@@ -43,10 +43,10 @@ struct ChatState
 	std::vector<int32_t> assistant_tokens;
 	std::vector<LLMMessageBlock> blocks;
 	int32_t current_pos = 0;
+	int32_t prepend_pos = 0;
+	int32_t pre_response_pos = 0;
 	int32_t message_count = 0;
 	llama_batch batch {};
-
-	Messages prev_messages;
 
 	Character user;
 	Character bot;
@@ -79,6 +79,8 @@ struct MessagePiece
 	bool isComplete = false;
 };
 
+enum class Responder { None, Narrator, User, Bot };
+
 class LLMInstance
 {
 public:
@@ -99,6 +101,8 @@ public:
 	
 	bool SendMessage(Role role, string message);
 	bool PushMessage(Role role, string message);
+	bool Instigate(Responder responder, MessageType msgType, int messageCount = 0);
+	bool Restart();
 
 	bool PollResponse(MessagePiece& piece);
 	LLMStatus GetStatus() const;
@@ -127,7 +131,21 @@ private:
 	typedef std::function<void(__PartialResult)> __PartialResultCallback;
 	typedef std::function<void(InternalError, string)> __GenerationCompleteCallback;
 	
-	void __Generate(Message msg, ChatState* chatState, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	struct PrepareArguments
+	{
+		ChatState* pChatState;
+		Responder responder = Responder::Bot;
+	};
+	void PrepareGeneration(PrepareArguments args);
+
+	struct GenerateArguments
+	{
+		ChatState* pChat;
+		MessageType msgType = MessageType::Undefined;
+		int maxMessages = 0;
+		string prepend;
+	};
+	void Generate(GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
 private:
 	bool _bLoadingModel = false;

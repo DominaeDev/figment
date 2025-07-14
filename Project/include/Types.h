@@ -24,7 +24,8 @@ enum class Role
 	Bot,
 };
 
-struct Message {
+struct Message 
+{
 	Role role;
     string content;
     string name;
