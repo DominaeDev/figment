@@ -212,6 +212,10 @@ void MainFrame::OnCommand(Command cmd)
 			pLLM->RemoveMessages(std::max(n, 1));
 			break;
 		}
+		case CommandType::Regenerate:
+			if (pLLM->RemoveMessages(1) && pLLM->Instigate(Responder::Bot, MessageType::Undefined, 0))
+				_pChatScroll->StartListening();
+			break;
 		case CommandType::Reset:
 			pLLM->Restart();
 			break;

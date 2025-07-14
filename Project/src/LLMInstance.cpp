@@ -1099,9 +1099,9 @@ bool LLMInstance::PushMessage(Role role, string message)
 	return true;
 }
 
-int LLMInstance::RemoveMessages(int numMessages)
+int LLMInstance::RemoveMessages( int numMessages)
 {
-	if (!IsReady() || IsGenerating() || numMessages == 0)
+	if (!IsReady() || IsGenerating() || numMessages < 1)
 		return 0;
 
 	int32_t newSize = std::max((int32_t)_chatState.blocks.size() - numMessages, 0);
