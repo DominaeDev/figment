@@ -11,3 +11,5 @@ Respond to {{user}} in the same way {{char}} would. You will not break character
 ##FORMATTING_SPEC##
 
 ##CHARACTER_INFO##
+
+##USER_INFO##

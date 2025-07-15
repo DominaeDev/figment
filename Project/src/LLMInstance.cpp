@@ -305,7 +305,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
 		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(1.5f));							// Temperature
 		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
-		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(0xc0c0c0));				// Seed
+		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
 
 		state.pSampler = pSampler;
 		state.pGrammar = grammar_sampler;
@@ -318,9 +318,17 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 	{
 		string persona;
 		persona.reserve(_chatState.bot.description.size() + 20);
-		prompt.append("# About {{char}}:\n");
-		prompt.append(trim(_chatState.bot.description));
+		persona.append("# About {{char}}:\n");
+		persona.append(trim(_chatState.bot.description));
 		replace(prompt, "##CHARACTER_INFO##", persona);
+	}	
+	if (!isEmptyOrWhitespace(_chatState.user.description))
+	{
+		string user_persona;
+		user_persona.reserve(_chatState.user.description.size() + 20);
+		user_persona.append("# About {{user}}:\n");
+		user_persona.append(trim(_chatState.user.description));
+		replace(prompt, "##USER_INFO##", user_persona);
 	}
 
 	messages.insert(std::begin(messages), Message { Role::System, prompt });
@@ -362,7 +370,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 	return true;
 }
 
-bool LLMInstance::Restart()
+bool LLMInstance::ResetChat()
 {
 	ModelState state = _atm_modelState.load();
 	if (!IsReady())
@@ -1137,6 +1145,15 @@ int LLMInstance::RemoveMessages( int numMessages)
 	return removed;
 }
 
+bool LLMInstance::GreetUser()
+{
+	if (!IsReady() || IsGenerating())
+		return false;
+
+	PushMessage(Role::Narrator, std::format("<{0}>{1} greets {2} and introduces themselves.</{0}>", Constants::NarrationTagBegin, _chatState.bot.name, _chatState.user.name));
+	Instigate(Responder::Bot, MessageType::Dialogue, 1);
+}
+
 bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messageCount)
 {
 	if (!IsReady() || IsGenerating() || responder == Responder::None)
@@ -1310,4 +1327,14 @@ bool LLMInstance::Reseed(uint32_t seed)
 		return true;
 	}
 	return false;
+}
+
+string LLMInstance::GetUserName() const
+{
+	return _chatState.user.name;
+}
+
+string LLMInstance::GetBotName() const
+{
+	return _chatState.bot.name;
 }

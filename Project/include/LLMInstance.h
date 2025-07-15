@@ -95,21 +95,25 @@ public:
 	bool IsGenerating() const;
 	
 	bool Resume();
+	bool ResetChat();
 	bool Halt();
 
 	bool InitializeChat(string systemPrompt, Messages messages);
+	bool Reseed(uint32_t seed = 0xFFFFFFFF);
 	
 	bool SendMessage(Role role, string message);
 	bool PushMessage(Role role, string message);
 	int RemoveMessages(int numMessages = 1);
 	bool Instigate(Responder responder, MessageType msgType, int messageCount = 0);
-	bool Restart();
-	bool Reseed(uint32_t seed = 0xFFFFFFFF);
+	bool GreetUser();
 
 	bool PollResponse(MessagePiece& piece);
 	LLMStatus GetStatus() const;
 
 	bool DumpContext(string filename) const;
+	
+	string GetUserName() const;
+	string GetBotName() const;
 
 private:
 	void ClearResponseQueue();

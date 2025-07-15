@@ -293,4 +293,17 @@
       <Filter>Source Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\formatting_grammar.gbnf">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\prompt_formatting.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="resources\prompt_system.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

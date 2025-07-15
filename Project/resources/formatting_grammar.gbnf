@@ -4,10 +4,10 @@ dlg			::= "<talk=\"" name "\">\"" text "\"</talk>"
 act			::= "<act=\"" name "\">*" text "*</act>"
 narrate		::= "<narrator>" text "</narrator>"
 think		::= "<think=\"" name "\">" text "</think>"
-stub		::= ("\"" text "\"</talk>") |
-				("*" text "*</act>") |
+stub		::= (text "\"</talk>") |
+				(text "*</act>") |
 				(text "</narrator>") |
-				("(" text ")</think>")
+				(text ")</think>")
 
 text		::= [^\t\n<>\"*]*
 ws			::= [ \t\n]

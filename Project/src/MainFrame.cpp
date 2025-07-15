@@ -97,9 +97,17 @@ void MainFrame::OnUpdate(float fDeltaTime)
 	if (_bAutoChat)
 		RunAutomation();
 	
+	if (_bStartedChat)
+	{
+		_bStartedChat = false;
+		auto pLLM = Application::GetLLM();
+		if (pLLM->GreetUser())
+			_pChatScroll->StartListening();
+	}
+
 	// Poll llm status
-	_fpollingCounter += fDeltaTime;
-	if (_fpollingCounter > 0.1f)
+	_fPollingCounter += fDeltaTime;
+	if (_fPollingCounter > 0.1f)
 		PollStatus();
 }
 
@@ -164,6 +172,8 @@ void MainFrame::StartChat()
 			DebugPrintLn(">> WARNING: No formatting spec!");
 		replace(system_prompt, "##FORMATTING_SPEC##", formatting_spec);
 		pLLM->InitializeChat(system_prompt, {});
+
+		_bStartedChat = true;
 	}
 }
 
@@ -183,7 +193,7 @@ void MainFrame::OnCommand(Command cmd)
 
 	switch (cmd.type)
 	{
-	case CommandType::Say:
+	case CommandType::UserMessage:
 	{
 		string formatted = FormatMessage(cmd.text, "{{user}}");
 		_pChatScroll->AddMessage("User", cmd.text, MessageType::UserMessage);
@@ -197,6 +207,10 @@ void MainFrame::OnCommand(Command cmd)
 		break;
 	case CommandType::InstigateDialogue:
 		if (pLLM->Instigate(Responder::Bot, MessageType::Dialogue, 1))
+			_pChatScroll->StartListening();
+		break;
+	case CommandType::InstigateAction:
+		if (pLLM->Instigate(Responder::Bot, MessageType::Action, 1))
 			_pChatScroll->StartListening();
 		break;
 	case CommandType::PassTurn:
@@ -231,7 +245,7 @@ void MainFrame::OnCommand(Command cmd)
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
 		if (seed != 0)
 			pLLM->Reseed(seed);
-		pLLM->Restart();
+		pLLM->ResetChat();
 		break;
 	}
 	case CommandType::Reseed:
@@ -245,9 +259,9 @@ void MainFrame::OnCommand(Command cmd)
 	}
 }
 
-void MainFrame::EnableAutoChat(bool bEnable)
+void MainFrame::ToggleAutoChat()
 {
-	_bAutoChat = bEnable;
+	_bAutoChat = !_bAutoChat;
 }
 
 static std::vector<std::string> split(std::string s, const std::string& delimiter)
@@ -282,22 +296,26 @@ void MainFrame::RunAutomation()
 	if (!pLLM->IsReady() || pLLM->IsGenerating())
 		return;
 
-	if (_autoQueue.empty())
+	if (_autoScript.empty())
 	{
-		string text = ReadTextFile("resources/debug_script.txt").value_or("");
-		auto lines = split(text, "\n");
-		for (auto& line : lines)
-			_autoQueue.push(line);
+		if (auto script = ReadTextFile("resources/auto_script.txt"))
+		{
+			string text = script.value();
+			replace_all(text, "{{user}}", pLLM->GetUserName());
+			replace_all(text, "{{char}}", pLLM->GetBotName());
+			_autoScript = split(text, "\n");
+		}
+		_autoScriptIndex = 0;
 	}
 
-	if (_autoQueue.empty())
+	if (_autoScript.empty())
 	{
 		_bAutoChat = false;
 		return;
 	}
 
-	string message = _autoQueue.front();
-	_autoQueue.pop();
+	string message = _autoScript[_autoScriptIndex];
+	_autoScriptIndex = ++_autoScriptIndex % _autoScript.size();
 
 	string formatted = FormatMessage(message, "{{user}}");
 	_pChatScroll->AddMessage("User", message, MessageType::UserMessage);

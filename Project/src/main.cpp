@@ -119,10 +119,7 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 			static_cast<MainFrame*>(pAppState->pTopFrame)->UnloadModel();
 			break;
 		case SDLK_F5:
-			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutoChat(true);
-			break;
-		case SDLK_F6:
-			static_cast<MainFrame*>(pAppState->pTopFrame)->EnableAutoChat(false);
+			static_cast<MainFrame*>(pAppState->pTopFrame)->ToggleAutoChat();
 			break;
 		case SDLK_F9:
 			Application::GetLLM()->Resume();

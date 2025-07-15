@@ -5,10 +5,11 @@
 enum class CommandType
 {
 	Invalid,
-	Say,
+	UserMessage,
 	SystemMessage,
 	PassTurn,
 	InstigateDialogue,
+	InstigateAction,
 	Narrate,
 	Reset,
 	Revert,
@@ -18,6 +19,6 @@ enum class CommandType
 
 struct Command
 {
-	CommandType type = CommandType::Say;
+	CommandType type = CommandType::UserMessage;
 	string text;
 };

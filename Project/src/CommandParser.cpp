@@ -7,10 +7,11 @@ struct _Cmd {
 };
 
 static _Cmd s_Commands[] {
-	{ "say",		CommandType::Say },
+	{ "say",		CommandType::UserMessage },
 	{ "system",		CommandType::SystemMessage },
 	{ "pass",		CommandType::PassTurn},
 	{ "talk",		CommandType::InstigateDialogue},
+	{ "act",		CommandType::InstigateAction},
 	{ "narrate",	CommandType::Narrate },
 	{ "reset",		CommandType::Reset },
 	{ "revert",		CommandType::Revert },
@@ -28,7 +29,7 @@ Command CommandParser::Parse(string text)
 		return Command { CommandType::InstigateDialogue };
 
 	if (text[0] != '/')
-		return Command { CommandType::Say, text };
+		return Command { CommandType::UserMessage, text };
 
 	if (string_begins_with(text, "//")) // Shorthand
 	{
