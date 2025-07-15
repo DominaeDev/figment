@@ -42,20 +42,12 @@ LLMInstance::LLMInstance()
 	// load dynamic backends
 	ggml_backend_load_all();
 
-	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(false);
 	_atm_modelState.store(ModelState());
 }
 
 LLMInstance::~LLMInstance()
 {
-	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
-	{
-		DebugPrint(">> Releasing. Waiting on worker thread ");
-		_workerThread.get()->join();
-		DebugPrintLn(">> Done!");
-	}
-
 	Shutdown();
 }
 
@@ -458,18 +450,13 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 	if (IsReady())
 		return false; // Already loaded
 
-	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
-	{
-		DebugPrint(">> Loading. Waiting on worker thread ");
-		_workerThread.get()->join();
-		DebugPrintLn(">> Done!");
-	}
+	CancelWorkerThread();
 
 	_bLoadingModel = true;
 
 	__LoadModelProgressCallback = onProgress;
 
-	auto pThread = new std::thread(__LoadModel,
+	_workerThread = std::jthread(__LoadModel,
 		filename,
 		[this, filename, onComplete](ModelState result)
 	{
@@ -486,8 +473,6 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 			onComplete(false);
 		}
 	});
-
-	_workerThread.reset(pThread);
 
 	return true;
 }
@@ -516,6 +501,7 @@ bool LLMInstance::Halt()
 		return false;
 
 	CancelWorkerThread();
+	_atm_bGeneratingResponse.store(false);
 	return true;
 }
 
@@ -791,7 +777,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	chat.prepend_pos = current_pos + (int32_t)prompt_tokens.size();
 }
 
-void LLMInstance::Generate(GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
 	std::vector<llama_token> sampled_tokens;
 	ModelState state = _atm_modelState.load();
@@ -906,8 +892,8 @@ void LLMInstance::Generate(GenerateArguments args, __PartialResultCallback onPar
 		next_token &= !bHalt;
 		send &= !bWait;
 
-		if (_atm_bCancelGeneration.load())
-			break; // Cancelled
+		if (thread_stop.stop_requested())
+			break;
 
 		if (send)
 		{
@@ -969,7 +955,7 @@ void LLMInstance::Generate(GenerateArguments args, __PartialResultCallback onPar
 			// Send piece
 			if (partial.size() > 0)
 			{
-				std::lock_guard<std::mutex> lock(_resultMutex);
+				std::scoped_lock lock(_resultMutex);
 
 				_resultQueue.push(MessagePiece {
 					genState.messageId,
@@ -1029,21 +1015,19 @@ void LLMInstance::Generate(GenerateArguments args, __PartialResultCallback onPar
 
 void LLMInstance::CancelWorkerThread()
 {
-	_atm_bCancelGeneration.store(true);
-
-	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
+	if (_workerThread.joinable())
 	{
-		DebugPrint(">> Halting. Waiting on worker thread ");
-		_workerThread.get()->join();
+		DebugPrint(">> Stoping worker thread ");
+		_workerThread.request_stop();
+		_workerThread.join();
 		DebugPrintLn(">> Done!");
 	}
-	_atm_bGeneratingResponse.store(false);
 }
 
 void LLMInstance::ClearResponseQueue()
 {
 	DebugPrintLn(">> Waiting on mutex ");
-	std::lock_guard lock(_resultMutex);
+	std::scoped_lock lock(_resultMutex);
 	while (!_resultQueue.empty())
 		_resultQueue.pop();
 	DebugPrintLn(">> Done!");
@@ -1054,14 +1038,7 @@ bool LLMInstance::SendMessage(Role role, string message)
 	if (!IsReady() || IsGenerating())
 		return false;
 
-	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
-	{
-		_atm_bCancelGeneration.store(true);
-		DebugPrint(">> Waiting on worker thread ");
-		_workerThread.get()->join();
-		DebugPrintLn(">> Done!");
-	}
-	_atm_bCancelGeneration.store(false);
+	CancelWorkerThread();
 
 	PushMessage(role, message);
 
@@ -1076,7 +1053,7 @@ bool LLMInstance::SendMessage(Role role, string message)
 		/*chat state*/ &_chatState,
 	};
 
-	auto pThread = new std::thread(&LLMInstance::Generate, this, generateArgs,
+	_workerThread = std::jthread(std::bind_front(&LLMInstance::Generate, this), generateArgs,
 		[](__PartialResult partial) {
 			// ...
 		},
@@ -1093,7 +1070,6 @@ bool LLMInstance::SendMessage(Role role, string message)
 			_atm_bGeneratingResponse.store(false);
 		});
 
-	_workerThread.reset(pThread);
 	return true;
 }
 
@@ -1152,22 +1128,16 @@ bool LLMInstance::GreetUser()
 
 	PushMessage(Role::Narrator, std::format("<{0}>{1} greets {2} and introduces themselves.</{0}>", Constants::NarrationTagBegin, _chatState.bot.name, _chatState.user.name));
 	Instigate(Responder::Bot, MessageType::Dialogue, 1);
+	return true;
 }
 
 bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messageCount)
 {
 	if (!IsReady() || IsGenerating() || responder == Responder::None)
 		return false;
+	
+	CancelWorkerThread();
 
-	if (_workerThread.get() != nullptr && _workerThread.get()->joinable())
-	{
-		_atm_bCancelGeneration.store(true);
-		DebugPrint(">> Waiting on worker thread ");
-		_workerThread.get()->join();
-		DebugPrintLn(">> Done!");
-	}
-
-	_atm_bCancelGeneration.store(false);
 	_atm_bGeneratingResponse.store(true);
 
 	PrepareArguments prepareArgs {
@@ -1194,8 +1164,8 @@ bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messag
 		/*maxMessageCount*/ messageCount,
 		/*prepend*/ prependMsg,
 	};
-
-	auto pThread = new std::thread(&LLMInstance::Generate, this, generateArgs,
+	
+	_workerThread = std::jthread(std::bind_front(&LLMInstance::Generate, this), generateArgs,
 		[](__PartialResult partial) {
 			// ...
 		},
@@ -1211,7 +1181,6 @@ bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messag
 			_atm_bGeneratingResponse.store(false);
 		});
 
-	_workerThread.reset(pThread);
 	return true;
 }
 
@@ -1234,10 +1203,11 @@ LLMStatus LLMInstance::GetStatus() const
 
 bool LLMInstance::PollResponse(MessagePiece& piece)
 {
-	std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
-	if(!lock.owns_lock())
-		return false;
+//	std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
+//	if (!lock.owns_lock())
+//		return false;
 
+	std::scoped_lock lock(_resultMutex);
 	if (_resultQueue.empty())
 		return false;
 

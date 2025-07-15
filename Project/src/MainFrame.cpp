@@ -101,7 +101,7 @@ void MainFrame::OnUpdate(float fDeltaTime)
 	{
 		_bStartedChat = false;
 		auto pLLM = Application::GetLLM();
-		if (pLLM->GreetUser())
+		if (pLLM && pLLM->GreetUser())
 			_pChatScroll->StartListening();
 	}
 
@@ -156,6 +156,7 @@ void MainFrame::UnloadModel()
 	{
 		pLLM->Shutdown();
 		SetStatusBar("Model unloaded");
+		_bAutoChat = false;
 	}
 }
 

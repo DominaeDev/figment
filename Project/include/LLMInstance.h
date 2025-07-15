@@ -151,7 +151,7 @@ private:
 		int maxMessages = 0;
 		string prepend;
 	};
-	void Generate(GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	void Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 
 private:
 	bool _bLoadingModel = false;
@@ -159,9 +159,8 @@ private:
 	std::atomic<ModelState> _atm_modelState {};
 	ChatState _chatState {};
 
-	std::atomic<bool> _atm_bCancelGeneration {};
 	std::atomic<bool> _atm_bGeneratingResponse {};
-	std::unique_ptr<std::thread> _workerThread;
+	std::jthread _workerThread;
 
 	std::mutex _resultMutex;
 	std::queue<MessagePiece> _resultQueue;

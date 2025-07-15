@@ -18,13 +18,11 @@ public:
 
 	void LoadModel();
 	void UnloadModel();
-
-	void StartChat();
+	void ToggleAutoChat();
 
 	static void SetStatusBar(string message);
 	static MainFrame& GetInstance() { return *s_pInstance; }
-	
-	void ToggleAutoChat();
+
 protected:
 	virtual void OnUpdate(float fDeltaTime) override;
 	virtual void OnRender(SDL_Renderer* pRenderer) override;
@@ -32,6 +30,7 @@ protected:
 	void OnCommand(Command cmd);
 	void RunAutomation();
 	void PollStatus();
+	void StartChat();
 
 private:
 	StatusBar* _pStatusBar;
@@ -40,5 +39,5 @@ private:
 	std::vector<string> _autoScript;
 	size_t _autoScriptIndex = 0;
 	float _fPollingCounter = 0.0f;
-	bool _bStartedChat = false;
+	bool _bStartedChat = false; // Used to trigger greeting
 };
