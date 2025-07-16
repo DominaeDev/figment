@@ -220,7 +220,7 @@ void MainFrame::OnCommand(Command cmd)
 		if (cmd.text.empty())
 			pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
 		else
-			pLLM->PushMessage(Role::Narrator, "["+cmd.text+"]", MessageType::Narration);
+			pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
 		break;
 	case CommandType::Guide:
 		if (!cmd.text.empty())
@@ -263,6 +263,27 @@ void MainFrame::OnCommand(Command cmd)
 		pLLM->Reseed(seed);
 		break;
 	}
+	case CommandType::Look:
+		if (!cmd.text.empty())
+		{
+			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, false);
+			pLLM->PushMessage(Role::Director, "{{Explain " + cmd.text + " to {{user}} in great detail.}}", MessageType::Direction, false);
+		}
+		else 
+		{
+			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their environment.]", MessageType::Narration, false);
+			pLLM->PushMessage(Role::Director, "{{Explain to {{user}} what can be seen from {{user}}'s point of view.}}", MessageType::Direction, false);
+		}
+		pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
+		break;
+	case CommandType::Examine:
+		if (!cmd.text.empty())
+		{
+			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false);
+			pLLM->PushMessage(Role::Director, "{{Describe to {{user}} the " + cmd.text + " in minute detail.}}", MessageType::Direction, false);
+			pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
+		}
+		break;
 	}
 }
 

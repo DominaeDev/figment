@@ -20,6 +20,8 @@ static _Cmd s_Commands[] {
 	{ "retry",			CommandType::RedoResponse },
 	{ "reseed",			CommandType::Reseed },
 	{ "impersonate",	CommandType::Impersonate },
+	{ "examine",		CommandType::Examine },
+	{ "look",			CommandType::Look },
 };
 
 Command CommandParser::Parse(string text)

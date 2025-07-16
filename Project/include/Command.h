@@ -18,6 +18,8 @@ enum class CommandType
 	RollbackUserMessage,
 	RedoResponse,
 	Reseed,
+	Look,
+	Examine,
 };
 
 struct Command

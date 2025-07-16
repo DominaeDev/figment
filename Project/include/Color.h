@@ -16,6 +16,7 @@ namespace Color
 	
 	extern SDL_Color UserMessageBackground;
 	extern SDL_Color BotMessageBackground;
+	extern SDL_Color NarrationBackground;
 
 	extern bool IsDefined(SDL_Color color);
 	extern SDL_Color WithAlpha(SDL_Color color, Uint8 alpha = 255u);
@@ -24,5 +25,4 @@ namespace Color
 	extern SDL_Color AddRGB(SDL_Color colorA, float value);
 	extern SDL_Color MultiplyRGB(SDL_Color colorA, SDL_Color colorB);
 	extern SDL_Color MultiplyRGB(SDL_Color colorA, float value);
-
 }

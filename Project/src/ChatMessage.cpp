@@ -26,7 +26,7 @@ ChatMessage::ChatMessage(Control* pParent, string name, string message, MessageT
 		bgColor = Color::UserMessageBackground;
 		break;
 	default:
-		bgColor = Color::DarkGray;
+		bgColor = Color::NarrationBackground;
 		break;
 	}
 

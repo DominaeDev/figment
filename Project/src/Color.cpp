@@ -12,6 +12,7 @@ SDL_Color Color::TextSelectionBackground			{ 0x99, 0xC9, 0xEF, 0xFF };
 
 SDL_Color Color::UserMessageBackground				{ 185, 219, 232, 255 };
 SDL_Color Color::BotMessageBackground				{ 255, 219, 238, 255 };
+SDL_Color Color::NarrationBackground				{ 180, 180, 180, 255 };
 
 bool Color::IsDefined(SDL_Color color)
 {
