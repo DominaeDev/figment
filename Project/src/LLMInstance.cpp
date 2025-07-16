@@ -2,6 +2,7 @@
 #include "common.h"
 #include "StringUtil.h"
 #include "Utility.h"
+#include "Message.h"
 #include "Constants.h"
 #include <format>
 #include <algorithm>
@@ -200,6 +201,23 @@ static void apply_names(string& prompt, string userName, string botName)
 	replace_all(prompt, "{{char}}", botName);
 }
 
+static const char* name_from_role(Role role)
+{
+	static const char* SYSTEM_NAME = "system";
+	static const char* NARRATOR_NAME = "Narrator";
+	static const char* USER_NAME = "{{user}}";
+	static const char* BOT_NAME = "{{char}}";
+
+	switch (role)
+	{
+	case Role::Bot: return BOT_NAME;
+	case Role::User: return USER_NAME;
+	case Role::Narrator: return NARRATOR_NAME;
+	case Role::System: return SYSTEM_NAME;
+	}
+	return "";
+}
+
 static string apply_chat_template(Messages in_messages, llama_context* pCtx, bool add_assistant)
 {
 	int prev_len = 0;
@@ -216,30 +234,15 @@ static string apply_chat_template(Messages in_messages, llama_context* pCtx, boo
 //	tmpl = "vicuna";
 //	tmpl = "deepseek3";
 
-	static const char* SYSTEM_NAME = "system";
-	static const char* NARRATOR_NAME = "Narrator";
-	static const char* USER_NAME = "{{user}}";
-	static const char* BOT_NAME = "{{char}}";
 
 	std::vector<llama_chat_message> llama_msgs(in_messages.size());
 	for (int i = 0; i < in_messages.size(); ++i)
 	{
 		auto& msg = in_messages[i];
-		if (msg.role == Role::System)
-		{
-			llama_msgs[i] = llama_chat_message { SYSTEM_NAME, msg.content.c_str() };
-		}
-		else if (msg.role == Role::Narrator)
-		{
-			llama_msgs[i] = llama_chat_message { NARRATOR_NAME, msg.content.c_str() };
-		}
-		else
-		{
-			llama_msgs[i] = llama_chat_message { 
-				msg.name.empty() ? (msg.role == Role::User ? USER_NAME : BOT_NAME) : msg.name.c_str(), 
-				msg.content.c_str() 
-			};
-		}
+		llama_msgs[i] = llama_chat_message { 
+			msg.name.empty() ? name_from_role(msg.role) : msg.name.c_str(), 
+			msg.content.c_str() 
+		};
 	}
 
 	std::vector<char> formatted(llama_n_ctx(pCtx));
@@ -306,7 +309,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 
 	// Init system prompt
 	string prompt = trim(system_prompt);
-	if (!isEmptyOrWhitespace(_chatState.bot.description))
+	if (!empty_or_whitespace(_chatState.bot.description))
 	{
 		string persona;
 		persona.reserve(_chatState.bot.description.size() + 20);
@@ -314,7 +317,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		persona.append(trim(_chatState.bot.description));
 		replace(prompt, "##CHARACTER_INFO##", persona);
 	}	
-	if (!isEmptyOrWhitespace(_chatState.user.description))
+	if (!empty_or_whitespace(_chatState.user.description))
 	{
 		string user_persona;
 		user_persona.reserve(_chatState.user.description.size() + 20);
@@ -362,10 +365,10 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 	return true;
 }
 
-bool LLMInstance::ResetChat()
+bool LLMInstance::ResetChat(int seed)
 {
 	ModelState state = _atm_modelState.load();
-	if (!IsReady())
+	if (!CanGenerate())
 		return false;
 
 	llama_context* pCtx = state.pCtx;
@@ -403,6 +406,8 @@ bool LLMInstance::ResetChat()
 		return false;
 	}
 
+	if (seed > 0)
+		Reseed(seed);
 	return true;
 }
 
@@ -489,9 +494,14 @@ bool LLMInstance::IsGenerating() const
 	return _atm_bGeneratingResponse.load();
 }
 
+bool LLMInstance::CanGenerate() const
+{
+	return IsReady() && !IsGenerating();
+}
+
 bool LLMInstance::Resume()
 {
-	if (!IsReady() || IsGenerating())
+	if (!CanGenerate())
 		return false;
 	return false; // Todo
 }
@@ -530,17 +540,17 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 	};
 
 	static std::vector<string> opening_tags {
-		std::format("<{0}=\"", Constants::DialogueTagBegin),
-		std::format("<{0}=\"", Constants::ActionTagBegin),
-		std::format("<{0}=\"", Constants::ThoughtTagBegin),
-		std::format("<{0}>", Constants::NarrationTagBegin),
+		std::format("<{0}=\"", Constants::DialogueTag),
+		std::format("<{0}=\"", Constants::ActionTag),
+		std::format("<{0}=\"", Constants::ThoughtTag),
+		std::format("<{0}>", Constants::NarrationTag),
 	};
 
 	static std::vector<string> closing_tags {
-		std::format("<{0}>", Constants::DialogueTagEnd),
-		std::format("<{0}>", Constants::ActionTagEnd),
-		std::format("<{0}>", Constants::ThoughtTagEnd),
-		std::format("<{0}>", Constants::NarrationTagEnd),
+		std::format("</{0}>", Constants::DialogueTag),
+		std::format("</{0}>", Constants::ActionTag),
+		std::format("</{0}>", Constants::ThoughtTag),
+		std::format("</{0}>", Constants::NarrationTag),
 	};
 
 	static std::vector<string> formatting_tags;
@@ -756,7 +766,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	{
 		string responderName;
 		if (args.responder == Responder::Narrator)
-			responderName = "Narrator";
+			responderName = name_from_role(Role::Narrator);
 		else if (args.responder == Responder::User)
 			responderName = chat.user.name;
 		else
@@ -799,8 +809,9 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 	string botName = chat.bot.name;
 	int32_t pre_response_pos = chat.pre_response_pos;
 
-	GenerationState genState;
-	genState.messageId = ++_messageCounter;
+	uuid responseId = CreateUUID();
+	uuid subMessageId = CreateUUID();
+	string responderName {};
 
 	DebugPrintLn(">> BEGIN GENERATION");
 
@@ -916,7 +927,10 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 					if (tagName == userName) 
 						break; // Stop if talking/acting for the user
 
-					if (tag == Constants::DialogueTagEnd || tag == Constants::ActionTagEnd || tag == Constants::NarrationTagEnd || tag == Constants::ThoughtTagEnd)
+					if (tag == Constants::DialogueTagEnd
+						|| tag == Constants::ActionTagEnd
+						|| tag == Constants::NarrationTagEnd
+						|| tag == Constants::ThoughtTagEnd)
 					{
 						carryOver = partial.substr(fmt_end + 1);
 						partial.erase(fmt_end + 1);
@@ -936,14 +950,14 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 						else
 						{
 							sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
-							genState.currName = tagName;
-							if (tag == Constants::DialogueTagBegin)
+							responderName = tagName;
+							if (tag == Constants::DialogueTag)
 								msgType = MessageType::Dialogue;
-							else if (tag == Constants::ActionTagBegin)
+							else if (tag == Constants::ActionTag)
 								msgType = MessageType::Action;
-							else if (tag == Constants::NarrationTagBegin)
+							else if (tag == Constants::NarrationTag)
 								msgType = MessageType::Narration;
-							else if (tag == Constants::ThoughtTagBegin)
+							else if (tag == Constants::ThoughtTag)
 								msgType = MessageType::Thought;
 						}
 					}
@@ -959,11 +973,12 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 				std::scoped_lock lock(_resultMutex);
 
 				_resultQueue.push(MessagePiece {
-					genState.messageId,
-					genState.currName,
-					sendMsg,
-					msgType,
-					bEndOfMessageType,
+					/*responseId*/ responseId,
+					/*subMessageId*/ subMessageId,
+					/*name*/ responderName,
+					/*text*/ sendMsg,
+					/*msgType*/ msgType,
+					/*isComplete*/bEndOfMessageType,
 				});
 				response += partial;
 
@@ -975,9 +990,9 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 			if (bEndOfMessageType)
 			{
 				msgType = MessageType::Undefined;
-				++genState.messageId;
 				if (args.maxMessages > 0)
 					break; // That's enough, thank you
+				subMessageId = CreateUUID();
 			}
 
 			send = false;
@@ -1001,6 +1016,7 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 	chat.current_pos = pre_response_pos;
 
 	chat.blocks.push_back(LLMMessageBlock {
+		/*responseId*/ responseId,
 		/*role*/ Role::Bot,
 		/*content*/ response,
 		/*tokens*/ sampled_tokens,
@@ -1036,7 +1052,7 @@ void LLMInstance::ClearResponseQueue()
 
 bool LLMInstance::SendMessage(Role role, string message)
 {
-	if (!IsReady() || IsGenerating())
+	if (!CanGenerate())
 		return false;
 
 	CancelWorkerThread();
@@ -1074,24 +1090,51 @@ bool LLMInstance::SendMessage(Role role, string message)
 	return true;
 }
 
-bool LLMInstance::PushMessage(Role role, string message)
+bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bool visible)
 {
-	if (!IsReady() || IsGenerating())
+	if (!CanGenerate())
 		return false;
 
+	string name = name_from_role(role);
+	string formatted = FormatMessage(message, name);
+
+	uuid blockId = CreateUUID();
+	uuid messageId = CreateUUID();
+
 	_chatState.blocks.push_back(LLMMessageBlock {
+		/*blockId*/ blockId,
 		/*role*/ role,
-		/*content*/ message,
+		/*content*/ formatted,
 		/*tokens*/ {},
 		/*ctx_pos*/ 0,
-		/* cached */ false,
+		/*cached*/ false,
 	});
+
+	if (visible)
+	{
+		if (role == Role::Bot)
+			name = _chatState.bot.name;
+		else if (role == Role::User)
+			name = _chatState.user.name;
+
+		std::scoped_lock lock(_resultMutex);
+		
+		// Add message to result queue
+		_resultQueue.push(MessagePiece {
+			/*blockId*/ blockId,
+			/*messageId*/ messageId,
+			/*name*/ name,
+			/*text*/ message,
+			/*msgType*/ msgType,
+			/*isComplete*/ true,
+			});
+	}
 	return true;
 }
 
 int LLMInstance::RemoveMessages( int numMessages)
 {
-	if (!IsReady() || IsGenerating() || numMessages < 1)
+	if (!CanGenerate() || numMessages < 1)
 		return 0;
 
 	int32_t newSize = std::max((int32_t)_chatState.blocks.size() - numMessages, 0);
@@ -1124,17 +1167,20 @@ int LLMInstance::RemoveMessages( int numMessages)
 
 bool LLMInstance::GreetUser()
 {
-	if (!IsReady() || IsGenerating())
+	if (!CanGenerate())
 		return false;
 
-	PushMessage(Role::Narrator, std::format("<{0}>{1} greets {2} who has just joined the conversation.</{0}>", Constants::NarrationTagBegin, _chatState.bot.name, _chatState.user.name));
-	Instigate(Responder::Bot, MessageType::Dialogue, 1);
+	PushMessage(Role::Narrator, 
+		std::format("[{0} greets {1} who has just joined the conversation.]", _chatState.bot.name, _chatState.user.name),
+		MessageType::Narration,
+		false);
+	InstigateResponse(Responder::Bot, MessageType::Dialogue, 1);
 	return true;
 }
 
-bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messageCount)
+bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, int messageCount)
 {
-	if (!IsReady() || IsGenerating() || responder == Responder::None)
+	if (!CanGenerate() || responder == Responder::None)
 		return false;
 	
 	CancelWorkerThread();
@@ -1151,13 +1197,13 @@ bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messag
 
 	string prependMsg;
 	if (msgType == MessageType::Dialogue)
-		prependMsg = std::format("<{}=\"{}\">\"", Constants::DialogueTagBegin, responderName);
+		prependMsg = std::format("<{}=\"{}\">\"", Constants::DialogueTag, responderName);
 	if (msgType == MessageType::Action)
-		prependMsg = std::format("<{}=\"{}\">*", Constants::ActionTagBegin, responderName);
+		prependMsg = std::format("<{}=\"{}\">*", Constants::ActionTag, responderName);
 	if (msgType == MessageType::Thought)
-		prependMsg = std::format("<{}=\"{}\">(", Constants::ThoughtTagBegin, responderName);
+		prependMsg = std::format("<{}=\"{}\">(", Constants::ThoughtTag, responderName);
 	else if (msgType == MessageType::Narration)
-		prependMsg = std::format("<{}>", Constants::NarrationTagBegin);
+		prependMsg = std::format("<{}>", Constants::NarrationTag);
 
 	GenerateArguments generateArgs {
 		/*chat state*/ &_chatState,
@@ -1281,7 +1327,7 @@ bool LLMInstance::DumpContext(string filename) const
 
 bool LLMInstance::Reseed(uint32_t seed)
 {
-	if (!IsReady() || IsGenerating())
+	if (!CanGenerate())
 		return false;
 
 	ModelState state = _atm_modelState.load();
@@ -1295,6 +1341,7 @@ bool LLMInstance::Reseed(uint32_t seed)
 	{
 		llama_sampler_chain_remove(pChain, n - 1);
 		llama_sampler_chain_add(pChain, llama_sampler_init_dist(seed));
+		llama_sampler_reset(pChain);
 		return true;
 	}
 	return false;

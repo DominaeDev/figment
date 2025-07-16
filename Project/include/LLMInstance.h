@@ -14,7 +14,6 @@ struct LLMStatus;
 
 typedef std::function<void(bool)> LoadModelCallback;
 typedef std::function<void(int)> LoadModelProgressCallback;
-typedef std::vector<Message> Messages;
 
 struct ModelState
 {
@@ -29,6 +28,7 @@ struct ModelState
 };
 
 struct LLMMessageBlock {
+	uuid responseId;
 	Role role;
     string content;
 	std::vector<int32_t> tokens;
@@ -52,15 +52,6 @@ struct ChatState
 	Character bot;
 };
 
-struct GenerationState
-{
-	int messageId = 0;
-	MessageType msgType = MessageType::Undefined;
-	std::string currName {};
-
-	~GenerationState() = default;
-};
-
 struct LLMStatus
 {
 	string modelName;
@@ -72,12 +63,21 @@ struct LLMStatus
 
 struct MessagePiece
 {
-	int messageId;
+	uuid responseId;	// response block
+	uuid subMessageId;	// shared id for pieces of the same message type
 	string name {};
 	string text {};
 	MessageType msgType = MessageType::Undefined;
 	bool isComplete = false;
 };
+
+struct Message 
+{
+	Role role;
+    string content;
+    string name;
+};
+typedef std::vector<Message> Messages;
 
 enum class Responder { None, Narrator, User, Bot };
 
@@ -95,16 +95,16 @@ public:
 	bool IsGenerating() const;
 	
 	bool Resume();
-	bool ResetChat();
+	bool ResetChat(int seed = -1);
 	bool Halt();
 
 	bool InitializeChat(string systemPrompt, Messages messages);
 	bool Reseed(uint32_t seed = 0xFFFFFFFF);
 	
 	bool SendMessage(Role role, string message);
-	bool PushMessage(Role role, string message);
+	bool PushMessage(Role role, string message, MessageType msgType = MessageType::UserMessage, bool visible = true);
 	int RemoveMessages(int numMessages = 1);
-	bool Instigate(Responder responder, MessageType msgType, int messageCount = 0);
+	bool InstigateResponse(Responder responder, MessageType msgType, int messageCount = 0);
 	bool GreetUser();
 
 	bool PollResponse(MessagePiece& piece);
@@ -118,6 +118,7 @@ public:
 private:
 	void ClearResponseQueue();
 	void CancelWorkerThread();
+	bool CanGenerate() const;
 
 private:
 	struct __PartialResult

@@ -2,7 +2,7 @@ root		::= stub? (dlg | act | narrate | think | ws)+ end?
 
 dlg			::= "<talk=\"" name "\">\"" text "\"</talk>"
 act			::= "<act=\"" name "\">*" text "*</act>"
-narrate		::= "<narrator>" text "</narrator>"
+narrate		::= "<narration>" text "</narration>"
 think		::= "<think=\"" name "\">" text "</think>"
 stub		::= (text "\"</talk>") |
 				(text "*</act>") |

@@ -10,14 +10,15 @@ double const Constants::StatusBarFontSize = 14.5;
 double const Constants::ChatMessageFontSize = 15.5;
 
 // Commands
-string const Constants::DialogueTagBegin = "talk";
-string const Constants::DialogueTagEnd = "/talk";
-string const Constants::ActionTagBegin = "act";
-string const Constants::ActionTagEnd = "/act";
-string const Constants::NarrationTagBegin = "narrator";
-string const Constants::NarrationTagEnd = "/narrator";
-string const Constants::ThoughtTagBegin = "think";
-string const Constants::ThoughtTagEnd = "/think";
+string const Constants::DialogueTag		= "talk";
+string const Constants::ActionTag		= "act";
+string const Constants::NarrationTag	= "narration";
+string const Constants::ThoughtTag		= "think";
+
+string const Constants::DialogueTagEnd	= "/" + Constants::DialogueTag;
+string const Constants::ActionTagEnd	= "/" + Constants::ActionTag;
+string const Constants::NarrationTagEnd	= "/" + Constants::NarrationTag;
+string const Constants::ThoughtTagEnd	= "/" + Constants::ThoughtTag;
 
 // Generation constants
 const int Constants::MaxMessageTokens = 512;

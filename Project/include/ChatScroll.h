@@ -12,21 +12,23 @@ public:
 	ChatScroll(Control* pParent);
 
 	ChatMessage* AddMessage(string name, string message, MessageType msgType);
-
-	void StartListening();
-	void StopListening();
+	void ClearMessages();
 
 protected:
 	void OnUpdate(float fDeltaTime) override;
 	void OnRender(SDL_Renderer* pRenderer) override {};
 
+	void EnablePolling(bool bEnable);
 	void Poll();
 
-	ChatMessage* _pLastBotMessage;
-	bool _bListening = false;
-	float _fListenTimer = 0.0f;
+private:
+	bool _bPolling = true;
+	float _fPollTimer = 0.0f;
 
-	int _messageId = 0;
-	MessageType _messageType = MessageType::Undefined;
-
+	struct MessageEntry
+	{
+		MessageType msgType;
+		ChatMessage* pChatMessage;
+	};
+	std::map<uuid, MessageEntry> _messagesById {};
 };

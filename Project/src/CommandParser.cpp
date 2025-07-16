@@ -25,7 +25,7 @@ Command CommandParser::Parse(string text)
 	if (text.empty())
 		return Command { CommandType::Invalid };
 
-	if (text == "...") // Shorthand
+	if (text == "..." || text == ".." || text == ".") // Shorthand
 		return Command { CommandType::InstigateDialogue };
 
 	if (text[0] != '/')

@@ -16,8 +16,7 @@ extern std::string rtrim(const std::string& s);
 extern std::string lcase(const std::string& s);
 extern std::string ucase(const std::string& s);
 
-extern inline bool isEmpty(const std::string& s);
-extern bool isEmptyOrWhitespace(const std::string& s);
+extern bool empty_or_whitespace(const std::string& s);
 
 extern bool string_begins_with(const std::string_view& str, const std::string_view& prefix);
 extern bool string_ends_with(const std::string_view& str, const std::string_view& suffix);

@@ -22,7 +22,7 @@ void Sizer::Layout()
 		OnLayout(_pOwner->GetRect());
 }
 
-void Sizer::Reset()
+void Sizer::Clear()
 {
 	_items.clear();
 }

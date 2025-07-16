@@ -107,8 +107,8 @@ void DebugPrintLn(string message)
 	DebugPrint("\r\n");
 }
 
-string CreateUUID()
+UUIDv4::UUID CreateUUID()
 {
 	static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-	return uuidGenerator.getUUID().str();
+	return uuidGenerator.getUUID();
 }

@@ -45,12 +45,7 @@ std::string rtrim(const std::string& in)
 	return s;
 }
 
-inline bool isEmpty(const std::string& s)
-{
-	return s.size() == 0;
-}
-
-bool isEmptyOrWhitespace(const std::string& s)
+bool empty_or_whitespace(const std::string& s)
 {
 	return s.size() == 0 || s.find_first_not_of(" \t\r\n", 0, 4) == std::string::npos;
 }

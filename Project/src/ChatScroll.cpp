@@ -21,35 +21,32 @@ ChatMessage* ChatScroll::AddMessage(string name, string message, MessageType msg
 {
 	auto pMessage = new ChatMessage(this, name, message, msgType);
 	_pSizer->Add(pMessage, 0, Sizer::Expand);
-
-	bool isBot = !(msgType == MessageType::UserMessage || msgType == MessageType::SystemMessage || msgType == MessageType::Undefined);
-	_pLastBotMessage = isBot ? pMessage : nullptr;
 	return pMessage;
+}
+
+void ChatScroll::ClearMessages()
+{
+	for (auto pMessage : _children)
+		delete pMessage;
+
+	_pSizer->Clear();
+	_children.clear();
+	_messagesById.clear();
 }
 
 void ChatScroll::OnUpdate(float fDeltaTime)
 {
-	if (_bListening)
+	_fPollTimer += fDeltaTime;
+	if (_fPollTimer >= POLL_INTERVAL)
 	{
-		_fListenTimer += fDeltaTime;
-		if (_fListenTimer >= POLL_INTERVAL)
-		{
-			_fListenTimer = 0.0f;
-			Poll();
-		}
+		_fPollTimer = 0.0f;
+		Poll();
 	}
 }
 
-void ChatScroll::StartListening()
+void ChatScroll::EnablePolling(bool bEnable)
 {
-	_bListening = true;
-	_messageId = 0;
-	_messageType = MessageType::Undefined;
-}
-
-void ChatScroll::StopListening()
-{
-	_bListening = false;
+	_bPolling = bEnable;
 }
 
 void ChatScroll::Poll()
@@ -61,25 +58,48 @@ void ChatScroll::Poll()
 	MessagePiece piece;
 	while (pLLM->PollResponse(piece))
 	{
-		if (!isEmptyOrWhitespace(piece.text))
+		MessageEntry* pEntry;
+		auto itMsg = _messagesById.find(piece.subMessageId);
+		if (itMsg != std::end(_messagesById))
 		{
-			if (!_pLastBotMessage || piece.messageId != _messageId)
-			{
-				_pLastBotMessage = AddMessage("Bot", piece.text, piece.msgType);
-				_messageId = piece.messageId;
-			}
+			// Append piece
+			pEntry = &itMsg->second;
+
+			if (pEntry->pChatMessage != nullptr)
+				pEntry->pChatMessage->AppendMessage(piece.text, piece.isComplete);
+			else if (!empty_or_whitespace(piece.text))
+				pEntry->pChatMessage = AddMessage("Bot", piece.text, piece.msgType);
 			else
-				_pLastBotMessage->AppendMessage(piece.text, piece.isComplete);
+				continue; // Skip until we receive some text
 		}
-		else if (_pLastBotMessage && piece.messageId == _messageId)
+		else if (empty_or_whitespace(piece.text) && piece.isComplete)
 		{
-			_pLastBotMessage->AppendMessage(piece.text, piece.isComplete);
+			// Ignore complete empty messages
+			continue;
+		}
+		else if (!empty_or_whitespace(piece.text))
+		{
+			// Create new message to hold the piece
+			ChatMessage* pMessage = AddMessage("Bot", piece.text, piece.msgType);
+			_messagesById[piece.subMessageId] = MessageEntry {
+				piece.msgType,
+				pMessage,
+			};
+			pEntry = &_messagesById[piece.subMessageId];
+		}
+		else
+		{
+			_messagesById[piece.subMessageId] = MessageEntry {
+				piece.msgType,
+				nullptr,
+			};
 		}
 
-		if (piece.isComplete)
+		// Clean up empty
+		if (piece.isComplete && itMsg != std::end(_messagesById) && itMsg->second.pChatMessage == nullptr)
 		{
-			_messageId = 0;
-			_messageType = MessageType::Undefined;
+			_messagesById.erase(itMsg);
+			continue;
 		}
 	}
 }
