@@ -87,25 +87,27 @@ public:
 	LLMInstance();
 	~LLMInstance();
 
+	bool InitializeChat(string systemPrompt, Messages messages);
 	void Shutdown();
+
 	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
 	bool IsLoadingModel() const { return _bLoadingModel; }
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool IsReady() const;
 	bool IsGenerating() const;
 	
-	bool Resume();
-	bool ResetChat(int seed = -1);
-	bool Halt();
-
-	bool InitializeChat(string systemPrompt, Messages messages);
-	bool Reseed(uint32_t seed = 0xFFFFFFFF);
-	
 	bool SendMessage(Role role, string message);
 	bool PushMessage(Role role, string message, MessageType msgType = MessageType::UserMessage, bool visible = true);
-	int RemoveMessages(int numMessages = 1);
+
+	bool Halt();
+	bool Resume();
+
 	bool InstigateResponse(Responder responder, MessageType msgType, int messageCount = 0);
 	bool GreetUser();
+	bool ResetChat(int seed = -1);
+	bool Reseed(uint32_t seed = 0xFFFFFFFF);
+	std::vector<uuid> RemoveMessages(int numMessages = 1);
+	std::vector<uuid> RollbackUserMessage();
 
 	bool PollResponse(MessagePiece& piece);
 	LLMStatus GetStatus() const;

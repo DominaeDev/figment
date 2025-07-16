@@ -13,7 +13,8 @@ enum class CommandType
 	Narrate,
 	Reset,
 	Revert,
-	Regenerate,
+	RollbackUserMessage,
+	RedoResponse,
 	Reseed,
 };
 

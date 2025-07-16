@@ -1132,10 +1132,10 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	return true;
 }
 
-int LLMInstance::RemoveMessages( int numMessages)
+std::vector<uuid> LLMInstance::RemoveMessages(int numMessages)
 {
 	if (!CanGenerate() || numMessages < 1)
-		return 0;
+		return {};
 
 	int32_t newSize = std::max((int32_t)_chatState.blocks.size() - numMessages, 0);
 	int32_t& current_pos = _chatState.current_pos;
@@ -1160,9 +1160,28 @@ int LLMInstance::RemoveMessages( int numMessages)
 	ModelState state = _atm_modelState.load();
 	llama_kv_self_seq_rm(state.pCtx, 0, current_pos, -1);
 
-	int removed = (int32_t)_chatState.blocks.size() - newSize;
+	// Return removed ids
+	std::vector<uuid> removedIds;
+	removedIds.reserve((int32_t)_chatState.blocks.size() - newSize);
+	for (size_t i = (size_t)newSize; i < _chatState.blocks.size(); ++i)
+		removedIds.push_back(_chatState.blocks[i].responseId);
+	
+	// Remove blocks
 	_chatState.blocks.resize((size_t)newSize);
-	return removed;
+	return removedIds;
+}
+
+std::vector<uuid> LLMInstance::RollbackUserMessage()
+{
+	if (!CanGenerate())
+		return {};
+
+	for (int i = (int32_t)_chatState.blocks.size() - 1; i >= 0; --i)
+	{
+		if (_chatState.blocks[i].role == Role::User)
+			return RemoveMessages((int32_t)_chatState.blocks.size() - i);
+	}
+	return {};
 }
 
 bool LLMInstance::GreetUser()

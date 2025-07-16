@@ -6,6 +6,7 @@
 #include "Color.h"
 #include "StringUtil.h"
 #include <format>
+#include <set>
 
 #define POLL_INTERVAL 0.1f
 
@@ -22,6 +23,35 @@ ChatMessage* ChatScroll::AddMessage(string name, string message, MessageType msg
 	auto pMessage = new ChatMessage(this, name, message, msgType);
 	_pSizer->Add(pMessage, 0, Sizer::Expand);
 	return pMessage;
+}
+
+int ChatScroll::RemoveMessages(std::vector<uuid> ids)
+{
+	int removed = 0;
+	std::set<uuid> removedIds;
+	for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
+	{
+		MessageEntry& entry = _messages[i];
+		if (std::find(std::cbegin(ids), std::cend(ids), entry.responseId) == std::cend(ids))
+			continue;
+
+		if (entry.pChatMessage)
+		{
+			_pSizer->Remove(entry.pChatMessage);
+			RemoveChild(entry.pChatMessage);
+			delete entry.pChatMessage;
+		}
+
+		removedIds.insert(entry.subMessageId);
+		_messages.erase(std::begin(_messages) + (ptrdiff_t)i);
+		++removed;
+	}
+
+	for (auto id : removedIds)
+		_messagesById.erase(id);
+
+	InvalidateLayout();
+	return removed;
 }
 
 void ChatScroll::ClearMessages()
@@ -58,12 +88,11 @@ void ChatScroll::Poll()
 	MessagePiece piece;
 	while (pLLM->PollResponse(piece))
 	{
-		MessageEntry* pEntry;
 		auto itMsg = _messagesById.find(piece.subMessageId);
 		if (itMsg != std::end(_messagesById))
 		{
 			// Append piece
-			pEntry = &itMsg->second;
+			MessageEntry* pEntry = itMsg->second;
 
 			if (pEntry->pChatMessage != nullptr)
 				pEntry->pChatMessage->AppendMessage(piece.text, piece.isComplete);
@@ -81,24 +110,34 @@ void ChatScroll::Poll()
 		{
 			// Create new message to hold the piece
 			ChatMessage* pMessage = AddMessage("Bot", piece.text, piece.msgType);
-			_messagesById[piece.subMessageId] = MessageEntry {
+			_messages.push_back(MessageEntry {
+				piece.responseId,
+				piece.subMessageId,
 				piece.msgType,
 				pMessage,
-			};
-			pEntry = &_messagesById[piece.subMessageId];
+			});
+			_messagesById[piece.subMessageId] = &_messages.back();
 		}
 		else
 		{
-			_messagesById[piece.subMessageId] = MessageEntry {
+			_messages.push_back(MessageEntry {
+				piece.responseId,
+				piece.subMessageId,
 				piece.msgType,
 				nullptr,
-			};
+			});
+			_messagesById[piece.subMessageId] = &_messages.back();
 		}
 
 		// Clean up empty
-		if (piece.isComplete && itMsg != std::end(_messagesById) && itMsg->second.pChatMessage == nullptr)
+		if (piece.isComplete && itMsg != std::end(_messagesById) && itMsg->second->pChatMessage == nullptr)
 		{
 			_messagesById.erase(itMsg);
+			for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
+			{
+				if (_messages[i].subMessageId == itMsg->first)
+					_messages.erase(std::begin(_messages) + (ptrdiff_t)i);
+			}
 			continue;
 		}
 	}

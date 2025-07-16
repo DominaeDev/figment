@@ -12,6 +12,7 @@ public:
 	ChatScroll(Control* pParent);
 
 	ChatMessage* AddMessage(string name, string message, MessageType msgType);
+	int RemoveMessages(std::vector<uuid> ids);
 	void ClearMessages();
 
 protected:
@@ -27,8 +28,11 @@ private:
 
 	struct MessageEntry
 	{
+		uuid responseId;
+		uuid subMessageId;
 		MessageType msgType;
 		ChatMessage* pChatMessage;
 	};
-	std::map<uuid, MessageEntry> _messagesById {};
+	std::vector<MessageEntry> _messages {};
+	std::map<uuid, MessageEntry*> _messagesById {}; // Sub-message id
 };

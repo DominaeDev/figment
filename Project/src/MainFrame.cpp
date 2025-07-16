@@ -225,10 +225,19 @@ void MainFrame::OnCommand(Command cmd)
 		pLLM->RemoveMessages(std::max(n, 1));
 		break;
 	}
-	case CommandType::Regenerate:
-		pLLM->RemoveMessages(1);
+	case CommandType::RedoResponse:
+	{
+		auto removedIds = pLLM->RemoveMessages(1);
+		_pChatScroll->RemoveMessages(removedIds);
 		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 0);
 		break;
+	}
+	case CommandType::RollbackUserMessage:
+	{
+		auto removedIds = pLLM->RollbackUserMessage();
+		_pChatScroll->RemoveMessages(removedIds);
+		break;
+	}
 	case CommandType::Reset:
 	{
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
