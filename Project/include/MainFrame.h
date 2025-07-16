@@ -18,26 +18,33 @@ public:
 
 	void LoadModel();
 	void UnloadModel();
-	void ToggleAutoChat();
 
 	static void SetStatusBar(string message);
 	static MainFrame& GetInstance() { return *s_pInstance; }
+
+	bool HandleKeyboardInput(SDL_Keycode key, bool down);
 
 protected:
 	virtual void OnUpdate(float fDeltaTime) override;
 	virtual void OnRender(SDL_Renderer* pRenderer) override;
 
 	void OnCommand(Command cmd);
-	void RunAutomation();
 	void PollStatus();
 	void StartChat();
 
 private:
 	StatusBar* _pStatusBar;
 	ChatScroll* _pChatScroll;
+	float _fPollingCounter = 0.0f;
+	bool _bStartedChat = false; // Used to trigger greeting
+
+#if AUTOCHAT
+public:
+	void ToggleAutoChat();
+private:
+	void AutoChat();
 	bool _bAutoChat;
 	std::vector<string> _autoScript;
 	size_t _autoScriptIndex = 0;
-	float _fPollingCounter = 0.0f;
-	bool _bStartedChat = false; // Used to trigger greeting
+#endif
 };

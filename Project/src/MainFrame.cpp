@@ -94,9 +94,6 @@ MainFrame::~MainFrame()
 
 void MainFrame::OnUpdate(float fDeltaTime)
 {
-	if (_bAutoChat)
-		RunAutomation();
-	
 	if (_bStartedChat)
 	{
 		_bStartedChat = false;
@@ -109,6 +106,10 @@ void MainFrame::OnUpdate(float fDeltaTime)
 	_fPollingCounter += fDeltaTime;
 	if (_fPollingCounter > 0.1f)
 		PollStatus();
+
+#if AUTOCHAT
+	if (_bAutoChat) AutoChat();
+#endif
 }
 
 void MainFrame::OnRender(SDL_Renderer* pRenderer)
@@ -156,7 +157,10 @@ void MainFrame::UnloadModel()
 	{
 		pLLM->Shutdown();
 		SetStatusBar("Model unloaded");
+
+#if _DEBUG
 		_bAutoChat = false;
+#endif
 	}
 }
 
@@ -260,11 +264,6 @@ void MainFrame::OnCommand(Command cmd)
 	}
 }
 
-void MainFrame::ToggleAutoChat()
-{
-	_bAutoChat = !_bAutoChat;
-}
-
 static std::vector<std::string> split(std::string s, const std::string& delimiter)
 {
 	std::vector<std::string> tokens;
@@ -281,7 +280,8 @@ static std::vector<std::string> split(std::string s, const std::string& delimite
 	return tokens;
 }
 
-void MainFrame::RunAutomation()
+#if _DEBUG
+void MainFrame::AutoChat()
 {
 	auto pLLM = Application::GetLLM();
 	if (!pLLM)
@@ -323,6 +323,7 @@ void MainFrame::RunAutomation()
 	if (pLLM->SendMessage(Role::User, formatted))
 		_pChatScroll->StartListening();
 }
+#endif
 
 void MainFrame::PollStatus()
 {
@@ -332,8 +333,7 @@ void MainFrame::PollStatus()
 		auto status = pLLM->GetStatus();
 		if (status.bInvalid)
 		{
-			pLLM->Shutdown();
-			_bAutoChat = false;
+			UnloadModel();
 			_pStatusBar->SetMessage("Error occurred. Model unloaded.");
 			_pStatusBar->SetModelInfo("", 0, 0);
 			return;
@@ -342,4 +342,26 @@ void MainFrame::PollStatus()
 		if (status.bReady)
 			_pStatusBar->SetModelInfo(status.modelName, status.allocCtxSize, status.usedCtxSize);
 	}
+}
+
+bool MainFrame::HandleKeyboardInput(SDL_Keycode key, bool down)
+{
+	if (down)
+	{
+		switch (key)
+		{
+		case SDLK_F2:
+			LoadModel();
+			return true;
+		case SDLK_F3:
+			UnloadModel();
+			return true;
+#if AUTOCHAT
+		case SDLK_F5:
+			_bAutoChat = !_bAutoChat;
+			return true;
+#endif
+		}
+	}
+	return false;
 }

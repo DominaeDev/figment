@@ -108,19 +108,14 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 		Application::GetLLM()->Halt();
 		return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
 	}
+
 	if (event->type == SDL_EVENT_KEY_DOWN)
 	{	
+		if (static_cast<MainFrame*>(pAppState->pTopFrame)->HandleKeyboardInput(event->key.key, true))
+			return SDL_APP_CONTINUE;
+
 		switch (event->key.key)
 		{
-		case SDLK_F2:
-			static_cast<MainFrame*>(pAppState->pTopFrame)->LoadModel();
-			break;
-		case SDLK_F3:
-			static_cast<MainFrame*>(pAppState->pTopFrame)->UnloadModel();
-			break;
-		case SDLK_F5:
-			static_cast<MainFrame*>(pAppState->pTopFrame)->ToggleAutoChat();
-			break;
 		case SDLK_F9:
 			Application::GetLLM()->Resume();
 			break;
@@ -131,6 +126,11 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 			Application::GetLLM()->DumpContext("prompt.txt");
 			break;
 		}
+	}
+	if (event->type == SDL_EVENT_KEY_UP)
+	{
+		if (static_cast<MainFrame*>(pAppState->pTopFrame)->HandleKeyboardInput(event->key.key, false))
+			return SDL_APP_CONTINUE;
 	}
 
 	if (pAppState->pTopFrame != nullptr)

@@ -447,7 +447,7 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 
 bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
 {
-	if (IsReady())
+	if (IsReady() || _bLoadingModel)
 		return false; // Already loaded
 
 	CancelWorkerThread();
@@ -456,10 +456,11 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 
 	__LoadModelProgressCallback = onProgress;
 
-	_workerThread = std::jthread(__LoadModel,
+	_workerThread = std::make_unique<std::jthread>(std::jthread(__LoadModel,
 		filename,
 		[this, filename, onComplete](ModelState result)
 	{
+		_bLoadingModel = false;
 		if (result.bReady)
 		{
 			_atm_modelState.store(result);
@@ -472,7 +473,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 			_modelName.clear();
 			onComplete(false);
 		}
-	});
+	}));
 
 	return true;
 }
@@ -1015,11 +1016,11 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 
 void LLMInstance::CancelWorkerThread()
 {
-	if (_workerThread.joinable())
+	if (_workerThread.get() && _workerThread->joinable())
 	{
 		DebugPrint(">> Stoping worker thread ");
-		_workerThread.request_stop();
-		_workerThread.join();
+		_workerThread->request_stop();
+		_workerThread->join();
 		DebugPrintLn(">> Done!");
 	}
 }
@@ -1053,7 +1054,7 @@ bool LLMInstance::SendMessage(Role role, string message)
 		/*chat state*/ &_chatState,
 	};
 
-	_workerThread = std::jthread(std::bind_front(&LLMInstance::Generate, this), generateArgs,
+	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::Generate, this), generateArgs,
 		[](__PartialResult partial) {
 			// ...
 		},
@@ -1068,7 +1069,7 @@ bool LLMInstance::SendMessage(Role role, string message)
 				_atm_modelState.store(state);
 			}
 			_atm_bGeneratingResponse.store(false);
-		});
+		}));
 
 	return true;
 }
@@ -1126,7 +1127,7 @@ bool LLMInstance::GreetUser()
 	if (!IsReady() || IsGenerating())
 		return false;
 
-	PushMessage(Role::Narrator, std::format("<{0}>{1} greets {2} and introduces themselves.</{0}>", Constants::NarrationTagBegin, _chatState.bot.name, _chatState.user.name));
+	PushMessage(Role::Narrator, std::format("<{0}>{1} greets {2} who has just joined the conversation.</{0}>", Constants::NarrationTagBegin, _chatState.bot.name, _chatState.user.name));
 	Instigate(Responder::Bot, MessageType::Dialogue, 1);
 	return true;
 }
@@ -1165,7 +1166,7 @@ bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messag
 		/*prepend*/ prependMsg,
 	};
 	
-	_workerThread = std::jthread(std::bind_front(&LLMInstance::Generate, this), generateArgs,
+	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::Generate, this), generateArgs,
 		[](__PartialResult partial) {
 			// ...
 		},
@@ -1179,7 +1180,7 @@ bool LLMInstance::Instigate(Responder responder, MessageType msgType, int messag
 				_atm_modelState.store(state);
 			}
 			_atm_bGeneratingResponse.store(false);
-		});
+		}));
 
 	return true;
 }
@@ -1203,11 +1204,11 @@ LLMStatus LLMInstance::GetStatus() const
 
 bool LLMInstance::PollResponse(MessagePiece& piece)
 {
-//	std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
-//	if (!lock.owns_lock())
-//		return false;
+	std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
+	if (!lock.owns_lock())
+		return false;
+//	std::scoped_lock lock(_resultMutex);
 
-	std::scoped_lock lock(_resultMutex);
 	if (_resultQueue.empty())
 		return false;
 

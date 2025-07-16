@@ -160,7 +160,7 @@ private:
 	ChatState _chatState {};
 
 	std::atomic<bool> _atm_bGeneratingResponse {};
-	std::jthread _workerThread;
+	std::unique_ptr<std::jthread> _workerThread;
 
 	std::mutex _resultMutex;
 	std::queue<MessagePiece> _resultQueue;

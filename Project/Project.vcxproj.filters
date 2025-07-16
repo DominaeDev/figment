@@ -51,6 +51,9 @@
     <Filter Include="Source Files\Chat">
       <UniqueIdentifier>{867c32c4-ffcd-4ac8-b0c0-d4e801575313}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Utility\Third-party\uuid">
+      <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -291,6 +294,12 @@
     </ClInclude>
     <ClInclude Include="include\Message.h">
       <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h">
+      <Filter>Source Files\Utility\Third-party\uuid</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\uuid_v4\endianness.h">
+      <Filter>Source Files\Utility\Third-party\uuid</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

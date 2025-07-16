@@ -5,6 +5,7 @@
 #include <locale>
 #include <fstream>
 
+
 SDL_FRect Rect_Expand(const SDL_FRect& rect, float pixels)
 {
 	return SDL_FRect { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
@@ -89,14 +90,25 @@ string NormalizeNewlines(string&& text)
 
 void DebugPrint(string message)
 {
+#if _DEBUG
 	if (message.empty())
 		return;
 
 	printf(message.c_str());
 	fflush(stdout);
+#else
+	// noop
+#endif
 }
 
 void DebugPrintLn(string message)
 {
-	DebugPrint(message + "\r\n");
+	DebugPrint(message);
+	DebugPrint("\r\n");
+}
+
+string CreateUUID()
+{
+	static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+	return uuidGenerator.getUUID().str();
 }
