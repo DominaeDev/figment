@@ -455,7 +455,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 	if (IsReady() || _bLoadingModel)
 		return false; // Already loaded
 
-	CancelWorkerThread();
+	CancelGeneration();
 
 	_bLoadingModel = true;
 
@@ -511,7 +511,7 @@ bool LLMInstance::Halt()
 	if (!IsReady() || !IsGenerating())
 		return false;
 
-	CancelWorkerThread();
+	CancelGeneration();
 	_atm_bGeneratingResponse.store(false);
 	return true;
 }
@@ -1030,7 +1030,7 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 	onComplete(InternalError::NoError, response);
 };
 
-void LLMInstance::CancelWorkerThread()
+void LLMInstance::CancelGeneration()
 {
 	if (_workerThread.get() && _workerThread->joinable())
 	{
@@ -1055,7 +1055,10 @@ bool LLMInstance::SendMessage(Role role, string message)
 	if (!CanGenerate())
 		return false;
 
-	CancelWorkerThread();
+	if (empty_or_whitespace(message))
+		return false;
+
+	CancelGeneration();
 
 	PushMessage(role, message);
 
@@ -1095,6 +1098,10 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	if (!CanGenerate())
 		return false;
 
+	if (empty_or_whitespace(message))
+		return false;
+
+	// Process
 	string name = name_from_role(role);
 	string formatted = FormatMessage(message, name);
 
@@ -1202,7 +1209,7 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 	if (!CanGenerate() || responder == Responder::None)
 		return false;
 	
-	CancelWorkerThread();
+	CancelGeneration();
 
 	_atm_bGeneratingResponse.store(true);
 

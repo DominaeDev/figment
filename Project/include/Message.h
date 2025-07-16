@@ -7,11 +7,10 @@ enum class MessageType
 	Undefined = -1, 
 
 	Dialogue = 0,
-	QuotedDialogue,
 	Action,
-	Narration,
 	Thought,
 
+	Narration,
 	UserMessage,
 	SystemMessage,
 };

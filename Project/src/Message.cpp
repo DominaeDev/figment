@@ -7,12 +7,21 @@
 #include <algorithm>
 #include <format>
 
+enum class SpanType
+{
+	Undefined = -1, 
+	Dialogue = 0,
+	QuotedDialogue,
+	Action,
+	Narration,
+	Thought,
+};
+
 struct Span
 {
-	MessageType msgType;
+	SpanType msgType;
 	size_t start;
 	size_t end; // exclusive
-
 	size_t length() const { return end - start; }
 };
 
@@ -52,7 +61,7 @@ static bool in_span(size_t pos, const std::vector<Span>& spans)
 	return false;
 }
 
-static void mark_spans(const std::string s, MessageType type, std::string open, std::string close, std::vector<Span>& spans)
+static void mark_spans(const std::string s, SpanType type, std::string open, std::string close, std::vector<Span>& spans)
 {
 	if (open.size() > s.size())
 		return;
@@ -81,7 +90,7 @@ static void mark_spans(const std::string s, MessageType type, std::string open, 
 	}
 }
 
-static void fill_gaps(const std::string s, MessageType type, std::vector<Span>& spans)
+static void fill_gaps(const std::string s, SpanType type, std::vector<Span>& spans)
 {
 	auto CheckAndAdd = [type, &spans](size_t pos, size_t len) {
 		if (len != 0)
@@ -146,15 +155,31 @@ std::string FormatMessage(std::string message, std::string actorName)
 	size_t pos = 0;
 	size_t length = message.size();
 
+	trim(message);
+	char first = message[0];
+	char last = 0;
+	if (first == '"' || first == '*')
+		last = first;
+	else if (first == '[')
+		last = ']';
+	else if (first == '(')
+		last = ')';
+	if (last != 0)
+	{
+		size_t pos_last = message.find(last, 1);
+		if (pos_last == string::npos)
+			message += last;
+	}
+
 	std::vector<Span> spans;
 	spans.reserve(64);
 
-	mark_spans(message, MessageType::QuotedDialogue, "\"", "\"", spans);
-	mark_spans(message, MessageType::Action, "*", "*", spans);
-	mark_spans(message, MessageType::Narration, "[", "]", spans);
-	mark_spans(message, MessageType::Thought, "((", "))", spans);
+	mark_spans(message, SpanType::QuotedDialogue, "\"", "\"", spans);
+	mark_spans(message, SpanType::Action, "*", "*", spans);
+	mark_spans(message, SpanType::Narration, "[", "]", spans);
+	mark_spans(message, SpanType::Thought, "((", "))", spans);
 
-	fill_gaps(message, MessageType::Dialogue, spans);
+	fill_gaps(message, SpanType::Dialogue, spans);
 //	trim_spans(message, spans);
 
 	std::string result;
@@ -165,13 +190,13 @@ std::string FormatMessage(std::string message, std::string actorName)
 
 		switch (span.msgType)
 		{
-		case MessageType::QuotedDialogue:
-		case MessageType::Action:
-		case MessageType::Narration:
+		case SpanType::QuotedDialogue:
+		case SpanType::Action:
+		case SpanType::Narration:
 			text.erase(text.length() - 1, 1);
 			text.erase(0, 1);
 			break;
-		case MessageType::Thought:
+		case SpanType::Thought:
 			text.erase(text.length() - 2, 2);
 			text.erase(0, 2);
 			break;
@@ -185,17 +210,17 @@ std::string FormatMessage(std::string message, std::string actorName)
 
 		switch (span.msgType)
 		{
-		case MessageType::QuotedDialogue:
-		case MessageType::Dialogue:
+		case SpanType::QuotedDialogue:
+		case SpanType::Dialogue:
 			result.append(std::format("<{0}=\"{1}\">\"{2}\"</{0}>", Constants::DialogueTag, actorName, text));
 			break;
-		case MessageType::Action:
+		case SpanType::Action:
 			result.append(std::format("<{0}=\"{1}\">*{2}*</{0}>", Constants::ActionTag, actorName, text));
 			break;
-		case MessageType::Narration:
+		case SpanType::Narration:
 			result.append(std::format("<{0}>{1}</{0}>", Constants::NarrationTag, text));
 			break;
-		case MessageType::Thought:
+		case SpanType::Thought:
 			result.append(std::format("<{0}=\"{1}\">({2})</{0}>", Constants::ThoughtTag, actorName, text));
 			break;
 		}

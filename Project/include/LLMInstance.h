@@ -119,7 +119,7 @@ public:
 
 private:
 	void ClearResponseQueue();
-	void CancelWorkerThread();
+	void CancelGeneration();
 	bool CanGenerate() const;
 
 private:
