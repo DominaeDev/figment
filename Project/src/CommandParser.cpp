@@ -7,17 +7,19 @@ struct _Cmd {
 };
 
 static _Cmd s_Commands[] {
-	{ "say",		CommandType::UserMessage },
-	{ "system",		CommandType::SystemMessage },
-	{ "pass",		CommandType::PassTurn},
-	{ "talk",		CommandType::InstigateDialogue},
-	{ "act",		CommandType::InstigateAction},
-	{ "narrate",	CommandType::Narrate },
-	{ "reset",		CommandType::Reset },
-	{ "revert",		CommandType::Revert },
-	{ "undo",		CommandType::RollbackUserMessage },
-	{ "retry",		CommandType::RedoResponse },
-	{ "reseed",		CommandType::Reseed },
+	{ "say",			CommandType::UserMessage },
+	{ "system",			CommandType::SystemMessage },
+	{ "pass",			CommandType::PassTurn},
+	{ "talk",			CommandType::InstigateDialogue},
+	{ "act",			CommandType::InstigateAction},
+	{ "narrate",		CommandType::Narrate },
+	{ "guide",			CommandType::Guide },
+	{ "reset",			CommandType::Reset },
+	{ "revert",			CommandType::Revert },
+	{ "undo",			CommandType::RollbackUserMessage },
+	{ "retry",			CommandType::RedoResponse },
+	{ "reseed",			CommandType::Reseed },
+	{ "impersonate",	CommandType::Impersonate },
 };
 
 Command CommandParser::Parse(string text)

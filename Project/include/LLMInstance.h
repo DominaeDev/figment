@@ -79,7 +79,7 @@ struct Message
 };
 typedef std::vector<Message> Messages;
 
-enum class Responder { None, Narrator, User, Bot };
+enum class Responder { None, Narrator, Director, User, Bot };
 
 class LLMInstance
 {
@@ -150,6 +150,7 @@ private:
 	struct GenerateArguments
 	{
 		ChatState* pChat;
+		Role role = Role::Bot;
 		MessageType msgType = MessageType::Undefined;
 		int maxMessages = 0;
 		string prepend;

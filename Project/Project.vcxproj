@@ -185,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\prompt_formatting.txt" />
+    <Text Include="resources\prompt_greeting.txt" />
     <Text Include="resources\prompt_system.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

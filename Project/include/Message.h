@@ -11,6 +11,7 @@ enum class MessageType
 	Thought,
 
 	Narration,
+	Direction,
 	UserMessage,
 	SystemMessage,
 };

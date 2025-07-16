@@ -211,13 +211,23 @@ void MainFrame::OnCommand(Command cmd)
 		pLLM->InstigateResponse(Responder::Bot, MessageType::Action, 1);
 		break;
 	case CommandType::PassTurn:
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 0);
+		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined);
+		break;
+	case CommandType::Impersonate:
+		pLLM->InstigateResponse(Responder::User, MessageType::Dialogue, 1);
 		break;
 	case CommandType::Narrate:
 		if (cmd.text.empty())
 			pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
 		else
 			pLLM->PushMessage(Role::Narrator, "["+cmd.text+"]", MessageType::Narration);
+		break;
+	case CommandType::Guide:
+		if (!cmd.text.empty())
+		{
+			pLLM->PushMessage(Role::Director, "{{" + cmd.text + "}}", MessageType::Direction, false);
+			pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 0);
+		}
 		break;
 	case CommandType::Revert:
 	{

@@ -16,13 +16,15 @@ namespace Constants
 
 	extern const string DialogueTag;
 	extern const string ActionTag;
-	extern const string NarrationTag;
 	extern const string ThoughtTag;
+	extern const string NarrationTag;
+	extern const string DirectionTag;
 
 	extern const string DialogueTagEnd;
 	extern const string ActionTagEnd;
-	extern const string NarrationTagEnd;
 	extern const string ThoughtTagEnd;
+	extern const string NarrationTagEnd;
+	extern const string DirectionTagEnd;
 
 	extern const int MaxMessageTokens;
 	extern const float ContextWindowSizeRatio;

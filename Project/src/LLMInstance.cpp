@@ -205,6 +205,7 @@ static const char* name_from_role(Role role)
 {
 	static const char* SYSTEM_NAME = "system";
 	static const char* NARRATOR_NAME = "Narrator";
+	static const char* DIRECTOR_NAME = "Director";
 	static const char* USER_NAME = "{{user}}";
 	static const char* BOT_NAME = "{{char}}";
 
@@ -212,8 +213,9 @@ static const char* name_from_role(Role role)
 	{
 	case Role::Bot: return BOT_NAME;
 	case Role::User: return USER_NAME;
-	case Role::Narrator: return NARRATOR_NAME;
 	case Role::System: return SYSTEM_NAME;
+	case Role::Narrator: return NARRATOR_NAME;
+	case Role::Director: return DIRECTOR_NAME;
 	}
 	return "";
 }
@@ -544,6 +546,7 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 		std::format("<{0}=\"", Constants::ActionTag),
 		std::format("<{0}=\"", Constants::ThoughtTag),
 		std::format("<{0}>", Constants::NarrationTag),
+		std::format("<{0}>", Constants::DirectionTag),
 	};
 
 	static std::vector<string> closing_tags {
@@ -551,6 +554,7 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 		std::format("</{0}>", Constants::ActionTag),
 		std::format("</{0}>", Constants::ThoughtTag),
 		std::format("</{0}>", Constants::NarrationTag),
+		std::format("</{0}>", Constants::DirectionTag),
 	};
 
 	static std::vector<string> formatting_tags;
@@ -811,6 +815,7 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 
 	uuid responseId = CreateUUID();
 	uuid subMessageId = CreateUUID();
+	int numMessages = 0;
 	string responderName {};
 
 	DebugPrintLn(">> BEGIN GENERATION");
@@ -924,13 +929,10 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 					string tag, tagName;
 					get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
-					if (tagName == userName) 
+					if (tagName == userName && args.role != Role::User)
 						break; // Stop if talking/acting for the user
 
-					if (tag == Constants::DialogueTagEnd
-						|| tag == Constants::ActionTagEnd
-						|| tag == Constants::NarrationTagEnd
-						|| tag == Constants::ThoughtTagEnd)
+					if (tag.size() > 1 && tag[0] == '/')
 					{
 						carryOver = partial.substr(fmt_end + 1);
 						partial.erase(fmt_end + 1);
@@ -955,10 +957,12 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 								msgType = MessageType::Dialogue;
 							else if (tag == Constants::ActionTag)
 								msgType = MessageType::Action;
-							else if (tag == Constants::NarrationTag)
-								msgType = MessageType::Narration;
 							else if (tag == Constants::ThoughtTag)
 								msgType = MessageType::Thought;
+							else if (tag == Constants::NarrationTag)
+								msgType = MessageType::Narration;
+							else if (tag == Constants::DirectionTag)
+								msgType = MessageType::Direction;
 						}
 					}
 				}
@@ -977,7 +981,7 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 					/*subMessageId*/ subMessageId,
 					/*name*/ responderName,
 					/*text*/ sendMsg,
-					/*msgType*/ msgType,
+					/*msgType*/ args.role == Role::User ? MessageType::UserMessage : msgType,
 					/*isComplete*/bEndOfMessageType,
 				});
 				response += partial;
@@ -990,7 +994,7 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 			if (bEndOfMessageType)
 			{
 				msgType = MessageType::Undefined;
-				if (args.maxMessages > 0)
+				if (args.maxMessages > 0 && ++numMessages >= args.maxMessages)
 					break; // That's enough, thank you
 				subMessageId = CreateUUID();
 			}
@@ -1017,7 +1021,7 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 
 	chat.blocks.push_back(LLMMessageBlock {
 		/*responseId*/ responseId,
-		/*role*/ Role::Bot,
+		/*role*/ args.role,
 		/*content*/ response,
 		/*tokens*/ sampled_tokens,
 		/*ctx_pos*/ pre_response_pos,
@@ -1196,11 +1200,14 @@ bool LLMInstance::GreetUser()
 	if (!CanGenerate())
 		return false;
 
-	PushMessage(Role::Narrator, 
-		std::format("[{0} greets {1} who has just joined the conversation.]", _chatState.bot.name, _chatState.user.name),
-		MessageType::Narration,
+	string prompt = ReadTextFile("./resources/prompt_greeting.txt").value_or("{{char}} greets {{user}}.");
+	apply_names(prompt, _chatState.user.name, _chatState.bot.name);
+
+	PushMessage(Role::Director, 
+		"{{" + prompt + "}}",
+		MessageType::Direction,
 		false);
-	InstigateResponse(Responder::Bot, MessageType::Dialogue, 1);
+	InstigateResponse(Responder::Bot, MessageType::Dialogue, 3);
 	return true;
 }
 
@@ -1219,20 +1226,45 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 	};
 	PrepareGeneration(prepareArgs);
 
-	string responderName = responder == Responder::User ? _chatState.user.name : _chatState.bot.name;
+	string responderName;
+	Role role;
+	switch (responder)
+	{
+	case Responder::Bot:
+		responderName = _chatState.bot.name;
+		role = Role::Bot;
+		break;
+	case Responder::User:
+		responderName = _chatState.user.name;
+		role = Role::User;
+		break;
+	case Responder::Narrator:
+		responderName = name_from_role(Role::Narrator);
+		role = Role::Narrator;
+		break;
+	case Responder::Director:
+		responderName = name_from_role(Role::Director);
+		role = Role::Director;
+		break;
+	}
 
 	string prependMsg;
 	if (msgType == MessageType::Dialogue)
-		prependMsg = std::format("<{}=\"{}\">\"", Constants::DialogueTag, responderName);
-	if (msgType == MessageType::Action)
-		prependMsg = std::format("<{}=\"{}\">*", Constants::ActionTag, responderName);
-	if (msgType == MessageType::Thought)
-		prependMsg = std::format("<{}=\"{}\">(", Constants::ThoughtTag, responderName);
+		prependMsg = std::format("<{}=\"{}\">", Constants::DialogueTag, responderName);
+	else if (msgType == MessageType::Action)
+		prependMsg = std::format("<{}=\"{}\">", Constants::ActionTag, responderName);
+	else if (msgType == MessageType::Thought)
+		prependMsg = std::format("<{}=\"{}\">", Constants::ThoughtTag, responderName);
 	else if (msgType == MessageType::Narration)
 		prependMsg = std::format("<{}>", Constants::NarrationTag);
+	else if (msgType == MessageType::Direction)
+		prependMsg = std::format("<{}>", Constants::DirectionTag);
+	else if (msgType == MessageType::UserMessage)
+		prependMsg = std::format("<{}=\"{}\">", Constants::DialogueTag, responderName);
 
 	GenerateArguments generateArgs {
 		/*chat state*/ &_chatState,
+		/*role*/ role,
 		/*msgType*/ msgType,
 		/*maxMessageCount*/ messageCount,
 		/*prepend*/ prependMsg,

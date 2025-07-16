@@ -12,13 +12,15 @@ double const Constants::ChatMessageFontSize = 15.5;
 // Commands
 string const Constants::DialogueTag		= "talk";
 string const Constants::ActionTag		= "act";
-string const Constants::NarrationTag	= "narration";
 string const Constants::ThoughtTag		= "think";
+string const Constants::NarrationTag	= "narrator";
+string const Constants::DirectionTag	= "director";
 
 string const Constants::DialogueTagEnd	= "/" + Constants::DialogueTag;
 string const Constants::ActionTagEnd	= "/" + Constants::ActionTag;
 string const Constants::NarrationTagEnd	= "/" + Constants::NarrationTag;
 string const Constants::ThoughtTagEnd	= "/" + Constants::ThoughtTag;
+string const Constants::DirectionTagEnd	= "/" + Constants::DirectionTag;
 
 // Generation constants
 const int Constants::MaxMessageTokens = 512;

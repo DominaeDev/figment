@@ -2,15 +2,15 @@ root		::= stub? (dlg | act | narrate | think | ws)+ end?
 
 dlg			::= "<talk=\"" name "\">\"" text "\"</talk>"
 act			::= "<act=\"" name "\">*" text "*</act>"
-narrate		::= "<narration>" text "</narration>"
+narrate		::= "<narrator>[" text "]</narrator>"
 think		::= "<think=\"" name "\">" text "</think>"
-stub		::= (text "\"</talk>") |
-				(text "*</act>") |
-				(text "</narrator>") |
-				(text ")</think>")
+stub		::= ("\"" text "\"</talk>") |
+				("*" text "*</act>") |
+				("(" text ")</think>") |
+				("[" text "]</narrator>")
 
-text		::= [^\t\n<>\"*]*
-ws			::= [ \t\n]
+text		::= [^\t<>"*]*
+ws			::= [ \n]
 
 name		::= ##NAME_PATTERN##
 end			::= ( "<|im_end|>" | "</s>" | "<s>" | "<end_of_turn>" | "<EOT>" | "_<EOT>" | "###" | "<｜end▁of▁sentence｜>" )

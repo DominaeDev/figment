@@ -314,5 +314,8 @@
     <Text Include="resources\prompt_system.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="resources\prompt_greeting.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

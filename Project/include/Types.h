@@ -22,6 +22,7 @@ enum class Role
 {
 	System,
 	Narrator,
+	Director,
 	User,
 	Bot,
 };

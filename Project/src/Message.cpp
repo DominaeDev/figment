@@ -13,8 +13,9 @@ enum class SpanType
 	Dialogue = 0,
 	QuotedDialogue,
 	Action,
-	Narration,
 	Thought,
+	Narration,
+	Direction,
 };
 
 struct Span
@@ -164,6 +165,8 @@ std::string FormatMessage(std::string message, std::string actorName)
 		last = ']';
 	else if (first == '(')
 		last = ')';
+	else if (first == '{')
+		last = '}';
 	if (last != 0)
 	{
 		size_t pos_last = message.find(last, 1);
@@ -176,8 +179,9 @@ std::string FormatMessage(std::string message, std::string actorName)
 
 	mark_spans(message, SpanType::QuotedDialogue, "\"", "\"", spans);
 	mark_spans(message, SpanType::Action, "*", "*", spans);
-	mark_spans(message, SpanType::Narration, "[", "]", spans);
 	mark_spans(message, SpanType::Thought, "((", "))", spans);
+	mark_spans(message, SpanType::Narration, "[", "]", spans);
+	mark_spans(message, SpanType::Direction, "{{", "}}", spans);
 
 	fill_gaps(message, SpanType::Dialogue, spans);
 //	trim_spans(message, spans);
@@ -197,6 +201,7 @@ std::string FormatMessage(std::string message, std::string actorName)
 			text.erase(0, 1);
 			break;
 		case SpanType::Thought:
+		case SpanType::Direction:
 			text.erase(text.length() - 2, 2);
 			text.erase(0, 2);
 			break;
@@ -217,11 +222,14 @@ std::string FormatMessage(std::string message, std::string actorName)
 		case SpanType::Action:
 			result.append(std::format("<{0}=\"{1}\">*{2}*</{0}>", Constants::ActionTag, actorName, text));
 			break;
-		case SpanType::Narration:
-			result.append(std::format("<{0}>{1}</{0}>", Constants::NarrationTag, text));
-			break;
 		case SpanType::Thought:
 			result.append(std::format("<{0}=\"{1}\">({2})</{0}>", Constants::ThoughtTag, actorName, text));
+			break;
+		case SpanType::Narration:
+			result.append(std::format("<{0}>[{1}]</{0}>", Constants::NarrationTag, text));
+			break;
+		case SpanType::Direction:
+			result.append(std::format("<{0}>{1}</{0}>", Constants::DirectionTag, text));
 			break;
 		}
 	}
