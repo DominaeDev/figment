@@ -111,7 +111,7 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 
 	if (event->type == SDL_EVENT_KEY_DOWN)
 	{	
-		if (static_cast<MainFrame*>(pAppState->pTopFrame)->HandleKeyboardInput(event->key.key, true))
+		if (static_cast<MainFrame*>(pAppState->pTopFrame)->HandleKeyPress(event->key.key))
 			return SDL_APP_CONTINUE;
 
 		switch (event->key.key)
@@ -127,10 +127,10 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 			break;
 		}
 	}
+
 	if (event->type == SDL_EVENT_KEY_UP)
 	{
-		if (static_cast<MainFrame*>(pAppState->pTopFrame)->HandleKeyboardInput(event->key.key, false))
-			return SDL_APP_CONTINUE;
+		// ...
 	}
 
 	if (pAppState->pTopFrame != nullptr)

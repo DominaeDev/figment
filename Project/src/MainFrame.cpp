@@ -364,24 +364,21 @@ void MainFrame::PollStatus()
 	}
 }
 
-bool MainFrame::HandleKeyboardInput(SDL_Keycode key, bool down)
+bool MainFrame::HandleKeyPress(SDL_Keycode key)
 {
-	if (down)
+	switch (key)
 	{
-		switch (key)
-		{
-		case SDLK_F2:
-			LoadModel();
-			return true;
-		case SDLK_F3:
-			UnloadModel();
-			return true;
+	case SDLK_F2:
+		LoadModel();
+		return true;
+	case SDLK_F3:
+		UnloadModel();
+		return true;
 #if AUTOCHAT
-		case SDLK_F5:
-			_bAutoChat = !_bAutoChat;
-			return true;
+	case SDLK_F5:
+		_bAutoChat = !_bAutoChat;
+		return true;
 #endif
-		}
 	}
 	return false;
 }

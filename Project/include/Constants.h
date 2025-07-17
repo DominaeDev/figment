@@ -26,6 +26,6 @@ namespace Constants
 	extern const string NarrationTagEnd;
 	extern const string DirectionTagEnd;
 
-	extern const int MaxMessageTokens;
-	extern const float ContextWindowSizeRatio;
+	extern const int MaxResponseLength;
+	extern const float ContextWindowKeepRatio;
 }

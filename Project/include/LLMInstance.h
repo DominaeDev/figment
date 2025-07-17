@@ -34,6 +34,8 @@ struct LLMMessageBlock {
 	std::vector<int32_t> tokens;
 	int32_t ctx_pos;
 	bool cached = false;
+
+	size_t length() const { return tokens.size(); }
 };
 
 struct ChatState

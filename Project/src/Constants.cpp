@@ -23,5 +23,5 @@ string const Constants::ThoughtTagEnd	= "/" + Constants::ThoughtTag;
 string const Constants::DirectionTagEnd	= "/" + Constants::DirectionTag;
 
 // Generation constants
-const int Constants::MaxMessageTokens = 512;
-const float Constants::ContextWindowSizeRatio = 0.5f;
+const int Constants::MaxResponseLength = 368;
+const float Constants::ContextWindowKeepRatio = 0.75f;

@@ -272,6 +272,201 @@ static string apply_chat_template(Message msg, llama_context* pCtx, bool add_ass
 	return apply_chat_template(Messages { msg }, pCtx, add_assistant);
 }
 
+static void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word)
+{
+	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
+	{
+		*bWait = true;
+		*bHalt = false;
+		return;
+	}
+
+	static std::vector<string> stop_words {
+		"<|",
+		"<end_of_turn",
+		"<EOT>",
+		"_<EOT>",
+		"<s>",
+		"</s>",
+		"### ",
+		"<｜",
+		"\r\r",
+//		"<|end",
+//		"<｜end▁of▁sentence｜>",
+	};
+
+	static std::vector<string> opening_tags {
+		std::format("<{0}=\"", Constants::DialogueTag),
+		std::format("<{0}=\"", Constants::ActionTag),
+		std::format("<{0}=\"", Constants::ThoughtTag),
+		std::format("<{0}>", Constants::NarrationTag),
+		std::format("<{0}>", Constants::DirectionTag),
+	};
+
+	static std::vector<string> closing_tags {
+		std::format("</{0}>", Constants::DialogueTag),
+		std::format("</{0}>", Constants::ActionTag),
+		std::format("</{0}>", Constants::ThoughtTag),
+		std::format("</{0}>", Constants::NarrationTag),
+		std::format("</{0}>", Constants::DirectionTag),
+	};
+
+	static std::vector<string> formatting_tags;
+	if (formatting_tags.empty())
+	{
+		formatting_tags.insert(std::end(formatting_tags), std::begin(opening_tags), std::end(opening_tags));
+		formatting_tags.insert(std::end(formatting_tags), std::begin(closing_tags), std::end(closing_tags));
+	}
+
+	// Look for stop word - and halt
+	size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
+	if (stop_pos != string::npos)
+	{
+		stop_word = partial.substr(stop_pos);
+
+		// Print to console
+		partial = partial.erase(stop_pos); // Erase stop word
+		*bHalt = true;
+		*bWait = false;
+		return;
+	}
+
+	// Look for partial stop word - and wait
+	stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
+	if (stop_pos != string::npos)
+	{
+		*bHalt = false;
+		*bWait = true;
+		return;
+	}
+
+	// Look for formatting tags
+	size_t fmt_pos = find_one_of(partial, opening_tags);
+	if (fmt_pos != string::npos)
+	{
+		// Await end of tag '>', or beginning of a new tag '<' (indicating garbage from the model)
+		if (partial.find_first_of("<>", fmt_pos + 1, 2) == string::npos)
+		{
+			*bHalt = false;
+			*bWait = true;
+			return;
+		}
+	}
+	else
+	{
+		// Look for partial formatting tags - and wait
+		fmt_pos = find_stopping_strings(partial, formatting_tags, str_token.size(), false);
+		if (fmt_pos != string::npos)
+		{
+			*bHalt = false;
+			*bWait = true;
+			return;
+		}
+	}
+
+	*bHalt = false;
+	*bWait = false;
+}
+
+static void assign_block_positions(ChatState& chat)
+{
+	size_t pos = chat.system_tokens.size();
+	for (auto& block : chat.blocks)
+	{
+		block.ctx_pos = (int32_t)pos;
+		pos += block.length();
+	}
+}
+
+static void init_batch_logits(llama_batch& batch)
+{
+	if (batch.n_tokens <= 0)
+		return;
+
+	for (int i = 0; i < batch.n_tokens - 1; ++i)
+		batch.logits[i] = false;
+	batch.logits[batch.n_tokens - 1] = true;  // Only need logits for last token
+}
+
+static std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddSpecial)
+{
+	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
+
+	std::vector<llama_token> prompt_tokens(1024);
+	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true);
+	if (n_prompt_tokens < 0)
+	{
+		prompt_tokens.resize(-n_prompt_tokens);
+		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true) < 0)
+		{
+			// Error
+			return std::vector<llama_token> {};
+		}
+	}
+	else
+	{
+		prompt_tokens.resize(n_prompt_tokens);
+	}
+	return prompt_tokens;
+}
+
+static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
+{
+	const int32_t maxCtx = llama_n_ctx(pCtx);
+	const bool is_first = llama_kv_self_used_cells(pCtx) == 0;
+
+	// tokenize the prompt
+	std::vector<llama_token> prompt_tokens = __tokenize(pModel, prompt, is_first);
+
+	// Prepare a batch for the prompt
+	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
+	int32_t num_tokens = (int32_t)prompt_tokens.size();
+
+	// Add tokens to batch
+	for (int i = 0; i < num_tokens; ++i) {
+		batch.token[i] = prompt_tokens[i];
+		batch.pos[i] = i;  // Position in sequence
+		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
+		batch.seq_id[i][0] = 0;  // Sequence ID 0
+		batch.logits[i] = false;  // Don't need logits for most tokens
+	}
+	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
+	batch.n_tokens = num_tokens;
+
+	out_pBatch = batch;
+	return true;
+}
+
+static int32_t remove_and_shift(llama_context* pCtx, ChatState& chat, std::vector<LLMMessageBlock>::iterator itBegin, std::vector<LLMMessageBlock>::iterator itEnd)
+{
+	// Remove
+	llama_pos shift_amount = 0;
+	for (auto it = itBegin; it != itEnd; ++it)
+		shift_amount += (llama_pos)(*it).length();
+	
+	llama_pos pos_remove_begin = (*itBegin).ctx_pos;
+	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
+
+	if (llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
+		chat.blocks.erase(itBegin, itEnd);
+	else
+		return 0; // Error
+
+	// Shift
+	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, -1, -shift_amount);
+
+	auto& batch = chat.batch;
+//	int32_t n_batch = (int32_t)llama_n_batch(pCtx);
+	int32_t n_batch = batch.n_tokens;
+	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
+	{
+		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
+		batch.logits[i] = false;
+	}
+	batch.n_tokens -= shift_amount;
+	return (int32_t)shift_amount;
+}
+
 bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 {
 	ModelState state = _atm_modelState.load();
@@ -302,7 +497,11 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
 		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(1.5f));							// Temperature
 		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
+#if _DEBUG
+		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(0xA0B0C0D0));				// Seed
+#else
 		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
+#endif
 
 		state.pSampler = pSampler;
 		state.pGrammar = grammar_sampler;
@@ -518,171 +717,6 @@ bool LLMInstance::Halt()
 	return true;
 }
 
-static void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word)
-{
-	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
-	{
-		*bWait = true;
-		*bHalt = false;
-		return;
-	}
-
-	static std::vector<string> stop_words {
-		"<|",
-		"<end_of_turn",
-		"<EOT>",
-		"_<EOT>",
-		"<s>",
-		"</s>",
-		"### ",
-		"<｜",
-		"\r\r",
-//		"<|end",
-//		"<｜end▁of▁sentence｜>",
-	};
-
-	static std::vector<string> opening_tags {
-		std::format("<{0}=\"", Constants::DialogueTag),
-		std::format("<{0}=\"", Constants::ActionTag),
-		std::format("<{0}=\"", Constants::ThoughtTag),
-		std::format("<{0}>", Constants::NarrationTag),
-		std::format("<{0}>", Constants::DirectionTag),
-	};
-
-	static std::vector<string> closing_tags {
-		std::format("</{0}>", Constants::DialogueTag),
-		std::format("</{0}>", Constants::ActionTag),
-		std::format("</{0}>", Constants::ThoughtTag),
-		std::format("</{0}>", Constants::NarrationTag),
-		std::format("</{0}>", Constants::DirectionTag),
-	};
-
-	static std::vector<string> formatting_tags;
-	if (formatting_tags.empty())
-	{
-		formatting_tags.insert(std::end(formatting_tags), std::begin(opening_tags), std::end(opening_tags));
-		formatting_tags.insert(std::end(formatting_tags), std::begin(closing_tags), std::end(closing_tags));
-	}
-
-	// Look for stop word - and halt
-	size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
-	if (stop_pos != string::npos)
-	{
-		stop_word = partial.substr(stop_pos);
-
-		// Print to console
-		partial = partial.erase(stop_pos); // Erase stop word
-		*bHalt = true;
-		*bWait = false;
-		return;
-	}
-
-	// Look for partial stop word - and wait
-	stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
-	if (stop_pos != string::npos)
-	{
-		*bHalt = false;
-		*bWait = true;
-		return;
-	}
-
-	// Look for formatting tags
-	size_t fmt_pos = find_one_of(partial, opening_tags);
-	if (fmt_pos != string::npos)
-	{
-		// Await end of tag '>', or beginning of a new tag '<' (indicating garbage from the model)
-		if (partial.find_first_of("<>", fmt_pos + 1, 2) == string::npos)
-		{
-			*bHalt = false;
-			*bWait = true;
-			return;
-		}
-	}
-	else
-	{
-		// Look for partial formatting tags - and wait
-		fmt_pos = find_stopping_strings(partial, formatting_tags, str_token.size(), false);
-		if (fmt_pos != string::npos)
-		{
-			*bHalt = false;
-			*bWait = true;
-			return;
-		}
-	}
-
-	*bHalt = false;
-	*bWait = false;
-}
-
-static void assign_block_positions(ChatState& chat)
-{
-	size_t pos = chat.system_tokens.size();
-	for (auto& block : chat.blocks)
-	{
-		block.ctx_pos = (int32_t)pos;
-		pos += block.tokens.size();
-	}
-}
-
-static void init_batch_logits(llama_batch& batch)
-{
-	if (batch.n_tokens <= 0)
-		return;
-
-	for (int i = 0; i < batch.n_tokens - 1; ++i)
-		batch.logits[i] = false;
-	batch.logits[batch.n_tokens - 1] = true;  // Only need logits for last token
-}
-
-std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddSpecial)
-{
-	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
-
-	std::vector<llama_token> prompt_tokens(1024);
-	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true);
-	if (n_prompt_tokens < 0)
-	{
-		prompt_tokens.resize(-n_prompt_tokens);
-		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true) < 0)
-		{
-			// Error
-			return std::vector<llama_token> {};
-		}
-	}
-	else
-	{
-		prompt_tokens.resize(n_prompt_tokens);
-	}
-	return prompt_tokens;
-}
-
-static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
-{
-	const int32_t maxCtx = llama_n_ctx(pCtx);
-	const bool is_first = llama_kv_self_used_cells(pCtx) == 0;
-
-	// tokenize the prompt
-	std::vector<llama_token> prompt_tokens = __tokenize(pModel, prompt, is_first);
-
-	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
-	int32_t num_tokens = (int32_t)prompt_tokens.size();
-
-	// Add tokens to batch
-	for (int i = 0; i < num_tokens; ++i) {
-		batch.token[i] = prompt_tokens[i];
-		batch.pos[i] = i;  // Position in sequence
-		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;  // Sequence ID 0
-		batch.logits[i] = false;  // Don't need logits for most tokens
-	}
-	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
-	batch.n_tokens = num_tokens;
-
-	out_pBatch = batch;
-	return true;
-}
-
 void LLMInstance::PrepareGeneration(PrepareArguments args)
 {
 	// Load state
@@ -697,7 +731,6 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Prepare prompt
 	int32_t& current_pos = chat.current_pos;
 	current_pos = llama_kv_self_used_cells(state.pCtx);
-	int32_t start_pos = current_pos;
 	int32_t n_batch = llama_n_batch(state.pCtx);
 	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 
@@ -718,50 +751,30 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		block.content = content;
 		block.tokens = lastTokens;
 		block.ctx_pos = 0; // assigned later
-		block.cached = true;
 
 		prompt_tokens.insert(std::end(prompt_tokens), std::cbegin(lastTokens), std::cend(lastTokens));
 	}
 
 	// Shift context window
-	if (current_pos + (int32_t)prompt_tokens.size() + Constants::MaxMessageTokens > ctx_size)
+	size_t ctx_reserve = prompt_tokens.size() + Constants::MaxResponseLength;
+	if (current_pos + ctx_reserve > ctx_size)
 	{
-		size_t keep_tokens = static_cast<int32_t>(ctx_size * Constants::ContextWindowSizeRatio) - (int32_t)prompt_tokens.size();
+		size_t ctx_chat_max = ctx_size - chat.system_tokens.size(); // Exclude system prompt
+		size_t free_tokens = std::max(static_cast<int32_t>(ctx_reserve), static_cast<int32_t>(ctx_chat_max * (1.0f - Constants::ContextWindowKeepRatio)));
 		
 		size_t total = 0;
-		int32_t first_to_keep = (int32_t)chat.blocks.size() - 1;
-		for (; first_to_keep >= 0; --first_to_keep)
-		{
-			if (total + chat.blocks[first_to_keep].tokens.size() >= keep_tokens)
-				break;
-			total += (int32_t)chat.blocks[first_to_keep].tokens.size();
-		}
-		size_t shift_amount = 0;
-		for (int32_t i = 0; i < first_to_keep; ++i)
-			shift_amount += chat.blocks[i].tokens.size();
-		chat.blocks.erase(std::cbegin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
+		size_t first_to_keep = 0;
+		while (first_to_keep < chat.blocks.size() && total < free_tokens && chat.blocks[first_to_keep].cached)
+			total += (int32_t)chat.blocks[first_to_keep++].length();
 
-		int32_t pos_remove_begin = (int32_t)chat.system_tokens.size();
-		int32_t pos_remove_end = pos_remove_begin + (int32_t)shift_amount;
-
-		bool removed = llama_kv_self_seq_rm(state.pCtx, 0, pos_remove_begin, pos_remove_end);
-		llama_kv_self_seq_add(state.pCtx, 0, (llama_pos)pos_remove_end, -1, -(llama_pos)shift_amount); // shift up
-
-		start_pos -= (int32_t)shift_amount;
-		current_pos -= (int32_t)shift_amount;
-
-		// Shift batch
-		for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
-		{
-			batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
-			batch.logits[i] = false;  // Don't need logits for most tokens
-		}
-		batch.n_tokens = batch.n_tokens - (int32_t)shift_amount;
+		current_pos -= remove_and_shift(state.pCtx, chat, std::begin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
 	}
 
+	// Calculate block positions
 	assign_block_positions(chat);
 
-	chat.pre_response_pos = start_pos + (int32_t)prompt_tokens.size();
+	// Store response position
+	chat.pre_response_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append assistant tokens
 	if (args.responder == Responder::Bot)
@@ -777,19 +790,25 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 			responderName = chat.bot.name; // Fallback
 
 		// Prepare assistant prelude
-		string assistant_prefix = apply_chat_template(Messages{}, state.pCtx, true);
-		replace(assistant_prefix, "assistant", responderName);
-		replace(assistant_prefix, "ASSISTANT", responderName);
-		auto assistant_tokens = __tokenize(state.pModel, assistant_prefix, false);
+		string assistant_prelude = apply_chat_template(Messages{}, state.pCtx, true);
+		replace(assistant_prelude, "assistant", responderName);
+		replace(assistant_prelude, "ASSISTANT", responderName);
+		auto assistant_tokens = __tokenize(state.pModel, assistant_prelude, false);
 		prompt_tokens.insert(std::end(prompt_tokens), std::begin(assistant_tokens), std::end(assistant_tokens));
 	}
+
+	// Store beginning of response (after assistant prelude)
+	chat.prepend_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append to batch
 	for (int i = 0; i < prompt_tokens.size(); ++i)
 		common_batch_add(batch, prompt_tokens[i], current_pos + i, { 0 }, false);
 	batch.logits[current_pos + prompt_tokens.size() - 1] = true;
 
-	chat.prepend_pos = current_pos + (int32_t)prompt_tokens.size();
+	// Mark blocks in cache (they will be shortly)
+	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
+		it->cached = true;
+
 }
 
 void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
@@ -1155,7 +1174,7 @@ std::vector<uuid> LLMInstance::RemoveMessages(int numMessages)
 	{
 		auto& block = _chatState.blocks[newSize - 1];
 		if (block.cached)
-			current_pos = std::min(current_pos, block.ctx_pos + (int32_t)block.tokens.size());
+			current_pos = std::min(current_pos, block.ctx_pos + (int32_t)block.length());
 		else
 			current_pos = std::min(current_pos, block.ctx_pos);
 	}
@@ -1370,7 +1389,7 @@ bool LLMInstance::DumpContext(string filename) const
 		result.append("[");
 		if (!block.tokens.empty())
 		{
-			for (int32_t i = 0; i < block.tokens.size(); ++i)
+			for (int32_t i = 0; i < block.length(); ++i)
 				result.append(fnTokenStr(block.tokens[i]));
 		}
 		else

@@ -22,7 +22,7 @@ public:
 	static void SetStatusBar(string message);
 	static MainFrame& GetInstance() { return *s_pInstance; }
 
-	bool HandleKeyboardInput(SDL_Keycode key, bool down);
+	bool HandleKeyPress(SDL_Keycode key);
 
 protected:
 	virtual void OnUpdate(float fDeltaTime) override;
@@ -39,8 +39,6 @@ private:
 	bool _bStartedChat = false; // Used to trigger greeting
 
 #if AUTOCHAT
-public:
-	void ToggleAutoChat();
 private:
 	void AutoChat();
 	bool _bAutoChat;
