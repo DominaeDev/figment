@@ -14,7 +14,7 @@ enum class CommandType
 	Narrate,
 	Guide,
 	Reset,
-	Revert,
+	RemoveLast,
 	RollbackUserMessage,
 	RedoResponse,
 	Reseed,

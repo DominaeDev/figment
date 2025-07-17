@@ -229,10 +229,11 @@ void MainFrame::OnCommand(Command cmd)
 			pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 0);
 		}
 		break;
-	case CommandType::Revert:
+	case CommandType::RemoveLast:
 	{
 		int n = atoi(cmd.text.c_str());
-		pLLM->RemoveMessages(std::max(n, 1));
+		auto removedIds = pLLM->RemoveMessages(std::max(n, 1));
+		_pChatScroll->RemoveMessages(removedIds);
 		break;
 	}
 	case CommandType::RedoResponse:
