@@ -437,9 +437,11 @@ static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt
 	return true;
 }
 
-static int32_t remove_and_shift(llama_context* pCtx, ChatState& chat, std::vector<LLMMessageBlock>::iterator itBegin, std::vector<LLMMessageBlock>::iterator itEnd)
+/// <summary>
+/// Warning: Callin ctx_remove in isolation leaves the batch in an invalid state.
+/// </summary>
+static int32_t ctx_remove(llama_context* pCtx, ChatState& chat, std::vector<LLMMessageBlock>::iterator itBegin, std::vector<LLMMessageBlock>::iterator itEnd)
 {
-	// Remove
 	llama_pos shift_amount = 0;
 	for (auto it = itBegin; it != itEnd; ++it)
 		shift_amount += (llama_pos)(*it).length();
@@ -448,15 +450,28 @@ static int32_t remove_and_shift(llama_context* pCtx, ChatState& chat, std::vecto
 	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
 
 	if (llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
+	{
 		chat.blocks.erase(itBegin, itEnd);
-	else
-		return 0; // Error
+		return shift_amount;
+	}
 
+	return 0; // Error
+}
+
+static int32_t ctx_remove_and_shift(llama_context* pCtx, ChatState& chat, std::vector<LLMMessageBlock>::iterator itBegin, std::vector<LLMMessageBlock>::iterator itEnd)
+{
+	// Remove
+	llama_pos pos_remove_begin = (*itBegin).ctx_pos;
+	int32_t shift_amount = ctx_remove(pCtx, chat, itBegin, itEnd);
+	if (shift_amount == 0)
+		return 0;
+	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
+	
 	// Shift
 	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, -1, -shift_amount);
-
+	
+	// Update batch
 	auto& batch = chat.batch;
-//	int32_t n_batch = (int32_t)llama_n_batch(pCtx);
 	int32_t n_batch = batch.n_tokens;
 	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
 	{
@@ -464,8 +479,36 @@ static int32_t remove_and_shift(llama_context* pCtx, ChatState& chat, std::vecto
 		batch.logits[i] = false;
 	}
 	batch.n_tokens -= shift_amount;
-	return (int32_t)shift_amount;
+	return (int32_t)-shift_amount;
 }
+
+static int32_t ctx_insert(llama_context* pCtx, llama_batch& batch, llama_pos pos_insert, LLMMessageBlock& block)
+{
+    // Where to insert in the existing context
+    int32_t shift_amount = (int32_t)block.length();
+
+    // Shift cache
+    llama_kv_self_seq_add(pCtx, 0, pos_insert, -1, shift_amount);
+
+    // Shift batch
+    int32_t n_batch = batch.n_tokens;
+    for (int32_t i = n_batch - 1; i >= pos_insert; --i) {
+        batch.token[i + shift_amount]  = batch.token[i];
+        batch.logits[i + shift_amount] = batch.logits[i];
+    }
+
+    // Insert tokens into batch
+    for (int32_t i = 0; i < shift_amount; ++i) {
+        batch.token[pos_insert + i]  = block.tokens[i];
+        batch.logits[pos_insert + i] = false;
+    }
+    batch.n_tokens += shift_amount;
+
+	block.ctx_pos = pos_insert;
+	block.cached = true;
+	return shift_amount;
+}
+
 
 bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 {
@@ -767,7 +810,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		while (first_to_keep < chat.blocks.size() && total < free_tokens && chat.blocks[first_to_keep].cached)
 			total += (int32_t)chat.blocks[first_to_keep++].length();
 
-		current_pos -= remove_and_shift(state.pCtx, chat, std::begin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
+		current_pos += ctx_remove_and_shift(state.pCtx, chat, std::begin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
 	}
 
 	// Calculate block positions
