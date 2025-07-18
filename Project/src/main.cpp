@@ -116,12 +116,6 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 
 		switch (event->key.key)
 		{
-		case SDLK_F9:
-			Application::GetLLM()->Resume();
-			break;
-		case SDLK_F10:
-			Application::GetLLM()->Halt();
-			break;
 		case SDLK_F11:
 			Application::GetLLM()->DumpContext("prompt.txt");
 			break;

@@ -12,8 +12,10 @@ public:
 	ChatScroll(Control* pParent);
 
 	ChatMessage* AddMessage(string name, string message, MessageType msgType);
-	int RemoveMessages(std::vector<uuid> ids);
+	int RemoveMessages(std::vector<string> ids);
 	void ClearMessages();
+
+	std::tuple<std::string, std::string> GetLastMessage() const;
 
 protected:
 	void OnUpdate(float fDeltaTime) override;
@@ -28,11 +30,11 @@ private:
 
 	struct MessageEntry
 	{
-		uuid responseId;
-		uuid subMessageId;
+		string responseId;
+		string subMessageId;
 		MessageType msgType;
 		ChatMessage* pChatMessage;
 	};
 	std::vector<MessageEntry> _messages {};
-	std::map<uuid, MessageEntry*> _messagesById {}; // Sub-message id
+	std::map<string, MessageEntry*> _messagesById {}; // Sub-message id
 };

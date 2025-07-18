@@ -61,7 +61,8 @@ void ChatMessage::SetMessage(const string& text)
 
 void ChatMessage::AppendMessage(const string& text, bool lastPiece)
 {
-	SetMessage(_pStaticText->GetText() + text);
+	if (_pStaticText)
+		SetMessage(_pStaticText->GetText() + text);
 }
 
 void ChatMessage::OnSize()

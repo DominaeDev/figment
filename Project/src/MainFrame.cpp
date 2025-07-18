@@ -367,6 +367,7 @@ void MainFrame::PollStatus()
 
 bool MainFrame::HandleKeyPress(SDL_Keycode key)
 {
+	auto pLLM = Application::GetLLM();
 	switch (key)
 	{
 	case SDLK_F2:
@@ -375,6 +376,19 @@ bool MainFrame::HandleKeyPress(SDL_Keycode key)
 	case SDLK_F3:
 		UnloadModel();
 		return true;
+	case SDLK_F9:
+	{
+		auto [a, b] = _pChatScroll->GetLastMessage();
+		pLLM->Continue(a, b);
+		break;
+	}
+	case SDLK_F10:
+		pLLM->Halt();
+#if AUTOCHAT
+		_bAutoChat = false;
+#endif		
+		break;
+
 #if AUTOCHAT
 	case SDLK_F5:
 		_bAutoChat = !_bAutoChat;

@@ -1,26 +1,29 @@
 #pragma once
 
-#include "llama.h"
 #include "Types.h"
 #include "Message.h"
 #include "Character.h"
+#include <llama.h>
 #include <vector>
 #include <functional>
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <array>
 
 struct LLMStatus;
 
-typedef std::function<void(bool)> LoadModelCallback;
-typedef std::function<void(int)> LoadModelProgressCallback;
+using LoadModelCallback = std::function<void(bool)>;
+using LoadModelProgressCallback = std::function<void(int)>;
 
 struct ModelState
 {
 	llama_model* pModel = nullptr;
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
-	llama_sampler* pGrammar = nullptr;
+	llama_sampler* pActiveGrammar = nullptr;
+
+	std::array<llama_sampler*, 3> grammars = {};
 
 	bool bReady = false;
 	bool bInvalid = false;
@@ -28,7 +31,7 @@ struct ModelState
 };
 
 struct LLMMessageBlock {
-	uuid responseId;
+	string responseId;
 	Role role;
     string content;
 	std::vector<int32_t> tokens;
@@ -65,8 +68,8 @@ struct LLMStatus
 
 struct MessagePiece
 {
-	uuid responseId;	// response block
-	uuid subMessageId;	// shared id for pieces of the same message type
+	string responseId;		// response block
+	string subMessageId;	// shared id for pieces of the same message type
 	string name {};
 	string text {};
 	MessageType msgType = MessageType::Undefined;
@@ -79,9 +82,9 @@ struct Message
     string content;
     string name;
 };
-typedef std::vector<Message> Messages;
+using Messages = std::vector<Message>;
 
-enum class Responder { None, Narrator, Director, User, Bot };
+enum class Responder { None, Continuation, User, Narrator, Director, Bot };
 
 class LLMInstance
 {
@@ -92,7 +95,7 @@ public:
 	bool InitializeChat(string systemPrompt, Messages messages);
 	void Shutdown();
 
-	bool HasLoadedModel() const { return _atm_modelState.load().pModel != nullptr; }
+	bool HasLoadedModel() const { return _atModelState.load().pModel != nullptr; }
 	bool IsLoadingModel() const { return _bLoadingModel; }
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool IsReady() const;
@@ -102,14 +105,14 @@ public:
 	bool PushMessage(Role role, string message, MessageType msgType = MessageType::UserMessage, bool visible = true);
 
 	bool Halt();
-	bool Resume();
+	bool Continue(string responseId, string subMessageId);
 
 	bool InstigateResponse(Responder responder, MessageType msgType, int messageCount = 0);
 	bool GreetUser();
 	bool ResetChat(int seed = -1);
 	bool Reseed(uint32_t seed = 0xFFFFFFFF);
-	std::vector<uuid> RemoveMessages(int numMessages = 1);
-	std::vector<uuid> RollbackUserMessage();
+	std::vector<string> RemoveMessages(int numMessages = 1);
+	std::vector<string> RollbackUserMessage();
 
 	bool PollResponse(MessagePiece& piece);
 	LLMStatus GetStatus() const;
@@ -139,8 +142,8 @@ private:
 		GrammarError = 4,
 	};
 
-	typedef std::function<void(__PartialResult)> __PartialResultCallback;
-	typedef std::function<void(InternalError, string)> __GenerationCompleteCallback;
+	using __PartialResultCallback = std::function<void(__PartialResult)>;
+	using __GenerationCompleteCallback = std::function<void(InternalError, string)>;
 	
 	struct PrepareArguments
 	{
@@ -156,16 +159,20 @@ private:
 		MessageType msgType = MessageType::Undefined;
 		int maxMessages = 0;
 		string prepend;
+		string responseId {};
+		string subMessageId {};
 	};
-	void Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	void __Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
+	void StartGeneration(GenerateArguments args);
 
 private:
 	bool _bLoadingModel = false;
 	string _modelName {};
-	std::atomic<ModelState> _atm_modelState {};
-	ChatState _chatState {};
 
-	std::atomic<bool> _atm_bGeneratingResponse {};
+	std::atomic<ModelState> _atModelState {}; // todo: better than this
+	ChatState _chatState {}; // todo: better than this
+
+	std::atomic<bool> _atbGeneratingResponse {};
 	std::unique_ptr<std::jthread> _workerThread;
 
 	std::mutex _resultMutex;

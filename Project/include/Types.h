@@ -11,7 +11,6 @@ struct TTF_TextEngine;
 typedef std::string string;
 typedef SDL_FPoint Point;
 typedef SDL_FRect Rect;
-typedef UUIDv4::UUID uuid;
 
 class Control;
 class LayoutElement;

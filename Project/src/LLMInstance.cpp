@@ -6,14 +6,28 @@
 #include "Constants.h"
 #include <format>
 #include <algorithm>
+#include <assert.h>
 
 std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddBOS);
 bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 
+enum Grammar {
+	None = 0,
+	Default = 1,
+	Continue = 2,
+};
+
+static llama_sampler* swap_active_grammar(ModelState& state, Grammar grammar);
+
 void ModelState::Release()
 {
 	if (pSampler)
+	{
+		swap_active_grammar(*this, Grammar::None);
 		llama_sampler_free(pSampler);
+		llama_sampler_free(grammars[Grammar::Default]);
+		llama_sampler_free(grammars[Grammar::Continue]);
+	}
 	if (pCtx)
 	{
 		llama_kv_self_clear(pCtx);
@@ -23,12 +37,31 @@ void ModelState::Release()
 		llama_model_free(pModel);
 
 	pSampler = nullptr;
-	pGrammar = nullptr; // Freed by chain
+	pActiveGrammar = nullptr;
+	grammars[Grammar::Default] = nullptr;	// Default grammar
+	grammars[Grammar::Continue] = nullptr;	// Continue grammar
 	pCtx = nullptr;
 	pModel = nullptr;
 	bReady = false;
 	bInvalid = false;
 }
+
+static std::vector<string> const opening_tags {
+	std::format("<{0}=\"", Constants::DialogueTag),
+	std::format("<{0}=\"", Constants::ActionTag),
+	std::format("<{0}=\"", Constants::ThoughtTag),
+	std::format("<{0}>", Constants::NarrationTag),
+	std::format("<{0}>", Constants::DirectionTag),
+};
+
+
+static std::vector<string> const closing_tags {
+	std::format("</{0}>", Constants::DialogueTag),
+	std::format("</{0}>", Constants::ActionTag),
+	std::format("</{0}>", Constants::ThoughtTag),
+	std::format("</{0}>", Constants::NarrationTag),
+	std::format("</{0}>", Constants::DirectionTag),
+};
 
 LLMInstance::LLMInstance()
 {
@@ -43,8 +76,8 @@ LLMInstance::LLMInstance()
 	// load dynamic backends
 	ggml_backend_load_all();
 
-	_atm_bGeneratingResponse.store(false);
-	_atm_modelState.store(ModelState());
+	_atbGeneratingResponse.store(false);
+	_atModelState.store(ModelState());
 }
 
 LLMInstance::~LLMInstance()
@@ -57,12 +90,12 @@ void LLMInstance::Shutdown()
 	Halt();
 
 	// Clear state and release
-	auto state = _atm_modelState.exchange(ModelState());
+	auto state = _atModelState.exchange(ModelState());
 	state.Release();
 }
 
-typedef std::function<void(ModelState)> __LoadModelCallback;
-static LoadModelProgressCallback __LoadModelProgressCallback = nullptr;
+using __LoadModelCallback = std::function<void(ModelState)>;
+static LoadModelProgressCallback __LoadModelProgressCallback = nullptr; //! @thread-safety
 
 static void OnLoadModelProgress(float progress, void* user_data)
 {
@@ -236,7 +269,6 @@ static string apply_chat_template(Messages in_messages, llama_context* pCtx, boo
 //	tmpl = "vicuna";
 //	tmpl = "deepseek3";
 
-
 	std::vector<llama_chat_message> llama_msgs(in_messages.size());
 	for (int i = 0; i < in_messages.size(); ++i)
 	{
@@ -272,6 +304,105 @@ static string apply_chat_template(Message msg, llama_context* pCtx, bool add_ass
 	return apply_chat_template(Messages { msg }, pCtx, add_assistant);
 }
 
+static string apply_chat_template_prefix(Message msg, string userName, string botName, llama_context* pCtx, bool add_assistant)
+{
+	// Strip prompt template from block content
+	static const char* MARKER = "<MESSAGE>";
+	string tmpl = apply_chat_template(Message { msg.role, MARKER }, pCtx, false);
+	size_t pos_marker = tmpl.find(MARKER);
+	string prefix = tmpl.substr(0, pos_marker);
+	string suffix = tmpl.substr(pos_marker + strlen(MARKER));
+	apply_names(prefix, userName, botName);
+
+	string content = msg.content;
+	if (string_ends_with(content, suffix))
+		content = content.substr(0, content.length() - suffix.length());
+	if (!string_begins_with(content, prefix))
+		content = prefix + content;
+	return content;
+}
+
+static std::pair<MessageType, bool> detect_message_type(string text)
+{
+	auto patterns = std::vector<std::tuple<string, MessageType>> {
+		{ std::format("<{0}", Constants::DialogueTag),		MessageType::Dialogue},
+		{ std::format("<{0}", Constants::ActionTag),		MessageType::Action},
+		{ std::format("<{0}", Constants::ThoughtTag),		MessageType::Thought},
+		{ std::format("<{0}", Constants::NarrationTag),		MessageType::Narration},
+		{ std::format("<{0}", Constants::DirectionTag),		MessageType::Direction},
+	};
+	
+	size_t last_pos = std::string::npos;
+	MessageType msgType = MessageType::Undefined;
+	for (int i = 0; i < patterns.size(); ++i)
+	{
+		size_t pos = text.rfind(std::get<0>(patterns[i]), std::string::npos);
+		if (pos != std::string::npos && (last_pos == std::string::npos || pos > last_pos))
+		{
+			last_pos = pos;
+			msgType = std::get<1>(patterns[i]);
+		}
+	}
+
+	bool bComplete = false;
+	for (auto tag : closing_tags)
+	{
+		size_t pos_end = text.rfind(tag, std::string::npos);
+		if (pos_end != std::string::npos && pos_end > last_pos)
+		{
+			bComplete = true;
+			break;
+		}
+	}
+
+	return std::make_pair(msgType, bComplete);
+}
+
+static string& sanitize_response(string& text)
+{
+	size_t pos_last = text.find_last_of('<');
+	if (pos_last == std::string::npos)
+		return text;
+	size_t pos_close = text.find_last_of('>');
+	if (pos_close == std::string::npos || pos_close < pos_last)
+		text = text.substr(0, pos_last);
+	return text;
+}
+
+static string& complete_message(string& text)
+{
+	auto [msgType, complete] = detect_message_type(sanitize_response(text));
+	if (complete)
+		return text;
+
+	switch (msgType)
+	{
+	case MessageType::Undefined:
+		text = std::format("<{0}=\"{{{{char}}}}\">{1}</{0}>", Constants::DialogueTag, text);
+		break;
+	case MessageType::UserMessage:
+	case MessageType::Dialogue:
+		text.append(std::format("</{0}>", Constants::DialogueTag));
+		break;
+	case MessageType::Action:
+		text.append(std::format("</{0}>", Constants::ActionTag));
+		break;
+	case MessageType::Thought:
+		text.append(std::format("</{0}>", Constants::ThoughtTag));
+		break;
+	case MessageType::Narration:
+		text.append(std::format("</{0}>", Constants::NarrationTag));
+		break;
+	case MessageType::Direction:
+		text.append(std::format("</{0}>", Constants::DirectionTag));
+		break;
+	case MessageType::SystemMessage:
+	default:
+		break;
+	}
+	return text;
+}
+
 static void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word)
 {
 	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
@@ -293,22 +424,6 @@ static void process(string& partial, string str_token, bool* bWait, bool* bHalt,
 		"\r\r",
 //		"<|end",
 //		"<｜end▁of▁sentence｜>",
-	};
-
-	static std::vector<string> opening_tags {
-		std::format("<{0}=\"", Constants::DialogueTag),
-		std::format("<{0}=\"", Constants::ActionTag),
-		std::format("<{0}=\"", Constants::ThoughtTag),
-		std::format("<{0}>", Constants::NarrationTag),
-		std::format("<{0}>", Constants::DirectionTag),
-	};
-
-	static std::vector<string> closing_tags {
-		std::format("</{0}>", Constants::DialogueTag),
-		std::format("</{0}>", Constants::ActionTag),
-		std::format("</{0}>", Constants::ThoughtTag),
-		std::format("</{0}>", Constants::NarrationTag),
-		std::format("</{0}>", Constants::DirectionTag),
 	};
 
 	static std::vector<string> formatting_tags;
@@ -437,6 +552,43 @@ static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt
 	return true;
 }
 
+static llama_sampler* swap_active_grammar(ModelState& state, Grammar grammar)
+{
+	if (static_cast<size_t>(grammar) >= state.grammars.size() 
+		|| state.grammars[Grammar::Default] == nullptr)
+		return nullptr;
+
+	llama_sampler* pChain = state.pSampler;
+	llama_sampler* pSelectedGrammar = state.grammars[grammar];
+
+	if (pSelectedGrammar != nullptr && pSelectedGrammar == llama_sampler_chain_get(pChain, 0))
+		return pSelectedGrammar; // No swap
+
+	std::list<llama_sampler*> samplers;
+	int32_t n = llama_sampler_chain_n(pChain);
+	assert(n <= 5);
+
+	for (int32_t i = n - 1; i >= 0; --i)
+	{
+		samplers.push_front(llama_sampler_chain_get(pChain, i));
+		llama_sampler_chain_remove(pChain, i);
+	}
+
+	samplers.remove(state.grammars[Grammar::Default]);
+	samplers.remove(state.grammars[Grammar::Continue]);
+	state.pActiveGrammar = nullptr;
+
+	if (pSelectedGrammar)
+	{
+		samplers.push_front(pSelectedGrammar);
+		state.pActiveGrammar = pSelectedGrammar;
+	}
+	
+	for (auto sampler : samplers)
+		llama_sampler_chain_add(pChain, sampler);
+	return state.pActiveGrammar;
+}
+
 /// <summary>
 /// Warning: Callin ctx_remove in isolation leaves the batch in an invalid state.
 /// </summary>
@@ -512,7 +664,7 @@ static int32_t ctx_insert(llama_context* pCtx, llama_batch& batch, llama_pos pos
 
 bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 {
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 	if (!state.bReady || !state.pModel)
 		return false;
 
@@ -532,23 +684,26 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		// Load grammar
 		string grammar = ReadTextFile("./resources/formatting_grammar.gbnf").value_or("");
 		replace_all(grammar, "##NAME_PATTERN##", "(\"" + _chatState.bot.name + "\")");
-		llama_sampler* grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
-		if (grammar_sampler)
+		llama_sampler* default_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
+		llama_sampler* continue_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "continue-root");
+		if (default_grammar_sampler)
 			DebugPrintLn("Grammar loaded");
 
-		if (grammar_sampler) llama_sampler_chain_add(pSampler, grammar_sampler);					// Grammar
+		if (default_grammar_sampler) llama_sampler_chain_add(pSampler, default_grammar_sampler);	// Grammar
 		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
 		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(1.5f));							// Temperature
 		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
 #if _DEBUG
-		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(0xA0B0C0D0));				// Seed
+		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(0xA0B0C0D0));						// Seed
 #else
 		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
 #endif
 
 		state.pSampler = pSampler;
-		state.pGrammar = grammar_sampler;
-		_atm_modelState.store(state);
+		state.pActiveGrammar = default_grammar_sampler;
+		state.grammars[Grammar::Default] = default_grammar_sampler;
+		state.grammars[Grammar::Continue] = continue_grammar_sampler;
+		_atModelState.store(state);
 	}
 
 	// Init system prompt
@@ -611,7 +766,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 
 bool LLMInstance::ResetChat(int seed)
 {
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 	if (!CanGenerate())
 		return false;
 
@@ -712,7 +867,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 		_bLoadingModel = false;
 		if (result.bReady)
 		{
-			_atm_modelState.store(result);
+			_atModelState.store(result);
 			_modelName = get_filename(filename);
 			onComplete(true);
 		}
@@ -729,13 +884,13 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 
 bool LLMInstance::IsReady() const
 {
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 	return state.bReady && !state.bInvalid && state.pModel && _chatState.isInitialized;
 }
 
 bool LLMInstance::IsGenerating() const
 {
-	return _atm_bGeneratingResponse.load();
+	return _atbGeneratingResponse.load();
 }
 
 bool LLMInstance::CanGenerate() const
@@ -743,11 +898,54 @@ bool LLMInstance::CanGenerate() const
 	return IsReady() && !IsGenerating();
 }
 
-bool LLMInstance::Resume()
+bool LLMInstance::Continue(string responseId, string subMessageId)
 {
 	if (!CanGenerate())
 		return false;
-	return false; // Todo
+
+	if (_chatState.blocks.size() == 0)
+	{
+		// Nothing to continue, instigate new response
+		return InstigateResponse(Responder::Bot, MessageType::Undefined);
+	}
+
+	LLMMessageBlock& block = _chatState.blocks[_chatState.blocks.size() - 1];
+	if (block.responseId != responseId)
+	{
+		// Nothing to continue, instigate new response
+		return InstigateResponse(Responder::Bot, MessageType::Undefined);
+	}
+
+	auto [msgType, bComplete] = detect_message_type(block.content);
+	if (msgType == MessageType::Undefined || bComplete)
+	{
+		// Dubious continue, or complete response, instigate new response instead
+		return InstigateResponse(Responder::Bot, MessageType::Undefined);
+	}
+
+	LLMMessageBlock blockCopy = block;
+	blockCopy.cached = false;
+	RemoveMessages(1); // Remove the last message, resets current_pos
+	_chatState.blocks.push_back(blockCopy); // Reinsert block
+
+	PrepareArguments prepareArgs {
+		/*chat state*/ &_chatState,
+		/*responder */ Responder::Continuation,
+	};
+	PrepareGeneration(prepareArgs);
+	_chatState.pre_response_pos = _chatState.current_pos; // Beginning of continued message
+	
+	GenerateArguments generateArgs {
+		/*chat state*/ &_chatState,
+		/*role*/ block.role,
+		/*msgType*/ msgType,
+		/*maxMessageCount*/ 1,
+		/*prepend*/ {},
+		/*responseId*/ responseId,
+		/*subMessageId*/ subMessageId,
+	};
+	StartGeneration(generateArgs);
+	return true;
 }
 
 bool LLMInstance::Halt()
@@ -756,14 +954,15 @@ bool LLMInstance::Halt()
 		return false;
 
 	CancelGeneration();
-	_atm_bGeneratingResponse.store(false);
+	_atbGeneratingResponse.store(false);
+
 	return true;
 }
 
 void LLMInstance::PrepareGeneration(PrepareArguments args)
 {
 	// Load state
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 	ChatState& chat = *args.pChatState;
 	llama_batch& batch = chat.batch;
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
@@ -786,16 +985,21 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		if (block.cached)
 			continue;
 
-		string content = apply_chat_template(Message { block.role, block.content }, state.pCtx, false);
-		apply_names(content, userName, botName);
-
-		auto lastTokens = __tokenize(state.pModel, content, false);
-
-		block.content = content;
-		block.tokens = lastTokens;
+		string content = block.content;
+		if (args.responder == Responder::Continuation) // Continue response
+			content = apply_chat_template_prefix(Message { block.role, content }, userName, botName, state.pCtx, false);
+		else
+		{
+			complete_message(content);
+			content = apply_chat_template(Message { block.role, content }, state.pCtx, false);
+			apply_names(content, userName, botName);
+		}
+		
+		auto block_tokens = __tokenize(state.pModel, content, false);
+//		block.content = content;
+		block.tokens = block_tokens;
 		block.ctx_pos = 0; // assigned later
-
-		prompt_tokens.insert(std::end(prompt_tokens), std::cbegin(lastTokens), std::cend(lastTokens));
+		prompt_tokens.insert(std::end(prompt_tokens), std::cbegin(block_tokens), std::cend(block_tokens));
 	}
 
 	// Shift context window
@@ -822,7 +1026,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Append assistant tokens
 	if (args.responder == Responder::Bot)
 		prompt_tokens.insert(std::end(prompt_tokens), std::begin(chat.assistant_tokens), std::end(chat.assistant_tokens));
-	else if (args.responder != Responder::None)
+	else if (args.responder != Responder::None && args.responder != Responder::Continuation)
 	{
 		string responderName;
 		if (args.responder == Responder::Narrator)
@@ -846,18 +1050,18 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Append to batch
 	for (int i = 0; i < prompt_tokens.size(); ++i)
 		common_batch_add(batch, prompt_tokens[i], current_pos + i, { 0 }, false);
-	batch.logits[current_pos + prompt_tokens.size() - 1] = true;
+//	batch.logits[current_pos + prompt_tokens.size() - 1] = true;
+	batch.n_tokens = current_pos + (int32_t)prompt_tokens.size();
 
 	// Mark blocks in cache (they will be shortly)
 	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
 		it->cached = true;
-
 }
 
-void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
 	std::vector<llama_token> sampled_tokens;
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 
 	llama_token sampled_token;
@@ -874,16 +1078,19 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 	string userName = chat.user.name;
 	string botName = chat.bot.name;
 	int32_t pre_response_pos = chat.pre_response_pos;
+	bool bIsContinuation = !args.responseId.empty() && !chat.blocks.empty();
 
-	uuid responseId = CreateUUID();
-	uuid subMessageId = CreateUUID();
+	string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
+	string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
+
 	int numMessages = 0;
 	string responderName {};
 
 	DebugPrintLn(">> BEGIN GENERATION");
 
-	if (state.pGrammar)
-		llama_sampler_reset(state.pGrammar);
+	// Init grammar
+	if (auto pGrammar = swap_active_grammar(state, bIsContinuation ? Grammar::Continue : Grammar::Default))
+		llama_sampler_reset(pGrammar);
 
 	if (!args.prepend.empty())
 	{
@@ -1081,26 +1288,64 @@ void LLMInstance::Generate(std::stop_token thread_stop, GenerateArguments args, 
 	batch.n_tokens = pre_response_pos;
 	chat.current_pos = pre_response_pos;
 
-	chat.blocks.push_back(LLMMessageBlock {
-		/*responseId*/ responseId,
-		/*role*/ args.role,
-		/*content*/ response,
-		/*tokens*/ sampled_tokens,
-		/*ctx_pos*/ pre_response_pos,
-	});
+	sanitize_response(response);
 
-	DebugPrintLn();
+	if (response.length() > 0)
+	{
+		if (bIsContinuation)
+		{
+			auto& lastBlock = chat.blocks[chat.blocks.size() - 1];
+			lastBlock.content += response;
+			lastBlock.tokens.insert(std::end(lastBlock.tokens), std::begin(sampled_tokens), std::end(sampled_tokens));
+			lastBlock.cached = false;
+		}
+		else
+		{
+			chat.blocks.push_back(LLMMessageBlock {
+				/*responseId*/ responseId,
+				/*role*/ args.role,
+				/*content*/ response,
+				/*tokens*/ sampled_tokens,
+				/*ctx_pos*/ pre_response_pos,
+			});
+		}
+	}
+	else
+	{
+		DebugPrint("(Empty response)");
+	}
+
 	DebugPrintLn();
 	DebugPrintLn(std::format("END OF GENERATION (stopped on:{})", stop_word.c_str()));
 
 	onComplete(InternalError::NoError, response);
 };
 
+void LLMInstance::StartGeneration(GenerateArguments args)
+{
+	_atbGeneratingResponse.store(true);
+	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__Generate, this), args,
+		[](__PartialResult partial) {
+			// ...
+		},
+		[this](InternalError error, string response) {
+			// ...
+			ModelState state = _atModelState.load();
+			if (error != InternalError::NoError)
+			{
+				printf("\r\n>> Internal error: (%d) %s\r\n", error, response.c_str());
+				state.bInvalid = true; // Invalidate state
+				_atModelState.store(state);
+			}
+			_atbGeneratingResponse.store(false);
+		}));
+}
+
 void LLMInstance::CancelGeneration()
 {
 	if (_workerThread.get() && _workerThread->joinable())
 	{
-		DebugPrint(">> Stoping worker thread ");
+		DebugPrint(">> Stopping worker thread ");
 		_workerThread->request_stop();
 		_workerThread->join();
 		DebugPrintLn(">> Done!");
@@ -1134,27 +1379,11 @@ bool LLMInstance::SendMessage(Role role, string message)
 	};
 	PrepareGeneration(prepareArgs);
 
-	_atm_bGeneratingResponse.store(true);
 	GenerateArguments generateArgs {
 		/*chat state*/ &_chatState,
 	};
-
-	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::Generate, this), generateArgs,
-		[](__PartialResult partial) {
-			// ...
-		},
-		[this](InternalError error, string response) {
-			// ...
-			ModelState state = _atm_modelState.load();
-			if (error != InternalError::NoError)
-			{
-				DebugPrintLn();
-				DebugPrintLn(std::format(">> Internal error: ({}) {}", (int)error, response.c_str()));
-				state.bInvalid = true; // Invalidate state
-				_atm_modelState.store(state);
-			}
-			_atm_bGeneratingResponse.store(false);
-		}));
+	
+	StartGeneration(generateArgs);
 
 	return true;
 }
@@ -1171,11 +1400,11 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	string name = name_from_role(role);
 	string formatted = FormatMessage(message, name);
 
-	uuid blockId = CreateUUID();
-	uuid messageId = CreateUUID();
+	string responseId = CreateUUID();
+	string subMessageId = CreateUUID();
 
 	_chatState.blocks.push_back(LLMMessageBlock {
-		/*blockId*/ blockId,
+		/*blockId*/ responseId,
 		/*role*/ role,
 		/*content*/ formatted,
 		/*tokens*/ {},
@@ -1194,8 +1423,8 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 		
 		// Add message to result queue
 		_resultQueue.push(MessagePiece {
-			/*blockId*/ blockId,
-			/*messageId*/ messageId,
+			/*blockId*/ responseId,
+			/*messageId*/ subMessageId,
 			/*name*/ name,
 			/*text*/ message,
 			/*msgType*/ msgType,
@@ -1205,7 +1434,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	return true;
 }
 
-std::vector<uuid> LLMInstance::RemoveMessages(int numMessages)
+std::vector<string> LLMInstance::RemoveMessages(int numMessages)
 {
 	if (!CanGenerate() || numMessages < 1)
 		return {};
@@ -1230,11 +1459,11 @@ std::vector<uuid> LLMInstance::RemoveMessages(int numMessages)
 	_chatState.batch.n_tokens = current_pos;
 
 	// Clear kv cache
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 	llama_kv_self_seq_rm(state.pCtx, 0, current_pos, -1);
 
 	// Return removed ids
-	std::vector<uuid> removedIds;
+	std::vector<string> removedIds;
 	removedIds.reserve((int32_t)_chatState.blocks.size() - newSize);
 	for (size_t i = (size_t)newSize; i < _chatState.blocks.size(); ++i)
 		removedIds.push_back(_chatState.blocks[i].responseId);
@@ -1244,7 +1473,7 @@ std::vector<uuid> LLMInstance::RemoveMessages(int numMessages)
 	return removedIds;
 }
 
-std::vector<uuid> LLMInstance::RollbackUserMessage()
+std::vector<string> LLMInstance::RollbackUserMessage()
 {
 	if (!CanGenerate())
 		return {};
@@ -1279,8 +1508,6 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 		return false;
 	
 	CancelGeneration();
-
-	_atm_bGeneratingResponse.store(true);
 
 	PrepareArguments prepareArgs {
 		/*chat state*/ &_chatState,
@@ -1332,21 +1559,7 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 		/*prepend*/ prependMsg,
 	};
 	
-	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::Generate, this), generateArgs,
-		[](__PartialResult partial) {
-			// ...
-		},
-		[this](InternalError error, string response) {
-			// ...
-			ModelState state = _atm_modelState.load();
-			if (error != InternalError::NoError)
-			{
-				printf("\r\n>> Internal error: (%d) %s\r\n", error, response.c_str());
-				state.bInvalid = true; // Invalidate state
-				_atm_modelState.store(state);
-			}
-			_atm_bGeneratingResponse.store(false);
-		}));
+	StartGeneration(generateArgs);
 
 	return true;
 }
@@ -1354,7 +1567,7 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 
 LLMStatus LLMInstance::GetStatus() const
 {
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 
 	LLMStatus status {};
 	if (state.pModel && state.pCtx)
@@ -1388,7 +1601,7 @@ bool LLMInstance::DumpContext(string filename) const
 	if (!IsReady())
 		return false;
 
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 
 	auto fnTokenStr = [pVocab](llama_token token) -> string {
@@ -1403,7 +1616,7 @@ bool LLMInstance::DumpContext(string filename) const
 		else if (token == llama_vocab_pad(pVocab))
 			return "<PAD>";
 		else if (token == llama_vocab_nl(pVocab))
-			return "\r\n";
+			return "\r\n"; // <NL>
 		else
 		{
 			char buf[256];
@@ -1419,7 +1632,7 @@ bool LLMInstance::DumpContext(string filename) const
 
 	// Detokenize the batched tokens
 	string result;
-	result.reserve(batch.n_tokens * 4); // Rough estimate for string size
+	result.reserve(65536);
 
 	for (int32_t i = 0; i < batch.n_tokens; ++i)
 		result.append(fnTokenStr(batch.token[i]));
@@ -1450,7 +1663,7 @@ bool LLMInstance::Reseed(uint32_t seed)
 	if (!CanGenerate())
 		return false;
 
-	ModelState state = _atm_modelState.load();
+	ModelState state = _atModelState.load();
 	if (!state.bReady || !state.pModel)
 		return false;
 
@@ -1459,9 +1672,13 @@ bool LLMInstance::Reseed(uint32_t seed)
 	llama_sampler* pDistSampler = llama_sampler_chain_get(pChain, n - 1);
 	if (pDistSampler)
 	{
-		llama_sampler_chain_remove(pChain, n - 1);
-		llama_sampler_chain_add(pChain, llama_sampler_init_dist(seed));
-		llama_sampler_reset(pChain);
+		const char* sampler_name = llama_sampler_name(pDistSampler);
+		if (strcmp(sampler_name, "dist") == 0)
+		{
+			llama_sampler_chain_remove(pChain, n - 1);
+			llama_sampler_chain_add(pChain, llama_sampler_init_dist(seed));
+			llama_sampler_reset(pChain);
+		}
 		return true;
 	}
 	return false;

@@ -25,10 +25,10 @@ ChatMessage* ChatScroll::AddMessage(string name, string message, MessageType msg
 	return pMessage;
 }
 
-int ChatScroll::RemoveMessages(std::vector<uuid> ids)
+int ChatScroll::RemoveMessages(std::vector<string> ids)
 {
 	int removed = 0;
-	std::set<uuid> removedIds;
+	std::set<string> removedIds;
 	for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
 	{
 		MessageEntry& entry = _messages[i];
@@ -62,6 +62,14 @@ void ChatScroll::ClearMessages()
 	_pSizer->Clear();
 	_children.clear();
 	_messagesById.clear();
+}
+
+std::tuple<std::string, std::string> ChatScroll::GetLastMessage() const
+{
+	if (_messages.empty())
+		return {};
+	auto& message = _messages[_messages.size() - 1];
+	return std::make_tuple(message.responseId, message.subMessageId);
 }
 
 void ChatScroll::OnUpdate(float fDeltaTime)
