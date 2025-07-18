@@ -307,18 +307,18 @@ static string apply_chat_template(Message msg, llama_context* pCtx, bool add_ass
 static string apply_chat_template_prefix(Message msg, string userName, string botName, llama_context* pCtx, bool add_assistant)
 {
 	// Strip prompt template from block content
-	static const char* MARKER = "<MESSAGE>";
+	static const char* const MARKER = "{{__PLACEHOLDER__}}";
 	string tmpl = apply_chat_template(Message { msg.role, MARKER }, pCtx, false);
-	size_t pos_marker = tmpl.find(MARKER);
-	string prefix = tmpl.substr(0, pos_marker);
-	string suffix = tmpl.substr(pos_marker + strlen(MARKER));
-	apply_names(prefix, userName, botName);
+	size_t pos_msg = tmpl.find(MARKER);
+	string prelude = tmpl.substr(0, pos_msg);
+	string postlude = tmpl.substr(pos_msg + strlen(MARKER));
+	apply_names(prelude, userName, botName);
 
 	string content = msg.content;
-	if (string_ends_with(content, suffix))
-		content = content.substr(0, content.length() - suffix.length());
-	if (!string_begins_with(content, prefix))
-		content = prefix + content;
+	if (string_ends_with(content, postlude))
+		content = content.substr(0, content.length() - postlude.length());
+	if (!string_begins_with(content, prelude))
+		content = prelude + content;
 	return content;
 }
 
@@ -382,16 +382,16 @@ static string& complete_message(string& text)
 		break;
 	case MessageType::UserMessage:
 	case MessageType::Dialogue:
-		text.append(std::format("</{0}>", Constants::DialogueTag));
+		text.append(std::format("\"</{0}>", Constants::DialogueTag));
 		break;
 	case MessageType::Action:
-		text.append(std::format("</{0}>", Constants::ActionTag));
+		text.append(std::format("*</{0}>", Constants::ActionTag));
 		break;
 	case MessageType::Thought:
-		text.append(std::format("</{0}>", Constants::ThoughtTag));
+		text.append(std::format("))</{0}>", Constants::ThoughtTag));
 		break;
 	case MessageType::Narration:
-		text.append(std::format("</{0}>", Constants::NarrationTag));
+		text.append(std::format("]</{0}>", Constants::NarrationTag));
 		break;
 	case MessageType::Direction:
 		text.append(std::format("</{0}>", Constants::DirectionTag));
@@ -1504,7 +1504,9 @@ bool LLMInstance::GreetUser()
 
 bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, int messageCount)
 {
-	if (!CanGenerate() || responder == Responder::None)
+	if (!CanGenerate() 
+		|| responder == Responder::None 
+		|| responder == Responder::Continuation)
 		return false;
 	
 	CancelGeneration();
