@@ -1,1 +1,0 @@
-Greet {{user}} and let them know what you're thinking about right now.

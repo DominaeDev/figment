@@ -5,9 +5,9 @@ std::map<Texture, SDL_Texture*> TextureStore::_textures;
 
 void TextureStore::Init(SDL_Renderer* pRenderer)
 {
-	LoadTexture(pRenderer, Texture::BORDER, "resources/line.png");
-	LoadTexture(pRenderer, Texture::BG_9GRID, "resources/bg_9grid.png");
-	LoadTexture(pRenderer, Texture::BORDER_9GRID, "resources/bg_9grid_border.png");
+	LoadTexture(pRenderer, Texture::BORDER, "./resources/images/line.png");
+	LoadTexture(pRenderer, Texture::BG_9GRID, "./resources/images/bg_9grid.png");
+	LoadTexture(pRenderer, Texture::BORDER_9GRID, "./resources/images/bg_9grid_border.png");
 }
 
 void TextureStore::Release()

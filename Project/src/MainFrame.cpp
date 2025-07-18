@@ -158,7 +158,7 @@ void MainFrame::UnloadModel()
 		pLLM->Shutdown();
 		SetStatusBar("Model unloaded");
 
-#if _DEBUG
+#if AUTOCHAT
 		_bAutoChat = false;
 #endif
 	}
@@ -169,10 +169,10 @@ void MainFrame::StartChat()
 	auto pLLM = Application::GetLLM();
 	if (pLLM && pLLM->HasLoadedModel())
 	{
-		string system_prompt = ReadTextFile("./resources/prompt_system.txt").value_or("");
+		string system_prompt = ReadTextFile("./resources/prompting/prompt_system.txt").value_or("");
 		if (system_prompt.empty())
 			DebugPrintLn(">> WARNING: No system prompt!");
-		string formatting_spec = ReadTextFile("./resources/prompt_formatting.txt").value_or("");
+		string formatting_spec = ReadTextFile("./resources/prompting/prompt_formatting.txt").value_or("");
 		if (formatting_spec.empty())
 			DebugPrintLn(">> WARNING: No formatting spec!");
 		replace(system_prompt, "##FORMATTING_SPEC##", formatting_spec);
@@ -199,7 +199,7 @@ void MainFrame::OnCommand(Command cmd)
 	switch (cmd.type)
 	{
 	case CommandType::UserMessage:
-		pLLM->SendMessage(Role::User, cmd.text);
+		pLLM->SendMessage(cmd.text);
 		break;
 	case CommandType::SystemMessage:
 		pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
@@ -222,12 +222,9 @@ void MainFrame::OnCommand(Command cmd)
 		else
 			pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
 		break;
-	case CommandType::Guide:
+	case CommandType::Instruct:
 		if (!cmd.text.empty())
-		{
-			pLLM->PushMessage(Role::Director, "{{" + cmd.text + "}}", MessageType::Direction, false);
-			pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 0);
-		}
+			pLLM->Instruct(cmd.text);
 		break;
 	case CommandType::RemoveLast:
 	{
@@ -267,21 +264,21 @@ void MainFrame::OnCommand(Command cmd)
 	case CommandType::Look:
 		if (!cmd.text.empty())
 		{
-			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, false);
-			pLLM->PushMessage(Role::Director, "{{Explain " + cmd.text + " to {{user}} in great detail.}}", MessageType::Direction, false);
+			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, false, 1);
+			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see of " + cmd.text + ", while paying extra attention to detail.}}", MessageType::Direction, false, 1);
 		}
 		else 
 		{
-			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their environment.]", MessageType::Narration, false);
-			pLLM->PushMessage(Role::Director, "{{Explain to {{user}} what can be seen from {{user}}'s point of view.}}", MessageType::Direction, false);
+			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their surroundings.]", MessageType::Narration, false, 1);
+			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and any other people who are present.}}", MessageType::Direction, false, 1);
 		}
 		pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
 		break;
 	case CommandType::Examine:
 		if (!cmd.text.empty())
 		{
-			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false);
-			pLLM->PushMessage(Role::Director, "{{Describe to {{user}} the " + cmd.text + " in minute detail.}}", MessageType::Direction, false);
+			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false, 1);
+			pLLM->PushMessage(Role::Director, "{{Describe to {{user}} the " + cmd.text + " in minute detail.}}", MessageType::Direction, false, 1);
 			pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
 		}
 		break;
@@ -304,7 +301,7 @@ static std::vector<std::string> split(std::string s, const std::string& delimite
 	return tokens;
 }
 
-#if _DEBUG
+#if AUTOCHAT
 void MainFrame::AutoChat()
 {
 	auto pLLM = Application::GetLLM();
@@ -342,7 +339,7 @@ void MainFrame::AutoChat()
 	string message = _autoScript[_autoScriptIndex];
 	_autoScriptIndex = ++_autoScriptIndex % _autoScript.size();
 
-	pLLM->SendMessage(Role::User, message);
+	pLLM->SendMessage(message);
 }
 #endif
 
@@ -378,8 +375,9 @@ bool MainFrame::HandleKeyPress(SDL_Keycode key)
 		return true;
 	case SDLK_F9:
 	{
-		auto [a, b] = _pChatScroll->GetLastMessage();
-		pLLM->Continue(a, b);
+		auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
+		if (!pLLM->Continue(responseId, subMessageId))
+			return pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined);
 		break;
 	}
 	case SDLK_F10:

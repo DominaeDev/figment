@@ -13,7 +13,7 @@ static _Cmd s_Commands[] {
 	{ "talk",			CommandType::InstigateDialogue},
 	{ "act",			CommandType::InstigateAction},
 	{ "narrate",		CommandType::Narrate },
-	{ "guide",			CommandType::Guide },
+	{ "instruct",		CommandType::Instruct },
 	{ "reset",			CommandType::Reset },
 	{ "remove",			CommandType::RemoveLast},
 	{ "undo",			CommandType::RollbackUserMessage },

@@ -12,7 +12,7 @@ enum class CommandType
 	InstigateAction,
 	Impersonate,
 	Narrate,
-	Guide,
+	Instruct,
 	Reset,
 	RemoveLast,
 	RollbackUserMessage,

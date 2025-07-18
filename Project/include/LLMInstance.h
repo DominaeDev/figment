@@ -37,6 +37,7 @@ struct LLMMessageBlock {
 	std::vector<int32_t> tokens;
 	int32_t ctx_pos;
 	bool cached = false;
+	int ttl = -1;
 
 	size_t length() const { return tokens.size(); }
 };
@@ -101,17 +102,18 @@ public:
 	bool IsReady() const;
 	bool IsGenerating() const;
 	
-	bool SendMessage(Role role, string message);
-	bool PushMessage(Role role, string message, MessageType msgType = MessageType::UserMessage, bool visible = true);
+	bool SendMessage(string message);
+	bool PushMessage(Role role, string message, MessageType msgType = MessageType::UserMessage, bool visible = true, int ttl = 0);
 
 	bool Halt();
 	bool Continue(string responseId, string subMessageId);
 
 	bool InstigateResponse(Responder responder, MessageType msgType, int messageCount = 0);
 	bool GreetUser();
+	bool Instruct(string instructions);
 	bool ResetChat(int seed = -1);
 	bool Reseed(uint32_t seed = 0xFFFFFFFF);
-	std::vector<string> RemoveMessages(int numMessages = 1);
+	std::vector<string> RemoveMessages(int numMessages = 1, bool rewindTime = true);
 	std::vector<string> RollbackUserMessage();
 
 	bool PollResponse(MessagePiece& piece);
@@ -149,6 +151,7 @@ private:
 	{
 		ChatState* pChatState;
 		Responder responder = Responder::Bot;
+		int time = 0;	// decrement ttl
 	};
 	void PrepareGeneration(PrepareArguments args);
 
@@ -158,7 +161,7 @@ private:
 		Role role = Role::Bot;
 		MessageType msgType = MessageType::Undefined;
 		int maxMessages = 0;
-		string prepend;
+		string prepend {};
 		string responseId {};
 		string subMessageId {};
 	};

@@ -682,7 +682,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_sampler* pSampler = llama_sampler_chain_init(sampler_params);
 
 		// Load grammar
-		string grammar = ReadTextFile("./resources/formatting_grammar.gbnf").value_or("");
+		string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 		replace_all(grammar, "##NAME_PATTERN##", "(\"" + _chatState.bot.name + "\")");
 		llama_sampler* default_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
 		llama_sampler* continue_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "continue-root");
@@ -904,24 +904,15 @@ bool LLMInstance::Continue(string responseId, string subMessageId)
 		return false;
 
 	if (_chatState.blocks.size() == 0)
-	{
-		// Nothing to continue, instigate new response
-		return InstigateResponse(Responder::Bot, MessageType::Undefined);
-	}
+		return false;
 
 	LLMMessageBlock& block = _chatState.blocks[_chatState.blocks.size() - 1];
 	if (block.responseId != responseId)
-	{
-		// Nothing to continue, instigate new response
-		return InstigateResponse(Responder::Bot, MessageType::Undefined);
-	}
+		return false; // Not last message
 
 	auto [msgType, bComplete] = detect_message_type(block.content);
 	if (msgType == MessageType::Undefined || bComplete)
-	{
-		// Dubious continue, or complete response, instigate new response instead
-		return InstigateResponse(Responder::Bot, MessageType::Undefined);
-	}
+		return false; // Not incomplete message
 
 	LLMMessageBlock blockCopy = block;
 	blockCopy.cached = false;
@@ -931,12 +922,13 @@ bool LLMInstance::Continue(string responseId, string subMessageId)
 	PrepareArguments prepareArgs {
 		/*chat state*/ &_chatState,
 		/*responder */ Responder::Continuation,
+		/*time*/ 1,
 	};
 	PrepareGeneration(prepareArgs);
 	_chatState.pre_response_pos = _chatState.current_pos; // Beginning of continued message
 	
 	GenerateArguments generateArgs {
-		/*chat state*/ &_chatState,
+		/*chat*/ &_chatState,
 		/*role*/ block.role,
 		/*msgType*/ msgType,
 		/*maxMessageCount*/ 1,
@@ -977,6 +969,23 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 
 	std::vector<llama_token> prompt_tokens;
+
+	// Decrement ttl
+	for (int32_t i = (int32_t)chat.blocks.size() - 1; i >= 0; --i)
+	{
+		auto& block = chat.blocks[i];
+		if (block.ttl <= 0)
+			continue;
+		block.ttl -= args.time;
+		if (block.ttl > 0)
+			continue;
+		
+		// Remove block
+		if (!block.cached)
+			chat.blocks.erase(std::begin(chat.blocks) + (ptrdiff_t)i);
+		else
+			current_pos += ctx_remove_and_shift(state.pCtx, _chatState, std::begin(chat.blocks) + (ptrdiff_t)i, std::begin(chat.blocks) + (ptrdiff_t)(i + 1));
+	}
 
 	// Tokenize uncached messages
 	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
@@ -1361,7 +1370,7 @@ void LLMInstance::ClearResponseQueue()
 	DebugPrintLn(">> Done!");
 }
 
-bool LLMInstance::SendMessage(Role role, string message)
+bool LLMInstance::SendMessage(string message)
 {
 	if (!CanGenerate())
 		return false;
@@ -1371,11 +1380,12 @@ bool LLMInstance::SendMessage(Role role, string message)
 
 	CancelGeneration();
 
-	PushMessage(role, message);
+	PushMessage(Role::User, message);
 
 	PrepareArguments prepareArgs {
 		/*chat state*/ &_chatState,
 		/*responder */ Responder::Bot,
+		/*time*/ 1,
 	};
 	PrepareGeneration(prepareArgs);
 
@@ -1388,7 +1398,7 @@ bool LLMInstance::SendMessage(Role role, string message)
 	return true;
 }
 
-bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bool visible)
+bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bool visible, int ttl)
 {
 	if (!CanGenerate())
 		return false;
@@ -1398,7 +1408,12 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 
 	// Process
 	string name = name_from_role(role);
-	string formatted = FormatMessage(message, name);
+	string content = message;
+	apply_names(content, _chatState.user.name, _chatState.bot.name);
+	if (msgType == MessageType::SystemMessage)
+		content = trim(content);
+	else 
+		content = FormatMessage(content, name);
 
 	string responseId = CreateUUID();
 	string subMessageId = CreateUUID();
@@ -1406,10 +1421,11 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	_chatState.blocks.push_back(LLMMessageBlock {
 		/*blockId*/ responseId,
 		/*role*/ role,
-		/*content*/ formatted,
+		/*content*/ content,
 		/*tokens*/ {},
 		/*ctx_pos*/ 0,
 		/*cached*/ false,
+		/*ttl*/ ttl > 0 ? ttl + 1 : 0,
 	});
 
 	if (visible)
@@ -1434,13 +1450,24 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	return true;
 }
 
-std::vector<string> LLMInstance::RemoveMessages(int numMessages)
+std::vector<string> LLMInstance::RemoveMessages(int numMessages, bool rewindTime)
 {
 	if (!CanGenerate() || numMessages < 1)
 		return {};
 
-	int32_t newSize = std::max((int32_t)_chatState.blocks.size() - numMessages, 0);
+	int32_t numRemovals = std::min(numMessages, (int32_t)_chatState.blocks.size());
+	int32_t newSize = (int32_t)_chatState.blocks.size() - numMessages;
 	int32_t& current_pos = _chatState.current_pos;
+
+	// Rewind time
+	if (rewindTime)
+	{
+		for (auto& block : _chatState.blocks)
+		{
+			if (block.ttl > 0)
+				block.ttl += numRemovals;
+		}
+	}
 
 	if (newSize > 0)
 	{
@@ -1491,14 +1518,27 @@ bool LLMInstance::GreetUser()
 	if (!CanGenerate())
 		return false;
 
-	string prompt = ReadTextFile("./resources/prompt_greeting.txt").value_or("{{char}} greets {{user}}.");
-	apply_names(prompt, _chatState.user.name, _chatState.bot.name);
+	string greetingInstruction = "{{Greet {{user}} and let them know what you're thinking about right now.}}";
+	apply_names(greetingInstruction, _chatState.user.name, _chatState.bot.name);
 
-	PushMessage(Role::Director, 
-		"{{" + prompt + "}}",
-		MessageType::Direction,
-		false);
+	PushMessage(Role::Director, greetingInstruction, MessageType::Direction, false, 1);
 	InstigateResponse(Responder::Bot, MessageType::Dialogue, 3);
+	return true;
+}
+
+bool LLMInstance::Instruct(string instructions)
+{
+	if (!CanGenerate())
+		return false;
+
+	if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
+	{
+		string prompt = text.value();
+		apply_names(prompt, _chatState.user.name, _chatState.bot.name);
+		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
+	}
+	PushMessage(Role::Director, "{{" + instructions + "}}", MessageType::Direction, false, 4);
+	InstigateResponse(Responder::Bot, MessageType::Undefined, 0);
 	return true;
 }
 
@@ -1514,6 +1554,7 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 	PrepareArguments prepareArgs {
 		/*chat state*/ &_chatState,
 		/*responder */ responder,
+		/*time*/ 1,
 	};
 	PrepareGeneration(prepareArgs);
 
