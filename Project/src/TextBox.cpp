@@ -3,7 +3,7 @@
 #include "AppState.h"
 #include <algorithm>
 #include "Color.h"
-#include "StringUtil.h"
+#include "StringUtility.h"
 
 #define CURSOR_BLINK_INTERVAL_MS    500
 
@@ -1014,7 +1014,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			{
 				if (_pOnEnter && _pText->text) // Invoke
 				{
-					_pOnEnter(trim(string(_pText->text)));
+					_pOnEnter(string_util::trim(string(_pText->text)));
 					Clear();
 				}
 			}

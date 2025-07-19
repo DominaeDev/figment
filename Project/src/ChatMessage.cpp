@@ -4,26 +4,22 @@
 #include "Color.h"
 #include "Constants.h"
 #include "Fonts.h"
-#include "StringUtil.h"
+#include "StringUtility.h"
 #include "Utility.h"
 #include "CustomRenderer.h"
 
-ChatMessage::ChatMessage(Control* pParent, string name, string message, MessageType msgType) : Control(pParent),
+ChatMessage::ChatMessage(Control* pParent, string name, string message, Role role, MessageType msgType) : Control(pParent),
 	_name(name),
 	_message(message),
-	_messageType(msgType)
+	_messageType(msgType),
+	_role(role)
 {
 	SDL_Color bgColor;
 	switch (msgType)
 	{
 	case MessageType::Dialogue:
-		bgColor = Color::BotMessageBackground;
-		break;
 	case MessageType::Action:
-		bgColor = Color::BotMessageBackground;
-		break;
-	case MessageType::UserMessage:
-		bgColor = Color::UserMessageBackground;
+		bgColor = role == Role::User ? Color::UserMessageBackground : Color::BotMessageBackground;
 		break;
 	default:
 		bgColor = Color::NarrationBackground;
@@ -47,7 +43,7 @@ void ChatMessage::OnRender(SDL_Renderer* pRenderer)
 void ChatMessage::SetMessage(const string& text)
 {
 	int w, h;
-	_message = trim(text);
+	_message = string_util::trim(text);
 	_pStaticText->SetTextAndResize(_message, w, h);
 
 	// Resize

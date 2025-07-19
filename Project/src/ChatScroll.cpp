@@ -4,7 +4,7 @@
 #include "AppState.h"
 #include "LLMInstance.h"
 #include "Color.h"
-#include "StringUtil.h"
+#include "StringUtility.h"
 #include <format>
 #include <set>
 
@@ -18,9 +18,9 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	SetSizer(pTopSizer);
 }
 
-ChatMessage* ChatScroll::AddMessage(string name, string message, MessageType msgType)
+ChatMessage* ChatScroll::AddMessage(string name, string message, Role role, MessageType msgType)
 {
-	auto pMessage = new ChatMessage(this, name, message, msgType);
+	auto pMessage = new ChatMessage(this, name, message, role, msgType);
 	_pSizer->Add(pMessage, 0, Sizer::Expand);
 	return pMessage;
 }
@@ -104,20 +104,20 @@ void ChatScroll::Poll()
 
 			if (pEntry->pChatMessage != nullptr)
 				pEntry->pChatMessage->AppendMessage(piece.text, piece.isComplete);
-			else if (!empty_or_whitespace(piece.text))
-				pEntry->pChatMessage = AddMessage("Bot", piece.text, piece.msgType);
+			else if (!string_util::empty_or_whitespace(piece.text))
+				pEntry->pChatMessage = AddMessage(piece.name, piece.text, piece.role, piece.msgType);
 			else
 				continue; // Skip until we receive some text
 		}
-		else if (empty_or_whitespace(piece.text) && piece.isComplete)
+		else if (string_util::empty_or_whitespace(piece.text) && piece.isComplete)
 		{
 			// Ignore complete empty messages
 			continue;
 		}
-		else if (!empty_or_whitespace(piece.text))
+		else if (!string_util::empty_or_whitespace(piece.text))
 		{
 			// Create new message to hold the piece
-			ChatMessage* pMessage = AddMessage("Bot", piece.text, piece.msgType);
+			ChatMessage* pMessage = AddMessage(piece.name, piece.text, piece.role, piece.msgType);
 			_messages.push_back(MessageEntry {
 				piece.responseId,
 				piece.subMessageId,

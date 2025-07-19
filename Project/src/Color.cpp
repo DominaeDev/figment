@@ -1,5 +1,6 @@
 #include "Color.h"
 #include "Utility.h"
+#include <algorithm>
 
 SDL_Color Color::White								{ 0xFF, 0xFF, 0xFF, 0xFF };
 SDL_Color Color::Black								{ 0x00, 0x00, 0x00, 0xFF };
@@ -26,9 +27,9 @@ SDL_Color Color::WithAlpha(SDL_Color color, Uint8 alpha)
 
 SDL_Color Color::AddRGB(SDL_Color colorA, SDL_Color colorB)
 {
-	float r = clamp(toF(colorA.r) + toF(colorB.r), 0.0f, 255.0f);
-	float g = clamp(toF(colorA.g) + toF(colorB.g), 0.0f, 255.0f);
-	float b = clamp(toF(colorA.b) + toF(colorB.b), 0.0f, 255.0f);
+	float r = std::clamp(toF(colorA.r) + toF(colorB.r), 0.0f, 255.0f);
+	float g = std::clamp(toF(colorA.g) + toF(colorB.g), 0.0f, 255.0f);
+	float b = std::clamp(toF(colorA.b) + toF(colorB.b), 0.0f, 255.0f);
 
 	return SDL_Color {
 		static_cast<uint8_t>(r),
@@ -40,9 +41,9 @@ SDL_Color Color::AddRGB(SDL_Color colorA, SDL_Color colorB)
 
 SDL_Color Color::AddRGB(SDL_Color color, float value)
 {
-	float r = clamp(toF(color.r) + value * 255.0f, 0.0f, 255.0f);
-	float g = clamp(toF(color.g) + value * 255.0f, 0.0f, 255.0f);
-	float b = clamp(toF(color.b) + value * 255.0f, 0.0f, 255.0f);
+	float r = std::clamp(toF(color.r) + value * 255.0f, 0.0f, 255.0f);
+	float g = std::clamp(toF(color.g) + value * 255.0f, 0.0f, 255.0f);
+	float b = std::clamp(toF(color.b) + value * 255.0f, 0.0f, 255.0f);
 
 	return SDL_Color {
 		static_cast<uint8_t>(r),
@@ -64,9 +65,9 @@ SDL_Color Color::MultiplyRGB(SDL_Color colorA, SDL_Color colorB)
 
 SDL_Color Color::MultiplyRGB(SDL_Color color, float value)
 {
-	float r = clamp(toF(color.r) * value, 0.0f, 255.0f);
-	float g = clamp(toF(color.g) * value, 0.0f, 255.0f);
-	float b = clamp(toF(color.b) * value, 0.0f, 255.0f);
+	float r = std::clamp(toF(color.r) * value, 0.0f, 255.0f);
+	float g = std::clamp(toF(color.g) * value, 0.0f, 255.0f);
+	float b = std::clamp(toF(color.b) * value, 0.0f, 255.0f);
 
 	return SDL_Color {
 		static_cast<uint8_t>(r),

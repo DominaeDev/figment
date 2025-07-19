@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "Graphics.h"
 #include "IUpdateable.h"
 
 class LayoutElement;

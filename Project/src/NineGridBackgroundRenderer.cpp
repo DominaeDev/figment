@@ -1,6 +1,6 @@
 #include "NineGridBackgroundRenderer.h"
 #include "TextureStore.h"
-#include "Utility.h"
+#include "GraphicsUtility.h"
 
 NineGridBackgroundRenderer::NineGridBackgroundRenderer(float cornerSize, SDL_Color bgColor, SDL_Color borderColor) :
 	_cornerSize(cornerSize),

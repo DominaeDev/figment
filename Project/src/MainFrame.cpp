@@ -7,20 +7,17 @@
 #include "VerticalSizer.h"
 #include "TextBox.h"
 #include "Constants.h"
+#include "Command.h"
 #include "Color.h"
 #include "ChatScroll.h"
 #include "ChatMessage.h"
 #include "StatusBar.h"
-#include "StringUtil.h"
+#include "StringUtility.h"
 #include "LLMInstance.h"
 #include "AppState.h"
-#include <format>
-#include "SolidBackgroundRenderer.h"
-#include "RoundedBackgroundRenderer.h"
-#include "NineGridBackgroundRenderer.h"
-#include "RoundedBorderRenderer.h"
+#include "Renderers.h"
 #include "CommandParser.h"
-#include "Message.h"
+#include <format>
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -42,7 +39,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	rightPanel->SetSize(200, -1);
 	rightPanel->SetMinSize(200, -1);
 
-	auto pStaticText = new StaticText(centerPanel, "Hello, how are you? iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", FontFace::Default, Constants::DefaultFontSize);
+	auto pStaticText = new StaticText(centerPanel, "", FontFace::Default, Constants::DefaultFontSize);
 	pStaticText->SetAlignment(TextAlignment::Middle_Center);
 	pStaticText->SetSize(80, 80);
 	pStaticText->SetMinSize(-1, 80);
@@ -175,7 +172,7 @@ void MainFrame::StartChat()
 		string formatting_spec = ReadTextFile("./resources/prompting/prompt_formatting.txt").value_or("");
 		if (formatting_spec.empty())
 			DebugPrintLn(">> WARNING: No formatting spec!");
-		replace(system_prompt, "##FORMATTING_SPEC##", formatting_spec);
+		string_util::replace(system_prompt, "##FORMATTING_SPEC##", formatting_spec);
 		pLLM->InitializeChat(system_prompt, {});
 
 		_bStartedChat = true;
@@ -199,6 +196,11 @@ void MainFrame::OnCommand(Command cmd)
 	switch (cmd.type)
 	{
 	case CommandType::UserMessage:
+#if _DEBUG
+		if (!pLLM->IsReady())
+			_pChatScroll->AddMessage("User", cmd.text, Role::User, MessageType::Dialogue);
+		else
+#endif
 		pLLM->SendMessage(cmd.text);
 		break;
 	case CommandType::SystemMessage:
@@ -285,22 +287,6 @@ void MainFrame::OnCommand(Command cmd)
 	}
 }
 
-static std::vector<std::string> split(std::string s, const std::string& delimiter)
-{
-	std::vector<std::string> tokens;
-	size_t pos = 0;
-	std::string token;
-	while ((pos = s.find(delimiter)) != std::string::npos)
-	{
-		token = s.substr(0, pos);
-		tokens.push_back(token);
-		s.erase(0, pos + delimiter.length());
-	}
-	tokens.push_back(s);
-
-	return tokens;
-}
-
 #if AUTOCHAT
 void MainFrame::AutoChat()
 {
@@ -323,9 +309,9 @@ void MainFrame::AutoChat()
 		if (auto script = ReadTextFile("resources/auto_script.txt"))
 		{
 			string text = script.value();
-			replace_all(text, "{{user}}", pLLM->GetUserName());
-			replace_all(text, "{{char}}", pLLM->GetBotName());
-			_autoScript = split(text, "\n");
+			string_util::replace_all(text, "{{user}}", pLLM->GetUserName());
+			string_util::replace_all(text, "{{char}}", pLLM->GetBotName());
+			_autoScript = string_util::split(text, "\n");
 		}
 		_autoScriptIndex = 0;
 	}

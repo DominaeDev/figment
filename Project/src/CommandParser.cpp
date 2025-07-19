@@ -1,5 +1,5 @@
 #include "CommandParser.h"
-#include "StringUtil.h"
+#include "StringUtility.h"
 
 struct _Cmd {
 	string word;
@@ -26,7 +26,7 @@ static _Cmd s_Commands[] {
 
 Command CommandParser::Parse(string text)
 {
-	trim(text);
+	string_util::trim(text);
 	if (text.empty())
 		return Command { CommandType::Invalid };
 
@@ -36,9 +36,9 @@ Command CommandParser::Parse(string text)
 	if (text[0] != '/')
 		return Command { CommandType::UserMessage, text };
 
-	if (string_begins_with(text, "//")) // Shorthand
+	if (string_util::string_begins_with(text, "//")) // Shorthand
 	{
-		string payload = trim(text.substr(2));
+		string payload = string_util::trim(text.substr(2));
 		return Command { CommandType::SystemMessage, payload };
 	}
 
@@ -47,12 +47,12 @@ Command CommandParser::Parse(string text)
 	string payload;
 	if (pos_begin != std::string::npos)
 	{
-		command = lcase(trim(text.substr(1, pos_begin - 1)));
-		payload = trim(text.substr(pos_begin));
+		command = string_util::lcase(string_util::trim(text.substr(1, pos_begin - 1)));
+		payload = string_util::trim(text.substr(pos_begin));
 	}
 	else
 	{
-		command = lcase(trim(text.substr(1, pos_begin - 1)));
+		command = string_util::lcase(string_util::trim(text.substr(1, pos_begin - 1)));
 		payload = "";
 	}
 

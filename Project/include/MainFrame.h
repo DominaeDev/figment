@@ -2,12 +2,11 @@
 
 #include "Frame.h"
 #include "Types.h"
-#include "Command.h"
-#include <queue>
 
 class Sizer;
 class StatusBar;
 class ChatScroll;
+struct Command;
 
 class MainFrame : public Frame
 {

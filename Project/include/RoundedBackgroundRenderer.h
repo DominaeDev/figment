@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Types.h"
 #include "CustomRenderer.h"
 
 struct SDL_Vertex;

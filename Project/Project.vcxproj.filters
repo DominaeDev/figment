@@ -54,6 +54,9 @@
     <Filter Include="Source Files\Utility\Third-party\uuid">
       <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Interface\Stores">
+      <UniqueIdentifier>{7771305b-7f8b-4983-9d10-858bdd59b614}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -149,7 +152,7 @@
     <ClCompile Include="src\StatusBar.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\StringUtil.cpp">
+    <ClCompile Include="src\StringUtility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\SolidBackgroundRenderer.cpp">
@@ -176,8 +179,14 @@
     <ClCompile Include="src\CommandParser.cpp">
       <Filter>Source Files\Chat</Filter>
     </ClCompile>
-    <ClCompile Include="src\Message.cpp">
-      <Filter>Source Files\Model</Filter>
+    <ClCompile Include="src\ImageStore.cpp">
+      <Filter>Source Files\Interface\Stores</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GraphicsUtility.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LLMUtility.cpp">
+      <Filter>Source Files\Inference</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -238,7 +247,7 @@
     <ClInclude Include="include\ChatScroll.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\StringUtil.h">
+    <ClInclude Include="include\StringUtility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\ChatMessage.h">
@@ -292,14 +301,26 @@
     <ClInclude Include="include\ChatSession.h">
       <Filter>Source Files\Chat</Filter>
     </ClInclude>
-    <ClInclude Include="include\Message.h">
-      <Filter>Source Files\Model</Filter>
-    </ClInclude>
     <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h">
       <Filter>Source Files\Utility\Third-party\uuid</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\uuid_v4\endianness.h">
       <Filter>Source Files\Utility\Third-party\uuid</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ImageStore.h">
+      <Filter>Source Files\Interface\Stores</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GraphicsUtility.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LLMUtility.h">
+      <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Renderers.h">
+      <Filter>Source Files\Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Types.h"
-#include "Message.h"
 #include "Character.h"
 #include <llama.h>
 #include <vector>
@@ -16,18 +15,26 @@ struct LLMStatus;
 using LoadModelCallback = std::function<void(bool)>;
 using LoadModelProgressCallback = std::function<void(int)>;
 
+enum class Grammar {
+	None = 0,
+	Default = 1,
+	Continue = 2,
+};
+
 struct ModelState
 {
 	llama_model* pModel = nullptr;
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
 	llama_sampler* pActiveGrammar = nullptr;
-
 	std::array<llama_sampler*, 3> grammars = {};
 
 	bool bReady = false;
 	bool bInvalid = false;
+	
 	void Release();
+
+	llama_sampler* SetActiveGrammar(Grammar grammar);
 };
 
 struct LLMMessageBlock {
@@ -56,6 +63,8 @@ struct ChatState
 
 	Character user;
 	Character bot;
+
+	int32_t AssignBlockPositions();
 };
 
 struct LLMStatus
@@ -73,17 +82,10 @@ struct MessagePiece
 	string subMessageId;	// shared id for pieces of the same message type
 	string name {};
 	string text {};
+	Role role = Role::Bot;
 	MessageType msgType = MessageType::Undefined;
 	bool isComplete = false;
 };
-
-struct Message 
-{
-	Role role;
-    string content;
-    string name;
-};
-using Messages = std::vector<Message>;
 
 enum class Responder { None, Continuation, User, Narrator, Director, Bot };
 
@@ -103,7 +105,7 @@ public:
 	bool IsGenerating() const;
 	
 	bool SendMessage(string message);
-	bool PushMessage(Role role, string message, MessageType msgType = MessageType::UserMessage, bool visible = true, int ttl = 0);
+	bool PushMessage(Role role, string message, MessageType msgType = MessageType::Dialogue, bool visible = true, int ttl = 0);
 
 	bool Halt();
 	bool Continue(string responseId, string subMessageId);

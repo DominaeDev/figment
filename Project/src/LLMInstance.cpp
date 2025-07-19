@@ -1,32 +1,21 @@
 ﻿#include "LLMInstance.h"
-#include "common.h"
-#include "StringUtil.h"
-#include "Utility.h"
-#include "Message.h"
-#include "Constants.h"
+#include <common.h>
 #include <format>
 #include <algorithm>
 #include <assert.h>
-
-std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddBOS);
-bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
-
-enum Grammar {
-	None = 0,
-	Default = 1,
-	Continue = 2,
-};
-
-static llama_sampler* swap_active_grammar(ModelState& state, Grammar grammar);
+#include "LLMUtility.h"
+#include "StringUtility.h"
+#include "Utility.h"
+#include "Constants.h"
 
 void ModelState::Release()
 {
 	if (pSampler)
 	{
-		swap_active_grammar(*this, Grammar::None);
+		SetActiveGrammar(Grammar::None); // Detach grammars (if any)
 		llama_sampler_free(pSampler);
-		llama_sampler_free(grammars[Grammar::Default]);
-		llama_sampler_free(grammars[Grammar::Continue]);
+		llama_sampler_free(grammars[toI(Grammar::Default)]);
+		llama_sampler_free(grammars[toI(Grammar::Continue)]);
 	}
 	if (pCtx)
 	{
@@ -38,30 +27,61 @@ void ModelState::Release()
 
 	pSampler = nullptr;
 	pActiveGrammar = nullptr;
-	grammars[Grammar::Default] = nullptr;	// Default grammar
-	grammars[Grammar::Continue] = nullptr;	// Continue grammar
+	grammars[toI(Grammar::Default)] = nullptr;	// Default grammar
+	grammars[toI(Grammar::Continue)] = nullptr;	// Continue grammar
 	pCtx = nullptr;
 	pModel = nullptr;
 	bReady = false;
 	bInvalid = false;
 }
 
-static std::vector<string> const opening_tags {
-	std::format("<{0}=\"", Constants::DialogueTag),
-	std::format("<{0}=\"", Constants::ActionTag),
-	std::format("<{0}=\"", Constants::ThoughtTag),
-	std::format("<{0}>", Constants::NarrationTag),
-	std::format("<{0}>", Constants::DirectionTag),
-};
+llama_sampler* ModelState::SetActiveGrammar(Grammar grammar)
+{
+	if (static_cast<size_t>(grammar) >= grammars.size() 
+		|| grammars[toI(Grammar::Default)] == nullptr)
+		return nullptr;
 
+	llama_sampler* pChain = pSampler;
+	llama_sampler* pSelectedGrammar = grammars[toI(grammar)];
 
-static std::vector<string> const closing_tags {
-	std::format("</{0}>", Constants::DialogueTag),
-	std::format("</{0}>", Constants::ActionTag),
-	std::format("</{0}>", Constants::ThoughtTag),
-	std::format("</{0}>", Constants::NarrationTag),
-	std::format("</{0}>", Constants::DirectionTag),
-};
+	if (pSelectedGrammar != nullptr && pSelectedGrammar == llama_sampler_chain_get(pChain, 0))
+		return pSelectedGrammar; // No swap
+
+	std::list<llama_sampler*> samplers;
+	int32_t n = llama_sampler_chain_n(pChain);
+	assert(n <= 5);
+
+	for (int32_t i = n - 1; i >= 0; --i)
+	{
+		samplers.push_front(llama_sampler_chain_get(pChain, i));
+		llama_sampler_chain_remove(pChain, i);
+	}
+
+	samplers.remove(grammars[toI(Grammar::Default)]);
+	samplers.remove(grammars[toI(Grammar::Continue)]);
+	pActiveGrammar = nullptr;
+
+	if (pSelectedGrammar)
+	{
+		samplers.push_front(pSelectedGrammar);
+		pActiveGrammar = pSelectedGrammar;
+	}
+	
+	for (auto sampler : samplers)
+		llama_sampler_chain_add(pChain, sampler);
+	return pActiveGrammar;
+}
+
+int32_t ChatState::AssignBlockPositions()
+{
+	size_t pos = system_tokens.size();
+	for (auto& block : blocks)
+	{
+		block.ctx_pos = (int32_t)pos;
+		pos += block.length();
+	}
+	return (int32_t)pos;
+}
 
 LLMInstance::LLMInstance()
 {
@@ -103,491 +123,6 @@ static void OnLoadModelProgress(float progress, void* user_data)
 		__LoadModelProgressCallback(static_cast<int>(progress * 100.0f));
 }
 
-static std::string stringFromToken(const llama_vocab* pVocab, llama_token token)
-{
-	// convert the token to a string, print it and add it to the response
-	char buf[256];
-	int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, false);
-	if (n < 0)
-		return "";
-
-	return std::string(buf, n);
-}
-
-size_t validate_utf8(const string& text)
-{
-	size_t len = text.size();
-	if (len == 0) return 0;
-
-	// Check the last few bytes to see if a multi-byte character is cut off
-	for (size_t i = 1; i <= 4 && i <= len; ++i)
-	{
-		unsigned char c = text[len - i];
-		// Check for start of a multi-byte sequence from the end
-		if ((c & 0xE0) == 0xC0)
-		{
-			// 2-byte character start: 110xxxxx
-			// Needs at least 2 bytes
-			if (i < 2) return len - i;
-		}
-		else if ((c & 0xF0) == 0xE0)
-		{
-			// 3-byte character start: 1110xxxx
-			// Needs at least 3 bytes
-			if (i < 3) return len - i;
-		}
-		else if ((c & 0xF8) == 0xF0)
-		{
-			// 4-byte character start: 11110xxx
-			// Needs at least 4 bytes
-			if (i < 4) return len - i;
-		}
-	}
-
-	// If no cut-off multi-byte character is found, return full length
-	return len;
-}
-
-size_t string_find_partial_stop(const std::string_view& str, const std::string_view& stop)
-{
-	if (!str.empty() && !stop.empty())
-	{
-		const char text_last_char = str.back();
-		for (int64_t char_index = stop.size() - 1; char_index >= 0; char_index--)
-		{
-			if (stop[char_index] == text_last_char)
-			{
-				const auto current_partial = stop.substr(0, char_index + 1);
-				if (string_ends_with(str, current_partial))
-				{
-					return str.size() - char_index - 1;
-				}
-			}
-		}
-	}
-
-	return string::npos;
-}
-
-size_t find_one_of(const string& text, const std::vector<string>& words)
-{
-	size_t stop_pos = string::npos;
-
-	for (const string& word : words)
-	{
-		size_t pos = text.find(word);
-		if (pos != string::npos && (stop_pos == string::npos || pos < stop_pos))
-			stop_pos = pos;
-	}
-
-	return stop_pos;
-}
-
-size_t find_stopping_strings(const string& text, const std::vector<string>& stop_words, const size_t last_token_size, bool is_full_stop)
-{
-	size_t stop_pos = string::npos;
-
-	for (const string& word : stop_words)
-	{
-		size_t pos;
-
-		if (is_full_stop)
-		{
-			const size_t tmp = word.size() + last_token_size;
-			const size_t from_pos = text.size() > tmp ? text.size() - tmp : 0;
-
-			pos = text.find(word, from_pos);
-		}
-		else
-		{
-			// otherwise, partial stop
-			pos = string_find_partial_stop(text, word);
-		}
-
-		if (pos != string::npos && (stop_pos == string::npos || pos < stop_pos))
-		{
-			stop_pos = pos;
-		}
-	}
-
-	return stop_pos;
-}
-
-static void get_tag_and_name(const string& text, string& tag, string& name)
-{
-	size_t pos_equals = text.find('=', 1);
-	if (pos_equals == string::npos)
-	{
-		tag = trim(text.substr(1, text.length() - 2));
-		name = "";
-		return;
-	}
-
-	tag = trim(text.substr(1, pos_equals - 1));
-	name = trim(text.substr(pos_equals + 1, text.length() - pos_equals - 2));
-	string_replace_all(name, "\"", "");
-}
-
-static void apply_names(string& prompt, string userName, string botName)
-{
-	replace_all(prompt, "{{user}}", userName);
-	replace_all(prompt, "{{char}}", botName);
-}
-
-static const char* name_from_role(Role role)
-{
-	static const char* SYSTEM_NAME = "system";
-	static const char* NARRATOR_NAME = "Narrator";
-	static const char* DIRECTOR_NAME = "Director";
-	static const char* USER_NAME = "{{user}}";
-	static const char* BOT_NAME = "{{char}}";
-
-	switch (role)
-	{
-	case Role::Bot: return BOT_NAME;
-	case Role::User: return USER_NAME;
-	case Role::System: return SYSTEM_NAME;
-	case Role::Narrator: return NARRATOR_NAME;
-	case Role::Director: return DIRECTOR_NAME;
-	}
-	return "";
-}
-
-static string apply_chat_template(Messages in_messages, llama_context* pCtx, bool add_assistant)
-{
-	int prev_len = 0;
-
-//	const char* tmpl = llama_model_chat_template(state.pModel, nullptr);
-	const char* tmpl = "chatml";
-
-//	tmpl = "mistral-v7-tekken";
-//	tmpl = "chatml";
-//	tmpl = "llama2";
-//	tmpl = "llama3";
-//	tmpl = "command-r";
-//	tmpl = "gemma";
-//	tmpl = "vicuna";
-//	tmpl = "deepseek3";
-
-	std::vector<llama_chat_message> llama_msgs(in_messages.size());
-	for (int i = 0; i < in_messages.size(); ++i)
-	{
-		auto& msg = in_messages[i];
-		llama_msgs[i] = llama_chat_message { 
-			msg.name.empty() ? name_from_role(msg.role) : msg.name.c_str(), 
-			msg.content.c_str() 
-		};
-	}
-
-	std::vector<char> formatted(llama_n_ctx(pCtx));
-	int new_len = llama_chat_apply_template(tmpl, llama_msgs.data(), (int32_t)llama_msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
-	if (new_len > (int)formatted.size())
-	{
-		formatted.resize(new_len);
-		new_len = llama_chat_apply_template(tmpl, llama_msgs.data(), (int32_t)llama_msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
-	}
-
-	if (new_len < 0)
-	{
-		fprintf(stderr, "failed to apply the chat template\n");
-		return "";
-	}
-
-	// remove previous messages to obtain the prompt to generate the response
-	string prompt = string(formatted.begin() + prev_len, formatted.begin() + new_len);
-
-	return prompt;
-}
-
-static string apply_chat_template(Message msg, llama_context* pCtx, bool add_assistant)
-{
-	return apply_chat_template(Messages { msg }, pCtx, add_assistant);
-}
-
-static string apply_chat_template_prefix(Message msg, string userName, string botName, llama_context* pCtx, bool add_assistant)
-{
-	// Strip prompt template from block content
-	static const char* const MARKER = "{{__PLACEHOLDER__}}";
-	string tmpl = apply_chat_template(Message { msg.role, MARKER }, pCtx, false);
-	size_t pos_msg = tmpl.find(MARKER);
-	string prelude = tmpl.substr(0, pos_msg);
-	string postlude = tmpl.substr(pos_msg + strlen(MARKER));
-	apply_names(prelude, userName, botName);
-
-	string content = msg.content;
-	if (string_ends_with(content, postlude))
-		content = content.substr(0, content.length() - postlude.length());
-	if (!string_begins_with(content, prelude))
-		content = prelude + content;
-	return content;
-}
-
-static std::pair<MessageType, bool> detect_message_type(string text)
-{
-	auto patterns = std::vector<std::tuple<string, MessageType>> {
-		{ std::format("<{0}", Constants::DialogueTag),		MessageType::Dialogue},
-		{ std::format("<{0}", Constants::ActionTag),		MessageType::Action},
-		{ std::format("<{0}", Constants::ThoughtTag),		MessageType::Thought},
-		{ std::format("<{0}", Constants::NarrationTag),		MessageType::Narration},
-		{ std::format("<{0}", Constants::DirectionTag),		MessageType::Direction},
-	};
-	
-	size_t last_pos = std::string::npos;
-	MessageType msgType = MessageType::Undefined;
-	for (int i = 0; i < patterns.size(); ++i)
-	{
-		size_t pos = text.rfind(std::get<0>(patterns[i]), std::string::npos);
-		if (pos != std::string::npos && (last_pos == std::string::npos || pos > last_pos))
-		{
-			last_pos = pos;
-			msgType = std::get<1>(patterns[i]);
-		}
-	}
-
-	bool bComplete = false;
-	for (auto tag : closing_tags)
-	{
-		size_t pos_end = text.rfind(tag, std::string::npos);
-		if (pos_end != std::string::npos && pos_end > last_pos)
-		{
-			bComplete = true;
-			break;
-		}
-	}
-
-	return std::make_pair(msgType, bComplete);
-}
-
-static string& sanitize_response(string& text)
-{
-	size_t pos_last = text.find_last_of('<');
-	if (pos_last == std::string::npos)
-		return text;
-	size_t pos_close = text.find_last_of('>');
-	if (pos_close == std::string::npos || pos_close < pos_last)
-		text = text.substr(0, pos_last);
-	return text;
-}
-
-static string& complete_message(string& text)
-{
-	auto [msgType, complete] = detect_message_type(sanitize_response(text));
-	if (complete)
-		return text;
-
-	switch (msgType)
-	{
-	case MessageType::Undefined:
-		text = std::format("<{0}=\"{{{{char}}}}\">{1}</{0}>", Constants::DialogueTag, text);
-		break;
-	case MessageType::UserMessage:
-	case MessageType::Dialogue:
-		text.append(std::format("\"</{0}>", Constants::DialogueTag));
-		break;
-	case MessageType::Action:
-		text.append(std::format("*</{0}>", Constants::ActionTag));
-		break;
-	case MessageType::Thought:
-		text.append(std::format("))</{0}>", Constants::ThoughtTag));
-		break;
-	case MessageType::Narration:
-		text.append(std::format("]</{0}>", Constants::NarrationTag));
-		break;
-	case MessageType::Direction:
-		text.append(std::format("</{0}>", Constants::DirectionTag));
-		break;
-	case MessageType::SystemMessage:
-	default:
-		break;
-	}
-	return text;
-}
-
-static void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word)
-{
-	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
-	{
-		*bWait = true;
-		*bHalt = false;
-		return;
-	}
-
-	static std::vector<string> stop_words {
-		"<|",
-		"<end_of_turn",
-		"<EOT>",
-		"_<EOT>",
-		"<s>",
-		"</s>",
-		"### ",
-		"<｜",
-		"\r\r",
-//		"<|end",
-//		"<｜end▁of▁sentence｜>",
-	};
-
-	static std::vector<string> formatting_tags;
-	if (formatting_tags.empty())
-	{
-		formatting_tags.insert(std::end(formatting_tags), std::begin(opening_tags), std::end(opening_tags));
-		formatting_tags.insert(std::end(formatting_tags), std::begin(closing_tags), std::end(closing_tags));
-	}
-
-	// Look for stop word - and halt
-	size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
-	if (stop_pos != string::npos)
-	{
-		stop_word = partial.substr(stop_pos);
-
-		// Print to console
-		partial = partial.erase(stop_pos); // Erase stop word
-		*bHalt = true;
-		*bWait = false;
-		return;
-	}
-
-	// Look for partial stop word - and wait
-	stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
-	if (stop_pos != string::npos)
-	{
-		*bHalt = false;
-		*bWait = true;
-		return;
-	}
-
-	// Look for formatting tags
-	size_t fmt_pos = find_one_of(partial, opening_tags);
-	if (fmt_pos != string::npos)
-	{
-		// Await end of tag '>', or beginning of a new tag '<' (indicating garbage from the model)
-		if (partial.find_first_of("<>", fmt_pos + 1, 2) == string::npos)
-		{
-			*bHalt = false;
-			*bWait = true;
-			return;
-		}
-	}
-	else
-	{
-		// Look for partial formatting tags - and wait
-		fmt_pos = find_stopping_strings(partial, formatting_tags, str_token.size(), false);
-		if (fmt_pos != string::npos)
-		{
-			*bHalt = false;
-			*bWait = true;
-			return;
-		}
-	}
-
-	*bHalt = false;
-	*bWait = false;
-}
-
-static void assign_block_positions(ChatState& chat)
-{
-	size_t pos = chat.system_tokens.size();
-	for (auto& block : chat.blocks)
-	{
-		block.ctx_pos = (int32_t)pos;
-		pos += block.length();
-	}
-}
-
-static void init_batch_logits(llama_batch& batch)
-{
-	if (batch.n_tokens <= 0)
-		return;
-
-	for (int i = 0; i < batch.n_tokens - 1; ++i)
-		batch.logits[i] = false;
-	batch.logits[batch.n_tokens - 1] = true;  // Only need logits for last token
-}
-
-static std::vector<llama_token> __tokenize(llama_model* pModel, string prompt, bool bAddSpecial)
-{
-	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
-
-	std::vector<llama_token> prompt_tokens(1024);
-	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true);
-	if (n_prompt_tokens < 0)
-	{
-		prompt_tokens.resize(-n_prompt_tokens);
-		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true) < 0)
-		{
-			// Error
-			return std::vector<llama_token> {};
-		}
-	}
-	else
-	{
-		prompt_tokens.resize(n_prompt_tokens);
-	}
-	return prompt_tokens;
-}
-
-static bool __init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
-{
-	const int32_t maxCtx = llama_n_ctx(pCtx);
-	const bool is_first = llama_kv_self_used_cells(pCtx) == 0;
-
-	// tokenize the prompt
-	std::vector<llama_token> prompt_tokens = __tokenize(pModel, prompt, is_first);
-
-	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
-	int32_t num_tokens = (int32_t)prompt_tokens.size();
-
-	// Add tokens to batch
-	for (int i = 0; i < num_tokens; ++i) {
-		batch.token[i] = prompt_tokens[i];
-		batch.pos[i] = i;  // Position in sequence
-		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;  // Sequence ID 0
-		batch.logits[i] = false;  // Don't need logits for most tokens
-	}
-	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
-	batch.n_tokens = num_tokens;
-
-	out_pBatch = batch;
-	return true;
-}
-
-static llama_sampler* swap_active_grammar(ModelState& state, Grammar grammar)
-{
-	if (static_cast<size_t>(grammar) >= state.grammars.size() 
-		|| state.grammars[Grammar::Default] == nullptr)
-		return nullptr;
-
-	llama_sampler* pChain = state.pSampler;
-	llama_sampler* pSelectedGrammar = state.grammars[grammar];
-
-	if (pSelectedGrammar != nullptr && pSelectedGrammar == llama_sampler_chain_get(pChain, 0))
-		return pSelectedGrammar; // No swap
-
-	std::list<llama_sampler*> samplers;
-	int32_t n = llama_sampler_chain_n(pChain);
-	assert(n <= 5);
-
-	for (int32_t i = n - 1; i >= 0; --i)
-	{
-		samplers.push_front(llama_sampler_chain_get(pChain, i));
-		llama_sampler_chain_remove(pChain, i);
-	}
-
-	samplers.remove(state.grammars[Grammar::Default]);
-	samplers.remove(state.grammars[Grammar::Continue]);
-	state.pActiveGrammar = nullptr;
-
-	if (pSelectedGrammar)
-	{
-		samplers.push_front(pSelectedGrammar);
-		state.pActiveGrammar = pSelectedGrammar;
-	}
-	
-	for (auto sampler : samplers)
-		llama_sampler_chain_add(pChain, sampler);
-	return state.pActiveGrammar;
-}
 
 /// <summary>
 /// Warning: Callin ctx_remove in isolation leaves the batch in an invalid state.
@@ -683,7 +218,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 
 		// Load grammar
 		string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
-		replace_all(grammar, "##NAME_PATTERN##", "(\"" + _chatState.bot.name + "\")");
+		string_util::replace_all(grammar, "##NAME_PATTERN##", "(\"" + _chatState.bot.name + "\")");
 		llama_sampler* default_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
 		llama_sampler* continue_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "continue-root");
 		if (default_grammar_sampler)
@@ -701,47 +236,47 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 
 		state.pSampler = pSampler;
 		state.pActiveGrammar = default_grammar_sampler;
-		state.grammars[Grammar::Default] = default_grammar_sampler;
-		state.grammars[Grammar::Continue] = continue_grammar_sampler;
+		state.grammars[toI(Grammar::Default)] = default_grammar_sampler;
+		state.grammars[toI(Grammar::Continue)] = continue_grammar_sampler;
 		_atModelState.store(state);
 	}
 
 	// Init system prompt
-	string prompt = trim(system_prompt);
-	if (!empty_or_whitespace(_chatState.bot.description))
+	string prompt = string_util::trim(system_prompt);
+	if (!string_util::empty_or_whitespace(_chatState.bot.description))
 	{
 		string persona;
 		persona.reserve(_chatState.bot.description.size() + 20);
 		persona.append("# About {{char}}:\n");
-		persona.append(trim(_chatState.bot.description));
-		replace(prompt, "##CHARACTER_INFO##", persona);
+		persona.append(string_util::trim(_chatState.bot.description));
+		string_util::replace(prompt, "##CHARACTER_INFO##", persona);
 	}	
-	if (!empty_or_whitespace(_chatState.user.description))
+	if (!string_util::empty_or_whitespace(_chatState.user.description))
 	{
 		string user_persona;
 		user_persona.reserve(_chatState.user.description.size() + 20);
 		user_persona.append("# About {{user}}:\n");
-		user_persona.append(trim(_chatState.user.description));
-		replace(prompt, "##USER_INFO##", user_persona);
+		user_persona.append(string_util::trim(_chatState.user.description));
+		string_util::replace(prompt, "##USER_INFO##", user_persona);
 	}
 
 	messages.insert(std::begin(messages), Message { Role::System, prompt });
-	prompt = apply_chat_template(messages, state.pCtx, false);
+	prompt = llm_util::apply_chat_template(messages, state.pCtx, false);
 
-	apply_names(prompt, _chatState.user.name, _chatState.bot.name);
+	llm_util::apply_names(prompt, _chatState.user.name, _chatState.bot.name);
 
 	llama_context* pCtx = state.pCtx;
 
 	// Tokenize system prompt
-	_chatState.system_tokens = __tokenize(state.pModel, prompt, true);
+	_chatState.system_tokens = llm_util::tokenize(state.pModel, prompt, true);
 	_chatState.current_pos = (int32_t)_chatState.system_tokens.size();
 	_chatState.isInitialized = true;
 
 	// Prepare assistant prelude
-	string assistant_prefix = apply_chat_template(Messages{}, state.pCtx, true);
-	replace(assistant_prefix, "assistant", _chatState.bot.name);
-	replace(assistant_prefix, "ASSISTANT", _chatState.bot.name);
-	_chatState.assistant_tokens = __tokenize(state.pModel, assistant_prefix, false);
+	string assistant_prefix = llm_util::apply_chat_template(Messages{}, state.pCtx, true);
+	string_util::replace(assistant_prefix, "assistant", _chatState.bot.name);
+	string_util::replace(assistant_prefix, "ASSISTANT", _chatState.bot.name);
+	_chatState.assistant_tokens = llm_util::tokenize(state.pModel, assistant_prefix, false);
 
 	// Pre-load system prompt into kv cache
 	llama_kv_self_clear(pCtx);
@@ -750,7 +285,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_batch_free(_chatState.batch);
 
 	// Prepare a batch for the prompt
-	if (!__init_batch(state.pModel, state.pCtx, prompt, _chatState.batch))
+	if (!llm_util::init_batch(state.pModel, state.pCtx, prompt, _chatState.batch))
 		return false;
 
 	if (_chatState.batch.n_tokens > 0 && llama_decode(state.pCtx, _chatState.batch))
@@ -868,7 +403,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 		if (result.bReady)
 		{
 			_atModelState.store(result);
-			_modelName = get_filename(filename);
+			_modelName = string_util::get_filename(filename);
 			onComplete(true);
 		}
 		else
@@ -910,7 +445,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId)
 	if (block.responseId != responseId)
 		return false; // Not last message
 
-	auto [msgType, bComplete] = detect_message_type(block.content);
+	auto [msgType, bComplete] = llm_util::detect_message_type(block.content);
 	if (msgType == MessageType::Undefined || bComplete)
 		return false; // Not incomplete message
 
@@ -996,15 +531,15 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 		string content = block.content;
 		if (args.responder == Responder::Continuation) // Continue response
-			content = apply_chat_template_prefix(Message { block.role, content }, userName, botName, state.pCtx, false);
+			content = llm_util::apply_chat_template_prefix(Message { block.role, content }, userName, botName, state.pCtx, false);
 		else
 		{
-			complete_message(content);
-			content = apply_chat_template(Message { block.role, content }, state.pCtx, false);
-			apply_names(content, userName, botName);
+			llm_util::complete_message(content);
+			content = llm_util::apply_chat_template(Message { block.role, content }, state.pCtx, false);
+			llm_util::apply_names(content, userName, botName);
 		}
 		
-		auto block_tokens = __tokenize(state.pModel, content, false);
+		auto block_tokens = llm_util::tokenize(state.pModel, content, false);
 //		block.content = content;
 		block.tokens = block_tokens;
 		block.ctx_pos = 0; // assigned later
@@ -1027,7 +562,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	}
 
 	// Calculate block positions
-	assign_block_positions(chat);
+	chat.AssignBlockPositions();
 
 	// Store response position
 	chat.pre_response_pos = current_pos + (int32_t)prompt_tokens.size();
@@ -1039,17 +574,17 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	{
 		string responderName;
 		if (args.responder == Responder::Narrator)
-			responderName = name_from_role(Role::Narrator);
+			responderName = llm_util::name_from_role(Role::Narrator);
 		else if (args.responder == Responder::User)
 			responderName = chat.user.name;
 		else
 			responderName = chat.bot.name; // Fallback
 
 		// Prepare assistant prelude
-		string assistant_prelude = apply_chat_template(Messages{}, state.pCtx, true);
-		replace(assistant_prelude, "assistant", responderName);
-		replace(assistant_prelude, "ASSISTANT", responderName);
-		auto assistant_tokens = __tokenize(state.pModel, assistant_prelude, false);
+		string assistant_prelude = llm_util::apply_chat_template(Messages{}, state.pCtx, true);
+		string_util::replace(assistant_prelude, "assistant", responderName);
+		string_util::replace(assistant_prelude, "ASSISTANT", responderName);
+		auto assistant_tokens = llm_util::tokenize(state.pModel, assistant_prelude, false);
 		prompt_tokens.insert(std::end(prompt_tokens), std::begin(assistant_tokens), std::end(assistant_tokens));
 	}
 
@@ -1098,12 +633,12 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	DebugPrintLn(">> BEGIN GENERATION");
 
 	// Init grammar
-	if (auto pGrammar = swap_active_grammar(state, bIsContinuation ? Grammar::Continue : Grammar::Default))
+	if (auto pGrammar = state.SetActiveGrammar(bIsContinuation ? Grammar::Continue : Grammar::Default))
 		llama_sampler_reset(pGrammar);
 
 	if (!args.prepend.empty())
 	{
-		auto prepend_tokens = __tokenize(state.pModel, args.prepend, false);
+		auto prepend_tokens = llm_util::tokenize(state.pModel, args.prepend, false);
 
 		// Append to batch
 		for (int i = 0; i < prepend_tokens.size(); ++i)
@@ -1113,7 +648,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		partial += args.prepend;
 		printf("%s", partial.c_str());
 	}
-	init_batch_logits(batch);
+	llm_util::init_batch_logits(batch);
 
 	while (true)
 	{
@@ -1168,7 +703,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		}
 
 		// convert the token to a string, print it and add it to the response
-		string str_token = stringFromToken(pVocab, sampled_token);
+		string str_token = llm_util::stringFromToken(pVocab, sampled_token);
 		if (str_token.size() == 0)
 			break; // Error
 
@@ -1183,7 +718,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		// check if there is incomplete UTF-8 character at the end
 		bool bHalt = false;
 		bool bWait = false;
-		process(partial, str_token, &bWait, &bHalt, stop_word);
+		llm_util::process(partial, str_token, &bWait, &bHalt, stop_word);
 		next_token &= !bHalt;
 		send &= !bWait;
 
@@ -1205,7 +740,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 				if (fmt_end != string::npos)
 				{
 					string tag, tagName;
-					get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
+					llm_util::get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
 					if (tagName == userName && args.role != Role::User)
 						break; // Stop if talking/acting for the user
@@ -1259,7 +794,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 					/*subMessageId*/ subMessageId,
 					/*name*/ responderName,
 					/*text*/ sendMsg,
-					/*msgType*/ args.role == Role::User ? MessageType::UserMessage : msgType,
+					/*role*/ args.role,
+					/*msgType*/ msgType,
 					/*isComplete*/bEndOfMessageType,
 				});
 				response += partial;
@@ -1297,7 +833,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	batch.n_tokens = pre_response_pos;
 	chat.current_pos = pre_response_pos;
 
-	sanitize_response(response);
+	llm_util::sanitize_response(response);
 
 	if (response.length() > 0)
 	{
@@ -1375,7 +911,7 @@ bool LLMInstance::SendMessage(string message)
 	if (!CanGenerate())
 		return false;
 
-	if (empty_or_whitespace(message))
+	if (string_util::empty_or_whitespace(message))
 		return false;
 
 	CancelGeneration();
@@ -1403,15 +939,15 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	if (!CanGenerate())
 		return false;
 
-	if (empty_or_whitespace(message))
+	if (string_util::empty_or_whitespace(message))
 		return false;
 
 	// Process
-	string name = name_from_role(role);
+	string name = llm_util::name_from_role(role);
 	string content = message;
-	apply_names(content, _chatState.user.name, _chatState.bot.name);
+	llm_util::apply_names(content, _chatState.user.name, _chatState.bot.name);
 	if (msgType == MessageType::SystemMessage)
-		content = trim(content);
+		content = string_util::trim(content);
 	else 
 		content = FormatMessage(content, name);
 
@@ -1443,9 +979,10 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 			/*messageId*/ subMessageId,
 			/*name*/ name,
 			/*text*/ message,
+			/*role*/ role,
 			/*msgType*/ msgType,
 			/*isComplete*/ true,
-			});
+		});
 	}
 	return true;
 }
@@ -1519,7 +1056,7 @@ bool LLMInstance::GreetUser()
 		return false;
 
 	string greetingInstruction = "{{Greet {{user}} and let them know what you're thinking about right now.}}";
-	apply_names(greetingInstruction, _chatState.user.name, _chatState.bot.name);
+	llm_util::apply_names(greetingInstruction, _chatState.user.name, _chatState.bot.name);
 
 	PushMessage(Role::Director, greetingInstruction, MessageType::Direction, false, 1);
 	InstigateResponse(Responder::Bot, MessageType::Dialogue, 3);
@@ -1534,7 +1071,7 @@ bool LLMInstance::Instruct(string instructions)
 	if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
 	{
 		string prompt = text.value();
-		apply_names(prompt, _chatState.user.name, _chatState.bot.name);
+		llm_util::apply_names(prompt, _chatState.user.name, _chatState.bot.name);
 		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
 	}
 	PushMessage(Role::Director, "{{" + instructions + "}}", MessageType::Direction, false, 4);
@@ -1571,11 +1108,11 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 		role = Role::User;
 		break;
 	case Responder::Narrator:
-		responderName = name_from_role(Role::Narrator);
+		responderName = llm_util::name_from_role(Role::Narrator);
 		role = Role::Narrator;
 		break;
 	case Responder::Director:
-		responderName = name_from_role(Role::Director);
+		responderName = llm_util::name_from_role(Role::Director);
 		role = Role::Director;
 		break;
 	}
@@ -1591,8 +1128,6 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 		prependMsg = std::format("<{}>", Constants::NarrationTag);
 	else if (msgType == MessageType::Direction)
 		prependMsg = std::format("<{}>", Constants::DirectionTag);
-	else if (msgType == MessageType::UserMessage)
-		prependMsg = std::format("<{}=\"{}\">", Constants::DialogueTag, responderName);
 
 	GenerateArguments generateArgs {
 		/*chat state*/ &_chatState,

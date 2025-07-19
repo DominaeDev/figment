@@ -115,7 +115,9 @@
     <ClCompile Include="src\Control.cpp" />
     <ClCompile Include="src\ControlWithMargins.cpp" />
     <ClCompile Include="src\Fonts.cpp" />
-    <ClCompile Include="src\Message.cpp" />
+    <ClCompile Include="src\GraphicsUtility.cpp" />
+    <ClCompile Include="src\ImageStore.cpp" />
+    <ClCompile Include="src\LLMUtility.cpp" />
     <ClCompile Include="src\Frame.cpp" />
     <ClCompile Include="src\HorizontalSizer.cpp" />
     <ClCompile Include="src\LLMInstance.cpp" />
@@ -130,7 +132,7 @@
     <ClCompile Include="src\SolidBackgroundRenderer.cpp" />
     <ClCompile Include="src\StaticText.cpp" />
     <ClCompile Include="src\StatusBar.cpp" />
-    <ClCompile Include="src\StringUtil.cpp" />
+    <ClCompile Include="src\StringUtility.cpp" />
     <ClCompile Include="src\Text.cpp" />
     <ClCompile Include="src\TextBox.cpp" />
     <ClCompile Include="src\TextureStore.cpp" />
@@ -157,12 +159,16 @@
     <ClInclude Include="include\ControlWithMargins.h" />
     <ClInclude Include="include\Fonts.h" />
     <ClInclude Include="include\Frame.h" />
+    <ClInclude Include="include\Graphics.h" />
+    <ClInclude Include="include\GraphicsUtility.h" />
     <ClInclude Include="include\HorizontalSizer.h" />
+    <ClInclude Include="include\ImageStore.h" />
     <ClInclude Include="include\LLMInstance.h" />
     <ClInclude Include="include\IUpdateable.h" />
     <ClInclude Include="include\LayoutElement.h" />
-    <ClInclude Include="include\Message.h" />
+    <ClInclude Include="include\LLMUtility.h" />
     <ClInclude Include="include\NineGridBackgroundRenderer.h" />
+    <ClInclude Include="include\Renderers.h" />
     <ClInclude Include="include\RoundedBackgroundRenderer.h" />
     <ClInclude Include="include\RoundedBorderRenderer.h" />
     <ClInclude Include="include\Sizer.h" />
@@ -171,7 +177,7 @@
     <ClInclude Include="include\SolidBackgroundRenderer.h" />
     <ClInclude Include="include\StaticText.h" />
     <ClInclude Include="include\StatusBar.h" />
-    <ClInclude Include="include\StringUtil.h" />
+    <ClInclude Include="include\StringUtility.h" />
     <ClInclude Include="include\Text.h" />
     <ClInclude Include="include\TextBox.h" />
     <ClInclude Include="include\TextureStore.h" />

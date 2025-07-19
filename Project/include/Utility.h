@@ -1,27 +1,26 @@
 #pragma once
 
-#include "Types.h"
 #include <optional>
-
-#define toI(X) static_cast<int>(X)
-#define toF(X) static_cast<float>(X)
-
-extern SDL_FRect Rect_Expand(const SDL_FRect& rect, float pixels);
-
-extern void DebugPrint(string message);
-extern void DebugPrintLn(string message = "");
-
-extern string CreateUUID();
-
-extern string& NormalizeNewlines(string& text);
-extern string NormalizeNewlines(string&& s);
-extern std::optional<string> ReadTextFile(const string& filename, bool normalizeNewlines = true);
-extern bool WriteTextFile(const string& filename, const string& content, bool append = false);
+#include <string>
 
 template<typename T>
-inline T clamp(const T& value, T min, T max)
-{
-	return std::min(std::max(value, std::min(min, max)), std::max(min, max));
-}
+inline int32_t toI(T x) { return static_cast<int32_t>(x); }
+template<typename T>
+inline int64_t toI64(T x) { return static_cast<int64_t>(x); }
+template<typename T>
+inline float toF(T x) { return static_cast<float>(x); }
+template<typename T>
+inline double toD(T x) { return static_cast<double>(x); }
 
+extern void DebugPrint(std::string message);
+extern void DebugPrintLn(std::string message = "");
+
+extern std::string CreateUUID();
+
+extern std::string FormatMessage(std::string message, std::string actorName);
+
+extern std::string& NormalizeNewlines(std::string& text);
+extern std::string NormalizeNewlines(std::string&& s);
+extern std::optional<std::string> ReadTextFile(const std::string& filename, bool normalizeNewlines = true);
+extern bool WriteTextFile(const std::string& filename, const std::string& content, bool append = false);
 

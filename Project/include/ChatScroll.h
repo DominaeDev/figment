@@ -2,7 +2,6 @@
 
 #include "Control.h"
 #include "Types.h"
-#include "Message.h"
 
 class ChatMessage;
 
@@ -11,7 +10,7 @@ class ChatScroll : public Control
 public:
 	ChatScroll(Control* pParent);
 
-	ChatMessage* AddMessage(string name, string message, MessageType msgType);
+	ChatMessage* AddMessage(string name, string message, Role role, MessageType msgType);
 	int RemoveMessages(std::vector<string> ids);
 	void ClearMessages();
 

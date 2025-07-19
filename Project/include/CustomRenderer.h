@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Types.h"
+#include "Graphics.h"
+
 struct SDL_Renderer;
 struct SDL_FRect;
 
