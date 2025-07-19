@@ -27,9 +27,6 @@
     <Filter Include="Source Files\Utility\Third-party\tinyxml2">
       <UniqueIdentifier>{abfccfd5-f4a0-4eff-8c48-c0fed63d8c8c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Utility\Interface">
-      <UniqueIdentifier>{97d6e564-79f4-44e4-83c1-f1f1e7cd70b7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Interface\Controls">
       <UniqueIdentifier>{629db8c4-47b9-4beb-a0f2-ed7e30cf6b90}</UniqueIdentifier>
     </Filter>
@@ -39,14 +36,8 @@
     <Filter Include="Source Files\Inference">
       <UniqueIdentifier>{b6a16c68-2efd-46d3-b4b1-42ee978fc28a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Utility\Interface\Theme">
-      <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Model">
       <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Utility\Interface\Layout">
-      <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Chat">
       <UniqueIdentifier>{867c32c4-ffcd-4ac8-b0c0-d4e801575313}</UniqueIdentifier>
@@ -54,8 +45,17 @@
     <Filter Include="Source Files\Utility\Third-party\uuid">
       <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Interface\Layout">
+      <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Theme">
+      <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\Interface\Stores">
-      <UniqueIdentifier>{7771305b-7f8b-4983-9d10-858bdd59b614}</UniqueIdentifier>
+      <UniqueIdentifier>{a03df242-3861-42f9-a5a1-d305c5eef703}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Fonts">
+      <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -86,107 +86,107 @@
     <ClCompile Include="src\Constants.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
-    <ClCompile Include="src\Sizer.cpp">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
+    <ClCompile Include="src\gui\Sizer.cpp">
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\HorizontalSizer.cpp">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
+    <ClCompile Include="src\gui\HorizontalSizer.cpp">
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\LayoutElement.cpp">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
+    <ClCompile Include="src\gui\LayoutElement.cpp">
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\Control.cpp">
-      <Filter>Source Files\Utility\Interface</Filter>
+    <ClCompile Include="src\gui\VerticalSizer.cpp">
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\Frame.cpp">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Fonts.cpp">
+    <ClCompile Include="src\model\AppState.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
-    <ClCompile Include="src\Text.cpp">
-      <Filter>Source Files\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VerticalSizer.cpp">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AppState.cpp">
-      <Filter>Source Files\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MainFrame.cpp">
+    <ClCompile Include="src\gui\MainFrame.cpp">
       <Filter>Source Files\Interface\Frames</Filter>
     </ClCompile>
-    <ClCompile Include="src\Panel.cpp">
+    <ClCompile Include="src\gui\Panel.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\StaticText.cpp">
+    <ClCompile Include="src\gui\StaticText.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\TextBox.cpp">
+    <ClCompile Include="src\gui\TextBox.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\Color.cpp">
+    <ClCompile Include="src\gui\VerticalListSizer.cpp">
+      <Filter>Source Files\Interface\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ChatScroll.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ChatMessage.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\Utility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\VerticalListSizer.cpp">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ChatScroll.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ChatMessage.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utility.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="src\LLMInstance.cpp">
+    <ClCompile Include="src\llm\LLMInstance.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
-    <ClCompile Include="src\Area.cpp">
+    <ClCompile Include="src\gui\Area.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\ControlWithMargins.cpp">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="src\StatusBar.cpp">
+    <ClCompile Include="src\gui\StatusBar.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\StringUtility.cpp">
+    <ClCompile Include="src\util\StringUtility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\SolidBackgroundRenderer.cpp">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    <ClCompile Include="src\gui\SolidBackgroundRenderer.cpp">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
-    <ClCompile Include="src\RoundedBackgroundRenderer.cpp">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    <ClCompile Include="src\gui\RoundedBackgroundRenderer.cpp">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
-    <ClCompile Include="src\RoundedBorderRenderer.cpp">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    <ClCompile Include="src\gui\RoundedBorderRenderer.cpp">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
-    <ClCompile Include="src\TextureStore.cpp">
-      <Filter>Source Files\Application</Filter>
+    <ClCompile Include="src\gui\NineGridBackgroundRenderer.cpp">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
-    <ClCompile Include="src\NineGridBackgroundRenderer.cpp">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Character.cpp">
+    <ClCompile Include="src\model\Character.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp">
       <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
     </ClCompile>
-    <ClCompile Include="src\CommandParser.cpp">
-      <Filter>Source Files\Chat</Filter>
+    <ClCompile Include="src\llm\LLMUtility.cpp">
+      <Filter>Source Files\Inference</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImageStore.cpp">
-      <Filter>Source Files\Interface\Stores</Filter>
+    <ClCompile Include="src\gui\Graphics.cpp">
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\GraphicsUtility.cpp">
+    <ClCompile Include="src\util\CommandParser.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\LLMUtility.cpp">
-      <Filter>Source Files\Inference</Filter>
+    <ClCompile Include="src\gui\Control.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Color.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ControlWithMargins.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Frame.cpp">
+      <Filter>Source Files\Interface\Frames</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Fonts.cpp">
+      <Filter>Source Files\Interface\Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Text.cpp">
+      <Filter>Source Files\Interface\Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\TextureStore.cpp">
+      <Filter>Source Files\Interface\Stores</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterImageStore.cpp">
+      <Filter>Source Files\Interface\Stores</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -196,110 +196,80 @@
     <ClInclude Include="include\Types.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="include\Sizer.h">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
+    <ClInclude Include="include\gui\Sizer.h">
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="include\HorizontalSizer.h">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
+    <ClInclude Include="include\gui\HorizontalSizer.h">
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="include\LayoutElement.h">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
+    <ClInclude Include="include\gui\LayoutElement.h">
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="include\Control.h">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Frame.h">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IUpdateable.h">
+    <ClInclude Include="include\gui\IUpdateable.h">
       <Filter>Source Files\Interface</Filter>
     </ClInclude>
-    <ClInclude Include="include\Fonts.h">
+    <ClInclude Include="include\gui\VerticalSizer.h">
+      <Filter>Source Files\Interface\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\AppState.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="include\Text.h">
-      <Filter>Source Files\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VerticalSizer.h">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AppState.h">
-      <Filter>Source Files\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="include\MainFrame.h">
+    <ClInclude Include="include\gui\MainFrame.h">
       <Filter>Source Files\Interface\Frames</Filter>
     </ClInclude>
-    <ClInclude Include="include\Panel.h">
+    <ClInclude Include="include\gui\Panel.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\StaticText.h">
+    <ClInclude Include="include\gui\StaticText.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\TextBox.h">
+    <ClInclude Include="include\gui\TextBox.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\Color.h">
+    <ClInclude Include="include\gui\VerticalListSizer.h">
+      <Filter>Source Files\Interface\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatScroll.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\StringUtility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\VerticalListSizer.h">
-      <Filter>Source Files\Utility\Interface\Layout</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ChatScroll.h">
+    <ClInclude Include="include\gui\ChatMessage.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\StringUtility.h">
+    <ClInclude Include="include\util\Utility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\ChatMessage.h">
-      <Filter>Source Files\Interface\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Utility.h">
-      <Filter>Source Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\LLMInstance.h">
+    <ClInclude Include="include\llm\LLMInstance.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
-    <ClInclude Include="include\Area.h">
+    <ClInclude Include="include\gui\Area.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\ControlWithMargins.h">
-      <Filter>Source Files\Utility\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\StatusBar.h">
+    <ClInclude Include="include\gui\StatusBar.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\CustomRenderer.h">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    <ClInclude Include="include\gui\CustomRenderer.h">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
-    <ClInclude Include="include\SolidBackgroundRenderer.h">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    <ClInclude Include="include\gui\SolidBackgroundRenderer.h">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
-    <ClInclude Include="include\RoundedBackgroundRenderer.h">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    <ClInclude Include="include\gui\RoundedBackgroundRenderer.h">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
-    <ClInclude Include="include\RoundedBorderRenderer.h">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
+    <ClInclude Include="include\gui\RoundedBorderRenderer.h">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
-    <ClInclude Include="include\TextureStore.h">
-      <Filter>Source Files\Application</Filter>
+    <ClInclude Include="include\gui\NineGridBackgroundRenderer.h">
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
-    <ClInclude Include="include\NineGridBackgroundRenderer.h">
-      <Filter>Source Files\Utility\Interface\Theme</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Character.h">
+    <ClInclude Include="include\model\Character.h">
       <Filter>Source Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h">
       <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
-    </ClInclude>
-    <ClInclude Include="include\CommandParser.h">
-      <Filter>Source Files\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Command.h">
-      <Filter>Source Files\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ChatSession.h">
-      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h">
       <Filter>Source Files\Utility\Third-party\uuid</Filter>
@@ -307,20 +277,47 @@
     <ClInclude Include="..\Libraries\uuid_v4\endianness.h">
       <Filter>Source Files\Utility\Third-party\uuid</Filter>
     </ClInclude>
-    <ClInclude Include="include\ImageStore.h">
-      <Filter>Source Files\Interface\Stores</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics.h">
-      <Filter>Source Files\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GraphicsUtility.h">
-      <Filter>Source Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\LLMUtility.h">
+    <ClInclude Include="include\llm\LLMUtility.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
-    <ClInclude Include="include\Renderers.h">
+    <ClInclude Include="include\gui\Renderers.h">
       <Filter>Source Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Graphics.h">
+      <Filter>Source Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatSession.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\Command.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\CommandParser.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Control.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Color.h">
+      <Filter>Source Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ControlWithMargins.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Frame.h">
+      <Filter>Source Files\Interface\Frames</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Fonts.h">
+      <Filter>Source Files\Interface\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Text.h">
+      <Filter>Source Files\Interface\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TextureStore.h">
+      <Filter>Source Files\Interface\Stores</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterImageStore.h">
+      <Filter>Source Files\Interface\Stores</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

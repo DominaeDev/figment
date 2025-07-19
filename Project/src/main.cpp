@@ -4,14 +4,15 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "AppState.h"
 #include "Types.h"
 #include "Constants.h"
-#include "Fonts.h"
-#include "TextureStore.h"
-#include "Text.h"
-#include "MainFrame.h"
-#include "LLMInstance.h"
+#include "model/AppState.h"
+#include "gui/Fonts.h"
+#include "gui/TextureStore.h"
+#include "gui/CharacterImageStore.h"
+#include "gui/Text.h"
+#include "gui/MainFrame.h"
+#include "llm/LLMInstance.h"
 
 #if defined(_DEBUG)
 #define CHECK_MEMORY_LEAKS
@@ -86,6 +87,9 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 	// Load textures
 	TextureStore::Init(pRenderer);
+
+	// Load character images (temp)
+	CharacterImageStore::Init(pRenderer);
 
 	// Create main frame
 	auto pMainFrame = new MainFrame(pWindow);
@@ -187,6 +191,7 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 	delete pAppState->pTopFrame;
 	delete pAppState->pLLM;
 	
+	CharacterImageStore::Release();
 	TextureStore::Release();
 	Fonts::ReleaseFonts();
 	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
