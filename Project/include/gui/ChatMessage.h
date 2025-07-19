@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Control.h"
 #include "Types.h"
+#include "Control.h"
+#include "Graphics.h"
 
 class StaticText;
 
@@ -20,6 +21,8 @@ protected:
 private:
 	string _name;
 	string _message;
+	
+	Panel* _pMessagePanel;
 	StaticText* _pStaticText = nullptr;
 	bool _bIgnoreEvent = false;
 	Role _role = Role::Bot;

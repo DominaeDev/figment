@@ -10,6 +10,7 @@
 #include "gui/ChatMessage.h"
 #include "gui/StatusBar.h"
 #include "gui/Renderers.h"
+#include "gui/TextureStore.h"
 #include "model/AppState.h"
 #include "llm/LLMInstance.h"
 #include "util/StringUtility.h"
@@ -22,8 +23,8 @@ MainFrame* MainFrame::s_pInstance = nullptr;
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
-	SetForegroundColor(SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE });
-	SetBackgroundColor(SDL_Color { 30, 30, 30, SDL_ALPHA_OPAQUE });
+	SetForegroundColor(Color::Black);
+	SetBackgroundColor(Color::AppBackground);
 
 	auto mainArea = new Area(this);
 
@@ -31,7 +32,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	leftPanel->SetSize(200, -1);
 
 	auto centerPanel = new Panel(mainArea);
-	centerPanel->SetBackgroundColor(SDL_Color { 40, 40, 40, SDL_ALPHA_OPAQUE });
+	centerPanel->SetBackgroundColor(Color::ChatBackground);
 	centerPanel->SetSize(800, -1);
 
 	auto rightPanel = new Panel(mainArea);
@@ -76,7 +77,12 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	});
 
 //	pTextBox->SetBorderRenderer(new RoundedBorderRenderer(4.5f, 2.5f, Color::Black));
-	pTextBox->SetBackgroundRenderer(new NineGridBackgroundRenderer(10.0f, Color::White, Color::Black));
+
+	auto pTextBoxBG = new NineGridBackgroundRenderer();
+	pTextBoxBG->SetCornerSize(10.0f);
+	pTextBoxBG->SetColors(Color::White, SDL_Color { 0xb9, 0xb2, 0x8f, 0xFF });
+	pTextBoxBG->SetTextures(TextureStore::GetTexture(Texture::TEXTBOX_BG), TextureStore::GetTexture(Texture::TEXTBOX_BORDER));
+	pTextBox->SetBackgroundRenderer(pTextBoxBG);
 
 	pTextBox->SetFocus(true);
 

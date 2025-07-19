@@ -8,8 +8,12 @@ struct SDL_Texture;
 enum class Texture
 {
 	BORDER = 0,
-	BG_9GRID,
-	BORDER_9GRID,
+	
+	TEXTBOX_BG,
+	TEXTBOX_BORDER,
+
+	SPEECH_BUBBLE_BG,
+	SPEECH_BUBBLE_BORDER,
 };
 
 class TextureStore

@@ -10,6 +10,7 @@ typedef SDL_FPoint Point;
 typedef SDL_FRect Rect;
 
 class Control;
+class Panel;
 class LayoutElement;
 class Sizer;
 

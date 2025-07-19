@@ -72,7 +72,9 @@ void StaticText::OnUpdate(float fDeltaTime)
 
 void StaticText::OnRender(SDL_Renderer* pRenderer)
 {
-	DrawBackground(pRenderer);
+	auto bgColor = GetBackgroundColor();
+	if (Color::IsDefined(bgColor) && bgColor.a != 0)
+		DrawBackground(pRenderer);
 
 	if (_pTexture)
 	{
@@ -96,6 +98,22 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 		if (bgColor.a == 0xFF)
 		{
 			SDL_Surface* pSurface = TTF_RenderText_LCD_Wrapped(_pFont, _text.c_str(), 0, fgColor, bgColor, maxWidth);
+			if (pSurface)
+			{
+				_textWidth = pSurface->w;
+				_textHeight = pSurface->h;
+				_pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+				SDL_DestroySurface(pSurface);
+
+				newWidth = _textWidth + HMargin();
+				newHeight = _textHeight + VMargin();
+				if (_bAutoSize)
+					SetSize(toF(newWidth), toF(newHeight));
+			}
+		}
+		else if (bgColor.a == 0) // Transparent background
+		{
+			SDL_Surface* pSurface = TTF_RenderText_Blended_Wrapped(_pFont, _text.c_str(), 0, fgColor, maxWidth);
 			if (pSurface)
 			{
 				_textWidth = pSurface->w;

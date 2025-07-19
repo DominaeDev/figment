@@ -118,7 +118,7 @@ void Control::DrawBackground(SDL_Renderer* pRenderer)
 	}
 
 	auto bgColor = GetBackgroundColor();
-	if (Color::IsDefined(bgColor))
+	if (Color::IsDefined(bgColor) && bgColor.a != 0)
 	{
 		SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(pRenderer, &_rect);

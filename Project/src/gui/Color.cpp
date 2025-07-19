@@ -11,9 +11,19 @@ SDL_Color Color::TextForeground						{ 0x00, 0x00, 0x00, 0xFF };
 SDL_Color Color::TextSelectionForeground			{ 0xFF, 0xFF, 0xFF, 0xFF };
 SDL_Color Color::TextSelectionBackground			{ 0x99, 0xC9, 0xEF, 0xFF };
 
-SDL_Color Color::UserMessageBackground				{ 185, 219, 232, 255 };
-SDL_Color Color::BotMessageBackground				{ 255, 219, 238, 255 };
+SDL_Color Color::UserMessageBackground				{ 0xf2, 0xfb, 0xff, 255 };
+SDL_Color Color::UserMessageBorder					{ 0x4d, 0xa1, 0xc1, 255 };
+SDL_Color Color::BotMessageBackground				{ 0xff, 0xf3, 0xf9, 255 };
+SDL_Color Color::BotMessageBorder					{ 0xef, 0x76, 0xbd, 255 };
 SDL_Color Color::NarrationBackground				{ 180, 180, 180, 255 };
+SDL_Color Color::NarrationBorder					{ 60, 60, 60, 255 };
+
+//SDL_Color Color::AppBackground					{ 30, 30, 30, 255 };
+//SDL_Color Color::ChatBackground					{ 40, 40, 40, 255 };
+//SDL_Color Color::AppBackground					{ 255, 255, 255, 255 };
+//SDL_Color Color::ChatBackground					{ 248, 248, 248, 255 };
+SDL_Color Color::AppBackground						{ 0xfa, 0xf9, 0xf5, 255 };
+SDL_Color Color::ChatBackground						{ 0xfa, 0xf9, 0xf5, 255 };
 
 bool Color::IsDefined(SDL_Color color)
 {

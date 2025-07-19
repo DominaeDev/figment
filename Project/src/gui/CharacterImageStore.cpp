@@ -5,7 +5,7 @@ std::map<string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByC
 
 void CharacterImageStore::Init(SDL_Renderer* pRenderer)
 {
-	LoadTexture(pRenderer, "User", ImageType::Portrait_Square, "./resources/images/avatar_user.png");
+	LoadTexture(pRenderer, "Default", ImageType::Portrait_Square, "./resources/images/avatar_default.png");
 	LoadTexture(pRenderer, "Female1", ImageType::Portrait_Square, "./resources/images/avatar_f1.png");
 	LoadTexture(pRenderer, "Female2", ImageType::Portrait_Square, "./resources/images/avatar_f2.png");
 	LoadTexture(pRenderer, "Female3", ImageType::Portrait_Square, "./resources/images/avatar_f3.png");

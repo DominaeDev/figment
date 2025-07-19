@@ -6,8 +6,10 @@ std::map<Texture, SDL_Texture*> TextureStore::_textures;
 void TextureStore::Init(SDL_Renderer* pRenderer)
 {
 	LoadTexture(pRenderer, Texture::BORDER, "./resources/gui/line.png");
-	LoadTexture(pRenderer, Texture::BG_9GRID, "./resources/gui/bg_9grid.png");
-	LoadTexture(pRenderer, Texture::BORDER_9GRID, "./resources/gui/bg_9grid_border.png");
+	LoadTexture(pRenderer, Texture::TEXTBOX_BG, "./resources/gui/bg_9grid.png");
+	LoadTexture(pRenderer, Texture::TEXTBOX_BORDER, "./resources/gui/bg_9grid_border.png");
+	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_BG, "./resources/gui/speech_bubble_bg.png");
+	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_BORDER, "./resources/gui/speech_bubble_border.png");
 }
 
 void TextureStore::Release()
