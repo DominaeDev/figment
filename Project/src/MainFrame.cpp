@@ -265,12 +265,12 @@ void MainFrame::OnCommand(Command cmd)
 		if (!cmd.text.empty())
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, false, 1);
-			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see of " + cmd.text + ", while paying extra attention to detail.}}", MessageType::Direction, false, 1);
+			pLLM->PushMessage(Role::Director, "{{Describe " + cmd.text + "from {{user}}'s perspective and pay attention to visual details.}}", MessageType::Direction, false, 1);
 		}
 		else 
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their surroundings.]", MessageType::Narration, false, 1);
-			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and any other people who are present.}}", MessageType::Direction, false, 1);
+			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and anyone who are present.}}", MessageType::Direction, false, 1);
 		}
 		pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
 		break;
