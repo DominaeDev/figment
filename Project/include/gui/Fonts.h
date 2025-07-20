@@ -9,6 +9,7 @@ enum class FontFace
 	Regular,
 	Italic,
 	Bold,
+	NunitoBold,
 	Default = Regular,
 };
 

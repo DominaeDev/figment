@@ -24,3 +24,8 @@ void Image::OnRender(SDL_Renderer* pRenderer)
 		SDL_RenderTexture(pRenderer, _pTexture, NULL, &rect);
 	}
 }
+
+void Image::SetTexture(SDL_Texture* pTexture)
+{
+	_pTexture = pTexture;
+}

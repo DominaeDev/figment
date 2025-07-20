@@ -4,6 +4,7 @@
 #include "gui/Color.h"
 #include "model/AppState.h"
 #include "llm/LLMInstance.h"
+#include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
 #include <format>
 #include <set>
@@ -18,9 +19,31 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	SetSizer(pTopSizer);
 }
 
-ChatMessage* ChatScroll::AddMessage(string name, string message, Role role, MessageType msgType)
+ChatMessage* ChatScroll::AddMessage(string name, Role role, MessageType msgType, string message, bool complete)
 {
-	auto pMessage = new ChatMessage(this, name, message, role, msgType);
+	if (msgType == MessageType::Narration)
+		role = Role::Narrator;
+
+	bool bShowAvatar = (role == Role::Bot || role == Role::User);
+	auto itLast = std::find_if(std::crbegin(_messages), std::crend(_messages), [](const MessageEntry& entry) {
+		return entry.pChatMessage != nullptr;
+	});
+	
+	Role lastRole = Role::Undefined;
+	if (itLast != std::crend(_messages))
+	{
+		if ((*itLast).msgType == MessageType::Narration)
+			lastRole = Role::Narrator;
+		else
+			lastRole = (*itLast).role;
+	}
+	bShowAvatar &= role != lastRole;
+	bool bShowName = role != lastRole;
+	if (msgType == MessageType::Narration)
+		name = llm_util::name_from_role(Role::Narrator);
+
+	auto pMessage = new ChatMessage(this, bShowName ? name : "", role, msgType, bShowAvatar, bShowName);
+	pMessage->SetMessage(message, complete);
 	_pSizer->Add(pMessage, 0, Sizer::Expand);
 	return pMessage;
 }
@@ -61,6 +84,7 @@ void ChatScroll::ClearMessages()
 
 	_pSizer->Clear();
 	_children.clear();
+	_messages.clear();
 	_messagesById.clear();
 }
 
@@ -105,7 +129,11 @@ void ChatScroll::Poll()
 			if (pEntry->pChatMessage != nullptr)
 				pEntry->pChatMessage->AppendMessage(piece.text, piece.isComplete);
 			else if (!string_util::empty_or_whitespace(piece.text))
-				pEntry->pChatMessage = AddMessage(piece.name, piece.text, piece.role, piece.msgType);
+			{
+				(*itMsg).second->role = piece.role;
+				(*itMsg).second->msgType = piece.msgType;
+				pEntry->pChatMessage = AddMessage(piece.name, piece.role, piece.msgType, piece.text, piece.isComplete);
+			}
 			else
 				continue; // Skip until we receive some text
 		}
@@ -117,8 +145,9 @@ void ChatScroll::Poll()
 		else if (!string_util::empty_or_whitespace(piece.text))
 		{
 			// Create new message to hold the piece
-			ChatMessage* pMessage = AddMessage(piece.name, piece.text, piece.role, piece.msgType);
+			ChatMessage* pMessage = AddMessage(piece.name, piece.role, piece.msgType, piece.text, piece.isComplete);
 			_messages.push_back(MessageEntry {
+				piece.role,
 				piece.responseId,
 				piece.subMessageId,
 				piece.msgType,
@@ -126,9 +155,10 @@ void ChatScroll::Poll()
 			});
 			_messagesById[piece.subMessageId] = &_messages.back();
 		}
-		else
+		else // Empty or whitespace
 		{
 			_messages.push_back(MessageEntry {
+				piece.role,
 				piece.responseId,
 				piece.subMessageId,
 				piece.msgType,

@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <assert.h>
 
+#define DEBUG_SEED 0xA1B2C3D4
+
 void ModelState::Release()
 {
 	if (pSampler)
@@ -153,10 +155,10 @@ static int32_t ctx_remove_and_shift(llama_context* pCtx, ChatState& chat, std::v
 	if (shift_amount == 0)
 		return 0;
 	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
-	
+
 	// Shift
 	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, -1, -shift_amount);
-	
+
 	// Update batch
 	auto& batch = chat.batch;
 	int32_t n_batch = batch.n_tokens;
@@ -171,25 +173,27 @@ static int32_t ctx_remove_and_shift(llama_context* pCtx, ChatState& chat, std::v
 
 static int32_t ctx_insert(llama_context* pCtx, llama_batch& batch, llama_pos pos_insert, LLMMessageBlock& block)
 {
-    // Where to insert in the existing context
-    int32_t shift_amount = (int32_t)block.length();
+	// Where to insert in the existing context
+	int32_t shift_amount = (int32_t)block.length();
 
-    // Shift cache
-    llama_kv_self_seq_add(pCtx, 0, pos_insert, -1, shift_amount);
+	// Shift cache
+	llama_kv_self_seq_add(pCtx, 0, pos_insert, -1, shift_amount);
 
-    // Shift batch
-    int32_t n_batch = batch.n_tokens;
-    for (int32_t i = n_batch - 1; i >= pos_insert; --i) {
-        batch.token[i + shift_amount]  = batch.token[i];
-        batch.logits[i + shift_amount] = batch.logits[i];
-    }
+	// Shift batch
+	int32_t n_batch = batch.n_tokens;
+	for (int32_t i = n_batch - 1; i >= pos_insert; --i)
+	{
+		batch.token[i + shift_amount] = batch.token[i];
+		batch.logits[i + shift_amount] = batch.logits[i];
+	}
 
-    // Insert tokens into batch
-    for (int32_t i = 0; i < shift_amount; ++i) {
-        batch.token[pos_insert + i]  = block.tokens[i];
-        batch.logits[pos_insert + i] = false;
-    }
-    batch.n_tokens += shift_amount;
+	// Insert tokens into batch
+	for (int32_t i = 0; i < shift_amount; ++i)
+	{
+		batch.token[pos_insert + i] = block.tokens[i];
+		batch.logits[pos_insert + i] = false;
+	}
+	batch.n_tokens += shift_amount;
 
 	block.ctx_pos = pos_insert;
 	block.cached = true;
@@ -229,7 +233,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(1.5f));							// Temperature
 		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
 #if _DEBUG
-		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(0xA0B0C0D0));						// Seed
+		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(DEBUG_SEED));						// Seed
 #else
 		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
 #endif
@@ -296,6 +300,13 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		return false;
 	}
 
+	// Initialize rng
+#if _DEBUG
+	_rng.seed(DEBUG_SEED);
+#else
+	_rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
+#endif
+
 	return true;
 }
 
@@ -308,40 +319,33 @@ bool LLMInstance::ResetChat(int seed)
 	llama_context* pCtx = state.pCtx;
 	const int32_t maxCtx = llama_n_ctx(pCtx);
 
-	auto& prompt_tokens = _chatState.system_tokens;
-
 	// Reset batch pointer
-	_chatState.current_pos = (int32_t)prompt_tokens.size();
+	_chatState.current_pos = (int32_t)_chatState.system_tokens.size();
 	_chatState.blocks.clear();
 	_chatState.isInitialized = true;
 
-	llama_kv_self_clear(pCtx);
-
 	// Reinit the batch
-	int32_t num_tokens = (int32_t)prompt_tokens.size();
+	int32_t num_tokens = (int32_t)_chatState.system_tokens.size();
+	llama_kv_self_seq_rm(state.pCtx, 0, num_tokens, -1);
+	// llama_kv_self_clear(pCtx);
 
 	// Add tokens to batch
 	auto& batch = _chatState.batch;
-	for (int i = 0; i < num_tokens; ++i) {
-		batch.token[i] = prompt_tokens[i];
-		batch.pos[i] = i;  // Position in sequence
-		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;  // Sequence ID 0
-		batch.logits[i] = false;  // Don't need logits for most tokens
-	}
-	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
-	batch.n_tokens = num_tokens;
-
-	if (_chatState.batch.n_tokens > 0 && llama_decode(state.pCtx, _chatState.batch))
+	for (int i = 0; i < num_tokens; ++i)
 	{
-		fprintf(stderr, "failed to initialize chat\n");
-		llama_batch_free(_chatState.batch);
-		_chatState.batch = llama_batch {};
-		return false;
+		batch.token[i] = _chatState.system_tokens[i];
+		batch.pos[i] = i;
+		batch.n_seq_id[i] = 1;
+		batch.seq_id[i][0] = 0;
+		batch.logits[i] = false; // No logits
 	}
+	batch.n_tokens = num_tokens;
+	_chatState.current_pos = num_tokens;
 
 	if (seed > 0)
 		Reseed(seed);
+
+	GreetUser();
 	return true;
 }
 
@@ -709,7 +713,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 		partial += str_token;
 		sampled_tokens.push_back(sampled_token);
-		
+
 		if (current_pos >= ctx_size)
 			break; // Max limit reached
 
@@ -868,6 +872,10 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 void LLMInstance::StartGeneration(GenerateArguments args)
 {
+	static std::uniform_int_distribution<int> numMessages(1, 3);
+	if (args.maxMessages <= 0) // Randomize number of messages
+		args.maxMessages = numMessages(_rng);
+
 	_atbGeneratingResponse.store(true);
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__Generate, this), args,
 		[](__PartialResult partial) {
@@ -927,6 +935,8 @@ bool LLMInstance::SendMessage(string message)
 
 	GenerateArguments generateArgs {
 		/*chat state*/ &_chatState,
+		/*role*/ Role::Bot,
+		/*msgType*/ MessageType::Undefined,
 	};
 	
 	StartGeneration(generateArgs);
@@ -1075,7 +1085,7 @@ bool LLMInstance::Instruct(string instructions)
 		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
 	}
 	PushMessage(Role::Director, "{{" + instructions + "}}", MessageType::Direction, false, 4);
-	InstigateResponse(Responder::Bot, MessageType::Undefined, 0);
+	InstigateResponse(Responder::Bot, MessageType::Undefined, 3);
 	return true;
 }
 
@@ -1257,8 +1267,11 @@ bool LLMInstance::Reseed(uint32_t seed)
 			llama_sampler_chain_add(pChain, llama_sampler_init_dist(seed));
 			llama_sampler_reset(pChain);
 		}
+
+		_rng.seed(seed); // Use same seed
 		return true;
 	}
+
 	return false;
 }
 

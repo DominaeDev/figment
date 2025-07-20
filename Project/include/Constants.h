@@ -12,7 +12,9 @@ namespace Constants
 
 	extern const double DefaultFontSize;
 	extern const double StatusBarFontSize;
+	extern const double CharacterNameFontSize;
 	extern const double ChatMessageFontSize;
+	extern const int ChatScrollWidth;
 
 	extern const string DialogueTag;
 	extern const string ActionTag;

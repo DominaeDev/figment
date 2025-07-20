@@ -15,8 +15,8 @@ SDL_Color Color::UserMessageBackground				{ 0xf2, 0xfb, 0xff, 255 };
 SDL_Color Color::UserMessageBorder					{ 0x4d, 0xa1, 0xc1, 255 };
 SDL_Color Color::BotMessageBackground				{ 0xff, 0xf3, 0xf9, 255 };
 SDL_Color Color::BotMessageBorder					{ 0xef, 0x76, 0xbd, 255 };
-SDL_Color Color::NarrationBackground				{ 180, 180, 180, 255 };
-SDL_Color Color::NarrationBorder					{ 60, 60, 60, 255 };
+SDL_Color Color::NarrationBackground				{ 0xf4, 0xf4, 0xf4, 255 };
+SDL_Color Color::NarrationBorder					{ 0x9f, 0x9f, 0x9f, 255 };
 
 //SDL_Color Color::AppBackground					{ 30, 30, 30, 255 };
 //SDL_Color Color::ChatBackground					{ 40, 40, 40, 255 };
@@ -46,6 +46,20 @@ SDL_Color Color::AddRGB(SDL_Color colorA, SDL_Color colorB)
 		static_cast<uint8_t>(g),
 		static_cast<uint8_t>(b),
 		colorA.a
+	};
+}
+
+SDL_Color Color::AddRGB(SDL_Color color, int value)
+{
+	int r = std::clamp(toI(color.r) + value, 0, 255);
+	int g = std::clamp(toI(color.g) + value, 0, 255);
+	int b = std::clamp(toI(color.b) + value, 0, 255);
+
+	return SDL_Color {
+		static_cast<uint8_t>(r),
+		static_cast<uint8_t>(g),
+		static_cast<uint8_t>(b),
+		color.a
 	};
 }
 

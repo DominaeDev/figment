@@ -13,6 +13,7 @@
 #include "gui/TextureStore.h"
 #include "model/AppState.h"
 #include "llm/LLMInstance.h"
+#include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
 #include "util/CommandParser.h"
 #include "util/Utility.h"
@@ -33,7 +34,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	auto centerPanel = new Panel(mainArea);
 	centerPanel->SetBackgroundColor(Color::ChatBackground);
-	centerPanel->SetSize(800, -1);
+	centerPanel->SetSize(toF(Constants::ChatScrollWidth), -1);
 
 	auto rightPanel = new Panel(mainArea);
 	rightPanel->SetSize(200, -1);
@@ -53,7 +54,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pTextBox->SelectAll();
 
 	auto pCenterSizer = new VerticalSizer();
-	pCenterSizer->Add(_pChatScroll, -1, Sizer::Expand);
+	pCenterSizer->Add(_pChatScroll, -1, Sizer::Expand | Sizer::Bottom, 20);
 	pCenterSizer->Add(pTextBox, 0, Sizer::AlignBottom | Sizer::Expand);
 	centerPanel->SetSizer(pCenterSizer);
 
@@ -203,7 +204,12 @@ void MainFrame::OnCommand(Command cmd)
 	case CommandType::UserMessage:
 #if _DEBUG
 		if (!pLLM->IsReady())
-			_pChatScroll->AddMessage("User", cmd.text, Role::User, MessageType::Dialogue);
+		{
+			static int turn = 0;
+			auto [msgType, complete] = llm_util::detect_message_type(FormatMessage(cmd.text, ""));
+			_pChatScroll->AddMessage(turn % 2 == 0 ? "User" : "Bot", turn % 2 == 0 ? Role::User : Role::Bot, msgType, cmd.text);
+			++turn;
+		}
 		else
 #endif
 		pLLM->SendMessage(cmd.text);
@@ -218,7 +224,7 @@ void MainFrame::OnCommand(Command cmd)
 		pLLM->InstigateResponse(Responder::Bot, MessageType::Action, 1);
 		break;
 	case CommandType::PassTurn:
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined);
+		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 3);
 		break;
 	case CommandType::Impersonate:
 		pLLM->InstigateResponse(Responder::User, MessageType::Dialogue, 1);
@@ -244,7 +250,7 @@ void MainFrame::OnCommand(Command cmd)
 	{
 		auto removedIds = pLLM->RemoveMessages(1);
 		_pChatScroll->RemoveMessages(removedIds);
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 0);
+		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 3);
 		break;
 	}
 	case CommandType::RollbackUserMessage:
@@ -256,7 +262,7 @@ void MainFrame::OnCommand(Command cmd)
 	case CommandType::Reset:
 	{
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
-		if (pLLM->ResetChat(seed))
+		if (!pLLM->IsReady() || pLLM->ResetChat(seed))
 			_pChatScroll->ClearMessages();
 		break;
 	}
@@ -272,7 +278,7 @@ void MainFrame::OnCommand(Command cmd)
 		if (!cmd.text.empty())
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, false, 1);
-			pLLM->PushMessage(Role::Director, "{{Describe " + cmd.text + "from {{user}}'s perspective and pay attention to visual details.}}", MessageType::Direction, false, 1);
+			pLLM->PushMessage(Role::Director, "{{Describe " + cmd.text + " from {{user}}'s perspective and pay attention to visual details.}}", MessageType::Direction, false, 1);
 		}
 		else 
 		{

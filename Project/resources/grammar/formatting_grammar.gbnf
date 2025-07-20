@@ -9,7 +9,7 @@ stub		::= ("\"" text "\"</talk>") |
 				("[" text "]</narrator>")
 cont		::= text ("\"</talk>" | "*</act>" | "]</narrator>")
 
-text		::= [^\t<>"*]*
+text		::= [^\t<>"*\]]*
 ws			::= [ \n]
 
 name		::= ##NAME_PATTERN##

@@ -2,9 +2,10 @@
 #include "Constants.h"
 
 std::map<FontFace, const char*> s_FontFilenames {
-	{ FontFace::Regular,	"./fonts/Nunito-Regular.ttf" },
-	{ FontFace::Italic,		"./fonts/Roboto-Italic.ttf" },
-	{ FontFace::Bold,		"./fonts/Roboto-Medium.ttf" },
+	{ FontFace::Regular,	"./resources/fonts/Nunito-Regular.ttf" },
+	{ FontFace::Italic,		"./resources/fonts/Nunito-Italic.ttf" },
+	{ FontFace::Bold,		"./resources/fonts/Roboto-Medium.ttf" },
+	{ FontFace::NunitoBold,	"./resources/fonts/Nunito-MediumItalic.ttf" },
 };
 
 std::list<const char*> s_FallbackFontFilenames {

@@ -75,7 +75,7 @@ size_t llm_util::string_find_partial_stop(const std::string_view& str, const std
 			if (stop[char_index] == text_last_char)
 			{
 				const auto current_partial = stop.substr(0, char_index + 1);
-				if (string_util::string_ends_with(str, current_partial))
+				if (string_util::ends_with(str, current_partial))
 				{
 					return str.size() - char_index - 1;
 				}
@@ -156,6 +156,7 @@ const char* llm_util::name_from_role(Role role)
 	static const char* SYSTEM_NAME = "system";
 	static const char* NARRATOR_NAME = "Narrator";
 	static const char* DIRECTOR_NAME = "Director";
+	static const char* UNKNOWN_NAME = "Unknown";
 	static const char* USER_NAME = "{{user}}";
 	static const char* BOT_NAME = "{{char}}";
 
@@ -166,6 +167,7 @@ const char* llm_util::name_from_role(Role role)
 	case Role::System: return SYSTEM_NAME;
 	case Role::Narrator: return NARRATOR_NAME;
 	case Role::Director: return DIRECTOR_NAME;
+	case Role::Undefined: return UNKNOWN_NAME;
 	}
 	return "";
 }
@@ -232,9 +234,9 @@ string llm_util::apply_chat_template_prefix(Message msg, string userName, string
 	apply_names(prelude, userName, botName);
 
 	string content = msg.content;
-	if (string_util::string_ends_with(content, postlude))
+	if (string_util::ends_with(content, postlude))
 		content = content.substr(0, content.length() - postlude.length());
-	if (!string_util::string_begins_with(content, prelude))
+	if (!string_util::begins_with(content, prelude))
 		content = prelude + content;
 	return content;
 }

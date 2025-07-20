@@ -9,22 +9,35 @@ class StaticText;
 class ChatMessage : public Control
 {
 public:
-	ChatMessage(Control* pParent, string name, string message, Role role, MessageType messageType);
+	ChatMessage(Control* pParent, string name, Role role, MessageType messageType, bool bShowAvatar, bool bShowName);
 
-	void SetMessage(const string& text);
-	void AppendMessage(const string& text, bool lastPiece = false);
+	void SetMessage(string text, bool complete = false);
+	void AppendMessage(const string& text, bool complete = false);
+
+	void SetActive(bool bActive);
 
 protected:
-	void OnRender(SDL_Renderer* pRenderer) override;
-	void OnSize() override;
 
 private:
 	string _name;
 	string _message;
 	
 	Panel* _pMessagePanel;
-	StaticText* _pStaticText = nullptr;
+	StaticText* _pMessageText = nullptr;
+	StaticText* _pNameText = nullptr;
 	bool _bIgnoreEvent = false;
-	Role _role = Role::Bot;
+	Role _role = Role::Undefined;
+	bool _bShowAvatar = false;
+	bool _bShowName = false;
 	MessageType _messageType = MessageType::Undefined;
+
+	enum Style
+	{
+		Default = 0,
+		Dialogue = 1 << 0,
+		Action = 1 << 1,
+		Left = 1 << 2,
+		Right = 1 << 3,
+	};
+	int _style = Style::Default;
 };

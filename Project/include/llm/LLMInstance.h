@@ -82,7 +82,7 @@ struct MessagePiece
 	string subMessageId;	// shared id for pieces of the same message type
 	string name {};
 	string text {};
-	Role role = Role::Bot;
+	Role role = Role::Undefined;
 	MessageType msgType = MessageType::Undefined;
 	bool isComplete = false;
 };
@@ -160,7 +160,7 @@ private:
 	struct GenerateArguments
 	{
 		ChatState* pChat;
-		Role role = Role::Bot;
+		Role role = Role::Undefined;
 		MessageType msgType = MessageType::Undefined;
 		int maxMessages = 0;
 		string prepend {};
@@ -185,4 +185,6 @@ private:
 		
 	LLMStatus _lastStatus {};
 	int _messageCounter = 0;
+
+	std::mt19937 _rng {};
 };

@@ -29,6 +29,8 @@ public:
 	void SetRect(float x, float y, float width, float height);
 	void SetPosition(SDL_FPoint position);
 	void SetPosition(float x, float y);
+	void SetX(float x);
+	void SetY(float y);
 	void SetSize(SDL_FPoint size);
 	void SetSize(float width, float height);
 	void SetWidth(float width);

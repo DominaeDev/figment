@@ -8,8 +8,12 @@ void TextureStore::Init(SDL_Renderer* pRenderer)
 	LoadTexture(pRenderer, Texture::BORDER, "./resources/gui/line.png");
 	LoadTexture(pRenderer, Texture::TEXTBOX_BG, "./resources/gui/bg_9grid.png");
 	LoadTexture(pRenderer, Texture::TEXTBOX_BORDER, "./resources/gui/bg_9grid_border.png");
-	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_BG, "./resources/gui/speech_bubble_bg.png");
-	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_BORDER, "./resources/gui/speech_bubble_border.png");
+	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_LEFT_BG, "./resources/gui/speech_bubble_left_bg.png");
+	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_LEFT_BORDER, "./resources/gui/speech_bubble_left_border.png");
+	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_CENTER_BG, "./resources/gui/speech_bubble_center_bg.png");
+	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_CENTER_BORDER, "./resources/gui/speech_bubble_center_border.png");
+	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_RIGHT_BG, "./resources/gui/speech_bubble_right_bg.png");
+	LoadTexture(pRenderer, Texture::SPEECH_BUBBLE_RIGHT_BORDER, "./resources/gui/speech_bubble_right_border.png");
 }
 
 void TextureStore::Release()

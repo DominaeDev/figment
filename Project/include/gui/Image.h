@@ -7,6 +7,7 @@ class Image : public Control
 {
 public:
 	Image(Control* pParent, SDL_Texture* pTexture);
+	void SetTexture(SDL_Texture* pTexture);
 
 protected:
 	void OnUpdate(float fDeltaTime) override {};

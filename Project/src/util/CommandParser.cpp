@@ -36,7 +36,7 @@ Command CommandParser::Parse(string text)
 	if (text[0] != '/')
 		return Command { CommandType::UserMessage, text };
 
-	if (string_util::string_begins_with(text, "//")) // Shorthand
+	if (string_util::begins_with(text, "//")) // Shorthand
 	{
 		string payload = string_util::trim(text.substr(2));
 		return Command { CommandType::SystemMessage, payload };

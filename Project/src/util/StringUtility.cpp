@@ -84,12 +84,12 @@ std::string string_util::ucase(const std::string& str)
 	return s;
 }
 
-bool string_util::string_begins_with(const std::string_view& str, const std::string_view& suffix)
+bool string_util::begins_with(const std::string_view& str, const std::string_view& suffix)
 {
 	return str.size() >= suffix.size() && str.compare(0, suffix.size(), suffix) == 0;
 }
 
-bool string_util::string_ends_with(const std::string_view& str, const std::string_view& suffix)
+bool string_util::ends_with(const std::string_view& str, const std::string_view& suffix)
 {
 	return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }

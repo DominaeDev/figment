@@ -1008,6 +1008,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			break;
 
 		case SDLK_RETURN:
+		case SDLK_KP_ENTER:
 			if (bCtrl)
 				Insert("\n");
 			else

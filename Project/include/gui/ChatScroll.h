@@ -10,7 +10,7 @@ class ChatScroll : public Control
 public:
 	ChatScroll(Control* pParent);
 
-	ChatMessage* AddMessage(string name, string message, Role role, MessageType msgType);
+	ChatMessage* AddMessage(string name, Role role, MessageType msgType, string message, bool complete = true);
 	int RemoveMessages(std::vector<string> ids);
 	void ClearMessages();
 
@@ -29,6 +29,7 @@ private:
 
 	struct MessageEntry
 	{
+		Role role;
 		string responseId;
 		string subMessageId;
 		MessageType msgType;

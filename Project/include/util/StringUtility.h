@@ -22,7 +22,7 @@ namespace string_util
 	extern std::string get_filename(const std::string& str);
 
 	extern bool empty_or_whitespace(const std::string& s);
-	extern bool string_begins_with(const std::string_view& str, const std::string_view& prefix);
-	extern bool string_ends_with(const std::string_view& str, const std::string_view& suffix);
+	extern bool begins_with(const std::string_view& str, const std::string_view& prefix);
+	extern bool ends_with(const std::string_view& str, const std::string_view& suffix);
 	extern std::vector<std::string> split(std::string s, const std::string& delimiter);
 }

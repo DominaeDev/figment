@@ -28,6 +28,7 @@ namespace Color
 	extern SDL_Color WithAlpha(SDL_Color color, Uint8 alpha = 255u);
 
 	extern SDL_Color AddRGB(SDL_Color colorA, SDL_Color colorB);
+	extern SDL_Color AddRGB(SDL_Color colorA, int value);
 	extern SDL_Color AddRGB(SDL_Color colorA, float value);
 	extern SDL_Color MultiplyRGB(SDL_Color colorA, SDL_Color colorB);
 	extern SDL_Color MultiplyRGB(SDL_Color colorA, float value);

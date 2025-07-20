@@ -58,6 +58,16 @@ void LayoutElement::SetPosition(float x, float y)
 	SetPosition(SDL_FPoint(x, y));
 }
 
+void LayoutElement::SetX(float x)
+{
+	SetPosition(SDL_FPoint(x, _position.y));
+}
+
+void LayoutElement::SetY(float y)
+{
+	SetPosition(SDL_FPoint(_position.x, y));
+}
+
 void LayoutElement::SetPosition(SDL_FPoint position)
 {
 	_position = position;

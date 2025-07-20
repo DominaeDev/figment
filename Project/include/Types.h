@@ -12,6 +12,7 @@ struct llama_chat_message;
 
 enum class Role
 {
+	Undefined = 0,
 	System,
 	Narrator,
 	Director,
