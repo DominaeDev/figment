@@ -1,5 +1,4 @@
 #include "gui/RoundedBackgroundRenderer.h"
-#include "util/Utility.h"
 
 RoundedBackgroundRenderer::RoundedBackgroundRenderer(float radius, SDL_Color color) :
 	_radius(radius),
@@ -7,7 +6,7 @@ RoundedBackgroundRenderer::RoundedBackgroundRenderer(float radius, SDL_Color col
 {
 }
 
-void RoundedBackgroundRenderer::Draw(SDL_Renderer* pRenderer, SDL_FRect rect)
+void RoundedBackgroundRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
 {
 	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);

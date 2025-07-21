@@ -1,7 +1,6 @@
 #include "gui/VerticalGradient.h"
 #include "gui/Color.h"
 #include "gui/TextureStore.h"
-#include "util/Utility.h"
 
 VerticalGradient::VerticalGradient(Control* pParent, SDL_Color colorTop, SDL_Color colorBottom) : Control(pParent)
 {
@@ -11,8 +10,8 @@ VerticalGradient::VerticalGradient(Control* pParent, SDL_Color colorTop, SDL_Col
 
 void VerticalGradient::SetColors(SDL_Color colorTop, SDL_Color colorBottom)
 {
-	_colorTop = Color::ColorToFColor(colorTop);
-	_colorBottom = Color::ColorToFColor(colorBottom);
+	_colorTop = color_util::to_colorf(colorTop);
+	_colorBottom = color_util::to_colorf(colorBottom);
 }
 
 void VerticalGradient::OnRender(SDL_Renderer* pRenderer)

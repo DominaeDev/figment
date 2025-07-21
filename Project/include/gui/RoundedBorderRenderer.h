@@ -11,7 +11,7 @@ class RoundedBorderRenderer : public CustomRenderer
 public:
 	RoundedBorderRenderer(float radius, float thickness, SDL_Color color);
 	
-	void Draw(SDL_Renderer* pRenderer, SDL_FRect rect);
+	void Render(SDL_Renderer* pRenderer, SDL_FRect rect);
 	void SetColor(SDL_Color color);
 
 private:

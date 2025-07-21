@@ -1,6 +1,5 @@
 #include "gui/VerticalListSizer.h"
 #include "gui/Control.h"
-#include "util/Utility.h"
 
 static int CeilInt(float f)
 {
@@ -17,10 +16,10 @@ void VerticalListSizer::OnLayout(SDL_FRect parentRect)
 	for (auto it = std::rbegin(_items); it != std::rend(_items); ++it)
 	{
 		auto& item = *it;
-		if (item.pFrame == nullptr)
+		if (item.pControl == nullptr)
 			continue;
 
-		auto& frame = *item.pFrame;
+		auto& frame = *item.pControl;
 		auto& rect = frame.GetRect();
 		int height = CeilInt(frame.GetHeight());
 

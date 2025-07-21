@@ -2,7 +2,6 @@
 #include "gui/Text.h"
 #include "gui/Color.h"
 #include "model/AppState.h"
-#include "util/Utility.h"
 #include "Constants.h"
 #include <algorithm>
 
@@ -73,7 +72,7 @@ void StaticText::OnUpdate(float fDeltaTime)
 void StaticText::OnRender(SDL_Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
-	if (Color::IsDefined(bgColor) && bgColor.a != 0)
+	if (color_util::is_defined(bgColor) && bgColor.a != 0)
 		DrawBackground(pRenderer);
 
 	if (_pTexture)
@@ -92,7 +91,7 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 
 	int maxWidth = std::max(toI(_maxSize.x), 0);
 
-	if (Color::IsDefined(fgColor) && _text.size() > 0)
+	if (color_util::is_defined(fgColor) && _text.size() > 0)
 	{
 		// Opaque background: Use ClearType
 		if (bgColor.a == 0xFF)
@@ -130,7 +129,7 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 		else
 		{
 			// Recreate text
-			SDL_Surface* pSurface = TTF_RenderText_Blended_Wrapped(_pFont, _text.c_str(), 0, Color::White, maxWidth);
+			SDL_Surface* pSurface = TTF_RenderText_Blended_Wrapped(_pFont, _text.c_str(), 0, Colors::White, maxWidth);
 			if (pSurface)
 			{
 				_textWidth = pSurface->w;

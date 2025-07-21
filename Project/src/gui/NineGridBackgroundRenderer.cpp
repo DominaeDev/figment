@@ -1,6 +1,5 @@
 #include "gui/NineGridBackgroundRenderer.h"
 #include "gui/TextureStore.h"
-#include "util/Utility.h"
 
 NineGridBackgroundRenderer::NineGridBackgroundRenderer(int cornerPixels)
 {
@@ -12,7 +11,7 @@ NineGridBackgroundRenderer::NineGridBackgroundRenderer(std::array<float, 4> corn
 	_cornerPixels = corners;
 }
 
-void NineGridBackgroundRenderer::Draw(SDL_Renderer* pRenderer, SDL_FRect rect)
+void NineGridBackgroundRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
 {
 	auto expandedRect = Rect_Expand(rect, 5.0f);
 	

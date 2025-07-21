@@ -113,9 +113,9 @@ void LayoutElement::AddChild(LayoutElement* pLayoutElement)
 	OnAddedChild(pLayoutElement);
 }
 
-bool LayoutElement::RemoveChild(LayoutElement* frame)
+bool LayoutElement::RemoveChild(LayoutElement* pChild)
 {
-	auto it = std::find(std::begin(_children), std::end(_children), frame);
+	auto it = std::find(std::begin(_children), std::end(_children), pChild);
 	if (it != std::end(_children))
 	{
 		OnRemovedChild(*it);

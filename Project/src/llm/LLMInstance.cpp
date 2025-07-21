@@ -1,7 +1,7 @@
 ﻿#include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
-#include "util/Utility.h"
+#include "util/Common.h"
 #include "Constants.h"
 #include <common.h>
 #include <format>
@@ -523,7 +523,9 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		if (!block.cached)
 			chat.blocks.erase(std::begin(chat.blocks) + (ptrdiff_t)i);
 		else
-			current_pos += ctx_remove_and_shift(state.pCtx, _chatState, std::begin(chat.blocks) + (ptrdiff_t)i, std::begin(chat.blocks) + (ptrdiff_t)(i + 1));
+			current_pos += ctx_remove_and_shift(state.pCtx, _chatState, 
+				std::begin(chat.blocks) + (ptrdiff_t)i, 
+				std::begin(chat.blocks) + (ptrdiff_t)(toSZ(i + 1)));
 	}
 
 	// Tokenize uncached messages
@@ -959,7 +961,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	if (msgType == MessageType::SystemMessage)
 		content = string_util::trim(content);
 	else 
-		content = FormatMessage(content, name);
+		content = llm_util::format_message(content, name);
 
 	string responseId = CreateUUID();
 	string subMessageId = CreateUUID();
@@ -1002,8 +1004,8 @@ std::vector<string> LLMInstance::RemoveMessages(int numMessages, bool rewindTime
 	if (!CanGenerate() || numMessages < 1)
 		return {};
 
-	int32_t numRemovals = std::min(numMessages, (int32_t)_chatState.blocks.size());
-	int32_t newSize = (int32_t)_chatState.blocks.size() - numMessages;
+	size_t numRemovals = std::min(toSZ(numMessages), _chatState.blocks.size());
+	size_t newSize = _chatState.blocks.size() - toSZ(numMessages);
 	int32_t& current_pos = _chatState.current_pos;
 
 	// Rewind time
@@ -1012,21 +1014,21 @@ std::vector<string> LLMInstance::RemoveMessages(int numMessages, bool rewindTime
 		for (auto& block : _chatState.blocks)
 		{
 			if (block.ttl > 0)
-				block.ttl += numRemovals;
+				block.ttl += toI(numRemovals);
 		}
 	}
 
 	if (newSize > 0)
 	{
-		auto& block = _chatState.blocks[newSize - 1];
+		auto& block = _chatState.blocks[newSize - 1_sz];
 		if (block.cached)
-			current_pos = std::min(current_pos, block.ctx_pos + (int32_t)block.length());
+			current_pos = std::min(current_pos, block.ctx_pos + toI(block.length()));
 		else
 			current_pos = std::min(current_pos, block.ctx_pos);
 	}
 	else
 	{
-		current_pos = (int32_t)_chatState.system_tokens.size();
+		current_pos = toI(_chatState.system_tokens.size());
 	}
 	
 	// Update batch
@@ -1038,7 +1040,7 @@ std::vector<string> LLMInstance::RemoveMessages(int numMessages, bool rewindTime
 
 	// Return removed ids
 	std::vector<string> removedIds;
-	removedIds.reserve((int32_t)_chatState.blocks.size() - newSize);
+	removedIds.reserve(_chatState.blocks.size() - (size_t)newSize);
 	for (size_t i = (size_t)newSize; i < _chatState.blocks.size(); ++i)
 		removedIds.push_back(_chatState.blocks[i].responseId);
 	
@@ -1124,6 +1126,9 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 	case Responder::Director:
 		responderName = llm_util::name_from_role(Role::Director);
 		role = Role::Director;
+		break;
+	default:
+		role = Role::Undefined;
 		break;
 	}
 

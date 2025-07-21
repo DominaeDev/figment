@@ -2,37 +2,41 @@
 
 #include "Graphics.h"
 
-namespace Color
+namespace Colors
 {
-	extern SDL_Color Transparent;
-	extern SDL_Color White;
-	extern SDL_Color Black;
-	extern SDL_Color DarkGray;
-	extern SDL_Color Debug;
+	extern Color Transparent;
+	extern Color White;
+	extern Color Black;
+	extern Color DarkGray;
+	extern Color Debug;
 
-	extern SDL_Color AppBackground;
-	extern SDL_Color ChatBackground;
+	extern Color AppBackground;
+	extern Color ChatBackground;
 
-	extern SDL_Color TextForeground;
-	extern SDL_Color TextSelectionForeground;
-	extern SDL_Color TextSelectionBackground;
-	
-	extern SDL_Color UserMessageBackground;
-	extern SDL_Color UserMessageBorder;
-	extern SDL_Color BotMessageBackground;
-	extern SDL_Color BotMessageBorder;
-	extern SDL_Color NarrationBackground;
-	extern SDL_Color NarrationBorder;
+	extern Color TextForeground;
+	extern Color TextSelectionForeground;
+	extern Color TextSelectionBackground;
 
-	extern bool IsDefined(SDL_Color color);
-	extern SDL_Color WithAlpha(SDL_Color color, Uint8 alpha = 255u);
-
-	extern SDL_Color AddRGB(SDL_Color colorA, SDL_Color colorB);
-	extern SDL_Color AddRGB(SDL_Color colorA, int value);
-	extern SDL_Color AddRGB(SDL_Color colorA, float value);
-	extern SDL_Color MultiplyRGB(SDL_Color colorA, SDL_Color colorB);
-	extern SDL_Color MultiplyRGB(SDL_Color colorA, float value);
-
-	extern SDL_FColor ColorToFColor(SDL_Color color);
-	extern SDL_Color FColorToColor(SDL_FColor color);
+	extern Color UserMessageBackground;
+	extern Color UserMessageBorder;
+	extern Color BotMessageBackground;
+	extern Color BotMessageBorder;
+	extern Color NarrationBackground;
+	extern Color NarrationBorder;
 }
+
+struct color_util
+{
+	static bool is_defined(Color color);
+	static Colorf to_colorf(Color color);
+	static Color to_color(Colorf color);
+
+	static Color add_rgb(Color colorA, Color colorB);
+	static Color add_rgb(Color colorA, int value);
+	static Color add_rgb(Color colorA, float value);
+	static Color multiply_rgb(Color colorA, Color colorB);
+	static Color multiply_rgb(Color colorA, float value);
+	static Color with_alpha(Color color, Uint8 alpha = 255u);
+
+	color_util() = delete;
+};

@@ -75,7 +75,7 @@ void TextBox::OnRender(SDL_Renderer* pRenderer)
 		TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(_pText, marker, length, NULL);
 		if (pHighlights)
 		{
-			SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
+			SDL_SetRenderDrawColor(pRenderer, Colors::TextSelectionBackground.r, Colors::TextSelectionBackground.g, Colors::TextSelectionBackground.b, Colors::TextSelectionBackground.a);
 			for (int i = 0; pHighlights[i]; ++i)
 			{
 				SDL_FRect rect;
@@ -808,7 +808,7 @@ void TextBox::Copy()
 	int marker, length;
 	if (GetHighlightExtents(&marker, &length))
 	{
-		char* temp = (char*)SDL_malloc(length + 1);
+		char* temp = (char*)SDL_malloc(toSZ(length + 1));
 		if (temp)
 		{
 			SDL_memcpy(temp, &_pText->text[marker], length);
@@ -832,7 +832,7 @@ void TextBox::Cut()
 	int marker, length;
 	if (GetHighlightExtents(&marker, &length))
 	{
-		char* temp = (char*)SDL_malloc(length + 1);
+		char* temp = (char*)SDL_malloc(toSZ(length + 1));
 		if (temp)
 		{
 			SDL_memcpy(temp, &_pText->text[marker], length);

@@ -1,6 +1,5 @@
 #include "gui/RoundedBorderRenderer.h"
 #include "gui/TextureStore.h"
-#include "util/Utility.h"
 
 RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, SDL_Color color) :
 	_thickness(thickness),
@@ -10,7 +9,7 @@ RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, SDL_
 	_pTexture = TextureStore::GetTexture(Texture::BORDER);
 }
 
-void RoundedBorderRenderer::Draw(SDL_Renderer* pRenderer, SDL_FRect rect)
+void RoundedBorderRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
 {
 	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);

@@ -1,16 +1,6 @@
 #include "util/StringUtility.h"
 #include <algorithm>
 
-std::string& string_util::trim(std::string& s)
-{
-	return ltrim(rtrim(s));
-}
-
-std::string string_util::trim(const std::string& s)
-{
-	return ltrim(rtrim(s));
-}
-
 std::string& string_util::ltrim(std::string& s)
 {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -127,4 +117,30 @@ std::vector<std::string> string_util::split(std::string s, const std::string& de
 	tokens.push_back(s);
 
 	return tokens;
+}
+
+std::string& string_util::normalize_newlines(std::string& text)
+{
+	size_t cursor_write = 0;
+
+	for (size_t cursor_read = 0; cursor_read < text.size(); ++cursor_read)
+	{
+		if (text[cursor_read] == '\r')
+		{
+			// Skip CR and optional following LF
+			if (cursor_read + 1 < text.size() && text[cursor_read + 1] == '\n')
+				++cursor_read;
+			text[cursor_write++] = '\n';
+		}
+		else
+			text[cursor_write++] = text[cursor_read];
+	}
+
+	text.resize(cursor_write);
+	return text;
+}
+
+std::string string_util::normalize_newlines(std::string&& text)
+{
+	return normalize_newlines(text); // rvo
 }

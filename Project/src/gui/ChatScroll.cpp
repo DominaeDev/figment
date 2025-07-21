@@ -7,7 +7,6 @@
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
-#include "util/Utility.h"
 #include <format>
 #include <set>
 
@@ -22,7 +21,7 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	_pScrollSizer->SetSpacing(12);
 	SetSizer(_pScrollSizer);
 
-	_pBottomGradient = new VerticalGradient(this, Color::WithAlpha(Color::ChatBackground, 0), Color::ChatBackground);
+	_pBottomGradient = new VerticalGradient(this, color_util::with_alpha(Colors::ChatBackground, 0), Colors::ChatBackground);
 	SetClipping(true);
 }
 

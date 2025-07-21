@@ -83,7 +83,7 @@ protected:
 	SDL_FRect _cursor_rect;
 
 	/* Highlight support */
-	bool _bIsHighlighting;
+	bool _bIsHighlighting = false;
 	int highlight_start;
 	int highlight_end;
 

@@ -1,5 +1,4 @@
 #include "gui/Frame.h"
-#include "util/Utility.h"
 #include "gui/Graphics.h"
 
 Frame::Frame(SDL_Window* pWindow) : Control(nullptr)

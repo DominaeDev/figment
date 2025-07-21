@@ -77,11 +77,11 @@ void Control::DrawBorder(SDL_Renderer* pRenderer)
 	// Custom renderer
 	if (_pBorderRenderer)
 	{
-		_pBorderRenderer->Draw(pRenderer, _rect);
+		_pBorderRenderer->Render(pRenderer, _rect);
 		return;
 	}
 
-	if (!Color::IsDefined(_borderColor))
+	if (!color_util::is_defined(_borderColor))
 		return;
 	
 	SDL_SetRenderDrawColor(pRenderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
@@ -90,7 +90,7 @@ void Control::DrawBorder(SDL_Renderer* pRenderer)
 
 SDL_Color Control::GetForegroundColor() const
 {
-	if (!Color::IsDefined(_foregroundColor))
+	if (!color_util::is_defined(_foregroundColor))
 	{
 		auto frameParent = dynamic_cast<Control*>(_pParent);
 		return frameParent ? frameParent->GetForegroundColor() : SDL_Color();
@@ -100,7 +100,7 @@ SDL_Color Control::GetForegroundColor() const
 
 SDL_Color Control::GetBackgroundColor() const
 {
-	if (!Color::IsDefined(_backgroundColor))
+	if (!color_util::is_defined(_backgroundColor))
 	{
 		auto frameParent = dynamic_cast<Control*>(_pParent);
 		return frameParent ? frameParent->GetBackgroundColor() : SDL_Color();
@@ -113,12 +113,12 @@ void Control::DrawBackground(SDL_Renderer* pRenderer)
 	// Custom renderer
 	if (_pBGRenderer)
 	{
-		_pBGRenderer->Draw(pRenderer, _rect);
+		_pBGRenderer->Render(pRenderer, _rect);
 		return;
 	}
 
 	auto bgColor = GetBackgroundColor();
-	if (Color::IsDefined(bgColor) && bgColor.a != 0)
+	if (color_util::is_defined(bgColor) && bgColor.a != 0)
 	{
 		SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(pRenderer, &_rect);
@@ -132,9 +132,9 @@ void Control::OnParent()
 	auto pParent = dynamic_cast<Control*>(_pParent);
 	if (pParent)
 	{
-		if (!Color::IsDefined(_foregroundColor))
+		if (!color_util::is_defined(_foregroundColor))
 			_foregroundColor = pParent->GetForegroundColor();
-		if (!Color::IsDefined(_backgroundColor))
+		if (!color_util::is_defined(_backgroundColor))
 			_backgroundColor = pParent->GetBackgroundColor();
 	}
 }

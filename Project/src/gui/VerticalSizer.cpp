@@ -19,8 +19,8 @@ void VerticalSizer::OnLayout(SDL_FRect parentRect)
 	int numStretch = 0;
 	for (auto& item : _items)
 	{
-		if (item.prop == 0 && item.pFrame != nullptr)
-			remainingHeight = CeilInt(std::max(remainingHeight - item.pFrame->GetHeight(), 0.0f));
+		if (item.prop == 0 && item.pControl != nullptr)
+			remainingHeight = CeilInt(std::max(remainingHeight - item.pControl->GetHeight(), 0.0f));
 		else if (item.prop > 0)
 			totalProportion += item.prop;
 		else
@@ -32,13 +32,13 @@ void VerticalSizer::OnLayout(SDL_FRect parentRect)
 	int y = 0;
 	for (auto& item : _items)
 	{
-		if (item.pFrame == nullptr)
+		if (item.pControl == nullptr)
 		{
 			y += CeilInt(remainingHeight / (float)numStretch);
 			continue;
 		}
 
-		auto& frame = *item.pFrame;
+		auto& frame = *item.pControl;
 		auto& rect = frame.GetRect();
 		int height = 0;
 		if (item.prop == 0)

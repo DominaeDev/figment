@@ -11,7 +11,7 @@ public:
 	NineGridBackgroundRenderer(int cornerPixels = 64);
 	NineGridBackgroundRenderer(std::array<float, 4> corners);
 	
-	void Draw(SDL_Renderer* pRenderer, SDL_FRect rect);
+	void Render(SDL_Renderer* pRenderer, SDL_FRect rect);
 	void SetCornerSize(float cornerSize);
 	void SetColors(SDL_Color bgColor, SDL_Color borderColor);
 	void SetTextures(SDL_Texture* bgTexture, SDL_Texture* borderTexture);

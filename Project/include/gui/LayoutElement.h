@@ -41,8 +41,8 @@ public:
 	void SetMaxSize(SDL_FPoint size) { _maxSize = size; }
 	void SetMaxSize(float width, float height) { _maxSize = SDL_FPoint { width, height }; }
 	
-	void AddChild(LayoutElement* pFrame);
-	bool RemoveChild(LayoutElement* pFrame);
+	void AddChild(LayoutElement* pChild);
+	bool RemoveChild(LayoutElement* pChild);
 	void MoveChildToTop(LayoutElement* pChild);
 	void MoveChildToBottom(LayoutElement* pChild);
 

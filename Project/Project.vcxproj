@@ -140,7 +140,7 @@
     <ClCompile Include="src\gui\Text.cpp" />
     <ClCompile Include="src\gui\TextBox.cpp" />
     <ClCompile Include="src\gui\TextureStore.cpp" />
-    <ClCompile Include="src\util\Utility.cpp" />
+    <ClCompile Include="src\util\Common.cpp" />
     <ClCompile Include="src\gui\VerticalListSizer.cpp" />
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
   </ItemGroup>
@@ -189,7 +189,7 @@
     <ClInclude Include="include\gui\TextBox.h" />
     <ClInclude Include="include\gui\TextureStore.h" />
     <ClInclude Include="include\Types.h" />
-    <ClInclude Include="include\util\Utility.h" />
+    <ClInclude Include="include\util\Common.h" />
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
   </ItemGroup>

@@ -39,10 +39,10 @@ struct ModelState
 
 struct LLMMessageBlock {
 	string responseId;
-	Role role;
+	Role role = Role::Undefined;
     string content;
 	std::vector<int32_t> tokens;
-	int32_t ctx_pos;
+	int32_t ctx_pos = 0;
 	bool cached = false;
 	int ttl = -1;
 
@@ -138,7 +138,7 @@ private:
 		string fullText;
 	};
 
-	enum InternalError : int {
+	enum class InternalError : int {
 		NoError = 0,
 		ContextFull = 1,
 		DecodeError = 2,

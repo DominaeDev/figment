@@ -6,8 +6,10 @@ struct TTF_TextEngine;
 struct SDL_Renderer;
 struct SDL_Texture;
 
-typedef SDL_FPoint Point;
-typedef SDL_FRect Rect;
+using Point = SDL_FPoint;
+using Rect = SDL_FRect;
+using Colorf = SDL_FColor;
+using Color = SDL_Color;
 
 class Control;
 class Panel;

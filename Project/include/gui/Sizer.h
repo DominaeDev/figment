@@ -32,15 +32,15 @@ public:
 	void Layout();
 	void SetOwner(LayoutElement* pOwner);
 
-	void Add(Control* pFrame, int proportion = 0, int flags = Flag::Default, int border = 0);
+	void Add(Control* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
 	void AddStretchSpacer();
-	void Remove(Control* pFrame);
+	void Remove(Control* pControl);
 	void Clear();
 
 protected:
 	struct LayoutInfo
 	{
-		Control* pFrame;
+		Control* pControl;
 		int prop = 0;
 		int flags = Flag::None;
 		int border = 0;

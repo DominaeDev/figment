@@ -1,7 +1,6 @@
 #include "gui/HorizontalGradient.h"
 #include "gui/Color.h"
 #include "gui/TextureStore.h"
-#include "util/Utility.h"
 
 HorizontalGradient::HorizontalGradient(Control* pParent, SDL_Color colorLeft, SDL_Color colorRight) : Control(pParent)
 {
@@ -11,8 +10,8 @@ HorizontalGradient::HorizontalGradient(Control* pParent, SDL_Color colorLeft, SD
 
 void HorizontalGradient::SetColors(SDL_Color colorLeft, SDL_Color colorRight)
 {
-	_colorLeft = Color::ColorToFColor(colorLeft);
-	_colorRight = Color::ColorToFColor(colorRight);
+	_colorLeft = color_util::to_colorf(colorLeft);
+	_colorRight = color_util::to_colorf(colorRight);
 }
 
 void HorizontalGradient::OnRender(SDL_Renderer* pRenderer)

@@ -16,7 +16,7 @@
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
 #include "util/CommandParser.h"
-#include "util/Utility.h"
+#include "util/Common.h"
 #include "Constants.h"
 #include <format>
 
@@ -24,8 +24,8 @@ MainFrame* MainFrame::s_pInstance = nullptr;
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
-	SetForegroundColor(Color::Black);
-	SetBackgroundColor(Color::AppBackground);
+	SetForegroundColor(Colors::Black);
+	SetBackgroundColor(Colors::AppBackground);
 
 	auto mainArea = new Area(this);
 
@@ -33,7 +33,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	leftPanel->SetSize(200, -1);
 
 	auto centerPanel = new Panel(mainArea);
-	centerPanel->SetBackgroundColor(Color::ChatBackground);
+	centerPanel->SetBackgroundColor(Colors::ChatBackground);
 	centerPanel->SetSize(toF(Constants::ChatScrollWidth), -1);
 
 	auto rightPanel = new Panel(mainArea);
@@ -77,11 +77,9 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 		OnCommand(CommandParser::Parse(text));
 	});
 
-//	pTextBox->SetBorderRenderer(new RoundedBorderRenderer(4.5f, 2.5f, Color::Black));
-
 	auto pTextBoxBG = new NineGridBackgroundRenderer();
 	pTextBoxBG->SetCornerSize(10.0f);
-	pTextBoxBG->SetColors(Color::White, SDL_Color { 0xb9, 0xb2, 0x8f, 0xFF });
+	pTextBoxBG->SetColors(Colors::White, SDL_Color { 0xb9, 0xb2, 0x8f, 0xFF });
 	pTextBoxBG->SetTextures(TextureStore::GetTexture(Texture::TEXTBOX_BG), TextureStore::GetTexture(Texture::TEXTBOX_BORDER));
 	pTextBox->SetBackgroundRenderer(pTextBoxBG);
 
@@ -206,7 +204,7 @@ void MainFrame::OnCommand(Command cmd)
 		if (!pLLM->IsReady())
 		{
 			static int turn = 0;
-			auto [msgType, complete] = llm_util::detect_message_type(FormatMessage(cmd.text, ""));
+			auto [msgType, complete] = llm_util::detect_message_type(llm_util::format_message(cmd.text, ""));
 			_pChatScroll->AddMessage(turn % 2 == 0 ? "User" : "Bot", turn % 2 == 0 ? Role::User : Role::Bot, msgType, cmd.text);
 			++turn;
 		}

@@ -10,7 +10,6 @@
 #include "gui/TextureStore.h"
 #include "gui/CharacterImageStore.h"
 #include "util/StringUtility.h"
-#include "util/Utility.h"
 #include "Constants.h"
 #include <format>
 
@@ -52,12 +51,12 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	{
 	case MessageType::Dialogue:
 	case MessageType::Action:
-		bgColor = role == Role::User ? Color::UserMessageBackground : Color::BotMessageBackground;
-		borderColor = role == Role::User ? Color::UserMessageBorder: Color::BotMessageBorder;
+		bgColor = role == Role::User ? Colors::UserMessageBackground : Colors::BotMessageBackground;
+		borderColor = role == Role::User ? Colors::UserMessageBorder: Colors::BotMessageBorder;
 		break;
 	default:
-		bgColor = Color::NarrationBackground;
-		borderColor = Color::NarrationBorder;
+		bgColor = Colors::NarrationBackground;
+		borderColor = Colors::NarrationBorder;
 		break;
 	}
 
@@ -129,24 +128,24 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	if (msgType != MessageType::Dialogue)
 		font = FontFace::Italic;
 
-	SDL_Color textColor = Color::Black;
+	SDL_Color textColor = Colors::Black;
 	if (!bDialogue)
-		textColor = Color::MultiplyRGB(borderColor, 0.5f);
+		textColor = color_util::multiply_rgb(borderColor, 0.5f);
 
 	_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::ChatMessageFontSize, true);
 	_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
 	_pMessageText->SetForegroundColor(textColor);
-	_pMessageText->SetBackgroundColor(Color::Transparent);
+	_pMessageText->SetBackgroundColor(Colors::Transparent);
 	_pMessageText->SetMaxSize(toF(Constants::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2), -1);
 
 	// Name label
 	if (_bShowName)
 	{
-		SDL_Color nameColor = Color::AddRGB(borderColor, -0.1f);
+		SDL_Color nameColor = color_util::add_rgb(borderColor, -0.1f);
 		_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::CharacterNameFontSize, false);
 		_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
 		_pNameText->SetForegroundColor(nameColor);
-		_pNameText->SetBackgroundColor(Color::Transparent);
+		_pNameText->SetBackgroundColor(Colors::Transparent);
 		_pNameText->SetPosition(LEFT_MARGIN, -1);
 		_pNameText->SetSize(Constants::ChatScrollWidth - HMARGIN, -1);
 	}

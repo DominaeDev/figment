@@ -1,6 +1,5 @@
 #include "gui/HorizontalSizer.h"
 #include "gui/Control.h"
-#include "util/Utility.h"
 
 static int CeilInt(float f)
 {
@@ -20,8 +19,8 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 	int numStretch = 0;
 	for (auto& item : _items)
 	{
-		if (item.prop == 0 && item.pFrame != nullptr)
-			remainingWidth = CeilInt(std::max(remainingWidth - item.pFrame->GetWidth(), 0.0f));
+		if (item.prop == 0 && item.pControl != nullptr)
+			remainingWidth = CeilInt(std::max(remainingWidth - item.pControl->GetWidth(), 0.0f));
 		else if (item.prop > 0)
 			totalProportion += item.prop;
 		else
@@ -33,13 +32,13 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 	int x = 0;
 	for (auto& item : _items)
 	{
-		if (item.pFrame == nullptr)
+		if (item.pControl == nullptr)
 		{
 			x += CeilInt(remainingWidth / (float)numStretch);
 			continue;
 		}
 
-		auto& frame = *item.pFrame;
+		auto& frame = *item.pControl;
 		auto& rect = frame.GetRect();
 		int width = 0;
 		if (item.prop == 0)

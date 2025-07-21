@@ -10,14 +10,14 @@ void Image::OnRender(SDL_Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
 	auto fgColor = GetForegroundColor();
-	if (Color::IsDefined(bgColor) && bgColor.a != 0)
+	if (color_util::is_defined(bgColor) && bgColor.a != 0)
 		DrawBackground(pRenderer);
 
 	if (_pTexture)
 	{
 		SDL_FRect rect = GetRect();
 
-		if (Color::IsDefined(fgColor) && fgColor.a != 0)
+		if (color_util::is_defined(fgColor) && fgColor.a != 0)
 			SDL_SetTextureAlphaMod(_pTexture, fgColor.a);
 		else
 			SDL_SetTextureAlphaMod(_pTexture, 0xFF);
