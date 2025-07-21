@@ -23,5 +23,7 @@ using Vertex = SDL_Vertex;
 using Surface = SDL_Surface;
 
 extern Rectf expand_rect(const Rectf& rect, float pixels);
+extern Rect expand_rect(const Rect& rect, int pixels);
+
 extern inline Rect toRect(Rectf rect);
 extern inline Rectf toRectf(Rect rect);

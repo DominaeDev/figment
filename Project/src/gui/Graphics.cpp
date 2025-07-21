@@ -1,5 +1,10 @@
 #include "gui/graphics.h"
 
+Rect expand_rect(const Rect& rect, int pixels)
+{
+	return Rect { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
+}
+
 Rectf expand_rect(const Rectf& rect, float pixels)
 {
 	return Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };

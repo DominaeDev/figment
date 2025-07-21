@@ -36,7 +36,7 @@ void Control::Render(Renderer* pRenderer)
 	static Rect* s_pClippingRect = nullptr;
 	Rect* lastClippingRect = s_pClippingRect;
 	Rect clippingRect;
-	Rect cullingRect = toRect(GetRect());
+	Rect cullingRect = expand_rect(toRect(GetRect()), 100);	
 
 	if (_bClipping)
 	{
