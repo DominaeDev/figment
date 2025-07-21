@@ -106,7 +106,10 @@
     <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\Graphics.cpp" />
+    <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
+    <ClCompile Include="src\gui\VerticalGradient.cpp" />
+    <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />
     <ClCompile Include="src\gui\Area.cpp" />
     <ClCompile Include="src\model\Character.cpp" />
@@ -146,7 +149,10 @@
     <ClInclude Include="..\Libraries\uuid_v4\endianness.h" />
     <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
+    <ClInclude Include="include\gui\HorizontalGradient.h" />
     <ClInclude Include="include\gui\Image.h" />
+    <ClInclude Include="include\gui\VerticalGradient.h" />
+    <ClInclude Include="include\gui\VerticalScrollSizer.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Character.h" />

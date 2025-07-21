@@ -1,5 +1,6 @@
 #include "gui/Color.h"
 #include "util/Utility.h"
+#include "Types.h"
 #include <algorithm>
 
 SDL_Color Color::White								{ 0xFF, 0xFF, 0xFF, 0xFF };
@@ -98,5 +99,25 @@ SDL_Color Color::MultiplyRGB(SDL_Color color, float value)
 		static_cast<uint8_t>(g),
 		static_cast<uint8_t>(b),
 		color.a
+	};
+}
+
+SDL_FColor Color::ColorToFColor(SDL_Color color)
+{
+	return SDL_FColor {
+		color.r / 255.0f,
+		color.g / 255.0f,
+		color.b / 255.0f,
+		color.a / 255.0f,
+	};
+}
+
+SDL_Color Color::FColorToColor(SDL_FColor color)
+{
+	return SDL_Color {
+		std::clamp(static_cast<uint8_t>(color.r * 255.0f), 0_u8, 255_u8),
+		std::clamp(static_cast<uint8_t>(color.g * 255.0f), 0_u8, 255_u8),
+		std::clamp(static_cast<uint8_t>(color.b * 255.0f), 0_u8, 255_u8),
+		std::clamp(static_cast<uint8_t>(color.a * 255.0f), 0_u8, 255_u8),
 	};
 }

@@ -24,6 +24,8 @@ void LayoutElement::Layout()
 	if (_pSizer)
 		_pSizer->Layout();
 	_bInvalidLayout = false;
+
+	OnAfterLayout();
 }
 
 void LayoutElement::SetRect(SDL_FRect rect)
@@ -102,11 +104,13 @@ void LayoutElement::SetHeight(float height)
 void LayoutElement::AddChild(LayoutElement* pLayoutElement)
 {
 	auto itFind = std::find(std::cbegin(_children), std::cend(_children), pLayoutElement);
-	if (itFind == std::cend(_children))
-	{
-		_children.push_back(pLayoutElement);
-		InvalidateLayout();
-	}
+	if (itFind != std::cend(_children))
+		return; // Already added
+
+	_children.push_back(pLayoutElement);
+	InvalidateLayout();
+
+	OnAddedChild(pLayoutElement);
 }
 
 bool LayoutElement::RemoveChild(LayoutElement* frame)
@@ -114,6 +118,7 @@ bool LayoutElement::RemoveChild(LayoutElement* frame)
 	auto it = std::find(std::begin(_children), std::end(_children), frame);
 	if (it != std::end(_children))
 	{
+		OnRemovedChild(*it);
 		(*it)->SetParent(nullptr);
 		_children.erase(it);
 		return true;
@@ -170,4 +175,23 @@ void LayoutElement::InvalidateParentLayout(bool bRefreshImmediately)
 		else
 			InvalidateLayout();
 	}
+}
+
+void LayoutElement::MoveChildToTop(LayoutElement* pChild)
+{
+	auto it = std::find(std::begin(_children), std::end(_children), pChild);
+	if (it == std::end(_children))
+		return;
+	_children.erase(it);
+	_children.push_back(pChild);
+}
+
+void LayoutElement::MoveChildToBottom(LayoutElement* pChild)
+{
+	auto it = std::find(std::begin(_children), std::end(_children), pChild);
+	if (it == std::end(_children))
+		return;
+
+	_children.erase(it);
+	_children.insert(std::begin(_children), pChild);
 }

@@ -1,22 +1,29 @@
 #include "gui/ChatScroll.h"
-#include "gui/VerticalListSizer.h"
+#include "gui/VerticalScrollSizer.h"
+#include "gui/VerticalGradient.h"
 #include "gui/ChatMessage.h"
 #include "gui/Color.h"
 #include "model/AppState.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
+#include "util/Utility.h"
 #include <format>
 #include <set>
 
 #define POLL_INTERVAL 0.1f
+#define ANIMATED_SCROLL_SPEED 15.0f
+#define GRADIENT_HEIGHT 40.0f
 
 ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 {
-	auto pTopSizer = new VerticalListSizer();
-	pTopSizer->SetBottomMargin(8);
-	pTopSizer->SetSpacing(8);
-	SetSizer(pTopSizer);
+	_pScrollSizer = new VerticalScrollSizer();
+	_pScrollSizer->SetBottomMargin(50);
+	_pScrollSizer->SetSpacing(12);
+	SetSizer(_pScrollSizer);
+
+	_pBottomGradient = new VerticalGradient(this, Color::WithAlpha(Color::ChatBackground, 0), Color::ChatBackground);
+	SetClipping(true);
 }
 
 ChatMessage* ChatScroll::AddMessage(string name, Role role, MessageType msgType, string message, bool complete)
@@ -98,11 +105,21 @@ std::tuple<std::string, std::string> ChatScroll::GetLastMessage() const
 
 void ChatScroll::OnUpdate(float fDeltaTime)
 {
+	// Poll LLM for new messages
 	_fPollTimer += fDeltaTime;
 	if (_fPollTimer >= POLL_INTERVAL)
 	{
 		_fPollTimer = 0.0f;
 		Poll();
+	}
+
+	// Animated scrolling
+	if (_fAnimatedScroll > 0.0f)
+	{
+		_fAnimatedScroll -= _fAnimatedScroll * fDeltaTime * ANIMATED_SCROLL_SPEED;
+		if (_fAnimatedScroll < 1.0f)
+			_fAnimatedScroll = 0.0f;
+		_pScrollSizer->SetOffset(_fScrollY + _fAnimatedScroll);
 	}
 }
 
@@ -179,4 +196,43 @@ void ChatScroll::Poll()
 			continue;
 		}
 	}
+}
+
+bool ChatScroll::OnEvent(SDL_Event* event)
+{
+	if (event->type == SDL_EVENT_MOUSE_WHEEL)
+	{
+		return HandleMouseWheel(event->wheel);
+	}
+	return false;
+}
+
+bool ChatScroll::HandleMouseWheel(SDL_MouseWheelEvent event)
+{
+	SDL_FPoint pt = { event.mouse_x, event.mouse_y };
+	if (!SDL_PointInRectFloat(&pt, &_rect))
+		return false;
+
+	_fScrollY = std::max(_fScrollY + toF(event.integer_y) * 40.0f, 0.0f);
+	_pScrollSizer->SetOffset(_fScrollY + _fAnimatedScroll);
+	return true;
+}
+
+void ChatScroll::OnAfterLayout()
+{
+	float listHeight = _pScrollSizer->GetListHeight();
+	if (listHeight > _fLastListHeight) // Near bottom
+	{
+		// Animate scroll
+		_fAnimatedScroll += (listHeight - _fLastListHeight);
+		_pScrollSizer->SetOffset(_fAnimatedScroll);
+	}
+	_fLastListHeight = listHeight;
+
+	_pBottomGradient->SetRect(0, GetHeight() - GRADIENT_HEIGHT, GetWidth(), GRADIENT_HEIGHT);
+}
+
+void ChatScroll::OnAddedChild(LayoutElement* pChild)
+{
+	MoveChildToTop(_pBottomGradient);
 }

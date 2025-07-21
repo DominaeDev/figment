@@ -54,7 +54,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pTextBox->SelectAll();
 
 	auto pCenterSizer = new VerticalSizer();
-	pCenterSizer->Add(_pChatScroll, -1, Sizer::Expand | Sizer::Bottom, 20);
+	pCenterSizer->Add(_pChatScroll, -1, Sizer::Expand | Sizer::Bottom, 8);
 	pCenterSizer->Add(pTextBox, 0, Sizer::AlignBottom | Sizer::Expand);
 	centerPanel->SetSizer(pCenterSizer);
 

@@ -5,6 +5,7 @@ std::map<Texture, SDL_Texture*> TextureStore::_textures;
 
 void TextureStore::Init(SDL_Renderer* pRenderer)
 {
+	LoadTexture(pRenderer, Texture::BLANK, "./resources/gui/white.png");
 	LoadTexture(pRenderer, Texture::BORDER, "./resources/gui/line.png");
 	LoadTexture(pRenderer, Texture::TEXTBOX_BG, "./resources/gui/bg_9grid.png");
 	LoadTexture(pRenderer, Texture::TEXTBOX_BORDER, "./resources/gui/bg_9grid_border.png");

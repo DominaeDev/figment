@@ -1,5 +1,6 @@
 #include "gui/VerticalListSizer.h"
 #include "gui/Control.h"
+#include "util/Utility.h"
 
 static int CeilInt(float f)
 {
@@ -34,5 +35,6 @@ void VerticalListSizer::OnLayout(SDL_FRect parentRect)
 		frame.SetSize(rect.w, rect.h);
 
 		y += height + _spacing;
-	}	
+	}
+	_totalListHeight = toF(y - _spacing);
 }

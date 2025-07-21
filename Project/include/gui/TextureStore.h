@@ -7,7 +7,8 @@ struct SDL_Texture;
 
 enum class Texture
 {
-	BORDER = 0,
+	BLANK,
+	BORDER,
 	
 	TEXTBOX_BG,
 	TEXTBOX_BORDER,

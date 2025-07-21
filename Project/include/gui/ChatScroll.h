@@ -4,6 +4,7 @@
 #include "Types.h"
 
 class ChatMessage;
+class VerticalScrollSizer;
 
 class ChatScroll : public Control
 {
@@ -18,15 +19,19 @@ public:
 
 protected:
 	void OnUpdate(float fDeltaTime) override;
-	void OnRender(SDL_Renderer* pRenderer) override {};
+	bool OnEvent(SDL_Event* event) override;
+	void OnAfterLayout() override;
+	void OnAddedChild(LayoutElement* pChild) override;
 
+	bool HandleMouseWheel(SDL_MouseWheelEvent event);
 	void EnablePolling(bool bEnable);
 	void Poll();
 
 private:
+	Control* _pBottomGradient;
 	bool _bPolling = true;
 	float _fPollTimer = 0.0f;
-
+	
 	struct MessageEntry
 	{
 		Role role;
@@ -37,4 +42,11 @@ private:
 	};
 	std::vector<MessageEntry> _messages {};
 	std::map<string, MessageEntry*> _messagesById {}; // Sub-message id
+
+	// Scrolling
+	VerticalScrollSizer* _pScrollSizer;
+	float _fScrollY = 0.0f;
+	float _fLastListHeight = 0.0f;
+	float _fAnimatedScroll = 0.0f;
+
 };

@@ -32,4 +32,7 @@ namespace Color
 	extern SDL_Color AddRGB(SDL_Color colorA, float value);
 	extern SDL_Color MultiplyRGB(SDL_Color colorA, SDL_Color colorB);
 	extern SDL_Color MultiplyRGB(SDL_Color colorA, float value);
+
+	extern SDL_FColor ColorToFColor(SDL_Color color);
+	extern SDL_Color FColorToColor(SDL_FColor color);
 }

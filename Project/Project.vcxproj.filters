@@ -188,6 +188,15 @@
     <ClCompile Include="src\gui\Image.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\VerticalScrollSizer.cpp">
+      <Filter>Source Files\Interface\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\VerticalGradient.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\HorizontalGradient.cpp">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Constants.h">
@@ -320,6 +329,15 @@
       <Filter>Source Files\Interface\Stores</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Image.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\VerticalScrollSizer.h">
+      <Filter>Source Files\Interface\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\VerticalGradient.h">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\HorizontalGradient.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
   </ItemGroup>

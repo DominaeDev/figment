@@ -18,8 +18,8 @@ public:
 	SDL_FPoint GetSize() const { return _size; }
 
 	SDL_FPoint GetAbsolutePosition() const;
-	float GetLeft() const { return _position.x; }
-	float GetTop() const { return _position.y; }
+	float GetX() const { return _position.x; }
+	float GetY() const { return _position.y; }
 	float GetWidth() const { return _size.x; }
 	float GetHeight() const { return _size.y; }
 	const SDL_FPoint& GetMinSize() const { return _minSize; }
@@ -43,6 +43,8 @@ public:
 	
 	void AddChild(LayoutElement* pFrame);
 	bool RemoveChild(LayoutElement* pFrame);
+	void MoveChildToTop(LayoutElement* pChild);
+	void MoveChildToBottom(LayoutElement* pChild);
 
 	void SetSizer(Sizer* sizer);
 	void InvalidateLayout();
@@ -55,6 +57,9 @@ protected:
 	virtual void OnSize();
 	virtual void OnParent();
 	virtual void OnUpdate(float fDeltaTime) {};
+	virtual void OnAfterLayout() {};
+	virtual void OnAddedChild(LayoutElement* pChild) {}
+	virtual void OnRemovedChild(LayoutElement* pChild) {}
 
 protected:
 	std::vector<LayoutElement*> _children;
