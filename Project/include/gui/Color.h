@@ -36,7 +36,7 @@ struct color_util
 	static Color add_rgb(Color colorA, float value);
 	static Color multiply_rgb(Color colorA, Color colorB);
 	static Color multiply_rgb(Color colorA, float value);
-	static Color with_alpha(Color color, Uint8 alpha = 255u);
+	static Color with_alpha(Color color, Uint8 alpha);
 
 	color_util() = delete;
 };

@@ -37,7 +37,6 @@
 #define TEXT_HMARGIN		(TEXT_LEFT_MARGIN + TEXT_RIGHT_MARGIN)
 #define TEXT_VMARGIN		(TEXT_TOP_MARGIN + TEXT_BOTTOM_MARGIN)
 
-
 ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType msgType, bool bShowAvatar, bool bShowName) : Control(pParent),
 	_name(name),
 	_messageType(msgType),
@@ -45,21 +44,6 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	_bShowAvatar(bShowAvatar),
 	_bShowName(bShowName)
 {
-	Color bgColor;
-	Color borderColor;
-	switch (msgType)
-	{
-	case MessageType::Dialogue:
-	case MessageType::Action:
-		bgColor = role == Role::User ? Colors::UserMessageBackground : Colors::BotMessageBackground;
-		borderColor = role == Role::User ? Colors::UserMessageBorder: Colors::BotMessageBorder;
-		break;
-	default:
-		bgColor = Colors::NarrationBackground;
-		borderColor = Colors::NarrationBorder;
-		break;
-	}
-
 	_bShowName &= !name.empty();
 
 	_style = Style::Default;
@@ -94,33 +78,28 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 
 	_pMessagePanel = new Panel(this);
 
-	NineGridBackgroundRenderer* pBackground;
-
 	if ((_style & Style::Dialogue) == Style::Dialogue)
 	{
 		if (bRight)
 		{
-			pBackground = new NineGridBackgroundRenderer({ 30, 72, 64, 30 });
-			pBackground->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BORDER));
+			_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 30, 72, 64, 30 });
+			_pSpeechBubbleBG->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BORDER));
 		}
 		else
 		{
-			pBackground = new NineGridBackgroundRenderer({ 72, 30, 64, 30 });
-			pBackground->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BORDER));
+			_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 72, 30, 64, 30 });
+			_pSpeechBubbleBG->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BORDER));
 		}
 	}
 	else
 	{
-		pBackground = new NineGridBackgroundRenderer({ 30, 30, 64, 30 });
-		pBackground->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
+		_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 30, 30, 64, 30 });
+		_pSpeechBubbleBG->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
 	}
+	_pSpeechBubbleBG->SetCornerSize(7.0f);
+
 	_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), _bShowName ? TOP_OFFSET : 0); // Left
-
-	pBackground->SetCornerSize(7.0f);
-	pBackground->SetColors(bgColor, borderColor);
-
-	_pMessagePanel->SetBackgroundRenderer(pBackground);
-	_pMessagePanel->SetBackgroundColor(bgColor); // Text background
+	_pMessagePanel->SetBackgroundRenderer(_pSpeechBubbleBG);
 
 	SetSize(-1, 38);
 
@@ -128,27 +107,22 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	if (msgType != MessageType::Dialogue)
 		font = FontFace::Italic;
 
-	Color textColor = Colors::Black;
-	if (!bDialogue)
-		textColor = color_util::multiply_rgb(borderColor, 0.5f);
-
 	_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::ChatMessageFontSize, true);
 	_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
-	_pMessageText->SetForegroundColor(textColor);
 	_pMessageText->SetBackgroundColor(Colors::Transparent);
 	_pMessageText->SetMaxSize(toF(Constants::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2), -1);
 
 	// Name label
 	if (_bShowName)
 	{
-		Color nameColor = color_util::add_rgb(borderColor, -0.1f);
 		_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::CharacterNameFontSize, false);
 		_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
-		_pNameText->SetForegroundColor(nameColor);
 		_pNameText->SetBackgroundColor(Colors::Transparent);
 		_pNameText->SetPosition(LEFT_MARGIN, -1);
 		_pNameText->SetSize(Constants::ChatScrollWidth - HMARGIN, -1);
 	}
+
+	RefreshColors();
 }
 
 static void strip_ends(string& text, MessageType msgType)
@@ -239,5 +213,48 @@ void ChatMessage::AppendMessage(const string& text, bool complete)
 
 void ChatMessage::SetActive(bool bActive)
 {
-	SetForegroundColor(Color { 0, 0, 0, (uint8_t)(bActive ? 255 : 160) });
+	if (_bActive == bActive)
+		return;
+	_bActive = bActive;
+	RefreshColors();
+}
+
+void ChatMessage::RefreshColors()
+{
+	Color bgColor;
+	Color borderColor;
+	const uint8_t fadedAlpha = 120;
+	bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
+
+	switch (_messageType)
+	{
+	case MessageType::Dialogue:
+	case MessageType::Action:
+		bgColor = _role == Role::User ? Colors::UserMessageBackground : Colors::BotMessageBackground;
+		borderColor = _role == Role::User ? Colors::UserMessageBorder: Colors::BotMessageBorder;
+		break;
+	default:
+		bgColor = Colors::NarrationBackground;
+		borderColor = Colors::NarrationBorder;
+		break;
+	}
+	
+	uint8_t alpha = (uint8_t)(_bActive ? 255 : fadedAlpha);
+	bgColor.a = alpha;
+	borderColor.a = alpha;
+	SetForegroundColor(Color { 0, 0, 0, alpha });
+
+	Color textColor = Colors::Black;
+	if (!bDialogue)
+		textColor = color_util::multiply_rgb(borderColor, 0.5f);
+	_pMessageText->SetForegroundColor(color_util::with_alpha(textColor, alpha));
+
+	_pSpeechBubbleBG->SetColors(bgColor, borderColor);
+	_pMessagePanel->SetBackgroundColor(color_util::with_alpha(_pMessagePanel->GetBackgroundColor(), alpha));
+	_pMessageText->SetForegroundColor(color_util::with_alpha(_pMessageText->GetForegroundColor(), alpha));
+	if (_pNameText)
+	{
+		Color nameColor = color_util::add_rgb(borderColor, -0.1f);
+		_pNameText->SetForegroundColor(color_util::with_alpha(nameColor, alpha));
+	}
 }

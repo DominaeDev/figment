@@ -18,12 +18,8 @@ Color Colors::BotMessageBorder					{ 0xef, 0x76, 0xbd, 255 };
 Color Colors::NarrationBackground				{ 0xf4, 0xf4, 0xf4, 255 };
 Color Colors::NarrationBorder					{ 0x9f, 0x9f, 0x9f, 255 };
 
-//Color Colors::AppBackground					{ 30, 30, 30, 255 };
-//Color Colors::ChatBackground					{ 40, 40, 40, 255 };
-//Color Colors::AppBackground					{ 255, 255, 255, 255 };
-//Color Colors::ChatBackground					{ 248, 248, 248, 255 };
 Color Colors::AppBackground						{ 0xfa, 0xf9, 0xf5, 255 };
-Color Colors::ChatBackground						{ 0xfa, 0xf9, 0xf5, 255 };
+Color Colors::ChatBackground					{ 0xfa, 0xf9, 0xf5, 255 };
 
 bool color_util::is_defined(Color color)
 {

@@ -205,12 +205,12 @@ void MainFrame::OnCommand(Command cmd)
 		{
 			static int turn = 0;
 			auto [msgType, complete] = llm_util::detect_message_type(llm_util::format_message(cmd.text, ""));
-			_pChatScroll->AddDummyMessage(turn % 2 == 0 ? Role::User : Role::Bot, turn % 2 == 0 ? "User" : "Bot", cmd.text);
+			_pChatScroll->AddDummyMessage(turn % 2 == 0 ? "User" : "Bot", turn % 2 == 0 ? Role::User : Role::Bot, msgType, cmd.text);
 			++turn;
 		}
 		else
 #endif
-		pLLM->SendMessage(cmd.text);
+			pLLM->SendMessage(cmd.text);
 		break;
 	case CommandType::SystemMessage:
 		pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);

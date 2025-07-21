@@ -323,9 +323,9 @@ bool LLMInstance::ResetChat(int seed)
 	const int32_t maxCtx = llama_n_ctx(pCtx);
 
 	// Reset batch pointer
-	_chatState.current_pos = (int32_t)_chatState.system_tokens.size();
-	_chatState.blocks.clear();
-	_chatState.isInitialized = true;
+		_chatState.current_pos = (int32_t)_chatState.system_tokens.size();
+		_chatState.blocks.clear();
+		_chatState.isInitialized = true;
 
 	// Reinit the batch
 	int32_t num_tokens = (int32_t)_chatState.system_tokens.size();
@@ -354,8 +354,8 @@ bool LLMInstance::ResetChat(int seed)
 
 static void __LoadModel(string filename, __LoadModelCallback onComplete)
 {
-	const int ngl = 99;
-	const int n_ctx = 2048;
+	const int ngl = 99; // All layers
+	const int n_ctx = Constants::ContextSize;
 
 	// initialize the model
 	llama_model_params model_params = llama_model_default_params();
@@ -478,6 +478,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId)
 		/*prepend*/ {},
 		/*responseId*/ responseId,
 		/*subMessageId*/ subMessageId,
+		/*continue?*/ true,
 	};
 	StartGeneration(generateArgs);
 	return true;
@@ -632,7 +633,6 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	string userName = chat.user.name;
 	string botName = chat.bot.name;
 	int32_t pre_response_pos = chat.pre_response_pos;
-	bool bIsContinuation = !args.responseId.empty() && !chat.blocks.empty();
 
 	string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
 	string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
@@ -643,7 +643,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	DebugPrintLn(">> BEGIN GENERATION");
 
 	// Init grammar
-	if (auto pGrammar = state.SetActiveGrammar(bIsContinuation ? Grammar::Continue : Grammar::Default))
+	if (auto pGrammar = state.SetActiveGrammar(args.bContinueLast ? Grammar::Continue : Grammar::Default))
 		llama_sampler_reset(pGrammar);
 
 	if (!args.prepend.empty())
@@ -848,7 +848,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 	if (response.length() > 0)
 	{
-		if (bIsContinuation)
+		if (args.bContinueLast)
 		{
 			auto& lastBlock = chat.blocks[chat.blocks.size() - 1];
 			lastBlock.content += response;
@@ -883,7 +883,17 @@ void LLMInstance::StartGeneration(GenerateArguments args)
 	if (args.maxMessages <= 0) // Randomize number of messages
 		args.maxMessages = numMessages(_rng);
 
-	PushStatus(LLMStatusSignal::GenerationComplete);
+	if (args.responseId.empty())
+		args.responseId = CreateUUID();
+	if (args.subMessageId.empty())
+		args.subMessageId = CreateUUID();
+
+	{
+		std::scoped_lock(_resultMutex);
+		_activeResponseIds.insert(args.responseId);
+	}
+
+	PushStatus(LLMStatusSignal::GenerationStarted);
 	_atbGeneratingResponse.store(true);
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__Generate, this), args,
 		[](__PartialResult partial) {
@@ -901,6 +911,14 @@ void LLMInstance::StartGeneration(GenerateArguments args)
 
 			_atbGeneratingResponse.store(false);
 			PushStatus(LLMStatusSignal::GenerationComplete);
+
+			// Update active responses
+			{
+				std::scoped_lock lock(_resultMutex);
+				_activeResponseIds.clear();
+				for (auto it = std::cbegin(_chatState.blocks); it != std::cend(_chatState.blocks); ++it)
+					_activeResponseIds.insert(it->responseId);
+			}
 		}));
 }
 
@@ -948,7 +966,7 @@ bool LLMInstance::SendMessage(string message)
 		/*role*/ Role::Bot,
 		/*msgType*/ MessageType::Undefined,
 	};
-	
+
 	StartGeneration(generateArgs);
 
 	return true;
@@ -1003,6 +1021,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 			/*msgType*/ msgType,
 			/*isComplete*/ true,
 		});
+		_activeResponseIds.insert(responseId);
 	}
 	return true;
 }
@@ -1312,4 +1331,10 @@ void LLMInstance::PushStatus(LLMStatusSignal signal)
 		return;
 
 	_statusSignals.push(signal);
+}
+
+std::set<string> LLMInstance::GetActiveMessages()
+{
+	std::scoped_lock lock(_resultMutex);
+	return std::set<string>(std::begin(_activeResponseIds), std::end(_activeResponseIds)); // Copy
 }

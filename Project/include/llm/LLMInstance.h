@@ -4,6 +4,7 @@
 #include "model/Character.h"
 #include <llama.h>
 #include <vector>
+#include <set>
 #include <functional>
 #include <thread>
 #include <mutex>
@@ -127,6 +128,7 @@ public:
 	bool Reseed(uint32_t seed = 0xFFFFFFFF);
 	std::vector<string> RemoveMessages(int numMessages = 1, bool rewindTime = true);
 	std::vector<string> RollbackUserMessage();
+	std::set<string> GetActiveMessages();
 
 	bool PollResponse(MessagePiece& piece);
 	LLMStatus GetStatus();
@@ -176,6 +178,7 @@ private:
 		string prepend {};
 		string responseId {};
 		string subMessageId {};
+		bool bContinueLast = false;
 	};
 	void __Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 	void StartGeneration(GenerateArguments args);
@@ -187,6 +190,7 @@ private:
 
 	std::atomic<ModelState> _atModelState {}; // todo: better than this
 	ChatState _chatState {}; // todo: better than this
+	std::set<string> _activeResponseIds;
 
 	std::atomic<bool> _atbGeneratingResponse {};
 	std::unique_ptr<std::jthread> _workerThread;

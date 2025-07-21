@@ -28,5 +28,6 @@ string const Constants::ThoughtTagEnd	= "/" + Constants::ThoughtTag;
 string const Constants::DirectionTagEnd	= "/" + Constants::DirectionTag;
 
 // Generation constants
-const int Constants::MaxResponseLength = 368;
+const int Constants::ContextSize = 4096;
+const int Constants::MaxResponseLength = 256;
 const float Constants::ContextWindowKeepRatio = 0.75f;

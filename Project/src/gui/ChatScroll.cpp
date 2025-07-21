@@ -13,6 +13,7 @@
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f
 #define GRADIENT_HEIGHT 40.0f
+#define MOUSE_SCROLL_SPEED 80.0f
 
 ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 {
@@ -26,14 +27,15 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	EnableCulling(true);
 }
 
-void ChatScroll::AddDummyMessage(Role role, string name, string message)
+void ChatScroll::AddDummyMessage(string name, Role role, MessageType msgType, string message)
 {
-	ChatMessage* pMessage = AddMessage(name, role, MessageType::Dialogue, message, true);
+	ChatMessage* pMessage = AddMessage(name, role, msgType, message, true);
+	pMessage->SetActive(false);
 	_messages.push_back(MessageEntry {
 		role,
 		"",
 		"",
-		MessageType::Dialogue,
+		msgType,
 		pMessage,
 	});
 }
@@ -149,6 +151,8 @@ void ChatScroll::Poll()
 	if (!pLLM)
 		return;
 
+	bool bNewResponse = false;
+
 	MessagePiece piece;
 	while (pLLM->PollResponse(piece))
 	{
@@ -210,7 +214,11 @@ void ChatScroll::Poll()
 			}
 			continue;
 		}
+		bNewResponse |= piece.isComplete;
 	}
+
+	if (bNewResponse)
+		RefreshActive();
 }
 
 bool ChatScroll::OnEvent(SDL_Event* event)
@@ -228,7 +236,7 @@ bool ChatScroll::HandleMouseWheel(SDL_MouseWheelEvent event)
 	if (!SDL_PointInRectFloat(&pt, &_rect))
 		return false;
 
-	_fScrollY = std::max(_fScrollY + toF(event.integer_y) * 40.0f, 0.0f);
+	_fScrollY = std::max(_fScrollY + toF(event.integer_y) * MOUSE_SCROLL_SPEED, 0.0f);
 	_pScrollSizer->SetOffset(_fScrollY + _fAnimatedScroll);
 	return true;
 }
@@ -250,4 +258,24 @@ void ChatScroll::OnAfterLayout()
 void ChatScroll::OnAddedChild(LayoutElement* pChild)
 {
 	MoveChildToTop(_pBottomGradient);
+}
+
+void ChatScroll::RefreshActive()
+{
+	auto pLLM = Application::GetLLM();
+	if (!pLLM)
+		return;
+
+	// Check which messages are present in the context
+	auto activeMessages = pLLM->GetActiveMessages();
+
+	for (auto& message : _messages)
+	{
+		if (!message.pChatMessage)
+			continue;
+
+		bool bActive = message.responseId.empty() 
+			|| activeMessages.find(message.responseId) != std::end(activeMessages);
+		message.pChatMessage->SetActive(bActive);
+	}
 }

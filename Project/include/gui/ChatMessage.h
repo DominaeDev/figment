@@ -5,6 +5,7 @@
 #include "Graphics.h"
 
 class StaticText;
+class NineGridBackgroundRenderer;
 
 class ChatMessage : public Control
 {
@@ -17,6 +18,7 @@ public:
 	void SetActive(bool bActive);
 
 protected:
+	void RefreshColors();
 
 private:
 	string _name;
@@ -25,10 +27,12 @@ private:
 	Panel* _pMessagePanel;
 	StaticText* _pMessageText = nullptr;
 	StaticText* _pNameText = nullptr;
-	bool _bIgnoreEvent = false;
+	NineGridBackgroundRenderer* _pSpeechBubbleBG;
+
 	Role _role = Role::Undefined;
 	bool _bShowAvatar = false;
 	bool _bShowName = false;
+	bool _bActive = true;
 	MessageType _messageType = MessageType::Undefined;
 
 	enum Style
