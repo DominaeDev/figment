@@ -31,7 +31,7 @@ std::string llm_util::stringFromToken(const llama_vocab* pVocab, llama_token tok
 	return std::string(buf, n);
 }
 
-size_t llm_util::validate_utf8(const string& text)
+size_t llm_util::validate_utf8(const string& text) noexcept
 {
 	size_t len = text.size();
 	if (len == 0) return 0;
@@ -241,7 +241,7 @@ string llm_util::apply_chat_template_prefix(Message msg, string userName, string
 	return content;
 }
 
-std::pair<MessageType, bool> llm_util::detect_message_type(string text)
+std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
 {
 	auto patterns = std::vector<std::tuple<string, MessageType>> {
 		{ std::format("<{0}", Constants::DialogueTag),		MessageType::Dialogue},
@@ -604,7 +604,7 @@ static void trim_spans(const std::string s, std::vector<Span>& spans)
 	}
 }
 
-std::string llm_util::format_message(std::string message, std::string actorName)
+std::string llm_util::format_message(std::string message, std::string actorName) noexcept
 {
 	size_t pos = 0;
 	size_t length = message.size();

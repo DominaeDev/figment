@@ -6,7 +6,7 @@
 namespace llm_util
 {
 	extern std::string stringFromToken(const llama_vocab* pVocab, llama_token token);
-	extern size_t validate_utf8(const string& text);
+	extern size_t validate_utf8(const string& text) noexcept;
 	extern size_t string_find_partial_stop(const std::string_view& str, const std::string_view& stop);
 	extern size_t find_one_of(const string& text, const std::vector<string>& words);
 	extern size_t find_stopping_strings(const string& text, const std::vector<string>& stop_words, const size_t last_token_size, bool is_full_stop);
@@ -20,10 +20,10 @@ namespace llm_util
 	extern std::vector<llama_token> tokenize(llama_model* pModel, string prompt, bool bAddSpecial);
 	extern bool init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 
-	extern std::pair<MessageType, bool> detect_message_type(string text);
+	extern std::pair<MessageType, bool> detect_message_type(string text) noexcept;
 	extern string apply_chat_template(Messages in_messages, llama_context* pCtx, bool add_assistant);
 	extern string apply_chat_template(Message msg, llama_context* pCtx, bool add_assistant);
 	extern string apply_chat_template_prefix(Message msg, string userName, string botName, llama_context* pCtx, bool add_assistant);
 
-	extern std::string format_message(std::string message, std::string actorName);
+	extern std::string format_message(std::string message, std::string actorName) noexcept;
 }

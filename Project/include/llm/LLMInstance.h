@@ -116,7 +116,7 @@ public:
 	bool IsGenerating() const;
 	
 	bool SendMessage(string message);
-	bool PushMessage(Role role, string message, MessageType msgType = MessageType::Dialogue, bool visible = true, int ttl = 0);
+	bool PushMessage(Role role, string message, MessageType msgType = MessageType::Undefined, bool visible = true, int ttl = 0);
 
 	bool Halt();
 	bool Continue(string responseId, string subMessageId);

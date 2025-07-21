@@ -986,8 +986,12 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	llm_util::apply_names(content, _chatState.user.name, _chatState.bot.name);
 	if (msgType == MessageType::SystemMessage)
 		content = string_util::trim(content);
-	else 
+	else
+	{
 		content = llm_util::format_message(content, name);
+		if (msgType == MessageType::Undefined)
+			msgType = llm_util::detect_message_type(content).first;
+	}
 
 	string responseId = CreateUUID();
 	string subMessageId = CreateUUID();

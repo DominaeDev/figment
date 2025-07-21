@@ -210,7 +210,7 @@ void MainFrame::OnCommand(Command cmd)
 		}
 		else
 #endif
-			pLLM->SendMessage(cmd.text);
+		pLLM->SendMessage(cmd.text);
 		break;
 	case CommandType::SystemMessage:
 		pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
