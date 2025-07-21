@@ -6,13 +6,13 @@
 class Image : public Control
 {
 public:
-	Image(Control* pParent, SDL_Texture* pTexture);
-	void SetTexture(SDL_Texture* pTexture);
+	Image(Control* pParent, Texture* pTexture);
+	void SetTexture(Texture* pTexture);
 
 protected:
 	void OnUpdate(float fDeltaTime) override {};
-	void OnRender(SDL_Renderer* pRenderer) override;
+	void OnRender(Renderer* pRenderer) override;
 
 private:
-	SDL_Texture* _pTexture = nullptr;
+	Texture* _pTexture = nullptr;
 };

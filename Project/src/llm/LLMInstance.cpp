@@ -114,6 +114,8 @@ void LLMInstance::Shutdown()
 	// Clear state and release
 	auto state = _atModelState.exchange(ModelState());
 	state.Release();
+
+	PushStatus(LLMStatusSignal::ModelUnloaded);
 }
 
 using __LoadModelCallback = std::function<void(ModelState)>;
@@ -307,6 +309,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 	_rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 #endif
 
+	PushStatus(LLMStatusSignal::ChatStarted);
 	return true;
 }
 
@@ -408,6 +411,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 		{
 			_atModelState.store(result);
 			_modelName = string_util::get_filename(filename);
+			PushStatus(LLMStatusSignal::ModelLoaded);
 			onComplete(true);
 		}
 		else
@@ -817,6 +821,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 				if (args.maxMessages > 0 && ++numMessages >= args.maxMessages)
 					break; // That's enough, thank you
 				subMessageId = CreateUUID();
+				PushStatus(LLMStatusSignal::MessageComplete);
 			}
 
 			send = false;
@@ -878,6 +883,7 @@ void LLMInstance::StartGeneration(GenerateArguments args)
 	if (args.maxMessages <= 0) // Randomize number of messages
 		args.maxMessages = numMessages(_rng);
 
+	PushStatus(LLMStatusSignal::GenerationComplete);
 	_atbGeneratingResponse.store(true);
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__Generate, this), args,
 		[](__PartialResult partial) {
@@ -892,7 +898,9 @@ void LLMInstance::StartGeneration(GenerateArguments args)
 				state.bInvalid = true; // Invalidate state
 				_atModelState.store(state);
 			}
+
 			_atbGeneratingResponse.store(false);
+			PushStatus(LLMStatusSignal::GenerationComplete);
 		}));
 }
 
@@ -1158,7 +1166,7 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 }
 
 
-LLMStatus LLMInstance::GetStatus() const
+LLMStatus LLMInstance::GetStatus()
 {
 	ModelState state = _atModelState.load();
 
@@ -1171,6 +1179,13 @@ LLMStatus LLMInstance::GetStatus() const
 		status.bReady = state.bReady;
 		status.bInvalid = state.bInvalid;
 	}
+
+	std::scoped_lock lock(_statusMutex);
+	if (!_statusSignals.empty())
+	{
+		status.signal = _statusSignals.front();
+		_statusSignals.pop();
+	}
 	return status;
 }
 
@@ -1179,7 +1194,6 @@ bool LLMInstance::PollResponse(MessagePiece& piece)
 	std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
 	if (!lock.owns_lock())
 		return false;
-//	std::scoped_lock lock(_resultMutex);
 
 	if (_resultQueue.empty())
 		return false;
@@ -1288,4 +1302,14 @@ string LLMInstance::GetUserName() const
 string LLMInstance::GetBotName() const
 {
 	return _chatState.bot.name;
+}
+
+void LLMInstance::PushStatus(LLMStatusSignal signal)
+{
+	std::scoped_lock lock(_statusMutex);
+
+	if (!_statusSignals.empty() && _statusSignals.back() == signal)
+		return;
+
+	_statusSignals.push(signal);
 }

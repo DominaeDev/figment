@@ -50,7 +50,7 @@ void TextBox::OnUpdate(float fDeltaTime)
 		TTF_SubString cursor;
 		if (TTF_GetTextSubString(_pText, _cursor, &cursor))
 		{
-			SDL_FRect cursor_rect;
+			Rectf cursor_rect;
 			SDL_RectToFRect(&cursor.rect, &cursor_rect);
 			cursor_rect.x += _rect.x + _marginLeft;
 			cursor_rect.y += _rect.y + _marginTop;
@@ -63,7 +63,7 @@ void TextBox::OnUpdate(float fDeltaTime)
 	}
 }
 
-void TextBox::OnRender(SDL_Renderer* pRenderer)
+void TextBox::OnRender(Renderer* pRenderer)
 {
 	DrawBackground(pRenderer);
 	DrawBorder(pRenderer);
@@ -78,7 +78,7 @@ void TextBox::OnRender(SDL_Renderer* pRenderer)
 			SDL_SetRenderDrawColor(pRenderer, Colors::TextSelectionBackground.r, Colors::TextSelectionBackground.g, Colors::TextSelectionBackground.b, Colors::TextSelectionBackground.a);
 			for (int i = 0; pHighlights[i]; ++i)
 			{
-				SDL_FRect rect;
+				Rectf rect;
 				SDL_RectToFRect(&pHighlights[i]->rect, &rect);
 				if (rect.x <= 2)
 				{
@@ -115,7 +115,7 @@ static bool IsShiftDown()
 	return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
 }
 
-void TextBox::DrawText(SDL_Renderer* pRenderer, TTF_Text* pText,  float x, float y)
+void TextBox::DrawText(Renderer* pRenderer, TTF_Text* pText,  float x, float y)
 {
 	auto fgColor = GetForegroundColor();
 	TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
@@ -197,7 +197,7 @@ void TextBox::CancelComposition()
 	SDL_ClearComposition(Application::GetWindow());
 }
 
-void TextBox::DrawComposition(SDL_Renderer* pRenderer)
+void TextBox::DrawComposition(Renderer* pRenderer)
 {
 	/* Draw an underline under the composed text */
 	int font_height = TTF_GetFontHeight(_pFont);
@@ -206,7 +206,7 @@ void TextBox::DrawComposition(SDL_Renderer* pRenderer)
 	{
 		for (int i = 0; substrings[i]; ++i)
 		{
-			SDL_FRect rect;
+			Rectf rect;
 			SDL_RectToFRect(&substrings[i]->rect, &rect);
 			rect.x += rect.x;
 			rect.y += (rect.y + font_height);
@@ -224,7 +224,7 @@ void TextBox::DrawComposition(SDL_Renderer* pRenderer)
 		{
 			for (int i = 0; substrings[i]; ++i)
 			{
-				SDL_FRect rect;
+				Rectf rect;
 				SDL_RectToFRect(&substrings[i]->rect, &rect);
 				rect.x += rect.x;
 				rect.y += (rect.y + font_height) - 1;
@@ -236,14 +236,14 @@ void TextBox::DrawComposition(SDL_Renderer* pRenderer)
 	}
 }
 
-void TextBox::DrawCompositionCursor(SDL_Renderer* pRenderer)
+void TextBox::DrawCompositionCursor(Renderer* pRenderer)
 {
 	if (composition_cursor_length == 0)
 	{
 		TTF_SubString cursor;
 		if (TTF_GetTextSubString(_pText, composition_start + composition_cursor, &cursor))
 		{
-			SDL_FRect rect;
+			Rectf rect;
 			SDL_RectToFRect(&cursor.rect, &rect);
 			rect.x += rect.x;
 			rect.y += rect.y;
@@ -348,10 +348,10 @@ void TextBox::SaveCandidates(const SDL_Event* event)
 	}
 }
 
-void TextBox::DrawCandidates(SDL_Renderer* pRenderer)
+void TextBox::DrawCandidates(Renderer* pRenderer)
 {
 	SDL_Rect safe_rect;
-	SDL_FRect candidates_rect;
+	Rectf candidates_rect;
 	int candidates_w;
 	int candidates_h;
 	float x, y;
@@ -402,7 +402,7 @@ void TextBox::DrawCandidates(SDL_Renderer* pRenderer)
 		{
 			for (int i = 0; substrings[i]; ++i)
 			{
-				SDL_FRect rect;
+				Rectf rect;
 				SDL_RectToFRect(&substrings[i]->rect, &rect);
 				rect.x += x;
 				rect.y += (y + font_height);
@@ -416,13 +416,13 @@ void TextBox::DrawCandidates(SDL_Renderer* pRenderer)
 
 void TextBox::UpdateTextInputArea()
 {
-	SDL_Renderer* pRenderer = Application::GetRenderer();
+	Renderer* pRenderer = Application::GetRenderer();
 	SDL_Window* pWindow = Application::GetWindow();
 
 	/* Convert the text input area and cursor into window coordinates */
-	SDL_FPoint window_edit_rect_min;
-	SDL_FPoint window_edit_rect_max;
-	SDL_FPoint window_cursor;
+	Pointf window_edit_rect_min;
+	Pointf window_edit_rect_max;
+	Pointf window_cursor;
 	if (!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft, _rect.y + _marginTop, &window_edit_rect_min.x, &window_edit_rect_min.y) ||
 		!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft + _rect.w, _rect.y + _marginTop + _rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) ||
 		!SDL_RenderCoordinatesToWindow(pRenderer, _cursor_rect.x, _cursor_rect.y, &window_cursor.x, &window_cursor.y))
@@ -439,7 +439,7 @@ void TextBox::UpdateTextInputArea()
 	SDL_SetTextInputArea(pWindow, &rect, cursor_offset);
 }
 
-void TextBox::DrawCursor(SDL_Renderer* pRenderer)
+void TextBox::DrawCursor(Renderer* pRenderer)
 {
 	if (composition_length > 0)
 	{
@@ -699,7 +699,7 @@ void TextBox::Delete()
 
 bool TextBox::HandleMouseDown(float x, float y)
 {
-	SDL_FPoint pt = { x, y };
+	Pointf pt = { x, y };
 	if (!SDL_PointInRectFloat(&pt, &_rect))
 	{
 		if (_bFocused)
@@ -754,7 +754,7 @@ bool TextBox::HandleMouseMotion(float x, float y)
 	}
 
 	// Change cursor
-	SDL_FPoint pt = { x, y };
+	Pointf pt = { x, y };
 	bool bInRect = SDL_PointInRectFloat(&pt, &_rect);
 	if (bInRect != _bIBeamCursor)
 	{

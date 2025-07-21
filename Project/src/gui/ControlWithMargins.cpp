@@ -12,7 +12,7 @@ void ControlWithMargins::SetMargins(int left, int top, int right, int bottom)
 	_marginBottom = bottom;
 }
 
-void ControlWithMargins::SetMargins(SDL_Rect rect)
+void ControlWithMargins::SetMargins(Rect rect)
 {
 	SetMargins(rect.x, rect.y, rect.w, rect.h);
 }

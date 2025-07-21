@@ -13,7 +13,7 @@ void VerticalScrollSizer::SetOffset(float offset)
 	_offset = offset;
 }
 
-void VerticalScrollSizer::OnLayout(SDL_FRect rect)
+void VerticalScrollSizer::OnLayout(Rectf rect)
 {
 	VerticalListSizer::OnLayout(rect);
 	if (_offset == 0.0f)

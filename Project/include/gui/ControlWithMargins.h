@@ -8,7 +8,7 @@ public:
 	ControlWithMargins(Control* pParent);
 
 	void SetMargins(int left, int top, int right, int bottom);
-	void SetMargins(SDL_Rect rect);
+	void SetMargins(Rect rect);
 
 protected:
 	int _marginLeft = 0;

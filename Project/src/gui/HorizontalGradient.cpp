@@ -2,24 +2,24 @@
 #include "gui/Color.h"
 #include "gui/TextureStore.h"
 
-HorizontalGradient::HorizontalGradient(Control* pParent, SDL_Color colorLeft, SDL_Color colorRight) : Control(pParent)
+HorizontalGradient::HorizontalGradient(Control* pParent, Color colorLeft, Color colorRight) : Control(pParent)
 {
 	SetColors(colorLeft, colorRight);
-	_pTexture = TextureStore::GetTexture(Texture::BLANK);
+	_pTexture = TextureStore::GetTexture(TextureType::BLANK);
 }
 
-void HorizontalGradient::SetColors(SDL_Color colorLeft, SDL_Color colorRight)
+void HorizontalGradient::SetColors(Color colorLeft, Color colorRight)
 {
 	_colorLeft = color_util::to_colorf(colorLeft);
 	_colorRight = color_util::to_colorf(colorRight);
 }
 
-void HorizontalGradient::OnRender(SDL_Renderer* pRenderer)
+void HorizontalGradient::OnRender(Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
 	auto fgColor = GetForegroundColor();
 
-	Rect rect = GetRect();
+	Rectf rect = GetRect();
 	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);
 
@@ -28,7 +28,7 @@ void HorizontalGradient::OnRender(SDL_Renderer* pRenderer)
 	SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), indices, 6);
 }
 
-void HorizontalGradient::RefreshGeometry(SDL_FRect rect)
+void HorizontalGradient::RefreshGeometry(Rectf rect)
 {
 	_lastRect = rect;
 
@@ -40,8 +40,8 @@ void HorizontalGradient::RefreshGeometry(SDL_FRect rect)
 	float top = rect.y;
 	float bottom = rect.y + rect.h;
 
-	_vertices.push_back(SDL_Vertex { SDL_FPoint { left, bottom }, _colorLeft });
-	_vertices.push_back(SDL_Vertex { SDL_FPoint { right, bottom }, _colorRight });
-	_vertices.push_back(SDL_Vertex { SDL_FPoint { right, top }, _colorRight });
-	_vertices.push_back(SDL_Vertex { SDL_FPoint { left, top }, _colorLeft });
+	_vertices.push_back(Vertex { Pointf { left, bottom }, _colorLeft });
+	_vertices.push_back(Vertex { Pointf { right, bottom }, _colorRight });
+	_vertices.push_back(Vertex { Pointf { right, top }, _colorRight });
+	_vertices.push_back(Vertex { Pointf { left, top }, _colorLeft });
 }

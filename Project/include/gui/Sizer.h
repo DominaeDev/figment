@@ -51,7 +51,7 @@ protected:
 
 	unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }
 
-	virtual void OnLayout(SDL_FRect rect) = 0;
+	virtual void OnLayout(Rectf rect) = 0;
 	void Update(float fDeltaTime) override {}
 
 };

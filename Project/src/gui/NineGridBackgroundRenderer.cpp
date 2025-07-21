@@ -11,9 +11,9 @@ NineGridBackgroundRenderer::NineGridBackgroundRenderer(std::array<float, 4> corn
 	_cornerPixels = corners;
 }
 
-void NineGridBackgroundRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
+void NineGridBackgroundRenderer::Render(Renderer* pRenderer, Rectf rect)
 {
-	auto expandedRect = Rect_Expand(rect, 5.0f);
+	auto expandedRect = expand_rect(rect, 5.0f);
 	
 	if (_pBGTexture)
 	{
@@ -30,13 +30,13 @@ void NineGridBackgroundRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
 	}
 }
 
-void NineGridBackgroundRenderer::SetColors(SDL_Color bgColor, SDL_Color borderColor)
+void NineGridBackgroundRenderer::SetColors(Color bgColor, Color borderColor)
 {
 	_bgColor = bgColor;
 	_borderColor = borderColor;
 }
 
-void NineGridBackgroundRenderer::SetTextures(SDL_Texture* pBGTexture, SDL_Texture* pBorderTexture)
+void NineGridBackgroundRenderer::SetTextures(Texture* pBGTexture, Texture* pBorderTexture)
 {
 	_pBGTexture = pBGTexture;
 	_pBorderTexture = pBorderTexture;

@@ -1,12 +1,12 @@
 #include "gui/RoundedBackgroundRenderer.h"
 
-RoundedBackgroundRenderer::RoundedBackgroundRenderer(float radius, SDL_Color color) :
+RoundedBackgroundRenderer::RoundedBackgroundRenderer(float radius, Color color) :
 	_radius(radius),
 	_color(color)
 {
 }
 
-void RoundedBackgroundRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
+void RoundedBackgroundRenderer::Render(Renderer* pRenderer, Rectf rect)
 {
 	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);
@@ -14,16 +14,16 @@ void RoundedBackgroundRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
 	SDL_RenderGeometry(pRenderer, nullptr, _vertices.data(), toI(_vertices.size()), _indices.data(), toI(_indices.size()));
 }
 
-void RoundedBackgroundRenderer::SetColor(SDL_Color color)
+void RoundedBackgroundRenderer::SetColor(Color color)
 {
 	_color = color;
 }
 
 #define CORNER_TRIANGLES 2
 
-static void AddPoint(float x, float y, std::vector<SDL_Vertex>& vertices, SDL_FColor color)
+static void AddPoint(float x, float y, std::vector<Vertex>& vertices, Colorf color)
 {
-	vertices.push_back(SDL_Vertex { SDL_FPoint { x, y }, color });
+	vertices.push_back(Vertex { Pointf { x, y }, color });
 }
 
 static void AddQuad(int p0, int p1, int p2, int p3, std::vector<int>& indices)
@@ -43,28 +43,28 @@ static void AddTriangle(int p0, int p1, int p2, std::vector<int>& indices)
 	indices.push_back(p2);
 }
 
-static SDL_FPoint Rotate(SDL_FPoint vec, float theta)
+static Pointf Rotate(Pointf vec, float theta)
 {
 	float sinTheta = SDL_sinf(-theta);
 	float cosTheta = SDL_cosf(-theta);
 
-	return SDL_FPoint {
+	return Pointf {
 		vec.x * cosTheta - vec.y * sinTheta,
 		vec.x * sinTheta + vec.y * cosTheta,
 	};
 }
 
-static void AddCorner(float x0, float y0, float x1, float y1, std::vector<SDL_Vertex>& vertices, std::vector<int>& indices, SDL_FColor color)
+static void AddCorner(float x0, float y0, float x1, float y1, std::vector<Vertex>& vertices, std::vector<int>& indices, Colorf color)
 {
 	float theta = SDL_PI_F / (2.0f * CORNER_TRIANGLES);
-	SDL_FPoint v0 { x1 - x0, y1 - y0 };
+	Pointf v0 { x1 - x0, y1 - y0 };
 	int index = (int)vertices.size();
 
 	for (int i = 0; i < CORNER_TRIANGLES; ++i)
 	{
-		SDL_FPoint p0 { x0, y0 };
-		SDL_FPoint p1 = Rotate(v0, (float)(i + 0) * theta);
-		SDL_FPoint p2 = Rotate(v0, (float)(i + 1) * theta);
+		Pointf p0 { x0, y0 };
+		Pointf p1 = Rotate(v0, (float)(i + 0) * theta);
+		Pointf p2 = Rotate(v0, (float)(i + 1) * theta);
 		AddPoint(p0.x, p0.y, vertices, color);
 		AddPoint(p0.x + p1.x, p0.y + p1.y, vertices, color);
 		AddPoint(p0.x + p2.x, p0.y + p2.y, vertices, color);
@@ -73,14 +73,14 @@ static void AddCorner(float x0, float y0, float x1, float y1, std::vector<SDL_Ve
 	}
 }
 
-void RoundedBackgroundRenderer::RefreshGeometry(SDL_FRect rect)
+void RoundedBackgroundRenderer::RefreshGeometry(Rectf rect)
 {
 	float radius = SDL_min(_radius, SDL_min(rect.w, rect.h) / 2.0f);
 
 	if (radius <= 0.0f)
 		return;
 
-	SDL_FColor color = {
+	Colorf color = {
 		_color.r / 255.0f,
 		_color.g / 255.0f,
 		_color.b / 255.0f,

@@ -6,11 +6,11 @@
 class SolidBackgroundRenderer : public CustomRenderer
 {
 public:
-	SolidBackgroundRenderer(SDL_Color color);
+	SolidBackgroundRenderer(Color color);
 	
-	void Render(SDL_Renderer* pRenderer, SDL_FRect rect);
-	void SetColor(SDL_Color color);
+	void Render(Renderer* pRenderer, Rectf rect);
+	void SetColor(Color color);
 
 private:
-	SDL_Color _color {};
+	Color _color {};
 };

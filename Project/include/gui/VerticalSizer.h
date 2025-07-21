@@ -5,5 +5,5 @@
 class VerticalSizer : public Sizer
 {
 protected:
-	void OnLayout(SDL_FRect rect) override;
+	void OnLayout(Rectf rect) override;
 };

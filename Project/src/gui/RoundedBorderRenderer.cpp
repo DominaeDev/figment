@@ -1,15 +1,15 @@
 #include "gui/RoundedBorderRenderer.h"
 #include "gui/TextureStore.h"
 
-RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, SDL_Color color) :
+RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, Color color) :
 	_thickness(thickness),
 	_radius(radius),
 	_color(color)
 {
-	_pTexture = TextureStore::GetTexture(Texture::BORDER);
+	_pTexture = TextureStore::GetTexture(TextureType::BORDER);
 }
 
-void RoundedBorderRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
+void RoundedBorderRenderer::Render(Renderer* pRenderer, Rectf rect)
 {
 	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);
@@ -17,16 +17,16 @@ void RoundedBorderRenderer::Render(SDL_Renderer* pRenderer, SDL_FRect rect)
 	SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), _indices.data(), toI(_indices.size()));
 }
 
-void RoundedBorderRenderer::SetColor(SDL_Color color)
+void RoundedBorderRenderer::SetColor(Color color)
 {
 	_color = color;
 }
 
 #define CORNER_TRIANGLES 8
 
-static void AddPoint(float x, float y, float u, float v, std::vector<SDL_Vertex>& vertices, SDL_FColor color)
+static void AddPoint(float x, float y, float u, float v, std::vector<Vertex>& vertices, Colorf color)
 {
-	vertices.push_back(SDL_Vertex { SDL_FPoint { x, y }, color,  SDL_FPoint { u, v } });
+	vertices.push_back(Vertex { Pointf { x, y }, color,  Pointf { u, v } });
 }
 
 static void AddQuad(int p0, int p1, int p2, int p3, std::vector<int>& indices)
@@ -46,50 +46,50 @@ static void AddTriangle(int p0, int p1, int p2, std::vector<int>& indices)
 	indices.push_back(p2);
 }
 
-static SDL_FPoint Vec_Rotate(SDL_FPoint vec, float theta)
+static Pointf Vec_Rotate(Pointf vec, float theta)
 {
 	float sinTheta = SDL_sinf(-theta);
 	float cosTheta = SDL_cosf(-theta);
 
-	return SDL_FPoint {
+	return Pointf {
 		vec.x * cosTheta - vec.y * sinTheta,
 		vec.x * sinTheta + vec.y * cosTheta,
 	};
 }
 
-static SDL_FPoint Vec_Normalize(SDL_FPoint v)
+static Pointf Vec_Normalize(Pointf v)
 {
 	float l = SDL_sqrtf(v.x * v.x + v.y * v.y);
-	return SDL_FPoint { v.x / l, v.y / l };
+	return Pointf { v.x / l, v.y / l };
 }
 
-static SDL_FPoint Vec_Add(SDL_FPoint a, SDL_FPoint b)
+static Pointf Vec_Add(Pointf a, Pointf b)
 {
-	return SDL_FPoint { a.x + b.x, a.y + b.y };
+	return Pointf { a.x + b.x, a.y + b.y };
 }
 
-static SDL_FPoint Vec_Multiply(SDL_FPoint v, float factor)
+static Pointf Vec_Multiply(Pointf v, float factor)
 {
-	return SDL_FPoint { v.x * factor, v.y * factor };
+	return Pointf { v.x * factor, v.y * factor };
 }
 
 // Takes an origin and a vector, then rotates that vector 90d, tracing a line with thickness
-static void AddCorner(float x0, float y0, float x1, float y1, float thickness, std::vector<SDL_Vertex>& vertices, std::vector<int>& indices, SDL_FColor color)
+static void AddCorner(float x0, float y0, float x1, float y1, float thickness, std::vector<Vertex>& vertices, std::vector<int>& indices, Colorf color)
 {
 	float theta = SDL_PI_F / (2.0f * CORNER_TRIANGLES);
-	SDL_FPoint v0 { x0, y0 };
-	SDL_FPoint v1 { x1 - x0, y1 - y0 };
+	Pointf v0 { x0, y0 };
+	Pointf v1 { x1 - x0, y1 - y0 };
 	auto hej = Vec_Normalize(v1);
-	SDL_FPoint v2 = Vec_Add(Vec_Multiply(Vec_Normalize(v1), -thickness), v1);
+	Pointf v2 = Vec_Add(Vec_Multiply(Vec_Normalize(v1), -thickness), v1);
 
 	int index = (int)vertices.size();
 
 	for (int i = 0; i < CORNER_TRIANGLES; ++i)
 	{
-		SDL_FPoint p0 = Vec_Add(Vec_Rotate(v2, (float)(i + 1) * theta), v0);
-		SDL_FPoint p1 = Vec_Add(Vec_Rotate(v2, (float)(i + 0) * theta), v0);
-		SDL_FPoint p2 = Vec_Add(Vec_Rotate(v1, (float)(i + 0) * theta), v0);
-		SDL_FPoint p3 = Vec_Add(Vec_Rotate(v1, (float)(i + 1) * theta), v0);
+		Pointf p0 = Vec_Add(Vec_Rotate(v2, (float)(i + 1) * theta), v0);
+		Pointf p1 = Vec_Add(Vec_Rotate(v2, (float)(i + 0) * theta), v0);
+		Pointf p2 = Vec_Add(Vec_Rotate(v1, (float)(i + 0) * theta), v0);
+		Pointf p3 = Vec_Add(Vec_Rotate(v1, (float)(i + 1) * theta), v0);
 
 		AddPoint(p0.x, p0.y, 0.0f, 0.0f, vertices, color);
 		AddPoint(p1.x, p1.y, 1.0f, 0.0f, vertices, color);
@@ -101,14 +101,14 @@ static void AddCorner(float x0, float y0, float x1, float y1, float thickness, s
 	}
 }
 
-void RoundedBorderRenderer::RefreshGeometry(SDL_FRect rect)
+void RoundedBorderRenderer::RefreshGeometry(Rectf rect)
 {
 	float radius = SDL_min(_radius, SDL_min(rect.w, rect.h) / 2.0f);
 
 	if (radius <= 0.0f)
 		return;
 
-	SDL_FColor color = {
+	Colorf color = {
 		_color.r / 255.0f,
 		_color.g / 255.0f,
 		_color.b / 255.0f,

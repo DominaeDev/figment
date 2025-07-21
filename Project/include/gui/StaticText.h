@@ -46,15 +46,15 @@ public:
 
 	void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
 
-	void SetForegroundColor(SDL_Color color) override;
-	void SetBackgroundColor(SDL_Color color) override;
+	void SetForegroundColor(Color color) override;
+	void SetBackgroundColor(Color color) override;
 
 protected:
-	SDL_FRect GetAlignedRect() const;
+	Rectf GetAlignedRect() const;
 	void InvalidateText();
 
 	void OnUpdate(float fDeltaTime) override;
-	void OnRender(SDL_Renderer* pRenderer) override;
+	void OnRender(Renderer* pRenderer) override;
 	void OnParent() override;
 
 private:
@@ -66,7 +66,7 @@ private:
 	bool _bAutoSize = true;
 
 	TTF_Font* _pFont = nullptr;
-	SDL_Texture* _pTexture = nullptr;
+	Texture* _pTexture = nullptr;
 	int _textWidth;
 	int _textHeight;
 

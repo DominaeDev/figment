@@ -2,24 +2,24 @@
 #include "gui/Color.h"
 #include "gui/TextureStore.h"
 
-VerticalGradient::VerticalGradient(Control* pParent, SDL_Color colorTop, SDL_Color colorBottom) : Control(pParent)
+VerticalGradient::VerticalGradient(Control* pParent, Color colorTop, Color colorBottom) : Control(pParent)
 {
 	SetColors(colorTop, colorBottom);
-	_pTexture = TextureStore::GetTexture(Texture::BLANK);
+	_pTexture = TextureStore::GetTexture(TextureType::BLANK);
 }
 
-void VerticalGradient::SetColors(SDL_Color colorTop, SDL_Color colorBottom)
+void VerticalGradient::SetColors(Color colorTop, Color colorBottom)
 {
 	_colorTop = color_util::to_colorf(colorTop);
 	_colorBottom = color_util::to_colorf(colorBottom);
 }
 
-void VerticalGradient::OnRender(SDL_Renderer* pRenderer)
+void VerticalGradient::OnRender(Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
 	auto fgColor = GetForegroundColor();
 
-	Rect rect = GetRect();
+	Rectf rect = GetRect();
 	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);
 
@@ -28,7 +28,7 @@ void VerticalGradient::OnRender(SDL_Renderer* pRenderer)
 	SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), indices, 6);
 }
 
-void VerticalGradient::RefreshGeometry(SDL_FRect rect)
+void VerticalGradient::RefreshGeometry(Rectf rect)
 {
 	_lastRect = rect;
 
@@ -40,8 +40,8 @@ void VerticalGradient::RefreshGeometry(SDL_FRect rect)
 	float top = rect.y;
 	float bottom = rect.y + rect.h;
 
-	_vertices.push_back(SDL_Vertex { SDL_FPoint { left, bottom }, _colorBottom });
-	_vertices.push_back(SDL_Vertex { SDL_FPoint { right, bottom }, _colorBottom });
-	_vertices.push_back(SDL_Vertex { SDL_FPoint { right, top }, _colorTop });
-	_vertices.push_back(SDL_Vertex { SDL_FPoint { left, top }, _colorTop });
+	_vertices.push_back(Vertex { Pointf { left, bottom }, _colorBottom });
+	_vertices.push_back(Vertex { Pointf { right, bottom }, _colorBottom });
+	_vertices.push_back(Vertex { Pointf { right, top }, _colorTop });
+	_vertices.push_back(Vertex { Pointf { left, top }, _colorTop });
 }

@@ -67,6 +67,15 @@ struct ChatState
 	int32_t AssignBlockPositions();
 };
 
+enum class LLMStatusSignal {
+	ModelLoaded,
+	ModelUnloaded,
+	ChatStarted,
+	MessageComplete,
+	GenerationStarted,
+	GenerationComplete,
+};
+
 struct LLMStatus
 {
 	string modelName;
@@ -74,6 +83,7 @@ struct LLMStatus
 	size_t usedCtxSize = 0;
 	bool bReady = false;
 	bool bInvalid = false;
+	LLMStatusSignal signal;
 };
 
 struct MessagePiece
@@ -119,7 +129,7 @@ public:
 	std::vector<string> RollbackUserMessage();
 
 	bool PollResponse(MessagePiece& piece);
-	LLMStatus GetStatus() const;
+	LLMStatus GetStatus();
 
 	bool DumpContext(string filename) const;
 	
@@ -170,6 +180,7 @@ private:
 	void __Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 	void StartGeneration(GenerateArguments args);
 
+	void PushStatus(LLMStatusSignal signal);
 private:
 	bool _bLoadingModel = false;
 	string _modelName {};
@@ -183,8 +194,9 @@ private:
 	std::mutex _resultMutex;
 	std::queue<MessagePiece> _resultQueue;
 		
+	std::mutex _statusMutex;
 	LLMStatus _lastStatus {};
-	int _messageCounter = 0;
+	std::queue<LLMStatusSignal> _statusSignals;
 
 	std::mt19937 _rng {};
 };

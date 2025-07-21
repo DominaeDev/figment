@@ -4,7 +4,7 @@ Panel::Panel(Control* pParent) : Control(pParent)
 {
 }
 
-void Panel::OnRender(SDL_Renderer* pRenderer)
+void Panel::OnRender(Renderer* pRenderer)
 {
 	DrawBackground(pRenderer);
 }

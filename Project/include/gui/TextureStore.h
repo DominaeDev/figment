@@ -1,11 +1,9 @@
 #pragma once
 
 #include <map>
+#include "Graphics.h"
 
-struct SDL_Renderer;
-struct SDL_Texture;
-
-enum class Texture
+enum class TextureType
 {
 	BLANK,
 	BORDER,
@@ -24,12 +22,12 @@ enum class Texture
 class TextureStore
 {
 public:
-	static void Init(SDL_Renderer* pRenderer);
+	static void Init(Renderer* pRenderer);
 	static void Release();
-	static SDL_Texture* GetTexture(Texture id);
+	static Texture* GetTexture(TextureType id);
 
 private:
-	static bool LoadTexture(SDL_Renderer* pRenderer, Texture textureId, const char* filename);
+	static bool LoadTexture(Renderer* pRenderer, TextureType textureId, const char* filename);
 
-	static std::map<Texture, SDL_Texture*> _textures;
+	static std::map<TextureType, Texture*> _textures;
 };

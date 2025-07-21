@@ -11,7 +11,7 @@ class ChatScroll : public Control
 public:
 	ChatScroll(Control* pParent);
 
-	ChatMessage* AddMessage(string name, Role role, MessageType msgType, string message, bool complete = true);
+	void AddDummyMessage(Role role, string name, string message);
 	int RemoveMessages(std::vector<string> ids);
 	void ClearMessages();
 
@@ -23,6 +23,7 @@ protected:
 	void OnAfterLayout() override;
 	void OnAddedChild(LayoutElement* pChild) override;
 
+	ChatMessage* AddMessage(string name, Role role, MessageType msgType, string message, bool complete);
 	bool HandleMouseWheel(SDL_MouseWheelEvent event);
 	void EnablePolling(bool bEnable);
 	void Poll();

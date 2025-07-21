@@ -11,7 +11,7 @@ public:
 	float GetListHeight() const { return _totalListHeight; }
 
 protected:
-	virtual void OnLayout(SDL_FRect rect) override;
+	virtual void OnLayout(Rectf rect) override;
 
 	float _totalListHeight;
 	int _marginBottom = 0;

@@ -8,7 +8,7 @@ public:
 	void SetOffset(float offset);
 
 protected:
-	void OnLayout(SDL_FRect rect) override;
+	void OnLayout(Rectf rect) override;
 
 	float _offset = 0.0f;
 };

@@ -6,7 +6,7 @@ static int CeilInt(float f)
 	return (int)ceilf(f);
 }
 
-void HorizontalSizer::OnLayout(SDL_FRect parentRect)
+void HorizontalSizer::OnLayout(Rectf parentRect)
 {
 	auto count = GetCount();
 	if (count == 0)
@@ -53,7 +53,7 @@ void HorizontalSizer::OnLayout(SDL_FRect parentRect)
 		if (frame.GetMaxSize().x > 0)
 			width = CeilInt(std::min(toF(width), frame.GetMaxSize().x));
 
-		SDL_FRect borderRect {
+		Rectf borderRect {
 			parentRect.x + x,
 			parentRect.y,
 			(float)width,

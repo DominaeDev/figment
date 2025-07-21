@@ -69,7 +69,7 @@ void StaticText::OnUpdate(float fDeltaTime)
 	}
 }
 
-void StaticText::OnRender(SDL_Renderer* pRenderer)
+void StaticText::OnRender(Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
 	if (color_util::is_defined(bgColor) && bgColor.a != 0)
@@ -77,7 +77,7 @@ void StaticText::OnRender(SDL_Renderer* pRenderer)
 
 	if (_pTexture)
 	{
-		SDL_FRect alignRect = GetAlignedRect();
+		Rectf alignRect = GetAlignedRect();
 		SDL_RenderTexture(pRenderer, _pTexture, NULL, &alignRect);
 	}
 }
@@ -176,13 +176,13 @@ void StaticText::OnParent()
 	SetText(_text);
 }
 
-Rect StaticText::GetAlignedRect() const
+Rectf StaticText::GetAlignedRect() const
 {
 	int x = toI(_rect.x + _marginLeft);
 	int y = toI(_rect.y + _marginTop);
 	int w = _textWidth;
 	int h = _textHeight;
-	Rect rect(toF(x), toF(y), toF(w), toF(h));
+	Rectf rect(toF(x), toF(y), toF(w), toF(h));
 
 	if ((_alignment & HorizontalAlignment::Center) != 0)
 		rect.x = x + (_rect.w - w) / 2;
@@ -195,13 +195,13 @@ Rect StaticText::GetAlignedRect() const
 	return rect;
 }
 
-void StaticText::SetForegroundColor(SDL_Color color) 
+void StaticText::SetForegroundColor(Color color) 
 { 
 	_foregroundColor = color;
 	InvalidateText();
 }
 
-void StaticText::SetBackgroundColor(SDL_Color color) 
+void StaticText::SetBackgroundColor(Color color) 
 { 
 	_backgroundColor = color; 
 	InvalidateText();

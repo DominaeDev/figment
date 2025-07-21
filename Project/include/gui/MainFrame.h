@@ -25,7 +25,7 @@ public:
 
 protected:
 	virtual void OnUpdate(float fDeltaTime) override;
-	virtual void OnRender(SDL_Renderer* pRenderer) override;
+	virtual void OnRender(Renderer* pRenderer) override;
 
 	void OnCommand(Command cmd);
 	void PollStatus();

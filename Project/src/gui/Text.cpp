@@ -2,7 +2,7 @@
 
 TTF_TextEngine* Text::_pEngine = nullptr;
 
-TTF_TextEngine* Text::InitEngine(SDL_Renderer* pRenderer)
+TTF_TextEngine* Text::InitEngine(Renderer* pRenderer)
 {
 	_pEngine = TTF_CreateRendererTextEngine(pRenderer);
 	return _pEngine;

@@ -2,18 +2,26 @@
 
 #include <SDL3/SDL.h>
 
-struct TTF_TextEngine;
 struct SDL_Renderer;
 struct SDL_Texture;
-
-using Point = SDL_FPoint;
-using Rect = SDL_FRect;
-using Colorf = SDL_FColor;
-using Color = SDL_Color;
-
+struct TTF_TextEngine;
 class Control;
 class Panel;
 class LayoutElement;
 class Sizer;
 
-extern SDL_FRect Rect_Expand(const SDL_FRect& rect, float pixels);
+// SDL types
+using Pointf = SDL_FPoint;
+using Point = SDL_Point;
+using Rectf = SDL_FRect;
+using Rect = SDL_Rect;
+using Colorf = SDL_FColor;
+using Color = SDL_Color;
+using Renderer = SDL_Renderer;
+using Texture = SDL_Texture;
+using Vertex = SDL_Vertex;
+using Surface = SDL_Surface;
+
+extern Rectf expand_rect(const Rectf& rect, float pixels);
+extern inline Rect toRect(Rectf rect);
+extern inline Rectf toRectf(Rect rect);

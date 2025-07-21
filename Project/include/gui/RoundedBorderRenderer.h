@@ -3,26 +3,23 @@
 #include "Types.h"
 #include "CustomRenderer.h"
 
-struct SDL_Vertex;
-struct SDL_Texture;
-
 class RoundedBorderRenderer : public CustomRenderer
 {
 public:
-	RoundedBorderRenderer(float radius, float thickness, SDL_Color color);
+	RoundedBorderRenderer(float radius, float thickness, Color color);
 	
-	void Render(SDL_Renderer* pRenderer, SDL_FRect rect);
-	void SetColor(SDL_Color color);
+	void Render(Renderer* pRenderer, Rectf rect);
+	void SetColor(Color color);
 
 private:
-	void RefreshGeometry(SDL_FRect rect);
+	void RefreshGeometry(Rectf rect);
 
-	SDL_Color _color {};
-	SDL_FRect _lastRect {};
-	SDL_Texture* _pTexture = nullptr;
+	Color _color {};
+	Rectf _lastRect {};
+	Texture* _pTexture = nullptr;
 	float _thickness = 0;
 	float _radius = 0;
 
-	std::vector<SDL_Vertex> _vertices {};
+	std::vector<Vertex> _vertices {};
 	std::vector<int> _indices {};
 };

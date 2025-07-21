@@ -2,23 +2,21 @@
 
 #include "CustomRenderer.h"
 
-struct SDL_Vertex;
-
 class RoundedBackgroundRenderer : public CustomRenderer
 {
 public:
-	RoundedBackgroundRenderer(float radius, SDL_Color color);
+	RoundedBackgroundRenderer(float radius, Color color);
 	
-	void Render(SDL_Renderer* pRenderer, SDL_FRect rect);
-	void SetColor(SDL_Color color);
+	void Render(Renderer* pRenderer, Rectf rect);
+	void SetColor(Color color);
 
 private:
-	void RefreshGeometry(SDL_FRect rect);
+	void RefreshGeometry(Rectf rect);
 
-	SDL_Color _color {};
-	SDL_FRect _lastRect {};
+	Color _color {};
+	Rectf _lastRect {};
 	float _radius = 0;
 
-	std::vector<SDL_Vertex> _vertices {};
+	std::vector<Vertex> _vertices {};
 	std::vector<int> _indices {};
 };

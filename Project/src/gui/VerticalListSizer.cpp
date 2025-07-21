@@ -6,7 +6,7 @@ static int CeilInt(float f)
 	return (int)ceilf(f);
 }
 
-void VerticalListSizer::OnLayout(SDL_FRect parentRect)
+void VerticalListSizer::OnLayout(Rectf parentRect)
 {
 	auto count = GetCount();
 	if (count == 0)

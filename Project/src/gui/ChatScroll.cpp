@@ -22,7 +22,20 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	SetSizer(_pScrollSizer);
 
 	_pBottomGradient = new VerticalGradient(this, color_util::with_alpha(Colors::ChatBackground, 0), Colors::ChatBackground);
-	SetClipping(true);
+	EnableClipping(true);
+	EnableCulling(true);
+}
+
+void ChatScroll::AddDummyMessage(Role role, string name, string message)
+{
+	ChatMessage* pMessage = AddMessage(name, role, MessageType::Dialogue, message, true);
+	_messages.push_back(MessageEntry {
+		role,
+		"",
+		"",
+		MessageType::Dialogue,
+		pMessage,
+	});
 }
 
 ChatMessage* ChatScroll::AddMessage(string name, Role role, MessageType msgType, string message, bool complete)
@@ -49,8 +62,9 @@ ChatMessage* ChatScroll::AddMessage(string name, Role role, MessageType msgType,
 		name = llm_util::name_from_role(Role::Narrator);
 
 	auto pMessage = new ChatMessage(this, bShowName ? name : "", role, msgType, bShowAvatar, bShowName);
+	pMessage->SetY(-1000); // Move off-screen
 	pMessage->SetMessage(message, complete);
-	_pSizer->Add(pMessage, 0, Sizer::Expand);
+	GetSizer()->Add(pMessage, 0, Sizer::Expand);
 	return pMessage;
 }
 
@@ -66,7 +80,7 @@ int ChatScroll::RemoveMessages(std::vector<string> ids)
 
 		if (entry.pChatMessage)
 		{
-			_pSizer->Remove(entry.pChatMessage);
+			GetSizer()->Remove(entry.pChatMessage);
 			RemoveChild(entry.pChatMessage);
 			delete entry.pChatMessage;
 		}
@@ -85,13 +99,15 @@ int ChatScroll::RemoveMessages(std::vector<string> ids)
 
 void ChatScroll::ClearMessages()
 {
-	for (auto pMessage : _children)
-		delete pMessage;
-
-	_pSizer->Clear();
-	_children.clear();
+	for (auto entry : _messages)
+	{
+		RemoveChild(entry.pChatMessage);
+		delete entry.pChatMessage;
+	}
 	_messages.clear();
 	_messagesById.clear();
+
+	GetSizer()->Clear();
 }
 
 std::tuple<std::string, std::string> ChatScroll::GetLastMessage() const
@@ -208,7 +224,7 @@ bool ChatScroll::OnEvent(SDL_Event* event)
 
 bool ChatScroll::HandleMouseWheel(SDL_MouseWheelEvent event)
 {
-	SDL_FPoint pt = { event.mouse_x, event.mouse_y };
+	Pointf pt = { event.mouse_x, event.mouse_y };
 	if (!SDL_PointInRectFloat(&pt, &_rect))
 		return false;
 

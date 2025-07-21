@@ -45,8 +45,8 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	_bShowAvatar(bShowAvatar),
 	_bShowName(bShowName)
 {
-	SDL_Color bgColor;
-	SDL_Color borderColor;
+	Color bgColor;
+	Color borderColor;
 	switch (msgType)
 	{
 	case MessageType::Dialogue:
@@ -101,18 +101,18 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 		if (bRight)
 		{
 			pBackground = new NineGridBackgroundRenderer({ 30, 72, 64, 30 });
-			pBackground->SetTextures(TextureStore::GetTexture(Texture::SPEECH_BUBBLE_RIGHT_BG), TextureStore::GetTexture(Texture::SPEECH_BUBBLE_RIGHT_BORDER));
+			pBackground->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BORDER));
 		}
 		else
 		{
 			pBackground = new NineGridBackgroundRenderer({ 72, 30, 64, 30 });
-			pBackground->SetTextures(TextureStore::GetTexture(Texture::SPEECH_BUBBLE_LEFT_BG), TextureStore::GetTexture(Texture::SPEECH_BUBBLE_LEFT_BORDER));
+			pBackground->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BORDER));
 		}
 	}
 	else
 	{
 		pBackground = new NineGridBackgroundRenderer({ 30, 30, 64, 30 });
-		pBackground->SetTextures(TextureStore::GetTexture(Texture::SPEECH_BUBBLE_CENTER_BG), TextureStore::GetTexture(Texture::SPEECH_BUBBLE_CENTER_BORDER));
+		pBackground->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
 	}
 	_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), _bShowName ? TOP_OFFSET : 0); // Left
 
@@ -128,7 +128,7 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	if (msgType != MessageType::Dialogue)
 		font = FontFace::Italic;
 
-	SDL_Color textColor = Colors::Black;
+	Color textColor = Colors::Black;
 	if (!bDialogue)
 		textColor = color_util::multiply_rgb(borderColor, 0.5f);
 
@@ -141,7 +141,7 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	// Name label
 	if (_bShowName)
 	{
-		SDL_Color nameColor = color_util::add_rgb(borderColor, -0.1f);
+		Color nameColor = color_util::add_rgb(borderColor, -0.1f);
 		_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::CharacterNameFontSize, false);
 		_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
 		_pNameText->SetForegroundColor(nameColor);
@@ -239,5 +239,5 @@ void ChatMessage::AppendMessage(const string& text, bool complete)
 
 void ChatMessage::SetActive(bool bActive)
 {
-	SetForegroundColor(SDL_Color { 0, 0, 0, (uint8_t)(bActive ? 255 : 160) });
+	SetForegroundColor(Color { 0, 0, 0, (uint8_t)(bActive ? 255 : 160) });
 }

@@ -3,7 +3,7 @@
 
 std::map<string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByCharacter;
 
-void CharacterImageStore::Init(SDL_Renderer* pRenderer)
+void CharacterImageStore::Init(Renderer* pRenderer)
 {
 	LoadTexture(pRenderer, "Default", ImageType::Portrait_Square, "./resources/images/avatar_default.png");
 	LoadTexture(pRenderer, "Female1", ImageType::Portrait_Square, "./resources/images/avatar_f1.png");
@@ -26,7 +26,7 @@ void CharacterImageStore::Release()
 	_imagesByCharacter.clear();
 }
 
-bool CharacterImageStore::LoadTexture(SDL_Renderer* pRenderer, string characterId, ImageType imageType, const char* filename)
+bool CharacterImageStore::LoadTexture(Renderer* pRenderer, string characterId, ImageType imageType, const char* filename)
 {
 	if (imageType == ImageType::Undefined)
 		return false;
@@ -48,7 +48,7 @@ bool CharacterImageStore::LoadTexture(SDL_Renderer* pRenderer, string characterI
 	return true;
 }
 
-SDL_Texture* CharacterImageStore::GetTexture(string characterId, ImageType imageType)
+Texture* CharacterImageStore::GetTexture(string characterId, ImageType imageType)
 {
 	auto itCharacter = _imagesByCharacter.find(characterId);
 	if (itCharacter != std::end(_imagesByCharacter))

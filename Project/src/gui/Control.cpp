@@ -28,17 +28,19 @@ void Control::Update(float fDeltaTime)
 		child->Update(fDeltaTime);
 }
 
-void Control::Render(SDL_Renderer* pRenderer)
+void Control::Render(Renderer* pRenderer)
 {
 	if (!_bVisible)
 		return;
 
-	static SDL_Rect* s_pClippingRect = nullptr;
-	SDL_Rect* lastClippingRect = s_pClippingRect;
-	SDL_Rect clippingRect;
+	static Rect* s_pClippingRect = nullptr;
+	Rect* lastClippingRect = s_pClippingRect;
+	Rect clippingRect;
+	Rect cullingRect = toRect(GetRect());
+
 	if (_bClipping)
 	{
-		SDL_Rect rect { (int)_rect.x, (int)_rect.y, (int)_rect.w, (int)_rect.h };
+		Rect rect { (int)_rect.x, (int)_rect.y, (int)_rect.w, (int)_rect.h };
 		if (s_pClippingRect)
 			SDL_GetRectIntersection(s_pClippingRect, &rect, &clippingRect);
 		else
@@ -56,7 +58,16 @@ void Control::Render(SDL_Renderer* pRenderer)
 	{
 		auto renderable = dynamic_cast<Control*>(child);
 		if (renderable)
+		{
+			if (_bCulling)
+			{
+				auto childRect = toRect(renderable->GetRect());
+				if (!SDL_HasRectIntersection(&cullingRect, &childRect))
+					continue;
+			}
+			
 			renderable->Render(pRenderer);
+		}
 	}
 
 	if (_bClipping)
@@ -66,13 +77,13 @@ void Control::Render(SDL_Renderer* pRenderer)
 	}
 }
 
-void Control::OnRender(SDL_Renderer* pRenderer)
+void Control::OnRender(Renderer* pRenderer)
 {
 	DrawBackground(pRenderer);
 	DrawBorder(pRenderer);
 }
 
-void Control::DrawBorder(SDL_Renderer* pRenderer)
+void Control::DrawBorder(Renderer* pRenderer)
 {
 	// Custom renderer
 	if (_pBorderRenderer)
@@ -88,27 +99,27 @@ void Control::DrawBorder(SDL_Renderer* pRenderer)
 	SDL_RenderRect(pRenderer, &_rect);
 }
 
-SDL_Color Control::GetForegroundColor() const
+Color Control::GetForegroundColor() const
 {
 	if (!color_util::is_defined(_foregroundColor))
 	{
 		auto frameParent = dynamic_cast<Control*>(_pParent);
-		return frameParent ? frameParent->GetForegroundColor() : SDL_Color();
+		return frameParent ? frameParent->GetForegroundColor() : Color();
 	}
 	return _foregroundColor;
 }
 
-SDL_Color Control::GetBackgroundColor() const
+Color Control::GetBackgroundColor() const
 {
 	if (!color_util::is_defined(_backgroundColor))
 	{
 		auto frameParent = dynamic_cast<Control*>(_pParent);
-		return frameParent ? frameParent->GetBackgroundColor() : SDL_Color();
+		return frameParent ? frameParent->GetBackgroundColor() : Color();
 	}
 	return _backgroundColor;
 }
 
-void Control::DrawBackground(SDL_Renderer* pRenderer)
+void Control::DrawBackground(Renderer* pRenderer)
 {
 	// Custom renderer
 	if (_pBGRenderer)

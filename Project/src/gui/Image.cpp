@@ -1,12 +1,12 @@
 #include "gui/Image.h"
 #include "gui/Color.h"
 
-Image::Image(Control* pParent, SDL_Texture* pTexture) : Control(pParent),
+Image::Image(Control* pParent, Texture* pTexture) : Control(pParent),
 	_pTexture(pTexture)
 {
 }
 
-void Image::OnRender(SDL_Renderer* pRenderer)
+void Image::OnRender(Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
 	auto fgColor = GetForegroundColor();
@@ -15,7 +15,7 @@ void Image::OnRender(SDL_Renderer* pRenderer)
 
 	if (_pTexture)
 	{
-		SDL_FRect rect = GetRect();
+		Rectf rect = GetRect();
 
 		if (color_util::is_defined(fgColor) && fgColor.a != 0)
 			SDL_SetTextureAlphaMod(_pTexture, fgColor.a);
@@ -25,7 +25,7 @@ void Image::OnRender(SDL_Renderer* pRenderer)
 	}
 }
 
-void Image::SetTexture(SDL_Texture* pTexture)
+void Image::SetTexture(Texture* pTexture)
 {
 	_pTexture = pTexture;
 }

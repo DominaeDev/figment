@@ -45,7 +45,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	}
 
 	SDL_Window* pWindow;
-	SDL_Renderer* pRenderer;
+	Renderer* pRenderer;
 	try
 	{
 		if (!SDL_CreateWindowAndRenderer(Constants::AppTitle, Constants::WindowWidth, Constants::WindowHeight, SDL_WINDOW_RESIZABLE, &pWindow, &pRenderer))

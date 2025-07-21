@@ -35,18 +35,18 @@ public:
 
 protected:
 	void OnUpdate(float fDeltaTime) override;
-	void OnRender(SDL_Renderer* pRenderer) override;
+	void OnRender(Renderer* pRenderer) override;
 	bool OnEvent(SDL_Event* event) override;
 	void OnSize() override;
 
 private:
 	void Insert(const char* text);
 
-	void DrawText(SDL_Renderer* pRenderer, TTF_Text* pText, float x, float y);
-	void DrawCursor(SDL_Renderer* pRenderer);
-	void DrawCandidates(SDL_Renderer* pRenderer);
-	void DrawComposition(SDL_Renderer* pRenderer);
-	void DrawCompositionCursor(SDL_Renderer* pRenderer);
+	void DrawText(Renderer* pRenderer, TTF_Text* pText, float x, float y);
+	void DrawCursor(Renderer* pRenderer);
+	void DrawCandidates(Renderer* pRenderer);
+	void DrawComposition(Renderer* pRenderer);
+	void DrawCompositionCursor(Renderer* pRenderer);
 	void ClearCandidates();
 	void SaveCandidates(const SDL_Event* event);
 	bool GetHighlightExtents(int* marker, int* length);
@@ -72,15 +72,15 @@ protected:
 	bool _bFocused = false;
 	bool _bIBeamCursor = false;
 
-	SDL_Texture* _pTexture = nullptr;
-	SDL_Surface* _pSurface = nullptr;
+	Texture* _pTexture = nullptr;
+	Surface* _pSurface = nullptr;
 	EnterPressedCallback _pOnEnter = nullptr;
 
 	/* Cursor support */
 	int _cursor = 0;
 	bool _cursor_visible;
 	Uint64 _last_cursor_change;
-	SDL_FRect _cursor_rect;
+	Rectf _cursor_rect;
 
 	/* Highlight support */
 	bool _bIsHighlighting = false;

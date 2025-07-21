@@ -28,7 +28,7 @@ void LayoutElement::Layout()
 	OnAfterLayout();
 }
 
-void LayoutElement::SetRect(SDL_FRect rect)
+void LayoutElement::SetRect(Rectf rect)
 {
 	SetPosition(rect.x, rect.y);
 	SetSize(rect.w, rect.h);
@@ -42,7 +42,7 @@ void LayoutElement::SetRect(float x, float y, float width, float height)
 	OnSize();
 }
 
-SDL_FPoint LayoutElement::GetAbsolutePosition() const
+Pointf LayoutElement::GetAbsolutePosition() const
 {
 	if (_pParent)
 	{
@@ -57,28 +57,28 @@ SDL_FPoint LayoutElement::GetAbsolutePosition() const
 
 void LayoutElement::SetPosition(float x, float y)
 {
-	SetPosition(SDL_FPoint(x, y));
+	SetPosition(Pointf(x, y));
 }
 
 void LayoutElement::SetX(float x)
 {
-	SetPosition(SDL_FPoint(x, _position.y));
+	SetPosition(Pointf(x, _position.y));
 }
 
 void LayoutElement::SetY(float y)
 {
-	SetPosition(SDL_FPoint(_position.x, y));
+	SetPosition(Pointf(_position.x, y));
 }
 
-void LayoutElement::SetPosition(SDL_FPoint position)
+void LayoutElement::SetPosition(Pointf position)
 {
 	_position = position;
 	position = GetAbsolutePosition();
-	_rect = SDL_FRect(position.x, position.y, _rect.w, _rect.h);
+	_rect = Rectf(position.x, position.y, _rect.w, _rect.h);
 	OnSize();
 }
 
-void LayoutElement::SetSize(SDL_FPoint size)
+void LayoutElement::SetSize(Pointf size)
 {
 	_size = size;
 	_rect.w = size.x;
@@ -88,17 +88,17 @@ void LayoutElement::SetSize(SDL_FPoint size)
 
 void LayoutElement::SetSize(float width, float height)
 {
-	SetSize(SDL_FPoint(width, height));
+	SetSize(Pointf(width, height));
 }
 
 void LayoutElement::SetWidth(float width)
 {
-	SetSize(SDL_FPoint(width, _size.y));
+	SetSize(Pointf(width, _size.y));
 }
 
 void LayoutElement::SetHeight(float height)
 {
-	SetSize(SDL_FPoint(_size.x, height));
+	SetSize(Pointf(_size.x, height));
 }
 
 void LayoutElement::AddChild(LayoutElement* pLayoutElement)

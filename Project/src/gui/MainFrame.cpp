@@ -44,7 +44,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pStaticText->SetAlignment(TextAlignment::Middle_Center);
 	pStaticText->SetSize(80, 80);
 	pStaticText->SetMinSize(-1, 80);
-	pStaticText->SetBackgroundColor(SDL_Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
+	pStaticText->SetBackgroundColor(Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
 	pStaticText->SetVisible(false);
 
 	_pChatScroll = new ChatScroll(centerPanel);
@@ -79,8 +79,8 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	auto pTextBoxBG = new NineGridBackgroundRenderer();
 	pTextBoxBG->SetCornerSize(10.0f);
-	pTextBoxBG->SetColors(Colors::White, SDL_Color { 0xb9, 0xb2, 0x8f, 0xFF });
-	pTextBoxBG->SetTextures(TextureStore::GetTexture(Texture::TEXTBOX_BG), TextureStore::GetTexture(Texture::TEXTBOX_BORDER));
+	pTextBoxBG->SetColors(Colors::White, Color { 0xb9, 0xb2, 0x8f, 0xFF });
+	pTextBoxBG->SetTextures(TextureStore::GetTexture(TextureType::TEXTBOX_BG), TextureStore::GetTexture(TextureType::TEXTBOX_BORDER));
 	pTextBox->SetBackgroundRenderer(pTextBoxBG);
 
 	pTextBox->SetFocus(true);
@@ -113,7 +113,7 @@ void MainFrame::OnUpdate(float fDeltaTime)
 #endif
 }
 
-void MainFrame::OnRender(SDL_Renderer* pRenderer)
+void MainFrame::OnRender(Renderer* pRenderer)
 {
 	DrawBackground(pRenderer);
 }
@@ -205,7 +205,7 @@ void MainFrame::OnCommand(Command cmd)
 		{
 			static int turn = 0;
 			auto [msgType, complete] = llm_util::detect_message_type(llm_util::format_message(cmd.text, ""));
-			_pChatScroll->AddMessage(turn % 2 == 0 ? "User" : "Bot", turn % 2 == 0 ? Role::User : Role::Bot, msgType, cmd.text);
+			_pChatScroll->AddDummyMessage(turn % 2 == 0 ? Role::User : Role::Bot, turn % 2 == 0 ? "User" : "Bot", cmd.text);
 			++turn;
 		}
 		else
@@ -349,11 +349,14 @@ void MainFrame::PollStatus()
 			UnloadModel();
 			_pStatusBar->SetMessage("Error occurred. Model unloaded.");
 			_pStatusBar->SetModelInfo("", 0, 0);
-			return;
 		}
-
-		if (status.bReady)
+		else if (status.bReady)
 			_pStatusBar->SetModelInfo(status.modelName, status.allocCtxSize, status.usedCtxSize);
+
+		if (status.signal == LLMStatusSignal::ChatStarted)
+		{
+			_pChatScroll->ClearMessages();
+		}
 	}
 }
 
