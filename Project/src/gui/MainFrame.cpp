@@ -61,7 +61,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	auto mainSizer = new HorizontalSizer();
 	mainSizer->Add(leftPanel, -1, Sizer::Expand);
-	mainSizer->Add(centerPanel, 0, Sizer::Expand | Sizer::Bottom | Sizer::Top, 8);
+	mainSizer->Add(centerPanel, 0, Sizer::Expand | Sizer::Bottom, 24);
 	mainSizer->Add(rightPanel, -1, Sizer::Expand);
 	mainArea->SetSizer(mainSizer);
 
@@ -70,7 +70,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	auto topSizer = new VerticalSizer();
 	topSizer->Add(mainArea, -1, Sizer::Expand);
-	topSizer->Add(_pStatusBar, 0);
+	topSizer->Add(_pStatusBar, 0, Sizer::Expand);
 
 	SetSizer(topSizer);
 	
@@ -359,15 +359,40 @@ void MainFrame::PollStatus()
 		if (status.bInvalid)
 		{
 			UnloadModel();
-			_pStatusBar->SetMessage("Error occurred. Model unloaded.");
 			_pStatusBar->SetModelInfo("", 0, 0);
 		}
 		else if (status.bReady)
 			_pStatusBar->SetModelInfo(status.modelName, status.allocCtxSize, status.usedCtxSize);
 
-		if (status.signal == LLMStatusSignal::ChatStarted)
+		switch (status.signal)
 		{
+		case LLMStatusSignal::InitializingChat:
+			SetStatusBar("Initializing chat...");
+			break;
+		case LLMStatusSignal::InitializedChat:
+			SetStatusBar("Chat initialized");
 			_pChatScroll->ClearMessages();
+			break;
+		case LLMStatusSignal::InitializeChatFailure:
+			SetStatusBar("Failed to initialize chat");
+			break;
+		case LLMStatusSignal::LoadingModel:
+			SetStatusBar("Loading model...");
+			break;
+		case LLMStatusSignal::LoadedModel:
+			SetStatusBar("Model loaded");
+			break;
+		case LLMStatusSignal::LoadModelFailure:
+			SetStatusBar("Failed to load model");
+			break;
+		case LLMStatusSignal::GenerationStarted:
+			SetStatusBar("Generating response...");
+			break;
+		case LLMStatusSignal::GenerationComplete:
+			SetStatusBar("Ready");
+			break;
+		default:
+			break;
 		}
 	}
 }

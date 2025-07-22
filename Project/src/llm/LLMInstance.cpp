@@ -120,7 +120,7 @@ void LLMInstance::Shutdown()
 	auto state = _atModelState.exchange(ModelState());
 	state.Release();
 
-	PushStatus(LLMStatusSignal::ModelUnloaded);
+	PushStatus(LLMStatusSignal::UnloadedModel);
 }
 
 using __LoadModelCallback = std::function<void(ModelState)>;
@@ -213,6 +213,8 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 	ModelState state = _atModelState.load();
 	if (!state.bReady || !state.pModel)
 		return false;
+
+	PushStatus(LLMStatusSignal::InitializingChat);
 
 	_chatState = ChatState();
 	_chatState.user.LoadFromXml("characters/user.xml"); // tmp
@@ -311,6 +313,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		fprintf(stderr, "failed to initialize chat\n");
 		llama_batch_free(_chatState.batch);
 		_chatState.batch = llama_batch {};
+		PushStatus(LLMStatusSignal::InitializeChatFailure);
 		return false;
 	}
 
@@ -321,7 +324,7 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 	_rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 #endif
 
-	PushStatus(LLMStatusSignal::ChatStarted);
+	PushStatus(LLMStatusSignal::InitializedChat);
 	return true;
 }
 
@@ -423,7 +426,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 		{
 			_atModelState.store(result);
 			_modelName = string_util::get_filename(filename);
-			PushStatus(LLMStatusSignal::ModelLoaded);
+			PushStatus(LLMStatusSignal::LoadedModel);
 			onComplete(true);
 		}
 		else
@@ -431,6 +434,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 			result.Release();
 			_modelName.clear();
 			onComplete(false);
+			PushStatus(LLMStatusSignal::LoadedModel);
 		}
 	}));
 
@@ -483,14 +487,6 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 			char last_char = blockCopy.content.back();
 			if (last_char == '*' || last_char == '"' || last_char == ']')
 				blockCopy.content.pop_back(); // Trim scaffolding char
-			/*if (!blockCopy.content.empty() && blockCopy.content.back() == '.')
-			{
-				blockCopy.content.pop_back();
-				blockCopy.content.append(", "); // Seed continuation
-			}
-			else
-				blockCopy.content.append(" "); // Seed continuation
-			*/
 		}
 	}
 	_chatState.blocks.push_back(blockCopy); // Reinsert block
@@ -898,7 +894,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 					break; // That's enough, thank you
 				}
 				subMessageId = CreateUUID();
-				PushStatus(LLMStatusSignal::MessageComplete);
+				PushStatus(LLMStatusSignal::CompletedMessage);
 			}
 		}
 

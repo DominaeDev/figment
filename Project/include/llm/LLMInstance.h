@@ -82,12 +82,17 @@ struct ChatState
 };
 
 enum class LLMStatusSignal {
-	ModelLoaded,
-	ModelUnloaded,
-	ChatStarted,
-	MessageComplete,
+	Nothing = 0,
+	LoadingModel,
+	LoadedModel,
+	LoadModelFailure,
+	UnloadedModel,
 	GenerationStarted,
 	GenerationComplete,
+	InitializingChat,
+	InitializedChat,
+	InitializeChatFailure,
+	CompletedMessage,
 };
 
 struct LLMStatus

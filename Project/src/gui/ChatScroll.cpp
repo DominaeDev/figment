@@ -108,7 +108,8 @@ void ChatScroll::ClearMessages()
 	}
 	_messages.clear();
 	_messagesById.clear();
-
+	_fScrollY = 0.0f;
+	_fAnimatedScroll = 0.0f;
 	GetSizer()->Clear();
 }
 

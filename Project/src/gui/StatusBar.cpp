@@ -8,11 +8,11 @@ StatusBar::StatusBar(Control* pParent) : Control(pParent)
 {
 	SetSize(pParent->GetWidth(), 24);
 
-	SetForegroundColor(Color { 220,220,220, SDL_ALPHA_OPAQUE });
-	SetBackgroundColor(Color { 40, 40, 40, SDL_ALPHA_OPAQUE });
+	SetForegroundColor(Color { 0x51, 0x4a, 0x2f, SDL_ALPHA_OPAQUE });
+	SetBackgroundColor(Color { 0xde, 0xd9, 0xc5, SDL_ALPHA_OPAQUE });
 
 	_pMessage = new StaticText(this, "", FontFace::Default, Constants::StatusBarFontSize, false);
-	_pMessage->SetPosition(8, 0);
+	_pMessage->SetPosition(8, 1);
 
 	_pModelInfo = new StaticText(this, "", FontFace::Default, Constants::StatusBarFontSize, false);
 	_pModelInfo->SetPosition(400, 0);
