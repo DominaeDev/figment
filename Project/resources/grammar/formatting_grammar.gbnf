@@ -7,9 +7,9 @@ stub-act		::= "*" [^"*]* "*</act>" more
 stub-narr		::= "[" [^"*\]]* "]</narrator>" more
 
 # Continuations
-cont-talk		::= [^"*]* "\"</talk>" more
-cont-act		::= [^"*]* "*</act>" more
-cont-narr		::= [^"*\]]* "]</narrator>" more
+cont-talk		::= [^"*<\n]* "\"</talk>" more
+cont-act		::= [^"*<\n]* "*</act>" more
+cont-narr		::= [^"*<\n\]]* "]</narrator>" more
 
 # Message types
 dlg			::= "<talk=\"" name "\">\"" text "\"</talk>"

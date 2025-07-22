@@ -386,7 +386,7 @@ bool MainFrame::HandleKeyPress(SDL_Keycode key)
 	case SDLK_F9:
 	{
 		auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
-		if (!pLLM->Continue(responseId, subMessageId))
+		if (!pLLM->Continue(responseId, subMessageId, true))
 			return pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined);
 		break;
 	}

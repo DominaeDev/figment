@@ -132,7 +132,7 @@ public:
 	bool PushMessage(Role role, string message, MessageType msgType = MessageType::Undefined, bool visible = true, int ttl = 0);
 
 	bool Halt();
-	bool Continue(string responseId, string subMessageId);
+	bool Continue(string responseId, string subMessageId, bool extend);
 
 	bool InstigateResponse(Responder responder, MessageType msgType, int messageCount = 0);
 	bool GreetUser();

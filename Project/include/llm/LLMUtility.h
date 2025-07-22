@@ -16,9 +16,9 @@ namespace llm_util
 	extern string& sanitize_response(string& text);
 	extern string& complete_message(string& text);
 	extern void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word);
+	extern bool init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 	extern void init_batch_logits(llama_batch& batch);
 	extern std::vector<llama_token> tokenize(llama_model* pModel, string prompt, bool bAddSpecial);
-	extern bool init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 
 	extern std::pair<MessageType, bool> detect_message_type(string text) noexcept;
 	extern string apply_chat_template(Messages in_messages, llama_context* pCtx, bool add_assistant);

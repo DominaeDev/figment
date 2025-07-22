@@ -453,7 +453,7 @@ bool LLMInstance::CanGenerate() const
 	return IsReady() && !IsGenerating();
 }
 
-bool LLMInstance::Continue(string responseId, string subMessageId)
+bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 {
 	if (!CanGenerate())
 		return false;
@@ -466,12 +466,33 @@ bool LLMInstance::Continue(string responseId, string subMessageId)
 		return false; // Not last message
 
 	auto [msgType, bComplete] = llm_util::detect_message_type(block.content);
-	if (msgType == MessageType::Undefined || bComplete)
+	if (msgType == MessageType::Undefined || (bComplete && !extend) )
 		return false; // Not incomplete message
 
 	LLMMessageBlock blockCopy = block;
 	blockCopy.cached = false;
 	RemoveMessages(1); // Remove the last message, resets current_pos
+
+	if (extend && bComplete)
+	{
+		// Strip end tag
+		size_t pos_end = blockCopy.content.rfind("</", std::string::npos);
+		if (pos_end != std::string::npos)
+		{
+			blockCopy.content = blockCopy.content.substr(0, pos_end);
+			char last_char = blockCopy.content.back();
+			if (last_char == '*' || last_char == '"' || last_char == ']')
+				blockCopy.content.pop_back(); // Trim scaffolding char
+			/*if (!blockCopy.content.empty() && blockCopy.content.back() == '.')
+			{
+				blockCopy.content.pop_back();
+				blockCopy.content.append(", "); // Seed continuation
+			}
+			else
+				blockCopy.content.append(" "); // Seed continuation
+			*/
+		}
+	}
 	_chatState.blocks.push_back(blockCopy); // Reinsert block
 
 	PrepareArguments prepareArgs {
