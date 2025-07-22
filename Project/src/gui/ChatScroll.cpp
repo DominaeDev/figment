@@ -178,29 +178,33 @@ void ChatScroll::Poll()
 			// Ignore complete empty messages
 			continue;
 		}
-		else if (!string_util::empty_or_whitespace(piece.text))
+		else
 		{
-			// Create new message to hold the piece
-			ChatMessage* pMessage = AddMessage(piece.name, piece.role, piece.msgType, piece.text, piece.isComplete);
-			_messages.push_back(MessageEntry {
-				piece.role,
-				piece.responseId,
-				piece.subMessageId,
-				piece.msgType,
-				pMessage,
-			});
-			_messagesById[piece.subMessageId] = &_messages.back();
-		}
-		else // Empty or whitespace
-		{
-			_messages.push_back(MessageEntry {
-				piece.role,
-				piece.responseId,
-				piece.subMessageId,
-				piece.msgType,
-				nullptr,
-			});
-			_messagesById[piece.subMessageId] = &_messages.back();
+			string text = string_util::trim(piece.text);
+			if (text.empty() || (text.length() == 1 && (text[0] == '"' || text[0] == '*' || text[0] == '['))) // Empty or scaffolding
+			{
+				_messages.push_back(MessageEntry {
+					piece.role,
+					piece.responseId,
+					piece.subMessageId,
+					piece.msgType,
+					nullptr,
+					});
+				_messagesById[piece.subMessageId] = &_messages.back();
+			}
+			else
+			{
+				// Create new message to hold the piece
+				ChatMessage* pMessage = AddMessage(piece.name, piece.role, piece.msgType, piece.text, piece.isComplete);
+				_messages.push_back(MessageEntry {
+					piece.role,
+					piece.responseId,
+					piece.subMessageId,
+					piece.msgType,
+					pMessage,
+					});
+				_messagesById[piece.subMessageId] = &_messages.back();
+			}
 		}
 
 		// Clean up empty

@@ -1,12 +1,11 @@
 #include "util/StringUtility.h"
 #include <algorithm>
 
-std::string& string_util::ltrim(std::string& s)
+void string_util::ltrim_str(std::string& s)
 {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
 		return !std::isspace(ch);
 	}));
-	return s;
 }
 
 std::string string_util::ltrim(const std::string& in)
@@ -18,12 +17,11 @@ std::string string_util::ltrim(const std::string& in)
 	return s;
 }
 
-std::string& string_util::rtrim(std::string& s)
+void string_util::rtrim_str(std::string& s)
 {
 	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
 		return !std::isspace(ch);
 	}).base(), s.end());
-	return s;
 }
 
 std::string string_util::rtrim(const std::string& in)
@@ -46,18 +44,6 @@ std::string string_util::get_filename(const std::string& str)
 	if (pos == std::string::npos)
 		return str;
 	return str.substr(pos + 1);
-}
-
-std::string& string_util::lcase(std::string& str)
-{
-	std::transform(std::begin(str), std::end(str), std::begin(str), [](unsigned char c){ return std::tolower(c); });
-	return str;
-}
-
-std::string& string_util::ucase(std::string& str)
-{
-	std::transform(std::begin(str), std::end(str), std::begin(str), [](unsigned char c){ return std::tolower(c); });
-	return str;
 }
 
 std::string string_util::lcase(const std::string& str)

@@ -609,7 +609,7 @@ std::string llm_util::format_message(std::string message, std::string actorName)
 	size_t pos = 0;
 	size_t length = message.size();
 
-	string_util::trim(message);
+	string_util::trim_str(message);
 	char first = message[0];
 	char last = 0;
 	if (first == '"' || first == '*')
@@ -660,7 +660,7 @@ std::string llm_util::format_message(std::string message, std::string actorName)
 			break;
 		}
 		
-		if (string_util::trim(text).empty())
+		if (string_util::empty_or_whitespace(text))
 			continue;
 
 		if (result.length() > 0)

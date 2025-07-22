@@ -9,6 +9,8 @@
 #include <assert.h>
 
 #define DEBUG_SEED 0xA1B2C3D4
+#define LIMIT_MSG_COUNT 1
+#define RANDOMIZE_MSG_COUNT 1
 
 void ModelState::Release()
 {
@@ -771,7 +773,13 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		else // EOG token
 		{
 			bHalt = true;
-			bSend = true;
+			stop_word = "EOG";
+		}
+
+		if (sampled_tokens.size() >= Constants::MaxResponseLength)
+		{
+			bHalt = true;
+			stop_word = "length";
 		}
 
 		bSend &= !bWait;
@@ -795,7 +803,10 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 					llm_util::get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
 					if (tagName == userName && args.role != Role::User)
+					{
+						stop_word = "user";
 						break; // Stop if talking/acting for the user
+					}
 
 					if (tag.size() > 1 && tag[0] == '/')
 					{
@@ -861,7 +872,10 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			{
 				msgType = MessageType::Undefined;
 				if (args.maxMessages > 0 && ++numMessages >= args.maxMessages)
+				{
+					stop_word = "msg count";
 					break; // That's enough, thank you
+				}
 				subMessageId = CreateUUID();
 				PushStatus(LLMStatusSignal::MessageComplete);
 			}
@@ -919,9 +933,13 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 void LLMInstance::StartGeneration(GenerateArguments args)
 {
+#if defined(_DEBUG) && RANDOMIZE_MSG_COUNT
 	static std::uniform_int_distribution<int> numMessages(1, 3);
 	if (args.maxMessages <= 0) // Randomize number of messages
 		args.maxMessages = numMessages(_rng);
+#else !LIMIT_MSG_COUNT
+	args.maxMessages = 0;
+#endif
 
 	if (args.responseId.empty())
 		args.responseId = CreateUUID();

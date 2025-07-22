@@ -26,7 +26,7 @@ static _Cmd s_Commands[] {
 
 Command CommandParser::Parse(string text)
 {
-	string_util::trim(text);
+	string_util::trim_str(text);
 	if (text.empty())
 		return Command { CommandType::Invalid };
 

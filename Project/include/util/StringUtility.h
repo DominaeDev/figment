@@ -5,16 +5,14 @@
 
 struct string_util
 {
-	static std::string& ltrim(std::string& s);
+	static void ltrim_str(std::string& s);
 	static std::string ltrim(const std::string& s);
-	static std::string& rtrim(std::string& s);
+	static void rtrim_str(std::string& s);
 	static std::string rtrim(const std::string& s);
-	static inline std::string& trim(std::string& s) { return ltrim(rtrim(s)); }
 	static inline std::string trim(const std::string& s) { return ltrim(rtrim(s)); }
+	static inline void trim_str(std::string& s) { ltrim_str(s); rtrim_str(s); }
 
-	static std::string& lcase(std::string& str);
 	static std::string lcase(const std::string& s);
-	static std::string& ucase(std::string& str);
 	static std::string ucase(const std::string& s);
 
 	static std::string& replace(std::string& str, const std::string& find, const std::string& replace);
