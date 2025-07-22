@@ -52,9 +52,9 @@ enum class Role
 
 enum class MessageType
 {
-	Undefined = -1, 
+	Undefined = 0, 
 
-	Dialogue = 0,
+	Dialogue,
 	Action,
 	Thought,
 
@@ -70,3 +70,9 @@ struct Message
     string name;
 };
 using Messages = std::vector<Message>;
+
+struct Submessage
+{
+	MessageType msgType = MessageType::Undefined;
+	string content;
+};

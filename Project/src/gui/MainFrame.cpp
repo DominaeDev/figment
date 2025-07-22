@@ -209,7 +209,7 @@ void MainFrame::OnCommand(Command cmd)
 		if (!pLLM->IsReady())
 		{
 			static int turn = 0;
-			auto [msgType, complete] = llm_util::detect_message_type(llm_util::format_message(cmd.text, ""));
+			auto [msgType, complete] = llm_util::detect_message_type(llm_util::process_message(cmd.text, ""));
 			_pChatScroll->AddDummyMessage(turn % 2 == 0 ? "User" : "Bot", turn % 2 == 0 ? Role::User : Role::Bot, msgType, cmd.text);
 			++turn;
 		}

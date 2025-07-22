@@ -460,20 +460,9 @@ bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string promp
 	return true;
 }
 
-enum class SpanType
-{
-	Undefined = -1, 
-	Dialogue = 0,
-	QuotedDialogue,
-	Action,
-	Thought,
-	Narration,
-	Direction,
-};
-
 struct Span
 {
-	SpanType msgType;
+	MessageType msgType {};
 	size_t start;
 	size_t end; // exclusive
 	size_t length() const { return end - start; }
@@ -515,7 +504,7 @@ static bool in_span(size_t pos, const std::vector<Span>& spans)
 	return false;
 }
 
-static void mark_spans(const std::string s, SpanType type, std::string open, std::string close, std::vector<Span>& spans)
+static void mark_spans(const std::string s, MessageType msgType, std::string open, std::string close, std::vector<Span>& spans)
 {
 	if (open.size() > s.size())
 		return;
@@ -539,16 +528,16 @@ static void mark_spans(const std::string s, SpanType type, std::string open, std
 		if (pos_close == std::string::npos)
 			return;
 
-		spans.push_back(Span { type, pos_open, pos_close + close.size() });
+		spans.push_back(Span { msgType, pos_open, pos_close + close.size() });
 		pos_open = find_next(s, open, pos_close + close.size());
 	}
 }
 
-static void fill_gaps(const std::string s, SpanType type, std::vector<Span>& spans)
+static void fill_gaps(const std::string s, MessageType msgType, std::vector<Span>& spans)
 {
-	auto CheckAndAdd = [type, &spans](size_t pos, size_t len) {
+	auto CheckAndAdd = [msgType, &spans](size_t pos, size_t len) {
 		if (len != 0)
-			spans.push_back(Span { type, pos, pos + len });
+			spans.push_back(Span { msgType, pos, pos + len });
 		return true;
 	};
 
@@ -604,7 +593,7 @@ static void trim_spans(const std::string s, std::vector<Span>& spans)
 	}
 }
 
-std::string llm_util::format_message(std::string message, std::string actorName) noexcept
+std::string llm_util::process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages) noexcept
 {
 	size_t pos = 0;
 	size_t length = message.size();
@@ -630,31 +619,36 @@ std::string llm_util::format_message(std::string message, std::string actorName)
 	std::vector<Span> spans;
 	spans.reserve(64);
 
-	mark_spans(message, SpanType::QuotedDialogue, "\"", "\"", spans);
-	mark_spans(message, SpanType::Action, "*", "*", spans);
-	mark_spans(message, SpanType::Thought, "((", "))", spans);
-	mark_spans(message, SpanType::Narration, "[", "]", spans);
-	mark_spans(message, SpanType::Direction, "{{", "}}", spans);
+	mark_spans(message, MessageType::Dialogue, "\"", "\"", spans);
+	mark_spans(message, MessageType::Action, "*", "*", spans);
+	mark_spans(message, MessageType::Thought, "((", "))", spans);
+	mark_spans(message, MessageType::Narration, "[", "]", spans);
+	mark_spans(message, MessageType::Direction, "{{", "}}", spans);
 
-	fill_gaps(message, SpanType::Dialogue, spans);
-//	trim_spans(message, spans);
+	fill_gaps(message, MessageType::Dialogue, spans);
+	trim_spans(message, spans);
 
 	std::string result;
 	result.reserve(256);
 	for (auto& span : spans)
 	{
 		std::string text = message.substr(span.start, span.end - span.start);
-
 		switch (span.msgType)
 		{
-		case SpanType::QuotedDialogue:
-		case SpanType::Action:
-		case SpanType::Narration:
+		case MessageType::Dialogue:
+			if (text[0] == '"')
+			{
+				text.erase(text.length() - 1, 1);
+				text.erase(0, 1);
+			}
+			break;
+		case MessageType::Action:
+		case MessageType::Narration:
 			text.erase(text.length() - 1, 1);
 			text.erase(0, 1);
 			break;
-		case SpanType::Thought:
-		case SpanType::Direction:
+		case MessageType::Thought:
+		case MessageType::Direction:
 			text.erase(text.length() - 2, 2);
 			text.erase(0, 2);
 			break;
@@ -668,22 +662,29 @@ std::string llm_util::format_message(std::string message, std::string actorName)
 
 		switch (span.msgType)
 		{
-		case SpanType::QuotedDialogue:
-		case SpanType::Dialogue:
+		case MessageType::Dialogue:
 			result.append(std::format("<{0}=\"{1}\">\"{2}\"</{0}>", Constants::DialogueTag, actorName, text));
 			break;
-		case SpanType::Action:
+		case MessageType::Action:
 			result.append(std::format("<{0}=\"{1}\">*{2}*</{0}>", Constants::ActionTag, actorName, text));
 			break;
-		case SpanType::Thought:
+		case MessageType::Thought:
 			result.append(std::format("<{0}=\"{1}\">({2})</{0}>", Constants::ThoughtTag, actorName, text));
 			break;
-		case SpanType::Narration:
+		case MessageType::Narration:
 			result.append(std::format("<{0}>[{1}]</{0}>", Constants::NarrationTag, text));
 			break;
-		case SpanType::Direction:
+		case MessageType::Direction:
 			result.append(std::format("<{0}>{1}</{0}>", Constants::DirectionTag, text));
 			break;
+		}
+
+		if (out_pSubmessages != nullptr)
+		{
+			(*out_pSubmessages).push_back(Submessage {
+				span.msgType,
+				text,
+			});
 		}
 	}
 

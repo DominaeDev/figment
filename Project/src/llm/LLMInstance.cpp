@@ -1042,17 +1042,20 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	string name = llm_util::name_from_role(role);
 	string content = message;
 	llm_util::apply_names(content, _chatState.user.name, _chatState.bot.name);
-	if (msgType == MessageType::SystemMessage)
-		content = string_util::trim(content);
-	else
-	{
-		content = llm_util::format_message(content, name);
-		if (msgType == MessageType::Undefined)
-			msgType = llm_util::detect_message_type(content).first;
-	}
+	std::vector<Submessage> subMessages;
+	content = llm_util::process_message(content, name, &subMessages);
+
+	if (msgType == MessageType::Undefined)
+		msgType = llm_util::detect_message_type(content).first;
+	
+	if (msgType == MessageType::SystemMessage) //! @correctness
+		role = Role::System;
+	else if (msgType == MessageType::Narration)
+		role = Role::Narrator;
+	else if (msgType == MessageType::Direction)
+		role = Role::Director;
 
 	string responseId = CreateUUID();
-	string subMessageId = CreateUUID();
 
 	_chatState.blocks.push_back(LLMMessageBlock {
 		/*blockId*/ responseId,
@@ -1070,19 +1073,30 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 			name = _chatState.bot.name;
 		else if (role == Role::User)
 			name = _chatState.user.name;
+		else
+			name = llm_util::name_from_role(role);
 
 		std::scoped_lock lock(_resultMutex);
+		_activeResponseIds.insert(responseId);
 		
 		// Add message to result queue
-		_resultQueue.push(MessagePiece {
-			/*blockId*/ responseId,
-			/*messageId*/ subMessageId,
-			/*name*/ name,
-			/*text*/ message,
-			/*role*/ role,
-			/*msgType*/ msgType,
-			/*isComplete*/ true,
-		});
+		for (auto subMsg : subMessages)
+		{
+			string subMessageId = CreateUUID();
+			_resultQueue.push(MessagePiece {
+				/*blockId*/ responseId,
+				/*messageId*/ subMessageId,
+				/*name*/ name,
+				/*text*/ subMsg.content,
+				/*role*/ role,
+				/*msgType*/ subMsg.msgType,
+				/*isComplete*/ true,
+				});
+		}
+	}
+	else
+	{
+		std::scoped_lock lock(_resultMutex);
 		_activeResponseIds.insert(responseId);
 	}
 	return true;
