@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <ranges>
 #include <uuid_v4.h>
 
 template<typename T>
@@ -16,6 +17,8 @@ template<typename T>
 inline constexpr double toD(T x) { return static_cast<double>(x); }
 template<typename T>
 inline constexpr size_t toSZ(T x) { return static_cast<size_t>(x); }
+template<typename T>
+inline constexpr size_t castEnum(T x) { return static_cast<size_t>(x); }
 
 inline constexpr uint8_t operator "" _u8( unsigned long long arg ) noexcept
 {
@@ -25,6 +28,13 @@ inline constexpr uint8_t operator "" _u8( unsigned long long arg ) noexcept
 inline constexpr size_t operator "" _sz( unsigned long long arg ) noexcept
 {
     return static_cast<size_t>( arg );
+}
+
+template <std::ranges::range R>
+constexpr auto to_vector(R&& r)
+{
+	using elem_t = std::decay_t<std::ranges::range_value_t<R>>;
+	return std::vector<elem_t>{r.begin(), r.end()};
 }
 
 typedef std::string string;

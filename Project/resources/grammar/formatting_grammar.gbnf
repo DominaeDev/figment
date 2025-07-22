@@ -1,16 +1,23 @@
-root	::= stub? (dlg | act | narrate | ws)+ end?
-continue-root	::= cont (dlg | act | narrate | ws)+ end?
+root			::= any+ end?
+more 			::= any* end?
 
+# Stubs
+stub-talk		::= "\"" [^"*]* "\"</talk>" more
+stub-act		::= "*" [^"*]* "*</act>" more
+stub-narr		::= "[" [^"*\]]* "]</narrator>" more
+
+# Continuations
+cont-talk		::= text "\"</talk>" more
+cont-act		::= text "*</act>" more
+cont-narr		::= text "]</narrator>" more
+
+# Message types
 dlg			::= "<talk=\"" name "\">\"" text "\"</talk>"
 act			::= "<act=\"" name "\">*" text "*</act>"
-narrate		::= "<narrator>[" text "]</narrator>"
-stub		::= ("\"" text "\"</talk>") |
-				("*" text "*</act>") |
-				("[" text "]</narrator>")
-cont		::= text ("\"</talk>" | "*</act>" | "]</narrator>")
+narr		::= "<narrator>[" text "]</narrator>"
+any			::= (dlg | act | narr | ws)
 
 text		::= [^\t<>"*\]]*
 ws			::= [ \n]
-
 name		::= ##NAME_PATTERN##
 end			::= ( "<|im_end|>" | "</s>" | "<s>" | "<end_of_turn>" | "<EOT>" | "_<EOT>" | "###" | "<｜end▁of▁sentence｜>" )

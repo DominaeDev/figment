@@ -19,6 +19,7 @@
 #include "util/Common.h"
 #include "Constants.h"
 #include <format>
+#include <ranges>
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -197,6 +198,10 @@ void MainFrame::OnCommand(Command cmd)
 	if (!pLLM)
 		return;
 
+	auto fnRemovedMessageIds = [](std::vector<RemovedMessage> msgs) -> std::vector<string> {
+		return to_vector(msgs | std::views::transform([](RemovedMessage msg) { return msg.responseId; }));
+	};
+
 	switch (cmd.type)
 	{
 	case CommandType::UserMessage:
@@ -216,10 +221,10 @@ void MainFrame::OnCommand(Command cmd)
 		pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
 		break;
 	case CommandType::InstigateDialogue:
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Dialogue, 1);
+		pLLM->InstigateResponse(Responder::Bot, MessageType::Dialogue, 0);
 		break;
 	case CommandType::InstigateAction:
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Action, 1);
+		pLLM->InstigateResponse(Responder::Bot, MessageType::Action, 0);
 		break;
 	case CommandType::PassTurn:
 		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 3);
@@ -241,20 +246,27 @@ void MainFrame::OnCommand(Command cmd)
 	{
 		int n = atoi(cmd.text.c_str());
 		auto removedIds = pLLM->RemoveMessages(std::max(n, 1));
-		_pChatScroll->RemoveMessages(removedIds);
+		_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
 		break;
 	}
 	case CommandType::RedoResponse:
 	{
 		auto removedIds = pLLM->RemoveMessages(1);
-		_pChatScroll->RemoveMessages(removedIds);
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 3);
+		if (!removedIds.empty())
+		{
+			Responder responder = Responder::Bot;
+			if (removedIds.front().role == Role::Narrator)
+				responder = Responder::Narrator;
+
+			_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
+			pLLM->InstigateResponse(responder, MessageType::Undefined, 3);
+		}
 		break;
 	}
 	case CommandType::RollbackUserMessage:
 	{
 		auto removedIds = pLLM->RollbackUserMessage();
-		_pChatScroll->RemoveMessages(removedIds);
+		_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
 		break;
 	}
 	case CommandType::Reset:

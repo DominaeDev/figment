@@ -17,9 +17,14 @@ using LoadModelCallback = std::function<void(bool)>;
 using LoadModelProgressCallback = std::function<void(int)>;
 
 enum class Grammar {
-	None = 0,
-	Default = 1,
-	Continue = 2,
+	None				= 0,
+	Default				= 1,
+	StubDialogue		= 2,
+	StubAction			= 3,
+	StubNarration		= 4,
+	ContinueDialogue	= 5,
+	ContinueAction		= 6,
+	ContinueNarration	= 7,
 };
 
 struct ModelState
@@ -28,7 +33,7 @@ struct ModelState
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
 	llama_sampler* pActiveGrammar = nullptr;
-	std::array<llama_sampler*, 3> grammars = {};
+	std::array<llama_sampler*, 8> grammars = {};
 
 	bool bReady = false;
 	bool bInvalid = false;
@@ -38,7 +43,8 @@ struct ModelState
 	llama_sampler* SetActiveGrammar(Grammar grammar);
 };
 
-struct LLMMessageBlock {
+struct LLMMessageBlock 
+{
 	string responseId;
 	Role role = Role::Undefined;
     string content;
@@ -48,6 +54,13 @@ struct LLMMessageBlock {
 	int ttl = -1;
 
 	size_t length() const { return tokens.size(); }
+};
+
+struct RemovedMessage 
+{
+	string responseId;
+    string content;
+	Role role;
 };
 
 struct ChatState
@@ -126,8 +139,8 @@ public:
 	bool Instruct(string instructions);
 	bool ResetChat(int seed = -1);
 	bool Reseed(uint32_t seed = 0xFFFFFFFF);
-	std::vector<string> RemoveMessages(int numMessages = 1, bool rewindTime = true);
-	std::vector<string> RollbackUserMessage();
+	std::vector<RemovedMessage> RemoveMessages(int numMessages = 1, bool rewindTime = true);
+	std::vector<RemovedMessage> RollbackUserMessage();
 	std::set<string> GetActiveMessages();
 
 	bool PollResponse(MessagePiece& piece);
@@ -169,16 +182,17 @@ private:
 	};
 	void PrepareGeneration(PrepareArguments args);
 
+	enum GenerateFlag { None = 0, Continuation, Instigation, };
 	struct GenerateArguments
 	{
 		ChatState* pChat;
 		Role role = Role::Undefined;
 		MessageType msgType = MessageType::Undefined;
+		GenerateFlag flags = GenerateFlag::None;
 		int maxMessages = 0;
 		string prepend {};
 		string responseId {};
 		string subMessageId {};
-		bool bContinueLast = false;
 	};
 	void __Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 	void StartGeneration(GenerateArguments args);
