@@ -15,7 +15,7 @@ StatusBar::StatusBar(Control* pParent) : Control(pParent)
 	_pMessage->SetPosition(8, 1);
 
 	_pModelInfo = new StaticText(this, "", FontFace::Default, Constants::StatusBarFontSize, false);
-	_pModelInfo->SetPosition(400, 0);
+	_pModelInfo->SetPosition(400, 1);
 	AddChild(_pMessage);
 }
 
