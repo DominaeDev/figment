@@ -355,14 +355,13 @@ void MainFrame::PollStatus()
 	auto pLLM = Application::GetLLM();
 	if (pLLM)
 	{
-		auto status = pLLM->GetStatus();
-		if (status.bInvalid)
+		auto [status, ok] = pLLM->PollStatus();
+		if (ok)
 		{
-			UnloadModel();
-			_pStatusBar->SetModelInfo("", 0, 0);
+			if (status.bInvalid)
+				UnloadModel();
+			_pStatusBar->SetModelInfo(status);
 		}
-		else if (status.bReady)
-			_pStatusBar->SetModelInfo(status.modelName, status.allocCtxSize, status.usedCtxSize);
 
 		switch (status.signal)
 		{

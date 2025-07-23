@@ -1,6 +1,7 @@
 #include "gui/StatusBar.h"
 #include "gui/StaticText.h"
 #include "gui/Fonts.h"
+#include "llm/LLMInstance.h"
 #include "Constants.h"
 #include <format>
 
@@ -24,10 +25,13 @@ void StatusBar::SetMessage(string message)
 	_pMessage->SetText(message);
 }
 
-void StatusBar::SetModelInfo(string modelName, size_t maxCtxSize, size_t usedCtxSize)
+void StatusBar::SetModelInfo(LLMStatus status)
 {
-	if (!modelName.empty())
-		_pModelInfo->SetText(std::format("Model: {} Ctx: {:d}/{:d}", modelName, usedCtxSize, maxCtxSize));
+	if (!status.bReady)
+		_pModelInfo->SetText("");
+	
+	if (!status.modelName.empty())
+		_pModelInfo->SetText(std::format("Model: {} Ctx: {:d}/{:d} ({:.2f} t/s)", status.modelName, status.usedCtxSize, status.allocCtxSize, status.tokensPerSec));
 	else
 		_pModelInfo->SetText("");
 }

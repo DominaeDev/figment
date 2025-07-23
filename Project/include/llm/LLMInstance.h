@@ -11,8 +11,6 @@
 #include <queue>
 #include <array>
 
-struct LLMStatus;
-
 using LoadModelCallback = std::function<void(bool)>;
 using LoadModelProgressCallback = std::function<void(int)>;
 
@@ -35,48 +33,35 @@ struct ModelState
 	llama_sampler* pActiveGrammar = nullptr;
 	std::array<llama_sampler*, 8> grammars = {};
 
-	bool bReady = false;
-	bool bInvalid = false;
-	
+	string modelName {};
+	std::mt19937 rng {};
+
 	void Release();
 
 	llama_sampler* SetActiveGrammar(Grammar grammar);
 };
 
-struct LLMMessageBlock 
+struct ContextBlock 
 {
 	string responseId;
-	Role role = Role::Undefined;
+	Role role;
     string content;
 	std::vector<int32_t> tokens;
-	int32_t ctx_pos = 0;
+	int32_t ctx_pos;
 	bool cached = false;
 	int ttl = -1;
 
 	size_t length() const { return tokens.size(); }
 };
 
-struct RemovedMessage 
+struct ContextState
 {
-	string responseId;
-    string content;
-	Role role;
-};
-
-struct ChatState
-{
-	bool isInitialized = false;
 	std::vector<int32_t> system_tokens;
-	std::vector<int32_t> assistant_tokens;
-	std::vector<LLMMessageBlock> blocks;
+	std::vector<ContextBlock> blocks;
 	int32_t current_pos = 0;
 	int32_t prepend_pos = 0;
 	int32_t pre_response_pos = 0;
-	int32_t message_count = 0;
 	llama_batch batch {};
-
-	Character user;
-	Character bot;
 
 	int32_t AssignBlockPositions();
 };
@@ -102,6 +87,7 @@ struct LLMStatus
 	size_t usedCtxSize = 0;
 	bool bReady = false;
 	bool bInvalid = false;
+	double tokensPerSec = 0.0;
 	LLMStatusSignal signal;
 };
 
@@ -116,7 +102,12 @@ struct MessagePiece
 	bool isComplete = false;
 };
 
-enum class Responder { None, Continuation, User, Narrator, Director, Bot };
+struct RemovedMessage 
+{
+	string responseId;
+    string content;
+	Role role;
+};
 
 class LLMInstance
 {
@@ -127,8 +118,8 @@ public:
 	bool InitializeChat(string systemPrompt, Messages messages);
 	void Shutdown();
 
-	bool HasLoadedModel() const { return _atModelState.load().pModel != nullptr; }
-	bool IsLoadingModel() const { return _bLoadingModel; }
+	bool IsLoadingModel() const { return _readyState.load(std::memory_order_relaxed) == ReadyState::Initializing; }
+	bool HasLoadedModel() const { return _modelState.pModel != nullptr; }
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool IsReady() const;
 	bool IsGenerating() const;
@@ -149,7 +140,7 @@ public:
 	std::set<string> GetActiveMessages();
 
 	bool PollResponse(MessagePiece& piece);
-	LLMStatus GetStatus();
+	std::pair<LLMStatus, bool> PollStatus();
 
 	bool DumpContext(string filename) const;
 	
@@ -158,7 +149,6 @@ public:
 
 private:
 	void ClearResponseQueue();
-	void CancelGeneration();
 	bool CanGenerate() const;
 
 private:
@@ -170,10 +160,10 @@ private:
 
 	enum class InternalError : int {
 		NoError = 0,
-		ContextFull = 1,
-		DecodeError = 2,
-		SamplerError = 3,
-		GrammarError = 4,
+		ContextFull,
+		DecodeError,
+		SamplerError,
+		GrammarError,
 	};
 
 	using __PartialResultCallback = std::function<void(__PartialResult)>;
@@ -181,7 +171,6 @@ private:
 	
 	struct PrepareArguments
 	{
-		ChatState* pChatState;
 		Responder responder = Responder::Bot;
 		int time = 0;	// decrement ttl
 	};
@@ -190,7 +179,6 @@ private:
 	enum GenerateFlag { None = 0, Continuation, Instigation, };
 	struct GenerateArguments
 	{
-		ChatState* pChat;
 		Role role = Role::Undefined;
 		MessageType msgType = MessageType::Undefined;
 		GenerateFlag flags = GenerateFlag::None;
@@ -202,24 +190,29 @@ private:
 	void __Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 	void StartGeneration(GenerateArguments args);
 
-	void PushStatus(LLMStatusSignal signal);
+	void PushSignal(LLMStatusSignal signal);
+	void RefreshActiveResponses();
+	std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
+
 private:
-	bool _bLoadingModel = false;
-	string _modelName {};
+	enum class ReadyState { Invalid, Uninitialized, LoadingModel, ModelLoaded, Initializing, Ready, Generating };
+	std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };
 
-	std::atomic<ModelState> _atModelState {}; // todo: better than this
-	ChatState _chatState {}; // todo: better than this
-	std::set<string> _activeResponseIds;
+	std::mutex _stateMutex; // Guards state variables
+	ModelState _modelState;
+	ContextState _contextState;
 
-	std::atomic<bool> _atbGeneratingResponse {};
-	std::unique_ptr<std::jthread> _workerThread;
-
-	std::mutex _resultMutex;
+	std::mutex _resultMutex; // Guards output queue
 	std::queue<MessagePiece> _resultQueue;
+	std::set<string> _activeResponseIds;
 		
-	std::mutex _statusMutex;
+	std::mutex _statusMutex; // Guards status reporting
 	LLMStatus _lastStatus {};
 	std::queue<LLMStatusSignal> _statusSignals;
+	std::atomic<double> _tokensPerSec {};
 
-	std::mt19937 _rng {};
+	std::unique_ptr<std::jthread> _workerThread;
+
+	Character user;
+	Character bot;
 };

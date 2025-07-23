@@ -4,6 +4,7 @@
 #include "Types.h"
 
 class StaticText;
+struct LLMStatus;
 
 class StatusBar : public Control
 {
@@ -11,7 +12,7 @@ public:
 	StatusBar(Control* pParent);
 
 	void SetMessage(string message);
-	void SetModelInfo(string modelName, size_t maxCtxSize, size_t usedCtxSize);
+	void SetModelInfo(LLMStatus status);
 
 private:
 	StaticText* _pMessage;

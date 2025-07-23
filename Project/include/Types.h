@@ -76,3 +76,12 @@ struct Submessage
 	MessageType msgType = MessageType::Undefined;
 	string content;
 };
+
+enum class Responder
+{ 
+	None, 
+	User, 
+	Narrator, 
+	Director, 
+	Bot 
+};

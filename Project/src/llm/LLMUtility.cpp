@@ -2,6 +2,7 @@
 #include "util/StringUtility.h"
 #include "Constants.h"
 #include <format>
+#include <cwctype>
 
 static std::vector<string> const opening_tags {
 	std::format("<{0}=\"", Constants::DialogueTag),
@@ -654,8 +655,19 @@ std::string llm_util::process_message(std::string message, std::string actorName
 			break;
 		}
 		
+		text = string_util::trim(text);
 		if (string_util::empty_or_whitespace(text))
 			continue;
+
+		if (span.msgType == MessageType::Dialogue) // Minor processing for correctness
+		{
+			std::wstring uniText = string_util::from_utf8(text);
+			if (!std::iswpunct(uniText.front()) && !std::iswupper(uniText.front()))
+				uniText[0] = std::toupper(uniText[0]); // Uppercase first letter
+			if (!std::iswpunct(uniText.back()))
+				uniText.append(L"."); // Require punctuation
+			text = string_util::to_utf8(uniText);
+		}
 
 		if (result.length() > 0)
 			result.append(" ");
@@ -689,4 +701,21 @@ std::string llm_util::process_message(std::string message, std::string actorName
 	}
 
 	return result;
+}
+
+std::string llm_util::get_responder_prelude(Responder responder, llama_context* pCtx) noexcept
+{
+	string responderName;
+	if (responder == Responder::Narrator)
+		responderName = llm_util::name_from_role(Role::Narrator);
+	else if (responder == Responder::User)
+		responderName = "{{user}}";
+	else
+		responderName = "{{char}}";;
+
+	// Prepare assistant prelude
+	string prelude = llm_util::apply_chat_template(Messages{}, pCtx, true);
+	string_util::replace(prelude, "assistant", responderName);
+	string_util::replace(prelude, "ASSISTANT", responderName);
+	return prelude;
 }

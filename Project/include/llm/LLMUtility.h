@@ -26,4 +26,5 @@ namespace llm_util
 	extern string apply_chat_template_prefix(Message msg, string userName, string botName, llama_context* pCtx, bool add_assistant);
 
 	extern std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
+	extern std::string get_responder_prelude(Responder responder, llama_context* pCtx) noexcept;
 }

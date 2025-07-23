@@ -1,5 +1,6 @@
 #include "util/StringUtility.h"
 #include <algorithm>
+#include <codecvt>
 
 void string_util::ltrim_str(std::string& s)
 {
@@ -129,4 +130,16 @@ std::string& string_util::normalize_newlines(std::string& text)
 std::string string_util::normalize_newlines(std::string&& text)
 {
 	return normalize_newlines(text); // rvo
+}
+
+std::wstring string_util::from_utf8(const std::string& str)
+{
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+	return converter.from_bytes(str);
+}
+
+std::string string_util::to_utf8(const std::wstring& str)
+{
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+	return converter.to_bytes(str);
 }

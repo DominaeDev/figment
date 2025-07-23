@@ -27,5 +27,8 @@ struct string_util
 	static std::string& normalize_newlines(std::string& text);
 	static std::string normalize_newlines(std::string&& s);
 
+	static std::wstring from_utf8(const std::string& str);
+	static std::string to_utf8(const std::wstring& str);
+
 	string_util() = delete;
 };
