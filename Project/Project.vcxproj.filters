@@ -340,6 +340,9 @@
     <ClInclude Include="include\Types.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\llm\LLMTypes.h">
+      <Filter>Source Files\Inference</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\formatting_grammar.gbnf">

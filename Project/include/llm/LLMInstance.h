@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "llm/LLMTypes.h"
 #include "model/Character.h"
 #include <llama.h>
 #include <vector>
@@ -50,6 +50,7 @@ struct ContextBlock
 	int32_t ctx_pos;
 	bool cached = false;
 	int ttl = -1;
+	ContextSequenceList seqIds {};
 
 	size_t length() const { return tokens.size(); }
 };

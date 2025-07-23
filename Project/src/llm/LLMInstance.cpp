@@ -142,7 +142,7 @@ static int32_t ctx_remove(llama_context* pCtx, ContextState& chat, std::vector<C
 	llama_pos pos_remove_begin = (*itBegin).ctx_pos;
 	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
 
-	if (llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
+	if (llama_kv_self_seq_rm(pCtx, -1, pos_remove_begin, pos_remove_end)) //! @seqIds
 	{
 		chat.blocks.erase(itBegin, itEnd);
 		return shift_amount;
@@ -161,7 +161,7 @@ static int32_t ctx_remove_and_shift(llama_context* pCtx, ContextState& chat, std
 	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
 
 	// Shift
-	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, -1, -shift_amount);
+	llama_kv_self_seq_add(pCtx, -1, pos_remove_end, -1, -shift_amount); //! @seqIds
 
 	// Update batch
 	auto& batch = chat.batch;
@@ -181,7 +181,7 @@ static int32_t ctx_insert(llama_context* pCtx, llama_batch& batch, llama_pos pos
 	int32_t shift_amount = (int32_t)block.length();
 
 	// Shift cache
-	llama_kv_self_seq_add(pCtx, 0, pos_insert, -1, shift_amount);
+	llama_kv_self_seq_add(pCtx, -1, pos_insert, -1, shift_amount); //! @seqIds
 
 	// Shift batch
 	int32_t n_batch = batch.n_tokens;
@@ -192,6 +192,7 @@ static int32_t ctx_insert(llama_context* pCtx, llama_batch& batch, llama_pos pos
 	}
 
 	// Insert tokens into batch
+	//! @seqIds
 	for (int32_t i = 0; i < shift_amount; ++i)
 	{
 		batch.token[pos_insert + i] = block.tokens[i];
@@ -352,18 +353,18 @@ bool LLMInstance::ResetChat(int seed)
 
 		// Reinit the batch
 		int32_t num_tokens = (int32_t)_contextState.system_tokens.size();
-		llama_kv_self_seq_rm(_modelState.pCtx, 0, num_tokens, -1);
+		llama_kv_self_seq_rm(_modelState.pCtx, -1, num_tokens, -1); //! @seqIds
 		// llama_kv_self_clear(pCtx);
 
 		// Add tokens to batch
 		auto& batch = _contextState.batch;
+		auto seqIds = llm_util::get_sequences(ContextSequenceId::Shared);
 		for (int i = 0; i < num_tokens; ++i)
 		{
 			batch.token[i] = _contextState.system_tokens[i];
 			batch.pos[i] = i;
-			batch.n_seq_id[i] = 1;
-			batch.seq_id[i][0] = 0;
 			batch.logits[i] = false; // No logits
+			llm_util::set_sequences(batch, i, seqIds);
 		}
 		batch.n_tokens = num_tokens;
 		_contextState.current_pos = num_tokens;
@@ -642,8 +643,9 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	chat.prepend_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append to batch
+	auto seqIds = llm_util::get_sequences(ContextSequenceId::Shared); //! @seqIds from blocks?
 	for (int i = 0; i < prompt_tokens.size(); ++i)
-		common_batch_add(batch, prompt_tokens[i], current_pos + i, { 0 }, false);
+		common_batch_add(batch, prompt_tokens[i], current_pos + i, seqIds, false);
 	batch.n_tokens = current_pos + (int32_t)prompt_tokens.size();
 
 	// Mark blocks in cache (they will be shortly)
@@ -681,6 +683,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 	int numMessages = 0;
 	string responderName {};
+
+	auto seqIds = llm_util::get_sequences(ContextSequenceId::Shared);
 
 	DebugPrintLn(">> BEGIN GENERATION");
 
@@ -721,7 +725,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 		// Append to batch
 		for (int i = 0; i < prepend_tokens.size(); ++i)
-			common_batch_add(batch, prepend_tokens[i], chat.prepend_pos + i, { 0 }, false);
+			common_batch_add(batch, prepend_tokens[i], chat.prepend_pos + i, seqIds, false);
 		batch.logits[chat.prepend_pos + prepend_tokens.size() - 1] = true;
 
 		partial += args.prepend;
@@ -745,7 +749,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		llama_batch batch_view = {
 			n_tokens,
 			batch.token + current_pos,
-			nullptr,
+			nullptr, // embd
 			batch.pos + current_pos,
 			batch.n_seq_id + current_pos,
 			batch.seq_id + current_pos,
@@ -771,7 +775,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		// sample the next token
 		try
 		{
-			sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);
+			sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);  //! @seqIds
 		}
 		catch (const std::runtime_error& e)
 		{
@@ -915,7 +919,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		// Print to console
 		printf("%s", str_token.c_str());
 
-		common_batch_add(batch, sampled_token, current_pos, { 0 }, true);
+		common_batch_add(batch, sampled_token, current_pos, seqIds, true);
 
 		// prepare the next batch with the sampled token
 		if (!next_token)
@@ -933,7 +937,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	stateLock.lock();
 
 	// Remove full response from cache (re-added, with formatting, next generation)
-	llama_kv_self_seq_rm(state.pCtx, 0, pre_response_pos, -1);
+	llama_kv_self_seq_rm(state.pCtx, -1, pre_response_pos, -1); //! @seqIds
 	batch.n_tokens = pre_response_pos;
 	chat.current_pos = pre_response_pos;
 
@@ -1170,7 +1174,7 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 
 	// Clear kv cache
 	ModelState& state = _modelState;
-	llama_kv_self_seq_rm(state.pCtx, 0, current_pos, -1);
+	llama_kv_self_seq_rm(state.pCtx, -1, current_pos, -1);
 
 	// Return removed ids
 	std::vector<RemovedMessage> removedIds;

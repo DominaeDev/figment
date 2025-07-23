@@ -153,6 +153,7 @@
     <ClInclude Include="include\gui\Image.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
+    <ClInclude Include="include\llm\LLMTypes.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Character.h" />

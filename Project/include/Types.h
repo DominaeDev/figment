@@ -30,6 +30,12 @@ inline constexpr size_t operator "" _sz( unsigned long long arg ) noexcept
     return static_cast<size_t>( arg );
 }
 
+#define DEFINE_ENUM_FLAGS(E, T) \
+constexpr enum E operator| (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) | static_cast<T>(b)); }\
+constexpr enum E operator& (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) & static_cast<T>(b)); }\
+constexpr enum E operator^ (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) ^ static_cast<T>(b)); }\
+constexpr enum E operator~ (const enum E a) { return static_cast<enum E>(~static_cast<T>(a)); }
+
 template <std::ranges::range R>
 constexpr auto to_vector(R&& r)
 {

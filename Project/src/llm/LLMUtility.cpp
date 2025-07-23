@@ -1,4 +1,5 @@
 ﻿#include "llm/LLMUtility.h"
+#include "llm/LLMTypes.h"
 #include "util/StringUtility.h"
 #include "Constants.h"
 #include <format>
@@ -434,27 +435,27 @@ std::vector<llama_token> llm_util::tokenize(llama_model* pModel, string prompt, 
 	return prompt_tokens;
 }
 
-bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
+bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string system_prompt, llama_batch& out_pBatch)
 {
 	const int32_t maxCtx = llama_n_ctx(pCtx);
 	const bool is_first = llama_kv_self_used_cells(pCtx) == 0;
 
 	// tokenize the prompt
-	std::vector<llama_token> prompt_tokens = tokenize(pModel, prompt, is_first);
+	std::vector<llama_token> prompt_tokens = tokenize(pModel, system_prompt, is_first);
 
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
+	llama_batch batch = llama_batch_init(maxCtx, 0, Constants::MaxContextSequences);
 	int32_t num_tokens = (int32_t)prompt_tokens.size();
 
 	// Add tokens to batch
-	for (int i = 0; i < num_tokens; ++i) {
+	auto seqIds = llm_util::get_sequences(ContextSequenceId::Shared);
+	for (int i = 0; i < num_tokens; ++i)
+	{
 		batch.token[i] = prompt_tokens[i];
 		batch.pos[i] = i;  // Position in sequence
-		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;  // Sequence ID 0
-		batch.logits[i] = false;  // Don't need logits for most tokens
+		llm_util::set_sequences(batch, i, seqIds);
+		batch.logits[i] = false;
 	}
-	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
 	batch.n_tokens = num_tokens;
 
 	out_pBatch = batch;
@@ -718,4 +719,33 @@ std::string llm_util::get_responder_prelude(Responder responder, llama_context* 
 	string_util::replace(prelude, "assistant", responderName);
 	string_util::replace(prelude, "ASSISTANT", responderName);
 	return prelude;
+}
+
+ContextSequenceList llm_util::get_sequences(ContextSequenceId seq) noexcept
+{
+	ContextSequenceList seqIds;
+	seqIds.reserve(Constants::MaxContextSequences);
+
+	std::array<ContextSequenceId, 4> ids {
+		ContextSequenceId::Bot1,
+		ContextSequenceId::Bot2,
+		ContextSequenceId::Bot3,
+		ContextSequenceId::Bot4,
+	};
+
+	for (size_t i = 0; i < ids.size() && i < Constants::MaxContextSequences; ++i)
+	{
+		if ((bool)(seq & ids[i]))
+			seqIds.push_back(toI(i));
+	}
+	return std::move(seqIds);
+}
+
+void llm_util::set_sequences(llama_batch& batch, int32_t pos, const std::vector<int32_t>& seqIds)
+{
+	batch.n_seq_id[pos] = toI(seqIds.size());
+	for (size_t i = 0; i < seqIds.size() && i < Constants::MaxContextSequences; ++i) {
+        batch.seq_id[pos][i] = seqIds[i];
+    }
+//	memcpy_s(batch.seq_id[pos], Constants::MaxContextSequences, seqIds.data(), std::min(toI(seqIds.size()), Constants::MaxContextSequences));
 }

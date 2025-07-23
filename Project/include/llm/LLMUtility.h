@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "LLMTypes.h"
 #include <llama.h>
 
 namespace llm_util
@@ -27,4 +27,8 @@ namespace llm_util
 
 	extern std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 	extern std::string get_responder_prelude(Responder responder, llama_context* pCtx) noexcept;
+
+	extern ContextSequenceList get_sequences(ContextSequenceId seq) noexcept;
+
+	extern void set_sequences(llama_batch& batch, int32_t pos, const ContextSequenceList& seqIds);
 }
