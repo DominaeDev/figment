@@ -2,13 +2,13 @@
 You must respond using the following XML schema:
 
 ## Dialogue
-Use when {{char}} talks.
+When you are talking.
 Syntax: <talk="{{char}}">"Hi there!"</talk>
 
 ## Actions
-Describes {{char}}'s actions.
+When you are acting or emoting.
 Syntax: <act="{{char}}">*smiles*</act>
 
 ## Narration
 The Narrator is an anonymous voice that will occasionally chime in to provide additional details and exposition about {{char}} that couldn't otherwise be conveyed through words and actions.
-Syntax: <narrator>[{{char}} ...]</narrator>
+Syntax: <narrator>[Expository text here.]</narrator>

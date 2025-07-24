@@ -147,17 +147,11 @@ void llm_util::get_tag_and_name(const string& text, string& tag, string& name)
 	string_util::replace_all(name, "\"", "");
 }
 
-void llm_util::apply_names(string& prompt, string userName, string botName)
-{
-	string_util::replace_all(prompt, "{{user}}", userName);
-	string_util::replace_all(prompt, "{{char}}", botName);
-}
-
 const char* llm_util::name_from_role(Role role)
 {
 	static const char* SYSTEM_NAME = "system";
-	static const char* NARRATOR_NAME = "Narrator";
-	static const char* DIRECTOR_NAME = "Director";
+	static const char* NARRATOR_NAME = "narrator";
+	static const char* DIRECTOR_NAME = "director";
 	static const char* UNKNOWN_NAME = "Unknown";
 	static const char* USER_NAME = "{{user}}";
 	static const char* BOT_NAME = "{{char}}";
@@ -233,7 +227,8 @@ string llm_util::apply_chat_template_prefix(Message msg, string userName, string
 	size_t pos_msg = tmpl.find(MARKER);
 	string prelude = tmpl.substr(0, pos_msg);
 	string postlude = tmpl.substr(pos_msg + strlen(MARKER));
-	apply_names(prelude, userName, botName);
+	string_util::replace_all(prelude, "{{user}}", userName);
+	string_util::replace_all(prelude, "{{char}}", botName);
 
 	string content = msg.content;
 	if (string_util::ends_with(content, postlude))
@@ -435,6 +430,16 @@ std::vector<llama_token> llm_util::tokenize(llama_model* pModel, string prompt, 
 	return prompt_tokens;
 }
 
+llama_batch llm_util::init_batch(llama_context* pCtx)
+{
+	const int32_t maxCtx = llama_n_ctx(pCtx);
+
+	// Prepare a batch for the prompt
+	llama_batch batch = llama_batch_init(maxCtx, 0, Constants::MaxContextSequences);
+	batch.n_tokens = 0;
+	return batch;
+}
+
 bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, std::vector<int32_t>& tokens, llama_batch& out_pBatch)
 {
 	const int32_t maxCtx = llama_n_ctx(pCtx);
@@ -454,23 +459,6 @@ bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, std::vector<
 		batch.logits[i] = false;
 	}
 	batch.n_tokens = num_tokens;
-		
-	{	//! @test
-		string secret = "<|im_start|>The secret word is 'WABBAJOCKEY'.<|im_end|>";
-		std::vector<llama_token> secret_tokens = tokenize(pModel, secret, false);
-		int32_t num_new_tokens = (int32_t)secret_tokens.size();
-		seqIds = llm_util::get_sequences(ContextSequenceId::Bot2);
-		for (int i = 0; i < num_new_tokens; ++i)
-		{
-			int j = num_tokens + i;
-			batch.token[j] = secret_tokens[i];
-			batch.pos[j] = j;  // Position in sequence
-			llm_util::set_sequences(batch, j, seqIds);
-			batch.logits[j] = false;
-		}
-		batch.n_tokens = num_tokens + num_new_tokens;
-		tokens.insert(std::end(tokens), std::begin(secret_tokens), std::end(secret_tokens));
-	}
 
 	out_pBatch = batch;
 	return true;

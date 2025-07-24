@@ -30,12 +30,6 @@ inline constexpr size_t operator "" _sz( unsigned long long arg ) noexcept
     return static_cast<size_t>( arg );
 }
 
-#define DEFINE_ENUM_FLAGS(E, T) \
-constexpr enum E operator| (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) | static_cast<T>(b)); }\
-constexpr enum E operator& (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) & static_cast<T>(b)); }\
-constexpr enum E operator^ (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) ^ static_cast<T>(b)); }\
-constexpr enum E operator~ (const enum E a) { return static_cast<enum E>(~static_cast<T>(a)); }
-
 template <std::ranges::range R>
 constexpr auto to_vector(R&& r)
 {
@@ -44,50 +38,13 @@ constexpr auto to_vector(R&& r)
 }
 
 typedef std::string string;
-struct llama_chat_message;
 
-enum class Role
-{
-	Undefined = 0,
-	System,
-	Narrator,
-	Director,
-	User,
-	Bot,
-};
+// Macros
 
-enum class MessageType
-{
-	Undefined = 0, 
-
-	Dialogue,
-	Action,
-	Thought,
-
-	SystemMessage,
-	Narration,
-	Direction,
-};
-
-struct Message 
-{
-	Role role;
-    string content;
-    string name;
-};
-using Messages = std::vector<Message>;
-
-struct Submessage
-{
-	MessageType msgType = MessageType::Undefined;
-	string content;
-};
-
-enum class Responder
-{ 
-	None, 
-	User, 
-	Narrator, 
-	Director, 
-	Bot 
-};
+#ifndef DEFINE_ENUM_FLAGS
+#define DEFINE_ENUM_FLAGS(E, T) \
+constexpr enum E operator| (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) | static_cast<T>(b)); }\
+constexpr enum E operator& (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) & static_cast<T>(b)); }\
+constexpr enum E operator^ (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) ^ static_cast<T>(b)); }\
+constexpr enum E operator~ (const enum E a) { return static_cast<enum E>(~static_cast<T>(a)); }
+#endif

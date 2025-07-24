@@ -12,6 +12,7 @@
 #include "gui/Renderers.h"
 #include "gui/TextureStore.h"
 #include "model/AppState.h"
+#include "model/ChatSession.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
@@ -171,14 +172,12 @@ void MainFrame::StartChat()
 	auto pLLM = Application::GetLLM();
 	if (pLLM && pLLM->HasLoadedModel())
 	{
-		string system_prompt = ReadTextFile("./resources/prompting/prompt_system.txt").value_or("");
-		if (system_prompt.empty())
-			DebugPrintLn(">> WARNING: No system prompt!");
-		string formatting_spec = ReadTextFile("./resources/prompting/prompt_formatting.txt").value_or("");
-		if (formatting_spec.empty())
-			DebugPrintLn(">> WARNING: No formatting spec!");
-		string_util::replace(system_prompt, "##FORMATTING_SPEC##", formatting_spec);
-		pLLM->InitializeChat(system_prompt, {});
+		ChatSession session;
+		session.Initialize();
+		session.LoadCharacter(Role::User, "./characters/user.xml");
+		session.LoadCharacter(Role::Bot, "./characters/character.xml");
+
+		pLLM->InitializeChat(session, {});
 
 		_bStartedChat = true;
 	}
@@ -330,8 +329,7 @@ void MainFrame::AutoChat()
 		if (auto script = ReadTextFile("resources/auto_script.txt"))
 		{
 			string text = script.value();
-			string_util::replace_all(text, "{{user}}", pLLM->GetUserName());
-			string_util::replace_all(text, "{{char}}", pLLM->GetBotName());
+			text = pLLM->GetSession().ApplyNames(text);
 			_autoScript = string_util::split(text, "\n");
 		}
 		_autoScriptIndex = 0;

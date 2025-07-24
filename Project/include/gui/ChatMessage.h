@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "llm/LLMTypes.h"
 #include "Control.h"
 #include "Graphics.h"
 

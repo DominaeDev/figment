@@ -1,7 +1,7 @@
 #pragma once
 
 #include "llm/LLMTypes.h"
-#include "model/Character.h"
+#include "model/ChatSession.h"
 #include <llama.h>
 #include <vector>
 #include <set>
@@ -50,7 +50,7 @@ struct ContextBlock
 	int32_t ctx_pos;
 	bool cached = false;
 	int ttl = -1;
-	ContextSequenceList seqIds {};
+	ContextSequenceId seqId;
 
 	size_t length() const { return tokens.size(); }
 };
@@ -116,7 +116,7 @@ public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool InitializeChat(string systemPrompt, Messages messages);
+	bool InitializeChat(ChatSession session, Messages messages);
 	void Shutdown();
 
 	bool IsLoadingModel() const { return _readyState.load(std::memory_order_relaxed) == ReadyState::Initializing; }
@@ -144,9 +144,7 @@ public:
 	std::pair<LLMStatus, bool> PollStatus();
 
 	bool DumpContext(string filename) const;
-	
-	string GetUserName() const;
-	string GetBotName() const;
+	const ChatSession& GetSession() const { return _session; }
 
 private:
 	void ClearResponseQueue();
@@ -214,6 +212,5 @@ private:
 
 	std::unique_ptr<std::jthread> _workerThread;
 
-	Character user;
-	Character bot;
+	ChatSession _session;
 };
