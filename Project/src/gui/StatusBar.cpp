@@ -31,7 +31,12 @@ void StatusBar::SetModelInfo(LLMStatus status)
 		_pModelInfo->SetText("");
 	
 	if (!status.modelName.empty())
-		_pModelInfo->SetText(std::format("Model: {} Ctx: {:d}/{:d} ({:.2f} t/s)", status.modelName, status.usedCtxSize, status.allocCtxSize, status.tokensPerSec));
+	{
+		string text = std::format("Model: {} Ctx: {:d}/{:d}", status.modelName, status.usedCtxSize, status.allocCtxSize);
+		if (status.tokensPerSec > 0.0)
+			text += std::format(" ({:.1f} t/s)", status.tokensPerSec);
+		_pModelInfo->SetText(text);
+	}
 	else
 		_pModelInfo->SetText("");
 }

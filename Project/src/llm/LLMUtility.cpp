@@ -435,28 +435,43 @@ std::vector<llama_token> llm_util::tokenize(llama_model* pModel, string prompt, 
 	return prompt_tokens;
 }
 
-bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string system_prompt, llama_batch& out_pBatch)
+bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, std::vector<int32_t>& tokens, llama_batch& out_pBatch)
 {
 	const int32_t maxCtx = llama_n_ctx(pCtx);
 	const bool is_first = llama_kv_self_used_cells(pCtx) == 0;
 
-	// tokenize the prompt
-	std::vector<llama_token> prompt_tokens = tokenize(pModel, system_prompt, is_first);
-
 	// Prepare a batch for the prompt
 	llama_batch batch = llama_batch_init(maxCtx, 0, Constants::MaxContextSequences);
-	int32_t num_tokens = (int32_t)prompt_tokens.size();
+	int32_t num_tokens = (int32_t)tokens.size();
 
 	// Add tokens to batch
 	auto seqIds = llm_util::get_sequences(ContextSequenceId::Shared);
 	for (int i = 0; i < num_tokens; ++i)
 	{
-		batch.token[i] = prompt_tokens[i];
+		batch.token[i] = tokens[i];
 		batch.pos[i] = i;  // Position in sequence
 		llm_util::set_sequences(batch, i, seqIds);
 		batch.logits[i] = false;
 	}
 	batch.n_tokens = num_tokens;
+		
+	{	//! @test
+		string secret = "<|im_start|>The secret word is 'WABBAJOCKEY'.<|im_end|>";
+		std::vector<llama_token> secret_tokens = tokenize(pModel, secret, false);
+		int32_t num_new_tokens = (int32_t)secret_tokens.size();
+		seqIds = llm_util::get_sequences(ContextSequenceId::Bot1);
+		for (int i = 0; i < num_new_tokens; ++i)
+		{
+			int j = num_tokens + i;
+			batch.token[j] = secret_tokens[i];
+			batch.pos[j] = j;  // Position in sequence
+			llm_util::set_sequences(batch, j, seqIds);
+			batch.logits[j] = false;
+		}
+		batch.n_tokens = num_tokens + num_new_tokens;
+		tokens.insert(std::end(tokens), std::begin(secret_tokens), std::end(secret_tokens));
+	}
+
 
 	out_pBatch = batch;
 	return true;
@@ -726,16 +741,9 @@ ContextSequenceList llm_util::get_sequences(ContextSequenceId seq) noexcept
 	ContextSequenceList seqIds;
 	seqIds.reserve(Constants::MaxContextSequences);
 
-	std::array<ContextSequenceId, 4> ids {
-		ContextSequenceId::Bot1,
-		ContextSequenceId::Bot2,
-		ContextSequenceId::Bot3,
-		ContextSequenceId::Bot4,
-	};
-
-	for (size_t i = 0; i < ids.size() && i < Constants::MaxContextSequences; ++i)
+	for (size_t i = 0; i < AllContextSequenceIds.size() && i < Constants::MaxContextSequences; ++i)
 	{
-		if ((bool)(seq & ids[i]))
+		if ((bool)(seq & AllContextSequenceIds[i]))
 			seqIds.push_back(toI(i));
 	}
 	return std::move(seqIds);

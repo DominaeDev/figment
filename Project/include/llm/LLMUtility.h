@@ -16,7 +16,7 @@ namespace llm_util
 	extern string& sanitize_response(string& text);
 	extern string& complete_message(string& text);
 	extern void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word);
-	extern bool init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
+	extern bool init_batch(llama_model* pModel, llama_context* pCtx, std::vector<int32_t>& tokens, llama_batch& out_pBatch);
 	extern void init_batch_logits(llama_batch& batch);
 	extern std::vector<llama_token> tokenize(llama_model* pModel, string prompt, bool bAddSpecial);
 

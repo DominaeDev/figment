@@ -31,5 +31,5 @@ namespace Constants
 	extern const int ContextSize;
 	extern const int MaxResponseLength;
 	extern const float ContextWindowKeepRatio;
-	constexpr size_t MaxContextSequences = 1;
+	constexpr size_t MaxContextSequences = 3;
 }

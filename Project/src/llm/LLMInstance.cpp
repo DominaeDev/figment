@@ -235,11 +235,11 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_sampler* default_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
 		if (default_grammar_sampler)
 		{
-			_modelState.grammars[castEnum(Grammar::Default)]				= default_grammar_sampler;
-			_modelState.grammars[castEnum(Grammar::StubDialogue)]			= llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-talk");
+			_modelState.grammars[castEnum(Grammar::Default)]			= default_grammar_sampler;
+			_modelState.grammars[castEnum(Grammar::StubDialogue)]		= llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-talk");
 			_modelState.grammars[castEnum(Grammar::StubAction)]			= llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-act");
 			_modelState.grammars[castEnum(Grammar::StubNarration)]		= llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-narr");
-			_modelState.grammars[castEnum(Grammar::ContinueDialogue)]		= llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-talk");
+			_modelState.grammars[castEnum(Grammar::ContinueDialogue)]	= llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-talk");
 			_modelState.grammars[castEnum(Grammar::ContinueAction)]		= llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-act");
 			_modelState.grammars[castEnum(Grammar::ContinueNarration)]	= llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-narr");
 
@@ -303,12 +303,13 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		llama_batch_free(_contextState.batch);
 
 	// Prepare a batch for the prompt
-	if (!llm_util::init_batch(_modelState.pModel, _modelState.pCtx, prompt, _contextState.batch))
+	if (!llm_util::init_batch(_modelState.pModel, _modelState.pCtx, _contextState.system_tokens, _contextState.batch))
 	{
 		_readyState.store(ReadyState::Invalid);
 		PushSignal(LLMStatusSignal::InitializeChatFailure);
 		return false;
 	}
+	_contextState.current_pos = _contextState.batch.n_tokens; //! @test
 
 	if (_contextState.batch.n_tokens > 0 && llama_decode(_modelState.pCtx, _contextState.batch))
 	{
@@ -643,7 +644,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	chat.prepend_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append to batch
-	auto seqIds = llm_util::get_sequences(ContextSequenceId::Shared); //! @seqIds from blocks?
+	auto seqIds = llm_util::get_sequences(ContextSequenceId::Shared);
 	for (int i = 0; i < prompt_tokens.size(); ++i)
 		common_batch_add(batch, prompt_tokens[i], current_pos + i, seqIds, false);
 	batch.n_tokens = current_pos + (int32_t)prompt_tokens.size();
@@ -736,6 +737,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	stateLock.unlock();
 	auto startTime = std::chrono::steady_clock::now();
 
+	ContextSequenceId currentSequence = ContextSequenceId::Bot1;
+
 	while (true)
 	{
 		bool next_token = true;
@@ -746,15 +749,29 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			break; // Max limit reached
 
 		const int32_t n_tokens = std::min(n_batch, batch.n_tokens - current_pos);
-		llama_batch batch_view = {
-			n_tokens,
-			batch.token + current_pos,
-			nullptr, // embd
-			batch.pos + current_pos,
-			batch.n_seq_id + current_pos,
-			batch.seq_id + current_pos,
-			batch.logits + current_pos,
-		};
+		ContextSequenceList seq_ids = llm_util::get_sequences(currentSequence);
+		llama_batch batch_view = llama_batch_init(n_tokens, 0, 1);
+		batch_view.n_tokens = n_tokens;
+		batch_view.embd = nullptr;
+		for (int32_t i = 0; i < n_tokens; ++i)
+		{
+			int idx = current_pos + i;
+			batch_view.token[i] = batch.token[idx];
+			batch_view.pos[i] = batch.pos[idx];
+			batch_view.n_seq_id[i] = (int32_t)seq_ids.size();
+			batch_view.seq_id[i] = seq_ids.data();
+			batch_view.logits[i] = i == n_tokens - 1;
+		}
+		
+		//llama_batch batch_view = {
+		//	n_tokens,
+		//	batch.token + current_pos,
+		//	nullptr, // embd
+		//	batch.pos + current_pos,
+		//	batch.n_seq_id + current_pos,
+		//	batch.seq_id + current_pos,
+		//	batch.logits + current_pos,
+		//};
 
 		// check if we have enough space in the context to evaluate this batch
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -770,12 +787,13 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			return;
 		}
 
-		current_pos += batch_view.n_tokens;
+		current_pos += n_tokens;
+//		llama_batch_free(batch_view);
 
 		// sample the next token
 		try
 		{
-			sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);  //! @seqIds
+			sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);
 		}
 		catch (const std::runtime_error& e)
 		{
