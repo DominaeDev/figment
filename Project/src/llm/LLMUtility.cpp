@@ -459,7 +459,7 @@ bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, std::vector<
 		string secret = "<|im_start|>The secret word is 'WABBAJOCKEY'.<|im_end|>";
 		std::vector<llama_token> secret_tokens = tokenize(pModel, secret, false);
 		int32_t num_new_tokens = (int32_t)secret_tokens.size();
-		seqIds = llm_util::get_sequences(ContextSequenceId::Bot1);
+		seqIds = llm_util::get_sequences(ContextSequenceId::Bot2);
 		for (int i = 0; i < num_new_tokens; ++i)
 		{
 			int j = num_tokens + i;
@@ -471,7 +471,6 @@ bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, std::vector<
 		batch.n_tokens = num_tokens + num_new_tokens;
 		tokens.insert(std::end(tokens), std::begin(secret_tokens), std::end(secret_tokens));
 	}
-
 
 	out_pBatch = batch;
 	return true;
@@ -740,6 +739,13 @@ ContextSequenceList llm_util::get_sequences(ContextSequenceId seq) noexcept
 {
 	ContextSequenceList seqIds;
 	seqIds.reserve(Constants::MaxContextSequences);
+
+	static constexpr std::array<ContextSequenceId, 5> AllContextSequenceIds {
+		ContextSequenceId::Bot1,
+		ContextSequenceId::Bot2,
+		ContextSequenceId::Bot3,
+		ContextSequenceId::Bot4,
+	};
 
 	for (size_t i = 0; i < AllContextSequenceIds.size() && i < Constants::MaxContextSequences; ++i)
 	{

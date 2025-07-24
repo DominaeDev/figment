@@ -720,6 +720,33 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	if (auto pGrammar = state.SetActiveGrammar(grammar))
 		llama_sampler_reset(pGrammar);
 
+	// Decode up until prepend_position
+	{
+		const int32_t n_tokens = std::min(n_batch, pre_response_pos - current_pos);
+		if (n_tokens > 0)
+		{
+			ContextSequenceList seq_ids = llm_util::get_sequences(ContextSequenceId::Shared);
+			llama_batch batch_view = llama_batch_init(n_tokens, 0, 1);
+			batch_view.n_tokens = n_tokens;
+			for (int32_t i = 0; i < n_tokens; ++i)
+			{
+				int idx = current_pos + i;
+				batch_view.token[i] = batch.token[idx];
+				batch_view.pos[i] = batch.pos[idx];
+				batch_view.n_seq_id[i] = (int32_t)seq_ids.size();
+				batch_view.seq_id[i] = seq_ids.data();
+				batch_view.logits[i] = i == n_tokens - 1;
+			}
+
+			if (batch_view.n_tokens > 0 && llama_decode(state.pCtx, batch_view))
+			{
+				onComplete(InternalError::DecodeError, "llama_decode returned error");
+				return;
+			}
+			current_pos += n_tokens;
+		}
+	}
+
 	if (!args.prepend.empty())
 	{
 		auto prepend_tokens = llm_util::tokenize(state.pModel, args.prepend, false);
@@ -737,7 +764,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	stateLock.unlock();
 	auto startTime = std::chrono::steady_clock::now();
 
-	ContextSequenceId currentSequence = ContextSequenceId::Bot1;
+	ContextSequenceId currentSequence = ContextSequenceId::Bot2;
 
 	while (true)
 	{
@@ -752,7 +779,6 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		ContextSequenceList seq_ids = llm_util::get_sequences(currentSequence);
 		llama_batch batch_view = llama_batch_init(n_tokens, 0, 1);
 		batch_view.n_tokens = n_tokens;
-		batch_view.embd = nullptr;
 		for (int32_t i = 0; i < n_tokens; ++i)
 		{
 			int idx = current_pos + i;
