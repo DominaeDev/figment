@@ -1200,7 +1200,7 @@ std::vector<RemovedMessage> LLMInstance::RollbackUserMessage()
 	for (int i = (int32_t)_contextState.blocks.size() - 1; i >= 0; --i)
 	{
 		if (_contextState.blocks[i].role == Role::User)
-			return RemoveMessages((int32_t)_contextState.blocks.size() - i);
+			return impl_RemoveMessages((int32_t)_contextState.blocks.size() - i, true);
 	}
 	return {};
 }
