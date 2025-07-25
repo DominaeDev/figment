@@ -64,11 +64,15 @@ struct ContextState
 	int32_t prepend_pos = 0;
 	int32_t pre_response_pos = 0;
 	int32_t blocks_begin = 0;	// post-system prompt
-	int32_t blocks_end = 0;		// bottom
+	int32_t floor_pos = 0;		// bottom
 	llama_batch batch {};
 
 	int32_t AssignBlockPositions();
 	void SwapInPersona(size_t index);
+
+	// Testing
+	std::vector<int32_t> secret_tokens;
+	int32_t secret_pos = 0;
 };
 
 enum class LLMStatusSignal {

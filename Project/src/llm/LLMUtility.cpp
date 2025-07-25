@@ -441,6 +441,9 @@ llama_batch llm_util::init_batch(llama_context* pCtx)
 	// Prepare a batch for the prompt
 	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
 	batch.n_tokens = 0;
+
+	for (size_t i = 0; i < Constants::ContextSize; ++i)
+		batch.token[i] = 0;
 	return batch;
 }
 

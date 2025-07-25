@@ -79,7 +79,7 @@ llama_sampler* ModelState::SetActiveGrammar(Grammar grammar)
 
 int32_t ContextState::AssignBlockPositions()
 {
-	size_t pos = system_tokens.size();
+	size_t pos = blocks_begin;
 	for (auto& block : blocks)
 	{
 		block.ctx_pos = (int32_t)pos;
@@ -169,41 +169,78 @@ static int32_t ctx_remove_and_shift(llama_context* pCtx, ContextState& chat, std
 	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
 	{
 		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
+		batch.n_seq_id[pos_remove_begin + i] = batch.n_seq_id[pos_remove_end + i];
+		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
+		batch.seq_id[pos_remove_begin + i] = batch.seq_id[pos_remove_end + i];
 		batch.logits[i] = false;
 	}
 	batch.n_tokens -= shift_amount;
 	return (int32_t)-shift_amount;
 }
 
-static int32_t ctx_insert(llama_context* pCtx, llama_batch& batch, llama_pos pos_insert, ContextBlock& block)
+static int32_t ctx_shift_down(llama_context* pCtx, ContextState& ctxState, int32_t pos, int32_t length)
 {
-	// Where to insert in the existing context
-	int32_t shift_amount = (int32_t)block.length();
+	llama_batch& batch = ctxState.batch;
 
-	// Shift cache
-	llama_kv_self_seq_add(pCtx, 0, pos_insert, -1, shift_amount);
+	int32_t partition_size = std::min(ctxState.floor_pos - ctxState.current_pos, length);
+	int32_t shifted = 0;
+	int32_t shift_amount = ctxState.floor_pos - (pos + length);
 
-	// Shift batch
-	int32_t n_batch = batch.n_tokens;
-	for (int32_t i = n_batch - 1; i >= pos_insert; --i)
+	while (shifted < length)
 	{
-		batch.token[i + shift_amount] = batch.token[i];
-		batch.logits[i + shift_amount] = batch.logits[i];
+		int32_t piece_length = std::min(partition_size, length - shifted);
+		int32_t shift_from = pos + length - (shifted + piece_length);
+		int32_t shift_to = shift_from + piece_length;
+
+		int32_t k0 = pos + length - shifted;
+		int32_t k1 = ctxState.current_pos - shifted;
+		int32_t k2 = ctxState.floor_pos - partition_size - shifted;
+
+		// Shift down kv cache
+		llama_kv_self_seq_add(pCtx, 0, shift_from, shift_to - 1, shift_amount);
+
+		// Shift down batch
+		for (int32_t i = 0; i < partition_size; ++i)
+		{
+			batch.pos[k2 + i] = k2 + i;
+			batch.token[k2 + i] = batch.token[shift_from + i];
+			batch.n_seq_id[k2 + i] = batch.n_seq_id[shift_from + i];
+			batch.seq_id[k2 + i] = batch.seq_id[shift_from + i];
+			batch.logits[k2 + i] = false;
+		}
+
+		// Apply down-shifts
+		llama_kv_self_update(pCtx);
+
+		// Shift up kv cache
+		if (k1 > k0)
+		{
+			llama_kv_self_seq_add(pCtx, 0, k0, k1 - 1, -shift_amount);
+
+			// Shift up batch
+			for (int32_t i = 0; i < k1 - k0; ++i)
+			{
+				batch.pos[shift_from + i] = shift_from + i;
+				batch.token[shift_from + i] = batch.token[k0 + i];
+				batch.n_seq_id[shift_from + i] = batch.n_seq_id[k0 + i];
+				batch.seq_id[shift_from + i] = batch.seq_id[k0 + i];
+				batch.logits[shift_from + i] = false;
+			}
+
+			// Apply up-shifts
+			llama_kv_self_update(pCtx);
+		}
+
+		shifted += piece_length;
 	}
 
-	// Insert tokens into batch
-	for (int32_t i = 0; i < shift_amount; ++i)
-	{
-		batch.token[pos_insert + i] = block.tokens[i];
-		batch.logits[pos_insert + i] = false;
-	}
-	batch.n_tokens += shift_amount;
+	batch.n_tokens -= shifted;
+	ctxState.current_pos -= shifted;
+	ctxState.blocks_begin -= shifted;
+	ctxState.floor_pos -= shifted;
 
-	block.ctx_pos = pos_insert;
-	block.cached = true;
-	return shift_amount;
+	return ctxState.floor_pos;
 }
-
 
 bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 {
@@ -265,10 +302,9 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 
 	_contextState.batch = llm_util::init_batch(pCtx);
 	llama_batch& batch = _contextState.batch;
-
-	_contextState.system_tokens.clear();
 	int32_t& current_pos = _contextState.current_pos;
 	current_pos = 0;
+	_contextState.floor_pos = llama_n_ctx(pCtx);
 
 	// Init system prompt
 	string system_prompt = _session.GetSystemPrompt();
@@ -279,7 +315,6 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	Messages systemMsgs;
 	systemMsgs.push_back(Message { Role::System, system_prompt, "system" });
 	systemMsgs.push_back(Message { Role::System, botPersona, "system" });
-//	systemMsgs.push_back(Message { Role::System, "The secret word is 'Brachiosaurus'", "system" });
 	systemMsgs.push_back(Message { Role::System, userPersona, "system" });
 
 	for (auto& systemMsg : systemMsgs)
@@ -312,9 +347,51 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 			return false;
 
 		_contextState.system_tokens.insert(std::end(_contextState.system_tokens), std::cbegin(tokens), std::cend(tokens));
+		_contextState.blocks_begin = current_pos;
 	}
 
-	current_pos = (int32_t)_contextState.system_tokens.size();
+	// Insert secret
+	{
+		string secret = llm_util::apply_chat_template(Message { Role::System, "The secret word is 'Brachiosaurus'.", "system" }, _modelState.pCtx, false);
+		auto secret_tokens = llm_util::tokenize(_modelState.pModel, secret, false);
+		current_pos += (int32_t)_contextState.secret_tokens.size();
+
+		int32_t n_tokens = (int32_t)secret_tokens.size();
+		
+		for (int32_t i = 0; i < n_tokens; ++i)
+		{
+			int idx = current_pos + i;
+			batch.token[idx] = secret_tokens[i];
+			batch.pos[idx] = idx;
+			batch.n_seq_id[idx] = 1;
+			batch.seq_id[idx][0] = 0;
+			batch.logits[idx] = false;
+		}
+		batch.n_tokens += n_tokens;
+		
+		// Place in kv cache.
+		llama_batch batch_view = llm_util::init_batch_view(pCtx, batch, current_pos, current_pos + n_tokens);
+		if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view))
+			return false;
+		
+		_contextState.secret_pos = current_pos;
+		current_pos += n_tokens;
+
+		_contextState.secret_tokens.insert(std::end(_contextState.secret_tokens), std::cbegin(secret_tokens), std::cend(secret_tokens));
+		_contextState.blocks_begin = current_pos;
+
+		// Shift secret down
+		_contextState.secret_pos = ctx_shift_down(pCtx, _contextState, _contextState.secret_pos, n_tokens);
+/*		const int shift = 600;
+		const int offset = (int32_t)_contextState.secret_tokens.size();
+		llama_kv_self_seq_add(pCtx, 0, _contextState.secret_pos, _contextState.secret_pos + (int32_t)_contextState.secret_tokens.size(), shift);
+
+		current_pos -= offset;
+		_contextState.blocks_begin -= offset;
+	*/	
+		DumpContext("prompt.txt");
+		int k = 0;
+	}
 
 	// Initialize rng
 #if _DEBUG
@@ -343,7 +420,7 @@ bool LLMInstance::ResetChat(int seed)
 		const int32_t maxCtx = llama_n_ctx(pCtx);
 
 		// Reset batch pointer
-		_contextState.current_pos = (int32_t)_contextState.system_tokens.size();
+		_contextState.current_pos = _contextState.blocks_begin;
 		_contextState.blocks.clear();
 
 		// Reinit the batch
@@ -550,13 +627,13 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	llama_batch& batch = chat.batch;
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 
-	string userName = _session.GetNameOf(Role::Bot);
+	string userName = _session.GetNameOf(Role::User);
 	string botName = _session.GetNameOf(Role::Bot);
 
 	// Prepare prompt
 	int32_t& current_pos = chat.current_pos;
-	current_pos = llama_kv_self_used_cells(state.pCtx);
-	int32_t n_batch = llama_n_batch(state.pCtx);
+//	current_pos = llama_kv_self_used_cells(state.pCtx);
+//	int32_t n_batch = llama_n_batch(state.pCtx);
 	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 
 	std::vector<llama_token> prompt_tokens;
@@ -608,7 +685,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	size_t ctx_reserve = prompt_tokens.size() + Constants::MaxResponseLength;
 	if (current_pos + ctx_reserve > ctx_size)
 	{
-		size_t ctx_chat_max = ctx_size - chat.system_tokens.size(); // Exclude system prompt
+		size_t ctx_chat_max = ctx_size - chat.blocks_begin; // Exclude system prompt
 		size_t free_tokens = std::max(static_cast<int32_t>(ctx_reserve), static_cast<int32_t>(ctx_chat_max * (1.0f - Constants::ContextWindowKeepRatio)));
 		
 		size_t total = 0;
@@ -736,7 +813,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			break; // Cancelled
 		if (current_pos >= ctx_size)
 			break; // Max limit reached
-
+		//init_batch_view
 		const int32_t n_tokens = std::min(n_batch, batch.n_tokens - current_pos);
 		llama_batch batch_view = {
 			n_tokens,
@@ -1156,7 +1233,7 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 	}
 	else
 	{
-		current_pos = toI(_contextState.system_tokens.size());
+		current_pos = _contextState.blocks_begin;
 	}
 	
 	// Update batch
@@ -1339,8 +1416,8 @@ bool LLMInstance::PollResponse(MessagePiece& piece)
 
 bool LLMInstance::DumpContext(string filename) const
 {
-	if (!IsReady())
-		return false;
+//	if (!IsReady())
+//		return false;
 
 	const ModelState& state = _modelState; //! @threading Don't acquire lock since we're only using this for debugging.
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
@@ -1370,13 +1447,16 @@ bool LLMInstance::DumpContext(string filename) const
 		}
 	};
 
+	if (batch.token == nullptr || batch.n_tokens == 0)
+		return false;
+
 	// Detokenize the batched tokens
 	string result;
 	result.reserve(65536);
-
-	for (int32_t i = 0; i < batch.n_tokens; ++i)
+	for (int32_t i = 0; i < Constants::ContextSize; ++i)
 		result.append(fnTokenStr(batch.token[i]));
 
+	// Cached blocks
 	for (auto& block : _contextState.blocks)
 	{
 		if (block.cached)
