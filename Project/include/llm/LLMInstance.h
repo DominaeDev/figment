@@ -127,7 +127,7 @@ public:
 	bool InitializeChat(ChatSession session, Messages messages);
 	void Shutdown();
 
-	bool IsLoadingModel() const { return _readyState.load(std::memory_order_relaxed) == ReadyState::Initializing; }
+	bool IsLoadingModel() const { return _readyState.load() == ReadyState::LoadingModel; }
 	bool HasLoadedModel() const { return _modelState.pModel != nullptr; }
 	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool IsReady() const;
@@ -151,7 +151,7 @@ public:
 	bool PollResponse(MessagePiece& piece);
 	std::pair<LLMStatus, bool> PollStatus();
 
-	bool DumpContext(string filename) const;
+	bool DumpContext(bool full) const;
 
 	const ChatSession& GetSession() const { return _session; }
 

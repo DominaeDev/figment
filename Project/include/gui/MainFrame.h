@@ -21,7 +21,7 @@ public:
 	static void SetStatusBar(string message);
 	static MainFrame& GetInstance() { return *s_pInstance; }
 
-	bool HandleKeyPress(SDL_Keycode key);
+	bool HandleKeyboardEvent(SDL_KeyboardEvent event);
 
 protected:
 	virtual void OnUpdate(float fDeltaTime) override;

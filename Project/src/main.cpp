@@ -110,25 +110,13 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 	if (event->type == SDL_EVENT_QUIT)
 	{
 		Application::GetLLM()->Halt();
-		return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
+		return SDL_APP_SUCCESS;
 	}
 
-	if (event->type == SDL_EVENT_KEY_DOWN)
+	if (event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP)
 	{	
-		if (static_cast<MainFrame*>(pAppState->pTopFrame)->HandleKeyPress(event->key.key))
+		if (static_cast<MainFrame*>(pAppState->pTopFrame)->HandleKeyboardEvent(event->key))
 			return SDL_APP_CONTINUE;
-
-		switch (event->key.key)
-		{
-		case SDLK_F11:
-			Application::GetLLM()->DumpContext("prompt.txt");
-			break;
-		}
-	}
-
-	if (event->type == SDL_EVENT_KEY_UP)
-	{
-		// ...
 	}
 
 	if (pAppState->pTopFrame != nullptr)

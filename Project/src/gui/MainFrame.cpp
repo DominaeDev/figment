@@ -393,36 +393,41 @@ void MainFrame::PollStatus()
 	}
 }
 
-bool MainFrame::HandleKeyPress(SDL_Keycode key)
+bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 {
 	auto pLLM = Application::GetLLM();
-	switch (key)
+	if (event.down && !event.repeat)
 	{
-	case SDLK_F2:
-		LoadModel();
-		return true;
-	case SDLK_F3:
-		UnloadModel();
-		return true;
-	case SDLK_F9:
-	{
-		auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
-		if (!pLLM->Continue(responseId, subMessageId, true))
-			return pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined);
-		break;
-	}
-	case SDLK_F10:
-		pLLM->Halt();
+		switch (event.key)
+		{
+		case SDLK_F2:
+			LoadModel();
+			return true;
+		case SDLK_F3:
+			UnloadModel();
+			return true;
+		case SDLK_F9:
+		{
+			auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
+			if (!pLLM->Continue(responseId, subMessageId, true))
+				return pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined);
+			break;
+		}
+		case SDLK_F10:
+			pLLM->Halt();
 #if AUTOCHAT
-		_bAutoChat = false;
+			_bAutoChat = false;
 #endif		
-		break;
-
+			break;
+		case SDLK_F11:
+			pLLM->DumpContext((event.mod & SDL_KMOD_LSHIFT) != 0);
+			break;
 #if AUTOCHAT
-	case SDLK_F5:
-		_bAutoChat = !_bAutoChat;
-		return true;
+		case SDLK_F5:
+			_bAutoChat = !_bAutoChat;
+			return true;
 #endif
+		}
 	}
 	return false;
 }
