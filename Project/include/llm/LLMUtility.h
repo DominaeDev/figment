@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "llm/LLMTypes.h"
 #include <llama.h>
 
 namespace llm_util
@@ -16,6 +16,9 @@ namespace llm_util
 	extern string& sanitize_response(string& text);
 	extern string& complete_message(string& text);
 	extern void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word);
+	
+	extern llama_batch init_batch(llama_context* pCtx);
+	extern llama_batch init_batch_view(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t end, bool logit = false);
 	extern bool init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 	extern void init_batch_logits(llama_batch& batch);
 	extern std::vector<llama_token> tokenize(llama_model* pModel, string prompt, bool bAddSpecial);

@@ -205,9 +205,11 @@ static int32_t ctx_insert(llama_context* pCtx, llama_batch& batch, llama_pos pos
 }
 
 
-bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
+bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 {
 	std::scoped_lock lock(_stateMutex);
+
+	_session = session;
 
 	if (_readyState < ReadyState::ModelLoaded || !_modelState.pModel)
 		return false;
@@ -215,9 +217,6 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 	PushSignal(LLMStatusSignal::InitializingChat);
 
 	_contextState = {};
-
-	user.LoadFromXml("characters/user.xml"); //! tmp
-	bot.LoadFromXml("characters/character.xml"); //! tmp
 
 	// Initialize sampler + grammar
 	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
@@ -230,15 +229,15 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 
 		// Load grammar(s)
 		string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
-		string_util::replace_all(grammar, "##NAME_PATTERN##", "(\"" + bot.name + "\")");
+		string_util::replace_all(grammar, "##NAME_PATTERN##", "(\"" + _session.GetNameOf(Role::Bot) + "\")");
 		llama_sampler* default_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
 		if (default_grammar_sampler)
 		{
-			_modelState.grammars[castEnum(Grammar::Default)]				= default_grammar_sampler;
-			_modelState.grammars[castEnum(Grammar::StubDialogue)]			= llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-talk");
+			_modelState.grammars[castEnum(Grammar::Default)]			= default_grammar_sampler;
+			_modelState.grammars[castEnum(Grammar::StubDialogue)]		= llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-talk");
 			_modelState.grammars[castEnum(Grammar::StubAction)]			= llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-act");
 			_modelState.grammars[castEnum(Grammar::StubNarration)]		= llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-narr");
-			_modelState.grammars[castEnum(Grammar::ContinueDialogue)]		= llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-talk");
+			_modelState.grammars[castEnum(Grammar::ContinueDialogue)]	= llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-talk");
 			_modelState.grammars[castEnum(Grammar::ContinueAction)]		= llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-act");
 			_modelState.grammars[castEnum(Grammar::ContinueNarration)]	= llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-narr");
 
@@ -259,66 +258,63 @@ bool LLMInstance::InitializeChat(string system_prompt, Messages messages)
 		_modelState.pActiveGrammar = default_grammar_sampler;
 	}
 
-	// Init system prompt
-	string prompt = string_util::trim(system_prompt);
-	if (!string_util::empty_or_whitespace(bot.description))
-	{
-		string persona;
-		persona.reserve(bot.description.size() + 20);
-		persona.append("# About {{char}}:\n");
-		persona.append(string_util::trim(bot.description));
-		string_util::replace(prompt, "##CHARACTER_INFO##", persona);
-	}	
-	if (!string_util::empty_or_whitespace(user.description))
-	{
-		string user_persona;
-		user_persona.reserve(user.description.size() + 20);
-		user_persona.append("# About {{user}}:\n");
-		user_persona.append(string_util::trim(user.description));
-		string_util::replace(prompt, "##USER_INFO##", user_persona);
-	}
-
-	messages.insert(std::begin(messages), Message { Role::System, prompt });
-	prompt = llm_util::apply_chat_template(messages, _modelState.pCtx, false);
-
-	llm_util::apply_names(prompt, user.name, bot.name);
-
+	// Clear kv cache
 	llama_context* pCtx = _modelState.pCtx;
-
-	// Tokenize system prompt
-	_contextState.system_tokens = llm_util::tokenize(_modelState.pModel, prompt, true);
-	_contextState.current_pos = (int32_t)_contextState.system_tokens.size();
-
-	// Prepare assistant prelude
-//	string assistant_prefix = llm_util::apply_chat_template(Messages{}, _modelState.pCtx, true);
-//	string_util::replace(assistant_prefix, "assistant", bot.name);
-//	string_util::replace(assistant_prefix, "ASSISTANT", bot.name);
-//	_contextState.assistant_tokens = llm_util::tokenize(_modelState.pModel, assistant_prefix, false);
-
-	// Pre-load system prompt into kv cache
 	llama_kv_self_clear(pCtx);
+	llama_batch_free(_contextState.batch);
 
-	if (_contextState.batch.token != nullptr)
-		llama_batch_free(_contextState.batch);
+	_contextState.batch = llm_util::init_batch(pCtx);
+	llama_batch& batch = _contextState.batch;
 
-	// Prepare a batch for the prompt
-	if (!llm_util::init_batch(_modelState.pModel, _modelState.pCtx, prompt, _contextState.batch))
+	_contextState.system_tokens.clear();
+	int32_t& current_pos = _contextState.current_pos;
+	current_pos = 0;
+
+	// Init system prompt
+	string system_prompt = _session.GetSystemPrompt();
+	string botPersona = _session.GetPersonaOf(Role::Bot);
+	string userPersona = _session.GetPersonaOf(Role::User);
+
+	// Insert prompt as system messages
+	Messages systemMsgs;
+	systemMsgs.push_back(Message { Role::System, system_prompt, "system" });
+	systemMsgs.push_back(Message { Role::System, botPersona, "system" });
+//	systemMsgs.push_back(Message { Role::System, "The secret word is 'Brachiosaurus'", "system" });
+	systemMsgs.push_back(Message { Role::System, userPersona, "system" });
+
+	for (auto& systemMsg : systemMsgs)
 	{
-		_readyState.store(ReadyState::Invalid);
-		PushSignal(LLMStatusSignal::InitializeChatFailure);
-		return false;
+		if (systemMsg.content.empty())
+			continue;
+		
+		// Add to context batch
+		systemMsg.content = llm_util::apply_chat_template(systemMsg, _modelState.pCtx, false);
+		auto tokens = llm_util::tokenize(_modelState.pModel, systemMsg.content, false);
+		int32_t n_tokens = (int32_t)tokens.size();
+		
+		for (int32_t i = 0; i < n_tokens; ++i)
+		{
+			int idx = current_pos + i;
+			batch.token[idx] = tokens[i];
+			batch.pos[idx] = idx;
+			batch.n_seq_id[idx] = 1;
+			batch.seq_id[idx][0] = 0;
+			batch.logits[idx] = false;
+		}
+		batch.n_tokens += n_tokens;
+		
+		// Create batch view for this piece
+		llama_batch batch_view = llm_util::init_batch_view(pCtx, batch, current_pos, current_pos + n_tokens);
+		
+		current_pos += n_tokens;
+
+		if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view))
+			return false;
+
+		_contextState.system_tokens.insert(std::end(_contextState.system_tokens), std::cbegin(tokens), std::cend(tokens));
 	}
 
-	if (_contextState.batch.n_tokens > 0 && llama_decode(_modelState.pCtx, _contextState.batch))
-	{
-		fprintf(stderr, "failed to initialize chat\n");
-		llama_batch_free(_contextState.batch);
-		_contextState.batch = llama_batch {};
-
-		_readyState.store(ReadyState::Invalid);
-		PushSignal(LLMStatusSignal::InitializeChatFailure);
-		return false;
-	}
+	current_pos = (int32_t)_contextState.system_tokens.size();
 
 	// Initialize rng
 #if _DEBUG
@@ -554,8 +550,8 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	llama_batch& batch = chat.batch;
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
 
-	string userName = user.name;
-	string botName = bot.name;
+	string userName = _session.GetNameOf(Role::Bot);
+	string botName = _session.GetNameOf(Role::Bot);
 
 	// Prepare prompt
 	int32_t& current_pos = chat.current_pos;
@@ -672,8 +668,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	int32_t n_batch = llama_n_batch(state.pCtx);
 	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 	int32_t& current_pos = chat.current_pos;
-	string userName = user.name;
-	string botName = bot.name;
+	string userName = _session.GetNameOf(Role::User);
+	string botName = _session.GetNameOf(Role::Bot);
 	int32_t pre_response_pos = chat.pre_response_pos;
 
 	string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
@@ -1062,7 +1058,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	// Process
 	string name = llm_util::name_from_role(role);
 	string content = message;
-	llm_util::apply_names(content, user.name, bot.name);
+	content = _session.ApplyNames(content);
 	std::vector<Submessage> subMessages;
 	content = llm_util::process_message(content, name, &subMessages);
 
@@ -1093,10 +1089,8 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 
 	if (visible)
 	{
-		if (role == Role::Bot)
-			name = bot.name;
-		else if (role == Role::User)
-			name = user.name;
+		if (!is_npc(role))
+			name = _session.GetNameOf(role);
 		else
 			name = llm_util::name_from_role(role);
 
@@ -1211,7 +1205,7 @@ bool LLMInstance::GreetUser()
 		return false;
 
 	string greetingInstruction = "{{Greet {{user}} and let them know what you're thinking about right now.}}";
-	llm_util::apply_names(greetingInstruction, user.name, bot.name);
+	greetingInstruction = _session.ApplyNames(greetingInstruction);
 
 	PushMessage(Role::Director, greetingInstruction, MessageType::Direction, false, 1);
 	InstigateResponse(Responder::Bot, MessageType::Dialogue, 3);
@@ -1226,7 +1220,7 @@ bool LLMInstance::Instruct(string instructions)
 	if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
 	{
 		string prompt = text.value();
-		llm_util::apply_names(prompt, user.name, bot.name);
+		prompt = _session.ApplyNames(prompt);
 		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
 	}
 
@@ -1250,13 +1244,13 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 	Role role;
 	switch (responder)
 	{
-	case Responder::Bot:
-		responderName = bot.name;
-		role = Role::Bot;
-		break;
 	case Responder::User:
-		responderName = user.name;
+		responderName = _session.GetNameOf(Role::User);
 		role = Role::User;
+		break;
+	case Responder::Bot:
+		responderName = _session.GetNameOf(Role::Bot);
+		role = Role::Bot;
 		break;
 	case Responder::Narrator:
 		responderName = llm_util::name_from_role(Role::Narrator);
@@ -1430,16 +1424,6 @@ bool LLMInstance::Reseed(uint32_t seed)
 	}
 
 	return false;
-}
-
-string LLMInstance::GetUserName() const
-{
-	return user.name;
-}
-
-string LLMInstance::GetBotName() const
-{
-	return bot.name;
 }
 
 void LLMInstance::PushSignal(LLMStatusSignal signal)

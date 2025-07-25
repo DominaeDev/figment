@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Types.h"
-#include "model/Character.h"
-#include <llama.h>
+#include "LLMTypes.h"
+#include "model/ChatSession.h"
+
 #include <vector>
 #include <set>
 #include <functional>
@@ -14,7 +14,8 @@
 using LoadModelCallback = std::function<void(bool)>;
 using LoadModelProgressCallback = std::function<void(int)>;
 
-enum class Grammar {
+enum class Grammar
+{
 	None				= 0,
 	Default				= 1,
 	StubDialogue		= 2,
@@ -57,13 +58,17 @@ struct ContextBlock
 struct ContextState
 {
 	std::vector<int32_t> system_tokens;
+	std::array<std::vector<int32_t>,4> personas;
 	std::vector<ContextBlock> blocks;
 	int32_t current_pos = 0;
 	int32_t prepend_pos = 0;
 	int32_t pre_response_pos = 0;
+	int32_t blocks_begin = 0;	// post-system prompt
+	int32_t blocks_end = 0;		// bottom
 	llama_batch batch {};
 
 	int32_t AssignBlockPositions();
+	void SwapInPersona(size_t index);
 };
 
 enum class LLMStatusSignal {
@@ -115,7 +120,7 @@ public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool InitializeChat(string systemPrompt, Messages messages);
+	bool InitializeChat(ChatSession session, Messages messages);
 	void Shutdown();
 
 	bool IsLoadingModel() const { return _readyState.load(std::memory_order_relaxed) == ReadyState::Initializing; }
@@ -143,9 +148,8 @@ public:
 	std::pair<LLMStatus, bool> PollStatus();
 
 	bool DumpContext(string filename) const;
-	
-	string GetUserName() const;
-	string GetBotName() const;
+
+	const ChatSession& GetSession() const { return _session; }
 
 private:
 	void ClearResponseQueue();
@@ -213,6 +217,5 @@ private:
 
 	std::unique_ptr<std::jthread> _workerThread;
 
-	Character user;
-	Character bot;
+	ChatSession _session;
 };

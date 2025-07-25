@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Control.h"
-#include "Types.h"
+#include "gui/Control.h"
+#include "llm/LLMTypes.h"
 
 class ChatMessage;
 class VerticalScrollSizer;

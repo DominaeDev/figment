@@ -116,6 +116,7 @@
     <ClCompile Include="src\gui\ChatMessage.cpp" />
     <ClCompile Include="src\gui\ChatScroll.cpp" />
     <ClCompile Include="src\gui\Color.cpp" />
+    <ClCompile Include="src\model\ChatSession.cpp" />
     <ClCompile Include="src\util\CommandParser.cpp" />
     <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="include\gui\Image.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
+    <ClInclude Include="include\llm\LLMTypes.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Character.h" />

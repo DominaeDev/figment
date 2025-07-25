@@ -434,6 +434,33 @@ std::vector<llama_token> llm_util::tokenize(llama_model* pModel, string prompt, 
 	return prompt_tokens;
 }
 
+llama_batch llm_util::init_batch(llama_context* pCtx)
+{
+	const int32_t maxCtx = llama_n_ctx(pCtx);
+
+	// Prepare a batch for the prompt
+	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
+	batch.n_tokens = 0;
+	return batch;
+}
+
+llama_batch llm_util::init_batch_view(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t end, bool logit)
+{
+	int32_t n_tokens = end - begin;
+	llama_batch batch_view = llama_batch_init(n_tokens, 0, 1);
+	batch_view.n_tokens = n_tokens;
+	for (int32_t i = 0; i < n_tokens; ++i)
+	{
+		int idx = begin + i;
+		batch_view.token[i] = batch.token[idx];
+		batch_view.pos[i] = batch.pos[idx];
+		batch_view.n_seq_id[i] = batch.n_seq_id[idx];
+		batch_view.seq_id[i] = batch.seq_id[idx];
+		batch_view.logits[i] = logit && i == n_tokens - 1;
+	}
+	return batch_view;
+}
+
 bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
 {
 	const int32_t maxCtx = llama_n_ctx(pCtx);

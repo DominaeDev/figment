@@ -16,19 +16,19 @@ namespace Constants
 	extern const double ChatMessageFontSize;
 	extern const int ChatScrollWidth;
 
-	extern const string DialogueTag;
-	extern const string ActionTag;
-	extern const string ThoughtTag;
-	extern const string NarrationTag;
-	extern const string DirectionTag;
+	constexpr const std::string_view DialogueTag		= "talk";
+	constexpr const std::string_view ActionTag			= "act";
+	constexpr const std::string_view ThoughtTag			= "think";
+	constexpr const std::string_view NarrationTag		= "narrator";
+	constexpr const std::string_view DirectionTag		= "director";
 
-	extern const string DialogueTagEnd;
-	extern const string ActionTagEnd;
-	extern const string ThoughtTagEnd;
-	extern const string NarrationTagEnd;
-	extern const string DirectionTagEnd;
+	constexpr const std::string_view DialogueTagEnd		= "/talk";
+	constexpr const std::string_view ActionTagEnd		= "/act";
+	constexpr const std::string_view ThoughtTagEnd		= "/think";
+	constexpr const std::string_view NarrationTagEnd	= "/narrator";
+	constexpr const std::string_view DirectionTagEnd	= "/director";
 
-	extern const int ContextSize;
-	extern const int MaxResponseLength;
-	extern const float ContextWindowKeepRatio;
+	constexpr const int ContextSize						= 2048;
+	constexpr const int MaxResponseLength				= 256;
+	constexpr const float ContextWindowKeepRatio		= 0.75f;
 }

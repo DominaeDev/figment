@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Types.h"
-#include "Control.h"
-#include "Graphics.h"
+#include "llm/LLMTypes.h"
+#include "gui/Control.h"
+#include "gui/Graphics.h"
 
 class StaticText;
 class NineGridBackgroundRenderer;

@@ -13,21 +13,3 @@ double const Constants::CharacterNameFontSize = 12;
 double const Constants::ChatMessageFontSize = 16; //15.5;
 
 const int Constants::ChatScrollWidth = 800;
-
-// Commands
-string const Constants::DialogueTag		= "talk";
-string const Constants::ActionTag		= "act";
-string const Constants::ThoughtTag		= "think";
-string const Constants::NarrationTag	= "narrator";
-string const Constants::DirectionTag	= "director";
-
-string const Constants::DialogueTagEnd	= "/" + Constants::DialogueTag;
-string const Constants::ActionTagEnd	= "/" + Constants::ActionTag;
-string const Constants::NarrationTagEnd	= "/" + Constants::NarrationTag;
-string const Constants::ThoughtTagEnd	= "/" + Constants::ThoughtTag;
-string const Constants::DirectionTagEnd	= "/" + Constants::DirectionTag;
-
-// Generation constants
-const int Constants::ContextSize = 4096;
-const int Constants::MaxResponseLength = 256;
-const float Constants::ContextWindowKeepRatio = 0.75f;
