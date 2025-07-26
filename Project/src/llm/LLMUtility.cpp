@@ -636,7 +636,7 @@ static void trim_spans(const std::string s, std::vector<Span>& spans)
 	}
 }
 
-std::string llm_util::process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages) noexcept
+std::string llm_util::process_message(std::string message, std::string identifier, std::vector<Submessage>* out_pSubmessages) noexcept
 {
 	size_t pos = 0;
 	size_t length = message.size();
@@ -717,13 +717,13 @@ std::string llm_util::process_message(std::string message, std::string actorName
 		switch (span.msgType)
 		{
 		case MessageType::Dialogue:
-			result.append(std::format("<{0}=\"{1}\">\"{2}\"</{0}>", Constants::DialogueTag, actorName, text));
+			result.append(std::format("<{0}=\"@{1}\">\"{2}\"</{0}>", Constants::DialogueTag, identifier, text));
 			break;
 		case MessageType::Action:
-			result.append(std::format("<{0}=\"{1}\">*{2}*</{0}>", Constants::ActionTag, actorName, text));
+			result.append(std::format("<{0}=\"@{1}\">*{2}*</{0}>", Constants::ActionTag, identifier, text));
 			break;
 		case MessageType::Thought:
-			result.append(std::format("<{0}=\"{1}\">({2})</{0}>", Constants::ThoughtTag, actorName, text));
+			result.append(std::format("<{0}=\"@{1}\">({2})</{0}>", Constants::ThoughtTag, identifier, text));
 			break;
 		case MessageType::Narration:
 			result.append(std::format("<{0}>[{1}]</{0}>", Constants::NarrationTag, text));

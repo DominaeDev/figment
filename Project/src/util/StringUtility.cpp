@@ -1,6 +1,7 @@
 #include "util/StringUtility.h"
 #include <algorithm>
 #include <codecvt>
+#include <cwctype>
 
 void string_util::ltrim_str(std::string& s)
 {
@@ -49,16 +50,28 @@ std::string string_util::get_filename(const std::string& str)
 
 std::string string_util::lcase(const std::string& str)
 {
-	std::string s = str;
-	std::transform(std::begin(str), std::end(str), std::begin(s), [](unsigned char c){ return std::tolower(c); });
-	return s;
+	std::wstring s = from_utf8(str);
+	std::transform(std::begin(s), std::end(s), std::begin(s), [](wchar_t c){ return std::towlower(c); });
+	return to_utf8(s);
 }
 
 std::string string_util::ucase(const std::string& str)
 {
-	std::string s = str;
-	std::transform(std::begin(str), std::end(str), std::begin(s), [](unsigned char c){ return std::tolower(c); });
-	return s;
+	std::wstring s = from_utf8(str);
+	std::transform(std::begin(s), std::end(s), std::begin(s), [](wchar_t c){ return std::towupper(c); });
+	return to_utf8(s);
+}
+
+int string_util::compare(const std::string& a, const std::string& b, bool ignore_case)
+{
+	std::wstring wa = from_utf8(a);
+	std::wstring wb = from_utf8(b);
+	return ignore_case ? _wcsicmp(wa.c_str(), wb.c_str()) : wcscmp(wa.c_str(), wb.c_str());
+}
+
+bool string_util::equals(const std::string& a, const std::string& b, bool ignore_case)
+{
+	return compare(a, b, ignore_case) == 0;
 }
 
 bool string_util::begins_with(const std::string_view& str, const std::string_view& suffix)

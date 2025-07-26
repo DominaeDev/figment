@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui/Control.h"
+#include "model/ChatSession.h"
 #include "llm/LLMTypes.h"
 
 class ChatMessage;
@@ -10,7 +11,9 @@ class ChatScroll : public Control
 {
 public:
 	ChatScroll(Control* pParent);
-
+	
+	void SetSession(std::shared_ptr<ChatSession> session) { _pSession = session; }
+	
 	void AddDummyMessage(string name, Role role, MessageType msgType, string message);
 	int RemoveMessages(std::vector<string> ids);
 	void ClearMessages();
@@ -52,4 +55,5 @@ private:
 	float _fLastListHeight = 0.0f;
 	float _fAnimatedScroll = 0.0f;
 
+	std::shared_ptr<ChatSession> _pSession {};
 };

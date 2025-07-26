@@ -12,9 +12,11 @@ public:
 	bool LoadCharacter(Role role, string filename);
 
 	std::optional<Character> GetCharacter(Role role) const;
+	std::optional<Character> GetCharacterById(string id) const;
 
 	string GetSystemPrompt() const;
 	string GetDirectorPrompt() const;
+	string GetIdentifierOf(Role role) const;
 	string GetNameOf(Role role) const;
 	string GetPersonaOf(Role role) const;
 	size_t GetBotCount() const;

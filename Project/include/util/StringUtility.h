@@ -14,6 +14,8 @@ struct string_util
 
 	static std::string lcase(const std::string& s);
 	static std::string ucase(const std::string& s);
+	static int compare(const std::string& a, const std::string& b, bool ignore_case = false);
+	static bool equals(const std::string& a, const std::string& b, bool ignore_case = false);
 
 	static std::string& replace(std::string& str, const std::string& find, const std::string& replace);
 	static std::string& replace_all(std::string& str, const std::string& find, const std::string& replace);

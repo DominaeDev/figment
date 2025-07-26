@@ -41,9 +41,35 @@ bool ChatSession::LoadCharacter(Role role, string filename)
 std::optional<Character> ChatSession::GetCharacter(Role role) const
 {
 	auto itFind = _characters.find(role);
-	if (itFind != std::cend(_characters))
+	if (itFind != std::end(_characters))
 		return itFind->second;
 	return std::nullopt;
+}
+
+std::optional<Character> ChatSession::GetCharacterById(string identifier) const
+{
+	if (identifier.empty())
+		return std::nullopt;
+	
+	if (identifier[0] == '@') // trim @
+		identifier = identifier.substr(1);
+
+	auto itFind = std::find_if(std::begin(_characters), std::end(_characters), [identifier](const auto& kvp) {
+		return string_util::equals(kvp.second.id.c_str(), identifier.c_str(), true);
+	});
+	if (itFind != std::end(_characters))
+		return itFind->second;
+	return std::nullopt;
+}
+
+string ChatSession::GetIdentifierOf(Role role) const
+{
+	if (role == Role::User)
+		return "USR";
+	auto optCharacter = GetCharacter(role);
+	if (optCharacter.has_value())
+		return string_util::ucase(optCharacter.value().id);
+	return "UNK";
 }
 
 string ChatSession::GetNameOf(Role role) const
@@ -51,9 +77,9 @@ string ChatSession::GetNameOf(Role role) const
 	if (role == Role::System)
 		return "system";
 	if (role == Role::Narrator)
-		return "narrator";
+		return "Narrator";
 	if (role == Role::Director)
-		return "director";
+		return "Director";
 	auto optCharacter = GetCharacter(role);
 	if (optCharacter.has_value())
 		return optCharacter.value().name;
@@ -97,6 +123,17 @@ string ChatSession::ApplyNames(string text) const
 	string_util::replace_all(text, "{{char6}}", GetNameOf(Role::Bot6));
 	string_util::replace_all(text, "{{char7}}", GetNameOf(Role::Bot7));
 	string_util::replace_all(text, "{{char8}}", GetNameOf(Role::Bot8));
+
+	string_util::replace_all(text, "{{id_user}}", GetIdentifierOf(Role::User));
+	string_util::replace_all(text, "{{id_char1}}", GetIdentifierOf(Role::Bot1));
+	string_util::replace_all(text, "{{id_char2}}", GetIdentifierOf(Role::Bot2));
+	string_util::replace_all(text, "{{id_char3}}", GetIdentifierOf(Role::Bot3));
+	string_util::replace_all(text, "{{id_char4}}", GetIdentifierOf(Role::Bot4));
+	string_util::replace_all(text, "{{id_char5}}", GetIdentifierOf(Role::Bot5));
+	string_util::replace_all(text, "{{id_char6}}", GetIdentifierOf(Role::Bot6));
+	string_util::replace_all(text, "{{id_char7}}", GetIdentifierOf(Role::Bot7));
+	string_util::replace_all(text, "{{id_char8}}", GetIdentifierOf(Role::Bot8));
+
 	return text;
 }
 

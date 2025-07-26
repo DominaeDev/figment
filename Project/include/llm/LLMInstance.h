@@ -105,8 +105,8 @@ struct MessagePiece
 {
 	string responseId;		// response block
 	string subMessageId;	// shared id for pieces of the same message type
-	string name {};
-	string text {};
+	string identifier {};	// who said this?
+	string content {};
 	Role role = Role::Undefined;
 	MessageType msgType = MessageType::Undefined;
 	bool isComplete = false;
@@ -125,7 +125,7 @@ public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool InitializeChat(ChatSession session, Messages messages);
+	bool InitializeChat(std::shared_ptr<ChatSession> session, Messages messages);
 	void Shutdown();
 
 	bool IsLoadingModel() const { return _readyState.load() == ReadyState::LoadingModel; }
@@ -154,7 +154,7 @@ public:
 
 	bool DumpContext(bool full) const;
 
-	const ChatSession& GetSession() const { return _session; }
+	const ChatSession& GetSession() const { return *_pSession; }
 
 private:
 	void ClearResponseQueue();
@@ -222,5 +222,5 @@ private:
 
 	std::unique_ptr<std::jthread> _workerThread;
 
-	ChatSession _session;
+	std::shared_ptr<ChatSession> _pSession;
 };

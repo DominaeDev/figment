@@ -305,11 +305,11 @@ static int32_t ctx_stash_tokens(llama_context* pCtx, ContextState& ctxState, int
 	return ctxState.floor_pos;
 }
 
-bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
+bool LLMInstance::InitializeChat(std::shared_ptr<ChatSession> session, Messages messages)
 {
 	std::scoped_lock lock(_stateMutex);
 
-	_session = session;
+	_pSession = session;
 
 	if (_readyState < ReadyState::ModelLoaded || !_modelState.pModel)
 		return false;
@@ -329,7 +329,14 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 
 		// Load grammar(s)
 		string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
-		string_util::replace_all(grammar, "##NAME_PATTERN##", "(\"" + _session.GetNameOf(Role::Bot1) + "\")"); //! @role
+
+		string pattern = "\"@" + _pSession->GetIdentifierOf(Role::User) + "\"";
+		int32_t botCount = (int32_t)_pSession->GetBotCount();
+		for (int i = 0; i < botCount; ++i)
+			pattern += "| \"@" + _pSession->GetIdentifierOf((Role)(static_cast<int32_t>(Role::Bot1) + i)) + "\"";
+		pattern = "(" + pattern + ")";
+
+		string_util::replace_all(grammar, "##NAME_PATTERN##", pattern);
 		llama_sampler* default_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
 		if (default_grammar_sampler)
 		{
@@ -370,9 +377,9 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	_contextState.floor_pos = llama_n_ctx(pCtx);
 
 	// Init system prompt
-	string system_prompt = _session.GetSystemPrompt();
-	string botPersona = _session.GetPersonaOf(Role::Bot1); // @role
-	string userPersona = _session.GetPersonaOf(Role::User);
+	string system_prompt = _pSession->GetSystemPrompt();
+	string botPersona = _pSession->GetPersonaOf(Role::Bot1); // @role
+	string userPersona = _pSession->GetPersonaOf(Role::User);
 
 	// Insert prompt as system messages
 	Messages systemMsgs;
@@ -413,8 +420,9 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		_contextState.blocks_begin = current_pos;
 	}
 
-	// Insert secret
+#if 0 //! @test
 	{
+		// Insert secret
 		string secret = llm_util::apply_chat_template(_modelState.pCtx, Message { Role::System, "The secret word is 'Brachiosaurus'.", "system" }, false);
 		auto secret_tokens = llm_util::tokenize(_modelState.pModel, secret, false);
 		current_pos += (int32_t)_contextState.secret_tokens.size();
@@ -450,6 +458,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		// Shift secret up
 		_contextState.secret_pos = ctx_restore_tokens(pCtx, _contextState, _contextState.secret_pos, n_tokens, orig_secret_pos);
 	}
+#endif
 
 	// Initialize rng
 #if _DEBUG
@@ -730,7 +739,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 			llm_util::complete_message(content);
 			content = llm_util::apply_chat_template(pCtx, Message { block.role, content }, false);
 		}
-		content = _session.ApplyNames(content);
+		content = _pSession->ApplyNames(content);
 		
 		auto block_tokens = llm_util::tokenize(state.pModel, content, false);
 		block.tokens = block_tokens;
@@ -763,7 +772,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	if (args.responder != Responder::None)
 	{
 		string prelude = llm_util::get_responder_prelude(args.responder, pCtx);
-		prelude = _session.ApplyNames(prelude);
+		prelude = _pSession->ApplyNames(prelude);
 		auto assistant_tokens = llm_util::tokenize(state.pModel, prelude, false);
 		prompt_tokens.insert(std::end(prompt_tokens), std::begin(assistant_tokens), std::end(assistant_tokens));
 	}
@@ -802,9 +811,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	int32_t n_batch = llama_n_batch(state.pCtx);
 	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 	int32_t& current_pos = chat.current_pos;
-	string userName = _session.GetNameOf(Role::User);
+	string userName = _pSession->GetNameOf(Role::User);
 	int32_t pre_response_pos = chat.pre_response_pos;
-	string responderName = _session.GetNameOf(args.role);
 
 	string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
 	string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
@@ -1016,7 +1024,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 				_resultQueue.push(MessagePiece {
 					/*responseId*/ responseId,
 					/*subMessageId*/ subMessageId,
-					/*name*/ responderName,
+					/*name*/ responderId,
 					/*text*/ sendMsg,
 					/*role*/ args.role,
 					/*msgType*/ msgType,
@@ -1083,7 +1091,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			chat.blocks.push_back(ContextBlock {
 				/*responseId*/ responseId,
 				/*role*/ args.role,
-				/*name*/ responderName,
+				/*name*/ responderId,
 				/*content*/ response,
 				/*tokens*/ sampled_tokens,
 				/*ctx_pos*/ pre_response_pos,
@@ -1191,11 +1199,11 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 		return false;
 
 	// Process
-	string name = _session.GetNameOf(role);
+	string identifier = _pSession->GetIdentifierOf(role);
 	string content = message;
-	content = _session.ApplyNames(content);
+	content = _pSession->ApplyNames(content);
 	std::vector<Submessage> subMessages;
-	content = llm_util::process_message(content, name, &subMessages);
+	content = llm_util::process_message(content, identifier, &subMessages);
 
 	if (msgType == MessageType::Undefined)
 		msgType = llm_util::detect_message_type(content).first;
@@ -1214,7 +1222,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 		_contextState.blocks.push_back(ContextBlock {
 			/*blockId*/ responseId,
 			/*role*/ role,
-			/*name*/ name,
+			/*name*/ identifier,
 			/*content*/ content,
 			/*tokens*/ {},
 			/*ctx_pos*/ 0,
@@ -1226,9 +1234,9 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 	if (visible)
 	{
 		if (!is_npc(role))
-			name = _session.GetNameOf(role);
+			identifier = _pSession->GetNameOf(role);
 		else
-			name = llm_util::name_from_role(role);
+			identifier = llm_util::name_from_role(role);
 
 		std::scoped_lock lock(_resultMutex);
 		_activeResponseIds.insert(responseId);
@@ -1240,7 +1248,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 			_resultQueue.push(MessagePiece {
 				/*blockId*/ responseId,
 				/*messageId*/ subMessageId,
-				/*name*/ name,
+				/*name*/ identifier,
 				/*text*/ subMsg.content,
 				/*role*/ role,
 				/*msgType*/ subMsg.msgType,
@@ -1341,7 +1349,7 @@ bool LLMInstance::GreetUser()
 		return false;
 
 	string greetingInstruction = "{{Greet {{user}} and let them know what you're thinking about right now.}}";
-	greetingInstruction = _session.ApplyNames(greetingInstruction);
+	greetingInstruction = _pSession->ApplyNames(greetingInstruction);
 
 	PushMessage(Role::Director, greetingInstruction, MessageType::Direction, false, 1);
 	InstigateResponse(Responder::Bot, MessageType::Dialogue, 3);
@@ -1356,7 +1364,7 @@ bool LLMInstance::Instruct(string instructions)
 	if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
 	{
 		string prompt = text.value();
-		prompt = _session.ApplyNames(prompt);
+		prompt = _pSession->ApplyNames(prompt);
 		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
 	}
 
@@ -1377,15 +1385,15 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 	PrepareGeneration(prepareArgs);
 
 	Role role = llm_util::role_from_responder(responder);
-	string responderName = _session.GetNameOf(role);
+	string responderId = _pSession->GetIdentifierOf(role);
 
 	string prependMsg;
 	if (msgType == MessageType::Dialogue)
-		prependMsg = std::format("<{}=\"{}\">", Constants::DialogueTag, responderName);
+		prependMsg = std::format("<{}=\"@{}\">", Constants::DialogueTag, responderId);
 	else if (msgType == MessageType::Action)
-		prependMsg = std::format("<{}=\"{}\">", Constants::ActionTag, responderName);
+		prependMsg = std::format("<{}=\"@{}\">", Constants::ActionTag, responderId);
 	else if (msgType == MessageType::Thought)
-		prependMsg = std::format("<{}=\"{}\">", Constants::ThoughtTag, responderName);
+		prependMsg = std::format("<{}=\"@{}\">", Constants::ThoughtTag, responderId);
 	else if (msgType == MessageType::Narration)
 		prependMsg = std::format("<{}>", Constants::NarrationTag);
 	else if (msgType == MessageType::Direction)

@@ -12,6 +12,7 @@ struct CharacterProperty
 class Character
 {
 public:
+	string id;
 	string name;
 	string description;
 	std::vector<CharacterProperty> properties;

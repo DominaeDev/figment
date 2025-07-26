@@ -11,6 +11,11 @@ bool Character::LoadFromXml(string filename)
 
 	XMLElement& root = *xmlDoc.FirstChildElement();
 
+	// Read ID
+	XMLElement* pID = root.FirstChildElement("ID");
+	if (pID)
+		id = pID->GetText();
+
 	// Read name
 	XMLElement* pName = root.FirstChildElement("Name");
 	if (pName)

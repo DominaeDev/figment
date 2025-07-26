@@ -40,7 +40,7 @@ void ChatScroll::AddDummyMessage(string name, Role role, MessageType msgType, st
 	});
 }
 
-ChatMessage* ChatScroll::AddMessage(string name, Role role, MessageType msgType, string message, bool complete)
+ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType msgType, string message, bool complete)
 {
 	if (msgType == MessageType::Narration)
 		role = Role::Narrator;
@@ -59,9 +59,15 @@ ChatMessage* ChatScroll::AddMessage(string name, Role role, MessageType msgType,
 			lastRole = (*itLast).role;
 	}
 	bShowAvatar &= role != lastRole;
+	
+	string name = "Unknown";
+	if (auto character = _pSession->GetCharacterById(identifier))
+	{
+		name = character.value().name;
+	}
 	bool bShowName = role != lastRole;
 	if (msgType == MessageType::Narration)
-		name = llm_util::name_from_role(Role::Narrator);
+		name = _pSession->GetNameOf(Role::Narrator);
 
 	auto pMessage = new ChatMessage(this, bShowName ? name : "", role, msgType, bShowAvatar, bShowName);
 	pMessage->SetY(-1000); // Move off-screen
@@ -164,24 +170,24 @@ void ChatScroll::Poll()
 			MessageEntry* pEntry = itMsg->second;
 
 			if (pEntry->pChatMessage != nullptr)
-				pEntry->pChatMessage->AppendMessage(piece.text, piece.isComplete);
-			else if (!string_util::empty_or_whitespace(piece.text))
+				pEntry->pChatMessage->AppendMessage(piece.content, piece.isComplete);
+			else if (!string_util::empty_or_whitespace(piece.content))
 			{
 				(*itMsg).second->role = piece.role;
 				(*itMsg).second->msgType = piece.msgType;
-				pEntry->pChatMessage = AddMessage(piece.name, piece.role, piece.msgType, piece.text, piece.isComplete);
+				pEntry->pChatMessage = AddMessage(piece.identifier, piece.role, piece.msgType, piece.content, piece.isComplete);
 			}
 			else
 				continue; // Skip until we receive some text
 		}
-		else if (string_util::empty_or_whitespace(piece.text) && piece.isComplete)
+		else if (string_util::empty_or_whitespace(piece.content) && piece.isComplete)
 		{
 			// Ignore complete empty messages
 			continue;
 		}
 		else
 		{
-			string text = string_util::trim(piece.text);
+			string text = string_util::trim(piece.content);
 			if (text.empty() || (text.length() == 1 && (text[0] == '"' || text[0] == '*' || text[0] == '['))) // Empty or scaffolding
 			{
 				_messages.push_back(MessageEntry {
@@ -196,7 +202,7 @@ void ChatScroll::Poll()
 			else
 			{
 				// Create new message to hold the piece
-				ChatMessage* pMessage = AddMessage(piece.name, piece.role, piece.msgType, piece.text, piece.isComplete);
+				ChatMessage* pMessage = AddMessage(piece.identifier, piece.role, piece.msgType, piece.content, piece.isComplete);
 				_messages.push_back(MessageEntry {
 					piece.role,
 					piece.responseId,
