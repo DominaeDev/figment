@@ -761,3 +761,10 @@ std::string llm_util::get_responder_prelude(Responder responder, llama_context* 
 	string_util::replace(prelude, "ASSISTANT", responderName);
 	return prelude;
 }
+
+string llm_util::format_id(string id)
+{ 
+	if (id[0] == '@')
+		id = id.substr(1);
+	return string_util::lcase(id);
+}

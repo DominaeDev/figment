@@ -17,9 +17,11 @@ public:
 	static void Init(Renderer* pRenderer);
 	static void Release();
 	static Texture* GetTexture(string characterId, ImageType imageType);
+	
+	static bool LoadCharacterPortrait(string characterId, string filename);
 
 private:
-	static bool LoadTexture(Renderer* pRenderer, string characterId, ImageType imageType, const char* filename);
+	static bool LoadTexture(Renderer* pRenderer, string characterId, ImageType imageType, string filename);
 
 	struct CharacterImage
 	{

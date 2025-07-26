@@ -37,15 +37,12 @@
 #define TEXT_HMARGIN		(TEXT_LEFT_MARGIN + TEXT_RIGHT_MARGIN)
 #define TEXT_VMARGIN		(TEXT_TOP_MARGIN + TEXT_BOTTOM_MARGIN)
 
-ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType msgType, bool bShowAvatar, bool bShowName) : Control(pParent),
+ChatMessage::ChatMessage(Control* pParent, Role role, string characterId, string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
 	_name(name),
 	_messageType(msgType),
 	_role(role),
-	_bShowAvatar(bShowAvatar),
-	_bShowName(bShowName)
+	_bShowAvatar(bShowAvatar)
 {
-	_bShowName &= !name.empty();
-
 	_style = Style::Default;
 	if (msgType == MessageType::Dialogue)
 		_style |= Style::Dialogue;
@@ -71,13 +68,9 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 
 	if (_bShowAvatar)
 	{
-		Texture* pTexture;
-		if (role == Role::Bot1)
-			pTexture = CharacterImageStore::GetTexture("Female1", ImageType::Portrait_Square);	//! @temp
-		else if (role == Role::Bot2)
-			pTexture = CharacterImageStore::GetTexture("Female2", ImageType::Portrait_Square);	//! @temp
-		else
-			pTexture = CharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);	//! @temp
+		Texture* pTexture = CharacterImageStore::GetTexture(characterId, ImageType::Portrait_Square);
+		if (!pTexture)
+			pTexture = CharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);
 
 		Image* pPortrait = new Image(this, pTexture);
 		pPortrait->SetSize(52, 52);
@@ -106,7 +99,7 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	}
 	_pSpeechBubbleBG->SetCornerSize(7.0f);
 
-	_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), _bShowName ? TOP_OFFSET : 0); // Left
+	_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), _name.empty() ? 0 : TOP_OFFSET); // Left
 	_pMessagePanel->SetBackgroundRenderer(_pSpeechBubbleBG);
 
 	SetSize(-1, 38);
@@ -121,7 +114,7 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	_pMessageText->SetMaxSize(toF(Constants::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2), -1);
 
 	// Name label
-	if (_bShowName)
+	if (!name.empty())
 	{
 		_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::CharacterNameFontSize, false);
 		_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
@@ -199,7 +192,7 @@ void ChatMessage::SetMessage(string text, bool complete)
 	if (currentHeight < h)
 	{
 		_pMessagePanel->SetHeight(toF(h));
-		SetHeight(std::max(_pMessagePanel->GetHeight() + (_bShowName ? TOP_OFFSET : 0) + BOTTOM_MARGIN, MIN_HEIGHT));
+		SetHeight(std::max(_pMessagePanel->GetHeight() + (_name.empty() ? 0 : TOP_OFFSET) + BOTTOM_MARGIN, MIN_HEIGHT));
 	}
 	
 	int currentWidth = toI(_pMessagePanel->GetWidth());

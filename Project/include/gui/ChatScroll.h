@@ -40,6 +40,7 @@ private:
 	
 	struct MessageEntry
 	{
+		string characterId;
 		Role role;
 		string responseId;
 		string subMessageId;

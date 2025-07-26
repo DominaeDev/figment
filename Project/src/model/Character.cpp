@@ -21,6 +21,11 @@ bool Character::LoadFromXml(string filename)
 	if (pName)
 		name = pName->GetText();
 
+	// Image
+	XMLElement* pImage = root.FirstChildElement("Image");
+	if (pImage)
+		portraitFilename = pImage->GetText();
+
 	// Read description
 	XMLElement* pDesc = root.FirstChildElement("Description");
 	if (pDesc)

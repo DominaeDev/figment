@@ -32,6 +32,7 @@ void ChatScroll::AddDummyMessage(string name, Role role, MessageType msgType, st
 	ChatMessage* pMessage = AddMessage(name, role, msgType, message, true);
 	pMessage->SetActive(false);
 	_messages.push_back(MessageEntry {
+		"dummy",
 		role,
 		"",
 		"",
@@ -51,25 +52,30 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	});
 	
 	Role lastRole = Role::Undefined;
+	string lastId = "";
 	if (itLast != std::crend(_messages))
 	{
 		if ((*itLast).msgType == MessageType::Narration)
 			lastRole = Role::Narrator;
 		else
+		{
 			lastRole = (*itLast).role;
+			lastId = (*itLast).characterId;
+		}
 	}
-	bShowAvatar &= role != lastRole;
+	bShowAvatar &= (role != lastRole) || (identifier != lastId);
 	
 	string name = "Unknown";
-	if (auto character = _pSession->GetCharacterById(identifier))
+	if (_pSession)
 	{
-		name = character.value().name;
+		if (auto character = _pSession->GetCharacterById(identifier))
+			name = character.value().name;
 	}
-	bool bShowName = role != lastRole;
+	bool bShowName = (role != lastRole) || (identifier != lastId);
 	if (msgType == MessageType::Narration)
 		name = _pSession->GetNameOf(Role::Narrator);
 
-	auto pMessage = new ChatMessage(this, bShowName ? name : "", role, msgType, bShowAvatar, bShowName);
+	auto pMessage = new ChatMessage(this, role, identifier, bShowName ? name : "", msgType, bShowAvatar);
 	pMessage->SetY(-1000); // Move off-screen
 	pMessage->SetMessage(message, complete);
 	GetSizer()->Add(pMessage, 0, Sizer::Expand);
@@ -191,12 +197,13 @@ void ChatScroll::Poll()
 			if (text.empty() || (text.length() == 1 && (text[0] == '"' || text[0] == '*' || text[0] == '['))) // Empty or scaffolding
 			{
 				_messages.push_back(MessageEntry {
+					piece.identifier,
 					piece.role,
 					piece.responseId,
 					piece.subMessageId,
 					piece.msgType,
 					nullptr,
-					});
+				});
 				_messagesById[piece.subMessageId] = &_messages.back();
 			}
 			else
@@ -204,12 +211,13 @@ void ChatScroll::Poll()
 				// Create new message to hold the piece
 				ChatMessage* pMessage = AddMessage(piece.identifier, piece.role, piece.msgType, piece.content, piece.isComplete);
 				_messages.push_back(MessageEntry {
+					piece.identifier,
 					piece.role,
 					piece.responseId,
 					piece.subMessageId,
 					piece.msgType,
 					pMessage,
-					});
+				});
 				_messagesById[piece.subMessageId] = &_messages.back();
 			}
 		}

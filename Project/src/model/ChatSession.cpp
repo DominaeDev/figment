@@ -2,6 +2,7 @@
 #include "llm/LLMUtility.h"
 #include "util/Common.h"
 #include "util/StringUtility.h"
+#include "gui/CharacterImageStore.h"
 
 #include <exception>
 
@@ -32,6 +33,9 @@ bool ChatSession::LoadCharacter(Role role, string filename)
 	Character character;
 	if (character.LoadFromXml(filename))
 	{
+		if (!string_util::empty_or_whitespace(character.portraitFilename))
+			CharacterImageStore::LoadCharacterPortrait(character.id, "./characters/" + character.portraitFilename);
+
 		_characters[role] = std::move(character);
 		return true;
 	}
@@ -48,18 +52,28 @@ std::optional<Character> ChatSession::GetCharacter(Role role) const
 
 std::optional<Character> ChatSession::GetCharacterById(string identifier) const
 {
-	if (identifier.empty())
+	if (identifier.empty() || _characters.empty())
 		return std::nullopt;
 	
-	if (identifier[0] == '@') // trim @
-		identifier = identifier.substr(1);
-
 	auto itFind = std::find_if(std::begin(_characters), std::end(_characters), [identifier](const auto& kvp) {
-		return string_util::equals(kvp.second.id.c_str(), identifier.c_str(), true);
+		return string_util::equals(kvp.second.id, identifier, true);
 	});
 	if (itFind != std::end(_characters))
 		return itFind->second;
 	return std::nullopt;
+}
+
+Role ChatSession::GetRoleOf(string characterId) const
+{
+	if (characterId.empty() || _characters.empty())
+		return Role::Undefined;
+	
+	auto itFind = std::find_if(std::begin(_characters), std::end(_characters), [characterId](const auto& kvp) {
+		return string_util::equals(kvp.second.id, characterId, true);
+	});
+	if (itFind != std::end(_characters))
+		return itFind->first;
+	return Role::Undefined;
 }
 
 string ChatSession::GetIdentifierOf(Role role) const
@@ -69,7 +83,7 @@ string ChatSession::GetIdentifierOf(Role role) const
 	auto optCharacter = GetCharacter(role);
 	if (optCharacter.has_value())
 		return string_util::ucase(optCharacter.value().id);
-	return "UNK";
+	return "_UNK";
 }
 
 string ChatSession::GetNameOf(Role role) const
@@ -106,6 +120,7 @@ string ChatSession::GetPersonaOf(Role role) const
 	{
 		string prompt = _system_prompt_character;
 		string_util::replace_all(prompt, "##PERSONA##", description);
+		string_util::replace_all(prompt, "{{char}}", GetNameOf(role));
 		return ApplyNames(prompt, role);
 	}
 }
@@ -113,7 +128,7 @@ string ChatSession::GetPersonaOf(Role role) const
 string ChatSession::ApplyNames(string text) const
 {
 	string_util::replace_all(text, "{{user}}", GetNameOf(Role::User));
-	string_util::replace_all(text, "{{char}}", GetNameOf(Role::Bot1));
+//	string_util::replace_all(text, "{{char}}", GetNameOf(Role::Bot1));
 
 	string_util::replace_all(text, "{{char1}}", GetNameOf(Role::Bot1));
 	string_util::replace_all(text, "{{char2}}", GetNameOf(Role::Bot2));

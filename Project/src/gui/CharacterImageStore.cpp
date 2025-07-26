@@ -1,5 +1,8 @@
 #include "gui/CharacterImageStore.h"
+#include "model/AppState.h"
+#include "util/StringUtility.h"
 #include <SDL3_image/SDL_image.h>
+
 
 std::map<string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByCharacter;
 
@@ -26,31 +29,46 @@ void CharacterImageStore::Release()
 	_imagesByCharacter.clear();
 }
 
-bool CharacterImageStore::LoadTexture(Renderer* pRenderer, string characterId, ImageType imageType, const char* filename)
+bool CharacterImageStore::LoadCharacterPortrait(string characterId, string filename)
+{
+	return LoadTexture(Application::GetRenderer(), characterId, ImageType::Portrait_Square, filename);
+}
+
+bool CharacterImageStore::LoadTexture(Renderer* pRenderer, string characterId, ImageType imageType, string filename)
 {
 	if (imageType == ImageType::Undefined)
 		return false;
 
-	auto pSurface = IMG_Load(filename);
-	if (!pSurface)
+	try
+	{
+		auto pSurface = IMG_Load(filename.c_str());
+		if (!pSurface)
+			return false;
+
+		auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+		SDL_DestroySurface(pSurface);
+
+		if (!pTexture)
+			return false;
+
+		_imagesByCharacter[string_util::lcase(characterId)].push_back(CharacterImage {
+			/*imageType*/ imageType,
+			/*texture*/ pTexture,
+			});
+		return true;
+	}
+	catch (...)
+	{
 		return false;
-
-	auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
-	SDL_DestroySurface(pSurface);
-
-	if (!pTexture)
-		return false;
-
-	_imagesByCharacter[characterId].push_back(CharacterImage {
-		/*imageType*/ imageType,
-		/*texture*/ pTexture,
-	});
-	return true;
+	}
 }
 
 Texture* CharacterImageStore::GetTexture(string characterId, ImageType imageType)
 {
-	auto itCharacter = _imagesByCharacter.find(characterId);
+	if (characterId.empty())
+		return nullptr;
+	
+	auto itCharacter = _imagesByCharacter.find(string_util::lcase(characterId));
 	if (itCharacter != std::end(_imagesByCharacter))
 	{
 		auto& imageList = (*itCharacter).second;

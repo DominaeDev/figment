@@ -377,15 +377,21 @@ bool LLMInstance::InitializeChat(std::shared_ptr<ChatSession> session, Messages 
 	_contextState.floor_pos = llama_n_ctx(pCtx);
 
 	// Init system prompt
+	Messages systemMsgs;
 	string system_prompt = _pSession->GetSystemPrompt();
-	string botPersona = _pSession->GetPersonaOf(Role::Bot1); // @role
 	string userPersona = _pSession->GetPersonaOf(Role::User);
+	std::vector<string> botPersonas;
+	int32_t botCount = (int32_t)_pSession->GetBotCount();
+	for (int i = 0; i < botCount; ++i)
+	{
+		string persona = _pSession->GetPersonaOf((Role)(static_cast<int32_t>(Role::Bot1) + i));
+		if (string_util::empty_or_whitespace(persona))
+			systemMsgs.push_back(Message { Role::System, persona, "system" });
+	}
 
 	// Insert prompt as system messages
-	Messages systemMsgs;
-	systemMsgs.push_back(Message { Role::System, system_prompt, "system" });
-	systemMsgs.push_back(Message { Role::System, botPersona, "system" });
-	systemMsgs.push_back(Message { Role::System, userPersona, "system" });
+	systemMsgs.insert(std::begin(systemMsgs), Message { Role::System, system_prompt, "system" });
+	systemMsgs.insert(std::end(systemMsgs), Message { Role::System, userPersona, "system" });
 
 	for (auto& systemMsg : systemMsgs)
 	{
@@ -818,6 +824,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
 
 	int numMessages = 0;
+	Role responderRole = args.role;
 	string responderId {};
 
 	DebugPrintLn(">> BEGIN GENERATION");
@@ -971,7 +978,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 					string tag, tagName;
 					llm_util::get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
-					if (tagName == userName && args.role != Role::User)
+					if (tagName == "@USR" && args.role != Role::User)
 					{
 						stop_word = "user";
 						break; // Stop if talking/acting for the user
@@ -993,11 +1000,15 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 							carryOver = partial.substr(fmt_start);
 							partial.erase(fmt_start);
 							sendMsg = partial;
+							responderId = llm_util::format_id(tagName);
+							responderRole = _pSession->GetRoleOf(responderId);
 						}
 						else
 						{
 							sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
-							responderId = tagName;
+							responderId = llm_util::format_id(tagName);
+							responderRole = _pSession->GetRoleOf(responderId);
+
 							if (tag == Constants::DialogueTag)
 								msgType = MessageType::Dialogue;
 							else if (tag == Constants::ActionTag)
@@ -1024,9 +1035,9 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 				_resultQueue.push(MessagePiece {
 					/*responseId*/ responseId,
 					/*subMessageId*/ subMessageId,
-					/*name*/ responderId,
+					/*identifier*/ responderId,
 					/*text*/ sendMsg,
-					/*role*/ args.role,
+					/*role*/ responderRole,
 					/*msgType*/ msgType,
 					/*isComplete*/bEndOfMessageType,
 				});
@@ -1090,7 +1101,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		{
 			chat.blocks.push_back(ContextBlock {
 				/*responseId*/ responseId,
-				/*role*/ args.role,
+				/*role*/ responderRole,
 				/*name*/ responderId,
 				/*content*/ response,
 				/*tokens*/ sampled_tokens,
@@ -1233,11 +1244,6 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 
 	if (visible)
 	{
-		if (!is_npc(role))
-			identifier = _pSession->GetNameOf(role);
-		else
-			identifier = llm_util::name_from_role(role);
-
 		std::scoped_lock lock(_resultMutex);
 		_activeResponseIds.insert(responseId);
 		
@@ -1248,7 +1254,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 			_resultQueue.push(MessagePiece {
 				/*blockId*/ responseId,
 				/*messageId*/ subMessageId,
-				/*name*/ identifier,
+				/*identifier*/ identifier,
 				/*text*/ subMsg.content,
 				/*role*/ role,
 				/*msgType*/ subMsg.msgType,

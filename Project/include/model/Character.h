@@ -15,6 +15,7 @@ public:
 	string id;
 	string name;
 	string description;
+	string portraitFilename;
 	std::vector<CharacterProperty> properties;
 
 	bool LoadFromXml(string filename);
