@@ -54,7 +54,6 @@ string ChatSession::GetNameOf(Role role) const
 		return "narrator";
 	if (role == Role::Director)
 		return "director";
-
 	auto optCharacter = GetCharacter(role);
 	if (optCharacter.has_value())
 		return optCharacter.value().name;
@@ -88,9 +87,16 @@ string ChatSession::GetPersonaOf(Role role) const
 string ChatSession::ApplyNames(string text) const
 {
 	string_util::replace_all(text, "{{user}}", GetNameOf(Role::User));
-	string_util::replace_all(text, "{{char}}", GetNameOf(Role::Bot));
-	string_util::replace_all(text, "{{char1}}", GetNameOf(Role::Bot));
-	// ...
+	string_util::replace_all(text, "{{char}}", GetNameOf(Role::Bot1));
+
+	string_util::replace_all(text, "{{char1}}", GetNameOf(Role::Bot1));
+	string_util::replace_all(text, "{{char2}}", GetNameOf(Role::Bot2));
+	string_util::replace_all(text, "{{char3}}", GetNameOf(Role::Bot3));
+	string_util::replace_all(text, "{{char4}}", GetNameOf(Role::Bot4));
+	string_util::replace_all(text, "{{char5}}", GetNameOf(Role::Bot5));
+	string_util::replace_all(text, "{{char6}}", GetNameOf(Role::Bot6));
+	string_util::replace_all(text, "{{char7}}", GetNameOf(Role::Bot7));
+	string_util::replace_all(text, "{{char8}}", GetNameOf(Role::Bot8));
 	return text;
 }
 
@@ -111,4 +117,9 @@ string ChatSession::GetDirectorPrompt() const
 {
 	string prompt = _formatting_director;
 	return ApplyNames(prompt);
+}
+
+size_t ChatSession::GetBotCount() const
+{
+	return std::count_if(std::begin(_characters), std::end(_characters), [](auto kvp) { return is_bot(kvp.first); });
 }

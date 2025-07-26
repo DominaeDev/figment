@@ -154,26 +154,61 @@ void llm_util::apply_names(string& prompt, string userName, string botName)
 
 const char* llm_util::name_from_role(Role role)
 {
-	static const char* SYSTEM_NAME = "system";
-	static const char* NARRATOR_NAME = "Narrator";
-	static const char* DIRECTOR_NAME = "Director";
-	static const char* UNKNOWN_NAME = "Unknown";
-	static const char* USER_NAME = "{{user}}";
-	static const char* BOT_NAME = "{{char}}";
-
 	switch (role)
 	{
-	case Role::Bot: return BOT_NAME;
-	case Role::User: return USER_NAME;
-	case Role::System: return SYSTEM_NAME;
-	case Role::Narrator: return NARRATOR_NAME;
-	case Role::Director: return DIRECTOR_NAME;
-	case Role::Undefined: return UNKNOWN_NAME;
+	case Role::User: return "{{user}}";
+	case Role::System: return "system";
+	case Role::Narrator: return "narrator";
+	case Role::Director: return "director";
+	
+	case Role::Bot1: return "{{char1}}";
+	case Role::Bot2: return "{{char2}}";
+	case Role::Bot3: return "{{char3}}";
+	case Role::Bot4: return "{{char4}}";
+	case Role::Bot5: return "{{char5}}";
+	case Role::Bot6: return "{{char6}}";
+	case Role::Bot7: return "{{char7}}";
+	case Role::Bot8: return "{{char8}}";
 	}
-	return "";
+	return "Unknown";
 }
 
-string llm_util::apply_chat_template(Messages in_messages, llama_context* pCtx, bool add_assistant)
+extern Role llm_util::role_from_responder(Responder responder)
+{
+	switch (responder)
+	{
+	case Responder::User: return Role::User;
+	case Responder::Narrator: return Role::Narrator;
+	case Responder::Director: return Role::Director;
+	case Responder::Bot: return Role::Bot1;
+	}
+	return Role::Undefined;
+}
+
+string llm_util::apply_chat_template(llama_context* pCtx, Message msg, bool add_assistant)
+{
+	return apply_chat_template(pCtx, Messages { msg }, add_assistant);
+}
+
+string llm_util::apply_chat_template_prefix(llama_context* pCtx, Message msg)
+{
+	// Strip prompt template from block content
+	static const char* const MARKER = "{{__PLACEHOLDER__}}";
+	string tmpl = apply_chat_template(pCtx, Message { msg.role, MARKER }, false);
+	size_t pos_msg = tmpl.find(MARKER);
+	string prelude = tmpl.substr(0, pos_msg);
+	string postlude = tmpl.substr(pos_msg + strlen(MARKER));
+	apply_names(prelude, "{{user}}", "{{char}}");
+
+	string content = msg.content;
+	if (string_util::ends_with(content, postlude))
+		content = content.substr(0, content.length() - postlude.length());
+	if (!string_util::begins_with(content, prelude))
+		content = prelude + content;
+	return content;
+}
+
+string llm_util::apply_chat_template(llama_context* pCtx, Messages in_messages, bool add_assistant)
 {
 	int prev_len = 0;
 
@@ -217,29 +252,6 @@ string llm_util::apply_chat_template(Messages in_messages, llama_context* pCtx, 
 	string prompt = string(formatted.begin() + prev_len, formatted.begin() + new_len);
 
 	return prompt;
-}
-
-string llm_util::apply_chat_template(Message msg, llama_context* pCtx, bool add_assistant)
-{
-	return apply_chat_template(Messages { msg }, pCtx, add_assistant);
-}
-
-string llm_util::apply_chat_template_prefix(Message msg, string userName, string botName, llama_context* pCtx, bool add_assistant)
-{
-	// Strip prompt template from block content
-	static const char* const MARKER = "{{__PLACEHOLDER__}}";
-	string tmpl = apply_chat_template(Message { msg.role, MARKER }, pCtx, false);
-	size_t pos_msg = tmpl.find(MARKER);
-	string prelude = tmpl.substr(0, pos_msg);
-	string postlude = tmpl.substr(pos_msg + strlen(MARKER));
-	apply_names(prelude, userName, botName);
-
-	string content = msg.content;
-	if (string_util::ends_with(content, postlude))
-		content = content.substr(0, content.length() - postlude.length());
-	if (!string_util::begins_with(content, prelude))
-		content = prelude + content;
-	return content;
 }
 
 std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
@@ -744,7 +756,7 @@ std::string llm_util::get_responder_prelude(Responder responder, llama_context* 
 		responderName = "{{char}}";;
 
 	// Prepare assistant prelude
-	string prelude = llm_util::apply_chat_template(Messages{}, pCtx, true);
+	string prelude = llm_util::apply_chat_template(pCtx, Messages{}, true);
 	string_util::replace(prelude, "assistant", responderName);
 	string_util::replace(prelude, "ASSISTANT", responderName);
 	return prelude;

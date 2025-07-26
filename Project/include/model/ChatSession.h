@@ -15,12 +15,12 @@ public:
 
 	string GetSystemPrompt() const;
 	string GetDirectorPrompt() const;
-
 	string GetNameOf(Role role) const;
 	string GetPersonaOf(Role role) const;
+	size_t GetBotCount() const;
 
-	string ApplyNames(string text) const;
-	string ApplyNames(string text, Role characterRole) const;
+	[[nodiscard]] string ApplyNames(string text) const;
+	[[nodiscard]] string ApplyNames(string text, Role characterRole) const;
 protected:
 	std::map<Role, Character> _characters {};
 	string _system_prompt_common;

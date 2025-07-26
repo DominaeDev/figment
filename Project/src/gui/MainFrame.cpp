@@ -173,8 +173,9 @@ void MainFrame::StartChat()
 	{
 		ChatSession session;
 		session.Initialize();
-		session.LoadCharacter(Role::User, "./characters/user.xml");
-		session.LoadCharacter(Role::Bot, "./characters/character.xml");
+		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
+		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
+		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
 		pLLM->InitializeChat(session, {});
 
@@ -208,7 +209,7 @@ void MainFrame::OnCommand(Command cmd)
 		{
 			static int turn = 0;
 			auto [msgType, complete] = llm_util::detect_message_type(llm_util::process_message(cmd.text, ""));
-			_pChatScroll->AddDummyMessage(turn % 2 == 0 ? "User" : "Bot", turn % 2 == 0 ? Role::User : Role::Bot, msgType, cmd.text);
+			_pChatScroll->AddDummyMessage(turn % 2 == 0 ? "User" : "Bot", turn % 2 == 0 ? Role::User : Role::Bot1, msgType, cmd.text);
 			++turn;
 		}
 		else

@@ -52,7 +52,7 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 	else if (msgType == MessageType::Action)
 		_style |= Style::Action;
 
-	if (role == Role::Bot)
+	if (is_bot(role))
 		_style |= Style::Left;
 	else if (role == Role::User)
 	{
@@ -71,7 +71,15 @@ ChatMessage::ChatMessage(Control* pParent, string name, Role role, MessageType m
 
 	if (_bShowAvatar)
 	{
-		Image* pPortrait = new Image(this, CharacterImageStore::GetTexture(role == Role::User ? "Default" : "Female1", ImageType::Portrait_Square));
+		Texture* pTexture;
+		if (role == Role::Bot1)
+			pTexture = CharacterImageStore::GetTexture("Female1", ImageType::Portrait_Square);	//! @temp
+		else if (role == Role::Bot2)
+			pTexture = CharacterImageStore::GetTexture("Female2", ImageType::Portrait_Square);	//! @temp
+		else
+			pTexture = CharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);	//! @temp
+
+		Image* pPortrait = new Image(this, pTexture);
 		pPortrait->SetSize(52, 52);
 		pPortrait->SetPosition(bRight ? Constants::ChatScrollWidth - pPortrait->GetWidth() : 0, 0);
 	}

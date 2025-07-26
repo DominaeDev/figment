@@ -13,6 +13,7 @@ namespace llm_util
 	extern void get_tag_and_name(const string& text, string& tag, string& name);
 	extern void apply_names(string& prompt, string userName, string botName);
 	extern const char* name_from_role(Role role);
+	extern Role role_from_responder(Responder responder);
 	extern string& sanitize_response(string& text);
 	extern string& complete_message(string& text);
 	extern void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word);
@@ -24,9 +25,9 @@ namespace llm_util
 	extern std::vector<llama_token> tokenize(llama_model* pModel, string prompt, bool bAddSpecial);
 
 	extern std::pair<MessageType, bool> detect_message_type(string text) noexcept;
-	extern string apply_chat_template(Messages in_messages, llama_context* pCtx, bool add_assistant);
-	extern string apply_chat_template(Message msg, llama_context* pCtx, bool add_assistant);
-	extern string apply_chat_template_prefix(Message msg, string userName, string botName, llama_context* pCtx, bool add_assistant);
+	extern string apply_chat_template(llama_context* pCtx, Message msg, bool add_assistant);
+	extern string apply_chat_template(llama_context* pCtx, Messages in_messages, bool add_assistant);
+	extern string apply_chat_template_prefix(llama_context* pCtx, Message msg);
 
 	extern std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 	extern std::string get_responder_prelude(Responder responder, llama_context* pCtx) noexcept;

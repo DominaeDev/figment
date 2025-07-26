@@ -46,6 +46,7 @@ struct ContextBlock
 {
 	string responseId;
 	Role role;
+	string name;
     string content;
 	std::vector<int32_t> tokens;
 	int32_t ctx_pos;

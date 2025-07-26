@@ -5,16 +5,24 @@
 
 enum class Role
 {
-	Undefined = 0,
+	Undefined	= 0,
 	System,
 	Narrator,
 	Director,
 	User,
-	Bot,
+	Bot1		= 10,
+	Bot2,
+	Bot3,
+	Bot4,
+	Bot5,
+	Bot6,
+	Bot7,
+	Bot8,
 };
 
-constexpr inline bool is_bot(Role role) { return role == Role::Bot; }
+constexpr inline bool is_bot(Role role) { return role >= Role::Bot1 && role <= Role::Bot8; }
 constexpr inline bool is_npc(Role role) { return role == Role::Director || role == Role::Narrator || role == Role::System; }
+constexpr inline bool get_bot_index(Role role) { return is_bot(role) ? static_cast<int>(Role::Bot1) - static_cast<int>(role) : -1; }
 
 enum class MessageType
 {

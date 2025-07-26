@@ -45,7 +45,7 @@ ChatMessage* ChatScroll::AddMessage(string name, Role role, MessageType msgType,
 	if (msgType == MessageType::Narration)
 		role = Role::Narrator;
 
-	bool bShowAvatar = (role == Role::Bot || role == Role::User);
+	bool bShowAvatar = !is_npc(role);
 	auto itLast = std::find_if(std::crbegin(_messages), std::crend(_messages), [](const MessageEntry& entry) {
 		return entry.pChatMessage != nullptr;
 	});
