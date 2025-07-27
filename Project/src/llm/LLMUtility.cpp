@@ -146,33 +146,6 @@ void llm_util::get_tag_and_name(const string& text, string& tag, string& name)
 	string_util::replace_all(name, "\"", "");
 }
 
-void llm_util::apply_names(string& prompt, string userName, string botName)
-{
-	string_util::replace_all(prompt, "{{user}}", userName);
-	string_util::replace_all(prompt, "{{char}}", botName);
-}
-
-const char* llm_util::name_from_role(Role role)
-{
-	switch (role)
-	{
-	case Role::User: return "{{user}}";
-	case Role::System: return "system";
-	case Role::Narrator: return "narrator";
-	case Role::Director: return "director";
-	
-	case Role::Bot1: return "{{char1}}";
-	case Role::Bot2: return "{{char2}}";
-	case Role::Bot3: return "{{char3}}";
-	case Role::Bot4: return "{{char4}}";
-	case Role::Bot5: return "{{char5}}";
-	case Role::Bot6: return "{{char6}}";
-	case Role::Bot7: return "{{char7}}";
-	case Role::Bot8: return "{{char8}}";
-	}
-	return "Unknown";
-}
-
 extern Role llm_util::role_from_responder(Responder responder)
 {
 	switch (responder)
@@ -193,12 +166,11 @@ string llm_util::apply_chat_template(llama_context* pCtx, Message msg, bool add_
 string llm_util::apply_chat_template_prefix(llama_context* pCtx, Message msg)
 {
 	// Strip prompt template from block content
-	static const char* const MARKER = "{{__PLACEHOLDER__}}";
-	string tmpl = apply_chat_template(pCtx, Message { msg.role, MARKER }, false);
-	size_t pos_msg = tmpl.find(MARKER);
+	static const char* const SUBSTITUTE = "{{SUBSTITUTE}}";
+	string tmpl = apply_chat_template(pCtx, Message { msg.role, SUBSTITUTE }, false);
+	size_t pos_msg = tmpl.find(SUBSTITUTE);
 	string prelude = tmpl.substr(0, pos_msg);
-	string postlude = tmpl.substr(pos_msg + strlen(MARKER));
-	apply_names(prelude, "{{user}}", "{{char}}");
+	string postlude = tmpl.substr(pos_msg + strlen(SUBSTITUTE));
 
 	string content = msg.content;
 	if (string_util::ends_with(content, postlude))
@@ -229,7 +201,7 @@ string llm_util::apply_chat_template(llama_context* pCtx, Messages in_messages, 
 	{
 		auto& msg = in_messages[i];
 		llama_msgs[i] = llama_chat_message { 
-			msg.name.empty() ? name_from_role(msg.role) : msg.name.c_str(), 
+			msg.name.c_str(), 
 			msg.content.c_str() 
 		};
 	}
@@ -459,10 +431,11 @@ llama_batch llm_util::init_batch(llama_context* pCtx)
 	return batch;
 }
 
-llama_batch llm_util::init_batch_view(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t end, bool logit)
+llama_batch llm_util::create_batch_view(llama_batch& batch, int32_t begin, int32_t end)
 {
 	int32_t n_tokens = end - begin;
 	llama_batch batch_view = llama_batch_init(n_tokens, 0, 1);
+	batch_view.embd = nullptr;
 	batch_view.n_tokens = n_tokens;
 	for (int32_t i = 0; i < n_tokens; ++i)
 	{
@@ -471,7 +444,7 @@ llama_batch llm_util::init_batch_view(llama_context* pCtx, llama_batch& batch, i
 		batch_view.pos[i] = batch.pos[idx];
 		batch_view.n_seq_id[i] = batch.n_seq_id[idx];
 		batch_view.seq_id[i] = batch.seq_id[idx];
-		batch_view.logits[i] = logit && i == n_tokens - 1;
+		batch_view.logits[i] = batch.logits[idx];
 	}
 	return batch_view;
 }
@@ -501,6 +474,37 @@ bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string promp
 
 	out_pBatch = batch;
 	return true;
+}
+
+std::vector<llama_token> llm_util::tokenize_and_batch(llama_model* pModel, llama_context* pCtx, llama_batch& batch, string content, int32_t pos, bool add_special)
+{
+	// Add to context batch
+	auto tokens = llm_util::tokenize(pModel, content, add_special);
+	int32_t n_tokens = (int32_t)tokens.size();
+
+	for (int32_t i = 0; i < n_tokens; ++i)
+	{
+		int idx = pos + i;
+		batch.token[idx] = tokens[i];
+		batch.pos[idx] = idx;
+		batch.n_seq_id[idx] = 1;
+		batch.seq_id[idx][0] = 0;
+		batch.logits[i] = false;
+	}
+	batch.n_tokens += n_tokens;
+	return tokens;
+}
+
+std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(llama_model* pModel, llama_context* pCtx, llama_batch& batch, string content, int32_t pos, bool add_special)
+{
+	auto tokens = tokenize_and_batch(pModel, pCtx, batch, content, pos, add_special);
+	int32_t n_tokens = toI(tokens.size());
+
+	llama_batch batch_view = llm_util::create_batch_view(batch, pos, pos + n_tokens);
+	if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
+		return std::nullopt;
+	llama_batch_free(batch_view);
+	return tokens;
 }
 
 struct Span
@@ -749,11 +753,11 @@ std::string llm_util::get_responder_prelude(Responder responder, llama_context* 
 {
 	string responderName;
 	if (responder == Responder::Narrator)
-		responderName = llm_util::name_from_role(Role::Narrator);
+		responderName = "narrator";
 	else if (responder == Responder::User)
 		responderName = "{{user}}";
 	else
-		responderName = "{{char}}";;
+		responderName = "{{char}}";
 
 	// Prepare assistant prelude
 	string prelude = llm_util::apply_chat_template(pCtx, Messages{}, true);
@@ -767,4 +771,29 @@ string llm_util::format_id(string id)
 	if (id[0] == '@')
 		id = id.substr(1);
 	return string_util::lcase(id);
+}
+
+Role llm_util::role_from_index(int32_t botIndex) noexcept
+{
+	constexpr static int32_t first = (int32_t)Role::Bot1;
+	constexpr static int32_t last = (int32_t)Role::Bot8;
+	if (first + botIndex < 0 || first + botIndex > last)
+		return Role::Undefined;
+	return static_cast<Role>(first + botIndex);
+}
+
+void llm_util::erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t from, int32_t to, int32_t seq)
+{
+	if (to <= from || from < 0 || to < 0 || from >= Constants::ContextSize || to > Constants::ContextSize)
+		return;
+
+	llama_kv_self_seq_rm(pCtx, seq, from, to);
+
+	for (int32_t i = from; i < to; ++i)
+	{
+		batch.pos[i] = 0;
+		batch.token[i] = 0;
+		batch.n_seq_id[i] = 0;
+		batch.logits[i] = false;
+	}
 }

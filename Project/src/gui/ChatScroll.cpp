@@ -97,6 +97,7 @@ int ChatScroll::RemoveMessages(std::vector<string> ids)
 			GetSizer()->Remove(entry.pChatMessage);
 			RemoveChild(entry.pChatMessage);
 			delete entry.pChatMessage;
+			entry.pChatMessage = nullptr;
 		}
 
 		removedIds.insert(entry.subMessageId);

@@ -5,6 +5,7 @@
 #include "gui/CharacterImageStore.h"
 
 #include <exception>
+#include <cassert>
 
 bool ChatSession::Initialize()
 {
@@ -114,7 +115,7 @@ string ChatSession::GetPersonaOf(Role role) const
 	{
 		string prompt = _system_prompt_user;
 		string_util::replace_all(prompt, "##PERSONA##", description);
-		return ApplyNames(prompt);
+		return ApplyNames(prompt, Role::Bot1);
 	}
 	else
 	{
@@ -127,6 +128,8 @@ string ChatSession::GetPersonaOf(Role role) const
 
 string ChatSession::ApplyNames(string text) const
 {
+	assert(text.find("{{char}}") == std::string::npos);
+
 	string_util::replace_all(text, "{{user}}", GetNameOf(Role::User));
 //	string_util::replace_all(text, "{{char}}", GetNameOf(Role::Bot1));
 

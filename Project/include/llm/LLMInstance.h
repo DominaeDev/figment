@@ -53,18 +53,29 @@ struct ContextBlock
 	bool cached = false;
 	int ttl = -1;
 
-	size_t length() const { return tokens.size(); }
+	int32_t length() const { return toI(tokens.size()); }
+};
+
+struct PersonaBlock
+{
+	Role role;
+	string content;
+	std::vector<int32_t> tokens;
+	int32_t offset;
+	bool isActive = false;
+	int32_t length() const { return toI(tokens.size()); }
 };
 
 struct ContextState
 {
 	std::vector<int32_t> system_tokens;
-	std::array<std::vector<int32_t>,4> personas;
+	std::map<Role, PersonaBlock> personas;
 	std::vector<ContextBlock> blocks;
 	int32_t current_pos = 0;
 	int32_t prepend_pos = 0;
 	int32_t pre_response_pos = 0;
-	int32_t blocks_begin = 0;	// post-system prompt
+	int32_t persona_pos = 0;
+	int32_t blocks_pos = 0;		// post-system prompt
 	int32_t floor_pos = 0;		// bottom
 	llama_batch batch {};
 
@@ -152,7 +163,7 @@ public:
 	bool PollResponse(MessagePiece& piece);
 	std::pair<LLMStatus, bool> PollStatus();
 
-	bool DumpContext(bool full) const;
+	bool DumpContext(bool full, string filename = "prompt.txt") const;
 
 	const ChatSession& GetSession() const { return *_pSession; }
 

@@ -48,3 +48,8 @@ constexpr enum E operator& (const enum E a, const enum E b) { return static_cast
 constexpr enum E operator^ (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) ^ static_cast<T>(b)); }\
 constexpr enum E operator~ (const enum E a) { return static_cast<enum E>(~static_cast<T>(a)); }
 #endif
+
+#if !defined(TRUE) && !defined(FALSE)
+#define TRUE (1==1)
+#define FALSE !TRUE
+#endif

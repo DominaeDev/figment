@@ -23,7 +23,9 @@ std::optional<std::string> ReadTextFile(const std::string& filename, bool normal
 		std::string content;
 		content.reserve(size);
 		content.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-		return normalizeNewlines ? string_util::normalize_newlines(content) : content;
+		if (!content.empty())
+			return normalizeNewlines ? string_util::normalize_newlines(content) : content;
+		return std::nullopt; // Empty file
 	}
 	catch (...)
 	{

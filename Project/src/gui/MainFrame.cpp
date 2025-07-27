@@ -139,9 +139,6 @@ void MainFrame::LoadModel()
 				if (bSuccess)
 				{
 					SetStatusBar("Model loaded");
-					DebugPrintLn("Loaded model OK");
-
-					StartChat();
 				}
 				else
 				{
@@ -379,6 +376,7 @@ void MainFrame::PollStatus()
 			break;
 		case LLMStatusSignal::LoadedModel:
 			SetStatusBar("Model loaded");
+			StartChat();
 			break;
 		case LLMStatusSignal::LoadModelFailure:
 			SetStatusBar("Failed to load model");
@@ -422,7 +420,8 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 #endif		
 			break;
 		case SDLK_F11:
-			pLLM->DumpContext((event.mod & SDL_KMOD_LSHIFT) != 0);
+			if (pLLM->IsReady())
+				pLLM->DumpContext((event.mod & SDL_KMOD_LSHIFT) != 0);
 			break;
 #if AUTOCHAT
 		case SDLK_F5:
@@ -432,4 +431,4 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		}
 	}
 	return false;
-}
+}	

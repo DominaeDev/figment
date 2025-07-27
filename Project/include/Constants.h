@@ -28,7 +28,7 @@ namespace Constants
 	constexpr const std::string_view NarrationTagEnd	= "/narrator";
 	constexpr const std::string_view DirectionTagEnd	= "/director";
 
-	constexpr const int ContextSize						= 2048;
+	constexpr const int ContextSize						= 4096;
 	constexpr const int MaxResponseLength				= 256;
 	constexpr const float ContextWindowKeepRatio		= 0.75f;
 }

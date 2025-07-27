@@ -108,6 +108,7 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 				newHeight = _textHeight + VMargin();
 				if (_bAutoSize)
 					SetSize(toF(newWidth), toF(newHeight));
+				return;
 			}
 		}
 		else if (bgColor.a == 0) // Transparent background
@@ -124,6 +125,7 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 				newHeight = _textHeight + VMargin();
 				if (_bAutoSize)
 					SetSize(toF(newWidth), toF(newHeight));
+				return;
 			}
 		}
 		else
@@ -154,18 +156,17 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 				newHeight = _textHeight + VMargin();
 				if (_bAutoSize)
 					SetSize(toF(newWidth), toF(newHeight));
+				return;
 			}
 		}
 	}
-	else
-	{
-		_textWidth = 0;
-		_textHeight = 0;
-		newWidth = 0;
-		newHeight = 0;
-		if (_bAutoSize)
-			SetSize(0, 0);
-	}
+
+	_textWidth = 0;
+	_textHeight = 0;
+	newWidth = 0;
+	newHeight = 0;
+	if (_bAutoSize)
+		SetSize(0, 0);
 }
 
 void StaticText::OnParent()
