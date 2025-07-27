@@ -249,75 +249,65 @@ static int32_t ctx_stash_tokens(llama_context* pCtx, ContextState& ctxState, int
 
 	int32_t partition_size = std::min(ctxState.floor_pos - ctxState.current_pos, src_length);
 	int32_t shifted = 0;
-	int32_t current_pos = ctxState.current_pos;
-	int32_t floor_pos = ctxState.floor_pos;
 
 	while (shifted < src_length)
 	{
+		int32_t current_pos = ctxState.current_pos - shifted;
+		int32_t floor_pos = ctxState.floor_pos - shifted;
+
 		int32_t piece_length = std::min(partition_size, src_length - shifted);
 		int32_t shift_begin = src_pos + src_length - (shifted + piece_length);
 		int32_t shift_end = shift_begin + piece_length;
 
-		int32_t k0 = src_pos + src_length - shifted;
-		int32_t k1 = current_pos - shifted;
-		int32_t k2 = floor_pos - partition_size - shifted;
+		int32_t target_begin = floor_pos - (shifted + piece_length);
+		int32_t target_end = target_begin + piece_length;
+		int32_t shift_amount = target_begin - shift_begin;
 
-		// Shift down kv cache
-		llama_kv_self_seq_add(pCtx, 0, shift_begin, shift_end, floor_pos - (src_pos + src_length));
-
-		// Shift down batch
-		for (int32_t i = 0; i < partition_size; ++i)
+		// Shift down
+		for (int32_t i = 0; i < piece_length; ++i)
 		{
-			batch.pos[k2 + i] = k2 + i;
-			batch.token[k2 + i] = batch.token[shift_begin + i];
-			batch.n_seq_id[k2 + i] = batch.n_seq_id[shift_begin + i];
-			batch.seq_id[k2 + i] = batch.seq_id[shift_begin + i];
-			batch.logits[k2 + i] = false;
+			batch.pos[target_begin + i] = target_begin + i;
+			batch.token[target_begin + i] = batch.token[shift_begin + i];
+			batch.n_seq_id[target_begin + i] = batch.n_seq_id[shift_begin + i];
+			batch.seq_id[target_begin + i][0] = batch.seq_id[shift_begin + i][0];
+			batch.logits[target_begin + i] = batch.logits[shift_begin + i];
 		}
 
 		// Apply down-shifts
+		llama_kv_self_seq_add(pCtx, 0, shift_begin, shift_end, shift_amount);
 		llama_kv_self_update(pCtx);
 
-		if (k1 > k0)
+		int32_t bottom = current_pos - shift_end; // Tokens below persona
+		if (bottom > 0)
 		{
-			// Shift up kv cache
-			llama_kv_self_seq_add(pCtx, 0, k0, k1, -piece_length);
-
-			// Shift up batch
-			for (int32_t i = 0; i < k1 - k0; ++i)
+			// Shift up
+			for (int32_t i = 0; i < bottom; ++i)
 			{
 				batch.pos[shift_begin + i] = shift_begin + i;
-				batch.token[shift_begin + i] = batch.token[k0 + i];
-				batch.n_seq_id[shift_begin + i] = batch.n_seq_id[k0 + i];
-				batch.seq_id[shift_begin + i] = batch.seq_id[k0 + i];
-				batch.logits[shift_begin + i] = false;
+				batch.token[shift_begin + i] = batch.token[shift_begin + piece_length + i];
+				batch.n_seq_id[shift_begin + i] = batch.n_seq_id[shift_begin + piece_length + i];
+				batch.seq_id[shift_begin + i][0] = batch.seq_id[shift_begin + piece_length + i][0];
+				batch.logits[shift_begin + i] = batch.logits[shift_begin + piece_length + i];
 			}
 
 			// Apply up-shifts
-			llama_kv_self_update(pCtx);
+			llama_kv_self_seq_add(pCtx, 0, shift_end, shift_end - bottom, -piece_length);
 		}
 
-		llm_util::erase_tokens(pCtx, batch, k1 - piece_length, k1);
-
-		/*llama_kv_self_seq_rm(pCtx, 0, k1 - piece_length, k1);
-		for (int32_t i = k1 - piece_length; i < k1; ++i)
-		{
-			batch.token[i] = 0;
-			batch.n_seq_id[i] = 0;
-			batch.logits[i] = false;
-		}*/
+		llama_kv_self_update(pCtx);
+		llm_util::erase_tokens(pCtx, batch, current_pos - piece_length, current_pos);
 
 		shifted += piece_length;
 	}
 
-	return floor_pos - shifted;
+	return ctxState.floor_pos - src_length;
 }
 
-bool LLMInstance::InitializeChat(std::shared_ptr<ChatSession> session, Messages messages)
+bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 {
 	std::scoped_lock lock(_stateMutex);
 
-	_pSession = session;
+	_session = session;
 
 	if (_readyState < ReadyState::ModelLoaded || !_modelState.pModel)
 		return false;
@@ -338,10 +328,10 @@ bool LLMInstance::InitializeChat(std::shared_ptr<ChatSession> session, Messages 
 		// Load grammar(s)
 		string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 
-		string pattern = "\"@" + _pSession->GetIdentifierOf(Role::User) + "\"";
-		int32_t botCount = (int32_t)_pSession->GetBotCount();
+		string pattern = "\"@" + _session.GetIdentifierOf(Role::User) + "\"";
+		int32_t botCount = (int32_t)_session.GetBotCount();
 		for (int i = 0; i < botCount; ++i)
-			pattern += "| \"@" + _pSession->GetIdentifierOf((Role)(static_cast<int32_t>(Role::Bot1) + i)) + "\"";
+			pattern += "| \"@" + _session.GetIdentifierOf((Role)(static_cast<int32_t>(Role::Bot1) + i)) + "\"";
 		pattern = "(" + pattern + ")";
 
 		string_util::replace_all(grammar, "##NAME_PATTERN##", pattern);
@@ -385,14 +375,14 @@ bool LLMInstance::InitializeChat(std::shared_ptr<ChatSession> session, Messages 
 	_contextState.floor_pos = llama_n_ctx(pCtx);
 
 	// Init system prompt
-	string system_prompt = _pSession->GetSystemPrompt();
-	string user_persona = _pSession->GetPersonaOf(Role::User);
+	string system_prompt = _session.GetSystemPrompt();
+	string user_persona = _session.GetPersonaOf(Role::User);
 	std::map<Role, string> personas;
-	int32_t botCount = (int32_t)_pSession->GetBotCount();
+	int32_t botCount = (int32_t)_session.GetBotCount();
 	for (int32_t i = 0; i < botCount; ++i)
 	{
 		Role role = llm_util::role_from_index(i);
-		personas[role] = _pSession->GetPersonaOf(role);
+		personas[role] = _session.GetPersonaOf(role);
 	}
 
 	// System prompt
@@ -463,8 +453,8 @@ bool LLMInstance::InitializeChat(std::shared_ptr<ChatSession> session, Messages 
 				persona.second.offset -= shift;
 		}
 
-		DumpContext(true, "stash_persona_full.txt");
-		DumpContext(false, "stash_persona.txt");
+//		DumpContext(true, "stash_persona_full.txt");
+//		DumpContext(false, "stash_persona.txt");
 	}
 #endif
 
@@ -791,7 +781,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 			llm_util::complete_message(content);
 			content = llm_util::apply_chat_template(pCtx, Message { block.role, content }, false);
 		}
-		content = _pSession->ApplyNames(content, llm_util::role_from_responder(args.responder));
+		content = _session.ApplyNames(content, llm_util::role_from_responder(args.responder));
 		
 		auto block_tokens = llm_util::tokenize(state.pModel, content, false);
 		block.tokens = block_tokens;
@@ -824,7 +814,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	if (args.responder != Responder::None)
 	{
 		string prelude = llm_util::get_responder_prelude(args.responder, pCtx);
-		prelude = _pSession->ApplyNames(prelude, llm_util::role_from_responder(args.responder));
+		prelude = _session.ApplyNames(prelude, llm_util::role_from_responder(args.responder));
 		auto assistant_tokens = llm_util::tokenize(state.pModel, prelude, false);
 		prompt_tokens.insert(std::end(prompt_tokens), std::begin(assistant_tokens), std::end(assistant_tokens));
 	}
@@ -863,7 +853,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	int32_t n_batch = llama_n_batch(state.pCtx);
 	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 	int32_t& current_pos = chat.current_pos;
-	string userName = _pSession->GetNameOf(Role::User);
+	string userName = _session.GetNameOf(Role::User);
 	int32_t pre_response_pos = chat.pre_response_pos;
 
 	string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
@@ -933,7 +923,16 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			break; // Max limit reached
 
 		const int32_t n_tokens = std::min(n_batch, batch.n_tokens - current_pos);
-		llama_batch batch_view = llm_util::create_batch_view(batch, current_pos, current_pos + n_tokens);
+		llama_batch batch_view = {
+			n_tokens,
+			batch.token + current_pos,
+			nullptr,
+			batch.pos + current_pos,
+			batch.n_seq_id + current_pos,
+			batch.seq_id + current_pos,
+			batch.logits + current_pos,
+		};
+		//llama_batch batch_view = llm_util::create_batch_view(batch, current_pos, current_pos + n_tokens);
 
 		// check if we have enough space in the context to evaluate this batch
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -1039,13 +1038,13 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 							partial.erase(fmt_start);
 							sendMsg = partial;
 							responderId = llm_util::format_id(tagName);
-							responderRole = _pSession->GetRoleOf(responderId);
+							responderRole = _session.GetRoleOf(responderId);
 						}
 						else
 						{
 							sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
 							responderId = llm_util::format_id(tagName);
-							responderRole = _pSession->GetRoleOf(responderId);
+							responderRole = _session.GetRoleOf(responderId);
 
 							if (tag == Constants::DialogueTag)
 								msgType = MessageType::Dialogue;
@@ -1248,9 +1247,9 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 		return false;
 
 	// Process
-	string identifier = _pSession->GetIdentifierOf(role);
+	string identifier = _session.GetIdentifierOf(role);
 	string content = message;
-	content = _pSession->ApplyNames(content);
+	content = _session.ApplyNames(content);
 	std::vector<Submessage> subMessages;
 	content = llm_util::process_message(content, identifier, &subMessages);
 
@@ -1394,7 +1393,7 @@ bool LLMInstance::GreetUser()
 
 	if (auto text = ReadTextFile("./resources/prompting/prompt_greeting.txt"))
 	{
-		string greetingInstruction = _pSession->ApplyNames(text.value());
+		string greetingInstruction = _session.ApplyNames(text.value());
 		PushMessage(Role::Director, "{{" + greetingInstruction + "}}", MessageType::Direction, false, 1);
 		InstigateResponse(Responder::Bot, MessageType::Dialogue, 3);
 	}
@@ -1409,7 +1408,7 @@ bool LLMInstance::Instruct(string instructions)
 	if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
 	{
 		string prompt = text.value();
-		prompt = _pSession->ApplyNames(prompt);
+		prompt = _session.ApplyNames(prompt);
 		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
 	}
 
@@ -1430,7 +1429,7 @@ bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, in
 	PrepareGeneration(prepareArgs);
 
 	Role role = llm_util::role_from_responder(responder);
-	string responderId = _pSession->GetIdentifierOf(role);
+	string responderId = _session.GetIdentifierOf(role);
 
 	string prependMsg;
 	if (msgType == MessageType::Dialogue)

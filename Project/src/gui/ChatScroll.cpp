@@ -66,14 +66,11 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	bShowAvatar &= (role != lastRole) || (identifier != lastId);
 	
 	string name = "Unknown";
-	if (_pSession)
-	{
-		if (auto character = _pSession->GetCharacterById(identifier))
-			name = character.value().name;
-	}
+	if (auto character = _session.GetCharacterById(identifier))
+		name = character.value().name;
 	bool bShowName = (role != lastRole) || (identifier != lastId);
 	if (msgType == MessageType::Narration)
-		name = _pSession->GetNameOf(Role::Narrator);
+		name = _session.GetNameOf(Role::Narrator);
 
 	auto pMessage = new ChatMessage(this, role, identifier, bShowName ? name : "", msgType, bShowAvatar);
 	pMessage->SetY(-1000); // Move off-screen

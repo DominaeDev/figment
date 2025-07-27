@@ -168,14 +168,14 @@ void MainFrame::StartChat()
 	auto pLLM = Application::GetLLM();
 	if (pLLM && pLLM->HasLoadedModel())
 	{
-		std::shared_ptr<ChatSession> pSession = std::make_shared<ChatSession>();
-		pSession->Initialize();
-		pSession->LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
-		pSession->LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-		pSession->LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+		ChatSession session;
+		session.Initialize();
+		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
+		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
+		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
-		pLLM->InitializeChat(pSession, {});
-		_pChatScroll->SetSession(pSession);
+		pLLM->InitializeChat(session, {});
+		_pChatScroll->SetSession(session);
 
 		_bStartedChat = true;
 	}

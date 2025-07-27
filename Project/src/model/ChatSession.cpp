@@ -128,10 +128,10 @@ string ChatSession::GetPersonaOf(Role role) const
 
 string ChatSession::ApplyNames(string text) const
 {
-	assert(text.find("{{char}}") == std::string::npos);
+//	assert(text.find("{{char}}") == std::string::npos);
 
 	string_util::replace_all(text, "{{user}}", GetNameOf(Role::User));
-//	string_util::replace_all(text, "{{char}}", GetNameOf(Role::Bot1));
+	string_util::replace_all(text, "{{char}}", GetNameOf(Role::Bot1)); //! @correctness
 
 	string_util::replace_all(text, "{{char1}}", GetNameOf(Role::Bot1));
 	string_util::replace_all(text, "{{char2}}", GetNameOf(Role::Bot2));

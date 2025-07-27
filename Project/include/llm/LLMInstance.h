@@ -136,7 +136,7 @@ public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool InitializeChat(std::shared_ptr<ChatSession> session, Messages messages);
+	bool InitializeChat(ChatSession session, Messages messages);
 	void Shutdown();
 
 	bool IsLoadingModel() const { return _readyState.load() == ReadyState::LoadingModel; }
@@ -165,7 +165,7 @@ public:
 
 	bool DumpContext(bool full, string filename = "prompt.txt") const;
 
-	const ChatSession& GetSession() const { return *_pSession; }
+	const ChatSession& GetSession() const { return _session; }
 
 private:
 	void ClearResponseQueue();
@@ -233,5 +233,5 @@ private:
 
 	std::unique_ptr<std::jthread> _workerThread;
 
-	std::shared_ptr<ChatSession> _pSession;
+	ChatSession _session;
 };
