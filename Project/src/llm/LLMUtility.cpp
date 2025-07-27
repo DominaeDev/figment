@@ -807,7 +807,6 @@ void llm_util::erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t fro
 	{
 		batch.pos[i] = 0;
 		batch.token[i] = 0;
-		batch.n_seq_id[i] = 0;
 		batch.logits[i] = false;
 	}
 }
