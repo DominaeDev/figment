@@ -427,26 +427,41 @@ llama_batch llm_util::init_batch(llama_context* pCtx)
 	batch.n_tokens = 0;
 
 	for (size_t i = 0; i < Constants::ContextSize; ++i)
+	{
+		batch.pos[i] = (int32_t)i;
 		batch.token[i] = 0;
+		batch.n_seq_id[i] = 0;
+	}
 	return batch;
 }
 
 llama_batch llm_util::create_batch_view(llama_batch& batch, int32_t begin, int32_t end)
 {
 	int32_t n_tokens = end - begin;
+	return llama_batch {
+		n_tokens,
+		batch.token + begin,
+		nullptr,
+		batch.pos + begin,
+		batch.n_seq_id + begin,
+		batch.seq_id + begin,
+		batch.logits + begin,
+	};
+
+/*	int32_t n_tokens = end - begin;
 	llama_batch batch_view = llama_batch_init(n_tokens, 0, 1);
 	batch_view.embd = nullptr;
 	batch_view.n_tokens = n_tokens;
 	for (int32_t i = 0; i < n_tokens; ++i)
 	{
 		int idx = begin + i;
-		batch_view.token[i] = batch.token[idx];
-		batch_view.pos[i] = batch.pos[idx];
-		batch_view.n_seq_id[i] = batch.n_seq_id[idx];
-		batch_view.seq_id[i] = batch.seq_id[idx];
-		batch_view.logits[i] = batch.logits[idx];
+		batch_view.token[i]		= batch.token[idx];
+		batch_view.pos[i]		= batch.pos[idx];
+		batch_view.n_seq_id[i]	= batch.n_seq_id[idx];
+		batch_view.seq_id[i][0] = batch.seq_id[idx][0];
+		batch_view.logits[i]	= batch.logits[idx];
 	}
-	return batch_view;
+	return batch_view;*/
 }
 
 bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
@@ -503,7 +518,6 @@ std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(llama_mode
 	llama_batch batch_view = llm_util::create_batch_view(batch, pos, pos + n_tokens);
 	if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
 		return std::nullopt;
-	llama_batch_free(batch_view);
 	return tokens;
 }
 

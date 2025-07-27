@@ -131,6 +131,46 @@ static void OnLoadModelProgress(float progress, void* user_data)
 		__LoadModelProgressCallback(static_cast<int>(progress * 100.0f));
 }
 
+static bool __dump_context(const llama_batch& batch, const llama_vocab* pVocab, string filename)
+{
+	auto fnTokenStr = [pVocab](llama_token token) -> string {
+		if (token == llama_vocab_bos(pVocab))
+			return "<BOS>";
+		else if (token == llama_vocab_eos(pVocab))
+			return "<EOS>";
+		else if (token == llama_vocab_eot(pVocab))
+			return "<EOT>";
+		else if (token == llama_vocab_sep(pVocab))
+			return "<SEP>";
+		else if (token == llama_vocab_pad(pVocab))
+			return "<PAD>";
+		else if (token == llama_vocab_nl(pVocab))
+			return "\r\n"; //"<NL>";
+		else
+		{
+			char buf[256];
+			int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
+			if (n < 0)
+				return "<UNK>";
+			else
+				return string(buf, n);
+		}
+	};
+
+	if (batch.token == nullptr || batch.n_tokens == 0)
+		return false;
+
+	// Detokenize the batched tokens
+	string result;
+	result.reserve(65536);
+//	for (int32_t i = 0; i < Constants::ContextSize; ++i)
+//		result.append(std::format("{0}\t{1}\r\n", batch.pos[i], fnTokenStr(batch.token[i])));
+	for (int32_t i = 0; i < Constants::ContextSize; ++i)
+		result.append(fnTokenStr(batch.token[i]));
+
+	return WriteTextFile(filename, result, false);
+}
+
 /// <summary>
 /// Warning: Callin ctx_remove in isolation leaves the batch in an invalid state.
 /// </summary>
@@ -152,27 +192,29 @@ static int32_t ctx_remove(llama_context* pCtx, ContextState& chat, std::vector<C
 	return 0; // Error
 }
 
-static int32_t ctx_remove_and_shift(llama_context* pCtx, ContextState& chat, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
+static int32_t ctx_remove_and_shift(llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
 {
 	// Remove
 	llama_pos pos_remove_begin = (*itBegin).ctx_pos;
-	int32_t shift_amount = ctx_remove(pCtx, chat, itBegin, itEnd);
+	int32_t shift_amount = ctx_remove(pCtx, ctxState, itBegin, itEnd);
 	if (shift_amount == 0)
 		return 0;
+
 	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
+	llama_pos pos_floor = std::min((int32_t)llama_n_ctx(pCtx), ctxState.floor_pos);
 
 	// Shift
-	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, -1, -shift_amount);
+	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, pos_floor, -shift_amount);
 
 	// Update batch
-	auto& batch = chat.batch;
+	auto& batch = ctxState.batch;
 	int32_t n_batch = batch.n_tokens;
 	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
 	{
 		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
 		batch.n_seq_id[pos_remove_begin + i] = batch.n_seq_id[pos_remove_end + i];
 		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
-		batch.seq_id[pos_remove_begin + i] = batch.seq_id[pos_remove_end + i];
+		batch.seq_id[pos_remove_begin + i][0] = batch.seq_id[pos_remove_end + i][0];
 		batch.logits[i] = false;
 	}
 	batch.n_tokens -= shift_amount;
@@ -204,7 +246,7 @@ static int32_t ctx_restore_tokens(llama_context* pCtx, ContextState& ctxState, i
 				batch.pos[k1 + piece_length - i] = k1 + piece_length - i;
 				batch.token[k1 + piece_length - i] = batch.token[k0 + piece_length - i];
 				batch.n_seq_id[k1 + piece_length - i] = batch.n_seq_id[k0 + piece_length - i];
-				batch.seq_id[k1 + piece_length - i] = batch.seq_id[k0 + piece_length - i];
+				batch.seq_id[k1 + piece_length - i][0] = batch.seq_id[k0 + piece_length - i][0];
 				batch.logits[k1 + piece_length - i] = false;
 			}
 
@@ -225,7 +267,7 @@ static int32_t ctx_restore_tokens(llama_context* pCtx, ContextState& ctxState, i
 			batch.pos[k0 + i] = k0 + i;
 			batch.token[k0 + i] = batch.token[shift_begin + i];
 			batch.n_seq_id[k0 + i] = batch.n_seq_id[shift_begin + i];
-			batch.seq_id[k0 + i] = batch.seq_id[shift_begin + i];
+			batch.seq_id[k0 + i][0] = batch.seq_id[shift_begin + i][0];
 			batch.logits[k0 + i] = false;
 		}
 
@@ -243,9 +285,11 @@ static int32_t ctx_restore_tokens(llama_context* pCtx, ContextState& ctxState, i
 	return dest_pos;
 }
 
-static int32_t ctx_stash_tokens(llama_context* pCtx, ContextState& ctxState, int32_t src_pos, int32_t src_length)
+static int32_t ctx_stash_tokens(llama_model* pModel, llama_context* pCtx, ContextState& ctxState, int32_t src_pos, int32_t src_length)
 {
 	llama_batch& batch = ctxState.batch;
+
+//	__dump_context(batch, llama_model_get_vocab(pModel), "prompt.txt");
 
 	int32_t partition_size = std::min(ctxState.floor_pos - ctxState.current_pos, src_length);
 	int32_t shifted = 0;
@@ -259,46 +303,50 @@ static int32_t ctx_stash_tokens(llama_context* pCtx, ContextState& ctxState, int
 		int32_t shift_begin = src_pos + src_length - (shifted + piece_length);
 		int32_t shift_end = shift_begin + piece_length;
 
-		int32_t target_begin = floor_pos - (shifted + piece_length);
+		int32_t target_begin = floor_pos - piece_length;
 		int32_t target_end = target_begin + piece_length;
 		int32_t shift_amount = target_begin - shift_begin;
 
 		// Shift down
 		for (int32_t i = 0; i < piece_length; ++i)
 		{
-			batch.pos[target_begin + i] = target_begin + i;
-			batch.token[target_begin + i] = batch.token[shift_begin + i];
-			batch.n_seq_id[target_begin + i] = batch.n_seq_id[shift_begin + i];
-			batch.seq_id[target_begin + i][0] = batch.seq_id[shift_begin + i][0];
-			batch.logits[target_begin + i] = batch.logits[shift_begin + i];
+			int idx = target_begin + i;
+			batch.pos[idx] = idx;
+			batch.token[idx]		= batch.token[shift_begin + i];
+			batch.n_seq_id[idx]		= batch.n_seq_id[shift_begin + i];
+			batch.seq_id[idx][0]	= batch.seq_id[shift_begin + i][0];
+			batch.logits[idx]		= batch.logits[shift_begin + i];
 		}
 
 		// Apply down-shifts
 		llama_kv_self_seq_add(pCtx, 0, shift_begin, shift_end, shift_amount);
 		llama_kv_self_update(pCtx);
 
-		int32_t bottom = current_pos - shift_end; // Tokens below persona
-		if (bottom > 0)
+		int32_t n_tokens_under = current_pos - shift_end; // Tokens under persona
+		if (n_tokens_under > 0)
 		{
 			// Shift up
-			for (int32_t i = 0; i < bottom; ++i)
+			for (int32_t i = 0; i < n_tokens_under; ++i)
 			{
-				batch.pos[shift_begin + i] = shift_begin + i;
-				batch.token[shift_begin + i] = batch.token[shift_begin + piece_length + i];
-				batch.n_seq_id[shift_begin + i] = batch.n_seq_id[shift_begin + piece_length + i];
-				batch.seq_id[shift_begin + i][0] = batch.seq_id[shift_begin + piece_length + i][0];
-				batch.logits[shift_begin + i] = batch.logits[shift_begin + piece_length + i];
+				int idx = shift_begin + i;
+				batch.pos[idx] = idx;
+				batch.token[idx]		= batch.token[shift_end + i];
+				batch.n_seq_id[idx]		= batch.n_seq_id[shift_end + i];
+				batch.seq_id[idx][0]	= batch.seq_id[shift_end + i][0];
+				batch.logits[idx]		= batch.logits[shift_end + i];
 			}
 
 			// Apply up-shifts
-			llama_kv_self_seq_add(pCtx, 0, shift_end, shift_end - bottom, -piece_length);
+			llama_kv_self_seq_add(pCtx, 0, shift_end, shift_end + n_tokens_under, -piece_length);
+			llama_kv_self_update(pCtx);
 		}
 
-		llama_kv_self_update(pCtx);
 		llm_util::erase_tokens(pCtx, batch, current_pos - piece_length, current_pos);
 
 		shifted += piece_length;
 	}
+
+//	__dump_context(batch, llama_model_get_vocab(pModel), "prompt.txt");
 
 	return ctxState.floor_pos - src_length;
 }
@@ -436,7 +484,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	{
 		Role role = persona.first;
 		PersonaBlock& block = persona.second;
-		int32_t new_pos = ctx_stash_tokens(pCtx, _contextState, _contextState.persona_pos + block.offset, block.length());
+		int32_t new_pos = ctx_stash_tokens(_modelState.pModel, pCtx, _contextState, _contextState.persona_pos + block.offset, block.length());
 		block.offset = new_pos - _contextState.persona_pos;
 		block.isActive = false;
 
@@ -452,9 +500,6 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 			if (persona.second.isActive)
 				persona.second.offset -= shift;
 		}
-
-//		DumpContext(true, "stash_persona_full.txt");
-//		DumpContext(false, "stash_persona.txt");
 	}
 #endif
 
@@ -505,8 +550,6 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	_modelState.rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 #endif
 
-	DumpContext(true);
-
 	_readyState.store(ReadyState::Ready);
 	PushSignal(LLMStatusSignal::InitializedChat);
 	return true;
@@ -535,7 +578,7 @@ bool LLMInstance::ResetChat(int seed)
 		llama_kv_self_seq_rm(_modelState.pCtx, 0, num_tokens, -1);
 		// llama_kv_self_clear(pCtx);
 
-		/*// Add tokens to batch
+		// Add tokens to batch
 		auto& batch = _contextState.batch;
 		for (int i = 0; i < num_tokens; ++i)
 		{
@@ -546,7 +589,6 @@ bool LLMInstance::ResetChat(int seed)
 			batch.logits[i] = false; // No logits
 		}
 		batch.n_tokens = num_tokens;
-		*/
 		
 		ClearQueue(_resultQueue);
 		_readyState.store(ReadyState::Ready);
@@ -740,9 +782,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 	// Prepare prompt
 	int32_t& current_pos = chat.current_pos;
-//	current_pos = llama_kv_self_used_cells(pCtx);
-//	int32_t n_batch = llama_n_batch(pCtx);
-	int32_t ctx_size  = llama_n_ctx(pCtx);
+	int32_t ctx_floor = chat.floor_pos;
 
 	std::vector<llama_token> prompt_tokens;
 
@@ -791,9 +831,11 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 	// Shift context window
 	size_t ctx_reserve = prompt_tokens.size() + Constants::MaxResponseLength;
-	if (current_pos + ctx_reserve > ctx_size)
+	if (current_pos + ctx_reserve > ctx_floor)
 	{
-		size_t ctx_chat_max = ctx_size - chat.blocks_pos; // Exclude system prompt
+		DumpContext(true);
+
+		size_t ctx_chat_max = ctx_floor - chat.blocks_pos; // Exclude system prompt
 		size_t free_tokens = std::max(static_cast<int32_t>(ctx_reserve), static_cast<int32_t>(ctx_chat_max * (1.0f - Constants::ContextWindowKeepRatio)));
 		
 		size_t total = 0;
@@ -932,7 +974,6 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			batch.seq_id + current_pos,
 			batch.logits + current_pos,
 		};
-		//llama_batch batch_view = llm_util::create_batch_view(batch, current_pos, current_pos + n_tokens);
 
 		// check if we have enough space in the context to evaluate this batch
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -1552,9 +1593,7 @@ bool LLMInstance::DumpContext(bool full, string filename) const
 	}
 
 	if (!full)
-	{
-		result.append(std::format("[batch:{0}, curr:{1}]\r\n", batch.n_tokens, _contextState.current_pos));
-	}
+		result.append(std::format("[pos:{0}/{1}]\r\n", _contextState.current_pos, batch.n_tokens));
 
 	// Cached blocks
 	for (auto& block : _contextState.blocks)
