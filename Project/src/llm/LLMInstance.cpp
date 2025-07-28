@@ -389,8 +389,9 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		{
 			if (i > 0)
 				pattern += "| ";
-			pattern += "\"@" + _session.GetIdentifierOf((Role)(static_cast<int32_t>(Role::Bot1) + i)) + "\"";
+			pattern += "\"@" + _session.GetIdentifierOf(llm_util::role_from_index(i)) + "\"";
 		}
+		pattern += "| \"@" + _session.GetIdentifierOf(Role::User) + "\"";
 		pattern = "(" + pattern + ")";
 
 		string_util::replace_all(grammar, "##NAME_PATTERN##", pattern);
@@ -445,7 +446,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		personas[role] = _session.GetPersonaOf(role);
 	}
 
-	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(pCtx, Role::System, "system");
+	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System);
 
 	auto pre_persona = llm_util::tokenize(_modelState.pModel, template_prefix + system_prompt, false); // <BOS>?
 	_contextState.system_tokens = pre_persona;
@@ -823,6 +824,20 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	}
 
 	// Tokenize uncached messages
+	Messages messages;
+	messages.reserve(4);
+	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
+	{
+		auto& block = *it;
+		if (block.cached)
+			continue;
+
+		messages.insert(std::begin(messages), Message {
+			block.role,
+			block.content,
+		});
+	}
+	
 	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
 	{
 		auto& block = *it;
@@ -831,11 +846,11 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 		string content = block.content;
 		if (args.responder == Responder::None) // Continue response
-			content = llm_tmpl::apply_chat_template_prefix(pCtx, Message { block.role, content }, block.name);
+			content = llm_tmpl::apply_chat_template_prefix(block.role, content);
 		else
 		{
 			llm_util::complete_message(content);
-			content = llm_tmpl::apply_chat_template(pCtx, Message { block.role, content }, false);
+			content = llm_tmpl::apply_chat_template({ Message { block.role, content } }, false);
 		}
 		content = _session.ApplyNames(content, llm_util::role_from_responder(args.responder));
 		
@@ -869,7 +884,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Append assistant tokens
 	if (args.responder != Responder::None)
 	{
-		string prelude = llm_tmpl::get_responder_prelude(args.responder, pCtx);
+		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(llm_util::role_from_responder(args.responder));
 		prelude = _session.ApplyNames(prelude, llm_util::role_from_responder(args.responder));
 		auto assistant_tokens = llm_util::tokenize(state.pModel, prelude, false);
 		prompt_tokens.insert(std::end(prompt_tokens), std::begin(assistant_tokens), std::end(assistant_tokens));
@@ -1222,7 +1237,7 @@ void LLMInstance::StartGeneration(GenerateArguments args)
 		if (args.maxMessages <= 0) // Randomize number of messages
 			args.maxMessages = numMessages(_modelState.rng);
 	}
-#else !LIMIT_MSG_COUNT
+#elif !LIMIT_MSG_COUNT
 	args.maxMessages = 0;
 #endif
 

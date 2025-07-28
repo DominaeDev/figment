@@ -47,17 +47,17 @@ enum class PromptTemplate
     Smolvlm,
 	*/
 	Automatic,
-	Default = Gemma
+	Default = ChatML
 };
 
 class llm_tmpl
 {
 public:
-	static string apply_chat_template(llama_context* pCtx, Message msg, bool add_assistant);
-	static string apply_chat_template_prefix(llama_context* pCtx, Message msg, string name);
-	static std::pair<string, string> get_chat_template_prefix_suffix(llama_context* pCtx, Role role, string name);
-	static std::string get_responder_prelude(Responder responder, llama_context* pCtx) noexcept;
 	static PromptTemplate auto_detect_template(llama_model* pModel);
+	static string apply_chat_template(Messages msg, bool add_assistant);
+	
+	static std::pair<string, string> get_chat_template_prefix_suffix(Role role);
+	static string apply_chat_template_prefix(Role role, string content);
 
 	static PromptTemplate current_template;
 

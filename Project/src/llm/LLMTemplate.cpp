@@ -57,11 +57,9 @@ static const char* get_tmpl(PromptTemplate tmpl)
 	return LLAMA_CPP_TEMPLATES.find(tmpl)->second.c_str();
 }
 
-// From llamacpp source
-static int32_t apply_template(
-    PromptTemplate tmpl,
-    const std::vector<const llama_chat_message *> & chat,
-    std::string & dest, bool add_ass) {
+// Lifted from llama.cpp API
+static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama_chat_message*>& chat, std::string& dest, bool add_ass) 
+{
     // Taken from the research: https://github.com/ggerganov/llama.cpp/issues/5527
     std::stringstream ss;
     if (tmpl == PromptTemplate::ChatML) {
@@ -280,11 +278,11 @@ static int32_t apply_template(
 }
 
 
-std::pair<string, string> llm_tmpl::get_chat_template_prefix_suffix(llama_context* pCtx, Role role, string name)
+std::pair<string, string> llm_tmpl::get_chat_template_prefix_suffix(Role role)
 {
 	// Strip prompt template from block content
 	static const char* const SUBSTITUTE = "{{SUBSTITUTE}}";
-	string tmpl = apply_chat_template(pCtx, Message { role, SUBSTITUTE, name }, false);
+	string tmpl = apply_chat_template({ Message { role, SUBSTITUTE } }, false);
 	if (tmpl.empty())
 		return std::make_pair("", ""); // Unknown template
 
@@ -294,11 +292,10 @@ std::pair<string, string> llm_tmpl::get_chat_template_prefix_suffix(llama_contex
 	return std::make_pair(prefix, suffix);
 }
 
-string llm_tmpl::apply_chat_template_prefix(llama_context* pCtx, Message msg, string name)
+string llm_tmpl::apply_chat_template_prefix(Role role, string content)
 {
-	auto [pre, post] = get_chat_template_prefix_suffix(pCtx, msg.role, name);
+	auto [pre, post] = get_chat_template_prefix_suffix(role);
 
-	string content = msg.content;
 	if (string_util::ends_with(content, post))
 		content = content.substr(0, content.length() - post.length());
 	if (!string_util::begins_with(content, content))
@@ -321,24 +318,31 @@ PromptTemplate llm_tmpl::auto_detect_template(llama_model* pModel)
 	return PromptTemplate::Undefined;
 }
 
-string llm_tmpl::apply_chat_template(llama_context* pCtx, Message message, bool add_assistant)
+string llm_tmpl::apply_chat_template(Messages messages, bool add_assistant)
 {
-	const char* name;
-	if (is_npc(message.role))
-		name = "system";
-	else if (message.role == Role::User)
-		name = "user";
-	else
-		name = "assistant";
+	if (messages.empty())
+		return "";
+
+	std::vector<llama_chat_message> msgs;
+	msgs.reserve(messages.size());
+	for (size_t i = 0; i < messages.size(); ++i)
+	{
+		const auto& msg = messages[i];
+		const char* name;
+		if (is_npc(msg.role))
+			name = "system";
+		else if (msg.role == Role::User)
+			name = "user";
+		else
+			name = "assistant";
+		msgs.push_back(llama_chat_message { 
+			name,
+			msg.content.c_str() 
+		});
+	}
 
 	if (!_template.empty())
 	{
-		std::vector<llama_chat_message> msgs;
-		msgs.push_back(llama_chat_message { 
-			name,
-			message.content.c_str() 
-		});
-
 		std::vector<char> formatted(Constants::MaxResponseLength * 2);
 		int new_len = llama_chat_apply_template(_template.c_str(), msgs.data(), msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
 		if (new_len > (int)formatted.size())
@@ -356,18 +360,17 @@ string llm_tmpl::apply_chat_template(llama_context* pCtx, Message message, bool 
 	}
 	else
 	{
+		std::vector<const llama_chat_message*> pMsgs;
+		pMsgs.reserve(messages.size());
+		for (size_t i = 0; i < msgs.size(); ++i)
+			pMsgs.push_back(&msgs[i]);
+
 		PromptTemplate tmpl = current_template;
 		if (tmpl == PromptTemplate::Undefined || tmpl == PromptTemplate::Automatic)
 			tmpl = PromptTemplate::Default;
 
-		std::vector<const llama_chat_message*> msgs;
-		msgs.push_back(new llama_chat_message { 
-			name,
-			message.content.c_str() 
-		}); //! @leak
-
 		std::string formatted;
-		int new_len = apply_template(current_template, msgs, formatted, add_assistant);
+		int new_len = apply_template(tmpl, pMsgs, formatted, add_assistant);
 
 		if (new_len < 0)
 		{
@@ -379,20 +382,4 @@ string llm_tmpl::apply_chat_template(llama_context* pCtx, Message message, bool 
 
 }
 
-std::string llm_tmpl::get_responder_prelude(Responder responder, llama_context* pCtx) noexcept
-{
-	string responderName;
-	if (responder == Responder::Narrator)
-		responderName = "narrator";
-	else if (responder == Responder::User)
-		responderName = "{{user}}";
-	else
-		responderName = "{{char}}";
-
-	// Prepare assistant prelude
-	string prelude = apply_chat_template(pCtx, Message{}, true);
-	string_util::replace(prelude, "assistant", responderName);
-	string_util::replace(prelude, "ASSISTANT", responderName);
-	return prelude;
-}
 
