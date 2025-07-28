@@ -1,5 +1,6 @@
 ﻿#include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
+#include "llm/LLMTemplate.h"
 #include "util/StringUtility.h"
 #include "util/Common.h"
 #include "Constants.h"
@@ -11,7 +12,7 @@
 
 #define DEBUG_SEED 0xA1B2C3D4
 #define LIMIT_MSG_COUNT 1
-#define RANDOMIZE_MSG_COUNT 1
+#define RANDOMIZE_MSG_COUNT 0
 
 void ModelState::Release()
 {
@@ -252,7 +253,6 @@ static void ctx_shift(llama_context* pCtx, llama_batch& batch, int32_t src_pos, 
 	// Apply down-shifts
 	int32_t shift_amount = dest_pos - src_pos;
 	llama_kv_self_seq_add(pCtx, 0, src_pos, src_pos + src_len, shift_amount);
-	llama_kv_self_update(pCtx);
 }
 
 /// <summary>
@@ -383,10 +383,14 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		// Load grammar(s)
 		string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 
-		string pattern = "\"@" + _session.GetIdentifierOf(Role::User) + "\"";
 		int32_t botCount = (int32_t)_session.GetBotCount();
+		string pattern;
 		for (int i = 0; i < botCount; ++i)
-			pattern += "| \"@" + _session.GetIdentifierOf((Role)(static_cast<int32_t>(Role::Bot1) + i)) + "\"";
+		{
+			if (i > 0)
+				pattern += "| ";
+			pattern += "\"@" + _session.GetIdentifierOf((Role)(static_cast<int32_t>(Role::Bot1) + i)) + "\"";
+		}
 		pattern = "(" + pattern + ")";
 
 		string_util::replace_all(grammar, "##NAME_PATTERN##", pattern);
@@ -420,6 +424,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 
 	// Clear kv cache
 	llama_context* pCtx = _modelState.pCtx;
+	int32_t ctx_size = llama_n_ctx(pCtx);
 	llama_kv_self_clear(pCtx);
 	llama_batch_free(_contextState.batch);
 
@@ -427,7 +432,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	llama_batch& batch = _contextState.batch;
 	int32_t& current_pos = _contextState.current_pos;
 	current_pos = 0;
-	_contextState.floor_pos = llama_n_ctx(pCtx);
+	_contextState.floor_pos = ctx_size;
 
 	// Init system prompt
 	string system_prompt = _session.GetSystemPrompt();
@@ -440,16 +445,16 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		personas[role] = _session.GetPersonaOf(role);
 	}
 
-	// System prompt
-	if (auto tokens = llm_util::tokenize_and_decode(_modelState.pModel, _modelState.pCtx, batch, 
-		llm_util::apply_chat_template(_modelState.pCtx, Message { Role::System, system_prompt, "system" }, false),
-		current_pos, true))
-	{
-		current_pos += toI(tokens.value().size());
-		_contextState.system_tokens = tokens.value();
-	}
+	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(pCtx, Role::System, "system");
 
-	_contextState.persona_pos = current_pos;
+	auto pre_persona = llm_util::tokenize(_modelState.pModel, template_prefix + system_prompt, false); // <BOS>?
+	_contextState.system_tokens = pre_persona;
+	_contextState.persona_pos = toI(pre_persona.size());
+
+	std::vector<llama_token> system_prompt_tokens;
+	system_prompt_tokens.reserve(ctx_size);
+	AppendVector(system_prompt_tokens, pre_persona);
+	current_pos += toI(pre_persona.size());
 
 	// Bot persona(s)
 	for (const auto& kvp : personas)
@@ -457,35 +462,44 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		if (string_util::empty_or_whitespace(kvp.second))
 			continue;
 
-		if (auto tokens = llm_util::tokenize_and_decode(_modelState.pModel, _modelState.pCtx, batch,
-			llm_util::apply_chat_template(_modelState.pCtx, Message { Role::System, kvp.second, "system" }, false),
-			current_pos, false))
-		{
-			_contextState.personas[kvp.first] = PersonaBlock {
-				/*role*/ kvp.first,
-				/*content*/ kvp.second,
-				/*tokens*/ tokens.value(),
-				/*offset*/ current_pos - _contextState.persona_pos,
-				/*active*/ true,
-			};
-			current_pos += toI(tokens.value().size());
-		}
+		auto persona_tokens = llm_util::tokenize(_modelState.pModel, kvp.second);
+		_contextState.personas[kvp.first] = PersonaBlock {
+			/*role*/ kvp.first,
+			/*content*/ kvp.second,
+			/*tokens*/ persona_tokens,
+			/*offset*/ current_pos - _contextState.persona_pos,
+			/*active*/ true,
+		};
+		AppendVector(system_prompt_tokens, persona_tokens);
+		current_pos += toI(persona_tokens.size());
 	}
 
 	// User persona
 	if (!string_util::empty_or_whitespace(user_persona))
 	{
-		if (auto tokens = llm_util::tokenize_and_decode(_modelState.pModel, _modelState.pCtx, batch,
-			llm_util::apply_chat_template(_modelState.pCtx, Message { Role::System, user_persona, "system" }, false),
-			current_pos, false))
-		{
-			current_pos += toI(tokens.value().size());
-		}
+		auto user_persona_tokens = llm_util::tokenize(_modelState.pModel, user_persona);
+		AppendVector(system_prompt_tokens, user_persona_tokens);
+		current_pos += toI(user_persona_tokens.size());
 	}
+
+	// Suffix
+	auto template_suffix_tokens = llm_util::tokenize(_modelState.pModel, template_suffix);
+	AppendVector(system_prompt_tokens, template_suffix_tokens);
+	current_pos += toI(template_suffix_tokens.size());
 	
 	_contextState.blocks_pos = current_pos;
 
-#if FALSE
+	// Append to batch
+	for (int i = 0; i < system_prompt_tokens.size(); ++i)
+		common_batch_add(batch, system_prompt_tokens[i], i, { 0 }, false);
+	batch.n_tokens = current_pos;
+
+	// Decode
+	llama_batch batch_view = llm_util::create_batch_view(batch, 0, batch.n_tokens);
+	if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
+		return false; // Error
+
+#if TRUE
 	// Stash personas
 	for (auto& persona : _contextState.personas)
 	{
@@ -512,7 +526,9 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 				persona.second.offset -= shift;
 		}
 	}
+#endif
 
+#if FALSE
 	// Restore personas
 	for (auto& persona : _contextState.personas)
 	{
@@ -615,6 +631,8 @@ static void __LoadModel(string filename, __LoadModelCallback onComplete)
 	ModelState state;
 	state.pModel = llama_model_load_from_file(filename.c_str(), model_params);
 	state.modelName = string_util::get_filename(filename);
+
+	llm_tmpl::auto_detect_template(state.pModel);
 
 	if (!state.pModel)
 	{
@@ -813,11 +831,11 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 		string content = block.content;
 		if (args.responder == Responder::None) // Continue response
-			content = llm_util::apply_chat_template_prefix(pCtx, Message { block.role, content });
+			content = llm_tmpl::apply_chat_template_prefix(pCtx, Message { block.role, content }, block.name);
 		else
 		{
 			llm_util::complete_message(content);
-			content = llm_util::apply_chat_template(pCtx, Message { block.role, content }, false);
+			content = llm_tmpl::apply_chat_template(pCtx, Message { block.role, content }, false);
 		}
 		content = _session.ApplyNames(content, llm_util::role_from_responder(args.responder));
 		
@@ -851,7 +869,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Append assistant tokens
 	if (args.responder != Responder::None)
 	{
-		string prelude = llm_util::get_responder_prelude(args.responder, pCtx);
+		string prelude = llm_tmpl::get_responder_prelude(args.responder, pCtx);
 		prelude = _session.ApplyNames(prelude, llm_util::role_from_responder(args.responder));
 		auto assistant_tokens = llm_util::tokenize(state.pModel, prelude, false);
 		prompt_tokens.insert(std::end(prompt_tokens), std::begin(assistant_tokens), std::end(assistant_tokens));
@@ -1540,6 +1558,7 @@ bool LLMInstance::PollResponse(MessagePiece& piece)
 	return true;
 }
 
+#if _DEBUG
 bool LLMInstance::DumpContext(bool full, string filename) const
 {
 	const ModelState& state = _modelState;
@@ -1612,6 +1631,7 @@ bool LLMInstance::DumpContext(bool full, string filename) const
 
 	return WriteTextFile(filename, result, false);
 }
+#endif 
 
 bool LLMInstance::Reseed(uint32_t seed)
 {

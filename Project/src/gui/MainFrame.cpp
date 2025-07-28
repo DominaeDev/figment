@@ -378,6 +378,9 @@ void MainFrame::PollStatus()
 			SetStatusBar("Model loaded");
 			StartChat();
 			break;
+		case LLMStatusSignal::UnloadedModel:
+			SetStatusBar("Model unloaded");
+			break;
 		case LLMStatusSignal::LoadModelFailure:
 			SetStatusBar("Failed to load model");
 			break;
@@ -419,10 +422,12 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 			_bAutoChat = false;
 #endif		
 			break;
+#if _DEBUG
 		case SDLK_F11:
 			if (pLLM->IsReady())
 				pLLM->DumpContext((event.mod & SDL_KMOD_LSHIFT) != 0);
 			break;
+#endif
 #if AUTOCHAT
 		case SDLK_F5:
 			_bAutoChat = !_bAutoChat;

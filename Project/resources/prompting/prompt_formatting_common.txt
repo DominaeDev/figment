@@ -13,7 +13,7 @@ Syntax: <act="@ID">*smiles*</act>
 The narrator is an anonymous voice that occasionally chimes in to provide details and exposition that can't be conveyed through spoken words or actions alone.
 Syntax: <narrator>[Expository text here.]</narrator>
 
-# List of participants (ID, Name)
+# List of Characters (ID, Name)
 @{{id_char1}} = "{{char1}}"
 @{{id_char2}} = "{{char2}}"
-@{{id_user}} = "{{user}}"
+@{{id_user}} = "{{user}}" (The user)

@@ -163,7 +163,9 @@ public:
 	bool PollResponse(MessagePiece& piece);
 	std::pair<LLMStatus, bool> PollStatus();
 
+#if _DEBUG
 	bool DumpContext(bool full, string filename = "prompt.txt") const;
+#endif
 
 	const ChatSession& GetSession() const { return _session; }
 

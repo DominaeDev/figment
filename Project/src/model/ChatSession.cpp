@@ -107,7 +107,7 @@ string ChatSession::GetPersonaOf(Role role) const
 	if (!optCharacter.has_value())
 		return "";
 
-	string description = optCharacter.value().description;
+	string description = string_util::trim(optCharacter.value().description);
 	if (description.empty())
 		return "";
 

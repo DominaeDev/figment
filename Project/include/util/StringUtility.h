@@ -6,14 +6,14 @@
 struct string_util
 {
 	static void ltrim_str(std::string& s);
-	static std::string ltrim(const std::string& s);
+	static [[nodiscard]] std::string ltrim(const std::string& s);
 	static void rtrim_str(std::string& s);
-	static std::string rtrim(const std::string& s);
-	static inline std::string trim(const std::string& s) { return ltrim(rtrim(s)); }
+	static [[nodiscard]] std::string rtrim(const std::string& s);
+	static inline [[nodiscard]] std::string trim(const std::string& s) { return ltrim(rtrim(s)); }
 	static inline void trim_str(std::string& s) { ltrim_str(s); rtrim_str(s); }
 
-	static std::string lcase(const std::string& s);
-	static std::string ucase(const std::string& s);
+	static [[nodiscard]] std::string lcase(const std::string& s);
+	static [[nodiscard]] std::string ucase(const std::string& s);
 	static int compare(const std::string& a, const std::string& b, bool ignore_case = false);
 	static bool equals(const std::string& a, const std::string& b, bool ignore_case = false);
 

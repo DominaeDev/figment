@@ -158,74 +158,6 @@ extern Role llm_util::role_from_responder(Responder responder)
 	return Role::Undefined;
 }
 
-string llm_util::apply_chat_template(llama_context* pCtx, Message msg, bool add_assistant)
-{
-	return apply_chat_template(pCtx, Messages { msg }, add_assistant);
-}
-
-string llm_util::apply_chat_template_prefix(llama_context* pCtx, Message msg)
-{
-	// Strip prompt template from block content
-	static const char* const SUBSTITUTE = "{{SUBSTITUTE}}";
-	string tmpl = apply_chat_template(pCtx, Message { msg.role, SUBSTITUTE }, false);
-	size_t pos_msg = tmpl.find(SUBSTITUTE);
-	string prelude = tmpl.substr(0, pos_msg);
-	string postlude = tmpl.substr(pos_msg + strlen(SUBSTITUTE));
-
-	string content = msg.content;
-	if (string_util::ends_with(content, postlude))
-		content = content.substr(0, content.length() - postlude.length());
-	if (!string_util::begins_with(content, prelude))
-		content = prelude + content;
-	return content;
-}
-
-string llm_util::apply_chat_template(llama_context* pCtx, Messages in_messages, bool add_assistant)
-{
-	int prev_len = 0;
-
-//	const char* tmpl = llama_model_chat_template(state.pModel, nullptr);
-	const char* tmpl = "chatml";
-
-//	tmpl = "mistral-v7-tekken";
-//	tmpl = "chatml";
-//	tmpl = "llama2";
-//	tmpl = "llama3";
-//	tmpl = "command-r";
-//	tmpl = "gemma";
-//	tmpl = "vicuna";
-//	tmpl = "deepseek3";
-
-	std::vector<llama_chat_message> llama_msgs(in_messages.size());
-	for (int i = 0; i < in_messages.size(); ++i)
-	{
-		auto& msg = in_messages[i];
-		llama_msgs[i] = llama_chat_message { 
-			msg.name.c_str(), 
-			msg.content.c_str() 
-		};
-	}
-
-	std::vector<char> formatted(llama_n_ctx(pCtx));
-	int new_len = llama_chat_apply_template(tmpl, llama_msgs.data(), (int32_t)llama_msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
-	if (new_len > (int)formatted.size())
-	{
-		formatted.resize(new_len);
-		new_len = llama_chat_apply_template(tmpl, llama_msgs.data(), (int32_t)llama_msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
-	}
-
-	if (new_len < 0)
-	{
-		fprintf(stderr, "failed to apply the chat template\n");
-		return "";
-	}
-
-	// remove previous messages to obtain the prompt to generate the response
-	string prompt = string(formatted.begin() + prev_len, formatted.begin() + new_len);
-
-	return prompt;
-}
-
 std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
 {
 	auto patterns = std::vector<std::tuple<string, MessageType>> {
@@ -396,16 +328,16 @@ void llm_util::init_batch_logits(llama_batch& batch)
 	batch.logits[batch.n_tokens - 1] = true;  // Only need logits for last token
 }
 
-std::vector<llama_token> llm_util::tokenize(llama_model* pModel, string prompt, bool bAddSpecial)
+std::vector<llama_token> llm_util::tokenize(llama_model* pModel, string prompt, bool add_special)
 {
 	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
 
 	std::vector<llama_token> prompt_tokens(1024);
-	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true);
+	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), add_special, false);
 	if (n_prompt_tokens < 0)
 	{
 		prompt_tokens.resize(-n_prompt_tokens);
-		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), bAddSpecial, true) < 0)
+		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), add_special, false) < 0)
 		{
 			// Error
 			return std::vector<llama_token> {};
@@ -763,23 +695,6 @@ std::string llm_util::process_message(std::string message, std::string identifie
 	return result;
 }
 
-std::string llm_util::get_responder_prelude(Responder responder, llama_context* pCtx) noexcept
-{
-	string responderName;
-	if (responder == Responder::Narrator)
-		responderName = "narrator";
-	else if (responder == Responder::User)
-		responderName = "{{user}}";
-	else
-		responderName = "{{char}}";
-
-	// Prepare assistant prelude
-	string prelude = llm_util::apply_chat_template(pCtx, Messages{}, true);
-	string_util::replace(prelude, "assistant", responderName);
-	string_util::replace(prelude, "ASSISTANT", responderName);
-	return prelude;
-}
-
 string llm_util::format_id(string id)
 { 
 	if (id[0] == '@')
@@ -801,11 +716,12 @@ void llm_util::erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t fro
 	if (to <= from || from < 0 || to < 0 || from >= Constants::ContextSize || to > Constants::ContextSize)
 		return;
 
+	llama_kv_self_update(pCtx);
 	llama_kv_self_seq_rm(pCtx, seq, from, to);
 
 	for (int32_t i = from; i < to; ++i)
 	{
-		batch.pos[i] = 0;
+//		batch.pos[i] = 0;
 		batch.token[i] = 0;
 		batch.logits[i] = false;
 	}

@@ -2,13 +2,13 @@ root			::= any+ end?
 more 			::= any* end?
 
 # Stubs
-stub-talk		::= "\"" [^"*<|>\n]* "\"</talk>" more
-stub-act		::= "*" [^"*<|>\n]* "*</act>" more
-stub-narr		::= "[" [^"*<|>\]]* "]</narrator>" more
+stub-talk		::= "\"" [^"*<|>@\n]* "\"</talk>" more
+stub-act		::= "*" [^"*<|>@\n]* "*</act>" more
+stub-narr		::= "[" [^"*<|>@\]]* "]</narrator>" more
 
 # Continuations
-cont-talk		::= [^"*<|>\n]* "\"</talk>" more
-cont-act		::= [^"*<|>\n]* "*</act>" more
+cont-talk		::= [^"*<|>@\n]* "\"</talk>" more
+cont-act		::= [^"*<|>@\n]* "*</act>" more
 cont-narr		::= [^"*<|>\]]* "]</narrator>" more
 
 # Message types
@@ -17,7 +17,7 @@ act			::= "<act=\"" name "\">*" text "*</act>"
 narr		::= "<narrator>[" text "]</narrator>"
 any			::= (dlg | act | narr | ws)
 
-text		::= [^\t<|>"*\]]*
+text		::= [^\t<|>@"*\]]*
 ws			::= [ \n]
 name		::= ##NAME_PATTERN##
 end			::= ( "<|im_end|>" | "</s>" | "<s>" | "<end_of_turn>" | "<EOT>" | "_<EOT>" | "###" | "<｜end▁of▁sentence｜>" )
