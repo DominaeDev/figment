@@ -68,6 +68,7 @@ struct PersonaBlock
 
 struct ContextState
 {
+	llama_batch batch {};	// Representation of the kv-cache (mirror)
 	std::vector<int32_t> system_tokens;
 	std::map<Role, PersonaBlock> personas;
 	std::vector<ContextBlock> blocks;
@@ -77,14 +78,10 @@ struct ContextState
 	int32_t persona_pos = 0;
 	int32_t blocks_pos = 0;		// post-system prompt
 	int32_t floor_pos = 0;		// bottom
-	llama_batch batch {};
 
 	int32_t AssignBlockPositions();
-	void SwapInPersona(size_t index);
 
-	// Testing
-	std::vector<int32_t> secret_tokens;
-	int32_t secret_pos = 0;
+	Role activePersona = Role::Undefined;
 };
 
 enum class LLMStatusSignal {
@@ -106,6 +103,8 @@ struct LLMStatus
 	string modelName;
 	size_t allocCtxSize = 0;
 	size_t usedCtxSize = 0;
+	int64_t usedVRAM = 0;
+	int64_t usedRAM = 0;
 	bool bReady = false;
 	bool bInvalid = false;
 	double tokensPerSec = 0.0;
@@ -188,6 +187,9 @@ private:
 		GrammarError,
 	};
 
+	using __LoadModelCallback = std::function<void(ModelState)>;
+	void __LoadModel(string filename, __LoadModelCallback onComplete);
+
 	using __PartialResultCallback = std::function<void(__PartialResult)>;
 	using __GenerationCompleteCallback = std::function<void(InternalError, string)>;
 	
@@ -211,6 +213,7 @@ private:
 	};
 	void __Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 	void StartGeneration(GenerateArguments args);
+	bool ActivatePersona(Role persona);
 
 	void PushSignal(LLMStatusSignal signal);
 	void RefreshActiveResponses();
@@ -236,4 +239,8 @@ private:
 	std::unique_ptr<std::jthread> _workerThread;
 
 	ChatSession _session;
+	
+public:
+	std::atomic<int64_t> _usedVRAM; // As reported from llama.cpp
+	std::atomic<int64_t> _usedRAM; // As reported from llama.cpp
 };

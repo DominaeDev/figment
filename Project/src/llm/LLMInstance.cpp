@@ -123,7 +123,40 @@ void LLMInstance::Shutdown()
 	PushSignal(LLMStatusSignal::UnloadedModel);
 }
 
-using __LoadModelCallback = std::function<void(ModelState)>;
+using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;
+static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
+{
+	LLMInstance* pThis = static_cast<LLMInstance*>(user_data);
+
+	string log(text);
+	size_t pos_eq = log.find('=');
+	bool bGPU = log.find("CUDA") != string::npos;
+	bool bCPU = log.find("CPU") != string::npos;
+
+	if (pos_eq != string::npos && log.find("buffer size") != string::npos)
+	{
+		string value = string_util::trim(log.substr(pos_eq + 1));
+		double mul= 1024.0 * 1024.0; // MiB
+		if (string_util::ends_with(value, "GiB"))
+			mul *= 1024.0;
+
+		try
+		{
+			int64_t iValue = static_cast<int64_t>(std::stod(value) * mul);
+			if (bGPU)
+				pThis->_usedVRAM.fetch_add(iValue);
+			else if (bCPU)
+				pThis->_usedRAM.fetch_add(iValue);
+		}
+		catch (...)
+		{
+			// Do nothing
+		}
+	}
+
+	DebugPrint(text);
+}
+
 static LoadModelProgressCallback __LoadModelProgressCallback = nullptr; //! @thread-safety
 
 static void OnLoadModelProgress(float progress, void* user_data)
@@ -146,7 +179,7 @@ static bool __dump_context(const llama_batch& batch, const llama_vocab* pVocab, 
 		else if (token == llama_vocab_pad(pVocab))
 			return "<PAD>";
 		else if (token == llama_vocab_nl(pVocab))
-			return "\r\n"; //"<NL>";
+			return "<NL>"; //"\r\n";
 		else
 		{
 			char buf[256];
@@ -164,10 +197,10 @@ static bool __dump_context(const llama_batch& batch, const llama_vocab* pVocab, 
 	// Detokenize the batched tokens
 	string result;
 	result.reserve(65536);
-//	for (int32_t i = 0; i < Constants::ContextSize; ++i)
-//		result.append(std::format("{0}\t{1}\r\n", batch.pos[i], fnTokenStr(batch.token[i])));
 	for (int32_t i = 0; i < Constants::ContextSize; ++i)
-		result.append(fnTokenStr(batch.token[i]));
+		result.append(std::format("{0}\t{1:5}\t\"{2}\"\r\n", batch.pos[i], batch.token[i], fnTokenStr(batch.token[i])));
+//	for (int32_t i = 0; i < Constants::ContextSize; ++i)
+//		result.append(fnTokenStr(batch.token[i]));
 
 	return WriteTextFile(filename, result, false);
 }
@@ -423,7 +456,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		_modelState.pActiveGrammar = default_grammar_sampler;
 	}
 
-	// Clear kv cache
+	// Initialize context
 	llama_context* pCtx = _modelState.pCtx;
 	int32_t ctx_size = llama_n_ctx(pCtx);
 	llama_kv_self_clear(pCtx);
@@ -435,9 +468,9 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	current_pos = 0;
 	_contextState.floor_pos = ctx_size;
 
-	// Init system prompt
 	string system_prompt = _session.GetSystemPrompt();
 	string user_persona = _session.GetPersonaOf(Role::User);
+
 	std::map<Role, string> personas;
 	int32_t botCount = (int32_t)_session.GetBotCount();
 	for (int32_t i = 0; i < botCount; ++i)
@@ -463,7 +496,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		if (string_util::empty_or_whitespace(kvp.second))
 			continue;
 
-		auto persona_tokens = llm_util::tokenize(_modelState.pModel, kvp.second);
+		auto persona_tokens = llm_util::tokenize(_modelState.pModel, "<{"+kvp.second+"}>");
 		_contextState.personas[kvp.first] = PersonaBlock {
 			/*role*/ kvp.first,
 			/*content*/ kvp.second,
@@ -471,6 +504,12 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 			/*offset*/ current_pos - _contextState.persona_pos,
 			/*active*/ true,
 		};
+
+		string begin_piece = llm_util::stringFromToken(pVocab, persona_tokens[0]);
+		auto begin_piece1 = llm_util::stringFromToken(pVocab, persona_tokens[1]);
+		auto begin_piece2 = llm_util::stringFromToken(pVocab, persona_tokens[2]);
+		string end_piece = llm_util::stringFromToken(pVocab, persona_tokens.back());
+
 		AppendVector(system_prompt_tokens, persona_tokens);
 		current_pos += toI(persona_tokens.size());
 	}
@@ -527,6 +566,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 				persona.second.offset -= shift;
 		}
 	}
+	_contextState.activePersona = Role::Undefined;
 #endif
 
 #if FALSE
@@ -564,6 +604,8 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 #else
 	_modelState.rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 #endif
+
+//	__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
 
 	_readyState.store(ReadyState::Ready);
 	PushSignal(LLMStatusSignal::InitializedChat);
@@ -618,10 +660,15 @@ bool LLMInstance::ResetChat(int seed)
 	return true;
 }
 
-static void __LoadModel(string filename, __LoadModelCallback onComplete)
+void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 {
 	const int ngl = 99; // All layers
 	const int n_ctx = Constants::ContextSize;
+
+	_usedVRAM.store(0);
+	_usedRAM.store(0);
+
+	llama_log_set(OnLlamaLog, (void*)this);
 
 	// initialize the model
 	llama_model_params model_params = llama_model_default_params();
@@ -667,7 +714,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 	_readyState.store(ReadyState::LoadingModel);
 	__LoadModelProgressCallback = onProgress;
 
-	_workerThread = std::make_unique<std::jthread>(std::jthread(__LoadModel, filename,
+	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__LoadModel, this), filename,
 		[this, filename, onComplete](ModelState result)
 	{
 		if (result.pModel) // Success
@@ -925,7 +972,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	int32_t ctx_size  = llama_n_ctx(state.pCtx);
 	int32_t& current_pos = chat.current_pos;
 	string userName = _session.GetNameOf(Role::User);
-	int32_t pre_response_pos = chat.pre_response_pos;
+	int32_t& pre_response_pos = chat.pre_response_pos;
 
 	string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
 	string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
@@ -1126,6 +1173,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 								msgType = MessageType::Narration;
 							else if (tag == Constants::DirectionTag)
 								msgType = MessageType::Direction;
+
+							ActivatePersona(responderRole);
 						}
 					}
 				}
@@ -1539,6 +1588,8 @@ std::pair<LLMStatus, bool> LLMInstance::PollStatus()
 			status.allocCtxSize = llama_n_ctx(_modelState.pCtx);
 			status.usedCtxSize = llama_kv_self_used_cells(_modelState.pCtx);
 			status.tokensPerSec = _tokensPerSec.load();
+			status.usedVRAM = _usedVRAM.load();
+			status.usedRAM = _usedRAM.load();
 		}
 		lock.unlock();
 		lock.release();
@@ -1698,4 +1749,75 @@ void LLMInstance::RefreshActiveResponses()
 	_activeResponseIds.clear();
 	for (auto it = std::cbegin(_contextState.blocks); it != std::cend(_contextState.blocks); ++it)
 		_activeResponseIds.insert(it->responseId);
+}
+
+bool LLMInstance::ActivatePersona(Role role)
+{
+	if (!is_bot(role))
+		return false;
+
+	if (role == _contextState.activePersona)
+		return false; // No change
+
+	llama_batch& batch = _contextState.batch;
+	llama_context* pCtx = _modelState.pCtx;
+
+//	__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
+
+	// Move active persona
+	auto itFindActive = _contextState.personas.find(_contextState.activePersona);
+	if (itFindActive != _contextState.personas.end() && itFindActive->second.isActive)
+	{
+		PersonaBlock& block = itFindActive->second;
+		int32_t old_offset = block.offset;
+		int32_t new_pos = ctx_shift_down(pCtx, _contextState, _contextState.persona_pos + block.offset, block.length());
+		block.offset = new_pos - _contextState.persona_pos;
+		block.isActive = false;
+
+		int32_t shift = block.length();
+		_contextState.current_pos -= shift;
+		_contextState.pre_response_pos -= shift;
+		_contextState.blocks_pos -= shift;
+		_contextState.floor_pos -= shift;
+		batch.n_tokens -= block.length();
+
+		_contextState.activePersona = Role::Undefined;
+	}
+
+//	__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
+
+	auto itFindInactive = _contextState.personas.find(role);
+	if (itFindInactive != _contextState.personas.end() && !itFindInactive->second.isActive)
+	{
+		PersonaBlock& block = itFindInactive->second;
+
+		int32_t old_offset = block.offset;
+		int32_t new_pos = ctx_shift_up(pCtx, _contextState, _contextState.persona_pos + block.offset, block.length(), _contextState.persona_pos);
+		block.offset = new_pos - _contextState.persona_pos;
+		block.isActive = true;
+
+		int32_t shift = block.length();
+		_contextState.current_pos += shift;
+		_contextState.pre_response_pos += shift;
+		_contextState.blocks_pos += shift;
+		_contextState.floor_pos += shift;
+		batch.n_tokens += block.length();
+
+		_contextState.activePersona = role;
+
+		// Update other persona offset
+		for (auto& kvp : _contextState.personas)
+		{
+			if (&kvp.second == &block)
+				continue; // Same
+
+			if (!kvp.second.isActive && kvp.second.offset < old_offset)
+				kvp.second.offset += shift;
+		}
+
+//		__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
+		return true;
+	}
+
+	return false;
 }
