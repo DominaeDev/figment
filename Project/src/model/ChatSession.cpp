@@ -1,8 +1,10 @@
 #include "model/ChatSession.h"
-#include "llm/LLMUtility.h"
+
 #include "util/Common.h"
 #include "util/StringUtility.h"
+#include "llm/LLMUtility.h"
 #include "gui/CharacterImageStore.h"
+#include "gui/Color.h"
 
 #include <exception>
 #include <cassert>
@@ -99,6 +101,22 @@ string ChatSession::GetNameOf(Role role) const
 	if (optCharacter.has_value())
 		return optCharacter.value().name;
 	return "Unknown";
+}
+
+std::pair<Color, Color> ChatSession::GetColorsOf(Role role) const
+{
+	if (auto character = GetCharacter(role))
+	{
+		if (color_util::is_defined(character.value().bgColor) && color_util::is_defined(character.value().borderColor))
+			return std::make_pair(character.value().bgColor, character.value().borderColor);
+	}
+
+	if (is_bot(role))
+		return std::make_pair(Colors::DefaultBotMessageBackgrounds[get_bot_index(role) % 8], Colors::DefaultBotMessageBorders[get_bot_index(role) % 8]);
+	else if (role == Role::User)
+		return std::make_pair(Colors::DefaultUserMessageBackground, Colors::DefaultUserMessageBorder);
+	else
+		return std::make_pair(Colors::MessageBackgroundDefault, Colors::MessageBorderDefault);
 }
 
 string ChatSession::GetPersonaOf(Role role) const

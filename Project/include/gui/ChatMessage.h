@@ -13,6 +13,8 @@ public:
 	ChatMessage(Control* pParent, Role role, string characterId, string name, MessageType msgType, bool bShowAvatar);
 
 	void SetMessage(string text, bool complete = false);
+	void SetColors(std::pair<Color, Color> colors);
+	void SetColors(Color bgColor, Color borderColor);
 	void AppendMessage(const string& text, bool complete = false);
 
 	void SetActive(bool bActive);
@@ -34,6 +36,11 @@ private:
 	bool _bShowAvatar = false;
 	bool _bActive = true;
 	MessageType _messageType = MessageType::Undefined;
+
+	Color _bgColor;
+	Color _borderColor;
+	Color _nameColor;
+	Color _textColor;
 
 	enum Style
 	{

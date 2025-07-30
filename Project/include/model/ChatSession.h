@@ -19,6 +19,7 @@ public:
 	string GetIdentifierOf(Role role) const;
 	string GetNameOf(Role role) const;
 	string GetPersonaOf(Role role) const;
+	std::pair<Color, Color> GetColorsOf(Role role) const;
 	Role GetRoleOf(string characterId) const;
 	size_t GetBotCount() const;
 	bool IsGroupChat() const { return GetBotCount() > 1; }

@@ -75,6 +75,7 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	auto pMessage = new ChatMessage(this, role, identifier, bShowName ? name : "", msgType, bShowAvatar);
 	pMessage->SetY(-1000); // Move off-screen
 	pMessage->SetMessage(message, complete);
+	pMessage->SetColors(_session.GetColorsOf(role));
 	GetSizer()->Add(pMessage, 0, Sizer::Expand);
 	return pMessage;
 }

@@ -22,7 +22,7 @@ enum class Role
 
 constexpr inline bool is_bot(Role role) { return role >= Role::Bot1 && role <= Role::Bot8; }
 constexpr inline bool is_npc(Role role) { return role == Role::Director || role == Role::Narrator || role == Role::System; }
-constexpr inline bool get_bot_index(Role role) { return is_bot(role) ? static_cast<int>(Role::Bot1) - static_cast<int>(role) : -1; }
+constexpr inline int32_t get_bot_index(Role role) { return is_bot(role) ? static_cast<int32_t>(role) - static_cast<int32_t>(Role::Bot1) : -1; }
 
 enum class MessageType
 {

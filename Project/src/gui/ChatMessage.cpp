@@ -122,8 +122,6 @@ ChatMessage::ChatMessage(Control* pParent, Role role, string characterId, string
 		_pNameText->SetPosition(LEFT_MARGIN, -1);
 		_pNameText->SetSize(Constants::ChatScrollWidth - HMARGIN, -1);
 	}
-
-	RefreshColors();
 }
 
 static void strip_ends(string& text, MessageType msgType)
@@ -220,42 +218,35 @@ void ChatMessage::SetActive(bool bActive)
 	RefreshColors();
 }
 
+void ChatMessage::SetColors(std::pair<Color, Color> colors)
+{
+	SetColors(colors.first, colors.second);
+}
+
+void ChatMessage::SetColors(Color bgColor, Color borderColor)
+{
+	_bgColor = bgColor;
+	_borderColor = borderColor;
+	if ((_style & Style::Dialogue) == Style::Dialogue)
+		_textColor = Colors::Black;
+	else
+		_textColor = color_util::multiply_rgb(borderColor, 0.5f);
+	_nameColor = color_util::add_rgb(borderColor, -0.1f);
+	RefreshColors();
+}
+
 void ChatMessage::RefreshColors()
 {
-	Color bgColor;
-	Color borderColor;
 	const uint8_t fadedAlpha = 120;
 	bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
 
-	switch (_messageType)
-	{
-	case MessageType::Dialogue:
-	case MessageType::Action:
-		bgColor = _role == Role::User ? Colors::UserMessageBackground : Colors::BotMessageBackground;
-		borderColor = _role == Role::User ? Colors::UserMessageBorder: Colors::BotMessageBorder;
-		break;
-	default:
-		bgColor = Colors::NarrationBackground;
-		borderColor = Colors::NarrationBorder;
-		break;
-	}
-	
 	uint8_t alpha = (uint8_t)(_bActive ? 255 : fadedAlpha);
-	bgColor.a = alpha;
-	borderColor.a = alpha;
+	
 	SetForegroundColor(Color { 0, 0, 0, alpha });
 
-	Color textColor = Colors::Black;
-	if (!bDialogue)
-		textColor = color_util::multiply_rgb(borderColor, 0.5f);
-	_pMessageText->SetForegroundColor(color_util::with_alpha(textColor, alpha));
-
-	_pSpeechBubbleBG->SetColors(bgColor, borderColor);
+	_pSpeechBubbleBG->SetColors(color_util::with_alpha(_bgColor, alpha), color_util::with_alpha(_borderColor, alpha));
 	_pMessagePanel->SetBackgroundColor(color_util::with_alpha(_pMessagePanel->GetBackgroundColor(), alpha));
-	_pMessageText->SetForegroundColor(color_util::with_alpha(_pMessageText->GetForegroundColor(), alpha));
+	_pMessageText->SetForegroundColor(color_util::with_alpha(_textColor, alpha));
 	if (_pNameText)
-	{
-		Color nameColor = color_util::add_rgb(borderColor, -0.1f);
-		_pNameText->SetForegroundColor(color_util::with_alpha(nameColor, alpha));
-	}
+		_pNameText->SetForegroundColor(color_util::with_alpha(_nameColor, alpha));
 }

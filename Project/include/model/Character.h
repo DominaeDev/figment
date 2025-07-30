@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "gui/Graphics.h"
 
 struct CharacterProperty 
 {
@@ -16,6 +17,8 @@ public:
 	string name;
 	string description;
 	string portraitFilename;
+	Color bgColor {};
+	Color borderColor {};
 	std::vector<CharacterProperty> properties;
 
 	bool LoadFromXml(string filename);

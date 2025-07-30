@@ -17,12 +17,31 @@ namespace Colors
 	extern Color TextSelectionForeground;
 	extern Color TextSelectionBackground;
 
-	extern Color UserMessageBackground;
-	extern Color UserMessageBorder;
-	extern Color BotMessageBackground;
-	extern Color BotMessageBorder;
-	extern Color NarrationBackground;
-	extern Color NarrationBorder;
+	extern Color MessageBorderDefault;
+	extern Color MessageBackgroundDefault;
+	extern Color MessageBorderBlue;
+	extern Color MessageBackgroundBlue;
+	extern Color MessageBorderPink;
+	extern Color MessageBackgroundPink;
+	extern Color MessageBorderGreen;
+	extern Color MessageBackgroundGreen;
+	extern Color MessageBorderYellow;
+	extern Color MessageBackgroundYellow;
+	extern Color MessageBorderRed;
+	extern Color MessageBackgroundRed;
+	extern Color MessageBorderTeal;
+	extern Color MessageBackgroundTeal;
+	extern Color MessageBorderPurple;
+	extern Color MessageBackgroundPurple;
+	extern Color MessageBorderBrown;
+	extern Color MessageBackgroundBrown;
+	extern Color MessageBorderNavy;
+	extern Color MessageBackgroundNavy;
+
+	extern Color DefaultUserMessageBorder;
+	extern Color DefaultUserMessageBackground;
+	extern std::array<Color, 8> DefaultBotMessageBorders;
+	extern std::array<Color, 8> DefaultBotMessageBackgrounds;
 }
 
 struct color_util
@@ -37,6 +56,10 @@ struct color_util
 	static Color multiply_rgb(Color colorA, Color colorB);
 	static Color multiply_rgb(Color colorA, float value);
 	static Color with_alpha(Color color, Uint8 alpha);
+
+	static Color color_from_string(std::string hex);
+	static void color_to_hsv(Color color, float& h, float& s, float& v);
+	static Color hsv_to_color(float h, float s, float v);
 
 	color_util() = delete;
 };

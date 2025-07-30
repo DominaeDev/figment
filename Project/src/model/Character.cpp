@@ -1,4 +1,7 @@
 #include "model/Character.h"
+#include "util/StringUtility.h"
+#include "gui/Color.h"
+
 #include <tinyxml2.h>
 
 using namespace tinyxml2;
@@ -11,33 +14,53 @@ bool Character::LoadFromXml(string filename)
 
 	XMLElement& root = *xmlDoc.FirstChildElement();
 
-	// Read ID
+	// Identifier
 	XMLElement* pID = root.FirstChildElement("ID");
 	if (pID)
-		id = pID->GetText();
+		id = string_util::trim(pID->GetText());
 
-	// Read name
+	// Name
 	XMLElement* pName = root.FirstChildElement("Name");
 	if (pName)
-		name = pName->GetText();
+		name = string_util::trim(pName->GetText());
 
-	// Image
+	if (id.empty())
+		id = name;
+
+	// Portrait
 	XMLElement* pImage = root.FirstChildElement("Image");
 	if (pImage)
-		portraitFilename = pImage->GetText();
+		portraitFilename = string_util::trim(pImage->GetText());
 
 	// Read description
 	XMLElement* pDesc = root.FirstChildElement("Description");
 	if (pDesc)
-		description = pDesc->GetText();
+		description = string_util::trim(pDesc->GetText());
 
 	// Read gender
 	XMLElement* pGender = root.FirstChildElement("Gender");
 	if (pGender)
 	{
-		string gender = pGender->GetText();
+		string gender = string_util::trim(pGender->GetText());
 		if (!gender.empty())
 			properties.push_back(CharacterProperty { "gender", gender, "Gender" });
+	}
+
+	// Color
+	bgColor = (Color)0;
+	borderColor = (Color)0;
+	XMLElement* pColor = root.FirstChildElement("Color");
+	if (pColor)
+	{
+		borderColor = color_util::color_from_string(pColor->GetText());
+
+		float h, s, v;
+		color_util::color_to_hsv(borderColor, h, s, v);
+
+		if (s > 0.0f)
+			bgColor = color_util::hsv_to_color(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
+		else
+			bgColor = color_util::hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 	}
 
 	return !name.empty();
