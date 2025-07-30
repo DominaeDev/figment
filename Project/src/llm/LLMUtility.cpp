@@ -427,8 +427,14 @@ std::vector<llama_token> llm_util::tokenize_and_batch(llama_model* pModel, llama
 {
 	// Add to context batch
 	auto tokens = llm_util::tokenize(pModel, content, add_special);
-	int32_t n_tokens = (int32_t)tokens.size();
+	batch.n_tokens += batch_write(pModel, pCtx, batch, tokens, pos);
+	return tokens;
+}
 
+int32_t llm_util::batch_write(llama_model* pModel, llama_context* pCtx, llama_batch& batch, const std::vector<llama_token>& tokens, int32_t pos)
+{
+	// Add to context batch
+	int32_t n_tokens = (int32_t)tokens.size();
 	for (int32_t i = 0; i < n_tokens; ++i)
 	{
 		int idx = pos + i;
@@ -438,8 +444,7 @@ std::vector<llama_token> llm_util::tokenize_and_batch(llama_model* pModel, llama
 		batch.seq_id[idx][0] = 0;
 		batch.logits[i] = false;
 	}
-	batch.n_tokens += n_tokens;
-	return tokens;
+	return n_tokens;
 }
 
 std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(llama_model* pModel, llama_context* pCtx, llama_batch& batch, string content, int32_t pos, bool add_special)
@@ -711,19 +716,125 @@ Role llm_util::role_from_index(int32_t botIndex) noexcept
 	return static_cast<Role>(first + botIndex);
 }
 
-void llm_util::erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t from, int32_t to, int32_t seq)
+int32_t llm_util::erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t from, int32_t length)
 {
-	if (to <= from || from < 0 || to < 0 || from >= Constants::ContextSize || to > Constants::ContextSize)
-		return;
+	if (from < 0 || from >= Constants::ContextSize || length <= 0  || from + length > Constants::ContextSize)
+		return 0;
 
-	llama_kv_self_update(pCtx);
-	llama_kv_self_seq_rm(pCtx, seq, from, to);
+	llama_kv_self_seq_rm(pCtx, 0, from, from + length);
 
-	for (int32_t i = from; i < to; ++i)
+	for (int32_t i = 0; i < length; ++i)
 	{
-		batch.pos[i] = 0;
-		batch.token[i] = 0;
-		batch.n_seq_id = 0;
+		int32_t idx = from + i;
+		batch.pos[idx] = 0;
+		batch.token[idx] = 0;
+		batch.n_seq_id[idx] = 0;
+		batch.logits[idx] = false;
+	}
+	batch.n_tokens -= length;
+	return length;
+}
+
+int32_t llm_util::batch_remove(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t end)
+{
+	int32_t n_removed = end - begin;
+
+	// Remove
+	llama_kv_self_seq_rm(pCtx, 0, begin, end);
+	llama_kv_self_seq_add(pCtx, 0, end, -1, -n_removed);
+	llama_kv_self_update(pCtx);
+
+	// Update batch
+	int32_t n_batch = batch.n_tokens;
+	for (int32_t i = 0; i < n_removed; ++i)
+	{
+		batch.token[begin + i] = batch.token[end + i];
+		batch.n_seq_id[begin + i] = batch.n_seq_id[end + i];
+		batch.pos[begin + i] = begin + i;
+		batch.seq_id[begin + i][0] = batch.seq_id[end + i][0];
 		batch.logits[i] = false;
 	}
+	batch.n_tokens -= n_removed;
+	return n_removed;
+}
+
+
+int32_t llm_util::batch_allocate(llama_context* pCtx, llama_batch& batch, int32_t pos, int32_t length)
+{
+	// Remove
+	llama_kv_self_seq_add(pCtx, 0, pos, -1, length);
+	llama_kv_self_update(pCtx);
+
+	int32_t ctx_size = llama_n_ctx(pCtx);
+
+	// Update batch
+	int32_t n_batch = batch.n_tokens;
+	for (int32_t i = 0; i < n_batch - pos; ++i)
+	{
+		if (i >= ctx_size)
+			continue;
+
+		int32_t idx = n_batch + length - i - 1;
+		batch.pos[idx] = idx;
+		batch.token[idx] = batch.token[idx - length];
+		batch.n_seq_id[idx] = batch.n_seq_id[idx - length];
+		batch.seq_id[idx][0] = batch.seq_id[idx - length][0];
+		batch.logits[idx] = false;
+	}
+	batch.n_tokens += length;
+
+	// Clear allocated tokens
+	for (int32_t i = 0; i < length; ++i)
+	{
+		int32_t idx = pos + i;
+		batch.pos[idx] = -1;
+		batch.token[idx] = 0;
+		batch.n_seq_id[idx] = 0;
+		batch.logits[idx] = false;
+	}
+
+	return length;
+}
+
+int32_t llm_util::shift_tokens(llama_context* pCtx, llama_batch& batch, int32_t pos, int32_t len, int32_t shift_amount)
+{
+	// Shift down
+	int32_t ctx_size = llama_n_ctx(pCtx);
+	if (len < 0)
+		len = ctx_size - pos;
+
+	int32_t src_pos = pos;
+	int32_t dest_pos = pos + shift_amount;
+	if (src_pos > dest_pos) // Shifting up, write top down
+	{
+		for (int32_t i = 0; i < shift_amount; ++i)
+		{
+			int idx = dest_pos + i;
+			if (idx < 0 || idx >= ctx_size)
+				continue;
+			batch.pos[idx] = idx;
+			batch.token[idx] = batch.token[src_pos + i];
+			batch.n_seq_id[idx] = batch.n_seq_id[src_pos + i];
+			batch.seq_id[idx][0] = batch.seq_id[src_pos + i][0];
+			batch.logits[idx] = batch.logits[src_pos + i];
+		}
+	}
+	else if (src_pos < dest_pos) // Shifting down, write bottom up
+	{
+		for (int32_t i = 0; i < shift_amount; ++i)
+		{
+			int idx = dest_pos + len - i - 1;
+			if (idx < 0 || idx >= ctx_size)
+				continue;
+			batch.pos[idx] = idx;
+			batch.token[idx] = batch.token[src_pos + len - i - 1];
+			batch.n_seq_id[idx] = batch.n_seq_id[src_pos + len - i - 1];
+			batch.seq_id[idx][0] = batch.seq_id[src_pos + len - i - 1][0];
+			batch.logits[idx] = batch.logits[src_pos + len - i - 1];
+		}		
+	}
+
+	// Apply down-shifts
+	llama_kv_self_seq_add(pCtx, 0, pos, -1, shift_amount);
+	return shift_amount;
 }

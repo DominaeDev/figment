@@ -56,28 +56,17 @@ struct ContextBlock
 	int32_t length() const { return toI(tokens.size()); }
 };
 
-struct PersonaBlock
-{
-	Role role;
-	string content;
-	std::vector<int32_t> tokens;
-	int32_t offset;
-	bool isActive = false;
-	int32_t length() const { return toI(tokens.size()); }
-};
-
 struct ContextState
 {
-	llama_batch batch {};	// Representation of the kv-cache (mirror)
+	llama_batch batch {};			// Representation of the kv-cache (mirror)
 	std::vector<int32_t> system_tokens;
-	std::map<Role, PersonaBlock> personas;
+	std::map<Role, std::vector<int32_t>> personas;
 	std::vector<ContextBlock> blocks;
-	int32_t current_pos = 0;
+	int32_t persona_pos = 0;		// persona insertion point
+	int32_t response_pos = 0;		// start of response
 	int32_t prepend_pos = 0;
-	int32_t pre_response_pos = 0;
-	int32_t persona_pos = 0;
-	int32_t blocks_pos = 0;		// post-system prompt
-	int32_t floor_pos = 0;		// bottom
+	int32_t blocks_pos = 0;			// chat start
+	int32_t current_pos = 0;		// cursor position
 
 	int32_t AssignBlockPositions();
 
