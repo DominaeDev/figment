@@ -399,6 +399,11 @@ void MainFrame::PollStatus()
 bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 {
 	auto pLLM = Application::GetLLM();
+
+	bool bShiftDown = (event.mod & SDL_KMOD_SHIFT) != 0;
+	bool bAltDown = (event.mod & SDL_KMOD_ALT) != 0;
+	bool bCtrlDown = (event.mod & SDL_KMOD_CTRL) != 0;
+
 	if (event.down && !event.repeat)
 	{
 		switch (event.key)
@@ -425,7 +430,12 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 #if _DEBUG
 		case SDLK_F11:
 			if (pLLM->IsReady())
-				pLLM->DumpContext((event.mod & SDL_KMOD_LSHIFT) != 0);
+			{
+				if (bCtrlDown && bShiftDown && !bAltDown)
+					pLLM->RefreshKVCache();
+				else
+					pLLM->DumpContext(bShiftDown);
+			}
 			break;
 #endif
 #if AUTOCHAT

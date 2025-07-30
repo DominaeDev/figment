@@ -394,15 +394,13 @@ static int32_t ctx_shift_down(llama_context* pCtx, ContextState& ctxState, int32
 bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 {
 	std::scoped_lock lock(_stateMutex);
-
-	_session = session;
-
 	if (_readyState < ReadyState::ModelLoaded || !_modelState.pModel)
 		return false;
 
 	PushSignal(LLMStatusSignal::InitializingChat);
 
 	_contextState = {};
+	_session = session;
 
 	// Initialize sampler + grammar
 	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
@@ -462,11 +460,34 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	llama_kv_self_clear(pCtx);
 	llama_batch_free(_contextState.batch);
 
-	_contextState.batch = llm_util::init_batch(pCtx);
-	llama_batch& batch = _contextState.batch;
-	int32_t& current_pos = _contextState.current_pos;
-	current_pos = 0;
+	llama_batch& batch = _contextState.batch = llm_util::init_batch(pCtx);
+	int32_t& current_pos = _contextState.current_pos = 0;
 	_contextState.floor_pos = ctx_size;
+
+	auto fnDecode = [&batch, pCtx](const std::vector<llama_token>& tokens, int32_t& cursor_pos, bool append) -> bool {
+		int32_t n_tokens = static_cast<int32_t>(tokens.size());
+		for (int i = 0; i < n_tokens; ++i)
+		{
+			int32_t idx = cursor_pos + i;
+			batch.pos[idx] = idx;
+			batch.token[idx] = tokens[i];
+			batch.n_seq_id[idx] = 1;
+			batch.seq_id[idx][0] = 0;
+			batch.logits[idx] = false;
+		}
+
+		// Decode
+		llama_batch batch_view = llm_util::create_batch_view(batch, cursor_pos, n_tokens);
+		if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
+			return false; // Error
+
+		if (append)
+		{
+			batch.n_tokens += n_tokens;
+			cursor_pos += n_tokens;
+		}
+		return true;
+	};
 
 	string system_prompt = _session.GetSystemPrompt();
 	string user_persona = _session.GetPersonaOf(Role::User);
@@ -481,65 +502,54 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 
 	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System);
 
-	auto pre_persona = llm_util::tokenize(_modelState.pModel, template_prefix + system_prompt, false); // <BOS>?
-	_contextState.system_tokens = pre_persona;
-	_contextState.persona_pos = toI(pre_persona.size());
+	std::vector<llama_token>& system_prompt_tokens = _contextState.system_tokens = llm_util::tokenize(_modelState.pModel, template_prefix + system_prompt, false); // <BOS>?;
+	_contextState.persona_pos = toI(system_prompt_tokens.size());
 
-	std::vector<llama_token> system_prompt_tokens;
-	system_prompt_tokens.reserve(ctx_size);
-	AppendVector(system_prompt_tokens, pre_persona);
-	current_pos += toI(pre_persona.size());
-
-	// Bot persona(s)
-	for (const auto& kvp : personas)
-	{
-		if (string_util::empty_or_whitespace(kvp.second))
-			continue;
-
-		auto persona_tokens = llm_util::tokenize(_modelState.pModel, "<{"+kvp.second+"}>");
-		_contextState.personas[kvp.first] = PersonaBlock {
-			/*role*/ kvp.first,
-			/*content*/ kvp.second,
-			/*tokens*/ persona_tokens,
-			/*offset*/ current_pos - _contextState.persona_pos,
-			/*active*/ true,
-		};
-
-		string begin_piece = llm_util::stringFromToken(pVocab, persona_tokens[0]);
-		auto begin_piece1 = llm_util::stringFromToken(pVocab, persona_tokens[1]);
-		auto begin_piece2 = llm_util::stringFromToken(pVocab, persona_tokens[2]);
-		string end_piece = llm_util::stringFromToken(pVocab, persona_tokens.back());
-
-		AppendVector(system_prompt_tokens, persona_tokens);
-		current_pos += toI(persona_tokens.size());
-	}
+	if (!fnDecode(system_prompt_tokens, current_pos, true))
+		return false;
 
 	// User persona
 	if (!string_util::empty_or_whitespace(user_persona))
 	{
 		auto user_persona_tokens = llm_util::tokenize(_modelState.pModel, user_persona);
-		AppendVector(system_prompt_tokens, user_persona_tokens);
-		current_pos += toI(user_persona_tokens.size());
+		ContainerAppend(system_prompt_tokens, user_persona_tokens);
+
+		if (!fnDecode(user_persona_tokens, current_pos, true))
+			return false;
 	}
 
 	// Suffix
 	auto template_suffix_tokens = llm_util::tokenize(_modelState.pModel, template_suffix);
-	AppendVector(system_prompt_tokens, template_suffix_tokens);
-	current_pos += toI(template_suffix_tokens.size());
-	
+	ContainerAppend(system_prompt_tokens, template_suffix_tokens);
+	if (!fnDecode(template_suffix_tokens, current_pos, true))
+		return false;
+
 	_contextState.blocks_pos = current_pos;
 
-	// Append to batch
-	for (int i = 0; i < system_prompt_tokens.size(); ++i)
-		common_batch_add(batch, system_prompt_tokens[i], i, { 0 }, false);
-	batch.n_tokens = current_pos;
+	// Bot persona(s)
+	int32_t persona_shift = 0;
+	for (const auto& kvp : personas)
+	{
+		if (string_util::empty_or_whitespace(kvp.second))
+			continue;
+		
+		auto persona_tokens = llm_util::tokenize(_modelState.pModel, llm_tmpl::apply_chat_template({{ Role::System, kvp.second, "system" }}, false));
+		persona_shift += (int32_t)persona_tokens.size();
+		int persona_pos = ctx_size - persona_shift;
+		PersonaBlock& block = _contextState.personas[kvp.first] = PersonaBlock {
+			/*role*/ kvp.first,
+			/*content*/ kvp.second,
+			/*tokens*/ persona_tokens,
+			/*offset*/ persona_pos - _contextState.persona_pos,
+			/*active*/ false,
+		};
 
-	// Decode
-	llama_batch batch_view = llm_util::create_batch_view(batch, 0, batch.n_tokens);
-	if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
-		return false; // Error
+		if (!fnDecode(persona_tokens, persona_pos, false))
+			return false;
+	}
+	_contextState.floor_pos = ctx_size - persona_shift;
 
-#if TRUE
+#if FALSE
 	// Stash personas
 	for (auto& persona : _contextState.personas)
 	{
@@ -605,7 +615,9 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	_modelState.rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 #endif
 
-//	__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
+	__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
+
+	_contextState.system_tokens = system_prompt_tokens;
 
 	_readyState.store(ReadyState::Ready);
 	PushSignal(LLMStatusSignal::InitializedChat);
@@ -632,7 +644,7 @@ bool LLMInstance::ResetChat(int seed)
 
 		// Reinit the batch
 		int32_t num_tokens = _contextState.blocks_pos;
-		llama_kv_self_seq_rm(_modelState.pCtx, 0, num_tokens, -1);
+		llama_kv_self_seq_rm(_modelState.pCtx, 0, num_tokens, _contextState.floor_pos);
 		// llama_kv_self_clear(pCtx);
 
 		// Add tokens to batch
@@ -1115,6 +1127,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		bSend &= !bWait;
 		next_token &= !bHalt;
 
+		// Send/Queue result
 		if (bSend)
 		{
 			string carryOver;
@@ -1132,7 +1145,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 					string tag, tagName;
 					llm_util::get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
-					if (tagName == "@USR" && args.role != Role::User)
+					if (tagName == "@USR" || tagName == _session.GetNameOf(Role::User) && args.role != Role::User)
 					{
 						stop_word = "user";
 						break; // Stop if talking/acting for the user
@@ -1148,16 +1161,15 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 					}
 					else
 					{
-						if (fmt_start > 0)
+						if (fmt_start > 0) // Remainder: Send it first
 						{
-							// Send remainder first
 							carryOver = partial.substr(fmt_start);
 							partial.erase(fmt_start);
 							sendMsg = partial;
 							responderId = llm_util::format_id(tagName);
 							responderRole = _session.GetRoleOf(responderId);
 						}
-						else
+						else // No remainder: New message
 						{
 							sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
 							responderId = llm_util::format_id(tagName);
@@ -1220,6 +1232,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		// Print to console
 		printf("%s", str_token.c_str());
 
+		// Add sampled token to batch
 		common_batch_add(batch, sampled_token, current_pos, { 0 }, true);
 
 		// prepare the next batch with the sampled token
@@ -1235,12 +1248,13 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		_tokensPerSec.store(toD(sampled_tokens.size()) / (duration / 1000.0));
 	}
 
+	// Re-acquire lock to push result
 	stateLock.lock();
 
-	// Remove full response from cache (re-added, with formatting, next generation)
-	llama_kv_self_seq_rm(state.pCtx, 0, pre_response_pos, -1);
+	// Remove full response from cache (will be reinserted on next generation)
+	llama_kv_self_seq_rm(state.pCtx, 0, pre_response_pos, current_pos);
 	batch.n_tokens = pre_response_pos;
-	chat.current_pos = pre_response_pos;
+	current_pos = pre_response_pos;
 
 	llm_util::sanitize_response(response);
 
@@ -1470,7 +1484,7 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 
 	// Clear kv cache
 	ModelState& state = _modelState;
-	llama_kv_self_seq_rm(state.pCtx, 0, current_pos, -1);
+	llama_kv_self_seq_rm(state.pCtx, 0, current_pos, _contextState.floor_pos);
 
 	// Return removed ids
 	std::vector<RemovedMessage> removedIds;
@@ -1815,9 +1829,37 @@ bool LLMInstance::ActivatePersona(Role role)
 				kvp.second.offset += shift;
 		}
 
+		// Re-decode
+		auto startTime = std::chrono::steady_clock::now();
+
+		llama_batch batch_view = llm_util::create_batch_view(_contextState.batch, _contextState.persona_pos + block.offset, block.length());
+		if (batch_view.n_tokens > 0 && llama_decode(_modelState.pCtx, batch_view) != 0)
+			return false; // Error
+
+		auto endTime = std::chrono::steady_clock::now();
+		double duration = toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count());
+		DebugPrintLn(std::format("Re-decode took {0:d}ms ({1} tokens).", (int)duration, block.length()));
+
 //		__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
 		return true;
 	}
 
 	return false;
+}
+
+bool LLMInstance::RefreshKVCache()
+{
+	if (!CanGenerate())
+		return false;
+
+	std::scoped_lock lock(_stateMutex);
+	
+	// Clear cache
+	llama_kv_self_clear(_modelState.pCtx);
+
+	llama_batch batch_view = llm_util::create_batch_view(_contextState.batch, 0, _contextState.current_pos);
+	if (batch_view.n_tokens > 0 && llama_decode(_modelState.pCtx, batch_view) != 0)
+		return false; // Error
+
+	return true;
 }

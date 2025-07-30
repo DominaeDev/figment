@@ -158,6 +158,7 @@ public:
 	std::vector<RemovedMessage> RemoveMessages(int numMessages = 1, bool rewindTime = true);
 	std::vector<RemovedMessage> RollbackUserMessage();
 	std::set<string> GetActiveMessages();
+	bool RefreshKVCache();
 
 	bool PollResponse(MessagePiece& piece);
 	std::pair<LLMStatus, bool> PollStatus();

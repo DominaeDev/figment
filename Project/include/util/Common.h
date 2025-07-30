@@ -3,6 +3,8 @@
 #include <optional>
 #include <string>
 #include <queue>
+#include <memory>
+
 
 // Debugging
 extern void DebugPrint(std::string message);
@@ -21,22 +23,22 @@ void ClearQueue(std::queue<T>& q)
 	std::swap(q, empty);
 }
 
-template<typename T, typename V = T::value_type>
-void AppendVector(T& vecA, const T& vecB) noexcept
+template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
+void ContainerAppend(Cont<V, A>& vecA, const Cont<V, A>& vecB) noexcept
 {
 	vecA.insert(std::end(vecA), std::begin(vecB), std::end(vecB));
 }
 
-template<typename T, typename V = T::value_type>
-void PrependVector(T& vecA, const T& vecB) noexcept
+template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
+void ContainerPrepend(Cont<V, A>& vecA, const Cont<V, A>& vecB) noexcept
 {
 	vecA.insert(std::begin(vecA), std::begin(vecB), std::end(vecB));
 }
 
-template<typename T, typename V = T::value_type>
-T ConcatVector(const T& vecA, const T& vecB) noexcept
+template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
+Cont<V, A> ContainerConcat(const Cont<V, A>& vecA, const Cont<V, A>& vecB) noexcept
 {
-	T result;
+	Cont<V, A> result;
 	result.reserve(vecA.size() + vecB.size());
 	result.insert(std::end(result), std::begin(vecA), std::end(vecA));
 	result.insert(std::end(result), std::begin(vecB), std::end(vecB));
