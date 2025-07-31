@@ -1,1 +1,1 @@
-{{user}} has joined the conversation.
+{{user}} has joined the conversation. {{char1:name}} and {{char2:name}} are here.

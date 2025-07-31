@@ -278,11 +278,11 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
 }
 
 
-std::pair<string, string> llm_tmpl::get_chat_template_prefix_suffix(Role role)
+std::pair<string, string> llm_tmpl::get_chat_template_prefix_suffix(Role role, string name)
 {
 	// Strip prompt template from block content
 	static const char* const SUBSTITUTE = "{{SUBSTITUTE}}";
-	string tmpl = apply_chat_template({ Message { role, SUBSTITUTE } }, false);
+	string tmpl = apply_chat_template({ Message { role, SUBSTITUTE, name } }, false);
 	if (tmpl.empty())
 		return std::make_pair("", ""); // Unknown template
 
@@ -292,10 +292,10 @@ std::pair<string, string> llm_tmpl::get_chat_template_prefix_suffix(Role role)
 	return std::make_pair(prefix, suffix);
 }
 
-string llm_tmpl::apply_chat_template_prefix(Role role, string content)
+string llm_tmpl::apply_chat_template_prefix(Role role, string content, string name)
 {
-	auto [pre, post] = get_chat_template_prefix_suffix(role);
-
+	auto [pre, post] = get_chat_template_prefix_suffix(role, name);
+	
 	if (string_util::ends_with(content, post))
 		content = content.substr(0, content.length() - post.length());
 	if (!string_util::begins_with(content, content))
@@ -334,7 +334,11 @@ string llm_tmpl::apply_chat_template(Messages messages, bool add_assistant)
 		else if (msg.role == Role::User)
 			name = "user";
 		else
-			name = "assistant";
+		{
+			name = msg.name.c_str();
+			// name = "assistant";
+		}
+
 		msgs.push_back(llama_chat_message { 
 			name,
 			msg.content.c_str() 

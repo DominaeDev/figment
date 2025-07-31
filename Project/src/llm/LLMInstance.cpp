@@ -81,13 +81,13 @@ llama_sampler* ModelState::SetActiveGrammar(Grammar grammar)
 
 int32_t ContextState::AssignBlockPositions()
 {
-	int32_t pos = blocks_pos;
+	int32_t offset = 0;
 	for (auto& block : blocks)
 	{
-		block.ctx_pos = pos;
-		pos += block.length();
+		block.offset = offset;
+		offset += block.length();
 	}
-	return pos;
+	return offset;
 }
 
 LLMInstance::LLMInstance()
@@ -205,55 +205,6 @@ static bool __dump_context(const llama_batch& batch, const llama_vocab* pVocab, 
 	return WriteTextFile(filename, result, false);
 }
 
-/// <summary>
-/// Warning: Callin ctx_remove in isolation leaves the batch in an invalid state.
-/// </summary>
-static int32_t ctx_remove(llama_context* pCtx, ContextState& chat, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
-{
-	int32_t shift_amount = 0;
-	for (auto it = itBegin; it != itEnd; ++it)
-		shift_amount += (*it).length();
-	
-	int32_t pos_remove_begin = (*itBegin).ctx_pos;
-	int32_t pos_remove_end = pos_remove_begin + shift_amount;
-
-	if (llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
-	{
-		chat.blocks.erase(itBegin, itEnd);
-		return shift_amount;
-	}
-
-	return 0; // Error
-}
-
-static int32_t ctx_remove_and_shift(llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
-{
-	// Remove
-	llama_pos pos_remove_begin = (*itBegin).ctx_pos;
-	int32_t shift_amount = ctx_remove(pCtx, ctxState, itBegin, itEnd);
-	if (shift_amount == 0)
-		return 0;
-
-	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
-
-	// Shift
-	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, -1, -shift_amount);
-
-	// Update batch
-	auto& batch = ctxState.batch;
-	int32_t n_batch = batch.n_tokens;
-	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
-	{
-		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
-		batch.n_seq_id[pos_remove_begin + i] = batch.n_seq_id[pos_remove_end + i];
-		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
-		batch.seq_id[pos_remove_begin + i][0] = batch.seq_id[pos_remove_end + i][0];
-		batch.logits[i] = false;
-	}
-	batch.n_tokens -= shift_amount;
-	return (int32_t)-shift_amount;
-}
-
 bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 {
 	std::scoped_lock lock(_stateMutex);
@@ -362,7 +313,7 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		personas[role] = _session.GetPersonaOf(role);
 	}
 
-	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System);
+	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System, "");
 
 	std::vector<llama_token>& system_prompt_tokens = _contextState.system_tokens = llm_util::tokenize(_modelState.pModel, template_prefix + system_prompt, false); // <BOS>?;
 	_contextState.persona_pos = toI(system_prompt_tokens.size());
@@ -724,7 +675,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		if (!block.cached)
 			chat.blocks.erase(std::begin(chat.blocks) + (ptrdiff_t)i);
 		else
-			current_pos += ctx_remove_and_shift(pCtx, _contextState, 
+			current_pos += llm_util::ctx_remove_and_shift(pCtx, _contextState, 
 				std::begin(chat.blocks) + (ptrdiff_t)i, 
 				std::begin(chat.blocks) + (ptrdiff_t)(toSZ(i + 1)));
 	}
@@ -752,17 +703,17 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 		string content = block.content;
 		if (args.responder == Responder::None) // Continue response
-			content = llm_tmpl::apply_chat_template_prefix(block.role, content);
+			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name);
 		else
 		{
 			llm_util::complete_message(content);
-			content = llm_tmpl::apply_chat_template({ Message { block.role, content } }, false);
+			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
 		}
 		content = _session.ApplyNames(content, llm_util::role_from_responder(args.responder));
 		
 		auto block_tokens = llm_util::tokenize(state.pModel, content, false);
 		block.tokens = block_tokens;
-		block.ctx_pos = 0; // assigned later
+		block.offset = 0; // assigned later
 		prompt_tokens.insert(std::end(prompt_tokens), std::cbegin(block_tokens), std::cend(block_tokens));
 	}
 
@@ -779,7 +730,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		while (first_to_keep < chat.blocks.size() && total < free_tokens && chat.blocks[first_to_keep].cached)
 			total += chat.blocks[first_to_keep++].length();
 
-		current_pos += ctx_remove_and_shift(pCtx, chat, std::begin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
+		current_pos += llm_util::ctx_remove_and_shift(pCtx, chat, std::begin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
 	}
 
 	// Calculate block positions
@@ -791,7 +742,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Append assistant tokens
 	if (args.responder != Responder::None)
 	{
-		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(llm_util::role_from_responder(args.responder));
+		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(llm_util::role_from_responder(args.responder), "assistant"); //! @name
 		prelude = _session.ApplyNames(prelude, llm_util::role_from_responder(args.responder));
 		auto assistant_tokens = llm_util::tokenize(state.pModel, prelude, false);
 		prompt_tokens.insert(std::end(prompt_tokens), std::begin(assistant_tokens), std::end(assistant_tokens));
@@ -1318,9 +1269,9 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 	{
 		auto& block = _contextState.blocks[newSize - 1_sz];
 		if (block.cached)
-			current_pos = std::min(current_pos, block.ctx_pos + block.length());
+			current_pos = std::min(current_pos, _contextState.blocks_pos + block.offset + block.length());
 		else
-			current_pos = std::min(current_pos, block.ctx_pos);
+			current_pos = std::min(current_pos, _contextState.blocks_pos + block.offset);
 	}
 	else
 	{
@@ -1633,8 +1584,6 @@ bool LLMInstance::ActivatePersona(Role role)
 
 		// Remove from kv cache
 		int32_t shift = llm_util::batch_remove(pCtx, batch, _contextState.persona_pos, _contextState.persona_pos + len);
-		__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
-		//int32_t shift = llm_util::erase_tokens(pCtx, batch, _contextState.persona_pos, len);
 
 		_contextState.current_pos -= shift;
 		_contextState.blocks_pos -= shift;
@@ -1651,16 +1600,13 @@ bool LLMInstance::ActivatePersona(Role role)
 		auto& tokens = itFindInactive->second;
 		int32_t len = toI(tokens.size());
 
-		//! TODO: Allocate
+		//! TODO: Allocate enough space
 
 		// Shift down
 		int32_t shift = llm_util::batch_allocate(pCtx, batch, _contextState.persona_pos, len);
-		//llm_util::shift_tokens(pCtx, batch, _contextState.persona_pos, -1, len);
-		__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
 		
 		// Write persona to batch
 		llm_util::batch_write(_modelState.pModel, pCtx, batch, tokens, _contextState.persona_pos);
-		__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
 
 		// Decode
 		llama_batch batch_view = llm_util::create_batch_view(_contextState.batch, _contextState.persona_pos, len);
@@ -1673,8 +1619,6 @@ bool LLMInstance::ActivatePersona(Role role)
 		_contextState.prepend_pos += len;
 
 		_contextState.activePersona = role;
-
-		__dump_context(batch, llama_model_get_vocab(_modelState.pModel), "prompt.txt");
 		return true;
 	}
 

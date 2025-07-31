@@ -838,3 +838,49 @@ int32_t llm_util::shift_tokens(llama_context* pCtx, llama_batch& batch, int32_t 
 	llama_kv_self_seq_add(pCtx, 0, pos, -1, shift_amount);
 	return shift_amount;
 }
+
+int32_t llm_util::ctx_remove(llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
+{
+	int32_t shift_amount = 0;
+	for (auto it = itBegin; it != itEnd; ++it)
+		shift_amount += (*it).length();
+	
+	int32_t pos_remove_begin = ctxState.blocks_pos + (*itBegin).offset;
+	int32_t pos_remove_end = pos_remove_begin + shift_amount;
+
+	if (llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
+	{
+		ctxState.blocks.erase(itBegin, itEnd);
+		return shift_amount;
+	}
+
+	return 0; // Error
+}
+
+int32_t llm_util::ctx_remove_and_shift(llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
+{
+	// Remove
+	llama_pos pos_remove_begin = ctxState.blocks_pos + (*itBegin).offset;
+	int32_t shift_amount = ctx_remove(pCtx, ctxState, itBegin, itEnd);
+	if (shift_amount == 0)
+		return 0;
+
+	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
+
+	// Shift
+	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, -1, -shift_amount);
+
+	// Update batch
+	auto& batch = ctxState.batch;
+	int32_t n_batch = batch.n_tokens;
+	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
+	{
+		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
+		batch.n_seq_id[pos_remove_begin + i] = batch.n_seq_id[pos_remove_end + i];
+		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
+		batch.seq_id[pos_remove_begin + i][0] = batch.seq_id[pos_remove_end + i][0];
+		batch.logits[i] = false;
+	}
+	batch.n_tokens -= shift_amount;
+	return (int32_t)-shift_amount;
+}

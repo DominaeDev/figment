@@ -3,17 +3,19 @@ You must respond using the following XML schema:
 
 ## Dialogue
 When you are talking.
-Syntax: <talk="@ID">"Hi there!"</talk>
+Syntax: <talk="...">"Hi there!"</talk>
 
 ## Actions
 When you are acting or emoting.
-Syntax: <act="@ID">*smiles*</act>
+Syntax: <act="...">*smiles*</act>
 
 ## Narration
 The narrator is an anonymous voice that occasionally chimes in to provide details and exposition that can't be conveyed through spoken words or actions alone.
 Syntax: <narrator>[Expository text here.]</narrator>
 
-# List of Characters (ID, Name)
-@{{id_char1}} = "{{char1}}"
-@{{id_char2}} = "{{char2}}"
-@{{id_user}} = "{{user}}" (The user)
+# Characters
+{ 
+	"@{{char1:id}}": {"name": "{{char1:name}}", "info": "{{char1:brief}}"},
+	"@{{char2:id}}": {"name": "{{char2:name}}", "info": "{{char2:brief}}"},
+	"@USR": {"name": "{{user}}", "info": "{{user:brief}}"}
+}

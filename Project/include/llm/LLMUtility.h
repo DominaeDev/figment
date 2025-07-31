@@ -29,6 +29,8 @@ namespace llm_util
 	extern int32_t batch_write(llama_model* pModel, llama_context* pCtx, llama_batch& batch, const std::vector<llama_token>& tokens, int32_t pos);
 	extern int32_t batch_remove(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t end);
 	extern int32_t batch_allocate(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t length);
+	extern int32_t ctx_remove(llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd);
+	extern int32_t ctx_remove_and_shift(llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd);
 
 	extern std::pair<MessageType, bool> detect_message_type(string text) noexcept;
 

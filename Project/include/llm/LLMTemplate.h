@@ -56,8 +56,8 @@ public:
 	static PromptTemplate auto_detect_template(llama_model* pModel);
 	static string apply_chat_template(Messages msg, bool add_assistant);
 	
-	static std::pair<string, string> get_chat_template_prefix_suffix(Role role);
-	static string apply_chat_template_prefix(Role role, string content);
+	static std::pair<string, string> get_chat_template_prefix_suffix(Role role, string name);
+	static string apply_chat_template_prefix(Role role, string content, string name);
 
 	static PromptTemplate current_template;
 

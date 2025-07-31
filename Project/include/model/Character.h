@@ -15,6 +15,7 @@ class Character
 public:
 	string id;
 	string name;
+	string brief;
 	string description;
 	string portraitFilename;
 	Color bgColor {};

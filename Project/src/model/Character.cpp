@@ -33,6 +33,11 @@ bool Character::LoadFromXml(string filename)
 		portraitFilename = string_util::trim(pImage->GetText());
 
 	// Read description
+	XMLElement* pBrief = root.FirstChildElement("Brief");
+	if (pBrief)
+		brief = string_util::trim(pBrief->GetText());
+
+	// Read description
 	XMLElement* pDesc = root.FirstChildElement("Description");
 	if (pDesc)
 		description = string_util::trim(pDesc->GetText());

@@ -13,12 +13,14 @@ public:
 
 	std::optional<Character> GetCharacter(Role role) const;
 	std::optional<Character> GetCharacterById(string characterId) const;
+	std::optional<Character> GetCharacterByName(string name) const;
 
 	string GetSystemPrompt() const;
 	string GetDirectorPrompt() const;
 	string GetIdentifierOf(Role role) const;
 	string GetNameOf(Role role) const;
 	string GetPersonaOf(Role role) const;
+	string GetBriefOf(Role role) const;
 	std::pair<Color, Color> GetColorsOf(Role role) const;
 	Role GetRoleOf(string characterId) const;
 	size_t GetBotCount() const;
