@@ -385,32 +385,19 @@ bool LLMInstance::ResetChat(int seed)
 
 	{	// Lock state
 		std::scoped_lock lock(_stateMutex, _resultMutex);
-
-		llama_context* pCtx = _modelState.pCtx;
-		const int32_t maxCtx = llama_n_ctx(pCtx);
-
-		// Reset batch pointer
-		_contextState.current_pos = _contextState.blocks_pos;
-		_contextState.blocks.clear();
-
-		// Reinit the batch
-		int32_t num_tokens = _contextState.blocks_pos;
-		llama_kv_self_seq_rm(_modelState.pCtx, 0, num_tokens, -1);
-		// llama_kv_self_clear(pCtx);
-
-		// Add tokens to batch
-		auto& batch = _contextState.batch;
-		for (int i = 0; i < num_tokens; ++i)
-		{
-			batch.token[i] = _contextState.system_tokens[i];
-			batch.pos[i] = i;
-			batch.n_seq_id[i] = 1;
-			batch.seq_id[i][0] = 0;
-			batch.logits[i] = false; // No logits
-		}
-		batch.n_tokens = num_tokens;
-		
 		ClearQueue(_resultQueue);
+
+		if (CHECK_OPTION(LLMOption::SwapPersonas))
+			ActivatePersona(Role::Undefined);
+
+		_contextState.blocks.clear();
+		llama_kv_self_seq_rm(_modelState.pCtx, 0, _contextState.blocks_pos, -1);
+
+		int32_t& current_pos = _contextState.current_pos = _contextState.blocks_pos;
+		_contextState.prepend_pos = current_pos;
+		_contextState.response_pos = current_pos;
+		_contextState.batch.n_tokens = current_pos;
+
 		_readyState.store(ReadyState::Ready);
 	}
 

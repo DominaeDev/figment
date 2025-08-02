@@ -452,7 +452,10 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 				if (bCtrlDown && bShiftDown && !bAltDown)
 					pLLM->RefreshKVCache();
 				else
-					pLLM->DumpContext(bShiftDown);
+				{
+					pLLM->DumpContext(false, "prompt.txt");
+					pLLM->DumpContext(true, "prompt-full.txt");
+				}
 			}
 			break;
 #endif

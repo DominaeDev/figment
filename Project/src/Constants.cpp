@@ -3,7 +3,7 @@
 
 // UI constants
 const char* const Constants::AppTitle = "Llama chat";
-int const Constants::WindowWidth = 1200;
+int const Constants::WindowWidth = 1280;
 int const Constants::WindowHeight = 900;
 double const Constants::DefaultFontSize = 18.5;
 double const Constants::StatusBarFontSize = 14.5;

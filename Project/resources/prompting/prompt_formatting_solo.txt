@@ -10,6 +10,7 @@ When you are acting or emoting.
 Syntax: <act="{{char1:id}}">*smiles*</act>
 
 ## Narration
-The narrator is an anonymous voice that occasionally chimes in to summarize ongoing events.
+The narrator is an anonymous voice that occasionally chimes in to summarize ongoing events, but only when necessary and appropriate.
 The narrator is capable of reading between the lines and provide further details that couldn't be conveyed through spoken words or actions alone.
+However, the narrator must never divulge secret or private information, and never break the fourth wall.
 Syntax: <narrator>[Narration...]</narrator>
