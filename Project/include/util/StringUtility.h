@@ -14,6 +14,8 @@ struct string_util
 
 	static [[nodiscard]] std::string lcase(const std::string& s);
 	static [[nodiscard]] std::string ucase(const std::string& s);
+	static [[nodiscard]] std::wstring lcase(const std::wstring& s);
+	static [[nodiscard]] std::wstring ucase(const std::wstring& s);
 	static int compare(const std::string& a, const std::string& b, bool ignore_case = false);
 	static bool equals(const std::string& a, const std::string& b, bool ignore_case = false);
 
@@ -22,8 +24,8 @@ struct string_util
 	static std::string get_filename(const std::string& str);
 
 	static bool empty_or_whitespace(const std::string& s);
-	static bool begins_with(const std::string_view& str, const std::string_view& prefix);
-	static bool ends_with(const std::string_view& str, const std::string_view& suffix);
+	static bool begins_with(const std::string& str, const std::string& prefix, bool ignore_case = false);
+	static bool ends_with(const std::string& str, const std::string& suffix, bool ignore_case = false);
 	static std::vector<std::string> split(std::string s, const std::string& delimiter);
 
 	static std::string& normalize_newlines(std::string& text);

@@ -30,13 +30,6 @@ inline constexpr size_t operator "" _sz( unsigned long long arg ) noexcept
     return static_cast<size_t>( arg );
 }
 
-template <std::ranges::range R>
-constexpr auto to_vector(R&& r)
-{
-	using elem_t = std::decay_t<std::ranges::range_value_t<R>>;
-	return std::vector<elem_t>{r.begin(), r.end()};
-}
-
 typedef std::string string;
 
 // Macros

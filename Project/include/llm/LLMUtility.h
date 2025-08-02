@@ -8,7 +8,7 @@ namespace llm_util
 {
 	extern std::string stringFromToken(const llama_vocab* pVocab, llama_token token);
 	extern size_t validate_utf8(const string& text) noexcept;
-	extern size_t string_find_partial_stop(const std::string_view& str, const std::string_view& stop);
+	extern size_t string_find_partial_stop(const std::string& str, const std::string& stop);
 	extern size_t find_one_of(const string& text, const std::vector<string>& words);
 	extern size_t find_stopping_strings(const string& text, const std::vector<string>& stop_words, const size_t last_token_size, bool is_full_stop);
 	extern void get_tag_and_name(const string& text, string& tag, string& name);
@@ -36,5 +36,4 @@ namespace llm_util
 	extern std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 
 	extern string format_id(string id);
-	extern Role bot_by_index(int32_t botIndex) noexcept;
 }

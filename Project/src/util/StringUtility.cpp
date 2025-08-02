@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <codecvt>
 #include <cwctype>
+#include <ranges>
 
 void string_util::ltrim_str(std::string& s)
 {
@@ -62,11 +63,35 @@ std::string string_util::ucase(const std::string& str)
 	return to_utf8(s);
 }
 
+std::wstring string_util::lcase(const std::wstring& str)
+{
+	std::wstring s = str;
+	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towlower(c); });
+	return s;
+}
+
+std::wstring string_util::ucase(const std::wstring& str)
+{
+	std::wstring s = str;
+	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towupper(c); });
+	return s;
+}
+
 int string_util::compare(const std::string& a, const std::string& b, bool ignore_case)
 {
 	std::wstring wa = from_utf8(a);
 	std::wstring wb = from_utf8(b);
-	return ignore_case ? _wcsicmp(wa.c_str(), wb.c_str()) : wcscmp(wa.c_str(), wb.c_str());
+	
+	if (ignore_case)
+	{
+		wa = lcase(wa);
+		wb = lcase(wb);
+	}
+	if (wa < wb)
+		return -1;
+	if (wa > wb)
+		return 1;
+	return 0;
 }
 
 bool string_util::equals(const std::string& a, const std::string& b, bool ignore_case)
@@ -74,14 +99,36 @@ bool string_util::equals(const std::string& a, const std::string& b, bool ignore
 	return compare(a, b, ignore_case) == 0;
 }
 
-bool string_util::begins_with(const std::string_view& str, const std::string_view& suffix)
+bool string_util::begins_with(const std::string& str, const std::string& prefix, bool ignore_case)
 {
-	return str.size() >= suffix.size() && str.compare(0, suffix.size(), suffix) == 0;
+	if (str.size() < prefix.size())
+		return false;
+
+	std::wstring wstr = from_utf8(str);
+	std::wstring wprefix = from_utf8(prefix);
+
+	const std::wstring begin_piece = wstr.substr(0, wprefix.length());
+
+	if (ignore_case)
+		return std::equal(begin_piece.begin(), begin_piece.end(), wprefix.begin(), wprefix.end(), [](wchar_t a, wchar_t b) {return std::towlower(a) == std::towlower(b); });
+	else
+		return begin_piece == wprefix;
 }
 
-bool string_util::ends_with(const std::string_view& str, const std::string_view& suffix)
+bool string_util::ends_with(const std::string& str, const std::string& suffix, bool ignore_case)
 {
-	return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+	if (str.size() < suffix.size())
+		return false;
+
+	std::wstring wstr = from_utf8(str);
+	std::wstring wsuffix = from_utf8(suffix);
+
+	const std::wstring end_piece = wstr.substr(str.length() - wsuffix.length());
+
+	if (ignore_case)
+		return std::equal(end_piece.begin(), end_piece.end(), suffix.begin(), suffix.end(), [](wchar_t a, wchar_t b) {return std::towlower(a) == std::towlower(b); });
+	else
+		return end_piece == wsuffix;
 }
 
 std::string& string_util::replace(std::string& str, const std::string& find, const std::string& replace)

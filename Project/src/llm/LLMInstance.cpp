@@ -236,9 +236,9 @@ bool LLMInstance::InitializeChat(LLMArguments args)
 			if (i > 0)
 				pattern += "| ";
 			if (CHECK_OPTION(LLMOption::UseCharacterIds))
-				pattern += std::format("| \"@{}\"", _session.GetIdentifierOf(llm_util::bot_by_index(i)));
+				pattern += std::format("| \"@{}\"", _session.GetIdentifierOf(bot_from_index(i)));
 			else
-				pattern += std::format("| \"{}\"", _session.GetNameOf(llm_util::bot_by_index(i)));
+				pattern += std::format("| \"{}\"", _session.GetNameOf(bot_from_index(i)));
 		}
 		if (CHECK_OPTION(LLMOption::AllowUserResponse))
 		{
@@ -318,7 +318,7 @@ bool LLMInstance::InitializeChat(LLMArguments args)
 	int32_t botCount = (int32_t)_session.GetBotCount();
 	for (int32_t i = 0; i < botCount; ++i)
 	{
-		Role role = llm_util::bot_by_index(i);
+		Role role = bot_from_index(i);
 		personas[role] = _session.GetPersonaOf(role);
 	}
 

@@ -171,7 +171,7 @@ void MainFrame::StartChat()
 		session.Initialize(sessionArgs);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-//		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
 		LLMArguments llmArgs {
 			options,
@@ -202,9 +202,20 @@ void MainFrame::OnCommand(Command cmd)
 		return to_vector(msgs | std::views::transform([](RemovedMessage msg) { return msg.responseId; }));
 	};
 
-	auto fnRoleFromName = [](std::vector<RemovedMessage> msgs) -> std::vector<string> {
-		return to_vector(msgs | std::views::transform([](RemovedMessage msg) { return msg.responseId; }));
+	auto fnRoleFromName = [pLLM](string text) -> Role {
+		if (string_util::empty_or_whitespace(text))
+			return Role::Undefined;
+		if (std::isdigit(text[0]))
+			return bot_from_index(std::stoi(text) - 1);
+		for (auto kvp : pLLM->GetSession().GetCharactersByRole())
+		{
+			if (string_util::begins_with(kvp.second.name, text, true))
+				return kvp.first;
+		}
+		return pLLM->GetSession().GetRoleOf(text);
 	};
+
+	Role targetRole = fnRoleFromName(cmd.text);
 
 	switch (cmd.type)
 	{
@@ -225,16 +236,16 @@ void MainFrame::OnCommand(Command cmd)
 		pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
 		break;
 	case CommandType::InstigateDialogue:
-		pLLM->InstigateResponse(Role::Undefined, MessageType::Dialogue, 0);
+		pLLM->InstigateResponse(targetRole, MessageType::Dialogue, 0);
 		break;
 	case CommandType::InstigateAction:
-		pLLM->InstigateResponse(Role::Undefined, MessageType::Action, 0);
+		pLLM->InstigateResponse(targetRole, MessageType::Action, 0);
 		break;
 	case CommandType::PassTurn:
-		pLLM->InstigateResponse(Role::Undefined, MessageType::Undefined, 3);
+		pLLM->InstigateResponse(targetRole, MessageType::Undefined, 3);
 		break;
 	case CommandType::Impersonate:
-		pLLM->InstigateResponse(Role::Undefined, MessageType::Dialogue, 1);
+		pLLM->InstigateResponse(Role::User, MessageType::Dialogue, 1);
 		break;
 	case CommandType::Narrate:
 		if (cmd.text.empty())
@@ -305,7 +316,7 @@ void MainFrame::OnCommand(Command cmd)
 		if (!cmd.text.empty())
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false, 1);
-			pLLM->PushMessage(Role::Director, "{{Describe to {{user}} the " + cmd.text + " in minute detail.}}", MessageType::Direction, false, 1);
+			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} is able to find, if anything, " + cmd.text + " in minute detail.}}", MessageType::Direction, false, 1);
 			pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
 		}
 		break;

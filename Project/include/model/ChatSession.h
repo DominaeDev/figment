@@ -34,6 +34,8 @@ public:
 	[[nodiscard]] string ApplyNames(string text) const;
 	[[nodiscard]] string ApplyNames(string text, Role characterRole) const;
 
+	const std::map<Role, Character>& GetCharactersByRole() const { return _characters; }
+
 protected:
 	std::map<Role, Character> _characters {};
 	

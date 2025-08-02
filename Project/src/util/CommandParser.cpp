@@ -7,21 +7,21 @@ struct _Cmd {
 };
 
 static _Cmd s_Commands[] {
+	{ "act",			CommandType::InstigateAction},
+	{ "erase",			CommandType::RemoveLast},
+	{ "examine",		CommandType::Examine },
+	{ "impersonate",	CommandType::Impersonate },
+	{ "instruct",		CommandType::Instruct },
+	{ "look",			CommandType::Look },
+	{ "narrate",		CommandType::Narrate },
+	{ "pass",			CommandType::PassTurn},
+	{ "retry",			CommandType::RedoResponse },
+	{ "reset",			CommandType::Reset },
+	{ "reseed",			CommandType::Reseed },
 	{ "say",			CommandType::UserMessage },
 	{ "system",			CommandType::SystemMessage },
-	{ "pass",			CommandType::PassTurn},
 	{ "talk",			CommandType::InstigateDialogue},
-	{ "act",			CommandType::InstigateAction},
-	{ "narrate",		CommandType::Narrate },
-	{ "instruct",		CommandType::Instruct },
-	{ "reset",			CommandType::Reset },
-	{ "erase",			CommandType::RemoveLast},
 	{ "undo",			CommandType::RollbackUserMessage },
-	{ "retry",			CommandType::RedoResponse },
-	{ "reseed",			CommandType::Reseed },
-	{ "impersonate",	CommandType::Impersonate },
-	{ "examine",		CommandType::Examine },
-	{ "look",			CommandType::Look },
 };
 
 Command CommandParser::Parse(string text)
@@ -59,6 +59,13 @@ Command CommandParser::Parse(string text)
 	for (auto& c : s_Commands)
 	{
 		if (c.word == command)
+			return Command { c.cmdType, payload };
+	}
+	
+	// Partial match
+	for (auto& c : s_Commands)
+	{
+		if (string_util::begins_with(c.word, command))
 			return Command { c.cmdType, payload };
 	}
 

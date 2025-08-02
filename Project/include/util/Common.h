@@ -44,3 +44,10 @@ Cont<V, A> ContainerConcat(const Cont<V, A>& vecA, const Cont<V, A>& vecB) noexc
 	result.insert(std::end(result), std::begin(vecB), std::end(vecB));
 	return result;
 }
+
+template <std::ranges::range R>
+constexpr auto to_vector(R&& r)
+{
+	using elem_t = std::decay_t<std::ranges::range_value_t<R>>;
+	return std::vector<elem_t>{r.begin(), r.end()};
+}

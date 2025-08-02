@@ -66,7 +66,7 @@ size_t llm_util::validate_utf8(const string& text) noexcept
 	return len;
 }
 
-size_t llm_util::string_find_partial_stop(const std::string_view& str, const std::string_view& stop)
+size_t llm_util::string_find_partial_stop(const std::string& str, const std::string& stop)
 {
 	if (!str.empty() && !stop.empty())
 	{
@@ -693,15 +693,6 @@ string llm_util::format_id(string id)
 	if (id[0] == '@')
 		id = id.substr(1);
 	return string_util::lcase(id);
-}
-
-Role llm_util::bot_by_index(int32_t botIndex) noexcept
-{
-	constexpr static int32_t first = (int32_t)Role::Bot1;
-	constexpr static int32_t last = (int32_t)Role::Bot8;
-	if (first + botIndex < 0 || first + botIndex > last)
-		return Role::Undefined;
-	return static_cast<Role>(first + botIndex);
 }
 
 int32_t llm_util::erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t from, int32_t length)
