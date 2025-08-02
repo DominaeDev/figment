@@ -59,7 +59,8 @@ ChatMessage::ChatMessage(Control* pParent, Role role, string characterId, string
 		_style |= Style::Left;
 #endif
 #if USER_YOU
-		name = "You";
+		if (!name.empty())
+			name = "You";
 #endif
 	}
 
@@ -173,6 +174,12 @@ void ChatMessage::SetMessage(string text, bool complete)
 		text = "\u201C" + text;
 		if (complete)
 			text += "\u201D";
+	}
+	else if (_messageType == MessageType::Action)
+	{
+		text = "*" + text;
+		if (complete)
+			text += "*";
 	}
 	else if (_messageType == MessageType::Thought)
 	{

@@ -11,8 +11,8 @@
 #include <format>
 
 #define DEBUG_SEED 0xA1B2C3D4
-#define LIMIT_MSG_COUNT 1
-#define RANDOMIZE_MSG_COUNT 0
+
+#define CHECK_OPTION(E) ((_options & E) == E)
 
 void ModelState::Release()
 {
@@ -144,9 +144,9 @@ static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
 		{
 			int64_t iValue = static_cast<int64_t>(std::stod(value) * mul);
 			if (bGPU)
-				pThis->_usedVRAM.fetch_add(iValue);
+				pThis->usedVRAM.fetch_add(iValue);
 			else if (bCPU)
-				pThis->_usedRAM.fetch_add(iValue);
+				pThis->usedRAM.fetch_add(iValue);
 		}
 		catch (...)
 		{
@@ -205,7 +205,7 @@ static bool __dump_context(const llama_batch& batch, const llama_vocab* pVocab, 
 	return WriteTextFile(filename, result, false);
 }
 
-bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
+bool LLMInstance::InitializeChat(LLMArguments args)
 {
 	std::scoped_lock lock(_stateMutex);
 	if (_readyState < ReadyState::ModelLoaded || !_modelState.pModel)
@@ -214,7 +214,8 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	PushSignal(LLMStatusSignal::InitializingChat);
 
 	_contextState = {};
-	_session = session;
+	_session = args.session;
+	_options = args.options;
 
 	// Initialize sampler + grammar
 	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
@@ -228,16 +229,24 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		// Load grammar(s)
 		string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 
-		int32_t botCount = (int32_t)_session.GetBotCount();
 		string pattern;
+		int32_t botCount = (int32_t)_session.GetBotCount();
 		for (int i = 0; i < botCount; ++i)
 		{
 			if (i > 0)
 				pattern += "| ";
-			pattern += "\"@" + _session.GetIdentifierOf(llm_util::role_from_index(i)) + "\"";
+			if (CHECK_OPTION(LLMOption::UseCharacterIds))
+				pattern += std::format("| \"@{}\"", _session.GetIdentifierOf(llm_util::bot_by_index(i)));
+			else
+				pattern += std::format("| \"{}\"", _session.GetNameOf(llm_util::bot_by_index(i)));
 		}
-		pattern += "| \"@" + _session.GetIdentifierOf(Role::User) + "\"";
-		pattern = "(" + pattern + ")";
+		if (CHECK_OPTION(LLMOption::AllowUserResponse))
+		{
+			if (CHECK_OPTION(LLMOption::UseCharacterIds))
+				pattern += std::format("| \"@{}\"", _session.GetIdentifierOf(Role::User));
+			else
+				pattern += std::format("| \"{}\"", _session.GetNameOf(Role::User));
+		}
 
 		string_util::replace_all(grammar, "##NAME_PATTERN##", pattern);
 		llama_sampler* default_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
@@ -302,14 +311,14 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		return true;
 	};
 
-	string system_prompt = _session.GetSystemPrompt();
+	string system_prompt = _session.GetSystemPrompt(_session.IsGroupChat(), true, CHECK_OPTION(LLMOption::Uncensored));
 	string user_persona = _session.GetPersonaOf(Role::User);
 
 	std::map<Role, string> personas;
 	int32_t botCount = (int32_t)_session.GetBotCount();
 	for (int32_t i = 0; i < botCount; ++i)
 	{
-		Role role = llm_util::role_from_index(i);
+		Role role = llm_util::bot_by_index(i);
 		personas[role] = _session.GetPersonaOf(role);
 	}
 
@@ -318,6 +327,17 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 	std::vector<llama_token>& system_prompt_tokens = _contextState.system_tokens = llm_util::tokenize(_modelState.pModel, template_prefix + system_prompt, false); // <BOS>?;
 	_contextState.persona_pos = toI(system_prompt_tokens.size());
 
+	// Tokenize persona(s)
+	for (const auto& kvp : personas)
+	{
+		if (string_util::empty_or_whitespace(kvp.second))
+			continue;
+		
+		_contextState.personas[kvp.first] = llm_util::tokenize(_modelState.pModel, kvp.second, false);
+
+		if (!_session.IsGroupChat() || !CHECK_OPTION(LLMOption::SwapPersonas))
+			ContainerAppend(system_prompt_tokens, _contextState.personas[Role::Bot1]);
+	}
 	if (!fnDecode(system_prompt_tokens, current_pos, true))
 		return false;
 
@@ -338,74 +358,6 @@ bool LLMInstance::InitializeChat(ChatSession session, Messages messages)
 		return false;
 
 	_contextState.blocks_pos = current_pos;
-
-	// Tokenize persona(s)
-	for (const auto& kvp : personas)
-	{
-		if (string_util::empty_or_whitespace(kvp.second))
-			continue;
-		
-		_contextState.personas[kvp.first] = llm_util::tokenize(_modelState.pModel, kvp.second, false);
-	}
-
-#if FALSE
-	// Stash personas
-	for (auto& persona : _contextState.personas)
-	{
-		Role role = persona.first;
-		PersonaBlock& block = persona.second;
-		if (!block.isActive)
-			continue;
-
-		int32_t old_offset = block.offset;
-		int32_t new_pos = ctx_shift_down(pCtx, _contextState, _contextState.persona_pos + block.offset, block.length());
-		block.offset = new_pos - _contextState.persona_pos;
-		block.isActive = false;
-
-		int32_t shift = block.length();
-		_contextState.current_pos -= shift;
-		_contextState.blocks_pos -= shift;
-		_contextState.floor_pos -= shift;
-		batch.n_tokens -= block.length();
-
-		// Update other persona offset
-		for (auto& persona : _contextState.personas)
-		{
-			if (persona.second.isActive && persona.second.offset > old_offset)
-				persona.second.offset -= shift;
-		}
-	}
-	_contextState.activePersona = Role::Undefined;
-#endif
-
-#if FALSE
-	// Restore personas
-	for (auto& persona : _contextState.personas)
-	{
-		Role role = persona.first;
-		PersonaBlock& block = persona.second;
-		if (block.isActive)
-			continue;
-
-		int32_t old_offset = block.offset;
-		int32_t new_pos = ctx_shift_up(pCtx, _contextState, _contextState.persona_pos + block.offset, block.length(), _contextState.persona_pos);
-		block.offset = new_pos - _contextState.persona_pos;
-		block.isActive = true;
-
-		int32_t shift = block.length();
-		_contextState.current_pos += shift;
-		_contextState.blocks_pos += shift;
-		_contextState.floor_pos += shift;
-		batch.n_tokens += block.length();
-
-		// Update other persona offset
-		for (auto& persona : _contextState.personas)
-		{
-			if (!persona.second.isActive && persona.second.offset < old_offset)
-				persona.second.offset += shift;
-		}
-	}
-#endif
 
 	// Initialize rng
 #if _DEBUG
@@ -467,7 +419,8 @@ bool LLMInstance::ResetChat(int seed)
 
 	PushSignal(LLMStatusSignal::InitializedChat);
 
-	GreetUser();
+	if (CHECK_OPTION(LLMOption::GreetUser))
+		GreetUser();
 	return true;
 }
 
@@ -476,8 +429,8 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 	const int ngl = 99; // All layers
 	const int n_ctx = Constants::ContextSize;
 
-	_usedVRAM.store(0);
-	_usedRAM.store(0);
+	usedVRAM.store(0);
+	usedRAM.store(0);
 
 	llama_log_set(OnLlamaLog, (void*)this);
 
@@ -620,7 +573,8 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 	}
 
 	PrepareArguments prepareArgs {
-		/*responder */ Responder::None,
+		/*responder */ Role::Undefined,
+		/*continue*/ true,
 		/*time*/ 1,
 	};
 	PrepareGeneration(prepareArgs);
@@ -673,48 +627,48 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		
 		// Remove block
 		if (!block.cached)
-			chat.blocks.erase(std::begin(chat.blocks) + (ptrdiff_t)i);
+			chat.blocks.erase(chat.blocks.begin() + (ptrdiff_t)i);
 		else
 			current_pos += llm_util::ctx_remove_and_shift(pCtx, _contextState, 
-				std::begin(chat.blocks) + (ptrdiff_t)i, 
-				std::begin(chat.blocks) + (ptrdiff_t)(toSZ(i + 1)));
+				chat.blocks.begin() + (ptrdiff_t)i, 
+				chat.blocks.begin() + (ptrdiff_t)(toSZ(i + 1)));
 	}
 
 	// Tokenize uncached messages
 	Messages messages;
 	messages.reserve(4);
-	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
+	for (auto it = chat.blocks.begin(); it != chat.blocks.end(); ++it)
 	{
 		auto& block = *it;
 		if (block.cached)
 			continue;
 
-		messages.insert(std::begin(messages), Message {
+		messages.insert(messages.begin(), Message {
 			block.role,
 			block.content,
 		});
 	}
 	
-	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
+	for (auto it = chat.blocks.begin(); it != chat.blocks.end(); ++it)
 	{
 		auto& block = *it;
 		if (block.cached)
 			continue;
 
 		string content = block.content;
-		if (args.responder == Responder::None) // Continue response
+		if (args.is_continue) // Continue response
 			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name);
 		else
 		{
 			llm_util::complete_message(content);
 			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
 		}
-		content = _session.ApplyNames(content, llm_util::role_from_responder(args.responder));
+		content = _session.ApplyNames(content, args.responder);
 		
 		auto block_tokens = llm_util::tokenize(state.pModel, content, false);
 		block.tokens = block_tokens;
 		block.offset = 0; // assigned later
-		prompt_tokens.insert(std::end(prompt_tokens), std::cbegin(block_tokens), std::cend(block_tokens));
+		prompt_tokens.insert(prompt_tokens.end(), block_tokens.cbegin(), block_tokens.cend());
 	}
 
 	// Shift context window
@@ -730,7 +684,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		while (first_to_keep < chat.blocks.size() && total < free_tokens && chat.blocks[first_to_keep].cached)
 			total += chat.blocks[first_to_keep++].length();
 
-		current_pos += llm_util::ctx_remove_and_shift(pCtx, chat, std::begin(chat.blocks), std::begin(chat.blocks) + (ptrdiff_t)first_to_keep);
+		current_pos += llm_util::ctx_remove_and_shift(pCtx, chat, chat.blocks.begin(), chat.blocks.begin() + (ptrdiff_t)first_to_keep);
 	}
 
 	// Calculate block positions
@@ -740,12 +694,12 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	chat.response_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append assistant tokens
-	if (args.responder != Responder::None)
+	if (!args.is_continue)
 	{
-		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(llm_util::role_from_responder(args.responder), "assistant"); //! @name
-		prelude = _session.ApplyNames(prelude, llm_util::role_from_responder(args.responder));
+		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(args.responder, "assistant"); //! @name
+		prelude = _session.ApplyNames(prelude, args.responder);
 		auto assistant_tokens = llm_util::tokenize(state.pModel, prelude, false);
-		prompt_tokens.insert(std::end(prompt_tokens), std::begin(assistant_tokens), std::end(assistant_tokens));
+		prompt_tokens.insert(prompt_tokens.end(), assistant_tokens.begin(), assistant_tokens.end());
 	}
 
 	// Store beginning of response (after assistant prelude)
@@ -757,7 +711,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	batch.n_tokens = current_pos + (int32_t)prompt_tokens.size();
 
 	// Mark blocks in cache (they will be shortly)
-	for (auto it = std::begin(chat.blocks); it != std::end(chat.blocks); ++it)
+	for (auto it = chat.blocks.begin(); it != chat.blocks.end(); ++it)
 		it->cached = true;
 }
 
@@ -985,7 +939,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 							else if (tag == Constants::DirectionTag)
 								msgType = MessageType::Direction;
 
-							ActivatePersona(responderRole);
+							if (CHECK_OPTION(LLMOption::SwapPersonas))
+								ActivatePersona(responderRole);
 						}
 					}
 				}
@@ -1063,7 +1018,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		{
 			auto& lastBlock = chat.blocks[chat.blocks.size() - 1];
 			lastBlock.content += response;
-			lastBlock.tokens.insert(std::end(lastBlock.tokens), std::begin(sampled_tokens), std::end(sampled_tokens));
+			lastBlock.tokens.insert(lastBlock.tokens.end(), sampled_tokens.begin(), sampled_tokens.end());
 			lastBlock.cached = false;
 		}
 		else
@@ -1092,16 +1047,15 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 void LLMInstance::StartGeneration(GenerateArguments args)
 {
-#if defined(_DEBUG) && RANDOMIZE_MSG_COUNT
+	if (CHECK_OPTION(LLMOption::RandomizeMessageCount))
 	{	// Acquire state lock
 		std::scoped_lock lock(_stateMutex);
 		static std::uniform_int_distribution<int> numMessages(1, 3);
 		if (args.maxMessages <= 0) // Randomize number of messages
 			args.maxMessages = numMessages(_modelState.rng);
 	}
-#elif !LIMIT_MSG_COUNT
-	args.maxMessages = 0;
-#endif
+	else if (!CHECK_OPTION(LLMOption::LimitMessages))
+		args.maxMessages = 0;
 
 	if (args.responseId.empty())
 		args.responseId = CreateUUID();
@@ -1155,7 +1109,8 @@ bool LLMInstance::SendMessage(string message)
 	PushMessage(Role::User, message);
 
 	PrepareArguments prepareArgs {
-		/*responder */ Responder::Bot,
+		/*responder */ Role::Undefined,
+		/*continue*/ false,
 		/*time*/ 1,
 	};
 	PrepareGeneration(prepareArgs);
@@ -1327,7 +1282,7 @@ bool LLMInstance::GreetUser()
 	{
 		string greetingInstruction = _session.ApplyNames(text.value());
 		PushMessage(Role::Director, "{{" + greetingInstruction + "}}", MessageType::Direction, false, 1);
-		InstigateResponse(Responder::Bot, MessageType::Dialogue, 3);
+		InstigateResponse(Role::Undefined, MessageType::Dialogue, 3);
 	}
 	return true;
 }
@@ -1345,31 +1300,34 @@ bool LLMInstance::Instruct(string instructions)
 	}
 
 	PushMessage(Role::Director, "{{" + instructions + "}}", MessageType::Direction, false, 4);
-	InstigateResponse(Responder::Bot, MessageType::Undefined, 3);
+	InstigateResponse(Role::Undefined, MessageType::Undefined, 3);
 	return true;
 }
 
-bool LLMInstance::InstigateResponse(Responder responder, MessageType msgType, int messageCount)
+bool LLMInstance::InstigateResponse(Role role, MessageType msgType, int messageCount)
 {
-	if (!CanGenerate() || responder == Responder::None)
+	if (!CanGenerate())
 		return false;
 	
+	if (role == Role::Undefined)
+		role = Role::Bot1;
+
 	PrepareArguments prepareArgs {
-		/*responder */ responder,
+		/*responder */ role,
+		/*continue*/ false,
 		/*time*/ 1,
 	};
 	PrepareGeneration(prepareArgs);
 
-	Role role = llm_util::role_from_responder(responder);
-	string responderId = _session.GetIdentifierOf(role);
+	string responder = CHECK_OPTION(LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
 
 	string prependMsg;
 	if (msgType == MessageType::Dialogue)
-		prependMsg = std::format("<{}=\"@{}\">", Constants::DialogueTag, responderId);
+		prependMsg = std::format("<{}=\"{}\">", Constants::DialogueTag, responder);
 	else if (msgType == MessageType::Action)
-		prependMsg = std::format("<{}=\"@{}\">", Constants::ActionTag, responderId);
+		prependMsg = std::format("<{}=\"{}\">", Constants::ActionTag, responder);
 	else if (msgType == MessageType::Thought)
-		prependMsg = std::format("<{}=\"@{}\">", Constants::ThoughtTag, responderId);
+		prependMsg = std::format("<{}=\"{}\">", Constants::ThoughtTag, responder);
 	else if (msgType == MessageType::Narration)
 		prependMsg = std::format("<{}>", Constants::NarrationTag);
 	else if (msgType == MessageType::Direction)
@@ -1401,8 +1359,8 @@ std::pair<LLMStatus, bool> LLMInstance::PollStatus()
 			status.allocCtxSize = llama_n_ctx(_modelState.pCtx);
 			status.usedCtxSize = llama_kv_self_used_cells(_modelState.pCtx);
 			status.tokensPerSec = _tokensPerSec.load();
-			status.usedVRAM = _usedVRAM.load();
-			status.usedRAM = _usedRAM.load();
+			status.usedVRAM = usedVRAM.load();
+			status.usedRAM = usedRAM.load();
 		}
 		lock.unlock();
 		lock.release();
@@ -1553,20 +1511,20 @@ void LLMInstance::PushSignal(LLMStatusSignal signal)
 std::set<string> LLMInstance::GetActiveMessages()
 {
 	std::scoped_lock lock(_resultMutex);
-	return std::set<string>(std::begin(_activeResponseIds), std::end(_activeResponseIds)); // Copy
+	return std::set<string>(_activeResponseIds.begin(), _activeResponseIds.end()); // Copy
 }
 
 void LLMInstance::RefreshActiveResponses()
 {
 	std::scoped_lock lock(_resultMutex);
 	_activeResponseIds.clear();
-	for (auto it = std::cbegin(_contextState.blocks); it != std::cend(_contextState.blocks); ++it)
+	for (auto it = _contextState.blocks.cbegin(); it != _contextState.blocks.cend(); ++it)
 		_activeResponseIds.insert(it->responseId);
 }
 
 bool LLMInstance::ActivatePersona(Role role)
 {
-	if (!(is_bot(role) || role == Role::Undefined))
+	if (!_session.IsGroupChat() || !(is_bot(role) || role == Role::Undefined))
 		return false;
 
 	if (role == _contextState.activePersona)

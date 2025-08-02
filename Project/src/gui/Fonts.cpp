@@ -89,7 +89,7 @@ TTF_Font* Fonts::GetFont(FontFace face, double ptSize)
 {
 	int iSize = (int)(ptSize * 10.0);
 	auto itFind = s_Fonts.find(face);
-	if (itFind != std::cend(s_Fonts))
+	if (itFind != s_Fonts.cend())
 	{
 		for (auto font : itFind->second)
 		{

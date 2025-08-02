@@ -69,13 +69,13 @@ Texture* CharacterImageStore::GetTexture(string characterId, ImageType imageType
 		return nullptr;
 	
 	auto itCharacter = _imagesByCharacter.find(string_util::lcase(characterId));
-	if (itCharacter != std::end(_imagesByCharacter))
+	if (itCharacter != _imagesByCharacter.end())
 	{
 		auto& imageList = (*itCharacter).second;
-		auto itImage = std::find_if(std::begin(imageList), std::end(imageList), [imageType](const CharacterImage& image) {
+		auto itImage = std::find_if(imageList.begin(), imageList.end(), [imageType](const CharacterImage& image) {
 			return image.imageType == imageType;
 		});
-		if (itImage != std::end(imageList))
+		if (itImage != imageList.end())
 			return itImage->pTexture;
 	}
 	return nullptr;

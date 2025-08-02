@@ -51,16 +51,6 @@ struct Submessage
 	string content;
 };
 
-enum class Responder
-{ 
-	None, 
-	User, 
-	Narrator, 
-	Director, 
-	Bot 
-};
-
-
 enum class Grammar
 {
 	None				= 0,
@@ -119,3 +109,16 @@ struct ContextState
 
 	Role activePersona = Role::Undefined;
 };
+
+enum class LLMOption : int32_t
+{
+	None = 0,
+	UseCharacterIds			= 1 << 0,
+	AllowUserResponse		= 1 << 1,
+	LimitMessages			= 1 << 2,
+	RandomizeMessageCount	= 1 << 3,
+	GreetUser				= 1 << 4,
+	SwapPersonas			= 1 << 5,
+	Uncensored				= 1 << 6,
+};
+DEFINE_ENUM_FLAGS(LLMOption, int32_t)

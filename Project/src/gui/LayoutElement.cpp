@@ -103,8 +103,8 @@ void LayoutElement::SetHeight(float height)
 
 void LayoutElement::AddChild(LayoutElement* pLayoutElement)
 {
-	auto itFind = std::find(std::cbegin(_children), std::cend(_children), pLayoutElement);
-	if (itFind != std::cend(_children))
+	auto itFind = std::find(_children.cbegin(), _children.cend(), pLayoutElement);
+	if (itFind != _children.cend())
 		return; // Already added
 
 	_children.push_back(pLayoutElement);
@@ -115,8 +115,8 @@ void LayoutElement::AddChild(LayoutElement* pLayoutElement)
 
 bool LayoutElement::RemoveChild(LayoutElement* pChild)
 {
-	auto it = std::find(std::begin(_children), std::end(_children), pChild);
-	if (it != std::end(_children))
+	auto it = std::find(_children.begin(), _children.end(), pChild);
+	if (it != _children.end())
 	{
 		OnRemovedChild(*it);
 		(*it)->SetParent(nullptr);
@@ -179,8 +179,8 @@ void LayoutElement::InvalidateParentLayout(bool bRefreshImmediately)
 
 void LayoutElement::MoveChildToTop(LayoutElement* pChild)
 {
-	auto it = std::find(std::begin(_children), std::end(_children), pChild);
-	if (it == std::end(_children))
+	auto it = std::find(_children.begin(), _children.end(), pChild);
+	if (it == _children.end())
 		return;
 	_children.erase(it);
 	_children.push_back(pChild);
@@ -188,10 +188,10 @@ void LayoutElement::MoveChildToTop(LayoutElement* pChild)
 
 void LayoutElement::MoveChildToBottom(LayoutElement* pChild)
 {
-	auto it = std::find(std::begin(_children), std::end(_children), pChild);
-	if (it == std::end(_children))
+	auto it = std::find(_children.begin(), _children.end(), pChild);
+	if (it == _children.end())
 		return;
 
 	_children.erase(it);
-	_children.insert(std::begin(_children), pChild);
+	_children.insert(_children.begin(), pChild);
 }

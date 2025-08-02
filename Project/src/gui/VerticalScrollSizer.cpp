@@ -4,7 +4,7 @@
 void VerticalScrollSizer::SetOffset(float offset)
 {
 	float diff = offset - _offset;
-	for (auto it = std::begin(_items); it != std::end(_items); ++it)
+	for (auto it = _items.begin(); it != _items.end(); ++it)
 	{
 		auto pControl = (*it).pControl;
 		if (pControl)
@@ -19,7 +19,7 @@ void VerticalScrollSizer::OnLayout(Rectf rect)
 	if (_offset == 0.0f)
 		return;
 
-	for (auto it = std::begin(_items); it != std::end(_items); ++it)
+	for (auto it = _items.begin(); it != _items.end(); ++it)
 	{
 		auto pControl = (*it).pControl;
 		if (pControl)

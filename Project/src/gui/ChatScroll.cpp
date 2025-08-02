@@ -47,13 +47,13 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 		role = Role::Narrator;
 
 	bool bShowAvatar = !is_npc(role);
-	auto itLast = std::find_if(std::crbegin(_messages), std::crend(_messages), [](const MessageEntry& entry) {
+	auto itLast = std::find_if(_messages.crbegin(), _messages.crend(), [](const MessageEntry& entry) {
 		return entry.pChatMessage != nullptr;
 	});
 	
 	Role lastRole = Role::Undefined;
 	string lastId = "";
-	if (itLast != std::crend(_messages))
+	if (itLast != _messages.crend())
 	{
 		if ((*itLast).msgType == MessageType::Narration)
 			lastRole = Role::Narrator;
@@ -65,14 +65,28 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	}
 	bShowAvatar &= (role != lastRole) || (identifier != lastId);
 	
-	string name = "Unknown";
+	string id = identifier;
+	string name = _session.GetNameOf(role);
 	if (auto character = _session.GetCharacterById(identifier))
+	{
 		name = character.value().name;
-	bool bShowName = (role != lastRole) || (identifier != lastId);
+		id = character.value().id;
+	}
+	else if (auto character = _session.GetCharacterByName(identifier))
+	{
+		name = character.value().name;
+		id = character.value().id;
+	}
+	
+	bool bShowName = bShowAvatar;
 	if (msgType == MessageType::Narration)
+	{
 		name = _session.GetNameOf(Role::Narrator);
+		bShowName = true;
+		bShowAvatar = false;
+	}
 
-	auto pMessage = new ChatMessage(this, role, identifier, bShowName ? name : "", msgType, bShowAvatar);
+	auto pMessage = new ChatMessage(this, role, id, bShowName ? name : "", msgType, bShowAvatar);
 	pMessage->SetY(-1000); // Move off-screen
 	pMessage->SetMessage(message, complete);
 	pMessage->SetColors(_session.GetColorsOf(role));
@@ -87,7 +101,7 @@ int ChatScroll::RemoveMessages(std::vector<string> ids)
 	for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
 	{
 		MessageEntry& entry = _messages[i];
-		if (std::find(std::cbegin(ids), std::cend(ids), entry.responseId) == std::cend(ids))
+		if (std::find(ids.cbegin(), ids.cend(), entry.responseId) == ids.cend())
 			continue;
 
 		if (entry.pChatMessage)
@@ -99,7 +113,7 @@ int ChatScroll::RemoveMessages(std::vector<string> ids)
 		}
 
 		removedIds.insert(entry.subMessageId);
-		_messages.erase(std::begin(_messages) + (ptrdiff_t)i);
+		_messages.erase(_messages.begin() + (ptrdiff_t)i);
 		++removed;
 	}
 
@@ -169,7 +183,7 @@ void ChatScroll::Poll()
 	while (pLLM->PollResponse(piece))
 	{
 		auto itMsg = _messagesById.find(piece.subMessageId);
-		if (itMsg != std::end(_messagesById))
+		if (itMsg != _messagesById.end())
 		{
 			// Append piece
 			MessageEntry* pEntry = itMsg->second;
@@ -222,13 +236,13 @@ void ChatScroll::Poll()
 		}
 
 		// Clean up empty
-		if (piece.isComplete && itMsg != std::end(_messagesById) && itMsg->second->pChatMessage == nullptr)
+		if (piece.isComplete && itMsg != _messagesById.end() && itMsg->second->pChatMessage == nullptr)
 		{
 			_messagesById.erase(itMsg);
 			for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
 			{
 				if (_messages[i].subMessageId == itMsg->first)
-					_messages.erase(std::begin(_messages) + (ptrdiff_t)i);
+					_messages.erase(_messages.begin() + (ptrdiff_t)i);
 			}
 			continue;
 		}
@@ -293,7 +307,7 @@ void ChatScroll::RefreshActive()
 			continue;
 
 		bool bActive = message.responseId.empty() 
-			|| activeMessages.find(message.responseId) != std::end(activeMessages);
+			|| activeMessages.find(message.responseId) != activeMessages.end();
 		message.pChatMessage->SetActive(bActive);
 	}
 }

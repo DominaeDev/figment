@@ -146,18 +146,6 @@ void llm_util::get_tag_and_name(const string& text, string& tag, string& name)
 	string_util::replace_all(name, "\"", "");
 }
 
-extern Role llm_util::role_from_responder(Responder responder)
-{
-	switch (responder)
-	{
-	case Responder::User: return Role::User;
-	case Responder::Narrator: return Role::Narrator;
-	case Responder::Director: return Role::Director;
-	case Responder::Bot: return Role::Bot1;
-	}
-	return Role::Undefined;
-}
-
 std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
 {
 	auto patterns = std::vector<std::tuple<string, MessageType>> {
@@ -264,8 +252,8 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 	static std::vector<string> formatting_tags;
 	if (formatting_tags.empty())
 	{
-		formatting_tags.insert(std::end(formatting_tags), std::begin(opening_tags), std::end(opening_tags));
-		formatting_tags.insert(std::end(formatting_tags), std::begin(closing_tags), std::end(closing_tags));
+		formatting_tags.insert(formatting_tags.end(), opening_tags.begin(), opening_tags.end());
+		formatting_tags.insert(formatting_tags.end(), closing_tags.begin(), closing_tags.end());
 	}
 
 	// Look for stop word - and halt
@@ -540,7 +528,7 @@ static void fill_gaps(const std::string s, MessageType msgType, std::vector<Span
 	};
 
 	// Sort spans
-	std::sort(std::begin(spans), std::end(spans), [](Span a, Span b) {
+	std::sort(spans.begin(), spans.end(), [](Span a, Span b) {
 		return a.start < b.start;
 	});
 
@@ -565,7 +553,7 @@ static void fill_gaps(const std::string s, MessageType msgType, std::vector<Span
 	}
 
 	// Sort again
-	std::sort(std::begin(spans), std::end(spans), [](Span a, Span b) {
+	std::sort(spans.begin(), spans.end(), [](Span a, Span b) {
 		return a.start < b.start;
 	});
 }
@@ -707,7 +695,7 @@ string llm_util::format_id(string id)
 	return string_util::lcase(id);
 }
 
-Role llm_util::role_from_index(int32_t botIndex) noexcept
+Role llm_util::bot_by_index(int32_t botIndex) noexcept
 {
 	constexpr static int32_t first = (int32_t)Role::Bot1;
 	constexpr static int32_t last = (int32_t)Role::Bot8;

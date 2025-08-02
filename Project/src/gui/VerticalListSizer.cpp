@@ -13,7 +13,7 @@ void VerticalListSizer::OnLayout(Rectf parentRect)
 		return;
 
 	int y = 0;
-	for (auto it = std::rbegin(_items); it != std::rend(_items); ++it)
+	for (auto it = _items.rbegin(); it != _items.rend(); ++it)
 	{
 		auto& item = *it;
 		if (item.pControl == nullptr)

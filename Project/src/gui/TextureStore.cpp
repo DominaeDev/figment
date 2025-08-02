@@ -45,7 +45,7 @@ bool TextureStore::LoadTexture(Renderer* pRenderer, TextureType textureId, const
 Texture* TextureStore::GetTexture(TextureType id)
 {
 	auto itFind = _textures.find(id);
-	if (itFind != std::end(_textures))
+	if (itFind != _textures.end())
 		return itFind->second;
 	return nullptr;
 }

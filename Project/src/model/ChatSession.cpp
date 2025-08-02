@@ -8,11 +8,15 @@
 
 #include <exception>
 #include <cassert>
+#include <format>
 
-bool ChatSession::Initialize()
+bool ChatSession::Initialize(SessionArgs args)
 {
-	// System prompt (common)
-	_system_prompt_common = ReadTextFile("./resources/prompting/prompt_system_common.txt").value_or("");
+	_bUseCharacterIds = args.useCharacterIds;
+
+	// System prompt
+	_system_prompt_solo = ReadTextFile("./resources/prompting/prompt_system_solo.txt").value_or("");
+	_system_prompt_group = ReadTextFile("./resources/prompting/prompt_system_group.txt").value_or("");
 
 	// System prompt (character)
 	_system_prompt_character = ReadTextFile("./resources/prompting/prompt_system_character.txt").value_or("");
@@ -21,12 +25,16 @@ bool ChatSession::Initialize()
 	_system_prompt_user = ReadTextFile("./resources/prompting/prompt_system_user.txt").value_or("");
 
 	// Formatting spec
-	_formatting_common = ReadTextFile("./resources/prompting/prompt_formatting_common.txt").value_or("");
+	_formatting_solo = ReadTextFile("./resources/prompting/prompt_formatting_solo.txt").value_or("");
+	_formatting_group = ReadTextFile("./resources/prompting/prompt_formatting_group.txt").value_or("");
 
 	// Director prompt
 	_formatting_director = ReadTextFile("./resources/prompting/prompt_formatting_director.txt").value_or("");
 
-	return !_system_prompt_common.empty()
+	// (Optional) Uncensored instructions
+	_system_prompt_uncensored = ReadTextFile("./resources/prompting/prompt_system_uncensored.txt").value_or("");
+
+	return !_system_prompt_solo.empty()
 		&& !_system_prompt_character.empty()
 		&& !_system_prompt_user.empty();
 }
@@ -39,6 +47,8 @@ bool ChatSession::LoadCharacter(Role role, string filename)
 		if (!string_util::empty_or_whitespace(character.portraitFilename))
 			CharacterImageStore::LoadCharacterPortrait(character.id, "./characters/" + character.portraitFilename);
 
+		if (role == Role::User)
+			character.id = "USR";
 		_characters[role] = std::move(character);
 		return true;
 	}
@@ -48,7 +58,7 @@ bool ChatSession::LoadCharacter(Role role, string filename)
 std::optional<Character> ChatSession::GetCharacter(Role role) const
 {
 	auto itFind = _characters.find(role);
-	if (itFind != std::end(_characters))
+	if (itFind != _characters.end())
 		return itFind->second;
 	return std::nullopt;
 }
@@ -58,10 +68,10 @@ std::optional<Character> ChatSession::GetCharacterById(string identifier) const
 	if (identifier.empty() || _characters.empty())
 		return std::nullopt;
 	
-	auto itFind = std::find_if(std::begin(_characters), std::end(_characters), [identifier](const auto& kvp) {
+	auto itFind = std::find_if(_characters.begin(), _characters.end(), [identifier](const auto& kvp) {
 		return string_util::equals(kvp.second.id, identifier, true);
 	});
-	if (itFind != std::end(_characters))
+	if (itFind != _characters.end())
 		return itFind->second;
 	return std::nullopt;
 }
@@ -71,10 +81,10 @@ std::optional<Character> ChatSession::GetCharacterByName(string name) const
 	if (name.empty() || _characters.empty())
 		return std::nullopt;
 	
-	auto itFind = std::find_if(std::begin(_characters), std::end(_characters), [name](const auto& kvp) {
+	auto itFind = std::find_if(_characters.begin(), _characters.end(), [name](const auto& kvp) {
 		return string_util::equals(kvp.second.name, name, true);
 	});
-	if (itFind != std::end(_characters))
+	if (itFind != _characters.end())
 		return itFind->second;
 	return std::nullopt;
 }
@@ -84,10 +94,10 @@ Role ChatSession::GetRoleOf(string characterId) const
 	if (characterId.empty() || _characters.empty())
 		return Role::Undefined;
 	
-	auto itFind = std::find_if(std::begin(_characters), std::end(_characters), [characterId](const auto& kvp) {
-		return string_util::equals(kvp.second.id, characterId, true);
+	auto itFind = std::find_if(_characters.begin(), _characters.end(), [characterId](const auto& kvp) {
+		return string_util::equals(kvp.second.id, characterId, true) || string_util::equals(kvp.second.name, characterId, true);
 	});
-	if (itFind != std::end(_characters))
+	if (itFind != _characters.end())
 		return itFind->first;
 	return Role::Undefined;
 }
@@ -159,9 +169,7 @@ string ChatSession::GetPersonaOf(Role role) const
 	{
 		string prompt = _system_prompt_user;
 		string_util::replace_all(prompt, "##PERSONA##", description);
-		string_util::replace_all(prompt, "{{user}}", GetNameOf(Role::User));
-		string_util::replace_all(prompt, "{{char}}", optCharacter.value().name);
-		return prompt;
+		return ApplyNames(prompt);
 	}
 	else
 	{
@@ -218,10 +226,76 @@ string ChatSession::ApplyNames(string text, Role characterRole) const
 	return ApplyNames(text);
 }
 
-string ChatSession::GetSystemPrompt() const
+string ChatSession::GetSystemPrompt(bool bGroup, bool bCharacterList, bool bUncensored) const
 {
-	string prompt = _system_prompt_common;
-	string_util::replace_all(prompt, "##FORMATTING_SPEC##", _formatting_common);
+	string prompt;
+	if (bGroup)
+	{
+		prompt = _system_prompt_group;
+		string_util::replace_all(prompt, "##FORMATTING_SPEC##", _formatting_group);
+	}
+	else
+	{
+		prompt = _system_prompt_solo;
+		string_util::replace_all(prompt, "##FORMATTING_SPEC##", _formatting_solo);
+	}
+
+	string_util::replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", bUncensored ? _system_prompt_uncensored : "");
+	prompt = string_util::trim(prompt);
+
+	if (bGroup && bCharacterList)
+	{
+		prompt.append("\n\n# Characters");
+		
+		if (_bUseCharacterIds)
+		{
+			prompt.append("\n{\n");
+			// Bots
+			for (auto& kvp : _characters)
+			{
+				auto& character = kvp.second;
+				if (is_bot(kvp.first))
+				{
+					prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", string_util::ucase(character.id), character.name));
+					if (!string_util::empty_or_whitespace(character.brief))
+						prompt.append(std::format(", \"info\": \"{0}\"", character.brief));
+					prompt.append("}},\n");
+				}
+			}
+
+			// User
+			if (auto user = GetCharacter(Role::User))
+			{
+				prompt.append(std::format("\t\"@USR\": {{\"name\": \"{0}\"", user.value().name));
+				if (!string_util::empty_or_whitespace(user.value().brief))
+					prompt.append(std::format(", \"info\": \"{0}\"", user.value().brief));
+				prompt.append("}\n");
+			}
+			prompt.append("}");
+		}
+		else
+		{
+			// Bots
+			for (auto& kvp : _characters)
+			{
+				auto& character = kvp.second;
+				if (is_bot(kvp.first))
+				{
+					prompt.append(std::format("\n- {}", character.name));
+					if (!string_util::empty_or_whitespace(character.brief))
+						prompt.append(std::format(": {}", character.brief));
+				}
+			}
+
+			// User
+			if (auto user = GetCharacter(Role::User))
+			{
+				prompt.append(std::format("\n- {}", user.value().name));
+				if (!string_util::empty_or_whitespace(user.value().brief))
+					prompt.append(std::format(": {}", user.value().brief));
+			}
+		}
+	}
 	return ApplyNames(prompt);
 }
 
@@ -233,5 +307,5 @@ string ChatSession::GetDirectorPrompt() const
 
 size_t ChatSession::GetBotCount() const
 {
-	return std::count_if(std::begin(_characters), std::end(_characters), [](auto kvp) { return is_bot(kvp.first); });
+	return std::count_if(_characters.begin(), _characters.end(), [](auto kvp) { return is_bot(kvp.first); });
 }

@@ -12,7 +12,6 @@ namespace llm_util
 	extern size_t find_one_of(const string& text, const std::vector<string>& words);
 	extern size_t find_stopping_strings(const string& text, const std::vector<string>& stop_words, const size_t last_token_size, bool is_full_stop);
 	extern void get_tag_and_name(const string& text, string& tag, string& name);
-	extern Role role_from_responder(Responder responder);
 	extern string& sanitize_response(string& text);
 	extern string& complete_message(string& text);
 	extern void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word);
@@ -37,5 +36,5 @@ namespace llm_util
 	extern std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 
 	extern string format_id(string id);
-	extern Role role_from_index(int32_t botIndex) noexcept;
+	extern Role bot_by_index(int32_t botIndex) noexcept;
 }

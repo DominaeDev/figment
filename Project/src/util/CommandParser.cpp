@@ -15,7 +15,7 @@ static _Cmd s_Commands[] {
 	{ "narrate",		CommandType::Narrate },
 	{ "instruct",		CommandType::Instruct },
 	{ "reset",			CommandType::Reset },
-	{ "remove",			CommandType::RemoveLast},
+	{ "erase",			CommandType::RemoveLast},
 	{ "undo",			CommandType::RollbackUserMessage },
 	{ "retry",			CommandType::RedoResponse },
 	{ "reseed",			CommandType::Reseed },

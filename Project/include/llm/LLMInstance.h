@@ -59,13 +59,20 @@ struct RemovedMessage
 	Role role;
 };
 
+struct LLMArguments
+{
+	LLMOption options {};
+	ChatSession session;
+	Messages messages;
+};
+
 class LLMInstance
 {
 public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool InitializeChat(ChatSession session, Messages messages);
+	bool InitializeChat(LLMArguments args);
 	void Shutdown();
 
 	bool IsLoadingModel() const { return _readyState.load() == ReadyState::LoadingModel; }
@@ -80,7 +87,7 @@ public:
 	bool Halt();
 	bool Continue(string responseId, string subMessageId, bool extend);
 
-	bool InstigateResponse(Responder responder, MessageType msgType, int messageCount = 0);
+	bool InstigateResponse(Role role, MessageType msgType, int messageCount = 0);
 	bool GreetUser();
 	bool Instruct(string instructions);
 	bool ResetChat(int seed = -1);
@@ -126,7 +133,8 @@ private:
 	
 	struct PrepareArguments
 	{
-		Responder responder = Responder::Bot;
+		Role responder = Role::Bot1;
+		bool is_continue = false;
 		int time = 0;	// decrement ttl
 	};
 	void PrepareGeneration(PrepareArguments args);
@@ -170,8 +178,9 @@ private:
 	std::unique_ptr<std::jthread> _workerThread;
 
 	ChatSession _session;
-	
+	LLMOption _options;
+		
 public:
-	std::atomic<int64_t> _usedVRAM; // As reported from llama.cpp
-	std::atomic<int64_t> _usedRAM; // As reported from llama.cpp
+	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
+	std::atomic<int64_t> usedRAM; // As reported from llama.cpp
 };

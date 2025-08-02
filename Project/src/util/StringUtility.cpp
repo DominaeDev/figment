@@ -51,14 +51,14 @@ std::string string_util::get_filename(const std::string& str)
 std::string string_util::lcase(const std::string& str)
 {
 	std::wstring s = from_utf8(str);
-	std::transform(std::begin(s), std::end(s), std::begin(s), [](wchar_t c){ return std::towlower(c); });
+	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towlower(c); });
 	return to_utf8(s);
 }
 
 std::string string_util::ucase(const std::string& str)
 {
 	std::wstring s = from_utf8(str);
-	std::transform(std::begin(s), std::end(s), std::begin(s), [](wchar_t c){ return std::towupper(c); });
+	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towupper(c); });
 	return to_utf8(s);
 }
 

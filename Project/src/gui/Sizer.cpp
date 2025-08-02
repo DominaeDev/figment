@@ -8,11 +8,11 @@ void Sizer::Add(Control* pControl, int proportion, int flags, int border)
 
 void Sizer::Remove(Control* pControl)
 {
-	auto it = std::find_if(std::cbegin(_items), std::cend(_items), [pControl](const LayoutInfo& li) {
+	auto it = std::find_if(_items.cbegin(), _items.cend(), [pControl](const LayoutInfo& li) {
 		return li.pControl == pControl;
 	});
 
-	if (it != std::end(_items))
+	if (it != _items.end())
 		_items.erase(it);
 }
 

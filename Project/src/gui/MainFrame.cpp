@@ -121,8 +121,6 @@ void MainFrame::OnRender(Renderer* pRenderer)
 
 void MainFrame::LoadModel()
 {
-	SetStatusBar("Loading model...");
-
 	auto pLLM = Application::GetLLM();
 	if (!pLLM)
 		return;
@@ -136,15 +134,6 @@ void MainFrame::LoadModel()
 			},
 			[this](bool bSuccess) 
 			{
-				if (bSuccess)
-				{
-					SetStatusBar("Model loaded");
-				}
-				else
-				{
-					DebugPrintLn("Failed to load model");
-					SetStatusBar("Failed to load model");
-				}
 			});
 	}
 }
@@ -168,13 +157,27 @@ void MainFrame::StartChat()
 	auto pLLM = Application::GetLLM();
 	if (pLLM && pLLM->HasLoadedModel())
 	{
+		LLMOption options = LLMOption::GreetUser
+			| LLMOption::LimitMessages
+			| LLMOption::SwapPersonas
+			| LLMOption::RandomizeMessageCount
+			| LLMOption::Uncensored;
+
+		SessionArgs sessionArgs {
+			/*use ids*/ (options & LLMOption::UseCharacterIds) == LLMOption::UseCharacterIds,
+		};
+
 		ChatSession session;
-		session.Initialize();
+		session.Initialize(sessionArgs);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+//		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
-		pLLM->InitializeChat(session, {});
+		LLMArguments llmArgs {
+			options,
+			session,
+		};
+		pLLM->InitializeChat(llmArgs);
 		_pChatScroll->SetSession(session);
 
 		_bStartedChat = true;
@@ -199,6 +202,10 @@ void MainFrame::OnCommand(Command cmd)
 		return to_vector(msgs | std::views::transform([](RemovedMessage msg) { return msg.responseId; }));
 	};
 
+	auto fnRoleFromName = [](std::vector<RemovedMessage> msgs) -> std::vector<string> {
+		return to_vector(msgs | std::views::transform([](RemovedMessage msg) { return msg.responseId; }));
+	};
+
 	switch (cmd.type)
 	{
 	case CommandType::UserMessage:
@@ -218,20 +225,20 @@ void MainFrame::OnCommand(Command cmd)
 		pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
 		break;
 	case CommandType::InstigateDialogue:
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Dialogue, 0);
+		pLLM->InstigateResponse(Role::Undefined, MessageType::Dialogue, 0);
 		break;
 	case CommandType::InstigateAction:
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Action, 0);
+		pLLM->InstigateResponse(Role::Undefined, MessageType::Action, 0);
 		break;
 	case CommandType::PassTurn:
-		pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined, 3);
+		pLLM->InstigateResponse(Role::Undefined, MessageType::Undefined, 3);
 		break;
 	case CommandType::Impersonate:
-		pLLM->InstigateResponse(Responder::User, MessageType::Dialogue, 1);
+		pLLM->InstigateResponse(Role::Undefined, MessageType::Dialogue, 1);
 		break;
 	case CommandType::Narrate:
 		if (cmd.text.empty())
-			pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
+			pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
 		else
 			pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
 		break;
@@ -251,9 +258,9 @@ void MainFrame::OnCommand(Command cmd)
 		auto removedIds = pLLM->RemoveMessages(1);
 		if (!removedIds.empty())
 		{
-			Responder responder = Responder::Bot;
-			if (removedIds.front().role == Role::Narrator)
-				responder = Responder::Narrator;
+			Role responder = removedIds.front().role;
+			if (!is_bot(responder))
+				responder = Role::Undefined;
 
 			_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
 			pLLM->InstigateResponse(responder, MessageType::Undefined, 3);
@@ -292,14 +299,14 @@ void MainFrame::OnCommand(Command cmd)
 			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their surroundings.]", MessageType::Narration, false, 1);
 			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and anyone who are present.}}", MessageType::Direction, false, 1);
 		}
-		pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
+		pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
 		break;
 	case CommandType::Examine:
 		if (!cmd.text.empty())
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false, 1);
 			pLLM->PushMessage(Role::Director, "{{Describe to {{user}} the " + cmd.text + " in minute detail.}}", MessageType::Direction, false, 1);
-			pLLM->InstigateResponse(Responder::Narrator, MessageType::Narration, 1);
+			pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
 		}
 		break;
 	}
@@ -418,7 +425,7 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		{
 			auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
 			if (!pLLM->Continue(responseId, subMessageId, true))
-				return pLLM->InstigateResponse(Responder::Bot, MessageType::Undefined);
+				return pLLM->InstigateResponse(Role::Undefined, MessageType::Undefined);
 			break;
 		}
 		case SDLK_F10:

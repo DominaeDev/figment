@@ -155,7 +155,7 @@ bool Control::ProcessEvent(SDL_Event* event)
 	if (OnEvent(event))
 		return true;
 
-	for (auto it = std::begin(_children); it != std::end(_children); ++it)
+	for (auto it = _children.begin(); it != std::end(_children); ++it)
 	{
 		Control* pControl = dynamic_cast<Control*>(*it);
 		if (pControl && pControl->ProcessEvent(event))
