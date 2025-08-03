@@ -75,7 +75,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	SetSizer(topSizer);
 	
 	pTextBox->SetEnterPressedCallback([this](string text) {
-		OnCommand(CommandParser::Parse(text));
+		EnqueueCommand(CommandParser::Parse(text));
 	});
 
 	auto pTextBoxBG = new NineGridBackgroundRenderer();
@@ -189,14 +189,14 @@ void MainFrame::SetStatusBar(string message)
 	s_pInstance->_pStatusBar->SetMessage(message);
 }
 
-void MainFrame::OnCommand(Command cmd)
+bool MainFrame::OnCommand(Command cmd)
 {
 	if (cmd.type == CommandType::Invalid)
-		return;
+		return false;
 
 	auto pLLM = Application::GetLLM();
 	if (!pLLM)
-		return;
+		return false;
 
 	auto fnRemovedMessageIds = [](std::vector<RemovedMessage> msgs) -> std::vector<string> {
 		return to_vector(msgs | std::views::transform([](RemovedMessage msg) { return msg.responseId; }));
@@ -227,42 +227,33 @@ void MainFrame::OnCommand(Command cmd)
 			auto [msgType, complete] = llm_util::detect_message_type(llm_util::process_message(cmd.text, ""));
 			_pChatScroll->AddDummyMessage(turn % 2 == 0 ? "@USR" : "@BOT", turn % 2 == 0 ? Role::User : Role::Bot1, msgType, cmd.text);
 			++turn;
+			return true;
 		}
-		else
 #endif
-		pLLM->SendMessage(cmd.text);
-		break;
+		return pLLM->SendMessage(cmd.text);
 	case CommandType::SystemMessage:
-		pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
-		break;
+		return pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
 	case CommandType::InstigateDialogue:
-		pLLM->InstigateResponse(targetRole, MessageType::Dialogue, 0);
-		break;
+		return pLLM->InstigateResponse(targetRole, MessageType::Dialogue, 0);
 	case CommandType::InstigateAction:
-		pLLM->InstigateResponse(targetRole, MessageType::Action, 0);
-		break;
+		return pLLM->InstigateResponse(targetRole, MessageType::Action, 0);
 	case CommandType::PassTurn:
-		pLLM->InstigateResponse(targetRole, MessageType::Undefined, 3);
-		break;
+		return pLLM->InstigateResponse(targetRole, MessageType::Undefined, 3);
 	case CommandType::Impersonate:
-		pLLM->InstigateResponse(Role::User, MessageType::Dialogue, 1);
-		break;
+		return pLLM->InstigateResponse(Role::User, MessageType::Dialogue, 1);
 	case CommandType::Narrate:
 		if (cmd.text.empty())
-			pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
+			return pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
 		else
-			pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
-		break;
+			return pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
 	case CommandType::Instruct:
 		if (!cmd.text.empty())
-			pLLM->Instruct(cmd.text);
-		break;
+			return pLLM->Instruct(cmd.text);
 	case CommandType::RemoveLast:
 	{
 		int n = atoi(cmd.text.c_str());
 		auto removedIds = pLLM->RemoveMessages(std::max(n, 1));
-		_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
-		break;
+		return _pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
 	}
 	case CommandType::RedoResponse:
 	{
@@ -274,14 +265,14 @@ void MainFrame::OnCommand(Command cmd)
 				responder = Role::Undefined;
 
 			_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
-			pLLM->InstigateResponse(responder, MessageType::Undefined, 3);
+			return pLLM->InstigateResponse(responder, MessageType::Undefined, 3);
 		}
 		break;
 	}
 	case CommandType::RollbackUserMessage:
 	{
 		auto removedIds = pLLM->RollbackUserMessage();
-		_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
+		return _pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
 		break;
 	}
 	case CommandType::Reset:
@@ -289,7 +280,8 @@ void MainFrame::OnCommand(Command cmd)
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
 		if (!pLLM->IsReady() || pLLM->ResetChat(seed))
 			_pChatScroll->ClearMessages();
-		break;
+		ClearQueue(_commandQueue);
+		return true;
 	}
 	case CommandType::Reseed:
 	{
@@ -310,17 +302,17 @@ void MainFrame::OnCommand(Command cmd)
 			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their surroundings.]", MessageType::Narration, false, 1);
 			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and anyone who are present.}}", MessageType::Direction, false, 1);
 		}
-		pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
-		break;
+		return pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
 	case CommandType::Examine:
 		if (!cmd.text.empty())
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false, 1);
 			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} is able to find, if anything, " + cmd.text + " in minute detail.}}", MessageType::Direction, false, 1);
-			pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
+			return pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
 		}
 		break;
 	}
+	return false;
 }
 
 #if AUTOCHAT
@@ -385,6 +377,7 @@ void MainFrame::PollStatus()
 		case LLMStatusSignal::InitializedChat:
 			SetStatusBar("Chat initialized");
 			_pChatScroll->ClearMessages();
+			ClearQueue(_commandQueue);
 			break;
 		case LLMStatusSignal::InitializeChatFailure:
 			SetStatusBar("Failed to initialize chat");
@@ -394,10 +387,12 @@ void MainFrame::PollStatus()
 			break;
 		case LLMStatusSignal::LoadedModel:
 			SetStatusBar("Model loaded");
+			ClearQueue(_commandQueue);
 			StartChat();
 			break;
 		case LLMStatusSignal::UnloadedModel:
 			SetStatusBar("Model unloaded");
+			ClearQueue(_commandQueue);
 			break;
 		case LLMStatusSignal::LoadModelFailure:
 			SetStatusBar("Failed to load model");
@@ -407,6 +402,7 @@ void MainFrame::PollStatus()
 			break;
 		case LLMStatusSignal::GenerationComplete:
 			SetStatusBar("Ready");
+			NextQueuedCommand();
 			break;
 		default:
 			break;
@@ -441,6 +437,7 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		}
 		case SDLK_F10:
 			pLLM->Halt();
+			ClearQueue(_commandQueue);
 #if AUTOCHAT
 			_bAutoChat = false;
 #endif		
@@ -467,4 +464,27 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		}
 	}
 	return false;
-}	
+}
+
+void MainFrame::EnqueueCommand(Command cmd)
+{
+	if (Application::GetLLM() && Application::GetLLM()->IsGenerating())
+	{
+		if (_commandQueue.size() < 3)
+			_commandQueue.push(cmd);
+	}
+	else
+		OnCommand(cmd);
+}
+
+void MainFrame::NextQueuedCommand()
+{
+	while (!_commandQueue.empty())
+	{
+		auto command = _commandQueue.front();
+		_commandQueue.pop();
+
+		if (OnCommand(command))
+			break;
+	}
+}

@@ -2,6 +2,8 @@
 
 #include "Frame.h"
 #include "Types.h"
+#include "util/Command.h"
+#include <queue>
 
 class Sizer;
 class StatusBar;
@@ -27,15 +29,19 @@ protected:
 	virtual void OnUpdate(float fDeltaTime) override;
 	virtual void OnRender(Renderer* pRenderer) override;
 
-	void OnCommand(Command cmd);
+	bool OnCommand(Command cmd);
 	void PollStatus();
 	void StartChat();
+	void EnqueueCommand(Command cmd);
+	void NextQueuedCommand();
 
 private:
 	StatusBar* _pStatusBar;
 	ChatScroll* _pChatScroll;
 	float _fPollingCounter = 0.0f;
 	bool _bStartedChat = false; // Used to trigger greeting
+
+	std::queue<Command> _commandQueue;
 
 #if AUTOCHAT
 private:
