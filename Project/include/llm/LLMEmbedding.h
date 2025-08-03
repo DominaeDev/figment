@@ -1,0 +1,30 @@
+#pragma once
+
+#include "LLMTypes.h"
+#include "model/ChatSession.h"
+
+#include <vector>
+#include <set>
+#include <functional>
+#include <thread>
+#include <mutex>
+#include <queue>
+#include <array>
+
+class LLMEmbedding
+{
+public:
+	~LLMEmbedding();
+
+	bool LoadModel(string filename);
+	void Shutdown();
+	bool IsReady() const;
+
+	bool Generate(string text, std::vector<float>& out_embedding);
+	
+private:
+	llama_model* _pModel = nullptr;
+	llama_context* _pCtx = nullptr;
+	llama_batch* _pBatch = nullptr;
+	size_t n_embed {};
+};

@@ -110,6 +110,7 @@
     <ClCompile Include="src\gui\Image.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
+    <ClCompile Include="src\llm\LLMEmbedding.cpp" />
     <ClCompile Include="src\llm\LLMTemplate.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />
     <ClCompile Include="src\gui\Area.cpp" />
@@ -155,8 +156,10 @@
     <ClInclude Include="include\gui\Image.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
+    <ClInclude Include="include\llm\LLMEmbedding.h" />
     <ClInclude Include="include\llm\LLMTemplate.h" />
     <ClInclude Include="include\llm\LLMTypes.h" />
+    <ClInclude Include="include\llm\TestEmbeddings.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Character.h" />

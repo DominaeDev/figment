@@ -203,6 +203,9 @@
     <ClCompile Include="src\llm\LLMTemplate.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
+    <ClCompile Include="src\llm\LLMEmbedding.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -350,6 +353,12 @@
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMTemplate.h">
+      <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\LLMEmbedding.h">
+      <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\TestEmbeddings.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
   </ItemGroup>

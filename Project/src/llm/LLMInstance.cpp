@@ -118,6 +118,9 @@ void LLMInstance::Shutdown()
 		_modelState.Release();
 		_modelState = {};
 		_contextState = {};
+
+		if (_pEmbedding)
+			_pEmbedding->Shutdown();
 	}
 	_readyState.store(ReadyState::Uninitialized);
 	PushSignal(LLMStatusSignal::UnloadedModel);
@@ -452,6 +455,12 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 		onComplete(state);
 		return;
 	}
+
+	// Initialize embedder
+	if (!_pEmbedding)
+		_pEmbedding = std::make_unique<LLMEmbedding>();
+	if (!_pEmbedding->LoadModel(DEFAULT_EMBEDDING_MODEL_LOCATION))
+		_pEmbedding = nullptr; // Destroy
 
 	onComplete(state);
 }
@@ -1094,6 +1103,12 @@ bool LLMInstance::SendMessage(string message)
 		return false;
 
 	PushMessage(Role::User, message);
+
+	if (_pEmbedding && _pEmbedding->IsReady())
+	{
+		std::vector<float> vec;
+		_pEmbedding->Generate(message, vec);
+	}
 
 	PrepareArguments prepareArgs {
 		/*responder */ Role::Undefined,

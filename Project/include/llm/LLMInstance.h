@@ -1,6 +1,7 @@
 #pragma once
 
-#include "LLMTypes.h"
+#include "llm/LLMTypes.h"
+#include "llm/LLMEmbedding.h"
 #include "model/ChatSession.h"
 
 #include <vector>
@@ -179,6 +180,9 @@ private:
 
 	ChatSession _session;
 	LLMOption _options;
+
+	// Embedding
+	std::unique_ptr<LLMEmbedding> _pEmbedding;
 		
 public:
 	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
