@@ -3,7 +3,7 @@
 #include "Types.h"
 
 #define DEFAULT_MODEL_LOCATION "M:\\LLM\\default_model.gguf"
-#define DEFAULT_EMBEDDING_MODEL_LOCATION "M:\\Embedding\\snowflake-arctic-embed-s.Q6_K.gguf"
+#define DEFAULT_EMBEDDING_MODEL_LOCATION "M:\\Embedding\\gist-all-minilm-l6-v2.Q8_0.gguf"
 
 namespace Constants
 {

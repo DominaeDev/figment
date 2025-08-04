@@ -311,7 +311,14 @@ bool MainFrame::OnCommand(Command cmd)
 			return pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
 		}
 		break;
+	case CommandType::GenerateEmbedding:
+#if _DEBUG
+		return pLLM->GenerateEmbedding(cmd.text);
+#else
+		return false;
+#endif
 	}
+
 	return false;
 }
 

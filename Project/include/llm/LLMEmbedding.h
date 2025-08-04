@@ -6,10 +6,6 @@
 #include <vector>
 #include <set>
 #include <functional>
-#include <thread>
-#include <mutex>
-#include <queue>
-#include <array>
 
 class LLMEmbedding
 {
@@ -20,7 +16,11 @@ public:
 	void Shutdown();
 	bool IsReady() const;
 
-	bool Generate(string text, std::vector<float>& out_embedding);
+	bool Generate(const std::vector<string>& history, std::vector<float>& out_embedding);
+	bool Generate(std::string text, std::vector<float>& out_embedding);
+
+private:
+	bool __Generate(const std::vector<llama_token>& tokens, std::vector<float>& out_embedding);
 	
 private:
 	llama_model* _pModel = nullptr;

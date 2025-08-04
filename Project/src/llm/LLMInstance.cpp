@@ -742,6 +742,12 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	Role responderRole = args.role;
 	string responderId {};
 
+	if (!args.history.empty() && _pEmbedding)
+	{
+		std::vector<float> embd;
+		_pEmbedding->Generate(args.history, embd);
+	}
+
 	DebugPrintLn(">> BEGIN GENERATION");
 
 	// Select and init grammar
@@ -1104,12 +1110,6 @@ bool LLMInstance::SendMessage(string message)
 
 	PushMessage(Role::User, message);
 
-	if (_pEmbedding && _pEmbedding->IsReady())
-	{
-		std::vector<float> vec;
-		_pEmbedding->Generate(message, vec);
-	}
-
 	PrepareArguments prepareArgs {
 		/*responder */ Role::Undefined,
 		/*continue*/ false,
@@ -1121,7 +1121,7 @@ bool LLMInstance::SendMessage(string message)
 		/*role*/ Role::Bot1,	 // @role
 		/*msgType*/ MessageType::Undefined,
 	};
-
+	generateArgs.history = GetHistory();
 	StartGeneration(generateArgs);
 
 	return true;
@@ -1342,6 +1342,7 @@ bool LLMInstance::InstigateResponse(Role role, MessageType msgType, int messageC
 		/*maxMessageCount*/ messageCount,
 		/*prepend*/ prependMsg,
 	};
+	generateArgs.history = GetHistory();
 	
 	StartGeneration(generateArgs);
 	return true;
@@ -1601,3 +1602,70 @@ bool LLMInstance::RefreshKVCache()
 
 	return true;
 }
+
+std::vector<string> LLMInstance::GetHistory()
+{
+	std::scoped_lock lock(_stateMutex);
+	std::vector<string> messages;
+
+	for (auto& block : _contextState.blocks)
+	{
+		if (!(is_bot(block.role) || block.role == Role::User || block.role == Role::Narrator))
+			continue;
+		
+		string msg = string_util::trim(block.content);
+
+		size_t pos_begin = msg.find('>', 0);
+		while (pos_begin != string::npos)
+		{
+			size_t pos_end = msg.find('<', pos_begin);
+			if (pos_end == string::npos)
+				break;
+
+/*			string name;
+			if (block.role == Role::User)
+				name = "user";
+			else if (block.role == Role::Narrator)
+				name = "narrator";
+			else
+				name = "agent";
+			messages.push_back(name + ": " + msg.substr(pos_begin + 1, pos_end - pos_begin - 1) + "\n");
+*/
+			messages.push_back(msg.substr(pos_begin + 1, pos_end - pos_begin - 1) + "\n");
+			pos_begin = msg.find('>', pos_end + 1);
+			if (pos_begin == string::npos)
+				break;
+			pos_begin = msg.find('>', pos_begin + 1);
+		}
+		
+	}
+	return messages;
+}
+
+#if _DEBUG
+bool LLMInstance::GenerateEmbedding(string text)
+{
+	if (!_pEmbedding)
+		return false;
+
+	std::vector<float> embedding;
+	_pEmbedding->Generate(text, embedding);
+
+	string asString;
+	asString.reserve(2048);
+	asString.append(std::format("float embedding[{}] = {{\r\n", embedding.size()));
+	int n = 0;
+	for (float f : embedding)
+	{
+		asString.append(std::format("\t{}f, ", f));
+		if (++n == 8)
+		{
+			n = 0;
+			asString.append("\r\n");
+		}
+	}
+	asString.append("};");
+
+	return true; // Break here
+}
+#endif

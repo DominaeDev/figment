@@ -411,20 +411,17 @@ bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string promp
 	return true;
 }
 
-bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
+bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch)
 {
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 
-	// tokenize the prompt
-	std::vector<llama_token> prompt_tokens = tokenize(pModel, prompt, false);
-
 	// Prepare a batch for the prompt
 	llama_batch batch = llama_batch_init(ctx_size, 0, 1);
-	int32_t num_tokens = std::min((int32_t)prompt_tokens.size(), ctx_size);
+	int32_t num_tokens = std::min((int32_t)tokens.size(), ctx_size);
 
 	// Add tokens to batch
 	for (int i = 0; i < num_tokens; ++i) {
-		batch.token[i] = prompt_tokens[i];
+		batch.token[i] = tokens[i];
 		batch.pos[i] = i;  // Position in sequence
 		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
 		batch.seq_id[i][0] = 0;  // Sequence ID 0

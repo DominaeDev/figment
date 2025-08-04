@@ -76,14 +76,65 @@ bool LLMEmbedding::IsReady() const
 	return _pModel != nullptr && _pCtx != nullptr;
 }
 
-bool LLMEmbedding::Generate(string text, std::vector<float>& out_embedding)
+bool LLMEmbedding::Generate(const std::vector<string>& history, std::vector<float>& out_embedding)
 {
-	auto tokens = llm_util::tokenize(_pModel, text, false);
-
-	llama_batch batch;
-	if (!llm_util::init_embedding_batch(_pModel, _pCtx, text, batch))
+	if (history.empty())
 		return false;
 
+	int32_t ctx_size = llama_n_ctx(_pCtx);
+	const llama_vocab* pVocab = llama_model_get_vocab(_pModel);
+
+	std::vector<llama_token> tokens;
+	tokens.reserve(ctx_size);
+
+	int n = 0;
+	for (auto it = history.crbegin(); it != history.crend(); ++it)
+	{
+		auto msg_tokens = llm_util::tokenize(_pModel, *it, false);
+		if (msg_tokens.size() > ctx_size - tokens.size())
+			break;
+		tokens.insert(tokens.begin(), msg_tokens.cbegin(), msg_tokens.cend());
+		tokens.insert(tokens.begin(), llama_vocab_sep(pVocab));
+		
+		if (++n == 4)
+			break;
+	}
+	tokens[0] = llama_vocab_bos(pVocab);
+
+	if (!__Generate(tokens, out_embedding))
+		return false;
+
+#if _DEBUG
+	for (size_t i = 0; i < n_test_embeddings; ++i)
+	{
+		float similarity = common_embd_similarity_cos(test_embeddings[i], out_embedding.data(), (int32_t)n_embed);
+		DebugPrintLn(std::format("Similarity [{0}] = {1}", (int32_t)i, similarity));
+	}
+#endif
+	return true;
+}
+
+bool LLMEmbedding::Generate(std::string text, std::vector<float>& out_embedding)
+{
+	std::vector<llama_token> tokens = llm_util::tokenize(_pModel, text, false);
+	const llama_vocab* pVocab = llama_model_get_vocab(_pModel);
+	tokens.insert(tokens.begin(), llama_vocab_bos(pVocab));
+	return __Generate(tokens, out_embedding);
+}
+
+bool LLMEmbedding::__Generate(const std::vector<llama_token>& tokens, std::vector<float>& out_embedding)
+{
+	int32_t ctx_size = llama_n_ctx(_pCtx);
+
+	llama_batch batch;
+	if (!llm_util::init_embedding_batch(_pModel, _pCtx, tokens, batch))
+		return false;
+
+	if (batch.n_tokens > ctx_size)
+		batch.n_tokens = ctx_size;
+	batch.logits[batch.n_tokens - 1] = true;
+
+	llama_kv_self_clear(_pCtx);
 	if (llama_decode(_pCtx, batch) != 0)
 	{
 		llama_batch_free(batch);
@@ -99,28 +150,5 @@ bool LLMEmbedding::Generate(string text, std::vector<float>& out_embedding)
 
 	out_embedding = std::vector<float>(embedding, embedding + n_embed);
 	common_embd_normalize(out_embedding.data(), out_embedding.data(), (int32_t)out_embedding.size(), 2); // 2 = euclidean
-
-#if _DEBUG
-	string asString;
-	asString.reserve(2048);
-	asString.append(std::format("float embedding[{}] = {{\r\n", out_embedding.size()));
-	int n = 0;
-	for (float f : out_embedding)
-	{
-		asString.append(std::format("\t{}f, ", f));
-		if (++n == 8)
-		{
-			n = 0;
-			asString.append("\r\n");
-		}
-	}
-	asString.append("};");
-
-	for (size_t i = 0; i < n_test_embeddings; ++i)
-	{
-		float similarity = common_embd_similarity_cos(embedding, test_embeddings[i], (int32_t)n_embed);
-		DebugPrintLn(std::format("Similarity [{0}] = {1}", (int32_t)i, similarity));
-	}
-#endif
 	return true;
 }

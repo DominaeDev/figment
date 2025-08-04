@@ -20,6 +20,7 @@ enum class CommandType
 	Reseed,
 	Look,
 	Examine,
+	GenerateEmbedding,
 };
 
 struct Command

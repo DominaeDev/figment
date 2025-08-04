@@ -103,6 +103,7 @@ public:
 
 #if _DEBUG
 	bool DumpContext(bool full, string filename = "prompt.txt") const;
+	bool GenerateEmbedding(string text);
 #endif
 
 	const ChatSession& GetSession() const { return _session; }
@@ -150,6 +151,7 @@ private:
 		string prepend {};
 		string responseId {};
 		string subMessageId {};
+		std::vector<string> history; // Used for embedding
 	};
 	void __Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 	void StartGeneration(GenerateArguments args);
@@ -158,6 +160,8 @@ private:
 	void PushSignal(LLMStatusSignal signal);
 	void RefreshActiveResponses();
 	std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
+
+	std::vector<string> GetHistory();
 
 private:
 	enum class ReadyState { Invalid, Uninitialized, LoadingModel, ModelLoaded, Initializing, Ready, Generating };

@@ -19,7 +19,7 @@ namespace llm_util
 	extern llama_batch init_batch(llama_context* pCtx);
 	extern bool init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 	extern void init_batch_logits(llama_batch& batch);
-	extern bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
+	extern bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch);
 	extern llama_batch create_batch_view(llama_batch& batch, int32_t begin, int32_t end);
 	extern std::vector<llama_token> tokenize(llama_model* pModel, string prompt, bool add_special = false);
 	extern std::vector<llama_token> tokenize_and_batch(llama_model* pModel, llama_context* pCtx, llama_batch& batch, string content, int32_t pos, bool add_special = false);
