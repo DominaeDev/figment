@@ -69,13 +69,13 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	string name = _session.GetNameOf(role);
 	if (auto character = _session.GetCharacterById(identifier))
 	{
-		name = character.value().name;
 		id = character.value().id;
+		name = character.value().fullName;
 	}
 	else if (auto character = _session.GetCharacterByName(identifier))
 	{
-		name = character.value().name;
 		id = character.value().id;
+		name = character.value().fullName;
 	}
 	
 	bool bShowName = bShowAvatar;

@@ -660,13 +660,13 @@ std::string llm_util::process_message(std::string message, std::string identifie
 		switch (span.msgType)
 		{
 		case MessageType::Dialogue:
-			result.append(std::format("<{0}=\"@{1}\">\"{2}\"</{0}>", Constants::DialogueTag, identifier, text));
+			result.append(std::format("<{0}=\"{1}\">\"{2}\"</{0}>", Constants::DialogueTag, identifier, text));
 			break;
 		case MessageType::Action:
-			result.append(std::format("<{0}=\"@{1}\">*{2}*</{0}>", Constants::ActionTag, identifier, text));
+			result.append(std::format("<{0}=\"{1}\">*{2}*</{0}>", Constants::ActionTag, identifier, text));
 			break;
 		case MessageType::Thought:
-			result.append(std::format("<{0}=\"@{1}\">({2})</{0}>", Constants::ThoughtTag, identifier, text));
+			result.append(std::format("<{0}=\"{1}\">({2})</{0}>", Constants::ThoughtTag, identifier, text));
 			break;
 		case MessageType::Narration:
 			result.append(std::format("<{0}>[{1}]</{0}>", Constants::NarrationTag, text));

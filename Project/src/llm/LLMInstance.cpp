@@ -1121,7 +1121,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 		return false;
 
 	// Process
-	string identifier = _session.GetIdentifierOf(role);
+	string identifier = CHECK_OPTION(LLMOption::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
 	string content = message;
 	content = _session.ApplyNames(content);
 	std::vector<Submessage> subMessages;

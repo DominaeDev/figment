@@ -14,7 +14,8 @@ class Character
 {
 public:
 	string id;
-	string name;
+	string shortName;
+	string fullName;
 	string brief;
 	string description;
 	string portraitFilename;
