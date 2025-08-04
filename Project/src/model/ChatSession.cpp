@@ -82,7 +82,7 @@ std::optional<Character> ChatSession::GetCharacterByName(string name) const
 		return std::nullopt;
 	
 	auto itFind = std::find_if(_characters.begin(), _characters.end(), [name](const auto& kvp) {
-		return string_util::equals(kvp.second.name, name, true);
+		return string_util::equals(kvp.second.shortName, name, true);
 	});
 	if (itFind != _characters.end())
 		return itFind->second;
@@ -95,7 +95,7 @@ Role ChatSession::GetRoleOf(string characterId) const
 		return Role::Undefined;
 	
 	auto itFind = std::find_if(_characters.begin(), _characters.end(), [characterId](const auto& kvp) {
-		return string_util::equals(kvp.second.id, characterId, true) || string_util::equals(kvp.second.name, characterId, true);
+		return string_util::equals(kvp.second.id, characterId, true) || string_util::equals(kvp.second.shortName, characterId, true);
 	});
 	if (itFind != _characters.end())
 		return itFind->first;
@@ -122,7 +122,7 @@ string ChatSession::GetNameOf(Role role) const
 		return "Director";
 	auto optCharacter = GetCharacter(role);
 	if (optCharacter.has_value())
-		return optCharacter.value().name;
+		return optCharacter.value().shortName;
 	return "Unknown";
 }
 
@@ -150,7 +150,7 @@ string ChatSession::GetBriefOf(Role role) const
 
 	string brief = string_util::trim(optCharacter.value().brief);
 	string_util::replace_all(brief, "{{user}}", GetNameOf(Role::User));
-	string_util::replace_all(brief, "{{char}}", optCharacter.value().name);
+	string_util::replace_all(brief, "{{char}}", optCharacter.value().shortName);
 	return brief;
 }
 
@@ -176,7 +176,7 @@ string ChatSession::GetPersonaOf(Role role) const
 		string prompt = _system_prompt_character;
 		string_util::replace_all(prompt, "##PERSONA##", description);
 		string_util::replace_all(prompt, "{{user}}", GetNameOf(Role::User));
-		string_util::replace_all(prompt, "{{char}}", optCharacter.value().name);
+		string_util::replace_all(prompt, "{{char}}", optCharacter.value().shortName);
 		return prompt;
 	}
 }
@@ -256,7 +256,7 @@ string ChatSession::GetSystemPrompt(bool bGroup, bool bCharacterList, bool bUnce
 				auto& character = kvp.second;
 				if (is_bot(kvp.first))
 				{
-					prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", string_util::ucase(character.id), character.name));
+					prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", string_util::ucase(character.id), character.shortName));
 					if (!string_util::empty_or_whitespace(character.brief))
 						prompt.append(std::format(", \"info\": \"{0}\"", character.brief));
 					prompt.append("}},\n");
@@ -266,7 +266,7 @@ string ChatSession::GetSystemPrompt(bool bGroup, bool bCharacterList, bool bUnce
 			// User
 			if (auto user = GetCharacter(Role::User))
 			{
-				prompt.append(std::format("\t\"@USR\": {{\"name\": \"{0}\"", user.value().name));
+				prompt.append(std::format("\t\"@USR\": {{\"name\": \"{0}\"", user.value().shortName));
 				if (!string_util::empty_or_whitespace(user.value().brief))
 					prompt.append(std::format(", \"info\": \"{0}\"", user.value().brief));
 				prompt.append("}\n");
@@ -281,7 +281,7 @@ string ChatSession::GetSystemPrompt(bool bGroup, bool bCharacterList, bool bUnce
 				auto& character = kvp.second;
 				if (is_bot(kvp.first))
 				{
-					prompt.append(std::format("\n- {}", character.name));
+					prompt.append(std::format("\n- {}", character.shortName));
 					if (!string_util::empty_or_whitespace(character.brief))
 						prompt.append(std::format(": {}", character.brief));
 				}
@@ -290,7 +290,7 @@ string ChatSession::GetSystemPrompt(bool bGroup, bool bCharacterList, bool bUnce
 			// User
 			if (auto user = GetCharacter(Role::User))
 			{
-				prompt.append(std::format("\n- {}", user.value().name));
+				prompt.append(std::format("\n- {}", user.value().shortName));
 				if (!string_util::empty_or_whitespace(user.value().brief))
 					prompt.append(std::format(": {}", user.value().brief));
 			}

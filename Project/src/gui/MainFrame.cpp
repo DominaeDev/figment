@@ -209,7 +209,7 @@ bool MainFrame::OnCommand(Command cmd)
 			return bot_from_index(std::stoi(text) - 1);
 		for (auto kvp : pLLM->GetSession().GetCharactersByRole())
 		{
-			if (string_util::begins_with(kvp.second.name, text, true))
+			if (string_util::begins_with(kvp.second.shortName, text, true))
 				return kvp.first;
 		}
 		return pLLM->GetSession().GetRoleOf(text);

@@ -19,13 +19,20 @@ bool Character::LoadFromXml(string filename)
 	if (pID)
 		id = string_util::trim(pID->GetText());
 
-	// Name
-	XMLElement* pName = root.FirstChildElement("Name");
-	if (pName)
-		name = string_util::trim(pName->GetText());
+	// Name(s)
+	XMLElement* pFirstName = root.FirstChildElement("FirstName");
+	if (pFirstName)
+		shortName = string_util::trim(pFirstName->GetText());
+
+	XMLElement* pFullName = root.FirstChildElement("FullName");
+	if (pFullName)
+		fullName = string_util::trim(pFullName->GetText());
 
 	if (id.empty())
-		id = name;
+		id = shortName;
+	if (fullName.empty())
+		fullName = shortName;
+
 
 	// Portrait
 	XMLElement* pImage = root.FirstChildElement("Image");
@@ -68,5 +75,5 @@ bool Character::LoadFromXml(string filename)
 			bgColor = color_util::hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 	}
 
-	return !name.empty();
+	return !id.empty() && !shortName.empty();
 }
