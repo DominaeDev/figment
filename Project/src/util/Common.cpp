@@ -8,6 +8,7 @@
 #include <fstream>
 #include <uuid_v4.h>
 #include <format>
+#include <filesystem>
 
 std::optional<std::string> ReadTextFile(const std::string& filename, bool normalizeNewlines)
 {
@@ -43,7 +44,6 @@ bool ReadTextFile(const std::string& filename, std::string& out_content, bool no
 	}
 	return false;
 }
-
 
 bool WriteTextFile(const std::string& filename, const std::string& content, bool append)
 {
@@ -85,4 +85,21 @@ std::string CreateUUID()
 {
 	static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 	return uuidGenerator.getUUID().str();
+}
+
+std::vector<std::string> FindFilesInPath(const std::string& dirPath, const std::string& extension)
+{
+	std::vector<std::string> matchingFiles;
+	std::filesystem::path directory(dirPath);
+
+	if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory))
+		return matchingFiles;
+
+	for (const auto& entry : std::filesystem::directory_iterator(directory))
+	{
+		if (std::filesystem::is_regular_file(entry) && (extension.empty() || string_util::equals(entry.path().extension().string(), extension, true)))
+			matchingFiles.push_back(entry.path().string());
+	}
+
+	return matchingFiles;
 }

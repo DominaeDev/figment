@@ -96,7 +96,9 @@ int string_util::compare(const std::string& a, const std::string& b, bool ignore
 
 bool string_util::equals(const std::string& a, const std::string& b, bool ignore_case)
 {
-	return compare(a, b, ignore_case) == 0;
+	if (!ignore_case)
+		return a == b;
+	return compare(a, b, true) == 0;
 }
 
 bool string_util::begins_with(const std::string& str, const std::string& prefix, bool ignore_case)

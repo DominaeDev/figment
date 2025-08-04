@@ -13,6 +13,7 @@ extern void DebugPrintLn(std::string message = "");
 // File IO
 extern std::optional<std::string> ReadTextFile(const std::string& filename, bool normalizeNewlines = true);
 extern bool WriteTextFile(const std::string& filename, const std::string& content, bool append = false);
+extern std::vector<std::string> FindFilesInPath(const std::string& dirPath, const std::string& extension);
 
 extern std::string CreateUUID();
 

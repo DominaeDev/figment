@@ -1,6 +1,7 @@
 ﻿#include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "llm/LLMTemplate.h"
+#include "llm/Embedding.h"
 #include "util/StringUtility.h"
 #include "util/Common.h"
 #include "Constants.h"
@@ -124,6 +125,8 @@ void LLMInstance::Shutdown()
 	}
 	_readyState.store(ReadyState::Uninitialized);
 	PushSignal(LLMStatusSignal::UnloadedModel);
+
+	llama_backend_free();
 }
 
 using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;
@@ -421,6 +424,8 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 
 	usedVRAM.store(0);
 	usedRAM.store(0);
+
+	llama_backend_init();
 
 	llama_log_set(OnLlamaLog, (void*)this);
 
@@ -744,7 +749,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 	if (!args.history.empty() && _pEmbedding)
 	{
-		std::vector<float> embd;
+		Embedding embd;
 		_pEmbedding->Generate(args.history, embd);
 	}
 
@@ -1631,7 +1636,18 @@ std::vector<string> LLMInstance::GetHistory()
 				name = "agent";
 			messages.push_back(name + ": " + msg.substr(pos_begin + 1, pos_end - pos_begin - 1) + "\n");
 */
-			messages.push_back(msg.substr(pos_begin + 1, pos_end - pos_begin - 1) + "\n");
+			string content = msg.substr(pos_begin + 1, pos_end - pos_begin - 1);
+			if (content.empty())
+				continue;
+			if (content.length() > 2)
+			{
+				if (content.front() == '*' && content.back() == '*')
+					content = content.substr(1, content.length() - 2);
+				else if (content.front() == '"' && content.back() == '"')
+					content = content.substr(1, content.length() - 2);
+			}
+
+			messages.push_back(content);
 			pos_begin = msg.find('>', pos_end + 1);
 			if (pos_begin == string::npos)
 				break;
@@ -1648,24 +1664,15 @@ bool LLMInstance::GenerateEmbedding(string text)
 	if (!_pEmbedding)
 		return false;
 
-	std::vector<float> embedding;
-	_pEmbedding->Generate(text, embedding);
-
-	string asString;
-	asString.reserve(2048);
-	asString.append(std::format("float embedding[{}] = {{\r\n", embedding.size()));
-	int n = 0;
-	for (float f : embedding)
+	Embedding embedding;
+	if (_pEmbedding->Generate(text, true, embedding))
 	{
-		asString.append(std::format("\t{}f, ", f));
-		if (++n == 8)
-		{
-			n = 0;
-			asString.append("\r\n");
-		}
-	}
-	asString.append("};");
+		Embeddings::AddEmbedding(embedding);
 
+		// Save to disk
+		string filename = std::format("./embeddings/{}.txt", CreateUUID());
+		embedding.SaveToFile(filename);
+	}
 	return true; // Break here
 }
 #endif
