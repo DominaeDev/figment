@@ -130,3 +130,10 @@ enum class LLMOption : int32_t
 	Uncensored				= 1 << 6,
 };
 DEFINE_ENUM_FLAGS(LLMOption, int32_t)
+
+struct Sentence
+{
+	Role role;
+	string sentence;
+};
+using Sentences = std::vector<Sentence>;

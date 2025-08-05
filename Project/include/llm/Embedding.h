@@ -21,4 +21,8 @@ public:
 	static void AddEmbedding(Embedding embedding);
 private:
 	static std::vector<Embedding> _embeddings;
+
+private:
+	Embeddings() = delete;
+	~Embeddings() = delete;
 };

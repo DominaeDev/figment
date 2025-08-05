@@ -132,7 +132,7 @@ private:
 
 	using __PartialResultCallback = std::function<void(__PartialResult)>;
 	using __GenerationCompleteCallback = std::function<void(InternalError, string)>;
-	
+
 	struct PrepareArguments
 	{
 		Role responder = Role::Bot1;
@@ -151,7 +151,7 @@ private:
 		string prepend {};
 		string responseId {};
 		string subMessageId {};
-		std::vector<string> history; // Used for embedding
+		Sentences history; // Used for embedding
 	};
 	void __Generate(std::stop_token stop, GenerateArguments, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete);
 	void StartGeneration(GenerateArguments args);
@@ -161,7 +161,7 @@ private:
 	void RefreshActiveResponses();
 	std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
 
-	std::vector<string> GetHistory();
+	Sentences GetHistory(size_t depth);
 
 private:
 	enum class ReadyState { Invalid, Uninitialized, LoadingModel, ModelLoaded, Initializing, Ready, Generating };

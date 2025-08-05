@@ -2,37 +2,37 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 
-struct string_util
+namespace string_util
 {
-	static void ltrim_str(std::string& s);
-	static [[nodiscard]] std::string ltrim(const std::string& s);
-	static void rtrim_str(std::string& s);
-	static [[nodiscard]] std::string rtrim(const std::string& s);
-	static inline [[nodiscard]] std::string trim(const std::string& s) { return ltrim(rtrim(s)); }
-	static inline void trim_str(std::string& s) { ltrim_str(s); rtrim_str(s); }
+	void ltrim_str(std::string& s);
+	[[nodiscard]] std::string ltrim(const std::string& s);
+	void rtrim_str(std::string& s);
+	[[nodiscard]] std::string rtrim(const std::string& s);
+	inline [[nodiscard]] std::string trim(const std::string& s) { return ltrim(rtrim(s)); }
+	inline void trim_str(std::string& s) { ltrim_str(s); rtrim_str(s); }
 
-	static [[nodiscard]] std::string lcase(const std::string& s);
-	static [[nodiscard]] std::string ucase(const std::string& s);
-	static [[nodiscard]] std::wstring lcase(const std::wstring& s);
-	static [[nodiscard]] std::wstring ucase(const std::wstring& s);
-	static int compare(const std::string& a, const std::string& b, bool ignore_case = false);
-	static bool equals(const std::string& a, const std::string& b, bool ignore_case = false);
+	[[nodiscard]] std::string lcase(const std::string& s);
+	[[nodiscard]] std::string ucase(const std::string& s);
+	[[nodiscard]] std::wstring lcase(const std::wstring& s);
+	[[nodiscard]] std::wstring ucase(const std::wstring& s);
+	int compare(const std::string& a, const std::string& b, bool ignore_case = false);
+	bool equals(const std::string& a, const std::string& b, bool ignore_case = false);
 
-	static std::string& replace(std::string& str, const std::string& find, const std::string& replace);
-	static std::string& replace_all(std::string& str, const std::string& find, const std::string& replace);
-	static std::string get_filename(const std::string& str);
+	std::string& replace(std::string& str, const std::string& find, const std::string& replace);
+	std::string& replace_all(std::string& str, const std::string& find, const std::string& replace);
+	std::string get_filename(const std::string& str);
 
-	static bool empty_or_whitespace(const std::string& s);
-	static bool begins_with(const std::string& str, const std::string& prefix, bool ignore_case = false);
-	static bool ends_with(const std::string& str, const std::string& suffix, bool ignore_case = false);
-	static std::vector<std::string> split(std::string s, const std::string& delimiter);
+	bool empty_or_whitespace(const std::string& s);
+	bool begins_with(const std::string& str, const std::string& prefix, bool ignore_case = false);
+	bool ends_with(const std::string& str, const std::string& suffix, bool ignore_case = false);
+	std::vector<std::string> split(std::string s, char delimiter, bool removeEmpty = true);
+	std::vector<std::string> split(const std::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty);
 
-	static std::string& normalize_newlines(std::string& text);
-	static std::string normalize_newlines(std::string&& s);
+	std::string& normalize_newlines(std::string& text);
+	std::string normalize_newlines(std::string&& s);
 
-	static std::wstring from_utf8(const std::string& str);
-	static std::string to_utf8(const std::wstring& str);
-
-	string_util() = delete;
-};
+	std::wstring from_utf8(const std::string& str);
+	std::string to_utf8(const std::wstring& str);
+}

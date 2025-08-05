@@ -171,7 +171,7 @@ void MainFrame::StartChat()
 		session.Initialize(sessionArgs);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+//		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
 		LLMArguments llmArgs {
 			options,
@@ -345,7 +345,7 @@ void MainFrame::AutoChat()
 		{
 			string text = script.value();
 			text = pLLM->GetSession().ApplyNames(text);
-			_autoScript = string_util::split(text, "\n");
+			_autoScript = string_util::split(text, '\n');
 		}
 		_autoScriptIndex = 0;
 	}

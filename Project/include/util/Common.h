@@ -4,7 +4,7 @@
 #include <string>
 #include <queue>
 #include <memory>
-
+#include <iterator>
 
 // Debugging
 extern void DebugPrint(std::string message);
@@ -43,6 +43,14 @@ Cont<V, A> ContainerConcat(const Cont<V, A>& vecA, const Cont<V, A>& vecB) noexc
 	result.reserve(vecA.size() + vecB.size());
 	result.insert(std::end(result), std::begin(vecA), std::end(vecA));
 	result.insert(std::end(result), std::begin(vecB), std::end(vecB));
+	return result;
+}
+
+template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>, typename Predicate>
+Cont<V, A> FilterContainer(const Cont<V, A>& input, Predicate pred)
+{
+	Cont<V, A> result;
+	std::copy_if(input.begin(), input.end(), std::back_inserter(result), pred);
 	return result;
 }
 

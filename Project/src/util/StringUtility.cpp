@@ -125,7 +125,7 @@ bool string_util::ends_with(const std::string& str, const std::string& suffix, b
 	std::wstring wstr = from_utf8(str);
 	std::wstring wsuffix = from_utf8(suffix);
 
-	const std::wstring end_piece = wstr.substr(str.length() - wsuffix.length());
+	const std::wstring end_piece = wstr.substr(wstr.length() - wsuffix.length());
 
 	if (ignore_case)
 		return std::equal(end_piece.begin(), end_piece.end(), suffix.begin(), suffix.end(), [](wchar_t a, wchar_t b) {return std::towlower(a) == std::towlower(b); });
@@ -152,20 +152,50 @@ std::string& string_util::replace_all(std::string& str, const std::string& find,
 	return str;
 }
 
-std::vector<std::string> string_util::split(std::string s, const std::string& delimiter)
+std::vector<std::string> string_util::split(std::string s, char delimiter, bool removeEmpty)
 {
-	std::vector<std::string> tokens;
+	std::vector<std::string> sections;
 	size_t pos = 0;
-	std::string token;
 	while ((pos = s.find(delimiter)) != std::string::npos)
 	{
-		token = s.substr(0, pos);
-		tokens.push_back(token);
-		s.erase(0, pos + delimiter.length());
+		std::string token = s.substr(0, pos);
+		if (!removeEmpty || !empty_or_whitespace(token))
+			sections.push_back(token);
+		s.erase(0, pos + 1);
 	}
-	tokens.push_back(s);
+	if (!removeEmpty || !empty_or_whitespace(s))
+		sections.push_back(s); // Remainder
 
-	return tokens;
+	std::transform(sections.begin(), sections.end(), sections.begin(), [](std::string str) {
+		return string_util::trim(str);
+	});
+
+	return sections;
+}
+
+std::vector<std::string> string_util::split(const std::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty)
+{
+	std::vector<std::string> result;
+	std::string token;
+
+	for (char ch : input)
+	{
+		if (delimiters.find(ch) != delimiters.end())
+		{
+			if (!token.empty())
+			{
+				result.push_back(token);
+				token.clear();
+			}
+		}
+		else
+			token += ch;
+	}
+
+	if (!removeEmpty || !token.empty())
+		result.push_back(token);
+
+	return result;
 }
 
 std::string& string_util::normalize_newlines(std::string& text)

@@ -3,9 +3,6 @@
 #include "Types.h"
 
 #define DEFAULT_MODEL_LOCATION "M:\\LLM\\default_model.gguf"
-//#define DEFAULT_EMBEDDING_MODEL_LOCATION "M:\\Embedding\\nomic-embed-text-v1.Q6_K.gguf"
-#define DEFAULT_EMBEDDING_MODEL_LOCATION "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf"
-#define NOMIC_EMBEDDING FALSE
 
 namespace Constants
 {

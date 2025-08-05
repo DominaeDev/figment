@@ -749,8 +749,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 	if (!args.history.empty() && _pEmbedding)
 	{
-		Embedding embd;
-		_pEmbedding->Generate(args.history, embd);
+		_pEmbedding->Search(args.history, true, false);
 	}
 
 	DebugPrintLn(">> BEGIN GENERATION");
@@ -1126,7 +1125,7 @@ bool LLMInstance::SendMessage(string message)
 		/*role*/ Role::Bot1,	 // @role
 		/*msgType*/ MessageType::Undefined,
 	};
-	generateArgs.history = GetHistory();
+	generateArgs.history = GetHistory(EMBEDDING_DEPTH);
 	StartGeneration(generateArgs);
 
 	return true;
@@ -1347,7 +1346,7 @@ bool LLMInstance::InstigateResponse(Role role, MessageType msgType, int messageC
 		/*maxMessageCount*/ messageCount,
 		/*prepend*/ prependMsg,
 	};
-	generateArgs.history = GetHistory();
+	generateArgs.history = GetHistory(EMBEDDING_DEPTH);
 	
 	StartGeneration(generateArgs);
 	return true;
@@ -1608,16 +1607,15 @@ bool LLMInstance::RefreshKVCache()
 	return true;
 }
 
-std::vector<string> LLMInstance::GetHistory()
+Sentences LLMInstance::GetHistory(size_t depth)
 {
 	std::scoped_lock lock(_stateMutex);
-	std::vector<string> messages;
+	Sentences sentences;
 
-	for (auto& block : _contextState.blocks)
+	int n = 0;
+	for (auto it = _contextState.blocks.crbegin(); it != _contextState.blocks.crend() && n < depth; ++it, ++n)
 	{
-		if (!(is_bot(block.role) || block.role == Role::User || block.role == Role::Narrator))
-			continue;
-		
+		auto& block = *it;
 		string msg = string_util::trim(block.content);
 
 		size_t pos_begin = msg.find('>', 0);
@@ -1627,18 +1625,7 @@ std::vector<string> LLMInstance::GetHistory()
 			if (pos_end == string::npos)
 				break;
 
-/*			string name;
-			if (block.role == Role::User)
-				name = "user";
-			else if (block.role == Role::Narrator)
-				name = "narrator";
-			else
-				name = "agent";
-			messages.push_back(name + ": " + msg.substr(pos_begin + 1, pos_end - pos_begin - 1) + "\n");
-*/
 			string content = msg.substr(pos_begin + 1, pos_end - pos_begin - 1);
-			if (content.empty())
-				continue;
 			if (content.length() > 2)
 			{
 				if (content.front() == '*' && content.back() == '*')
@@ -1647,15 +1634,25 @@ std::vector<string> LLMInstance::GetHistory()
 					content = content.substr(1, content.length() - 2);
 			}
 
-			messages.push_back(content);
+#if EMBEDDING_SPLIT_SENTENCES
+			// Split into individual sentences for RAG
+			string_util::replace_all(content, "?", ".");
+			string_util::replace_all(content, "!", ".");
+			auto split = string_util::split(content, '.', true);
+			for (auto& s : split)
+				sentences.insert(sentences.begin(), { block.role, s });
+#else
+			sentences.insert(sentences.begin(), { block.role, content });
+#endif
+
 			pos_begin = msg.find('>', pos_end + 1);
 			if (pos_begin == string::npos)
 				break;
 			pos_begin = msg.find('>', pos_begin + 1);
 		}
-		
 	}
-	return messages;
+
+	return sentences;
 }
 
 #if _DEBUG
@@ -1665,7 +1662,7 @@ bool LLMInstance::GenerateEmbedding(string text)
 		return false;
 
 	Embedding embedding;
-	if (_pEmbedding->Generate(text, true, embedding))
+	if (_pEmbedding->Generate(text, embedding))
 	{
 		Embeddings::AddEmbedding(embedding);
 
