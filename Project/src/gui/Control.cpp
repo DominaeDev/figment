@@ -36,7 +36,7 @@ void Control::Render(Renderer* pRenderer)
 	static Rect* s_pClippingRect = nullptr;
 	Rect* lastClippingRect = s_pClippingRect;
 	Rect clippingRect;
-	Rect cullingRect = expand_rect(toRect(GetRect()), 100);	
+	Rect cullingRect = gui_util::expand_rect(gui_util::to_rect(GetRect()), 100);	
 
 	if (_bClipping)
 	{
@@ -61,7 +61,7 @@ void Control::Render(Renderer* pRenderer)
 		{
 			if (_bCulling)
 			{
-				auto childRect = toRect(renderable->GetRect());
+				auto childRect = gui_util::to_rect(renderable->GetRect());
 				if (!SDL_HasRectIntersection(&cullingRect, &childRect))
 					continue;
 			}

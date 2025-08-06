@@ -105,7 +105,6 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
     <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
-    <ClCompile Include="src\gui\Graphics.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
@@ -121,7 +120,6 @@
     <ClCompile Include="src\gui\Color.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
     <ClCompile Include="src\util\CommandParser.cpp" />
-    <ClCompile Include="src\Constants.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
     <ClCompile Include="src\gui\ControlWithMargins.cpp" />
     <ClCompile Include="src\gui\Fonts.cpp" />

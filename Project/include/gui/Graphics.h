@@ -23,8 +23,35 @@ using Texture = SDL_Texture;
 using Vertex = SDL_Vertex;
 using Surface = SDL_Surface;
 
-extern Rectf expand_rect(const Rectf& rect, float pixels);
-extern Rect expand_rect(const Rect& rect, int pixels);
+namespace gui_util
+{
+	inline constexpr Rect expand_rect(const Rect& rect, int pixels)
+	{
+		return Rect { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
+	}
 
-extern inline Rect toRect(Rectf rect);
-extern inline Rectf toRectf(Rect rect);
+	inline constexpr Rectf expand_rect(const Rectf& rect, float pixels)
+	{
+		return Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
+	}
+
+	inline constexpr Rect to_rect(Rectf rect)
+	{
+		return Rect { 
+			(int32_t)rect.x, 
+			(int32_t)rect.y, 
+			(int32_t)rect.w, 
+			(int32_t)rect.h
+		};
+	}
+
+	inline constexpr Rectf to_rectf(Rect rect)
+	{
+		return Rectf { 
+			(float)rect.x, 
+			(float)rect.y, 
+			(float)rect.w, 
+			(float)rect.h 
+		};
+	}
+}

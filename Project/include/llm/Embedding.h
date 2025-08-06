@@ -2,7 +2,7 @@
 
 #include "Types.h"
 
-struct Embedding
+struct EmbeddingVector
 {
 	string modelName;
 	string content;
@@ -17,10 +17,10 @@ class Embeddings
 public:
 	static void Initialize(string filePath, string modelName);
 
-	static const std::vector<Embedding>& GetEmbeddings();
-	static void AddEmbedding(Embedding embedding);
+	static const std::vector<EmbeddingVector>& GetEmbeddings();
+	static void AddEmbedding(EmbeddingVector embedding);
 private:
-	static std::vector<Embedding> _embeddings;
+	static std::vector<EmbeddingVector> _embeddings;
 
 private:
 	Embeddings() = delete;

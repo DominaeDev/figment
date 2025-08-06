@@ -38,7 +38,7 @@ bool LLMEmbedding::LoadModel(string filename)
 	ctx_params.n_ctx = ctx_size;
 	ctx_params.n_batch = ctx_size;
 	ctx_params.embeddings = true;
-	ctx_params.pooling_type = LLAMA_POOLING_TYPE_LAST;
+	ctx_params.pooling_type = LLAMA_POOLING_TYPE_MEAN;
 
 	_pCtx = llama_init_from_model(_pModel, ctx_params);
 	if (!_pCtx)
@@ -121,7 +121,7 @@ bool LLMEmbedding::Search(const Sentences& sentences, bool bUser, bool bBot)
 	if (!searchSentences.empty())
 	{
 		auto tokens = TokenizeSentences(_pModel, _pCtx, searchSentences);
-		Embedding embedding;
+		EmbeddingVector embedding;
 		if (!__Generate(tokens, "", Mode::Query, embedding))
 			return false;
 #if _DEBUG
@@ -131,7 +131,7 @@ bool LLMEmbedding::Search(const Sentences& sentences, bool bUser, bool bBot)
 	return true;
 }
 
-bool LLMEmbedding::Generate(std::string text, Embedding& out_embedding)
+bool LLMEmbedding::Generate(std::string text, EmbeddingVector& out_embedding)
 {
 	string content = text;
 	const llama_vocab* pVocab = llama_model_get_vocab(_pModel);
@@ -206,8 +206,9 @@ static bool batch_decode(llama_context* ctx, llama_batch& batch, float* output, 
 }
 
 
-bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, string content, Mode mode, Embedding& out_embedding)
+bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, string content, Mode mode, EmbeddingVector& out_embedding)
 {
+	DebugPrint("Generate embeddings...");
 	int32_t ctx_size = llama_n_ctx(_pCtx);
 
 	std::vector<llama_token> tokens = in_tokens;
@@ -238,7 +239,7 @@ bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, string 
 	batch_decode(_pCtx, batch, embedding, 1, (int32_t)n_embed, 2);
 	llama_batch_free(batch);
 
-	out_embedding = Embedding {
+	out_embedding = EmbeddingVector {
 		/*modelName*/ _modelName,
 		/*content*/ content,
 		std::vector<float>(embedding, embedding + n_embed),
@@ -259,7 +260,6 @@ void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sen
 			continue;
 
 		float similarity = common_embd_similarity_cos(embeddings[i].vec.data(), vec.data(), (int32_t)vec.size());
-		similarity = powf(similarity, 1.5f);
 
 		string content = embeddings[i].content;
 		if (content.size() > MaxLength)

@@ -13,7 +13,7 @@ NineGridBackgroundRenderer::NineGridBackgroundRenderer(std::array<float, 4> corn
 
 void NineGridBackgroundRenderer::Render(Renderer* pRenderer, Rectf rect)
 {
-	auto expandedRect = expand_rect(rect, 5.0f);
+	auto expandedRect = gui_util::expand_rect(rect, 5.0f);
 	
 	if (_pBGTexture)
 	{

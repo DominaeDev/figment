@@ -54,6 +54,9 @@
     <Filter Include="Source Files\Interface\Fonts">
       <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Inference\Embeddings">
+      <UniqueIdentifier>{fc79dcd6-092f-47e7-870f-bcd0142e0610}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -152,9 +155,6 @@
     <ClCompile Include="src\llm\LLMUtility.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Graphics.cpp">
-      <Filter>Source Files\Interface</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\CommandParser.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
@@ -194,20 +194,17 @@
     <ClCompile Include="src\gui\HorizontalGradient.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\Constants.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\model\ChatSession.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMTemplate.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
-    <ClCompile Include="src\llm\LLMEmbedding.cpp">
-      <Filter>Source Files\Inference</Filter>
-    </ClCompile>
     <ClCompile Include="src\llm\Embedding.cpp">
-      <Filter>Source Files\Inference</Filter>
+      <Filter>Source Files\Inference\Embeddings</Filter>
+    </ClCompile>
+    <ClCompile Include="src\llm\LLMEmbedding.cpp">
+      <Filter>Source Files\Inference\Embeddings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -359,10 +356,10 @@
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMEmbedding.h">
-      <Filter>Source Files\Inference</Filter>
+      <Filter>Source Files\Inference\Embeddings</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\Embedding.h">
-      <Filter>Source Files\Inference</Filter>
+      <Filter>Source Files\Inference\Embeddings</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

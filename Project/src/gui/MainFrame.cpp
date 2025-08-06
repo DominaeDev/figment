@@ -127,7 +127,7 @@ void MainFrame::LoadModel()
 
 	if (!pLLM->HasLoadedModel())
 	{
-		pLLM->LoadModelAsync(DEFAULT_MODEL_LOCATION, 
+		pLLM->LoadModelAsync(string(Constants::DefaultModelLocation), 
 			[](int percent) 
 			{
 				SetStatusBar(std::format("Loading model... {0}%", percent));
@@ -205,7 +205,7 @@ bool MainFrame::OnCommand(Command cmd)
 	auto fnRoleFromName = [pLLM](string text) -> Role {
 		if (string_util::empty_or_whitespace(text))
 			return Role::Undefined;
-		if (std::isdigit(text[0]))
+		if (std::isdigit(text[0])) //! @utf8
 			return bot_from_index(std::stoi(text) - 1);
 		for (auto kvp : pLLM->GetSession().GetCharactersByRole())
 		{

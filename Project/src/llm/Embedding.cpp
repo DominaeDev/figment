@@ -14,7 +14,7 @@ union FloatToChar
 	static_assert(sizeof(int32_t) == 4);
 };
 
-bool Embedding::LoadFromFile(string filename)
+bool EmbeddingVector::LoadFromFile(string filename)
 {
 	std::ifstream file(filename); // Open the file
     if (!file.is_open()) {
@@ -54,7 +54,7 @@ bool Embedding::LoadFromFile(string filename)
 	return !modelName.empty() && !content.empty() && !vec.empty();
 }
 
-bool Embedding::SaveToFile(string filename) const
+bool EmbeddingVector::SaveToFile(string filename) const
 {
 	try
 	{
@@ -81,7 +81,7 @@ bool Embedding::SaveToFile(string filename) const
 	}
 }
 
-std::vector<Embedding> Embeddings::_embeddings;
+std::vector<EmbeddingVector> Embeddings::_embeddings;
 
 void Embeddings::Initialize(string filePath, string modelName)
 {
@@ -89,18 +89,18 @@ void Embeddings::Initialize(string filePath, string modelName)
 	auto files = FindFilesInPath(filePath, ".txt");
 	for (auto& fn : files)
 	{
-		Embedding embd;
+		EmbeddingVector embd;
 		if (embd.LoadFromFile(fn) && string_util::equals(embd.modelName, modelName, true))
 			_embeddings.push_back(std::move(embd));
 	}
 }
 
-const std::vector<Embedding>& Embeddings::GetEmbeddings()
+const std::vector<EmbeddingVector>& Embeddings::GetEmbeddings()
 {
 	return _embeddings;
 }
 
-void Embeddings::AddEmbedding(Embedding embedding)
+void Embeddings::AddEmbedding(EmbeddingVector embedding)
 {
 	_embeddings.push_back(embedding);
 }

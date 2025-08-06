@@ -3,63 +3,6 @@
 #include "Types.h"
 #include <algorithm>
 
-Color Colors::White								{ 0xFF, 0xFF, 0xFF, 0xFF };
-Color Colors::Black								{ 0x00, 0x00, 0x00, 0xFF };
-Color Colors::DarkGray							{ 0x64, 0x64, 0x64, 0xFF };
-Color Colors::Transparent						{ 0xFF, 0xFF, 0xFF, 0x00 };
-Color Colors::Debug								{ 0xC0, 0x00, 0xC0, 0xFF };
-Color Colors::TextForeground					{ 0x00, 0x00, 0x00, 0xFF };
-Color Colors::TextSelectionForeground			{ 0xFF, 0xFF, 0xFF, 0xFF };
-Color Colors::TextSelectionBackground			{ 0x99, 0xC9, 0xEF, 0xFF };
-
-Color Colors::AppBackground						{ 0xfa, 0xf9, 0xf5, 255 };
-Color Colors::ChatBackground					{ 0xfa, 0xf9, 0xf5, 255 };
-
-Color Colors::MessageBorderDefault				{ 0x9f, 0x9f, 0x9f, 0xff };
-Color Colors::MessageBackgroundDefault			{ 0xf4, 0xf4, 0xf4, 0xff };
-Color Colors::MessageBorderBlue					{ 0x4d, 0xa1, 0xc1, 0xff };
-Color Colors::MessageBackgroundBlue				{ 0xf2, 0xfb, 0xff, 0xff };
-Color Colors::MessageBorderPink					{ 0xef, 0x76, 0xbd, 0xff };
-Color Colors::MessageBackgroundPink				{ 0xff, 0xf3, 0xf9, 0xff };
-Color Colors::MessageBorderGreen				{ 0x50, 0xe4, 0x33, 0xff };
-Color Colors::MessageBackgroundGreen			{ 0xea, 0xff, 0xe9, 0xff };
-Color Colors::MessageBorderYellow				{ 0xe4, 0xc5, 0x33, 0xff };
-Color Colors::MessageBackgroundYellow			{ 0xff, 0xfc, 0xea, 0xff };
-Color Colors::MessageBorderRed					{ 0xd5, 0x2b, 0x2b, 0xff };
-Color Colors::MessageBackgroundRed				{ 0xff, 0xee, 0xee, 0xff };
-Color Colors::MessageBorderTeal					{ 0x4d, 0xc1, 0xba, 0xff };
-Color Colors::MessageBackgroundTeal				{ 0xee, 0xff, 0xfc, 0xff };
-Color Colors::MessageBorderPurple				{ 0xb2, 0x5c, 0xe1, 0xff };
-Color Colors::MessageBackgroundPurple			{ 0xfc, 0xf3, 0xff, 0xff };
-Color Colors::MessageBorderBrown				{ 0xc0, 0x7c, 0x4c, 0xff };
-Color Colors::MessageBackgroundBrown			{ 0xff, 0xf9, 0xea, 0xff };
-Color Colors::MessageBorderNavy					{ 0x4d, 0x55, 0xc1, 0xff };
-Color Colors::MessageBackgroundNavy				{ 0xf2, 0xfa, 0xff, 0xff };
-
-Color Colors::DefaultUserMessageBorder = Colors::MessageBorderBlue;
-Color Colors::DefaultUserMessageBackground = Colors::MessageBackgroundBlue;
-std::array<Color, 8> Colors::DefaultBotMessageBorders {
-	MessageBorderPink,
-	MessageBorderGreen,
-	MessageBorderYellow,
-	MessageBorderRed,
-	MessageBorderTeal,
-	MessageBorderPurple,
-	MessageBorderBrown,
-	MessageBorderNavy,
-};
-std::array<Color, 8> Colors::DefaultBotMessageBackgrounds {
-	MessageBackgroundPink,
-	MessageBackgroundGreen,
-	MessageBackgroundYellow,
-	MessageBackgroundRed,
-	MessageBackgroundTeal,
-	MessageBackgroundPurple,
-	MessageBackgroundBrown,
-	MessageBackgroundNavy,
-};
-
-
 bool color_util::is_defined(Color color)
 {
 	return color.r != 0 || color.g != 0 || color.b != 0 || color.a != 0;

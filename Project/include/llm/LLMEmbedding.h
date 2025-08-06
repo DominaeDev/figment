@@ -1,7 +1,5 @@
 #pragma once
 
-#define DEFAULT_EMBEDDING_MODEL_LOCATION "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf"
-//#define DEFAULT_EMBEDDING_MODEL_LOCATION "M:\\Embedding\\gist-all-minilm-l6-v2.Q8_0.gguf"
 #define NOMIC_EMBEDDING FALSE
 #define EMBEDDING_DEPTH 1
 #define EMBEDDING_SPLIT_SENTENCES TRUE
@@ -23,7 +21,7 @@ public:
 	void Shutdown();
 	bool IsReady() const;
 
-	bool Generate(std::string text, Embedding& out_embedding);
+	bool Generate(std::string text, EmbeddingVector& out_embedding);
 	bool Search(const Sentences& sentences, bool bUser = true, bool bBot = true);
 
 private:
@@ -34,7 +32,7 @@ private:
 		Document,
 	};
 
-	bool __Generate(const std::vector<llama_token>& tokens, string content, Mode mode, Embedding& out_embedding);
+	bool __Generate(const std::vector<llama_token>& tokens, string content, Mode mode, EmbeddingVector& out_embedding);
 #if _DEBUG
 	void CompareSimilarity(const std::vector<float>& vec, size_t n_sentences);
 #endif

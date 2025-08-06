@@ -2,33 +2,36 @@
 
 #include "Types.h"
 
-#define DEFAULT_MODEL_LOCATION "M:\\LLM\\default_model.gguf"
-
 namespace Constants
 {
-	extern const char* const AppTitle;
-	extern const int WindowWidth;
-	extern const int WindowHeight;
+	inline constexpr const char* AppTitle = "Llama chat";
+	inline constexpr int WindowWidth = 1280;
+	inline constexpr int WindowHeight = 900;
 
-	extern const double DefaultFontSize;
-	extern const double StatusBarFontSize;
-	extern const double CharacterNameFontSize;
-	extern const double ChatMessageFontSize;
-	extern const int ChatScrollWidth;
+	inline constexpr double DefaultFontSize = 18.5;
+	inline constexpr double StatusBarFontSize = 14.5;
+	inline constexpr double CharacterNameFontSize = 12.0;
+	inline constexpr double ChatMessageFontSize = 16.0; //15.5;
+	inline constexpr int ChatScrollWidth = 800;
 
-	constexpr const std::string_view DialogueTag		= "talk";
-	constexpr const std::string_view ActionTag			= "act";
-	constexpr const std::string_view ThoughtTag			= "think";
-	constexpr const std::string_view NarrationTag		= "narrator";
-	constexpr const std::string_view DirectionTag		= "director";
+	inline constexpr std::string_view DialogueTag		= "talk";
+	inline constexpr std::string_view ActionTag			= "act";
+	inline constexpr std::string_view ThoughtTag		= "think";
+	inline constexpr std::string_view NarrationTag		= "narrator";
+	inline constexpr std::string_view DirectionTag		= "director";
 
-	constexpr const std::string_view DialogueTagEnd		= "/talk";
-	constexpr const std::string_view ActionTagEnd		= "/act";
-	constexpr const std::string_view ThoughtTagEnd		= "/think";
-	constexpr const std::string_view NarrationTagEnd	= "/narrator";
-	constexpr const std::string_view DirectionTagEnd	= "/director";
+	inline constexpr std::string_view DialogueTagEnd	= "/talk";
+	inline constexpr std::string_view ActionTagEnd		= "/act";
+	inline constexpr std::string_view ThoughtTagEnd		= "/think";
+	inline constexpr std::string_view NarrationTagEnd	= "/narrator";
+	inline constexpr std::string_view DirectionTagEnd	= "/director";
 
-	constexpr const int ContextSize						= 4096;
-	constexpr const int MaxResponseLength				= 256;
-	constexpr const float ContextWindowKeepRatio		= 0.75f;
+	inline constexpr int ContextSize					= 4096;
+	inline constexpr int MaxResponseLength				= 256;
+	inline constexpr float ContextWindowKeepRatio		= 0.75f;
+
+	inline constexpr std::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";
+	inline constexpr std::string_view DefaultEmbeddingModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
+//	inline constexpr std::string_view DefaultEmbeddingModelLocation = "M:\\Embedding\\gist-all-minilm-l6-v2.Q8_0.gguf";
+
 }

@@ -464,7 +464,7 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 	// Initialize embedder
 	if (!_pEmbedding)
 		_pEmbedding = std::make_unique<LLMEmbedding>();
-	if (!_pEmbedding->LoadModel(DEFAULT_EMBEDDING_MODEL_LOCATION))
+	if (!_pEmbedding->LoadModel(string(Constants::DefaultEmbeddingModelLocation)))
 		_pEmbedding = nullptr; // Destroy
 
 	onComplete(state);
@@ -594,6 +594,7 @@ bool LLMInstance::Halt()
 	{
 		_workerThread->request_stop();
 		_workerThread->join();
+		_workerThread.reset(nullptr);
 	}
 	_readyState.store(ReadyState::Ready);
 	return true;
@@ -718,7 +719,12 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
-	std::unique_lock stateLock(_stateMutex); // Acquire state lock
+	std::unique_lock<std::mutex> stateLock(_stateMutex, std::defer_lock ); // Acquire state lock
+
+	if (!stateLock.try_lock())
+	{
+
+	}
 
 	std::vector<llama_token> sampled_tokens;
 	ModelState& state = _modelState;
@@ -749,7 +755,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 	if (!args.history.empty() && _pEmbedding)
 	{
-		_pEmbedding->Search(args.history, true, false);
+		_pEmbedding->Search(args.history, true, true);
 	}
 
 	DebugPrintLn(">> BEGIN GENERATION");
@@ -1043,11 +1049,11 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	{
 		DebugPrint("(Empty response)");
 	}
+	stateLock.unlock();
 
 	DebugPrintLn();
 	DebugPrintLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stop_word.c_str(), sampled_tokens.size()));
 
-	stateLock.unlock();
 	onComplete(InternalError::NoError, response);
 };
 
@@ -1126,6 +1132,7 @@ bool LLMInstance::SendMessage(string message)
 		/*msgType*/ MessageType::Undefined,
 	};
 	generateArgs.history = GetHistory(EMBEDDING_DEPTH);
+
 	StartGeneration(generateArgs);
 
 	return true;
@@ -1661,7 +1668,7 @@ bool LLMInstance::GenerateEmbedding(string text)
 	if (!_pEmbedding)
 		return false;
 
-	Embedding embedding;
+	EmbeddingVector embedding;
 	if (_pEmbedding->Generate(text, embedding))
 	{
 		Embeddings::AddEmbedding(embedding);
