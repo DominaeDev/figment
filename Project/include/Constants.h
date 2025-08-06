@@ -26,12 +26,25 @@ namespace Constants
 	inline constexpr std::string_view NarrationTagEnd	= "/narrator";
 	inline constexpr std::string_view DirectionTagEnd	= "/director";
 
-	inline constexpr int ContextSize					= 4096;
+	inline constexpr int ContextSize					= 4096; //32768
 	inline constexpr int MaxResponseLength				= 256;
 	inline constexpr float ContextWindowKeepRatio		= 0.75f;
 
 	inline constexpr std::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";
-	inline constexpr std::string_view DefaultEmbeddingModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
 //	inline constexpr std::string_view DefaultEmbeddingModelLocation = "M:\\Embedding\\gist-all-minilm-l6-v2.Q8_0.gguf";
 
+	namespace Embedding
+	{
+		inline constexpr std::string_view DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
+		inline constexpr std::string_view EmbeddingSaveLocation = ".\\embeddings\\";
+		inline constexpr int32_t ContextSize = 384;
+		inline constexpr int32_t Depth = 1;
+		inline constexpr bool SplitSentences = true;
+		inline constexpr std::string_view DocumentPrefix	= "";
+		inline constexpr std::string_view QueryPrefix		= "";
+//		inline constexpr std::string_view DocumentPrefix	= "search_document: ";
+//		inline constexpr std::string_view QueryPrefix		= "search_query: ";
+//		inline constexpr std::string_view DocumentPrefix	= "Represent the statement: ";
+//		inline constexpr std::string_view QueryPrefix		= "Represent the statement: ";
+	}
 }

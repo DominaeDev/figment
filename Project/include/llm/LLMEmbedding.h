@@ -1,9 +1,5 @@
 #pragma once
 
-#define NOMIC_EMBEDDING FALSE
-#define EMBEDDING_DEPTH 1
-#define EMBEDDING_SPLIT_SENTENCES TRUE
-
 #include "model/ChatSession.h"
 #include "llm/LLMTypes.h"
 #include "llm/Embedding.h"

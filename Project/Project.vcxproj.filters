@@ -343,12 +343,6 @@
     <ClInclude Include="include\util\Command.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\Constants.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Types.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\llm\LLMTypes.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
@@ -360,6 +354,12 @@
     </ClInclude>
     <ClInclude Include="include\llm\Embedding.h">
       <Filter>Source Files\Inference\Embeddings</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Types.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Constants.h">
+      <Filter>Source Files\Application</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

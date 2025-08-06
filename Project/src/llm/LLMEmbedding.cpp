@@ -16,7 +16,7 @@ LLMEmbedding::~LLMEmbedding()
 bool LLMEmbedding::LoadModel(string filename)
 {
 	const int ngl = 99; // All layers
-	const int n_ctx = 384;
+	const int n_ctx = Constants::Embedding::ContextSize;
 
 	// initialize the model
 	llama_model_params model_params = llama_model_default_params();
@@ -52,7 +52,7 @@ bool LLMEmbedding::LoadModel(string filename)
 
 	n_embed = llama_model_n_embd(_pModel);
 
-	Embeddings::Initialize("./embeddings/", _modelName);
+	Embeddings::Initialize(string(Constants::Embedding::EmbeddingSaveLocation), _modelName);
 
 	return true;
 }
@@ -135,32 +135,20 @@ bool LLMEmbedding::Generate(std::string text, EmbeddingVector& out_embedding)
 {
 	string content = text;
 	const llama_vocab* pVocab = llama_model_get_vocab(_pModel);
-	std::vector<llama_token> tokens;
 
-	llama_token tok_bok = llama_vocab_bos(pVocab);
-	llama_token tok_eos = llama_vocab_eos(pVocab);
-	llama_token tok_sep = llama_vocab_sep(pVocab);
-
-#if EMBEDDING_SPLIT_SENTENCES
-	auto sentences = string_util::split(text, { '.', ';' }, true);
-	int n = 0;
-	for (auto it = sentences.crbegin(); it != sentences.crend(); ++it)
+	Sentences sentences;
+	if (Constants::Embedding::SplitSentences)
 	{
-		auto msg_tokens = llm_util::tokenize(_pModel, *it, false);
-		tokens.insert(tokens.begin(), msg_tokens.cbegin(), msg_tokens.cend());
-		if (n > 0 && tok_sep > 0)
-			tokens.insert(tokens.begin(), tok_sep);
-		if (++n == 1)
-			break;
+		auto strings = string_util::split(text, { '.', ';' }, true);
+		for (auto& s : strings)
+			sentences.push_back(Sentence { Role::Undefined, s});
 	}
-#else
-	tokens = llm_util::tokenize(_pModel, text, false);
-#endif
+	else
+	{
+		sentences.push_back(Sentence { Role::Undefined, string_util::trim(text) });
+	}
 
-	if (tok_bok > 0)
-		tokens.insert(tokens.begin(), tok_bok);
-	if (tok_eos > 0)
-		tokens.insert(tokens.end(), tok_eos);
+	auto tokens = TokenizeSentences(_pModel, _pCtx, sentences);
 
 	return __Generate(tokens, content, Mode::Document, out_embedding);
 }
@@ -208,22 +196,14 @@ static bool batch_decode(llama_context* ctx, llama_batch& batch, float* output, 
 
 bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, string content, Mode mode, EmbeddingVector& out_embedding)
 {
-	DebugPrint("Generate embeddings...");
 	int32_t ctx_size = llama_n_ctx(_pCtx);
 
 	std::vector<llama_token> tokens = in_tokens;
 	std::vector<llama_token> instructions;
-#if NOMIC_EMBEDDING
-	if (mode == Mode::Query)
-		instructions = llm_util::tokenize(_pModel, "search_query: ", false);
-	else if (mode == Mode::Document)
-		instructions = llm_util::tokenize(_pModel, "search_document: ", false);
-#else
-//	if (mode == Mode::Query)
-//		instructions = llm_util::tokenize(_pModel, "Represent the statement: ", false);
-//	else if (mode == Mode::Document)
-//		instructions = llm_util::tokenize(_pModel, "Represent the statement: ", false);
-#endif
+	if (mode == Mode::Query && !Constants::Embedding::QueryPrefix.empty())
+		instructions = llm_util::tokenize(_pModel, string(Constants::Embedding::QueryPrefix), false);
+	else if (mode == Mode::Document && !Constants::Embedding::DocumentPrefix.empty())
+		instructions = llm_util::tokenize(_pModel, string(Constants::Embedding::DocumentPrefix), false);
 	tokens.insert(tokens.begin(), instructions.begin(), instructions.end());
 
 	llama_batch batch;

@@ -420,8 +420,6 @@ bool LLMInstance::ResetChat(int seed)
 void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 {
 	const int ngl = 99; // All layers
-	const int n_ctx = Constants::ContextSize;
-
 	usedVRAM.store(0);
 	usedRAM.store(0);
 
@@ -448,6 +446,8 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 		return;
 	}
 
+	int32_t n_ctx = std::min(Constants::ContextSize, llama_model_n_ctx_train(state.pModel));
+
 	// initialize the context
 	llama_context_params ctx_params = llama_context_default_params();
 	ctx_params.n_ctx = n_ctx;
@@ -464,7 +464,7 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 	// Initialize embedder
 	if (!_pEmbedding)
 		_pEmbedding = std::make_unique<LLMEmbedding>();
-	if (!_pEmbedding->LoadModel(string(Constants::DefaultEmbeddingModelLocation)))
+	if (!_pEmbedding->LoadModel(string(Constants::Embedding::DefaultModelLocation)))
 		_pEmbedding = nullptr; // Destroy
 
 	onComplete(state);
@@ -1131,7 +1131,7 @@ bool LLMInstance::SendMessage(string message)
 		/*role*/ Role::Bot1,	 // @role
 		/*msgType*/ MessageType::Undefined,
 	};
-	generateArgs.history = GetHistory(EMBEDDING_DEPTH);
+	generateArgs.history = GetHistory(Constants::Embedding::Depth);
 
 	StartGeneration(generateArgs);
 
@@ -1353,7 +1353,7 @@ bool LLMInstance::InstigateResponse(Role role, MessageType msgType, int messageC
 		/*maxMessageCount*/ messageCount,
 		/*prepend*/ prependMsg,
 	};
-	generateArgs.history = GetHistory(EMBEDDING_DEPTH);
+	generateArgs.history = GetHistory(Constants::Embedding::Depth);
 	
 	StartGeneration(generateArgs);
 	return true;
@@ -1641,16 +1641,19 @@ Sentences LLMInstance::GetHistory(size_t depth)
 					content = content.substr(1, content.length() - 2);
 			}
 
-#if EMBEDDING_SPLIT_SENTENCES
-			// Split into individual sentences for RAG
-			string_util::replace_all(content, "?", ".");
-			string_util::replace_all(content, "!", ".");
-			auto split = string_util::split(content, '.', true);
-			for (auto& s : split)
-				sentences.insert(sentences.begin(), { block.role, s });
-#else
-			sentences.insert(sentences.begin(), { block.role, content });
-#endif
+			if (Constants::Embedding::SplitSentences)
+			{
+				// Split into individual sentences for RAG
+				string_util::replace_all(content, "?", ".");
+				string_util::replace_all(content, "!", ".");
+				auto split = string_util::split(content, '.', true);
+				for (auto& s : split)
+					sentences.insert(sentences.begin(), { block.role, s });
+			}
+			else
+			{
+				sentences.insert(sentences.begin(), { block.role, content });
+			}
 
 			pos_begin = msg.find('>', pos_end + 1);
 			if (pos_begin == string::npos)
