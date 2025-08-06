@@ -103,12 +103,11 @@ bool string_util::equals(const std::string& a, const std::string& b, bool ignore
 
 bool string_util::begins_with(const std::string& str, const std::string& prefix, bool ignore_case)
 {
-	if (str.size() < prefix.size())
-		return false;
-
 	std::wstring wstr = from_utf8(str);
 	std::wstring wprefix = from_utf8(prefix);
 
+	if (wstr.size() < wprefix.size())
+		return false;
 	const std::wstring begin_piece = wstr.substr(0, wprefix.length());
 
 	if (ignore_case)
@@ -119,11 +118,11 @@ bool string_util::begins_with(const std::string& str, const std::string& prefix,
 
 bool string_util::ends_with(const std::string& str, const std::string& suffix, bool ignore_case)
 {
-	if (str.size() < suffix.size())
-		return false;
-
 	std::wstring wstr = from_utf8(str);
 	std::wstring wsuffix = from_utf8(suffix);
+
+	if (wstr.size() < wsuffix.size())
+		return false;
 
 	const std::wstring end_piece = wstr.substr(wstr.length() - wsuffix.length());
 

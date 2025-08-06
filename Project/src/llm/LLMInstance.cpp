@@ -10,10 +10,12 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <chrono>
 
 #define DEBUG_SEED 0xA1B2C3D4
-
 #define CHECK_OPTION(E) ((_options & E) == E)
+
+using namespace std::chrono_literals;
 
 void ModelState::Release()
 {
@@ -530,7 +532,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 	GenerateArguments generateArgs;
 
 	{	// Acquire state lock
-		std::unique_lock lock(_stateMutex);
+		std::scoped_lock lock(_stateMutex);
 
 		if (_contextState.blocks.size() == 0)
 			return false;
@@ -719,11 +721,11 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
 {
-	std::unique_lock<std::mutex> stateLock(_stateMutex, std::defer_lock ); // Acquire state lock
-
-	if (!stateLock.try_lock())
+	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
+	if (!stateLock.try_lock_for(100ms))
 	{
-
+		onComplete(InternalError::UnknownError, "Failed to acquire lock");
+		return;
 	}
 
 	std::vector<llama_token> sampled_tokens;
@@ -755,6 +757,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 	if (!args.history.empty() && _pEmbedding)
 	{
+		DebugPrintLn(">> SEARCH EMBEDDINGS");
 		_pEmbedding->Search(args.history, true, true);
 	}
 
@@ -805,7 +808,6 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	}
 	llm_util::init_batch_logits(batch);
 
-	stateLock.unlock();
 	auto startTime = std::chrono::steady_clock::now();
 
 	while (true)
@@ -1014,9 +1016,6 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		_tokensPerSec.store(toD(sampled_tokens.size()) / (duration / 1000.0));
 	}
 
-	// Re-acquire lock to push result
-	stateLock.lock();
-
 	// Remove full response from cache (will be reinserted on next generation)
 	llama_kv_self_seq_rm(state.pCtx, 0, pre_response_pos, current_pos);
 	batch.n_tokens = pre_response_pos;
@@ -1049,7 +1048,6 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	{
 		DebugPrint("(Empty response)");
 	}
-	stateLock.unlock();
 
 	DebugPrintLn();
 	DebugPrintLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stop_word.c_str(), sampled_tokens.size()));
@@ -1079,8 +1077,8 @@ void LLMInstance::StartGeneration(GenerateArguments args)
 		_activeResponseIds.insert(args.responseId);
 	}
 
-	PushSignal(LLMStatusSignal::GenerationStarted);
 	_readyState.store(ReadyState::Generating);
+	PushSignal(LLMStatusSignal::GenerationStarted);
 
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__Generate, this), args,
 		[](__PartialResult partial) {
@@ -1364,7 +1362,7 @@ std::pair<LLMStatus, bool> LLMInstance::PollStatus()
 	LLMStatus status {};
 
 	// Try to acquire state lock
-	std::unique_lock<std::mutex> lock(_stateMutex, std::try_to_lock);
+	std::unique_lock<std::timed_mutex> lock(_stateMutex, std::try_to_lock);
 	if (lock.owns_lock())
 	{
 		if (_modelState.pModel && _modelState.pCtx)
@@ -1377,7 +1375,6 @@ std::pair<LLMStatus, bool> LLMInstance::PollStatus()
 			status.usedRAM = usedRAM.load();
 		}
 		lock.unlock();
-		lock.release();
 	}
 
 	ReadyState readyState = _readyState.load();

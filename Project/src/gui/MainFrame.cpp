@@ -20,6 +20,7 @@
 #include "Constants.h"
 #include <format>
 #include <ranges>
+#include <cwctype>
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -205,7 +206,7 @@ bool MainFrame::OnCommand(Command cmd)
 	auto fnRoleFromName = [pLLM](string text) -> Role {
 		if (string_util::empty_or_whitespace(text))
 			return Role::Undefined;
-		if (std::isdigit(text[0])) //! @utf8
+		if (std::iswdigit(string_util::from_utf8(text)[0]))
 			return bot_from_index(std::stoi(text) - 1);
 		for (auto kvp : pLLM->GetSession().GetCharactersByRole())
 		{
@@ -215,7 +216,6 @@ bool MainFrame::OnCommand(Command cmd)
 		return pLLM->GetSession().GetRoleOf(text);
 	};
 
-	Role targetRole = fnRoleFromName(cmd.text);
 
 	switch (cmd.type)
 	{
@@ -234,11 +234,20 @@ bool MainFrame::OnCommand(Command cmd)
 	case CommandType::SystemMessage:
 		return pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
 	case CommandType::InstigateDialogue:
+	{
+		Role targetRole = fnRoleFromName(cmd.text);
 		return pLLM->InstigateResponse(targetRole, MessageType::Dialogue, 0);
+	}
 	case CommandType::InstigateAction:
+	{
+		Role targetRole = fnRoleFromName(cmd.text);
 		return pLLM->InstigateResponse(targetRole, MessageType::Action, 0);
+	}
 	case CommandType::PassTurn:
+	{
+		Role targetRole = fnRoleFromName(cmd.text);
 		return pLLM->InstigateResponse(targetRole, MessageType::Undefined, 3);
+	}
 	case CommandType::Impersonate:
 		return pLLM->InstigateResponse(Role::User, MessageType::Dialogue, 1);
 	case CommandType::Narrate:

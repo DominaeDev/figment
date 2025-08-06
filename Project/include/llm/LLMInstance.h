@@ -125,6 +125,7 @@ private:
 		DecodeError,
 		SamplerError,
 		GrammarError,
+		UnknownError,
 	};
 
 	using __LoadModelCallback = std::function<void(ModelState)>;
@@ -167,7 +168,7 @@ private:
 	enum class ReadyState { Invalid, Uninitialized, LoadingModel, ModelLoaded, Initializing, Ready, Generating };
 	std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };
 
-	std::mutex _stateMutex; // Guards state variables
+	std::timed_mutex _stateMutex; // Guards state variables
 	ModelState _modelState;
 	ContextState _contextState;
 
