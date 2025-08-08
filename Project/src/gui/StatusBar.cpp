@@ -13,10 +13,10 @@ StatusBar::StatusBar(Control* pParent) : Control(pParent)
 	SetBackgroundColor(Color { 0xde, 0xd9, 0xc5, SDL_ALPHA_OPAQUE });
 
 	_pMessage = new StaticText(this, "", FontFace::Default, Constants::StatusBarFontSize, false);
-	_pMessage->SetPosition(8, 1);
+	_pMessage->SetPosition(8, 2);
 
 	_pModelInfo = new StaticText(this, "", FontFace::Default, Constants::StatusBarFontSize, false);
-	_pModelInfo->SetPosition(400, 1);
+	_pModelInfo->SetPosition(400, 2);
 	AddChild(_pMessage);
 }
 
@@ -42,6 +42,4 @@ void StatusBar::SetModelInfo(LLMStatus status)
 			static_cast<float>(status.usedRAM / MiB) / 1024.0f
 		));
 	}
-	else
-		_pModelInfo->SetText("");
 }

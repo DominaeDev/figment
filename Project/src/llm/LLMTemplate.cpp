@@ -347,7 +347,7 @@ string llm_tmpl::apply_chat_template(Messages messages, bool add_assistant)
 
 	if (!_template.empty())
 	{
-		std::vector<char> formatted(Constants::MaxResponseLength * 2);
+		std::vector<char> formatted(Constants::Context::MaxResponseLength * 2);
 		int new_len = llama_chat_apply_template(_template.c_str(), msgs.data(), msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
 		if (new_len > (int)formatted.size())
 		{

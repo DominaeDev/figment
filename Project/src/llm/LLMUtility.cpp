@@ -1,8 +1,10 @@
 ﻿#include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
+#include "util/Common.h"
 #include "Constants.h"
 #include <format>
 #include <cwctype>
+#include <cassert>
 
 static std::vector<string> const opening_tags {
 	std::format("<{0}=\"", Constants::DialogueTag),
@@ -11,7 +13,6 @@ static std::vector<string> const opening_tags {
 	std::format("<{0}>", Constants::NarrationTag),
 	std::format("<{0}>", Constants::DirectionTag),
 };
-
 
 static std::vector<string> const closing_tags {
 	std::format("</{0}>", Constants::DialogueTag),
@@ -346,7 +347,7 @@ llama_batch llm_util::init_batch(llama_context* pCtx)
 	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
 	batch.n_tokens = 0;
 
-	for (size_t i = 0; i < Constants::ContextSize; ++i)
+	for (size_t i = 0; i < Constants::Context::Size; ++i)
 	{
 		batch.pos[i] = (int32_t)i;
 		batch.token[i] = 0;
@@ -355,17 +356,16 @@ llama_batch llm_util::init_batch(llama_context* pCtx)
 	return batch;
 }
 
-llama_batch llm_util::create_batch_view(llama_batch& batch, int32_t begin, int32_t end)
+llama_batch llm_util::create_batch_view(const llama_batch& batch, int32_t position, int32_t length)
 {
-	int32_t n_tokens = end - begin;
 	return llama_batch {
-		n_tokens,
-		batch.token + begin,
+		length,
+		batch.token + position,
 		nullptr,
-		batch.pos + begin,
-		batch.n_seq_id + begin,
-		batch.seq_id + begin,
-		batch.logits + begin,
+		batch.pos + position,
+		batch.n_seq_id + position,
+		batch.seq_id + position,
+		batch.logits + position,
 	};
 }
 
@@ -447,7 +447,7 @@ std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(llama_mode
 	auto tokens = tokenize_and_batch(pModel, pCtx, batch, content, pos, add_special);
 	int32_t n_tokens = toI(tokens.size());
 
-	llama_batch batch_view = llm_util::create_batch_view(batch, pos, pos + n_tokens);
+	llama_batch batch_view = llm_util::create_batch_view(batch, pos, n_tokens);
 	if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
 		return std::nullopt;
 	return tokens;
@@ -704,7 +704,7 @@ string llm_util::format_id(string id)
 
 int32_t llm_util::erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t from, int32_t length)
 {
-	if (from < 0 || from >= Constants::ContextSize || length <= 0  || from + length > Constants::ContextSize)
+	if (from < 0 || from >= Constants::Context::Size || length <= 0  || from + length > Constants::Context::Size)
 		return 0;
 
 	llama_kv_self_seq_rm(pCtx, 0, from, from + length);
@@ -825,48 +825,88 @@ int32_t llm_util::shift_tokens(llama_context* pCtx, llama_batch& batch, int32_t 
 	return shift_amount;
 }
 
-int32_t llm_util::ctx_remove(llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
+int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
 {
+	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
+
+//	dump_context(ctxState.batch, pVocab, "prompt-full.txt");
+
+	// Remove
 	int32_t shift_amount = 0;
 	for (auto it = itBegin; it != itEnd; ++it)
 		shift_amount += (*it).length();
-	
-	int32_t pos_remove_begin = ctxState.blocks_pos + (*itBegin).offset;
-	int32_t pos_remove_end = pos_remove_begin + shift_amount;
-
-	if (llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
-	{
-		ctxState.blocks.erase(itBegin, itEnd);
-		return shift_amount;
-	}
-
-	return 0; // Error
-}
-
-int32_t llm_util::ctx_remove_and_shift(llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
-{
-	// Remove
-	llama_pos pos_remove_begin = ctxState.blocks_pos + (*itBegin).offset;
-	int32_t shift_amount = ctx_remove(pCtx, ctxState, itBegin, itEnd);
 	if (shift_amount == 0)
 		return 0;
 
-	llama_pos pos_remove_end = pos_remove_begin + shift_amount;
+	int32_t n_used = llama_kv_self_used_cells(pCtx);
+
+	int32_t pos_remove_begin = ctxState.blocks_pos + (*itBegin).offset;
+	int32_t pos_remove_end = pos_remove_begin + shift_amount;
+	if (!llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
+		return 0;
+	
+	assert(llama_kv_self_used_cells(pCtx) < n_used);
+
 
 	// Shift
-	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, -1, -shift_amount);
+	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, ctxState.current_pos, -shift_amount);
+//	llama_kv_self_update(pCtx);
 
 	// Update batch
 	auto& batch = ctxState.batch;
 	int32_t n_batch = batch.n_tokens;
 	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
 	{
+		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
 		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
 		batch.n_seq_id[pos_remove_begin + i] = batch.n_seq_id[pos_remove_end + i];
-		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
 		batch.seq_id[pos_remove_begin + i][0] = batch.seq_id[pos_remove_end + i][0];
 		batch.logits[i] = false;
 	}
 	batch.n_tokens -= shift_amount;
+
+//	dump_context(ctxState.batch, pVocab, "prompt-full.txt");
+
 	return (int32_t)-shift_amount;
+}
+
+bool llm_util::dump_context(const llama_batch& batch, const llama_vocab* pVocab, string filename)
+{
+	auto fnTokenStr = [pVocab](llama_token token) -> string {
+		if (token == llama_vocab_bos(pVocab))
+			return "<BOS>";
+		else if (token == llama_vocab_eos(pVocab))
+			return "<EOS>";
+		else if (token == llama_vocab_eot(pVocab))
+			return "<EOT>";
+		else if (token == llama_vocab_sep(pVocab))
+			return "<SEP>";
+		else if (token == llama_vocab_pad(pVocab))
+			return "<PAD>";
+		else if (token == llama_vocab_nl(pVocab))
+			return "<NL>"; //"\r\n";
+		else
+		{
+			if (token < 0 || token > 32000)
+				return "<UNK>"; // Error
+
+			char buf[256];
+			int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
+			if (n < 0)
+				return "<UNK>";
+			else
+				return string(buf, n);
+		}
+	};
+
+	if (batch.token == nullptr || batch.n_tokens <= 0)
+		return false;
+
+	// Detokenize the batched tokens
+	string result;
+	result.reserve(65536);
+	for (int32_t i = 0; i < batch.n_tokens; ++i)
+		result.append(std::format("{0:<8} {1:<8} {2}({3})\t{4:<8} \"{5}\"\r\n", batch.pos[i], batch.token[i], batch.seq_id[i][0], batch.n_seq_id[i], (int32_t)batch.logits[i], fnTokenStr(batch.token[i])));
+
+	return WriteTextFile(filename, result, false);
 }

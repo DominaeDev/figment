@@ -2,6 +2,7 @@
 
 #include "llm/LLMTypes.h"
 #include "llm/LLMEmbedding.h"
+#include "llm/LLMState.h"
 #include "model/ChatSession.h"
 
 #include <vector>
@@ -27,6 +28,7 @@ enum class LLMStatusSignal {
 	InitializedChat,
 	InitializeChatFailure,
 	CompletedMessage,
+	RebuildingContext,
 };
 
 struct LLMStatus
@@ -96,7 +98,6 @@ public:
 	std::vector<RemovedMessage> RemoveMessages(int numMessages = 1, bool rewindTime = true);
 	std::vector<RemovedMessage> RollbackUserMessage();
 	std::set<string> GetActiveMessages();
-	bool RefreshKVCache();
 
 	bool PollResponse(MessagePiece& piece);
 	std::pair<LLMStatus, bool> PollStatus();
@@ -161,11 +162,12 @@ private:
 	void PushSignal(LLMStatusSignal signal);
 	void RefreshActiveResponses();
 	std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
+	bool RebuildKVCache(llama_context* pCtx, const llama_batch& batch);
 
 	Sentences GetHistory(size_t depth);
 
 private:
-	enum class ReadyState { Invalid, Uninitialized, LoadingModel, ModelLoaded, Initializing, Ready, Generating };
+	enum class ReadyState { Invalid, Uninitialized, LoadingModel, ModelLoaded, Initializing, Ready, Generating, RebuildingContext };
 	std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };
 
 	std::timed_mutex _stateMutex; // Guards state variables
@@ -185,10 +187,13 @@ private:
 
 	ChatSession _session;
 	LLMOption _options;
+	bool _bCtxReallocateNextTurn = false;
 
 	// Embedding
 	std::unique_ptr<LLMEmbedding> _pEmbedding;
-		
+	
+	// State
+	LLMState _state;
 public:
 	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 	std::atomic<int64_t> usedRAM; // As reported from llama.cpp

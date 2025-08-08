@@ -10,9 +10,9 @@
 #include <cassert>
 #include <format>
 
-bool ChatSession::Initialize(SessionArgs args)
+bool ChatSession::Initialize(LLMOption options)
 {
-	_bUseCharacterIds = args.useCharacterIds;
+	_options = options;
 
 	// System prompt
 	_system_prompt_solo = ReadTextFile("./resources/prompting/prompt_system_solo.txt").value_or("");
@@ -27,6 +27,9 @@ bool ChatSession::Initialize(SessionArgs args)
 	// Formatting spec
 	_formatting_solo = ReadTextFile("./resources/prompting/prompt_formatting_solo.txt").value_or("");
 	_formatting_group = ReadTextFile("./resources/prompting/prompt_formatting_group.txt").value_or("");
+
+	// State tracking
+	_formatting_state = ReadTextFile("./resources/prompting/prompt_formatting_state.txt").value_or("");
 
 	// Director prompt
 	_formatting_director = ReadTextFile("./resources/prompting/prompt_formatting_director.txt").value_or("");
@@ -226,28 +229,29 @@ string ChatSession::ApplyNames(string text, Role characterRole) const
 	return ApplyNames(text);
 }
 
-string ChatSession::GetSystemPrompt(bool bGroup, bool bCharacterList, bool bUncensored) const
+string ChatSession::GetSystemPrompt() const
 {
 	string prompt;
-	if (bGroup)
+	if (IsGroupChat())
 	{
 		prompt = _system_prompt_group;
-		string_util::replace_all(prompt, "##FORMATTING_SPEC##", _formatting_group);
+		string_util::replace_all(prompt, "##FORMATTING##", _formatting_group);
 	}
 	else
 	{
 		prompt = _system_prompt_solo;
-		string_util::replace_all(prompt, "##FORMATTING_SPEC##", _formatting_solo);
+		string_util::replace_all(prompt, "##FORMATTING##", _formatting_solo);
 	}
 
-	string_util::replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", bUncensored ? _system_prompt_uncensored : "");
+	string_util::replace_all(prompt, "##STATE_FORMATTING##", CheckOption(_options, LLMOption::TrackedState) ? _formatting_state : "");
+	string_util::replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", CheckOption(_options, LLMOption::Uncensored) ? _system_prompt_uncensored : "");
 	prompt = string_util::trim(prompt);
 
-	if (bGroup && bCharacterList)
+	if (IsGroupChat())
 	{
 		prompt.append("\n\n# Characters");
 		
-		if (_bUseCharacterIds)
+		if (CheckOption(_options, LLMOption::UseCharacterIds))
 		{
 			prompt.append("\n{\n");
 			// Bots

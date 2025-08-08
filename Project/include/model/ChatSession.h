@@ -5,22 +5,17 @@
 #include "model/Character.h"
 #include <optional>
 
-struct SessionArgs
-{
-	bool useCharacterIds = true;
-};
-
 class ChatSession
 {
 public:
-	bool Initialize(SessionArgs args);
+	bool Initialize(LLMOption options);
 	bool LoadCharacter(Role role, string filename);
 
 	std::optional<Character> GetCharacter(Role role) const;
 	std::optional<Character> GetCharacterById(string characterId) const;
 	std::optional<Character> GetCharacterByName(string name) const;
 
-	string GetSystemPrompt(bool bGroup, bool bCharacterList, bool bUncensored) const;
+	string GetSystemPrompt() const;
 	string GetDirectorPrompt() const;
 	string GetIdentifierOf(Role role) const;
 	string GetNameOf(Role role) const;
@@ -38,7 +33,8 @@ public:
 
 protected:
 	std::map<Role, Character> _characters {};
-	
+	LLMOption _options {};
+
 	// Prompts
 	string _system_prompt_solo;
 	string _system_prompt_group;
@@ -48,6 +44,5 @@ protected:
 	string _formatting_solo;
 	string _formatting_group;
 	string _formatting_director;
-
-	bool _bUseCharacterIds;
+	string _formatting_state;
 };

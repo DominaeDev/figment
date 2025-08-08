@@ -43,6 +43,8 @@ enum class MessageType
 	SystemMessage,
 	Narration,
 	Direction,
+
+	StateReport,
 };
 
 struct Message 
@@ -94,7 +96,7 @@ struct ContextBlock
 	string name;
     string content;
 	std::vector<int32_t> tokens;
-	int32_t offset;
+	int32_t offset {};
 	bool cached = false;
 	int ttl = -1;
 
@@ -128,8 +130,15 @@ enum class LLMOption : int32_t
 	GreetUser				= 1 << 4,
 	SwapPersonas			= 1 << 5,
 	Uncensored				= 1 << 6,
+	TrackedState			= 1 << 7,
+	Embeddings				= 1 << 8,
 };
 DEFINE_ENUM_FLAGS(LLMOption, int32_t)
+
+inline constexpr bool CheckOption(LLMOption options, LLMOption value)
+{
+	return (options & value) == value;
+}
 
 struct Sentence
 {

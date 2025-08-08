@@ -159,17 +159,14 @@ void MainFrame::StartChat()
 	if (pLLM && pLLM->HasLoadedModel())
 	{
 		LLMOption options = LLMOption::GreetUser
-			| LLMOption::LimitMessages
+//			| LLMOption::LimitMessages
+//			| LLMOption::RandomizeMessageCount
 			| LLMOption::SwapPersonas
-			| LLMOption::RandomizeMessageCount
+			| LLMOption::TrackedState
 			| LLMOption::Uncensored;
 
-		SessionArgs sessionArgs {
-			/*use ids*/ (options & LLMOption::UseCharacterIds) == LLMOption::UseCharacterIds,
-		};
-
 		ChatSession session;
-		session.Initialize(sessionArgs);
+		session.Initialize(options);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
 //		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
@@ -416,6 +413,9 @@ void MainFrame::PollStatus()
 		case LLMStatusSignal::GenerationStarted:
 			SetStatusBar("Generating response...");
 			break;
+		case LLMStatusSignal::RebuildingContext:
+			SetStatusBar("Rebuilding context...");
+			break;
 		case LLMStatusSignal::GenerationComplete:
 			SetStatusBar("Ready");
 			NextQueuedCommand();
@@ -462,13 +462,8 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		case SDLK_F11:
 			if (pLLM->IsReady())
 			{
-				if (bCtrlDown && bShiftDown && !bAltDown)
-					pLLM->RefreshKVCache();
-				else
-				{
-					pLLM->DumpContext(false, "prompt.txt");
-					pLLM->DumpContext(true, "prompt-full.txt");
-				}
+				pLLM->DumpContext(false, "prompt.txt");
+				pLLM->DumpContext(true, "prompt-full.txt");
 			}
 			break;
 #endif

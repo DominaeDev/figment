@@ -19,6 +19,7 @@ namespace Constants
 	inline constexpr std::string_view ThoughtTag		= "think";
 	inline constexpr std::string_view NarrationTag		= "narrator";
 	inline constexpr std::string_view DirectionTag		= "director";
+	inline constexpr std::string_view StateReportTag	= "change";
 
 	inline constexpr std::string_view DialogueTagEnd	= "/talk";
 	inline constexpr std::string_view ActionTagEnd		= "/act";
@@ -26,9 +27,13 @@ namespace Constants
 	inline constexpr std::string_view NarrationTagEnd	= "/narrator";
 	inline constexpr std::string_view DirectionTagEnd	= "/director";
 
-	inline constexpr int ContextSize					= 4096; //32768
-	inline constexpr int MaxResponseLength				= 256;
-	inline constexpr float ContextWindowKeepRatio		= 0.75f;
+	namespace Context
+	{
+		inline constexpr int Size = 4096; //32768
+		inline constexpr int MaxResponseLength = 256;
+		inline constexpr int MicroBatchSize = 256;
+		inline constexpr float WindowKeepRatio = 0.75f;
+	}
 
 	inline constexpr std::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";
 //	inline constexpr std::string_view DefaultEmbeddingModelLocation = "M:\\Embedding\\gist-all-minilm-l6-v2.Q8_0.gguf";

@@ -111,6 +111,7 @@
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
     <ClCompile Include="src\llm\Embedding.cpp" />
     <ClCompile Include="src\llm\LLMEmbedding.cpp" />
+    <ClCompile Include="src\llm\LLMState.cpp" />
     <ClCompile Include="src\llm\LLMTemplate.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />
     <ClCompile Include="src\gui\Area.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
     <ClInclude Include="include\llm\Embedding.h" />
     <ClInclude Include="include\llm\LLMEmbedding.h" />
+    <ClInclude Include="include\llm\LLMState.h" />
     <ClInclude Include="include\llm\LLMTemplate.h" />
     <ClInclude Include="include\llm\LLMTypes.h" />
     <ClInclude Include="include\model\AppState.h" />
