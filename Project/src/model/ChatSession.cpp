@@ -243,7 +243,7 @@ string ChatSession::GetSystemPrompt() const
 		string_util::replace_all(prompt, "##FORMATTING##", _formatting_solo);
 	}
 
-	string_util::replace_all(prompt, "##STATE_FORMATTING##", CheckOption(_options, LLMOption::TrackedState) ? _formatting_state : "");
+	string_util::replace_all(prompt, "##STATE_FORMATTING##", CheckOption(_options, LLMOption::StateVariables) ? _formatting_state : "");
 	string_util::replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", CheckOption(_options, LLMOption::Uncensored) ? _system_prompt_uncensored : "");
 	prompt = string_util::trim(prompt);
 

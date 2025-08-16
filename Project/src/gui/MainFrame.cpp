@@ -24,6 +24,15 @@
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
+LLMOption llmOptions = LLMOption::GreetUser
+	| LLMOption::Uncensored
+//	| LLMOption::LimitMessages
+//	| LLMOption::RandomizeMessageCount
+//	| LLMOption::StateVariables
+//	| LLMOption::Embeddings
+//	| LLMOption::SwapPersonas
+;
+
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {
 	SetForegroundColor(Colors::Black);
@@ -120,15 +129,15 @@ void MainFrame::OnRender(Renderer* pRenderer)
 	DrawBackground(pRenderer);
 }
 
-void MainFrame::LoadModel()
+void MainFrame::InitializeModel()
 {
 	auto pLLM = Application::GetLLM();
 	if (!pLLM)
 		return;
 
-	if (!pLLM->HasLoadedModel())
+	if (!pLLM->IsInitialized())
 	{
-		pLLM->LoadModelAsync(string(Constants::DefaultModelLocation), 
+		pLLM->Initialize(string(Constants::DefaultModelLocation), llmOptions, 
 			[](int percent) 
 			{
 				SetStatusBar(std::format("Loading model... {0}%", percent));
@@ -142,7 +151,7 @@ void MainFrame::LoadModel()
 void MainFrame::UnloadModel()
 {
 	auto pLLM = Application::GetLLM();
-	if (pLLM && pLLM->HasLoadedModel())
+	if (pLLM && pLLM->IsInitialized())
 	{
 		pLLM->Shutdown();
 		SetStatusBar("Model unloaded");
@@ -156,23 +165,15 @@ void MainFrame::UnloadModel()
 void MainFrame::StartChat()
 {
 	auto pLLM = Application::GetLLM();
-	if (pLLM && pLLM->HasLoadedModel())
+	if (pLLM && pLLM->IsInitialized())
 	{
-		LLMOption options = LLMOption::GreetUser
-//			| LLMOption::LimitMessages
-//			| LLMOption::RandomizeMessageCount
-			| LLMOption::SwapPersonas
-			| LLMOption::TrackedState
-			| LLMOption::Uncensored;
-
 		ChatSession session;
-		session.Initialize(options);
+		session.Initialize(llmOptions);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
 //		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
-		LLMArguments llmArgs {
-			options,
+		LLMChatArguments llmArgs {
 			session,
 		};
 		pLLM->InitializeChat(llmArgs);
@@ -335,10 +336,10 @@ void MainFrame::AutoChat()
 	if (!pLLM)
 		return;
 
-	if (!pLLM->HasLoadedModel())
+	if (!pLLM->IsInitialized())
 	{
-		if (!pLLM->IsLoadingModel())
-			LoadModel();
+		if (!pLLM->IsInitializing())
+			InitializeModel();
 		return;
 	}
 
@@ -439,7 +440,7 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		switch (event.key)
 		{
 		case SDLK_F2:
-			LoadModel();
+			InitializeModel();
 			return true;
 		case SDLK_F3:
 			UnloadModel();

@@ -76,6 +76,7 @@ enum class Grammar
 struct ModelState
 {
 	llama_model* pModel = nullptr;
+	const llama_vocab* pVocab = nullptr;
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
 	llama_sampler* pActiveGrammar = nullptr;
@@ -105,19 +106,22 @@ struct ContextBlock
 
 struct ContextState
 {
-	llama_batch batch {};			// Representation of the kv-cache (mirror)
+	llama_context* pCtx = nullptr;			// Non-owned
+	const llama_vocab* pVocab = nullptr;	// Non-owned
+	llama_batch batch {};					// Representation of the kv-cache (mirror)
 	std::vector<int32_t> system_tokens;
 	std::map<Role, std::vector<int32_t>> personas;
 	std::vector<ContextBlock> blocks;
-	int32_t persona_pos = 0;		// persona insertion point
-	int32_t response_pos = 0;		// start of response
-	int32_t prepend_pos = 0;
-	int32_t blocks_pos = 0;			// chat start
-	int32_t current_pos = 0;		// cursor position
 
-	int32_t AssignBlockPositions();
+	int32_t persona_pos = 0;				// persona insertion point
+	int32_t response_pos = 0;				// start of response, including prompt template preamble
+	int32_t prepend_pos = 0;				// start of response, not including prompt template preamble
+	int32_t blocks_pos = 0;					// position of first message block
+	int32_t current_pos = 0;				// current position (cursor)
 
 	Role activePersona = Role::Undefined;
+	
+	int32_t AssignBlockPositions();
 };
 
 enum class LLMOption : int32_t
@@ -130,7 +134,7 @@ enum class LLMOption : int32_t
 	GreetUser				= 1 << 4,
 	SwapPersonas			= 1 << 5,
 	Uncensored				= 1 << 6,
-	TrackedState			= 1 << 7,
+	StateVariables			= 1 << 7,
 	Embeddings				= 1 << 8,
 };
 DEFINE_ENUM_FLAGS(LLMOption, int32_t)

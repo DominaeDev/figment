@@ -62,9 +62,8 @@ struct RemovedMessage
 	Role role;
 };
 
-struct LLMArguments
+struct LLMChatArguments
 {
-	LLMOption options {};
 	ChatSession session;
 	Messages messages;
 };
@@ -75,12 +74,14 @@ public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool InitializeChat(LLMArguments args);
+	bool Initialize(string filename, LLMOption options, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	void Shutdown();
 
-	bool IsLoadingModel() const { return _readyState.load() == ReadyState::LoadingModel; }
-	bool HasLoadedModel() const { return _modelState.pModel != nullptr; }
-	bool LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
+	bool IsInitialized() const { return _modelState.pModel != nullptr; }
+	bool IsInitializing() const { return _readyState.load() == ReadyState::LoadingModel; }
+
+	bool InitializeChat(LLMChatArguments args);
+
 	bool IsReady() const;
 	bool IsGenerating() const;
 	
@@ -138,7 +139,7 @@ private:
 	struct PrepareArguments
 	{
 		Role responder = Role::Bot1;
-		bool is_continue = false;
+		bool isContinuation = false;
 		int time = 0;	// decrement ttl
 	};
 	void PrepareGeneration(PrepareArguments args);

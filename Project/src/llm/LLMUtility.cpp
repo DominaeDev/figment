@@ -407,10 +407,10 @@ bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, co
 	// Add tokens to batch
 	for (int i = 0; i < num_tokens; ++i) {
 		batch.token[i] = tokens[i];
-		batch.pos[i] = i;  // Position in sequence
-		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;  // Sequence ID 0
-		batch.logits[i] = false;  // Don't need logits for most tokens
+		batch.pos[i] = i;		// Position in sequence
+		batch.n_seq_id[i] = 1;	// This token belongs to 1 sequence
+		batch.seq_id[i][0] = 0;	// Sequence ID 0
+		batch.logits[i] = true;
 	}
 	batch.n_tokens = num_tokens;
 
@@ -825,9 +825,10 @@ int32_t llm_util::shift_tokens(llama_context* pCtx, llama_batch& batch, int32_t 
 	return shift_amount;
 }
 
-int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, llama_context* pCtx, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
+int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
 {
 	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
+	llama_context* pCtx = ctxState.pCtx;
 
 //	dump_context(ctxState.batch, pVocab, "prompt-full.txt");
 
@@ -847,10 +848,9 @@ int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, llama_context* pCtx,
 	
 	assert(llama_kv_self_used_cells(pCtx) < n_used);
 
-
 	// Shift
 	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, ctxState.current_pos, -shift_amount);
-//	llama_kv_self_update(pCtx);
+	llama_kv_self_update(pCtx);
 
 	// Update batch
 	auto& batch = ctxState.batch;

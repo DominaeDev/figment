@@ -43,6 +43,7 @@ void ModelState::Release()
 	pActiveGrammar = nullptr;
 	pCtx = nullptr;
 	pModel = nullptr;
+	pVocab = nullptr;
 }
 
 llama_sampler* ModelState::SetActiveGrammar(Grammar grammar)
@@ -122,7 +123,10 @@ void LLMInstance::Shutdown()
 		_contextState = {};
 
 		if (_pEmbedding)
+		{
 			_pEmbedding->Shutdown();
+			_pEmbedding = nullptr;
+		}
 	}
 	_readyState.store(ReadyState::Uninitialized);
 	PushSignal(LLMStatusSignal::UnloadedModel);
@@ -172,7 +176,7 @@ static void OnLoadModelProgress(float progress, void* user_data)
 		__LoadModelProgressCallback(static_cast<int>(progress * 100.0f));
 }
 
-bool LLMInstance::InitializeChat(LLMArguments args)
+bool LLMInstance::InitializeChat(LLMChatArguments args)
 {
 	std::scoped_lock lock(_stateMutex);
 	if (_readyState < ReadyState::ModelLoaded || !_modelState.pModel)
@@ -181,11 +185,13 @@ bool LLMInstance::InitializeChat(LLMArguments args)
 	PushSignal(LLMStatusSignal::InitializingChat);
 
 	_contextState = {};
-	_state = {};
-	_state.SetValue("Location", "Kitchen");
-	_state.SetValue("Yor's mood", "Neutral");
+	_contextState.pCtx = _modelState.pCtx;
+
 	_session = args.session;
-	_options = args.options;
+
+	_state = {};
+	_state.SetValue("Location", "Kitchen"); //! @temp
+	_state.SetValue(_session.ApplyNames("{{char}}'s mood", Role::Bot1), "Neutral"); //! @temp
 
 	// Initialize sampler + grammar
 	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
@@ -221,7 +227,7 @@ bool LLMInstance::InitializeChat(LLMArguments args)
 		string_util::replace_all(grammar, "##NAMES##", namesPattern);
 
 		// Variables
-		if (CheckOption(_options, LLMOption::TrackedState))
+		if (CheckOption(_options, LLMOption::StateVariables))
 		{
 			string_util::replace_all(grammar, "##STATE##", "stat");
 			string_util::replace_all(grammar, "##STATE_VARS##", _state.GetGrammarPattern());
@@ -261,7 +267,7 @@ bool LLMInstance::InitializeChat(LLMArguments args)
 	}
 
 	// Initialize context
-	llama_context* pCtx = _modelState.pCtx;
+	llama_context* pCtx = _contextState.pCtx;
 	int32_t ctx_size = llama_n_ctx(pCtx);
 	llama_kv_self_clear(pCtx);
 	llama_batch_free(_contextState.batch);
@@ -401,11 +407,13 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 	// initialize the model
 	llama_model_params model_params = llama_model_default_params();
 	model_params.n_gpu_layers = ngl;
+	model_params.use_mmap = true;
 	model_params.use_mlock = true;
 	model_params.progress_callback = (llama_progress_callback)&OnLoadModelProgress;
 
 	ModelState state;
 	state.pModel = llama_model_load_from_file(filename.c_str(), model_params);
+	state.pVocab = llama_model_get_vocab(state.pModel);
 	state.modelName = string_util::get_filename(filename);
 
 	llm_tmpl::auto_detect_template(state.pModel);
@@ -438,14 +446,16 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 	if (CheckOption(_options, LLMOption::Embeddings))
 	{
 		_pEmbedding = std::make_unique<LLMEmbedding>();
-		if (!_pEmbedding->LoadModel(string(Constants::Embedding::DefaultModelLocation)))
+		if (_pEmbedding->LoadModel(string(Constants::Embedding::DefaultModelLocation)))
+			DebugPrintLn("Loaded embedding model");
+		else
 			_pEmbedding = nullptr; // Destroy
 	}
 
 	onComplete(state);
 }
 
-bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
+bool LLMInstance::Initialize(string filename, LLMOption options, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
 {
 	auto readyState = _readyState.load();
 	if (readyState > ReadyState::Uninitialized)
@@ -453,6 +463,7 @@ bool LLMInstance::LoadModelAsync(string filename, LoadModelProgressCallback onPr
 
 	_readyState.store(ReadyState::LoadingModel);
 	__LoadModelProgressCallback = onProgress;
+	_options = options;
 
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__LoadModel, this), filename,
 		[this, filename, onComplete](ModelState result)
@@ -546,7 +557,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 			/*responseId*/ responseId,
 			/*subMessageId*/ subMessageId,
 		};
-	}
+	} // Release state lock
 
 	PrepareArguments prepareArgs {
 		/*responder */ Role::Undefined,
@@ -581,20 +592,20 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	std::scoped_lock lock(_stateMutex);
 
 	ModelState& state = _modelState;
-	ContextState& chat = _contextState;
-	llama_context* pCtx = _modelState.pCtx;
-	llama_batch& batch = chat.batch;
 	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
+	ContextState& ctxState = _contextState;
+	llama_context* pCtx = _contextState.pCtx;
+	llama_batch& batch = ctxState.batch;
 
 	// Prepare prompt
-	int32_t& current_pos = chat.current_pos;
+	int32_t& current_pos = ctxState.current_pos;
 
 	std::vector<llama_token> prompt_tokens;
 
 	// Decrement ttl
-	for (int32_t i = (int32_t)chat.blocks.size() - 1; i >= 0; --i)
+	for (int32_t i = (int32_t)ctxState.blocks.size() - 1; i >= 0; --i)
 	{
-		auto& block = chat.blocks[i];
+		auto& block = ctxState.blocks[i];
 		if (block.ttl <= 0)
 			continue;
 
@@ -605,24 +616,24 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		if (block.cached)
 		{
 			// Remove from context
-			int32_t shift = llm_util::ctx_remove_and_shift(state.pModel, pCtx, _contextState,
-				chat.blocks.begin() + (ptrdiff_t)i,
-				chat.blocks.begin() + (ptrdiff_t)(toSZ(i + 1)));
+			int32_t shift = llm_util::ctx_remove_and_shift(state.pModel, _contextState,
+				ctxState.blocks.begin() + (ptrdiff_t)i,
+				ctxState.blocks.begin() + (ptrdiff_t)(toSZ(i + 1)));
 
 			// Adjust block offsets
-			for (int32_t j = i + 1; j < (int32_t)chat.blocks.size(); ++j)
-				chat.blocks[j].offset += shift;
+			for (int32_t j = i + 1; j < (int32_t)ctxState.blocks.size(); ++j)
+				ctxState.blocks[j].offset += shift;
 			current_pos += shift;
 		}
 
 		// Remove block
-		chat.blocks.erase(chat.blocks.begin() + (ptrdiff_t)i);
+		ctxState.blocks.erase(ctxState.blocks.begin() + (ptrdiff_t)i);
 	}
 
 	// Add state block
-	if (!_state.IsEmpty() && CheckOption(_options, LLMOption::TrackedState))
+	if (!_state.IsEmpty() && CheckOption(_options, LLMOption::StateVariables))
 	{
-		auto it = std::find_if(chat.blocks.begin(), chat.blocks.end(), [](const ContextBlock& b) { return !b.cached; });
+		auto it = std::find_if(ctxState.blocks.begin(), ctxState.blocks.end(), [](const ContextBlock& b) { return !b.cached; });
 
 		string content = string("# Story parameters\n")
 			+ "The following parameters track the state of the story and world.\n";
@@ -630,7 +641,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		content += "\nImportant: When actions or dialogue demands that any parameter above changes to a differt value and only then, always end your response with a compiled list of suggested changes.";
 		content += "\nEx: <change>Variable = Value</change>\n";
 
-		chat.blocks.insert(it, ContextBlock {
+		ctxState.blocks.insert(it, ContextBlock {
 			/*responseId*/ "",
 			/*role*/ Role::System,
 			/*name*/ "",
@@ -644,7 +655,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 	// Tokenize uncached messages
 	int32_t offset = 0;
-	for (auto it = chat.blocks.begin(); it != chat.blocks.end(); ++it)
+	for (auto it = ctxState.blocks.begin(); it != ctxState.blocks.end(); ++it)
 	{
 		auto& block = *it;
 		if (block.cached)
@@ -654,9 +665,9 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		}
 
 		string content = block.content;
-		if (args.is_continue) // Continue response
+		if (args.isContinuation) // Continue response
 			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name);
-		if (block.role == Role::System) // Continue response
+		else if (block.role == Role::System)
 			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
 		else
 		{
@@ -674,7 +685,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	}
 
 	// Calculate block positions
-	chat.AssignBlockPositions();
+	ctxState.AssignBlockPositions();
 
 	// Allocate and shift context window
 	int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -685,34 +696,34 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		DebugPrintLn(">> ALLOCATING CONTEXT");
 		_bCtxReallocateNextTurn = false;
 
-		size_t ctx_chat_max = ctx_size - chat.blocks_pos; // Exclude system prompt
+		size_t ctx_chat_max = ctx_size - ctxState.blocks_pos; // Exclude system prompt
 		size_t free_tokens = std::max(static_cast<int32_t>(ctx_reserve), static_cast<int32_t>(ctx_chat_max * (1.0f - Constants::Context::WindowKeepRatio)));
 		
 		size_t total = 0;
 		size_t first_to_keep = 0;
-		while (first_to_keep < chat.blocks.size() && total < free_tokens && chat.blocks[first_to_keep].cached)
-			total += chat.blocks[first_to_keep++].length();
+		while (first_to_keep < ctxState.blocks.size() && total < free_tokens && ctxState.blocks[first_to_keep].cached)
+			total += ctxState.blocks[first_to_keep++].length();
 
 		if (first_to_keep > 0)
 		{
-			auto itBegin = chat.blocks.begin();
-			auto itEnd = chat.blocks.begin() + (ptrdiff_t)first_to_keep;
-			int32_t shift = llm_util::ctx_remove_and_shift(state.pModel, pCtx, chat, itBegin, itEnd);
+			auto itBegin = ctxState.blocks.begin();
+			auto itEnd = ctxState.blocks.begin() + (ptrdiff_t)first_to_keep;
+			int32_t shift = llm_util::ctx_remove_and_shift(state.pModel, ctxState, itBegin, itEnd);
 
 			// Adjust block offsets
-			for (auto& block : chat.blocks)
+			for (auto& block : ctxState.blocks)
 				block.offset += shift;
 
-			chat.blocks.erase(itBegin, itEnd);
+			ctxState.blocks.erase(itBegin, itEnd);
 			current_pos += shift;
 		}
 	}
 
 	// Store response position (before assistant prelude)
-	chat.response_pos = current_pos + (int32_t)prompt_tokens.size();
+	ctxState.response_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append assistant tokens
-	if (!args.is_continue)
+	if (!args.isContinuation)
 	{
 		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(args.responder, "assistant"); //! @name?
 		prelude = _session.ApplyNames(prelude, args.responder);
@@ -721,7 +732,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	}
 
 	// Store beginning of response (after assistant prelude)
-	chat.prepend_pos = current_pos + (int32_t)prompt_tokens.size();
+	ctxState.prepend_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append to batch
 	for (int i = 0; i < prompt_tokens.size(); ++i)
@@ -729,7 +740,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	batch.n_tokens = current_pos + (int32_t)prompt_tokens.size();
 
 	// Mark blocks in cache
-	for (auto it = chat.blocks.begin(); it != chat.blocks.end(); ++it)
+	for (auto it = ctxState.blocks.begin(); it != ctxState.blocks.end(); ++it)
 		it->cached = true;
 }
 
@@ -748,7 +759,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 	llama_token sampled_token;
 	string partial;
-	string stop_word;
+	string stopped_on_word;
 	string response;
 	MessageType msgType = args.msgType;
 	bool isContinuation = args.flags == GenerateFlag::Continuation;
@@ -925,18 +936,18 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			// check if there is incomplete UTF-8 character at the end
 			bHalt = false;
 			bWait = false;
-			llm_util::process(partial, str_token, &bWait, &bHalt, stop_word);
+			llm_util::process(partial, str_token, &bWait, &bHalt, stopped_on_word);
 		}
 		else // EOG token
 		{
 			bHalt = true;
-			stop_word = "EOG";
+			stopped_on_word = "EOG";
 		}
 
 		if (sampled_tokens.size() >= Constants::Context::MaxResponseLength)
 		{
 			bHalt = true;
-			stop_word = "length";
+			stopped_on_word = "length";
 		}
 
 		bSend &= !bWait;
@@ -962,7 +973,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 					if (tagName == "@USR" || tagName == _session.GetNameOf(Role::User) && args.role != Role::User)
 					{
-						stop_word = "user";
+						stopped_on_word = "user";
 						break; // Stop if talking/acting for the user
 					}
 
@@ -1004,7 +1015,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 							if (msgType != MessageType::StateReport && args.maxMessages > 0 && ++numMessages >= args.maxMessages)
 							{
-								stop_word = "msg count";
+								stopped_on_word = "msg count";
 								break; // That's enough, thank you
 							}
 
@@ -1112,7 +1123,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	}
 
 	DebugPrintLn();
-	DebugPrintLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stop_word.c_str(), sampled_tokens.size()));
+	DebugPrintLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stopped_on_word.c_str(), sampled_tokens.size()));
 
 	onComplete(InternalError::NoError, response);
 };
@@ -1295,11 +1306,11 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 
 	if (newSize > 0)
 	{
-		auto& block = _contextState.blocks[newSize - 1_sz];
-		if (block.cached)
-			current_pos = std::min(current_pos, _contextState.blocks_pos + block.offset + block.length());
+		auto& newLastblock = _contextState.blocks[newSize - 1_sz];
+		if (newLastblock.cached)
+			current_pos = std::min(current_pos, _contextState.blocks_pos + newLastblock.offset + newLastblock.length());
 		else
-			current_pos = std::min(current_pos, _contextState.blocks_pos + block.offset);
+			current_pos = std::min(current_pos, _contextState.blocks_pos + newLastblock.offset);
 	}
 	else
 	{

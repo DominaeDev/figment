@@ -21,6 +21,7 @@ bool LLMEmbedding::LoadModel(string filename)
 	// initialize the model
 	llama_model_params model_params = llama_model_default_params();
 	model_params.n_gpu_layers = ngl;
+	model_params.use_mmap = false;
 	model_params.use_mlock = false;
 	_pModel = llama_model_load_from_file(filename.c_str(), model_params);
 	_modelName = string_util::get_filename(filename);
@@ -166,7 +167,7 @@ static bool batch_decode(llama_context* ctx, llama_batch& batch, float* output, 
 
 	for (int i = 0; i < batch.n_tokens; i++)
 	{
-		if (!batch.logits[i])
+		if (batch.logits == nullptr || !batch.logits[i])
 			continue;
 
 		const float* embd = nullptr;

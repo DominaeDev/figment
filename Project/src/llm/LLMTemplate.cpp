@@ -298,8 +298,8 @@ string llm_tmpl::apply_chat_template_prefix(Role role, string content, string na
 	
 	if (string_util::ends_with(content, post))
 		content = content.substr(0, content.length() - post.length());
-	if (!string_util::begins_with(content, content))
-		content = content + content;
+	if (!string_util::begins_with(content, pre))
+		content = pre + content;
 	return content;
 }
 

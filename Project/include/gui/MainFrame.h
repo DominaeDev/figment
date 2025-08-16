@@ -17,7 +17,7 @@ public:
 	MainFrame(SDL_Window* pWindow);
 	virtual ~MainFrame();
 
-	void LoadModel();
+	void InitializeModel();
 	void UnloadModel();
 
 	static void SetStatusBar(string message);
