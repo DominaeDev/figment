@@ -114,6 +114,15 @@ private:
 	void ClearResponseQueue();
 	bool CanGenerate() const;
 
+public:
+	enum class GenerateFlag : int32_t
+	{ 
+		None = 0, 
+		Continuation	= 1 << 0, 
+		Instigation		= 1 << 1,
+		AllowNarrator	= 1 << 2,
+	};
+
 private:
 	struct __PartialResult
 	{
@@ -144,7 +153,6 @@ private:
 	};
 	void PrepareGeneration(PrepareArguments args);
 
-	enum GenerateFlag { None = 0, Continuation, Instigation, };
 	struct GenerateArguments
 	{
 		Role role = Role::Undefined;
@@ -166,6 +174,7 @@ private:
 	bool RebuildKVCache(llama_context* pCtx, const llama_batch& batch);
 
 	Sentences GetHistory(size_t depth);
+	llama_sampler* CompileGrammar(GrammarFlag grammarFlags);
 
 private:
 	enum class ReadyState { Invalid, Uninitialized, LoadingModel, ModelLoaded, Initializing, Ready, Generating, RebuildingContext };
@@ -199,3 +208,5 @@ public:
 	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 	std::atomic<int64_t> usedRAM; // As reported from llama.cpp
 };
+
+DEFINE_ENUM_FLAGS(LLMInstance::GenerateFlag, int32_t);

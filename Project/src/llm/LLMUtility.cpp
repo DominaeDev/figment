@@ -5,6 +5,7 @@
 #include <format>
 #include <cwctype>
 #include <cassert>
+#include <set>
 
 static std::vector<string> const opening_tags {
 	std::format("<{0}=\"", Constants::DialogueTag),
@@ -909,4 +910,98 @@ bool llm_util::dump_context(const llama_batch& batch, const llama_vocab* pVocab,
 		result.append(std::format("{0:<8} {1:<8} {2}({3})\t{4:<8} \"{5}\"\r\n", batch.pos[i], batch.token[i], batch.seq_id[i][0], batch.n_seq_id[i], (int32_t)batch.logits[i], fnTokenStr(batch.token[i])));
 
 	return WriteTextFile(filename, result, false);
+}
+
+static inline constexpr bool CheckFlag(GrammarFlag options, GrammarFlag value)
+{
+	return (options & value) == value;
+}
+
+static bool _evaluate(string& text, size_t pos_begin, const std::set<string>& flags)
+{
+	size_t pos_next = text.find("{{", pos_begin + 2);
+	size_t pos_end = text.find("}}", pos_begin + 2);
+	if (pos_end == string::npos)
+		return false;
+
+	if (pos_next != string::npos && pos_next < pos_end)
+	{
+		_evaluate(text, pos_next, flags); // Evaluate inner
+		return _evaluate(text, pos_begin, flags); // Re-evaluate outer
+	}
+
+	size_t pos_q = text.find('?', pos_begin + 2);
+	if (pos_q == string::npos || pos_q > pos_end)
+		return false;
+
+	string condition = text.substr(pos_begin + 2, pos_q - pos_begin - 2);
+	auto expected_flags = string_util::split(condition, '|', true);
+	bool result = true;
+	for (auto& flag : expected_flags)
+	{
+		bool bTrue = true;
+		if (flag[0] == '!')
+		{
+			flag = flag.substr(1);
+			bTrue = false;
+		}
+		if ((flags.find(flag) != flags.end()) != bTrue)
+		{
+			result = false;
+			break;
+		}
+	}
+
+	if (result)
+	{
+		text.erase(pos_end, 2); // }}
+		text.erase(pos_begin, pos_q - pos_begin + 1); // {{...?
+	}
+	else
+		text.erase(pos_begin, pos_end - pos_begin + 2);
+	return true;
+}
+
+llama_sampler* llm_util::compile_grammar(GrammarFlag grammarFlags, const llama_vocab* pVocab, string names, string stateVars)
+{
+	string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
+	if (grammar.size() == 0)
+		return nullptr;
+
+	string_util::replace_all(grammar, "{{_NAMES_}}", names);
+	string_util::replace_all(grammar, "{{_STATE_VARS_}}", stateVars);
+
+	std::set<string> flags;
+	if (CheckFlag(grammarFlags, GrammarFlag::Default))
+		flags.insert("default");
+	if (CheckFlag(grammarFlags, GrammarFlag::Stub))
+		flags.insert("stub");
+	if (CheckFlag(grammarFlags, GrammarFlag::Continue))
+		flags.insert("continue");
+	if (CheckFlag(grammarFlags, GrammarFlag::Talk))
+		flags.insert("talk");
+	if (CheckFlag(grammarFlags, GrammarFlag::Act))
+		flags.insert("act");
+	if (CheckFlag(grammarFlags, GrammarFlag::Narrate))
+		flags.insert("narrate");
+	if (CheckFlag(grammarFlags, GrammarFlag::EnableNarrator))
+		flags.insert("enable-narrator");
+	if (CheckFlag(grammarFlags, GrammarFlag::EnableState))
+		flags.insert("enable-state");
+
+	size_t pos = grammar.find("{{", 0);
+	while (pos != string::npos && pos < grammar.size())
+	{
+		if (_evaluate(grammar, pos, flags))
+		{
+			assert(grammar[pos] != '{');
+			pos = grammar.find("{{", pos);
+		}
+		else
+			pos = grammar.find("{{", pos + 2);
+	}
+
+	auto pGrammar = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
+	assert(pGrammar);
+	return pGrammar;
 }

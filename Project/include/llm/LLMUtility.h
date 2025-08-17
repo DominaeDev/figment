@@ -37,4 +37,5 @@ namespace llm_util
 
 	string format_id(string id);
 	bool dump_context(const llama_batch& batch, const llama_vocab* pVocab, string filename);
+	llama_sampler* compile_grammar(GrammarFlag flags, const llama_vocab* pVocab, string names, string stateVars);
 }

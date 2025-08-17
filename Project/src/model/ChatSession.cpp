@@ -243,15 +243,15 @@ string ChatSession::GetSystemPrompt() const
 		string_util::replace_all(prompt, "##FORMATTING##", _formatting_solo);
 	}
 
-	string_util::replace_all(prompt, "##STATE_FORMATTING##", CheckOption(_options, LLMOption::StateVariables) ? _formatting_state : "");
-	string_util::replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", CheckOption(_options, LLMOption::Uncensored) ? _system_prompt_uncensored : "");
+	string_util::replace_all(prompt, "##STATE_FORMATTING##", CheckEnumFlag(_options, LLMOption::StateVariables) ? _formatting_state : "");
+	string_util::replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", CheckEnumFlag(_options, LLMOption::Uncensored) ? _system_prompt_uncensored : "");
 	prompt = string_util::trim(prompt);
 
 	if (IsGroupChat())
 	{
 		prompt.append("\n\n# Characters");
 		
-		if (CheckOption(_options, LLMOption::UseCharacterIds))
+		if (CheckEnumFlag(_options, LLMOption::UseCharacterIds))
 		{
 			prompt.append("\n{\n");
 			// Bots
@@ -312,4 +312,27 @@ string ChatSession::GetDirectorPrompt() const
 size_t ChatSession::GetBotCount() const
 {
 	return std::count_if(_characters.begin(), _characters.end(), [](auto kvp) { return is_bot(kvp.first); });
+}
+
+string ChatSession::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
+{
+	string pattern;
+	int32_t botCount = (int32_t)GetBotCount();
+	for (int i = 0; i < botCount; ++i)
+	{
+		if (i > 0)
+			pattern += "| ";
+		if (useCharacterIds)
+			pattern += std::format("| \"@{}\"", GetIdentifierOf(bot_from_index(i)));
+		else
+			pattern += std::format("| \"{}\"", GetNameOf(bot_from_index(i)));
+	}
+	if (bIncludeUser)
+	{
+		if (useCharacterIds)
+			pattern += std::format("| \"@{}\"", GetIdentifierOf(Role::User));
+		else
+			pattern += std::format("| \"{}\"", GetNameOf(Role::User));
+	}
+	return pattern;
 }

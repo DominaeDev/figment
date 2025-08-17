@@ -1,29 +1,37 @@
-root			::= any{1,3} ##STATE## end?
-more 			::= any{0,2} ##STATE## end?
+{{default?
+# Default root
+root ::= any{1,3}{{enable-state? stat}} end?
+}}
 
 # Stubs
-stub-talk		::= "\"" [^"*<|>@\n]* "\"</talk>" more
-stub-act		::= "*" [^"*<|>@\n]* "*</act>" more
-stub-narr		::= "[" [^"*<|>@\]]* "]</narrator>" more
+{{stub?
+{{talk?root ::= "\"" [^"*<|>@\n]* "\"</talk>" more}}
+{{act?root ::= "*" [^"*<|>@\n]* "*</act>" more}}
+{{narrate?root ::= "[" [^"*<|>@\]]* "]</narrator>" more}}}}
 
 # Continuations
-cont-talk		::= [^"*<|>@\n]* "\"</talk>" more
-cont-act		::= [^"*<|>@\n]* "*</act>" more
-cont-narr		::= [^"*<|>\]]* "]</narrator>" more
-
-# Message types
-dlg			::= "<talk=\"" name "\">\"" text "\"</talk>"
-act			::= "<act=\"" name "\">*" text "*</act>"
-narr		::= "<narrator>[" text "]</narrator>"
-any			::= (dlg | act | narr | ws)
+{{continue?
+{{talk?root ::= [^"*<|>@\n]* "\"</talk>" more}}
+{{act?root ::= [^"*<|>@\n]* "*</act>" more}}
+{{narrate?root ::= [^"*<|>\]]* "]</narrator>" more}}
+}}
 
 # State variables
+{{enable-state?
 stat		::= ("<change>" (var-expr | "None") "</change>")*
 var-expr	::= var-name " = " var-value
-var-name 	::= ##STATE_VARS##
+var-name 	::= {{_STATE_VARS_}}
 var-value 	::= [^\n\t<>|=,.;@"*(){}[\]]+
+}}
 
-text		::= [^\t<|>@"*\]]*
-ws			::= [ \n]
-name		::= ##NAMES##
-end			::= ( "<|im_end|>" | "</s>" | "<s>" | "<end_of_turn>" | "<EOT>" | "_<EOT>" | "###" | "<｜end▁of▁sentence｜>" )
+# Message types
+dlg ::= "<talk=\"" name "\">\"" text "\"</talk>"
+act ::= "<act=\"" name "\">*" text "*</act>"
+narr ::= "<narrator>[" text "]</narrator>"
+any ::= (dlg | act{{enable-narrator? | narr}} | ws)
+
+text ::= [^\t<|>@"*\]]*
+ws ::= [ \n]
+name ::= {{_NAMES_}}
+more ::= any{0,2}{{enable-state? stat}} end?
+end ::= ( "<|im_end|>" | "</s>" | "<s>" | "<end_of_turn>" | "<EOT>" | "_<EOT>" | "###" | "<｜end▁of▁sentence｜>" )

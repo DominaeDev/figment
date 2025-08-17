@@ -25,6 +25,7 @@ public:
 	Role GetRoleOf(string characterId) const;
 	size_t GetBotCount() const;
 	bool IsGroupChat() const { return GetBotCount() > 1; }
+	string GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const;
 
 	[[nodiscard]] string ApplyNames(string text) const;
 	[[nodiscard]] string ApplyNames(string text, Role characterRole) const;

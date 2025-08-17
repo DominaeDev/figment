@@ -61,17 +61,27 @@ struct Submessage
 	string content;
 };
 
-enum class Grammar
+enum class GrammarFlag : int32_t
 {
-	None				= 0,
-	Default				= 1,
-	StubDialogue		= 2,
-	StubAction			= 3,
-	StubNarration		= 4,
-	ContinueDialogue	= 5,
-	ContinueAction		= 6,
-	ContinueNarration	= 7,
+	None			= 0,
+
+	// Generation type
+	Default			= 1 << 0,
+	Stub			= 1 << 1,
+	Continue		= 1 << 2,
+
+	// Message type
+	Talk			= 1 << 3,
+	Act				= 1 << 4,
+	Narrate			= 1 << 5,
+
+	// Options
+	EnableNarrator	= 1 << 6,
+	EnableState		= 1 << 7,
+	UseCharacterIds	= 1 << 8,
+	AllowUser		= 1 << 9,
 };
+DEFINE_ENUM_FLAGS(GrammarFlag, int32_t)
 
 struct ModelState
 {
@@ -80,14 +90,15 @@ struct ModelState
 	llama_context* pCtx = nullptr;
 	llama_sampler* pSampler = nullptr;
 	llama_sampler* pActiveGrammar = nullptr;
-	std::array<llama_sampler*, 8> grammars = {};
+	std::map<GrammarFlag, llama_sampler*> grammars = {};
 
 	string modelName {};
 	std::mt19937 rng {};
 
 	void Release();
 
-	llama_sampler* SetActiveGrammar(Grammar grammar);
+	bool HasGrammar(GrammarFlag flags) const;
+	llama_sampler* SetActiveGrammar(GrammarFlag flags);
 };
 
 struct ContextBlock 
@@ -139,9 +150,10 @@ enum class LLMOption : int32_t
 };
 DEFINE_ENUM_FLAGS(LLMOption, int32_t)
 
-inline constexpr bool CheckOption(LLMOption options, LLMOption value)
+template <typename E>
+inline constexpr bool CheckEnumFlag(const E set, const E flag)
 {
-	return (options & value) == value;
+	return (set & flag) == flag;
 }
 
 struct Sentence

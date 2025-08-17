@@ -20,15 +20,13 @@ void ModelState::Release()
 {
 	if (pSampler)
 	{
-		SetActiveGrammar(Grammar::None); // Detach grammar (if any)
+		SetActiveGrammar(GrammarFlag::None); // Detach grammar (if any)
 		llama_sampler_free(pSampler);
 	}
 
-	for (size_t i = 0; i < grammars.size(); ++i)
-	{
-		llama_sampler_free(grammars[i]);
-		grammars[i] = nullptr;
-	}
+	for (auto& kvp : grammars)
+		llama_sampler_free(kvp.second);
+	grammars.clear();
 
 	if (pCtx)
 	{
@@ -46,14 +44,17 @@ void ModelState::Release()
 	pVocab = nullptr;
 }
 
-llama_sampler* ModelState::SetActiveGrammar(Grammar grammar)
+llama_sampler* ModelState::SetActiveGrammar(GrammarFlag flags)
 {
-	if (static_cast<size_t>(grammar) >= grammars.size() || grammars[castEnum(Grammar::Default)] == nullptr)
-		return nullptr;
-
+	llama_sampler* pSelectedGrammar = nullptr;
+	if (flags != GrammarFlag::None)
+	{
+		auto itFind = grammars.find(flags);
+		if (itFind != grammars.end())
+			pSelectedGrammar = itFind->second;
+	}
+	
 	llama_sampler* pChain = pSampler;
-	llama_sampler* pSelectedGrammar = grammars[castEnum(grammar)];
-
 	if (pSelectedGrammar != nullptr && pSelectedGrammar == llama_sampler_chain_get(pChain, 0))
 		return pSelectedGrammar; // No swap
 
@@ -67,8 +68,7 @@ llama_sampler* ModelState::SetActiveGrammar(Grammar grammar)
 		llama_sampler_chain_remove(pChain, i);
 	}
 
-	for (size_t i = 0; i < grammars.size(); ++i)
-		samplers.remove(grammars[i]);
+	samplers.remove(pActiveGrammar);
 	pActiveGrammar = nullptr;
 
 	if (pSelectedGrammar)
@@ -80,6 +80,11 @@ llama_sampler* ModelState::SetActiveGrammar(Grammar grammar)
 	for (auto sampler : samplers)
 		llama_sampler_chain_add(pChain, sampler);
 	return pActiveGrammar;
+}
+
+bool ModelState::HasGrammar(GrammarFlag flags) const
+{
+	return grammars.find(flags) != grammars.end();
 }
 
 int32_t ContextState::AssignBlockPositions()
@@ -213,14 +218,14 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		{
 			if (i > 0)
 				namesPattern += "| ";
-			if (CheckOption(_options, LLMOption::UseCharacterIds))
+			if (CheckEnumFlag(_options, LLMOption::UseCharacterIds))
 				namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(bot_from_index(i)));
 			else
 				namesPattern += std::format("| \"{}\"", _session.GetNameOf(bot_from_index(i)));
 		}
-		if (CheckOption(_options, LLMOption::AllowUserResponse))
+		if (CheckEnumFlag(_options, LLMOption::AllowUserResponse))
 		{
-			if (CheckOption(_options, LLMOption::UseCharacterIds))
+			if (CheckEnumFlag(_options, LLMOption::UseCharacterIds))
 				namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(Role::User));
 			else
 				namesPattern += std::format("| \"{}\"", _session.GetNameOf(Role::User));
@@ -228,7 +233,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		string_util::replace_all(grammar, "##NAMES##", namesPattern);
 
 		// Variables
-		if (CheckOption(_options, LLMOption::StateVariables))
+		if (CheckEnumFlag(_options, LLMOption::StateVariables))
 		{
 			string_util::replace_all(grammar, "##STATE##", "stat");
 			string_util::replace_all(grammar, "##STATE_VARS##", _state.GetGrammarPattern());
@@ -239,19 +244,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 			string_util::replace_all(grammar, "##STATE_VARS##", "[]");
 		}
 
-		llama_sampler* default_grammar_sampler = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
-		if (default_grammar_sampler)
-		{
-			_modelState.grammars[castEnum(Grammar::Default)] = default_grammar_sampler;
-			_modelState.grammars[castEnum(Grammar::StubDialogue)] = llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-talk");
-			_modelState.grammars[castEnum(Grammar::StubAction)] = llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-act");
-			_modelState.grammars[castEnum(Grammar::StubNarration)] = llama_sampler_init_grammar(pVocab, grammar.c_str(), "stub-narr");
-			_modelState.grammars[castEnum(Grammar::ContinueDialogue)] = llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-talk");
-			_modelState.grammars[castEnum(Grammar::ContinueAction)] = llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-act");
-			_modelState.grammars[castEnum(Grammar::ContinueNarration)] = llama_sampler_init_grammar(pVocab, grammar.c_str(), "cont-narr");
-
-			DebugPrintLn("Grammar loaded");
-		}
+		llama_sampler* default_grammar_sampler = CompileGrammar(GrammarFlag::Default);
 
 		if (default_grammar_sampler) llama_sampler_chain_add(pSampler, default_grammar_sampler);	// Grammar
 		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
@@ -322,7 +315,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		
 		_contextState.personas[kvp.first] = llm_util::tokenize(_modelState.pModel, kvp.second, false);
 
-		if (!_session.IsGroupChat() || !CheckOption(_options, LLMOption::SwapPersonas))
+		if (!_session.IsGroupChat() || !CheckEnumFlag(_options, LLMOption::SwapPersonas))
 			ContainerAppend(system_prompt_tokens, _contextState.personas[Role::Bot1]);
 	}
 
@@ -371,7 +364,7 @@ bool LLMInstance::ResetChat(int seed)
 		std::scoped_lock lock(_stateMutex, _resultMutex);
 		ClearQueue(_resultQueue);
 
-		if (CheckOption(_options, LLMOption::SwapPersonas))
+		if (CheckEnumFlag(_options, LLMOption::SwapPersonas))
 			ActivatePersona(Role::Undefined);
 
 		_contextState.blocks.clear();
@@ -390,7 +383,7 @@ bool LLMInstance::ResetChat(int seed)
 
 	PushSignal(LLMStatusSignal::InitializedChat);
 
-	if (CheckOption(_options, LLMOption::GreetUser))
+	if (CheckEnumFlag(_options, LLMOption::GreetUser))
 		GreetUser();
 	return true;
 }
@@ -444,7 +437,7 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 	}
 
 	// Initialize embedder
-	if (CheckOption(_options, LLMOption::Embeddings))
+	if (CheckEnumFlag(_options, LLMOption::Embeddings))
 	{
 		_pEmbedding = std::make_unique<LLMEmbedding>();
 		if (_pEmbedding->LoadModel(string(Constants::Embedding::DefaultModelLocation)))
@@ -632,7 +625,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	}
 
 	// Add state block
-	if (!_state.IsEmpty() && CheckOption(_options, LLMOption::StateVariables))
+	if (!_state.IsEmpty() && CheckEnumFlag(_options, LLMOption::StateVariables))
 	{
 		auto it = std::find_if(ctxState.blocks.begin(), ctxState.blocks.end(), [](const ContextBlock& b) { return !b.cached; });
 
@@ -766,8 +759,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	string stop_reason;
 	string response;
 	MessageType msgType = args.msgType;
-	bool isContinuation = args.flags == GenerateFlag::Continuation;
-	bool isInstigation = args.flags == GenerateFlag::Instigation;
+	bool isContinuation = CheckEnumFlag(args.flags, GenerateFlag::Continuation);
+	bool isInstigation = CheckEnumFlag(args.flags, GenerateFlag::Instigation);
 
 	ContextState& chat = _contextState;
 	llama_batch& batch = chat.batch;
@@ -796,34 +789,33 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	DebugPrintLn(">> BEGIN GENERATION");
 
 	// Select and init grammar
-	Grammar grammar = Grammar::None;
+	GrammarFlag grammarFlags = GrammarFlag::None;
 	if (args.msgType != MessageType::Undefined)
 	{
 		if (isContinuation)
-		{
-			if (args.msgType == MessageType::Dialogue)
-				grammar = Grammar::ContinueDialogue;
-			else if (args.msgType == MessageType::Action)
-				grammar = Grammar::ContinueAction;
-			else if (args.msgType == MessageType::Narration)
-				grammar = Grammar::ContinueNarration;
-		}
+			grammarFlags = grammarFlags | GrammarFlag::Continue;
 		else if (isInstigation)
-		{
-			if (args.msgType == MessageType::Dialogue)
-				grammar = Grammar::StubDialogue;
-			else if (args.msgType == MessageType::Action)
-				grammar = Grammar::StubAction;
-			else if (args.msgType == MessageType::Narration)
-				grammar = Grammar::StubNarration;
-		}
+			grammarFlags = grammarFlags | GrammarFlag::Stub;
 		else
-			grammar = Grammar::Default;
+			grammarFlags = grammarFlags | GrammarFlag::Default;
+
+		if (args.msgType == MessageType::Dialogue)
+			grammarFlags = grammarFlags | GrammarFlag::Talk;
+		else if (args.msgType == MessageType::Action)
+			grammarFlags = grammarFlags | GrammarFlag::Act;
+		else if (args.msgType == MessageType::Narration)
+			grammarFlags = grammarFlags | GrammarFlag::Narrate;
 	}
 	else
-		grammar = Grammar::Default;
+		grammarFlags = GrammarFlag::Default;
 
-	if (auto pGrammar = state.SetActiveGrammar(grammar))
+	if (CheckEnumFlag(args.flags, GenerateFlag::AllowNarrator))
+		grammarFlags = grammarFlags | GrammarFlag::EnableNarrator;
+	if (CheckEnumFlag(_options, LLMOption::StateVariables))
+		grammarFlags = grammarFlags | GrammarFlag::EnableNarrator;
+
+	CompileGrammar(grammarFlags);
+	if (auto pGrammar = state.SetActiveGrammar(grammarFlags))
 		llama_sampler_reset(pGrammar);
 
 	if (!args.prepend.empty())
@@ -1029,7 +1021,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 								break; // That's enough, thank you
 							}
 
-							if (CheckOption(_options, LLMOption::SwapPersonas))
+							if (CheckEnumFlag(_options, LLMOption::SwapPersonas))
 								ActivatePersona(responderRole);
 						}
 					}
@@ -1140,14 +1132,14 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 void LLMInstance::StartGeneration(GenerateArguments args)
 {
-	if (CheckOption(_options, LLMOption::RandomizeMessageCount))
+	if (CheckEnumFlag(_options, LLMOption::RandomizeMessageCount))
 	{	// Acquire state lock
 		std::scoped_lock lock(_stateMutex);
 		static std::uniform_int_distribution<int> numMessages(1, 3);
 		if (args.maxMessages <= 0) // Randomize number of messages
 			args.maxMessages = numMessages(_modelState.rng);
 	}
-	else if (!CheckOption(_options, LLMOption::LimitMessages))
+	else if (!CheckEnumFlag(_options, LLMOption::LimitMessages))
 		args.maxMessages = 0;
 
 	if (args.responseId.empty())
@@ -1228,7 +1220,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 		return false;
 
 	// Process
-	string identifier = CheckOption(_options, LLMOption::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
+	string identifier = CheckEnumFlag(_options, LLMOption::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
 	string content = message;
 	content = _session.ApplyNames(content);
 	std::vector<Submessage> subMessages;
@@ -1412,7 +1404,7 @@ bool LLMInstance::InstigateResponse(Role role, MessageType msgType, int messageC
 	};
 	PrepareGeneration(prepareArgs);
 
-	string responder = CheckOption(_options, LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
+	string responder = CheckEnumFlag(_options, LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
 
 	string prependMsg;
 	if (msgType == MessageType::Dialogue)
@@ -1767,4 +1759,24 @@ bool LLMInstance::RebuildKVCache(llama_context* pCtx, const llama_batch& batch)
 	_readyState.store(prevReadyState);
 	PushSignal(LLMStatusSignal::GenerationStarted);
 	return r == 0;
+}
+
+llama_sampler* LLMInstance::CompileGrammar(GrammarFlag flags)
+{
+	if (flags == GrammarFlag::None)
+		return nullptr;
+
+	auto itFind = _modelState.grammars.find(flags);
+	if (itFind != _modelState.grammars.end())
+		return itFind->second;
+
+	DebugPrintLn(std::format("Compiling grammar variant 0x{:X}", (int32_t)flags));
+	llama_sampler* pGrammar = llm_util::compile_grammar(
+		flags,
+		_modelState.pVocab, 
+		_session.GetNameGrammar(CheckEnumFlag(_options, LLMOption::UseCharacterIds), CheckEnumFlag(_options, LLMOption::AllowUserResponse)), 
+		_state.GetGrammarPattern());
+	
+	_modelState.grammars[flags] = pGrammar;
+	return pGrammar;
 }
