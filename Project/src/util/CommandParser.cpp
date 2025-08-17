@@ -15,7 +15,7 @@ static _Cmd s_Commands[] {
 	{ "look",			CommandType::Look },
 	{ "narrate",		CommandType::Narrate },
 	{ "pass",			CommandType::PassTurn},
-	{ "retry",			CommandType::RedoResponse },
+	{ "redo",			CommandType::RedoResponse },
 	{ "reset",			CommandType::Reset },
 	{ "reseed",			CommandType::Reseed },
 	{ "say",			CommandType::UserMessage },

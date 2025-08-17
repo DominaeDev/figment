@@ -1015,8 +1015,9 @@ bool TextBox::OnEvent(SDL_Event* event)
 			{
 				if (_pOnEnter && _pText->text) // Invoke
 				{
-					_pOnEnter(string_util::trim(string(_pText->text)));
+					string text = string_util::trim(string(_pText->text));
 					Clear();
+					_pOnEnter(text);
 				}
 			}
 			break;
@@ -1067,4 +1068,10 @@ void TextBox::Clear()
 	highlight_start = -1;
 	highlight_end = -1;
 	SetCursorPosition(0);
+}
+
+void TextBox::SetText(string text)
+{
+	Clear();
+	Insert(text.c_str());
 }

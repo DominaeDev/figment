@@ -17,6 +17,8 @@ public:
 
 	void SetEnterPressedCallback(EnterPressedCallback cb);
 
+	void SetText(string text);
+
 	void Clear();
 	void SetFocus(bool focus);
 	void MoveCursorBeginningOfLine();

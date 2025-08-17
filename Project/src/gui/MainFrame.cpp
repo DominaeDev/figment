@@ -60,13 +60,13 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	_pChatScroll = new ChatScroll(centerPanel);
 
-	auto pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::DefaultFontSize);
-	pTextBox->SetSize(-1, 88);
-	pTextBox->SelectAll();
+	_pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::DefaultFontSize);
+	_pTextBox->SetSize(-1, 88);
+	_pTextBox->SelectAll();
 
 	auto pCenterSizer = new VerticalSizer();
 	pCenterSizer->Add(_pChatScroll, -1, Sizer::Expand | Sizer::Bottom, 8);
-	pCenterSizer->Add(pTextBox, 0, Sizer::AlignBottom | Sizer::Expand);
+	pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::Expand);
 	centerPanel->SetSizer(pCenterSizer);
 
 	auto mainSizer = new HorizontalSizer();
@@ -84,7 +84,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	SetSizer(topSizer);
 	
-	pTextBox->SetEnterPressedCallback([this](string text) {
+	_pTextBox->SetEnterPressedCallback([this](string text) {
 		EnqueueCommand(CommandParser::Parse(text));
 	});
 
@@ -92,9 +92,9 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	pTextBoxBG->SetCornerSize(10.0f);
 	pTextBoxBG->SetColors(Colors::White, Color { 0xb9, 0xb2, 0x8f, 0xFF });
 	pTextBoxBG->SetTextures(TextureStore::GetTexture(TextureType::TEXTBOX_BG), TextureStore::GetTexture(TextureType::TEXTBOX_BORDER));
-	pTextBox->SetBackgroundRenderer(pTextBoxBG);
+	_pTextBox->SetBackgroundRenderer(pTextBoxBG);
 
-	pTextBox->SetFocus(true);
+	_pTextBox->SetFocus(true);
 
 	InvalidateLayout();
 	s_pInstance = this;
@@ -279,7 +279,11 @@ bool MainFrame::OnCommand(Command cmd)
 	case CommandType::RollbackUserMessage:
 	{
 		auto removedIds = pLLM->RollbackUserMessage();
-		return _pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
+		if (removedIds.size() > 0)
+		{
+			_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
+			_pTextBox->SetText(removedIds[0].content);
+		}
 		break;
 	}
 	case CommandType::Reset:

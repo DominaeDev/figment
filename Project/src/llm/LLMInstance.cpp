@@ -186,6 +186,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 
 	_contextState = {};
 	_contextState.pCtx = _modelState.pCtx;
+	_contextState.pVocab = _modelState.pVocab;
 
 	_session = args.session;
 
@@ -531,7 +532,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 
 		ContextBlock block = currBlock;
 		block.cached = false;
-		impl_RemoveMessages(1, true); // Remove the last message, resets current_pos
+		impl_RemoveMessages(1, false); // Remove the last message, resets current_pos
 
 		if (extend && bComplete)
 		{
@@ -666,7 +667,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 		string content = block.content;
 		if (args.isContinuation) // Continue response
-			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name);
+			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name); //! name?
 		else if (block.role == Role::System)
 			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
 		else
@@ -720,7 +721,8 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	}
 
 	// Store response position (before assistant prelude)
-	ctxState.response_pos = current_pos + (int32_t)prompt_tokens.size();
+	if (!args.isContinuation)
+		ctxState.response_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append assistant tokens
 	if (!args.isContinuation)
@@ -742,6 +744,8 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Mark blocks in cache
 	for (auto it = ctxState.blocks.begin(); it != ctxState.blocks.end(); ++it)
 		it->cached = true;
+
+	llm_util::dump_context(batch, ctxState.pVocab, "prompt-full.txt");
 }
 
 void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
@@ -759,7 +763,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 	llama_token sampled_token;
 	string partial;
-	string stopped_on_word;
+	string stop_reason;
 	string response;
 	MessageType msgType = args.msgType;
 	bool isContinuation = args.flags == GenerateFlag::Continuation;
@@ -843,10 +847,16 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		bool next_token = true;
 
 		if (thread_stop.stop_requested())
+		{
+			stop_reason = "cancel";
 			break; // Cancelled
+		}
 
 		if (current_pos >= ctx_size)
+		{
+			stop_reason = "max ctx";
 			break; // Max limit reached
+		}
 
 		const int32_t n_tokens = std::min(n_batch, batch.n_tokens - current_pos);
 		llama_batch batch_view = {
@@ -936,18 +946,18 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			// check if there is incomplete UTF-8 character at the end
 			bHalt = false;
 			bWait = false;
-			llm_util::process(partial, str_token, &bWait, &bHalt, stopped_on_word);
+			llm_util::process(partial, str_token, &bWait, &bHalt, stop_reason);
 		}
 		else // EOG token
 		{
 			bHalt = true;
-			stopped_on_word = "EOG";
+			stop_reason = "EOG";
 		}
 
 		if (sampled_tokens.size() >= Constants::Context::MaxResponseLength)
 		{
 			bHalt = true;
-			stopped_on_word = "length";
+			stop_reason = "length";
 		}
 
 		bSend &= !bWait;
@@ -973,7 +983,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 					if (tagName == "@USR" || tagName == _session.GetNameOf(Role::User) && args.role != Role::User)
 					{
-						stopped_on_word = "user";
+						stop_reason = "user";
 						break; // Stop if talking/acting for the user
 					}
 
@@ -1015,7 +1025,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 							if (msgType != MessageType::StateReport && args.maxMessages > 0 && ++numMessages >= args.maxMessages)
 							{
-								stopped_on_word = "msg count";
+								stop_reason = "msg count";
 								break; // That's enough, thank you
 							}
 
@@ -1123,7 +1133,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	}
 
 	DebugPrintLn();
-	DebugPrintLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stopped_on_word.c_str(), sampled_tokens.size()));
+	DebugPrintLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stop_reason.c_str(), sampled_tokens.size()));
 
 	onComplete(InternalError::NoError, response);
 };
@@ -1321,8 +1331,7 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 	_contextState.batch.n_tokens = current_pos;
 
 	// Clear kv cache
-	ModelState& state = _modelState;
-	llama_kv_self_seq_rm(state.pCtx, 0, current_pos, -1);
+	llama_kv_self_seq_rm(_contextState.pCtx, 0, current_pos, -1);
 
 	// Return removed ids
 	std::vector<RemovedMessage> removedIds;

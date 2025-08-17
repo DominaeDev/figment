@@ -8,6 +8,7 @@
 class Sizer;
 class StatusBar;
 class ChatScroll;
+class TextBox;
 struct Command;
 
 class MainFrame : public Frame
@@ -38,6 +39,8 @@ protected:
 private:
 	StatusBar* _pStatusBar;
 	ChatScroll* _pChatScroll;
+	TextBox* _pTextBox;
+
 	float _fPollingCounter = 0.0f;
 	bool _bStartedChat = false; // Used to trigger greeting
 

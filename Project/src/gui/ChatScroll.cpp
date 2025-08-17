@@ -112,13 +112,10 @@ int ChatScroll::RemoveMessages(std::vector<string> ids)
 			entry.pChatMessage = nullptr;
 		}
 
-		removedIds.insert(entry.subMessageId);
-		_messages.erase(_messages.begin() + (ptrdiff_t)i);
+		_messagesById.erase(entry.subMessageId);
+		_messages.erase(_messages.begin() + i);
 		++removed;
 	}
-
-	for (auto id : removedIds)
-		_messagesById.erase(id);
 
 	InvalidateLayout();
 	return removed;
