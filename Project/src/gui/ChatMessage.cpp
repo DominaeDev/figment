@@ -75,7 +75,7 @@ ChatMessage::ChatMessage(Control* pParent, Role role, string characterId, string
 
 		Image* pPortrait = new Image(this, pTexture);
 		pPortrait->SetSize(52, 52);
-		pPortrait->SetPosition(bRight ? Constants::ChatScrollWidth - pPortrait->GetWidth() : 0, 0);
+		pPortrait->SetPosition(bRight ? Constants::GUI::ChatScrollWidth - pPortrait->GetWidth() : 0, 0);
 	}
 
 	_pMessagePanel = new Panel(this);
@@ -109,19 +109,19 @@ ChatMessage::ChatMessage(Control* pParent, Role role, string characterId, string
 	if (msgType != MessageType::Dialogue)
 		font = FontFace::Italic;
 
-	_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::ChatMessageFontSize, true);
+	_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::GUI::ChatMessageFontSize, true);
 	_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
 	_pMessageText->SetBackgroundColor(Colors::Transparent);
-	_pMessageText->SetMaxSize(toF(Constants::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2), -1);
+	_pMessageText->SetMaxSize(toF(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2), -1);
 
 	// Name label
 	if (!name.empty())
 	{
-		_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::CharacterNameFontSize, false);
+		_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
 		_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
 		_pNameText->SetBackgroundColor(Colors::Transparent);
 		_pNameText->SetPosition(LEFT_MARGIN, -1);
-		_pNameText->SetSize(Constants::ChatScrollWidth - HMARGIN, -1);
+		_pNameText->SetSize(Constants::GUI::ChatScrollWidth - HMARGIN, -1);
 	}
 }
 
@@ -203,9 +203,9 @@ void ChatMessage::SetMessage(string text, bool complete)
 	int currentWidth = toI(_pMessagePanel->GetWidth());
 	if (currentWidth < w)
 	{
-		_pMessagePanel->SetWidth(std::clamp(toF(w), MIN_WIDTH, Constants::ChatScrollWidth - HMARGIN));
+		_pMessagePanel->SetWidth(std::clamp(toF(w), MIN_WIDTH, Constants::GUI::ChatScrollWidth - HMARGIN));
 		if (bRight)
-			_pMessagePanel->SetX(Constants::ChatScrollWidth - _pMessagePanel->GetWidth() - RIGHT_MARGIN + (bDialogue ? DIALOGUE_OFFSET : 0));
+			_pMessagePanel->SetX(Constants::GUI::ChatScrollWidth - _pMessagePanel->GetWidth() - RIGHT_MARGIN + (bDialogue ? DIALOGUE_OFFSET : 0));
 	}
 	InvalidateParentLayout(true);
 	InvalidateLayout();

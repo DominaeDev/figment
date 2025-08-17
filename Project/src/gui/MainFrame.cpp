@@ -45,13 +45,13 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	auto centerPanel = new Panel(mainArea);
 	centerPanel->SetBackgroundColor(Colors::ChatBackground);
-	centerPanel->SetSize(toF(Constants::ChatScrollWidth), -1);
+	centerPanel->SetSize(toF(Constants::GUI::ChatScrollWidth), -1);
 
 	auto rightPanel = new Panel(mainArea);
 	rightPanel->SetSize(200, -1);
 	rightPanel->SetMinSize(200, -1);
 
-	auto pStaticText = new StaticText(centerPanel, "", FontFace::Default, Constants::DefaultFontSize);
+	auto pStaticText = new StaticText(centerPanel, "", FontFace::Default, Constants::GUI::DefaultFontSize);
 	pStaticText->SetAlignment(TextAlignment::Middle_Center);
 	pStaticText->SetSize(80, 80);
 	pStaticText->SetMinSize(-1, 80);
@@ -60,7 +60,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	_pChatScroll = new ChatScroll(centerPanel);
 
-	_pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::DefaultFontSize);
+	_pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::GUI::DefaultFontSize);
 	_pTextBox->SetSize(-1, 88);
 	_pTextBox->SelectAll();
 
@@ -174,7 +174,8 @@ void MainFrame::StartChat()
 //		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
 		LLMChatArguments llmArgs {
-			session,
+			/*session*/ session,
+			/*messages*/ {},
 		};
 		pLLM->InitializeChat(llmArgs);
 		_pChatScroll->SetSession(session);
@@ -234,12 +235,12 @@ bool MainFrame::OnCommand(Command cmd)
 	case CommandType::InstigateDialogue:
 	{
 		Role targetRole = fnRoleFromName(cmd.text);
-		return pLLM->InstigateResponse(targetRole, MessageType::Dialogue, 0);
+		return pLLM->InstigateResponse(targetRole, MessageType::Dialogue, 1);
 	}
 	case CommandType::InstigateAction:
 	{
 		Role targetRole = fnRoleFromName(cmd.text);
-		return pLLM->InstigateResponse(targetRole, MessageType::Action, 0);
+		return pLLM->InstigateResponse(targetRole, MessageType::Action, 1);
 	}
 	case CommandType::PassTurn:
 	{

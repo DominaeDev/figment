@@ -8,19 +8,19 @@
 #include <set>
 
 static std::vector<string> const opening_tags {
-	std::format("<{0}=\"", Constants::DialogueTag),
-	std::format("<{0}=\"", Constants::ActionTag),
-	std::format("<{0}=\"", Constants::ThoughtTag),
-	std::format("<{0}>", Constants::NarrationTag),
-	std::format("<{0}>", Constants::DirectionTag),
+	std::format("<{0}=\"", Constants::Chat::DialogueTag),
+	std::format("<{0}=\"", Constants::Chat::ActionTag),
+	std::format("<{0}=\"", Constants::Chat::ThoughtTag),
+	std::format("<{0}>", Constants::Chat::NarrationTag),
+	std::format("<{0}>", Constants::Chat::DirectionTag),
 };
 
 static std::vector<string> const closing_tags {
-	std::format("</{0}>", Constants::DialogueTag),
-	std::format("</{0}>", Constants::ActionTag),
-	std::format("</{0}>", Constants::ThoughtTag),
-	std::format("</{0}>", Constants::NarrationTag),
-	std::format("</{0}>", Constants::DirectionTag),
+	std::format("</{0}>", Constants::Chat::DialogueTag),
+	std::format("</{0}>", Constants::Chat::ActionTag),
+	std::format("</{0}>", Constants::Chat::ThoughtTag),
+	std::format("</{0}>", Constants::Chat::NarrationTag),
+	std::format("</{0}>", Constants::Chat::DirectionTag),
 };
 
 std::string llm_util::stringFromToken(const llama_vocab* pVocab, llama_token token)
@@ -151,11 +151,11 @@ void llm_util::get_tag_and_name(const string& text, string& tag, string& name)
 std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
 {
 	auto patterns = std::vector<std::tuple<string, MessageType>> {
-		{ std::format("<{0}", Constants::DialogueTag),		MessageType::Dialogue},
-		{ std::format("<{0}", Constants::ActionTag),		MessageType::Action},
-		{ std::format("<{0}", Constants::ThoughtTag),		MessageType::Thought},
-		{ std::format("<{0}", Constants::NarrationTag),		MessageType::Narration},
-		{ std::format("<{0}", Constants::DirectionTag),		MessageType::Direction},
+		{ std::format("<{0}", Constants::Chat::DialogueTag),		MessageType::Dialogue},
+		{ std::format("<{0}", Constants::Chat::ActionTag),		MessageType::Action},
+		{ std::format("<{0}", Constants::Chat::ThoughtTag),		MessageType::Thought},
+		{ std::format("<{0}", Constants::Chat::NarrationTag),		MessageType::Narration},
+		{ std::format("<{0}", Constants::Chat::DirectionTag),		MessageType::Direction},
 	};
 	
 	size_t last_pos = std::string::npos;
@@ -204,22 +204,22 @@ string& llm_util::complete_message(string& text)
 	switch (msgType)
 	{
 	case MessageType::Undefined:
-		text = std::format("<{0}=\"{{{{char}}}}\">{1}</{0}>", Constants::DialogueTag, text);
+		text = std::format("<{0}=\"{{{{char}}}}\">{1}</{0}>", Constants::Chat::DialogueTag, text);
 		break;
 	case MessageType::Dialogue:
-		text.append(std::format("\"</{0}>", Constants::DialogueTag));
+		text.append(std::format("\"</{0}>", Constants::Chat::DialogueTag));
 		break;
 	case MessageType::Action:
-		text.append(std::format("*</{0}>", Constants::ActionTag));
+		text.append(std::format("*</{0}>", Constants::Chat::ActionTag));
 		break;
 	case MessageType::Thought:
-		text.append(std::format("))</{0}>", Constants::ThoughtTag));
+		text.append(std::format("))</{0}>", Constants::Chat::ThoughtTag));
 		break;
 	case MessageType::Narration:
-		text.append(std::format("]</{0}>", Constants::NarrationTag));
+		text.append(std::format("]</{0}>", Constants::Chat::NarrationTag));
 		break;
 	case MessageType::Direction:
-		text.append(std::format("</{0}>", Constants::DirectionTag));
+		text.append(std::format("</{0}>", Constants::Chat::DirectionTag));
 		break;
 	case MessageType::SystemMessage:
 	default:
@@ -668,19 +668,19 @@ std::string llm_util::process_message(std::string message, std::string identifie
 		switch (span.msgType)
 		{
 		case MessageType::Dialogue:
-			result.append(std::format("<{0}=\"{1}\">\"{2}\"</{0}>", Constants::DialogueTag, identifier, text));
+			result.append(std::format("<{0}=\"{1}\">\"{2}\"</{0}>", Constants::Chat::DialogueTag, identifier, text));
 			break;
 		case MessageType::Action:
-			result.append(std::format("<{0}=\"{1}\">*{2}*</{0}>", Constants::ActionTag, identifier, text));
+			result.append(std::format("<{0}=\"{1}\">*{2}*</{0}>", Constants::Chat::ActionTag, identifier, text));
 			break;
 		case MessageType::Thought:
-			result.append(std::format("<{0}=\"{1}\">({2})</{0}>", Constants::ThoughtTag, identifier, text));
+			result.append(std::format("<{0}=\"{1}\">({2})</{0}>", Constants::Chat::ThoughtTag, identifier, text));
 			break;
 		case MessageType::Narration:
-			result.append(std::format("<{0}>[{1}]</{0}>", Constants::NarrationTag, text));
+			result.append(std::format("<{0}>[{1}]</{0}>", Constants::Chat::NarrationTag, text));
 			break;
 		case MessageType::Direction:
-			result.append(std::format("<{0}>{1}</{0}>", Constants::DirectionTag, text));
+			result.append(std::format("<{0}>{1}</{0}>", Constants::Chat::DirectionTag, text));
 			break;
 		}
 

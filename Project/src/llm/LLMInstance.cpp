@@ -4,7 +4,6 @@
 #include "llm/Embedding.h"
 #include "util/StringUtility.h"
 #include "util/Common.h"
-#include "Constants.h"
 #include <common.h>
 #include <format>
 #include <algorithm>
@@ -196,8 +195,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 	_session = args.session;
 
 	_state = {};
+#if _DEBUG
 	_state.SetValue("Location", "Kitchen"); //! @temp
 	_state.SetValue(_session.ApplyNames("{{char}}'s mood", Role::Bot1), "Neutral"); //! @temp
+#endif
+
+	_narratorCooldownDuration = args.narrationCooldownDuration;
+	_narratorCooldown = -1;
 
 	// Initialize sampler + grammar
 	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
@@ -545,7 +549,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 		generateArgs = GenerateArguments {
 			/*role*/ block.role,
 			/*msgType*/ msgType,
-			/*flag*/ GenerateFlag::Continuation,
+			/*flags*/ GenerateFlag::Continuation,
 			/*maxMessageCount*/ 1,
 			/*prepend*/ {},
 			/*responseId*/ responseId,
@@ -556,7 +560,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 	PrepareArguments prepareArgs {
 		/*responder */ Role::Undefined,
 		/*continue*/ true,
-		/*time*/ 1,
+		/*time*/ 0,
 	};
 	PrepareGeneration(prepareArgs);
 	
@@ -623,6 +627,9 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		// Remove block
 		ctxState.blocks.erase(ctxState.blocks.begin() + (ptrdiff_t)i);
 	}
+
+	// Decrement narrator cooldown
+	_narratorCooldown = std::max(_narratorCooldown - args.time, 0);
 
 	// Add state block
 	if (!_state.IsEmpty() && CheckEnumFlag(_options, LLMOption::StateVariables))
@@ -1002,17 +1009,17 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 							responderId = llm_util::format_id(tagName);
 							responderRole = _session.GetRoleOf(responderId);
 
-							if (tag == Constants::DialogueTag)
+							if (tag == Constants::Chat::DialogueTag)
 								msgType = MessageType::Dialogue;
-							else if (tag == Constants::ActionTag)
+							else if (tag == Constants::Chat::ActionTag)
 								msgType = MessageType::Action;
-							else if (tag == Constants::ThoughtTag)
+							else if (tag == Constants::Chat::ThoughtTag)
 								msgType = MessageType::Thought;
-							else if (tag == Constants::NarrationTag)
+							else if (tag == Constants::Chat::NarrationTag)
 								msgType = MessageType::Narration;
-							else if (tag == Constants::DirectionTag)
+							else if (tag == Constants::Chat::DirectionTag)
 								msgType = MessageType::Direction;
-							else if (tag == Constants::StateReportTag)
+							else if (tag == Constants::Chat::StateReportTag)
 								msgType = MessageType::StateReport;
 
 							if (msgType != MessageType::StateReport && args.maxMessages > 0 && ++numMessages >= args.maxMessages)
@@ -1020,6 +1027,9 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 								stop_reason = "msg count";
 								break; // That's enough, thank you
 							}
+
+							if (msgType == MessageType::Narration)
+								_narratorCooldown = _narratorCooldownDuration;
 
 							if (CheckEnumFlag(_options, LLMOption::SwapPersonas))
 								ActivatePersona(responderRole);
@@ -1200,9 +1210,14 @@ bool LLMInstance::SendMessage(string message)
 	};
 	PrepareGeneration(prepareArgs);
 
+	GenerateFlag flags = GenerateFlag::None;
+	if (_narratorCooldown <= 0)
+		flags = flags | GenerateFlag::AllowNarrator;
+
 	GenerateArguments generateArgs {
 		/*role*/ Role::Bot1,	 // @role
 		/*msgType*/ MessageType::Undefined,
+		/*flags*/ flags,
 	};
 	generateArgs.history = GetHistory(Constants::Embedding::Depth);
 
@@ -1304,6 +1319,9 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 			if (block.ttl > 0)
 				block.ttl += toI(numRemovals);
 		}
+
+		if (_narratorCooldown > 0)
+			_narratorCooldown = std::min(_narratorCooldown + toI(numRemovals), _narratorCooldownDuration);
 	}
 
 	if (newSize > 0)
@@ -1406,22 +1424,41 @@ bool LLMInstance::InstigateResponse(Role role, MessageType msgType, int messageC
 
 	string responder = CheckEnumFlag(_options, LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
 
+	bool bAllowNarration = true;
+
 	string prependMsg;
 	if (msgType == MessageType::Dialogue)
-		prependMsg = std::format("<{}=\"{}\">", Constants::DialogueTag, responder);
+	{
+		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::DialogueTag, responder);
+		bAllowNarration = false;
+	}
 	else if (msgType == MessageType::Action)
-		prependMsg = std::format("<{}=\"{}\">", Constants::ActionTag, responder);
+	{
+		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::ActionTag, responder);
+		bAllowNarration = false;
+	}
 	else if (msgType == MessageType::Thought)
-		prependMsg = std::format("<{}=\"{}\">", Constants::ThoughtTag, responder);
+	{
+		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::ThoughtTag, responder);
+		bAllowNarration = false;
+	}
 	else if (msgType == MessageType::Narration)
-		prependMsg = std::format("<{}>", Constants::NarrationTag);
+	{
+		prependMsg = std::format("<{}>", Constants::Chat::NarrationTag);
+		_narratorCooldown = _narratorCooldownDuration;
+	}
 	else if (msgType == MessageType::Direction)
-		prependMsg = std::format("<{}>", Constants::DirectionTag);
+	{
+		prependMsg = std::format("<{}>", Constants::Chat::DirectionTag);
+		bAllowNarration = false;
+	}
+
+	bAllowNarration &= _narratorCooldown <= 0 || msgType == MessageType::Narration;
 
 	GenerateArguments generateArgs {
 		/*role*/ role,
 		/*msgType*/ msgType,
-		/*flag*/ GenerateFlag::Instigation,
+		/*flags*/ GenerateFlag::Instigation | (bAllowNarration ? GenerateFlag::AllowNarrator : GenerateFlag::None),
 		/*maxMessageCount*/ messageCount,
 		/*prepend*/ prependMsg,
 	};

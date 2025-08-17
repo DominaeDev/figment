@@ -3,6 +3,7 @@
 #include "llm/LLMTypes.h"
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMState.h"
+#include "Constants.h"
 #include "model/ChatSession.h"
 
 #include <vector>
@@ -66,6 +67,7 @@ struct LLMChatArguments
 {
 	ChatSession session;
 	Messages messages;
+	int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldownLength;
 };
 
 class LLMInstance
@@ -204,6 +206,9 @@ private:
 	
 	// State
 	LLMState _state;
+	int32_t _narratorCooldownDuration = 0;
+	int32_t _narratorCooldown = 0;
+
 public:
 	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 	std::atomic<int64_t> usedRAM; // As reported from llama.cpp

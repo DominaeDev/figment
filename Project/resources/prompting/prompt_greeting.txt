@@ -1,1 +1,1 @@
-{{user}} has arrived. {{char1:name}} and {{char2:name}} are already present.
+{{user}} is here. Greet them and introduce yourself.

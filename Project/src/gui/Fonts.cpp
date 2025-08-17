@@ -19,9 +19,9 @@ std::list<Fonts::Font> Fonts::s_FallbackFonts = {};
 
 void Fonts::Init()
 {
-	GetFont(FontFace::Regular, Constants::DefaultFontSize);
-	GetFont(FontFace::Italic, Constants::DefaultFontSize);
-	GetFont(FontFace::Bold, Constants::DefaultFontSize);
+	GetFont(FontFace::Regular, Constants::GUI::DefaultFontSize);
+	GetFont(FontFace::Italic, Constants::GUI::DefaultFontSize);
+	GetFont(FontFace::Bold, Constants::GUI::DefaultFontSize);
 }
 
 void Fonts::ReleaseFonts()
