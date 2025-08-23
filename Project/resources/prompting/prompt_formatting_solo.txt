@@ -6,7 +6,7 @@ When you are talking.
 Ex: <talk="{{char1:id}}">"Hi there!"</talk>
 
 ## Actions
-When you are acting or emoting.
+When you are acting or emoting. (Only for actions; narration is forbidden.)
 Ex: <act="{{char1:id}}">*smiles*</act>
 
 ## Narration

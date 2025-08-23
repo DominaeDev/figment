@@ -1,1 +1,1 @@
-{{user}} is here. Greet them and introduce yourself.
+{{user}} is here.

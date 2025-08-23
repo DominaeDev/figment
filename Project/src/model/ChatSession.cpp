@@ -47,11 +47,11 @@ bool ChatSession::LoadCharacter(Role role, string filename)
 	Character character;
 	if (character.LoadFromXml(filename))
 	{
-		if (!string_util::empty_or_whitespace(character.portraitFilename))
-			CharacterImageStore::LoadCharacterPortrait(character.id, "./characters/" + character.portraitFilename);
-
 		if (role == Role::User)
 			character.id = "USR";
+
+		if (!string_util::empty_or_whitespace(character.portraitFilename))
+			CharacterImageStore::LoadCharacterPortrait(character.id, "./characters/" + character.portraitFilename);
 		_characters[role] = std::move(character);
 		return true;
 	}

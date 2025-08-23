@@ -6,7 +6,7 @@ When you are talking. Always specify who is talking.
 Ex: <talk="@ID">"Hi there!"</talk>
 
 ## Actions
-When you are acting or emoting. Always specify who is acting.
+When you are acting or emoting. Always specify who is acting. (Only for actions; narration is forbidden.)
 Ex: <act="@ID">*smiles*</act>
 
 ## Narration

@@ -819,7 +819,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	if (CheckEnumFlag(args.flags, GenerateFlag::AllowNarrator))
 		grammarFlags = grammarFlags | GrammarFlag::EnableNarrator;
 	if (CheckEnumFlag(_options, LLMOption::StateVariables))
-		grammarFlags = grammarFlags | GrammarFlag::EnableNarrator;
+		grammarFlags = grammarFlags | GrammarFlag::EnableState;
 
 	CompileGrammar(grammarFlags);
 	if (auto pGrammar = state.SetActiveGrammar(grammarFlags))
