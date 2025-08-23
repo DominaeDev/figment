@@ -28,7 +28,7 @@ LLMOption llmOptions = LLMOption::GreetUser
 	| LLMOption::Uncensored
 //	| LLMOption::LimitMessages
 //	| LLMOption::RandomizeMessageCount
-//	| LLMOption::StateVariables
+	| LLMOption::StateVariables
 //	| LLMOption::Embeddings
 //	| LLMOption::SwapPersonas
 ;

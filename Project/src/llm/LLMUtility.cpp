@@ -847,7 +847,8 @@ int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, ContextState& ctxSta
 	if (!llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
 		return 0;
 	
-	assert(llama_kv_self_used_cells(pCtx) < n_used);
+	int32_t n_used_after = llama_kv_self_used_cells(pCtx);
+	assert(n_used_after < n_used);
 
 	// Shift
 	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, ctxState.current_pos, -shift_amount);

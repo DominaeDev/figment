@@ -101,6 +101,14 @@ struct ModelState
 	llama_sampler* SetActiveGrammar(GrammarFlag flags);
 };
 
+enum class ContextBlockFlag : int32_t
+{
+	None		= 0,
+	Cached		= 1 << 0,
+	Volatile	= 1 << 1,
+};
+DEFINE_ENUM_FLAGS(ContetBlockFlag, int32_t);
+
 struct ContextBlock 
 {
 	string responseId;

@@ -631,29 +631,6 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	// Decrement narrator cooldown
 	_narratorCooldown = std::max(_narratorCooldown - args.time, 0);
 
-	// Add state block
-	if (!_state.IsEmpty() && CheckEnumFlag(_options, LLMOption::StateVariables))
-	{
-		auto it = std::find_if(ctxState.blocks.begin(), ctxState.blocks.end(), [](const ContextBlock& b) { return !b.cached; });
-
-		string content = string("# Story parameters\n")
-			+ "The following parameters track the state of the story and world.\n";
-		content += std::format("<params>\n{}</params>", _state.GetList());
-		content += "\nImportant: When actions or dialogue demands that any parameter above changes to a differt value and only then, always end your response with a compiled list of suggested changes.";
-		content += "\nEx: <change>Variable = Value</change>\n";
-
-		ctxState.blocks.insert(it, ContextBlock {
-			/*responseId*/ "",
-			/*role*/ Role::System,
-			/*name*/ "",
-			/*content*/ content,
-			/*tokens*/ {},
-			/*offset*/ 0,
-			/*cached*/ false,
-			/*ttl*/ 1,
-		});
-	}
-
 	// Tokenize uncached messages
 	int32_t offset = 0;
 	for (auto it = ctxState.blocks.begin(); it != ctxState.blocks.end(); ++it)
@@ -683,6 +660,33 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 		offset += toI(block.tokens.size());
 		prompt_tokens.insert(prompt_tokens.end(), block_tokens.cbegin(), block_tokens.cend()); //! @assumes contiguous
+	}
+
+	// Store response position (before assistant prelude)
+	if (!args.isContinuation)
+		ctxState.response_pos = current_pos + (int32_t)prompt_tokens.size();
+
+	// Add state block
+	if (!_state.IsEmpty() && CheckEnumFlag(_options, LLMOption::StateVariables) && !args.isContinuation)
+	{
+		string content;
+			//= string("# Story parameters\n")
+			//+ "The following parameters track the state of the story and world.\n";
+		content += std::format("{}", _state.GetList());
+		content += "\nImportant: When actions or dialogue demands a parameter change, end your response with a compiled list of suggested changes.";
+		content += "\nEx: <change>Variable = Value</change>\n";
+
+		auto state_tokens = llm_util::tokenize(state.pModel, content, false);
+		prompt_tokens.insert(prompt_tokens.end(), state_tokens.cbegin(), state_tokens.cend());
+		ctxState.blocks.insert(ctxState.blocks.end(), ContextBlock {
+			/*responseId*/ "",
+			/*role*/ Role::System,
+			/*name*/ "",
+			/*content*/ content,
+			/*tokens*/ state_tokens,
+			/*offset*/ 0,
+			/*cached*/ false,
+		});
 	}
 
 	// Calculate block positions
@@ -719,10 +723,6 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 			current_pos += shift;
 		}
 	}
-
-	// Store response position (before assistant prelude)
-	if (!args.isContinuation)
-		ctxState.response_pos = current_pos + (int32_t)prompt_tokens.size();
 
 	// Append assistant tokens
 	if (!args.isContinuation)
@@ -1082,6 +1082,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 
 		// Print to console
 		printf("%s", str_token.c_str());
+		assert(current_pos < ctx_size);
 
 		// Add sampled token to batch
 		common_batch_add(batch, sampled_token, current_pos, { 0 }, true);
