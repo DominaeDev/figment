@@ -677,7 +677,9 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	if (!args.isContinuation && CheckEnumFlag(_options, LLMOption::StateVariables) && !_state.IsEmpty())
 	{
 		auto itUserRev = std::find_if(blocks.rbegin(), blocks.rend(), [](const ContextBlock& block) { return block.role == Role::User && !block.is_cached(); });
-		auto itUserFwd = flip_iterator<ContextBlock>(blocks, itUserRev);
+		auto itState = flip_iterator<ContextBlock>(blocks, itUserRev);
+
+		itState = std::max(itState, blocks.size() > 1 ? std::max(blocks.end() - 2, blocks.begin()) : blocks.end());
 
 		string content;
 			//= string("# Story parameters\n")
@@ -685,9 +687,9 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		content += std::format("{}", _state.GetList());
 		content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
 		content += "\nEx: <change>Param = New value</change>\n";
-
+		content = llm_tmpl::apply_chat_template({ Message { Role::System, content } }, false);
 		auto state_tokens = llm_util::tokenize(state.pModel, content, false);
-		auto it = blocks.insert(itUserFwd, ContextBlock {
+		auto it = blocks.insert(itState, ContextBlock {
 			/*responseId*/ "",
 			/*role*/ Role::System,
 			/*name*/ "",

@@ -30,7 +30,7 @@ LLMOption llmOptions = LLMOption::GreetUser
 //	| LLMOption::RandomizeMessageCount
 	| LLMOption::StateVariables
 //	| LLMOption::Embeddings
-//	| LLMOption::SwapPersonas
+	| LLMOption::SwapPersonas
 ;
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
