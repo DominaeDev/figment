@@ -202,6 +202,7 @@
     <ClInclude Include="include\gui\VerticalSizer.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="resources\formatting_grammar.gbnf" />
   </ItemGroup>
   <ItemGroup>

@@ -372,6 +372,7 @@
     <None Include="resources\formatting_grammar.gbnf">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\prompt_formatting.txt">

@@ -32,8 +32,25 @@ inline constexpr size_t operator "" _sz( unsigned long long arg ) noexcept
 
 typedef std::string string;
 
-// Macros
+template <typename E>
+inline constexpr bool CheckEnumFlag(const E set, const E flag)
+{
+	return (set & flag) == flag;
+}
 
+template <typename T, typename A = std::allocator<T>>
+constexpr std::vector<T, A>::iterator flip_iterator(typename std::vector<T, A>& vec, typename std::vector<T, A>::reverse_iterator rit)
+{
+	if (rit != vec.rend())
+	{
+		auto it = vec.begin();
+		std::advance(it, (ptrdiff_t)std::distance(rit, vec.rend()) - 1);
+		return it;
+	}
+	return vec.end();
+}
+
+// Macros
 #ifndef DEFINE_ENUM_FLAGS
 #define DEFINE_ENUM_FLAGS(E, T) \
 constexpr enum E operator| (const enum E a, const enum E b) { return static_cast<enum E>(static_cast<T>(a) | static_cast<T>(b)); }\

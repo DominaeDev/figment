@@ -2,11 +2,11 @@
 You must respond using the following XML schema:
 
 ## Dialogue
-When you are talking. Always specify who is talking.
+Use when you are speaking, in the first person only. Always specify who is talking.
 Ex: <talk="@ID">"Hi there!"</talk>
 
 ## Actions
-When you are acting or emoting. Always specify who is acting. (Only for actions; narration is forbidden.)
+Use when you are acting, or emoting, in the first person only. (Only for actions; narration is forbidden.)
 Ex: <act="@ID">*smiles*</act>
 
 ## Narration

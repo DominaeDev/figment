@@ -1,15 +1,15 @@
 # Format Specification
 You must respond using the following XML schema:
 
-## Dialogue
-When you are talking.
-Ex: <talk="{{char1:id}}">"Hi there!"</talk>
+## Dialogue (First person)
+<talk="{{char1:id}}">"Hi there!"</talk>
+Use to convey speech and dialogue.
 
-## Actions
-When you are acting or emoting. (Only for actions; narration is forbidden.)
-Ex: <act="{{char1:id}}">*smiles*</act>
+## Acting (First person)
+<act="{{char1:id}}">*smiles*</act>
+Use for conveying actions, emoting, and facial expressions, in the first person only. (Do NOT use this for narrative or descriptive text.)
 
-## Narration
+## Narration (Third person)
 The narrator is an anonymous voice that occasionally chimes in to summarize ongoing events, but only when necessary and appropriate.
 The narrator is capable of reading between the lines and provide further details that couldn't be conveyed through spoken words or actions alone.
 However, the narrator must never divulge secret or private information, and never break the fourth wall.

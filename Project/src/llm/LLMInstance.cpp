@@ -528,7 +528,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 			return false; // Not incomplete message
 
 		ContextBlock block = currBlock;
-		block.cached = false;
+		block.flags = (block.flags & ~ContextBlockFlag::Cached);
 		impl_RemoveMessages(1, false); // Remove the last message, resets current_pos
 
 		if (extend && bComplete)
@@ -594,16 +594,20 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	ContextState& ctxState = _contextState;
 	llama_context* pCtx = _contextState.pCtx;
 	llama_batch& batch = ctxState.batch;
+	auto& blocks = ctxState.blocks;
 
 	// Prepare prompt
 	int32_t& current_pos = ctxState.current_pos;
 
 	std::vector<llama_token> prompt_tokens;
 
+	// Remove volatile blocks
+	std::erase_if(blocks, [](const ContextBlock& block) { return block.is_volatile(); });
+
 	// Decrement ttl
-	for (int32_t i = (int32_t)ctxState.blocks.size() - 1; i >= 0; --i)
+	for (int32_t i = (int32_t)blocks.size() - 1; i >= 0; --i)
 	{
-		auto& block = ctxState.blocks[i];
+		auto& block = blocks[i];
 		if (block.ttl <= 0)
 			continue;
 
@@ -611,21 +615,21 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		if (block.ttl > 0)
 			continue;
 		
-		if (block.cached)
+		if (block.is_cached())
 		{
 			// Remove from context
 			int32_t shift = llm_util::ctx_remove_and_shift(state.pModel, _contextState,
-				ctxState.blocks.begin() + (ptrdiff_t)i,
-				ctxState.blocks.begin() + (ptrdiff_t)(toSZ(i + 1)));
+				blocks.begin() + (ptrdiff_t)i,
+				blocks.begin() + (ptrdiff_t)(toSZ(i + 1)));
 
 			// Adjust block offsets
-			for (int32_t j = i + 1; j < (int32_t)ctxState.blocks.size(); ++j)
-				ctxState.blocks[j].offset += shift;
+			for (int32_t j = i + 1; j < (int32_t)blocks.size(); ++j)
+				blocks[j].offset += shift;
 			current_pos += shift;
 		}
 
 		// Remove block
-		ctxState.blocks.erase(ctxState.blocks.begin() + (ptrdiff_t)i);
+		blocks.erase(blocks.begin() + (ptrdiff_t)i);
 	}
 
 	// Decrement narrator cooldown
@@ -633,10 +637,10 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 
 	// Tokenize uncached messages
 	int32_t offset = 0;
-	for (auto it = ctxState.blocks.begin(); it != ctxState.blocks.end(); ++it)
+	for (auto it = blocks.begin(); it != blocks.end(); ++it)
 	{
 		auto& block = *it;
-		if (block.cached)
+		if (block.is_cached())
 		{
 			offset += toI(block.tokens.size());
 			continue;
@@ -666,31 +670,35 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	if (!args.isContinuation)
 		ctxState.response_pos = current_pos + (int32_t)prompt_tokens.size();
 
-	// Add state block
-	if (!_state.IsEmpty() && CheckEnumFlag(_options, LLMOption::StateVariables) && !args.isContinuation)
+	// Calculate block positions
+	ctxState.AssignBlockPositions();
+
+	// Add state block (preface)
+	if (!args.isContinuation && CheckEnumFlag(_options, LLMOption::StateVariables) && !_state.IsEmpty())
 	{
+		auto itUserRev = std::find_if(blocks.rbegin(), blocks.rend(), [](const ContextBlock& block) { return block.role == Role::User && !block.is_cached(); });
+		auto itUserFwd = flip_iterator<ContextBlock>(blocks, itUserRev);
+
 		string content;
 			//= string("# Story parameters\n")
 			//+ "The following parameters track the state of the story and world.\n";
 		content += std::format("{}", _state.GetList());
-		content += "\nImportant: When actions or dialogue demands a parameter change, end your response with a compiled list of suggested changes.";
-		content += "\nEx: <change>Variable = Value</change>\n";
+		content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
+		content += "\nEx: <change>Param = New value</change>\n";
 
 		auto state_tokens = llm_util::tokenize(state.pModel, content, false);
-		prompt_tokens.insert(prompt_tokens.end(), state_tokens.cbegin(), state_tokens.cend());
-		ctxState.blocks.insert(ctxState.blocks.end(), ContextBlock {
+		auto it = blocks.insert(itUserFwd, ContextBlock {
 			/*responseId*/ "",
 			/*role*/ Role::System,
 			/*name*/ "",
 			/*content*/ content,
 			/*tokens*/ state_tokens,
-			/*offset*/ 0,
-			/*cached*/ false,
+			/*cached*/ ContextBlockFlag::Volatile,
 		});
+		ctxState.AssignBlockPositions();
+		prompt_tokens.insert(prompt_tokens.begin() + ptrdiff_t((ctxState.blocks_pos + it->offset) - current_pos), state_tokens.cbegin(), state_tokens.cend());
+		ctxState.response_pos = ctxState.blocks_pos + it->offset;
 	}
-
-	// Calculate block positions
-	ctxState.AssignBlockPositions();
 
 	// Allocate and shift context window
 	int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -706,20 +714,20 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 		
 		size_t total = 0;
 		size_t first_to_keep = 0;
-		while (first_to_keep < ctxState.blocks.size() && total < free_tokens && ctxState.blocks[first_to_keep].cached)
-			total += ctxState.blocks[first_to_keep++].length();
+		while (first_to_keep < blocks.size() && total < free_tokens && blocks[first_to_keep].is_cached())
+			total += blocks[first_to_keep++].length();
 
 		if (first_to_keep > 0)
 		{
-			auto itBegin = ctxState.blocks.begin();
-			auto itEnd = ctxState.blocks.begin() + (ptrdiff_t)first_to_keep;
+			auto itBegin = blocks.begin();
+			auto itEnd = blocks.begin() + (ptrdiff_t)first_to_keep;
 			int32_t shift = llm_util::ctx_remove_and_shift(state.pModel, ctxState, itBegin, itEnd);
 
 			// Adjust block offsets
-			for (auto& block : ctxState.blocks)
+			for (auto& block : blocks)
 				block.offset += shift;
 
-			ctxState.blocks.erase(itBegin, itEnd);
+			blocks.erase(itBegin, itEnd);
 			current_pos += shift;
 		}
 	}
@@ -742,8 +750,8 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	batch.n_tokens = current_pos + (int32_t)prompt_tokens.size();
 
 	// Mark blocks in cache
-	for (auto it = ctxState.blocks.begin(); it != ctxState.blocks.end(); ++it)
-		it->cached = true;
+	for (auto it = blocks.begin(); it != blocks.end(); ++it)
+		it->flags = (it->flags | ContextBlockFlag::Cached);
 
 	llm_util::dump_context(batch, ctxState.pVocab, "prompt-full.txt");
 }
@@ -1100,10 +1108,16 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 		_tokensPerSec.store(toD(sampled_tokens.size()) / (duration / 1000.0));
 	}
 
-	// Remove full response from cache (will be reinserted on next generation)
+	// Remove full response from cache (will be reinserted on next turn)
 	llama_kv_self_seq_rm(state.pCtx, 0, pre_response_pos, current_pos);
 	batch.n_tokens = pre_response_pos;
 	current_pos = pre_response_pos;
+
+	for (auto& block : chat.blocks)
+	{
+		if (chat.blocks_pos + block.offset >= pre_response_pos)
+			block.flags = (block.flags & ~ContextBlockFlag::Cached);
+	}
 
 	_state.UpdateValues(stateReport);
 
@@ -1116,7 +1130,6 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			auto& lastBlock = chat.blocks[chat.blocks.size() - 1];
 			lastBlock.content += response;
 			lastBlock.tokens.insert(lastBlock.tokens.end(), sampled_tokens.begin(), sampled_tokens.end());
-			lastBlock.cached = false;
 		}
 		else
 		{
@@ -1126,6 +1139,7 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 				/*name*/ responderId,
 				/*content*/ response,
 				/*tokens*/ sampled_tokens,
+				/*flags*/ ContextBlockFlag::None,
 				/*offset*/ pre_response_pos - chat.blocks_pos,
 			});
 		}
@@ -1262,8 +1276,8 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 			/*name*/ identifier,
 			/*content*/ content,
 			/*tokens*/ {},
+			/*cached*/ ContextBlockFlag::None,
 			/*offset*/ 0,
-			/*cached*/ false,
 			/*ttl*/ ttl > 0 ? ttl + 1 : 0,
 		});
 	}
@@ -1328,7 +1342,7 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 	if (newSize > 0)
 	{
 		auto& newLastblock = _contextState.blocks[newSize - 1_sz];
-		if (newLastblock.cached)
+		if (newLastblock.is_cached())
 			current_pos = std::min(current_pos, _contextState.blocks_pos + newLastblock.offset + newLastblock.length());
 		else
 			current_pos = std::min(current_pos, _contextState.blocks_pos + newLastblock.offset);
@@ -1575,7 +1589,7 @@ bool LLMInstance::DumpContext(bool full, string filename) const
 	// Cached blocks
 	for (auto& block : _contextState.blocks)
 	{
-		if (block.cached)
+		if (block.is_cached())
 			continue;
 
 		result.append("[");

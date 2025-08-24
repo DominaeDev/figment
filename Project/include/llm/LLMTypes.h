@@ -104,10 +104,10 @@ struct ModelState
 enum class ContextBlockFlag : int32_t
 {
 	None		= 0,
-	Cached		= 1 << 0,
-	Volatile	= 1 << 1,
+	Cached		= 1 << 0,	// Currently in context
+	Volatile	= 1 << 1,	// Thrown away at end of turn
 };
-DEFINE_ENUM_FLAGS(ContetBlockFlag, int32_t);
+DEFINE_ENUM_FLAGS(ContextBlockFlag, int32_t);
 
 struct ContextBlock 
 {
@@ -116,10 +116,12 @@ struct ContextBlock
 	string name;
     string content;
 	std::vector<int32_t> tokens;
+	ContextBlockFlag flags = ContextBlockFlag::None;
 	int32_t offset {};
-	bool cached = false;
 	int ttl = -1;
 
+	bool is_cached() const { return CheckEnumFlag(flags, ContextBlockFlag::Cached); }
+	bool is_volatile() const { return CheckEnumFlag(flags, ContextBlockFlag::Volatile); }
 	int32_t length() const { return toI(tokens.size()); }
 };
 
@@ -157,12 +159,6 @@ enum class LLMOption : int32_t
 	Embeddings				= 1 << 8,
 };
 DEFINE_ENUM_FLAGS(LLMOption, int32_t)
-
-template <typename E>
-inline constexpr bool CheckEnumFlag(const E set, const E flag)
-{
-	return (set & flag) == flag;
-}
 
 struct Sentence
 {
