@@ -41,10 +41,27 @@ void ChatScroll::AddDummyMessage(string name, Role role, MessageType msgType, st
 	});
 }
 
+void ChatScroll::AddSystemMessage(string message)
+{
+	ChatMessage* pMessage = AddMessage("", Role::System, MessageType::SystemMessage, message, true );
+	pMessage->SetActive(false);
+	pMessage->SetColors(Colors::MessageBackgroundNavy, Colors::MessageBorderNavy);
+	_messages.push_back(MessageEntry {
+		"dummy",
+		Role::System,
+		"",
+		"",
+		MessageType::SystemMessage,
+		pMessage,
+	});
+}
+
 ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType msgType, string message, bool complete)
 {
 	if (msgType == MessageType::Narration)
 		role = Role::Narrator;
+	else if (msgType == MessageType::SystemMessage)
+		role = Role::System;
 
 	bool bShowAvatar = !is_npc(role);
 	auto itLast = std::find_if(_messages.crbegin(), _messages.crend(), [](const MessageEntry& entry) {
@@ -64,9 +81,16 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 		}
 	}
 	bShowAvatar &= (role != lastRole) || (identifier != lastId);
+	bool bShowName = bShowAvatar;
 	
 	string id = identifier;
 	string name = _session.GetNameOf(role);
+	if (role == Role::System)
+	{
+		bShowName = true;
+		name = "System message";
+	}
+
 	if (auto character = _session.GetCharacterById(identifier))
 	{
 		id = character.value().id;
@@ -78,7 +102,6 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 		name = character.value().fullName;
 	}
 	
-	bool bShowName = bShowAvatar;
 	if (msgType == MessageType::Narration)
 	{
 		name = _session.GetNameOf(Role::Narrator);

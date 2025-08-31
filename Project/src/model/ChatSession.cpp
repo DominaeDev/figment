@@ -141,6 +141,8 @@ std::pair<Color, Color> ChatSession::GetColorsOf(Role role) const
 		return std::make_pair(Colors::DefaultBotMessageBackgrounds[get_bot_index(role) % 8], Colors::DefaultBotMessageBorders[get_bot_index(role) % 8]);
 	else if (role == Role::User)
 		return std::make_pair(Colors::DefaultUserMessageBackground, Colors::DefaultUserMessageBorder);
+	else if (role == Role::System)
+		return std::make_pair(Colors::MessageBackgroundNavy, Colors::MessageBorderNavy);
 	else
 		return std::make_pair(Colors::MessageBackgroundDefault, Colors::MessageBorderDefault);
 }

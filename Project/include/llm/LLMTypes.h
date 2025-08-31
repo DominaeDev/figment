@@ -156,7 +156,8 @@ enum class LLMOption : int32_t
 	SwapPersonas			= 1 << 5,
 	Uncensored				= 1 << 6,
 	StateVariables			= 1 << 7,
-	Embeddings				= 1 << 8,
+	ReportStateChanges	= 1 << 8,
+	Embeddings				= 1 << 9,
 };
 DEFINE_ENUM_FLAGS(LLMOption, int32_t)
 

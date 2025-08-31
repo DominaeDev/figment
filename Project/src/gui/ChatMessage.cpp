@@ -48,6 +48,8 @@ ChatMessage::ChatMessage(Control* pParent, Role role, string characterId, string
 		_style |= Style::Dialogue;
 	else if (msgType == MessageType::Action)
 		_style |= Style::Action;
+	else if (msgType == MessageType::SystemMessage)
+		_style |= Style::System;
 
 	if (is_bot(role))
 		_style |= Style::Left;

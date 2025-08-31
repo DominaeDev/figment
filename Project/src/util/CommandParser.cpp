@@ -23,6 +23,8 @@ static _Cmd s_Commands[] {
 	{ "talk",			CommandType::InstigateDialogue},
 	{ "undo",			CommandType::RollbackUserMessage },
 	{ "embed",			CommandType::GenerateEmbedding },
+	{ "define",			CommandType::NewStateVariable },
+	{ "set",			CommandType::SetStateVariable },
 };
 
 Command CommandParser::Parse(string text)

@@ -15,6 +15,8 @@ public:
 	void SetSession(ChatSession session) { _session = session; }
 	
 	void AddDummyMessage(string name, Role role, MessageType msgType, string message);
+	void AddSystemMessage(string message);
+
 	int RemoveMessages(std::vector<string> ids);
 	void ClearMessages();
 

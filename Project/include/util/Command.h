@@ -21,6 +21,8 @@ enum class CommandType
 	Look,
 	Examine,
 	GenerateEmbedding,
+	NewStateVariable,
+	SetStateVariable,
 };
 
 struct Command

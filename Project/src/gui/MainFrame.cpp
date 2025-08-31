@@ -339,6 +339,38 @@ bool MainFrame::OnCommand(Command cmd)
 #else
 		return false;
 #endif
+	case CommandType::NewStateVariable:
+		if (!cmd.text.empty())
+		{
+			size_t pos_eq = cmd.text.find('=');
+			if (pos_eq != string::npos)
+			{
+				string name = string_util::trim(cmd.text.substr(0, pos_eq));
+				string value = string_util::trim(cmd.text.substr(pos_eq + 1));
+				if (pLLM->SetStateVariable(name, value, true))
+				{
+					_pChatScroll->AddSystemMessage(std::format("{} = {}", name, value));
+					return true;
+				}
+			}
+		}
+		return false;
+	case CommandType::SetStateVariable:
+		if (!cmd.text.empty())
+		{
+			size_t pos_eq = cmd.text.find('=');
+			if (pos_eq != string::npos)
+			{
+				string name = string_util::trim(cmd.text.substr(0, pos_eq));
+				string value = string_util::trim(cmd.text.substr(pos_eq + 1));
+				if (pLLM->SetStateVariable(name, value, false))
+				{
+					_pChatScroll->AddSystemMessage(std::format("{} = {}", name, value));
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	return false;

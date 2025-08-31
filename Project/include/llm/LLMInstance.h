@@ -101,6 +101,7 @@ public:
 	std::vector<RemovedMessage> RemoveMessages(int numMessages = 1, bool rewindTime = true);
 	std::vector<RemovedMessage> RollbackUserMessage();
 	std::set<string> GetActiveMessages();
+	bool SetStateVariable(string name, string value, bool allowCreate = true);
 
 	bool PollResponse(MessagePiece& piece);
 	std::pair<LLMStatus, bool> PollStatus();

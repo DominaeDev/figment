@@ -1121,7 +1121,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			block.flags = (block.flags & ~ContextBlockFlag::Cached);
 	}
 
-	_state.UpdateValues(stateReport);
+	std::map<string, string> variables;
+	_state.UpdateValues(stateReport, variables);
 
 	llm_util::sanitize_response(response);
 
@@ -1149,6 +1150,26 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	else
 	{
 		DebugPrint("(Empty response)");
+	}
+
+	// Report state variable changes
+	if (!variables.empty() && CheckEnumFlag(_options, LLMOption::ReportStateChanges))
+	{
+		string varText;
+		varText.reserve(512);
+		for (auto kvp : variables)
+			varText = varText + std::format("{} = {}\n", kvp.first, kvp.second);
+		varText = string_util::rtrim(varText);
+
+		_resultQueue.push(MessagePiece {
+			/*responseId*/ CreateUUID(),
+			/*subMessageId*/ CreateUUID(),
+			/*identifier*/ "",
+			/*text*/ varText,
+			/*role*/ Role::System,
+			/*msgType*/ MessageType::SystemMessage,
+			/*isComplete*/true,
+		});
 	}
 
 	DebugPrintLn();
@@ -1833,6 +1854,22 @@ llama_sampler* LLMInstance::CompileGrammar(GrammarFlag flags)
 	
 	_modelState.grammars[flags] = pGrammar;
 	return pGrammar;
+}
+
+bool LLMInstance::SetStateVariable(string name, string value, bool allowCreate)
+{
+	if (!CanGenerate() || !CheckEnumFlag(_options, LLMOption::StateVariables))
+		return false;
+
+	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
+	if (!stateLock.try_lock_for(100ms))
+		return false;
+
+	if (!_state.HasValue(name) && !allowCreate)
+		return false;
+
+	_state.SetValue(name, value);
+	return true;
 }
 
 std::map<string, string> LLMInstance::GetStateVariables()

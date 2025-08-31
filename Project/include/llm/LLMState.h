@@ -5,9 +5,10 @@
 class LLMState
 {
 public:
-	void SetValue(string name, string value);
+	bool SetValue(string name, string value);
+	bool HasValue(string name) const;
 	bool IsEmpty() const { return _variables.empty(); }
-	void UpdateValues(string stateReport);
+	void UpdateValues(string stateReport, std::map<string, string>& updatedVariables);
 
 	string GetList() const;
 	string GetGrammarPattern() const;

@@ -47,8 +47,10 @@ private:
 		Default = 0,
 		Dialogue = 1 << 0,
 		Action = 1 << 1,
-		Left = 1 << 2,
-		Right = 1 << 3,
+		System = 1 << 2,
+
+		Left = 1 << 3,
+		Right = 1 << 4,
 	};
 	int _style = Style::Default;
 };

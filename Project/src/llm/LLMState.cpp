@@ -2,20 +2,40 @@
 #include "util/StringUtility.h"
 #include <format>
 
-void LLMState::SetValue(string name, string value)
+bool LLMState::SetValue(string name, string value)
 {
 	if (!value.empty())
 	{
 		auto itFind = std::find_if(_variables.begin(), _variables.end(), [&name](auto kvp) {
 			return string_util::equals(kvp.first, name, true);
 		});
+		
 		if (itFind != _variables.end())
-			itFind->second = value;
+		{
+			if (itFind->second != value)
+			{
+				itFind->second = value;
+				return true;
+			}
+			return false; // Unchanged
+		}
 		else
+		{
 			_variables[name] = value;
+			return true;
+		}
 	}
-	else
-		_variables.erase(name);
+
+	return _variables.erase(name) > 0;
+}
+
+bool LLMState::HasValue(string name) const
+{
+	auto itFind = std::find_if(_variables.begin(), _variables.end(), [&name](auto kvp) {
+		return string_util::equals(kvp.first, name, true);
+	});
+		
+	return itFind != _variables.end();
 }
 
 string LLMState::GetList() const
@@ -42,7 +62,7 @@ string LLMState::GetGrammarPattern() const
 	return result;
 }
 
-void LLMState::UpdateValues(string stateReport)
+void LLMState::UpdateValues(string stateReport, std::map<string, string>& updatedVariables)
 {
 	string_util::replace_all(stateReport, "<change>", "");
 	string_util::replace_all(stateReport, "</change>", ";");
@@ -56,6 +76,7 @@ void LLMState::UpdateValues(string stateReport)
 
 		string lhs = string_util::trim(row.substr(0, pos_eq));
 		string rhs = string_util::trim(row.substr(pos_eq + 1));
-		SetValue(lhs, rhs);
+		if (SetValue(lhs, rhs))
+			updatedVariables[lhs] = rhs;
 	}
 }
