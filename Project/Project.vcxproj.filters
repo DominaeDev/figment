@@ -209,6 +209,9 @@
     <ClCompile Include="src\llm\LLMState.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\VariableList.cpp">
+      <Filter>Source Files\Model\Interface\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -366,6 +369,9 @@
     </ClInclude>
     <ClInclude Include="include\llm\LLMState.h">
       <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\VariableList.h">
+      <Filter>Source Files\Model\Interface\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

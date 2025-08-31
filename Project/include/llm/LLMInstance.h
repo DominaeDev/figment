@@ -111,6 +111,7 @@ public:
 #endif
 
 	const ChatSession& GetSession() const { return _session; }
+	std::map<string, string> GetStateVariables();
 
 private:
 	void ClearResponseQueue();

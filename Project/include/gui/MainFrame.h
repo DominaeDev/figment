@@ -9,6 +9,7 @@ class Sizer;
 class StatusBar;
 class ChatScroll;
 class TextBox;
+class VariableList;
 struct Command;
 
 class MainFrame : public Frame
@@ -40,6 +41,7 @@ private:
 	StatusBar* _pStatusBar;
 	ChatScroll* _pChatScroll;
 	TextBox* _pTextBox;
+	VariableList* _pVariableList;
 
 	float _fPollingCounter = 0.0f;
 	bool _bStartedChat = false; // Used to trigger greeting

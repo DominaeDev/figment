@@ -107,6 +107,7 @@
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
+    <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
     <ClCompile Include="src\llm\Embedding.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="include\gui\CharacterImageStore.h" />
     <ClInclude Include="include\gui\HorizontalGradient.h" />
     <ClInclude Include="include\gui\Image.h" />
+    <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
     <ClInclude Include="include\llm\Embedding.h" />

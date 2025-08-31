@@ -4,7 +4,7 @@
 
 namespace Constants
 {
-	inline constexpr const char* AppTitle = "Llama chat";
+	inline constexpr const char* AppTitle = "Mikan RP";
 
 	namespace GUI
 	{
@@ -37,15 +37,14 @@ namespace Constants
 
 	namespace Context
 	{
-		inline constexpr int Size = 4096; //32768
+		inline constexpr int Size = 8192; //32768
 		inline constexpr int MaxResponseLength = 256;
 		inline constexpr int MicroBatchSize = 512;
 		inline constexpr float WindowKeepRatio = 0.75f;
 	}
 
 	inline constexpr std::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";
-//	inline constexpr std::string_view DefaultEmbeddingModelLocation = "M:\\Embedding\\gist-all-minilm-l6-v2.Q8_0.gguf";
-
+	
 	namespace Embedding
 	{
 		inline constexpr std::string_view DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";

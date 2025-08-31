@@ -5,6 +5,7 @@
 #include "gui/HorizontalSizer.h"
 #include "gui/VerticalSizer.h"
 #include "gui/TextBox.h"
+#include "gui/VariableList.h"
 #include "gui/Color.h"
 #include "gui/ChatScroll.h"
 #include "gui/ChatMessage.h"
@@ -95,6 +96,15 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	_pTextBox->SetBackgroundRenderer(pTextBoxBG);
 
 	_pTextBox->SetFocus(true);
+
+	_pVariableList = new VariableList(mainArea);
+	_pVariableList->SetPosition(10, 10);
+	_pVariableList->SetVisible(false);
+
+	std::map<string, string> test;
+	test["Location"] = "Nice beach";
+	test["Mood"] = "Terrible weather";
+	_pVariableList->SetVariables(test);
 
 	InvalidateLayout();
 	s_pInstance = this;
@@ -478,6 +488,23 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 			_bAutoChat = !_bAutoChat;
 			return true;
 #endif
+		case SDLK_TAB:
+			if (pLLM->IsInitialized())
+			{
+				_pVariableList->SetVariables(pLLM->GetStateVariables());
+				_pVariableList->SetVisible(!_pVariableList->IsEmpty());
+			}
+			break;
+		}
+	}
+
+	else if (!event.down && !event.repeat) // Release
+	{
+		switch (event.key)
+		{
+		case SDLK_TAB:
+			_pVariableList->SetVisible(false);
+			break;
 		}
 	}
 	return false;
@@ -505,3 +532,4 @@ void MainFrame::NextQueuedCommand()
 			break;
 	}
 }
+

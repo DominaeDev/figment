@@ -1834,3 +1834,14 @@ llama_sampler* LLMInstance::CompileGrammar(GrammarFlag flags)
 	_modelState.grammars[flags] = pGrammar;
 	return pGrammar;
 }
+
+std::map<string, string> LLMInstance::GetStateVariables()
+{
+	std::map<string, string> result;
+
+	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
+	if (stateLock.try_lock_for(100ms))
+		result.insert(_state.GetVariables().begin(), _state.GetVariables().end());
+
+	return result;
+}
