@@ -43,7 +43,7 @@ void VariableList::SetVariables(const std::map<string, string>& variables)
 	int w, h;
 	_pText->SetTextAndResize(text, w, h);
 	
-	SetSize(w + MARGIN * 2, h + MARGIN * 2);
+	SetSize(toF(w + MARGIN * 2), toF(h + MARGIN * 2));
 }
 
 bool VariableList::IsEmpty() const
