@@ -15,6 +15,15 @@
 
 using namespace std::chrono_literals;
 
+inline string Direction(string text)
+{
+	return "{{" + text + "}}";
+}
+inline string Narration(string text)
+{
+	return "[" + text + "]";
+}
+
 void ModelState::Release()
 {
 	if (pSampler)
@@ -549,7 +558,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 		generateArgs = GenerateArguments {
 			/*role*/ block.role,
 			/*msgType*/ msgType,
-			/*flags*/ GenerateFlag::Continuation,
+			/*flags*/ GenerateFlag::Generate | GenerateFlag::Continuation,
 			/*maxMessageCount*/ 1,
 			/*prepend*/ {},
 			/*responseId*/ responseId,
@@ -562,9 +571,7 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 		/*continue*/ true,
 		/*time*/ 0,
 	};
-	PrepareGeneration(prepareArgs);
-	
-	StartGeneration(generateArgs);
+	__PrepareGeneration(prepareArgs);
 	return true;
 }
 
@@ -584,7 +591,7 @@ bool LLMInstance::Halt()
 	return true;
 }
 
-void LLMInstance::PrepareGeneration(PrepareArguments args)
+void LLMInstance::__PrepareGeneration(PrepareArguments args)
 {
 	// Load state
 	std::scoped_lock lock(_stateMutex);
@@ -758,7 +765,7 @@ void LLMInstance::PrepareGeneration(PrepareArguments args)
 	llm_util::dump_context(batch, ctxState.pVocab, "prompt-full.txt");
 }
 
-void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args, __PartialResultCallback onPartial, __GenerationCompleteCallback onComplete)
+void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
 {
 	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
 	if (!stateLock.try_lock_for(100ms))
@@ -822,6 +829,8 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 			grammarFlags = grammarFlags | GrammarFlag::Act;
 		else if (args.msgType == MessageType::Narration)
 			grammarFlags = grammarFlags | GrammarFlag::Narrate;
+		else
+			throw new std::runtime_error("AAah!");
 	}
 	else
 		grammarFlags = GrammarFlag::Default;
@@ -1076,9 +1085,6 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 					/*isComplete*/bEndOfMessageType,
 				});
 				response += partial;
-
-				if (onPartial)
-					onPartial(__PartialResult { partial, response });
 			}
 
 			partial = carryOver;
@@ -1178,35 +1184,107 @@ void LLMInstance::__Generate(std::stop_token thread_stop, GenerateArguments args
 	onComplete(InternalError::NoError, response);
 };
 
-void LLMInstance::StartGeneration(GenerateArguments args)
+bool LLMInstance::__ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
 {
-	if (CheckEnumFlag(_options, LLMOption::RandomizeMessageCount))
-	{	// Acquire state lock
-		std::scoped_lock lock(_stateMutex);
-		static std::uniform_int_distribution<int> numMessages(1, 3);
-		if (args.maxMessages <= 0) // Randomize number of messages
-			args.maxMessages = numMessages(_modelState.rng);
-	}
-	else if (!CheckEnumFlag(_options, LLMOption::LimitMessages))
-		args.maxMessages = 0;
-
-	if (args.responseId.empty())
-		args.responseId = CreateUUID();
-	if (args.subMessageId.empty())
-		args.subMessageId = CreateUUID();
-
+	LLMTask task;
 	{
-		std::scoped_lock(_resultMutex);
-		_activeResponseIds.insert(args.responseId);
+		std::scoped_lock lock(_taskMutex);
+		if (_tasks.empty())
+			return false;
+		task = _tasks.front();
+		_tasks.pop();
 	}
+
+	bool r;
+	switch (task.type)
+	{
+	case LLMTaskType::SendMessage:
+		r = __SendMessage(task.input, prepareArgs, generateArgs);
+		break;
+	case LLMTaskType::PushMessage:
+		r = __PushMessage(task.role, task.input, task.msgType, !CheckEnumFlag(task.flags, LLMTaskFlag::HiddenMessage), task.ttl);
+		break;
+	case LLMTaskType::Instigate:
+		r = __Instigate(task.role, task.msgType, task.msgCount, prepareArgs, generateArgs);
+		break;
+	default:
+		return false; // Undefined
+	}
+
+	return true;
+}
+
+void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCompleteCallback onComplete)
+{
+	InternalError error = InternalError::NoError;
+	string response;
+	bool bWaiting = false;
+
+	while(true)
+	{
+		if (thread_stop.stop_requested())
+			return;
+
+		if (error != InternalError::NoError)
+		{
+			onComplete(error, response);
+			return;
+		}
+
+		if (bWaiting)
+		{
+			std::this_thread::sleep_for(50ms);
+			continue;
+		}
+
+		PrepareArguments prepareArgs {};
+		GenerateArguments generateArgs {};
+		if (!__ExectuteNextTask(prepareArgs, generateArgs))
+		{
+			onComplete(InternalError::NoError, response);
+			return;
+		}
+
+		if (!CheckEnumFlag(generateArgs.flags, LLMInstance::GenerateFlag::Generate))
+			continue;
+
+		// Generate response
+		if (CheckEnumFlag(_options, LLMOption::RandomizeMessageCount))
+		{	// Acquire state lock
+			std::scoped_lock lock(_stateMutex);
+			static std::uniform_int_distribution<int> numMessages(1, 3);
+			if (generateArgs.maxMessages <= 0) // Randomize number of messages
+				generateArgs.maxMessages = numMessages(_modelState.rng);
+		}
+		else if (!CheckEnumFlag(_options, LLMOption::LimitMessages))
+			generateArgs.maxMessages = 0;
+
+		if (generateArgs.responseId.empty())
+			generateArgs.responseId = CreateUUID();
+		if (generateArgs.subMessageId.empty())
+			generateArgs.subMessageId = CreateUUID();
+
+		bWaiting = true;
+		__PrepareGeneration(prepareArgs);
+		__Generate(thread_stop, generateArgs,
+			[this, &bWaiting, &error, &response](InternalError result, string msg) {
+				if (result != InternalError::NoError)
+					error = result;
+				response = msg;
+				bWaiting = false;
+			});
+	}
+}
+
+void LLMInstance::StartGeneration()
+{
+	if (IsGenerating())
+		return; // Already running
 
 	_readyState.store(ReadyState::Generating);
 	PushSignal(LLMStatusSignal::GenerationStarted);
 
-	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__Generate, this), args,
-		[](__PartialResult partial) {
-			// ...
-		},
+	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__ProcessTaskQueue, this),
 		[this](InternalError error, string response) {
 			// ...
 			if (error != InternalError::NoError)
@@ -1220,7 +1298,6 @@ void LLMInstance::StartGeneration(GenerateArguments args)
 			}
 
 			RefreshActiveResponses();
-
 			PushSignal(LLMStatusSignal::GenerationComplete);
 		}));
 }
@@ -1231,44 +1308,100 @@ void LLMInstance::ClearResponseQueue()
 	ClearQueue(_resultQueue);
 }
 
-bool LLMInstance::SendMessage(string message)
+bool LLMInstance::EnqueueTask(LLMTask task)
 {
-	if (!CanGenerate())
+	if (!IsReady())
 		return false;
 
+	// Try to acquire state lock
+	std::scoped_lock lock(_taskMutex);
+	_tasks.push(task);
+
+	StartGeneration();
+	return true;
+}
+
+bool LLMInstance::ClearTasksQueue()
+{
+	// Try to acquire state lock
+	std::scoped_lock lock(_taskMutex);
+	if (_tasks.empty())
+		return false;
+
+	ClearQueue(_tasks);
+	return true;
+}
+
+bool LLMInstance::SendMessage(string message)
+{
 	if (string_util::empty_or_whitespace(message))
 		return false;
 
-	PushMessage(Role::User, message);
+	return EnqueueTask(LLMTask {
+		/* type */ LLMTaskType::SendMessage,
+		/* input */ message,
+	});
+}
 
-	PrepareArguments prepareArgs {
+bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bool visible, int ttl)
+{
+	if (string_util::empty_or_whitespace(message))
+		return false;
+
+	return EnqueueTask(LLMTask {
+		/* type */ LLMTaskType::PushMessage,
+		/* input */ message,
+		/* role */ role,
+		/* msgType */ msgType,
+		/* flags */ (!visible ? LLMTaskFlag::HiddenMessage : LLMTaskFlag::None),
+		/* count */ 0,
+		/* ttl */ ttl,
+	});
+}
+
+bool LLMInstance::Instigate(Role role, MessageType msgType, int messageCount)
+{
+	if (role == Role::Undefined)
+		role = Role::Bot1;
+
+	return EnqueueTask(LLMTask {
+		/* type */ LLMTaskType::Instigate,
+		/* input */ "",
+		/* role */ role,
+		/* msgType */ msgType,
+		/* flags */ LLMTaskFlag::HiddenMessage,
+		/* count */ messageCount,
+	});
+}
+
+bool LLMInstance::__SendMessage(string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
+{
+	if (string_util::empty_or_whitespace(message))
+		return false;
+
+	__PushMessage(Role::User, message, MessageType::Undefined, true, 0);
+
+	prepareArgs = PrepareArguments {
 		/*responder */ Role::Undefined,
 		/*continue*/ false,
 		/*time*/ 1,
 	};
-	PrepareGeneration(prepareArgs);
 
-	GenerateFlag flags = GenerateFlag::None;
+	GenerateFlag flags = GenerateFlag::Generate;
 	if (_narratorCooldown <= 0)
 		flags = flags | GenerateFlag::AllowNarrator;
 
-	GenerateArguments generateArgs {
+	generateArgs = GenerateArguments {
 		/*role*/ Role::Bot1,	 // @role
 		/*msgType*/ MessageType::Undefined,
 		/*flags*/ flags,
 	};
 	generateArgs.history = GetHistory(Constants::Embedding::Depth);
-
-	StartGeneration(generateArgs);
-
 	return true;
 }
 
-bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bool visible, int ttl)
+bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, bool visible, int ttl)
 {
-	if (!CanGenerate())
-		return false;
-
 	if (string_util::empty_or_whitespace(message))
 		return false;
 
@@ -1322,7 +1455,7 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 				/*role*/ role,
 				/*msgType*/ subMsg.msgType,
 				/*isComplete*/ true,
-				});
+			});
 		}
 	}
 	else
@@ -1330,6 +1463,88 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 		std::scoped_lock lock(_resultMutex);
 		_activeResponseIds.insert(responseId);
 	}
+	return true;
+}
+
+bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
+{	
+	if (role == Role::Undefined)
+		role = Role::Bot1;
+
+	prepareArgs = PrepareArguments {
+		/*responder */ role,
+		/*continue*/ false,
+		/*time*/ 1,
+	};
+
+	string responder = CheckEnumFlag(_options, LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
+
+	bool bAllowNarration = true;
+
+	string prependMsg;
+	if (msgType == MessageType::Dialogue)
+	{
+		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::DialogueTag, responder);
+		bAllowNarration = false;
+	}
+	else if (msgType == MessageType::Action)
+	{
+		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::ActionTag, responder);
+		bAllowNarration = false;
+	}
+	else if (msgType == MessageType::Thought)
+	{
+		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::ThoughtTag, responder);
+		bAllowNarration = false;
+	}
+	else if (msgType == MessageType::Narration)
+	{
+		prependMsg = std::format("<{}>", Constants::Chat::NarrationTag);
+		_narratorCooldown = _narratorCooldownDuration;
+	}
+	else if (msgType == MessageType::Direction)
+	{
+		prependMsg = std::format("<{}>", Constants::Chat::DirectionTag);
+		bAllowNarration = false;
+	}
+
+	bAllowNarration &= _narratorCooldown <= 0 || msgType == MessageType::Narration;
+
+	generateArgs = GenerateArguments {
+		/*role*/ role,
+		/*msgType*/ msgType,
+		/*flags*/ GenerateFlag::Generate | GenerateFlag::Instigation | (bAllowNarration ? GenerateFlag::AllowNarrator : GenerateFlag::None),
+		/*maxMessageCount*/ messageCount,
+		/*prepend*/ prependMsg,
+	};
+	generateArgs.history = GetHistory(Constants::Embedding::Depth);
+	return true;
+}
+
+bool LLMInstance::GreetUser()
+{
+	if (auto text = ReadTextFile("./resources/prompting/prompt_greeting.txt"))
+	{
+		string greetingInstruction = _session.ApplyNames(text.value());
+		PushMessage(Role::Director, Direction(greetingInstruction), MessageType::Direction, false, 1);
+		Instigate(Role::Narrator, MessageType::Narration, 1);
+		Instigate(Role::Undefined, MessageType::Dialogue, 3);
+		return true;
+	}
+	return false;
+}
+
+bool LLMInstance::Instruct(string instructions)
+{
+	if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
+	{
+		string prompt = text.value();
+		prompt = _session.ApplyNames(prompt);
+		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
+	}
+
+	PushMessage(Role::Director, Direction(instructions), MessageType::Direction, false, 4);
+	Instigate(Role::Undefined, MessageType::Undefined, 3);
 	return true;
 }
 
@@ -1412,98 +1627,6 @@ std::vector<RemovedMessage> LLMInstance::RollbackUserMessage()
 			return impl_RemoveMessages((int32_t)_contextState.blocks.size() - i, true);
 	}
 	return {};
-}
-
-bool LLMInstance::GreetUser()
-{
-	if (!CanGenerate())
-		return false;
-
-	if (auto text = ReadTextFile("./resources/prompting/prompt_greeting.txt"))
-	{
-		string greetingInstruction = _session.ApplyNames(text.value());
-		PushMessage(Role::Director, "{{" + greetingInstruction + "}}", MessageType::Direction, false, 1);
-		InstigateResponse(Role::Undefined, MessageType::Dialogue, 3);
-	}
-	return true;
-}
-
-bool LLMInstance::Instruct(string instructions)
-{
-	if (!CanGenerate())
-		return false;
-
-	if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
-	{
-		string prompt = text.value();
-		prompt = _session.ApplyNames(prompt);
-		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
-	}
-
-	PushMessage(Role::Director, "{{" + instructions + "}}", MessageType::Direction, false, 4);
-	InstigateResponse(Role::Undefined, MessageType::Undefined, 3);
-	return true;
-}
-
-bool LLMInstance::InstigateResponse(Role role, MessageType msgType, int messageCount)
-{
-	if (!CanGenerate())
-		return false;
-	
-	if (role == Role::Undefined)
-		role = Role::Bot1;
-
-	PrepareArguments prepareArgs {
-		/*responder */ role,
-		/*continue*/ false,
-		/*time*/ 1,
-	};
-	PrepareGeneration(prepareArgs);
-
-	string responder = CheckEnumFlag(_options, LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
-
-	bool bAllowNarration = true;
-
-	string prependMsg;
-	if (msgType == MessageType::Dialogue)
-	{
-		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::DialogueTag, responder);
-		bAllowNarration = false;
-	}
-	else if (msgType == MessageType::Action)
-	{
-		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::ActionTag, responder);
-		bAllowNarration = false;
-	}
-	else if (msgType == MessageType::Thought)
-	{
-		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::ThoughtTag, responder);
-		bAllowNarration = false;
-	}
-	else if (msgType == MessageType::Narration)
-	{
-		prependMsg = std::format("<{}>", Constants::Chat::NarrationTag);
-		_narratorCooldown = _narratorCooldownDuration;
-	}
-	else if (msgType == MessageType::Direction)
-	{
-		prependMsg = std::format("<{}>", Constants::Chat::DirectionTag);
-		bAllowNarration = false;
-	}
-
-	bAllowNarration &= _narratorCooldown <= 0 || msgType == MessageType::Narration;
-
-	GenerateArguments generateArgs {
-		/*role*/ role,
-		/*msgType*/ msgType,
-		/*flags*/ GenerateFlag::Instigation | (bAllowNarration ? GenerateFlag::AllowNarrator : GenerateFlag::None),
-		/*maxMessageCount*/ messageCount,
-		/*prepend*/ prependMsg,
-	};
-	generateArgs.history = GetHistory(Constants::Embedding::Depth);
-	
-	StartGeneration(generateArgs);
-	return true;
 }
 
 std::pair<LLMStatus, bool> LLMInstance::PollStatus()
@@ -1858,7 +1981,7 @@ llama_sampler* LLMInstance::CompileGrammar(GrammarFlag flags)
 
 bool LLMInstance::SetStateVariable(string name, string value, bool allowCreate)
 {
-	if (!CanGenerate() || !CheckEnumFlag(_options, LLMOption::StateVariables))
+	if (!CheckEnumFlag(_options, LLMOption::StateVariables))
 		return false;
 
 	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);

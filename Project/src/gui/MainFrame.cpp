@@ -245,23 +245,23 @@ bool MainFrame::OnCommand(Command cmd)
 	case CommandType::InstigateDialogue:
 	{
 		Role targetRole = fnRoleFromName(cmd.text);
-		return pLLM->InstigateResponse(targetRole, MessageType::Dialogue, 1);
+		return pLLM->Instigate(targetRole, MessageType::Dialogue, 1);
 	}
 	case CommandType::InstigateAction:
 	{
 		Role targetRole = fnRoleFromName(cmd.text);
-		return pLLM->InstigateResponse(targetRole, MessageType::Action, 1);
+		return pLLM->Instigate(targetRole, MessageType::Action, 1);
 	}
 	case CommandType::PassTurn:
 	{
 		Role targetRole = fnRoleFromName(cmd.text);
-		return pLLM->InstigateResponse(targetRole, MessageType::Undefined, 3);
+		return pLLM->Instigate(targetRole, MessageType::Undefined, 3);
 	}
 	case CommandType::Impersonate:
-		return pLLM->InstigateResponse(Role::User, MessageType::Dialogue, 1);
+		return pLLM->Instigate(Role::User, MessageType::Dialogue, 1);
 	case CommandType::Narrate:
 		if (cmd.text.empty())
-			return pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
+			return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 		else
 			return pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
 	case CommandType::Instruct:
@@ -283,7 +283,7 @@ bool MainFrame::OnCommand(Command cmd)
 				responder = Role::Undefined;
 
 			_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
-			return pLLM->InstigateResponse(responder, MessageType::Undefined, 3);
+			return pLLM->Instigate(responder, MessageType::Undefined, 3);
 		}
 		break;
 	}
@@ -324,13 +324,13 @@ bool MainFrame::OnCommand(Command cmd)
 			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their surroundings.]", MessageType::Narration, false, 1);
 			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and anyone who are present.}}", MessageType::Direction, false, 1);
 		}
-		return pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
+		return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 	case CommandType::Examine:
 		if (!cmd.text.empty())
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false, 1);
 			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} is able to find, if anything, " + cmd.text + " in minute detail.}}", MessageType::Direction, false, 1);
-			return pLLM->InstigateResponse(Role::Narrator, MessageType::Narration, 1);
+			return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 		}
 		break;
 	case CommandType::GenerateEmbedding:
@@ -496,7 +496,7 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		{
 			auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
 			if (!pLLM->Continue(responseId, subMessageId, true))
-				return pLLM->InstigateResponse(Role::Undefined, MessageType::Undefined);
+				return pLLM->Instigate(Role::Undefined, MessageType::Undefined);
 			break;
 		}
 		case SDLK_F10:
