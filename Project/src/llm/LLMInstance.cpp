@@ -1264,6 +1264,8 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 		if (generateArgs.subMessageId.empty())
 			generateArgs.subMessageId = CreateUUID();
 
+		_activeResponseIds.insert(generateArgs.responseId);
+
 		bWaiting = true;
 		__PrepareGeneration(prepareArgs);
 		__Generate(thread_stop, generateArgs,
