@@ -30,6 +30,7 @@ LLMOption llmOptions = LLMOption::GreetUser
 //	| LLMOption::LimitMessages
 //	| LLMOption::RandomizeMessageCount
 	| LLMOption::StateVariables
+//	| LLMOption::ReportStateChanges
 //	| LLMOption::Embeddings
 	| LLMOption::SwapPersonas
 ;
@@ -438,6 +439,8 @@ void MainFrame::PollStatus()
 		case LLMStatusSignal::InitializedChat:
 			SetStatusBar("Chat initialized");
 			_pChatScroll->ClearMessages();
+			_pVariableList->SetVariables(pLLM->GetStateVariables());
+			_pVariableList->SetVisible(true);
 			ClearQueue(_commandQueue);
 			break;
 		case LLMStatusSignal::InitializeChatFailure:
@@ -453,6 +456,7 @@ void MainFrame::PollStatus()
 			break;
 		case LLMStatusSignal::UnloadedModel:
 			SetStatusBar("Model unloaded");
+			_pVariableList->SetVisible(false);
 			ClearQueue(_commandQueue);
 			break;
 		case LLMStatusSignal::LoadModelFailure:
@@ -466,6 +470,7 @@ void MainFrame::PollStatus()
 			break;
 		case LLMStatusSignal::GenerationComplete:
 			SetStatusBar("Ready");
+			_pVariableList->SetVariables(pLLM->GetStateVariables());
 			NextQueuedCommand();
 			break;
 		default:

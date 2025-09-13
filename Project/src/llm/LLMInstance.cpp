@@ -261,7 +261,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 
 		if (default_grammar_sampler) llama_sampler_chain_add(pSampler, default_grammar_sampler);	// Grammar
 		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
-		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(1.5f));							// Temperature
+		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(2.5f));							// Temperature
 		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
 #if _DEBUG
 		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(DEBUG_SEED));						// Seed
