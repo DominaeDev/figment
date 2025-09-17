@@ -212,6 +212,9 @@
     <ClCompile Include="src\gui\VariableList.cpp">
       <Filter>Source Files\Model\Interface\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\llm\LLMTypes.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">

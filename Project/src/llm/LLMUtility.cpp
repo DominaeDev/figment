@@ -826,12 +826,11 @@ int32_t llm_util::shift_tokens(llama_context* pCtx, llama_batch& batch, int32_t 
 	return shift_amount;
 }
 
-int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, ContextState& ctxState, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
+int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, llama_context* pCtx, ContextSequence& seq, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
 {
 	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
-	llama_context* pCtx = ctxState.pCtx;
 
-//	dump_context(ctxState.batch, pVocab, "prompt-full.txt");
+//	dump_context(seq.batch, pVocab, "prompt-full.txt");
 
 	// Remove
 	int32_t shift_amount = 0;
@@ -842,7 +841,7 @@ int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, ContextState& ctxSta
 
 	int32_t n_used = llama_kv_self_used_cells(pCtx);
 
-	int32_t pos_remove_begin = ctxState.blocks_pos + (*itBegin).offset;
+	int32_t pos_remove_begin = seq.blocks_pos + (*itBegin).offset;
 	int32_t pos_remove_end = pos_remove_begin + shift_amount;
 	if (!llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
 		return 0;
@@ -851,11 +850,11 @@ int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, ContextState& ctxSta
 	assert(n_used_after < n_used);
 
 	// Shift
-	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, ctxState.current_pos, -shift_amount);
+	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, seq.current_pos, -shift_amount);
 	llama_kv_self_update(pCtx);
 
 	// Update batch
-	auto& batch = ctxState.batch;
+	auto& batch = seq.batch;
 	int32_t n_batch = batch.n_tokens;
 	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
 	{

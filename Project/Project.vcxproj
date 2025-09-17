@@ -114,6 +114,7 @@
     <ClCompile Include="src\llm\LLMEmbedding.cpp" />
     <ClCompile Include="src\llm\LLMState.cpp" />
     <ClCompile Include="src\llm\LLMTemplate.cpp" />
+    <ClCompile Include="src\llm\LLMTypes.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />
     <ClCompile Include="src\gui\Area.cpp" />
     <ClCompile Include="src\model\Character.cpp" />

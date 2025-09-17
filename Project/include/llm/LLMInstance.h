@@ -183,7 +183,7 @@ private:
 	void PushSignal(LLMStatusSignal signal);
 	void RefreshActiveResponses();
 	std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
-	bool RebuildKVCache(llama_context* pCtx, const llama_batch& batch);
+	bool RebuildKVCache(llama_context* pCtx, ContextSequence& seq);
 
 	Sentences GetHistory(size_t depth);
 	llama_sampler* CompileGrammar(GrammarFlag grammarFlags);
