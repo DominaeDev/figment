@@ -33,7 +33,7 @@ inline constexpr size_t operator "" _sz( unsigned long long arg ) noexcept
 typedef std::string string;
 
 template <typename E>
-inline constexpr bool CheckEnumFlag(const E set, const E flag)
+inline constexpr bool CheckEnumFlag(const E set, const E flag) noexcept
 {
 	return (set & flag) == flag;
 }

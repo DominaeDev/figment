@@ -1,8 +1,8 @@
-#include "llm/LLMState.h"
+#include "llm/LLMStateVariables.h"
 #include "util/StringUtility.h"
 #include <format>
 
-bool LLMState::SetValue(string name, string value)
+bool LLMStateVariables::SetValue(string name, string value)
 {
 	if (!value.empty())
 	{
@@ -29,7 +29,7 @@ bool LLMState::SetValue(string name, string value)
 	return _variables.erase(name) > 0;
 }
 
-bool LLMState::HasValue(string name) const
+bool LLMStateVariables::HasValue(string name) const
 {
 	auto itFind = std::find_if(_variables.begin(), _variables.end(), [&name](auto kvp) {
 		return string_util::equals(kvp.first, name, true);
@@ -38,7 +38,7 @@ bool LLMState::HasValue(string name) const
 	return itFind != _variables.end();
 }
 
-string LLMState::GetList() const
+string LLMStateVariables::GetList() const
 {
 	string result;
 	for (auto kvp : _variables)
@@ -46,7 +46,7 @@ string LLMState::GetList() const
 	return result;
 }
 
-string LLMState::GetGrammarPattern() const
+string LLMStateVariables::GetGrammarPattern() const
 {
 	if (_variables.empty())
 		return "[]";
@@ -62,7 +62,7 @@ string LLMState::GetGrammarPattern() const
 	return result;
 }
 
-void LLMState::UpdateValues(string stateReport, std::map<string, string>& updatedVariables)
+void LLMStateVariables::UpdateValues(string stateReport, std::map<string, string>& updatedVariables)
 {
 	string_util::replace_all(stateReport, "<change>", "");
 	string_util::replace_all(stateReport, "</change>", ";");

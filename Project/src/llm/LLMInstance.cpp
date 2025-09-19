@@ -189,15 +189,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 	_contextState = {};
 	_contextState.pCtx = _modelState.pCtx;
 	_contextState.pVocab = _modelState.pVocab;
-	_contextState.sequences.push_back(ContextSequence { 0 }); //! @seq
+	_contextState.sequences.push_back(ContextSequence { _modelState.pCtx, 0 }); //! @seq
 
 	_session = args.session;
-	_state = {};
+	_stateVars = {};
 
-#if _DEBUG
-	_state.SetValue("Location", "Kitchen"); //! @temp
-	_state.SetValue(_session.ApplyNames("{{char}}'s mood", Role::Bot1), "Neutral"); //! @temp
-#endif
+	_stateVars.SetValue("Location", "Kitchen"); //! @tempasdasd
+	_stateVars.SetValue(_session.ApplyNames("{{char}}'s mood", Role::Bot1), "Neutral"); //! @temp
 
 	_narratorCooldownDuration = args.narrationCooldownDuration;
 	_narratorCooldown = -1;
@@ -239,7 +237,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		if (CheckEnumFlag(_options, LLMOption::StateVariables))
 		{
 			string_util::replace_all(grammar, "##STATE##", "stat");
-			string_util::replace_all(grammar, "##STATE_VARS##", _state.GetGrammarPattern());
+			string_util::replace_all(grammar, "##STATE_VARS##", _stateVars.GetGrammarPattern());
 		}
 		else
 		{
@@ -609,7 +607,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	for (int32_t i = (int32_t)blocks.size() - 1; i >= 0; --i)
 	{
 		auto& block = blocks[i];
-		if (block.ttl <= 0)
+		if (!block.is_temporary())
 			continue;
 
 		block.ttl -= args.time;
@@ -619,7 +617,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		if (block.is_cached())
 		{
 			// Remove from context
-			int32_t shift = llm_util::ctx_remove_and_shift(state.pModel, _contextState.pCtx, _contextState.current_sequence(),
+			int32_t shift = seq.RemoveAndShift(state.pVocab,
 				blocks.begin() + (ptrdiff_t)i,
 				blocks.begin() + (ptrdiff_t)(toSZ(i + 1)));
 
@@ -675,7 +673,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	seq.AssignBlockPositions();
 
 	// Add state block (preface)
-	if (!args.isContinuation && CheckEnumFlag(_options, LLMOption::StateVariables) && !_state.IsEmpty())
+	if (!args.isContinuation && CheckEnumFlag(_options, LLMOption::StateVariables) && !_stateVars.IsEmpty())
 	{
 		auto itUserRev = std::find_if(blocks.rbegin(), blocks.rend(), [](const ContextBlock& block) { return block.role == Role::User && !block.is_cached(); });
 		auto itState = flip_iterator<ContextBlock>(blocks, itUserRev);
@@ -685,7 +683,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		string content;
 			//= string("# Story parameters\n")
 			//+ "The following parameters track the state of the story and world.\n";
-		content += std::format("{}", _state.GetList());
+		content += std::format("{}", _stateVars.GetList());
 		content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
 		content += "\nEx: <change>Param = New value</change>\n";
 		content = llm_tmpl::apply_chat_template({ Message { Role::System, content } }, false);
@@ -724,7 +722,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		{
 			auto itBegin = blocks.begin();
 			auto itEnd = blocks.begin() + (ptrdiff_t)first_to_keep;
-			int32_t shift = llm_util::ctx_remove_and_shift(state.pModel, _contextState.pCtx, seq, itBegin, itEnd);
+			int32_t shift = seq.RemoveAndShift(state.pVocab, itBegin, itEnd);
 
 			// Adjust block offsets
 			for (auto& block : blocks)
@@ -916,7 +914,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 				}
 #else
 				DebugPrintLn(">> REBUILDING CONTEXT");
-				if (!RebuildKVCache(state.pCtx, seq))
+				if (!RebuildKVCache(seq))
 				{
 					onComplete(InternalError::DecodeError, "llama_decode returned error");
 					return;
@@ -1122,7 +1120,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	}
 
 	std::map<string, string> variables;
-	_state.UpdateValues(stateReport, variables);
+	_stateVars.UpdateValues(stateReport, variables);
 
 	llm_util::sanitize_response(response);
 
@@ -1941,27 +1939,6 @@ bool LLMInstance::GenerateEmbedding(string text)
 }
 #endif
 
-bool LLMInstance::RebuildKVCache(llama_context* pCtx, ContextSequence& seq)
-{
-	PushSignal(LLMStatusSignal::RebuildingContext);
-	auto prevReadyState = _readyState.exchange(ReadyState::RebuildingContext);
-	const llama_batch& batch = seq.batch;
-#if FALSE
-	llama_kv_self_clear(pCtx);
-	int r = llama_decode(pCtx, batch);
-#else
-	llama_kv_self_seq_rm(pCtx, seq.seq_index, seq.blocks_pos, -1);
-	auto batch_view = llm_util::create_batch_view(batch, seq.blocks_pos, batch.n_tokens - seq.blocks_pos);
-	int r = llama_decode(pCtx, batch_view);
-#endif
-
-	seq.current_pos = batch.n_tokens;
-
-	_readyState.store(prevReadyState);
-	PushSignal(LLMStatusSignal::GenerationStarted);
-	return r == 0;
-}
-
 llama_sampler* LLMInstance::CompileGrammar(GrammarFlag flags)
 {
 	if (flags == GrammarFlag::None)
@@ -1976,7 +1953,7 @@ llama_sampler* LLMInstance::CompileGrammar(GrammarFlag flags)
 		flags,
 		_modelState.pVocab, 
 		_session.GetNameGrammar(CheckEnumFlag(_options, LLMOption::UseCharacterIds), CheckEnumFlag(_options, LLMOption::AllowUserResponse)), 
-		_state.GetGrammarPattern());
+		_stateVars.GetGrammarPattern());
 	
 	_modelState.grammars[flags] = pGrammar;
 	return pGrammar;
@@ -1991,10 +1968,10 @@ bool LLMInstance::SetStateVariable(string name, string value, bool allowCreate)
 	if (!stateLock.try_lock_for(100ms))
 		return false;
 
-	if (!_state.HasValue(name) && !allowCreate)
+	if (!_stateVars.HasValue(name) && !allowCreate)
 		return false;
 
-	_state.SetValue(name, value);
+	_stateVars.SetValue(name, value);
 	return true;
 }
 
@@ -2004,7 +1981,19 @@ std::map<string, string> LLMInstance::GetStateVariables()
 
 	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
 	if (stateLock.try_lock_for(100ms))
-		result.insert(_state.GetVariables().begin(), _state.GetVariables().end());
+		result.insert(_stateVars.GetVariables().begin(), _stateVars.GetVariables().end());
 
 	return result;
+}
+
+bool LLMInstance::RebuildKVCache(ContextSequence& seq)
+{
+    PushSignal(LLMStatusSignal::RebuildingContext);
+    auto prevReadyState = _readyState.exchange(ReadyState::RebuildingContext);
+
+	bool r = seq.RebuildKVCache();
+
+    _readyState.store(prevReadyState);
+    PushSignal(LLMStatusSignal::GenerationStarted);
+    return r == 0;
 }

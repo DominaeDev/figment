@@ -110,9 +110,10 @@
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
+    <ClCompile Include="src\llm\Context.cpp" />
     <ClCompile Include="src\llm\Embedding.cpp" />
     <ClCompile Include="src\llm\LLMEmbedding.cpp" />
-    <ClCompile Include="src\llm\LLMState.cpp" />
+    <ClCompile Include="src\llm\LLMStateVariables.cpp" />
     <ClCompile Include="src\llm\LLMTemplate.cpp" />
     <ClCompile Include="src\llm\LLMTypes.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />
@@ -159,9 +160,10 @@
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
+    <ClInclude Include="include\llm\Context.h" />
     <ClInclude Include="include\llm\Embedding.h" />
     <ClInclude Include="include\llm\LLMEmbedding.h" />
-    <ClInclude Include="include\llm\LLMState.h" />
+    <ClInclude Include="include\llm\LLMStateVariables.h" />
     <ClInclude Include="include\llm\LLMTemplate.h" />
     <ClInclude Include="include\llm\LLMTypes.h" />
     <ClInclude Include="include\model\AppState.h" />

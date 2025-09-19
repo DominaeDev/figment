@@ -206,13 +206,16 @@
     <ClCompile Include="src\llm\LLMEmbedding.cpp">
       <Filter>Source Files\Inference\Embeddings</Filter>
     </ClCompile>
-    <ClCompile Include="src\llm\LLMState.cpp">
+    <ClCompile Include="src\llm\LLMStateVariables.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VariableList.cpp">
       <Filter>Source Files\Model\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMTypes.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
+    <ClCompile Include="src\llm\Context.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
   </ItemGroup>
@@ -370,11 +373,14 @@
     <ClInclude Include="include\Constants.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
-    <ClInclude Include="include\llm\LLMState.h">
+    <ClInclude Include="include\llm\LLMStateVariables.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VariableList.h">
       <Filter>Source Files\Model\Interface\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\Context.h">
+      <Filter>Source Files\Inference</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

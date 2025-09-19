@@ -2,7 +2,8 @@
 
 #include "llm/LLMTypes.h"
 #include "llm/LLMEmbedding.h"
-#include "llm/LLMState.h"
+#include "llm/LLMStateVariables.h"
+#include "llm/Context.h"
 #include "Constants.h"
 #include "model/ChatSession.h"
 
@@ -183,7 +184,7 @@ private:
 	void PushSignal(LLMStatusSignal signal);
 	void RefreshActiveResponses();
 	std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
-	bool RebuildKVCache(llama_context* pCtx, ContextSequence& seq);
+	bool RebuildKVCache(ContextSequence& seq);
 
 	Sentences GetHistory(size_t depth);
 	llama_sampler* CompileGrammar(GrammarFlag grammarFlags);
@@ -250,7 +251,7 @@ private:
 	std::unique_ptr<LLMEmbedding> _pEmbedding;
 	
 	// State
-	LLMState _state;
+	LLMStateVariables _stateVars;
 	int32_t _narratorCooldownDuration = 0;
 	int32_t _narratorCooldown = 0;
 public:

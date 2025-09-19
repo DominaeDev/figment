@@ -2,7 +2,7 @@
 
 #include "Types.h"
 
-class LLMState
+class LLMStateVariables
 {
 public:
 	bool SetValue(string name, string value);

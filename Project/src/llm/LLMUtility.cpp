@@ -826,51 +826,6 @@ int32_t llm_util::shift_tokens(llama_context* pCtx, llama_batch& batch, int32_t 
 	return shift_amount;
 }
 
-int32_t llm_util::ctx_remove_and_shift(llama_model* pModel, llama_context* pCtx, ContextSequence& seq, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
-{
-	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
-
-//	dump_context(seq.batch, pVocab, "prompt-full.txt");
-
-	// Remove
-	int32_t shift_amount = 0;
-	for (auto it = itBegin; it != itEnd; ++it)
-		shift_amount += (*it).length();
-	if (shift_amount == 0)
-		return 0;
-
-	int32_t n_used = llama_kv_self_used_cells(pCtx);
-
-	int32_t pos_remove_begin = seq.blocks_pos + (*itBegin).offset;
-	int32_t pos_remove_end = pos_remove_begin + shift_amount;
-	if (!llama_kv_self_seq_rm(pCtx, 0, pos_remove_begin, pos_remove_end))
-		return 0;
-	
-	int32_t n_used_after = llama_kv_self_used_cells(pCtx);
-	assert(n_used_after < n_used);
-
-	// Shift
-	llama_kv_self_seq_add(pCtx, 0, pos_remove_end, seq.current_pos, -shift_amount);
-	llama_kv_self_update(pCtx);
-
-	// Update batch
-	auto& batch = seq.batch;
-	int32_t n_batch = batch.n_tokens;
-	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
-	{
-		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
-		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
-		batch.n_seq_id[pos_remove_begin + i] = batch.n_seq_id[pos_remove_end + i];
-		batch.seq_id[pos_remove_begin + i][0] = batch.seq_id[pos_remove_end + i][0];
-		batch.logits[i] = false;
-	}
-	batch.n_tokens -= shift_amount;
-
-//	dump_context(ctxState.batch, pVocab, "prompt-full.txt");
-
-	return (int32_t)-shift_amount;
-}
-
 bool llm_util::dump_context(const llama_batch& batch, const llama_vocab* pVocab, string filename)
 {
 	auto fnTokenStr = [pVocab](llama_token token) -> string {
