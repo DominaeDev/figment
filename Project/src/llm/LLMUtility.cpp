@@ -23,7 +23,7 @@ static std::vector<string> const closing_tags {
 	std::format("</{0}>", Constants::Chat::DirectionTag),
 };
 
-std::string llm_util::stringFromToken(const llama_vocab* pVocab, llama_token token)
+std::string llm_util::stringFromToken(VocabPtr pVocab, llama_token token)
 {
 	// convert the token to a string, print it and add it to the response
 	char buf[256];
@@ -318,10 +318,8 @@ void llm_util::init_batch_logits(llama_batch& batch)
 	batch.logits[batch.n_tokens - 1] = true;  // Only need logits for last token
 }
 
-std::vector<llama_token> llm_util::tokenize(llama_model* pModel, string prompt, bool add_special)
+std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, string prompt, bool add_special)
 {
-	const llama_vocab* pVocab = llama_model_get_vocab(pModel);
-
 	std::vector<llama_token> prompt_tokens(1024);
 	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), add_special, false);
 	if (n_prompt_tokens < 0)
@@ -370,13 +368,13 @@ llama_batch llm_util::create_batch_view(const llama_batch& batch, int32_t positi
 	};
 }
 
-bool llm_util::init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
+bool llm_util::init_batch(VocabPtr pVocab, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
 {
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 	const bool is_first = llama_kv_self_used_cells(pCtx) == 0;
 
 	// tokenize the prompt
-	std::vector<llama_token> prompt_tokens = tokenize(pModel, prompt, is_first);
+	std::vector<llama_token> prompt_tokens = tokenize(pVocab, prompt, is_first);
 
 	// Prepare a batch for the prompt
 	llama_batch batch = llama_batch_init(ctx_size, 0, 1);
@@ -419,38 +417,22 @@ bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, co
 	return true;
 }
 
-std::vector<llama_token> llm_util::tokenize_and_batch(llama_model* pModel, llama_context* pCtx, llama_batch& batch, string content, int32_t pos, bool add_special)
+std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(VocabPtr pVocab, ContextSequence& seq, string content, int32_t pos, bool add_special)
 {
-	// Add to context batch
-	auto tokens = llm_util::tokenize(pModel, content, add_special);
-	batch.n_tokens += batch_write(pModel, pCtx, batch, tokens, pos);
+	auto tokens = tokenize_and_batch(pVocab, seq, content, pos, add_special);
+	int32_t n_tokens = toI(tokens.size());
+
+	llama_batch batch_view = llm_util::create_batch_view(seq.batch, pos, n_tokens);
+	if (batch_view.n_tokens > 0 && llama_decode(seq.pCtx, batch_view) != 0)
+		return std::nullopt;
 	return tokens;
 }
 
-int32_t llm_util::batch_write(llama_model* pModel, llama_context* pCtx, llama_batch& batch, const std::vector<llama_token>& tokens, int32_t pos)
+std::vector<llama_token> llm_util::tokenize_and_batch(VocabPtr pVocab, ContextSequence& seq, string content, int32_t pos, bool add_special)
 {
 	// Add to context batch
-	int32_t n_tokens = (int32_t)tokens.size();
-	for (int32_t i = 0; i < n_tokens; ++i)
-	{
-		int idx = pos + i;
-		batch.token[idx] = tokens[i];
-		batch.pos[idx] = idx;
-		batch.n_seq_id[idx] = 1;
-		batch.seq_id[idx][0] = 0;
-		batch.logits[i] = false;
-	}
-	return n_tokens;
-}
-
-std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(llama_model* pModel, llama_context* pCtx, llama_batch& batch, string content, int32_t pos, bool add_special)
-{
-	auto tokens = tokenize_and_batch(pModel, pCtx, batch, content, pos, add_special);
-	int32_t n_tokens = toI(tokens.size());
-
-	llama_batch batch_view = llm_util::create_batch_view(batch, pos, n_tokens);
-	if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
-		return std::nullopt;
+	auto tokens = llm_util::tokenize(pVocab, content, add_special);
+	seq.batch.n_tokens += seq.BatchWrite(tokens, pos);
 	return tokens;
 }
 
@@ -703,130 +685,7 @@ string llm_util::format_id(string id)
 	return string_util::lcase(id);
 }
 
-int32_t llm_util::erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t from, int32_t length)
-{
-	if (from < 0 || from >= Constants::Context::Size || length <= 0  || from + length > Constants::Context::Size)
-		return 0;
-
-	llama_kv_self_seq_rm(pCtx, 0, from, from + length);
-
-	for (int32_t i = 0; i < length; ++i)
-	{
-		int32_t idx = from + i;
-		batch.pos[idx] = 0;
-		batch.token[idx] = 0;
-		batch.n_seq_id[idx] = 0;
-		batch.logits[idx] = false;
-	}
-	batch.n_tokens -= length;
-	return length;
-}
-
-int32_t llm_util::batch_remove(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t end)
-{
-	int32_t n_removed = end - begin;
-
-	// Remove
-	llama_kv_self_seq_rm(pCtx, 0, begin, end);
-	llama_kv_self_seq_add(pCtx, 0, end, -1, -n_removed);
-	llama_kv_self_update(pCtx);
-
-	// Update batch
-	int32_t n_batch = batch.n_tokens;
-	for (int32_t i = 0; i < n_removed; ++i)
-	{
-		batch.token[begin + i] = batch.token[end + i];
-		batch.n_seq_id[begin + i] = batch.n_seq_id[end + i];
-		batch.pos[begin + i] = begin + i;
-		batch.seq_id[begin + i][0] = batch.seq_id[end + i][0];
-		batch.logits[i] = false;
-	}
-	batch.n_tokens -= n_removed;
-	return n_removed;
-}
-
-
-int32_t llm_util::batch_allocate(llama_context* pCtx, llama_batch& batch, int32_t pos, int32_t length)
-{
-	// Remove
-	llama_kv_self_seq_add(pCtx, 0, pos, -1, length);
-	llama_kv_self_update(pCtx);
-
-	int32_t ctx_size = llama_n_ctx(pCtx);
-
-	// Update batch
-	int32_t n_batch = batch.n_tokens;
-	for (int32_t i = 0; i < n_batch - pos; ++i)
-	{
-		if (i >= ctx_size)
-			continue;
-
-		int32_t idx = n_batch + length - i - 1;
-		batch.pos[idx] = idx;
-		batch.token[idx] = batch.token[idx - length];
-		batch.n_seq_id[idx] = batch.n_seq_id[idx - length];
-		batch.seq_id[idx][0] = batch.seq_id[idx - length][0];
-		batch.logits[idx] = false;
-	}
-	batch.n_tokens += length;
-
-	// Clear allocated tokens
-	for (int32_t i = 0; i < length; ++i)
-	{
-		int32_t idx = pos + i;
-		batch.pos[idx] = -1;
-		batch.token[idx] = 0;
-		batch.n_seq_id[idx] = 0;
-		batch.logits[idx] = false;
-	}
-
-	return length;
-}
-
-int32_t llm_util::shift_tokens(llama_context* pCtx, llama_batch& batch, int32_t pos, int32_t len, int32_t shift_amount)
-{
-	// Shift down
-	int32_t ctx_size = llama_n_ctx(pCtx);
-	if (len < 0)
-		len = ctx_size - pos;
-
-	int32_t src_pos = pos;
-	int32_t dest_pos = pos + shift_amount;
-	if (src_pos > dest_pos) // Shifting up, write top down
-	{
-		for (int32_t i = 0; i < shift_amount; ++i)
-		{
-			int idx = dest_pos + i;
-			if (idx < 0 || idx >= ctx_size)
-				continue;
-			batch.pos[idx] = idx;
-			batch.token[idx] = batch.token[src_pos + i];
-			batch.n_seq_id[idx] = batch.n_seq_id[src_pos + i];
-			batch.seq_id[idx][0] = batch.seq_id[src_pos + i][0];
-			batch.logits[idx] = batch.logits[src_pos + i];
-		}
-	}
-	else if (src_pos < dest_pos) // Shifting down, write bottom up
-	{
-		for (int32_t i = 0; i < shift_amount; ++i)
-		{
-			int idx = dest_pos + len - i - 1;
-			if (idx < 0 || idx >= ctx_size)
-				continue;
-			batch.pos[idx] = idx;
-			batch.token[idx] = batch.token[src_pos + len - i - 1];
-			batch.n_seq_id[idx] = batch.n_seq_id[src_pos + len - i - 1];
-			batch.seq_id[idx][0] = batch.seq_id[src_pos + len - i - 1][0];
-			batch.logits[idx] = batch.logits[src_pos + len - i - 1];
-		}		
-	}
-
-	// Apply down-shifts
-	llama_kv_self_seq_add(pCtx, 0, pos, -1, shift_amount);
-	return shift_amount;
-}
-
-bool llm_util::dump_context(const llama_batch& batch, const llama_vocab* pVocab, string filename)
+bool llm_util::dump_context(const llama_batch& batch, VocabPtr pVocab, string filename)
 {
 	auto fnTokenStr = [pVocab](llama_token token) -> string {
 		if (token == llama_vocab_bos(pVocab))
@@ -917,7 +776,7 @@ static bool _evaluate(string& text, size_t pos_begin, const std::set<string>& fl
 	return true;
 }
 
-llama_sampler* llm_util::compile_grammar(GrammarFlag grammarFlags, const llama_vocab* pVocab, string names, string stateVars)
+llama_sampler* llm_util::compile_grammar(GrammarFlag grammarFlags, VocabPtr pVocab, string names, string stateVars)
 {
 	string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 	if (grammar.size() == 0)

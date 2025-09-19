@@ -148,6 +148,7 @@ void MainFrame::InitializeModel()
 
 	if (!pLLM->IsInitialized())
 	{
+		SetStatusBar("Loading model...");
 		pLLM->Initialize(string(Constants::DefaultModelLocation), llmOptions, 
 			[](int percent) 
 			{

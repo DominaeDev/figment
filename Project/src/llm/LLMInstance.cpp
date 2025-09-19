@@ -305,7 +305,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 
 	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System, "");
 
-	std::vector<llama_token>& system_prompt_tokens = _contextState.system_tokens = llm_util::tokenize(_modelState.pModel, template_prefix + system_prompt, false); // <BOS>?;
+	std::vector<llama_token>& system_prompt_tokens = _contextState.system_tokens = llm_util::tokenize(_modelState.pVocab, template_prefix + system_prompt, false); // <BOS>?;
 	seq.persona_pos = toI(system_prompt_tokens.size());
 
 	// Tokenize persona(s)
@@ -314,7 +314,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		if (string_util::empty_or_whitespace(kvp.second))
 			continue;
 		
-		_contextState.personas[kvp.first] = llm_util::tokenize(_modelState.pModel, kvp.second, false);
+		_contextState.personas[kvp.first] = llm_util::tokenize(_modelState.pVocab, kvp.second, false);
 
 		if (!_session.IsGroupChat() || !CheckEnumFlag(_options, LLMOption::SwapPersonas))
 			ContainerAppend(system_prompt_tokens, _contextState.personas[Role::Bot1]);
@@ -323,7 +323,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 	// User persona
 	if (!string_util::empty_or_whitespace(user_persona))
 	{
-		auto user_persona_tokens = llm_util::tokenize(_modelState.pModel, user_persona);
+		auto user_persona_tokens = llm_util::tokenize(_modelState.pVocab, user_persona);
 		ContainerAppend(system_prompt_tokens, user_persona_tokens);
 	}
 
@@ -331,7 +331,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		return false;
 
 	// Suffix
-	auto template_suffix_tokens = llm_util::tokenize(_modelState.pModel, template_suffix);
+	auto template_suffix_tokens = llm_util::tokenize(_modelState.pVocab, template_suffix);
 	ContainerAppend(system_prompt_tokens, template_suffix_tokens);
 	if (!fnDecode(template_suffix_tokens, current_pos))
 		return false;
@@ -657,7 +657,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		}
 		content = _session.ApplyNames(content, args.responder);
 		
-		auto block_tokens = llm_util::tokenize(state.pModel, content, false);
+		auto block_tokens = llm_util::tokenize(state.pVocab, content, false);
 		block.tokens = block_tokens;
 		block.offset = offset;
 
@@ -687,7 +687,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
 		content += "\nEx: <change>Param = New value</change>\n";
 		content = llm_tmpl::apply_chat_template({ Message { Role::System, content } }, false);
-		auto state_tokens = llm_util::tokenize(state.pModel, content, false);
+		auto state_tokens = llm_util::tokenize(state.pVocab, content, false);
 		auto it = blocks.insert(itState, ContextBlock {
 			/*responseId*/ "",
 			/*role*/ Role::System,
@@ -738,7 +738,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	{
 		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(args.responder, "assistant"); //! @name?
 		prelude = _session.ApplyNames(prelude, args.responder);
-		auto assistant_tokens = llm_util::tokenize(state.pModel, prelude, false);
+		auto assistant_tokens = llm_util::tokenize(state.pVocab, prelude, false);
 		prompt_tokens.insert(prompt_tokens.end(), assistant_tokens.begin(), assistant_tokens.end());
 	}
 
@@ -838,7 +838,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 	if (!args.prepend.empty())
 	{
-		auto prepend_tokens = llm_util::tokenize(state.pModel, args.prepend, false);
+		auto prepend_tokens = llm_util::tokenize(state.pVocab, args.prepend, false);
 
 		// Append to batch
 		for (int i = 0; i < prepend_tokens.size(); ++i)
@@ -1826,7 +1826,7 @@ bool LLMInstance::ActivatePersona(Role role)
 		int32_t len = toI(tokens.size());
 
 		// Remove from kv cache
-		int32_t shift = llm_util::batch_remove(pCtx, batch, seq.persona_pos, seq.persona_pos + len);
+		int32_t shift = seq.BatchRemove(seq.persona_pos, seq.persona_pos + len);
 
 		seq.current_pos -= shift;
 		seq.blocks_pos -= shift;
@@ -1846,10 +1846,10 @@ bool LLMInstance::ActivatePersona(Role role)
 		//! TODO: Allocate enough space
 
 		// Shift down
-		int32_t shift = llm_util::batch_allocate(pCtx, batch, seq.persona_pos, len);
+		int32_t shift = seq.BatchAllocate(seq.persona_pos, len);
 		
 		// Write persona to batch
-		llm_util::batch_write(_modelState.pModel, pCtx, batch, tokens, seq.persona_pos);
+		seq.BatchWrite(tokens, seq.persona_pos);
 
 		// Decode
 		llama_batch batch_view = llm_util::create_batch_view(seq.batch, seq.persona_pos, len);

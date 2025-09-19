@@ -22,6 +22,7 @@ struct ContextBlock
 	int32_t offset {};
 	int ttl = -1;
 
+	inline bool is_static() const { return CheckEnumFlag(flags, ContextBlockFlag::Static); }
 	inline bool is_cached() const { return CheckEnumFlag(flags, ContextBlockFlag::Cached); }
 	inline bool is_volatile() const { return CheckEnumFlag(flags, ContextBlockFlag::Volatile); }
 	inline bool is_temporary() const { return ttl > 0; }
@@ -57,6 +58,12 @@ struct ContextSequence
 	int32_t AssignBlockPositions();
 	int32_t RemoveAndShift(const llama_vocab* pVocab, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd);
 	bool RebuildKVCache();
+
+	int32_t EraseTokens(int32_t from, int32_t length);
+	int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
+	int32_t BatchWrite(const std::vector<llama_token>& tokens, int32_t pos);
+	int32_t BatchRemove(int32_t begin, int32_t end);
+	int32_t BatchAllocate(int32_t pos, int32_t length);
 };
 
 struct ContextState

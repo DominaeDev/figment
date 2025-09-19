@@ -1,11 +1,12 @@
 #pragma once
 
 #include "llm/LLMTypes.h"
+#include "llm/Context.h"
 #include <optional>
 
 namespace llm_util
 {
-	std::string stringFromToken(const llama_vocab* pVocab, llama_token token);
+	std::string stringFromToken(VocabPtr pVocab, llama_token token);
 	size_t validate_utf8(const string& text) noexcept;
 	size_t string_find_partial_stop(const std::string& str, const std::string& stop);
 	size_t find_one_of(const string& text, const std::vector<string>& words);
@@ -14,26 +15,21 @@ namespace llm_util
 	string& sanitize_response(string& text);
 	string& complete_message(string& text);
 	void process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word);
+	std::pair<MessageType, bool> detect_message_type(string text) noexcept;
 	
 	llama_batch init_batch(llama_context* pCtx);
-	bool init_batch(llama_model* pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
+	bool init_batch(VocabPtr pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 	void init_batch_logits(llama_batch& batch);
 	bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch);
 	llama_batch create_batch_view(const llama_batch& batch, int32_t position, int32_t length);
-	std::vector<llama_token> tokenize(llama_model* pModel, string prompt, bool add_special = false);
-	std::vector<llama_token> tokenize_and_batch(llama_model* pModel, llama_context* pCtx, llama_batch& batch, string content, int32_t pos, bool add_special = false);
-	std::optional<std::vector<llama_token>> tokenize_and_decode(llama_model* pModel, llama_context* pCtx, llama_batch& batch, string content, int32_t pos, bool add_special = false);
-	int32_t erase_tokens(llama_context* pCtx, llama_batch& batch, int32_t from, int32_t length);
-	int32_t shift_tokens(llama_context* pCtx, llama_batch& batch, int32_t pos, int32_t len, int32_t shift_amount);
-	int32_t batch_write(llama_model* pModel, llama_context* pCtx, llama_batch& batch, const std::vector<llama_token>& tokens, int32_t pos);
-	int32_t batch_remove(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t end);
-	int32_t batch_allocate(llama_context* pCtx, llama_batch& batch, int32_t begin, int32_t length);
+	std::vector<llama_token> tokenize(VocabPtr pModel, string prompt, bool add_special = false);
+	std::vector<llama_token> tokenize_and_batch(VocabPtr pModel, ContextSequence& seq, string content, int32_t pos, bool add_special = false);
+	std::optional<std::vector<llama_token>> tokenize_and_decode(VocabPtr pModel, ContextSequence& seq, string content, int32_t pos, bool add_special = false);
 
-	std::pair<MessageType, bool> detect_message_type(string text) noexcept;
 
 	std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 
 	string format_id(string id);
-	bool dump_context(const llama_batch& batch, const llama_vocab* pVocab, string filename);
-	llama_sampler* compile_grammar(GrammarFlag flags, const llama_vocab* pVocab, string names, string stateVars);
+	bool dump_context(const llama_batch& batch, VocabPtr pVocab, string filename);
+	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
 }

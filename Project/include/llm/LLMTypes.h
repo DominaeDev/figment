@@ -124,3 +124,5 @@ struct Sentence
 	string sentence;
 };
 using Sentences = std::vector<Sentence>;
+
+using VocabPtr = const llama_vocab*;
