@@ -819,3 +819,23 @@ llama_sampler* llm_util::compile_grammar(GrammarFlag grammarFlags, VocabPtr pVoc
 	assert(pGrammar);
 	return pGrammar;
 }
+
+SequenceList llm_util::get_sequences(SequenceId seq) noexcept
+{
+	SequenceList seqIds;
+	seqIds.reserve(Constants::Context::MaxSequences);
+
+	static constexpr std::array<SequenceId, 5> s_AllContextSequenceIds {
+		SequenceId::Bot1,
+		SequenceId::Bot2,
+		SequenceId::Bot3,
+		SequenceId::Bot4,
+	};
+
+	for (size_t i = 0; i < s_AllContextSequenceIds.size() && i < Constants::Context::MaxSequences; ++i)
+	{
+		if ((bool)(seq & s_AllContextSequenceIds[i]))
+			seqIds.push_back(toI(i));
+	}
+	return std::move(seqIds);
+}

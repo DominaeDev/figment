@@ -4,7 +4,7 @@
 
 namespace Constants
 {
-	inline constexpr const char* AppTitle = "Mikan RP";
+	inline constexpr const char* AppTitle = "Figment Chat";
 
 	namespace GUI
 	{
@@ -41,6 +41,7 @@ namespace Constants
 		inline constexpr int MaxResponseLength = 256;
 		inline constexpr int MicroBatchSize = 512;
 		inline constexpr float WindowKeepRatio = 0.75f;
+		inline constexpr int MaxSequences = 4;
 	}
 
 	inline constexpr std::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";

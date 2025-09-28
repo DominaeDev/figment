@@ -125,4 +125,21 @@ struct Sentence
 };
 using Sentences = std::vector<Sentence>;
 
+using ModelPtr = llama_model*;
+using ContextPtr = llama_context*;
 using VocabPtr = const llama_vocab*;
+
+enum class ContextSize : int32_t
+{
+	Context_2K = 2048,
+	Context_3K = 3072,
+	Context_4K = 4096,
+	Context_5K = 5120,
+	Context_6K = 6144,
+	Context_8K = 8192,
+	Context_10K = 10240,
+	Context_12K = 12288,
+	Context_16K = 16384,
+	Context_24K = 24576,
+	Context_32K = 32768,
+};

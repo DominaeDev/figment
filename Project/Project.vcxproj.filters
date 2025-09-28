@@ -57,6 +57,9 @@
     <Filter Include="Source Files\Model\Interface\Fonts">
       <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Inference\Context">
+      <UniqueIdentifier>{1a0e4325-4392-475b-9d87-cc5d5fa0b897}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -206,17 +209,17 @@
     <ClCompile Include="src\llm\LLMEmbedding.cpp">
       <Filter>Source Files\Inference\Embeddings</Filter>
     </ClCompile>
-    <ClCompile Include="src\llm\LLMStateVariables.cpp">
-      <Filter>Source Files\Inference</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\VariableList.cpp">
       <Filter>Source Files\Model\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMTypes.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
+    <ClCompile Include="src\llm\LLMStateVariables.cpp">
+      <Filter>Source Files\Inference\Context</Filter>
+    </ClCompile>
     <ClCompile Include="src\llm\Context.cpp">
-      <Filter>Source Files\Inference</Filter>
+      <Filter>Source Files\Inference\Context</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -370,17 +373,17 @@
     <ClInclude Include="include\Types.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\Constants.h">
-      <Filter>Source Files\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="include\llm\LLMStateVariables.h">
-      <Filter>Source Files\Inference</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\VariableList.h">
       <Filter>Source Files\Model\Interface\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="include\Constants.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\LLMStateVariables.h">
+      <Filter>Source Files\Inference\Context</Filter>
+    </ClInclude>
     <ClInclude Include="include\llm\Context.h">
-      <Filter>Source Files\Inference</Filter>
+      <Filter>Source Files\Inference\Context</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

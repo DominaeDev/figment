@@ -26,10 +26,12 @@ namespace llm_util
 	std::vector<llama_token> tokenize_and_batch(VocabPtr pModel, ContextSequence& seq, string content, int32_t pos, bool add_special = false);
 	std::optional<std::vector<llama_token>> tokenize_and_decode(VocabPtr pModel, ContextSequence& seq, string content, int32_t pos, bool add_special = false);
 
-
 	std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 
 	string format_id(string id);
 	bool dump_context(const llama_batch& batch, VocabPtr pVocab, string filename);
 	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
+
+	SequenceList get_sequences(SequenceId seq) noexcept;
+	
 }

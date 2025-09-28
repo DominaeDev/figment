@@ -3,36 +3,50 @@
 #include "Constants.h"
 #include <cassert>
 
-int32_t ContextSequence::AssignBlockPositions()
+void ContextSequence::AssignBlockPositions()
 {
-	int32_t offset = 0;
+	int32_t block_offset = 0;
+
 	for (auto& block : blocks)
 	{
-		block.offset = offset;
-		offset += block.length();
+		block.offset = block_offset;
+		block_offset += block.length();
 	}
-	return offset;
 }
 
 bool ContextSequence::RebuildKVCache()
 {
-#if FALSE // Entire context
+#if FALSE // Clear everything
 	llama_kv_self_clear(pCtx);
 	int r = llama_decode(pCtx, batch);
-#else // Post system_prompt
+#else // Clear non-static only
+	int32_t blocks_pos = GetFirstNonStaticOffset();
+
 	llama_kv_self_seq_rm(pCtx, seq_index, blocks_pos, -1);
 	auto batch_view = llm_util::create_batch_view(batch, blocks_pos, batch.n_tokens - blocks_pos);
 	int r = llama_decode(pCtx, batch_view);
 #endif
 
-	current_pos = batch.n_tokens;
+	cursor_pos = batch.n_tokens;
 	return r == 0;
 }
 
+int32_t ContextSequence::GetFirstNonStaticOffset() const
+{
+	int32_t offset = 0;
+
+	for (auto& block : blocks)
+	{
+		if (!block.is_static())
+			break;
+		offset += block.length();
+	}
+	return offset;
+}
 
 int32_t ContextSequence::RemoveAndShift(const llama_vocab* pVocab, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
 {
-//	dump_context(seq.batch, pVocab, "prompt-full.txt");
+	llm_util::dump_context(batch, pVocab, "prompt-full.txt");
 
 	// Remove
 	int32_t shift_amount = 0;
@@ -42,22 +56,24 @@ int32_t ContextSequence::RemoveAndShift(const llama_vocab* pVocab, std::vector<C
 		return 0;
 
 	int32_t n_used = llama_kv_self_used_cells(pCtx);
-
-	int32_t pos_remove_begin = blocks_pos + (*itBegin).offset;
+	int32_t pos_remove_begin = (*itBegin).offset;
 	int32_t pos_remove_end = pos_remove_begin + shift_amount;
+
+	blocks.erase(itBegin, itEnd);
+	AssignBlockPositions();
+
 	if (!llama_kv_self_seq_rm(pCtx, seq_index, pos_remove_begin, pos_remove_end))
 		return 0;
+
+	// Shift
+	llama_kv_self_seq_add(pCtx, seq_index, pos_remove_end, cursor_pos, -shift_amount);
+	llama_kv_self_update(pCtx);
 	
 	int32_t n_used_after = llama_kv_self_used_cells(pCtx);
 	assert(n_used_after < n_used);
 
-	// Shift
-	llama_kv_self_seq_add(pCtx, seq_index, pos_remove_end, current_pos, -shift_amount);
-	llama_kv_self_update(pCtx);
-
 	// Update batch
-	int32_t n_batch = batch.n_tokens;
-	for (int32_t i = 0; i < n_batch - pos_remove_end; ++i)
+	for (int32_t i = 0; i < pos_remove_end - pos_remove_begin; ++i)
 	{
 		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
 		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
@@ -67,7 +83,7 @@ int32_t ContextSequence::RemoveAndShift(const llama_vocab* pVocab, std::vector<C
 	}
 	batch.n_tokens -= shift_amount;
 
-//	dump_context(ctxState.batch, pVocab, "prompt-full.txt");
+	llm_util::dump_context(batch, pVocab, "prompt-full.txt");
 
 	return (int32_t)-shift_amount;
 }
@@ -212,4 +228,11 @@ int32_t ContextSequence::BatchWrite(const std::vector<llama_token>& tokens, int3
 		batch.logits[i] = false;
 	}
 	return n_tokens;
+}
+
+void ContextSequence::BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds)
+{
+	batch.n_seq_id[pos] = toI(seqIds.size());
+	for (size_t i = 0; i < seqIds.size() && i < Constants::Context::MaxSequences; ++i)
+		batch.seq_id[pos][i] = seqIds[i];
 }

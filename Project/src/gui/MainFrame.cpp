@@ -29,7 +29,7 @@ LLMOption llmOptions = LLMOption::GreetUser
 	| LLMOption::Uncensored
 //	| LLMOption::LimitMessages
 //	| LLMOption::RandomizeMessageCount
-	| LLMOption::StateVariables
+//	| LLMOption::StateVariables
 //	| LLMOption::ReportStateChanges
 //	| LLMOption::Embeddings
 	| LLMOption::SwapPersonas
@@ -188,6 +188,7 @@ void MainFrame::StartChat()
 		LLMChatArguments llmArgs {
 			/*session*/ session,
 			/*messages*/ {},
+			/*options*/ llmOptions,
 		};
 		pLLM->InitializeChat(llmArgs);
 		_pChatScroll->SetSession(session);
