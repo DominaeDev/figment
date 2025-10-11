@@ -135,6 +135,7 @@ public:
 		Continuation	= 1 << 1, 
 		Instigation		= 1 << 2,
 		AllowNarrator	= 1 << 3,
+		SwapPersonas	= 1 << 4,
 	};
 
 private:
@@ -189,6 +190,7 @@ private:
 
 	Sentences GetHistory(size_t depth);
 	llama_sampler* CompileGrammar(GrammarFlag grammarFlags);
+	void InitSamplers();
 
 	// Tasks
 	enum class LLMTaskType

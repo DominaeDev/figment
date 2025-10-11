@@ -32,7 +32,7 @@ LLMOption llmOptions = LLMOption::GreetUser
 //	| LLMOption::StateVariables
 //	| LLMOption::ReportStateChanges
 //	| LLMOption::Embeddings
-	| LLMOption::SwapPersonas
+	| LLMOption::UseMultipleSequences
 ;
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
@@ -149,7 +149,7 @@ void MainFrame::InitializeModel()
 	if (!pLLM->IsInitialized())
 	{
 		SetStatusBar("Loading model...");
-		pLLM->Initialize(string(Constants::DefaultModelLocation), llmOptions, 
+		pLLM->Initialize(string(Constants::DefaultModelLocation), llmOptions,
 			[](int percent) 
 			{
 				SetStatusBar(std::format("Loading model... {0}%", percent));
@@ -183,7 +183,7 @@ void MainFrame::StartChat()
 		session.Initialize(llmOptions);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-//		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
 		LLMChatArguments llmArgs {
 			/*session*/ session,

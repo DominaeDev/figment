@@ -46,13 +46,14 @@ using SequenceList = std::vector<int32_t>;
 struct ContextSequence
 {
 	llama_context* pCtx = nullptr;
-	int32_t seq_index = 0;					// Sequence index
-	llama_batch batch {};					// Representation of the kv-cache (mirror)
+	int32_t seq_index = 0;						// Sequence index
+	std::vector<llama_seq_id> seq_ids { 0 };
+	llama_batch batch {};						// Representation of the kv-cache (mirror)
 	std::vector<ContextBlock> blocks {};
-	int32_t persona_pos = 0;				// persona insertion point
-	int32_t response_pos = 0;				// start of response, including prompt template preamble
-	int32_t prepend_pos = 0;				// start of response, not including prompt template preamble
-	int32_t cursor_pos = 0;					// current position
+	int32_t persona_pos = 0;					// persona insertion point
+	int32_t response_pos = 0;					// start of response, including prompt template preamble
+	int32_t prepend_pos = 0;					// start of response, not including prompt template preamble
+	int32_t cursor_pos = 0;						// current position
 	
 	void AssignBlockPositions();
 	int32_t GetFirstNonStaticOffset() const;
@@ -72,10 +73,6 @@ struct ContextState
 	llama_context* pCtx = nullptr;
 	const llama_vocab* pVocab = nullptr;
 
-	// Static instructions
-//	std::vector<int32_t> system_tokens;
-	
-	// Character swapping
 	std::map<Role, std::vector<int32_t>> personas;
 	Role activePersona = Role::Undefined;
 

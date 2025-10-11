@@ -186,102 +186,72 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 
 	PushSignal(LLMStatusSignal::InitializingChat);
 
+	bool bMultiSequence = args.session.IsGroupChat() && CheckEnumFlag(args.options, LLMOption::UseMultipleSequences);
+	int32_t n_seq = bMultiSequence ? (int32_t)args.session.GetBotCount() : 1;
+
 	_contextState = {};
 	_contextState.pCtx = _modelState.pCtx;
 	_contextState.pVocab = _modelState.pVocab;
-	_contextState.sequences.push_back(ContextSequence { _modelState.pCtx, 0 }); //! @seq
+	
+	for (int32_t i = 0; i < n_seq; ++i)
+		_contextState.sequences.push_back(ContextSequence { _modelState.pCtx, i, { i } });
 
 	_session = args.session;
 	_stateVars = {};
+	_contextState.active_sequence = 1; //! @temp
 
+	// Read personas
+	std::map<Role, string> personas;
+	int32_t botCount = (int32_t)_session.GetBotCount();
+	for (int32_t i = 0; i < botCount; ++i)
+	{
+		Role role = bot_from_index(i);
+		personas[role] = _session.GetPersonaOf(role);
+	}
+	string user_persona = _session.GetPersonaOf(Role::User);
+
+	if (!personas.contains(Role::Bot1))
+		return false; // No main character
+
+	_narratorCooldownDuration = args.narrationCooldownDuration;
+	_narratorCooldown = -1;
+
+	// Initialize sampler + grammar
+	InitSamplers();
+
+	// Initialize rng
+#if _DEBUG
+	_modelState.rng.seed(DEBUG_SEED);
+#else
+	_modelState.rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
+#endif
+
+	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
+
+	// Init state variables (temp)
 	if (CheckEnumFlag(args.options, LLMOption::StateVariables))
 	{
 		_stateVars.SetValue("Location", "Kitchen"); //! @temp
 		_stateVars.SetValue(_session.ApplyNames("{{char}}'s mood", Role::Bot1), "Neutral"); //! @temp
 	}
 
-	_narratorCooldownDuration = args.narrationCooldownDuration;
-	_narratorCooldown = -1;
-
-	// Initialize sampler + grammar
-	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
-
-	// Init sampler chain
-	if (_modelState.pSampler == nullptr)
-	{
-		llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
-		llama_sampler* pSampler = llama_sampler_chain_init(sampler_params);
-
-		// Load grammar(s)
-		string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
-
-		// Names
-		string namesPattern;
-		int32_t botCount = (int32_t)_session.GetBotCount();
-		for (int i = 0; i < botCount; ++i)
-		{
-			if (i > 0)
-				namesPattern += "| ";
-			if (CheckEnumFlag(_options, LLMOption::UseCharacterIds))
-				namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(bot_from_index(i)));
-			else
-				namesPattern += std::format("| \"{}\"", _session.GetNameOf(bot_from_index(i)));
-		}
-		if (CheckEnumFlag(_options, LLMOption::AllowUserResponse))
-		{
-			if (CheckEnumFlag(_options, LLMOption::UseCharacterIds))
-				namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(Role::User));
-			else
-				namesPattern += std::format("| \"{}\"", _session.GetNameOf(Role::User));
-		}
-		string_util::replace_all(grammar, "##NAMES##", namesPattern);
-
-		// Variables
-		if (CheckEnumFlag(_options, LLMOption::StateVariables))
-		{
-			string_util::replace_all(grammar, "##STATE##", "stat");
-			string_util::replace_all(grammar, "##STATE_VARS##", _stateVars.GetGrammarPattern());
-		}
-		else
-		{
-			string_util::replace_all(grammar, "##STATE##", "");
-			string_util::replace_all(grammar, "##STATE_VARS##", "[]");
-		}
-
-		llama_sampler* default_grammar_sampler = CompileGrammar(GrammarFlag::Default);
-
-		if (default_grammar_sampler) llama_sampler_chain_add(pSampler, default_grammar_sampler);	// Grammar
-		llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
-		llama_sampler_chain_add(pSampler, llama_sampler_init_temp(2.5f));							// Temperature
-		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
-#if _DEBUG
-		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(DEBUG_SEED));						// Seed
-#else
-		llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
-#endif
-
-		_modelState.pSampler = pSampler;
-		_modelState.pActiveGrammar = default_grammar_sampler;
-	}
-
 	// Initialize context
 	llama_context* pCtx = _contextState.pCtx;
-	ContextSequence& seq = _contextState.current_sequence();
 	int32_t ctx_size = llama_n_ctx(pCtx);
 	llama_kv_self_clear(pCtx);
 
-	llama_batch& batch = seq.batch = llm_util::init_batch(pCtx);
-	int32_t& cursor_pos = seq.cursor_pos = 0;
-
-	auto fnDecode = [&batch, pCtx](const std::vector<llama_token>& tokens, int32_t& cursor_pos) -> bool {
+	auto fnDecode = [pCtx](ContextSequence& seq, const std::vector<llama_token>& tokens, int32_t& cursor_pos) -> bool {
 		int32_t n_tokens = static_cast<int32_t>(tokens.size());
+		int32_t n_seq_id = (int32_t)seq.seq_ids.size();
+		llama_batch& batch = seq.batch;
+
 		for (int i = 0; i < n_tokens; ++i)
 		{
 			int32_t idx = cursor_pos + i;
 			batch.pos[idx] = idx;
 			batch.token[idx] = tokens[i];
-			batch.n_seq_id[idx] = 1;
-			batch.seq_id[idx][0] = 0;
+			batch.n_seq_id[idx] = n_seq_id;
+			batch.seq_id[idx] = seq.seq_ids.data();
 			batch.logits[idx] = false;
 		}
 
@@ -295,106 +265,236 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		return true;
 	};
 
-	string system_prompt = _session.GetSystemPrompt();
-	string user_persona = _session.GetPersonaOf(Role::User);
-
-	std::map<Role, string> personas;
-	int32_t botCount = (int32_t)_session.GetBotCount();
-	for (int32_t i = 0; i < botCount; ++i)
-	{
-		Role role = bot_from_index(i);
-		personas[role] = _session.GetPersonaOf(role);
-	}
-
 	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System, "");
 
-	std::vector<llama_token> system_prompt_tokens = llm_util::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
-
-	seq.blocks.emplace_back(ContextBlock {
-		/*responseId*/ "",
-		/*role*/ Role::System,
-		/*name*/ "",
-		/*content*/ template_prefix + system_prompt,
-		/*tokens*/ system_prompt_tokens,
-		/*flags*/ ContextBlockFlag::Static,
-		/*offset*/ 0,
-	});
-	if (!fnDecode(system_prompt_tokens, cursor_pos))
-		return false;
-
-	seq.persona_pos = toI(system_prompt_tokens.size());
-
-	// Tokenize persona(s)
-	if (_session.IsGroupChat() && CheckEnumFlag(_options, LLMOption::SwapPersonas))
+	if (bMultiSequence) // Initialize a sequence for each bot
 	{
-		// Tokenize and store
-		for (const auto& kvp : personas)
+		for (int32_t i = 0; i < n_seq; ++i)
 		{
-			if (string_util::empty_or_whitespace(kvp.second))
-				continue;
+			ContextSequence& seq = _contextState.sequences[i];
+			llama_batch& batch = seq.batch = llm_util::init_batch(pCtx);
+			int32_t& cursor_pos = seq.cursor_pos = 0;
+			Role role = bot_from_index(i);
 
-			_contextState.personas[kvp.first] = llm_util::tokenize(pVocab, kvp.second, false);
+			string system_prompt = _session.GetSystemPrompt(); //! @group
+
+			std::vector<llama_token> system_prompt_tokens = llm_util::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
+
+			// System prompt
+			seq.blocks.emplace_back(ContextBlock {
+				/*responseId*/ "",
+				/*role*/ Role::System,
+				/*name*/ "",
+				/*content*/ template_prefix + system_prompt,
+				/*tokens*/ system_prompt_tokens,
+				/*flags*/ ContextBlockFlag::Static,
+				/*offset*/ 0,
+			});
+
+			if (!fnDecode(seq, system_prompt_tokens, cursor_pos))
+				return false;
+
+			seq.persona_pos = toI(system_prompt_tokens.size());
+
+			// Persona
+			std::vector<llama_token> persona_tokens = llm_util::tokenize(pVocab, personas[role], false);
+			seq.blocks.emplace_back(ContextBlock {
+				/*responseId*/ "",
+				/*role*/ Role::System,
+				/*name*/ "",
+				/*content*/ personas[role],
+				/*tokens*/ persona_tokens,
+				/*flags*/ ContextBlockFlag::Static,
+				/*offset*/ cursor_pos,
+			});
+
+			if (!persona_tokens.empty() && !fnDecode(seq, persona_tokens, cursor_pos))
+				return false;
+
+			// User persona
+			if (!string_util::empty_or_whitespace(user_persona))
+			{
+				auto user_persona_tokens = llm_util::tokenize(pVocab, user_persona);
+				seq.blocks.emplace_back(ContextBlock {
+					/*responseId*/ "",
+					/*role*/ Role::System,
+					/*name*/ "",
+					/*content*/ user_persona,
+					/*tokens*/ user_persona_tokens,
+					/*flags*/ ContextBlockFlag::Static,
+					/*offset*/ cursor_pos,
+				});
+				if (!user_persona_tokens.empty() && !fnDecode(seq, user_persona_tokens, cursor_pos))
+					return false;
+			}
+
+			// Template suffix
+			auto template_suffix_tokens = llm_util::tokenize(pVocab, template_suffix);
+			seq.blocks.emplace_back(ContextBlock {
+				/*responseId*/ "",
+				/*role*/ Role::System,
+				/*name*/ "",
+				/*content*/ template_suffix,
+				/*tokens*/ template_suffix_tokens,
+				/*flags*/ ContextBlockFlag::Static,
+				/*offset*/ cursor_pos,
+			});
+			if (!fnDecode(seq, template_suffix_tokens, cursor_pos))
+				return false;
+		}
+	}
+	else // Single sequence
+	{
+		ContextSequence& seq = _contextState.current_sequence();
+
+		llama_batch& batch = seq.batch = llm_util::init_batch(pCtx);
+		int32_t& cursor_pos = seq.cursor_pos = 0;
+
+		if (_session.IsGroupChat())
+		{
+			// Tokenize and store personas for later
+			for (const auto& kvp : personas)
+			{
+				if (string_util::empty_or_whitespace(kvp.second))
+					continue;
+
+				_contextState.personas[kvp.first] = llm_util::tokenize(pVocab, kvp.second, false);
+			}
 		}
 
-	}
-	else if (personas.contains(Role::Bot1))
-	{
-		std::vector<llama_token> persona_tokens = llm_util::tokenize(pVocab, personas[Role::Bot1], false);
+		string system_prompt = _session.GetSystemPrompt();
+
+		std::vector<llama_token> system_prompt_tokens = llm_util::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
+
 		seq.blocks.emplace_back(ContextBlock {
 			/*responseId*/ "",
 			/*role*/ Role::System,
 			/*name*/ "",
-			/*content*/ personas[Role::Bot1],
-			/*tokens*/ persona_tokens,
+			/*content*/ template_prefix + system_prompt,
+			/*tokens*/ system_prompt_tokens,
 			/*flags*/ ContextBlockFlag::Static,
-			/*offset*/ cursor_pos,
+			/*offset*/ 0,
 		});
-		if (!persona_tokens.empty() && !fnDecode(persona_tokens, cursor_pos))
-			return false;
-	}
 
-	// User persona
-	if (!string_util::empty_or_whitespace(user_persona))
-	{
-		auto user_persona_tokens = llm_util::tokenize(pVocab, user_persona);
+		if (!fnDecode(seq, system_prompt_tokens, cursor_pos))
+			return false;
+
+		seq.persona_pos = toI(system_prompt_tokens.size());
+
+		if (!_session.IsGroupChat())
+		{
+			// Tokenize persona(s)
+			std::vector<llama_token> persona_tokens = llm_util::tokenize(pVocab, personas[Role::Bot1], false);
+			seq.blocks.emplace_back(ContextBlock {
+				/*responseId*/ "",
+				/*role*/ Role::System,
+				/*name*/ "",
+				/*content*/ personas[Role::Bot1],
+				/*tokens*/ persona_tokens,
+				/*flags*/ ContextBlockFlag::Static,
+				/*offset*/ cursor_pos,
+			});
+		if (!persona_tokens.empty() && !fnDecode(seq, persona_tokens, cursor_pos))
+			return false;
+		}
+
+		// User persona
+		if (!string_util::empty_or_whitespace(user_persona))
+		{
+			auto user_persona_tokens = llm_util::tokenize(pVocab, user_persona);
+			seq.blocks.emplace_back(ContextBlock {
+				/*responseId*/ "",
+				/*role*/ Role::System,
+				/*name*/ "",
+				/*content*/ user_persona,
+				/*tokens*/ user_persona_tokens,
+				/*flags*/ ContextBlockFlag::Static,
+				/*offset*/ cursor_pos,
+			});
+			if (!user_persona_tokens.empty() && !fnDecode(seq, user_persona_tokens, cursor_pos))
+				return false;
+		}
+
+		// Template suffix
+		auto template_suffix_tokens = llm_util::tokenize(pVocab, template_suffix);
 		seq.blocks.emplace_back(ContextBlock {
 			/*responseId*/ "",
 			/*role*/ Role::System,
 			/*name*/ "",
-			/*content*/ user_persona,
-			/*tokens*/ user_persona_tokens,
+			/*content*/ template_suffix,
+			/*tokens*/ template_suffix_tokens,
 			/*flags*/ ContextBlockFlag::Static,
 			/*offset*/ cursor_pos,
 		});
-		if (!user_persona_tokens.empty() && !fnDecode(user_persona_tokens, cursor_pos))
+		if (!fnDecode(seq, template_suffix_tokens, cursor_pos))
 			return false;
 	}
-
-	// Template suffix
-	auto template_suffix_tokens = llm_util::tokenize(pVocab, template_suffix);
-	seq.blocks.emplace_back(ContextBlock {
-		/*responseId*/ "",
-		/*role*/ Role::System,
-		/*name*/ "",
-		/*content*/ template_suffix,
-		/*tokens*/ template_suffix_tokens,
-		/*flags*/ ContextBlockFlag::Static,
-		/*offset*/ cursor_pos,
-	});
-	if (!fnDecode(template_suffix_tokens, cursor_pos))
-		return false;
-
-	// Initialize rng
-#if _DEBUG
-	_modelState.rng.seed(DEBUG_SEED);
-#else
-	_modelState.rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
-#endif
 
 	_bCtxReallocateNextTurn = false;
 	_readyState.store(ReadyState::Ready);
 	PushSignal(LLMStatusSignal::InitializedChat);
 	return true;
+}
+
+void LLMInstance::InitSamplers()
+{
+	// Init sampler chain
+	if (_modelState.pSampler != nullptr)
+		return;
+
+	llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
+	llama_sampler* pSampler = llama_sampler_chain_init(sampler_params);
+
+	// Load grammar(s)
+	string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
+
+	// Names
+	string namesPattern;
+	int32_t botCount = (int32_t)_session.GetBotCount();
+	for (int i = 0; i < botCount; ++i)
+	{
+		if (i > 0)
+			namesPattern += "| ";
+		if (CheckEnumFlag(_options, LLMOption::UseCharacterIds))
+			namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(bot_from_index(i)));
+		else
+			namesPattern += std::format("| \"{}\"", _session.GetNameOf(bot_from_index(i)));
+	}
+	if (CheckEnumFlag(_options, LLMOption::AllowUserResponse))
+	{
+		if (CheckEnumFlag(_options, LLMOption::UseCharacterIds))
+			namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(Role::User));
+		else
+			namesPattern += std::format("| \"{}\"", _session.GetNameOf(Role::User));
+	}
+	string_util::replace_all(grammar, "##NAMES##", namesPattern);
+
+	// Variables
+	if (CheckEnumFlag(_options, LLMOption::StateVariables))
+	{
+		string_util::replace_all(grammar, "##STATE##", "stat");
+		string_util::replace_all(grammar, "##STATE_VARS##", _stateVars.GetGrammarPattern());
+	}
+	else
+	{
+		string_util::replace_all(grammar, "##STATE##", "");
+		string_util::replace_all(grammar, "##STATE_VARS##", "[]");
+	}
+
+	llama_sampler* default_grammar_sampler = CompileGrammar(GrammarFlag::Default);
+
+	if (default_grammar_sampler) llama_sampler_chain_add(pSampler, default_grammar_sampler);	// Grammar
+	llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
+	llama_sampler_chain_add(pSampler, llama_sampler_init_temp(2.5f));							// Temperature
+	llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
+#if _DEBUG
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(DEBUG_SEED));						// Seed
+#else
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
+#endif
+
+	_modelState.pSampler = pSampler;
+	_modelState.pActiveGrammar = default_grammar_sampler;
 }
 
 bool LLMInstance::ResetChat(int seed)
@@ -409,7 +509,7 @@ bool LLMInstance::ResetChat(int seed)
 		std::scoped_lock lock(_stateMutex, _resultMutex);
 		ClearQueue(_resultQueue);
 
-		if (CheckEnumFlag(_options, LLMOption::SwapPersonas))
+		if (_session.IsGroupChat() && !CheckEnumFlag(_options, LLMOption::UseMultipleSequences))
 			ActivatePersona(Role::Undefined);
 
 		ContextSequence& seq = _contextState.current_sequence();
@@ -473,7 +573,7 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 	ctx_params.n_ctx = n_ctx;
 	ctx_params.n_batch = n_ctx;
 	ctx_params.n_ubatch = Constants::Context::MicroBatchSize;
-	ctx_params.n_seq_max = 1;
+	ctx_params.n_seq_max = Constants::Context::MaxSequences;
 
 	state.pCtx = llama_init_from_model(state.pModel, ctx_params);
 	if (!state.pCtx)
@@ -673,7 +773,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	}
 
 	// Decrement narrator cooldown
-	_narratorCooldown = std::max(_narratorCooldown - args.time, 0);
+	_narratorCooldown = std::max(_narratorCooldown - args.time, 0); //! Move to session?
 
 	// Tokenize uncached messages
 	int32_t offset = 0;
@@ -797,7 +897,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 
 	// Append to batch
 	for (int i = 0; i < prompt_tokens.size(); ++i)
-		common_batch_add(batch, prompt_tokens[i], cursor_pos + i, { seq.seq_index }, false);
+		common_batch_add(batch, prompt_tokens[i], cursor_pos + i, seq.seq_ids, false);
 	batch.logits[batch.n_tokens - 1] = true;
 
 	// Mark blocks in cache
@@ -893,7 +993,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 		// Append to batch
 		for (int i = 0; i < prepend_tokens.size(); ++i)
-			common_batch_add(batch, prepend_tokens[i], seq.prepend_pos + i, { 0 }, false);
+			common_batch_add(batch, prepend_tokens[i], seq.prepend_pos + i, seq.seq_ids, false);
 		batch.logits[seq.prepend_pos + prepend_tokens.size() - 1] = true;
 
 		partial += args.prepend;
@@ -974,7 +1074,6 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 #endif
 			}
 		}
-
 
 		// sample the next token
 		try
@@ -1093,7 +1192,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 							if (msgType == MessageType::Narration)
 								_narratorCooldown = _narratorCooldownDuration;
 
-							if (CheckEnumFlag(_options, LLMOption::SwapPersonas))
+							if (CheckEnumFlag(args.flags, GenerateFlag::SwapPersonas))
 								ActivatePersona(responderRole);
 						}
 					}
@@ -1144,7 +1243,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		assert(cursor_pos < ctx_size);
 
 		// Add sampled token to batch
-		common_batch_add(batch, sampled_token, cursor_pos, { 0 }, true);
+		common_batch_add(batch, sampled_token, cursor_pos, seq.seq_ids, true); //! @seq
 
 		// prepare the next batch with the sampled token
 		if (!next_token)
@@ -1290,6 +1389,9 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 
 		if (!CheckEnumFlag(generateArgs.flags, LLMInstance::GenerateFlag::Generate))
 			continue;
+
+		if (_session.IsGroupChat() && !CheckEnumFlag(_options, LLMOption::UseMultipleSequences))
+			generateArgs.flags = generateArgs.flags | GenerateFlag::SwapPersonas;
 
 		// Generate response
 		if (CheckEnumFlag(_options, LLMOption::RandomizeMessageCount))

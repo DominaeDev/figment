@@ -102,7 +102,7 @@ struct ModelState
 	llama_sampler* SetActiveGrammar(GrammarFlag flags);
 };
 
-enum class LLMOption : int32_t
+enum class LLMOption : uint32_t
 {
 	None = 0,
 	UseCharacterIds			= 1 << 0,
@@ -110,13 +110,15 @@ enum class LLMOption : int32_t
 	LimitMessages			= 1 << 2,
 	RandomizeMessageCount	= 1 << 3,
 	GreetUser				= 1 << 4,
-	SwapPersonas			= 1 << 5,
+	Embeddings				= 1 << 5,
 	Uncensored				= 1 << 6,
+	
 	StateVariables			= 1 << 7,
-	ReportStateChanges	= 1 << 8,
-	Embeddings				= 1 << 9,
+	ReportStateChanges		= 1 << 8,
+
+	UseMultipleSequences	= 1 << 9,
 };
-DEFINE_ENUM_FLAGS(LLMOption, int32_t)
+DEFINE_ENUM_FLAGS(LLMOption, uint32_t)
 
 struct Sentence
 {

@@ -343,7 +343,7 @@ llama_batch llm_util::init_batch(llama_context* pCtx)
 	const int32_t maxCtx = llama_n_ctx(pCtx);
 
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(maxCtx, 0, 1);
+	llama_batch batch = llama_batch_init(maxCtx, 0, Constants::Context::MaxSequences);
 	batch.n_tokens = 0;
 
 	for (size_t i = 0; i < Constants::Context::Size; ++i)
@@ -368,39 +368,12 @@ llama_batch llm_util::create_batch_view(const llama_batch& batch, int32_t positi
 	};
 }
 
-bool llm_util::init_batch(VocabPtr pVocab, llama_context* pCtx, string prompt, llama_batch& out_pBatch)
-{
-	const int32_t ctx_size = llama_n_ctx(pCtx);
-	const bool is_first = llama_kv_self_used_cells(pCtx) == 0;
-
-	// tokenize the prompt
-	std::vector<llama_token> prompt_tokens = tokenize(pVocab, prompt, is_first);
-
-	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(ctx_size, 0, 1);
-	int32_t num_tokens = std::min((int32_t)prompt_tokens.size(), ctx_size);
-
-	// Add tokens to batch
-	for (int i = 0; i < num_tokens; ++i) {
-		batch.token[i] = prompt_tokens[i];
-		batch.pos[i] = i;  // Position in sequence
-		batch.n_seq_id[i] = 1;  // This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;  // Sequence ID 0
-		batch.logits[i] = false;  // Don't need logits for most tokens
-	}
-	batch.logits[num_tokens - 1] = true;  // Only need logits for last token
-	batch.n_tokens = num_tokens;
-
-	out_pBatch = batch;
-	return true;
-}
-
 bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch)
 {
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(ctx_size, 0, 1);
+	llama_batch batch = llama_batch_init(ctx_size, 0, Constants::Context::MaxSequences);
 	int32_t num_tokens = std::min((int32_t)tokens.size(), ctx_size);
 
 	// Add tokens to batch
@@ -408,7 +381,7 @@ bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, co
 		batch.token[i] = tokens[i];
 		batch.pos[i] = i;		// Position in sequence
 		batch.n_seq_id[i] = 1;	// This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;	// Sequence ID 0
+		batch.seq_id[i][0] = 0;	// Sequence ID 0 //! @seq
 		batch.logits[i] = true;
 	}
 	batch.n_tokens = num_tokens;
@@ -721,7 +694,14 @@ bool llm_util::dump_context(const llama_batch& batch, VocabPtr pVocab, string fi
 	string result;
 	result.reserve(65536);
 	for (int32_t i = 0; i < batch.n_tokens; ++i)
-		result.append(std::format("{0:<8} {1:<8} {2}({3})\t{4:<8} \"{5}\"\r\n", batch.pos[i], batch.token[i], batch.seq_id[i][0], batch.n_seq_id[i], (int32_t)batch.logits[i], fnTokenStr(batch.token[i])));
+		result.append(std::format("{0:<8} {1:<8} {2}({3})\t{4:<8} \"{5}\"\r\n", 
+			batch.pos[i], 
+			batch.token[i], 
+			batch.seq_id[i][0], 
+			batch.n_seq_id[i], 
+			(int32_t)batch.logits[i], 
+			fnTokenStr(batch.token[i]))
+		);
 
 	return WriteTextFile(filename, result, false);
 }

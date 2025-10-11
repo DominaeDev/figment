@@ -18,7 +18,6 @@ namespace llm_util
 	std::pair<MessageType, bool> detect_message_type(string text) noexcept;
 	
 	llama_batch init_batch(llama_context* pCtx);
-	bool init_batch(VocabPtr pModel, llama_context* pCtx, string prompt, llama_batch& out_pBatch);
 	void init_batch_logits(llama_batch& batch);
 	bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch);
 	llama_batch create_batch_view(const llama_batch& batch, int32_t position, int32_t length);
