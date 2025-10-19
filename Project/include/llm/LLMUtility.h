@@ -30,7 +30,7 @@ namespace llm_util
 
 	string format_id(string id);
 	bool dump_batch(const llama_batch& batch, VocabPtr pVocab, string filename);
-	bool dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string filename);
+	bool dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string filename, int32_t cursor_pos = -1);
 	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
 
 	SequenceList get_sequences(SequenceId seq) noexcept;

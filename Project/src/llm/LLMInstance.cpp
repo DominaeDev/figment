@@ -777,6 +777,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		auto block_tokens = llm_util::tokenize(state.pVocab, content, false);
 		block.tokens = block_tokens;
 		block.offset = offset;
+		block.flags = (block.flags | ContextBlockFlag::Cached);
 
 		offset += toI(block.tokens.size());
 		last_response_tokens.insert(last_response_tokens.end(), block_tokens.cbegin(), block_tokens.cend()); //! assumes contiguous blocks
@@ -831,24 +832,24 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		assert(ctx_size - seq.cursor_pos >= Constants::Context::MaxResponseLength);
 	}
 
-	seq.write_offset = _contextState.get_max_position() - cursor_pos;
-
 	// Append last response to batch
 	for (int i = 0; i < last_response_tokens.size(); ++i)
 		common_batch_add(batch, last_response_tokens[i], cursor_pos + i, seq.seq_ids, false);
-//	batch.logits[batch.n_tokens - 1] = true;
+	batch.logits[batch.n_tokens - 1] = true;
 
 	// Decode
-//	llama_batch batch_view = llm_util::create_batch_view(seq.batch, cursor_pos, toI(last_response_tokens.size()));
-//	if (batch_view.n_tokens > 0)
-//	{
-//		llama_decode(_modelState.pCtx, batch_view);
-//		cursor_pos += batch_view.n_tokens;
-//	}
+	llama_batch batch_view = llm_util::create_batch_view(seq.batch, cursor_pos, toI(last_response_tokens.size()));
+	if (batch_view.n_tokens > 0)
+	{
+		llama_decode(_modelState.pCtx, batch_view);
+		cursor_pos += batch_view.n_tokens;
+	}
+
+	seq.write_offset = _contextState.get_max_position() - cursor_pos;
 
 	// Store response position (before assistant prelude)
 	if (!args.isContinuation)
-		response_pos = cursor_pos + toI(last_response_tokens.size());
+		response_pos = cursor_pos;
 
 	// Append assistant tokens
 	if (!args.isContinuation)
@@ -862,11 +863,11 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 //	seq.write_offset = _contextState.get_max_position() - cursor_pos;
 
 	// Store beginning of response (after assistant prelude)
-	seq.prepend_pos = seq.cursor_pos + (int32_t)last_response_tokens.size() + (int32_t)pre_prompt_tokens.size();
+	seq.prepend_pos = seq.cursor_pos + (int32_t)pre_prompt_tokens.size();
 
 	// Append to batch
 	for (int i = 0; i < pre_prompt_tokens.size(); ++i)
-		common_batch_add(batch, pre_prompt_tokens[i], seq.cursor_pos + seq.write_offset + i, seq.seq_ids, false);
+		common_batch_add(batch, pre_prompt_tokens[i], cursor_pos + i, seq.seq_ids, false);
 	batch.logits[batch.n_tokens - 1] = true;
 
 	// Mark blocks in cache
@@ -874,8 +875,8 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		it->flags = (it->flags | ContextBlockFlag::Cached);
 
 //	DumpContext(false, "prompt.txt");
-//	llm_util::dump_kv_cache(state.pCtx, seq.seq_id, "kvcache.txt");
 //	llm_util::dump_batch(batch, _contextState.pVocab, "prompt-full.txt");
+	llm_util::dump_kv_cache(state.pCtx, seq.seq_id, "kvcache.txt", cursor_pos);
 }
 
 void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)

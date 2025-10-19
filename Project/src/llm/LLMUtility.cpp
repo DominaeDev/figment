@@ -832,7 +832,7 @@ void llm_util::clear_batch_from(llama_batch& batch, int32_t pos)
 	}
 }
 
-bool llm_util::dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string filename)
+bool llm_util::dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string filename, int32_t cursor_pos)
 {
 	auto cache_view = llama_kv_cache_view_init(pCtx, Constants::Context::MaxSequences);
 	llama_kv_cache_view_update(pCtx, &cache_view);
@@ -872,9 +872,9 @@ bool llm_util::dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string f
 			result.append(" ");
 
 		if (cells[i] == 0)
-			result.append(".");
+			result.append(cursor_pos == i ? "_" : ".");
 		else if (cells[i] == 1)
-			result.append("#");
+			result.append(cursor_pos == i ? "0" : "O");
 		else 
 			result.append("D");
 	}
