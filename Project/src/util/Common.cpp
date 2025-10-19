@@ -69,7 +69,6 @@ void DebugPrint(std::string message)
 		return;
 
 	printf(message.c_str());
-	fflush(stdout);
 #else
 	// noop
 #endif

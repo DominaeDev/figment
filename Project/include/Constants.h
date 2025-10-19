@@ -37,7 +37,7 @@ namespace Constants
 
 	namespace Context
 	{
-		inline constexpr int Size = 8192; //32768
+		inline constexpr int Size = 4096; //32768
 		inline constexpr int MaxResponseLength = 256;
 		inline constexpr int MicroBatchSize = 512;
 		inline constexpr float WindowKeepRatio = 0.75f;

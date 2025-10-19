@@ -18,6 +18,7 @@ namespace llm_util
 	std::pair<MessageType, bool> detect_message_type(string text) noexcept;
 	
 	llama_batch init_batch(llama_context* pCtx);
+	void clear_batch_from(llama_batch& batch, int32_t pos);
 	void init_batch_logits(llama_batch& batch);
 	bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch);
 	llama_batch create_batch_view(const llama_batch& batch, int32_t position, int32_t length);
@@ -28,7 +29,8 @@ namespace llm_util
 	std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 
 	string format_id(string id);
-	bool dump_context(const llama_batch& batch, VocabPtr pVocab, string filename);
+	bool dump_batch(const llama_batch& batch, VocabPtr pVocab, string filename);
+	bool dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string filename);
 	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
 
 	SequenceList get_sequences(SequenceId seq) noexcept;

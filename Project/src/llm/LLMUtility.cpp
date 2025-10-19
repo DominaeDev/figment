@@ -658,7 +658,7 @@ string llm_util::format_id(string id)
 	return string_util::lcase(id);
 }
 
-bool llm_util::dump_context(const llama_batch& batch, VocabPtr pVocab, string filename)
+bool llm_util::dump_batch(const llama_batch& batch, VocabPtr pVocab, string filename)
 {
 	auto fnTokenStr = [pVocab](llama_token token) -> string {
 		if (token == llama_vocab_bos(pVocab))
@@ -818,4 +818,68 @@ SequenceList llm_util::get_sequences(SequenceId seq) noexcept
 			seqIds.push_back(toI(i));
 	}
 	return std::move(seqIds);
+}
+
+void llm_util::clear_batch_from(llama_batch& batch, int32_t pos)
+{
+	for (int i = 0; i < batch.n_tokens; ++i)
+	{
+		if (batch.pos[i] >= pos)
+		{
+			batch.n_tokens = i;
+			break;
+		}
+	}
+}
+
+bool llm_util::dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string filename)
+{
+	auto cache_view = llama_kv_cache_view_init(pCtx, Constants::Context::MaxSequences);
+	llama_kv_cache_view_update(pCtx, &cache_view);
+
+	int32_t n_max_seq = cache_view.n_seq_max;
+	std::vector<int32_t> cells;
+	cells.resize(cache_view.n_cells);
+
+	for (int it_cell = 0; it_cell < cache_view.n_cells; ++it_cell)
+	{
+		auto& cell = cache_view.cells[it_cell];
+		if (cell.pos < 0)
+			continue;
+
+		auto& seqs = cache_view.cells_sequences[it_cell * n_max_seq];
+		for (int n = 0; n < n_max_seq; ++n)
+		{
+			if (n == seq_id)
+			{
+				++cells[cell.pos];
+				break;
+			}
+		}
+	}
+
+	string result;
+	result.reserve(32384);
+	for (int32_t i = 0; i < (int32_t)cells.size(); ++i)
+	{
+		if (i % 64 == 0)
+		{
+			if (i > 0)
+				result.append("\r\n");
+			result.append(std::format("[{:<5}] ", i));
+		}
+		else if (i % 8 == 0 && i > 0)
+			result.append(" ");
+
+		if (cells[i] == 0)
+			result.append(".");
+		else if (cells[i] == 1)
+			result.append("#");
+		else 
+			result.append("D");
+	}
+
+	llama_kv_cache_view_free(&cache_view);
+	
+	return WriteTextFile(filename, result, false);
 }

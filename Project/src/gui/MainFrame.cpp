@@ -183,7 +183,7 @@ void MainFrame::StartChat()
 		session.Initialize(llmOptions);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+//		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
 		LLMChatArguments llmArgs {
 			/*session*/ session,

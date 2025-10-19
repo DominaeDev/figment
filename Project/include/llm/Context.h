@@ -47,19 +47,22 @@ using SequenceList = std::vector<int32_t>;
 struct ContextSequence
 {
 	llama_context* pCtx = nullptr;
-	int32_t seq_index = 0;						// Sequence index
+	llama_seq_id seq_id = 0;
 	std::vector<llama_seq_id> seq_ids { 0 };
 	llama_batch batch {};						// Representation of the kv-cache (mirror)
 	std::vector<ContextBlock> blocks {};
 	int32_t response_pos = 0;					// start of response, including prompt template preamble
-	int32_t prepend_pos = 0;					// start of response, not including prompt template preamble
-	int32_t cursor_pos = 0;						// current position
+	int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
+	int32_t cursor_pos = 0;						// current position (read)
+	int32_t write_offset = 0;
 	
 	void AssignBlockPositions();
 	int32_t GetFirstNonStaticOffset() const;
-	int32_t RemoveAndShift(const llama_vocab* pVocab, std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd);
+	int32_t RemoveAndShift(std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd);
 	bool RebuildKVCache();
+	int32_t AllocateKVCache(int32_t alloc_size);
 
+	int32_t DecrementTTL(int32_t time);
 	int32_t EraseTokens(int32_t from, int32_t length);
 	int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
 	int32_t BatchWrite(const std::vector<llama_token>& tokens, int32_t pos);
