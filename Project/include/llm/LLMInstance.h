@@ -181,7 +181,7 @@ private:
 	};
 	void __Generate(std::stop_token& stop, GenerateArguments args, __GenerationCompleteCallback onComplete);
 	void StartGeneration();
-	bool ActivatePersona(Role persona);
+	bool SwapPersona(Role persona);
 
 	void PushSignal(LLMStatusSignal signal);
 	void RefreshActiveResponses();

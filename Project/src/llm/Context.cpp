@@ -236,3 +236,23 @@ void ContextSequence::BatchSetSequences(int32_t pos, const std::vector<int32_t>&
 	for (size_t i = 0; i < seqIds.size() && i < Constants::Context::MaxSequences; ++i)
 		batch.seq_id[pos][i] = seqIds[i];
 }
+
+int32_t ContextState::get_max_position() const
+{
+	int32_t max = 0;
+	for (auto& seq : sequences)
+	{
+		int32_t offset = 0;
+		for (auto& block : seq.blocks)
+		{
+			if (block.is_static() || block.is_cached())
+			{
+				offset += block.length();
+				continue;
+			}
+			break;
+		}
+		max = std::max(max, offset);
+	}
+	return max;
+}

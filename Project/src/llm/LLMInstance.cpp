@@ -304,7 +304,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 				/*name*/ "",
 				/*content*/ personas[role],
 				/*tokens*/ persona_tokens,
-				/*flags*/ ContextBlockFlag::Static,
+				/*flags*/ ContextBlockFlag::Static | ContextBlockFlag::Persona,
 				/*offset*/ cursor_pos,
 			});
 
@@ -510,7 +510,7 @@ bool LLMInstance::ResetChat(int seed)
 		ClearQueue(_resultQueue);
 
 		if (_session.IsGroupChat() && !CheckEnumFlag(_options, LLMOption::UseMultipleSequences))
-			ActivatePersona(Role::Undefined);
+			SwapPersona(Role::Undefined);
 
 		ContextSequence& seq = _contextState.current_sequence();
 		int32_t blocks_pos = seq.GetFirstNonStaticOffset();
@@ -1193,7 +1193,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 								_narratorCooldown = _narratorCooldownDuration;
 
 							if (CheckEnumFlag(args.flags, GenerateFlag::SwapPersonas))
-								ActivatePersona(responderRole);
+								SwapPersona(responderRole);
 						}
 					}
 				}
@@ -1959,7 +1959,7 @@ void LLMInstance::RefreshActiveResponses()
 		_activeResponseIds.insert(it->responseId);
 }
 
-bool LLMInstance::ActivatePersona(Role role)
+bool LLMInstance::SwapPersona(Role role)
 {
 	if (!_session.IsGroupChat() || !(is_bot(role) || role == Role::Undefined))
 		return false;
@@ -1972,21 +1972,21 @@ bool LLMInstance::ActivatePersona(Role role)
 	llama_context* pCtx = _modelState.pCtx;
 
 	// Remove current persona
-	auto itFindActive = _contextState.personas.find(_contextState.activePersona);
-	if (itFindActive != _contextState.personas.end())
-	{
-		auto& tokens = itFindActive->second;
-		int32_t len = toI(tokens.size());
+	auto itFind = std::find_if(seq.blocks.begin(), seq.blocks.end(), [](const ContextBlock& b) { return CheckEnumFlag(b.flags, ContextBlockFlag::Persona); });
+	if (itFind == seq.blocks.end())
+		return false; // No persona
+
+	ContextBlock& block = *itFind;
+	int32_t insertion_pos = block.offset;
 
 		// Remove from kv cache
-		int32_t shift = seq.BatchRemove(seq.persona_pos, seq.persona_pos + len);
+	int32_t shift = seq.BatchRemove(block.offset, block.offset + block.length());
 
 		seq.cursor_pos -= shift;
 		seq.response_pos -= shift;
 		seq.prepend_pos -= shift;
 
 		_contextState.activePersona = Role::Undefined;
-	}
 
 	// Activate next persona
 	auto itFindInactive = _contextState.personas.find(role);
@@ -1998,15 +1998,18 @@ bool LLMInstance::ActivatePersona(Role role)
 		//! TODO: Allocate enough space
 
 		// Shift down
-		int32_t shift = seq.BatchAllocate(seq.persona_pos, len);
+		int32_t shift = seq.BatchAllocate(insertion_pos, len);
 		
 		// Write persona to batch
-		seq.BatchWrite(tokens, seq.persona_pos);
+		seq.BatchWrite(tokens, insertion_pos);
 
 		// Decode
-		llama_batch batch_view = llm_util::create_batch_view(seq.batch, seq.persona_pos, len);
+		llama_batch batch_view = llm_util::create_batch_view(seq.batch, insertion_pos, len);
 		if (batch_view.n_tokens > 0 && llama_decode(_modelState.pCtx, batch_view) != 0)
 			return false; // Error
+
+		block.tokens = tokens;
+		block.role = role;
 
 		seq.cursor_pos += len;
 		seq.response_pos += len;

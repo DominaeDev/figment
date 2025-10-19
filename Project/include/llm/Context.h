@@ -8,6 +8,7 @@ enum class ContextBlockFlag : int32_t
 	Static		= 1 << 0,	// Static instruction
 	Cached		= 1 << 1,	// Is currently in kv-cache
 	Volatile	= 1 << 2,	// Should be discarded immediately
+	Persona		= 1 << 3,	// Persona
 };
 DEFINE_ENUM_FLAGS(ContextBlockFlag, int32_t);
 
@@ -50,7 +51,6 @@ struct ContextSequence
 	std::vector<llama_seq_id> seq_ids { 0 };
 	llama_batch batch {};						// Representation of the kv-cache (mirror)
 	std::vector<ContextBlock> blocks {};
-	int32_t persona_pos = 0;					// persona insertion point
 	int32_t response_pos = 0;					// start of response, including prompt template preamble
 	int32_t prepend_pos = 0;					// start of response, not including prompt template preamble
 	int32_t cursor_pos = 0;						// current position
@@ -84,4 +84,6 @@ struct ContextState
 	constexpr const ContextSequence& current_sequence() const {
 		return sequences[active_sequence];
 	}
+
+	int32_t get_max_position() const;
 };
