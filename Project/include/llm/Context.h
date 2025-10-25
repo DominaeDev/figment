@@ -54,7 +54,7 @@ struct ContextSequence
 	int32_t response_pos = 0;					// start of response, including prompt template preamble
 	int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
 	int32_t cursor_pos = 0;						// current position (read)
-	int32_t write_offset = 0;
+//	int32_t write_offset = 0;
 	
 	void AssignBlockPositions();
 	int32_t GetFirstNonStaticOffset() const;
@@ -65,7 +65,7 @@ struct ContextSequence
 	int32_t DecrementTTL(int32_t time);
 	int32_t EraseTokens(int32_t from, int32_t length);
 	int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
-	int32_t BatchWrite(const std::vector<llama_token>& tokens, int32_t pos);
+	int32_t BatchWrite(std::span<llama_token> tokens, int32_t pos);
 	int32_t BatchRemove(int32_t begin, int32_t end);
 	int32_t BatchAllocate(int32_t pos, int32_t length);
 	void BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds);

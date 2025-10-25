@@ -238,7 +238,7 @@ int32_t ContextSequence::ShiftTokens(int32_t pos, int32_t len, int32_t offset)
 	return offset;
 }
 
-int32_t ContextSequence::BatchWrite(const std::vector<llama_token>& tokens, int32_t pos)
+int32_t ContextSequence::BatchWrite(std::span<llama_token> tokens, int32_t pos)
 {
 	// Add to context batch
 	int32_t n_tokens = (int32_t)tokens.size();
@@ -247,10 +247,12 @@ int32_t ContextSequence::BatchWrite(const std::vector<llama_token>& tokens, int3
 		int idx = pos + i;
 		batch.token[idx] = tokens[i];
 		batch.pos[idx] = idx;
-		batch.n_seq_id[idx] = 1;
-		batch.seq_id[idx][0] = 0;
+		batch.n_seq_id[idx] = toI(seq_ids.size());
+		for (size_t i = 0; i < seq_ids.size(); ++i)
+			batch.seq_id[idx][i] = seq_ids[i];
 		batch.logits[i] = false;
 	}
+	batch.n_tokens = pos + n_tokens;
 	return n_tokens;
 }
 

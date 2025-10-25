@@ -405,7 +405,7 @@ std::vector<llama_token> llm_util::tokenize_and_batch(VocabPtr pVocab, ContextSe
 {
 	// Add to context batch
 	auto tokens = llm_util::tokenize(pVocab, content, add_special);
-	seq.batch.n_tokens += seq.BatchWrite(tokens, pos);
+	seq.BatchWrite(tokens, pos);
 	return tokens;
 }
 
@@ -832,27 +832,48 @@ void llm_util::clear_batch_from(llama_batch& batch, int32_t pos)
 	}
 }
 
-bool llm_util::dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string filename, int32_t cursor_pos)
+bool llm_util::dump_kv_cache(ContextSequence seq, string filename)
 {
-	auto cache_view = llama_kv_cache_view_init(pCtx, Constants::Context::MaxSequences);
-	llama_kv_cache_view_update(pCtx, &cache_view);
+	auto cache_view = llama_kv_cache_view_init(seq.pCtx, Constants::Context::MaxSequences);
+	llama_kv_cache_view_update(seq.pCtx, &cache_view);
 
 	int32_t n_max_seq = cache_view.n_seq_max;
 	std::vector<int32_t> cells;
 	cells.resize(cache_view.n_cells);
+	std::vector<int32_t> batched;
+	batched.resize(cache_view.n_cells);
 
-	for (int it_cell = 0; it_cell < cache_view.n_cells; ++it_cell)
+	for (int32_t it_cell = 0; it_cell < cache_view.n_cells; ++it_cell)
 	{
 		auto& cell = cache_view.cells[it_cell];
 		if (cell.pos < 0)
 			continue;
 
-		auto& seqs = cache_view.cells_sequences[it_cell * n_max_seq];
-		for (int n = 0; n < n_max_seq; ++n)
+		llama_seq_id* cell_seqs = &cache_view.cells_sequences[it_cell * n_max_seq];
+		for (llama_seq_id* pSeq = cell_seqs; pSeq < cell_seqs + ptrdiff_t(n_max_seq); ++pSeq)
 		{
-			if (n == seq_id)
+			if (*pSeq == seq.seq_id)
 			{
 				++cells[cell.pos];
+				break;
+			}
+		}
+	}
+	
+	auto& batch = seq.batch;
+	for (int32_t idx = 0; idx < cache_view.n_cells && idx < batch.n_tokens; ++idx)
+	{
+		if (batch.pos[idx] < 0)
+			continue;
+
+		int32_t tok_pos = batch.pos[idx];
+		int32_t tok_n_seqs = batch.n_seq_id[idx];
+		int32_t* tok_seqs = batch.seq_id[idx];
+		for (int32_t* pSeq = tok_seqs; pSeq < tok_seqs + ptrdiff_t(tok_n_seqs); ++pSeq)
+		{
+			if (*pSeq == seq.seq_id)
+			{
+				++batched[tok_pos];
 				break;
 			}
 		}
@@ -872,9 +893,14 @@ bool llm_util::dump_kv_cache(const llama_context* pCtx, int32_t seq_id, string f
 			result.append(" ");
 
 		if (cells[i] == 0)
-			result.append(cursor_pos == i ? "_" : ".");
+		{
+			if (batched[i] == 0)
+				result.append(seq.cursor_pos == i ? "_" : ".");
+			else
+				result.append(seq.cursor_pos == i ? ">" : "o");
+		}
 		else if (cells[i] == 1)
-			result.append(cursor_pos == i ? "0" : "O");
+			result.append(seq.cursor_pos == i ? "0" : "O");
 		else 
 			result.append("D");
 	}

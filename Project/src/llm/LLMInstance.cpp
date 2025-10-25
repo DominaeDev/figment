@@ -740,7 +740,6 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	int32_t& cursor_pos = seq.cursor_pos;
 	int32_t& response_pos = seq.response_pos;
 	std::vector<llama_token> last_response_tokens;
-	std::vector<llama_token> pre_prompt_tokens;
 
 	// Remove volatile blocks
 	std::erase_if(blocks, [](const ContextBlock& block) { return block.is_volatile(); });
@@ -833,9 +832,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	}
 
 	// Append last response to batch
-	for (int i = 0; i < last_response_tokens.size(); ++i)
-		common_batch_add(batch, last_response_tokens[i], cursor_pos + i, seq.seq_ids, false);
-	batch.logits[batch.n_tokens - 1] = true;
+	seq.BatchWrite(last_response_tokens, cursor_pos);
 
 	// Decode
 	llama_batch batch_view = llm_util::create_batch_view(seq.batch, cursor_pos, toI(last_response_tokens.size()));
@@ -845,11 +842,11 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		cursor_pos += batch_view.n_tokens;
 	}
 
-	seq.write_offset = _contextState.get_max_position() - cursor_pos;
-
 	// Store response position (before assistant prelude)
 	if (!args.isContinuation)
 		response_pos = cursor_pos;
+
+	std::vector<llama_token> pre_prompt_tokens;
 
 	// Append assistant tokens
 	if (!args.isContinuation)
@@ -860,23 +857,22 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		pre_prompt_tokens.insert(pre_prompt_tokens.end(), assistant_tokens.begin(), assistant_tokens.end());
 	}
 
-//	seq.write_offset = _contextState.get_max_position() - cursor_pos;
-
-	// Store beginning of response (after assistant prelude)
-	seq.prepend_pos = seq.cursor_pos + (int32_t)pre_prompt_tokens.size();
+	cursor_pos = _contextState.get_max_position();
 
 	// Append to batch
-	for (int i = 0; i < pre_prompt_tokens.size(); ++i)
-		common_batch_add(batch, pre_prompt_tokens[i], cursor_pos + i, seq.seq_ids, false);
-	batch.logits[batch.n_tokens - 1] = true;
+	seq.BatchWrite(pre_prompt_tokens, cursor_pos);
+//	batch.logits[batch.n_tokens - 1] = true;
+
+	// Store beginning of response (after assistant prelude)
+	seq.prepend_pos = cursor_pos + (int32_t)pre_prompt_tokens.size();
 
 	// Mark blocks in cache
 	for (auto it = blocks.begin(); it != blocks.end(); ++it)
 		it->flags = (it->flags | ContextBlockFlag::Cached);
 
 //	DumpContext(false, "prompt.txt");
-//	llm_util::dump_batch(batch, _contextState.pVocab, "prompt-full.txt");
-	llm_util::dump_kv_cache(state.pCtx, seq.seq_id, "kvcache.txt", cursor_pos);
+	llm_util::dump_batch(batch, _contextState.pVocab, "prompt-full.txt");
+	llm_util::dump_kv_cache(seq, "kvcache.txt");
 }
 
 void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
@@ -908,7 +904,6 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	
 	int32_t pre_response_pos = seq.response_pos;
 	int32_t& cursor_pos = seq.cursor_pos;
-	int32_t offset = seq.write_offset;
 
 	string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
 	string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
@@ -966,8 +961,9 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		auto prepend_tokens = llm_util::tokenize(state.pVocab, args.prepend, false);
 
 		// Append to batch
-		for (int i = 0; i < prepend_tokens.size(); ++i)
-			common_batch_add(batch, prepend_tokens[i], seq.prepend_pos + offset + i, seq.seq_ids, false);
+//		for (int i = 0; i < prepend_tokens.size(); ++i)
+//			common_batch_add(batch, prepend_tokens[i], seq.prepend_pos + i, seq.seq_ids, false);
+		seq.BatchWrite(prepend_tokens, seq.prepend_pos);
 		batch.logits[batch.n_tokens - 1] = true;
 
 		partial += args.prepend;
@@ -975,8 +971,9 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	}
 	llm_util::init_batch_logits(batch);
 
+	// After prepend
 	llm_util::dump_batch(batch, state.pVocab, "prompt-full.txt");
-	llm_util::dump_kv_cache(state.pCtx, seq.seq_id, "kvcache.txt");
+	llm_util::dump_kv_cache(seq, "kvcache.txt");
 
 	auto startTime = std::chrono::steady_clock::now();
 
@@ -1220,10 +1217,10 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 		// Print to console
 		printf("%s", str_token.c_str());
-		assert(cursor_pos + offset < ctx_size);
+		assert(cursor_pos < ctx_size);
 
 		// Add sampled token to batch
-		common_batch_add(batch, sampled_token, cursor_pos + offset, seq.seq_ids, true); //! @seq
+		common_batch_add(batch, sampled_token, cursor_pos, seq.seq_ids, true); //! @seq
 
 		// prepare the next batch with the sampled token
 		if (!next_token)
@@ -1239,7 +1236,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	}
 
 //	llm_util::dump_batch(batch, state.pVocab, "prompt-full.txt");
-//	llm_util::dump_kv_cache(state.pCtx, seq.seq_id, "kvcache.txt");
+//	llm_util::dump_kv_cache(seq, "kvcache.txt");
 
 	// Remove full response from cache (will be reinserted on next turn)
 	llama_kv_self_seq_rm(state.pCtx, seq.seq_id, pre_response_pos, -1);
@@ -1248,7 +1245,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
     cursor_pos = pre_response_pos;
 
 //	llm_util::dump_batch(batch, state.pVocab, "prompt-full.txt");
-//	llm_util::dump_kv_cache(state.pCtx, seq.seq_id, "kvcache.txt");
+//	llm_util::dump_kv_cache(seq, "kvcache.txt");
 
 	for (auto& block : seq.blocks)
 	{
