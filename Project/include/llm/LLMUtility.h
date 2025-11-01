@@ -29,7 +29,9 @@ namespace llm_util
 	std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 
 	string format_id(string id);
-	bool dump_batch(const llama_batch& batch, VocabPtr pVocab, string filename);
+	bool dump_batch_text(ContextSequence seq, VocabPtr pVocab, string filename);
+	bool dump_batch_tokens(const ContextSequence& seq, VocabPtr pVocab, string filename);
+	bool dump_batch_tokens(const llama_batch& batch, VocabPtr pVocab, string filename);
 	bool dump_kv_cache(ContextSequence seq, string filename);
 	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
 

@@ -115,8 +115,9 @@ public:
 	bool PollResponse(MessagePiece& piece);
 	std::pair<LLMStatus, bool> PollStatus();
 
+	void DumpCurrentSequence() const;
+	void DumpContext() const;
 #if _DEBUG
-	bool DumpContext(bool full, string filename = "prompt.txt") const;
 	bool GenerateEmbedding(string text);
 #endif
 

@@ -734,8 +734,6 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	llama_batch& batch = seq.batch;
 	auto& blocks = seq.blocks;
 
-//	llm_util::dump_batch(batch, pVocab, "prompt-full.txt");
-
 	// Prepare prompt
 	int32_t& cursor_pos = seq.cursor_pos;
 	int32_t& response_pos = seq.response_pos;
@@ -870,9 +868,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	for (auto it = blocks.begin(); it != blocks.end(); ++it)
 		it->flags = (it->flags | ContextBlockFlag::Cached);
 
-//	DumpContext(false, "prompt.txt");
-	llm_util::dump_batch(batch, _contextState.pVocab, "prompt-full.txt");
-	llm_util::dump_kv_cache(seq, "kvcache.txt");
+	DumpCurrentSequence();
 }
 
 void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
@@ -972,8 +968,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	llm_util::init_batch_logits(batch);
 
 	// After prepend
-	llm_util::dump_batch(batch, state.pVocab, "prompt-full.txt");
-	llm_util::dump_kv_cache(seq, "kvcache.txt");
+	DumpCurrentSequence();
 
 	auto startTime = std::chrono::steady_clock::now();
 
@@ -1005,7 +1000,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		};
 
 		if (n_tokens > 1)
-			llm_util::dump_batch(batch_view, state.pVocab, "batch.txt");
+			llm_util::dump_batch_tokens(batch_view, state.pVocab, "batch.txt");
 
 		// check if we have enough space in the context to evaluate this batch
 		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
@@ -1814,83 +1809,30 @@ bool LLMInstance::PollResponse(MessagePiece& piece)
 	return true;
 }
 
-#if _DEBUG
-bool LLMInstance::DumpContext(bool full, string filename) const
+void LLMInstance::DumpCurrentSequence() const
 {
-	const ModelState& state = _modelState;
-	const llama_vocab* pVocab = llama_model_get_vocab(state.pModel);
-	const ContextSequence& seq = _contextState.current_sequence();
-	const llama_batch& batch = seq.batch;
+#if _DEBUG
+	auto& current_seq = _contextState.current_sequence();
+	auto itFind = std::find_if(_contextState.sequences.begin(), _contextState.sequences.end(), [&current_seq](const ContextSequence& seq) {return &seq == &current_seq; });
+	int32_t i = toI(std::distance(_contextState.sequences.begin(), itFind));
 
-	auto fnTokenStr = [pVocab, full](llama_token token, bool quote) -> string {
-		if (token <= 0)
-			return "<UNK>";
-		else if (token == llama_vocab_bos(pVocab))
-			return "<BOS>";
-		else if (token == llama_vocab_eos(pVocab))
-			return "<EOS>";
-		else if (token == llama_vocab_eot(pVocab))
-			return "<EOT>";
-		else if (token == llama_vocab_sep(pVocab))
-			return "<SEP>";
-		else if (token == llama_vocab_pad(pVocab))
-			return "<PAD>";
-		else if (token == llama_vocab_nl(pVocab))
-			return full ? "<NL>" : "\r\n";
-		else
-		{
-			char buf[256];
-			int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
-			if (n < 0)
-				return "<UNK>";
-			else
-				return quote ? "\"" + string(buf, n) + "\"" : string(buf, n);
-		}
-	};
-
-	if (batch.token == nullptr || batch.n_tokens == 0)
-		return false;
-
-	// Detokenize the batched tokens
-	string result;
-	result.reserve(65536);
-	int32_t size = full ? Constants::Context::Size : batch.n_tokens;
-	if (full)
-	{
-		for (int32_t i = 0; i < size; ++i)
-			result.append(std::format("{0:<8}{1:<8}{2}\r\n", batch.pos[i], batch.token[i], fnTokenStr(batch.token[i], true)));
-	}
-	else
-	{
-		for (int32_t i = 0; i < size; ++i)
-			result.append(fnTokenStr(batch.token[i], false));
-	}
-
-	if (!full)
-		result.append(std::format("[pos:{0}/{1}]\r\n", seq.cursor_pos, batch.n_tokens));
-
-	// Cached blocks
-	for (auto& block : seq.blocks)
-	{
-		if (block.is_cached())
-			continue;
-
-		result.append("[");
-		if (!block.tokens.empty())
-		{
-			for (int32_t i = 0; i < block.length(); ++i)
-				result.append(fnTokenStr(block.tokens[i], false));
-		}
-		else
-		{
-			result.append(block.content);
-		}
-		result.append("]\r\n");
-	}
-
-	return WriteTextFile(filename, result, false);
-}
+	llm_util::dump_batch_text(_contextState.sequences[i], _contextState.pVocab, std::format("prompt_{}.txt", i));
+	llm_util::dump_batch_tokens(_contextState.sequences[i], _contextState.pVocab, std::format("prompt_full_{}.txt", i));
+	llm_util::dump_kv_cache(_contextState.sequences[i], std::format("kvcache_{}.txt", i));
 #endif 
+}
+
+void LLMInstance::DumpContext() const
+{
+#if _DEBUG
+	for (int32_t i = 0;  i < toI(_contextState.sequences.size()); ++i)
+	{
+		llm_util::dump_batch_text(_contextState.sequences[i], _contextState.pVocab, std::format("prompt_text_{}.txt", i));
+		llm_util::dump_batch_tokens(_contextState.sequences[i], _contextState.pVocab, std::format("prompt_full_{}.txt", i));
+		llm_util::dump_kv_cache(_contextState.sequences[i], std::format("kvcache_{}.txt", i));
+	}
+#endif 
+}
 
 bool LLMInstance::Reseed(uint32_t seed)
 {

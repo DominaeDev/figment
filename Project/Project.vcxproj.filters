@@ -36,29 +36,29 @@
     <Filter Include="Source Files\Inference\Embeddings">
       <UniqueIdentifier>{fc79dcd6-092f-47e7-870f-bcd0142e0610}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Model\Interface">
-      <UniqueIdentifier>{19211871-fca3-43ea-a283-bedeafe48690}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model\Interface\Controls">
-      <UniqueIdentifier>{629db8c4-47b9-4beb-a0f2-ed7e30cf6b90}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model\Interface\Frames">
-      <UniqueIdentifier>{ad99cbed-4053-4284-9125-df5de355b049}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model\Interface\Layout">
-      <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model\Interface\Theme">
-      <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model\Interface\Stores">
-      <UniqueIdentifier>{a03df242-3861-42f9-a5a1-d305c5eef703}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model\Interface\Fonts">
-      <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Inference\Context">
       <UniqueIdentifier>{1a0e4325-4392-475b-9d87-cc5d5fa0b897}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface">
+      <UniqueIdentifier>{19211871-fca3-43ea-a283-bedeafe48690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Controls">
+      <UniqueIdentifier>{629db8c4-47b9-4beb-a0f2-ed7e30cf6b90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Frames">
+      <UniqueIdentifier>{ad99cbed-4053-4284-9125-df5de355b049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Layout">
+      <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Theme">
+      <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Stores">
+      <UniqueIdentifier>{a03df242-3861-42f9-a5a1-d305c5eef703}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interface\Fonts">
+      <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -87,40 +87,40 @@
       <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Sizer.cpp">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HorizontalSizer.cpp">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\LayoutElement.cpp">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalSizer.cpp">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\model\AppState.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MainFrame.cpp">
-      <Filter>Source Files\Model\Interface\Frames</Filter>
+      <Filter>Source Files\Interface\Frames</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Panel.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StaticText.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\TextBox.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalListSizer.cpp">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ChatScroll.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ChatMessage.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Common.cpp">
       <Filter>Source Files\Utility</Filter>
@@ -129,25 +129,25 @@
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Area.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StatusBar.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\util\StringUtility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SolidBackgroundRenderer.cpp">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\RoundedBackgroundRenderer.cpp">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\RoundedBorderRenderer.cpp">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\NineGridBackgroundRenderer.cpp">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\model\Character.cpp">
       <Filter>Source Files\Model</Filter>
@@ -162,40 +162,40 @@
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Control.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Color.cpp">
-      <Filter>Source Files\Model\Interface</Filter>
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ControlWithMargins.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Frame.cpp">
-      <Filter>Source Files\Model\Interface\Frames</Filter>
+      <Filter>Source Files\Interface\Frames</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Fonts.cpp">
-      <Filter>Source Files\Model\Interface\Fonts</Filter>
+      <Filter>Source Files\Interface\Fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Text.cpp">
-      <Filter>Source Files\Model\Interface\Fonts</Filter>
+      <Filter>Source Files\Interface\Fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\TextureStore.cpp">
-      <Filter>Source Files\Model\Interface\Stores</Filter>
+      <Filter>Source Files\Interface\Stores</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CharacterImageStore.cpp">
-      <Filter>Source Files\Model\Interface\Stores</Filter>
+      <Filter>Source Files\Interface\Stores</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Image.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalGradient.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HorizontalGradient.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\model\ChatSession.cpp">
       <Filter>Source Files\Model</Filter>
@@ -210,7 +210,7 @@
       <Filter>Source Files\Inference\Embeddings</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VariableList.cpp">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMTypes.cpp">
       <Filter>Source Files\Inference</Filter>
@@ -224,46 +224,46 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\HorizontalSizer.h">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\LayoutElement.h">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\IUpdateable.h">
-      <Filter>Source Files\Model\Interface</Filter>
+      <Filter>Source Files\Interface</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalSizer.h">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\model\AppState.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\MainFrame.h">
-      <Filter>Source Files\Model\Interface\Frames</Filter>
+      <Filter>Source Files\Interface\Frames</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Panel.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\StaticText.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\TextBox.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalListSizer.h">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ChatScroll.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\util\StringUtility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ChatMessage.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Common.h">
       <Filter>Source Files\Utility</Filter>
@@ -272,25 +272,25 @@
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Area.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\StatusBar.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CustomRenderer.h">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SolidBackgroundRenderer.h">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\RoundedBackgroundRenderer.h">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\RoundedBorderRenderer.h">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\NineGridBackgroundRenderer.h">
-      <Filter>Source Files\Model\Interface\Theme</Filter>
+      <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\model\Character.h">
       <Filter>Source Files\Model</Filter>
@@ -308,10 +308,10 @@
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Renderers.h">
-      <Filter>Source Files\Model\Interface</Filter>
+      <Filter>Source Files\Interface</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Graphics.h">
-      <Filter>Source Files\Model\Interface</Filter>
+      <Filter>Source Files\Interface</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ChatSession.h">
       <Filter>Source Files\Model</Filter>
@@ -320,40 +320,40 @@
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Control.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Color.h">
-      <Filter>Source Files\Model\Interface</Filter>
+      <Filter>Source Files\Interface</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ControlWithMargins.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Frame.h">
-      <Filter>Source Files\Model\Interface\Frames</Filter>
+      <Filter>Source Files\Interface\Frames</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Fonts.h">
-      <Filter>Source Files\Model\Interface\Fonts</Filter>
+      <Filter>Source Files\Interface\Fonts</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Text.h">
-      <Filter>Source Files\Model\Interface\Fonts</Filter>
+      <Filter>Source Files\Interface\Fonts</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\TextureStore.h">
-      <Filter>Source Files\Model\Interface\Stores</Filter>
+      <Filter>Source Files\Interface\Stores</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CharacterImageStore.h">
-      <Filter>Source Files\Model\Interface\Stores</Filter>
+      <Filter>Source Files\Interface\Stores</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Image.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalScrollSizer.h">
-      <Filter>Source Files\Model\Interface\Layout</Filter>
+      <Filter>Source Files\Interface\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalGradient.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\HorizontalGradient.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Command.h">
       <Filter>Source Files\Utility</Filter>
@@ -374,7 +374,7 @@
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VariableList.h">
-      <Filter>Source Files\Model\Interface\Controls</Filter>
+      <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\Constants.h">
       <Filter>Source Files</Filter>

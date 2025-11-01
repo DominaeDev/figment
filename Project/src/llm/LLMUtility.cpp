@@ -658,54 +658,6 @@ string llm_util::format_id(string id)
 	return string_util::lcase(id);
 }
 
-bool llm_util::dump_batch(const llama_batch& batch, VocabPtr pVocab, string filename)
-{
-	auto fnTokenStr = [pVocab](llama_token token) -> string {
-		if (token == llama_vocab_bos(pVocab))
-			return "<BOS>";
-		else if (token == llama_vocab_eos(pVocab))
-			return "<EOS>";
-		else if (token == llama_vocab_eot(pVocab))
-			return "<EOT>";
-		else if (token == llama_vocab_sep(pVocab))
-			return "<SEP>";
-		else if (token == llama_vocab_pad(pVocab))
-			return "<PAD>";
-		else if (token == llama_vocab_nl(pVocab))
-			return "<NL>"; //"\r\n";
-		else
-		{
-			if (token < 0 || token > 32000)
-				return "<UNK>"; // Error
-
-			char buf[256];
-			int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
-			if (n < 0)
-				return "<UNK>";
-			else
-				return string(buf, n);
-		}
-	};
-
-	if (batch.token == nullptr || batch.n_tokens <= 0)
-		return false;
-
-	// Detokenize the batched tokens
-	string result;
-	result.reserve(65536);
-	for (int32_t i = 0; i < batch.n_tokens; ++i)
-		result.append(std::format("{0:<8} {1:<8} {2}({3})\t{4:<8} \"{5}\"\r\n", 
-			batch.pos[i], 
-			batch.token[i], 
-			batch.seq_id[i][0], 
-			batch.n_seq_id[i], 
-			(int32_t)batch.logits[i], 
-			fnTokenStr(batch.token[i]))
-		);
-
-	return WriteTextFile(filename, result, false);
-}
-
 static inline constexpr bool CheckFlag(GrammarFlag options, GrammarFlag value)
 {
 	return (options & value) == value;
@@ -817,7 +769,7 @@ SequenceList llm_util::get_sequences(SequenceId seq) noexcept
 		if ((bool)(seq & s_AllContextSequenceIds[i]))
 			seqIds.push_back(toI(i));
 	}
-	return std::move(seqIds);
+	return seqIds;
 }
 
 void llm_util::clear_batch_from(llama_batch& batch, int32_t pos)
@@ -830,6 +782,123 @@ void llm_util::clear_batch_from(llama_batch& batch, int32_t pos)
 			break;
 		}
 	}
+}
+
+bool llm_util::dump_batch_text(ContextSequence seq, VocabPtr pVocab, string filename)
+{
+	auto& batch = seq.batch;
+
+	auto fnTokenStr = [pVocab](llama_token token, bool quote) -> string {
+		if (token <= 0)
+			return "<UNK>";
+		else if (token == llama_vocab_bos(pVocab))
+			return "<BOS>";
+		else if (token == llama_vocab_eos(pVocab))
+			return "<EOS>";
+		else if (token == llama_vocab_eot(pVocab))
+			return "<EOT>";
+		else if (token == llama_vocab_sep(pVocab))
+			return "<SEP>";
+		else if (token == llama_vocab_pad(pVocab))
+			return "<PAD>";
+		else if (token == llama_vocab_nl(pVocab))
+			return "\r\n";
+		else
+		{
+			char buf[256];
+			int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
+			if (n < 0)
+				return "<UNK>";
+			else
+				return quote ? "\"" + string(buf, n) + "\"" : string(buf, n);
+		}
+	};
+
+	if (batch.token == nullptr || batch.n_tokens == 0)
+		return false;
+
+	// Detokenize the batched tokens
+	string result;
+	result.reserve(65536);
+	int32_t size = batch.n_tokens;
+	for (int32_t i = 0; i < size; ++i)
+		result.append(fnTokenStr(batch.token[i], false));
+
+	result.append(std::format("[pos:{0}/{1}]\r\n", seq.cursor_pos, batch.n_tokens));
+
+	// Cached blocks
+	for (auto& block : seq.blocks)
+	{
+		if (block.is_cached())
+			continue;
+
+		result.append("[");
+		if (!block.tokens.empty())
+		{
+			for (int32_t i = 0; i < block.length(); ++i)
+				result.append(fnTokenStr(block.tokens[i], false));
+		}
+		else
+		{
+			result.append(block.content);
+		}
+		result.append("]\r\n");
+	}
+
+	return WriteTextFile(filename, result, false);
+}
+
+bool llm_util::dump_batch_tokens(const ContextSequence& seq, VocabPtr pVocab, string filename)
+{
+	return dump_batch_tokens(seq.batch, pVocab, filename);
+}
+
+bool llm_util::dump_batch_tokens(const llama_batch& batch, VocabPtr pVocab, string filename)
+{
+	auto fnTokenStr = [pVocab](llama_token token) -> string {
+		if (token == llama_vocab_bos(pVocab))
+			return "<BOS>";
+		else if (token == llama_vocab_eos(pVocab))
+			return "<EOS>";
+		else if (token == llama_vocab_eot(pVocab))
+			return "<EOT>";
+		else if (token == llama_vocab_sep(pVocab))
+			return "<SEP>";
+		else if (token == llama_vocab_pad(pVocab))
+			return "<PAD>";
+		else if (token == llama_vocab_nl(pVocab))
+			return "<NL>"; //"\r\n";
+		else
+		{
+			if (token < 0 || token > 32000)
+				return "<UNK>"; // Error
+
+			char buf[256];
+			int n = llama_token_to_piece(pVocab, token, buf, sizeof(buf), 0, true);
+			if (n < 0)
+				return "<UNK>";
+			else
+				return string(buf, n);
+		}
+	};
+
+	if (batch.token == nullptr || batch.n_tokens <= 0)
+		return false;
+
+	// Detokenize the batched tokens
+	string result;
+	result.reserve(65536);
+	for (int32_t i = 0; i < batch.n_tokens; ++i)
+		result.append(std::format("{0:<8} {1:<8} {2}({3})\t{4:<8} \"{5}\"\r\n", 
+			batch.pos[i], 
+			batch.token[i], 
+			batch.seq_id[i][0], 
+			batch.n_seq_id[i], 
+			(int32_t)batch.logits[i], 
+			fnTokenStr(batch.token[i]))
+		);
+
+	return WriteTextFile(filename, result, false);
 }
 
 bool llm_util::dump_kv_cache(ContextSequence seq, string filename)

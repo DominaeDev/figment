@@ -183,7 +183,7 @@ void MainFrame::StartChat()
 		session.Initialize(llmOptions);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-//		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
 		LLMChatArguments llmArgs {
 			/*session*/ session,
@@ -516,10 +516,7 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 #if _DEBUG
 		case SDLK_F11:
 			if (pLLM->IsReady())
-			{
-				pLLM->DumpContext(false, "prompt.txt");
-				pLLM->DumpContext(true, "prompt-full.txt");
-			}
+				pLLM->DumpContext();
 			break;
 #endif
 #if AUTOCHAT
