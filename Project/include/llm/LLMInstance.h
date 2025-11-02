@@ -258,6 +258,7 @@ private:
 	LLMStateVariables _stateVars;
 	int32_t _narratorCooldownDuration = 0;
 	int32_t _narratorCooldown = 0;
+
 public:
 	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 	std::atomic<int64_t> usedRAM; // As reported from llama.cpp

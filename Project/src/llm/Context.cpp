@@ -25,6 +25,15 @@ int32_t ContextState::get_max_position() const
 	return max;
 }
 
+SequenceList ContextState::AllSequences() const noexcept
+{
+	SequenceList result;
+	result.reserve(sequences.size());
+	for (size_t i = 0; i < sequences.size(); ++i)
+		result.push_back(sequences[i].seq_id);
+	return result;
+}
+
 void ContextSequence::AssignBlockPositions()
 {
 	int32_t block_offset = 0;
@@ -90,8 +99,8 @@ int32_t ContextSequence::RemoveAndShift(std::vector<ContextBlock>::iterator itBe
 	// Shift
 	llama_kv_self_seq_add(pCtx, seq_id, pos_remove_end, cursor_pos, -shift_amount);
 	llama_kv_self_update(pCtx);
-	llama_kv_self_defrag(pCtx);
-	llama_kv_self_update(pCtx);
+//	llama_kv_self_defrag(pCtx);
+//	llama_kv_self_update(pCtx);
 	
 #if _DEBUG
 	int32_t n_used_after = llama_kv_self_used_cells(pCtx);

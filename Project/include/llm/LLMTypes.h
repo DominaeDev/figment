@@ -145,3 +145,14 @@ enum class ContextSize : int32_t
 	Context_24K = 24576,
 	Context_32K = 32768,
 };
+
+enum class SequenceId : int32_t
+{
+	None	= 0,
+	Bot1	= 1 << 0,
+	Bot2	= 1 << 1,
+	Bot3	= 1 << 2,
+	Bot4	= 1 << 3,
+	Shared = Bot1 | Bot2 | Bot3 | Bot4,
+};
+DEFINE_ENUM_FLAGS(SequenceId, int32_t);

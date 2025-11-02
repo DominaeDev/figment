@@ -355,6 +355,26 @@ llama_batch llm_util::init_batch(llama_context* pCtx)
 	return batch;
 }
 
+llama_batch llm_util::create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t position)
+{
+	// Prepare a batch for the prompt
+	llama_batch batch = llama_batch_init(toI(tokens.size()), 0, Constants::Context::MaxSequences);
+	batch.n_tokens = toI(tokens.size());
+	batch.embd = nullptr;
+
+	size_t i = 0;
+	for (auto token : tokens)
+	{
+		batch.pos[i] = (int32_t)i + position;
+		batch.token[i] = token;
+		batch.n_seq_id[i] = toI(seqs.size());
+		batch.logits[i] = 0;
+		std::copy(seqs.begin(), seqs.end(), batch.seq_id[i]);
+		++i;
+	}
+	return batch;
+}
+
 llama_batch llm_util::create_batch_view(const llama_batch& batch, int32_t position, int32_t length)
 {
 	return llama_batch {
@@ -757,16 +777,16 @@ SequenceList llm_util::get_sequences(SequenceId seq) noexcept
 	SequenceList seqIds;
 	seqIds.reserve(Constants::Context::MaxSequences);
 
-	static constexpr std::array<SequenceId, 5> s_AllContextSequenceIds {
+	static constexpr std::array<SequenceId, 5> AllSequenceIDs {
 		SequenceId::Bot1,
 		SequenceId::Bot2,
 		SequenceId::Bot3,
 		SequenceId::Bot4,
 	};
 
-	for (size_t i = 0; i < s_AllContextSequenceIds.size() && i < Constants::Context::MaxSequences; ++i)
+	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < Constants::Context::MaxSequences; ++i)
 	{
-		if ((bool)(seq & s_AllContextSequenceIds[i]))
+		if ((bool)(seq & Constants::Context::AllSequenceIDs[i]))
 			seqIds.push_back(toI(i));
 	}
 	return seqIds;
@@ -972,6 +992,56 @@ bool llm_util::dump_kv_cache(ContextSequence seq, string filename)
 			result.append(seq.cursor_pos == i ? "0" : "O");
 		else 
 			result.append("D");
+	}
+
+	llama_kv_cache_view_free(&cache_view);
+	
+	return WriteTextFile(filename, result, false);
+}
+
+bool llm_util::dump_kv_cache_cells(const llama_context* pCtx, string filename)
+{
+	auto cache_view = llama_kv_cache_view_init(pCtx, Constants::Context::MaxSequences);
+	llama_kv_cache_view_update(pCtx, &cache_view);
+
+	int32_t n_max_seq = cache_view.n_seq_max;
+	std::vector<int32_t> cells;
+	cells.resize(cache_view.n_cells);
+
+	for (int32_t it_cell = 0; it_cell < cache_view.n_cells; ++it_cell)
+	{
+		auto& cell = cache_view.cells[it_cell];
+		llama_seq_id* cell_seqs = &cache_view.cells_sequences[it_cell * n_max_seq];
+		
+		cells[it_cell] = 0;
+
+		for (int32_t it_seq = 0; it_seq != n_max_seq; ++it_seq)
+		{
+			int32_t seq = static_cast<int32_t>(*(cell_seqs + it_seq));
+			if (seq >= 0)
+				cells[it_cell] |= 1 << seq;
+		}
+	}
+	
+	string result;
+	result.reserve(32384);
+	for (int32_t i = 0; i < (int32_t)cells.size(); ++i)
+	{
+		if (i % 64 == 0)
+		{
+			if (i > 0)
+				result.append("\r\n");
+			result.append(std::format("[{:<5}] ", i));
+		}
+		else if (i % 8 == 0 && i > 0)
+			result.append(" ");
+
+		if (cells[i] == 0)
+			result.append(".");
+		else if (cells[i] <= 0xf)
+			result.append(std::format("{:x}", cells[i]));
+		else
+			result.append("X");
 	}
 
 	llama_kv_cache_view_free(&cache_view);

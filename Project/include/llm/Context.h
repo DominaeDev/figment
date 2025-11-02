@@ -31,17 +31,6 @@ struct ContextBlock
 	inline int32_t length() const { return (int32_t)(tokens.size()); }
 };
 
-enum class SequenceId : int32_t
-{
-	None	= 0,
-	Bot1	= 1 << 0,
-	Bot2	= 1 << 1,
-	Bot3	= 1 << 2,
-	Bot4	= 1 << 3,
-	Shared = Bot1 | Bot2 | Bot3 | Bot4,
-};
-DEFINE_ENUM_FLAGS(SequenceId, int32_t);
-
 using SequenceList = std::vector<int32_t>;
 
 struct ContextSequence
@@ -88,5 +77,8 @@ struct ContextState
 		return sequences[active_sequence];
 	}
 
+	std::vector<ContextBlock> block_queue {};
+
 	int32_t get_max_position() const;
+	[[nodiscard]] SequenceList AllSequences() const noexcept;
 };

@@ -281,13 +281,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 
 			// System prompt
 			seq.blocks.emplace_back(ContextBlock {
-				/*responseId*/ "",
-				/*role*/ Role::System,
-				/*name*/ "",
-				/*content*/ template_prefix + system_prompt,
-				/*tokens*/ system_prompt_tokens,
-				/*flags*/ ContextBlockFlag::Static,
-				/*offset*/ 0,
+				.responseId = "",
+				.role = Role::System,
+				.name = "",
+				.content = template_prefix + system_prompt,
+				.tokens =  system_prompt_tokens,
+				.flags = ContextBlockFlag::Static,
+				.offset = 0,
 			});
 
 			if (!fnDecode(seq, system_prompt_tokens, cursor_pos))
@@ -296,13 +296,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 			// Persona
 			std::vector<llama_token> persona_tokens = llm_util::tokenize(pVocab, personas[role], false);
 			seq.blocks.emplace_back(ContextBlock {
-				/*responseId*/ "",
-				/*role*/ Role::System,
-				/*name*/ "",
-				/*content*/ personas[role],
-				/*tokens*/ persona_tokens,
-				/*flags*/ ContextBlockFlag::Static | ContextBlockFlag::Persona,
-				/*offset*/ cursor_pos,
+				.responseId = "",
+				.role = Role::System,
+				.name = "",
+				.content = personas[role],
+				.tokens = persona_tokens,
+				.flags = ContextBlockFlag::Static | ContextBlockFlag::Persona,
+				.offset = cursor_pos,
 			});
 
 			if (!persona_tokens.empty() && !fnDecode(seq, persona_tokens, cursor_pos))
@@ -313,13 +313,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 			{
 				auto user_persona_tokens = llm_util::tokenize(pVocab, user_persona);
 				seq.blocks.emplace_back(ContextBlock {
-					/*responseId*/ "",
-					/*role*/ Role::System,
-					/*name*/ "",
-					/*content*/ user_persona,
-					/*tokens*/ user_persona_tokens,
-					/*flags*/ ContextBlockFlag::Static,
-					/*offset*/ cursor_pos,
+					.responseId = "",
+					.role = Role::System,
+					.name = "",
+					.content = user_persona,
+					.tokens = user_persona_tokens,
+					.flags = ContextBlockFlag::Static,
+					.offset = cursor_pos,
 				});
 				if (!user_persona_tokens.empty() && !fnDecode(seq, user_persona_tokens, cursor_pos))
 					return false;
@@ -328,13 +328,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 			// Template suffix
 			auto template_suffix_tokens = llm_util::tokenize(pVocab, template_suffix);
 			seq.blocks.emplace_back(ContextBlock {
-				/*responseId*/ "",
-				/*role*/ Role::System,
-				/*name*/ "",
-				/*content*/ template_suffix,
-				/*tokens*/ template_suffix_tokens,
-				/*flags*/ ContextBlockFlag::Static,
-				/*offset*/ cursor_pos,
+				.responseId = "",
+				.role = Role::System,
+				.name = "",
+				.content = template_suffix,
+				.tokens = template_suffix_tokens,
+				.flags = ContextBlockFlag::Static,
+				.offset = cursor_pos,
 			});
 			if (!fnDecode(seq, template_suffix_tokens, cursor_pos))
 				return false;
@@ -364,13 +364,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		std::vector<llama_token> system_prompt_tokens = llm_util::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
 
 		seq.blocks.emplace_back(ContextBlock {
-			/*responseId*/ "",
-			/*role*/ Role::System,
-			/*name*/ "",
-			/*content*/ template_prefix + system_prompt,
-			/*tokens*/ system_prompt_tokens,
-			/*flags*/ ContextBlockFlag::Static,
-			/*offset*/ 0,
+			.responseId = "",
+			.role = Role::System,
+			.name = "",
+			.content = template_prefix + system_prompt,
+			.tokens = system_prompt_tokens,
+			.flags = ContextBlockFlag::Static,
+			.offset = 0,
 		});
 
 		if (!fnDecode(seq, system_prompt_tokens, cursor_pos))
@@ -381,13 +381,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 			// Tokenize persona(s)
 			std::vector<llama_token> persona_tokens = llm_util::tokenize(pVocab, personas[Role::Bot1], false);
 			seq.blocks.emplace_back(ContextBlock {
-				/*responseId*/ "",
-				/*role*/ Role::System,
-				/*name*/ "",
-				/*content*/ personas[Role::Bot1],
-				/*tokens*/ persona_tokens,
-				/*flags*/ ContextBlockFlag::Static,
-				/*offset*/ cursor_pos,
+				.responseId = "",
+				.role = Role::System,
+				.name = "",
+				.content = personas[Role::Bot1],
+				.tokens = persona_tokens,
+				.flags = ContextBlockFlag::Static,
+				.offset = cursor_pos,
 			});
 		if (!persona_tokens.empty() && !fnDecode(seq, persona_tokens, cursor_pos))
 			return false;
@@ -398,13 +398,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		{
 			auto user_persona_tokens = llm_util::tokenize(pVocab, user_persona);
 			seq.blocks.emplace_back(ContextBlock {
-				/*responseId*/ "",
-				/*role*/ Role::System,
-				/*name*/ "",
-				/*content*/ user_persona,
-				/*tokens*/ user_persona_tokens,
-				/*flags*/ ContextBlockFlag::Static,
-				/*offset*/ cursor_pos,
+				.responseId = "",
+				.role = Role::System,
+				.name = "",
+				.content = user_persona,
+				.tokens = user_persona_tokens,
+				.flags = ContextBlockFlag::Static,
+				.offset = cursor_pos,
 			});
 			if (!user_persona_tokens.empty() && !fnDecode(seq, user_persona_tokens, cursor_pos))
 				return false;
@@ -413,13 +413,13 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 		// Template suffix
 		auto template_suffix_tokens = llm_util::tokenize(pVocab, template_suffix);
 		seq.blocks.emplace_back(ContextBlock {
-			/*responseId*/ "",
-			/*role*/ Role::System,
-			/*name*/ "",
-			/*content*/ template_suffix,
-			/*tokens*/ template_suffix_tokens,
-			/*flags*/ ContextBlockFlag::Static,
-			/*offset*/ cursor_pos,
+			.responseId = "",
+			.role = Role::System,
+			.name = "",
+			.content = template_suffix,
+			.tokens = template_suffix_tokens,
+			.flags = ContextBlockFlag::Static,
+			.offset = cursor_pos,
 		});
 		if (!fnDecode(seq, template_suffix_tokens, cursor_pos))
 			return false;
@@ -687,20 +687,20 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 		seq.response_pos = seq.cursor_pos; // Beginning of continued message
 		
 		generateArgs = GenerateArguments {
-			/*role*/ block.role,
-			/*msgType*/ msgType,
-			/*flags*/ GenerateFlag::Generate | GenerateFlag::Continuation,
-			/*maxMessageCount*/ 1,
-			/*prepend*/ {},
-			/*responseId*/ responseId,
-			/*subMessageId*/ subMessageId,
+			.role = block.role,
+			.msgType = msgType,
+			.flags = GenerateFlag::Generate | GenerateFlag::Continuation,
+			.maxMessages = 1,
+			.prepend = {},
+			.responseId = responseId,
+			.subMessageId = subMessageId,
 		};
 	} // Release state lock
 
 	PrepareArguments prepareArgs {
-		/*responder */ Role::Undefined,
-		/*continue*/ true,
-		/*time*/ 0,
+		.responder  = Role::Undefined,
+		.isContinuation = true,
+		.time = 0,
 	};
 	__PrepareGeneration(prepareArgs);
 	return true;
@@ -749,16 +749,9 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	_narratorCooldown = std::max(_narratorCooldown - args.time, 0); //! Move to session?
 
 	// Tokenize uncached messages
-	int32_t offset = 0;
-	for (auto it = blocks.begin(); it != blocks.end(); ++it)
+	for (auto it = _contextState.block_queue.begin(); it != _contextState.block_queue.end(); ++it)
 	{
 		auto& block = *it;
-		if (block.is_static() || block.is_cached())
-		{
-			offset += toI(block.tokens.size());
-			continue;
-		}
-
 		string content = block.content;
 		if (args.isContinuation) // Continue response
 			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name); //! name?
@@ -773,17 +766,24 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		
 		auto block_tokens = llm_util::tokenize(state.pVocab, content, false);
 		block.tokens = block_tokens;
-		block.offset = offset;
 		block.flags = (block.flags | ContextBlockFlag::Cached);
+		
+		for (auto& seq : _contextState.sequences)
+		{
+			seq.blocks.push_back(block); // Copy to sequence block list
+			seq.BatchWrite(last_response_tokens, cursor_pos);
+		}
 
-		offset += toI(block.tokens.size());
-		last_response_tokens.insert(last_response_tokens.end(), block_tokens.cbegin(), block_tokens.cend()); //! assumes contiguous blocks
+		last_response_tokens.insert(last_response_tokens.end(), block_tokens.cbegin(), block_tokens.cend());
 	}
 
-	// Calculate block positions
-	seq.AssignBlockPositions();
+	_contextState.block_queue.clear();
 
-#if FALSE
+	// Calculate block positions
+	for (auto& seq : _contextState.sequences)
+		seq.AssignBlockPositions();
+
+#if FALSE // State vars
 	// Add state block (preface)
 	if (!args.isContinuation && CheckEnumFlag(_options, LLMOption::StateVariables) && !_stateVars.IsEmpty())
 	{
@@ -801,12 +801,12 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		content = llm_tmpl::apply_chat_template({ Message { Role::System, content } }, false);
 		auto state_tokens = llm_util::tokenize(state.pVocab, content, false);
 		auto it = blocks.insert(itState, ContextBlock {
-			/*responseId*/ "",
-			/*role*/ Role::System,
-			/*name*/ "",
-			/*content*/ content,
-			/*tokens*/ state_tokens,
-			/*cached*/ ContextBlockFlag::Volatile,
+			.responseId = "",
+			.role = Role::System,
+			.name = "",
+			.content = content,
+			.tokens = state_tokens,
+			.cached = ContextBlockFlag::Volatile,
 		});
 		seq.AssignBlockPositions();
 		last_response_tokens.insert(last_response_tokens.begin() + ptrdiff_t((it->offset) - cursor_pos), state_tokens.cbegin(), state_tokens.cend());
@@ -830,14 +830,18 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	}
 
 	// Append last response to batch
-	seq.BatchWrite(last_response_tokens, cursor_pos);
+//	seq.BatchWrite(last_response_tokens, cursor_pos);
 
 	// Decode
-	llama_batch batch_view = llm_util::create_batch_view(seq.batch, cursor_pos, toI(last_response_tokens.size()));
-	if (batch_view.n_tokens > 0)
+	if (!last_response_tokens.empty())
 	{
-		llama_decode(_modelState.pCtx, batch_view);
+		auto sequences = _contextState.AllSequences();
+		llama_batch batch_view = llm_util::create_batch(last_response_tokens, sequences, cursor_pos);
+
+		llama_decode(pCtx, batch_view);
 		cursor_pos += batch_view.n_tokens;
+
+		llama_batch_free(batch_view);
 	}
 
 	// Store response position (before assistant prelude)
@@ -1190,13 +1194,13 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 				std::scoped_lock lock(_resultMutex);
 
 				_resultQueue.push(MessagePiece {
-					/*responseId*/ responseId,
-					/*subMessageId*/ subMessageId,
-					/*identifier*/ responderId,
-					/*text*/ sendMsg,
-					/*role*/ responderRole,
-					/*msgType*/ msgType,
-					/*isComplete*/bEndOfMessageType,
+					.responseId = responseId,
+					.subMessageId = subMessageId,
+					.identifier = responderId,
+					.content = sendMsg,
+					.role = responderRole,
+					.msgType = msgType,
+					.isComplete = bEndOfMessageType,
 				});
 				response += partial;
 			}
@@ -1260,14 +1264,13 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		}
 		else
 		{
-			seq.blocks.push_back(ContextBlock {
-				/*responseId*/ responseId,
-				/*role*/ responderRole,
-				/*name*/ responderId,
-				/*content*/ response,
-				/*tokens*/ sampled_tokens,
-				/*flags*/ ContextBlockFlag::None, // uncached
-				/*offset*/ pre_response_pos,
+			_contextState.block_queue.emplace_back(ContextBlock {
+				.responseId = responseId,
+				.role = responderRole,
+				.name = responderId,
+				.content = response,
+				.tokens = sampled_tokens,
+				.flags = ContextBlockFlag::None, // uncached
 			});
 		}
 	}
@@ -1290,13 +1293,13 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		varText = string_util::rtrim(varText);
 
 		_resultQueue.push(MessagePiece {
-			/*responseId*/ CreateUUID(),
-			/*subMessageId*/ CreateUUID(),
-			/*identifier*/ "",
-			/*text*/ varText,
-			/*role*/ Role::System,
-			/*msgType*/ MessageType::SystemMessage,
-			/*isComplete*/true,
+			responseId = CreateUUID(),
+			subMessageId = CreateUUID(),
+			identifier = "",
+			text = varText,
+			role = Role::System,
+			msgType = MessageType::SystemMessage,
+			isComplete = true,
 		});
 	}
 #endif
@@ -1466,8 +1469,8 @@ bool LLMInstance::SendMessage(string message)
 		return false;
 
 	return EnqueueTask(LLMTask {
-		/* type */ LLMTaskType::SendMessage,
-		/* input */ message,
+		.type = LLMTaskType::SendMessage,
+		.input = message,
 	});
 }
 
@@ -1477,13 +1480,13 @@ bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bo
 		return false;
 
 	return EnqueueTask(LLMTask {
-		/* type */ LLMTaskType::PushMessage,
-		/* input */ message,
-		/* role */ role,
-		/* msgType */ msgType,
-		/* flags */ (!visible ? LLMTaskFlag::HiddenMessage : LLMTaskFlag::None),
-		/* count */ 0,
-		/* ttl */ ttl,
+		.type = LLMTaskType::PushMessage,
+		.input = message,
+		.role = role,
+		.msgType = msgType,
+		.flags = (!visible ? LLMTaskFlag::HiddenMessage : LLMTaskFlag::None),
+		.msgCount = 0,
+		.ttl = ttl,
 	});
 }
 
@@ -1493,12 +1496,12 @@ bool LLMInstance::Instigate(Role role, MessageType msgType, int messageCount)
 		role = Role::Bot1;
 
 	return EnqueueTask(LLMTask {
-		/* type */ LLMTaskType::Instigate,
-		/* input */ "",
-		/* role */ role,
-		/* msgType */ msgType,
-		/* flags */ LLMTaskFlag::HiddenMessage,
-		/* count */ messageCount,
+		.type = LLMTaskType::Instigate,
+		.input = "",
+		.role = role,
+		.msgType = msgType,
+		.flags = LLMTaskFlag::HiddenMessage,
+		.msgCount = messageCount,
 	});
 }
 
@@ -1510,9 +1513,9 @@ bool LLMInstance::__SendMessage(string message, PrepareArguments& prepareArgs, G
 	__PushMessage(Role::User, message, MessageType::Undefined, true, 0);
 
 	prepareArgs = PrepareArguments {
-		/*responder */ Role::Undefined,
-		/*continue*/ false,
-		/*time*/ 1,
+		.responder = Role::Undefined,
+		.isContinuation = false,
+		.time = 1,
 	};
 
 	GenerateFlag flags = GenerateFlag::Generate;
@@ -1520,9 +1523,9 @@ bool LLMInstance::__SendMessage(string message, PrepareArguments& prepareArgs, G
 		flags = flags | GenerateFlag::AllowNarrator;
 
 	generateArgs = GenerateArguments {
-		/*role*/ Role::Bot1,	 // @role
-		/*msgType*/ MessageType::Undefined,
-		/*flags*/ flags,
+		.role = Role::Bot1,	 // @role
+		.msgType = MessageType::Undefined,
+		.flags = flags,
 	};
 	generateArgs.history = GetHistory(Constants::Embedding::Depth);
 	return true;
@@ -1554,15 +1557,15 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 
 	{	// Acquire state lock
 		std::scoped_lock lock(_stateMutex);
-		_contextState.current_sequence().blocks.push_back(ContextBlock {
-			/*blockId*/ responseId,
-			/*role*/ role,
-			/*name*/ identifier,
-			/*content*/ content,
-			/*tokens*/ {},
-			/*cached*/ ContextBlockFlag::None,
-			/*offset*/ 0,
-			/*ttl*/ ttl > 0 ? ttl + 1 : 0,
+		_contextState.block_queue.emplace_back(ContextBlock {
+			.responseId = responseId,
+			.role = role,
+			.name = identifier,
+			.content = content,
+			.tokens = {},
+			.flags = ContextBlockFlag::None,
+			.offset = 0,
+			.ttl = ttl > 0 ? ttl + 1 : 0,
 		});
 	}
 
@@ -1576,13 +1579,13 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 		{
 			string subMessageId = CreateUUID();
 			_resultQueue.push(MessagePiece {
-				/*blockId*/ responseId,
-				/*messageId*/ subMessageId,
-				/*identifier*/ identifier,
-				/*text*/ subMsg.content,
-				/*role*/ role,
-				/*msgType*/ subMsg.msgType,
-				/*isComplete*/ true,
+				.responseId = responseId,
+				.subMessageId = subMessageId,
+				.identifier = identifier,
+				.content = subMsg.content,
+				.role = role,
+				.msgType = subMsg.msgType,
+				.isComplete = true,
 			});
 		}
 	}
@@ -1600,9 +1603,9 @@ bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, 
 		role = Role::Bot1;
 
 	prepareArgs = PrepareArguments {
-		/*responder */ role,
-		/*continue*/ false,
-		/*time*/ 1,
+		.responder = role,
+		.isContinuation = false,
+		.time = 1,
 	};
 
 	string responder = CheckEnumFlag(_options, LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
@@ -1639,11 +1642,11 @@ bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, 
 	bAllowNarration &= _narratorCooldown <= 0 || msgType == MessageType::Narration;
 
 	generateArgs = GenerateArguments {
-		/*role*/ role,
-		/*msgType*/ msgType,
-		/*flags*/ GenerateFlag::Generate | GenerateFlag::Instigation | (bAllowNarration ? GenerateFlag::AllowNarrator : GenerateFlag::None),
-		/*maxMessageCount*/ messageCount,
-		/*prepend*/ prependMsg,
+		.role = role,
+		.msgType = msgType,
+		.flags = GenerateFlag::Generate | GenerateFlag::Instigation | (bAllowNarration ? GenerateFlag::AllowNarrator : GenerateFlag::None),
+		.maxMessages = messageCount,
+		.prepend = prependMsg,
 	};
 	generateArgs.history = GetHistory(Constants::Embedding::Depth);
 	return true;
@@ -1819,6 +1822,7 @@ void LLMInstance::DumpCurrentSequence() const
 	llm_util::dump_batch_text(_contextState.sequences[i], _contextState.pVocab, std::format("prompt_{}.txt", i));
 	llm_util::dump_batch_tokens(_contextState.sequences[i], _contextState.pVocab, std::format("prompt_full_{}.txt", i));
 	llm_util::dump_kv_cache(_contextState.sequences[i], std::format("kvcache_{}.txt", i));
+	llm_util::dump_kv_cache_cells(_contextState.pCtx, std::format("kvcache_alloc.txt", i));
 #endif 
 }
 
@@ -1907,7 +1911,7 @@ bool LLMInstance::SwapPersona(Role role)
 	ContextBlock& block = *itFind;
 	int32_t insertion_pos = block.offset;
 
-		// Remove from kv cache
+	// Remove from kv cache
 	int32_t shift = seq.BatchRemove(block.offset, block.offset + block.length());
 
 		seq.cursor_pos -= shift;

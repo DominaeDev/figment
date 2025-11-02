@@ -21,6 +21,7 @@ namespace llm_util
 	void clear_batch_from(llama_batch& batch, int32_t pos);
 	void init_batch_logits(llama_batch& batch);
 	bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch);
+	llama_batch create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t position);
 	llama_batch create_batch_view(const llama_batch& batch, int32_t position, int32_t length);
 	std::vector<llama_token> tokenize(VocabPtr pModel, string prompt, bool add_special = false);
 	std::vector<llama_token> tokenize_and_batch(VocabPtr pModel, ContextSequence& seq, string content, int32_t pos, bool add_special = false);
@@ -33,6 +34,7 @@ namespace llm_util
 	bool dump_batch_tokens(const ContextSequence& seq, VocabPtr pVocab, string filename);
 	bool dump_batch_tokens(const llama_batch& batch, VocabPtr pVocab, string filename);
 	bool dump_kv_cache(ContextSequence seq, string filename);
+	bool dump_kv_cache_cells(const llama_context* pCtx, string filename);
 	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
 
 	SequenceList get_sequences(SequenceId seq) noexcept;
