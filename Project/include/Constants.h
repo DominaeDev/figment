@@ -38,11 +38,11 @@ namespace Constants
 
 	namespace Context
 	{
-		inline constexpr int Size = 4096; //32768
-		inline constexpr int MaxResponseLength = 256;
-		inline constexpr int MicroBatchSize = 512;
+		inline constexpr int32_t Size = 4096; //32768
+		inline constexpr int32_t MaxResponseLength = 256;
+		inline constexpr int32_t MicroBatchSize = 512;
 		inline constexpr float WindowKeepRatio = 0.75f;
-		inline constexpr int MaxSequences = 4;
+		inline constexpr int32_t MaxSequences = 4;
 
 		static constexpr std::array<SequenceId, 4> AllSequenceIDs {
 			SequenceId::Bot1,

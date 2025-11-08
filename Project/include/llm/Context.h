@@ -20,30 +20,27 @@ struct ContextBlock
     string content;
 	std::vector<int32_t> tokens;
 	ContextBlockFlag flags = ContextBlockFlag::None;
+	SequenceId sequenceId = SequenceId::None;
 	int32_t offset = 0;
 	int ttl = 0;
 
+	inline int32_t length() const		{ return (int32_t)(tokens.size()); }
 	inline bool is_static() const		{ return CheckEnumFlag(flags, ContextBlockFlag::Static); }
 	inline bool is_cached() const		{ return CheckEnumFlag(flags, ContextBlockFlag::Cached); }
 	inline bool is_volatile() const		{ return CheckEnumFlag(flags, ContextBlockFlag::Volatile); }
 	inline bool is_temporary() const	{ return ttl > 0; }
 
-	inline int32_t length() const { return (int32_t)(tokens.size()); }
+	[[nodiscard]] SequenceIndices get_sequence_ids() const noexcept;
 };
-
-using SequenceList = std::vector<int32_t>;
 
 struct ContextSequence
 {
 	llama_context* pCtx = nullptr;
-	llama_seq_id seq_id = 0;
-	std::vector<llama_seq_id> seq_ids { 0 };
 	llama_batch batch {};						// Representation of the kv-cache (mirror)
 	std::vector<ContextBlock> blocks {};
 	int32_t response_pos = 0;					// start of response, including prompt template preamble
 	int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
 	int32_t cursor_pos = 0;						// current position (read)
-//	int32_t write_offset = 0;
 	
 	void AssignBlockPositions();
 	int32_t GetFirstNonStaticOffset() const;
@@ -54,10 +51,12 @@ struct ContextSequence
 	int32_t DecrementTTL(int32_t time);
 	int32_t EraseTokens(int32_t from, int32_t length);
 	int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
-	int32_t BatchWrite(std::span<llama_token> tokens, int32_t pos);
+	int32_t BatchWrite(std::span<llama_token> tokens, SequenceId seq_id, int32_t pos);
 	int32_t BatchRemove(int32_t begin, int32_t end);
 	int32_t BatchAllocate(int32_t pos, int32_t length);
 	void BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds);
+
+	static int32_t default_seq_id;
 };
 
 struct ContextState
@@ -68,17 +67,13 @@ struct ContextState
 	std::map<Role, std::vector<int32_t>> personas;
 	Role activePersona = Role::Undefined;
 
-	size_t active_sequence = 0;
-	std::vector<ContextSequence> sequences;
-	constexpr ContextSequence& current_sequence() {
-		return sequences[active_sequence];
-	}
-	constexpr const ContextSequence& current_sequence() const {
-		return sequences[active_sequence];
-	}
+	ContextSequence sequence;
+	int32_t active_sequence = 0;
+	int32_t num_sequences = 1;
 
 	std::vector<ContextBlock> block_queue {};
 
 	int32_t get_max_position() const;
-	[[nodiscard]] SequenceList AllSequences() const noexcept;
+	[[nodiscard]] SequenceIndices get_active_sequence() const noexcept;
+	[[nodiscard]] SequenceIndices get_all_sequences() const noexcept;
 };

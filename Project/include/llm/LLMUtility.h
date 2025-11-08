@@ -23,20 +23,22 @@ namespace llm_util
 	bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch);
 	llama_batch create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t position);
 	llama_batch create_batch_view(const llama_batch& batch, int32_t position, int32_t length);
+
 	std::vector<llama_token> tokenize(VocabPtr pModel, string prompt, bool add_special = false);
-	std::vector<llama_token> tokenize_and_batch(VocabPtr pModel, ContextSequence& seq, string content, int32_t pos, bool add_special = false);
-	std::optional<std::vector<llama_token>> tokenize_and_decode(VocabPtr pModel, ContextSequence& seq, string content, int32_t pos, bool add_special = false);
+	std::vector<llama_token> tokenize_and_batch(VocabPtr pModel, ContextSequence& seq, string content, SequenceId seq_id, int32_t pos, bool add_special = false);
+	std::optional<std::vector<llama_token>> tokenize_and_decode(VocabPtr pModel, ContextSequence& seq, string content, SequenceId seq_id, int32_t pos, bool add_special = false);
+	void erase_bottom(llama_context* pCtx, int32_t pos);
 
 	std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 
 	string format_id(string id);
-	bool dump_batch_text(ContextSequence seq, VocabPtr pVocab, string filename);
-	bool dump_batch_tokens(const ContextSequence& seq, VocabPtr pVocab, string filename);
-	bool dump_batch_tokens(const llama_batch& batch, VocabPtr pVocab, string filename);
-	bool dump_kv_cache(ContextSequence seq, string filename);
+	bool dump_batch_text(ContextSequence seq, int32_t seq_id, VocabPtr pVocab, string filename);
+	bool dump_batch_tokens(const ContextSequence& seq, int32_t seq_id, VocabPtr pVocab, string filename);
+	bool dump_batch_tokens(const llama_batch& batch, int32_t seq_id, VocabPtr pVocab, string filename);
+	bool dump_kv_cache(ContextSequence seq, int32_t seq_id, string filename);
 	bool dump_kv_cache_cells(const llama_context* pCtx, string filename);
 	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
 
-	SequenceList get_sequences(SequenceId seq) noexcept;
-	
+	SequenceIndices get_sequence_indices(SequenceId seq) noexcept;
+	constexpr SequenceId sequence_from_index(int32_t seq_idx) noexcept;
 }

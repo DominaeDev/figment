@@ -153,6 +153,9 @@ enum class SequenceId : int32_t
 	Bot2	= 1 << 1,
 	Bot3	= 1 << 2,
 	Bot4	= 1 << 3,
-	Shared = Bot1 | Bot2 | Bot3 | Bot4,
+	Shared	= Bot1 | Bot2 | Bot3 | Bot4,
+	Default = Bot1,
 };
 DEFINE_ENUM_FLAGS(SequenceId, int32_t);
+
+using SequenceIndices = std::vector<int32_t>;
