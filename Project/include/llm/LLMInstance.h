@@ -115,7 +115,7 @@ public:
 	bool PollResponse(MessagePiece& piece);
 	std::pair<LLMStatus, bool> PollStatus();
 
-	void DumpCurrentSequence() const;
+	void DumpSequence(int32_t seq_id) const;
 	void DumpContext() const;
 #if _DEBUG
 	bool GenerateEmbedding(string text);
@@ -215,7 +215,7 @@ private:
 		int msgCount = 0;
 		int ttl = 0;
 	};
-	bool EnqueueTask(LLMTask task);
+	bool EnqueueTask(LLMTask&& task);
 	bool ClearTasksQueue();
 
 	void __ProcessTaskQueue(std::stop_token stop, __GenerationCompleteCallback onComplete);

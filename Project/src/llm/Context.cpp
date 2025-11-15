@@ -1,11 +1,13 @@
 #include "llm/Context.h"
 #include "llm/LLMUtility.h"
+#include "util/Common.h"
 #include "Constants.h"
 #include <cassert>
 #include <algorithm>
 #include <format>
+#include <cassert>
 
-int32_t ContextSequence::default_seq_id = 0;
+static int32_t default_seq_id = 0; //!
 
 SequenceIndices ContextBlock::get_sequence_ids() const noexcept
 {
@@ -35,11 +37,6 @@ int32_t ContextState::get_max_position() const
 	return max;
 }
 
-SequenceIndices ContextState::get_active_sequence() const noexcept
-{
-	return llm_util::get_sequence_indices(llm_util::sequence_from_index(active_sequence));
-}
-
 SequenceIndices ContextState::get_all_sequences() const noexcept
 {
 	SequenceIndices result;
@@ -49,15 +46,48 @@ SequenceIndices ContextState::get_all_sequences() const noexcept
 	return result;
 }
 
-void ContextSequence::AssignBlockPositions()
+bool ContextState::ReserveTokens(int32_t ctx_reserve, bool bForce)
 {
-	int32_t block_offset = 0;
+	int n_ctx_used = llama_kv_self_used_cells(pCtx);
+	int32_t ctx_size = llama_n_ctx(pCtx);
+	if (n_ctx_used + ctx_reserve >= ctx_size || bForce)
+	{
+		DebugPrintLn(">> REALLOCATING CONTEXT");
+		int32_t shift = sequence.AllocateKVCache(ctx_reserve);
+		DebugPrintLn(std::format(">> Allocated {} tokens.", std::abs(shift), ctx_size - sequence.cursor_pos));
+		assert(ctx_size - sequence.cursor_pos >= Constants::Context::MaxResponseLength);
+		return true;
+	}
+	return false;
+}
 
+int32_t ContextSequence::DecodeUncached(int32_t& cursor_pos)
+{
+	int32_t nDecoded = 0;
 	for (auto& block : blocks)
 	{
-		block.offset = block_offset;
-		block_offset += block.length();
+		assert(CheckEnumFlag(block.flags, ContextBlockFlag::Cached) || block.offset >= cursor_pos);
+
+		if (CheckEnumFlag(block.flags, ContextBlockFlag::Cached) || block.offset < cursor_pos) //! @wrong?
+			continue;
+
+		std::vector<llama_seq_id> seqs = block.get_sequence_ids();
+		llama_batch batch_view = llm_util::create_batch(block.tokens, seqs, cursor_pos);
+		if (!llama_decode(pCtx, batch_view))
+		{
+			block.flags = block.flags | ContextBlockFlag::Cached;
+			cursor_pos += batch_view.n_tokens;
+			nDecoded += batch_view.n_tokens;
+			llama_batch_free(batch_view);
+
+		}
+		else
+		{
+			llama_batch_free(batch_view);
+			return -1; // Error
+		}
 	}
+	return nDecoded;
 }
 
 bool ContextSequence::RebuildKVCache()
@@ -92,26 +122,28 @@ int32_t ContextSequence::GetFirstNonStaticOffset() const
 	return offset;
 }
 
-int32_t ContextSequence::RemoveAndShift(std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd)
+int32_t ContextSequence::RemoveAndShift(size_t from, size_t to)
 {
 	// Remove
 	int32_t shift_amount = 0;
-	for (auto it = itBegin; it != itEnd; ++it)
-		shift_amount += (*it).length();
+	for (auto i = from; i <= to; ++i)
+		shift_amount += blocks[i].length();
 	if (shift_amount == 0)
 		return 0;
 
 #if _DEBUG
 	int32_t n_used = llama_kv_self_used_cells(pCtx);
 #endif
-	int32_t pos_remove_begin = (*itBegin).offset;
+	int32_t pos_remove_begin = blocks[from].offset;
 	int32_t pos_remove_end = pos_remove_begin + shift_amount;
 
 	// Remove and shift
-	for (auto itBlock = itBegin; itBlock != itEnd; ++itBlock)
+	for (size_t i = from; i <= to; ++i)
 	{
-		assert((*itBlock).sequenceId != SequenceId::None);
-		for (auto seq_id : llm_util::get_sequence_indices((*itBlock).sequenceId))
+		auto& block = blocks[i];
+		assert(block.sequenceId != SequenceId::None);
+
+		for (auto seq_id : llm_util::get_sequence_indices(block.sequenceId))
 		{
 			if (!llama_kv_self_seq_rm(pCtx, seq_id, pos_remove_begin, pos_remove_end))
 				return 0;
@@ -119,9 +151,11 @@ int32_t ContextSequence::RemoveAndShift(std::vector<ContextBlock>::iterator itBe
 		}
 	}
 	llama_kv_self_update(pCtx);
+	blocks.erase(blocks.begin() + from, blocks.begin() + to + 1);
 
-	blocks.erase(itBegin, itEnd);
-	AssignBlockPositions();
+	// Shift blocks
+	for (size_t i = from; i < blocks.size(); ++i)
+		blocks[i].offset -= shift_amount;
 
 #if _DEBUG
 	int32_t n_used_after = llama_kv_self_used_cells(pCtx);
@@ -135,7 +169,7 @@ int32_t ContextSequence::RemoveAndShift(std::vector<ContextBlock>::iterator itBe
 		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
 		batch.n_seq_id[pos_remove_begin + i] = batch.n_seq_id[pos_remove_end + i];
 		batch.seq_id[pos_remove_begin + i][0] = batch.seq_id[pos_remove_end + i][0];
-		batch.logits[i] = false;
+		batch.logits[pos_remove_begin + i] = false;
 	}
 	batch.n_tokens -= shift_amount;
 
@@ -181,7 +215,7 @@ int32_t ContextSequence::BatchRemove(int32_t begin, int32_t end)
 		batch.n_seq_id[begin + i] = batch.n_seq_id[end + i];
 		batch.pos[begin + i] = begin + i;
 		batch.seq_id[begin + i][0] = batch.seq_id[end + i][0];
-		batch.logits[i] = false;
+		batch.logits[begin + i] = false;
 	}
 	batch.n_tokens -= n_removed;
 	return n_removed;
@@ -272,17 +306,18 @@ int32_t ContextSequence::ShiftTokens(int32_t pos, int32_t len, int32_t offset)
 int32_t ContextSequence::BatchWrite(std::span<llama_token> tokens, SequenceId seq_id, int32_t pos)
 {
 	// Add to context batch
-	int32_t n_tokens = (int32_t)tokens.size();
 	auto seq_ids = llm_util::get_sequence_indices(seq_id);
+	int32_t n_seq = toI(seq_ids.size());
+	int32_t n_tokens = toI(tokens.size());
 	for (int32_t i = 0; i < n_tokens; ++i)
 	{
 		int idx = pos + i;
 		batch.token[idx] = tokens[i];
 		batch.pos[idx] = idx;
-		batch.n_seq_id[idx] = toI(seq_ids.size());
-		for (size_t i = 0; i < seq_ids.size(); ++i)
-			batch.seq_id[idx][i] = seq_ids[i];
-		batch.logits[i] = false;
+		batch.n_seq_id[idx] = n_seq;
+		for (size_t itSeq = 0; itSeq < seq_ids.size(); ++itSeq)
+			batch.seq_id[idx][itSeq] = seq_ids[itSeq];
+		batch.logits[idx] = false;
 	}
 	batch.n_tokens = pos + n_tokens;
 	return n_tokens;
@@ -293,6 +328,19 @@ void ContextSequence::BatchSetSequences(int32_t pos, const std::vector<int32_t>&
 	batch.n_seq_id[pos] = toI(seqIds.size());
 	for (size_t i = 0; i < seqIds.size() && i < Constants::Context::MaxSequences; ++i)
 		batch.seq_id[pos][i] = seqIds[i];
+}
+
+void ContextSequence::BatchSetSequences(int32_t from, int32_t length, SequenceId seq_id)
+{
+	auto seqIds = llm_util::get_sequence_indices(seq_id);
+	int32_t n_seq = toI(seqIds.size());
+	int32_t to = from + length;
+	for (int32_t pos = from; pos < to; ++pos)
+	{
+		batch.n_seq_id[pos] = n_seq;
+		for (size_t i = 0; i < seqIds.size() && i < Constants::Context::MaxSequences; ++i)
+			batch.seq_id[pos][i] = seqIds[i];
+	}
 }
 
 int32_t ContextSequence::AllocateKVCache(int32_t alloc_size)
@@ -321,7 +369,7 @@ int32_t ContextSequence::AllocateKVCache(int32_t alloc_size)
 
 	if (itFirst != itLast)
 	{
-		int32_t shift = RemoveAndShift(itFirst, itLast);
+		int32_t shift = RemoveAndShift(std::distance(blocks.begin(), itFirst), std::distance(blocks.begin(), itLast) - 1);
 
 		cursor_pos += shift;
 		response_pos += shift;
@@ -351,13 +399,19 @@ int32_t ContextSequence::DecrementTTL(int32_t time)
 		if (block.is_cached())
 		{
 			// Remove from context
-			int32_t shift = RemoveAndShift(
-				blocks.begin() + (ptrdiff_t)i,
-				blocks.begin() + (ptrdiff_t)(i + 1));
+			int32_t shift = RemoveAndShift(i, i);
 			cursor_pos += shift;
 			response_pos += shift;
 			offset += shift;
 		}
 	}
+	return offset;
+}
+
+int32_t ContextSequence::GetLastBlockOffset() const
+{
+	int32_t offset = 0;
+	for (auto& block : blocks)
+		offset = std::max(offset, block.offset + block.length());
 	return offset;
 }

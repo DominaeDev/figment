@@ -158,4 +158,4 @@ enum class SequenceId : int32_t
 };
 DEFINE_ENUM_FLAGS(SequenceId, int32_t);
 
-using SequenceIndices = std::vector<int32_t>;
+using SequenceIndices = std::vector<llama_seq_id>;

@@ -27,7 +27,7 @@ static const std::map<PromptTemplate, std::string> LLAMA_CPP_TEMPLATES = {
 	{ PromptTemplate::Phi4,				"phi4",				},
 	{ PromptTemplate::CommandR,			"command-r",		},
 
-	/* Unsupported
+	/* Not supported for now
 	{ PromptTemplate::Vicuna,			"vicuna",			},
 	{ PromptTemplate::VicunaOrca,		"vicuna-orca",		},
 	{ PromptTemplate::Falcon3,			"falcon3",			},
@@ -276,7 +276,6 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     dest = ss.str();
     return toI(dest.size());
 }
-
 
 std::pair<string, string> llm_tmpl::get_chat_template_prefix_suffix(Role role, string name)
 {

@@ -822,7 +822,18 @@ bool llm_util::dump_batch_text(ContextSequence seq, int32_t seq_index, VocabPtr 
 	result.reserve(65536);
 	int32_t size = batch.n_tokens;
 	for (int32_t i = 0; i < size; ++i)
+	{
+		if (seq_index >= 0)
+		{
+			bool bFound = false;
+			for (int32_t itSeq = 0; itSeq < batch.n_seq_id[i]; ++itSeq)
+				bFound |= (batch.seq_id[i][itSeq] == seq_index);
+			if (!bFound)
+				continue;
+		}
+
 		result.append(fnTokenStr(batch.token[i], false));
+	}
 
 	result.append(std::format("[pos:{0}/{1}]\r\n", seq.cursor_pos, batch.n_tokens));
 
@@ -904,11 +915,20 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t seq_index, Vo
 				continue;
 		}
 
-		result.append(std::format("{0:<8} {1:<8} {2}({3})\t{4:<8} \"{5}\"\r\n",
+		int32_t seq_id = 0;
+		int32_t n_seq_id = batch.n_seq_id[i];
+		for (int32_t it_seq = 0; it_seq != n_seq_id; ++it_seq)
+		{
+			int32_t seq = batch.seq_id[i][it_seq];
+			if (seq >= 0)
+				seq_id |= 1 << seq;
+		}
+
+		result.append(std::format("{0:<8} {1:<8} {2:<4x} {4:<8} \"{5}\"\r\n",
 			batch.pos[i],
 			batch.token[i],
-			batch.seq_id[i][0],
-			batch.n_seq_id[i],
+			seq_id,
+			n_seq_id,
 			(int32_t)batch.logits[i],
 			fnTokenStr(batch.token[i]))
 		);

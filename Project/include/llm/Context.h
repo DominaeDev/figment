@@ -42,11 +42,13 @@ struct ContextSequence
 	int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
 	int32_t cursor_pos = 0;						// current position (read)
 	
-	void AssignBlockPositions();
+	//void AssignBlockPositions();
 	int32_t GetFirstNonStaticOffset() const;
-	int32_t RemoveAndShift(std::vector<ContextBlock>::iterator itBegin, std::vector<ContextBlock>::iterator itEnd);
+	int32_t RemoveAndShift(size_t from, size_t to);
 	bool RebuildKVCache();
 	int32_t AllocateKVCache(int32_t alloc_size);
+	int32_t DecodeUncached(int32_t& cursor_pos);
+	int32_t GetLastBlockOffset() const;
 
 	int32_t DecrementTTL(int32_t time);
 	int32_t EraseTokens(int32_t from, int32_t length);
@@ -55,8 +57,7 @@ struct ContextSequence
 	int32_t BatchRemove(int32_t begin, int32_t end);
 	int32_t BatchAllocate(int32_t pos, int32_t length);
 	void BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds);
-
-	static int32_t default_seq_id;
+	void BatchSetSequences(int32_t from, int32_t length, SequenceId seq_id);
 };
 
 struct ContextState
@@ -68,10 +69,10 @@ struct ContextState
 	Role activePersona = Role::Undefined;
 
 	ContextSequence sequence;
-	int32_t active_sequence = 0;
+	int32_t previous_sequence_index = 0;
 	int32_t num_sequences = 1;
 
-	std::vector<ContextBlock> block_queue {};
+	bool ReserveTokens(int32_t n_tokens, bool bForce = false);
 
 	int32_t get_max_position() const;
 	[[nodiscard]] SequenceIndices get_active_sequence() const noexcept;
