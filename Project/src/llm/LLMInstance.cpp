@@ -15,6 +15,27 @@
 
 using namespace std::chrono_literals;
 
+template <typename T>
+concept Mutex = requires (T mut)
+{
+	mut.lock();
+	mut.unlock();
+};
+
+template <Mutex T>
+static void LockAndDo(T& mutex, std::function<void()> fn)
+{
+	std::scoped_lock _ { mutex };
+	fn();
+}
+
+template <typename ReturnType, Mutex T>
+static ReturnType LockAndReturn(T& mutex, std::function<ReturnType()> fn)
+{
+	std::scoped_lock _ { mutex };
+	return fn();
+}
+
 inline string Direction(string text)
 {
 	return "{{" + text + "}}";
@@ -117,9 +138,9 @@ LLMInstance::~LLMInstance()
 void LLMInstance::Shutdown()
 {
 	Halt(); 
-		
-	{	// Clear and release state
-		std::scoped_lock lock(_stateMutex);
+	
+	LockAndDo(_stateMutex, [this]() {	
+		// Clear and release state
 		_modelState.Release();
 		_modelState = {};
 		_contextState = {};
@@ -129,7 +150,7 @@ void LLMInstance::Shutdown()
 			_pEmbedding->Shutdown();
 			_pEmbedding = nullptr;
 		}
-	}
+	});
 	_readyState.store(ReadyState::Uninitialized);
 	PushSignal(LLMStatusSignal::UnloadedModel);
 
@@ -629,10 +650,9 @@ bool LLMInstance::Initialize(string filename, LLMOption options, LoadModelProgre
 	{
 		if (result.pModel) // Success
 		{
-			{	// Write state
-				std::scoped_lock lock(_stateMutex);
+			LockAndDo(_stateMutex, [this, &result]() {
 				_modelState = result;
-			}
+			});
 			_readyState.store(ReadyState::ModelLoaded);
 
 			DebugPrintLn("Loaded model OK");
@@ -1232,16 +1252,16 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			}
 			else if (partial.size() > 0 && msgType != MessageType::Undefined)
 			{
-				std::scoped_lock lock(_resultMutex);
-
-				_resultQueue.push(MessagePiece {
-					.responseId = responseId,
-					.subMessageId = subMessageId,
-					.identifier = responderId,
-					.content = sendMsg,
-					.role = responderRole,
-					.msgType = msgType,
-					.isComplete = bEndOfMessageType,
+				LockAndDo(_resultMutex, [&]() {
+					_resultQueue.push(MessagePiece {
+						.responseId = responseId,
+						.subMessageId = subMessageId,
+						.identifier = responderId,
+						.content = sendMsg,
+						.role = responderRole,
+						.msgType = msgType,
+						.isComplete = bEndOfMessageType,
+					});
 				});
 				response += partial;
 			}
@@ -1357,14 +1377,17 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 bool LLMInstance::__ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
 {
 	LLMTask task;
+	if (!LockAndReturn<bool>(_taskMutex, [&]()
 	{
-		std::scoped_lock lock(_taskMutex);
 		if (_tasks.empty())
 			return false;
 		task = _tasks.front();
 		_tasks.pop();
+		return true;
+	}))
+	{
+		return false;
 	}
-
 	bool r;
 	switch (task.type)
 	{
@@ -1423,11 +1446,12 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 
 		// Generate response
 		if (CheckEnumFlag(_options, LLMOption::RandomizeMessageCount))
-		{	// Acquire state lock
-			std::scoped_lock lock(_stateMutex);
+		{
 			static std::uniform_int_distribution<int> numMessages(1, 3);
-			if (generateArgs.maxMessages <= 0) // Randomize number of messages
-				generateArgs.maxMessages = numMessages(_modelState.rng);
+			LockAndDo(_stateMutex, [&]() {
+				if (generateArgs.maxMessages <= 0) // Randomize number of messages
+					generateArgs.maxMessages = numMessages(_modelState.rng); //! Hmm..
+			});
 		}
 		else if (!CheckEnumFlag(_options, LLMOption::LimitMessages))
 			generateArgs.maxMessages = 0;
@@ -1479,20 +1503,19 @@ void LLMInstance::StartGeneration()
 
 void LLMInstance::ClearResponseQueue()
 {
-	std::scoped_lock lock(_resultMutex);
-	ClearQueue(_resultQueue);
+	LockAndDo(_resultMutex, [this]() {
+		ClearQueue(_resultQueue);
+	});
 }
 
-bool LLMInstance::EnqueueTask(LLMTask&& task)
+bool LLMInstance::EnqueueTask(LLMTask task)
 {
 	if (!IsReady())
 		return false;
 
-	// Try to acquire state lock
-	{
-		std::scoped_lock lock(_taskMutex);
-		_tasks.push(std::move(task));
-	}
+	LockAndDo(_taskMutex, [this, task]() {
+		_tasks.push(task);
+	});
 
 	StartGeneration();
 	return true;
@@ -1500,13 +1523,14 @@ bool LLMInstance::EnqueueTask(LLMTask&& task)
 
 bool LLMInstance::ClearTasksQueue()
 {
-	// Try to acquire state lock
-	std::scoped_lock lock(_taskMutex);
-	if (_tasks.empty())
-		return false;
+	return LockAndReturn<bool>(_taskMutex, 
+		[this]() -> bool {
+			if (_tasks.empty())
+				return false;
 
-	ClearQueue(_tasks);
-	return true;
+			ClearQueue(_tasks);
+			return true;
+		});
 }
 
 bool LLMInstance::SendMessage(string message)
@@ -1601,8 +1625,7 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 
 	string responseId = CreateUUID();
 
-	{	// Acquire state lock
-		std::scoped_lock lock(_stateMutex);
+	LockAndDo(_stateMutex, [&]() {
 		_contextState.sequence.blocks.emplace_back(ContextBlock {
 			.responseId = responseId,
 			.role = role,
@@ -1614,33 +1637,28 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 			.offset = _contextState.sequence.GetLastBlockOffset(),
 			.ttl = ttl > 0 ? ttl + 1 : 0,
 		});
-	}
+	});
 
-	if (visible)
-	{
-		std::scoped_lock lock(_resultMutex);
+	LockAndDo(_resultMutex, [&]() {
 		_activeResponseIds.insert(responseId);
-		
-		// Add message to result queue
-		for (auto subMsg : subMessages)
+		if (visible)
 		{
-			string subMessageId = CreateUUID();
-			_resultQueue.push(MessagePiece {
-				.responseId = responseId,
-				.subMessageId = subMessageId,
-				.identifier = identifier,
-				.content = subMsg.content,
-				.role = role,
-				.msgType = subMsg.msgType,
-				.isComplete = true,
-			});
+			// Add message to result queue
+			for (auto subMsg : subMessages)
+			{
+				string subMessageId = CreateUUID();
+				_resultQueue.push(MessagePiece {
+					.responseId = responseId,
+					.subMessageId = subMessageId,
+					.identifier = identifier,
+					.content = subMsg.content,
+					.role = role,
+					.msgType = subMsg.msgType,
+					.isComplete = true,
+				});
+			}
 		}
-	}
-	else
-	{
-		std::scoped_lock lock(_resultMutex);
-		_activeResponseIds.insert(responseId);
-	}
+	});
 	return true;
 }
 
@@ -1731,8 +1749,7 @@ std::vector<RemovedMessage> LLMInstance::RemoveMessages(int numMessages, bool re
 	if (!CanGenerate() || numMessages < 1)
 		return {};
 
-	std::scoped_lock lock(_stateMutex);
-
+	std::scoped_lock lock(_stateMutex); //! hmm...
 	return impl_RemoveMessages(numMessages, rewindTime);
 }
 
@@ -1833,14 +1850,13 @@ std::pair<LLMStatus, bool> LLMInstance::PollStatus()
 	status.bReady = readyState >= ReadyState::Ready;
 	status.bInvalid = readyState == ReadyState::Invalid;
 
-	{	// Acquire signal lock
-		std::scoped_lock signalLock(_statusMutex);
+	LockAndDo(_statusMutex, [&]() {
 		if (!_statusSignals.empty())
 		{
 			status.signal = _statusSignals.front();
 			_statusSignals.pop();
 		}
-	}
+	});
 	return std::make_pair(status, true);
 }
 
@@ -1911,7 +1927,7 @@ bool LLMInstance::Reseed(uint32_t seed)
 
 void LLMInstance::PushSignal(LLMStatusSignal signal)
 {
-	std::scoped_lock lock(_statusMutex);
+	std::scoped_lock _ { _statusMutex };
 
 	if (!_statusSignals.empty() && _statusSignals.back() == signal)
 		return;
@@ -1921,17 +1937,18 @@ void LLMInstance::PushSignal(LLMStatusSignal signal)
 
 std::set<string> LLMInstance::GetActiveMessages()
 {
-	std::scoped_lock lock(_resultMutex);
+	std::scoped_lock _ { _resultMutex };
 	return std::set<string>(_activeResponseIds.begin(), _activeResponseIds.end()); // Copy
 }
 
 void LLMInstance::RefreshActiveResponses()
 {
-	std::scoped_lock lock(_resultMutex);
-	_activeResponseIds.clear();
-	const ContextSequence& seq = _contextState.sequence;
-	for (auto it = seq.blocks.cbegin(); it != seq.blocks.cend(); ++it)
-		_activeResponseIds.insert(it->responseId);
+	LockAndDo(_resultMutex, [&]() {
+		_activeResponseIds.clear();
+		const ContextSequence& seq = _contextState.sequence;
+		for (auto it = seq.blocks.cbegin(); it != seq.blocks.cend(); ++it)
+			_activeResponseIds.insert(it->responseId);
+	});
 }
 
 bool LLMInstance::SwapPersona(Role role)
