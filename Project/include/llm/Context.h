@@ -41,13 +41,14 @@ struct ContextSequence
 	int32_t response_pos = 0;					// start of response, including prompt template preamble
 	int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
 	int32_t cursor_pos = 0;						// current position (read)
+	int32_t chat_pos = 0;						// chat position
 	
-	//void AssignBlockPositions();
+	void RefreshBlockPositions();
 	int32_t GetFirstNonStaticOffset() const;
 	int32_t RemoveAndShift(size_t from, size_t to);
 	bool RebuildKVCache();
 	int32_t AllocateKVCache(int32_t alloc_size);
-	int32_t DecodeUncached(int32_t& cursor_pos);
+	int32_t DecodeUncached(int32_t cursor_pos);
 	int32_t GetLastBlockOffset() const;
 
 	int32_t DecrementTTL(int32_t time);

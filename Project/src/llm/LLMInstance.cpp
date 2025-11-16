@@ -16,33 +16,35 @@
 using namespace std::chrono_literals;
 
 template <typename T>
-concept Mutex = requires (T mut)
+concept Lockable = requires (T mut)
 {
+	mut.try_lock();
 	mut.lock();
 	mut.unlock();
 };
 
-template <Mutex T>
-static void LockAndDo(T& mutex, std::function<void()> fn)
+template <Lockable... MutexTypes>
+static void LockAndDo(std::function<void()> fn, MutexTypes&... mutexes)
 {
-	std::scoped_lock _ { mutex };
+	std::scoped_lock _ { mutexes... };
 	fn();
 }
 
-template <typename ReturnType, Mutex T>
-static ReturnType LockAndReturn(T& mutex, std::function<ReturnType()> fn)
+template <typename ReturnType, Lockable MutexType>
+[[nodiscard]] static ReturnType LockAndReturn(std::function<ReturnType()> fn, MutexType& mutex)
 {
 	std::scoped_lock _ { mutex };
 	return fn();
 }
 
-inline string Direction(string text)
+inline constexpr string Direction(std::string_view text)
 {
-	return "{{" + text + "}}";
+	return "{{" + std::string(text) + "}}";
 }
-inline string Narration(string text)
+
+inline constexpr string Narration(std::string_view text)
 {
-	return "[" + text + "]";
+	return "[" + std::string(text) + "]";
 }
 
 void ModelState::Release()
@@ -139,7 +141,7 @@ void LLMInstance::Shutdown()
 {
 	Halt(); 
 	
-	LockAndDo(_stateMutex, [this]() {	
+	LockAndDo([this]() {	
 		// Clear and release state
 		_modelState.Release();
 		_modelState = {};
@@ -150,7 +152,7 @@ void LLMInstance::Shutdown()
 			_pEmbedding->Shutdown();
 			_pEmbedding = nullptr;
 		}
-	});
+	}, _stateMutex);
 	_readyState.store(ReadyState::Uninitialized);
 	PushSignal(LLMStatusSignal::UnloadedModel);
 
@@ -215,6 +217,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 	_contextState = {};
 	_contextState.pCtx = _modelState.pCtx;
 	_contextState.pVocab = _modelState.pVocab;
+	_contextState.num_sequences = n_bots;
 	
 	_contextState.sequence = ContextSequence { 
 		.pCtx = _modelState.pCtx, 
@@ -466,7 +469,10 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 	}
 
 	for (auto& block : _contextState.sequence.blocks)
+	{
 		block.flags = block.flags | ContextBlockFlag::Cached;
+		_contextState.sequence.chat_pos = _contextState.sequence.GetLastBlockOffset();
+	}
 
 	_bCtxReallocateNextTurn = false;
 	_readyState.store(ReadyState::Ready);
@@ -650,9 +656,9 @@ bool LLMInstance::Initialize(string filename, LLMOption options, LoadModelProgre
 	{
 		if (result.pModel) // Success
 		{
-			LockAndDo(_stateMutex, [this, &result]() {
+			LockAndDo([this, &result]() {
 				_modelState = result;
-			});
+			}, _stateMutex);
 			_readyState.store(ReadyState::ModelLoaded);
 
 			DebugPrintLn("Loaded model OK");
@@ -797,7 +803,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	{
 		if (block.is_static() || block.is_cached())
 		{
-			offset += toI(block.tokens.size());
+			offset = std::max(offset, block.offset + block.length());
 			continue;
 		}
 
@@ -813,18 +819,13 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		}
 		content = _session.ApplyNames(content, args.responder);
 		
-		auto block_tokens = llm_util::tokenize(state.pVocab, content, false);
-		block.tokens = block_tokens;
 		block.offset = offset;
+		block.tokens = llm_util::tokenize(state.pVocab, content, false);
+		seq.BatchWrite(block.tokens, block.sequenceId, block.offset); //! Before alloc
 
-		seq.BatchWrite(block_tokens, block.sequenceId, offset); //! Before alloc
-		offset += toI(block.tokens.size());
-
-		last_response_tokens.insert(last_response_tokens.end(), block_tokens.cbegin(), block_tokens.cend());
+		offset += block.length();
+		last_response_tokens.insert(last_response_tokens.end(), block.tokens.cbegin(), block.tokens.cend());
 	}
-
-	// Calculate block positions
-//	seq.AssignBlockPositions();
 
 #if FALSE // State vars
 	// Add state block (preface)
@@ -858,15 +859,15 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	}
 #endif
 
+	seq.RefreshBlockPositions(); // jic at this point
+
 	// Allocate and shift context window
 	int32_t ctx_reserve = std::max((int32_t)last_response_tokens.size() + Constants::Context::MaxResponseLength, Constants::Context::MicroBatchSize);
 	if (_contextState.ReserveTokens(ctx_reserve, _bCtxReallocateNextTurn))
 		_bCtxReallocateNextTurn = false;
 
 	// Decode
-	seq.DecodeUncached(cursor_pos);
-
-	DumpSequence(0);
+	cursor_pos = seq.DecodeUncached(cursor_pos);
 
 	// Store response position (before assistant prelude)
 	if (!args.isContinuation)
@@ -883,15 +884,13 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		pre_prompt_tokens.insert(pre_prompt_tokens.end(), assistant_tokens.begin(), assistant_tokens.end());
 	}
 
-//	cursor_pos = _contextState.get_max_position();
-
 	// Append to batch
 	seq.BatchWrite(pre_prompt_tokens, SequenceId::Shared, cursor_pos); //! @seq_id
 
 	// Store beginning of response (after assistant prelude)
 	seq.prepend_pos = cursor_pos + (int32_t)pre_prompt_tokens.size();
 
-	DumpSequence(0);
+//	DumpContext();
 }
 
 void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
@@ -1209,9 +1208,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 							if (msgType == MessageType::Narration)
 								_narratorCooldown = _narratorCooldownDuration;
 
-							if (CheckEnumFlag(args.flags, GenerateFlag::SwapPersonas))
-								SwapPersona(responderRole);
-							else if (_session.IsGroupChat() && is_bot(responderRole))
+							if (_session.IsGroupChat() && is_bot(responderRole))
 							{
 								int32_t bot_index = get_bot_index(responderRole);
 								SequenceId new_sequence = llm_util::sequence_from_index(bot_index);
@@ -1223,14 +1220,15 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 									current_sequence_index = current_sequence_indices[0];
 
 									// Swap response over
-									llama_kv_self_seq_cp(state.pCtx, prev_sequence_index, current_sequence_index, pre_response_pos, cursor_pos - 1);
-									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos - 1);
-									seq.BatchSetSequences(pre_response_pos, cursor_pos - pre_response_pos - 1, current_sequence);
+									llama_kv_self_seq_cp(state.pCtx, prev_sequence_index, current_sequence_index, pre_response_pos, cursor_pos);
+									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos);
+									seq.BatchSetSequences(pre_response_pos, cursor_pos - pre_response_pos, current_sequence);
 									
 									DebugPrintLn(std::format(">> Sequence -> {}", current_sequence_index));
 								}
-								
 							}
+							else if (CheckEnumFlag(args.flags, GenerateFlag::SwapPersonas))
+								SwapPersona(responderRole);
 						}
 					}
 				}
@@ -1252,7 +1250,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			}
 			else if (partial.size() > 0 && msgType != MessageType::Undefined)
 			{
-				LockAndDo(_resultMutex, [&]() {
+				LockAndDo([&]() {
 					_resultQueue.push(MessagePiece {
 						.responseId = responseId,
 						.subMessageId = subMessageId,
@@ -1262,7 +1260,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 						.msgType = msgType,
 						.isComplete = bEndOfMessageType,
 					});
-				});
+				}, _resultMutex);
 				response += partial;
 			}
 
@@ -1295,19 +1293,13 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		_tokensPerSec.store(toD(sampled_tokens.size()) / (duration / 1000.0));
 	}
 
-//	llm_util::dump_batch(batch, state.pVocab, "prompt-full.txt");
-//	llm_util::dump_kv_cache(seq, "kvcache.txt");
-
 	// Remove full response from cache (will be reinserted on next turn)
 	llm_util::erase_bottom(_contextState.pCtx, pre_response_pos);
 
-//	llm_util::clear_batch_from(batch, pre_response_pos);
+	llm_util::clear_batch_from(batch, pre_response_pos);
     batch.n_tokens = pre_response_pos;
     cursor_pos = pre_response_pos;
 	_contextState.previous_sequence_index = current_sequence_index;
-
-//	llm_util::dump_batch(batch, state.pVocab, "prompt-full.txt");
-//	llm_util::dump_kv_cache(seq, "kvcache.txt");
 
 	for (auto& block : seq.blocks)
 	{
@@ -1343,6 +1335,8 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		DebugPrint("(Empty response)");
 	}
 
+	DumpContext();
+
 #if FALSE
 	std::map<string, string> variables;
 	_stateVars.UpdateValues(stateReport, variables);
@@ -1377,14 +1371,14 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 bool LLMInstance::__ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
 {
 	LLMTask task;
-	if (!LockAndReturn<bool>(_taskMutex, [&]()
+	if (!LockAndReturn<bool>([&]()
 	{
 		if (_tasks.empty())
 			return false;
 		task = _tasks.front();
 		_tasks.pop();
 		return true;
-	}))
+	}, _taskMutex))
 	{
 		return false;
 	}
@@ -1448,10 +1442,10 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 		if (CheckEnumFlag(_options, LLMOption::RandomizeMessageCount))
 		{
 			static std::uniform_int_distribution<int> numMessages(1, 3);
-			LockAndDo(_stateMutex, [&]() {
+			LockAndDo([&]() {
 				if (generateArgs.maxMessages <= 0) // Randomize number of messages
 					generateArgs.maxMessages = numMessages(_modelState.rng); //! Hmm..
-			});
+			}, _stateMutex);
 		}
 		else if (!CheckEnumFlag(_options, LLMOption::LimitMessages))
 			generateArgs.maxMessages = 0;
@@ -1503,9 +1497,9 @@ void LLMInstance::StartGeneration()
 
 void LLMInstance::ClearResponseQueue()
 {
-	LockAndDo(_resultMutex, [this]() {
+	LockAndDo([this]() {
 		ClearQueue(_resultQueue);
-	});
+	}, _resultMutex);
 }
 
 bool LLMInstance::EnqueueTask(LLMTask task)
@@ -1513,9 +1507,9 @@ bool LLMInstance::EnqueueTask(LLMTask task)
 	if (!IsReady())
 		return false;
 
-	LockAndDo(_taskMutex, [this, task]() {
+	LockAndDo([this, task]() {
 		_tasks.push(task);
-	});
+	}, _taskMutex);
 
 	StartGeneration();
 	return true;
@@ -1523,14 +1517,14 @@ bool LLMInstance::EnqueueTask(LLMTask task)
 
 bool LLMInstance::ClearTasksQueue()
 {
-	return LockAndReturn<bool>(_taskMutex, 
-		[this]() -> bool {
-			if (_tasks.empty())
-				return false;
+	return LockAndReturn<bool>([this]() -> bool 
+	{
+		if (_tasks.empty())
+			return false;
 
-			ClearQueue(_tasks);
-			return true;
-		});
+		ClearQueue(_tasks);
+		return true;
+	}, _taskMutex);
 }
 
 bool LLMInstance::SendMessage(string message)
@@ -1625,7 +1619,7 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 
 	string responseId = CreateUUID();
 
-	LockAndDo(_stateMutex, [&]() {
+	LockAndDo([&]() {
 		_contextState.sequence.blocks.emplace_back(ContextBlock {
 			.responseId = responseId,
 			.role = role,
@@ -1637,9 +1631,9 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 			.offset = _contextState.sequence.GetLastBlockOffset(),
 			.ttl = ttl > 0 ? ttl + 1 : 0,
 		});
-	});
+	}, _stateMutex);
 
-	LockAndDo(_resultMutex, [&]() {
+	LockAndDo([&]() {
 		_activeResponseIds.insert(responseId);
 		if (visible)
 		{
@@ -1658,7 +1652,7 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 				});
 			}
 		}
-	});
+	}, _resultMutex);
 	return true;
 }
 
@@ -1850,13 +1844,13 @@ std::pair<LLMStatus, bool> LLMInstance::PollStatus()
 	status.bReady = readyState >= ReadyState::Ready;
 	status.bInvalid = readyState == ReadyState::Invalid;
 
-	LockAndDo(_statusMutex, [&]() {
+	LockAndDo([&]() {
 		if (!_statusSignals.empty())
 		{
 			status.signal = _statusSignals.front();
 			_statusSignals.pop();
 		}
-	});
+	}, _statusMutex);
 	return std::make_pair(status, true);
 }
 
@@ -1894,6 +1888,7 @@ void LLMInstance::DumpContext() const
 		llm_util::dump_batch_tokens(_contextState.sequence, i, _contextState.pVocab, std::format("prompt_full_{}.txt", i));
 		llm_util::dump_kv_cache(_contextState.sequence, i, std::format("kvcache_{}.txt", i));
 	}
+	llm_util::dump_kv_cache_cells(_contextState.pCtx, "kvcache_alloc.txt");
 #endif 
 }
 
@@ -1943,12 +1938,12 @@ std::set<string> LLMInstance::GetActiveMessages()
 
 void LLMInstance::RefreshActiveResponses()
 {
-	LockAndDo(_resultMutex, [&]() {
+	LockAndDo([&]() {
 		_activeResponseIds.clear();
 		const ContextSequence& seq = _contextState.sequence;
 		for (auto it = seq.blocks.cbegin(); it != seq.blocks.cend(); ++it)
 			_activeResponseIds.insert(it->responseId);
-	});
+	}, _resultMutex);
 }
 
 bool LLMInstance::SwapPersona(Role role)

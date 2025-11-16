@@ -61,25 +61,34 @@ bool ContextState::ReserveTokens(int32_t ctx_reserve, bool bForce)
 	return false;
 }
 
-int32_t ContextSequence::DecodeUncached(int32_t& cursor_pos)
+void ContextSequence::RefreshBlockPositions()
 {
-	int32_t nDecoded = 0;
+	int32_t offset = 0;
 	for (auto& block : blocks)
 	{
-		assert(CheckEnumFlag(block.flags, ContextBlockFlag::Cached) || block.offset >= cursor_pos);
+		if (offset >= chat_pos)
+			block.offset = offset;
+		if (CheckEnumFlag(block.flags, ContextBlockFlag::Static))
+			offset = std::max(offset, block.offset + block.length());
+		else
+			offset += block.length();
+	}
+}
 
-		if (CheckEnumFlag(block.flags, ContextBlockFlag::Cached) || block.offset < cursor_pos) //! @wrong?
+int32_t ContextSequence::DecodeUncached(int32_t cursor_pos)
+{
+	for (auto& block : blocks)
+	{
+		if (CheckEnumFlag(block.flags, ContextBlockFlag::Cached))
 			continue;
 
 		std::vector<llama_seq_id> seqs = block.get_sequence_ids();
-		llama_batch batch_view = llm_util::create_batch(block.tokens, seqs, cursor_pos);
+		llama_batch batch_view = llm_util::create_batch(block.tokens, seqs, block.offset);
 		if (!llama_decode(pCtx, batch_view))
 		{
 			block.flags = block.flags | ContextBlockFlag::Cached;
-			cursor_pos += batch_view.n_tokens;
-			nDecoded += batch_view.n_tokens;
+			cursor_pos = std::max(cursor_pos, block.offset + block.length());
 			llama_batch_free(batch_view);
-
 		}
 		else
 		{
@@ -87,7 +96,7 @@ int32_t ContextSequence::DecodeUncached(int32_t& cursor_pos)
 			return -1; // Error
 		}
 	}
-	return nDecoded;
+	return cursor_pos;
 }
 
 bool ContextSequence::RebuildKVCache()
