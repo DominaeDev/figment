@@ -9,6 +9,15 @@
 
 static int32_t default_seq_id = 0; //!
 
+static void copy_batch_tokens(llama_batch& batch, int32_t from, int32_t to)
+{
+	batch.token[to] = batch.token[from];
+	batch.n_seq_id[to] = batch.n_seq_id[from];
+	for (int32_t itSeq = 0; itSeq < Constants::Context::MaxSequences; ++itSeq)
+		batch.seq_id[to][itSeq] = batch.seq_id[from][itSeq];
+	batch.logits[to] = batch.logits[from];
+}
+
 SequenceIndices ContextBlock::get_sequence_ids() const noexcept
 {
 	SequenceIndices seqIds;
@@ -66,7 +75,7 @@ void ContextSequence::RefreshBlockPositions()
 	int32_t offset = 0;
 	for (auto& block : blocks)
 	{
-		if (offset >= chat_pos)
+		if (offset >= chat_begin_pos)
 			block.offset = offset;
 		if (CheckEnumFlag(block.flags, ContextBlockFlag::Static))
 			offset = std::max(offset, block.offset + block.length());
@@ -105,7 +114,7 @@ bool ContextSequence::RebuildKVCache()
 	llama_kv_self_clear(pCtx);
 	int r = llama_decode(pCtx, batch);
 #else // Clear non-static only
-	int32_t blocks_pos = GetFirstNonStaticOffset();
+	int32_t blocks_pos = chat_begin_pos;
 
 	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size(); ++i)
 		llama_kv_self_seq_rm(pCtx, (int32_t)i, blocks_pos, -1);
@@ -116,19 +125,6 @@ bool ContextSequence::RebuildKVCache()
 
 	cursor_pos = batch.n_tokens;
 	return r == 0;
-}
-
-int32_t ContextSequence::GetFirstNonStaticOffset() const
-{
-	int32_t offset = 0;
-
-	for (auto& block : blocks)
-	{
-		if (!block.is_static())
-			break;
-		offset += block.length();
-	}
-	return offset;
 }
 
 int32_t ContextSequence::RemoveAndShift(size_t from, size_t to)
@@ -152,12 +148,9 @@ int32_t ContextSequence::RemoveAndShift(size_t from, size_t to)
 		auto& block = blocks[i];
 		assert(block.sequenceId != SequenceId::None);
 
-		for (auto seq_id : llm_util::get_sequence_indices(block.sequenceId))
-		{
-			if (!llama_kv_self_seq_rm(pCtx, seq_id, pos_remove_begin, pos_remove_end))
-				return 0;
-			llama_kv_self_seq_add(pCtx, seq_id, pos_remove_end, cursor_pos, -shift_amount);
-		}
+		if (!llama_kv_self_seq_rm(pCtx, -1, pos_remove_begin, pos_remove_end))
+			return 0;
+		llama_kv_self_seq_add(pCtx, -1, pos_remove_end, cursor_pos, -shift_amount);
 	}
 	llama_kv_self_update(pCtx);
 	blocks.erase(blocks.begin() + from, blocks.begin() + to + 1);
@@ -176,8 +169,10 @@ int32_t ContextSequence::RemoveAndShift(size_t from, size_t to)
 	{
 		batch.pos[pos_remove_begin + i] = pos_remove_begin + i;
 		batch.token[pos_remove_begin + i] = batch.token[pos_remove_end + i];
+		
 		batch.n_seq_id[pos_remove_begin + i] = batch.n_seq_id[pos_remove_end + i];
-		batch.seq_id[pos_remove_begin + i][0] = batch.seq_id[pos_remove_end + i][0];
+		for (int32_t itSeq = 0; itSeq < Constants::Context::MaxSequences; ++itSeq)
+			batch.seq_id[pos_remove_begin + i][itSeq] = batch.seq_id[pos_remove_end + i][itSeq];
 		batch.logits[pos_remove_begin + i] = false;
 	}
 	batch.n_tokens -= shift_amount;
@@ -221,9 +216,10 @@ int32_t ContextSequence::BatchRemove(int32_t begin, int32_t end)
 	for (int32_t i = 0; i < n_removed; ++i)
 	{
 		batch.token[begin + i] = batch.token[end + i];
-		batch.n_seq_id[begin + i] = batch.n_seq_id[end + i];
 		batch.pos[begin + i] = begin + i;
-		batch.seq_id[begin + i][0] = batch.seq_id[end + i][0];
+		batch.n_seq_id[begin + i] = batch.n_seq_id[end + i];
+		for (int32_t itSeq = 0; itSeq < Constants::Context::MaxSequences; ++itSeq)
+			batch.seq_id[begin + i][itSeq] = batch.seq_id[end + i][itSeq];
 		batch.logits[begin + i] = false;
 	}
 	batch.n_tokens -= n_removed;
@@ -249,7 +245,8 @@ int32_t ContextSequence::BatchAllocate(int32_t pos, int32_t length)
 		batch.pos[idx] = idx;
 		batch.token[idx] = batch.token[idx - length];
 		batch.n_seq_id[idx] = batch.n_seq_id[idx - length];
-		batch.seq_id[idx][0] = batch.seq_id[idx - length][0];
+		for (int32_t itSeq = 0; itSeq < Constants::Context::MaxSequences; ++itSeq)
+			batch.seq_id[idx][itSeq] = batch.seq_id[idx - length][itSeq];
 		batch.logits[idx] = false;
 	}
 	batch.n_tokens += length;
@@ -261,6 +258,8 @@ int32_t ContextSequence::BatchAllocate(int32_t pos, int32_t length)
 		batch.pos[idx] = -1;
 		batch.token[idx] = 0;
 		batch.n_seq_id[idx] = 0;
+		for (int32_t itSeq = 0; itSeq < Constants::Context::MaxSequences; ++itSeq)
+			batch.seq_id[idx][itSeq] = -1;
 		batch.logits[idx] = false;
 	}
 
@@ -287,7 +286,8 @@ int32_t ContextSequence::ShiftTokens(int32_t pos, int32_t len, int32_t offset)
 			batch.pos[idx] = idx;
 			batch.token[idx] = batch.token[src_pos + i];
 			batch.n_seq_id[idx] = batch.n_seq_id[src_pos + i];
-			batch.seq_id[idx][0] = batch.seq_id[src_pos + i][0];
+			for (int32_t itSeq = 0; itSeq < Constants::Context::MaxSequences; ++itSeq)
+				batch.seq_id[idx][itSeq] = batch.seq_id[src_pos + i][itSeq];
 			batch.logits[idx] = batch.logits[src_pos + i];
 		}
 	}
@@ -302,7 +302,8 @@ int32_t ContextSequence::ShiftTokens(int32_t pos, int32_t len, int32_t offset)
 			batch.pos[idx] = idx;
 			batch.token[idx] = batch.token[src_pos + len - i - 1];
 			batch.n_seq_id[idx] = batch.n_seq_id[src_pos + len - i - 1];
-			batch.seq_id[idx][0] = batch.seq_id[src_pos + len - i - 1][0];
+			for (int32_t itSeq = 0; itSeq < Constants::Context::MaxSequences; ++itSeq)
+				batch.seq_id[idx][itSeq] = batch.seq_id[src_pos + len - i - 1][itSeq];
 			batch.logits[idx] = batch.logits[src_pos + len - i - 1];
 		}		
 	}
@@ -352,21 +353,19 @@ void ContextSequence::BatchSetSequences(int32_t from, int32_t length, SequenceId
 	}
 }
 
-int32_t ContextSequence::AllocateKVCache(int32_t alloc_size)
+int32_t ContextSequence::AllocateKVCache(int32_t min_reserve)
 {
 	// Allocate and shift context window
 	int n_ctx_used = llama_kv_self_used_cells(pCtx);
-	size_t ctx_reserve = std::max(alloc_size + Constants::Context::MaxResponseLength, Constants::Context::MicroBatchSize);
-	size_t ctx_size = llama_n_ctx(pCtx);
+	int32_t ctx_size = llama_n_ctx(pCtx);
 
-	int32_t blocks_pos = GetFirstNonStaticOffset();
-	size_t ctx_chat_max = ctx_size - blocks_pos; // Exclude system prompt
-	size_t free_tokens = std::max(static_cast<int32_t>(ctx_reserve), static_cast<int32_t>(ctx_chat_max * (1.0f - Constants::Context::WindowKeepRatio)));
+	int32_t ctx_chat_max = ctx_size - chat_begin_pos; // Exclude system prompt
+	int32_t free_tokens = std::max(min_reserve, toI(ctx_chat_max * (1.0f - Constants::Context::WindowKeepRatio)));
 		
 	auto itFirst = std::find_if(blocks.begin(), blocks.end(), [](auto& block) { return !block.is_static(); });
 	assert(itFirst != blocks.end());
 
-	size_t total = 0;
+	int32_t total = 0;
 	auto itLast = itFirst;
 	while (itLast != blocks.end() && total < free_tokens && itLast->is_cached())
 	{
@@ -417,7 +416,7 @@ int32_t ContextSequence::DecrementTTL(int32_t time)
 	return offset;
 }
 
-int32_t ContextSequence::GetLastBlockOffset() const
+int32_t ContextSequence::GetBlockAppendOffset() const
 {
 	int32_t offset = 0;
 	for (auto& block : blocks)
