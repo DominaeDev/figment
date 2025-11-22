@@ -7,8 +7,6 @@
 #include <format>
 #include <cassert>
 
-static int32_t default_seq_id = 0; //!
-
 static void copy_batch_tokens(llama_batch& batch, int32_t from, int32_t to)
 {
 	batch.token[to] = batch.token[from];
@@ -127,11 +125,11 @@ bool ContextSequence::RebuildKVCache()
 	return r == 0;
 }
 
-int32_t ContextSequence::RemoveAndShift(size_t from, size_t to)
+int32_t ContextSequence::RemoveBlocksAndShift(int32_t idx_from, int32_t idx_to) // [from, to]
 {
 	// Remove
 	int32_t shift_amount = 0;
-	for (auto i = from; i <= to; ++i)
+	for (auto i = idx_from; i <= idx_to; ++i)
 		shift_amount += blocks[i].length();
 	if (shift_amount == 0)
 		return 0;
@@ -139,25 +137,32 @@ int32_t ContextSequence::RemoveAndShift(size_t from, size_t to)
 #if _DEBUG
 	int32_t n_used = llama_kv_self_used_cells(pCtx);
 #endif
-	int32_t pos_remove_begin = blocks[from].offset;
+	int32_t pos_remove_begin = blocks[idx_from].offset;
 	int32_t pos_remove_end = pos_remove_begin + shift_amount;
 
 	// Remove and shift
-	for (size_t i = from; i <= to; ++i)
+	for (int32_t i = idx_to; i >= idx_from; --i)
 	{
 		auto& block = blocks[i];
 		assert(block.sequenceId != SequenceId::None);
+		assert(block.offset >= pos_remove_begin && block.offset + block.length() <= pos_remove_end);
 
-		if (!llama_kv_self_seq_rm(pCtx, -1, pos_remove_begin, pos_remove_end))
+		if (!llama_kv_self_seq_rm(pCtx, -1, block.offset, block.offset + block.length()))
 			return 0;
-		llama_kv_self_seq_add(pCtx, -1, pos_remove_end, cursor_pos, -shift_amount);
-	}
-	llama_kv_self_update(pCtx);
-	blocks.erase(blocks.begin() + from, blocks.begin() + to + 1);
 
-	// Shift blocks
-	for (size_t i = from; i < blocks.size(); ++i)
+		blocks.erase(blocks.begin() + i);
+	}
+
+	// Shift up block-wise because of sequences
+	for (size_t i = idx_from; i < blocks.size(); ++i)
+	{
+		int32_t seq_id = blocks[i].get_sequence_ids()[0]; // Any of the block's sequence ids will work
+		llama_kv_self_seq_add(pCtx, 0, blocks[i].offset, blocks[i].offset + blocks[i].length(), -shift_amount); // seq_id (ugh)
 		blocks[i].offset -= shift_amount;
+	}
+
+	llama_kv_self_defrag(pCtx);
+	llama_kv_self_update(pCtx);
 
 #if _DEBUG
 	int32_t n_used_after = llama_kv_self_used_cells(pCtx);
@@ -185,7 +190,7 @@ int32_t ContextSequence::EraseTokens(int32_t from, int32_t length)
 	if (from < 0 || from >= Constants::Context::Size || length <= 0  || from + length > Constants::Context::Size)
 		return 0;
 
-	llama_kv_self_seq_rm(pCtx, default_seq_id, from, from + length);
+	llama_kv_self_seq_rm(pCtx, -1, from, from + length);
 
 	// Update batch
 	for (int32_t i = 0; i < length; ++i)
@@ -207,9 +212,10 @@ int32_t ContextSequence::BatchRemove(int32_t begin, int32_t end)
 	int32_t n_removed = end - begin;
 
 	// Remove
-	llama_kv_self_seq_rm(pCtx, default_seq_id, begin, end);
-	llama_kv_self_seq_add(pCtx, default_seq_id, end, -1, -n_removed);
+	llama_kv_self_seq_rm(pCtx, -1, begin, end);
+	llama_kv_self_seq_add(pCtx, 0, end, -1, -n_removed); //! @seq_id
 	llama_kv_self_update(pCtx);
+	assert(false && "This doesn't handle sequences yet.");
 
 	// Update batch
 	int32_t n_batch = batch.n_tokens;
@@ -229,8 +235,9 @@ int32_t ContextSequence::BatchRemove(int32_t begin, int32_t end)
 int32_t ContextSequence::BatchAllocate(int32_t pos, int32_t length)
 {
 	// Remove
-	llama_kv_self_seq_add(pCtx, default_seq_id, pos, -1, length);
+	llama_kv_self_seq_add(pCtx, 0, pos, -1, length); //! @seq_id
 	llama_kv_self_update(pCtx);
+	assert(false && "This doesn't handle sequences yet.");
 
 	int32_t ctx_size = llama_n_ctx(pCtx);
 
@@ -309,7 +316,9 @@ int32_t ContextSequence::ShiftTokens(int32_t pos, int32_t len, int32_t offset)
 	}
 
 	// Apply down-shifts
-	llama_kv_self_seq_add(pCtx, default_seq_id, pos, -1, offset);
+	llama_kv_self_seq_add(pCtx, 0, pos, -1, offset); //! @seq_id
+	assert(false && "This doesn't handle sequences yet.");
+
 	return offset;
 }
 
@@ -377,7 +386,7 @@ int32_t ContextSequence::AllocateKVCache(int32_t min_reserve)
 
 	if (itFirst != itLast)
 	{
-		int32_t shift = RemoveAndShift(std::distance(blocks.begin(), itFirst), std::distance(blocks.begin(), itLast) - 1);
+		int32_t shift = RemoveBlocksAndShift(toI(std::distance(blocks.begin(), itFirst)), toI(std::distance(blocks.begin(), itLast)) - 1);
 
 		cursor_pos += shift;
 		response_pos += shift;
@@ -407,7 +416,7 @@ int32_t ContextSequence::DecrementTTL(int32_t time)
 		if (block.is_cached())
 		{
 			// Remove from context
-			int32_t shift = RemoveAndShift(i, i);
+			int32_t shift = RemoveBlocksAndShift(i, i);
 			cursor_pos += shift;
 			response_pos += shift;
 			offset += shift;

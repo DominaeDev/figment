@@ -828,7 +828,6 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		
 		block.offset = offset;
 		block.tokens = llm_util::tokenize(state.pVocab, content, false);
-//		seq.BatchWrite(block.tokens, block.sequenceId, block.offset); //! Before alloc
 
 		offset += block.length();
 		last_response_tokens.insert(last_response_tokens.end(), block.tokens.cbegin(), block.tokens.cend());
@@ -1240,7 +1239,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 									// Swap response over
 									llama_kv_self_seq_cp(state.pCtx, prev_sequence_index, current_sequence_index, pre_response_pos, cursor_pos);
-									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos);
+//									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos); //! wrong?
 									seq.BatchSetSequences(pre_response_pos, cursor_pos - pre_response_pos, current_sequence);
 									
 									DebugPrintLn(std::format(">> Sequence -> {}", current_sequence_index));

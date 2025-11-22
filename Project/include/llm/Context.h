@@ -45,7 +45,7 @@ struct ContextSequence
 	
 	void RefreshBlockPositions();
 //	int32_t GetFirstNonStaticOffset() const;
-	int32_t RemoveAndShift(size_t from, size_t to);
+	int32_t RemoveBlocksAndShift(int32_t idx_from, int32_t idx_to);
 	bool RebuildKVCache();
 	int32_t AllocateKVCache(int32_t alloc_min);
 	int32_t DecodeUncached(int32_t cursor_pos);
