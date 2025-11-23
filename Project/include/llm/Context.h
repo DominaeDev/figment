@@ -30,6 +30,7 @@ struct ContextBlock
 	inline bool is_volatile() const		{ return CheckEnumFlag(flags, ContextBlockFlag::Volatile); }
 	inline bool is_temporary() const	{ return ttl > 0; }
 
+	llama_seq_id get_any_sequence_id() const noexcept;
 	[[nodiscard]] SequenceIndices get_sequence_ids() const noexcept;
 };
 
@@ -44,19 +45,23 @@ struct ContextSequence
 	int32_t chat_begin_pos = 0;						// chat position
 	
 	void RefreshBlockPositions();
-//	int32_t GetFirstNonStaticOffset() const;
-	int32_t RemoveBlocksAndShift(int32_t idx_from, int32_t idx_to);
+	int32_t RemoveBlock(const ContextBlock& block, bool shift = true);
+	int32_t RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift = true);
 	bool RebuildKVCache();
 	int32_t AllocateKVCache(int32_t alloc_min);
-	int32_t DecodeUncached(int32_t cursor_pos);
+
 	int32_t GetBlockAppendOffset() const;
 
+	int32_t DecodeUncached(int32_t cursor_pos);
 	int32_t DecrementTTL(int32_t time);
+	
 	int32_t EraseTokens(int32_t from, int32_t length);
 	int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
+	
 	int32_t BatchWrite(std::span<llama_token> tokens, SequenceId seq_id, int32_t pos);
 	int32_t BatchRemove(int32_t begin, int32_t end);
 	int32_t BatchAllocate(int32_t pos, int32_t length);
+
 	void BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds);
 	void BatchSetSequences(int32_t from, int32_t length, SequenceId seq_id);
 };

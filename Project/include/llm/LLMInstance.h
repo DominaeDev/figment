@@ -69,7 +69,7 @@ struct LLMChatArguments
 	ChatSession session;
 	Messages messages;
 	LLMOption options;
-	int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldownLength;
+	int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
 };
 
 enum class LLMTaskFlag : int32_t
