@@ -221,6 +221,12 @@
     <ClCompile Include="src\llm\Context.cpp">
       <Filter>Source Files\Inference\Context</Filter>
     </ClCompile>
+    <ClCompile Include="src\llm\ContextCache.cpp">
+      <Filter>Source Files\Inference\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="src\llm\ContextBlock.cpp">
+      <Filter>Source Files\Inference\Context</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -383,6 +389,12 @@
       <Filter>Source Files\Inference\Context</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\Context.h">
+      <Filter>Source Files\Inference\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\ContextCache.h">
+      <Filter>Source Files\Inference\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\ContextBlock.h">
       <Filter>Source Files\Inference\Context</Filter>
     </ClInclude>
   </ItemGroup>

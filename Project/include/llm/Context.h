@@ -1,52 +1,21 @@
 #include "llm/LLMTypes.h"
+#include "llm/ContextBlock.h"
+#include "llm/ContextCache.h"
 
 #pragma once
 
-enum class ContextBlockFlag : int32_t
+class ContextSequence
 {
-	None		= 0,
-	Static		= 1 << 0,	// Static instruction
-	Cached		= 1 << 1,	// Is currently in kv-cache
-	Volatile	= 1 << 2,	// Should be discarded immediately
-	Persona		= 1 << 3,	// Persona
-};
-DEFINE_ENUM_FLAGS(ContextBlockFlag, int32_t);
+public:
+	ContextSequence() = default;
+	ContextSequence(llama_context* pCtx, int32_t n_seq_max);
 
-struct ContextBlock 
-{
-	string responseId;
-	Role role = Role::Undefined;
-	string name;
-    string content;
-	std::vector<int32_t> tokens;
-	ContextBlockFlag flags = ContextBlockFlag::None;
-	SequenceId sequenceId = SequenceId::None;
-	int32_t offset = 0;
-	int ttl = 0;
-
-	inline int32_t length() const		{ return (int32_t)(tokens.size()); }
-	inline bool is_static() const		{ return CheckEnumFlag(flags, ContextBlockFlag::Static); }
-	inline bool is_cached() const		{ return CheckEnumFlag(flags, ContextBlockFlag::Cached); }
-	inline bool is_volatile() const		{ return CheckEnumFlag(flags, ContextBlockFlag::Volatile); }
-	inline bool is_temporary() const	{ return ttl > 0; }
-
-	llama_seq_id get_any_sequence_id() const noexcept;
-	[[nodiscard]] SequenceIndices get_sequence_ids() const noexcept;
-};
-
-struct ContextSequence
-{
-	llama_context* pCtx = nullptr;
-	llama_batch batch {};						// Representation of the kv-cache (mirror)
-	std::vector<ContextBlock> blocks {};
-	int32_t response_pos = 0;					// start of response, including prompt template preamble
-	int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
-	int32_t cursor_pos = 0;						// current position (read)
-	int32_t chat_begin_pos = 0;						// chat position
-	
 	void RefreshBlockPositions();
 	int32_t RemoveBlock(const ContextBlock& block, bool shift = true);
 	int32_t RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift = true);
+	int32_t EraseChat();
+	void EraseVolatile();
+
 	bool RebuildKVCache();
 	int32_t AllocateKVCache(int32_t alloc_min);
 
@@ -55,19 +24,44 @@ struct ContextSequence
 	int32_t DecodeUncached(int32_t cursor_pos);
 	int32_t DecrementTTL(int32_t time);
 	
-	int32_t EraseTokens(int32_t from, int32_t length);
-	int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
-	
-	int32_t BatchWrite(std::span<llama_token> tokens, SequenceId seq_id, int32_t pos);
-	int32_t BatchRemove(int32_t begin, int32_t end);
-	int32_t BatchAllocate(int32_t pos, int32_t length);
+	void AppendBlock(const ContextBlock& block);
+	void AppendBlock(ContextBlock&& block);
+	int32_t get_max_position() const;
 
-	void BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds);
-	void BatchSetSequences(int32_t from, int32_t length, SequenceId seq_id);
+	std::vector<ContextBlock>& GetBlocks() noexcept { return _blocks; }
+	const std::vector<ContextBlock>& GetBlocks() const noexcept { return _blocks; }
+	ContextCache& GetCache() { return *_cache.get(); }
+	const ContextCache& GetCache() const { return *_cache.get(); }
+	llama_batch& GetBatch() { return _cache.get()->GetBatch(); }
+	const llama_batch& GetBatch() const { return _cache.get()->GetBatch(); }
+
+	int32_t GetNumSequences() const { return n_seq_max; }
+
+public:
+	llama_context* pCtx = nullptr;
+
+	int32_t response_pos = 0;					// start of response, including prompt template preamble
+	int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
+	int32_t cursor_pos = 0;						// current position (read)
+	int32_t chat_begin_pos = 0;					// chat position
+	int32_t n_seq_max = 1;
+private:
+	std::shared_ptr<ContextCache> _cache;
+	std::vector<ContextBlock> _blocks {};
 };
 
 struct ContextState
 {
+	ContextState() = default;
+	ContextState(ContextState&& other) = default;
+	ContextState(const ContextState& other) = default;
+	ContextState(const ModelState& model, int32_t n_seq = 1);
+	ContextState& operator=(const ContextState& other) = default;
+
+	bool ReserveTokens(int32_t n_tokens, bool bForce = false);
+	int32_t get_max_position() const;
+	[[nodiscard]] SequenceIndices get_all_sequences() const noexcept;
+
 	llama_context* pCtx = nullptr;
 	const llama_vocab* pVocab = nullptr;
 
@@ -79,9 +73,4 @@ struct ContextState
 	int32_t num_sequences = 1;
 	int32_t max_tokens = 0;
 
-	bool ReserveTokens(int32_t n_tokens, bool bForce = false);
-
-	int32_t get_max_position() const;
-	[[nodiscard]] SequenceIndices get_active_sequence() const noexcept;
-	[[nodiscard]] SequenceIndices get_all_sequences() const noexcept;
 };

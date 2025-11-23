@@ -338,27 +338,42 @@ std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, string prompt, bool
 	return prompt_tokens;
 }
 
-llama_batch llm_util::init_batch(llama_context* pCtx)
+llama_batch llm_util::init_batch(int32_t ctx_size, int32_t n_seq_max)
 {
-	const int32_t maxCtx = llama_n_ctx(pCtx);
-
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(maxCtx, 0, Constants::Context::MaxSequences);
+	llama_batch batch = llama_batch_init(ctx_size, 0, n_seq_max);
 	batch.n_tokens = 0;
 
-	for (size_t i = 0; i < Constants::Context::Size; ++i)
+	for (size_t i = 0; i < ctx_size; ++i)
 	{
 		batch.pos[i] = (int32_t)i;
 		batch.token[i] = 0;
 		batch.n_seq_id[i] = 0;
+		for (size_t itSeq = 1; itSeq < n_seq_max; ++itSeq)
+			batch.seq_id[i][itSeq] = -1;
+		batch.logits[i] = false;
 	}
 	return batch;
 }
 
-llama_batch llm_util::create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t position)
+void llm_util::free_batch(llama_batch& batch)
+{
+	llama_batch_free(batch);
+
+	batch.pos = nullptr;
+	batch.token = nullptr;
+	batch.embd = nullptr;
+	batch.logits = nullptr;
+	batch.n_seq_id = nullptr;
+	batch.seq_id = nullptr;
+	batch.n_tokens = 0;
+}
+
+
+llama_batch llm_util::create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position)
 {
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(toI(tokens.size()), 0, Constants::Context::MaxSequences);
+	llama_batch batch = llama_batch_init(toI(tokens.size()), 0, n_seq_max);
 	batch.n_tokens = toI(tokens.size());
 	batch.embd = nullptr;
 
@@ -393,7 +408,7 @@ bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, co
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(ctx_size, 0, Constants::Context::MaxSequences);
+	llama_batch batch = llama_batch_init(ctx_size, 0, 1);
 	int32_t num_tokens = std::min((int32_t)tokens.size(), ctx_size);
 
 	// Add tokens to batch
@@ -415,7 +430,7 @@ std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(VocabPtr p
 	auto tokens = tokenize_and_batch(pVocab, seq, content, seq_id, pos, add_special);
 	int32_t n_tokens = toI(tokens.size());
 
-	llama_batch batch_view = llm_util::create_batch_view(seq.batch, pos, n_tokens);
+	llama_batch batch_view = seq.GetCache().CreateBatchView(pos, n_tokens);
 	if (batch_view.n_tokens > 0 && llama_decode(seq.pCtx, batch_view) != 0)
 		return std::nullopt;
 	return tokens;
@@ -425,7 +440,7 @@ std::vector<llama_token> llm_util::tokenize_and_batch(VocabPtr pVocab, ContextSe
 {
 	// Add to context batch
 	auto tokens = llm_util::tokenize(pVocab, content, add_special);
-	seq.BatchWrite(tokens, seq_id, pos);
+	seq.GetCache().BatchWrite(tokens, seq_id, pos);
 	return tokens;
 }
 
@@ -784,9 +799,9 @@ void llm_util::clear_batch_from(llama_batch& batch, int32_t pos)
 	}
 }
 
-bool llm_util::dump_batch_text(ContextSequence seq, int32_t seq_index, VocabPtr pVocab, string filename)
+bool llm_util::dump_batch_text(const ContextSequence& seq, int32_t seq_index, VocabPtr pVocab, string filename)
 {
-	auto& batch = seq.batch;
+	auto& batch = seq.GetBatch();
 
 	auto fnTokenStr = [pVocab](llama_token token, bool quote) -> string {
 		if (token <= 0)
@@ -839,7 +854,8 @@ bool llm_util::dump_batch_text(ContextSequence seq, int32_t seq_index, VocabPtr 
 
 	// Cached blocks
 	SequenceId seq_id = sequence_from_index(seq_index);
-	for (auto& block : seq.blocks)
+	auto& blocks = seq.GetBlocks();
+	for (auto& block : blocks)
 	{
 		if (block.is_cached())
 			continue;
@@ -864,7 +880,7 @@ bool llm_util::dump_batch_text(ContextSequence seq, int32_t seq_index, VocabPtr 
 
 bool llm_util::dump_batch_tokens(const ContextSequence& seq, int32_t seq_id, VocabPtr pVocab, string filename)
 {
-	return dump_batch_tokens(seq.batch, seq_id, pVocab, filename);
+	return dump_batch_tokens(seq.GetBatch(), seq_id, pVocab, filename);
 }
 
 bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t seq_index, VocabPtr pVocab, string filename)
@@ -937,9 +953,9 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t seq_index, Vo
 	return WriteTextFile(filename, result, false);
 }
 
-bool llm_util::dump_kv_cache(ContextSequence seq, int32_t seq_id, string filename)
+bool llm_util::dump_kv_cache(const ContextSequence& seq, int32_t seq_id, string filename)
 {
-	auto cache_view = llama_kv_cache_view_init(seq.pCtx, Constants::Context::MaxSequences);
+	auto cache_view = llama_kv_cache_view_init(seq.pCtx, seq.GetCache().n_seq_max());
 	llama_kv_cache_view_update(seq.pCtx, &cache_view);
 
 	int32_t n_max_seq = cache_view.n_seq_max;
@@ -965,7 +981,7 @@ bool llm_util::dump_kv_cache(ContextSequence seq, int32_t seq_id, string filenam
 		}
 	}
 	
-	auto& batch = seq.batch;
+	const auto& batch = seq.GetBatch();
 	for (int32_t idx = 0; idx < cache_view.n_cells && idx < batch.n_tokens; ++idx)
 	{
 		if (batch.pos[idx] < 0)
@@ -1015,10 +1031,10 @@ bool llm_util::dump_kv_cache(ContextSequence seq, int32_t seq_id, string filenam
 	return WriteTextFile(filename, result, false);
 }
 
-bool llm_util::dump_kv_cache_cells(const llama_context* pCtx, string filename)
+bool llm_util::dump_kv_cache_cells(const ContextState& contextState, string filename)
 {
-	auto cache_view = llama_kv_cache_view_init(pCtx, Constants::Context::MaxSequences);
-	llama_kv_cache_view_update(pCtx, &cache_view);
+	auto cache_view = llama_kv_cache_view_init(contextState.pCtx, contextState.num_sequences);
+	llama_kv_cache_view_update(contextState.pCtx, &cache_view);
 
 	int32_t n_max_seq = cache_view.n_seq_max;
 	std::vector<int32_t> cells;
@@ -1065,18 +1081,18 @@ bool llm_util::dump_kv_cache_cells(const llama_context* pCtx, string filename)
 	return WriteTextFile(filename, result, false);
 }
 
-void llm_util::erase_bottom(llama_context* pCtx, int32_t pos)
+void llm_util::erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos)
 {
-	for (int32_t seq_id = 0; seq_id < Constants::Context::MaxSequences; ++seq_id)
+	for (int32_t seq_id = 0; seq_id < n_max_seq; ++seq_id)
 		llama_kv_self_seq_rm(pCtx, seq_id, pos, -1);
 }
 
-SequenceIndices llm_util::get_sequence_indices(SequenceId seq) noexcept
+SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept
 {
 	SequenceIndices seqIds;
-	seqIds.reserve(Constants::Context::MaxSequences);
+	seqIds.reserve(n_seq_max);
 
-	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < Constants::Context::MaxSequences; ++i)
+	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < n_seq_max; ++i)
 	{
 		if ((bool)(seq & Constants::Context::AllSequenceIDs[i]))
 			seqIds.push_back(toI(i));
