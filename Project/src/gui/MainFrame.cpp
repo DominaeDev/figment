@@ -25,7 +25,8 @@
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
-LLMOption llmOptions = LLMOption::GreetUser
+LLMOption llmOptions = 
+	  LLMOption::GreetUser
 	| LLMOption::Uncensored
 //	| LLMOption::LimitMessages
 //	| LLMOption::RandomizeMessageCount

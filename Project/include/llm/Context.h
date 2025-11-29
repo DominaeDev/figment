@@ -21,19 +21,21 @@ public:
 
 	int32_t GetBlockAppendOffset() const;
 
+	std::pair<int32_t, bool> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id); // std::expected?
 	int32_t DecodeUncached(int32_t cursor_pos);
 	int32_t DecrementTTL(int32_t time);
 	
 	void AppendBlock(const ContextBlock& block);
 	void AppendBlock(ContextBlock&& block);
+	void ClearTokensBelow(int32_t pos);
+
+
 	int32_t get_max_position() const;
 
 	std::vector<ContextBlock>& GetBlocks() noexcept { return _blocks; }
 	const std::vector<ContextBlock>& GetBlocks() const noexcept { return _blocks; }
 	ContextCache& GetCache() { return *_cache.get(); }
 	const ContextCache& GetCache() const { return *_cache.get(); }
-	llama_batch& GetBatch() { return _cache.get()->GetBatch(); }
-	const llama_batch& GetBatch() const { return _cache.get()->GetBatch(); }
 
 	int32_t GetNumSequences() const { return n_seq_max; }
 
@@ -45,6 +47,7 @@ public:
 	int32_t cursor_pos = 0;						// current position (read)
 	int32_t chat_begin_pos = 0;					// chat position
 	int32_t n_seq_max = 1;
+
 private:
 	std::shared_ptr<ContextCache> _cache;
 	std::vector<ContextBlock> _blocks {};
@@ -58,7 +61,9 @@ struct ContextState
 	ContextState(const ModelState& model, int32_t n_seq = 1);
 	ContextState& operator=(const ContextState& other) = default;
 
+	void Initialize();
 	bool ReserveTokens(int32_t n_tokens, bool bForce = false);
+
 	int32_t get_max_position() const;
 	[[nodiscard]] SequenceIndices get_all_sequences() const noexcept;
 

@@ -65,6 +65,11 @@ bool ContextState::ReserveTokens(int32_t ctx_reserve, bool bForce)
 	return false;
 }
 
+void ContextState::Initialize()
+{
+	llama_kv_self_clear(pCtx);
+}
+
 ContextSequence::ContextSequence(llama_context* pCtx, int32_t n_seq_max)
 {
 	this->pCtx = pCtx;
@@ -101,6 +106,28 @@ void ContextSequence::RefreshBlockPositions()
 		else
 			offset += block.length();
 	}
+}
+
+std::pair<int32_t, bool> ContextSequence::DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id)
+{
+	if (tokens.size() == 0)
+		return std::make_pair(0, true);
+
+	int32_t n_tokens = static_cast<int32_t>(tokens.size());
+	auto seq_indices = llm_util::get_sequence_indices(seq_id, n_seq_max);
+	auto [batch_ref, batch_n] = GetCache().GetBatch();
+	llama_batch& batch = batch_ref.get();
+	
+	GetCache().BatchWrite(std::span(tokens.begin(), tokens.end()), seq_id, pos);
+
+	// Decode
+	llama_batch batch_view = llm_util::create_batch_view(batch, pos, n_tokens);
+	if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
+		return std::make_pair(0, false); // Error
+
+
+//	cursor_pos += n_tokens;
+	return std::make_pair(n_tokens, true);
 }
 
 int32_t ContextSequence::DecodeUncached(int32_t cursor_pos)
@@ -208,6 +235,12 @@ int32_t ContextSequence::RemoveBlocks(std::vector<ContextBlock>::const_iterator 
 #endif
 
 	return (int32_t)-total_length;
+}
+
+void ContextSequence::ClearTokensBelow(int32_t pos)
+{
+	llm_util::erase_bottom(pCtx, n_seq_max, pos);
+	GetCache().BatchClearFrom(pos);
 }
 
 int32_t ContextSequence::AllocateKVCache(int32_t min_reserve)

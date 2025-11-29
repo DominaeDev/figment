@@ -308,16 +308,6 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 	*bWait = false;
 }
 
-void llm_util::init_batch_logits(llama_batch& batch)
-{
-	if (batch.n_tokens <= 0)
-		return;
-
-	for (int i = 0; i < batch.n_tokens - 1; ++i)
-		batch.logits[i] = false;
-	batch.logits[batch.n_tokens - 1] = true;  // Only need logits for last token
-}
-
 std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, string prompt, bool add_special)
 {
 	std::vector<llama_token> prompt_tokens(1024);
@@ -368,7 +358,6 @@ void llm_util::free_batch(llama_batch& batch)
 	batch.seq_id = nullptr;
 	batch.n_tokens = 0;
 }
-
 
 llama_batch llm_util::create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position)
 {
@@ -787,21 +776,10 @@ llama_sampler* llm_util::compile_grammar(GrammarFlag grammarFlags, VocabPtr pVoc
 	return pGrammar;
 }
 
-void llm_util::clear_batch_from(llama_batch& batch, int32_t pos)
-{
-	for (int i = 0; i < batch.n_tokens; ++i)
-	{
-		if (batch.pos[i] >= pos)
-		{
-			batch.n_tokens = i;
-			break;
-		}
-	}
-}
-
 bool llm_util::dump_batch_text(const ContextSequence& seq, int32_t seq_index, VocabPtr pVocab, string filename)
 {
-	auto& batch = seq.GetBatch();
+	auto [batch_ref, batch_n] = seq.GetCache().GetBatch();
+	auto& batch = batch_ref.get();
 
 	auto fnTokenStr = [pVocab](llama_token token, bool quote) -> string {
 		if (token <= 0)
@@ -829,14 +807,13 @@ bool llm_util::dump_batch_text(const ContextSequence& seq, int32_t seq_index, Vo
 		}
 	};
 
-	if (batch.token == nullptr || batch.n_tokens == 0)
+	if (batch.token == nullptr)
 		return false;
 
 	// Detokenize the batched tokens
 	string result;
 	result.reserve(65536);
-	int32_t size = batch.n_tokens;
-	for (int32_t i = 0; i < size; ++i)
+	for (int32_t i = 0; i < batch_n; ++i)
 	{
 		if (seq_index >= 0)
 		{
@@ -850,7 +827,7 @@ bool llm_util::dump_batch_text(const ContextSequence& seq, int32_t seq_index, Vo
 		result.append(fnTokenStr(batch.token[i], false));
 	}
 
-	result.append(std::format("[pos:{0}/{1}]\r\n", seq.cursor_pos, batch.n_tokens));
+	result.append(std::format("[pos:{0}/{1}]\r\n", seq.cursor_pos, batch_n));
 
 	// Cached blocks
 	SequenceId seq_id = sequence_from_index(seq_index);
@@ -880,10 +857,12 @@ bool llm_util::dump_batch_text(const ContextSequence& seq, int32_t seq_index, Vo
 
 bool llm_util::dump_batch_tokens(const ContextSequence& seq, int32_t seq_id, VocabPtr pVocab, string filename)
 {
-	return dump_batch_tokens(seq.GetBatch(), seq_id, pVocab, filename);
+	auto [batch_ref, batch_n] = seq.GetCache().GetBatch();
+
+	return dump_batch_tokens(batch_ref, batch_n, seq_id, pVocab, filename);
 }
 
-bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t seq_index, VocabPtr pVocab, string filename)
+bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_index, VocabPtr pVocab, string filename)
 {
 	auto fnTokenStr = [pVocab](llama_token token) -> string {
 		if (token == llama_vocab_bos(pVocab))
@@ -912,7 +891,7 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t seq_index, Vo
 		}
 	};
 
-	if (batch.token == nullptr || batch.n_tokens <= 0)
+	if (batch.token == nullptr || num_tokens <= 0)
 		return false;
 
 	SequenceId seq_id = sequence_from_index(seq_index);
@@ -920,7 +899,7 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t seq_index, Vo
 	// Detokenize the batched tokens
 	string result;
 	result.reserve(65536);
-	for (int32_t i = 0; i < batch.n_tokens; ++i)
+	for (int32_t i = 0; i < num_tokens; ++i)
 	{
 		if (seq_index >= 0)
 		{
@@ -981,8 +960,9 @@ bool llm_util::dump_kv_cache(const ContextSequence& seq, int32_t seq_id, string 
 		}
 	}
 	
-	const auto& batch = seq.GetBatch();
-	for (int32_t idx = 0; idx < cache_view.n_cells && idx < batch.n_tokens; ++idx)
+	auto const [batch_ref, batch_n] = seq.GetCache().GetBatch();
+	auto& batch = batch_ref.get();
+	for (int32_t idx = 0; idx < cache_view.n_cells && idx < batch_n; ++idx)
 	{
 		if (batch.pos[idx] < 0)
 			continue;

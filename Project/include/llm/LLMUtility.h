@@ -20,8 +20,6 @@ namespace llm_util
 	llama_batch init_batch(int32_t ctx_size, int32_t n_seq_max);
 	void free_batch(llama_batch& batch);
 
-	void clear_batch_from(llama_batch& batch, int32_t pos);
-	void init_batch_logits(llama_batch& batch);
 	bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch);
 	llama_batch create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position);
 	llama_batch create_batch_view(const llama_batch& batch, int32_t position, int32_t length);
@@ -36,7 +34,7 @@ namespace llm_util
 	string format_id(string id);
 	bool dump_batch_text(const ContextSequence& seq, int32_t seq_id, VocabPtr pVocab, string filename);
 	bool dump_batch_tokens(const ContextSequence& seq, int32_t seq_id, VocabPtr pVocab, string filename);
-	bool dump_batch_tokens(const llama_batch& batch, int32_t seq_id, VocabPtr pVocab, string filename);
+	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_id, VocabPtr pVocab, string filename);
 	bool dump_kv_cache(const ContextSequence& seq, int32_t seq_id, string filename);
 	bool dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, string filename);
 	bool dump_kv_cache_cells(const ContextState& contextState, string filename);

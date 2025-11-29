@@ -5,7 +5,8 @@
 
 ContextCache::ContextCache(int32_t max_size, int32_t n_seq_max) : 
 	_max_size { max_size },
-	_n_seq_max { n_seq_max }
+	_n_seq_max { n_seq_max },
+	_length { 0 }
 {
 	_batch = std::make_unique<llama_batch>(llm_util::init_batch(max_size, n_seq_max));
 }
@@ -19,7 +20,25 @@ ContextCache::~ContextCache()
 	}
 }
 
-int32_t ContextCache::BatchWrite(std::span<llama_token> tokens, SequenceId seq_id, int32_t pos)
+int32_t ContextCache::BatchAddSingle(llama_token token, SequenceIndices seq_ids, int32_t pos)
+{
+	int32_t n_seq = toI(seq_ids.size());
+
+	llama_batch& batch = *_batch.get();
+	int idx = pos;
+	batch.token[idx] = token;
+	batch.pos[idx] = idx;
+	batch.n_seq_id[idx] = n_seq;
+	for (size_t itSeq = 0; itSeq < seq_ids.size(); ++itSeq)
+		batch.seq_id[idx][itSeq] = seq_ids[itSeq];
+	batch.logits[idx] = true;
+
+	++_length;
+	batch.n_tokens = _length;
+	return 1;
+}
+
+int32_t ContextCache::BatchWrite(std::span<const llama_token> tokens, SequenceId seq_id, int32_t pos)
 {
 	// Add to context batch
 	auto seq_ids = llm_util::get_sequence_indices(seq_id, _n_seq_max);
@@ -37,15 +56,18 @@ int32_t ContextCache::BatchWrite(std::span<llama_token> tokens, SequenceId seq_i
 			batch.seq_id[idx][itSeq] = seq_ids[itSeq];
 		batch.logits[idx] = false;
 	}
-	batch.n_tokens = pos + n_tokens;
+
+	_length = std::max(pos + n_tokens, _length);
+	batch.n_tokens = _length;
 	return n_tokens;
 }
 
 int32_t ContextCache::BatchRemove(int32_t begin, int32_t end)
 {
 	llama_batch& batch = *_batch.get();
-	int32_t n_removed = Shift(end, batch.n_tokens - end, -(end - begin)) * -1;
-	batch.n_tokens -= n_removed;
+	int32_t n_removed = Shift(end, _length - end, -(end - begin));
+	_length += n_removed;
+	batch.n_tokens = _length;
 	return n_removed;
 }
 
@@ -62,8 +84,23 @@ int32_t ContextCache::BatchClear(int32_t begin, int32_t end)
 			batch.seq_id[i][itSeq] = -1;
 		batch.logits[i] = false;
 	}
-	batch.n_tokens = begin;
+	_length = begin;
+	batch.n_tokens = _length;
 	return std::max(end - begin, 0);
+}
+
+void ContextCache::BatchClearFrom(int32_t pos)
+{
+	llama_batch& batch = *_batch.get();
+	for (int i = 0; i < batch.n_tokens; ++i)
+	{
+		if (batch.pos[i] >= pos)
+		{
+			_length = i;
+			batch.n_tokens = _length;
+			break;
+		}
+	}
 }
 
 int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
@@ -77,7 +114,7 @@ int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 
 	// Update batch
 	llama_batch& batch = *_batch.get();
-	int32_t n_batch = batch.n_tokens;
+	int32_t n_batch = _length;
 	for (int32_t i = 0; i < n_batch - pos; ++i)
 	{
 		if (i >= _max_size)
@@ -91,7 +128,6 @@ int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 			batch.seq_id[idx][itSeq] = batch.seq_id[idx - length][itSeq];
 		batch.logits[idx] = false;
 	}
-	batch.n_tokens += length;
 
 	// Clear allocated tokens
 	for (int32_t i = 0; i < length; ++i)
@@ -105,6 +141,8 @@ int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 		batch.logits[idx] = false;
 	}
 
+	_length += length;
+	batch.n_tokens = _length;
 	return length;
 }
 
@@ -153,7 +191,6 @@ int32_t ContextCache::Shift(int32_t pos, int32_t len, int32_t offset)
 	return offset;
 }
 
-
 void ContextCache::BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds)
 {
 	llama_batch& batch = *_batch.get();
@@ -174,6 +211,17 @@ void ContextCache::BatchSetSequences(int32_t from, int32_t length, SequenceId se
 		for (size_t i = 0; i < seqIds.size() && i < _n_seq_max; ++i)
 			batch.seq_id[pos][i] = seqIds[i];
 	}
+}
+
+void ContextCache::BatchInitLogits()
+{
+	if (_length <= 0)
+		return;
+
+	llama_batch& batch = *_batch.get();
+	for (int i = 0; i < _length - 1; ++i)
+		batch.logits[i] = false;
+	batch.logits[_length - 1] = true;  // Only need logits for last token
 }
 
 llama_batch ContextCache::CreateBatchView(int32_t pos, int32_t length) const
