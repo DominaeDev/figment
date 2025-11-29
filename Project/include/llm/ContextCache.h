@@ -33,6 +33,7 @@ public:
 
 private:
 	std::unique_ptr<llama_batch> _batch; // Representation of the kv-cache (mirror)
+	int32_t _length;
 	int32_t _max_size { 0 };
 	int32_t _n_seq_max { 1 };
 };

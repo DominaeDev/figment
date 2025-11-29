@@ -7,7 +7,7 @@ class Frame;
 struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Cursor;
-enum SDL_SystemCursor;
+enum SDL_SystemCursor : int;
 struct TTF_TextEngine;
 class LLMInstance;
 

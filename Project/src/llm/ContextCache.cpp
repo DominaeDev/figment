@@ -41,29 +41,10 @@ int32_t ContextCache::BatchWrite(std::span<llama_token> tokens, SequenceId seq_i
 	return n_tokens;
 }
 
-
 int32_t ContextCache::BatchRemove(int32_t begin, int32_t end)
 {
-	int32_t n_removed = end - begin;
-
-	// Remove
-//	llama_kv_self_seq_rm(pCtx, -1, begin, end);
-//	llama_kv_self_seq_add(pCtx, 0, end, -1, -n_removed); //! @seq_id
-//	llama_kv_self_update(pCtx);
-//	assert(false && "This doesn't handle sequences yet.");
-
-	// Update batch
 	llama_batch& batch = *_batch.get();
-	int32_t n_batch = batch.n_tokens;
-	for (int32_t i = 0; i < n_removed; ++i)
-	{
-		batch.pos[begin + i] = begin + i;
-		batch.token[begin + i] = batch.token[end + i];
-		batch.n_seq_id[begin + i] = batch.n_seq_id[end + i];
-		for (int32_t itSeq = 0; itSeq < _n_seq_max; ++itSeq)
-			batch.seq_id[begin + i][itSeq] = batch.seq_id[end + i][itSeq];
-		batch.logits[begin + i] = false;
-	}
+	int32_t n_removed = Shift(end, batch.n_tokens - end, -(end - begin)) * -1;
 	batch.n_tokens -= n_removed;
 	return n_removed;
 }
@@ -88,7 +69,7 @@ int32_t ContextCache::BatchClear(int32_t begin, int32_t end)
 int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 {
 	// Remove
-//	llama_kv_self_seq_add(pCtx, 0, pos, -1, length); //! @seq_id
+//	llama_kv_self_seq_add(pCtx, 0, pos, -1, length);
 //	llama_kv_self_update(pCtx);
 //	assert(false && "This doesn't handle sequences yet.");
 
@@ -126,7 +107,6 @@ int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 
 	return length;
 }
-
 
 int32_t ContextCache::Shift(int32_t pos, int32_t len, int32_t offset)
 {
@@ -170,9 +150,6 @@ int32_t ContextCache::Shift(int32_t pos, int32_t len, int32_t offset)
 		}		
 	}
 
-	// Apply down-shifts
-//	llama_kv_self_seq_add(pCtx, 0, pos, -1, offset); //! @seq_id
-//	assert(false && "This doesn't handle sequences yet.");
 	return offset;
 }
 

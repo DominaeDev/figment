@@ -214,7 +214,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 	if (n_bots == 0)
 		return false; // Error
 
-	_contextState = ContextState(_modelState, n_bots);
+	_contextState = ContextState(_modelState, Constants::Context::MaxSequences); //!
 	_session = args.session;
 	_stateVars = {};
 
@@ -890,7 +890,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	if (!args.isContinuation)
 		seq.response_pos = cursor_pos;
 
-	DumpContext();
+//	DumpContext();
 }
 
 void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
@@ -1013,8 +1013,6 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		printf("%s", partial.c_str());
 	}
 	llm_util::init_batch_logits(batch);
-
-	DumpSequence(current_sequence_index); // After prepend
 
 	auto startTime = std::chrono::steady_clock::now();
 
@@ -1337,7 +1335,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		DebugPrint("(Empty response)");
 	}
 
-	DumpContext();
+//	DumpContext();
 
 #if FALSE
 	std::map<string, string> variables;

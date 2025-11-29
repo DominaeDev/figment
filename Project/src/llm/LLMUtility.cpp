@@ -1033,8 +1033,14 @@ bool llm_util::dump_kv_cache(const ContextSequence& seq, int32_t seq_id, string 
 
 bool llm_util::dump_kv_cache_cells(const ContextState& contextState, string filename)
 {
-	auto cache_view = llama_kv_cache_view_init(contextState.pCtx, contextState.num_sequences);
-	llama_kv_cache_view_update(contextState.pCtx, &cache_view);
+	return dump_kv_cache_cells(contextState.pCtx, contextState.num_sequences, filename);
+}
+
+bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, string filename)
+{
+	auto cache_view = llama_kv_cache_view_init(pCtx, num_sequences);
+
+	llama_kv_cache_view_update(pCtx, &cache_view);
 
 	int32_t n_max_seq = cache_view.n_seq_max;
 	std::vector<int32_t> cells;

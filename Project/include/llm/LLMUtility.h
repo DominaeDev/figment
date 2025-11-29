@@ -38,6 +38,7 @@ namespace llm_util
 	bool dump_batch_tokens(const ContextSequence& seq, int32_t seq_id, VocabPtr pVocab, string filename);
 	bool dump_batch_tokens(const llama_batch& batch, int32_t seq_id, VocabPtr pVocab, string filename);
 	bool dump_kv_cache(const ContextSequence& seq, int32_t seq_id, string filename);
+	bool dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, string filename);
 	bool dump_kv_cache_cells(const ContextState& contextState, string filename);
 	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
 

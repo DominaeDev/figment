@@ -152,47 +152,45 @@ int32_t ContextSequence::RemoveBlock(const ContextBlock& block, bool bShift)
 	assert(block.sequenceId != SequenceId::None);
 
 	auto iter_block = std::find_if(_blocks.cbegin(), _blocks.cend(), [&block](const ContextBlock& b) { return &block == &b; });
-	return RemoveBlocks(iter_block, iter_block, bShift);
+	return RemoveBlocks(iter_block, iter_block + 1_sz, bShift);
 }
 
 int32_t ContextSequence::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift)
 {
 	int32_t idx_from = toI(std::distance(_blocks.cbegin(), begin));
-	int32_t idx_to = toI(std::distance(_blocks.cbegin(), end));
-
-	int32_t total_length = 0;
-	for (auto i = idx_from; i <= idx_to; ++i)
-		total_length += _blocks[i].length();
-	if (total_length == 0)
-		return 0;
-
-	int32_t pos_remove_begin = _blocks[idx_from].offset;
-	int32_t pos_remove_end = pos_remove_begin + total_length;
+	int32_t idx_to = toI(std::distance(_blocks.cbegin(), end)) - 1;
 
 #if _DEBUG
 	int32_t n_used = llama_kv_self_used_cells(pCtx);
 #endif
+	int32_t total_length = 0;
 
 	// Remove tokens
 	for (int32_t i = idx_to; i >= idx_from; --i)
 	{
 		auto& block = _blocks[i];
 		assert(block.sequenceId != SequenceId::None);
-		assert(block.offset >= pos_remove_begin && block.offset + block.length() <= pos_remove_end);
 
 		if (!llama_kv_self_seq_rm(pCtx, -1, block.offset, block.offset + block.length()))
 			return 0;
-
+		
+		total_length += block.length();
 		_blocks.erase(_blocks.begin() + i);
 	}
 
 	if (bShift)
 	{
+		int32_t pos_remove_begin = _blocks[idx_from].offset;
+		int32_t pos_remove_end = pos_remove_begin + total_length;
+
 		// Shift up (block-wise because of sequences)
-		for (size_t i = idx_from; i < _blocks.size(); ++i)
+		for (size_t i = _blocks.size() - 1; i >= idx_from; --i)
 		{
-			int32_t seq_id = _blocks[i].get_any_sequence_id();
-			llama_kv_self_seq_add(pCtx, seq_id, _blocks[i].offset, _blocks[i].offset + _blocks[i].length(), -total_length);
+			if (_blocks[i].is_cached())
+			{
+				int32_t seq_id = _blocks[i].get_any_sequence_id();
+				llama_kv_self_seq_add(pCtx, seq_id, _blocks[i].offset, _blocks[i].offset + _blocks[i].length(), -total_length);
+			}
 			_blocks[i].offset -= total_length;
 		}
 

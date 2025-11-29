@@ -11,7 +11,7 @@ public:
 	ContextSequence(llama_context* pCtx, int32_t n_seq_max);
 
 	void RefreshBlockPositions();
-	int32_t RemoveBlock(const ContextBlock& block, bool shift = true);
+	int32_t RemoveBlock(const ContextBlock& block, bool bShift = true);
 	int32_t RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift = true);
 	int32_t EraseChat();
 	void EraseVolatile();
