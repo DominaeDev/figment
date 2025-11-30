@@ -37,23 +37,23 @@ namespace Constants
 	}
 
 	// Sizes
-	namespace Context
+	enum class ContextSize : int32_t
 	{
-		constexpr int32_t Size2K  = 1024 * 2;
-		constexpr int32_t Size3K  = 1024 * 3;
-		constexpr int32_t Size4K  = 1024 * 4;
-		constexpr int32_t Size6K  = 1024 * 6;
-		constexpr int32_t Size8K  = 1024 * 8;
-		constexpr int32_t Size10K = 1024 * 10;
-		constexpr int32_t Size12K = 1024 * 12;
-		constexpr int32_t Size16K = 1024 * 16;
-		constexpr int32_t Size24K = 1024 * 24;
-		constexpr int32_t Size32K = 1024 * 32;
-	}
+		_2K  = 1024 * 2,
+		_3K  = 1024 * 3,
+		_4K  = 1024 * 4,
+		_6K  = 1024 * 6,
+		_8K  = 1024 * 8,
+		_10K = 1024 * 10,
+		_12K = 1024 * 12,
+		_16K = 1024 * 16,
+		_24K = 1024 * 24,
+		_32K = 1024 * 32,
+	};
 
 	namespace Context
 	{
-		inline constexpr int32_t Size = Size3K;
+		inline constexpr int32_t DefaultSize = static_cast<int32_t>(ContextSize::_3K);
 		inline constexpr int32_t MaxResponseLength = 256;
 		inline constexpr int32_t MicroBatchSize = 512;
 		inline constexpr float WindowKeepRatio = 0.75f;

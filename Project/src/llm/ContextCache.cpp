@@ -8,7 +8,7 @@ ContextCache::ContextCache(int32_t max_size, int32_t n_seq_max) :
 	_n_seq_max { n_seq_max },
 	_length { 0 }
 {
-	_batch = std::make_unique<llama_batch>(llm_util::init_batch(max_size, n_seq_max));
+	_batch = std::make_unique<Batch>(llm_util::init_batch(max_size, n_seq_max));
 }
 
 ContextCache::~ContextCache()
@@ -24,7 +24,7 @@ int32_t ContextCache::BatchAddSingle(llama_token token, SequenceIndices seq_ids,
 {
 	int32_t n_seq = toI(seq_ids.size());
 
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	int idx = pos;
 	batch.token[idx] = token;
 	batch.pos[idx] = idx;
@@ -44,7 +44,7 @@ int32_t ContextCache::BatchWrite(std::span<const llama_token> tokens, SequenceId
 	auto seq_ids = llm_util::get_sequence_indices(seq_id, _n_seq_max);
 	int32_t n_seq = toI(seq_ids.size());
 	int32_t n_tokens = toI(tokens.size());
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 
 	for (int32_t i = 0; i < n_tokens; ++i)
 	{
@@ -64,7 +64,7 @@ int32_t ContextCache::BatchWrite(std::span<const llama_token> tokens, SequenceId
 
 int32_t ContextCache::BatchRemove(int32_t begin, int32_t end)
 {
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	int32_t n_removed = Shift(end, _length - end, -(end - begin));
 	_length += n_removed;
 	batch.n_tokens = _length;
@@ -74,7 +74,7 @@ int32_t ContextCache::BatchRemove(int32_t begin, int32_t end)
 int32_t ContextCache::BatchClear(int32_t begin, int32_t end)
 {
 	// Update batch
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	for (int32_t i = begin; i < end; ++i)
 	{
 		batch.pos[i] = 0;
@@ -91,7 +91,7 @@ int32_t ContextCache::BatchClear(int32_t begin, int32_t end)
 
 void ContextCache::BatchClearFrom(int32_t pos)
 {
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	for (int i = 0; i < batch.n_tokens; ++i)
 	{
 		if (batch.pos[i] >= pos)
@@ -113,7 +113,7 @@ int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 //	int32_t ctx_size = llama_n_ctx(pCtx);
 
 	// Update batch
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	int32_t n_batch = _length;
 	for (int32_t i = 0; i < n_batch - pos; ++i)
 	{
@@ -154,7 +154,7 @@ int32_t ContextCache::Shift(int32_t pos, int32_t len, int32_t offset)
 
 	int32_t src_pos = pos;
 	int32_t dest_pos = pos + offset;
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	if (src_pos > dest_pos) // Shifting up, write top down
 	{
 		for (int32_t i = 0; i < offset; ++i)
@@ -193,7 +193,7 @@ int32_t ContextCache::Shift(int32_t pos, int32_t len, int32_t offset)
 
 void ContextCache::BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds)
 {
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	batch.n_seq_id[pos] = toI(seqIds.size());
 	for (size_t i = 0; i < seqIds.size() && i < _n_seq_max; ++i)
 		batch.seq_id[pos][i] = seqIds[i];
@@ -204,7 +204,7 @@ void ContextCache::BatchSetSequences(int32_t from, int32_t length, SequenceId se
 	auto seqIds = llm_util::get_sequence_indices(seq_id, _n_seq_max);
 	int32_t n_seq = toI(seqIds.size());
 	int32_t to = from + length;
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	for (int32_t pos = from; pos < to; ++pos)
 	{
 		batch.n_seq_id[pos] = n_seq;
@@ -218,21 +218,21 @@ void ContextCache::BatchInitLogits()
 	if (_length <= 0)
 		return;
 
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	for (int i = 0; i < _length - 1; ++i)
 		batch.logits[i] = false;
 	batch.logits[_length - 1] = true;  // Only need logits for last token
 }
 
-llama_batch ContextCache::CreateBatchView(int32_t pos, int32_t length) const
+Batch ContextCache::CreateBatchView(int32_t pos, int32_t length) const
 {
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	return llm_util::create_batch_view(batch, pos, length);
 }
 
 void ContextCache::CopyTokens(int32_t from, int32_t to)
 {
-	llama_batch& batch = *_batch.get();
+	Batch& batch = *_batch.get();
 	batch.token[to] = batch.token[from];
 	batch.n_seq_id[to] = batch.n_seq_id[from];
 	for (int32_t itSeq = 0; itSeq < _n_seq_max; ++itSeq)

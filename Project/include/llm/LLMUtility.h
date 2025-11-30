@@ -25,19 +25,21 @@ namespace llm_util
 	llama_batch create_batch_view(const llama_batch& batch, int32_t position, int32_t length);
 
 	std::vector<llama_token> tokenize(VocabPtr pModel, string prompt, bool add_special = false);
-	std::vector<llama_token> tokenize_and_batch(VocabPtr pModel, ContextSequence& seq, string content, SequenceId seq_id, int32_t pos, bool add_special = false);
-	std::optional<std::vector<llama_token>> tokenize_and_decode(VocabPtr pModel, ContextSequence& seq, string content, SequenceId seq_id, int32_t pos, bool add_special = false);
+	std::vector<llama_token> tokenize_and_batch(Context& context, string content, SequenceId seq_id, int32_t pos, bool add_special = false);
+	std::optional<std::vector<llama_token>> tokenize_and_decode(Context& context, string content, SequenceId seq_id, int32_t pos, bool add_special = false);
 	void erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos);
 
 	std::string process_message(std::string message, std::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 
 	string format_id(string id);
-	bool dump_batch_text(const ContextSequence& seq, int32_t seq_id, VocabPtr pVocab, string filename);
-	bool dump_batch_tokens(const ContextSequence& seq, int32_t seq_id, VocabPtr pVocab, string filename);
-	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_id, VocabPtr pVocab, string filename);
-	bool dump_kv_cache(const ContextSequence& seq, int32_t seq_id, string filename);
+	bool dump_batch_text(const Context& context, int32_t seq_id, string filename);
+	bool dump_batch_tokens(const Context& context, int32_t seq_id, string filename);
+	bool dump_kv_cache(const Context& context, int32_t seq_id, string filename);
+	bool dump_kv_cache_cells(const Context& contextState, string filename);
+	
 	bool dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, string filename);
-	bool dump_kv_cache_cells(const ContextState& contextState, string filename);
+	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_id, VocabPtr pVocab, string filename);
+
 	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
 
 	SequenceIndices get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept;

@@ -84,17 +84,26 @@ enum class GrammarFlag : int32_t
 };
 DEFINE_ENUM_FLAGS(GrammarFlag, int32_t)
 
+using ModelPtr = llama_model*;
+using ContextPtr = llama_context*;
+using VocabPtr = const llama_vocab*;
+using SamplerPtr = llama_sampler*;
+using Batch = llama_batch;
+using Token = llama_token;
+
 struct ModelState
 {
-	llama_model* pModel = nullptr;
-	const llama_vocab* pVocab = nullptr;
-	llama_context* pCtx = nullptr;
-	llama_sampler* pSampler = nullptr;
-	llama_sampler* pActiveGrammar = nullptr;
-	std::map<GrammarFlag, llama_sampler*> grammars = {};
+	ModelPtr pModel = nullptr;
+	VocabPtr pVocab = nullptr;
+	ContextPtr pCtx = nullptr;
+	SamplerPtr pSampler = nullptr;
+	SamplerPtr pActiveGrammar = nullptr;
+	std::map<GrammarFlag, SamplerPtr> grammars {};
 
 	string modelName {};
 	std::mt19937 rng {};
+	int32_t num_sequences {};
+	int32_t ctx_size {};
 
 	void Release();
 
@@ -126,25 +135,6 @@ struct Sentence
 	string sentence;
 };
 using Sentences = std::vector<Sentence>;
-
-using ModelPtr = llama_model*;
-using ContextPtr = llama_context*;
-using VocabPtr = const llama_vocab*;
-
-enum class ContextSize : int32_t
-{
-	Context_2K = 2048,
-	Context_3K = 3072,
-	Context_4K = 4096,
-	Context_5K = 5120,
-	Context_6K = 6144,
-	Context_8K = 8192,
-	Context_10K = 10240,
-	Context_12K = 12288,
-	Context_16K = 16384,
-	Context_24K = 24576,
-	Context_32K = 32768,
-};
 
 enum class SequenceId : int32_t
 {

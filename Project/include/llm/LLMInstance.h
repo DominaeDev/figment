@@ -187,7 +187,7 @@ private:
 	void PushSignal(LLMStatusSignal signal);
 	void RefreshActiveResponses();
 	std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
-	bool RebuildKVCache(ContextSequence& seq);
+	bool RebuildKVCache();
 
 	Sentences GetHistory(size_t depth);
 	llama_sampler* CompileGrammar(GrammarFlag grammarFlags);
@@ -229,7 +229,7 @@ private:
 
 	std::timed_mutex _stateMutex; // Guards state variables
 	ModelState _modelState;
-	ContextState _contextState;
+	Context _contextState;
 
 	std::mutex _resultMutex; // Guards output queue
 	std::queue<MessagePiece> _resultQueue;
