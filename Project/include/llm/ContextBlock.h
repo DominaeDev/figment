@@ -1,3 +1,6 @@
+#ifndef CONTEXT_BLOCK_H__
+#define CONTEXT_BLOCK_H__
+
 #include "llm/LLMTypes.h"
 
 #pragma once
@@ -32,3 +35,4 @@ struct ContextBlock
 	llama_seq_id get_any_sequence_id() const noexcept;
 	[[nodiscard]] SequenceIndices get_sequence_ids(int32_t n_seq_max) const noexcept;
 };
+#endif

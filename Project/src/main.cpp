@@ -4,7 +4,6 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "Types.h"
 #include "Constants.h"
 #include "model/AppState.h"
 #include "gui/Fonts.h"

@@ -1,6 +1,8 @@
 #include "gui/Frame.h"
 #include "gui/Graphics.h"
 
+import Utility;
+
 Frame::Frame(SDL_Window* pWindow) : Control(nullptr)
 {
 	_pWindow = pWindow;

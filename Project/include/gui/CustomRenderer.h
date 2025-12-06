@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CUSTOM_RENDERER_H__
+#define CUSTOM_RENDERER_H__
 
 #include "Types.h"
 #include "Graphics.h"
@@ -11,3 +12,5 @@ public:
 	virtual void Render(Renderer* pRenderer, Rectf rect) = 0;
 	virtual ~CustomRenderer() = default;
 };
+
+#endif

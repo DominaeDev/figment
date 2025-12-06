@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HORIZONTAL_GRADIENT_H__
+#define HORIZONTAL_GRADIENT_H__
 
 #include "Control.h"
 #include "Graphics.h"
@@ -22,3 +23,5 @@ private:
 
 	std::vector<Vertex> _vertices {};
 };
+
+#endif

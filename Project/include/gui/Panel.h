@@ -1,3 +1,6 @@
+#ifndef PANEL_H__
+#define PANEL_H__
+
 #pragma once
 
 #include "Control.h"
@@ -11,3 +14,5 @@ protected:
 	void OnUpdate(float fDeltaTime) override {};
 	void OnRender(Renderer* pRenderer) override;
 };
+
+#endif

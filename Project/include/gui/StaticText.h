@@ -1,3 +1,6 @@
+#ifndef STATIC_TEXT_H__
+#define STATIC_TEXT_H__
+
 #pragma once
 
 #include "ControlWithMargins.h"
@@ -72,3 +75,4 @@ private:
 
 	TextAlignment _alignment = TextAlignment::Default;
 };
+#endif

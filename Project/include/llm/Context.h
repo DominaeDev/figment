@@ -1,3 +1,6 @@
+#ifndef CONTEXT_H__
+#define CONTEXT_H__
+
 #include "llm/LLMTypes.h"
 #include "llm/ContextBlock.h"
 #include "llm/ContextCache.h"
@@ -71,3 +74,5 @@ private:
 	std::vector<ContextBlock> _blocks {};
 	std::shared_ptr<ContextCache> _cache {};
 };
+
+#endif

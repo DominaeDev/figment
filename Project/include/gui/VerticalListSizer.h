@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VERTICAL_LIST_SIZER_H__
+#define VERTICAL_LIST_SIZER_H__
 
 #include "Sizer.h"
 
@@ -17,3 +18,4 @@ protected:
 	int _marginBottom = 0;
 	int _spacing = 0;
 };
+#endif

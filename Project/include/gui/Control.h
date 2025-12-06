@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONTROL_H__
+#define CONTROL_H__
 
 #include "Types.h"
 #include "LayoutElement.h"
@@ -51,3 +52,4 @@ protected:
 	CustomRenderer* _pBGRenderer = nullptr;
 	CustomRenderer* _pBorderRenderer = nullptr;
 };
+#endif

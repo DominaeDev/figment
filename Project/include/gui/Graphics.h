@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAPHICS_H__
+#define GRAPHICS_H__
 
 #include <SDL3/SDL.h>
 #include <string>
@@ -55,3 +56,4 @@ namespace gui_util
 		};
 	}
 }
+#endif

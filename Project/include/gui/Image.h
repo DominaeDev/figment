@@ -1,4 +1,5 @@
-#pragma once
+#ifndef IMAGE_H__
+#define IMAGE_H__
 
 #include "Control.h"
 #include "Graphics.h"
@@ -16,3 +17,5 @@ protected:
 private:
 	Texture* _pTexture = nullptr;
 };
+
+#endif

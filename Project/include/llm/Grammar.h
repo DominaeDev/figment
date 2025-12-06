@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAMMAR_H__
+#define GRAMMAR_H__
 
 #include "LLMTypes.h"
 
@@ -28,3 +29,4 @@ namespace Grammar
 {
 	SamplerPtr compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, string names, string stateVars);
 }
+#endif

@@ -1,5 +1,9 @@
+#ifndef CONTEXT_CACHE_H__
+#define CONTEXT_CACHE_H__
+
 #include "llm/LLMTypes.h"
-#include "Constants.h"
+#include <memory>
+#include <span>
 
 #pragma once
 
@@ -44,3 +48,5 @@ private:
 	int32_t _max_size { 0 };
 	int32_t _n_seq_max { 1 };
 };
+
+#endif

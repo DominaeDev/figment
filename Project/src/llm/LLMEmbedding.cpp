@@ -1,10 +1,8 @@
 #include "llm/LLMEmbedding.h"
-#include "llm/LLMUtility.h"
-#include "Constants.h"
 #include <llama.h>
 #include <common.h>
-#include <format>
-#include <cassert>
+#include "llm/LLMUtility.h"
+#include "Constants.h"
 
 import Utility;
 
@@ -82,7 +80,7 @@ bool LLMEmbedding::IsReady() const
 	return _pModel != nullptr && _pCtx != nullptr;
 }
 
-static std::vector<llama_token> TokenizeSentences(VocabPtr pVocab, llama_context* pCtx, Sentences sentences)
+static std::vector<llama_token> TokenizeSentences(VocabPtr pVocab, ContextPtr pCtx, Sentences sentences)
 {
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 
@@ -154,7 +152,7 @@ bool LLMEmbedding::Generate(std::string text, EmbeddingVector& out_embedding)
 	return __Generate(tokens, content, Mode::Document, out_embedding);
 }
 
-static bool batch_decode(llama_context* ctx, llama_batch& batch, float* output, int n_seq, int n_embd, int embd_norm)
+static bool batch_decode(ContextPtr ctx, Batch& batch, float* output, int n_seq, int n_embd, int embd_norm)
 {
 	const enum llama_pooling_type pooling_type = llama_pooling_type(ctx);
 
@@ -195,7 +193,7 @@ static bool batch_decode(llama_context* ctx, llama_batch& batch, float* output, 
 }
 
 
-bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, string content, Mode mode, EmbeddingVector& out_embedding)
+bool LLMEmbedding::__Generate(const std::vector<Token>& in_tokens, string content, Mode mode, EmbeddingVector& out_embedding)
 {
 	int32_t ctx_size = llama_n_ctx(_pCtx);
 	const llama_vocab* pVocab = llama_model_get_vocab(_pModel);

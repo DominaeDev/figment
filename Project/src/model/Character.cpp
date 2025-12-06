@@ -1,6 +1,7 @@
 #include "model/Character.h"
 #include "gui/Color.h"
 #include <tinyxml2.h>
+#include <algorithm>
 
 import Utility;
 

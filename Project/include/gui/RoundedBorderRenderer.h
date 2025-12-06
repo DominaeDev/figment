@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROUNDED_BORDER_RENDERER_H__
+#define ROUNDED_BORDER_RENDERER_H__
 
 #include "Types.h"
 #include "CustomRenderer.h"
@@ -23,3 +24,4 @@ private:
 	std::vector<Vertex> _vertices {};
 	std::vector<int> _indices {};
 };
+#endif

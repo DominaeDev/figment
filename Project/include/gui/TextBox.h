@@ -1,3 +1,6 @@
+#ifndef TEXT_BOX_H__
+#define TEXT_BOX_H__
+
 #pragma once
 #include <functional>
 
@@ -100,3 +103,5 @@ protected:
 	int selected_candidate_start;
 	int selected_candidate_length;
 };
+
+#endif

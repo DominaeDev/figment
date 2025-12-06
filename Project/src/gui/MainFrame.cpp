@@ -1,4 +1,9 @@
 #include "gui/MainFrame.h"
+
+#include <format>
+#include <ranges>
+#include <cwctype>
+
 #include "gui/Area.h"
 #include "gui/Panel.h"
 #include "gui/StaticText.h"
@@ -16,10 +21,6 @@
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "Constants.h"
-
-#include <format>
-#include <ranges>
-#include <cwctype>
 
 import Utility;
 

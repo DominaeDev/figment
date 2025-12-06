@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LAYOUT_ELEMENT_H__
+#define LAYOUT_ELEMENT_H__
 
 #include "Types.h"
 #include "Graphics.h"
@@ -76,3 +77,4 @@ protected:
 private:
 	Sizer* _pSizer = nullptr;
 };
+#endif

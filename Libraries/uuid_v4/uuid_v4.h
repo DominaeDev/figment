@@ -1,3 +1,6 @@
+#ifndef UUID_V4_H__
+#define UUID_V4_H__
+
 /*
 MIT License
 
@@ -272,3 +275,4 @@ namespace std {
     }
   };
 }
+#endif

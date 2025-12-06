@@ -1,3 +1,6 @@
+#ifndef LLM_UTILITY_H__
+#define LLM_UTILITY_H__
+
 #pragma once
 
 #include "llm/LLMTypes.h"
@@ -44,3 +47,5 @@ namespace llm_util
 	SequenceIndices get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept;
 	SequenceId sequence_from_index(int32_t seq_idx) noexcept;
 }
+
+#endif

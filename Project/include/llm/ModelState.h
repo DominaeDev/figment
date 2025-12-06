@@ -1,7 +1,9 @@
-#pragma once
+#ifndef MODEL_STATE_H__
+#define MODEL_STATE_H__
 
 #include "LLMTypes.h"
 #include "Grammar.h"
+#include <random>
 
 class ModelState
 {
@@ -23,3 +25,4 @@ public:
 	SamplerPtr SetActiveGrammar(GrammarFlags flags);
 };
 
+#endif

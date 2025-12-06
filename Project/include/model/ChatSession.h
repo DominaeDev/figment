@@ -1,9 +1,16 @@
+#ifndef CHAT_SESSION_H__
+#define CHAT_SESSION_H__
+
 #pragma once
+
+#include <optional>
+#include <map>
+#include <memory>
 
 #include "Types.h"
 #include "llm/LLMTypes.h"
 #include "model/Character.h"
-#include <optional>
+
 
 class ChatSession
 {
@@ -47,3 +54,5 @@ protected:
 	string _formatting_director;
 	string _formatting_state;
 };
+
+#endif

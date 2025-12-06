@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROUNDED_BACKGROUND_RENDERER_H__
+#define ROUNDED_BACKGROUND_RENDERER_H__
 
 #include "CustomRenderer.h"
 
@@ -20,3 +21,4 @@ private:
 	std::vector<Vertex> _vertices {};
 	std::vector<int> _indices {};
 };
+#endif

@@ -1,6 +1,8 @@
 #include "gui/RoundedBorderRenderer.h"
 #include "gui/TextureStore.h"
 
+import Utility;
+
 RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, Color color) :
 	_thickness(thickness),
 	_radius(radius),

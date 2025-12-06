@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SOLID_BACKGROUND_RENDERER_H__
+#define SOLID_BACKGROUND_RENDERER_H__
 
 #include "Types.h"
 #include "CustomRenderer.h"
@@ -14,3 +15,5 @@ public:
 private:
 	Color _color {};
 };
+
+#endif

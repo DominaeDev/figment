@@ -1,3 +1,6 @@
+#ifndef CHAT_MESSAGE_H__
+#define CHAT_MESSAGE_H__
+
 #pragma once
 
 #include "llm/LLMTypes.h"
@@ -54,3 +57,5 @@ private:
 	};
 	int _style = Style::Default;
 };
+
+#endif

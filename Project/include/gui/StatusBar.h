@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATUS_BAR_H__
+#define STATUS_BAR_H__
 
 #include "Control.h"
 #include "Types.h"
@@ -18,3 +19,5 @@ private:
 	StaticText* _pMessage;
 	StaticText* _pModelInfo;
 };
+
+#endif

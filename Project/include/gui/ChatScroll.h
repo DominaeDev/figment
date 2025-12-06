@@ -1,5 +1,10 @@
+#ifndef CHAT_SCROLL_H__
+#define CHAT_SCROLL_H__
+
 #pragma once
 
+#include <format>
+#include <set>
 #include "gui/Control.h"
 #include "model/ChatSession.h"
 #include "llm/LLMTypes.h"
@@ -60,3 +65,5 @@ private:
 
 	ChatSession _session {};
 };
+
+#endif

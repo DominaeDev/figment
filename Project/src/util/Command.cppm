@@ -1,10 +1,12 @@
 module;
 
-#include "Types.h"
+#include <string>
 
 export module Utility.Command;
 
 import Utility;
+
+using string = std::string;
 
 export enum class CommandType
 {

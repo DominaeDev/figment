@@ -1,6 +1,7 @@
 ﻿#include "llm/LLMTemplate.h"
 #include "Constants.h"
 #include <cassert>
+#include <sstream>
 
 import Utility;
 

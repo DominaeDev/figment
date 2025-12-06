@@ -1,9 +1,10 @@
 #include "gui/StatusBar.h"
+#include <format>
+#include "Constants.h"
+#include "llm/LLMInstance.h"
+
 #include "gui/StaticText.h"
 #include "gui/Fonts.h"
-#include "llm/LLMInstance.h"
-#include "Constants.h"
-#include <format>
 
 StatusBar::StatusBar(Control* pParent) : Control(pParent)
 {

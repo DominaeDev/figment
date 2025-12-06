@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ENDIANNESS_H__
+#define ENDIANNESS_H__
 
 #if defined(__GLIBC__) || defined(__GNU_LIBRARY__) || defined(__ANDROID__)
   #include <endian.h>
@@ -155,3 +156,5 @@
         ((value & 0x00000000000000FFu) << 56u);
   }
 #endif // FALLBACK_SWAP
+
+#endif

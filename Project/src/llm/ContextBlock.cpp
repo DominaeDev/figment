@@ -2,6 +2,8 @@
 #include "Constants.h"
 #include <cassert>
 
+import Utility;
+
 llama_seq_id ContextBlock::get_any_sequence_id() const noexcept
 {
 	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < Constants::Context::MaxSequences; ++i)

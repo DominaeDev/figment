@@ -16,6 +16,7 @@
 #include <mutex>
 #include <queue>
 #include <array>
+#include <memory>
 
 using LoadModelCallback = std::function<void(bool)>;
 using LoadModelProgressCallback = std::function<void(int)>;

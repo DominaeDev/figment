@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef RENDERERS_H__
 #define RENDERERS_H__
 

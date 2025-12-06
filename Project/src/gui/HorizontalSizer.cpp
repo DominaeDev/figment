@@ -1,6 +1,8 @@
 #include "gui/HorizontalSizer.h"
 #include "gui/Control.h"
 
+import Utility;
+
 static int CeilInt(float f)
 {
 	return (int)ceilf(f);

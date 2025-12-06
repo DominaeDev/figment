@@ -1,3 +1,5 @@
+#ifndef EMBEDDING_H__
+#define EMBEDDING_H__
 #pragma once
 
 #include "Types.h"
@@ -26,3 +28,4 @@ private:
 	Embeddings() = delete;
 	~Embeddings() = delete;
 };
+#endif

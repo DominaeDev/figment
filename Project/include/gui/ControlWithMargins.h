@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONTROL_WITH_MARGINS_H__
+#define CONTROL_WITH_MARGINS_H__
 
 #include "Control.h"
 
@@ -19,3 +20,5 @@ protected:
 	int HMargin() const { return _marginLeft + _marginRight; }
 	int VMargin() const { return _marginTop + _marginBottom; }
 };
+
+#endif

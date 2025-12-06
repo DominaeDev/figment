@@ -1,3 +1,6 @@
+#ifndef AREA_H__
+#define AREA_H__
+
 #pragma once
 
 #include "Control.h"
@@ -15,3 +18,5 @@ protected:
 	void OnUpdate(float fDeltaTime) override {};
 	void OnRender(Renderer* pRenderer) override {}
 };
+
+#endif

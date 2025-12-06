@@ -230,7 +230,7 @@
     <ClCompile Include="src\util\EnumFlags.cppm">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\StringUtility.cppm">
+    <ClCompile Include="src\util\StringUtil.cppm">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Command.cppm">
@@ -239,8 +239,8 @@
     <ClCompile Include="src\util\Common.cppm">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\Libraries\uuid_v4\uuid_v4.ixx">
-      <Filter>Source Files\Utility\Third-party\uuid</Filter>
+    <ClCompile Include="src\util\FileUtil.cppm">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -312,9 +312,6 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h">
       <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h">
-      <Filter>Source Files\Utility\Third-party\uuid</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\uuid_v4\endianness.h">
       <Filter>Source Files\Utility\Third-party\uuid</Filter>
@@ -405,6 +402,9 @@
     </ClInclude>
     <ClInclude Include="include\llm\Grammar.h">
       <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h">
+      <Filter>Source Files\Utility\Third-party\uuid</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

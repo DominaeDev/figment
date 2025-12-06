@@ -11,6 +11,7 @@
 #include "gui/CharacterImageStore.h"
 #include "Constants.h"
 #include <format>
+#include <algorithm>
 
 import Utility;
 

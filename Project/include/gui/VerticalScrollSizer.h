@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VERTICAL_SCROLL_SIZER_H__
+#define VERTICAL_SCROLL_SIZER_H__
 
 #include "VerticalListSizer.h"
 
@@ -12,3 +13,5 @@ protected:
 
 	float _offset = 0.0f;
 };
+
+#endif

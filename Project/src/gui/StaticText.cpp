@@ -5,6 +5,8 @@
 #include "Constants.h"
 #include <algorithm>
 
+import Utility;
+
 StaticText::StaticText(Control* pParent, string text, FontFace fontFace, double ptSize, bool bAutoSize) : ControlWithMargins(pParent),
 	_bAutoSize(bAutoSize)
 {

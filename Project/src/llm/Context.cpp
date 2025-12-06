@@ -4,6 +4,7 @@
 #include <cassert>
 #include <algorithm>
 #include <format>
+#include <ranges>
 
 import Utility;
 

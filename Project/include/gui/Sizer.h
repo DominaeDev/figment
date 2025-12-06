@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SIZER_H__
+#define SIZER_H__
 
 #include "Types.h"
 #include "Graphics.h"
@@ -56,3 +57,4 @@ protected:
 
 };
 
+#endif

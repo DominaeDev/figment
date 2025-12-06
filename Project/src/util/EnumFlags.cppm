@@ -1,11 +1,11 @@
 module;
 
-#include <bitset>
-#include <type_traits>
-#include <utility>
-#include <ostream>
+export module EnumFlags;
 
-export module Utility.EnumFlags;
+import <bitset>;
+import <type_traits>;
+import <utility>;
+import <ostream>;
 
 // https://voithos.io/articles/type-safe-enum-class-bit-flags/
 // 

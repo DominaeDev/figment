@@ -1,12 +1,13 @@
 #include "model/ChatSession.h"
+#include <exception>
+#include <cassert>
+#include <format>
+#include <iostream>
 
 #include "llm/LLMUtility.h"
 #include "gui/CharacterImageStore.h"
 #include "gui/Color.h"
 
-#include <exception>
-#include <cassert>
-#include <format>
 
 import Utility;
 

@@ -6,6 +6,8 @@
 #include <llama.h>
 #include "Types.h"
 
+import EnumFlags;
+
 enum class Role : int32_t
 {
 	Undefined	= 0,

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LLM_TEMPLATE_H__
+#define LLM_TEMPLATE_H__
 
 #include "llm/LLMTypes.h"
 
@@ -65,3 +66,4 @@ public:
 private:
 	static string _template;
 };
+#endif

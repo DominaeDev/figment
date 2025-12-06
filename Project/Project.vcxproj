@@ -118,7 +118,6 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
     <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp" />
-    <ClCompile Include="..\Libraries\uuid_v4\uuid_v4.ixx" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
@@ -168,7 +167,8 @@
     <ClCompile Include="src\util\Command.cppm" />
     <ClCompile Include="src\util\Common.cppm" />
     <ClCompile Include="src\util\EnumFlags.cppm" />
-    <ClCompile Include="src\util\StringUtility.cppm" />
+    <ClCompile Include="src\util\FileUtil.cppm" />
+    <ClCompile Include="src\util\StringUtil.cppm" />
     <ClCompile Include="src\util\Utility.ixx" />
   </ItemGroup>
   <ItemGroup>

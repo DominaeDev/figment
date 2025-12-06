@@ -1,3 +1,6 @@
+#ifndef VARIABLE_LIST_H__
+#define VARIABLE_LIST_H__
+
 #pragma once
 
 #include "gui/Control.h"
@@ -18,3 +21,5 @@ protected:
 private:
 	StaticText* _pText = nullptr;
 };
+
+#endif

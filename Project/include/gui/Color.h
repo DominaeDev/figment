@@ -1,3 +1,6 @@
+#ifndef COLOR_H__
+#define COLOR_H__
+
 #pragma once
 
 #include "Graphics.h"
@@ -81,3 +84,5 @@ struct color_util
 
 	color_util() = delete;
 };
+
+#endif

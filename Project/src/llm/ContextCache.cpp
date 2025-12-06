@@ -1,7 +1,11 @@
 #include "llm/ContextCache.h"
+#include <cassert>
+#include <iostream>
+
 #include "llm/LLMUtility.h"
 #include "Constants.h"
-#include <cassert>
+
+import Utility;
 
 ContextCache::ContextCache(int32_t max_size, int32_t n_seq_max) : 
 	_max_size { max_size },
@@ -27,7 +31,7 @@ void ContextCache::Clear()
 	_batch = std::make_unique<Batch>(llm_util::init_batch(_max_size, _n_seq_max));
 }
 
-int32_t ContextCache::BatchAddSingle(llama_token token, SequenceIndices seq_ids, int32_t pos)
+int32_t ContextCache::BatchAddSingle(Token token, SequenceIndices seq_ids, int32_t pos)
 {
 	int32_t n_seq = toI(seq_ids.size());
 

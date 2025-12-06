@@ -1,3 +1,5 @@
+#ifndef LLM_STATE_VARIABLES_H__
+#define LLM_STATE_VARIABLES_H__
 #pragma once
 
 #include "Types.h"
@@ -17,3 +19,4 @@ public:
 private:
 	std::map<string, string> _variables;
 };
+#endif

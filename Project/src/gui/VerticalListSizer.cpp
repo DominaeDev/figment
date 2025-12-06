@@ -1,5 +1,8 @@
 #include "gui/VerticalListSizer.h"
 #include "gui/Control.h"
+#include <algorithm>
+
+import Utility;
 
 static int CeilInt(float f)
 {

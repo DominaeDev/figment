@@ -1,4 +1,5 @@
-#pragma once
+#ifndef NINE_GRID_BACKGROUND_RENDERER_H__
+#define NINE_GRID_BACKGROUND_RENDERER_H__
 
 #include "Types.h"
 #include "CustomRenderer.h"
@@ -22,3 +23,5 @@ private:
 	Texture* _pBGTexture = nullptr;
 	Texture* _pBorderTexture = nullptr;
 };
+
+#endif

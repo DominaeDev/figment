@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FRAME_H__
+#define FRAME_H__
 
 #include "Control.h"
 
@@ -16,3 +17,5 @@ protected:
 
 	SDL_Window* _pWindow = nullptr;
 };
+
+#endif

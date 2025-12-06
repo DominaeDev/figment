@@ -1,15 +1,37 @@
 #ifndef TYPES_H__
 #define TYPES_H__
 
-#pragma once
-
+// Standard library (must come before module imports)
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <array>
 #include <map>
-#include <ranges>
-#include <utility>
-#include <uuid_v4.h>
+#include <format>
+#include <cassert>
+#include <set>
+#include <functional>
+#include <ostream>
+
+// User literal
+inline constexpr uint8_t operator "" _u8( unsigned long long arg ) noexcept
+{
+    return static_cast<uint8_t>( arg );
+}
+
+using string = std::string;
+
+template <typename T, typename A = std::allocator<T>>
+constexpr std::vector<T, A>::iterator flip_iterator(typename std::vector<T, A>& vec, typename std::vector<T, A>::reverse_iterator rit)
+{
+	if (rit != vec.rend())
+	{
+		auto it = vec.begin();
+		std::advance(it, (ptrdiff_t)std::distance(rit, vec.rend()) - 1);
+		return it;
+	}
+	return vec.end();
+}
 
 template<typename T>
 inline constexpr int32_t toI(T x) { return static_cast<int32_t>(x); }
@@ -24,24 +46,6 @@ inline constexpr size_t toSZ(T x) { return static_cast<size_t>(x); }
 template<typename T>
 inline constexpr size_t castEnum(T x) { return static_cast<size_t>(x); }
 
-inline constexpr uint8_t operator "" _u8( unsigned long long arg ) noexcept
-{
-    return static_cast<uint8_t>( arg );
-}
-
-typedef std::string string;
-
-template <typename T, typename A = std::allocator<T>>
-constexpr std::vector<T, A>::iterator flip_iterator(typename std::vector<T, A>& vec, typename std::vector<T, A>::reverse_iterator rit)
-{
-	if (rit != vec.rend())
-	{
-		auto it = vec.begin();
-		std::advance(it, (ptrdiff_t)std::distance(rit, vec.rend()) - 1);
-		return it;
-	}
-	return vec.end();
-}
 
 // Macros
 #if !defined(TRUE)
@@ -55,5 +59,3 @@ constexpr bool Enabled = true;
 constexpr bool Disabled = false;
 
 #endif
-
-import Utility.EnumFlags;
