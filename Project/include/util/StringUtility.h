@@ -1,3 +1,6 @@
+#ifndef STRING_UTIL_H__
+#define STRING_UTIL_H__
+
 #pragma once
 
 #include <string>
@@ -36,3 +39,5 @@ namespace string_util
 	std::wstring from_utf8(const std::string& str);
 	std::string to_utf8(const std::wstring& str);
 }
+
+#endif 

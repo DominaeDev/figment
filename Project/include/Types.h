@@ -1,3 +1,6 @@
+#ifndef TYPES_H__
+#define TYPES_H__
+
 #pragma once
 
 #include <string>
@@ -52,3 +55,5 @@ constexpr std::vector<T, A>::iterator flip_iterator(typename std::vector<T, A>& 
 
 constexpr bool Enabled = true;
 constexpr bool Disabled = false;
+
+#endif
