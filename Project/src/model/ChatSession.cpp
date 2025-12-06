@@ -1,6 +1,5 @@
 #include "model/ChatSession.h"
 
-#include "util/Common.h"
 #include "util/StringUtility.h"
 #include "llm/LLMUtility.h"
 #include "gui/CharacterImageStore.h"
@@ -9,6 +8,8 @@
 #include <exception>
 #include <cassert>
 #include <format>
+
+import Utility;
 
 bool ChatSession::Initialize(LLMOptions options)
 {

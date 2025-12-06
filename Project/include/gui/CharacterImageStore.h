@@ -1,3 +1,6 @@
+#ifndef CHARACTER_IMAGE_STORE_H__
+#define CHARACTER_IMAGE_STORE_H__
+
 #pragma once
 
 #include "Types.h"
@@ -33,3 +36,5 @@ private:
 
 	static std::map<string, ImageList> _imagesByCharacter;
 };
+
+#endif

@@ -24,6 +24,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -31,6 +32,7 @@
     <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -66,11 +68,12 @@
       <MinimalRebuild>false</MinimalRebuild>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>/Zc:char8_t- /utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <TranslateIncludes>false</TranslateIncludes>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -91,11 +94,12 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>/Zc:char8_t- /utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
       <TranslateIncludes>false</TranslateIncludes>
+      <BuildStlModules>true</BuildStlModules>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -137,7 +141,6 @@
     <ClCompile Include="src\gui\ChatScroll.cpp" />
     <ClCompile Include="src\gui\Color.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
-    <ClCompile Include="src\util\CommandParser.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
     <ClCompile Include="src\gui\ControlWithMargins.cpp" />
     <ClCompile Include="src\gui\Fonts.cpp" />
@@ -160,9 +163,9 @@
     <ClCompile Include="src\gui\Text.cpp" />
     <ClCompile Include="src\gui\TextBox.cpp" />
     <ClCompile Include="src\gui\TextureStore.cpp" />
-    <ClCompile Include="src\util\Common.cpp" />
     <ClCompile Include="src\gui\VerticalListSizer.cpp" />
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
+    <ClCompile Include="src\util\Utility.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h" />
@@ -188,9 +191,10 @@
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Character.h" />
     <ClInclude Include="include\model\ChatSession.h" />
-    <ClInclude Include="include\util\EnumFlags.h" />
-    <ClInclude Include="include\util\Command.h" />
-    <ClInclude Include="include\util\CommandParser.h" />
+    <ClCompile Include="include\util\EnumFlags.cppm">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="include\util\Command.cppm" />
     <ClInclude Include="include\gui\CustomRenderer.h" />
     <ClInclude Include="include\gui\ChatMessage.h" />
     <ClInclude Include="include\gui\ChatScroll.h" />
@@ -221,7 +225,9 @@
     <ClInclude Include="include\gui\TextBox.h" />
     <ClInclude Include="include\gui\TextureStore.h" />
     <ClInclude Include="include\Types.h" />
-    <ClInclude Include="include\util\Common.h" />
+    <ClCompile Include="include\util\Common.cppm">
+      <FileType>Document</FileType>
+    </ClCompile>
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
   </ItemGroup>

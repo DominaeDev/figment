@@ -1,11 +1,12 @@
 ﻿#include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
-#include "util/Common.h"
 #include "Constants.h"
 #include <format>
 #include <cwctype>
 #include <cassert>
 #include <set>
+
+import Utility;
 
 static std::vector<string> const opening_tags {
 	std::format("<{0}=\"", Constants::Chat::DialogueTag),

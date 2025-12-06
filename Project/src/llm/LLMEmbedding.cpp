@@ -1,12 +1,13 @@
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
-#include "util/Common.h"
 #include "Constants.h"
 #include <llama.h>
 #include <common.h>
 #include <format>
 #include <cassert>
+
+import Utility;
 
 LLMEmbedding::~LLMEmbedding()
 {

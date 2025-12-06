@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __Application_h_
-#define __Application_h_
+#ifndef APP_STATE_H__
+#define APP_STATE_H__
 
 class Frame;
 struct SDL_Window;

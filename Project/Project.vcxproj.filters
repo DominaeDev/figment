@@ -122,9 +122,6 @@
     <ClCompile Include="src\gui\ChatMessage.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\Common.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="src\llm\LLMInstance.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
@@ -157,9 +154,6 @@
     </ClCompile>
     <ClCompile Include="src\llm\LLMUtility.cpp">
       <Filter>Source Files\Inference</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\CommandParser.cpp">
-      <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Control.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
@@ -233,6 +227,18 @@
     <ClCompile Include="src\llm\Grammar.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
+    <ClCompile Include="include\util\Command.cppm">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\Utility.ixx">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="include\util\EnumFlags.cppm">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="include\util\Common.cppm">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -276,9 +282,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\ChatMessage.h">
       <Filter>Source Files\Interface\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\Common.h">
-      <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMInstance.h">
       <Filter>Source Files\Inference</Filter>
@@ -328,9 +331,6 @@
     <ClInclude Include="include\model\ChatSession.h">
       <Filter>Source Files\Model</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\CommandParser.h">
-      <Filter>Source Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\Control.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
@@ -367,9 +367,6 @@
     <ClInclude Include="include\gui\HorizontalGradient.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\Command.h">
-      <Filter>Source Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\llm\LLMTypes.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
@@ -402,9 +399,6 @@
     </ClInclude>
     <ClInclude Include="include\llm\ContextBlock.h">
       <Filter>Source Files\Inference\Context</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\EnumFlags.h">
-      <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\ModelState.h">
       <Filter>Source Files\Inference</Filter>

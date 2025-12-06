@@ -1,8 +1,10 @@
+#ifndef MAINFRAME_H__
+#define MAINFRAME_H__
+
 #pragma once
 
 #include "Frame.h"
 #include "Types.h"
-#include "util/Command.h"
 #include <queue>
 
 class Sizer;
@@ -10,7 +12,8 @@ class StatusBar;
 class ChatScroll;
 class TextBox;
 class VariableList;
-struct Command;
+
+import Command;
 
 class MainFrame : public Frame
 {
@@ -56,3 +59,5 @@ private:
 	size_t _autoScriptIndex = 0;
 #endif
 };
+
+#endif

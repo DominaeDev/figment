@@ -1,3 +1,6 @@
+#ifndef FONTS_H__
+#define FONTS_H__
+
 #pragma once
 
 #include <SDL3_ttf/SDL_ttf.h>
@@ -38,3 +41,5 @@ private:
 
 	static std::list<Font> s_FallbackFonts;
 };
+
+#endif

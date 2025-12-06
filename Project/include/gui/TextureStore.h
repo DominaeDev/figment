@@ -1,3 +1,6 @@
+#ifndef TEXTURE_STORE_H__
+#define TEXTURE_STORE_H__
+
 #pragma once
 
 #include <map>
@@ -31,3 +34,5 @@ private:
 
 	static std::map<TextureType, Texture*> _textures;
 };
+
+#endif

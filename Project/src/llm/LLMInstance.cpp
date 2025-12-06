@@ -3,16 +3,12 @@
 #include "llm/LLMTemplate.h"
 #include "llm/Embedding.h"
 #include "util/StringUtility.h"
-#include "util/Common.h"
 #include <common.h>
 #include <format>
 #include <algorithm>
 #include <cassert>
-#include <chrono>
 
 #define DEBUG_SEED 0xA1B2C3D4
-
-using namespace std::chrono_literals;
 
 template <typename T>
 concept Lockable = requires (T mut)
@@ -46,6 +42,7 @@ inline constexpr string Narration(std::string_view text)
 	return "[" + std::string(text) + "]";
 }
 
+import Utility;
 
 LLMInstance::LLMInstance()
 {
@@ -789,7 +786,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
 {
 	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
-	if (!stateLock.try_lock_for(100ms))
+	if (!stateLock.try_lock_for(std::chrono::milliseconds(100)))
 	{
 		onComplete(InternalError::UnknownError, "Failed to acquire lock");
 		return;
@@ -1293,7 +1290,7 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 
 		if (bWaiting)
 		{
-			std::this_thread::sleep_for(50ms);
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			continue;
 		}
 
@@ -1978,7 +1975,7 @@ bool LLMInstance::SetStateVariable(string name, string value, bool allowCreate)
 		return false;
 
 	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
-	if (!stateLock.try_lock_for(100ms))
+	if (!stateLock.try_lock_for(std::chrono::milliseconds(100)))
 		return false;
 
 	if (!_stateVars.HasValue(name) && !allowCreate)
@@ -1993,7 +1990,7 @@ std::map<string, string> LLMInstance::GetStateVariables()
 	std::map<string, string> result;
 
 	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
-	if (stateLock.try_lock_for(100ms))
+	if (stateLock.try_lock_for(std::chrono::milliseconds(100)))
 		result.insert(_stateVars.GetVariables().begin(), _stateVars.GetVariables().end());
 
 	return result;

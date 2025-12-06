@@ -1,9 +1,10 @@
 #include "llm/Embedding.h"
-#include "util/Common.h"
 #include "util/StringUtility.h"
 #include <format>
 #include <iostream>
 #include <fstream>
+
+import Utility;
 
 union FloatToChar 
 {

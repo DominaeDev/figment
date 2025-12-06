@@ -1,3 +1,6 @@
+#ifndef CONSTANTS_H__
+#define CONSTANTS_H__
+
 #pragma once
 
 #include "Types.h"
@@ -85,3 +88,5 @@ namespace Constants
 //		inline constexpr std::string_view QueryPrefix		= "Represent the statement: ";
 	}
 }
+
+#endif

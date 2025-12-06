@@ -1,7 +1,12 @@
+#ifndef LLM_TYPES_H__
+#define LLM_TYPES_H__
+
 #pragma once
 
 #include "Types.h"
 #include <llama.h>
+
+import EnumFlags;
 
 enum class Role : int32_t
 {
@@ -106,3 +111,5 @@ struct Sentence
 	string sentence;
 };
 using Sentences = std::vector<Sentence>;
+
+#endif

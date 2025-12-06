@@ -1,6 +1,8 @@
+#ifndef LLMINSTANCE_H__
+#define LLMINSTANCE_H__
+
 #pragma once
 
-#include "llm/LLMTypes.h"
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMStateVariables.h"
 #include "llm/Context.h"
@@ -265,3 +267,5 @@ public:
 	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 	std::atomic<int64_t> usedRAM; // As reported from llama.cpp
 };
+
+#endif

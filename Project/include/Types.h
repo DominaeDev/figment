@@ -11,8 +11,6 @@
 #include <utility>
 #include <uuid_v4.h>
 
-#include "util/EnumFlags.h"
-
 template<typename T>
 inline constexpr int32_t toI(T x) { return static_cast<int32_t>(x); }
 template<typename T>

@@ -1,10 +1,11 @@
 #include "llm/Context.h"
 #include "llm/LLMUtility.h"
-#include "util/Common.h"
 #include "Constants.h"
 #include <cassert>
 #include <algorithm>
 #include <format>
+
+import Utility;
 
 Context::Context(const ModelState& model)
 {

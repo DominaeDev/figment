@@ -1,3 +1,6 @@
+#ifndef TEXT_H__
+#define TEXT_H__
+
 #pragma once
 
 #include "Fonts.h"
@@ -15,3 +18,5 @@ public:
 private:
 	static TTF_TextEngine* _pEngine;
 };
+
+#endif

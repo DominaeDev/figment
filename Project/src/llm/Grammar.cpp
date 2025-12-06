@@ -1,8 +1,9 @@
 #include "llm/Grammar.h"
-#include "util/Common.h"
 #include "util/StringUtility.h"
 #include <set>
 #include <cassert>
+
+import Utility;
 
 static bool _evaluate(string& text, size_t pos_begin, const std::set<string>& flags)
 {

@@ -16,12 +16,13 @@
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
-#include "util/CommandParser.h"
-#include "util/Common.h"
 #include "Constants.h"
+
 #include <format>
 #include <ranges>
 #include <cwctype>
+
+import Utility;
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
