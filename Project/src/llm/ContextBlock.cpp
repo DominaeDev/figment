@@ -6,7 +6,7 @@ llama_seq_id ContextBlock::get_any_sequence_id() const noexcept
 {
 	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < Constants::Context::MaxSequences; ++i)
 	{
-		if ((bool)(this->sequenceId & Constants::Context::AllSequenceIDs[i]))
+		if (sequenceId.IsSet(Constants::Context::AllSequenceIDs[i]))
 			return static_cast<llama_seq_id>(i);
 	}
 	assert(0 && "Block has no sequence");
@@ -20,7 +20,7 @@ SequenceIndices ContextBlock::get_sequence_ids(int32_t n_seq_max) const noexcept
 
 	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < n_seq_max; ++i)
 	{
-		if ((bool)(this->sequenceId & Constants::Context::AllSequenceIDs[i]))
+		if (sequenceId.IsSet(Constants::Context::AllSequenceIDs[i]))
 			seqIds.push_back(toI(i));
 	}
 	return seqIds;

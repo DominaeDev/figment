@@ -1,6 +1,8 @@
 #include "llm/LLMTypes.h"
 #include "llm/ContextBlock.h"
 #include "llm/ContextCache.h"
+#include "llm/ModelState.h"
+#include <optional>
 
 #pragma once
 
@@ -43,7 +45,7 @@ public:
 	// Blocks
 	int32_t AllocateKVCache(int32_t alloc_min);
 	bool RebuildKVCache();
-	std::pair<int32_t, bool> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id); // std::expected?
+	std::optional<int32_t> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id);
 	int32_t DecodeUncached(int32_t cursor_pos);
 	
 	void AppendBlock(const ContextBlock& block);

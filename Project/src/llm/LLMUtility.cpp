@@ -419,7 +419,7 @@ std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(Context& c
 	auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
 	int32_t n_tokens = toI(tokens.size());
 
-	llama_batch batch_view = context.GetCache().CreateBatchView(pos, n_tokens);
+	llama_batch batch_view = context.GetCache().GetBatchView(pos, n_tokens);
 	if (batch_view.n_tokens > 0 && llama_decode(context.GetCtxPtr(), batch_view) != 0)
 		return std::nullopt;
 	return tokens;
@@ -682,100 +682,6 @@ string llm_util::format_id(string id)
 	return string_util::lcase(id);
 }
 
-static inline constexpr bool CheckFlag(GrammarFlag options, GrammarFlag value)
-{
-	return (options & value) == value;
-}
-
-static bool _evaluate(string& text, size_t pos_begin, const std::set<string>& flags)
-{
-	size_t pos_next = text.find("{{", pos_begin + 2);
-	size_t pos_end = text.find("}}", pos_begin + 2);
-	if (pos_end == string::npos)
-		return false;
-
-	if (pos_next != string::npos && pos_next < pos_end)
-	{
-		_evaluate(text, pos_next, flags); // Evaluate inner
-		return _evaluate(text, pos_begin, flags); // Re-evaluate outer
-	}
-
-	size_t pos_q = text.find('?', pos_begin + 2);
-	if (pos_q == string::npos || pos_q > pos_end)
-		return false;
-
-	string condition = text.substr(pos_begin + 2, pos_q - pos_begin - 2);
-	auto expected_flags = string_util::split(condition, '|', true);
-	bool result = true;
-	for (auto& flag : expected_flags)
-	{
-		bool bTrue = true;
-		if (flag[0] == '!')
-		{
-			flag = flag.substr(1);
-			bTrue = false;
-		}
-		if ((flags.find(flag) != flags.end()) != bTrue)
-		{
-			result = false;
-			break;
-		}
-	}
-
-	if (result)
-	{
-		text.erase(pos_end, 2); // }}
-		text.erase(pos_begin, pos_q - pos_begin + 1); // {{...?
-	}
-	else
-		text.erase(pos_begin, pos_end - pos_begin + 2);
-	return true;
-}
-
-llama_sampler* llm_util::compile_grammar(GrammarFlag grammarFlags, VocabPtr pVocab, string names, string stateVars)
-{
-	string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
-	if (grammar.size() == 0)
-		return nullptr;
-
-	string_util::replace_all(grammar, "{{_NAMES_}}", names);
-	string_util::replace_all(grammar, "{{_STATE_VARS_}}", stateVars);
-
-	std::set<string> flags;
-	if (CheckFlag(grammarFlags, GrammarFlag::Default))
-		flags.insert("default");
-	if (CheckFlag(grammarFlags, GrammarFlag::Stub))
-		flags.insert("stub");
-	if (CheckFlag(grammarFlags, GrammarFlag::Continue))
-		flags.insert("continue");
-	if (CheckFlag(grammarFlags, GrammarFlag::Talk))
-		flags.insert("talk");
-	if (CheckFlag(grammarFlags, GrammarFlag::Act))
-		flags.insert("act");
-	if (CheckFlag(grammarFlags, GrammarFlag::Narrate))
-		flags.insert("narrate");
-	if (CheckFlag(grammarFlags, GrammarFlag::EnableNarrator))
-		flags.insert("enable-narrator");
-	if (CheckFlag(grammarFlags, GrammarFlag::EnableState))
-		flags.insert("enable-state");
-
-	size_t pos = grammar.find("{{", 0);
-	while (pos != string::npos && pos < grammar.size())
-	{
-		if (_evaluate(grammar, pos, flags))
-		{
-			assert(grammar[pos] != '{');
-			pos = grammar.find("{{", pos);
-		}
-		else
-			pos = grammar.find("{{", pos + 2);
-	}
-
-	auto pGrammar = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
-	assert(pGrammar);
-	return pGrammar;
-}
-
 bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, string filename)
 {
 	auto [batch_ref, batch_n] = context.GetCache().GetBatch();
@@ -894,8 +800,6 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, i
 
 	if (batch.token == nullptr || num_tokens <= 0)
 		return false;
-
-	SequenceId seq_id = sequence_from_index(seq_index);
 
 	// Detokenize the batched tokens
 	string result;
@@ -1074,6 +978,11 @@ void llm_util::erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos)
 		llama_kv_self_seq_rm(pCtx, seq_id, pos, -1);
 }
 
+SequenceIndices llm_util::get_sequence_indices(Sequence seq, int32_t n_seq_max) noexcept
+{
+	return get_sequence_indices({ seq }, n_seq_max);
+}
+
 SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept
 {
 	SequenceIndices seqIds;
@@ -1081,15 +990,15 @@ SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max
 
 	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < n_seq_max; ++i)
 	{
-		if ((bool)(seq & Constants::Context::AllSequenceIDs[i]))
+		if (seq.IsSet(Constants::Context::AllSequenceIDs[i]))
 			seqIds.push_back(toI(i));
 	}
 	return seqIds;
 }
 
-constexpr SequenceId llm_util::sequence_from_index(int32_t seq_idx) noexcept
+SequenceId llm_util::sequence_from_index(int32_t seq_idx) noexcept
 {
     if (seq_idx < 0 || seq_idx >= Constants::Context::AllSequenceIDs.size())
         return SequenceId::None;
-    return Constants::Context::AllSequenceIDs[seq_idx];
+	return { Constants::Context::AllSequenceIDs[seq_idx] };
 }

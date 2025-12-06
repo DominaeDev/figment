@@ -25,16 +25,16 @@
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
-LLMOption llmOptions = 
-	  LLMOption::GreetUser
-	| LLMOption::Uncensored
-//	| LLMOption::LimitMessages
-//	| LLMOption::RandomizeMessageCount
-//	| LLMOption::StateVariables
-//	| LLMOption::ReportStateChanges
-//	| LLMOption::Embeddings
-	| LLMOption::UseMultipleSequences
-;
+LLMOptions llmOptions = {
+	LLMOption::GreetUser,
+	LLMOption::Uncensored,
+//	LLMOption::LimitMessages,
+//	LLMOption::RandomizeMessageCount,
+	LLMOption::StateVariables,
+	LLMOption::ReportStateChanges,
+//	LLMOption::Embeddings,
+	LLMOption::UseMultipleSequences,
+};
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 {

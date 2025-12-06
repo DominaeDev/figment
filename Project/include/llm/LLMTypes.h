@@ -62,28 +62,6 @@ struct Submessage
 	string content;
 };
 
-enum class GrammarFlag : int32_t
-{
-	None			= 0,
-
-	// Generation type
-	Default			= 1 << 0,
-	Stub			= 1 << 1,
-	Continue		= 1 << 2,
-
-	// Message type
-	Talk			= 1 << 3,
-	Act				= 1 << 4,
-	Narrate			= 1 << 5,
-
-	// Options
-	EnableNarrator	= 1 << 6,
-	EnableState		= 1 << 7,
-	UseCharacterIds	= 1 << 8,
-	AllowUser		= 1 << 9,
-};
-DEFINE_ENUM_FLAGS(GrammarFlag, int32_t)
-
 using ModelPtr = llama_model*;
 using ContextPtr = llama_context*;
 using VocabPtr = const llama_vocab*;
@@ -91,29 +69,8 @@ using SamplerPtr = llama_sampler*;
 using Batch = llama_batch;
 using Token = llama_token;
 
-struct ModelState
-{
-	ModelPtr pModel = nullptr;
-	VocabPtr pVocab = nullptr;
-	ContextPtr pCtx = nullptr;
-	SamplerPtr pSampler = nullptr;
-	SamplerPtr pActiveGrammar = nullptr;
-	std::map<GrammarFlag, SamplerPtr> grammars {};
-
-	string modelName {};
-	std::mt19937 rng {};
-	int32_t num_sequences {};
-	int32_t ctx_size {};
-
-	void Release();
-
-	bool HasGrammar(GrammarFlag flags) const;
-	llama_sampler* SetActiveGrammar(GrammarFlag flags);
-};
-
 enum class LLMOption : uint32_t
 {
-	None = 0,
 	UseCharacterIds			= 1 << 0,
 	AllowUserResponse		= 1 << 1,
 	LimitMessages			= 1 << 2,
@@ -127,16 +84,9 @@ enum class LLMOption : uint32_t
 
 	UseMultipleSequences	= 1 << 9,
 };
-DEFINE_ENUM_FLAGS(LLMOption, uint32_t)
+using LLMOptions = EnumFlags<LLMOption>;
 
-struct Sentence
-{
-	Role role;
-	string sentence;
-};
-using Sentences = std::vector<Sentence>;
-
-enum class SequenceId : int32_t
+enum class Sequence : int32_t
 {
 	None	= 0,
 	Bot1	= 1 << 0,
@@ -146,6 +96,13 @@ enum class SequenceId : int32_t
 	Shared	= Bot1 | Bot2 | Bot3 | Bot4,
 	Default = Bot1,
 };
-DEFINE_ENUM_FLAGS(SequenceId, int32_t);
+using SequenceId = EnumFlags<Sequence>;
 
 using SequenceIndices = std::vector<llama_seq_id>;
+
+struct Sentence
+{
+	Role role;
+	string sentence;
+};
+using Sentences = std::vector<Sentence>;

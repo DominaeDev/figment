@@ -10,7 +10,7 @@
 #include <cassert>
 #include <format>
 
-bool ChatSession::Initialize(LLMOption options)
+bool ChatSession::Initialize(LLMOptions options)
 {
 	_options = options;
 
@@ -245,15 +245,15 @@ string ChatSession::GetSystemPrompt() const
 		string_util::replace_all(prompt, "##FORMATTING##", _formatting_solo);
 	}
 
-	string_util::replace_all(prompt, "##STATE_FORMATTING##", CheckEnumFlag(_options, LLMOption::StateVariables) ? _formatting_state : "");
-	string_util::replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", CheckEnumFlag(_options, LLMOption::Uncensored) ? _system_prompt_uncensored : "");
+	string_util::replace_all(prompt, "##STATE_FORMATTING##", _options.IsSet(LLMOption::StateVariables) ? _formatting_state : "");
+	string_util::replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", _options.IsSet(LLMOption::Uncensored) ? _system_prompt_uncensored : "");
 	prompt = string_util::trim(prompt);
 
 	if (IsGroupChat())
 	{
 		prompt.append("\n\n# Characters");
 		
-		if (CheckEnumFlag(_options, LLMOption::UseCharacterIds))
+		if (_options.IsSet(LLMOption::UseCharacterIds))
 		{
 			prompt.append("\n{\n");
 			// Bots

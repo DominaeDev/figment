@@ -59,11 +59,11 @@ namespace Constants
 		inline constexpr float WindowKeepRatio = 0.75f;
 		inline constexpr int32_t MaxSequences = 4;
 
-		static constexpr std::array<SequenceId, 4> AllSequenceIDs {
-			SequenceId::Bot1,
-			SequenceId::Bot2,
-			SequenceId::Bot3,
-			SequenceId::Bot4,
+		static constexpr std::array<Sequence, 4> AllSequenceIDs {
+			Sequence::Bot1,
+			Sequence::Bot2,
+			Sequence::Bot3,
+			Sequence::Bot4,
 		};
 
 	}

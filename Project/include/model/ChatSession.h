@@ -8,7 +8,7 @@
 class ChatSession
 {
 public:
-	bool Initialize(LLMOption options);
+	bool Initialize(LLMOptions options);
 	bool LoadCharacter(Role role, string filename);
 
 	std::optional<Character> GetCharacter(Role role) const;
@@ -34,7 +34,7 @@ public:
 
 protected:
 	std::map<Role, Character> _characters {};
-	LLMOption _options {};
+	LLMOptions _options {};
 
 	// Prompts
 	string _system_prompt_solo;

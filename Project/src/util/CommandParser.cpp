@@ -7,8 +7,8 @@ struct _Cmd {
 };
 
 static _Cmd s_Commands[] {
-	{ "act",			CommandType::InstigateAction},
-	{ "erase",			CommandType::RemoveLast},
+	{ "act",			CommandType::InstigateAction },
+	{ "erase",			CommandType::RemoveLast },
 	{ "examine",		CommandType::Examine },
 	{ "impersonate",	CommandType::Impersonate },
 	{ "instruct",		CommandType::Instruct },

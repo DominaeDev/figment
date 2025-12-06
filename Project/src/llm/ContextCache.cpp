@@ -20,6 +20,13 @@ ContextCache::~ContextCache()
 	}
 }
 
+void ContextCache::Clear()
+{
+	if (_batch)
+		llm_util::free_batch(*_batch.get());
+	_batch = std::make_unique<Batch>(llm_util::init_batch(_max_size, _n_seq_max));
+}
+
 int32_t ContextCache::BatchAddSingle(llama_token token, SequenceIndices seq_ids, int32_t pos)
 {
 	int32_t n_seq = toI(seq_ids.size());
@@ -65,13 +72,13 @@ int32_t ContextCache::BatchWrite(std::span<const llama_token> tokens, SequenceId
 int32_t ContextCache::BatchRemove(int32_t begin, int32_t end)
 {
 	Batch& batch = *_batch.get();
-	int32_t n_removed = Shift(end, _length - end, -(end - begin));
+	int32_t n_removed = ShiftTokens(end, _length - end, -(end - begin));
 	_length += n_removed;
 	batch.n_tokens = _length;
 	return n_removed;
 }
 
-int32_t ContextCache::BatchClear(int32_t begin, int32_t end)
+int32_t ContextCache::ClearRange(int32_t begin, int32_t end)
 {
 	// Update batch
 	Batch& batch = *_batch.get();
@@ -89,7 +96,7 @@ int32_t ContextCache::BatchClear(int32_t begin, int32_t end)
 	return std::max(end - begin, 0);
 }
 
-void ContextCache::BatchClearFrom(int32_t pos)
+void ContextCache::ClearTokensFrom(int32_t pos)
 {
 	Batch& batch = *_batch.get();
 	for (int i = 0; i < batch.n_tokens; ++i)
@@ -146,7 +153,7 @@ int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 	return length;
 }
 
-int32_t ContextCache::Shift(int32_t pos, int32_t len, int32_t offset)
+int32_t ContextCache::ShiftTokens(int32_t pos, int32_t len, int32_t offset)
 {
 	// Shift down
 	if (len < 0)
@@ -213,7 +220,7 @@ void ContextCache::BatchSetSequences(int32_t from, int32_t length, SequenceId se
 	}
 }
 
-void ContextCache::BatchInitLogits()
+void ContextCache::InitLogits()
 {
 	if (_length <= 0)
 		return;
@@ -224,7 +231,7 @@ void ContextCache::BatchInitLogits()
 	batch.logits[_length - 1] = true;  // Only need logits for last token
 }
 
-Batch ContextCache::CreateBatchView(int32_t pos, int32_t length) const
+Batch ContextCache::GetBatchView(int32_t pos, int32_t length) const
 {
 	Batch& batch = *_batch.get();
 	return llm_util::create_batch_view(batch, pos, length);

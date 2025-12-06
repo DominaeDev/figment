@@ -40,8 +40,7 @@ namespace llm_util
 	bool dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, string filename);
 	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_id, VocabPtr pVocab, string filename);
 
-	llama_sampler* compile_grammar(GrammarFlag flags, VocabPtr pVocab, string names, string stateVars);
-
+	inline SequenceIndices get_sequence_indices(Sequence seq, int32_t n_seq_max) noexcept;
 	SequenceIndices get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept;
-	constexpr SequenceId sequence_from_index(int32_t seq_idx) noexcept;
+	SequenceId sequence_from_index(int32_t seq_idx) noexcept;
 }

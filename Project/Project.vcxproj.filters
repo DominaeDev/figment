@@ -227,6 +227,12 @@
     <ClCompile Include="src\llm\ContextBlock.cpp">
       <Filter>Source Files\Inference\Context</Filter>
     </ClCompile>
+    <ClCompile Include="src\llm\ModelState.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
+    <ClCompile Include="src\llm\Grammar.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -396,6 +402,15 @@
     </ClInclude>
     <ClInclude Include="include\llm\ContextBlock.h">
       <Filter>Source Files\Inference\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\EnumFlags.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\ModelState.h">
+      <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\Grammar.h">
+      <Filter>Source Files\Inference</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

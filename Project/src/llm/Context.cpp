@@ -5,7 +5,6 @@
 #include <cassert>
 #include <algorithm>
 #include <format>
-#include <cassert>
 
 Context::Context(const ModelState& model)
 {
@@ -39,6 +38,8 @@ bool Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
 void Context::Initialize()
 {
 	llama_kv_self_clear(_pCtx);
+	_blocks.clear();
+	_cache->Clear();
 }
 
 void Context::RefreshBlockPositions()
@@ -48,17 +49,17 @@ void Context::RefreshBlockPositions()
 	{
 		if (offset >= chat_begin_pos)
 			block.offset = offset;
-		if (CheckEnumFlag(block.flags, ContextBlockFlag::Static))
+		if (block.flags.IsSet(ContextBlockFlag::Static))
 			offset = std::max(offset, block.offset + block.length());
 		else
 			offset += block.length();
 	}
 }
 
-std::pair<int32_t, bool> Context::DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id)
+std::optional<int32_t> Context::DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id)
 {
 	if (tokens.size() == 0)
-		return std::make_pair(0, true);
+		return std::make_optional(0);
 
 	int32_t n_tokens = static_cast<int32_t>(tokens.size());
 	auto seq_indices = llm_util::get_sequence_indices(seq_id, _num_sequences);
@@ -70,18 +71,18 @@ std::pair<int32_t, bool> Context::DecodeTokens(const std::vector<llama_token>& t
 	// Decode
 	llama_batch batch_view = llm_util::create_batch_view(batch, pos, n_tokens);
 	if (batch_view.n_tokens > 0 && llama_decode(_pCtx, batch_view) != 0)
-		return std::make_pair(0, false); // Error
+		return std::nullopt; // Error
 
 
 //	cursor_pos += n_tokens;
-	return std::make_pair(n_tokens, true);
+	return std::make_optional(n_tokens);
 }
 
 int32_t Context::DecodeUncached(int32_t cursor_pos)
 {
 	for (auto& block : _blocks)
 	{
-		if (CheckEnumFlag(block.flags, ContextBlockFlag::Cached))
+		if (block.flags.IsSet(ContextBlockFlag::Cached))
 			continue;
 
 		std::vector<llama_seq_id> seqs = block.get_sequence_ids(_num_sequences);
@@ -103,19 +104,27 @@ int32_t Context::DecodeUncached(int32_t cursor_pos)
 
 bool Context::RebuildKVCache()
 {
-#if FALSE // Clear everything
-	llama_kv_self_clear(_pCtx);
-	int r = llama_decode(_pCtx, batch);
-#else // Clear non-static only
-	int32_t blocks_pos = chat_begin_pos;
-
-	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size(); ++i)
-		llama_kv_self_seq_rm(_pCtx, (int32_t)i, blocks_pos, -1);
-
 	auto& cache = *_cache.get();
-	auto batch_view = cache.CreateBatchView(blocks_pos, cache.length() - blocks_pos);
-	int r = llama_decode(_pCtx, batch_view);
-#endif
+
+	int r;
+	if constexpr (::Disabled)
+	{
+		// Clear everything
+		llama_kv_self_clear(_pCtx);
+		auto batch_view = cache.GetBatchView(0, cache.length());
+		r = llama_decode(_pCtx, batch_view);
+	}
+	else
+	{
+		// Clear only non-static blocks
+		int32_t blocks_pos = chat_begin_pos;
+
+		for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size(); ++i)
+			llama_kv_self_seq_rm(_pCtx, (int32_t)i, blocks_pos, -1);
+
+		auto batch_view = cache.GetBatchView(blocks_pos, cache.length() - blocks_pos);
+		r = llama_decode(_pCtx, batch_view);
+	}
 
 	cursor_pos = cache.length();
 	return r == 0;
@@ -126,7 +135,7 @@ int32_t Context::RemoveBlock(const ContextBlock& block, bool bShift)
 	assert(block.sequenceId != SequenceId::None);
 
 	auto iter_block = std::find_if(_blocks.cbegin(), _blocks.cend(), [&block](const ContextBlock& b) { return &block == &b; });
-	return RemoveBlocks(iter_block, iter_block + 1_sz, bShift);
+	return RemoveBlocks(iter_block, iter_block + 1uz, bShift);
 }
 
 int32_t Context::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift)
@@ -187,7 +196,7 @@ int32_t Context::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, s
 void Context::ClearTokensBelow(int32_t pos)
 {
 	llm_util::erase_bottom(_pCtx, _num_sequences, pos);
-	GetCache().BatchClearFrom(pos);
+	GetCache().ClearTokensFrom(pos);
 }
 
 int32_t Context::AllocateKVCache(int32_t min_reserve)
@@ -263,7 +272,7 @@ int32_t Context::GetBlockAppendOffset() const
 
 int32_t Context::EraseChat()
 {
-	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return !CheckEnumFlag(block.flags, ContextBlockFlag::Static); });
+	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return !block.flags.IsSet(ContextBlockFlag::Static); });
 	if (itFirst == _blocks.end())
 	{
 		int32_t block_pos = GetBlockAppendOffset();
@@ -276,7 +285,7 @@ int32_t Context::EraseChat()
 		int32_t block_pos = itFirst->offset;
 		llm_util::erase_bottom(_pCtx, _num_sequences, block_pos);
 		auto& cache = *_cache.get();
-		cache.BatchClear(block_pos, cache.length());
+		cache.ClearRange(block_pos, cache.length());
 
 		cursor_pos = block_pos;
 		chat_begin_pos = block_pos;

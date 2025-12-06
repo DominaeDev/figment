@@ -10,7 +10,7 @@ namespace string_util
 	[[nodiscard]] std::string ltrim(const std::string& s);
 	void rtrim_str(std::string& s);
 	[[nodiscard]] std::string rtrim(const std::string& s);
-	inline [[nodiscard]] std::string trim(const std::string& s) { return ltrim(rtrim(s)); }
+	[[nodiscard]] inline std::string trim(const std::string& s) { return ltrim(rtrim(s)); }
 	inline void trim_str(std::string& s) { ltrim_str(s); rtrim_str(s); }
 
 	[[nodiscard]] std::string lcase(const std::string& s);

@@ -68,7 +68,7 @@ struct LLMChatArguments
 {
 	ChatSession session;
 	Messages messages;
-	LLMOption options;
+	LLMOptions options;
 	int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
 };
 
@@ -77,6 +77,7 @@ enum class LLMTaskFlag : int32_t
 	None = 0,
 	HiddenMessage = 1 << 0,
 };
+using LLMTaskFlags = EnumFlags<LLMTaskFlag>;
 
 class LLMInstance
 {
@@ -84,7 +85,7 @@ public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool Initialize(string filename, LLMOption options, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
+	bool Initialize(string filename, LLMOptions options, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	void Shutdown();
 
 	bool IsInitialized() const { return _modelState.pModel != nullptr; }
@@ -131,13 +132,14 @@ private:
 public:
 	enum class GenerateFlag : int32_t
 	{ 
-		None = 0, 
+		None			= 0,
 		Generate		= 1 << 0,
 		Continuation	= 1 << 1, 
 		Instigation		= 1 << 2,
 		AllowNarrator	= 1 << 3,
 		SwapPersonas	= 1 << 4,
 	};
+	using GenerateFlags = EnumFlags<GenerateFlag>;
 
 private:
 	struct __PartialResult
@@ -173,7 +175,7 @@ private:
 	{
 		Role role = Role::Undefined;
 		MessageType msgType = MessageType::Undefined;
-		GenerateFlag flags = GenerateFlag::None;
+		GenerateFlags flags = GenerateFlags::None;
 		int maxMessages = 0;
 		string prepend {};
 		string responseId {};
@@ -190,7 +192,7 @@ private:
 	bool RebuildKVCache();
 
 	Sentences GetHistory(size_t depth);
-	llama_sampler* CompileGrammar(GrammarFlag grammarFlags);
+	SamplerPtr CompileGrammar(GrammarFlags grammarFlags);
 	void InitSamplers();
 
 	// Tasks
@@ -211,7 +213,7 @@ private:
 		Role role = Role::Undefined;
 		MessageType msgType = MessageType::Undefined;
 
-		LLMTaskFlag flags = LLMTaskFlag::None;
+		LLMTaskFlags flags = LLMTaskFlags::None;
 		int msgCount = 0;
 		int ttl = 0;
 	};
@@ -248,7 +250,7 @@ private:
 
 	// Session
 	ChatSession _session;
-	LLMOption _options;
+	LLMOptions _options;
 	bool _bCtxReallocateNextTurn = false;
 
 	// Embedding
@@ -263,6 +265,3 @@ public:
 	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 	std::atomic<int64_t> usedRAM; // As reported from llama.cpp
 };
-
-DEFINE_ENUM_FLAGS(LLMInstance::GenerateFlag, int32_t);
-DEFINE_ENUM_FLAGS(LLMTaskFlag, int32_t);

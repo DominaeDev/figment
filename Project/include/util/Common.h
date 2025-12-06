@@ -5,6 +5,7 @@
 #include <queue>
 #include <memory>
 #include <iterator>
+#include <algorithm>
 
 // Debugging
 extern void DebugPrint(std::string message);
