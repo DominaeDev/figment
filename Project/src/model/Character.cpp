@@ -1,8 +1,8 @@
 #include "model/Character.h"
-#include "util/StringUtility.h"
 #include "gui/Color.h"
-
 #include <tinyxml2.h>
+
+import Utility;
 
 using namespace tinyxml2;
 

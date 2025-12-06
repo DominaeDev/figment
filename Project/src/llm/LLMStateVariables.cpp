@@ -1,6 +1,7 @@
 #include "llm/LLMStateVariables.h"
-#include "util/StringUtility.h"
 #include <format>
+
+import Utility;
 
 bool LLMStateVariables::SetValue(string name, string value)
 {

@@ -1,6 +1,5 @@
 #include "model/ChatSession.h"
 
-#include "util/StringUtility.h"
 #include "llm/LLMUtility.h"
 #include "gui/CharacterImageStore.h"
 #include "gui/Color.h"

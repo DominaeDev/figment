@@ -2,7 +2,6 @@
 #include "llm/LLMUtility.h"
 #include "llm/LLMTemplate.h"
 #include "llm/Embedding.h"
-#include "util/StringUtility.h"
 #include <common.h>
 #include <format>
 #include <algorithm>

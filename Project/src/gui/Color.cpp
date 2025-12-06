@@ -1,7 +1,8 @@
 #include "gui/Color.h"
-#include "util/StringUtility.h"
 #include "Types.h"
 #include <algorithm>
+
+import Utility;
 
 bool color_util::is_defined(Color color)
 {

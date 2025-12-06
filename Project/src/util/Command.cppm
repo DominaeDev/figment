@@ -1,9 +1,10 @@
 module;
 
 #include "Types.h"
-#include "util/StringUtility.h"
 
-export module Command;
+export module Utility.Command;
+
+import Utility;
 
 export enum class CommandType
 {

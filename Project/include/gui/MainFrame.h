@@ -13,7 +13,7 @@ class ChatScroll;
 class TextBox;
 class VariableList;
 
-import Command;
+import Utility.Command;
 
 class MainFrame : public Frame
 {

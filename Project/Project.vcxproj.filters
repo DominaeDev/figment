@@ -131,9 +131,6 @@
     <ClCompile Include="src\gui\StatusBar.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\StringUtility.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\SolidBackgroundRenderer.cpp">
       <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
@@ -227,17 +224,23 @@
     <ClCompile Include="src\llm\Grammar.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
-    <ClCompile Include="include\util\Command.cppm">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\Utility.ixx">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="include\util\EnumFlags.cppm">
+    <ClCompile Include="src\util\EnumFlags.cppm">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="include\util\Common.cppm">
+    <ClCompile Include="src\util\StringUtility.cppm">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\Command.cppm">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\Common.cppm">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\uuid_v4\uuid_v4.ixx">
+      <Filter>Source Files\Utility\Third-party\uuid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -276,9 +279,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\ChatScroll.h">
       <Filter>Source Files\Interface\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\StringUtility.h">
-      <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ChatMessage.h">
       <Filter>Source Files\Interface\Controls</Filter>

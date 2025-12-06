@@ -55,3 +55,5 @@ constexpr bool Enabled = true;
 constexpr bool Disabled = false;
 
 #endif
+
+import Utility.EnumFlags;

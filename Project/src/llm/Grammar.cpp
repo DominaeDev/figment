@@ -1,5 +1,4 @@
 #include "llm/Grammar.h"
-#include "util/StringUtility.h"
 #include <set>
 #include <cassert>
 

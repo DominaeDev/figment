@@ -1,6 +1,5 @@
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMUtility.h"
-#include "util/StringUtility.h"
 #include "Constants.h"
 #include <llama.h>
 #include <common.h>

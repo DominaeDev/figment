@@ -1,7 +1,8 @@
 ﻿#include "llm/LLMTemplate.h"
-#include "util/StringUtility.h"
 #include "Constants.h"
 #include <cassert>
+
+import Utility;
 
 PromptTemplate llm_tmpl::current_template = PromptTemplate::Default;
 string llm_tmpl::_template {};

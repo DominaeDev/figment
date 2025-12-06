@@ -2,8 +2,9 @@
 #include "gui/Text.h"
 #include "gui/Color.h"
 #include "model/AppState.h"
-#include "util/StringUtility.h"
 #include <algorithm>
+
+import Utility;
 
 #define CURSOR_BLINK_INTERVAL_MS    500
 

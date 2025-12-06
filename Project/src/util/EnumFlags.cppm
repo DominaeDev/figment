@@ -5,8 +5,7 @@ module;
 #include <utility>
 #include <ostream>
 
-export module EnumFlags;
-
+export module Utility.EnumFlags;
 
 // https://voithos.io/articles/type-safe-enum-class-bit-flags/
 // 

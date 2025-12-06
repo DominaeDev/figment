@@ -1,5 +1,4 @@
 #include "llm/Embedding.h"
-#include "util/StringUtility.h"
 #include <format>
 #include <iostream>
 #include <fstream>

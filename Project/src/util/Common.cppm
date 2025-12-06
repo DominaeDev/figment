@@ -5,12 +5,12 @@ module;
 #include <queue>
 #include <optional>
 #include <vector>
-#include "util/StringUtility.h"
 
 export module Utility:Common;
+import :StringUtil;
 
 import std;
-export import "uuid_v4.h";
+import uuid_v4;
 
 export 
 {

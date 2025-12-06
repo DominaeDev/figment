@@ -3,10 +3,8 @@
 
 #pragma once
 
-#include "Types.h"
 #include <llama.h>
-
-import EnumFlags;
+#include "Types.h"
 
 enum class Role : int32_t
 {

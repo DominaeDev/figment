@@ -4,8 +4,9 @@
 #include "gui/TextureStore.h"
 #include "gui/Color.h"
 #include "Constants.h"
-#include "util/StringUtility.h"
 #include <format>
+
+import Utility;
 
 #define MARGIN 8
 

@@ -6,9 +6,10 @@
 #include "model/AppState.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
-#include "util/StringUtility.h"
 #include <format>
 #include <set>
+
+import Utility;
 
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f

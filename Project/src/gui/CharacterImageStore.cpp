@@ -1,8 +1,8 @@
 #include "gui/CharacterImageStore.h"
 #include "model/AppState.h"
-#include "util/StringUtility.h"
 #include <SDL3_image/SDL_image.h>
 
+import Utility;
 
 std::map<string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByCharacter;
 

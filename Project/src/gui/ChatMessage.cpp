@@ -9,9 +9,10 @@
 #include "gui/CustomRenderer.h"
 #include "gui/TextureStore.h"
 #include "gui/CharacterImageStore.h"
-#include "util/StringUtility.h"
 #include "Constants.h"
 #include <format>
+
+import Utility;
 
 #define USER_RIGHT_ALIGNED	1
 #define USER_YOU			1
