@@ -58,6 +58,17 @@ export
 	};
 	using Messages = std::vector<Message>;
 
+	struct MessagePiece
+	{
+		string responseId;		// response block
+		string subMessageId;	// shared id for pieces of the same message type
+		string identifier {};	// who said this?
+		string content {};
+		Role role = Role::Undefined;
+		MessageType msgType = MessageType::Undefined;
+		bool isComplete = false;
+	};
+
 	struct Submessage
 	{
 		MessageType msgType = MessageType::Undefined;

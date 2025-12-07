@@ -278,6 +278,12 @@
     <ClCompile Include="src\gui\Sizer.ixx">
       <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
+    <ClCompile Include="src\llm\Context.ixx">
+      <Filter>Source Files\Inference\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Gradients.ixx">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h">

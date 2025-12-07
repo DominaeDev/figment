@@ -24,7 +24,7 @@ export
 
 int CeilInt(float f)
 {
-	return (int)ceilf(f);
+	return (int)std::ceilf(f);
 }
 
 void VerticalListSizer::OnLayout(Rectf parentRect)

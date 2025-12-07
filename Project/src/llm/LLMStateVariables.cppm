@@ -1,5 +1,3 @@
-module;
-
 export module LLMStateVariables;
 
 import Types;

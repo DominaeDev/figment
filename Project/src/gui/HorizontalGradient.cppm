@@ -1,3 +1,7 @@
+module;
+
+#include <SDL3/SDL.h>
+
 export module HorizontalGradient;
 
 import Types;

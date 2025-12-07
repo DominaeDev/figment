@@ -13,7 +13,7 @@ export
 
 static int CeilInt(float f)
 {
-	return (int)ceilf(f);
+	return (int)std::ceilf(f);
 }
 
 void VerticalSizer::OnLayout(Rectf parentRect)

@@ -1,19 +1,22 @@
 module;
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 export module AppState;
+import Frame;
+
+//class Frame;
+//struct SDL_Window;
+//struct SDL_Renderer;
+//struct SDL_Cursor;
+//enum SDL_SystemCursor : int;
+//struct TTF_TextEngine;
+
+extern "C++" class LLMInstance;
 
 export
 {
-	class Frame;
-	struct SDL_Window;
-	struct SDL_Renderer;
-	struct SDL_Cursor;
-	enum SDL_SystemCursor : int;
-	struct TTF_TextEngine;
-	class LLMInstance;
-
 	class Application
 	{
 	public:

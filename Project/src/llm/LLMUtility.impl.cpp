@@ -2,12 +2,9 @@
 
 import Types;
 import LLMTypes;
-import LLMUtility;
 import Utility;
 import Constants;
 import Context;
-import ContextBlock;
-import ContextCache;
 
 std::string llm_util::stringFromToken(VocabPtr pVocab, llama_token token)
 {
@@ -964,11 +961,11 @@ void llm_util::erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos)
 	for (int32_t seq_id = 0; seq_id < n_max_seq; ++seq_id)
 		llama_kv_self_seq_rm(pCtx, seq_id, pos, -1);
 }
-
+/*
 SequenceIndices llm_util::get_sequence_indices(Sequence seq, int32_t n_seq_max) noexcept
 {
 	return get_sequence_indices({ seq }, n_seq_max);
-}
+}*/
 
 SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept
 {

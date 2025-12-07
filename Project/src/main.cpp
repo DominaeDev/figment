@@ -4,16 +4,6 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-import Graphics;
-import Constants;
-import AppState;
-import Fonts;
-import TextureStore;
-import CharacterImageStore;
-import Text;
-import MainFrame;
-import LLMInstance;
-
 #if defined(_DEBUG)
 #define CHECK_MEMORY_LEAKS
 #endif
@@ -27,6 +17,16 @@ import LLMInstance;
 #define MEMORY_LEAK_ALLOC 0
 
 #define APP_STATE(P) static_cast<AppState*>(P);
+
+import Graphics;
+import Constants;
+import AppState;
+import Fonts;
+import TextureStore;
+import CharacterImageStore;
+import Text;
+import MainFrame;
+import LLMInstance;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])

@@ -11,10 +11,11 @@ module;
 
 export module LLMInstance;
 
-import Types;
+export import Types;
+export import LLMTypes;
+
 import Constants;
 import ChatSession;
-import LLMTypes;
 import LLMTemplate;
 import LLMUtility;
 import LLMEmbedding;
@@ -29,7 +30,6 @@ import Context;
 import <cassert>;
 import <cstdio>;
 
-class ContextBlock;
 
 export {
 
@@ -64,17 +64,6 @@ export {
 		LLMStatusSignal signal;
 	};
 
-	struct MessagePiece
-	{
-		string responseId;		// response block
-		string subMessageId;	// shared id for pieces of the same message type
-		string identifier {};	// who said this?
-		string content {};
-		Role role = Role::Undefined;
-		MessageType msgType = MessageType::Undefined;
-		bool isComplete = false;
-	};
-
 	struct RemovedMessage
 	{
 		string responseId;
@@ -97,7 +86,7 @@ export {
 	};
 	using LLMTaskFlags = EnumFlags<LLMTaskFlag>;
 
-	class LLMInstance
+	extern "C++" class LLMInstance
 	{
 	public:
 		LLMInstance();
@@ -283,7 +272,8 @@ export {
 		std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 		std::atomic<int64_t> usedRAM; // As reported from llama.cpp
 	};
-}
+} // export
+
 
 #define DEBUG_SEED 0xA1B2C3D4
 

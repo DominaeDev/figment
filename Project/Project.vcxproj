@@ -128,6 +128,7 @@
     <ClCompile Include="src\gui\CustomRenderer.cppm" />
     <ClCompile Include="src\gui\Fonts.cppm" />
     <ClCompile Include="src\gui\Frame.cppm" />
+    <ClCompile Include="src\gui\Gradients.ixx" />
     <ClCompile Include="src\gui\Graphics.cppm" />
     <ClCompile Include="src\gui\HorizontalGradient.cppm" />
     <ClCompile Include="src\gui\HorizontalSizer.cppm" />
@@ -163,6 +164,7 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Default</CompileAs>
     </ClCompile>
+    <ClCompile Include="src\llm\Context.ixx" />
     <ClCompile Include="src\llm\ContextBlock.cppm" />
     <ClCompile Include="src\llm\ContextCache.cppm" />
     <ClCompile Include="src\llm\ContextCache.impl.cpp" />

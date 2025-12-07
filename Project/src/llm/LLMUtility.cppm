@@ -5,12 +5,10 @@ import Utility;
 import LLMTypes;
 import Constants;
 
+extern "C++" class Context;
+
 export 
 {
-	class Context;
-	class ContextBlock;
-	class ContextCache;
-
 	namespace llm_util
 	{
 		std::string stringFromToken(VocabPtr pVocab, llama_token token);
@@ -47,7 +45,7 @@ export
 		bool dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, string filename);
 		bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_id, VocabPtr pVocab, string filename);
 
-		inline SequenceIndices get_sequence_indices(Sequence seq, int32_t n_seq_max) noexcept;
+//		inline SequenceIndices get_sequence_indices(Sequence seq, int32_t n_seq_max) noexcept;
 		SequenceIndices get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept;
 		SequenceId sequence_from_index(int32_t seq_idx) noexcept;
 	}

@@ -1,8 +1,8 @@
 module;
 
-export module Graphics;
+#include <SDL3/SDL.h>
 
-export import <SDL3/SDL.h>;
+export module Graphics;
 
 export
 {
