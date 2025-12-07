@@ -166,7 +166,6 @@
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
     <ClCompile Include="src\util\Command.cppm" />
     <ClCompile Include="src\util\Common.cppm" />
-    <ClCompile Include="src\util\EnumFlags.cppm" />
     <ClCompile Include="src\util\FileUtil.cppm" />
     <ClCompile Include="src\util\StringUtil.cppm" />
     <ClCompile Include="src\util\Utility.ixx" />
@@ -175,6 +174,7 @@
     <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h" />
     <ClInclude Include="..\Libraries\uuid_v4\endianness.h" />
     <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h" />
+    <ClInclude Include="include\EnumFlags.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
     <ClInclude Include="include\gui\HorizontalGradient.h" />
     <ClInclude Include="include\gui\Image.h" />

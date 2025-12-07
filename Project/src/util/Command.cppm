@@ -2,9 +2,9 @@ module;
 
 #include <string>
 
-export module Utility.Command;
+export module Utility:Command;
 
-import Utility;
+import :StringUtil;
 
 using string = std::string;
 

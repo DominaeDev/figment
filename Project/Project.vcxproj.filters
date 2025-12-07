@@ -227,9 +227,6 @@
     <ClCompile Include="src\util\Utility.ixx">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\EnumFlags.cppm">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\StringUtil.cppm">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
@@ -405,6 +402,9 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h">
       <Filter>Source Files\Utility\Third-party\uuid</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EnumFlags.h">
+      <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -13,6 +13,8 @@
 #include <functional>
 #include <ostream>
 
+#include "EnumFlags.h"
+
 // User literal
 inline constexpr uint8_t operator "" _u8( unsigned long long arg ) noexcept
 {

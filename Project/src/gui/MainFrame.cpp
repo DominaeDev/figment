@@ -1,9 +1,9 @@
 #include "gui/MainFrame.h"
 
+#include <chrono>
 #include <format>
 #include <ranges>
 #include <cwctype>
-
 #include "gui/Area.h"
 #include "gui/Panel.h"
 #include "gui/StaticText.h"

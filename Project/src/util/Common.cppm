@@ -10,10 +10,12 @@ export module Utility:Common;
 
 import :StringUtil;
 
+using string = std::string;
+
 export 
 {
 	// Debugging
-	void DebugPrint(std::string message)
+	void DebugPrint(string message)
 	{
 #if _DEBUG
 		if (message.empty())
@@ -25,13 +27,19 @@ export
 #endif
 	}
 
-	void DebugPrintLn(std::string message = "")
+	void DebugPrintLn(string message = "")
 	{
-		DebugPrint(message);
-		DebugPrint("\r\n");
+#if _DEBUG
+		if (message.empty())
+			return;
+
+		std::println(stdout, "{}", message);
+#else
+		// noop
+#endif
 	}
 
-	std::string CreateUUID()
+	string CreateUUID()
 	{
 		static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 		return uuidGenerator.getUUID().str();

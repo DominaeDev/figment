@@ -8,7 +8,6 @@
 #include "gui/CharacterImageStore.h"
 #include "gui/Color.h"
 
-
 import Utility;
 
 bool ChatSession::Initialize(LLMOptions options)

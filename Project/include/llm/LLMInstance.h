@@ -3,20 +3,20 @@
 
 #pragma once
 
-#include "llm/LLMEmbedding.h"
-#include "llm/LLMStateVariables.h"
-#include "llm/Context.h"
-#include "Constants.h"
-#include "model/ChatSession.h"
-
-#include <vector>
 #include <set>
+#include <vector>
 #include <functional>
 #include <thread>
 #include <mutex>
 #include <queue>
 #include <array>
 #include <memory>
+
+#include "llm/LLMEmbedding.h"
+#include "llm/LLMStateVariables.h"
+#include "llm/Context.h"
+#include "Constants.h"
+#include "model/ChatSession.h"
 
 using LoadModelCallback = std::function<void(bool)>;
 using LoadModelProgressCallback = std::function<void(int)>;
