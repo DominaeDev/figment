@@ -43,7 +43,6 @@ export namespace string_util
 	std::string to_utf8(const std::wstring& str);
 }
 
-
 void string_util::ltrim_str(std::string& s)
 {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {

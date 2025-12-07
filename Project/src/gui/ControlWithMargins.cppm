@@ -1,0 +1,41 @@
+export module ControlWithMargins;
+
+import Control;
+
+export
+{
+	class ControlWithMargins : public Control
+	{
+	public:
+		ControlWithMargins(Control* pParent);
+
+		void SetMargins(int left, int top, int right, int bottom);
+		void SetMargins(Rect rect);
+
+	protected:
+		int _marginLeft = 0;
+		int _marginTop = 0;
+		int _marginRight = 0;
+		int _marginBottom = 0;
+
+		int HMargin() const { return _marginLeft + _marginRight; }
+		int VMargin() const { return _marginTop + _marginBottom; }
+	};
+}
+
+ControlWithMargins::ControlWithMargins(Control* pParent) : Control(pParent)
+{
+}
+
+void ControlWithMargins::SetMargins(int left, int top, int right, int bottom)
+{
+	_marginLeft = left;
+	_marginTop = top;
+	_marginRight = right;
+	_marginBottom = bottom;
+}
+
+void ControlWithMargins::SetMargins(Rect rect)
+{
+	SetMargins(rect.x, rect.y, rect.w, rect.h);
+}

@@ -16,3 +16,4 @@ Project/resources/debug_script.txt
 Project/*.txt
 Project/resources/fonts/
 Project/embeddings/
+*.i

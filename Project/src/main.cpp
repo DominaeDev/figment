@@ -4,14 +4,15 @@
 #include <SDL3/SDL_main.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "Constants.h"
-#include "model/AppState.h"
-#include "gui/Fonts.h"
-#include "gui/TextureStore.h"
-#include "gui/CharacterImageStore.h"
-#include "gui/Text.h"
-#include "gui/MainFrame.h"
-#include "llm/LLMInstance.h"
+import Graphics;
+import Constants;
+import AppState;
+import Fonts;
+import TextureStore;
+import CharacterImageStore;
+import Text;
+import MainFrame;
+import LLMInstance;
 
 #if defined(_DEBUG)
 #define CHECK_MEMORY_LEAKS
