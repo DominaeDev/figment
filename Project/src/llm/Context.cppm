@@ -1,14 +1,19 @@
-export module Context:Context;
+module;
+
+#include <llama.h>
+
+export module Context;
 
 import Types;
-import LLMTypes;
 import Utility;
-import ModelState;
 import Constants;
+import LLMTypes;
+import ModelState;
 import ContextBlock;
 import LLMUtility;
 
-import :ContextCache;
+export import ContextCache;
+export import ContextBlock;
 
 import <cassert>;
 
@@ -160,7 +165,7 @@ int32_t Context::DecodeUncached(int32_t cursor_pos)
 		if (block.flags.IsSet(ContextBlockFlag::Cached))
 			continue;
 
-		std::vector<llama_seq_id> seqs = block.get_sequence_ids(_num_sequences);
+		std::vector<LlamaSequenceId> seqs = block.get_sequence_ids(_num_sequences);
 		llama_batch batch_view = llm_util::create_batch(block.tokens, seqs, _num_sequences, block.offset);
 		if (!llama_decode(_pCtx, batch_view))
 		{
@@ -194,7 +199,7 @@ bool Context::RebuildKVCache()
 		// Clear only non-static blocks
 		int32_t blocks_pos = chat_begin_pos;
 
-		for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size(); ++i)
+		for (size_t i = 0; i < AllSequenceIDs.size(); ++i)
 			llama_kv_self_seq_rm(_pCtx, (int32_t)i, blocks_pos, -1);
 
 		auto batch_view = cache.GetBatchView(blocks_pos, cache.length() - blocks_pos);

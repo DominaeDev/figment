@@ -2,14 +2,14 @@ module;
 
 #include <SDL3/SDL.h>
 
-export module Control;
+export module GUI.Control;
 
-import Types;
-import Color;
-import CustomRenderer;
-import Graphics;
+import Common;
+export import GUI.Layout.LayoutElement;
+export import GUI.GraphicTypes;
+export import CustomRenderer;
 
-export import Sizer;
+export import GUI.Layout;
 
 export
 {
@@ -58,6 +58,24 @@ export
 		// Theming
 		CustomRenderer* _pBGRenderer = nullptr;
 		CustomRenderer* _pBorderRenderer = nullptr;
+	};
+
+	class ControlWithMargins : public Control
+	{
+	public:
+		ControlWithMargins(Control* pParent);
+
+		void SetMargins(int left, int top, int right, int bottom);
+		void SetMargins(Rect rect);
+
+	protected:
+		int _marginLeft = 0;
+		int _marginTop = 0;
+		int _marginRight = 0;
+		int _marginBottom = 0;
+
+		int HMargin() const { return _marginLeft + _marginRight; }
+		int VMargin() const { return _marginTop + _marginBottom; }
 	};
 }
 
@@ -240,4 +258,21 @@ void Control::SetBorderRenderer(CustomRenderer* pCustom)
 		_pBorderRenderer = nullptr;
 	}
 	_pBorderRenderer = pCustom;
+}
+
+ControlWithMargins::ControlWithMargins(Control* pParent) : Control(pParent)
+{
+}
+
+void ControlWithMargins::SetMargins(int left, int top, int right, int bottom)
+{
+	_marginLeft = left;
+	_marginTop = top;
+	_marginRight = right;
+	_marginBottom = bottom;
+}
+
+void ControlWithMargins::SetMargins(Rect rect)
+{
+	SetMargins(rect.x, rect.y, rect.w, rect.h);
 }

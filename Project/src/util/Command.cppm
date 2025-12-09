@@ -1,9 +1,6 @@
-module;
-
-#include <string>
-
 export module Utility:Command;
 
+import std;
 import :StringUtil;
 
 using string = std::string;

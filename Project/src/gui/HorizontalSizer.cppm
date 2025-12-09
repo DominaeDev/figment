@@ -1,10 +1,8 @@
-export module Sizer:HorizontalSizer;
+export module GUI.Layout.HorizontalSizer;
 
-import :Sizer;
+import Common;
 
-import Types;
-import Utility;
-
+import GUI.Layout.LayoutElement;
 
 export
 {

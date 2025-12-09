@@ -2,15 +2,13 @@ module;
 
 #include <SDL3/SDL.h>
 
-export module StatusBar;
+export module GUI.Controls.StatusBar;
+export import GUI.Control;
 
-import Types;
-import Control;
-import Constants;
+import Common;
+import GUI.Text;
+import GUI.Controls.StaticText;
 import LLMInstance;
-
-import StaticText;
-import Fonts;
 
 export
 {

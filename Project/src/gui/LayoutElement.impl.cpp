@@ -1,6 +1,6 @@
-module Sizer;
+module GUI.Layout.LayoutElement;
 
-import :Sizer;
+import GUI.Layout.Sizer;
 
 LayoutElement::~LayoutElement()
 {

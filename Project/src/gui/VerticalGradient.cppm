@@ -2,15 +2,13 @@ module;
 
 #include <SDL3/SDL.h>
 
-export module VerticalGradient;
+export module GUI.Controls.VerticalGradient;
+export import GUI.Control;
 
-import Types;
-import Control;
-import Graphics;
-import Color;
+import Common;
+import GUI.GraphicTypes;
 import TextureStore;
 
-import Utility;
 
 export
 {

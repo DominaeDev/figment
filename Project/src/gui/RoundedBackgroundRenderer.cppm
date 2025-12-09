@@ -4,10 +4,9 @@ export module RoundedBackgroundRenderer;
 
 import <SDL3/SDL.h>;
 
-import Types;
+import Common;
 import CustomRenderer;
-import Utility;
-import Graphics;
+import GUI.GraphicTypes;
 
 export
 {

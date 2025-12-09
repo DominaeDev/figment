@@ -10,23 +10,23 @@
 
 #ifdef CHECK_MEMORY_LEAKS
 	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
+#pragma warning (push)
+#pragma warning (disable: 4005) // Disable warning: redefine macro
+//	#include <stdlib.h>
 	#include <crtdbg.h>
+#pragma warning (pop)
 #endif
 
 #define MEMORY_LEAK_ALLOC 0
 
-#define APP_STATE(P) static_cast<AppState*>(P);
-
-import Graphics;
-import Constants;
 import AppState;
-import Fonts;
+import Constants;
+import GUI.GraphicTypes;
+import GUI.Text;
 import TextureStore;
 import CharacterImageStore;
-import Text;
-import MainFrame;
 import LLMInstance;
+import MainFrame;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
@@ -80,7 +80,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	SDL_MaximizeWindow(pWindow);
 #endif
 	// Create TTF text engine
-	pAppState->pTextEngine = Text::InitEngine(pRenderer);
+	pAppState->pTextEngine = TextEngine::InitEngine(pRenderer);
 
 	// Load fonts
 	Fonts::Init();

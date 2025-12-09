@@ -1,10 +1,17 @@
+module;
+
 export module LLMTypes;
 
 export import <llama.h>;
-export import Types;
+import Common;
 
 export
 {
+	enum : uint32_t {
+		DEFAULT_SEED = LLAMA_DEFAULT_SEED,
+		DEBUG_SEED = 0xA1B2C3D4,
+	};
+
 	enum class Role : int32_t
 	{
 		Undefined = 0,
@@ -81,6 +88,7 @@ export
 	using SamplerPtr = llama_sampler*;
 	using Batch = llama_batch;
 	using Token = llama_token;
+	using LlamaSequenceId = llama_seq_id;
 
 	enum class LLMOption : uint32_t
 	{
@@ -111,7 +119,14 @@ export
 	};
 	using SequenceId = EnumFlags<Sequence>;
 
-	using SequenceIndices = std::vector<llama_seq_id>;
+	constexpr std::array<Sequence, 4> AllSequenceIDs {
+		Sequence::Bot1,
+		Sequence::Bot2,
+		Sequence::Bot3,
+		Sequence::Bot4,
+	};
+
+	using SequenceIndices = std::vector<LlamaSequenceId>;
 
 	struct Sentence
 	{

@@ -1,50 +1,17 @@
-module;
+export module GUI.Text.Fonts;
 
-#include <SDL3_ttf/SDL_ttf.h>
+import Common;
+import GUI.GraphicTypes;
+import <SDL3_ttf/SDL_ttf.h>;
 
-export module Fonts;
-
-import Types;
-import Constants;
-
-export
+export enum class FontFace
 {
-	enum class FontFace
-	{
-		Regular,
-		Italic,
-		Bold,
-		NunitoBold,
-		Default = Regular,
-	};
-
-	class Fonts
-	{
-	public:
-		static void Init();
-		static void ReleaseFonts();
-
-		static TTF_Font* GetFont(FontFace, double ptSize);
-
-	private:
-		static TTF_Font* LoadFont(FontFace face, const char* filename, double ptSize);
-		static std::list<TTF_Font*> GetFallbackFonts(double ptSize);
-		static TTF_Font* LoadFallbackFont(const char* filename, double ptSize);
-
-	private:
-
-		struct Font
-		{
-			TTF_Font* pFont;
-			FontFace face;
-			int size;
-		};
-		static std::map<FontFace, std::list<Font>> s_Fonts;
-
-		static std::list<Font> s_FallbackFonts;
-	};
-
-}
+	Regular,
+	Italic,
+	Bold,
+	NunitoBold,
+	Default = Regular,
+};
 
 std::map<FontFace, const char*> s_FontFilenames {
 	{ FontFace::Regular,	"./resources/fonts/Nunito-Regular.ttf" },
@@ -59,89 +26,106 @@ std::list<const char*> s_FallbackFontFilenames {
 	{"./fonts/NotoColorEmoji-Regular.ttf" },
 };
 
-std::map<FontFace, std::list<Fonts::Font>> Fonts::s_Fonts = {};
-std::list<Fonts::Font> Fonts::s_FallbackFonts = {};
-
-void Fonts::Init()
+struct Font
 {
-	GetFont(FontFace::Regular, Constants::GUI::DefaultFontSize);
-	GetFont(FontFace::Italic, Constants::GUI::DefaultFontSize);
-	GetFont(FontFace::Bold, Constants::GUI::DefaultFontSize);
-}
+	TTF_Font* pFont;
+	FontFace face;
+	int size;
+};
 
-void Fonts::ReleaseFonts()
+export class Fonts
 {
-	for (auto& kvp : s_Fonts)
+public:
+	static void Init()
 	{
-		for (auto& font : kvp.second)
+		GetFont(FontFace::Regular, Constants::GUI::DefaultFontSize);
+		GetFont(FontFace::Italic, Constants::GUI::DefaultFontSize);
+		GetFont(FontFace::Bold, Constants::GUI::DefaultFontSize);
+	}
+
+	static void ReleaseFonts()
+	{
+		for (auto& kvp : s_Fonts)
+		{
+			for (auto& font : kvp.second)
+				TTF_CloseFont(font.pFont);
+		}
+		for (auto& font : s_FallbackFonts)
 			TTF_CloseFont(font.pFont);
-	}
-	for (auto& font : s_FallbackFonts)
-		TTF_CloseFont(font.pFont);
-	s_Fonts.clear();
-}
-
-std::list<TTF_Font*> Fonts::GetFallbackFonts(double ptSize)
-{
-	int iSize = (int)(ptSize * 10.0);
-
-	std::list<TTF_Font*> fonts;
-	for (auto& font : s_FallbackFonts)
-	{
-		if (font.size == iSize)
-			fonts.push_back(font.pFont);
+		s_Fonts.clear();
 	}
 
-	if (fonts.size() == 0)
+	static TTF_Font* GetFont(FontFace face, double ptSize)
 	{
-		for (auto& fn : s_FallbackFontFilenames)
-			fonts.push_back(LoadFallbackFont(fn, ptSize));
+		int iSize = (int)(ptSize * 10.0);
+		auto itFind = s_Fonts.find(face);
+		if (itFind != s_Fonts.cend())
+		{
+			for (auto font : itFind->second)
+			{
+				if (font.size == iSize)
+					return font.pFont;
+			}
+		}
+
+		return LoadFont(face, s_FontFilenames[face], ptSize);
 	}
-	return fonts;
-}
 
-TTF_Font* Fonts::LoadFont(FontFace face, const char* filename, double ptSize)
-{
-	TTF_Font* pFont = TTF_OpenFont(filename, (float)ptSize);
-	if (pFont != nullptr)
+private:
+	static std::list<TTF_Font*> GetFallbackFonts(double ptSize)
 	{
-		TTF_SetFontHinting(pFont, TTF_HINTING_LIGHT_SUBPIXEL);
-		TTF_SetFontKerning(pFont, true);
-		s_Fonts[face].push_back(Font { pFont, face, (int)(ptSize * 10.0) });
+		int iSize = (int)(ptSize * 10.0);
 
-		auto fallbacks = GetFallbackFonts(ptSize);
-		for (auto& pFallbackFont : fallbacks)
-			TTF_AddFallbackFont(pFont, pFallbackFont);
-		return pFont;
-	}
-	return nullptr;
-}
-
-TTF_Font* Fonts::LoadFallbackFont(const char* filename, double ptSize)
-{
-	TTF_Font* pFont = TTF_OpenFont(filename, (float)ptSize);
-	if (pFont != nullptr)
-	{
-		TTF_SetFontHinting(pFont, TTF_HINTING_LIGHT_SUBPIXEL);
-		TTF_SetFontKerning(pFont, true);
-		s_FallbackFonts.push_back(Font { pFont, FontFace::Default, (int)(ptSize * 10.0) });
-		return pFont;
-	}
-	return nullptr;
-}
-
-TTF_Font* Fonts::GetFont(FontFace face, double ptSize)
-{
-	int iSize = (int)(ptSize * 10.0);
-	auto itFind = s_Fonts.find(face);
-	if (itFind != s_Fonts.cend())
-	{
-		for (auto font : itFind->second)
+		std::list<TTF_Font*> fonts;
+		for (auto& font : s_FallbackFonts)
 		{
 			if (font.size == iSize)
-				return font.pFont;
+				fonts.push_back(font.pFont);
 		}
+
+		if (fonts.size() == 0)
+		{
+			for (auto& fn : s_FallbackFontFilenames)
+				fonts.push_back(LoadFallbackFont(fn, ptSize));
+		}
+		return fonts;
 	}
 
-	return LoadFont(face, s_FontFilenames[face], ptSize);
-}
+	static TTF_Font* LoadFont(FontFace face, const char* filename, double ptSize)
+	{
+		TTF_Font* pFont = TTF_OpenFont(filename, (float)ptSize);
+		if (pFont != nullptr)
+		{
+			TTF_SetFontHinting(pFont, TTF_HINTING_LIGHT_SUBPIXEL);
+			TTF_SetFontKerning(pFont, true);
+			s_Fonts[face].push_back(Font { pFont, face, (int)(ptSize * 10.0) });
+
+			auto fallbacks = GetFallbackFonts(ptSize);
+			for (auto& pFallbackFont : fallbacks)
+				TTF_AddFallbackFont(pFont, pFallbackFont);
+			return pFont;
+		}
+		return nullptr;
+	}
+
+	static TTF_Font* LoadFallbackFont(const char* filename, double ptSize)
+	{
+		TTF_Font* pFont = TTF_OpenFont(filename, (float)ptSize);
+		if (pFont != nullptr)
+		{
+			TTF_SetFontHinting(pFont, TTF_HINTING_LIGHT_SUBPIXEL);
+			TTF_SetFontKerning(pFont, true);
+			s_FallbackFonts.push_back(Font { pFont, FontFace::Default, (int)(ptSize * 10.0) });
+			return pFont;
+		}
+		return nullptr;
+	}
+
+private:
+	static std::map<FontFace, std::list<Font>> s_Fonts;
+	static std::list<Font> s_FallbackFonts;
+};
+
+std::map<FontFace, std::list<Font>> Fonts::s_Fonts = {};
+std::list<Font> Fonts::s_FallbackFonts = {};
+

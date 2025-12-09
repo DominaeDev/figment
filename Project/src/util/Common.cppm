@@ -1,13 +1,11 @@
 module;
 
-#include <uuid_v4.h>
-
 export module Utility:Common;
 
 import Types;
+import Constants;
 import :StringUtil;
-
-using string = std::string;
+import <uuid_v4.h>;
 
 export 
 {

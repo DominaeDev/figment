@@ -1,7 +1,7 @@
-export module Sizer:VerticalListSizer;
+export module GUI.Layout.VerticalListSizer;
 
-import Types;
-import :Sizer;
+import Common;
+import GUI.Layout.LayoutElement;
 
 export
 {

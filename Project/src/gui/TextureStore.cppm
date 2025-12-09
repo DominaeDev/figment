@@ -4,8 +4,8 @@ module;
 
 export module TextureStore;
 
-import Types;
-import Graphics;
+import Common;
+import GUI.GraphicTypes;
 
 export
 {

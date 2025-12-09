@@ -60,6 +60,9 @@
     <Filter Include="Source Files\Third-party\uuid">
       <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{d29c7997-94e8-4fd5-9479-9e5cd494b571}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -105,9 +108,6 @@
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\Context.cppm">
-      <Filter>Source Files\Inference\Context</Filter>
-    </ClCompile>
-    <ClCompile Include="src\llm\Context.impl.cpp">
       <Filter>Source Files\Inference\Context</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\ContextBlock.cppm">
@@ -188,7 +188,7 @@
     <ClCompile Include="src\gui\Fonts.cppm">
       <Filter>Source Files\Interface\Fonts</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Text.cppm">
+    <ClCompile Include="src\gui\TextEngine.cppm">
       <Filter>Source Files\Interface\Fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MainFrame.cppm">
@@ -242,10 +242,10 @@
     <ClCompile Include="src\gui\CustomRenderer.cppm">
       <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Color.cppm">
+    <ClCompile Include="src\gui\Colors.cppm">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Graphics.cppm">
+    <ClCompile Include="src\gui\GraphicTypes.cppm">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
     <ClCompile Include="src\model\Character.cppm">
@@ -257,17 +257,8 @@
     <ClCompile Include="src\util\EnumFlags.cppm">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\Types.cppm">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\Constants.cppm">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\llm\LLMUtility.impl.cpp">
       <Filter>Source Files\Inference</Filter>
-    </ClCompile>
-    <ClCompile Include="src\llm\ContextCache.impl.cpp">
-      <Filter>Source Files\Inference\Context</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\LayoutElement.impl.cpp">
       <Filter>Source Files\Interface\Layout</Filter>
@@ -275,14 +266,23 @@
     <ClCompile Include="src\gui\Sizer.impl.cpp">
       <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Sizer.ixx">
+    <ClCompile Include="src\gui\Controls.ixx">
+      <Filter>Source Files\Interface\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Layout.ixx">
       <Filter>Source Files\Interface\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\llm\Context.ixx">
-      <Filter>Source Files\Inference\Context</Filter>
+    <ClCompile Include="src\util\Constants.cppm">
+      <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Gradients.ixx">
-      <Filter>Source Files\Interface\Controls</Filter>
+    <ClCompile Include="src\Common.ixx">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\Types.cppm">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Text.ixx">
+      <Filter>Source Files\Interface\Fonts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

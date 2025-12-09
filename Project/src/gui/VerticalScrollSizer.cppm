@@ -1,6 +1,6 @@
-export module Sizer:VerticalScrollSizer;
+export module GUI.Layout.VerticalScrollSizer;
 
-export import :VerticalListSizer;
+export import GUI.Layout.VerticalListSizer;
 
 export
 {

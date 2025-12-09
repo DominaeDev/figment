@@ -1,8 +1,11 @@
+module;
+
+#include <llama.h>
+
 export module Grammar;
 
-import Types;
+import Common;
 import LLMTypes;
-import Utility;
 import <cassert>;
 
 export enum class GrammarFlag : int32_t

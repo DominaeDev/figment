@@ -2,17 +2,18 @@ module;
 
 #include <SDL3/SDL.h>
 
-export module ChatScroll;
+export module GUI.Controls.ChatScroll;
+export import GUI.Control;
 
-export import Types;
-export import Control;
+import Common;
+import GUI.Controls.ChatMessage;
+import GUI.Controls.VerticalGradient;
 
 import LLMTypes;
 import LLMInstance;
 import ChatSession;
-import ChatMessage;
-import Gradients;
-import Color;
+import Utility;
+
 import AppState;
 
 export

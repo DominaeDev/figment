@@ -4,10 +4,8 @@ module;
 
 export module Character;
 
-import Types;
-import Graphics;
-import Color;
-import Utility;
+import Common;
+import GUI.GraphicTypes;
 
 export
 {

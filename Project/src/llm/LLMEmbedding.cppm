@@ -2,11 +2,10 @@ module;
 
 export module LLMEmbedding;
 
+import Common;
 import ChatSession;
-import Constants;
 import LLMTypes;
 import LLMUtility;
-import Utility;
 import Embedding;
 import <cassert>;
 import <llama.h>;

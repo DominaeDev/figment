@@ -1,19 +1,18 @@
-export module VariableList;
+export module GUI.Controls.VariableList;
+export import GUI.Control;
 
-import Types;
-import Control;
-import Graphics;
-import StaticText;
+import GUI.Controls.StaticText;
+
+import Common;
+import GUI.GraphicTypes;
 import NineGridBackgroundRenderer;
 import TextureStore;
-import Color;
-import Constants;
 
-import Utility;
+
+class StaticText;
 
 export
 {
-	class StaticText;
 
 	class VariableList : public Control
 	{

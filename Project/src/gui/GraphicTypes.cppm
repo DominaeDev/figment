@@ -1,8 +1,9 @@
-module;
+export module GUI.GraphicTypes;
 
-#include <SDL3/SDL.h>
+export import <SDL3/SDL.h>;
+export import <SDL3_image/SDL_image.h>;
 
-export module Graphics;
+export import GUI.Colors;
 
 export
 {
@@ -11,12 +12,13 @@ export
 	using Point = SDL_Point;
 	using Rectf = SDL_FRect;
 	using Rect = SDL_Rect;
-	using Colorf = SDL_FColor;
-	using Color = SDL_Color;
 	using Renderer = SDL_Renderer;
 	using Texture = SDL_Texture;
 	using Vertex = SDL_Vertex;
 	using Surface = SDL_Surface;
+	using Window = SDL_Window;
+	using WindowID = SDL_WindowID;
+	using Event = SDL_Event;
 
 	namespace gui_util
 	{

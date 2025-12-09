@@ -1,29 +1,26 @@
 module;
 
-#include <SDL3/SDL.h>
-
 export module Frame;
+export import GUI.Control;
 
-import Types;
-export import Control;
-import Graphics;
-import Utility;
+import Common;
+export import GUI.GraphicTypes;
 
 export
 {
 	class Frame : public Control
 	{
 	public:
-		Frame(SDL_Window* pWindow);
+		Frame(Window* pWindow);
 		virtual ~Frame();
 
-		SDL_Window* GetWindow() const { return _pWindow; }
-		SDL_WindowID GetWindowID() const;
+		Window* GetWindow() const { return _pWindow; }
+		WindowID GetWindowID() const;
 
 	protected:
 		bool OnEvent(SDL_Event* event) override;
 
-		SDL_Window* _pWindow = nullptr;
+		Window* _pWindow = nullptr;
 	};
 }
 
@@ -42,7 +39,7 @@ Frame::~Frame()
 {
 }
 
-SDL_WindowID Frame::GetWindowID() const
+WindowID Frame::GetWindowID() const
 {
 	return SDL_GetWindowID(_pWindow);
 }

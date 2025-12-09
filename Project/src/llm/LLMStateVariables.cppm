@@ -1,7 +1,6 @@
 export module LLMStateVariables;
 
-import Types;
-import Utility;
+import Common;
 
 export 
 {

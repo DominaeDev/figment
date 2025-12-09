@@ -1,6 +1,6 @@
-export module Sizer:VerticalSizer;
+export module GUI.Layout.VerticalSizer;
 
-import :Sizer;
+import GUI.Layout.LayoutElement;
 
 export
 {

@@ -1,14 +1,12 @@
-export module Panel;
-
-import Control;
+export module GUI.Controls.Panel;
+export import GUI.Control;
 
 export
 {
 	class Panel : public Control
 	{
 	public:
-		Panel(Control* pParent) : Control(pParent)
-		{}
+		Panel(Control* pParent) : Control(pParent) {}
 
 	protected:
 		void OnUpdate(float fDeltaTime) override {};

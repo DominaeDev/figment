@@ -1,4 +1,6 @@
-/*module Sizer:Sizer;
+module GUI.Layout.Sizer;
+
+import GUI.Layout.LayoutElement;
 
 void Sizer::Add(LayoutElement* pControl, int proportion, int flags, int border)
 {
@@ -30,4 +32,8 @@ void Sizer::SetOwner(LayoutElement* pOwner)
 {
 	_pOwner = pOwner;
 }
-*/
+
+void Sizer::AddStretchSpacer()
+{
+	Add(nullptr, -1);
+}

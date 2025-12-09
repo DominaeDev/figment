@@ -1,21 +1,7 @@
 export module Types;
 
-// Standard library (must come before module imports)
-/*#include <cstdint>
-#include <string>
-#include <vector>
-#include <array>
-#include <map>
-#include <format>
-#include <cassert>
-#include <set>
-#include <functional>
-#include <ostream>*/
-
-export import <cstdint>;
-export import <cwchar>;
-export import <cassert>;
 export import std;
+export import <cstdint>;
 export import EnumFlags;
 
 export

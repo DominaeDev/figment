@@ -1,14 +1,6 @@
-module;
-
-#include <string>
-#include <vector>
-#include <unordered_set>
-#include <algorithm>
-#include <codecvt>
-#include <cwctype>
-#include <ranges>
-
 export module Utility:StringUtil;
+
+import std;
 
 export namespace string_util
 {

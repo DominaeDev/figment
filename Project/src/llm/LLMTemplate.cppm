@@ -1,10 +1,10 @@
 ﻿module;
 
+#include <llama.h>
+
 export module LLMTemplate;
 
-import Types;
-import Constants;
-import Utility;
+import Common;
 import LLMTypes;
 import <cassert>;
 
@@ -62,7 +62,7 @@ export
 	class llm_tmpl
 	{
 	public:
-		static PromptTemplate auto_detect_template(llama_model* pModel);
+		static PromptTemplate auto_detect_template(ModelPtr pModel);
 		static string apply_chat_template(Messages msg, bool add_assistant);
 
 		static std::pair<string, string> get_chat_template_prefix_suffix(Role role, string name);
@@ -465,7 +465,7 @@ string llm_tmpl::apply_chat_template_prefix(Role role, string content, string na
     return content;
 }
 
-PromptTemplate llm_tmpl::auto_detect_template(llama_model* pModel)
+PromptTemplate llm_tmpl::auto_detect_template(ModelPtr pModel)
 {
     const char* tmpl = llama_model_chat_template(pModel, nullptr);
     if (tmpl)

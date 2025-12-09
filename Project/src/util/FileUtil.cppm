@@ -1,12 +1,6 @@
-module;
-
-#include <optional>
-#include <string>
-#include <fstream>
-#include <filesystem>
-
 export module Utility:FileUtil;
 
+import std;
 import :StringUtil;
 
 export

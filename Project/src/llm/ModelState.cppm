@@ -1,8 +1,10 @@
 module;
 
+#include <llama.h>
+
 export module ModelState;
 
-import Types;
+import Common;
 import LLMTypes;
 import Grammar;
 import <cassert>;

@@ -1,4 +1,4 @@
-export module IUpdateable;
+export module GUI.Layout.IUpdateable;
 
 export class IUpdateable
 {

@@ -1,7 +1,7 @@
 export module SolidBackgroundRenderer;
 
 import <SDL3/SDL.h>;
-import Types;
+import Common;
 import CustomRenderer;
 
 export

@@ -1,10 +1,9 @@
 export module RoundedBorderRenderer;
 
 import <SDL3/SDL.h>;
-import Types;
+import Common;
 import CustomRenderer;
 import TextureStore;
-import Utility;
 
 export
 {

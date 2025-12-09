@@ -1,6 +1,5 @@
-export module ControlWithMargins;
-
-import Control;
+/*export module ControlWithMargins;
+export import GUI.Control;
 
 export
 {
@@ -23,19 +22,4 @@ export
 	};
 }
 
-ControlWithMargins::ControlWithMargins(Control* pParent) : Control(pParent)
-{
-}
-
-void ControlWithMargins::SetMargins(int left, int top, int right, int bottom)
-{
-	_marginLeft = left;
-	_marginTop = top;
-	_marginRight = right;
-	_marginBottom = bottom;
-}
-
-void ControlWithMargins::SetMargins(Rect rect)
-{
-	SetMargins(rect.x, rect.y, rect.w, rect.h);
-}
+*/

@@ -2,12 +2,8 @@ module;
 
 #include <SDL3/SDL.h>
 
-export module Image;
-
-import Types;
-import Control;
-import Graphics;
-import Color;
+export module GUI.Controls.Image;
+export import GUI.Control;
 
 export
 {

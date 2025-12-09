@@ -4,11 +4,10 @@ module;
 
 export module NineGridBackgroundRenderer;
 
-import Types;
+import Common;
 import CustomRenderer;
 import TextureStore;
-import Utility;
-import Graphics;
+import GUI.GraphicTypes;
 
 export
 {

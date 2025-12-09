@@ -2,8 +2,7 @@ module;
 
 export module Embedding;
 
-import Types;
-import Utility;
+import Common;
 
 export 
 {

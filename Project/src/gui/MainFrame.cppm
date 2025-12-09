@@ -4,24 +4,15 @@ module;
 
 export module MainFrame;
 
-import Types;
+import Common;
 import Frame;
-import Utility;
-import Area;
-import Panel;
-import StaticText;
-import TextBox;
-import VariableList;
-import Color;
-import ChatScroll;
-import ChatMessage;
-import StatusBar;
+
+import GUI.Controls;
+
 import Renderers;
 import TextureStore;
 import AppState;
 
-import Constants;
-import Utility;
 import LLMInstance;
 import LLMUtility;
 import LLMTypes;

@@ -1,8 +1,13 @@
-export module Color;
+module;
 
-import Types;
-import Utility;
-export import Graphics;
+#include <SDL3/SDL.h>
+
+export module GUI.Colors;
+
+import Common;
+
+export using Colorf = SDL_FColor;
+export using Color = SDL_Color;
 
 export namespace Colors
 {

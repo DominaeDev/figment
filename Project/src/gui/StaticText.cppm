@@ -3,15 +3,12 @@ module;
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-export module StaticText;
+export module GUI.Controls.StaticText;
+export import GUI.Control;
 
-import Types;
-import ControlWithMargins;
-import Fonts;
-import Text;
-import Color;
-import AppState;
-import Utility;
+import Common;
+import GUI.Text;
+import AppState; //! Hmm.
 
 export
 {

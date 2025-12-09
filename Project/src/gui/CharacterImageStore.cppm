@@ -1,12 +1,8 @@
-module;
-#include <SDL3_image/SDL_image.h>
-
 export module CharacterImageStore;
 
-import Types;
-import Graphics;
+import Common;
+import GUI.GraphicTypes;
 import AppState;
-import Utility;
 
 export
 {

@@ -1,20 +1,15 @@
 module;
 
-//#include <common.h>
-
-//#include "llm/LLMUtility.h"
-//#include "llm/LLMTemplate.h"
-//#include "llm/LLMEmbedding.h"
-//#include "llm/LLMStateVariables.h"
-//#include "llm/Embedding.h"
-//#include "llm/Context.h"
+#include <llama.h>
+#include <cassert>
+#include <cstdio>
 
 export module LLMInstance;
 
-export import Types;
+import Common;
+
 export import LLMTypes;
 
-import Constants;
 import ChatSession;
 import LLMTemplate;
 import LLMUtility;
@@ -23,13 +18,8 @@ import LLMStateVariables;
 import Embedding;
 import ModelState;
 import Grammar;
-import Utility;
 
 import Context;
-
-import <cassert>;
-import <cstdio>;
-
 
 export {
 
@@ -274,8 +264,6 @@ export {
 	};
 } // export
 
-
-#define DEBUG_SEED 0xA1B2C3D4
 
 template <typename T>
 concept Lockable = requires (T mut)
@@ -684,7 +672,7 @@ void LLMInstance::InitSamplers()
 #if _DEBUG
 	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(DEBUG_SEED));						// Seed
 #else
-	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(DEFAULT_SEED));				// Seed
 #endif
 
 	_modelState.pSampler = pSampler;
@@ -1256,9 +1244,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			sampled_tokens.push_back(sampled_token);
 
 			// check if there is incomplete UTF-8 character at the end
-			bHalt = false;
-			bWait = false;
-			llm_util::process(partial, str_token, &bWait, &bHalt, stop_reason);
+			llm_util::process(partial, str_token, bWait, bHalt, stop_reason);
 		}
 		else // EOG token
 		{

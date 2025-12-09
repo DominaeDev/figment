@@ -2,16 +2,12 @@ module;
 
 #include <SDL3_ttf/SDL_ttf.h>
 
-export module TextBox;
+export module GUI.Controls.TextBox;
+export import GUI.Control;
 
-import Types;
-import ControlWithMargins;
-import Fonts;
-import Text;
-import Color;
+import Common;
+import GUI.Text;
 import AppState;
-
-import Utility;
 
 export
 {
@@ -120,7 +116,7 @@ static const char* _testString = "Hee hee, ho ho ho! \n\xE3\x81\xB2\xE3\x82\x89\
 TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWithMargins(pParent)
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);
-	_pText = TTF_CreateText(Text::GetEngine(), _pFont, "", 0);
+	_pText = TTF_CreateText(TextEngine::GetEngine(), _pFont, "", 0);
 
 	/* Show the whitespace when wrapping, so it can be edited */
 	TTF_SetTextWrapWhitespaceVisible(_pText, true);

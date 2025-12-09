@@ -1,6 +1,5 @@
-export module Area;
-
-import Control;
+export module GUI.Controls.Area;
+export import GUI.Control;
 
 /// <summary>
 /// Render-less panel
@@ -11,9 +10,7 @@ export
 	class Area : public Control
 	{
 	public:
-		Area(Control* pParent) : Control(pParent)
-		{
-		}
+		Area(Control* pParent) : Control(pParent) {}
 
 	protected:
 		void OnUpdate(float fDeltaTime) override {};

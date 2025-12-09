@@ -1,7 +1,5 @@
 module;
 
-#include <chrono>
-
 export module Utility;
 
 export import :Common;

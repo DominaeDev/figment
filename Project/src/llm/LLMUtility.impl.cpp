@@ -1,12 +1,14 @@
-﻿module LLMUtility;
+﻿module;
 
-import Types;
+#include <llama.h>
+
+module LLMUtility;
+
+import Common;
 import LLMTypes;
-import Utility;
-import Constants;
 import Context;
 
-std::string llm_util::stringFromToken(VocabPtr pVocab, llama_token token)
+std::string llm_util::stringFromToken(VocabPtr pVocab, Token token)
 {
 	// convert the token to a string, print it and add it to the response
 	char buf[256];
@@ -211,12 +213,12 @@ string& llm_util::complete_message(string& text)
 	return text;
 }
 
-void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word)
+void llm_util::process(string& partial, string str_token, bool& bWait, bool& bHalt, string& stop_word)
 {
 	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
 	{
-		*bWait = true;
-		*bHalt = false;
+		bWait = true;
+		bHalt = false;
 		return;
 	}
 
@@ -249,8 +251,8 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 
 		// Print to console
 		partial = partial.erase(stop_pos); // Erase stop word
-		*bHalt = true;
-		*bWait = false;
+		bHalt = true;
+		bWait = false;
 		return;
 	}
 
@@ -258,8 +260,8 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 	stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
 	if (stop_pos != string::npos)
 	{
-		*bHalt = false;
-		*bWait = true;
+		bHalt = false;
+		bWait = true;
 		return;
 	}
 
@@ -270,8 +272,8 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 		// Await end of tag '>', or beginning of a new tag '<' (indicating garbage from the model)
 		if (partial.find_first_of("<>", fmt_pos + 1, 2) == string::npos)
 		{
-			*bHalt = false;
-			*bWait = true;
+			bHalt = false;
+			bWait = true;
 			return;
 		}
 	}
@@ -281,19 +283,19 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 		fmt_pos = find_stopping_strings(partial, formatting_tags, str_token.size(), false);
 		if (fmt_pos != string::npos)
 		{
-			*bHalt = false;
-			*bWait = true;
+			bHalt = false;
+			bWait = true;
 			return;
 		}
 	}
 
-	*bHalt = false;
-	*bWait = false;
+	bHalt = false;
+	bWait = false;
 }
 
-std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, string prompt, bool add_special)
+std::vector<Token> llm_util::tokenize(VocabPtr pVocab, string prompt, bool add_special)
 {
-	std::vector<llama_token> prompt_tokens(1024);
+	std::vector<Token> prompt_tokens(1024);
 	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), add_special, false);
 	if (n_prompt_tokens < 0)
 	{
@@ -301,7 +303,7 @@ std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, string prompt, bool
 		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), add_special, false) < 0)
 		{
 			// Error
-			return std::vector<llama_token> {};
+			return std::vector<Token> {};
 		}
 	}
 	else
@@ -311,10 +313,10 @@ std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, string prompt, bool
 	return prompt_tokens;
 }
 
-llama_batch llm_util::init_batch(int32_t ctx_size, int32_t n_seq_max)
+Batch llm_util::init_batch(int32_t ctx_size, int32_t n_seq_max)
 {
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(ctx_size, 0, n_seq_max);
+	Batch batch = llama_batch_init(ctx_size, 0, n_seq_max);
 	batch.n_tokens = 0;
 
 	for (size_t i = 0; i < ctx_size; ++i)
@@ -329,7 +331,7 @@ llama_batch llm_util::init_batch(int32_t ctx_size, int32_t n_seq_max)
 	return batch;
 }
 
-void llm_util::free_batch(llama_batch& batch)
+void llm_util::free_batch(Batch& batch)
 {
 	llama_batch_free(batch);
 
@@ -342,10 +344,10 @@ void llm_util::free_batch(llama_batch& batch)
 	batch.n_tokens = 0;
 }
 
-llama_batch llm_util::create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position)
+Batch llm_util::create_batch(std::span<Token> tokens, std::span<LlamaSequenceId> seqs, int32_t n_seq_max, int32_t position)
 {
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(toI(tokens.size()), 0, n_seq_max);
+	Batch batch = llama_batch_init(toI(tokens.size()), 0, n_seq_max);
 	batch.n_tokens = toI(tokens.size());
 	batch.embd = nullptr;
 
@@ -362,9 +364,9 @@ llama_batch llm_util::create_batch(std::span<llama_token> tokens, std::span<llam
 	return batch;
 }
 
-llama_batch llm_util::create_batch_view(const llama_batch& batch, int32_t position, int32_t length)
+Batch llm_util::create_batch_view(const Batch& batch, int32_t position, int32_t length)
 {
-	return llama_batch {
+	return Batch {
 		length,
 		batch.token + position,
 		nullptr,
@@ -375,12 +377,12 @@ llama_batch llm_util::create_batch_view(const llama_batch& batch, int32_t positi
 	};
 }
 
-bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch)
+bool llm_util::init_embedding_batch(ModelPtr pModel, ContextPtr pCtx, const std::vector<Token>& tokens, Batch& out_pBatch)
 {
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 
 	// Prepare a batch for the prompt
-	llama_batch batch = llama_batch_init(ctx_size, 0, 1);
+	Batch batch = llama_batch_init(ctx_size, 0, 1);
 	int32_t num_tokens = std::min((int32_t)tokens.size(), ctx_size);
 
 	// Add tokens to batch
@@ -398,18 +400,18 @@ bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, co
 	return true;
 }
 
-std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(Context& context, string content, SequenceId seq_id, int32_t pos, bool add_special)
+std::optional<std::vector<Token>> llm_util::tokenize_and_decode(Context& context, string content, SequenceId seq_id, int32_t pos, bool add_special)
 {
 	auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
 	int32_t n_tokens = toI(tokens.size());
 
-	llama_batch batch_view = context.GetCache().GetBatchView(pos, n_tokens);
+	Batch batch_view = context.GetCache().GetBatchView(pos, n_tokens);
 	if (batch_view.n_tokens > 0 && llama_decode(context.GetCtxPtr(), batch_view) != 0)
 		return std::nullopt;
 	return tokens;
 }
 
-std::vector<llama_token> llm_util::tokenize_and_batch(Context& context, string content, SequenceId seq_id, int32_t pos, bool add_special)
+std::vector<Token> llm_util::tokenize_and_batch(Context& context, string content, SequenceId seq_id, int32_t pos, bool add_special)
 {
 	// Add to context batch
 	auto tokens = llm_util::tokenize(context.GetVocabPtr(), content, add_special);
@@ -672,7 +674,7 @@ bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, string
 	auto& batch = batch_ref.get();
 	auto pVocab = context.GetVocabPtr();
 
-	auto fnTokenStr = [pVocab](llama_token token, bool quote) -> string {
+	auto fnTokenStr = [pVocab](Token token, bool quote) -> string {
 		if (token <= 0)
 			return "<UNK>";
 		else if (token == llama_vocab_bos(pVocab))
@@ -753,9 +755,9 @@ bool llm_util::dump_batch_tokens(const Context& context, int32_t seq_id, string 
 	return dump_batch_tokens(batch_ref, batch_n, seq_id, context.GetVocabPtr(), filename);
 }
 
-bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_index, VocabPtr pVocab, string filename)
+bool llm_util::dump_batch_tokens(const Batch& batch, int32_t num_tokens, int32_t seq_index, VocabPtr pVocab, string filename)
 {
-	auto fnTokenStr = [pVocab](llama_token token) -> string {
+	auto fnTokenStr = [pVocab](Token token) -> string {
 		if (token == llama_vocab_bos(pVocab))
 			return "<BOS>";
 		else if (token == llama_vocab_eos(pVocab))
@@ -838,8 +840,8 @@ bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, string file
 		if (cell.pos < 0)
 			continue;
 
-		llama_seq_id* cell_seqs = &cache_view.cells_sequences[it_cell * n_max_seq];
-		for (llama_seq_id* pSeq = cell_seqs; pSeq < cell_seqs + ptrdiff_t(n_max_seq); ++pSeq)
+		LlamaSequenceId* cell_seqs = &cache_view.cells_sequences[it_cell * n_max_seq];
+		for (LlamaSequenceId* pSeq = cell_seqs; pSeq < cell_seqs + ptrdiff_t(n_max_seq); ++pSeq)
 		{
 			if (*pSeq == seq_id)
 			{
@@ -905,7 +907,7 @@ bool llm_util::dump_kv_cache_cells(const Context& contextState, string filename)
 	return dump_kv_cache_cells(contextState.GetCtxPtr(), contextState.GetNumSequences(), filename);
 }
 
-bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, string filename)
+bool llm_util::dump_kv_cache_cells(ContextPtr pCtx, int32_t num_sequences, string filename)
 {
 	auto cache_view = llama_kv_cache_view_init(pCtx, num_sequences);
 
@@ -918,7 +920,7 @@ bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, s
 	for (int32_t it_cell = 0; it_cell < cache_view.n_cells; ++it_cell)
 	{
 		auto& cell = cache_view.cells[it_cell];
-		llama_seq_id* cell_seqs = &cache_view.cells_sequences[it_cell * n_max_seq];
+		LlamaSequenceId* cell_seqs = &cache_view.cells_sequences[it_cell * n_max_seq];
 
 		cells[it_cell] = 0;
 
@@ -956,7 +958,7 @@ bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, s
 	return WriteTextFile(filename, result, false);
 }
 
-void llm_util::erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos)
+void llm_util::erase_bottom(ContextPtr pCtx, int32_t n_max_seq, int32_t pos)
 {
 	for (int32_t seq_id = 0; seq_id < n_max_seq; ++seq_id)
 		llama_kv_self_seq_rm(pCtx, seq_id, pos, -1);
@@ -972,9 +974,9 @@ SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max
 	SequenceIndices seqIds;
 	seqIds.reserve(n_seq_max);
 
-	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < n_seq_max; ++i)
+	for (size_t i = 0; i < AllSequenceIDs.size() && i < n_seq_max; ++i)
 	{
-		if (seq.IsSet(Constants::Context::AllSequenceIDs[i]))
+		if (seq.IsSet(AllSequenceIDs[i]))
 			seqIds.push_back(toI(i));
 	}
 	return seqIds;
@@ -982,7 +984,7 @@ SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max
 
 SequenceId llm_util::sequence_from_index(int32_t seq_idx) noexcept
 {
-	if (seq_idx < 0 || seq_idx >= Constants::Context::AllSequenceIDs.size())
+	if (seq_idx < 0 || seq_idx >= AllSequenceIDs.size())
 		return SequenceId::None;
-	return { Constants::Context::AllSequenceIDs[seq_idx] };
+	return { AllSequenceIDs[seq_idx] };
 }

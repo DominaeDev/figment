@@ -71,7 +71,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
       <TranslateIncludes>false</TranslateIncludes>
       <BuildStlModules>true</BuildStlModules>
     </ClCompile>
@@ -97,7 +97,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
       <TranslateIncludes>false</TranslateIncludes>
       <BuildStlModules>true</BuildStlModules>
     </ClCompile>
@@ -118,22 +118,24 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
     <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="src\Common.ixx" />
     <ClCompile Include="src\gui\Area.cppm" />
     <ClCompile Include="src\gui\CharacterImageStore.cppm" />
     <ClCompile Include="src\gui\ChatMessage.cppm" />
     <ClCompile Include="src\gui\ChatScroll.cppm" />
-    <ClCompile Include="src\gui\Color.cppm" />
+    <ClCompile Include="src\gui\Colors.cppm" />
     <ClCompile Include="src\gui\Control.cppm" />
+    <ClCompile Include="src\gui\Controls.ixx" />
     <ClCompile Include="src\gui\ControlWithMargins.cppm" />
     <ClCompile Include="src\gui\CustomRenderer.cppm" />
     <ClCompile Include="src\gui\Fonts.cppm" />
     <ClCompile Include="src\gui\Frame.cppm" />
-    <ClCompile Include="src\gui\Gradients.ixx" />
-    <ClCompile Include="src\gui\Graphics.cppm" />
+    <ClCompile Include="src\gui\GraphicTypes.cppm" />
     <ClCompile Include="src\gui\HorizontalGradient.cppm" />
     <ClCompile Include="src\gui\HorizontalSizer.cppm" />
     <ClCompile Include="src\gui\Image.cppm" />
     <ClCompile Include="src\gui\IUpdateable.cppm" />
+    <ClCompile Include="src\gui\Layout.ixx" />
     <ClCompile Include="src\gui\LayoutElement.cppm" />
     <ClCompile Include="src\gui\LayoutElement.impl.cpp" />
     <ClCompile Include="src\gui\MainFrame.cppm" />
@@ -144,11 +146,11 @@
     <ClCompile Include="src\gui\RoundedBorderRenderer.cppm" />
     <ClCompile Include="src\gui\Sizer.cppm" />
     <ClCompile Include="src\gui\Sizer.impl.cpp" />
-    <ClCompile Include="src\gui\Sizer.ixx" />
     <ClCompile Include="src\gui\SolidBackgroundRenderer.cppm" />
     <ClCompile Include="src\gui\StaticText.cppm" />
     <ClCompile Include="src\gui\StatusBar.cppm" />
-    <ClCompile Include="src\gui\Text.cppm" />
+    <ClCompile Include="src\gui\Text.ixx" />
+    <ClCompile Include="src\gui\TextEngine.cppm" />
     <ClCompile Include="src\gui\TextBox.cppm" />
     <ClCompile Include="src\gui\TextureStore.cppm" />
     <ClCompile Include="src\gui\VariableList.cppm" />
@@ -160,14 +162,8 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCppModule</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCppModule</CompileAs>
     </ClCompile>
-    <ClCompile Include="src\llm\Context.impl.cpp">
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</CompileAs>
-      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Default</CompileAs>
-    </ClCompile>
-    <ClCompile Include="src\llm\Context.ixx" />
     <ClCompile Include="src\llm\ContextBlock.cppm" />
     <ClCompile Include="src\llm\ContextCache.cppm" />
-    <ClCompile Include="src\llm\ContextCache.impl.cpp" />
     <ClCompile Include="src\llm\Embedding.cppm" />
     <ClCompile Include="src\llm\Grammar.cppm" />
     <ClCompile Include="src\llm\LLMEmbedding.cppm" />

@@ -1,13 +1,12 @@
 export module ChatSession;
 
-import Types;
-import Utility;
+import Common;
 import LLMUtility;
 import LLMTypes;
 
+import GUI.Colors;
 import Character;
 import CharacterImageStore;
-import Color;
 
 export 
 {
