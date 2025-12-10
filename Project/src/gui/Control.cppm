@@ -56,8 +56,8 @@ export
 		bool _bVisible = true;
 
 		// Theming
-		CustomRenderer* _pBGRenderer = nullptr;
-		CustomRenderer* _pBorderRenderer = nullptr;
+		std::unique_ptr<CustomRenderer> _pBGRenderer {};
+		std::unique_ptr<CustomRenderer> _pBorderRenderer {};
 	};
 
 	class ControlWithMargins : public Control
@@ -88,7 +88,6 @@ Control::Control(Control* pParent)
 
 Control::~Control()
 {
-	delete _pBGRenderer;
 }
 
 void Control::Update(float fDeltaTime)
@@ -242,22 +241,12 @@ bool Control::ProcessEvent(SDL_Event* event)
 
 void Control::SetBackgroundRenderer(CustomRenderer* pCustom)
 {
-	if (_pBGRenderer != nullptr)
-	{
-		delete _pBGRenderer;
-		_pBGRenderer = nullptr;
-	}
-	_pBGRenderer = pCustom;
+	_pBGRenderer.reset(pCustom);
 }
 
 void Control::SetBorderRenderer(CustomRenderer* pCustom)
 {
-	if (_pBorderRenderer != nullptr)
-	{
-		delete _pBorderRenderer;
-		_pBorderRenderer = nullptr;
-	}
-	_pBorderRenderer = pCustom;
+	_pBorderRenderer.reset(pCustom);
 }
 
 ControlWithMargins::ControlWithMargins(Control* pParent) : Control(pParent)
