@@ -955,9 +955,9 @@ SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max
 	SequenceIndices seqIds;
 	seqIds.reserve(n_seq_max);
 
-	for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size() && i < n_seq_max; ++i)
+	for (size_t i = 0; i < AllSequenceIDs.size() && i < n_seq_max; ++i)
 	{
-		if (seq.IsSet(Constants::Context::AllSequenceIDs[i]))
+		if (seq.IsSet(AllSequenceIDs[i]))
 			seqIds.push_back(toI(i));
 	}
 	return seqIds;
@@ -965,7 +965,7 @@ SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max
 
 SequenceId llm_util::sequence_from_index(int32_t seq_idx) noexcept
 {
-    if (seq_idx < 0 || seq_idx >= Constants::Context::AllSequenceIDs.size())
+    if (seq_idx < 0 || seq_idx >= AllSequenceIDs.size())
         return SequenceId::None;
-	return { Constants::Context::AllSequenceIDs[seq_idx] };
+	return { AllSequenceIDs[seq_idx] };
 }

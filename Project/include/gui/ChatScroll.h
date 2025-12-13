@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gui/Control.h"
-#include "llm/LLMTypes.h"
+#include "model/ChatTypes.h"
 #include "model/ChatSession.h"
 
 class ChatMessage;

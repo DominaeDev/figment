@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Types.h"
-#include "llm/LLMTypes.h"
+#include "model/ChatTypes.h"
+#include "model/ChatOptions.h"
 #include "model/Character.h"
 #include <optional>
 

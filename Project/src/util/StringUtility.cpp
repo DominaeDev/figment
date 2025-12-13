@@ -41,14 +41,6 @@ bool string_util::empty_or_whitespace(const std::string& s)
 	return s.size() == 0 || s.find_first_not_of(" \t\r\n", 0, 4) == std::string::npos;
 }
 
-std::string string_util::get_filename(const std::string& str)
-{
-	size_t pos = str.find_last_of("\\/");
-	if (pos == std::string::npos)
-		return str;
-	return str.substr(pos + 1);
-}
-
 std::string string_util::lcase(const std::string& str)
 {
 	std::wstring s = from_utf8(str);

@@ -72,3 +72,11 @@ std::expected<std::vector<std::string>, FileError> file_util::FindFilesInPath(co
 
 	return matchingFiles;
 }
+
+std::string file_util::GetFilename(const std::string& str)
+{
+	size_t pos = str.find_last_of("\\/"); //! hmm...
+	if (pos == std::string::npos)
+		return str;
+	return str.substr(pos + 1);
+}

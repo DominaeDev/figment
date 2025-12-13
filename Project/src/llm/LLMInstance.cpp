@@ -459,7 +459,7 @@ void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
 	ModelState state;
 	state.pModel = llama_model_load_from_file(filename.c_str(), model_params);
 	state.pVocab = llama_model_get_vocab(state.pModel);
-	state.modelName = string_util::get_filename(filename);
+	state.modelName = GetFilename(filename);
 
 	llm_tmpl::auto_detect_template(state.pModel);
 

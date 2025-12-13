@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LLMTypes.h"
+#include "llm/LLMTypes.h"
 
 enum class GrammarFlag : int32_t
 {

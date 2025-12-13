@@ -233,7 +233,7 @@
     <ClCompile Include="src\util\FileUtility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\CommandParser.cpp">
+    <ClCompile Include="src\model\ChatCommands.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
@@ -379,9 +379,6 @@
     <ClInclude Include="include\llm\Embedding.h">
       <Filter>Source Files\Inference\Embeddings</Filter>
     </ClInclude>
-    <ClInclude Include="include\Types.h">
-      <Filter>Source Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\VariableList.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
@@ -415,10 +412,16 @@
     <ClInclude Include="include\util\FileUtility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\Command.h">
+    <ClInclude Include="include\model\ChatCommands.h">
       <Filter>Source Files\Model</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\CommandParser.h">
+    <ClInclude Include="include\Types.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatTypes.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatOptions.h">
       <Filter>Source Files\Model</Filter>
     </ClInclude>
   </ItemGroup>

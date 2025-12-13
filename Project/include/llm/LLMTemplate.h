@@ -1,6 +1,7 @@
 #pragma once
 
 #include "llm/LLMTypes.h"
+#include "model/ChatTypes.h"
 
 enum class PromptTemplate
 {

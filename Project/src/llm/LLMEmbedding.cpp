@@ -1,12 +1,16 @@
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
+#include "util/FileUtility.h"
 #include "util/Common.h"
 #include "Constants.h"
 #include <llama.h>
 #include <common.h>
 #include <format>
 #include <cassert>
+
+using namespace string_util;
+using namespace file_util;
 
 LLMEmbedding::~LLMEmbedding()
 {
@@ -24,7 +28,7 @@ bool LLMEmbedding::LoadModel(string filename)
 	model_params.use_mmap = false;
 	model_params.use_mlock = false;
 	_pModel = llama_model_load_from_file(filename.c_str(), model_params);
-	_modelName = string_util::get_filename(filename);
+	_modelName = GetFilename(filename);
 
 	if (!_pModel)
 	{
@@ -142,13 +146,13 @@ bool LLMEmbedding::Generate(std::string text, EmbeddingVector& out_embedding)
 	Sentences sentences;
 	if (Constants::Embedding::SplitSentences)
 	{
-		auto strings = string_util::split(text, { '.', ';' }, true);
+		auto strings = split(text, { '.', ';' }, true);
 		for (auto& s : strings)
 			sentences.push_back(Sentence { Role::Undefined, s});
 	}
 	else
 	{
-		sentences.push_back(Sentence { Role::Undefined, string_util::trim(text) });
+		sentences.push_back(Sentence { Role::Undefined, trim(text) });
 	}
 
 	auto tokens = TokenizeSentences(pVocab, _pCtx, sentences);

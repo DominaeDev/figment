@@ -1,4 +1,5 @@
 #include "llm/LLMTypes.h"
+#include "model/ChatTypes.h"
 
 #pragma once
 

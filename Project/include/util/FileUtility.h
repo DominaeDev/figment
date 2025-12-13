@@ -21,6 +21,10 @@ namespace file_util
 	FileError ReadTextFile(const std::string& filename, std::string& out_content, bool normalizeNewlines = true);
 	FileError WriteTextFile(const std::string& filename, const std::string& content, bool append = false);
 	std::expected<std::vector<std::string>, FileError> FindFilesInPath(const std::string& dirPath, const std::string& extension);
+
+	// Utility
+	std::string GetFilename(const std::string& str);
+
 }
 
 #endif

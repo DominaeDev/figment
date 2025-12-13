@@ -3,14 +3,13 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <array>
 #include <map>
+#include <array>
 #include <ranges>
-#include <utility>
-#include <uuid_v4.h>
-
+#include <algorithm>
 #include "util/EnumFlags.h"
 
 template<typename T>
@@ -37,18 +36,6 @@ inline constexpr size_t operator "" _uz( unsigned long long arg ) noexcept
 }
 
 typedef std::string string;
-
-template <typename T, typename A = std::allocator<T>>
-constexpr std::vector<T, A>::iterator flip_iterator(typename std::vector<T, A>& vec, typename std::vector<T, A>::reverse_iterator rit)
-{
-	if (rit != vec.rend())
-	{
-		auto it = vec.begin();
-		std::advance(it, (ptrdiff_t)std::distance(rit, vec.rend()) - 1);
-		return it;
-	}
-	return vec.end();
-}
 
 // Macros
 #if !defined(TRUE)

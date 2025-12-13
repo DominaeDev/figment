@@ -1,6 +1,6 @@
 #pragma once
 
-#include "llm/LLMTypes.h"
+#include "model/ChatTypes.h"
 #include "gui/Control.h"
 #include "gui/Graphics.h"
 

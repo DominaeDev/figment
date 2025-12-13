@@ -1,7 +1,8 @@
 #pragma once
 
-#include "LLMTypes.h"
-#include "Grammar.h"
+#include "llm/LLMTypes.h"
+#include "llm/Grammar.h"
+#include <random>
 
 class ModelState
 {

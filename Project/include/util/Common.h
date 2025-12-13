@@ -2,11 +2,11 @@
 #define COMMON_UTILITY_H__
 
 #include <optional>
+#include <vector>
 #include <string>
 #include <queue>
 #include <memory>
 #include <iterator>
-#include <algorithm>
 
 namespace common_util
 {
@@ -43,6 +43,18 @@ namespace common_util
 		result.insert(std::end(result), std::begin(vecA), std::end(vecA));
 		result.insert(std::end(result), std::begin(vecB), std::end(vecB));
 		return result;
+	}
+
+	template <typename T, typename A = std::allocator<T>>
+	constexpr std::vector<T, A>::iterator flip_iterator(typename std::vector<T, A>& vec, typename std::vector<T, A>::reverse_iterator rit)
+	{
+		if (rit != vec.rend())
+		{
+			auto it = vec.begin();
+			std::advance(it, (ptrdiff_t)std::distance(rit, vec.rend()) - 1);
+			return it;
+		}
+		return vec.end();
 	}
 }
 #endif

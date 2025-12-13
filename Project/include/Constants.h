@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Types.h"
-#include "llm/LLMTypes.h"
+#include "model/ChatTypes.h"
 
 namespace Constants
 {
@@ -58,14 +57,6 @@ namespace Constants
 		inline constexpr int32_t MicroBatchSize = 512;
 		inline constexpr float WindowKeepRatio = 0.75f;
 		inline constexpr int32_t MaxSequences = 4;
-
-		static constexpr std::array<Sequence, 4> AllSequenceIDs {
-			Sequence::Bot1,
-			Sequence::Bot2,
-			Sequence::Bot3,
-			Sequence::Bot4,
-		};
-
 	}
 
 	inline constexpr std::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";

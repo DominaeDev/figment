@@ -155,7 +155,7 @@
     <ClCompile Include="src\gui\SolidBackgroundRenderer.cpp" />
     <ClCompile Include="src\gui\StaticText.cpp" />
     <ClCompile Include="src\gui\StatusBar.cpp" />
-    <ClCompile Include="src\model\CommandParser.cpp" />
+    <ClCompile Include="src\model\ChatCommands.cpp" />
     <ClCompile Include="src\util\FileUtility.cpp" />
     <ClCompile Include="src\util\StringUtility.cpp" />
     <ClCompile Include="src\gui\Text.cpp" />
@@ -188,9 +188,10 @@
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Character.h" />
+    <ClInclude Include="include\model\ChatOptions.h" />
     <ClInclude Include="include\model\ChatSession.h" />
-    <ClInclude Include="include\model\Command.h" />
-    <ClInclude Include="include\model\CommandParser.h" />
+    <ClInclude Include="include\model\ChatCommands.h" />
+    <ClInclude Include="include\model\ChatTypes.h" />
     <ClInclude Include="include\util\EnumFlags.h" />
     <ClInclude Include="include\gui\CustomRenderer.h" />
     <ClInclude Include="include\gui\ChatMessage.h" />

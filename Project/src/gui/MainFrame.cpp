@@ -13,7 +13,7 @@
 #include "gui/Renderers.h"
 #include "gui/TextureStore.h"
 #include "model/AppState.h"
-#include "model/CommandParser.h"
+#include "model/ChatCommands.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
@@ -92,7 +92,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	SetSizer(topSizer);
 	
 	_pTextBox->SetEnterPressedCallback([this](string text) {
-		EnqueueCommand(CommandParser::Parse(text));
+		EnqueueCommand(ChatCommands::Parse(text));
 	});
 
 	auto pTextBoxBG = new NineGridBackgroundRenderer();
@@ -207,9 +207,9 @@ void MainFrame::SetStatusBar(string message)
 	s_pInstance->_pStatusBar->SetMessage(message);
 }
 
-bool MainFrame::OnCommand(Command cmd)
+bool MainFrame::OnCommand(ParsedChatCommand cmd)
 {
-	if (cmd.type == CommandType::Invalid)
+	if (cmd.command == ChatCommand::Invalid)
 		return false;
 
 	auto pLLM = Application::GetLLM();
@@ -235,10 +235,9 @@ bool MainFrame::OnCommand(Command cmd)
 		return pLLM->GetSession().GetRoleOf(text);
 	};
 
-
-	switch (cmd.type)
+	switch (cmd.command)
 	{
-	case CommandType::UserMessage:
+	case ChatCommand::UserMessage:
 #if _DEBUG
 		if (!pLLM->IsReady())
 		{
@@ -250,41 +249,41 @@ bool MainFrame::OnCommand(Command cmd)
 		}
 #endif
 		return pLLM->SendMessage(cmd.text);
-	case CommandType::SystemMessage:
+	case ChatCommand::SystemMessage:
 		return pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
-	case CommandType::InstigateDialogue:
+	case ChatCommand::InstigateDialogue:
 	{
 		Role targetRole = fnRoleFromName(cmd.text);
 		return pLLM->Instigate(targetRole, MessageType::Dialogue, 1);
 	}
-	case CommandType::InstigateAction:
+	case ChatCommand::InstigateAction:
 	{
 		Role targetRole = fnRoleFromName(cmd.text);
 		return pLLM->Instigate(targetRole, MessageType::Action, 1);
 	}
-	case CommandType::PassTurn:
+	case ChatCommand::PassTurn:
 	{
 		Role targetRole = fnRoleFromName(cmd.text);
 		return pLLM->Instigate(targetRole, MessageType::Undefined, 3);
 	}
-	case CommandType::Impersonate:
+	case ChatCommand::Impersonate:
 		return pLLM->Instigate(Role::User, MessageType::Dialogue, 1);
-	case CommandType::Narrate:
+	case ChatCommand::Narrate:
 		if (cmd.text.empty())
 			return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 		else
 			return pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
-	case CommandType::Instruct:
+	case ChatCommand::Instruct:
 		if (!cmd.text.empty())
 			return pLLM->Instruct(cmd.text);
-	case CommandType::RemoveLast:
+	case ChatCommand::RemoveLast:
 	{
 		int n = atoi(cmd.text.c_str());
 		auto removedMsgs = pLLM->RemoveMessages(std::max(n, 1));
 		auto removedIds = filter_msg_ids(removedMsgs);
 		return _pChatScroll->RemoveMessages(removedIds);
 	}
-	case CommandType::RedoResponse:
+	case ChatCommand::RedoResponse:
 	{
 		auto removedMsgs = pLLM->RemoveMessages(1);
 		if (!removedMsgs.empty())
@@ -299,7 +298,7 @@ bool MainFrame::OnCommand(Command cmd)
 		}
 		break;
 	}
-	case CommandType::RollbackUserMessage:
+	case ChatCommand::RollbackUserMessage:
 	{
 		auto removedMsgs = pLLM->RollbackUserMessage();
 		if (!removedMsgs.empty())
@@ -310,7 +309,7 @@ bool MainFrame::OnCommand(Command cmd)
 		}
 		break;
 	}
-	case CommandType::Reset:
+	case ChatCommand::Reset:
 	{
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
 		if (!pLLM->IsReady() || pLLM->ResetChat(seed))
@@ -318,7 +317,7 @@ bool MainFrame::OnCommand(Command cmd)
 		queue_clear(_commandQueue);
 		return true;
 	}
-	case CommandType::Reseed:
+	case ChatCommand::Reseed:
 	{
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
 		if (seed == 0)
@@ -326,7 +325,7 @@ bool MainFrame::OnCommand(Command cmd)
 		pLLM->Reseed(seed);
 		break;
 	}
-	case CommandType::Look:
+	case ChatCommand::Look:
 		if (!cmd.text.empty())
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, false, 1);
@@ -338,7 +337,7 @@ bool MainFrame::OnCommand(Command cmd)
 			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and anyone who are present.}}", MessageType::Direction, false, 1);
 		}
 		return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
-	case CommandType::Examine:
+	case ChatCommand::Examine:
 		if (!cmd.text.empty())
 		{
 			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false, 1);
@@ -346,13 +345,13 @@ bool MainFrame::OnCommand(Command cmd)
 			return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 		}
 		break;
-	case CommandType::GenerateEmbedding:
+	case ChatCommand::GenerateEmbedding:
 #if _DEBUG
 		return pLLM->GenerateEmbedding(cmd.text);
 #else
 		return false;
 #endif
-	case CommandType::NewStateVariable:
+	case ChatCommand::NewStateVariable:
 		if (!cmd.text.empty())
 		{
 			size_t pos_eq = cmd.text.find('=');
@@ -368,7 +367,7 @@ bool MainFrame::OnCommand(Command cmd)
 			}
 		}
 		return false;
-	case CommandType::SetStateVariable:
+	case ChatCommand::SetStateVariable:
 		if (!cmd.text.empty())
 		{
 			size_t pos_eq = cmd.text.find('=');
@@ -556,7 +555,7 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 	return false;
 }
 
-void MainFrame::EnqueueCommand(Command cmd)
+void MainFrame::EnqueueCommand(ParsedChatCommand cmd)
 {
 	if (Application::GetLLM() && Application::GetLLM()->IsGenerating())
 	{

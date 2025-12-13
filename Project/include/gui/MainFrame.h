@@ -2,7 +2,7 @@
 
 #include "Frame.h"
 #include "Types.h"
-#include "model/Command.h"
+#include "model/ChatCommands.h"
 
 #include <queue>
 
@@ -11,7 +11,6 @@ class StatusBar;
 class ChatScroll;
 class TextBox;
 class VariableList;
-struct Command;
 
 class MainFrame : public Frame
 {
@@ -32,10 +31,10 @@ protected:
 	virtual void OnUpdate(float fDeltaTime) override;
 	virtual void OnRender(Renderer* pRenderer) override;
 
-	bool OnCommand(Command cmd);
 	void PollStatus();
 	void StartChat();
-	void EnqueueCommand(Command cmd);
+	bool OnCommand(ParsedChatCommand cmd);
+	void EnqueueCommand(ParsedChatCommand cmd);
 	void NextQueuedCommand();
 
 private:
@@ -47,7 +46,7 @@ private:
 	float _fPollingCounter = 0.0f;
 	bool _bStartedChat = false; // Used to trigger greeting
 
-	std::queue<Command> _commandQueue;
+	std::queue<ParsedChatCommand> _commandQueue;
 
 #if AUTOCHAT
 private:

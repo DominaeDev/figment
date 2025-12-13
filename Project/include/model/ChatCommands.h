@@ -1,8 +1,9 @@
-#pragma once
+#ifndef CHAT_COMMANDS_H__
+#define CHAT_COMMANDS_H__
 
 #include "Types.h"
 
-enum class CommandType
+enum class ChatCommand
 {
 	Invalid,
 	UserMessage,
@@ -25,8 +26,16 @@ enum class CommandType
 	SetStateVariable,
 };
 
-struct Command
+struct ParsedChatCommand
 {
-	CommandType type = CommandType::UserMessage;
+	ChatCommand command = ChatCommand::UserMessage;
 	string text;
 };
+
+class ChatCommands
+{
+public:
+	static ParsedChatCommand Parse(string text);
+};
+
+#endif

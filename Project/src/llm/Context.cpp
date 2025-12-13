@@ -121,7 +121,7 @@ bool Context::RebuildKVCache()
 		// Clear only non-static blocks
 		int32_t blocks_pos = chat_begin_pos;
 
-		for (size_t i = 0; i < Constants::Context::AllSequenceIDs.size(); ++i)
+		for (size_t i = 0; i < AllSequenceIDs.size(); ++i)
 			llama_kv_self_seq_rm(_pCtx, (int32_t)i, blocks_pos, -1);
 
 		auto batch_view = cache.GetBatchView(blocks_pos, cache.length() - blocks_pos);
