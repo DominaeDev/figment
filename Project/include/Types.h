@@ -31,6 +31,11 @@ inline constexpr uint8_t operator "" _u8( unsigned long long arg ) noexcept
     return static_cast<uint8_t>( arg );
 }
 
+inline constexpr size_t operator "" _uz( unsigned long long arg ) noexcept
+{
+    return static_cast<size_t>( arg );
+}
+
 typedef std::string string;
 
 template <typename T, typename A = std::allocator<T>>

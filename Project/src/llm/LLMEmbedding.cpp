@@ -114,9 +114,11 @@ bool LLMEmbedding::Search(const Sentences& sentences, bool bUser, bool bBot)
 	if (sentences.empty())
 		return false;
 
-	Sentences searchSentences = FilterContainer(sentences, [bUser, bBot](const Sentence& s) { 
-		return (bBot && (is_bot(s.role) || s.role == Role::Narrator)) || (bUser && s.role == Role::User); 
-	});
+	Sentences searchSentences = sentences
+		| std::views::filter([bUser, bBot](const Sentence& s) {
+			return (bBot && (is_bot(s.role) || s.role == Role::Narrator)) || (bUser && s.role == Role::User);
+		})
+		| std::ranges::to<Sentences>();
 
 	if (!searchSentences.empty())
 	{
@@ -253,6 +255,6 @@ void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sen
 	});
 
 	for (int i = 0; i < results.size() && i < 5; ++i)
-		DebugPrintLn(std::format("Similarity {0:.3f} = \"{1}\"", results[i].first, results[i].second));
+		common_util::DebugPrintLn(std::format("Similarity {0:.3f} = \"{1}\"", results[i].first, results[i].second));
 }
 #endif

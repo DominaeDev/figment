@@ -117,14 +117,14 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	return pMessage;
 }
 
-int ChatScroll::RemoveMessages(std::vector<string> ids)
+int ChatScroll::RemoveMessages(std::span<string> ids)
 {
 	int removed = 0;
 	std::set<string> removedIds;
 	for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
 	{
 		MessageEntry& entry = _messages[i];
-		if (std::find(ids.cbegin(), ids.cend(), entry.responseId) == ids.cend())
+		if (std::ranges::find(ids, entry.responseId) == ids.cend())
 			continue;
 
 		if (entry.pChatMessage)

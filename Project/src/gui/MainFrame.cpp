@@ -13,15 +13,19 @@
 #include "gui/Renderers.h"
 #include "gui/TextureStore.h"
 #include "model/AppState.h"
+#include "model/CommandParser.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
-#include "util/CommandParser.h"
+#include "util/FileUtility.h"
 #include "util/Common.h"
 #include "Constants.h"
 #include <format>
 #include <ranges>
 #include <cwctype>
+
+using namespace common_util;
+using namespace file_util;
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -212,8 +216,10 @@ bool MainFrame::OnCommand(Command cmd)
 	if (!pLLM)
 		return false;
 
-	auto fnRemovedMessageIds = [](std::vector<RemovedMessage> msgs) -> std::vector<string> {
-		return to_vector(msgs | std::views::transform([](RemovedMessage msg) { return msg.responseId; }));
+	auto filter_msg_ids = [](std::vector<RemovedMessage> msgs) -> std::vector<string> {
+		return msgs
+			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
+			| std::ranges::to<std::vector<string>>();
 	};
 
 	auto fnRoleFromName = [pLLM](string text) -> Role {
@@ -274,30 +280,33 @@ bool MainFrame::OnCommand(Command cmd)
 	case CommandType::RemoveLast:
 	{
 		int n = atoi(cmd.text.c_str());
-		auto removedIds = pLLM->RemoveMessages(std::max(n, 1));
-		return _pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
+		auto removedMsgs = pLLM->RemoveMessages(std::max(n, 1));
+		auto removedIds = filter_msg_ids(removedMsgs);
+		return _pChatScroll->RemoveMessages(removedIds);
 	}
 	case CommandType::RedoResponse:
 	{
-		auto removedIds = pLLM->RemoveMessages(1);
-		if (!removedIds.empty())
+		auto removedMsgs = pLLM->RemoveMessages(1);
+		if (!removedMsgs.empty())
 		{
-			Role responder = removedIds.front().role;
+			Role responder = removedMsgs.front().role;
 			if (!is_bot(responder))
 				responder = Role::Undefined;
 
-			_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
+			auto removedIds = filter_msg_ids(removedMsgs);
+			_pChatScroll->RemoveMessages(removedIds);
 			return pLLM->Instigate(responder, MessageType::Undefined, 3);
 		}
 		break;
 	}
 	case CommandType::RollbackUserMessage:
 	{
-		auto removedIds = pLLM->RollbackUserMessage();
-		if (removedIds.size() > 0)
+		auto removedMsgs = pLLM->RollbackUserMessage();
+		if (!removedMsgs.empty())
 		{
-			_pChatScroll->RemoveMessages(fnRemovedMessageIds(removedIds));
-			_pTextBox->SetText(removedIds[0].content);
+			auto removedIds = filter_msg_ids(removedMsgs);
+			_pChatScroll->RemoveMessages(removedIds);
+			_pTextBox->SetText(removedMsgs[0].content);
 		}
 		break;
 	}
@@ -306,7 +315,7 @@ bool MainFrame::OnCommand(Command cmd)
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
 		if (!pLLM->IsReady() || pLLM->ResetChat(seed))
 			_pChatScroll->ClearMessages();
-		ClearQueue(_commandQueue);
+		queue_clear(_commandQueue);
 		return true;
 	}
 	case CommandType::Reseed:
@@ -444,7 +453,7 @@ void MainFrame::PollStatus()
 			_pChatScroll->ClearMessages();
 			_pVariableList->SetVariables(pLLM->GetStateVariables());
 			_pVariableList->SetVisible(true);
-			ClearQueue(_commandQueue);
+			queue_clear(_commandQueue);
 			break;
 		case LLMStatusSignal::InitializeChatFailure:
 			SetStatusBar("Failed to initialize chat");
@@ -454,13 +463,13 @@ void MainFrame::PollStatus()
 			break;
 		case LLMStatusSignal::LoadedModel:
 			SetStatusBar("Model loaded");
-			ClearQueue(_commandQueue);
+			queue_clear(_commandQueue);
 			StartChat();
 			break;
 		case LLMStatusSignal::UnloadedModel:
 			SetStatusBar("Model unloaded");
 			_pVariableList->SetVisible(false);
-			ClearQueue(_commandQueue);
+			queue_clear(_commandQueue);
 			break;
 		case LLMStatusSignal::LoadModelFailure:
 			SetStatusBar("Failed to load model");
@@ -509,7 +518,7 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		}
 		case SDLK_F10:
 			pLLM->Halt();
-			ClearQueue(_commandQueue);
+			queue_clear(_commandQueue);
 #if AUTOCHAT
 			_bAutoChat = false;
 #endif		

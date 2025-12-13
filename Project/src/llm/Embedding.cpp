@@ -1,6 +1,7 @@
 #include "llm/Embedding.h"
 #include "util/Common.h"
 #include "util/StringUtility.h"
+#include "util/FileUtility.h"
 #include <format>
 #include <iostream>
 #include <fstream>
@@ -73,7 +74,7 @@ bool EmbeddingVector::SaveToFile(string filename) const
 			for (size_t j = 0; j < sizeof(float); ++j)
 				output += std::format("{:02X}", fc.c[j]);
 		}
-		return WriteTextFile(filename, output, false);
+		return file_util::WriteTextFile(filename, output, false) == FileError::NoError;
 	}
 	catch (...)
 	{
@@ -86,12 +87,15 @@ std::vector<EmbeddingVector> Embeddings::_embeddings;
 void Embeddings::Initialize(string filePath, string modelName)
 {
 	_embeddings.clear();
-	auto files = FindFilesInPath(filePath, ".txt");
-	for (auto& fn : files)
+	auto files = file_util::FindFilesInPath(filePath, ".txt");
+	if (files.has_value())
 	{
-		EmbeddingVector embd;
-		if (embd.LoadFromFile(fn) && string_util::equals(embd.modelName, modelName, true))
-			_embeddings.push_back(std::move(embd));
+		for (auto& fn : files.value())
+		{
+			EmbeddingVector embd;
+			if (embd.LoadFromFile(fn) && string_util::equals(embd.modelName, modelName, true))
+				_embeddings.push_back(std::move(embd));
+		}
 	}
 }
 

@@ -2,7 +2,8 @@
 
 #include "Frame.h"
 #include "Types.h"
-#include "util/Command.h"
+#include "model/Command.h"
+
 #include <queue>
 
 class Sizer;

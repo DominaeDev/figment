@@ -1,6 +1,7 @@
 #include "llm/Grammar.h"
 #include "util/Common.h"
 #include "util/StringUtility.h"
+#include "util/FileUtility.h"
 #include <set>
 #include <cassert>
 
@@ -51,7 +52,7 @@ static bool _evaluate(string& text, size_t pos_begin, const std::set<string>& fl
 
 SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, string names, string stateVars)
 {
-	string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
+	string grammar = file_util::ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 	if (grammar.size() == 0)
 		return nullptr;
 

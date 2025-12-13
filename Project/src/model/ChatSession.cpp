@@ -2,6 +2,7 @@
 
 #include "util/Common.h"
 #include "util/StringUtility.h"
+#include "util/FileUtility.h"
 #include "llm/LLMUtility.h"
 #include "gui/CharacterImageStore.h"
 #include "gui/Color.h"
@@ -15,27 +16,27 @@ bool ChatSession::Initialize(LLMOptions options)
 	_options = options;
 
 	// System prompt
-	_system_prompt_solo = ReadTextFile("./resources/prompting/prompt_system_solo.txt").value_or("");
-	_system_prompt_group = ReadTextFile("./resources/prompting/prompt_system_group.txt").value_or("");
+	_system_prompt_solo = file_util::ReadTextFile("./resources/prompting/prompt_system_solo.txt").value_or("");
+	_system_prompt_group = file_util::ReadTextFile("./resources/prompting/prompt_system_group.txt").value_or("");
 
 	// System prompt (character)
-	_system_prompt_character = ReadTextFile("./resources/prompting/prompt_system_character.txt").value_or("");
+	_system_prompt_character = file_util::ReadTextFile("./resources/prompting/prompt_system_character.txt").value_or("");
 
 	// System prompt (user)
-	_system_prompt_user = ReadTextFile("./resources/prompting/prompt_system_user.txt").value_or("");
+	_system_prompt_user = file_util::ReadTextFile("./resources/prompting/prompt_system_user.txt").value_or("");
 
 	// Formatting spec
-	_formatting_solo = ReadTextFile("./resources/prompting/prompt_formatting_solo.txt").value_or("");
-	_formatting_group = ReadTextFile("./resources/prompting/prompt_formatting_group.txt").value_or("");
+	_formatting_solo = file_util::ReadTextFile("./resources/prompting/prompt_formatting_solo.txt").value_or("");
+	_formatting_group = file_util::ReadTextFile("./resources/prompting/prompt_formatting_group.txt").value_or("");
 
 	// State tracking
-	_formatting_state = ReadTextFile("./resources/prompting/prompt_formatting_state.txt").value_or("");
+	_formatting_state = file_util::ReadTextFile("./resources/prompting/prompt_formatting_state.txt").value_or("");
 
 	// Director prompt
-	_formatting_director = ReadTextFile("./resources/prompting/prompt_formatting_director.txt").value_or("");
+	_formatting_director = file_util::ReadTextFile("./resources/prompting/prompt_formatting_director.txt").value_or("");
 
 	// (Optional) Uncensored instructions
-	_system_prompt_uncensored = ReadTextFile("./resources/prompting/prompt_system_uncensored.txt").value_or("");
+	_system_prompt_uncensored = file_util::ReadTextFile("./resources/prompting/prompt_system_uncensored.txt").value_or("");
 
 	return !_system_prompt_solo.empty()
 		&& !_system_prompt_character.empty()

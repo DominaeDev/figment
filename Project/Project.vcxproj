@@ -22,13 +22,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -137,7 +137,6 @@
     <ClCompile Include="src\gui\ChatScroll.cpp" />
     <ClCompile Include="src\gui\Color.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
-    <ClCompile Include="src\util\CommandParser.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
     <ClCompile Include="src\gui\ControlWithMargins.cpp" />
     <ClCompile Include="src\gui\Fonts.cpp" />
@@ -156,6 +155,8 @@
     <ClCompile Include="src\gui\SolidBackgroundRenderer.cpp" />
     <ClCompile Include="src\gui\StaticText.cpp" />
     <ClCompile Include="src\gui\StatusBar.cpp" />
+    <ClCompile Include="src\model\CommandParser.cpp" />
+    <ClCompile Include="src\util\FileUtility.cpp" />
     <ClCompile Include="src\util\StringUtility.cpp" />
     <ClCompile Include="src\gui\Text.cpp" />
     <ClCompile Include="src\gui\TextBox.cpp" />
@@ -188,9 +189,9 @@
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Character.h" />
     <ClInclude Include="include\model\ChatSession.h" />
+    <ClInclude Include="include\model\Command.h" />
+    <ClInclude Include="include\model\CommandParser.h" />
     <ClInclude Include="include\util\EnumFlags.h" />
-    <ClInclude Include="include\util\Command.h" />
-    <ClInclude Include="include\util\CommandParser.h" />
     <ClInclude Include="include\gui\CustomRenderer.h" />
     <ClInclude Include="include\gui\ChatMessage.h" />
     <ClInclude Include="include\gui\ChatScroll.h" />
@@ -216,6 +217,8 @@
     <ClInclude Include="include\gui\SolidBackgroundRenderer.h" />
     <ClInclude Include="include\gui\StaticText.h" />
     <ClInclude Include="include\gui\StatusBar.h" />
+    <ClInclude Include="include\util\FileUtility.h" />
+    <ClInclude Include="include\util\Lockable.h" />
     <ClInclude Include="include\util\StringUtility.h" />
     <ClInclude Include="include\gui\Text.h" />
     <ClInclude Include="include\gui\TextBox.h" />

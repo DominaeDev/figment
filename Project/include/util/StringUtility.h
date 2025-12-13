@@ -1,8 +1,6 @@
 #ifndef STRING_UTIL_H__
 #define STRING_UTIL_H__
 
-#pragma once
-
 #include <string>
 #include <vector>
 #include <unordered_set>
@@ -36,6 +34,7 @@ namespace string_util
 	std::string& normalize_newlines(std::string& text);
 	std::string normalize_newlines(std::string&& s);
 
+	size_t validate_utf8(const std::string& text) noexcept;
 	std::wstring from_utf8(const std::string& str);
 	std::string to_utf8(const std::wstring& str);
 }

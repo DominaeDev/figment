@@ -1,3 +1,6 @@
+#ifndef ENUM_FLAGS_H__
+#define ENUM_FLAGS_H__
+
 #pragma once
 
 #include <bitset>
@@ -36,7 +39,7 @@ class EnumFlags {
 public:
 	using UnderlyingType = std::underlying_type_t<T>;
 
-	constexpr EnumFlags() : _flags(Zero) {}
+	constexpr EnumFlags() : _flags(static_cast<std::underlying_type_t<T>>(0)) {}
 	constexpr explicit EnumFlags(T v) : _flags(ToUnderlying(v)) {}
 	constexpr EnumFlags(std::initializer_list<T> vs) : EnumFlags()
 	{
@@ -59,21 +62,21 @@ public:
 	constexpr bool IsAnySet(std::initializer_list<T> vs) const
 	{
 		auto v = EnumFlags(vs);
-		return (_flags & v.ToRaw()) != Zero;
+		return (_flags & v.ToRaw()) != static_cast<std::underlying_type_t<T>>(0);
 	}
 	// Checks if no flag is set.
-	constexpr bool IsEmpty() const { return _flags == Zero; }
+	constexpr bool IsEmpty() const { return _flags == static_cast<std::underlying_type_t<T>>(0); }
 
 	// Sets a single flag value.
 	constexpr void Set(T v) { _flags |= ToUnderlying(v); }
 	// Unsets a single flag value.
 	constexpr void Unset(T v) { _flags &= ~ToUnderlying(v); }
 	// Clears all flag values.
-	constexpr void Clear() { _flags = Zero; }
+	constexpr void Clear() { _flags = static_cast<std::underlying_type_t<T>>(0); }
 
 	constexpr operator bool() const
 	{
-		return _flags != Zero;
+		return _flags != static_cast<std::underlying_type_t<T>>(0);
 	}
 
 	friend constexpr EnumFlags operator|(EnumFlags lhs, T rhs)
@@ -175,6 +178,7 @@ public:
 
 	static const EnumFlags<T> None;
 	static const UnderlyingType Zero;
+	static const UnderlyingType One;
 
 private:
 	constexpr explicit EnumFlags(UnderlyingType flags) : _flags(flags) {}
@@ -184,5 +188,7 @@ private:
 
 template <typename T>
 const EnumFlags<T> EnumFlags<T>::None {};
+
 template <typename T>
-const EnumFlags<T>::UnderlyingType EnumFlags<T>::Zero = static_cast<EnumFlags<T>::UnderlyingType>(0);
+const std::underlying_type_t<T> EnumFlags<T>::Zero { static_cast<std::underlying_type_t<T>>(0) };
+#endif

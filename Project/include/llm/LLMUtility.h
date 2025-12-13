@@ -2,12 +2,12 @@
 
 #include "llm/LLMTypes.h"
 #include "llm/Context.h"
+
 #include <optional>
 
 namespace llm_util
 {
 	std::string stringFromToken(VocabPtr pVocab, llama_token token);
-	size_t validate_utf8(const string& text) noexcept;
 	size_t string_find_partial_stop(const std::string& str, const std::string& stop);
 	size_t find_one_of(const string& text, const std::vector<string>& words);
 	size_t find_stopping_strings(const string& text, const std::vector<string>& stop_words, const size_t last_token_size, bool is_full_stop);

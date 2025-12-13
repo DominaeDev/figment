@@ -3,7 +3,9 @@
 #include "llm/LLMTemplate.h"
 #include "llm/Embedding.h"
 #include "util/StringUtility.h"
+#include "util/FileUtility.h"
 #include "util/Common.h"
+#include "util/Lockable.h"
 #include <common.h>
 #include <format>
 #include <algorithm>
@@ -13,28 +15,8 @@
 #define DEBUG_SEED 0xA1B2C3D4
 
 using namespace std::chrono_literals;
-
-template <typename T>
-concept Lockable = requires (T mut)
-{
-	mut.try_lock();
-	mut.lock();
-	mut.unlock();
-};
-
-template <Lockable... MutexTypes>
-static void LockAndDo(std::function<void()> fn, MutexTypes&... mutexes)
-{
-	std::scoped_lock _ { mutexes... };
-	fn();
-}
-
-template <typename ReturnType, Lockable MutexType>
-[[nodiscard]] static ReturnType LockAndReturn(std::function<ReturnType()> fn, MutexType& mutex)
-{
-	std::scoped_lock _ { mutex };
-	return fn();
-}
+using namespace common_util;
+using namespace file_util;
 
 inline constexpr string Direction(std::string_view text)
 {
@@ -45,7 +27,6 @@ inline constexpr string Narration(std::string_view text)
 {
 	return "[" + std::string(text) + "]";
 }
-
 
 LLMInstance::LLMInstance()
 {
@@ -439,7 +420,7 @@ bool LLMInstance::ResetChat(int seed)
 
 	{	// Lock state
 		std::scoped_lock lock(_stateMutex, _resultMutex);
-		ClearQueue(_resultQueue);
+		queue_clear(_resultQueue);
 
 		if (_session.IsGroupChat() && !_options.IsSet(LLMOption::UseMultipleSequences))
 			SwapPersona(Role::Undefined);
@@ -1371,7 +1352,7 @@ void LLMInstance::StartGeneration()
 void LLMInstance::ClearResponseQueue()
 {
 	LockAndDo([this]() {
-		ClearQueue(_resultQueue);
+		queue_clear(_resultQueue);
 	}, _resultMutex);
 }
 
@@ -1395,7 +1376,7 @@ bool LLMInstance::ClearTasksQueue()
 		if (_tasks.empty())
 			return false;
 
-		ClearQueue(_tasks);
+		queue_clear(_tasks);
 		return true;
 	}, _taskMutex);
 }
@@ -1642,7 +1623,7 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 
 	if (newSize > 0)
 	{
-		const auto& newLastBlock = blocks[newSize - 1uz];
+		const auto& newLastBlock = blocks[newSize - 1_uz];
 		if (newLastBlock.is_cached())
 			cursor_pos = std::min(cursor_pos, newLastBlock.offset + newLastBlock.length());
 		else

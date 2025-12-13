@@ -1,8 +1,8 @@
 #pragma once
 
 #include "gui/Control.h"
-#include "model/ChatSession.h"
 #include "llm/LLMTypes.h"
+#include "model/ChatSession.h"
 
 class ChatMessage;
 class VerticalScrollSizer;
@@ -17,7 +17,7 @@ public:
 	void AddDummyMessage(string name, Role role, MessageType msgType, string message);
 	void AddSystemMessage(string message);
 
-	int RemoveMessages(std::vector<string> ids);
+	int RemoveMessages(std::span<string> ids);
 	void ClearMessages();
 
 	std::tuple<std::string, std::string> GetLastMessage() const;

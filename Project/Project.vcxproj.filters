@@ -158,9 +158,6 @@
     <ClCompile Include="src\llm\LLMUtility.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\CommandParser.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\Control.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
@@ -232,6 +229,12 @@
     </ClCompile>
     <ClCompile Include="src\llm\Grammar.cpp">
       <Filter>Source Files\Inference</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\FileUtility.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\CommandParser.cpp">
+      <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -328,9 +331,6 @@
     <ClInclude Include="include\model\ChatSession.h">
       <Filter>Source Files\Model</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\CommandParser.h">
-      <Filter>Source Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\Control.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
@@ -366,9 +366,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\HorizontalGradient.h">
       <Filter>Source Files\Interface\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\Command.h">
-      <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMTypes.h">
       <Filter>Source Files\Inference</Filter>
@@ -411,6 +408,18 @@
     </ClInclude>
     <ClInclude Include="include\llm\Grammar.h">
       <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\Lockable.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\FileUtility.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\Command.h">
+      <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\CommandParser.h">
+      <Filter>Source Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

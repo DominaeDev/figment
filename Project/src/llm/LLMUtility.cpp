@@ -1,5 +1,6 @@
 ﻿#include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
+#include "util/FileUtility.h"
 #include "util/Common.h"
 #include "Constants.h"
 #include <format>
@@ -32,40 +33,6 @@ std::string llm_util::stringFromToken(VocabPtr pVocab, llama_token token)
 		return "";
 
 	return std::string(buf, n);
-}
-
-size_t llm_util::validate_utf8(const string& text) noexcept
-{
-	size_t len = text.size();
-	if (len == 0) return 0;
-
-	// Check the last few bytes to see if a multi-byte character is cut off
-	for (size_t i = 1; i <= 4 && i <= len; ++i)
-	{
-		unsigned char c = text[len - i];
-		// Check for start of a multi-byte sequence from the end
-		if ((c & 0xE0) == 0xC0)
-		{
-			// 2-byte character start: 110xxxxx
-			// Needs at least 2 bytes
-			if (i < 2) return len - i;
-		}
-		else if ((c & 0xF0) == 0xE0)
-		{
-			// 3-byte character start: 1110xxxx
-			// Needs at least 3 bytes
-			if (i < 3) return len - i;
-		}
-		else if ((c & 0xF8) == 0xF0)
-		{
-			// 4-byte character start: 11110xxx
-			// Needs at least 4 bytes
-			if (i < 4) return len - i;
-		}
-	}
-
-	// If no cut-off multi-byte character is found, return full length
-	return len;
 }
 
 size_t llm_util::string_find_partial_stop(const std::string& str, const std::string& stop)
@@ -230,7 +197,7 @@ string& llm_util::complete_message(string& text)
 
 void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word)
 {
-	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
+	if (string_util::validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
 	{
 		*bWait = true;
 		*bHalt = false;
@@ -759,7 +726,7 @@ bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, string
 		result.append("]\r\n");
 	}
 
-	return WriteTextFile(filename, result, false);
+	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
 bool llm_util::dump_batch_tokens(const Context& context, int32_t seq_id, string filename)
@@ -834,7 +801,7 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, i
 		);
 	}
 
-	return WriteTextFile(filename, result, false);
+	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
 bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, string filename)
@@ -913,7 +880,7 @@ bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, string file
 
 	llama_kv_cache_view_free(&cache_view);
 	
-	return WriteTextFile(filename, result, false);
+	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
 bool llm_util::dump_kv_cache_cells(const Context& contextState, string filename)
@@ -969,7 +936,7 @@ bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, s
 
 	llama_kv_cache_view_free(&cache_view);
 	
-	return WriteTextFile(filename, result, false);
+	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
 void llm_util::erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos)

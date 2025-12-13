@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <format>
 
+using namespace common_util;
+
 Context::Context(const ModelState& model)
 {
 	_pModel = &model;
@@ -135,7 +137,7 @@ int32_t Context::RemoveBlock(const ContextBlock& block, bool bShift)
 	assert(block.sequenceId != SequenceId::None);
 
 	auto iter_block = std::find_if(_blocks.cbegin(), _blocks.cend(), [&block](const ContextBlock& b) { return &block == &b; });
-	return RemoveBlocks(iter_block, iter_block + 1uz, bShift);
+	return RemoveBlocks(iter_block, iter_block + 1_uz, bShift);
 }
 
 int32_t Context::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift)
