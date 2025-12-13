@@ -1,10 +1,12 @@
 #include "llm/LLMTypes.h"
 #include "llm/ContextBlock.h"
 #include "llm/ContextCache.h"
-#include "llm/ModelState.h"
 #include <optional>
+#include <map>
 
 #pragma once
+
+class ModelState;
 
 class Context
 {

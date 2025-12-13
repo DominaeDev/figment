@@ -1,4 +1,6 @@
 #include "llm/ModelState.h"
+#include "llm/LLMEmbedding.h"
+
 #include <list>
 #include <cassert>
 
@@ -22,6 +24,12 @@ void ModelState::Release()
 
 	if (pModel)
 		llama_model_free(pModel);
+
+	if (pEmbedding)
+	{
+		pEmbedding->Shutdown();
+		pEmbedding = nullptr;
+	}
 
 	pSampler = nullptr;
 	pActiveGrammar = nullptr;

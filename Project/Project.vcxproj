@@ -114,6 +114,7 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
     <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="include\llm\LLMEngine.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
@@ -130,6 +131,7 @@
     <ClCompile Include="src\llm\LLMTemplate.cpp" />
     <ClCompile Include="src\llm\LLMTypes.cpp" />
     <ClCompile Include="src\llm\ModelState.cpp" />
+    <ClCompile Include="src\llm\LLMStatus.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />
     <ClCompile Include="src\gui\Area.cpp" />
     <ClCompile Include="src\model\Character.cpp" />
@@ -181,10 +183,12 @@
     <ClInclude Include="include\llm\Embedding.h" />
     <ClInclude Include="include\llm\Grammar.h" />
     <ClInclude Include="include\llm\LLMEmbedding.h" />
+    <ClInclude Include="include\llm\LLMEngine.h" />
     <ClInclude Include="include\llm\LLMStateVariables.h" />
     <ClInclude Include="include\llm\LLMTemplate.h" />
     <ClInclude Include="include\llm\LLMTypes.h" />
     <ClInclude Include="include\llm\ModelState.h" />
+    <ClInclude Include="include\llm\LLMStatus.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Character.h" />

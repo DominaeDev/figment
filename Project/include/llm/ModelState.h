@@ -3,6 +3,9 @@
 #include "llm/LLMTypes.h"
 #include "llm/Grammar.h"
 #include <random>
+#include <map>
+
+class LLMEmbedding;
 
 class ModelState
 {
@@ -18,6 +21,8 @@ public:
 	std::mt19937 rng {};
 	int32_t num_sequences {};
 	int32_t ctx_size {};
+
+	LLMEmbedding* pEmbedding = nullptr;
 
 	void Release();
 	bool HasGrammar(GrammarFlags flags) const;

@@ -1,6 +1,7 @@
 ﻿#include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "llm/LLMTemplate.h"
+#include "llm/LLMStatus.h"
 #include "llm/Embedding.h"
 #include "util/StringUtility.h"
 #include "util/FileUtility.h"
@@ -49,80 +50,19 @@ LLMInstance::~LLMInstance()
 
 void LLMInstance::Shutdown()
 {
-	Halt(); 
-	
-	LockAndDo([this]() {	
-		// Clear and release state
-		_modelState.Release();
-		_modelState = {};
-		_contextState = {};
-
-		if (_pEmbedding)
-		{
-			_pEmbedding->Shutdown();
-			_pEmbedding = nullptr;
-		}
-	}, _stateMutex);
-	_readyState.store(ReadyState::Uninitialized);
-	PushSignal(LLMStatusSignal::UnloadedModel);
-
-	llama_backend_free();
-}
-
-using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;
-static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
-{
-	LLMInstance* pThis = static_cast<LLMInstance*>(user_data);
-
-	string log(text);
-	size_t pos_eq = log.find('=');
-	bool bGPU = log.find("CUDA") != string::npos;
-	bool bCPU = log.find("CPU") != string::npos;
-
-	if (pos_eq != string::npos && log.find("buffer size") != string::npos)
-	{
-		string value = string_util::trim(log.substr(pos_eq + 1));
-		double mul= 1024.0 * 1024.0; // MiB
-		if (string_util::ends_with(value, "GiB"))
-			mul *= 1024.0;
-
-		try
-		{
-			int64_t iValue = static_cast<int64_t>(std::stod(value) * mul);
-			if (bGPU)
-				pThis->usedVRAM.fetch_add(iValue);
-			else if (bCPU)
-				pThis->usedRAM.fetch_add(iValue);
-		}
-		catch (...)
-		{
-			// Do nothing
-		}
-	}
-
-	DebugPrint(text);
-}
-
-static LoadModelProgressCallback __LoadModelProgressCallback = nullptr; //! @thread-safety
-
-static void OnLoadModelProgress(float progress, void* user_data)
-{
-	if (__LoadModelProgressCallback)
-		__LoadModelProgressCallback(static_cast<int>(progress * 100.0f));
+	Halt();
 }
 
 bool LLMInstance::InitializeChat(LLMChatArguments args)
 {
-	std::scoped_lock lock(_stateMutex);
-	if (_readyState < ReadyState::ModelLoaded || !_modelState.pModel)
-		return false;
-
-	PushSignal(LLMStatusSignal::InitializingChat);
+	_pStatus->PushSignal(LLMStatusSignal::InitializingChat);
 
 	bool bMultiSequence = args.session.IsGroupChat() && args.options.IsSet(LLMOption::UseMultipleSequences);
 	int32_t n_bots = bMultiSequence ? (int32_t)args.session.GetBotCount() : 1;
 	if (n_bots == 0)
 		return false; // Error
+
+	std::scoped_lock _(_stateMutex);
 
 	_contextState = Context(_modelState); //!
 	_session = args.session;
@@ -344,8 +284,8 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 	}
 
 	_bCtxReallocateNextTurn = false;
-	_readyState.store(ReadyState::Ready);
-	PushSignal(LLMStatusSignal::InitializedChat);
+	SetReadyState(ReadyState::Ready);
+	_pStatus->PushSignal(LLMStatusSignal::InitializedChat);
 	return true;
 }
 
@@ -426,118 +366,22 @@ bool LLMInstance::ResetChat(int seed)
 			SwapPersona(Role::Undefined);
 
 		_contextState.EraseChat();
-		_readyState.store(ReadyState::Ready);
+		SetReadyState(ReadyState::Ready);
 	}
 
 	if (seed > 0)
 		Reseed(seed);
 
-	PushSignal(LLMStatusSignal::InitializedChat);
+	_pStatus->PushSignal(LLMStatusSignal::InitializedChat);
 
 	if (_options.IsSet(LLMOption::GreetUser))
 		GreetUser();
 	return true;
 }
 
-void LLMInstance::__LoadModel(string filename, __LoadModelCallback onComplete)
+bool LLMInstance::IsInitialized() const
 {
-	const int ngl = 99; // All layers
-	usedVRAM.store(0);
-	usedRAM.store(0);
-
-	llama_backend_init();
-
-	llama_log_set(OnLlamaLog, (void*)this);
-
-	// initialize the model
-	llama_model_params model_params = llama_model_default_params();
-	model_params.n_gpu_layers = ngl;
-	model_params.use_mmap = true;
-	model_params.use_mlock = true;
-	model_params.progress_callback = (llama_progress_callback)&OnLoadModelProgress;
-
-	ModelState state;
-	state.pModel = llama_model_load_from_file(filename.c_str(), model_params);
-	state.pVocab = llama_model_get_vocab(state.pModel);
-	state.modelName = GetFilename(filename);
-
-	llm_tmpl::auto_detect_template(state.pModel);
-
-	if (!state.pModel)
-	{
-		fprintf(stderr, "%s: error: unable to load model\n", __func__);
-		onComplete(state);
-		return;
-	}
-
-	// initialize the context
-	llama_context_params ctx_params = llama_context_default_params();
-	int32_t n_ctx = std::min(llama_model_n_ctx_train(state.pModel), Constants::Context::DefaultSize);
-	int32_t n_seq_max = Constants::Context::MaxSequences;
-	ctx_params.n_ctx = n_ctx;
-	ctx_params.n_seq_max = n_seq_max;
-	ctx_params.n_batch = n_ctx;
-	ctx_params.n_ubatch = Constants::Context::MicroBatchSize;
-
-	state.pCtx = llama_init_from_model(state.pModel, ctx_params);
-	state.ctx_size = llama_n_ctx(state.pCtx);
-	state.num_sequences = n_seq_max;
-
-	if (!state.pCtx)
-	{
-		fprintf(stderr, "%s: error: failed to create the llama_context\n", __func__);
-		onComplete(state);
-		return;
-	}
-
-	// Initialize embedder
-	if (_options.IsSet(LLMOption::Embeddings))
-	{
-		_pEmbedding = std::make_unique<LLMEmbedding>();
-		if (_pEmbedding->LoadModel(string(Constants::Embedding::DefaultModelLocation)))
-			DebugPrintLn("Loaded embedding model");
-		else
-			_pEmbedding = nullptr; // Destroy
-	}
-
-	onComplete(state);
-}
-
-bool LLMInstance::Initialize(string filename, LLMOptions options, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
-{
-	auto readyState = _readyState.load();
-	if (readyState > ReadyState::Uninitialized)
-		return false; // Already loading or loaded
-
-	_readyState.store(ReadyState::LoadingModel);
-	__LoadModelProgressCallback = onProgress;
-	_options = options;
-
-	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__LoadModel, this), filename,
-		[this, filename, onComplete](ModelState result)
-	{
-		if (result.pModel) // Success
-		{
-			LockAndDo([this, &result]() {
-				_modelState = result;
-			}, _stateMutex);
-			_readyState.store(ReadyState::ModelLoaded);
-
-			DebugPrintLn("Loaded model OK");
-			PushSignal(LLMStatusSignal::LoadedModel);
-			onComplete(true);
-		}
-		else // Failure
-		{
-			result.Release();
-
-			DebugPrintLn("Failed to load model");
-			PushSignal(LLMStatusSignal::LoadModelFailure);
-			onComplete(false);
-		}
-	}));
-
-	return true;
+	return _readyState.load() >= ReadyState::Ready;
 }
 
 bool LLMInstance::IsReady() const
@@ -628,7 +472,7 @@ bool LLMInstance::Halt()
 		_workerThread->join();
 		_workerThread.reset(nullptr);
 	}
-	_readyState.store(ReadyState::Ready);
+	SetReadyState(ReadyState::Ready);
 	return true;
 }
 
@@ -764,6 +608,9 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	if (!args.isContinuation)
 		_contextState.response_pos = cursor_pos;
 
+	// Update status
+	_pStatus->ReportModelInfo(state.modelName, state.ctx_size, n_ctx_used);
+
 //	DumpContext();
 }
 
@@ -836,10 +683,10 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	assert(current_sequence_index >= 0 && current_sequence_index < Constants::Context::MaxSequences);
 	assert(llama_kv_self_used_cells(state.pCtx) + Constants::Context::MaxResponseLength <= ctx_size);
 
-	if (!args.history.empty() && _pEmbedding)
+	if (!args.history.empty() && _modelState.pEmbedding)
 	{
 		DebugPrintLn(">> SEARCH EMBEDDINGS");
-		_pEmbedding->Search(args.history, true, true);
+		_modelState.pEmbedding->Search(args.history, true, true);
 	}
 
 	DebugPrintLn(">> BEGIN GENERATION");
@@ -1124,7 +971,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			{
 				msgType = MessageType::Undefined;
 				subMessageId = CreateUUID();
-				PushSignal(LLMStatusSignal::CompletedMessage);
+				_pStatus->PushSignal(LLMStatusSignal::CompletedMessage);
 			}
 		}
 
@@ -1145,7 +992,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	if (!sampled_tokens.empty())
 	{
 		double duration = toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count());
-		_tokensPerSec.store(toD(sampled_tokens.size()) / (duration / 1000.0));
+		_pStatus->ReportTokensPerSec(toD(sampled_tokens.size()) / (duration / 1000.0));
 	}
 
 	// Remove full response from cache (will be reinserted on next turn)
@@ -1328,8 +1175,8 @@ void LLMInstance::StartGeneration()
 	if (IsGenerating())
 		return; // Already running
 
-	_readyState.store(ReadyState::Generating);
-	PushSignal(LLMStatusSignal::GenerationStarted);
+	SetReadyState(ReadyState::Generating);
+	_pStatus->PushSignal(LLMStatusSignal::GenerationStarted);
 
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__ProcessTaskQueue, this),
 		[this](InternalError error, string response) {
@@ -1337,15 +1184,15 @@ void LLMInstance::StartGeneration()
 			if (error != InternalError::NoError)
 			{
 				printf("\r\n>> Internal error: (%d) %s\r\n", error, response.c_str());
-				_readyState.store(ReadyState::Invalid);
+				SetReadyState(ReadyState::Invalid);
 			}
 			else
 			{
-				_readyState.store(ReadyState::Ready);
+				SetReadyState(ReadyState::Ready);
 			}
 
 			RefreshActiveResponses();
-			PushSignal(LLMStatusSignal::GenerationComplete);
+			_pStatus->PushSignal(LLMStatusSignal::GenerationComplete);
 		}));
 }
 
@@ -1673,40 +1520,6 @@ std::vector<RemovedMessage> LLMInstance::RollbackUserMessage()
 	return {};
 }
 
-std::pair<LLMStatus, bool> LLMInstance::PollStatus()
-{
-	LLMStatus status {};
-
-	// Try to acquire state lock
-	std::unique_lock<std::timed_mutex> lock(_stateMutex, std::try_to_lock);
-	if (lock.owns_lock())
-	{
-		if (_modelState.pModel && _modelState.pCtx)
-		{
-			status.modelName = _modelState.modelName;
-			status.allocCtxSize = llama_n_ctx(_modelState.pCtx);
-			status.usedCtxSize = llama_kv_self_used_cells(_modelState.pCtx);
-			status.tokensPerSec = _tokensPerSec.load();
-			status.usedVRAM = usedVRAM.load();
-			status.usedRAM = usedRAM.load();
-		}
-		lock.unlock();
-	}
-
-	ReadyState readyState = _readyState.load();
-	status.bReady = readyState >= ReadyState::Ready;
-	status.bInvalid = readyState == ReadyState::Invalid;
-
-	LockAndDo([&]() {
-		if (!_statusSignals.empty())
-		{
-			status.signal = _statusSignals.front();
-			_statusSignals.pop();
-		}
-	}, _statusMutex);
-	return std::make_pair(status, true);
-}
-
 bool LLMInstance::PollResponse(MessagePiece& piece)
 {
 	std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
@@ -1770,16 +1583,6 @@ bool LLMInstance::Reseed(uint32_t seed)
 	}
 
 	return false;
-}
-
-void LLMInstance::PushSignal(LLMStatusSignal signal)
-{
-	std::scoped_lock _ { _statusMutex };
-
-	if (!_statusSignals.empty() && _statusSignals.back() == signal)
-		return;
-
-	_statusSignals.push(signal);
 }
 
 std::set<string> LLMInstance::GetActiveMessages()
@@ -1917,11 +1720,11 @@ Sentences LLMInstance::GetHistory(size_t depth)
 #if _DEBUG
 bool LLMInstance::GenerateEmbedding(string text)
 {
-	if (!_pEmbedding)
+	if (!_modelState.pEmbedding)
 		return false;
 
 	EmbeddingVector embedding;
-	if (_pEmbedding->Generate(text, embedding))
+	if (_modelState.pEmbedding->Generate(text, embedding))
 	{
 		Embeddings::AddEmbedding(embedding);
 
@@ -1982,12 +1785,19 @@ std::map<string, string> LLMInstance::GetStateVariables()
 
 bool LLMInstance::RebuildKVCache()
 {
-    PushSignal(LLMStatusSignal::RebuildingContext);
+	_pStatus->PushSignal(LLMStatusSignal::RebuildingContext);
     auto prevReadyState = _readyState.exchange(ReadyState::RebuildingContext);
+	_pStatus->ReportReadyState(ReadyState::RebuildingContext);
 
 	bool r = _contextState.RebuildKVCache();
 
-    _readyState.store(prevReadyState);
-    PushSignal(LLMStatusSignal::GenerationStarted);
+    SetReadyState(prevReadyState);
+	_pStatus->PushSignal(LLMStatusSignal::GenerationStarted);
     return r == 0;
+}
+
+void LLMInstance::SetReadyState(ReadyState readyState)
+{
+	_readyState.store(readyState);
+	_pStatus->ReportReadyState(readyState);
 }

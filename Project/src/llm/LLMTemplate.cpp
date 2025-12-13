@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include <cassert>
 #include <sstream>
+#include <map>
 
 PromptTemplate llm_tmpl::current_template = PromptTemplate::Default;
 string llm_tmpl::_template {};

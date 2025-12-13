@@ -2,6 +2,7 @@
 
 #include "Types.h"
 #include "Graphics.h"
+#include <map>
 
 enum class ImageType
 {

@@ -193,7 +193,7 @@ void ChatScroll::EnablePolling(bool bEnable)
 
 void ChatScroll::Poll()
 {
-	auto pLLM = Application::GetLLM();
+	auto pLLM = Application::GetLLMInstance();
 	if (!pLLM)
 		return;
 
@@ -314,7 +314,7 @@ void ChatScroll::OnAddedChild(LayoutElement* pChild)
 
 void ChatScroll::RefreshActive()
 {
-	auto pLLM = Application::GetLLM();
+	auto pLLM = Application::GetLLMInstance();
 	if (!pLLM)
 		return;
 

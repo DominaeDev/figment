@@ -3,6 +3,7 @@
 #include "gui/Control.h"
 #include "model/ChatTypes.h"
 #include "model/ChatSession.h"
+#include <map>
 
 class ChatMessage;
 class VerticalScrollSizer;

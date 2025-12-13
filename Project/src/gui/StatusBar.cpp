@@ -27,7 +27,7 @@ void StatusBar::SetMessage(string message)
 
 void StatusBar::SetModelInfo(LLMStatus status)
 {
-	if (!status.bReady)
+	if (!status.IsReady())
 		_pModelInfo->SetText("");
 	
 	if (!status.modelName.empty())

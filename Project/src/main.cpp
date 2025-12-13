@@ -12,6 +12,7 @@
 #include "gui/CharacterImageStore.h"
 #include "gui/Text.h"
 #include "gui/MainFrame.h"
+#include "llm/LLMEngine.h"
 #include "llm/LLMInstance.h"
 
 #if defined(_DEBUG)
@@ -95,10 +96,6 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	auto pMainFrame = new MainFrame(pWindow);
 	pAppState->pTopFrame = pMainFrame;
 
-	// Instantiate LLM
-	auto pLLM = new LLMInstance();
-	pAppState->pLLM = pLLM;
-
 	return SDL_APP_CONTINUE;
 }
 
@@ -109,7 +106,6 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 
 	if (event->type == SDL_EVENT_QUIT)
 	{
-		Application::GetLLM()->Halt();
 		return SDL_APP_SUCCESS;
 	}
 
@@ -176,13 +172,13 @@ SDL_AppResult SDL_AppIterate(void* state)
 void SDL_AppQuit(void* state, SDL_AppResult result)
 {
 	AppState* pAppState = static_cast<AppState*>(state);
-	delete pAppState->pTopFrame;
-	delete pAppState->pLLM;
-	
+
 	CharacterImageStore::Release();
 	TextureStore::Release();
 	Fonts::ReleaseFonts();
 	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
 	TTF_Quit();
+
+	Application::ReleaseState();
 }
 

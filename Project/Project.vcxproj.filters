@@ -15,23 +15,11 @@
     <Filter Include="Source Files\Utility">
       <UniqueIdentifier>{fe76bd4c-257b-4367-b334-f71f71e387db}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Utility\Third-party">
-      <UniqueIdentifier>{656a9e42-e42d-48b3-ba04-a1f41e278237}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Utility\Third-party\SQLiteCpp">
-      <UniqueIdentifier>{2d33d23a-af68-4cd7-8729-6d2367369bd8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Utility\Third-party\tinyxml2">
-      <UniqueIdentifier>{abfccfd5-f4a0-4eff-8c48-c0fed63d8c8c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Inference">
       <UniqueIdentifier>{b6a16c68-2efd-46d3-b4b1-42ee978fc28a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Model">
       <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Utility\Third-party\uuid">
-      <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Inference\Embeddings">
       <UniqueIdentifier>{fc79dcd6-092f-47e7-870f-bcd0142e0610}</UniqueIdentifier>
@@ -60,31 +48,46 @@
     <Filter Include="Source Files\Interface\Fonts">
       <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Inference\Session">
+      <UniqueIdentifier>{fff0aac0-523f-4b46-896c-5a89e16498dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party">
+      <UniqueIdentifier>{656a9e42-e42d-48b3-ba04-a1f41e278237}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party\SQLiteCpp">
+      <UniqueIdentifier>{2d33d23a-af68-4cd7-8729-6d2367369bd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party\tinyxml2">
+      <UniqueIdentifier>{abfccfd5-f4a0-4eff-8c48-c0fed63d8c8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party\uuid">
+      <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
-      <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
+      <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\SQLite3\src\Database.cpp">
-      <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
+      <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\SQLite3\src\Exception.cpp">
-      <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
+      <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\SQLite3\src\Savepoint.cpp">
-      <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
+      <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp">
-      <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
+      <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp">
-      <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
+      <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\SQLite3\src\Backup.cpp">
-      <Filter>Source Files\Utility\Third-party\SQLiteCpp</Filter>
+      <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Sizer.cpp">
       <Filter>Source Files\Interface\Layout</Filter>
@@ -125,9 +128,6 @@
     <ClCompile Include="src\util\Common.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\llm\LLMInstance.cpp">
-      <Filter>Source Files\Inference</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\Area.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
@@ -153,7 +153,7 @@
       <Filter>Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp">
-      <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
+      <Filter>Source Files\Third-party\tinyxml2</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMUtility.cpp">
       <Filter>Source Files\Inference</Filter>
@@ -236,6 +236,15 @@
     <ClCompile Include="src\model\ChatCommands.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="include\llm\LLMEngine.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
+    <ClCompile Include="src\llm\LLMInstance.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
+    <ClCompile Include="src\llm\LLMStatus.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -283,9 +292,6 @@
     <ClInclude Include="include\util\Common.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\llm\LLMInstance.h">
-      <Filter>Source Files\Inference</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\Area.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
@@ -311,13 +317,13 @@
       <Filter>Source Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h">
-      <Filter>Source Files\Utility\Third-party\tinyxml2</Filter>
+      <Filter>Source Files\Third-party\tinyxml2</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h">
-      <Filter>Source Files\Utility\Third-party\uuid</Filter>
+      <Filter>Source Files\Third-party\uuid</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\uuid_v4\endianness.h">
-      <Filter>Source Files\Utility\Third-party\uuid</Filter>
+      <Filter>Source Files\Third-party\uuid</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMUtility.h">
       <Filter>Source Files\Inference</Filter>
@@ -423,6 +429,15 @@
     </ClInclude>
     <ClInclude Include="include\model\ChatOptions.h">
       <Filter>Source Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\LLMEngine.h">
+      <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\LLMInstance.h">
+      <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\LLMStatus.h">
+      <Filter>Source Files\Inference</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

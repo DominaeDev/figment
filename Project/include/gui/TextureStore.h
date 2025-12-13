@@ -1,7 +1,7 @@
 #pragma once
 
-#include <map>
 #include "Graphics.h"
+#include <map>
 
 enum class TextureType
 {

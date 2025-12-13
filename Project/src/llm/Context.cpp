@@ -1,5 +1,6 @@
 #include "llm/Context.h"
 #include "llm/LLMUtility.h"
+#include "llm/ModelState.h"
 #include "util/Common.h"
 #include "Constants.h"
 #include <cassert>

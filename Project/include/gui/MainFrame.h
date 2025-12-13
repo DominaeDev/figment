@@ -3,6 +3,7 @@
 #include "Frame.h"
 #include "Types.h"
 #include "model/ChatCommands.h"
+#include "llm/LLMStatus.h"
 
 #include <queue>
 
@@ -47,6 +48,7 @@ private:
 	bool _bStartedChat = false; // Used to trigger greeting
 
 	std::queue<ParsedChatCommand> _commandQueue;
+	std::shared_ptr<LLMStatusChannel> _pStatus {};
 
 #if AUTOCHAT
 private:

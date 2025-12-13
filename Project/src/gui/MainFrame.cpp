@@ -14,6 +14,7 @@
 #include "gui/TextureStore.h"
 #include "model/AppState.h"
 #include "model/ChatCommands.h"
+#include "llm/LLMEngine.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
@@ -125,7 +126,7 @@ void MainFrame::OnUpdate(float fDeltaTime)
 	if (_bStartedChat)
 	{
 		_bStartedChat = false;
-		auto pLLM = Application::GetLLM();
+		auto pLLM = Application::GetLLMInstance();
 		if (pLLM)
 			pLLM->GreetUser();
 	}
@@ -147,32 +148,38 @@ void MainFrame::OnRender(Renderer* pRenderer)
 
 void MainFrame::InitializeModel()
 {
-	auto pLLM = Application::GetLLM();
-	if (!pLLM)
+	auto pLLMEngine = Application::GetLLMEngine();
+	if (!pLLMEngine)
 		return;
 
-	if (!pLLM->IsInitialized())
+	_pStatus = pLLMEngine->GetStatusChannel();
+
+	if (!pLLMEngine->IsInitialized())
 	{
 		SetStatusBar("Loading model...");
-		pLLM->Initialize(string(Constants::DefaultModelLocation), llmOptions,
-			[](int percent) 
+		pLLMEngine->Initialize(string(Constants::DefaultModelLocation), 
+			llmOptions.IsSet(LLMOption::Embeddings) ? string(Constants::Embedding::DefaultModelLocation) : "",
+			[this](int percent) 
 			{
 				SetStatusBar(std::format("Loading model... {0}%", percent));
 			},
-			[this](bool bSuccess) 
+			[this, pLLMEngine](bool bSuccess)
 			{
+				if (bSuccess)
+					Application::SetLLMInstance(pLLMEngine->CreateInstance());
 			});
 	}
 }
 
 void MainFrame::UnloadModel()
 {
-	auto pLLM = Application::GetLLM();
-	if (pLLM && pLLM->IsInitialized())
+	auto pLLMEngine = Application::GetLLMEngine();
+	if (pLLMEngine && pLLMEngine->IsInitialized())
 	{
-		pLLM->Shutdown();
+		pLLMEngine->Shutdown();
 		SetStatusBar("Model unloaded");
 
+		_pStatus.reset();
 #if AUTOCHAT
 		_bAutoChat = false;
 #endif
@@ -181,8 +188,8 @@ void MainFrame::UnloadModel()
 
 void MainFrame::StartChat()
 {
-	auto pLLM = Application::GetLLM();
-	if (pLLM && pLLM->IsInitialized())
+	auto pLLM = Application::GetLLMInstance();
+	if (pLLM && !pLLM->IsInitialized())
 	{
 		ChatSession session;
 		session.Initialize(llmOptions);
@@ -212,7 +219,7 @@ bool MainFrame::OnCommand(ParsedChatCommand cmd)
 	if (cmd.command == ChatCommand::Invalid)
 		return false;
 
-	auto pLLM = Application::GetLLM();
+	auto pLLM = Application::GetLLMInstance();
 	if (!pLLM)
 		return false;
 
@@ -391,18 +398,17 @@ bool MainFrame::OnCommand(ParsedChatCommand cmd)
 #if AUTOCHAT
 void MainFrame::AutoChat()
 {
-	auto pLLM = Application::GetLLM();
-	if (!pLLM)
-		return;
+	auto pLLMEngine = Application::GetLLMEngine();
 
-	if (!pLLM->IsInitialized())
+	if (!pLLMEngine->IsInitialized())
 	{
-		if (!pLLM->IsInitializing())
+		if (!pLLMEngine->IsInitializing())
 			InitializeModel();
 		return;
 	}
 
-	if (!pLLM->IsReady() || pLLM->IsGenerating())
+	auto pLLMInstance = Application::GetLLMInstance();
+	if (!pLLMInstance || !pLLMInstance->IsReady() || pLLMInstance->IsGenerating())
 		return;
 
 	if (_autoScript.empty())
@@ -410,7 +416,7 @@ void MainFrame::AutoChat()
 		if (auto script = ReadTextFile("resources/auto_script.txt"))
 		{
 			string text = script.value();
-			text = pLLM->GetSession().ApplyNames(text);
+			text = pLLMInstance->GetSession().ApplyNames(text);
 			_autoScript = string_util::split(text, '\n');
 		}
 		_autoScriptIndex = 0;
@@ -425,22 +431,19 @@ void MainFrame::AutoChat()
 	string message = _autoScript[_autoScriptIndex];
 	_autoScriptIndex = ++_autoScriptIndex % _autoScript.size();
 
-	pLLM->SendMessage(message);
+	pLLMInstance->SendMessage(message);
 }
 #endif
 
 void MainFrame::PollStatus()
 {
-	auto pLLM = Application::GetLLM();
-	if (pLLM)
+	if (_pStatus)
 	{
-		auto [status, ok] = pLLM->PollStatus();
-		if (ok)
-		{
-			if (status.bInvalid)
-				UnloadModel();
-			_pStatusBar->SetModelInfo(status);
-		}
+		auto pLLMInstance = Application::GetLLMInstance();
+		auto status = _pStatus->PollStatus();
+		if (status.IsInvalid())
+			UnloadModel();
+		_pStatusBar->SetModelInfo(status);
 
 		switch (status.signal)
 		{
@@ -450,8 +453,11 @@ void MainFrame::PollStatus()
 		case LLMStatusSignal::InitializedChat:
 			SetStatusBar("Chat initialized");
 			_pChatScroll->ClearMessages();
-			_pVariableList->SetVariables(pLLM->GetStateVariables());
-			_pVariableList->SetVisible(true);
+			if (pLLMInstance)
+			{
+				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
+				_pVariableList->SetVisible(true);
+			}
 			queue_clear(_commandQueue);
 			break;
 		case LLMStatusSignal::InitializeChatFailure:
@@ -468,6 +474,7 @@ void MainFrame::PollStatus()
 		case LLMStatusSignal::UnloadedModel:
 			SetStatusBar("Model unloaded");
 			_pVariableList->SetVisible(false);
+			Application::SetLLMInstance(nullptr);
 			queue_clear(_commandQueue);
 			break;
 		case LLMStatusSignal::LoadModelFailure:
@@ -481,7 +488,8 @@ void MainFrame::PollStatus()
 			break;
 		case LLMStatusSignal::GenerationComplete:
 			SetStatusBar("Ready");
-			_pVariableList->SetVariables(pLLM->GetStateVariables());
+			if (pLLMInstance)
+				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
 			NextQueuedCommand();
 			break;
 		default:
@@ -492,7 +500,7 @@ void MainFrame::PollStatus()
 
 bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 {
-	auto pLLM = Application::GetLLM();
+	auto pLLM = Application::GetLLMInstance();
 
 	bool bShiftDown = (event.mod & SDL_KMOD_SHIFT) != 0;
 	bool bAltDown = (event.mod & SDL_KMOD_ALT) != 0;
@@ -557,7 +565,9 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 
 void MainFrame::EnqueueCommand(ParsedChatCommand cmd)
 {
-	if (Application::GetLLM() && Application::GetLLM()->IsGenerating())
+	auto pLLM = Application::GetLLMInstance();
+
+	if (pLLM && pLLM->IsGenerating())
 	{
 		if (_commandQueue.size() < 3)
 			_commandQueue.push(cmd);
@@ -570,7 +580,7 @@ void MainFrame::NextQueuedCommand()
 {
 	while (!_commandQueue.empty())
 	{
-		auto command = _commandQueue.front();
+		ParsedChatCommand command = _commandQueue.front();
 		_commandQueue.pop();
 
 		if (OnCommand(command))

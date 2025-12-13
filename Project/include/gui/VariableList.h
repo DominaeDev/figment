@@ -2,6 +2,7 @@
 
 #include "gui/Control.h"
 #include "gui/Graphics.h"
+#include <map>
 
 class StaticText;
 

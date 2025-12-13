@@ -4,6 +4,7 @@
 #include "model/ChatOptions.h"
 #include "model/Character.h"
 #include <optional>
+#include <map>
 
 class ChatSession
 {

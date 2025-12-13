@@ -1,50 +1,24 @@
 #pragma once
 
 #include "llm/LLMTypes.h"
+#include "llm/ModelState.h"
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMStateVariables.h"
+#include "llm/LLMStatus.h"
 #include "llm/Context.h"
 #include "Constants.h"
 #include "model/ChatSession.h"
 
 #include <vector>
 #include <set>
+#include <map>
 #include <functional>
 #include <thread>
 #include <mutex>
 #include <queue>
 #include <array>
 
-using LoadModelCallback = std::function<void(bool)>;
-using LoadModelProgressCallback = std::function<void(int)>;
-
-enum class LLMStatusSignal {
-	Nothing = 0,
-	LoadingModel,
-	LoadedModel,
-	LoadModelFailure,
-	UnloadedModel,
-	GenerationStarted,
-	GenerationComplete,
-	InitializingChat,
-	InitializedChat,
-	InitializeChatFailure,
-	CompletedMessage,
-	RebuildingContext,
-};
-
-struct LLMStatus
-{
-	string modelName;
-	size_t allocCtxSize = 0;
-	size_t usedCtxSize = 0;
-	int64_t usedVRAM = 0;
-	int64_t usedRAM = 0;
-	bool bReady = false;
-	bool bInvalid = false;
-	double tokensPerSec = 0.0;
-	LLMStatusSignal signal;
-};
+class LLMStatusChannel;
 
 struct MessagePiece
 {
@@ -81,18 +55,15 @@ using LLMTaskFlags = EnumFlags<LLMTaskFlag>;
 
 class LLMInstance
 {
+	friend class LLMEngine;
 public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool Initialize(string filename, LLMOptions options, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
+	bool InitializeChat(LLMChatArguments args);
 	void Shutdown();
 
-	bool IsInitialized() const { return _modelState.pModel != nullptr; }
-	bool IsInitializing() const { return _readyState.load() == ReadyState::LoadingModel; }
-
-	bool InitializeChat(LLMChatArguments args);
-
+	bool IsInitialized() const;
 	bool IsReady() const;
 	bool IsGenerating() const;
 	
@@ -114,7 +85,6 @@ public:
 	
 	bool SetStateVariable(string name, string value, bool allowCreate = true);
 	bool PollResponse(MessagePiece& piece);
-	std::pair<LLMStatus, bool> PollStatus();
 
 	void DumpSequence(int32_t seq_id) const;
 	void DumpContext() const;
@@ -157,9 +127,6 @@ private:
 		UnknownError,
 	};
 
-	using __LoadModelCallback = std::function<void(ModelState)>;
-	void __LoadModel(string filename, __LoadModelCallback onComplete);
-
 	using __PartialResultCallback = std::function<void(__PartialResult)>;
 	using __GenerationCompleteCallback = std::function<void(InternalError error, string msg)>;
 
@@ -186,7 +153,6 @@ private:
 	void StartGeneration();
 	bool SwapPersona(Role persona);
 
-	void PushSignal(LLMStatusSignal signal);
 	void RefreshActiveResponses();
 	std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
 	bool RebuildKVCache();
@@ -225,24 +191,21 @@ private:
 	bool __SendMessage(string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 	bool __PushMessage(Role role, string message, MessageType msgType, bool visible, int ttl);
 	bool __Instigate(Role role, MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
+
 private:
-	enum class ReadyState { Invalid, Uninitialized, LoadingModel, ModelLoaded, Initializing, Ready, Generating, RebuildingContext };
+	void SetReadyState(ReadyState readyState);
 	std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };
 
 	std::timed_mutex _stateMutex; // Guards state variables
-	ModelState _modelState;
+	ModelState _modelState {};
 	Context _contextState;
 
 	std::mutex _resultMutex; // Guards output queue
 	std::queue<MessagePiece> _resultQueue;
 	std::set<string> _activeResponseIds;
-		
-	std::mutex _statusMutex; // Guards status reporting
-	LLMStatus _lastStatus {};
-	std::queue<LLMStatusSignal> _statusSignals;
-	std::atomic<double> _tokensPerSec {};
-
+	
 	std::unique_ptr<std::jthread> _workerThread;
+	std::shared_ptr<LLMStatusChannel> _pStatus;
 
 	// Tasks
 	std::mutex _taskMutex; // Guards task queue
@@ -252,16 +215,9 @@ private:
 	ChatSession _session;
 	LLMOptions _options;
 	bool _bCtxReallocateNextTurn = false;
-
-	// Embedding
-	std::unique_ptr<LLMEmbedding> _pEmbedding;
 	
 	// State
 	LLMStateVariables _stateVars;
 	int32_t _narratorCooldownDuration = 0;
 	int32_t _narratorCooldown = 0;
-
-public:
-	std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
-	std::atomic<int64_t> usedRAM; // As reported from llama.cpp
 };

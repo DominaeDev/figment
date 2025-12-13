@@ -1,5 +1,8 @@
 #include "model/AppState.h"
+#include "gui/MainFrame.h"
+#include "llm/LLMEngine.h"
 #include <SDL3/SDL.h>
+#include <cassert>
 
 Application::State* Application::__appState = nullptr;
 SDL_Cursor* Application::_pIBeamCursor = nullptr;
@@ -13,12 +16,22 @@ Application::State* Application::CreateState()
 
 	_pIBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 
+	__appState->pLLMEngine = std::make_shared<LLMEngine>();
+
 	return __appState;
 }
 
 void Application::ReleaseState()
 {
+	delete __appState->pTopFrame;
+	if (__appState->pLLMEngine)
+	{
+		__appState->pLLMEngine->Shutdown();
+		__appState->pLLMEngine.reset();
+	}
+	SDL_free(__appState);
 	SDL_DestroyCursor(_pIBeamCursor);
+	__appState = nullptr;
 }
 
 SDL_Window* Application::GetWindow()
@@ -31,9 +44,22 @@ SDL_Renderer* Application::GetRenderer()
 	return __appState ? __appState->pRenderer : nullptr;
 }
 
-LLMInstance* Application::GetLLM()
+std::shared_ptr<LLMEngine> Application::GetLLMEngine()
 {
-	return __appState ? __appState->pLLM : nullptr;
+	assert(__appState);
+	return __appState->pLLMEngine;
+}
+
+std::shared_ptr<LLMInstance> Application::GetLLMInstance()
+{
+	assert(__appState);
+	return __appState->pLLMInstance;
+}
+
+void Application::SetLLMInstance(std::shared_ptr<LLMInstance> pLLMInstance)
+{
+	assert(__appState);
+	__appState->pLLMInstance = pLLMInstance;
 }
 
 void Application::SetCursor(SDL_SystemCursor cursor)
