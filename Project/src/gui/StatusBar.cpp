@@ -20,9 +20,9 @@ StatusBar::StatusBar(Control* pParent) : Control(pParent)
 	AddChild(_pMessage);
 }
 
-void StatusBar::SetMessage(string message)
+void StatusBar::SetMessage(std::string_view message)
 {
-	_pMessage->SetText(message);
+	_pMessage->SetText(toS(message));
 }
 
 void StatusBar::SetModelInfo(LLMStatus status)

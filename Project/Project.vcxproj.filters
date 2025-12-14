@@ -48,9 +48,6 @@
     <Filter Include="Source Files\Interface\Fonts">
       <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Inference\Session">
-      <UniqueIdentifier>{fff0aac0-523f-4b46-896c-5a89e16498dc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Third-party">
       <UniqueIdentifier>{656a9e42-e42d-48b3-ba04-a1f41e278237}</UniqueIdentifier>
     </Filter>
@@ -62,6 +59,12 @@
     </Filter>
     <Filter Include="Source Files\Third-party\uuid">
       <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model\Chat">
+      <UniqueIdentifier>{b9eb11aa-5e0c-4fd0-b6c2-875b3e43e5b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model\Character">
+      <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -149,9 +152,6 @@
     <ClCompile Include="src\gui\NineGridBackgroundRenderer.cpp">
       <Filter>Source Files\Interface\Theme</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\Character.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
     <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp">
       <Filter>Source Files\Third-party\tinyxml2</Filter>
     </ClCompile>
@@ -194,9 +194,6 @@
     <ClCompile Include="src\gui\HorizontalGradient.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\ChatSession.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
     <ClCompile Include="src\llm\LLMTemplate.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
@@ -233,9 +230,6 @@
     <ClCompile Include="src\util\FileUtility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\ChatCommands.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
     <ClCompile Include="include\llm\LLMEngine.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
@@ -244,6 +238,18 @@
     </ClCompile>
     <ClCompile Include="src\llm\LLMStatus.cpp">
       <Filter>Source Files\Inference</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\ChatSession.cpp">
+      <Filter>Source Files\Model\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\ChatCommands.cpp">
+      <Filter>Source Files\Model\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\ChatCommandExecutor.cpp">
+      <Filter>Source Files\Model\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\Character.cpp">
+      <Filter>Source Files\Model\Character</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -313,9 +319,6 @@
     <ClInclude Include="include\gui\NineGridBackgroundRenderer.h">
       <Filter>Source Files\Interface\Theme</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\Character.h">
-      <Filter>Source Files\Model</Filter>
-    </ClInclude>
     <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h">
       <Filter>Source Files\Third-party\tinyxml2</Filter>
     </ClInclude>
@@ -333,9 +336,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\Graphics.h">
       <Filter>Source Files\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatSession.h">
-      <Filter>Source Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Control.h">
       <Filter>Source Files\Interface\Controls</Filter>
@@ -388,9 +388,6 @@
     <ClInclude Include="include\gui\VariableList.h">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\Constants.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\llm\LLMStateVariables.h">
       <Filter>Source Files\Inference\Context</Filter>
     </ClInclude>
@@ -418,17 +415,8 @@
     <ClInclude Include="include\util\FileUtility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\ChatCommands.h">
-      <Filter>Source Files\Model</Filter>
-    </ClInclude>
     <ClInclude Include="include\Types.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatTypes.h">
-      <Filter>Source Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatOptions.h">
-      <Filter>Source Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMEngine.h">
       <Filter>Source Files\Inference</Filter>
@@ -439,22 +427,32 @@
     <ClInclude Include="include\llm\LLMStatus.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
+    <ClInclude Include="include\model\GlobalStrings.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Constants.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatTypes.h">
+      <Filter>Source Files\Model\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatOptions.h">
+      <Filter>Source Files\Model\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatSession.h">
+      <Filter>Source Files\Model\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatCommandExecutor.h">
+      <Filter>Source Files\Model\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatCommands.h">
+      <Filter>Source Files\Model\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\Character.h">
+      <Filter>Source Files\Model\Character</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\formatting_grammar.gbnf">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="cpp.hint" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="resources\prompt_formatting.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="resources\prompt_system.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="resources\prompt_greeting.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
   </ItemGroup>
 </Project>

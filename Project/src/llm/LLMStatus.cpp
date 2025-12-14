@@ -29,7 +29,7 @@ LLMStatus LLMStatusChannel::PollStatus()
 	return status;
 }
 
-void LLMStatusChannel::PushSignal(LLMStatusSignal signal)
+void LLMStatusChannel::EmitSignal(LLMStatusSignal signal)
 {
 	std::scoped_lock _ { _statusMutex };
 

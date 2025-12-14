@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <ranges>
 #include <algorithm>
@@ -19,7 +20,7 @@ inline constexpr float toF(T x) { return static_cast<float>(x); }
 template<typename T>
 inline constexpr double toD(T x) { return static_cast<double>(x); }
 template<typename T>
-inline constexpr size_t toSZ(T x) { return static_cast<size_t>(x); }
+inline constexpr size_t toUZ(T x) { return static_cast<size_t>(x); }
 template<typename T>
 inline constexpr size_t castEnum(T x) { return static_cast<size_t>(x); }
 
@@ -34,6 +35,9 @@ inline constexpr size_t operator "" _uz( unsigned long long arg ) noexcept
 }
 
 typedef std::string string;
+
+inline constexpr string toS(std::string_view sv) { return string(sv); }
+inline constexpr const char* toCStr(std::string_view sv) { return static_cast<const char*>(sv.data()); }
 
 // Macros
 #if !defined(TRUE)

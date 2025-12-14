@@ -35,18 +35,16 @@ public:
 
 	static SDL_Window* GetWindow();
 	static SDL_Renderer* GetRenderer();
-	[[nodiscard]] static std::shared_ptr<LLMEngine> GetLLMEngine();
+	static LLMEngine& GetLLMEngine();
+
 	[[nodiscard]] static std::shared_ptr<LLMInstance> GetLLMInstance();
-	
 	static void SetLLMInstance(std::shared_ptr<LLMInstance> pLLMInstance);
 
 	static void SetCursor(SDL_SystemCursor cursor);
 
 private:
 	static State* __appState;
-
 	static SDL_Cursor* _pIBeamCursor;
-
 };
 
 typedef Application::State AppState;

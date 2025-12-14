@@ -3,9 +3,8 @@
 #include "Frame.h"
 #include "Types.h"
 #include "model/ChatCommands.h"
+#include "model/ChatCommandExecutor.h"
 #include "llm/LLMStatus.h"
-
-#include <queue>
 
 class Sizer;
 class StatusBar;
@@ -13,8 +12,11 @@ class ChatScroll;
 class TextBox;
 class VariableList;
 
+using ParsedChatCommandQueue = std::queue<ParsedChatCommand>;
+
 class MainFrame : public Frame
 {
+	friend bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor::Context context);
 	static MainFrame* s_pInstance;
 public:
 	MainFrame(SDL_Window* pWindow);
@@ -23,10 +25,11 @@ public:
 	void InitializeModel();
 	void UnloadModel();
 
-	static void SetStatusBar(string message);
+	static void SetStatusBar(std::string_view message);
 	static MainFrame& GetInstance() { return *s_pInstance; }
 
 	bool HandleKeyboardEvent(SDL_KeyboardEvent event);
+	void Close();
 
 protected:
 	virtual void OnUpdate(float fDeltaTime) override;
@@ -47,10 +50,9 @@ private:
 	float _fPollingCounter = 0.0f;
 	bool _bStartedChat = false; // Used to trigger greeting
 
-	std::queue<ParsedChatCommand> _commandQueue;
-	std::shared_ptr<LLMStatusChannel> _pStatus {};
+	ParsedChatCommandQueue _commandQueue;
 
-#if AUTOCHAT
+#if ENABLE_AUTO_CHAT
 private:
 	void AutoChat();
 	bool _bAutoChat;

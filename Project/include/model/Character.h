@@ -1,3 +1,6 @@
+#ifndef CHARACTER_H__
+#define CHARACTER_H__
+
 #pragma once
 
 #include "Types.h"
@@ -25,3 +28,5 @@ public:
 
 	bool LoadFromXml(string filename);
 };
+
+#endif

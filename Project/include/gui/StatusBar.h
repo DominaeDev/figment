@@ -11,7 +11,7 @@ class StatusBar : public Control
 public:
 	StatusBar(Control* pParent);
 
-	void SetMessage(string message);
+	void SetMessage(std::string_view message);
 	void SetModelInfo(LLMStatus status);
 
 private:

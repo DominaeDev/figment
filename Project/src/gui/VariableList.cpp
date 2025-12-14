@@ -7,7 +7,7 @@
 #include "util/StringUtility.h"
 #include <format>
 
-#define MARGIN 8
+constexpr float Margin { 8.0f };
 
 VariableList::VariableList(Control* pParent) : Control(pParent)
 {
@@ -21,7 +21,7 @@ VariableList::VariableList(Control* pParent) : Control(pParent)
 	SetBackgroundColor(Colors::MessageBackgroundDefault);
 
 	_pText = new StaticText(this, "", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
-	_pText->SetPosition(MARGIN, MARGIN);
+	_pText->SetPosition(Margin, Margin);
 	_pText->SetMaxSize(250, -1);
 }
 
@@ -43,7 +43,7 @@ void VariableList::SetVariables(const std::map<string, string>& variables)
 	int w, h;
 	_pText->SetTextAndResize(text, w, h);
 	
-	SetSize(toF(w + MARGIN * 2), toF(h + MARGIN * 2));
+	SetSize(toF(w + Margin * 2), toF(h + Margin * 2));
 }
 
 bool VariableList::IsEmpty() const

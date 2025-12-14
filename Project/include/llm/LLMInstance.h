@@ -53,6 +53,8 @@ enum class LLMTaskFlag : int32_t
 };
 using LLMTaskFlags = EnumFlags<LLMTaskFlag>;
 
+class LLMEngine;
+
 class LLMInstance
 {
 	friend class LLMEngine;
@@ -60,15 +62,15 @@ public:
 	LLMInstance();
 	~LLMInstance();
 
-	bool InitializeChat(LLMChatArguments args);
+	bool Initialize(LLMChatArguments args);
 	void Shutdown();
 
 	bool IsInitialized() const;
 	bool IsReady() const;
 	bool IsGenerating() const;
 	
-	bool Halt();
 	bool Continue(string responseId, string subMessageId, bool extend);
+	bool Halt();
 
 	// Tasks
 	bool GreetUser();

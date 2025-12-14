@@ -16,15 +16,13 @@
 #include "llm/LLMInstance.h"
 
 #if defined(_DEBUG)
-#define CHECK_MEMORY_LEAKS
-#endif
-
-#ifdef CHECK_MEMORY_LEAKS
+	#define DETECT_MEMORY_LEAKS
 	#define _CRTDBG_MAP_ALLOC
 	#include <stdlib.h>
 	#include <crtdbg.h>
 #endif
 
+// Set this to break on the specified allocation index. 0 = off
 #define MEMORY_LEAK_ALLOC 0
 
 #define APP_STATE(P) static_cast<AppState*>(P);
@@ -32,7 +30,7 @@
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 {
-#ifdef CHECK_MEMORY_LEAKS
+#ifdef DETECT_MEMORY_LEAKS
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #if defined(MEMORY_LEAK_ALLOC) && MEMORY_LEAK_ALLOC > 0
 	_CrtSetBreakAlloc(MEMORY_LEAK_ALLOC);
@@ -49,7 +47,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	Renderer* pRenderer;
 	try
 	{
-		if (!SDL_CreateWindowAndRenderer(Constants::AppTitle, Constants::GUI::WindowWidth, Constants::GUI::WindowHeight, SDL_WINDOW_RESIZABLE, &pWindow, &pRenderer))
+		if (!SDL_CreateWindowAndRenderer(toCStr(GlobalStrings::ApplicationTitle), Constants::GUI::WindowWidth, Constants::GUI::WindowHeight, SDL_WINDOW_RESIZABLE, &pWindow, &pRenderer))
 		{
 			SDL_Log("Couldn't create pWindow/pRenderer: %s", SDL_GetError());
 			return SDL_APP_FAILURE;
@@ -157,7 +155,7 @@ SDL_AppResult SDL_AppIterate(void* state)
 	static char title[256];
     if (now_ns - last > 999999999) {
         last = now_ns;
-        SDL_snprintf(title, sizeof(title), "%s %" SDL_PRIu64 " fps", Constants::AppTitle, accu);
+        SDL_snprintf(title, sizeof(title), "%s %" SDL_PRIu64 " fps", toCStr(GlobalStrings::ApplicationTitle), accu);
         accu = 0;
 
 		SDL_SetWindowTitle(pAppState->pWindow, title);
@@ -180,5 +178,6 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 	TTF_Quit();
 
 	Application::ReleaseState();
+	SDL_Quit();
 }
 

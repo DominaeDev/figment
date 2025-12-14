@@ -808,7 +808,7 @@ void TextBox::Copy()
 	int marker, length;
 	if (GetHighlightExtents(&marker, &length))
 	{
-		char* temp = (char*)SDL_malloc(toSZ(length + 1));
+		char* temp = (char*)SDL_malloc(toUZ(length + 1));
 		if (temp)
 		{
 			SDL_memcpy(temp, &_pText->text[marker], length);
@@ -832,7 +832,7 @@ void TextBox::Cut()
 	int marker, length;
 	if (GetHighlightExtents(&marker, &length))
 	{
-		char* temp = (char*)SDL_malloc(toSZ(length + 1));
+		char* temp = (char*)SDL_malloc(toUZ(length + 1));
 		if (temp)
 		{
 			SDL_memcpy(temp, &_pText->text[marker], length);

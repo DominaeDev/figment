@@ -24,11 +24,14 @@ Application::State* Application::CreateState()
 void Application::ReleaseState()
 {
 	delete __appState->pTopFrame;
+	
+	__appState->pLLMInstance.reset();
 	if (__appState->pLLMEngine)
 	{
 		__appState->pLLMEngine->Shutdown();
 		__appState->pLLMEngine.reset();
 	}
+
 	SDL_free(__appState);
 	SDL_DestroyCursor(_pIBeamCursor);
 	__appState = nullptr;
@@ -44,10 +47,10 @@ SDL_Renderer* Application::GetRenderer()
 	return __appState ? __appState->pRenderer : nullptr;
 }
 
-std::shared_ptr<LLMEngine> Application::GetLLMEngine()
+LLMEngine& Application::GetLLMEngine()
 {
 	assert(__appState);
-	return __appState->pLLMEngine;
+	return *(__appState->pLLMEngine.get());
 }
 
 std::shared_ptr<LLMInstance> Application::GetLLMInstance()

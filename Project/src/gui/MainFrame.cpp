@@ -14,6 +14,7 @@
 #include "gui/TextureStore.h"
 #include "model/AppState.h"
 #include "model/ChatCommands.h"
+#include "model/ChatCommandExecutor.h"
 #include "llm/LLMEngine.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
@@ -23,7 +24,6 @@
 #include "Constants.h"
 #include <format>
 #include <ranges>
-#include <cwctype>
 
 using namespace common_util;
 using namespace file_util;
@@ -136,7 +136,7 @@ void MainFrame::OnUpdate(float fDeltaTime)
 	if (_fPollingCounter > 0.1f)
 		PollStatus();
 
-#if AUTOCHAT
+#if ENABLE_AUTO_CHAT
 	if (_bAutoChat) AutoChat();
 #endif
 }
@@ -148,39 +148,35 @@ void MainFrame::OnRender(Renderer* pRenderer)
 
 void MainFrame::InitializeModel()
 {
-	auto pLLMEngine = Application::GetLLMEngine();
-	if (!pLLMEngine)
-		return;
+	auto& engine = Application::GetLLMEngine();
 
-	_pStatus = pLLMEngine->GetStatusChannel();
-
-	if (!pLLMEngine->IsInitialized())
+	if (!engine.IsInitialized())
 	{
-		SetStatusBar("Loading model...");
-		pLLMEngine->Initialize(string(Constants::DefaultModelLocation), 
+		SetStatusBar(GlobalStrings::Status::LoadingModel);
+
+		engine.Initialize(string(Constants::DefaultModelLocation), 
 			llmOptions.IsSet(LLMOption::Embeddings) ? string(Constants::Embedding::DefaultModelLocation) : "",
 			[this](int percent) 
 			{
-				SetStatusBar(std::format("Loading model... {0}%", percent));
+				SetStatusBar(std::format(GlobalStrings::Status::LoadingModelPercentFmt, percent));
 			},
-			[this, pLLMEngine](bool bSuccess)
+			[this, &engine](bool bSuccess)
 			{
 				if (bSuccess)
-					Application::SetLLMInstance(pLLMEngine->CreateInstance());
+					Application::SetLLMInstance(engine.CreateInstance(Constants::Context::DefaultSize, llmOptions.IsSet(LLMOption::Embeddings)));
 			});
 	}
 }
 
 void MainFrame::UnloadModel()
 {
-	auto pLLMEngine = Application::GetLLMEngine();
-	if (pLLMEngine && pLLMEngine->IsInitialized())
+	auto& engine = Application::GetLLMEngine();
+	if (engine.IsInitialized())
 	{
-		pLLMEngine->Shutdown();
-		SetStatusBar("Model unloaded");
+		engine.Shutdown();
+		SetStatusBar(GlobalStrings::Status::ModelUnloaded);
 
-		_pStatus.reset();
-#if AUTOCHAT
+#if ENABLE_AUTO_CHAT
 		_bAutoChat = false;
 #endif
 	}
@@ -202,207 +198,36 @@ void MainFrame::StartChat()
 			/*messages*/ {},
 			/*options*/ llmOptions,
 		};
-		pLLM->InitializeChat(llmArgs);
+		pLLM->Initialize(llmArgs);
 		_pChatScroll->SetSession(session);
 
 		_bStartedChat = true;
 	}
 }
 
-void MainFrame::SetStatusBar(string message)
+void MainFrame::SetStatusBar(std::string_view message)
 {
-	s_pInstance->_pStatusBar->SetMessage(message);
+	s_pInstance->_pStatusBar->SetMessage(toS(message));
 }
 
 bool MainFrame::OnCommand(ParsedChatCommand cmd)
 {
-	if (cmd.command == ChatCommand::Invalid)
-		return false;
-
-	auto pLLM = Application::GetLLMInstance();
-	if (!pLLM)
-		return false;
-
-	auto filter_msg_ids = [](std::vector<RemovedMessage> msgs) -> std::vector<string> {
-		return msgs
-			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
-			| std::ranges::to<std::vector<string>>();
-	};
-
-	auto fnRoleFromName = [pLLM](string text) -> Role {
-		if (string_util::empty_or_whitespace(text))
-			return Role::Undefined;
-		if (std::iswdigit(string_util::from_utf8(text)[0]))
-			return bot_from_index(std::stoi(text) - 1);
-		for (auto kvp : pLLM->GetSession().GetCharactersByRole())
+	return ChatCommandExecutor::Execute(cmd,
+		ChatCommandExecutor::Context
 		{
-			if (string_util::begins_with(kvp.second.shortName, text, true))
-				return kvp.first;
-		}
-		return pLLM->GetSession().GetRoleOf(text);
-	};
-
-	switch (cmd.command)
-	{
-	case ChatCommand::UserMessage:
-#if _DEBUG
-		if (!pLLM->IsReady())
-		{
-			static int turn = 0;
-			auto [msgType, complete] = llm_util::detect_message_type(llm_util::process_message(cmd.text, ""));
-			_pChatScroll->AddDummyMessage(turn % 2 == 0 ? "@USR" : "@BOT", turn % 2 == 0 ? Role::User : Role::Bot1, msgType, cmd.text);
-			++turn;
-			return true;
-		}
-#endif
-		return pLLM->SendMessage(cmd.text);
-	case ChatCommand::SystemMessage:
-		return pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
-	case ChatCommand::InstigateDialogue:
-	{
-		Role targetRole = fnRoleFromName(cmd.text);
-		return pLLM->Instigate(targetRole, MessageType::Dialogue, 1);
-	}
-	case ChatCommand::InstigateAction:
-	{
-		Role targetRole = fnRoleFromName(cmd.text);
-		return pLLM->Instigate(targetRole, MessageType::Action, 1);
-	}
-	case ChatCommand::PassTurn:
-	{
-		Role targetRole = fnRoleFromName(cmd.text);
-		return pLLM->Instigate(targetRole, MessageType::Undefined, 3);
-	}
-	case ChatCommand::Impersonate:
-		return pLLM->Instigate(Role::User, MessageType::Dialogue, 1);
-	case ChatCommand::Narrate:
-		if (cmd.text.empty())
-			return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
-		else
-			return pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
-	case ChatCommand::Instruct:
-		if (!cmd.text.empty())
-			return pLLM->Instruct(cmd.text);
-	case ChatCommand::RemoveLast:
-	{
-		int n = atoi(cmd.text.c_str());
-		auto removedMsgs = pLLM->RemoveMessages(std::max(n, 1));
-		auto removedIds = filter_msg_ids(removedMsgs);
-		return _pChatScroll->RemoveMessages(removedIds);
-	}
-	case ChatCommand::RedoResponse:
-	{
-		auto removedMsgs = pLLM->RemoveMessages(1);
-		if (!removedMsgs.empty())
-		{
-			Role responder = removedMsgs.front().role;
-			if (!is_bot(responder))
-				responder = Role::Undefined;
-
-			auto removedIds = filter_msg_ids(removedMsgs);
-			_pChatScroll->RemoveMessages(removedIds);
-			return pLLM->Instigate(responder, MessageType::Undefined, 3);
-		}
-		break;
-	}
-	case ChatCommand::RollbackUserMessage:
-	{
-		auto removedMsgs = pLLM->RollbackUserMessage();
-		if (!removedMsgs.empty())
-		{
-			auto removedIds = filter_msg_ids(removedMsgs);
-			_pChatScroll->RemoveMessages(removedIds);
-			_pTextBox->SetText(removedMsgs[0].content);
-		}
-		break;
-	}
-	case ChatCommand::Reset:
-	{
-		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
-		if (!pLLM->IsReady() || pLLM->ResetChat(seed))
-			_pChatScroll->ClearMessages();
-		queue_clear(_commandQueue);
-		return true;
-	}
-	case ChatCommand::Reseed:
-	{
-		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
-		if (seed == 0)
-			seed = 0xFFFFFFFF;
-		pLLM->Reseed(seed);
-		break;
-	}
-	case ChatCommand::Look:
-		if (!cmd.text.empty())
-		{
-			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, false, 1);
-			pLLM->PushMessage(Role::Director, "{{Describe " + cmd.text + " from {{user}}'s perspective and pay attention to visual details.}}", MessageType::Direction, false, 1);
-		}
-		else 
-		{
-			pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their surroundings.]", MessageType::Narration, false, 1);
-			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and anyone who are present.}}", MessageType::Direction, false, 1);
-		}
-		return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
-	case ChatCommand::Examine:
-		if (!cmd.text.empty())
-		{
-			pLLM->PushMessage(Role::Narrator, "[{{user}} examines the " + cmd.text + ".]", MessageType::Narration, false, 1);
-			pLLM->PushMessage(Role::Director, "{{Describe what {{user}} is able to find, if anything, " + cmd.text + " in minute detail.}}", MessageType::Direction, false, 1);
-			return pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
-		}
-		break;
-	case ChatCommand::GenerateEmbedding:
-#if _DEBUG
-		return pLLM->GenerateEmbedding(cmd.text);
-#else
-		return false;
-#endif
-	case ChatCommand::NewStateVariable:
-		if (!cmd.text.empty())
-		{
-			size_t pos_eq = cmd.text.find('=');
-			if (pos_eq != string::npos)
-			{
-				string name = string_util::trim(cmd.text.substr(0, pos_eq));
-				string value = string_util::trim(cmd.text.substr(pos_eq + 1));
-				if (pLLM->SetStateVariable(name, value, true))
-				{
-					_pChatScroll->AddSystemMessage(std::format("{} = {}", name, value));
-					return true;
-				}
-			}
-		}
-		return false;
-	case ChatCommand::SetStateVariable:
-		if (!cmd.text.empty())
-		{
-			size_t pos_eq = cmd.text.find('=');
-			if (pos_eq != string::npos)
-			{
-				string name = string_util::trim(cmd.text.substr(0, pos_eq));
-				string value = string_util::trim(cmd.text.substr(pos_eq + 1));
-				if (pLLM->SetStateVariable(name, value, false))
-				{
-					_pChatScroll->AddSystemMessage(std::format("{} = {}", name, value));
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	return false;
+			.pLLM = Application::GetLLMInstance(),
+			.pMainFrame = this,
+		});
 }
 
-#if AUTOCHAT
+#if ENABLE_AUTO_CHAT
 void MainFrame::AutoChat()
 {
-	auto pLLMEngine = Application::GetLLMEngine();
+	auto& engine = Application::GetLLMEngine();
 
-	if (!pLLMEngine->IsInitialized())
+	if (!engine.IsInitialized())
 	{
-		if (!pLLMEngine->IsInitializing())
+		if (!engine.IsInitializing())
 			InitializeModel();
 		return;
 	}
@@ -437,21 +262,20 @@ void MainFrame::AutoChat()
 
 void MainFrame::PollStatus()
 {
-	if (_pStatus)
+	auto pStatus = Application::GetLLMEngine().GetStatusChannel();
+	if (pStatus)
 	{
 		auto pLLMInstance = Application::GetLLMInstance();
-		auto status = _pStatus->PollStatus();
-		if (status.IsInvalid())
-			UnloadModel();
+		auto status = pStatus->PollStatus();
 		_pStatusBar->SetModelInfo(status);
 
 		switch (status.signal)
 		{
-		case LLMStatusSignal::InitializingChat:
-			SetStatusBar("Initializing chat...");
+		case LLMStatusSignal::ChatInitializing:
+			SetStatusBar(GlobalStrings::Status::InitializingChat);
 			break;
-		case LLMStatusSignal::InitializedChat:
-			SetStatusBar("Chat initialized");
+		case LLMStatusSignal::ChatInitialized:
+			SetStatusBar(GlobalStrings::Status::ChatInitialized);
 			_pChatScroll->ClearMessages();
 			if (pLLMInstance)
 			{
@@ -460,34 +284,37 @@ void MainFrame::PollStatus()
 			}
 			queue_clear(_commandQueue);
 			break;
-		case LLMStatusSignal::InitializeChatFailure:
-			SetStatusBar("Failed to initialize chat");
+		case LLMStatusSignal::ChatInitializationFailure:
+			SetStatusBar(GlobalStrings::Status::FailedToInitializeChat);
 			break;
-		case LLMStatusSignal::LoadingModel:
-			SetStatusBar("Loading model...");
+		case LLMStatusSignal::ModelLoading:
+			SetStatusBar(GlobalStrings::Status::LoadingModel);
 			break;
-		case LLMStatusSignal::LoadedModel:
-			SetStatusBar("Model loaded");
+		case LLMStatusSignal::ModelLoaded:
+			SetStatusBar(GlobalStrings::Status::ModelLoaded);
 			queue_clear(_commandQueue);
 			StartChat();
 			break;
-		case LLMStatusSignal::UnloadedModel:
-			SetStatusBar("Model unloaded");
+		case LLMStatusSignal::ModelUnloaded:
+			SetStatusBar(GlobalStrings::Status::ModelUnloaded);
 			_pVariableList->SetVisible(false);
 			Application::SetLLMInstance(nullptr);
 			queue_clear(_commandQueue);
 			break;
-		case LLMStatusSignal::LoadModelFailure:
-			SetStatusBar("Failed to load model");
+		case LLMStatusSignal::ModelLoadFailure:
+			SetStatusBar(GlobalStrings::Status::FailedToLoadModel);
+			break;
+		case LLMStatusSignal::ModelUnloadRequest:
+			UnloadModel();
 			break;
 		case LLMStatusSignal::GenerationStarted:
-			SetStatusBar("Generating response...");
+			SetStatusBar(GlobalStrings::Status::GeneratingResponse);
 			break;
-		case LLMStatusSignal::RebuildingContext:
-			SetStatusBar("Rebuilding context...");
+		case LLMStatusSignal::RebuildingKVCache:
+			SetStatusBar(GlobalStrings::Status::RebuildingContext);
 			break;
 		case LLMStatusSignal::GenerationComplete:
-			SetStatusBar("Ready");
+			SetStatusBar(GlobalStrings::Status::Ready);
 			if (pLLMInstance)
 				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
 			NextQueuedCommand();
@@ -526,7 +353,7 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 		case SDLK_F10:
 			pLLM->Halt();
 			queue_clear(_commandQueue);
-#if AUTOCHAT
+#if ENABLE_AUTO_CHAT
 			_bAutoChat = false;
 #endif		
 			break;
@@ -535,8 +362,13 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 			if (pLLM->IsReady())
 				pLLM->DumpContext();
 			break;
+
+		case SDLK_F12:
+			if (bCtrlDown)
+				Close();
+			break;
 #endif
-#if AUTOCHAT
+#if ENABLE_AUTO_CHAT
 		case SDLK_F5:
 			_bAutoChat = !_bAutoChat;
 			return true;
@@ -588,3 +420,10 @@ void MainFrame::NextQueuedCommand()
 	}
 }
 
+void MainFrame::Close()
+{
+	SDL_Event quit_event;
+	SDL_zero(quit_event);  /* SDL will copy this entire struct! Initialize to keep memory checkers happy. */
+	quit_event.type = SDL_EVENT_QUIT;
+	SDL_PushEvent(&quit_event);
+}

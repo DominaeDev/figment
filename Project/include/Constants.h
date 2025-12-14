@@ -1,11 +1,10 @@
 #pragma once
 
 #include "model/ChatTypes.h"
+#include "model/GlobalStrings.h"
 
 namespace Constants
 {
-	inline constexpr const char* AppTitle = "Figment Chat";
-
 	namespace GUI
 	{
 		inline constexpr int WindowWidth = 1280;
@@ -61,6 +60,12 @@ namespace Constants
 
 	inline constexpr std::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";
 	
+	namespace LLM
+	{
+		inline constexpr int32_t DefaultSeed = 0xFFFFFFFF;
+		inline constexpr int32_t DebugSeed = 0xA1B2C3D4;
+	}
+
 	namespace Embedding
 	{
 		inline constexpr std::string_view DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";

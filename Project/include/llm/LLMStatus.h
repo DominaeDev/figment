@@ -7,32 +7,38 @@
 #include <mutex>
 #include <optional>
 
-enum class LLMStatusSignal {
+enum class LLMStatusSignal : uint32_t
+{
 	Nothing = 0,
-	LoadingModel,
-	LoadedModel,
-	LoadModelFailure,
-	UnloadedModel,
+	ModelLoading,
+	ModelLoaded,
+	ModelLoadFailure,
+	ModelUnloaded,
+	ModelUnloadRequest,
+
+	ChatInitializing,
+	ChatInitialized,
+	ChatInitializationFailure,
+
 	GenerationStarted,
 	GenerationComplete,
-	InitializingChat,
-	InitializedChat,
-	InitializeChatFailure,
+
 	CompletedMessage,
-	RebuildingContext,
+
+	RebuildingKVCache,
 };
 
-enum class ReadyState 
+enum class ReadyState : uint32_t
 { 
-	Invalid,		// Invalid state -> Trigger unload
-	LoadError,
-	Uninitialized, 
-	LoadingModel,
-	ModelLoaded, 
-	Initializing, 
-	Ready, 
-	Generating, 
-	RebuildingContext,
+	Invalid,			// Invalid state
+	LoadError,			// Failed to load model
+	Uninitialized,		// Model is not loaded
+	LoadingModel,		// Model is loading
+	ModelLoaded,		// Model is loaded, chat uninitialized
+	Initializing,		// Initializing chat
+	Ready,				// Chat is initialized and ready
+	Generating,			// Chat is generating
+	RebuildingKVCache,	// Chat is rebuilding the kv cache
 };
 
 struct LLMStatus
@@ -47,15 +53,14 @@ struct LLMStatus
 	LLMStatusSignal signal;
 
 	inline bool IsReady() const noexcept { return readyState >= ReadyState::Ready; }
-	inline bool IsInvalid() const noexcept { return readyState == ReadyState::Invalid; }
 };
 
 class LLMStatusChannel
 {
 public:
 	LLMStatus PollStatus();
-	void PushSignal(LLMStatusSignal signal);
 
+	void EmitSignal(LLMStatusSignal signal);
 	void ReportModelInfo(string modelName, int32_t ctx_size, int32_t used_ctx);
 	void ReportTokensPerSec(double tokPerSec);
 	void ReportMemory(int64_t ram, int64_t vram, bool bIncrement);

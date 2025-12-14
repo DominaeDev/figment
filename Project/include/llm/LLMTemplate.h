@@ -26,7 +26,7 @@ enum class PromptTemplate
     Phi4,
     CommandR,
 
-/*	Unsupported: */
+/*	Not supported for now: */
 /*	
 	Falcon3,
 	Zephyr,

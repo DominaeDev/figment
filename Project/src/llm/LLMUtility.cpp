@@ -138,7 +138,7 @@ std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
 	}
 
 	bool bComplete = false;
-	for (auto tag : closing_tags)
+	for (auto& tag : closing_tags)
 	{
 		size_t pos_end = text.rfind(tag, std::string::npos);
 		if (pos_end != std::string::npos && pos_end > last_pos)

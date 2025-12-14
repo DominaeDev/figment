@@ -13,8 +13,6 @@
 #include <cassert>
 #include <chrono>
 
-#define DEBUG_SEED 0xA1B2C3D4
-
 using namespace std::chrono_literals;
 using namespace common_util;
 using namespace file_util;
@@ -53,16 +51,16 @@ void LLMInstance::Shutdown()
 	Halt();
 }
 
-bool LLMInstance::InitializeChat(LLMChatArguments args)
+bool LLMInstance::Initialize(LLMChatArguments args)
 {
-	_pStatus->PushSignal(LLMStatusSignal::InitializingChat);
+	_pStatus->EmitSignal(LLMStatusSignal::ChatInitializing);
 
 	bool bMultiSequence = args.session.IsGroupChat() && args.options.IsSet(LLMOption::UseMultipleSequences);
 	int32_t n_bots = bMultiSequence ? (int32_t)args.session.GetBotCount() : 1;
 	if (n_bots == 0)
 		return false; // Error
 
-	std::scoped_lock _(_stateMutex);
+	std::scoped_lock _(_stateMutex); // Lock for the entire duration of the scope
 
 	_contextState = Context(_modelState); //!
 	_session = args.session;
@@ -89,7 +87,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 
 	// Initialize rng
 #if _DEBUG
-	_modelState.rng.seed(DEBUG_SEED);
+	_modelState.rng.seed(Constants::LLM::DebugSeed);
 #else
 	_modelState.rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 #endif
@@ -285,7 +283,7 @@ bool LLMInstance::InitializeChat(LLMChatArguments args)
 
 	_bCtxReallocateNextTurn = false;
 	SetReadyState(ReadyState::Ready);
-	_pStatus->PushSignal(LLMStatusSignal::InitializedChat);
+	_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
 	return true;
 }
 
@@ -341,9 +339,9 @@ void LLMInstance::InitSamplers()
 	llama_sampler_chain_add(pSampler, llama_sampler_init_temp(2.5f));							// Temperature
 	llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
 #if _DEBUG
-	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(DEBUG_SEED));						// Seed
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(Constants::LLM::DebugSeed));		// Seed (fixed)
 #else
-	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));				// Seed
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(Constants::LLM::DefaultSeed));	// Seed
 #endif
 
 	_modelState.pSampler = pSampler;
@@ -372,7 +370,7 @@ bool LLMInstance::ResetChat(int seed)
 	if (seed > 0)
 		Reseed(seed);
 
-	_pStatus->PushSignal(LLMStatusSignal::InitializedChat);
+	_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
 
 	if (_options.IsSet(LLMOption::GreetUser))
 		GreetUser();
@@ -971,7 +969,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			{
 				msgType = MessageType::Undefined;
 				subMessageId = CreateUUID();
-				_pStatus->PushSignal(LLMStatusSignal::CompletedMessage);
+				_pStatus->EmitSignal(LLMStatusSignal::CompletedMessage);
 			}
 		}
 
@@ -1176,7 +1174,7 @@ void LLMInstance::StartGeneration()
 		return; // Already running
 
 	SetReadyState(ReadyState::Generating);
-	_pStatus->PushSignal(LLMStatusSignal::GenerationStarted);
+	_pStatus->EmitSignal(LLMStatusSignal::GenerationStarted);
 
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__ProcessTaskQueue, this),
 		[this](InternalError error, string response) {
@@ -1185,6 +1183,7 @@ void LLMInstance::StartGeneration()
 			{
 				printf("\r\n>> Internal error: (%d) %s\r\n", error, response.c_str());
 				SetReadyState(ReadyState::Invalid);
+				_pStatus->EmitSignal(LLMStatusSignal::ModelUnloadRequest);
 			}
 			else
 			{
@@ -1192,7 +1191,7 @@ void LLMInstance::StartGeneration()
 			}
 
 			RefreshActiveResponses();
-			_pStatus->PushSignal(LLMStatusSignal::GenerationComplete);
+			_pStatus->EmitSignal(LLMStatusSignal::GenerationComplete);
 		}));
 }
 
@@ -1450,8 +1449,8 @@ std::vector<RemovedMessage> LLMInstance::RemoveMessages(int numMessages, bool re
 
 std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bool rewindTime)
 {
-	int32_t numRemovals = toI(std::min(toSZ(numMessages), _contextState.GetBlocks().size()));
-	size_t newSize = toSZ(std::max(toI(_contextState.GetBlocks().size()) - numMessages, 0));
+	int32_t numRemovals = toI(std::min(toUZ(numMessages), _contextState.GetBlocks().size()));
+	size_t newSize = toUZ(std::max(toI(_contextState.GetBlocks().size()) - numMessages, 0));
 	int32_t& cursor_pos = _contextState.cursor_pos;
 	auto& blocks = _contextState.GetBlocks();
 
@@ -1785,14 +1784,14 @@ std::map<string, string> LLMInstance::GetStateVariables()
 
 bool LLMInstance::RebuildKVCache()
 {
-	_pStatus->PushSignal(LLMStatusSignal::RebuildingContext);
-    auto prevReadyState = _readyState.exchange(ReadyState::RebuildingContext);
-	_pStatus->ReportReadyState(ReadyState::RebuildingContext);
+	_pStatus->EmitSignal(LLMStatusSignal::RebuildingKVCache);
+    auto prevReadyState = _readyState.exchange(ReadyState::RebuildingKVCache);
+	_pStatus->ReportReadyState(ReadyState::RebuildingKVCache);
 
 	bool r = _contextState.RebuildKVCache();
 
     SetReadyState(prevReadyState);
-	_pStatus->PushSignal(LLMStatusSignal::GenerationStarted);
+	_pStatus->EmitSignal(LLMStatusSignal::GenerationStarted);
     return r == 0;
 }
 

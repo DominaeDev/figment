@@ -21,6 +21,8 @@ class LLMEngine
 {
 public:
 	LLMEngine();
+	~LLMEngine() = default;
+
 	bool Initialize(string modelFilename, string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool Shutdown();
 
@@ -28,7 +30,8 @@ public:
 	bool IsInitializing() const { return _readyState.load() == ReadyState::Initializing; }
 
 	std::shared_ptr<LLMStatusChannel> GetStatusChannel() noexcept { return _pStatus; }
-	std::shared_ptr<LLMInstance> CreateInstance() noexcept;
+	LLMInstancePtr CreateInstance(int32_t ctx_size, bool embeddings);
+	bool DestroyInstance(LLMInstancePtr instance);
 
 private:
 	using __LoadModelCallback = std::function<void(std::shared_ptr<ModelState>)>;
@@ -36,6 +39,7 @@ private:
 	static bool OnLoadModelProgress(float progress, void* user_data);
 
 	void SetReadyState(ReadyState readyState);
+
 private:
 	std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };
 	std::mutex _stateMutex; // Guards ready state
@@ -43,7 +47,9 @@ private:
 	std::unique_ptr<std::jthread> _workerThread;
 	std::shared_ptr<ModelState> _modelState {};
 	std::shared_ptr<LLMStatusChannel> _pStatus {};
-	std::shared_ptr<LLMInstance> _pInstance {};
+	
+	std::vector<LLMInstancePtr> _instances {};
+	LLMInstancePtr _mainInstance {};
 
 	LoadModelProgressCallback _pLoadModelProgressCallback = nullptr;
 public:

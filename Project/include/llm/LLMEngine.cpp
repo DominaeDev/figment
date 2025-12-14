@@ -69,6 +69,8 @@ bool LLMEngine::Initialize(string modelFilename, string embeddingFilename, LoadM
 	SetReadyState(ReadyState::Initializing);
 	_pLoadModelProgressCallback = onProgress;
 
+	_pStatus->EmitSignal(LLMStatusSignal::ModelLoading);
+
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMEngine::__LoadModel, this), 
 		modelFilename,
 		embeddingFilename,
@@ -83,7 +85,7 @@ bool LLMEngine::Initialize(string modelFilename, string embeddingFilename, LoadM
 				
 				DebugPrintLn("Loaded model OK");
 				_pStatus->ReportMemory(usedRAM.load(), usedVRAM.load(), false);
-				_pStatus->PushSignal(LLMStatusSignal::LoadedModel);
+				_pStatus->EmitSignal(LLMStatusSignal::ModelLoaded);
 				onComplete(true);
 			}
 			else // Failure
@@ -94,7 +96,7 @@ bool LLMEngine::Initialize(string modelFilename, string embeddingFilename, LoadM
 				}, _stateMutex);
 
 				SetReadyState(ReadyState::LoadError);
-				_pStatus->PushSignal(LLMStatusSignal::LoadModelFailure);
+				_pStatus->EmitSignal(LLMStatusSignal::ModelLoadFailure);
 
 				DebugPrintLn("Failed to load model");
 				onComplete(false);
@@ -106,11 +108,10 @@ bool LLMEngine::Initialize(string modelFilename, string embeddingFilename, LoadM
 
 bool LLMEngine::Shutdown()
 {
-	if (_pInstance)
-	{
-		_pInstance->Shutdown();
-		_pInstance.reset();
-	}
+	// Stop all instances
+	for (auto& instance : _instances)
+		instance->Shutdown();
+	_instances.clear(); // Free instances
 
 	LockAndDo([this]() {
 		// Clear and release state
@@ -123,7 +124,7 @@ bool LLMEngine::Shutdown()
 	}, _stateMutex);
 	
 	SetReadyState(ReadyState::Uninitialized);
-	_pStatus->PushSignal(LLMStatusSignal::UnloadedModel);
+	_pStatus->EmitSignal(LLMStatusSignal::ModelUnloaded);
 
 	llama_backend_free();
 	return true;
@@ -134,7 +135,6 @@ void LLMEngine::SetReadyState(ReadyState readyState)
 	_readyState.store(readyState);
 	_pStatus->ReportReadyState(readyState);
 }
-
 
 void LLMEngine::__LoadModel(string modelFilename, string embeddingFilename, __LoadModelCallback onComplete)
 {
@@ -203,11 +203,23 @@ void LLMEngine::__LoadModel(string modelFilename, string embeddingFilename, __Lo
 	onComplete(state);
 }
 
-std::shared_ptr<LLMInstance> LLMEngine::CreateInstance() noexcept
+LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
 {
 	auto pInstance = std::make_shared<LLMInstance>();
 	pInstance->_modelState = *_modelState.get();
 	pInstance->_pStatus = _pStatus;
-	_pInstance = pInstance;
+	_instances.push_back(pInstance);
 	return pInstance;
+}
+
+bool LLMEngine::DestroyInstance(LLMInstancePtr instance)
+{
+	auto itFind = std::ranges::find(_instances, instance);
+	if (itFind != std::ranges::end(_instances))
+	{
+		itFind->get()->Shutdown();
+		_instances.erase(itFind);
+		return true;
+	}
+	return false;
 }

@@ -29,7 +29,7 @@ static const std::map<PromptTemplate, std::string> LLAMA_CPP_TEMPLATES = {
 	{ PromptTemplate::Phi4,				"phi4",				},
 	{ PromptTemplate::CommandR,			"command-r",		},
 
-	/* Not supported for now
+	/* Not supported for now:
 	{ PromptTemplate::Vicuna,			"vicuna",			},
 	{ PromptTemplate::VicunaOrca,		"vicuna-orca",		},
 	{ PromptTemplate::Falcon3,			"falcon3",			},

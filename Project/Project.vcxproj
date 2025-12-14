@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -138,6 +138,7 @@
     <ClCompile Include="src\gui\ChatMessage.cpp" />
     <ClCompile Include="src\gui\ChatScroll.cpp" />
     <ClCompile Include="src\gui\Color.cpp" />
+    <ClCompile Include="src\model\ChatCommandExecutor.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
     <ClCompile Include="src\gui\ControlWithMargins.cpp" />
@@ -196,6 +197,8 @@
     <ClInclude Include="include\model\ChatSession.h" />
     <ClInclude Include="include\model\ChatCommands.h" />
     <ClInclude Include="include\model\ChatTypes.h" />
+    <ClInclude Include="include\model\ChatCommandExecutor.h" />
+    <ClInclude Include="include\model\GlobalStrings.h" />
     <ClInclude Include="include\util\EnumFlags.h" />
     <ClInclude Include="include\gui\CustomRenderer.h" />
     <ClInclude Include="include\gui\ChatMessage.h" />
@@ -235,12 +238,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-    <None Include="resources\formatting_grammar.gbnf" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="resources\prompt_formatting.txt" />
-    <Text Include="resources\prompt_greeting.txt" />
-    <Text Include="resources\prompt_system.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

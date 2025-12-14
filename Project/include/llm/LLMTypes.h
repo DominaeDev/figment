@@ -30,3 +30,8 @@ constexpr std::array<Sequence, 4> AllSequenceIDs {
 	Sequence::Bot3,
 	Sequence::Bot4,
 };
+
+class LLMEngine;
+using LLMEnginePtr = std::shared_ptr<LLMEngine>;
+class LLMInstance;
+using LLMInstancePtr = std::shared_ptr<LLMInstance>;
