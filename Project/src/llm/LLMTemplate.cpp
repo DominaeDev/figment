@@ -6,6 +6,7 @@
 #include <map>
 
 using namespace fig::string_util;
+using namespace fig::llm;
 
 PromptTemplate llm_tmpl::current_template = PromptTemplate::Default;
 fig::string llm_tmpl::_template {};

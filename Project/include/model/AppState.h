@@ -12,8 +12,11 @@ struct SDL_Cursor;
 enum SDL_SystemCursor : int;
 struct TTF_TextEngine;
 
-class LLMEngine;
-class LLMInstance;
+namespace fig::llm
+{
+	class LLMEngine;
+	class LLMInstance;
+}
 
 class Application
 {
@@ -26,8 +29,8 @@ public:
 		TTF_TextEngine* pTextEngine = nullptr;
 		unsigned __int64 last_step {};
 
-		std::shared_ptr<LLMEngine> pLLMEngine;
-		std::shared_ptr<LLMInstance> pLLMInstance;
+		std::shared_ptr<fig::llm::LLMEngine> pLLMEngine;
+		std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
 	};
 
 	static State* CreateState();
@@ -35,10 +38,10 @@ public:
 
 	static SDL_Window* GetWindow();
 	static SDL_Renderer* GetRenderer();
-	static LLMEngine& GetLLMEngine();
+	static fig::llm::LLMEngine& GetLLMEngine();
 
-	[[nodiscard]] static std::shared_ptr<LLMInstance> GetLLMInstance();
-	static void SetLLMInstance(std::shared_ptr<LLMInstance> pLLMInstance);
+	[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
+	static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);
 
 	static void SetCursor(SDL_SystemCursor cursor);
 

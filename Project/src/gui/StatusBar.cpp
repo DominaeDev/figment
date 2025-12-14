@@ -1,9 +1,11 @@
 #include "gui/StatusBar.h"
 #include "gui/StaticText.h"
 #include "gui/Fonts.h"
-#include "llm/LLMInstance.h"
+#include "llm/LLMStatus.h"
 #include "Constants.h"
 #include <format>
+
+using namespace fig::llm;
 
 StatusBar::StatusBar(Control* pParent) : Control(pParent)
 {
@@ -25,7 +27,7 @@ void StatusBar::SetMessage(fig::string_view message)
 	_pMessage->SetText(toStr(message));
 }
 
-void StatusBar::SetModelInfo(LLMStatus status)
+void StatusBar::SetModelInfo(fig::llm::LLMStatus status)
 {
 	if (!status.IsReady())
 		_pModelInfo->SetText("");

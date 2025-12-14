@@ -3,6 +3,7 @@
 #include <format>
 
 using namespace fig::string_util;
+using namespace fig::llm;
 
 bool LLMStateVariables::SetValue(fig::string name, fig::string value)
 {

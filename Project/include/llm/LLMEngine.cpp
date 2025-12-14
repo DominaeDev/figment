@@ -12,6 +12,7 @@
 using namespace fig::common_util;
 using namespace fig::string_util;
 using namespace fig::file_util;
+using namespace fig::llm;
 
 using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;
 static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
@@ -202,7 +203,7 @@ void LLMEngine::__LoadModel(fig::string modelFilename, fig::string embeddingFile
 	onComplete(state);
 }
 
-fig::LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
+LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
 {
 	auto pInstance = std::make_shared<LLMInstance>();
 	pInstance->_modelState = *_modelState.get();
@@ -211,7 +212,7 @@ fig::LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
 	return pInstance;
 }
 
-bool LLMEngine::DestroyInstance(fig::LLMInstancePtr instance)
+bool LLMEngine::DestroyInstance(LLMInstancePtr instance)
 {
 	auto itFind = std::ranges::find(_instances, instance);
 	if (itFind != std::ranges::end(_instances))

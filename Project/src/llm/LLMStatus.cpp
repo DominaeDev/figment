@@ -1,6 +1,8 @@
 #include "llm/LLMStatus.h"
 #include "util/Lockable.h"
 
+using namespace fig::llm;
+
 LLMStatus LLMStatusChannel::PollStatus()
 {
 	LLMStatus status {};

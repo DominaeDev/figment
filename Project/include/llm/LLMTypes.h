@@ -3,10 +3,7 @@
 #include "Types.h"
 #include <llama.h>
 
-class LLMEngine;
-class LLMInstance;
-
-namespace fig
+namespace fig::llm
 {
 	using ModelPtr = llama_model*;
 	using ContextPtr = llama_context*;
@@ -36,6 +33,8 @@ namespace fig
 		Sequence::Bot4,
 	};
 
+	class LLMEngine;
 	using LLMEnginePtr = std::shared_ptr<LLMEngine>;
+	class LLMInstance;
 	using LLMInstancePtr = std::shared_ptr<LLMInstance>;
 }

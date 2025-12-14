@@ -2,27 +2,30 @@
 
 #include "Types.h"
 
-struct EmbeddingVector
+namespace fig::llm
 {
-	fig::string modelName;
-	fig::string content;
-	std::vector<float> vec;
+	struct EmbeddingVector
+	{
+		fig::string modelName;
+		fig::string content;
+		std::vector<float> vec;
 
-	bool LoadFromFile(fig::string filename);
-	bool SaveToFile(fig::string filename) const;
-};
+		bool LoadFromFile(fig::string filename);
+		bool SaveToFile(fig::string filename) const;
+	};
 
-class Embeddings
-{
-public:
-	static void Initialize(fig::string filePath, fig::string modelName);
+	class Embeddings
+	{
+	public:
+		static void Initialize(fig::string filePath, fig::string modelName);
 
-	static const std::vector<EmbeddingVector>& GetEmbeddings();
-	static void AddEmbedding(EmbeddingVector embedding);
-private:
-	static std::vector<EmbeddingVector> _embeddings;
+		static const std::vector<EmbeddingVector>& GetEmbeddings();
+		static void AddEmbedding(EmbeddingVector embedding);
+	private:
+		static std::vector<EmbeddingVector> _embeddings;
 
-private:
-	Embeddings() = delete;
-	~Embeddings() = delete;
-};
+	private:
+		Embeddings() = delete;
+		~Embeddings() = delete;
+	};
+}

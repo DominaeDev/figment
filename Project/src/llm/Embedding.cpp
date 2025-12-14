@@ -8,6 +8,7 @@
 
 using namespace fig::string_util;
 using namespace fig::file_util;
+using namespace fig::llm;
 
 union FloatToChar 
 {

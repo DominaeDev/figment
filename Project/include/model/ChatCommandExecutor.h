@@ -4,15 +4,18 @@
 
 #include "ChatCommands.h"
 
-class LLMInstance;
 class MainFrame;
+namespace fig::llm
+{
+	class LLMInstance;
+}
 
 class ChatCommandExecutor
 {
 public:
 	struct Context
 	{
-		std::shared_ptr<LLMInstance> pLLM;
+		std::shared_ptr<fig::llm::LLMInstance> pLLM;
 		MainFrame* pMainFrame;
 	};
 

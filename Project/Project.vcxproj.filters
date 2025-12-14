@@ -206,9 +206,6 @@
     <ClCompile Include="src\gui\VariableList.cpp">
       <Filter>Source Files\Interface\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\llm\LLMTypes.cpp">
-      <Filter>Source Files\Inference</Filter>
-    </ClCompile>
     <ClCompile Include="src\llm\LLMStateVariables.cpp">
       <Filter>Source Files\Inference\Context</Filter>
     </ClCompile>

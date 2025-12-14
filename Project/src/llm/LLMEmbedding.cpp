@@ -12,6 +12,7 @@
 using namespace fig::string_util;
 using namespace fig::file_util;
 using namespace fig::common_util;
+using namespace fig::llm;
 
 LLMEmbedding::~LLMEmbedding()
 {
@@ -87,7 +88,7 @@ bool LLMEmbedding::IsReady() const
 	return _pModel != nullptr && _pCtx != nullptr;
 }
 
-static std::vector<llama_token> TokenizeSentences(fig::VocabPtr pVocab, llama_context* pCtx, Sentences sentences)
+static std::vector<llama_token> TokenizeSentences(VocabPtr pVocab, llama_context* pCtx, Sentences sentences)
 {
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 
@@ -97,7 +98,7 @@ static std::vector<llama_token> TokenizeSentences(fig::VocabPtr pVocab, llama_co
 	int n = 0;
 	for (auto it = sentences.crbegin(); it != sentences.crend(); ++it, ++n)
 	{
-		auto msg_tokens = llm_util::tokenize(pVocab, (*it).sentence, false);
+		auto msg_tokens = fig::llm::utility::tokenize(pVocab, (*it).sentence, false);
 		if (msg_tokens.size() > ctx_size - tokens.size() - 2) // Account for <bos> <eos>
 			break;
 		tokens.insert(tokens.begin(), msg_tokens.cbegin(), msg_tokens.cend());
@@ -210,13 +211,13 @@ bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, fig::st
 	std::vector<llama_token> tokens = in_tokens;
 	std::vector<llama_token> instructions;
 	if (mode == Mode::Query && !Constants::Embedding::QueryPrefix.empty())
-		instructions = llm_util::tokenize(pVocab, toStr(Constants::Embedding::QueryPrefix), false);
+		instructions = fig::llm::utility::tokenize(pVocab, toStr(Constants::Embedding::QueryPrefix), false);
 	else if (mode == Mode::Document && !Constants::Embedding::DocumentPrefix.empty())
-		instructions = llm_util::tokenize(pVocab, toStr(Constants::Embedding::DocumentPrefix), false);
+		instructions = fig::llm::utility::tokenize(pVocab, toStr(Constants::Embedding::DocumentPrefix), false);
 	tokens.insert(tokens.begin(), instructions.begin(), instructions.end());
 
 	llama_batch batch;
-	if (!llm_util::init_embedding_batch(_pModel, _pCtx, tokens, batch))
+	if (!fig::llm::utility::init_embedding_batch(_pModel, _pCtx, tokens, batch))
 		return false;
 
 	if (batch.n_tokens > ctx_size)

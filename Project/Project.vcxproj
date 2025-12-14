@@ -129,7 +129,6 @@
     <ClCompile Include="src\llm\LLMEmbedding.cpp" />
     <ClCompile Include="src\llm\LLMStateVariables.cpp" />
     <ClCompile Include="src\llm\LLMTemplate.cpp" />
-    <ClCompile Include="src\llm\LLMTypes.cpp" />
     <ClCompile Include="src\llm\ModelState.cpp" />
     <ClCompile Include="src\llm\LLMStatus.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />

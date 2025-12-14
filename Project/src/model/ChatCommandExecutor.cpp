@@ -14,10 +14,11 @@
 
 using namespace fig::common_util;
 using namespace fig::string_util;
+using namespace fig::llm;
 
 struct ChatCommandFunctionContext
 {
-	fig::LLMInstancePtr pLLM;
+	fig::llm::LLMInstancePtr pLLM;
 	ChatScroll* pChatScroll;
 	TextBox* pTextBox;
 	ParsedChatCommandQueue& commandQueue;
@@ -48,7 +49,7 @@ static std::vector<fig::string> FilterMessageIDs(std::vector<RemovedMessage> msg
 		| std::ranges::to<std::vector<fig::string>>();
 };
 
-static Role RoleFromName(fig::string text, fig::LLMInstancePtr pLLM) {
+static Role RoleFromName(fig::string text, LLMInstancePtr pLLM) {
 	if (empty_or_whitespace(text))
 		return Role::Undefined;
 	if (std::iswdigit(from_utf8(text)[0]))
@@ -67,7 +68,7 @@ static bool cmdUserMessage(ParsedChatCommand cmd, Ctx ctx)
 	if (!(ctx.pLLM && ctx.pLLM->IsReady()))
 	{
 		static int turn = 0;
-		auto [msgType, complete] = llm_util::detect_message_type(llm_util::process_message(cmd.text, ""));
+		auto [msgType, complete] = fig::llm::utility::detect_message_type(fig::llm::utility::process_message(cmd.text, ""));
 		ctx.pChatScroll->AddDummyMessage(turn % 2 == 0 ? "@USR" : "@BOT", turn % 2 == 0 ? Role::User : Role::Bot1, msgType, cmd.text);
 		++turn;
 		return true;

@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 #include <cassert>
 
+using namespace fig::llm;
+
 Application::State* Application::__appState = nullptr;
 SDL_Cursor* Application::_pIBeamCursor = nullptr;
 

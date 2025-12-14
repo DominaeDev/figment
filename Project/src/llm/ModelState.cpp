@@ -4,6 +4,8 @@
 #include <list>
 #include <cassert>
 
+using namespace fig::llm;
+
 void ModelState::Release()
 {
 	if (pSampler)

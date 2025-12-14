@@ -11,6 +11,7 @@
 #include <set>
 
 using namespace fig::string_util;
+using namespace fig::llm;
 
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f

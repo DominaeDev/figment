@@ -7,6 +7,7 @@
 
 using namespace fig::string_util;
 using namespace fig::file_util;
+using namespace fig::llm;
 
 static bool _evaluate(fig::string& text, size_t pos_begin, const std::set<fig::string>& flags)
 {
@@ -53,7 +54,7 @@ static bool _evaluate(fig::string& text, size_t pos_begin, const std::set<fig::s
 	return true;
 }
 
-fig::SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, fig::VocabPtr pVocab, fig::string names, fig::string stateVars)
+SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, fig::string names, fig::string stateVars)
 {
 	fig::string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 	if (grammar.size() == 0)
