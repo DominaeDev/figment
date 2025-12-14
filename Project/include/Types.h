@@ -16,6 +16,10 @@ namespace fig
     using string = std::string;
     using string_view = std::string_view;
     using c_string = const char*;
+    using wc_string = const wchar_t*;
+    using wstring = std::wstring;
+    using wstring_view = std::wstring_view;
+
     static constexpr auto npos = std::string::npos;
 }
 

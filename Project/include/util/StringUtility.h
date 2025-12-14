@@ -7,23 +7,26 @@
 
 namespace fig::string_util
 {
-	void ltrim_str(string& s);
-	void rtrim_str(string& s);
+	void ltrim_inplace(string& s);
+	void rtrim_inplace(string& s);
+	inline void trim_implace(string& s) { ltrim_inplace(s); rtrim_inplace(s); }
 
-	inline void trim_str(string& s) { ltrim_str(s); rtrim_str(s); }
 	[[nodiscard]] string ltrim(const string& s);
 	[[nodiscard]] string rtrim(const string& s);
 	[[nodiscard]] inline string trim(const string& s) { return ltrim(rtrim(s)); }
 
 	[[nodiscard]] string lcase(const string& s);
 	[[nodiscard]] string ucase(const string& s);
-	[[nodiscard]] std::wstring lcase(const std::wstring& s);
-	[[nodiscard]] std::wstring ucase(const std::wstring& s);
-	int compare(const string& a, const string& b, bool ignore_case = false);
-	bool equals(const string& a, const string& b, bool ignore_case = false);
+	[[nodiscard]] wstring lcase(const wstring& s);
+	[[nodiscard]] wstring ucase(const wstring& s);
+	[[nodiscard]] int compare(const string& a, const string& b, bool ignore_case = false);
+	[[nodiscard]] bool equals(const string& a, const string& b, bool ignore_case = false);
 
-	string& replace(string& str, const string& find, const string& replace);
-	string& replace_all(string& str, const string& find, const string& replace);
+	string replace(const string& str, const string& find, const string& replace);
+	string replace_all(const string& str, const string& find, const string& replace);
+
+	string& replace_inplace(string& str, const string& find, const string& replace);
+	string& replace_all_inplace(string& str, const string& find, const string& replace);
 
 	bool empty_or_whitespace(const string& s);
 	bool begins_with(const string& str, const string& prefix, bool ignore_case = false);
@@ -35,8 +38,8 @@ namespace fig::string_util
 	string normalize_newlines(string&& s);
 
 	size_t validate_utf8(const string& text) noexcept;
-	std::wstring from_utf8(const string& str);
-	string to_utf8(const std::wstring& str);
+	wstring from_utf8(const string& str);
+	string to_utf8(const wstring& str);
 }
 
 #endif 

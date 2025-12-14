@@ -59,8 +59,8 @@ fig::SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, fig::VocabPt
 	if (grammar.size() == 0)
 		return nullptr;
 
-	replace_all(grammar, "{{_NAMES_}}", names);
-	replace_all(grammar, "{{_STATE_VARS_}}", stateVars);
+	replace_all_inplace(grammar, "{{_NAMES_}}", names);
+	replace_all_inplace(grammar, "{{_STATE_VARS_}}", stateVars);
 
 	std::set<fig::string> flags;
 	if (grammarFlags.IsSet(GrammarFlag::Default))

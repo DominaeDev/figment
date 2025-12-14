@@ -63,7 +63,7 @@ bool EmbeddingVector::SaveToFile(fig::string filename) const
 	try
 	{
 		fig::string text = content;
-		replace_all(text, ";", ",");
+		replace_all_inplace(text, ";", ",");
 		fig::string output;
 		output.reserve(8192);
 		output += modelName + ";";

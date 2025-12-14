@@ -66,8 +66,8 @@ fig::string LLMStateVariables::GetGrammarPattern() const
 
 void LLMStateVariables::UpdateValues(fig::string stateReport, std::map<fig::string, fig::string>& updatedVariables)
 {
-	replace_all(stateReport, "<change>", "");
-	replace_all(stateReport, "</change>", ";");
+	replace_all_inplace(stateReport, "<change>", "");
+	replace_all_inplace(stateReport, "</change>", ";");
 	auto rows = split(stateReport, ';', true);
 
 	for (auto& row : rows)

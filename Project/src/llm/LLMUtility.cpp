@@ -115,7 +115,7 @@ void llm_util::get_tag_and_name(const fig::string& text, fig::string& tag, fig::
 
 	tag = trim(text.substr(1, pos_equals - 1));
 	name = trim(text.substr(pos_equals + 1, text.length() - pos_equals - 2));
-	replace_all(name, "\"", "");
+	replace_all_inplace(name, "\"", "");
 }
 
 std::pair<MessageType, bool> llm_util::detect_message_type(fig::string text) noexcept
@@ -541,7 +541,7 @@ fig::string llm_util::process_message(fig::string message, fig::string identifie
 	size_t pos = 0;
 	size_t length = message.size();
 
-	trim_str(message);
+	trim_implace(message);
 	char first = message[0];
 	char last = 0;
 	if (first == '"' || first == '*')
@@ -603,7 +603,7 @@ fig::string llm_util::process_message(fig::string message, fig::string identifie
 
 		if (span.msgType == MessageType::Dialogue) // Minor processing for correctness
 		{
-			std::wstring uniText = from_utf8(text);
+			fig::wstring uniText = from_utf8(text);
 			if (!std::iswpunct(uniText.front()) && !std::iswupper(uniText.front()))
 				uniText[0] = std::toupper(uniText[0]); // Uppercase first letter
 			if (!std::iswpunct(uniText.back()))

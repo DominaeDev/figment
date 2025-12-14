@@ -158,8 +158,8 @@ fig::string ChatSession::GetBriefOf(Role role) const
 		return "";
 
 	fig::string brief = trim(optCharacter.value().brief);
-	replace_all(brief, "{{user}}", GetNameOf(Role::User));
-	replace_all(brief, "{{char}}", optCharacter.value().shortName);
+	replace_all_inplace(brief, "{{user}}", GetNameOf(Role::User));
+	replace_all_inplace(brief, "{{char}}", optCharacter.value().shortName);
 	return brief;
 }
 
@@ -177,61 +177,61 @@ fig::string ChatSession::GetPersonaOf(Role role) const
 	if (role == Role::User)
 	{
 		fig::string prompt = _system_prompt_user;
-		replace_all(prompt, "##PERSONA##", description);
+		replace_all_inplace(prompt, "##PERSONA##", description);
 		return ApplyNames(prompt);
 	}
 	else
 	{
 		fig::string prompt = _system_prompt_character;
-		replace_all(prompt, "##PERSONA##", description);
-		replace_all(prompt, "{{user}}", GetNameOf(Role::User));
-		replace_all(prompt, "{{char}}", optCharacter.value().shortName);
+		replace_all_inplace(prompt, "##PERSONA##", description);
+		replace_all_inplace(prompt, "{{user}}", GetNameOf(Role::User));
+		replace_all_inplace(prompt, "{{char}}", optCharacter.value().shortName);
 		return prompt;
 	}
 }
 
 fig::string ChatSession::ApplyNames(fig::string text) const
 {
-	replace_all(text, "{{user}}", GetNameOf(Role::User));
-	replace_all(text, "{{char}}", GetNameOf(Role::Bot1));
-	replace_all(text, "{{user:name}}", GetNameOf(Role::User));
-	replace_all(text, "{{char:name}}", GetNameOf(Role::Bot1));
+	replace_all_inplace(text, "{{user}}", GetNameOf(Role::User));
+	replace_all_inplace(text, "{{char}}", GetNameOf(Role::Bot1));
+	replace_all_inplace(text, "{{user:name}}", GetNameOf(Role::User));
+	replace_all_inplace(text, "{{char:name}}", GetNameOf(Role::Bot1));
 
-	replace_all(text, "{{char1:name}}", GetNameOf(Role::Bot1));
-	replace_all(text, "{{char2:name}}", GetNameOf(Role::Bot2));
-	replace_all(text, "{{char3:name}}", GetNameOf(Role::Bot3));
-	replace_all(text, "{{char4:name}}", GetNameOf(Role::Bot4));
-	replace_all(text, "{{char5:name}}", GetNameOf(Role::Bot5));
-	replace_all(text, "{{char6:name}}", GetNameOf(Role::Bot6));
-	replace_all(text, "{{char7:name}}", GetNameOf(Role::Bot7));
-	replace_all(text, "{{char8:name}}", GetNameOf(Role::Bot8));
+	replace_all_inplace(text, "{{char1:name}}", GetNameOf(Role::Bot1));
+	replace_all_inplace(text, "{{char2:name}}", GetNameOf(Role::Bot2));
+	replace_all_inplace(text, "{{char3:name}}", GetNameOf(Role::Bot3));
+	replace_all_inplace(text, "{{char4:name}}", GetNameOf(Role::Bot4));
+	replace_all_inplace(text, "{{char5:name}}", GetNameOf(Role::Bot5));
+	replace_all_inplace(text, "{{char6:name}}", GetNameOf(Role::Bot6));
+	replace_all_inplace(text, "{{char7:name}}", GetNameOf(Role::Bot7));
+	replace_all_inplace(text, "{{char8:name}}", GetNameOf(Role::Bot8));
 
-	replace_all(text, "{{user:id}}", GetIdentifierOf(Role::User));
-	replace_all(text, "{{char1:id}}", GetIdentifierOf(Role::Bot1));
-	replace_all(text, "{{char2:id}}", GetIdentifierOf(Role::Bot2));
-	replace_all(text, "{{char3:id}}", GetIdentifierOf(Role::Bot3));
-	replace_all(text, "{{char4:id}}", GetIdentifierOf(Role::Bot4));
-	replace_all(text, "{{char5:id}}", GetIdentifierOf(Role::Bot5));
-	replace_all(text, "{{char6:id}}", GetIdentifierOf(Role::Bot6));
-	replace_all(text, "{{char7:id}}", GetIdentifierOf(Role::Bot7));
-	replace_all(text, "{{char8:id}}", GetIdentifierOf(Role::Bot8));
+	replace_all_inplace(text, "{{user:id}}", GetIdentifierOf(Role::User));
+	replace_all_inplace(text, "{{char1:id}}", GetIdentifierOf(Role::Bot1));
+	replace_all_inplace(text, "{{char2:id}}", GetIdentifierOf(Role::Bot2));
+	replace_all_inplace(text, "{{char3:id}}", GetIdentifierOf(Role::Bot3));
+	replace_all_inplace(text, "{{char4:id}}", GetIdentifierOf(Role::Bot4));
+	replace_all_inplace(text, "{{char5:id}}", GetIdentifierOf(Role::Bot5));
+	replace_all_inplace(text, "{{char6:id}}", GetIdentifierOf(Role::Bot6));
+	replace_all_inplace(text, "{{char7:id}}", GetIdentifierOf(Role::Bot7));
+	replace_all_inplace(text, "{{char8:id}}", GetIdentifierOf(Role::Bot8));
 
-	replace_all(text, "{{user:brief}}", GetBriefOf(Role::User));
-	replace_all(text, "{{char1:brief}}", GetBriefOf(Role::Bot1));
-	replace_all(text, "{{char2:brief}}", GetBriefOf(Role::Bot2));
-	replace_all(text, "{{char3:brief}}", GetBriefOf(Role::Bot3));
-	replace_all(text, "{{char4:brief}}", GetBriefOf(Role::Bot4));
-	replace_all(text, "{{char5:brief}}", GetBriefOf(Role::Bot5));
-	replace_all(text, "{{char6:brief}}", GetBriefOf(Role::Bot6));
-	replace_all(text, "{{char7:brief}}", GetBriefOf(Role::Bot7));
-	replace_all(text, "{{char8:brief}}", GetBriefOf(Role::Bot8));
+	replace_all_inplace(text, "{{user:brief}}", GetBriefOf(Role::User));
+	replace_all_inplace(text, "{{char1:brief}}", GetBriefOf(Role::Bot1));
+	replace_all_inplace(text, "{{char2:brief}}", GetBriefOf(Role::Bot2));
+	replace_all_inplace(text, "{{char3:brief}}", GetBriefOf(Role::Bot3));
+	replace_all_inplace(text, "{{char4:brief}}", GetBriefOf(Role::Bot4));
+	replace_all_inplace(text, "{{char5:brief}}", GetBriefOf(Role::Bot5));
+	replace_all_inplace(text, "{{char6:brief}}", GetBriefOf(Role::Bot6));
+	replace_all_inplace(text, "{{char7:brief}}", GetBriefOf(Role::Bot7));
+	replace_all_inplace(text, "{{char8:brief}}", GetBriefOf(Role::Bot8));
 
 	return text;
 }
 
 fig::string ChatSession::ApplyNames(fig::string text, Role characterRole) const
 {
-	replace_all(text, "{{char}}", GetNameOf(characterRole));
+	replace_all_inplace(text, "{{char}}", GetNameOf(characterRole));
 	return ApplyNames(text);
 }
 
@@ -241,16 +241,16 @@ fig::string ChatSession::GetSystemPrompt() const
 	if (IsGroupChat())
 	{
 		prompt = _system_prompt_group;
-		replace_all(prompt, "##FORMATTING##", _formatting_group);
+		replace_all_inplace(prompt, "##FORMATTING##", _formatting_group);
 	}
 	else
 	{
 		prompt = _system_prompt_solo;
-		replace_all(prompt, "##FORMATTING##", _formatting_solo);
+		replace_all_inplace(prompt, "##FORMATTING##", _formatting_solo);
 	}
 
-	replace_all(prompt, "##STATE_FORMATTING##", _options.IsSet(LLMOption::StateVariables) ? _formatting_state : "");
-	replace_all(prompt, "##UNCENSOR_INSTRUCTIONS##", _options.IsSet(LLMOption::Uncensored) ? _system_prompt_uncensored : "");
+	replace_all_inplace(prompt, "##STATE_FORMATTING##", _options.IsSet(LLMOption::StateVariables) ? _formatting_state : "");
+	replace_all_inplace(prompt, "##UNCENSOR_INSTRUCTIONS##", _options.IsSet(LLMOption::Uncensored) ? _system_prompt_uncensored : "");
 	prompt = trim(prompt);
 
 	if (IsGroupChat())

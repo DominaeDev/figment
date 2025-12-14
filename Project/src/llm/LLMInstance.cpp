@@ -319,18 +319,18 @@ void LLMInstance::InitSamplers()
 		else
 			namesPattern += std::format("| \"{}\"", _session.GetNameOf(Role::User));
 	}
-	replace_all(grammar, "##NAMES##", namesPattern);
+	replace_all_inplace(grammar, "##NAMES##", namesPattern);
 
 	// Variables
 	if (_options.IsSet(LLMOption::StateVariables))
 	{
-		replace_all(grammar, "##STATE##", "stat");
-		replace_all(grammar, "##STATE_VARS##", _stateVars.GetGrammarPattern());
+		replace_all_inplace(grammar, "##STATE##", "stat");
+		replace_all_inplace(grammar, "##STATE_VARS##", _stateVars.GetGrammarPattern());
 	}
 	else
 	{
-		replace_all(grammar, "##STATE##", "");
-		replace_all(grammar, "##STATE_VARS##", "[]");
+		replace_all_inplace(grammar, "##STATE##", "");
+		replace_all_inplace(grammar, "##STATE_VARS##", "[]");
 	}
 
 	auto default_grammar_sampler = CompileGrammar({ GrammarFlag::Default });
@@ -1698,8 +1698,8 @@ Sentences LLMInstance::GetHistory(size_t depth)
 			if (Constants::Embedding::SplitSentences)
 			{
 				// Split into individual sentences for RAG
-				replace_all(content, "?", ".");
-				replace_all(content, "!", ".");
+				replace_all_inplace(content, "?", ".");
+				replace_all_inplace(content, "!", ".");
 				auto split_sentences = split(content, '.', true);
 				for (auto& s : split_sentences)
 					sentences.insert(sentences.begin(), { block.role, s });
