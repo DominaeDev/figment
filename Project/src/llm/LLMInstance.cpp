@@ -14,8 +14,9 @@
 #include <chrono>
 
 using namespace std::chrono_literals;
-using namespace common_util;
-using namespace file_util;
+using namespace fig::common_util;
+using namespace fig::file_util;
+using namespace fig::string_util;
 
 inline constexpr fig::string Direction(fig::string_view text)
 {
@@ -104,7 +105,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	// Initialize context
 	_contextState.Initialize();
 
-	auto fnDecode = [this](const std::vector<llama_token>& tokens, SequenceId seq_id, int32_t& pos) -> bool {
+	auto fnDecode = [this](const std::vector<llama_token>& tokens, fig::SequenceId seq_id, int32_t& pos) -> bool {
 		if (auto n_tokens = _contextState.DecodeTokens(tokens, pos, seq_id))
 		{
 			pos += n_tokens.value();
@@ -130,11 +131,11 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			.content = template_prefix + system_prompt,
 			.tokens =  system_prompt_tokens,
 			.flags { ContextBlockFlag::Static },
-			.sequenceId { Sequence::Shared },
+			.sequenceId { fig::Sequence::Shared },
 			.offset = _contextState.GetBlockAppendOffset(),
 		});
 
-		if (!fnDecode(system_prompt_tokens, { Sequence::Shared }, cursor_pos))
+		if (!fnDecode(system_prompt_tokens, { fig::Sequence::Shared }, cursor_pos))
 			return false; // Error
 
 		// Write persona(s)
@@ -143,7 +144,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 		{
 			int32_t persona_offset = cursor_pos;
 			Role role = bot_from_index(i);
-			SequenceId seq_id = llm_util::sequence_from_index(i);
+			fig::SequenceId seq_id = llm_util::sequence_from_index(i);
 
 			// Persona
 			std::vector<llama_token> persona_tokens = llm_util::tokenize(pVocab, personas[role], false);
@@ -164,7 +165,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 		cursor_pos += max_persona;
 
 		// User persona
-		if (!string_util::empty_or_whitespace(user_persona))
+		if (!empty_or_whitespace(user_persona))
 		{
 			auto user_persona_tokens = llm_util::tokenize(pVocab, user_persona);
 			_contextState.AppendBlock(ContextBlock {
@@ -173,10 +174,10 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 				.content = user_persona,
 				.tokens = user_persona_tokens,
 				.flags { ContextBlockFlag::Static },
-				.sequenceId { Sequence::Shared },
+				.sequenceId { fig::Sequence::Shared },
 				.offset = cursor_pos,
 				});
-			if (!user_persona_tokens.empty() && !fnDecode(user_persona_tokens, { Sequence::Shared }, cursor_pos))
+			if (!user_persona_tokens.empty() && !fnDecode(user_persona_tokens, { fig::Sequence::Shared }, cursor_pos))
 				return false;
 		}
 
@@ -188,10 +189,10 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			.content = template_suffix,
 			.tokens = template_suffix_tokens,
 			.flags { ContextBlockFlag::Static },
-			.sequenceId { Sequence::Shared },
+			.sequenceId { fig::Sequence::Shared },
 			.offset = cursor_pos,
 		});
-		if (!fnDecode(template_suffix_tokens, { Sequence::Shared }, cursor_pos))
+		if (!fnDecode(template_suffix_tokens, { fig::Sequence::Shared }, cursor_pos))
 			return false;
 	}
 	else // Single sequence
@@ -203,7 +204,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			// Tokenize and store personas for later
 			for (const auto& kvp : personas)
 			{
-				if (string_util::empty_or_whitespace(kvp.second))
+				if (empty_or_whitespace(kvp.second))
 					continue;
 
 				_contextState.personas[kvp.first] = llm_util::tokenize(pVocab, kvp.second, false);
@@ -219,11 +220,11 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			.content = template_prefix + system_prompt,
 			.tokens = system_prompt_tokens,
 			.flags { ContextBlockFlag::Static },
-			.sequenceId { Sequence::Default },
+			.sequenceId { fig::Sequence::Default },
 			.offset = 0,
 		});
 
-		if (!fnDecode(system_prompt_tokens, { Sequence::Default }, cursor_pos))
+		if (!fnDecode(system_prompt_tokens, { fig::Sequence::Default }, cursor_pos))
 			return false;
 
 		if (!_session.IsGroupChat())
@@ -236,15 +237,15 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 				.content = personas[Role::Bot1],
 				.tokens = persona_tokens,
 				.flags { ContextBlockFlag::Static },
-				.sequenceId { Sequence::Default },
+				.sequenceId { fig::Sequence::Default },
 				.offset = cursor_pos,
 			});
-		if (!persona_tokens.empty() && !fnDecode(persona_tokens, { Sequence::Default }, cursor_pos))
+		if (!persona_tokens.empty() && !fnDecode(persona_tokens, { fig::Sequence::Default }, cursor_pos))
 			return false;
 		}
 
 		// User persona
-		if (!string_util::empty_or_whitespace(user_persona))
+		if (!empty_or_whitespace(user_persona))
 		{
 			auto user_persona_tokens = llm_util::tokenize(pVocab, user_persona);
 			_contextState.AppendBlock(ContextBlock {
@@ -253,10 +254,10 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 				.content = user_persona,
 				.tokens = user_persona_tokens,
 				.flags { ContextBlockFlag::Static },
-				.sequenceId { Sequence::Default },
+				.sequenceId { fig::Sequence::Default },
 				.offset = cursor_pos,
 			});
-			if (!user_persona_tokens.empty() && !fnDecode(user_persona_tokens, { Sequence::Shared }, cursor_pos))
+			if (!user_persona_tokens.empty() && !fnDecode(user_persona_tokens, { fig::Sequence::Shared }, cursor_pos))
 				return false;
 		}
 
@@ -268,10 +269,10 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			.content = template_suffix,
 			.tokens = template_suffix_tokens,
 			.flags { ContextBlockFlag::Static },
-			.sequenceId { Sequence::Default },
+			.sequenceId { fig::Sequence::Default },
 			.offset = cursor_pos,
 		});
-		if (!fnDecode(template_suffix_tokens, { Sequence::Shared }, cursor_pos)) //! Shared?
+		if (!fnDecode(template_suffix_tokens, { fig::Sequence::Shared }, cursor_pos)) //! Shared?
 			return false;
 	}
 
@@ -294,7 +295,7 @@ void LLMInstance::InitSamplers()
 		return;
 
 	llama_sampler_chain_params sampler_params = llama_sampler_chain_default_params();
-	SamplerPtr pSampler = llama_sampler_chain_init(sampler_params);
+	fig::SamplerPtr pSampler = llama_sampler_chain_init(sampler_params);
 
 	// Load grammar(s)
 	fig::string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
@@ -318,18 +319,18 @@ void LLMInstance::InitSamplers()
 		else
 			namesPattern += std::format("| \"{}\"", _session.GetNameOf(Role::User));
 	}
-	string_util::replace_all(grammar, "##NAMES##", namesPattern);
+	replace_all(grammar, "##NAMES##", namesPattern);
 
 	// Variables
 	if (_options.IsSet(LLMOption::StateVariables))
 	{
-		string_util::replace_all(grammar, "##STATE##", "stat");
-		string_util::replace_all(grammar, "##STATE_VARS##", _stateVars.GetGrammarPattern());
+		replace_all(grammar, "##STATE##", "stat");
+		replace_all(grammar, "##STATE_VARS##", _stateVars.GetGrammarPattern());
 	}
 	else
 	{
-		string_util::replace_all(grammar, "##STATE##", "");
-		string_util::replace_all(grammar, "##STATE_VARS##", "[]");
+		replace_all(grammar, "##STATE##", "");
+		replace_all(grammar, "##STATE_VARS##", "[]");
 	}
 
 	auto default_grammar_sampler = CompileGrammar({ GrammarFlag::Default });
@@ -555,7 +556,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 			.content = content,
 			.tokens = state_tokens,
 			.flags = ContextBlockFlag::Volatile,
-			.sequenceId = Sequence::Shared,
+			.sequenceId = fig::Sequence::Shared,
 			.responseId = "",
 		});
 
@@ -598,7 +599,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	}
 
 	// Append to batch
-	_contextState.GetCache().BatchWrite(pre_prompt_tokens, { Sequence::Shared }, cursor_pos); //! @seq_id
+	_contextState.GetCache().BatchWrite(pre_prompt_tokens, { fig::Sequence::Shared }, cursor_pos); //! @seq_id
 
 	// Store beginning of response (after assistant prelude)
 	_contextState.prepend_pos = cursor_pos + (int32_t)pre_prompt_tokens.size();
@@ -623,7 +624,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 	std::vector<llama_token> sampled_tokens;
 	ModelState& state = _modelState;
-	VocabPtr pVocab = state.pVocab;
+	fig::VocabPtr pVocab = state.pVocab;
 
 	llama_token sampled_token;
 	fig::string partial;
@@ -674,7 +675,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		current_sequence_index = get_bot_index(responderRole);
 	}
 
-	SequenceId current_sequence = llm_util::sequence_from_index(current_sequence_index);
+	fig::SequenceId current_sequence = llm_util::sequence_from_index(current_sequence_index);
 	const int32_t n_seq_max = state.num_sequences;
 	std::vector<int32_t> current_sequence_indices = llm_util::get_sequence_indices(current_sequence, state.num_sequences);
 
@@ -911,7 +912,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 							if (_session.IsGroupChat() && is_bot(responderRole))
 							{
 								int32_t bot_index = get_bot_index(responderRole);
-								SequenceId new_sequence = llm_util::sequence_from_index(bot_index);
+								fig::SequenceId new_sequence = llm_util::sequence_from_index(bot_index);
 								if (!new_sequence.IsEmpty() && new_sequence != current_sequence)
 								{
 									int32_t prev_sequence_index = current_sequence_index;
@@ -924,7 +925,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 //									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos); //! wrong?
 									cache.BatchSetSequences(pre_response_pos, cursor_pos - pre_response_pos, current_sequence);
 									
-									DebugPrintLn(std::format(">> Sequence -> {}", current_sequence_index));
+									DebugPrintLn(std::format(">> fig::Sequence -> {}", current_sequence_index));
 								}
 							}
 							else if (args.flags.IsSet(GenerateFlag::SwapPersonas))
@@ -1025,7 +1026,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 				.content = response,
 				.tokens = sampled_tokens,
 				.flags {}, // uncached
-				.sequenceId { Sequence::Shared },
+				.sequenceId { fig::Sequence::Shared },
 				.responseId = responseId,
 			});
 		}
@@ -1048,7 +1049,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			varText.reserve(512);
 			for (auto kvp : variables)
 				varText = varText + std::format("{} = {}\n", kvp.first, kvp.second);
-			varText = string_util::rtrim(varText);
+			varText = rtrim(varText);
 
 			_resultQueue.push(MessagePiece {
 				responseId = CreateUUID(),
@@ -1231,7 +1232,7 @@ bool LLMInstance::ClearTasksQueue()
 
 bool LLMInstance::SendMessage(fig::string message)
 {
-	if (string_util::empty_or_whitespace(message))
+	if (empty_or_whitespace(message))
 		return false;
 
 	return EnqueueTask(LLMTask {
@@ -1242,7 +1243,7 @@ bool LLMInstance::SendMessage(fig::string message)
 
 bool LLMInstance::PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl)
 {
-	if (string_util::empty_or_whitespace(message))
+	if (empty_or_whitespace(message))
 		return false;
 
 	return EnqueueTask(LLMTask {
@@ -1273,7 +1274,7 @@ bool LLMInstance::Instigate(Role role, MessageType msgType, int messageCount)
 
 bool LLMInstance::__SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
 {
-	if (string_util::empty_or_whitespace(message))
+	if (empty_or_whitespace(message))
 		return false;
 
 	__PushMessage(Role::User, message, MessageType::Undefined, true, 0);
@@ -1299,7 +1300,7 @@ bool LLMInstance::__SendMessage(fig::string message, PrepareArguments& prepareAr
 
 bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl)
 {
-	if (string_util::empty_or_whitespace(message))
+	if (empty_or_whitespace(message))
 		return false;
 
 	// Process
@@ -1328,7 +1329,7 @@ bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgT
 			.content = content,
 			.tokens {},
 			.flags {},
-			.sequenceId { Sequence::Shared }, //! @seq
+			.sequenceId { fig::Sequence::Shared }, //! @seq
 			.offset = _contextState.GetBlockAppendOffset(),
 			.ttl = ttl > 0 ? ttl + 1 : 0,
 			.responseId = responseId,
@@ -1566,9 +1567,9 @@ bool LLMInstance::Reseed(uint32_t seed)
 	std::scoped_lock lock(_stateMutex);
 	ModelState& state = _modelState;
 
-	SamplerPtr pChain = state.pSampler;
+	fig::SamplerPtr pChain = state.pSampler;
 	int n = llama_sampler_chain_n(pChain);
-	SamplerPtr pDistSampler = llama_sampler_chain_get(pChain, n - 1);
+	fig::SamplerPtr pDistSampler = llama_sampler_chain_get(pChain, n - 1);
 	if (pDistSampler)
 	{
 		const char* sampler_name = llama_sampler_name(pDistSampler);
@@ -1645,7 +1646,7 @@ bool LLMInstance::SwapPersona(Role role)
 		int32_t shift = _contextState.GetCache().BatchAllocate(insertion_pos, len);
 		
 		// Write persona to batch
-		_contextState.GetCache().BatchWrite(tokens, Sequence::Default, insertion_pos);
+		_contextState.GetCache().BatchWrite(tokens, fig::Sequence::Default, insertion_pos);
 
 		// Decode
 		llama_batch batch_view = llm_util::create_batch_view(_contextState.GetBatch(), insertion_pos, len);
@@ -1676,7 +1677,7 @@ Sentences LLMInstance::GetHistory(size_t depth)
 	for (auto it = blocks.crbegin(); it != blocks.crend() && n < depth; ++it, ++n)
 	{
 		auto& block = *it;
-		fig::string msg = string_util::trim(block.content);
+		fig::string msg = trim(block.content);
 
 		size_t pos_begin = msg.find('>', 0);
 		while (pos_begin != fig::npos)
@@ -1697,10 +1698,10 @@ Sentences LLMInstance::GetHistory(size_t depth)
 			if (Constants::Embedding::SplitSentences)
 			{
 				// Split into individual sentences for RAG
-				string_util::replace_all(content, "?", ".");
-				string_util::replace_all(content, "!", ".");
-				auto split = string_util::split(content, '.', true);
-				for (auto& s : split)
+				replace_all(content, "?", ".");
+				replace_all(content, "!", ".");
+				auto split_sentences = split(content, '.', true);
+				for (auto& s : split_sentences)
 					sentences.insert(sentences.begin(), { block.role, s });
 			}
 			else
@@ -1737,7 +1738,7 @@ bool LLMInstance::GenerateEmbedding(fig::string text)
 }
 #endif
 
-SamplerPtr LLMInstance::CompileGrammar(GrammarFlags flags)
+fig::SamplerPtr LLMInstance::CompileGrammar(GrammarFlags flags)
 {
 	if (flags.IsEmpty())
 		return nullptr;
@@ -1747,7 +1748,7 @@ SamplerPtr LLMInstance::CompileGrammar(GrammarFlags flags)
 		return itFind->second;
 
 	DebugPrintLn(std::format("Compiling grammar variant 0x{:X}", (int32_t)flags));
-	SamplerPtr pGrammar = Grammar::compile_grammar(
+	fig::SamplerPtr pGrammar = Grammar::compile_grammar(
 		flags,
 		_modelState.pVocab, 
 		_session.GetNameGrammar(_options.IsSet(LLMOption::UseCharacterIds), _options.IsSet(LLMOption::AllowUserResponse)),

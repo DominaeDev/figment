@@ -25,8 +25,9 @@
 #include <format>
 #include <ranges>
 
-using namespace common_util;
-using namespace file_util;
+using namespace fig::common_util;
+using namespace fig::file_util;
+using namespace fig::string_util;
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -242,7 +243,7 @@ void MainFrame::AutoChat()
 		{
 			fig::string text = script.value();
 			text = pLLMInstance->GetSession().ApplyNames(text);
-			_autoScript = string_util::split(text, '\n');
+			_autoScript = split(text, '\n');
 		}
 		_autoScriptIndex = 0;
 	}

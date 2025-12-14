@@ -3,6 +3,8 @@
 #include "Types.h"
 #include <algorithm>
 
+using namespace fig::string_util;
+
 bool color_util::is_defined(Color color)
 {
 	return color.r != 0 || color.g != 0 || color.b != 0 || color.a != 0;
@@ -101,7 +103,7 @@ Color color_util::to_color(Colorf color)
 
 Color color_util::color_from_string(fig::string hex)
 {
-	hex = string_util::trim(hex);
+	hex = trim(hex);
 	if (hex.empty())
 		return (Color)0;
 	if (hex[0] == '#')

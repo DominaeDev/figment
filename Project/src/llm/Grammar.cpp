@@ -5,6 +5,9 @@
 #include <set>
 #include <cassert>
 
+using namespace fig::string_util;
+using namespace fig::file_util;
+
 static bool _evaluate(fig::string& text, size_t pos_begin, const std::set<fig::string>& flags)
 {
 	size_t pos_next = text.find("{{", pos_begin + 2);
@@ -23,7 +26,7 @@ static bool _evaluate(fig::string& text, size_t pos_begin, const std::set<fig::s
 		return false;
 
 	fig::string condition = text.substr(pos_begin + 2, pos_q - pos_begin - 2);
-	auto expected_flags = string_util::split(condition, '|', true);
+	auto expected_flags = split(condition, '|', true);
 	bool result = true;
 	for (auto& flag : expected_flags)
 	{
@@ -50,14 +53,14 @@ static bool _evaluate(fig::string& text, size_t pos_begin, const std::set<fig::s
 	return true;
 }
 
-SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, fig::string names, fig::string stateVars)
+fig::SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, fig::VocabPtr pVocab, fig::string names, fig::string stateVars)
 {
-	fig::string grammar = file_util::ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
+	fig::string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 	if (grammar.size() == 0)
 		return nullptr;
 
-	string_util::replace_all(grammar, "{{_NAMES_}}", names);
-	string_util::replace_all(grammar, "{{_STATE_VARS_}}", stateVars);
+	replace_all(grammar, "{{_NAMES_}}", names);
+	replace_all(grammar, "{{_STATE_VARS_}}", stateVars);
 
 	std::set<fig::string> flags;
 	if (grammarFlags.IsSet(GrammarFlag::Default))

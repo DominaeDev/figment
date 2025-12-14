@@ -10,6 +10,8 @@
 #include <format>
 #include <set>
 
+using namespace fig::string_util;
+
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f
 #define GRADIENT_HEIGHT 40.0f
@@ -210,7 +212,7 @@ void ChatScroll::Poll()
 
 			if (pEntry->pChatMessage != nullptr)
 				pEntry->pChatMessage->AppendMessage(piece.content, piece.isComplete);
-			else if (!string_util::empty_or_whitespace(piece.content))
+			else if (!empty_or_whitespace(piece.content))
 			{
 				(*itMsg).second->role = piece.role;
 				(*itMsg).second->msgType = piece.msgType;
@@ -219,14 +221,14 @@ void ChatScroll::Poll()
 			else
 				continue; // Skip until we receive some text
 		}
-		else if (string_util::empty_or_whitespace(piece.content) && piece.isComplete)
+		else if (empty_or_whitespace(piece.content) && piece.isComplete)
 		{
 			// Ignore complete empty messages
 			continue;
 		}
 		else
 		{
-			fig::string text = string_util::trim(piece.content);
+			fig::string text = trim(piece.content);
 			if (text.empty() || (text.length() == 1 && (text[0] == '"' || text[0] == '*' || text[0] == '['))) // Empty or scaffolding
 			{
 				_messages.push_back(MessageEntry {

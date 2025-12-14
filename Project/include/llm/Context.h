@@ -25,8 +25,8 @@ public:
 
 	// Model info
 	const ModelState& GetModel() const noexcept { return *_pModel; }
-	ContextPtr GetCtxPtr() const noexcept { return _pCtx; }
-	VocabPtr GetVocabPtr() const noexcept { return _pVocab; }
+	fig::ContextPtr GetCtxPtr() const noexcept { return _pCtx; }
+	fig::VocabPtr GetVocabPtr() const noexcept { return _pVocab; }
 	int32_t GetNumSequences() const noexcept { return _num_sequences; }
 	int32_t GetUsedKVCacheCells() const;
 
@@ -47,7 +47,7 @@ public:
 	// Blocks
 	int32_t AllocateKVCache(int32_t alloc_min);
 	bool RebuildKVCache();
-	std::optional<int32_t> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id);
+	std::optional<int32_t> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, fig::SequenceId seq_id);
 	int32_t DecodeUncached(int32_t cursor_pos);
 	
 	void AppendBlock(const ContextBlock& block);
@@ -67,8 +67,8 @@ public:
 
 private:
 	const ModelState* _pModel = nullptr;
-	ContextPtr _pCtx = nullptr;
-	VocabPtr _pVocab = nullptr;
+	fig::ContextPtr _pCtx = nullptr;
+	fig::VocabPtr _pVocab = nullptr;
 	int32_t _num_sequences {};
 	std::vector<ContextBlock> _blocks {};
 	std::shared_ptr<ContextCache> _cache {};

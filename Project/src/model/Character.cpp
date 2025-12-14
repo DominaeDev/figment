@@ -4,6 +4,8 @@
 
 #include <tinyxml2.h>
 
+using namespace fig::string_util;
+
 using namespace tinyxml2;
 
 bool Character::LoadFromXml(fig::string filename)
@@ -17,16 +19,16 @@ bool Character::LoadFromXml(fig::string filename)
 	// Identifier
 	XMLElement* pID = root.FirstChildElement("ID");
 	if (pID)
-		id = string_util::trim(pID->GetText());
+		id = trim(pID->GetText());
 
 	// Name(s)
 	XMLElement* pFirstName = root.FirstChildElement("FirstName");
 	if (pFirstName)
-		shortName = string_util::trim(pFirstName->GetText());
+		shortName = trim(pFirstName->GetText());
 
 	XMLElement* pFullName = root.FirstChildElement("FullName");
 	if (pFullName)
-		fullName = string_util::trim(pFullName->GetText());
+		fullName = trim(pFullName->GetText());
 
 	if (id.empty())
 		id = shortName;
@@ -37,23 +39,23 @@ bool Character::LoadFromXml(fig::string filename)
 	// Portrait
 	XMLElement* pImage = root.FirstChildElement("Image");
 	if (pImage)
-		portraitFilename = string_util::trim(pImage->GetText());
+		portraitFilename = trim(pImage->GetText());
 
 	// Read description
 	XMLElement* pBrief = root.FirstChildElement("Brief");
 	if (pBrief)
-		brief = string_util::trim(pBrief->GetText());
+		brief = trim(pBrief->GetText());
 
 	// Read description
 	XMLElement* pDesc = root.FirstChildElement("Description");
 	if (pDesc)
-		description = string_util::trim(pDesc->GetText());
+		description = trim(pDesc->GetText());
 
 	// Read gender
 	XMLElement* pGender = root.FirstChildElement("Gender");
 	if (pGender)
 	{
-		fig::string gender = string_util::trim(pGender->GetText());
+		fig::string gender = trim(pGender->GetText());
 		if (!gender.empty())
 			properties.push_back(CharacterProperty { "gender", gender, "Gender" });
 	}

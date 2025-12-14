@@ -9,8 +9,9 @@
 #include <format>
 #include <cassert>
 
-using namespace string_util;
-using namespace file_util;
+using namespace fig::string_util;
+using namespace fig::file_util;
+using namespace fig::common_util;
 
 LLMEmbedding::~LLMEmbedding()
 {
@@ -86,7 +87,7 @@ bool LLMEmbedding::IsReady() const
 	return _pModel != nullptr && _pCtx != nullptr;
 }
 
-static std::vector<llama_token> TokenizeSentences(VocabPtr pVocab, llama_context* pCtx, Sentences sentences)
+static std::vector<llama_token> TokenizeSentences(fig::VocabPtr pVocab, llama_context* pCtx, Sentences sentences)
 {
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 
@@ -259,6 +260,6 @@ void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sen
 	});
 
 	for (int i = 0; i < results.size() && i < 5; ++i)
-		common_util::DebugPrintLn(std::format("Similarity {0:.3f} = \"{1}\"", results[i].first, results[i].second));
+		DebugPrintLn(std::format("Similarity {0:.3f} = \"{1}\"", results[i].first, results[i].second));
 }
 #endif

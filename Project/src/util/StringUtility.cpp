@@ -4,259 +4,262 @@
 #include <cwctype>
 #include <ranges>
 
-void string_util::ltrim_str(fig::string& s)
+namespace fig::string_util
 {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-		return !std::isspace(ch);
-	}));
-}
-
-fig::string string_util::ltrim(const fig::string& in)
-{
-	fig::string s(in);
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-		return !std::isspace(ch);
-	}));
-	return s;
-}
-
-void string_util::rtrim_str(fig::string& s)
-{
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-		return !std::isspace(ch);
-	}).base(), s.end());
-}
-
-fig::string string_util::rtrim(const fig::string& in)
-{
-	fig::string s(in);
-	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-		return !std::isspace(ch);
-	}).base(), s.end());
-	return s;
-}
-
-bool string_util::empty_or_whitespace(const fig::string& s)
-{
-	return s.size() == 0 || s.find_first_not_of(" \t\r\n", 0, 4) == fig::npos;
-}
-
-fig::string string_util::lcase(const fig::string& str)
-{
-	std::wstring s = from_utf8(str);
-	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towlower(c); });
-	return to_utf8(s);
-}
-
-fig::string string_util::ucase(const fig::string& str)
-{
-	std::wstring s = from_utf8(str);
-	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towupper(c); });
-	return to_utf8(s);
-}
-
-std::wstring string_util::lcase(const std::wstring& str)
-{
-	std::wstring s = str;
-	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towlower(c); });
-	return s;
-}
-
-std::wstring string_util::ucase(const std::wstring& str)
-{
-	std::wstring s = str;
-	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towupper(c); });
-	return s;
-}
-
-int string_util::compare(const fig::string& a, const fig::string& b, bool ignore_case)
-{
-	std::wstring wa = from_utf8(a);
-	std::wstring wb = from_utf8(b);
-	
-	if (ignore_case)
+	void ltrim_str(string& s)
 	{
-		wa = lcase(wa);
-		wb = lcase(wb);
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+			return !std::isspace(ch);
+		}));
 	}
-	if (wa < wb)
-		return -1;
-	if (wa > wb)
-		return 1;
-	return 0;
-}
 
-bool string_util::equals(const fig::string& a, const fig::string& b, bool ignore_case)
-{
-	if (!ignore_case)
-		return a == b;
-	return compare(a, b, true) == 0;
-}
-
-bool string_util::begins_with(const fig::string& str, const fig::string& prefix, bool ignore_case)
-{
-	std::wstring wstr = from_utf8(str);
-	std::wstring wprefix = from_utf8(prefix);
-
-	if (wstr.size() < wprefix.size())
-		return false;
-	const std::wstring begin_piece = wstr.substr(0, wprefix.length());
-
-	if (ignore_case)
-		return std::equal(begin_piece.begin(), begin_piece.end(), wprefix.begin(), wprefix.end(), [](wchar_t a, wchar_t b) {return std::towlower(a) == std::towlower(b); });
-	else
-		return begin_piece == wprefix;
-}
-
-bool string_util::ends_with(const fig::string& str, const fig::string& suffix, bool ignore_case)
-{
-	std::wstring wstr = from_utf8(str);
-	std::wstring wsuffix = from_utf8(suffix);
-
-	if (wstr.size() < wsuffix.size())
-		return false;
-
-	const std::wstring end_piece = wstr.substr(wstr.length() - wsuffix.length());
-
-	if (ignore_case)
-		return std::equal(end_piece.begin(), end_piece.end(), suffix.begin(), suffix.end(), [](wchar_t a, wchar_t b) {return std::towlower(a) == std::towlower(b); });
-	else
-		return end_piece == wsuffix;
-}
-
-fig::string& string_util::replace(fig::string& str, const fig::string& find, const fig::string& replace)
-{
-	auto&& pos = str.find(find);
-	if (pos != fig::npos)
-		str.replace(pos, find.length(), replace);
-	return str;
-}
-
-fig::string& string_util::replace_all(fig::string& str, const fig::string& find, const fig::string& replace)
-{
-	auto&& pos = str.find(find);
-	while (pos != fig::npos)
+	string ltrim(const string& in)
 	{
-		str.replace(pos, find.length(), replace);
-		pos = str.find(find, pos + replace.length());
+		string s(in);
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+			return !std::isspace(ch);
+		}));
+		return s;
 	}
-	return str;
-}
 
-std::vector<fig::string> string_util::split(fig::string s, char delimiter, bool removeEmpty)
-{
-	std::vector<fig::string> sections;
-	size_t pos = 0;
-	while ((pos = s.find(delimiter)) != fig::npos)
+	void rtrim_str(string& s)
 	{
-		fig::string token = s.substr(0, pos);
-		if (!removeEmpty || !empty_or_whitespace(token))
-			sections.push_back(token);
-		s.erase(0, pos + 1);
+		s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+			return !std::isspace(ch);
+		}).base(), s.end());
 	}
-	if (!removeEmpty || !empty_or_whitespace(s))
-		sections.push_back(s); // Remainder
 
-	std::transform(sections.begin(), sections.end(), sections.begin(), [](fig::string str) {
-		return string_util::trim(str);
-	});
-
-	return sections;
-}
-
-std::vector<fig::string> string_util::split(const fig::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty)
-{
-	std::vector<fig::string> result;
-	fig::string token;
-
-	for (char ch : input)
+	string rtrim(const string& in)
 	{
-		if (delimiters.find(ch) != delimiters.end())
+		string s(in);
+		s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+			return !std::isspace(ch);
+		}).base(), s.end());
+		return s;
+	}
+
+	bool empty_or_whitespace(const string& s)
+	{
+		return s.size() == 0 || s.find_first_not_of(" \t\r\n", 0, 4) == fig::npos;
+	}
+
+	string lcase(const string& str)
+	{
+		std::wstring s = from_utf8(str);
+		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towlower(c); });
+		return to_utf8(s);
+	}
+
+	string ucase(const string& str)
+	{
+		std::wstring s = from_utf8(str);
+		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towupper(c); });
+		return to_utf8(s);
+	}
+
+	std::wstring lcase(const std::wstring& str)
+	{
+		std::wstring s = str;
+		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towlower(c); });
+		return s;
+	}
+
+	std::wstring ucase(const std::wstring& str)
+	{
+		std::wstring s = str;
+		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towupper(c); });
+		return s;
+	}
+
+	int compare(const string& a, const string& b, bool ignore_case)
+	{
+		std::wstring wa = from_utf8(a);
+		std::wstring wb = from_utf8(b);
+
+		if (ignore_case)
 		{
-			if (!token.empty())
+			wa = lcase(wa);
+			wb = lcase(wb);
+		}
+		if (wa < wb)
+			return -1;
+		if (wa > wb)
+			return 1;
+		return 0;
+	}
+
+	bool equals(const string& a, const string& b, bool ignore_case)
+	{
+		if (!ignore_case)
+			return a == b;
+		return compare(a, b, true) == 0;
+	}
+
+	bool begins_with(const string& str, const string& prefix, bool ignore_case)
+	{
+		std::wstring wstr = from_utf8(str);
+		std::wstring wprefix = from_utf8(prefix);
+
+		if (wstr.size() < wprefix.size())
+			return false;
+		const std::wstring begin_piece = wstr.substr(0, wprefix.length());
+
+		if (ignore_case)
+			return std::equal(begin_piece.begin(), begin_piece.end(), wprefix.begin(), wprefix.end(), [](wchar_t a, wchar_t b) {return std::towlower(a) == std::towlower(b); });
+		else
+			return begin_piece == wprefix;
+	}
+
+	bool ends_with(const string& str, const string& suffix, bool ignore_case)
+	{
+		std::wstring wstr = from_utf8(str);
+		std::wstring wsuffix = from_utf8(suffix);
+
+		if (wstr.size() < wsuffix.size())
+			return false;
+
+		const std::wstring end_piece = wstr.substr(wstr.length() - wsuffix.length());
+
+		if (ignore_case)
+			return std::equal(end_piece.begin(), end_piece.end(), suffix.begin(), suffix.end(), [](wchar_t a, wchar_t b) {return std::towlower(a) == std::towlower(b); });
+		else
+			return end_piece == wsuffix;
+	}
+
+	string& replace(string& str, const string& find, const string& replace)
+	{
+		auto&& pos = str.find(find);
+		if (pos != fig::npos)
+			str.replace(pos, find.length(), replace);
+		return str;
+	}
+
+	string& replace_all(string& str, const string& find, const string& replace)
+	{
+		auto&& pos = str.find(find);
+		while (pos != fig::npos)
+		{
+			str.replace(pos, find.length(), replace);
+			pos = str.find(find, pos + replace.length());
+		}
+		return str;
+	}
+
+	std::vector<string> split(string s, char delimiter, bool removeEmpty)
+	{
+		std::vector<string> sections;
+		size_t pos = 0;
+		while ((pos = s.find(delimiter)) != fig::npos)
+		{
+			string token = s.substr(0, pos);
+			if (!removeEmpty || !empty_or_whitespace(token))
+				sections.push_back(token);
+			s.erase(0, pos + 1);
+		}
+		if (!removeEmpty || !empty_or_whitespace(s))
+			sections.push_back(s); // Remainder
+
+		std::transform(sections.begin(), sections.end(), sections.begin(), [](string str) {
+			return trim(str);
+		});
+
+		return sections;
+	}
+
+	std::vector<string> split(const string& input, const std::unordered_set<char>& delimiters, bool removeEmpty)
+	{
+		std::vector<string> result;
+		string token;
+
+		for (char ch : input)
+		{
+			if (delimiters.find(ch) != delimiters.end())
 			{
-				result.push_back(token);
-				token.clear();
+				if (!token.empty())
+				{
+					result.push_back(token);
+					token.clear();
+				}
+			}
+			else
+				token += ch;
+		}
+
+		if (!removeEmpty || !token.empty())
+			result.push_back(token);
+
+		return result;
+	}
+
+	string& normalize_newlines(string& text)
+	{
+		size_t cursor_write = 0;
+
+		for (size_t cursor_read = 0; cursor_read < text.size(); ++cursor_read)
+		{
+			if (text[cursor_read] == '\r')
+			{
+				// Skip CR and optional following LF
+				if (cursor_read + 1 < text.size() && text[cursor_read + 1] == '\n')
+					++cursor_read;
+				text[cursor_write++] = '\n';
+			}
+			else
+				text[cursor_write++] = text[cursor_read];
+		}
+
+		text.resize(cursor_write);
+		return text;
+	}
+
+	string normalize_newlines(string&& text)
+	{
+		return normalize_newlines(text); // rvo
+	}
+
+	std::wstring from_utf8(const string& str)
+	{
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		return converter.from_bytes(str);
+	}
+
+	string to_utf8(const std::wstring& str)
+	{
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		return converter.to_bytes(str);
+	}
+
+	size_t validate_utf8(const string& text) noexcept
+	{
+		size_t len = text.size();
+		if (len == 0) return 0;
+
+		// Check the last few bytes to see if a multi-byte character is cut off
+		for (size_t i = 1; i <= 4 && i <= len; ++i)
+		{
+			unsigned char c = text[len - i];
+			// Check for start of a multi-byte sequence from the end
+			if ((c & 0xE0) == 0xC0)
+			{
+				// 2-byte character start: 110xxxxx
+				// Needs at least 2 bytes
+				if (i < 2) return len - i;
+			}
+			else if ((c & 0xF0) == 0xE0)
+			{
+				// 3-byte character start: 1110xxxx
+				// Needs at least 3 bytes
+				if (i < 3) return len - i;
+			}
+			else if ((c & 0xF8) == 0xF0)
+			{
+				// 4-byte character start: 11110xxx
+				// Needs at least 4 bytes
+				if (i < 4) return len - i;
 			}
 		}
-		else
-			token += ch;
+
+		// If no cut-off multi-byte character is found, return full length
+		return len;
 	}
-
-	if (!removeEmpty || !token.empty())
-		result.push_back(token);
-
-	return result;
-}
-
-fig::string& string_util::normalize_newlines(fig::string& text)
-{
-	size_t cursor_write = 0;
-
-	for (size_t cursor_read = 0; cursor_read < text.size(); ++cursor_read)
-	{
-		if (text[cursor_read] == '\r')
-		{
-			// Skip CR and optional following LF
-			if (cursor_read + 1 < text.size() && text[cursor_read + 1] == '\n')
-				++cursor_read;
-			text[cursor_write++] = '\n';
-		}
-		else
-			text[cursor_write++] = text[cursor_read];
-	}
-
-	text.resize(cursor_write);
-	return text;
-}
-
-fig::string string_util::normalize_newlines(fig::string&& text)
-{
-	return normalize_newlines(text); // rvo
-}
-
-std::wstring string_util::from_utf8(const fig::string& str)
-{
-	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-	return converter.from_bytes(str);
-}
-
-fig::string string_util::to_utf8(const std::wstring& str)
-{
-	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-	return converter.to_bytes(str);
-}
-
-size_t string_util::validate_utf8(const fig::string& text) noexcept
-{
-	size_t len = text.size();
-	if (len == 0) return 0;
-
-	// Check the last few bytes to see if a multi-byte character is cut off
-	for (size_t i = 1; i <= 4 && i <= len; ++i)
-	{
-		unsigned char c = text[len - i];
-		// Check for start of a multi-byte sequence from the end
-		if ((c & 0xE0) == 0xC0)
-		{
-			// 2-byte character start: 110xxxxx
-			// Needs at least 2 bytes
-			if (i < 2) return len - i;
-		}
-		else if ((c & 0xF0) == 0xE0)
-		{
-			// 3-byte character start: 1110xxxx
-			// Needs at least 3 bytes
-			if (i < 3) return len - i;
-		}
-		else if ((c & 0xF8) == 0xF0)
-		{
-			// 4-byte character start: 11110xxx
-			// Needs at least 4 bytes
-			if (i < 4) return len - i;
-		}
-	}
-
-	// If no cut-off multi-byte character is found, return full length
-	return len;
 }

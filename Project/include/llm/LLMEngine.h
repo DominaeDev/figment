@@ -30,8 +30,8 @@ public:
 	bool IsInitializing() const { return _readyState.load() == ReadyState::Initializing; }
 
 	std::shared_ptr<LLMStatusChannel> GetStatusChannel() noexcept { return _pStatus; }
-	LLMInstancePtr CreateInstance(int32_t ctx_size, bool embeddings);
-	bool DestroyInstance(LLMInstancePtr instance);
+	fig::LLMInstancePtr CreateInstance(int32_t ctx_size, bool embeddings);
+	bool DestroyInstance(fig::LLMInstancePtr instance);
 
 private:
 	using __LoadModelCallback = std::function<void(std::shared_ptr<ModelState>)>;
@@ -48,8 +48,8 @@ private:
 	std::shared_ptr<ModelState> _modelState {};
 	std::shared_ptr<LLMStatusChannel> _pStatus {};
 	
-	std::vector<LLMInstancePtr> _instances {};
-	LLMInstancePtr _mainInstance {};
+	std::vector<fig::LLMInstancePtr> _instances {};
+	fig::LLMInstancePtr _mainInstance {};
 
 	LoadModelProgressCallback _pLoadModelProgressCallback = nullptr;
 public:

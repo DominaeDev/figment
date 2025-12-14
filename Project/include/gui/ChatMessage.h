@@ -37,10 +37,10 @@ private:
 	bool _bActive = true;
 	MessageType _messageType = MessageType::Undefined;
 
-	Color _bgColor;
-	Color _borderColor;
-	Color _nameColor;
-	Color _textColor;
+	Color _bgColor {};
+	Color _borderColor {};
+	Color _nameColor {};
+	Color _textColor {};
 
 	enum Style
 	{

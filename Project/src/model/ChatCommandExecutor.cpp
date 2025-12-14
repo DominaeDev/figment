@@ -12,12 +12,12 @@
 #include <cwctype>
 #include <ranges>
 
-using namespace common_util;
-using namespace string_util;
+using namespace fig::common_util;
+using namespace fig::string_util;
 
 struct ChatCommandFunctionContext
 {
-	LLMInstancePtr pLLM;
+	fig::LLMInstancePtr pLLM;
 	ChatScroll* pChatScroll;
 	TextBox* pTextBox;
 	ParsedChatCommandQueue& commandQueue;
@@ -48,7 +48,7 @@ static std::vector<fig::string> FilterMessageIDs(std::vector<RemovedMessage> msg
 		| std::ranges::to<std::vector<fig::string>>();
 };
 
-static Role RoleFromName(fig::string text, LLMInstancePtr pLLM) {
+static Role RoleFromName(fig::string text, fig::LLMInstancePtr pLLM) {
 	if (empty_or_whitespace(text))
 		return Role::Undefined;
 	if (std::iswdigit(from_utf8(text)[0]))
@@ -217,8 +217,8 @@ static bool cmdNewStateVariable(ParsedChatCommand cmd, Ctx ctx)
 		size_t pos_eq = cmd.text.find('=');
 		if (pos_eq != fig::npos)
 		{
-			fig::string name = string_util::trim(cmd.text.substr(0, pos_eq));
-			fig::string value = string_util::trim(cmd.text.substr(pos_eq + 1));
+			fig::string name = trim(cmd.text.substr(0, pos_eq));
+			fig::string value = trim(cmd.text.substr(pos_eq + 1));
 			if (ctx.pLLM->SetStateVariable(name, value, true))
 			{
 				ctx.pChatScroll->AddSystemMessage(std::format("{} = {}", name, value));
@@ -236,8 +236,8 @@ static bool cmdSetStateVariable(ParsedChatCommand cmd, Ctx ctx)
 		size_t pos_eq = cmd.text.find('=');
 		if (pos_eq != fig::npos)
 		{
-			fig::string name = string_util::trim(cmd.text.substr(0, pos_eq));
-			fig::string value = string_util::trim(cmd.text.substr(pos_eq + 1));
+			fig::string name = trim(cmd.text.substr(0, pos_eq));
+			fig::string value = trim(cmd.text.substr(pos_eq + 1));
 			if (ctx.pLLM->SetStateVariable(name, value, false))
 			{
 				ctx.pChatScroll->AddSystemMessage(std::format("{} = {}", name, value));

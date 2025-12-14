@@ -3,6 +3,7 @@
 #include "util/StringUtility.h"
 #include <SDL3_image/SDL_image.h>
 
+using namespace fig::string_util;
 
 std::map<fig::string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByCharacter;
 
@@ -51,7 +52,7 @@ bool CharacterImageStore::LoadTexture(Renderer* pRenderer, fig::string character
 		if (!pTexture)
 			return false;
 
-		_imagesByCharacter[string_util::lcase(characterId)].push_back(CharacterImage {
+		_imagesByCharacter[lcase(characterId)].push_back(CharacterImage {
 			/*imageType*/ imageType,
 			/*texture*/ pTexture,
 			});
@@ -68,7 +69,7 @@ Texture* CharacterImageStore::GetTexture(fig::string characterId, ImageType imag
 	if (characterId.empty())
 		return nullptr;
 	
-	auto itCharacter = _imagesByCharacter.find(string_util::lcase(characterId));
+	auto itCharacter = _imagesByCharacter.find(lcase(characterId));
 	if (itCharacter != _imagesByCharacter.end())
 	{
 		auto& imageList = (*itCharacter).second;

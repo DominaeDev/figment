@@ -5,6 +5,8 @@
 #include <sstream>
 #include <map>
 
+using namespace fig::string_util;
+
 PromptTemplate llm_tmpl::current_template = PromptTemplate::Default;
 fig::string llm_tmpl::_template {};
 
@@ -108,7 +110,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
             } else if (role == "user") {
                 ss << content << leading_space << "[/INST]";
             } else {
-                ss << trailing_space << (trim_assistant_message ? string_util::trim(content) : content) << "</s>";
+                ss << trailing_space << (trim_assistant_message ? trim(content) : content) << "</s>";
                 is_inside_turn = false;
             }
         }
@@ -129,7 +131,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
         bool is_inside_turn = true; // skip BOS at the beginning
         ss << "[INST] ";
         for (auto message : chat) {
-            fig::string content = strip_message ? string_util::trim(message->content) : message->content;
+            fig::string content = strip_message ? trim(message->content) : message->content;
             fig::string role(message->role);
             if (!is_inside_turn) {
                 is_inside_turn = true;
@@ -175,7 +177,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
                 // there is no system message for gemma, but we will merge it with user prompt, so nothing is broken
 				if (chat.size() > 1)
 				{
-					system_prompt = string_util::trim(message->content);
+					system_prompt = trim(message->content);
 					continue;
 				}
 				else
@@ -188,7 +190,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
                 ss << system_prompt << "\n\n";
                 system_prompt = "";
             }
-            ss << string_util::trim(message->content) << "<end_of_turn>\n";
+            ss << trim(message->content) << "<end_of_turn>\n";
         }
         if (add_ass) {
             ss << "<start_of_turn>model\n";
@@ -213,11 +215,11 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
         for (auto message : chat) {
             fig::string role(message->role);
             if (role == "system") {
-                ss << "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>" << string_util::trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+                ss << "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
             } else if (role == "user") {
-                ss << "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>" << string_util::trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+                ss << "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
             } else if (role == "assistant") {
-                ss << "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>" << string_util::trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+                ss << "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
             }
         }
         if (add_ass) {
@@ -227,7 +229,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
         // Llama 3
         for (auto message : chat) {
             fig::string role(message->role);
-            ss << "<|start_header_id|>" << role << "<|end_header_id|>\n\n" << string_util::trim(message->content) << "<|eot_id|>";
+            ss << "<|start_header_id|>" << role << "<|end_header_id|>\n\n" << trim(message->content) << "<|eot_id|>";
         }
         if (add_ass) {
             ss << "<|start_header_id|>assistant<|end_header_id|>\n\n";
@@ -266,7 +268,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
         // Llama 4
         for (auto message : chat) {
             fig::string role(message->role);
-            ss << "<|header_start|>" << role << "<|header_end|>\n\n" << string_util::trim(message->content) << "<|eot|>";
+            ss << "<|header_start|>" << role << "<|header_end|>\n\n" << trim(message->content) << "<|eot|>";
         }
         if (add_ass) {
             ss << "<|header_start|>assistant<|header_end|>\n\n";
@@ -297,9 +299,9 @@ fig::string llm_tmpl::apply_chat_template_prefix(Role role, fig::string content,
 {
 	auto [pre, post] = get_chat_template_prefix_suffix(role, name);
 	
-	if (string_util::ends_with(content, post))
+	if (ends_with(content, post))
 		content = content.substr(0, content.length() - post.length());
-	if (!string_util::begins_with(content, pre))
+	if (!begins_with(content, pre))
 		content = pre + content;
 	return content;
 }

@@ -160,7 +160,7 @@ private:
 	bool RebuildKVCache();
 
 	Sentences GetHistory(size_t depth);
-	SamplerPtr CompileGrammar(GrammarFlags grammarFlags);
+	fig::SamplerPtr CompileGrammar(GrammarFlags grammarFlags);
 	void InitSamplers();
 
 	// Tasks

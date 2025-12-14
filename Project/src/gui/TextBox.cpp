@@ -5,7 +5,9 @@
 #include "util/StringUtility.h"
 #include <algorithm>
 
-#define CURSOR_BLINK_INTERVAL_MS    500
+using namespace fig::string_util;
+
+constexpr uint64_t CursorBlinkIntervalMS { 500ull };
 
 static const char* _testString = "Hee hee, ho ho ho! \n\xE3\x81\xB2\xE3\x82\x89\xE3\x81\x8C\xE3\x81\xAA\x0A\xE3\x82\xAB\xE3\x82\xBF\xE3\x82\xAB\xE3\x83\x8A";
 
@@ -37,8 +39,8 @@ TextBox::~TextBox()
 
 void TextBox::OnUpdate(float fDeltaTime)
 {
-	Uint64 now = SDL_GetTicks();
-	if ((now - _last_cursor_change) >= CURSOR_BLINK_INTERVAL_MS)
+	uint64_t now = SDL_GetTicks();
+	if ((now - _last_cursor_change) >= CursorBlinkIntervalMS)
 	{
 		_cursor_visible = !_cursor_visible;
 		_last_cursor_change = now;
@@ -1015,7 +1017,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			{
 				if (_pOnEnter && _pText->text) // Invoke
 				{
-					fig::string text = string_util::trim(fig::string(_pText->text));
+					fig::string text = trim(fig::string(_pText->text));
 					Clear();
 					_pOnEnter(text);
 				}

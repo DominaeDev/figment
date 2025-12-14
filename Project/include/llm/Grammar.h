@@ -26,5 +26,5 @@ using GrammarFlags = EnumFlags<GrammarFlag>;
 
 namespace Grammar
 {
-	SamplerPtr compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, fig::string names, fig::string stateVars);
+	fig::SamplerPtr compile_grammar(GrammarFlags grammarFlags, fig::VocabPtr pVocab, fig::string names, fig::string stateVars);
 }

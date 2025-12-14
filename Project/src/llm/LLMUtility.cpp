@@ -8,6 +8,9 @@
 #include <cassert>
 #include <set>
 
+using namespace fig::string_util;
+using namespace fig::file_util;
+
 static std::vector<fig::string> const opening_tags {
 	std::format("<{0}=\"", Constants::Chat::DialogueTag),
 	std::format("<{0}=\"", Constants::Chat::ActionTag),
@@ -24,7 +27,7 @@ static std::vector<fig::string> const closing_tags {
 	std::format("</{0}>", Constants::Chat::DirectionTag),
 };
 
-fig::string llm_util::stringFromToken(VocabPtr pVocab, llama_token token)
+fig::string llm_util::stringFromToken(fig::VocabPtr pVocab, fig::Token token)
 {
 	// convert the token to a string, print it and add it to the response
 	char buf[256];
@@ -45,7 +48,7 @@ size_t llm_util::string_find_partial_stop(const fig::string& str, const fig::str
 			if (stop[char_index] == text_last_char)
 			{
 				const auto current_partial = stop.substr(0, char_index + 1);
-				if (string_util::ends_with(str, current_partial))
+				if (ends_with(str, current_partial))
 				{
 					return str.size() - char_index - 1;
 				}
@@ -105,14 +108,14 @@ void llm_util::get_tag_and_name(const fig::string& text, fig::string& tag, fig::
 	size_t pos_equals = text.find('=', 1);
 	if (pos_equals == fig::npos)
 	{
-		tag = string_util::trim(text.substr(1, text.length() - 2));
+		tag = trim(text.substr(1, text.length() - 2));
 		name = "";
 		return;
 	}
 
-	tag = string_util::trim(text.substr(1, pos_equals - 1));
-	name = string_util::trim(text.substr(pos_equals + 1, text.length() - pos_equals - 2));
-	string_util::replace_all(name, "\"", "");
+	tag = trim(text.substr(1, pos_equals - 1));
+	name = trim(text.substr(pos_equals + 1, text.length() - pos_equals - 2));
+	replace_all(name, "\"", "");
 }
 
 std::pair<MessageType, bool> llm_util::detect_message_type(fig::string text) noexcept
@@ -197,7 +200,7 @@ fig::string& llm_util::complete_message(fig::string& text)
 
 void llm_util::process(fig::string& partial, fig::string str_token, bool* bWait, bool* bHalt, fig::string& stop_word)
 {
-	if (string_util::validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
+	if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
 	{
 		*bWait = true;
 		*bHalt = false;
@@ -275,9 +278,9 @@ void llm_util::process(fig::string& partial, fig::string str_token, bool* bWait,
 	*bWait = false;
 }
 
-std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, fig::string prompt, bool add_special)
+std::vector<fig::Token> llm_util::tokenize(fig::VocabPtr pVocab, fig::string prompt, bool add_special)
 {
-	std::vector<llama_token> prompt_tokens(1024);
+	std::vector<fig::Token> prompt_tokens(1024);
 	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), add_special, false);
 	if (n_prompt_tokens < 0)
 	{
@@ -285,7 +288,7 @@ std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, fig::string prompt,
 		if (llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), add_special, false) < 0)
 		{
 			// Error
-			return std::vector<llama_token> {};
+			return std::vector<fig::Token> {};
 		}
 	}
 	else
@@ -326,7 +329,7 @@ void llm_util::free_batch(llama_batch& batch)
 	batch.n_tokens = 0;
 }
 
-llama_batch llm_util::create_batch(std::span<llama_token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position)
+llama_batch llm_util::create_batch(std::span<fig::Token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position)
 {
 	// Prepare a batch for the prompt
 	llama_batch batch = llama_batch_init(toI(tokens.size()), 0, n_seq_max);
@@ -359,7 +362,7 @@ llama_batch llm_util::create_batch_view(const llama_batch& batch, int32_t positi
 	};
 }
 
-bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<llama_token>& tokens, llama_batch& out_pBatch)
+bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<fig::Token>& tokens, llama_batch& out_pBatch)
 {
 	const int32_t ctx_size = llama_n_ctx(pCtx);
 
@@ -372,7 +375,7 @@ bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, co
 		batch.token[i] = tokens[i];
 		batch.pos[i] = i;		// Position in sequence
 		batch.n_seq_id[i] = 1;	// This token belongs to 1 sequence
-		batch.seq_id[i][0] = 0;	// Sequence ID 0 //! @seq
+		batch.seq_id[i][0] = 0;	// fig::Sequence ID 0 //! @seq
 		batch.logits[i] = true;
 	}
 	batch.n_tokens = num_tokens;
@@ -381,7 +384,7 @@ bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, co
 	return true;
 }
 
-std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(Context& context, fig::string content, SequenceId seq_id, int32_t pos, bool add_special)
+std::optional<std::vector<fig::Token>> llm_util::tokenize_and_decode(Context& context, fig::string content, fig::SequenceId seq_id, int32_t pos, bool add_special)
 {
 	auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
 	int32_t n_tokens = toI(tokens.size());
@@ -392,7 +395,7 @@ std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(Context& c
 	return tokens;
 }
 
-std::vector<llama_token> llm_util::tokenize_and_batch(Context& context, fig::string content, SequenceId seq_id, int32_t pos, bool add_special)
+std::vector<fig::Token> llm_util::tokenize_and_batch(Context& context, fig::string content, fig::SequenceId seq_id, int32_t pos, bool add_special)
 {
 	// Add to context batch
 	auto tokens = llm_util::tokenize(context.GetVocabPtr(), content, add_special);
@@ -538,7 +541,7 @@ fig::string llm_util::process_message(fig::string message, fig::string identifie
 	size_t pos = 0;
 	size_t length = message.size();
 
-	string_util::trim_str(message);
+	trim_str(message);
 	char first = message[0];
 	char last = 0;
 	if (first == '"' || first == '*')
@@ -594,18 +597,18 @@ fig::string llm_util::process_message(fig::string message, fig::string identifie
 			break;
 		}
 		
-		text = string_util::trim(text);
-		if (string_util::empty_or_whitespace(text))
+		text = trim(text);
+		if (empty_or_whitespace(text))
 			continue;
 
 		if (span.msgType == MessageType::Dialogue) // Minor processing for correctness
 		{
-			std::wstring uniText = string_util::from_utf8(text);
+			std::wstring uniText = from_utf8(text);
 			if (!std::iswpunct(uniText.front()) && !std::iswupper(uniText.front()))
 				uniText[0] = std::toupper(uniText[0]); // Uppercase first letter
 			if (!std::iswpunct(uniText.back()))
 				uniText.append(L"."); // Require punctuation
-			text = string_util::to_utf8(uniText);
+			text = to_utf8(uniText);
 		}
 
 		if (result.length() > 0)
@@ -646,7 +649,7 @@ fig::string llm_util::format_id(fig::string id)
 { 
 	if (id[0] == '@')
 		id = id.substr(1);
-	return string_util::lcase(id);
+	return lcase(id);
 }
 
 bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, fig::string filename)
@@ -655,7 +658,7 @@ bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, fig::s
 	auto& batch = batch_ref.get();
 	auto pVocab = context.GetVocabPtr();
 
-	auto fnTokenStr = [pVocab](llama_token token, bool quote) -> fig::string {
+	auto fnTokenStr = [pVocab](fig::Token token, bool quote) -> fig::string {
 		if (token <= 0)
 			return "<UNK>";
 		else if (token == llama_vocab_bos(pVocab))
@@ -704,7 +707,7 @@ bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, fig::s
 	result.append(std::format("[pos:{0}/{1}]\r\n", context.cursor_pos, batch_n));
 
 	// Cached blocks
-	SequenceId seq_id = sequence_from_index(seq_index);
+	fig::SequenceId seq_id = sequence_from_index(seq_index);
 	auto& blocks = context.GetBlocks();
 	for (auto& block : blocks)
 	{
@@ -726,7 +729,7 @@ bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, fig::s
 		result.append("]\r\n");
 	}
 
-	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
+	return WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
 bool llm_util::dump_batch_tokens(const Context& context, int32_t seq_id, fig::string filename)
@@ -736,9 +739,9 @@ bool llm_util::dump_batch_tokens(const Context& context, int32_t seq_id, fig::st
 	return dump_batch_tokens(batch_ref, batch_n, seq_id, context.GetVocabPtr(), filename);
 }
 
-bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_index, VocabPtr pVocab, fig::string filename)
+bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_index, fig::VocabPtr pVocab, fig::string filename)
 {
-	auto fnTokenStr = [pVocab](llama_token token) -> fig::string {
+	auto fnTokenStr = [pVocab](fig::Token token) -> fig::string {
 		if (token == llama_vocab_bos(pVocab))
 			return "<BOS>";
 		else if (token == llama_vocab_eos(pVocab))
@@ -801,7 +804,7 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, i
 		);
 	}
 
-	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
+	return WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
 bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, fig::string filename)
@@ -880,7 +883,7 @@ bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, fig::string
 
 	llama_kv_cache_view_free(&cache_view);
 	
-	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
+	return WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
 bool llm_util::dump_kv_cache_cells(const Context& contextState, fig::string filename)
@@ -936,7 +939,7 @@ bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, f
 
 	llama_kv_cache_view_free(&cache_view);
 	
-	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
+	return WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
 void llm_util::erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos)
@@ -945,27 +948,27 @@ void llm_util::erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos)
 		llama_kv_self_seq_rm(pCtx, seq_id, pos, -1);
 }
 
-SequenceIndices llm_util::get_sequence_indices(Sequence seq, int32_t n_seq_max) noexcept
+fig::SequenceIndices llm_util::get_sequence_indices(fig::Sequence seq, int32_t n_seq_max) noexcept
 {
 	return get_sequence_indices({ seq }, n_seq_max);
 }
 
-SequenceIndices llm_util::get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept
+fig::SequenceIndices llm_util::get_sequence_indices(fig::SequenceId seq, int32_t n_seq_max) noexcept
 {
-	SequenceIndices seqIds;
+	fig::SequenceIndices seqIds;
 	seqIds.reserve(n_seq_max);
 
-	for (size_t i = 0; i < AllSequenceIDs.size() && i < n_seq_max; ++i)
+	for (size_t i = 0; i < fig::AllSequenceIDs.size() && i < n_seq_max; ++i)
 	{
-		if (seq.IsSet(AllSequenceIDs[i]))
+		if (seq.IsSet(fig::AllSequenceIDs[i]))
 			seqIds.push_back(toI(i));
 	}
 	return seqIds;
 }
 
-SequenceId llm_util::sequence_from_index(int32_t seq_idx) noexcept
+fig::SequenceId llm_util::sequence_from_index(int32_t seq_idx) noexcept
 {
-    if (seq_idx < 0 || seq_idx >= AllSequenceIDs.size())
-        return SequenceId::None;
-	return { AllSequenceIDs[seq_idx] };
+    if (seq_idx < 0 || seq_idx >= fig::AllSequenceIDs.size())
+        return fig::SequenceId::None;
+	return { fig::AllSequenceIDs[seq_idx] };
 }

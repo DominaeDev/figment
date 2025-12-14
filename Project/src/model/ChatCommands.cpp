@@ -1,6 +1,8 @@
 #include "model/ChatCommands.h"
 #include "util/StringUtility.h"
 
+using namespace fig::string_util;
+
 struct CommandDefinition {
 	fig::string keyword;
 	ChatCommand command;
@@ -30,7 +32,7 @@ static CommandDefinition s_Commands[]
 
 ParsedChatCommand ChatCommands::Parse(fig::string text)
 {
-	string_util::trim_str(text);
+	trim_str(text);
 	if (text.empty())
 	{
 		return ParsedChatCommand { ChatCommand::Invalid };
@@ -50,9 +52,9 @@ ParsedChatCommand ChatCommands::Parse(fig::string text)
 		};
 	}
 
-	if (string_util::begins_with(text, "//")) // Shorthand
+	if (begins_with(text, "//")) // Shorthand
 	{
-		fig::string payload = string_util::trim(text.substr(2));
+		fig::string payload = trim(text.substr(2));
 		return ParsedChatCommand 
 		{ 
 			.command = ChatCommand::SystemMessage, 
@@ -65,12 +67,12 @@ ParsedChatCommand ChatCommands::Parse(fig::string text)
 	fig::string payload;
 	if (pos_begin != fig::npos)
 	{
-		command = string_util::lcase(string_util::trim(text.substr(1, pos_begin - 1)));
-		payload = string_util::trim(text.substr(pos_begin));
+		command = lcase(trim(text.substr(1, pos_begin - 1)));
+		payload = trim(text.substr(pos_begin));
 	}
 	else
 	{
-		command = string_util::lcase(string_util::trim(text.substr(1, pos_begin - 1)));
+		command = lcase(trim(text.substr(1, pos_begin - 1)));
 		payload = "";
 	}
 
@@ -88,7 +90,7 @@ ParsedChatCommand ChatCommands::Parse(fig::string text)
 	// Partial match
 	for (auto& c : s_Commands)
 	{
-		if (string_util::begins_with(c.keyword, command))
+		if (begins_with(c.keyword, command))
 			return ParsedChatCommand {
 				.command = c.command, 
 				.text = payload 

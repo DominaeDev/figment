@@ -13,6 +13,8 @@
 #include "Constants.h"
 #include <format>
 
+using namespace fig::string_util;
+
 #define USER_RIGHT_ALIGNED	1
 #define USER_YOU			1
 
@@ -41,7 +43,11 @@ ChatMessage::ChatMessage(Control* pParent, Role role, fig::string characterId, f
 	_name(name),
 	_messageType(msgType),
 	_role(role),
-	_bShowAvatar(bShowAvatar)
+	_bShowAvatar(bShowAvatar),
+	_bgColor {},
+	_borderColor {},
+	_nameColor {},
+	_textColor {}
 {
 	_style = Style::Default;
 	if (msgType == MessageType::Dialogue)
@@ -156,9 +162,9 @@ static void strip_ends(fig::string& text, MessageType msgType)
 		return;
 	}
 
-	while (string_util::ends_with(text, end))
+	while (ends_with(text, end))
 		text = text.substr(0, text.length() - 1);
-	while (string_util::begins_with(text, begin))
+	while (begins_with(text, begin))
 		text = text.substr(1);
 }
 
@@ -190,7 +196,7 @@ void ChatMessage::SetMessage(fig::string text, bool complete)
 			text += ")";
 	}
 
-	_pMessageText->SetTextAndResize(string_util::trim(text), w, h);
+	_pMessageText->SetTextAndResize(trim(text), w, h);
 	w += toI(TEXT_HMARGIN + (bDialogue ? DIALOGUE_OFFSET : 0));
 	h += toI(TEXT_VMARGIN);
 

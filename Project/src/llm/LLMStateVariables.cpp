@@ -2,12 +2,14 @@
 #include "util/StringUtility.h"
 #include <format>
 
+using namespace fig::string_util;
+
 bool LLMStateVariables::SetValue(fig::string name, fig::string value)
 {
 	if (!value.empty())
 	{
 		auto itFind = std::find_if(_variables.begin(), _variables.end(), [&name](auto kvp) {
-			return string_util::equals(kvp.first, name, true);
+			return equals(kvp.first, name, true);
 		});
 		
 		if (itFind != _variables.end())
@@ -32,7 +34,7 @@ bool LLMStateVariables::SetValue(fig::string name, fig::string value)
 bool LLMStateVariables::HasValue(fig::string name) const
 {
 	auto itFind = std::find_if(_variables.begin(), _variables.end(), [&name](auto kvp) {
-		return string_util::equals(kvp.first, name, true);
+		return equals(kvp.first, name, true);
 	});
 		
 	return itFind != _variables.end();
@@ -64,9 +66,9 @@ fig::string LLMStateVariables::GetGrammarPattern() const
 
 void LLMStateVariables::UpdateValues(fig::string stateReport, std::map<fig::string, fig::string>& updatedVariables)
 {
-	string_util::replace_all(stateReport, "<change>", "");
-	string_util::replace_all(stateReport, "</change>", ";");
-	auto rows = string_util::split(stateReport, ';', true);
+	replace_all(stateReport, "<change>", "");
+	replace_all(stateReport, "</change>", ";");
+	auto rows = split(stateReport, ';', true);
 
 	for (auto& row : rows)
 	{
@@ -74,8 +76,8 @@ void LLMStateVariables::UpdateValues(fig::string stateReport, std::map<fig::stri
 		if (pos_eq == fig::npos)
 			continue;
 
-		fig::string lhs = string_util::trim(row.substr(0, pos_eq));
-		fig::string rhs = string_util::trim(row.substr(pos_eq + 1));
+		fig::string lhs = trim(row.substr(0, pos_eq));
+		fig::string rhs = trim(row.substr(pos_eq + 1));
 		if (SetValue(lhs, rhs))
 			updatedVariables[lhs] = rhs;
 	}

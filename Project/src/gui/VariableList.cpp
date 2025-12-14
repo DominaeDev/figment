@@ -7,6 +7,8 @@
 #include "util/StringUtility.h"
 #include <format>
 
+using namespace fig::string_util;
+
 constexpr float Margin { 8.0f };
 
 VariableList::VariableList(Control* pParent) : Control(pParent)
@@ -38,7 +40,7 @@ void VariableList::SetVariables(const std::map<fig::string, fig::string>& variab
 	text.reserve(512);
 	for (auto kvp : variables)
 		text = text + std::format("{} = {}\n", kvp.first, kvp.second);
-	text = string_util::rtrim(text);
+	text = rtrim(text);
 
 	int w, h;
 	_pText->SetTextAndResize(text, w, h);

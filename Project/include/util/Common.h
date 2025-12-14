@@ -8,13 +8,13 @@
 #include <memory>
 #include <iterator>
 
-namespace common_util
+namespace fig::common_util
 {
 	// Debugging
-	void DebugPrint(fig::string message) noexcept;
-	void DebugPrintLn(fig::string message = "") noexcept;
+	void DebugPrint(string message) noexcept;
+	void DebugPrintLn(string message = "") noexcept;
 
-	fig::string CreateUUID();
+	string CreateUUID();
 
 	template<typename T>
 	void queue_clear(std::queue<T>& q)

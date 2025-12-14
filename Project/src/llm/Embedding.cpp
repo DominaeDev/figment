@@ -6,6 +6,9 @@
 #include <iostream>
 #include <fstream>
 
+using namespace fig::string_util;
+using namespace fig::file_util;
+
 union FloatToChar 
 {
 	float f;
@@ -60,7 +63,7 @@ bool EmbeddingVector::SaveToFile(fig::string filename) const
 	try
 	{
 		fig::string text = content;
-		string_util::replace_all(text, ";", ",");
+		replace_all(text, ";", ",");
 		fig::string output;
 		output.reserve(8192);
 		output += modelName + ";";
@@ -74,7 +77,7 @@ bool EmbeddingVector::SaveToFile(fig::string filename) const
 			for (size_t j = 0; j < sizeof(float); ++j)
 				output += std::format("{:02X}", fc.c[j]);
 		}
-		return file_util::WriteTextFile(filename, output, false) == FileError::NoError;
+		return WriteTextFile(filename, output, false) == FileError::NoError;
 	}
 	catch (...)
 	{
@@ -87,13 +90,13 @@ std::vector<EmbeddingVector> Embeddings::_embeddings;
 void Embeddings::Initialize(fig::string filePath, fig::string modelName)
 {
 	_embeddings.clear();
-	auto files = file_util::FindFilesInPath(filePath, ".txt");
+	auto files = FindFilesInPath(filePath, ".txt");
 	if (files.has_value())
 	{
 		for (auto& fn : files.value())
 		{
 			EmbeddingVector embd;
-			if (embd.LoadFromFile(fn) && string_util::equals(embd.modelName, modelName, true))
+			if (embd.LoadFromFile(fn) && equals(embd.modelName, modelName, true))
 				_embeddings.push_back(std::move(embd));
 		}
 	}

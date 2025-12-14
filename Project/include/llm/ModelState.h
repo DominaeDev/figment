@@ -10,13 +10,13 @@ class LLMEmbedding;
 class ModelState
 {
 public:
-	ModelPtr pModel = nullptr;
-	VocabPtr pVocab = nullptr;
-	ContextPtr pCtx = nullptr;
-	SamplerPtr pSampler = nullptr;
-	SamplerPtr pActiveGrammar = nullptr;
+	fig::ModelPtr pModel = nullptr;
+	fig::VocabPtr pVocab = nullptr;
+	fig::ContextPtr pCtx = nullptr;
+	fig::SamplerPtr pSampler = nullptr;
+	fig::SamplerPtr pActiveGrammar = nullptr;
 
-	std::map<GrammarFlags, SamplerPtr> grammars {};
+	std::map<GrammarFlags, fig::SamplerPtr> grammars {};
 	fig::string modelName {};
 	std::mt19937 rng {};
 	int32_t num_sequences {};
@@ -26,6 +26,6 @@ public:
 
 	void Release();
 	bool HasGrammar(GrammarFlags flags) const;
-	SamplerPtr SetActiveGrammar(GrammarFlags flags);
+	fig::SamplerPtr SetActiveGrammar(GrammarFlags flags);
 };
 

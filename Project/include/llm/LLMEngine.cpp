@@ -9,9 +9,9 @@
 #include "util/Common.h"
 #include "util/FileUtility.h"
 
-using namespace common_util;
-using namespace string_util;
-using namespace file_util;
+using namespace fig::common_util;
+using namespace fig::string_util;
+using namespace fig::file_util;
 
 using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;
 static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
@@ -25,14 +25,13 @@ static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
 
 	if (pos_eq != fig::npos && log.find("buffer size") != fig::npos)
 	{
-		fig::string value = string_util::trim(log.substr(pos_eq + 1));
+		fig::string value = trim(log.substr(pos_eq + 1));
 		double mul = 1024.0 * 1024.0; // MiB
-		if (string_util::ends_with(value, "GiB"))
+		if (ends_with(value, "GiB"))
 			mul *= 1024.0;
-
 		try
 		{
-			int64_t iValue = static_cast<int64_t>(std::stod(value) * mul);
+			int64_t iValue = toI64(std::stod(value) * mul);
 			if (bGPU)
 				pThis->usedVRAM.fetch_add(iValue);
 			else if (bCPU)
@@ -203,7 +202,7 @@ void LLMEngine::__LoadModel(fig::string modelFilename, fig::string embeddingFile
 	onComplete(state);
 }
 
-LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
+fig::LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
 {
 	auto pInstance = std::make_shared<LLMInstance>();
 	pInstance->_modelState = *_modelState.get();
@@ -212,7 +211,7 @@ LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
 	return pInstance;
 }
 
-bool LLMEngine::DestroyInstance(LLMInstancePtr instance)
+bool LLMEngine::DestroyInstance(fig::LLMInstancePtr instance)
 {
 	auto itFind = std::ranges::find(_instances, instance);
 	if (itFind != std::ranges::end(_instances))

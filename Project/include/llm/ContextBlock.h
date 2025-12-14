@@ -19,7 +19,7 @@ struct ContextBlock
     fig::string content;
 	std::vector<int32_t> tokens;
 	ContextBlockFlags flags {};
-	SequenceId sequenceId = SequenceId::None;
+	fig::SequenceId sequenceId = fig::SequenceId::None;
 	int32_t offset = 0;
 	int ttl = 0;
 	fig::string responseId;
@@ -31,5 +31,5 @@ struct ContextBlock
 	inline bool is_temporary() const	{ return ttl > 0; }
 
 	llama_seq_id get_any_sequence_id() const noexcept;
-	[[nodiscard]] SequenceIndices get_sequence_ids(int32_t n_seq_max) const noexcept;
+	[[nodiscard]] fig::SequenceIndices get_sequence_ids(int32_t n_seq_max) const noexcept;
 };
