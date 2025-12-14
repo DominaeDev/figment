@@ -15,7 +15,7 @@ union FloatToChar
 	static_assert(sizeof(int32_t) == 4);
 };
 
-bool EmbeddingVector::LoadFromFile(string filename)
+bool EmbeddingVector::LoadFromFile(fig::string filename)
 {
 	std::ifstream file(filename); // Open the file
     if (!file.is_open()) {
@@ -25,7 +25,7 @@ bool EmbeddingVector::LoadFromFile(string filename)
 
 	try
 	{
-		std::string line;
+		fig::string line;
 		if (!std::getline(file, line, ';'))
 			return false;
 		modelName = line;
@@ -55,13 +55,13 @@ bool EmbeddingVector::LoadFromFile(string filename)
 	return !modelName.empty() && !content.empty() && !vec.empty();
 }
 
-bool EmbeddingVector::SaveToFile(string filename) const
+bool EmbeddingVector::SaveToFile(fig::string filename) const
 {
 	try
 	{
-		string text = content;
+		fig::string text = content;
 		string_util::replace_all(text, ";", ",");
-		string output;
+		fig::string output;
 		output.reserve(8192);
 		output += modelName + ";";
 		output += text + ";";
@@ -84,7 +84,7 @@ bool EmbeddingVector::SaveToFile(string filename) const
 
 std::vector<EmbeddingVector> Embeddings::_embeddings;
 
-void Embeddings::Initialize(string filePath, string modelName)
+void Embeddings::Initialize(fig::string filePath, fig::string modelName)
 {
 	_embeddings.clear();
 	auto files = file_util::FindFilesInPath(filePath, ".txt");

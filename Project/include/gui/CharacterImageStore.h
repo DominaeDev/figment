@@ -17,12 +17,12 @@ class CharacterImageStore
 public:
 	static void Init(Renderer* pRenderer);
 	static void Release();
-	static Texture* GetTexture(string characterId, ImageType imageType);
+	static Texture* GetTexture(fig::string characterId, ImageType imageType);
 	
-	static bool LoadCharacterPortrait(string characterId, string filename);
+	static bool LoadCharacterPortrait(fig::string characterId, fig::string filename);
 
 private:
-	static bool LoadTexture(Renderer* pRenderer, string characterId, ImageType imageType, string filename);
+	static bool LoadTexture(Renderer* pRenderer, fig::string characterId, ImageType imageType, fig::string filename);
 
 	struct CharacterImage
 	{
@@ -32,5 +32,5 @@ private:
 
 	using ImageList = std::vector<CharacterImage>;
 
-	static std::map<string, ImageList> _imagesByCharacter;
+	static std::map<fig::string, ImageList> _imagesByCharacter;
 };

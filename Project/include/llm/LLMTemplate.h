@@ -56,13 +56,13 @@ class llm_tmpl
 {
 public:
 	static PromptTemplate auto_detect_template(llama_model* pModel);
-	static string apply_chat_template(Messages msg, bool add_assistant);
+	static fig::string apply_chat_template(Messages msg, bool add_assistant);
 	
-	static std::pair<string, string> get_chat_template_prefix_suffix(Role role, string name);
-	static string apply_chat_template_prefix(Role role, string content, string name);
+	static std::pair<fig::string, fig::string> get_chat_template_prefix_suffix(Role role, fig::string name);
+	static fig::string apply_chat_template_prefix(Role role, fig::string content, fig::string name);
 
 	static PromptTemplate current_template;
 
 private:
-	static string _template;
+	static fig::string _template;
 };

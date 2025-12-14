@@ -1,14 +1,3 @@
-#ifndef ENUM_FLAGS_H__
-#define ENUM_FLAGS_H__
-
-#pragma once
-
-#include <bitset>
-#include <type_traits>
-#include <utility>
-#include <ostream>
-
-// https://voithos.io/articles/type-safe-enum-class-bit-flags/
 // 
 // MIT License
 // 
@@ -32,6 +21,18 @@
 //
 // flags |= MyEnum::FlagB;
 // EnumFlags<MyEnum> new_flags = ~flags;
+//
+// https://voithos.io/articles/type-safe-enum-class-bit-flags/
+//
+
+#ifndef ENUM_FLAGS_H__
+#define ENUM_FLAGS_H__
+#pragma once
+
+#include <bitset>
+#include <type_traits>
+#include <utility>
+#include <ostream>
 
 template <typename T>
 class EnumFlags {
@@ -191,4 +192,5 @@ const EnumFlags<T> EnumFlags<T>::None {};
 
 template <typename T>
 const std::underlying_type_t<T> EnumFlags<T>::Zero { static_cast<std::underlying_type_t<T>>(0) };
+
 #endif

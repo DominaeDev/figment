@@ -92,7 +92,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 
 	SetSizer(topSizer);
 	
-	_pTextBox->SetEnterPressedCallback([this](string text) {
+	_pTextBox->SetEnterPressedCallback([this](fig::string text) {
 		EnqueueCommand(ChatCommands::Parse(text));
 	});
 
@@ -108,7 +108,7 @@ MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
 	_pVariableList->SetPosition(10, 10);
 	_pVariableList->SetVisible(false);
 
-	std::map<string, string> test;
+	std::map<fig::string, fig::string> test;
 	test["Location"] = "Nice beach";
 	test["Mood"] = "Terrible weather";
 	_pVariableList->SetVariables(test);
@@ -154,8 +154,8 @@ void MainFrame::InitializeModel()
 	{
 		SetStatusBar(GlobalStrings::Status::LoadingModel);
 
-		engine.Initialize(string(Constants::DefaultModelLocation), 
-			llmOptions.IsSet(LLMOption::Embeddings) ? string(Constants::Embedding::DefaultModelLocation) : "",
+		engine.Initialize(fig::string(Constants::DefaultModelLocation), 
+			llmOptions.IsSet(LLMOption::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
 			[this](int percent) 
 			{
 				SetStatusBar(std::format(GlobalStrings::Status::LoadingModelPercentFmt, percent));
@@ -205,9 +205,9 @@ void MainFrame::StartChat()
 	}
 }
 
-void MainFrame::SetStatusBar(std::string_view message)
+void MainFrame::SetStatusBar(fig::string_view message)
 {
-	s_pInstance->_pStatusBar->SetMessage(toS(message));
+	s_pInstance->_pStatusBar->SetMessage(toStr(message));
 }
 
 bool MainFrame::OnCommand(ParsedChatCommand cmd)
@@ -240,7 +240,7 @@ void MainFrame::AutoChat()
 	{
 		if (auto script = ReadTextFile("resources/auto_script.txt"))
 		{
-			string text = script.value();
+			fig::string text = script.value();
 			text = pLLMInstance->GetSession().ApplyNames(text);
 			_autoScript = string_util::split(text, '\n');
 		}
@@ -253,7 +253,7 @@ void MainFrame::AutoChat()
 		return;
 	}
 
-	string message = _autoScript[_autoScriptIndex];
+	fig::string message = _autoScript[_autoScriptIndex];
 	_autoScriptIndex = ++_autoScriptIndex % _autoScript.size();
 
 	pLLMInstance->SendMessage(message);

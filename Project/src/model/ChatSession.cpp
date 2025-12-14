@@ -43,7 +43,7 @@ bool ChatSession::Initialize(LLMOptions options)
 		&& !_system_prompt_user.empty();
 }
 
-bool ChatSession::LoadCharacter(Role role, string filename)
+bool ChatSession::LoadCharacter(Role role, fig::string filename)
 {
 	Character character;
 	if (character.LoadFromXml(filename))
@@ -67,7 +67,7 @@ std::optional<Character> ChatSession::GetCharacter(Role role) const
 	return std::nullopt;
 }
 
-std::optional<Character> ChatSession::GetCharacterById(string identifier) const
+std::optional<Character> ChatSession::GetCharacterById(fig::string identifier) const
 {
 	if (identifier.empty() || _characters.empty())
 		return std::nullopt;
@@ -80,7 +80,7 @@ std::optional<Character> ChatSession::GetCharacterById(string identifier) const
 	return std::nullopt;
 }
 
-std::optional<Character> ChatSession::GetCharacterByName(string name) const
+std::optional<Character> ChatSession::GetCharacterByName(fig::string name) const
 {
 	if (name.empty() || _characters.empty())
 		return std::nullopt;
@@ -93,7 +93,7 @@ std::optional<Character> ChatSession::GetCharacterByName(string name) const
 	return std::nullopt;
 }
 
-Role ChatSession::GetRoleOf(string characterId) const
+Role ChatSession::GetRoleOf(fig::string characterId) const
 {
 	if (characterId.empty() || _characters.empty())
 		return Role::Undefined;
@@ -106,7 +106,7 @@ Role ChatSession::GetRoleOf(string characterId) const
 	return Role::Undefined;
 }
 
-string ChatSession::GetIdentifierOf(Role role) const
+fig::string ChatSession::GetIdentifierOf(Role role) const
 {
 	if (role == Role::User)
 		return "USR";
@@ -116,7 +116,7 @@ string ChatSession::GetIdentifierOf(Role role) const
 	return "_UNK";
 }
 
-string ChatSession::GetNameOf(Role role) const
+fig::string ChatSession::GetNameOf(Role role) const
 {
 	if (role == Role::System)
 		return "system";
@@ -148,38 +148,38 @@ std::pair<Color, Color> ChatSession::GetColorsOf(Role role) const
 		return std::make_pair(Colors::MessageBackgroundDefault, Colors::MessageBorderDefault);
 }
 
-string ChatSession::GetBriefOf(Role role) const
+fig::string ChatSession::GetBriefOf(Role role) const
 {
 	auto optCharacter = GetCharacter(role);
 	if (!optCharacter.has_value())
 		return "";
 
-	string brief = string_util::trim(optCharacter.value().brief);
+	fig::string brief = string_util::trim(optCharacter.value().brief);
 	string_util::replace_all(brief, "{{user}}", GetNameOf(Role::User));
 	string_util::replace_all(brief, "{{char}}", optCharacter.value().shortName);
 	return brief;
 }
 
-string ChatSession::GetPersonaOf(Role role) const
+fig::string ChatSession::GetPersonaOf(Role role) const
 {
 	auto optCharacter = GetCharacter(role);
 	if (!optCharacter.has_value())
 		return "";
 
-	string description = string_util::trim(optCharacter.value().description);
+	fig::string description = string_util::trim(optCharacter.value().description);
 	if (description.empty())
 		return "";
 
 	// Format
 	if (role == Role::User)
 	{
-		string prompt = _system_prompt_user;
+		fig::string prompt = _system_prompt_user;
 		string_util::replace_all(prompt, "##PERSONA##", description);
 		return ApplyNames(prompt);
 	}
 	else
 	{
-		string prompt = _system_prompt_character;
+		fig::string prompt = _system_prompt_character;
 		string_util::replace_all(prompt, "##PERSONA##", description);
 		string_util::replace_all(prompt, "{{user}}", GetNameOf(Role::User));
 		string_util::replace_all(prompt, "{{char}}", optCharacter.value().shortName);
@@ -187,7 +187,7 @@ string ChatSession::GetPersonaOf(Role role) const
 	}
 }
 
-string ChatSession::ApplyNames(string text) const
+fig::string ChatSession::ApplyNames(fig::string text) const
 {
 	string_util::replace_all(text, "{{user}}", GetNameOf(Role::User));
 	string_util::replace_all(text, "{{char}}", GetNameOf(Role::Bot1));
@@ -226,15 +226,15 @@ string ChatSession::ApplyNames(string text) const
 	return text;
 }
 
-string ChatSession::ApplyNames(string text, Role characterRole) const
+fig::string ChatSession::ApplyNames(fig::string text, Role characterRole) const
 {
 	string_util::replace_all(text, "{{char}}", GetNameOf(characterRole));
 	return ApplyNames(text);
 }
 
-string ChatSession::GetSystemPrompt() const
+fig::string ChatSession::GetSystemPrompt() const
 {
-	string prompt;
+	fig::string prompt;
 	if (IsGroupChat())
 	{
 		prompt = _system_prompt_group;
@@ -306,9 +306,9 @@ string ChatSession::GetSystemPrompt() const
 	return ApplyNames(prompt);
 }
 
-string ChatSession::GetDirectorPrompt() const
+fig::string ChatSession::GetDirectorPrompt() const
 {
-	string prompt = _formatting_director;
+	fig::string prompt = _formatting_director;
 	return ApplyNames(prompt);
 }
 
@@ -317,9 +317,9 @@ size_t ChatSession::GetBotCount() const
 	return std::count_if(_characters.begin(), _characters.end(), [](auto kvp) { return is_bot(kvp.first); });
 }
 
-string ChatSession::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
+fig::string ChatSession::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
 {
-	string pattern;
+	fig::string pattern;
 	int32_t botCount = (int32_t)GetBotCount();
 	for (int i = 0; i < botCount; ++i)
 	{

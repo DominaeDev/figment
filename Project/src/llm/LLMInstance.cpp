@@ -17,14 +17,14 @@ using namespace std::chrono_literals;
 using namespace common_util;
 using namespace file_util;
 
-inline constexpr string Direction(std::string_view text)
+inline constexpr fig::string Direction(fig::string_view text)
 {
-	return "{{" + std::string(text) + "}}";
+	return "{{" + toStr(text) + "}}";
 }
 
-inline constexpr string Narration(std::string_view text)
+inline constexpr fig::string Narration(fig::string_view text)
 {
-	return "[" + std::string(text) + "]";
+	return "[" + toStr(text) + "]";
 }
 
 LLMInstance::LLMInstance()
@@ -67,14 +67,14 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	_stateVars = {};
 
 	// Read personas
-	std::map<Role, string> personas;
+	std::map<Role, fig::string> personas;
 	int32_t botCount = (int32_t)_session.GetBotCount();
 	for (int32_t i = 0; i < botCount; ++i)
 	{
 		Role role = bot_from_index(i);
 		personas[role] = _session.GetPersonaOf(role);
 	}
-	string user_persona = _session.GetPersonaOf(Role::User);
+	fig::string user_persona = _session.GetPersonaOf(Role::User);
 
 	if (!personas.contains(Role::Bot1))
 		return false; // No main character
@@ -119,7 +119,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	{
 		// Write (shared) system_prompt
 		int32_t& cursor_pos = _contextState.cursor_pos = 0;
-		string system_prompt = _session.GetSystemPrompt(); //! @group
+		fig::string system_prompt = _session.GetSystemPrompt(); //! @group
 
 		std::vector<llama_token> system_prompt_tokens = llm_util::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
 
@@ -210,7 +210,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			}
 		}
 
-		string system_prompt = _session.GetSystemPrompt();
+		fig::string system_prompt = _session.GetSystemPrompt();
 		std::vector<llama_token> system_prompt_tokens = llm_util::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
 
 		_contextState.AppendBlock(ContextBlock {
@@ -297,10 +297,10 @@ void LLMInstance::InitSamplers()
 	SamplerPtr pSampler = llama_sampler_chain_init(sampler_params);
 
 	// Load grammar(s)
-	string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
+	fig::string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 
 	// Names
-	string namesPattern;
+	fig::string namesPattern;
 	int32_t botCount = (int32_t)_session.GetBotCount();
 	for (int i = 0; i < botCount; ++i)
 	{
@@ -397,7 +397,7 @@ bool LLMInstance::CanGenerate() const
 	return _readyState.load() == ReadyState::Ready;
 }
 
-bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
+bool LLMInstance::Continue(fig::string responseId, fig::string subMessageId, bool extend)
 {
 	if (!CanGenerate())
 		return false;
@@ -426,8 +426,8 @@ bool LLMInstance::Continue(string responseId, string subMessageId, bool extend)
 		if (extend && bComplete)
 		{
 			// Strip end tag
-			size_t pos_end = block.content.rfind("</", std::string::npos);
-			if (pos_end != std::string::npos)
+			size_t pos_end = block.content.rfind("</", fig::npos);
+			if (pos_end != fig::npos)
 			{
 				block.content = block.content.substr(0, pos_end);
 				char last_char = block.content.back();
@@ -513,7 +513,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 			continue;
 		}
 
-		string content = block.content;
+		fig::string content = block.content;
 		if (args.isContinuation) // Continue response
 			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name); //! name?
 		else if (block.role == Role::System)
@@ -541,7 +541,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 
 		itState = std::max(itState, blocks.size() > 1 ? std::max(blocks.end() - 2, blocks.begin()) : blocks.end());
 
-		string content;
+		fig::string content;
 			//= string("# Story parameters\n")
 			//+ "The following parameters track the state of the story and world.\n";
 		content += std::format("{}", _stateVars.GetList());
@@ -626,9 +626,9 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	VocabPtr pVocab = state.pVocab;
 
 	llama_token sampled_token;
-	string partial;
-	string stop_reason;
-	string response;
+	fig::string partial;
+	fig::string stop_reason;
+	fig::string response;
 	MessageType msgType = args.msgType;
 	bool isContinuation = args.flags.IsSet(GenerateFlag::Continuation);
 	bool isInstigation = args.flags.IsSet(GenerateFlag::Instigation);
@@ -640,18 +640,18 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	llama_batch& batch = batch_ref.get();
 //	int32_t n_batch = llama_n_batch(state.pCtx);
 	int32_t ctx_size = state.ctx_size;
-	string userName = _session.GetNameOf(Role::User);
+	fig::string userName = _session.GetNameOf(Role::User);
 	
 	int32_t pre_response_pos = _contextState.response_pos;
 	int32_t& cursor_pos = _contextState.cursor_pos;
 
-	string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
-	string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
+	fig::string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
+	fig::string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
 
 	int numMessages = 0;
 	Role responderRole = args.role;
-	string responderId {};
-	string stateReport {};
+	fig::string responderId {};
+	fig::string stateReport {};
 
 	// Select sequence
 	int32_t current_sequence_index;
@@ -808,7 +808,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		bool bSend = true;
 		bool bHalt = false;
 		bool bWait = false;
-		string str_token;
+		fig::string str_token;
 		if (!llama_vocab_is_eog(pVocab, sampled_token))
 		{
 			// convert the token to a string, print it and add it to the response
@@ -842,19 +842,19 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		// Send/Queue result
 		if (bSend)
 		{
-			string carryOver;
-			string sendMsg = partial;
+			fig::string carryOver;
+			fig::string sendMsg = partial;
 			bool bEndOfMessageType = false;
 
 			// Check and erase formatting tags
 			size_t fmt_start = partial.find('<');
-			if (fmt_start != string::npos)
+			if (fmt_start != fig::npos)
 			{
 				bool bRemove = false;
 				size_t fmt_end = partial.find('>', fmt_start + 1);
-				if (fmt_end != string::npos)
+				if (fmt_end != fig::npos)
 				{
-					string tag, tagName;
+					fig::string tag, tagName;
 					llm_util::get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
 					if (tagName == "@USR" || tagName == _session.GetNameOf(Role::User) && args.role != Role::User)
@@ -1037,27 +1037,29 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 
 #if FALSE
-	std::map<string, string> variables;
-	_stateVars.UpdateValues(stateReport, variables);
-
-	// Report state variable changes
-	if (!variables.empty() && _options.IsSet(LLMOption::ReportStateChanges))
 	{
-		string varText;
-		varText.reserve(512);
-		for (auto kvp : variables)
-			varText = varText + std::format("{} = {}\n", kvp.first, kvp.second);
-		varText = string_util::rtrim(varText);
+		std::map<fig::string, fig::string> variables;
+		_stateVars.UpdateValues(stateReport, variables);
 
-		_resultQueue.push(MessagePiece {
-			responseId = CreateUUID(),
-			subMessageId = CreateUUID(),
-			identifier = "",
-			text = varText,
-			role = Role::System,
-			msgType = MessageType::SystemMessage,
-			isComplete = true,
-		});
+		// Report state variable changes
+		if (!variables.empty() && _options.IsSet(LLMOption::ReportStateChanges))
+		{
+			fig::string varText;
+			varText.reserve(512);
+			for (auto kvp : variables)
+				varText = varText + std::format("{} = {}\n", kvp.first, kvp.second);
+			varText = string_util::rtrim(varText);
+
+			_resultQueue.push(MessagePiece {
+				responseId = CreateUUID(),
+				subMessageId = CreateUUID(),
+				identifier = "",
+				text = varText,
+				role = Role::System,
+				msgType = MessageType::SystemMessage,
+				isComplete = true,
+				});
+		}
 	}
 #endif
 
@@ -1103,7 +1105,7 @@ bool LLMInstance::__ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArgu
 void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCompleteCallback onComplete)
 {
 	InternalError error = InternalError::NoError;
-	string response;
+	fig::string response;
 	bool bWaiting = false;
 
 	while(true)
@@ -1159,7 +1161,7 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 		bWaiting = true;
 		__PrepareGeneration(prepareArgs);
 		__Generate(thread_stop, generateArgs,
-			[this, &bWaiting, &error, &response](InternalError result, string msg) {
+			[this, &bWaiting, &error, &response](InternalError result, fig::string msg) {
 				if (result != InternalError::NoError)
 					error = result;
 				response = msg;
@@ -1177,7 +1179,7 @@ void LLMInstance::StartGeneration()
 	_pStatus->EmitSignal(LLMStatusSignal::GenerationStarted);
 
 	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__ProcessTaskQueue, this),
-		[this](InternalError error, string response) {
+		[this](InternalError error, fig::string response) {
 			// ...
 			if (error != InternalError::NoError)
 			{
@@ -1227,7 +1229,7 @@ bool LLMInstance::ClearTasksQueue()
 	}, _taskMutex);
 }
 
-bool LLMInstance::SendMessage(string message)
+bool LLMInstance::SendMessage(fig::string message)
 {
 	if (string_util::empty_or_whitespace(message))
 		return false;
@@ -1238,7 +1240,7 @@ bool LLMInstance::SendMessage(string message)
 	});
 }
 
-bool LLMInstance::PushMessage(Role role, string message, MessageType msgType, bool visible, int ttl)
+bool LLMInstance::PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl)
 {
 	if (string_util::empty_or_whitespace(message))
 		return false;
@@ -1269,7 +1271,7 @@ bool LLMInstance::Instigate(Role role, MessageType msgType, int messageCount)
 	});
 }
 
-bool LLMInstance::__SendMessage(string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
+bool LLMInstance::__SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
 {
 	if (string_util::empty_or_whitespace(message))
 		return false;
@@ -1295,14 +1297,14 @@ bool LLMInstance::__SendMessage(string message, PrepareArguments& prepareArgs, G
 	return true;
 }
 
-bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, bool visible, int ttl)
+bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl)
 {
 	if (string_util::empty_or_whitespace(message))
 		return false;
 
 	// Process
-	string identifier = _options.IsSet(LLMOption::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
-	string content = message;
+	fig::string identifier = _options.IsSet(LLMOption::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
+	fig::string content = message;
 	content = _session.ApplyNames(content);
 	std::vector<Submessage> subMessages;
 	content = llm_util::process_message(content, identifier, &subMessages);
@@ -1317,7 +1319,7 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 	else if (msgType == MessageType::Direction)
 		role = Role::Director;
 
-	string responseId = CreateUUID();
+	fig::string responseId = CreateUUID();
 
 	LockAndDo([&]() {
 		_contextState.AppendBlock(ContextBlock {
@@ -1340,7 +1342,7 @@ bool LLMInstance::__PushMessage(Role role, string message, MessageType msgType, 
 			// Add message to result queue
 			for (auto subMsg : subMessages)
 			{
-				string subMessageId = CreateUUID();
+				fig::string subMessageId = CreateUUID();
 				_resultQueue.push(MessagePiece {
 					.responseId = responseId,
 					.subMessageId = subMessageId,
@@ -1367,11 +1369,11 @@ bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, 
 		.time = 1,
 	};
 
-	string responder = _options.IsSet(LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
+	fig::string responder = _options.IsSet(LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
 
 	bool bAllowNarration = true;
 
-	string prependMsg;
+	fig::string prependMsg;
 	if (msgType == MessageType::Dialogue)
 	{
 		prependMsg = std::format("<{}=\"{}\">", Constants::Chat::DialogueTag, responder);
@@ -1415,7 +1417,7 @@ bool LLMInstance::GreetUser()
 {
 	if (auto text = ReadTextFile("./resources/prompting/prompt_greeting.txt"))
 	{
-		string greetingInstruction = _session.ApplyNames(text.value());
+		fig::string greetingInstruction = _session.ApplyNames(text.value());
 		PushMessage(Role::Director, Direction(greetingInstruction), MessageType::Direction, false, 1);
 		Instigate(Role::Narrator, MessageType::Narration, 1);
 		Instigate(Role::Undefined, MessageType::Dialogue, 3);
@@ -1424,11 +1426,11 @@ bool LLMInstance::GreetUser()
 	return false;
 }
 
-bool LLMInstance::Instruct(string instructions)
+bool LLMInstance::Instruct(fig::string instructions)
 {
 	if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
 	{
-		string prompt = text.value();
+		fig::string prompt = text.value();
 		prompt = _session.ApplyNames(prompt);
 		PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
 	}
@@ -1584,10 +1586,10 @@ bool LLMInstance::Reseed(uint32_t seed)
 	return false;
 }
 
-std::set<string> LLMInstance::GetActiveMessages()
+std::set<fig::string> LLMInstance::GetActiveMessages()
 {
 	std::scoped_lock _ { _resultMutex };
-	return std::set<string>(_activeResponseIds.begin(), _activeResponseIds.end()); // Copy
+	return std::set<fig::string>(_activeResponseIds.begin(), _activeResponseIds.end()); // Copy
 }
 
 void LLMInstance::RefreshActiveResponses()
@@ -1674,16 +1676,16 @@ Sentences LLMInstance::GetHistory(size_t depth)
 	for (auto it = blocks.crbegin(); it != blocks.crend() && n < depth; ++it, ++n)
 	{
 		auto& block = *it;
-		string msg = string_util::trim(block.content);
+		fig::string msg = string_util::trim(block.content);
 
 		size_t pos_begin = msg.find('>', 0);
-		while (pos_begin != string::npos)
+		while (pos_begin != fig::npos)
 		{
 			size_t pos_end = msg.find('<', pos_begin);
-			if (pos_end == string::npos)
+			if (pos_end == fig::npos)
 				break;
 
-			string content = msg.substr(pos_begin + 1, pos_end - pos_begin - 1);
+			fig::string content = msg.substr(pos_begin + 1, pos_end - pos_begin - 1);
 			if (content.length() > 2)
 			{
 				if (content.front() == '*' && content.back() == '*')
@@ -1707,7 +1709,7 @@ Sentences LLMInstance::GetHistory(size_t depth)
 			}
 
 			pos_begin = msg.find('>', pos_end + 1);
-			if (pos_begin == string::npos)
+			if (pos_begin == fig::npos)
 				break;
 			pos_begin = msg.find('>', pos_begin + 1);
 		}
@@ -1717,7 +1719,7 @@ Sentences LLMInstance::GetHistory(size_t depth)
 }
 
 #if _DEBUG
-bool LLMInstance::GenerateEmbedding(string text)
+bool LLMInstance::GenerateEmbedding(fig::string text)
 {
 	if (!_modelState.pEmbedding)
 		return false;
@@ -1728,7 +1730,7 @@ bool LLMInstance::GenerateEmbedding(string text)
 		Embeddings::AddEmbedding(embedding);
 
 		// Save to disk
-		string filename = std::format("./embeddings/{}.txt", CreateUUID());
+		fig::string filename = std::format("./embeddings/{}.txt", CreateUUID());
 		embedding.SaveToFile(filename);
 	}
 	return true; // Break here
@@ -1755,7 +1757,7 @@ SamplerPtr LLMInstance::CompileGrammar(GrammarFlags flags)
 	return pGrammar;
 }
 
-bool LLMInstance::SetStateVariable(string name, string value, bool allowCreate)
+bool LLMInstance::SetStateVariable(fig::string name, fig::string value, bool allowCreate)
 {
 	if (!_options.IsSet(LLMOption::StateVariables))
 		return false;
@@ -1771,9 +1773,9 @@ bool LLMInstance::SetStateVariable(string name, string value, bool allowCreate)
 	return true;
 }
 
-std::map<string, string> LLMInstance::GetStateVariables()
+std::map<fig::string, fig::string> LLMInstance::GetStateVariables()
 {
-	std::map<string, string> result;
+	std::map<fig::string, fig::string> result;
 
 	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
 	if (stateLock.try_lock_for(100ms))

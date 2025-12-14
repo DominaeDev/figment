@@ -43,7 +43,7 @@ enum class ReadyState : uint32_t
 
 struct LLMStatus
 {
-	string modelName;
+	fig::string modelName;
 	int32_t allocCtxSize = 0;
 	int32_t usedCtxSize = 0;
 	int64_t usedVRAM = 0;
@@ -61,7 +61,7 @@ public:
 	LLMStatus PollStatus();
 
 	void EmitSignal(LLMStatusSignal signal);
-	void ReportModelInfo(string modelName, int32_t ctx_size, int32_t used_ctx);
+	void ReportModelInfo(fig::string modelName, int32_t ctx_size, int32_t used_ctx);
 	void ReportTokensPerSec(double tokPerSec);
 	void ReportMemory(int64_t ram, int64_t vram, bool bIncrement);
 	void ReportReadyState(ReadyState readyState);
@@ -69,7 +69,7 @@ public:
 private:
 	std::timed_mutex _statusMutex; // Guards status reporting
 	LLMStatus _lastStatus {};
-	string _modelName;
+	fig::string _modelName;
 	int32_t _ctx_size {};
 	int32_t _used_ctx {};
 

@@ -22,10 +22,10 @@ class LLMStatusChannel;
 
 struct MessagePiece
 {
-	string responseId;		// response block
-	string subMessageId;	// shared id for pieces of the same message type
-	string identifier {};	// who said this?
-	string content {};
+	fig::string responseId;		// response block
+	fig::string subMessageId;	// shared id for pieces of the same message type
+	fig::string identifier {};	// who said this?
+	fig::string content {};
 	Role role = Role::Undefined;
 	MessageType msgType = MessageType::Undefined;
 	bool isComplete = false;
@@ -33,8 +33,8 @@ struct MessagePiece
 
 struct RemovedMessage 
 {
-	string responseId;
-    string content;
+	fig::string responseId;
+    fig::string content;
 	Role role;
 };
 
@@ -69,33 +69,33 @@ public:
 	bool IsReady() const;
 	bool IsGenerating() const;
 	
-	bool Continue(string responseId, string subMessageId, bool extend);
+	bool Continue(fig::string responseId, fig::string subMessageId, bool extend);
 	bool Halt();
 
 	// Tasks
 	bool GreetUser();
-	bool SendMessage(string message);
-	bool PushMessage(Role role, string message, MessageType msgType = MessageType::Undefined, bool visible = true, int ttl = 0);
+	bool SendMessage(fig::string message);
+	bool PushMessage(Role role, fig::string message, MessageType msgType = MessageType::Undefined, bool visible = true, int ttl = 0);
 	bool Instigate(Role role, MessageType msgType, int messageCount = 0);
-	bool Instruct(string instructions);
+	bool Instruct(fig::string instructions);
 
 	bool ResetChat(int seed = -1);
 	bool Reseed(uint32_t seed = 0xFFFFFFFF);
 	std::vector<RemovedMessage> RemoveMessages(int numMessages = 1, bool rewindTime = true);
 	std::vector<RemovedMessage> RollbackUserMessage();
-	std::set<string> GetActiveMessages();
+	std::set<fig::string> GetActiveMessages();
 	
-	bool SetStateVariable(string name, string value, bool allowCreate = true);
+	bool SetStateVariable(fig::string name, fig::string value, bool allowCreate = true);
 	bool PollResponse(MessagePiece& piece);
 
 	void DumpSequence(int32_t seq_id) const;
 	void DumpContext() const;
 #if _DEBUG
-	bool GenerateEmbedding(string text);
+	bool GenerateEmbedding(fig::string text);
 #endif
 
 	const ChatSession& GetSession() const { return _session; }
-	std::map<string, string> GetStateVariables();
+	std::map<fig::string, fig::string> GetStateVariables();
 
 private:
 	void ClearResponseQueue();
@@ -116,8 +116,8 @@ public:
 private:
 	struct __PartialResult
 	{
-		string piece;
-		string fullText;
+		fig::string piece;
+		fig::string fullText;
 	};
 
 	enum class InternalError : int {
@@ -130,7 +130,7 @@ private:
 	};
 
 	using __PartialResultCallback = std::function<void(__PartialResult)>;
-	using __GenerationCompleteCallback = std::function<void(InternalError error, string msg)>;
+	using __GenerationCompleteCallback = std::function<void(InternalError error, fig::string msg)>;
 
 	struct PrepareArguments
 	{
@@ -146,9 +146,9 @@ private:
 		MessageType msgType = MessageType::Undefined;
 		GenerateFlags flags = GenerateFlags::None;
 		int maxMessages = 0;
-		string prepend {};
-		string responseId {};
-		string subMessageId {};
+		fig::string prepend {};
+		fig::string responseId {};
+		fig::string subMessageId {};
 		Sentences history; // Used for embedding
 	};
 	void __Generate(std::stop_token& stop, GenerateArguments args, __GenerationCompleteCallback onComplete);
@@ -177,7 +177,7 @@ private:
 		LLMTaskType type;
 
 		// Parameters
-		string input;
+		fig::string input;
 		Role role = Role::Undefined;
 		MessageType msgType = MessageType::Undefined;
 
@@ -190,8 +190,8 @@ private:
 
 	void __ProcessTaskQueue(std::stop_token stop, __GenerationCompleteCallback onComplete);
 	bool __ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
-	bool __SendMessage(string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
-	bool __PushMessage(Role role, string message, MessageType msgType, bool visible, int ttl);
+	bool __SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
+	bool __PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl);
 	bool __Instigate(Role role, MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 
 private:
@@ -204,7 +204,7 @@ private:
 
 	std::mutex _resultMutex; // Guards output queue
 	std::queue<MessagePiece> _resultQueue;
-	std::set<string> _activeResponseIds;
+	std::set<fig::string> _activeResponseIds;
 	
 	std::unique_ptr<std::jthread> _workerThread;
 	std::shared_ptr<LLMStatusChannel> _pStatus;

@@ -39,7 +39,7 @@ void LLMStatusChannel::EmitSignal(LLMStatusSignal signal)
 	_statusSignals.push(signal);
 }
 
-void LLMStatusChannel::ReportModelInfo(string modelName, int32_t ctx_size, int32_t used_ctx)
+void LLMStatusChannel::ReportModelInfo(fig::string modelName, int32_t ctx_size, int32_t used_ctx)
 {
 	std::scoped_lock _ { _statusMutex };
 	_modelName = modelName;

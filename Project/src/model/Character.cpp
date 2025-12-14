@@ -6,7 +6,7 @@
 
 using namespace tinyxml2;
 
-bool Character::LoadFromXml(string filename)
+bool Character::LoadFromXml(fig::string filename)
 {
 	XMLDocument xmlDoc;
 	if (xmlDoc.LoadFile(filename.c_str()) != XML_SUCCESS)
@@ -53,7 +53,7 @@ bool Character::LoadFromXml(string filename)
 	XMLElement* pGender = root.FirstChildElement("Gender");
 	if (pGender)
 	{
-		string gender = string_util::trim(pGender->GetText());
+		fig::string gender = string_util::trim(pGender->GetText());
 		if (!gender.empty())
 			properties.push_back(CharacterProperty { "gender", gender, "Gender" });
 	}

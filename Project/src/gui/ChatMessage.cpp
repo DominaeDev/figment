@@ -37,7 +37,7 @@
 #define TEXT_HMARGIN		(TEXT_LEFT_MARGIN + TEXT_RIGHT_MARGIN)
 #define TEXT_VMARGIN		(TEXT_TOP_MARGIN + TEXT_BOTTOM_MARGIN)
 
-ChatMessage::ChatMessage(Control* pParent, Role role, string characterId, string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
+ChatMessage::ChatMessage(Control* pParent, Role role, fig::string characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
 	_name(name),
 	_messageType(msgType),
 	_role(role),
@@ -127,9 +127,9 @@ ChatMessage::ChatMessage(Control* pParent, Role role, string characterId, string
 	}
 }
 
-static void strip_ends(string& text, MessageType msgType)
+static void strip_ends(fig::string& text, MessageType msgType)
 {
-	string begin, end;
+	fig::string begin, end;
 	switch (msgType)
 	{
 	case MessageType::Dialogue:
@@ -162,7 +162,7 @@ static void strip_ends(string& text, MessageType msgType)
 		text = text.substr(1);
 }
 
-void ChatMessage::SetMessage(string text, bool complete)
+void ChatMessage::SetMessage(fig::string text, bool complete)
 {
 	bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
 	bool bRight = (_style & Style::Right) == Style::Right;
@@ -213,7 +213,7 @@ void ChatMessage::SetMessage(string text, bool complete)
 	InvalidateLayout();
 }
 
-void ChatMessage::AppendMessage(const string& text, bool complete)
+void ChatMessage::AppendMessage(const fig::string& text, bool complete)
 {
 	if (_pMessageText)
 		SetMessage(_message + text, complete);

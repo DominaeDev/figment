@@ -1,9 +1,8 @@
 #ifndef FILE_UTILITY_H__
 #define FILE_UTILITY_H__
 
+#include "Types.h"
 #include <expected>
-#include <string>
-#include <vector>
 
 enum class FileError : uint32_t
 {
@@ -17,13 +16,13 @@ enum class FileError : uint32_t
 namespace file_util
 {
 	// File IO
-	std::expected<std::string, FileError> ReadTextFile(const std::string& filename, bool normalizeNewlines = true);
-	FileError ReadTextFile(const std::string& filename, std::string& out_content, bool normalizeNewlines = true);
-	FileError WriteTextFile(const std::string& filename, const std::string& content, bool append = false);
-	std::expected<std::vector<std::string>, FileError> FindFilesInPath(const std::string& dirPath, const std::string& extension);
+	std::expected<fig::string, FileError> ReadTextFile(const fig::string& filename, bool normalizeNewlines = true);
+	FileError ReadTextFile(const fig::string& filename, fig::string& out_content, bool normalizeNewlines = true);
+	FileError WriteTextFile(const fig::string& filename, const fig::string& content, bool append = false);
+	std::expected<std::vector<fig::string>, FileError> FindFilesInPath(const fig::string& dirPath, const fig::string& extension);
 
 	// Utility
-	std::string GetFilename(const std::string& str);
+	fig::string GetFilename(const fig::string& str);
 
 }
 

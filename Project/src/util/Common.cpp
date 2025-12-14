@@ -8,7 +8,7 @@
 #include <uuid_v4.h>
 #include <format>
 
-void common_util::DebugPrint(std::string message) noexcept
+void common_util::DebugPrint(fig::string message) noexcept
 {
 #if _DEBUG
 	if (message.empty())
@@ -20,13 +20,13 @@ void common_util::DebugPrint(std::string message) noexcept
 #endif
 }
 
-void common_util::DebugPrintLn(std::string message) noexcept
+void common_util::DebugPrintLn(fig::string message) noexcept
 {
 	DebugPrint(message);
 	DebugPrint("\r\n");
 }
 
-std::string common_util::CreateUUID()
+fig::string common_util::CreateUUID()
 {
 	static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 	return uuidGenerator.getUUID().str();

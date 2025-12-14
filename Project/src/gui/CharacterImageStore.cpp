@@ -4,7 +4,7 @@
 #include <SDL3_image/SDL_image.h>
 
 
-std::map<string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByCharacter;
+std::map<fig::string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByCharacter;
 
 void CharacterImageStore::Init(Renderer* pRenderer)
 {
@@ -29,12 +29,12 @@ void CharacterImageStore::Release()
 	_imagesByCharacter.clear();
 }
 
-bool CharacterImageStore::LoadCharacterPortrait(string characterId, string filename)
+bool CharacterImageStore::LoadCharacterPortrait(fig::string characterId, fig::string filename)
 {
 	return LoadTexture(Application::GetRenderer(), characterId, ImageType::Portrait_Square, filename);
 }
 
-bool CharacterImageStore::LoadTexture(Renderer* pRenderer, string characterId, ImageType imageType, string filename)
+bool CharacterImageStore::LoadTexture(Renderer* pRenderer, fig::string characterId, ImageType imageType, fig::string filename)
 {
 	if (imageType == ImageType::Undefined)
 		return false;
@@ -63,7 +63,7 @@ bool CharacterImageStore::LoadTexture(Renderer* pRenderer, string characterId, I
 	}
 }
 
-Texture* CharacterImageStore::GetTexture(string characterId, ImageType imageType)
+Texture* CharacterImageStore::GetTexture(fig::string characterId, ImageType imageType)
 {
 	if (characterId.empty())
 		return nullptr;

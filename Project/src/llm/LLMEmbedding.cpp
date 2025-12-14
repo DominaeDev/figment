@@ -17,7 +17,7 @@ LLMEmbedding::~LLMEmbedding()
 	Shutdown();
 }
 
-bool LLMEmbedding::LoadModel(string filename)
+bool LLMEmbedding::LoadModel(fig::string filename)
 {
 	const int ngl = 99; // All layers
 	const int n_ctx = Constants::Embedding::ContextSize;
@@ -57,7 +57,7 @@ bool LLMEmbedding::LoadModel(string filename)
 
 	n_embed = llama_model_n_embd(_pModel);
 
-	Embeddings::Initialize(string(Constants::Embedding::EmbeddingSaveLocation), _modelName);
+	Embeddings::Initialize(fig::string(Constants::Embedding::EmbeddingSaveLocation), _modelName);
 
 	return true;
 }
@@ -138,9 +138,9 @@ bool LLMEmbedding::Search(const Sentences& sentences, bool bUser, bool bBot)
 	return true;
 }
 
-bool LLMEmbedding::Generate(std::string text, EmbeddingVector& out_embedding)
+bool LLMEmbedding::Generate(fig::string text, EmbeddingVector& out_embedding)
 {
-	string content = text;
+	fig::string content = text;
 	const llama_vocab* pVocab = llama_model_get_vocab(_pModel);
 
 	Sentences sentences;
@@ -201,7 +201,7 @@ static bool batch_decode(llama_context* ctx, llama_batch& batch, float* output, 
 }
 
 
-bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, string content, Mode mode, EmbeddingVector& out_embedding)
+bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, fig::string content, Mode mode, EmbeddingVector& out_embedding)
 {
 	int32_t ctx_size = llama_n_ctx(_pCtx);
 	const llama_vocab* pVocab = llama_model_get_vocab(_pModel);
@@ -209,9 +209,9 @@ bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, string 
 	std::vector<llama_token> tokens = in_tokens;
 	std::vector<llama_token> instructions;
 	if (mode == Mode::Query && !Constants::Embedding::QueryPrefix.empty())
-		instructions = llm_util::tokenize(pVocab, string(Constants::Embedding::QueryPrefix), false);
+		instructions = llm_util::tokenize(pVocab, toStr(Constants::Embedding::QueryPrefix), false);
 	else if (mode == Mode::Document && !Constants::Embedding::DocumentPrefix.empty())
-		instructions = llm_util::tokenize(pVocab, string(Constants::Embedding::DocumentPrefix), false);
+		instructions = llm_util::tokenize(pVocab, toStr(Constants::Embedding::DocumentPrefix), false);
 	tokens.insert(tokens.begin(), instructions.begin(), instructions.end());
 
 	llama_batch batch;
@@ -240,7 +240,7 @@ void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sen
 {
 	auto& embeddings = Embeddings::GetEmbeddings();
 
-	std::vector<std::pair<float, string>> results;
+	std::vector<std::pair<float, fig::string>> results;
 	const size_t MaxLength = 64;
 	for (size_t i = 0; i < embeddings.size(); ++i)
 	{
@@ -249,7 +249,7 @@ void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sen
 
 		float similarity = common_embd_similarity_cos(embeddings[i].vec.data(), vec.data(), (int32_t)vec.size());
 
-		string content = embeddings[i].content;
+		fig::string content = embeddings[i].content;
 		if (content.size() > MaxLength)
 			content = content.substr(0, MaxLength) + "...";
 		results.push_back(std::make_pair(similarity, content));

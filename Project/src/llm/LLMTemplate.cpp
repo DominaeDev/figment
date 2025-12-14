@@ -6,9 +6,9 @@
 #include <map>
 
 PromptTemplate llm_tmpl::current_template = PromptTemplate::Default;
-string llm_tmpl::_template {};
+fig::string llm_tmpl::_template {};
 
-static const std::map<PromptTemplate, std::string> LLAMA_CPP_TEMPLATES = {
+static const std::map<PromptTemplate, fig::string> LLAMA_CPP_TEMPLATES = {
 	{ PromptTemplate::ChatML,			"chatml",			},
 	{ PromptTemplate::Llama2_v1,		"llama2",			},
 	{ PromptTemplate::Llama2_sys,		"llama2-sys",		},
@@ -60,7 +60,7 @@ static const char* get_tmpl(PromptTemplate tmpl)
 }
 
 // Lifted from llama.cpp API
-static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama_chat_message*>& chat, std::string& dest, bool add_ass) 
+static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama_chat_message*>& chat, fig::string& dest, bool add_ass)
 {
     // Taken from the research: https://github.com/ggerganov/llama.cpp/issues/5527
     std::stringstream ss;
@@ -76,8 +76,8 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
         // Official mistral 'v7' template
         // See: https://huggingface.co/mistralai/Mistral-Large-Instruct-2411#basic-instruct-template-v7
         for (auto message : chat) {
-            std::string role(message->role);
-            std::string content(message->content);
+            fig::string role(message->role);
+            fig::string content(message->content);
             if (role == "system") {
                 ss << "[SYSTEM_PROMPT] " << content << "[/SYSTEM_PROMPT]";
             } else if (role == "user") {
@@ -92,8 +92,8 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
             || tmpl == PromptTemplate::MistralV3_tekken) {
         // See: https://github.com/mistralai/cookbook/blob/main/concept-deep-dive/tokenization/chat_templates.md
         // See: https://github.com/mistralai/cookbook/blob/main/concept-deep-dive/tokenization/templates.md
-        std::string leading_space = tmpl == PromptTemplate::MistralV1 ? " " : "";
-        std::string trailing_space = tmpl == PromptTemplate::MistralV3_tekken ? "" : " ";
+        fig::string leading_space = tmpl == PromptTemplate::MistralV1 ? " " : "";
+        fig::string trailing_space = tmpl == PromptTemplate::MistralV3_tekken ? "" : " ";
         bool trim_assistant_message = tmpl == PromptTemplate::MistralV3;
         bool is_inside_turn = false;
         for (auto message : chat) {
@@ -101,8 +101,8 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
                 ss << leading_space << "[INST]" << trailing_space;
                 is_inside_turn = true;
             }
-            std::string role(message->role);
-            std::string content(message->content);
+            fig::string role(message->role);
+            fig::string content(message->content);
             if (role == "system") {
                 ss << content << "\n\n";
             } else if (role == "user") {
@@ -129,8 +129,8 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
         bool is_inside_turn = true; // skip BOS at the beginning
         ss << "[INST] ";
         for (auto message : chat) {
-            std::string content = strip_message ? string_util::trim(message->content) : message->content;
-            std::string role(message->role);
+            fig::string content = strip_message ? string_util::trim(message->content) : message->content;
+            fig::string role(message->role);
             if (!is_inside_turn) {
                 is_inside_turn = true;
                 ss << (add_bos_inside_history ? "<s>[INST] " : "[INST] ");
@@ -152,7 +152,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     } else if (tmpl == PromptTemplate::Phi3) {
         // Phi 3
         for (auto message : chat) {
-            std::string role(message->role);
+            fig::string role(message->role);
             ss << "<|" << role << "|>\n" << message->content << "<|end|>\n";
         }
         if (add_ass) {
@@ -168,9 +168,9 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
         }
     } else if (tmpl == PromptTemplate::Gemma) {
         // google/gemma-7b-it
-        std::string system_prompt = "";
+        fig::string system_prompt = "";
         for (auto message : chat) {
-            std::string role(message->role);
+            fig::string role(message->role);
             if (role == "system") {
                 // there is no system message for gemma, but we will merge it with user prompt, so nothing is broken
 				if (chat.size() > 1)
@@ -196,7 +196,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     } else if (tmpl == PromptTemplate::Deepseek) {
         // deepseek-ai/deepseek-coder-33b-instruct
         for (auto message : chat) {
-            std::string role(message->role);
+            fig::string role(message->role);
             if (role == "system") {
                 ss << message->content;
             } else if (role == "user") {
@@ -211,7 +211,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     } else if (tmpl == PromptTemplate::CommandR) {
         // CohereForAI/c4ai-command-r-plus
         for (auto message : chat) {
-            std::string role(message->role);
+            fig::string role(message->role);
             if (role == "system") {
                 ss << "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>" << string_util::trim(message->content) << "<|END_OF_TURN_TOKEN|>";
             } else if (role == "user") {
@@ -226,7 +226,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     } else if (tmpl == PromptTemplate::Llama3) {
         // Llama 3
         for (auto message : chat) {
-            std::string role(message->role);
+            fig::string role(message->role);
             ss << "<|start_header_id|>" << role << "<|end_header_id|>\n\n" << string_util::trim(message->content) << "<|eot_id|>";
         }
         if (add_ass) {
@@ -235,7 +235,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     } else if (tmpl == PromptTemplate::Deepseek2) {
         // DeepSeek-V2
         for (auto message : chat) {
-            std::string role(message->role);
+            fig::string role(message->role);
             if (role == "system") {
                 ss << message->content << "\n\n";
             } else if (role == "user") {
@@ -250,7 +250,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     } else if (tmpl == PromptTemplate::Deepseek3) {
         // DeepSeek-V3
         for (auto message : chat) {
-            std::string role(message->role);
+            fig::string role(message->role);
             if (role == "system") {
                 ss << message->content << "\n\n";
             } else if (role == "user") {
@@ -265,7 +265,7 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     } else if (tmpl == PromptTemplate::Llama4) {
         // Llama 4
         for (auto message : chat) {
-            std::string role(message->role);
+            fig::string role(message->role);
             ss << "<|header_start|>" << role << "<|header_end|>\n\n" << string_util::trim(message->content) << "<|eot|>";
         }
         if (add_ass) {
@@ -279,21 +279,21 @@ static int32_t apply_template(PromptTemplate tmpl, const std::vector<const llama
     return toI(dest.size());
 }
 
-std::pair<string, string> llm_tmpl::get_chat_template_prefix_suffix(Role role, string name)
+std::pair<fig::string, fig::string> llm_tmpl::get_chat_template_prefix_suffix(Role role, fig::string name)
 {
 	// Strip prompt template from block content
 	static const char* const SUBSTITUTE = "{{SUBSTITUTE}}";
-	string tmpl = apply_chat_template({ Message { role, SUBSTITUTE, name } }, false);
+	fig::string tmpl = apply_chat_template({ Message { role, SUBSTITUTE, name } }, false);
 	if (tmpl.empty())
 		return std::make_pair("", ""); // Unknown template
 
 	size_t pos_msg = tmpl.find(SUBSTITUTE);
-	string prefix = tmpl.substr(0, pos_msg);
-	string suffix = tmpl.substr(pos_msg + strlen(SUBSTITUTE));
+	fig::string prefix = tmpl.substr(0, pos_msg);
+	fig::string suffix = tmpl.substr(pos_msg + strlen(SUBSTITUTE));
 	return std::make_pair(prefix, suffix);
 }
 
-string llm_tmpl::apply_chat_template_prefix(Role role, string content, string name)
+fig::string llm_tmpl::apply_chat_template_prefix(Role role, fig::string content, fig::string name)
 {
 	auto [pre, post] = get_chat_template_prefix_suffix(role, name);
 	
@@ -309,7 +309,7 @@ PromptTemplate llm_tmpl::auto_detect_template(llama_model* pModel)
 	const char* tmpl = llama_model_chat_template(pModel, nullptr);
 	if (tmpl)
 	{
-		_template = string(tmpl);
+		_template = toStr(tmpl);
 		current_template = PromptTemplate::Automatic;
 		return PromptTemplate::Automatic;
 	}
@@ -319,7 +319,7 @@ PromptTemplate llm_tmpl::auto_detect_template(llama_model* pModel)
 	return PromptTemplate::Undefined;
 }
 
-string llm_tmpl::apply_chat_template(Messages messages, bool add_assistant)
+fig::string llm_tmpl::apply_chat_template(Messages messages, bool add_assistant)
 {
 	if (messages.empty())
 		return "";
@@ -361,7 +361,7 @@ string llm_tmpl::apply_chat_template(Messages messages, bool add_assistant)
 			return "";
 		}
 
-		return string(formatted.begin(), formatted.begin() + new_len);
+		return fig::string(formatted.begin(), formatted.begin() + new_len);
 	}
 	else
 	{
@@ -374,7 +374,7 @@ string llm_tmpl::apply_chat_template(Messages messages, bool add_assistant)
 		if (tmpl == PromptTemplate::Undefined || tmpl == PromptTemplate::Automatic)
 			tmpl = PromptTemplate::Default;
 
-		std::string formatted;
+		fig::string formatted;
 		int new_len = apply_template(tmpl, pMsgs, formatted, add_assistant);
 
 		if (new_len < 0)

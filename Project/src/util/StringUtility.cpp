@@ -4,51 +4,51 @@
 #include <cwctype>
 #include <ranges>
 
-void string_util::ltrim_str(std::string& s)
+void string_util::ltrim_str(fig::string& s)
 {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
 		return !std::isspace(ch);
 	}));
 }
 
-std::string string_util::ltrim(const std::string& in)
+fig::string string_util::ltrim(const fig::string& in)
 {
-	std::string s(in);
+	fig::string s(in);
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
 		return !std::isspace(ch);
 	}));
 	return s;
 }
 
-void string_util::rtrim_str(std::string& s)
+void string_util::rtrim_str(fig::string& s)
 {
 	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
 		return !std::isspace(ch);
 	}).base(), s.end());
 }
 
-std::string string_util::rtrim(const std::string& in)
+fig::string string_util::rtrim(const fig::string& in)
 {
-	std::string s(in);
+	fig::string s(in);
 	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
 		return !std::isspace(ch);
 	}).base(), s.end());
 	return s;
 }
 
-bool string_util::empty_or_whitespace(const std::string& s)
+bool string_util::empty_or_whitespace(const fig::string& s)
 {
-	return s.size() == 0 || s.find_first_not_of(" \t\r\n", 0, 4) == std::string::npos;
+	return s.size() == 0 || s.find_first_not_of(" \t\r\n", 0, 4) == fig::npos;
 }
 
-std::string string_util::lcase(const std::string& str)
+fig::string string_util::lcase(const fig::string& str)
 {
 	std::wstring s = from_utf8(str);
 	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towlower(c); });
 	return to_utf8(s);
 }
 
-std::string string_util::ucase(const std::string& str)
+fig::string string_util::ucase(const fig::string& str)
 {
 	std::wstring s = from_utf8(str);
 	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::towupper(c); });
@@ -69,7 +69,7 @@ std::wstring string_util::ucase(const std::wstring& str)
 	return s;
 }
 
-int string_util::compare(const std::string& a, const std::string& b, bool ignore_case)
+int string_util::compare(const fig::string& a, const fig::string& b, bool ignore_case)
 {
 	std::wstring wa = from_utf8(a);
 	std::wstring wb = from_utf8(b);
@@ -86,14 +86,14 @@ int string_util::compare(const std::string& a, const std::string& b, bool ignore
 	return 0;
 }
 
-bool string_util::equals(const std::string& a, const std::string& b, bool ignore_case)
+bool string_util::equals(const fig::string& a, const fig::string& b, bool ignore_case)
 {
 	if (!ignore_case)
 		return a == b;
 	return compare(a, b, true) == 0;
 }
 
-bool string_util::begins_with(const std::string& str, const std::string& prefix, bool ignore_case)
+bool string_util::begins_with(const fig::string& str, const fig::string& prefix, bool ignore_case)
 {
 	std::wstring wstr = from_utf8(str);
 	std::wstring wprefix = from_utf8(prefix);
@@ -108,7 +108,7 @@ bool string_util::begins_with(const std::string& str, const std::string& prefix,
 		return begin_piece == wprefix;
 }
 
-bool string_util::ends_with(const std::string& str, const std::string& suffix, bool ignore_case)
+bool string_util::ends_with(const fig::string& str, const fig::string& suffix, bool ignore_case)
 {
 	std::wstring wstr = from_utf8(str);
 	std::wstring wsuffix = from_utf8(suffix);
@@ -124,18 +124,18 @@ bool string_util::ends_with(const std::string& str, const std::string& suffix, b
 		return end_piece == wsuffix;
 }
 
-std::string& string_util::replace(std::string& str, const std::string& find, const std::string& replace)
+fig::string& string_util::replace(fig::string& str, const fig::string& find, const fig::string& replace)
 {
 	auto&& pos = str.find(find);
-	if (pos != std::string::npos)
+	if (pos != fig::npos)
 		str.replace(pos, find.length(), replace);
 	return str;
 }
 
-std::string& string_util::replace_all(std::string& str, const std::string& find, const std::string& replace)
+fig::string& string_util::replace_all(fig::string& str, const fig::string& find, const fig::string& replace)
 {
 	auto&& pos = str.find(find);
-	while (pos != std::string::npos)
+	while (pos != fig::npos)
 	{
 		str.replace(pos, find.length(), replace);
 		pos = str.find(find, pos + replace.length());
@@ -143,13 +143,13 @@ std::string& string_util::replace_all(std::string& str, const std::string& find,
 	return str;
 }
 
-std::vector<std::string> string_util::split(std::string s, char delimiter, bool removeEmpty)
+std::vector<fig::string> string_util::split(fig::string s, char delimiter, bool removeEmpty)
 {
-	std::vector<std::string> sections;
+	std::vector<fig::string> sections;
 	size_t pos = 0;
-	while ((pos = s.find(delimiter)) != std::string::npos)
+	while ((pos = s.find(delimiter)) != fig::npos)
 	{
-		std::string token = s.substr(0, pos);
+		fig::string token = s.substr(0, pos);
 		if (!removeEmpty || !empty_or_whitespace(token))
 			sections.push_back(token);
 		s.erase(0, pos + 1);
@@ -157,17 +157,17 @@ std::vector<std::string> string_util::split(std::string s, char delimiter, bool 
 	if (!removeEmpty || !empty_or_whitespace(s))
 		sections.push_back(s); // Remainder
 
-	std::transform(sections.begin(), sections.end(), sections.begin(), [](std::string str) {
+	std::transform(sections.begin(), sections.end(), sections.begin(), [](fig::string str) {
 		return string_util::trim(str);
 	});
 
 	return sections;
 }
 
-std::vector<std::string> string_util::split(const std::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty)
+std::vector<fig::string> string_util::split(const fig::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty)
 {
-	std::vector<std::string> result;
-	std::string token;
+	std::vector<fig::string> result;
+	fig::string token;
 
 	for (char ch : input)
 	{
@@ -189,7 +189,7 @@ std::vector<std::string> string_util::split(const std::string& input, const std:
 	return result;
 }
 
-std::string& string_util::normalize_newlines(std::string& text)
+fig::string& string_util::normalize_newlines(fig::string& text)
 {
 	size_t cursor_write = 0;
 
@@ -210,24 +210,24 @@ std::string& string_util::normalize_newlines(std::string& text)
 	return text;
 }
 
-std::string string_util::normalize_newlines(std::string&& text)
+fig::string string_util::normalize_newlines(fig::string&& text)
 {
 	return normalize_newlines(text); // rvo
 }
 
-std::wstring string_util::from_utf8(const std::string& str)
+std::wstring string_util::from_utf8(const fig::string& str)
 {
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	return converter.from_bytes(str);
 }
 
-std::string string_util::to_utf8(const std::wstring& str)
+fig::string string_util::to_utf8(const std::wstring& str)
 {
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	return converter.to_bytes(str);
 }
 
-size_t string_util::validate_utf8(const std::string& text) noexcept
+size_t string_util::validate_utf8(const fig::string& text) noexcept
 {
 	size_t len = text.size();
 	if (len == 0) return 0;

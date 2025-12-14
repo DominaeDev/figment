@@ -41,14 +41,14 @@ struct ChatCommandFunctionInfo
 };
 
 
-static std::vector<string> FilterMessageIDs(std::vector<RemovedMessage> msgs) 
+static std::vector<fig::string> FilterMessageIDs(std::vector<RemovedMessage> msgs)
 {
 	return msgs
 		| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
-		| std::ranges::to<std::vector<string>>();
+		| std::ranges::to<std::vector<fig::string>>();
 };
 
-static Role RoleFromName(string text, LLMInstancePtr pLLM) {
+static Role RoleFromName(fig::string text, LLMInstancePtr pLLM) {
 	if (empty_or_whitespace(text))
 		return Role::Undefined;
 	if (std::iswdigit(from_utf8(text)[0]))
@@ -215,10 +215,10 @@ static bool cmdNewStateVariable(ParsedChatCommand cmd, Ctx ctx)
 	if (!cmd.text.empty())
 	{
 		size_t pos_eq = cmd.text.find('=');
-		if (pos_eq != string::npos)
+		if (pos_eq != fig::npos)
 		{
-			string name = string_util::trim(cmd.text.substr(0, pos_eq));
-			string value = string_util::trim(cmd.text.substr(pos_eq + 1));
+			fig::string name = string_util::trim(cmd.text.substr(0, pos_eq));
+			fig::string value = string_util::trim(cmd.text.substr(pos_eq + 1));
 			if (ctx.pLLM->SetStateVariable(name, value, true))
 			{
 				ctx.pChatScroll->AddSystemMessage(std::format("{} = {}", name, value));
@@ -234,10 +234,10 @@ static bool cmdSetStateVariable(ParsedChatCommand cmd, Ctx ctx)
 	if (!cmd.text.empty())
 	{
 		size_t pos_eq = cmd.text.find('=');
-		if (pos_eq != string::npos)
+		if (pos_eq != fig::npos)
 		{
-			string name = string_util::trim(cmd.text.substr(0, pos_eq));
-			string value = string_util::trim(cmd.text.substr(pos_eq + 1));
+			fig::string name = string_util::trim(cmd.text.substr(0, pos_eq));
+			fig::string value = string_util::trim(cmd.text.substr(pos_eq + 1));
 			if (ctx.pLLM->SetStateVariable(name, value, false))
 			{
 				ctx.pChatScroll->AddSystemMessage(std::format("{} = {}", name, value));

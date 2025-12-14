@@ -27,7 +27,7 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	EnableCulling(true);
 }
 
-void ChatScroll::AddDummyMessage(string name, Role role, MessageType msgType, string message)
+void ChatScroll::AddDummyMessage(fig::string name, Role role, MessageType msgType, fig::string message)
 {
 	ChatMessage* pMessage = AddMessage(name, role, msgType, message, true);
 	pMessage->SetActive(false);
@@ -41,7 +41,7 @@ void ChatScroll::AddDummyMessage(string name, Role role, MessageType msgType, st
 	});
 }
 
-void ChatScroll::AddSystemMessage(string message)
+void ChatScroll::AddSystemMessage(fig::string message)
 {
 	ChatMessage* pMessage = AddMessage("", Role::System, MessageType::SystemMessage, message, true );
 	pMessage->SetActive(false);
@@ -56,7 +56,7 @@ void ChatScroll::AddSystemMessage(string message)
 	});
 }
 
-ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType msgType, string message, bool complete)
+ChatMessage* ChatScroll::AddMessage(fig::string identifier, Role role, MessageType msgType, fig::string message, bool complete)
 {
 	if (msgType == MessageType::Narration)
 		role = Role::Narrator;
@@ -69,7 +69,7 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	});
 	
 	Role lastRole = Role::Undefined;
-	string lastId = "";
+	fig::string lastId = "";
 	if (itLast != _messages.crend())
 	{
 		if ((*itLast).msgType == MessageType::Narration)
@@ -83,8 +83,8 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	bShowAvatar &= (role != lastRole) || (identifier != lastId);
 	bool bShowName = bShowAvatar;
 	
-	string id = identifier;
-	string name = _session.GetNameOf(role);
+	fig::string id = identifier;
+	fig::string name = _session.GetNameOf(role);
 	if (role == Role::System)
 	{
 		bShowName = true;
@@ -117,10 +117,10 @@ ChatMessage* ChatScroll::AddMessage(string identifier, Role role, MessageType ms
 	return pMessage;
 }
 
-int ChatScroll::RemoveMessages(std::span<string> ids)
+int ChatScroll::RemoveMessages(std::span<fig::string> ids)
 {
 	int removed = 0;
-	std::set<string> removedIds;
+	std::set<fig::string> removedIds;
 	for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
 	{
 		MessageEntry& entry = _messages[i];
@@ -158,7 +158,7 @@ void ChatScroll::ClearMessages()
 	GetSizer()->Clear();
 }
 
-std::tuple<std::string, std::string> ChatScroll::GetLastMessage() const
+std::tuple<fig::string, fig::string> ChatScroll::GetLastMessage() const
 {
 	if (_messages.empty())
 		return {};
@@ -226,7 +226,7 @@ void ChatScroll::Poll()
 		}
 		else
 		{
-			string text = string_util::trim(piece.content);
+			fig::string text = string_util::trim(piece.content);
 			if (text.empty() || (text.length() == 1 && (text[0] == '"' || text[0] == '*' || text[0] == '['))) // Empty or scaffolding
 			{
 				_messages.push_back(MessageEntry {

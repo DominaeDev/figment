@@ -75,7 +75,7 @@ struct color_util
 	static Color multiply_rgb(Color colorA, float value);
 	static Color with_alpha(Color color, Uint8 alpha);
 
-	static Color color_from_string(std::string hex);
+	static Color color_from_string(fig::string hex);
 	static void color_to_hsv(Color color, float& h, float& s, float& v);
 	static Color hsv_to_color(float h, float s, float v);
 

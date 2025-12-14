@@ -8,25 +8,25 @@
 
 struct CharacterProperty 
 {
-	string key;
-	string value;
-	string label;
+	fig::string key;
+	fig::string value;
+	fig::string label;
 };
 
 class Character
 {
 public:
-	string id;
-	string shortName;
-	string fullName;
-	string brief;
-	string description;
-	string portraitFilename;
+	fig::string id;
+	fig::string shortName;
+	fig::string fullName;
+	fig::string brief;
+	fig::string description;
+	fig::string portraitFilename;
 	Color bgColor {};
 	Color borderColor {};
 	std::vector<CharacterProperty> properties;
 
-	bool LoadFromXml(string filename);
+	bool LoadFromXml(fig::string filename);
 };
 
 #endif

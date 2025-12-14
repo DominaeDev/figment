@@ -19,17 +19,17 @@ namespace Constants
 
 	namespace Chat
 	{
-		inline constexpr std::string_view DialogueTag = "talk";
-		inline constexpr std::string_view ActionTag = "act";
-		inline constexpr std::string_view ThoughtTag = "think";
-		inline constexpr std::string_view NarrationTag = "narrator";
-		inline constexpr std::string_view DirectionTag = "director";
-		inline constexpr std::string_view StateReportTag = "change";
-		inline constexpr std::string_view DialogueTagEnd = "/talk";
-		inline constexpr std::string_view ActionTagEnd = "/act";
-		inline constexpr std::string_view ThoughtTagEnd = "/think";
-		inline constexpr std::string_view NarrationTagEnd = "/narrator";
-		inline constexpr std::string_view DirectionTagEnd = "/director";
+		inline constexpr fig::string_view DialogueTag = "talk";
+		inline constexpr fig::string_view ActionTag = "act";
+		inline constexpr fig::string_view ThoughtTag = "think";
+		inline constexpr fig::string_view NarrationTag = "narrator";
+		inline constexpr fig::string_view DirectionTag = "director";
+		inline constexpr fig::string_view StateReportTag = "change";
+		inline constexpr fig::string_view DialogueTagEnd = "/talk";
+		inline constexpr fig::string_view ActionTagEnd = "/act";
+		inline constexpr fig::string_view ThoughtTagEnd = "/think";
+		inline constexpr fig::string_view NarrationTagEnd = "/narrator";
+		inline constexpr fig::string_view DirectionTagEnd = "/director";
 
 		inline constexpr int DefaultNarratorCooldown = 5;
 	}
@@ -58,7 +58,7 @@ namespace Constants
 		inline constexpr int32_t MaxSequences = 4;
 	}
 
-	inline constexpr std::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";
+	inline constexpr fig::string_view DefaultModelLocation = "M:\\LLM\\default_model.gguf";
 	
 	namespace LLM
 	{
@@ -68,16 +68,16 @@ namespace Constants
 
 	namespace Embedding
 	{
-		inline constexpr std::string_view DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
-		inline constexpr std::string_view EmbeddingSaveLocation = ".\\embeddings\\";
+		inline constexpr fig::string_view DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
+		inline constexpr fig::string_view EmbeddingSaveLocation = ".\\embeddings\\";
 		inline constexpr int32_t ContextSize = 384;
 		inline constexpr int32_t Depth = 1;
 		inline constexpr bool SplitSentences = true;
-		inline constexpr std::string_view DocumentPrefix	= "";
-		inline constexpr std::string_view QueryPrefix		= "";
-//		inline constexpr std::string_view DocumentPrefix	= "search_document: ";
-//		inline constexpr std::string_view QueryPrefix		= "search_query: ";
-//		inline constexpr std::string_view DocumentPrefix	= "Represent the statement: ";
-//		inline constexpr std::string_view QueryPrefix		= "Represent the statement: ";
+		inline constexpr fig::string_view DocumentPrefix	= "";
+		inline constexpr fig::string_view QueryPrefix		= "";
+//		inline constexpr fig::string_view DocumentPrefix	= "search_document: ";
+//		inline constexpr fig::string_view QueryPrefix		= "search_query: ";
+//		inline constexpr fig::string_view DocumentPrefix	= "Represent the statement: ";
+//		inline constexpr fig::string_view QueryPrefix		= "Represent the statement: ";
 	}
 }

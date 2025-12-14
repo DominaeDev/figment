@@ -5,7 +5,7 @@
 #include "Constants.h"
 #include <algorithm>
 
-StaticText::StaticText(Control* pParent, string text, FontFace fontFace, double ptSize, bool bAutoSize) : ControlWithMargins(pParent),
+StaticText::StaticText(Control* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize) : ControlWithMargins(pParent),
 	_bAutoSize(bAutoSize)
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);
@@ -38,7 +38,7 @@ void StaticText::ReleaseTexture()
 	}
 }
 
-void StaticText::SetText(string text)
+void StaticText::SetText(fig::string text)
 {
 	_text = text;
 
@@ -46,7 +46,7 @@ void StaticText::SetText(string text)
 	InvalidateLayout();
 }
 
-void StaticText::SetTextAndResize(string text, int& newWidth, int& newHeight)
+void StaticText::SetTextAndResize(fig::string text, int& newWidth, int& newHeight)
 {
 	_text = text;
 	_bInvalidated = false;

@@ -25,7 +25,7 @@ public:
 	void InitializeModel();
 	void UnloadModel();
 
-	static void SetStatusBar(std::string_view message);
+	static void SetStatusBar(fig::string_view message);
 	static MainFrame& GetInstance() { return *s_pInstance; }
 
 	bool HandleKeyboardEvent(SDL_KeyboardEvent event);
@@ -56,7 +56,7 @@ private:
 private:
 	void AutoChat();
 	bool _bAutoChat;
-	std::vector<string> _autoScript;
+	std::vector<fig::string> _autoScript;
 	size_t _autoScriptIndex = 0;
 #endif
 };

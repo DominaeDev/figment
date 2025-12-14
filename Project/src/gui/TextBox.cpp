@@ -670,14 +670,14 @@ void TextBox::Backspace()
 
 void TextBox::BackspaceToBeginning()
 {
-	/* Delete to the beginning of the string */
+	/* Delete to the beginning of the fig::string */
 	TTF_DeleteTextString(_pText, 0, _cursor);
 	SetCursorPosition(0);
 }
 
 void TextBox::DeleteToEnd()
 {
-	/* Delete to the end of the string */
+	/* Delete to the end of the fig::string */
 	TTF_DeleteTextString(_pText, _cursor, -1);
 }
 
@@ -1015,7 +1015,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			{
 				if (_pOnEnter && _pText->text) // Invoke
 				{
-					string text = string_util::trim(string(_pText->text));
+					fig::string text = string_util::trim(fig::string(_pText->text));
 					Clear();
 					_pOnEnter(text);
 				}
@@ -1070,7 +1070,7 @@ void TextBox::Clear()
 	SetCursorPosition(0);
 }
 
-void TextBox::SetText(string text)
+void TextBox::SetText(fig::string text)
 {
 	Clear();
 	Insert(text.c_str());

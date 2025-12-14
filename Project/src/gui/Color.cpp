@@ -99,7 +99,7 @@ Color color_util::to_color(Colorf color)
 	};
 }
 
-Color color_util::color_from_string(std::string hex)
+Color color_util::color_from_string(fig::string hex)
 {
 	hex = string_util::trim(hex);
 	if (hex.empty())

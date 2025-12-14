@@ -51,21 +51,21 @@ enum class MessageType
 struct Message
 {
 	Role role;
-	string content;
-	string name;
+	fig::string content;
+	fig::string name;
 };
 using Messages = std::vector<Message>;
 
 struct Submessage
 {
 	MessageType msgType = MessageType::Undefined;
-	string content;
+	fig::string content;
 };
 
 struct Sentence
 {
 	Role role;
-	string sentence;
+	fig::string sentence;
 };
 using Sentences = std::vector<Sentence>;
 

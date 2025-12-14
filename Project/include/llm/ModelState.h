@@ -17,7 +17,7 @@ public:
 	SamplerPtr pActiveGrammar = nullptr;
 
 	std::map<GrammarFlags, SamplerPtr> grammars {};
-	string modelName {};
+	fig::string modelName {};
 	std::mt19937 rng {};
 	int32_t num_sequences {};
 	int32_t ctx_size {};

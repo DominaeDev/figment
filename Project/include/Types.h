@@ -11,6 +11,16 @@
 #include <algorithm>
 #include "util/EnumFlags.h"
 
+namespace fig
+{
+    using string = std::string;
+    using string_view = std::string_view;
+    using c_string = const char*;
+    static constexpr auto npos = std::string::npos;
+}
+
+// Type conversion functions
+
 template<typename T>
 inline constexpr int32_t toI(T x) { return static_cast<int32_t>(x); }
 template<typename T>
@@ -34,10 +44,8 @@ inline constexpr size_t operator "" _uz( unsigned long long arg ) noexcept
     return static_cast<size_t>( arg );
 }
 
-typedef std::string string;
-
-inline constexpr string toS(std::string_view sv) { return string(sv); }
-inline constexpr const char* toCStr(std::string_view sv) { return static_cast<const char*>(sv.data()); }
+inline constexpr fig::string toStr(fig::string_view sv) { return fig::string(sv); }
+inline constexpr fig::c_string toCStr(fig::string_view sv) { return static_cast<fig::c_string>(sv.data()); }
 
 // Macros
 #if !defined(TRUE)

@@ -32,9 +32,9 @@ void VariableList::OnRender(Renderer* pRenderer)
 	Control::OnRender(pRenderer);
 }
 
-void VariableList::SetVariables(const std::map<string, string>& variables)
+void VariableList::SetVariables(const std::map<fig::string, fig::string>& variables)
 {
-	string text;
+	fig::string text;
 	text.reserve(512);
 	for (auto kvp : variables)
 		text = text + std::format("{} = {}\n", kvp.first, kvp.second);

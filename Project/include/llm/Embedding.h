@@ -4,18 +4,18 @@
 
 struct EmbeddingVector
 {
-	string modelName;
-	string content;
+	fig::string modelName;
+	fig::string content;
 	std::vector<float> vec;
 
-	bool LoadFromFile(string filename);
-	bool SaveToFile(string filename) const;
+	bool LoadFromFile(fig::string filename);
+	bool SaveToFile(fig::string filename) const;
 };
 
 class Embeddings
 {
 public:
-	static void Initialize(string filePath, string modelName);
+	static void Initialize(fig::string filePath, fig::string modelName);
 
 	static const std::vector<EmbeddingVector>& GetEmbeddings();
 	static void AddEmbedding(EmbeddingVector embedding);

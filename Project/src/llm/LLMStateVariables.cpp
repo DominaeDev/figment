@@ -2,7 +2,7 @@
 #include "util/StringUtility.h"
 #include <format>
 
-bool LLMStateVariables::SetValue(string name, string value)
+bool LLMStateVariables::SetValue(fig::string name, fig::string value)
 {
 	if (!value.empty())
 	{
@@ -29,7 +29,7 @@ bool LLMStateVariables::SetValue(string name, string value)
 	return _variables.erase(name) > 0;
 }
 
-bool LLMStateVariables::HasValue(string name) const
+bool LLMStateVariables::HasValue(fig::string name) const
 {
 	auto itFind = std::find_if(_variables.begin(), _variables.end(), [&name](auto kvp) {
 		return string_util::equals(kvp.first, name, true);
@@ -38,20 +38,20 @@ bool LLMStateVariables::HasValue(string name) const
 	return itFind != _variables.end();
 }
 
-string LLMStateVariables::GetList() const
+fig::string LLMStateVariables::GetList() const
 {
-	string result;
+	fig::string result;
 	for (auto kvp : _variables)
 		result.append(std::format("{} = {};\n", kvp.first, kvp.second));
 	return result;
 }
 
-string LLMStateVariables::GetGrammarPattern() const
+fig::string LLMStateVariables::GetGrammarPattern() const
 {
 	if (_variables.empty())
 		return "[]";
 
-	string result;
+	fig::string result;
 	int i = 0;
 	for (auto it = _variables.begin(); it != _variables.end(); ++it, ++i)
 	{
@@ -62,20 +62,20 @@ string LLMStateVariables::GetGrammarPattern() const
 	return result;
 }
 
-void LLMStateVariables::UpdateValues(string stateReport, std::map<string, string>& updatedVariables)
+void LLMStateVariables::UpdateValues(fig::string stateReport, std::map<fig::string, fig::string>& updatedVariables)
 {
 	string_util::replace_all(stateReport, "<change>", "");
 	string_util::replace_all(stateReport, "</change>", ";");
 	auto rows = string_util::split(stateReport, ';', true);
 
-	for (auto row : rows)
+	for (auto& row : rows)
 	{
 		size_t pos_eq = row.find("=");
-		if (pos_eq == string::npos)
+		if (pos_eq == fig::npos)
 			continue;
 
-		string lhs = string_util::trim(row.substr(0, pos_eq));
-		string rhs = string_util::trim(row.substr(pos_eq + 1));
+		fig::string lhs = string_util::trim(row.substr(0, pos_eq));
+		fig::string rhs = string_util::trim(row.substr(pos_eq + 1));
 		if (SetValue(lhs, rhs))
 			updatedVariables[lhs] = rhs;
 	}

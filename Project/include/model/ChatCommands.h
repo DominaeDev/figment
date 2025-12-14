@@ -29,13 +29,13 @@ enum class ChatCommand
 struct ParsedChatCommand
 {
 	ChatCommand command = ChatCommand::UserMessage;
-	string text;
+	fig::string text;
 };
 
 class ChatCommands
 {
 public:
-	static ParsedChatCommand Parse(string text);
+	static ParsedChatCommand Parse(fig::string text);
 };
 
 #endif

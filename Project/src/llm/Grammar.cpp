@@ -5,24 +5,24 @@
 #include <set>
 #include <cassert>
 
-static bool _evaluate(string& text, size_t pos_begin, const std::set<string>& flags)
+static bool _evaluate(fig::string& text, size_t pos_begin, const std::set<fig::string>& flags)
 {
 	size_t pos_next = text.find("{{", pos_begin + 2);
 	size_t pos_end = text.find("}}", pos_begin + 2);
-	if (pos_end == string::npos)
+	if (pos_end == fig::npos)
 		return false;
 
-	if (pos_next != string::npos && pos_next < pos_end)
+	if (pos_next != fig::npos && pos_next < pos_end)
 	{
 		_evaluate(text, pos_next, flags); // Evaluate inner
 		return _evaluate(text, pos_begin, flags); // Re-evaluate outer
 	}
 
 	size_t pos_q = text.find('?', pos_begin + 2);
-	if (pos_q == string::npos || pos_q > pos_end)
+	if (pos_q == fig::npos || pos_q > pos_end)
 		return false;
 
-	string condition = text.substr(pos_begin + 2, pos_q - pos_begin - 2);
+	fig::string condition = text.substr(pos_begin + 2, pos_q - pos_begin - 2);
 	auto expected_flags = string_util::split(condition, '|', true);
 	bool result = true;
 	for (auto& flag : expected_flags)
@@ -50,16 +50,16 @@ static bool _evaluate(string& text, size_t pos_begin, const std::set<string>& fl
 	return true;
 }
 
-SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, string names, string stateVars)
+SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, fig::string names, fig::string stateVars)
 {
-	string grammar = file_util::ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
+	fig::string grammar = file_util::ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
 	if (grammar.size() == 0)
 		return nullptr;
 
 	string_util::replace_all(grammar, "{{_NAMES_}}", names);
 	string_util::replace_all(grammar, "{{_STATE_VARS_}}", stateVars);
 
-	std::set<string> flags;
+	std::set<fig::string> flags;
 	if (grammarFlags.IsSet(GrammarFlag::Default))
 		flags.insert("default");
 	if (grammarFlags.IsSet(GrammarFlag::Stub))
@@ -78,7 +78,7 @@ SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, 
 		flags.insert("enable-state");
 
 	size_t pos = grammar.find("{{", 0);
-	while (pos != string::npos && pos < grammar.size())
+	while (pos != fig::npos && pos < grammar.size())
 	{
 		if (_evaluate(grammar, pos, flags))
 		{

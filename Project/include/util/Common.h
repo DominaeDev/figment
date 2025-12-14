@@ -1,9 +1,9 @@
 #ifndef COMMON_UTILITY_H__
 #define COMMON_UTILITY_H__
 
+#include "Types.h"
 #include <optional>
 #include <vector>
-#include <string>
 #include <queue>
 #include <memory>
 #include <iterator>
@@ -11,10 +11,10 @@
 namespace common_util
 {
 	// Debugging
-	void DebugPrint(std::string message) noexcept;
-	void DebugPrintLn(std::string message = "") noexcept;
+	void DebugPrint(fig::string message) noexcept;
+	void DebugPrintLn(fig::string message = "") noexcept;
 
-	std::string CreateUUID();
+	fig::string CreateUUID();
 
 	template<typename T>
 	void queue_clear(std::queue<T>& q)

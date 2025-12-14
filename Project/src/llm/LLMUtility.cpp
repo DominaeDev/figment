@@ -8,7 +8,7 @@
 #include <cassert>
 #include <set>
 
-static std::vector<string> const opening_tags {
+static std::vector<fig::string> const opening_tags {
 	std::format("<{0}=\"", Constants::Chat::DialogueTag),
 	std::format("<{0}=\"", Constants::Chat::ActionTag),
 	std::format("<{0}=\"", Constants::Chat::ThoughtTag),
@@ -16,7 +16,7 @@ static std::vector<string> const opening_tags {
 	std::format("<{0}>", Constants::Chat::DirectionTag),
 };
 
-static std::vector<string> const closing_tags {
+static std::vector<fig::string> const closing_tags {
 	std::format("</{0}>", Constants::Chat::DialogueTag),
 	std::format("</{0}>", Constants::Chat::ActionTag),
 	std::format("</{0}>", Constants::Chat::ThoughtTag),
@@ -24,7 +24,7 @@ static std::vector<string> const closing_tags {
 	std::format("</{0}>", Constants::Chat::DirectionTag),
 };
 
-std::string llm_util::stringFromToken(VocabPtr pVocab, llama_token token)
+fig::string llm_util::stringFromToken(VocabPtr pVocab, llama_token token)
 {
 	// convert the token to a string, print it and add it to the response
 	char buf[256];
@@ -32,10 +32,10 @@ std::string llm_util::stringFromToken(VocabPtr pVocab, llama_token token)
 	if (n < 0)
 		return "";
 
-	return std::string(buf, n);
+	return fig::string(buf, n);
 }
 
-size_t llm_util::string_find_partial_stop(const std::string& str, const std::string& stop)
+size_t llm_util::string_find_partial_stop(const fig::string& str, const fig::string& stop)
 {
 	if (!str.empty() && !stop.empty())
 	{
@@ -53,28 +53,28 @@ size_t llm_util::string_find_partial_stop(const std::string& str, const std::str
 		}
 	}
 
-	return string::npos;
+	return fig::npos;
 }
 
-size_t llm_util::find_one_of(const string& text, const std::vector<string>& words)
+size_t llm_util::find_one_of(const fig::string& text, const std::vector<fig::string>& words)
 {
-	size_t stop_pos = string::npos;
+	size_t stop_pos = fig::npos;
 
-	for (const string& word : words)
+	for (const fig::string& word : words)
 	{
 		size_t pos = text.find(word);
-		if (pos != string::npos && (stop_pos == string::npos || pos < stop_pos))
+		if (pos != fig::npos && (stop_pos == fig::npos || pos < stop_pos))
 			stop_pos = pos;
 	}
 
 	return stop_pos;
 }
 
-size_t llm_util::find_stopping_strings(const string& text, const std::vector<string>& stop_words, const size_t last_token_size, bool is_full_stop)
+size_t llm_util::find_stopping_strings(const fig::string& text, const std::vector<fig::string>& stop_words, const size_t last_token_size, bool is_full_stop)
 {
-	size_t stop_pos = string::npos;
+	size_t stop_pos = fig::npos;
 
-	for (const string& word : stop_words)
+	for (const fig::string& word : stop_words)
 	{
 		size_t pos;
 
@@ -91,7 +91,7 @@ size_t llm_util::find_stopping_strings(const string& text, const std::vector<str
 			pos = string_find_partial_stop(text, word);
 		}
 
-		if (pos != string::npos && (stop_pos == string::npos || pos < stop_pos))
+		if (pos != fig::npos && (stop_pos == fig::npos || pos < stop_pos))
 		{
 			stop_pos = pos;
 		}
@@ -100,10 +100,10 @@ size_t llm_util::find_stopping_strings(const string& text, const std::vector<str
 	return stop_pos;
 }
 
-void llm_util::get_tag_and_name(const string& text, string& tag, string& name)
+void llm_util::get_tag_and_name(const fig::string& text, fig::string& tag, fig::string& name)
 {
 	size_t pos_equals = text.find('=', 1);
-	if (pos_equals == string::npos)
+	if (pos_equals == fig::npos)
 	{
 		tag = string_util::trim(text.substr(1, text.length() - 2));
 		name = "";
@@ -115,9 +115,9 @@ void llm_util::get_tag_and_name(const string& text, string& tag, string& name)
 	string_util::replace_all(name, "\"", "");
 }
 
-std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
+std::pair<MessageType, bool> llm_util::detect_message_type(fig::string text) noexcept
 {
-	auto patterns = std::vector<std::tuple<string, MessageType>> {
+	auto patterns = std::vector<std::tuple<fig::string, MessageType>> {
 		{ std::format("<{0}", Constants::Chat::DialogueTag),		MessageType::Dialogue},
 		{ std::format("<{0}", Constants::Chat::ActionTag),		MessageType::Action},
 		{ std::format("<{0}", Constants::Chat::ThoughtTag),		MessageType::Thought},
@@ -125,12 +125,12 @@ std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
 		{ std::format("<{0}", Constants::Chat::DirectionTag),		MessageType::Direction},
 	};
 	
-	size_t last_pos = std::string::npos;
+	size_t last_pos = fig::npos;
 	MessageType msgType = MessageType::Undefined;
 	for (int i = 0; i < patterns.size(); ++i)
 	{
-		size_t pos = text.rfind(std::get<0>(patterns[i]), std::string::npos);
-		if (pos != std::string::npos && (last_pos == std::string::npos || pos > last_pos))
+		size_t pos = text.rfind(std::get<0>(patterns[i]), fig::npos);
+		if (pos != fig::npos && (last_pos == fig::npos || pos > last_pos))
 		{
 			last_pos = pos;
 			msgType = std::get<1>(patterns[i]);
@@ -140,8 +140,8 @@ std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
 	bool bComplete = false;
 	for (auto& tag : closing_tags)
 	{
-		size_t pos_end = text.rfind(tag, std::string::npos);
-		if (pos_end != std::string::npos && pos_end > last_pos)
+		size_t pos_end = text.rfind(tag, fig::npos);
+		if (pos_end != fig::npos && pos_end > last_pos)
 		{
 			bComplete = true;
 			break;
@@ -151,18 +151,18 @@ std::pair<MessageType, bool> llm_util::detect_message_type(string text) noexcept
 	return std::make_pair(msgType, bComplete);
 }
 
-string& llm_util::sanitize_response(string& text)
+fig::string& llm_util::sanitize_response(fig::string& text)
 {
 	size_t pos_last = text.find_last_of('<');
-	if (pos_last == std::string::npos)
+	if (pos_last == fig::npos)
 		return text;
 	size_t pos_close = text.find_last_of('>');
-	if (pos_close == std::string::npos || pos_close < pos_last)
+	if (pos_close == fig::npos || pos_close < pos_last)
 		text = text.substr(0, pos_last);
 	return text;
 }
 
-string& llm_util::complete_message(string& text)
+fig::string& llm_util::complete_message(fig::string& text)
 {
 	auto [msgType, complete] = detect_message_type(sanitize_response(text));
 	if (complete)
@@ -195,7 +195,7 @@ string& llm_util::complete_message(string& text)
 	return text;
 }
 
-void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHalt, string& stop_word)
+void llm_util::process(fig::string& partial, fig::string str_token, bool* bWait, bool* bHalt, fig::string& stop_word)
 {
 	if (string_util::validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
 	{
@@ -204,7 +204,7 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 		return;
 	}
 
-	static std::vector<string> stop_words {
+	static std::vector<fig::string> stop_words {
 		"<|",
 		"<end_of_turn",
 		"<EOT>",
@@ -218,7 +218,7 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 //		"<｜end▁of▁sentence｜>",
 	};
 
-	static std::vector<string> formatting_tags;
+	static std::vector<fig::string> formatting_tags;
 	if (formatting_tags.empty())
 	{
 		formatting_tags.insert(formatting_tags.end(), opening_tags.begin(), opening_tags.end());
@@ -227,7 +227,7 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 
 	// Look for stop word - and halt
 	size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
-	if (stop_pos != string::npos)
+	if (stop_pos != fig::npos)
 	{
 		stop_word = partial.substr(stop_pos);
 
@@ -240,7 +240,7 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 
 	// Look for partial stop word - and wait
 	stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), false);
-	if (stop_pos != string::npos)
+	if (stop_pos != fig::npos)
 	{
 		*bHalt = false;
 		*bWait = true;
@@ -249,10 +249,10 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 
 	// Look for formatting tags
 	size_t fmt_pos = find_one_of(partial, opening_tags);
-	if (fmt_pos != string::npos)
+	if (fmt_pos != fig::npos)
 	{
 		// Await end of tag '>', or beginning of a new tag '<' (indicating garbage from the model)
-		if (partial.find_first_of("<>", fmt_pos + 1, 2) == string::npos)
+		if (partial.find_first_of("<>", fmt_pos + 1, 2) == fig::npos)
 		{
 			*bHalt = false;
 			*bWait = true;
@@ -263,7 +263,7 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 	{
 		// Look for partial formatting tags - and wait
 		fmt_pos = find_stopping_strings(partial, formatting_tags, str_token.size(), false);
-		if (fmt_pos != string::npos)
+		if (fmt_pos != fig::npos)
 		{
 			*bHalt = false;
 			*bWait = true;
@@ -275,7 +275,7 @@ void llm_util::process(string& partial, string str_token, bool* bWait, bool* bHa
 	*bWait = false;
 }
 
-std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, string prompt, bool add_special)
+std::vector<llama_token> llm_util::tokenize(VocabPtr pVocab, fig::string prompt, bool add_special)
 {
 	std::vector<llama_token> prompt_tokens(1024);
 	const int32_t n_prompt_tokens = llama_tokenize(pVocab, prompt.c_str(), (int32_t)prompt.size(), prompt_tokens.data(), (int32_t)prompt_tokens.size(), add_special, false);
@@ -381,7 +381,7 @@ bool llm_util::init_embedding_batch(llama_model* pModel, llama_context* pCtx, co
 	return true;
 }
 
-std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(Context& context, string content, SequenceId seq_id, int32_t pos, bool add_special)
+std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(Context& context, fig::string content, SequenceId seq_id, int32_t pos, bool add_special)
 {
 	auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
 	int32_t n_tokens = toI(tokens.size());
@@ -392,7 +392,7 @@ std::optional<std::vector<llama_token>> llm_util::tokenize_and_decode(Context& c
 	return tokens;
 }
 
-std::vector<llama_token> llm_util::tokenize_and_batch(Context& context, string content, SequenceId seq_id, int32_t pos, bool add_special)
+std::vector<llama_token> llm_util::tokenize_and_batch(Context& context, fig::string content, SequenceId seq_id, int32_t pos, bool add_special)
 {
 	// Add to context batch
 	auto tokens = llm_util::tokenize(context.GetVocabPtr(), content, add_special);
@@ -408,7 +408,7 @@ struct Span
 	size_t length() const { return end - start; }
 };
 
-static size_t find_next(const std::string& text, const std::string& substring, size_t start = 0)
+static size_t find_next(const fig::string& text, const fig::string& substring, size_t start = 0)
 {
 	char ch = substring[0];
 	for (size_t pos = start; pos <= text.size() - substring.size(); ++pos)
@@ -428,12 +428,12 @@ static size_t find_next(const std::string& text, const std::string& substring, s
 				return pos;
 		}
 	}
-	return std::string::npos;
+	return fig::npos;
 }
 
 static bool in_span(size_t pos, const std::vector<Span>& spans)
 {
-	if (pos == std::string::npos)
+	if (pos == fig::npos)
 		return false;
 
 	for (auto s : spans)
@@ -444,13 +444,13 @@ static bool in_span(size_t pos, const std::vector<Span>& spans)
 	return false;
 }
 
-static void mark_spans(const std::string s, MessageType msgType, std::string open, std::string close, std::vector<Span>& spans)
+static void mark_spans(const fig::string s, MessageType msgType, fig::string open, fig::string close, std::vector<Span>& spans)
 {
 	if (open.size() > s.size())
 		return;
 
 	size_t pos_open = find_next(s, open);
-	while (pos_open != std::string::npos)
+	while (pos_open != fig::npos)
 	{
 		if (in_span(pos_open, spans))
 		{
@@ -465,7 +465,7 @@ static void mark_spans(const std::string s, MessageType msgType, std::string ope
 			continue;
 		}
 
-		if (pos_close == std::string::npos)
+		if (pos_close == fig::npos)
 			return;
 
 		spans.push_back(Span { msgType, pos_open, pos_close + close.size() });
@@ -473,7 +473,7 @@ static void mark_spans(const std::string s, MessageType msgType, std::string ope
 	}
 }
 
-static void fill_gaps(const std::string s, MessageType msgType, std::vector<Span>& spans)
+static void fill_gaps(const fig::string s, MessageType msgType, std::vector<Span>& spans)
 {
 	auto CheckAndAdd = [msgType, &spans](size_t pos, size_t len) {
 		if (len != 0)
@@ -512,7 +512,7 @@ static void fill_gaps(const std::string s, MessageType msgType, std::vector<Span
 	});
 }
 
-static void trim_spans(const std::string s, std::vector<Span>& spans)
+static void trim_spans(const fig::string s, std::vector<Span>& spans)
 {
 	for (auto& span : spans)
 	{
@@ -533,7 +533,7 @@ static void trim_spans(const std::string s, std::vector<Span>& spans)
 	}
 }
 
-std::string llm_util::process_message(std::string message, std::string identifier, std::vector<Submessage>* out_pSubmessages) noexcept
+fig::string llm_util::process_message(fig::string message, fig::string identifier, std::vector<Submessage>* out_pSubmessages) noexcept
 {
 	size_t pos = 0;
 	size_t length = message.size();
@@ -552,7 +552,7 @@ std::string llm_util::process_message(std::string message, std::string identifie
 	if (last != 0)
 	{
 		size_t pos_last = message.find(last, 1);
-		if (pos_last == string::npos)
+		if (pos_last == fig::npos)
 			message += last;
 	}
 
@@ -568,11 +568,11 @@ std::string llm_util::process_message(std::string message, std::string identifie
 	fill_gaps(message, MessageType::Dialogue, spans);
 	trim_spans(message, spans);
 
-	std::string result;
+	fig::string result;
 	result.reserve(256);
 	for (auto& span : spans)
 	{
-		std::string text = message.substr(span.start, span.end - span.start);
+		fig::string text = message.substr(span.start, span.end - span.start);
 		switch (span.msgType)
 		{
 		case MessageType::Dialogue:
@@ -642,20 +642,20 @@ std::string llm_util::process_message(std::string message, std::string identifie
 	return result;
 }
 
-string llm_util::format_id(string id)
+fig::string llm_util::format_id(fig::string id)
 { 
 	if (id[0] == '@')
 		id = id.substr(1);
 	return string_util::lcase(id);
 }
 
-bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, string filename)
+bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, fig::string filename)
 {
 	auto [batch_ref, batch_n] = context.GetCache().GetBatch();
 	auto& batch = batch_ref.get();
 	auto pVocab = context.GetVocabPtr();
 
-	auto fnTokenStr = [pVocab](llama_token token, bool quote) -> string {
+	auto fnTokenStr = [pVocab](llama_token token, bool quote) -> fig::string {
 		if (token <= 0)
 			return "<UNK>";
 		else if (token == llama_vocab_bos(pVocab))
@@ -677,7 +677,7 @@ bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, string
 			if (n < 0)
 				return "<UNK>";
 			else
-				return quote ? "\"" + string(buf, n) + "\"" : string(buf, n);
+				return quote ? "\"" + fig::string(buf, n) + "\"" : fig::string(buf, n);
 		}
 	};
 
@@ -685,7 +685,7 @@ bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, string
 		return false;
 
 	// Detokenize the batched tokens
-	string result;
+	fig::string result;
 	result.reserve(65536);
 	for (int32_t i = 0; i < batch_n; ++i)
 	{
@@ -729,16 +729,16 @@ bool llm_util::dump_batch_text(const Context& context, int32_t seq_index, string
 	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
-bool llm_util::dump_batch_tokens(const Context& context, int32_t seq_id, string filename)
+bool llm_util::dump_batch_tokens(const Context& context, int32_t seq_id, fig::string filename)
 {
 	auto [batch_ref, batch_n] = context.GetCache().GetBatch();
 
 	return dump_batch_tokens(batch_ref, batch_n, seq_id, context.GetVocabPtr(), filename);
 }
 
-bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_index, VocabPtr pVocab, string filename)
+bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_index, VocabPtr pVocab, fig::string filename)
 {
-	auto fnTokenStr = [pVocab](llama_token token) -> string {
+	auto fnTokenStr = [pVocab](llama_token token) -> fig::string {
 		if (token == llama_vocab_bos(pVocab))
 			return "<BOS>";
 		else if (token == llama_vocab_eos(pVocab))
@@ -761,7 +761,7 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, i
 			if (n < 0)
 				return "<UNK>";
 			else
-				return string(buf, n);
+				return fig::string(buf, n);
 		}
 	};
 
@@ -769,7 +769,7 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, i
 		return false;
 
 	// Detokenize the batched tokens
-	string result;
+	fig::string result;
 	result.reserve(65536);
 	for (int32_t i = 0; i < num_tokens; ++i)
 	{
@@ -804,7 +804,7 @@ bool llm_util::dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, i
 	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
-bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, string filename)
+bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, fig::string filename)
 {
 	auto cache_view = llama_kv_cache_view_init(context.GetCtxPtr(), context.GetCache().n_seq_max());
 	llama_kv_cache_view_update(context.GetCtxPtr(), &cache_view);
@@ -852,7 +852,7 @@ bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, string file
 		}
 	}
 
-	string result;
+	fig::string result;
 	result.reserve(32384);
 	for (int32_t i = 0; i < (int32_t)cells.size(); ++i)
 	{
@@ -883,12 +883,12 @@ bool llm_util::dump_kv_cache(const Context& context, int32_t seq_id, string file
 	return file_util::WriteTextFile(filename, result, false) == FileError::NoError;
 }
 
-bool llm_util::dump_kv_cache_cells(const Context& contextState, string filename)
+bool llm_util::dump_kv_cache_cells(const Context& contextState, fig::string filename)
 {
 	return dump_kv_cache_cells(contextState.GetCtxPtr(), contextState.GetNumSequences(), filename);
 }
 
-bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, string filename)
+bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, fig::string filename)
 {
 	auto cache_view = llama_kv_cache_view_init(pCtx, num_sequences);
 
@@ -913,7 +913,7 @@ bool llm_util::dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, s
 		}
 	}
 	
-	string result;
+	fig::string result;
 	result.reserve(32384);
 	for (int32_t i = 0; i < (int32_t)cells.size(); ++i)
 	{

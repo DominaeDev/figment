@@ -35,14 +35,14 @@ enum TextAlignment : unsigned short
 class StaticText : public ControlWithMargins
 {
 public:
-	StaticText(Control* pParent, string text, FontFace fontFace, double ptSize, bool bAutoSize = true);
+	StaticText(Control* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize = true);
 	virtual ~StaticText();
 
 	TTF_Font* GetFont() const { return _pFont; }
 
-	void SetText(string text);
-	void SetTextAndResize(string text, int& newWidth, int& newHeight);
-	string GetText() const { return _text; }
+	void SetText(fig::string text);
+	void SetTextAndResize(fig::string text, int& newWidth, int& newHeight);
+	fig::string GetText() const { return _text; }
 
 	void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
 
@@ -61,7 +61,7 @@ private:
 	void DrawText(int& textWidth, int& textHeight);
 	void ReleaseTexture();
 
-	string _text;
+	fig::string _text;
 	bool _bInvalidated = false;
 	bool _bAutoSize = true;
 

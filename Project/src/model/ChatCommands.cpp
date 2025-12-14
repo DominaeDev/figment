@@ -2,7 +2,7 @@
 #include "util/StringUtility.h"
 
 struct CommandDefinition {
-	string keyword;
+	fig::string keyword;
 	ChatCommand command;
 };
 
@@ -28,7 +28,7 @@ static CommandDefinition s_Commands[]
 	{ "set",			ChatCommand::SetStateVariable },
 };
 
-ParsedChatCommand ChatCommands::Parse(string text)
+ParsedChatCommand ChatCommands::Parse(fig::string text)
 {
 	string_util::trim_str(text);
 	if (text.empty())
@@ -52,7 +52,7 @@ ParsedChatCommand ChatCommands::Parse(string text)
 
 	if (string_util::begins_with(text, "//")) // Shorthand
 	{
-		string payload = string_util::trim(text.substr(2));
+		fig::string payload = string_util::trim(text.substr(2));
 		return ParsedChatCommand 
 		{ 
 			.command = ChatCommand::SystemMessage, 
@@ -61,9 +61,9 @@ ParsedChatCommand ChatCommands::Parse(string text)
 	}
 
 	size_t pos_begin = text.find(' ');
-	string command;
-	string payload;
-	if (pos_begin != std::string::npos)
+	fig::string command;
+	fig::string payload;
+	if (pos_begin != fig::npos)
 	{
 		command = string_util::lcase(string_util::trim(text.substr(1, pos_begin - 1)));
 		payload = string_util::trim(text.substr(pos_begin));

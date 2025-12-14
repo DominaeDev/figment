@@ -4,7 +4,7 @@
 #include <fstream>
 #include <filesystem>
 
-std::expected<std::string, FileError> file_util::ReadTextFile(const std::string& filename, bool normalizeNewlines)
+std::expected<fig::string, FileError> file_util::ReadTextFile(const fig::string& filename, bool normalizeNewlines)
 {
 	try
 	{
@@ -15,7 +15,7 @@ std::expected<std::string, FileError> file_util::ReadTextFile(const std::string&
 		std::streamsize size = file.tellg();
 		file.seekg(0, std::ios::beg);
 
-		std::string content;
+		fig::string content;
 		content.reserve(size);
 		content.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 		if (!content.empty())
@@ -28,7 +28,7 @@ std::expected<std::string, FileError> file_util::ReadTextFile(const std::string&
 	}
 }
 
-FileError file_util::ReadTextFile(const std::string& filename, std::string& out_content, bool normalizeNewlines)
+FileError file_util::ReadTextFile(const fig::string& filename, fig::string& out_content, bool normalizeNewlines)
 {
 	auto content = ReadTextFile(filename, normalizeNewlines);
 	if (content.has_value())
@@ -39,7 +39,7 @@ FileError file_util::ReadTextFile(const std::string& filename, std::string& out_
 	return content.error();
 }
 
-FileError file_util::WriteTextFile(const std::string& filename, const std::string& content, bool append)
+FileError file_util::WriteTextFile(const fig::string& filename, const fig::string& content, bool append)
 {
 	try
 	{
@@ -56,9 +56,9 @@ FileError file_util::WriteTextFile(const std::string& filename, const std::strin
 	}
 }
 
-std::expected<std::vector<std::string>, FileError> file_util::FindFilesInPath(const std::string& dirPath, const std::string& extension)
+std::expected<std::vector<fig::string>, FileError> file_util::FindFilesInPath(const fig::string& dirPath, const fig::string& extension)
 {
-	std::vector<std::string> matchingFiles;
+	std::vector<fig::string> matchingFiles;
 	std::filesystem::path directory(dirPath);
 
 	if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory))
@@ -73,10 +73,10 @@ std::expected<std::vector<std::string>, FileError> file_util::FindFilesInPath(co
 	return matchingFiles;
 }
 
-std::string file_util::GetFilename(const std::string& str)
+fig::string file_util::GetFilename(const fig::string& str)
 {
 	size_t pos = str.find_last_of("\\/"); //! hmm...
-	if (pos == std::string::npos)
+	if (pos == fig::string::npos)
 		return str;
 	return str.substr(pos + 1);
 }

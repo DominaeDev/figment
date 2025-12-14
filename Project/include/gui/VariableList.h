@@ -10,7 +10,7 @@ class VariableList : public Control
 {
 public:
 	VariableList(Control* pParent);
-	void SetVariables(const std::map<string, string>& variables);
+	void SetVariables(const std::map<fig::string, fig::string>& variables);
 	bool IsEmpty() const;
 
 protected:

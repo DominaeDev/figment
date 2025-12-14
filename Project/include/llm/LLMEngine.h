@@ -23,7 +23,7 @@ public:
 	LLMEngine();
 	~LLMEngine() = default;
 
-	bool Initialize(string modelFilename, string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
+	bool Initialize(fig::string modelFilename, fig::string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 	bool Shutdown();
 
 	bool IsInitialized() const { return _readyState.load() == ReadyState::Ready; }
@@ -35,7 +35,7 @@ public:
 
 private:
 	using __LoadModelCallback = std::function<void(std::shared_ptr<ModelState>)>;
-	void __LoadModel(string modelFilename, string embeddingFilename, __LoadModelCallback onComplete);
+	void __LoadModel(fig::string modelFilename, fig::string embeddingFilename, __LoadModelCallback onComplete);
 	static bool OnLoadModelProgress(float progress, void* user_data);
 
 	void SetReadyState(ReadyState readyState);

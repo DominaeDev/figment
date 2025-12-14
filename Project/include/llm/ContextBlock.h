@@ -15,14 +15,14 @@ using ContextBlockFlags = EnumFlags<ContextBlockFlag>;
 struct ContextBlock 
 {
 	Role role = Role::Undefined;
-	string name;
-    string content;
+	fig::string name;
+    fig::string content;
 	std::vector<int32_t> tokens;
 	ContextBlockFlags flags {};
 	SequenceId sequenceId = SequenceId::None;
 	int32_t offset = 0;
 	int ttl = 0;
-	string responseId;
+	fig::string responseId;
 
 	inline int32_t length() const		{ return (int32_t)(tokens.size()); }
 	inline bool is_static() const		{ return flags.IsSet(ContextBlockFlag::Static); }

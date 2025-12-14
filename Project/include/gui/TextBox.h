@@ -7,7 +7,7 @@
 
 struct SDL_Renderer;
 
-typedef std::function<void(string)> EnterPressedCallback;
+typedef std::function<void(fig::string)> EnterPressedCallback;
 
 class TextBox : public ControlWithMargins
 {
@@ -17,7 +17,7 @@ public:
 
 	void SetEnterPressedCallback(EnterPressedCallback cb);
 
-	void SetText(string text);
+	void SetText(fig::string text);
 
 	void Clear();
 	void SetFocus(bool focus);

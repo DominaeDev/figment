@@ -18,14 +18,14 @@ static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
 {
 	LLMEngine* pThis = static_cast<LLMEngine*>(user_data);
 
-	string log(text);
+	fig::string log(text);
 	size_t pos_eq = log.find('=');
-	bool bGPU = log.find("CUDA") != string::npos;
-	bool bCPU = log.find("CPU") != string::npos;
+	bool bGPU = log.find("CUDA") != fig::npos;
+	bool bCPU = log.find("CPU") != fig::npos;
 
-	if (pos_eq != string::npos && log.find("buffer size") != string::npos)
+	if (pos_eq != fig::npos && log.find("buffer size") != fig::npos)
 	{
-		string value = string_util::trim(log.substr(pos_eq + 1));
+		fig::string value = string_util::trim(log.substr(pos_eq + 1));
 		double mul = 1024.0 * 1024.0; // MiB
 		if (string_util::ends_with(value, "GiB"))
 			mul *= 1024.0;
@@ -60,7 +60,7 @@ LLMEngine::LLMEngine()
 	_pStatus = std::make_shared<LLMStatusChannel>();
 }
 
-bool LLMEngine::Initialize(string modelFilename, string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
+bool LLMEngine::Initialize(fig::string modelFilename, fig::string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
 {
 	auto readyState = _readyState.load();
 	if (readyState > ReadyState::Uninitialized)
@@ -136,7 +136,7 @@ void LLMEngine::SetReadyState(ReadyState readyState)
 	_pStatus->ReportReadyState(readyState);
 }
 
-void LLMEngine::__LoadModel(string modelFilename, string embeddingFilename, __LoadModelCallback onComplete)
+void LLMEngine::__LoadModel(fig::string modelFilename, fig::string embeddingFilename, __LoadModelCallback onComplete)
 {
 	const int ngl = 99; // All layers
 	usedVRAM.store(0);
