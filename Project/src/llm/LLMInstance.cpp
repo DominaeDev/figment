@@ -57,7 +57,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 {
 	_pStatus->EmitSignal(LLMStatusSignal::ChatInitializing);
 
-	bool bMultiSequence = args.session.IsGroupChat() && args.options.IsSet(LLMOption::UseMultipleSequences);
+	bool bMultiSequence = args.session.IsGroupChat() && args.options.multiBotMode == ChatOptions::MultiBotMode::MultipleSequences;
 	int32_t n_bots = bMultiSequence ? (int32_t)args.session.GetBotCount() : 1;
 	if (n_bots == 0)
 		return false; // Error
@@ -97,7 +97,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
 
 	// Init state variables (temp)
-	if (args.options.IsSet(LLMOption::StateVariables))
+	if (args.options.flags.IsSet(ChatOptions::Flag::StateVariables))
 	{
 		_stateVars.SetValue("Location", "Kitchen"); //! @temp
 		_stateVars.SetValue(_session.ApplyNames("{{char}}'s mood", Role::Bot1), "Neutral"); //! @temp
@@ -308,14 +308,14 @@ void LLMInstance::InitSamplers()
 	{
 		if (i > 0)
 			namesPattern += "| ";
-		if (_options.IsSet(LLMOption::UseCharacterIds))
+		if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
 			namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(bot_from_index(i)));
 		else
 			namesPattern += std::format("| \"{}\"", _session.GetNameOf(bot_from_index(i)));
 	}
-	if (_options.IsSet(LLMOption::AllowUserResponse))
+	if (_options.flags.IsSet(ChatOptions::Flag::AllowUserResponse))
 	{
-		if (_options.IsSet(LLMOption::UseCharacterIds))
+		if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
 			namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(Role::User));
 		else
 			namesPattern += std::format("| \"{}\"", _session.GetNameOf(Role::User));
@@ -323,7 +323,7 @@ void LLMInstance::InitSamplers()
 	replace_all_inplace(grammar, "##NAMES##", namesPattern);
 
 	// Variables
-	if (_options.IsSet(LLMOption::StateVariables))
+	if (_options.flags.IsSet(ChatOptions::Flag::StateVariables))
 	{
 		replace_all_inplace(grammar, "##STATE##", "stat");
 		replace_all_inplace(grammar, "##STATE_VARS##", _stateVars.GetGrammarPattern());
@@ -362,7 +362,7 @@ bool LLMInstance::ResetChat(int seed)
 		std::scoped_lock lock(_stateMutex, _resultMutex);
 		queue_clear(_resultQueue);
 
-		if (_session.IsGroupChat() && !_options.IsSet(LLMOption::UseMultipleSequences))
+		if (_session.IsGroupChat() && _options.multiBotMode == ChatOptions::MultiBotMode::SingleSequence)
 			SwapPersona(Role::Undefined);
 
 		_contextState.EraseChat();
@@ -374,7 +374,7 @@ bool LLMInstance::ResetChat(int seed)
 
 	_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
 
-	if (_options.IsSet(LLMOption::GreetUser))
+	if (_options.flags.IsSet(ChatOptions::Flag::GreetUser))
 		GreetUser();
 	return true;
 }
@@ -536,7 +536,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 
 #if FALSE // State vars
 	// Add state block (preface)
-	if (!args.isContinuation && _options.IsSet(LLMOption::StateVariables) && !_stateVars.IsEmpty())
+	if (!args.isContinuation && _options.flags.IsSet(ChatOptions::Flag::StateVariables) && !_stateVars.IsEmpty())
 	{
 		auto itUserRev = std::find_if(blocks.rbegin(), blocks.rend(), [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
 		auto itState = flip_iterator<ContextBlock>(blocks, itUserRev);
@@ -716,7 +716,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 	if (args.flags.IsSet(GenerateFlag::AllowNarrator))
 		grammarFlags = grammarFlags | GrammarFlag::EnableNarrator;
-	if (_options.IsSet(LLMOption::StateVariables))
+	if (_options.flags.IsSet(ChatOptions::Flag::StateVariables))
 		grammarFlags = grammarFlags | GrammarFlag::EnableState;
 
 	CompileGrammar(grammarFlags);
@@ -1044,7 +1044,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		_stateVars.UpdateValues(stateReport, variables);
 
 		// Report state variable changes
-		if (!variables.empty() && _options.IsSet(LLMOption::ReportStateChanges))
+		if (!variables.empty() && _options.flags.IsSet(ChatOptions::Flag::ReportStateChanges))
 		{
 			fig::string varText;
 			varText.reserve(512);
@@ -1138,11 +1138,11 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 		if (!generateArgs.flags.IsSet(LLMInstance::GenerateFlag::Generate))
 			continue;
 
-		if (_session.IsGroupChat() && !_options.IsSet(LLMOption::UseMultipleSequences))
+		if (_session.IsGroupChat() && _options.multiBotMode == ChatOptions::MultiBotMode::SingleSequence)
 			generateArgs.flags = generateArgs.flags | GenerateFlag::SwapPersonas;
 
 		// Generate response
-		if (_options.IsSet(LLMOption::RandomizeMessageCount))
+		if (_options.flags.IsSet(ChatOptions::Flag::RandomizeMessageCount))
 		{
 			static std::uniform_int_distribution<int> numMessages(1, 3);
 			LockAndDo([&]() {
@@ -1150,7 +1150,7 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 					generateArgs.maxMessages = numMessages(_modelState.rng); //! Hmm..
 			}, _stateMutex);
 		}
-		else if (!_options.IsSet(LLMOption::LimitMessages))
+		else if (!_options.flags.IsSet(ChatOptions::Flag::LimitMessages))
 			generateArgs.maxMessages = 0;
 
 		if (generateArgs.responseId.empty())
@@ -1305,7 +1305,7 @@ bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgT
 		return false;
 
 	// Process
-	fig::string identifier = _options.IsSet(LLMOption::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
+	fig::string identifier = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
 	fig::string content = message;
 	content = _session.ApplyNames(content);
 	std::vector<Submessage> subMessages;
@@ -1371,7 +1371,7 @@ bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, 
 		.time = 1,
 	};
 
-	fig::string responder = _options.IsSet(LLMOption::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
+	fig::string responder = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
 
 	bool bAllowNarration = true;
 
@@ -1752,7 +1752,7 @@ SamplerPtr LLMInstance::CompileGrammar(GrammarFlags flags)
 	SamplerPtr pGrammar = Grammar::compile_grammar(
 		flags,
 		_modelState.pVocab, 
-		_session.GetNameGrammar(_options.IsSet(LLMOption::UseCharacterIds), _options.IsSet(LLMOption::AllowUserResponse)),
+		_session.GetNameGrammar(_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds), _options.flags.IsSet(ChatOptions::Flag::AllowUserResponse)),
 		_stateVars.GetGrammarPattern());
 	
 	_modelState.grammars[flags] = pGrammar;
@@ -1761,7 +1761,7 @@ SamplerPtr LLMInstance::CompileGrammar(GrammarFlags flags)
 
 bool LLMInstance::SetStateVariable(fig::string name, fig::string value, bool allowCreate)
 {
-	if (!_options.IsSet(LLMOption::StateVariables))
+	if (!_options.flags.IsSet(ChatOptions::Flag::StateVariables))
 		return false;
 
 	std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);

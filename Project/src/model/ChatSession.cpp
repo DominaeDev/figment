@@ -14,7 +14,7 @@
 using namespace fig::string_util;
 using namespace fig::file_util;
 
-bool ChatSession::Initialize(LLMOptions options)
+bool ChatSession::Initialize(ChatOptions options)
 {
 	_options = options;
 
@@ -249,15 +249,15 @@ fig::string ChatSession::GetSystemPrompt() const
 		replace_all_inplace(prompt, "##FORMATTING##", _formatting_solo);
 	}
 
-	replace_all_inplace(prompt, "##STATE_FORMATTING##", _options.IsSet(LLMOption::StateVariables) ? _formatting_state : "");
-	replace_all_inplace(prompt, "##UNCENSOR_INSTRUCTIONS##", _options.IsSet(LLMOption::Uncensored) ? _system_prompt_uncensored : "");
+	replace_all_inplace(prompt, "##STATE_FORMATTING##", _options.flags.IsSet(ChatOptions::Flag::StateVariables) ? _formatting_state : "");
+	replace_all_inplace(prompt, "##UNCENSOR_INSTRUCTIONS##", _options.flags.IsSet(ChatOptions::Flag::Uncensored) ? _system_prompt_uncensored : "");
 	prompt = trim(prompt);
 
 	if (IsGroupChat())
 	{
 		prompt.append("\n\n# Characters");
 		
-		if (_options.IsSet(LLMOption::UseCharacterIds))
+		if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
 		{
 			prompt.append("\n{\n");
 			// Bots

@@ -32,15 +32,17 @@ using namespace fig::llm;
 
 MainFrame* MainFrame::s_pInstance = nullptr;
 
-LLMOptions llmOptions = {
-	LLMOption::GreetUser,
-	LLMOption::Uncensored,
-//	LLMOption::LimitMessages,
-//	LLMOption::RandomizeMessageCount,
-	LLMOption::StateVariables,
-	LLMOption::ReportStateChanges,
-//	LLMOption::Embeddings,
-	LLMOption::UseMultipleSequences,
+constexpr ChatOptions DefaultChatOptions {
+	.flags = {
+		ChatOptions::Flag::GreetUser,
+		ChatOptions::Flag::Uncensored,
+	//	ChatOptions::Flag::LimitMessages,
+	//	ChatOptions::Flag::RandomizeMessageCount,
+		ChatOptions::Flag::StateVariables,
+		ChatOptions::Flag::ReportStateChanges,
+	//	ChatOptions::Flag::Embeddings,
+	},
+	.multiBotMode = ChatOptions::MultiBotMode::MultipleSequences,
 };
 
 MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
@@ -157,7 +159,7 @@ void MainFrame::InitializeModel()
 		SetStatusBar(GlobalStrings::Status::LoadingModel);
 
 		engine.Initialize(fig::string(Constants::DefaultModelLocation), 
-			llmOptions.IsSet(LLMOption::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
+			DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
 			[this](int percent) 
 			{
 				SetStatusBar(std::format(GlobalStrings::Status::LoadingModelPercentFmt, percent));
@@ -165,7 +167,7 @@ void MainFrame::InitializeModel()
 			[this, &engine](bool bSuccess)
 			{
 				if (bSuccess)
-					Application::SetLLMInstance(engine.CreateInstance(Constants::Context::DefaultSize, llmOptions.IsSet(LLMOption::Embeddings)));
+					Application::SetLLMInstance(engine.CreateInstance(Constants::Context::DefaultSize, DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings)));
 			});
 	}
 }
@@ -190,7 +192,7 @@ void MainFrame::StartChat()
 	if (pLLM && !pLLM->IsInitialized())
 	{
 		ChatSession session;
-		session.Initialize(llmOptions);
+		session.Initialize(DefaultChatOptions);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
 		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
@@ -198,7 +200,7 @@ void MainFrame::StartChat()
 		LLMChatArguments llmArgs {
 			/*session*/ session,
 			/*messages*/ {},
-			/*options*/ llmOptions,
+			/*options*/ DefaultChatOptions,
 		};
 		pLLM->Initialize(llmArgs);
 		_pChatScroll->SetSession(session);

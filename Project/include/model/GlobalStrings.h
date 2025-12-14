@@ -2,35 +2,35 @@
 #define GLOBAL_STRINGS_H__
 #pragma once
 
-#include <string_view>
+#include "Types.h"
 
 namespace GlobalStrings
 {
-	inline constexpr fig::string_view ApplicationTitle = "Figment";
+	inline constexpr const_string ApplicationTitle = "Figment";
 
 	namespace Status
 	{
-		inline constexpr fig::string_view LoadingModel = 
+		inline constexpr const_string LoadingModel = 
 			"Loading model...";
-		inline constexpr fig::string_view LoadingModelPercentFmt = 
+		inline constexpr const_string LoadingModelPercentFmt = 
 			"Loading model... {0}%";
-		inline constexpr fig::string_view InitializingChat = 
+		inline constexpr const_string InitializingChat = 
 			"Initializing chat...";
-		inline constexpr fig::string_view ChatInitialized = 
+		inline constexpr const_string ChatInitialized = 
 			"Chat initialized";
-		inline constexpr fig::string_view FailedToInitializeChat = 
+		inline constexpr const_string FailedToInitializeChat = 
 			"Failed to initialize chat";
-		inline constexpr fig::string_view ModelLoaded = 
+		inline constexpr const_string ModelLoaded = 
 			"Model loaded";
-		inline constexpr fig::string_view ModelUnloaded = 
+		inline constexpr const_string ModelUnloaded = 
 			"Model unloaded";
-		inline constexpr fig::string_view FailedToLoadModel = 
+		inline constexpr const_string FailedToLoadModel = 
 			"Failed to load model";
-		inline constexpr fig::string_view GeneratingResponse = 
+		inline constexpr const_string GeneratingResponse = 
 			"Generating response...";
-		inline constexpr fig::string_view RebuildingContext = 
+		inline constexpr const_string RebuildingContext = 
 			"Rebuilding context...";
-		inline constexpr fig::string_view Ready = 
+		inline constexpr const_string Ready = 
 			"Ready";
 	}
 

@@ -66,6 +66,9 @@
     <Filter Include="Source Files\Model\Character">
       <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{08ed38ef-c891-490c-b20a-88677d1ca92a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -412,9 +415,6 @@
     <ClInclude Include="include\util\FileUtility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\Types.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\llm\LLMEngine.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
@@ -423,12 +423,6 @@
     </ClInclude>
     <ClInclude Include="include\llm\LLMStatus.h">
       <Filter>Source Files\Inference</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\GlobalStrings.h">
-      <Filter>Source Files\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Constants.h">
-      <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ChatTypes.h">
       <Filter>Source Files\Model\Chat</Filter>
@@ -447,6 +441,15 @@
     </ClInclude>
     <ClInclude Include="include\model\Character.h">
       <Filter>Source Files\Model\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Types.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\GlobalStrings.h">
+      <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Constants.h">
+      <Filter>Source Files\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

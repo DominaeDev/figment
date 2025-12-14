@@ -44,7 +44,7 @@ namespace fig::llm
 	{
 		ChatSession session;
 		Messages messages;
-		LLMOptions options;
+		ChatOptions options;
 		int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
 	};
 
@@ -217,7 +217,7 @@ namespace fig::llm
 
 		// Session
 		ChatSession _session;
-		LLMOptions _options;
+		ChatOptions _options;
 		bool _bCtxReallocateNextTurn = false;
 
 		// State

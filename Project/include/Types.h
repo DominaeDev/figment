@@ -23,6 +23,8 @@ namespace fig
     static constexpr auto npos = std::string::npos;
 }
 
+using const_string = fig::string_view const;
+
 // Type conversion functions
 
 template<typename T>
