@@ -2,6 +2,7 @@
 #define COMMON_UTILITY_H__
 
 #include "Types.h"
+
 #include <optional>
 #include <vector>
 #include <queue>
@@ -11,10 +12,13 @@
 namespace fig::common_util
 {
 	// Debugging
-	void DebugPrint(string message) noexcept;
-	void DebugPrintLn(string message = "") noexcept;
+	void DebugPrint(fig::string message) noexcept;
+	void DebugPrintLn(fig::string message = "") noexcept;
 
-	string CreateUUID();
+	fig::string CreateUUID();
+
+	fig::string Base64Encode(fig::byte_span data) noexcept;
+	fig::bytes Base64Decode(fig::string_view) noexcept;
 
 	template<typename T>
 	void queue_clear(std::queue<T>& q)

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __Application_h_
-#define __Application_h_
+#ifndef APPLICATION_STATE_H__
+#define APPLICATION_STATE_H__
 
 #include <memory>
 
@@ -18,7 +18,7 @@ namespace fig::llm
 	class LLMInstance;
 }
 
-class Application
+class ApplicationState
 {
 public:
 	struct State
@@ -50,6 +50,6 @@ private:
 	static SDL_Cursor* _pIBeamCursor;
 };
 
-typedef Application::State AppState;
+typedef ApplicationState::State AppState;
 
 #endif

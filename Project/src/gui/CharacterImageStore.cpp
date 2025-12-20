@@ -32,7 +32,7 @@ void CharacterImageStore::Release()
 
 bool CharacterImageStore::LoadCharacterPortrait(fig::string characterId, fig::string filename)
 {
-	return LoadTexture(Application::GetRenderer(), characterId, ImageType::Portrait_Square, filename);
+	return LoadTexture(ApplicationState::GetRenderer(), characterId, ImageType::Portrait_Square, filename);
 }
 
 bool CharacterImageStore::LoadTexture(Renderer* pRenderer, fig::string characterId, ImageType imageType, fig::string filename)

@@ -6,31 +6,31 @@
 
 namespace GlobalStrings
 {
-	inline constexpr const_string ApplicationTitle = "Figment";
+	inline constexpr fig::const_string ApplicationTitle = "Figment";
 
 	namespace Status
 	{
-		inline constexpr const_string LoadingModel = 
+		inline constexpr fig::const_string LoadingModel = 
 			"Loading model...";
-		inline constexpr const_string LoadingModelPercentFmt = 
+		inline constexpr fig::const_string LoadingModelPercentFmt = 
 			"Loading model... {0}%";
-		inline constexpr const_string InitializingChat = 
+		inline constexpr fig::const_string InitializingChat = 
 			"Initializing chat...";
-		inline constexpr const_string ChatInitialized = 
+		inline constexpr fig::const_string ChatInitialized = 
 			"Chat initialized";
-		inline constexpr const_string FailedToInitializeChat = 
+		inline constexpr fig::const_string FailedToInitializeChat = 
 			"Failed to initialize chat";
-		inline constexpr const_string ModelLoaded = 
+		inline constexpr fig::const_string ModelLoaded = 
 			"Model loaded";
-		inline constexpr const_string ModelUnloaded = 
+		inline constexpr fig::const_string ModelUnloaded = 
 			"Model unloaded";
-		inline constexpr const_string FailedToLoadModel = 
+		inline constexpr fig::const_string FailedToLoadModel = 
 			"Failed to load model";
-		inline constexpr const_string GeneratingResponse = 
+		inline constexpr fig::const_string GeneratingResponse = 
 			"Generating response...";
-		inline constexpr const_string RebuildingContext = 
+		inline constexpr fig::const_string RebuildingContext = 
 			"Rebuilding context...";
-		inline constexpr const_string Ready = 
+		inline constexpr fig::const_string Ready = 
 			"Ready";
 	}
 

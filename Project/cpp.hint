@@ -3,3 +3,4 @@
 // For more information see https://go.microsoft.com/fwlink/?linkid=865984
 #define TRUE (1==1)
 #define FALSE !TRUE
+#define STATIC_STRING inline constexpr fig::const_string

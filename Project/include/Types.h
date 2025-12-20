@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <string_view>
 #include <vector>
 #include <ranges>
+#include <span>
 #include <algorithm>
 #include "util/EnumFlags.h"
 
@@ -19,11 +20,15 @@ namespace fig
     using wc_string = const wchar_t*;
     using wstring = std::wstring;
     using wstring_view = std::wstring_view;
-
-    static constexpr auto npos = std::string::npos;
+    using const_string = string_view const;
+    static constexpr auto npos = string::npos;
+    
+    using byte = std::byte;
+    using byte_span = std::span<byte>;
+    using bytes = std::vector<byte>;
+    template<size_t N> 
+    using buffer = std::array<byte, N>;
 }
-
-using const_string = fig::string_view const;
 
 // Type conversion functions
 
@@ -52,14 +57,6 @@ inline constexpr size_t operator "" _uz( unsigned long long arg ) noexcept
 
 inline constexpr fig::string toStr(fig::string_view sv) { return fig::string(sv); }
 inline constexpr fig::c_string toCStr(fig::string_view sv) { return static_cast<fig::c_string>(sv.data()); }
-
-// Macros
-#if !defined(TRUE)
-#define TRUE 1
-#endif
-#if !defined(FALSE)
-#define FALSE 0
-#endif
 
 constexpr bool Enabled = true;
 constexpr bool Disabled = false;

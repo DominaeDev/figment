@@ -22,13 +22,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -46,19 +46,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4;$(ProjectDir)\..\Libraries\tinyxml2;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4\include;$(ProjectDir)\..\Libraries\tinyxml2\include;$(ProjectDir)\..\Libraries\aes\include;$(ProjectDir)\..\Libraries\sha256\include;$(ProjectDir)\..\Libraries\base64\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\ggml\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4;$(ProjectDir)\..\Libraries\tinyxml2;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llamacpp\include;$(ProjectDir)\..\Libraries\llamacpp\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4\include;$(ProjectDir)\..\Libraries\tinyxml2\include;$(ProjectDir)\..\Libraries\aes\include;$(ProjectDir)\..\Libraries\sha256\include;$(ProjectDir)\..\Libraries\base64\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\x64;$(ProjectDir)\..\Libraries\llamacpp\lib\ggml\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;AUTOCHAT;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;AUTOCHAT;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;%(PreprocessorDefinitions);USE_INTEL_AESNI</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -67,7 +67,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>/Zc:char8_t- /utf-8 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
       <TranslateIncludes>false</TranslateIncludes>
@@ -84,7 +84,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;%(PreprocessorDefinitions);USE_INTEL_AESNI</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -92,7 +92,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>/Zc:char8_t- /utf-8 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableLanguageExtensions>true</DisableLanguageExtensions>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
       <TranslateIncludes>false</TranslateIncludes>
@@ -106,6 +106,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Libraries\SHA256\src\sha256.c" />
     <ClCompile Include="..\Libraries\SQLite3\src\Backup.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Database.cpp" />
@@ -113,7 +114,7 @@
     <ClCompile Include="..\Libraries\SQLite3\src\Savepoint.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
     <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
-    <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="..\Libraries\tinyxml2\src\tinyxml2.cpp" />
     <ClCompile Include="include\llm\LLMEngine.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="src\gui\StatusBar.cpp" />
     <ClCompile Include="src\model\ChatCommands.cpp" />
     <ClCompile Include="src\util\FileUtility.cpp" />
+    <ClCompile Include="src\util\Hash.cpp" />
     <ClCompile Include="src\util\StringUtility.cpp" />
     <ClCompile Include="src\gui\Text.cpp" />
     <ClCompile Include="src\gui\TextBox.cpp" />
@@ -168,9 +170,13 @@
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h" />
-    <ClInclude Include="..\Libraries\uuid_v4\endianness.h" />
-    <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h" />
+    <ClInclude Include="..\Libraries\AES\include\AES.h" />
+    <ClInclude Include="..\Libraries\base64\include\base64.h" />
+    <ClInclude Include="..\Libraries\SHA256\include\sha256.h" />
+    <ClInclude Include="..\Libraries\SQLite3\include\sqlite3.h" />
+    <ClInclude Include="..\Libraries\tinyxml2\include\tinyxml2.h" />
+    <ClInclude Include="..\Libraries\uuid_v4\include\endianness.h" />
+    <ClInclude Include="..\Libraries\uuid_v4\include\uuid_v4.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
     <ClInclude Include="include\gui\HorizontalGradient.h" />
     <ClInclude Include="include\gui\Image.h" />
@@ -225,6 +231,7 @@
     <ClInclude Include="include\gui\StaticText.h" />
     <ClInclude Include="include\gui\StatusBar.h" />
     <ClInclude Include="include\util\FileUtility.h" />
+    <ClInclude Include="include\util\Hash.h" />
     <ClInclude Include="include\util\Lockable.h" />
     <ClInclude Include="include\util\StringUtility.h" />
     <ClInclude Include="include\gui\Text.h" />

@@ -87,7 +87,7 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 	auto fgColor = GetForegroundColor();
 	auto bgColor = GetBackgroundColor();
 	ReleaseTexture();
-	auto pRenderer = Application::GetRenderer();
+	auto pRenderer = ApplicationState::GetRenderer();
 
 	int maxWidth = std::max(toI(_maxSize.x), 0);
 

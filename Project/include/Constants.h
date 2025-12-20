@@ -20,17 +20,17 @@ namespace Constants
 
 	namespace Chat
 	{
-		inline constexpr const_string DialogueTag = "talk";
-		inline constexpr const_string ActionTag = "act";
-		inline constexpr const_string ThoughtTag = "think";
-		inline constexpr const_string NarrationTag = "narrator";
-		inline constexpr const_string DirectionTag = "director";
-		inline constexpr const_string StateReportTag = "change";
-		inline constexpr const_string DialogueTagEnd = "/talk";
-		inline constexpr const_string ActionTagEnd = "/act";
-		inline constexpr const_string ThoughtTagEnd = "/think";
-		inline constexpr const_string NarrationTagEnd = "/narrator";
-		inline constexpr const_string DirectionTagEnd = "/director";
+		inline constexpr fig::const_string DialogueTag = "talk";
+		inline constexpr fig::const_string ActionTag = "act";
+		inline constexpr fig::const_string ThoughtTag = "think";
+		inline constexpr fig::const_string NarrationTag = "narrator";
+		inline constexpr fig::const_string DirectionTag = "director";
+		inline constexpr fig::const_string StateReportTag = "change";
+		inline constexpr fig::const_string DialogueTagEnd = "/talk";
+		inline constexpr fig::const_string ActionTagEnd = "/act";
+		inline constexpr fig::const_string ThoughtTagEnd = "/think";
+		inline constexpr fig::const_string NarrationTagEnd = "/narrator";
+		inline constexpr fig::const_string DirectionTagEnd = "/director";
 
 		inline constexpr int DefaultNarratorCooldown = 5;
 	}
@@ -59,7 +59,7 @@ namespace Constants
 		inline constexpr int32_t MaxSequences = 4;
 	}
 
-	inline constexpr const_string DefaultModelLocation = "M:\\LLM\\default_model.gguf";
+	inline constexpr fig::const_string DefaultModelLocation = "M:\\LLM\\default_model.gguf";
 	
 	namespace LLM
 	{
@@ -69,16 +69,16 @@ namespace Constants
 
 	namespace Embedding
 	{
-		inline constexpr const_string DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
-		inline constexpr const_string EmbeddingSaveLocation = ".\\embeddings\\";
+		inline constexpr fig::const_string DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
+		inline constexpr fig::const_string EmbeddingSaveLocation = ".\\embeddings\\";
 		inline constexpr int32_t ContextSize = 384;
 		inline constexpr int32_t Depth = 1;
 		inline constexpr bool SplitSentences = true;
-		inline constexpr const_string DocumentPrefix	= "";
-		inline constexpr const_string QueryPrefix		= "";
-//		inline constexpr const_string DocumentPrefix	= "search_document: ";
-//		inline constexpr const_string QueryPrefix		= "search_query: ";
-//		inline constexpr const_string DocumentPrefix	= "Represent the statement: ";
-//		inline constexpr const_string QueryPrefix		= "Represent the statement: ";
+		inline constexpr fig::const_string DocumentPrefix	= "";
+		inline constexpr fig::const_string QueryPrefix		= "";
+//		inline constexpr fig::const_string DocumentPrefix	= "search_document: ";
+//		inline constexpr fig::const_string QueryPrefix		= "search_query: ";
+//		inline constexpr fig::const_string DocumentPrefix	= "Represent the statement: ";
+//		inline constexpr fig::const_string QueryPrefix		= "Represent the statement: ";
 	}
 }

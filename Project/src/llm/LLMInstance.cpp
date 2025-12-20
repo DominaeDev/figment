@@ -534,38 +534,39 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		last_response_tokens.insert(last_response_tokens.end(), block.tokens.cbegin(), block.tokens.cend());
 	}
 
-#if FALSE // State vars
-	// Add state block (preface)
-	if (!args.isContinuation && _options.flags.IsSet(ChatOptions::Flag::StateVariables) && !_stateVars.IsEmpty())
+	if constexpr (Disabled) // State vars
 	{
-		auto itUserRev = std::find_if(blocks.rbegin(), blocks.rend(), [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
-		auto itState = flip_iterator<ContextBlock>(blocks, itUserRev);
+		// Add state block (preface)
+		if (!args.isContinuation && _options.flags.IsSet(ChatOptions::Flag::StateVariables) && !_stateVars.IsEmpty())
+		{
+			auto itUserRev = std::find_if(blocks.rbegin(), blocks.rend(), [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
+			auto itState = flip_iterator<ContextBlock>(blocks, itUserRev);
 
-		itState = std::max(itState, blocks.size() > 1 ? std::max(blocks.end() - 2, blocks.begin()) : blocks.end());
+			itState = std::max(itState, blocks.size() > 1 ? std::max(blocks.end() - 2, blocks.begin()) : blocks.end());
 
-		fig::string content;
+			fig::string content;
 			//= string("# Story parameters\n")
 			//+ "The following parameters track the state of the story and world.\n";
-		content += std::format("{}", _stateVars.GetList());
-		content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
-		content += "\nEx: <change>Param = New value</change>\n";
-		content = llm_tmpl::apply_chat_template({ Message { Role::System, content } }, false);
-		auto state_tokens = fig::llm::utility::tokenize(state.pVocab, content, false);
-		auto it = blocks.insert(itState, ContextBlock {
-			.role = Role::System,
-			.name = "",
-			.content = content,
-			.tokens = state_tokens,
-			.flags = ContextBlockFlag::Volatile,
-			.sequenceId = Sequence::Shared,
-			.responseId = "",
-		});
+			content += std::format("{}", _stateVars.GetList());
+			content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
+			content += "\nEx: <change>Param = New value</change>\n";
+			content = llm_tmpl::apply_chat_template({ Message { Role::System, content } }, false);
+			auto state_tokens = fig::llm::utility::tokenize(state.pVocab, content, false);
+			auto it = blocks.insert(itState, ContextBlock {
+				.role = Role::System,
+				.name = "",
+				.content = content,
+				.tokens = state_tokens,
+				.flags { ContextBlockFlag::Volatile },
+				.sequenceId { Sequence::Shared }, //! @seq
+				.responseId = "",
+				});
 
-		_contextState.RefreshBlockPositions();
+			_contextState.RefreshBlockPositions();
 
-		last_response_tokens.insert(last_response_tokens.begin() + ptrdiff_t((it->offset) - cursor_pos), state_tokens.cbegin(), state_tokens.cend());
+			last_response_tokens.insert(last_response_tokens.begin() + ptrdiff_t((it->offset) - cursor_pos), state_tokens.cbegin(), state_tokens.cend());
+		}
 	}
-#endif
 
 	// Allocate and shift context window
 	int32_t ctx_reserve = std::max((int32_t)last_response_tokens.size() + Constants::Context::MaxResponseLength, Constants::Context::MicroBatchSize);
@@ -640,10 +641,10 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 	auto [batch_ref, batch_n] = cache.GetBatch();
 	llama_batch& batch = batch_ref.get();
-//	int32_t n_batch = llama_n_batch(state.pCtx);
+	//	int32_t n_batch = llama_n_batch(state.pCtx);
 	int32_t ctx_size = state.ctx_size;
 	fig::string userName = _session.GetNameOf(Role::User);
-	
+
 	int32_t pre_response_pos = _contextState.response_pos;
 	int32_t& cursor_pos = _contextState.cursor_pos;
 
@@ -665,7 +666,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		// Keep last sequence
 		current_sequence_index = _contextState.previous_sequence_index >= 0 ? _contextState.previous_sequence_index : 0;
 	}
-	else 
+	else
 	{
 		// Use role in most recent bot response
 		auto itLast = std::find_if(_contextState.GetBlocks().crbegin(), _contextState.GetBlocks().crend(), [](const ContextBlock& b) { return is_bot(b.role); });
@@ -734,7 +735,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		partial += args.prepend;
 		printf("%s", partial.c_str());
 	}
-	
+
 	cache.InitLogits();
 
 	auto startTime = std::chrono::steady_clock::now();
@@ -768,7 +769,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			onComplete(InternalError::ContextFull, std::format("context size exceeded ({} / {})", n_ctx_used, ctx_size));
 			return;
 		}
-		
+
 		if (batch_view.n_tokens > 0)
 		{
 			int r = llama_decode(state.pCtx, batch_view);
@@ -923,9 +924,9 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 									// Swap response over
 									llama_kv_self_seq_cp(state.pCtx, prev_sequence_index, current_sequence_index, pre_response_pos, cursor_pos);
-//									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos); //! wrong?
+									//									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos); //! wrong?
 									cache.BatchSetSequences(pre_response_pos, cursor_pos - pre_response_pos, current_sequence);
-									
+
 									DebugPrintLn(std::format(">> Sequence -> {}", current_sequence_index));
 								}
 							}
@@ -942,10 +943,10 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 				}
 			}
 
-//			if (msgType == MessageType::Undefined)
-//				msgType = MessageType::Dialogue;
+			//			if (msgType == MessageType::Undefined)
+			//				msgType = MessageType::Dialogue;
 
-			// Send piece
+						// Send piece
 			if (partial.size() > 0 && msgType == MessageType::StateReport)
 			{
 				stateReport += partial;
@@ -961,7 +962,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 						.role = responderRole,
 						.msgType = msgType,
 						.isComplete = bEndOfMessageType,
-					});
+						});
 				}, _resultMutex);
 				response += partial;
 			}
@@ -997,9 +998,9 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 	// Remove full response from cache (will be reinserted on next turn)
 	_contextState.ClearTokensBelow(pre_response_pos);
-//	fig::llm::utility::erase_bottom(_contextState.pCtx, _contextState.num_sequences, pre_response_pos);
-//	fig::llm::utility::clear_batch_from(batch, pre_response_pos);
-//	batch.n_tokens = pre_response_pos;
+	//	fig::llm::utility::erase_bottom(_contextState.pCtx, _contextState.num_sequences, pre_response_pos);
+	//	fig::llm::utility::clear_batch_from(batch, pre_response_pos);
+	//	batch.n_tokens = pre_response_pos;
 	cursor_pos = pre_response_pos;
 	_contextState.previous_sequence_index = current_sequence_index;
 
@@ -1029,7 +1030,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 				.flags {}, // uncached
 				.sequenceId { Sequence::Shared },
 				.responseId = responseId,
-			});
+				});
 		}
 	}
 	else
@@ -1038,7 +1039,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	}
 
 
-#if FALSE
+	if constexpr (Disabled)
 	{
 		std::map<fig::string, fig::string> variables;
 		_stateVars.UpdateValues(stateReport, variables);
@@ -1048,22 +1049,21 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		{
 			fig::string varText;
 			varText.reserve(512);
-			for (auto kvp : variables)
+			for (auto& kvp : variables)
 				varText = varText + std::format("{} = {}\n", kvp.first, kvp.second);
 			varText = rtrim(varText);
 
 			_resultQueue.push(MessagePiece {
-				responseId = CreateUUID(),
-				subMessageId = CreateUUID(),
-				identifier = "",
-				text = varText,
-				role = Role::System,
-				msgType = MessageType::SystemMessage,
-				isComplete = true,
-				});
+				.responseId = CreateUUID(),
+				.subMessageId = CreateUUID(),
+				.identifier = "",
+				.content = varText,
+				.role = Role::System,
+				.msgType = MessageType::SystemMessage,
+				.isComplete = true,
+			});
 		}
 	}
-#endif
 
 	DebugPrintLn();
 	DebugPrintLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stop_reason.c_str(), sampled_tokens.size()));
@@ -1605,66 +1605,66 @@ void LLMInstance::RefreshActiveResponses()
 
 bool LLMInstance::SwapPersona(Role role)
 {
-#if FALSE // Disabled
-	if (!_session.IsGroupChat() || !(is_bot(role) || role == Role::Undefined))
-		return false;
-
-	if (role == _contextState.activePersona)
-		return false; // No change
-
-	ContextSequence& seq = _contextState.sequence;
-	llama_batch& batch = _contextState.GetBatch();
-	llama_context* pCtx = _modelState.pCtx;
-
-	// Remove current persona
-	auto& blocks = _contextState.blocks;
-	auto itFind = std::find_if(blocks.begin(), blocks.end(), [](const ContextBlock& b) { return b.flags.IsSet(ContextBlockFlag::Persona); });
-	if (itFind == blocks.end())
-		return false; // No persona
-
-	ContextBlock& block = *itFind;
-	int32_t insertion_pos = block.offset;
-
-	// Remove from kv cache
-	int32_t shift = _contextState.GetCache().BatchRemove(block.offset, block.offset + block.length());
-
-	_contextState.cursor_pos -= shift;
-	_contextState.response_pos -= shift;
-	_contextState.prepend_pos -= shift;
-
-	_contextState.activePersona = Role::Undefined;
-
-	// Activate next persona
-	auto itFindInactive = _contextState.personas.find(role);
-	if (itFindInactive != _contextState.personas.end())
+	if constexpr (Disabled)
 	{
-		auto& tokens = itFindInactive->second;
-		int32_t len = toI(tokens.size());
+		if (!_session.IsGroupChat() || !(is_bot(role) || role == Role::Undefined))
+			return false;
 
-		//! TODO: Allocate enough space
+		if (role == _contextState.activePersona)
+			return false; // No change
 
-		// Shift down
-		int32_t shift = _contextState.GetCache().BatchAllocate(insertion_pos, len);
-		
-		// Write persona to batch
-		_contextState.GetCache().BatchWrite(tokens, Sequence::Default, insertion_pos);
+		auto [batch_ref, batch_n] = _contextState.GetCache().GetBatch();
+		llama_context* pCtx = _modelState.pCtx;
 
-		// Decode
-		llama_batch batch_view = fig::llm::utility::create_batch_view(_contextState.GetBatch(), insertion_pos, len);
-		if (batch_view.n_tokens > 0 && llama_decode(_modelState.pCtx, batch_view) != 0)
-			return false; // Error
+		// Remove current persona
+		auto& blocks = _contextState.GetBlocks();
+		auto itFind = std::find_if(blocks.begin(), blocks.end(), [](const ContextBlock& b) { return b.flags.IsSet(ContextBlockFlag::Persona); });
+		if (itFind == blocks.end())
+			return false; // No persona
 
-		block.tokens = tokens;
-		block.role = role;
+		ContextBlock& block = *itFind;
+		int32_t insertion_pos = block.offset;
 
-		_contextState.cursor_pos += len;
-		_contextState.response_pos += len;
-		_contextState.prepend_pos += len;
+		// Remove from kv cache
+		int32_t shift = _contextState.GetCache().BatchRemove(block.offset, block.offset + block.length());
 
-		_contextState.activePersona = role;
-		return true;
+		_contextState.cursor_pos -= shift;
+		_contextState.response_pos -= shift;
+		_contextState.prepend_pos -= shift;
+
+		_contextState.activePersona = Role::Undefined;
+
+		// Activate next persona
+		auto itFindInactive = _contextState.personas.find(role);
+		if (itFindInactive != _contextState.personas.end())
+		{
+			auto& tokens = itFindInactive->second;
+			int32_t len = toI(tokens.size());
+
+			//! TODO: Allocate enough space
+
+			// Shift down
+			int32_t shift = _contextState.GetCache().BatchAllocate(insertion_pos, len);
+
+			// Write persona to batch
+			_contextState.GetCache().BatchWrite(tokens, { Sequence::Default }, insertion_pos);
+
+			// Decode
+			llama_batch batch_view = fig::llm::utility::create_batch_view(batch_ref, insertion_pos, len);
+			if (batch_view.n_tokens > 0 && llama_decode(_modelState.pCtx, batch_view) != 0)
+				return false; // Error
+
+			block.tokens = tokens;
+			block.role = role;
+
+			_contextState.cursor_pos += len;
+			_contextState.response_pos += len;
+			_contextState.prepend_pos += len;
+
+			_contextState.activePersona = role;
+			return true;
+		}
 	}
-#endif
 	return false;
 }
 

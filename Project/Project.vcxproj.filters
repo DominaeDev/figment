@@ -18,35 +18,11 @@
     <Filter Include="Source Files\Inference">
       <UniqueIdentifier>{b6a16c68-2efd-46d3-b4b1-42ee978fc28a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Model">
-      <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Inference\Embeddings">
       <UniqueIdentifier>{fc79dcd6-092f-47e7-870f-bcd0142e0610}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Inference\Context">
       <UniqueIdentifier>{1a0e4325-4392-475b-9d87-cc5d5fa0b897}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Interface">
-      <UniqueIdentifier>{19211871-fca3-43ea-a283-bedeafe48690}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Interface\Controls">
-      <UniqueIdentifier>{629db8c4-47b9-4beb-a0f2-ed7e30cf6b90}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Interface\Frames">
-      <UniqueIdentifier>{ad99cbed-4053-4284-9125-df5de355b049}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Interface\Layout">
-      <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Interface\Theme">
-      <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Interface\Stores">
-      <UniqueIdentifier>{a03df242-3861-42f9-a5a1-d305c5eef703}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Interface\Fonts">
-      <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Third-party">
       <UniqueIdentifier>{656a9e42-e42d-48b3-ba04-a1f41e278237}</UniqueIdentifier>
@@ -60,14 +36,47 @@
     <Filter Include="Source Files\Third-party\uuid">
       <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Model\Chat">
-      <UniqueIdentifier>{b9eb11aa-5e0c-4fd0-b6c2-875b3e43e5b5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model\Character">
-      <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Common">
       <UniqueIdentifier>{08ed38ef-c891-490c-b20a-88677d1ca92a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{19211871-fca3-43ea-a283-bedeafe48690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI\Controls">
+      <UniqueIdentifier>{629db8c4-47b9-4beb-a0f2-ed7e30cf6b90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI\Frames">
+      <UniqueIdentifier>{ad99cbed-4053-4284-9125-df5de355b049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI\Layout">
+      <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI\Theme">
+      <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI\Stores">
+      <UniqueIdentifier>{a03df242-3861-42f9-a5a1-d305c5eef703}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI\Fonts">
+      <UniqueIdentifier>{5be0169e-3550-4e31-bc40-13950d3ee7c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AppModel">
+      <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AppModel\Chat">
+      <UniqueIdentifier>{b9eb11aa-5e0c-4fd0-b6c2-875b3e43e5b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AppModel\Character">
+      <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party\AES">
+      <UniqueIdentifier>{d5aecc7a-a1e8-4108-a4b6-d0e441fd4344}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party\SHA256">
+      <UniqueIdentifier>{736b1a5c-2d17-433e-b8d6-5c23761d805b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party\base64">
+      <UniqueIdentifier>{cdfbbad3-f54b-4189-a4e6-ceedbc2275e1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -96,106 +105,103 @@
       <Filter>Source Files\Third-party\SQLiteCpp</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Sizer.cpp">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HorizontalSizer.cpp">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\LayoutElement.cpp">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalSizer.cpp">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\model\AppState.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MainFrame.cpp">
-      <Filter>Source Files\Interface\Frames</Filter>
+      <Filter>Source Files\GUI\Frames</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Panel.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StaticText.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\TextBox.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalListSizer.cpp">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ChatScroll.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ChatMessage.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Common.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Area.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StatusBar.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\util\StringUtility.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SolidBackgroundRenderer.cpp">
-      <Filter>Source Files\Interface\Theme</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\RoundedBackgroundRenderer.cpp">
-      <Filter>Source Files\Interface\Theme</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\RoundedBorderRenderer.cpp">
-      <Filter>Source Files\Interface\Theme</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\NineGridBackgroundRenderer.cpp">
-      <Filter>Source Files\Interface\Theme</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Libraries\tinyxml2\tinyxml2.cpp">
-      <Filter>Source Files\Third-party\tinyxml2</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMUtility.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Control.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Color.cpp">
-      <Filter>Source Files\Interface</Filter>
+      <Filter>Source Files\GUI</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ControlWithMargins.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Frame.cpp">
-      <Filter>Source Files\Interface\Frames</Filter>
+      <Filter>Source Files\GUI\Frames</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Fonts.cpp">
-      <Filter>Source Files\Interface\Fonts</Filter>
+      <Filter>Source Files\GUI\Fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Text.cpp">
-      <Filter>Source Files\Interface\Fonts</Filter>
+      <Filter>Source Files\GUI\Fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\TextureStore.cpp">
-      <Filter>Source Files\Interface\Stores</Filter>
+      <Filter>Source Files\GUI\Stores</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CharacterImageStore.cpp">
-      <Filter>Source Files\Interface\Stores</Filter>
+      <Filter>Source Files\GUI\Stores</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Image.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalGradient.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HorizontalGradient.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMTemplate.cpp">
       <Filter>Source Files\Inference</Filter>
@@ -207,7 +213,7 @@
       <Filter>Source Files\Inference\Embeddings</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VariableList.cpp">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMStateVariables.cpp">
       <Filter>Source Files\Inference\Context</Filter>
@@ -240,138 +246,138 @@
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
     <ClCompile Include="src\model\ChatSession.cpp">
-      <Filter>Source Files\Model\Chat</Filter>
+      <Filter>Source Files\AppModel\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\model\ChatCommands.cpp">
-      <Filter>Source Files\Model\Chat</Filter>
+      <Filter>Source Files\AppModel\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\model\ChatCommandExecutor.cpp">
-      <Filter>Source Files\Model\Chat</Filter>
+      <Filter>Source Files\AppModel\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\model\Character.cpp">
-      <Filter>Source Files\Model\Character</Filter>
+      <Filter>Source Files\AppModel\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\Hash.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\SHA256\src\sha256.c">
+      <Filter>Source Files\Third-party\SHA256</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\tinyxml2\src\tinyxml2.cpp">
+      <Filter>Source Files\Third-party\tinyxml2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\HorizontalSizer.h">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\LayoutElement.h">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\IUpdateable.h">
-      <Filter>Source Files\Interface</Filter>
+      <Filter>Source Files\GUI</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalSizer.h">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\model\AppState.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\MainFrame.h">
-      <Filter>Source Files\Interface\Frames</Filter>
+      <Filter>Source Files\GUI\Frames</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Panel.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\StaticText.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\TextBox.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalListSizer.h">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ChatScroll.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\util\StringUtility.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ChatMessage.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Common.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Area.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\StatusBar.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CustomRenderer.h">
-      <Filter>Source Files\Interface\Theme</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SolidBackgroundRenderer.h">
-      <Filter>Source Files\Interface\Theme</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\RoundedBackgroundRenderer.h">
-      <Filter>Source Files\Interface\Theme</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\RoundedBorderRenderer.h">
-      <Filter>Source Files\Interface\Theme</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\NineGridBackgroundRenderer.h">
-      <Filter>Source Files\Interface\Theme</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Libraries\tinyxml2\tinyxml2.h">
-      <Filter>Source Files\Third-party\tinyxml2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Libraries\uuid_v4\uuid_v4.h">
-      <Filter>Source Files\Third-party\uuid</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Libraries\uuid_v4\endianness.h">
-      <Filter>Source Files\Third-party\uuid</Filter>
+      <Filter>Source Files\GUI\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMUtility.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Renderers.h">
-      <Filter>Source Files\Interface</Filter>
+      <Filter>Source Files\GUI</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Graphics.h">
-      <Filter>Source Files\Interface</Filter>
+      <Filter>Source Files\GUI</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Control.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Color.h">
-      <Filter>Source Files\Interface</Filter>
+      <Filter>Source Files\GUI</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ControlWithMargins.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Frame.h">
-      <Filter>Source Files\Interface\Frames</Filter>
+      <Filter>Source Files\GUI\Frames</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Fonts.h">
-      <Filter>Source Files\Interface\Fonts</Filter>
+      <Filter>Source Files\GUI\Fonts</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Text.h">
-      <Filter>Source Files\Interface\Fonts</Filter>
+      <Filter>Source Files\GUI\Fonts</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\TextureStore.h">
-      <Filter>Source Files\Interface\Stores</Filter>
+      <Filter>Source Files\GUI\Stores</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CharacterImageStore.h">
-      <Filter>Source Files\Interface\Stores</Filter>
+      <Filter>Source Files\GUI\Stores</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Image.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalScrollSizer.h">
-      <Filter>Source Files\Interface\Layout</Filter>
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalGradient.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\HorizontalGradient.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMTypes.h">
       <Filter>Source Files\Inference</Filter>
@@ -386,7 +392,7 @@
       <Filter>Source Files\Inference\Embeddings</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VariableList.h">
-      <Filter>Source Files\Interface\Controls</Filter>
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMStateVariables.h">
       <Filter>Source Files\Inference\Context</Filter>
@@ -425,22 +431,22 @@
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ChatTypes.h">
-      <Filter>Source Files\Model\Chat</Filter>
+      <Filter>Source Files\AppModel\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ChatOptions.h">
-      <Filter>Source Files\Model\Chat</Filter>
+      <Filter>Source Files\AppModel\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ChatSession.h">
-      <Filter>Source Files\Model\Chat</Filter>
+      <Filter>Source Files\AppModel\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ChatCommandExecutor.h">
-      <Filter>Source Files\Model\Chat</Filter>
+      <Filter>Source Files\AppModel\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ChatCommands.h">
-      <Filter>Source Files\Model\Chat</Filter>
+      <Filter>Source Files\AppModel\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\model\Character.h">
-      <Filter>Source Files\Model\Character</Filter>
+      <Filter>Source Files\AppModel\Character</Filter>
     </ClInclude>
     <ClInclude Include="include\Types.h">
       <Filter>Source Files\Common</Filter>
@@ -450,6 +456,30 @@
     </ClInclude>
     <ClInclude Include="include\Constants.h">
       <Filter>Source Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\Hash.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\AES\include\AES.h">
+      <Filter>Source Files\Third-party\AES</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\SHA256\include\sha256.h">
+      <Filter>Source Files\Third-party\SHA256</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\SQLite3\include\sqlite3.h">
+      <Filter>Source Files\Third-party\SQLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\tinyxml2\include\tinyxml2.h">
+      <Filter>Source Files\Third-party\tinyxml2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\uuid_v4\include\endianness.h">
+      <Filter>Source Files\Third-party\uuid</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\uuid_v4\include\uuid_v4.h">
+      <Filter>Source Files\Third-party\uuid</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\base64\include\base64.h">
+      <Filter>Source Files\Third-party\base64</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

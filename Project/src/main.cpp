@@ -65,7 +65,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 	}
 
-	AppState* pAppState = Application::CreateState();
+	AppState* pAppState = ApplicationState::CreateState();
 	if (!pAppState)
 		return SDL_APP_FAILURE;
 
@@ -177,7 +177,7 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
 	TTF_Quit();
 
-	Application::ReleaseState();
+	ApplicationState::ReleaseState();
 	SDL_Quit();
 }
 

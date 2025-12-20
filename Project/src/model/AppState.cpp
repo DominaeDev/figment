@@ -6,15 +6,15 @@
 
 using namespace fig::llm;
 
-Application::State* Application::__appState = nullptr;
-SDL_Cursor* Application::_pIBeamCursor = nullptr;
+ApplicationState::State* ApplicationState::__appState = nullptr;
+SDL_Cursor* ApplicationState::_pIBeamCursor = nullptr;
 
-Application::State* Application::CreateState()
+ApplicationState::State* ApplicationState::CreateState()
 {
 	if (__appState)
 		return __appState;
 
-	__appState = (Application::State*)SDL_calloc(1, sizeof(Application::State));
+	__appState = (ApplicationState::State*)SDL_calloc(1, sizeof(ApplicationState::State));
 
 	_pIBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 
@@ -23,7 +23,7 @@ Application::State* Application::CreateState()
 	return __appState;
 }
 
-void Application::ReleaseState()
+void ApplicationState::ReleaseState()
 {
 	delete __appState->pTopFrame;
 	
@@ -39,35 +39,35 @@ void Application::ReleaseState()
 	__appState = nullptr;
 }
 
-SDL_Window* Application::GetWindow()
+SDL_Window* ApplicationState::GetWindow()
 {
 	return __appState ? __appState->pWindow : nullptr;
 }
 
-SDL_Renderer* Application::GetRenderer()
+SDL_Renderer* ApplicationState::GetRenderer()
 {
 	return __appState ? __appState->pRenderer : nullptr;
 }
 
-LLMEngine& Application::GetLLMEngine()
+LLMEngine& ApplicationState::GetLLMEngine()
 {
 	assert(__appState);
 	return *(__appState->pLLMEngine.get());
 }
 
-std::shared_ptr<LLMInstance> Application::GetLLMInstance()
+std::shared_ptr<LLMInstance> ApplicationState::GetLLMInstance()
 {
 	assert(__appState);
 	return __appState->pLLMInstance;
 }
 
-void Application::SetLLMInstance(std::shared_ptr<LLMInstance> pLLMInstance)
+void ApplicationState::SetLLMInstance(std::shared_ptr<LLMInstance> pLLMInstance)
 {
 	assert(__appState);
 	__appState->pLLMInstance = pLLMInstance;
 }
 
-void Application::SetCursor(SDL_SystemCursor cursor)
+void ApplicationState::SetCursor(SDL_SystemCursor cursor)
 {
 	SDL_Cursor* pCursor;
 	switch (cursor)

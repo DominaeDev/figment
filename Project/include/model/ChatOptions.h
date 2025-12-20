@@ -21,6 +21,7 @@ struct ChatOptions
 		ReportStateChanges = 1 << 8,
 	};
 	using Flags = EnumFlags<Flag>;
+
 	Flags flags;
 
 	enum class MultiBotMode

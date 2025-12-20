@@ -196,7 +196,7 @@ void TextBox::CancelComposition()
 {
 	ResetComposition();
 
-	SDL_ClearComposition(Application::GetWindow());
+	SDL_ClearComposition(ApplicationState::GetWindow());
 }
 
 void TextBox::DrawComposition(Renderer* pRenderer)
@@ -418,8 +418,8 @@ void TextBox::DrawCandidates(Renderer* pRenderer)
 
 void TextBox::UpdateTextInputArea()
 {
-	Renderer* pRenderer = Application::GetRenderer();
-	SDL_Window* pWindow = Application::GetWindow();
+	Renderer* pRenderer = ApplicationState::GetRenderer();
+	SDL_Window* pWindow = ApplicationState::GetWindow();
 
 	/* Convert the text input area and cursor into window coordinates */
 	Pointf window_edit_rect_min;
@@ -459,7 +459,7 @@ void TextBox::SetFocus(bool focus)
 		return;
 
 	_bFocused = focus;
-	SDL_Window* pWindow = Application::GetWindow();
+	SDL_Window* pWindow = ApplicationState::GetWindow();
 	_cursor_visible = true;
 	_last_cursor_change = SDL_GetTicks();
 
@@ -761,7 +761,7 @@ bool TextBox::HandleMouseMotion(float x, float y)
 	if (bInRect != _bIBeamCursor)
 	{
 		_bIBeamCursor = bInRect;
-		Application::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
+		ApplicationState::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
 	}
 
 	return true;
