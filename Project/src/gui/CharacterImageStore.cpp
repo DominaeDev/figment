@@ -1,13 +1,13 @@
 #include "gui/CharacterImageStore.h"
-#include "model/AppState.h"
 #include "util/StringUtility.h"
 #include <SDL3_image/SDL_image.h>
 
+using namespace fig::gui;
 using namespace fig::string_util;
 
 std::map<fig::string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByCharacter;
 
-void CharacterImageStore::Init(Renderer* pRenderer)
+void CharacterImageStore::Init(RendererPtr pRenderer)
 {
 	LoadTexture(pRenderer, "Default", ImageType::Portrait_Square, "./resources/images/avatar_default.png");
 	LoadTexture(pRenderer, "Female1", ImageType::Portrait_Square, "./resources/images/avatar_f1.png");
@@ -30,9 +30,9 @@ void CharacterImageStore::Release()
 	_imagesByCharacter.clear();
 }
 
-bool CharacterImageStore::LoadCharacterPortrait(fig::string characterId, fig::string filename)
+bool CharacterImageStore::LoadCharacterPortrait(RendererPtr pRenderer, fig::string characterId, fig::string filename)
 {
-	return LoadTexture(ApplicationState::GetRenderer(), characterId, ImageType::Portrait_Square, filename);
+	return LoadTexture(pRenderer, characterId, ImageType::Portrait_Square, filename);
 }
 
 bool CharacterImageStore::LoadTexture(Renderer* pRenderer, fig::string characterId, ImageType imageType, fig::string filename)

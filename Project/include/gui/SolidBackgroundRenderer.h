@@ -3,14 +3,17 @@
 #include "Types.h"
 #include "CustomRenderer.h"
 
-class SolidBackgroundRenderer : public CustomRenderer
+namespace fig::gui
 {
-public:
-	SolidBackgroundRenderer(Color color);
-	
-	void Render(Renderer* pRenderer, Rectf rect);
-	void SetColor(Color color);
+	class SolidBackgroundRenderer : public CustomRenderer
+	{
+	public:
+		SolidBackgroundRenderer(Color color);
 
-private:
-	Color _color {};
-};
+		void Render(Renderer* pRenderer, Rectf rect);
+		void SetColor(Color color);
+
+	private:
+		Color _color {};
+	};
+}

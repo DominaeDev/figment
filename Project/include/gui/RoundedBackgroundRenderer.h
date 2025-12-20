@@ -2,21 +2,24 @@
 
 #include "CustomRenderer.h"
 
-class RoundedBackgroundRenderer : public CustomRenderer
+namespace fig::gui
 {
-public:
-	RoundedBackgroundRenderer(float radius, Color color);
-	
-	void Render(Renderer* pRenderer, Rectf rect);
-	void SetColor(Color color);
+	class RoundedBackgroundRenderer : public CustomRenderer
+	{
+	public:
+		RoundedBackgroundRenderer(float radius, Color color);
 
-private:
-	void RefreshGeometry(Rectf rect);
+		void Render(Renderer* pRenderer, Rectf rect);
+		void SetColor(Color color);
 
-	Color _color {};
-	Rectf _lastRect {};
-	float _radius = 0;
+	private:
+		void RefreshGeometry(Rectf rect);
 
-	std::vector<Vertex> _vertices {};
-	std::vector<int> _indices {};
-};
+		Color _color {};
+		Rectf _lastRect {};
+		float _radius = 0;
+
+		std::vector<Vertex> _vertices {};
+		std::vector<int> _indices {};
+	};
+}

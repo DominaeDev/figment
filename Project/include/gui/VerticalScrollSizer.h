@@ -2,13 +2,16 @@
 
 #include "VerticalListSizer.h"
 
-class VerticalScrollSizer : public VerticalListSizer
+namespace fig::gui
 {
-public:
-	void SetOffset(float offset);
+	class VerticalScrollSizer : public VerticalListSizer
+	{
+	public:
+		void SetOffset(float offset);
 
-protected:
-	void OnLayout(Rectf rect) override;
+	protected:
+		void OnLayout(Rectf rect) override;
 
-	float _offset = 0.0f;
-};
+		float _offset = 0.0f;
+	};
+}

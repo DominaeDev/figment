@@ -1,21 +1,24 @@
 #pragma once
 
 #include "gui/Control.h"
-#include "gui/Graphics.h"
+#include "gui/GUITypes.h"
 #include <map>
 
-class StaticText;
-
-class VariableList : public Control
+namespace fig::gui
 {
-public:
-	VariableList(Control* pParent);
-	void SetVariables(const std::map<fig::string, fig::string>& variables);
-	bool IsEmpty() const;
+	class StaticText;
 
-protected:
-	void OnRender(Renderer* pRenderer) override;
+	class VariableList : public Control
+	{
+	public:
+		VariableList(Control* pParent);
+		void SetVariables(const std::map<fig::string, fig::string>& variables);
+		bool IsEmpty() const;
 
-private:
-	StaticText* _pText = nullptr;
-};
+	protected:
+		void OnRender(Renderer* pRenderer) override;
+
+	private:
+		StaticText* _pText = nullptr;
+	};
+}

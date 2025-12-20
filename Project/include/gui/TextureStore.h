@@ -1,33 +1,36 @@
 #pragma once
 
-#include "Graphics.h"
+#include "gui/GUITypes.h"
 #include <map>
 
-enum class TextureType
+namespace fig::gui
 {
-	BLANK,
-	BORDER,
-	
-	TEXTBOX_BG,
-	TEXTBOX_BORDER,
+	enum class TextureType
+	{
+		BLANK,
+		BORDER,
 
-	SPEECH_BUBBLE_LEFT_BG,
-	SPEECH_BUBBLE_LEFT_BORDER,
-	SPEECH_BUBBLE_CENTER_BG,
-	SPEECH_BUBBLE_CENTER_BORDER,
-	SPEECH_BUBBLE_RIGHT_BG,
-	SPEECH_BUBBLE_RIGHT_BORDER,
-};
+		TEXTBOX_BG,
+		TEXTBOX_BORDER,
 
-class TextureStore
-{
-public:
-	static void Init(Renderer* pRenderer);
-	static void Release();
-	static Texture* GetTexture(TextureType id);
+		SPEECH_BUBBLE_LEFT_BG,
+		SPEECH_BUBBLE_LEFT_BORDER,
+		SPEECH_BUBBLE_CENTER_BG,
+		SPEECH_BUBBLE_CENTER_BORDER,
+		SPEECH_BUBBLE_RIGHT_BG,
+		SPEECH_BUBBLE_RIGHT_BORDER,
+	};
 
-private:
-	static bool LoadTexture(Renderer* pRenderer, TextureType textureId, const char* filename);
+	class TextureStore
+	{
+	public:
+		static void Init(Renderer* pRenderer);
+		static void Release();
+		static Texture* GetTexture(TextureType id);
 
-	static std::map<TextureType, Texture*> _textures;
-};
+	private:
+		static bool LoadTexture(Renderer* pRenderer, TextureType textureId, const char* filename);
+
+		static std::map<TextureType, Texture*> _textures;
+	};
+}

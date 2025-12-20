@@ -1,35 +1,36 @@
 #include "gui/Frame.h"
-#include "gui/Graphics.h"
+#include "gui/GUITypes.h"
+#include "gui/Window.h"
 
-Frame::Frame(SDL_Window* pWindow) : Control(nullptr)
+using namespace fig::gui;
+
+Frame::Frame(Window* pHostWindow) : Control(nullptr, pHostWindow)
 {
-	_pWindow = pWindow;
-	if (pWindow)
-	{
-		int w, h;
-		SDL_GetWindowSizeInPixels(pWindow, &w, &h);
-		SetSize(toF(w), toF(h));
-	}
+	int w, h;
+	SDL_GetWindowSizeInPixels(pHostWindow->GetSDLWindow(), &w, &h);
+	SetSize(toF(w), toF(h));
 }
 
 Frame::~Frame()
 {
 }
 
-SDL_WindowID Frame::GetWindowID() const
+void Frame::Render(Renderer* pRenderer)
 {
-	return SDL_GetWindowID(_pWindow);
+	SDL_SetRenderDrawColor(pRenderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
+	SDL_RenderClear(pRenderer);
+
+	Control::Render(pRenderer);
+
+	SDL_RenderPresent(pRenderer);
 }
 
-bool Frame::OnEvent(SDL_Event* event)
+bool Frame::OnEvent(Event& event)
 {
-	if (event->type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
+	if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 	{
-		if (GetWindowID() == event->window.windowID)
-		{
-			SetSize((float)event->window.data1, (float)event->window.data2);
+		if (OnKeyboardEvent(event.key))
 			return true;
-		}
 	}
 
 	return false;

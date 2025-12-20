@@ -22,7 +22,7 @@ public:
 	fig::string GetNameOf(Role role) const;
 	fig::string GetPersonaOf(Role role) const;
 	fig::string GetBriefOf(Role role) const;
-	std::pair<Color, Color> GetColorsOf(Role role) const;
+	std::pair<fig::gui::Color, fig::gui::Color> GetColorsOf(Role role) const;
 	Role GetRoleOf(fig::string characterId) const;
 	size_t GetBotCount() const;
 	bool IsGroupChat() const { return GetBotCount() > 1; }

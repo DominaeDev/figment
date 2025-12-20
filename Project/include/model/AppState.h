@@ -4,13 +4,18 @@
 #define APPLICATION_STATE_H__
 
 #include <memory>
+#include "gui/GUITypes.h"
 
-class MainFrame;
 struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Cursor;
 enum SDL_SystemCursor : int;
 struct TTF_TextEngine;
+
+namespace fig::gui
+{
+	class Window;
+}
 
 namespace fig::llm
 {
@@ -23,12 +28,7 @@ class ApplicationState
 public:
 	struct State
 	{
-		SDL_Window* pWindow = nullptr;
-		SDL_Renderer* pRenderer = nullptr;
-		MainFrame* pTopFrame = nullptr;
-		TTF_TextEngine* pTextEngine = nullptr;
-		unsigned __int64 last_step {};
-
+		std::shared_ptr<fig::gui::Window> pMainWindow;
 		std::shared_ptr<fig::llm::LLMEngine> pLLMEngine;
 		std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
 	};
@@ -36,8 +36,7 @@ public:
 	static State* CreateState();
 	static void ReleaseState();
 
-	static SDL_Window* GetWindow();
-	static SDL_Renderer* GetRenderer();
+	static fig::gui::Window& GetMainWindow();
 	static fig::llm::LLMEngine& GetLLMEngine();
 
 	[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();

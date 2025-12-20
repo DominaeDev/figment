@@ -10,7 +10,7 @@
 #include "gui/ChatScroll.h"
 #include "gui/ChatMessage.h"
 #include "gui/StatusBar.h"
-#include "gui/Renderers.h"
+#include "gui/CustomRenderers.h"
 #include "gui/TextureStore.h"
 #include "model/AppState.h"
 #include "model/ChatCommands.h"
@@ -25,12 +25,13 @@
 #include <format>
 #include <ranges>
 
+using namespace fig::gui;
 using namespace fig::common_util;
 using namespace fig::file_util;
 using namespace fig::string_util;
 using namespace fig::llm;
 
-MainFrame* MainFrame::s_pInstance = nullptr;
+fig::gui::MainFrame* MainFrame::s_pInstance = nullptr;
 
 constexpr ChatOptions DefaultChatOptions {
 	.flags = {
@@ -45,7 +46,7 @@ constexpr ChatOptions DefaultChatOptions {
 	.multiBotMode = ChatOptions::MultiBotMode::MultipleSequences,
 };
 
-MainFrame::MainFrame(SDL_Window* pWindow) : Frame(pWindow)
+MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 {
 	SetForegroundColor(Colors::Black);
 	SetBackgroundColor(Colors::AppBackground);
@@ -217,8 +218,7 @@ void MainFrame::SetStatusBar(fig::string_view message)
 bool MainFrame::OnCommand(ParsedChatCommand cmd)
 {
 	return ChatCommandExecutor::Execute(cmd,
-		ChatCommandExecutor::Context
-		{
+		ChatCommandExecutor::Context {
 			.pLLM = ApplicationState::GetLLMInstance(),
 			.pMainFrame = this,
 		});
@@ -329,7 +329,7 @@ void MainFrame::PollStatus()
 	}
 }
 
-bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
+bool MainFrame::OnKeyboardEvent(SDL_KeyboardEvent& event)
 {
 	auto pLLM = ApplicationState::GetLLMInstance();
 
@@ -384,16 +384,6 @@ bool MainFrame::HandleKeyboardEvent(SDL_KeyboardEvent event)
 				_pVariableList->SetVisible(!_pVariableList->IsEmpty());
 			}
 			break;
-
-		case SDLK_RETURN:
-			if (bAltDown && !bShiftDown && !bCtrlDown)
-			{
-				auto pWindow = GetWindow();
-				if (SDL_GetWindowFlags(pWindow) & SDL_WINDOW_MAXIMIZED)
-					SDL_RestoreWindow(pWindow);
-				else
-					SDL_MaximizeWindow(pWindow);
-			}
 		}
 	}
 

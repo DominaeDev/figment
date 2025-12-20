@@ -12,8 +12,20 @@
 namespace fig::common_util
 {
 	// Debugging
-	void DebugPrint(fig::string message) noexcept;
-	void DebugPrintLn(fig::string message = "") noexcept;
+	void DebugPrint(fig::string message);
+	void DebugPrintLn(fig::string message = "");
+
+	template<typename... Args>
+	void DebugPrint(string fmt, Args... args)
+	{
+		DebugPrint(std::format(fmt, args));
+	}
+
+	template<typename... Args>
+	void DebugPrintLn(string fmt, Args... args)
+	{
+		DebugPrintLn(std::format(fmt, args));
+	}
 
 	fig::string CreateUUID();
 
@@ -59,6 +71,18 @@ namespace fig::common_util
 			return it;
 		}
 		return vec.end();
+	}
+
+	template <std::floating_point T>
+	inline constexpr int32_t ceil_int(T f)
+	{
+		return static_cast<int32_t>(std::ceilf(f));
+	}
+
+	template <std::floating_point T>
+	inline constexpr int32_t floor_int(T f)
+	{
+		return static_cast<int32_t>(std::floorf(f));
 	}
 }
 #endif

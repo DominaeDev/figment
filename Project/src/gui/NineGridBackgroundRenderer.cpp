@@ -1,6 +1,8 @@
 #include "gui/NineGridBackgroundRenderer.h"
 #include "gui/TextureStore.h"
 
+using namespace fig::gui;
+
 NineGridBackgroundRenderer::NineGridBackgroundRenderer(int cornerPixels)
 {
 	_cornerPixels = { toF(cornerPixels), toF(cornerPixels), toF(cornerPixels), toF(cornerPixels)};

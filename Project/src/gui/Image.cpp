@@ -1,6 +1,8 @@
 #include "gui/Image.h"
 #include "gui/Color.h"
 
+using namespace fig::gui;
+
 Image::Image(Control* pParent, Texture* pTexture) : Control(pParent),
 	_pTexture(pTexture)
 {

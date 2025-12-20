@@ -3,6 +3,7 @@
 #include "Types.h"
 #include <algorithm>
 
+using namespace fig::gui;
 using namespace fig::string_util;
 
 bool color_util::is_defined(Color color)

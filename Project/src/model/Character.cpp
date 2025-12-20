@@ -4,6 +4,7 @@
 
 #include <tinyxml2.h>
 
+using namespace fig::gui;
 using namespace fig::string_util;
 
 using namespace tinyxml2;

@@ -3,51 +3,69 @@
 #include "Types.h"
 #include "LayoutElement.h"
 
-class CustomRenderer;
-
-class Control : public LayoutElement
+namespace fig::gui
 {
-public:
-	Control(Control* pParent);
-	virtual ~Control();
+	class CustomRenderer;
+	class Window;
 
-	virtual void Render(Renderer* pRenderer);
-	virtual void Update(float fDeltaTime) override;
+	class Control : public LayoutElement
+	{
+	public:
+		Control(Control* pParent);
+		Control(Control* pParent, Window* pHostWindow);
+		virtual ~Control();
 
-	Color GetForegroundColor() const;
-	Color GetBackgroundColor() const;
-	bool GetClipping() const { return _bClipping; }
-	virtual void SetForegroundColor(Color color) { _foregroundColor = color; }
-	virtual void SetBackgroundColor(Color color) { _backgroundColor = color; }
-	void SetBorderColor(Color color) { _borderColor = color; }
-	void EnableClipping(bool bEnable) { _bClipping = bEnable; }
-	void EnableCulling(bool bEnable) { _bCulling = bEnable; }
+		virtual void Render(Renderer* pRenderer);
+		virtual void Update(float fDeltaTime) override;
 
-	bool GetVisible() { return _bVisible; }
-	void SetVisible(bool bVisible) { _bVisible = bVisible; }
+		Color GetForegroundColor() const;
+		Color GetBackgroundColor() const;
+		bool GetClipping() const { return _bClipping; }
+		virtual void SetForegroundColor(Color color) { _foregroundColor = color; }
+		virtual void SetBackgroundColor(Color color) { _backgroundColor = color; }
+		void SetBorderColor(Color color) { _borderColor = color; }
+		void EnableClipping(bool bEnable) { _bClipping = bEnable; }
+		void EnableCulling(bool bEnable) { _bCulling = bEnable; }
 
-	bool ProcessEvent(SDL_Event* event);
+		bool GetVisible() { return _bVisible; }
+		void SetVisible(bool bVisible) { _bVisible = bVisible; }
 
-	void SetBackgroundRenderer(CustomRenderer* pCustom);
-	void SetBorderRenderer(CustomRenderer* pCustom);
+		bool ProcessEvent(Event& event);
 
-protected:
-	virtual void OnRender(Renderer* pRenderer);
-	virtual void OnParent();
-	virtual bool OnEvent(SDL_Event* event) { return false; }
+		void SetBackgroundRenderer(CustomRenderer* pCustom);
+		void SetBorderRenderer(CustomRenderer* pCustom);
 
-	void DrawBackground(Renderer* pRenderer);
-	void DrawBorder(Renderer* pRenderer);
+	protected:
+		virtual void OnRender(Renderer* pRenderer);
+		virtual void OnParent();
+		virtual bool OnEvent(Event& event) { return false; }
 
-protected:
-	Color _foregroundColor {};
-	Color _backgroundColor {};
-	Color _borderColor {};
-	bool _bClipping = false;
-	bool _bCulling = false;
-	bool _bVisible = true;
+		void DrawBackground(Renderer* pRenderer);
+		void DrawBorder(Renderer* pRenderer);
+
+		inline WindowPtr GetSDLWindow() { return _renderContext.pWindow; }
+		inline RendererPtr GetSDLRenderer() { return _renderContext.pRenderer; }
+		inline TextEnginePtr GetSDLTextEngine() { return _renderContext.pTextEngine; }
+
+	protected:
+		Color _foregroundColor {};
+		Color _backgroundColor {};
+		Color _borderColor {};
+		bool _bClipping = false;
+		bool _bCulling = false;
+		bool _bVisible = true;
+
+		// Theming
+		CustomRenderer* _pBGRenderer = nullptr;
+		CustomRenderer* _pBorderRenderer = nullptr;
 	
-	// Theming
-	CustomRenderer* _pBGRenderer = nullptr;
-	CustomRenderer* _pBorderRenderer = nullptr;
-};
+	private:
+		struct ControlRenderContext
+		{
+			WindowPtr pWindow {};	// weak
+			RendererPtr pRenderer {};	// weak
+			TextEnginePtr pTextEngine {};	// weak
+		};
+		ControlRenderContext _renderContext {};
+	};
+}

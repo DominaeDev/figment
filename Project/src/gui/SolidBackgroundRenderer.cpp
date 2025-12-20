@@ -1,5 +1,7 @@
 #include "gui/SolidBackgroundRenderer.h"
 
+using namespace fig::gui;
+
 SolidBackgroundRenderer::SolidBackgroundRenderer(Color color)
 {
 	SetColor(color);

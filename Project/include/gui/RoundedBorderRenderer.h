@@ -3,23 +3,26 @@
 #include "Types.h"
 #include "CustomRenderer.h"
 
-class RoundedBorderRenderer : public CustomRenderer
+namespace fig::gui
 {
-public:
-	RoundedBorderRenderer(float radius, float thickness, Color color);
-	
-	void Render(Renderer* pRenderer, Rectf rect);
-	void SetColor(Color color);
+	class RoundedBorderRenderer : public CustomRenderer
+	{
+	public:
+		RoundedBorderRenderer(float radius, float thickness, Color color);
 
-private:
-	void RefreshGeometry(Rectf rect);
+		void Render(Renderer* pRenderer, Rectf rect);
+		void SetColor(Color color);
 
-	Color _color {};
-	Rectf _lastRect {};
-	Texture* _pTexture = nullptr;
-	float _thickness = 0;
-	float _radius = 0;
+	private:
+		void RefreshGeometry(Rectf rect);
 
-	std::vector<Vertex> _vertices {};
-	std::vector<int> _indices {};
-};
+		Color _color {};
+		Rectf _lastRect {};
+		Texture* _pTexture = nullptr;
+		float _thickness = 0;
+		float _radius = 0;
+
+		std::vector<Vertex> _vertices {};
+		std::vector<int> _indices {};
+	};
+}

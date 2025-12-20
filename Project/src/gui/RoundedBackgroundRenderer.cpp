@@ -1,5 +1,7 @@
 #include "gui/RoundedBackgroundRenderer.h"
 
+using namespace fig::gui;
+
 RoundedBackgroundRenderer::RoundedBackgroundRenderer(float radius, Color color) :
 	_radius(radius),
 	_color(color)

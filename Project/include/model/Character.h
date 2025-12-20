@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Types.h"
-#include "gui/Graphics.h"
+#include "gui/GUITypes.h"
 
 struct CharacterProperty 
 {
@@ -22,8 +22,8 @@ public:
 	fig::string brief;
 	fig::string description;
 	fig::string portraitFilename;
-	Color bgColor {};
-	Color borderColor {};
+	fig::gui::Color bgColor {};
+	fig::gui::Color borderColor {};
 	std::vector<CharacterProperty> properties;
 
 	bool LoadFromXml(fig::string filename);

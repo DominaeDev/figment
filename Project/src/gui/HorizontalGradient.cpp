@@ -2,6 +2,8 @@
 #include "gui/Color.h"
 #include "gui/TextureStore.h"
 
+using namespace fig::gui;
+
 HorizontalGradient::HorizontalGradient(Control* pParent, Color colorLeft, Color colorRight) : Control(pParent)
 {
 	SetColors(colorLeft, colorRight);

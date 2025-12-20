@@ -4,7 +4,11 @@
 
 #include "ChatCommands.h"
 
-class MainFrame;
+namespace fig::gui
+{
+	class MainFrame;
+}
+
 namespace fig::llm
 {
 	class LLMInstance;
@@ -16,7 +20,7 @@ public:
 	struct Context
 	{
 		std::shared_ptr<fig::llm::LLMInstance> pLLM;
-		MainFrame* pMainFrame;
+		fig::gui::MainFrame* pMainFrame;
 	};
 
 	static bool Execute(ParsedChatCommand command, Context context);

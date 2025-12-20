@@ -1,6 +1,8 @@
 #include "gui/VerticalScrollSizer.h"
 #include "gui/Control.h"
 
+using namespace fig::gui;
+
 void VerticalScrollSizer::SetOffset(float offset)
 {
 	float diff = offset - _offset;

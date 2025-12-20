@@ -1,9 +1,14 @@
 #include "model/AppState.h"
+#include "model/GlobalStrings.h"
 #include "gui/MainFrame.h"
+#include "gui/Window.h"
+#include "gui/GUITypes.h"
 #include "llm/LLMEngine.h"
+#include "Constants.h"
 #include <SDL3/SDL.h>
 #include <cassert>
 
+using namespace fig::gui;
 using namespace fig::llm;
 
 ApplicationState::State* ApplicationState::__appState = nullptr;
@@ -20,13 +25,28 @@ ApplicationState::State* ApplicationState::CreateState()
 
 	__appState->pLLMEngine = std::make_shared<LLMEngine>();
 
+	try
+	{
+		// Create main frame
+		__appState->pMainWindow = std::make_shared<Window>(GlobalStrings::ApplicationTitle, Constants::GUI::WindowWidth, Constants::GUI::WindowHeight);
+		__appState->pMainWindow->CreateFrame<MainFrame>();
+
+#if !_DEBUG
+		SDL_MaximizeWindow(__appState->pMainWindow->GetSDLWindow());
+#endif
+	}
+	catch (...)
+	{
+		ReleaseState();
+		return nullptr;
+	}
+
 	return __appState;
 }
 
 void ApplicationState::ReleaseState()
 {
-	delete __appState->pTopFrame;
-	
+	__appState->pMainWindow.reset();
 	__appState->pLLMInstance.reset();
 	if (__appState->pLLMEngine)
 	{
@@ -39,14 +59,10 @@ void ApplicationState::ReleaseState()
 	__appState = nullptr;
 }
 
-SDL_Window* ApplicationState::GetWindow()
+fig::gui::Window& ApplicationState::GetMainWindow()
 {
-	return __appState ? __appState->pWindow : nullptr;
-}
-
-SDL_Renderer* ApplicationState::GetRenderer()
-{
-	return __appState ? __appState->pRenderer : nullptr;
+	assert(__appState && __appState->pMainWindow);
+	return *__appState->pMainWindow.get();
 }
 
 LLMEngine& ApplicationState::GetLLMEngine()

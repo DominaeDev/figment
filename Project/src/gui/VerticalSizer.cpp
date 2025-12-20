@@ -1,10 +1,9 @@
 #include "gui/VerticalSizer.h"
 #include "gui/Control.h"
+#include "util/Common.h"
 
-static int CeilInt(float f)
-{
-	return (int)ceilf(f);
-}
+using namespace fig::gui;
+using namespace fig::common_util;
 
 void VerticalSizer::OnLayout(Rectf parentRect)
 {
@@ -12,15 +11,15 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 	if (count == 0)
 		return;
 
-	int totalHeight = CeilInt(std::max(parentRect.h, 0.0f));
-	int itemHeight= CeilInt((float)totalHeight/ count);
+	int totalHeight = ceil_int(std::max(parentRect.h, 0.0f));
+	int itemHeight= ceil_int((float)totalHeight/ count);
 	int remainingHeight = totalHeight;
 	int totalProportion = 0;
 	int numStretch = 0;
 	for (auto& item : _items)
 	{
 		if (item.prop == 0 && item.pControl != nullptr)
-			remainingHeight = CeilInt(std::max(remainingHeight - item.pControl->GetHeight(), 0.0f));
+			remainingHeight = ceil_int(std::max(remainingHeight - item.pControl->GetHeight(), 0.0f));
 		else if (item.prop > 0)
 			totalProportion += item.prop;
 		else
@@ -34,7 +33,7 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 	{
 		if (item.pControl == nullptr)
 		{
-			y += CeilInt(remainingHeight / (float)numStretch);
+			y += ceil_int(remainingHeight / (float)numStretch);
 			continue;
 		}
 
@@ -42,16 +41,16 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 		auto& rect = frame.GetRect();
 		int height = 0;
 		if (item.prop == 0)
-			height = CeilInt(frame.GetHeight());
+			height = ceil_int(frame.GetHeight());
 		else if (item.prop > 0)
-			height = CeilInt(item.prop * remainingHeight / (float)totalProportion);
+			height = ceil_int(item.prop * remainingHeight / (float)totalProportion);
 		else
-			height = CeilInt(remainingHeight / (float)numStretch);
+			height = ceil_int(remainingHeight / (float)numStretch);
 
 		if (frame.GetMinSize().y > 0)
-			height = CeilInt(std::max((float)height, frame.GetMinSize().y));
+			height = ceil_int(std::max((float)height, frame.GetMinSize().y));
 		if (frame.GetMaxSize().y > 0)
-			height = CeilInt(std::min((float)height, frame.GetMaxSize().y));
+			height = ceil_int(std::min((float)height, frame.GetMaxSize().y));
 
 		Rectf borderRect {
 			parentRect.x,

@@ -1,5 +1,7 @@
 #include "gui/Panel.h"
 
+using namespace fig::gui;
+
 Panel::Panel(Control* pParent) : Control(pParent)
 {
 }

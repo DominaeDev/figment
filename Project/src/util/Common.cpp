@@ -12,7 +12,7 @@
 
 namespace fig::common_util
 {
-	void DebugPrint(string message) noexcept
+	void DebugPrint(string message)
 	{
 #if _DEBUG
 		if (message.empty())
@@ -24,7 +24,7 @@ namespace fig::common_util
 #endif
 	}
 
-	void DebugPrintLn(string message) noexcept
+	void DebugPrintLn(string message)
 	{
 		std::println("{}", message);
 	}

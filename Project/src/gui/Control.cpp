@@ -1,13 +1,25 @@
 #include "gui/Control.h"
+#include "gui/Window.h"
 #include "gui/Sizer.h"
 #include "gui/Color.h"
 #include "gui/CustomRenderer.h"
+
+using namespace fig::gui;
 
 Control::Control(Control* pParent)
 {
 	if (pParent)
 		pParent->AddChild(this);
 	_pParent = pParent;
+}
+
+Control::Control(Control* pParent, Window* pHostWindow) : Control(pParent)
+{
+	_renderContext = ControlRenderContext {
+		.pWindow = pHostWindow->GetSDLWindow().get(),
+		.pRenderer = pHostWindow->GetSDLRenderer().get(),
+		.pTextEngine = pHostWindow->GetSDLTextEngine().get(),
+	};
 }
 
 Control::~Control()
@@ -143,6 +155,8 @@ void Control::OnParent()
 	auto pParent = dynamic_cast<Control*>(_pParent);
 	if (pParent)
 	{
+		_renderContext = pParent->_renderContext;
+
 		if (!color_util::is_defined(_foregroundColor))
 			_foregroundColor = pParent->GetForegroundColor();
 		if (!color_util::is_defined(_backgroundColor))
@@ -150,7 +164,7 @@ void Control::OnParent()
 	}
 }
 
-bool Control::ProcessEvent(SDL_Event* event)
+bool Control::ProcessEvent(Event& event)
 {
 	if (OnEvent(event))
 		return true;

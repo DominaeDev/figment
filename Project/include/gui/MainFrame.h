@@ -1,62 +1,66 @@
 #pragma once
 
 #include "Frame.h"
-#include "Types.h"
 #include "model/ChatCommands.h"
 #include "model/ChatCommandExecutor.h"
 #include "llm/LLMStatus.h"
 
-class Sizer;
-class StatusBar;
-class ChatScroll;
-class TextBox;
-class VariableList;
-
 using ParsedChatCommandQueue = std::queue<ParsedChatCommand>;
 
-class MainFrame : public Frame
+namespace fig::gui
 {
-	friend bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor::Context context);
-	static MainFrame* s_pInstance;
-public:
-	MainFrame(SDL_Window* pWindow);
-	virtual ~MainFrame();
+	class Window;
+	class Sizer;
+	class StatusBar;
+	class ChatScroll;
+	class TextBox;
+	class VariableList;
 
-	void InitializeModel();
-	void UnloadModel();
+	class MainFrame : public Frame
+	{
+		friend bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor::Context context);
+		static MainFrame* s_pInstance;
+	public:
+		MainFrame(Window* pWindow);
+		virtual ~MainFrame();
 
-	static void SetStatusBar(fig::string_view message);
-	static MainFrame& GetInstance() { return *s_pInstance; }
+		void InitializeModel();
+		void UnloadModel();
 
-	bool HandleKeyboardEvent(SDL_KeyboardEvent event);
-	void Close();
+		static void SetStatusBar(fig::string_view message);
+		static MainFrame& GetInstance() { return *s_pInstance; }
 
-protected:
-	virtual void OnUpdate(float fDeltaTime) override;
-	virtual void OnRender(Renderer* pRenderer) override;
+		void Close();
 
-	void PollStatus();
-	void StartChat();
-	bool OnCommand(ParsedChatCommand cmd);
-	void EnqueueCommand(ParsedChatCommand cmd);
-	void NextQueuedCommand();
+	protected:
+		virtual void OnUpdate(float fDeltaTime) override;
+		virtual void OnRender(Renderer* pRenderer) override;
 
-private:
-	StatusBar* _pStatusBar;
-	ChatScroll* _pChatScroll;
-	TextBox* _pTextBox;
-	VariableList* _pVariableList;
+		void PollStatus();
+		void StartChat();
+		bool OnCommand(ParsedChatCommand cmd);
+		void EnqueueCommand(ParsedChatCommand cmd);
+		void NextQueuedCommand();
 
-	float _fPollingCounter = 0.0f;
-	bool _bStartedChat = false; // Used to trigger greeting
+		bool OnKeyboardEvent(SDL_KeyboardEvent& event) override;
 
-	ParsedChatCommandQueue _commandQueue;
+	private:
+		StatusBar* _pStatusBar = nullptr;
+		ChatScroll* _pChatScroll = nullptr;
+		TextBox* _pTextBox;
+		VariableList* _pVariableList;
+
+		float _fPollingCounter = 0.0f;
+		bool _bStartedChat = false; // Used to trigger greeting
+
+		ParsedChatCommandQueue _commandQueue;
 
 #if ENABLE_AUTO_CHAT
-private:
-	void AutoChat();
-	bool _bAutoChat;
-	std::vector<fig::string> _autoScript;
-	size_t _autoScriptIndex = 0;
+	private:
+		void AutoChat();
+		bool _bAutoChat;
+		std::vector<fig::string> _autoScript;
+		size_t _autoScriptIndex = 0;
 #endif
-};
+	};
+}

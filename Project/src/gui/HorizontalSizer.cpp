@@ -1,10 +1,9 @@
 #include "gui/HorizontalSizer.h"
 #include "gui/Control.h"
+#include "util/Common.h"
 
-static int CeilInt(float f)
-{
-	return (int)ceilf(f);
-}
+using namespace fig::gui;
+using namespace fig::common_util;
 
 void HorizontalSizer::OnLayout(Rectf parentRect)
 {
@@ -12,15 +11,15 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 	if (count == 0)
 		return;
 
-	int totalWidth = CeilInt(std::max(parentRect.w, 0.0f));
-	int itemWidth = CeilInt((float)totalWidth / count);
+	int totalWidth = ceil_int(std::max(parentRect.w, 0.0f));
+	int itemWidth = ceil_int((float)totalWidth / count);
 	int remainingWidth = totalWidth;
 	int totalProportion = 0;
 	int numStretch = 0;
 	for (auto& item : _items)
 	{
 		if (item.prop == 0 && item.pControl != nullptr)
-			remainingWidth = CeilInt(std::max(remainingWidth - item.pControl->GetWidth(), 0.0f));
+			remainingWidth = ceil_int(std::max(remainingWidth - item.pControl->GetWidth(), 0.0f));
 		else if (item.prop > 0)
 			totalProportion += item.prop;
 		else
@@ -34,7 +33,7 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 	{
 		if (item.pControl == nullptr)
 		{
-			x += CeilInt(remainingWidth / (float)numStretch);
+			x += ceil_int(remainingWidth / (float)numStretch);
 			continue;
 		}
 
@@ -42,16 +41,16 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 		auto& rect = frame.GetRect();
 		int width = 0;
 		if (item.prop == 0)
-			width = CeilInt(frame.GetWidth());
+			width = ceil_int(frame.GetWidth());
 		else if (item.prop > 0)
-			width = CeilInt(item.prop * remainingWidth / (float)totalProportion);
+			width = ceil_int(item.prop * remainingWidth / (float)totalProportion);
 		else
-			width = CeilInt(remainingWidth / (float)numStretch);
+			width = ceil_int(remainingWidth / (float)numStretch);
 
 		if (frame.GetMinSize().x > 0)
-			width = CeilInt(std::max(toF(width), frame.GetMinSize().x));
+			width = ceil_int(std::max(toF(width), frame.GetMinSize().x));
 		if (frame.GetMaxSize().x > 0)
-			width = CeilInt(std::min(toF(width), frame.GetMaxSize().x));
+			width = ceil_int(std::min(toF(width), frame.GetMaxSize().x));
 
 		Rectf borderRect {
 			parentRect.x + x,

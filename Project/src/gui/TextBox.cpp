@@ -1,10 +1,11 @@
 #include "gui/Textbox.h"
-#include "gui/Text.h"
 #include "gui/Color.h"
+#include "gui/Window.h"
 #include "model/AppState.h"
 #include "util/StringUtility.h"
 #include <algorithm>
 
+using namespace fig::gui;
 using namespace fig::string_util;
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ull };
@@ -14,7 +15,7 @@ static const char* _testString = "Hee hee, ho ho ho! \n\xE3\x81\xB2\xE3\x82\x89\
 TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWithMargins(pParent)
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);
-	_pText = TTF_CreateText(Text::GetEngine(), _pFont, "", 0);
+	_pText = TTF_CreateText(GetSDLTextEngine(), _pFont, "", 0);
 
 	/* Show the whitespace when wrapping, so it can be edited */
 	TTF_SetTextWrapWhitespaceVisible(_pText, true);
@@ -196,7 +197,7 @@ void TextBox::CancelComposition()
 {
 	ResetComposition();
 
-	SDL_ClearComposition(ApplicationState::GetWindow());
+	SDL_ClearComposition(GetSDLWindow());
 }
 
 void TextBox::DrawComposition(Renderer* pRenderer)
@@ -418,8 +419,8 @@ void TextBox::DrawCandidates(Renderer* pRenderer)
 
 void TextBox::UpdateTextInputArea()
 {
-	Renderer* pRenderer = ApplicationState::GetRenderer();
-	SDL_Window* pWindow = ApplicationState::GetWindow();
+	SDL_Window* pWindow = GetSDLWindow();
+	Renderer* pRenderer = GetSDLRenderer();
 
 	/* Convert the text input area and cursor into window coordinates */
 	Pointf window_edit_rect_min;
@@ -459,7 +460,7 @@ void TextBox::SetFocus(bool focus)
 		return;
 
 	_bFocused = focus;
-	SDL_Window* pWindow = ApplicationState::GetWindow();
+	SDL_Window* pWindow = GetSDLWindow();
 	_cursor_visible = true;
 	_last_cursor_change = SDL_GetTicks();
 
@@ -878,27 +879,22 @@ void TextBox::Insert(const char* text)
 	SetCursorPosition((int)(_cursor + length));
 }
 
-bool TextBox::OnEvent(SDL_Event* event)
+bool TextBox::OnEvent(Event& event)
 {
-	if (!event)
-	{
-		return false;
-	}
+	bool bCtrl = event.key.mod & SDL_KMOD_CTRL;
+	bool bAlt = event.key.mod & SDL_KMOD_ALT;
+	bool bShift = event.key.mod & SDL_KMOD_SHIFT;
 
-	bool bCtrl = event->key.mod & SDL_KMOD_CTRL;
-	bool bAlt = event->key.mod & SDL_KMOD_ALT;
-	bool bShift = event->key.mod & SDL_KMOD_SHIFT;
-
-	switch (event->type)
+	switch (event.type)
 	{
 	case SDL_EVENT_MOUSE_BUTTON_DOWN:
-		return HandleMouseDown(event->button.x, event->button.y);
+		return HandleMouseDown(event.button.x, event.button.y);
 
 	case SDL_EVENT_MOUSE_MOTION:
-		return HandleMouseMotion(event->motion.x, event->motion.y);
+		return HandleMouseMotion(event.motion.x, event.motion.y);
 
 	case SDL_EVENT_MOUSE_BUTTON_UP:
-		return HandleMouseUp(event->button.x, event->button.y);
+		return HandleMouseUp(event.button.x, event.button.y);
 
 	case SDL_EVENT_KEY_DOWN:
 		if (!_bFocused)
@@ -906,7 +902,7 @@ bool TextBox::OnEvent(SDL_Event* event)
 			break;
 		}
 
-		switch (event->key.key)
+		switch (event.key.key)
 		{
 		case SDLK_A:
 			if (bCtrl)
@@ -1034,16 +1030,16 @@ bool TextBox::OnEvent(SDL_Event* event)
 		return true;
 
 	case SDL_EVENT_TEXT_INPUT:
-		Insert(event->text.text);
+		Insert(event.text.text);
 		return true;
 
 	case SDL_EVENT_TEXT_EDITING:
-		HandleComposition(&event->edit);
+		HandleComposition(&event.edit);
 		break;
 
 	case SDL_EVENT_TEXT_EDITING_CANDIDATES:
 		ClearCandidates();
-		SaveCandidates(event);
+		SaveCandidates(&event);
 		break;
 
 	default:

@@ -40,6 +40,8 @@ namespace fig::string_util
 	size_t validate_utf8(const string& text) noexcept;
 	wstring from_utf8(const string& str);
 	string to_utf8(const wstring& str);
+
+	bytes to_bytes(const string& str);
 }
 
 #endif 

@@ -12,15 +12,16 @@
 #include <cwctype>
 #include <ranges>
 
+using namespace fig::gui;
 using namespace fig::common_util;
 using namespace fig::string_util;
 using namespace fig::llm;
 
 struct ChatCommandFunctionContext
 {
-	fig::llm::LLMInstancePtr pLLM;
 	ChatScroll* pChatScroll;
 	TextBox* pTextBox;
+	fig::llm::LLMInstancePtr pLLM;
 	ParsedChatCommandQueue& commandQueue;
 };
 
@@ -296,9 +297,9 @@ bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor
 	// Pick out gui controls for commands to access
 	auto functionCtx = Ctx
 	{
-		.pLLM = context.pLLM,
 		.pChatScroll = context.pMainFrame->_pChatScroll,
 		.pTextBox = context.pMainFrame->_pTextBox,
+		.pLLM = context.pLLM,
 		.commandQueue = context.pMainFrame->_commandQueue,
 	};
 

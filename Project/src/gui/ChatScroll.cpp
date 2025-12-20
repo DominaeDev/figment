@@ -10,6 +10,7 @@
 #include <format>
 #include <set>
 
+using namespace fig::gui;
 using namespace fig::string_util;
 using namespace fig::llm;
 
@@ -276,11 +277,11 @@ void ChatScroll::Poll()
 		RefreshActive();
 }
 
-bool ChatScroll::OnEvent(SDL_Event* event)
+bool ChatScroll::OnEvent(Event& event)
 {
-	if (event->type == SDL_EVENT_MOUSE_WHEEL)
+	if (event.type == SDL_EVENT_MOUSE_WHEEL)
 	{
-		return HandleMouseWheel(event->wheel);
+		return HandleMouseWheel(event.wheel);
 	}
 	return false;
 }

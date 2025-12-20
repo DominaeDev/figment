@@ -2,8 +2,11 @@
 
 #include "Sizer.h"
 
-class VerticalSizer : public Sizer
+namespace fig::gui
 {
-protected:
-	void OnLayout(Rectf rect) override;
-};
+	class VerticalSizer : public Sizer
+	{
+	protected:
+		void OnLayout(Rectf rect) override;
+	};
+}

@@ -1,8 +1,11 @@
 #pragma once
 
-class IUpdateable
+namespace fig::gui
 {
-public:
-	virtual ~IUpdateable() = default;
-	virtual void Update(float fDeltaTime) = 0;
-};
+	class IUpdateable
+	{
+	public:
+		virtual ~IUpdateable() = default;
+		virtual void Update(float fDeltaTime) = 0;
+	};
+}

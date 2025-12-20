@@ -13,6 +13,7 @@
 #include "Constants.h"
 #include <format>
 
+using namespace fig::gui;
 using namespace fig::string_util;
 
 #define USER_RIGHT_ALIGNED	1

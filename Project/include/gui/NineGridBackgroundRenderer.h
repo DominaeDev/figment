@@ -3,22 +3,25 @@
 #include "Types.h"
 #include "CustomRenderer.h"
 
-class NineGridBackgroundRenderer : public CustomRenderer
+namespace fig::gui
 {
-public:
-	NineGridBackgroundRenderer(int cornerPixels = 64);
-	NineGridBackgroundRenderer(std::array<float, 4> corners);
-	
-	void Render(Renderer* pRenderer, Rectf rect);
-	void SetCornerSize(float cornerSize);
-	void SetColors(Color bgColor, Color borderColor);
-	void SetTextures(Texture* bgTexture, Texture* borderTexture);
+	class NineGridBackgroundRenderer : public CustomRenderer
+	{
+	public:
+		NineGridBackgroundRenderer(int cornerPixels = 64);
+		NineGridBackgroundRenderer(std::array<float, 4> corners);
 
-private:
-	std::array<float, 4> _cornerPixels = { 64, 64, 64, 64 };
-	float _cornerSize = 20.0f;
-	Color _bgColor {};
-	Color _borderColor {};
-	Texture* _pBGTexture = nullptr;
-	Texture* _pBorderTexture = nullptr;
-};
+		void Render(Renderer* pRenderer, Rectf rect);
+		void SetCornerSize(float cornerSize);
+		void SetColors(Color bgColor, Color borderColor);
+		void SetTextures(Texture* bgTexture, Texture* borderTexture);
+
+	private:
+		std::array<float, 4> _cornerPixels = { 64, 64, 64, 64 };
+		float _cornerSize = 20.0f;
+		Color _bgColor {};
+		Color _borderColor {};
+		Texture* _pBGTexture = nullptr;
+		Texture* _pBorderTexture = nullptr;
+	};
+}

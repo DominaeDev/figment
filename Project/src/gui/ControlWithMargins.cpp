@@ -1,5 +1,7 @@
 #include "gui/ControlWithMargins.h"
 
+using namespace fig::gui;
+
 ControlWithMargins::ControlWithMargins(Control* pParent) : Control(pParent)
 {
 }

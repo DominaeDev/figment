@@ -3,22 +3,25 @@
 #include "Control.h"
 #include "Types.h"
 
-class StaticText;
-
 namespace fig::llm
 {
 	struct LLMStatus;
 }
 
-class StatusBar : public Control
+namespace fig::gui
 {
-public:
-	StatusBar(Control* pParent);
+	class StaticText;
 
-	void SetMessage(fig::string_view message);
-	void SetModelInfo(fig::llm::LLMStatus status);
+	class StatusBar : public Control
+	{
+	public:
+		StatusBar(Control* pParent);
 
-private:
-	StaticText* _pMessage;
-	StaticText* _pModelInfo;
-};
+		void SetMessage(fig::string_view message);
+		void SetModelInfo(fig::llm::LLMStatus status);
+
+	private:
+		StaticText* _pMessage;
+		StaticText* _pModelInfo;
+	};
+}

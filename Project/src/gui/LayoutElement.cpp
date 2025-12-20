@@ -1,6 +1,8 @@
 #include "gui/LayoutElement.h"
 #include "gui/Sizer.h"
 
+using namespace fig::gui;
+
 LayoutElement::~LayoutElement()
 {
 	for (auto& child : _children)
@@ -108,6 +110,7 @@ void LayoutElement::AddChild(LayoutElement* pLayoutElement)
 		return; // Already added
 
 	_children.push_back(pLayoutElement);
+	pLayoutElement->SetParent(this);
 	InvalidateLayout();
 
 	OnAddedChild(pLayoutElement);

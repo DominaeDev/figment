@@ -8,14 +8,14 @@ namespace Constants
 {
 	namespace GUI
 	{
-		inline constexpr int WindowWidth = 1280;
-		inline constexpr int WindowHeight = 900;
+		inline constexpr int32_t WindowWidth = 1280;
+		inline constexpr int32_t WindowHeight = 900;
 
 		inline constexpr double DefaultFontSize = 18.5;
 		inline constexpr double StatusBarFontSize = 14.5;
 		inline constexpr double CharacterNameFontSize = 12.0;
 		inline constexpr double ChatMessageFontSize = 16.0; //15.5;
-		inline constexpr int ChatScrollWidth = 800;
+		inline constexpr int32_t ChatScrollWidth = 800;
 	}
 
 	namespace Chat

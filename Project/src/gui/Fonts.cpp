@@ -1,6 +1,8 @@
 #include "gui/Fonts.h"
 #include "Constants.h"
 
+using namespace fig::gui;
+
 std::map<FontFace, const char*> s_FontFilenames {
 	{ FontFace::Regular,	"./resources/fonts/Nunito-Regular.ttf" },
 	{ FontFace::Italic,		"./resources/fonts/Nunito-Italic.ttf" },

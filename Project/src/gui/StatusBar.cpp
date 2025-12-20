@@ -5,6 +5,7 @@
 #include "Constants.h"
 #include <format>
 
+using namespace fig::gui;
 using namespace fig::llm;
 
 StatusBar::StatusBar(Control* pParent) : Control(pParent)

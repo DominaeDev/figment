@@ -8,10 +8,8 @@
 #include "Constants.h"
 #include "model/AppState.h"
 #include "gui/Fonts.h"
-#include "gui/TextureStore.h"
-#include "gui/CharacterImageStore.h"
-#include "gui/Text.h"
 #include "gui/MainFrame.h"
+#include "gui/Window.h"
 #include "llm/LLMEngine.h"
 #include "llm/LLMInstance.h"
 
@@ -26,6 +24,8 @@
 #define MEMORY_LEAK_ALLOC 0
 
 #define APP_STATE(P) static_cast<AppState*>(P);
+
+using namespace fig::gui;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
@@ -43,22 +43,6 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 	}
 
-	SDL_Window* pWindow;
-	Renderer* pRenderer;
-	try
-	{
-		if (!SDL_CreateWindowAndRenderer(toCStr(GlobalStrings::ApplicationTitle), Constants::GUI::WindowWidth, Constants::GUI::WindowHeight, SDL_WINDOW_RESIZABLE, &pWindow, &pRenderer))
-		{
-			SDL_Log("Couldn't create pWindow/pRenderer: %s", SDL_GetError());
-			return SDL_APP_FAILURE;
-		}
-	}
-	catch (...)
-	{
-		SDL_Log("Couldn't create pWindow/pRenderer: %s", SDL_GetError());
-		return SDL_APP_FAILURE;
-	}
-
 	if (!TTF_Init())
 	{
 		SDL_Log("Couldn't initialise SDL_ttf: %s\n", SDL_GetError());
@@ -68,31 +52,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	AppState* pAppState = ApplicationState::CreateState();
 	if (!pAppState)
 		return SDL_APP_FAILURE;
-
 	*ppAppState = pAppState;
-	pAppState->pWindow = pWindow;
-	pAppState->pRenderer = pRenderer;
-
-	SDL_SetWindowMinimumSize(pWindow, 800, 400);
-	SDL_SetRenderVSync(pRenderer, 1);
-#if !_DEBUG
-	SDL_MaximizeWindow(pWindow);
-#endif
-	// Create TTF text engine
-	pAppState->pTextEngine = Text::InitEngine(pRenderer);
-
-	// Load fonts
-	Fonts::Init();
-
-	// Load textures
-	TextureStore::Init(pRenderer);
-
-	// Load character images (temp)
-	CharacterImageStore::Init(pRenderer);
-
-	// Create main frame
-	auto pMainFrame = new MainFrame(pWindow);
-	pAppState->pTopFrame = pMainFrame;
 
 	return SDL_APP_CONTINUE;
 }
@@ -107,14 +67,10 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 		return SDL_APP_SUCCESS;
 	}
 
-	if (event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP)
-	{	
-		if (static_cast<MainFrame*>(pAppState->pTopFrame)->HandleKeyboardEvent(event->key))
-			return SDL_APP_CONTINUE;
+	if (pAppState->pMainWindow && pAppState->pMainWindow->HandleEvent(*event))
+	{
+		return SDL_APP_CONTINUE;
 	}
-
-	if (pAppState->pTopFrame != nullptr)
-		pAppState->pTopFrame->ProcessEvent(event);
 
 	return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
@@ -131,18 +87,11 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 	float fDeltaTime = static_cast<float>(delta) / 1000.0f;
 
-	auto pRenderer = pAppState->pRenderer;
-	SDL_SetRenderDrawColor(pRenderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
-	SDL_RenderClear(pRenderer);
-
-	if (pAppState->pTopFrame != nullptr)
+	if (pAppState->pMainWindow)
 	{
-		pAppState->pTopFrame->Update(fDeltaTime);
-		pAppState->pTopFrame->Render(pRenderer);
+		pAppState->pMainWindow->Update(fDeltaTime);
+		pAppState->pMainWindow->Render();
 	}
-
-	SDL_RenderPresent(pRenderer);
-
 
 #if _DEBUG
 	// Count fps
@@ -152,13 +101,11 @@ SDL_AppResult SDL_AppIterate(void* state)
     Uint64 now_ns = SDL_GetTicksNS();
     Uint64 dt_ns = now_ns - past;
 
-	static char title[256];
-    if (now_ns - last > 999999999) {
+    if (now_ns - last > 999999999) 
+	{
         last = now_ns;
-        SDL_snprintf(title, sizeof(title), "%s %" SDL_PRIu64 " fps", toCStr(GlobalStrings::ApplicationTitle), accu);
+		ApplicationState::GetMainWindow().SetTitle(std::format("{} {} fps", GlobalStrings::ApplicationTitle, accu));
         accu = 0;
-
-		SDL_SetWindowTitle(pAppState->pWindow, title);
     }
     past = now_ns;
     accu += 1;
@@ -169,15 +116,10 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 void SDL_AppQuit(void* state, SDL_AppResult result)
 {
-	AppState* pAppState = static_cast<AppState*>(state);
-
-	CharacterImageStore::Release();
-	TextureStore::Release();
 	Fonts::ReleaseFonts();
-	TTF_DestroyRendererTextEngine(pAppState->pTextEngine);
-	TTF_Quit();
-
 	ApplicationState::ReleaseState();
+
+	TTF_Quit();
 	SDL_Quit();
 }
 

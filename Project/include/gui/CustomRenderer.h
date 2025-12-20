@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Types.h"
-#include "Graphics.h"
+#include "gui/GUITypes.h"
 
-struct SDL_Renderer;
-
-class CustomRenderer
+namespace fig::gui
 {
-public:
-	virtual void Render(Renderer* pRenderer, Rectf rect) = 0;
-	virtual ~CustomRenderer() = default;
-};
+	class CustomRenderer
+	{
+	public:
+		virtual void Render(Renderer* pRenderer, Rectf rect) = 0;
+		virtual ~CustomRenderer() = default;
+	};
+}

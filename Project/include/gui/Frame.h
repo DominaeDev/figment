@@ -2,17 +2,20 @@
 
 #include "Control.h"
 
-class Frame : public Control
+namespace fig::gui
 {
-public:
-	Frame(SDL_Window* pWindow);
-	virtual ~Frame();
+	class Window;
 
-	SDL_Window* GetWindow() const { return _pWindow; }
-	SDL_WindowID GetWindowID() const;
+	class Frame : public Control
+	{
+	public:
+		Frame(Window* pHostWindow);
+		virtual ~Frame();
 
-protected:
-	bool OnEvent(SDL_Event* event) override;
+		void Render(Renderer* pRenderer) override;
 
-	SDL_Window* _pWindow = nullptr;
-};
+	protected:
+		bool OnEvent(Event& event) override;
+		virtual bool OnKeyboardEvent(SDL_KeyboardEvent& event) { return false; };
+	};
+}

@@ -1,6 +1,8 @@
 #include "gui/Sizer.h"
 #include "gui/LayoutElement.h"
 
+using namespace fig::gui;
+
 void Sizer::Add(Control* pControl, int proportion, int flags, int border)
 {
 	_items.push_back(LayoutInfo { pControl, proportion, flags, border, });

@@ -1,9 +1,10 @@
 #include "gui/StaticText.h"
-#include "gui/Text.h"
 #include "gui/Color.h"
 #include "model/AppState.h"
 #include "Constants.h"
 #include <algorithm>
+
+using namespace fig::gui;
 
 StaticText::StaticText(Control* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize) : ControlWithMargins(pParent),
 	_bAutoSize(bAutoSize)
@@ -87,7 +88,7 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 	auto fgColor = GetForegroundColor();
 	auto bgColor = GetBackgroundColor();
 	ReleaseTexture();
-	auto pRenderer = ApplicationState::GetRenderer();
+	auto pRenderer = GetSDLRenderer();
 
 	int maxWidth = std::max(toI(_maxSize.x), 0);
 

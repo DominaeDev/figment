@@ -1,10 +1,9 @@
 #include "gui/VerticalListSizer.h"
 #include "gui/Control.h"
+#include "util/Common.h"
 
-static int CeilInt(float f)
-{
-	return (int)ceilf(f);
-}
+using namespace fig::gui;
+using namespace fig::common_util;
 
 void VerticalListSizer::OnLayout(Rectf parentRect)
 {
@@ -21,7 +20,7 @@ void VerticalListSizer::OnLayout(Rectf parentRect)
 
 		auto& frame = *item.pControl;
 		auto& rect = frame.GetRect();
-		int height = CeilInt(frame.GetHeight());
+		int height = ceil_int(frame.GetHeight());
 
 		rect.x = parentRect.x;
 

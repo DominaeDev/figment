@@ -1,9 +1,11 @@
 #include "model/ChatSession.h"
+#include "model/AppState.h"
 
 #include "util/Common.h"
 #include "util/StringUtility.h"
 #include "util/FileUtility.h"
 #include "llm/LLMUtility.h"
+#include "gui/Window.h"
 #include "gui/CharacterImageStore.h"
 #include "gui/Color.h"
 
@@ -11,6 +13,7 @@
 #include <cassert>
 #include <format>
 
+using namespace fig::gui;
 using namespace fig::string_util;
 using namespace fig::file_util;
 
@@ -48,6 +51,8 @@ bool ChatSession::Initialize(ChatOptions options)
 
 bool ChatSession::LoadCharacter(Role role, fig::string filename)
 {
+	auto pRenderer = ApplicationState::GetMainWindow().GetSDLRenderer().get();
+
 	Character character;
 	if (character.LoadFromXml(filename))
 	{
@@ -55,7 +60,7 @@ bool ChatSession::LoadCharacter(Role role, fig::string filename)
 			character.id = "USR";
 
 		if (!empty_or_whitespace(character.portraitFilename))
-			CharacterImageStore::LoadCharacterPortrait(character.id, "./characters/" + character.portraitFilename);
+			CharacterImageStore::LoadCharacterPortrait(pRenderer, character.id, "./characters/" + character.portraitFilename);
 		_characters[role] = std::move(character);
 		return true;
 	}
@@ -133,7 +138,7 @@ fig::string ChatSession::GetNameOf(Role role) const
 	return "Unknown";
 }
 
-std::pair<Color, Color> ChatSession::GetColorsOf(Role role) const
+std::pair<fig::gui::Color, fig::gui::Color> ChatSession::GetColorsOf(Role role) const
 {
 	if (auto character = GetCharacter(role))
 	{

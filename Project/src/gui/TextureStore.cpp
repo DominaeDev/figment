@@ -1,6 +1,8 @@
 #include "gui/TextureStore.h"
 #include <SDL3_image/SDL_image.h>
 
+using namespace fig::gui;
+
 std::map<TextureType, Texture*> TextureStore::_textures;
 
 void TextureStore::Init(Renderer* pRenderer)

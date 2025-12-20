@@ -1,58 +1,61 @@
 #pragma once
 
 #include "Types.h"
-#include "Graphics.h"
+#include "gui/GUITypes.h"
 #include "IUpdateable.h"
 
-class LayoutElement;
-
-class Sizer : public IUpdateable
+namespace fig::gui
 {
-public:
-	enum Flag : int {
-		None	= 0,
-		Expand	= 1 << 0,
-		Top		= 1 << 1,
-		Bottom	= 1 << 2,
-		Left	= 1 << 3,
-		Right	= 1 << 4,
+	class Control;
+	class LayoutElement;
 
-		AlignLeft				= 1 << 10,
-		AlignRight				= 1 << 11,
-		AlignTop				= 1 << 12,
-		AlignBottom				= 1 << 13,
-		AlignCenterHorizontal	= 1 << 14,
-		AlignCenterVertical		= 1 << 15,
-
-		All		= Top | Bottom | Left | Right,
-		Default = None,
-	};
-
-public:
-	void Layout();
-	void SetOwner(LayoutElement* pOwner);
-
-	void Add(Control* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
-	void AddStretchSpacer();
-	void Remove(Control* pControl);
-	void Clear();
-
-protected:
-	struct LayoutInfo
+	class Sizer : public IUpdateable
 	{
-		Control* pControl;
-		int prop = 0;
-		int flags = Flag::None;
-		int border = 0;
+	public:
+		enum Flag : int {
+			None = 0,
+			Expand = 1 << 0,
+			Top = 1 << 1,
+			Bottom = 1 << 2,
+			Left = 1 << 3,
+			Right = 1 << 4,
+
+			AlignLeft = 1 << 10,
+			AlignRight = 1 << 11,
+			AlignTop = 1 << 12,
+			AlignBottom = 1 << 13,
+			AlignCenterHorizontal = 1 << 14,
+			AlignCenterVertical = 1 << 15,
+
+			All = Top | Bottom | Left | Right,
+			Default = None,
+		};
+
+	public:
+		void Layout();
+		void SetOwner(LayoutElement* pOwner);
+
+		void Add(Control* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
+		void AddStretchSpacer();
+		void Remove(Control* pControl);
+		void Clear();
+
+	protected:
+		struct LayoutInfo
+		{
+			Control* pControl;
+			int prop = 0;
+			int flags = Flag::None;
+			int border = 0;
+		};
+
+		LayoutElement* _pOwner = nullptr;
+		std::vector<LayoutInfo> _items;
+
+		unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }
+
+		virtual void OnLayout(Rectf rect) = 0;
+		void Update(float fDeltaTime) override {}
+
 	};
-
-	LayoutElement* _pOwner = nullptr;
-	std::vector<LayoutInfo> _items;
-
-	unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }
-
-	virtual void OnLayout(Rectf rect) = 0;
-	void Update(float fDeltaTime) override {}
-
-};
-
+}
