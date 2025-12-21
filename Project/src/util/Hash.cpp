@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "util/Hash.h"
 
 extern "C" {

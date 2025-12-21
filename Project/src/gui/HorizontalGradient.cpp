@@ -1,5 +1,5 @@
+#include <pch.h>
 #include "gui/HorizontalGradient.h"
-#include "gui/Color.h"
 #include "gui/TextureStore.h"
 
 using namespace fig::gui;
@@ -12,8 +12,8 @@ HorizontalGradient::HorizontalGradient(Control* pParent, Color colorLeft, Color 
 
 void HorizontalGradient::SetColors(Color colorLeft, Color colorRight)
 {
-	_colorLeft = color_util::to_colorf(colorLeft);
-	_colorRight = color_util::to_colorf(colorRight);
+	_colorLeft = to_colorf(colorLeft);
+	_colorRight = to_colorf(colorRight);
 }
 
 void HorizontalGradient::OnRender(Renderer* pRenderer)

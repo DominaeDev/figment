@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/Area.h"
 
 using namespace fig::gui;

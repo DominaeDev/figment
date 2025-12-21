@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/StatusBar.h"
 #include "gui/StaticText.h"
 #include "gui/Fonts.h"

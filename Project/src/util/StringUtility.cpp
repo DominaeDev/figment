@@ -1,8 +1,5 @@
+#include <pch.h>
 #include "util/StringUtility.h"
-#include <algorithm>
-#include <codecvt>
-#include <cwctype>
-#include <ranges>
 
 namespace fig::string_util
 {

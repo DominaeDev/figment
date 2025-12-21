@@ -1,12 +1,10 @@
+#include <pch.h>
 #include "gui/ChatMessage.h"
 
-#include "gui/StaticText.h"
-#include "gui/Panel.h"
-#include "gui/Image.h"
-#include "gui/NineGridBackgroundRenderer.h"
-#include "gui/Color.h"
-#include "gui/Fonts.h"
-#include "gui/CustomRenderer.h"
+#include "gui/GUICommon.h"
+#include "gui/Controls.h"
+#include "gui/CustomRenderers.h"
+
 #include "gui/TextureStore.h"
 #include "gui/CharacterImageStore.h"
 #include "util/StringUtility.h"
@@ -14,6 +12,7 @@
 #include <format>
 
 using namespace fig::gui;
+using namespace fig::gui_util;
 using namespace fig::string_util;
 
 #define USER_RIGHT_ALIGNED	1
@@ -246,8 +245,8 @@ void ChatMessage::SetColors(Color bgColor, Color borderColor)
 	if ((_style & Style::Dialogue) == Style::Dialogue)
 		_textColor = Colors::Black;
 	else
-		_textColor = color_util::multiply_rgb(borderColor, 0.5f);
-	_nameColor = color_util::add_rgb(borderColor, -0.1f);
+		_textColor = multiply_rgb(borderColor, 0.5f);
+	_nameColor = add_rgb(borderColor, -0.1f);
 	RefreshColors();
 }
 
@@ -260,9 +259,9 @@ void ChatMessage::RefreshColors()
 	
 	SetForegroundColor(Color { 0, 0, 0, alpha });
 
-	_pSpeechBubbleBG->SetColors(color_util::with_alpha(_bgColor, alpha), color_util::with_alpha(_borderColor, alpha));
-	_pMessagePanel->SetBackgroundColor(color_util::with_alpha(_pMessagePanel->GetBackgroundColor(), alpha));
-	_pMessageText->SetForegroundColor(color_util::with_alpha(_textColor, alpha));
+	_pSpeechBubbleBG->SetColors(with_alpha(_bgColor, alpha), with_alpha(_borderColor, alpha));
+	_pMessagePanel->SetBackgroundColor(with_alpha(_pMessagePanel->GetBackgroundColor(), alpha));
+	_pMessageText->SetForegroundColor(with_alpha(_textColor, alpha));
 	if (_pNameText)
-		_pNameText->SetForegroundColor(color_util::with_alpha(_nameColor, alpha));
+		_pNameText->SetForegroundColor(with_alpha(_nameColor, alpha));
 }

@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/CharacterImageStore.h"
 #include "util/StringUtility.h"
 #include <SDL3_image/SDL_image.h>
@@ -35,7 +36,7 @@ bool CharacterImageStore::LoadCharacterPortrait(RendererPtr pRenderer, fig::stri
 	return LoadTexture(pRenderer, characterId, ImageType::Portrait_Square, filename);
 }
 
-bool CharacterImageStore::LoadTexture(Renderer* pRenderer, fig::string characterId, ImageType imageType, fig::string filename)
+bool CharacterImageStore::LoadTexture(RendererPtr pRenderer, fig::string characterId, ImageType imageType, fig::string filename)
 {
 	if (imageType == ImageType::Undefined)
 		return false;

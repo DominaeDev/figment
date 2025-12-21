@@ -1,10 +1,12 @@
+#include <pch.h>
 #include "gui/StaticText.h"
-#include "gui/Color.h"
+#include "gui/GUICommon.h"
 #include "model/AppState.h"
 #include "Constants.h"
 #include <algorithm>
 
 using namespace fig::gui;
+using namespace fig::gui_util;
 
 StaticText::StaticText(Control* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize) : ControlWithMargins(pParent),
 	_bAutoSize(bAutoSize)
@@ -73,7 +75,7 @@ void StaticText::OnUpdate(float fDeltaTime)
 void StaticText::OnRender(Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
-	if (color_util::is_defined(bgColor) && bgColor.a != 0)
+	if (is_defined(bgColor) && bgColor.a != 0)
 		DrawBackground(pRenderer);
 
 	if (_pTexture)
@@ -92,7 +94,7 @@ void StaticText::DrawText(int& newWidth, int& newHeight)
 
 	int maxWidth = std::max(toI(_maxSize.x), 0);
 
-	if (color_util::is_defined(fgColor) && _text.size() > 0)
+	if (is_defined(fgColor) && _text.size() > 0)
 	{
 		// Opaque background: Use ClearType
 		if (bgColor.a == 0xFF)

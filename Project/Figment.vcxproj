@@ -71,6 +71,8 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
       <TranslateIncludes>false</TranslateIncludes>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -96,6 +98,8 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
       <TranslateIncludes>false</TranslateIncludes>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -106,15 +110,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Libraries\SHA256\src\sha256.c" />
-    <ClCompile Include="..\Libraries\SQLite3\src\Backup.cpp" />
-    <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp" />
-    <ClCompile Include="..\Libraries\SQLite3\src\Database.cpp" />
-    <ClCompile Include="..\Libraries\SQLite3\src\Exception.cpp" />
-    <ClCompile Include="..\Libraries\SQLite3\src\Savepoint.cpp" />
-    <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp" />
-    <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp" />
-    <ClCompile Include="..\Libraries\tinyxml2\src\tinyxml2.cpp" />
+    <ClCompile Include="..\Libraries\SHA256\src\sha256.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\SQLite3\src\Backup.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\SQLite3\src\Database.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\SQLite3\src\Exception.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\SQLite3\src\Savepoint.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\SQLite3\src\Statement.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\SQLite3\src\Transaction.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\tinyxml2\src\tinyxml2.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="include\llm\LLMEngine.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
@@ -138,7 +169,7 @@
     <ClCompile Include="src\model\Character.cpp" />
     <ClCompile Include="src\gui\ChatMessage.cpp" />
     <ClCompile Include="src\gui\ChatScroll.cpp" />
-    <ClCompile Include="src\gui\Color.cpp" />
+    <ClCompile Include="src\gui\GUIUtility.cpp" />
     <ClCompile Include="src\model\ChatCommandExecutor.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
@@ -160,6 +191,10 @@
     <ClCompile Include="src\gui\StaticText.cpp" />
     <ClCompile Include="src\gui\StatusBar.cpp" />
     <ClCompile Include="src\model\ChatCommands.cpp" />
+    <ClCompile Include="src\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\util\FileUtility.cpp" />
     <ClCompile Include="src\util\Hash.cpp" />
     <ClCompile Include="src\util\StringUtility.cpp" />
@@ -270,6 +305,9 @@
     <ClInclude Include="..\Libraries\uuid_v4\include\endianness.h" />
     <ClInclude Include="..\Libraries\uuid_v4\include\uuid_v4.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
+    <ClInclude Include="include\gui\Controls.h" />
+    <ClInclude Include="include\gui\GUICommon.h" />
+    <ClInclude Include="include\gui\GUIUtility.h" />
     <ClInclude Include="include\gui\HorizontalGradient.h" />
     <ClInclude Include="include\gui\Image.h" />
     <ClInclude Include="include\gui\VariableList.h" />
@@ -297,11 +335,12 @@
     <ClInclude Include="include\model\ChatTypes.h" />
     <ClInclude Include="include\model\ChatCommandExecutor.h" />
     <ClInclude Include="include\model\GlobalStrings.h" />
+    <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\util\EnumFlags.h" />
     <ClInclude Include="include\gui\CustomRenderer.h" />
     <ClInclude Include="include\gui\ChatMessage.h" />
     <ClInclude Include="include\gui\ChatScroll.h" />
-    <ClInclude Include="include\gui\Color.h" />
+    <ClInclude Include="include\gui\GUIColors.h" />
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\gui\Control.h" />
     <ClInclude Include="include\gui\ControlWithMargins.h" />

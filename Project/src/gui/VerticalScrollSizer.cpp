@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/VerticalScrollSizer.h"
 #include "gui/Control.h"
 

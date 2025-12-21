@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/HorizontalSizer.h"
 #include "gui/Control.h"
 #include "util/Common.h"

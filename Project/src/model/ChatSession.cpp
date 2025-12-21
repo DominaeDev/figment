@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "model/ChatSession.h"
 #include "model/AppState.h"
 
@@ -5,15 +6,16 @@
 #include "util/StringUtility.h"
 #include "util/FileUtility.h"
 #include "llm/LLMUtility.h"
+#include "gui/GUIUtility.h"
 #include "gui/Window.h"
 #include "gui/CharacterImageStore.h"
-#include "gui/Color.h"
 
 #include <exception>
 #include <cassert>
 #include <format>
 
 using namespace fig::gui;
+using namespace fig::gui_util;
 using namespace fig::string_util;
 using namespace fig::file_util;
 
@@ -142,7 +144,7 @@ std::pair<fig::gui::Color, fig::gui::Color> ChatSession::GetColorsOf(Role role) 
 {
 	if (auto character = GetCharacter(role))
 	{
-		if (color_util::is_defined(character.value().bgColor) && color_util::is_defined(character.value().borderColor))
+		if (is_defined(character.value().bgColor) && is_defined(character.value().borderColor))
 			return std::make_pair(character.value().bgColor, character.value().borderColor);
 	}
 

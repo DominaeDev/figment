@@ -1,10 +1,12 @@
+#include <pch.h>
 #include "gui/Control.h"
 #include "gui/Window.h"
+#include "gui/GUIUtility.h"
 #include "gui/Sizer.h"
-#include "gui/Color.h"
 #include "gui/CustomRenderer.h"
 
 using namespace fig::gui;
+using namespace fig::gui_util;
 
 Control::Control(Control* pParent)
 {
@@ -104,7 +106,7 @@ void Control::DrawBorder(Renderer* pRenderer)
 		return;
 	}
 
-	if (!color_util::is_defined(_borderColor))
+	if (!is_defined(_borderColor))
 		return;
 	
 	SDL_SetRenderDrawColor(pRenderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
@@ -113,7 +115,7 @@ void Control::DrawBorder(Renderer* pRenderer)
 
 Color Control::GetForegroundColor() const
 {
-	if (!color_util::is_defined(_foregroundColor))
+	if (!is_defined(_foregroundColor))
 	{
 		auto frameParent = dynamic_cast<Control*>(_pParent);
 		return frameParent ? frameParent->GetForegroundColor() : Color();
@@ -123,7 +125,7 @@ Color Control::GetForegroundColor() const
 
 Color Control::GetBackgroundColor() const
 {
-	if (!color_util::is_defined(_backgroundColor))
+	if (!is_defined(_backgroundColor))
 	{
 		auto frameParent = dynamic_cast<Control*>(_pParent);
 		return frameParent ? frameParent->GetBackgroundColor() : Color();
@@ -141,7 +143,7 @@ void Control::DrawBackground(Renderer* pRenderer)
 	}
 
 	auto bgColor = GetBackgroundColor();
-	if (color_util::is_defined(bgColor) && bgColor.a != 0)
+	if (is_defined(bgColor) && bgColor.a != 0)
 	{
 		SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(pRenderer, &_rect);
@@ -157,9 +159,9 @@ void Control::OnParent()
 	{
 		_renderContext = pParent->_renderContext;
 
-		if (!color_util::is_defined(_foregroundColor))
+		if (!is_defined(_foregroundColor))
 			_foregroundColor = pParent->GetForegroundColor();
-		if (!color_util::is_defined(_backgroundColor))
+		if (!is_defined(_backgroundColor))
 			_backgroundColor = pParent->GetBackgroundColor();
 	}
 }

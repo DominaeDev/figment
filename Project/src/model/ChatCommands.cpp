@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "model/ChatCommands.h"
 #include "util/StringUtility.h"
 

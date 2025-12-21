@@ -1,8 +1,8 @@
+#include <pch.h>
 #include "gui/ChatScroll.h"
-#include "gui/VerticalScrollSizer.h"
-#include "gui/VerticalGradient.h"
+#include "gui/Controls.h"
 #include "gui/ChatMessage.h"
-#include "gui/Color.h"
+#include "gui/GUIUtility.h"
 #include "model/AppState.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
@@ -11,6 +11,7 @@
 #include <set>
 
 using namespace fig::gui;
+using namespace fig::gui_util;
 using namespace fig::string_util;
 using namespace fig::llm;
 
@@ -26,7 +27,7 @@ ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 	_pScrollSizer->SetSpacing(12);
 	SetSizer(_pScrollSizer);
 
-	_pBottomGradient = new VerticalGradient(this, color_util::with_alpha(Colors::ChatBackground, 0), Colors::ChatBackground);
+	_pBottomGradient = new VerticalGradient(this, with_alpha(Colors::ChatBackground, 0), Colors::ChatBackground);
 	EnableClipping(true);
 	EnableCulling(true);
 }

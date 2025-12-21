@@ -1,8 +1,8 @@
+#include <pch.h>
 #include "gui/VariableList.h"
 #include "gui/StaticText.h"
 #include "gui/NineGridBackgroundRenderer.h"
 #include "gui/TextureStore.h"
-#include "gui/Color.h"
 #include "Constants.h"
 #include "util/StringUtility.h"
 #include <format>

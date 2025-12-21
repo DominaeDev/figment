@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/Frame.h"
 #include "gui/GUITypes.h"
 #include "gui/Window.h"

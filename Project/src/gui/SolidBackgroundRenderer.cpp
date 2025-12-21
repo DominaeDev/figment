@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/SolidBackgroundRenderer.h"
 
 using namespace fig::gui;

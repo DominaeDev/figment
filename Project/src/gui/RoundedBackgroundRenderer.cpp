@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/RoundedBackgroundRenderer.h"
 
 using namespace fig::gui;

@@ -3,13 +3,11 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <ranges>
 #include <span>
-#include <algorithm>
+
 #include "util/EnumFlags.h"
 
 namespace fig

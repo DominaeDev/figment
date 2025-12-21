@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "model/AppState.h"
 #include "model/GlobalStrings.h"
 #include "gui/MainFrame.h"

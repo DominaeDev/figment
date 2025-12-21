@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "gui/ControlWithMargins.h"
 
 using namespace fig::gui;

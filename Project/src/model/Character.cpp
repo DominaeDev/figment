@@ -1,10 +1,12 @@
+#include <pch.h>
 #include "model/Character.h"
+#include "gui/GUIUtility.h"
 #include "util/StringUtility.h"
-#include "gui/Color.h"
 
 #include <tinyxml2.h>
 
 using namespace fig::gui;
+using namespace fig::gui_util;
 using namespace fig::string_util;
 
 using namespace tinyxml2;
@@ -67,15 +69,15 @@ bool Character::LoadFromXml(fig::string filename)
 	XMLElement* pColor = root.FirstChildElement("Color");
 	if (pColor)
 	{
-		borderColor = color_util::color_from_string(pColor->GetText());
+		borderColor = color_from_string(pColor->GetText());
 
 		float h, s, v;
-		color_util::color_to_hsv(borderColor, h, s, v);
+		color_to_hsv(borderColor, h, s, v);
 
 		if (s > 0.0f)
-			bgColor = color_util::hsv_to_color(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
+			bgColor = hsv_to_color(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
 		else
-			bgColor = color_util::hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
+			bgColor = hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 	}
 
 	return !id.empty() && !shortName.empty();

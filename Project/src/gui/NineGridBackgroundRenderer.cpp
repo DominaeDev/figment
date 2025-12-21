@@ -1,7 +1,10 @@
+#include <pch.h>
 #include "gui/NineGridBackgroundRenderer.h"
 #include "gui/TextureStore.h"
+#include "gui/GUIUtility.h"
 
 using namespace fig::gui;
+using namespace fig::gui_util;
 
 NineGridBackgroundRenderer::NineGridBackgroundRenderer(int cornerPixels)
 {
@@ -15,7 +18,7 @@ NineGridBackgroundRenderer::NineGridBackgroundRenderer(std::array<float, 4> corn
 
 void NineGridBackgroundRenderer::Render(Renderer* pRenderer, Rectf rect)
 {
-	auto expandedRect = gui_util::expand_rect(rect, 5.0f);
+	auto expandedRect = expand_rect(rect, 5.0f);
 	
 	if (_pBGTexture)
 	{

@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "model/ChatCommandExecutor.h"
 #include "model/AppState.h"
 #include "llm/LLMInstance.h"

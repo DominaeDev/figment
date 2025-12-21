@@ -1,10 +1,13 @@
 #pragma once
 
-#include "gui/GUITypes.h"
-#include <array>
+#include <SDL3/SDL.h>
+#include "Types.h"
 
 namespace fig::gui
 {
+	using Colorf = SDL_FColor;
+	using Color = SDL_Color;
+
 	namespace Colors
 	{
 		inline constexpr Color White { 0xFF, 0xFF, 0xFF, 0xFF };
@@ -63,24 +66,24 @@ namespace fig::gui
 			MessageBackgroundNavy,
 		};
 	}
+}
 
-	struct color_util
-	{
-		static bool is_defined(Color color);
-		static Colorf to_colorf(Color color);
-		static Color to_color(Colorf color);
+inline constexpr fig::gui::Colorf to_colorf(fig::gui::Color color)
+{
+	return fig::gui::Colorf {
+		color.r / 255.0f,
+		color.g / 255.0f,
+		color.b / 255.0f,
+		color.a / 255.0f,
+	};
+}
 
-		static Color add_rgb(Color colorA, Color colorB);
-		static Color add_rgb(Color colorA, int value);
-		static Color add_rgb(Color colorA, float value);
-		static Color multiply_rgb(Color colorA, Color colorB);
-		static Color multiply_rgb(Color colorA, float value);
-		static Color with_alpha(Color color, Uint8 alpha);
-
-		static Color color_from_string(fig::string hex);
-		static void color_to_hsv(Color color, float& h, float& s, float& v);
-		static Color hsv_to_color(float h, float s, float v);
-
-		color_util() = delete;
+inline constexpr fig::gui::Color to_color(fig::gui::Colorf color)
+{
+	return fig::gui::Color {
+		std::clamp(static_cast<uint8_t>(color.r * 255.0f), 0_u8, 255_u8),
+		std::clamp(static_cast<uint8_t>(color.g * 255.0f), 0_u8, 255_u8),
+		std::clamp(static_cast<uint8_t>(color.b * 255.0f), 0_u8, 255_u8),
+		std::clamp(static_cast<uint8_t>(color.a * 255.0f), 0_u8, 255_u8),
 	};
 }

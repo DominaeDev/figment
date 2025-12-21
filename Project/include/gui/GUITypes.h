@@ -4,6 +4,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Types.h"
 #include "c_resource.h"
+#include "gui/GUIColors.h"
 
 namespace fig::sdl
 {
@@ -22,8 +23,6 @@ namespace fig::gui
 	using Point = SDL_Point;
 	using Rectf = SDL_FRect;
 	using Rect = SDL_Rect;
-	using Colorf = SDL_FColor;
-	using Color = SDL_Color;
 	using Event = SDL_Event;
 
 	using Renderer = SDL_Renderer;
@@ -37,37 +36,4 @@ namespace fig::gui
 	using TexturePtr = SDL_Texture*;
 	using VertexPtr = SDL_Vertex*;
 	using TextEnginePtr = TTF_TextEngine*;
-}
-
-namespace fig::gui_util
-{
-	inline constexpr fig::gui::Rect expand_rect(const fig::gui::Rect& rect, int pixels)
-	{
-		return fig::gui::Rect { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
-	}
-
-	inline constexpr fig::gui::Rectf expand_rect(const fig::gui::Rectf& rect, float pixels)
-	{
-		return fig::gui::Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
-	}
-
-	inline constexpr fig::gui::Rect to_rect(fig::gui::Rectf rect)
-	{
-		return fig::gui::Rect {
-			(int32_t)rect.x, 
-			(int32_t)rect.y, 
-			(int32_t)rect.w, 
-			(int32_t)rect.h
-		};
-	}
-
-	inline constexpr fig::gui::Rectf to_rectf(fig::gui::Rect rect)
-	{
-		return fig::gui::Rectf {
-			(float)rect.x, 
-			(float)rect.y, 
-			(float)rect.w, 
-			(float)rect.h 
-		};
-	}
 }
