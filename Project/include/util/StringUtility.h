@@ -28,7 +28,9 @@ namespace fig::string_util
 	string& replace_inplace(string& str, const string& find, const string& replace);
 	string& replace_all_inplace(string& str, const string& find, const string& replace);
 
-	bool empty_or_whitespace(const string& s);
+	bool is_whitespace(char ch) noexcept;
+	bool is_punctuation(char ch) noexcept;
+	bool empty_or_whitespace(const string& s) noexcept;
 	bool begins_with(const string& str, const string& prefix, bool ignore_case = false);
 	bool ends_with(const string& str, const string& suffix, bool ignore_case = false);
 	std::vector<string> split(string s, char delimiter, bool removeEmpty = true);
@@ -41,7 +43,6 @@ namespace fig::string_util
 	wstring from_utf8(const string& str);
 	string to_utf8(const wstring& str);
 
-	bytes to_bytes(const string& str);
 }
 
 #endif 

@@ -2,7 +2,6 @@
 #include "gui/ChatMessage.h"
 
 #include "gui/GUICommon.h"
-#include "gui/Controls.h"
 #include "gui/CustomRenderers.h"
 
 #include "gui/TextureStore.h"

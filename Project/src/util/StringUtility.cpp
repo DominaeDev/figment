@@ -35,9 +35,20 @@ namespace fig::string_util
 		return s;
 	}
 
-	bool empty_or_whitespace(const string& s)
+	bool empty_or_whitespace(const string& s) noexcept
 	{
-		return s.size() == 0 || s.find_first_not_of(" \t\r\n", 0, 4) == fig::npos;
+		static constexpr const_string ws { " \t\r\n\v\f" };
+		return s.size() == 0 || s.find_first_not_of(ws.data(), 0, ws.length()) == fig::npos;
+	}
+
+	bool is_whitespace(char ch) noexcept
+	{
+		return std::isspace(static_cast<unsigned char>(ch));
+	}
+
+	bool is_punctuation(char ch) noexcept
+	{
+		return std::ispunct(static_cast<unsigned char>(ch));
 	}
 
 	string lcase(const string& str)

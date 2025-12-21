@@ -1,23 +1,20 @@
+#ifndef TEXT_BOX_H__
+#define TEXT_BOX_H__
 #pragma once
+
 #include <functional>
 
 #include "ControlWithMargins.h"
-#include "Fonts.h"
-#include "Types.h"
-
-namespace fig
-{
-	typedef std::function<void(fig::string)> EnterPressedCallback;
-}
 
 namespace fig::gui
 {
+	using EnterPressedCallback = std::function<void(fig::string)>;
 
 	class TextBox : public ControlWithMargins
 	{
 	public:
 		TextBox(Control* pParent, FontFace fontFace, double ptSize);
-		virtual ~TextBox();
+		~TextBox();
 
 		void SetEnterPressedCallback(EnterPressedCallback cb);
 
@@ -29,11 +26,8 @@ namespace fig::gui
 		void MoveCursorEndOfLine();
 		void MoveCursorBeginning();
 		void MoveCursorEnd();
-		void Backspace();
-		void BackspaceToBeginning();
-		void DeleteToEnd();
-		void Delete();
 		void SelectAll();
+		void Deselect();
 		bool DeleteHighlight();
 		void Copy();
 		void Cut();
@@ -67,14 +61,25 @@ namespace fig::gui
 		void MoveCursorRight();
 		void MoveCursorUp();
 		void MoveCursorDown();
+		void MoveCursorToPriorWord();
+		void MoveCursorToNextWord();
+		void Backspace();
+		void BackspaceToBeginning();
+		void BackspaceToBeginningOfLine();
+		void BackspaceToPriorWord();
+		void DeleteToEnd();
+		void DeleteToEndOfLine();
+		void DeleteToNextWord();
+		void Delete();
+
 
 		bool HandleMouseDown(float x, float y);
 		bool HandleMouseMotion(float x, float y);
 		bool HandleMouseUp(float x, float y);
 
 	protected:
-		TTF_Font* _pFont;
-		TTF_Text* _pText;
+		TTF_Font* _pFont {};
+		TTF_Text* _pText {};
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;
 
@@ -84,24 +89,25 @@ namespace fig::gui
 
 		/* Cursor support */
 		int _cursor = 0;
-		bool _cursor_visible;
-		Uint64 _last_cursor_change;
-		Rectf _cursor_rect;
+		bool _cursor_visible = false;
+		Uint64 _last_cursor_change {};
+		Rectf _cursor_rect {};
 
 		/* Highlight support */
 		bool _bIsHighlighting = false;
-		int highlight_start;
-		int highlight_end;
+		int highlight_start = -1;
+		int highlight_end = -1;
 
 		/* IME composition */
-		int composition_start;
-		int composition_length;
-		int composition_cursor;
-		int composition_cursor_length;
+		int composition_start = -1;
+		int composition_length = -1;
+		int composition_cursor = -1;
+		int composition_cursor_length = -1;
 
 		/* IME candidates */
-		TTF_Text* candidates;
-		int selected_candidate_start;
-		int selected_candidate_length;
+		TTF_Text* candidates {};
+		int selected_candidate_start = -1;
+		int selected_candidate_length = -1;
 	};
 }
+#endif

@@ -2,7 +2,6 @@
 #include "gui/MainFrame.h"
 
 #include "gui/GUICommon.h"
-#include "gui/Controls.h"
 #include "gui/CustomRenderers.h"
 #include "gui/ChatScroll.h"
 #include "gui/ChatMessage.h"
@@ -72,7 +71,7 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 
 	_pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::GUI::DefaultFontSize);
 	_pTextBox->SetSize(-1, 88);
-	_pTextBox->SelectAll();
+//	_pTextBox->SelectAll();
 
 	auto pCenterSizer = new VerticalSizer();
 	pCenterSizer->Add(_pChatScroll, -1, Sizer::Expand | Sizer::Bottom, 8);

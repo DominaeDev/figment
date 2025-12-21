@@ -13,3 +13,5 @@
 #include <cwctype>
 
 #include "Types.h"
+#include "Constants.h"
+#include "gui/GUICommon.h"

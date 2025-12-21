@@ -305,7 +305,7 @@
     <ClInclude Include="..\Libraries\uuid_v4\include\endianness.h" />
     <ClInclude Include="..\Libraries\uuid_v4\include\uuid_v4.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
-    <ClInclude Include="include\gui\Controls.h" />
+    <ClInclude Include="include\gui\Primitives.h" />
     <ClInclude Include="include\gui\GUICommon.h" />
     <ClInclude Include="include\gui\GUIUtility.h" />
     <ClInclude Include="include\gui\HorizontalGradient.h" />

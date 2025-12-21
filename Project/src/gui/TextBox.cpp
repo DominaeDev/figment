@@ -118,6 +118,11 @@ static bool IsShiftDown()
 	return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
 }
 
+static bool IsControlDown()
+{
+	return (SDL_GetModState() & SDL_KMOD_CTRL) != 0;
+}
+
 void TextBox::DrawText(Renderer* pRenderer, TTF_Text* pText,  float x, float y)
 {
 	auto fgColor = GetForegroundColor();
@@ -127,7 +132,7 @@ void TextBox::DrawText(Renderer* pRenderer, TTF_Text* pText,  float x, float y)
 
 bool TextBox::GetHighlightExtents(int* marker, int* length)
 {
-	if (highlight_start >= 0 && highlight_end >= 0)
+	if (highlight_start >= 0 and highlight_end >= 0)
 	{
 		int marker1 = SDL_min(highlight_start, highlight_end);
 		int marker2 = SDL_max(highlight_start, highlight_end);
@@ -180,7 +185,7 @@ void TextBox::HandleComposition(const SDL_TextEditingEvent* event)
 		composition_start = _cursor;
 		composition_length = length;
 		TTF_InsertTextString(_pText, composition_start, event->text, composition_length);
-		if (event->start > 0 || event->length > 0)
+		if (event->start > 0 or event->length > 0)
 		{
 			composition_cursor = UTF8ByteLength(&_pText->text[composition_start], event->start);
 			composition_cursor_length = UTF8ByteLength(&_pText->text[composition_start + composition_cursor], event->length);
@@ -426,8 +431,8 @@ void TextBox::UpdateTextInputArea()
 	Pointf window_edit_rect_min;
 	Pointf window_edit_rect_max;
 	Pointf window_cursor;
-	if (!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft, _rect.y + _marginTop, &window_edit_rect_min.x, &window_edit_rect_min.y) ||
-		!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft + _rect.w, _rect.y + _marginTop + _rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) ||
+	if (!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft, _rect.y + _marginTop, &window_edit_rect_min.x, &window_edit_rect_min.y) or
+		!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft + _rect.w, _rect.y + _marginTop + _rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) or
 		!SDL_RenderCoordinatesToWindow(pRenderer, _cursor_rect.x, _cursor_rect.y, &window_cursor.x, &window_cursor.y))
 	{
 		return;
@@ -491,12 +496,132 @@ static int GetCursorTextIndex(int x, const TTF_SubString* substring)
 	}
 }
 
+static int FindPriorWord(TTF_Text* pText, int cursor)
+{
+	const char* start = &pText->text[cursor];
+	const char* zero = &pText->text[0];
+	const char* curr = start;
+	if (start == zero)
+		return 0;
+
+	enum CharType {
+		Whitespace,
+		Punctuation,
+		Character,
+	};
+
+	auto fnCharType = [](char ch) -> CharType
+	{
+		if (is_whitespace(ch)) return CharType::Whitespace;
+		if (is_punctuation(ch)) return CharType::Punctuation;
+		return CharType::Character;
+	};
+
+	auto fnMoveLeft = [pText, &fnCharType](const char*& ch) -> CharType {
+		SDL_StepBackUTF8(pText->text, &ch);
+		return fnCharType(ch[0]);
+	};
+
+	auto fnMoveRight = [pText, &fnCharType](const char*& ch) -> CharType {
+		size_t length = SDL_strlen(ch);
+		SDL_StepUTF8(&ch, &length);
+		return fnCharType(ch[0]);
+	};
+
+	// Skip any whitespace first
+	while (curr > zero)
+	{
+		CharType charType = fnMoveLeft(curr);
+		if (not is_whitespace(curr[0]))
+		{
+			fnMoveRight(curr);
+			break;
+		}
+	}
+
+	// Find first position of word
+	if (curr > zero)
+	{
+		CharType skipType = fnMoveLeft(curr);
+		while (curr > zero)
+		{
+			CharType priorType = fnMoveLeft(curr);
+			if (priorType == skipType)
+				continue;
+
+			fnMoveRight(curr);
+			break;
+		}
+	}
+
+	int length = (int)(uintptr_t)(start - curr);
+	return cursor - length;
+}
+
+static int FindNextWord(TTF_Text* pText, int cursor)
+{
+	size_t length = SDL_strlen(pText->text);
+	const char* start = &pText->text[cursor];
+	const char* end = &pText->text[length];
+	const char* curr = start;
+	if (start == end)
+		return cursor;
+
+	enum CharType {
+		Whitespace,
+		Punctuation,
+		Character,
+	};
+
+	auto fnCharType = [](char ch) -> CharType
+	{
+		if (is_whitespace(ch)) return CharType::Whitespace;
+		if (is_punctuation(ch)) return CharType::Punctuation;
+		return CharType::Character;
+	};
+
+	auto fnMoveLeft = [pText, &fnCharType](const char*& ch) -> CharType {
+		SDL_StepBackUTF8(pText->text, &ch);
+		return fnCharType(ch[0]);
+	};
+
+	auto fnMoveRight = [pText, &fnCharType](const char*& ch) -> CharType {
+		size_t length = SDL_strlen(ch);
+		SDL_StepUTF8(&ch, &length);
+		return fnCharType(ch[0]);
+	};
+
+	CharType startType = fnCharType(start[0]);
+	if (startType == CharType::Whitespace)
+	{
+		// On whitespace: only erase whitespace
+		while (curr < end and is_whitespace(curr[0]))
+			fnMoveRight(curr);
+		int length = (int)(uintptr_t)(curr - start);
+		return cursor + length;
+	}
+	else
+	{
+		// Otherwise: skip of same type
+		CharType nextType = startType;
+		while (curr < end and nextType == startType)
+			nextType = fnMoveRight(curr);
+
+		// ..then skip any whitespace
+		while (curr < end and nextType == CharType::Whitespace)
+			nextType = fnMoveRight(curr);
+
+		int length = (int)(uintptr_t)(curr - start);
+		return cursor + length;
+	}
+}
+
 void TextBox::SetCursorPosition(int position)
 {
 	if (composition_length > 0)
 	{
 		/* Don't let the cursor be moved into the composition */
-		if (position >= composition_start && position <= (composition_start + composition_length))
+		if (position >= composition_start and position <= (composition_start + composition_length))
 			return;
 
 		CancelComposition();
@@ -513,16 +638,16 @@ void TextBox::MoveCursorIndex(int direction)
 
 	int last_cursor = _cursor;
 
-	if (direction < 0)
+	if (direction < 0) // <-
 	{
 		if (TTF_GetTextSubString(_pText, _cursor - 1, &substring))
 		{
 			SetCursorPosition(substring.offset);
 		}
 	}
-	else
+	else // ->
 	{
-		if (TTF_GetTextSubString(_pText, _cursor, &substring) &&
+		if (TTF_GetTextSubString(_pText, _cursor, &substring) and
 			TTF_GetTextSubString(_pText, substring.offset + SDL_max(substring.length, 1), &substring))
 		{
 			SetCursorPosition(substring.offset);
@@ -535,14 +660,14 @@ void TextBox::MoveCursorIndex(int direction)
 void TextBox::OnMoveCursor(int last)
 {
 	bool isShiftDown = IsShiftDown();
-	bool is_highlighting = highlight_start != -1 && highlight_end != -1;
-	if (!is_highlighting && isShiftDown)
+	bool is_highlighting = highlight_start != -1 and highlight_end != -1;
+	if (!is_highlighting and isShiftDown)
 	{
 		highlight_start = last;
 		highlight_end = last;
 		is_highlighting = true;
 	}
-	else if (is_highlighting && !isShiftDown)
+	else if (is_highlighting and !isShiftDown)
 	{
 		highlight_start = -1;
 		highlight_end = -1;
@@ -613,7 +738,7 @@ void TextBox::MoveCursorDown()
 void TextBox::MoveCursorBeginningOfLine()
 {
 	TTF_SubString substring;
-	if (TTF_GetTextSubString(_pText, _cursor, &substring) &&
+	if (TTF_GetTextSubString(_pText, _cursor, &substring) and
 		TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
 	{
 		int last_cursor = _cursor;
@@ -625,12 +750,12 @@ void TextBox::MoveCursorBeginningOfLine()
 void TextBox::MoveCursorEndOfLine()
 {
 	TTF_SubString substring;
-	if (TTF_GetTextSubString(_pText, _cursor, &substring) &&
+	if (TTF_GetTextSubString(_pText, _cursor, &substring) and
 		TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
 	{
 		int last_cursor = _cursor;
 		int pos = substring.offset + substring.length;
-		if (pos > 0 && pos <= strlen(_pText->text) && _pText->text[pos - 1] == '\n')
+		if (pos > 0 and pos <= strlen(_pText->text) and _pText->text[pos - 1] == '\n')
 			pos--;
 		SetCursorPosition(pos);
 		OnMoveCursor(last_cursor);
@@ -652,15 +777,34 @@ void TextBox::MoveCursorEnd()
 	}
 }
 
+void TextBox::MoveCursorToPriorWord()
+{
+	if (_pText->text)
+	{
+		int prior = FindPriorWord(_pText, _cursor);
+		int last_cursor = _cursor;
+		SetCursorPosition(prior);
+		OnMoveCursor(last_cursor);
+	}
+}
+
+void TextBox::MoveCursorToNextWord()
+{
+	if (_pText->text)
+	{
+		int next = FindNextWord(_pText, _cursor);
+		int last_cursor = _cursor;
+		SetCursorPosition(next);
+		OnMoveCursor(last_cursor);
+	}
+}
+
 void TextBox::Backspace()
 {
-	if (!_pText->text)
-		return;
-
 	if (DeleteHighlight())
 		return;
 
-	if (_cursor > 0)
+	if (_pText->text and _cursor > 0)
 	{
 		const char* start = &_pText->text[_cursor];
 		const char* next = start;
@@ -671,33 +815,109 @@ void TextBox::Backspace()
 	}
 }
 
+void TextBox::BackspaceToPriorWord()
+{
+	if (DeleteHighlight())
+		return;
+
+	if (_pText->text)
+	{
+		int prior = FindPriorWord(_pText, _cursor);
+		int length = (_cursor - prior);
+		TTF_DeleteTextString(_pText, prior, length);
+		_cursor -= length;
+	}
+}
+
 void TextBox::BackspaceToBeginning()
 {
-	/* Delete to the beginning of the fig::string */
-	TTF_DeleteTextString(_pText, 0, _cursor);
-	SetCursorPosition(0);
+	if (DeleteHighlight())
+		return;
+	
+	if (_pText->text)
+	{
+		TTF_DeleteTextString(_pText, 0, _cursor);
+		SetCursorPosition(0);
+	}
+}
+
+void TextBox::BackspaceToBeginningOfLine()
+{
+	if (DeleteHighlight())
+		return;
+	
+	if (_pText->text)
+	{
+		TTF_SubString substring;
+		if (TTF_GetTextSubString(_pText, _cursor, &substring) and
+			TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
+		{
+			int last_cursor = _cursor;
+			TTF_DeleteTextString(_pText, substring.offset, _cursor);
+			SetCursorPosition(substring.offset);
+			OnMoveCursor(last_cursor);
+		}
+	}
+}
+
+void TextBox::DeleteToNextWord()
+{
+	if (DeleteHighlight())
+		return;
+
+	if (_pText->text)
+	{
+		int next = FindNextWord(_pText, _cursor);
+		int length = (next - _cursor);
+		TTF_DeleteTextString(_pText, _cursor, length);
+	}
 }
 
 void TextBox::DeleteToEnd()
 {
-	/* Delete to the end of the fig::string */
-	TTF_DeleteTextString(_pText, _cursor, -1);
+	if (DeleteHighlight())
+		return;
+	
+	if (_pText->text)
+	{
+		TTF_DeleteTextString(_pText, _cursor, -1);
+	}
+}
+
+void TextBox::DeleteToEndOfLine()
+{
+	if (DeleteHighlight())
+		return;
+	
+	if (_pText->text)
+	{
+		TTF_SubString substring;
+		if (TTF_GetTextSubString(_pText, _cursor, &substring) and
+			TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
+		{
+			int pos = substring.offset + substring.length;
+			if (pos > 0 and pos <= strlen(_pText->text) and _pText->text[pos - 1] == '\n')
+				pos--;
+			int length = (pos - _cursor);
+			TTF_DeleteTextString(_pText, _cursor, length);
+		}
+	}
 }
 
 void TextBox::Delete()
 {
-	if (!_pText->text)
-		return;
-
 	if (DeleteHighlight())
 		return;
 
-	const char* start = &_pText->text[_cursor];
-	const char* next = start;
-	size_t length = SDL_strlen(next);
-	SDL_StepUTF8(&next, &length);
-	length = (next - start);
-	TTF_DeleteTextString(_pText, _cursor, (int)length);
+	if (_pText->text)
+	{
+		const char* start = &_pText->text[_cursor];
+		const char* next = start;
+		size_t length = SDL_strlen(next);
+		SDL_StepUTF8(&next, &length);
+		length = (next - start);
+		TTF_DeleteTextString(_pText, _cursor, (int)length);
+	}
 }
 
 bool TextBox::HandleMouseDown(float x, float y)
@@ -786,6 +1006,13 @@ void TextBox::SelectAll()
 	highlight_end = (int)SDL_strlen(_pText->text);
 }
 
+void TextBox::Deselect()
+{
+	_bIsHighlighting = false;
+	highlight_start = -1;
+	highlight_end = -1;
+}
+
 bool TextBox::DeleteHighlight()
 {
 	if (!_pText->text)
@@ -796,8 +1023,7 @@ bool TextBox::DeleteHighlight()
 	{
 		TTF_DeleteTextString(_pText, marker, length);
 		SetCursorPosition(marker);
-		highlight_start = -1;
-		highlight_end = -1;
+		Deselect();
 		return true;
 	}
 	return false;
@@ -845,8 +1071,7 @@ void TextBox::Cut()
 		}
 		TTF_DeleteTextString(_pText, marker, length);
 		SetCursorPosition(marker);
-		highlight_start = -1;
-		highlight_end = -1;
+		Deselect();
 	}
 	else
 	{
@@ -882,8 +1107,14 @@ void TextBox::Insert(const char* text)
 bool TextBox::OnEvent(Event& event)
 {
 	bool bCtrl = event.key.mod & SDL_KMOD_CTRL;
-	bool bAlt = event.key.mod & SDL_KMOD_ALT;
 	bool bShift = event.key.mod & SDL_KMOD_SHIFT;
+	bool bAlt = event.key.mod & SDL_KMOD_ALT;
+
+	bool bModCtrl		= bCtrl and not (bShift or bAlt);
+	bool bModShift		= bShift and not (bCtrl or bAlt);
+	bool bModAlt		= bAlt and not (bCtrl or bShift);
+	bool bModCtrlShift	= bCtrl and bShift and not bAlt;
+	bool bModNone		= not (bCtrl or bShift or bAlt);
 
 	switch (event.type)
 	{
@@ -905,101 +1136,136 @@ bool TextBox::OnEvent(Event& event)
 		switch (event.key.key)
 		{
 		case SDLK_A:
-			if (bCtrl)
+			if (bModCtrl)
 			{
 				SelectAll();
 			}
 			break;
 		case SDLK_C:
-			if (bCtrl)
+			if (bModCtrl)
 			{
 				Copy();
 			}
 			break;
 
 		case SDLK_V:
-			if (bCtrl)
+			if (bModCtrl)
 			{
 				Paste();
 			}
 			break;
 
 		case SDLK_X:
-			if (bCtrl)
+			if (bModCtrl)
 			{
 				Cut();
 			}
 			break;
 
 		case SDLK_LEFT:
-			if (bCtrl)
+/*			if (bModCtrlShift)
 			{
 				MoveCursorBeginningOfLine();
+			} 
+			else */
+			if (bModCtrl or bModCtrlShift)
+			{
+				MoveCursorToPriorWord();
 			}
-			else
+			else if (bModNone or bModShift)
 			{
 				MoveCursorLeft();
 			}
 			break;
 
 		case SDLK_RIGHT:
-			if (bCtrl)
+/*			if (bModCtrlShift)
 			{
 				MoveCursorEndOfLine();
 			}
-			else
+			else */
+			if (bModCtrl)
+			{
+				MoveCursorToNextWord();
+			}
+			else if (bModNone or bModShift)
 			{
 				MoveCursorRight();
 			}
 			break;
 
 		case SDLK_UP:
-			if (bCtrl)
+/*			if (bModCtrl)
 			{
 				MoveCursorBeginning();
 			}
-			else
+			else */
+			if (bModNone or bModShift)
 			{
 				MoveCursorUp();
 			}
 			break;
 
 		case SDLK_DOWN:
-			if (bCtrl)
+/*			if (bModCtrl)
 			{
 				MoveCursorEnd();
 			}
-			else
+			else */
+			if (bModNone or bModShift)
 			{
 				MoveCursorDown();
 			}
 			break;
 
 		case SDLK_HOME:
-			MoveCursorBeginningOfLine();
+			if (bModCtrl)
+			{
+				MoveCursorBeginning();
+			}
+			else if (bModNone or bModShift)
+			{
+				MoveCursorBeginningOfLine();
+			}
 			break;
 
 		case SDLK_END:
-			MoveCursorEndOfLine();
+			if (bModCtrl)
+			{
+				MoveCursorEnd();
+			}
+			else if (bModNone or bModShift)
+			{
+				MoveCursorEndOfLine();
+			}
 			break;
 
 		case SDLK_BACKSPACE:
-			if (bCtrl)
+			if (bModCtrlShift)
 			{
-				BackspaceToBeginning();
+				BackspaceToBeginningOfLine();
 			}
 			else
+			if (bModCtrl)
+			{
+				BackspaceToPriorWord();
+			}
+			else if (bModNone)
 			{
 				Backspace();
 			}
 			break;
 
 		case SDLK_DELETE:
-			if (bCtrl)
+			if (bModCtrlShift)
 			{
-				DeleteToEnd();
+				DeleteToEndOfLine();
 			}
-			else
+			else if (bModCtrl)
+			{
+				DeleteToNextWord();
+			}
+			else if (bModNone)
 			{
 				Delete();
 			}
@@ -1007,11 +1273,11 @@ bool TextBox::OnEvent(Event& event)
 
 		case SDLK_RETURN:
 		case SDLK_KP_ENTER:
-			if (bCtrl)
+			if (bModCtrl)
 				Insert("\n");
-			else
+			else if (bModNone)
 			{
-				if (_pOnEnter && _pText->text) // Invoke
+				if (_pOnEnter and _pText->text) // Invoke
 				{
 					fig::string text = trim(fig::string(_pText->text));
 					Clear();
@@ -1021,7 +1287,8 @@ bool TextBox::OnEvent(Event& event)
 			break;
 
 		case SDLK_ESCAPE:
-			SetFocus(false);
+			if (bModNone)
+				SetFocus(false);
 			break;
 
 		default:
@@ -1062,9 +1329,7 @@ void TextBox::SetEnterPressedCallback(EnterPressedCallback cb)
 void TextBox::Clear()
 {
 	TTF_SetTextString(_pText, "", 0);
-	_bIsHighlighting = false;
-	highlight_start = -1;
-	highlight_end = -1;
+	Deselect();
 	SetCursorPosition(0);
 }
 

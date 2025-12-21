@@ -1,7 +1,6 @@
 #include <pch.h>
+#include "gui/GUICommon.h"
 #include "gui/StatusBar.h"
-#include "gui/StaticText.h"
-#include "gui/Fonts.h"
 #include "llm/LLMStatus.h"
 #include "Constants.h"
 #include <format>

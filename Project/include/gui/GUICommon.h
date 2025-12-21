@@ -5,5 +5,6 @@
 #include "gui/GUITypes.h"
 #include "gui/GUIUtility.h"
 #include "gui/Fonts.h"
+#include "gui/Primitives.h"
 
 #endif

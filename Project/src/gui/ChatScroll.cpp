@@ -1,6 +1,6 @@
 #include <pch.h>
+#include "gui/GUICommon.h"
 #include "gui/ChatScroll.h"
-#include "gui/Controls.h"
 #include "gui/ChatMessage.h"
 #include "gui/GUIUtility.h"
 #include "model/AppState.h"

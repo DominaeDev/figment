@@ -93,6 +93,9 @@
     <Filter Include="Source Files\GUI\Utility">
       <UniqueIdentifier>{062e3db7-9b40-48c1-aa77-79b7eb40528d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GUI\Primitives">
+      <UniqueIdentifier>{2c70c89d-43b8-455e-8e3e-7dc34517dae3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -134,15 +137,6 @@
     <ClCompile Include="src\gui\MainFrame.cpp">
       <Filter>Source Files\GUI\Frames</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Panel.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\StaticText.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\TextBox.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\VerticalListSizer.cpp">
       <Filter>Source Files\GUI\Layout</Filter>
     </ClCompile>
@@ -154,9 +148,6 @@
     </ClCompile>
     <ClCompile Include="src\util\Common.cpp">
       <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\Area.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StatusBar.cpp">
       <Filter>Source Files\GUI\Controls</Filter>
@@ -179,12 +170,6 @@
     <ClCompile Include="src\llm\LLMUtility.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Control.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ControlWithMargins.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\Frame.cpp">
       <Filter>Source Files\GUI\Frames</Filter>
     </ClCompile>
@@ -194,17 +179,8 @@
     <ClCompile Include="src\gui\CharacterImageStore.cpp">
       <Filter>Source Files\GUI\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Image.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp">
       <Filter>Source Files\GUI\Layout</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\VerticalGradient.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\HorizontalGradient.cpp">
-      <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMTemplate.cpp">
       <Filter>Source Files\Inference</Filter>
@@ -284,6 +260,33 @@
     <ClCompile Include="src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\Area.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Control.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ControlWithMargins.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Image.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Panel.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StaticText.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\TextBox.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\VerticalGradient.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\HorizontalGradient.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -304,15 +307,6 @@
     <ClInclude Include="include\gui\MainFrame.h">
       <Filter>Source Files\GUI\Frames</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\Panel.h">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\StaticText.h">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\TextBox.h">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\VerticalListSizer.h">
       <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
@@ -327,9 +321,6 @@
     </ClInclude>
     <ClInclude Include="include\util\Common.h">
       <Filter>Source Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\Area.h">
-      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\StatusBar.h">
       <Filter>Source Files\GUI\Controls</Filter>
@@ -352,12 +343,6 @@
     <ClInclude Include="include\llm\LLMUtility.h">
       <Filter>Source Files\Inference</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\Control.h">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ControlWithMargins.h">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\Frame.h">
       <Filter>Source Files\GUI\Frames</Filter>
     </ClInclude>
@@ -367,17 +352,8 @@
     <ClInclude Include="include\gui\CharacterImageStore.h">
       <Filter>Source Files\GUI\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\Image.h">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\VerticalScrollSizer.h">
       <Filter>Source Files\GUI\Layout</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\VerticalGradient.h">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\HorizontalGradient.h">
-      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMTypes.h">
       <Filter>Source Files\Inference</Filter>
@@ -781,11 +757,38 @@
     <ClInclude Include="include\gui\IUpdateable.h">
       <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\Controls.h">
-      <Filter>Source Files\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\pch.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Area.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Control.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Primitives.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ControlWithMargins.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Image.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Panel.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StaticText.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TextBox.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\VerticalGradient.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\HorizontalGradient.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
