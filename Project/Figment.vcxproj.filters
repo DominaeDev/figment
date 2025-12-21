@@ -790,6 +790,9 @@
     <ClInclude Include="include\gui\HorizontalGradient.h">
       <Filter>Source Files\GUI\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\util\UndoStack.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

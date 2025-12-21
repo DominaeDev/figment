@@ -18,6 +18,13 @@ using namespace fig::common_util;
 using namespace fig::string_util;
 using namespace fig::llm;
 
+template<typename T>
+void queue_clear(std::queue<T>& q)
+{
+	std::queue<T> empty;
+	std::swap(q, empty);
+}
+
 struct ChatCommandFunctionContext
 {
 	ChatScroll* pChatScroll;

@@ -372,6 +372,7 @@
     <ClInclude Include="include\util\Common.h" />
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
+    <ClInclude Include="include\util\UndoStack.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

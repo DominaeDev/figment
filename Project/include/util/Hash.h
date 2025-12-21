@@ -4,10 +4,18 @@
 
 #include "Types.h"
 
-namespace fig::common_util
+namespace fig
 {
-	struct SHA_256 {
-		uint32_t parts[8] {};
+	struct Hash 
+	{
+		uint32_t parts[8] = {0};
+
+		Hash() = default;
+		Hash(const Hash& other);
+		Hash(Hash&& other) = default;
+		Hash& operator=(const Hash& other);
+		Hash& operator=(Hash&& other) = default;
+		auto operator<=>(const Hash& rhs) const;
 
 		fig::string to_string() const noexcept
 		{
@@ -15,14 +23,22 @@ namespace fig::common_util
 		}
 
 		explicit operator fig::string() const { return to_string(); }
-		auto operator<=>(const SHA_256& rhs) const;
 
-		static SHA_256 Empty;
+		static Hash Empty;
 	};
+}
 
-	using Hash = SHA_256;
+namespace fig::common_util
+{
+	[[nodiscard]] fig::Hash GetHash(const fig::string& text);
+	[[nodiscard]] fig::Hash GetHash(fig::byte_span data);
+	[[nodiscard]] fig::Hash HashCombine(fig::Hash a, fig::Hash b, size_t& seed);
 
-	[[nodiscard]] Hash GetHash(const fig::string& text);
-	[[nodiscard]] Hash GetHash(fig::byte_span data);
+	template <typename T, typename... Rest>
+	void hash_combine(std::size_t& seed, const T& v, const Rest&... rest)
+	{
+		seed ^= std::hash<T>{}(v)+0x9e3779b9 + (seed << 6) + (seed >> 2);
+		(hash_combine(seed, rest), ...);
+	}
 }
 #endif

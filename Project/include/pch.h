@@ -8,9 +8,12 @@
 #include <vector>
 #include <ranges>
 #include <span>
+#include <optional>
 #include <algorithm>
 #include <codecvt>
 #include <cwctype>
+#include <stack>
+#include <queue>
 
 #include "Types.h"
 #include "Constants.h"

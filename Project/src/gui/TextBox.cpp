@@ -10,7 +10,10 @@ using namespace fig::string_util;
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ull };
 
-static const char* _testString = "Hee hee, ho ho ho! \n\xE3\x81\xB2\xE3\x82\x89\xE3\x81\x8C\xE3\x81\xAA\x0A\xE3\x82\xAB\xE3\x82\xBF\xE3\x82\xAB\xE3\x83\x8A";
+size_t TextBox::UndoState::GetHash() const
+{
+	return std::hash<UndoState>{}(*this);
+}
 
 TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWithMargins(pParent)
 {
@@ -195,6 +198,7 @@ void TextBox::HandleComposition(const SDL_TextEditingEvent* event)
 			composition_cursor = length;
 			composition_cursor_length = 0;
 		}
+		PushUndo();
 	}
 }
 
@@ -687,6 +691,8 @@ void TextBox::OnMoveCursor(int last)
 		highlight_start = SDL_min(start, end);
 		highlight_end = SDL_max(start, end);
 	}
+
+	_undo.PushState(GetUndoState());
 }
 
 void TextBox::MoveCursorLeft()
@@ -812,6 +818,8 @@ void TextBox::Backspace()
 		int length = (int)(uintptr_t)(start - next);
 		TTF_DeleteTextString(_pText, _cursor - length, length);
 		_cursor -= length;
+
+		PushUndo();
 	}
 }
 
@@ -826,6 +834,8 @@ void TextBox::BackspaceToPriorWord()
 		int length = (_cursor - prior);
 		TTF_DeleteTextString(_pText, prior, length);
 		_cursor -= length;
+
+		PushUndo();
 	}
 }
 
@@ -838,6 +848,8 @@ void TextBox::BackspaceToBeginning()
 	{
 		TTF_DeleteTextString(_pText, 0, _cursor);
 		SetCursorPosition(0);
+
+		PushUndo();
 	}
 }
 
@@ -856,6 +868,8 @@ void TextBox::BackspaceToBeginningOfLine()
 			TTF_DeleteTextString(_pText, substring.offset, _cursor);
 			SetCursorPosition(substring.offset);
 			OnMoveCursor(last_cursor);
+
+			PushUndo();
 		}
 	}
 }
@@ -870,6 +884,8 @@ void TextBox::DeleteToNextWord()
 		int next = FindNextWord(_pText, _cursor);
 		int length = (next - _cursor);
 		TTF_DeleteTextString(_pText, _cursor, length);
+
+		PushUndo();
 	}
 }
 
@@ -881,6 +897,8 @@ void TextBox::DeleteToEnd()
 	if (_pText->text)
 	{
 		TTF_DeleteTextString(_pText, _cursor, -1);
+
+		PushUndo();
 	}
 }
 
@@ -900,6 +918,8 @@ void TextBox::DeleteToEndOfLine()
 				pos--;
 			int length = (pos - _cursor);
 			TTF_DeleteTextString(_pText, _cursor, length);
+
+			PushUndo();
 		}
 	}
 }
@@ -917,6 +937,8 @@ void TextBox::Delete()
 		SDL_StepUTF8(&next, &length);
 		length = (next - start);
 		TTF_DeleteTextString(_pText, _cursor, (int)length);
+
+		PushUndo();
 	}
 }
 
@@ -1024,6 +1046,8 @@ bool TextBox::DeleteHighlight()
 		TTF_DeleteTextString(_pText, marker, length);
 		SetCursorPosition(marker);
 		Deselect();
+
+		PushUndo();
 		return true;
 	}
 	return false;
@@ -1078,6 +1102,8 @@ void TextBox::Cut()
 		SDL_SetClipboardText(_pText->text);
 		TTF_DeleteTextString(_pText, 0, -1);
 	}
+
+	PushUndo();
 }
 
 void TextBox::Paste()
@@ -1102,6 +1128,7 @@ void TextBox::Insert(const char* text)
 	size_t length = SDL_strlen(text);
 	TTF_InsertTextString(_pText, _cursor, text, length);
 	SetCursorPosition((int)(_cursor + length));
+	PushUndo();
 }
 
 bool TextBox::OnEvent(Event& event)
@@ -1159,6 +1186,20 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrl)
 			{
 				Cut();
+			}
+			break;
+
+		case SDLK_Z:
+			if (bModCtrl)
+			{
+				Undo();
+			}
+			break;
+
+		case SDLK_Y:
+			if (bModCtrl)
+			{
+				Redo();
 			}
 			break;
 
@@ -1331,10 +1372,65 @@ void TextBox::Clear()
 	TTF_SetTextString(_pText, "", 0);
 	Deselect();
 	SetCursorPosition(0);
+
+	InitUndo();
 }
 
 void TextBox::SetText(fig::string text)
 {
 	Clear();
 	Insert(text.c_str());
+	
+	InitUndo();
+}
+
+fig::string TextBox::GetText() const
+{
+	if (_pText->text)
+		return fig::string(_pText->text);
+	return {};
+}
+
+TextBox::UndoState TextBox::GetUndoState() const
+{
+	return UndoState
+	{
+		.text = GetText(),
+		.cursor_pos = _cursor,
+		.highlight_start = highlight_start,
+		.highlight_end = highlight_end,
+	};
+}
+
+void TextBox::InitUndo()
+{
+	_undo.SetInitState(GetUndoState());
+}
+
+void TextBox::PushUndo()
+{
+	_undo.PushState(GetUndoState());
+	_undo.MakeUndo();
+}
+
+void TextBox::Undo()
+{
+	if (auto undo = _undo.Undo())
+	{
+		TTF_SetTextString(_pText, toCStr(undo.value().text), 0);
+		SetCursorPosition(undo.value().cursor_pos);
+		highlight_start = undo.value().highlight_start;
+		highlight_end = undo.value().highlight_end;
+	}
+}
+
+void TextBox::Redo()
+{
+	if (auto undo = _undo.Redo())
+	{
+		TTF_SetTextString(_pText, toCStr(undo.value().text), 0);
+		SetCursorPosition(undo.value().cursor_pos);
+		highlight_start = undo.value().highlight_start;
+		highlight_end = undo.value().highlight_end;
+	}
 }

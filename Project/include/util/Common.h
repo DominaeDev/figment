@@ -5,9 +5,10 @@
 
 #include <optional>
 #include <vector>
-#include <queue>
 #include <memory>
 #include <iterator>
+#include <algorithm>
+#include <functional>
 
 namespace fig::common_util
 {
@@ -31,13 +32,6 @@ namespace fig::common_util
 
 	fig::string Base64Encode(fig::byte_span data) noexcept;
 	fig::bytes Base64Decode(fig::string_view) noexcept;
-
-	template<typename T>
-	void queue_clear(std::queue<T>& q)
-	{
-		std::queue<T> empty;
-		std::swap(q, empty);
-	}
 
 	template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
 	void container_prepend(Cont<V, A>& vecA, const Cont<V, A>& vecB) noexcept

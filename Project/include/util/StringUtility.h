@@ -43,6 +43,21 @@ namespace fig::string_util
 	wstring from_utf8(const string& str);
 	string to_utf8(const wstring& str);
 
+	template<typename Pred>
+	int32_t find_index(const string& str, int32_t pos, Pred pred)
+	{
+		auto it_pos = str.cbegin();
+		std::advance(it_pos, pos);
+		if (it_pos < str.cbegin() || it_pos >= str.cend())
+			return -1;
+
+		auto it = std::find_if(it_pos, str.cend(), pred);
+		if (it != str.cend())
+			return toI(std::distance(str.cbegin(), it));
+		return -1;
+	};
+
+	int32_t count_words(const string& text, int32_t cursor, int32_t& pos_last_word);
 }
 
 #endif 

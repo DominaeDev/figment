@@ -29,6 +29,13 @@ using namespace fig::llm;
 
 fig::gui::MainFrame* MainFrame::s_pInstance = nullptr;
 
+template<typename T>
+void queue_clear(std::queue<T>& q)
+{
+	std::queue<T> empty;
+	std::swap(q, empty);
+}
+
 constexpr ChatOptions DefaultChatOptions {
 	.flags = {
 		ChatOptions::Flag::GreetUser,

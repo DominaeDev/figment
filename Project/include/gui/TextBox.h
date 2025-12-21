@@ -4,7 +4,9 @@
 
 #include <functional>
 
-#include "ControlWithMargins.h"
+#include "gui/ControlWithMargins.h"
+#include "util/UndoStack.h"
+#include "util/StringUtility.h"
 
 namespace fig::gui
 {
@@ -16,9 +18,10 @@ namespace fig::gui
 		TextBox(Control* pParent, FontFace fontFace, double ptSize);
 		~TextBox();
 
+		void SetText(fig::string text);
 		void SetEnterPressedCallback(EnterPressedCallback cb);
 
-		void SetText(fig::string text);
+		fig::string GetText() const;
 
 		void Clear();
 		void SetFocus(bool focus);
@@ -32,6 +35,8 @@ namespace fig::gui
 		void Copy();
 		void Cut();
 		void Paste();
+		void Undo();
+		void Redo();
 
 	protected:
 		void OnUpdate(float fDeltaTime) override;
@@ -72,7 +77,6 @@ namespace fig::gui
 		void DeleteToNextWord();
 		void Delete();
 
-
 		bool HandleMouseDown(float x, float y);
 		bool HandleMouseMotion(float x, float y);
 		bool HandleMouseUp(float x, float y);
@@ -108,6 +112,36 @@ namespace fig::gui
 		TTF_Text* candidates {};
 		int selected_candidate_start = -1;
 		int selected_candidate_length = -1;
+
+		struct UndoState
+		{
+			fig::string text;
+			int cursor_pos;
+			int highlight_start;
+			int highlight_end;
+
+			size_t GetHash() const;
+		};
+		friend struct std::hash<fig::gui::TextBox::UndoState>;
+		UndoStack<UndoState> _undo {};
+
+		UndoState GetUndoState() const;
+		void InitUndo();
+		void PushUndo();
+	};
+}
+
+namespace std
+{
+	template<> struct hash<fig::gui::TextBox::UndoState>
+	{
+		std::size_t operator()(fig::gui::TextBox::UndoState const& state) const noexcept
+		{
+			int32_t lastWord;
+			int32_t count = fig::string_util::count_words(state.text, state.cursor_pos, lastWord);
+			string leading = state.text.substr(0, lastWord);
+			return toUZ((31uz * count) + std::hash<string>{}(leading));
+		}
 	};
 }
 #endif

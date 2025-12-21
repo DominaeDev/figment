@@ -20,6 +20,13 @@ using namespace fig::file_util;
 using namespace fig::string_util;
 using namespace fig::llm;
 
+template<typename T>
+void queue_clear(std::queue<T>& q)
+{
+	std::queue<T> empty;
+	std::swap(q, empty);
+}
+
 inline constexpr fig::string Direction(fig::string_view text)
 {
 	return "{{" + toStr(text) + "}}";
