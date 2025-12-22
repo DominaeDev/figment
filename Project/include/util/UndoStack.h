@@ -5,6 +5,7 @@
 #include "Types.h"
 #include "Hash.h"
 #include <stack>
+#include <list>
 #include <optional>
 #include <type_traits>
 #include <concepts>
@@ -14,14 +15,13 @@ namespace fig
 	/// <summary>
 	/// Concept: A custom undo state struct type that's trivially copyable and has the following members:
 	///		enum actionType
-	///		bool mayCoalesce
 	/// </summary>
 	template <typename T, typename EType>
 	concept IUndoState = requires (T const t)
 	{
 		{ t.actionType } -> std::same_as<const EType&>;
-		{ t.mayCoalesce } -> std::same_as<const bool&>;
 		std::stack<T>().push(t);
+		std::list<T>().push_front(t);
 	} and std::copyable<T>;
 
 	/// <summary>
@@ -44,7 +44,7 @@ namespace fig
 			std::swap(q, empty);
 		}
 	public:
-		UndoStack(size_t capacity = 64uz) :
+		UndoStack(size_t capacity = 512uz) :
 			_capacity { capacity }
 		{}
 		
@@ -52,7 +52,7 @@ namespace fig
 		{
 			_stateBuffer[0] = state;
 			_stateBuffer[1] = state;
-			stack_clear(_undoFrames);
+			_undoFrames.clear();
 			stack_clear(_redoFrames);
 		}
 
@@ -62,31 +62,28 @@ namespace fig
 			_stateBuffer[0] = state;
 		}
 
-		void CreateUndo()
+		void CreateUndo(bool allowCoalesce = true)
 		{
 			stack_clear(_redoFrames);
 
-			if (!_undoFrames.empty())
+			// Coalesce
+			if (!_undoFrames.empty() && allowCoalesce)
 			{
-				// Coalesce?
-				auto& topFrame = _undoFrames.top();
+				auto& topFrame = _undoFrames.front();
 				auto& lastState = _stateBuffer[0];
-				bool bCoalesce = topFrame.after.mayCoalesce && lastState.mayCoalesce;
-				if (!_undoFrames.empty() and bCoalesce)
+				if (topFrame.after.actionType == lastState.actionType)
 				{
-					bCoalesce &= topFrame.after.actionType == lastState.actionType;
-					if (bCoalesce)
-					{
-						topFrame.after = lastState;
-						return;
-					}
+					topFrame.after = lastState;
+					return;
 				}
 			}
 
-			_undoFrames.push(UndoFrame {
+			_undoFrames.push_front(UndoFrame {
 				.before = _stateBuffer[1],
 				.after = _stateBuffer[0],
 			});
+			while (_undoFrames.size() > _capacity)
+				_undoFrames.pop_back();
 		}
 
 		std::optional<T> Undo()
@@ -94,8 +91,8 @@ namespace fig
 			if (_undoFrames.empty())
 				return std::nullopt;
 
-			UndoFrame frame = _undoFrames.top();
-			_undoFrames.pop();
+			UndoFrame frame = _undoFrames.front();
+			_undoFrames.pop_front();
 			_redoFrames.push(frame);
 
 			_stateBuffer[0] = frame.before;
@@ -109,7 +106,7 @@ namespace fig
 
 			UndoFrame frame = _redoFrames.top();
 			_redoFrames.pop();
-			_undoFrames.push(frame);
+			_undoFrames.push_front(frame);
 
 			_stateBuffer[0] = frame.after;
 			return frame.after;
@@ -120,10 +117,9 @@ namespace fig
 
 	private:
 		std::array<T, 2> _stateBuffer {};
-		std::stack<UndoFrame> _undoFrames {};
+		std::list<UndoFrame> _undoFrames {};
 		std::stack<UndoFrame> _redoFrames {};
-
-		size_t _capacity = 64uz;
+		size_t _capacity = 512uz;
 	};
 }
 

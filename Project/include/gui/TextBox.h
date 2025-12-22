@@ -129,11 +129,10 @@ namespace fig::gui
 			int highlight_start;
 			int highlight_end;
 			UndoAction actionType;
-			bool mayCoalesce;
 		};
 		UndoStack<UndoState, UndoAction> _undo {};
 
-		UndoState GetUndoState(UndoAction action, bool allowCoalesce) const noexcept;
+		UndoState GetUndoState(UndoAction action) const noexcept;
 		void InitUndo() noexcept;
 		void PushUndo(UndoAction action, bool allowCoalesce = true);
 	};

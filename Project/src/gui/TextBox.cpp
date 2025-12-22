@@ -687,7 +687,7 @@ void TextBox::OnMoveCursor(int last)
 		highlight_end = SDL_max(start, end);
 	}
 
-	_undo.PushState(GetUndoState(UndoAction::Default, true));
+	_undo.PushState(GetUndoState(UndoAction::Default));
 }
 
 void TextBox::MoveCursorLeft()
@@ -1394,7 +1394,7 @@ fig::string TextBox::GetText() const
 	return {};
 }
 
-TextBox::UndoState TextBox::GetUndoState(UndoAction action, bool allowCoalesce) const noexcept
+TextBox::UndoState TextBox::GetUndoState(UndoAction action) const noexcept
 {
 	return UndoState
 	{
@@ -1403,19 +1403,18 @@ TextBox::UndoState TextBox::GetUndoState(UndoAction action, bool allowCoalesce) 
 		.highlight_start = highlight_start,
 		.highlight_end = highlight_end,
 		.actionType = action,
-		.mayCoalesce = allowCoalesce,
 	};
 }
 
 void TextBox::InitUndo() noexcept
 {
-	_undo.SetInitState(GetUndoState(UndoAction::Default, true));
+	_undo.SetInitState(GetUndoState(UndoAction::Default));
 }
 
 void TextBox::PushUndo(UndoAction action, bool allowCoalesce)
 {
-	_undo.PushState(GetUndoState(action, allowCoalesce));
-	_undo.CreateUndo();
+	_undo.PushState(GetUndoState(action));
+	_undo.CreateUndo(allowCoalesce);
 }
 
 void TextBox::Undo()
