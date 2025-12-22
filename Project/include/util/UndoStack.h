@@ -11,14 +11,24 @@
 
 namespace fig
 {
-	template <typename T>
+	/// <summary>
+	/// Concept: A custom undo state struct type that's trivially copyable and has the following members:
+	///		enum actionType
+	///		bool mayCoalesce
+	/// </summary>
+	template <typename T, typename EType>
 	concept IUndoState = requires (T const t)
 	{
-		{ t.GetHash() } -> std::same_as<size_t>;
+		{ t.actionType } -> std::same_as<const EType&>;
+		{ t.mayCoalesce } -> std::same_as<const bool&>;
 		std::stack<T>().push(t);
 	} and std::copyable<T>;
 
-	template <IUndoState T>
+	/// <summary>
+	/// Generic undo stack
+	/// </summary>
+	template <typename T, typename EType>
+		requires IUndoState<T, EType>
 	class UndoStack
 	{
 		struct UndoFrame
@@ -37,24 +47,6 @@ namespace fig
 		UndoStack(size_t capacity = 64uz) :
 			_capacity { capacity }
 		{}
-
-		void PushState(const T& state)
-		{
-			// Compare hash (based on word count), and push to stack
-			if (!_undoFrames.empty())
-			{
-				auto& top = _undoFrames.top();
-				
-				if (top.after.text == state.text || top.after.GetHash() == state.GetHash())
-				{
-					_stateBuffer[0] = state;
-					return;
-				}
-			}
-			
-			_stateBuffer[1] = _stateBuffer[0];
-			_stateBuffer[0] = state;
-		}
 		
 		void SetInitState(const T& state)
 		{
@@ -64,9 +56,33 @@ namespace fig
 			stack_clear(_redoFrames);
 		}
 
-		void MakeUndo()
+		void PushState(const T& state)
+		{
+			_stateBuffer[1] = _stateBuffer[0];
+			_stateBuffer[0] = state;
+		}
+
+		void CreateUndo()
 		{
 			stack_clear(_redoFrames);
+
+			if (!_undoFrames.empty())
+			{
+				// Coalesce?
+				auto& topFrame = _undoFrames.top();
+				auto& lastState = _stateBuffer[0];
+				bool bCoalesce = topFrame.after.mayCoalesce && lastState.mayCoalesce;
+				if (!_undoFrames.empty() and bCoalesce)
+				{
+					bCoalesce &= topFrame.after.actionType == lastState.actionType;
+					if (bCoalesce)
+					{
+						topFrame.after = lastState;
+						return;
+					}
+				}
+			}
+
 			_undoFrames.push(UndoFrame {
 				.before = _stateBuffer[1],
 				.after = _stateBuffer[0],
@@ -81,6 +97,8 @@ namespace fig
 			UndoFrame frame = _undoFrames.top();
 			_undoFrames.pop();
 			_redoFrames.push(frame);
+
+			_stateBuffer[0] = frame.before;
 			return frame.before;
 		}
 
@@ -88,9 +106,12 @@ namespace fig
 		{
 			if (_redoFrames.empty())
 				return std::nullopt;
+
 			UndoFrame frame = _redoFrames.top();
 			_redoFrames.pop();
 			_undoFrames.push(frame);
+
+			_stateBuffer[0] = frame.after;
 			return frame.after;
 		}
 

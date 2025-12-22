@@ -113,35 +113,29 @@ namespace fig::gui
 		int selected_candidate_start = -1;
 		int selected_candidate_length = -1;
 
+		enum class UndoAction
+		{
+			Default,
+			Write,
+			WhitespacePunctuation,
+			Erase,
+			Other,
+		};
+
 		struct UndoState
 		{
 			fig::string text;
 			int cursor_pos;
 			int highlight_start;
 			int highlight_end;
-
-			size_t GetHash() const;
+			UndoAction actionType;
+			bool mayCoalesce;
 		};
-		friend struct std::hash<fig::gui::TextBox::UndoState>;
-		UndoStack<UndoState> _undo {};
+		UndoStack<UndoState, UndoAction> _undo {};
 
-		UndoState GetUndoState() const;
-		void InitUndo();
-		void PushUndo();
-	};
-}
-
-namespace std
-{
-	template<> struct hash<fig::gui::TextBox::UndoState>
-	{
-		std::size_t operator()(fig::gui::TextBox::UndoState const& state) const noexcept
-		{
-			int32_t lastWord;
-			int32_t count = fig::string_util::count_words(state.text, state.cursor_pos, lastWord);
-			string leading = state.text.substr(0, lastWord);
-			return toUZ((31uz * count) + std::hash<string>{}(leading));
-		}
+		UndoState GetUndoState(UndoAction action, bool allowCoalesce) const noexcept;
+		void InitUndo() noexcept;
+		void PushUndo(UndoAction action, bool allowCoalesce = true);
 	};
 }
 #endif

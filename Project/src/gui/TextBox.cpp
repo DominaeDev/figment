@@ -10,11 +10,6 @@ using namespace fig::string_util;
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ull };
 
-size_t TextBox::UndoState::GetHash() const
-{
-	return std::hash<UndoState>{}(*this);
-}
-
 TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWithMargins(pParent)
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);
@@ -198,7 +193,7 @@ void TextBox::HandleComposition(const SDL_TextEditingEvent* event)
 			composition_cursor = length;
 			composition_cursor_length = 0;
 		}
-		PushUndo();
+		PushUndo(UndoAction::Write);
 	}
 }
 
@@ -692,7 +687,7 @@ void TextBox::OnMoveCursor(int last)
 		highlight_end = SDL_max(start, end);
 	}
 
-	_undo.PushState(GetUndoState());
+	_undo.PushState(GetUndoState(UndoAction::Default, true));
 }
 
 void TextBox::MoveCursorLeft()
@@ -819,7 +814,7 @@ void TextBox::Backspace()
 		TTF_DeleteTextString(_pText, _cursor - length, length);
 		_cursor -= length;
 
-		PushUndo();
+		PushUndo(UndoAction::Erase);
 	}
 }
 
@@ -835,7 +830,7 @@ void TextBox::BackspaceToPriorWord()
 		TTF_DeleteTextString(_pText, prior, length);
 		_cursor -= length;
 
-		PushUndo();
+		PushUndo(UndoAction::Erase);
 	}
 }
 
@@ -849,7 +844,7 @@ void TextBox::BackspaceToBeginning()
 		TTF_DeleteTextString(_pText, 0, _cursor);
 		SetCursorPosition(0);
 
-		PushUndo();
+		PushUndo(UndoAction::Erase);
 	}
 }
 
@@ -869,7 +864,7 @@ void TextBox::BackspaceToBeginningOfLine()
 			SetCursorPosition(substring.offset);
 			OnMoveCursor(last_cursor);
 
-			PushUndo();
+			PushUndo(UndoAction::Erase);
 		}
 	}
 }
@@ -885,7 +880,7 @@ void TextBox::DeleteToNextWord()
 		int length = (next - _cursor);
 		TTF_DeleteTextString(_pText, _cursor, length);
 
-		PushUndo();
+		PushUndo(UndoAction::Erase);
 	}
 }
 
@@ -898,7 +893,7 @@ void TextBox::DeleteToEnd()
 	{
 		TTF_DeleteTextString(_pText, _cursor, -1);
 
-		PushUndo();
+		PushUndo(UndoAction::Erase);
 	}
 }
 
@@ -919,7 +914,7 @@ void TextBox::DeleteToEndOfLine()
 			int length = (pos - _cursor);
 			TTF_DeleteTextString(_pText, _cursor, length);
 
-			PushUndo();
+			PushUndo(UndoAction::Erase);
 		}
 	}
 }
@@ -938,7 +933,7 @@ void TextBox::Delete()
 		length = (next - start);
 		TTF_DeleteTextString(_pText, _cursor, (int)length);
 
-		PushUndo();
+		PushUndo(UndoAction::Erase);
 	}
 }
 
@@ -1047,7 +1042,7 @@ bool TextBox::DeleteHighlight()
 		SetCursorPosition(marker);
 		Deselect();
 
-		PushUndo();
+		PushUndo(UndoAction::Erase);
 		return true;
 	}
 	return false;
@@ -1103,13 +1098,14 @@ void TextBox::Cut()
 		TTF_DeleteTextString(_pText, 0, -1);
 	}
 
-	PushUndo();
+	PushUndo(UndoAction::Erase, false);
 }
 
 void TextBox::Paste()
 {
 	const char* text = SDL_GetClipboardText();
 	Insert(text);
+	PushUndo(UndoAction::Write, false);
 }
 
 void TextBox::Insert(const char* text)
@@ -1128,7 +1124,6 @@ void TextBox::Insert(const char* text)
 	size_t length = SDL_strlen(text);
 	TTF_InsertTextString(_pText, _cursor, text, length);
 	SetCursorPosition((int)(_cursor + length));
-	PushUndo();
 }
 
 bool TextBox::OnEvent(Event& event)
@@ -1315,7 +1310,10 @@ bool TextBox::OnEvent(Event& event)
 		case SDLK_RETURN:
 		case SDLK_KP_ENTER:
 			if (bModCtrl)
+			{
 				Insert("\n");
+				PushUndo(UndoAction::Write, false);
+			}
 			else if (bModNone)
 			{
 				if (_pOnEnter and _pText->text) // Invoke
@@ -1339,6 +1337,13 @@ bool TextBox::OnEvent(Event& event)
 
 	case SDL_EVENT_TEXT_INPUT:
 		Insert(event.text.text);
+		if (event.text.text)
+		{
+			if (is_whitespace(event.text.text[0]) || is_punctuation(event.text.text[0]))
+				PushUndo(UndoAction::WhitespacePunctuation);
+			else
+				PushUndo(UndoAction::Write);
+		}
 		return true;
 
 	case SDL_EVENT_TEXT_EDITING:
@@ -1372,7 +1377,6 @@ void TextBox::Clear()
 	TTF_SetTextString(_pText, "", 0);
 	Deselect();
 	SetCursorPosition(0);
-
 	InitUndo();
 }
 
@@ -1380,7 +1384,6 @@ void TextBox::SetText(fig::string text)
 {
 	Clear();
 	Insert(text.c_str());
-	
 	InitUndo();
 }
 
@@ -1391,7 +1394,7 @@ fig::string TextBox::GetText() const
 	return {};
 }
 
-TextBox::UndoState TextBox::GetUndoState() const
+TextBox::UndoState TextBox::GetUndoState(UndoAction action, bool allowCoalesce) const noexcept
 {
 	return UndoState
 	{
@@ -1399,18 +1402,20 @@ TextBox::UndoState TextBox::GetUndoState() const
 		.cursor_pos = _cursor,
 		.highlight_start = highlight_start,
 		.highlight_end = highlight_end,
+		.actionType = action,
+		.mayCoalesce = allowCoalesce,
 	};
 }
 
-void TextBox::InitUndo()
+void TextBox::InitUndo() noexcept
 {
-	_undo.SetInitState(GetUndoState());
+	_undo.SetInitState(GetUndoState(UndoAction::Default, true));
 }
 
-void TextBox::PushUndo()
+void TextBox::PushUndo(UndoAction action, bool allowCoalesce)
 {
-	_undo.PushState(GetUndoState());
-	_undo.MakeUndo();
+	_undo.PushState(GetUndoState(action, allowCoalesce));
+	_undo.CreateUndo();
 }
 
 void TextBox::Undo()
