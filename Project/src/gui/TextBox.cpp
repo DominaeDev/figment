@@ -87,9 +87,6 @@ void TextBox::OnUpdate(float fDeltaTime)
 
 	UpdatePassword();
 
-	// Autosize
-	Autosize();
-
 	if (_bFocused)
 	{
 		int32_t cursor_pos = ConvertToPasswordPosition(_cursor);
@@ -1629,6 +1626,7 @@ void TextBox::Autosize()
 	{
 		auto& rect = GetRect();
 		SetHeight(numRows * lineSkip + GetMarginVertical());
+		InvalidateParentLayout(false);
 	}
 }
 
@@ -1734,3 +1732,9 @@ void TextBox::Redo()
 }
 
 #pragma endregion Undo/Redo
+
+void TextBox::OnPostRender()
+{
+	// Autosize
+	Autosize();
+}

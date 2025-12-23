@@ -37,6 +37,7 @@ namespace fig::gui
 
 	protected:
 		virtual void OnRender(Renderer* pRenderer);
+		virtual void OnPostRender() {};
 		virtual void OnParent();
 		virtual bool OnEvent(Event& event) { return false; }
 

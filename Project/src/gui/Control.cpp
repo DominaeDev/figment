@@ -81,6 +81,7 @@ void Control::Render(Renderer* pRenderer)
 			}
 			
 			renderable->Render(pRenderer);
+			renderable->OnPostRender();
 		}
 	}
 

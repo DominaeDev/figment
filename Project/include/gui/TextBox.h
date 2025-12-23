@@ -54,6 +54,7 @@ namespace fig::gui
 		void OnRender(RendererPtr pRenderer) override;
 		bool OnEvent(Event& event) override;
 		void OnSize() override;
+		void OnPostRender() override;
 
 	private:
 		void Insert(const char* text);

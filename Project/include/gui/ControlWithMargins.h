@@ -11,7 +11,6 @@ namespace fig::gui
 
 		void SetMargins(float left, float top, float right, float bottom);
 		void SetMargins(Rectf rect);
-
 		Rectf GetClientRect() const noexcept;
 		inline float GetMarginLeft() const noexcept { return _marginLeft; }
 		inline float GetMarginTop() const noexcept { return _marginTop; }
