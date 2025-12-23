@@ -9,16 +9,18 @@ namespace fig::gui
 	public:
 		ControlWithMargins(Control* pParent);
 
-		void SetMargins(int left, int top, int right, int bottom);
-		void SetMargins(Rect rect);
+		void SetMargins(float left, float top, float right, float bottom);
+		void SetMargins(Rectf rect);
+
+		Rectf GetClientRect() const;
 
 	protected:
-		int _marginLeft = 0;
-		int _marginTop = 0;
-		int _marginRight = 0;
-		int _marginBottom = 0;
+		float _marginLeft = 0;
+		float _marginTop = 0;
+		float _marginRight = 0;
+		float _marginBottom = 0;
 
-		int HMargin() const { return _marginLeft + _marginRight; }
-		int VMargin() const { return _marginTop + _marginBottom; }
+		float HMargin() const { return _marginLeft + _marginRight; }
+		float VMargin() const { return _marginTop + _marginBottom; }
 	};
 }

@@ -15,7 +15,14 @@ namespace fig::gui
 	class TextBox : public ControlWithMargins
 	{
 	public:
-		TextBox(Control* pParent, FontFace fontFace, double ptSize);
+		enum class Flag
+		{ 
+			Single	= 1 << 0,
+			Multi	= 1 << 1,
+		};
+		using Flags = EnumFlags<Flag>;
+
+		TextBox(Control* pParent, FontFace fontFace, double ptSize, Flags flags = { Flag::Single });
 		~TextBox();
 
 		void SetText(fig::string text);
@@ -40,18 +47,18 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fDeltaTime) override;
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(RendererPtr pRenderer) override;
 		bool OnEvent(Event& event) override;
 		void OnSize() override;
 
 	private:
 		void Insert(const char* text);
 
-		void DrawText(Renderer* pRenderer, TTF_Text* pText, float x, float y);
-		void DrawCursor(Renderer* pRenderer);
-		void DrawCandidates(Renderer* pRenderer);
-		void DrawComposition(Renderer* pRenderer);
-		void DrawCompositionCursor(Renderer* pRenderer);
+		void DrawText(RendererPtr pRenderer, TTF_Text* pText, float x, float y);
+		void DrawCursor(RendererPtr pRenderer);
+		void DrawCandidates(RendererPtr pRenderer);
+		void DrawComposition(RendererPtr pRenderer);
+		void DrawCompositionCursor(RendererPtr pRenderer);
 		void ClearCandidates();
 		void SaveCandidates(const SDL_Event* event);
 		bool GetHighlightExtents(int* marker, int* length);
@@ -76,16 +83,27 @@ namespace fig::gui
 		void DeleteToEndOfLine();
 		void DeleteToNextWord();
 		void Delete();
+		void ResetCursorBlink();
 
 		bool HandleMouseDown(float x, float y);
 		bool HandleMouseMotion(float x, float y);
 		bool HandleMouseUp(float x, float y);
+
+		inline bool HasSelection() const { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
+
+		void ScrollPoint(int& x, int& y) const;
+		void ScrollPoint(float& x, float& y) const;
+		void ScrollPoint(Rectf& rect) const;
+		inline bool IsMultiline() const { return _flags.IsSet(Flag::Multi); }
 
 	protected:
 		TTF_Font* _pFont {};
 		TTF_Text* _pText {};
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;
+		Flags _flags {};
+		bool _bAutoSize = false;
+		Point _scroll {};
 
 		Texture* _pTexture = nullptr;
 		Surface* _pSurface = nullptr;
@@ -98,7 +116,7 @@ namespace fig::gui
 		Rectf _cursor_rect {};
 
 		/* Highlight support */
-		bool _bIsHighlighting = false;
+		bool _bIsHighlighting = false; // Mouse-selection
 		int highlight_start = -1;
 		int highlight_end = -1;
 

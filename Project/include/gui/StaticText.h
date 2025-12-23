@@ -43,7 +43,7 @@ namespace fig::gui
 		TTF_Font* GetFont() const { return _pFont; }
 
 		void SetText(fig::string text);
-		void SetTextAndResize(fig::string text, int& newWidth, int& newHeight);
+		void SetTextAndResize(fig::string text, float& newWidth, float& newHeight);
 		fig::string GetText() const { return _text; }
 
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
@@ -60,7 +60,7 @@ namespace fig::gui
 		void OnParent() override;
 
 	private:
-		void DrawText(int& textWidth, int& textHeight);
+		void DrawText(float& textWidth, float& textHeight);
 		void ReleaseTexture();
 
 		fig::string _text;

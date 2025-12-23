@@ -253,6 +253,32 @@ namespace fig::string_util
 		return normalize_newlines(text); // rvo
 	}
 
+	wstring& normalize_newlines(wstring& text)
+	{
+		size_t cursor_write = 0;
+
+		for (size_t cursor_read = 0; cursor_read < text.size(); ++cursor_read)
+		{
+			if (text[cursor_read] == L'\r')
+			{
+				// Skip CR and optional following LF
+				if (cursor_read + 1 < text.size() && text[cursor_read + 1] == L'\n')
+					++cursor_read;
+				text[cursor_write++] = L'\n';
+			}
+			else
+				text[cursor_write++] = text[cursor_read];
+		}
+
+		text.resize(cursor_write);
+		return text;
+	}
+
+	wstring normalize_newlines(wstring&& text)
+	{
+		return normalize_newlines(text); // rvo
+	}
+
 	wstring from_utf8(const string& str)
 	{
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;

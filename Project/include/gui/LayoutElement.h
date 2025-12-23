@@ -18,6 +18,7 @@ namespace fig::gui
 		virtual void Update(float fDeltaTime);
 
 		Rectf& GetRect() { return _rect; }
+		const Rectf& GetRect() const { return _rect; }
 		Pointf GetPosition() const { return _position; }
 		Pointf GetSize() const { return _size; }
 

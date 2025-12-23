@@ -6,11 +6,12 @@
 #include <algorithm>
 
 using namespace fig::gui;
+using namespace fig::gui_util;
 using namespace fig::string_util;
 
-constexpr uint64_t CursorBlinkIntervalMS { 500ull };
+constexpr uint64_t CursorBlinkIntervalMS { 500ULL };
 
-TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize) : ControlWithMargins(pParent)
+TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : ControlWithMargins(pParent)
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);
 	_pText = TTF_CreateText(GetSDLTextEngine(), _pFont, "", 0);
@@ -64,11 +65,31 @@ void TextBox::OnUpdate(float fDeltaTime)
 	}
 }
 
-void TextBox::OnRender(Renderer* pRenderer)
+void TextBox::OnRender(RendererPtr pRenderer)
 {
 	DrawBackground(pRenderer);
 	DrawBorder(pRenderer);
 	
+	// Clipping
+	Rect prevClippingRect;
+	bool restoreClipping = SDL_GetRenderClipRect(pRenderer, &prevClippingRect) && prevClippingRect.w > 0;
+	Rect clientRect = to_rect(GetClientRect());
+	SDL_SetRenderClipRect(pRenderer, &clientRect);
+
+	int maxCursorWidth = clientRect.w;
+	int textWidth, textHeight;
+	TTF_GetTextSize(_pText, &textWidth, &textHeight);
+	if (!IsMultiline()) // Single line scrolling
+	{
+		constexpr int kScrollStep = 80;
+		int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
+		while (cursorX - _scroll.x > maxCursorWidth)
+			_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorWidth);
+		while (cursorX - _scroll.x < 0)
+			_scroll.x = std::max(_scroll.x - kScrollStep, 0);
+		_scroll.y = 0;
+	}
+
 	// Draw highlight(s) 
 	int marker, length;
 	if (GetHighlightExtents(&marker, &length))
@@ -79,17 +100,12 @@ void TextBox::OnRender(Renderer* pRenderer)
 			SDL_SetRenderDrawColor(pRenderer, Colors::TextSelectionBackground.r, Colors::TextSelectionBackground.g, Colors::TextSelectionBackground.b, Colors::TextSelectionBackground.a);
 			for (int i = 0; pHighlights[i]; ++i)
 			{
-				Rectf rect;
-				SDL_RectToFRect(&pHighlights[i]->rect, &rect);
-				if (rect.x <= 2)
-				{
-					rect.w += rect.x;
-					rect.x = 0;
-				}
+				Rectf rect = to_rectf(pHighlights[i]->rect);
 				rect.w = std::max(rect.w, 3.0f);
 				rect.x += _rect.x + _marginLeft;
 				rect.y += _rect.y + _marginTop;
 
+				ScrollPoint(rect);
 				SDL_RenderFillRect(pRenderer, &rect);
 			}
 			SDL_free(pHighlights);
@@ -109,24 +125,35 @@ void TextBox::OnRender(Renderer* pRenderer)
 		if (_cursor_visible)
 			DrawCursor(pRenderer);
 	}
+
+	SDL_SetRenderClipRect(pRenderer, restoreClipping ? &prevClippingRect : nullptr);
 }
 
-static bool IsShiftDown()
-{
-	return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
-}
-
-static bool IsControlDown()
-{
-	return (SDL_GetModState() & SDL_KMOD_CTRL) != 0;
-}
-
-void TextBox::DrawText(Renderer* pRenderer, TTF_Text* pText,  float x, float y)
+void TextBox::DrawText(RendererPtr pRenderer, TTF_Text* pText,  float x, float y)
 {
 	auto fgColor = GetForegroundColor();
 	TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
-	TTF_DrawRendererText(pText, _rect.x + _marginLeft, _rect.y + _marginTop);
+
+	float xx = _rect.x + _marginLeft;
+	float yy = _rect.y + _marginTop;
+	ScrollPoint(xx, yy);
+	TTF_DrawRendererText(pText, xx, yy);
 }
+
+void TextBox::DrawCursor(RendererPtr pRenderer)
+{
+	if (composition_length > 0)
+	{
+		DrawCompositionCursor(pRenderer);
+		return;
+	}
+
+	auto rect = _cursor_rect;
+	ScrollPoint(rect);
+	SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
+	SDL_RenderFillRect(pRenderer, &rect);
+}
+
 
 bool TextBox::GetHighlightExtents(int* marker, int* length)
 {
@@ -143,6 +170,19 @@ bool TextBox::GetHighlightExtents(int* marker, int* length)
 	}
 	return false;
 }
+
+static bool IsShiftDown()
+{
+	return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
+}
+
+void TextBox::ResetCursorBlink()
+{
+	_cursor_visible = true;
+	_last_cursor_change = SDL_GetTicks();
+}
+
+#pragma region Composition
 
 void TextBox::ResetComposition()
 {
@@ -204,7 +244,7 @@ void TextBox::CancelComposition()
 	SDL_ClearComposition(GetSDLWindow());
 }
 
-void TextBox::DrawComposition(Renderer* pRenderer)
+void TextBox::DrawComposition(RendererPtr pRenderer)
 {
 	/* Draw an underline under the composed text */
 	int font_height = TTF_GetFontHeight(_pFont);
@@ -243,7 +283,7 @@ void TextBox::DrawComposition(Renderer* pRenderer)
 	}
 }
 
-void TextBox::DrawCompositionCursor(Renderer* pRenderer)
+void TextBox::DrawCompositionCursor(RendererPtr pRenderer)
 {
 	if (composition_cursor_length == 0)
 	{
@@ -256,6 +296,7 @@ void TextBox::DrawCompositionCursor(Renderer* pRenderer)
 			rect.y += rect.y;
 			rect.w = 1.0f;
 
+			ScrollPoint(rect);
 			SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
 			SDL_RenderFillRect(pRenderer, &rect);
 		}
@@ -355,7 +396,7 @@ void TextBox::SaveCandidates(const SDL_Event* event)
 	}
 }
 
-void TextBox::DrawCandidates(Renderer* pRenderer)
+void TextBox::DrawCandidates(RendererPtr pRenderer)
 {
 	SDL_Rect safe_rect;
 	Rectf candidates_rect;
@@ -389,6 +430,8 @@ void TextBox::DrawCandidates(Renderer* pRenderer)
 		}
 	}
 
+	ScrollPoint(candidates_rect);
+
 	/* Draw the candidate background */
 	SDL_SetRenderDrawColor(pRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
 	SDL_RenderFillRect(pRenderer, &candidates_rect);
@@ -421,10 +464,12 @@ void TextBox::DrawCandidates(Renderer* pRenderer)
 	}
 }
 
+#pragma endregion Composition
+
 void TextBox::UpdateTextInputArea()
 {
 	SDL_Window* pWindow = GetSDLWindow();
-	Renderer* pRenderer = GetSDLRenderer();
+	RendererPtr pRenderer = GetSDLRenderer();
 
 	/* Convert the text input area and cursor into window coordinates */
 	Pointf window_edit_rect_min;
@@ -444,18 +489,6 @@ void TextBox::UpdateTextInputArea()
 	rect.h = (int)SDL_roundf(window_edit_rect_max.y - window_edit_rect_min.y);
 	int cursor_offset = (int)SDL_roundf(window_cursor.x - window_edit_rect_min.x);
 	SDL_SetTextInputArea(pWindow, &rect, cursor_offset);
-}
-
-void TextBox::DrawCursor(Renderer* pRenderer)
-{
-	if (composition_length > 0)
-	{
-		DrawCompositionCursor(pRenderer);
-		return;
-	}
-	
-	SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
-	SDL_RenderFillRect(pRenderer, &_cursor_rect);
 }
 
 void TextBox::SetFocus(bool focus)
@@ -627,8 +660,7 @@ void TextBox::SetCursorPosition(int position)
 	}
 
 	_cursor = position;
-	_cursor_visible = true;
-	_last_cursor_change = SDL_GetTicks();
+	ResetCursorBlink();
 }
 
 void TextBox::MoveCursorIndex(int direction)
@@ -687,7 +719,7 @@ void TextBox::OnMoveCursor(int last)
 		highlight_end = SDL_max(start, end);
 	}
 
-	_undo.PushState(GetUndoState(UndoAction::Default));
+	ResetCursorBlink();
 }
 
 void TextBox::MoveCursorLeft()
@@ -702,6 +734,9 @@ void TextBox::MoveCursorRight()
 
 void TextBox::MoveCursorUp()
 {
+	if (not IsMultiline())
+		return;
+
 	TTF_SubString substring;
 	if (TTF_GetTextSubString(_pText, _cursor, &substring))
 	{
@@ -720,6 +755,9 @@ void TextBox::MoveCursorUp()
 
 void TextBox::MoveCursorDown()
 {
+	if (not IsMultiline())
+		return;
+
 	TTF_SubString substring;
 	if (TTF_GetTextSubString(_pText, _cursor, &substring))
 	{
@@ -743,6 +781,7 @@ void TextBox::MoveCursorBeginningOfLine()
 		TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
 	{
 		int last_cursor = _cursor;
+
 		SetCursorPosition(substring.offset);
 		OnMoveCursor(last_cursor);
 	}
@@ -758,6 +797,7 @@ void TextBox::MoveCursorEndOfLine()
 		int pos = substring.offset + substring.length;
 		if (pos > 0 and pos <= strlen(_pText->text) and _pText->text[pos - 1] == '\n')
 			pos--;
+
 		SetCursorPosition(pos);
 		OnMoveCursor(last_cursor);
 	}
@@ -814,6 +854,7 @@ void TextBox::Backspace()
 		TTF_DeleteTextString(_pText, _cursor - length, length);
 		_cursor -= length;
 
+		ResetCursorBlink();
 		PushUndo(UndoAction::Erase);
 	}
 }
@@ -830,7 +871,8 @@ void TextBox::BackspaceToPriorWord()
 		TTF_DeleteTextString(_pText, prior, length);
 		_cursor -= length;
 
-		PushUndo(UndoAction::Erase);
+		ResetCursorBlink();
+		PushUndo(UndoAction::Erase, false);
 	}
 }
 
@@ -844,7 +886,7 @@ void TextBox::BackspaceToBeginning()
 		TTF_DeleteTextString(_pText, 0, _cursor);
 		SetCursorPosition(0);
 
-		PushUndo(UndoAction::Erase);
+		PushUndo(UndoAction::Erase, false);
 	}
 }
 
@@ -864,8 +906,27 @@ void TextBox::BackspaceToBeginningOfLine()
 			SetCursorPosition(substring.offset);
 			OnMoveCursor(last_cursor);
 
-			PushUndo(UndoAction::Erase);
+			PushUndo(UndoAction::Erase, false);
 		}
+	}
+}
+
+void TextBox::Delete()
+{
+	if (DeleteHighlight())
+		return;
+
+	if (_pText->text)
+	{
+		const char* start = &_pText->text[_cursor];
+		const char* next = start;
+		size_t length = SDL_strlen(next);
+		SDL_StepUTF8(&next, &length);
+		length = (next - start);
+		TTF_DeleteTextString(_pText, _cursor, (int)length);
+
+		ResetCursorBlink();
+		PushUndo(UndoAction::Erase);
 	}
 }
 
@@ -880,7 +941,8 @@ void TextBox::DeleteToNextWord()
 		int length = (next - _cursor);
 		TTF_DeleteTextString(_pText, _cursor, length);
 
-		PushUndo(UndoAction::Erase);
+		ResetCursorBlink();
+		PushUndo(UndoAction::Erase, false);
 	}
 }
 
@@ -893,7 +955,8 @@ void TextBox::DeleteToEnd()
 	{
 		TTF_DeleteTextString(_pText, _cursor, -1);
 
-		PushUndo(UndoAction::Erase);
+		ResetCursorBlink();
+		PushUndo(UndoAction::Erase, false);
 	}
 }
 
@@ -914,29 +977,31 @@ void TextBox::DeleteToEndOfLine()
 			int length = (pos - _cursor);
 			TTF_DeleteTextString(_pText, _cursor, length);
 
-			PushUndo(UndoAction::Erase);
+			ResetCursorBlink();
+			PushUndo(UndoAction::Erase, false);
 		}
 	}
 }
 
-void TextBox::Delete()
+bool TextBox::DeleteHighlight()
 {
-	if (DeleteHighlight())
-		return;
+	if (!_pText->text)
+		return false;
 
-	if (_pText->text)
+	int marker, length;
+	if (GetHighlightExtents(&marker, &length))
 	{
-		const char* start = &_pText->text[_cursor];
-		const char* next = start;
-		size_t length = SDL_strlen(next);
-		SDL_StepUTF8(&next, &length);
-		length = (next - start);
-		TTF_DeleteTextString(_pText, _cursor, (int)length);
+		TTF_DeleteTextString(_pText, marker, length);
+		SetCursorPosition(marker);
+		Deselect();
 
 		PushUndo(UndoAction::Erase);
+		return true;
 	}
+	return false;
 }
 
+#pragma region Selection
 bool TextBox::HandleMouseDown(float x, float y)
 {
 	Pointf pt = { x, y };
@@ -956,8 +1021,8 @@ bool TextBox::HandleMouseDown(float x, float y)
 	}
 
 	TTF_SubString substring;
-	int textX = (int)SDL_roundf(x - _rect.x - _marginLeft);
-	int textY = (int)SDL_roundf(y - _rect.y - _marginTop);
+	int textX = (int)SDL_roundf(x - _rect.x - _marginLeft + _scroll.x);
+	int textY = (int)SDL_roundf(y - _rect.y - _marginTop + _scroll.y);
 	if (TTF_GetTextSubStringForPoint(_pText, textX, textY, &substring))
 	{
 		if (IsShiftDown())
@@ -984,8 +1049,8 @@ bool TextBox::HandleMouseMotion(float x, float y)
 	{
 		/* Set the highlight position */
 		TTF_SubString substring;
-		int textX = (int)SDL_roundf(x - _rect.x - _marginLeft);
-		int textY = (int)SDL_roundf(y - _rect.y - _marginTop);
+		int textX = (int)SDL_roundf(x - _rect.x - _marginLeft + _scroll.x);
+		int textY = (int)SDL_roundf(y - _rect.y - _marginTop + _scroll.y);
 		if (TTF_GetTextSubStringForPoint(_pText, textX, textY, &substring))
 		{
 			SetCursorPosition(GetCursorTextIndex(textX, &substring));
@@ -1030,23 +1095,7 @@ void TextBox::Deselect()
 	highlight_end = -1;
 }
 
-bool TextBox::DeleteHighlight()
-{
-	if (!_pText->text)
-		return false;
-
-	int marker, length;
-	if (GetHighlightExtents(&marker, &length))
-	{
-		TTF_DeleteTextString(_pText, marker, length);
-		SetCursorPosition(marker);
-		Deselect();
-
-		PushUndo(UndoAction::Erase);
-		return true;
-	}
-	return false;
-}
+#pragma endregion Selection
 
 void TextBox::Copy()
 {
@@ -1103,8 +1152,23 @@ void TextBox::Cut()
 
 void TextBox::Paste()
 {
-	const char* text = SDL_GetClipboardText();
-	Insert(text);
+	if (!IsMultiline())
+	{
+		// Only accept the first line of pasted content
+		wstring content = from_utf8(SDL_GetClipboardText());
+		string_util::normalize_newlines(content);
+		int32_t pos_endl = index_of(content, 0, L'\n');
+		if (pos_endl != -1)
+			content.resize(pos_endl);
+		
+		string contentUtf8 = to_utf8(content);
+		Insert(contentUtf8.c_str());
+	}
+	else
+	{
+		Insert(SDL_GetClipboardText());
+	}
+
 	PushUndo(UndoAction::Write, false);
 }
 
@@ -1125,6 +1189,8 @@ void TextBox::Insert(const char* text)
 	TTF_InsertTextString(_pText, _cursor, text, length);
 	SetCursorPosition((int)(_cursor + length));
 }
+
+#pragma region Events
 
 bool TextBox::OnEvent(Event& event)
 {
@@ -1151,22 +1217,41 @@ bool TextBox::OnEvent(Event& event)
 
 	case SDL_EVENT_KEY_DOWN:
 		if (!_bFocused)
-		{
 			break;
+#if _DEBUG
+		if (bModAlt)
+		{
+			switch (event.key.key)
+			{
+			case SDLK_UP:
+				_scroll.y -= 10;
+				return true;
+			case SDLK_DOWN:
+				_scroll.y += 10;
+				return true;
+			case SDLK_LEFT:
+				_scroll.x -= 10;
+				return true;
+			case SDLK_RIGHT:
+				_scroll.x += 10;
+				return true;
+			}
 		}
-
+#endif
 		switch (event.key.key)
 		{
 		case SDLK_A:
 			if (bModCtrl)
 			{
 				SelectAll();
+				return true;
 			}
 			break;
 		case SDLK_C:
 			if (bModCtrl)
 			{
 				Copy();
+				return true;
 			}
 			break;
 
@@ -1174,6 +1259,7 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrl)
 			{
 				Paste();
+				return true;
 			}
 			break;
 
@@ -1181,6 +1267,7 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrl)
 			{
 				Cut();
+				return true;
 			}
 			break;
 
@@ -1188,6 +1275,7 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrl)
 			{
 				Undo();
+				return true;
 			}
 			break;
 
@@ -1195,62 +1283,49 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrl)
 			{
 				Redo();
+				return true;
 			}
 			break;
 
 		case SDLK_LEFT:
-/*			if (bModCtrlShift)
-			{
-				MoveCursorBeginningOfLine();
-			} 
-			else */
 			if (bModCtrl or bModCtrlShift)
 			{
 				MoveCursorToPriorWord();
+				return true;
 			}
 			else if (bModNone or bModShift)
 			{
 				MoveCursorLeft();
+				return true;
 			}
 			break;
 
 		case SDLK_RIGHT:
-/*			if (bModCtrlShift)
-			{
-				MoveCursorEndOfLine();
-			}
-			else */
-			if (bModCtrl)
+			if (bModCtrl or bModCtrlShift)
 			{
 				MoveCursorToNextWord();
+				return true;
 			}
 			else if (bModNone or bModShift)
 			{
 				MoveCursorRight();
+				return true;
 			}
 			break;
 
 		case SDLK_UP:
-/*			if (bModCtrl)
-			{
-				MoveCursorBeginning();
-			}
-			else */
 			if (bModNone or bModShift)
 			{
 				MoveCursorUp();
+				return true;
 			}
 			break;
 
 		case SDLK_DOWN:
-/*			if (bModCtrl)
-			{
-				MoveCursorEnd();
-			}
-			else */
 			if (bModNone or bModShift)
 			{
 				MoveCursorDown();
+				return true;
 			}
 			break;
 
@@ -1258,10 +1333,12 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrl)
 			{
 				MoveCursorBeginning();
+				return true;
 			}
 			else if (bModNone or bModShift)
 			{
 				MoveCursorBeginningOfLine();
+				return true;
 			}
 			break;
 
@@ -1269,10 +1346,12 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrl)
 			{
 				MoveCursorEnd();
+				return true;
 			}
 			else if (bModNone or bModShift)
 			{
 				MoveCursorEndOfLine();
+				return true;
 			}
 			break;
 
@@ -1280,15 +1359,18 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrlShift)
 			{
 				BackspaceToBeginningOfLine();
+				return true;
 			}
 			else
 			if (bModCtrl)
 			{
 				BackspaceToPriorWord();
+				return true;
 			}
-			else if (bModNone)
+			else if (bModNone || bModShift)
 			{
 				Backspace();
+				return true;
 			}
 			break;
 
@@ -1296,45 +1378,58 @@ bool TextBox::OnEvent(Event& event)
 			if (bModCtrlShift)
 			{
 				DeleteToEndOfLine();
+				return true;
 			}
 			else if (bModCtrl)
 			{
 				DeleteToNextWord();
+				return true;
 			}
-			else if (bModNone)
+			else if (bModNone || bModShift)
 			{
 				Delete();
+				return true;
 			}
 			break;
 
 		case SDLK_RETURN:
 		case SDLK_KP_ENTER:
-			if (bModCtrl)
+			if ((bModCtrl || bModShift) && IsMultiline())
 			{
 				Insert("\n");
 				PushUndo(UndoAction::Write, false);
+				return true;
 			}
-			else if (bModNone)
+			else if (bModNone and _pOnEnter and _pText->text)
 			{
-				if (_pOnEnter and _pText->text) // Invoke
-				{
-					fig::string text = trim(fig::string(_pText->text));
-					Clear();
-					_pOnEnter(text);
-				}
+				// Invoke
+				fig::string text = trim(fig::string(_pText->text));
+				Clear();
+				_pOnEnter(text);
+				return true;
 			}
 			break;
 
 		case SDLK_ESCAPE:
 			if (bModNone)
-				SetFocus(false);
+			{
+				if (HasSelection())
+				{
+					Deselect();
+					return true;
+				}
+				else
+				{
+					SetFocus(false);
+					return true;
+				}
+			}
 			break;
 
 		default:
-			break;
+			return false;
 		}
-		return true;
-
+		break;
 	case SDL_EVENT_TEXT_INPUT:
 		Insert(event.text.text);
 		if (event.text.text)
@@ -1358,13 +1453,23 @@ bool TextBox::OnEvent(Event& event)
 	default:
 		break;
 	}
+
 	return false;
 }
 
+#pragma endregion Events
+
 void TextBox::OnSize()
 {
-	int width = std::max((int)GetWidth() - (_marginLeft + _marginRight), 0);
-	TTF_SetTextWrapWidth(_pText, width);
+	if (IsMultiline())
+	{
+		int width = toI(std::max(GetWidth() - (_marginLeft + _marginRight), 0.0f));
+		TTF_SetTextWrapWidth(_pText, width);
+	}
+	else
+	{
+		TTF_SetTextWrapWidth(_pText, 0);
+	}
 }
 
 void TextBox::SetEnterPressedCallback(EnterPressedCallback cb)
@@ -1378,6 +1483,7 @@ void TextBox::Clear()
 	Deselect();
 	SetCursorPosition(0);
 	InitUndo();
+	_scroll = {};
 }
 
 void TextBox::SetText(fig::string text)
@@ -1393,6 +1499,26 @@ fig::string TextBox::GetText() const
 		return fig::string(_pText->text);
 	return {};
 }
+
+void TextBox::ScrollPoint(int& x, int& y) const
+{
+	x -= _scroll.x;
+	y -= _scroll.y;
+}
+
+void TextBox::ScrollPoint(float& x, float& y) const
+{
+	x -= _scroll.x;
+	y -= _scroll.y;
+}
+
+void TextBox::ScrollPoint(Rectf& rect) const
+{
+	rect.x -= _scroll.x;
+	rect.y -= _scroll.y;
+}
+
+#pragma region Undo/Redo
 
 TextBox::UndoState TextBox::GetUndoState(UndoAction action) const noexcept
 {
@@ -1438,3 +1564,5 @@ void TextBox::Redo()
 		highlight_end = undo.value().highlight_end;
 	}
 }
+
+#pragma endregion Undo/Redo

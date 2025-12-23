@@ -174,7 +174,7 @@ void ChatMessage::SetMessage(fig::string text, bool complete)
 
 	strip_ends(text, _messageType);
 
-	int w, h;
+	float w, h;
 	_message = text;
 	if (_messageType == MessageType::Dialogue)
 	{
@@ -196,8 +196,8 @@ void ChatMessage::SetMessage(fig::string text, bool complete)
 	}
 
 	_pMessageText->SetTextAndResize(trim(text), w, h);
-	w += toI(TEXT_HMARGIN + (bDialogue ? DIALOGUE_OFFSET : 0));
-	h += toI(TEXT_VMARGIN);
+	w += TEXT_HMARGIN + (bDialogue ? DIALOGUE_OFFSET : 0);
+	h += TEXT_VMARGIN;
 
 	// Resize/position bubble
 	int currentHeight = toI(_pMessagePanel->GetHeight());

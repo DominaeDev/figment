@@ -39,14 +39,14 @@ void VariableList::SetVariables(const std::map<fig::string, fig::string>& variab
 {
 	fig::string text;
 	text.reserve(512);
-	for (auto kvp : variables)
+	for (auto& kvp : variables)
 		text = text + std::format("{} = {}\n", kvp.first, kvp.second);
 	text = rtrim(text);
 
-	int w, h;
+	float w, h;
 	_pText->SetTextAndResize(text, w, h);
 	
-	SetSize(toF(w + Margin * 2), toF(h + Margin * 2));
+	SetSize(w + Margin * 2.0f, h + Margin * 2.0f);
 }
 
 bool VariableList::IsEmpty() const

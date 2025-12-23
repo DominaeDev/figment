@@ -334,69 +334,115 @@ void MainFrame::PollStatus()
 
 bool MainFrame::OnKeyboardEvent(SDL_KeyboardEvent& event)
 {
-	auto pLLM = ApplicationState::GetLLMInstance();
-
+	bool bCtrlDown = (event.mod & SDL_KMOD_CTRL) != 0;
 	bool bShiftDown = (event.mod & SDL_KMOD_SHIFT) != 0;
 	bool bAltDown = (event.mod & SDL_KMOD_ALT) != 0;
-	bool bCtrlDown = (event.mod & SDL_KMOD_CTRL) != 0;
+
+	bool bModNone = !bCtrlDown and !bShiftDown and !bAltDown;
+	bool bModCtrl = bCtrlDown and !bShiftDown and !bAltDown;
 
 	if (event.down && !event.repeat)
 	{
 		switch (event.key)
 		{
 		case SDLK_F2:
-			InitializeModel();
-			return true;
-		case SDLK_F3:
-			UnloadModel();
-			return true;
-		case SDLK_F9:
-		{
-			auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
-			if (!pLLM->Continue(responseId, subMessageId, true))
-				return pLLM->Instigate(Role::Undefined, MessageType::Undefined);
+			if (bModNone)
+			{
+				InitializeModel();
+				return true;
+			}
 			break;
-		}
-		case SDLK_F10:
-			pLLM->Halt();
-			queue_clear(_commandQueue);
-#if ENABLE_AUTO_CHAT
-			_bAutoChat = false;
-#endif		
+		case SDLK_F3:
+			if (bModNone)
+			{
+				UnloadModel();
+				return true;
+			}
 			break;
 #if _DEBUG
-		case SDLK_F11:
-			if (pLLM->IsReady())
-				pLLM->DumpContext();
-			break;
-
 		case SDLK_F12:
-			if (bCtrlDown)
+			if (bModCtrl)
+			{
 				Close();
+				return true;
+			}
 			break;
 #endif
 #if ENABLE_AUTO_CHAT
 		case SDLK_F5:
-			_bAutoChat = !_bAutoChat;
-			return true;
-#endif
-		case SDLK_TAB:
-			if (pLLM->IsInitialized())
+			if (bModNone)
 			{
-				_pVariableList->SetVariables(pLLM->GetStateVariables());
-				_pVariableList->SetVisible(!_pVariableList->IsEmpty());
+				_bAutoChat = !_bAutoChat;
+				return true;
 			}
 			break;
+#endif
 		}
 	}
-
 	else if (!event.down && !event.repeat) // Release
 	{
 		switch (event.key)
 		{
 		case SDLK_TAB:
-			_pVariableList->SetVisible(false);
+			if (bModNone)
+			{
+				_pVariableList->SetVisible(false);
+				return true;
+			}
 			break;
+		}
+	}
+
+	// LLM shortcuts
+	auto pLLM = ApplicationState::GetLLMInstance();
+	if (pLLM)
+	{
+		if (event.down && !event.repeat)
+		{
+			switch (event.key)
+			{
+			case SDLK_F9:
+				if (bModNone)
+				{
+					auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
+					if (!pLLM->Continue(responseId, subMessageId, true))
+						pLLM->Instigate(Role::Undefined, MessageType::Undefined);
+					return true;
+				}
+				break;
+			case SDLK_F10:
+				if (bModNone)
+				{
+					pLLM->Halt();
+					queue_clear(_commandQueue);
+#if ENABLE_AUTO_CHAT
+					_bAutoChat = false;
+#endif		
+					return true;
+				}
+				break;
+#if _DEBUG
+			case SDLK_F11:
+				if (bModNone)
+				{
+					if (pLLM->IsReady())
+						pLLM->DumpContext();
+					return true;
+				}
+				break;
+#endif
+			case SDLK_TAB:
+				if (bModNone)
+				{
+					if (pLLM->IsInitialized())
+					{
+						_pVariableList->SetVariables(pLLM->GetStateVariables());
+						_pVariableList->SetVisible(!_pVariableList->IsEmpty());
+					}
+					return true;
+				}
+				break;
+			}
 		}
 	}
 	return false;

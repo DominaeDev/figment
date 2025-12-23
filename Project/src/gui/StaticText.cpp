@@ -49,7 +49,7 @@ void StaticText::SetText(fig::string text)
 	InvalidateLayout();
 }
 
-void StaticText::SetTextAndResize(fig::string text, int& newWidth, int& newHeight)
+void StaticText::SetTextAndResize(fig::string text, float& newWidth, float& newHeight)
 {
 	_text = text;
 	_bInvalidated = false;
@@ -67,7 +67,7 @@ void StaticText::OnUpdate(float fDeltaTime)
 	if (_bInvalidated)
 	{
 		_bInvalidated = false;
-		int tmp;
+		float tmp;
 		DrawText(tmp, tmp);
 	}
 }
@@ -85,7 +85,7 @@ void StaticText::OnRender(Renderer* pRenderer)
 	}
 }
 
-void StaticText::DrawText(int& newWidth, int& newHeight)
+void StaticText::DrawText(float& newWidth, float& newHeight)
 {
 	auto fgColor = GetForegroundColor();
 	auto bgColor = GetBackgroundColor();

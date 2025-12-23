@@ -37,14 +37,17 @@ namespace fig::string_util
 	std::vector<string> split(const string& input, const std::unordered_set<char>& delimiters, bool removeEmpty);
 
 	string& normalize_newlines(string& text);
-	string normalize_newlines(string&& s);
+	[[nodiscard]] string normalize_newlines(string&& s);
+
+	wstring& normalize_newlines(wstring& text);
+	[[nodiscard]] wstring normalize_newlines(wstring&& s);
 
 	size_t validate_utf8(const string& text) noexcept;
 	wstring from_utf8(const string& str);
 	string to_utf8(const wstring& str);
 
-	template<typename Pred>
-	int32_t find_index(const string& str, int32_t pos, Pred pred)
+	template<typename Str, typename Pred>
+	int32_t find_index(const Str& str, int32_t pos, Pred pred)
 	{
 		auto it_pos = str.cbegin();
 		std::advance(it_pos, pos);
@@ -52,6 +55,20 @@ namespace fig::string_util
 			return -1;
 
 		auto it = std::find_if(it_pos, str.cend(), pred);
+		if (it != str.cend())
+			return toI(std::distance(str.cbegin(), it));
+		return -1;
+	};
+
+	template<typename Str, typename V = Str::value_type>
+	int32_t index_of(const Str& str, int32_t pos, V value)
+	{
+		auto it_pos = str.cbegin();
+		std::advance(it_pos, pos);
+		if (it_pos < str.cbegin() || it_pos >= str.cend())
+			return -1;
+
+		auto it = std::find(it_pos, str.cend(), value);
 		if (it != str.cend())
 			return toI(std::distance(str.cbegin(), it));
 		return -1;

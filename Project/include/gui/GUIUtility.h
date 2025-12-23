@@ -16,7 +16,7 @@ namespace fig::gui_util
 		return fig::gui::Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
 	}
 
-	inline constexpr fig::gui::Rect to_rect(fig::gui::Rectf rect)
+	inline constexpr fig::gui::Rect to_rect(const fig::gui::Rectf& rect)
 	{
 		return fig::gui::Rect {
 			(int32_t)rect.x,
@@ -26,7 +26,7 @@ namespace fig::gui_util
 		};
 	}
 
-	inline constexpr fig::gui::Rectf to_rectf(fig::gui::Rect rect)
+	inline constexpr fig::gui::Rectf to_rectf(const fig::gui::Rect& rect)
 	{
 		return fig::gui::Rectf {
 			(float)rect.x,
