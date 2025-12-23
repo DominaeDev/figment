@@ -17,16 +17,20 @@ namespace fig::gui
 	public:
 		enum class Flag
 		{ 
-			Single	= 1 << 0,
-			Multi	= 1 << 1,
+			Single		= 1 << 0,
+			Multi		= 1 << 1,
+			Autosize	= 1 << 2,
+			Password	= 1 << 3,
 		};
 		using Flags = EnumFlags<Flag>;
 
-		TextBox(Control* pParent, FontFace fontFace, double ptSize, Flags flags = { Flag::Single });
+		TextBox(Control* pParent, FontFace fontFace, double ptSize, Flags flags);
 		~TextBox();
 
 		void SetText(fig::string text);
 		void SetEnterPressedCallback(EnterPressedCallback cb);
+		void SetMinRows(int32_t rows);
+		void SetMaxRows(int32_t rows);
 
 		fig::string GetText() const;
 
@@ -53,7 +57,6 @@ namespace fig::gui
 
 	private:
 		void Insert(const char* text);
-
 		void DrawText(RendererPtr pRenderer, TTF_Text* pText, float x, float y);
 		void DrawCursor(RendererPtr pRenderer);
 		void DrawCandidates(RendererPtr pRenderer);
@@ -65,7 +68,7 @@ namespace fig::gui
 		void HandleComposition(const SDL_TextEditingEvent* event);
 		void CancelComposition();
 		void ResetComposition();
-		void OnMoveCursor(int last);
+		void OnMoveCursor(int last_cursor);
 		void UpdateTextInputArea();
 		void SetCursorPosition(int position);
 		void MoveCursorIndex(int direction);
@@ -88,56 +91,64 @@ namespace fig::gui
 		bool HandleMouseDown(float x, float y);
 		bool HandleMouseMotion(float x, float y);
 		bool HandleMouseUp(float x, float y);
+		void ApplyScroll(int& x, int& y) const;
+		void ApplyScroll(float& x, float& y) const;
+		void ApplyScroll(Rectf& rect) const;
+		void Autosize();
 
-		inline bool HasSelection() const { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
+		inline bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
+		inline bool IsMultiline() const noexcept { return _flags.IsSet(Flag::Multi) && not IsPassword(); }
+		inline bool IsPassword() const noexcept { return _flags.IsSet(Flag::Password); }
+		inline bool IsAutosized() const noexcept { return _flags.IsSet(Flag::Autosize); }
 
-		void ScrollPoint(int& x, int& y) const;
-		void ScrollPoint(float& x, float& y) const;
-		void ScrollPoint(Rectf& rect) const;
-		inline bool IsMultiline() const { return _flags.IsSet(Flag::Multi); }
+		TTF_Text* GetRenderedText();
+		void UpdatePassword();
+		int32_t ConvertToPasswordPosition(int32_t position);
+		int32_t ConvertFromPasswordPosition(int32_t position);
 
 	protected:
-		TTF_Font* _pFont {};
-		TTF_Text* _pText {};
+		TTF_Font* _pFont = nullptr;
+		TTF_Text* _pText = nullptr;
+		TTF_Text* _pPassword = nullptr;
+		size_t _lastLength = 0uz;
+		
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;
 		Flags _flags {};
 		bool _bAutoSize = false;
-		Point _scroll {};
+		Pointf _scroll {};
+		int _minRows = 1;
+		int _maxRows = 1;
 
 		Texture* _pTexture = nullptr;
 		Surface* _pSurface = nullptr;
 		EnterPressedCallback _pOnEnter = nullptr;
 
-		/* Cursor support */
+		// Cursor
 		int _cursor = 0;
 		bool _cursor_visible = false;
-		Uint64 _last_cursor_change {};
+		uint64_t _last_cursor_change = 0ULL;
 		Rectf _cursor_rect {};
 
-		/* Highlight support */
-		bool _bIsHighlighting = false; // Mouse-selection
+		// Selection
+		bool _bIsHighlighting = false;
 		int highlight_start = -1;
 		int highlight_end = -1;
 
-		/* IME composition */
+		// IME composition
 		int composition_start = -1;
 		int composition_length = -1;
 		int composition_cursor = -1;
 		int composition_cursor_length = -1;
 
-		/* IME candidates */
 		TTF_Text* candidates {};
 		int selected_candidate_start = -1;
 		int selected_candidate_length = -1;
 
+		// Undo
 		enum class UndoAction
 		{
-			Default,
-			Write,
-			WhitespacePunctuation,
-			Erase,
-			Other,
+			Default, Write, WhitespacePunctuation, Erase,
 		};
 
 		struct UndoState

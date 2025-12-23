@@ -17,18 +17,18 @@ namespace fig::gui
 
 		virtual void Update(float fDeltaTime);
 
-		Rectf& GetRect() { return _rect; }
-		const Rectf& GetRect() const { return _rect; }
-		Pointf GetPosition() const { return _position; }
-		Pointf GetSize() const { return _size; }
+		inline Rectf& GetRect() noexcept { return _rect; }
+		inline const Rectf& GetRect() const noexcept { return _rect; }
+		inline Pointf GetPosition() const noexcept { return _position; }
+		inline Pointf GetSize() const noexcept { return _size; }
 
-		Pointf GetAbsolutePosition() const;
-		float GetX() const { return _position.x; }
-		float GetY() const { return _position.y; }
-		float GetWidth() const { return _size.x; }
-		float GetHeight() const { return _size.y; }
-		const Pointf& GetMinSize() const { return _minSize; }
-		const Pointf& GetMaxSize() const { return _maxSize; }
+		inline Pointf GetAbsolutePosition() const noexcept;
+		inline float GetX() const noexcept { return _position.x; }
+		inline float GetY() const noexcept { return _position.y; }
+		inline float GetWidth() const noexcept { return _size.x; }
+		inline float GetHeight() const noexcept { return _size.y; }
+		inline const Pointf& GetMinSize() const noexcept { return _minSize; }
+		inline const Pointf& GetMaxSize() const noexcept { return _maxSize; }
 
 		void SetRect(Rectf rect);
 		void SetRect(float x, float y, float width, float height);

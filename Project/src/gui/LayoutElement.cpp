@@ -45,7 +45,7 @@ void LayoutElement::SetRect(float x, float y, float width, float height)
 	OnSize();
 }
 
-Pointf LayoutElement::GetAbsolutePosition() const
+Pointf LayoutElement::GetAbsolutePosition() const noexcept
 {
 	if (_pParent)
 	{

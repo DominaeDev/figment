@@ -49,33 +49,33 @@ public:
 	}
 
 	// Checks if a specific flag is set.
-	constexpr bool IsSet(T v) const
+	constexpr bool IsSet(T v) const noexcept
 	{
 		return (_flags & ToUnderlying(v)) == ToUnderlying(v);
 	}
 	// Checks if a set of flags are set.
-	constexpr bool IsSet(std::initializer_list<T> vs) const
+	constexpr bool IsSet(std::initializer_list<T> vs) const noexcept
 	{
 		auto v = EnumFlags(vs);
 		return (_flags & v.ToRaw()) == v.ToRaw();
 	}
 	// Checks if any in a set of flags are set.
-	constexpr bool IsAnySet(std::initializer_list<T> vs) const
+	constexpr bool IsAnySet(std::initializer_list<T> vs) const noexcept
 	{
 		auto v = EnumFlags(vs);
 		return (_flags & v.ToRaw()) != static_cast<std::underlying_type_t<T>>(0);
 	}
 	// Checks if no flag is set.
-	constexpr bool IsEmpty() const { return _flags == static_cast<std::underlying_type_t<T>>(0); }
+	constexpr bool IsEmpty() const noexcept { return _flags == static_cast<std::underlying_type_t<T>>(0); }
 
 	// Sets a single flag value.
-	constexpr void Set(T v) { _flags |= ToUnderlying(v); }
+	constexpr void Set(T v) noexcept { _flags |= ToUnderlying(v); }
 	// Unsets a single flag value.
-	constexpr void Unset(T v) { _flags &= ~ToUnderlying(v); }
+	constexpr void Unset(T v) noexcept { _flags &= ~ToUnderlying(v); }
 	// Clears all flag values.
-	constexpr void Clear() { _flags = static_cast<std::underlying_type_t<T>>(0); }
+	constexpr void Clear() noexcept { _flags = static_cast<std::underlying_type_t<T>>(0); }
 
-	constexpr operator bool() const
+	constexpr operator bool() const noexcept
 	{
 		return _flags != static_cast<std::underlying_type_t<T>>(0);
 	}

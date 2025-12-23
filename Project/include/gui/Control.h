@@ -47,7 +47,7 @@ namespace fig::gui
 		inline RendererPtr GetSDLRenderer() { return _renderContext.pRenderer; }
 		inline TextEnginePtr GetSDLTextEngine() { return _renderContext.pTextEngine; }
 
-	protected:
+	private:
 		Color _foregroundColor {};
 		Color _backgroundColor {};
 		Color _borderColor {};

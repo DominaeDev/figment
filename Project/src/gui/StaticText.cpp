@@ -107,8 +107,8 @@ void StaticText::DrawText(float& newWidth, float& newHeight)
 				_pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
 				SDL_DestroySurface(pSurface);
 
-				newWidth = _textWidth + HMargin();
-				newHeight = _textHeight + VMargin();
+				newWidth = _textWidth + GetMarginHorizontal();
+				newHeight = _textHeight + GetMarginVertical();
 				if (_bAutoSize)
 					SetSize(toF(newWidth), toF(newHeight));
 				return;
@@ -124,8 +124,8 @@ void StaticText::DrawText(float& newWidth, float& newHeight)
 				_pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
 				SDL_DestroySurface(pSurface);
 
-				newWidth = _textWidth + HMargin();
-				newHeight = _textHeight + VMargin();
+				newWidth = _textWidth + GetMarginHorizontal();
+				newHeight = _textHeight + GetMarginVertical();
 				if (_bAutoSize)
 					SetSize(toF(newWidth), toF(newHeight));
 				return;
@@ -155,8 +155,8 @@ void StaticText::DrawText(float& newWidth, float& newHeight)
 				SDL_DestroySurface(pColorSurface);
 				SDL_DestroySurface(pSurface);
 
-				newWidth = _textWidth + HMargin();
-				newHeight = _textHeight + VMargin();
+				newWidth = _textWidth + GetMarginHorizontal();
+				newHeight = _textHeight + GetMarginVertical();
 				if (_bAutoSize)
 					SetSize(toF(newWidth), toF(newHeight));
 				return;
@@ -182,8 +182,8 @@ void StaticText::OnParent()
 
 Rectf StaticText::GetAlignedRect() const
 {
-	int x = toI(_rect.x + _marginLeft);
-	int y = toI(_rect.y + _marginTop);
+	int x = toI(_rect.x + GetMarginLeft());
+	int y = toI(_rect.y + GetMarginTop());
 	int w = _textWidth;
 	int h = _textHeight;
 	Rectf rect(toF(x), toF(y), toF(w), toF(h));
@@ -201,12 +201,12 @@ Rectf StaticText::GetAlignedRect() const
 
 void StaticText::SetForegroundColor(Color color) 
 { 
-	_foregroundColor = color;
+	Control::SetForegroundColor(color);
 	InvalidateText();
 }
 
 void StaticText::SetBackgroundColor(Color color) 
 { 
-	_backgroundColor = color; 
+	Control::SetBackgroundColor(color);
 	InvalidateText();
 }

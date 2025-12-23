@@ -76,8 +76,10 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 
 	_pChatScroll = new ChatScroll(centerPanel);
 
-	_pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::GUI::DefaultFontSize);
+	_pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::GUI::DefaultFontSize, { TextBox::Flag::Multi, TextBox::Flag::Autosize });
 	_pTextBox->SetSize(-1, 88);
+	_pTextBox->SetMinRows(2);
+	_pTextBox->SetMaxRows(6);
 //	_pTextBox->SelectAll();
 
 	auto pCenterSizer = new VerticalSizer();

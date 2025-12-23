@@ -15,12 +15,12 @@ void ControlWithMargins::SetMargins(float left, float top, float right, float bo
 	_marginBottom = bottom;
 }
 
-void ControlWithMargins::SetMargins(Rectf rect)
+void ControlWithMargins::SetMargins(Rectf rect) 
 {
 	SetMargins(rect.x, rect.y, rect.w, rect.h);
 }
 
-Rectf ControlWithMargins::GetClientRect() const
+Rectf ControlWithMargins::GetClientRect() const noexcept
 {
 	Rectf clientRect = GetRect();
 	clientRect.x += _marginLeft;

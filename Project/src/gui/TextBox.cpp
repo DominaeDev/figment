@@ -11,30 +11,69 @@ using namespace fig::string_util;
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ULL };
 
-TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : ControlWithMargins(pParent)
+static int UTF8ByteLength(const char* text, int num_codepoints)
+{
+	if (!text)
+		return 0;
+	const char* start = text;
+	while (num_codepoints > 0)
+	{
+		Uint32 ch = SDL_StepUTF8(&text, NULL);
+		if (ch == 0)
+		{
+			break;
+		}
+		--num_codepoints;
+	}
+	return (int)(uintptr_t)(text - start);
+}
+
+static int BytesUTF8Length(const char* text, int num_bytes)
+{
+	if (!text)
+		return 0;
+	const char* start = text;
+	const char* end = text + num_bytes;
+	int num_codepoints = 0;
+	while (text < end)
+	{
+		++num_codepoints;
+		Uint32 ch = SDL_StepUTF8(&text, NULL);
+		if (ch == 0)
+			break;
+	}
+	return num_codepoints;
+}
+
+TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : ControlWithMargins(pParent),
+	_flags { flags }
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);
 	_pText = TTF_CreateText(GetSDLTextEngine(), _pFont, "", 0);
-
-	/* Show the whitespace when wrapping, so it can be edited */
 	TTF_SetTextWrapWhitespaceVisible(_pText, true);
+	
+	if (flags.IsSet(Flag::Password))
+		_pPassword = TTF_CreateText(GetSDLTextEngine(), _pFont, "", 0);
 
 	_bFocused = false;
-	_bClipping = false;
+	EnableClipping(false);
 
 	highlight_start = -1;
 	highlight_end = -1;
 
-	_marginLeft = 8;
-	_marginTop = 4;
-	_marginRight = 4;
-	_marginBottom = 6;
+	SetMargins(8, 4, 4, 6);
 }
 
 TextBox::~TextBox()
 {
 	ClearCandidates();
+	TTF_DestroyText(_pPassword);
 	TTF_DestroyText(_pText);
+}
+
+TTF_Text* TextBox::GetRenderedText()
+{
+	return _flags.IsSet(Flag::Password) && _pPassword ? _pPassword : _pText;
 }
 
 void TextBox::OnUpdate(float fDeltaTime)
@@ -46,16 +85,23 @@ void TextBox::OnUpdate(float fDeltaTime)
 		_last_cursor_change = now;
 	}
 
+	UpdatePassword();
+
+	// Autosize
+	Autosize();
+
 	if (_bFocused)
 	{
+		int32_t cursor_pos = ConvertToPasswordPosition(_cursor);
+		
 		/* Calculate the cursor rect, used for positioning candidates */
 		TTF_SubString cursor;
-		if (TTF_GetTextSubString(_pText, _cursor, &cursor))
+		if (TTF_GetTextSubString(GetRenderedText(), cursor_pos, &cursor))
 		{
 			Rectf cursor_rect;
 			SDL_RectToFRect(&cursor.rect, &cursor_rect);
-			cursor_rect.x += _rect.x + _marginLeft;
-			cursor_rect.y += _rect.y + _marginTop;
+			cursor_rect.x += _rect.x + GetMarginLeft();
+			cursor_rect.y += _rect.y + GetMarginTop();
 			cursor_rect.w = 1.0f;
 			cursor_rect.h = std::max(cursor_rect.h, (float)TTF_GetFontLineSkip(_pFont));
 			SDL_copyp(&_cursor_rect, &cursor_rect);
@@ -70,23 +116,39 @@ void TextBox::OnRender(RendererPtr pRenderer)
 	DrawBackground(pRenderer);
 	DrawBorder(pRenderer);
 	
+	int lineSkip = TTF_GetFontLineSkip(_pFont);
+	int maxRows = IsMultiline() ? std::max(_maxRows, 1) : 1;
+
+	Rectf clientRect = GetClientRect();
 	// Clipping
 	Rect prevClippingRect;
 	bool restoreClipping = SDL_GetRenderClipRect(pRenderer, &prevClippingRect) && prevClippingRect.w > 0;
-	Rect clientRect = to_rect(GetClientRect());
-	SDL_SetRenderClipRect(pRenderer, &clientRect);
+	Rect clippingRect = to_rect(clientRect);
+	clippingRect.h = std::min(clippingRect.h, lineSkip * maxRows);
+	SDL_SetRenderClipRect(pRenderer, &clippingRect);
 
-	int maxCursorWidth = clientRect.w;
-	int textWidth, textHeight;
-	TTF_GetTextSize(_pText, &textWidth, &textHeight);
-	if (!IsMultiline()) // Single line scrolling
+	// Scroll to cursor
+	if (IsMultiline()) // Multiline (Vertical scrolling)
 	{
-		constexpr int kScrollStep = 80;
+		float cursorY = _cursor_rect.y - clientRect.y;
+		while (toI(std::round((cursorY - _scroll.y) / lineSkip)) >= maxRows)
+			_scroll.y += lineSkip;
+		while (toI(std::round((cursorY - _scroll.y) / lineSkip)) < 0)
+			_scroll.y -= lineSkip;
+		_scroll.x = 0;
+	}
+	else // Single line (Horizontal scrolling)
+	{
+		constexpr float kScrollStep = 80.0f;
+
+		float maxCursorX = clientRect.w;
+		int textWidth, _;
+		TTF_GetTextSize(GetRenderedText(), &textWidth, &_);
 		int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
-		while (cursorX - _scroll.x > maxCursorWidth)
-			_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorWidth);
-		while (cursorX - _scroll.x < 0)
-			_scroll.x = std::max(_scroll.x - kScrollStep, 0);
+		while (cursorX - _scroll.x > maxCursorX)
+			_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
+		while (cursorX - _scroll.x < 0.0f)
+			_scroll.x = std::max(_scroll.x - kScrollStep, 0.0f);
 		_scroll.y = 0;
 	}
 
@@ -94,7 +156,15 @@ void TextBox::OnRender(RendererPtr pRenderer)
 	int marker, length;
 	if (GetHighlightExtents(&marker, &length))
 	{
-		TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(_pText, marker, length, NULL);
+		if (IsPassword())
+		{
+			int utf8_text_start = BytesUTF8Length(_pText->text, marker);
+			int utf8_text_end = BytesUTF8Length(_pText->text, marker + length);
+			marker = UTF8ByteLength(_pPassword->text, utf8_text_start);
+			length = UTF8ByteLength(_pPassword->text, utf8_text_end) - marker;
+		}
+
+		TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(GetRenderedText(), marker, length, NULL);
 		if (pHighlights)
 		{
 			SDL_SetRenderDrawColor(pRenderer, Colors::TextSelectionBackground.r, Colors::TextSelectionBackground.g, Colors::TextSelectionBackground.b, Colors::TextSelectionBackground.a);
@@ -102,17 +172,17 @@ void TextBox::OnRender(RendererPtr pRenderer)
 			{
 				Rectf rect = to_rectf(pHighlights[i]->rect);
 				rect.w = std::max(rect.w, 3.0f);
-				rect.x += _rect.x + _marginLeft;
-				rect.y += _rect.y + _marginTop;
+				rect.x += _rect.x + GetMarginLeft();
+				rect.y += _rect.y + GetMarginTop();
 
-				ScrollPoint(rect);
+				ApplyScroll(rect);
 				SDL_RenderFillRect(pRenderer, &rect);
 			}
 			SDL_free(pHighlights);
 		}
 	}
 
-	DrawText(pRenderer, _pText, _rect.x, _rect.y);
+	DrawText(pRenderer, GetRenderedText(), _rect.x, _rect.y + 8);
 
 	if (_bFocused)
 	{
@@ -134,9 +204,9 @@ void TextBox::DrawText(RendererPtr pRenderer, TTF_Text* pText,  float x, float y
 	auto fgColor = GetForegroundColor();
 	TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
 
-	float xx = _rect.x + _marginLeft;
-	float yy = _rect.y + _marginTop;
-	ScrollPoint(xx, yy);
+	float xx = _rect.x + GetMarginLeft();
+	float yy = _rect.y + GetMarginTop();
+	ApplyScroll(xx, yy);
 	TTF_DrawRendererText(pText, xx, yy);
 }
 
@@ -149,7 +219,7 @@ void TextBox::DrawCursor(RendererPtr pRenderer)
 	}
 
 	auto rect = _cursor_rect;
-	ScrollPoint(rect);
+	ApplyScroll(rect);
 	SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
 	SDL_RenderFillRect(pRenderer, &rect);
 }
@@ -190,21 +260,6 @@ void TextBox::ResetComposition()
 	composition_length = 0;
 	composition_cursor = 0;
 	composition_cursor_length = 0;
-}
-
-static int UTF8ByteLength(const char* text, int num_codepoints)
-{
-	const char* start = text;
-	while (num_codepoints > 0)
-	{
-		Uint32 ch = SDL_StepUTF8(&text, NULL);
-		if (ch == 0)
-		{
-			break;
-		}
-		--num_codepoints;
-	}
-	return (int)(uintptr_t)(text - start);
 }
 
 void TextBox::HandleComposition(const SDL_TextEditingEvent* event)
@@ -296,7 +351,7 @@ void TextBox::DrawCompositionCursor(RendererPtr pRenderer)
 			rect.y += rect.y;
 			rect.w = 1.0f;
 
-			ScrollPoint(rect);
+			ApplyScroll(rect);
 			SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
 			SDL_RenderFillRect(pRenderer, &rect);
 		}
@@ -417,8 +472,8 @@ void TextBox::DrawCandidates(RendererPtr pRenderer)
 
 	SDL_GetRenderSafeArea(pRenderer, &safe_rect);
 	TTF_GetTextSize(candidates, &candidates_w, &candidates_h);
-	candidates_rect.x = _rect.x + _marginLeft + cursor.rect.x;
-	candidates_rect.y = _rect.y + _marginTop + cursor.rect.y + cursor.rect.h + 2.0f;
+	candidates_rect.x = _rect.x + GetMarginLeft() + cursor.rect.x;
+	candidates_rect.y = _rect.y + GetMarginTop() + cursor.rect.y + cursor.rect.h + 2.0f;
 	candidates_rect.w = 1.0f + 2.0f + candidates_w + 2.0f + 1.0f;
 	candidates_rect.h = 1.0f + 2.0f + candidates_h + 2.0f + 1.0f;
 	if ((candidates_rect.x + candidates_rect.w) > safe_rect.w)
@@ -430,7 +485,7 @@ void TextBox::DrawCandidates(RendererPtr pRenderer)
 		}
 	}
 
-	ScrollPoint(candidates_rect);
+	ApplyScroll(candidates_rect);
 
 	/* Draw the candidate background */
 	SDL_SetRenderDrawColor(pRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
@@ -475,8 +530,8 @@ void TextBox::UpdateTextInputArea()
 	Pointf window_edit_rect_min;
 	Pointf window_edit_rect_max;
 	Pointf window_cursor;
-	if (!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft, _rect.y + _marginTop, &window_edit_rect_min.x, &window_edit_rect_min.y) or
-		!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + _marginLeft + _rect.w, _rect.y + _marginTop + _rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) or
+	if (!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + GetMarginLeft(), _rect.y + GetMarginTop(), &window_edit_rect_min.x, &window_edit_rect_min.y) or
+		!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + GetMarginLeft() + _rect.w, _rect.y + GetMarginTop() + _rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) or
 		!SDL_RenderCoordinatesToWindow(pRenderer, _cursor_rect.x, _cursor_rect.y, &window_cursor.x, &window_cursor.y))
 	{
 		return;
@@ -650,6 +705,10 @@ static int FindNextWord(TTF_Text* pText, int cursor)
 
 void TextBox::SetCursorPosition(int position)
 {
+	const char* pText = _pText->text;
+	if (!pText)
+		return;
+
 	if (composition_length > 0)
 	{
 		/* Don't let the cursor be moved into the composition */
@@ -688,14 +747,14 @@ void TextBox::MoveCursorIndex(int direction)
 	OnMoveCursor(last_cursor);
 }
 
-void TextBox::OnMoveCursor(int last)
+void TextBox::OnMoveCursor(int last_cursor)
 {
 	bool isShiftDown = IsShiftDown();
 	bool is_highlighting = highlight_start != -1 and highlight_end != -1;
 	if (!is_highlighting and isShiftDown)
 	{
-		highlight_start = last;
-		highlight_end = last;
+		highlight_start = last_cursor;
+		highlight_end = last_cursor;
 		is_highlighting = true;
 	}
 	else if (is_highlighting and !isShiftDown)
@@ -710,7 +769,7 @@ void TextBox::OnMoveCursor(int last)
 		int start = highlight_start;
 		int end = highlight_end;
 		int curr = _cursor;
-		if (start == last)
+		if (start == last_cursor)
 			start = curr;
 		else
 			end = curr;
@@ -781,7 +840,6 @@ void TextBox::MoveCursorBeginningOfLine()
 		TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
 	{
 		int last_cursor = _cursor;
-
 		SetCursorPosition(substring.offset);
 		OnMoveCursor(last_cursor);
 	}
@@ -805,8 +863,9 @@ void TextBox::MoveCursorEndOfLine()
 
 void TextBox::MoveCursorBeginning()
 {
-	/* Move to the beginning of the text */
+	int last_cursor = _cursor;
 	SetCursorPosition(0);
+	OnMoveCursor(last_cursor);
 }
 
 void TextBox::MoveCursorEnd()
@@ -814,7 +873,9 @@ void TextBox::MoveCursorEnd()
 	/* Move to the end of the text */
 	if (_pText->text)
 	{
+		int last_cursor = _cursor;
 		SetCursorPosition((int)SDL_strlen(_pText->text));
+		OnMoveCursor(last_cursor);
 	}
 }
 
@@ -1021,19 +1082,26 @@ bool TextBox::HandleMouseDown(float x, float y)
 	}
 
 	TTF_SubString substring;
-	int textX = (int)SDL_roundf(x - _rect.x - _marginLeft + _scroll.x);
-	int textY = (int)SDL_roundf(y - _rect.y - _marginTop + _scroll.y);
-	if (TTF_GetTextSubStringForPoint(_pText, textX, textY, &substring))
+	int textX = (int)SDL_roundf(x - _rect.x - GetMarginLeft() + _scroll.x);
+	int textY = (int)SDL_roundf(y - _rect.y - GetMarginTop() + _scroll.y);
+	if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
 	{
+		int32_t pos = GetCursorTextIndex(textX, &substring);
+		if (IsPassword())
+		{
+			pos = ConvertFromPasswordPosition(pos);
+			if (TTF_GetTextSubString(_pText, pos, &substring))
+				pos = GetCursorTextIndex(textX, &substring);
+		}
 		if (IsShiftDown())
 		{
 			int last_cursor = _cursor;
-			SetCursorPosition(GetCursorTextIndex(textX, &substring));
+			SetCursorPosition(pos);
 			OnMoveCursor(last_cursor);
 		}
 		else
 		{
-			SetCursorPosition(GetCursorTextIndex(textX, &substring));
+			SetCursorPosition(pos);
 			_bIsHighlighting = true;
 			highlight_start = _cursor;
 			highlight_end = -1;
@@ -1049,11 +1117,19 @@ bool TextBox::HandleMouseMotion(float x, float y)
 	{
 		/* Set the highlight position */
 		TTF_SubString substring;
-		int textX = (int)SDL_roundf(x - _rect.x - _marginLeft + _scroll.x);
-		int textY = (int)SDL_roundf(y - _rect.y - _marginTop + _scroll.y);
-		if (TTF_GetTextSubStringForPoint(_pText, textX, textY, &substring))
+		int textX = (int)SDL_roundf(x - _rect.x - GetMarginLeft() + _scroll.x);
+		int textY = (int)SDL_roundf(y - _rect.y - GetMarginTop() + _scroll.y);
+		if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
 		{
-			SetCursorPosition(GetCursorTextIndex(textX, &substring));
+			int32_t pos = GetCursorTextIndex(textX, &substring);
+			if (IsPassword())
+			{
+				pos = ConvertFromPasswordPosition(pos);
+				if (TTF_GetTextSubString(_pText, pos, &substring))
+					pos = GetCursorTextIndex(textX, &substring);
+			}
+
+			SetCursorPosition(pos);
 			highlight_end = _cursor;
 		}
 	}
@@ -1330,7 +1406,7 @@ bool TextBox::OnEvent(Event& event)
 			break;
 
 		case SDLK_HOME:
-			if (bModCtrl)
+			if (bModCtrl or bModCtrlShift)
 			{
 				MoveCursorBeginning();
 				return true;
@@ -1343,7 +1419,7 @@ bool TextBox::OnEvent(Event& event)
 			break;
 
 		case SDLK_END:
-			if (bModCtrl)
+			if (bModCtrl or bModCtrlShift)
 			{
 				MoveCursorEnd();
 				return true;
@@ -1458,17 +1534,18 @@ bool TextBox::OnEvent(Event& event)
 }
 
 #pragma endregion Events
-
 void TextBox::OnSize()
 {
 	if (IsMultiline())
 	{
-		int width = toI(std::max(GetWidth() - (_marginLeft + _marginRight), 0.0f));
-		TTF_SetTextWrapWidth(_pText, width);
+		int width = toI(std::max(GetWidth() - (GetMarginHorizontal()), 0.0f));
+		int currWrapWidth;
+		if (TTF_GetTextWrapWidth(GetRenderedText(), &currWrapWidth) && currWrapWidth != width)
+			TTF_SetTextWrapWidth(GetRenderedText(), width);
 	}
 	else
 	{
-		TTF_SetTextWrapWidth(_pText, 0);
+		TTF_SetTextWrapWidth(GetRenderedText(), 0);
 	}
 }
 
@@ -1500,22 +1577,113 @@ fig::string TextBox::GetText() const
 	return {};
 }
 
-void TextBox::ScrollPoint(int& x, int& y) const
+void TextBox::ApplyScroll(int& x, int& y) const
+{
+	x -= toI(_scroll.x);
+	y -= toI(_scroll.y);
+}
+
+void TextBox::ApplyScroll(float& x, float& y) const
 {
 	x -= _scroll.x;
 	y -= _scroll.y;
 }
 
-void TextBox::ScrollPoint(float& x, float& y) const
-{
-	x -= _scroll.x;
-	y -= _scroll.y;
-}
-
-void TextBox::ScrollPoint(Rectf& rect) const
+void TextBox::ApplyScroll(Rectf& rect) const
 {
 	rect.x -= _scroll.x;
 	rect.y -= _scroll.y;
+}
+
+void TextBox::SetMinRows(int32_t rows)
+{
+	_minRows = std::max(rows, 1);
+	_maxRows = std::max(_minRows, _maxRows);
+}
+
+void TextBox::SetMaxRows(int32_t rows)
+{
+	_maxRows = std::max(rows, 1);
+	_minRows = std::min(_minRows, _maxRows);
+}
+
+void TextBox::Autosize()
+{
+	if (!IsAutosized())
+		return;
+
+	Rect clientRect = to_rect(GetClientRect());
+	int lineSkip = TTF_GetFontLineSkip(_pFont);
+	size_t textLen = _pText->text ? SDL_strlen(_pText->text) : 0;
+	int numRows;
+	TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_pText, 0, toI(textLen), &numRows);
+
+	if (_pText->text && numRows > 0 && substrings[numRows - 1]->length != 0)
+	{
+		if (textLen > 0 && _pText->text[textLen - 1] == '\n')
+			numRows += 1; // Count empty row
+	}
+
+	numRows = std::clamp(numRows, _minRows, _maxRows);
+	if (numRows * lineSkip != clientRect.h)
+	{
+		auto& rect = GetRect();
+		SetHeight(numRows * lineSkip + GetMarginVertical());
+	}
+}
+
+void TextBox::UpdatePassword()
+{
+	if (!_pPassword)
+		return;
+
+	if (_pText->text)
+	{
+		size_t length = SDL_utf8strlen(_pText->text);
+		if (_pPassword->text && _lastLength == length)
+			return;
+		_lastLength = length;
+
+		wstring wdots;
+		wdots.resize(length);
+		for (size_t i = 0; i < length; ++i)
+			wdots[i] = L'\u2022'; // Heavy asterisk
+		string dots = to_utf8(wdots);
+
+		TTF_SetTextString(_pPassword, toCStr(dots), 0);
+
+/*		size_t length = SDL_utf8strlen(_pText->text);
+		string dots;
+		dots.resize(length);
+		for (size_t i = 0; i < length; ++i)
+			dots[i] = '*';*/
+
+//		TTF_SetTextString(_pPassword, phehe, 0);
+	}
+	else
+	{
+		TTF_SetTextString(_pPassword, "", 0);
+	}
+}
+
+int32_t TextBox::ConvertToPasswordPosition(int32_t position)
+{
+	if (IsPassword())
+	{
+		int utf8_position = BytesUTF8Length(_pText->text, position);
+		return UTF8ByteLength(_pPassword->text, utf8_position);
+	}
+	return position;
+}
+
+int32_t TextBox::ConvertFromPasswordPosition(int32_t position)
+{
+	if (IsPassword())
+	{
+		int utf8_position = BytesUTF8Length(_pPassword->text, position);
+		return UTF8ByteLength(_pText->text, utf8_position);
+	}
+	return position;
 }
 
 #pragma region Undo/Redo
