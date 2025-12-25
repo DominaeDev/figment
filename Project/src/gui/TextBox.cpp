@@ -702,10 +702,6 @@ static int FindNextWord(TTF_Text* pText, int cursor)
 
 void TextBox::SetCursorPosition(int position)
 {
-	const char* pText = _pText->text;
-	if (!pText)
-		return;
-
 	if (composition_length > 0)
 	{
 		/* Don't let the cursor be moved into the composition */

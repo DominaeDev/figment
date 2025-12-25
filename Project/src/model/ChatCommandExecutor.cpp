@@ -195,7 +195,7 @@ static bool cmdLook(ParsedChatCommand cmd, Ctx ctx)
 	else
 	{
 		ctx.pLLM->PushMessage(Role::Narrator, "[{{user}} takes a moment to observe their surroundings.]", MessageType::Narration, false, 1);
-		ctx.pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and anyone who are present.}}", MessageType::Direction, false, 1);
+		ctx.pLLM->PushMessage(Role::Director, "{{Describe what {{user}} can clearly see, including points of interest, interactable objects, and anyone who is present.}}", MessageType::Direction, false, 1);
 	}
 	return ctx.pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 }

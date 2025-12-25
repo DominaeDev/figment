@@ -109,14 +109,12 @@ int32_t Context::DecodeUncached(int32_t cursor_pos)
 
 bool Context::RebuildKVCache()
 {
-	auto& cache = *_cache.get();
-
 	int r;
 	if constexpr (::Disabled)
 	{
 		// Clear everything
 		llama_kv_self_clear(_pCtx);
-		auto batch_view = cache.GetBatchView(0, cache.length());
+		auto batch_view = _cache->GetBatchView(0, _cache->length());
 		r = llama_decode(_pCtx, batch_view);
 	}
 	else
@@ -127,11 +125,11 @@ bool Context::RebuildKVCache()
 		for (size_t i = 0; i < AllSequenceIDs.size(); ++i)
 			llama_kv_self_seq_rm(_pCtx, (int32_t)i, blocks_pos, -1);
 
-		auto batch_view = cache.GetBatchView(blocks_pos, cache.length() - blocks_pos);
+		auto batch_view = _cache->GetBatchView(blocks_pos, _cache->length() - blocks_pos);
 		r = llama_decode(_pCtx, batch_view);
 	}
 
-	cursor_pos = cache.length();
+	cursor_pos = _cache->length();
 	return r == 0;
 }
 
@@ -183,8 +181,7 @@ int32_t Context::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, s
 		}
 
 		// Update batch
-		auto& cache = *_cache.get();
-		cache.BatchRemove(pos_remove_begin, pos_remove_end);
+		_cache->BatchRemove(pos_remove_begin, pos_remove_end);
 	}
 
 	llama_kv_self_defrag(_pCtx);
@@ -275,7 +272,7 @@ int32_t Context::GetBlockAppendOffset() const
 	return offset;
 }
 
-int32_t Context::EraseChat()
+int32_t Context::EraseChat() 
 {
 	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return !block.flags.IsSet(ContextBlockFlag::Static); });
 	if (itFirst == _blocks.end())
@@ -289,8 +286,8 @@ int32_t Context::EraseChat()
 	{
 		int32_t block_pos = itFirst->offset;
 		fig::llm::utility::erase_bottom(_pCtx, _num_sequences, block_pos);
-		auto& cache = *_cache.get();
-		cache.ClearRange(block_pos, cache.length());
+		_cache->ClearRange(block_pos, _cache->length());
+		_blocks.erase(itFirst, _blocks.end());
 
 		cursor_pos = block_pos;
 		chat_begin_pos = block_pos;
