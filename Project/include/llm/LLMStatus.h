@@ -60,7 +60,7 @@ namespace fig::llm
 	class LLMStatusChannel
 	{
 	public:
-		LLMStatus PollStatus();
+		std::optional<LLMStatus> PollStatus();
 
 		void EmitSignal(LLMStatusSignal signal);
 		void ReportModelInfo(fig::string modelName, int32_t ctx_size, int32_t used_ctx);
@@ -69,16 +69,16 @@ namespace fig::llm
 		void ReportReadyState(ReadyState readyState);
 
 	private:
-		std::timed_mutex _statusMutex; // Guards status reporting
+		std::timed_mutex _statusMutex; // Guards status variables
 		LLMStatus _lastStatus {};
 		fig::string _modelName;
 		int32_t _ctx_size {};
 		int32_t _used_ctx {};
 
 		std::queue<LLMStatusSignal> _statusSignals;
-		std::atomic<double> _tokensPerSec {};
-		std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };
-		std::atomic<std::pair<int64_t, int64_t>> _usedRAMVRAM { {0, 0} };
+		double _tokensPerSec {};
+		ReadyState _readyState { ReadyState::Uninitialized };
+		std::pair<int64_t, int64_t> _usedRAMVRAM {0, 0};
 	};
 }
 #endif

@@ -82,12 +82,13 @@ bool LLMEngine::Initialize(fig::string modelFilename, fig::string embeddingFilen
 				LockAndDo([this, &result]() {
 					_modelState = result;
 				}, _stateMutex);
+
 				SetReadyState(ReadyState::Ready);
-				
-				DebugPrintLn("Loaded model OK");
+				onComplete(true);
+
 				_pStatus->ReportMemory(usedRAM.load(), usedVRAM.load(), false);
 				_pStatus->EmitSignal(LLMStatusSignal::ModelLoaded);
-				onComplete(true);
+				DebugPrintLn("Loaded model OK");
 			}
 			else // Failure
 			{
@@ -97,10 +98,11 @@ bool LLMEngine::Initialize(fig::string modelFilename, fig::string embeddingFilen
 				}, _stateMutex);
 
 				SetReadyState(ReadyState::LoadError);
-				_pStatus->EmitSignal(LLMStatusSignal::ModelLoadFailure);
-
-				DebugPrintLn("Failed to load model");
 				onComplete(false);
+
+				_pStatus->ReportMemory(0, 0, false);
+				_pStatus->EmitSignal(LLMStatusSignal::ModelLoadFailure);
+				DebugPrintLn("Failed to load model");
 			}
 		}));
 

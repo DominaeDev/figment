@@ -1,34 +1,45 @@
 #include <pch.h>
+#include <chrono>
 #include "llm/LLMStatus.h"
+#include "util/Common.h"
 #include "util/Lockable.h"
 
 using namespace fig::llm;
+using namespace fig::common_util;
 
-LLMStatus LLMStatusChannel::PollStatus()
+using namespace std::chrono_literals;
+
+std::optional<LLMStatus> LLMStatusChannel::PollStatus()
 {
-	LLMStatus status {};
+	// Try to acquire status lock
+	std::unique_lock lock(_statusMutex, std::defer_lock);
+	if (!lock.try_lock_for(50ms))
+		return std::nullopt;
 
-	// Try to acquire state lock
-	std::unique_lock<std::timed_mutex> lock(_statusMutex, std::try_to_lock);
-	if (lock.owns_lock())
+	LLMStatus status
 	{
-		status.modelName = _modelName;
-		status.allocCtxSize = _ctx_size;
-		status.usedCtxSize = _used_ctx;
-		if (!_statusSignals.empty())
-		{
-			status.signal = _statusSignals.front();
-			_statusSignals.pop();
-		};
-		lock.unlock();
-	}
+		.modelName = _modelName,
+		.allocCtxSize = _ctx_size,
+		.usedCtxSize = _used_ctx,
+	};
 
-	status.readyState = _readyState.load();
-	status.tokensPerSec = _tokensPerSec.load();
-	auto memory = _usedRAMVRAM.load();
-	status.usedRAM = memory.first;
-	status.usedVRAM = memory.second;
+	if (!_statusSignals.empty())
+	{
+		status.signal = _statusSignals.front();
+		_statusSignals.pop();
+	};
+	lock.unlock();
 
+
+	if (status.signal != LLMStatusSignal::Nothing)
+		DebugPrintLn(std::format("Received signal {}", (int32_t)status.signal));
+
+	status.readyState = _readyState;
+	status.tokensPerSec = _tokensPerSec;
+	auto& [ram, vram] = _usedRAMVRAM;
+	status.usedRAM = ram;
+	status.usedVRAM = vram;
+	_lastStatus = status;
 	return status;
 }
 
@@ -37,7 +48,11 @@ void LLMStatusChannel::EmitSignal(LLMStatusSignal signal)
 	std::scoped_lock _ { _statusMutex };
 
 	if (!_statusSignals.empty() && _statusSignals.back() == signal)
+	{
+		DebugPrintLn(std::format("Rejected signal: {}", (int32_t)signal));
 		return;
+	}
+	DebugPrintLn(std::format("Emitted signal: {}", (int32_t)signal));
 
 	_statusSignals.push(signal);
 }
@@ -52,23 +67,23 @@ void LLMStatusChannel::ReportModelInfo(fig::string modelName, int32_t ctx_size, 
 
 void LLMStatusChannel::ReportTokensPerSec(double tokPerSec)
 {
-	_tokensPerSec.store(tokPerSec);
+	std::scoped_lock _ { _statusMutex };
+	_tokensPerSec = tokPerSec;
 }
 
 void LLMStatusChannel::ReportReadyState(ReadyState readyState)
 {
-	_readyState.store(readyState);
+	std::scoped_lock _ { _statusMutex };
+	_readyState = readyState;
 }
 
 void LLMStatusChannel::ReportMemory(int64_t ram, int64_t vram, bool bIncrement)
 {
 	if (bIncrement)
 	{
-		auto mem = _usedRAMVRAM.load();
-		mem.first += ram;
-		mem.second += vram;
-		_usedRAMVRAM.store(mem);
+		_usedRAMVRAM.first += ram;
+		_usedRAMVRAM.second += vram;
 	}
 	else
-		_usedRAMVRAM.store({ram, vram});
+		_usedRAMVRAM = {ram, vram};
 }

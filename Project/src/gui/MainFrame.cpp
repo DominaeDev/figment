@@ -212,6 +212,10 @@ void MainFrame::StartChat()
 
 		_bStartedChat = true;
 	}
+	else
+	{
+		DebugPrintLn("Failed to initialize chat");
+	}
 }
 
 void MainFrame::SetStatusBar(fig::string_view message)
@@ -270,14 +274,16 @@ void MainFrame::AutoChat()
 
 void MainFrame::PollStatus()
 {
-	auto pStatus = ApplicationState::GetLLMEngine().GetStatusChannel();
-	if (pStatus)
+	auto pChannel = ApplicationState::GetLLMEngine().GetStatusChannel();
+	if (!pChannel)
+		return;
+
+	if (auto status = pChannel->PollStatus())
 	{
 		auto pLLMInstance = ApplicationState::GetLLMInstance();
-		auto status = pStatus->PollStatus();
-		_pStatusBar->SetModelInfo(status);
+		_pStatusBar->SetModelInfo(status.value());
 
-		switch (status.signal)
+		switch (status.value().signal)
 		{
 		case LLMStatusSignal::ChatInitializing:
 			SetStatusBar(GlobalStrings::Status::InitializingChat);
