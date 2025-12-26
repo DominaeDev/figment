@@ -67,6 +67,18 @@ namespace fig::common_util
 		return vec.end();
 	}
 
+	template <typename T, typename A = std::allocator<T>>
+	constexpr std::vector<T, A>::const_iterator flip_iterator(typename const std::vector<T, A>& vec, typename std::vector<T, A>::const_reverse_iterator rit)
+	{
+		if (rit != vec.crend())
+		{
+			auto it = vec.cbegin();
+			std::advance(it, (ptrdiff_t)std::distance(rit, vec.crend()) - 1);
+			return it;
+		}
+		return vec.cend();
+	}
+
 	template <std::floating_point T>
 	inline constexpr int32_t ceil_int(T f)
 	{

@@ -15,7 +15,7 @@ enum class ChatCommand
 	Narrate,
 	Instruct,
 	Reset,
-	RemoveLast,
+	Erase,
 	RollbackUserMessage,
 	RedoResponse,
 	Reseed,

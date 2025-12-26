@@ -21,13 +21,13 @@ namespace fig::llm::utility
 	void free_batch(llama_batch& batch);
 
 	bool init_embedding_batch(llama_model* pModel, llama_context* pCtx, const std::vector<Token>& tokens, llama_batch& out_pBatch);
-	llama_batch create_batch(std::span<Token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position);
+	llama_batch create_batch(std::span<Token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position, bool logits = false);
 	llama_batch create_batch_view(const llama_batch& batch, int32_t position, int32_t length);
 
 	std::vector<Token> tokenize(VocabPtr pModel, fig::string prompt, bool add_special = false);
 	std::vector<Token> tokenize_and_batch(Context& context, fig::string content, SequenceId seq_id, int32_t pos, bool add_special = false);
 	std::optional<std::vector<Token>> tokenize_and_decode(Context& context, fig::string content, SequenceId seq_id, int32_t pos, bool add_special = false);
-	void erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos);
+	void erase_bottom(llama_context* pCtx, int32_t pos);
 
 	fig::string process_message(fig::string message, fig::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 

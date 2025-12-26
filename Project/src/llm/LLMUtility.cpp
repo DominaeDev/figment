@@ -333,7 +333,7 @@ namespace fig::llm::utility
 		batch.n_tokens = 0;
 	}
 
-	llama_batch create_batch(std::span<Token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position)
+	llama_batch create_batch(std::span<Token> tokens, std::span<llama_seq_id> seqs, int32_t n_seq_max, int32_t position, bool logits)
 	{
 		// Prepare a batch for the prompt
 		llama_batch batch = llama_batch_init(toI(tokens.size()), 0, n_seq_max);
@@ -350,6 +350,8 @@ namespace fig::llm::utility
 			std::copy(seqs.begin(), seqs.end(), batch.seq_id[i]);
 			++i;
 		}
+		if (i > 0)
+			batch.logits[i - 1] = logits;
 		return batch;
 	}
 
@@ -883,7 +885,10 @@ namespace fig::llm::utility
 			else if (cells[i] == 1)
 				result.append(context.cursor_pos == i ? "0" : "O");
 			else
+			{
+				assert(false); //! bad
 				result.append("D");
+			}
 		}
 
 		llama_kv_cache_view_free(&cache_view);
@@ -947,10 +952,9 @@ namespace fig::llm::utility
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	void erase_bottom(llama_context* pCtx, int32_t n_max_seq, int32_t pos)
+	void erase_bottom(llama_context* pCtx, int32_t pos)
 	{
-		for (int32_t seq_id = 0; seq_id < n_max_seq; ++seq_id)
-			llama_kv_self_seq_rm(pCtx, seq_id, pos, -1);
+		llama_kv_self_seq_rm(pCtx, -1, pos, -1);
 	}
 
 	SequenceIndices get_sequence_indices(Sequence seq, int32_t n_seq_max) noexcept

@@ -58,7 +58,7 @@ namespace fig::gui
 #if ENABLE_AUTO_CHAT
 	private:
 		void AutoChat();
-		bool _bAutoChat;
+		bool _bAutoChat {};
 		std::vector<fig::string> _autoScript;
 		size_t _autoScriptIndex = 0;
 #endif

@@ -132,7 +132,7 @@ static bool cmdInstruct(ParsedChatCommand cmd, Ctx ctx)
 	return false;
 }
 
-static bool cmdRemoveLast(ParsedChatCommand cmd, Ctx ctx)
+static bool cmdErase(ParsedChatCommand cmd, Ctx ctx)
 {
 	int n = atoi(cmd.text.c_str());
 	auto removedMsgs = ctx.pLLM->RemoveMessages(std::max(n, 1));
@@ -269,7 +269,7 @@ static std::map<ChatCommand, ChatCommandFunctionInfo> functions
 	{ ChatCommand::Narrate,				 	{ cmdNarrate,				{ Requirement::LLM }					} },
 	{ ChatCommand::Instruct,			 	{ cmdInstruct,				{ Requirement::LLM }					} },
 	{ ChatCommand::Reset,				 	{ cmdReset,					{ Requirement::GUI }					} },
-	{ ChatCommand::RemoveLast,			 	{ cmdRemoveLast,			{ Requirement::LLM, Requirement::GUI }	} },
+	{ ChatCommand::Erase,			 		{ cmdErase,					{ Requirement::LLM, Requirement::GUI }	} },
 	{ ChatCommand::RollbackUserMessage,	 	{ cmdRollbackUserMessage,	{ Requirement::LLM, Requirement::GUI }	} },
 	{ ChatCommand::RedoResponse,		 	{ cmdRedoResponse,			{ Requirement::LLM, Requirement::GUI }	} },
 	{ ChatCommand::Reseed,				 	{ cmdReseed,				{ Requirement::LLM }					} },

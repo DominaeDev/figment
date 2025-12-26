@@ -236,7 +236,8 @@ bool MainFrame::OnCommand(ParsedChatCommand cmd)
 void MainFrame::AutoChat()
 {
 	auto& engine = ApplicationState::GetLLMEngine();
-
+	static std::mt19937 rng {};
+	static std::uniform_int_distribution<int> dist(0, 99);
 	if (!engine.IsInitialized())
 	{
 		if (!engine.IsInitializing())
@@ -257,6 +258,7 @@ void MainFrame::AutoChat()
 			_autoScript = split(text, '\n');
 		}
 		_autoScriptIndex = 0;
+		rng.seed(Constants::LLM::DebugSeed);
 	}
 
 	if (_autoScript.empty())
@@ -265,10 +267,22 @@ void MainFrame::AutoChat()
 		return;
 	}
 
-	fig::string message = _autoScript[_autoScriptIndex];
-	_autoScriptIndex = ++_autoScriptIndex % _autoScript.size();
+	string command;
+	int roll = dist(rng);
+	if (roll < 5)
+		command = "/erase";
+	else if (roll < 10)
+		command = "/redo";
+//	else if (roll < 15)
+//		command = "/instruct They think for a moment.";
+	else
+	{
+		command = _autoScript[_autoScriptIndex];
+		_autoScriptIndex = ++_autoScriptIndex % _autoScript.size();
+	}
 
-	pLLMInstance->SendMessage(message);
+	DebugPrintLn(std::format(">> Auto: {}", command));
+	EnqueueCommand(ChatCommands::Parse(command));
 }
 #endif
 
@@ -413,7 +427,7 @@ bool MainFrame::OnKeyboardEvent(SDL_KeyboardEvent& event)
 				{
 					auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
 					if (!pLLM->Continue(responseId, subMessageId, true))
-						pLLM->Instigate(Role::Undefined, MessageType::Undefined);
+						pLLM->Instigate(Role::Undefined, MessageType::Undefined); // Can't continue: Pass
 					return true;
 				}
 				break;

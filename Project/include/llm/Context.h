@@ -45,12 +45,13 @@ namespace fig::llm
 		void EraseVolatile();
 		int32_t GetBlockAppendOffset() const;
 		int32_t DecrementTTL(int32_t time);
+		std::vector<ContextBlock>::const_iterator GetLastCachedBlock() const;
 
 		// Blocks
 		int32_t AllocateKVCache(int32_t alloc_min);
 		bool RebuildKVCache();
 		std::optional<int32_t> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id);
-		int32_t DecodeUncached(int32_t cursor_pos);
+		int32_t DecodeUncached(int32_t cursor_pos, bool logits = false);
 
 		void AppendBlock(const ContextBlock& block);
 		void AppendBlock(ContextBlock&& block);

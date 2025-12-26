@@ -294,6 +294,8 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	_bCtxReallocateNextTurn = false;
 	SetReadyState(ReadyState::Ready);
 	_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
+
+	DumpContext();
 	return true;
 }
 
@@ -346,12 +348,12 @@ void LLMInstance::InitSamplers()
 
 	if (default_grammar_sampler) llama_sampler_chain_add(pSampler, default_grammar_sampler);	// Grammar
 	llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
-	llama_sampler_chain_add(pSampler, llama_sampler_init_temp(2.5f));							// Temperature
+	llama_sampler_chain_add(pSampler, llama_sampler_init_temp(0.9f));							// Temperature
 	llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
 #if _DEBUG
-	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(Constants::LLM::DebugSeed));		// Seed (fixed)
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(Constants::LLM::DebugSeed));		// Seed (debug)
 #else
-	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(Constants::LLM::DefaultSeed));	// Seed
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(Constants::LLM::RandomSeed));		// Seed
 #endif
 
 	_modelState.pSampler = pSampler;
@@ -407,67 +409,6 @@ bool LLMInstance::CanGenerate() const
 	return _readyState.load() == ReadyState::Ready;
 }
 
-bool LLMInstance::Continue(fig::string responseId, fig::string subMessageId, bool extend)
-{
-	if (!CanGenerate())
-		return false;
-
-	GenerateArguments generateArgs;
-
-	{	// Acquire state lock
-		std::scoped_lock lock(_stateMutex);
-
-		auto& blocks = _contextState.GetBlocks();
-		if (blocks.size() == 0)
-			return false;
-
-		ContextBlock& currBlock = blocks[blocks.size() - 1];
-		if (currBlock.responseId != responseId)
-			return false; // Not last message
-
-		auto [msgType, bComplete] = fig::llm::utility::detect_message_type(currBlock.content);
-		if (msgType == MessageType::Undefined || (bComplete && !extend))
-			return false; // Not incomplete message
-
-		ContextBlock block = currBlock;
-		block.flags.Unset(ContextBlockFlag::Cached);
-		impl_RemoveMessages(1, false); // Remove the last message, resets cursor_pos
-
-		if (extend && bComplete)
-		{
-			// Strip end tag
-			size_t pos_end = block.content.rfind("</", fig::npos);
-			if (pos_end != fig::npos)
-			{
-				block.content = block.content.substr(0, pos_end);
-				char last_char = block.content.back();
-				if (last_char == '*' || last_char == '"' || last_char == ']')
-					block.content.pop_back(); // Trim scaffolding char
-			}
-		}
-		_contextState.AppendBlock(block); // Reinsert block
-		_contextState.response_pos = _contextState.cursor_pos; // Beginning of continued message
-		
-		generateArgs = GenerateArguments {
-			.role = block.role,
-			.msgType = msgType,
-			.flags { GenerateFlag::Generate, GenerateFlag::Continuation},
-			.maxMessages = 1,
-			.prepend {},
-			.responseId = responseId,
-			.subMessageId = subMessageId,
-		};
-	} // Release state lock
-
-	PrepareArguments prepareArgs {
-		.responder  = Role::Undefined,
-		.isContinuation = true,
-		.time = 0,
-	};
-	__PrepareGeneration(prepareArgs);
-	return true;
-}
-
 bool LLMInstance::Halt()
 {
 	if (_readyState.load() != ReadyState::Generating)
@@ -480,6 +421,8 @@ bool LLMInstance::Halt()
 		_workerThread->join();
 		_workerThread.reset(nullptr);
 	}
+
+	ClearTasksQueue();
 	SetReadyState(ReadyState::Ready);
 	return true;
 }
@@ -497,21 +440,24 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	int32_t& cursor_pos = _contextState.cursor_pos;
 	std::vector<llama_token> last_response_tokens;
 
-	// Remove volatile blocks
-	_contextState.EraseVolatile();
-
-	// Allocate and shift context window
-	if (_bCtxReallocateNextTurn)
+	if (!args.isContinuation)
 	{
-		_contextState.ReserveTokens(Constants::Context::MicroBatchSize, true);
-		_bCtxReallocateNextTurn = false;
+		// Remove volatile blocks
+		_contextState.EraseVolatile();
+
+		// Allocate and shift context window
+		if (_bCtxReallocateNextTurn)
+		{
+			_contextState.ReserveTokens(Constants::Context::MicroBatchSize, true);
+			_bCtxReallocateNextTurn = false;
+		}
+
+		// Decrement ttl
+		_contextState.DecrementTTL(args.time);
+
+		// Decrement narrator cooldown
+		_narratorCooldown = std::max(_narratorCooldown - args.time, 0); //! Move to session?
 	}
-
-	// Decrement ttl
-	_contextState.DecrementTTL(args.time);
-
-	// Decrement narrator cooldown
-	_narratorCooldown = std::max(_narratorCooldown - args.time, 0); //! Move to session?
 
 	// Tokenize uncached messages
 	int32_t offset = 0;
@@ -595,7 +541,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	}
 
 	// Decode
-	cursor_pos = _contextState.DecodeUncached(cursor_pos);
+	cursor_pos = _contextState.DecodeUncached(cursor_pos, args.isContinuation);
 
 	std::vector<llama_token> pre_prompt_tokens;
 
@@ -620,7 +566,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	// Update status
 	_pStatus->ReportModelInfo(state.modelName, state.ctx_size, n_ctx_used);
 
-//	DumpContext();
+	DumpContext();
 }
 
 void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
@@ -716,7 +662,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		else if (args.msgType == MessageType::Action)
 			grammarFlags = grammarFlags | GrammarFlag::Act;
 		else if (args.msgType == MessageType::Narration)
-			grammarFlags = grammarFlags | GrammarFlag::Narrate;
+			grammarFlags = grammarFlags | GrammarFlag::Narrate | GrammarFlag::EnableNarrator;
 		else
 			throw new std::runtime_error("AAah!");
 	}
@@ -932,7 +878,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 									// Swap response over
 									llama_kv_self_seq_cp(state.pCtx, prev_sequence_index, current_sequence_index, pre_response_pos, cursor_pos);
-									//									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos); //! wrong?
+//									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos); //! wrong?
 									cache.BatchSetSequences(pre_response_pos, cursor_pos - pre_response_pos, current_sequence);
 
 									DebugPrintLn(std::format(">> Sequence -> {}", current_sequence_index));
@@ -1006,8 +952,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 	// Remove full response from cache (will be reinserted on next turn)
 	_contextState.ClearTokensBelow(pre_response_pos);
-	//	fig::llm::utility::erase_bottom(_contextState.pCtx, _contextState.num_sequences, pre_response_pos);
-	//	fig::llm::utility::clear_batch_from(batch, pre_response_pos);
+
 	//	batch.n_tokens = pre_response_pos;
 	cursor_pos = pre_response_pos;
 	_contextState.previous_sequence_index = current_sequence_index;
@@ -1104,6 +1049,9 @@ bool LLMInstance::__ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArgu
 		break;
 	case LLMTaskType::Instigate:
 		r = __Instigate(task.role, task.msgType, task.msgCount, prepareArgs, generateArgs);
+		break;
+	case LLMTaskType::Continue:
+		r = __Continue(task.responseId, task.subMessageId, task.flags.IsSet(LLMTaskFlag::ExtendMessage), prepareArgs, generateArgs);
 		break;
 	default:
 		return false; // Undefined
@@ -1281,6 +1229,20 @@ bool LLMInstance::Instigate(Role role, MessageType msgType, int messageCount)
 	});
 }
 
+bool LLMInstance::Continue(fig::string responseId, fig::string subMessageId, bool extend)
+{
+	if (!CanGenerate())
+		return false;
+
+	return EnqueueTask(LLMTask {
+		.type = LLMTaskType::Continue,
+		.responseId = responseId,
+		.subMessageId = subMessageId,
+		.flags { LLMTaskFlag::ExtendMessage },
+		.msgCount = 1,
+	});
+}
+
 bool LLMInstance::__SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
 {
 	if (empty_or_whitespace(message))
@@ -1350,7 +1312,7 @@ bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgT
 		if (visible)
 		{
 			// Add message to result queue
-			for (auto subMsg : subMessages)
+			for (auto const& subMsg : subMessages)
 			{
 				fig::string subMessageId = CreateUUID();
 				_resultQueue.push(MessagePiece {
@@ -1423,6 +1385,58 @@ bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, 
 	return true;
 }
 
+bool LLMInstance::__Continue(fig::string responseId, fig::string subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
+{
+	auto& blocks = _contextState.GetBlocks();
+	if (blocks.size() == 0)
+		return false; // Nothing to continue
+
+	ContextBlock& currBlock = blocks[blocks.size() - 1];
+	if (currBlock.responseId != responseId)
+		return false; // Not last message
+
+	auto [msgType, bComplete] = fig::llm::utility::detect_message_type(currBlock.content);
+	if (msgType == MessageType::Undefined || (bComplete && !extend))
+		return false; // Not incomplete message
+
+	ContextBlock block = currBlock;
+	block.flags.Unset(ContextBlockFlag::Cached);
+	impl_RemoveMessages(1, false); // Remove the last message, resets cursor_pos
+
+	if (extend && bComplete)
+	{
+		// Strip end tag
+		size_t pos_end = block.content.rfind("</", fig::npos);
+		if (pos_end != fig::npos)
+		{
+			block.content = block.content.substr(0, pos_end);
+			char last_char = block.content.back();
+			if (last_char == '*' || last_char == '"' || last_char == ']')
+				block.content.pop_back(); // Trim scaffolding char
+		}
+	}
+	_contextState.AppendBlock(block); // Reinsert block
+	_contextState.response_pos = _contextState.cursor_pos; // Beginning of continued message
+
+	prepareArgs = PrepareArguments {
+		.responder = block.role,
+		.isContinuation = true,
+		.time = 0,
+	};
+
+	generateArgs = GenerateArguments {
+		.role = block.role,
+		.msgType = MessageType::Narration,
+		.flags { GenerateFlag::Generate, GenerateFlag::Continuation},
+		.maxMessages = 1,
+		.prepend {},
+		.responseId = responseId,
+		.subMessageId = subMessageId,
+	};
+
+	return true;
+}
+
 bool LLMInstance::GreetUser()
 {
 	if (auto text = ReadTextFile("./resources/prompting/prompt_greeting.txt"))
@@ -1466,42 +1480,26 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 	int32_t& cursor_pos = _contextState.cursor_pos;
 	auto& blocks = _contextState.GetBlocks();
 
-	// Rewind time
-	if (rewindTime)
+	if constexpr (Disabled) // Replace TTL
 	{
-		for (auto& block : blocks)
+		// Rewind time
+		if (rewindTime)
 		{
-			if (block.ttl > 0)
-				block.ttl += numRemovals;
+			for (auto& block : blocks)
+			{
+				if (block.ttl > 0)
+					block.ttl += numRemovals;
+			}
+
+			if (_narratorCooldown > 0)
+				_narratorCooldown = std::min(_narratorCooldown + numRemovals, _narratorCooldownDuration);
 		}
-
-		if (_narratorCooldown > 0)
-			_narratorCooldown = std::min(_narratorCooldown + numRemovals, _narratorCooldownDuration);
 	}
 
-	if (newSize > 0)
-	{
-		const auto& newLastBlock = blocks[newSize - 1_uz];
-		if (newLastBlock.is_cached())
-			cursor_pos = std::min(cursor_pos, newLastBlock.offset + newLastBlock.length());
-		else
-			cursor_pos = std::min(cursor_pos, newLastBlock.offset);
-	}
-	else
-	{
-		cursor_pos = _contextState.chat_begin_pos;
-	}
-	
-	// Update batch
-//	_contextState.GetBatch().n_tokens = cursor_pos;
-
-	// Clear kv cache
-	fig::llm::utility::erase_bottom(_contextState.GetModel().pCtx, _contextState.GetModel().num_sequences, cursor_pos);
-
-	// Return removed ids
+	// Store removed message ids
 	std::vector<RemovedMessage> removedIds;
-	removedIds.reserve(_contextState.GetBlocks().size() - (size_t)newSize);
-	for (size_t i = (size_t)newSize; i < _contextState.GetBlocks().size(); ++i)
+	removedIds.reserve(_contextState.GetBlocks().size() - newSize);
+	for (size_t i = newSize; i < _contextState.GetBlocks().size(); ++i)
 	{
 		auto const& block = blocks[i];
 		removedIds.push_back(RemovedMessage {
@@ -1510,8 +1508,18 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 			block.role,
 		});
 	}
+
+	// Erase blocks
+	blocks.resize(newSize);
+
+	auto itLast = _contextState.GetLastCachedBlock();
+	if (itLast != blocks.cend())
+		cursor_pos = std::min(cursor_pos, (*itLast).offset + (*itLast).length());
+	else
+		cursor_pos = _contextState.chat_begin_pos;
 	
-	blocks.resize((size_t)newSize);
+	// Update context
+	_contextState.ClearTokensBelow(cursor_pos);
 	return removedIds;
 }
 

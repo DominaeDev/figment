@@ -52,6 +52,7 @@ namespace fig::llm
 	{
 		None = 0,
 		HiddenMessage = 1 << 0,
+		ExtendMessage = 1 << 1,
 	};
 	using LLMTaskFlags = EnumFlags<LLMTaskFlag>;
 
@@ -182,6 +183,8 @@ namespace fig::llm
 			fig::string input;
 			Role role = Role::Undefined;
 			MessageType msgType = MessageType::Undefined;
+			fig::string responseId {};
+			fig::string subMessageId {};
 
 			LLMTaskFlags flags = LLMTaskFlags::None;
 			int msgCount = 0;
@@ -195,6 +198,7 @@ namespace fig::llm
 		bool __SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl);
 		bool __Instigate(Role role, MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
+		bool __Continue(fig::string responseId, fig::string subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 
 	private:
 		void SetReadyState(ReadyState readyState);

@@ -12,7 +12,7 @@ struct CommandDefinition {
 static CommandDefinition s_Commands[]
 {
 	{ "act",			ChatCommand::InstigateAction },
-	{ "erase",			ChatCommand::RemoveLast },
+	{ "erase",			ChatCommand::Erase },
 	{ "examine",		ChatCommand::Examine },
 	{ "impersonate",	ChatCommand::Impersonate },
 	{ "instruct",		ChatCommand::Instruct },

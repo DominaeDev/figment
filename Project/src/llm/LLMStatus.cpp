@@ -30,10 +30,6 @@ std::optional<LLMStatus> LLMStatusChannel::PollStatus()
 	};
 	lock.unlock();
 
-
-	if (status.signal != LLMStatusSignal::Nothing)
-		DebugPrintLn(std::format("Received signal {}", (int32_t)status.signal));
-
 	status.readyState = _readyState;
 	status.tokensPerSec = _tokensPerSec;
 	auto& [ram, vram] = _usedRAMVRAM;
@@ -48,11 +44,7 @@ void LLMStatusChannel::EmitSignal(LLMStatusSignal signal)
 	std::scoped_lock _ { _statusMutex };
 
 	if (!_statusSignals.empty() && _statusSignals.back() == signal)
-	{
-		DebugPrintLn(std::format("Rejected signal: {}", (int32_t)signal));
 		return;
-	}
-	DebugPrintLn(std::format("Emitted signal: {}", (int32_t)signal));
 
 	_statusSignals.push(signal);
 }
