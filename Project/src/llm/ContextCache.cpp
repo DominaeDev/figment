@@ -94,8 +94,8 @@ int32_t ContextCache::ClearRange(int32_t begin, int32_t end)
 			batch.seq_id[i][itSeq] = -1;
 		batch.logits[i] = false;
 	}
-	_length = begin;
-	batch.n_tokens = _length;
+//	_length = begin;
+//	batch.n_tokens = _length;
 	return std::max(end - begin, 0);
 }
 

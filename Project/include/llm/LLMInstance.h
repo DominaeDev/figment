@@ -81,17 +81,17 @@ namespace fig::llm
 		bool PushMessage(Role role, fig::string message, MessageType msgType = MessageType::Undefined, bool visible = true, int ttl = 0);
 		bool Instigate(Role role, MessageType msgType, int messageCount = 0);
 		bool Instruct(fig::string instructions);
+		std::vector<RemovedMessage> EraseMessages(int numMessages = 1);
+		std::vector<RemovedMessage> RollbackUserMessage();
 
 		bool ResetChat(int seed = -1);
 		bool Reseed(uint32_t seed = 0xFFFFFFFF);
-		std::vector<RemovedMessage> RemoveMessages(int numMessages = 1, bool rewindTime = true);
-		std::vector<RemovedMessage> RollbackUserMessage();
+		int32_t RewindTime(int32_t rewind_turns);
 		std::set<fig::string> GetActiveMessages();
 
 		bool SetStateVariable(fig::string name, fig::string value, bool allowCreate = true);
 		bool PollResponse(MessagePiece& piece);
 
-		void DumpSequence(int32_t seq_id) const;
 		void DumpContext() const;
 #if _DEBUG
 		bool GenerateEmbedding(fig::string text);
@@ -126,6 +126,7 @@ namespace fig::llm
 		enum class InternalError : int {
 			NoError = 0,
 			ContextFull,
+			InvalidContextError,
 			DecodeError,
 			SamplerError,
 			GrammarError,
@@ -139,9 +140,9 @@ namespace fig::llm
 		{
 			Role responder = Role::Bot1;
 			bool isContinuation = false;
-			int time = 0;	// decrement ttl
+			bool progressTime = true;
 		};
-		void __PrepareGeneration(PrepareArguments args);
+		InternalError __PrepareGeneration(PrepareArguments args);
 
 		struct GenerateArguments
 		{
@@ -159,7 +160,7 @@ namespace fig::llm
 		bool SwapPersona(Role persona);
 
 		void RefreshActiveResponses();
-		std::vector<RemovedMessage> impl_RemoveMessages(int numMessages, bool rewindTime);
+//		std::vector<RemovedMessage> impl_RemoveMessages(int numMessages);
 		bool RebuildKVCache();
 
 		Sentences GetHistory(size_t depth);
@@ -169,6 +170,7 @@ namespace fig::llm
 		// Tasks
 		enum class LLMTaskType
 		{
+			Undefined = 0,
 			SendMessage,
 			PushMessage,
 			Instigate,
@@ -177,7 +179,7 @@ namespace fig::llm
 
 		struct LLMTask
 		{
-			LLMTaskType type;
+			LLMTaskType type { LLMTaskType::Undefined };
 
 			// Parameters
 			fig::string input;
@@ -196,9 +198,11 @@ namespace fig::llm
 		void __ProcessTaskQueue(std::stop_token stop, __GenerationCompleteCallback onComplete);
 		bool __ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
-		bool __PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl);
+		bool __PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int32_t ttl);
 		bool __Instigate(Role role, MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __Continue(fig::string responseId, fig::string subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
+
+		void Panic(InternalError error, const fig::string& message);
 
 	private:
 		void SetReadyState(ReadyState readyState);
@@ -223,10 +227,11 @@ namespace fig::llm
 		ChatSession _session;
 		ChatOptions _options;
 		bool _bCtxReallocateNextTurn = false;
+		std::atomic<int32_t> _turn_counter = 0;
 
 		// State
 		LLMStateVariables _stateVars;
 		int32_t _narratorCooldownDuration = 0;
-		int32_t _narratorCooldown = 0;
+		int32_t _next_narrator_turn = 0;
 	};
 }

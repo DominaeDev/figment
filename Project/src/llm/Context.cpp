@@ -1,8 +1,10 @@
 #include <pch.h>
 #include "llm/Context.h"
 #include "llm/LLMUtility.h"
+#include "llm/LLMTemplate.h"
 #include "llm/ModelState.h"
 #include "util/Common.h"
+#include "model/ChatSession.h"
 #include "Constants.h"
 #include <cassert>
 #include <algorithm>
@@ -80,34 +82,92 @@ std::optional<int32_t> Context::DecodeTokens(const std::vector<llama_token>& tok
 	if (batch_view.n_tokens > 0 && llama_decode(_pCtx, batch_view) != 0)
 		return std::nullopt; // Error
 
-
 //	cursor_pos += n_tokens;
 	return std::make_optional(n_tokens);
 }
 
-int32_t Context::DecodeUncached(int32_t cursor_pos, bool logits)
+int32_t Context::TokenizeUncached(ChatSession& session)
 {
+	// Tokenize uncached messages
+	int32_t num_tokens = 0;
+	for (auto& block : _blocks)
+	{
+		if (block.is_static() || block.is_cached() || !block.tokens.empty())
+			continue;
+
+		fig::string content = block.content;
+		if (block.is_continuation()) // Continue response
+			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name); //! name?
+		else if (block.role == Role::System)
+			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
+		else
+		{
+			fig::llm::utility::complete_message(content);
+			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
+		}
+		content = session.ApplyNames(content, block.role); //! @move?
+
+		block.offset = -1;
+		block.tokens = fig::llm::utility::tokenize(_pVocab, content, false);
+		num_tokens += block.length();
+	}
+	return num_tokens;
+}
+
+int32_t Context::DecodeUncached()
+{
+	int32_t last_offset = -1;
+	int32_t offset = 0;
+	int32_t persona_offset = -1;
 	for (size_t i = 0; i < _blocks.size(); ++i)
 	{
 		auto& block = _blocks[i];
-		if (block.flags.IsSet(ContextBlockFlag::Cached))
-			continue;
-
-		std::vector<llama_seq_id> seqs = block.get_sequence_ids(_num_sequences);
-		llama_batch batch_view = create_batch(block.tokens, seqs, _num_sequences, block.offset, logits && (i + 1 == _blocks.size()));
-		if (!llama_decode(_pCtx, batch_view))
+		if (block.is_cached())
 		{
-			block.flags = block.flags | ContextBlockFlag::Cached;
-			cursor_pos = std::max(cursor_pos, block.offset + block.length());
-			llama_batch_free(batch_view);
+			offset = std::max(block.offset + block.length(), offset);
+			if (block.is_persona() && persona_offset < 0)
+				persona_offset = offset;
+			continue;
 		}
-		else
+
+		assert(last_offset <= offset);
+		assert(block.length() > 0);
+
+		block.offset = offset;
+		last_offset = offset;
+
+		if (block.is_persona()) // Personas overlap
+		{
+			if (persona_offset < 0)
+				persona_offset = offset;
+			else
+				block.offset = persona_offset;
+		}
+
+		GetCache().BatchWrite(block.tokens, block.sequenceId, block.offset); //! This doesn't work for personas (may not matter)
+
+		// Decode
+		std::vector<llama_seq_id> seqs = block.get_sequence_ids(_num_sequences);
+		assert(!block.is_persona() || seqs.size() == 1);
+
+		llama_batch batch_view = create_batch(block.tokens, seqs, _num_sequences, block.offset, block.is_continuation());
+		if (llama_decode(_pCtx, batch_view) != 0)
 		{
 			llama_batch_free(batch_view);
 			return -1; // Error
 		}
+
+		block.flags.Set(ContextBlockFlag::Cached);
+		block.flags.Unset(ContextBlockFlag::Contination);
+		offset = std::max(offset, block.offset + block.length());
+		llama_batch_free(batch_view);
 	}
+	cursor_pos = std::max(cursor_pos, offset);
 	return cursor_pos;
+}
+
+void Context::SetLogits()
+{
 }
 
 bool Context::RebuildKVCache()
@@ -136,15 +196,77 @@ bool Context::RebuildKVCache()
 	return r == 0;
 }
 
-int32_t Context::RemoveBlock(const ContextBlock& block, bool bShift)
+std::optional<int32_t> Context::RemoveDiscardedBlocks()
 {
-	assert(block.sequenceId != SequenceId::None);
+	int32_t tokens_removed = 0;
+#if _DEBUG
+	int32_t n_used_before = llama_kv_self_used_cells(_pCtx);
+#endif
+	
+	DumpContext();
 
-	auto iter_block = std::find_if(_blocks.cbegin(), _blocks.cend(), [&block](const ContextBlock& b) { return &block == &b; });
-	return RemoveBlocks(iter_block, iter_block + 1_uz, bShift);
+	// Remove
+	for (int32_t i = toI(_blocks.size()) - 1; i >= 0; --i)
+	{
+		size_t idx = toUZ(i);
+		auto& block = _blocks[idx];
+		if (not block.is_discarded())
+			continue;
+
+		if (not block.is_cached())
+		{
+			_blocks.erase(_blocks.cbegin() + idx);
+			continue;
+		}
+
+		if (!llama_kv_self_seq_rm(_pCtx, -1, block.offset, block.offset + block.length()))
+			return std::nullopt; // Error
+
+		_cache->ClearRange(block.offset, block.offset + block.length());
+		tokens_removed += block.length();
+		_blocks.erase(_blocks.cbegin() + idx);
+	}
+
+	if (tokens_removed == 0)
+		return 0;
+
+	llama_kv_self_defrag(_pCtx);
+	llama_kv_self_update(_pCtx);
+
+	DumpContext();
+
+#if _DEBUG
+	int32_t n_used_after = llama_kv_self_used_cells(_pCtx);
+	assert(n_used_after == n_used_before - tokens_removed);
+#endif
+	
+	// Realign blocks (shift)
+	int32_t curr_offset = 0;
+	for (size_t idx = 0; idx < _blocks.size(); ++idx)
+	{
+		auto& block = _blocks[idx];
+		if (!block.is_static() && block.offset > curr_offset)
+		{
+			int32_t shift = block.offset - curr_offset;
+			for (auto it = _blocks.begin() + idx; it != _blocks.end(); ++it)
+			{
+				auto& shift_block = *it;
+				if (shift_block.is_cached())
+				{
+					int32_t seq_id = shift_block.get_any_sequence_id();
+					llama_kv_self_seq_add(_pCtx, seq_id, shift_block.offset, shift_block.offset + shift_block.length(), shift);
+				}
+				shift_block.offset += shift;
+			}
+		}
+		curr_offset += block.length();
+	}
+
+	DumpContext();
+	return tokens_removed;
 }
 
-int32_t Context::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift)
+/*int32_t Context::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift)
 {
 	int32_t idx_from = toI(std::distance(_blocks.cbegin(), begin));
 	int32_t idx_to = toI(std::distance(_blocks.cbegin(), end)) - 1;
@@ -153,7 +275,6 @@ int32_t Context::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, s
 	int32_t n_used = llama_kv_self_used_cells(_pCtx);
 #endif
 	int32_t total_length = 0;
-
 
 	int32_t pos_remove_begin = _blocks[idx_from].offset;
 
@@ -207,6 +328,17 @@ int32_t Context::RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, s
 #endif
 
 	return (int32_t)-total_length;
+}*/
+
+bool Context::DiscardBlock(const ContextBlock& block)
+{
+	auto itFind = std::find(_blocks.begin(), _blocks.end(), block);
+	if (itFind != _blocks.end())
+	{
+		itFind->Discard();
+		return true;
+	}
+	return false;
 }
 
 void Context::ClearTokensBelow(int32_t pos)
@@ -236,46 +368,22 @@ int32_t Context::AllocateKVCache(int32_t min_reserve)
 	}
 
 	assert(itFirst != itLast);
-
-	if (itFirst != itLast)
-	{
-		int32_t shift = RemoveBlocks(itFirst, itLast);
-
-		cursor_pos += shift;
-		response_pos += shift;
-
-		assert(ctx_size - cursor_pos >= Constants::Context::MaxResponseLength);
-		return shift;
-	}
-	return 0;
+	for (auto it = itFirst; it != itLast; ++it)
+		it->Discard();
+	return total;
 }
 
-int32_t Context::DecrementTTL(int32_t time)
+void Context::DiscardByTTL(int32_t current_turn)
 {
-	if (time <= 0)
-		return 0;
-
 	int32_t offset = 0;
-	for (int32_t i = (int32_t)_blocks.size() - 1; i >= 0; --i)
+	for (auto& block : _blocks)
 	{
-		auto& block = _blocks[i];
 		if (!block.is_temporary())
 			continue;
 
-		block.ttl -= time;
-		if (block.ttl > 0)
-			continue;
-		
-		if (block.is_cached())
-		{
-			// Remove from context
-			int32_t shift = RemoveBlock(block);
-			cursor_pos += shift;
-			response_pos += shift;
-			offset += shift;
-		}
+		if (block.turn + block.ttl < current_turn)
+			block.Discard();
 	}
-	return offset;
 }
 
 int32_t Context::GetBlockAppendOffset() const
@@ -307,11 +415,8 @@ int32_t Context::EraseChat()
 	else
 	{
 		int32_t block_pos = itFirst->offset;
-		erase_bottom(_pCtx, block_pos);
-		_cache->ClearRange(block_pos, _cache->length());
-		_blocks.erase(itFirst, _blocks.end());
-
-		cursor_pos = block_pos;
+		for (auto it = itFirst; it != _blocks.end(); ++it)
+			it->Discard();
 		chat_begin_pos = block_pos;
 		return block_pos;
 	}
@@ -327,7 +432,15 @@ void Context::AppendBlock(ContextBlock&& block)
 	_blocks.emplace_back(std::move(block));
 }
 
-void Context::EraseVolatile()
+void Context::DumpContext()
 {
-	std::erase_if(_blocks, [](const ContextBlock& block) { return block.is_volatile(); });
+#if _DEBUG
+	for (int32_t i = 0; i < _num_sequences; ++i)
+	{
+		fig::llm::utility::dump_batch_text(*this, i, std::format("prompt_text_{}.txt", i));
+		fig::llm::utility::dump_batch_tokens(*this, i, std::format("prompt_full_{}.txt", i));
+		fig::llm::utility::dump_kv_cache(*this, i, std::format("kvcache_{}.txt", i));
+	}
+	fig::llm::utility::dump_kv_cache_cells(*this, "kvcache_alloc.txt");
+#endif
 }

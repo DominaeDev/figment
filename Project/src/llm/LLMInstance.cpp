@@ -75,6 +75,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	_contextState = Context(_modelState); //!
 	_session = args.session;
 	_stateVars = {};
+	_turn_counter.store(0);
 
 	// Read personas
 	std::map<Role, fig::string> personas;
@@ -89,8 +90,9 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	if (!personas.contains(Role::Bot1))
 		return false; // No main character
 
+	_next_narrator_turn = -1;
 	_narratorCooldownDuration = args.narrationCooldownDuration;
-	_narratorCooldown = -1;
+	_bCtxReallocateNextTurn = false;
 
 	// Initialize sampler + grammar
 	InitSamplers();
@@ -113,22 +115,23 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 
 	// Initialize context
 	_contextState.Initialize();
+	int32_t& cursor_pos = _contextState.cursor_pos = 0;
 
-	auto fnDecode = [this](const std::vector<llama_token>& tokens, SequenceId seq_id, int32_t& pos) -> bool {
+	/*auto fnDecode = [this](const std::vector<llama_token>& tokens, SequenceId seq_id, int32_t& pos) -> bool {
 		if (auto n_tokens = _contextState.DecodeTokens(tokens, pos, seq_id))
 		{
 			pos += n_tokens.value();
 			return true;
 		}
 		return false;
-	};
+	};*/
 
 	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System, "");
 
 	if (bMultiSequence) // Initialize a sequence for each bot
 	{
 		// Write (shared) system_prompt
-		int32_t& cursor_pos = _contextState.cursor_pos = 0;
+//		
 		fig::string system_prompt = _session.GetSystemPrompt(); //! @group
 
 		std::vector<llama_token> system_prompt_tokens = fig::llm::utility::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
@@ -141,17 +144,17 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			.tokens =  system_prompt_tokens,
 			.flags { ContextBlockFlag::Static },
 			.sequenceId { Sequence::Shared },
-			.offset = _contextState.GetBlockAppendOffset(),
+			.offset = -1,
 		});
 
-		if (!fnDecode(system_prompt_tokens, { Sequence::Shared }, cursor_pos))
-			return false; // Error
+//		if (!fnDecode(system_prompt_tokens, { Sequence::Shared }, cursor_pos))
+//			return false; // Error
 
 		// Write persona(s)
-		int32_t max_persona = 0;
+//		int32_t max_persona = 0;
 		for (int32_t i = 0; i < n_bots; ++i)
 		{
-			int32_t persona_offset = cursor_pos;
+//			int32_t persona_offset = cursor_pos;
 			Role role = bot_from_index(i);
 			SequenceId seq_id = fig::llm::utility::sequence_from_index(i);
 
@@ -164,14 +167,14 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 				.tokens = persona_tokens,
 				.flags { ContextBlockFlag::Static,  ContextBlockFlag::Persona },
 				.sequenceId = seq_id,
-				.offset = persona_offset,
+				.offset = -1,
 			});
 
-			if (!persona_tokens.empty() && !fnDecode(persona_tokens, seq_id, persona_offset))
-				return false;
-			max_persona = std::max(max_persona, toI(persona_tokens.size()));
+//			if (!persona_tokens.empty() && !fnDecode(persona_tokens, seq_id, persona_offset))
+//				return false;
+//			max_persona = std::max(max_persona, toI(persona_tokens.size()));
 		}
-		cursor_pos += max_persona;
+//		cursor_pos += max_persona;
 
 		// User persona
 		if (!empty_or_whitespace(user_persona))
@@ -184,10 +187,10 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 				.tokens = user_persona_tokens,
 				.flags { ContextBlockFlag::Static },
 				.sequenceId { Sequence::Shared },
-				.offset = cursor_pos,
+				.offset = -1,
 				});
-			if (!user_persona_tokens.empty() && !fnDecode(user_persona_tokens, { Sequence::Shared }, cursor_pos))
-				return false;
+//			if (!user_persona_tokens.empty() && !fnDecode(user_persona_tokens, { Sequence::Shared }, cursor_pos))
+//				return false;
 		}
 
 		// Template suffix
@@ -199,14 +202,14 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			.tokens = template_suffix_tokens,
 			.flags { ContextBlockFlag::Static },
 			.sequenceId { Sequence::Shared },
-			.offset = cursor_pos,
+			.offset = -1,
 		});
-		if (!fnDecode(template_suffix_tokens, { Sequence::Shared }, cursor_pos))
-			return false;
+//		if (!fnDecode(template_suffix_tokens, { Sequence::Shared }, cursor_pos))
+//			return false;
 	}
 	else // Single sequence
 	{
-		int32_t& cursor_pos = _contextState.cursor_pos = 0;
+//		int32_t& cursor_pos = _contextState.cursor_pos = 0;
 
 		if (_session.IsGroupChat())
 		{
@@ -230,11 +233,11 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			.tokens = system_prompt_tokens,
 			.flags { ContextBlockFlag::Static },
 			.sequenceId { Sequence::Default },
-			.offset = 0,
+			.offset = -1,
 		});
 
-		if (!fnDecode(system_prompt_tokens, { Sequence::Default }, cursor_pos))
-			return false;
+//		if (!fnDecode(system_prompt_tokens, { Sequence::Default }, cursor_pos))
+//			return false;
 
 		if (!_session.IsGroupChat())
 		{
@@ -247,10 +250,10 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 				.tokens = persona_tokens,
 				.flags { ContextBlockFlag::Static },
 				.sequenceId { Sequence::Default },
-				.offset = cursor_pos,
+				.offset = -1,
 			});
-		if (!persona_tokens.empty() && !fnDecode(persona_tokens, { Sequence::Default }, cursor_pos))
-			return false;
+//		if (!persona_tokens.empty()/* && !fnDecode(persona_tokens, { Sequence::Default }, cursor_pos)*/)
+//			return false;
 		}
 
 		// User persona
@@ -264,10 +267,10 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 				.tokens = user_persona_tokens,
 				.flags { ContextBlockFlag::Static },
 				.sequenceId { Sequence::Default },
-				.offset = cursor_pos,
+				.offset = -1,
 			});
-			if (!user_persona_tokens.empty() && !fnDecode(user_persona_tokens, { Sequence::Shared }, cursor_pos))
-				return false;
+//			if (!user_persona_tokens.empty() /*&& !fnDecode(user_persona_tokens, { Sequence::Shared }, cursor_pos)*/)
+//				return false;
 		}
 
 		// Template suffix
@@ -279,19 +282,19 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			.tokens = template_suffix_tokens,
 			.flags { ContextBlockFlag::Static },
 			.sequenceId { Sequence::Default },
-			.offset = cursor_pos,
+//			.offset = cursor_pos,
 		});
-		if (!fnDecode(template_suffix_tokens, { Sequence::Shared }, cursor_pos)) //! Shared?
-			return false;
+//		if (!fnDecode(template_suffix_tokens, { Sequence::Shared }, cursor_pos)) //! Shared?
+//			return false;
 	}
 
-	for (auto& block : _contextState.GetBlocks())
-	{
-		block.flags = block.flags | ContextBlockFlag::Cached;
-		_contextState.chat_begin_pos = _contextState.GetBlockAppendOffset();
-	}
+	_contextState.TokenizeUncached(_session);
+	cursor_pos = _contextState.DecodeUncached();
+	if (cursor_pos < 0)
+		return false; // Error
 
-	_bCtxReallocateNextTurn = false;
+	_contextState.chat_begin_pos = _contextState.GetBlockAppendOffset();
+	
 	SetReadyState(ReadyState::Ready);
 	_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
 
@@ -427,7 +430,7 @@ bool LLMInstance::Halt()
 	return true;
 }
 
-void LLMInstance::__PrepareGeneration(PrepareArguments args)
+LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments args)
 {
 	// Load state
 	std::scoped_lock lock(_stateMutex);
@@ -440,53 +443,16 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	int32_t& cursor_pos = _contextState.cursor_pos;
 	std::vector<llama_token> last_response_tokens;
 
-	if (!args.isContinuation)
+	// Increment turn counter
+	int32_t current_turn;
+	if (args.progressTime)
 	{
-		// Remove volatile blocks
-		_contextState.EraseVolatile();
-
-		// Allocate and shift context window
-		if (_bCtxReallocateNextTurn)
-		{
-			_contextState.ReserveTokens(Constants::Context::MicroBatchSize, true);
-			_bCtxReallocateNextTurn = false;
-		}
-
-		// Decrement ttl
-		_contextState.DecrementTTL(args.time);
-
-		// Decrement narrator cooldown
-		_narratorCooldown = std::max(_narratorCooldown - args.time, 0); //! Move to session?
+		current_turn = _turn_counter++; // atomic
+		_contextState.DiscardByTTL(current_turn);
 	}
 
 	// Tokenize uncached messages
-	int32_t offset = 0;
-	for (auto& block : blocks)
-	{
-		if (block.is_static() || block.is_cached())
-		{
-			offset = std::max(offset, block.offset + block.length());
-			continue;
-		}
-
-		fig::string content = block.content;
-		if (args.isContinuation) // Continue response
-			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name); //! name?
-		else if (block.role == Role::System)
-			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
-		else
-		{
-			fig::llm::utility::complete_message(content);
-			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
-		}
-		content = _session.ApplyNames(content, args.responder);
-		
-		block.offset = offset;
-		block.tokens = fig::llm::utility::tokenize(state.pVocab, content, false);
-
-		offset += block.length();
-		last_response_tokens.insert(last_response_tokens.end(), block.tokens.cbegin(), block.tokens.cend());
-	}
+	_contextState.TokenizeUncached(_session);
 
 	if constexpr (Disabled) // State vars
 	{
@@ -514,7 +480,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 				.flags { ContextBlockFlag::Volatile },
 				.sequenceId { Sequence::Shared }, //! @seq
 				.responseId = "",
-				});
+			});
 
 			_contextState.RefreshBlockPositions();
 
@@ -522,26 +488,48 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 		}
 	}
 
+	// Remove discarded blocks
+	if (auto num_removed = _contextState.RemoveDiscardedBlocks())
+		cursor_pos -= num_removed.value();
+	else
+	{
+		Panic(InternalError::InvalidContextError, "Context is in an invalid state.");
+		return InternalError::InvalidContextError;
+	}
+
 	// Allocate and shift context window
 	int32_t ctx_reserve = std::max((int32_t)last_response_tokens.size() + Constants::Context::MaxResponseLength, Constants::Context::MicroBatchSize);
 	int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
 	if (n_ctx_used + ctx_reserve >= state.ctx_size)
 	{
-		if (_contextState.ReserveTokens(ctx_reserve, false))
-			_bCtxReallocateNextTurn = false;
+		if (not _contextState.ReserveTokens(ctx_reserve, false))
+		{
+			Panic(InternalError::ContextFull, "Failed to reserve enough context space to hold response.");
+			return InternalError::ContextFull;
+		}
 	}
+	else if (_bCtxReallocateNextTurn)
+	{
+		_contextState.ReserveTokens(Constants::Context::MicroBatchSize, true);
+	}
+	_bCtxReallocateNextTurn = false;
 
 	// Write new blocks to batch
-	for (auto& block : _contextState.GetBlocks())
+	/*for (auto& block : _contextState.GetBlocks())
 	{
 		if (block.is_static() || block.is_cached())
 			continue;
 
 		_contextState.GetCache().BatchWrite(block.tokens, block.sequenceId, block.offset);
-	}
+	}*/
 
 	// Decode
-	cursor_pos = _contextState.DecodeUncached(cursor_pos, args.isContinuation);
+	cursor_pos = _contextState.DecodeUncached();
+	if (cursor_pos < 0)
+	{
+		Panic(InternalError::DecodeError, "Token decode error");
+		return InternalError::DecodeError;
+	}
 
 	std::vector<llama_token> pre_prompt_tokens;
 
@@ -567,6 +555,7 @@ void LLMInstance::__PrepareGeneration(PrepareArguments args)
 	_pStatus->ReportModelInfo(state.modelName, state.ctx_size, n_ctx_used);
 
 	DumpContext();
+	return InternalError::NoError;
 }
 
 void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
@@ -609,6 +598,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	Role responderRole = args.role;
 	fig::string responderId {};
 	fig::string stateReport {};
+	int32_t current_turn = _turn_counter.load();
 
 	// Select sequence
 	int32_t current_sequence_index;
@@ -618,7 +608,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	else if (is_npc(responderRole))
 	{
 		// Keep last sequence
-		current_sequence_index = _contextState.previous_sequence_index >= 0 ? _contextState.previous_sequence_index : 0;
+		current_sequence_index = _contextState.last_sequence_index >= 0 ? _contextState.last_sequence_index : 0;
 	}
 	else
 	{
@@ -863,7 +853,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 							}
 
 							if (msgType == MessageType::Narration)
-								_narratorCooldown = _narratorCooldownDuration;
+								_next_narrator_turn = current_turn + _narratorCooldownDuration;
 
 							if (_session.IsGroupChat() && is_bot(responderRole))
 							{
@@ -955,7 +945,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 	//	batch.n_tokens = pre_response_pos;
 	cursor_pos = pre_response_pos;
-	_contextState.previous_sequence_index = current_sequence_index;
+	_contextState.last_sequence_index = current_sequence_index;
 
 	for (auto& block : blocks)
 	{
@@ -982,8 +972,9 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 				.tokens = sampled_tokens,
 				.flags {}, // uncached
 				.sequenceId { Sequence::Shared },
+				.turn = current_turn,
 				.responseId = responseId,
-				});
+			});
 		}
 	}
 	else
@@ -991,6 +982,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		DebugPrint("(Empty response)");
 	}
 
+	_turn_counter++; // Increment turn counter (atomically)
 
 	if constexpr (Disabled)
 	{
@@ -1117,7 +1109,13 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 		_activeResponseIds.insert(generateArgs.responseId);
 
 		bWaiting = true;
-		__PrepareGeneration(prepareArgs);
+		auto prepareError = __PrepareGeneration(prepareArgs);
+		if (prepareError != InternalError::NoError)
+		{
+			onComplete(prepareError, "");
+			return;
+		}
+
 		__Generate(thread_stop, generateArgs,
 			[this, &bWaiting, &error, &response](InternalError result, fig::string msg) {
 				if (result != InternalError::NoError)
@@ -1141,15 +1139,11 @@ void LLMInstance::StartGeneration()
 			// ...
 			if (error != InternalError::NoError)
 			{
-				printf("\r\n>> Internal error: (%d) %s\r\n", error, response.c_str());
-				SetReadyState(ReadyState::Invalid);
-				_pStatus->EmitSignal(LLMStatusSignal::ModelUnloadRequest);
-			}
-			else
-			{
-				SetReadyState(ReadyState::Ready);
+				Panic(error, response);
+				return;
 			}
 
+			SetReadyState(ReadyState::Ready);
 			RefreshActiveResponses();
 			_pStatus->EmitSignal(LLMStatusSignal::GenerationComplete);
 		}));
@@ -1253,11 +1247,11 @@ bool LLMInstance::__SendMessage(fig::string message, PrepareArguments& prepareAr
 	prepareArgs = PrepareArguments {
 		.responder = Role::Undefined,
 		.isContinuation = false,
-		.time = 1,
+		.progressTime = true,
 	};
 
 	GenerateFlags flags { GenerateFlag::Generate };
-	if (_narratorCooldown <= 0)
+	if (_next_narrator_turn < _turn_counter.load())
 		flags.Set(GenerateFlag::AllowNarrator);
 
 	generateArgs = GenerateArguments {
@@ -1269,7 +1263,7 @@ bool LLMInstance::__SendMessage(fig::string message, PrepareArguments& prepareAr
 	return true;
 }
 
-bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl)
+bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int32_t ttl)
 {
 	if (empty_or_whitespace(message))
 		return false;
@@ -1338,9 +1332,10 @@ bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, 
 	prepareArgs = PrepareArguments {
 		.responder = role,
 		.isContinuation = false,
-		.time = 1,
+		.progressTime = true,
 	};
 
+	int32_t current_turn = _turn_counter.load();
 	fig::string responder = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
 
 	bool bAllowNarration = true;
@@ -1364,7 +1359,7 @@ bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, 
 	else if (msgType == MessageType::Narration)
 	{
 		prependMsg = std::format("<{}>", Constants::Chat::NarrationTag);
-		_narratorCooldown = _narratorCooldownDuration;
+		_next_narrator_turn = current_turn + _narratorCooldownDuration;
 	}
 	else if (msgType == MessageType::Direction)
 	{
@@ -1372,7 +1367,7 @@ bool LLMInstance::__Instigate(Role role, MessageType msgType, int messageCount, 
 		bAllowNarration = false;
 	}
 
-	bAllowNarration &= _narratorCooldown <= 0 || msgType == MessageType::Narration;
+	bAllowNarration &= _next_narrator_turn < current_turn || msgType == MessageType::Narration;
 
 	generateArgs = GenerateArguments {
 		.role = role,
@@ -1399,33 +1394,34 @@ bool LLMInstance::__Continue(fig::string responseId, fig::string subMessageId, b
 	if (msgType == MessageType::Undefined || (bComplete && !extend))
 		return false; // Not incomplete message
 
-	ContextBlock block = currBlock;
-	block.flags.Unset(ContextBlockFlag::Cached);
-	impl_RemoveMessages(1, false); // Remove the last message, resets cursor_pos
+	currBlock.Discard();
+
+	ContextBlock newBlock = currBlock;
+	newBlock.flags.Unset({ ContextBlockFlag::Cached, ContextBlockFlag::Discard });
+	newBlock.flags.Set(ContextBlockFlag::Contination);
 
 	if (extend && bComplete)
 	{
 		// Strip end tag
-		size_t pos_end = block.content.rfind("</", fig::npos);
+		size_t pos_end = newBlock.content.rfind("</", fig::npos);
 		if (pos_end != fig::npos)
 		{
-			block.content = block.content.substr(0, pos_end);
-			char last_char = block.content.back();
+			newBlock.content = newBlock.content.substr(0, pos_end);
+			char last_char = newBlock.content.back();
 			if (last_char == '*' || last_char == '"' || last_char == ']')
-				block.content.pop_back(); // Trim scaffolding char
+				newBlock.content.pop_back(); // Trim scaffolding char
 		}
 	}
-	_contextState.AppendBlock(block); // Reinsert block
+	_contextState.AppendBlock(newBlock); // Reinsert block
 	_contextState.response_pos = _contextState.cursor_pos; // Beginning of continued message
 
 	prepareArgs = PrepareArguments {
-		.responder = block.role,
+		.responder = newBlock.role,
 		.isContinuation = true,
-		.time = 0,
 	};
 
 	generateArgs = GenerateArguments {
-		.role = block.role,
+		.role = newBlock.role,
 		.msgType = MessageType::Narration,
 		.flags { GenerateFlag::Generate, GenerateFlag::Continuation},
 		.maxMessages = 1,
@@ -1464,37 +1460,27 @@ bool LLMInstance::Instruct(fig::string instructions)
 	return true;
 }
 
-std::vector<RemovedMessage> LLMInstance::RemoveMessages(int numMessages, bool rewindTime)
+int32_t LLMInstance::RewindTime(int32_t rewind_turns)
+{
+	int32_t turn = _turn_counter.load();
+	turn = std::max(turn - rewind_turns, 0);
+	_turn_counter.store(turn);
+	return turn;
+}
+
+std::vector<RemovedMessage> LLMInstance::EraseMessages(int numMessages)
 {
 	if (!CanGenerate() || numMessages < 1)
 		return {};
 
-	std::scoped_lock lock(_stateMutex); //! hmm...
-	return impl_RemoveMessages(numMessages, rewindTime);
-}
+	std::unique_lock lock(_stateMutex, std::defer_lock);
+	if (!lock.try_lock_for(50ms))
+		return {};
 
-std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bool rewindTime)
-{
 	int32_t numRemovals = toI(std::min(toUZ(numMessages), _contextState.GetBlocks().size()));
 	size_t newSize = toUZ(std::max(toI(_contextState.GetBlocks().size()) - numMessages, 0));
 	int32_t& cursor_pos = _contextState.cursor_pos;
 	auto& blocks = _contextState.GetBlocks();
-
-	if constexpr (Disabled) // Replace TTL
-	{
-		// Rewind time
-		if (rewindTime)
-		{
-			for (auto& block : blocks)
-			{
-				if (block.ttl > 0)
-					block.ttl += numRemovals;
-			}
-
-			if (_narratorCooldown > 0)
-				_narratorCooldown = std::min(_narratorCooldown + numRemovals, _narratorCooldownDuration);
-		}
-	}
 
 	// Store removed message ids
 	std::vector<RemovedMessage> removedIds;
@@ -1509,17 +1495,8 @@ std::vector<RemovedMessage> LLMInstance::impl_RemoveMessages(int numMessages, bo
 		});
 	}
 
-	// Erase blocks
-	blocks.resize(newSize);
-
-	auto itLast = _contextState.GetLastCachedBlock();
-	if (itLast != blocks.cend())
-		cursor_pos = std::min(cursor_pos, (*itLast).offset + (*itLast).length());
-	else
-		cursor_pos = _contextState.chat_begin_pos;
-	
-	// Update context
-	_contextState.ClearTokensBelow(cursor_pos);
+	for (size_t i = newSize; i < blocks.size(); ++i)
+		blocks[i].Discard();
 	return removedIds;
 }
 
@@ -1527,15 +1504,19 @@ std::vector<RemovedMessage> LLMInstance::RollbackUserMessage()
 {
 	if (!CanGenerate())
 		return {};
-
+	//! Disabled
+	/*
 	std::scoped_lock lock(_stateMutex);
-
+	
 	auto& blocks = _contextState.GetBlocks();
 	for (int i = (int32_t)blocks.size() - 1; i >= 0; --i)
 	{
 		if (blocks[i].role == Role::User)
-			return impl_RemoveMessages((int32_t)blocks.size() - i, true);
-	}
+		{
+			RewindTime(1);
+			return impl_RemoveMessages((int32_t)blocks.size() - i);
+		}
+	} */
 	return {};
 }
 
@@ -1551,16 +1532,6 @@ bool LLMInstance::PollResponse(MessagePiece& piece)
 	piece = _resultQueue.front();
 	_resultQueue.pop();
 	return true;
-}
-
-void LLMInstance::DumpSequence(int32_t seq_id) const
-{
-#if _DEBUG
-	fig::llm::utility::dump_batch_text(_contextState, seq_id, std::format("prompt_text_{}.txt", seq_id));
-	fig::llm::utility::dump_batch_tokens(_contextState, seq_id, std::format("prompt_full_{}.txt", seq_id));
-	fig::llm::utility::dump_kv_cache(_contextState, seq_id, std::format("kvcache_{}.txt", seq_id));
-	fig::llm::utility::dump_kv_cache_cells(_contextState, "kvcache_alloc.txt");
-#endif 
 }
 
 void LLMInstance::DumpContext() const
@@ -1626,7 +1597,7 @@ bool LLMInstance::SwapPersona(Role role)
 		if (!_session.IsGroupChat() || !(is_bot(role) || role == Role::Undefined))
 			return false;
 
-		if (role == _contextState.activePersona)
+		if (role == _contextState.active_persona)
 			return false; // No change
 
 		auto [batch_ref, batch_n] = _contextState.GetCache().GetBatch();
@@ -1648,7 +1619,7 @@ bool LLMInstance::SwapPersona(Role role)
 		_contextState.response_pos -= shift;
 		_contextState.prepend_pos -= shift;
 
-		_contextState.activePersona = Role::Undefined;
+		_contextState.active_persona = Role::Undefined;
 
 		// Activate next persona
 		auto itFindInactive = _contextState.personas.find(role);
@@ -1677,7 +1648,7 @@ bool LLMInstance::SwapPersona(Role role)
 			_contextState.response_pos += len;
 			_contextState.prepend_pos += len;
 
-			_contextState.activePersona = role;
+			_contextState.active_persona = role;
 			return true;
 		}
 	}
@@ -1819,4 +1790,11 @@ void LLMInstance::SetReadyState(ReadyState readyState)
 {
 	_readyState.store(readyState);
 	_pStatus->ReportReadyState(readyState);
+}
+
+void LLMInstance::Panic(InternalError error, const string& message)
+{
+	DebugPrintLn(std::format("\r\n>> Internal error 0x{:02x}: {}", toI(error), message));
+	SetReadyState(ReadyState::Invalid);
+	_pStatus->EmitSignal(LLMStatusSignal::ModelUnloadRequest);
 }

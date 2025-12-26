@@ -135,14 +135,14 @@ static bool cmdInstruct(ParsedChatCommand cmd, Ctx ctx)
 static bool cmdErase(ParsedChatCommand cmd, Ctx ctx)
 {
 	int n = atoi(cmd.text.c_str());
-	auto removedMsgs = ctx.pLLM->RemoveMessages(std::max(n, 1));
+	auto removedMsgs = ctx.pLLM->EraseMessages(std::max(n, 1));
 	auto removedIds = FilterMessageIDs(removedMsgs);
 	return ctx.pChatScroll->RemoveMessages(removedIds);
 }
 
 static bool cmdRedoResponse(ParsedChatCommand cmd, Ctx ctx)
 {
-	auto removedMsgs = ctx.pLLM->RemoveMessages(1);
+	auto removedMsgs = ctx.pLLM->EraseMessages(1);
 	if (removedMsgs.empty())
 		return false;
 

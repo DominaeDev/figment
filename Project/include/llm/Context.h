@@ -6,6 +6,8 @@
 
 #pragma once
 
+class ChatSession;
+
 namespace fig::llm
 {
 	class ModelState;
@@ -32,26 +34,27 @@ namespace fig::llm
 		int32_t GetNumSequences() const noexcept { return _num_sequences; }
 		int32_t GetUsedKVCacheCells() const;
 
-		std::map<Role, std::vector<int32_t>> personas;
-		Role activePersona = Role::Undefined;
-		int32_t previous_sequence_index = 0;
-
-		// ContextSequence
-
 		void RefreshBlockPositions();
-		int32_t RemoveBlock(const ContextBlock& block, bool bShift = true);
-		int32_t RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift = true);
+		void DiscardByTTL(int32_t current_turn);
 		int32_t EraseChat();
-		void EraseVolatile();
+
+		int32_t TokenizeUncached(ChatSession& session);
+		bool DiscardBlock(const ContextBlock& block);
+		void SetLogits();
+
+//		int32_t RemoveBlock(const ContextBlock& block, bool bShift = true);
+//		int32_t RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift = true);
+//		void EraseVolatile();
 		int32_t GetBlockAppendOffset() const;
-		int32_t DecrementTTL(int32_t time);
 		std::vector<ContextBlock>::const_iterator GetLastCachedBlock() const;
+
+		std::optional<int32_t> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id);
+		int32_t DecodeUncached();
+		std::optional<int32_t> RemoveDiscardedBlocks();
 
 		// Blocks
 		int32_t AllocateKVCache(int32_t alloc_min);
 		bool RebuildKVCache();
-		std::optional<int32_t> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id);
-		int32_t DecodeUncached(int32_t cursor_pos, bool logits = false);
 
 		void AppendBlock(const ContextBlock& block);
 		void AppendBlock(ContextBlock&& block);
@@ -62,11 +65,18 @@ namespace fig::llm
 		ContextCache& GetCache() { return *_cache.get(); }
 		const ContextCache& GetCache() const { return *_cache.get(); }
 
+		std::map<Role, std::vector<int32_t>> personas;
+		Role active_persona = Role::Undefined;
+		int32_t last_sequence_index = 0;
+
 		// Positions
 		int32_t response_pos = 0;					// start of response, including prompt template preamble
 		int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
 		int32_t cursor_pos = 0;						// current position (read)
 		int32_t chat_begin_pos = 0;					// chat position
+	
+	private:
+		void DumpContext();
 
 	private:
 		const ModelState* _pModel = nullptr;

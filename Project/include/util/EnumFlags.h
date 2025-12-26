@@ -72,6 +72,14 @@ public:
 	constexpr void Set(T v) noexcept { _flags |= ToUnderlying(v); }
 	// Unsets a single flag value.
 	constexpr void Unset(T v) noexcept { _flags &= ~ToUnderlying(v); }
+
+	// Unsets multiple flag values.
+	constexpr void Unset(std::initializer_list<T> vs) noexcept 
+	{
+		auto v = EnumFlags(vs);
+		_flags &= ~v.ToRaw();
+	}
+
 	// Clears all flag values.
 	constexpr void Clear() noexcept { _flags = static_cast<std::underlying_type_t<T>>(0); }
 
