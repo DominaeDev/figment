@@ -298,7 +298,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	SetReadyState(ReadyState::Ready);
 	_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
 
-	DumpContext();
+//	DumpContext();
 	return true;
 }
 
@@ -502,7 +502,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 	int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
 	if (n_ctx_used + ctx_reserve >= state.ctx_size)
 	{
-		if (not _contextState.ReserveTokens(ctx_reserve, false))
+		if (!_contextState.ReserveTokens(ctx_reserve, false))
 		{
 			Panic(InternalError::ContextFull, "Failed to reserve enough context space to hold response.");
 			return InternalError::ContextFull;
@@ -510,7 +510,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 	}
 	else if (_bCtxReallocateNextTurn)
 	{
-		_contextState.ReserveTokens(Constants::Context::MicroBatchSize, true);
+		_contextState.ReserveTokens(ctx_reserve, false);
 	}
 	_bCtxReallocateNextTurn = false;
 

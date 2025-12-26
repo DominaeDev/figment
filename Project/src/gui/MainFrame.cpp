@@ -273,8 +273,8 @@ void MainFrame::AutoChat()
 		command = "/erase";
 	else if (roll < 10)
 		command = "/redo";
-//	else if (roll < 15)
-//		command = "/instruct They think for a moment.";
+	else if (roll < 15)
+		command = "/instruct They think for a moment.";
 	else
 	{
 		command = _autoScript[_autoScriptIndex];

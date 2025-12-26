@@ -40,15 +40,12 @@ namespace fig::llm
 
 		int32_t TokenizeUncached(ChatSession& session);
 		bool DiscardBlock(const ContextBlock& block);
-		void SetLogits();
+		
+		void RebuildBatch();
 
-//		int32_t RemoveBlock(const ContextBlock& block, bool bShift = true);
-//		int32_t RemoveBlocks(std::vector<ContextBlock>::const_iterator begin, std::vector<ContextBlock>::const_iterator end, bool bShift = true);
-//		void EraseVolatile();
 		int32_t GetBlockAppendOffset() const;
 		std::vector<ContextBlock>::const_iterator GetLastCachedBlock() const;
 
-		std::optional<int32_t> DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id);
 		int32_t DecodeUncached();
 		std::optional<int32_t> RemoveDiscardedBlocks();
 

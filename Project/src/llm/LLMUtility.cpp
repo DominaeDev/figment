@@ -836,6 +836,7 @@ namespace fig::llm::utility
 			{
 				if (*pSeq == seq_id)
 				{
+					assert(cell.pos >= 0 && cell.pos < cells.size());
 					++cells[cell.pos];
 					break;
 				}
@@ -886,7 +887,6 @@ namespace fig::llm::utility
 				result.append(context.cursor_pos == i ? "0" : "O");
 			else
 			{
-				assert(false); //! bad
 				result.append("D");
 			}
 		}

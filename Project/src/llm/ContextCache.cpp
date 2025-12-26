@@ -28,9 +28,10 @@ void ContextCache::Clear()
 	if (_batch)
 		fig::llm::utility::free_batch(*_batch.get());
 	_batch = std::make_unique<Batch>(fig::llm::utility::init_batch(_max_size, _n_seq_max));
+	_length = 0;
 }
 
-int32_t ContextCache::BatchAddSingle(llama_token token, SequenceIndices seq_ids, int32_t pos)
+int32_t ContextCache::BatchAddSingle(Token token, SequenceIndices seq_ids, int32_t pos)
 {
 	int32_t n_seq = toI(seq_ids.size());
 
@@ -48,7 +49,7 @@ int32_t ContextCache::BatchAddSingle(llama_token token, SequenceIndices seq_ids,
 	return 1;
 }
 
-int32_t ContextCache::BatchWrite(std::span<const llama_token> tokens, SequenceId seq_id, int32_t pos)
+int32_t ContextCache::BatchWrite(std::span<const Token> tokens, SequenceId seq_id, int32_t pos)
 {
 	// Add to context batch
 	auto seq_ids = fig::llm::utility::get_sequence_indices(seq_id, _n_seq_max);

@@ -34,12 +34,14 @@ bool Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
 	int32_t ctx_size = _pModel->ctx_size;
 	if (n_ctx_used + ctx_reserve >= ctx_size || bForce)
 	{
-		DebugPrintLn(">> REALLOCATING CONTEXT");
-		int32_t shift = AllocateKVCache(ctx_reserve);
-		DebugPrintLn(std::format(">> Allocated {} tokens.", std::abs(shift), ctx_size - cursor_pos));
-		assert(ctx_size - cursor_pos >= Constants::Context::MaxResponseLength);
-
-		return true;
+		int32_t allocated = AllocateKVCache(ctx_reserve);
+		DebugPrintLn(std::format(">> REALLOCATING CONTEXT: Allocated {} tokens.", allocated));
+		if (allocated > 0)
+		{
+			cursor_pos -= allocated;
+			RebuildBatch();
+			return true;
+		}
 	}
 	return false;
 }
@@ -63,27 +65,6 @@ void Context::RefreshBlockPositions()
 		else
 			offset += block.length();
 	}
-}
-
-std::optional<int32_t> Context::DecodeTokens(const std::vector<llama_token>& tokens, int32_t pos, SequenceId seq_id)
-{
-	if (tokens.size() == 0)
-		return std::make_optional(0);
-
-	int32_t n_tokens = static_cast<int32_t>(tokens.size());
-	auto seq_indices = get_sequence_indices(seq_id, _num_sequences);
-	auto [batch_ref, batch_n] = GetCache().GetBatch();
-	llama_batch& batch = batch_ref.get();
-	
-	GetCache().BatchWrite(std::span(tokens.begin(), tokens.end()), seq_id, pos);
-
-	// Decode
-	llama_batch batch_view = create_batch_view(batch, pos, n_tokens);
-	if (batch_view.n_tokens > 0 && llama_decode(_pCtx, batch_view) != 0)
-		return std::nullopt; // Error
-
-//	cursor_pos += n_tokens;
-	return std::make_optional(n_tokens);
 }
 
 int32_t Context::TokenizeUncached(ChatSession& session)
@@ -166,10 +147,6 @@ int32_t Context::DecodeUncached()
 	return cursor_pos;
 }
 
-void Context::SetLogits()
-{
-}
-
 bool Context::RebuildKVCache()
 {
 	int r;
@@ -203,8 +180,6 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 	int32_t n_used_before = llama_kv_self_used_cells(_pCtx);
 #endif
 	
-	DumpContext();
-
 	// Remove
 	for (int32_t i = toI(_blocks.size()) - 1; i >= 0; --i)
 	{
@@ -233,8 +208,6 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 	llama_kv_self_defrag(_pCtx);
 	llama_kv_self_update(_pCtx);
 
-	DumpContext();
-
 #if _DEBUG
 	int32_t n_used_after = llama_kv_self_used_cells(_pCtx);
 	assert(n_used_after == n_used_before - tokens_removed);
@@ -247,22 +220,21 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 		auto& block = _blocks[idx];
 		if (!block.is_static() && block.offset > curr_offset)
 		{
-			int32_t shift = block.offset - curr_offset;
-			for (auto it = _blocks.begin() + idx; it != _blocks.end(); ++it)
+			int32_t shift = curr_offset - block.offset;
+			for (auto it = _blocks.begin() + idx; it < _blocks.end(); ++it)
 			{
 				auto& shift_block = *it;
 				if (shift_block.is_cached())
 				{
 					int32_t seq_id = shift_block.get_any_sequence_id();
 					llama_kv_self_seq_add(_pCtx, seq_id, shift_block.offset, shift_block.offset + shift_block.length(), shift);
+					shift_block.offset += shift;
 				}
-				shift_block.offset += shift;
 			}
 		}
-		curr_offset += block.length();
+		curr_offset = std::max(curr_offset, block.offset + block.length());
 	}
 
-	DumpContext();
 	return tokens_removed;
 }
 
@@ -355,7 +327,7 @@ int32_t Context::AllocateKVCache(int32_t min_reserve)
 
 	int32_t ctx_chat_max = ctx_size - chat_begin_pos; // Exclude system prompt
 	int32_t free_tokens = std::max(min_reserve, toI(ctx_chat_max * (1.0f - Constants::Context::WindowKeepRatio)));
-		
+
 	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](auto& block) { return !block.is_static(); });
 	assert(itFirst != _blocks.end());
 
@@ -370,7 +342,13 @@ int32_t Context::AllocateKVCache(int32_t min_reserve)
 	assert(itFirst != itLast);
 	for (auto it = itFirst; it != itLast; ++it)
 		it->Discard();
-	return total;
+
+	if (auto removed = RemoveDiscardedBlocks())
+	{
+		assert(removed == total);
+		return total;
+	}
+	return 0;
 }
 
 void Context::DiscardByTTL(int32_t current_turn)
@@ -443,4 +421,20 @@ void Context::DumpContext()
 	}
 	fig::llm::utility::dump_kv_cache_cells(*this, "kvcache_alloc.txt");
 #endif
+}
+
+void Context::RebuildBatch()
+{
+	auto& cache = GetCache();
+	cache.Clear();
+	
+	int32_t offset = 0;
+	for (auto& block : _blocks)
+	{
+		if (block.is_cached())
+		{
+			cache.BatchWrite(block.tokens, block.sequenceId, offset);
+			offset += block.length();
+		}
+	}
 }
