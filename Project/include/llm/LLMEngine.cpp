@@ -45,7 +45,7 @@ static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
 		}
 	}
 
-	DebugPrint(text);
+	Log(text);
 }
 
 bool LLMEngine::OnLoadModelProgress(float progress, void* user_data)
@@ -88,7 +88,7 @@ bool LLMEngine::Initialize(fig::string modelFilename, fig::string embeddingFilen
 
 				_pStatus->ReportMemory(usedRAM.load(), usedVRAM.load(), false);
 				_pStatus->EmitSignal(LLMStatusSignal::ModelLoaded);
-				DebugPrintLn("Loaded model OK");
+				LogLn("Loaded model OK");
 			}
 			else // Failure
 			{
@@ -102,7 +102,7 @@ bool LLMEngine::Initialize(fig::string modelFilename, fig::string embeddingFilen
 
 				_pStatus->ReportMemory(0, 0, false);
 				_pStatus->EmitSignal(LLMStatusSignal::ModelLoadFailure);
-				DebugPrintLn("Failed to load model");
+				LogLn("Failed to load model");
 			}
 		}));
 
@@ -195,7 +195,7 @@ void LLMEngine::__LoadModel(fig::string modelFilename, fig::string embeddingFile
 	{
 		state->pEmbedding = new LLMEmbedding {};
 		if (state->pEmbedding->LoadModel(embeddingFilename))
-			DebugPrintLn("Loaded embedding model");
+			LogLn("Loaded embedding model");
 		else
 		{
 			delete state->pEmbedding;

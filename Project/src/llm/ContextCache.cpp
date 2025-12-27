@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "llm/ContextCache.h"
 #include "llm/LLMUtility.h"
+#include "llm/LlamaApi.h"
 #include "Constants.h"
 #include <cassert>
 
@@ -11,14 +12,14 @@ ContextCache::ContextCache(int32_t max_size, int32_t n_seq_max) :
 	_n_seq_max { n_seq_max },
 	_length { 0 }
 {
-	_batch = std::make_unique<Batch>(fig::llm::utility::init_batch(max_size, n_seq_max));
+	_batch = std::make_unique<Batch>(llama::init_batch(max_size, n_seq_max));
 }
 
 ContextCache::~ContextCache()
 {
 	if (_batch)
 	{
-		fig::llm::utility::free_batch(*_batch.get());
+		llama::free(*_batch.get());
 		_batch.reset();
 	}
 }
@@ -26,8 +27,8 @@ ContextCache::~ContextCache()
 void ContextCache::Clear()
 {
 	if (_batch)
-		fig::llm::utility::free_batch(*_batch.get());
-	_batch = std::make_unique<Batch>(fig::llm::utility::init_batch(_max_size, _n_seq_max));
+		llama::free(*_batch.get());
+	_batch = std::make_unique<Batch>(llama::init_batch(_max_size, _n_seq_max));
 	_length = 0;
 }
 
@@ -238,7 +239,7 @@ void ContextCache::InitLogits()
 Batch ContextCache::GetBatchView(int32_t pos, int32_t length) const
 {
 	Batch& batch = *_batch.get();
-	return fig::llm::utility::create_batch_view(batch, pos, length);
+	return llama::create_batch_view(batch, pos, length);
 }
 
 void ContextCache::CopyTokens(int32_t from, int32_t to)

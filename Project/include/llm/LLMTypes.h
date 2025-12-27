@@ -5,6 +5,7 @@
 
 namespace fig::llm
 {
+	// Aliases
 	using ModelPtr = llama_model*;
 	using ContextPtr = llama_context*;
 	using VocabPtr = const llama_vocab*;

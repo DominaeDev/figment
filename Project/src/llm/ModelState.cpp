@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "llm/ModelState.h"
+#include "llm/LlamaApi.h"
 #include "llm/LLMEmbedding.h"
 
 #include <list>
@@ -12,21 +13,21 @@ void ModelState::Release()
 	if (pSampler)
 	{
 		SetActiveGrammar(GrammarFlags::None); // Detach grammar (if any)
-		llama_sampler_free(pSampler);
+		llama::free(pSampler);
 	}
 
 	for (auto& kvp : grammars)
-		llama_sampler_free(kvp.second);
+		llama::free(kvp.second);
 	grammars.clear();
 
 	if (pCtx)
 	{
-		llama_kv_self_clear(pCtx);
-		llama_free(pCtx);
+		llama::ctx_clear(pCtx);
+		llama::free(pCtx);
 	}
 
 	if (pModel)
-		llama_model_free(pModel);
+		llama::free(pModel);
 
 	if (pEmbedding)
 	{
@@ -41,9 +42,9 @@ void ModelState::Release()
 	pVocab = nullptr;
 }
 
-llama_sampler* ModelState::SetActiveGrammar(GrammarFlags flags)
+SamplerPtr ModelState::SetActiveGrammar(GrammarFlags flags)
 {
-	llama_sampler* pSelectedGrammar = nullptr;
+	SamplerPtr pSelectedGrammar = nullptr;
 	if (flags)
 	{
 		auto itFind = grammars.find(flags);
@@ -51,11 +52,11 @@ llama_sampler* ModelState::SetActiveGrammar(GrammarFlags flags)
 			pSelectedGrammar = itFind->second;
 	}
 
-	llama_sampler* pChain = pSampler;
+	SamplerPtr pChain = pSampler;
 	if (pSelectedGrammar != nullptr && pSelectedGrammar == llama_sampler_chain_get(pChain, 0))
 		return pSelectedGrammar; // No swap
 
-	std::list<llama_sampler*> samplers;
+	std::list<SamplerPtr> samplers;
 	int32_t n = llama_sampler_chain_n(pChain);
 	assert(n <= 5);
 

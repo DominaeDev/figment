@@ -284,14 +284,14 @@ bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor
 {
 	if (command.command == ChatCommand::Invalid)
 	{
-		DebugPrintLn("Invalid command");
+		LogLn("Invalid command");
 		return false;
 	}
 
 	auto itFind = functions.find(command.command);
 	if (itFind == functions.cend())
 	{
-		DebugPrintLn("Command is not implemented");
+		LogLn("Command is not implemented");
 		return false;
 	}
 

@@ -13,7 +13,7 @@
 
 namespace fig::common_util
 {
-	void DebugPrint(string message)
+	void Log(fig::string message)
 	{
 #if _DEBUG
 		if (message.empty())
@@ -25,12 +25,12 @@ namespace fig::common_util
 #endif
 	}
 
-	void DebugPrintLn(string message)
+	void LogLn(fig::string message)
 	{
 		std::println("{}", message);
 	}
 
-	string CreateUUID()
+	fig::string CreateUUID()
 	{
 		static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 		return uuidGenerator.getUUID().str();

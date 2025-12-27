@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "llm/Context.h"
+#include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
 #include "llm/LLMTemplate.h"
 #include "llm/ModelState.h"
@@ -25,7 +26,7 @@ Context::Context(const ModelState& model)
 
 int32_t Context::GetUsedKVCacheCells() const
 {
-	return llama_kv_self_used_cells(_pModel->pCtx);
+	return llama::ctx_used_cells(_pCtx);
 }
 
 bool Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
@@ -35,7 +36,7 @@ bool Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
 	if (n_ctx_used + ctx_reserve >= ctx_size || bForce)
 	{
 		int32_t allocated = AllocateKVCache(ctx_reserve);
-		DebugPrintLn(std::format(">> REALLOCATING CONTEXT: Allocated {} tokens.", allocated));
+		LogLn(std::format(">> REALLOCATING CONTEXT: Allocated {} tokens.", allocated));
 		if (allocated > 0)
 		{
 			cursor_pos -= allocated;
@@ -48,7 +49,7 @@ bool Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
 
 void Context::Initialize()
 {
-	llama_kv_self_clear(_pCtx);
+	llama::ctx_clear(_pCtx);
 	_blocks.clear();
 	_cache->Clear();
 }
@@ -89,7 +90,7 @@ int32_t Context::TokenizeUncached(ChatSession& session)
 		content = session.ApplyNames(content, block.role); //! @move?
 
 		block.offset = -1;
-		block.tokens = fig::llm::utility::tokenize(_pVocab, content, false);
+		block.tokens = llama::tokenize(_pVocab, content, false);
 		num_tokens += block.length();
 	}
 	return num_tokens;
@@ -131,7 +132,7 @@ int32_t Context::DecodeUncached()
 		std::vector<llama_seq_id> seqs = block.get_sequence_ids(_num_sequences);
 		assert(!block.is_persona() || seqs.size() == 1);
 
-		llama_batch batch_view = create_batch(block.tokens, seqs, _num_sequences, block.offset, block.is_continuation());
+		llama_batch batch_view = llama::create_batch(block.tokens, seqs, _num_sequences, block.offset, block.is_continuation());
 		if (llama_decode(_pCtx, batch_view) != 0)
 		{
 			llama_batch_free(batch_view);
@@ -153,7 +154,7 @@ bool Context::RebuildKVCache()
 	if constexpr (::Disabled)
 	{
 		// Clear everything
-		llama_kv_self_clear(_pCtx);
+		llama::ctx_clear(_pCtx);
 		auto batch_view = _cache->GetBatchView(0, _cache->length());
 		r = llama_decode(_pCtx, batch_view);
 	}
@@ -162,8 +163,7 @@ bool Context::RebuildKVCache()
 		// Clear only non-static blocks
 		int32_t blocks_pos = chat_begin_pos;
 
-		for (size_t i = 0; i < AllSequenceIDs.size(); ++i)
-			llama_kv_self_seq_rm(_pCtx, (int32_t)i, blocks_pos, -1);
+		llama::ctx_remove(_pCtx, blocks_pos);
 
 		auto batch_view = _cache->GetBatchView(blocks_pos, _cache->length() - blocks_pos);
 		r = llama_decode(_pCtx, batch_view);
@@ -177,7 +177,7 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 {
 	int32_t tokens_removed = 0;
 #if _DEBUG
-	int32_t n_used_before = llama_kv_self_used_cells(_pCtx);
+	int32_t n_used_before = llama::ctx_used_cells(_pCtx);
 #endif
 	
 	// Remove
@@ -194,7 +194,7 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 			continue;
 		}
 
-		if (!llama_kv_self_seq_rm(_pCtx, -1, block.offset, block.offset + block.length()))
+		if (not llama::ctx_remove(_pCtx, block.offset, block.offset + block.length()))
 			return std::nullopt; // Error
 
 		_cache->ClearRange(block.offset, block.offset + block.length());
@@ -205,11 +205,11 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 	if (tokens_removed == 0)
 		return 0;
 
-	llama_kv_self_defrag(_pCtx);
-	llama_kv_self_update(_pCtx);
+	llama::ctx_defrag(_pCtx);
+	llama::ctx_update(_pCtx);
 
 #if _DEBUG
-	int32_t n_used_after = llama_kv_self_used_cells(_pCtx);
+	int32_t n_used_after = llama::ctx_used_cells(_pCtx);
 	assert(n_used_after == n_used_before - tokens_removed);
 #endif
 	
@@ -226,8 +226,8 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 				auto& shift_block = *it;
 				if (shift_block.is_cached())
 				{
-					int32_t seq_id = shift_block.get_any_sequence_id();
-					llama_kv_self_seq_add(_pCtx, seq_id, shift_block.offset, shift_block.offset + shift_block.length(), shift);
+					LlamaSequence seq_id = shift_block.get_any_sequence_id();
+					llama::ctx_move(_pCtx, seq_id, shift_block.offset, shift_block.offset + shift_block.length(), shift);
 					shift_block.offset += shift;
 				}
 			}
@@ -244,7 +244,7 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 	int32_t idx_to = toI(std::distance(_blocks.cbegin(), end)) - 1;
 
 #if _DEBUG
-	int32_t n_used = llama_kv_self_used_cells(_pCtx);
+	int32_t n_used = llama::get_used_cells(_pCtx);
 #endif
 	int32_t total_length = 0;
 
@@ -290,12 +290,12 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 	try
 	{
 		llama_kv_self_update(_pCtx);
-		int32_t n_used_after = llama_kv_self_used_cells(_pCtx);
+		int32_t n_used_after = llama::get_used_cells(_pCtx);
 		assert(n_used_after < n_used);
 	}
 	catch (std::exception& e)
 	{
-		DebugPrintLn(std::format("Exception: {}", e.what()));
+		LogLn(std::format("Exception: {}", e.what()));
 	}
 #endif
 
@@ -315,15 +315,15 @@ bool Context::DiscardBlock(const ContextBlock& block)
 
 void Context::ClearTokensBelow(int32_t pos)
 {
-	erase_bottom(_pCtx, pos);
+	llama::ctx_remove(_pCtx, pos);
 	GetCache().ClearTokensFrom(pos);
 }
 
 int32_t Context::AllocateKVCache(int32_t min_reserve)
 {
 	// Allocate and shift context window
-	int n_ctx_used = llama_kv_self_used_cells(_pCtx);
-	int32_t ctx_size = llama_n_ctx(_pCtx);
+	int n_ctx_used = llama::ctx_used_cells(_pCtx);
+	int32_t ctx_size = llama::ctx_size(_pCtx);
 
 	int32_t ctx_chat_max = ctx_size - chat_begin_pos; // Exclude system prompt
 	int32_t free_tokens = std::max(min_reserve, toI(ctx_chat_max * (1.0f - Constants::Context::WindowKeepRatio)));

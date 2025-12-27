@@ -5,7 +5,7 @@
 
 using namespace fig::llm;
 
-llama_seq_id ContextBlock::get_any_sequence_id() const noexcept
+LlamaSequence ContextBlock::get_any_sequence_id() const noexcept
 {
 	for (size_t i = 0; i < AllSequenceIDs.size() && i < Constants::Context::MaxSequences; ++i)
 	{

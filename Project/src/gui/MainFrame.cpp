@@ -214,7 +214,7 @@ void MainFrame::StartChat()
 	}
 	else
 	{
-		DebugPrintLn("Failed to initialize chat");
+		LogLn("Failed to initialize chat");
 	}
 }
 
@@ -281,7 +281,7 @@ void MainFrame::AutoChat()
 		_autoScriptIndex = ++_autoScriptIndex % _autoScript.size();
 	}
 
-	DebugPrintLn(std::format(">> Auto: {}", command));
+	LogLn(std::format(">> Auto: {}", command));
 	EnqueueCommand(ChatCommands::Parse(command));
 }
 #endif

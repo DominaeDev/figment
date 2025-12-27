@@ -13,19 +13,19 @@
 namespace fig::common_util
 {
 	// Debugging
-	void DebugPrint(fig::string message);
-	void DebugPrintLn(fig::string message = "");
+	void Log(fig::string message);
+	void LogLn(fig::string message = "");
 
 	template<typename... Args>
-	void DebugPrint(string fmt, Args... args)
+	void Log(string fmt, Args... args)
 	{
-		DebugPrint(std::format(fmt, args));
+		Log(std::format(fmt, args));
 	}
 
 	template<typename... Args>
-	void DebugPrintLn(string fmt, Args... args)
+	void LogLn(string fmt, Args... args)
 	{
-		DebugPrintLn(std::format(fmt, args));
+		LogLn(std::format(fmt, args));
 	}
 
 	fig::string CreateUUID();

@@ -287,6 +287,9 @@
     <ClCompile Include="src\gui\HorizontalGradient.cpp">
       <Filter>Source Files\GUI\Primitives</Filter>
     </ClCompile>
+    <ClCompile Include="src\llm\LlamaApi.cpp">
+      <Filter>Source Files\Inference</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -792,6 +795,9 @@
     </ClInclude>
     <ClInclude Include="include\util\UndoStack.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\LlamaApi.h">
+      <Filter>Source Files\Inference</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

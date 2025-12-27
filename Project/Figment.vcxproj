@@ -159,6 +159,7 @@
     <ClCompile Include="src\llm\ContextCache.cpp" />
     <ClCompile Include="src\llm\Embedding.cpp" />
     <ClCompile Include="src\llm\Grammar.cpp" />
+    <ClCompile Include="src\llm\LlamaApi.cpp" />
     <ClCompile Include="src\llm\LLMEmbedding.cpp" />
     <ClCompile Include="src\llm\LLMStateVariables.cpp" />
     <ClCompile Include="src\llm\LLMTemplate.cpp" />
@@ -319,6 +320,7 @@
     <ClInclude Include="include\llm\ContextCache.h" />
     <ClInclude Include="include\llm\Embedding.h" />
     <ClInclude Include="include\llm\Grammar.h" />
+    <ClInclude Include="include\llm\LlamaApi.h" />
     <ClInclude Include="include\llm\LLMEmbedding.h" />
     <ClInclude Include="include\llm\LLMEngine.h" />
     <ClInclude Include="include\llm\LLMStateVariables.h" />

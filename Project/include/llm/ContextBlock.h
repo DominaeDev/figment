@@ -40,7 +40,7 @@ namespace fig::llm
 		inline bool is_persona() const { return flags.IsSet(ContextBlockFlag::Persona); }
 		inline bool is_continuation() const { return flags.IsSet(ContextBlockFlag::Contination); }
 
-		llama_seq_id get_any_sequence_id() const noexcept;
+		LlamaSequence get_any_sequence_id() const noexcept;
 		[[nodiscard]] SequenceIndices get_sequence_ids(int32_t n_seq_max) const noexcept;
 
 		inline void Discard() { flags.Set(ContextBlockFlag::Discard); }

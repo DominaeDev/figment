@@ -1,6 +1,7 @@
 ﻿#include <pch.h>
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
+#include "llm/LLamaApi.h"
 #include "llm/LLMTemplate.h"
 #include "llm/LLMStatus.h"
 #include "llm/Embedding.h"
@@ -104,7 +105,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	_modelState.rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 #endif
 
-	const llama_vocab* pVocab = llama_model_get_vocab(_modelState.pModel);
+	VocabPtr pVocab = llama::get_vocab(_modelState.pModel);
 
 	// Init state variables (temp)
 	if (args.options.flags.IsSet(ChatOptions::Flag::StateVariables))
@@ -117,7 +118,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	_contextState.Initialize();
 	int32_t& cursor_pos = _contextState.cursor_pos = 0;
 
-	/*auto fnDecode = [this](const std::vector<llama_token>& tokens, SequenceId seq_id, int32_t& pos) -> bool {
+	/*auto fnDecode = [this](const std::vector<Token>& tokens, SequenceId seq_id, int32_t& pos) -> bool {
 		if (auto n_tokens = _contextState.DecodeTokens(tokens, pos, seq_id))
 		{
 			pos += n_tokens.value();
@@ -134,7 +135,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 //		
 		fig::string system_prompt = _session.GetSystemPrompt(); //! @group
 
-		std::vector<llama_token> system_prompt_tokens = fig::llm::utility::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
+		std::vector<Token> system_prompt_tokens = llama::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
 
 		// System prompt
 		_contextState.AppendBlock(ContextBlock {
@@ -159,7 +160,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 			SequenceId seq_id = fig::llm::utility::sequence_from_index(i);
 
 			// Persona
-			std::vector<llama_token> persona_tokens = fig::llm::utility::tokenize(pVocab, personas[role], false);
+			std::vector<Token> persona_tokens = llama::tokenize(pVocab, personas[role], false);
 			_contextState.AppendBlock(ContextBlock {
 				.role = Role::System,
 				.name = "",
@@ -179,7 +180,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 		// User persona
 		if (!empty_or_whitespace(user_persona))
 		{
-			auto user_persona_tokens = fig::llm::utility::tokenize(pVocab, user_persona);
+			auto user_persona_tokens = llama::tokenize(pVocab, user_persona);
 			_contextState.AppendBlock(ContextBlock {
 				.role = Role::System,
 				.name = "",
@@ -194,7 +195,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 		}
 
 		// Template suffix
-		auto template_suffix_tokens = fig::llm::utility::tokenize(pVocab, template_suffix);
+		auto template_suffix_tokens = llama::tokenize(pVocab, template_suffix);
 		_contextState.AppendBlock(ContextBlock {
 			.role = Role::System,
 			.name = "",
@@ -219,12 +220,12 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 				if (empty_or_whitespace(kvp.second))
 					continue;
 
-				_contextState.personas[kvp.first] = fig::llm::utility::tokenize(pVocab, kvp.second, false);
+				_contextState.personas[kvp.first] = llama::tokenize(pVocab, kvp.second, false);
 			}
 		}
 
 		fig::string system_prompt = _session.GetSystemPrompt();
-		std::vector<llama_token> system_prompt_tokens = fig::llm::utility::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
+		std::vector<Token> system_prompt_tokens = llama::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
 
 		_contextState.AppendBlock(ContextBlock {
 			.role = Role::System,
@@ -242,7 +243,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 		if (!_session.IsGroupChat())
 		{
 			// Tokenize persona(s)
-			std::vector<llama_token> persona_tokens = fig::llm::utility::tokenize(pVocab, personas[Role::Bot1], false);
+			std::vector<Token> persona_tokens = llama::tokenize(pVocab, personas[Role::Bot1], false);
 			_contextState.AppendBlock(ContextBlock {
 				.role = Role::System,
 				.name = "",
@@ -259,7 +260,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 		// User persona
 		if (!empty_or_whitespace(user_persona))
 		{
-			auto user_persona_tokens = fig::llm::utility::tokenize(pVocab, user_persona);
+			auto user_persona_tokens = llama::tokenize(pVocab, user_persona);
 			_contextState.AppendBlock(ContextBlock {
 				.role = Role::System,
 				.name = "",
@@ -274,7 +275,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 		}
 
 		// Template suffix
-		auto template_suffix_tokens = fig::llm::utility::tokenize(pVocab, template_suffix);
+		auto template_suffix_tokens = llama::tokenize(pVocab, template_suffix);
 		_contextState.AppendBlock(ContextBlock {
 			.role = Role::System,
 			.name = "",
@@ -441,7 +442,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 
 	// Prepare prompt
 	int32_t& cursor_pos = _contextState.cursor_pos;
-	std::vector<llama_token> last_response_tokens;
+	std::vector<Token> last_response_tokens;
 
 	// Increment turn counter
 	int32_t current_turn;
@@ -471,7 +472,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 			content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
 			content += "\nEx: <change>Param = New value</change>\n";
 			content = llm_tmpl::apply_chat_template({ Message { Role::System, content } }, false);
-			auto state_tokens = fig::llm::utility::tokenize(state.pVocab, content, false);
+			auto state_tokens = llama::tokenize(state.pVocab, content, false);
 			auto it = blocks.insert(itState, ContextBlock {
 				.role = Role::System,
 				.name = "",
@@ -499,7 +500,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 
 	// Allocate and shift context window
 	int32_t ctx_reserve = std::max((int32_t)last_response_tokens.size() + Constants::Context::MaxResponseLength, Constants::Context::MicroBatchSize);
-	int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
+	int n_ctx_used = llama::ctx_used_cells(state.pCtx);
 	if (n_ctx_used + ctx_reserve >= state.ctx_size)
 	{
 		if (!_contextState.ReserveTokens(ctx_reserve, false))
@@ -531,14 +532,14 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 		return InternalError::DecodeError;
 	}
 
-	std::vector<llama_token> pre_prompt_tokens;
+	std::vector<Token> pre_prompt_tokens;
 
 	// Append assistant tokens
 	if (!args.isContinuation)
 	{
 		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(args.responder, "assistant"); //! @name?
 		prelude = _session.ApplyNames(prelude, args.responder);
-		auto assistant_tokens = fig::llm::utility::tokenize(state.pVocab, prelude, false);
+		auto assistant_tokens = llama::tokenize(state.pVocab, prelude, false);
 		pre_prompt_tokens.insert(pre_prompt_tokens.end(), assistant_tokens.begin(), assistant_tokens.end());
 	}
 
@@ -567,11 +568,11 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		return;
 	}
 
-	std::vector<llama_token> sampled_tokens;
+	std::vector<Token> sampled_tokens;
 	ModelState& state = _modelState;
 	VocabPtr pVocab = state.pVocab;
 
-	llama_token sampled_token;
+	Token sampled_token;
 	fig::string partial;
 	fig::string stop_reason;
 	fig::string response;
@@ -583,8 +584,8 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	auto& cache = _contextState.GetCache();
 
 	auto [batch_ref, batch_n] = cache.GetBatch();
-	llama_batch& batch = batch_ref.get();
-	//	int32_t n_batch = llama_n_batch(state.pCtx);
+	auto& batch = batch_ref.get();
+
 	int32_t ctx_size = state.ctx_size;
 	fig::string userName = _session.GetNameOf(Role::User);
 
@@ -626,15 +627,15 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	std::vector<int32_t> current_sequence_indices = fig::llm::utility::get_sequence_indices(current_sequence, state.num_sequences);
 
 	assert(current_sequence_index >= 0 && current_sequence_index < Constants::Context::MaxSequences);
-	assert(llama_kv_self_used_cells(state.pCtx) + Constants::Context::MaxResponseLength <= ctx_size);
+	assert(llama::ctx_used_cells(state.pCtx) + Constants::Context::MaxResponseLength <= ctx_size);
 
 	if (!args.history.empty() && _modelState.pEmbedding)
 	{
-		DebugPrintLn(">> SEARCH EMBEDDINGS");
+		LogLn(">> SEARCH EMBEDDINGS");
 		_modelState.pEmbedding->Search(args.history, true, true);
 	}
 
-	DebugPrintLn(">> BEGIN GENERATION");
+	LogLn(">> BEGIN GENERATION");
 
 	// Select and init grammar
 	GrammarFlags grammarFlags {};
@@ -671,7 +672,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	// Add prepend string
 	if (!args.prepend.empty())
 	{
-		auto prepend_tokens = fig::llm::utility::tokenize(state.pVocab, args.prepend, false);
+		auto prepend_tokens = llama::tokenize(state.pVocab, args.prepend, false);
 
 		// Append to batch
 		cache.BatchWrite(prepend_tokens, current_sequence, _contextState.prepend_pos);
@@ -701,13 +702,13 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		}
 
 		// Create batch view
-		llama_batch batch_view = cache.GetBatchView(cursor_pos, cache.length() - cursor_pos);
+		Batch batch_view = cache.GetBatchView(cursor_pos, cache.length() - cursor_pos);
 
 		if (batch_view.n_tokens > 1) // First only
 			fig::llm::utility::dump_batch_tokens(batch_view, batch_view.n_tokens, current_sequence_index, state.pVocab, "batch.txt");
 
 		// Ensure enough space in the context to evaluate this batch
-		int n_ctx_used = llama_kv_self_used_cells(state.pCtx);
+		int n_ctx_used = llama::ctx_used_cells(state.pCtx);
 		if (n_ctx_used + batch_view.n_tokens > ctx_size)
 		{
 			onComplete(InternalError::ContextFull, std::format("context size exceeded ({} / {})", n_ctx_used, ctx_size));
@@ -728,7 +729,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			}
 			else if (r > 0) // Insufficient cache size (possibly due to fragmentation)
 			{
-				DebugPrintLn(">> REBUILDING CONTEXT");
+				LogLn(">> REBUILDING CONTEXT");
 				if (!RebuildKVCache())
 				{
 					onComplete(InternalError::DecodeError, "llama_decode returned error");
@@ -759,7 +760,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		if (!llama_vocab_is_eog(pVocab, sampled_token))
 		{
 			// convert the token to a string, print it and add it to the response
-			str_token = fig::llm::utility::stringFromToken(pVocab, sampled_token);
+			str_token = llama::untokenize(pVocab, sampled_token);
 			if (str_token.size() == 0)
 				break; // Error
 
@@ -867,11 +868,11 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 									current_sequence_index = current_sequence_indices[0];
 
 									// Swap response over
-									llama_kv_self_seq_cp(state.pCtx, prev_sequence_index, current_sequence_index, pre_response_pos, cursor_pos);
+									llama::ctx_copy_sequence(state.pCtx, prev_sequence_index, current_sequence_index, pre_response_pos, cursor_pos);
 //									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos); //! wrong?
 									cache.BatchSetSequences(pre_response_pos, cursor_pos - pre_response_pos, current_sequence);
 
-									DebugPrintLn(std::format(">> Sequence -> {}", current_sequence_index));
+									LogLn(std::format(">> Sequence -> {}", current_sequence_index));
 								}
 							}
 							else if (args.flags.IsSet(GenerateFlag::SwapPersonas))
@@ -979,7 +980,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	}
 	else
 	{
-		DebugPrint("(Empty response)");
+		Log("(Empty response)");
 	}
 
 	_turn_counter++; // Increment turn counter (atomically)
@@ -1010,8 +1011,8 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		}
 	}
 
-	DebugPrintLn();
-	DebugPrintLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stop_reason.c_str(), sampled_tokens.size()));
+	LogLn();
+	LogLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stop_reason.c_str(), sampled_tokens.size()));
 
 	onComplete(InternalError::NoError, response);
 };
@@ -1637,7 +1638,7 @@ bool LLMInstance::SwapPersona(Role role)
 			_contextState.GetCache().BatchWrite(tokens, { Sequence::Default }, insertion_pos);
 
 			// Decode
-			llama_batch batch_view = fig::llm::utility::create_batch_view(batch_ref, insertion_pos, len);
+			Batch batch_view = llama::create_batch_view(batch_ref, insertion_pos, len);
 			if (batch_view.n_tokens > 0 && llama_decode(_modelState.pCtx, batch_view) != 0)
 				return false; // Error
 
@@ -1735,7 +1736,7 @@ SamplerPtr LLMInstance::CompileGrammar(GrammarFlags flags)
 	if (itFind != _modelState.grammars.end())
 		return itFind->second;
 
-	DebugPrintLn(std::format("Compiling grammar variant 0x{:X}", (int32_t)flags));
+	LogLn(std::format("Compiling grammar variant 0x{:X}", (int32_t)flags));
 	SamplerPtr pGrammar = Grammar::compile_grammar(
 		flags,
 		_modelState.pVocab, 
@@ -1794,7 +1795,7 @@ void LLMInstance::SetReadyState(ReadyState readyState)
 
 void LLMInstance::Panic(InternalError error, const string& message)
 {
-	DebugPrintLn(std::format("\r\n>> Internal error 0x{:02x}: {}", toI(error), message));
+	LogLn(std::format("\r\n>> Internal error 0x{:02x}: {}", toI(error), message));
 	SetReadyState(ReadyState::Invalid);
 	_pStatus->EmitSignal(LLMStatusSignal::ModelUnloadRequest);
 }
