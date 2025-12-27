@@ -53,7 +53,7 @@ int32_t ContextCache::BatchAddSingle(Token token, SequenceIndices seq_ids, int32
 int32_t ContextCache::BatchWrite(std::span<const Token> tokens, SequenceId seq_id, int32_t pos)
 {
 	// Add to context batch
-	auto seq_ids = fig::llm::utility::get_sequence_indices(seq_id, _n_seq_max);
+	auto seq_ids = fig::llm_util::get_sequence_indices(seq_id, _n_seq_max);
 	int32_t n_seq = toI(seq_ids.size());
 	int32_t n_tokens = toI(tokens.size());
 	Batch& batch = *_batch.get();
@@ -213,7 +213,7 @@ void ContextCache::BatchSetSequences(int32_t pos, const std::vector<int32_t>& se
 
 void ContextCache::BatchSetSequences(int32_t from, int32_t length, SequenceId seq_id)
 {
-	auto seqIds = fig::llm::utility::get_sequence_indices(seq_id, _n_seq_max);
+	auto seqIds = fig::llm_util::get_sequence_indices(seq_id, _n_seq_max);
 	int32_t n_seq = toI(seqIds.size());
 	int32_t to = from + length;
 	Batch& batch = *_batch.get();
@@ -236,7 +236,7 @@ void ContextCache::InitLogits()
 	batch.logits[_length - 1] = true;  // Only need logits for last token
 }
 
-Batch ContextCache::GetBatchView(int32_t pos, int32_t length) const
+Batch ContextCache::GetView(int32_t pos, int32_t length) const
 {
 	Batch& batch = *_batch.get();
 	return llama::create_batch_view(batch, pos, length);

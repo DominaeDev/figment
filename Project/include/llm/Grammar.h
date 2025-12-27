@@ -3,7 +3,7 @@
 #include "llm/LLMTypes.h"
 namespace fig::llm
 {
-	enum class GrammarFlag : int32_t
+	enum class GrammarFlag : uint32_t
 	{
 		None = 0,
 

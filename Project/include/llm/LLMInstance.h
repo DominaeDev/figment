@@ -160,7 +160,6 @@ namespace fig::llm
 		bool SwapPersona(Role persona);
 
 		void RefreshActiveResponses();
-//		std::vector<RemovedMessage> impl_RemoveMessages(int numMessages);
 		bool RebuildKVCache();
 
 		Sentences GetHistory(size_t depth);
@@ -226,7 +225,6 @@ namespace fig::llm
 		// Session
 		ChatSession _session;
 		ChatOptions _options;
-		bool _bCtxReallocateNextTurn = false;
 		std::atomic<int32_t> _turn_counter = 0;
 
 		// State

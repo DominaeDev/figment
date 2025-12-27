@@ -38,20 +38,20 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 			continue;
 		}
 
-		auto& frame = *item.pControl;
-		auto& rect = frame.GetRect();
+		auto& control = *item.pControl;
+		auto& rect = control.GetRect();
 		int width = 0;
 		if (item.prop == 0)
-			width = ceil_int(frame.GetWidth());
+			width = ceil_int(control.GetWidth());
 		else if (item.prop > 0)
 			width = ceil_int(item.prop * remainingWidth / (float)totalProportion);
 		else
 			width = ceil_int(remainingWidth / (float)numStretch);
 
-		if (frame.GetMinSize().x > 0)
-			width = ceil_int(std::max(toF(width), frame.GetMinSize().x));
-		if (frame.GetMaxSize().x > 0)
-			width = ceil_int(std::min(toF(width), frame.GetMaxSize().x));
+		if (control.GetMinSize().x > 0)
+			width = ceil_int(std::max(toF(width), control.GetMinSize().x));
+		if (control.GetMaxSize().x > 0)
+			width = ceil_int(std::min(toF(width), control.GetMaxSize().x));
 
 		Rectf borderRect {
 			parentRect.x + x,
@@ -99,8 +99,8 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 				rect.y = borderRect.y + borderRect.h - rect.h;
 		}
 
-		frame.SetPosition(rect.x - parentRect.x, rect.y - parentRect.y);
-		frame.SetSize(rect.w, rect.h);
+		control.SetPosition(rect.x - parentRect.x, rect.y - parentRect.y);
+		control.SetSize(rect.w, rect.h);
 
 		x += width;
 	}

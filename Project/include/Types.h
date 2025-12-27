@@ -7,6 +7,7 @@
 #include <string_view>
 #include <vector>
 #include <span>
+#include <stdint.h>
 
 #include "util/EnumFlags.h"
 

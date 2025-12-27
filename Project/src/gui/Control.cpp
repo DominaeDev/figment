@@ -128,8 +128,8 @@ Color Control::GetBackgroundColor() const
 {
 	if (!is_defined(_backgroundColor))
 	{
-		auto frameParent = dynamic_cast<Control*>(_pParent);
-		return frameParent ? frameParent->GetBackgroundColor() : Color();
+		auto parentControl = dynamic_cast<Control*>(_pParent);
+		return parentControl ? parentControl->GetBackgroundColor() : Color();
 	}
 	return _backgroundColor;
 }

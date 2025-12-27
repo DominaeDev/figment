@@ -19,9 +19,9 @@ void VerticalListSizer::OnLayout(Rectf parentRect)
 		if (item.pControl == nullptr)
 			continue;
 
-		auto& frame = *item.pControl;
-		auto& rect = frame.GetRect();
-		int height = ceil_int(frame.GetHeight());
+		auto& control = *item.pControl;
+		auto& rect = control.GetRect();
+		int height = ceil_int(control.GetHeight());
 
 		rect.x = parentRect.x;
 
@@ -30,8 +30,8 @@ void VerticalListSizer::OnLayout(Rectf parentRect)
 
 		rect.y = parentRect.y + parentRect.h - y - rect.h - _marginBottom;
 
-		frame.SetPosition(rect.x - parentRect.x, rect.y - parentRect.y);
-		frame.SetSize(rect.w, rect.h);
+		control.SetPosition(rect.x - parentRect.x, rect.y - parentRect.y);
+		control.SetSize(rect.w, rect.h);
 
 		y += height + _spacing;
 	}

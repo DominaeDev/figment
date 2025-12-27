@@ -13,12 +13,13 @@ namespace fig::llm
 		ContextCache(int32_t size, int32_t n_seq_max);
 		~ContextCache();
 
-		Batch GetBatchView(int32_t pos, int32_t length) const;
+		Batch GetView(int32_t pos, int32_t length) const;
 		void Clear();
 
 		int32_t BatchAllocate(int32_t pos, int32_t length);
 		int32_t BatchWrite(std::span<const Token> tokens, SequenceId seq_id, int32_t pos);
 		int32_t BatchAddSingle(Token token, SequenceIndices seq_ids, int32_t pos);
+		int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
 
 		void InitLogits();
 		void BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds);
@@ -37,7 +38,6 @@ namespace fig::llm
 
 	private:
 		void CopyTokens(int32_t from, int32_t to);
-		int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
 
 	private:
 		std::unique_ptr<Batch> _batch; // Representation of the kv-cache (mirror)

@@ -13,7 +13,7 @@
 
 using namespace fig::common_util;
 using namespace fig::llm;
-using namespace fig::llm::utility;
+using namespace fig::llm_util;
 
 Context::Context(const ModelState& model)
 {
@@ -29,22 +29,13 @@ int32_t Context::GetUsedKVCacheCells() const
 	return llama::ctx_used_cells(_pCtx);
 }
 
-bool Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
+int32_t Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
 {
-	int32_t n_ctx_used = GetUsedKVCacheCells();
 	int32_t ctx_size = _pModel->ctx_size;
+	int32_t n_ctx_used = GetUsedKVCacheCells();
 	if (n_ctx_used + ctx_reserve >= ctx_size || bForce)
-	{
-		int32_t allocated = AllocateKVCache(ctx_reserve);
-		LogLn(std::format(">> REALLOCATING CONTEXT: Allocated {} tokens.", allocated));
-		if (allocated > 0)
-		{
-			cursor_pos -= allocated;
-			RebuildBatch();
-			return true;
-		}
-	}
-	return false;
+		return AllocateKVCache(ctx_reserve);
+	return 0;
 }
 
 void Context::Initialize()
@@ -84,7 +75,7 @@ int32_t Context::TokenizeUncached(ChatSession& session)
 			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
 		else
 		{
-			fig::llm::utility::complete_message(content);
+			fig::llm_util::complete_message(content);
 			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
 		}
 		content = session.ApplyNames(content, block.role); //! @move?
@@ -126,7 +117,7 @@ int32_t Context::DecodeUncached()
 				block.offset = persona_offset;
 		}
 
-		GetCache().BatchWrite(block.tokens, block.sequenceId, block.offset); //! This doesn't work for personas (may not matter)
+		GetCache().BatchWrite(block.tokens, block.sequenceId, block.offset); //! Personas
 
 		// Decode
 		std::vector<llama_seq_id> seqs = block.get_sequence_ids(_num_sequences);
@@ -155,7 +146,7 @@ bool Context::RebuildKVCache()
 	{
 		// Clear everything
 		llama::ctx_clear(_pCtx);
-		auto batch_view = _cache->GetBatchView(0, _cache->length());
+		auto batch_view = _cache->GetView(0, _cache->length());
 		r = llama_decode(_pCtx, batch_view);
 	}
 	else
@@ -165,7 +156,7 @@ bool Context::RebuildKVCache()
 
 		llama::ctx_remove(_pCtx, blocks_pos);
 
-		auto batch_view = _cache->GetBatchView(blocks_pos, _cache->length() - blocks_pos);
+		auto batch_view = _cache->GetView(blocks_pos, _cache->length() - blocks_pos);
 		r = llama_decode(_pCtx, batch_view);
 	}
 
@@ -197,9 +188,26 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 		if (not llama::ctx_remove(_pCtx, block.offset, block.offset + block.length()))
 			return std::nullopt; // Error
 
-		_cache->ClearRange(block.offset, block.offset + block.length());
-		tokens_removed += block.length();
-		_blocks.erase(_blocks.cbegin() + idx);
+		int32_t removed = block.length();
+		tokens_removed += removed;
+
+		_cache->ClearRange(block.offset, block.offset + removed);
+		container_remove_at(_blocks, idx);
+
+		// Shift up subsequent blocks
+		int32_t shift = -removed;
+		for (size_t shift_idx = idx; shift_idx < _blocks.size(); ++shift_idx)
+		{
+			auto& shift_block = _blocks[shift_idx];
+			if (shift_block.is_cached())
+			{
+				LlamaSequence seq_id = shift_block.get_any_sequence_id();
+				llama::ctx_move(_pCtx, seq_id, shift_block.offset, shift_block.offset + shift_block.length(), shift);
+
+				_cache->ShiftTokens(shift_block.offset, toI(shift_block.length()), shift);
+				shift_block.offset += shift;
+			}
+		}
 	}
 
 	if (tokens_removed == 0)
@@ -214,26 +222,35 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 #endif
 	
 	// Realign blocks (shift)
-	int32_t curr_offset = 0;
-	for (size_t idx = 0; idx < _blocks.size(); ++idx)
+	if constexpr (Disabled)
 	{
-		auto& block = _blocks[idx];
-		if (!block.is_static() && block.offset > curr_offset)
+		int32_t curr_offset = 0;
+		for (size_t idx = 0; idx < _blocks.size(); ++idx)
 		{
-			int32_t shift = curr_offset - block.offset;
-			for (auto it = _blocks.begin() + idx; it < _blocks.end(); ++it)
+			auto& block = _blocks[idx];
+			if (!block.is_static() && block.offset > curr_offset)
 			{
-				auto& shift_block = *it;
-				if (shift_block.is_cached())
+				int32_t shift = curr_offset - block.offset;
+				for (auto it = _blocks.begin() + idx; it < _blocks.end(); ++it)
 				{
-					LlamaSequence seq_id = shift_block.get_any_sequence_id();
-					llama::ctx_move(_pCtx, seq_id, shift_block.offset, shift_block.offset + shift_block.length(), shift);
-					shift_block.offset += shift;
+					auto& shift_block = *it;
+					if (shift_block.is_cached())
+					{
+						LlamaSequence seq_id = shift_block.get_any_sequence_id();
+						llama::ctx_move(_pCtx, seq_id, shift_block.offset, shift_block.offset + shift_block.length(), shift);
+
+						_cache->ShiftTokens(block.offset, toI(block.length()), shift);
+						shift_block.offset += shift;
+					}
 				}
 			}
+			curr_offset = std::max(curr_offset, block.offset + block.length());
 		}
-		curr_offset = std::max(curr_offset, block.offset + block.length());
 	}
+
+	cursor_pos -= tokens_removed;
+
+	DumpContext();
 
 	return tokens_removed;
 }
@@ -415,11 +432,11 @@ void Context::DumpContext()
 #if _DEBUG
 	for (int32_t i = 0; i < _num_sequences; ++i)
 	{
-		fig::llm::utility::dump_batch_text(*this, i, std::format("prompt_text_{}.txt", i));
-		fig::llm::utility::dump_batch_tokens(*this, i, std::format("prompt_full_{}.txt", i));
-		fig::llm::utility::dump_kv_cache(*this, i, std::format("kvcache_{}.txt", i));
+		fig::llm_util::dump_batch_text(*this, i, std::format("prompt_text_{}.txt", i));
+		fig::llm_util::dump_batch_tokens(*this, i, std::format("prompt_full_{}.txt", i));
+		fig::llm_util::dump_kv_cache(*this, i, std::format("kvcache_{}.txt", i));
 	}
-	fig::llm::utility::dump_kv_cache_cells(*this, "kvcache_alloc.txt");
+	fig::llm_util::dump_kv_cache_cells(*this, "kvcache_alloc.txt");
 #endif
 }
 
@@ -437,4 +454,23 @@ void Context::RebuildBatch()
 			offset += block.length();
 		}
 	}
+}
+
+int32_t Context::Prepend(SequenceId seq_id, fig::string text)
+{
+	auto& cache = GetCache();
+
+	auto prepend_tokens = llama::tokenize(_pVocab, text, false);
+	// Append to batch
+	cache.BatchWrite(prepend_tokens, seq_id, prepend_pos);
+	prepend_pos += toI(prepend_tokens.size());
+
+	DumpContext();
+	return toI(prepend_tokens.size());
+}
+
+Batch Context::GetCursorView() const
+{
+	auto& cache = GetCache();
+	return cache.GetView(cursor_pos, cache.length() - cursor_pos);
 }

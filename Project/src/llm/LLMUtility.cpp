@@ -30,7 +30,7 @@ static std::vector<fig::string> const closing_tags {
 	std::format("</{0}>", Constants::Chat::DirectionTag),
 };
 
-namespace fig::llm::utility
+namespace fig::llm_util
 {
 	size_t string_find_partial_stop(const fig::string& str, const fig::string& stop)
 	{
@@ -277,7 +277,7 @@ namespace fig::llm::utility
 		auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
 		int32_t n_tokens = toI(tokens.size());
 
-		llama_batch batch_view = context.GetCache().GetBatchView(pos, n_tokens);
+		llama_batch batch_view = context.GetCache().GetView(pos, n_tokens);
 		if (batch_view.n_tokens > 0 && llama_decode(context.GetCtxPtr(), batch_view) != 0)
 			return std::nullopt;
 		return tokens;

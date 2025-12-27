@@ -93,7 +93,6 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 
 	_next_narrator_turn = -1;
 	_narratorCooldownDuration = args.narrationCooldownDuration;
-	_bCtxReallocateNextTurn = false;
 
 	// Initialize sampler + grammar
 	InitSamplers();
@@ -157,7 +156,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 		{
 //			int32_t persona_offset = cursor_pos;
 			Role role = bot_from_index(i);
-			SequenceId seq_id = fig::llm::utility::sequence_from_index(i);
+			SequenceId seq_id = fig::llm_util::sequence_from_index(i);
 
 			// Persona
 			std::vector<Token> persona_tokens = llama::tokenize(pVocab, personas[role], false);
@@ -490,9 +489,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 	}
 
 	// Remove discarded blocks
-	if (auto num_removed = _contextState.RemoveDiscardedBlocks())
-		cursor_pos -= num_removed.value();
-	else
+	if (!_contextState.RemoveDiscardedBlocks())
 	{
 		Panic(InternalError::InvalidContextError, "Context is in an invalid state.");
 		return InternalError::InvalidContextError;
@@ -503,26 +500,14 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 	int n_ctx_used = llama::ctx_used_cells(state.pCtx);
 	if (n_ctx_used + ctx_reserve >= state.ctx_size)
 	{
-		if (!_contextState.ReserveTokens(ctx_reserve, false))
+		int32_t allocated = _contextState.ReserveTokens(ctx_reserve, false);
+		if (!allocated)
 		{
 			Panic(InternalError::ContextFull, "Failed to reserve enough context space to hold response.");
 			return InternalError::ContextFull;
 		}
+		LogLn(std::format(">> REALLOCATING CONTEXT: Allocated {} tokens.", allocated));
 	}
-	else if (_bCtxReallocateNextTurn)
-	{
-		_contextState.ReserveTokens(ctx_reserve, false);
-	}
-	_bCtxReallocateNextTurn = false;
-
-	// Write new blocks to batch
-	/*for (auto& block : _contextState.GetBlocks())
-	{
-		if (block.is_static() || block.is_cached())
-			continue;
-
-		_contextState.GetCache().BatchWrite(block.tokens, block.sequenceId, block.offset);
-	}*/
 
 	// Decode
 	cursor_pos = _contextState.DecodeUncached();
@@ -548,6 +533,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 
 	// Store beginning of response (after assistant prelude)
 	_contextState.prepend_pos = cursor_pos + (int32_t)pre_prompt_tokens.size();
+
 	// Store response position (before assistant prelude)
 	if (!args.isContinuation)
 		_contextState.response_pos = cursor_pos;
@@ -569,34 +555,35 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	}
 
 	std::vector<Token> sampled_tokens;
-	ModelState& state = _modelState;
-	VocabPtr pVocab = state.pVocab;
+	ContextPtr pCtx = _modelState.pCtx;
+	VocabPtr pVocab = _modelState.pVocab;
 
 	Token sampled_token;
 	fig::string partial;
-	fig::string stop_reason;
+	
+	enum class StopReason {
+		Completed = 0,
+		MessageCountLimit,
+		ResponseLengthLimit,
+		UserHalt,
+		ContextFull,
+		ImpersonatingUser,
+	};
+	StopReason stop_reason;
 	fig::string response;
 	MessageType msgType = args.msgType;
+	Role responderRole = args.role;
 	bool isContinuation = args.flags.IsSet(GenerateFlag::Continuation);
 	bool isInstigation = args.flags.IsSet(GenerateFlag::Instigation);
-
-	auto& blocks = _contextState.GetBlocks();
-	auto& cache = _contextState.GetCache();
-
-	auto [batch_ref, batch_n] = cache.GetBatch();
-	auto& batch = batch_ref.get();
-
-	int32_t ctx_size = state.ctx_size;
-	fig::string userName = _session.GetNameOf(Role::User);
-
-	int32_t pre_response_pos = _contextState.response_pos;
-	int32_t& cursor_pos = _contextState.cursor_pos;
-
 	fig::string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
 	fig::string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
+	fig::string userName = _session.GetNameOf(Role::User);
+
+	int32_t response_start_pos = _contextState.response_pos;
+	int32_t& cursor_pos = _contextState.cursor_pos;
+	auto& cache = _contextState.GetCache();
 
 	int numMessages = 0;
-	Role responderRole = args.role;
 	fig::string responderId {};
 	fig::string stateReport {};
 	int32_t current_turn = _turn_counter.load();
@@ -622,12 +609,11 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		current_sequence_index = get_bot_index(responderRole);
 	}
 
-	SequenceId current_sequence = fig::llm::utility::sequence_from_index(current_sequence_index);
-	const int32_t n_seq_max = state.num_sequences;
-	std::vector<int32_t> current_sequence_indices = fig::llm::utility::get_sequence_indices(current_sequence, state.num_sequences);
+	SequenceId current_sequence = fig::llm_util::sequence_from_index(current_sequence_index);
+	std::vector<int32_t> current_sequence_indices = fig::llm_util::get_sequence_indices(current_sequence, _modelState.num_sequences);
 
 	assert(current_sequence_index >= 0 && current_sequence_index < Constants::Context::MaxSequences);
-	assert(llama::ctx_used_cells(state.pCtx) + Constants::Context::MaxResponseLength <= ctx_size);
+	assert(llama::ctx_used_cells(pCtx) + Constants::Context::MaxResponseLength <= _modelState.ctx_size);
 
 	if (!args.history.empty() && _modelState.pEmbedding)
 	{
@@ -666,58 +652,53 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		grammarFlags = grammarFlags | GrammarFlag::EnableState;
 
 	CompileGrammar(grammarFlags);
-	if (auto pGrammar = state.SetActiveGrammar(grammarFlags))
+	if (auto pGrammar = _modelState.SetActiveGrammar(grammarFlags))
 		llama_sampler_reset(pGrammar);
 
 	// Add prepend string
 	if (!args.prepend.empty())
 	{
-		auto prepend_tokens = llama::tokenize(state.pVocab, args.prepend, false);
-
-		// Append to batch
-		cache.BatchWrite(prepend_tokens, current_sequence, _contextState.prepend_pos);
-
+		_contextState.Prepend(current_sequence, args.prepend);
 		partial += args.prepend;
-		printf("%s", partial.c_str());
 	}
 
 	cache.InitLogits();
 
 	auto startTime = std::chrono::steady_clock::now();
 
-	while (true)
+	while (true) // Main LLM sampling loop
 	{
 		bool next_token = true;
 
 		if (thread_stop.stop_requested())
 		{
-			stop_reason = "cancel";
+			stop_reason = StopReason::UserHalt;
 			break; // Cancelled
 		}
 
-		if (cursor_pos >= ctx_size)
+		if (cursor_pos >= _modelState.ctx_size)
 		{
-			stop_reason = "max ctx";
+			stop_reason = StopReason::ContextFull;
 			break; // Max limit reached
 		}
 
 		// Create batch view
-		Batch batch_view = cache.GetBatchView(cursor_pos, cache.length() - cursor_pos);
+		Batch batch_view = _contextState.GetCursorView();
 
 		if (batch_view.n_tokens > 1) // First only
-			fig::llm::utility::dump_batch_tokens(batch_view, batch_view.n_tokens, current_sequence_index, state.pVocab, "batch.txt");
+			fig::llm_util::dump_batch_tokens(batch_view, batch_view.n_tokens, current_sequence_index, pVocab, "batch.txt");
 
 		// Ensure enough space in the context to evaluate this batch
-		int n_ctx_used = llama::ctx_used_cells(state.pCtx);
-		if (n_ctx_used + batch_view.n_tokens > ctx_size)
+		int n_ctx_used = llama::ctx_used_cells(pCtx);
+		if (n_ctx_used + batch_view.n_tokens > _modelState.ctx_size)
 		{
-			onComplete(InternalError::ContextFull, std::format("context size exceeded ({} / {})", n_ctx_used, ctx_size));
+			onComplete(InternalError::ContextFull, std::format("context size exceeded ({} / {})", n_ctx_used, _modelState.ctx_size));
 			return;
 		}
 
 		if (batch_view.n_tokens > 0)
 		{
-			int r = llama_decode(state.pCtx, batch_view);
+			int r = llama_decode(pCtx, batch_view);
 			if (r == 0) // Success
 			{
 				cursor_pos += batch_view.n_tokens;
@@ -735,14 +716,13 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 					onComplete(InternalError::DecodeError, "llama_decode returned error");
 					return;
 				}
-				_bCtxReallocateNextTurn = true; // Also free up more memory
 			}
 		}
 
 		// sample the next token
 		try
 		{
-			sampled_token = llama_sampler_sample(state.pSampler, state.pCtx, -1);
+			sampled_token = llama_sampler_sample(_modelState.pSampler, pCtx, -1);
 		}
 		catch (const std::runtime_error& e)
 		{
@@ -757,6 +737,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		bool bHalt = false;
 		bool bWait = false;
 		fig::string str_token;
+		fig::string stop_word;
 		if (!llama_vocab_is_eog(pVocab, sampled_token))
 		{
 			// convert the token to a string, print it and add it to the response
@@ -770,18 +751,21 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			// check if there is incomplete UTF-8 character at the end
 			bHalt = false;
 			bWait = false;
-			fig::llm::utility::process(partial, str_token, &bWait, &bHalt, stop_reason);
+			fig::llm_util::process(partial, str_token, &bWait, &bHalt, stop_word);
+
+			if (bHalt)
+				stop_reason = StopReason::Completed;
 		}
 		else // EOG token
 		{
 			bHalt = true;
-			stop_reason = "EOG";
+			stop_reason = StopReason::Completed;
 		}
 
 		if (sampled_tokens.size() >= Constants::Context::MaxResponseLength)
 		{
 			bHalt = true;
-			stop_reason = "length";
+			stop_reason = StopReason::ResponseLengthLimit;
 		}
 
 		bSend &= !bWait;
@@ -803,11 +787,11 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 				if (fmt_end != fig::npos)
 				{
 					fig::string tag, tagName;
-					fig::llm::utility::get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
+					fig::llm_util::get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
 					if (tagName == "@USR" || tagName == _session.GetNameOf(Role::User) && args.role != Role::User)
 					{
-						stop_reason = "user";
+						stop_reason = StopReason::ImpersonatingUser;
 						break; // Stop if talking/acting for the user
 					}
 
@@ -825,13 +809,13 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 							carryOver = partial.substr(fmt_start);
 							partial.erase(fmt_start);
 							sendMsg = !partial.empty();
-							responderId = fig::llm::utility::format_id(tagName);
+							responderId = fig::llm_util::format_id(tagName);
 							responderRole = _session.GetRoleOf(responderId);
 						}
 						else // No remainder: New message
 						{
 							sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
-							responderId = fig::llm::utility::format_id(tagName);
+							responderId = fig::llm_util::format_id(tagName);
 							responderRole = _session.GetRoleOf(responderId);
 
 							if (tag == Constants::Chat::DialogueTag)
@@ -849,7 +833,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 							if (msgType != MessageType::StateReport && args.maxMessages > 0 && ++numMessages >= args.maxMessages)
 							{
-								stop_reason = "msg count";
+								stop_reason = StopReason::MessageCountLimit;
 								break; // That's enough, thank you
 							}
 
@@ -859,18 +843,18 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 							if (_session.IsGroupChat() && is_bot(responderRole))
 							{
 								int32_t bot_index = get_bot_index(responderRole);
-								SequenceId new_sequence = fig::llm::utility::sequence_from_index(bot_index);
+								SequenceId new_sequence = fig::llm_util::sequence_from_index(bot_index);
 								if (!new_sequence.IsEmpty() && new_sequence != current_sequence)
 								{
 									int32_t prev_sequence_index = current_sequence_index;
 									current_sequence = new_sequence;
-									current_sequence_indices = fig::llm::utility::get_sequence_indices(current_sequence, n_seq_max);
+									current_sequence_indices = fig::llm_util::get_sequence_indices(current_sequence, _modelState.num_sequences);
 									current_sequence_index = current_sequence_indices[0];
 
 									// Swap response over
-									llama::ctx_copy_sequence(state.pCtx, prev_sequence_index, current_sequence_index, pre_response_pos, cursor_pos);
-//									llama_kv_self_seq_rm(state.pCtx, prev_sequence_index, pre_response_pos, cursor_pos); //! wrong?
-									cache.BatchSetSequences(pre_response_pos, cursor_pos - pre_response_pos, current_sequence);
+									llama::ctx_copy_sequence(pCtx, prev_sequence_index, current_sequence_index, response_start_pos, cursor_pos);
+//									llama_kv_self_seq_rm(pCtx, prev_sequence_index, response_start_pos, cursor_pos); //! wrong?
+									cache.BatchSetSequences(response_start_pos, cursor_pos - response_start_pos, current_sequence);
 
 									LogLn(std::format(">> Sequence -> {}", current_sequence_index));
 								}
@@ -923,7 +907,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 		// Print to console
 		printf("%s", str_token.c_str());
-		assert(cursor_pos < ctx_size);
+		assert(cursor_pos < _modelState.ctx_size);
 
 		// Add sampled token to batch
 		cache.BatchAddSingle(sampled_token, current_sequence_indices, cursor_pos);
@@ -942,19 +926,21 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	}
 
 	// Remove full response from cache (will be reinserted on next turn)
-	_contextState.ClearTokensBelow(pre_response_pos);
+	_contextState.ClearTokensBelow(response_start_pos);
 
-	//	batch.n_tokens = pre_response_pos;
-	cursor_pos = pre_response_pos;
+	//	batch.n_tokens = response_start_pos;
+	cursor_pos = response_start_pos;
 	_contextState.last_sequence_index = current_sequence_index;
+
+	auto& blocks = _contextState.GetBlocks();
 
 	for (auto& block : blocks)
 	{
-		if (block.offset >= pre_response_pos)
+		if (block.offset >= response_start_pos)
 			block.flags.Unset(ContextBlockFlag::Cached);
 	}
 
-	fig::llm::utility::sanitize_response(response);
+	fig::llm_util::sanitize_response(response);
 
 	if (response.length() > 0)
 	{
@@ -1012,7 +998,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	}
 
 	LogLn();
-	LogLn(std::format("END OF GENERATION (stopped on:{}) [{}]", stop_reason.c_str(), sampled_tokens.size()));
+	LogLn(std::format("END OF GENERATION (reason: 0x{:02X}) [{}]", (int32_t)stop_reason, sampled_tokens.size()));
 
 	onComplete(InternalError::NoError, response);
 };
@@ -1274,10 +1260,10 @@ bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgT
 	fig::string content = message;
 	content = _session.ApplyNames(content);
 	std::vector<Submessage> subMessages;
-	content = fig::llm::utility::process_message(content, identifier, &subMessages);
+	content = fig::llm_util::process_message(content, identifier, &subMessages);
 
 	if (msgType == MessageType::Undefined)
-		msgType = fig::llm::utility::detect_message_type(content).first;
+		msgType = fig::llm_util::detect_message_type(content).first;
 	
 	if (msgType == MessageType::SystemMessage) //! @correctness
 		role = Role::System;
@@ -1391,7 +1377,7 @@ bool LLMInstance::__Continue(fig::string responseId, fig::string subMessageId, b
 	if (currBlock.responseId != responseId)
 		return false; // Not last message
 
-	auto [msgType, bComplete] = fig::llm::utility::detect_message_type(currBlock.content);
+	auto [msgType, bComplete] = fig::llm_util::detect_message_type(currBlock.content);
 	if (msgType == MessageType::Undefined || (bComplete && !extend))
 		return false; // Not incomplete message
 
@@ -1540,11 +1526,11 @@ void LLMInstance::DumpContext() const
 #if _DEBUG
 	for (int32_t i = 0; i < _contextState.GetModel().num_sequences; ++i)
 	{
-		fig::llm::utility::dump_batch_text(_contextState, i, std::format("prompt_text_{}.txt", i));
-		fig::llm::utility::dump_batch_tokens(_contextState, i, std::format("prompt_full_{}.txt", i));
-		fig::llm::utility::dump_kv_cache(_contextState, i, std::format("kvcache_{}.txt", i));
+		fig::llm_util::dump_batch_text(_contextState, i, std::format("prompt_text_{}.txt", i));
+		fig::llm_util::dump_batch_tokens(_contextState, i, std::format("prompt_full_{}.txt", i));
+		fig::llm_util::dump_kv_cache(_contextState, i, std::format("kvcache_{}.txt", i));
 	}
-	fig::llm::utility::dump_kv_cache_cells(_contextState, "kvcache_alloc.txt");
+	fig::llm_util::dump_kv_cache_cells(_contextState, "kvcache_alloc.txt");
 #endif 
 }
 
@@ -1602,7 +1588,7 @@ bool LLMInstance::SwapPersona(Role role)
 			return false; // No change
 
 		auto [batch_ref, batch_n] = _contextState.GetCache().GetBatch();
-		llama_context* pCtx = _modelState.pCtx;
+		llama_context* pCtx = pCtx;
 
 		// Remove current persona
 		auto& blocks = _contextState.GetBlocks();
@@ -1639,7 +1625,7 @@ bool LLMInstance::SwapPersona(Role role)
 
 			// Decode
 			Batch batch_view = llama::create_batch_view(batch_ref, insertion_pos, len);
-			if (batch_view.n_tokens > 0 && llama_decode(_modelState.pCtx, batch_view) != 0)
+			if (batch_view.n_tokens > 0 && llama_decode(pCtx, batch_view) != 0)
 				return false; // Error
 
 			block.tokens = tokens;
@@ -1734,9 +1720,12 @@ SamplerPtr LLMInstance::CompileGrammar(GrammarFlags flags)
 
 	auto itFind = _modelState.grammars.find(flags);
 	if (itFind != _modelState.grammars.end())
+	{
+		LogLn(std::format("Selecting grammar variant 0x{:02X}", (uint32_t)flags));
 		return itFind->second;
+	}
 
-	LogLn(std::format("Compiling grammar variant 0x{:X}", (int32_t)flags));
+	LogLn(std::format("Compiling grammar variant 0x{:02X}", (uint32_t)flags));
 	SamplerPtr pGrammar = Grammar::compile_grammar(
 		flags,
 		_modelState.pVocab, 
@@ -1795,7 +1784,7 @@ void LLMInstance::SetReadyState(ReadyState readyState)
 
 void LLMInstance::Panic(InternalError error, const string& message)
 {
-	LogLn(std::format("\r\n>> Internal error 0x{:02x}: {}", toI(error), message));
+	LogLn(std::format("\r\n>> Internal error 0x{:02X}: {}", toI(error), message));
 	SetReadyState(ReadyState::Invalid);
 	_pStatus->EmitSignal(LLMStatusSignal::ModelUnloadRequest);
 }

@@ -115,7 +115,7 @@ namespace fig::llm::llama
 
 	bool ctx_remove(ContextPtr pCtx, SequenceId seq_ids, int32_t begin, int32_t end)
 	{
-		auto seq_id = fig::llm::utility::get_sequence_indices(seq_ids, toI(AllSequenceIDs.size()));
+		auto seq_id = fig::llm_util::get_sequence_indices(seq_ids, toI(AllSequenceIDs.size()));
 		for (auto id : seq_id)
 		{
 			if (!llama_kv_self_seq_rm(pCtx, id, begin, end))
@@ -126,8 +126,8 @@ namespace fig::llm::llama
 
 	void ctx_copy_sequence(ContextPtr pCtx, SequenceId seq_from, SequenceId seq_to, int32_t begin, int32_t end)
 	{
-		auto from = fig::llm::utility::get_sequence_indices(seq_from, toI(AllSequenceIDs.size()))[0];
-		auto to = fig::llm::utility::get_sequence_indices(seq_to, toI(AllSequenceIDs.size()))[0];
+		auto from = fig::llm_util::get_sequence_indices(seq_from, toI(AllSequenceIDs.size()))[0];
+		auto to = fig::llm_util::get_sequence_indices(seq_to, toI(AllSequenceIDs.size()))[0];
 		llama_kv_self_seq_cp(pCtx, from, to, begin, end);
 	}
 }

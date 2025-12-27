@@ -15,19 +15,18 @@ namespace fig::common_util
 {
 	void Log(fig::string message)
 	{
-#if _DEBUG
-		if (message.empty())
-			return;
-
-		std::print("{}", message);
-#else
-		// noop
-#endif
+		if constexpr (EnableLogging)
+		{
+			std::print("{}", message);
+		}
 	}
 
 	void LogLn(fig::string message)
 	{
-		std::println("{}", message);
+		if constexpr (EnableLogging)
+		{
+			std::println("{}", message);
+		}
 	}
 
 	fig::string CreateUUID()
@@ -45,7 +44,7 @@ namespace fig::common_util
 	fig::bytes Base64Decode(fig::string_view text) noexcept
 	{
 		return base64::decode_into<fig::bytes>(text)
-			.value_or(fig::bytes()); // RVO
+			.value_or(fig::bytes()); // rvo
 	}
 
 	std::optional<fig::bytes> TryBase64Decode(fig::string_view text) noexcept

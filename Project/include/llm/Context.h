@@ -25,7 +25,7 @@ namespace fig::llm
 
 		// ContextState
 		void Initialize();
-		bool ReserveTokens(int32_t n_tokens, bool bForce = false);
+		int32_t ReserveTokens(int32_t n_tokens, bool bForce = false);
 
 		// Model info
 		const ModelState& GetModel() const noexcept { return *_pModel; }
@@ -56,6 +56,10 @@ namespace fig::llm
 		void AppendBlock(const ContextBlock& block);
 		void AppendBlock(ContextBlock&& block);
 		void ClearTokensBelow(int32_t pos);
+
+		// Generation
+		Batch GetCursorView() const;
+		int32_t Prepend(SequenceId seq_id, fig::string text);
 
 		std::vector<ContextBlock>& GetBlocks() noexcept { return _blocks; }
 		const std::vector<ContextBlock>& GetBlocks() const noexcept { return _blocks; }

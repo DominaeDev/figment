@@ -10,8 +10,15 @@
 #include <algorithm>
 #include <functional>
 
+
 namespace fig::common_util
 {
+#if _DEBUG
+	constexpr bool EnableLogging = true;
+#else
+	constexpr bool EnableLogging = false;
+#endif
+
 	// Debugging
 	void Log(fig::string message);
 	void LogLn(fig::string message = "");
@@ -19,13 +26,19 @@ namespace fig::common_util
 	template<typename... Args>
 	void Log(string fmt, Args... args)
 	{
-		Log(std::format(fmt, args));
+		if constexpr (EnableLogging)
+		{
+			Log(std::format(fmt, args));
+		}
 	}
 
 	template<typename... Args>
 	void LogLn(string fmt, Args... args)
 	{
-		LogLn(std::format(fmt, args));
+		if constexpr (EnableLogging)
+		{
+			LogLn(std::format(fmt, args));
+		}
 	}
 
 	fig::string CreateUUID();
@@ -34,24 +47,37 @@ namespace fig::common_util
 	fig::bytes Base64Decode(fig::string_view) noexcept;
 
 	template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
-	void container_prepend(Cont<V, A>& vecA, const Cont<V, A>& vecB) noexcept
+	void container_prepend(Cont<V, A>& contA, const Cont<V, A>& contB) noexcept
 	{
-		vecA.insert(std::begin(vecA), std::begin(vecB), std::end(vecB));
+		contA.insert(std::begin(contA), std::begin(contB), std::end(contB));
 	}
 
 	template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
-	void container_append(Cont<V, A>& vecA, const Cont<V, A>& vecB) noexcept
+	void container_append(Cont<V, A>& contA, const Cont<V, A>& contB) noexcept
 	{
-		vecA.insert(std::end(vecA), std::begin(vecB), std::end(vecB));
+		contA.insert(std::end(contA), std::begin(contB), std::end(contB));
 	}
 
 	template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
-	Cont<V, A> container_concat(const Cont<V, A>& vecA, const Cont<V, A>& vecB) noexcept
+	bool container_remove_at(Cont<V, A>& cont, size_t index) noexcept
+	{
+		auto it = std::cbegin(cont);
+		std::advance(it, index);
+		if (it < std::cend(cont))
+		{
+			cont.erase(it);
+			return false;
+		}
+		return false;
+	}
+
+	template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
+	Cont<V, A> container_concat(const Cont<V, A>& contA, const Cont<V, A>& contB) noexcept
 	{
 		Cont<V, A> result;
-		result.reserve(vecA.size() + vecB.size());
-		result.insert(std::end(result), std::begin(vecA), std::end(vecA));
-		result.insert(std::end(result), std::begin(vecB), std::end(vecB));
+		result.reserve(contA.size() + contB.size());
+		result.insert(std::end(result), std::begin(contA), std::end(contA));
+		result.insert(std::end(result), std::begin(contB), std::end(contB));
 		return result;
 	}
 
