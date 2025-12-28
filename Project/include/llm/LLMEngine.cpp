@@ -181,7 +181,7 @@ void LLMEngine::__LoadModel(fig::string modelFilename, fig::string embeddingFile
 
 	state->pCtx = llama_init_from_model(state->pModel, ctx_params);
 	state->ctx_size = llama_n_ctx(state->pCtx);
-	state->num_sequences = n_seq_max;
+	state->max_sequences = n_seq_max;
 
 	if (!state->pCtx)
 	{

@@ -15,7 +15,7 @@ namespace fig::llm
 	class Context
 	{
 	public:
-		Context(const ModelState& model);
+		Context(const ModelState& model, int32_t num_sequences);
 
 		Context() = default;
 		Context(Context&& other) = default;
@@ -34,19 +34,18 @@ namespace fig::llm
 		int32_t GetNumSequences() const noexcept { return _num_sequences; }
 		int32_t GetUsedKVCacheCells() const;
 
-		void RefreshBlockPositions();
 		void DiscardByTTL(int32_t current_turn);
-		int32_t EraseChat();
+		ContextCursor EraseChat();
 
-		int32_t TokenizeUncached(ChatSession& session);
+		void TokenizeUncached(ChatSession& session);
 		bool DiscardBlock(const ContextBlock& block);
 		
 		void RebuildBatch();
 
-		int32_t GetBlockAppendOffset() const;
+		ContextCursor GetBlockAppendOffset() const;
 		std::vector<ContextBlock>::const_iterator GetLastCachedBlock() const;
 
-		int32_t DecodeUncached();
+		ContextCursor DecodeUncached();
 		std::optional<int32_t> RemoveDiscardedBlocks();
 
 		// Blocks
@@ -59,7 +58,7 @@ namespace fig::llm
 
 		// Generation
 		Batch GetCursorView() const;
-		int32_t Prepend(SequenceId seq_id, fig::string text);
+		int32_t Prepend(SequenceSlots seq_id, fig::string text);
 
 		std::vector<ContextBlock>& GetBlocks() noexcept { return _blocks; }
 		const std::vector<ContextBlock>& GetBlocks() const noexcept { return _blocks; }
@@ -71,10 +70,10 @@ namespace fig::llm
 		int32_t last_sequence_index = 0;
 
 		// Positions
-		int32_t response_pos = 0;					// start of response, including prompt template preamble
-		int32_t prepend_pos = 0;					// start of response, excluding prompt template preamble
-		int32_t cursor_pos = 0;						// current position (read)
-		int32_t chat_begin_pos = 0;					// chat position
+		ContextCursor response_pos {};		// (kv-cache) start of response, including prompt template preamble
+		ContextCursor prepend_pos {};		// (kv-cache) start of response, excluding prompt template preamble
+		ContextCursor cursor_pos {};		// (kv-cache) current position (read)
+		ContextCursor chat_begin_pos {};	// (kv-cache) chat position
 	
 	private:
 		void DumpContext();

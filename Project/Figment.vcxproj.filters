@@ -290,6 +290,9 @@
     <ClCompile Include="src\llm\LlamaApi.cpp">
       <Filter>Source Files\Inference</Filter>
     </ClCompile>
+    <ClCompile Include="src\llm\ContextCursor.cpp">
+      <Filter>Source Files\Inference\Context</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -798,6 +801,9 @@
     </ClInclude>
     <ClInclude Include="include\llm\LlamaApi.h">
       <Filter>Source Files\Inference</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\ContextCursor.h">
+      <Filter>Source Files\Inference\Context</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

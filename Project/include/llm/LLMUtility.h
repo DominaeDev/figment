@@ -14,8 +14,8 @@ namespace fig::llm_util
 	fig::string& sanitize_response(fig::string& text);
 	fig::string& complete_message(fig::string& text);
 	
-	std::vector<fig::llm::Token> tokenize_and_batch(fig::llm::Context& context, fig::string content, fig::llm::SequenceId seq_id, int32_t pos, bool add_special = false);
-	std::optional<std::vector<fig::llm::Token>> tokenize_and_decode(fig::llm::Context& context, fig::string content, fig::llm::SequenceId seq_id, int32_t pos, bool add_special = false);
+	std::vector<fig::llm::Token> tokenize_and_batch(fig::llm::Context& context, fig::string content, fig::llm::SequenceSlots seq_id, int32_t pos, bool add_special = false);
+	std::optional<std::vector<fig::llm::Token>> tokenize_and_decode(fig::llm::Context& context, fig::string content, fig::llm::SequenceSlots seq_id, int32_t pos, bool add_special = false);
 
 	void process(fig::string& partial, fig::string str_token, bool* bWait, bool* bHalt, fig::string& stop_word);
 	fig::string process_message(fig::string message, fig::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
@@ -28,9 +28,9 @@ namespace fig::llm_util
 	bool dump_kv_cache_cells(const fig::llm::Context& contextState, fig::string filename);	
 	bool dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, fig::string filename);
 
-	inline fig::llm::SequenceIndices get_sequence_indices(fig::llm::Sequence seq, int32_t n_seq_max) noexcept;
-	fig::llm::SequenceIndices get_sequence_indices(fig::llm::SequenceId seq, int32_t n_seq_max) noexcept;
-	fig::llm::SequenceId sequence_from_index(int32_t seq_idx) noexcept;
+	inline fig::llm::Sequences get_sequence_indices(fig::llm::SequenceSlot seq, int32_t n_seq_max) noexcept;
+	fig::llm::Sequences get_sequence_indices(fig::llm::SequenceSlots seq, int32_t n_seq_max) noexcept;
+	fig::llm::SequenceSlots get_sequence_from_index(int32_t seq_idx) noexcept;
 
 	fig::string format_id(fig::string id);
 }

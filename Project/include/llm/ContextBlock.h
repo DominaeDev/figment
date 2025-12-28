@@ -25,8 +25,9 @@ namespace fig::llm
 		fig::string content;
 		std::vector<int32_t> tokens;
 		ContextBlockFlags flags {};
-		SequenceId sequenceId = SequenceId::None;
-		int32_t offset = -1;
+		int32_t attn_position = -1;
+		int32_t cache_position = -1;
+		SequenceSlots sequenceSlots = SequenceSlots::None;
 		int turn = -1;
 		int ttl = 0;
 		fig::string responseId;
@@ -40,8 +41,8 @@ namespace fig::llm
 		inline bool is_persona() const { return flags.IsSet(ContextBlockFlag::Persona); }
 		inline bool is_continuation() const { return flags.IsSet(ContextBlockFlag::Contination); }
 
-		LlamaSequence get_any_sequence_id() const noexcept;
-		[[nodiscard]] SequenceIndices get_sequence_ids(int32_t n_seq_max) const noexcept;
+		Sequence get_any_sequence_id() const noexcept;
+		[[nodiscard]] Sequences get_sequence_ids(int32_t n_seq_max) const noexcept;
 
 		inline void Discard() { flags.Set(ContextBlockFlag::Discard); }
 

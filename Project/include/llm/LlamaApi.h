@@ -4,6 +4,11 @@
 
 #include "llm/LLMTypes.h"
 
+namespace fig::llm
+{
+	struct ContextBlock;
+}
+
 namespace fig::llm::llama
 {
 	std::vector<Token> tokenize(VocabPtr pModel, fig::string prompt, bool add_special = false);
@@ -11,7 +16,7 @@ namespace fig::llm::llama
 
 	Batch init_batch(int32_t ctx_size, int32_t n_seq_max);
 	bool init_embedding_batch(ModelPtr pModel, ContextPtr pCtx, const std::vector<Token>& tokens, Batch& out_pBatch);
-	Batch create_batch(std::span<Token> tokens, std::span<LlamaSequence> seqs, int32_t n_seq_max, int32_t position, bool logits = false);
+	Batch create_batch(std::span<Token> tokens, std::span<Sequence> seqs, int32_t n_seq_max, int32_t position, bool logits = false);
 	Batch create_batch_view(const Batch& batch, int32_t position, int32_t length);
 
 	enum class DecodeError
@@ -30,29 +35,26 @@ namespace fig::llm::llama
 		return DecodeError::Failed;
 	}
 
-	inline bool ctx_remove(ContextPtr pCtx, int32_t begin, int32_t end = -1)
-	{
-		return llama_kv_self_seq_rm(pCtx, -1, begin, end);
-	}
+	bool ctx_remove(ContextPtr pCtx, int32_t begin, int32_t end = -1);
+	
+	bool ctx_remove(ContextPtr pCtx, Sequence seq_id, int32_t begin, int32_t end);
 
-	inline bool ctx_remove(ContextPtr pCtx, LlamaSequence seq_id, int32_t begin, int32_t end)
-	{
-		llama_kv_self_seq_rm(pCtx, seq_id, begin, end);
-	}
+	bool ctx_remove(ContextPtr pCtx, const ContextBlock& block);
+	bool ctx_remove(ContextPtr pCtx, SequenceSlots seq_ids, int32_t begin, int32_t end = -1);
 
-	bool ctx_remove(ContextPtr pCtx, SequenceId seq_ids, int32_t begin, int32_t end = -1);
+	void ctx_move(ContextPtr pCtx, ContextBlock& block, int32_t offset);
 
-	inline void ctx_move(ContextPtr pCtx, LlamaSequence seq_id, int32_t begin, int32_t end, int32_t offset)
+	inline void ctx_move(ContextPtr pCtx, Sequence seq_id, int32_t begin, int32_t end, int32_t offset)
 	{
 		llama_kv_self_seq_add(pCtx, seq_id, begin, end, offset);
 	}
 
-	inline void ctx_copy_sequence(ContextPtr pCtx, LlamaSequence seq_from, LlamaSequence seq_to, int32_t begin, int32_t end)
+	inline void ctx_copy_sequence(ContextPtr pCtx, Sequence seq_from, Sequence seq_to, int32_t begin, int32_t end)
 	{
 		llama_kv_self_seq_cp(pCtx, seq_from, seq_to, begin, end);
 	}
 
-	void ctx_copy_sequence(ContextPtr pCtx, SequenceId seq_from, SequenceId seq_to, int32_t begin, int32_t end);
+	void ctx_copy_sequence(ContextPtr pCtx, SequenceSlots seq_from, SequenceSlots seq_to, int32_t begin, int32_t end);
 
 	inline void ctx_clear(ContextPtr pCtx)
 	{

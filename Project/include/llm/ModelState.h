@@ -21,7 +21,7 @@ namespace fig::llm
 		std::map<GrammarFlags, SamplerPtr> grammars {};
 		fig::string modelName {};
 		std::mt19937 rng {};
-		int32_t num_sequences {};
+		int32_t max_sequences {};
 		int32_t ctx_size {};
 
 		LLMEmbedding* pEmbedding = nullptr;

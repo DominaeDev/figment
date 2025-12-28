@@ -150,9 +150,9 @@ public:
 		return lhs;
 	}
 
-	friend constexpr EnumFlags operator~(const EnumFlags& bf)
+	friend constexpr EnumFlags operator~(const EnumFlags& rhs)
 	{
-		return EnumFlags(~bf._flags);
+		return EnumFlags(~rhs._flags);
 	}
 
 	friend constexpr bool operator==(const EnumFlags& lhs, const EnumFlags& rhs)
@@ -162,6 +162,15 @@ public:
 	friend constexpr bool operator!=(const EnumFlags& lhs, const EnumFlags& rhs)
 	{
 		return lhs._flags != rhs._flags;
+	}
+
+	friend constexpr bool operator==(const EnumFlags& lhs, T rhs)
+	{
+		return lhs._flags == ToUnderlying(rhs);
+	}
+	friend constexpr bool operator!=(const EnumFlags& lhs, T rhs)
+	{
+		return lhs._flags != ToUnderlying(rhs);
 	}
 
 	auto operator<=>(const EnumFlags& rhs) const

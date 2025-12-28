@@ -17,16 +17,18 @@ namespace fig::llm
 		void Clear();
 
 		int32_t BatchAllocate(int32_t pos, int32_t length);
-		int32_t BatchWrite(std::span<const Token> tokens, SequenceId seq_id, int32_t pos);
-		int32_t BatchAddSingle(Token token, SequenceIndices seq_ids, int32_t pos);
-		int32_t ShiftTokens(int32_t pos, int32_t len, int32_t offset);
+		
+		// Returns the position and length of tokens written
+		std::pair<int32_t, int32_t> BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t pos);
+		int32_t BatchAddSingle(Token token, Sequences seq_ids, int32_t pos);
+		
+		void MoveBlock(ContextBlock& block, int32_t offset);
 
 		void InitLogits();
 		void BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds);
-		void BatchSetSequences(int32_t from, int32_t length, SequenceId seq_id);
+		void BatchSetSequences(int32_t from, int32_t length, SequenceSlots seq_id);
 
-		int32_t BatchRemove(int32_t begin, int32_t end);
-		int32_t ClearRange(int32_t begin, int32_t end);
+		int32_t RemoveBlock(const ContextBlock& block);
 		void ClearTokensFrom(int32_t from);
 
 		int32_t length() const { return _length; }
@@ -37,7 +39,9 @@ namespace fig::llm
 		std::pair<std::reference_wrapper<Batch>, int32_t> GetBatch() const { return std::make_pair<std::reference_wrapper<Batch>, int32_t>(static_cast<Batch&>(*_batch.get()), static_cast<int32_t>(_length)); }
 
 	private:
-		void CopyTokens(int32_t from, int32_t to);
+		void CopyTokens(int32_t begin, int32_t end, int32_t offset);
+		void ClearToken(int32_t pos);
+		void ClearTokens(int32_t begin, int32_t end);
 
 	private:
 		std::unique_ptr<Batch> _batch; // Representation of the kv-cache (mirror)

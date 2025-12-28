@@ -1,4 +1,5 @@
 #include <pch.h>
+#include <cassert>
 #include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
 
@@ -55,7 +56,7 @@ namespace fig::llm::llama
 		return batch;
 	}
 
-	Batch create_batch(std::span<Token> tokens, std::span<LlamaSequence> seqs, int32_t n_seq_max, int32_t position, bool logits)
+	Batch create_batch(std::span<Token> tokens, std::span<Sequence> seqs, int32_t n_seq_max, int32_t position, bool logits)
 	{
 		// Prepare a batch for the prompt
 		Batch batch = llama_batch_init(toI(tokens.size()), 0, n_seq_max);
@@ -113,9 +114,39 @@ namespace fig::llm::llama
 		return true;
 	}
 
-	bool ctx_remove(ContextPtr pCtx, SequenceId seq_ids, int32_t begin, int32_t end)
+	bool ctx_remove(ContextPtr pCtx, int32_t begin, int32_t end)
 	{
-		auto seq_id = fig::llm_util::get_sequence_indices(seq_ids, toI(AllSequenceIDs.size()));
+#if _DEBUG
+		bool r = llama_kv_self_seq_rm(pCtx, -1, begin, end);
+		assert(r); // When is this false?
+		return r;
+#else
+		return llama_kv_self_seq_rm(pCtx, -1, begin, end);
+#endif
+	}
+
+	bool ctx_remove(ContextPtr pCtx, Sequence seq_id, int32_t begin, int32_t end)
+	{
+#if _DEBUG
+		bool r = llama_kv_self_seq_rm(pCtx, seq_id, begin, end);
+		assert(r); // When is this false?
+		return r;
+#else
+		return llama_kv_self_seq_rm(pCtx, seq_id, begin, end);
+#endif
+	}
+
+	bool ctx_remove(ContextPtr pCtx, const ContextBlock& block)
+	{
+		if (block.sequenceSlots == SequenceSlot::Shared)
+			return ctx_remove(pCtx, block.attn_position, block.attn_position + block.length());
+		else
+			return ctx_remove(pCtx, block.sequenceSlots, block.attn_position, block.attn_position + block.length());
+	}
+
+	bool ctx_remove(ContextPtr pCtx, SequenceSlots seq_ids, int32_t begin, int32_t end)
+	{
+		auto seq_id = fig::llm_util::get_sequence_indices(seq_ids, toI(AllSequenceSlots.size()));
 		for (auto id : seq_id)
 		{
 			if (!llama_kv_self_seq_rm(pCtx, id, begin, end))
@@ -124,10 +155,16 @@ namespace fig::llm::llama
 		return true;
 	}
 
-	void ctx_copy_sequence(ContextPtr pCtx, SequenceId seq_from, SequenceId seq_to, int32_t begin, int32_t end)
+	void ctx_copy_sequence(ContextPtr pCtx, SequenceSlots seq_from, SequenceSlots seq_to, int32_t begin, int32_t end)
 	{
-		auto from = fig::llm_util::get_sequence_indices(seq_from, toI(AllSequenceIDs.size()))[0];
-		auto to = fig::llm_util::get_sequence_indices(seq_to, toI(AllSequenceIDs.size()))[0];
+		auto from = fig::llm_util::get_sequence_indices(seq_from, toI(AllSequenceSlots.size()))[0];
+		auto to = fig::llm_util::get_sequence_indices(seq_to, toI(AllSequenceSlots.size()))[0];
 		llama_kv_self_seq_cp(pCtx, from, to, begin, end);
+	}
+
+	void ctx_move(ContextPtr pCtx, ContextBlock& block, int32_t offset)
+	{
+		auto seq_id = block.get_any_sequence_id();
+		ctx_move(pCtx, seq_id, block.attn_position, block.attn_position + block.length(), offset);
 	}
 }

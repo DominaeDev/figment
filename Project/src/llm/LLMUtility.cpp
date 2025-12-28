@@ -272,7 +272,7 @@ namespace fig::llm_util
 		*bWait = false;
 	}
 
-	std::optional<std::vector<Token>> tokenize_and_decode(Context& context, fig::string content, SequenceId seq_id, int32_t pos, bool add_special)
+	std::optional<std::vector<Token>> tokenize_and_decode(Context& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
 	{
 		auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
 		int32_t n_tokens = toI(tokens.size());
@@ -283,7 +283,7 @@ namespace fig::llm_util
 		return tokens;
 	}
 
-	std::vector<Token> tokenize_and_batch(Context& context, fig::string content, SequenceId seq_id, int32_t pos, bool add_special)
+	std::vector<Token> tokenize_and_batch(Context& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
 	{
 		// Add to context batch
 		auto tokens = llama::tokenize(context.GetVocabPtr(), content, add_special);
@@ -595,13 +595,13 @@ namespace fig::llm_util
 		result.append(std::format("[pos:{0}/{1}]\r\n", context.cursor_pos, batch_n));
 
 		// Cached blocks
-		SequenceId seq_id = sequence_from_index(seq_index);
+		SequenceSlots seq_id = get_sequence_from_index(seq_index);
 		auto& blocks = context.GetBlocks();
 		for (auto& block : blocks)
 		{
 			if (block.is_cached())
 				continue;
-			if ((bool)(block.sequenceId & seq_id) == false)
+			if ((bool)(block.sequenceSlots & seq_id) == false)
 				continue;
 
 			result.append("[");
@@ -682,7 +682,8 @@ namespace fig::llm_util
 					seq_id |= 1 << seq;
 			}
 
-			result.append(std::format("{0:<8} {1:<8} {2:<4x} {4:<8} \"{5}\"\r\n",
+			result.append(std::format("{0:<8}{1:<8} {2:<8} {3:<4x} {4:<8} \"{6}\"\r\n",
+				i,
 				batch.pos[i],
 				batch.token[i],
 				seq_id,
@@ -833,28 +834,30 @@ namespace fig::llm_util
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	SequenceIndices get_sequence_indices(Sequence seq, int32_t n_seq_max) noexcept
+	Sequences get_sequence_indices(SequenceSlot seq, int32_t n_seq_max) noexcept
 	{
 		return get_sequence_indices({ seq }, n_seq_max);
 	}
 
-	SequenceIndices get_sequence_indices(SequenceId seq, int32_t n_seq_max) noexcept
+	Sequences get_sequence_indices(SequenceSlots seq, int32_t n_seq_max) noexcept
 	{
-		SequenceIndices seqIds;
-		seqIds.reserve(n_seq_max);
+		Sequences seq_ids;
+		seq_ids.reserve(n_seq_max);
 
-		for (size_t i = 0; i < AllSequenceIDs.size() && i < n_seq_max; ++i)
+		for (size_t i = 0; i < fig::llm::AllSequenceSlots.size() && i < n_seq_max; ++i)
 		{
-			if (seq.IsSet(AllSequenceIDs[i]))
-				seqIds.push_back(toI(i));
+			if (seq.IsSet(fig::llm::AllSequenceSlots[i]))
+				seq_ids.push_back(toI(i));
 		}
-		return seqIds;
+		if (seq_ids.empty())
+			seq_ids.push_back(fig::llm::InvalidSequence); // None
+		return seq_ids;
 	}
 
-	SequenceId sequence_from_index(int32_t seq_idx) noexcept
+	SequenceSlots get_sequence_from_index(int32_t seq_idx) noexcept
 	{
-		if (seq_idx < 0 || seq_idx >= AllSequenceIDs.size())
-			return SequenceId::None;
-		return { AllSequenceIDs[seq_idx] };
+		if (seq_idx < 0 || seq_idx >= AllSequenceSlots.size())
+			return SequenceSlots::None;
+		return { AllSequenceSlots[seq_idx] };
 	}
 }

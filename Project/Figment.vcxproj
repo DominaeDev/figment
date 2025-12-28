@@ -157,6 +157,7 @@
     <ClCompile Include="src\llm\Context.cpp" />
     <ClCompile Include="src\llm\ContextBlock.cpp" />
     <ClCompile Include="src\llm\ContextCache.cpp" />
+    <ClCompile Include="src\llm\ContextCursor.cpp" />
     <ClCompile Include="src\llm\Embedding.cpp" />
     <ClCompile Include="src\llm\Grammar.cpp" />
     <ClCompile Include="src\llm\LlamaApi.cpp" />
@@ -318,6 +319,7 @@
     <ClInclude Include="include\llm\Context.h" />
     <ClInclude Include="include\llm\ContextBlock.h" />
     <ClInclude Include="include\llm\ContextCache.h" />
+    <ClInclude Include="include\llm\ContextCursor.h" />
     <ClInclude Include="include\llm\Embedding.h" />
     <ClInclude Include="include\llm\Grammar.h" />
     <ClInclude Include="include\llm\LlamaApi.h" />
