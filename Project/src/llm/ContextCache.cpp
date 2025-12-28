@@ -54,31 +54,31 @@ int32_t ContextCache::BatchAddSingle(Token token, Sequences seq_ids, int32_t pos
 	return 1;
 }
 
-std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t pos)
+std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t attn_position)
 {
 	// Add to context batch
 	auto seq_ids = get_sequence_indices(seq_id, _n_seq_max);
 	int32_t n_seq = toI(seq_ids.size());
 	Batch& batch = *_batch.get();
 
-	int32_t pos_begin = batch.n_tokens;
+	int32_t cache_pos = batch.n_tokens;
 	int32_t n_tokens = toI(tokens.size());
 
 	for (int32_t i = 0; i < n_tokens; ++i)
 	{
-		int32_t idx = pos_begin + i;
+		int32_t idx = cache_pos + i;
 		assert(idx < _max_size);
 
-		batch.pos[idx] = pos + i;
 		batch.token[idx] = tokens[i];
+		batch.pos[idx] = attn_position + i;
 		batch.n_seq_id[idx] = n_seq;
 		for (size_t itSeq = 0; itSeq < seq_ids.size(); ++itSeq)
 			batch.seq_id[idx][itSeq] = seq_ids[itSeq];
 		batch.logits[idx] = false;
 	}
 
-	_length = batch.n_tokens = pos_begin + n_tokens;
-	return std::make_pair(pos_begin, n_tokens); // <pos, len>
+	_length = batch.n_tokens = cache_pos + n_tokens;
+	return std::make_pair(cache_pos, n_tokens); // <pos, len>
 }
 
 // Returns number of cells after removal
@@ -91,16 +91,25 @@ int32_t ContextCache::RemoveBlock(const ContextBlock& block)
 	for (int32_t i = 0; i < length; ++i)
 	{
 		int idx = block.cache_position + i;
-		for (auto seq_id : seq_ids)
+		if (block.sequenceSlots == SequenceSlot::Shared)
 		{
-			int32_t offset = 0;
-			for (int32_t itSeq = 0; itSeq < _n_seq_max && batch.n_seq_id[idx]; ++itSeq)
+			for (int32_t itSeq = 0; itSeq < _n_seq_max; ++itSeq)
+				batch.seq_id[idx][itSeq] = -1;
+			batch.n_seq_id[idx] = 0;
+		}
+		else
+		{
+			for (auto seq_id : seq_ids)
 			{
-				if (batch.seq_id[idx][itSeq] == seq_id)
+				int32_t offset = 0;
+				for (int32_t itSeq = 0; itSeq < _n_seq_max && batch.n_seq_id[idx]; ++itSeq)
 				{
-					batch.seq_id[idx][itSeq] = -1;
-					batch.n_seq_id[idx]--;
-					break;
+					if (batch.seq_id[idx][itSeq] == seq_id)
+					{
+						batch.seq_id[idx][itSeq] = -1;
+						batch.n_seq_id[idx]--;
+						break;
+					}
 				}
 			}
 		}
@@ -208,31 +217,33 @@ int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 void ContextCache::MoveBlock(ContextBlock& block, int32_t offset)
 {
 	int32_t src_pos = block.cache_position;
-	CopyTokens(block.cache_position, block.length(), offset);
+	CopyTokens(block.cache_position, block.cache_position + block.length(), offset);
 	block.cache_position += offset;
+	ShiftTokens(block.cache_position, block.cache_position + block.length(), offset);
 }
 
-void ContextCache::CopyTokens(int32_t pos, int32_t len, int32_t offset)
+void ContextCache::CopyTokens(int32_t begin, int32_t end, int32_t offset)
 {
 	Batch& batch = *_batch.get();
 
-	int32_t src_pos = pos;
-	int32_t dest_pos = pos + offset;
+	int32_t src_pos = begin;
+	int32_t dest_pos = begin + offset;
+	int32_t length = std::abs(begin - end);
 	if (src_pos > dest_pos)
 	{
 		// Copy tokens up
-		for (int32_t i = 0; i < offset; ++i)
+		for (int32_t i = 0; i < length; ++i)
 		{
 			int src_idx = src_pos + i;
 			int dest_idx = dest_pos + i;
 			assert(dest_idx >= 0 && dest_idx < _max_size && src_idx >= 0 || src_idx < _max_size);
 
-			batch.pos[dest_idx] = batch.token[src_idx];
-			batch.token[dest_idx] = batch.token[src_idx];
-			batch.n_seq_id[dest_idx] = batch.n_seq_id[src_idx];
+			batch.pos[dest_idx]			= batch.pos[src_idx];
+			batch.token[dest_idx]		= batch.token[src_idx];
+			batch.n_seq_id[dest_idx]	= batch.n_seq_id[src_idx];
 			for (int32_t itSeq = 0; itSeq < _n_seq_max; ++itSeq)
 				batch.seq_id[dest_idx][itSeq] = batch.seq_id[src_idx][itSeq];
-			batch.logits[dest_idx] = batch.logits[src_idx];
+			batch.logits[dest_idx]		= batch.logits[src_idx];
 
 			ClearToken(src_idx);
 		}
@@ -240,22 +251,30 @@ void ContextCache::CopyTokens(int32_t pos, int32_t len, int32_t offset)
 	else if (src_pos < dest_pos)
 	{
 		// Copy tokens down
-		for (int32_t i = 0; i < offset; ++i)
+		for (int32_t i = 0; i < length; ++i)
 		{
-			int src_idx = src_pos + len - i - 1;
-			int dest_idx = dest_pos + len - i - 1;
+			int src_idx = src_pos + length - i - 1;
+			int dest_idx = dest_pos + length - i - 1;
 			assert(src_idx >= 0 || src_idx < _max_size && dest_idx >= 0 && dest_idx < _max_size);
 
-			batch.pos[dest_idx] = batch.pos[src_idx];
-			batch.token[dest_idx] = batch.token[src_idx];
-			batch.n_seq_id[dest_idx] = batch.n_seq_id[src_idx];
+			batch.pos[dest_idx]			= batch.pos[src_idx];
+			batch.token[dest_idx]		= batch.token[src_idx];
+			batch.n_seq_id[dest_idx]	= batch.n_seq_id[src_idx];
 			for (int32_t itSeq = 0; itSeq < _n_seq_max; ++itSeq)
 				batch.seq_id[dest_idx][itSeq] = batch.seq_id[src_idx][itSeq];
-			batch.logits[dest_idx] = batch.logits[src_idx];
+			batch.logits[dest_idx]		= batch.logits[src_idx];
 
 			ClearToken(src_idx);
 		}		
 	}
+}
+
+void ContextCache::ShiftTokens(int32_t begin, int32_t end, int32_t offset)
+{
+	Batch& batch = *_batch.get();
+	int32_t length = std::abs(begin - end);
+	for (int32_t i = 0; i < length; ++i)
+		batch.pos[begin + i] += offset;
 }
 
 void ContextCache::BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds)

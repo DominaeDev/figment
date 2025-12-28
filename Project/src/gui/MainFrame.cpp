@@ -267,6 +267,9 @@ void MainFrame::AutoChat()
 		return;
 	}
 
+	if (_bStartedChat)
+		return; // Wait for greeting
+
 	string command;
 	int roll = dist(rng);
 	if (roll < 5)

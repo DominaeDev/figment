@@ -499,7 +499,14 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 	// Update status
 	_pStatus->ReportModelInfo(state.modelName, state.ctx_size, n_ctx_used);
 
-	DumpContext();
+#if _DEBUG
+	if (!llm_util::validate_kv_cache(_contextState, 0))
+	{
+		DumpContext();
+		Panic(InternalError::InvalidContextError, "Context desync error");
+		return InternalError::InvalidContextError;
+	}
+#endif
 	return InternalError::NoError;
 }
 

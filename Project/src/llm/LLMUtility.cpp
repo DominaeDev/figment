@@ -1,6 +1,7 @@
 ﻿#include <pch.h>
 #include "llm/LLMUtility.h"
 #include "llm/LlamaApi.h"
+#include "llm/ModelState.h"
 #include "util/StringUtility.h"
 #include "util/FileUtility.h"
 #include "util/Common.h"
@@ -11,6 +12,7 @@
 #include <set>
 
 using namespace fig::llm;
+using namespace fig::common_util;
 using namespace fig::string_util;
 using namespace fig::file_util;
 
@@ -533,6 +535,40 @@ namespace fig::llm_util
 		return result;
 	}
 
+	Sequences get_sequence_indices(SequenceSlot seq, int32_t n_seq_max) noexcept
+	{
+		return get_sequence_indices({ seq }, n_seq_max);
+	}
+
+	Sequences get_sequence_indices(SequenceSlots seq, int32_t n_seq_max) noexcept
+	{
+		Sequences seq_ids;
+		seq_ids.reserve(n_seq_max);
+
+		for (size_t i = 0; i < fig::llm::AllSequenceSlots.size() && i < n_seq_max; ++i)
+		{
+			if (seq.IsSet(fig::llm::AllSequenceSlots[i]))
+				seq_ids.push_back(toI(i));
+		}
+		if (seq_ids.empty())
+			seq_ids.push_back(fig::llm::InvalidSequence); // None
+		return seq_ids;
+	}
+
+	SequenceSlots get_sequence_from_index(int32_t seq_idx) noexcept
+	{
+		if (seq_idx < 0 || seq_idx >= AllSequenceSlots.size())
+			return SequenceSlots::None;
+		return { AllSequenceSlots[seq_idx] };
+	}
+
+	SequenceSlot get_sequence_slot_from_index(Sequence seq_idx) noexcept
+	{
+		if (seq_idx < 0 || seq_idx >= AllSequenceSlots.size())
+			return SequenceSlot::None;
+		return AllSequenceSlots[seq_idx];
+	}
+
 	fig::string format_id(fig::string id)
 	{
 		if (id[0] == '@')
@@ -682,7 +718,7 @@ namespace fig::llm_util
 					seq_id |= 1 << seq;
 			}
 
-			result.append(std::format("{0:<8}{1:<8} {2:<8} {3:<4x} {4:<8} \"{6}\"\r\n",
+			result.append(std::format("{0:<8}{1:<8} {2:<8} {3:<4x} {4:<8} {5} \"{6}\"\r\n",
 				i,
 				batch.pos[i],
 				batch.token[i],
@@ -783,7 +819,7 @@ namespace fig::llm_util
 		return dump_kv_cache_cells(contextState.GetCtxPtr(), contextState.GetNumSequences(), filename);
 	}
 
-	bool dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, fig::string filename)
+	bool dump_kv_cache_cells(ContextPtr pCtx, int32_t num_sequences, fig::string filename)
 	{
 		auto cache_view = llama_kv_cache_view_init(pCtx, num_sequences);
 
@@ -834,30 +870,134 @@ namespace fig::llm_util
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	Sequences get_sequence_indices(SequenceSlot seq, int32_t n_seq_max) noexcept
+	bool validate_kv_cache(const fig::llm::Context& context, fig::llm::Sequence sequence)
 	{
-		return get_sequence_indices({ seq }, n_seq_max);
-	}
+#if !_DEBUG
+		return true;
+#else
+		auto pCtx = context.GetCtxPtr();
+		auto [batch_ref, batch_n] = context.GetCache().GetBatch();
+		auto& batch = batch_ref.get();
+		auto& blocks = context.GetBlocks();
+		int32_t ctx_size = context.GetModel().ctx_size;
+		int32_t n_max_seq = context.GetModel().max_sequences;
+		auto filter_seq = get_sequence_slot_from_index(sequence);
 
-	Sequences get_sequence_indices(SequenceSlots seq, int32_t n_seq_max) noexcept
-	{
-		Sequences seq_ids;
-		seq_ids.reserve(n_seq_max);
-
-		for (size_t i = 0; i < fig::llm::AllSequenceSlots.size() && i < n_seq_max; ++i)
+		// Check internal consistency of blocks
+		int32_t expected_cache_pos = 0;
+		int32_t expected_attn_pos = 0;
+		for (size_t i = 0; i < blocks.size(); ++i)
 		{
-			if (seq.IsSet(fig::llm::AllSequenceSlots[i]))
-				seq_ids.push_back(toI(i));
-		}
-		if (seq_ids.empty())
-			seq_ids.push_back(fig::llm::InvalidSequence); // None
-		return seq_ids;
-	}
+			auto& block = blocks[i];
+			if (not block.is_cached())
+				continue;
 
-	SequenceSlots get_sequence_from_index(int32_t seq_idx) noexcept
-	{
-		if (seq_idx < 0 || seq_idx >= AllSequenceSlots.size())
-			return SequenceSlots::None;
-		return { AllSequenceSlots[seq_idx] };
+			// Cache position
+			if (block.cache_position != expected_cache_pos)
+			{
+				LogLn(std::format(">> Validation failed: Block at index {} has an unexpected cache position.", i));
+				return false;
+			}
+			expected_cache_pos += block.length();
+
+			if (not block.sequenceSlots.IsSet(filter_seq))
+				continue;
+
+			// Attention position
+			if (block.attn_position > expected_attn_pos)
+			{
+				LogLn(std::format(">> Validation failed: Block at index {} has an unexpected attention position.", i));
+				return false;
+			}
+			expected_attn_pos = std::max(expected_attn_pos, block.attn_position + block.length());
+
+			// Check tokens against batch
+			auto seq_ids = block.get_sequence_ids(context.GetNumSequences());
+			for (size_t idx = 0; idx < block.tokens.size(); ++idx)
+			{
+				size_t pos = block.cache_position + idx;
+				if (batch.token[pos] != block.tokens[idx])
+				{
+					LogLn(std::format(">> Validation failed: Token mismatch at position {} in block at index {}.", pos, i));
+					return false;
+				}
+
+				for (size_t itSeq = 0; itSeq < batch.n_seq_id[pos] && itSeq < n_max_seq; ++itSeq)
+				{
+					Sequence seq = batch.seq_id[pos][itSeq];
+					if (seq == -1)
+					{
+						LogLn(std::format(">> Validation failed: Invalid sequence id for token at position {} in block at index {}.", pos, i));
+						return false;
+					}
+					
+					if (std::find(seq_ids.begin(), seq_ids.end(), seq) == seq_ids.end())
+					{
+						LogLn(std::format(">> Validation failed: Sequence id mismatch (expected {}) for token at position {} in block at index {}.", seq, pos, i));
+						return false;
+					}
+				}
+			}
+		}
+
+		// Check kv-cache allocations
+		auto cache_view = llama_kv_cache_view_init(pCtx, n_max_seq);
+		llama_kv_cache_view_update(pCtx, &cache_view);
+		std::vector<char> tokens; // by pos
+		tokens.resize(cache_view.n_cells, 0);
+		
+		for (int32_t it_cell = 0; it_cell < cache_view.n_cells; ++it_cell)
+		{
+			auto& cell = cache_view.cells[it_cell];
+			llama_seq_id* cell_seqs = &cache_view.cells_sequences[it_cell * n_max_seq];
+			if (cell.pos < 0)
+				continue;
+
+			for (int32_t it_seq = 0; it_seq != n_max_seq; ++it_seq)
+			{
+				int32_t seq = static_cast<int32_t>(*(cell_seqs + it_seq));
+				if (seq == sequence)
+				{
+					if (cell.pos >= ctx_size)
+					{
+						LogLn(std::format(">> Validation failed: Token out of bounds ({}).", cell.pos));
+						return false;
+					}
+
+					if (tokens[cell.pos] != 0)
+					{
+						LogLn(std::format(">> Validation failed: Overlapping tokens at position {}.", cell.pos));
+						return false;
+					}
+
+					tokens[cell.pos] = 1;
+				}
+			}
+		}
+		llama_kv_cache_view_free(&cache_view);
+
+		for (size_t i = 0; i < blocks.size(); ++i)
+		{
+			auto& block = blocks[i];
+			if (!block.is_cached())
+				continue;
+
+			if (block.attn_position < 0 || block.cache_position < 0 || block.attn_position >= ctx_size || block.cache_position >= ctx_size)
+			{
+				LogLn(std::format(">> Validation failed: Block at index {} has invalid position.", i));
+				return false;
+			}
+
+			for (int32_t pos = block.attn_position; pos < block.attn_position + block.length(); ++pos)
+			{
+				if (tokens[pos] == 0)
+				{
+					LogLn(std::format(">> Validation failed: Token position mismatch in block at index {}.", i));
+					return false;
+				}
+			}
+		}
+		return true;
+#endif
 	}
 }

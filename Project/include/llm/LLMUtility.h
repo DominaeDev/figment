@@ -26,11 +26,14 @@ namespace fig::llm_util
 	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_id, fig::llm::VocabPtr pVocab, fig::string filename);
 	bool dump_kv_cache(const fig::llm::Context& context, int32_t seq_id, fig::string filename);
 	bool dump_kv_cache_cells(const fig::llm::Context& contextState, fig::string filename);	
-	bool dump_kv_cache_cells(llama_context* pCtx, int32_t num_sequences, fig::string filename);
+	bool dump_kv_cache_cells(fig::llm::ContextPtr pCtx, int32_t num_sequences, fig::string filename);
+	
+	bool validate_kv_cache(const fig::llm::Context& context, fig::llm::Sequence sequence);
 
 	inline fig::llm::Sequences get_sequence_indices(fig::llm::SequenceSlot seq, int32_t n_seq_max) noexcept;
 	fig::llm::Sequences get_sequence_indices(fig::llm::SequenceSlots seq, int32_t n_seq_max) noexcept;
 	fig::llm::SequenceSlots get_sequence_from_index(int32_t seq_idx) noexcept;
+	fig::llm::SequenceSlot get_sequence_slot_from_index(fig::llm::Sequence seq_idx) noexcept;
 
 	fig::string format_id(fig::string id);
 }

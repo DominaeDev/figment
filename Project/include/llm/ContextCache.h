@@ -40,6 +40,7 @@ namespace fig::llm
 
 	private:
 		void CopyTokens(int32_t begin, int32_t end, int32_t offset);
+		void ShiftTokens(int32_t begin, int32_t end, int32_t offset);
 		void ClearToken(int32_t pos);
 		void ClearTokens(int32_t begin, int32_t end);
 

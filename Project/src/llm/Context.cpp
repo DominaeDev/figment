@@ -88,7 +88,7 @@ ContextCursor Context::DecodeUncached()
 		auto& block = _blocks[i];
 		if (block.is_cached())
 		{
-			attn_position = std::max(block.attn_position + block.length(), attn_position);
+			attn_position = std::max(attn_position, block.attn_position + block.length());
 			continue;
 		}
 
@@ -108,6 +108,7 @@ ContextCursor Context::DecodeUncached()
 
 		// ... and decode it.
 		Batch batch_view = GetCache().GetView(block.cache_position, block.length());
+//		llm_util::dump_batch_tokens(batch_view, batch_view.n_tokens, 0, _pVocab, "add.txt");
 		if (llama::ctx_decode(_pCtx, batch_view) != llama::DecodeError::NoError)
 		{
 			llama::free(batch_view);
@@ -156,8 +157,6 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 	
 	auto& cache = GetCache();
 
-	DumpContext();
-
 	int32_t total_shift = 0;
 	for (int32_t i = toI(_blocks.size()) - 1; i >= 0; --i)
 	{
@@ -172,6 +171,8 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 			container_remove_at(_blocks, block_idx);
 			continue;
 		}
+
+//		DumpContext();
 
 		// Remove from cache
 		int32_t block_pos = block.cache_position;
@@ -189,22 +190,28 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 		if (shift != 0)
 		{
 			// Shift up subsequent blocks
-			for (size_t shift_idx = 0; shift_idx < _blocks.size(); ++shift_idx)
+			for (size_t shift_idx = i; shift_idx < _blocks.size(); ++shift_idx)
 			{
 				auto& shift_block = _blocks[shift_idx];
-				if (shift_block.cache_position > block_pos && shift_block.is_cached())
+				if (shift_block.cache_position > block_pos)
 				{
-					cache.MoveBlock(shift_block, shift);
-					llama::ctx_move(_pCtx, shift_block, shift);
-					shift_block.attn_position += shift;
+					assert(shift_block.attn_position >= 0);
+					if (shift_block.is_cached())
+					{
+						cache.MoveBlock(shift_block, shift);
+						llama::ctx_move(_pCtx, shift_block, shift);
+						shift_block.attn_position += shift;
+//						DumpContext();
+					}
 				}
 			}
 		}
 	}
 
-
 	if (tokens_removed == 0)
 		return 0;
+
+	LogLn(std::format("Removed {} tokens.", tokens_removed));
 
 	llama::ctx_defrag(_pCtx);
 	llama::ctx_update(_pCtx);
