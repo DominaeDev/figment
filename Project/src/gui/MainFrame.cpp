@@ -141,6 +141,7 @@ void MainFrame::OnUpdate(float fDeltaTime)
 			if (pLLM)
 				pLLM->GreetUser();
 		}
+	}
 
 	// Poll llm status
 	_fPollingCounter += fDeltaTime;
