@@ -35,7 +35,7 @@ namespace fig::llm
 		int32_t GetUsedKVCacheCells() const;
 
 		void DiscardByTTL(int32_t current_turn);
-		ContextCursor EraseChat();
+		void EraseChat();
 
 		void TokenizeUncached(ChatSession& session);
 		bool DiscardBlock(const ContextBlock& block);
@@ -43,6 +43,8 @@ namespace fig::llm
 		void RebuildBatch();
 
 		ContextCursor GetBlockAppendOffset() const;
+		ContextCursor GetUncachedOffset() const;
+		ContextCursor GetChatBeginOffset() const;
 		std::vector<ContextBlock>::const_iterator GetLastCachedBlock() const;
 
 		ContextCursor DecodeUncached();
@@ -70,10 +72,11 @@ namespace fig::llm
 		int32_t last_sequence_index = 0;
 
 		// Positions
-		ContextCursor response_pos {};		// (kv-cache) start of response, including prompt template preamble
-		ContextCursor prepend_pos {};		// (kv-cache) start of response, excluding prompt template preamble
 		ContextCursor cursor_pos {};		// (kv-cache) current position (read)
+		ContextCursor response_pos {};		// (token) start of response, including prompt template preamble
+		ContextCursor prepend_pos {};		// (token) start of response, excluding prompt template preamble
 		ContextCursor chat_begin_pos {};	// (kv-cache) chat position
+		ContextCursor token_pos {};			// (token) Current token/attention position (write)
 	
 	private:
 		void DumpContext();

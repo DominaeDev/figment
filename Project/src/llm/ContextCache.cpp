@@ -36,25 +36,31 @@ void ContextCache::Clear()
 	_length = 0;
 }
 
-int32_t ContextCache::BatchAddSingle(Token token, Sequences seq_ids, int32_t pos)
+int32_t ContextCache::BatchAddSingle(Token token, Sequences seq_ids, int32_t attn_pos, bool logits)
 {
-	int32_t n_seq = toI(seq_ids.size());
-
 	Batch& batch = *_batch.get();
-	int idx = pos;
+	
+	int idx = batch.n_tokens;
 	batch.token[idx] = token;
-	batch.pos[idx] = idx;
-	batch.n_seq_id[idx] = n_seq;
+	batch.pos[idx] = attn_pos;
+	
+	batch.n_seq_id[idx] = toI(seq_ids.size());
 	for (size_t itSeq = 0; itSeq < seq_ids.size(); ++itSeq)
 		batch.seq_id[idx][itSeq] = seq_ids[itSeq];
-	batch.logits[idx] = true;
+	batch.logits[idx] = logits;
 
-	++_length;
-	batch.n_tokens = _length;
+	_length = ++batch.n_tokens;
 	return 1;
 }
 
-std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t attn_position)
+std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, ContextCursor& cursor)
+{
+	auto r = BatchWrite(tokens, seq_id, cursor.as_int());
+	cursor.increment(r.second);
+	return r;
+}
+
+std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t attn_pos)
 {
 	// Add to context batch
 	auto seq_ids = get_sequence_indices(seq_id, _n_seq_max);
@@ -70,7 +76,7 @@ std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> toke
 		assert(idx < _max_size);
 
 		batch.token[idx] = tokens[i];
-		batch.pos[idx] = attn_position + i;
+		batch.pos[idx] = attn_pos + i;
 		batch.n_seq_id[idx] = n_seq;
 		for (size_t itSeq = 0; itSeq < seq_ids.size(); ++itSeq)
 			batch.seq_id[idx][itSeq] = seq_ids[itSeq];
@@ -147,11 +153,11 @@ void ContextCache::ClearToken(int32_t pos)
 	batch.logits[pos] = false;
 }
 
-void ContextCache::ClearTokens(int32_t begin, int32_t end)
+void ContextCache::ClearTokens(int32_t index, int32_t length)
 {
 	// Update batch
 	Batch& batch = *_batch.get();
-	for (int32_t idx = begin; idx < end && idx < _max_size; ++idx)
+	for (int32_t idx = index; idx < index + length && idx < _max_size; ++idx)
 	{
 		batch.pos[idx] = 0;
 		batch.token[idx] = 0;
@@ -162,13 +168,12 @@ void ContextCache::ClearTokens(int32_t begin, int32_t end)
 	}
 }
 
-void ContextCache::ClearTokensFrom(int32_t pos)
+void ContextCache::ClearTokensFromIndex(int32_t index)
 {
-	ClearTokens(pos, _max_size);
-	_length = pos;
+	ClearTokens(index, _max_size);
 
 	Batch& batch = *_batch.get();
-	batch.n_tokens = _length;
+	_length = batch.n_tokens = index;
 }
 
 int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
@@ -217,9 +222,10 @@ int32_t ContextCache::BatchAllocate(int32_t pos, int32_t length)
 void ContextCache::MoveBlock(ContextBlock& block, int32_t offset)
 {
 	int32_t src_pos = block.cache_position;
-	CopyTokens(block.cache_position, block.cache_position + block.length(), offset);
+	CopyTokens(src_pos, src_pos + block.length(), offset);
+	ShiftTokens(src_pos, src_pos + block.length(), offset);
 	block.cache_position += offset;
-	ShiftTokens(block.cache_position, block.cache_position + block.length(), offset);
+	block.attn_position += offset;
 }
 
 void ContextCache::CopyTokens(int32_t begin, int32_t end, int32_t offset)
@@ -285,17 +291,18 @@ void ContextCache::BatchSetSequences(int32_t pos, const std::vector<int32_t>& se
 		batch.seq_id[pos][i] = seqIds[i];
 }
 
-void ContextCache::BatchSetSequences(int32_t from, int32_t length, SequenceSlots seq_id)
+void ContextCache::BatchSetSequences(int32_t begin, int32_t end, SequenceSlots seq_id)
 {
-	auto seqIds = get_sequence_indices(seq_id, _n_seq_max);
+	Sequences seqIds = get_sequence_indices(seq_id, _n_seq_max);
 	int32_t n_seq = toI(seqIds.size());
-	int32_t to = from + length;
+	int32_t length = (end - begin);
+
 	Batch& batch = *_batch.get();
-	for (int32_t pos = from; pos < to; ++pos)
+	for (int32_t idx = begin; idx < end; ++idx)
 	{
-		batch.n_seq_id[pos] = n_seq;
-		for (size_t i = 0; i < seqIds.size() && i < _n_seq_max; ++i)
-			batch.seq_id[pos][i] = seqIds[i];
+		batch.n_seq_id[idx] = n_seq;
+		for (size_t itSeq = 0; itSeq < seqIds.size() && itSeq < _n_seq_max; ++itSeq)
+			batch.seq_id[idx][itSeq] = seqIds[itSeq];
 	}
 }
 

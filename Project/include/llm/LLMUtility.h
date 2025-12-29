@@ -14,8 +14,8 @@ namespace fig::llm_util
 	fig::string& sanitize_response(fig::string& text);
 	fig::string& complete_message(fig::string& text);
 	
-	std::vector<fig::llm::Token> tokenize_and_batch(fig::llm::Context& context, fig::string content, fig::llm::SequenceSlots seq_id, int32_t pos, bool add_special = false);
-	std::optional<std::vector<fig::llm::Token>> tokenize_and_decode(fig::llm::Context& context, fig::string content, fig::llm::SequenceSlots seq_id, int32_t pos, bool add_special = false);
+	// std::vector<fig::llm::Token> tokenize_and_batch(fig::llm::Context& context, fig::string content, fig::llm::SequenceSlots seq_id, int32_t pos, bool add_special = false);
+	// std::optional<std::vector<fig::llm::Token>> tokenize_and_decode(fig::llm::Context& context, fig::string content, fig::llm::SequenceSlots seq_id, int32_t pos, bool add_special = false);
 
 	void process(fig::string& partial, fig::string str_token, bool* bWait, bool* bHalt, fig::string& stop_word);
 	fig::string process_message(fig::string message, fig::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;

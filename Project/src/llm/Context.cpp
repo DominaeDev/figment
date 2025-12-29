@@ -76,14 +76,14 @@ ContextCursor Context::DecodeUncached()
 {
 	if (_blocks.empty())
 	{
-		cursor_pos = 0;
+		cursor_pos = 0; //! @ok
+		token_pos = 0;
 		return ContextCursor(0);
 	}
 
 	int32_t last_position = -1;
 	int32_t attn_position = 0;
 
-	bool bDecode = true;
 	auto itLastUser = find_last_if(_blocks, [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
 	for (auto it = _blocks.begin(); it != _blocks.end(); ++it)
 	{
@@ -104,30 +104,27 @@ ContextCursor Context::DecodeUncached()
 		// Write block to cache
 		auto [batch_pos, _] = GetCache().BatchWrite(block.tokens, block.sequenceSlots, block.attn_position);
 		block.cache_position = batch_pos;
-		attn_position = std::max(attn_position, block.attn_position + block.length());
 
 		if (block.is_continuation())
 			GetCache().InitLogits(); // Enable logits for last token
 
 		if (it == itLastUser)
-			bDecode = false;
+			break;
 
-		if (bDecode)
-		{
-			// ... and decode it.
-			Batch batch_view = GetCache().GetView(block.cache_position, block.length());
+		// ... and decode it.
+		Batch batch_view = GetCache().GetView(block.cache_position, block.length());
 //			llm_util::dump_batch_tokens(batch_view, batch_view.n_tokens, 0, _pVocab, "add.txt");
-			if (llama::ctx_decode(_pCtx, batch_view) != llama::DecodeError::NoError)
-			{
-				llama::free(batch_view);
-				return ContextCursor::Invalid; // Error
-			}
-			block.flags.Set(ContextBlockFlag::Cached);
-			block.flags.Unset(ContextBlockFlag::Contination);
-			cursor_pos = block.cache_position + block.length();
+		if (llama::ctx_decode(_pCtx, batch_view) != llama::DecodeError::NoError)
+		{
+			llama::free(batch_view);
+			return ContextCursor::Invalid; // Error
 		}
+		block.flags.Set(ContextBlockFlag::Cached);
+		block.flags.Unset(ContextBlockFlag::Contination);
+		cursor_pos = block.cache_position + block.length(); //! @ok
+		attn_position = std::max(attn_position, block.attn_position + block.length());
 	}
-	return cursor_pos;
+	return ContextCursor { attn_position };
 }
 
 bool Context::RebuildKVCache()
@@ -150,7 +147,8 @@ bool Context::RebuildKVCache()
 		r = llama_decode(_pCtx, batch_view);
 	}
 
-	cursor_pos = _cache->length();
+	cursor_pos = _cache->length(); //! @ok
+	token_pos = chat_begin_pos; //! @ok
 	return r == 0;
 }
 
@@ -204,9 +202,8 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 					assert(shift_block.attn_position >= 0);
 					if (shift_block.is_cached())
 					{
-						cache.MoveBlock(shift_block, shift);
 						llama::ctx_move(_pCtx, shift_block, shift);
-						shift_block.attn_position += shift;
+						cache.MoveBlock(shift_block, shift);
 //						DumpContext();
 					}
 				}
@@ -227,8 +224,9 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 	assert(n_used_after == n_used_before - tokens_removed);
 #endif
 	
-	cache.ClearTokensFrom(cache.length() + total_shift);
-	cursor_pos.increment(total_shift);
+	cache.ClearTokensFromIndex(cache.length() + total_shift);
+	cursor_pos.increment(total_shift); //! @ok
+	token_pos.increment(total_shift); //! @maybe
 
 	DumpContext();
 	return tokens_removed;
@@ -248,7 +246,21 @@ bool Context::DiscardBlock(const ContextBlock& block)
 void Context::ClearTokensBelow(int32_t pos)
 {
 	llama::ctx_remove(_pCtx, pos);
-	GetCache().ClearTokensFrom(pos);
+
+	for (auto& block : _blocks)
+	{
+		if (not block.is_cached())
+			continue;
+		
+		if (block.attn_position >= pos)
+		{
+			block.flags.Unset(ContextBlockFlag::Cached);
+			block.attn_position = -1;
+			block.cache_position = -1;
+		}
+	}
+	auto cache_pos = GetUncachedOffset();
+	_cache->ClearTokensFromIndex(cache_pos.as_int());
 }
 
 int32_t Context::AllocateKVCache(int32_t min_reserve)
@@ -257,7 +269,7 @@ int32_t Context::AllocateKVCache(int32_t min_reserve)
 	int n_ctx_used = llama::ctx_used_cells(_pCtx);
 	int32_t ctx_size = llama::ctx_size(_pCtx);
 
-	int32_t ctx_chat_max = ctx_size - chat_begin_pos.as_int(); // Exclude system prompt
+	int32_t ctx_chat_max = ctx_size - GetChatBeginOffset().as_int(); // Exclude system prompt
 	int32_t free_tokens = std::max(min_reserve, toI(ctx_chat_max * (1.0f - Constants::Context::WindowKeepRatio)));
 
 	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](auto& block) { return !block.is_static(); });
@@ -298,9 +310,26 @@ void Context::DiscardByTTL(int32_t current_turn)
 
 ContextCursor Context::GetBlockAppendOffset() const
 {
-	if (auto pCache = _cache.get())
-		return ContextCursor(pCache->length());
-	return ContextCursor::Invalid;
+	return ContextCursor { GetCache().length() };
+}
+
+ContextCursor Context::GetUncachedOffset() const
+{
+	int32_t pos = 0;
+	for (auto& block : _blocks)
+	{
+		if (block.is_cached())
+			pos = std::max(pos, block.cache_position + block.length());
+	}
+	return ContextCursor { pos };
+}
+
+ContextCursor Context::GetChatBeginOffset() const
+{
+	auto itFind = std::find_if(_blocks.crbegin(), _blocks.crend(), [](const ContextBlock& block) { return not block.flags.IsSet(ContextBlockFlag::Static); });
+	if (itFind != _blocks.crend())
+		return ContextCursor { itFind->cache_position };
+	return ContextCursor { GetCache().length() };
 }
 
 std::vector<ContextBlock>::const_iterator Context::GetLastCachedBlock() const
@@ -311,22 +340,31 @@ std::vector<ContextBlock>::const_iterator Context::GetLastCachedBlock() const
 	return _blocks.cend();
 }
 
-ContextCursor Context::EraseChat() 
+void Context::EraseChat() 
 {
+	if (_blocks.empty())
+	{
+		cursor_pos = 0;
+		chat_begin_pos = 0;
+		token_pos = 0;
+		return;
+	}
+
 	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return !block.flags.IsSet(ContextBlockFlag::Static); });
 	if (itFirst == _blocks.end())
 	{
 		ContextCursor block_pos { _cache->length() };
-		cursor_pos = block_pos;
-		chat_begin_pos = block_pos;
-		return block_pos;
+		cursor_pos = block_pos; //! @ok
+		chat_begin_pos = _blocks.back().attn_position + _blocks.back().length(); //! @ok
+		token_pos = chat_begin_pos;
 	}
 	else
 	{
-		chat_begin_pos = itFirst->cache_position;
+		cursor_pos = itFirst->cache_position; //! @ok
+		chat_begin_pos = itFirst->attn_position; //! @ok
+		token_pos = chat_begin_pos;
 		for (auto it = itFirst; it != _blocks.end(); ++it)
 			it->Discard();
-		return chat_begin_pos;
 	}
 }
 
@@ -363,7 +401,7 @@ void Context::RebuildBatch()
 	{
 		if (block.is_cached())
 		{
-			cache.BatchWrite(block.tokens, block.sequenceSlots, offset);
+			cache.BatchWrite(block.tokens, block.sequenceSlots, block.attn_position);
 			offset += block.length();
 		}
 	}
@@ -376,8 +414,8 @@ int32_t Context::Prepend(SequenceSlots seq_id, fig::string text)
 	auto prepend_tokens = llama::tokenize(_pVocab, text, false);
 	
 	// Append to batch
-	cache.BatchWrite(prepend_tokens, seq_id, prepend_pos.as_int());
-	prepend_pos.increment(prepend_tokens.size());
+	auto [_, len] = cache.BatchWrite(prepend_tokens, seq_id, prepend_pos.as_int());
+	prepend_pos.increment(len);
 
 	DumpContext();
 	return toI(prepend_tokens.size());
@@ -386,5 +424,5 @@ int32_t Context::Prepend(SequenceSlots seq_id, fig::string text)
 Batch Context::GetCursorView() const
 {
 	auto& cache = GetCache();
-	return cache.GetView(cursor_pos.as_int(), cache.length() - cursor_pos.as_int());
+	return cache.GetView(cursor_pos.as_int(), cache.length() - cursor_pos.as_int()); //! @ok
 }

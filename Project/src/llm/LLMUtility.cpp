@@ -273,7 +273,7 @@ namespace fig::llm_util
 		*bHalt = false;
 		*bWait = false;
 	}
-
+	/*
 	std::optional<std::vector<Token>> tokenize_and_decode(Context& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
 	{
 		auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
@@ -291,7 +291,7 @@ namespace fig::llm_util
 		auto tokens = llama::tokenize(context.GetVocabPtr(), content, add_special);
 		context.GetCache().BatchWrite(tokens, seq_id, pos);
 		return tokens;
-	}
+	}*/
 
 	struct Span
 	{
@@ -628,7 +628,7 @@ namespace fig::llm_util
 			result.append(fnTokenStr(batch.token[i], false));
 		}
 
-		result.append(std::format("[pos:{0}/{1}]\r\n", context.cursor_pos, batch_n));
+		result.append(std::format("[pos:{0}/{1}/{2}]\r\n", context.token_pos, context.cursor_pos, batch_n));
 
 		// Cached blocks
 		SequenceSlots seq_id = get_sequence_from_index(seq_index);
@@ -797,12 +797,12 @@ namespace fig::llm_util
 			if (cells[i] == 0)
 			{
 				if (batched[i] == 0)
-					result.append(context.cursor_pos == i ? "_" : ".");
+					result.append(context.token_pos == i ? "_" : ".");
 				else
-					result.append(context.cursor_pos == i ? ">" : "o");
+					result.append(context.token_pos == i ? ">" : "o");
 			}
 			else if (cells[i] == 1)
-				result.append(context.cursor_pos == i ? "0" : "O");
+				result.append(context.token_pos == i ? "0" : "O");
 			else
 			{
 				result.append("D");
