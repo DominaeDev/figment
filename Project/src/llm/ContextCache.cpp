@@ -90,13 +90,16 @@ std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> toke
 // Returns number of cells after removal
 int32_t ContextCache::RemoveBlock(const ContextBlock& block)
 {
-	int32_t empty = 0;
+	int32_t n_empty = 0;
 	Batch& batch = *_batch.get();
 	int32_t length = block.length();
 	auto seq_ids = block.get_sequence_ids(_n_seq_max);
 	for (int32_t i = 0; i < length; ++i)
 	{
 		int idx = block.cache_position + i;
+
+		assert(block.tokens[i] == batch.token[idx]);
+
 		if (block.sequenceSlots == SequenceSlot::Shared)
 		{
 			for (int32_t itSeq = 0; itSeq < _n_seq_max; ++itSeq)
@@ -126,17 +129,16 @@ int32_t ContextCache::RemoveBlock(const ContextBlock& block)
 			batch.pos[idx] = 0;
 			batch.token[idx] = 0;
 			batch.logits[idx] = false;
-			++empty;
+			++n_empty;
 		}
 		else
 		{
 			auto seq_span = std::span(&batch.seq_id[idx][0], &batch.seq_id[idx][_n_seq_max - 1]);
 			std::ranges::sort(seq_span, [](Sequence a, Sequence b) { return a > b; });
 			std::vector<Sequence> hehe(seq_span.begin(), seq_span.end());
-			int k = 0;
 		}
 	}
-	return empty;
+	return n_empty;
 }
 
 void ContextCache::ClearToken(int32_t pos)

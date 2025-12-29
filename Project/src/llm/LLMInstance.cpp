@@ -115,7 +115,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 
 	// Initialize context
 	_contextState.Initialize();
-	ContextCursor& cursor_pos = _contextState.cursor_pos = 0; //! @ok
+	ContextCursor& cursor_pos = _contextState.cursor_pos = 0;
 
 	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System, "");
 
@@ -254,7 +254,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 
 	_contextState.chat_begin_pos = pos_attn;
 	_contextState.token_pos = pos_attn;
-	_contextState.cursor_pos = _contextState.GetUncachedOffset(); //! @ok
+	_contextState.cursor_pos = _contextState.GetUncachedOffset();
 	
 	SetReadyState(ReadyState::Ready);
 	_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
@@ -646,7 +646,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			break; // Cancelled
 		}
 
-		if (cursor_pos >= _modelState.ctx_size) //! @ok
+		if (cursor_pos >= _modelState.ctx_size)
 		{
 			stop_reason = StopReason::ContextFull;
 			break; // Max limit reached
@@ -674,8 +674,8 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			int r = llama_decode(pCtx, batch_view);
 			if (r == 0) // Success
 			{
-				cursor_pos.increment(batch_view.n_tokens); //! @ok
-				token_pos.increment(batch_view.n_tokens); //! @ok
+				cursor_pos.increment(batch_view.n_tokens);
+				token_pos.increment(batch_view.n_tokens);
 			}
 			else if (r < 0) // Error
 			{
@@ -881,10 +881,10 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 
 		// Print to console
 		Log(str_token);
-		assert(cursor_pos < _modelState.ctx_size); //! @ok
+		assert(cursor_pos < _modelState.ctx_size);
 
 		// Add sampled token to batch
-		cache.BatchAddSingle(sampled_token, current_sequence_indices, token_pos.as_int()); //! @ok
+		cache.BatchAddSingle(sampled_token, current_sequence_indices, token_pos.as_int());
 
 		// prepare the next batch with the sampled token
 		if (!next_token)

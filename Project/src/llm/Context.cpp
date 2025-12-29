@@ -76,7 +76,7 @@ ContextCursor Context::DecodeUncached()
 {
 	if (_blocks.empty())
 	{
-		cursor_pos = 0; //! @ok
+		cursor_pos = 0;
 		token_pos = 0;
 		return ContextCursor(0);
 	}
@@ -84,7 +84,6 @@ ContextCursor Context::DecodeUncached()
 	int32_t last_position = -1;
 	int32_t attn_position = 0;
 
-	auto itLastUser = find_last_if(_blocks, [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
 	for (auto it = _blocks.begin(); it != _blocks.end(); ++it)
 	{
 		auto& block = *it;
@@ -108,12 +107,9 @@ ContextCursor Context::DecodeUncached()
 		if (block.is_continuation())
 			GetCache().InitLogits(); // Enable logits for last token
 
-		if (it == itLastUser)
-			break;
-
 		// ... and decode it.
 		Batch batch_view = GetCache().GetView(block.cache_position, block.length());
-//			llm_util::dump_batch_tokens(batch_view, batch_view.n_tokens, 0, _pVocab, "add.txt");
+//		llm_util::dump_batch_tokens(batch_view, batch_view.n_tokens, 0, _pVocab, "add.txt");
 		if (llama::ctx_decode(_pCtx, batch_view) != llama::DecodeError::NoError)
 		{
 			llama::free(batch_view);
@@ -121,7 +117,7 @@ ContextCursor Context::DecodeUncached()
 		}
 		block.flags.Set(ContextBlockFlag::Cached);
 		block.flags.Unset(ContextBlockFlag::Contination);
-		cursor_pos = block.cache_position + block.length(); //! @ok
+		cursor_pos = block.cache_position + block.length();
 		attn_position = std::max(attn_position, block.attn_position + block.length());
 	}
 	return ContextCursor { attn_position };
@@ -147,8 +143,8 @@ bool Context::RebuildKVCache()
 		r = llama_decode(_pCtx, batch_view);
 	}
 
-	cursor_pos = _cache->length(); //! @ok
-	token_pos = chat_begin_pos; //! @ok
+	cursor_pos = _cache->length();
+	token_pos = chat_begin_pos;
 	return r == 0;
 }
 
@@ -176,8 +172,6 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 			continue;
 		}
 
-//		DumpContext();
-
 		// Remove from cache
 		int32_t block_pos = block.cache_position;
 		int32_t block_len = toI(block.length());
@@ -202,12 +196,22 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 					assert(shift_block.attn_position >= 0);
 					if (shift_block.is_cached())
 					{
+						if constexpr (Debugging)
+						{
+							// Validate move
+							auto [batch_ref, _] = GetCache().GetBatch();
+							auto& batch = batch_ref.get();
+							for (size_t tok = 0; tok < shift_block.tokens.size(); ++tok)
+							{
+								assert(shift_block.tokens[tok] == batch.token[shift_block.cache_position + tok]);
+							}
+						}
 						llama::ctx_move(_pCtx, shift_block, shift);
 						cache.MoveBlock(shift_block, shift);
-//						DumpContext();
 					}
 				}
 			}
+			llama::ctx_update(_pCtx);
 		}
 	}
 
@@ -225,8 +229,8 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 #endif
 	
 	cache.ClearTokensFromIndex(cache.length() + total_shift);
-	cursor_pos.increment(total_shift); //! @ok
-	token_pos.increment(total_shift); //! @maybe
+	cursor_pos.increment(total_shift);
+	token_pos.increment(total_shift);
 
 	DumpContext();
 	return tokens_removed;
@@ -350,21 +354,26 @@ void Context::EraseChat()
 		return;
 	}
 
-	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return !block.flags.IsSet(ContextBlockFlag::Static); });
+	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { 
+		return !block.flags.IsSet(ContextBlockFlag::Static)
+			and block.flags.IsSet(ContextBlockFlag::Cached);
+	});
 	if (itFirst == _blocks.end())
 	{
 		ContextCursor block_pos { _cache->length() };
-		cursor_pos = block_pos; //! @ok
-		chat_begin_pos = _blocks.back().attn_position + _blocks.back().length(); //! @ok
+		cursor_pos = block_pos;
+		chat_begin_pos = _blocks.back().attn_position + _blocks.back().length();
 		token_pos = chat_begin_pos;
 	}
 	else
 	{
-		cursor_pos = itFirst->cache_position; //! @ok
-		chat_begin_pos = itFirst->attn_position; //! @ok
-		token_pos = chat_begin_pos;
 		for (auto it = itFirst; it != _blocks.end(); ++it)
 			it->Discard();
+		RemoveDiscardedBlocks();
+		cursor_pos = GetUncachedOffset();
+		chat_begin_pos = GetChatBeginOffset();
+		token_pos = chat_begin_pos;
+		int k = 0;
 	}
 }
 
@@ -424,5 +433,5 @@ int32_t Context::Prepend(SequenceSlots seq_id, fig::string text)
 Batch Context::GetCursorView() const
 {
 	auto& cache = GetCache();
-	return cache.GetView(cursor_pos.as_int(), cache.length() - cursor_pos.as_int()); //! @ok
+	return cache.GetView(cursor_pos.as_int(), cache.length() - cursor_pos.as_int());
 }
