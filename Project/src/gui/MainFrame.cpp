@@ -40,11 +40,11 @@ constexpr ChatOptions DefaultChatOptions {
 	.flags = {
 		ChatOptions::Flag::GreetUser,
 		ChatOptions::Flag::Uncensored,
-	//	ChatOptions::Flag::LimitMessages,
-	//	ChatOptions::Flag::RandomizeMessageCount,
-		ChatOptions::Flag::StateVariables,
-		ChatOptions::Flag::ReportStateChanges,
-	//	ChatOptions::Flag::Embeddings,
+//		ChatOptions::Flag::LimitMessages,
+//		ChatOptions::Flag::RandomizeMessageCount,
+//		ChatOptions::Flag::StateVariables,
+//		ChatOptions::Flag::ReportStateChanges,
+//		ChatOptions::Flag::Embeddings,
 	},
 	.multiBotMode = ChatOptions::MultiBotMode::MultipleSequences,
 };
@@ -135,10 +135,12 @@ void MainFrame::OnUpdate(float fDeltaTime)
 	if (_bStartedChat)
 	{
 		_bStartedChat = false;
-		auto pLLM = ApplicationState::GetLLMInstance();
-		if (pLLM)
-			pLLM->GreetUser();
-	}
+		if (DefaultChatOptions.flags.IsSet(ChatOptions::Flag::GreetUser))
+		{
+			auto pLLM = ApplicationState::GetLLMInstance();
+			if (pLLM)
+				pLLM->GreetUser();
+		}
 
 	// Poll llm status
 	_fPollingCounter += fDeltaTime;
@@ -200,7 +202,7 @@ void MainFrame::StartChat()
 		session.Initialize(DefaultChatOptions);
 		session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
 		session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+//		session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
 
 		LLMChatArguments llmArgs {
 			/*session*/ session,

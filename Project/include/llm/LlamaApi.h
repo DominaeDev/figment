@@ -25,35 +25,17 @@ namespace fig::llm::llama
 		Failed,
 		NoContiguousBlock,
 	};
-	inline DecodeError ctx_decode(ContextPtr pCtx, const Batch& batch_view)
-	{
-		int32_t r = llama_decode(pCtx, batch_view);
-		if (r == 0)
-			return DecodeError::NoError;
-		if (r > 0)
-			return DecodeError::NoContiguousBlock;
-		return DecodeError::Failed;
-	}
+	DecodeError ctx_decode(ContextPtr pCtx, const Batch& batch_view);
 
 	bool ctx_remove(ContextPtr pCtx, int32_t begin, int32_t end = -1);
-	
 	bool ctx_remove(ContextPtr pCtx, Sequence seq_id, int32_t begin, int32_t end);
-
 	bool ctx_remove(ContextPtr pCtx, const ContextBlock& block);
 	bool ctx_remove(ContextPtr pCtx, SequenceSlots seq_ids, int32_t begin, int32_t end = -1);
 
 	void ctx_move(ContextPtr pCtx, ContextBlock& block, int32_t offset);
+	void ctx_move(ContextPtr pCtx, Sequence seq_id, int32_t begin, int32_t end, int32_t offset);
 
-	inline void ctx_move(ContextPtr pCtx, Sequence seq_id, int32_t begin, int32_t end, int32_t offset)
-	{
-		llama_kv_self_seq_add(pCtx, seq_id, begin, end, offset);
-	}
-
-	inline void ctx_copy_sequence(ContextPtr pCtx, Sequence seq_from, Sequence seq_to, int32_t begin, int32_t end)
-	{
-		llama_kv_self_seq_cp(pCtx, seq_from, seq_to, begin, end);
-	}
-
+	void ctx_copy_sequence(ContextPtr pCtx, Sequence seq_from, Sequence seq_to, int32_t begin, int32_t end);
 	void ctx_copy_sequence(ContextPtr pCtx, SequenceSlots seq_from, SequenceSlots seq_to, int32_t begin, int32_t end);
 
 	inline void ctx_clear(ContextPtr pCtx)

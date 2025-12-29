@@ -2,8 +2,10 @@
 #include <cassert>
 #include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
+#include "util/Common.h"
 
 using namespace fig::llm;
+using namespace fig::common_util;
 
 namespace fig::llm::llama
 {
@@ -114,26 +116,48 @@ namespace fig::llm::llama
 		return true;
 	}
 
+	DecodeError ctx_decode(ContextPtr pCtx, const Batch& batch_view)
+	{
+		if constexpr (Debugging)
+		{
+			LogLn(std::format("llama_decode(pCtx, t={}, pos={}, len={}, n_seq={}, seq={});", batch_view.token[0], batch_view.pos[0], batch_view.n_tokens, batch_view.n_seq_id[0], batch_view.seq_id[0][0]));
+		}
+		int32_t r = llama_decode(pCtx, batch_view);
+		if (r == 0)
+			return DecodeError::NoError;
+		if (r > 0)
+			return DecodeError::NoContiguousBlock;
+		return DecodeError::Failed;
+	}
+
 	bool ctx_remove(ContextPtr pCtx, int32_t begin, int32_t end)
 	{
-#if _DEBUG
-		bool r = llama_kv_self_seq_rm(pCtx, -1, begin, end);
-		assert(r); // When is this false?
-		return r;
-#else
-		return llama_kv_self_seq_rm(pCtx, -1, begin, end);
-#endif
+		if constexpr (Debugging)
+		{
+			LogLn(std::format("llama_kv_self_seq_rm(pCtx, -1, {}, {});", begin, end));
+			bool r = llama_kv_self_seq_rm(pCtx, -1, begin, end);
+			assert(r); // When is this false?
+			return r;
+		}
+		else
+		{
+			return llama_kv_self_seq_rm(pCtx, -1, begin, end);
+		}
 	}
 
 	bool ctx_remove(ContextPtr pCtx, Sequence seq_id, int32_t begin, int32_t end)
 	{
-#if _DEBUG
-		bool r = llama_kv_self_seq_rm(pCtx, seq_id, begin, end);
-		assert(r); // When is this false?
-		return r;
-#else
-		return llama_kv_self_seq_rm(pCtx, seq_id, begin, end);
-#endif
+		if constexpr (Debugging)
+		{
+			LogLn(std::format("llama_kv_self_seq_rm(pCtx, {}, {}, {});", seq_id, begin, end));
+			bool r = llama_kv_self_seq_rm(pCtx, seq_id, begin, end);
+			assert(r); // When is this false?
+			return r;
+		}
+		else
+		{
+			return llama_kv_self_seq_rm(pCtx, seq_id, begin, end);
+		}
 	}
 
 	bool ctx_remove(ContextPtr pCtx, const ContextBlock& block)
@@ -144,12 +168,12 @@ namespace fig::llm::llama
 			return ctx_remove(pCtx, block.sequenceSlots, block.attn_position, block.attn_position + block.length());
 	}
 
-	bool ctx_remove(ContextPtr pCtx, SequenceSlots seq_ids, int32_t begin, int32_t end)
+	bool ctx_remove(ContextPtr pCtx, SequenceSlots seq_slots, int32_t begin, int32_t end)
 	{
-		auto seq_id = fig::llm_util::get_sequence_indices(seq_ids, toI(AllSequenceSlots.size()));
-		for (auto id : seq_id)
+		auto seq_ids = fig::llm_util::get_sequence_indices(seq_slots, toI(AllSequenceSlots.size()));
+		for (auto seq_id : seq_ids)
 		{
-			if (!llama_kv_self_seq_rm(pCtx, id, begin, end))
+			if (!ctx_remove(pCtx, seq_id, begin, end))
 				return false;
 		}
 		return true;
@@ -159,6 +183,11 @@ namespace fig::llm::llama
 	{
 		auto from = fig::llm_util::get_sequence_indices(seq_from, toI(AllSequenceSlots.size()))[0];
 		auto to = fig::llm_util::get_sequence_indices(seq_to, toI(AllSequenceSlots.size()))[0];
+
+		if constexpr (Debugging)
+		{
+			LogLn(std::format("llama_kv_self_seq_cp(pCtx, {}, {}, {}, {});", from, to, begin, end));
+		}
 		llama_kv_self_seq_cp(pCtx, from, to, begin, end);
 	}
 
@@ -166,5 +195,23 @@ namespace fig::llm::llama
 	{
 		auto seq_id = block.get_any_sequence_id();
 		ctx_move(pCtx, seq_id, block.attn_position, block.attn_position + block.length(), offset);
+	}
+
+	void ctx_move(ContextPtr pCtx, Sequence seq_id, int32_t begin, int32_t end, int32_t offset)
+	{
+		if constexpr (Debugging)
+		{
+			LogLn(std::format("llama_kv_self_seq_add(pCtx, {}, {}, {}, {});", seq_id, begin, end, offset));
+		}
+		llama_kv_self_seq_add(pCtx, seq_id, begin, end, offset);
+	}
+
+	void ctx_copy_sequence(ContextPtr pCtx, Sequence seq_from, Sequence seq_to, int32_t begin, int32_t end)
+	{
+		if constexpr (Debugging)
+		{
+			LogLn(std::format("llama_kv_self_seq_cp(pCtx, {}, {}, {}, {});", seq_from, seq_to, begin, end));
+		}
+		llama_kv_self_seq_cp(pCtx, seq_from, seq_to, begin, end);
 	}
 }

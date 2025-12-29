@@ -83,9 +83,11 @@ ContextCursor Context::DecodeUncached()
 	int32_t last_position = -1;
 	int32_t attn_position = 0;
 
-	for (size_t i = 0; i < _blocks.size(); ++i)
+	bool bDecode = true;
+	auto itLastUser = find_last_if(_blocks, [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
+	for (auto it = _blocks.begin(); it != _blocks.end(); ++it)
 	{
-		auto& block = _blocks[i];
+		auto& block = *it;
 		if (block.is_cached())
 		{
 			attn_position = std::max(attn_position, block.attn_position + block.length());
@@ -102,25 +104,29 @@ ContextCursor Context::DecodeUncached()
 		// Write block to cache
 		auto [batch_pos, _] = GetCache().BatchWrite(block.tokens, block.sequenceSlots, block.attn_position);
 		block.cache_position = batch_pos;
+		attn_position = std::max(attn_position, block.attn_position + block.length());
 
 		if (block.is_continuation())
 			GetCache().InitLogits(); // Enable logits for last token
 
-		// ... and decode it.
-		Batch batch_view = GetCache().GetView(block.cache_position, block.length());
-//		llm_util::dump_batch_tokens(batch_view, batch_view.n_tokens, 0, _pVocab, "add.txt");
-		if (llama::ctx_decode(_pCtx, batch_view) != llama::DecodeError::NoError)
+		if (it == itLastUser)
+			bDecode = false;
+
+		if (bDecode)
 		{
-			llama::free(batch_view);
-			return ContextCursor::Invalid; // Error
+			// ... and decode it.
+			Batch batch_view = GetCache().GetView(block.cache_position, block.length());
+//			llm_util::dump_batch_tokens(batch_view, batch_view.n_tokens, 0, _pVocab, "add.txt");
+			if (llama::ctx_decode(_pCtx, batch_view) != llama::DecodeError::NoError)
+			{
+				llama::free(batch_view);
+				return ContextCursor::Invalid; // Error
+			}
+			block.flags.Set(ContextBlockFlag::Cached);
+			block.flags.Unset(ContextBlockFlag::Contination);
+			cursor_pos = block.cache_position + block.length();
 		}
-
-		block.flags.Set(ContextBlockFlag::Cached);
-		block.flags.Unset(ContextBlockFlag::Contination);
-		attn_position = std::max(attn_position, block.attn_position + block.length());
 	}
-
-	cursor_pos = _blocks.back().cache_position + _blocks.back().length();
 	return cursor_pos;
 }
 

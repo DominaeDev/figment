@@ -73,7 +73,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 
 	std::scoped_lock _(_stateMutex); // Lock for the entire duration of the scope
 
-	_contextState = Context(_modelState, std::clamp(_modelState.max_sequences, 1, toI(args.session.GetBotCount())));
+	_contextState = Context(_modelState, _modelState.max_sequences);
 	_session = args.session;
 	_stateVars = {};
 	_turn_counter.store(0);
@@ -257,7 +257,6 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	SetReadyState(ReadyState::Ready);
 	_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
 
-//	DumpContext();
 	return true;
 }
 
@@ -418,8 +417,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 		// Add state block (preface)
 		if (!args.isContinuation && _options.flags.IsSet(ChatOptions::Flag::StateVariables) && !_stateVars.IsEmpty())
 		{
-			auto itUserRev = std::find_if(blocks.rbegin(), blocks.rend(), [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
-			auto itState = flip_iterator<ContextBlock>(blocks, itUserRev);
+			auto itState = find_last_if(blocks, [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
 
 			itState = std::max(itState, blocks.size() > 1 ? std::max(blocks.end() - 2, blocks.begin()) : blocks.end());
 
@@ -468,7 +466,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 	}
 
 	// Decode
-	cursor_pos = _contextState.DecodeUncached();
+	_contextState.DecodeUncached();
 	if (not cursor_pos.is_valid())
 	{
 		Panic(InternalError::DecodeError, "Token decode error");
@@ -499,14 +497,17 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 	// Update status
 	_pStatus->ReportModelInfo(state.modelName, state.ctx_size, n_ctx_used);
 
-#if _DEBUG
-	if (!llm_util::validate_kv_cache(_contextState, 0))
+	if constexpr (Debugging)
 	{
-		DumpContext();
-		Panic(InternalError::InvalidContextError, "Context desync error");
-		return InternalError::InvalidContextError;
+		if (!llm_util::validate_kv_cache(_contextState, 0))
+		{
+			DumpContext();
+			Panic(InternalError::InvalidContextError, "Context desync error");
+			return InternalError::InvalidContextError;
+		}
 	}
-#endif
+
+	DumpContext();
 	return InternalError::NoError;
 }
 
@@ -890,6 +891,11 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 		_pStatus->ReportTokensPerSec(toD(sampled_tokens.size()) / (duration / 1000.0));
 	}
 
+	LogLn();
+	LogLn(std::format("END OF GENERATION (reason: 0x{:02X})", (int32_t)stop_reason));
+	
+	LogLn(std::format("Generated {} tokens ({})", sampled_tokens.size(), cursor_pos));
+
 	// Remove full response from cache (will be reinserted on next turn)
 	_contextState.ClearTokensBelow(response_start_pos.as_int());
 
@@ -960,9 +966,6 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			});
 		}
 	}
-
-	LogLn();
-	LogLn(std::format("END OF GENERATION (reason: 0x{:02X}) [{}]", (int32_t)stop_reason, sampled_tokens.size()));
 
 	onComplete(InternalError::NoError, response);
 };

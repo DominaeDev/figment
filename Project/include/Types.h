@@ -60,4 +60,10 @@ inline constexpr fig::c_string toCStr(fig::string_view sv) { return static_cast<
 constexpr bool Enabled = true;
 constexpr bool Disabled = false;
 
+#if defined(_DEBUG) && !defined(NDEBUG)
+constexpr bool Debugging = true;
+#else
+constexpr bool Debugging = false;
 #endif
+
+#endif // TYPES_H__

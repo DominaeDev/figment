@@ -116,5 +116,20 @@ namespace fig::common_util
 	{
 		return static_cast<int32_t>(std::floorf(f));
 	}
+
+	template<template <typename, typename> class Cont, typename V, typename Pred, typename A = std::allocator<V>>
+	inline constexpr Cont<V, A>::const_iterator find_last_if(const Cont<V, A>& cont, Pred pred)
+	{
+		auto itFind = std::find_if(cont.rbegin(), cont.rend(), pred);
+		return flip_iterator<V>(cont, itFind);
+	};
+
+	template<template <typename, typename> class Cont, typename V, typename Pred, typename A = std::allocator<V>>
+	inline Cont<V, A>::iterator find_last_if(Cont<V, A>& cont, Pred pred)
+	{
+		auto itFind = std::find_if(cont.rbegin(), cont.rend(), pred);
+		return flip_iterator<V>(cont, itFind);
+	};
+
 }
 #endif
