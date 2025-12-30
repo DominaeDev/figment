@@ -307,17 +307,37 @@ void LLMInstance::InitSamplers()
 		replace_all_inplace(grammar, "##STATE_VARS##", "[]");
 	}
 
+	uint32_t random_seed;
+	if constexpr (Debugging)
+		random_seed = Constants::LLM::DebugSeed;
+	else
+		random_seed = Constants::LLM::RandomSeed;
+
 	auto default_grammar_sampler = CompileGrammar({ GrammarFlag::Default });
 
-	if (default_grammar_sampler) llama_sampler_chain_add(pSampler, default_grammar_sampler);	// Grammar
-	llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.15f, 1));						// Min P sampler
-	llama_sampler_chain_add(pSampler, llama_sampler_init_temp(0.9f));							// Temperature
-	llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));	// Repeat penalty
-#if _DEBUG
-	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(Constants::LLM::DebugSeed));		// Seed (debug)
-#else
-	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(Constants::LLM::RandomSeed));		// Seed
-#endif
+	// Grammar
+	if (default_grammar_sampler) 
+		llama_sampler_chain_add(pSampler, default_grammar_sampler);
+	
+	// Dry (Details: https://github.com/oobabooga/text-generation-webui/pull/5677)
+	static auto dry_seq_breakers = std::array<const char*, 5> { "\n", ":", "\"", "*", "]" };
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dry(_modelState.pVocab, _modelState.ctx_size, 0.8f, 1.75f, 2, 256, dry_seq_breakers.data(), dry_seq_breakers.size()));
+
+	// Repeat penalty (Off)
+	if constexpr (Disabled)
+		llama_sampler_chain_add(pSampler, llama_sampler_init_penalties(512, 1.05f, 0.0f, 0.0f));
+
+	// Min P sampler
+	llama_sampler_chain_add(pSampler, llama_sampler_init_min_p(0.05f, 0));
+	
+	// Temperature
+	llama_sampler_chain_add(pSampler, llama_sampler_init_temp(0.9f));
+
+	// XTC (Details: https://github.com/oobabooga/text-generation-webui/pull/6335)
+	llama_sampler_chain_add(pSampler, llama_sampler_init_xtc(0.5f, 0.1f, 0, random_seed));
+
+	// Random seed
+	llama_sampler_chain_add(pSampler, llama_sampler_init_dist(random_seed));
 
 	_modelState.pSampler = pSampler;
 	_modelState.pActiveGrammar = default_grammar_sampler;

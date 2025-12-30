@@ -63,8 +63,8 @@ namespace Constants
 	
 	namespace LLM
 	{
-		inline constexpr int32_t RandomSeed = 0xFFFFFFFF;
-		inline constexpr int32_t DebugSeed = 0xA1B2C3D4;
+		inline constexpr uint32_t RandomSeed = 0xFFFFFFFF;
+		inline constexpr uint32_t DebugSeed = 0xA1B2C3D4;
 	}
 
 	namespace Embedding

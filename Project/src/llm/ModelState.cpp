@@ -58,7 +58,6 @@ SamplerPtr ModelState::SetActiveGrammar(GrammarFlags flags)
 
 	std::list<SamplerPtr> samplers;
 	int32_t n = llama_sampler_chain_n(pChain);
-	assert(n <= 5);
 
 	for (int32_t i = n - 1; i >= 0; --i)
 	{
