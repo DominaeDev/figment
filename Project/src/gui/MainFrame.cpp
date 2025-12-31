@@ -26,6 +26,7 @@ using namespace fig::common_util;
 using namespace fig::file_util;
 using namespace fig::string_util;
 using namespace fig::llm;
+using namespace fig::data;
 
 fig::gui::MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -46,7 +47,7 @@ constexpr ChatOptions DefaultChatOptions {
 //		ChatOptions::Flag::ReportStateChanges,
 //		ChatOptions::Flag::Embeddings,
 	},
-	.multiBotMode = ChatOptions::MultiBotMode::MultipleSequences,
+	.groupChatMode = ChatOptions::GroupChatMode::SwapPersonas,
 };
 
 MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
@@ -164,13 +165,13 @@ void MainFrame::InitializeModel()
 
 	if (!engine.IsInitialized())
 	{
-		SetStatusBar(GlobalStrings::Status::LoadingModel);
+		SetStatusBar(fig::strings::Status::LoadingModel);
 
 		engine.Initialize(fig::string(Constants::DefaultModelLocation), 
 			DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
 			[this](int percent) 
 			{
-				SetStatusBar(std::format(GlobalStrings::Status::LoadingModelPercentFmt, percent));
+				SetStatusBar(std::format(fig::strings::Status::LoadingModelPercentFmt, percent));
 			},
 			[this, &engine](bool bSuccess)
 			{
@@ -186,7 +187,7 @@ void MainFrame::UnloadModel()
 	if (engine.IsInitialized())
 	{
 		engine.Shutdown();
-		SetStatusBar(GlobalStrings::Status::ModelUnloaded);
+		SetStatusBar(fig::strings::Status::ModelUnloaded);
 
 #if ENABLE_AUTO_CHAT
 		_bAutoChat = false;
@@ -306,10 +307,10 @@ void MainFrame::PollStatus()
 		switch (status.value().signal)
 		{
 		case LLMStatusSignal::ChatInitializing:
-			SetStatusBar(GlobalStrings::Status::InitializingChat);
+			SetStatusBar(fig::strings::Status::InitializingChat);
 			break;
 		case LLMStatusSignal::ChatInitialized:
-			SetStatusBar(GlobalStrings::Status::ChatInitialized);
+			SetStatusBar(fig::strings::Status::ChatInitialized);
 			_pChatScroll->ClearMessages();
 			if (pLLMInstance)
 			{
@@ -319,36 +320,36 @@ void MainFrame::PollStatus()
 			queue_clear(_commandQueue);
 			break;
 		case LLMStatusSignal::ChatInitializationFailure:
-			SetStatusBar(GlobalStrings::Status::FailedToInitializeChat);
+			SetStatusBar(fig::strings::Status::FailedToInitializeChat);
 			break;
 		case LLMStatusSignal::ModelLoading:
-			SetStatusBar(GlobalStrings::Status::LoadingModel);
+			SetStatusBar(fig::strings::Status::LoadingModel);
 			break;
 		case LLMStatusSignal::ModelLoaded:
-			SetStatusBar(GlobalStrings::Status::ModelLoaded);
+			SetStatusBar(fig::strings::Status::ModelLoaded);
 			queue_clear(_commandQueue);
 			StartChat();
 			break;
 		case LLMStatusSignal::ModelUnloaded:
-			SetStatusBar(GlobalStrings::Status::ModelUnloaded);
+			SetStatusBar(fig::strings::Status::ModelUnloaded);
 			_pVariableList->SetVisible(false);
 			ApplicationState::SetLLMInstance(nullptr);
 			queue_clear(_commandQueue);
 			break;
 		case LLMStatusSignal::ModelLoadFailure:
-			SetStatusBar(GlobalStrings::Status::FailedToLoadModel);
+			SetStatusBar(fig::strings::Status::FailedToLoadModel);
 			break;
 		case LLMStatusSignal::ModelUnloadRequest:
 			UnloadModel();
 			break;
 		case LLMStatusSignal::GenerationStarted:
-			SetStatusBar(GlobalStrings::Status::GeneratingResponse);
+			SetStatusBar(fig::strings::Status::GeneratingResponse);
 			break;
 		case LLMStatusSignal::RebuildingKVCache:
-			SetStatusBar(GlobalStrings::Status::RebuildingContext);
+			SetStatusBar(fig::strings::Status::RebuildingContext);
 			break;
 		case LLMStatusSignal::GenerationComplete:
-			SetStatusBar(GlobalStrings::Status::Ready);
+			SetStatusBar(fig::strings::Status::Ready);
 			if (pLLMInstance)
 				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
 			NextQueuedCommand();

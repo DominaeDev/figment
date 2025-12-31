@@ -29,7 +29,7 @@ ApplicationState::State* ApplicationState::CreateState()
 	try
 	{
 		// Create main frame
-		__appState->pMainWindow = std::make_shared<Window>(GlobalStrings::ApplicationTitle, Constants::GUI::WindowWidth, Constants::GUI::WindowHeight);
+		__appState->pMainWindow = std::make_shared<Window>(fig::strings::ApplicationTitle, Constants::GUI::WindowWidth, Constants::GUI::WindowHeight);
 		__appState->pMainWindow->CreateFrame<MainFrame>();
 
 #if !_DEBUG

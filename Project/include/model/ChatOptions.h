@@ -24,13 +24,13 @@ struct ChatOptions
 
 	Flags flags;
 
-	enum class MultiBotMode
+	enum class GroupChatMode
 	{
-		Simple,
-		SingleSequence,
-		MultipleSequences,
+		Simple,			// All personas in context
+		SwapPersonas,	// One persona in context
+		SwapSequences,	// All personas in context (different sequences)
 	};
-	MultiBotMode multiBotMode = MultiBotMode::MultipleSequences;
+	GroupChatMode groupChatMode = GroupChatMode::SwapSequences;
 };
 
 #endif

@@ -15,7 +15,7 @@ namespace fig::gui
 	public:
 		ChatScroll(Control* pParent);
 
-		void SetSession(ChatSession session) { _session = session; }
+		void SetSession(fig::data::ChatSession session) { _session = session; }
 
 		void AddDummyMessage(fig::string name, Role role, MessageType msgType, fig::string message);
 		void AddSystemMessage(fig::string message);
@@ -61,6 +61,6 @@ namespace fig::gui
 		float _fLastListHeight = 0.0f;
 		float _fAnimatedScroll = 0.0f;
 
-		ChatSession _session {};
+		fig::data::ChatSession _session {};
 	};
 }

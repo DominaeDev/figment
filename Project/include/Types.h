@@ -20,7 +20,7 @@ namespace fig
     using wstring = std::wstring;
     using wstring_view = std::wstring_view;
     using const_string = string_view const;
-    static constexpr auto npos = string::npos;
+    static constexpr size_t npos = static_cast<size_t>(-1);
     
     using byte = std::byte;
     using byte_span = std::span<byte>;

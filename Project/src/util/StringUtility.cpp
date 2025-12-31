@@ -324,34 +324,4 @@ namespace fig::string_util
 		// If no cut-off multi-byte character is found, return full length
 		return len;
 	}
-
-	int32_t count_words(const string& text, int32_t cursor, int32_t& pos_last_word)
-	{
-		if (text.empty())
-		{
-			pos_last_word = 0;
-			return 0;
-		}
-
-		if (cursor < 0 || cursor > toI(text.length()))
-			cursor = toI(text.length());
-
-		pos_last_word = 0;
-		int32_t count = 1;
-
-		auto fnFindWhitespace = [](const char& ch) -> bool { return fig::string_util::is_whitespace(ch); };
-		auto fnFindNotWhitespace = [](const char& ch) -> bool { return !fig::string_util::is_whitespace(ch); };
-
-		int32_t pos = fig::string_util::find_index(text, 0, fnFindWhitespace);
-		while (pos != -1 && pos < cursor)
-		{
-			int next_word = fig::string_util::find_index(text, pos, fnFindNotWhitespace);
-			if (next_word == -1 || next_word >= cursor)
-				return count;
-			count++;
-			pos_last_word = next_word;
-			pos = fig::string_util::find_index(text, next_word, fnFindWhitespace);
-		}
-		return count;
-	};
 }

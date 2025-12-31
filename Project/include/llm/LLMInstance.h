@@ -42,7 +42,7 @@ namespace fig::llm
 
 	struct LLMChatArguments
 	{
-		ChatSession session;
+		fig::data::ChatSession session;
 		Messages messages;
 		ChatOptions options;
 		int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
@@ -97,7 +97,7 @@ namespace fig::llm
 		bool GenerateEmbedding(fig::string text);
 #endif
 
-		const ChatSession& GetSession() const { return _session; }
+		const fig::data::ChatSession& GetSession() const { return _session; }
 		std::map<fig::string, fig::string> GetStateVariables();
 
 	private:
@@ -112,7 +112,6 @@ namespace fig::llm
 			Continuation = 1 << 1,
 			Instigation = 1 << 2,
 			AllowNarrator = 1 << 3,
-			SwapPersonas = 1 << 4,
 		};
 		using GenerateFlags = EnumFlags<GenerateFlag>;
 
@@ -130,6 +129,7 @@ namespace fig::llm
 			DecodeError,
 			SamplerError,
 			GrammarError,
+			PersonaSwapError,
 			UnknownError,
 		};
 
@@ -149,6 +149,7 @@ namespace fig::llm
 			Role role = Role::Undefined;
 			MessageType msgType = MessageType::Undefined;
 			GenerateFlags flags = GenerateFlags::None;
+			ChatOptions::GroupChatMode groupChatMode {};
 			int maxMessages = 0;
 			fig::string prepend {};
 			fig::string responseId {};
@@ -157,7 +158,7 @@ namespace fig::llm
 		};
 		void __Generate(std::stop_token& stop, GenerateArguments args, __GenerationCompleteCallback onComplete);
 		void StartGeneration();
-		bool SwapPersona(Role persona);
+		bool SwapPersona(Role persona, bool immediate = true);
 
 		void RefreshActiveResponses();
 		bool RebuildKVCache();
@@ -223,7 +224,7 @@ namespace fig::llm
 		std::queue<LLMTask> _tasks;
 
 		// Session
-		ChatSession _session;
+		fig::data::ChatSession _session;
 		ChatOptions _options;
 		std::atomic<int32_t> _turn_counter = 0;
 

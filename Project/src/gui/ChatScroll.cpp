@@ -4,6 +4,7 @@
 #include "gui/ChatMessage.h"
 #include "gui/GUIUtility.h"
 #include "model/AppState.h"
+#include "model/ChatSession.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
@@ -14,6 +15,7 @@ using namespace fig::gui;
 using namespace fig::gui_util;
 using namespace fig::string_util;
 using namespace fig::llm;
+using namespace fig::data;
 
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f

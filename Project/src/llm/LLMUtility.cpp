@@ -870,7 +870,7 @@ namespace fig::llm_util
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	bool validate_kv_cache(const fig::llm::Context& context, fig::llm::Sequence sequence)
+	bool validate_kv_cache(const fig::llm::Context& context, fig::llm::Sequence sequence, int32_t turn)
 	{
 #if !_DEBUG
 		return true;
@@ -883,8 +883,25 @@ namespace fig::llm_util
 		int32_t n_max_seq = context.GetModel().max_sequences;
 		auto filter_seq = get_sequence_slot_from_index(sequence);
 
-		// Check internal consistency of blocks
+		// Check cache positions
 		int32_t expected_cache_pos = 0;
+		std::vector<ContextBlock> sorted_blocks(std::begin(blocks), std::end(blocks));
+		std::sort(std::begin(sorted_blocks), std::end(sorted_blocks), [](const ContextBlock& a, const ContextBlock& b) { return a.cache_position < b.cache_position; });
+		for (size_t i = 0; i < sorted_blocks.size(); ++i)
+		{
+			auto& block = sorted_blocks[i];
+			if (not block.is_cached())
+				continue;
+
+			if (block.cache_position != expected_cache_pos)
+			{
+				LogLn(std::format(">> Validation failed on turn {0}: Block at index {1} has an unexpected cache position.", turn, i));
+				return false;
+			}
+			expected_cache_pos += block.length();
+		}
+
+		// Check attention positions
 		int32_t expected_attn_pos = 0;
 		for (size_t i = 0; i < blocks.size(); ++i)
 		{
@@ -892,33 +909,35 @@ namespace fig::llm_util
 			if (not block.is_cached())
 				continue;
 
-			// Cache position
-			if (block.cache_position != expected_cache_pos)
-			{
-				LogLn(std::format(">> Validation failed: Block at index {} has an unexpected cache position.", i));
-				return false;
-			}
-			expected_cache_pos += block.length();
-
 			if (not block.sequenceSlots.IsSet(filter_seq))
 				continue;
 
 			// Attention position
 			if (block.attn_position > expected_attn_pos)
 			{
-				LogLn(std::format(">> Validation failed: Block at index {} has an unexpected attention position.", i));
+				LogLn(std::format(">> Validation failed on turn {0}: Block at index {1} has an unexpected attention position.", turn, i));
 				return false;
 			}
 			expected_attn_pos = std::max(expected_attn_pos, block.attn_position + block.length());
+		}
 
-			// Check tokens against batch
+		// Check tokens against batch
+		for (size_t i = 0; i < blocks.size(); ++i)
+		{
+			auto& block = blocks[i];
+			if (not block.is_cached())
+				continue;
+
+			if (not block.sequenceSlots.IsSet(filter_seq))
+				continue;
+
 			auto seq_ids = block.get_sequence_ids(context.GetNumSequences());
 			for (size_t idx = 0; idx < block.tokens.size(); ++idx)
 			{
 				size_t pos = block.cache_position + idx;
 				if (batch.token[pos] != block.tokens[idx])
 				{
-					LogLn(std::format(">> Validation failed: Token mismatch at position {} in block at index {}.", pos, i));
+					LogLn(std::format(">> Validation failed on turn {0}: Token mismatch at position {1} in block at index {2}.", turn, pos, i));
 					return false;
 				}
 
@@ -927,13 +946,13 @@ namespace fig::llm_util
 					Sequence seq = batch.seq_id[pos][itSeq];
 					if (seq == -1)
 					{
-						LogLn(std::format(">> Validation failed: Invalid sequence id for token at position {} in block at index {}.", pos, i));
+						LogLn(std::format(">> Validation failed on turn {0}: Invalid sequence id for token at position {1} in block at index {2}.", turn, pos, i));
 						return false;
 					}
-					
+
 					if (std::find(seq_ids.begin(), seq_ids.end(), seq) == seq_ids.end())
 					{
-						LogLn(std::format(">> Validation failed: Sequence id mismatch (expected {}) for token at position {} in block at index {}.", seq, pos, i));
+						LogLn(std::format(">> Validation failed on turn {0}: Sequence id mismatch (expected {1}) for token at position {2} in block at index {3}.", turn, seq, pos, i));
 						return false;
 					}
 				}
@@ -960,13 +979,13 @@ namespace fig::llm_util
 				{
 					if (cell.pos >= ctx_size)
 					{
-						LogLn(std::format(">> Validation failed: Token out of bounds ({}).", cell.pos));
+						LogLn(std::format(">> Validation failed on turn {0}: Token out of bounds ({1}).", turn, cell.pos));
 						return false;
 					}
 
 					if (tokens[cell.pos] != 0)
 					{
-						LogLn(std::format(">> Validation failed: Overlapping tokens at position {}.", cell.pos));
+						LogLn(std::format(">> Validation failed on turn {0}: Overlapping tokens at position {1}.", turn, cell.pos));
 						return false;
 					}
 
@@ -984,7 +1003,7 @@ namespace fig::llm_util
 
 			if (block.attn_position < 0 || block.cache_position < 0 || block.attn_position >= ctx_size || block.cache_position >= ctx_size)
 			{
-				LogLn(std::format(">> Validation failed: Block at index {} has invalid position.", i));
+				LogLn(std::format(">> Validation failed on turn {0}: Block at index {1} has invalid position.", turn, i));
 				return false;
 			}
 
@@ -992,7 +1011,7 @@ namespace fig::llm_util
 			{
 				if (tokens[pos] == 0)
 				{
-					LogLn(std::format(">> Validation failed: Token position mismatch in block at index {}.", i));
+					LogLn(std::format(">> Validation failed on turn {0}: Token position mismatch in block at index {1}.", turn, i));
 					return false;
 				}
 			}

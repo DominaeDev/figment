@@ -1226,8 +1226,8 @@ void TextBox::Paste()
 		// Only accept the first line of pasted content
 		wstring content = from_utf8(SDL_GetClipboardText());
 		string_util::normalize_newlines(content);
-		int32_t pos_endl = index_of(content, 0, L'\n');
-		if (pos_endl != -1)
+		size_t pos_endl = index_of(content, 0, L'\n');
+		if (pos_endl != fig::npos)
 			content.resize(pos_endl);
 		
 		string contentUtf8 = to_utf8(content);

@@ -14,6 +14,7 @@
 using namespace fig::common_util;
 using namespace fig::llm;
 using namespace fig::llm_util;
+using namespace fig::data;
 
 Context::Context(const ModelState& model, int32_t num_sequences)
 {
@@ -34,7 +35,11 @@ int32_t Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
 	int32_t ctx_size = _pModel->ctx_size;
 	int32_t n_ctx_used = GetUsedKVCacheCells();
 	if (n_ctx_used + ctx_reserve >= ctx_size || bForce)
-		return AllocateKVCache(ctx_reserve);
+	{
+		int32_t allocated = AllocateKVCache(ctx_reserve);
+		LogLn(std::format(">> REALLOCATING CONTEXT: Allocated {} tokens.", allocated));
+		return allocated;
+	}
 	return 0;
 }
 
@@ -81,9 +86,20 @@ ContextCursor Context::DecodeUncached()
 		return ContextCursor(0);
 	}
 
+	auto& cache = GetCache();
 	int32_t last_position = -1;
 	int32_t attn_position = 0;
 
+	// Reserve space
+	int32_t total_reserve = 0;
+	for (auto const& block : _blocks)
+	{
+		if (not block.is_cached())
+			total_reserve += block.length();
+	}
+	ReserveTokens(total_reserve, false);
+
+	// Decode
 	for (auto it = _blocks.begin(); it != _blocks.end(); ++it)
 	{
 		auto& block = *it;
@@ -101,26 +117,130 @@ ContextCursor Context::DecodeUncached()
 		last_position = block.attn_position;
 
 		// Write block to cache
-		auto [batch_pos, _] = GetCache().BatchWrite(block.tokens, block.sequenceSlots, block.attn_position);
+		auto [batch_pos, _] = cache.BatchWrite(block.tokens, block.sequenceSlots, -1, block.attn_position);
 		block.cache_position = batch_pos;
 
 		if (block.is_continuation())
-			GetCache().InitLogits(); // Enable logits for last token
+			cache.InitLogits(); // Enable logits for last token
 
 		// ... and decode it.
-		Batch batch_view = GetCache().GetView(block.cache_position, block.length());
-//		llm_util::dump_batch_tokens(batch_view, batch_view.n_tokens, 0, _pVocab, "add.txt");
+		Batch batch_view = cache.GetView(block.cache_position, block.length());
 		if (llama::ctx_decode(_pCtx, batch_view) != llama::DecodeError::NoError)
-		{
-			llama::free(batch_view);
 			return ContextCursor::Invalid; // Error
-		}
+
 		block.flags.Set(ContextBlockFlag::Cached);
 		block.flags.Unset(ContextBlockFlag::Contination);
 		cursor_pos = block.cache_position + block.length();
 		attn_position = std::max(attn_position, block.attn_position + block.length());
 	}
 	return ContextCursor { attn_position };
+}
+
+std::optional<int32_t> Context::DecodeSingleUncached(ContextBlock& block)
+{
+	assert(block.length() > 0);
+	if (block.attn_position == -1)
+		return std::nullopt;
+
+	// Write block to cache
+	auto [cache_pos, length] = GetCache().BatchWrite(block.tokens, block.sequenceSlots, block.cache_position, block.attn_position);
+	block.cache_position = cache_pos;
+
+	// ... and decode it.
+	Batch batch_view = GetCache().GetView(block.cache_position, block.length());
+	if (llama::ctx_decode(_pCtx, batch_view) != llama::DecodeError::NoError)
+		return std::nullopt; // Error
+
+	block.flags.Set(ContextBlockFlag::Cached);
+	return length; // Shift
+}
+
+std::optional<int32_t> Context::RealizeUncachedBlocks()
+{
+	int32_t tokens_added = 0;
+#if _DEBUG
+	int32_t n_used_before = llama::ctx_used_cells(_pCtx);
+#endif
+
+	auto& cache = GetCache();
+
+	int32_t total_shift = 0;
+	size_t index = 0;
+	for (auto itBlock = _blocks.begin(); itBlock != _blocks.end(); ++itBlock, ++index)
+	{
+		auto& block = *itBlock;
+		if (block.is_cached())
+			continue;
+
+		assert(block.length() > 0);
+		if (block.attn_position == -1)
+		{
+			// Find positions
+			int32_t attn_position = 0;
+			int32_t cache_position = 0;
+
+			for (auto it = _blocks.begin(); it < itBlock; ++it)
+			{
+				auto& block = *it;
+				if (block.is_cached())
+				{
+					attn_position = std::max(attn_position, block.attn_position + block.length());
+					cache_position = std::max(cache_position, block.cache_position + block.length());
+				}
+			}
+
+			block.attn_position = attn_position;
+			block.cache_position = cache_position;
+		}
+
+		int32_t shift = block.length();
+		int32_t block_cache_pos = block.cache_position;
+		int32_t block_attn_pos = block.attn_position;
+		tokens_added += shift;
+		total_shift += shift;
+
+		// Shift down subsequent blocks
+		if (shift != 0)
+		{
+			assert(shift > 0);
+			for (int32_t shift_idx = toI(_blocks.size()) - 1; shift_idx >= index + 1; --shift_idx)
+			{
+				auto& shift_block = _blocks[shift_idx];
+				if (!shift_block.is_cached())
+					continue;
+
+				if (shift_block.attn_position >= block_attn_pos)
+				{
+					llama::ctx_move(_pCtx, shift_block, shift);
+					cache.ShiftBlock(shift_block, shift);
+				}
+
+				if (shift_block.cache_position >= block_cache_pos)
+					cache.MoveBlock(shift_block, shift);
+			}
+			llama::ctx_update(_pCtx);
+		}
+
+		// Add to cache (after shift)
+		if (not DecodeSingleUncached(block))
+			continue; // Error
+	}
+
+	if (tokens_added == 0)
+		return 0;
+
+	LogLn(std::format("Insert {} tokens.", tokens_added));
+
+#if _DEBUG
+	int32_t n_used_after = llama::ctx_used_cells(_pCtx);
+	assert(n_used_after == n_used_before + tokens_added);
+#endif
+
+	llama::ctx_defrag(_pCtx);
+
+	cursor_pos.increment(total_shift);
+	token_pos.increment(total_shift);
+	return tokens_added;
 }
 
 bool Context::RebuildKVCache()
@@ -150,12 +270,17 @@ bool Context::RebuildKVCache()
 
 std::optional<int32_t> Context::RemoveDiscardedBlocks()
 {
+	if (std::count_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return block.is_cached() && block.is_discarded(); }) == 0)
+		return 0;
+
 	int32_t tokens_removed = 0;
 #if _DEBUG
 	int32_t n_used_before = llama::ctx_used_cells(_pCtx);
 #endif
 	
 	auto& cache = GetCache();
+
+	llama::ctx_update(_pCtx);
 
 	int32_t total_shift = 0;
 	for (int32_t i = toI(_blocks.size()) - 1; i >= 0; --i)
@@ -173,7 +298,8 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 		}
 
 		// Remove from cache
-		int32_t block_pos = block.cache_position;
+		int32_t block_cache_pos = block.cache_position;
+		int32_t block_attn_pos = block.attn_position;
 		int32_t block_len = toI(block.length());
 		if (not llama::ctx_remove(_pCtx, block))
 			return std::nullopt; // Error
@@ -187,29 +313,34 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 
 		if (shift != 0)
 		{
+			assert(shift < 0); // hmm
+
 			// Shift up subsequent blocks
 			for (size_t shift_idx = i; shift_idx < _blocks.size(); ++shift_idx)
 			{
 				auto& shift_block = _blocks[shift_idx];
-				if (shift_block.cache_position > block_pos)
+				if (!shift_block.is_cached())
+					continue;
+
+				// Shift attention
+				if (shift_block.attn_position > block_attn_pos)
 				{
-					assert(shift_block.attn_position >= 0);
-					if (shift_block.is_cached())
+					if constexpr (Debugging)
 					{
-						if constexpr (Debugging)
-						{
-							// Validate move
-							auto [batch_ref, _] = GetCache().GetBatch();
-							auto& batch = batch_ref.get();
-							for (size_t tok = 0; tok < shift_block.tokens.size(); ++tok)
-							{
-								assert(shift_block.tokens[tok] == batch.token[shift_block.cache_position + tok]);
-							}
-						}
-						llama::ctx_move(_pCtx, shift_block, shift);
-						cache.MoveBlock(shift_block, shift);
+						// Validate token positions
+						assert(shift_block.attn_position >= 0);
+						auto [batch_ref, _] = GetCache().GetBatch();
+						auto& batch = batch_ref.get();
+						for (size_t tok = 0; tok < shift_block.tokens.size(); ++tok)
+							assert(shift_block.tokens[tok] == batch.token[shift_block.cache_position + tok]);
 					}
+					llama::ctx_move(_pCtx, shift_block, shift);
+					cache.ShiftBlock(shift_block, shift);
 				}
+
+				// Shift cache pos
+				if (shift_block.cache_position > block_cache_pos)
+					cache.MoveBlock(shift_block, shift);
 			}
 			llama::ctx_update(_pCtx);
 		}
@@ -232,7 +363,6 @@ std::optional<int32_t> Context::RemoveDiscardedBlocks()
 	cursor_pos.increment(total_shift);
 	token_pos.increment(total_shift);
 
-	DumpContext();
 	return tokens_removed;
 }
 
@@ -387,6 +517,18 @@ void Context::AppendBlock(ContextBlock&& block)
 	_blocks.emplace_back(std::move(block));
 }
 
+void Context::InsertBlock(ContextBlock&& block, size_t index)
+{
+	if (index < _blocks.size())
+	{
+		auto it = _blocks.begin();
+		std::advance(it, index);
+		_blocks.insert(it, std::move(block));
+	}
+	else
+		AppendBlock(std::move(block));
+}
+
 void Context::DumpContext()
 {
 #if _DEBUG
@@ -405,14 +547,10 @@ void Context::RebuildBatch()
 	auto& cache = GetCache();
 	cache.Clear();
 	
-	int32_t offset = 0;
 	for (auto& block : _blocks)
 	{
 		if (block.is_cached())
-		{
-			cache.BatchWrite(block.tokens, block.sequenceSlots, block.attn_position);
-			offset += block.length();
-		}
+			cache.BatchWrite(block.tokens, block.sequenceSlots, block.cache_position, block.attn_position);
 	}
 }
 
@@ -423,7 +561,7 @@ int32_t Context::Prepend(SequenceSlots seq_id, fig::string text)
 	auto prepend_tokens = llama::tokenize(_pVocab, text, false);
 	
 	// Append to batch
-	auto [_, len] = cache.BatchWrite(prepend_tokens, seq_id, prepend_pos.as_int());
+	auto [_, len] = cache.BatchWrite(prepend_tokens, seq_id, -1, prepend_pos.as_int());
 	prepend_pos.increment(len);
 
 	DumpContext();

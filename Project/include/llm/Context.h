@@ -6,7 +6,10 @@
 
 #pragma once
 
-class ChatSession;
+namespace fig::data
+{
+	class ChatSession;
+}
 
 namespace fig::llm
 {
@@ -37,7 +40,7 @@ namespace fig::llm
 		void DiscardByTTL(int32_t current_turn);
 		void EraseChat();
 
-		void TokenizeUncached(ChatSession& session);
+		void TokenizeUncached(fig::data::ChatSession& session);
 		bool DiscardBlock(const ContextBlock& block);
 		
 		void RebuildBatch();
@@ -48,6 +51,8 @@ namespace fig::llm
 		std::vector<ContextBlock>::const_iterator GetLastCachedBlock() const;
 
 		ContextCursor DecodeUncached();
+
+		std::optional<int32_t> RealizeUncachedBlocks();
 		std::optional<int32_t> RemoveDiscardedBlocks();
 
 		// Blocks
@@ -56,6 +61,7 @@ namespace fig::llm
 
 		void AppendBlock(const ContextBlock& block);
 		void AppendBlock(ContextBlock&& block);
+		void InsertBlock(ContextBlock&& block, size_t index);
 		void ClearTokensBelow(int32_t pos);
 
 		// Generation
@@ -80,6 +86,7 @@ namespace fig::llm
 	
 	private:
 		void DumpContext();
+		std::optional<int32_t> DecodeSingleUncached(ContextBlock& block);
 
 	private:
 		const ModelState* _pModel = nullptr;

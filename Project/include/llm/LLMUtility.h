@@ -28,7 +28,7 @@ namespace fig::llm_util
 	bool dump_kv_cache_cells(const fig::llm::Context& contextState, fig::string filename);	
 	bool dump_kv_cache_cells(fig::llm::ContextPtr pCtx, int32_t num_sequences, fig::string filename);
 	
-	bool validate_kv_cache(const fig::llm::Context& context, fig::llm::Sequence sequence);
+	bool validate_kv_cache(const fig::llm::Context& context, fig::llm::Sequence sequence, int32_t turn);
 
 	inline fig::llm::Sequences get_sequence_indices(fig::llm::SequenceSlot seq, int32_t n_seq_max) noexcept;
 	fig::llm::Sequences get_sequence_indices(fig::llm::SequenceSlots seq, int32_t n_seq_max) noexcept;

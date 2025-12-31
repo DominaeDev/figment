@@ -33,6 +33,11 @@ namespace fig::llm
 	using SequenceSlots = EnumFlags<SequenceSlot>;
 	constexpr Sequence InvalidSequence = -1;
 
+	inline constexpr Sequence operator "" _seq(unsigned long long arg) noexcept
+	{
+		return static_cast<Sequence>(arg);
+	}
+
 	constexpr std::array<SequenceSlot, 4> AllSequenceSlots {
 		SequenceSlot::Bot1,
 		SequenceSlot::Bot2,

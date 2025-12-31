@@ -53,21 +53,22 @@ int32_t ContextCache::BatchAddSingle(Token token, Sequences seq_ids, int32_t att
 	return 1;
 }
 
-std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, ContextCursor& cursor)
+std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t cache_pos, ContextCursor& cursor)
 {
-	auto r = BatchWrite(tokens, seq_id, cursor.as_int());
+	auto r = BatchWrite(tokens, seq_id, cache_pos, cursor.as_int());
 	cursor.increment(r.second);
 	return r;
 }
 
-std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t attn_pos)
+std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t cache_pos, int32_t attn_pos)
 {
 	// Add to context batch
 	auto seq_ids = get_sequence_indices(seq_id, _n_seq_max);
 	int32_t n_seq = toI(seq_ids.size());
 	Batch& batch = *_batch.get();
 
-	int32_t cache_pos = batch.n_tokens;
+	if (cache_pos < 0)
+		cache_pos = batch.n_tokens;
 	int32_t n_tokens = toI(tokens.size());
 
 	for (int32_t i = 0; i < n_tokens; ++i)
@@ -83,7 +84,7 @@ std::pair<int32_t, int32_t> ContextCache::BatchWrite(std::span<const Token> toke
 		batch.logits[idx] = false;
 	}
 
-	_length = batch.n_tokens = cache_pos + n_tokens;
+	_length = batch.n_tokens += n_tokens;
 	return std::make_pair(cache_pos, n_tokens); // <pos, len>
 }
 
@@ -225,8 +226,13 @@ void ContextCache::MoveBlock(ContextBlock& block, int32_t offset)
 {
 	int32_t src_pos = block.cache_position;
 	CopyTokens(src_pos, src_pos + block.length(), offset);
-	ShiftTokens(src_pos, src_pos + block.length(), offset);
 	block.cache_position += offset;
+}
+
+void ContextCache::ShiftBlock(ContextBlock& block, int32_t offset)
+{
+	int32_t src_pos = block.cache_position;
+	ShiftTokens(src_pos, src_pos + block.length(), offset);
 	block.attn_position += offset;
 }
 
@@ -283,6 +289,12 @@ void ContextCache::ShiftTokens(int32_t begin, int32_t end, int32_t offset)
 	int32_t length = std::abs(begin - end);
 	for (int32_t i = 0; i < length; ++i)
 		batch.pos[begin + i] += offset;
+}
+
+void ContextCache::AdjustLength(int32_t offset)
+{
+	Batch& batch = *_batch.get();
+	_length = batch.n_tokens += offset;
 }
 
 void ContextCache::BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds)

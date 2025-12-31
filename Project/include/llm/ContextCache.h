@@ -19,11 +19,13 @@ namespace fig::llm
 		int32_t BatchAllocate(int32_t pos, int32_t length);
 		
 		// Returns the position and length of tokens written
-		std::pair<int32_t, int32_t> BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t attn_position);
-		std::pair<int32_t, int32_t> BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, ContextCursor& cursor);
+		std::pair<int32_t, int32_t> BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t cache_pos, int32_t attn_position);
+		std::pair<int32_t, int32_t> BatchWrite(std::span<const Token> tokens, SequenceSlots seq_id, int32_t cache_pos, ContextCursor& cursor);
 		int32_t BatchAddSingle(Token token, Sequences seq_ids, int32_t pos, bool logits = true);
 		
+		void ShiftBlock(ContextBlock& block, int32_t offset);
 		void MoveBlock(ContextBlock& block, int32_t offset);
+		void AdjustLength(int32_t offset);
 
 		void InitLogits();
 		void BatchSetSequences(int32_t pos, const std::vector<int32_t>& seqIds);

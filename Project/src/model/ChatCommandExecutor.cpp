@@ -1,4 +1,5 @@
 #include <pch.h>
+#include "model/ChatSession.h"
 #include "model/ChatCommandExecutor.h"
 #include "model/AppState.h"
 #include "llm/LLMInstance.h"
@@ -58,11 +59,14 @@ static std::vector<fig::string> FilterMessageIDs(std::vector<RemovedMessage> msg
 		| std::ranges::to<std::vector<fig::string>>();
 };
 
-static Role RoleFromName(fig::string text, LLMInstancePtr pLLM) {
+static Role RoleFromName(fig::string text, LLMInstancePtr pLLM) 
+{
 	if (empty_or_whitespace(text))
 		return Role::Undefined;
+
 	if (std::iswdigit(from_utf8(text)[0]))
 		return bot_from_index(std::stoi(text) - 1);
+
 	for (auto const& kvp : pLLM->GetSession().GetCharactersByRole())
 	{
 		if (begins_with(kvp.second.shortName, text, true))

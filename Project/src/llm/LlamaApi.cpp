@@ -43,7 +43,7 @@ namespace fig::llm::llama
 	Batch init_batch(int32_t ctx_size, int32_t n_seq_max)
 	{
 		// Prepare a batch for the prompt
-		Batch batch = llama_batch_init(ctx_size, 0, n_seq_max);
+		Batch batch = llama_batch_init(ctx_size, NULL, n_seq_max);
 		batch.n_tokens = 0;
 
 		for (size_t i = 0; i < ctx_size; ++i)
@@ -61,7 +61,7 @@ namespace fig::llm::llama
 	Batch create_batch(std::span<Token> tokens, std::span<Sequence> seqs, int32_t n_seq_max, int32_t position, bool logits)
 	{
 		// Prepare a batch for the prompt
-		Batch batch = llama_batch_init(toI(tokens.size()), 0, n_seq_max);
+		Batch batch = llama_batch_init(toI(tokens.size()), NULL, n_seq_max);
 		batch.n_tokens = toI(tokens.size());
 		batch.embd = nullptr;
 
@@ -98,7 +98,7 @@ namespace fig::llm::llama
 		const int32_t ctx_size = llama_n_ctx(pCtx);
 
 		// Prepare a batch for the prompt
-		Batch batch = llama_batch_init(ctx_size, 0, 1);
+		Batch batch = llama_batch_init(ctx_size, NULL, 1);
 		int32_t num_tokens = std::min((int32_t)tokens.size(), ctx_size);
 
 		// Add tokens to batch

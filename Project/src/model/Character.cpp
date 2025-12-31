@@ -8,77 +8,79 @@
 using namespace fig::gui;
 using namespace fig::gui_util;
 using namespace fig::string_util;
-
 using namespace tinyxml2;
 
-bool Character::LoadFromXml(fig::string filename)
+namespace fig::data
 {
-	XMLDocument xmlDoc;
-	if (xmlDoc.LoadFile(filename.c_str()) != XML_SUCCESS)
-		return false;
-
-	XMLElement& root = *xmlDoc.FirstChildElement();
-
-	// Identifier
-	XMLElement* pID = root.FirstChildElement("ID");
-	if (pID)
-		id = trim(pID->GetText());
-
-	// Name(s)
-	XMLElement* pFirstName = root.FirstChildElement("FirstName");
-	if (pFirstName)
-		shortName = trim(pFirstName->GetText());
-
-	XMLElement* pFullName = root.FirstChildElement("FullName");
-	if (pFullName)
-		fullName = trim(pFullName->GetText());
-
-	if (id.empty())
-		id = shortName;
-	if (fullName.empty())
-		fullName = shortName;
-
-
-	// Portrait
-	XMLElement* pImage = root.FirstChildElement("Image");
-	if (pImage)
-		portraitFilename = trim(pImage->GetText());
-
-	// Read description
-	XMLElement* pBrief = root.FirstChildElement("Brief");
-	if (pBrief)
-		brief = trim(pBrief->GetText());
-
-	// Read description
-	XMLElement* pDesc = root.FirstChildElement("Description");
-	if (pDesc)
-		description = trim(pDesc->GetText());
-
-	// Read gender
-	XMLElement* pGender = root.FirstChildElement("Gender");
-	if (pGender)
+	bool Character::LoadFromXml(fig::string filename)
 	{
-		fig::string gender = trim(pGender->GetText());
-		if (!gender.empty())
-			properties.push_back(CharacterProperty { "gender", gender, "Gender" });
+		XMLDocument xmlDoc;
+		if (xmlDoc.LoadFile(filename.c_str()) != XML_SUCCESS)
+			return false;
+
+		XMLElement& root = *xmlDoc.FirstChildElement();
+
+		// Identifier
+		XMLElement* pID = root.FirstChildElement("ID");
+		if (pID)
+			id = trim(pID->GetText());
+
+		// Name(s)
+		XMLElement* pFirstName = root.FirstChildElement("FirstName");
+		if (pFirstName)
+			shortName = trim(pFirstName->GetText());
+
+		XMLElement* pFullName = root.FirstChildElement("FullName");
+		if (pFullName)
+			fullName = trim(pFullName->GetText());
+
+		if (id.empty())
+			id = shortName;
+		if (fullName.empty())
+			fullName = shortName;
+
+
+		// Portrait
+		XMLElement* pImage = root.FirstChildElement("Image");
+		if (pImage)
+			portraitFilename = trim(pImage->GetText());
+
+		// Read description
+		XMLElement* pBrief = root.FirstChildElement("Brief");
+		if (pBrief)
+			brief = trim(pBrief->GetText());
+
+		// Read description
+		XMLElement* pDesc = root.FirstChildElement("Description");
+		if (pDesc)
+			description = trim(pDesc->GetText());
+
+		// Read gender
+		XMLElement* pGender = root.FirstChildElement("Gender");
+		if (pGender)
+		{
+			fig::string gender = trim(pGender->GetText());
+			if (!gender.empty())
+				properties.push_back(CharacterProperty { "gender", gender, "Gender" });
+		}
+
+		// Color
+		bgColor = (Color)0;
+		borderColor = (Color)0;
+		XMLElement* pColor = root.FirstChildElement("Color");
+		if (pColor)
+		{
+			borderColor = color_from_string(pColor->GetText());
+
+			float h, s, v;
+			color_to_hsv(borderColor, h, s, v);
+
+			if (s > 0.0f)
+				bgColor = hsv_to_color(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
+			else
+				bgColor = hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
+		}
+
+		return !id.empty() && !shortName.empty();
 	}
-
-	// Color
-	bgColor = (Color)0;
-	borderColor = (Color)0;
-	XMLElement* pColor = root.FirstChildElement("Color");
-	if (pColor)
-	{
-		borderColor = color_from_string(pColor->GetText());
-
-		float h, s, v;
-		color_to_hsv(borderColor, h, s, v);
-
-		if (s > 0.0f)
-			bgColor = hsv_to_color(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
-		else
-			bgColor = hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
-	}
-
-	return !id.empty() && !shortName.empty();
 }

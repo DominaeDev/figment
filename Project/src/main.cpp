@@ -106,7 +106,7 @@ SDL_AppResult SDL_AppIterate(void* state)
     if (now_ns - last > 999999999) 
 	{
         last = now_ns;
-		ApplicationState::GetMainWindow().SetTitle(std::format("{} {} fps", GlobalStrings::ApplicationTitle, accu));
+		ApplicationState::GetMainWindow().SetTitle(std::format("{} {} fps", fig::strings::ApplicationTitle, accu));
         accu = 0;
     }
     past = now_ns;

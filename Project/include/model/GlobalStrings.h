@@ -4,7 +4,7 @@
 
 #include "Types.h"
 
-namespace GlobalStrings
+namespace fig::strings
 {
 	inline constexpr fig::const_string ApplicationTitle = "Figment";
 

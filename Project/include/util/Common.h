@@ -131,5 +131,23 @@ namespace fig::common_util
 		return flip_iterator<V>(cont, itFind);
 	};
 
+	template<template <typename, typename> class Cont, typename V, typename Pred, typename A = std::allocator<V>>
+	inline constexpr size_t find_index(const Cont<V, A>& cont, Pred pred)
+	{
+		auto it = std::find_if(cont.cbegin(), cont.cend(), pred);
+		if (it != cont.cend())
+			return toI(std::distance(cont.cbegin(), it));
+		return fig::npos;
+	};
+
+	template<template <typename, typename> class Cont, typename V, typename Pred, typename A = std::allocator<V>>
+	inline constexpr size_t index_of(const Cont<V, A>& cont, V value)
+	{
+		auto it = std::find(cont.cbegin(), cont.cend(), value);
+		if (it != cont.cend())
+			return toI(std::distance(cont.cbegin(), it));
+		return fig::npos;
+	};
+
 }
 #endif
