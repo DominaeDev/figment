@@ -7,7 +7,6 @@
 #include "util/Common.h"
 #include "Constants.h"
 #include <llama.h>
-#include <common.h>
 #include <format>
 #include <cassert>
 
@@ -132,9 +131,9 @@ bool LLMEmbedding::Search(const Sentences& sentences, bool bUser, bool bBot)
 		EmbeddingVector embedding;
 		if (!__Generate(tokens, "", Mode::Query, embedding))
 			return false;
-#if _DEBUG
-		CompareSimilarity(embedding.vec, sentences.size());
-#endif
+
+		if constexpr (Debugging)
+			CompareSimilarity(embedding.vec, sentences.size());
 	}
 	return true;
 }
@@ -177,7 +176,7 @@ static bool batch_decode(ContextPtr ctx, Batch& batch, float* output, int n_seq,
 		if (batch.logits == nullptr || !batch.logits[i])
 			continue;
 
-		const float* embd = nullptr;
+		float* embd = nullptr;
 		int embd_pos = 0;
 
 		if (pooling_type == LLAMA_POOLING_TYPE_NONE)
@@ -196,7 +195,7 @@ static bool batch_decode(ContextPtr ctx, Batch& batch, float* output, int n_seq,
 		}
 
 		float* out = output + embd_pos * n_embd;
-		common_embd_normalize(embd, out, n_embd, embd_norm);
+		fig::llm_util::embd_normalize(embd, out, n_embd, embd_norm);
 	}
 	return true;
 }
@@ -236,7 +235,6 @@ bool LLMEmbedding::__Generate(const std::vector<llama_token>& in_tokens, fig::st
 	return true;
 }
 
-#if _DEBUG
 void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sentences)
 {
 	auto& embeddings = Embeddings::GetEmbeddings();
@@ -248,7 +246,7 @@ void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sen
 		if (embeddings[i].vec.size() != vec.size())
 			continue;
 
-		float similarity = common_embd_similarity_cos(embeddings[i].vec.data(), vec.data(), (int32_t)vec.size());
+		float similarity = fig::llm_util::embd_similarity_cos(embeddings[i].vec, vec, (int32_t)vec.size());
 
 		fig::string content = embeddings[i].content;
 		if (content.size() > MaxLength)
@@ -262,4 +260,3 @@ void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sen
 	for (int i = 0; i < results.size() && i < 5; ++i)
 		LogLn(std::format("Similarity {0:.3f} = \"{1}\"", results[i].first, results[i].second));
 }
-#endif

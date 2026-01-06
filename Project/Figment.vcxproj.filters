@@ -466,15 +466,6 @@
     <ClInclude Include="..\Libraries\base64\include\base64.h">
       <Filter>Source Files\Third-party\base64</Filter>
     </ClInclude>
-    <ClInclude Include="..\Libraries\llamacpp\include\llama.h">
-      <Filter>Source Files\Third-party\llamacpp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Libraries\llamacpp\include\llama-cpp.h">
-      <Filter>Source Files\Third-party\llamacpp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Libraries\llamacpp\include\common.h">
-      <Filter>Source Files\Third-party\llamacpp</Filter>
-    </ClInclude>
     <ClInclude Include="..\Libraries\SDL3\include\SDL3\SDL.h">
       <Filter>Source Files\Third-party\SDL3</Filter>
     </ClInclude>
@@ -807,6 +798,12 @@
     </ClInclude>
     <ClInclude Include="include\llm\ContextCursor.h">
       <Filter>Source Files\Inference\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\llama.cpp\b5237\include\llama-cpp.h">
+      <Filter>Source Files\Third-party\llamacpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\llama.cpp\b5237\include\llama.h">
+      <Filter>Source Files\Third-party\llamacpp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

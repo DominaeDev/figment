@@ -31,9 +31,7 @@ namespace fig::llm
 		};
 
 		bool __Generate(const std::vector<Token>& tokens, fig::string content, Mode mode, EmbeddingVector& out_embedding);
-#if _DEBUG
 		void CompareSimilarity(const std::vector<float>& vec, size_t n_sentences);
-#endif
 	private:
 		ModelPtr _pModel = nullptr;
 		ContextPtr _pCtx = nullptr;

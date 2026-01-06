@@ -1019,4 +1019,79 @@ namespace fig::llm_util
 		return true;
 #endif
 	}
-}
+
+	void embd_normalize(const std::vector<float>& inp, std::vector<float>& out, int n, int embd_norm)
+	{
+		embd_normalize(inp.data(), out.data(), n, embd_norm);
+	}
+
+	void embd_normalize(const float* inp, float* out, int n, int embd_norm)
+	{
+		double sum = 0.0;
+
+		switch (embd_norm)
+		{
+		case -1: // no normalisation
+			sum = 1.0;
+			break;
+		case 0: // max absolute
+			for (int i = 0; i < n; i++)
+			{
+				if (sum < std::abs(inp[i]))
+				{
+					sum = std::abs(inp[i]);
+				}
+			}
+			sum /= 32760.0; // make an int16 range
+			break;
+		case 2: // euclidean
+			for (int i = 0; i < n; i++)
+			{
+				sum += inp[i] * inp[i];
+			}
+			sum = std::sqrt(sum);
+			break;
+		default: // p-norm (euclidean is p-norm p=2)
+			for (int i = 0; i < n; i++)
+			{
+				sum += std::pow(std::abs(inp[i]), embd_norm);
+			}
+			sum = std::pow(sum, 1.0 / embd_norm);
+			break;
+		}
+
+		const float norm = (sum > 0.0) ? 1.0f / toF(sum) : 0.0f;
+
+		for (int i = 0; i < n; i++)
+		{
+			out[i] = inp[i] * norm;
+		}
+	}
+
+	float embd_similarity_cos(const std::vector<float>& embd1, const std::vector<float>& embd2, int n)
+	{
+		double sum = 0.0;
+		double sum1 = 0.0;
+		double sum2 = 0.0;
+
+		for (int i = 0; i < n; i++)
+		{
+			sum += embd1[i] * embd2[i];
+			sum1 += embd1[i] * embd1[i];
+			sum2 += embd2[i] * embd2[i];
+		}
+
+		// Handle the case where one or both vectors are zero vectors
+		if (sum1 == 0.0 || sum2 == 0.0)
+		{
+			if (sum1 == 0.0 && sum2 == 0.0)
+			{
+				return 1.0f; // two zero vectors are similar
+			}
+			return 0.0f;
+		}
+
+		return toF(sum / (sqrt(sum1) * sqrt(sum2)));
+	}
+
+} // namespace

@@ -36,4 +36,8 @@ namespace fig::llm_util
 	fig::llm::SequenceSlot get_sequence_slot_from_index(fig::llm::Sequence seq_idx) noexcept;
 
 	fig::string format_id(fig::string id);
+
+	void embd_normalize(const std::vector<float>& inp, std::vector<float>& out, int n, int embd_norm);
+	void embd_normalize(const float* inp, float* out, int n, int embd_norm);
+	float embd_similarity_cos(const std::vector<float>& embd1, const std::vector<float>& embd2, int n);
 }

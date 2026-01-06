@@ -23,7 +23,7 @@
 #endif
 
 // Set this to break on the specified allocation index. 0 = off
-#define MEMORY_LEAK_ALLOC 0
+#define MEMORY_LEAK_ALLOC 228
 
 #define APP_STATE(P) static_cast<AppState*>(P);
 

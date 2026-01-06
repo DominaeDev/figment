@@ -16,3 +16,6 @@ Project/resources/debug_script.txt
 Project/*.txt
 Project/resources/fonts/
 Project/embeddings/
+Libraries/llama.cpp/b5237/dlls/
+Libraries/temp/
+Project/old_dlls/

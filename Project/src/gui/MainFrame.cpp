@@ -47,7 +47,7 @@ constexpr ChatOptions DefaultChatOptions {
 //		ChatOptions::Flag::ReportStateChanges,
 //		ChatOptions::Flag::Embeddings,
 	},
-	.groupChatMode = ChatOptions::GroupChatMode::SwapPersonas,
+	.groupChatMode = ChatOptions::GroupChatMode::SwapSequences,
 };
 
 MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
