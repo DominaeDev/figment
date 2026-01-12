@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <functional>
 
-
 namespace fig::common_util
 {
 #if _DEBUG
@@ -41,7 +40,11 @@ namespace fig::common_util
 		}
 	}
 
-	fig::string CreateUUID();
+	fig::uuid CreateUUID();
+	inline fig::string CreateStrUUID()
+	{
+		return CreateUUID().str();
+	}
 
 	fig::string Base64Encode(fig::byte_span data) noexcept;
 	fig::bytes Base64Decode(fig::string_view) noexcept;

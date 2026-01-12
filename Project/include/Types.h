@@ -9,6 +9,7 @@
 #include <span>
 #include <stdint.h>
 
+#include <uuid_v4.h>
 #include "util/EnumFlags.h"
 
 namespace fig
@@ -27,6 +28,8 @@ namespace fig
     using bytes = std::vector<byte>;
     template<size_t N> 
     using buffer = std::array<byte, N>;
+
+    using uuid = UUIDv4::UUID;
 }
 
 // Type conversion functions
@@ -46,12 +49,17 @@ inline constexpr size_t castEnum(T x) { return static_cast<size_t>(x); }
 
 inline constexpr uint8_t operator "" _u8( unsigned long long arg ) noexcept
 {
-    return static_cast<uint8_t>( arg );
+    return static_cast<uint8_t>(arg);
 }
 
 inline constexpr size_t operator "" _uz( unsigned long long arg ) noexcept
 {
-    return static_cast<size_t>( arg );
+    return static_cast<size_t>(arg);
+}
+
+inline constexpr std::byte operator "" _byte( unsigned long long arg ) noexcept
+{
+    return static_cast<std::byte>(arg);
 }
 
 inline constexpr fig::string toStr(fig::string_view sv) { return fig::string(sv); }

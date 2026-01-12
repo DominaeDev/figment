@@ -563,8 +563,8 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 	bool isInstigation = args.flags.IsSet(GenerateFlag::Instigation);
 	bool isGroupChat = _session.IsGroupChat();
 
-	fig::string responseId = args.responseId.empty() ? CreateUUID() : args.responseId;
-	fig::string subMessageId = args.subMessageId.empty() ? CreateUUID() : args.subMessageId;
+	fig::string responseId = args.responseId.empty() ? CreateStrUUID() : args.responseId;
+	fig::string subMessageId = args.subMessageId.empty() ? CreateStrUUID() : args.subMessageId;
 	fig::string userName = _session.GetNameOf(Role::User);
 
 	auto& response_pos = _contextState.response_pos; 
@@ -917,7 +917,7 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			if (bEndOfMessageType)
 			{
 				msgType = MessageType::Undefined;
-				subMessageId = CreateUUID();
+				subMessageId = CreateStrUUID();
 				_pStatus->EmitSignal(LLMStatusSignal::CompletedMessage);
 			}
 		}
@@ -1000,8 +1000,8 @@ void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments arg
 			varText = rtrim(varText);
 
 			_resultQueue.push(MessagePiece {
-				.responseId = CreateUUID(),
-				.subMessageId = CreateUUID(),
+				.responseId = CreateStrUUID(),
+				.subMessageId = CreateStrUUID(),
 				.identifier = "",
 				.content = varText,
 				.role = Role::System,
@@ -1101,9 +1101,9 @@ void LLMInstance::__ProcessTaskQueue(std::stop_token thread_stop, __GenerationCo
 			generateArgs.maxMessages = 0;
 
 		if (generateArgs.responseId.empty())
-			generateArgs.responseId = CreateUUID();
+			generateArgs.responseId = CreateStrUUID();
 		if (generateArgs.subMessageId.empty())
-			generateArgs.subMessageId = CreateUUID();
+			generateArgs.subMessageId = CreateStrUUID();
 
 		_activeResponseIds.insert(generateArgs.responseId);
 
@@ -1284,7 +1284,7 @@ bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgT
 	else if (msgType == MessageType::Direction)
 		role = Role::Director;
 
-	fig::string responseId = CreateUUID();
+	fig::string responseId = CreateStrUUID();
 	int32_t current_turn = _turn_counter.load();
 
 	LockAndDo([&]() {
@@ -1308,7 +1308,7 @@ bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgT
 			// Add message to result queue
 			for (auto const& subMsg : subMessages)
 			{
-				fig::string subMessageId = CreateUUID();
+				fig::string subMessageId = CreateStrUUID();
 				_resultQueue.push(MessagePiece {
 					.responseId = responseId,
 					.subMessageId = subMessageId,
@@ -1750,7 +1750,7 @@ bool LLMInstance::GenerateEmbedding(fig::string text)
 		Embeddings::AddEmbedding(embedding);
 
 		// Save to disk
-		fig::string filename = std::format("./embeddings/{}.txt", CreateUUID());
+		fig::string filename = std::format("./embeddings/{}.txt", CreateStrUUID());
 		embedding.SaveToFile(filename);
 	}
 	return true; // Break here

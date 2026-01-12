@@ -99,6 +99,9 @@
     <Filter Include="Source Files\AppModel\Data\Character">
       <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\AppModel\Assets">
+      <UniqueIdentifier>{72d9b498-dc93-4958-b2d5-f0c34226e0f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -295,6 +298,15 @@
     </ClCompile>
     <ClCompile Include="src\llm\ContextCursor.cpp">
       <Filter>Source Files\Inference\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\Asset.cpp">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\UserManager.cpp">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\Encrypt.cpp">
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -804,6 +816,21 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\llama.cpp\b5237\include\llama.h">
       <Filter>Source Files\Third-party\llamacpp</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\UserProfile.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\AssetManager.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\Asset.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\UserManager.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\Encrypt.h">
+      <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

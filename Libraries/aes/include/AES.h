@@ -88,7 +88,7 @@ namespace Cipher
 		static constexpr size_t Nk = key_bits / 32;
 		static constexpr size_t Nr = Nk + 6;
 		static constexpr size_t round_keys_size = 4 * Nb * (Nr + 1);
-		static constexpr size_t key_bytes = key_bits / sizeof(char);
+		static constexpr size_t key_bytes = key_bits / 8;
 
 		unsigned char round_keys[round_keys_size];
 

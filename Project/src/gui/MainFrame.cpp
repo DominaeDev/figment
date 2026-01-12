@@ -11,6 +11,7 @@
 #include "model/AppState.h"
 #include "model/ChatCommands.h"
 #include "model/ChatCommandExecutor.h"
+#include "model/UserManager.h"
 #include "llm/LLMEngine.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
@@ -27,6 +28,7 @@ using namespace fig::file_util;
 using namespace fig::string_util;
 using namespace fig::llm;
 using namespace fig::data;
+using namespace fig::fs;
 
 fig::gui::MainFrame* MainFrame::s_pInstance = nullptr;
 
@@ -125,6 +127,10 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 
 	InvalidateLayout();
 	s_pInstance = this;
+
+	//! @temp
+	UserManager userMngr {};
+	userMngr.CreateProfile("Default User");
 }
 
 MainFrame::~MainFrame()

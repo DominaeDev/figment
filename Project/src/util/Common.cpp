@@ -29,10 +29,10 @@ namespace fig::common_util
 		}
 	}
 
-	fig::string CreateUUID()
+	fig::uuid CreateUUID()
 	{
 		static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-		return uuidGenerator.getUUID().str();
+		return uuidGenerator.getUUID();
 	}
 
 	fig::string Base64Encode(fig::byte_span data) noexcept
