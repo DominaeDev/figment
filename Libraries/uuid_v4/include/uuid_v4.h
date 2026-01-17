@@ -102,130 +102,162 @@ __m128i inline stom128i(const char* mem) {
  * UUIDv4 (random 128-bits) RFC-4122
  */
 class UUID {
-  public:
-    UUID()
-    {}
+public:
+	UUID()
+	{
+	}
 
-    UUID(const UUID &other) {
-      __m128i x = _mm_load_si128((__m128i*)other.data);
-      _mm_store_si128((__m128i*)data, x);
-    }
+	UUID(const UUID& other)
+	{
+		__m128i x = _mm_load_si128((__m128i*)other.data);
+		_mm_store_si128((__m128i*)data, x);
+	}
 
-    /* Builds a 128-bits UUID */
-    UUID(__m128i uuid) {
-      _mm_store_si128((__m128i*)data, uuid);
-    }
+	/* Builds a 128-bits UUID */
+	UUID(__m128i uuid)
+	{
+		_mm_store_si128((__m128i*)data, uuid);
+	}
 
-    UUID(uint64_t x, uint64_t y) {
-      __m128i z = _mm_set_epi64x(x, y);
-      _mm_store_si128((__m128i*)data, z);
-    }
+	UUID(uint64_t x, uint64_t y)
+	{
+		__m128i z = _mm_set_epi64x(x, y);
+		_mm_store_si128((__m128i*)data, z);
+	}
 
-    UUID(const uint8_t* bytes) {
-      __m128i x = _mm_loadu_si128((__m128i*)bytes);
-      _mm_store_si128((__m128i*)data, x);
-    }
+	UUID(const uint8_t* bytes)
+	{
+		__m128i x = _mm_loadu_si128((__m128i*)bytes);
+		_mm_store_si128((__m128i*)data, x);
+	}
 
-    /* Builds an UUID from a byte string (16 bytes long) */
-    explicit UUID(const std::string &bytes) {
-      __m128i x = betole128(_mm_loadu_si128((__m128i*)bytes.data()));
-      _mm_store_si128((__m128i*)data, x);
-    }
+	/* Builds an UUID from a byte string (16 bytes long) */
+	explicit UUID(const std::string& bytes)
+	{
+		__m128i x = betole128(_mm_loadu_si128((__m128i*)bytes.data()));
+		_mm_store_si128((__m128i*)data, x);
+	}
 
-    /* Static factory to parse an UUID from its string representation */
-    static UUID fromStrFactory(const std::string &s) {
-      return fromStrFactory(s.c_str());
-    }
+	/* Static factory to parse an UUID from its string representation */
+	static UUID fromStrFactory(const std::string& s)
+	{
+		return fromStrFactory(s.c_str());
+	}
 
-    static UUID fromStrFactory(const char* raw) {
-      return UUID(stom128i(raw));
-    }
+	static UUID fromStrFactory(const char* raw)
+	{
+		return UUID(stom128i(raw));
+	}
 
-    void fromStr(const char* raw) {
-      _mm_store_si128((__m128i*)data, stom128i(raw));
-    }
+	void fromStr(const char* raw)
+	{
+		_mm_store_si128((__m128i*)data, stom128i(raw));
+	}
 
-    UUID& operator=(const UUID &other) {
-      if (&other == this) {
-        return *this;
-      }
-      __m128i x = _mm_load_si128((__m128i*)other.data);
-      _mm_store_si128((__m128i*)data, x);
-      return *this;
-    }
+	UUID& operator=(const UUID& other)
+	{
+		if (&other == this)
+		{
+			return *this;
+		}
+		__m128i x = _mm_load_si128((__m128i*)other.data);
+		_mm_store_si128((__m128i*)data, x);
+		return *this;
+	}
 
-    friend bool operator==(const UUID &lhs, const UUID &rhs) {
-      __m128i x = _mm_load_si128((__m128i*)lhs.data);
-      __m128i y = _mm_load_si128((__m128i*)rhs.data);
+	friend bool operator==(const UUID& lhs, const UUID& rhs)
+	{
+		__m128i x = _mm_load_si128((__m128i*)lhs.data);
+		__m128i y = _mm_load_si128((__m128i*)rhs.data);
 
-      __m128i neq = _mm_xor_si128(x, y);
-      return _mm_test_all_zeros(neq, neq);
-    }
+		__m128i neq = _mm_xor_si128(x, y);
+		return _mm_test_all_zeros(neq, neq);
+	}
 
-    friend bool operator<(const UUID &lhs, const UUID &rhs) {
-      // There are no trivial 128-bits comparisons in SSE/AVX
-      // It's faster to compare two uint64_t
-      uint64_t *x = (uint64_t*)lhs.data;
-      uint64_t *y = (uint64_t*)rhs.data;
-      return *x < *y || (*x == *y && *(x + 1) < *(y + 1));
-    }
+	friend bool operator<(const UUID& lhs, const UUID& rhs)
+	{
+		// There are no trivial 128-bits comparisons in SSE/AVX
+		// It's faster to compare two uint64_t
+		uint64_t* x = (uint64_t*)lhs.data;
+		uint64_t* y = (uint64_t*)rhs.data;
+		return *x < *y || (*x == *y && *(x + 1) < *(y + 1));
+	}
 
-    friend bool operator!=(const UUID &lhs, const UUID &rhs) { return !(lhs == rhs); }
-    friend bool operator> (const UUID &lhs, const UUID &rhs) { return rhs < lhs; }
-    friend bool operator<=(const UUID &lhs, const UUID &rhs) { return !(lhs > rhs); }
-    friend bool operator>=(const UUID &lhs, const UUID &rhs) { return !(lhs < rhs); }
+	friend bool operator!=(const UUID& lhs, const UUID& rhs) { return !(lhs == rhs); }
+	friend bool operator> (const UUID& lhs, const UUID& rhs) { return rhs < lhs; }
+	friend bool operator<=(const UUID& lhs, const UUID& rhs) { return !(lhs > rhs); }
+	friend bool operator>=(const UUID& lhs, const UUID& rhs) { return !(lhs < rhs); }
 
-    /* Serializes the uuid to a byte string (16 bytes) */
-    std::string bytes() const {
-      std::string mem;
-      bytes(mem);
-      return mem;
-    }
+	/* Serializes the uuid to a byte string (16 bytes) */
+	std::string bytes() const
+	{
+		std::string mem;
+		bytes(mem);
+		return mem;
+	}
 
-    void bytes(std::string &out) const {
-      out.resize(sizeof(data));
-      bytes((char*)out.data());
-    }
+	void bytes(std::string& out) const
+	{
+		out.resize(sizeof(data));
+		bytes((char*)out.data());
+	}
 
-    void bytes(char* bytes) const {
-      __m128i x = betole128(_mm_load_si128((__m128i*)data));
-      _mm_storeu_si128((__m128i*)bytes, x);
-    }
+	void bytes(char* bytes) const
+	{
+		__m128i x = betole128(_mm_load_si128((__m128i*)data));
+		_mm_storeu_si128((__m128i*)bytes, x);
+	}
 
-    /* Converts the uuid to its string representation */
-    std::string str() const {
-      std::string mem;
-      str(mem);
-      return mem;
-    }
+	/* Converts the uuid to its string representation */
+	std::string str() const
+	{
+		std::string mem;
+		str(mem);
+		return mem;
+	}
 
-    void str(std::string &s) const {
-      s.resize(36);
-      str((char*)s.data());
-    }
+	void str(std::string& s) const
+	{
+		s.resize(36);
+		str((char*)s.data());
+	}
 
-    void str(char *res) const {
-      __m128i x = _mm_load_si128((__m128i*)data);
-      m128itos(x, res);
-    }
+	void str(char* res) const
+	{
+		__m128i x = _mm_load_si128((__m128i*)data);
+		m128itos(x, res);
+	}
 
-    friend std::ostream& operator<< (std::ostream& stream, const UUID& uuid) {
-      return stream << uuid.str();
-    }
+	bool is_empty() const noexcept
+	{
+		for (size_t i = 0; i < sizeof(data); ++i)
+		{
+			if (data[i] != 0)
+				return false;
+		}
+		return true;
+	}
 
-    friend std::istream& operator>> (std::istream& stream, UUID& uuid) {
-      std::string s;
-      stream >> s;
-      uuid = fromStrFactory(s);
-      return stream;
-    }
+	friend std::ostream& operator<< (std::ostream& stream, const UUID& uuid)
+	{
+		return stream << uuid.str();
+	}
 
-    size_t hash() const {
-      return *((uint64_t*)data) ^ *((uint64_t*)data+8);
-    }
+	friend std::istream& operator>> (std::istream& stream, UUID& uuid)
+	{
+		std::string s;
+		stream >> s;
+		uuid = fromStrFactory(s);
+		return stream;
+	}
 
-  private:
-    alignas(128) uint8_t data[16];
+	size_t hash() const
+	{
+		return *((uint64_t*)data) ^ *((uint64_t*)data + 8);
+	}
+
+private:
+	alignas(128) uint8_t data[16] { 0 };
 };
 
 /*

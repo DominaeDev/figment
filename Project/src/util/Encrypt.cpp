@@ -2,8 +2,12 @@
 #include <cassert>
 #include "util/Encrypt.h"
 #include "AES.h"
+#include "util/Hash.h"
 
-static void encrypt_data(unsigned char* pData, size_t length, const fig::encrypt::Key& key)
+constexpr bool UsePBKDF2 = true;
+constexpr uint32_t PBKDF2Iterations = 10000;
+
+static void encrypt_data(unsigned char* pData, size_t length, const fig::security::AESKey& key)
 {
 	static_assert(sizeof(unsigned char) == sizeof(std::byte));
 	static_assert(sizeof(key) == 32);
@@ -19,7 +23,7 @@ static void encrypt_data(unsigned char* pData, size_t length, const fig::encrypt
 		aes.encrypt_block(pData + i);
 }
 
-static void decrypt_data(unsigned char* pData, size_t length, const fig::encrypt::Key& key)
+static void decrypt_data(unsigned char* pData, size_t length, const fig::security::AESKey& key)
 {
 	static_assert(sizeof(unsigned char) == sizeof(std::byte));
 	static_assert(sizeof(key) == 32);
@@ -35,57 +39,184 @@ static void decrypt_data(unsigned char* pData, size_t length, const fig::encrypt
 		aes.decrypt_block(pData + i);
 }
 
-namespace fig::encrypt
+static fig::bytes hmac_compute(std::span<const std::byte> key, std::span<const std::byte> data)
 {
-	DataBlock::DataBlock(const unsigned char* pData, size_t length)
+	constexpr size_t block_size = 64;
+	fig::bytes k(block_size, std::byte { 0 });
+
+	if (key.size() > block_size)
 	{
-		_data_length = length;
-		auto padded_size = _data_length % 16 == 0 ? _data_length : (1 + _data_length / 16) * 16;
-		_data.resize(padded_size, 0);
-		std::memcpy(_data.data(), pData, _data_length);
+		auto hashed = fig::common_util::GetHash(key).to_bytes();
+		std::copy(hashed.begin(), hashed.end(), k.begin());
+	}
+	else
+	{
+		std::copy(key.begin(), key.end(), k.begin());
 	}
 
-	DataBlock::DataBlock(const fig::bytes& data)
+	fig::bytes o_key_pad(block_size), i_key_pad(block_size);
+	for (size_t i = 0; i < block_size; ++i)
 	{
-		_data_length = data.size();
-		auto padded_size = _data_length % 16 == 0 ? _data_length : (1 + _data_length / 16) * 16;
-		_data.resize(padded_size, 0);
-		std::memcpy(_data.data(), data.data(), _data_length);
+		o_key_pad[i] = k[i] ^ std::byte { 0x5c };
+		i_key_pad[i] = k[i] ^ std::byte { 0x36 };
 	}
 
-	DataBlock::DataBlock(DataBlock&& other) noexcept
-	{
-		_data = std::move(other._data);
-		_data_length = other._data_length;
-		other._data.resize(0);
-	}
+	fig::bytes inner_data;
+	inner_data.insert(inner_data.end(), i_key_pad.begin(), i_key_pad.end());
+	inner_data.insert(inner_data.end(), data.begin(), data.end());
+	auto inner_hash = fig::common_util::GetHash(inner_data).to_bytes();
 
-	void DataBlock::Encrypt(const Key& key)
-	{
-		encrypt_data(reinterpret_cast<unsigned char*>(_data.data()), _data.size(), key);
-	}
+	fig::bytes outer_data;
+	outer_data.insert(outer_data.end(), o_key_pad.begin(), o_key_pad.end());
+	outer_data.insert(outer_data.end(), inner_hash.begin(), inner_hash.end());
 
-	void DataBlock::Decrypt(const Key& key)
-	{
-		decrypt_data(reinterpret_cast<unsigned char*>(_data.data()), _data.size(), key);
-	}
+	return fig::common_util::GetHash(outer_data).to_bytes();
 }
 
-namespace fig::common_util
+static fig::bytes PBKDF2(std::span<const std::byte> password, std::span<const std::byte> salt, uint32_t iterations, size_t output_length)
 {
-	void Encrypt(fig::bytes& data, const fig::encrypt::Key& key)
+	constexpr size_t hash_len = 32; // SHA-256 output length
+	size_t blocks = (output_length + hash_len - 1) / hash_len;
+
+	fig::bytes derived_key;
+	derived_key.reserve(blocks * hash_len);
+
+	for (uint32_t block = 1; block <= blocks; ++block)
 	{
-		fig::encrypt::DataBlock block(data);
-		block.Encrypt(key);
-		data.resize(block.size());
-		std::memcpy(data.data(), block.data(), data.size());
+		// Prepare salt || INT(i)
+		fig::bytes salt_block;
+		salt_block.reserve(salt.size() + 4uz);
+		salt_block.insert(salt_block.end(), salt.begin(), salt.end());
+		salt_block.push_back(std::byte((block >> 24) & 0xff));
+		salt_block.push_back(std::byte((block >> 16) & 0xff));
+		salt_block.push_back(std::byte((block >> 8) & 0xff));
+		salt_block.push_back(std::byte(block & 0xff));
+
+		// U_1 = PRF(password, salt || INT(i))
+		fig::bytes u = hmac_compute(password, salt_block);
+		fig::bytes result { u };
+
+		// U_j = PRF(password, U_{j-1})
+		for (uint32_t j = 1; j < iterations; ++j)
+		{
+			u = hmac_compute(password, u);
+			for (size_t k = 0; k < hash_len; ++k)
+				result[k] ^= u[k];
+		}
+
+		derived_key.insert(derived_key.end(), result.begin(), result.end());
 	}
 
-	void Decrypt(fig::bytes& data, const fig::encrypt::Key& key)
+	derived_key.resize(output_length);
+	return derived_key;
+}
+
+static fig::bytes SimpleHash(fig::string password, fig::security::AuthSalt salt)
+{
+	size_t seed;
+	fig::Hash hash = fig::common_util::GetHash(password);
+	hash = fig::common_util::HashCombine(hash, fig::common_util::GetHash(salt), seed);
+	return hash.to_bytes();
+}
+
+namespace fig::security
+{
+	EncryptedData Encrypt(const fig::bytes& input, const fig::security::AESKey& key)
 	{
-		fig::encrypt::DataBlock block(data);
-		block.Decrypt(key);
-		data.resize(block.size());
-		std::memcpy(data.data(), block.data(), block.size());
+		auto size = input.size();
+		EncryptedData encrypted {
+			.original_size = input.size(),
+		};
+
+		auto padded_size = size % 16 == 0 ? size : (1 + size / 16) * 16;
+		encrypted.data.resize(padded_size, 0_byte);
+		std::memcpy((void*)input.data(), encrypted.data.data(), input.size());
+		encrypted.data = input;
+
+		encrypt_data(reinterpret_cast<unsigned char*>(encrypted.data.data()), encrypted.data.size(), key);
+		return encrypted; // rvo
+	}
+
+	DecryptedData Decrypt(const EncryptedData& input, const fig::security::AESKey& key)
+	{
+		assert(input.data.size() % 16 == 0);
+
+		DecryptedData decrypted { input.data };
+		decrypt_data(reinterpret_cast<unsigned char*>(decrypted.data()), decrypted.size(), key);
+		decrypted.resize(input.original_size);
+		return decrypted; // rvo
+	}
+
+	EncryptedData Encrypt(fig::bytes&& input, const fig::security::AESKey& key)
+	{
+		auto size = input.size();
+		
+		EncryptedData encrypted { .original_size = size };
+		encrypted.data = std::move(input);
+		auto padded_size = size % 16 == 0 ? size : (1 + size / 16) * 16;
+		encrypted.data.resize(padded_size, 0_byte);
+
+		auto encrypted_chars = bytes_to_u8(encrypted.data);
+		encrypt_data(encrypted_chars.data(), encrypted_chars.size(), key);
+		return encrypted; // rvo
+	}
+
+	DecryptedData Decrypt(EncryptedData&& input, const fig::security::AESKey& key)
+	{
+		assert(input.data.size() % 16 == 0);
+
+		DecryptedData decrypted { std::move(input.data) };
+		auto decrypted_chars = bytes_to_u8(decrypted);
+		decrypt_data(decrypted_chars.data(), decrypted_chars.size(), key);
+
+		decrypted.resize(input.original_size);
+		return decrypted; // rvo
+	}
+
+	AESKey DeriveKeyFromPassword(const fig::string& password, const fig::security::AuthSalt& salt)
+	{
+		fig::bytes derived_key;
+		if constexpr (UsePBKDF2)
+		{
+			auto password_bytes = string_to_bytes(password);
+			auto salt_bytes = std::span { salt.data(), salt.size() };
+			derived_key = PBKDF2(password_bytes, salt_bytes, PBKDF2Iterations, sizeof(AESKey));
+		}
+		else
+		{
+			derived_key = SimpleHash(password, salt);
+		}
+
+		AESKey authKey;
+		std::memcpy(authKey.data(), derived_key.data(), std::min(sizeof(AESKey), derived_key.size()));
+		return authKey;
+	}
+
+	Bit128 Random128Bits()
+	{
+		static_assert(sizeof(Bit128) == 16);
+		static std::mt19937_64 rng { std::random_device{}() };
+		constexpr size_t u64_size = sizeof(uint64_t);
+		Bit128 key;
+		for (size_t n = 0; n < 16; n += u64_size)
+		{
+			auto r = rng();
+			std::memcpy(&key[n], &r, u64_size);
+		}
+		return key;
+	}
+
+	Bit256 Random256Bits()
+	{
+		static_assert(sizeof(Bit256) == 32);
+		static std::mt19937_64 rng { std::random_device{}() };
+		constexpr size_t u64_size = sizeof(uint64_t);
+		Bit256 key;
+		for (size_t n = 0; n < 32; n += u64_size)
+		{
+			auto r = rng();
+			std::memcpy(&key[n], &r, u64_size);
+		}
+		return key;
 	}
 }

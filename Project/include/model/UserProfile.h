@@ -12,9 +12,9 @@ namespace fig::fs
 	{
 		fig::uuid id { 0 };
 		fig::string name;
-		fig::encrypt::Key authKey {};
-		fig::encrypt::Bit128 authSalt {};
 		fig::bytes authChallenge {};
+		fig::security::AuthSalt authSalt {};
+		unsigned short version { 0 };
 	};
 }
 #endif

@@ -4,6 +4,7 @@
 
 class AssetManager
 {
+public:
 
 };
 #endif

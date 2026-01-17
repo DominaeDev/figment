@@ -6,67 +6,103 @@
 #include "util/Encrypt.h"
 #include "model/UserManager.h"
 
-using namespace fig::encrypt;
+using namespace fig::security;
 
 namespace fig::fs
 {
-	static fig::const_string DefaultPassword { "||NO PASSWORD PROTECTION||" };
-	constexpr std::array<fig::byte, 29> Challenge { 0x3c_byte, 0x41_byte, 0x55_byte, 0x54_byte, 0x48_byte, 0x3e_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x3c_byte, 0x2f_byte, 0x41_byte, 0x55_byte, 0x54_byte, 0x48_byte, 0x3e_byte, };
-	constexpr size_t ChallengeAuthPosition = 6uz;
+	static fig::const_string kDefaultProfileName { "Default profile" };
+	static fig::const_string kDefaultPassword { "||NO PASSWORD PROTECTION||" };
+	constexpr std::array<fig::byte, 48> kChallenge { 
+		0x41_byte, 0x55_byte, 0x54_byte, 0x48_byte, 0x5f_byte, 0x4b_byte, 0x45_byte, 0x59_byte,
+		0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 
+		0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 
+		0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 
+		0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte, 0x00_byte,
+		0x41_byte, 0x55_byte, 0x54_byte, 0x48_byte, 0x5f_byte, 0x4b_byte, 0x45_byte, 0x59_byte,
+	};
+	static fig::const_string kChallengeMagicWord { "AUTH_KEY" };
+	constexpr size_t kChallengeKeyPosition = 8uz;
 
-	static Bit128 Random128Bits()
+	UserProfile& UserManager::CreateDefaultProfile()
 	{
-		static_assert(sizeof(Bit128) == 16);
-		static std::mt19937_64 rng { std::random_device{}() };
-		constexpr size_t u64_size = sizeof(uint64_t);
-		Bit128 key;
-		for (size_t n = 0; n < 16; n += u64_size)
-		{
-			auto r = rng();
-			std::memcpy(&key[n], &r, u64_size);
-		}
-		return key;
+		return CreateProfile(fig::string(kDefaultProfileName), fig::string(kDefaultPassword));
 	}
 
-	static Key AuthKeyFromPassword(string password, Bit128 salt)
+	UserProfile& UserManager::CreateProfile(const fig::string& name, const fig::string& password)
 	{
-		static_assert(sizeof(fig::Hash) == sizeof(Key));
+		auto authKey = fig::security::Random256Bits();
+		auto authSalt = fig::security::Random256Bits();
+		auto encKey = fig::security::DeriveKeyFromPassword(not password.empty() ? password : fig::string(kDefaultPassword), authSalt);
 
-		size_t seed;
-		fig::Hash hash = common_util::GetHash(password);
-		hash = common_util::HashCombine(hash, common_util::GetHash(salt), seed);
-
-		Key authKey;
-		std::memcpy(authKey.data(), &hash, sizeof(Key));
-		return authKey;
-	}
-
-	UserProfile& UserManager::CreateProfile(fig::string name, fig::string password)
-	{
-		if (password.empty())
-			password = DefaultPassword;
-
-		auto authKey = Random128Bits();
-		auto salt = Random128Bits();
-		auto encKey = AuthKeyFromPassword(password, salt);
-
-		// Create decryption challenge
+		// Create auth challenge
 		fig::bytes challenge;
-		challenge.resize(Challenge.size());
-		std::memcpy(challenge.data(), Challenge.data(), Challenge.size());
-		std::memcpy(challenge.data() + ChallengeAuthPosition, authKey.data(), authKey.size());
-
-		// Encrypt challenge
-		common_util::Encrypt(challenge, encKey);
-//		common_util::Decrypt(challenge, encKey);
+		challenge.resize(kChallenge.size());
+		std::memcpy(challenge.data(), kChallenge.data(), kChallenge.size());
+		std::memcpy(challenge.data() + kChallengeKeyPosition, authKey.data(), authKey.size());
+		auto authChallenge = fig::security::Encrypt(std::move(challenge), encKey);
 
 		_profiles.emplace_back(UserProfile {
 			.id = common_util::CreateUUID(),
 			.name = name,
-			.authKey {}, // Not stored
-			.authSalt = salt,
-			.authChallenge = challenge,
+			.authChallenge = authChallenge.data,
+			.authSalt = authSalt,
 		});
+
 		return _profiles.back();
+	}
+
+	bool UserManager::SignIn(const fig::string& profileName, const fig::string& password)
+	{
+		auto itProfile = std::find_if(_profiles.cbegin(), _profiles.cend(), [&profileName](const UserProfile& profile) {
+			return profile.name == profileName;
+		});
+
+		if (itProfile == _profiles.cend())
+			return false; // Not found
+
+		return SignIn(*itProfile, password);
+	}
+
+	bool UserManager::SignIn(const fig::uuid& profileID, const fig::string& password)
+	{
+		auto itProfile = std::find_if(_profiles.cbegin(), _profiles.cend(), [&profileID](const UserProfile& profile) {
+			return profile.id == profileID;
+		});
+
+		if (itProfile == _profiles.cend())
+			return false; // Not found
+
+		return SignIn(*itProfile, password);
+	}
+
+	bool UserManager::SignIn(const UserProfile& profile, const fig::string& password)
+	{
+		auto encKey = fig::security::DeriveKeyFromPassword(not password.empty() ? password : fig::string(kDefaultPassword), profile.authSalt);
+
+		EncryptedData encrypted {
+			.data = profile.authChallenge,
+			.original_size = kChallenge.size(),		
+		};
+		auto decryptedChallenge = fig::security::Decrypt(std::move(encrypted), encKey);
+
+		// Validate
+		auto prefix = std::strncmp((const char*)decryptedChallenge.data(), kChallengeMagicWord.data(), 8uz);
+		auto suffix = std::strncmp((const char*)decryptedChallenge.data() + 40uz, kChallengeMagicWord.data(), 8uz);
+		if (prefix or suffix)
+			return false; // Incorrect password
+
+		_signedInProfileId = profile.id;
+		std::memcpy(_signedInAuthKey.data(), decryptedChallenge.data() + kChallengeKeyPosition, _signedInAuthKey.size());
+		return true;
+	}
+
+	bool UserManager::SignOut()
+	{
+		if (not IsSignedIn())
+			return false;
+
+		_signedInProfileId = { 0 };
+		_signedInAuthKey = AuthKey {};
+		return true;
 	}
 }

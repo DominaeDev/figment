@@ -13,10 +13,23 @@ namespace fig::fs
 		UserManager() = default;
 		~UserManager() = default;
 
-		UserProfile& CreateProfile(fig::string name, fig::string password = "");
+		UserProfile& CreateDefaultProfile();
+		UserProfile& CreateProfile(const fig::string& profileName, const fig::string& password);
+
+		bool IsSignedIn() const noexcept { return not _signedInProfileId.is_empty(); };
+		bool SignIn(const fig::uuid& profileID, const fig::string& password);
+		bool SignIn(const fig::string& profileName, const fig::string& password);
+		bool SignOut();
+
+		const fig::security::AuthKey& GetAuthKey() const noexcept { return _signedInAuthKey; };
+
+	private:
+		bool SignIn(const UserProfile& profile, const fig::string& password);
 
 	private:
 		std::vector<UserProfile> _profiles {};
+		fig::uuid _signedInProfileId {};
+		fig::security::AuthKey _signedInAuthKey {};
 	};
 }
 #endif

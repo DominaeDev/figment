@@ -24,7 +24,7 @@ namespace fig
     static constexpr size_t npos = static_cast<size_t>(-1);
     
     using byte = std::byte;
-    using byte_span = std::span<byte>;
+    using byte_span = std::span<const byte>;
     using bytes = std::vector<byte>;
     template<size_t N> 
     using buffer = std::array<byte, N>;
@@ -64,6 +64,36 @@ inline constexpr std::byte operator "" _byte( unsigned long long arg ) noexcept
 
 inline constexpr fig::string toStr(fig::string_view sv) { return fig::string(sv); }
 inline constexpr fig::c_string toCStr(fig::string_view sv) { return static_cast<fig::c_string>(sv.data()); }
+
+inline constexpr std::span<const uint8_t> bytes_to_u8(const fig::byte_span& bytes)
+{
+    return std::span { reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size() };
+}
+
+inline constexpr std::span<uint8_t> bytes_to_u8(fig::bytes& bytes)
+{
+    return std::span { reinterpret_cast<uint8_t*>(bytes.data()), bytes.size() };
+}
+
+inline constexpr fig::byte_span u8_to_bytes(const std::span<const uint8_t>& chars)
+{
+    return std::span { reinterpret_cast<const std::byte*>(chars.data()), chars.size() };
+}
+
+inline constexpr fig::byte_span u8_to_bytes(std::span<uint8_t>& chars)
+{
+    return std::span { reinterpret_cast<const std::byte*>(chars.data()), chars.size() };
+}
+
+inline constexpr fig::byte_span string_to_bytes(const fig::string& str)
+{
+    return std::span { reinterpret_cast<const std::byte*>(str.data()), str.size() };
+}
+
+inline constexpr fig::byte_span string_to_bytes(const fig::string_view& sv)
+{
+    return std::span { reinterpret_cast<const std::byte*>(sv.data()), sv.size() };
+}
 
 constexpr bool Enabled = true;
 constexpr bool Disabled = false;

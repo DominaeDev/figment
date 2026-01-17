@@ -9,6 +9,7 @@ namespace fig
 	struct Hash 
 	{
 		uint32_t parts[8] = {0};
+		static Hash Empty;
 
 		Hash() = default;
 		Hash(const Hash& other);
@@ -24,7 +25,18 @@ namespace fig
 
 		explicit operator fig::string() const { return to_string(); }
 
-		static Hash Empty;
+		inline fig::bytes to_bytes() const noexcept
+		{
+			std::vector<std::byte> result(32);
+			for (size_t i = 0; i < 8; ++i)
+			{
+				result[i * 4 + 0uz] = fig::byte((parts[i] >> 24) & 0xff);
+				result[i * 4 + 1uz] = fig::byte((parts[i] >> 16) & 0xff);
+				result[i * 4 + 2uz] = fig::byte((parts[i] >> 8) & 0xff);
+				result[i * 4 + 3uz] = fig::byte((parts[i] >> 0) & 0xff);
+			}
+			return result;
+		}
 	};
 }
 
