@@ -9,10 +9,8 @@
 #include "util/Xml.h"
 #include "model/UserManager.h"
 #include "model/GlobalStrings.h"
-#include <tinyxml2.h>
 
 using namespace fig::security;
-using namespace tinyxml2;
 
 namespace fig::fs
 {
@@ -28,7 +26,7 @@ namespace fig::fs
 	static fig::const_string kChallengeMagicWord { "AUTH_KEY" };
 	constexpr size_t kChallengeKeyPosition = 8uz;
 
-	static fig::const_string kProfilesFilePath { "./profiles/index.xml" };
+	static fig::const_string kProfilesFilePath { "./profiles/Profiles.xml" };
 
 	UserProfile& UserManager::CreateDefaultProfile()
 	{
@@ -132,23 +130,21 @@ namespace fig::fs
 			auto& profileNode = pProfile.value();
 			UserProfile profile {};
 
-			profile.version = profileNode["version"].AsInt().value_or((unsigned short)-1);
+			profile.version = profileNode["version"].AsInt((unsigned short)-1);
 
 			// ID
-			fig::string id = profileNode.GetElementText("ID").value_or("");
-			if (not id.empty())
-				profile.id.fromStr(id.c_str()); //! @unsafe
+			profile.id = profileNode.GetElementUUID("ID").value_or({});
 
 			// Name
-			profile.name = profileNode.GetElementText("Name").value_or("");
+			profile.name = profileNode.GetElementText("Name", "");
 
 			// Auth challenge
-			profile.authChallenge = profileNode.GetElementBytes("Auth").value_or({});
+			profile.authChallenge = profileNode.GetElementBytes("AuthData").value_or({});
 
 			// Auth challenge
-			if (auto saltNode = profileNode.GetFirstElement("Salt"))
+			if (auto saltNode = profileNode.GetFirstElement("AuthSalt"))
 			{
-				auto salt = saltNode.value().GetBytesText().value_or({});
+				auto salt = saltNode.value().GetBytes().value_or({});
 				std::memcpy(profile.authSalt.data(), salt.data(), std::min(salt.size(), profile.authSalt.size()));
 			}
 
@@ -163,32 +159,18 @@ namespace fig::fs
 
 	bool UserManager::SaveProfiles() const
 	{
-		XMLDocument xmlDoc;
-		auto pDecl = xmlDoc.NewDeclaration(nullptr);
-		xmlDoc.InsertFirstChild(pDecl);
-
-		auto pRoot = xmlDoc.NewElement("Profiles");
-		xmlDoc.InsertEndChild(pRoot);
-
+		XmlWriter xml("Profiles");
 		for (auto& profile : _profiles)
 		{
-			auto pProfile = pRoot->InsertNewChildElement("Profile");
-			pProfile->SetAttribute("version", toI(profile.version));
+			auto profileNode = xml.AddChild("Profile");
+			profileNode["version"] = toI(profile.version);
 
-			// ID
-			pProfile->InsertNewChildElement("ID")->InsertNewText(profile.id.str().c_str());
-
-			// Name
-			pProfile->InsertNewChildElement("Name")->InsertNewText(profile.name.c_str());
-
-			// Auth challenge
-			pProfile->InsertNewChildElement("Auth")->InsertNewText(common_util::Base64Encode(profile.authChallenge).c_str());
-
-			// Auth challenge
-			pProfile->InsertNewChildElement("Salt")->InsertNewText(common_util::Base64Encode(profile.authSalt).c_str());
+			profileNode.SetElement("ID", profile.id);
+			profileNode.SetElement("Name", profile.name);
+			profileNode.SetElement("AuthData", profile.authChallenge);
+			profileNode.SetElement("AuthSalt", profile.authSalt);
 		}
 
-		auto const filename = std::filesystem::path(kProfilesFilePath);
-		return xmlDoc.SaveFile(filename.generic_u8string().c_str()) == XML_SUCCESS;
+		return xml.Save(fig::string(kProfilesFilePath));
 	}
 }

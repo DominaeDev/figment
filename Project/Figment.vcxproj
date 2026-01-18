@@ -209,6 +209,7 @@
     <ClCompile Include="src\gui\VerticalListSizer.cpp" />
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
     <ClCompile Include="src\util\XmlReader.cpp" />
+    <ClCompile Include="src\util\XmlWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\AES\include\AES.h" />

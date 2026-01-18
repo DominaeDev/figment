@@ -127,9 +127,8 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 
 	InvalidateLayout();
 	s_pInstance = this;
-
-	//! @temp
-	UserManager userMngr {};
+	
+	UserManager userMngr {}; //! @temp
 	if (not userMngr.LoadProfiles())
 	{
 		userMngr.CreateDefaultProfile();

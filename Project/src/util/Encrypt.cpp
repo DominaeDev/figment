@@ -5,7 +5,7 @@
 #include "util/Hash.h"
 
 constexpr bool UsePBKDF2 = true;
-constexpr uint32_t PBKDF2Iterations = 10000;
+constexpr uint32_t PBKDF2Iterations = 1000;
 
 static void encrypt_data(unsigned char* pData, size_t length, const fig::security::AESKey& key)
 {

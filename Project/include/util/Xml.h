@@ -22,14 +22,17 @@ namespace fig
 	public:
 		bool IsOk() const noexcept;
 
-		std::optional<fig::string> AsString() const noexcept;
+		std::optional<bool> AsBool() const noexcept;
 		std::optional<int32_t> AsInt() const noexcept;
 		std::optional<float> AsFloat() const noexcept;
+		std::optional<fig::string> AsText() const noexcept;
 		std::optional<fig::bytes> AsBytes() const noexcept;
+		std::optional<fig::uuid> AsUUID() const noexcept;
 
-		inline fig::string AsString(const fig::string& default_value) const noexcept;
-		inline int32_t AsInt(int32_t default_value) const noexcept;
-		inline float AsFloat(float default_value) const noexcept;
+		bool AsBool(bool default_value) const noexcept;
+		int32_t AsInt(int32_t default_value) const noexcept;
+		float AsFloat(float default_value) const noexcept;
+		fig::string AsText(const fig::string& default_value) const noexcept;
 
 	private:
 		const tinyxml2::XMLAttribute* _pAttrib;
@@ -47,19 +50,29 @@ namespace fig
 		std::optional<XmlReaderElement> GetNextSibling() const noexcept;
 		std::optional<XmlReaderElement> GetNextSibling(const fig::string& name) const noexcept;
 
+		std::optional<bool> GetBool() const noexcept;
+		std::optional<int32_t> GetInt() const noexcept;
+		std::optional<float> GetFloat() const noexcept;
 		std::optional<fig::string> GetText() const noexcept;
-		std::optional<int32_t> GetIntText() const noexcept;
-		std::optional<float> GetFloatText() const noexcept;
-		std::optional<fig::bytes> GetBytesText() const noexcept;
+		std::optional<fig::bytes> GetBytes() const noexcept;
+		std::optional<fig::uuid> GetUUID() const noexcept;
 
-		inline fig::string GetText(const fig::string& default_value) const noexcept;
-		inline int32_t GetIntText(int32_t default_value) const noexcept;
-		inline float GetFloatText(float default_value) const noexcept;
+		bool GetBool(bool default_value) const noexcept;
+		int32_t GetInt(int32_t default_value) const noexcept;
+		float GetFloat(float default_value) const noexcept;
+		fig::string GetText(const fig::string& default_value) const noexcept;
 
-		std::optional<fig::string> GetElementText(const fig::string& name) const noexcept;
+		std::optional<bool> GetElementBool(const fig::string& name) const noexcept;
 		std::optional<int32_t> GetElementInt(const fig::string& name) const noexcept;
 		std::optional<float> GetElementFloat(const fig::string& name) const noexcept;
+		std::optional<fig::string> GetElementText(const fig::string& name) const noexcept;
 		std::optional<fig::bytes> GetElementBytes(const fig::string& name) const noexcept;
+		std::optional<fig::uuid> GetElementUUID(const fig::string& name) const noexcept;
+
+		bool GetElementBool(const fig::string& name, bool default_value) const noexcept;
+		int32_t GetElementInt(const fig::string& name, int32_t default_value) const noexcept;
+		float GetElementFloat(const fig::string& name, float default_value) const noexcept;
+		fig::string GetElementText(const fig::string& name, const fig::string& default_value) const noexcept;
 
 		XmlReaderAttribute operator[] (const std::string& key) const noexcept;
 
@@ -70,16 +83,92 @@ namespace fig
 
 	class XmlReader
 	{
+		XmlReader() = delete;
 	public:
 		XmlReader(const fig::string& filename);
 		XmlReader(const fig::string& filename, const fig::string& root);
+		~XmlReader();
+
 		bool IsOk() const noexcept;
 
 		std::optional<XmlReaderElement> GetRootElement() const noexcept;
 		std::optional<XmlReaderElement> GetFirstElement(const fig::string& name) const noexcept;
 
 	private:
-		std::unique_ptr<tinyxml2::XMLDocument> _pDoc {};
+		tinyxml2::XMLDocument* _pDoc {};
+		tinyxml2::XMLElement* _pRoot {};
+	};
+
+	class XmlWriterAttribute
+	{
+		friend class XmlWriterElement;
+		XmlWriterAttribute() = delete;
+		XmlWriterAttribute(const fig::string& name, tinyxml2::XMLElement* pParent) noexcept;
+
+	public:
+		XmlWriterAttribute& operator=(bool value) noexcept;
+		XmlWriterAttribute& operator=(int32_t value) noexcept;
+		XmlWriterAttribute& operator=(float value) noexcept;
+		XmlWriterAttribute& operator=(fig::string value) noexcept;
+		XmlWriterAttribute& operator=(const fig::byte_span& value) noexcept;
+		XmlWriterAttribute& operator=(const fig::uuid& value) noexcept;
+
+	private:
+		fig::string _name;
+		tinyxml2::XMLElement* _pParent;
+	};
+
+	class XmlWriterElement
+	{
+		friend class XmlWriter;
+		XmlWriterElement() = delete;
+		XmlWriterElement(tinyxml2::XMLElement* pElement) noexcept;
+
+	public:
+		void SetValue(bool value) noexcept;
+		void SetValue(int32_t value) noexcept;
+		void SetValue(float value) noexcept;
+		void SetValue(const fig::string& value) noexcept;
+		void SetValue(const fig::byte_span& value) noexcept;
+		void SetValue(const fig::uuid& value) noexcept;
+
+		void SetAttribute(const fig::string& name, bool value) noexcept;
+		void SetAttribute(const fig::string& name, int32_t value) noexcept;
+		void SetAttribute(const fig::string& name, float value) noexcept;
+		void SetAttribute(const fig::string& name, const fig::string& value) noexcept;
+		void SetAttribute(const fig::string& name, const fig::byte_span& value) noexcept;
+		void SetAttribute(const fig::string& name, const fig::uuid& value) noexcept;
+
+		void SetElement(const fig::string& name, bool value) noexcept;
+		void SetElement(const fig::string& name, int32_t value) noexcept;
+		void SetElement(const fig::string& name, float value) noexcept;
+		void SetElement(const fig::string& name, const fig::string& value) noexcept;
+		void SetElement(const fig::string& name, const fig::byte_span& value) noexcept;
+		void SetElement(const fig::string& name, const fig::uuid& value) noexcept;
+
+		XmlWriterAttribute operator[] (const std::string& key) noexcept;
+
+		XmlWriterElement AddChild(const fig::string& name) noexcept;
+	private:
+		void DeleteValue();
+	private:
+		tinyxml2::XMLElement* _pElement {};
+	};
+
+	class XmlWriter
+	{
+		XmlWriter() = delete;
+	public:
+		XmlWriter(const fig::string& root);
+		~XmlWriter();
+
+		XmlWriterElement GetRoot() noexcept;
+		XmlWriterElement AddChild(const fig::string& name) noexcept;
+
+		bool Save(const fig::string& filename) const;
+
+	private:
+		tinyxml2::XMLDocument* _pDoc {};
 		tinyxml2::XMLElement* _pRoot {};
 	};
 }

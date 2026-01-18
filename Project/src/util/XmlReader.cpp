@@ -1,10 +1,9 @@
 #include <pch.h>
-#include "util/Common.h"
-#include "util/Xml.h"
 
+#include "util/Xml.h"
+#include "util/Common.h"
 #include <tinyxml2.h>
 #include <filesystem>
-#include <limits>
 
 using namespace tinyxml2;
 
@@ -20,12 +19,13 @@ namespace fig
 		return (bool)_pAttrib;
 	}
 
-	std::optional<fig::string> XmlReaderAttribute::AsString() const noexcept
+	std::optional<bool> XmlReaderAttribute::AsBool() const noexcept
 	{
 		if (_pAttrib)
 		{
-			const char* value = _pAttrib->Value();
-			return value ? std::make_optional(fig::string(value)) : std::nullopt;
+			bool value;
+			if (_pAttrib->QueryBoolValue(&value) == XML_SUCCESS)
+				return std::make_optional(value);
 		}
 		return std::nullopt;
 	}
@@ -52,6 +52,16 @@ namespace fig
 		return std::nullopt;
 	}
 
+	std::optional<fig::string> XmlReaderAttribute::AsText() const noexcept
+	{
+		if (_pAttrib)
+		{
+			const char* value = _pAttrib->Value();
+			return value ? std::make_optional(fig::string(value)) : std::nullopt;
+		}
+		return std::nullopt;
+	}
+
 	std::optional<fig::bytes> XmlReaderAttribute::AsBytes() const noexcept
 	{
 		if (_pAttrib)
@@ -62,19 +72,39 @@ namespace fig
 		return std::nullopt;
 	}
 
-	inline fig::string XmlReaderAttribute::AsString(const fig::string& default_value) const noexcept
+	std::optional<fig::uuid> XmlReaderAttribute::AsUUID() const noexcept
 	{
-		return AsString().value_or(default_value);
+		if (_pAttrib)
+		{
+			const char* value = _pAttrib->Value();
+			if (value)
+			{
+				fig::uuid uuid {};
+				uuid.fromStr(value);
+				return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
+			}
+		}
+		return std::nullopt;
 	}
 
-	inline int32_t XmlReaderAttribute::AsInt(int32_t default_value) const noexcept
+	bool XmlReaderAttribute::AsBool(bool default_value) const noexcept
+	{
+		return AsBool().value_or(default_value);
+	}
+
+	int32_t XmlReaderAttribute::AsInt(int32_t default_value) const noexcept
 	{
 		return AsInt().value_or(default_value);
 	}
 
-	inline float XmlReaderAttribute::AsFloat(float default_value) const noexcept
+	float XmlReaderAttribute::AsFloat(float default_value) const noexcept
 	{
 		return AsFloat().value_or(default_value);
+	}
+
+	fig::string XmlReaderAttribute::AsText(const fig::string& default_value) const noexcept
+	{
+		return AsText().value_or(default_value);
 	}
 
 	XmlReaderElement::XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot) noexcept :
@@ -106,43 +136,72 @@ namespace fig
 		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
 	}
 
+	std::optional<bool> XmlReaderElement::GetBool() const noexcept
+	{
+		bool value;
+		if (_pElement->QueryBoolText(&value) == XML_SUCCESS)
+			return std::make_optional(value);
+		return std::nullopt;
+	}
+
+	std::optional<int32_t> XmlReaderElement::GetInt() const noexcept
+	{
+		int32_t value;
+		if (_pElement->QueryIntText(&value) == XML_SUCCESS)
+			return std::make_optional(value);
+		return std::nullopt;
+	}
+
+	std::optional<float> XmlReaderElement::GetFloat() const noexcept
+	{
+		float value;
+		if (_pElement->QueryFloatText(&value) == XML_SUCCESS)
+			return std::make_optional(value);
+		return std::nullopt;
+	}
+
 	std::optional<fig::string> XmlReaderElement::GetText() const noexcept
 	{
 		const char* value = _pElement->GetText();
 		return value ? std::make_optional(fig::string(value)) : std::nullopt;
 	}
 
-	std::optional<int32_t> XmlReaderElement::GetIntText() const noexcept
-	{
-		int32_t value = _pElement->IntText(std::numeric_limits<int32_t>::min());
-		return value != std::numeric_limits<int32_t>::min() ? std::make_optional(value) : std::nullopt;
-	}
-
-	std::optional<float> XmlReaderElement::GetFloatText() const noexcept
-	{
-		float value = _pElement->FloatText(std::numeric_limits<float>::min());
-		return value != std::numeric_limits<float>::min() ? std::make_optional(value) : std::nullopt;
-	}
-
-	std::optional<fig::bytes> XmlReaderElement::GetBytesText() const noexcept
+	std::optional<fig::bytes> XmlReaderElement::GetBytes() const noexcept
 	{
 		const char* value = _pElement->GetText();
 		return value ? std::make_optional(common_util::Base64Decode(value)) : std::nullopt;
 	}
 
-	inline fig::string XmlReaderElement::GetText(const fig::string& default_value) const noexcept
+	std::optional<fig::uuid> XmlReaderElement::GetUUID() const noexcept
+	{
+		const char* value = _pElement->GetText();
+		if (value)
+		{
+			fig::uuid uuid {};
+			uuid.fromStr(value);
+			return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
+		}
+		return std::nullopt;
+	}
+
+	bool XmlReaderElement::GetBool(bool default_value) const noexcept
+	{
+		return GetBool().value_or(default_value);
+	}
+
+	int32_t XmlReaderElement::GetInt(int32_t default_value) const noexcept
+	{
+		return GetInt().value_or(default_value);
+	}
+
+	float XmlReaderElement::GetFloat(float default_value) const noexcept
+	{
+		return GetFloat().value_or(default_value);
+	}
+
+	fig::string XmlReaderElement::GetText(const fig::string& default_value) const noexcept
 	{
 		return GetText().value_or(default_value);
-	}
-
-	inline int32_t XmlReaderElement::GetIntText(int32_t default_value) const noexcept
-	{
-		return GetIntText().value_or(default_value);
-	}
-
-	inline float XmlReaderElement::GetFloatText(float default_value) const noexcept
-	{
-		return GetFloatText().value_or(default_value);
 	}
 
 	XmlReaderAttribute XmlReaderElement::operator[] (const std::string& key) const noexcept
@@ -151,24 +210,31 @@ namespace fig
 		return XmlReaderAttribute(pAttrib);
 	}
 
-	std::optional<fig::string> XmlReaderElement::GetElementText(const fig::string& name) const noexcept
+	std::optional<bool> XmlReaderElement::GetElementBool(const fig::string& name) const noexcept
 	{
 		if (auto elem = GetFirstElement(name))
-			return elem.value().GetText();
+			return elem.value().GetBool();
 		return std::nullopt;
 	}
 
 	std::optional<int32_t> XmlReaderElement::GetElementInt(const fig::string& name) const noexcept
 	{
 		if (auto elem = GetFirstElement(name))
-			return elem.value().GetIntText();
+			return elem.value().GetInt();
 		return std::nullopt;
 	}
 
 	std::optional<float> XmlReaderElement::GetElementFloat(const fig::string& name) const noexcept
 	{
 		if (auto elem = GetFirstElement(name))
-			return elem.value().GetFloatText();
+			return elem.value().GetFloat();
+		return std::nullopt;
+	}
+
+	std::optional<fig::string> XmlReaderElement::GetElementText(const fig::string& name) const noexcept
+	{
+		if (auto elem = GetFirstElement(name))
+			return elem.value().GetText();
 		return std::nullopt;
 	}
 
@@ -183,15 +249,51 @@ namespace fig
 		return std::nullopt;
 	}
 
+	std::optional<fig::uuid> XmlReaderElement::GetElementUUID(const fig::string& name) const noexcept
+	{
+		if (auto elem = GetFirstElement(name))
+		{
+			auto value = elem.value().GetText();
+			if (value.has_value())
+			{
+				fig::uuid uuid {};
+				uuid.fromStr(value.value().c_str());
+				return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
+			}
+		}
+		return std::nullopt;
+	}
+
+	bool XmlReaderElement::GetElementBool(const fig::string& name, bool default_value) const noexcept
+	{
+		return GetElementBool(name).value_or(default_value);
+	}
+
+	int32_t XmlReaderElement::GetElementInt(const fig::string& name, int32_t default_value) const noexcept
+	{
+		return GetElementInt(name).value_or(default_value);
+	}
+
+	float XmlReaderElement::GetElementFloat(const fig::string& name, float default_value) const noexcept
+	{
+		return GetElementFloat(name).value_or(default_value);
+	}
+
+	fig::string XmlReaderElement::GetElementText(const fig::string& name, const fig::string& default_value) const noexcept
+	{
+		return GetElementText(name).value_or(default_value);
+	}
+
 	XmlReader::XmlReader(const fig::string& filename)
 	{
 		auto const path = std::filesystem::path(filename.c_str());
 		
-		_pDoc = std::make_unique<XMLDocument>();
+		_pDoc = new XMLDocument();
 		if (_pDoc->LoadFile(path.generic_u8string().c_str()) != XML_SUCCESS)
 		{
 			// Error
-			_pDoc.reset();
+			delete _pDoc;
+			_pDoc = nullptr;
 			_pRoot = nullptr;
 			return;
 		}
@@ -202,16 +304,21 @@ namespace fig
 	{
 		auto const path = std::filesystem::path(filename.c_str());
 		
-		_pDoc = std::make_unique<XMLDocument>();
+		_pDoc = new XMLDocument();
 		if (_pDoc->LoadFile(path.generic_u8string().c_str()) != XML_SUCCESS 
 			or std::strcmp(_pDoc->RootElement()->Name(), root.c_str()) != 0)
 		{
-			// Error
-			_pDoc.reset();
+			delete _pDoc;
+			_pDoc = nullptr;
 			_pRoot = nullptr;
 			return;
 		}
 		_pRoot = _pDoc->RootElement();
+	}
+
+	XmlReader::~XmlReader()
+	{
+		delete _pDoc;
 	}
 
 	bool XmlReader::IsOk() const noexcept

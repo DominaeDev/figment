@@ -311,6 +311,9 @@
     <ClCompile Include="src\util\XmlReader.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\XmlWriter.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
