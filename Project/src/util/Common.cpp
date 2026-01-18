@@ -54,4 +54,5 @@ namespace fig::common_util
 		else
 			return std::nullopt;
 	}
+
 }

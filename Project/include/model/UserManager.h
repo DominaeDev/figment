@@ -13,12 +13,16 @@ namespace fig::fs
 		UserManager() = default;
 		~UserManager() = default;
 
+		bool LoadProfiles();
+		bool SaveProfiles() const;
+
 		UserProfile& CreateDefaultProfile();
 		UserProfile& CreateProfile(const fig::string& profileName, const fig::string& password);
 
-		bool IsSignedIn() const noexcept { return not _signedInProfileId.is_empty(); };
+		bool IsSignedIn() const noexcept { return not _signedInProfileId.empty(); };
 		bool SignIn(const fig::uuid& profileID, const fig::string& password);
 		bool SignIn(const fig::string& profileName, const fig::string& password);
+		bool SignInDefaultProfile();
 		bool SignOut();
 
 		const fig::security::AuthKey& GetAuthKey() const noexcept { return _signedInAuthKey; };

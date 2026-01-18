@@ -34,6 +34,12 @@ namespace fig::strings
 			"Ready";
 	}
 
+	namespace UserProfile
+	{
+		inline constexpr fig::const_string DefaultUser =
+			"Default User";
+	}
+
 	namespace Errors
 	{
 		// ...

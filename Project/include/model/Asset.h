@@ -8,40 +8,51 @@
 
 namespace fig::fs
 {
-	enum class FileType : unsigned short
+	enum class DataFormat : uint8_t
 	{
-		Undefined,
-		TextGeneric,
-		TextBase64,
-		TextXml,
-		TextJson,
-		ImagePng,
-		ImageJpeg,
+		Undefined = 0,
+		Binary = 1,
+		BinaryBase64 = 2,
+
+		TextGeneric = 4,
+		TextXml = 5,
+		TextJson = 6,
+
+		ImagePng = 8,
+		ImageJpeg = 9,
 	};
 
-	enum class AssetType : unsigned short
+	enum class AssetType : uint8_t
 	{
-		Undefined,
-		Character,
-		Scenario,
-		Concept,
+		Undefined = 0,
 
-		ImageGeneric,
-		ImageCover,
-		ImageCharacter,
-		ImagePortrait,
-		ImageBackground,
-		
-		ChatLog,
-		ChatParameters,
+		Character = 1,
+		Scenario = 2,
+		Concept = 3,
+
+		Image = 10,
+
+		ChatSession = 20,
+		ChatLog = 21,
+	};
+
+	enum class ImageSubtype : uint8_t
+	{
+		Generic			= 0,
+		Cover			= 1,
+		SquarePortrait	= 2,
+		LargePortrait	= 3,
+		Background		= 4,
 	};
 
 	using ParamVar = std::variant<int32_t, float, fig::string>;
 
 	struct Asset
 	{
-		FileType file_type { FileType::Undefined };
-		AssetType asset_type { AssetType::Undefined };
+		DataFormat file_type {};
+		AssetType asset_type {};
+		uint8_t asset_subtype {};
+
 		fig::bytes data {};
 		std::map<fig::string, ParamVar> parameters {};
 

@@ -308,6 +308,9 @@
     <ClCompile Include="src\util\Encrypt.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\XmlReader.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -830,6 +833,9 @@
       <Filter>Source Files\AppModel\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Encrypt.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\Xml.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>

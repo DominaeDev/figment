@@ -228,7 +228,7 @@ public:
 		m128itos(x, res);
 	}
 
-	bool is_empty() const noexcept
+	bool empty() const noexcept
 	{
 		for (size_t i = 0; i < sizeof(data); ++i)
 		{

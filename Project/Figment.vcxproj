@@ -208,6 +208,7 @@
     <ClCompile Include="src\util\Common.cpp" />
     <ClCompile Include="src\gui\VerticalListSizer.cpp" />
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
+    <ClCompile Include="src\util\XmlReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\AES\include\AES.h" />
@@ -384,6 +385,7 @@
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
     <ClInclude Include="include\util\UndoStack.h" />
+    <ClInclude Include="include\util\Xml.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

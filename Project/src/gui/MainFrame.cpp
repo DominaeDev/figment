@@ -130,9 +130,13 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 
 	//! @temp
 	UserManager userMngr {};
-	userMngr.CreateDefaultProfile();
+	if (not userMngr.LoadProfiles())
+	{
+		userMngr.CreateDefaultProfile();
+		userMngr.SaveProfiles();
+	}
 
-	userMngr.SignIn("Default profile", "");
+	userMngr.SignInDefaultProfile();
 }
 
 MainFrame::~MainFrame()
