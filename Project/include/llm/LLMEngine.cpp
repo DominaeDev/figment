@@ -12,7 +12,7 @@
 
 using namespace fig::common_util;
 using namespace fig::string_util;
-using namespace fig::file_util;
+using namespace fig::fs;
 using namespace fig::llm;
 
 using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;

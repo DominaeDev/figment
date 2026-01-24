@@ -17,6 +17,11 @@ namespace fig::gui
 	class Window;
 }
 
+namespace fig::fs
+{
+	class UserManager;
+}
+
 namespace fig::llm
 {
 	class LLMEngine;
@@ -31,6 +36,7 @@ public:
 		std::shared_ptr<fig::gui::Window> pMainWindow;
 		std::shared_ptr<fig::llm::LLMEngine> pLLMEngine;
 		std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
+		std::shared_ptr<fig::fs::UserManager> pUserManager;
 	};
 
 	static State* CreateState();
@@ -38,6 +44,7 @@ public:
 
 	static fig::gui::Window& GetMainWindow();
 	static fig::llm::LLMEngine& GetLLMEngine();
+	static fig::fs::UserManager& GetUserManager();
 
 	[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
 	static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);

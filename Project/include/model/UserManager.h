@@ -4,6 +4,7 @@
 
 #include "Types.h"
 #include "model/UserProfile.h"
+#include "model/AssetManager.h"
 
 namespace fig::fs
 {
@@ -19,21 +20,27 @@ namespace fig::fs
 		UserProfile& CreateDefaultProfile();
 		UserProfile& CreateProfile(const fig::string& profileName, const fig::string& password);
 
-		bool IsSignedIn() const noexcept { return not _signedInProfileId.empty(); };
+		bool IsSignedIn() const noexcept { return _signedInProfile != nullptr; };
 		bool SignIn(const fig::uuid& profileID, const fig::string& password);
 		bool SignIn(const fig::string& profileName, const fig::string& password);
 		bool SignInDefaultProfile();
 		bool SignOut();
-
-		const fig::security::AuthKey& GetAuthKey() const noexcept { return _signedInAuthKey; };
+		
+		std::optional<std::reference_wrapper<UserProfile>> GetActiveProfile() noexcept;
+		std::optional<std::reference_wrapper<AssetManager>> GetAssets() noexcept;
+		const fig::security::AESKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };
+		static bool ChangePassword(UserProfile& profile, const fig::string& oldPassword, const fig::string& newPassword);
 
 	private:
-		bool SignIn(const UserProfile& profile, const fig::string& password);
+		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AESKey& outKey);
+		bool SignIn(UserProfile& profile, const fig::string& password);
 
 	private:
 		std::vector<UserProfile> _profiles {};
-		fig::uuid _signedInProfileId {};
-		fig::security::AuthKey _signedInAuthKey {};
+		UserProfile* _signedInProfile = nullptr;
+		fig::security::AESKey _signedInAuthKey {};
+
+		std::unique_ptr<AssetManager> _pAssetMngr {};
 	};
 }
 #endif

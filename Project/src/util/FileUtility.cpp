@@ -7,8 +7,32 @@
 
 using namespace fig::string_util;
 
-namespace fig::file_util
+namespace fig::fs
 {
+	std::expected<fig::bytes, FileError> ReadFile(const fig::string& filename)
+	{
+		try
+		{
+			auto const path = std::filesystem::path(filename.c_str());
+			std::ifstream file(path.wstring(), std::ios::binary | std::ios::in | std::ios::ate);
+			if (!file)
+				return std::unexpected(FileError::FileNotFound);
+
+			std::streamsize size = file.tellg();
+			file.seekg(0, std::ios::beg);
+			if (size == 0uz)
+				return std::unexpected(FileError::ReadError); // Empty file
+
+			fig::bytes content(size);
+			file.read(reinterpret_cast<char*>(content.data()), size);
+			return content; // rvo
+		}
+		catch (...)
+		{
+			return std::unexpected(FileError::ReadError);
+		}
+	}
+
 	std::expected<string, FileError> ReadTextFile(const string& filename, bool normalizeNewlines)
 	{
 		try

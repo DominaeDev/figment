@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "model/AppState.h"
 #include "model/GlobalStrings.h"
+#include "model/UserManager.h"
 #include "gui/MainFrame.h"
 #include "gui/Window.h"
 #include "gui/GUITypes.h"
@@ -10,6 +11,7 @@
 #include <cassert>
 
 using namespace fig::gui;
+using namespace fig::fs;
 using namespace fig::llm;
 
 ApplicationState::State* ApplicationState::__appState = nullptr;
@@ -25,6 +27,7 @@ ApplicationState::State* ApplicationState::CreateState()
 	_pIBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 
 	__appState->pLLMEngine = std::make_shared<LLMEngine>();
+	__appState->pUserManager = std::make_shared<UserManager>();
 
 	try
 	{
@@ -49,6 +52,8 @@ void ApplicationState::ReleaseState()
 {
 	__appState->pMainWindow.reset();
 	__appState->pLLMInstance.reset();
+	__appState->pUserManager.reset();
+
 	if (__appState->pLLMEngine)
 	{
 		__appState->pLLMEngine->Shutdown();
@@ -76,6 +81,12 @@ std::shared_ptr<LLMInstance> ApplicationState::GetLLMInstance()
 {
 	assert(__appState);
 	return __appState->pLLMInstance;
+}
+
+UserManager& ApplicationState::GetUserManager()
+{
+	assert(__appState);
+	return *(__appState->pUserManager.get());
 }
 
 void ApplicationState::SetLLMInstance(std::shared_ptr<LLMInstance> pLLMInstance)

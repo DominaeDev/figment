@@ -14,7 +14,7 @@
 using namespace fig::llm;
 using namespace fig::common_util;
 using namespace fig::string_util;
-using namespace fig::file_util;
+using namespace fig::fs;
 
 static std::vector<fig::string> const opening_tags {
 	std::format("<{0}=\"", Constants::Chat::DialogueTag),

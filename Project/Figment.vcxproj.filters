@@ -102,6 +102,9 @@
     <Filter Include="Source Files\AppModel\Assets">
       <UniqueIdentifier>{72d9b498-dc93-4958-b2d5-f0c34226e0f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Serialization">
+      <UniqueIdentifier>{eea3d39a-71b8-4c8b-b27c-1c3807000f83}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -305,14 +308,23 @@
     <ClCompile Include="src\model\UserManager.cpp">
       <Filter>Source Files\AppModel\Assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\Encrypt.cpp">
+    <ClCompile Include="src\util\Security.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\AssetManager.cpp">
+      <Filter>Source Files\AppModel\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\util\XmlReader.cpp">
-      <Filter>Source Files\Utility</Filter>
+      <Filter>Source Files\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\util\XmlWriter.cpp">
-      <Filter>Source Files\Utility</Filter>
+      <Filter>Source Files\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\BinaryWriter.cpp">
+      <Filter>Source Files\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\BinaryReader.cpp">
+      <Filter>Source Files\Serialization</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -835,11 +847,20 @@
     <ClInclude Include="include\model\UserManager.h">
       <Filter>Source Files\AppModel\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\Encrypt.h">
+    <ClInclude Include="include\util\Security.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Xml.h">
-      <Filter>Source Files\Utility</Filter>
+      <Filter>Source Files\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\BinaryWriter.h">
+      <Filter>Source Files\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\Serialization.h">
+      <Filter>Source Files\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\BinaryReader.h">
+      <Filter>Source Files\Serialization</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -12,6 +12,7 @@
 #include "model/ChatCommands.h"
 #include "model/ChatCommandExecutor.h"
 #include "model/UserManager.h"
+#include "model/AssetManager.h"
 #include "llm/LLMEngine.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
@@ -24,7 +25,6 @@
 
 using namespace fig::gui;
 using namespace fig::common_util;
-using namespace fig::file_util;
 using namespace fig::string_util;
 using namespace fig::llm;
 using namespace fig::data;
@@ -128,7 +128,7 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 	InvalidateLayout();
 	s_pInstance = this;
 	
-	UserManager userMngr {}; //! @temp
+	auto& userMngr = ApplicationState::GetUserManager();
 	if (not userMngr.LoadProfiles())
 	{
 		userMngr.CreateDefaultProfile();
@@ -136,6 +136,24 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 	}
 
 	userMngr.SignInDefaultProfile();
+
+	//! @temp
+	if (userMngr.IsSignedIn())
+	{
+		if (auto some_file = fig::fs::ReadFile("./characters/rei03.jpg"))
+		{
+			AssetManager& assetMngr = userMngr.GetAssets().value();
+			auto& asset = assetMngr.CreateAsset(AssetType::Image, std::move(some_file.value()));
+			asset.file_type = DataFormat::ImageJpeg;
+			asset.parameters[MetaTag::ImageType] = true;
+			asset.parameters[MetaTag::ImageWidth] = 1920;
+			asset.parameters[MetaTag::ImageHeight] = 1080;
+			asset.parameters[MetaTag::CreatedAt] = common_util::utc_now();
+			asset.parameters[MetaTag::UpdatedAt] = common_util::utc_now();
+			asset.parameters[MetaTag::Title] = { "Testing 1, 2, 3..." };
+			assetMngr.SaveAll();
+		}
+	}
 }
 
 MainFrame::~MainFrame()

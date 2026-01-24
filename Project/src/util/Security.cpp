@@ -1,8 +1,8 @@
 #include <pch.h>
 #include <cassert>
-#include "util/Encrypt.h"
-#include "AES.h"
+#include "util/Security.h"
 #include "util/Hash.h"
+#include "AES.h"
 
 constexpr bool UsePBKDF2 = true;
 constexpr uint32_t PBKDF2Iterations = 1000;
@@ -121,6 +121,12 @@ static fig::bytes SimpleHash(fig::string password, fig::security::AuthSalt salt)
 
 namespace fig::security
 {
+	void Encrypt(fig::byte* data, size_t length, const fig::security::AESKey& key)
+	{
+		assert(length % 16 == 0);
+		encrypt_data(reinterpret_cast<unsigned char*>(data), length, key);
+	}
+
 	EncryptedData Encrypt(const fig::bytes& input, const fig::security::AESKey& key)
 	{
 		auto size = input.size();

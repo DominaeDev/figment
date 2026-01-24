@@ -11,7 +11,7 @@
 #include <cassert>
 
 using namespace fig::string_util;
-using namespace fig::file_util;
+using namespace fig::fs;
 using namespace fig::common_util;
 using namespace fig::llm;
 

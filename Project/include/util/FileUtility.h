@@ -3,19 +3,13 @@
 
 #include "Types.h"
 #include <expected>
+#include "util/Serialization.h"
 
-enum class FileError : uint32_t
-{
-	NoError = 0,
-	FileNotFound,
-	DirectoryDoesNotExist,
-	ReadError,
-	WriteError,
-};
-
-namespace fig::file_util
+namespace fig::fs
 {
 	// File IO
+	std::expected<fig::bytes, FileError> ReadFile(const string& filename);
+
 	std::expected<string, FileError> ReadTextFile(const string& filename, bool normalizeNewlines = true);
 	FileError ReadTextFile(const string& filename, string& out_content, bool normalizeNewlines = true);
 	FileError WriteTextFile(const string& filename, const string& content, bool append = false);

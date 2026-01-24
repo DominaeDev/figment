@@ -5,7 +5,7 @@
 
 #include "util/Common.h"
 #include "util/Hash.h"
-#include "util/Encrypt.h"
+#include "util/Security.h"
 #include "util/Xml.h"
 #include "model/UserManager.h"
 #include "model/GlobalStrings.h"
@@ -56,9 +56,28 @@ namespace fig::fs
 		return _profiles.back();
 	}
 
+	bool UserManager::Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AESKey& outKey)
+	{
+		auto key = fig::security::DeriveKeyFromPassword(not password.empty() ? password : fig::string(kDefaultPassword), profile.authSalt);
+		auto challenge = fig::security::Decrypt(
+			EncryptedData {
+				.data = profile.authChallenge,
+				.original_size = kChallenge.size(),
+			}, key);
+
+		// Validate
+		auto prefix = std::strncmp((const char*)challenge.data(), kChallengeMagicWord.data(), 8uz);
+		auto suffix = std::strncmp((const char*)challenge.data() + 40uz, kChallengeMagicWord.data(), 8uz);
+		if (prefix or suffix)
+			return false; // Invalid password
+		
+		std::memcpy(outKey.data(), challenge.data() + kChallengeKeyPosition, outKey.size());
+		return true;
+	}
+
 	bool UserManager::SignIn(const fig::string& profileName, const fig::string& password)
 	{
-		auto itProfile = std::find_if(_profiles.cbegin(), _profiles.cend(), [&profileName](const UserProfile& profile) {
+		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileName](const UserProfile& profile) {
 			return profile.name == profileName;
 		});
 
@@ -70,7 +89,7 @@ namespace fig::fs
 
 	bool UserManager::SignIn(const fig::uuid& profileID, const fig::string& password)
 	{
-		auto itProfile = std::find_if(_profiles.cbegin(), _profiles.cend(), [&profileID](const UserProfile& profile) {
+		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileID](const UserProfile& profile) {
 			return profile.id == profileID;
 		});
 
@@ -80,24 +99,13 @@ namespace fig::fs
 		return SignIn(*itProfile, password);
 	}
 
-	bool UserManager::SignIn(const UserProfile& profile, const fig::string& password)
+	bool UserManager::SignIn(UserProfile& profile, const fig::string& password)
 	{
-		auto encKey = fig::security::DeriveKeyFromPassword(not password.empty() ? password : fig::string(kDefaultPassword), profile.authSalt);
-
-		EncryptedData encrypted {
-			.data = profile.authChallenge,
-			.original_size = kChallenge.size(),		
-		};
-		auto decryptedChallenge = fig::security::Decrypt(std::move(encrypted), encKey);
-
-		// Validate
-		auto prefix = std::strncmp((const char*)decryptedChallenge.data(), kChallengeMagicWord.data(), 8uz);
-		auto suffix = std::strncmp((const char*)decryptedChallenge.data() + 40uz, kChallengeMagicWord.data(), 8uz);
-		if (prefix or suffix)
+		if (not Authenticate(profile, password, _signedInAuthKey))
 			return false; // Incorrect password
 
-		_signedInProfileId = profile.id;
-		std::memcpy(_signedInAuthKey.data(), decryptedChallenge.data() + kChallengeKeyPosition, _signedInAuthKey.size());
+		_signedInProfile = &profile;
+		_pAssetMngr = std::make_unique<AssetManager>();
 		return true;
 	}
 
@@ -111,8 +119,9 @@ namespace fig::fs
 		if (not IsSignedIn())
 			return false;
 
-		_signedInProfileId = { 0 };
+		_signedInProfile = nullptr;
 		_signedInAuthKey = AuthKey {};
+		_pAssetMngr.reset();
 		return true;
 	}
 
@@ -172,5 +181,40 @@ namespace fig::fs
 		}
 
 		return xml.Save(fig::string(kProfilesFilePath));
+	}
+
+	bool UserManager::ChangePassword(UserProfile& profile, const fig::string& oldPassword, const fig::string& newPassword)
+	{
+		fig::security::AuthKey authKey;
+		if (not Authenticate(profile, oldPassword, authKey))
+			return false;
+
+		auto newPasswordKey = fig::security::DeriveKeyFromPassword(not newPassword.empty() ? newPassword : fig::string(kDefaultPassword), profile.authSalt);
+
+		// Replace auth challenge
+		fig::bytes challenge;
+		challenge.resize(kChallenge.size());
+		std::memcpy(challenge.data(), kChallenge.data(), kChallenge.size());
+		std::memcpy(challenge.data() + kChallengeKeyPosition, authKey.data(), authKey.size());
+		auto authChallenge = fig::security::Encrypt(std::move(challenge), newPasswordKey);
+
+		profile.authChallenge = authChallenge.data;
+		return true;
+	}
+
+	std::optional<std::reference_wrapper<UserProfile>> UserManager::GetActiveProfile() noexcept
+	{
+		if (_signedInProfile == nullptr)
+			return std::nullopt;
+
+		return std::make_optional<std::reference_wrapper<UserProfile>>(static_cast<UserProfile&>(*_signedInProfile));
+	}
+
+	std::optional<std::reference_wrapper<AssetManager>> UserManager::GetAssets() noexcept
+	{
+		if (_signedInProfile == nullptr || !_pAssetMngr)
+			return std::nullopt;
+
+		return std::make_optional<std::reference_wrapper<AssetManager>>(static_cast<AssetManager&>(*_pAssetMngr));
 	}
 }

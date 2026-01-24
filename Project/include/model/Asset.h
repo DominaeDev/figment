@@ -3,25 +3,12 @@
 #pragma once
 
 #include "Types.h"
+#include "util/Serialization.h"
 #include <map>
 #include <variant>
 
 namespace fig::fs
 {
-	enum class DataFormat : uint8_t
-	{
-		Undefined = 0,
-		Binary = 1,
-		BinaryBase64 = 2,
-
-		TextGeneric = 4,
-		TextXml = 5,
-		TextJson = 6,
-
-		ImagePng = 8,
-		ImageJpeg = 9,
-	};
-
 	enum class AssetType : uint8_t
 	{
 		Undefined = 0,
@@ -36,6 +23,20 @@ namespace fig::fs
 		ChatLog = 21,
 	};
 
+	enum class DataFormat : uint8_t
+	{
+		Undefined = 0,
+		Binary = 1,
+		BinaryBase64 = 2,
+
+		TextGeneric = 4,
+		TextXml = 5,
+		TextJson = 6,
+
+		ImagePng = 8,
+		ImageJpeg = 9,
+	};
+
 	enum class ImageSubtype : uint8_t
 	{
 		Generic			= 0,
@@ -45,18 +46,25 @@ namespace fig::fs
 		Background		= 4,
 	};
 
-	using ParamVar = std::variant<int32_t, float, fig::string>;
-
-	struct Asset
+	class Asset
 	{
-		DataFormat file_type {};
-		AssetType asset_type {};
+	public:
+		void SetData(fig::bytes&& data);
+		void SetData(fig::byte_span data);
+		constexpr fig::string AsString() const;
+
+		fig::uuid id {};
+		fig::uuid parentID {};
+		DataFormat file_type { DataFormat::Undefined };
+		AssetType asset_type { AssetType::Undefined };
 		uint8_t asset_subtype {};
 
 		fig::bytes data {};
-		std::map<fig::string, ParamVar> parameters {};
+		std::map<MetaTag, MetaValue> parameters {};
+		bool needSave = false;
 
-		constexpr fig::string as_string() const;
+		AssetFile ToFile() const noexcept;
+		void FromFile(const AssetFile& file) const;
 	};
 }
 

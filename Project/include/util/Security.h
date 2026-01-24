@@ -1,5 +1,5 @@
-#ifndef ENCRYPT_H__
-#define ENCRYPT_H__
+#ifndef SECURITY_H__
+#define SECURITY_H__
 #pragma once
 
 #include "Types.h"
@@ -20,9 +20,9 @@ namespace fig::security
 		constexpr size_t encrypted_size() const noexcept { return data.size(); }
 	};
 
+	void Encrypt(fig::byte* data, size_t length, const fig::security::AESKey& key);
 	EncryptedData Encrypt(const fig::bytes& input, const fig::security::AESKey& key);
 	EncryptedData Encrypt(fig::bytes&& input, const fig::security::AESKey& key);
-
 	DecryptedData Decrypt(const fig::security::EncryptedData& input, const fig::security::AESKey& key);
 	DecryptedData Decrypt(fig::security::EncryptedData&& input, const fig::security::AESKey& key);
 

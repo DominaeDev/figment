@@ -30,6 +30,7 @@ namespace fig
     using buffer = std::array<byte, N>;
 
     using uuid = UUIDv4::UUID;
+    using timestamp = uint64_t;
 }
 
 // Type conversion functions
