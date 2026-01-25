@@ -7,7 +7,7 @@
 constexpr bool UsePBKDF2 = true;
 constexpr uint32_t PBKDF2Iterations = 1000;
 
-static void encrypt_data(unsigned char* pData, size_t length, const fig::security::AESKey& key)
+static void encrypt_data(unsigned char* pData, size_t length, const fig::security::AuthKey& key)
 {
 	static_assert(sizeof(unsigned char) == sizeof(std::byte));
 	static_assert(sizeof(key) == 32);
@@ -23,7 +23,7 @@ static void encrypt_data(unsigned char* pData, size_t length, const fig::securit
 		aes.encrypt_block(pData + i);
 }
 
-static void decrypt_data(unsigned char* pData, size_t length, const fig::security::AESKey& key)
+static void decrypt_data(unsigned char* pData, size_t length, const fig::security::AuthKey& key)
 {
 	static_assert(sizeof(unsigned char) == sizeof(std::byte));
 	static_assert(sizeof(key) == 32);
@@ -121,7 +121,7 @@ static fig::bytes SimpleHash(fig::string password, fig::security::AuthSalt salt)
 
 namespace fig::security
 {
-	void Encrypt(std::ofstream& stream, fig::byte_span in_data, const fig::security::AESKey& key)
+	void Encrypt(std::ofstream& stream, fig::byte_span in_data, const fig::security::AuthKey& key)
 	{
 		static_assert(sizeof(unsigned char) == sizeof(std::byte));
 		static_assert(sizeof(key) == 32);
@@ -146,7 +146,23 @@ namespace fig::security
 		}
 	}
 
-	EncryptedData Encrypt(const fig::bytes& input, const fig::security::AESKey& key)
+	void Encrypt(fig::bytes& data, const AuthKey& key)
+	{
+		static_assert(sizeof(unsigned char) == sizeof(std::byte));
+		static_assert(sizeof(key) == 32);
+		assert(data.size() % 16 == 0);
+
+		unsigned char u8Key[32];
+		std::memcpy(u8Key, key.data(), key.size());
+
+		Cipher::Aes<256> aes(u8Key);
+
+		constexpr size_t stride = 16;
+		for (size_t i = 0; i < data.size(); i += stride)
+			aes.encrypt_block((unsigned char*)data.data() + ptrdiff_t(i));
+	}
+
+	EncryptedData Encrypt(const fig::bytes& input, const fig::security::AuthKey& key)
 	{
 		auto size = input.size();
 		EncryptedData encrypted {
@@ -161,7 +177,7 @@ namespace fig::security
 		return encrypted; // rvo
 	}
 
-	EncryptedData Encrypt(fig::bytes&& input, const fig::security::AESKey& key)
+	EncryptedData Encrypt(fig::bytes&& input, const fig::security::AuthKey& key)
 	{
 		auto size = input.size();
 		
@@ -175,7 +191,7 @@ namespace fig::security
 		return encrypted; // rvo
 	}
 
-	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const fig::security::AESKey& key)
+	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const fig::security::AuthKey& key)
 	{
 		static_assert(sizeof(unsigned char) == sizeof(std::byte));
 		static_assert(sizeof(key) == 32);
@@ -201,13 +217,22 @@ namespace fig::security
 		}
 	}
 
-	void Decrypt(fig::byte* data, size_t length, const fig::security::AESKey& key)
+	void Decrypt(fig::bytes& data, const AuthKey& key)
 	{
-		assert(length % 16 == 0);
-		decrypt_data(reinterpret_cast<unsigned char*>(data), length, key);
+		static_assert(sizeof(unsigned char) == sizeof(std::byte));
+		static_assert(sizeof(key) == 32);
+		assert(data.size() % 16 == 0);
+
+		unsigned char u8Key[32];
+		std::memcpy(u8Key, key.data(), key.size());
+
+		Cipher::Aes<256> aes(u8Key);
+		constexpr size_t stride = 16;
+		for (size_t i = 0; i < data.size(); i += stride)
+			aes.decrypt_block((unsigned char*)data.data() + ptrdiff_t(i));
 	}
 
-	DecryptedData Decrypt(const EncryptedData& input, const fig::security::AESKey& key)
+	DecryptedData Decrypt(const EncryptedData& input, const fig::security::AuthKey& key)
 	{
 		assert(input.data.size() % 16 == 0);
 
@@ -217,7 +242,7 @@ namespace fig::security
 		return decrypted; // rvo
 	}
 
-	DecryptedData Decrypt(EncryptedData&& input, const fig::security::AESKey& key)
+	DecryptedData Decrypt(EncryptedData&& input, const fig::security::AuthKey& key)
 	{
 		assert(input.data.size() % 16 == 0);
 
@@ -229,37 +254,23 @@ namespace fig::security
 		return decrypted; // rvo
 	}
 
-	AESKey DeriveKeyFromPassword(const fig::string& password, const fig::security::AuthSalt& salt)
+	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::security::AuthSalt& salt)
 	{
 		fig::bytes derived_key;
 		if constexpr (UsePBKDF2)
 		{
 			auto password_bytes = string_to_bytes(password);
 			auto salt_bytes = std::span { salt.data(), salt.size() };
-			derived_key = PBKDF2(password_bytes, salt_bytes, PBKDF2Iterations, sizeof(AESKey));
+			derived_key = PBKDF2(password_bytes, salt_bytes, PBKDF2Iterations, sizeof(AuthKey));
 		}
 		else
 		{
 			derived_key = SimpleHash(password, salt);
 		}
 
-		AESKey authKey;
-		std::memcpy(authKey.data(), derived_key.data(), std::min(sizeof(AESKey), derived_key.size()));
+		AuthKey authKey;
+		std::memcpy(authKey.data(), derived_key.data(), std::min(sizeof(AuthKey), derived_key.size()));
 		return authKey;
-	}
-
-	Bit128 Random128Bits()
-	{
-		static_assert(sizeof(Bit128) == 16);
-		static std::mt19937_64 rng { std::random_device{}() };
-		constexpr size_t u64_size = sizeof(uint64_t);
-		Bit128 key;
-		for (size_t n = 0; n < 16; n += u64_size)
-		{
-			auto r = rng();
-			std::memcpy(&key[n], &r, u64_size);
-		}
-		return key;
 	}
 
 	Bit256 Random256Bits()

@@ -8,6 +8,7 @@
 #include <vector>
 #include <span>
 #include <stdint.h>
+#include <filesystem>
 
 #include <uuid_v4.h>
 #include "util/EnumFlags.h"
@@ -31,6 +32,7 @@ namespace fig
 
     using uuid = UUIDv4::UUID;
     using timestamp = uint64_t;
+    using path = std::filesystem::path;
 }
 
 // Type conversion functions

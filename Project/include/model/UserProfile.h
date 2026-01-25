@@ -5,7 +5,6 @@
 #include "Types.h"
 #include "util/Security.h"
 #include <array>
-#include <filesystem>
 
 namespace fig::fs
 {
@@ -22,16 +21,15 @@ namespace fig::fs
 			return version == 0
 				and not id.empty()
 				and not name.empty()
-				and authChallenge.size() == 48;
+				and authChallenge.size() == 64;
 		}
 
-		std::filesystem::path GetPath() const noexcept
+		fig::path GetPath() const noexcept
 		{
-			return std::filesystem::path(std::format("{}/{}",
-				fig::string(Constants::Paths::ProfilesFolder),
-				id.str()
+			return fig::path(Constants::Paths::ProfilesFolder) / 
+				fig::path(id.str()
 					| std::ranges::views::filter([](char c) { return c != '-'; })
-					| std::ranges::to<fig::string>()));
+					| std::ranges::to<fig::string>());
 		}
 	};
 }

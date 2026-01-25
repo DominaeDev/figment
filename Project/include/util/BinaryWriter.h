@@ -12,11 +12,11 @@ namespace fig::fs
 	{
 		BinaryWriter() = delete;
 	public:
-		explicit BinaryWriter(fig::security::AESKey key) noexcept;
-		FileError WriteFile(const std::filesystem::path& directory, const AssetFile& file) noexcept;
+		explicit BinaryWriter(fig::security::AuthKey key) noexcept;
+		FileError WriteFile(const fig::path& directory, const AssetFile& file) noexcept;
 
 	private:
-		fig::security::AESKey _authKey {};
+		fig::security::AuthKey _authKey {};
 	};
 }
 #endif

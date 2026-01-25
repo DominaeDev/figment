@@ -68,18 +68,6 @@ namespace fig::fs
 		void SetData(fig::byte_span data);
 		constexpr fig::string AsString() const;
 
-		fig::uuid id {};
-		fig::uuid parent_id {};
-		AssetType asset_type { AssetType::Undefined };
-		uint8_t asset_subtype {};
-		fig::bytes data {};
-		DataFormat data_format { DataFormat::Undefined };
-		
-		FileStatus status = { FileStatus::NotLoaded };
-
-		AssetFile ToFile() const noexcept;
-		void FromFile(const AssetFile& file) const;
-	
 		void SetMeta(MetaTag tag, bool value) noexcept;
 		void SetMeta(MetaTag tag, int32_t value) noexcept;
 		void SetMeta(MetaTag tag, float value) noexcept;
@@ -93,6 +81,23 @@ namespace fig::fs
 				| std::ranges::views::filter([](char c) { return c != '-'; })
 				| std::ranges::to<fig::string>();
 		}
+
+		AssetFile ToFile() const noexcept;
+		void FromFile(const AssetFile& file) noexcept;
+		void FromFile(AssetFile&& file) noexcept;
+
+		bool IsOfType(AssetType type) const noexcept { return asset_type == type; }
+		bool IsOfImageType(ImageSubtype subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
+
+	public:
+		fig::uuid id {};
+		fig::uuid parent_id {};
+		AssetType asset_type { AssetType::Undefined };
+		uint8_t asset_subtype {};
+		DataFormat data_format { DataFormat::Undefined };
+		fig::bytes data {};
+		FileStatus status = { FileStatus::NotLoaded };
+
 	private:
 		std::map<MetaTag, MetaValue> _parameters {};
 

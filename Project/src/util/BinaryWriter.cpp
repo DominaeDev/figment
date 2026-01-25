@@ -1,12 +1,11 @@
 #include <pch.h>
 #include "util/BinaryWriter.h"
 #include "util/Security.h"
-#include <filesystem>
 #include <cassert>
 
 namespace fig::fs
 {
-	BinaryWriter::BinaryWriter(fig::security::AESKey key) noexcept :
+	BinaryWriter::BinaryWriter(fig::security::AuthKey key) noexcept :
 		_authKey { key }
 	{
 	}
@@ -92,12 +91,12 @@ namespace fig::fs
 		}
 	}
 
-	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::security::AESKey authKey) noexcept
+	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::security::AuthKey authKey) noexcept
 	{
 		fig::security::Encrypt(fs, file.data, authKey);
 	}
 
-	FileError BinaryWriter::WriteFile(const std::filesystem::path& directory, const AssetFile& file) noexcept
+	FileError BinaryWriter::WriteFile(const fig::path& directory, const AssetFile& file) noexcept
 	{
 		auto const path = directory / file.GetFileName();
 

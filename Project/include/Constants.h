@@ -62,8 +62,10 @@ namespace Constants
 	namespace Paths
 	{
 		inline constexpr fig::const_string ProfilesFolder = "./profiles";
+		inline constexpr fig::const_string ProfilesFileName = "profiles";
+		inline constexpr fig::const_string ProfilesFileExt = "";
 		inline constexpr fig::const_string ProfileIndexFileName = "index";
-		inline constexpr fig::const_string ProfileIndexFileExt = "xml";
+		inline constexpr fig::const_string ProfileIndexFileExt = "";
 		inline constexpr fig::const_string AssetFileExt = "";
 	}
 

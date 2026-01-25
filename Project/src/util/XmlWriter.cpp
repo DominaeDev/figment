@@ -3,7 +3,6 @@
 #include "util/Xml.h"
 #include "util/Common.h"
 #include <tinyxml2.h>
-#include <filesystem>
 #include <limits>
 #include <format>
 
@@ -197,7 +196,7 @@ namespace fig
 
 	bool XmlWriter::Save(const fig::string& filename) const
 	{
-		auto const path = std::filesystem::path(filename);
+		auto const path = fig::path(filename);
 		return _pDoc->SaveFile(path.u8string().c_str()) == XML_SUCCESS;
 	}
 }

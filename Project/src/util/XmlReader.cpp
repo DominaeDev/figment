@@ -3,7 +3,6 @@
 #include "util/Xml.h"
 #include "util/Common.h"
 #include <tinyxml2.h>
-#include <filesystem>
 
 using namespace tinyxml2;
 
@@ -286,7 +285,7 @@ namespace fig
 
 	XmlReader::XmlReader(const fig::string& filename)
 	{
-		auto const path = std::filesystem::path(filename.c_str());
+		auto const path = fig::path(filename.c_str());
 		
 		_pDoc = new XMLDocument();
 		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS)
@@ -302,7 +301,7 @@ namespace fig
 
 	XmlReader::XmlReader(const fig::string& filename, const fig::string& root)
 	{
-		auto const path = std::filesystem::path(filename.c_str());
+		auto const path = fig::path(filename.c_str());
 		
 		_pDoc = new XMLDocument();
 		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS 

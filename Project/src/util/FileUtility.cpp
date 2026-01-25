@@ -3,7 +3,6 @@
 #include "util/StringUtility.h"
 
 #include <fstream>
-#include <filesystem>
 
 using namespace fig::string_util;
 
@@ -13,7 +12,7 @@ namespace fig::fs
 	{
 		try
 		{
-			auto const path = std::filesystem::path(filename.c_str());
+			auto const path = fig::path(filename.c_str());
 			std::ifstream file(path.wstring(), std::ios::binary | std::ios::in | std::ios::ate);
 			if (!file)
 				return std::unexpected(FileError::FileNotFound);
@@ -37,7 +36,7 @@ namespace fig::fs
 	{
 		try
 		{
-			auto const path = std::filesystem::path(filename.c_str());
+			auto const path = fig::path(filename.c_str());
 			std::ofstream file(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
 			if (not file.is_open())
 				return FileError::WriteError;
@@ -106,7 +105,7 @@ namespace fig::fs
 	std::expected<std::vector<string>, FileError> FindFilesInPath(const string& dirPath, const string& extension)
 	{
 		std::vector<string> matchingFiles;
-		std::filesystem::path directory(dirPath);
+		fig::path directory(dirPath);
 
 		if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory))
 			return std::unexpected(FileError::DirectoryDoesNotExist);

@@ -10,83 +10,6 @@
 
 namespace fig::fs
 {
-	void Asset::SetData(fig::bytes&& data)
-	{
-		this->data = std::move(data);
-		status = FileStatus::Modified;
-	}
-
-	void Asset::SetData(fig::byte_span data)
-	{
-		this->data.resize(data.size());
-		std::memcpy(this->data.data(), data.data(), data.size());
-		status = FileStatus::Modified;
-	}
-
-	constexpr fig::string Asset::AsString() const
-	{
-		fig::string str;
-		str.assign(reinterpret_cast<const char*>(data.data()), data.size());
-		return str;
-	}
-
-	AssetFile Asset::ToFile() const noexcept
-	{
-		auto file = AssetFile {
-			.asset_id = id,
-			.parent_id = parent_id,
-			.data_format = static_cast<uint8_t>(data_format),
-			.data_length = data.size(),
-			.meta = _parameters,
-		};
-
-		file.data = data; // copy (for now)
-
-		auto now = common_util::utc_now();
-		file.meta[MetaTag::CreatedAt] = now;
-		file.meta[MetaTag::UpdatedAt] = now;
-		return file;
-	}
-
-	void Asset::SetMeta(MetaTag tag, bool value) noexcept
-	{
-		auto meta_type = get_meta_type(tag);
-		assert(meta_type == MetaValueType::Boolean);
-		_parameters[tag] = value;
-	}
-
-	void Asset::SetMeta(MetaTag tag, int32_t value) noexcept
-	{
-		auto meta_type = get_meta_type(tag);
-		assert(meta_type == MetaValueType::Integer);
-		_parameters[tag] = value;
-	}
-
-	void Asset::SetMeta(MetaTag tag, float value) noexcept
-	{
-		auto meta_type = get_meta_type(tag);
-		assert(meta_type == MetaValueType::Float);
-		_parameters[tag] = value;
-	}
-
-	void Asset::SetMeta(MetaTag tag, fig::timestamp value) noexcept
-	{
-		auto meta_type = get_meta_type(tag);
-		assert(meta_type == MetaValueType::TimeStamp);
-		_parameters[tag] = value;
-	}
-
-	void Asset::SetMeta(MetaTag tag, const char* value) noexcept
-	{
-		SetMeta(tag, fig::string(value));
-	}
-
-	void Asset::SetMeta(MetaTag tag, const fig::string& value) noexcept
-	{
-		auto meta_type = get_meta_type(tag);
-		assert(meta_type == MetaValueType::String);
-		_parameters[tag] = value;
-	}
 
 	fig::string AssetTypeToString(AssetType type, uint8_t subtype)
 	{
@@ -198,4 +121,103 @@ namespace fig::fs
 		else if (str == "image/webp")		return DataFormat::ImageWebp;
 		else								return DataFormat::Undefined;
 	}
+
+	void Asset::SetData(fig::bytes&& data)
+	{
+		this->data = std::move(data);
+		status = FileStatus::Modified;
+	}
+
+	void Asset::SetData(fig::byte_span data)
+	{
+		this->data.resize(data.size());
+		std::memcpy(this->data.data(), data.data(), data.size());
+		status = FileStatus::Modified;
+	}
+
+	constexpr fig::string Asset::AsString() const
+	{
+		fig::string str;
+		str.assign(reinterpret_cast<const char*>(data.data()), data.size());
+		return str;
+	}
+
+	AssetFile Asset::ToFile() const noexcept
+	{
+		auto file = AssetFile {
+			.asset_id = id,
+			.parent_id = parent_id,
+			.asset_type = static_cast<uint8_t>(asset_type),
+			.asset_subtype = asset_subtype,
+			.data_format = static_cast<uint8_t>(data_format),
+			.data_length = data.size(),
+			.meta = _parameters,
+		};
+
+		file.data = data; // copy (for now)
+		return file;
+	}
+
+	void Asset::FromFile(const AssetFile& file) noexcept
+	{
+		id = file.asset_id;
+		parent_id = file.parent_id;
+		asset_type = static_cast<AssetType>(file.asset_type);
+		asset_subtype = file.asset_subtype;
+		data_format = static_cast<DataFormat>(file.data_format);
+		data = file.data; // copy (for now)
+		_parameters = file.meta;
+	}
+
+	void Asset::FromFile(AssetFile&& file) noexcept
+	{
+		id = file.asset_id;
+		parent_id = file.parent_id;
+		asset_type = static_cast<AssetType>(file.asset_type);
+		asset_subtype = file.asset_subtype;
+		data_format = static_cast<DataFormat>(file.data_format);
+		data = std::move(file.data);
+		_parameters = file.meta;
+	}
+
+	void Asset::SetMeta(MetaTag tag, bool value) noexcept
+	{
+		auto meta_type = get_meta_type(tag);
+		assert(meta_type == MetaValueType::Boolean);
+		_parameters[tag] = value;
+	}
+
+	void Asset::SetMeta(MetaTag tag, int32_t value) noexcept
+	{
+		auto meta_type = get_meta_type(tag);
+		assert(meta_type == MetaValueType::Integer);
+		_parameters[tag] = value;
+	}
+
+	void Asset::SetMeta(MetaTag tag, float value) noexcept
+	{
+		auto meta_type = get_meta_type(tag);
+		assert(meta_type == MetaValueType::Float);
+		_parameters[tag] = value;
+	}
+
+	void Asset::SetMeta(MetaTag tag, fig::timestamp value) noexcept
+	{
+		auto meta_type = get_meta_type(tag);
+		assert(meta_type == MetaValueType::TimeStamp);
+		_parameters[tag] = value;
+	}
+
+	void Asset::SetMeta(MetaTag tag, const char* value) noexcept
+	{
+		SetMeta(tag, fig::string(value));
+	}
+
+	void Asset::SetMeta(MetaTag tag, const fig::string& value) noexcept
+	{
+		auto meta_type = get_meta_type(tag);
+		assert(meta_type == MetaValueType::String);
+		_parameters[tag] = value;
+	}
+
 }

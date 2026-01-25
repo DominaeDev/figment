@@ -4,9 +4,11 @@
 #include "model/AppState.h"
 #include "util/Common.h"
 #include "util/BinaryWriter.h"
+#include "util/BinaryReader.h"
 #include "util/Xml.h"
 #include <filesystem>
 #include <format>
+#include <ranges>
 
 using namespace fig::common_util;
 
@@ -14,15 +16,15 @@ namespace fig::fs
 {
 	AssetManager::AssetManager(const UserManager& userMngr)
 	{
-		UserProfile& profile = userMngr.GetActiveProfile().value();
+		auto const& profile = userMngr.GetActiveProfile();
 		_profileAuthKey = userMngr.GetActiveAuthKey();
 		_profileID = profile.id;
 		_profilePath = profile.GetPath();
 
 		if (not LoadIndex())
-		{
-			Log(std::format("No asset index found for profile {}.", profile.name));
-		}
+			Log(std::format("No asset index found for profile '{}'.", profile.name));
+
+		LoadAssetMetaData();
 	}
 
 	bool AssetManager::LoadIndex()
@@ -74,12 +76,25 @@ namespace fig::fs
 		return xml.Save(path.u8string());
 	}
 
-	Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data) noexcept
+	Asset& AssetManager::CreateEmptyAsset(AssetType type, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = CreateUUID();
 		auto& newAsset = _assets[id] = Asset {};
 		newAsset.id = id;
-		newAsset.parent_id = _profileID;
+		newAsset.parent_id = not parent.empty() ? parent : _profileID;
+		newAsset.asset_type = type;
+		newAsset.status = FileStatus::PartiallyLoaded;
+		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
+		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
+		return newAsset;
+	}
+
+	Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent) noexcept
+	{
+		fig::uuid id = CreateUUID();
+		auto& newAsset = _assets[id] = Asset {};
+		newAsset.id = id;
+		newAsset.parent_id = not parent.empty() ? parent : _profileID;
 		newAsset.asset_type = type;
 		newAsset.data = std::move(data); // Move data
 		newAsset.status = FileStatus::Modified;
@@ -88,20 +103,7 @@ namespace fig::fs
 		return newAsset;
 	}
 
-	Asset& AssetManager::CreateEmptyAsset(AssetType type) noexcept
-	{
-		fig::uuid id = CreateUUID();
-		auto& newAsset = _assets[id] = Asset {};
-		newAsset.id = id;
-		newAsset.parent_id = _profileID;
-		newAsset.asset_type = type;
-		newAsset.status = FileStatus::PartiallyLoaded;
-		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
-		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
-		return newAsset;
-	}
-
-	Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data) noexcept
+	Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = CreateUUID();
 		auto& newAsset = _assets[id] = Asset {};
@@ -118,11 +120,11 @@ namespace fig::fs
 		return newAsset;
 	}
 
-	std::optional<std::reference_wrapper<Asset>> AssetManager::FindAsset(const fig::uuid& id) noexcept
+	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& id) noexcept
 	{
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend())
-			return std::make_optional<std::reference_wrapper<Asset>>(static_cast<Asset&>(itFind->second));
+			return std::make_optional<AssetRef>(static_cast<Asset&>(itFind->second));
 		return std::nullopt;
 	}
 
@@ -142,19 +144,58 @@ namespace fig::fs
 
 	bool AssetManager::WriteAsset(const Asset& asset) const
 	{
-		auto& userMngr = ApplicationState::GetUserManager();
-		if (not userMngr.IsSignedIn())
-			return false;
-		
-		auto const& authKey = userMngr.GetActiveAuthKey();
-		auto const& profile = userMngr.GetActiveProfile();
-
-		if (not profile.has_value())
-			return false; // Error
-		
 		auto file = asset.ToFile();
-		BinaryWriter writer(authKey);
-		auto error = writer.WriteFile(profile.value().get().GetPath(), file);
+		BinaryWriter writer(_profileAuthKey);
+		auto error = writer.WriteFile(_profilePath, file);
 		return error == FileError::NoError;
+	}
+
+	bool AssetManager::LoadAssetMetaData()
+	{
+		for (auto& kvp : _assets)
+		{
+			auto& asset = kvp.second;
+			if (asset.status > FileStatus::NotLoaded)
+				continue;
+
+			BinaryReader reader(_profilePath, _profileAuthKey);
+			if (auto file = reader.ReadFile(asset.GetFileName(), false))
+			{
+				asset.FromFile(std::move(file.value()));
+				asset.status = FileStatus::PartiallyLoaded;
+			}
+			else
+			{
+				asset.status = FileStatus::Invalid;
+			}
+		}
+		return true;
+	}
+
+	std::expected<AssetRef, FileError> AssetManager::LoadAsset(const fig::uuid& id) noexcept
+	{
+		auto findAsset = FindAsset(id);
+		if (not findAsset.has_value())
+			return std::unexpected(FileError::FileNotFound);
+		
+		Asset& asset = findAsset.value();
+		if (asset.status == FileStatus::FullyLoaded)
+			return asset;
+
+		if (asset.status == FileStatus::Invalid)
+			return std::unexpected(FileError::ReadError);
+
+		BinaryReader reader(_profilePath, _profileAuthKey);
+		if (auto file = reader.ReadFile(asset.GetFileName()))
+		{
+			asset.FromFile(std::move(file.value()));
+			asset.status = FileStatus::FullyLoaded;
+			return asset;
+		}
+		else
+		{
+			asset.status = FileStatus::Invalid;
+			return std::unexpected(FileError::ReadError);
+		}
 	}
 }

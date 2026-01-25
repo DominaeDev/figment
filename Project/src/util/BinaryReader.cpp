@@ -1,12 +1,11 @@
 #include <pch.h>
 #include "util/BinaryReader.h"
 #include <format>
-#include <filesystem>
 
 namespace fig::fs
 {
-	BinaryReader::BinaryReader(const fig::string& profileName, fig::security::AESKey key) noexcept :
-		_profileName { profileName },
+	BinaryReader::BinaryReader(const fig::path& profilePath, fig::security::AuthKey key) noexcept :
+		_profilePath { profilePath },
 		_authKey { key }
 	{
 	}
@@ -76,18 +75,18 @@ namespace fig::fs
 		return true;
 	}
 
-	static void ReadData(std::ifstream& fs, AssetFile& file, fig::security::AESKey authKey) noexcept
+	static void ReadData(std::ifstream& fs, AssetFile& file, fig::security::AuthKey authKey) noexcept
 	{
 		size_t length = file.data_length;
 		file.data.resize(length);
 		fig::security::Decrypt(fs, file.data, authKey);
 	}
 
-	std::expected<AssetFile, FileError> BinaryReader::ReadFile(const fig::string& filename) noexcept
+	std::expected<AssetFile, FileError> BinaryReader::ReadFile(const fig::string& filename, bool read_data) noexcept
 	{
 		try
 		{
-			auto const path = std::filesystem::path(std::format("{0}/{1}/{2}", Constants::Paths::ProfilesFolder, _profileName, filename));
+			auto const path = _profilePath / filename;
 
 			std::ifstream fs(path.wstring(), std::ios::binary | std::ios::in | std::ios::ate);
 			if (fs.fail())
@@ -119,10 +118,10 @@ namespace fig::fs
 			if (not ReadHeader(fs, file_size, header))
 				return std::unexpected(FileError::UnrecognizedFormat);
 
-			auto parent_id = reinterpret_cast<uint32_t*>(&header.parent_id);
-			file.parent_id = fig::uuid(parent_id[0], parent_id[1]);
-			auto asset_id = reinterpret_cast<uint32_t*>(&header.asset_id);
-			file.asset_id = fig::uuid(asset_id[0], asset_id[1]);
+			auto parent_id = reinterpret_cast<uint64_t*>(&header.parent_id);
+			file.parent_id = fig::uuid(parent_id[1], parent_id[0]);
+			auto asset_id = reinterpret_cast<uint64_t*>(&header.asset_id);
+			file.asset_id = fig::uuid(asset_id[1], asset_id[0]);
 			file.asset_type = header.asset_type;
 			file.asset_subtype = header.asset_subtype;
 			file.data_format = header.data_format;
@@ -133,9 +132,11 @@ namespace fig::fs
 				return std::unexpected(FileError::UnrecognizedFormat);
 
 			// Read data
-			fs.seekg(header.data_offset, std::ios::beg);
-			ReadData(fs, file, _authKey);
-
+			if (read_data)
+			{
+				fs.seekg(header.data_offset, std::ios::beg);
+				ReadData(fs, file, _authKey);
+			}
 			return file;
 		}
 		catch (...)

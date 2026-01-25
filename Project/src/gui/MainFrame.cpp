@@ -138,25 +138,6 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 	}
 
 	userMngr.SignInDefaultProfile();
-
-	//! @temp
-	/*if (userMngr.IsSignedIn())
-	{
-		auto& authKey = userMngr.GetActiveAuthKey();
-		AssetManager& assetMngr = userMngr.GetAssets().value();
-		if (auto some_file = fig::fs::ReadFile("./characters/rei03.jpg"))
-		{
-			auto& data = some_file.value();
-
-			auto& asset = assetMngr.CreateAsset(AssetType::Image, std::move(some_file.value()));
-			asset.data_format = DataFormat::ImageJpeg;
-			asset.asset_subtype = static_cast<uint8_t>(ImageSubtype::LargePortrait);
-			asset.SetMeta(MetaTag::ImageWidth, 1920);
-			asset.SetMeta(MetaTag::ImageHeight, 1080);
-			asset.SetMeta(MetaTag::Title, "Testing 1, 2, 3...");
-			assetMngr.SaveAll();
-		}
-	}*/
 }
 
 MainFrame::~MainFrame()
