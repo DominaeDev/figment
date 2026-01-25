@@ -1,4 +1,6 @@
 #include <pch.h>
+#include "model/UserManager.h"
+
 #include <random>
 #include <chrono>
 #include <filesystem>
@@ -7,7 +9,7 @@
 #include "util/Hash.h"
 #include "util/Security.h"
 #include "util/Xml.h"
-#include "model/UserManager.h"
+#include "model/AssetManager.h"
 #include "model/GlobalStrings.h"
 
 using namespace fig::security;
@@ -105,7 +107,7 @@ namespace fig::fs
 			return false; // Incorrect password
 
 		_signedInProfile = &profile;
-		_pAssetMngr = std::make_unique<AssetManager>();
+		_pAssetMngr = std::make_unique<AssetManager>(*this);
 		return true;
 	}
 
@@ -157,7 +159,7 @@ namespace fig::fs
 				std::memcpy(profile.authSalt.data(), salt.data(), std::min(salt.size(), profile.authSalt.size()));
 			}
 
-			if (profile.is_valid())
+			if (profile.IsValid())
 				_profiles.push_back(profile);
 
 			pProfile = profileNode.GetNextSibling();
@@ -183,8 +185,17 @@ namespace fig::fs
 		return xml.Save(fig::string(kProfilesFilePath));
 	}
 
-	bool UserManager::ChangePassword(UserProfile& profile, const fig::string& oldPassword, const fig::string& newPassword)
+	bool UserManager::ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword)
 	{
+		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileID](const UserProfile& profile) {
+			return profile.id == profileID;
+		});
+
+		if (itProfile == _profiles.cend())
+			return false; // Not found
+
+		auto& profile = *itProfile;
+
 		fig::security::AuthKey authKey;
 		if (not Authenticate(profile, oldPassword, authKey))
 			return false;
@@ -202,7 +213,7 @@ namespace fig::fs
 		return true;
 	}
 
-	std::optional<std::reference_wrapper<UserProfile>> UserManager::GetActiveProfile() noexcept
+	std::optional<std::reference_wrapper<UserProfile>> UserManager::GetActiveProfile() const noexcept
 	{
 		if (_signedInProfile == nullptr)
 			return std::nullopt;

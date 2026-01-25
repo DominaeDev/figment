@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Types.h"
+#include <fstream>
 
 namespace fig::security
 {
@@ -20,9 +21,11 @@ namespace fig::security
 		constexpr size_t encrypted_size() const noexcept { return data.size(); }
 	};
 
-	void Encrypt(fig::byte* data, size_t length, const fig::security::AESKey& key);
+	void Encrypt(std::ofstream& stream, fig::byte_span in_data, const fig::security::AESKey& key);
 	EncryptedData Encrypt(const fig::bytes& input, const fig::security::AESKey& key);
 	EncryptedData Encrypt(fig::bytes&& input, const fig::security::AESKey& key);
+
+	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const fig::security::AESKey& key);
 	DecryptedData Decrypt(const fig::security::EncryptedData& input, const fig::security::AESKey& key);
 	DecryptedData Decrypt(fig::security::EncryptedData&& input, const fig::security::AESKey& key);
 

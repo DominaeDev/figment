@@ -59,6 +59,14 @@ namespace Constants
 		inline constexpr int32_t MaxSequences = 4;
 	}
 
+	namespace Paths
+	{
+		inline constexpr fig::const_string ProfilesFolder = "./profiles";
+		inline constexpr fig::const_string ProfileIndexFileName = "index";
+		inline constexpr fig::const_string ProfileIndexFileExt = "xml";
+		inline constexpr fig::const_string AssetFileExt = "";
+	}
+
 	inline constexpr fig::const_string DefaultModelLocation = "M:\\LLM\\default_model.gguf";
 	
 	namespace LLM

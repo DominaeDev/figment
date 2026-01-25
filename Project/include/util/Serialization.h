@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Types.h"
+#include "Constants.h"
 #include <variant>
 #include <map>
 #include <chrono>
@@ -13,8 +14,9 @@ namespace fig::fs
 	{
 		NoError = 0,
 		FileNotFound,
-		AccessError,
+		FileAccessError,
 		DirectoryDoesNotExist,
+		UnrecognizedFormat,
 		ReadError,
 		WriteError,
 	};
@@ -96,7 +98,7 @@ namespace fig::fs
 		uint8_t meta_count;
 	};
 
-	enum MetaTag
+	enum MetaTag : uint8_t
 	{
 		Unknown = 0,
 		CreatedAt = 1,		// utc
@@ -113,24 +115,44 @@ namespace fig::fs
 	enum class MetaValueType : uint8_t
 	{
 		Boolean = 0,
-		Int32 = 1,
+		Integer = 1,
 		Float = 2,
-		TimeStamp = 3,
-		CString = 4,	// Zero-terminated
-		String = 5,		// Has length
+		String = 3,
+		TimeStamp = 4,
+
+		Unknown = 255,
 	};
+	
+	constexpr MetaValueType get_meta_type(MetaTag tag) noexcept
+	{
+		switch (tag)
+		{
+		case MetaTag::ImageWidth:
+		case MetaTag::ImageHeight:
+		case MetaTag::ImageType:
+			return MetaValueType::Integer;
+
+		case MetaTag::CreatedAt:
+		case MetaTag::UpdatedAt:
+			return MetaValueType::TimeStamp;
+
+		case MetaTag::Title:
+			return MetaValueType::String;
+
+		default:
+			return MetaValueType::Unknown;
+		}
+	}
 
 	struct AssetFile
 	{
-		fig::uuid assetID {};
-		fig::uuid parentID {};
-		fig::timestamp createdAt;
-		fig::timestamp updatedAt;
-		uint8_t assetType {0};
-		uint8_t assetSubtype {0};
-		uint8_t dataFormat {0};
+		fig::uuid asset_id {};
+		fig::uuid parent_id {};
+		uint8_t asset_type {0};
+		uint8_t asset_subtype {0};
+		uint8_t data_format {0};
 
-		const fig::byte* data {};
+		fig::bytes data {};
 		size_t data_length {};
 		std::map<MetaTag, MetaValue> meta {};
 
@@ -146,12 +168,37 @@ namespace fig::fs
 		template <typename T>
 		bool try_get_meta(MetaTag tag, T& out_value) const noexcept
 		{
-			if (auto m = get_meta(tag))
+			if (auto m = get_meta<T>(tag))
 			{
 				out_value = m.value();
 				return true;
 			}
 			return false;
+		}
+
+		fig::timestamp GetCreatedAt()
+		{
+			fig::timestamp ts;
+			if (try_get_meta(MetaTag::CreatedAt, ts))
+				return ts;
+			return fig::timestamp { 0 };
+		}
+		
+		fig::timestamp GetUpdatedAt()
+		{
+			fig::timestamp ts;
+			if (try_get_meta(MetaTag::UpdatedAt, ts))
+				return ts;
+			return fig::timestamp { 0 };
+		}
+
+		fig::string GetFileName() const noexcept
+		{
+			return std::format("{0}.{1}", 
+				asset_id.str()
+					| std::ranges::views::filter([](char c) { return c != '-'; })
+					| std::ranges::to<fig::string>(),
+				fig::string(Constants::Paths::AssetFileExt));
 		}
 	};
 }

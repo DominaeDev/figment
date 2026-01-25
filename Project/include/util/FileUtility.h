@@ -9,6 +9,7 @@ namespace fig::fs
 {
 	// File IO
 	std::expected<fig::bytes, FileError> ReadFile(const string& filename);
+	FileError WriteFile(const fig::string& filename, fig::byte_span data);
 
 	std::expected<string, FileError> ReadTextFile(const string& filename, bool normalizeNewlines = true);
 	FileError ReadTextFile(const string& filename, string& out_content, bool normalizeNewlines = true);

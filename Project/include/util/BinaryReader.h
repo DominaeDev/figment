@@ -1,5 +1,5 @@
-#ifndef BINARY_READER_H__
-#define BINARY_READER_H__
+#ifndef BINARY_WRITER_H__
+#define BINARY_WRITER_H__
 #pragma once
 
 #include "util/Serialization.h"
@@ -13,11 +13,12 @@ namespace fig::fs
 	{
 		BinaryReader() = delete;
 	public:
-		explicit BinaryReader(fig::security::AuthKey key) noexcept;
+		explicit BinaryReader(const fig::string& profileName, fig::security::AESKey key) noexcept;
 		std::expected<AssetFile, FileError> ReadFile(const fig::string& filename) noexcept;
 
 	private:
-		fig::security::AuthKey _authKey {};
+		fig::string _profileName {};
+		fig::security::AESKey _authKey {};
 	};
 }
 #endif

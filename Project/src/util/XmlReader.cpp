@@ -289,7 +289,7 @@ namespace fig
 		auto const path = std::filesystem::path(filename.c_str());
 		
 		_pDoc = new XMLDocument();
-		if (_pDoc->LoadFile(path.generic_u8string().c_str()) != XML_SUCCESS)
+		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS)
 		{
 			// Error
 			delete _pDoc;
@@ -305,7 +305,7 @@ namespace fig
 		auto const path = std::filesystem::path(filename.c_str());
 		
 		_pDoc = new XMLDocument();
-		if (_pDoc->LoadFile(path.generic_u8string().c_str()) != XML_SUCCESS 
+		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS 
 			or std::strcmp(_pDoc->RootElement()->Name(), root.c_str()) != 0)
 		{
 			delete _pDoc;

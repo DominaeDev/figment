@@ -6,8 +6,7 @@
 
 namespace fig::fs
 {
-	BinaryWriter::BinaryWriter(const fig::string& profileName, fig::security::AESKey key) noexcept :
-		_profileName { profileName },
+	BinaryWriter::BinaryWriter(fig::security::AESKey key) noexcept :
 		_authKey { key }
 	{
 	}
@@ -43,12 +42,12 @@ namespace fig::fs
 	{
 		FileHeader header {
 			.data_length = static_cast<uint32_t>(file.data_length),
-			.data_format = file.dataFormat,
-			.asset_type = file.assetType,
-			.asset_subtype = file.assetSubtype,
+			.data_format = file.data_format,
+			.asset_type = file.asset_type,
+			.asset_subtype = file.asset_subtype,
 		};
-		file.assetID.bytes(reinterpret_cast<char*>(&header.asset_id));
-		file.parentID.bytes(reinterpret_cast<char*>(&header.parent_id));
+		file.asset_id.bytes(reinterpret_cast<char*>(&header.asset_id));
+		file.parent_id.bytes(reinterpret_cast<char*>(&header.parent_id));
 
 		assert(file.meta.size() < std::numeric_limits<uint8_t>::max());
 		header.meta_count = static_cast<uint8_t>(file.meta.size());
@@ -95,22 +94,19 @@ namespace fig::fs
 
 	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::security::AESKey authKey) noexcept
 	{
-		std::array<uint8_t, 256> buffer { 0 };
-		for (size_t i = 0; i < file.data_length; i += 256)
-		{
-			std::memcpy(buffer.data(), file.data + i, std::min(sizeof(buffer), file.data_length - i));
-			fig::security::Encrypt((fig::byte*)(buffer.data()), buffer.size(), authKey);
-
-			fs.write((const char*)buffer.data(), buffer.size());
-		}
+		fig::security::Encrypt(fs, file.data, authKey);
 	}
 
-	FileError BinaryWriter::WriteFile(const AssetFile& file) noexcept
+	FileError BinaryWriter::WriteFile(const std::filesystem::path& directory, const AssetFile& file) noexcept
 	{
-		fig::string filename = std::format("./profiles/{0}/{1}", _profileName, file.assetID.str());
-		auto const path = std::filesystem::path(filename.c_str());
+		auto const path = directory / file.GetFileName();
 
-		std::ofstream fs(path.generic_wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
+		// Create subfolder
+		auto const parentPath = path.parent_path();
+		if (not std::filesystem::exists(parentPath))
+			std::filesystem::create_directory(parentPath);
+
+		std::ofstream fs(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
 		if (not fs.is_open())
 			return FileError::FileNotFound;
 

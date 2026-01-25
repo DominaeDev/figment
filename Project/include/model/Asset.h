@@ -19,32 +19,47 @@ namespace fig::fs
 
 		Image = 10,
 
-		ChatSession = 20,
+		ChatInstance = 20,
 		ChatLog = 21,
 	};
 
 	enum class DataFormat : uint8_t
 	{
-		Undefined = 0,
-		Binary = 1,
-		BinaryBase64 = 2,
+		Undefined	= 0, // generic binary
+		Text		= 1, // utf-8
+		
+		DataXml		= 4, // utf-8
+		DataJson	= 5, // utf-8
 
-		TextGeneric = 4,
-		TextXml = 5,
-		TextJson = 6,
-
-		ImagePng = 8,
-		ImageJpeg = 9,
+		ImageJpeg	= 10,
+		ImagePng	= 11,
+		ImageWebp	= 12,
 	};
 
 	enum class ImageSubtype : uint8_t
 	{
-		Generic			= 0,
-		Cover			= 1,
-		SquarePortrait	= 2,
-		LargePortrait	= 3,
-		Background		= 4,
+		Unspecified		= 0,
+		ProfileImage	= 1,
+		CoverImage		= 2,
+		SquarePortrait	= 3,
+		LargePortrait	= 4,
+		Background		= 5,
+		Expression		= 10,
 	};
+
+	enum class FileStatus : uint8_t
+	{
+		NotLoaded = 0,
+		PartiallyLoaded,
+		FullyLoaded,
+		Modified,
+		Invalid,
+	};
+
+	fig::string AssetTypeToString(AssetType type, uint8_t subtype);
+	std::pair<AssetType, uint8_t> AssetTypeFromString(const fig::string& str);
+	fig::string DataFormatToString(DataFormat format);
+	DataFormat DataFormatFromString(const fig::string& str);
 
 	class Asset
 	{
@@ -54,17 +69,33 @@ namespace fig::fs
 		constexpr fig::string AsString() const;
 
 		fig::uuid id {};
-		fig::uuid parentID {};
-		DataFormat file_type { DataFormat::Undefined };
+		fig::uuid parent_id {};
 		AssetType asset_type { AssetType::Undefined };
 		uint8_t asset_subtype {};
-
 		fig::bytes data {};
-		std::map<MetaTag, MetaValue> parameters {};
-		bool needSave = false;
+		DataFormat data_format { DataFormat::Undefined };
+		
+		FileStatus status = { FileStatus::NotLoaded };
 
 		AssetFile ToFile() const noexcept;
 		void FromFile(const AssetFile& file) const;
+	
+		void SetMeta(MetaTag tag, bool value) noexcept;
+		void SetMeta(MetaTag tag, int32_t value) noexcept;
+		void SetMeta(MetaTag tag, float value) noexcept;
+		void SetMeta(MetaTag tag, fig::timestamp value) noexcept;
+		void SetMeta(MetaTag tag, const char* value) noexcept;
+		void SetMeta(MetaTag tag, const fig::string& value) noexcept;
+
+		fig::string GetFileName() const noexcept
+		{
+			return id.str()
+				| std::ranges::views::filter([](char c) { return c != '-'; })
+				| std::ranges::to<fig::string>();
+		}
+	private:
+		std::map<MetaTag, MetaValue> _parameters {};
+
 	};
 }
 

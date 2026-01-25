@@ -121,10 +121,29 @@ static fig::bytes SimpleHash(fig::string password, fig::security::AuthSalt salt)
 
 namespace fig::security
 {
-	void Encrypt(fig::byte* data, size_t length, const fig::security::AESKey& key)
+	void Encrypt(std::ofstream& stream, fig::byte_span in_data, const fig::security::AESKey& key)
 	{
-		assert(length % 16 == 0);
-		encrypt_data(reinterpret_cast<unsigned char*>(data), length, key);
+		static_assert(sizeof(unsigned char) == sizeof(std::byte));
+		static_assert(sizeof(key) == 32);
+
+		unsigned char u8Key[32];
+		std::memcpy(u8Key, key.data(), key.size());
+
+		Cipher::Aes<256> aes(u8Key);
+		constexpr size_t kBufferSize = 256;
+		std::array<fig::byte, kBufferSize> buffer {};
+
+		size_t length = in_data.size();
+		for (size_t i = 0; i < length; i += kBufferSize)
+		{
+			std::memcpy(buffer.data(), in_data.data() + ptrdiff_t(i), std::min(buffer.size(), length - i));
+			
+			constexpr size_t stride = 16;
+			for (size_t j = 0; j < buffer.size(); j += stride)
+				aes.encrypt_block((unsigned char*)buffer.data() + ptrdiff_t(j));
+
+			stream.write((const char*)buffer.data(), buffer.size());
+		}
 	}
 
 	EncryptedData Encrypt(const fig::bytes& input, const fig::security::AESKey& key)
@@ -136,21 +155,10 @@ namespace fig::security
 
 		auto padded_size = size % 16 == 0 ? size : (1 + size / 16) * 16;
 		encrypted.data.resize(padded_size, 0_byte);
-		std::memcpy((void*)input.data(), encrypted.data.data(), input.size());
-		encrypted.data = input;
+		std::memcpy(encrypted.data.data(), (void*)input.data(), input.size());
 
 		encrypt_data(reinterpret_cast<unsigned char*>(encrypted.data.data()), encrypted.data.size(), key);
 		return encrypted; // rvo
-	}
-
-	DecryptedData Decrypt(const EncryptedData& input, const fig::security::AESKey& key)
-	{
-		assert(input.data.size() % 16 == 0);
-
-		DecryptedData decrypted { input.data };
-		decrypt_data(reinterpret_cast<unsigned char*>(decrypted.data()), decrypted.size(), key);
-		decrypted.resize(input.original_size);
-		return decrypted; // rvo
 	}
 
 	EncryptedData Encrypt(fig::bytes&& input, const fig::security::AESKey& key)
@@ -165,6 +173,48 @@ namespace fig::security
 		auto encrypted_chars = bytes_to_u8(encrypted.data);
 		encrypt_data(encrypted_chars.data(), encrypted_chars.size(), key);
 		return encrypted; // rvo
+	}
+
+	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const fig::security::AESKey& key)
+	{
+		static_assert(sizeof(unsigned char) == sizeof(std::byte));
+		static_assert(sizeof(key) == 32);
+
+		unsigned char u8Key[32];
+		std::memcpy(u8Key, key.data(), key.size());
+
+		Cipher::Aes<256> aes(u8Key);
+
+		constexpr size_t kBufferSize = 256;
+		std::array<uint8_t, kBufferSize> buffer { 0 };
+
+		size_t max_length = out_data.size();
+		for (size_t i = 0; i < max_length; i += kBufferSize)
+		{
+			stream.read((char*)buffer.data(), kBufferSize);
+
+			constexpr size_t stride = 16;
+			for (size_t j = 0; j < kBufferSize; j += stride)
+				aes.decrypt_block(buffer.data() + ptrdiff_t(j));
+
+			std::memcpy(out_data.data() + ptrdiff_t(i), buffer.data(), std::min(kBufferSize, max_length - i));
+		}
+	}
+
+	void Decrypt(fig::byte* data, size_t length, const fig::security::AESKey& key)
+	{
+		assert(length % 16 == 0);
+		decrypt_data(reinterpret_cast<unsigned char*>(data), length, key);
+	}
+
+	DecryptedData Decrypt(const EncryptedData& input, const fig::security::AESKey& key)
+	{
+		assert(input.data.size() % 16 == 0);
+
+		DecryptedData decrypted { input.data };
+		decrypt_data(reinterpret_cast<unsigned char*>(decrypted.data()), decrypted.size(), key);
+		decrypted.resize(input.original_size);
+		return decrypted; // rvo
 	}
 
 	DecryptedData Decrypt(EncryptedData&& input, const fig::security::AESKey& key)

@@ -26,10 +26,11 @@ namespace fig::fs
 		bool SignInDefaultProfile();
 		bool SignOut();
 		
-		std::optional<std::reference_wrapper<UserProfile>> GetActiveProfile() noexcept;
+		std::optional<std::reference_wrapper<UserProfile>> GetActiveProfile() const noexcept;
 		std::optional<std::reference_wrapper<AssetManager>> GetAssets() noexcept;
 		const fig::security::AESKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };
-		static bool ChangePassword(UserProfile& profile, const fig::string& oldPassword, const fig::string& newPassword);
+		
+		bool ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword);
 
 	private:
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AESKey& outKey);
@@ -40,7 +41,7 @@ namespace fig::fs
 		UserProfile* _signedInProfile = nullptr;
 		fig::security::AESKey _signedInAuthKey {};
 
-		std::unique_ptr<AssetManager> _pAssetMngr {};
+		std::unique_ptr<AssetManager> _pAssetMngr;
 	};
 }
 #endif

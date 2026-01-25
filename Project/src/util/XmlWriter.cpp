@@ -198,6 +198,6 @@ namespace fig
 	bool XmlWriter::Save(const fig::string& filename) const
 	{
 		auto const path = std::filesystem::path(filename);
-		return _pDoc->SaveFile(path.generic_u8string().c_str()) == XML_SUCCESS;
+		return _pDoc->SaveFile(path.u8string().c_str()) == XML_SUCCESS;
 	}
 }

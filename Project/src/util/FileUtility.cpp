@@ -33,6 +33,24 @@ namespace fig::fs
 		}
 	}
 
+	FileError WriteFile(const fig::string& filename, fig::byte_span data)
+	{
+		try
+		{
+			auto const path = std::filesystem::path(filename.c_str());
+			std::ofstream file(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
+			if (not file.is_open())
+				return FileError::WriteError;
+
+			file.write((const char*)(data.data()), data.size());
+			return FileError::NoError;
+		}
+		catch (...)
+		{
+			return FileError::WriteError;
+		}
+	}
+
 	std::expected<string, FileError> ReadTextFile(const string& filename, bool normalizeNewlines)
 	{
 		try
@@ -74,7 +92,7 @@ namespace fig::fs
 		{
 			std::ofstream file(filename.c_str(), std::ios::binary | std::ios::out | (append ? std::ios::app : std::ios::trunc));
 			if (!file.is_open())
-				return FileError::FileNotFound;
+				return FileError::WriteError;
 
 			file.write(content.c_str(), content.length());
 			return file.fail() ? FileError::WriteError : FileError::NoError;

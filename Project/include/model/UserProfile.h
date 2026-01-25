@@ -2,9 +2,10 @@
 #define USER_PROFILE_H__
 #pragma once
 
-#include <array>
 #include "Types.h"
 #include "util/Security.h"
+#include <array>
+#include <filesystem>
 
 namespace fig::fs
 {
@@ -16,12 +17,21 @@ namespace fig::fs
 		fig::security::AuthSalt authSalt {};
 		unsigned short version { 0 };
 
-		constexpr bool is_valid() const
+		inline constexpr bool IsValid() const noexcept
 		{
 			return version == 0
 				and not id.empty()
 				and not name.empty()
 				and authChallenge.size() == 48;
+		}
+
+		std::filesystem::path GetPath() const noexcept
+		{
+			return std::filesystem::path(std::format("{}/{}",
+				fig::string(Constants::Paths::ProfilesFolder),
+				id.str()
+					| std::ranges::views::filter([](char c) { return c != '-'; })
+					| std::ranges::to<fig::string>()));
 		}
 	};
 }
