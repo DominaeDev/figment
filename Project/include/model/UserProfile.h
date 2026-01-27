@@ -21,7 +21,7 @@ namespace fig::fs
 			return version == 0
 				and not id.empty()
 				and not name.empty()
-				and authChallenge.size() == 64;
+				and authChallenge.size() == 32;
 		}
 
 		fig::path GetPath() const noexcept

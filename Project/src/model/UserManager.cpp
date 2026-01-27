@@ -23,20 +23,20 @@ namespace fig::fs
 		return CreateProfile(fig::string(fig::strings::UserProfile::DefaultUser), fig::string(kDefaultPassword));
 	}
 
-	static fig::bytes CreateChallenge(Bit256 key, Bit256 salt, AuthKey encKey)
+	static fig::bytes CreateChallenge(Bit128 key, Bit128 salt, AuthKey encKey)
 	{
-		fig::bytes challenge(64);
+		fig::bytes challenge(32);
 		std::memcpy(challenge.data() + ptrdiff_t(0), key.data(), key.size());
-		for (size_t i = 0; i < 32uz; ++i)
-			challenge[i + 32u] = challenge[i] ^ salt[i];
+		for (size_t i = 0; i < 16uz; ++i)
+			challenge[i + 16uz] = challenge[i] ^ salt[i];
 		fig::security::Encrypt(challenge, encKey);
 		return challenge; // rvo
 	}
 
 	UserProfile& UserManager::CreateProfile(const fig::string& name, const fig::string& password)
 	{
-		auto authKey = fig::security::Random256Bits();
-		auto authSalt = fig::security::Random256Bits();
+		auto authKey = fig::security::Random128Bits();
+		auto authSalt = fig::security::Random128Bits();
 		auto encKey = fig::security::DeriveKeyFromPassword(not password.empty() ? password : fig::string(kDefaultPassword), authSalt);
 
 		// Create auth challenge
@@ -62,12 +62,12 @@ namespace fig::fs
 			}, key);
 
 		// Validate
-		if (decrypted.size() != 64)
+		if (decrypted.size() != 32)
 			return false;
 
-		for (size_t i = 0; i < 32; ++i)
+		for (size_t i = 0; i < 16; ++i)
 		{
-			if (decrypted[i + 32uz] != (decrypted[i] ^ profile.authSalt[i]))
+			if (decrypted[i + 16uz] != (decrypted[i] ^ profile.authSalt[i]))
 				return false; // Invalid password
 		}
 		
@@ -155,13 +155,6 @@ namespace fig::fs
 				profile.authChallenge.resize(authData.size() - sizeof(AuthSalt));
 				std::memcpy(profile.authSalt.data(), authData.data(), sizeof(AuthSalt));
 				std::memcpy(profile.authChallenge.data(), authData.data() + sizeof(AuthSalt), profile.authChallenge.size());
-			}
-
-			// Auth challenge
-			if (auto saltNode = profileNode.GetFirstElement("AuthSalt"))
-			{
-				auto salt = saltNode.value().GetBytes().value_or({});
-				std::memcpy(profile.authSalt.data(), salt.data(), std::min(salt.size(), profile.authSalt.size()));
 			}
 
 			if (profile.IsValid())

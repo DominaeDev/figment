@@ -5,6 +5,7 @@
 #include "model/Asset.h"
 #include "util/Security.h"
 #include <expected>
+#include <ranges>
 
 namespace fig::fs
 {
@@ -27,7 +28,7 @@ namespace fig::fs
 
 		bool LoadIndex();
 		bool SaveIndex() const;
-		void SaveAll();
+		void SaveModified();
 
 	private:
 		bool LoadAssetMetaData();

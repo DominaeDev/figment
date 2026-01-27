@@ -7,9 +7,10 @@
 
 namespace fig::security
 {
+	using Bit128 = std::array<fig::byte, 16uz>;
 	using Bit256 = std::array<fig::byte, 32uz>;
-	using AuthKey = Bit256;
-	using AuthSalt = Bit256;
+	using AuthKey = Bit128;
+	using AuthSalt = Bit128;
 
 	using DecryptedData = fig::bytes;
 	struct EncryptedData
@@ -31,6 +32,7 @@ namespace fig::security
 
 	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::security::AuthSalt& salt);
 
+	Bit128 Random128Bits();
 	Bit256 Random256Bits();
 }
 

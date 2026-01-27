@@ -100,12 +100,12 @@ ChatMessage* ChatScroll::AddMessage(fig::string identifier, Role role, MessageTy
 
 	if (auto character = _session.GetCharacterById(identifier))
 	{
-		id = character.value().id;
+		id = character.value().characterId;
 		name = character.value().fullName;
 	}
 	else if (auto character = _session.GetCharacterByName(identifier))
 	{
-		id = character.value().id;
+		id = character.value().characterId;
 		name = character.value().fullName;
 	}
 	

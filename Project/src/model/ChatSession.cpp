@@ -61,10 +61,10 @@ namespace fig::data
 		if (character.LoadFromXml(filename))
 		{
 			if (role == Role::User)
-				character.id = "USR";
+				character.characterId = "USR";
 
 			if (!empty_or_whitespace(character.portraitFilename))
-				CharacterImageStore::LoadCharacterPortrait(pRenderer, character.id, "./characters/" + character.portraitFilename);
+				CharacterImageStore::LoadCharacterPortrait(pRenderer, character.characterId, "./characters/" + character.portraitFilename);
 			_characters[role] = std::move(character);
 			return true;
 		}
@@ -85,7 +85,7 @@ namespace fig::data
 			return std::nullopt;
 
 		auto itFind = std::find_if(_characters.begin(), _characters.end(), [identifier](const auto& kvp) {
-			return equals(kvp.second.id, identifier, true);
+			return equals(kvp.second.characterId, identifier, true);
 		});
 		if (itFind != _characters.end())
 			return itFind->second;
@@ -111,7 +111,7 @@ namespace fig::data
 			return Role::Undefined;
 
 		auto itFind = std::find_if(_characters.begin(), _characters.end(), [characterId](const auto& kvp) {
-			return equals(kvp.second.id, characterId, true) || equals(kvp.second.shortName, characterId, true);
+			return equals(kvp.second.characterId, characterId, true) || equals(kvp.second.shortName, characterId, true);
 		});
 		if (itFind != _characters.end())
 			return itFind->first;
@@ -124,7 +124,7 @@ namespace fig::data
 			return "USR";
 		auto optCharacter = GetCharacter(role);
 		if (optCharacter.has_value())
-			return ucase(optCharacter.value().id);
+			return ucase(optCharacter.value().characterId);
 		return "_UNK";
 	}
 
@@ -275,7 +275,7 @@ namespace fig::data
 					auto& character = kvp.second;
 					if (is_bot(kvp.first))
 					{
-						prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", ucase(character.id), character.shortName));
+						prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", ucase(character.characterId), character.shortName));
 						if (!empty_or_whitespace(character.brief))
 							prompt.append(std::format(", \"info\": \"{0}\"", character.brief));
 						prompt.append("}},\n");

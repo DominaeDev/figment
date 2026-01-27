@@ -128,7 +128,7 @@ namespace fig::fs
 		return std::nullopt;
 	}
 
-	void AssetManager::SaveAll()
+	void AssetManager::SaveModified()
 	{
 		for (auto& kvp : _assets)
 		{

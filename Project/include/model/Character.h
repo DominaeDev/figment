@@ -18,7 +18,7 @@ namespace fig::data
 	class Character
 	{
 	public:
-		fig::string id;
+		fig::string characterId;
 		fig::string shortName;
 		fig::string fullName;
 		fig::string brief;
