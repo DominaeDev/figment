@@ -57,7 +57,12 @@ namespace fig::gui_util
 	};
 
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
-	fig::sdl::Surface ScaleSurface(fig::gui::SurfacePtr image, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
+	fig::sdl::Surface ScaleSurface(fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
+
+	enum class CornerStyle {
+		Card,
+	};
+	bool MaskCorners(fig::sdl::Surface& surface, CornerStyle style);
 }
 
 #endif

@@ -32,7 +32,7 @@ namespace fig::fs
 		DataJson			= 0x05,	// utf-8
 
 		ImageRGB24			= 0x0A,	// bitmap
-		ImageARGB32			= 0x0B,	// bitmap
+		ImageARGB32 = 0x0B,	// bitmap
 		ImageJpeg			= 0x0C,
 		ImagePng			= 0x0D,
 		ImageWebp			= 0x0E,
@@ -100,7 +100,7 @@ namespace fig::fs
 		constexpr bool IsOfType(AssetType type) const noexcept { return asset_type == type; }
 		constexpr bool IsOfImageType(ImageType subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
 		constexpr bool IsReference() const noexcept { return asset_type == AssetType::Reference; }
-
+		constexpr bool HasData() const noexcept { return not data.empty(); }
 	public:
 		fig::uuid id {};
 		fig::uuid parent_id {};

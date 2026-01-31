@@ -131,22 +131,26 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 	s_pInstance = this;
 	
 	auto& userMngr = ApplicationState::GetUserManager();
-	if (not userMngr.LoadProfiles() or true)
+	if (not userMngr.LoadProfiles())
 	{
 		userMngr.CreateDefaultProfile();
 		userMngr.SaveProfiles();
+		userMngr.SignInDefaultProfile();
+	}
+	else
+	{
+		userMngr.SignInDefaultProfile();
+	}
 
-		if (userMngr.SignInDefaultProfile())
+	if constexpr (Disabled)
+	{
+		if (userMngr.IsSignedIn())
 		{
 			auto& assets = userMngr.GetProfileAssets();
 			auto x = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
 			auto y = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
 			assets.SaveModified();
 		}
-	}
-	else
-	{
-		userMngr.SignInDefaultProfile();
 	}
 }
 

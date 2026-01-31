@@ -3,8 +3,10 @@
 #include <algorithm>
 #include "util/Common.h"
 #include "util/StringUtility.h"
+#include "util/FileUtility.h"
 #include <SDL3_image/SDL_image.h>
 #include <c_resource.h>
+#include <tuple>
 
 using namespace fig::gui;
 using namespace fig::string_util;
@@ -213,12 +215,15 @@ namespace fig::gui_util
 	{
 		try
 		{
-			fig::sdl::Surface pSurface;
-			pSurface.reset(IMG_Load(filename.u8string().c_str()));
-			if (!pSurface)
+			fig::sdl::Surface surface;
+			surface.reset(IMG_Load(filename.u8string().c_str()));
+
+			if (!surface)
 				return {};
 
-			return ScaleSurface(pSurface.get(), width, height, fit);
+			auto scaled = ScaleSurface(surface, width, height, fit);
+//			IMG_SavePNG(scaled.get(), "./resized.png");
+			return scaled;
 		}
 		catch (...)
 		{
@@ -226,12 +231,13 @@ namespace fig::gui_util
 		}
 	}
 
-	fig::sdl::Surface ScaleSurface(fig::gui::SurfacePtr pImage, int32_t width, int32_t height, ImageFit fit)
+	fig::sdl::Surface ScaleSurface(fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit)
 	{
+		auto pImage = surface.get();
 		if (pImage == nullptr || width <= 0 || height <= 0)
 			return {};
 
-		auto pSurface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR32);
+		auto pSurface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
 		fig::sdl::Surface pScaledSurface;
 		pScaledSurface.reset(pSurface);
 
@@ -255,9 +261,9 @@ namespace fig::gui_util
 
 			float scale;
 			if (fit == ImageFit::Inside)
-				scale = std::min((float)width / srcWidth, (float)height / srcHeight);
+				scale = std::min(toF(width) / srcWidth, toF(height) / srcHeight);
 			else if (fit == ImageFit::Outside || fit == ImageFit::Portrait)
-				scale = std::max((float)width / srcWidth, (float)height / srcHeight);
+				scale = std::max(toF(width) / srcWidth, toF(height) / srcHeight);
 			else
 				scale = 1.0f;
 
@@ -290,9 +296,98 @@ namespace fig::gui_util
 			if (SDL_GetRectIntersection(&dstRect, &fixedRect, &tmp))
 				dstRect = tmp;
 
-			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, SDL_SCALEMODE_NEAREST);
+			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, SDL_SCALEMODE_LINEAR);
 		}
 
 		return pScaledSurface;
+	}
+
+	static void AlphaToMask(fig::path filename)
+	{
+		auto pMask = IMG_Load(filename.u8string().c_str());
+		if (not (bool)pMask)
+			return;
+
+		if (SDL_LockSurface(pMask))
+		{
+			auto pixels = pMask->pixels;
+			fig::bytes data(pMask->w * pMask->h);
+			for (size_t i = 0; i < toUZ(pMask->w * pMask->h); ++i)
+				data.data()[i] = ((std::byte*)pixels)[i * (pMask->pitch / pMask->w)];
+			fig::fs::WriteFile("./mask.bin", data);
+			SDL_UnlockSurface(pMask);
+		}
+	}
+
+	bool MaskCorners(fig::sdl::Surface& surface, CornerStyle style)
+	{
+		auto pImage = surface.get();
+		if (pImage == nullptr || pImage->w <= 0 || pImage->h <= 0)
+			return false;
+
+		// Load mask
+		fig::path maskPath;
+		switch (style)
+		{
+		case CornerStyle::Card:
+			maskPath = fig::path("./resources/masks/card_corners.mask");
+			break;
+		default:
+			return false;
+		}
+
+		auto maybe_mask = fig::fs::ReadFile(maskPath); //! @todo cache
+		if (not maybe_mask.has_value())
+			return false;
+
+		// Convert to RGBA
+		if (pImage->format != SDL_PIXELFORMAT_RGBA8888)
+		{
+			if (auto newSurface = SDL_ConvertSurface(pImage, SDL_PIXELFORMAT_RGBA8888))
+			{
+				surface.reset(newSurface);
+				pImage = newSurface;
+			}
+		}
+
+		uint8_t* mask_pixels = (uint8_t*)maybe_mask.value().data();
+		size_t mask_width	= toUZ(std::sqrt(toI(maybe_mask.value().size()))); // assumes square mask
+		size_t mask_pitch	= mask_width;
+		size_t corner_size	= mask_width / 2;
+
+		if (SDL_LockSurface(pImage))
+		{
+			auto pixels = (uint8_t*)pImage->pixels;
+			auto stride = pImage->pitch / pImage->w;
+			
+			const std::tuple<size_t, size_t, size_t, size_t> offsets[4] {
+				/* Top left */ { 0, 0, 0, 0 },
+				/* Top right  */ { corner_size, 0, pImage->w - corner_size - 1, 0 },
+				/* Bottom left */ { 0, corner_size, 0, pImage->h - corner_size - 1 },
+				/* Bottom right */ { corner_size, corner_size, pImage->w - corner_size - 1, pImage->h - corner_size - 1 },
+			};
+
+			for (auto& offset : offsets)
+			{
+				std::pair<size_t, size_t> msk_offset { std::get<0>(offset), std::get<1>(offset) };
+				std::pair<size_t, size_t> img_offset { std::get<2>(offset), std::get<3>(offset) };
+				
+				for (int32_t y = 0; y < corner_size; ++y)
+				{
+					size_t msk_row = (y + msk_offset.second) * mask_pitch;
+					size_t img_row = (y + img_offset.second) * pImage->pitch;
+					for (size_t x = 0; x < corner_size; ++x)
+					{
+						auto& p = pixels[img_row + ((x + img_offset.first) * stride) + 0];
+						auto& m = mask_pixels[msk_row + (x + msk_offset.first)];
+
+						p = (uint8_t)((uint16_t)p * m / 255);
+					}
+				}
+			}
+			SDL_UnlockSurface(pImage);
+		}
+
+		return true;
 	}
 }

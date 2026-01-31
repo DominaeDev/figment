@@ -12,9 +12,10 @@
 #include <format>
 #include <ranges>
 
-using namespace fig::common_util;
 using namespace fig::data;
+using namespace fig::common_util;
 using namespace fig::string_util;
+using namespace fig::gui_util;
 
 namespace fig::fs
 {
@@ -153,6 +154,39 @@ namespace fig::fs
 		return asset;
 	}
 
+	Asset& AssetManager::CreateImageAsset(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	{
+		auto& asset = CreateEmptyAsset(AssetType::Image, parent);
+		if (!surface.get())
+			return asset; // Error
+
+		asset.asset_subtype = static_cast<uint8_t>(subtype);
+		asset.status = AssetFileStatus::Modified;
+
+		auto pSurface = surface.get();
+		int32_t stride = pSurface->pitch / pSurface->w;
+		if (stride == 4)
+			asset.data_format = DataFormat::ImageARGB32;
+		else if (stride == 3)
+			asset.data_format = DataFormat::ImageRGB24;
+		else
+			asset.data_format = DataFormat::Undefined;
+
+		asset.SetMeta(MetaTag::ImageWidth, pSurface->w);
+		asset.SetMeta(MetaTag::ImageHeight, pSurface->h);
+
+		if (SDL_LockSurface(pSurface))
+		{
+			size_t data_length = toUZ(pSurface->h * pSurface->pitch);
+
+			// Copy pixel data
+			asset.data.resize(data_length);
+			std::memcpy(asset.data.data(), (fig::byte*)pSurface->pixels, data_length);
+			SDL_UnlockSurface(pSurface);
+		}
+		return asset;
+	}
+
 	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& id) noexcept
 	{
 		auto itFind = _assets.find(id);
@@ -255,16 +289,19 @@ namespace fig::fs
 		{
 			if (auto file = fig::fs::ReadFile(filename.parent_path() / character.largePortraitFilename))
 			{
+				// Create portrait asset
 				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormatFromExt(GetFileExt(character.largePortraitFilename)), std::move(file.value()), characterAsset.id);
 
 				// Create cover card
-				auto scaled = fig::gui_util::LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, 384, 512, fig::gui_util::ImageFit::Portrait);
-				if (scaled and SDL_LockSurface(scaled.get()))
+				if (auto coverImage = LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
 				{
-					auto pImage = scaled.get();
-					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, DataFormat::ImageARGB32, fig::byte_span((fig::byte*)pImage->pixels, toUZ(pImage->w * pImage->h * sizeof(int32_t))), characterAsset.id);
-					SDL_UnlockSurface(scaled.get());
+					// Round corners
+					MaskCorners(coverImage, CornerStyle::Card);
 
+					// Save cover asset (bitmap)
+					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, characterAsset.id);
+
+					// Create reference to original
 					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
 				}
 			}

@@ -24,6 +24,7 @@ namespace fig::fs
 		Asset& CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
 		Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
 		Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
+		Asset& CreateImageAsset(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
 
 		std::optional<AssetRef> FindAsset(const fig::uuid& id) noexcept;
 		std::expected<AssetRef, FileError> LoadAsset(const fig::uuid& id) noexcept;

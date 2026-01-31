@@ -16,6 +16,9 @@ namespace Constants
 		inline constexpr double CharacterNameFontSize = 12.0;
 		inline constexpr double ChatMessageFontSize = 16.0; //15.5;
 		inline constexpr int32_t ChatScrollWidth = 800;
+		
+		inline constexpr int32_t CardWidth = 320;
+		inline constexpr int32_t CardHeight = 412;
 	}
 
 	namespace Chat
