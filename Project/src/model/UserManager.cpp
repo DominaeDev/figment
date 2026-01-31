@@ -16,11 +16,18 @@ using namespace fig::security;
 
 namespace fig::fs
 {
-	static fig::const_string kDefaultPassword { "||NO PASSWORD PROTECTION||" };
+	static fig::security::Bit128 kDefaultAuthKey { 
+		fig::byte { 0xA1 }, fig::byte { 0xB2 }, fig::byte { 0xC3 }, fig::byte { 0xD4 }, fig::byte { 0xE5 }, fig::byte { 0xF6 }, fig::byte { 0xAB }, fig::byte { 0xCD },
+		fig::byte { 0xEF }, fig::byte { 0x1A }, fig::byte { 0x2B }, fig::byte { 0x3C }, fig::byte { 0x4D }, fig::byte { 0x5E }, fig::byte { 0x6F }, fig::byte { 0xF0 },
+	};
+	static fig::security::Bit128 kDefaultAuthSalt { 
+		fig::byte { 0xEF }, fig::byte { 0x1A }, fig::byte { 0x2B }, fig::byte { 0x3C }, fig::byte { 0x4D }, fig::byte { 0x5E }, fig::byte { 0x6F }, fig::byte { 0xF0 },
+		fig::byte { 0xA1 }, fig::byte { 0xB2 }, fig::byte { 0xC3 }, fig::byte { 0xD4 }, fig::byte { 0xE5 }, fig::byte { 0xF6 }, fig::byte { 0xAB }, fig::byte { 0xCD },
+	};
 
 	UserProfile& UserManager::CreateDefaultProfile()
 	{
-		return CreateProfile(fig::string(fig::strings::UserProfile::DefaultUser), fig::string(kDefaultPassword));
+		return CreateProfile(fig::string(fig::strings::UserProfile::DefaultUser), "");
 	}
 
 	static fig::bytes CreateChallenge(Bit128 key, Bit128 salt, AuthKey encKey)
@@ -36,8 +43,8 @@ namespace fig::fs
 	UserProfile& UserManager::CreateProfile(const fig::string& name, const fig::string& password)
 	{
 		auto authKey = fig::security::Random128Bits();
-		auto authSalt = fig::security::Random128Bits();
-		auto encKey = fig::security::DeriveKeyFromPassword(not password.empty() ? password : fig::string(kDefaultPassword), authSalt);
+		auto authSalt = not password.empty() ? fig::security::Random128Bits() : kDefaultAuthSalt;
+		auto encKey = not password.empty() ? fig::security::DeriveKeyFromPassword(password, authSalt) : kDefaultAuthKey;
 
 		// Create auth challenge
 		fig::bytes authChallenge = CreateChallenge(authKey, authSalt, encKey);
@@ -54,12 +61,12 @@ namespace fig::fs
 
 	bool UserManager::Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AuthKey& outKey)
 	{
-		auto key = fig::security::DeriveKeyFromPassword(not password.empty() ? password : fig::string(kDefaultPassword), profile.authSalt);
+		auto encKey = not password.empty() ? fig::security::DeriveKeyFromPassword(password, profile.authSalt) : kDefaultAuthKey;
 		auto decrypted = fig::security::Decrypt(
 			EncryptedData {
 				.data = profile.authChallenge,
 				.original_size = profile.authChallenge.size(),
-			}, key);
+			}, encKey);
 
 		// Validate
 		if (decrypted.size() != 32)
@@ -204,7 +211,7 @@ namespace fig::fs
 		if (not Authenticate(profile, oldPassword, authKey))
 			return false;
 
-		auto newPasswordKey = fig::security::DeriveKeyFromPassword(not newPassword.empty() ? newPassword : fig::string(kDefaultPassword), profile.authSalt);
+		AuthKey newPasswordKey = not newPassword.empty() ? fig::security::DeriveKeyFromPassword(newPassword, profile.authSalt) : kDefaultAuthKey;
 
 		// Update challenge
 		profile.authChallenge = CreateChallenge(authKey, profile.authSalt, newPasswordKey);

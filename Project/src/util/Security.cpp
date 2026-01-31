@@ -7,7 +7,6 @@
 constexpr bool UsePBKDF2 = true;
 constexpr uint32_t PBKDF2Iterations = 1000;
 
-
 static fig::bytes hmac_compute(std::span<const std::byte> key, std::span<const std::byte> data)
 {
 	constexpr size_t block_size = 64;
