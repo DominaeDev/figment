@@ -119,9 +119,11 @@ namespace fig::fs
 		if (not IsSignedIn())
 			return false;
 
+		_pAssetMngr->SaveModified();
+		_pAssetMngr.reset();
+
 		_signedInProfile = nullptr;
 		_signedInAuthKey = AuthKey {};
-		_pAssetMngr.reset();
 		return true;
 	}
 

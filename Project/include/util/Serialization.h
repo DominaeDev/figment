@@ -21,7 +21,8 @@ namespace fig::fs
 		WriteError,
 	};
 
-	struct VersionNumber {
+	struct VersionNumber
+	{
 		uint8_t major { 0 };
 		uint8_t minor { 0 };
 

@@ -125,14 +125,14 @@ namespace fig::fs
 	void Asset::SetData(fig::bytes&& data)
 	{
 		this->data = std::move(data);
-		status = FileStatus::Modified;
+		status = AssetFileStatus::Modified;
 	}
 
 	void Asset::SetData(fig::byte_span data)
 	{
 		this->data.resize(data.size());
 		std::memcpy(this->data.data(), data.data(), data.size());
-		status = FileStatus::Modified;
+		status = AssetFileStatus::Modified;
 	}
 
 	constexpr fig::string Asset::AsString() const

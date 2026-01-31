@@ -48,8 +48,7 @@ namespace fig::fs
 			auto [type, subtype] = AssetTypeFromString(assetNode.GetElementText("Type").value_or(""));
 			asset.asset_type = type;
 			asset.asset_subtype = subtype;
-			asset.data_format = DataFormatFromString(assetNode.GetElementText("Format").value_or(""));
-			asset.status = FileStatus::NotLoaded;
+			asset.status = AssetFileStatus::NotLoaded;
 			if (!asset.id.empty())
 				_assets[asset.id] = asset;
 			optAsset = assetNode.GetNextSibling();
@@ -70,7 +69,6 @@ namespace fig::fs
 			assetNode.SetElement("ID", asset.id);
 			assetNode.SetElement("ParentID", asset.parent_id);
 			assetNode.SetElement("Type", AssetTypeToString(asset.asset_type, asset.asset_subtype));
-			assetNode.SetElement("Format", DataFormatToString(asset.data_format));
 		}
 
 		return xml.Save(path.u8string());
@@ -83,7 +81,7 @@ namespace fig::fs
 		newAsset.id = id;
 		newAsset.parent_id = not parent.empty() ? parent : _profileID;
 		newAsset.asset_type = type;
-		newAsset.status = FileStatus::PartiallyLoaded;
+		newAsset.status = AssetFileStatus::PartiallyLoaded;
 		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
 		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
 		return newAsset;
@@ -97,7 +95,7 @@ namespace fig::fs
 		newAsset.parent_id = not parent.empty() ? parent : _profileID;
 		newAsset.asset_type = type;
 		newAsset.data = std::move(data); // Move data
-		newAsset.status = FileStatus::Modified;
+		newAsset.status = AssetFileStatus::Modified;
 		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
 		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
 		return newAsset;
@@ -110,7 +108,7 @@ namespace fig::fs
 		newAsset.id = id;
 		newAsset.parent_id = _profileID;
 		newAsset.asset_type = type;
-		newAsset.status = FileStatus::Modified;
+		newAsset.status = AssetFileStatus::Modified;
 		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
 		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
 
@@ -133,11 +131,11 @@ namespace fig::fs
 		for (auto& kvp : _assets)
 		{
 			auto& asset = kvp.second;
-			if (asset.status != FileStatus::Modified)
+			if (asset.status != AssetFileStatus::Modified)
 				continue;
 
 			if (WriteAsset(asset))
-				asset.status = FileStatus::FullyLoaded;
+				asset.status = AssetFileStatus::FullyLoaded;
 		}
 		SaveIndex();
 	}
@@ -155,20 +153,28 @@ namespace fig::fs
 		for (auto& kvp : _assets)
 		{
 			auto& asset = kvp.second;
-			if (asset.status > FileStatus::NotLoaded)
+			if (asset.status > AssetFileStatus::NotLoaded)
 				continue;
 
 			BinaryReader reader(_profilePath, _profileAuthKey);
 			if (auto file = reader.ReadFile(asset.GetFileName(), false))
 			{
 				asset.FromFile(std::move(file.value()));
-				asset.status = FileStatus::PartiallyLoaded;
+				asset.status = AssetFileStatus::PartiallyLoaded;
 			}
+			else if (file.error() == FileError::FileNotFound)
+				asset.status = AssetFileStatus::Missing;
 			else
-			{
-				asset.status = FileStatus::Invalid;
-			}
+				asset.status = AssetFileStatus::Invalid; // Failed to load for some reason, but the file exists.
 		}
+
+		// Remove missing assets from index
+		for (auto& id : _assets
+			| std::views::filter([](auto& kvp) { return kvp.second.status == AssetFileStatus::Missing; })
+			| std::views::keys
+			| std::ranges::to<std::vector>())
+			_assets.erase(id);
+
 		return true;
 	}
 
@@ -179,22 +185,22 @@ namespace fig::fs
 			return std::unexpected(FileError::FileNotFound);
 		
 		Asset& asset = findAsset.value();
-		if (asset.status == FileStatus::FullyLoaded)
+		if (asset.status == AssetFileStatus::FullyLoaded)
 			return asset;
 
-		if (asset.status == FileStatus::Invalid)
+		if (asset.status == AssetFileStatus::Invalid)
 			return std::unexpected(FileError::ReadError);
 
 		BinaryReader reader(_profilePath, _profileAuthKey);
 		if (auto file = reader.ReadFile(asset.GetFileName()))
 		{
 			asset.FromFile(std::move(file.value()));
-			asset.status = FileStatus::FullyLoaded;
+			asset.status = AssetFileStatus::FullyLoaded;
 			return asset;
 		}
 		else
 		{
-			asset.status = FileStatus::Invalid;
+			asset.status = AssetFileStatus::Invalid;
 			return std::unexpected(FileError::ReadError);
 		}
 	}

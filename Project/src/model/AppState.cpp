@@ -52,7 +52,12 @@ void ApplicationState::ReleaseState()
 {
 	__appState->pMainWindow.reset();
 	__appState->pLLMInstance.reset();
-	__appState->pUserManager.reset();
+	
+	if (__appState->pUserManager)
+	{
+		__appState->pUserManager->SignOut();
+		__appState->pUserManager.reset();
+	}
 
 	if (__appState->pLLMEngine)
 	{

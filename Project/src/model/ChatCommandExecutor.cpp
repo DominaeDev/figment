@@ -174,7 +174,7 @@ static bool cmdRollbackUserMessage(ParsedChatCommand cmd, Ctx ctx)
 static bool cmdReset(ParsedChatCommand cmd, Ctx ctx)
 {
 	uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
-	if (!ctx.pLLM->IsReady() || ctx.pLLM->ResetChat(seed))
+	if (not ctx.pLLM or not ctx.pLLM->IsReady() or ctx.pLLM->ResetChat(seed))
 		ctx.pChatScroll->ClearMessages();
 	queue_clear(ctx.commandQueue);
 	return true;

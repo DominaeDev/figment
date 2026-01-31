@@ -47,12 +47,13 @@ namespace fig::fs
 		Expression		= 10,
 	};
 
-	enum class FileStatus : uint8_t
+	enum class AssetFileStatus : uint8_t
 	{
 		NotLoaded = 0,
 		PartiallyLoaded,
 		FullyLoaded,
 		Modified,
+		Missing,
 		Invalid,
 	};
 
@@ -96,7 +97,7 @@ namespace fig::fs
 		uint8_t asset_subtype {};
 		DataFormat data_format { DataFormat::Undefined };
 		fig::bytes data {};
-		FileStatus status = { FileStatus::NotLoaded };
+		AssetFileStatus status = { AssetFileStatus::NotLoaded };
 
 	private:
 		std::map<MetaTag, MetaValue> _parameters {};

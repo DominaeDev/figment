@@ -26,11 +26,11 @@ namespace fig::fs
 		std::expected<AssetRef, FileError> LoadAsset(const fig::uuid& id) noexcept;
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
 
-		bool LoadIndex();
-		bool SaveIndex() const;
 		void SaveModified();
 
 	private:
+		bool LoadIndex();
+		bool SaveIndex() const;
 		bool LoadAssetMetaData();
 		bool WriteAsset(const Asset& asset) const;
 
