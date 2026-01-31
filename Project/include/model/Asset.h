@@ -32,7 +32,7 @@ namespace fig::fs
 		DataJson			= 0x05,	// utf-8
 
 		ImageRGB24			= 0x0A,	// bitmap
-		ImageARGB32 = 0x0B,	// bitmap
+		ImageARGB32			= 0x0B,	// bitmap
 		ImageJpeg			= 0x0C,
 		ImagePng			= 0x0D,
 		ImageWebp			= 0x0E,
