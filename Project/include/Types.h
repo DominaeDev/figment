@@ -7,6 +7,7 @@
 #include <string_view>
 #include <vector>
 #include <span>
+#include <map>
 #include <stdint.h>
 #include <filesystem>
 

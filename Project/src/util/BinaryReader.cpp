@@ -55,6 +55,10 @@ namespace fig::fs
 				fs.read(buf, sizeof(fig::timestamp));
 				outMeta[tag] = *reinterpret_cast<fig::timestamp*>(&buf);
 				break;
+			case MetaValueType::Identifier:
+				fs.read(buf, sizeof(_meta_identifier));
+				outMeta[tag] = *reinterpret_cast<_meta_identifier*>(&buf);
+				break;
 			case MetaValueType::String:
 			{
 				// Read length
@@ -130,6 +134,9 @@ namespace fig::fs
 			// Read meta
 			if (not ReadMeta(fs, header.meta_count, file.meta))
 				return std::unexpected(FileError::UnrecognizedFormat);
+
+			if (header.data_offset == 0xFFFF)
+				read_data = false; // Reference: No data
 
 			// Read data
 			if (read_data)

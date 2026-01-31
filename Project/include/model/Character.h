@@ -10,25 +10,37 @@ namespace fig::data
 {
 	struct CharacterProperty
 	{
-		fig::string key;
-		fig::string value;
 		fig::string label;
+		fig::string value;
 	};
 
-	class Character
+	enum class CharacterGender
+	{
+		Undefined = 0,
+		Male,
+		Female,
+		Custom,
+	};
+
+	class CharacterData
 	{
 	public:
-		fig::string characterId;
+		fig::string characterId; // Chat id
 		fig::string shortName;
 		fig::string fullName;
 		fig::string brief;
 		fig::string description;
-		fig::string portraitFilename;
 		gui::Color bgColor {};
 		gui::Color borderColor {};
-		std::vector<CharacterProperty> properties;
+		CharacterGender gender {};
+
+		fig::string largePortraitFilename;
+		fig::string smallPortraitFilename;
+
+		std::map<fig::string, CharacterProperty> properties;
 
 		bool LoadFromXml(fig::string filename);
+		void SaveToXml(fig::bytes& buffer);
 	};
 }
 

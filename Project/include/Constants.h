@@ -91,4 +91,10 @@ namespace Constants
 //		inline constexpr fig::const_string DocumentPrefix	= "Represent the statement: ";
 //		inline constexpr fig::const_string QueryPrefix		= "Represent the statement: ";
 	}
+
+	namespace CharacterProperties
+	{
+		inline constexpr const char* const Gender = "gender";
+
+	}
 }

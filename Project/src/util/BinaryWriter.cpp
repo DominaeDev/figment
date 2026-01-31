@@ -12,6 +12,9 @@ namespace fig::fs
 
 	static uint16_t get_data_offset(const AssetFile& file)
 	{
+		if (file.IsReference())
+			return static_cast<uint16_t>(0xFFFF); // No data
+
 		uint32_t offset = 0;
 		for (auto it = file.meta.cbegin(); it != file.meta.cend(); ++it)
 		{
@@ -25,10 +28,12 @@ namespace fig::fs
 				offset += sizeof(float);
 			else if (const fig::timestamp* x = std::get_if<fig::timestamp>(&value))
 				offset += sizeof(fig::timestamp);
+			else if (const _meta_identifier* x = std::get_if<_meta_identifier>(&value))
+				offset += sizeof(_meta_identifier);
 			else if (const fig::string* s = std::get_if<fig::string>(&value))
 			{
-				offset += sizeof(uint32_t); // length
-				offset += static_cast<uint32_t>(s->size()); // data
+				offset += sizeof(uint16_t); // length
+				offset += static_cast<uint16_t>(s->size()); // data
 			}
 		}
 
@@ -81,11 +86,16 @@ namespace fig::fs
 				fs << tag;
 				fs.write((const char*)(t), sizeof(fig::timestamp));
 			}
+			else if (const _meta_identifier* t = std::get_if<_meta_identifier>(&value))
+			{
+				fs << tag;
+				fs.write((const char*)(t), sizeof(_meta_identifier));
+			}
 			else if (const fig::string* s = std::get_if<fig::string>(&value))
 			{
 				fs << tag;
-				uint32_t length = static_cast<uint32_t>(s->size());
-				fs.write((const char*)(&length), sizeof(uint32_t));
+				uint16_t length = static_cast<uint16_t>(s->size());
+				fs.write((const char*)(&length), sizeof(uint16_t));
 				fs.write(s->c_str(), s->size());
 			}
 		}
@@ -93,7 +103,8 @@ namespace fig::fs
 
 	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::security::AuthKey authKey) noexcept
 	{
-		fig::security::Encrypt(fs, file.data, authKey);
+		if (not file.IsReference())
+			fig::security::Encrypt(fs, file.data, authKey);
 	}
 
 	FileError BinaryWriter::WriteFile(const fig::path& directory, const AssetFile& file) noexcept

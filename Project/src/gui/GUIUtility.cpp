@@ -1,7 +1,9 @@
 #include <pch.h>
 #include "gui/GUIUtility.h"
-#include "util/StringUtility.h"
 #include <algorithm>
+#include "util/StringUtility.h"
+#include <SDL3_image/SDL_image.h>
+#include <c_resource.h>
 
 using namespace fig::gui;
 using namespace fig::string_util;
@@ -203,5 +205,38 @@ namespace fig::gui_util
 		uint8_t r, g, b;
 		HSVtoRGB(h, s, v, r, g, b);
 		return Color { r, g, b, 0xff };
+	}
+
+	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, Fit fit)
+	{
+		try
+		{
+			fig::sdl::Surface pSurface;
+			pSurface.reset(IMG_Load(filename.u8string().c_str()));
+			if (!pSurface)
+				return {};
+
+			return ScaleSurface(pSurface.get(), width, height, fit);
+		}
+		catch (...)
+		{
+			return {};
+		}
+	}
+
+	fig::sdl::Surface ScaleSurface(fig::gui::SurfacePtr pImage, int32_t width, int32_t height, Fit fit)
+	{
+		if (pImage == nullptr || width <= 0 || height <= 0)
+			return {};
+
+		fig::sdl::Surface pScaledSurface;
+		pScaledSurface.reset(SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR32));
+
+		fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
+		fig::gui::Rect dstRect { 0, 0, width, height };
+
+		SDL_BlitSurfaceScaled(pImage, &srcRect, pScaledSurface.get(), &dstRect, SDL_SCALEMODE_LINEAR);
+
+		return pScaledSurface;
 	}
 }

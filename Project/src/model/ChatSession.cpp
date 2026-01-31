@@ -57,21 +57,21 @@ namespace fig::data
 	{
 		auto pRenderer = ApplicationState::GetMainWindow().GetSDLRenderer().get();
 
-		Character character;
+		CharacterData character;
 		if (character.LoadFromXml(filename))
 		{
 			if (role == Role::User)
 				character.characterId = "USR";
 
-			if (!empty_or_whitespace(character.portraitFilename))
-				CharacterImageStore::LoadCharacterPortrait(pRenderer, character.characterId, "./characters/" + character.portraitFilename);
+			if (!empty_or_whitespace(character.smallPortraitFilename))
+				CharacterImageStore::LoadCharacterPortrait(pRenderer, character.characterId, "./characters/" + character.smallPortraitFilename);
 			_characters[role] = std::move(character);
 			return true;
 		}
 		return false;
 	}
 
-	std::optional<Character> ChatSession::GetCharacter(Role role) const
+	std::optional<CharacterData> ChatSession::GetCharacter(Role role) const
 	{
 		auto itFind = _characters.find(role);
 		if (itFind != _characters.end())
@@ -79,7 +79,7 @@ namespace fig::data
 		return std::nullopt;
 	}
 
-	std::optional<Character> ChatSession::GetCharacterById(fig::string identifier) const
+	std::optional<CharacterData> ChatSession::GetCharacterById(fig::string identifier) const
 	{
 		if (identifier.empty() || _characters.empty())
 			return std::nullopt;
@@ -92,7 +92,7 @@ namespace fig::data
 		return std::nullopt;
 	}
 
-	std::optional<Character> ChatSession::GetCharacterByName(fig::string name) const
+	std::optional<CharacterData> ChatSession::GetCharacterByName(fig::string name) const
 	{
 		if (name.empty() || _characters.empty())
 			return std::nullopt;

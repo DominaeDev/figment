@@ -8,16 +8,17 @@
 namespace fig::fs
 {
 	// File IO
-	std::expected<fig::bytes, FileError> ReadFile(const string& filename);
-	FileError WriteFile(const fig::string& filename, fig::byte_span data);
+	std::expected<fig::bytes, FileError> ReadFile(fig::path filename);
+	FileError WriteFile(fig::path filename, fig::byte_span data);
 
-	std::expected<string, FileError> ReadTextFile(const string& filename, bool normalizeNewlines = true);
-	FileError ReadTextFile(const string& filename, string& out_content, bool normalizeNewlines = true);
-	FileError WriteTextFile(const string& filename, const string& content, bool append = false);
-	std::expected<std::vector<string>, FileError> FindFilesInPath(const string& dirPath, const string& extension);
+	std::expected<fig::string, FileError> ReadTextFile(const fig::string& filename, bool normalizeNewlines = true);
+	FileError ReadTextFile(const fig::string& filename, fig::string& out_content, bool normalizeNewlines = true);
+	FileError WriteTextFile(const fig::string& filename, const fig::string& content, bool append = false);
+	std::expected<std::vector<fig::string>, FileError> FindFilesInPath(const fig::string& dirPath, const fig::string& extension);
 
 	// Utility
-	string GetFilename(const string& str);
+	fig::string GetFilename(const fig::string& str);
+	fig::string GetFileExt(fig::path filename);
 }
 
 #endif

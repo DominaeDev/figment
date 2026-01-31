@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "util/FileUtility.h"
 #include "util/StringUtility.h"
+#include "model/Asset.h"
 
 #include <fstream>
 
@@ -8,12 +9,11 @@ using namespace fig::string_util;
 
 namespace fig::fs
 {
-	std::expected<fig::bytes, FileError> ReadFile(const fig::string& filename)
+	std::expected<fig::bytes, FileError> ReadFile(fig::path filename)
 	{
 		try
 		{
-			auto const path = fig::path(filename.c_str());
-			std::ifstream file(path.wstring(), std::ios::binary | std::ios::in | std::ios::ate);
+			std::ifstream file(filename.wstring(), std::ios::binary | std::ios::in | std::ios::ate);
 			if (!file)
 				return std::unexpected(FileError::FileNotFound);
 
@@ -32,12 +32,11 @@ namespace fig::fs
 		}
 	}
 
-	FileError WriteFile(const fig::string& filename, fig::byte_span data)
+	FileError WriteFile(fig::path filename, fig::byte_span data)
 	{
 		try
 		{
-			auto const path = fig::path(filename.c_str());
-			std::ofstream file(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
+			std::ofstream file(filename.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
 			if (not file.is_open())
 				return FileError::WriteError;
 
@@ -50,7 +49,7 @@ namespace fig::fs
 		}
 	}
 
-	std::expected<string, FileError> ReadTextFile(const string& filename, bool normalizeNewlines)
+	std::expected<fig::string, FileError> ReadTextFile(const fig::string& filename, bool normalizeNewlines)
 	{
 		try
 		{
@@ -61,7 +60,7 @@ namespace fig::fs
 			std::streamsize size = file.tellg();
 			file.seekg(0, std::ios::beg);
 
-			string content;
+			fig::string content;
 			content.reserve(size);
 			content.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 			if (!content.empty())
@@ -74,7 +73,7 @@ namespace fig::fs
 		}
 	}
 
-	FileError ReadTextFile(const string& filename, string& out_content, bool normalizeNewlines)
+	FileError ReadTextFile(const fig::string& filename, fig::string& out_content, bool normalizeNewlines)
 	{
 		auto content = ReadTextFile(filename, normalizeNewlines);
 		if (content.has_value())
@@ -85,7 +84,7 @@ namespace fig::fs
 		return content.error();
 	}
 
-	FileError WriteTextFile(const string& filename, const string& content, bool append)
+	FileError WriteTextFile(const fig::string& filename, const fig::string& content, bool append)
 	{
 		try
 		{
@@ -102,9 +101,9 @@ namespace fig::fs
 		}
 	}
 
-	std::expected<std::vector<string>, FileError> FindFilesInPath(const string& dirPath, const string& extension)
+	std::expected<std::vector<fig::string>, FileError> FindFilesInPath(const fig::string& dirPath, const fig::string& extension)
 	{
-		std::vector<string> matchingFiles;
+		std::vector<fig::string> matchingFiles;
 		fig::path directory(dirPath);
 
 		if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory))
@@ -112,18 +111,23 @@ namespace fig::fs
 
 		for (const auto& entry : std::filesystem::directory_iterator(directory))
 		{
-			if (std::filesystem::is_regular_file(entry) && (extension.empty() || equals(entry.path().extension().string(), extension, true)))
-				matchingFiles.push_back(entry.path().string());
+			if (std::filesystem::is_regular_file(entry) && (extension.empty() || equals(entry.path().extension().u8string(), extension, true)))
+				matchingFiles.push_back(entry.path().u8string());
 		}
 
 		return matchingFiles;
 	}
 
-	string GetFilename(const string& str)
+	fig::string GetFilename(const fig::string& str)
 	{
 		size_t pos = str.find_last_of("\\/"); //! hmm...
 		if (pos == string::npos)
 			return str;
 		return str.substr(pos + 1);
+	}
+
+	fig::string GetFileExt(fig::path filename)
+	{
+		return string_util::lcase(fig::path(filename).extension().u8string());
 	}
 }

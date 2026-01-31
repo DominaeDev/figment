@@ -6,11 +6,15 @@
 #include "util/BinaryWriter.h"
 #include "util/BinaryReader.h"
 #include "util/Xml.h"
+#include "util/FileUtility.h"
+#include "model/Character.h"
 #include <filesystem>
 #include <format>
 #include <ranges>
 
 using namespace fig::common_util;
+using namespace fig::data;
+using namespace fig::string_util;
 
 namespace fig::fs
 {
@@ -87,6 +91,21 @@ namespace fig::fs
 		return newAsset;
 	}
 
+	Asset& AssetManager::CreateAssetReference(ReferenceType refType, const fig::uuid& referenceId, const fig::uuid& parent) noexcept
+	{
+		fig::uuid id = CreateUUID();
+		auto& newAsset = _assets[id] = Asset {};
+		newAsset.id = id;
+		newAsset.parent_id = not parent.empty() ? parent : _profileID;
+		newAsset.asset_type = AssetType::Reference;
+		newAsset.asset_subtype = static_cast<uint8_t>(refType);
+		newAsset.status = AssetFileStatus::Modified;
+		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
+		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
+		newAsset.SetMeta(MetaTag::Reference, referenceId);
+		return newAsset;
+	}
+
 	Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = CreateUUID();
@@ -106,7 +125,7 @@ namespace fig::fs
 		fig::uuid id = CreateUUID();
 		auto& newAsset = _assets[id] = Asset {};
 		newAsset.id = id;
-		newAsset.parent_id = _profileID;
+		newAsset.parent_id = not parent.empty() ? parent : _profileID;
 		newAsset.asset_type = type;
 		newAsset.status = AssetFileStatus::Modified;
 		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
@@ -116,6 +135,22 @@ namespace fig::fs
 		newAsset.data.resize(data.size());
 		std::memcpy(newAsset.data.data(), data.data(), data.size());
 		return newAsset;
+	}
+
+	Asset& AssetManager::CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
+	{
+		auto& asset = CreateAsset(AssetType::Image, std::move(data), parent);
+		asset.asset_subtype = static_cast<uint8_t>(subtype);
+		asset.data_format = format;
+		return asset;
+	}
+
+	Asset& AssetManager::CreateImageAsset(ImageType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
+	{
+		auto& asset = CreateAsset(AssetType::Image, data, parent);
+		asset.asset_subtype = static_cast<uint8_t>(subtype);
+		asset.data_format = format;
+		return asset;
 	}
 
 	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& id) noexcept
@@ -203,5 +238,46 @@ namespace fig::fs
 			asset.status = AssetFileStatus::Invalid;
 			return std::unexpected(FileError::ReadError);
 		}
+	}
+
+	std::expected<AssetRef, FileError> AssetManager::ImportCharacter(fig::path filename, CharacterDataFormat format)
+	{
+		CharacterData character;
+		if (not character.LoadFromXml(filename.u8string()))
+			return std::unexpected(FileError::UnrecognizedFormat);
+
+		fig::bytes characterData;
+		character.SaveToXml(characterData);
+		auto& characterAsset = CreateAsset(AssetType::Character, characterData, _profileID);
+
+		// Load portrait image(s)
+		if (not empty_or_whitespace(character.largePortraitFilename))
+		{
+			if (auto file = fig::fs::ReadFile(filename.parent_path() / character.largePortraitFilename))
+			{
+				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormatFromExt(GetFileExt(character.largePortraitFilename)), std::move(file.value()), characterAsset.id);
+
+				// Create cover card
+				auto scaled = fig::gui_util::LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, 384, 512, fig::gui_util::Fit::FitInside);
+				if (scaled and SDL_LockSurface(scaled.get()))
+				{
+					auto pImage = scaled.get();
+					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, DataFormat::ImageARGB32, fig::byte_span((fig::byte*)pImage->pixels, toUZ(pImage->w * pImage->h * sizeof(int32_t))), characterAsset.id);
+					SDL_UnlockSurface(scaled.get());
+
+					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
+				}
+			}
+		}
+
+		if (not empty_or_whitespace(character.smallPortraitFilename))
+		{
+			if (auto file = fig::fs::ReadFile(filename.parent_path() / character.smallPortraitFilename))
+			{
+				CreateImageAsset(ImageType::SmallPortrait, DataFormatFromExt(GetFileExt(character.smallPortraitFilename)), std::move(file.value()), characterAsset.id);
+			}
+		}
+
+		return characterAsset;
 	}
 }

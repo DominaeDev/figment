@@ -43,7 +43,7 @@ bool CharacterImageStore::LoadTexture(RendererPtr pRenderer, fig::string charact
 
 	try
 	{
-		auto pSurface = IMG_Load(filename.c_str());
+		SurfacePtr pSurface = IMG_Load(filename.c_str());
 		if (!pSurface)
 			return false;
 

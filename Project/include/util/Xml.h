@@ -76,6 +76,7 @@ namespace fig
 
 		XmlReaderAttribute operator[] (const std::string& key) const noexcept;
 
+		bool IsOk() const { return (bool)_pRoot and (bool)_pElement; }
 	private:
 		const tinyxml2::XMLElement* _pRoot {};
 		const tinyxml2::XMLElement* _pElement {};
@@ -91,7 +92,7 @@ namespace fig
 
 		bool IsOk() const noexcept;
 
-		std::optional<XmlReaderElement> GetRootElement() const noexcept;
+		XmlReaderElement GetRootElement() const noexcept;
 		std::optional<XmlReaderElement> GetFirstElement(const fig::string& name) const noexcept;
 
 	private:
@@ -166,6 +167,7 @@ namespace fig
 		XmlWriterElement AddChild(const fig::string& name) noexcept;
 
 		bool Save(const fig::string& filename) const;
+		void SaveToMemory(fig::bytes& buffer) const;
 
 	private:
 		tinyxml2::XMLDocument* _pDoc {};

@@ -325,9 +325,9 @@ namespace fig
 		return (bool)_pDoc and (bool)_pRoot;
 	}
 
-	std::optional<XmlReaderElement> XmlReader::GetRootElement() const noexcept
+	XmlReaderElement XmlReader::GetRootElement() const noexcept
 	{
-		return IsOk() ? std::make_optional<XmlReaderElement>({ _pRoot, _pRoot }) : std::nullopt;
+		return IsOk() ? XmlReaderElement { _pRoot, _pRoot } : XmlReaderElement { nullptr, nullptr };
 	}
 
 	std::optional<XmlReaderElement> XmlReader::GetFirstElement(const fig::string& name) const noexcept

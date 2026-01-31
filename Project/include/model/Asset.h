@@ -11,40 +11,48 @@ namespace fig::fs
 {
 	enum class AssetType : uint8_t
 	{
-		Undefined = 0,
+		Undefined			= 0x00,
+		Character			= 0x01,
+		Scenario			= 0x02,
+		Concept				= 0x03,
 
-		Character = 1,
-		Scenario = 2,
-		Concept = 3,
+		Image				= 0x0A,
+		ChatInstance		= 0x14,
+		ChatLog				= 0x15,
 
-		Image = 10,
-
-		ChatInstance = 20,
-		ChatLog = 21,
+		Reference			= 0x40,
 	};
 
 	enum class DataFormat : uint8_t
 	{
-		Undefined	= 0, // generic binary
-		Text		= 1, // utf-8
-		
-		DataXml		= 4, // utf-8
-		DataJson	= 5, // utf-8
+		Undefined			= 0x00,	// generic binary
+		Text				= 0x01,	// utf-8
+	
+		DataXml				= 0x04,	// utf-8
+		DataJson			= 0x05,	// utf-8
 
-		ImageJpeg	= 10,
-		ImagePng	= 11,
-		ImageWebp	= 12,
+		ImageRGB24			= 0x0A,	// bitmap
+		ImageARGB32			= 0x0B,	// bitmap
+		ImageJpeg			= 0x0C,
+		ImagePng			= 0x0D,
+		ImageWebp			= 0x0E,
 	};
 
-	enum class ImageSubtype : uint8_t
+	enum class ImageType : uint8_t
 	{
-		Unspecified		= 0,
-		ProfileImage	= 1,
-		CoverImage		= 2,
-		SquarePortrait	= 3,
-		LargePortrait	= 4,
-		Background		= 5,
-		Expression		= 10,
+		Unspecified			= 0x00,
+		ProfileImage		= 0x01,
+		CoverImage			= 0x02,	// card
+		SmallPortrait		= 0x03,
+		LargePortrait		= 0x04,
+		Background			= 0x05,
+		Expression			= 0x0A, // ...
+	};
+
+	enum class ReferenceType : uint8_t
+	{
+		Unspecified			= 0x00,
+		Original			= 0x01,
 	};
 
 	enum class AssetFileStatus : uint8_t
@@ -61,6 +69,7 @@ namespace fig::fs
 	std::pair<AssetType, uint8_t> AssetTypeFromString(const fig::string& str);
 	fig::string DataFormatToString(DataFormat format);
 	DataFormat DataFormatFromString(const fig::string& str);
+	DataFormat DataFormatFromExt(const fig::string& ext);
 
 	class Asset
 	{
@@ -75,6 +84,7 @@ namespace fig::fs
 		void SetMeta(MetaTag tag, fig::timestamp value) noexcept;
 		void SetMeta(MetaTag tag, const char* value) noexcept;
 		void SetMeta(MetaTag tag, const fig::string& value) noexcept;
+		void SetMeta(MetaTag tag, const fig::uuid& value) noexcept;
 
 		fig::string GetFileName() const noexcept
 		{
@@ -87,8 +97,9 @@ namespace fig::fs
 		void FromFile(const AssetFile& file) noexcept;
 		void FromFile(AssetFile&& file) noexcept;
 
-		bool IsOfType(AssetType type) const noexcept { return asset_type == type; }
-		bool IsOfImageType(ImageSubtype subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
+		constexpr bool IsOfType(AssetType type) const noexcept { return asset_type == type; }
+		constexpr bool IsOfImageType(ImageType subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
+		constexpr bool IsReference() const noexcept { return asset_type == AssetType::Reference; }
 
 	public:
 		fig::uuid id {};

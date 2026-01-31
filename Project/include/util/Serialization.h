@@ -99,29 +99,32 @@ namespace fig::fs
 		uint8_t meta_count;
 	};
 
-	enum MetaTag : uint8_t
+	enum class MetaTag : uint8_t
 	{
-		Unknown = 0,
-		CreatedAt = 1,		// utc
-		UpdatedAt = 2,		// utc
-		Title = 3,
+		Unknown		= 0x00,
+		CreatedAt	= 0x01,		// utc
+		UpdatedAt	= 0x02,		// utc
 
-		ImageWidth = 16,
-		ImageHeight = 17,
-		ImageType = 18,
+		ImageWidth	= 0x10,
+		ImageHeight	= 0x11,
+		ImageType	= 0x12,
+
+		Reference	= 0x40,
 	};
 
-	using MetaValue = std::variant<bool, int32_t, float, fig::timestamp, fig::string>;
+	using _meta_identifier = std::array<uint64_t, 2>;
+	using MetaValue = std::variant<bool, int32_t, float, fig::string, fig::timestamp, _meta_identifier>;
 
 	enum class MetaValueType : uint8_t
 	{
-		Boolean = 0,
-		Integer = 1,
-		Float = 2,
-		String = 3,
-		TimeStamp = 4,
+		Boolean		= 0x00,
+		Integer		= 0x01,
+		Float		= 0x02,
+		String		= 0x03,
+		TimeStamp	= 0x04,
+		Identifier	= 0x40,
 
-		Unknown = 255,
+		Unknown		= 0xFF,
 	};
 	
 	constexpr MetaValueType get_meta_type(MetaTag tag) noexcept
@@ -137,8 +140,8 @@ namespace fig::fs
 		case MetaTag::UpdatedAt:
 			return MetaValueType::TimeStamp;
 
-		case MetaTag::Title:
-			return MetaValueType::String;
+		case MetaTag::Reference:
+			return MetaValueType::Identifier;
 
 		default:
 			return MetaValueType::Unknown;
@@ -177,7 +180,7 @@ namespace fig::fs
 			return false;
 		}
 
-		fig::timestamp GetCreatedAt()
+		fig::timestamp GetCreatedAt() const noexcept
 		{
 			fig::timestamp ts;
 			if (try_get_meta(MetaTag::CreatedAt, ts))
@@ -185,7 +188,7 @@ namespace fig::fs
 			return fig::timestamp { 0 };
 		}
 		
-		fig::timestamp GetUpdatedAt()
+		fig::timestamp GetUpdatedAt() const noexcept
 		{
 			fig::timestamp ts;
 			if (try_get_meta(MetaTag::UpdatedAt, ts))
@@ -200,6 +203,11 @@ namespace fig::fs
 					| std::ranges::views::filter([](char c) { return c != '-'; })
 					| std::ranges::to<fig::string>(),
 				fig::string(Constants::Paths::AssetFileExt));
+		}
+
+		bool IsReference() const noexcept
+		{
+			return get_meta<_meta_identifier>(MetaTag::Reference).has_value();
 		}
 	};
 }

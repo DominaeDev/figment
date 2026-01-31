@@ -10,13 +10,13 @@ using namespace fig::string_util;
 
 namespace fig::data
 {
-	bool Character::LoadFromXml(fig::string filename)
+	bool CharacterData::LoadFromXml(fig::string filename)
 	{
 		XmlReader xml(filename, "Character");
 		if (not xml.IsOk())
 			return false; // Invalid document type
 
-		auto const& rootNode = xml.GetRootElement().value();
+		auto rootNode = xml.GetRootElement();
 
 		// Identifier
 		characterId = trim(rootNode.GetElementText("ID").value_or(""));
@@ -31,7 +31,8 @@ namespace fig::data
 			fullName = shortName;
 
 		// Portrait
-		portraitFilename = trim(rootNode.GetElementText("Image").value_or(""));
+		largePortraitFilename = trim(rootNode.GetElementText("LargePortrait").value_or(""));
+		smallPortraitFilename = trim(rootNode.GetElementText("SmallPortrait").value_or(""));
 
 		// Read brief
 		brief = trim(rootNode.GetElementText("Brief").value_or(""));
@@ -43,8 +44,7 @@ namespace fig::data
 		if (auto genderText = rootNode.GetElementText("Gender"))
 		{
 			fig::string gender = trim(genderText.value());
-			if (!gender.empty())
-				properties.push_back(CharacterProperty { "gender", gender, "Gender" });
+			properties[Constants::CharacterProperties::Gender] = CharacterProperty { "Gender", gender };
 		}
 
 		// Color
@@ -65,5 +65,44 @@ namespace fig::data
 		}
 
 		return !characterId.empty() && !shortName.empty();
+	}
+
+	void CharacterData::SaveToXml(fig::bytes& buffer)
+	{
+		XmlWriter xml("Assets");
+
+		auto root = xml.GetRoot();
+		root.SetElement("ID", characterId);
+		
+		if (not shortName.empty())
+			root.SetElement("FirstName", shortName);
+		else
+			root.SetElement("FirstName", "Unnamed");
+
+		if (not fullName.empty())
+			root.SetElement("FullName", fullName);
+
+		switch (gender)
+		{
+		case CharacterGender::Male:
+			root.SetElement("Gender", "Male");
+			break;
+		case CharacterGender::Female:
+			root.SetElement("Gender", "Female");
+			break;
+		case CharacterGender::Custom:
+			if (properties.contains(Constants::CharacterProperties::Gender))
+				root.SetElement("Gender", properties[Constants::CharacterProperties::Gender].value);
+			break;
+		default:
+			break;
+		}
+
+		if (not brief.empty())
+			root.SetElement("Brief", brief);
+		if (not description.empty())
+			root.SetElement("Description", description);
+
+		xml.SaveToMemory(buffer);
 	}
 }

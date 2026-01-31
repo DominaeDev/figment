@@ -15,30 +15,36 @@ namespace fig::fs
 	{
 		string strType, strSubtype;
 		if (type == AssetType::Character)
-			strType = "character";
+			strType = "data/character";
 		else if (type == AssetType::Scenario)
-			strType = "scenario";
+			strType = "data/scenario";
 		else if (type == AssetType::Concept)
-			strType = "concept";
+			strType = "data/concept";
 		else if (type == AssetType::ChatInstance)
-			strType = "chat";
+			strType = "data/chat";
 		else if (type == AssetType::ChatLog)
-			strType = "chat/log";
+			strType = "data/log";
 		else if (type == AssetType::Image)
 		{
 			strType = "image";
-			if (subtype == static_cast<uint8_t>(ImageSubtype::ProfileImage))
+			if (subtype == static_cast<uint8_t>(ImageType::ProfileImage))
 				strSubtype = "profile";
-			else if (subtype == static_cast<uint8_t>(ImageSubtype::CoverImage))
+			else if (subtype == static_cast<uint8_t>(ImageType::CoverImage))
 				strSubtype = "cover";
-			else if (subtype == static_cast<uint8_t>(ImageSubtype::LargePortrait))
+			else if (subtype == static_cast<uint8_t>(ImageType::LargePortrait))
 				strSubtype = "portrait";
-			else if (subtype == static_cast<uint8_t>(ImageSubtype::SquarePortrait))
-				strSubtype = "square";
-			else if (subtype == static_cast<uint8_t>(ImageSubtype::Background))
+			else if (subtype == static_cast<uint8_t>(ImageType::SmallPortrait))
+				strSubtype = "small";
+			else if (subtype == static_cast<uint8_t>(ImageType::Background))
 				strSubtype = "background";
-			else if (subtype == static_cast<uint8_t>(ImageSubtype::Expression))
+			else if (subtype == static_cast<uint8_t>(ImageType::Expression))
 				strSubtype = "expression";
+		}
+		else if (type == AssetType::Reference)
+		{
+			strType = "ref";
+			if (subtype == static_cast<uint8_t>(ReferenceType::Original))
+				strSubtype = "original";
 		}
 		else
 			strType = "unknown";
@@ -65,31 +71,40 @@ namespace fig::fs
 
 		AssetType type;
 		uint8_t subtype = 0u;
-		if (strType == "character")
-			type = AssetType::Character;
-		else if (strType == "scenario")
-			type = AssetType::Scenario;
-		else if (strType == "concept")
-			type = AssetType::Concept;
-		else if (strType == "chat")
-			type = AssetType::ChatInstance;
-		else if (strType == "log")
-			type = AssetType::ChatLog;
+		if (strType == "data")
+		{
+			if (strSubtype == "character")
+				type = AssetType::Character;
+			else if (strSubtype == "scenario")
+				type = AssetType::Scenario;
+			else if (strSubtype == "concept")
+				type = AssetType::Concept;
+			else if (strSubtype == "chat")
+				type = AssetType::ChatInstance;
+			else if (strSubtype == "log")
+				type = AssetType::ChatLog;
+		}
 		else if (strType == "image")
 		{
 			type = AssetType::Image;
 			if (strSubtype == "profile")
-				subtype = static_cast<uint8_t>(ImageSubtype::ProfileImage);
+				subtype = static_cast<uint8_t>(ImageType::ProfileImage);
 			else if (strSubtype == "cover")
-				subtype = static_cast<uint8_t>(ImageSubtype::CoverImage);
+				subtype = static_cast<uint8_t>(ImageType::CoverImage);
 			else if (strSubtype == "portrait")
-				subtype = static_cast<uint8_t>(ImageSubtype::LargePortrait);
-			else if (strSubtype == "square")
-				subtype = static_cast<uint8_t>(ImageSubtype::SquarePortrait);
+				subtype = static_cast<uint8_t>(ImageType::LargePortrait);
+			else if (strSubtype == "small")
+				subtype = static_cast<uint8_t>(ImageType::SmallPortrait);
 			else if (strSubtype == "background")
-				subtype = static_cast<uint8_t>(ImageSubtype::Background);
+				subtype = static_cast<uint8_t>(ImageType::Background);
 			else if (strSubtype == "expression")
-				subtype = static_cast<uint8_t>(ImageSubtype::Expression);
+				subtype = static_cast<uint8_t>(ImageType::Expression);
+		}
+		else if (strType == "ref")
+		{
+			type = AssetType::Reference;
+			if (strSubtype == "original")
+				subtype = static_cast<uint8_t>(ReferenceType::Original);
 		}
 		else
 			type = AssetType::Undefined;
@@ -101,13 +116,15 @@ namespace fig::fs
 	{
 		switch (format)
 		{
-		case DataFormat::Text:			return "text/default";
-		case DataFormat::DataXml:		return "text/xml";
-		case DataFormat::DataJson:		return "text/json";
-		case DataFormat::ImageJpeg:		return "image/jpeg";
-		case DataFormat::ImagePng:		return "image/png";
-		case DataFormat::ImageWebp:		return "image/webp";
-		default:						return "unknown";
+		case DataFormat::Text:				return "text/default";
+		case DataFormat::DataXml:			return "text/xml";
+		case DataFormat::DataJson:			return "text/json";
+		case DataFormat::ImageRGB24:		return "image/rgb24";
+		case DataFormat::ImageARGB32:		return "image/argb32";
+		case DataFormat::ImageJpeg:			return "image/jpeg";
+		case DataFormat::ImagePng:			return "image/png";
+		case DataFormat::ImageWebp:			return "image/webp";
+		default:							return "unknown";
 		}
 	}
 
@@ -116,10 +133,32 @@ namespace fig::fs
 		if (str == "text/default")			return DataFormat::Text;
 		else if (str == "text/xml")			return DataFormat::DataXml;
 		else if (str == "text/json")		return DataFormat::DataJson;
+		else if (str == "image/rgb24")		return DataFormat::ImageRGB24;
+		else if (str == "image/argb32")		return DataFormat::ImageARGB32;
 		else if (str == "image/jpeg")		return DataFormat::ImageJpeg;
 		else if (str == "image/png")		return DataFormat::ImagePng;
 		else if (str == "image/webp")		return DataFormat::ImageWebp;
 		else								return DataFormat::Undefined;
+	}
+
+	DataFormat DataFormatFromExt(const fig::string& ext)
+	{
+		if (not ext.empty())
+		{
+			if (ext == ".png" || ext == ".apng")
+				return DataFormat::ImagePng;
+			if (ext == ".jpg" || ext == ".jpeg" || ext == ".jfif")
+				return DataFormat::ImageJpeg;
+			if (ext == ".webp")
+				return DataFormat::ImageWebp;
+			if (ext == ".xml")
+				return DataFormat::DataXml;
+			if (ext == ".json")
+				return DataFormat::DataJson;
+			if (ext == ".txt")
+				return DataFormat::Text;
+		}
+		return DataFormat::Undefined;
 	}
 
 	void Asset::SetData(fig::bytes&& data)
@@ -206,6 +245,15 @@ namespace fig::fs
 		auto meta_type = get_meta_type(tag);
 		assert(meta_type == MetaValueType::TimeStamp);
 		_parameters[tag] = value;
+	}
+
+	void Asset::SetMeta(MetaTag tag, const fig::uuid& value) noexcept
+	{
+		auto meta_type = get_meta_type(tag);
+		assert(meta_type == MetaValueType::Identifier);
+		_meta_identifier id;
+		value.bytes((char*)id.data());
+		_parameters[tag] = id;
 	}
 
 	void Asset::SetMeta(MetaTag tag, const char* value) noexcept

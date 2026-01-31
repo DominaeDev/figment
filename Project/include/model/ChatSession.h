@@ -14,9 +14,9 @@ namespace fig::data
 		bool Initialize(ChatOptions options);
 		bool LoadCharacter(Role role, fig::string filename);
 
-		std::optional<Character> GetCharacter(Role role) const;
-		std::optional<Character> GetCharacterById(fig::string characterId) const;
-		std::optional<Character> GetCharacterByName(fig::string name) const;
+		std::optional<CharacterData> GetCharacter(Role role) const;
+		std::optional<CharacterData> GetCharacterById(fig::string characterId) const;
+		std::optional<CharacterData> GetCharacterByName(fig::string name) const;
 
 		fig::string GetSystemPrompt() const;
 		fig::string GetDirectorPrompt() const;
@@ -33,10 +33,10 @@ namespace fig::data
 		[[nodiscard]] fig::string ApplyNames(fig::string text) const;
 		[[nodiscard]] fig::string ApplyNames(fig::string text, Role characterRole) const;
 
-		const std::map<Role, Character>& GetCharactersByRole() const { return _characters; }
+		const std::map<Role, CharacterData>& GetCharactersByRole() const { return _characters; }
 
 	protected:
-		std::map<Role, Character> _characters {};
+		std::map<Role, CharacterData> _characters {};
 		ChatOptions _options {};
 
 		// Prompts

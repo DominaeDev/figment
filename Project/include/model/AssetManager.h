@@ -19,14 +19,20 @@ namespace fig::fs
 		AssetManager(const UserManager& userMngr);
 
 		Asset& CreateEmptyAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
+		Asset& CreateAssetReference(ReferenceType refType, const fig::uuid& referenceId, const fig::uuid& parent = {}) noexcept;
 		Asset& CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
 		Asset& CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
+		Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
+		Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
 
 		std::optional<AssetRef> FindAsset(const fig::uuid& id) noexcept;
 		std::expected<AssetRef, FileError> LoadAsset(const fig::uuid& id) noexcept;
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
 
 		void SaveModified();
+
+		enum class CharacterDataFormat { Default, };
+		std::expected<AssetRef, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 
 	private:
 		bool LoadIndex();

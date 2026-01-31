@@ -199,4 +199,12 @@ namespace fig
 		auto const path = fig::path(filename);
 		return _pDoc->SaveFile(path.u8string().c_str()) == XML_SUCCESS;
 	}
+
+	void XmlWriter::SaveToMemory(fig::bytes& buffer) const
+	{
+		XMLPrinter printer;
+		_pDoc->Print(&printer);
+		buffer.resize(printer.CStrSize());
+		std::memcpy(buffer.data(), printer.CStr(), buffer.size());
+	}
 }

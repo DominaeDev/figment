@@ -135,9 +135,19 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 	{
 		userMngr.CreateDefaultProfile();
 		userMngr.SaveProfiles();
-	}
 
-	userMngr.SignInDefaultProfile();
+		if (userMngr.SignInDefaultProfile())
+		{
+			auto& assets = userMngr.GetProfileAssets();
+			auto x = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
+			auto y = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
+			assets.SaveModified();
+		}
+	}
+	else
+	{
+		userMngr.SignInDefaultProfile();
+	}
 }
 
 MainFrame::~MainFrame()
