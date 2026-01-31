@@ -131,7 +131,7 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 	s_pInstance = this;
 	
 	auto& userMngr = ApplicationState::GetUserManager();
-	if (not userMngr.LoadProfiles())
+	if (not userMngr.LoadProfiles() or true)
 	{
 		userMngr.CreateDefaultProfile();
 		userMngr.SaveProfiles();

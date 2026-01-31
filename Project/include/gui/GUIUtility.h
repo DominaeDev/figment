@@ -48,15 +48,16 @@ namespace fig::gui_util
 	void color_to_hsv(fig::gui::Color color, float& h, float& s, float& v);
 	fig::gui::Color hsv_to_color(float h, float s, float v);
 
-	enum class Fit {
+	enum class ImageFit {
 		None,
 		Stretch,
-		FitInside,
-		FitOutside,
+		Inside,
+		Outside,
+		Portrait,
 	};
 
-	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, Fit fit = Fit::None);
-	fig::sdl::Surface ScaleSurface(fig::gui::SurfacePtr image, int32_t width, int32_t height, Fit fit = Fit::None);
+	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
+	fig::sdl::Surface ScaleSurface(fig::gui::SurfacePtr image, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
 }
 
 #endif

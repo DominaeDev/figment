@@ -163,5 +163,10 @@ namespace fig::common_util
 		return fig::npos;
 	};
 
+	inline constexpr int32_t roundToInt(float value)
+	{
+		return toI(std::roundf(value));
+	}
+
 }
 #endif

@@ -258,7 +258,7 @@ namespace fig::fs
 				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormatFromExt(GetFileExt(character.largePortraitFilename)), std::move(file.value()), characterAsset.id);
 
 				// Create cover card
-				auto scaled = fig::gui_util::LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, 384, 512, fig::gui_util::Fit::FitInside);
+				auto scaled = fig::gui_util::LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, 384, 512, fig::gui_util::ImageFit::Portrait);
 				if (scaled and SDL_LockSurface(scaled.get()))
 				{
 					auto pImage = scaled.get();

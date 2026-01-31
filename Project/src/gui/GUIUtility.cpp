@@ -1,12 +1,14 @@
 #include <pch.h>
 #include "gui/GUIUtility.h"
 #include <algorithm>
+#include "util/Common.h"
 #include "util/StringUtility.h"
 #include <SDL3_image/SDL_image.h>
 #include <c_resource.h>
 
 using namespace fig::gui;
 using namespace fig::string_util;
+using namespace fig::common_util;
 
 namespace fig::gui_util
 {
@@ -207,7 +209,7 @@ namespace fig::gui_util
 		return Color { r, g, b, 0xff };
 	}
 
-	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, Fit fit)
+	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit)
 	{
 		try
 		{
@@ -224,18 +226,72 @@ namespace fig::gui_util
 		}
 	}
 
-	fig::sdl::Surface ScaleSurface(fig::gui::SurfacePtr pImage, int32_t width, int32_t height, Fit fit)
+	fig::sdl::Surface ScaleSurface(fig::gui::SurfacePtr pImage, int32_t width, int32_t height, ImageFit fit)
 	{
 		if (pImage == nullptr || width <= 0 || height <= 0)
 			return {};
 
+		auto pSurface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR32);
 		fig::sdl::Surface pScaledSurface;
-		pScaledSurface.reset(SDL_CreateSurface(width, height, SDL_PIXELFORMAT_ABGR32));
+		pScaledSurface.reset(pSurface);
 
-		fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
-		fig::gui::Rect dstRect { 0, 0, width, height };
+		if (fit == ImageFit::None)
+		{
+			fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::gui::Rect dstRect { 0, 0, width, height };
+			SDL_BlitSurface(pImage, &srcRect, pSurface, &dstRect);
 
-		SDL_BlitSurfaceScaled(pImage, &srcRect, pScaledSurface.get(), &dstRect, SDL_SCALEMODE_LINEAR);
+		}
+		else if (fit == ImageFit::Stretch)
+		{
+			fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::gui::Rect dstRect { 0, 0, width, height };
+			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, SDL_SCALEMODE_LINEAR);
+		}
+		else
+		{
+			float srcWidth = toF(pImage->w);
+			float srcHeight = toF(pImage->h);
+
+			float scale;
+			if (fit == ImageFit::Inside)
+				scale = std::min((float)width / srcWidth, (float)height / srcHeight);
+			else if (fit == ImageFit::Outside || fit == ImageFit::Portrait)
+				scale = std::max((float)width / srcWidth, (float)height / srcHeight);
+			else
+				scale = 1.0f;
+
+			float newWidth = srcWidth * scale;
+			float newHeight = srcHeight * scale;
+			float newX = std::roundf(-0.5f * (newWidth - width));
+			float newY = std::roundf(-0.5f * (newHeight - height));
+			if (fit == ImageFit::Portrait)
+				newY = 0;
+
+			fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::gui::Rect dstRect { toI(newX), toI(newY), toI(newWidth), toI(newHeight) };
+
+			if (fit != ImageFit::Inside)
+			{
+				srcRect.x = std::max(toI(-newX / scale), 0);
+				srcRect.y = std::max(toI(-newY / scale), 0);
+				srcRect.w = std::min(srcRect.w - srcRect.x, toI(toF(width) / scale));
+				srcRect.h = std::min(srcRect.h - srcRect.y, toI(toF(height) / scale));
+			}
+
+			// clip src
+			fig::gui::Rect tmp;
+			fig::gui::Rect fullRect { 0, 0, pImage->w, pImage->h };
+			if (SDL_GetRectIntersection(&srcRect, &fullRect, &tmp))
+				srcRect = tmp;
+
+			// clip dst
+			fig::gui::Rect fixedRect { 0, 0, width, height };
+			if (SDL_GetRectIntersection(&dstRect, &fixedRect, &tmp))
+				dstRect = tmp;
+
+			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, SDL_SCALEMODE_NEAREST);
+		}
 
 		return pScaledSurface;
 	}
