@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	class MainFrame;
+	class ChatFrame;
 }
 
 namespace fig::llm
@@ -20,7 +20,7 @@ public:
 	struct Context
 	{
 		std::shared_ptr<fig::llm::LLMInstance> pLLM;
-		fig::gui::MainFrame* pMainFrame;
+		fig::gui::ChatFrame* pChatFrame;
 	};
 
 	static bool Execute(ParsedChatCommand command, Context context);

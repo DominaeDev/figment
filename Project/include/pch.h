@@ -13,4 +13,5 @@
 
 #include "Types.h"
 #include "Constants.h"
+#include "util/Common.h"
 #include "gui/GUICommon.h"

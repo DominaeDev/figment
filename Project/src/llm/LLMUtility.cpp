@@ -3,7 +3,7 @@
 #include "llm/LlamaApi.h"
 #include "llm/ModelState.h"
 #include "util/StringUtility.h"
-#include "util/FileUtility.h"
+#include "fs/FileUtility.h"
 #include "util/Common.h"
 #include "Constants.h"
 #include <format>

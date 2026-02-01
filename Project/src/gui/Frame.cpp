@@ -12,10 +12,6 @@ Frame::Frame(Window* pHostWindow) : Control(nullptr, pHostWindow)
 	SetSize(toF(w), toF(h));
 }
 
-Frame::~Frame()
-{
-}
-
 void Frame::Render(Renderer* pRenderer)
 {
 	SDL_SetRenderDrawColor(pRenderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
@@ -26,13 +22,3 @@ void Frame::Render(Renderer* pRenderer)
 	SDL_RenderPresent(pRenderer);
 }
 
-bool Frame::OnEvent(Event& event)
-{
-	if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
-	{
-		if (OnKeyboardEvent(event.key))
-			return true;
-	}
-
-	return false;
-}

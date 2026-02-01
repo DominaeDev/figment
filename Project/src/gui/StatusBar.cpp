@@ -28,7 +28,7 @@ void StatusBar::SetMessage(fig::string_view message)
 	_pMessage->SetText(toStr(message));
 }
 
-void StatusBar::SetModelInfo(fig::llm::LLMStatus status)
+void StatusBar::SetModelInfo(const fig::llm::LLMStatus& status)
 {
 	if (!status.IsReady())
 		_pModelInfo->SetText("");

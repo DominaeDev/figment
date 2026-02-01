@@ -8,7 +8,7 @@
 #include "util/Lockable.h"
 #include "util/StringUtility.h"
 #include "util/Common.h"
-#include "util/FileUtility.h"
+#include "fs/FileUtility.h"
 
 using namespace fig::common_util;
 using namespace fig::string_util;

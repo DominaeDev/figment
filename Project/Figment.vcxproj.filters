@@ -108,6 +108,9 @@
     <Filter Include="Source Files\Authentication">
       <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GUI\Screens">
+      <UniqueIdentifier>{0b0e7823-493d-4e1c-9c9f-946893298eae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -145,9 +148,6 @@
     </ClCompile>
     <ClCompile Include="src\model\AppState.cpp">
       <Filter>Source Files\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\MainFrame.cpp">
-      <Filter>Source Files\GUI\Frames</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalListSizer.cpp">
       <Filter>Source Files\GUI\Layout</Filter>
@@ -329,6 +329,18 @@
     <ClCompile Include="src\model\UserManager.cpp">
       <Filter>Source Files\Authentication</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\HomeFrame.cpp">
+      <Filter>Source Files\GUI\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ChatFrame.cpp">
+      <Filter>Source Files\GUI\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Screen.cpp">
+      <Filter>Source Files\GUI\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\MainFrame.cpp">
+      <Filter>Source Files\GUI\Frames</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -345,9 +357,6 @@
     </ClInclude>
     <ClInclude Include="include\model\AppState.h">
       <Filter>Source Files\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\MainFrame.h">
-      <Filter>Source Files\GUI\Frames</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalListSizer.h">
       <Filter>Source Files\GUI\Layout</Filter>
@@ -858,6 +867,18 @@
     </ClInclude>
     <ClInclude Include="include\model\UserManager.h">
       <Filter>Source Files\Authentication</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Screen.h">
+      <Filter>Source Files\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\HomeFrame.h">
+      <Filter>Source Files\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatFrame.h">
+      <Filter>Source Files\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\MainFrame.h">
+      <Filter>Source Files\GUI\Frames</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

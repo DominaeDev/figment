@@ -4,7 +4,7 @@
 
 #include "util/Common.h"
 #include "util/StringUtility.h"
-#include "util/FileUtility.h"
+#include "fs/FileUtility.h"
 #include "llm/LLMUtility.h"
 #include "gui/GUIUtility.h"
 #include "gui/Window.h"

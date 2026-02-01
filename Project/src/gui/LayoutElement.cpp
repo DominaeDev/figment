@@ -130,6 +130,20 @@ bool LayoutElement::RemoveChild(LayoutElement* pChild)
 	return false;
 }
 
+bool LayoutElement::RemoveChildren()
+{
+	if (_children.empty())
+		return false;
+
+	for (auto& child : _children)
+	{
+		OnRemovedChild(child);
+		child->SetParent(nullptr);
+	}
+	_children.clear();
+	return true;
+}
+
 void LayoutElement::SetSizer(Sizer* pSizer)
 {
 	if (_pSizer)
@@ -137,9 +151,10 @@ void LayoutElement::SetSizer(Sizer* pSizer)
 	_pSizer = pSizer;
 
 	if (pSizer)
+	{
 		pSizer->SetOwner(this);
-	
-	InvalidateLayout();
+		InvalidateLayout();
+	}	
 }
 
 void LayoutElement::SetParent(LayoutElement* pParent)

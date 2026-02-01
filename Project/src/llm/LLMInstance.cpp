@@ -6,7 +6,7 @@
 #include "llm/LLMStatus.h"
 #include "llm/Embedding.h"
 #include "util/StringUtility.h"
-#include "util/FileUtility.h"
+#include "fs/FileUtility.h"
 #include "util/Common.h"
 #include "util/Lockable.h"
 #include <format>

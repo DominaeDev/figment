@@ -7,6 +7,7 @@
 #include "util/StringUtility.h"
 #include "llm/LLMUtility.h"
 #include "gui/MainFrame.h"
+#include "gui/ChatFrame.h"
 #include "gui/ChatScroll.h"
 #include "gui/TextBox.h"
 #include <map>
@@ -303,16 +304,16 @@ bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor
 	auto& info = itFind->second;
 	if (info.req.IsSet(Requirement::LLM) && !context.pLLM)
 		return false; // Requires non-null pointer to LLM
-	if (info.req.IsSet(Requirement::GUI) && !context.pMainFrame)
+	if (info.req.IsSet(Requirement::GUI) && !context.pChatFrame)
 		return false; // Requires non-null pointer to GUI
 
 	// Pick out gui controls for commands to access
 	auto functionCtx = Ctx
 	{
-		.pChatScroll = context.pMainFrame->_pChatScroll,
-		.pTextBox = context.pMainFrame->_pTextBox,
+		.pChatScroll = context.pChatFrame->_pChatScroll,
+		.pTextBox = context.pChatFrame->_pTextBox,
 		.pLLM = context.pLLM,
-		.commandQueue = context.pMainFrame->_commandQueue,
+		.commandQueue = context.pChatFrame->_commandQueue,
 	};
 
 	return info.func(command, functionCtx);

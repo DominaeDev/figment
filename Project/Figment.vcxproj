@@ -153,8 +153,11 @@
     <ClCompile Include="src\fs\XmlReader.cpp" />
     <ClCompile Include="src\fs\XmlWriter.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
+    <ClCompile Include="src\gui\ChatFrame.cpp" />
+    <ClCompile Include="src\gui\HomeFrame.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
+    <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
@@ -317,11 +320,14 @@
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\Xml.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
+    <ClInclude Include="include\gui\ChatFrame.h" />
+    <ClInclude Include="include\gui\HomeFrame.h" />
     <ClInclude Include="include\gui\Primitives.h" />
     <ClInclude Include="include\gui\GUICommon.h" />
     <ClInclude Include="include\gui\GUIUtility.h" />
     <ClInclude Include="include\gui\HorizontalGradient.h" />
     <ClInclude Include="include\gui\Image.h" />
+    <ClInclude Include="include\gui\Screen.h" />
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include "util/Common.h"
 #include "util/StringUtility.h"
-#include "util/FileUtility.h"
+#include "fs/FileUtility.h"
 #include <SDL3_image/SDL_image.h>
 #include <c_resource.h>
 #include <tuple>
