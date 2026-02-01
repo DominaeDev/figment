@@ -28,7 +28,6 @@ namespace fig::gui
 
 		RegisterScreen<HomeFrame>();
 		RegisterScreen<ChatFrame>();
-		ChangeScreen<ChatFrame>();
 
 		// Sign in
 		auto& userMngr = ApplicationState::GetUserManager();
@@ -54,6 +53,13 @@ namespace fig::gui
 				auto z = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
 				assets.SaveModified();
 			}
+		}
+
+		// Show home screen
+		if (userMngr.IsSignedIn())
+		{
+			auto pScreen = ChangeScreen<HomeFrame>();
+			pScreen->CreateCards();
 		}
 	}
 

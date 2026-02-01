@@ -161,18 +161,14 @@ namespace fig::fs
 
 		asset.asset_subtype = static_cast<uint8_t>(subtype);
 		asset.status = AssetFileStatus::Modified;
+		asset.data_format = DataFormat::ImageUncompressed;
 
 		auto pSurface = surface.get();
 		int32_t stride = pSurface->pitch / pSurface->w;
-		if (stride == 4)
-			asset.data_format = DataFormat::ImageARGB32;
-		else if (stride == 3)
-			asset.data_format = DataFormat::ImageRGB24;
-		else
-			asset.data_format = DataFormat::Undefined;
 
 		asset.SetMeta(MetaTag::ImageWidth, pSurface->w);
 		asset.SetMeta(MetaTag::ImageHeight, pSurface->h);
+		asset.SetMeta(MetaTag::ImageFormatDepth, stride);
 
 		if (SDL_LockSurface(pSurface))
 		{

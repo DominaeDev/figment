@@ -361,10 +361,10 @@ namespace fig::gui_util
 			auto stride = pImage->pitch / pImage->w;
 			
 			const std::tuple<size_t, size_t, size_t, size_t> offsets[4] {
-				/* Top left */ { 0, 0, 0, 0 },
-				/* Top right  */ { corner_size, 0, pImage->w - corner_size - 1, 0 },
-				/* Bottom left */ { 0, corner_size, 0, pImage->h - corner_size - 1 },
-				/* Bottom right */ { corner_size, corner_size, pImage->w - corner_size - 1, pImage->h - corner_size - 1 },
+				/* Top left */		{ 0, 0, 0, 0 },
+				/* Top right  */	{ corner_size, 0, pImage->w - corner_size, 0 },
+				/* Bottom left */	{ 0, corner_size, 0, pImage->h - corner_size },
+				/* Bottom right */	{ corner_size, corner_size, pImage->w - corner_size, pImage->h - corner_size },
 			};
 
 			for (auto& offset : offsets)

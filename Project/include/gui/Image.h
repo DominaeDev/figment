@@ -15,7 +15,7 @@ namespace fig::gui
 		void OnUpdate(float fDeltaTime) override {};
 		void OnRender(Renderer* pRenderer) override;
 
-	private:
+	protected:
 		Texture* _pTexture = nullptr;
 	};
 }

@@ -119,8 +119,7 @@ namespace fig::fs
 		case DataFormat::Text:				return "text/default";
 		case DataFormat::DataXml:			return "text/xml";
 		case DataFormat::DataJson:			return "text/json";
-		case DataFormat::ImageRGB24:		return "image/rgb24";
-		case DataFormat::ImageARGB32:		return "image/argb32";
+		case DataFormat::ImageUncompressed:	return "image/bitmap";
 		case DataFormat::ImageJpeg:			return "image/jpeg";
 		case DataFormat::ImagePng:			return "image/png";
 		case DataFormat::ImageWebp:			return "image/webp";
@@ -133,8 +132,7 @@ namespace fig::fs
 		if (str == "text/default")			return DataFormat::Text;
 		else if (str == "text/xml")			return DataFormat::DataXml;
 		else if (str == "text/json")		return DataFormat::DataJson;
-		else if (str == "image/rgb24")		return DataFormat::ImageRGB24;
-		else if (str == "image/argb32")		return DataFormat::ImageARGB32;
+		else if (str == "image/bitmap")		return DataFormat::ImageUncompressed;
 		else if (str == "image/jpeg")		return DataFormat::ImageJpeg;
 		else if (str == "image/png")		return DataFormat::ImagePng;
 		else if (str == "image/webp")		return DataFormat::ImageWebp;

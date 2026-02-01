@@ -12,11 +12,16 @@ namespace fig::gui
 	public:
 		HomeFrame(Frame* pParent);
 
+		void CreateCards();
+
 	protected:
 		virtual void OnUpdate(float fDeltaTime) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
+
+	private:
+		Area* _pMainArea {};
 	};
 }
 

@@ -18,8 +18,11 @@ namespace fig::fs
 		// Validate header
 		bool valid = header.magic[0] == 'F' && header.magic[1] == 'I' && header.magic[2] == 'G' && header.magic[3] == 'M'; // Magic word
 		valid &= VersionNumber(header.fmt_version) == VersionNumber(1, 0); // Format version
-		valid &= header.data_offset + header.data_length < file_size; // Data offset
-		valid &= (file_size - header.data_offset) % 16 == 0; // Data length should match
+		if (header.data_offset != 0xffff)
+		{
+			valid &= (header.data_offset + header.data_length <= file_size); // Data offset
+			valid &= (file_size - header.data_offset) % 16 == 0; // Data length should match
+		}
 		return valid;
 	}
 

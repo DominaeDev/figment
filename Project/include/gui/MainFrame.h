@@ -53,9 +53,11 @@ namespace fig::gui
 		void Close();
 
 		template<typename T>
-		void ChangeScreen()
+		T* ChangeScreen()
 		{
-			ChangeScreen(GetScreen<T>());
+			T* pScreen = GetScreen<T>();
+			ChangeScreen(pScreen);
+			return pScreen;
 		}
 
 	protected:

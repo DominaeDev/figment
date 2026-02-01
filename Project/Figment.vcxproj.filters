@@ -341,6 +341,9 @@
     <ClCompile Include="src\gui\MainFrame.cpp">
       <Filter>Source Files\GUI\Frames</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CharacterCard.cpp">
+      <Filter>Source Files\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -879,6 +882,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\MainFrame.h">
       <Filter>Source Files\GUI\Frames</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterCard.h">
+      <Filter>Source Files\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

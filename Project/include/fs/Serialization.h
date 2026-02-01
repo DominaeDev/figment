@@ -103,15 +103,16 @@ namespace fig::fs
 
 	enum class MetaTag : uint8_t
 	{
-		Unknown		= 0x00,
-		CreatedAt	= 0x01,		// utc
-		UpdatedAt	= 0x02,		// utc
+		Unknown				= 0x00,
+		CreatedAt			= 0x01,		// utc
+		UpdatedAt			= 0x02,		// utc
 
-		ImageWidth	= 0x10,
-		ImageHeight	= 0x11,
-		ImageType	= 0x12,
+		ImageWidth			= 0x10,
+		ImageHeight			= 0x11,
+		ImageType			= 0x12,
+		ImageFormatDepth	= 0x13,
 
-		Reference	= 0x40,
+		Reference			= 0x40,
 	};
 
 	using _meta_identifier = std::array<uint64_t, 2>;
@@ -136,6 +137,7 @@ namespace fig::fs
 		case MetaTag::ImageWidth:
 		case MetaTag::ImageHeight:
 		case MetaTag::ImageType:
+		case MetaTag::ImageFormatDepth:
 			return MetaValueType::Integer;
 
 		case MetaTag::CreatedAt:

@@ -31,11 +31,10 @@ namespace fig::fs
 		DataXml				= 0x04,	// utf-8
 		DataJson			= 0x05,	// utf-8
 
-		ImageRGB24			= 0x0A,	// bitmap
-		ImageARGB32			= 0x0B,	// bitmap
-		ImageJpeg			= 0x0C,
-		ImagePng			= 0x0D,
-		ImageWebp			= 0x0E,
+		ImageUncompressed	= 0x0A,	// bitmap
+		ImageJpeg			= 0x0B,
+		ImagePng			= 0x0C,
+		ImageWebp			= 0x0D,
 	};
 
 	enum class ImageType : uint8_t
@@ -101,6 +100,22 @@ namespace fig::fs
 		constexpr bool IsOfImageType(ImageType subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
 		constexpr bool IsReference() const noexcept { return asset_type == AssetType::Reference; }
 		constexpr bool HasData() const noexcept { return not data.empty(); }
+
+		template <typename T>
+		std::optional<T> GetMeta(MetaTag tag) const
+		{
+			auto it = _parameters.find(tag);
+			if (it != _parameters.cend())
+			{
+				if (const T* x = std::get_if<T>(&it->second))
+					return std::make_optional(*x);
+			}
+			return std::nullopt;
+		}
+
+		constexpr fig::timestamp GetCreatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::CreatedAt).value_or({}); }
+		constexpr fig::timestamp GetUpdatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::UpdatedAt).value_or({}); }
+
 	public:
 		fig::uuid id {};
 		fig::uuid parent_id {};
