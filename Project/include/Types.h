@@ -108,4 +108,9 @@ constexpr bool Debugging = true;
 constexpr bool Debugging = false;
 #endif
 
+template<typename T>
+void type_id() {}
+using type_id_t = void(*)();
+
+
 #endif // TYPES_H__

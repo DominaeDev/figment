@@ -55,6 +55,9 @@ namespace fig::gui
 		void SetSizer(Sizer* sizer);
 		void InvalidateLayout();
 
+		inline LayoutElement* GetParent() { return _pParent; }
+		inline constexpr LayoutElement* GetParent() const { return _pParent; }
+
 	protected:
 		void SetParent(LayoutElement* pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);

@@ -5,6 +5,8 @@
 #include "model/ChatCommandExecutor.h"
 #include "llm/LLMStatus.h"
 
+#include <unordered_map>
+
 using ParsedChatCommandQueue = std::queue<ParsedChatCommand>;
 
 namespace fig::llm
@@ -15,14 +17,6 @@ namespace fig::llm
 namespace fig::gui
 {
 	class Screen;
-	class HomeFrame;
-	class ChatFrame;
-
-	enum class ScreenType
-	{
-		Home,
-		Chat,
-	};
 
 	class MainFrame : public Frame
 	{
@@ -36,24 +30,50 @@ namespace fig::gui
 		static void SetStatusBar(const fig::llm::LLMStatus& status);
 		static MainFrame& GetInstance() { return *s_pInstance; }
 
-		HomeFrame& GetHomeFrame() { return *_pHomeFrame; }
-		const HomeFrame& GetHomeFrame() const { return *_pHomeFrame; }
-		ChatFrame& GetChatFrame() { return *_pChatFrame; }
-		const ChatFrame& GetChatFrame() const { return *_pChatFrame; }
+		template <typename T>
+			requires std::derived_from<T, fig::gui::Screen>
+		T* GetScreen()
+		{
+			auto it = _screensByType.find(type_id<T>);
+			if (it != _screensByType.end())
+				return static_cast<T*>(it->second);
+			return nullptr;
+		}
+
+		template <typename T>
+			requires std::derived_from<T, fig::gui::Screen>
+		const T* GetScreen() const
+		{
+			auto it = _screensByType.find(type_id<T>);
+			if (it != _screensByType.end())
+				return static_cast<T*>(it->second);
+			return nullptr;
+		}
 
 		void Close();
 
-		void ChangeScreen(ScreenType screen);
+		template<typename T>
+		void ChangeScreen()
+		{
+			ChangeScreen(GetScreen<T>());
+		}
 
 	protected:
+		template<typename T>
+		void RegisterScreen();
+
+		template<typename T>
+		void UnregisterScreen();
+
+		void ChangeScreen(Screen* pScreen);
+
 		virtual void OnUpdate(float fDeltaTime) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 		
-		bool OnEvent(Event& event) override;
+		bool OnEvent(SDL_Event& event) override;
 
 	private:
-		HomeFrame* _pHomeFrame = nullptr;
-		ChatFrame* _pChatFrame = nullptr;
+		std::unordered_map<type_id_t, Screen*> _screensByType {};
 		Screen* _pActiveScreen = nullptr;
 
 		StatusBar* _pStatusBar = nullptr;

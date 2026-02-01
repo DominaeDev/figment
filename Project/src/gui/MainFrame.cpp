@@ -26,9 +26,9 @@ namespace fig::gui
 		SetSizer(topSizer);
 		s_pInstance = this;
 
-		_pHomeFrame = new HomeFrame(this);
-		_pChatFrame = new ChatFrame(this);
-		ChangeScreen(ScreenType::Chat);
+		RegisterScreen<HomeFrame>();
+		RegisterScreen<ChatFrame>();
+		ChangeScreen<ChatFrame>();
 
 		// Sign in
 		auto& userMngr = ApplicationState::GetUserManager();
@@ -59,11 +59,14 @@ namespace fig::gui
 
 	MainFrame::~MainFrame()
 	{
-		if (_pActiveScreen)
+		for (auto& [_, pScreen] : _screensByType)
 		{
-			_pMainArea->RemoveChild(_pActiveScreen);
-			_pActiveScreen = nullptr;
+			auto pParent = pScreen->GetParent();
+			if (pParent)
+				pParent->RemoveChild(pScreen);
+			delete pScreen;
 		}
+		_screensByType.clear();
 	}
 
 	void MainFrame::OnUpdate(float fDeltaTime)
@@ -118,34 +121,50 @@ namespace fig::gui
 		SDL_PushEvent(&quit_event);
 	}
 
-	void MainFrame::ChangeScreen(ScreenType screen)
+	void MainFrame::ChangeScreen(Screen* pScreen)
 	{
 		if (_pActiveScreen)
 		{
-			_pActiveScreen->SetVisible(false);
+			// Detach
+			auto pParent = _pActiveScreen->GetParent();
+			if (pParent)
+				pParent->RemoveChild(pScreen);
 			_pActiveScreen = nullptr;
 		}
 
-		switch (screen)
-		{
-		case ScreenType::Home:
-			_pActiveScreen = _pHomeFrame;
-			break;
-		case ScreenType::Chat:
-			_pActiveScreen = _pChatFrame;
-			break;
-		}
-
+		_pActiveScreen = pScreen;
 		if (not (bool)_pActiveScreen)
 			return;
 
-		_pActiveScreen->SetVisible(true);
-
-		_pMainArea->RemoveChildren();
 		_pMainArea->AddChild(_pActiveScreen);
 		
 		auto sizer = new VerticalSizer();
 		sizer->Add(_pActiveScreen, -1, Sizer::Expand);
 		_pMainArea->SetSizer(sizer);
 	}
+
+	template<typename T>
+	void MainFrame::RegisterScreen()
+	{
+		if (_screensByType.contains(type_id<T>))
+			UnregisterScreen<T>();
+
+		auto pScreen = new T(this);	// Must pass this to receive renderer
+		RemoveChild(pScreen);
+		_screensByType[type_id<T>] = pScreen;
+	}
+
+	template<typename T>
+	void MainFrame::UnregisterScreen()
+	{
+		auto pScreen = GetScreen<T>();
+		if (!pScreen)
+			return;
+
+		_pMainArea->RemoveChild(pScreen);
+		RemoveChild(pScreen);
+		_screensByType.erase(type_id<T>);
+		delete pScreen;
+	}
+
 }
