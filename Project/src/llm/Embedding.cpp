@@ -2,7 +2,7 @@
 #include "llm/Embedding.h"
 #include "util/Common.h"
 #include "util/StringUtility.h"
-#include "util/FileUtility.h"
+#include "fs/FileUtility.h"
 #include <format>
 #include <iostream>
 #include <fstream>

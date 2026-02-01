@@ -1,12 +1,14 @@
-#ifndef BINARY_SERIALIZATION_H__
-#define BINARY_SERIALIZATION_H__
+#ifndef SERIALIZATION_H__
+#define SERIALIZATION_H__
 #pragma once
 
 #include "Types.h"
 #include "Constants.h"
+#include "util/Security.h"
 #include <variant>
 #include <map>
 #include <chrono>
+#include <expected>
 
 namespace fig::fs
 {
@@ -209,6 +211,29 @@ namespace fig::fs
 		{
 			return get_meta<_meta_identifier>(MetaTag::Reference).has_value();
 		}
+	};
+
+	class BinaryReader
+	{
+		BinaryReader() = delete;
+	public:
+		explicit BinaryReader(const fig::path& directory, fig::security::AuthKey key) noexcept;
+		std::expected<AssetFile, FileError> ReadFile(const fig::string& filename, bool read_data = true) noexcept;
+
+	private:
+		fig::path _profilePath {};
+		fig::security::AuthKey _authKey {};
+	};
+
+	class BinaryWriter
+	{
+		BinaryWriter() = delete;
+	public:
+		explicit BinaryWriter(fig::security::AuthKey key) noexcept;
+		FileError WriteFile(const fig::path& directory, const AssetFile& file) noexcept;
+
+	private:
+		fig::security::AuthKey _authKey {};
 	};
 }
 

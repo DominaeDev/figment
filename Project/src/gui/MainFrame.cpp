@@ -12,18 +12,17 @@
 #include "model/ChatCommands.h"
 #include "model/ChatCommandExecutor.h"
 #include "model/UserManager.h"
+#include "model/AssetManager.h"
 #include "llm/LLMEngine.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
-#include "util/FileUtility.h"
 #include "util/Common.h"
+#include "fs/Serialization.h"
+#include "fs/FileUtility.h"
 #include "Constants.h"
 #include <format>
 #include <ranges>
-
-#include "model/AssetManager.h"
-#include "util/BinaryReader.h"
 
 using namespace fig::gui;
 using namespace fig::common_util;
@@ -147,8 +146,9 @@ MainFrame::MainFrame(Window* pWindow) : Frame(pWindow)
 		if (userMngr.IsSignedIn())
 		{
 			auto& assets = userMngr.GetProfileAssets();
-			auto x = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
-			auto y = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
+			auto x = assets.ImportCharacter(fig::path("./characters/user.xml"));
+			auto y = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
+			auto z = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
 			assets.SaveModified();
 		}
 	}

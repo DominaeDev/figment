@@ -2,7 +2,7 @@
 #include "model/Character.h"
 #include "gui/GUIUtility.h"
 #include "util/StringUtility.h"
-#include "util/Xml.h"
+#include "fs/Xml.h"
 
 using namespace fig::gui;
 using namespace fig::gui_util;

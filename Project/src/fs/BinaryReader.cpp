@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "util/BinaryReader.h"
+#include "fs/Serialization.h"
 #include <format>
 
 namespace fig::fs

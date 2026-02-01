@@ -3,10 +3,9 @@
 #include "model/UserManager.h"
 #include "model/AppState.h"
 #include "util/Common.h"
-#include "util/BinaryWriter.h"
-#include "util/BinaryReader.h"
-#include "util/Xml.h"
-#include "util/FileUtility.h"
+#include "fs/Xml.h"
+#include "fs/Serialization.h"
+#include "fs/FileUtility.h"
 #include "model/Character.h"
 #include <filesystem>
 #include <format>

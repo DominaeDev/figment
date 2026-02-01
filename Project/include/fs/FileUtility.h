@@ -3,7 +3,7 @@
 
 #include "Types.h"
 #include <expected>
-#include "util/Serialization.h"
+#include "fs/Serialization.h"
 
 namespace fig::fs
 {
@@ -14,6 +14,7 @@ namespace fig::fs
 	std::expected<fig::string, FileError> ReadTextFile(const fig::string& filename, bool normalizeNewlines = true);
 	FileError ReadTextFile(const fig::string& filename, fig::string& out_content, bool normalizeNewlines = true);
 	FileError WriteTextFile(const fig::string& filename, const fig::string& content, bool append = false);
+
 	std::expected<std::vector<fig::string>, FileError> FindFilesInPath(const fig::string& dirPath, const fig::string& extension);
 
 	// Utility

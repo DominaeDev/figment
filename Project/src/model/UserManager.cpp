@@ -8,7 +8,7 @@
 #include "util/Common.h"
 #include "util/Hash.h"
 #include "util/Security.h"
-#include "util/Xml.h"
+#include "fs/Xml.h"
 #include "model/AssetManager.h"
 #include "model/GlobalStrings.h"
 
