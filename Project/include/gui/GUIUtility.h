@@ -63,6 +63,7 @@ namespace fig::gui_util
 		Card,
 	};
 	bool MaskCorners(fig::sdl::Surface& surface, CornerStyle style);
+	void AlphaToMask(fig::path filename);
 }
 
 #endif

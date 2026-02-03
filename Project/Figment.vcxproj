@@ -146,6 +146,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="include\gui\Border.cpp" />
     <ClCompile Include="include\llm\LLMEngine.cpp" />
     <ClCompile Include="src\fs\BinaryReader.cpp" />
     <ClCompile Include="src\fs\BinaryWriter.cpp" />
@@ -155,6 +156,7 @@
     <ClCompile Include="src\gui\CharacterCard.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\ChatFrame.cpp" />
+    <ClCompile Include="src\gui\GridSizer.cpp" />
     <ClCompile Include="src\gui\HomeFrame.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
@@ -320,9 +322,11 @@
     <ClInclude Include="include\fs\FileUtility.h" />
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\Xml.h" />
+    <ClInclude Include="include\gui\Border.h" />
     <ClInclude Include="include\gui\CharacterCard.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
     <ClInclude Include="include\gui\ChatFrame.h" />
+    <ClInclude Include="include\gui\GridSizer.h" />
     <ClInclude Include="include\gui\HomeFrame.h" />
     <ClInclude Include="include\gui\Primitives.h" />
     <ClInclude Include="include\gui\GUICommon.h" />

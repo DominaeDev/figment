@@ -3,6 +3,8 @@
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "model/AssetManager.h"
+#include "gui/Border.h"
+#include "gui/TextureStore.h"
 #include "fs/Serialization.h"
 #include <cassert>
 
@@ -13,6 +15,10 @@ namespace fig::gui
 	CharacterCard::CharacterCard(Control* pParent) : Image(pParent, nullptr)
 	{
 		SetSize(Constants::GUI::CardWidth, Constants::GUI::CardHeight);
+
+		auto pBorder = new Border(this, TextureStore::GetTexture(TextureType::CARD_BORDER), 16);
+		pBorder->SetSize(GetSize());
+		pBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 	}
 
 	CharacterCard::CharacterCard(Control* pParent, const fig::uuid& characterId) : Image(pParent, nullptr),
@@ -21,6 +27,10 @@ namespace fig::gui
 		SetSize(Constants::GUI::CardWidth, Constants::GUI::CardHeight);
 
 		LoadCharacterPortrait();
+
+		auto pBorder = new Border(this, TextureStore::GetTexture(TextureType::CARD_BORDER), 16);
+		pBorder->SetSize(GetSize());
+		pBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 	}
 
 	bool CharacterCard::LoadCharacterPortrait()
@@ -86,6 +96,7 @@ namespace fig::gui
 	void CharacterCard::OnRender(Renderer* pRenderer)
 	{
 		Image::OnRender(pRenderer);
+		DrawBorder(pRenderer);
 	}
 
 

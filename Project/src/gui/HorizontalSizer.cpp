@@ -105,8 +105,3 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 		x += width;
 	}
 }
-
-void Sizer::AddStretchSpacer()
-{
-	Add(nullptr, -1);
-}

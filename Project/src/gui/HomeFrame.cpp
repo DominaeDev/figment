@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/HomeFrame.h"
 #include "gui/CharacterCard.h"
+#include "gui/GridSizer.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "model/AssetManager.h"
@@ -20,8 +21,6 @@ namespace fig::gui
 		auto topSizer = new VerticalSizer();
 		topSizer->Add(_pMainArea, -1, Sizer::Expand);
 		SetSizer(topSizer);
-
-		InvalidateLayout();
 	}
 
 	void HomeFrame::OnUpdate(float fDeltaTime)
@@ -51,8 +50,13 @@ namespace fig::gui
 		auto& assets = ApplicationState::GetUserManager().GetProfileAssets();
 		const auto& profileId = ApplicationState::GetUserManager().GetActiveProfile().id;
 
-		float x = 0.0f;
-		// Find character
+		float x = 40.0f;
+
+		auto gridSizer = new GridSizer(Constants::GUI::CardWidth, Constants::GUI::CardHeight);
+		gridSizer->SetSpacing(12, 12);
+		_pMainArea->SetSizer(gridSizer);
+
+		// Find characters
 		auto characters = assets.GetAssets()
 			| std::views::filter([&profileId](const auto& a) { return a.parent_id == profileId and a.IsOfType(AssetType::Character); })
 			| std::ranges::to<std::vector>();
@@ -61,9 +65,12 @@ namespace fig::gui
 		for (auto& asset : characters)
 		{
 			auto pCard = new CharacterCard(_pMainArea, asset.id);
-			pCard->SetPosition(x, 0);
+			pCard->SetPosition(x, 40.0f);
 			x += Constants::GUI::CardWidth + 16.0f;
+			gridSizer->Add(pCard);
 		}
+
+		InvalidateLayout();
 	}
 
 }

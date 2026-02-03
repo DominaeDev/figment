@@ -302,7 +302,7 @@ namespace fig::gui_util
 		return pScaledSurface;
 	}
 
-	static void AlphaToMask(fig::path filename)
+	void AlphaToMask(fig::path filename)
 	{
 		auto pMask = IMG_Load(filename.u8string().c_str());
 		if (not (bool)pMask)

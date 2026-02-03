@@ -344,6 +344,12 @@
     <ClCompile Include="src\gui\CharacterCard.cpp">
       <Filter>Source Files\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="include\gui\Border.cpp">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\GridSizer.cpp">
+      <Filter>Source Files\GUI\Layout</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -885,6 +891,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterCard.h">
       <Filter>Source Files\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Border.h">
+      <Filter>Source Files\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\GridSizer.h">
+      <Filter>Source Files\GUI\Layout</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
