@@ -99,17 +99,17 @@
     <Filter Include="Source Files\AppModel\Data\Character">
       <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\AppModel\Assets">
-      <UniqueIdentifier>{72d9b498-dc93-4958-b2d5-f0c34226e0f0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Serialization">
       <UniqueIdentifier>{eea3d39a-71b8-4c8b-b27c-1c3807000f83}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Authentication">
-      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\GUI\Screens">
       <UniqueIdentifier>{0b0e7823-493d-4e1c-9c9f-946893298eae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utility\Authentication">
+      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AppModel\Assets">
+      <UniqueIdentifier>{53846e02-0a04-4382-a8c9-5e14c62ffb05}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -299,12 +299,6 @@
     <ClCompile Include="src\llm\ContextCursor.cpp">
       <Filter>Source Files\Inference\Context</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\Asset.cpp">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\AssetManager.cpp">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClCompile>
     <ClCompile Include="src\fs\XmlWriter.cpp">
       <Filter>Source Files\Serialization</Filter>
     </ClCompile>
@@ -321,13 +315,10 @@
       <Filter>Source Files\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Hash.cpp">
-      <Filter>Source Files\Authentication</Filter>
+      <Filter>Source Files\Utility\Authentication</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Security.cpp">
-      <Filter>Source Files\Authentication</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\UserManager.cpp">
-      <Filter>Source Files\Authentication</Filter>
+      <Filter>Source Files\Utility\Authentication</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HomeFrame.cpp">
       <Filter>Source Files\GUI\Screens</Filter>
@@ -349,6 +340,21 @@
     </ClCompile>
     <ClCompile Include="src\gui\GridSizer.cpp">
       <Filter>Source Files\GUI\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\UserManager.cpp">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\Asset.cpp">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\AssetManager.cpp">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\ContentDatabase.cpp">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ImageStore.cpp">
+      <Filter>Source Files\GUI\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -594,12 +600,6 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\llama.cpp\b5237\include\llama.h">
       <Filter>Source Files\Third-party\llamacpp</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\AssetManager.h">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\Asset.h">
-      <Filter>Source Files\AppModel\Assets</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\SDL3\3.2.30\include\SDL3\SDL.h">
       <Filter>Source Files\Third-party\SDL3</Filter>
@@ -866,16 +866,10 @@
       <Filter>Source Files\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Hash.h">
-      <Filter>Source Files\Authentication</Filter>
+      <Filter>Source Files\Utility\Authentication</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Security.h">
-      <Filter>Source Files\Authentication</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\UserProfile.h">
-      <Filter>Source Files\Authentication</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\UserManager.h">
-      <Filter>Source Files\Authentication</Filter>
+      <Filter>Source Files\Utility\Authentication</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Screen.h">
       <Filter>Source Files\GUI\Screens</Filter>
@@ -897,6 +891,24 @@
     </ClInclude>
     <ClInclude Include="include\gui\GridSizer.h">
       <Filter>Source Files\GUI\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\UserManager.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\UserProfile.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\Asset.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\AssetManager.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ContentDatabase.h">
+      <Filter>Source Files\AppModel\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ImageStore.h">
+      <Filter>Source Files\GUI\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

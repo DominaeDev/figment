@@ -5,6 +5,7 @@
 #include "Types.h"
 #include "model/UserProfile.h"
 #include "model/AssetManager.h"
+#include "model/ContentDatabase.h"
 
 namespace fig::fs
 {
@@ -28,6 +29,7 @@ namespace fig::fs
 		
 		const UserProfile& GetActiveProfile() const;
 		AssetManager& GetProfileAssets();
+		ContentDatabase& GetContent();
 		const fig::security::AuthKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };
 		
 		bool ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword);
@@ -42,6 +44,7 @@ namespace fig::fs
 		fig::security::AuthKey _signedInAuthKey {};
 
 		std::unique_ptr<AssetManager> _pAssetMngr;
+		std::unique_ptr<ContentDatabase> _pContentDatabase;
 	};
 }
 #endif

@@ -113,6 +113,8 @@ namespace fig::fs
 
 		_signedInProfile = &profile;
 		_pAssetMngr = std::make_unique<AssetManager>(*this);
+		_pContentDatabase = std::make_unique<ContentDatabase>(*_pAssetMngr.get());
+
 		return true;
 	}
 
@@ -125,6 +127,8 @@ namespace fig::fs
 	{
 		if (not IsSignedIn())
 			return false;
+
+		_pContentDatabase.reset();
 
 		_pAssetMngr->SaveModified();
 		_pAssetMngr.reset();
@@ -232,5 +236,13 @@ namespace fig::fs
 			throw std::runtime_error("Not signed in");
 
 		return static_cast<AssetManager&>(*_pAssetMngr);
+	}
+
+	ContentDatabase& UserManager::GetContent()
+	{
+		if (_signedInProfile == nullptr || !_pContentDatabase)
+			throw std::runtime_error("Not signed in");
+
+		return static_cast<ContentDatabase&>(*_pContentDatabase);
 	}
 }

@@ -135,6 +135,13 @@ namespace fig
 		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
 	}
 
+	fig::string XmlReaderElement::GetName() const noexcept
+	{
+		if (_pElement)
+			return fig::string(_pElement->Name());
+		return "";
+	}
+
 	std::optional<bool> XmlReaderElement::GetBool() const noexcept
 	{
 		bool value;
@@ -283,10 +290,8 @@ namespace fig
 		return GetElementText(name).value_or(default_value);
 	}
 
-	XmlReader::XmlReader(const fig::string& filename)
+	XmlReader::XmlReader(const fig::path& path)
 	{
-		auto const path = fig::path(filename.c_str());
-		
 		_pDoc = new XMLDocument();
 		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS)
 		{
@@ -299,10 +304,8 @@ namespace fig
 		_pRoot = _pDoc->RootElement();
 	}
 
-	XmlReader::XmlReader(const fig::string& filename, const fig::string& root)
+	XmlReader::XmlReader(const fig::path& path, const fig::string& root)
 	{
-		auto const path = fig::path(filename.c_str());
-		
 		_pDoc = new XMLDocument();
 		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS 
 			or std::strcmp(_pDoc->RootElement()->Name(), root.c_str()) != 0)
@@ -314,6 +317,21 @@ namespace fig
 		}
 		_pRoot = _pDoc->RootElement();
 	}
+
+	XmlReader::XmlReader(const fig::string& document)
+	{
+		_pDoc = new XMLDocument();
+		if (_pDoc->Parse(document.c_str()) != XML_SUCCESS)
+		{
+			// Error
+			delete _pDoc;
+			_pDoc = nullptr;
+			_pRoot = nullptr;
+			return;
+		}
+		_pRoot = _pDoc->RootElement();
+	}
+
 
 	XmlReader::~XmlReader()
 	{

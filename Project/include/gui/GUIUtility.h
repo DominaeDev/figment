@@ -56,8 +56,9 @@ namespace fig::gui_util
 		Portrait,
 	};
 
+	fig::sdl::Surface LoadImageFromMemory(fig::byte_span data);
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
-	fig::sdl::Surface ScaleSurface(fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
+	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
 
 	enum class CornerStyle {
 		Card,

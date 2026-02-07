@@ -160,6 +160,7 @@
     <ClCompile Include="src\gui\HomeFrame.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
+    <ClCompile Include="src\gui\ImageStore.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
@@ -185,6 +186,7 @@
     <ClCompile Include="src\gui\ChatMessage.cpp" />
     <ClCompile Include="src\gui\ChatScroll.cpp" />
     <ClCompile Include="src\gui\GUIUtility.cpp" />
+    <ClCompile Include="src\model\ContentDatabase.cpp" />
     <ClCompile Include="src\model\ChatCommandExecutor.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
@@ -328,6 +330,7 @@
     <ClInclude Include="include\gui\ChatFrame.h" />
     <ClInclude Include="include\gui\GridSizer.h" />
     <ClInclude Include="include\gui\HomeFrame.h" />
+    <ClInclude Include="include\gui\ImageStore.h" />
     <ClInclude Include="include\gui\Primitives.h" />
     <ClInclude Include="include\gui\GUICommon.h" />
     <ClInclude Include="include\gui\GUIUtility.h" />
@@ -357,6 +360,7 @@
     <ClInclude Include="include\model\Asset.h" />
     <ClInclude Include="include\model\AssetManager.h" />
     <ClInclude Include="include\model\Character.h" />
+    <ClInclude Include="include\model\ContentDatabase.h" />
     <ClInclude Include="include\model\ChatOptions.h" />
     <ClInclude Include="include\model\ChatSession.h" />
     <ClInclude Include="include\model\ChatCommands.h" />

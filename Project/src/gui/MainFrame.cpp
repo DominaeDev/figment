@@ -51,7 +51,7 @@ namespace fig::gui
 				auto x = assets.ImportCharacter(fig::path("./characters/user.xml"));
 				auto y = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
 				auto z = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
-				assets.SaveModified();
+				userMngr.GetProfileAssets().SaveModified();
 			}
 		}
 
@@ -61,6 +61,8 @@ namespace fig::gui
 			auto pScreen = ChangeScreen<HomeFrame>();
 			pScreen->CreateCards();
 		}
+
+		userMngr.GetProfileAssets().SaveModified();
 	}
 
 	MainFrame::~MainFrame()
@@ -102,17 +104,23 @@ namespace fig::gui
 
 			if (keyEvent.down and not keyEvent.repeat)
 			{
-				switch (keyEvent.key)
-				{
 #if _DEBUG
-				case SDLK_F12:
-					if (keyEvent.mod == SDL_KMOD_CTRL)
-					{
-						Close();
-						return true;
-					}
-					break;
+				if (keyEvent.key == SDLK_F12 and ((keyEvent.mod & SDL_KMOD_CTRL) != 0))
+				{
+					Close();
+					return true;
+				}
 #endif
+
+				if (keyEvent.key == SDLK_1 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
+				{
+					ChangeScreen<HomeFrame>();
+					return true;
+				}
+				else if (keyEvent.key == SDLK_2 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
+				{
+					ChangeScreen<ChatFrame>();
+					return true;
 				}
 			}
 		}

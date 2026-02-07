@@ -7,10 +7,10 @@
 #include <sstream>
 #include <chrono>
 #include <cassert>
+#include <limits>
 
 namespace fig::fs
 {
-
 	fig::string AssetTypeToString(AssetType type, uint8_t subtype)
 	{
 		string strType, strSubtype;
@@ -172,11 +172,11 @@ namespace fig::fs
 		status = AssetFileStatus::Modified;
 	}
 
-	constexpr fig::string Asset::AsString() const
+	fig::string Asset::AsString() const
 	{
 		fig::string str;
 		str.assign(reinterpret_cast<const char*>(data.data()), data.size());
-		return str;
+		return str; // rvo
 	}
 
 	AssetFile Asset::ToFile() const noexcept
@@ -224,6 +224,20 @@ namespace fig::fs
 		_parameters[tag] = value;
 	}
 
+	void Asset::SetMeta(MetaTag tag, uint8_t value) noexcept
+	{
+		auto meta_type = get_meta_type(tag);
+		assert(meta_type == MetaValueType::UChar);
+		_parameters[tag] = value;
+	}
+
+	void Asset::SetMeta(MetaTag tag, uint16_t value) noexcept
+	{
+		auto meta_type = get_meta_type(tag);
+		assert(meta_type == MetaValueType::UShort);
+		_parameters[tag] = value;
+	}
+
 	void Asset::SetMeta(MetaTag tag, int32_t value) noexcept
 	{
 		auto meta_type = get_meta_type(tag);
@@ -262,8 +276,22 @@ namespace fig::fs
 	void Asset::SetMeta(MetaTag tag, const fig::string& value) noexcept
 	{
 		auto meta_type = get_meta_type(tag);
-		assert(meta_type == MetaValueType::String);
-		_parameters[tag] = value;
+		assert(meta_type == MetaValueType::String8 || meta_type == MetaValueType::String16);
+
+		if (meta_type == MetaValueType::String8 && value.length() >= toUZ(std::numeric_limits<uint8_t>::max()))
+		{
+			fig::string copy { value };
+			copy.resize(toUZ(std::numeric_limits<uint8_t>::max()));
+			_parameters[tag] = copy;
+		}
+		else if (meta_type == MetaValueType::String16 && value.length() >= toUZ(std::numeric_limits<uint16_t>::max()))
+		{
+			fig::string copy { value };
+			copy.resize(toUZ(std::numeric_limits<uint16_t>::max()));
+			_parameters[tag] = copy;
+		}
+		else
+			_parameters[tag] = value;
 	}
 
 }

@@ -211,6 +211,21 @@ namespace fig::gui_util
 		return Color { r, g, b, 0xff };
 	}
 
+	fig::sdl::Surface LoadImageFromMemory(fig::byte_span data)
+	{
+		SDL_IOStream* io = SDL_IOFromConstMem(data.data(), data.size());
+		if (!io)
+			return {};
+
+		SDL_Surface* pSurface = IMG_Load_IO(io, true);
+		if (!pSurface)
+			return {};
+
+		fig::sdl::Surface surface;
+		surface.reset(pSurface);
+		return surface; // rvo
+	}
+
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit)
 	{
 		try
@@ -231,7 +246,7 @@ namespace fig::gui_util
 		}
 	}
 
-	fig::sdl::Surface ScaleSurface(fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit)
+	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit)
 	{
 		auto pImage = surface.get();
 		if (pImage == nullptr || width <= 0 || height <= 0)

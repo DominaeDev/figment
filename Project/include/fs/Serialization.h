@@ -87,17 +87,19 @@ namespace fig::fs
 		}
 	};
 
+	constexpr fig::const_string MagicWord = "FIGM";
+
 	struct alignas(8) FileHeader
 	{
 		char magic[4] = { 'F','I','G','M' };
 		uint16_t fmt_version = { VersionNumber(1, 0).to_uint16() };
 		uint16_t data_offset;
-		uint64_t parent_id[2];
 		uint64_t asset_id[2];
+		uint64_t parent_id[2];
 		uint32_t data_length;
-		uint8_t data_format;
 		uint8_t asset_type;
 		uint8_t asset_subtype;
+		uint8_t data_format;
 		uint8_t meta_count;
 	};
 
@@ -106,25 +108,29 @@ namespace fig::fs
 		Unknown				= 0x00,
 		CreatedAt			= 0x01,		// utc
 		UpdatedAt			= 0x02,		// utc
+		Version				= 0x03,
 
 		ImageWidth			= 0x10,
 		ImageHeight			= 0x11,
-		ImageType			= 0x12,
-		ImageFormatDepth	= 0x13,
+		ImageFormatDepth	= 0x12,
 
 		Reference			= 0x40,
 	};
 
 	using _meta_identifier = std::array<uint64_t, 2>;
-	using MetaValue = std::variant<bool, int32_t, float, fig::string, fig::timestamp, _meta_identifier>;
+	using MetaValue = std::variant<bool, uint8_t, uint16_t, int32_t, float, fig::string, fig::timestamp, _meta_identifier>;
 
 	enum class MetaValueType : uint8_t
 	{
 		Boolean		= 0x00,
-		Integer		= 0x01,
-		Float		= 0x02,
-		String		= 0x03,
-		TimeStamp	= 0x04,
+		UChar		= 0x01,
+		UShort		= 0x02,
+		Integer		= 0x03,
+		Float		= 0x04,
+
+		String8		= 0x08,
+		String16	= 0x09,
+		TimeStamp	= 0x10,
 		Identifier	= 0x40,
 
 		Unknown		= 0xFF,
@@ -134,11 +140,13 @@ namespace fig::fs
 	{
 		switch (tag)
 		{
+		case MetaTag::Version:
+		case MetaTag::ImageFormatDepth:
+			return MetaValueType::UChar;
+
 		case MetaTag::ImageWidth:
 		case MetaTag::ImageHeight:
-		case MetaTag::ImageType:
-		case MetaTag::ImageFormatDepth:
-			return MetaValueType::Integer;
+			return MetaValueType::UShort;
 
 		case MetaTag::CreatedAt:
 		case MetaTag::UpdatedAt:

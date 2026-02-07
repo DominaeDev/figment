@@ -10,66 +10,91 @@ using namespace fig::string_util;
 
 namespace fig::data
 {
-	bool CharacterData::LoadFromXml(fig::string filename)
+	static bool ReadXml(XmlReader& xml, CharacterData& data)
 	{
-		XmlReader xml(filename, "Character");
-		if (not xml.IsOk())
-			return false; // Invalid document type
-
 		auto rootNode = xml.GetRootElement();
 
 		// Identifier
-		characterId = trim(rootNode.GetElementText("ID").value_or(""));
+		data.characterId = trim(rootNode.GetElementText("ID").value_or(""));
 
 		// Name(s)
-		shortName = trim(rootNode.GetElementText("FirstName").value_or(""));
-		fullName = trim(rootNode.GetElementText("FullName").value_or(""));
-		
-		if (characterId.empty())
-			characterId = shortName;
-		if (fullName.empty())
-			fullName = shortName;
+		data.shortName = trim(rootNode.GetElementText("FirstName").value_or(""));
+		data.fullName = trim(rootNode.GetElementText("FullName").value_or(""));
+
+		if (data.characterId.empty())
+			data.characterId = data.shortName;
+		if (data.fullName.empty())
+			data.fullName = data.shortName;
 
 		// Portrait
-		largePortraitFilename = trim(rootNode.GetElementText("LargePortrait").value_or(""));
-		smallPortraitFilename = trim(rootNode.GetElementText("SmallPortrait").value_or(""));
+		data.largePortraitFilename = trim(rootNode.GetElementText("LargePortrait").value_or(""));
+		data.smallPortraitFilename = trim(rootNode.GetElementText("SmallPortrait").value_or(""));
 
 		// Read brief
-		brief = trim(rootNode.GetElementText("Brief").value_or(""));
+		data.brief = trim(rootNode.GetElementText("Brief").value_or(""));
 
 		// Read description
-		description = trim(rootNode.GetElementText("Description").value_or(""));
+		data.description = trim(rootNode.GetElementText("Description").value_or(""));
 
 		// Read gender
 		if (auto genderText = rootNode.GetElementText("Gender"))
 		{
 			fig::string gender = trim(genderText.value());
-			properties[Constants::CharacterProperties::Gender] = CharacterProperty { "Gender", gender };
+
+			if (string_util::equals(gender, "male", true))
+				data.gender = CharacterGender::Male;
+			else if (string_util::equals(gender, "female", true))
+				data.gender = CharacterGender::Female;
+			else if (not gender.empty())
+			{
+				data.gender = CharacterGender::Custom;
+				data.properties[Constants::CharacterProperties::Gender] = CharacterProperty { "Gender", gender };
+			}
+			else
+				data.gender = CharacterGender::Undefined;
 		}
 
 		// Color
-		bgColor = (Color)0;
-		borderColor = (Color)0;
+		data.bgColor = (Color)0;
+		data.borderColor = (Color)0;
 
 		if (auto colorText = rootNode.GetElementText("Color"))
 		{
-			borderColor = color_from_string(colorText.value());
+			data.borderColor = color_from_string(colorText.value());
 
 			float h, s, v;
-			color_to_hsv(borderColor, h, s, v);
+			color_to_hsv(data.borderColor, h, s, v);
 
 			if (s > 0.0f)
-				bgColor = hsv_to_color(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
+				data.bgColor = hsv_to_color(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
 			else
-				bgColor = hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
+				data.bgColor = hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 		}
 
-		return !characterId.empty() && !shortName.empty();
+		return !data.characterId.empty() && !data.shortName.empty();
+	}
+
+	bool CharacterData::LoadFromXml(const fig::path& path)
+	{
+		XmlReader xml(path, "Character");
+		if (not xml.IsOk())
+			return false; // Invalid document type
+
+		return ReadXml(xml, *this);
+	}
+
+	bool CharacterData::LoadFromXml(const fig::string& doc)
+	{
+		XmlReader xml(doc);
+		if (not xml.IsOk() or xml.GetRootElement().GetName() != "Character")
+			return false; // Invalid document type
+
+		return ReadXml(xml, *this);
 	}
 
 	void CharacterData::SaveToXml(fig::bytes& buffer)
 	{
-		XmlWriter xml("Assets");
+		XmlWriter xml("Character");
 
 		auto root = xml.GetRoot();
 		root.SetElement("ID", characterId);

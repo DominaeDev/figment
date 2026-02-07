@@ -5,6 +5,7 @@
 #include "Constants.h"
 #include "gui/TextureStore.h"
 #include "gui/CharacterImageStore.h"
+#include "gui/ImageStore.h"
 
 using namespace fig::gui;
 
@@ -39,6 +40,8 @@ Window::Window(fig::string_view title, int32_t width, int32_t height) :
 	// Load textures
 	TextureStore::Init(_renderer.get()); //! @temp
 
+	ImageStore::Init();
+
 	// Load character images
 	CharacterImageStore::Init(_renderer.get());	//! @temp
 }
@@ -46,6 +49,7 @@ Window::Window(fig::string_view title, int32_t width, int32_t height) :
 Window::~Window()
 {
 	CharacterImageStore::Release();
+	ImageStore::Release();
 	TextureStore::Release();
 }
 

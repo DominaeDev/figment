@@ -39,7 +39,8 @@ namespace fig::data
 
 		std::map<fig::string, CharacterProperty> properties;
 
-		bool LoadFromXml(fig::string filename);
+		bool LoadFromXml(const fig::path& filename);
+		bool LoadFromXml(const fig::string& doc);
 		void SaveToXml(fig::bytes& buffer);
 	};
 }

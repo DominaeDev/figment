@@ -10,7 +10,6 @@ namespace fig::gui
 	class CharacterCard : public Image
 	{
 	public:
-		CharacterCard(Control* pParent);
 		CharacterCard(Control* pParent, const fig::uuid& characterId);
 
 	protected:

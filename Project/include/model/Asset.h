@@ -75,9 +75,10 @@ namespace fig::fs
 	public:
 		void SetData(fig::bytes&& data);
 		void SetData(fig::byte_span data);
-		constexpr fig::string AsString() const;
 
 		void SetMeta(MetaTag tag, bool value) noexcept;
+		void SetMeta(MetaTag tag, uint8_t value) noexcept;
+		void SetMeta(MetaTag tag, uint16_t value) noexcept;
 		void SetMeta(MetaTag tag, int32_t value) noexcept;
 		void SetMeta(MetaTag tag, float value) noexcept;
 		void SetMeta(MetaTag tag, fig::timestamp value) noexcept;
@@ -100,6 +101,7 @@ namespace fig::fs
 		constexpr bool IsOfImageType(ImageType subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
 		constexpr bool IsReference() const noexcept { return asset_type == AssetType::Reference; }
 		constexpr bool HasData() const noexcept { return not data.empty(); }
+		fig::string AsString() const;
 
 		template <typename T>
 		std::optional<T> GetMeta(MetaTag tag) const

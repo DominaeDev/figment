@@ -21,6 +21,10 @@ namespace fig::fs
 			auto& value = it->second;
 			if (const bool* x = std::get_if<bool>(&value))
 				offset += 1u;
+			else if (const uint8_t* x = std::get_if<uint8_t>(&value))
+				offset += sizeof(uint8_t);
+			else if (const uint16_t* x = std::get_if<uint16_t>(&value))
+				offset += sizeof(uint16_t);
 			else if (const int32_t* x = std::get_if<int32_t>(&value))
 				offset += sizeof(int32_t);
 			else if (const float* x = std::get_if<float>(&value))
@@ -31,8 +35,11 @@ namespace fig::fs
 				offset += sizeof(_meta_identifier);
 			else if (const fig::string* s = std::get_if<fig::string>(&value))
 			{
-				offset += sizeof(uint16_t); // length
-				offset += static_cast<uint16_t>(s->size()); // data
+				if (s->size() > toUZ(std::numeric_limits<uint8_t>::max()))
+					offset += sizeof(uint16_t); // length
+				else
+					offset += sizeof(uint8_t); // length
+				offset += static_cast<uint32_t>(s->size()); // data
 			}
 		}
 
@@ -45,9 +52,9 @@ namespace fig::fs
 	{
 		FileHeader header {
 			.data_length = static_cast<uint32_t>(file.data_length),
-			.data_format = file.data_format,
 			.asset_type = file.asset_type,
 			.asset_subtype = file.asset_subtype,
+			.data_format = file.data_format,
 		};
 		file.asset_id.bytes(reinterpret_cast<char*>(&header.asset_id));
 		file.parent_id.bytes(reinterpret_cast<char*>(&header.parent_id));
@@ -69,6 +76,16 @@ namespace fig::fs
 			{
 				fs << tag;
 				fs << uint8_t(*b ? 1 : 0);
+			}
+			else if (const uint8_t* i = std::get_if<uint8_t>(&value))
+			{
+				fs << tag;
+				fs.write((const char*)(i), sizeof(uint8_t));
+			}
+			else if (const uint16_t* i = std::get_if<uint16_t>(&value))
+			{
+				fs << tag;
+				fs.write((const char*)(i), sizeof(uint16_t));
 			}
 			else if (const int32_t* i = std::get_if<int32_t>(&value))
 			{
@@ -92,9 +109,18 @@ namespace fig::fs
 			}
 			else if (const fig::string* s = std::get_if<fig::string>(&value))
 			{
-				fs << tag;
-				uint16_t length = static_cast<uint16_t>(s->size());
-				fs.write((const char*)(&length), sizeof(uint16_t));
+				if (s->size() <= toUZ(std::numeric_limits<uint8_t>::max()))
+				{
+					fs << static_cast<uint8_t>(MetaValueType::String8);
+					uint8_t length = static_cast<uint8_t>(s->size());
+					fs.write((const char*)(&length), sizeof(uint8_t));
+				}
+				else
+				{
+					fs << static_cast<uint8_t>(MetaValueType::String16);
+					uint16_t length = static_cast<uint16_t>(s->size());
+					fs.write((const char*)(&length), sizeof(uint16_t));
+				}
 				fs.write(s->c_str(), s->size());
 			}
 		}

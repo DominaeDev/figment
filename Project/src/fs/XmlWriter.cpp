@@ -194,9 +194,8 @@ namespace fig
 		return XmlWriterElement(pElement);
 	}
 
-	bool XmlWriter::Save(const fig::string& filename) const
+	bool XmlWriter::Save(const fig::path& path) const
 	{
-		auto const path = fig::path(filename);
 		return _pDoc->SaveFile(path.u8string().c_str()) == XML_SUCCESS;
 	}
 

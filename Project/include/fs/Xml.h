@@ -57,6 +57,7 @@ namespace fig
 		std::optional<fig::bytes> GetBytes() const noexcept;
 		std::optional<fig::uuid> GetUUID() const noexcept;
 
+		fig::string GetName() const noexcept;
 		bool GetBool(bool default_value) const noexcept;
 		int32_t GetInt(int32_t default_value) const noexcept;
 		float GetFloat(float default_value) const noexcept;
@@ -86,8 +87,9 @@ namespace fig
 	{
 		XmlReader() = delete;
 	public:
-		XmlReader(const fig::string& filename);
-		XmlReader(const fig::string& filename, const fig::string& root);
+		XmlReader(const fig::path& path);
+		XmlReader(const fig::path& path, const fig::string& root);
+		XmlReader(const fig::string& document);
 		~XmlReader();
 
 		bool IsOk() const noexcept;
@@ -166,7 +168,7 @@ namespace fig
 		XmlWriterElement GetRoot() noexcept;
 		XmlWriterElement AddChild(const fig::string& name) noexcept;
 
-		bool Save(const fig::string& filename) const;
+		bool Save(const fig::path& filename) const;
 		void SaveToMemory(fig::bytes& buffer) const;
 
 	private:

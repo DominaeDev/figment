@@ -35,7 +35,7 @@ namespace fig::fs
 	{
 		auto const path = _profilePath / std::format("{}.{}", Constants::Paths::ProfileIndexFileName, Constants::Paths::ProfileIndexFileExt);
 
-		fig::XmlReader xml(path.u8string(), "Assets");
+		fig::XmlReader xml(path, "Assets");
 		if (not xml.IsOk())
 			return false; // Invalid document type
 
@@ -75,7 +75,7 @@ namespace fig::fs
 			assetNode.SetElement("Type", AssetTypeToString(asset.asset_type, asset.asset_subtype));
 		}
 
-		return xml.Save(path.u8string());
+		return xml.Save(path);
 	}
 
 	Asset& AssetManager::CreateEmptyAsset(AssetType type, const fig::uuid& parent) noexcept
@@ -106,7 +106,7 @@ namespace fig::fs
 		return newAsset;
 	}
 
-	Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = CreateUUID();
 		auto& newAsset = _assets[id] = Asset {};
@@ -114,19 +114,21 @@ namespace fig::fs
 		newAsset.parent_id = not parent.empty() ? parent : _profileID;
 		newAsset.asset_type = type;
 		newAsset.data = std::move(data); // Move data
+		newAsset.data_format = format;
 		newAsset.status = AssetFileStatus::Modified;
 		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
 		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
 		return newAsset;
 	}
 
-	Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = CreateUUID();
 		auto& newAsset = _assets[id] = Asset {};
 		newAsset.id = id;
 		newAsset.parent_id = not parent.empty() ? parent : _profileID;
 		newAsset.asset_type = type;
+		newAsset.data_format = format;
 		newAsset.status = AssetFileStatus::Modified;
 		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
 		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
@@ -139,17 +141,15 @@ namespace fig::fs
 
 	Asset& AssetManager::CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
-		auto& asset = CreateAsset(AssetType::Image, std::move(data), parent);
+		auto& asset = CreateAsset(AssetType::Image, format, std::move(data), parent);
 		asset.asset_subtype = static_cast<uint8_t>(subtype);
-		asset.data_format = format;
 		return asset;
 	}
 
 	Asset& AssetManager::CreateImageAsset(ImageType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
-		auto& asset = CreateAsset(AssetType::Image, data, parent);
+		auto& asset = CreateAsset(AssetType::Image, format, data, parent);
 		asset.asset_subtype = static_cast<uint8_t>(subtype);
-		asset.data_format = format;
 		return asset;
 	}
 
@@ -166,9 +166,9 @@ namespace fig::fs
 		auto pSurface = surface.get();
 		int32_t stride = pSurface->pitch / pSurface->w;
 
-		asset.SetMeta(MetaTag::ImageWidth, pSurface->w);
-		asset.SetMeta(MetaTag::ImageHeight, pSurface->h);
-		asset.SetMeta(MetaTag::ImageFormatDepth, stride);
+		asset.SetMeta(MetaTag::ImageWidth, static_cast<uint16_t>(pSurface->w));
+		asset.SetMeta(MetaTag::ImageHeight, static_cast<uint16_t>(pSurface->h));
+		asset.SetMeta(MetaTag::ImageFormatDepth, static_cast<uint8_t>(stride));
 
 		if (SDL_LockSurface(pSurface))
 		{
@@ -185,6 +185,19 @@ namespace fig::fs
 	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& id) noexcept
 	{
 		auto itFind = _assets.find(id);
+		if (itFind != _assets.cend())
+			return std::make_optional<AssetRef>(static_cast<Asset&>(itFind->second));
+		return std::nullopt;
+	}
+
+	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept
+	{
+		auto itFind = std::find_if(_assets.begin(), _assets.end(),
+			[&parentId, imageType](auto& kvp) {
+				return kvp.second.parent_id == parentId
+					and kvp.second.asset_type == AssetType::Image 
+					and kvp.second.asset_subtype == static_cast<uint8_t>(imageType);
+			});
 		if (itFind != _assets.cend())
 			return std::make_optional<AssetRef>(static_cast<Asset&>(itFind->second));
 		return std::nullopt;
@@ -242,6 +255,14 @@ namespace fig::fs
 		return true;
 	}
 
+	FileError AssetManager::LoadAsset(const Asset& asset) noexcept
+	{
+		if (const auto result = LoadAsset(asset.id); result.has_value())
+			return FileError::NoError;
+		else
+			return result.error();
+	}
+
 	std::expected<AssetRef, FileError> AssetManager::LoadAsset(const fig::uuid& id) noexcept
 	{
 		auto findAsset = FindAsset(id);
@@ -272,12 +293,12 @@ namespace fig::fs
 	std::expected<AssetRef, FileError> AssetManager::ImportCharacter(fig::path filename, CharacterDataFormat format)
 	{
 		CharacterData character;
-		if (not character.LoadFromXml(filename.u8string()))
+		if (not character.LoadFromXml(filename))
 			return std::unexpected(FileError::UnrecognizedFormat);
 
 		fig::bytes characterData;
 		character.SaveToXml(characterData);
-		auto& characterAsset = CreateAsset(AssetType::Character, characterData, _profileID);
+		auto& characterAsset = CreateAsset(AssetType::Character, DataFormat::DataXml, characterData, _profileID);
 
 		// Load portrait image(s)
 		if (not empty_or_whitespace(character.largePortraitFilename))
@@ -287,17 +308,20 @@ namespace fig::fs
 				// Create portrait asset
 				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormatFromExt(GetFileExt(character.largePortraitFilename)), std::move(file.value()), characterAsset.id);
 
-				// Create cover card
-				if (auto coverImage = LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
+				if constexpr (Disabled)
 				{
-					// Round corners
-					MaskCorners(coverImage, CornerStyle::Card);
+					// Create cover card
+					if (auto coverImage = LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
+					{
+						// Round corners
+						MaskCorners(coverImage, CornerStyle::Card);
 
-					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, characterAsset.id);
+						// Save cover asset (bitmap)
+						auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, characterAsset.id);
 
-					// Create reference to original
-					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
+						// Create reference to original
+						CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
+					}
 				}
 			}
 		}

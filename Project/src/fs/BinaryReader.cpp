@@ -16,7 +16,7 @@ namespace fig::fs
 		fs.read((char*)&header, sizeof(FileHeader));
 
 		// Validate header
-		bool valid = header.magic[0] == 'F' && header.magic[1] == 'I' && header.magic[2] == 'G' && header.magic[3] == 'M'; // Magic word
+		bool valid = header.magic[0] == MagicWord[0] && header.magic[1] == MagicWord[1] && header.magic[2] == MagicWord[2] && header.magic[3] == MagicWord[3];
 		valid &= VersionNumber(header.fmt_version) == VersionNumber(1, 0); // Format version
 		if (header.data_offset != 0xffff)
 		{
@@ -46,6 +46,14 @@ namespace fig::fs
 				fs.read(buf, sizeof(uint8_t));
 				outMeta[tag] = (bool)(*reinterpret_cast<uint8_t*>(&buf));
 				break;
+			case MetaValueType::UChar:
+				fs.read(buf, sizeof(uint8_t));
+				outMeta[tag] = *reinterpret_cast<uint8_t*>(&buf);
+				break;
+			case MetaValueType::UShort:
+				fs.read(buf, sizeof(uint16_t));
+				outMeta[tag] = *reinterpret_cast<uint16_t*>(&buf);
+				break;
 			case MetaValueType::Integer:
 				fs.read(buf, sizeof(int32_t));
 				outMeta[tag] = *reinterpret_cast<int32_t*>(&buf);
@@ -62,12 +70,25 @@ namespace fig::fs
 				fs.read(buf, sizeof(_meta_identifier));
 				outMeta[tag] = *reinterpret_cast<_meta_identifier*>(&buf);
 				break;
-			case MetaValueType::String:
+			case MetaValueType::String8:
 			{
 				// Read length
 				uint32_t len;
-				fs.read(buf, sizeof(uint32_t));
-				len = *reinterpret_cast<uint32_t*>(&buf);
+				fs.read(buf, sizeof(uint8_t));
+				len = *reinterpret_cast<uint8_t*>(&buf);
+
+				// Read data
+				std::vector<char> strbuf(len);
+				fs.read(strbuf.data(), len);
+				outMeta[tag] = fig::string(strbuf.cbegin(), strbuf.cend());
+				break;
+			}
+			case MetaValueType::String16:
+			{
+				// Read length
+				uint32_t len;
+				fs.read(buf, sizeof(uint16_t));
+				len = *reinterpret_cast<uint16_t*>(&buf);
 
 				// Read data
 				std::vector<char> strbuf(len);
