@@ -12,6 +12,8 @@ namespace fig::gui
 		Italic,
 		Bold,
 		NunitoBold,
+		CardHeader,
+		CardSubheader = Regular,
 		Default = Regular,
 	};
 

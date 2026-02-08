@@ -60,8 +60,8 @@ void Control::Render(Renderer* pRenderer)
 		else
 			clippingRect = rect;
 
-		SDL_SetRenderClipRect(pRenderer, &clippingRect);
-		s_pClippingRect = &clippingRect;
+		if (SDL_SetRenderClipRect(pRenderer, &clippingRect))
+			s_pClippingRect = &clippingRect;
 	}
 
 	// Draw this

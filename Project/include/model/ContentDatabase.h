@@ -13,6 +13,7 @@ namespace fig::fs
 	public:
 		ContentDatabase(AssetManager& assetMngr);
 
+		std::optional<fig::data::CharacterData> GetCharacter(const fig::uuid& id) const noexcept;
 		auto GetCharacters() const noexcept { return _characters | std::views::values; }
 
 	protected:

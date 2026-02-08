@@ -9,6 +9,7 @@ std::map<FontFace, const char*> s_FontFilenames {
 	{ FontFace::Italic,		"./resources/fonts/Nunito-Italic.ttf" },
 	{ FontFace::Bold,		"./resources/fonts/Roboto-Medium.ttf" },
 	{ FontFace::NunitoBold,	"./resources/fonts/Nunito-MediumItalic.ttf" },
+	{ FontFace::CardHeader,	"./resources/fonts/Nunito-BoldItalic.ttf" },
 };
 
 std::list<const char*> s_FallbackFontFilenames {

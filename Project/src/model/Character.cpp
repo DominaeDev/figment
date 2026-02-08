@@ -21,6 +21,8 @@ namespace fig::data
 		data.shortName = trim(rootNode.GetElementText("FirstName").value_or(""));
 		data.fullName = trim(rootNode.GetElementText("FullName").value_or(""));
 
+		data.subheader = trim(rootNode.GetElementText("Subheader").value_or(""));
+
 		if (data.characterId.empty())
 			data.characterId = data.shortName;
 		if (data.fullName.empty())
@@ -106,6 +108,9 @@ namespace fig::data
 
 		if (not fullName.empty())
 			root.SetElement("FullName", fullName);
+
+		if (not subheader.empty())
+			root.SetElement("Subheader", subheader);
 
 		switch (gender)
 		{

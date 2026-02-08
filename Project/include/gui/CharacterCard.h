@@ -23,6 +23,7 @@ namespace fig::gui
 		fig::uuid _characterId;
 		fig::sdl::Surface _surface;
 		fig::sdl::Texture _texture;
+
 	};
 }
 

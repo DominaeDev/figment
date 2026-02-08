@@ -35,4 +35,11 @@ namespace fig::fs
 		}
 	}
 
+	std::optional<fig::data::CharacterData> ContentDatabase::GetCharacter(const fig::uuid& id) const noexcept
+	{
+		auto itFind = _characters.find(id);
+		if (itFind != _characters.cend())
+			return std::make_optional(itFind->second);
+		return std::nullopt;
+	}
 }

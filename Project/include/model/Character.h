@@ -28,6 +28,7 @@ namespace fig::data
 		fig::string characterId; // Chat id
 		fig::string shortName;
 		fig::string fullName;
+		fig::string subheader;
 		fig::string brief;
 		fig::string description;
 		gui::Color bgColor {};

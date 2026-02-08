@@ -50,6 +50,9 @@ namespace fig::gui
 
 		void SetForegroundColor(Color color) override;
 		void SetBackgroundColor(Color color) override;
+		void EnableDropShadow(bool bEnable) noexcept { _bDropShadow = bEnable; _bInvalidated = true; }
+		void EnableWordWrap(bool bEnable) noexcept { _bWordWrap = bEnable; _bInvalidated = true; }
+		void EnableEllipsis(bool bEnable) noexcept { _bEllipsis = bEnable; _bInvalidated = true; }
 
 	protected:
 		Rectf GetAlignedRect() const;
@@ -61,14 +64,20 @@ namespace fig::gui
 
 	private:
 		void DrawText(float& textWidth, float& textHeight);
+		void DrawShadow(const char* pText);
+		fig::string GetEllipsisText(const fig::string& text) const;
 		void ReleaseTexture();
 
 		fig::string _text;
 		bool _bInvalidated = false;
 		bool _bAutoSize = true;
+		bool _bDropShadow = false;
+		bool _bWordWrap = true;
+		bool _bEllipsis = false;
 
 		TTF_Font* _pFont = nullptr;
-		Texture* _pTexture = nullptr;
+		fig::sdl::Texture _texture {};
+		fig::sdl::Texture _shadow {};
 		int _textWidth;
 		int _textHeight;
 

@@ -8,6 +8,9 @@
 using namespace fig::gui;
 using namespace fig::gui_util;
 
+constexpr Color DropShadowColor { 0x00, 0x00, 0x00, 0xC0 };
+constexpr float DropShadowDistance { 1.25f };
+
 StaticText::StaticText(Control* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize) : ControlWithMargins(pParent),
 	_bAutoSize(bAutoSize)
 {
@@ -34,11 +37,8 @@ StaticText::~StaticText()
 
 void StaticText::ReleaseTexture()
 {
-	if (_pTexture)
-	{
-		SDL_DestroyTexture(_pTexture);
-		_pTexture = nullptr;
-	}
+	_texture.clear();
+	_shadow.clear();
 }
 
 void StaticText::SetText(fig::string text)
@@ -78,10 +78,20 @@ void StaticText::OnRender(Renderer* pRenderer)
 	if (is_defined(bgColor) && bgColor.a != 0)
 		DrawBackground(pRenderer);
 
-	if (_pTexture)
+	bool test = SDL_RenderClipEnabled(pRenderer);
+
+	if (not _shadow.empty() and _bDropShadow)
 	{
 		Rectf alignRect = GetAlignedRect();
-		SDL_RenderTexture(pRenderer, _pTexture, NULL, &alignRect);
+		alignRect.x += DropShadowDistance;
+		alignRect.y += DropShadowDistance;
+		SDL_RenderTexture(pRenderer, _shadow.get(), NULL, &alignRect);
+	}
+
+	if (not _texture.empty())
+	{
+		Rectf alignRect = GetAlignedRect();
+		SDL_RenderTexture(pRenderer, _texture.get(), NULL, &alignRect);
 	}
 }
 
@@ -92,19 +102,41 @@ void StaticText::DrawText(float& newWidth, float& newHeight)
 	ReleaseTexture();
 	auto pRenderer = GetSDLRenderer();
 
-	int maxWidth = std::max(toI(_maxSize.x), 0);
+	if (_text.empty())
+	{
+		newWidth = 0;
+		newHeight = 0;
+		return;
+	}
 
-	if (is_defined(fgColor) && _text.size() > 0)
+	int maxWidth = std::max(toI(_maxSize.x), 0);
+	const char* pText = _text.c_str();
+	
+	std::string altText;
+	if (_bEllipsis)
+	{
+		altText = GetEllipsisText(_text);
+		pText = altText.c_str();
+	}
+
+	if (_bDropShadow)
+		DrawShadow(pText);
+
+
+	if (is_defined(fgColor))
 	{
 		// Opaque background: Use ClearType
 		if (bgColor.a == 0xFF)
 		{
-			SDL_Surface* pSurface = TTF_RenderText_LCD_Wrapped(_pFont, _text.c_str(), 0, fgColor, bgColor, maxWidth);
+			SDL_Surface* pSurface = _bWordWrap ? 
+				  TTF_RenderText_LCD_Wrapped(_pFont, pText, 0, fgColor, bgColor, maxWidth)
+				: TTF_RenderText_LCD(_pFont, pText, 0, fgColor, bgColor);
 			if (pSurface)
 			{
 				_textWidth = pSurface->w;
 				_textHeight = pSurface->h;
-				_pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+
+				_texture.reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
 				SDL_DestroySurface(pSurface);
 
 				newWidth = _textWidth + GetMarginHorizontal();
@@ -116,12 +148,14 @@ void StaticText::DrawText(float& newWidth, float& newHeight)
 		}
 		else if (bgColor.a == 0) // Transparent background
 		{
-			SDL_Surface* pSurface = TTF_RenderText_Blended_Wrapped(_pFont, _text.c_str(), 0, fgColor, maxWidth);
+			SDL_Surface* pSurface = _bWordWrap ?
+				  TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, fgColor, maxWidth)
+				: TTF_RenderText_Blended(_pFont, pText, 0, fgColor);
 			if (pSurface)
 			{
 				_textWidth = pSurface->w;
 				_textHeight = pSurface->h;
-				_pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+				_texture.reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
 				SDL_DestroySurface(pSurface);
 
 				newWidth = _textWidth + GetMarginHorizontal();
@@ -134,7 +168,9 @@ void StaticText::DrawText(float& newWidth, float& newHeight)
 		else
 		{
 			// Recreate text
-			SDL_Surface* pSurface = TTF_RenderText_Blended_Wrapped(_pFont, _text.c_str(), 0, Colors::White, maxWidth);
+			SDL_Surface* pSurface = _bWordWrap ? 
+				  TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, Colors::White, maxWidth)
+				: TTF_RenderText_Blended(_pFont, pText, 0, Colors::White);
 			if (pSurface)
 			{
 				_textWidth = pSurface->w;
@@ -149,8 +185,8 @@ void StaticText::DrawText(float& newWidth, float& newHeight)
 				SDL_SetSurfaceBlendMode(pSurface, SDL_BLENDMODE_NONE);
 				SDL_BlitSurface(pColorSurface, NULL, pSurface, NULL);
 
-				_pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
-				SDL_SetTextureBlendMode(_pTexture, SDL_BLENDMODE_BLEND);
+				_texture.reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
+				SDL_SetTextureBlendMode(_texture.get(), SDL_BLENDMODE_BLEND);
 
 				SDL_DestroySurface(pColorSurface);
 				SDL_DestroySurface(pSurface);
@@ -170,6 +206,29 @@ void StaticText::DrawText(float& newWidth, float& newHeight)
 	newHeight = 0;
 	if (_bAutoSize)
 		SetSize(0, 0);
+}
+
+void StaticText::DrawShadow(const char* pText)
+{
+	auto pRenderer = GetSDLRenderer();
+	auto fgColor = GetForegroundColor();
+
+	int maxWidth = std::max(toI(_maxSize.x), 0);
+
+	_shadow.clear();
+
+	if (is_defined(fgColor))
+	{
+		SDL_Surface* pSurface = _bWordWrap ? 
+			  TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, DropShadowColor, maxWidth)
+			: TTF_RenderText_Blended(_pFont, pText, 0, DropShadowColor);
+
+		if (pSurface)
+		{
+			_shadow.reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
+			SDL_DestroySurface(pSurface);
+		}
+	}
 }
 
 void StaticText::OnParent()
@@ -209,4 +268,42 @@ void StaticText::SetBackgroundColor(Color color)
 { 
 	Control::SetBackgroundColor(color);
 	InvalidateText();
+}
+
+constexpr fig::string ellipsis(const fig::string& text, size_t length) noexcept
+{
+	return text.substr(0, std::min(length, text.size())) + "\u2026";
+}
+
+fig::string StaticText::GetEllipsisText(const fig::string& text) const
+{
+	if (text.empty())
+		return "";
+	
+	int maxWidth = std::max(toI(_maxSize.x), 0);
+	if (maxWidth == 0)
+		return text;
+
+	int w, h;
+	if (TTF_GetStringSize(_pFont, text.c_str(), 0, &w, &h) and w <= maxWidth)
+		return text;
+
+	fig::string testString;
+	testString.reserve(text.length());
+	size_t pos = 1;
+	for (; pos < text.length(); pos += 6)
+	{
+		testString = ellipsis(text, pos);
+		if (TTF_GetStringSize(_pFont, testString.c_str(), 0, &w, &h) and w > maxWidth)
+			break;
+	}
+
+	--pos;
+	for (; pos > 0; --pos)
+	{
+		testString = text.substr(0, pos) + "\u2026";
+		if (TTF_GetStringSize(_pFont, testString.c_str(), 0, &w, &h) and w <= maxWidth)
+			return testString;
+	}
+	return text;
 }

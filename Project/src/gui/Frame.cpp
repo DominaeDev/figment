@@ -8,7 +8,7 @@ using namespace fig::gui;
 Frame::Frame(Window* pHostWindow) : Control(nullptr, pHostWindow)
 {
 	int w, h;
-	SDL_GetWindowSizeInPixels(pHostWindow->GetSDLWindow(), &w, &h);
+	SDL_GetWindowSizeInPixels(pHostWindow->GetSDLWindow().get(), &w, &h);
 	SetSize(toF(w), toF(h));
 }
 

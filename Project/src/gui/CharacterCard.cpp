@@ -28,6 +28,33 @@ namespace fig::gui
 		auto pBorder = new Border(this, TextureStore::GetTexture(TextureType::CARD_BORDER), 16);
 		pBorder->SetSize(GetSize());
 		pBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+
+		if (auto character = ApplicationState::GetUserManager().GetContent().GetCharacter(characterId))
+		{
+			auto pNameLabel = new StaticText(this, character.value().fullName, FontFace::CardHeader, 24.0, false);
+			pNameLabel->SetMaxSize(GetWidth() - (12 * 2), -1);
+			pNameLabel->SetSize(GetWidth() - (12 * 2), 80);
+			pNameLabel->SetPosition(12, GetHeight() - 62);
+			pNameLabel->SetForegroundColor(Colors::White);
+			pNameLabel->SetBackgroundColor(Colors::Transparent);
+			pNameLabel->EnableDropShadow(true);
+			pNameLabel->EnableWordWrap(false);
+			pNameLabel->EnableEllipsis(true);
+
+
+			if (not character.value().subheader.empty())
+			{
+				auto pSubLabel = new StaticText(this, character.value().subheader, FontFace::CardHeader, 16.5, false);
+				pSubLabel->SetMaxSize(GetWidth() - (12 * 2), -1);
+				pSubLabel->SetSize(GetWidth() - (12 * 2), 80);
+				pSubLabel->SetPosition(12, GetHeight() - 32);
+				pSubLabel->SetForegroundColor(Colors::White);
+				pSubLabel->SetBackgroundColor(Colors::Transparent);
+				pSubLabel->EnableDropShadow(true);
+				pSubLabel->EnableWordWrap(false);
+				pSubLabel->EnableEllipsis(true);
+			}
+		}
 	}
 
 	void CharacterCard::OnRender(Renderer* pRenderer)
