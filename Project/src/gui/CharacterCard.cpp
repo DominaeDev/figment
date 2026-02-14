@@ -13,6 +13,8 @@ using namespace fig::fs;
 
 namespace fig::gui
 {
+	constexpr float Margin = 12.0f;
+
 	CharacterCard::CharacterCard(Control* pParent, const fig::uuid& characterId) : Image(pParent, nullptr),
 		_characterId { characterId }
 	{
@@ -32,9 +34,9 @@ namespace fig::gui
 		if (auto character = ApplicationState::GetUserManager().GetContent().GetCharacter(characterId))
 		{
 			auto pNameLabel = new StaticText(this, character.value().fullName, FontFace::CardHeader, 24.0, false);
-			pNameLabel->SetMaxSize(GetWidth() - (12 * 2), -1);
-			pNameLabel->SetSize(GetWidth() - (12 * 2), 80);
-			pNameLabel->SetPosition(12, GetHeight() - 62);
+			pNameLabel->SetMaxSize(GetWidth() - (Margin * 2), -1);
+			pNameLabel->SetSize(GetWidth() - (Margin * 2), 80);
+			pNameLabel->SetPosition(Margin, GetHeight() - Margin - 52);
 			pNameLabel->SetForegroundColor(Colors::White);
 			pNameLabel->SetBackgroundColor(Colors::Transparent);
 			pNameLabel->EnableDropShadow(true);
@@ -44,10 +46,10 @@ namespace fig::gui
 
 			if (not character.value().subheader.empty())
 			{
-				auto pSubLabel = new StaticText(this, character.value().subheader, FontFace::CardHeader, 16.5, false);
-				pSubLabel->SetMaxSize(GetWidth() - (12 * 2), -1);
-				pSubLabel->SetSize(GetWidth() - (12 * 2), 80);
-				pSubLabel->SetPosition(12, GetHeight() - 32);
+				auto pSubLabel = new StaticText(this, character.value().subheader, FontFace::CardSubheader, 16.5, false);
+				pSubLabel->SetMaxSize(GetWidth() - (Margin * 2), -1);
+				pSubLabel->SetSize(GetWidth() - (Margin * 2), 80);
+				pSubLabel->SetPosition(Margin, GetHeight() - Margin - 22);
 				pSubLabel->SetForegroundColor(Colors::White);
 				pSubLabel->SetBackgroundColor(Colors::Transparent);
 				pSubLabel->EnableDropShadow(true);
@@ -62,6 +64,4 @@ namespace fig::gui
 		Image::OnRender(pRenderer);
 		DrawBorder(pRenderer);
 	}
-
-
 }
