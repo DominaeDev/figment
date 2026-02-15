@@ -12,7 +12,7 @@
 #include "gui/Fonts.h"
 #include "gui/MainFrame.h"
 #include "gui/Window.h"
-#include "llm/LLMEngine.h"
+#include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 
 #if defined(_DEBUG)

@@ -1,6 +1,5 @@
 #include <pch.h>
-#include "model/Character.h"
-#include "gui/GUIUtility.h"
+#include "model/CharacterData.h"
 #include "util/StringUtility.h"
 #include "fs/Xml.h"
 
@@ -94,44 +93,44 @@ namespace fig::data
 		return ReadXml(xml, *this);
 	}
 
-	void CharacterData::SaveToXml(fig::bytes& buffer)
+	void CharacterData::SaveToXml(fig::bytes& buffer) const
 	{
 		XmlWriter xml("Character");
 
 		auto root = xml.GetRoot();
-		root.SetElement("ID", characterId);
+		root.SetElementValue("ID", characterId);
 		
 		if (not shortName.empty())
-			root.SetElement("FirstName", shortName);
+			root.SetElementValue("FirstName", shortName);
 		else
-			root.SetElement("FirstName", "Unnamed");
+			root.SetElementValue("FirstName", "Unnamed");
 
 		if (not fullName.empty())
-			root.SetElement("FullName", fullName);
+			root.SetElementValue("FullName", fullName);
 
 		if (not subheader.empty())
-			root.SetElement("Subheader", subheader);
+			root.SetElementValue("Subheader", subheader);
 
 		switch (gender)
 		{
 		case CharacterGender::Male:
-			root.SetElement("Gender", "Male");
+			root.SetElementValue("Gender", "Male");
 			break;
 		case CharacterGender::Female:
-			root.SetElement("Gender", "Female");
+			root.SetElementValue("Gender", "Female");
 			break;
 		case CharacterGender::Custom:
-			if (properties.contains(Constants::CharacterProperties::Gender))
-				root.SetElement("Gender", properties[Constants::CharacterProperties::Gender].value);
+			if (auto it = properties.find(Constants::CharacterProperties::Gender); it != properties.cend())
+				root.SetElementValue("Gender", it->second.value);
 			break;
 		default:
 			break;
 		}
 
 		if (not brief.empty())
-			root.SetElement("Brief", brief);
+			root.SetElementValue("Brief", brief);
 		if (not description.empty())
-			root.SetElement("Description", description);
+			root.SetElementValue("Description", description);
 
 		xml.SaveToMemory(buffer);
 	}

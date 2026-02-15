@@ -45,6 +45,7 @@ namespace fig
 		XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot) noexcept;
 
 	public:
+		std::optional<XmlReaderElement> GetFirstElement() const noexcept;
 		std::optional<XmlReaderElement> GetFirstElement(const fig::string& name) const noexcept;
 		std::optional<XmlReaderElement> GetNextSiblingAny() const noexcept;
 		std::optional<XmlReaderElement> GetNextSibling() const noexcept;
@@ -142,12 +143,12 @@ namespace fig
 		void SetAttribute(const fig::string& name, const fig::byte_span& value) noexcept;
 		void SetAttribute(const fig::string& name, const fig::uuid& value) noexcept;
 
-		void SetElement(const fig::string& name, bool value) noexcept;
-		void SetElement(const fig::string& name, int32_t value) noexcept;
-		void SetElement(const fig::string& name, float value) noexcept;
-		void SetElement(const fig::string& name, const fig::string& value) noexcept;
-		void SetElement(const fig::string& name, const fig::byte_span& value) noexcept;
-		void SetElement(const fig::string& name, const fig::uuid& value) noexcept;
+		void SetElementValue(const fig::string& name, bool value) noexcept;
+		void SetElementValue(const fig::string& name, int32_t value) noexcept;
+		void SetElementValue(const fig::string& name, float value) noexcept;
+		void SetElementValue(const fig::string& name, const fig::string& value) noexcept;
+		void SetElementValue(const fig::string& name, const fig::byte_span& value) noexcept;
+		void SetElementValue(const fig::string& name, const fig::uuid& value) noexcept;
 
 		XmlWriterAttribute operator[] (const std::string& key) noexcept;
 

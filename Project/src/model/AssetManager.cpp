@@ -1,15 +1,17 @@
 #include <pch.h>
+#include <filesystem>
+#include <format>
+#include <ranges>
+#include <set>
 #include "model/AssetManager.h"
 #include "model/UserManager.h"
 #include "model/AppState.h"
+#include "model/CharacterData.h"
+#include "model/ScenarioData.h"
 #include "util/Common.h"
 #include "fs/Xml.h"
 #include "fs/Serialization.h"
 #include "fs/FileUtility.h"
-#include "model/Character.h"
-#include <filesystem>
-#include <format>
-#include <ranges>
 
 using namespace fig::data;
 using namespace fig::common_util;
@@ -70,9 +72,9 @@ namespace fig::fs
 		{
 			auto& asset = kvp.second;
 			auto assetNode = xml.AddChild("Asset");
-			assetNode.SetElement("ID", asset.id);
-			assetNode.SetElement("ParentID", asset.parent_id);
-			assetNode.SetElement("Type", AssetTypeToString(asset.asset_type, asset.asset_subtype));
+			assetNode.SetElementValue("ID", asset.id);
+			assetNode.SetElementValue("ParentID", asset.parent_id);
+			assetNode.SetElementValue("Type", AssetTypeToString(asset.asset_type, asset.asset_subtype));
 		}
 
 		return xml.Save(path);
@@ -335,5 +337,85 @@ namespace fig::fs
 		}
 
 		return characterAsset;
+	}
+
+	std::expected<AssetRef, FileError> AssetManager::ImportScenario(fig::path filename)
+	{
+		ScenarioData scenario;
+		if (not scenario.LoadFromXml(filename))
+			return std::unexpected(FileError::UnrecognizedFormat);
+
+		fig::bytes scenarioData;
+		scenario.SaveToXml(scenarioData);
+		auto& scenarioAsset = CreateAsset(AssetType::Scenario, DataFormat::DataXml, scenarioData, _profileID);
+		return scenarioAsset;
+	}
+
+	uint32_t AssetManager::DeleteAssets(std::span<fig::uuid> assetIDs) noexcept
+	{
+		uint32_t count = 0;
+		for (auto& id : assetIDs)
+			count += DeleteAsset(id);
+		return count;
+	}
+
+	uint32_t AssetManager::DeleteAsset(const fig::uuid& assetID) noexcept
+	{
+		// Find all related assets
+		std::set<fig::uuid> assetIDs;
+		std::set<fig::uuid> openList;
+		openList.insert(assetID);
+
+		while (not openList.empty())
+		{
+			fig::uuid id = *openList.begin();
+			openList.erase(id);
+			auto itAsset = _assets.find(id);
+			if (itAsset == _assets.end())
+				continue;
+
+			assetIDs.insert(id);
+
+			// Scan children
+			openList.insert_range(_assets
+				| std::views::filter([&id](auto const& kvp) { return kvp.second.parent_id == id; })
+				| std::views::transform([](auto const& kvp) -> fig::uuid { return kvp.second.id; }));
+		}
+
+		// Delete
+		uint32_t count = 0;
+		for (auto& id : assetIDs)
+		{
+			if (EraseAsset(id))
+				++count;
+		}
+		
+		if (count > 0)
+			SaveIndex();
+
+		return count;
+	}
+
+	bool AssetManager::EraseAsset(const fig::uuid& assetID) noexcept
+	{
+		// Find asset and all related assets
+		std::vector<fig::uuid> assetIds;
+
+		auto itAsset = _assets.find(assetID);
+		if (itAsset == _assets.end())
+			return false;
+
+		auto& asset = itAsset->second;
+		auto path = _profilePath / asset.GetFileName();
+		if (std::filesystem::exists(path) and std::filesystem::is_regular_file(path))
+		{
+			std::error_code err;
+			if (std::filesystem::remove(path, err))
+			{
+				_assets.erase(itAsset);
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -14,7 +14,7 @@
 #include "model/ChatCommandExecutor.h"
 #include "model/UserManager.h"
 #include "model/AssetManager.h"
-#include "llm/LLMEngine.h"
+#include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "util/StringUtility.h"
@@ -129,15 +129,26 @@ namespace fig::gui
 			userMngr.SignInDefaultProfile();
 		}
 
+		// Import test characters
 		if constexpr (Disabled)
 		{
-			// Import test characters
 			if (userMngr.IsSignedIn())
 			{
 				auto& assets = userMngr.GetProfileAssets();
 				auto x = assets.ImportCharacter(fig::path("./characters/user.xml"));
 				auto y = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
 				auto z = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
+				assets.SaveModified();
+			}
+		}
+
+		// Import test scenario
+		if constexpr (Disabled)
+		{
+			if (userMngr.IsSignedIn())
+			{
+				auto& assets = userMngr.GetProfileAssets();
+				auto x = assets.ImportScenario(fig::path("./characters/scenario.xml"));
 				assets.SaveModified();
 			}
 		}
@@ -188,7 +199,10 @@ namespace fig::gui
 				[this, &engine](bool bSuccess)
 			{
 				if (bSuccess)
-					ApplicationState::SetLLMInstance(engine.CreateInstance(Constants::Context::DefaultSize, DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings)));
+				{
+					auto pInstance = engine.CreateInstance(Constants::Context::DefaultSize, DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings));
+					ApplicationState::SetLLMInstance(pInstance);
+				}
 			});
 		}
 	}

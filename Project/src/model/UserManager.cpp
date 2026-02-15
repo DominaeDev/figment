@@ -187,13 +187,13 @@ namespace fig::fs
 			auto profileNode = xml.AddChild("Profile");
 			profileNode["version"] = toI(profile.version);
 
-			profileNode.SetElement("ID", profile.id);
-			profileNode.SetElement("Name", profile.name);
+			profileNode.SetElementValue("ID", profile.id);
+			profileNode.SetElementValue("Name", profile.name);
 
 			fig::bytes auth(profile.authChallenge.size() + sizeof(AuthSalt));
 			std::memcpy(auth.data(), profile.authSalt.data(), sizeof(AuthSalt));
 			std::memcpy(auth.data() + sizeof(AuthSalt), profile.authChallenge.data(), profile.authChallenge.size());
-			profileNode.SetElement("Auth", auth);
+			profileNode.SetElementValue("Auth", auth);
 		}
 
 		fig::path path(std::format("{}/{}.{}", Constants::Paths::ProfilesFolder, Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt));

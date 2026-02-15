@@ -133,32 +133,32 @@ namespace fig
 		return XmlWriterElement(pElement);
 	}
 
-	void XmlWriterElement::SetElement(const fig::string& name, bool value) noexcept
+	void XmlWriterElement::SetElementValue(const fig::string& name, bool value) noexcept
 	{
 		AddChild(name).SetValue(value);
 	}
 
-	void XmlWriterElement::SetElement(const fig::string& name, int32_t value) noexcept
+	void XmlWriterElement::SetElementValue(const fig::string& name, int32_t value) noexcept
 	{
 		AddChild(name).SetValue(value);
 	}
 
-	void XmlWriterElement::SetElement(const fig::string& name, float value) noexcept
+	void XmlWriterElement::SetElementValue(const fig::string& name, float value) noexcept
 	{
 		AddChild(name).SetValue(value);
 	}
 
-	void XmlWriterElement::SetElement(const fig::string& name, const fig::string& value) noexcept
+	void XmlWriterElement::SetElementValue(const fig::string& name, const fig::string& value) noexcept
 	{
 		AddChild(name).SetValue(value);
 	}
 
-	void XmlWriterElement::SetElement(const fig::string& name, const fig::byte_span& value) noexcept
+	void XmlWriterElement::SetElementValue(const fig::string& name, const fig::byte_span& value) noexcept
 	{
 		AddChild(name).SetValue(value);
 	}
 
-	void XmlWriterElement::SetElement(const fig::string& name, const fig::uuid& value) noexcept
+	void XmlWriterElement::SetElementValue(const fig::string& name, const fig::uuid& value) noexcept
 	{
 		AddChild(name).SetValue(value);
 	}

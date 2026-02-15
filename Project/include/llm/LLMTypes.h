@@ -2,6 +2,7 @@
 
 #include "Types.h"
 #include "ContextCursor.h"
+#include "llm/PromptTemplateTypes.h"
 #include <llama.h>
 
 namespace fig::llm
@@ -45,8 +46,8 @@ namespace fig::llm
 		SequenceSlot::Bot4,
 	};
 
-	class LLMEngine;
-	using LLMEnginePtr = std::shared_ptr<LLMEngine>;
+	class LLMBackend;
+	using LLMEnginePtr = std::shared_ptr<LLMBackend>;
 	class LLMInstance;
 	using LLMInstancePtr = std::shared_ptr<LLMInstance>;
 

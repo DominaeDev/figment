@@ -1094,4 +1094,480 @@ namespace fig::llm_util
 		return toF(sum / (sqrt(sum1) * sqrt(sum2)));
 	}
 
+	PromptTemplateType _current_template = PromptTemplateType::Default;
+	fig::string _template {};
+
+	static const std::map<PromptTemplateType, fig::string> LLAMA_CPP_TEMPLATES = {
+		{ PromptTemplateType::ChatML,			"chatml",			},
+		{ PromptTemplateType::Llama2_v1,		"llama2",			},
+		{ PromptTemplateType::Llama2_sys,		"llama2-sys",		},
+		{ PromptTemplateType::Llama2_sys_bos,	"llama2-sys-bos",	},
+		{ PromptTemplateType::Llama2_sys_strip,	"llama2-sys-strip",	},
+		{ PromptTemplateType::Llama3,			"llama3",			},
+		{ PromptTemplateType::Llama4,			"llama4",			},
+		{ PromptTemplateType::Deepseek,			"deepseek",			},
+		{ PromptTemplateType::Deepseek2,		"deepseek2",		},
+		{ PromptTemplateType::Deepseek3,		"deepseek3",		},
+		{ PromptTemplateType::Gemma,			"gemma",			},	// only: user, model
+
+		{ PromptTemplateType::MistralV1,		"mistral-v1",		},
+		{ PromptTemplateType::MistralV3,		"mistral-v3",		},
+		{ PromptTemplateType::MistralV3_tekken,	"mistral-v3-tekken",},
+		{ PromptTemplateType::MistralV7,		"mistral-v7",		},
+		{ PromptTemplateType::Phi3,				"phi3",				},
+		{ PromptTemplateType::Phi4,				"phi4",				},
+		{ PromptTemplateType::CommandR,			"command-r",		},
+
+		/* Not supported for now:
+		{ PromptTemplateType::Vicuna,			"vicuna",			},
+		{ PromptTemplateType::VicunaOrca,		"vicuna-orca",		},
+		{ PromptTemplateType::Falcon3,			"falcon3",			},
+		{ PromptTemplateType::Zephyr,			"zephyr",			},
+		{ PromptTemplateType::Monarch,			"monarch",			},
+		{ PromptTemplateType::Orion,			"orion",			},
+		{ PromptTemplateType::OpenChat,			"openchat",			},
+		{ PromptTemplateType::Chatglm3,			"chatglm3",			},
+		{ PromptTemplateType::Chatglm4,			"chatglm4",			},
+		{ PromptTemplateType::Glmedge,			"glmedge",			},
+		{ PromptTemplateType::Minicpm,			"minicpm",			},
+		{ PromptTemplateType::Exaone3,			"exaone3",			},
+		{ PromptTemplateType::Rwkv_world,		"rwkv-world",		},
+		{ PromptTemplateType::Granite,			"granite",			},
+		{ PromptTemplateType::Gigachat,			"gigachat",			},
+		{ PromptTemplateType::Megrez,			"megrez",			},
+		{ PromptTemplateType::Yandex,			"yandex",			},
+		{ PromptTemplateType::Bailing,			"bailing",			},
+		{ PromptTemplateType::Smolvlm,			"smolvlm",			},
+		*/
+	};
+
+#define LU8(x) (const char*)(u8##x)
+
+	static const char* get_tmpl(PromptTemplateType tmpl)
+	{
+		return LLAMA_CPP_TEMPLATES.find(tmpl)->second.c_str();
+	}
+
+	// Lifted from llama.cpp API
+	static int32_t apply_template(PromptTemplateType tmpl, const std::vector<const llama_chat_message*>& chat, fig::string& dest, bool add_ass)
+	{
+		// Taken from the research: https://github.com/ggerganov/llama.cpp/issues/5527
+		std::stringstream ss;
+		if (tmpl == PromptTemplateType::ChatML)
+		{
+			// chatml template
+			for (auto message : chat)
+			{
+				ss << "<|im_start|>" << message->role << "\n" << message->content << "<|im_end|>\n";
+			}
+			if (add_ass)
+			{
+				ss << "<|im_start|>assistant\n";
+			}
+		}
+		else if (tmpl == PromptTemplateType::MistralV7)
+		{
+			// Official mistral 'v7' template
+			// See: https://huggingface.co/mistralai/Mistral-Large-Instruct-2411#basic-instruct-template-v7
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				fig::string content(message->content);
+				if (role == "system")
+				{
+					ss << "[SYSTEM_PROMPT] " << content << "[/SYSTEM_PROMPT]";
+				}
+				else if (role == "user")
+				{
+					ss << "[INST] " << content << "[/INST]";
+				}
+				else
+				{
+					ss << " " << content << "</s>";
+				}
+			}
+		}
+		else if (tmpl == PromptTemplateType::MistralV1
+			|| tmpl == PromptTemplateType::MistralV3
+			|| tmpl == PromptTemplateType::MistralV3_tekken)
+		{
+			// See: https://github.com/mistralai/cookbook/blob/main/concept-deep-dive/tokenization/chat_templates.md
+			// See: https://github.com/mistralai/cookbook/blob/main/concept-deep-dive/tokenization/templates.md
+			fig::string leading_space = tmpl == PromptTemplateType::MistralV1 ? " " : "";
+			fig::string trailing_space = tmpl == PromptTemplateType::MistralV3_tekken ? "" : " ";
+			bool trim_assistant_message = tmpl == PromptTemplateType::MistralV3;
+			bool is_inside_turn = false;
+			for (auto message : chat)
+			{
+				if (!is_inside_turn)
+				{
+					ss << leading_space << "[INST]" << trailing_space;
+					is_inside_turn = true;
+				}
+				fig::string role(message->role);
+				fig::string content(message->content);
+				if (role == "system")
+				{
+					ss << content << "\n\n";
+				}
+				else if (role == "user")
+				{
+					ss << content << leading_space << "[/INST]";
+				}
+				else
+				{
+					ss << trailing_space << (trim_assistant_message ? trim(content) : content) << "</s>";
+					is_inside_turn = false;
+				}
+			}
+		}
+		else if (
+			tmpl == PromptTemplateType::Llama2_v1
+			|| tmpl == PromptTemplateType::Llama2_sys
+			|| tmpl == PromptTemplateType::Llama2_sys_bos
+			|| tmpl == PromptTemplateType::Llama2_sys_strip)
+		{
+			// llama2 template and its variants
+			// [variant] support system message
+			// See: https://huggingface.co/blog/llama2#how-to-prompt-llama-2
+			bool support_system_message = tmpl != PromptTemplateType::Llama2_v1;
+			// [variant] add BOS inside history
+			bool add_bos_inside_history = tmpl == PromptTemplateType::Llama2_sys_bos;
+			// [variant] trim spaces from the input message
+			bool strip_message = tmpl == PromptTemplateType::Llama2_sys_strip;
+			// construct the prompt
+			bool is_inside_turn = true; // skip BOS at the beginning
+			ss << "[INST] ";
+			for (auto message : chat)
+			{
+				fig::string content = strip_message ? trim(message->content) : message->content;
+				fig::string role(message->role);
+				if (!is_inside_turn)
+				{
+					is_inside_turn = true;
+					ss << (add_bos_inside_history ? "<s>[INST] " : "[INST] ");
+				}
+				if (role == "system")
+				{
+					if (support_system_message)
+					{
+						ss << "<<SYS>>\n" << content << "\n<</SYS>>\n\n";
+					}
+					else
+					{
+						// if the model does not support system message, we still include it in the first message, but without <<SYS>>
+						ss << content << "\n";
+					}
+				}
+				else if (role == "user")
+				{
+					ss << content << " [/INST]";
+				}
+				else
+				{
+					ss << content << "</s>";
+					is_inside_turn = false;
+				}
+			}
+		}
+		else if (tmpl == PromptTemplateType::Phi3)
+		{
+			// Phi 3
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				ss << "<|" << role << "|>\n" << message->content << "<|end|>\n";
+			}
+			if (add_ass)
+			{
+				ss << "<|assistant|>\n";
+			}
+		}
+		else if (tmpl == PromptTemplateType::Phi4)
+		{
+			// chatml template
+			for (auto message : chat)
+			{
+				ss << "<|im_start|>" << message->role << "<|im_sep|>" << message->content << "<|im_end|>";
+			}
+			if (add_ass)
+			{
+				ss << "<|im_start|>assistant<|im_sep|>";
+			}
+		}
+		else if (tmpl == PromptTemplateType::Gemma)
+		{
+			// google/gemma-7b-it
+			fig::string system_prompt = "";
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				if (role == "system")
+				{
+					// there is no system message for gemma, but we will merge it with user prompt, so nothing is broken
+					if (chat.size() > 1)
+					{
+						system_prompt = trim(message->content);
+						continue;
+					}
+					else
+						role = "user";
+				}
+				// in gemma, "assistant" is "model"
+				role = role == "assistant" ? "model" : message->role;
+				ss << "<start_of_turn>" << role << "\n";
+				if (!system_prompt.empty() && role != "model")
+				{
+					ss << system_prompt << "\n\n";
+					system_prompt = "";
+				}
+				ss << trim(message->content) << "<end_of_turn>\n";
+			}
+			if (add_ass)
+			{
+				ss << "<start_of_turn>model\n";
+			}
+		}
+		else if (tmpl == PromptTemplateType::Deepseek)
+		{
+			// deepseek-ai/deepseek-coder-33b-instruct
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				if (role == "system")
+				{
+					ss << message->content;
+				}
+				else if (role == "user")
+				{
+					ss << "### Instruction:\n" << message->content << "\n";
+				}
+				else if (role == "assistant")
+				{
+					ss << "### Response:\n" << message->content << "\n<|EOT|>\n";
+				}
+			}
+			if (add_ass)
+			{
+				ss << "### Response:\n";
+			}
+		}
+		else if (tmpl == PromptTemplateType::CommandR)
+		{
+			// CohereForAI/c4ai-command-r-plus
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				if (role == "system")
+				{
+					ss << "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+				}
+				else if (role == "user")
+				{
+					ss << "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+				}
+				else if (role == "assistant")
+				{
+					ss << "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+				}
+			}
+			if (add_ass)
+			{
+				ss << "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>";
+			}
+		}
+		else if (tmpl == PromptTemplateType::Llama3)
+		{
+			// Llama 3
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				ss << "<|start_header_id|>" << role << "<|end_header_id|>\n\n" << trim(message->content) << "<|eot_id|>";
+			}
+			if (add_ass)
+			{
+				ss << "<|start_header_id|>assistant<|end_header_id|>\n\n";
+			}
+		}
+		else if (tmpl == PromptTemplateType::Deepseek2)
+		{
+			// DeepSeek-V2
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				if (role == "system")
+				{
+					ss << message->content << "\n\n";
+				}
+				else if (role == "user")
+				{
+					ss << "User: " << message->content << "\n\n";
+				}
+				else if (role == "assistant")
+				{
+					ss << "Assistant: " << message->content << LU8("<｜end▁of▁sentence｜>");
+				}
+			}
+			if (add_ass)
+			{
+				ss << "Assistant:";
+			}
+		}
+		else if (tmpl == PromptTemplateType::Deepseek3)
+		{
+			// DeepSeek-V3
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				if (role == "system")
+				{
+					ss << message->content << "\n\n";
+				}
+				else if (role == "user")
+				{
+					ss << LU8("<｜User｜>") << message->content;
+				}
+				else if (role == "assistant")
+				{
+					ss << LU8("<｜Assistant｜>") << message->content << LU8("<｜end▁of▁sentence｜>");
+				}
+			}
+			if (add_ass)
+			{
+				ss << LU8("<｜Assistant｜>");
+			}
+		}
+		else if (tmpl == PromptTemplateType::Llama4)
+		{
+			// Llama 4
+			for (auto message : chat)
+			{
+				fig::string role(message->role);
+				ss << "<|header_start|>" << role << "<|header_end|>\n\n" << trim(message->content) << "<|eot|>";
+			}
+			if (add_ass)
+			{
+				ss << "<|header_start|>assistant<|header_end|>\n\n";
+			}
+		}
+		else
+		{
+			// template not supported
+			return -1;
+		}
+		dest = ss.str();
+		return toI(dest.size());
+	}
+
+	std::pair<fig::string, fig::string> get_chat_template_prefix_suffix(Role role, fig::string name)
+	{
+		// Strip prompt template from block content
+		static const char* const SUBSTITUTE = "{{SUBSTITUTE}}";
+		fig::string tmpl = apply_chat_template({ Message { role, SUBSTITUTE, name } }, false);
+		if (tmpl.empty())
+			return std::make_pair("", ""); // Unknown template
+
+		size_t pos_msg = tmpl.find(SUBSTITUTE);
+		fig::string prefix = tmpl.substr(0, pos_msg);
+		fig::string suffix = tmpl.substr(pos_msg + strlen(SUBSTITUTE));
+		return std::make_pair(prefix, suffix);
+	}
+
+	fig::string apply_chat_template_prefix(Role role, fig::string content, fig::string name)
+	{
+		auto [pre, post] = get_chat_template_prefix_suffix(role, name);
+
+		if (ends_with(content, post))
+			content = content.substr(0, content.length() - post.length());
+		if (!begins_with(content, pre))
+			content = pre + content;
+		return content;
+	}
+
+	PromptTemplateType auto_detect_template(llama_model* pModel)
+	{
+		const char* tmpl = llama_model_chat_template(pModel, nullptr);
+		if (tmpl)
+		{
+			_template = toStr(tmpl);
+			_current_template = PromptTemplateType::Automatic;
+			return PromptTemplateType::Automatic;
+		}
+
+		// Not found
+		_current_template = PromptTemplateType::Undefined;
+		return PromptTemplateType::Undefined;
+	}
+
+	fig::string apply_chat_template(Messages messages, bool add_assistant)
+	{
+		if (messages.empty())
+			return "";
+
+		std::vector<llama_chat_message> msgs;
+		msgs.reserve(messages.size());
+		for (size_t i = 0; i < messages.size(); ++i)
+		{
+			const auto& msg = messages[i];
+			const char* name;
+			if (is_npc(msg.role))
+				name = "system";
+			else if (msg.role == Role::User)
+				name = "user";
+			else
+			{
+				name = msg.name.c_str();
+				// name = "assistant";
+			}
+
+			msgs.push_back(llama_chat_message {
+				name,
+				msg.content.c_str()
+				});
+		}
+
+		if (!_template.empty())
+		{
+			std::vector<char> formatted(Constants::Context::MaxResponseLength * 2);
+			int new_len = llama_chat_apply_template(_template.c_str(), msgs.data(), msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
+			if (new_len > (int)formatted.size())
+			{
+				formatted.resize(new_len);
+				new_len = llama_chat_apply_template(_template.c_str(), msgs.data(), msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
+			}
+			if (new_len < 0)
+			{
+				assert(0 && "failed to apply the chat template");
+				return "";
+			}
+
+			return fig::string(formatted.begin(), formatted.begin() + new_len);
+		}
+		else
+		{
+			std::vector<const llama_chat_message*> pMsgs;
+			pMsgs.reserve(messages.size());
+			for (size_t i = 0; i < msgs.size(); ++i)
+				pMsgs.push_back(&msgs[i]);
+
+			PromptTemplateType tmpl = _current_template;
+			if (tmpl == PromptTemplateType::Undefined || tmpl == PromptTemplateType::Automatic)
+				tmpl = PromptTemplateType::Default;
+
+			fig::string formatted;
+			int new_len = apply_template(tmpl, pMsgs, formatted, add_assistant);
+
+			if (new_len < 0)
+			{
+				assert(0 && "failed to apply the chat template");
+				return "";
+			}
+			return formatted;
+		}
+
+	}
+
+
+
+
 } // namespace

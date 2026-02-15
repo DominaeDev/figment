@@ -28,4 +28,6 @@ namespace fig::llm
 		Embeddings() = delete;
 		~Embeddings() = delete;
 	};
+
+	// TODO: remove static state
 }

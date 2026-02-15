@@ -1,5 +1,5 @@
-#ifndef CHARACTER_H__
-#define CHARACTER_H__
+#ifndef CHARACTER_DATA_H__
+#define CHARACTER_DATA_H__
 
 #pragma once
 
@@ -42,7 +42,7 @@ namespace fig::data
 
 		bool LoadFromXml(const fig::path& filename);
 		bool LoadFromXml(const fig::string& doc);
-		void SaveToXml(fig::bytes& buffer);
+		void SaveToXml(fig::bytes& buffer) const;
 	};
 }
 

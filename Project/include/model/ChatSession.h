@@ -2,7 +2,7 @@
 
 #include "model/ChatTypes.h"
 #include "model/ChatOptions.h"
-#include "model/Character.h"
+#include "model/CharacterData.h"
 #include <optional>
 #include <map>
 

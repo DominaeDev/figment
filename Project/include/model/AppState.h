@@ -24,7 +24,7 @@ namespace fig::fs
 
 namespace fig::llm
 {
-	class LLMEngine;
+	class LLMBackend;
 	class LLMInstance;
 }
 
@@ -34,7 +34,7 @@ public:
 	struct State
 	{
 		std::shared_ptr<fig::gui::Window> pMainWindow;
-		std::shared_ptr<fig::llm::LLMEngine> pLLMEngine;
+		std::shared_ptr<fig::llm::LLMBackend> pLLMEngine;
 		std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
 		std::shared_ptr<fig::fs::UserManager> pUserManager;
 	};
@@ -43,7 +43,7 @@ public:
 	static void ReleaseState();
 
 	static fig::gui::Window& GetMainWindow();
-	static fig::llm::LLMEngine& GetLLMEngine();
+	static fig::llm::LLMBackend& GetLLMEngine();
 	static fig::fs::UserManager& GetUserManager();
 
 	[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();

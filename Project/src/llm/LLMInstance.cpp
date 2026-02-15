@@ -2,7 +2,6 @@
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "llm/LLamaApi.h"
-#include "llm/LLMTemplate.h"
 #include "llm/LLMStatus.h"
 #include "llm/Embedding.h"
 #include "util/StringUtility.h"
@@ -118,7 +117,7 @@ bool LLMInstance::Initialize(LLMChatArguments args)
 	_contextState.Initialize();
 	ContextCursor& cursor_pos = _contextState.cursor_pos = 0;
 
-	auto [template_prefix, template_suffix] = llm_tmpl::get_chat_template_prefix_suffix(Role::System, "");
+	auto [template_prefix, template_suffix] = llm_util::get_chat_template_prefix_suffix(Role::System, "");
 
 	if (bMultiSequence) // Initialize a sequence for each bot
 	{
@@ -450,7 +449,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 			content += std::format("{}", _stateVars.GetList());
 			content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
 			content += "\nEx: <change>Param = New value</change>\n";
-			content = llm_tmpl::apply_chat_template({ Message { Role::System, content } }, false);
+			content = llm_util::apply_chat_template({ Message { Role::System, content } }, false);
 			auto state_tokens = llama::tokenize(state.pVocab, content, false);
 			auto it = blocks.insert(itState, ContextBlock {
 				.role = Role::System,
@@ -497,7 +496,7 @@ LLMInstance::InternalError LLMInstance::__PrepareGeneration(PrepareArguments arg
 	// Append assistant tokens
 	if (!args.isContinuation)
 	{
-		auto [prelude, _] = llm_tmpl::get_chat_template_prefix_suffix(args.responder, "assistant"); //! @name?
+		auto [prelude, _] = llm_util::get_chat_template_prefix_suffix(args.responder, "assistant"); //! @name?
 		prelude = _session.ApplyNames(prelude, args.responder);
 		auto assistant_tokens = llama::tokenize(state.pVocab, prelude, false);
 		pre_prompt_tokens.insert(pre_prompt_tokens.end(), assistant_tokens.begin(), assistant_tokens.end());

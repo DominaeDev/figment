@@ -2,7 +2,6 @@
 #include "llm/Context.h"
 #include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
-#include "llm/LLMTemplate.h"
 #include "llm/ModelState.h"
 #include "util/Common.h"
 #include "model/ChatSession.h"
@@ -61,13 +60,13 @@ void Context::TokenizeUncached(ChatSession& session)
 		fig::string content = block.content;
 
 		if (block.is_continuation()) // Continue response
-			content = llm_tmpl::apply_chat_template_prefix(block.role, content, block.name); //! name?
+			content = apply_chat_template_prefix(block.role, content, block.name); //! name?
 		else if (block.role == Role::System)
-			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
+			content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 		else
 		{
 			fig::llm_util::complete_message(content);
-			content = llm_tmpl::apply_chat_template({ Message { block.role, content, block.name } }, false);
+			content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 		}
 		content = session.ApplyNames(content, block.role); //! @move?
 		block.tokens = llama::tokenize(_pVocab, content, false);

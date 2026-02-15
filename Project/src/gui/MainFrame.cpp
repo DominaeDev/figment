@@ -42,15 +42,38 @@ namespace fig::gui
 			userMngr.SignInDefaultProfile();
 		}
 
+		// Import test characters
 		if constexpr (Disabled)
 		{
-			// Import test characters
 			if (userMngr.IsSignedIn())
 			{
 				auto& assets = userMngr.GetProfileAssets();
+
+				// Delete all characters
+				auto remove_characters = assets.GetAllCharacters()
+					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+					| std::ranges::to<std::vector>();
+				assets.DeleteAssets(remove_characters);
+
 				auto x = assets.ImportCharacter(fig::path("./characters/user.xml"));
 				auto y = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
 				auto z = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
+				userMngr.GetProfileAssets().SaveModified();
+			}
+		}
+
+		// Import test scenario
+		if constexpr (Disabled)
+		{
+			if (userMngr.IsSignedIn())
+			{
+				auto& assets = userMngr.GetProfileAssets();
+				auto remove_scenarios = assets.GetAllScenarios()
+					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+					| std::ranges::to<std::vector>();
+				assets.DeleteAssets(remove_scenarios);
+
+				auto x = assets.ImportScenario(fig::path("./characters/scenario.xml"));
 				userMngr.GetProfileAssets().SaveModified();
 			}
 		}

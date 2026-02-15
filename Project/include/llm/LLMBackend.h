@@ -19,11 +19,11 @@ namespace fig::llm
 	class LLMInstance;
 	class LLMEmbedding;
 
-	class LLMEngine
+	class LLMBackend
 	{
 	public:
-		LLMEngine();
-		~LLMEngine() = default;
+		LLMBackend();
+		~LLMBackend() = default;
 
 		bool Initialize(fig::string modelFilename, fig::string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 		bool Shutdown();
@@ -54,6 +54,7 @@ namespace fig::llm
 		LLMInstancePtr _mainInstance {};
 
 		LoadModelProgressCallback _pLoadModelProgressCallback = nullptr;
+
 	public:
 		std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 		std::atomic<int64_t> usedRAM; // As reported from llama.cpp

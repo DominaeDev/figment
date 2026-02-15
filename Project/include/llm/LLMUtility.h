@@ -14,9 +14,6 @@ namespace fig::llm_util
 	fig::string& sanitize_response(fig::string& text);
 	fig::string& complete_message(fig::string& text);
 	
-	// std::vector<fig::llm::Token> tokenize_and_batch(fig::llm::Context& context, fig::string content, fig::llm::SequenceSlots seq_id, int32_t pos, bool add_special = false);
-	// std::optional<std::vector<fig::llm::Token>> tokenize_and_decode(fig::llm::Context& context, fig::string content, fig::llm::SequenceSlots seq_id, int32_t pos, bool add_special = false);
-
 	void process(fig::string& partial, fig::string str_token, bool* bWait, bool* bHalt, fig::string& stop_word);
 	fig::string process_message(fig::string message, fig::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 	std::pair<MessageType, bool> detect_message_type(fig::string text) noexcept;
@@ -40,4 +37,11 @@ namespace fig::llm_util
 	void embd_normalize(const std::vector<float>& inp, std::vector<float>& out, int n, int embd_norm);
 	void embd_normalize(const float* inp, float* out, int n, int embd_norm);
 	float embd_similarity_cos(const std::vector<float>& embd1, const std::vector<float>& embd2, int n);
+
+	fig::llm::PromptTemplateType auto_detect_template(llama_model* pModel);
+	fig::string apply_chat_template(Messages msg, bool add_assistant);
+
+	std::pair<fig::string, fig::string> get_chat_template_prefix_suffix(Role role, fig::string name);
+	fig::string apply_chat_template_prefix(Role role, fig::string content, fig::string name);
+
 }

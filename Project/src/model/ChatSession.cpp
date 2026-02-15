@@ -58,7 +58,7 @@ namespace fig::data
 		auto pRenderer = ApplicationState::GetMainWindow().GetSDLRenderer().get();
 
 		CharacterData character;
-		if (character.LoadFromXml(filename))
+		if (character.LoadFromXml(fig::path(filename)))
 		{
 			if (role == Role::User)
 				character.characterId = "USR";

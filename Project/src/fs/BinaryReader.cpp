@@ -110,7 +110,7 @@ namespace fig::fs
 		fig::security::Decrypt(fs, file.data, authKey);
 	}
 
-	std::expected<AssetFile, FileError> BinaryReader::ReadFile(const fig::string& filename, bool read_data) noexcept
+	std::expected<AssetFile, FileError> BinaryReader::ReadFile(const fig::path& filename, bool read_data) noexcept
 	{
 		try
 		{

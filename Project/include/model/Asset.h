@@ -86,11 +86,11 @@ namespace fig::fs
 		void SetMeta(MetaTag tag, const fig::string& value) noexcept;
 		void SetMeta(MetaTag tag, const fig::uuid& value) noexcept;
 
-		fig::string GetFileName() const noexcept
+		fig::path GetFileName() const noexcept
 		{
-			return id.str()
+			return fig::path(id.str()
 				| std::ranges::views::filter([](char c) { return c != '-'; })
-				| std::ranges::to<fig::string>();
+				| std::ranges::to<fig::string>());
 		}
 
 		AssetFile ToFile() const noexcept;

@@ -2,7 +2,7 @@
 #define CHARACTER_DATABASE_H__
 #pragma once
 
-#include "model/Character.h"
+#include "model/CharacterData.h"
 
 namespace fig::fs
 {

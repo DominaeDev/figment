@@ -5,7 +5,7 @@
 #include "gui/MainFrame.h"
 #include "gui/Window.h"
 #include "gui/GUITypes.h"
-#include "llm/LLMEngine.h"
+#include "llm/LLMBackend.h"
 #include "Constants.h"
 #include <SDL3/SDL.h>
 #include <cassert>
@@ -26,7 +26,7 @@ ApplicationState::State* ApplicationState::CreateState()
 
 	_pIBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 
-	__appState->pLLMEngine = std::make_shared<LLMEngine>();
+	__appState->pLLMEngine = std::make_shared<LLMBackend>();
 	__appState->pUserManager = std::make_shared<UserManager>();
 
 	try
@@ -76,7 +76,7 @@ fig::gui::Window& ApplicationState::GetMainWindow()
 	return *__appState->pMainWindow.get();
 }
 
-LLMEngine& ApplicationState::GetLLMEngine()
+LLMBackend& ApplicationState::GetLLMEngine()
 {
 	assert(__appState);
 	return *(__appState->pLLMEngine.get());

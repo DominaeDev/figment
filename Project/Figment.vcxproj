@@ -147,7 +147,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="include\gui\Border.cpp" />
-    <ClCompile Include="include\llm\LLMEngine.cpp" />
+    <ClCompile Include="include\llm\LLMBackend.cpp" />
     <ClCompile Include="src\fs\BinaryReader.cpp" />
     <ClCompile Include="src\fs\BinaryWriter.cpp" />
     <ClCompile Include="src\fs\FileUtility.cpp" />
@@ -175,14 +175,13 @@
     <ClCompile Include="src\llm\LlamaApi.cpp" />
     <ClCompile Include="src\llm\LLMEmbedding.cpp" />
     <ClCompile Include="src\llm\LLMStateVariables.cpp" />
-    <ClCompile Include="src\llm\LLMTemplate.cpp" />
     <ClCompile Include="src\llm\ModelState.cpp" />
     <ClCompile Include="src\llm\LLMStatus.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />
     <ClCompile Include="src\gui\Area.cpp" />
     <ClCompile Include="src\model\Asset.cpp" />
     <ClCompile Include="src\model\AssetManager.cpp" />
-    <ClCompile Include="src\model\Character.cpp" />
+    <ClCompile Include="src\model\CharacterData.cpp" />
     <ClCompile Include="src\gui\ChatMessage.cpp" />
     <ClCompile Include="src\gui\ChatScroll.cpp" />
     <ClCompile Include="src\gui\GUIUtility.cpp" />
@@ -208,6 +207,7 @@
     <ClCompile Include="src\gui\StaticText.cpp" />
     <ClCompile Include="src\gui\StatusBar.cpp" />
     <ClCompile Include="src\model\ChatCommands.cpp" />
+    <ClCompile Include="src\model\ScenarioData.cpp" />
     <ClCompile Include="src\model\UserManager.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -349,17 +349,17 @@
     <ClInclude Include="include\llm\Grammar.h" />
     <ClInclude Include="include\llm\LlamaApi.h" />
     <ClInclude Include="include\llm\LLMEmbedding.h" />
-    <ClInclude Include="include\llm\LLMEngine.h" />
+    <ClInclude Include="include\llm\LLMBackend.h" />
     <ClInclude Include="include\llm\LLMStateVariables.h" />
-    <ClInclude Include="include\llm\LLMTemplate.h" />
     <ClInclude Include="include\llm\LLMTypes.h" />
     <ClInclude Include="include\llm\ModelState.h" />
     <ClInclude Include="include\llm\LLMStatus.h" />
+    <ClInclude Include="include\llm\PromptTemplateTypes.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Asset.h" />
     <ClInclude Include="include\model\AssetManager.h" />
-    <ClInclude Include="include\model\Character.h" />
+    <ClInclude Include="include\model\CharacterData.h" />
     <ClInclude Include="include\model\ContentDatabase.h" />
     <ClInclude Include="include\model\ChatOptions.h" />
     <ClInclude Include="include\model\ChatSession.h" />
@@ -367,6 +367,7 @@
     <ClInclude Include="include\model\ChatTypes.h" />
     <ClInclude Include="include\model\ChatCommandExecutor.h" />
     <ClInclude Include="include\model\GlobalStrings.h" />
+    <ClInclude Include="include\model\ScenarioData.h" />
     <ClInclude Include="include\model\UserManager.h" />
     <ClInclude Include="include\model\UserProfile.h" />
     <ClInclude Include="include\pch.h" />

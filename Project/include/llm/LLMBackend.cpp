@@ -1,9 +1,9 @@
 #include <pch.h>
-#include "llm/LLMEngine.h"
+#include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
-#include "llm/LLMTemplate.h"
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMStatus.h"
+#include "llm/LLMUtility.h"
 
 #include "util/Lockable.h"
 #include "util/StringUtility.h"
@@ -18,7 +18,7 @@ using namespace fig::llm;
 using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;
 static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
 {
-	LLMEngine* pThis = static_cast<LLMEngine*>(user_data);
+	LLMBackend* pThis = static_cast<LLMBackend*>(user_data);
 
 	fig::string log(text);
 	size_t pos_eq = log.find('=');
@@ -48,31 +48,31 @@ static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
 	Log(text);
 }
 
-bool LLMEngine::OnLoadModelProgress(float progress, void* user_data)
+bool LLMBackend::OnLoadModelProgress(float progress, void* user_data)
 {
-	LLMEngine* pThis = static_cast<LLMEngine*>(user_data);
+	LLMBackend* pThis = static_cast<LLMBackend*>(user_data);
 	if (pThis->_pLoadModelProgressCallback)
 		pThis->_pLoadModelProgressCallback(static_cast<int>(progress * 100.0f));
 	return true;
 }
 
-LLMEngine::LLMEngine()
+LLMBackend::LLMBackend()
 {
 	_pStatus = std::make_shared<LLMStatusChannel>();
 }
 
-bool LLMEngine::Initialize(fig::string modelFilename, fig::string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
+bool LLMBackend::Initialize(fig::string modelFilename, fig::string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete)
 {
 	auto readyState = _readyState.load();
 	if (readyState > ReadyState::Uninitialized)
-		return false; // Already loading or loaded
+		return false; // Already loaded or in the process of loading
 
 	SetReadyState(ReadyState::Initializing);
 	_pLoadModelProgressCallback = onProgress;
 
 	_pStatus->EmitSignal(LLMStatusSignal::ModelLoading);
 
-	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMEngine::__LoadModel, this), 
+	_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMBackend::__LoadModel, this), 
 		modelFilename,
 		embeddingFilename,
 		[this, modelFilename, embeddingFilename, onComplete](std::shared_ptr<ModelState> result)
@@ -109,7 +109,7 @@ bool LLMEngine::Initialize(fig::string modelFilename, fig::string embeddingFilen
 	return true;
 }
 
-bool LLMEngine::Shutdown()
+bool LLMBackend::Shutdown()
 {
 	// Stop all instances
 	for (auto& instance : _instances)
@@ -123,7 +123,6 @@ bool LLMEngine::Shutdown()
 			_modelState->Release();
 			_modelState.reset();
 		}
-
 	}, _stateMutex);
 	
 	SetReadyState(ReadyState::Uninitialized);
@@ -133,13 +132,13 @@ bool LLMEngine::Shutdown()
 	return true;
 }
 
-void LLMEngine::SetReadyState(ReadyState readyState)
+void LLMBackend::SetReadyState(ReadyState readyState)
 {
 	_readyState.store(readyState);
 	_pStatus->ReportReadyState(readyState);
 }
 
-void LLMEngine::__LoadModel(fig::string modelFilename, fig::string embeddingFilename, __LoadModelCallback onComplete)
+void LLMBackend::__LoadModel(fig::string modelFilename, fig::string embeddingFilename, __LoadModelCallback onComplete)
 {
 	const int ngl = 99; // All layers
 	usedVRAM.store(0);
@@ -168,7 +167,7 @@ void LLMEngine::__LoadModel(fig::string modelFilename, fig::string embeddingFile
 
 	state->pVocab = llama_model_get_vocab(state->pModel);
 	state->modelName = GetFilename(modelFilename);
-	llm_tmpl::auto_detect_template(state->pModel);
+	llm_util::auto_detect_template(state->pModel);
 
 	// initialize the context
 	llama_context_params ctx_params = llama_context_default_params();
@@ -206,7 +205,7 @@ void LLMEngine::__LoadModel(fig::string modelFilename, fig::string embeddingFile
 	onComplete(state);
 }
 
-LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
+LLMInstancePtr LLMBackend::CreateInstance(int32_t ctx_size, bool embeddings)
 {
 	auto pInstance = std::make_shared<LLMInstance>();
 	pInstance->_modelState = *_modelState.get();
@@ -215,7 +214,7 @@ LLMInstancePtr LLMEngine::CreateInstance(int32_t ctx_size, bool embeddings)
 	return pInstance;
 }
 
-bool LLMEngine::DestroyInstance(LLMInstancePtr instance)
+bool LLMBackend::DestroyInstance(LLMInstancePtr instance)
 {
 	auto itFind = std::ranges::find(_instances, instance);
 	if (itFind != std::ranges::end(_instances))

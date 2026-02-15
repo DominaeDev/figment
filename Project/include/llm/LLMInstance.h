@@ -56,11 +56,11 @@ namespace fig::llm
 	};
 	using LLMTaskFlags = EnumFlags<LLMTaskFlag>;
 
-	class LLMEngine;
+	class LLMBackend;
 
 	class LLMInstance
 	{
-		friend class LLMEngine;
+		friend class LLMBackend;
 	public:
 		LLMInstance();
 		~LLMInstance();

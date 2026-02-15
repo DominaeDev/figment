@@ -111,6 +111,12 @@ namespace fig
 		_pRoot { pRoot }
 	{}
 
+	std::optional<XmlReaderElement> XmlReaderElement::GetFirstElement() const noexcept
+	{
+		auto pElement = _pElement->FirstChildElement(nullptr);
+		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
+	}
+
 	std::optional<XmlReaderElement> XmlReaderElement::GetFirstElement(const fig::string& name) const noexcept
 	{
 		auto pElement = _pElement->FirstChildElement(name.c_str());
@@ -168,6 +174,7 @@ namespace fig
 
 	std::optional<fig::string> XmlReaderElement::GetText() const noexcept
 	{
+		//! @todo: Resolve mix of CDATA, XMLText, and XMLComment.
 		const char* value = _pElement->GetText();
 		return value ? std::make_optional(fig::string(value)) : std::nullopt;
 	}

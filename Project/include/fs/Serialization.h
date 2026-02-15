@@ -228,7 +228,7 @@ namespace fig::fs
 		BinaryReader() = delete;
 	public:
 		explicit BinaryReader(const fig::path& directory, fig::security::AuthKey key) noexcept;
-		std::expected<AssetFile, FileError> ReadFile(const fig::string& filename, bool read_data = true) noexcept;
+		std::expected<AssetFile, FileError> ReadFile(const fig::path& filename, bool read_data = true) noexcept;
 
 	private:
 		fig::path _profilePath {};
