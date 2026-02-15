@@ -57,6 +57,18 @@ namespace fig::gui
 		gridSizer->SetSpacing(12, 12);
 		_pMainArea->SetSizer(gridSizer);
 
+		// Find scenarios
+		auto scenarios = assets.GetAllScenarios() | std::ranges::to<std::vector>();
+		std::sort(scenarios.begin(), scenarios.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
+
+		for (auto& asset : scenarios)
+		{
+			auto pCard = new ScenarioCard(_pMainArea, asset.id);
+			pCard->SetPosition(x, 40.0f);
+			x += Constants::GUI::CardWidth + 16.0f;
+			gridSizer->Add(pCard);
+		}
+
 		// Find characters
 		auto characters = assets.GetAllCharacters() | std::ranges::to<std::vector>();
 		std::sort(characters.begin(), characters.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
@@ -69,17 +81,6 @@ namespace fig::gui
 			gridSizer->Add(pCard);
 		}
 
-		// Find scenarios
-		auto scenarios = assets.GetAllScenarios() | std::ranges::to<std::vector>();
-		std::sort(scenarios.begin(), scenarios.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
-
-		for (auto& asset : scenarios)
-		{
-			auto pCard = new ScenarioCard(_pMainArea, asset.id);
-			pCard->SetPosition(x, 40.0f);
-			x += Constants::GUI::CardWidth + 16.0f;
-			gridSizer->Add(pCard);
-		}
 
 		InvalidateLayout();
 	}
