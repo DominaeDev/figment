@@ -10,16 +10,15 @@ namespace fig::fs
 	{
 		_pAssetMngr = &assetMngr;
 
-		LoadAllCharacters();
+		LoadAll();
 	}
 
-	void ContentDatabase::LoadAllCharacters()
+	void ContentDatabase::LoadAll()
 	{
 		auto& assetMngr = *_pAssetMngr;
-		auto assets = _pAssetMngr->GetAssets()
-			| std::views::filter([](auto& a) { return a.asset_type == AssetType::Character; });
-		
-		for (auto& asset : assets)
+
+		// Load characters
+		for (auto& asset : _pAssetMngr->GetAllCharacters())
 		{
 			assetMngr.LoadAsset(asset);
 
@@ -31,14 +30,34 @@ namespace fig::fs
 			}
 			else
 				continue; // Skip
+		}
 
+		// Load scenarios
+		for (auto& asset : _pAssetMngr->GetAllScenarios())
+		{
+			assetMngr.LoadAsset(asset);
+
+			if (asset.data_format == DataFormat::DataXml && asset.HasData())
+			{
+				ScenarioData scenario;
+				if (scenario.LoadFromXml(asset.AsString()))
+					_scenarios[asset.id] = std::move(scenario);
+			}
+			else
+				continue; // Skip
 		}
 	}
 
 	std::optional<fig::data::CharacterData> ContentDatabase::GetCharacter(const fig::uuid& id) const noexcept
 	{
-		auto itFind = _characters.find(id);
-		if (itFind != _characters.cend())
+		if (auto itFind = _characters.find(id); itFind != _characters.cend())
+			return std::make_optional(itFind->second);
+		return std::nullopt;
+	}
+
+	std::optional<fig::data::ScenarioData> ContentDatabase::GetScenario(const fig::uuid& id) const noexcept
+	{
+		if (auto itFind = _scenarios.find(id); itFind != _scenarios.cend())
 			return std::make_optional(itFind->second);
 		return std::nullopt;
 	}

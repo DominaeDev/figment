@@ -156,11 +156,13 @@
     <ClCompile Include="src\gui\CharacterCard.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\ChatFrame.cpp" />
+    <ClCompile Include="src\gui\CoverCard.cpp" />
     <ClCompile Include="src\gui\GridSizer.cpp" />
     <ClCompile Include="src\gui\HomeFrame.cpp" />
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
     <ClCompile Include="src\gui\ImageStore.cpp" />
+    <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
@@ -328,6 +330,7 @@
     <ClInclude Include="include\gui\CharacterCard.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
     <ClInclude Include="include\gui\ChatFrame.h" />
+    <ClInclude Include="include\gui\CoverCard.h" />
     <ClInclude Include="include\gui\GridSizer.h" />
     <ClInclude Include="include\gui\HomeFrame.h" />
     <ClInclude Include="include\gui\ImageStore.h" />
@@ -336,6 +339,7 @@
     <ClInclude Include="include\gui\GUIUtility.h" />
     <ClInclude Include="include\gui\HorizontalGradient.h" />
     <ClInclude Include="include\gui\Image.h" />
+    <ClInclude Include="include\gui\ScenarioCard.h" />
     <ClInclude Include="include\gui\Screen.h" />
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />

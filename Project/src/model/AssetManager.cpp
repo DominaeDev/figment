@@ -310,20 +310,17 @@ namespace fig::fs
 				// Create portrait asset
 				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormatFromExt(GetFileExt(character.largePortraitFilename)), std::move(file.value()), characterAsset.id);
 
-				if constexpr (Disabled)
+				// Create cover card
+				if (auto coverImage = LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
 				{
-					// Create cover card
-					if (auto coverImage = LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
-					{
-						// Round corners
-						MaskCorners(coverImage, CornerStyle::Card);
+					// Round corners
+					MaskCorners(coverImage, CornerStyle::Card);
 
-						// Save cover asset (bitmap)
-						auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, characterAsset.id);
+					// Save cover asset (bitmap)
+					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, characterAsset.id);
 
-						// Create reference to original
-						CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
-					}
+					// Create reference to original
+					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
 				}
 			}
 		}
@@ -348,6 +345,30 @@ namespace fig::fs
 		fig::bytes scenarioData;
 		scenario.SaveToXml(scenarioData);
 		auto& scenarioAsset = CreateAsset(AssetType::Scenario, DataFormat::DataXml, scenarioData, _profileID);
+
+		// Load scenario image
+		if (not empty_or_whitespace(scenario.imageFilename))
+		{
+			if (auto file = fig::fs::ReadFile(filename.parent_path() / scenario.imageFilename))
+			{
+				// Create portrait asset
+				auto& scenarioImageAsset = CreateImageAsset(ImageType::Unspecified, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
+
+				// Create cover card
+				if (auto coverImage = LoadAndResizeImage(filename.parent_path() / scenario.imageFilename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
+				{
+					// Round corners
+					MaskCorners(coverImage, CornerStyle::Card);
+
+					// Save cover asset (bitmap)
+					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, scenarioAsset.id);
+
+					// Create reference to original
+					CreateAssetReference(ReferenceType::Original, scenarioImageAsset.id, coverAsset.id);
+				}
+			}
+		}
+
 		return scenarioAsset;
 	}
 

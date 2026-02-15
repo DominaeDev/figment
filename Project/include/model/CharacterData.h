@@ -35,8 +35,8 @@ namespace fig::data
 		gui::Color borderColor {};
 		CharacterGender gender {};
 
-		fig::string largePortraitFilename;
-		fig::string smallPortraitFilename;
+		fig::string largePortraitFilename;	//! @temp
+		fig::string smallPortraitFilename;	//! @temp
 
 		std::map<fig::string, CharacterProperty> properties;
 

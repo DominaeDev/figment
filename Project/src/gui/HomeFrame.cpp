@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/HomeFrame.h"
 #include "gui/CharacterCard.h"
+#include "gui/ScenarioCard.h"
 #include "gui/GridSizer.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
@@ -57,14 +58,24 @@ namespace fig::gui
 		_pMainArea->SetSizer(gridSizer);
 
 		// Find characters
-		auto characters = assets.GetAssets()
-			| std::views::filter([&profileId](const auto& a) { return a.parent_id == profileId and a.IsOfType(AssetType::Character); })
-			| std::ranges::to<std::vector>();
+		auto characters = assets.GetAllCharacters() | std::ranges::to<std::vector>();
 		std::sort(characters.begin(), characters.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
 
 		for (auto& asset : characters)
 		{
 			auto pCard = new CharacterCard(_pMainArea, asset.id);
+			pCard->SetPosition(x, 40.0f);
+			x += Constants::GUI::CardWidth + 16.0f;
+			gridSizer->Add(pCard);
+		}
+
+		// Find scenarios
+		auto scenarios = assets.GetAllScenarios() | std::ranges::to<std::vector>();
+		std::sort(scenarios.begin(), scenarios.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
+
+		for (auto& asset : scenarios)
+		{
+			auto pCard = new ScenarioCard(_pMainArea, asset.id);
 			pCard->SetPosition(x, 40.0f);
 			x += Constants::GUI::CardWidth + 16.0f;
 			gridSizer->Add(pCard);

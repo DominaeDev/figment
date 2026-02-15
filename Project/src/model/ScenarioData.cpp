@@ -58,6 +58,9 @@ namespace fig::data
 		// Identifier
 		scenario.title = trim(rootNode.GetElementText("Title").value_or(""));
 
+		// Image
+		scenario.imageFilename = trim(rootNode.GetElementText("Image").value_or(""));
+
 		// Prompt(s)
 		if (auto node = rootNode.GetFirstElement("Prompt"))
 		{

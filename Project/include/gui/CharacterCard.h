@@ -3,27 +3,20 @@
 
 #pragma once
 
-#include "Image.h"
+#include "CoverCard.h"
 
 namespace fig::gui
 {
-	class CharacterCard : public Image
+	class CharacterCard : public CoverCard
 	{
 	public:
 		CharacterCard(Control* pParent, const fig::uuid& characterId);
 
 	protected:
 		void OnUpdate(float fDeltaTime) override {};
-		void OnRender(Renderer* pRenderer) override;
-
-	private:
-		bool LoadCharacterPortrait();
 
 	private:
 		fig::uuid _characterId;
-		fig::sdl::Surface _surface;
-		fig::sdl::Texture _texture;
-
 	};
 }
 

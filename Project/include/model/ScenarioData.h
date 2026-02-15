@@ -42,6 +42,7 @@ namespace fig::data
 
 		fig::string title;
 		fig::string description;
+		fig::string imageFilename; //! @temp
 		std::vector<Prompt> prompts;
 
 		struct RoleValidation
