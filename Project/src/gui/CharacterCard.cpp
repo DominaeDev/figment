@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "gui/CharacterCard.h"
+#include "gui/TextureStore.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 
@@ -13,7 +14,9 @@ namespace fig::gui
 		if (auto character = ApplicationState::GetUserManager().GetContent().GetCharacter(characterId))
 		{
 			SetLabel(character.value().fullName);
-			SetSublabel(character.value().subheader);
+//			SetSublabel(character.value().subheader);
 		}
+
+		CreateChatCounter(0);
 	}
 }

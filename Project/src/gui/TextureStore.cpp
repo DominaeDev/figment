@@ -18,7 +18,10 @@ void TextureStore::Init(Renderer* pRenderer)
 	LoadTexture(pRenderer, TextureType::SPEECH_BUBBLE_CENTER_BORDER, "./resources/gui/speech_bubble_center_border.png");
 	LoadTexture(pRenderer, TextureType::SPEECH_BUBBLE_RIGHT_BG, "./resources/gui/speech_bubble_right_bg.png");
 	LoadTexture(pRenderer, TextureType::SPEECH_BUBBLE_RIGHT_BORDER, "./resources/gui/speech_bubble_right_border.png");
+	
 	LoadTexture(pRenderer, TextureType::CARD_BORDER, "./resources/gui/card_border.png");
+	LoadTexture(pRenderer, TextureType::CARD_TAG_BG, "./resources/gui/card_tag_bg.png");
+	LoadTexture(pRenderer, TextureType::CARD_CHAT_COUNTER_ICON, "./resources/gui/icon_small_chat.png");
 }
 
 void TextureStore::Release()

@@ -43,7 +43,7 @@ namespace fig::gui
 		}
 
 		// Import test characters
-		if constexpr (Disabled)
+		if constexpr (Debugging and Disabled)
 		{
 			if (userMngr.IsSignedIn())
 			{
@@ -63,7 +63,7 @@ namespace fig::gui
 		}
 
 		// Import test scenario
-		if constexpr (Disabled)
+		if constexpr (Debugging and Disabled)
 		{
 			if (userMngr.IsSignedIn())
 			{
@@ -180,18 +180,18 @@ namespace fig::gui
 		_pMainArea->SetSizer(sizer);
 	}
 
-	template<typename T>
+	template<IsScreen T>
 	void MainFrame::RegisterScreen()
 	{
-		if (_screensByType.contains(type_id<T>))
+		if (_screensByType.contains(type_id<T>()))
 			UnregisterScreen<T>();
 
 		auto pScreen = new T(this);	// Must pass this to receive renderer
 		RemoveChild(pScreen);
-		_screensByType[type_id<T>] = pScreen;
+		_screensByType[type_id<T>()] = pScreen;
 	}
 
-	template<typename T>
+	template<IsScreen T>
 	void MainFrame::UnregisterScreen()
 	{
 		auto pScreen = GetScreen<T>();
@@ -200,7 +200,7 @@ namespace fig::gui
 
 		_pMainArea->RemoveChild(pScreen);
 		RemoveChild(pScreen);
-		_screensByType.erase(type_id<T>);
+		_screensByType.erase(type_id<T>());
 		delete pScreen;
 	}
 

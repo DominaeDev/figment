@@ -162,6 +162,7 @@
     <ClCompile Include="src\gui\HorizontalGradient.cpp" />
     <ClCompile Include="src\gui\Image.cpp" />
     <ClCompile Include="src\gui\ImageStore.cpp" />
+    <ClCompile Include="src\gui\NineGridImage.cpp" />
     <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\VariableList.cpp" />
@@ -341,6 +342,7 @@
     <ClInclude Include="include\gui\Image.h" />
     <ClInclude Include="include\gui\ScenarioCard.h" />
     <ClInclude Include="include\gui\Screen.h" />
+    <ClInclude Include="include\gui\NineGridImage.h" />
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
@@ -411,6 +413,7 @@
     <ClInclude Include="include\util\Common.h" />
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
+    <ClInclude Include="include\util\TypeId.h" />
     <ClInclude Include="include\util\UndoStack.h" />
   </ItemGroup>
   <ItemGroup>

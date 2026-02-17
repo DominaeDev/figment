@@ -54,6 +54,8 @@ namespace fig::gui
 		void EnableWordWrap(bool bEnable) noexcept { _bWordWrap = bEnable; _bInvalidated = true; }
 		void EnableEllipsis(bool bEnable) noexcept { _bEllipsis = bEnable; _bInvalidated = true; }
 
+		std::pair<int, int> MeasureText() const;
+
 	protected:
 		Rectf GetAlignedRect() const;
 		void InvalidateText();

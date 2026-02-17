@@ -8,6 +8,8 @@ using namespace fig::gui_util;
 Image::Image(Control* pParent, Texture* pTexture) : Control(pParent),
 	_pTexture(pTexture)
 {
+	if (pTexture)
+		SetSize(toF(pTexture->w), toF(pTexture->h));
 }
 
 void Image::OnRender(Renderer* pRenderer)

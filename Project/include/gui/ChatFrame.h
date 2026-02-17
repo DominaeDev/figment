@@ -29,6 +29,7 @@ namespace fig::gui
 
 		void Close();
 
+		TYPE_ID(2);
 	protected:
 		virtual void OnUpdate(float fDeltaTime) override;
 		virtual void OnRender(Renderer* pRenderer) override;
@@ -43,6 +44,7 @@ namespace fig::gui
 		void SetStatusBar(fig::string_view message);
 
 	private:
+
 		ChatScroll* _pChatScroll = nullptr;
 		TextBox* _pTextBox;
 		VariableList* _pVariableList;

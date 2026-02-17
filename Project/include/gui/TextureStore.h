@@ -21,6 +21,8 @@ namespace fig::gui
 		SPEECH_BUBBLE_RIGHT_BORDER,
 
 		CARD_BORDER,
+		CARD_TAG_BG,
+		CARD_CHAT_COUNTER_ICON,
 	};
 
 	class TextureStore

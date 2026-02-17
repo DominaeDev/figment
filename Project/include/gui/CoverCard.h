@@ -19,6 +19,7 @@ namespace fig::gui
 
 		void SetLabel(const fig::string& text) noexcept;
 		void SetSublabel(const fig::string& text) noexcept;
+		void CreateChatCounter(uint32_t count);
 
 	private:
 		fig::uuid _assetId;

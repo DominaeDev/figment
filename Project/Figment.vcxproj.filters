@@ -63,9 +63,6 @@
     <Filter Include="Source Files\AppModel\Data\Character">
       <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Utility\Authentication">
-      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\AppModel\Assets">
       <UniqueIdentifier>{53846e02-0a04-4382-a8c9-5e14c62ffb05}</UniqueIdentifier>
     </Filter>
@@ -116,6 +113,9 @@
     </Filter>
     <Filter Include="Source Files\Backend\LLM\Utility">
       <UniqueIdentifier>{a0782deb-9c61-45f0-ab51-c5a61d5c0d41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\Authentication">
+      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -303,10 +303,10 @@
       <Filter>Source Files\Frontend\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Hash.cpp">
-      <Filter>Source Files\Utility\Authentication</Filter>
+      <Filter>Source Files\Frontend\Authentication</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Security.cpp">
-      <Filter>Source Files\Utility\Authentication</Filter>
+      <Filter>Source Files\Frontend\Authentication</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HomeFrame.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
@@ -367,6 +367,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\CoverCard.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\NineGridImage.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -863,10 +866,10 @@
       <Filter>Source Files\Frontend\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Hash.h">
-      <Filter>Source Files\Utility\Authentication</Filter>
+      <Filter>Source Files\Frontend\Authentication</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Security.h">
-      <Filter>Source Files\Utility\Authentication</Filter>
+      <Filter>Source Files\Frontend\Authentication</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Screen.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
@@ -930,6 +933,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\CoverCard.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\TypeId.h">
+      <Filter>Source Files\AppModel\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\NineGridImage.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

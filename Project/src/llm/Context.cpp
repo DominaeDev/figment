@@ -245,7 +245,7 @@ std::optional<int32_t> Context::RealizeUncachedBlocks()
 bool Context::RebuildKVCache()
 {
 	int r;
-	if constexpr (::Disabled)
+	if constexpr (Disabled)
 	{
 		// Clear everything
 		llama::ctx_clear(_pCtx);

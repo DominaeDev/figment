@@ -14,6 +14,7 @@ namespace fig::gui
 
 		void CreateCards();
 
+		TYPE_ID(1);
 	protected:
 		virtual void OnUpdate(float fDeltaTime) override;
 		virtual void OnRender(Renderer* pRenderer) override;

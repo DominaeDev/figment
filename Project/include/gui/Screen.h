@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Control.h"
+#include "util/TypeId.h"
 
 namespace fig::gui
 {
@@ -34,6 +35,11 @@ namespace fig::gui
 		bool OnEvent(Event& event) override;
 		virtual bool OnKeyboardEvent(KeyboardEvent& event) = 0;
 	};
+
+	template <typename T>
+	concept IsScreen = std::derived_from<T, fig::gui::Screen>
+		and HasTypeId<T>;
+	
 }
 
 #endif

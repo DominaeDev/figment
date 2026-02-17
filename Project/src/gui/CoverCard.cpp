@@ -3,6 +3,7 @@
 #include "gui/Border.h"
 #include "gui/ImageStore.h"
 #include "gui/TextureStore.h"
+#include "gui/NineGridImage.h"
 #include <cassert>
 
 namespace fig::gui
@@ -43,7 +44,7 @@ namespace fig::gui
 		_pLabel = new StaticText(this, text, FontFace::CardHeader, 24.0, false);
 		_pLabel->SetMaxSize(GetWidth() - (Margin * 2), -1);
 		_pLabel->SetSize(GetWidth() - (Margin * 2), 80);
-		_pLabel->SetPosition(Margin, GetHeight() - Margin - 52);
+		_pLabel->SetPosition(Margin, GetHeight() - Margin - 58);
 		_pLabel->SetForegroundColor(Colors::White);
 		_pLabel->SetBackgroundColor(Colors::Transparent);
 		_pLabel->EnableDropShadow(true);
@@ -62,11 +63,34 @@ namespace fig::gui
 		_pSublabel = new StaticText(this, text, FontFace::CardSubheader, 16.5, false);
 		_pSublabel->SetMaxSize(GetWidth() - (Margin * 2), -1);
 		_pSublabel->SetSize(GetWidth() - (Margin * 2), 80);
-		_pSublabel->SetPosition(Margin, GetHeight() - Margin - 22);
+		_pSublabel->SetPosition(Margin, GetHeight() - Margin - 28);
 		_pSublabel->SetForegroundColor(Colors::White);
 		_pSublabel->SetBackgroundColor(Colors::Transparent);
 		_pSublabel->EnableDropShadow(true);
 		_pSublabel->EnableWordWrap(false);
 		_pSublabel->EnableEllipsis(true);
+	}
+
+	void CoverCard::CreateChatCounter(uint32_t count)
+	{
+		auto position = Pointf { 10, GetHeight() - 35 };
+		auto pCounterBG = new NineGridImage(this, TextureStore::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		pCounterBG->SetPosition(position);
+		pCounterBG->SetForegroundColor(Color { 0, 0, 0, 96 });
+
+		auto pCounterIcon = new Image(this, TextureStore::GetTexture(TextureType::CARD_CHAT_COUNTER_ICON));
+		pCounterIcon->SetPosition(position.x + 6, position.y + 6);
+		pCounterIcon->SetForegroundColor(Colors::White);
+		pCounterIcon->SetBackgroundColor(Colors::Transparent);
+
+		auto pLabel = new StaticText(this, std::format("{}", count), FontFace::Default, 14.0, true);
+		pLabel->SetPosition(position.x + 27, position.y + 3);
+		pLabel->SetForegroundColor(Colors::White);
+		pLabel->SetBackgroundColor(Colors::Transparent);
+		pLabel->EnableWordWrap(false);
+
+		auto [w, h] = pLabel->MeasureText();
+		pCounterBG->SetSize(toF(std::max(w + 35, 32)), 26);
+
 	}
 }
