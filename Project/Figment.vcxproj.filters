@@ -371,6 +371,12 @@
     <ClCompile Include="src\gui\NineGridImage.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\SidePanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ScrollPanel.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -938,6 +944,10 @@
       <Filter>Source Files\AppModel\Common</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\NineGridImage.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\SidePanel.h" />
+    <ClInclude Include="include\gui\ScrollPanel.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
   </ItemGroup>

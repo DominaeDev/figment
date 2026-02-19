@@ -439,4 +439,50 @@ namespace fig::fs
 		}
 		return false;
 	}
+
+	void AssetManager::ImportTestCharacters(fig::path directory)
+	{
+		std::vector<fig::path> files;
+		for (const auto& entry : std::filesystem::directory_iterator(directory))
+			files.push_back(entry.path());
+
+		auto rng = std::default_random_engine {};
+		rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
+		std::ranges::shuffle(files, rng);
+
+		int32_t index = 0;
+		for (auto& filename : files)
+		{
+			CharacterData character {
+				.characterId = std::format("Test{}", index),
+				.shortName = std::format("Test character #{:03}", index),
+				.fullName = std::format("Test character #{:03}", index),
+			};
+			index++;
+
+			fig::bytes characterData;
+			character.SaveToXml(characterData);
+			auto& characterAsset = CreateAsset(AssetType::Character, DataFormat::DataXml, characterData, _profileID);
+
+			// Load portrait image(s)
+			if (auto file = fig::fs::ReadFile(filename))
+			{
+				// Create portrait asset
+				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
+
+				// Create cover card
+				if (auto coverImage = LoadAndResizeImage(filename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
+				{
+					// Round corners
+					MaskCorners(coverImage, CornerStyle::Card);
+
+					// Save cover asset (bitmap)
+					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, characterAsset.id);
+
+					// Create reference to original
+					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
+				}
+			}
+		}
+	}
 }

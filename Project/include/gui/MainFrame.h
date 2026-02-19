@@ -17,6 +17,8 @@ namespace fig::llm
 
 namespace fig::gui
 {
+	class SidePanel;
+
 	class MainFrame : public Frame
 	{
 		friend bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor::Context context);
@@ -77,5 +79,6 @@ namespace fig::gui
 
 		StatusBar* _pStatusBar = nullptr;
 		Control* _pMainArea = nullptr;
+		SidePanel* _pSidePanel;
 	};
 }

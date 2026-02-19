@@ -8,7 +8,7 @@ namespace Constants
 {
 	namespace GUI
 	{
-		inline constexpr int32_t WindowWidth = 1280;
+		inline constexpr int32_t WindowWidth = 1320;
 		inline constexpr int32_t WindowHeight = 900;
 
 		inline constexpr double DefaultFontSize = 18.5;
@@ -19,6 +19,8 @@ namespace Constants
 		
 		inline constexpr int32_t CardWidth = 320;
 		inline constexpr int32_t CardHeight = 412;
+
+		inline constexpr float MouseScrollSpeed = 80.0f;
 	}
 
 	namespace Chat

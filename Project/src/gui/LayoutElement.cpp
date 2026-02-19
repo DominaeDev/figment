@@ -127,6 +127,7 @@ bool LayoutElement::RemoveChild(LayoutElement* pChild)
 		_children.erase(it);
 		return true;
 	}
+
 	return false;
 }
 
@@ -141,6 +142,9 @@ bool LayoutElement::RemoveChildren()
 		child->SetParent(nullptr);
 	}
 	_children.clear();
+
+	if (_pSizer)
+		_pSizer->Clear();
 	return true;
 }
 

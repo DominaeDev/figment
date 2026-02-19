@@ -36,6 +36,7 @@ namespace fig::gui
 		void SetOwner(LayoutElement* pOwner);
 
 		void Add(Control* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
+		Control* Add(Sizer* pControl, Control* pParent, int proportion = 0, int flags = Flag::Default, int border = 0);
 		void AddStretchSpacer();
 		void Remove(Control* pControl);
 		void Clear();

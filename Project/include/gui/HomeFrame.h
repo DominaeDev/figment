@@ -7,6 +7,8 @@
 
 namespace fig::gui
 {
+	class ScrollPanel;
+
 	class HomeFrame : public Screen
 	{
 	public:
@@ -16,13 +18,14 @@ namespace fig::gui
 
 		TYPE_ID(1);
 	protected:
-		virtual void OnUpdate(float fDeltaTime) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
 	private:
-		Area* _pMainArea {};
+		ScrollPanel* _pMainArea {};
+		Area* _pScrollArea {};
+		float _fScrollY {};
 	};
 }
 

@@ -20,7 +20,6 @@ using namespace fig::data;
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f
 #define GRADIENT_HEIGHT 40.0f
-#define MOUSE_SCROLL_SPEED 80.0f
 
 ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
 {
@@ -295,7 +294,7 @@ bool ChatScroll::HandleMouseWheel(SDL_MouseWheelEvent event)
 	if (!SDL_PointInRectFloat(&pt, &_rect))
 		return false;
 
-	_fScrollY = std::max(_fScrollY + toF(event.integer_y) * MOUSE_SCROLL_SPEED, 0.0f);
+	_fScrollY = std::max(_fScrollY + toF(event.integer_y) * Constants::GUI::MouseScrollSpeed, 0.0f);
 	_pScrollSizer->SetOffset(_fScrollY + _fAnimatedScroll);
 	return true;
 }

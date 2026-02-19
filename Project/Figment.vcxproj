@@ -165,6 +165,8 @@
     <ClCompile Include="src\gui\NineGridImage.cpp" />
     <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
+    <ClCompile Include="src\gui\ScrollPanel.cpp" />
+    <ClCompile Include="src\gui\SidePanel.cpp" />
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
@@ -343,6 +345,8 @@
     <ClInclude Include="include\gui\ScenarioCard.h" />
     <ClInclude Include="include\gui\Screen.h" />
     <ClInclude Include="include\gui\NineGridImage.h" />
+    <ClInclude Include="include\gui\ScrollPanel.h" />
+    <ClInclude Include="include\gui\SidePanel.h" />
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />

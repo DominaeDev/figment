@@ -34,6 +34,8 @@ namespace fig::gui
 
 		int rows = (count % columns == 0) ? (count / columns) : (count / columns + 1);
 
+		float offsetX = _bCenterX ? toF(totalWidth - (columns * _cellWidth + std::max(columns - 1, 0) * _spacingX)) / 2 : 0.0f;
+
 		int32_t index = 0;
 		for (auto& item : _items)
 		{
@@ -44,8 +46,13 @@ namespace fig::gui
 
 			auto& control = *item.pControl;
 
-			control.SetPosition(toF(col * (_cellWidth + _spacingX)), toF(row * (_cellHeight + _spacingY)));
+			control.SetPosition(offsetX + toF(col * (_cellWidth + _spacingX)), toF(row * (_cellHeight + _spacingY)));
 			index++;
 		}
+	}
+
+	void GridSizer::EnableCentering(bool bEnable)
+	{
+		_bCenterX = bEnable;
 	}
 }

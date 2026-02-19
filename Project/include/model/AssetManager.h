@@ -44,6 +44,7 @@ namespace fig::fs
 		enum class CharacterDataFormat { Default, };
 		std::expected<AssetRef, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		std::expected<AssetRef, FileError> ImportScenario(fig::path filename);
+		void ImportTestCharacters(fig::path directory);
 
 	private:
 		bool LoadIndex();

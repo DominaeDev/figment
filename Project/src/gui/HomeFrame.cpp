@@ -3,6 +3,8 @@
 #include "gui/CharacterCard.h"
 #include "gui/ScenarioCard.h"
 #include "gui/GridSizer.h"
+#include "gui/ScrollPanel.h"
+#include "gui/MainFrame.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "model/AssetManager.h"
@@ -17,16 +19,15 @@ namespace fig::gui
 		SetForegroundColor(Colors::Black);
 		SetBackgroundColor(Colors::AppBackground);
 
-		_pMainArea = new Area(this);
+		auto pTopBar = new Panel(this);
+		pTopBar->SetHeight(48);
+
+		_pMainArea = new ScrollPanel(this);
 
 		auto topSizer = new VerticalSizer();
-		topSizer->Add(_pMainArea, -1, Sizer::Expand);
+		topSizer->Add(pTopBar, 0, Sizer::Expand);
+		topSizer->Add(_pMainArea, -1, Sizer::Expand | Sizer::Left | Sizer::Right, 6);
 		SetSizer(topSizer);
-	}
-
-	void HomeFrame::OnUpdate(float fDeltaTime)
-	{
-
 	}
 
 	void HomeFrame::OnRender(Renderer* pRenderer)
@@ -47,6 +48,8 @@ namespace fig::gui
 
 	void HomeFrame::CreateCards()
 	{
+		auto startTime = std::chrono::steady_clock::now();
+
 		// Create cards
 		auto& assets = ApplicationState::GetUserManager().GetProfileAssets();
 		const auto& profileId = ApplicationState::GetUserManager().GetActiveProfile().id;
@@ -54,7 +57,8 @@ namespace fig::gui
 		float x = 40.0f;
 
 		auto gridSizer = new GridSizer(Constants::GUI::CardWidth, Constants::GUI::CardHeight);
-		gridSizer->SetSpacing(12, 12);
+		gridSizer->SetSpacing(10, 12);
+		gridSizer->EnableCentering(true);
 		_pMainArea->SetSizer(gridSizer);
 
 		// Find scenarios
@@ -81,8 +85,11 @@ namespace fig::gui
 			gridSizer->Add(pCard);
 		}
 
+		auto endTime = std::chrono::steady_clock::now();
+		double duration = toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count());
+
+		MainFrame::SetStatusBar(std::format("Duration: {}ms", duration));
 
 		InvalidateLayout();
 	}
-
 }

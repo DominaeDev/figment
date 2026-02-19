@@ -1,12 +1,21 @@
 #include <pch.h>
 #include "gui/Sizer.h"
 #include "gui/LayoutElement.h"
+#include "gui/Area.h"
 
 namespace fig::gui
 {
 	void Sizer::Add(Control* pControl, int proportion, int flags, int border)
 	{
-		_items.push_back(LayoutInfo { pControl, proportion, flags, border, });
+		_items.push_back(LayoutInfo { pControl, proportion, flags, border });
+	}
+
+	Control* Sizer::Add(Sizer* pSizer, Control* pParent, int proportion, int flags, int border)
+	{
+		auto pControl = new Area(pParent);
+		pControl->SetSizer(pSizer);
+		_items.push_back(LayoutInfo { pControl, proportion, flags, border });
+		return pControl;
 	}
 
 	void Sizer::Remove(Control* pControl)

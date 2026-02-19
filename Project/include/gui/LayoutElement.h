@@ -74,6 +74,7 @@ namespace fig::gui
 	protected:
 		std::vector<LayoutElement*> _children;
 		LayoutElement* _pParent = nullptr;
+		Sizer* _pSizer = nullptr;
 
 		Rectf _rect = {};
 		Pointf _position = {};
@@ -81,8 +82,5 @@ namespace fig::gui
 		Pointf _minSize = {};
 		Pointf _maxSize = {};
 		bool _bInvalidLayout = false;
-
-	private:
-		Sizer* _pSizer = nullptr;
 	};
 }

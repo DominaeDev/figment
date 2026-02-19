@@ -2,6 +2,7 @@
 #include "gui/MainFrame.h"
 #include "gui/HomeFrame.h"
 #include "gui/ChatFrame.h"
+#include "gui/SidePanel.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 
@@ -15,12 +16,17 @@ namespace fig::gui
 		SetBackgroundColor(Colors::AppBackground);
 
 		_pMainArea = new Area(this);
+		_pSidePanel = new SidePanel(this);
 
 		// Status bar
 		_pStatusBar = new StatusBar(this);
 
+		auto mainSizer = new HorizontalSizer();
+		mainSizer->Add(_pSidePanel, 0, Sizer::Expand);
+		mainSizer->Add(_pMainArea, -1, Sizer::Expand);
+
 		auto topSizer = new VerticalSizer();
-		topSizer->Add(_pMainArea, -1, Sizer::Expand);
+		topSizer->Add(mainSizer, this, -1, Sizer::Expand);
 		topSizer->Add(_pStatusBar, 0, Sizer::Expand);
 
 		SetSizer(topSizer);
@@ -74,6 +80,23 @@ namespace fig::gui
 				assets.DeleteAssets(remove_scenarios);
 
 				auto x = assets.ImportScenario(fig::path("./characters/scenario.xml"));
+				userMngr.GetProfileAssets().SaveModified();
+			}
+		}
+
+		// Import test characters
+		if constexpr (Debugging and Disabled)
+		{
+			if (userMngr.IsSignedIn())
+			{
+				auto& assets = userMngr.GetProfileAssets();
+
+				// Delete all characters
+				auto remove_characters = assets.GetAllCharacters()
+					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+					| std::ranges::to<std::vector>();
+				assets.DeleteAssets(remove_characters);
+
 				userMngr.GetProfileAssets().SaveModified();
 			}
 		}
@@ -147,6 +170,9 @@ namespace fig::gui
 				}
 			}
 		}
+
+		if (_pActiveScreen)
+			return _pActiveScreen->ProcessEvent(event);
 		return false;
 	}
 
