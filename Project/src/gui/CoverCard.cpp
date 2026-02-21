@@ -22,15 +22,23 @@ namespace fig::gui
 				Image::SetTexture(pTexture);
 		}
 
+		auto pBottomFade = new NineGridImage(this, TextureStore::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
+		pBottomFade->SetWidth(GetWidth());
+		pBottomFade->SetY(GetHeight() - pBottomFade->GetHeight());
+		pBottomFade->SetForegroundColor(Color { 0, 0, 0, 0x40 });
+
 		auto pBorder = new Border(this, TextureStore::GetTexture(TextureType::CARD_BORDER), 16);
 		pBorder->SetSize(GetSize());
 		pBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+
+		auto pFavoriteOff = new Image(this, TextureStore::GetTexture(TextureType::CARD_ICON_FAVORITE_OFF));
+		pFavoriteOff->SetPosition(GetWidth() - 42, 8);
+		pFavoriteOff->SetForegroundColor(Color { 0x60, 0x60, 0x60, 0x60 });
 	}
 
 	void CoverCard::OnRender(Renderer* pRenderer)
 	{
 		Image::OnRender(pRenderer);
-		DrawBorder(pRenderer);
 	}
 
 	void CoverCard::SetLabel(const fig::string& text) noexcept
@@ -78,7 +86,7 @@ namespace fig::gui
 		pCounterBG->SetPosition(position);
 		pCounterBG->SetForegroundColor(Color { 0, 0, 0, 96 });
 
-		auto pCounterIcon = new Image(this, TextureStore::GetTexture(TextureType::CARD_CHAT_COUNTER_ICON));
+		auto pCounterIcon = new Image(this, TextureStore::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
 		pCounterIcon->SetPosition(position.x + 6, position.y + 6);
 		pCounterIcon->SetForegroundColor(Colors::White);
 		pCounterIcon->SetBackgroundColor(Colors::Transparent);

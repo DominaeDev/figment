@@ -8,36 +8,42 @@ namespace Constants
 {
 	namespace GUI
 	{
-		inline constexpr int32_t WindowWidth = 1320;
-		inline constexpr int32_t WindowHeight = 900;
+		constexpr int32_t WindowWidth = 1320;
+		constexpr int32_t WindowHeight = 900;
 
-		inline constexpr double DefaultFontSize = 18.5;
-		inline constexpr double StatusBarFontSize = 14.5;
-		inline constexpr double CharacterNameFontSize = 12.0;
-		inline constexpr double ChatMessageFontSize = 16.0; //15.5;
-		inline constexpr int32_t ChatScrollWidth = 800;
+		constexpr double DefaultFontSize = 18.5;
+		constexpr double StatusBarFontSize = 14.5;
+		constexpr double CharacterNameFontSize = 12.0;
+		constexpr double ChatMessageFontSize = 16.0; //15.5;
+		constexpr int32_t ChatScrollWidth = 800;
 		
-		inline constexpr int32_t CardWidth = 320;
-		inline constexpr int32_t CardHeight = 412;
+		constexpr int32_t CardWidth = 320;
+		constexpr int32_t CardHeight = 412;
 
-		inline constexpr float MouseScrollSpeed = 80.0f;
+		constexpr float MouseScrollSpeed = 80.0f;
+
+		namespace SidePanel
+		{
+			constexpr float Width = 240.0f;
+
+		}
 	}
 
 	namespace Chat
 	{
-		inline constexpr fig::const_string DialogueTag = "talk";
-		inline constexpr fig::const_string ActionTag = "act";
-		inline constexpr fig::const_string ThoughtTag = "think";
-		inline constexpr fig::const_string NarrationTag = "narrator";
-		inline constexpr fig::const_string DirectionTag = "director";
-		inline constexpr fig::const_string StateReportTag = "change";
-		inline constexpr fig::const_string DialogueTagEnd = "/talk";
-		inline constexpr fig::const_string ActionTagEnd = "/act";
-		inline constexpr fig::const_string ThoughtTagEnd = "/think";
-		inline constexpr fig::const_string NarrationTagEnd = "/narrator";
-		inline constexpr fig::const_string DirectionTagEnd = "/director";
+		constexpr fig::const_string DialogueTag = "talk";
+		constexpr fig::const_string ActionTag = "act";
+		constexpr fig::const_string ThoughtTag = "think";
+		constexpr fig::const_string NarrationTag = "narrator";
+		constexpr fig::const_string DirectionTag = "director";
+		constexpr fig::const_string StateReportTag = "change";
+		constexpr fig::const_string DialogueTagEnd = "/talk";
+		constexpr fig::const_string ActionTagEnd = "/act";
+		constexpr fig::const_string ThoughtTagEnd = "/think";
+		constexpr fig::const_string NarrationTagEnd = "/narrator";
+		constexpr fig::const_string DirectionTagEnd = "/director";
 
-		inline constexpr int DefaultNarratorCooldown = 5;
+		constexpr int DefaultNarratorCooldown = 5;
 	}
 
 	// Sizes
@@ -57,49 +63,49 @@ namespace Constants
 
 	namespace Context
 	{
-		inline constexpr int32_t DefaultSize = static_cast<int32_t>(ContextSize::_3K);
-		inline constexpr int32_t MaxResponseLength = 256;
-		inline constexpr int32_t MicroBatchSize = 512;
-		inline constexpr float WindowKeepRatio = 0.75f;
-		inline constexpr int32_t MaxSequences = 4;
+		constexpr int32_t DefaultSize = static_cast<int32_t>(ContextSize::_3K);
+		constexpr int32_t MaxResponseLength = 256;
+		constexpr int32_t MicroBatchSize = 512;
+		constexpr float WindowKeepRatio = 0.75f;
+		constexpr int32_t MaxSequences = 4;
 	}
 
 	namespace Paths
 	{
-		inline constexpr fig::const_string ProfilesFolder = "./profiles";
-		inline constexpr fig::const_string ProfilesFileName = "profiles";
-		inline constexpr fig::const_string ProfilesFileExt = "";
-		inline constexpr fig::const_string ProfileIndexFileName = "index";
-		inline constexpr fig::const_string ProfileIndexFileExt = "";
-		inline constexpr fig::const_string AssetFileExt = "";
+		constexpr fig::const_string ProfilesFolder = "./profiles";
+		constexpr fig::const_string ProfilesFileName = "profiles";
+		constexpr fig::const_string ProfilesFileExt = "";
+		constexpr fig::const_string ProfileIndexFileName = "index";
+		constexpr fig::const_string ProfileIndexFileExt = "";
+		constexpr fig::const_string AssetFileExt = "";
 	}
 
-	inline constexpr fig::const_string DefaultModelLocation = "M:\\LLM\\default_model.gguf";
+	constexpr fig::const_string DefaultModelLocation = "M:\\LLM\\default_model.gguf";
 	
 	namespace LLM
 	{
-		inline constexpr uint32_t RandomSeed = 0xFFFFFFFF;
-		inline constexpr uint32_t DebugSeed = 0xA1B2C3D4;
+		constexpr uint32_t RandomSeed = 0xFFFFFFFF;
+		constexpr uint32_t DebugSeed = 0xA1B2C3D4;
 	}
 
 	namespace Embedding
 	{
-		inline constexpr fig::const_string DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
-		inline constexpr fig::const_string EmbeddingSaveLocation = ".\\embeddings\\";
-		inline constexpr int32_t ContextSize = 384;
-		inline constexpr int32_t Depth = 1;
-		inline constexpr bool SplitSentences = true;
-		inline constexpr fig::const_string DocumentPrefix	= "";
-		inline constexpr fig::const_string QueryPrefix		= "";
-//		inline constexpr fig::const_string DocumentPrefix	= "search_document: ";
-//		inline constexpr fig::const_string QueryPrefix		= "search_query: ";
-//		inline constexpr fig::const_string DocumentPrefix	= "Represent the statement: ";
-//		inline constexpr fig::const_string QueryPrefix		= "Represent the statement: ";
+		constexpr fig::const_string DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
+		constexpr fig::const_string EmbeddingSaveLocation = ".\\embeddings\\";
+		constexpr int32_t ContextSize = 384;
+		constexpr int32_t Depth = 1;
+		constexpr bool SplitSentences = true;
+		constexpr fig::const_string DocumentPrefix	= "";
+		constexpr fig::const_string QueryPrefix		= "";
+//		constexpr fig::const_string DocumentPrefix	= "search_document: ";
+//		constexpr fig::const_string QueryPrefix		= "search_query: ";
+//		constexpr fig::const_string DocumentPrefix	= "Represent the statement: ";
+//		constexpr fig::const_string QueryPrefix		= "Represent the statement: ";
 	}
 
 	namespace CharacterProperties
 	{
-		inline constexpr const char* const Gender = "gender";
+		constexpr const char* const Gender = "gender";
 
 	}
 }

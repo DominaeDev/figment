@@ -5,7 +5,7 @@ namespace fig::gui
 {
 	SidePanel::SidePanel(Control* parent) : Control(parent)
 	{
-		SetWidth(240);
+		SetWidth(Constants::GUI::SidePanel::Width);
 		SetBackgroundColor(Color { 0xEE, 0xEC, 0xE4, 0xFF });
 	}
 }

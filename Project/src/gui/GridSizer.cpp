@@ -37,10 +37,8 @@ namespace fig::gui
 		float offsetX = _bCenterX ? toF(totalWidth - (columns * _cellWidth + std::max(columns - 1, 0) * _spacingX)) / 2 : 0.0f;
 
 		int32_t index = 0;
-		for (auto& item : _items)
+		for (auto& item : GetLayoutItems())
 		{
-			if (item.pControl == nullptr)
-				continue;
 			int col = index % columns;
 			int row = index / columns;
 

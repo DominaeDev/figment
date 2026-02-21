@@ -14,6 +14,9 @@ LayoutElement::~LayoutElement()
 
 void LayoutElement::Layout()
 {
+	if (not _bLayoutEnabled)
+		return;
+
 	// Update child positions
 	for (auto& child : _children)
 	{

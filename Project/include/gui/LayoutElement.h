@@ -53,6 +53,9 @@ namespace fig::gui
 		void MoveChildToBottom(LayoutElement* pChild);
 
 		void SetSizer(Sizer* sizer);
+
+		void EnableLayout(bool bEnable) noexcept { _bLayoutEnabled = bEnable; }
+		bool IsLayoutEnabled() const noexcept { return _bLayoutEnabled; }
 		void InvalidateLayout();
 
 		inline LayoutElement* GetParent() { return _pParent; }
@@ -81,6 +84,7 @@ namespace fig::gui
 		Pointf _size = {};
 		Pointf _minSize = {};
 		Pointf _maxSize = {};
+		bool _bLayoutEnabled = true;
 		bool _bInvalidLayout = false;
 	};
 }

@@ -59,6 +59,8 @@ namespace fig::gui
 			return pScreen;
 		}
 
+		void ShowSidePanel(bool bShow) noexcept;
+
 	protected:
 		template<IsScreen T>
 		void RegisterScreen();

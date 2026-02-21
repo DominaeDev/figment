@@ -17,7 +17,10 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 	int remainingHeight = totalHeight;
 	int totalProportion = 0;
 	int numStretch = 0;
-	for (auto& item : _items)
+
+	auto items = GetLayoutItems();
+
+	for (auto& item : items)
 	{
 		if (item.prop == 0 && item.pControl != nullptr)
 			remainingHeight = ceil_int(std::max(remainingHeight - item.pControl->GetHeight(), 0.0f));
@@ -30,14 +33,8 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 		totalProportion = 1;
 
 	int y = 0;
-	for (auto& item : _items)
+	for (auto& item : items)
 	{
-		if (item.pControl == nullptr)
-		{
-			y += ceil_int(remainingHeight / (float)numStretch);
-			continue;
-		}
-
 		auto& control = *item.pControl;
 		auto& rect = control.GetRect();
 		int height = 0;

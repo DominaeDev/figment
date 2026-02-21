@@ -50,7 +50,7 @@ void Control::Render(Renderer* pRenderer)
 	static Rect* s_pClippingRect = nullptr;
 	Rect* lastClippingRect = s_pClippingRect;
 	Rect clippingRect;
-	Rect cullingRect = gui_util::expand_rect(gui_util::to_rect(GetRect()), 100);
+	Rect cullingRect = gui_util::expand_rect(gui_util::to_rect(GetRect()), 64);
 
 	if (_bClipping)
 	{

@@ -21,7 +21,9 @@ void TextureStore::Init(Renderer* pRenderer)
 	
 	LoadTexture(pRenderer, TextureType::CARD_BORDER, "./resources/gui/card_border.png");
 	LoadTexture(pRenderer, TextureType::CARD_TAG_BG, "./resources/gui/card_tag_bg.png");
-	LoadTexture(pRenderer, TextureType::CARD_CHAT_COUNTER_ICON, "./resources/gui/icon_small_chat.png");
+	LoadTexture(pRenderer, TextureType::CARD_ICON_CHAT_COUNTER, "./resources/gui/icon_small_chat.png");
+	LoadTexture(pRenderer, TextureType::CARD_BOTTOM_FADE, "./resources/gui/card_bottom_fade.png");
+	LoadTexture(pRenderer, TextureType::CARD_ICON_FAVORITE_OFF, "./resources/gui/card_icon_favorite_off.png");
 }
 
 void TextureStore::Release()

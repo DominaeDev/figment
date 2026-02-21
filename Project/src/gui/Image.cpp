@@ -10,6 +10,9 @@ Image::Image(Control* pParent, Texture* pTexture) : Control(pParent),
 {
 	if (pTexture)
 		SetSize(toF(pTexture->w), toF(pTexture->h));
+	
+	SetForegroundColor(Colors::White);
+	SetBackgroundColor(Colors::Transparent);
 }
 
 void Image::OnRender(Renderer* pRenderer)
@@ -23,10 +26,16 @@ void Image::OnRender(Renderer* pRenderer)
 	{
 		Rectf rect = GetRect();
 
+		if (is_defined(fgColor))
+			SDL_SetTextureColorMod(_pTexture, fgColor.r, fgColor.g, fgColor.b);
+		else
+			SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
+
 		if (is_defined(fgColor) && fgColor.a != 0)
 			SDL_SetTextureAlphaMod(_pTexture, fgColor.a);
 		else
 			SDL_SetTextureAlphaMod(_pTexture, 0xFF);
+
 		SDL_RenderTexture(pRenderer, _pTexture, NULL, &rect);
 	}
 }

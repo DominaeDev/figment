@@ -3,6 +3,7 @@
 #include "Types.h"
 #include "gui/GUITypes.h"
 #include "IUpdateable.h"
+#include <ranges>
 
 namespace fig::gui
 {
@@ -51,12 +52,18 @@ namespace fig::gui
 		};
 
 		LayoutElement* _pOwner = nullptr;
-		std::vector<LayoutInfo> _items;
 
 		unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }
+		auto GetLayoutItems() const noexcept
+		{
+			return _items
+				| std::views::filter([](auto& i) { return (bool)i.pControl and i.pControl->IsLayoutEnabled(); });
+		}
 
 		virtual void OnLayout(Rectf rect) = 0;
-		void Update(float fDeltaTime) override {}
+		void Update(float fDeltaTime) override {};
 
+	private:
+		std::vector<LayoutInfo> _items;
 	};
 }

@@ -5,6 +5,7 @@ namespace fig::gui
 {
 	ScrollPanel::ScrollPanel(Control* pParent) : Control(pParent)
 	{
+		EnableCulling(true);
 	}
 
 	bool ScrollPanel::OnEvent(Event& event)

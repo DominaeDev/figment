@@ -33,6 +33,11 @@ namespace fig::gui
 				return true;
 		}
 
+		if (event.type == SDL_EVENT_MOUSE_WHEEL)
+		{
+			return false;
+		}
+
 		return false;
 	}
 }

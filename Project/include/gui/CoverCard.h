@@ -27,6 +27,7 @@ namespace fig::gui
 		fig::sdl::Texture _texture;
 		StaticText* _pLabel {};
 		StaticText* _pSublabel {};
+		Image* _pBottomFade {};
 	};
 }
 

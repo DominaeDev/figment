@@ -6,13 +6,20 @@ namespace fig::gui
 	NineGridImage::NineGridImage(Control* pParent, Texture* pTexture, float cornerPixels) : Control(pParent),
 		_pTexture { pTexture }
 	{
+		// Left, Right, Top, Bottom
 		_cornerPixels = { cornerPixels, cornerPixels, cornerPixels, cornerPixels };
+
+		if (pTexture)
+			SetSize(toF(pTexture->w), toF(pTexture->h));
 	}
 
 	NineGridImage::NineGridImage(Control* pParent, Texture* pTexture, std::array<float, 4> corners) : Control(pParent),
 		_pTexture { pTexture }
 	{
 		_cornerPixels = corners;
+
+		if (pTexture)
+			SetSize(toF(pTexture->w), toF(pTexture->h));
 	}
 
 	void NineGridImage::SetTexture(Texture* pTexture)

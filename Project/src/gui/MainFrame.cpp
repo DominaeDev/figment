@@ -168,6 +168,11 @@ namespace fig::gui
 					ChangeScreen<ChatFrame>();
 					return true;
 				}
+				else if (keyEvent.key == SDLK_3 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
+				{
+					ShowSidePanel(not _pSidePanel->GetVisible());
+					return true;
+				}
 			}
 		}
 
@@ -230,4 +235,10 @@ namespace fig::gui
 		delete pScreen;
 	}
 
+	void MainFrame::ShowSidePanel(bool bShow) noexcept
+	{
+		_pSidePanel->SetVisible(bShow);
+		_pSidePanel->EnableLayout(bShow);
+		InvalidateLayout();
+	}
 }

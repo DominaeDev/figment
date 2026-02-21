@@ -12,12 +12,13 @@ void VerticalListSizer::OnLayout(Rectf parentRect)
 	if (count == 0)
 		return;
 
+	auto items = GetLayoutItems()
+		| std::views::reverse;
+
 	int y = 0;
-	for (auto it = _items.rbegin(); it != _items.rend(); ++it)
+	for (auto it = items.begin(); it != items.end(); ++it)
 	{
 		auto& item = *it;
-		if (item.pControl == nullptr)
-			continue;
 
 		auto& control = *item.pControl;
 		auto& rect = control.GetRect();
