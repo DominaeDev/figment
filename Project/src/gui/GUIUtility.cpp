@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/GUIUtility.h"
 #include <algorithm>
+#include "gui/TextureStore.h"
 #include "util/Common.h"
 #include "util/StringUtility.h"
 #include "fs/FileUtility.h"
@@ -226,6 +227,22 @@ namespace fig::gui_util
 		return surface; // rvo
 	}
 
+	std::optional<fig::sdl::Surface> LoadImage(fig::path filename)
+	{
+		try
+		{
+			auto pSurface = IMG_Load(filename.u8string().c_str());
+			if (!pSurface)
+				return std::nullopt;
+
+			return fig::make_cresource<fig::sdl::Surface>(pSurface);
+		}
+		catch (...)
+		{
+			return {};
+		}
+	}
+
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit)
 	{
 		try
@@ -253,6 +270,7 @@ namespace fig::gui_util
 			return {};
 
 		auto pSurface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
+		
 		fig::sdl::Surface pScaledSurface;
 		pScaledSurface.reset(pSurface);
 
@@ -404,5 +422,27 @@ namespace fig::gui_util
 		}
 
 		return true;
+	}
+
+	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface)
+	{
+		auto pSurface = SDL_CreateSurface(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, SDL_PIXELFORMAT_RGBA8888);
+		if (not (bool)pSurface)
+			return {};
+		
+		fig::sdl::Surface cover {};
+		cover.reset(pSurface);
+
+		// Draw background
+		auto pBGImage = TextureStore::GetImage(TextureType::CARD_DEFAULT_BG);
+		SDL_BlitSurface(pBGImage, NULL, pSurface, NULL);
+
+		auto pScaledImage = ScaleSurface(surface, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
+		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
+
+		// Round corners
+		MaskCorners(cover, CornerStyle::Card);
+
+		return cover;
 	}
 }

@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "fs/Serialization.h"
+#include <Crc32.h>
 #include <cassert>
 
 namespace fig::fs
@@ -12,7 +13,7 @@ namespace fig::fs
 	static uint16_t get_data_offset(const AssetFile& file)
 	{
 		if (file.IsReference())
-			return static_cast<uint16_t>(0xFFFF); // No data
+			return 0; // No data
 
 		uint32_t offset = 0;
 		for (auto it = file.meta.cbegin(); it != file.meta.cend(); ++it)
@@ -35,16 +36,12 @@ namespace fig::fs
 				offset += sizeof(_meta_identifier);
 			else if (const fig::string* s = std::get_if<fig::string>(&value))
 			{
-				if (s->size() > toUZ(std::numeric_limits<uint8_t>::max()))
-					offset += sizeof(uint16_t); // length
-				else
-					offset += sizeof(uint8_t); // length
+				offset += sizeof(uint8_t); // length
 				offset += static_cast<uint32_t>(s->size()); // data
 			}
 		}
 
-		offset += static_cast<uint32_t>(sizeof(FileHeader));
-		assert(offset < static_cast<uint32_t>(std::numeric_limits<uint16_t>::max()));
+		assert(offset <= static_cast<uint16_t>(std::numeric_limits<uint16_t>::max()));
 		return offset;
 	}
 
@@ -59,9 +56,14 @@ namespace fig::fs
 		file.asset_id.bytes(reinterpret_cast<char*>(&header.asset_id));
 		file.parent_id.bytes(reinterpret_cast<char*>(&header.parent_id));
 
-		assert(file.meta.size() < std::numeric_limits<uint8_t>::max());
+		assert(file.meta.size() <= toUZ(std::numeric_limits<uint8_t>::max()));
 		header.meta_count = static_cast<uint8_t>(file.meta.size());
 		header.data_offset = get_data_offset(file);
+
+		if (file.data_encrypted)
+			header.flags = header.flags | FileHeaderFlag::Encrypted;
+		if (file.has_meta(MetaTag::Checksum))
+			header.flags = header.flags | FileHeaderFlag::Checksum;
 
 		fs.write((const char*)(&header), sizeof(header));
 	}
@@ -109,27 +111,29 @@ namespace fig::fs
 			}
 			else if (const fig::string* s = std::get_if<fig::string>(&value))
 			{
-				if (s->size() <= toUZ(std::numeric_limits<uint8_t>::max()))
-				{
-					fs << static_cast<uint8_t>(MetaValueType::String8);
-					uint8_t length = static_cast<uint8_t>(s->size());
-					fs.write((const char*)(&length), sizeof(uint8_t));
-				}
-				else
-				{
-					fs << static_cast<uint8_t>(MetaValueType::String16);
-					uint16_t length = static_cast<uint16_t>(s->size());
-					fs.write((const char*)(&length), sizeof(uint16_t));
-				}
-				fs.write(s->c_str(), s->size());
+				fs << static_cast<uint8_t>(MetaValueType::String);
+				uint8_t length = static_cast<uint8_t>(std::min(s->size(), 254uz));
+				fs.write((const char*)(&length), sizeof(uint8_t));
+				fs.write(s->c_str(), length);
 			}
 		}
 	}
 
 	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::security::AuthKey authKey) noexcept
 	{
-		if (not file.IsReference())
+		if (file.IsReference())
+			return; // No data
+
+		if (file.data_encrypted)
+		{
+			// Write encrypted
 			fig::security::Encrypt(fs, file.data, authKey);
+		}
+		else
+		{
+			// Write unencrypted
+			fs.write((const char*)file.data.data(), file.data.size());
+		}
 	}
 
 	FileError BinaryWriter::WriteFile(const fig::path& directory, const AssetFile& file) noexcept

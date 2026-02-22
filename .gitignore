@@ -21,3 +21,5 @@ Libraries/temp/
 Project/old_dlls/
 Project/profiles/
 Libraries/SDL3/3.2.12/
+Project/import/
+*.psd

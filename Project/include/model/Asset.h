@@ -96,6 +96,7 @@ namespace fig::fs
 		AssetFile ToFile() const noexcept;
 		void FromFile(const AssetFile& file) noexcept;
 		void FromFile(AssetFile&& file) noexcept;
+		void CalculateChecksum();
 
 		constexpr bool IsOfType(AssetType type) const noexcept { return asset_type == type; }
 		constexpr bool IsOfImageType(ImageType subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }

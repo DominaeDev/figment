@@ -61,9 +61,9 @@ namespace fig::gui
 					| std::ranges::to<std::vector>();
 				assets.DeleteAssets(remove_characters);
 
-				auto x = assets.ImportCharacter(fig::path("./characters/user.xml"));
-				auto y = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
-				auto z = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
+				auto x = assets.ImportCharacter(fig::path("./import/user.xml"));
+				auto y = assets.ImportCharacter(fig::path("./import/bot1.xml"));
+				auto z = assets.ImportCharacter(fig::path("./import/bot2.xml"));
 				userMngr.GetProfileAssets().SaveModified();
 			}
 		}
@@ -79,7 +79,7 @@ namespace fig::gui
 					| std::ranges::to<std::vector>();
 				assets.DeleteAssets(remove_scenarios);
 
-				auto x = assets.ImportScenario(fig::path("./characters/scenario.xml"));
+				auto x = assets.ImportScenario(fig::path("./import/scenario.xml"));
 				userMngr.GetProfileAssets().SaveModified();
 			}
 		}
@@ -97,6 +97,7 @@ namespace fig::gui
 					| std::ranges::to<std::vector>();
 				assets.DeleteAssets(remove_characters);
 
+				assets.ImportTestCharacters(fig::path("./import/characters"));
 				userMngr.GetProfileAssets().SaveModified();
 			}
 		}

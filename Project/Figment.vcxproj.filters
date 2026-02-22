@@ -117,6 +117,9 @@
     <Filter Include="Source Files\Frontend\Authentication">
       <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Third-party\fast-crc32">
+      <UniqueIdentifier>{7adc1fef-db02-42af-a1be-8a578e63bd50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -376,6 +379,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\SidePanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\fast-crc32\Crc32.cpp">
+      <Filter>Source Files\Third-party\fast-crc32</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -951,6 +957,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\SidePanel.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\fast-crc32\Crc32.h">
+      <Filter>Source Files\Third-party\fast-crc32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

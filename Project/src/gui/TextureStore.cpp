@@ -4,7 +4,8 @@
 
 using namespace fig::gui;
 
-std::map<TextureType, Texture*> TextureStore::_textures;
+std::map<TextureType, fig::sdl::Surface> TextureStore::_surfaces;
+std::map<TextureType, fig::sdl::Texture> TextureStore::_textures;
 
 void TextureStore::Init(Renderer* pRenderer)
 {
@@ -24,37 +25,53 @@ void TextureStore::Init(Renderer* pRenderer)
 	LoadTexture(pRenderer, TextureType::CARD_ICON_CHAT_COUNTER, "./resources/gui/icon_small_chat.png");
 	LoadTexture(pRenderer, TextureType::CARD_BOTTOM_FADE, "./resources/gui/card_bottom_fade.png");
 	LoadTexture(pRenderer, TextureType::CARD_ICON_FAVORITE_OFF, "./resources/gui/card_icon_favorite_off.png");
+	LoadTexture(pRenderer, TextureType::CARD_DEFAULT_BG, "./resources/gui/default_card_bg.png");
 }
 
 void TextureStore::Release()
 {
-	for (auto it : _textures)
-	{
-		SDL_DestroyTexture(it.second);
-	}
+	_textures.clear();
+	_surfaces.clear();
 }
 
 bool TextureStore::LoadTexture(Renderer* pRenderer, TextureType textureId, const char* filename)
 {
-	auto pSurface = IMG_Load(filename);
-	if (!pSurface)
-		return false;
+	SurfacePtr pSurface;
+	auto itFind = _surfaces.find(textureId);
+	if (itFind != _surfaces.cend())
+		pSurface = itFind->second.get();
+	else
+	{
+		pSurface = IMG_Load(filename);
+		if (not (bool)pSurface)
+			return false; // File not found
+		
+		auto& surface = _surfaces[textureId] = fig::sdl::Surface();
+		surface.reset(pSurface);
+	}
 
 	auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
-	SDL_DestroySurface(pSurface);
-
 	if (pTexture)
 	{
-		_textures[textureId] = pTexture;
+		auto& texture = _textures[textureId] = fig::sdl::Texture();
+		texture.reset(pTexture);
 		return true;
 	}
 	return false;
 }
 
-Texture* TextureStore::GetTexture(TextureType id)
+TexturePtr TextureStore::GetTexture(TextureType id)
 {
 	auto itFind = _textures.find(id);
 	if (itFind != _textures.end())
-		return itFind->second;
+		return itFind->second.get();
+	return nullptr;
+}
+
+SurfacePtr TextureStore::GetImage(TextureType id) noexcept
+{
+	auto itFind = _surfaces.find(id);
+	if (itFind != _surfaces.end())
+		return itFind->second.get();
 	return nullptr;
 }

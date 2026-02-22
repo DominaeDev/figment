@@ -21,6 +21,7 @@ namespace fig::fs
 		UnrecognizedFormat,
 		ReadError,
 		WriteError,
+		ChecksumError,
 	};
 
 	struct VersionNumber
@@ -89,10 +90,18 @@ namespace fig::fs
 
 	constexpr fig::const_string MagicWord = "FIGM";
 
+	enum class FileHeaderFlag : uint8_t
+	{
+		Encrypted	= 1 << 0,
+		Checksum	= 1 << 1,
+	};
+	using FileHeaderFlags = EnumFlags<FileHeaderFlag>;
+
 	struct alignas(8) FileHeader
 	{
 		char magic[4] = { 'F','I','G','M' };
-		uint16_t fmt_version = { VersionNumber(1, 0).to_uint16() };
+		uint8_t header_version { 1 };
+		FileHeaderFlags flags;
 		uint16_t data_offset;
 		uint64_t asset_id[2];
 		uint64_t parent_id[2];
@@ -106,9 +115,10 @@ namespace fig::fs
 	enum class MetaTag : uint8_t
 	{
 		Unknown				= 0x00,
-		CreatedAt			= 0x01,		// utc
-		UpdatedAt			= 0x02,		// utc
+		CreatedAt			= 0x01,	// utc
+		UpdatedAt			= 0x02,	// utc
 		Version				= 0x03,
+		Checksum			= 0x04,
 
 		ImageWidth			= 0x10,
 		ImageHeight			= 0x11,
@@ -128,8 +138,7 @@ namespace fig::fs
 		Integer		= 0x03,
 		Float		= 0x04,
 
-		String8		= 0x08,
-		String16	= 0x09,
+		String		= 0x08,
 		TimeStamp	= 0x10,
 		Identifier	= 0x40,
 
@@ -155,6 +164,9 @@ namespace fig::fs
 		case MetaTag::Reference:
 			return MetaValueType::Identifier;
 
+		case MetaTag::Checksum:
+			return MetaValueType::Integer;
+
 		default:
 			return MetaValueType::Unknown;
 		}
@@ -170,10 +182,16 @@ namespace fig::fs
 
 		fig::bytes data {};
 		size_t data_length {};
+		bool data_encrypted { true };
 		std::map<MetaTag, MetaValue> meta {};
 
+		bool has_meta(MetaTag tag) const
+		{
+			return meta.contains(tag);
+		}
+
 		template <typename T>
-		std::optional<T> get_meta(MetaTag tag) const noexcept
+		std::optional<T> get_meta(MetaTag tag) const
 		{
 			auto it = meta.find(tag);
 			if (it != meta.cend())
@@ -182,7 +200,7 @@ namespace fig::fs
 		}
 
 		template <typename T>
-		bool try_get_meta(MetaTag tag, T& out_value) const noexcept
+		bool try_get_meta(MetaTag tag, T& out_value) const
 		{
 			if (auto m = get_meta<T>(tag))
 			{
@@ -221,6 +239,8 @@ namespace fig::fs
 		{
 			return get_meta<_meta_identifier>(MetaTag::Reference).has_value();
 		}
+
+		static constexpr size_t MaxMetaStringLen { std::numeric_limits<uint8_t>::max() - 1 };
 	};
 
 	class BinaryReader

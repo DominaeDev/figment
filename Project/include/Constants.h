@@ -17,15 +17,20 @@ namespace Constants
 		constexpr double ChatMessageFontSize = 16.0; //15.5;
 		constexpr int32_t ChatScrollWidth = 800;
 		
-		constexpr int32_t CardWidth = 320;
-		constexpr int32_t CardHeight = 412;
-
 		constexpr float MouseScrollSpeed = 80.0f;
+
+		namespace HomeScreen
+		{
+			constexpr int32_t CardWidth = 320;
+			constexpr int32_t CardHeight = 412;
+
+			constexpr int32_t CardSpacingX = 18;
+			constexpr int32_t CardSpacingY = 20;
+		}
 
 		namespace SidePanel
 		{
 			constexpr float Width = 240.0f;
-
 		}
 	}
 

@@ -54,10 +54,8 @@ namespace fig::gui
 		auto& assets = ApplicationState::GetUserManager().GetProfileAssets();
 		const auto& profileId = ApplicationState::GetUserManager().GetActiveProfile().id;
 
-		float x = 40.0f;
-
-		auto gridSizer = new GridSizer(Constants::GUI::CardWidth, Constants::GUI::CardHeight);
-		gridSizer->SetSpacing(10, 12);
+		auto gridSizer = new GridSizer(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight);
+		gridSizer->SetSpacing(Constants::GUI::HomeScreen::CardSpacingX, Constants::GUI::HomeScreen::CardSpacingY);
 		gridSizer->EnableCentering(true);
 		_pMainArea->SetSizer(gridSizer);
 
@@ -68,8 +66,6 @@ namespace fig::gui
 		for (auto& asset : scenarios)
 		{
 			auto pCard = new ScenarioCard(_pMainArea, asset.id);
-			pCard->SetPosition(x, 40.0f);
-			x += Constants::GUI::CardWidth + 16.0f;
 			gridSizer->Add(pCard);
 		}
 
@@ -80,8 +76,6 @@ namespace fig::gui
 		for (auto& asset : characters)
 		{
 			auto pCard = new CharacterCard(_pMainArea, asset.id);
-			pCard->SetPosition(x, 40.0f);
-			x += Constants::GUI::CardWidth + 16.0f;
 			gridSizer->Add(pCard);
 		}
 

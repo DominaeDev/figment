@@ -26,6 +26,7 @@ namespace fig::gui
 		CARD_ICON_CHAT_COUNTER,
 		CARD_ICON_FAVORITE_OFF,
 		CARD_ICON_FAVORITE_ON,
+		CARD_DEFAULT_BG,
 	};
 
 	class TextureStore
@@ -33,11 +34,13 @@ namespace fig::gui
 	public:
 		static void Init(Renderer* pRenderer);
 		static void Release();
-		static Texture* GetTexture(TextureType id);
+		static TexturePtr GetTexture(TextureType id);
+		static SurfacePtr GetImage(TextureType id) noexcept;
 
 	private:
 		static bool LoadTexture(Renderer* pRenderer, TextureType textureId, const char* filename);
 
-		static std::map<TextureType, Texture*> _textures;
+		static std::map<TextureType, fig::sdl::Surface> _surfaces;
+		static std::map<TextureType, fig::sdl::Texture> _textures;
 	};
 }

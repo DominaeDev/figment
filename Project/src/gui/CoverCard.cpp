@@ -13,7 +13,7 @@ namespace fig::gui
 	CoverCard::CoverCard(Control* pParent, const fig::uuid& assetId) : Image(pParent, nullptr),
 		_assetId { assetId }
 	{
-		SetSize(Constants::GUI::CardWidth, Constants::GUI::CardHeight);
+		SetSize(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight);
 
 		if (ImageStore::LoadCoverImage(assetId))
 		{

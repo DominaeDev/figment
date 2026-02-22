@@ -14,7 +14,7 @@ namespace fig::gui
 
 		static bool LoadCoverImage(const fig::uuid& characterAssetID);
 		static fig::uuid GetCoverImageID(const fig::uuid& characterAssetID) noexcept;
-		static Texture* GetTexture(RendererPtr pRenderer, const fig::uuid& assetID);
+		static TexturePtr GetTexture(RendererPtr pRenderer, const fig::uuid& assetID);
 	
 	private:
 		static std::map<fig::uuid, fig::uuid> _coverImages;

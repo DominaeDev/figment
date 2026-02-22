@@ -145,6 +145,7 @@ namespace fig::fs
 	{
 		auto& asset = CreateAsset(AssetType::Image, format, std::move(data), parent);
 		asset.asset_subtype = static_cast<uint8_t>(subtype);
+		asset.CalculateChecksum();
 		return asset;
 	}
 
@@ -152,6 +153,7 @@ namespace fig::fs
 	{
 		auto& asset = CreateAsset(AssetType::Image, format, data, parent);
 		asset.asset_subtype = static_cast<uint8_t>(subtype);
+		asset.CalculateChecksum();
 		return asset;
 	}
 
@@ -181,6 +183,7 @@ namespace fig::fs
 			std::memcpy(asset.data.data(), (fig::byte*)pSurface->pixels, data_length);
 			SDL_UnlockSurface(pSurface);
 		}
+		asset.CalculateChecksum();
 		return asset;
 	}
 
@@ -311,15 +314,15 @@ namespace fig::fs
 				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormatFromExt(GetFileExt(character.largePortraitFilename)), std::move(file.value()), characterAsset.id);
 
 				// Create cover card
-				if (auto coverImage = LoadAndResizeImage(filename.parent_path() / character.largePortraitFilename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
+				if (auto coverImage = LoadImage(filename.parent_path() / character.largePortraitFilename)
+					.transform([](auto img) {
+						return CreateCoverImage(img); 
+					}))
 				{
-					// Round corners
-					MaskCorners(coverImage, CornerStyle::Card);
-
 					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, characterAsset.id);
+					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage.value(), characterAsset.id);
 
-					// Create reference to original
+					// Create reference to original image
 					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
 				}
 			}
@@ -355,13 +358,13 @@ namespace fig::fs
 				auto& scenarioImageAsset = CreateImageAsset(ImageType::Unspecified, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
 
 				// Create cover card
-				if (auto coverImage = LoadAndResizeImage(filename.parent_path() / scenario.imageFilename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
+				if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
+					.transform([](auto img) {
+						return CreateCoverImage(img);
+					}))
 				{
-					// Round corners
-					MaskCorners(coverImage, CornerStyle::Card);
-
 					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, scenarioAsset.id);
+					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage.value(), scenarioAsset.id);
 
 					// Create reference to original
 					CreateAssetReference(ReferenceType::Original, scenarioImageAsset.id, coverAsset.id);
@@ -471,13 +474,13 @@ namespace fig::fs
 				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
 
 				// Create cover card
-				if (auto coverImage = LoadAndResizeImage(filename, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait))
+				if (auto coverImage = LoadImage(filename)
+					.transform([](auto img) {
+						return CreateCoverImage(img);
+					}))
 				{
-					// Round corners
-					MaskCorners(coverImage, CornerStyle::Card);
-
 					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage, characterAsset.id);
+					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage.value(), characterAsset.id);
 
 					// Create reference to original
 					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);

@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "fs/Serialization.h"
+#include <Crc32.h>
 #include <format>
 
 namespace fig::fs
@@ -17,11 +18,16 @@ namespace fig::fs
 
 		// Validate header
 		bool valid = header.magic[0] == MagicWord[0] && header.magic[1] == MagicWord[1] && header.magic[2] == MagicWord[2] && header.magic[3] == MagicWord[3];
-		valid &= VersionNumber(header.fmt_version) == VersionNumber(1, 0); // Format version
-		if (header.data_offset != 0xffff)
+		
+		// Version
+		valid &= header.header_version == 1;
+
+		// Data extents
+		if (valid and header.data_length != 0)
 		{
-			valid &= (header.data_offset + header.data_length <= file_size); // Data offset
-			valid &= (file_size - header.data_offset) % 16 == 0; // Data length should match
+			size_t data_offset = header.data_offset + sizeof(FileHeader);
+			valid &= (data_offset + header.data_length <= file_size);
+			valid &= (!(bool)(header.flags & FileHeaderFlag::Encrypted)) or ((file_size - data_offset) % 16 == 0); // Encrypted data length must be divisible by 16
 		}
 		return valid;
 	}
@@ -70,25 +76,12 @@ namespace fig::fs
 				fs.read(buf, sizeof(_meta_identifier));
 				outMeta[tag] = *reinterpret_cast<_meta_identifier*>(&buf);
 				break;
-			case MetaValueType::String8:
+			case MetaValueType::String:
 			{
 				// Read length
-				uint32_t len;
+				uint8_t len;
 				fs.read(buf, sizeof(uint8_t));
 				len = *reinterpret_cast<uint8_t*>(&buf);
-
-				// Read data
-				std::vector<char> strbuf(len);
-				fs.read(strbuf.data(), len);
-				outMeta[tag] = fig::string(strbuf.cbegin(), strbuf.cend());
-				break;
-			}
-			case MetaValueType::String16:
-			{
-				// Read length
-				uint32_t len;
-				fs.read(buf, sizeof(uint16_t));
-				len = *reinterpret_cast<uint16_t*>(&buf);
 
 				// Read data
 				std::vector<char> strbuf(len);
@@ -107,7 +100,16 @@ namespace fig::fs
 	{
 		size_t length = file.data_length;
 		file.data.resize(length);
-		fig::security::Decrypt(fs, file.data, authKey);
+		if (file.data_encrypted)
+		{
+			// Read encrypted
+			fig::security::Decrypt(fs, file.data, authKey);
+		}
+		else
+		{
+			// Read unencrypted
+			fs.read((char*)file.data.data(), file.data.size());
+		}
 	}
 
 	std::expected<AssetFile, FileError> BinaryReader::ReadFile(const fig::path& filename, bool read_data) noexcept
@@ -154,19 +156,26 @@ namespace fig::fs
 			file.asset_subtype = header.asset_subtype;
 			file.data_format = header.data_format;
 			file.data_length = header.data_length;
+			file.data_encrypted = (bool)(header.flags & FileHeaderFlag::Encrypted);
 
 			// Read meta
 			if (not ReadMeta(fs, header.meta_count, file.meta))
 				return std::unexpected(FileError::UnrecognizedFormat);
 
-			if (header.data_offset == 0xFFFF)
-				read_data = false; // Reference: No data
-
 			// Read data
-			if (read_data)
+			if (header.data_length > 0)
 			{
-				fs.seekg(header.data_offset, std::ios::beg);
+				fs.seekg(header.data_offset + sizeof(FileHeader), std::ios::beg);
 				ReadData(fs, file, _authKey);
+
+				int32_t checksum;
+				if ((bool)(header.flags & FileHeaderFlag::Checksum) and file.try_get_meta(MetaTag::Checksum, checksum))
+				{
+					// Compare checksum
+					int32_t crc32 = static_cast<int32_t>(crc32_fast(file.data.data(), file.data.size()));
+					if (crc32 != checksum)
+						return std::unexpected(FileError::ChecksumError);
+				}
 			}
 			return file;
 		}

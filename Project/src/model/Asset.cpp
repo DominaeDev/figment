@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cassert>
 #include <limits>
+#include <crc32.h>
 
 namespace fig::fs
 {
@@ -276,22 +277,33 @@ namespace fig::fs
 	void Asset::SetMeta(MetaTag tag, const fig::string& value) noexcept
 	{
 		auto meta_type = get_meta_type(tag);
-		assert(meta_type == MetaValueType::String8 || meta_type == MetaValueType::String16);
+		assert(meta_type == MetaValueType::String);
 
-		if (meta_type == MetaValueType::String8 && value.length() >= toUZ(std::numeric_limits<uint8_t>::max()))
+		if (value.length() >= AssetFile::MaxMetaStringLen)
 		{
+			// Truncate string
 			fig::string copy { value };
-			copy.resize(toUZ(std::numeric_limits<uint8_t>::max()));
-			_parameters[tag] = copy;
-		}
-		else if (meta_type == MetaValueType::String16 && value.length() >= toUZ(std::numeric_limits<uint16_t>::max()))
-		{
-			fig::string copy { value };
-			copy.resize(toUZ(std::numeric_limits<uint16_t>::max()));
+			copy.resize(AssetFile::MaxMetaStringLen);
 			_parameters[tag] = copy;
 		}
 		else
+		{
 			_parameters[tag] = value;
+		}
+	}
+
+	void Asset::CalculateChecksum()
+	{
+		if (_parameters.contains(MetaTag::Checksum))
+			return;
+
+		if (data.size() == 0)
+		{
+			_parameters.erase(MetaTag::Checksum);
+			return;
+		}
+
+		SetMeta(MetaTag::Checksum, static_cast<int32_t>(crc32_fast(data.data(), data.size())));
 	}
 
 }

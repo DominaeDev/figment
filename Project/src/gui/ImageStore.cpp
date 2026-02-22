@@ -29,8 +29,8 @@ namespace fig::gui
 	static bool CreateSurface(const Asset& cover, fig::sdl::Surface& out_surface)
 	{
 		// Create SDL surface
-		int32_t width = cover.GetMeta<uint16_t>(MetaTag::ImageWidth).value_or(Constants::GUI::CardWidth);
-		int32_t height = cover.GetMeta<uint16_t>(MetaTag::ImageHeight).value_or(Constants::GUI::CardHeight);
+		int32_t width = cover.GetMeta<uint16_t>(MetaTag::ImageWidth).value_or(Constants::GUI::HomeScreen::CardWidth);
+		int32_t height = cover.GetMeta<uint16_t>(MetaTag::ImageHeight).value_or(Constants::GUI::HomeScreen::CardHeight);
 		int32_t depth = cover.GetMeta<uint8_t>(MetaTag::ImageFormatDepth).value_or(4);
 
 		try
@@ -85,7 +85,7 @@ namespace fig::gui
 			{
 				if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
 				{
-					auto coverImage = ScaleSurface(portraitImage, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait);
+					auto coverImage = ScaleSurface(portraitImage, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
 
 					// Round corners
 					MaskCorners(coverImage, CornerStyle::Card);

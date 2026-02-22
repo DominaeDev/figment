@@ -16,6 +16,23 @@ namespace fig::sdl
 	using TextEngine = stdex::c_resource<TTF_TextEngine, TTF_CreateRendererTextEngine, TTF_DestroyRendererTextEngine>;
 }
 
+namespace fig
+{
+	template <typename T, typename P = T::pointer>
+	concept IsCResource = requires(T type, P p)
+	{
+		type.reset(p);
+	};
+
+	template <IsCResource T, typename P = T::pointer>
+	T make_cresource(P ptr)
+	{
+		T surface;
+		surface.reset(ptr);
+		return surface;
+	};
+}
+
 namespace fig::gui
 {
 	// SDL types
