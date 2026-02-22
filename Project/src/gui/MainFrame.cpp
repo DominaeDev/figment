@@ -210,6 +210,8 @@ namespace fig::gui
 		auto sizer = new VerticalSizer();
 		sizer->Add(_pActiveScreen, -1, Sizer::Expand);
 		_pMainArea->SetSizer(sizer);
+
+		LayoutNow();
 	}
 
 	template<IsScreen T>
@@ -221,6 +223,7 @@ namespace fig::gui
 		auto pScreen = new T(this);	// Must pass this to receive renderer
 		RemoveChild(pScreen);
 		_screensByType[type_id<T>()] = pScreen;
+		pScreen->SetSize(this->_size);
 	}
 
 	template<IsScreen T>

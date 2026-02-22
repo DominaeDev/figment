@@ -158,6 +158,7 @@
     <ClCompile Include="src\fs\FileUtility.cpp" />
     <ClCompile Include="src\fs\XmlReader.cpp" />
     <ClCompile Include="src\fs\XmlWriter.cpp" />
+    <ClCompile Include="src\gui\CardList.cpp" />
     <ClCompile Include="src\gui\CharacterCard.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
     <ClCompile Include="src\gui\ChatFrame.cpp" />
@@ -336,6 +337,7 @@
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\Xml.h" />
     <ClInclude Include="include\gui\Border.h" />
+    <ClInclude Include="include\gui\CardList.h" />
     <ClInclude Include="include\gui\CharacterCard.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />
     <ClInclude Include="include\gui\ChatFrame.h" />

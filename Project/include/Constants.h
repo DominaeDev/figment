@@ -23,7 +23,6 @@ namespace Constants
 		{
 			constexpr int32_t CardWidth = 320;
 			constexpr int32_t CardHeight = 412;
-
 			constexpr int32_t CardSpacingX = 18;
 			constexpr int32_t CardSpacingY = 20;
 		}

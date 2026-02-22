@@ -47,6 +47,9 @@ namespace fig::gui
 			control.SetPosition(offsetX + toF(col * (_cellWidth + _spacingX)), toF(row * (_cellHeight + _spacingY)));
 			index++;
 		}
+
+		last_columns = columns;
+		last_rows = rows;
 	}
 
 	void GridSizer::EnableCentering(bool bEnable)

@@ -16,6 +16,10 @@ void LayoutElement::Layout()
 {
 	if (not _bLayoutEnabled)
 		return;
+	_bInvalidLayout = false;
+
+	if (_pSizer)
+		_pSizer->Layout();
 
 	// Update child positions
 	for (auto& child : _children)
@@ -27,11 +31,12 @@ void LayoutElement::Layout()
 		child->Layout();
 	}
 
-	if (_pSizer)
-		_pSizer->Layout();
-	_bInvalidLayout = false;
-
 	OnAfterLayout();
+}
+
+void LayoutElement::LayoutNow()
+{
+	Layout();
 }
 
 void LayoutElement::SetRect(Rectf rect)
@@ -134,7 +139,7 @@ bool LayoutElement::RemoveChild(LayoutElement* pChild)
 	return false;
 }
 
-bool LayoutElement::RemoveChildren()
+bool LayoutElement::RemoveChildren(bool destroy)
 {
 	if (_children.empty())
 		return false;
@@ -142,6 +147,10 @@ bool LayoutElement::RemoveChildren()
 	for (auto& child : _children)
 	{
 		OnRemovedChild(child);
+
+		if (destroy)
+			delete child;
+		else
 		child->SetParent(nullptr);
 	}
 	_children.clear();

@@ -19,8 +19,8 @@ namespace fig::gui
 
 		inline Rectf& GetRect() noexcept { return _rect; }
 		inline const Rectf& GetRect() const noexcept { return _rect; }
-		inline Pointf GetPosition() const noexcept { return _position; }
-		inline Pointf GetSize() const noexcept { return _size; }
+		inline const Pointf& GetPosition() const noexcept { return _position; }
+		inline const Pointf& GetSize() const noexcept { return _size; }
 
 		inline Pointf GetAbsolutePosition() const noexcept;
 		inline float GetX() const noexcept { return _position.x; }
@@ -48,7 +48,7 @@ namespace fig::gui
 
 		void AddChild(LayoutElement* pChild);
 		bool RemoveChild(LayoutElement* pChild);
-		bool RemoveChildren();
+		bool RemoveChildren(bool destroy = false);
 		void MoveChildToTop(LayoutElement* pChild);
 		void MoveChildToBottom(LayoutElement* pChild);
 
@@ -57,6 +57,7 @@ namespace fig::gui
 		void EnableLayout(bool bEnable) noexcept { _bLayoutEnabled = bEnable; }
 		bool IsLayoutEnabled() const noexcept { return _bLayoutEnabled; }
 		void InvalidateLayout();
+		void LayoutNow();
 
 		inline LayoutElement* GetParent() { return _pParent; }
 		inline constexpr LayoutElement* GetParent() const { return _pParent; }

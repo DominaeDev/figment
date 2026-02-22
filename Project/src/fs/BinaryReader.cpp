@@ -163,7 +163,7 @@ namespace fig::fs
 				return std::unexpected(FileError::UnrecognizedFormat);
 
 			// Read data
-			if (header.data_length > 0)
+			if (read_data and header.data_length > 0)
 			{
 				fs.seekg(header.data_offset + sizeof(FileHeader), std::ios::beg);
 				ReadData(fs, file, _authKey);

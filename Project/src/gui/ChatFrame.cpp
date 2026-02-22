@@ -116,42 +116,6 @@ namespace fig::gui
 		_pVariableList->SetVariables(test);
 
 		InvalidateLayout();
-
-		auto& userMngr = ApplicationState::GetUserManager();
-		if (not userMngr.LoadProfiles())
-		{
-			userMngr.CreateDefaultProfile();
-			userMngr.SaveProfiles();
-			userMngr.SignInDefaultProfile();
-		}
-		else
-		{
-			userMngr.SignInDefaultProfile();
-		}
-
-		// Import test characters
-		if constexpr (Disabled)
-		{
-			if (userMngr.IsSignedIn())
-			{
-				auto& assets = userMngr.GetProfileAssets();
-				auto x = assets.ImportCharacter(fig::path("./characters/user.xml"));
-				auto y = assets.ImportCharacter(fig::path("./characters/bot1.xml"));
-				auto z = assets.ImportCharacter(fig::path("./characters/bot2.xml"));
-				assets.SaveModified();
-			}
-		}
-
-		// Import test scenario
-		if constexpr (Disabled)
-		{
-			if (userMngr.IsSignedIn())
-			{
-				auto& assets = userMngr.GetProfileAssets();
-				auto x = assets.ImportScenario(fig::path("./characters/scenario.xml"));
-				assets.SaveModified();
-			}
-		}
 	}
 
 	void ChatFrame::OnUpdate(float fDeltaTime)

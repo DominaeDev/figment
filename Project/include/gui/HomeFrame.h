@@ -7,7 +7,7 @@
 
 namespace fig::gui
 {
-	class ScrollPanel;
+	class CardList;
 
 	class HomeFrame : public Screen
 	{
@@ -23,9 +23,7 @@ namespace fig::gui
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
 	private:
-		ScrollPanel* _pMainArea {};
-		Area* _pScrollArea {};
-		float _fScrollY {};
+		CardList* _pCardList {};
 	};
 }
 

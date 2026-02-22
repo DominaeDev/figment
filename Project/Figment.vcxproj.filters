@@ -383,6 +383,9 @@
     <ClCompile Include="..\Libraries\fast-crc32\Crc32.cpp">
       <Filter>Source Files\Third-party\fast-crc32</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CardList.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -960,6 +963,9 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\fast-crc32\Crc32.h">
       <Filter>Source Files\Third-party\fast-crc32</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CardList.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
