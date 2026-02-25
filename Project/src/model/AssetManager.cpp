@@ -449,8 +449,8 @@ namespace fig::fs
 		for (const auto& entry : std::filesystem::directory_iterator(directory))
 			files.push_back(entry.path());
 
-		auto rng = std::default_random_engine {};
-		rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
+		auto rng = std::random_device {};
+//		rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 		std::ranges::shuffle(files, rng);
 
 		int32_t index = 0;

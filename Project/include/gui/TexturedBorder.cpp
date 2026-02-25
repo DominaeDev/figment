@@ -1,24 +1,24 @@
 #include <pch.h>
-#include "gui/Border.h"
+#include "gui/TexturedBorder.h"
 #include "gui/TextureStore.h"
 #include "gui/GUIUtility.h"
 
 using namespace fig::gui;
 using namespace fig::gui_util;
 
-Border::Border(Control* pParent, Texture* borderTexture, int cornerPixels) : Control(pParent)
+TexturedBorder::TexturedBorder(Control* pParent, Texture* borderTexture, int cornerPixels) : Control(pParent)
 {
 	_cornerPixels = { toF(cornerPixels), toF(cornerPixels), toF(cornerPixels), toF(cornerPixels) };
 	_pBorderTexture = borderTexture;
 }
 
-Border::Border(Control* pParent, Texture* borderTexture, std::array<float, 4> corners) : Control(pParent)
+TexturedBorder::TexturedBorder(Control* pParent, Texture* borderTexture, std::array<float, 4> corners) : Control(pParent)
 {
 	_cornerPixels = corners;
 	_pBorderTexture = borderTexture;
 }
 
-void Border::OnRender(Renderer* pRenderer)
+void TexturedBorder::OnRender(Renderer* pRenderer)
 {
 	if (_pBorderTexture)
 	{
@@ -30,18 +30,18 @@ void Border::OnRender(Renderer* pRenderer)
 	}
 }
 
-void Border::SetColors(Color bgColor, Color borderColor)
+void TexturedBorder::SetColors(Color bgColor, Color borderColor)
 {
 	_bgColor = bgColor;
 	_borderColor = borderColor;
 }
 
-void Border::SetTexture(Texture* pBorderTexture)
+void TexturedBorder::SetTexture(Texture* pBorderTexture)
 {
 	_pBorderTexture = pBorderTexture;
 }
 
-void Border::SetCornerSize(float cornerSize)
+void TexturedBorder::SetCornerSize(float cornerSize)
 {
 	_cornerSize = cornerSize;
 }

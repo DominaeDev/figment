@@ -311,9 +311,19 @@ namespace fig::gui
 
 	std::pair<int, int> StaticText::MeasureText() const
 	{
-		int w, h;
-		if (TTF_GetStringSize(_pFont, _text.c_str(), 0, &w, &h))
-			return std::make_pair(w, h);
+		if (_bEllipsis)
+		{
+			auto text = GetEllipsisText(_text);
+			int w, h;
+			if (TTF_GetStringSize(_pFont, text.c_str(), 0, &w, &h))
+				return std::make_pair(w, h);
+		}
+		else
+		{
+			int w, h;
+			if (TTF_GetStringSize(_pFont, _text.c_str(), 0, &w, &h))
+				return std::make_pair(w, h);
+		}
 		return std::make_pair(0, 0);
 	}
 }

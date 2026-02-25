@@ -151,13 +151,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="include\gui\Border.cpp" />
+    <ClCompile Include="include\gui\TexturedBorder.cpp" />
     <ClCompile Include="include\llm\LLMBackend.cpp" />
     <ClCompile Include="src\fs\BinaryReader.cpp" />
     <ClCompile Include="src\fs\BinaryWriter.cpp" />
     <ClCompile Include="src\fs\FileUtility.cpp" />
     <ClCompile Include="src\fs\XmlReader.cpp" />
     <ClCompile Include="src\fs\XmlWriter.cpp" />
+    <ClCompile Include="src\gui\RoundedBorder.cpp" />
     <ClCompile Include="src\gui\CardList.cpp" />
     <ClCompile Include="src\gui\CharacterCard.cpp" />
     <ClCompile Include="src\gui\CharacterImageStore.cpp" />
@@ -336,7 +337,8 @@
     <ClInclude Include="include\fs\FileUtility.h" />
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\Xml.h" />
-    <ClInclude Include="include\gui\Border.h" />
+    <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\TexturedBorder.h" />
     <ClInclude Include="include\gui\CardList.h" />
     <ClInclude Include="include\gui\CharacterCard.h" />
     <ClInclude Include="include\gui\CharacterImageStore.h" />

@@ -1,16 +1,16 @@
-#ifndef BORDER_H__
-#define BORDER_H__
+#ifndef TEXTURED_BORDER_H__
+#define TEXTURED_BORDER_H__
 #pragma once
 
 #include "Control.h"
 
 namespace fig::gui
 {
-	class Border : public Control
+	class TexturedBorder : public Control
 	{
 	public:
-		Border(Control* pParent, Texture* borderTexture, int cornerPixels = 64);
-		Border(Control* pParent, Texture* borderTexture, std::array<float, 4> corners);
+		TexturedBorder(Control* pParent, Texture* borderTexture, int cornerPixels = 64);
+		TexturedBorder(Control* pParent, Texture* borderTexture, std::array<float, 4> corners);
 
 		void SetCornerSize(float cornerSize);
 		void SetColors(Color bgColor, Color borderColor);

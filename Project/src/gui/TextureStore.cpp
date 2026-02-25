@@ -26,6 +26,13 @@ void TextureStore::Init(Renderer* pRenderer)
 	LoadTexture(pRenderer, TextureType::CARD_BOTTOM_FADE, "./resources/gui/card_bottom_fade.png");
 	LoadTexture(pRenderer, TextureType::CARD_ICON_FAVORITE_OFF, "./resources/gui/card_icon_favorite_off.png");
 	LoadTexture(pRenderer, TextureType::CARD_DEFAULT_BG, "./resources/gui/default_card_bg.png");
+
+	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_01, "./resources/card_borders/border_01.png");
+	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_02, "./resources/card_borders/border_02.png");
+	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_03, "./resources/card_borders/border_03.png");
+	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_04, "./resources/card_borders/border_04.png");
+	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_05, "./resources/card_borders/border_05.png");
+	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_06, "./resources/card_borders/border_06.png");
 }
 
 void TextureStore::Release()

@@ -326,7 +326,7 @@
     <ClCompile Include="src\gui\CharacterCard.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="include\gui\Border.cpp">
+    <ClCompile Include="include\gui\TexturedBorder.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\GridSizer.cpp">
@@ -385,6 +385,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\CardList.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\RoundedBorder.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -901,7 +904,7 @@
     <ClInclude Include="include\gui\CharacterCard.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\Border.h">
+    <ClInclude Include="include\gui\TexturedBorder.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\GridSizer.h">
@@ -966,6 +969,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\CardList.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\RoundedBorder.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

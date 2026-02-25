@@ -1,14 +1,22 @@
 #include <pch.h>
 #include "gui/CoverCard.h"
-#include "gui/Border.h"
+#include "gui/TexturedBorder.h"
 #include "gui/ImageStore.h"
 #include "gui/TextureStore.h"
 #include "gui/NineGridImage.h"
+#include "gui/RoundedBorder.h"
+
 #include <cassert>
 
 namespace fig::gui
 {
 	constexpr float Margin = 12.0f;
+
+	constexpr float kTagLeftMargin = 10;
+	constexpr float kTagSpacing = 6;
+	constexpr float kTagInnerMargin = 8;
+	constexpr float kTagMinWidth = 36;
+	constexpr float kTagRowHeight = 32;
 
 	CoverCard::CoverCard(Control* pParent, const fig::uuid& assetId) : Image(pParent, nullptr),
 		_assetId { assetId }
@@ -22,37 +30,69 @@ namespace fig::gui
 				Image::SetTexture(pTexture);
 		}
 
-		auto pBottomFade = new NineGridImage(this, TextureStore::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
-		pBottomFade->SetWidth(GetWidth());
-		pBottomFade->SetY(GetHeight() - pBottomFade->GetHeight());
-		pBottomFade->SetForegroundColor(Color { 0, 0, 0, 0x40 });
+		_pFooter = new Area(this);
+		_pFooter->SetSize(GetSize());
 
-		auto pBorder = new Border(this, TextureStore::GetTexture(TextureType::CARD_BORDER), 16);
-		pBorder->SetSize(GetSize());
-		pBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+		_pSimpleBorder = new TexturedBorder(this, TextureStore::GetTexture(TextureType::CARD_BORDER), 16);
+		_pSimpleBorder->SetSize(GetSize());
+		_pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 
-		auto pFavoriteOff = new Image(this, TextureStore::GetTexture(TextureType::CARD_ICON_FAVORITE_OFF));
-		pFavoriteOff->SetPosition(GetWidth() - 42, 8);
-		pFavoriteOff->SetForegroundColor(Color { 0x60, 0x60, 0x60, 0x60 });
-	}
+		_pStyledBorder = new Image(this, nullptr);
+		_pStyledBorder->SetPosition(-16, -16);
+		_pStyledBorder->SetVisible(false);
 
-	void CoverCard::OnRender(Renderer* pRenderer)
-	{
-		Image::OnRender(pRenderer);
+		_pFooterFade = new NineGridImage(_pFooter, TextureStore::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
+		_pFooterFade->SetWidth(GetWidth());
+		_pFooterFade->SetY(GetHeight() - _pFooterFade->GetHeight());
+		_pFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x40 });
+
+		_tagPosition.x = kTagLeftMargin;
+		_tagPosition.y = GetHeight() - 35;
+
+//		auto pFavoriteOff = new Image(this, TextureStore::GetTexture(TextureType::CARD_ICON_FAVORITE_OFF));
+//		pFavoriteOff->SetPosition(GetWidth() - 42, 8);
+//		pFavoriteOff->SetForegroundColor(Color { 0x60, 0x60, 0x60, 0x60 });
+
+		static std::mt19937_64 rng { std::default_random_engine{}() };
+
+		constexpr std::array<BorderStyle, 16> borderWeights {
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::None,
+			 BorderStyle::Style01,
+			 BorderStyle::Style02,
+			 BorderStyle::Style03,
+			 BorderStyle::Style04,
+			 BorderStyle::Style05,
+			 BorderStyle::Style06,
+		};
+		static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
+		SetBorder(borderWeights[dist(rng)]);
+
+//		auto pSelectionBorder = new RoundedBorder(this, 8.0f, 6.0f, { 50, 200, 255 });
+//		pSelectionBorder->SetPosition(-1, -1);
+//		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
 	}
 
 	void CoverCard::SetLabel(const fig::string& text) noexcept
 	{
 		if (_pLabel)
 		{
-			RemoveChild(_pLabel);
+			_pFooter->RemoveChild(_pLabel);
 			delete _pLabel;
 		}
 
-		_pLabel = new StaticText(this, text, FontFace::CardHeader, 24.0, false);
+		_pLabel = new StaticText(_pFooter, text, FontFace::CardHeader, 24.0, false);
 		_pLabel->SetMaxSize(GetWidth() - (Margin * 2), -1);
 		_pLabel->SetSize(GetWidth() - (Margin * 2), 80);
-		_pLabel->SetPosition(Margin, GetHeight() - Margin - 58);
+		_pLabel->SetPosition(Margin, GetHeight() - Margin - 62); // 58
 		_pLabel->SetForegroundColor(Colors::White);
 		_pLabel->SetBackgroundColor(Colors::Transparent);
 		_pLabel->EnableDropShadow(true);
@@ -64,11 +104,11 @@ namespace fig::gui
 	{
 		if (_pSublabel)
 		{
-			RemoveChild(_pSublabel);
+			_pFooter->RemoveChild(_pSublabel);
 			delete _pSublabel;
 		}
 
-		_pSublabel = new StaticText(this, text, FontFace::CardSubheader, 16.5, false);
+		_pSublabel = new StaticText(_pFooter, text, FontFace::CardSubheader, 16.5, false);
 		_pSublabel->SetMaxSize(GetWidth() - (Margin * 2), -1);
 		_pSublabel->SetSize(GetWidth() - (Margin * 2), 80);
 		_pSublabel->SetPosition(Margin, GetHeight() - Margin - 28);
@@ -81,24 +121,98 @@ namespace fig::gui
 
 	void CoverCard::CreateChatCounter(uint32_t count)
 	{
-		auto position = Pointf { 10, GetHeight() - 35 };
-		auto pCounterBG = new NineGridImage(this, TextureStore::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		auto position = _tagPosition;
+		
+		auto pCounterBG = new NineGridImage(_pFooter, TextureStore::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
 		pCounterBG->SetPosition(position);
-		pCounterBG->SetForegroundColor(Color { 0, 0, 0, 96 });
+		pCounterBG->SetForegroundColor(Color { 0, 0, 0, 0xA0 });
 
-		auto pCounterIcon = new Image(this, TextureStore::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
+		auto pCounterIcon = new Image(_pFooter, TextureStore::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
 		pCounterIcon->SetPosition(position.x + 6, position.y + 6);
 		pCounterIcon->SetForegroundColor(Colors::White);
 		pCounterIcon->SetBackgroundColor(Colors::Transparent);
 
-		auto pLabel = new StaticText(this, std::format("{}", count), FontFace::Default, 14.0, true);
+		auto pLabel = new StaticText(_pFooter, std::format("{}", count), FontFace::Default, 14.0, true);
 		pLabel->SetPosition(position.x + 27, position.y + 3);
 		pLabel->SetForegroundColor(Colors::White);
 		pLabel->SetBackgroundColor(Colors::Transparent);
-		pLabel->EnableWordWrap(false);
+		pLabel->EnableWordWrap(_pFooter);
 
 		auto [w, h] = pLabel->MeasureText();
 		pCounterBG->SetSize(toF(std::max(w + 35, 32)), 26);
 
+		_tagPosition.x += pCounterBG->GetWidth() + kTagSpacing;
+	}
+
+	void CoverCard::AddTag(const fig::string& text, const Color& color)
+	{
+		auto position = _tagPosition;
+
+		if (position.x + kTagInnerMargin * 2 + kTagLeftMargin + kTagMinWidth >= GetWidth())
+		{
+			if (++_tagRows > 2)
+				return;
+
+			_tagPosition.x = kTagLeftMargin;
+			_tagPosition.y += kTagRowHeight;
+
+			_pFooter->SetY(_pFooter->GetY() - kTagRowHeight);
+			_pFooterFade->SetHeight(_pFooterFade->GetHeight() + kTagRowHeight);
+			position = _tagPosition;
+		}
+
+		auto pTagBG = new NineGridImage(_pFooter, TextureStore::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		pTagBG->SetPosition(position);
+		pTagBG->SetForegroundColor(Color { color.r, color.g, color.b, 0xA0 });
+
+		auto pLabel = new StaticText(_pFooter, text, FontFace::Default, 14.0, true);
+		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);
+		pLabel->SetForegroundColor(Colors::White);
+		pLabel->SetBackgroundColor(Colors::Transparent);
+		pLabel->EnableWordWrap(false);
+		pLabel->EnableEllipsis(true);
+		pLabel->SetMaxSize(GetWidth() - (position.x + kTagInnerMargin * 2 + kTagLeftMargin), 0);
+
+		auto [w, h] = pLabel->MeasureText();
+		pTagBG->SetSize(toF(w + kTagInnerMargin * 2), 26);
+
+		_tagPosition.x += pTagBG->GetWidth() + kTagSpacing;
+	}
+
+	void CoverCard::SetBorder(BorderStyle style)
+	{
+		if (style == None)
+		{
+			_pStyledBorder->SetTexture(nullptr);
+			_pStyledBorder->SetVisible(false);
+			_pSimpleBorder->SetVisible(true);
+		}
+
+		TextureType textureType;
+		switch (style)
+		{
+		case BorderStyle::Style01: textureType = TextureType::CARD_BORDER_STYLE_01; break;
+		case BorderStyle::Style02: textureType = TextureType::CARD_BORDER_STYLE_02; break;
+		case BorderStyle::Style03: textureType = TextureType::CARD_BORDER_STYLE_03; break;
+		case BorderStyle::Style04: textureType = TextureType::CARD_BORDER_STYLE_04; break;
+		case BorderStyle::Style05: textureType = TextureType::CARD_BORDER_STYLE_05; break;
+		case BorderStyle::Style06: textureType = TextureType::CARD_BORDER_STYLE_06; break;
+		default:
+			return;
+		};
+
+		if (auto pTexture = TextureStore::GetTexture(textureType))
+		{
+			_pStyledBorder->SetTexture(pTexture);
+			_pStyledBorder->SetSize(toF(pTexture->w), toF(pTexture->h));
+			_pStyledBorder->SetVisible((bool)pTexture);
+			_pSimpleBorder->SetVisible(false);
+		}
+		else
+		{
+			_pStyledBorder->SetTexture(nullptr);
+			_pStyledBorder->SetVisible(false);
+			_pSimpleBorder->SetVisible(true);
+		}
 	}
 }
