@@ -3,7 +3,7 @@
 
 #include "Types.h"
 #include <expected>
-#include "fs/Serialization.h"
+#include "fs/FileError.h"
 
 namespace fig::fs
 {
@@ -20,6 +20,9 @@ namespace fig::fs
 	// Utility
 	fig::string GetFilename(const fig::string& str);
 	fig::string GetFileExt(fig::path filename);
+
+	std::expected<fig::string, FileError> ReadPNGMeta(fig::path filename, const fig::string& keyword = "chara", bool bDecodeBase64 = true) noexcept;
+	std::expected<fig::string, FileError> ReadPNGMeta(const fig::bytes& buffer, const fig::string& keyword = "chara", bool bDecodeBase64 = true) noexcept;
 }
 
 #endif

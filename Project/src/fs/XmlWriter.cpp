@@ -8,7 +8,7 @@
 
 using namespace tinyxml2;
 
-namespace fig
+namespace fig::fs
 {
 	XmlWriterAttribute::XmlWriterAttribute(const fig::string& name, tinyxml2::XMLElement* pParent) noexcept :
 		_name { name },

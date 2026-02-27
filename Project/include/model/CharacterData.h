@@ -38,6 +38,7 @@ namespace fig::data
 		fig::string largePortraitFilename;	//! @temp
 		fig::string smallPortraitFilename;	//! @temp
 
+		std::vector<fig::string> tags;
 		std::map<fig::string, CharacterProperty> properties;
 
 		bool LoadFromXml(const fig::path& filename);

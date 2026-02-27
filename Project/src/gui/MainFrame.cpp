@@ -5,6 +5,7 @@
 #include "gui/SidePanel.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
+#include "fs/FileUtility.h"
 
 namespace fig::gui
 {
@@ -97,7 +98,7 @@ namespace fig::gui
 					| std::ranges::to<std::vector>();
 				assets.DeleteAssets(remove_characters);
 
-				assets.ImportTestCharacters(fig::path("./import/characters"));
+				assets.ImportCharacters(fig::path("./import/characters"));
 				userMngr.GetProfileAssets().SaveModified();
 			}
 		}

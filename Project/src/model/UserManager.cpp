@@ -141,7 +141,7 @@ namespace fig::fs
 	bool UserManager::LoadProfiles()
 	{
 		fig::path path(std::format("{}/{}.{}", Constants::Paths::ProfilesFolder, Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt));
-		fig::XmlReader xml(path.u8string(), "Profiles");
+		XmlReader xml(path.u8string(), "Profiles");
 		if (not xml.IsOk())
 			return false; // Invalid document type
 

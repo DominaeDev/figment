@@ -7,6 +7,11 @@
 #include <expected>
 #include <ranges>
 
+namespace fig::data
+{
+	class CharacterData;
+}
+
 namespace fig::fs
 {
 	class UserManager;
@@ -41,12 +46,14 @@ namespace fig::fs
 
 		void SaveModified();
 
-		enum class CharacterDataFormat { Default, };
-		std::expected<AssetRef, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		enum class CharacterDataFormat { Default, TavernV2, };
+		void ImportCharacters(fig::path directory);
+		std::expected<fig::data::CharacterData, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		std::expected<AssetRef, FileError> ImportScenario(fig::path filename);
-		void ImportTestCharacters(fig::path directory);
 
 	private:
+		fig::uuid NewUUID() const noexcept;
+		
 		bool LoadIndex();
 		bool SaveIndex() const;
 		bool LoadAssetMetaData();

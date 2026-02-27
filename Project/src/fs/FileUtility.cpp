@@ -2,7 +2,7 @@
 #include "fs/FileUtility.h"
 #include "util/StringUtility.h"
 #include "model/Asset.h"
-
+#include <spng.h>
 #include <fstream>
 
 using namespace fig::string_util;
@@ -129,5 +129,95 @@ namespace fig::fs
 	fig::string GetFileExt(fig::path filename)
 	{
 		return string_util::lcase(fig::path(filename).extension().u8string());
+	}
+
+	using sPngCtx = stdex::c_resource<spng_ctx, spng_ctx_new, spng_ctx_free>;
+
+	std::expected<fig::string, FileError> ReadPNGMeta(fig::path filename, const fig::string& keyword, bool bDecodeBase64) noexcept
+	{
+#if defined(_MSC_VER)
+		FILE* file = nullptr;
+		if (_wfopen_s(&file, filename.wstring().c_str(), L"rb") != 0 or !file)
+			return std::unexpected(FileError::FileNotFound);
+#else
+		FILE* file = fopen(filename.string().c_str(), "rb");
+		if (!file)
+			return std::unexpected(FileError::FileNotFound);
+#endif
+		
+		fig::string content;
+		try
+		{
+			sPngCtx ctx { 0 };
+			spng_set_png_file(ctx.get(), file);
+
+			struct spng_ihdr ihdr;
+			spng_get_ihdr(ctx.get(), &ihdr);
+
+			uint32_t n_text = 0;
+			spng_get_text(ctx.get(), nullptr, &n_text);
+
+			std::vector<spng_text> texts(n_text);
+			spng_get_text(ctx.get(), texts.data(), &n_text);
+			
+			fclose(file);
+
+			auto itFind = std::find_if(texts.cbegin(), texts.cend(), [&keyword](auto& t) { return strcmp(t.keyword, keyword.c_str()) == 0; });
+			if (itFind == texts.cend())
+				return std::unexpected(FileError::ReadError); // Not found
+			content = fig::string { itFind->text };
+		}
+		catch (...)
+		{
+			fclose(file);
+			return std::unexpected(FileError::ReadError);
+		}
+
+		if (bDecodeBase64)
+		{
+			auto decoded = fig::common_util::Base64Decode(content);
+			content.assign(reinterpret_cast<const char*>(decoded.data()), decoded.size());
+		}
+
+		return content;
+	}
+
+	std::expected<fig::string, FileError> ReadPNGMeta(const fig::bytes& buffer, const fig::string& keyword, bool bDecodeBase64) noexcept
+	{
+		if (buffer.size() == 0)
+			return std::unexpected(FileError::ReadError);
+
+		std::vector<spng_text> texts;
+		try
+		{
+			sPngCtx ctx { 0 };
+			spng_set_png_buffer(ctx.get(), buffer.data(), buffer.size());
+
+			struct spng_ihdr ihdr;
+			spng_get_ihdr(ctx.get(), &ihdr);
+
+			uint32_t n_text = 0;
+			spng_get_text(ctx.get(), nullptr, &n_text);
+
+			texts.resize(n_text);
+			spng_get_text(ctx.get(), texts.data(), &n_text);
+		}
+		catch (...)
+		{
+			return std::unexpected(FileError::ReadError);
+		}
+
+		auto itFind = std::find_if(texts.cbegin(), texts.cend(), [&keyword](auto& t) { return strcmp(t.keyword, keyword.c_str()) == 0; });
+		if (itFind == texts.cend())
+			return std::unexpected(FileError::ReadError); // Not found
+
+		fig::string content { itFind->text };
+		if (bDecodeBase64)
+		{
+			auto decoded = fig::common_util::Base64Decode(content);
+			content.assign(reinterpret_cast<const char*>(decoded.data()), decoded.size());
+		}
+
+		return content;
 	}
 }

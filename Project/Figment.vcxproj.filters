@@ -81,9 +81,6 @@
     <Filter Include="Source Files\Backend\LLM\Context">
       <UniqueIdentifier>{1a0e4325-4392-475b-9d87-cc5d5fa0b897}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\Serialization">
-      <UniqueIdentifier>{eea3d39a-71b8-4c8b-b27c-1c3807000f83}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\GUI">
       <UniqueIdentifier>{19211871-fca3-43ea-a283-bedeafe48690}</UniqueIdentifier>
     </Filter>
@@ -119,6 +116,24 @@
     </Filter>
     <Filter Include="Source Files\Third-party\fast-crc32">
       <UniqueIdentifier>{7adc1fef-db02-42af-a1be-8a578e63bd50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\FileSystem">
+      <UniqueIdentifier>{ba779378-b49f-4ec8-9178-0fbc6b173e3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\FileSystem\Serialization">
+      <UniqueIdentifier>{eea3d39a-71b8-4c8b-b27c-1c3807000f83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\FileSystem\Import">
+      <UniqueIdentifier>{7918e58f-670b-451a-bb45-c6d9b98f246c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party\libspng">
+      <UniqueIdentifier>{b39e232e-dcf5-487b-acfb-3a20538267a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Third-party\miniz">
+      <UniqueIdentifier>{bedbb7e8-502e-458f-9bdb-a2c59f44851b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\UserProfile">
+      <UniqueIdentifier>{8e498fb3-7b47-4628-ba65-d85fd8f6c436}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -291,19 +306,19 @@
       <Filter>Source Files\Backend\LLM\Context</Filter>
     </ClCompile>
     <ClCompile Include="src\fs\XmlWriter.cpp">
-      <Filter>Source Files\Frontend\Serialization</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\fs\BinaryReader.cpp">
-      <Filter>Source Files\Frontend\Serialization</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\fs\BinaryWriter.cpp">
-      <Filter>Source Files\Frontend\Serialization</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\fs\FileUtility.cpp">
-      <Filter>Source Files\Frontend\Serialization</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\fs\XmlReader.cpp">
-      <Filter>Source Files\Frontend\Serialization</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Hash.cpp">
       <Filter>Source Files\Frontend\Authentication</Filter>
@@ -332,16 +347,7 @@
     <ClCompile Include="src\gui\GridSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\UserManager.cpp">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClCompile>
     <ClCompile Include="src\model\Asset.cpp">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\AssetManager.cpp">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ContentDatabase.cpp">
       <Filter>Source Files\AppModel\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ImageStore.cpp">
@@ -380,14 +386,38 @@
     <ClCompile Include="src\gui\SidePanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
-    <ClCompile Include="..\Libraries\fast-crc32\Crc32.cpp">
-      <Filter>Source Files\Third-party\fast-crc32</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\CardList.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\RoundedBorder.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\fast-crc32\src\crc32.cpp">
+      <Filter>Source Files\Third-party\fast-crc32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\libspng\src\spng.c">
+      <Filter>Source Files\Third-party\libspng</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\miniz\src\miniz.c">
+      <Filter>Source Files\Third-party\miniz</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fs\CardImporter.cpp">
+      <Filter>Source Files\Frontend\FileSystem\Import</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fs\TavernCardV2.cpp">
+      <Filter>Source Files\Frontend\FileSystem\Import</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\UserManager.cpp">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\AssetManager.cpp">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\ContentDatabase.cpp">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\ProfileDatabase.cpp">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -875,13 +905,13 @@
       <Filter>Source Files\Third-party\SDL3</Filter>
     </ClInclude>
     <ClInclude Include="include\fs\FileUtility.h">
-      <Filter>Source Files\Frontend\Serialization</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\fs\Serialization.h">
-      <Filter>Source Files\Frontend\Serialization</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\fs\Xml.h">
-      <Filter>Source Files\Frontend\Serialization</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Hash.h">
       <Filter>Source Files\Frontend\Authentication</Filter>
@@ -910,19 +940,7 @@
     <ClInclude Include="include\gui\GridSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\UserManager.h">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\UserProfile.h">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClInclude>
     <ClInclude Include="include\model\Asset.h">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\AssetManager.h">
-      <Filter>Source Files\AppModel\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ContentDatabase.h">
       <Filter>Source Files\AppModel\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ImageStore.h">
@@ -964,14 +982,44 @@
     <ClInclude Include="include\gui\SidePanel.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
-    <ClInclude Include="..\Libraries\fast-crc32\Crc32.h">
-      <Filter>Source Files\Third-party\fast-crc32</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\CardList.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\RoundedBorder.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\fast-crc32\include\crc32.h">
+      <Filter>Source Files\Third-party\fast-crc32</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\FileError.h">
+      <Filter>Source Files\Frontend\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\libspng\include\spng.h">
+      <Filter>Source Files\Third-party\libspng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\miniz\include\miniz.h">
+      <Filter>Source Files\Third-party\miniz</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\CardImporter.h">
+      <Filter>Source Files\Frontend\FileSystem\Import</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\TavernCardV2.h">
+      <Filter>Source Files\Frontend\FileSystem\Import</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\UserManager.h">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\AssetManager.h">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ContentDatabase.h">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\UserProfile.h">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\ProfileDatabase.h">
+      <Filter>Source Files\Frontend\UserProfile</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

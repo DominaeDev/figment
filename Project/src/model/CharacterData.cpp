@@ -6,6 +6,7 @@
 using namespace fig::gui;
 using namespace fig::gui_util;
 using namespace fig::string_util;
+using namespace fig::fs;
 
 namespace fig::data
 {

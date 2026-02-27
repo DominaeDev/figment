@@ -5,6 +5,7 @@
 #include "Types.h"
 #include "Constants.h"
 #include "util/Security.h"
+#include "fs/FileError.h"
 #include <variant>
 #include <map>
 #include <chrono>
@@ -12,18 +13,6 @@
 
 namespace fig::fs
 {
-	enum class FileError : uint32_t
-	{
-		NoError = 0,
-		FileNotFound,
-		FileAccessError,
-		DirectoryDoesNotExist,
-		UnrecognizedFormat,
-		ReadError,
-		WriteError,
-		ChecksumError,
-	};
-
 	struct VersionNumber
 	{
 		uint8_t major { 0 };

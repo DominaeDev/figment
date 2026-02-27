@@ -6,7 +6,7 @@
 
 using namespace tinyxml2;
 
-namespace fig
+namespace fig::fs
 {
 	XmlReaderAttribute::XmlReaderAttribute(const tinyxml2::XMLAttribute* pAttribute) noexcept :
 		_pAttrib { pAttribute }

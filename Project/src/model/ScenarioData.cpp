@@ -4,6 +4,7 @@
 #include "fs/Xml.h"
 #include <cassert>
 
+using namespace fig::fs;
 using namespace fig::string_util;
 
 namespace fig::data

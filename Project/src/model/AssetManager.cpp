@@ -12,6 +12,7 @@
 #include "fs/Xml.h"
 #include "fs/Serialization.h"
 #include "fs/FileUtility.h"
+#include "fs/CardImporter.h"
 
 using namespace fig::data;
 using namespace fig::common_util;
@@ -37,7 +38,7 @@ namespace fig::fs
 	{
 		auto const path = _profilePath / std::format("{}.{}", Constants::Paths::ProfileIndexFileName, Constants::Paths::ProfileIndexFileExt);
 
-		fig::XmlReader xml(path, "Assets");
+		XmlReader xml(path, "Assets");
 		if (not xml.IsOk())
 			return false; // Invalid document type
 
@@ -82,7 +83,7 @@ namespace fig::fs
 
 	Asset& AssetManager::CreateEmptyAsset(AssetType type, const fig::uuid& parent) noexcept
 	{
-		fig::uuid id = CreateUUID();
+		fig::uuid id = NewUUID();
 		auto& newAsset = _assets[id] = Asset {};
 		newAsset.id = id;
 		newAsset.parent_id = not parent.empty() ? parent : _profileID;
@@ -95,7 +96,7 @@ namespace fig::fs
 
 	Asset& AssetManager::CreateAssetReference(ReferenceType refType, const fig::uuid& referenceId, const fig::uuid& parent) noexcept
 	{
-		fig::uuid id = CreateUUID();
+		fig::uuid id = NewUUID();
 		auto& newAsset = _assets[id] = Asset {};
 		newAsset.id = id;
 		newAsset.parent_id = not parent.empty() ? parent : _profileID;
@@ -110,7 +111,7 @@ namespace fig::fs
 
 	Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
-		fig::uuid id = CreateUUID();
+		fig::uuid id = NewUUID();
 		auto& newAsset = _assets[id] = Asset {};
 		newAsset.id = id;
 		newAsset.parent_id = not parent.empty() ? parent : _profileID;
@@ -125,7 +126,7 @@ namespace fig::fs
 
 	Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
-		fig::uuid id = CreateUUID();
+		fig::uuid id = NewUUID();
 		auto& newAsset = _assets[id] = Asset {};
 		newAsset.id = id;
 		newAsset.parent_id = not parent.empty() ? parent : _profileID;
@@ -295,48 +296,24 @@ namespace fig::fs
 		}
 	}
 
-	std::expected<AssetRef, FileError> AssetManager::ImportCharacter(fig::path filename, CharacterDataFormat format)
+	std::expected<CharacterData, FileError> AssetManager::ImportCharacter(fig::path filename, CharacterDataFormat format)
 	{
-		CharacterData character;
-		if (not character.LoadFromXml(filename))
+		switch (format)
+		{
+		case CharacterDataFormat::Default:
+		{
+			CharacterData character;
+			if (character.LoadFromXml(filename))
+				return character;
+		} break;
+		case CharacterDataFormat::TavernV2:
+			if (auto import = CardImporter::Import(filename); import.has_value())
+				return import.value();
+			break;
+		default:
 			return std::unexpected(FileError::UnrecognizedFormat);
-
-		fig::bytes characterData;
-		character.SaveToXml(characterData);
-		auto& characterAsset = CreateAsset(AssetType::Character, DataFormat::DataXml, characterData, _profileID);
-
-		// Load portrait image(s)
-		if (not empty_or_whitespace(character.largePortraitFilename))
-		{
-			if (auto file = fig::fs::ReadFile(filename.parent_path() / character.largePortraitFilename))
-			{
-				// Create portrait asset
-				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormatFromExt(GetFileExt(character.largePortraitFilename)), std::move(file.value()), characterAsset.id);
-
-				// Create cover card
-				if (auto coverImage = LoadImage(filename.parent_path() / character.largePortraitFilename)
-					.transform([](auto img) {
-						return CreateCoverImage(img); 
-					}))
-				{
-					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage.value(), characterAsset.id);
-
-					// Create reference to original image
-					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
-				}
-			}
-		}
-
-		if (not empty_or_whitespace(character.smallPortraitFilename))
-		{
-			if (auto file = fig::fs::ReadFile(filename.parent_path() / character.smallPortraitFilename))
-			{
-				CreateImageAsset(ImageType::SmallPortrait, DataFormatFromExt(GetFileExt(character.smallPortraitFilename)), std::move(file.value()), characterAsset.id);
-			}
-		}
-
-		return characterAsset;
+		}		
+		return std::unexpected(FileError::UnrecognizedFormat);
 	}
 
 	std::expected<AssetRef, FileError> AssetManager::ImportScenario(fig::path filename)
@@ -443,25 +420,21 @@ namespace fig::fs
 		return false;
 	}
 
-	void AssetManager::ImportTestCharacters(fig::path directory)
+	void AssetManager::ImportCharacters(fig::path directory)
 	{
 		std::vector<fig::path> files;
 		for (const auto& entry : std::filesystem::directory_iterator(directory))
 			files.push_back(entry.path());
 
 		auto rng = std::random_device {};
-//		rng.seed((uint32_t)std::chrono::steady_clock::now().time_since_epoch().count());
 		std::ranges::shuffle(files, rng);
 
-		int32_t index = 0;
 		for (auto& filename : files)
 		{
-			CharacterData character {
-				.characterId = std::format("Test{}", index),
-				.shortName = std::format("Test character #{:03}", index),
-				.fullName = std::format("Test character #{:03}", index),
-			};
-			index++;
+			auto try_character = ImportCharacter(filename, fig::fs::AssetManager::CharacterDataFormat::TavernV2);
+			if (not try_character.has_value())
+				continue;
+			auto& character = try_character.value();
 
 			fig::bytes characterData;
 			character.SaveToXml(characterData);
@@ -487,5 +460,13 @@ namespace fig::fs
 				}
 			}
 		}
+	}
+
+	fig::uuid AssetManager::NewUUID() const noexcept
+	{
+		auto id = CreateUUID();
+		while (_assets.contains(id))
+			id = CreateUUID();
+		return id;
 	}
 }

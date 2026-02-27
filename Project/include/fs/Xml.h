@@ -11,7 +11,7 @@ namespace tinyxml2
 	class XMLAttribute;
 }
 
-namespace fig
+namespace fig::fs
 {
 	class XmlReaderAttribute
 	{
