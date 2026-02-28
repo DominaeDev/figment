@@ -6,6 +6,7 @@
 #include "model/UserProfile.h"
 #include "model/AssetManager.h"
 #include "model/ContentDatabase.h"
+#include "util/ProfileDatabase.h"
 
 namespace fig::fs
 {
@@ -16,10 +17,9 @@ namespace fig::fs
 		~UserManager() = default;
 
 		bool LoadProfiles();
-		bool SaveProfiles() const;
 
-		UserProfile& CreateDefaultProfile();
-		UserProfile& CreateProfile(const fig::string& profileName, const fig::string& password);
+		std::optional<UserProfileCRef> CreateDefaultProfile();
+		std::optional<UserProfileCRef> CreateProfile(const fig::string& profileName, const fig::string& password);
 
 		bool IsSignedIn() const noexcept { return _signedInProfile != nullptr; };
 		bool SignIn(const fig::uuid& profileID, const fig::string& password);
@@ -37,8 +37,12 @@ namespace fig::fs
 	private:
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AuthKey& outKey);
 		bool SignIn(UserProfile& profile, const fig::string& password);
+		fig::user::ProfileDatabase& GetDatabase() noexcept;
+
 
 	private:
+		std::unique_ptr<fig::user::ProfileDatabase> _pProfileDB;
+
 		std::vector<UserProfile> _profiles {};
 		UserProfile* _signedInProfile = nullptr;
 		fig::security::AuthKey _signedInAuthKey {};

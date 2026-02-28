@@ -10,6 +10,7 @@
 #include <cwctype>
 #include <stack>
 #include <queue>
+#include <expected>
 
 #include "Types.h"
 #include "Constants.h"

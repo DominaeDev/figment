@@ -8,6 +8,8 @@
 
 namespace fig::fs
 {
+	constexpr size_t AuthChallengeSize = 32uz;
+
 	struct UserProfile
 	{
 		fig::uuid id { 0, 0 };
@@ -21,7 +23,7 @@ namespace fig::fs
 			return version == 0
 				and not id.empty()
 				and not name.empty()
-				and authChallenge.size() == 32;
+				and authChallenge.size() == AuthChallengeSize;
 		}
 
 		fig::path GetPath() const noexcept
@@ -32,5 +34,8 @@ namespace fig::fs
 					| std::ranges::to<fig::string>());
 		}
 	};
+
+	using UserProfileRef = std::reference_wrapper<UserProfile>;
+	using UserProfileCRef = std::reference_wrapper<const UserProfile>;
 }
 #endif

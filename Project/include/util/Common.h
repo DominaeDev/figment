@@ -167,6 +167,5 @@ namespace fig::common_util
 	{
 		return toI(std::roundf(value));
 	}
-
 }
 #endif

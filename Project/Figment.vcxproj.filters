@@ -1021,6 +1021,9 @@
     <ClInclude Include="include\util\ProfileDatabase.h">
       <Filter>Source Files\Frontend\UserProfile</Filter>
     </ClInclude>
+    <ClInclude Include="include\fs\DatabaseError.h">
+      <Filter>Source Files\Frontend\FileSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

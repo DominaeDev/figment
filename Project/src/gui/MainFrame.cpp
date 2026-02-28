@@ -41,7 +41,7 @@ namespace fig::gui
 		if (not userMngr.LoadProfiles())
 		{
 			userMngr.CreateDefaultProfile();
-			userMngr.SaveProfiles();
+//			userMngr.SaveProfiles();
 			userMngr.SignInDefaultProfile();
 		}
 		else

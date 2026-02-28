@@ -8,6 +8,8 @@
 #include "util/Common.h"
 #include "util/Hash.h"
 #include "util/Security.h"
+#include "util/ProfileDatabase.h"
+
 #include "fs/Xml.h"
 #include "model/AssetManager.h"
 #include "model/GlobalStrings.h"
@@ -25,12 +27,7 @@ namespace fig::fs
 		fig::byte { 0xA1 }, fig::byte { 0xB2 }, fig::byte { 0xC3 }, fig::byte { 0xD4 }, fig::byte { 0xE5 }, fig::byte { 0xF6 }, fig::byte { 0xAB }, fig::byte { 0xCD },
 	};
 
-	UserProfile& UserManager::CreateDefaultProfile()
-	{
-		return CreateProfile(fig::string(fig::strings::UserProfile::DefaultUser), "");
-	}
-
-	static fig::bytes CreateChallenge(Bit128 key, Bit128 salt, AuthKey encKey)
+	static fig::bytes CreateAuthChallenge(Bit128 key, Bit128 salt, AuthKey encKey)
 	{
 		fig::bytes challenge(32);
 		std::memcpy(challenge.data() + ptrdiff_t(0), key.data(), key.size());
@@ -40,23 +37,36 @@ namespace fig::fs
 		return challenge; // rvo
 	}
 
-	UserProfile& UserManager::CreateProfile(const fig::string& name, const fig::string& password)
+	std::optional<UserProfileCRef> UserManager::CreateDefaultProfile()
+	{
+		return CreateProfile(fig::string(fig::strings::UserProfile::DefaultUser), "");
+	}
+
+	std::optional<UserProfileCRef> UserManager::CreateProfile(const fig::string& name, const fig::string& password)
 	{
 		auto authKey = fig::security::Random128Bits();
 		auto authSalt = not password.empty() ? fig::security::Random128Bits() : kDefaultAuthSalt;
 		auto encKey = not password.empty() ? fig::security::DeriveKeyFromPassword(password, authSalt) : kDefaultAuthKey;
 
+		auto id = common_util::CreateUUID();
+		auto& db = GetDatabase();
+
 		// Create auth challenge
-		fig::bytes authChallenge = CreateChallenge(authKey, authSalt, encKey);
+		fig::bytes authChallenge = CreateAuthChallenge(authKey, authSalt, encKey);
 
-		_profiles.emplace_back(UserProfile {
-			.id = common_util::CreateUUID(),
-			.name = name,
-			.authChallenge = authChallenge,
-			.authSalt = authSalt,
-		});
+		if (db.CreateProfile(id, name, authChallenge, authSalt) == DatabaseError::NoError)
+		{
+			_profiles.emplace_back(UserProfile {
+				.id = common_util::CreateUUID(),
+				.name = name,
+				.authChallenge = authChallenge,
+				.authSalt = authSalt,
+			});
 
-		return _profiles.back();
+			return std::make_optional(std::cref(_profiles.back()));
+		}
+
+		return std::nullopt;
 	}
 
 	bool UserManager::Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AuthKey& outKey)
@@ -140,64 +150,14 @@ namespace fig::fs
 
 	bool UserManager::LoadProfiles()
 	{
-		fig::path path(std::format("{}/{}.{}", Constants::Paths::ProfilesFolder, Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt));
-		XmlReader xml(path.u8string(), "Profiles");
-		if (not xml.IsOk())
-			return false; // Invalid document type
-
-		_profiles.clear();
-
-		auto pProfile = xml.GetFirstElement("Profile");
-		while (pProfile)
+		auto& db = GetDatabase();
+		if (auto profiles = db.FetchProfiles(); profiles.has_value())
 		{
-			auto& profileNode = pProfile.value();
-			UserProfile profile {};
-
-			profile.version = profileNode["version"].AsInt((unsigned short)-1);
-
-			// ID
-			profile.id = profileNode.GetElementUUID("ID").value_or({});
-
-			// Name
-			profile.name = profileNode.GetElementText("Name", "");
-
-			// Auth challenge
-			auto authData = profileNode.GetElementBytes("Auth").value_or({});
-			if (authData.size() > sizeof(AuthSalt))
-			{
-				profile.authChallenge.resize(authData.size() - sizeof(AuthSalt));
-				std::memcpy(profile.authSalt.data(), authData.data(), sizeof(AuthSalt));
-				std::memcpy(profile.authChallenge.data(), authData.data() + sizeof(AuthSalt), profile.authChallenge.size());
-			}
-
-			if (profile.IsValid())
-				_profiles.push_back(profile);
-
-			pProfile = profileNode.GetNextSibling();
+			_profiles = std::move(profiles.value());
+			return not _profiles.empty();
 		}
-		
-		return not _profiles.empty();
-	}
-
-	bool UserManager::SaveProfiles() const
-	{
-		XmlWriter xml("Profiles");
-		for (auto& profile : _profiles)
-		{
-			auto profileNode = xml.AddChild("Profile");
-			profileNode["version"] = toI(profile.version);
-
-			profileNode.SetElementValue("ID", profile.id);
-			profileNode.SetElementValue("Name", profile.name);
-
-			fig::bytes auth(profile.authChallenge.size() + sizeof(AuthSalt));
-			std::memcpy(auth.data(), profile.authSalt.data(), sizeof(AuthSalt));
-			std::memcpy(auth.data() + sizeof(AuthSalt), profile.authChallenge.data(), profile.authChallenge.size());
-			profileNode.SetElementValue("Auth", auth);
-		}
-
-		fig::path path(std::format("{}/{}.{}", Constants::Paths::ProfilesFolder, Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt));
-		return xml.Save(path.u8string());
+		else
+			return false;
 	}
 
 	bool UserManager::ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword)
@@ -217,9 +177,21 @@ namespace fig::fs
 
 		AuthKey newPasswordKey = not newPassword.empty() ? fig::security::DeriveKeyFromPassword(newPassword, profile.authSalt) : kDefaultAuthKey;
 
-		// Update challenge
-		profile.authChallenge = CreateChallenge(authKey, profile.authSalt, newPasswordKey);
-		return true;
+		auto newChallenge = CreateAuthChallenge(authKey, profile.authSalt, newPasswordKey);
+
+		auto& db = GetDatabase();
+		if (db.UpdateProfile(UserProfile {
+			.id = profile.id,
+			.name = profile.name,
+			.authChallenge = newChallenge,
+			.authSalt = profile.authSalt,
+		}) == DatabaseError::NoError)
+		{
+			// Update challenge
+			profile.authChallenge = newChallenge;
+			return true;
+		}
+		return false;
 	}
 
 	const UserProfile& UserManager::GetActiveProfile() const
@@ -227,7 +199,7 @@ namespace fig::fs
 		if (_signedInProfile == nullptr)
 			throw std::runtime_error("Not signed in");
 
-		return static_cast<UserProfile&>(*_signedInProfile);
+		return std::cref(*_signedInProfile);
 	}
 
 	AssetManager& UserManager::GetProfileAssets()
@@ -244,5 +216,12 @@ namespace fig::fs
 			throw std::runtime_error("Not signed in");
 
 		return static_cast<ContentDatabase&>(*_pContentDatabase);
+	}
+
+	fig::user::ProfileDatabase& UserManager::GetDatabase() noexcept
+	{
+		if (!_pProfileDB)
+			_pProfileDB = std::make_unique<fig::user::ProfileDatabase>(fig::path(std::format("{}/{}.{}", Constants::Paths::ProfilesFolder, Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt)));
+		return *_pProfileDB.get();
 	}
 }
