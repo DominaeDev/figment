@@ -19,7 +19,7 @@ namespace fig::user
 		virtual ~ProfileDatabase();
 
 		std::expected<std::vector<fig::fs::UserProfile>, DatabaseError> FetchProfiles() noexcept;
-		DatabaseError CreateProfile(const fig::uuid& id, const fig::string& name, fig::byte_span auth_challenge, fig::security::AuthSalt auth_salt) noexcept;
+		DatabaseError CreateProfile(const fig::fs::UserProfile& profile) noexcept;
 		DatabaseError UpdateProfile(const fig::fs::UserProfile& profile) noexcept;
 		DatabaseError DeleteProfile(const fig::uuid& id) noexcept;
 		
@@ -37,6 +37,7 @@ namespace fig::user
 
 		enum class SQL
 		{
+			CreateProfileTable,
 			FetchProfiles,
 			CreateProfile,
 			UpdateProfile,

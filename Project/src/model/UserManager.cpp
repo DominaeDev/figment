@@ -54,15 +54,16 @@ namespace fig::fs
 		// Create auth challenge
 		fig::bytes authChallenge = CreateAuthChallenge(authKey, authSalt, encKey);
 
-		if (db.CreateProfile(id, name, authChallenge, authSalt) == DatabaseError::NoError)
-		{
-			_profiles.emplace_back(UserProfile {
-				.id = common_util::CreateUUID(),
-				.name = name,
-				.authChallenge = authChallenge,
-				.authSalt = authSalt,
-			});
+		UserProfile profile {
+			.id = id,
+			.name = name,
+			.authChallenge = authChallenge,
+			.authSalt = authSalt,
+		};
 
+		if (db.CreateProfile(profile) == DatabaseError::NoError)
+		{
+			_profiles.emplace_back(profile);
 			return std::make_optional(std::cref(_profiles.back()));
 		}
 
