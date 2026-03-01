@@ -28,103 +28,68 @@ namespace fig::fs
 		_profileID = profile.id;
 		_profilePath = profile.GetPath();
 
-		if (not LoadIndex())
+		if (LoadAssetIndex())
+			LoadAssetMetaData();
+		else
 			Log(std::format("No asset index found for profile '{}'.", profile.name));
-
-		LoadAssetMetaData();
 	}
 
-	bool AssetManager::LoadIndex()
+	bool AssetManager::LoadAssetIndex()
 	{
-		auto const path = _profilePath / std::format("{}.{}", Constants::Paths::ProfileIndexFileName, Constants::Paths::ProfileIndexFileExt);
-
-		XmlReader xml(path, "Assets");
-		if (not xml.IsOk())
-			return false; // Invalid document type
-
-		_assets.clear();
-
-		auto optAsset = xml.GetFirstElement("Asset");
-		while (optAsset)
+		auto& db = GetDatabase();
+		if (auto assets = db.FetchAssets(); assets.has_value())
 		{
-			auto& assetNode = optAsset.value();
-
-			Asset asset {};
-			asset.id = assetNode.GetElementUUID("ID").value_or({});
-			asset.parent_id = assetNode.GetElementUUID("ParentID").value_or({});
-			auto [type, subtype] = AssetTypeFromString(assetNode.GetElementText("Type").value_or(""));
-			asset.asset_type = type;
-			asset.asset_subtype = subtype;
-			asset.status = AssetFileStatus::NotLoaded;
-			if (!asset.id.empty())
-				_assets[asset.id] = asset;
-			optAsset = assetNode.GetNextSibling();
+			_assets = std::move(assets.value());
+			return true;
 		}
-
-		return true;
-	}
-
-	bool AssetManager::SaveIndex() const
-	{
-		auto const path = _profilePath / std::format("{}.{}", Constants::Paths::ProfileIndexFileName, Constants::Paths::ProfileIndexFileExt);
-
-		XmlWriter xml("Assets");
-		for (auto& kvp : _assets)
-		{
-			auto& asset = kvp.second;
-			auto assetNode = xml.AddChild("Asset");
-			assetNode.SetElementValue("ID", asset.id);
-			assetNode.SetElementValue("ParentID", asset.parent_id);
-			assetNode.SetElementValue("Type", AssetTypeToString(asset.asset_type, asset.asset_subtype));
-		}
-
-		return xml.Save(path);
+		else
+			return false;
 	}
 
 	Asset& AssetManager::CreateEmptyAsset(AssetType type, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = NewUUID();
-		auto& newAsset = _assets[id] = Asset {};
-		newAsset.id = id;
-		newAsset.parent_id = not parent.empty() ? parent : _profileID;
-		newAsset.asset_type = type;
-		newAsset.status = AssetFileStatus::PartiallyLoaded;
-		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
-		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
-		return newAsset;
+		auto& asset = _assets[id] = Asset {};
+		asset.id = id;
+		asset.parent_id = not parent.empty() ? parent : _profileID;
+		asset.asset_type = type;
+		asset.file_status = AssetFileStatus::PartiallyLoaded;
+		asset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
+		asset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
+		return asset;
 	}
 
 	Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = NewUUID();
-		auto& newAsset = _assets[id] = Asset {};
-		newAsset.id = id;
-		newAsset.parent_id = not parent.empty() ? parent : _profileID;
-		newAsset.asset_type = type;
-		newAsset.data = std::move(data); // Move data
-		newAsset.data_format = format;
-		newAsset.status = AssetFileStatus::Modified;
-		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
-		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
-		return newAsset;
+		auto& asset = _assets[id] = Asset {};
+		asset.id = id;
+		asset.parent_id = not parent.empty() ? parent : _profileID;
+		asset.asset_type = type;
+		asset.data = std::move(data); // Move data
+		asset.data_format = format;
+		asset.file_status = AssetFileStatus::PartiallyLoaded;
+		asset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
+		asset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
+		return asset;
 	}
 
 	Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = NewUUID();
-		auto& newAsset = _assets[id] = Asset {};
-		newAsset.id = id;
-		newAsset.parent_id = not parent.empty() ? parent : _profileID;
-		newAsset.asset_type = type;
-		newAsset.data_format = format;
-		newAsset.status = AssetFileStatus::Modified;
-		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
-		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
+		auto& asset = _assets[id] = Asset {};
+		asset.id = id;
+		asset.parent_id = not parent.empty() ? parent : _profileID;
+		asset.asset_type = type;
+		asset.data_format = format;
+		asset.file_status = AssetFileStatus::PartiallyLoaded;
+		asset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
+		asset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
 
 		// Copy data
-		newAsset.data.resize(data.size());
-		std::memcpy(newAsset.data.data(), data.data(), data.size());
-		return newAsset;
+		asset.data.resize(data.size());
+		std::memcpy(asset.data.data(), data.data(), data.size());
+		return asset;
 	}
 
 	Asset& AssetManager::CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
@@ -150,7 +115,7 @@ namespace fig::fs
 			return asset; // Error
 
 		asset.asset_subtype = static_cast<uint8_t>(subtype);
-		asset.status = AssetFileStatus::Modified;
+		asset.file_status = AssetFileStatus::PartiallyLoaded;
 		asset.data_format = DataFormat::ImageUncompressed;
 
 		auto pSurface = surface.get();
@@ -199,21 +164,45 @@ namespace fig::fs
 		for (auto& kvp : _assets)
 		{
 			auto& asset = kvp.second;
-			if (asset.status != AssetFileStatus::Modified)
-				continue;
-
-			if (WriteAsset(asset))
-				asset.status = AssetFileStatus::FullyLoaded;
+			if (asset.file_status == AssetFileStatus::Modified)
+				WriteAsset(asset);
+			if (asset.save_status != AssetSaveStatus::Saved)
+				UpdateAsset(asset);
 		}
-		SaveIndex();
 	}
 
-	bool AssetManager::WriteAsset(const Asset& asset) const
+	bool AssetManager::WriteAsset(Asset& asset)
 	{
 		auto file = asset.ToFile();
 		BinaryWriter writer(_profilePath, _profileAuthKey);
-		auto error = writer.WriteFile(file);
-		return error == FileError::NoError;
+		if (auto error = writer.WriteFile(file); error == FileError::NoError)
+		{
+			asset.file_status = AssetFileStatus::FullyLoaded;
+			return true;
+		}
+		return false;
+	}
+
+	bool AssetManager::UpdateAsset(Asset& asset)
+	{
+		auto& db = GetDatabase();
+		if (asset.save_status == AssetSaveStatus::Created)
+		{
+			if (db.CreateAsset(asset) == DatabaseError::NoError)
+			{
+				asset.save_status = AssetSaveStatus::Saved;
+				return true;
+			}
+		}
+		else if (asset.save_status == AssetSaveStatus::Updated)
+		{
+			if (db.UpdateAsset(asset) == DatabaseError::NoError)
+			{
+				asset.save_status = AssetSaveStatus::Saved;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	bool AssetManager::LoadAssetMetaData()
@@ -221,24 +210,24 @@ namespace fig::fs
 		for (auto& kvp : _assets)
 		{
 			auto& asset = kvp.second;
-			if (asset.status > AssetFileStatus::NotLoaded)
+			if (asset.file_status > AssetFileStatus::NotLoaded)
 				continue;
 
 			BinaryReader reader(_profilePath, _profileAuthKey);
 			if (auto file = reader.ReadFile(asset.GetFileName(), false))
 			{
 				asset.FromFile(std::move(file.value()));
-				asset.status = AssetFileStatus::PartiallyLoaded;
+				asset.file_status = AssetFileStatus::PartiallyLoaded;
 			}
 			else if (file.error() == FileError::FileNotFound)
-				asset.status = AssetFileStatus::Missing;
+				asset.file_status = AssetFileStatus::Missing;
 			else
-				asset.status = AssetFileStatus::Invalid; // Failed to load for some reason, but the file exists.
+				asset.file_status = AssetFileStatus::Invalid; // Failed to load for some reason, but the file exists.
 		}
 
 		// Remove missing assets from index
 		for (auto& id : _assets
-			| std::views::filter([](auto& kvp) { return kvp.second.status == AssetFileStatus::Missing; })
+			| std::views::filter([](auto& kvp) { return kvp.second.file_status == AssetFileStatus::Missing; })
 			| std::views::keys
 			| std::ranges::to<std::vector>())
 			_assets.erase(id);
@@ -261,22 +250,22 @@ namespace fig::fs
 			return std::unexpected(FileError::FileNotFound);
 		
 		Asset& asset = findAsset.value();
-		if (asset.status == AssetFileStatus::FullyLoaded)
+		if (asset.file_status == AssetFileStatus::FullyLoaded)
 			return asset;
 
-		if (asset.status == AssetFileStatus::Invalid)
+		if (asset.file_status == AssetFileStatus::Invalid)
 			return std::unexpected(FileError::ReadError);
 
 		BinaryReader reader(_profilePath, _profileAuthKey);
 		if (auto file = reader.ReadFile(asset.GetFileName()))
 		{
 			asset.FromFile(std::move(file.value()));
-			asset.status = AssetFileStatus::FullyLoaded;
+			asset.file_status = AssetFileStatus::FullyLoaded;
 			return asset;
 		}
 		else
 		{
-			asset.status = AssetFileStatus::Invalid;
+			asset.file_status = AssetFileStatus::Invalid;
 			return std::unexpected(FileError::ReadError);
 		}
 	}
@@ -366,17 +355,18 @@ namespace fig::fs
 				| std::views::transform([](auto const& kvp) -> fig::uuid { return kvp.second.id; }));
 		}
 
+		auto& db = GetDatabase();
+
 		// Delete
 		uint32_t count = 0;
 		for (auto& id : assetIDs)
 		{
 			if (EraseAsset(id))
+			{
+				db.DeleteAsset(id);
 				++count;
+			}
 		}
-		
-		if (count > 0)
-			SaveIndex();
-
 		return count;
 	}
 
@@ -403,7 +393,7 @@ namespace fig::fs
 		return false;
 	}
 
-	void AssetManager::ImportCharacters(fig::path directory)
+	void AssetManager::ImportCharacters(fig::path directory, size_t max_count)
 	{
 		std::vector<fig::path> files;
 		for (const auto& entry : std::filesystem::directory_iterator(directory))
@@ -412,11 +402,15 @@ namespace fig::fs
 		auto rng = std::random_device {};
 		std::ranges::shuffle(files, rng);
 
+		if (max_count > 0)
+			files.resize(std::min(max_count, files.size()));
+
 		for (auto& filename : files)
 		{
 			auto try_character = ImportCharacter(filename, fig::fs::AssetManager::CharacterDataFormat::TavernV2);
 			if (not try_character.has_value())
 				continue;
+
 			auto& character = try_character.value();
 
 			fig::bytes characterData;
@@ -450,4 +444,12 @@ namespace fig::fs
 			id = CreateUUID();
 		return id;
 	}
+
+	AssetDatabase& AssetManager::GetDatabase() noexcept
+	{
+		if (!_pAssetDB)
+			_pAssetDB = std::make_unique<AssetDatabase>(_profilePath / fig::path(std::format("{}.{}", Constants::Paths::AssetIndexFileName, Constants::Paths::AssetIndexFileExt)));
+		return *_pAssetDB.get();
+	}
+
 }

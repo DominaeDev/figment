@@ -132,6 +132,9 @@
     <Filter Include="Source Files\Frontend\User">
       <UniqueIdentifier>{8e498fb3-7b47-4628-ba65-d85fd8f6c436}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\User\Assets">
+      <UniqueIdentifier>{267bc7c3-9a6f-4e7d-a7aa-d92284a5b061}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -411,10 +414,13 @@
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
     <ClCompile Include="src\model\Asset.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+      <Filter>Source Files\Frontend\User\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\model\AssetManager.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+      <Filter>Source Files\Frontend\User\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fs\AssetDatabase.cpp">
+      <Filter>Source Files\Frontend\User\Assets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1016,10 +1022,13 @@
       <Filter>Source Files\Frontend\FileSystem</Filter>
     </ClInclude>
     <ClInclude Include="include\model\Asset.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+      <Filter>Source Files\Frontend\User\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\model\AssetManager.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+      <Filter>Source Files\Frontend\User\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\AssetDatabase.h">
+      <Filter>Source Files\Frontend\User\Assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

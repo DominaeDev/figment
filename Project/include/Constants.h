@@ -79,8 +79,8 @@ namespace Constants
 		constexpr fig::const_string ProfilesFolder = "./profiles";
 		constexpr fig::const_string ProfilesFileName = "profiles";
 		constexpr fig::const_string ProfilesFileExt = "";
-		constexpr fig::const_string ProfileIndexFileName = "index";
-		constexpr fig::const_string ProfileIndexFileExt = "";
+		constexpr fig::const_string AssetIndexFileName = "index";
+		constexpr fig::const_string AssetIndexFileExt = "";
 		constexpr fig::const_string RecoveryFileName = "recovery";
 		constexpr fig::const_string RecoveryFileExt = "";
 		constexpr fig::const_string AssetFileExt = "";

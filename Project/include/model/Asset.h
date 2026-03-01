@@ -51,8 +51,16 @@ namespace fig::fs
 		NotLoaded = 0,
 		PartiallyLoaded,
 		FullyLoaded,
-		Modified,
 		Missing,
+		Invalid,
+		Modified,
+	};
+
+	enum class AssetSaveStatus : uint8_t
+	{
+		Created = 0,
+		Updated,
+		Saved,
 		Invalid,
 	};
 
@@ -117,7 +125,8 @@ namespace fig::fs
 		uint8_t asset_subtype {};
 		DataFormat data_format { DataFormat::Undefined };
 		fig::bytes data {};
-		AssetFileStatus status = { AssetFileStatus::NotLoaded };
+		AssetFileStatus file_status = { AssetFileStatus::NotLoaded };
+		AssetSaveStatus save_status = { AssetSaveStatus::Created };
 
 	private:
 		void Invalidate();

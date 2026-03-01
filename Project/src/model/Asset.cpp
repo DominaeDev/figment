@@ -303,6 +303,14 @@ namespace fig::fs
 
 	void Asset::Invalidate()
 	{
-		status = AssetFileStatus::Modified;
+		if (file_status == AssetFileStatus::Invalid || file_status == AssetFileStatus::Missing)
+		{
+			save_status = AssetSaveStatus::Invalid;
+			return;
+		}
+
+		file_status = AssetFileStatus::Modified;
+		if (save_status != AssetSaveStatus::Created)
+			save_status = AssetSaveStatus::Updated;
 	}
 }

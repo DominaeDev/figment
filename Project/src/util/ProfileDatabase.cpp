@@ -8,11 +8,11 @@ using namespace fig::common_util;
 
 constexpr fig::const_string create_tables =
 	"CREATE TABLE Profiles("
-		"id TEXT PRIMARY KEY NOT NULL,"
-		"version INTEGER,"
-		"name TEXT NOT NULL,"
-		"settings TEXT NOT NULL,"
-		"auth BLOB NOT NULL,"
+		"id       TEXT    PRIMARY KEY NOT NULL,"
+		"version  INTEGER NOT NULL,"
+		"name     TEXT    NOT NULL,"
+		"settings TEXT    NOT NULL DEFAULT('{}'),"
+		"auth     BLOB    NOT NULL,"
 		"recovery BLOB"
 	");";
 
