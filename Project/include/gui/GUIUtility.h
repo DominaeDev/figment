@@ -4,7 +4,7 @@
 
 #include "gui/GUITypes.h"
 
-namespace fig::gui_util
+namespace fig::gui::util
 {
 	inline constexpr fig::gui::Rect expand_rect(const fig::gui::Rect& rect, int pixels)
 	{

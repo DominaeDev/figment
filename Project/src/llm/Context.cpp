@@ -10,10 +10,10 @@
 #include <algorithm>
 #include <format>
 
-using namespace fig::common_util;
+using namespace fig::util;
 using namespace fig::llm;
-using namespace fig::llm_util;
-using namespace fig::data;
+using namespace fig::llm::util;
+using namespace fig::io::data;
 
 Context::Context(const ModelState& model, int32_t num_sequences)
 {
@@ -65,7 +65,7 @@ void Context::TokenizeUncached(ChatSession& session)
 			content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 		else
 		{
-			fig::llm_util::complete_message(content);
+			fig::llm::util::complete_message(content);
 			content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 		}
 		content = session.ApplyNames(content, block.role); //! @move?
@@ -533,11 +533,11 @@ void Context::DumpContext()
 #if _DEBUG
 	for (int32_t i = 0; i < _num_sequences; ++i)
 	{
-		fig::llm_util::dump_batch_text(*this, i, std::format("prompt_text_{}.txt", i));
-		fig::llm_util::dump_batch_tokens(*this, i, std::format("prompt_full_{}.txt", i));
-		fig::llm_util::dump_kv_cache(*this, i, std::format("kvcache_{}.txt", i));
+		fig::llm::util::dump_batch_text(*this, i, std::format("prompt_text_{}.txt", i));
+		fig::llm::util::dump_batch_tokens(*this, i, std::format("prompt_full_{}.txt", i));
+		fig::llm::util::dump_kv_cache(*this, i, std::format("kvcache_{}.txt", i));
 	}
-	fig::llm_util::dump_kv_cache_cells(*this, "kvcache_alloc.txt");
+	fig::llm::util::dump_kv_cache_cells(*this, "kvcache_alloc.txt");
 #endif
 }
 

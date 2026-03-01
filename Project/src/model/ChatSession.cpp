@@ -15,11 +15,11 @@
 #include <format>
 
 using namespace fig::gui;
-using namespace fig::gui_util;
-using namespace fig::string_util;
-using namespace fig::fs;
+using namespace fig::gui::util;
+using namespace fig::util;
+using namespace fig::io;
 
-namespace fig::data
+namespace fig::io::data
 {
 	bool ChatSession::Initialize(ChatOptions options)
 	{
@@ -55,7 +55,7 @@ namespace fig::data
 
 	bool ChatSession::LoadCharacter(Role role, fig::string filename)
 	{
-		auto pRenderer = ApplicationState::GetMainWindow().GetSDLRenderer().get();
+		auto pRenderer = Global::GetMainWindow().GetSDLRenderer().get();
 
 		CharacterData character;
 		if (character.LoadFromXml(fig::path(filename)))

@@ -3,7 +3,7 @@
 #include "gui/GUIUtility.h"
 
 using namespace fig::gui;
-using namespace fig::gui_util;
+using namespace fig::gui::util;
 
 Image::Image(Control* pParent, Texture* pTexture) : Control(pParent),
 	_pTexture(pTexture)

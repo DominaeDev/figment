@@ -4,14 +4,14 @@
 #include "model/AppState.h"
 #include "model/UserManager.h"
 
-using namespace fig::fs;
+using namespace fig::io;
 
 namespace fig::gui
 {
 	CharacterCard::CharacterCard(Control* pParent, const fig::uuid& characterId) : CoverCard(pParent, characterId),
 		_characterId { characterId }
 	{
-		if (auto character = ApplicationState::GetUserManager().GetContent().GetCharacter(characterId))
+		if (auto character = Global::GetUserManager().GetContent().GetCharacter(characterId))
 		{
 			SetLabel(character.value().fullName);
 //			SetSublabel(character.value().subheader);

@@ -11,8 +11,8 @@
 #include <format>
 
 using namespace fig::gui;
-using namespace fig::gui_util;
-using namespace fig::string_util;
+using namespace fig::gui::util;
+using namespace fig::util;
 
 #define USER_RIGHT_ALIGNED	1
 #define USER_YOU			1

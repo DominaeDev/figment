@@ -8,7 +8,7 @@
 
 using namespace tinyxml2;
 
-namespace fig::fs
+namespace fig::io
 {
 	XmlWriterAttribute::XmlWriterAttribute(const fig::string& name, tinyxml2::XMLElement* pParent) noexcept :
 		_name { name },
@@ -41,7 +41,7 @@ namespace fig::fs
 
 	XmlWriterAttribute& XmlWriterAttribute::operator=(const fig::byte_span& value) noexcept
 	{
-		_pParent->SetAttribute(_name.c_str(), common_util::Base64Encode(value).c_str());
+		_pParent->SetAttribute(_name.c_str(), util::Base64Encode(value).c_str());
 		return *this;
 	}
 
@@ -88,7 +88,7 @@ namespace fig::fs
 	void XmlWriterElement::SetValue(const fig::byte_span& value) noexcept
 	{
 		DeleteValue();
-		_pElement->InsertNewText(common_util::Base64Encode(value).c_str());
+		_pElement->InsertNewText(util::Base64Encode(value).c_str());
 	}
 
 	void XmlWriterElement::SetValue(const fig::uuid& value) noexcept
@@ -119,7 +119,7 @@ namespace fig::fs
 
 	void XmlWriterElement::SetAttribute(const fig::string& name, const fig::byte_span& value) noexcept
 	{
-		_pElement->SetAttribute(name.c_str(), common_util::Base64Encode(value).c_str());
+		_pElement->SetAttribute(name.c_str(), util::Base64Encode(value).c_str());
 	}
 
 	void XmlWriterElement::SetAttribute(const fig::string& name, const fig::uuid& value) noexcept

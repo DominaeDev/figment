@@ -4,11 +4,11 @@
 #include "fs/Xml.h"
 
 using namespace fig::gui;
-using namespace fig::gui_util;
-using namespace fig::string_util;
-using namespace fig::fs;
+using namespace fig::gui::util;
+using namespace fig::util;
+using namespace fig::io;
 
-namespace fig::data
+namespace fig::io::data
 {
 	static bool ReadXml(XmlReader& xml, CharacterData& data)
 	{
@@ -43,9 +43,9 @@ namespace fig::data
 		{
 			fig::string gender = trim(genderText.value());
 
-			if (string_util::equals(gender, "male", true))
+			if (equals(gender, "male", true))
 				data.gender = CharacterGender::Male;
-			else if (string_util::equals(gender, "female", true))
+			else if (equals(gender, "female", true))
 				data.gender = CharacterGender::Female;
 			else if (not gender.empty())
 			{

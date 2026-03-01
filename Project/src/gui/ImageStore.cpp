@@ -6,8 +6,9 @@
 #include "Constants.h"
 #include <cassert>
 
-using namespace fig::fs;
-using namespace fig::gui_util;
+using namespace fig::io;
+using namespace fig::io::data;
+using namespace fig::gui::util;
 
 namespace fig::gui
 {
@@ -57,7 +58,7 @@ namespace fig::gui
 
 	bool ImageStore::LoadCoverImage(const fig::uuid& characterAssetID)
 	{
-		auto& assetMngr = ApplicationState::GetUserManager().GetProfileAssets();
+		auto& assetMngr = Global::GetUserManager().GetProfileAssets();
 
 		if (auto findCover = assetMngr.FindAsset(characterAssetID, ImageType::CoverImage))
 		{

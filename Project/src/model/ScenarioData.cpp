@@ -4,10 +4,10 @@
 #include "fs/Xml.h"
 #include <cassert>
 
-using namespace fig::fs;
-using namespace fig::string_util;
+using namespace fig::io;
+using namespace fig::util;
 
-namespace fig::data
+namespace fig::io::data
 {
 	static constexpr std::array<std::pair<const char*, ScenarioData::PromptType>, 6> elements {
 		std::pair { "System",				ScenarioData::PromptType::System },

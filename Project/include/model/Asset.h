@@ -7,7 +7,7 @@
 #include <map>
 #include <variant>
 
-namespace fig::fs
+namespace fig::io
 {
 	enum class AssetType : uint8_t
 	{
@@ -72,6 +72,9 @@ namespace fig::fs
 
 	class Asset
 	{
+		using AssetFile = fig::io::data::AssetFile;
+		using MetaTag = fig::io::data::MetaTag;
+		using MetaValue = fig::io::data::MetaValue;
 	public:
 		void SetData(fig::bytes&& data);
 		void SetData(fig::byte_span data);
@@ -135,6 +138,10 @@ namespace fig::fs
 		std::map<MetaTag, MetaValue> _parameters {};
 
 	};
+
+	using AssetRef = std::reference_wrapper<Asset>;
+	using AssetCRef = std::reference_wrapper<const Asset>;
+
 }
 
 #endif

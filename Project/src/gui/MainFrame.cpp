@@ -37,7 +37,7 @@ namespace fig::gui
 		RegisterScreen<ChatFrame>();
 
 		// Sign in
-		auto& userMngr = ApplicationState::GetUserManager();
+		auto& userMngr = Global::GetUserManager();
 		if (not userMngr.LoadProfiles())
 		{
 			userMngr.CreateDefaultProfile();

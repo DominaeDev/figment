@@ -4,7 +4,7 @@
 #include "util/Common.h"
 
 using namespace fig::gui;
-using namespace fig::common_util;
+using namespace fig::util;
 
 void HorizontalSizer::OnLayout(Rectf parentRect)
 {

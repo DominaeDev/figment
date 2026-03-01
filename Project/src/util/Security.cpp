@@ -14,7 +14,7 @@ static fig::bytes hmac_compute(std::span<const std::byte> key, std::span<const s
 
 	if (key.size() > block_size)
 	{
-		auto hashed = fig::common_util::GetHash(key).to_bytes();
+		auto hashed = fig::util::GetHash(key).to_bytes();
 		std::copy(hashed.begin(), hashed.end(), k.begin());
 	}
 	else
@@ -32,13 +32,13 @@ static fig::bytes hmac_compute(std::span<const std::byte> key, std::span<const s
 	fig::bytes inner_data;
 	inner_data.insert(inner_data.end(), i_key_pad.begin(), i_key_pad.end());
 	inner_data.insert(inner_data.end(), data.begin(), data.end());
-	auto inner_hash = fig::common_util::GetHash(inner_data).to_bytes();
+	auto inner_hash = fig::util::GetHash(inner_data).to_bytes();
 
 	fig::bytes outer_data;
 	outer_data.insert(outer_data.end(), o_key_pad.begin(), o_key_pad.end());
 	outer_data.insert(outer_data.end(), inner_hash.begin(), inner_hash.end());
 
-	return fig::common_util::GetHash(outer_data).to_bytes();
+	return fig::util::GetHash(outer_data).to_bytes();
 }
 
 static fig::bytes PBKDF2(std::span<const std::byte> password, std::span<const std::byte> salt, uint32_t iterations, size_t output_length)
@@ -79,23 +79,23 @@ static fig::bytes PBKDF2(std::span<const std::byte> password, std::span<const st
 	return derived_key;
 }
 
-static fig::bytes SimpleHash(fig::string password, fig::security::AuthSalt salt)
+static fig::bytes SimpleHash(fig::string password, fig::user::auth::AuthSalt salt)
 {
 	size_t seed;
-	fig::Hash hash = fig::common_util::GetHash(password);
-	hash = fig::common_util::HashCombine(hash, fig::common_util::GetHash(salt), seed);
+	fig::Hash hash = fig::util::GetHash(password);
+	hash = fig::util::HashCombine(hash, fig::util::GetHash(salt), seed);
 	return hash.to_bytes();
 }
 
-static fig::bytes SimpleHash(fig::byte_span data, fig::security::AuthSalt salt)
+static fig::bytes SimpleHash(fig::byte_span data, fig::user::auth::AuthSalt salt)
 {
 	size_t seed;
-	fig::Hash hash = fig::common_util::GetHash(data);
-	hash = fig::common_util::HashCombine(hash, fig::common_util::GetHash(salt), seed);
+	fig::Hash hash = fig::util::GetHash(data);
+	hash = fig::util::HashCombine(hash, fig::util::GetHash(salt), seed);
 	return hash.to_bytes();
 }
 
-static void encrypt_data(unsigned char* pData, size_t length, const fig::security::AuthKey& key)
+static void encrypt_data(unsigned char* pData, size_t length, const fig::user::auth::AuthKey& key)
 {
 	static_assert(sizeof(unsigned char) == sizeof(std::byte));
 	static_assert(sizeof(key) == 16);
@@ -110,7 +110,7 @@ static void encrypt_data(unsigned char* pData, size_t length, const fig::securit
 		aes.encrypt_block(pData + i);
 }
 
-static void decrypt_data(unsigned char* pData, size_t length, const fig::security::AuthKey& key)
+static void decrypt_data(unsigned char* pData, size_t length, const fig::user::auth::AuthKey& key)
 {
 	static_assert(sizeof(unsigned char) == sizeof(std::byte));
 	static_assert(sizeof(key) == 16);
@@ -125,9 +125,9 @@ static void decrypt_data(unsigned char* pData, size_t length, const fig::securit
 		aes.decrypt_block(pData + i);
 }
 
-namespace fig::security
+namespace fig::user::auth
 {
-	void Encrypt(std::ofstream& stream, fig::byte_span in_data, const fig::security::AuthKey& key)
+	void Encrypt(std::ofstream& stream, fig::byte_span in_data, const fig::user::auth::AuthKey& key)
 	{
 		static_assert(sizeof(unsigned char) == sizeof(std::byte));
 		static_assert(sizeof(key) == 16);
@@ -167,7 +167,7 @@ namespace fig::security
 			aes.encrypt_block((unsigned char*)data.data() + ptrdiff_t(i));
 	}
 
-	EncryptedData Encrypt(const fig::bytes& input, const fig::security::AuthKey& key)
+	EncryptedData Encrypt(const fig::bytes& input, const fig::user::auth::AuthKey& key)
 	{
 		auto size = input.size();
 		EncryptedData encrypted {
@@ -182,7 +182,7 @@ namespace fig::security
 		return encrypted; // rvo
 	}
 
-	EncryptedData Encrypt(fig::bytes&& input, const fig::security::AuthKey& key)
+	EncryptedData Encrypt(fig::bytes&& input, const fig::user::auth::AuthKey& key)
 	{
 		auto size = input.size();
 		
@@ -196,7 +196,7 @@ namespace fig::security
 		return encrypted; // rvo
 	}
 
-	EncryptedData Encrypt(const AuthChallenge& input, const fig::security::AuthKey& key)
+	EncryptedData Encrypt(const AuthChallenge& input, const fig::user::auth::AuthKey& key)
 	{
 		static_assert(sizeof(AuthChallenge) % 16 == 0);
 		auto size = input.size();
@@ -210,7 +210,7 @@ namespace fig::security
 		return encrypted; // rvo
 	}
 
-	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const fig::security::AuthKey& key)
+	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const fig::user::auth::AuthKey& key)
 	{
 		static_assert(sizeof(unsigned char) == sizeof(std::byte));
 		static_assert(sizeof(key) == 16);
@@ -250,7 +250,7 @@ namespace fig::security
 			aes.decrypt_block((unsigned char*)data.data() + ptrdiff_t(i));
 	}
 
-	DecryptedData Decrypt(const EncryptedData& input, const fig::security::AuthKey& key)
+	DecryptedData Decrypt(const EncryptedData& input, const fig::user::auth::AuthKey& key)
 	{
 		assert(input.data.size() % 16 == 0);
 
@@ -260,7 +260,7 @@ namespace fig::security
 		return decrypted; // rvo
 	}
 
-	DecryptedData Decrypt(EncryptedData&& input, const fig::security::AuthKey& key)
+	DecryptedData Decrypt(EncryptedData&& input, const fig::user::auth::AuthKey& key)
 	{
 		assert(input.data.size() % 16 == 0);
 
@@ -272,13 +272,13 @@ namespace fig::security
 		return decrypted; // rvo
 	}
 
-	DecryptedData Decrypt(const AuthChallenge& input, const fig::security::AuthKey& key)
+	DecryptedData Decrypt(const AuthChallenge& input, const fig::user::auth::AuthKey& key)
 	{
 		static_assert(sizeof(AuthChallenge) % 16 == 0);
 		fig::bytes encData(input.size());
 		std::memcpy(encData.data(), input.data(), input.size());
 
-		return fig::security::Decrypt(
+		return fig::user::auth::Decrypt(
 			EncryptedData {
 				.data { encData },
 				.original_size { encData.size() },
@@ -287,7 +287,7 @@ namespace fig::security
 
 	}
 
-	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::security::AuthSalt& salt)
+	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::user::auth::AuthSalt& salt)
 	{
 		fig::bytes derived_key;
 		if constexpr (UsePBKDF2)
@@ -306,7 +306,7 @@ namespace fig::security
 		return authKey;
 	}
 
-	AuthKey DeriveKeyFromBytes(fig::byte_span data, const fig::security::AuthSalt& salt)
+	AuthKey DeriveKeyFromBytes(fig::byte_span data, const fig::user::auth::AuthSalt& salt)
 	{
 		fig::bytes derived_key;
 		if constexpr (UsePBKDF2)

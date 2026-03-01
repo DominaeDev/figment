@@ -25,11 +25,10 @@
 #include <format>
 #include <ranges>
 
-using namespace fig::common_util;
-using namespace fig::string_util;
+using namespace fig::util;
 using namespace fig::llm;
-using namespace fig::data;
-using namespace fig::fs;
+using namespace fig::io::data;
+using namespace fig::io;
 
 template<typename T>
 void queue_clear(std::queue<T>& q)
@@ -125,7 +124,7 @@ namespace fig::gui
 			_bStartedChat = false;
 			if (DefaultChatOptions.flags.IsSet(ChatOptions::Flag::GreetUser))
 			{
-				auto pLLM = ApplicationState::GetLLMInstance();
+				auto pLLM = Global::GetLLMInstance();
 				if (pLLM)
 					pLLM->GreetUser();
 			}
@@ -148,7 +147,7 @@ namespace fig::gui
 
 	void ChatFrame::InitializeModel()
 	{
-		auto& engine = ApplicationState::GetLLMEngine();
+		auto& engine = Global::GetLLMEngine();
 
 		if (!engine.IsInitialized())
 		{
@@ -165,7 +164,7 @@ namespace fig::gui
 				if (bSuccess)
 				{
 					auto pInstance = engine.CreateInstance(Constants::Context::DefaultSize, DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings));
-					ApplicationState::SetLLMInstance(pInstance);
+					Global::SetLLMInstance(pInstance);
 				}
 			});
 		}
@@ -173,7 +172,7 @@ namespace fig::gui
 
 	void ChatFrame::UnloadModel()
 	{
-		auto& engine = ApplicationState::GetLLMEngine();
+		auto& engine = Global::GetLLMEngine();
 		if (engine.IsInitialized())
 		{
 			engine.Shutdown();
@@ -187,7 +186,7 @@ namespace fig::gui
 
 	void ChatFrame::StartChat()
 	{
-		auto pLLM = ApplicationState::GetLLMInstance();
+		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
 		{
 			ChatSession session;
@@ -221,7 +220,7 @@ namespace fig::gui
 	{
 		return ChatCommandExecutor::Execute(cmd,
 			ChatCommandExecutor::Context {
-				.pLLM = ApplicationState::GetLLMInstance(),
+				.pLLM = Global::GetLLMInstance(),
 				.pChatFrame = this,
 			});
 	}
@@ -229,7 +228,7 @@ namespace fig::gui
 #if ENABLE_AUTO_CHAT
 	void ChatFrame::AutoChat()
 	{
-		auto& engine = ApplicationState::GetLLMEngine();
+		auto& engine = Global::GetLLMEngine();
 		static std::mt19937 rng {};
 		static std::uniform_int_distribution<int> dist(0, 99);
 		if (!engine.IsInitialized())
@@ -239,7 +238,7 @@ namespace fig::gui
 			return;
 		}
 
-		auto pLLMInstance = ApplicationState::GetLLMInstance();
+		auto pLLMInstance = Global::GetLLMInstance();
 		if (!pLLMInstance || !pLLMInstance->IsReady() || pLLMInstance->IsGenerating())
 			return;
 
@@ -285,13 +284,13 @@ namespace fig::gui
 
 	void ChatFrame::PollStatus()
 	{
-		auto pChannel = ApplicationState::GetLLMEngine().GetStatusChannel();
+		auto pChannel = Global::GetLLMEngine().GetStatusChannel();
 		if (!pChannel)
 			return;
 
 		if (auto status = pChannel->PollStatus())
 		{
-			auto pLLMInstance = ApplicationState::GetLLMInstance();
+			auto pLLMInstance = Global::GetLLMInstance();
 			MainFrame::GetInstance().SetStatusBar(status.value());
 
 			switch (status.value().signal)
@@ -323,7 +322,7 @@ namespace fig::gui
 			case LLMStatusSignal::ModelUnloaded:
 				SetStatusBar(fig::strings::Status::ModelUnloaded);
 				_pVariableList->SetVisible(false);
-				ApplicationState::SetLLMInstance(nullptr);
+				Global::SetLLMInstance(nullptr);
 				queue_clear(_commandQueue);
 				break;
 			case LLMStatusSignal::ModelLoadFailure:
@@ -407,7 +406,7 @@ namespace fig::gui
 		}
 
 		// LLM shortcuts
-		auto pLLM = ApplicationState::GetLLMInstance();
+		auto pLLM = Global::GetLLMInstance();
 		if (pLLM)
 		{
 			if (event.pressed)
@@ -463,7 +462,7 @@ namespace fig::gui
 
 	void ChatFrame::EnqueueCommand(ParsedChatCommand cmd)
 	{
-		auto pLLM = ApplicationState::GetLLMInstance();
+		auto pLLM = Global::GetLLMInstance();
 
 		if (pLLM && pLLM->IsGenerating())
 		{

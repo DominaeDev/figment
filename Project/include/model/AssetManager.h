@@ -8,21 +8,23 @@
 #include <expected>
 #include <ranges>
 
-namespace fig::data
+namespace fig::io::data
 {
 	class CharacterData;
 }
 
-namespace fig::fs
+namespace fig::user
 {
 	class UserManager;
+}
 
-	using AssetRef = std::reference_wrapper<Asset>;
+namespace fig::io
+{
 	class AssetManager
 	{
 		AssetManager() = delete;
 	public:
-		AssetManager(const UserManager& userMngr);
+		AssetManager(const fig::user::UserManager& userMngr);
 
 		Asset& CreateEmptyAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
 		Asset& CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
@@ -48,7 +50,7 @@ namespace fig::fs
 
 		enum class CharacterDataFormat { Default, TavernV2, };
 		void ImportCharacters(fig::path directory, size_t max_count = 0);
-		std::expected<fig::data::CharacterData, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		std::expected<fig::io::data::CharacterData, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		std::expected<AssetRef, FileError> ImportScenario(fig::path filename);
 
 	private:
@@ -65,7 +67,7 @@ namespace fig::fs
 		std::unique_ptr<AssetDatabase> _pAssetDB;
 		fig::uuid _profileID;
 		fig::path _profilePath;
-		fig::security::AuthKey _profileAuthKey {};
+		fig::user::auth::AuthKey _profileAuthKey {};
 		std::map<fig::uuid, Asset> _assets {};
 	};
 

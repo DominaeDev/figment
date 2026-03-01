@@ -4,14 +4,16 @@
 #include <Crc32.h>
 #include <cassert>
 
-namespace fig::fs
+using namespace fig::io::data;
+
+namespace fig::io
 {
 	BinaryWriter::BinaryWriter(const fig::path& directory) noexcept :
 		_directory { directory }
 	{
 	}
 
-	BinaryWriter::BinaryWriter(const fig::path& directory, fig::security::AuthKey key) noexcept :
+	BinaryWriter::BinaryWriter(const fig::path& directory, fig::user::auth::AuthKey key) noexcept :
 		_directory { directory },
 		_authKey { key }
 	{
@@ -123,7 +125,7 @@ namespace fig::fs
 		}
 	}
 
-	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::security::AuthKey authKey) noexcept
+	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::user::auth::AuthKey authKey) noexcept
 	{
 		if (file.data.size() == 0uz)
 			return; // No data
@@ -131,7 +133,7 @@ namespace fig::fs
 		if (file.data_encrypted)
 		{
 			// Write encrypted
-			fig::security::Encrypt(fs, file.data, authKey);
+			fig::user::auth::Encrypt(fs, file.data, authKey);
 		}
 		else
 		{
@@ -167,7 +169,7 @@ namespace fig::fs
 		}
 	}
 
-	FileError BinaryWriter::WriteRecoveryFile(const fig::fs::UserProfile& profile, const fig::security::AuthChallenge& recoveryChallenge) noexcept
+	FileError BinaryWriter::WriteRecoveryFile(const fig::user::UserProfile& profile, const fig::user::auth::AuthChallenge& recoveryChallenge) noexcept
 	{
 		auto directory = profile.GetPath();
 		auto const path = directory / fig::path(std::format("{}.{}", Constants::Paths::RecoveryFileName, Constants::Paths::RecoveryFileExt));

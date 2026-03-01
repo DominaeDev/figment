@@ -16,8 +16,7 @@
 #include <ranges>
 
 using namespace fig::gui;
-using namespace fig::common_util;
-using namespace fig::string_util;
+using namespace fig::util;
 using namespace fig::llm;
 
 template<typename T>
@@ -82,7 +81,7 @@ static bool cmdUserMessage(ParsedChatCommand cmd, Ctx ctx)
 	if (!(ctx.pLLM && ctx.pLLM->IsReady()))
 	{
 		static int turn = 0;
-		auto [msgType, complete] = fig::llm_util::detect_message_type(fig::llm_util::process_message(cmd.text, ""));
+		auto [msgType, complete] = fig::llm::util::detect_message_type(fig::llm::util::process_message(cmd.text, ""));
 		ctx.pChatScroll->AddDummyMessage(turn % 2 == 0 ? "@USR" : "@BOT", turn % 2 == 0 ? Role::User : Role::Bot1, msgType, cmd.text);
 		++turn;
 		return true;

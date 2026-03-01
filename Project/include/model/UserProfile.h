@@ -7,14 +7,14 @@
 #include "Constants.h"
 #include <array>
 
-namespace fig::fs
+namespace fig::user
 {
 	struct UserProfile
 	{
 		fig::uuid id { 0, 0 };
 		fig::string name;
-		fig::security::UserAuth auth {};
-		fig::security::UserAuth recovery {};
+		fig::user::auth::UserAuth auth {};
+		fig::user::auth::UserAuth recovery {};
 
 		unsigned short version { 0 };
 

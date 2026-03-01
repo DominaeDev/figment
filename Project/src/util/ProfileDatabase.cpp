@@ -3,8 +3,8 @@
 #include "fs/FileUtility.h"
 #include <sqlite3.h>
 
-using namespace fig::security;
-using namespace fig::common_util;
+using namespace fig::user::auth;
+using namespace fig::util;
 
 constexpr fig::const_string create_tables =
 	"CREATE TABLE Profiles("
@@ -16,7 +16,7 @@ constexpr fig::const_string create_tables =
 		"recovery BLOB"
 	");";
 
-namespace fig::user
+namespace fig::io
 {
 	ProfileDatabase::ProfileDatabase(fig::path filename) : 
 		_filename { filename }
@@ -111,12 +111,12 @@ namespace fig::user
 		return true;
 	}
 
-	std::expected<std::vector<fig::fs::UserProfile>, DatabaseError> ProfileDatabase::FetchProfiles() noexcept
+	std::expected<std::vector<fig::user::UserProfile>, DatabaseError> ProfileDatabase::FetchProfiles() noexcept
 	{
 		if (!_pDB)
 			return std::unexpected(DatabaseError::NotConnected);
 
-		std::vector<fig::fs::UserProfile> result;
+		std::vector<fig::user::UserProfile> result;
 
 		int rc;
 		auto stmt = _sqlStatements[SQL::FetchProfiles];
@@ -133,16 +133,16 @@ namespace fig::user
 
 			fig::uuid id = fig::uuid::fromStrFactory(pID ? pID : "");
 			std::string name_str(pName ? pName : "");
-			fig::security::UserAuth userAuth {};
-			fig::security::UserAuth recoveryData {};
+			fig::user::auth::UserAuth userAuth {};
+			fig::user::auth::UserAuth recoveryData {};
 
-			if (auth_data && toUZ(auth_size) == sizeof(fig::security::UserAuth))
-				std::memcpy(&userAuth, auth_data, sizeof(fig::security::UserAuth));
+			if (auth_data && toUZ(auth_size) == sizeof(fig::user::auth::UserAuth))
+				std::memcpy(&userAuth, auth_data, sizeof(fig::user::auth::UserAuth));
 			
-			if (recovery_data && toUZ(recovery_size) == sizeof(fig::security::UserAuth))
-				std::memcpy(&recoveryData, recovery_data, sizeof(fig::security::UserAuth));
+			if (recovery_data && toUZ(recovery_size) == sizeof(fig::user::auth::UserAuth))
+				std::memcpy(&recoveryData, recovery_data, sizeof(fig::user::auth::UserAuth));
 
-			fig::fs::UserProfile profile {
+			fig::user::UserProfile profile {
 				.id { std::move(id) },
 				.name { std::move(name_str) },
 				.auth { std::move(userAuth) },
@@ -165,7 +165,7 @@ namespace fig::user
 		return result;
 	}
 
-	DatabaseError ProfileDatabase::CreateProfile(const fig::fs::UserProfile& profile) noexcept
+	DatabaseError ProfileDatabase::CreateProfile(const fig::user::UserProfile& profile) noexcept
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;
@@ -176,8 +176,8 @@ namespace fig::user
 		sqlite3_bind_int(stmt, 2, profile.version);
 		sqlite3_bind_text(stmt, 3, profile.name.c_str(), -1, SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 4, "{}", -1, SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 5, &profile.auth, sizeof(fig::security::UserAuth), SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 6, &profile.recovery, sizeof(fig::security::UserAuth), SQLITE_STATIC);
+		sqlite3_bind_blob(stmt, 5, &profile.auth, sizeof(fig::user::auth::UserAuth), SQLITE_STATIC);
+		sqlite3_bind_blob(stmt, 6, &profile.recovery, sizeof(fig::user::auth::UserAuth), SQLITE_STATIC);
 
 		int rc = sqlite3_step(stmt);
 		sqlite3_reset(stmt);
@@ -191,7 +191,7 @@ namespace fig::user
 		return DatabaseError::NoError;
 	}
 
-	DatabaseError ProfileDatabase::UpdateProfile(const fig::fs::UserProfile& profile) noexcept
+	DatabaseError ProfileDatabase::UpdateProfile(const fig::user::UserProfile& profile) noexcept
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;
@@ -201,7 +201,7 @@ namespace fig::user
 		sqlite3_bind_int(stmt, 1, (int)profile.version);
 		sqlite3_bind_text(stmt, 2, profile.name.c_str(), -1, SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 3, "{}", -1, SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 4, &profile.auth, sizeof(fig::security::UserAuth), SQLITE_STATIC);
+		sqlite3_bind_blob(stmt, 4, &profile.auth, sizeof(fig::user::auth::UserAuth), SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 5, profile.id.str().c_str(), -1, SQLITE_TRANSIENT);
 
 		int rc = sqlite3_step(stmt);
@@ -222,14 +222,14 @@ namespace fig::user
 		return DatabaseError::NoError;
 	}
 
-	DatabaseError ProfileDatabase::UpdateRecovery(const fig::fs::UserProfile& profile) noexcept
+	DatabaseError ProfileDatabase::UpdateRecovery(const fig::user::UserProfile& profile) noexcept
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;
 
 		auto stmt = _sqlStatements[SQL::UpdateProfile];
 
-		sqlite3_bind_blob(stmt, 1, &profile.recovery, sizeof(fig::security::UserAuth), SQLITE_STATIC);
+		sqlite3_bind_blob(stmt, 1, &profile.recovery, sizeof(fig::user::auth::UserAuth), SQLITE_STATIC);
 
 		int rc = sqlite3_step(stmt);
 		sqlite3_reset(stmt);

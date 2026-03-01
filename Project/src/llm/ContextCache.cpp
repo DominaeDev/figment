@@ -9,7 +9,7 @@
 #include <ranges>
 
 using namespace fig::llm;
-using namespace fig::llm_util;
+using namespace fig::llm::util;
 
 ContextCache::ContextCache(int32_t max_size, int32_t n_seq_max) : 
 	_max_size { max_size },

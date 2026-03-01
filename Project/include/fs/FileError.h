@@ -2,14 +2,17 @@
 
 #include <stdint.h>
 
-enum class FileError : uint32_t
+namespace fig::io
 {
-	NoError = 0,
-	FileNotFound,
-	FileAccessError,
-	DirectoryDoesNotExist,
-	UnrecognizedFormat,
-	ReadError,
-	WriteError,
-	ChecksumError,
-};
+	enum class FileError : uint32_t
+	{
+		NoError = 0,
+		FileNotFound,
+		FileAccessError,
+		DirectoryDoesNotExist,
+		UnrecognizedFormat,
+		ReadError,
+		WriteError,
+		ChecksumError,
+	};
+}

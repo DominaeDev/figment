@@ -6,8 +6,8 @@
 #include <algorithm>
 
 using namespace fig::gui;
-using namespace fig::gui_util;
-using namespace fig::string_util;
+using namespace fig::gui::util;
+using namespace fig::util;
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ULL };
 
@@ -1133,7 +1133,7 @@ bool TextBox::HandleMouseMotion(float x, float y)
 	if (bInRect != _bIBeamCursor)
 	{
 		_bIBeamCursor = bInRect;
-		ApplicationState::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
+		Global::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
 	}
 
 	return true;
@@ -1225,7 +1225,7 @@ void TextBox::Paste()
 	{
 		// Only accept the first line of pasted content
 		wstring content = from_utf8(SDL_GetClipboardText());
-		string_util::normalize_newlines(content);
+		normalize_newlines(content);
 		size_t pos_endl = index_of(content, 0, L'\n');
 		if (pos_endl != fig::npos)
 			content.resize(pos_endl);

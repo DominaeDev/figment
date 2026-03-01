@@ -10,10 +10,9 @@
 #include <format>
 #include <cassert>
 
-using namespace fig::string_util;
-using namespace fig::fs;
-using namespace fig::common_util;
+using namespace fig::io;
 using namespace fig::llm;
+using namespace fig::util;
 
 LLMEmbedding::~LLMEmbedding()
 {
@@ -195,7 +194,7 @@ static bool batch_decode(ContextPtr ctx, Batch& batch, float* output, int n_seq,
 		}
 
 		float* out = output + embd_pos * n_embd;
-		fig::llm_util::embd_normalize(embd, out, n_embd, embd_norm);
+		fig::llm::util::embd_normalize(embd, out, n_embd, embd_norm);
 	}
 	return true;
 }
@@ -246,7 +245,7 @@ void LLMEmbedding::CompareSimilarity(const std::vector<float>& vec, size_t n_sen
 		if (embeddings[i].vec.size() != vec.size())
 			continue;
 
-		float similarity = fig::llm_util::embd_similarity_cos(embeddings[i].vec, vec, (int32_t)vec.size());
+		float similarity = fig::llm::util::embd_similarity_cos(embeddings[i].vec, vec, (int32_t)vec.size());
 
 		fig::string content = embeddings[i].content;
 		if (content.size() > MaxLength)

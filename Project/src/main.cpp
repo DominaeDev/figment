@@ -51,7 +51,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 	}
 
-	AppState* pAppState = ApplicationState::CreateState();
+	auto pAppState = fig::Global::CreateState();
 	if (!pAppState)
 		return SDL_APP_FAILURE;
 	*ppAppState = pAppState;
@@ -62,7 +62,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 /* This function runs when a new event (mouse input, keypresses, etc) occurs. */
 SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 {
-	AppState* pAppState = static_cast<AppState*>(state);
+	fig::AppState* pAppState = static_cast<fig::AppState*>(state);
 
 	if (event->type == SDL_EVENT_QUIT)
 	{
@@ -81,7 +81,7 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 
 SDL_AppResult SDL_AppIterate(void* state)
 {
-	AppState* pAppState = static_cast<AppState*>(state);
+	fig::AppState* pAppState = static_cast<fig::AppState*>(state);
     static Uint64 lastTick = 0;
     Uint64 now = SDL_GetTicks();
     Uint64 delta = now - lastTick;
@@ -106,7 +106,7 @@ SDL_AppResult SDL_AppIterate(void* state)
     if (now_ns - last > 999999999) 
 	{
         last = now_ns;
-		ApplicationState::GetMainWindow().SetTitle(std::format("{} {} fps", fig::strings::ApplicationTitle, accu));
+		fig::Global::GetMainWindow().SetTitle(std::format("{} {} fps", fig::strings::ApplicationTitle, accu));
         accu = 0;
     }
     past = now_ns;
@@ -119,7 +119,7 @@ SDL_AppResult SDL_AppIterate(void* state)
 void SDL_AppQuit(void* state, SDL_AppResult result)
 {
 	Fonts::ReleaseFonts();
-	ApplicationState::ReleaseState();
+	fig::Global::ReleaseState();
 
 	TTF_Quit();
 	SDL_Quit();

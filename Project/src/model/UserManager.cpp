@@ -16,10 +16,11 @@
 #include "model/AssetManager.h"
 #include "model/GlobalStrings.h"
 
-using namespace fig::security;
-using namespace fig::common_util;
+using namespace fig::io;
+using namespace fig::user::auth;
+using namespace fig::util;
 
-namespace fig::fs
+namespace fig::user
 {
 	static Bit128 kDefaultAuthKey { 
 		fig::byte { 0xA1 }, fig::byte { 0xB2 }, fig::byte { 0xC3 }, fig::byte { 0xD4 }, fig::byte { 0xE5 }, fig::byte { 0xF6 }, fig::byte { 0xAB }, fig::byte { 0xCD },
@@ -304,10 +305,10 @@ namespace fig::fs
 		return static_cast<ContentDatabase&>(*_pContentDatabase);
 	}
 
-	fig::user::ProfileDatabase& UserManager::GetDatabase() noexcept
+	fig::io::ProfileDatabase& UserManager::GetDatabase() noexcept
 	{
 		if (!_pProfileDB)
-			_pProfileDB = std::make_unique<fig::user::ProfileDatabase>(fig::path(std::format("{}/{}.{}", Constants::Paths::ProfilesFolder, Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt)));
+			_pProfileDB = std::make_unique<fig::io::ProfileDatabase>(fig::path(std::format("{}/{}.{}", Constants::Paths::ProfilesFolder, Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt)));
 		return *_pProfileDB.get();
 	}
 

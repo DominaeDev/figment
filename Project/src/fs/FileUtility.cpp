@@ -5,9 +5,9 @@
 #include <spng.h>
 #include <fstream>
 
-using namespace fig::string_util;
+using namespace fig::util;
 
-namespace fig::fs
+namespace fig::io
 {
 	std::expected<fig::bytes, FileError> ReadFile(fig::path filename)
 	{
@@ -128,7 +128,7 @@ namespace fig::fs
 
 	fig::string GetFileExt(fig::path filename)
 	{
-		return string_util::lcase(fig::path(filename).extension().u8string());
+		return lcase(fig::path(filename).extension().u8string());
 	}
 
 	using sPngCtx = stdex::c_resource<spng_ctx, spng_ctx_new, spng_ctx_free>;
@@ -175,7 +175,7 @@ namespace fig::fs
 
 		if (bDecodeBase64)
 		{
-			auto decoded = fig::common_util::Base64Decode(content);
+			auto decoded = fig::util::Base64Decode(content);
 			content.assign(reinterpret_cast<const char*>(decoded.data()), decoded.size());
 		}
 
@@ -214,7 +214,7 @@ namespace fig::fs
 		fig::string content { itFind->text };
 		if (bDecodeBase64)
 		{
-			auto decoded = fig::common_util::Base64Decode(content);
+			auto decoded = fig::util::Base64Decode(content);
 			content.assign(reinterpret_cast<const char*>(decoded.data()), decoded.size());
 		}
 

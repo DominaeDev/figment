@@ -5,198 +5,200 @@
 #include "gui/Sizer.h"
 #include "gui/CustomRenderer.h"
 
-using namespace fig::gui;
-using namespace fig::gui_util;
+using namespace fig::gui::util;
 
-Control::Control(Control* pParent)
+namespace fig::gui
 {
-	if (pParent)
-		pParent->AddChild(this);
-	_pParent = pParent;
-}
-
-Control::Control(Control* pParent, Window* pHostWindow) : Control(pParent)
-{
-	_renderContext = ControlRenderContext {
-		.pWindow = pHostWindow->GetSDLWindow().get(),
-		.pRenderer = pHostWindow->GetSDLRenderer().get(),
-		.pTextEngine = pHostWindow->GetSDLTextEngine().get(),
-	};
-}
-
-Control::~Control()
-{
-	delete _pBGRenderer;
-}
-
-void Control::Update(float fDeltaTime)
-{
-	if (_bInvalidLayout)
-		Layout();
-
-	// Update this
-	OnUpdate(fDeltaTime);
-
-	// Update children
-	for (auto& child : _children)
-		child->Update(fDeltaTime);
-}
-
-void Control::Render(Renderer* pRenderer)
-{
-	if (!_bVisible)
-		return;
-
-	static Rect* s_pClippingRect = nullptr;
-	Rect* lastClippingRect = s_pClippingRect;
-	Rect clippingRect;
-	Rect cullingRect = gui_util::expand_rect(gui_util::to_rect(GetRect()), 64);
-
-	if (_bClipping)
+	Control::Control(Control* pParent)
 	{
-		Rect rect { (int)_rect.x, (int)_rect.y, (int)_rect.w, (int)_rect.h };
-		if (s_pClippingRect)
-			SDL_GetRectIntersection(s_pClippingRect, &rect, &clippingRect);
-		else
-			clippingRect = rect;
-
-		if (SDL_SetRenderClipRect(pRenderer, &clippingRect))
-			s_pClippingRect = &clippingRect;
+		if (pParent)
+			pParent->AddChild(this);
+		_pParent = pParent;
 	}
 
-	// Draw this
-	OnRender(pRenderer);
-
-	// Draw children
-	for (auto& child : _children)
+	Control::Control(Control* pParent, Window* pHostWindow) : Control(pParent)
 	{
-		auto renderable = dynamic_cast<Control*>(child);
-		if (renderable)
+		_renderContext = ControlRenderContext {
+			.pWindow = pHostWindow->GetSDLWindow().get(),
+			.pRenderer = pHostWindow->GetSDLRenderer().get(),
+			.pTextEngine = pHostWindow->GetSDLTextEngine().get(),
+		};
+	}
+
+	Control::~Control()
+	{
+		delete _pBGRenderer;
+	}
+
+	void Control::Update(float fDeltaTime)
+	{
+		if (_bInvalidLayout)
+			Layout();
+
+		// Update this
+		OnUpdate(fDeltaTime);
+
+		// Update children
+		for (auto& child : _children)
+			child->Update(fDeltaTime);
+	}
+
+	void Control::Render(Renderer* pRenderer)
+	{
+		if (!_bVisible)
+			return;
+
+		static Rect* s_pClippingRect = nullptr;
+		Rect* lastClippingRect = s_pClippingRect;
+		Rect clippingRect;
+		Rect cullingRect = expand_rect(to_rect(GetRect()), 64);
+
+		if (_bClipping)
 		{
-			if (_bCulling)
+			Rect rect { (int)_rect.x, (int)_rect.y, (int)_rect.w, (int)_rect.h };
+			if (s_pClippingRect)
+				SDL_GetRectIntersection(s_pClippingRect, &rect, &clippingRect);
+			else
+				clippingRect = rect;
+
+			if (SDL_SetRenderClipRect(pRenderer, &clippingRect))
+				s_pClippingRect = &clippingRect;
+		}
+
+		// Draw this
+		OnRender(pRenderer);
+
+		// Draw children
+		for (auto& child : _children)
+		{
+			auto renderable = dynamic_cast<Control*>(child);
+			if (renderable)
 			{
-				auto childRect = gui_util::to_rect(renderable->GetRect());
-				if (!SDL_HasRectIntersection(&cullingRect, &childRect))
-					continue;
+				if (_bCulling)
+				{
+					auto childRect = to_rect(renderable->GetRect());
+					if (!SDL_HasRectIntersection(&cullingRect, &childRect))
+						continue;
+				}
+
+				renderable->Render(pRenderer);
+				renderable->OnPostRender();
 			}
-			
-			renderable->Render(pRenderer);
-			renderable->OnPostRender();
+		}
+
+		if (_bClipping)
+		{
+			s_pClippingRect = lastClippingRect;
+			SDL_SetRenderClipRect(pRenderer, s_pClippingRect);
 		}
 	}
 
-	if (_bClipping)
+	void Control::OnRender(Renderer* pRenderer)
 	{
-		s_pClippingRect = lastClippingRect;
-		SDL_SetRenderClipRect(pRenderer, s_pClippingRect);
-	}
-}
-
-void Control::OnRender(Renderer* pRenderer)
-{
-	DrawBackground(pRenderer);
-	DrawBorder(pRenderer);
-}
-
-void Control::DrawBorder(Renderer* pRenderer)
-{
-	// Custom renderer
-	if (_pBorderRenderer)
-	{
-		_pBorderRenderer->Render(pRenderer, _rect);
-		return;
+		DrawBackground(pRenderer);
+		DrawBorder(pRenderer);
 	}
 
-	if (!is_defined(_borderColor))
-		return;
-	
-	SDL_SetRenderDrawColor(pRenderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
-	SDL_RenderRect(pRenderer, &_rect);
-}
-
-Color Control::GetForegroundColor() const
-{
-	if (!is_defined(_foregroundColor))
+	void Control::DrawBorder(Renderer* pRenderer)
 	{
-		auto frameParent = dynamic_cast<Control*>(_pParent);
-		return frameParent ? frameParent->GetForegroundColor() : Color();
-	}
-	return _foregroundColor;
-}
+		// Custom renderer
+		if (_pBorderRenderer)
+		{
+			_pBorderRenderer->Render(pRenderer, _rect);
+			return;
+		}
 
-Color Control::GetBackgroundColor() const
-{
-	if (!is_defined(_backgroundColor))
-	{
-		auto parentControl = dynamic_cast<Control*>(_pParent);
-		return parentControl ? parentControl->GetBackgroundColor() : Color();
-	}
-	return _backgroundColor;
-}
+		if (!is_defined(_borderColor))
+			return;
 
-void Control::DrawBackground(Renderer* pRenderer)
-{
-	// Custom renderer
-	if (_pBGRenderer)
-	{
-		_pBGRenderer->Render(pRenderer, _rect);
-		return;
+		SDL_SetRenderDrawColor(pRenderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
+		SDL_RenderRect(pRenderer, &_rect);
 	}
 
-	auto bgColor = GetBackgroundColor();
-	if (is_defined(bgColor) && bgColor.a != 0)
+	Color Control::GetForegroundColor() const
 	{
-		SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
-		SDL_RenderFillRect(pRenderer, &_rect);
-	}
-}
-
-void Control::OnParent()
-{
-	LayoutElement::OnParent();
-
-	auto pParent = dynamic_cast<Control*>(_pParent);
-	if (pParent)
-	{
-		_renderContext = pParent->_renderContext;
-
 		if (!is_defined(_foregroundColor))
-			_foregroundColor = pParent->GetForegroundColor();
+		{
+			auto frameParent = dynamic_cast<Control*>(_pParent);
+			return frameParent ? frameParent->GetForegroundColor() : Color();
+		}
+		return _foregroundColor;
+	}
+
+	Color Control::GetBackgroundColor() const
+	{
 		if (!is_defined(_backgroundColor))
-			_backgroundColor = pParent->GetBackgroundColor();
+		{
+			auto parentControl = dynamic_cast<Control*>(_pParent);
+			return parentControl ? parentControl->GetBackgroundColor() : Color();
+		}
+		return _backgroundColor;
 	}
-}
 
-bool Control::ProcessEvent(Event& event)
-{
-	if (OnEvent(event))
-		return true;
-
-	for (auto it = _children.begin(); it != std::end(_children); ++it)
+	void Control::DrawBackground(Renderer* pRenderer)
 	{
-		Control* pControl = dynamic_cast<Control*>(*it);
-		if (pControl && pControl->ProcessEvent(event))
+		// Custom renderer
+		if (_pBGRenderer)
+		{
+			_pBGRenderer->Render(pRenderer, _rect);
+			return;
+		}
+
+		auto bgColor = GetBackgroundColor();
+		if (is_defined(bgColor) && bgColor.a != 0)
+		{
+			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
+			SDL_RenderFillRect(pRenderer, &_rect);
+		}
+	}
+
+	void Control::OnParent()
+	{
+		LayoutElement::OnParent();
+
+		auto pParent = dynamic_cast<Control*>(_pParent);
+		if (pParent)
+		{
+			_renderContext = pParent->_renderContext;
+
+			if (!is_defined(_foregroundColor))
+				_foregroundColor = pParent->GetForegroundColor();
+			if (!is_defined(_backgroundColor))
+				_backgroundColor = pParent->GetBackgroundColor();
+		}
+	}
+
+	bool Control::ProcessEvent(Event& event)
+	{
+		if (OnEvent(event))
 			return true;
-	}
-	return false;
-}
 
-void Control::SetBackgroundRenderer(CustomRenderer* pCustom)
-{
-	if (_pBGRenderer != nullptr)
-	{
-		delete _pBGRenderer;
-		_pBGRenderer = nullptr;
+		for (auto it = _children.begin(); it != std::end(_children); ++it)
+		{
+			Control* pControl = dynamic_cast<Control*>(*it);
+			if (pControl && pControl->ProcessEvent(event))
+				return true;
+		}
+		return false;
 	}
-	_pBGRenderer = pCustom;
-}
 
-void Control::SetBorderRenderer(CustomRenderer* pCustom)
-{
-	if (_pBorderRenderer != nullptr)
+	void Control::SetBackgroundRenderer(CustomRenderer* pCustom)
 	{
-		delete _pBorderRenderer;
-		_pBorderRenderer = nullptr;
+		if (_pBGRenderer != nullptr)
+		{
+			delete _pBGRenderer;
+			_pBGRenderer = nullptr;
+		}
+		_pBGRenderer = pCustom;
 	}
-	_pBorderRenderer = pCustom;
+
+	void Control::SetBorderRenderer(CustomRenderer* pCustom)
+	{
+		if (_pBorderRenderer != nullptr)
+		{
+			delete _pBorderRenderer;
+			_pBorderRenderer = nullptr;
+		}
+		_pBorderRenderer = pCustom;
+	}
 }

@@ -3,8 +3,9 @@
 #include "fs/FileUtility.h"
 #include <sqlite3.h>
 
-using namespace fig::security;
-using namespace fig::common_util;
+using namespace fig::user::auth;
+using namespace fig::util;
+using namespace fig::io::data;
 
 constexpr fig::const_string create_tables =
 	"CREATE TABLE Assets("
@@ -16,7 +17,7 @@ constexpr fig::const_string create_tables =
 		"updatedAt DATETIME NOT NULL DEFAULT(CURRENT_TIMESTAMP)"
 	");";
 
-namespace fig::fs
+namespace fig::io
 {
 	AssetDatabase::AssetDatabase(fig::path filename) :
 		_filename { filename }

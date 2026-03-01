@@ -6,7 +6,7 @@
 #include "Types.h"
 #include "gui/GUITypes.h"
 
-namespace fig::data
+namespace fig::io::data
 {
 	struct CharacterProperty
 	{

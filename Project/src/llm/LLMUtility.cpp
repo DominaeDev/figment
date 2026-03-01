@@ -12,9 +12,8 @@
 #include <set>
 
 using namespace fig::llm;
-using namespace fig::common_util;
-using namespace fig::string_util;
-using namespace fig::fs;
+using namespace fig::util;
+using namespace fig::io;
 
 static std::vector<fig::string> const opening_tags {
 	std::format("<{0}=\"", Constants::Chat::DialogueTag),
@@ -32,7 +31,7 @@ static std::vector<fig::string> const closing_tags {
 	std::format("</{0}>", Constants::Chat::DirectionTag),
 };
 
-namespace fig::llm_util
+namespace fig::llm::util
 {
 	size_t string_find_partial_stop(const fig::string& str, const fig::string& stop)
 	{

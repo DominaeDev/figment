@@ -5,7 +5,7 @@
 #include "util/Lockable.h"
 
 using namespace fig::llm;
-using namespace fig::common_util;
+using namespace fig::util;
 
 using namespace std::chrono_literals;
 

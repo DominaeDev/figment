@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace fig::llm_util
+namespace fig::llm::util
 {
 	size_t string_find_partial_stop(const fig::string& str, const fig::string& stop);
 	size_t find_one_of(const fig::string& text, const std::vector<fig::string>& words);

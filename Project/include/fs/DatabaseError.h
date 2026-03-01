@@ -2,11 +2,14 @@
 
 #include <stdint.h>
 
-enum class DatabaseError : uint32_t
+namespace fig::io
 {
-	NoError = 0,
-	NotConnected,
-	ZeroChanges,
-	FailedContraint,
-	SQLError,
-};
+	enum class DatabaseError : uint32_t
+	{
+		NoError = 0,
+		NotConnected,
+		ZeroChanges,
+		FailedContraint,
+		SQLError,
+	};
+}

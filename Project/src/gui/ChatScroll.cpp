@@ -12,10 +12,10 @@
 #include <set>
 
 using namespace fig::gui;
-using namespace fig::gui_util;
-using namespace fig::string_util;
+using namespace fig::gui::util;
+using namespace fig::util;
 using namespace fig::llm;
-using namespace fig::data;
+using namespace fig::io::data;
 
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f
@@ -199,7 +199,7 @@ void ChatScroll::EnablePolling(bool bEnable)
 
 void ChatScroll::Poll()
 {
-	auto pLLM = ApplicationState::GetLLMInstance();
+	auto pLLM = Global::GetLLMInstance();
 	if (!pLLM)
 		return;
 
@@ -320,7 +320,7 @@ void ChatScroll::OnAddedChild(LayoutElement* pChild)
 
 void ChatScroll::RefreshActive()
 {
-	auto pLLM = ApplicationState::GetLLMInstance();
+	auto pLLM = Global::GetLLMInstance();
 	if (!pLLM)
 		return;
 

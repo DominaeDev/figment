@@ -14,14 +14,13 @@
 #include "fs/FileUtility.h"
 #include "fs/CardImporter.h"
 
-using namespace fig::data;
-using namespace fig::common_util;
-using namespace fig::string_util;
-using namespace fig::gui_util;
+using namespace fig::io::data;
+using namespace fig::util;
+using namespace fig::gui::util;
 
-namespace fig::fs
+namespace fig::io
 {
-	AssetManager::AssetManager(const UserManager& userMngr)
+	AssetManager::AssetManager(const fig::user::UserManager& userMngr)
 	{
 		auto const& profile = userMngr.GetActiveProfile();
 		_profileAuthKey = userMngr.GetActiveAuthKey();
@@ -54,8 +53,8 @@ namespace fig::fs
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
 		asset.file_status = AssetFileStatus::PartiallyLoaded;
-		asset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
-		asset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
+		asset.SetMeta(MetaTag::CreatedAt, util::utc_now());
+		asset.SetMeta(MetaTag::UpdatedAt, util::utc_now());
 		return asset;
 	}
 
@@ -69,8 +68,8 @@ namespace fig::fs
 		asset.data = std::move(data); // Move data
 		asset.data_format = format;
 		asset.file_status = AssetFileStatus::PartiallyLoaded;
-		asset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
-		asset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
+		asset.SetMeta(MetaTag::CreatedAt, util::utc_now());
+		asset.SetMeta(MetaTag::UpdatedAt, util::utc_now());
 		return asset;
 	}
 
@@ -83,8 +82,8 @@ namespace fig::fs
 		asset.asset_type = type;
 		asset.data_format = format;
 		asset.file_status = AssetFileStatus::PartiallyLoaded;
-		asset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
-		asset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
+		asset.SetMeta(MetaTag::CreatedAt, util::utc_now());
+		asset.SetMeta(MetaTag::UpdatedAt, util::utc_now());
 
 		// Copy data
 		asset.data.resize(data.size());
@@ -142,7 +141,7 @@ namespace fig::fs
 	{
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend())
-			return std::make_optional<AssetRef>(static_cast<Asset&>(itFind->second));
+			return std::make_optional<AssetRef>(static_cast<Asset&>(std::ref(itFind->second)));
 		return std::nullopt;
 	}
 
@@ -154,8 +153,9 @@ namespace fig::fs
 					and kvp.second.asset_type == AssetType::Image 
 					and kvp.second.asset_subtype == static_cast<uint8_t>(imageType);
 			});
+
 		if (itFind != _assets.cend())
-			return std::make_optional<AssetRef>(static_cast<Asset&>(itFind->second));
+			return std::make_optional<AssetRef>(static_cast<Asset&>(std::ref(itFind->second)));
 		return std::nullopt;
 	}
 
@@ -303,7 +303,7 @@ namespace fig::fs
 		// Load scenario image
 		if (not empty_or_whitespace(scenario.imageFilename))
 		{
-			if (auto file = fig::fs::ReadFile(filename.parent_path() / scenario.imageFilename))
+			if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
 			{
 				// Create portrait asset
 				auto& scenarioImageAsset = CreateImageAsset(ImageType::Unspecified, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
@@ -407,7 +407,7 @@ namespace fig::fs
 
 		for (auto& filename : files)
 		{
-			auto try_character = ImportCharacter(filename, fig::fs::AssetManager::CharacterDataFormat::TavernV2);
+			auto try_character = ImportCharacter(filename, fig::io::AssetManager::CharacterDataFormat::TavernV2);
 			if (not try_character.has_value())
 				continue;
 
@@ -418,7 +418,7 @@ namespace fig::fs
 			auto& characterAsset = CreateAsset(AssetType::Character, DataFormat::DataXml, characterData, _profileID);
 
 			// Load portrait image(s)
-			if (auto file = fig::fs::ReadFile(filename))
+			if (auto file = fig::io::ReadFile(filename))
 			{
 				// Create portrait asset
 				auto& portraitAsset = CreateImageAsset(ImageType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);

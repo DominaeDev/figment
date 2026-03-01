@@ -5,7 +5,7 @@
 #include "Types.h"
 #include "model/ChatOptions.h"
 
-namespace fig::data
+namespace fig::io::data
 {
 	class ScenarioData
 	{

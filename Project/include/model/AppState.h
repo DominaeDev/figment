@@ -17,7 +17,7 @@ namespace fig::gui
 	class Window;
 }
 
-namespace fig::fs
+namespace fig::user
 {
 	class UserManager;
 }
@@ -28,34 +28,38 @@ namespace fig::llm
 	class LLMInstance;
 }
 
-class ApplicationState
+namespace fig
 {
-public:
-	struct State
+	class Global
 	{
-		std::shared_ptr<fig::gui::Window> pMainWindow;
-		std::shared_ptr<fig::llm::LLMBackend> pLLMEngine;
-		std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
-		std::shared_ptr<fig::fs::UserManager> pUserManager;
+	public:
+		struct State
+		{
+			std::shared_ptr<fig::gui::Window> pMainWindow;
+			std::shared_ptr<fig::llm::LLMBackend> pLLMEngine;
+			std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
+			std::shared_ptr<fig::user::UserManager> pUserManager;
+		};
+
+		static State* CreateState();
+		static void ReleaseState();
+
+		static fig::gui::Window& GetMainWindow();
+		static fig::llm::LLMBackend& GetLLMEngine();
+		static fig::user::UserManager& GetUserManager();
+
+		[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
+		static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);
+
+		static void SetCursor(SDL_SystemCursor cursor);
+
+	private:
+		static State* __appState;
+		static SDL_Cursor* _pIBeamCursor;
 	};
 
-	static State* CreateState();
-	static void ReleaseState();
+	using AppState = Global::State;
+}
 
-	static fig::gui::Window& GetMainWindow();
-	static fig::llm::LLMBackend& GetLLMEngine();
-	static fig::fs::UserManager& GetUserManager();
-
-	[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
-	static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);
-
-	static void SetCursor(SDL_SystemCursor cursor);
-
-private:
-	static State* __appState;
-	static SDL_Cursor* _pIBeamCursor;
-};
-
-typedef ApplicationState::State AppState;
 
 #endif

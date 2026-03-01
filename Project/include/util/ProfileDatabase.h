@@ -10,7 +10,7 @@
 struct sqlite3;
 struct sqlite3_stmt;
 
-namespace fig::user
+namespace fig::io
 {
 	class ProfileDatabase
 	{
@@ -18,10 +18,10 @@ namespace fig::user
 		ProfileDatabase(fig::path filename);
 		virtual ~ProfileDatabase();
 
-		std::expected<std::vector<fig::fs::UserProfile>, DatabaseError> FetchProfiles() noexcept;
-		DatabaseError CreateProfile(const fig::fs::UserProfile& profile) noexcept;
-		DatabaseError UpdateProfile(const fig::fs::UserProfile& profile) noexcept;
-		DatabaseError UpdateRecovery(const fig::fs::UserProfile& profile) noexcept;
+		std::expected<std::vector<fig::user::UserProfile>, DatabaseError> FetchProfiles() noexcept;
+		DatabaseError CreateProfile(const fig::user::UserProfile& profile) noexcept;
+		DatabaseError UpdateProfile(const fig::user::UserProfile& profile) noexcept;
+		DatabaseError UpdateRecovery(const fig::user::UserProfile& profile) noexcept;
 		DatabaseError DeleteProfile(const fig::uuid& id) noexcept;
 		
 		bool IsConnected() const noexcept { return _pDB != nullptr; }

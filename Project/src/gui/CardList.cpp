@@ -8,7 +8,7 @@
 #include "model/AssetManager.h"
 #include "fs/Serialization.h"
 
-using namespace fig::fs;
+using namespace fig::io;
 
 namespace fig::gui
 {
@@ -29,8 +29,8 @@ namespace fig::gui
 	void CardList::CreateCards(CardType cardType)
 	{
 		// Create cards
-		auto& assets = ApplicationState::GetUserManager().GetProfileAssets();
-		const auto& profileId = ApplicationState::GetUserManager().GetActiveProfile().id;
+		auto& assets = Global::GetUserManager().GetProfileAssets();
+		const auto& profileId = Global::GetUserManager().GetActiveProfile().id;
 
 		RemoveChildren(true);
 

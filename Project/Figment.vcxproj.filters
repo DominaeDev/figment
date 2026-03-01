@@ -126,14 +126,14 @@
     <Filter Include="Source Files\AppModel\Data\Character">
       <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\Authentication">
-      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\User">
       <UniqueIdentifier>{8e498fb3-7b47-4628-ba65-d85fd8f6c436}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\User\Assets">
+    <Filter Include="Source Files\Frontend\FileSystem\Assets">
       <UniqueIdentifier>{267bc7c3-9a6f-4e7d-a7aa-d92284a5b061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\User\Authentication">
+      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -321,10 +321,10 @@
       <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Hash.cpp">
-      <Filter>Source Files\Frontend\Authentication</Filter>
+      <Filter>Source Files\Frontend\User\Authentication</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Security.cpp">
-      <Filter>Source Files\Frontend\Authentication</Filter>
+      <Filter>Source Files\Frontend\User\Authentication</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HomeFrame.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
@@ -407,20 +407,20 @@
     <ClCompile Include="src\model\UserManager.cpp">
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\ContentDatabase.cpp">
-      <Filter>Source Files\Frontend\User</Filter>
+    <ClCompile Include="src\model\Asset.cpp">
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\AssetManager.cpp">
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fs\AssetDatabase.cpp">
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\util\ProfileDatabase.cpp">
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\Asset.cpp">
-      <Filter>Source Files\Frontend\User\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\AssetManager.cpp">
-      <Filter>Source Files\Frontend\User\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\AssetDatabase.cpp">
-      <Filter>Source Files\Frontend\User\Assets</Filter>
+    <ClCompile Include="src\model\ContentDatabase.cpp">
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -917,10 +917,10 @@
       <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Hash.h">
-      <Filter>Source Files\Frontend\Authentication</Filter>
+      <Filter>Source Files\Frontend\User\Authentication</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Security.h">
-      <Filter>Source Files\Frontend\Authentication</Filter>
+      <Filter>Source Files\Frontend\User\Authentication</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Screen.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
@@ -1009,26 +1009,26 @@
     <ClInclude Include="include\model\UserManager.h">
       <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\ContentDatabase.h">
-      <Filter>Source Files\Frontend\User</Filter>
-    </ClInclude>
     <ClInclude Include="include\model\UserProfile.h">
-      <Filter>Source Files\Frontend\User</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\ProfileDatabase.h">
       <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
     <ClInclude Include="include\fs\DatabaseError.h">
       <Filter>Source Files\Frontend\FileSystem</Filter>
     </ClInclude>
     <ClInclude Include="include\model\Asset.h">
-      <Filter>Source Files\Frontend\User\Assets</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\model\AssetManager.h">
-      <Filter>Source Files\Frontend\User\Assets</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\fs\AssetDatabase.h">
-      <Filter>Source Files\Frontend\User\Assets</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\ProfileDatabase.h">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ContentDatabase.h">
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

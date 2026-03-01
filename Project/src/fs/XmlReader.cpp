@@ -6,7 +6,7 @@
 
 using namespace tinyxml2;
 
-namespace fig::fs
+namespace fig::io
 {
 	XmlReaderAttribute::XmlReaderAttribute(const tinyxml2::XMLAttribute* pAttribute) noexcept :
 		_pAttrib { pAttribute }
@@ -66,7 +66,7 @@ namespace fig::fs
 		if (_pAttrib)
 		{
 			const char* value = _pAttrib->Value();
-			return value ? std::make_optional(common_util::Base64Decode(value)) : std::nullopt;
+			return value ? std::make_optional(util::Base64Decode(value)) : std::nullopt;
 		}
 		return std::nullopt;
 	}
@@ -182,7 +182,7 @@ namespace fig::fs
 	std::optional<fig::bytes> XmlReaderElement::GetBytes() const noexcept
 	{
 		const char* value = _pElement->GetText();
-		return value ? std::make_optional(common_util::Base64Decode(value)) : std::nullopt;
+		return value ? std::make_optional(util::Base64Decode(value)) : std::nullopt;
 	}
 
 	std::optional<fig::uuid> XmlReaderElement::GetUUID() const noexcept
@@ -257,7 +257,7 @@ namespace fig::fs
 		{
 			auto value = elem.value().GetText();
 			if (value.has_value())
-				return std::make_optional(common_util::Base64Decode(value.value()));
+				return std::make_optional(util::Base64Decode(value.value()));
 		}
 		return std::nullopt;
 	}

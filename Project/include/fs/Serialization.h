@@ -11,10 +11,13 @@
 #include <chrono>
 #include <expected>
 
-namespace fig::fs
+namespace fig::user
 {
 	struct UserProfile;
+}
 
+namespace fig::io::data
+{
 	struct VersionNumber
 	{
 		uint8_t major { 0 };
@@ -83,8 +86,8 @@ namespace fig::fs
 
 	enum class FileHeaderFlag : uint8_t
 	{
-		Encrypted	= 1 << 0,
-		Checksum	= 1 << 1,
+		Encrypted = 1 << 0,
+		Checksum = 1 << 1,
 	};
 	using FileHeaderFlags = EnumFlags<FileHeaderFlag>;
 
@@ -105,17 +108,17 @@ namespace fig::fs
 
 	enum class MetaTag : uint8_t
 	{
-		Unknown					= 0x00,
-		CreatedAt				= 0x01,	// utc
-		UpdatedAt				= 0x02,	// utc
-		Version					= 0x03,
-		Checksum				= 0x04,
+		Unknown = 0x00,
+		CreatedAt = 0x01,	// utc
+		UpdatedAt = 0x02,	// utc
+		Version = 0x03,
+		Checksum = 0x04,
 
-		ImageWidth				= 0x10,
-		ImageHeight				= 0x11,
-		ImageFormatDepth		= 0x12,
+		ImageWidth = 0x10,
+		ImageHeight = 0x11,
+		ImageFormatDepth = 0x12,
 
-		ReferenceToOriginal		= 0x40,
+		ReferenceToOriginal = 0x40,
 	};
 
 	using _meta_identifier = std::array<uint64_t, 2>;
@@ -123,19 +126,19 @@ namespace fig::fs
 
 	enum class MetaValueType : uint8_t
 	{
-		Boolean		= 0x00,
-		UChar		= 0x01,
-		UShort		= 0x02,
-		Integer		= 0x03,
-		Float		= 0x04,
+		Boolean = 0x00,
+		UChar = 0x01,
+		UShort = 0x02,
+		Integer = 0x03,
+		Float = 0x04,
 
-		String		= 0x08,
-		TimeStamp	= 0x10,
-		Identifier	= 0x40,
+		String = 0x08,
+		TimeStamp = 0x10,
+		Identifier = 0x40,
 
-		Unknown		= 0xFF,
+		Unknown = 0xFF,
 	};
-	
+
 	constexpr MetaValueType get_meta_type(MetaTag tag) noexcept
 	{
 		switch (tag)
@@ -167,9 +170,9 @@ namespace fig::fs
 	{
 		fig::uuid asset_id {};
 		fig::uuid parent_id {};
-		uint8_t asset_type {0};
-		uint8_t asset_subtype {0};
-		uint8_t data_format {0};
+		uint8_t asset_type { 0 };
+		uint8_t asset_subtype { 0 };
+		uint8_t data_format { 0 };
 
 		fig::bytes data {};
 		size_t data_length {};
@@ -208,7 +211,7 @@ namespace fig::fs
 				return ts;
 			return fig::timestamp { 0 };
 		}
-		
+
 		fig::timestamp GetUpdatedAt() const noexcept
 		{
 			fig::timestamp ts;
@@ -219,10 +222,10 @@ namespace fig::fs
 
 		fig::string GetFileName() const noexcept
 		{
-			return std::format("{0}.{1}", 
+			return std::format("{0}.{1}",
 				asset_id.str()
-					| std::ranges::views::filter([](char c) { return c != '-'; })
-					| std::ranges::to<fig::string>(),
+				| std::ranges::views::filter([](char c) { return c != '-'; })
+				| std::ranges::to<fig::string>(),
 				fig::string(Constants::Paths::AssetFileExt));
 		}
 
@@ -237,21 +240,24 @@ namespace fig::fs
 		uint16_t profile_version { 0 };
 		uint64_t profile_id[2];
 
-		fig::security::AuthChallenge recovery_challenge {};
-		fig::security::AuthChallenge auth_challenge {};
-		fig::security::AuthSalt auth_salt {};
+		fig::user::auth::AuthChallenge recovery_challenge {};
+		fig::user::auth::AuthChallenge auth_challenge {};
+		fig::user::auth::AuthSalt auth_salt {};
 	};
+}
 
+namespace fig::io
+{
 	class BinaryReader
 	{
 		BinaryReader() = delete;
 	public:
-		explicit BinaryReader(const fig::path& directory, fig::security::AuthKey key) noexcept;
-		std::expected<AssetFile, FileError> ReadFile(const fig::path& filename, bool read_data = true) noexcept;
+		explicit BinaryReader(const fig::path& directory, fig::user::auth::AuthKey key) noexcept;
+		std::expected<fig::io::data::AssetFile, FileError> ReadFile(const fig::path& filename, bool read_data = true) noexcept;
 
 	private:
 		fig::path _directory {};
-		fig::security::AuthKey _authKey {};
+		fig::user::auth::AuthKey _authKey {};
 	};
 
 	class BinaryWriter
@@ -259,14 +265,14 @@ namespace fig::fs
 		BinaryWriter() = delete;
 	public:
 		explicit BinaryWriter(const fig::path& directory) noexcept;
-		explicit BinaryWriter(const fig::path& directory, fig::security::AuthKey key) noexcept;
-		FileError WriteFile(const AssetFile& file) noexcept;
+		explicit BinaryWriter(const fig::path& directory, fig::user::auth::AuthKey key) noexcept;
+		FileError WriteFile(const fig::io::data::AssetFile& file) noexcept;
 
-		static FileError WriteRecoveryFile(const fig::fs::UserProfile& profile, const fig::security::AuthChallenge& recoveryChallenge) noexcept;
+		static FileError WriteRecoveryFile(const fig::user::UserProfile& profile, const fig::user::auth::AuthChallenge& recoveryChallenge) noexcept;
 
 	private:
 		fig::path _directory {};
-		fig::security::AuthKey _authKey {};
+		fig::user::auth::AuthKey _authKey {};
 	};
 }
 

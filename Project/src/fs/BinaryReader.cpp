@@ -3,9 +3,11 @@
 #include <Crc32.h>
 #include <format>
 
-namespace fig::fs
+using namespace fig::io::data;
+
+namespace fig::io
 {
-	BinaryReader::BinaryReader(const fig::path& directory, fig::security::AuthKey key) noexcept :
+	BinaryReader::BinaryReader(const fig::path& directory, fig::user::auth::AuthKey key) noexcept :
 		_directory { directory },
 		_authKey { key }
 	{
@@ -96,14 +98,14 @@ namespace fig::fs
 		return true;
 	}
 
-	static void ReadData(std::ifstream& fs, AssetFile& file, fig::security::AuthKey authKey) noexcept
+	static void ReadData(std::ifstream& fs, AssetFile& file, fig::user::auth::AuthKey authKey) noexcept
 	{
 		size_t length = file.data_length;
 		file.data.resize(length);
 		if (file.data_encrypted)
 		{
 			// Read encrypted
-			fig::security::Decrypt(fs, file.data, authKey);
+			fig::user::auth::Decrypt(fs, file.data, authKey);
 		}
 		else
 		{

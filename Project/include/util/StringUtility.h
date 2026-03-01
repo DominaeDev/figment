@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_set>
 
-namespace fig::string_util
+namespace fig::util
 {
 	void ltrim_inplace(string& s);
 	void rtrim_inplace(string& s);

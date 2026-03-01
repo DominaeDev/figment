@@ -7,9 +7,9 @@
 #include <iostream>
 #include <fstream>
 
-using namespace fig::string_util;
-using namespace fig::fs;
+using namespace fig::io;
 using namespace fig::llm;
+using namespace fig::util;
 
 union FloatToChar 
 {

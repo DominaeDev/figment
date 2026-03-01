@@ -3,8 +3,8 @@
 #include "util/StringUtility.h"
 #include <format>
 
-using namespace fig::string_util;
 using namespace fig::llm;
+using namespace fig::util;
 
 bool LLMStateVariables::SetValue(fig::string name, fig::string value)
 {

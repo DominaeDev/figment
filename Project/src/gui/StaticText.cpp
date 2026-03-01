@@ -5,7 +5,7 @@
 #include "Constants.h"
 #include <algorithm>
 
-using namespace fig::gui_util;
+using namespace fig::gui::util;
 
 namespace fig::gui
 {

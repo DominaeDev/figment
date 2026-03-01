@@ -4,14 +4,14 @@
 #include "fs/FileUtility.h"
 #include "fs/TavernCardV2.h"
 
-using namespace fig::data;
+using namespace fig::io::data;
 using json = nlohmann::json;
 
-namespace fig::fs
+namespace fig::io
 {
 	std::expected<CharacterData, FileError> CardImporter::Import(fig::path filename) noexcept
 	{
-		auto try_import = fig::fs::ReadPNGMeta(filename, "chara", true);
+		auto try_import = fig::io::ReadPNGMeta(filename, "chara", true);
 		if (not try_import.has_value())
 			return std::unexpected(try_import.error());
 

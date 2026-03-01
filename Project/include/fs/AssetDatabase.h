@@ -11,7 +11,7 @@
 struct sqlite3;
 struct sqlite3_stmt;
 
-namespace fig::fs
+namespace fig::io
 {
 	class AssetDatabase
 	{

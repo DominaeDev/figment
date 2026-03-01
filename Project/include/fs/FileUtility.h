@@ -5,7 +5,7 @@
 #include <expected>
 #include "fs/FileError.h"
 
-namespace fig::fs
+namespace fig::io
 {
 	// File IO
 	std::expected<fig::bytes, FileError> ReadFile(fig::path filename);

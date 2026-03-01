@@ -3,7 +3,7 @@
 #include "model/AppState.h"
 #include "model/UserManager.h"
 
-using namespace fig::fs;
+using namespace fig::io;
 
 namespace fig::gui
 {
@@ -12,7 +12,7 @@ namespace fig::gui
 	ScenarioCard::ScenarioCard(Control* pParent, const fig::uuid& scenarioId) : CoverCard(pParent, scenarioId),
 		_scenarioId { scenarioId }
 	{
-		if (auto scenario = ApplicationState::GetUserManager().GetContent().GetScenario(scenarioId))
+		if (auto scenario = Global::GetUserManager().GetContent().GetScenario(scenarioId))
 		{
 			SetLabel(scenario.value().title);
 			CreateChatCounter(0);

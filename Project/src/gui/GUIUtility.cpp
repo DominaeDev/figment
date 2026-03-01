@@ -10,10 +10,9 @@
 #include <tuple>
 
 using namespace fig::gui;
-using namespace fig::string_util;
-using namespace fig::common_util;
+using namespace fig::util;
 
-namespace fig::gui_util
+namespace fig::gui::util
 {
 	bool is_defined(Color color)
 	{
@@ -347,7 +346,7 @@ namespace fig::gui_util
 			fig::bytes data(pMask->w * pMask->h);
 			for (size_t i = 0; i < toUZ(pMask->w * pMask->h); ++i)
 				data.data()[i] = ((std::byte*)pixels)[i * (pMask->pitch / pMask->w)];
-			fig::fs::WriteFile("./mask.bin", data);
+			fig::io::WriteFile("./mask.bin", data);
 			SDL_UnlockSurface(pMask);
 		}
 	}
@@ -369,7 +368,7 @@ namespace fig::gui_util
 			return false;
 		}
 
-		auto maybe_mask = fig::fs::ReadFile(maskPath); //! @todo cache
+		auto maybe_mask = fig::io::ReadFile(maskPath); //! @todo cache
 		if (not maybe_mask.has_value())
 			return false;
 

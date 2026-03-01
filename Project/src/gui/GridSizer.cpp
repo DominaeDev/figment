@@ -3,7 +3,7 @@
 #include "gui/Control.h"
 #include "util/Common.h"
 
-using namespace fig::common_util;
+using namespace fig::util;
 
 namespace fig::gui
 {

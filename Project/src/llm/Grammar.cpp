@@ -6,8 +6,8 @@
 #include <set>
 #include <cassert>
 
-using namespace fig::string_util;
-using namespace fig::fs;
+using namespace fig::util;
+using namespace fig::io;
 using namespace fig::llm;
 
 static bool _evaluate(fig::string& text, size_t pos_begin, const std::set<fig::string>& flags)

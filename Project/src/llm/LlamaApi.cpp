@@ -5,7 +5,7 @@
 #include "util/Common.h"
 
 using namespace fig::llm;
-using namespace fig::common_util;
+using namespace fig::util;
 
 namespace fig::llm::llama
 {
@@ -170,7 +170,7 @@ namespace fig::llm::llama
 
 	bool ctx_remove(ContextPtr pCtx, SequenceSlots seq_slots, int32_t begin, int32_t end)
 	{
-		auto seq_ids = fig::llm_util::get_sequence_indices(seq_slots, toI(AllSequenceSlots.size()));
+		auto seq_ids = fig::llm::util::get_sequence_indices(seq_slots, toI(AllSequenceSlots.size()));
 		for (auto seq_id : seq_ids)
 		{
 			if (!ctx_remove(pCtx, seq_id, begin, end))
@@ -181,8 +181,8 @@ namespace fig::llm::llama
 
 	void ctx_copy_sequence(ContextPtr pCtx, SequenceSlots seq_from, SequenceSlots seq_to, int32_t begin, int32_t end)
 	{
-		auto from = fig::llm_util::get_sequence_indices(seq_from, toI(AllSequenceSlots.size()))[0];
-		auto to = fig::llm_util::get_sequence_indices(seq_to, toI(AllSequenceSlots.size()))[0];
+		auto from = fig::llm::util::get_sequence_indices(seq_from, toI(AllSequenceSlots.size()))[0];
+		auto to = fig::llm::util::get_sequence_indices(seq_to, toI(AllSequenceSlots.size()))[0];
 
 		if constexpr (Debugging)
 		{

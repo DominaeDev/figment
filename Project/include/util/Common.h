@@ -11,7 +11,7 @@
 #include <functional>
 #include <chrono>
 
-namespace fig::common_util
+namespace fig::util
 {
 #if _DEBUG
 	constexpr bool EnableLogging = true;

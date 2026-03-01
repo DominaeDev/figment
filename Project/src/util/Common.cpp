@@ -11,7 +11,7 @@
 #include <uuid_v4.h>
 #include <base64.h>
 
-namespace fig::common_util
+namespace fig::util
 {
 	void Log(fig::string message)
 	{

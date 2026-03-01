@@ -2,7 +2,7 @@
 #include "model/ChatCommands.h"
 #include "util/StringUtility.h"
 
-using namespace fig::string_util;
+using namespace fig::util;
 
 struct CommandDefinition {
 	fig::string keyword;

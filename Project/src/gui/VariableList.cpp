@@ -8,7 +8,7 @@
 #include <format>
 
 using namespace fig::gui;
-using namespace fig::string_util;
+using namespace fig::util;
 
 constexpr float Margin { 8.0f };
 
