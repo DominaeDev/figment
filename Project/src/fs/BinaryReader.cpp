@@ -5,8 +5,8 @@
 
 namespace fig::fs
 {
-	BinaryReader::BinaryReader(const fig::path& profilePath, fig::security::AuthKey key) noexcept :
-		_profilePath { profilePath },
+	BinaryReader::BinaryReader(const fig::path& directory, fig::security::AuthKey key) noexcept :
+		_directory { directory },
 		_authKey { key }
 	{
 	}
@@ -116,7 +116,7 @@ namespace fig::fs
 	{
 		try
 		{
-			auto const path = _profilePath / filename;
+			auto const path = _directory / filename;
 
 			std::ifstream fs(path.wstring(), std::ios::binary | std::ios::in | std::ios::ate);
 			if (fs.fail())

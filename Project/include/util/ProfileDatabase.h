@@ -21,6 +21,7 @@ namespace fig::user
 		std::expected<std::vector<fig::fs::UserProfile>, DatabaseError> FetchProfiles() noexcept;
 		DatabaseError CreateProfile(const fig::fs::UserProfile& profile) noexcept;
 		DatabaseError UpdateProfile(const fig::fs::UserProfile& profile) noexcept;
+		DatabaseError UpdateRecovery(const fig::fs::UserProfile& profile) noexcept;
 		DatabaseError DeleteProfile(const fig::uuid& id) noexcept;
 		
 		bool IsConnected() const noexcept { return _pDB != nullptr; }
@@ -41,6 +42,7 @@ namespace fig::user
 			FetchProfiles,
 			CreateProfile,
 			UpdateProfile,
+			UpdateRecovery,
 		};
 		std::map<SQL, sqlite3_stmt*> _sqlStatements;
 	};

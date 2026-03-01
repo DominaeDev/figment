@@ -63,9 +63,6 @@
     <Filter Include="Source Files\AppModel\Data\Character">
       <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\AppModel\Assets">
-      <UniqueIdentifier>{53846e02-0a04-4382-a8c9-5e14c62ffb05}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend">
       <UniqueIdentifier>{d3b1a8a7-b33d-4d6d-a5fc-2fa4c92addad}</UniqueIdentifier>
     </Filter>
@@ -134,6 +131,9 @@
     </Filter>
     <Filter Include="Source Files\Frontend\UserProfile">
       <UniqueIdentifier>{8e498fb3-7b47-4628-ba65-d85fd8f6c436}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\FileSystem\Assets">
+      <UniqueIdentifier>{53846e02-0a04-4382-a8c9-5e14c62ffb05}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -348,7 +348,7 @@
       <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClCompile>
     <ClCompile Include="src\model\Asset.cpp">
-      <Filter>Source Files\AppModel\Assets</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ImageStore.cpp">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
@@ -941,7 +941,7 @@
       <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\model\Asset.h">
-      <Filter>Source Files\AppModel\Assets</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ImageStore.h">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>

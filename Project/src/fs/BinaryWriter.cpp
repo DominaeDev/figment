@@ -1,11 +1,18 @@
 #include <pch.h>
 #include "fs/Serialization.h"
+#include "model/UserProfile.h"
 #include <Crc32.h>
 #include <cassert>
 
 namespace fig::fs
 {
-	BinaryWriter::BinaryWriter(fig::security::AuthKey key) noexcept :
+	BinaryWriter::BinaryWriter(const fig::path& directory) noexcept :
+		_directory { directory }
+	{
+	}
+
+	BinaryWriter::BinaryWriter(const fig::path& directory, fig::security::AuthKey key) noexcept :
+		_directory { directory },
 		_authKey { key }
 	{
 	}
@@ -136,23 +143,63 @@ namespace fig::fs
 		}
 	}
 
-	FileError BinaryWriter::WriteFile(const fig::path& directory, const AssetFile& file) noexcept
+	FileError BinaryWriter::WriteFile(const AssetFile& file) noexcept
 	{
-		auto const path = directory / file.GetFileName();
+		auto const path = _directory / file.GetFileName();
 
-		// Create subfolder
-		auto const parentPath = path.parent_path();
-		if (not std::filesystem::exists(parentPath))
-			std::filesystem::create_directory(parentPath);
+		try
+		{
+			// Create subfolder
+			auto const parentPath = path.parent_path();
+			if (not std::filesystem::exists(parentPath))
+				std::filesystem::create_directory(parentPath);
 
-		std::ofstream fs(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
-		if (not fs.is_open())
-			return FileError::FileNotFound;
+			std::ofstream fs(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
+			if (not fs.is_open())
+				return FileError::WriteError;
 
-		WriteHeader(fs, file);
-		WriteMeta(fs, file);
-		WriteData(fs, file, _authKey);
+			WriteHeader(fs, file);
+			WriteMeta(fs, file);
+			WriteData(fs, file, _authKey);
 
-		return FileError::NoError;
+			return FileError::NoError;
+		}
+		catch (...)
+		{
+			return FileError::WriteError;
+		}
+	}
+
+	FileError BinaryWriter::WriteRecoveryFile(const fig::fs::UserProfile& profile, const fig::security::AuthChallenge& recoveryChallenge) noexcept
+	{
+		auto directory = profile.GetPath();
+		auto const path = directory / fig::path(std::format("{}.{}", Constants::Paths::RecoveryFileName, Constants::Paths::RecoveryFileExt));
+
+		try
+		{
+			// Create subfolder
+			auto const parentPath = path.parent_path();
+			if (not std::filesystem::exists(parentPath))
+				std::filesystem::create_directory(parentPath);
+
+			std::ofstream fs(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
+			if (not fs.is_open())
+				return FileError::WriteError;
+
+			RecoveryFile file {
+				.profile_version = profile.version,
+				.recovery_challenge = recoveryChallenge,
+				.auth_challenge = profile.auth.challenge,
+				.auth_salt = profile.auth.salt,
+			};
+			profile.id.bytes(reinterpret_cast<char*>(&file.profile_id));
+
+			fs.write((const char*)(&file), sizeof(file));
+			return FileError::NoError;
+		}
+		catch (...)
+		{
+			return FileError::WriteError;
+		}
 	}
 }

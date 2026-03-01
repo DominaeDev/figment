@@ -167,5 +167,16 @@ namespace fig::common_util
 	{
 		return toI(std::roundf(value));
 	}
+
+	template <typename T>
+	bool is_empty(std::span<T> data) noexcept
+	{
+		for (T& value : data)
+		{
+			if (value != (T)0)
+				return false;
+		}
+		return true;
+	}
 }
 #endif

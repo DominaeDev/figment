@@ -9,10 +9,11 @@ using namespace fig::common_util;
 constexpr fig::const_string create_tables =
 	"CREATE TABLE Profiles("
 		"id TEXT PRIMARY KEY NOT NULL,"
-		"name TEXT,"
+		"version INTEGER,"
+		"name TEXT NOT NULL,"
+		"settings TEXT NOT NULL,"
 		"auth BLOB NOT NULL,"
-		"salt BLOB NOT NULL,"
-		"version INTEGER"
+		"recovery BLOB"
 	");";
 
 namespace fig::user
@@ -71,9 +72,10 @@ namespace fig::user
 	void ProfileDatabase::PrepareStatements() noexcept
 	{
 		// Prepare statements
-		SQL_PREPARE(SQL::FetchProfiles, "SELECT id, name, auth, salt, version FROM Profiles;");
-		SQL_PREPARE(SQL::CreateProfile, "INSERT INTO Profiles (id, name, auth, salt, version) VALUES (?, ?, ?, ?, ?);");
-		SQL_PREPARE(SQL::UpdateProfile, "UPDATE Profiles SET name = ?, auth = ?, salt = ?, version = ? WHERE id = ?;");
+		SQL_PREPARE(SQL::FetchProfiles, "SELECT id, version, name, settings, auth, recovery FROM Profiles;");
+		SQL_PREPARE(SQL::CreateProfile, "INSERT INTO Profiles (id, version, name, settings, auth, recovery) VALUES (?, ?, ?, ?, ?, ?);");
+		SQL_PREPARE(SQL::UpdateProfile, "UPDATE Profiles SET version = ?, name = ?, settings = ?, auth = ? WHERE id = ?;");
+		SQL_PREPARE(SQL::UpdateRecovery, "UPDATE Profiles SET recovery = ? WHERE id = ?;");
 	}
 
 	bool ProfileDatabase::CreateDatabaseAndConnect() noexcept
@@ -106,7 +108,6 @@ namespace fig::user
 		}
 
 		PrepareStatements();
-
 		return true;
 	}
 
@@ -122,34 +123,30 @@ namespace fig::user
 		while ((rc = sqlite3_step(stmt)) == SQLITE_ROW)
 		{
 			const char* pID = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-			const char* pName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-			const void* auth_data = sqlite3_column_blob(stmt, 2);
-			int auth_size = sqlite3_column_bytes(stmt, 2);
-			const void* salt_data = sqlite3_column_blob(stmt, 3);
-			int salt_size = sqlite3_column_bytes(stmt, 3);
-			int version = sqlite3_column_int(stmt, 4);
+			int version = sqlite3_column_int(stmt, 1);
+			const char* pName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+			const char* pSettings = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+			const void* auth_data = sqlite3_column_blob(stmt, 4);
+			int auth_size = sqlite3_column_bytes(stmt, 4);
+			const void* recovery_data = sqlite3_column_blob(stmt, 5);
+			int recovery_size = sqlite3_column_bytes(stmt, 5);
 
 			fig::uuid id = fig::uuid::fromStrFactory(pID ? pID : "");
 			std::string name_str(pName ? pName : "");
-			fig::bytes authChallenge {};
-			fig::security::AuthSalt authSalt {};
+			fig::security::UserAuth userAuth {};
+			fig::security::UserAuth recoveryData {};
 
-			if (auth_data && auth_size > 0)
-			{
-				authChallenge.resize(toUZ(auth_size));
-				std::memcpy(authChallenge.data(), auth_data, auth_size);
-			}
-
-			if (salt_data && toUZ(salt_size) == sizeof(AuthSalt))
-			{
-				std::memcpy(authSalt.data(), salt_data, salt_size);
-			}
+			if (auth_data && toUZ(auth_size) == sizeof(fig::security::UserAuth))
+				std::memcpy(&userAuth, auth_data, sizeof(fig::security::UserAuth));
+			
+			if (recovery_data && toUZ(recovery_size) == sizeof(fig::security::UserAuth))
+				std::memcpy(&recoveryData, recovery_data, sizeof(fig::security::UserAuth));
 
 			fig::fs::UserProfile profile {
 				.id { std::move(id) },
 				.name { std::move(name_str) },
-				.authChallenge { std::move(authChallenge) },
-				.authSalt { std::move(authSalt) },
+				.auth { std::move(userAuth) },
+				.recovery { std::move(recoveryData) },
 				.version { static_cast<unsigned short>(version) },
 			};
 
@@ -176,13 +173,13 @@ namespace fig::user
 		auto stmt = _sqlStatements[SQL::CreateProfile];
 
 		sqlite3_bind_text(stmt, 1, profile.id.str().c_str(), -1, SQLITE_TRANSIENT);
-		sqlite3_bind_text(stmt, 2, profile.name.c_str(), -1, SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 3, profile.authChallenge.data(), (int)profile.authChallenge.size(), SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 4, profile.authSalt.data(), (int)profile.authSalt.size(), SQLITE_STATIC);
-		sqlite3_bind_int(stmt, 5, profile.version);
+		sqlite3_bind_int(stmt, 2, profile.version);
+		sqlite3_bind_text(stmt, 3, profile.name.c_str(), -1, SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 4, "{}", -1, SQLITE_STATIC);
+		sqlite3_bind_blob(stmt, 5, &profile.auth, sizeof(fig::security::UserAuth), SQLITE_STATIC);
+		sqlite3_bind_blob(stmt, 6, &profile.recovery, sizeof(fig::security::UserAuth), SQLITE_STATIC);
 
 		int rc = sqlite3_step(stmt);
-
 		sqlite3_reset(stmt);
 		sqlite3_clear_bindings(stmt);
 
@@ -201,11 +198,38 @@ namespace fig::user
 
 		auto stmt = _sqlStatements[SQL::UpdateProfile];
 
-		sqlite3_bind_text(stmt, 1, profile.name.c_str(), -1, SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 2, profile.authChallenge.data(), (int)profile.authChallenge.size(), SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 3, profile.authSalt.data(), (int)profile.authSalt.size(), SQLITE_STATIC);
-		sqlite3_bind_int(stmt, 4, (int)profile.version);
+		sqlite3_bind_int(stmt, 1, (int)profile.version);
+		sqlite3_bind_text(stmt, 2, profile.name.c_str(), -1, SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 3, "{}", -1, SQLITE_STATIC);
+		sqlite3_bind_blob(stmt, 4, &profile.auth, sizeof(fig::security::UserAuth), SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 5, profile.id.str().c_str(), -1, SQLITE_TRANSIENT);
+
+		int rc = sqlite3_step(stmt);
+		sqlite3_reset(stmt);
+		sqlite3_clear_bindings(stmt);
+
+		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
+		{
+			Log("SQLite Error: No changes");
+			return DatabaseError::ZeroChanges;
+		}
+
+		if (rc != SQLITE_DONE)
+		{
+			Log(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
+			return DatabaseError::SQLError;
+		}
+		return DatabaseError::NoError;
+	}
+
+	DatabaseError ProfileDatabase::UpdateRecovery(const fig::fs::UserProfile& profile) noexcept
+	{
+		if (!_pDB)
+			return DatabaseError::NotConnected;
+
+		auto stmt = _sqlStatements[SQL::UpdateProfile];
+
+		sqlite3_bind_blob(stmt, 1, &profile.recovery, sizeof(fig::security::UserAuth), SQLITE_STATIC);
 
 		int rc = sqlite3_step(stmt);
 		sqlite3_reset(stmt);

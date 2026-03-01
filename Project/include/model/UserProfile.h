@@ -4,26 +4,25 @@
 
 #include "Types.h"
 #include "util/Security.h"
+#include "Constants.h"
 #include <array>
 
 namespace fig::fs
 {
-	constexpr size_t AuthChallengeSize = 32uz;
-
 	struct UserProfile
 	{
 		fig::uuid id { 0, 0 };
 		fig::string name;
-		fig::bytes authChallenge {};
-		fig::security::AuthSalt authSalt {};
+		fig::security::UserAuth auth {};
+		fig::security::UserAuth recovery {};
+
 		unsigned short version { 0 };
 
 		inline constexpr bool IsValid() const noexcept
 		{
 			return version == 0
 				and not id.empty()
-				and not name.empty()
-				and authChallenge.size() == AuthChallengeSize;
+				and not name.empty();
 		}
 
 		fig::path GetPath() const noexcept

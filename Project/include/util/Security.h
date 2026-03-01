@@ -9,6 +9,7 @@ namespace fig::security
 {
 	using Bit128 = std::array<fig::byte, 16uz>;
 	using Bit256 = std::array<fig::byte, 32uz>;
+	using AuthChallenge = Bit256;
 	using AuthKey = Bit128;
 	using AuthSalt = Bit128;
 
@@ -20,17 +21,25 @@ namespace fig::security
 		constexpr size_t encrypted_size() const noexcept { return data.size(); }
 	};
 
+	struct alignas(8) UserAuth
+	{
+		fig::security::AuthChallenge challenge {};
+		fig::security::AuthSalt salt {};
+	};
+
 	void Encrypt(fig::bytes& data, const AuthKey& key);
 	void Encrypt(std::ofstream& stream, fig::byte_span in_data, const AuthKey& key);
 	EncryptedData Encrypt(const fig::bytes& input, const AuthKey& key);
 	EncryptedData Encrypt(fig::bytes&& input, const AuthKey& key);
+	EncryptedData Encrypt(const AuthChallenge& data, const AuthKey& key);
 
 	void Decrypt(fig::bytes& data, const AuthKey& key);
 	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const AuthKey& key);
-	DecryptedData Decrypt(const fig::security::EncryptedData& input, const AuthKey& key);
-	DecryptedData Decrypt(fig::security::EncryptedData&& input, const AuthKey& key);
+	DecryptedData Decrypt(const EncryptedData& input, const AuthKey& key);
+	DecryptedData Decrypt(EncryptedData&& input, const AuthKey& key);
+	DecryptedData Decrypt(const AuthChallenge& input, const AuthKey& key);
 
-	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::security::AuthSalt& salt);
+	AuthKey DeriveKeyFromPassword(const fig::string& password, const AuthSalt& salt);
 
 	Bit128 Random128Bits();
 	Bit256 Random256Bits();

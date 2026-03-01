@@ -13,7 +13,7 @@ namespace fig::fs
 	class UserManager
 	{
 	public:
-		UserManager() = default;
+		UserManager();
 		~UserManager() = default;
 
 		bool LoadProfiles();
@@ -34,11 +34,16 @@ namespace fig::fs
 		
 		bool ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword);
 
+		bool CreateRecoveryFile(const UserProfile& profile, const fig::string& password, fig::security::AuthChallenge& recoveryChallenge, fig::security::AuthKey& recoveryKey);
+		bool RestoreProfile(const fig::uuid& profileID, const fig::security::AuthKey& recoveryKey);
+
 	private:
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AuthKey& outKey);
+		static bool Authenticate(const fig::security::AuthChallenge& challenge, const fig::security::AuthSalt& salt, const fig::security::AuthKey& key, fig::security::AuthKey& outKey);
 		bool SignIn(UserProfile& profile, const fig::string& password);
 		fig::user::ProfileDatabase& GetDatabase() noexcept;
-
+		static fig::string RecoveryKeyToCode(const fig::security::AuthKey& key) noexcept;
+		static bool RecoveryCodeToKey(const fig::string& code, fig::security::AuthKey& outKey) noexcept;
 
 	private:
 		std::unique_ptr<fig::user::ProfileDatabase> _pProfileDB;

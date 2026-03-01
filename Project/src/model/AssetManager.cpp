@@ -226,8 +226,8 @@ namespace fig::fs
 	bool AssetManager::WriteAsset(const Asset& asset) const
 	{
 		auto file = asset.ToFile();
-		BinaryWriter writer(_profileAuthKey);
-		auto error = writer.WriteFile(_profilePath, file);
+		BinaryWriter writer(_profilePath, _profileAuthKey);
+		auto error = writer.WriteFile(file);
 		return error == FileError::NoError;
 	}
 

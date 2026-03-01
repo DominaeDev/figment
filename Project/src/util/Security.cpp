@@ -188,6 +188,20 @@ namespace fig::security
 		return encrypted; // rvo
 	}
 
+	EncryptedData Encrypt(const AuthChallenge& input, const fig::security::AuthKey& key)
+	{
+		static_assert(sizeof(AuthChallenge) % 16 == 0);
+		auto size = input.size();
+
+		EncryptedData encrypted { .original_size = size };
+		encrypted.data.resize(size, 0_byte);
+		std::memcpy(encrypted.data.data(), input.data(), size);
+
+		auto encrypted_chars = bytes_to_u8(encrypted.data);
+		encrypt_data(encrypted_chars.data(), encrypted_chars.size(), key);
+		return encrypted; // rvo
+	}
+
 	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const fig::security::AuthKey& key)
 	{
 		static_assert(sizeof(unsigned char) == sizeof(std::byte));
@@ -248,6 +262,21 @@ namespace fig::security
 
 		decrypted.resize(input.original_size);
 		return decrypted; // rvo
+	}
+
+	DecryptedData Decrypt(const AuthChallenge& input, const fig::security::AuthKey& key)
+	{
+		static_assert(sizeof(AuthChallenge) % 16 == 0);
+		fig::bytes encData(input.size());
+		std::memcpy(encData.data(), input.data(), input.size());
+
+		return fig::security::Decrypt(
+			EncryptedData {
+				.data { encData },
+				.original_size { encData.size() },
+			},
+			key);
+
 	}
 
 	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::security::AuthSalt& salt)

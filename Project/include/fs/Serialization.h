@@ -13,6 +13,8 @@
 
 namespace fig::fs
 {
+	struct UserProfile;
+
 	struct VersionNumber
 	{
 		uint8_t major { 0 };
@@ -232,6 +234,19 @@ namespace fig::fs
 		static constexpr size_t MaxMetaStringLen { std::numeric_limits<uint8_t>::max() - 1 };
 	};
 
+	struct alignas(8) RecoveryFile
+	{
+		char magic[4] = { 'F','I','G','R' };
+		uint8_t recovery_version { 0 };
+		uint8_t reserved { 0 };
+		uint16_t profile_version { 0 };
+		uint64_t profile_id[2];
+
+		fig::security::AuthChallenge recovery_challenge {};
+		fig::security::AuthChallenge auth_challenge {};
+		fig::security::AuthSalt auth_salt {};
+	};
+
 	class BinaryReader
 	{
 		BinaryReader() = delete;
@@ -240,7 +255,7 @@ namespace fig::fs
 		std::expected<AssetFile, FileError> ReadFile(const fig::path& filename, bool read_data = true) noexcept;
 
 	private:
-		fig::path _profilePath {};
+		fig::path _directory {};
 		fig::security::AuthKey _authKey {};
 	};
 
@@ -248,10 +263,14 @@ namespace fig::fs
 	{
 		BinaryWriter() = delete;
 	public:
-		explicit BinaryWriter(fig::security::AuthKey key) noexcept;
-		FileError WriteFile(const fig::path& directory, const AssetFile& file) noexcept;
+		explicit BinaryWriter(const fig::path& directory) noexcept;
+		explicit BinaryWriter(const fig::path& directory, fig::security::AuthKey key) noexcept;
+		FileError WriteFile(const AssetFile& file) noexcept;
+
+		static FileError WriteRecoveryFile(const fig::fs::UserProfile& profile, const fig::security::AuthChallenge& recoveryChallenge) noexcept;
 
 	private:
+		fig::path _directory {};
 		fig::security::AuthKey _authKey {};
 	};
 }
