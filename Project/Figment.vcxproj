@@ -410,6 +410,7 @@
     <ClInclude Include="include\model\UserProfile.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\util\ProfileDatabase.h" />
+    <ClInclude Include="include\util\RecoverCodeLUT.h" />
     <ClInclude Include="include\util\Security.h" />
     <ClInclude Include="include\util\EnumFlags.h" />
     <ClInclude Include="include\gui\CustomRenderer.h" />

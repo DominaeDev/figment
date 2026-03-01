@@ -1030,6 +1030,9 @@
     <ClInclude Include="include\model\ContentDatabase.h">
       <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
+    <ClInclude Include="include\util\RecoverCodeLUT.h">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
