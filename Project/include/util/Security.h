@@ -40,6 +40,7 @@ namespace fig::security
 	DecryptedData Decrypt(const AuthChallenge& input, const AuthKey& key);
 
 	AuthKey DeriveKeyFromPassword(const fig::string& password, const AuthSalt& salt);
+	AuthKey DeriveKeyFromBytes(fig::byte_span data, const fig::security::AuthSalt& salt);
 
 	Bit128 Random128Bits();
 	Bit256 Random256Bits();

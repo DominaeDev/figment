@@ -57,12 +57,6 @@
     <Filter Include="Source Files\AppModel\Common">
       <UniqueIdentifier>{08ed38ef-c891-490c-b20a-88677d1ca92a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\AppModel\Data">
-      <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\AppModel\Data\Character">
-      <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend">
       <UniqueIdentifier>{d3b1a8a7-b33d-4d6d-a5fc-2fa4c92addad}</UniqueIdentifier>
     </Filter>
@@ -108,9 +102,6 @@
     <Filter Include="Source Files\Backend\LLM\Utility">
       <UniqueIdentifier>{a0782deb-9c61-45f0-ab51-c5a61d5c0d41}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\Authentication">
-      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Third-party\fast-crc32">
       <UniqueIdentifier>{7adc1fef-db02-42af-a1be-8a578e63bd50}</UniqueIdentifier>
     </Filter>
@@ -129,11 +120,17 @@
     <Filter Include="Source Files\Third-party\miniz">
       <UniqueIdentifier>{bedbb7e8-502e-458f-9bdb-a2c59f44851b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\UserProfile">
-      <UniqueIdentifier>{8e498fb3-7b47-4628-ba65-d85fd8f6c436}</UniqueIdentifier>
+    <Filter Include="Source Files\AppModel\Data">
+      <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\FileSystem\Assets">
-      <UniqueIdentifier>{53846e02-0a04-4382-a8c9-5e14c62ffb05}</UniqueIdentifier>
+    <Filter Include="Source Files\AppModel\Data\Character">
+      <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\Authentication">
+      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\User">
+      <UniqueIdentifier>{8e498fb3-7b47-4628-ba65-d85fd8f6c436}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -347,9 +344,6 @@
     <ClCompile Include="src\gui\GridSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\Asset.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\ImageStore.cpp">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
     </ClCompile>
@@ -408,16 +402,19 @@
       <Filter>Source Files\Frontend\FileSystem\Import</Filter>
     </ClCompile>
     <ClCompile Include="src\model\UserManager.cpp">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\AssetManager.cpp">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
+      <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
     <ClCompile Include="src\model\ContentDatabase.cpp">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
+      <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
     <ClCompile Include="src\util\ProfileDatabase.cpp">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\Asset.cpp">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\AssetManager.cpp">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -940,9 +937,6 @@
     <ClInclude Include="include\gui\GridSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\Asset.h">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\ImageStore.h">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
     </ClInclude>
@@ -1007,22 +1001,25 @@
       <Filter>Source Files\Frontend\FileSystem\Import</Filter>
     </ClInclude>
     <ClInclude Include="include\model\UserManager.h">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\AssetManager.h">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
+      <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
     <ClInclude Include="include\model\ContentDatabase.h">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
+      <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
     <ClInclude Include="include\model\UserProfile.h">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
+      <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
     <ClInclude Include="include\util\ProfileDatabase.h">
-      <Filter>Source Files\Frontend\UserProfile</Filter>
+      <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
     <ClInclude Include="include\fs\DatabaseError.h">
       <Filter>Source Files\Frontend\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\Asset.h">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\AssetManager.h">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

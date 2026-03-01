@@ -105,17 +105,17 @@ namespace fig::fs
 
 	enum class MetaTag : uint8_t
 	{
-		Unknown				= 0x00,
-		CreatedAt			= 0x01,	// utc
-		UpdatedAt			= 0x02,	// utc
-		Version				= 0x03,
-		Checksum			= 0x04,
+		Unknown					= 0x00,
+		CreatedAt				= 0x01,	// utc
+		UpdatedAt				= 0x02,	// utc
+		Version					= 0x03,
+		Checksum				= 0x04,
 
-		ImageWidth			= 0x10,
-		ImageHeight			= 0x11,
-		ImageFormatDepth	= 0x12,
+		ImageWidth				= 0x10,
+		ImageHeight				= 0x11,
+		ImageFormatDepth		= 0x12,
 
-		Reference			= 0x40,
+		ReferenceToOriginal		= 0x40,
 	};
 
 	using _meta_identifier = std::array<uint64_t, 2>;
@@ -152,7 +152,7 @@ namespace fig::fs
 		case MetaTag::UpdatedAt:
 			return MetaValueType::TimeStamp;
 
-		case MetaTag::Reference:
+		case MetaTag::ReferenceToOriginal:
 			return MetaValueType::Identifier;
 
 		case MetaTag::Checksum:
@@ -226,17 +226,12 @@ namespace fig::fs
 				fig::string(Constants::Paths::AssetFileExt));
 		}
 
-		bool IsReference() const noexcept
-		{
-			return get_meta<_meta_identifier>(MetaTag::Reference).has_value();
-		}
-
 		static constexpr size_t MaxMetaStringLen { std::numeric_limits<uint8_t>::max() - 1 };
 	};
 
 	struct alignas(8) RecoveryFile
 	{
-		char magic[4] = { 'F','I','G','R' };
+		char magic[4] = { 'F', 'I', 'G', 'R' };
 		uint8_t recovery_version { 0 };
 		uint8_t reserved { 0 };
 		uint16_t profile_version { 0 };

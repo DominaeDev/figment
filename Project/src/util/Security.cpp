@@ -87,6 +87,14 @@ static fig::bytes SimpleHash(fig::string password, fig::security::AuthSalt salt)
 	return hash.to_bytes();
 }
 
+static fig::bytes SimpleHash(fig::byte_span data, fig::security::AuthSalt salt)
+{
+	size_t seed;
+	fig::Hash hash = fig::common_util::GetHash(data);
+	hash = fig::common_util::HashCombine(hash, fig::common_util::GetHash(salt), seed);
+	return hash.to_bytes();
+}
+
 static void encrypt_data(unsigned char* pData, size_t length, const fig::security::AuthKey& key)
 {
 	static_assert(sizeof(unsigned char) == sizeof(std::byte));
@@ -291,6 +299,25 @@ namespace fig::security
 		else
 		{
 			derived_key = SimpleHash(password, salt);
+		}
+
+		AuthKey authKey;
+		std::memcpy(authKey.data(), derived_key.data(), std::min(sizeof(AuthKey), derived_key.size()));
+		return authKey;
+	}
+
+	AuthKey DeriveKeyFromBytes(fig::byte_span data, const fig::security::AuthSalt& salt)
+	{
+		fig::bytes derived_key;
+		if constexpr (UsePBKDF2)
+		{
+			auto password_bytes = data; // copy
+			auto salt_bytes = std::span { salt.data(), salt.size() };
+			derived_key = PBKDF2(password_bytes, salt_bytes, PBKDF2Iterations, sizeof(AuthKey));
+		}
+		else
+		{
+			derived_key = SimpleHash(data, salt);
 		}
 
 		AuthKey authKey;

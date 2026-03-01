@@ -41,12 +41,6 @@ namespace fig::fs
 			else if (subtype == static_cast<uint8_t>(ImageType::Expression))
 				strSubtype = "expression";
 		}
-		else if (type == AssetType::Reference)
-		{
-			strType = "ref";
-			if (subtype == static_cast<uint8_t>(ReferenceType::Original))
-				strSubtype = "original";
-		}
 		else
 			strType = "unknown";
 
@@ -100,12 +94,6 @@ namespace fig::fs
 				subtype = static_cast<uint8_t>(ImageType::Background);
 			else if (strSubtype == "expression")
 				subtype = static_cast<uint8_t>(ImageType::Expression);
-		}
-		else if (strType == "ref")
-		{
-			type = AssetType::Reference;
-			if (strSubtype == "original")
-				subtype = static_cast<uint8_t>(ReferenceType::Original);
 		}
 		else
 			type = AssetType::Undefined;
@@ -163,14 +151,14 @@ namespace fig::fs
 	void Asset::SetData(fig::bytes&& data)
 	{
 		this->data = std::move(data);
-		status = AssetFileStatus::Modified;
+		Invalidate();
 	}
 
 	void Asset::SetData(fig::byte_span data)
 	{
 		this->data.resize(data.size());
 		std::memcpy(this->data.data(), data.data(), data.size());
-		status = AssetFileStatus::Modified;
+		Invalidate();
 	}
 
 	fig::string Asset::AsString() const
@@ -223,6 +211,7 @@ namespace fig::fs
 		auto meta_type = get_meta_type(tag);
 		assert(meta_type == MetaValueType::Boolean);
 		_parameters[tag] = value;
+		Invalidate();
 	}
 
 	void Asset::SetMeta(MetaTag tag, uint8_t value) noexcept
@@ -230,6 +219,7 @@ namespace fig::fs
 		auto meta_type = get_meta_type(tag);
 		assert(meta_type == MetaValueType::UChar);
 		_parameters[tag] = value;
+		Invalidate();
 	}
 
 	void Asset::SetMeta(MetaTag tag, uint16_t value) noexcept
@@ -237,6 +227,7 @@ namespace fig::fs
 		auto meta_type = get_meta_type(tag);
 		assert(meta_type == MetaValueType::UShort);
 		_parameters[tag] = value;
+		Invalidate();
 	}
 
 	void Asset::SetMeta(MetaTag tag, int32_t value) noexcept
@@ -244,6 +235,7 @@ namespace fig::fs
 		auto meta_type = get_meta_type(tag);
 		assert(meta_type == MetaValueType::Integer);
 		_parameters[tag] = value;
+		Invalidate();
 	}
 
 	void Asset::SetMeta(MetaTag tag, float value) noexcept
@@ -251,6 +243,7 @@ namespace fig::fs
 		auto meta_type = get_meta_type(tag);
 		assert(meta_type == MetaValueType::Float);
 		_parameters[tag] = value;
+		Invalidate();
 	}
 
 	void Asset::SetMeta(MetaTag tag, fig::timestamp value) noexcept
@@ -258,6 +251,7 @@ namespace fig::fs
 		auto meta_type = get_meta_type(tag);
 		assert(meta_type == MetaValueType::TimeStamp);
 		_parameters[tag] = value;
+		Invalidate();
 	}
 
 	void Asset::SetMeta(MetaTag tag, const fig::uuid& value) noexcept
@@ -267,6 +261,7 @@ namespace fig::fs
 		_meta_identifier id;
 		value.bytes((char*)id.data());
 		_parameters[tag] = id;
+		Invalidate();
 	}
 
 	void Asset::SetMeta(MetaTag tag, const char* value) noexcept
@@ -306,4 +301,8 @@ namespace fig::fs
 		SetMeta(MetaTag::Checksum, static_cast<int32_t>(crc32_fast(data.data(), data.size())));
 	}
 
+	void Asset::Invalidate()
+	{
+		status = AssetFileStatus::Modified;
+	}
 }

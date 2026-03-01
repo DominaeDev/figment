@@ -24,7 +24,6 @@ namespace fig::fs
 		AssetManager(const UserManager& userMngr);
 
 		Asset& CreateEmptyAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
-		Asset& CreateAssetReference(ReferenceType refType, const fig::uuid& referenceId, const fig::uuid& parent = {}) noexcept;
 		Asset& CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
 		Asset& CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
 		Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;

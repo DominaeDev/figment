@@ -94,21 +94,6 @@ namespace fig::fs
 		return newAsset;
 	}
 
-	Asset& AssetManager::CreateAssetReference(ReferenceType refType, const fig::uuid& referenceId, const fig::uuid& parent) noexcept
-	{
-		fig::uuid id = NewUUID();
-		auto& newAsset = _assets[id] = Asset {};
-		newAsset.id = id;
-		newAsset.parent_id = not parent.empty() ? parent : _profileID;
-		newAsset.asset_type = AssetType::Reference;
-		newAsset.asset_subtype = static_cast<uint8_t>(refType);
-		newAsset.status = AssetFileStatus::Modified;
-		newAsset.SetMeta(MetaTag::CreatedAt, common_util::utc_now());
-		newAsset.SetMeta(MetaTag::UpdatedAt, common_util::utc_now());
-		newAsset.SetMeta(MetaTag::Reference, referenceId);
-		return newAsset;
-	}
-
 	Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = NewUUID();
@@ -342,9 +327,7 @@ namespace fig::fs
 				{
 					// Save cover asset (bitmap)
 					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage.value(), scenarioAsset.id);
-
-					// Create reference to original
-					CreateAssetReference(ReferenceType::Original, scenarioImageAsset.id, coverAsset.id);
+					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, scenarioImageAsset.id);
 				}
 			}
 		}
@@ -454,9 +437,7 @@ namespace fig::fs
 				{
 					// Save cover asset (bitmap)
 					auto& coverAsset = CreateImageAsset(ImageType::CoverImage, coverImage.value(), characterAsset.id);
-
-					// Create reference to original
-					CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
+					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 				}
 			}
 		}

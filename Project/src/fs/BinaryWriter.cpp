@@ -19,9 +19,6 @@ namespace fig::fs
 
 	static uint16_t get_data_offset(const AssetFile& file)
 	{
-		if (file.IsReference())
-			return 0; // No data
-
 		uint32_t offset = 0;
 		for (auto it = file.meta.cbegin(); it != file.meta.cend(); ++it)
 		{
@@ -128,7 +125,7 @@ namespace fig::fs
 
 	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::security::AuthKey authKey) noexcept
 	{
-		if (file.IsReference())
+		if (file.data.size() == 0uz)
 			return; // No data
 
 		if (file.data_encrypted)

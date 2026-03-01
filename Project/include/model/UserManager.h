@@ -35,7 +35,9 @@ namespace fig::fs
 		bool ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword);
 
 		bool CreateRecoveryFile(const UserProfile& profile, const fig::string& password, fig::security::AuthChallenge& recoveryChallenge, fig::security::AuthKey& recoveryKey);
-		bool RestoreProfile(const fig::uuid& profileID, const fig::security::AuthKey& recoveryKey);
+		
+		bool RecoverProfile(const fig::uuid& profileID, const fig::string& recoveryCode);
+		bool RecoverProfile(const fig::uuid& profileID, const fig::security::AuthKey& recoveryKey);
 
 	private:
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AuthKey& outKey);

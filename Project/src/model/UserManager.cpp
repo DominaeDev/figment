@@ -22,11 +22,11 @@ using namespace fig::common_util;
 
 namespace fig::fs
 {
-	static fig::security::Bit128 kDefaultAuthKey { 
+	static Bit128 kDefaultAuthKey { 
 		fig::byte { 0xA1 }, fig::byte { 0xB2 }, fig::byte { 0xC3 }, fig::byte { 0xD4 }, fig::byte { 0xE5 }, fig::byte { 0xF6 }, fig::byte { 0xAB }, fig::byte { 0xCD },
 		fig::byte { 0xEF }, fig::byte { 0x1A }, fig::byte { 0x2B }, fig::byte { 0x3C }, fig::byte { 0x4D }, fig::byte { 0x5E }, fig::byte { 0x6F }, fig::byte { 0xF0 },
 	};
-	static fig::security::Bit128 kDefaultAuthSalt { 
+	static Bit128 kDefaultAuthSalt { 
 		fig::byte { 0xEF }, fig::byte { 0x1A }, fig::byte { 0x2B }, fig::byte { 0x3C }, fig::byte { 0x4D }, fig::byte { 0x5E }, fig::byte { 0x6F }, fig::byte { 0xF0 },
 		fig::byte { 0xA1 }, fig::byte { 0xB2 }, fig::byte { 0xC3 }, fig::byte { 0xD4 }, fig::byte { 0xE5 }, fig::byte { 0xF6 }, fig::byte { 0xAB }, fig::byte { 0xCD },
 	};
@@ -42,13 +42,13 @@ namespace fig::fs
 		"3HVXMGI5V6CM5RMFMVQ1KFUGVVLVQ3G47FD92ARUMXQSU8FIDJP13M24AQ8KNRTU4DDSST3BDHW9X23DNWK8DTFG1LN1BAB47T5QUTPMEDQXRDE7QUGAXGLKQ5MKCEIPMPJMM3GBPWU162FHIAMJRX7EHWE288K2HCT5WWCBX5SBC4KJTTT6AAINWLP85XT7BFCUPXW71R971PFC9VNBKWL4JWKA4329XHW1D8EEXPHNG2F5MRUF7AUA3NS87535GFQHIEPSBEHGQKL6PDEGR8V8RGJUS6IUP54EDC8QTPPP7QXLEKH9FKU9L5JP7H7JGI5WI1SH716C7DW2NPER64RJAVLFPKA6IKLULHM989G66LN4WDKVUEPVWS26GD3WBCBLUU5UD4NIWV67538XVM5KF81WAGEINV6N4J9F2XVL572PX8PT79U7HHHLQ7B37RTLGN1D8CNSFDEQF9G7UV9N3UCNL7P3APVT2V3PSJFFJV968VEJND1BX147JI6J",
 	};
 
-	static fig::security::AuthChallenge CreateAuthChallenge(Bit128 key, Bit128 salt, AuthKey encKey)
+	static AuthChallenge CreateAuthChallenge(Bit128 key, Bit128 salt, AuthKey encKey)
 	{
-		fig::security::AuthChallenge challenge;
+		AuthChallenge challenge;
 		std::memcpy(challenge.data() + ptrdiff_t(0), key.data(), key.size());
 		for (size_t i = 0; i < 16uz; ++i)
 			challenge[i + 16uz] = challenge[i] ^ salt[i];
-		auto encrypted = fig::security::Encrypt(challenge, encKey);
+		auto encrypted = Encrypt(challenge, encKey);
 		std::memcpy(challenge.data(), encrypted.data.data(), challenge.size());
 		return challenge; // rvo
 	}
@@ -104,15 +104,15 @@ namespace fig::fs
 
 	std::optional<UserProfileCRef> UserManager::CreateProfile(const fig::string& name, const fig::string& password)
 	{
-		auto authKey = fig::security::Random128Bits();
-		auto authSalt = not password.empty() ? fig::security::Random128Bits() : kDefaultAuthSalt;
-		auto encKey = not password.empty() ? fig::security::DeriveKeyFromPassword(password, authSalt) : kDefaultAuthKey;
+		auto authKey = Random128Bits();
+		auto authSalt = not password.empty() ? Random128Bits() : kDefaultAuthSalt;
+		auto encKey = not password.empty() ? DeriveKeyFromPassword(password, authSalt) : kDefaultAuthKey;
 
 		auto id = CreateUUID();
 		auto& db = GetDatabase();
 
 		// Create auth challenge
-		fig::security::AuthChallenge authChallenge = CreateAuthChallenge(authKey, authSalt, encKey);
+		AuthChallenge authChallenge = CreateAuthChallenge(authKey, authSalt, encKey);
 
 		UserProfile profile {
 			.id = id,
@@ -134,7 +134,7 @@ namespace fig::fs
 			};
 
 			auto code = RecoveryKeyToCode(recoveryKey);
-			LogLn(std::format("Recovery code: {}", code));
+			LogLn(std::format("Recovery code for user {}: {}", profile.id.str(), code));
 		}
 
 		if (db.CreateProfile(profile) == DatabaseError::NoError)
@@ -146,15 +146,9 @@ namespace fig::fs
 		return std::nullopt;
 	}
 
-	bool UserManager::Authenticate(const UserProfile& profile, const fig::string& password, fig::security::AuthKey& outKey)
+	static bool __Authenticate(const AuthChallenge& challenge, const AuthSalt& salt, const AuthKey& key, AuthKey& outKey)
 	{
-		auto encKey = not password.empty() ? fig::security::DeriveKeyFromPassword(password, profile.auth.salt) : kDefaultAuthKey;
-		return Authenticate(profile.auth.challenge, profile.auth.salt, encKey, outKey);
-	}
-
-	bool UserManager::Authenticate(const fig::security::AuthChallenge& challenge, const fig::security::AuthSalt& salt, const fig::security::AuthKey& key, fig::security::AuthKey& outKey)
-	{
-		auto decrypted = fig::security::Decrypt(challenge, key);
+		auto decrypted = Decrypt(challenge, key);
 
 		// Validate
 		if (decrypted.size() != sizeof(AuthChallenge))
@@ -168,6 +162,18 @@ namespace fig::fs
 
 		std::memcpy(outKey.data(), decrypted.data(), outKey.size());
 		return true;
+	}
+
+	bool UserManager::Authenticate(const UserProfile& profile, const fig::string& password, AuthKey& outKey)
+	{
+		auto encKey = not password.empty() ? DeriveKeyFromPassword(password, profile.auth.salt) : kDefaultAuthKey;
+		return __Authenticate(profile.auth.challenge, profile.auth.salt, encKey, outKey);
+	}
+
+	bool UserManager::Authenticate(const AuthChallenge& challenge, const AuthSalt& salt, const AuthKey& key, AuthKey& outKey)
+	{
+		auto encKey = DeriveKeyFromBytes(key, salt);
+		return __Authenticate(challenge, salt, encKey, outKey);
 	}
 
 	bool UserManager::SignIn(const fig::string& profileName, const fig::string& password)
@@ -249,11 +255,11 @@ namespace fig::fs
 
 		auto& profile = *itProfile;
 
-		fig::security::AuthKey authKey;
+		AuthKey authKey;
 		if (not Authenticate(profile, oldPassword, authKey))
 			return false;
 
-		AuthKey newPasswordKey = not newPassword.empty() ? fig::security::DeriveKeyFromPassword(newPassword, profile.auth.salt) : kDefaultAuthKey;
+		AuthKey newPasswordKey = not newPassword.empty() ? DeriveKeyFromPassword(newPassword, profile.auth.salt) : kDefaultAuthKey;
 
 		auto newChallenge = CreateAuthChallenge(authKey, profile.auth.salt, newPasswordKey);
 
@@ -265,7 +271,7 @@ namespace fig::fs
 				.challenge = newChallenge,
 				.salt = profile.auth.salt,
 			},
-			.recovery = profile.recovery,
+			.recovery = {},
 		}) == DatabaseError::NoError)
 		{
 			// Update local profile
@@ -306,19 +312,30 @@ namespace fig::fs
 		return *_pProfileDB.get();
 	}
 
-	bool UserManager::CreateRecoveryFile(const UserProfile& profile, const fig::string& password, fig::security::AuthChallenge& recoveryChallenge, fig::security::AuthKey& recoveryKey)
+	bool UserManager::CreateRecoveryFile(const UserProfile& profile, const fig::string& password, AuthChallenge& recoveryChallenge, AuthKey& recoveryKey)
 	{
 		AuthKey authKey;
 		if (Authenticate(profile, password, authKey) == false)
 			return false;
 
-		recoveryKey = fig::security::Random128Bits();
-		recoveryChallenge = CreateAuthChallenge(authKey, profile.auth.salt, recoveryKey);
+		auto& salt = profile.auth.salt;
+		recoveryKey = Random128Bits();
+	
+		AuthKey encKey = DeriveKeyFromBytes(recoveryKey, salt);
+		recoveryChallenge = CreateAuthChallenge(authKey, salt, encKey);
 		
 		return BinaryWriter::WriteRecoveryFile(profile, recoveryChallenge) == FileError::NoError;
 	}
 
-	bool UserManager::RestoreProfile(const fig::uuid& profileID, const fig::security::AuthKey& recoveryKey)
+	bool UserManager::RecoverProfile(const fig::uuid& profileID, const fig::string& recoveryCode)
+	{
+		AuthKey recoveryKey;
+		if (RecoveryCodeToKey(recoveryCode, recoveryKey))
+			return RecoverProfile(profileID, recoveryKey);
+		return false;
+	}
+
+	bool UserManager::RecoverProfile(const fig::uuid& profileID, const AuthKey& recoveryKey)
 	{
 		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileID](const UserProfile& profile) {
 			return profile.id == profileID;
@@ -346,7 +363,7 @@ namespace fig::fs
 					.challenge = newChallenge,
 					.salt = kDefaultAuthSalt,
 				},
-				.recovery = profile.recovery,
+				.recovery = {},
 				}) == DatabaseError::NoError)
 			{
 				// Update local profile
@@ -359,7 +376,7 @@ namespace fig::fs
 		return false;
 	}
 
-	fig::string UserManager::RecoveryKeyToCode(const fig::security::AuthKey& key) noexcept
+	fig::string UserManager::RecoveryKeyToCode(const AuthKey& key) noexcept
 	{
 		fig::string code;
 		code.reserve(35);
@@ -379,14 +396,14 @@ namespace fig::fs
 		return code;
 	}
 
-	bool UserManager::RecoveryCodeToKey(const fig::string& code, fig::security::AuthKey& outKey) noexcept
+	bool UserManager::RecoveryCodeToKey(const fig::string& code, AuthKey& outKey) noexcept
 	{
 		fig::string formatted = code
 			| std::views::filter([](auto& c) { return std::isalnum((int)c); })
 			| std::views::transform([](auto& c) { return (char)std::toupper((int)c); })
 			| std::ranges::to<fig::string>();
 
-		if (formatted.size() != sizeof(fig::security::AuthKey) * 2)
+		if (formatted.size() != sizeof(AuthKey) * 2)
 			return false;
 
 		for (size_t i = 0; i < 16uz; ++i)

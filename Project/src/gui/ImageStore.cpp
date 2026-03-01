@@ -93,9 +93,7 @@ namespace fig::gui
 					// Save cover asset (bitmap)
 					auto& coverAsset = assetMngr.CreateImageAsset(ImageType::CoverImage, coverImage, characterAssetID);
 					coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
-
-					// Create reference to original
-					assetMngr.CreateAssetReference(ReferenceType::Original, portraitAsset.id, coverAsset.id);
+					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 
 					_images[coverAsset.id] = std::move(coverImage);
 					_coverImages[characterAssetID] = coverAsset.id;

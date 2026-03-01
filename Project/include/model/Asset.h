@@ -19,8 +19,6 @@ namespace fig::fs
 		Image				= 0x0A,
 		ChatInstance		= 0x14,
 		ChatLog				= 0x15,
-
-		Reference			= 0x40,
 	};
 
 	enum class DataFormat : uint8_t
@@ -46,12 +44,6 @@ namespace fig::fs
 		LargePortrait		= 0x04,
 		Background			= 0x05,
 		Expression			= 0x0A, // ...
-	};
-
-	enum class ReferenceType : uint8_t
-	{
-		Unspecified			= 0x00,
-		Original			= 0x01,
 	};
 
 	enum class AssetFileStatus : uint8_t
@@ -100,7 +92,6 @@ namespace fig::fs
 
 		constexpr bool IsOfType(AssetType type) const noexcept { return asset_type == type; }
 		constexpr bool IsOfImageType(ImageType subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
-		constexpr bool IsReference() const noexcept { return asset_type == AssetType::Reference; }
 		constexpr bool HasData() const noexcept { return not data.empty(); }
 		fig::string AsString() const;
 
@@ -118,7 +109,7 @@ namespace fig::fs
 
 		constexpr fig::timestamp GetCreatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::CreatedAt).value_or({}); }
 		constexpr fig::timestamp GetUpdatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::UpdatedAt).value_or({}); }
-
+	
 	public:
 		fig::uuid id {};
 		fig::uuid parent_id {};
@@ -127,6 +118,9 @@ namespace fig::fs
 		DataFormat data_format { DataFormat::Undefined };
 		fig::bytes data {};
 		AssetFileStatus status = { AssetFileStatus::NotLoaded };
+
+	private:
+		void Invalidate();
 
 	private:
 		std::map<MetaTag, MetaValue> _parameters {};
