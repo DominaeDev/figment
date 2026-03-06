@@ -12,9 +12,6 @@ namespace fig::gui
 	public:
 		CharacterCard(Control* pParent, const fig::uuid& characterId);
 
-	protected:
-		void OnUpdate(float fDeltaTime) override {};
-
 	private:
 		fig::uuid _characterId;
 	};

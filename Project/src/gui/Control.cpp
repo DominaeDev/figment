@@ -32,6 +32,9 @@ namespace fig::gui
 
 	void Control::Update(float fDeltaTime)
 	{
+		if (_bCulled)
+			return;
+
 		if (_bInvalidLayout)
 			Layout();
 
@@ -45,7 +48,7 @@ namespace fig::gui
 
 	void Control::Render(Renderer* pRenderer)
 	{
-		if (!_bVisible)
+		if (not _bVisible or _bCulled)
 			return;
 
 		static Rect* s_pClippingRect = nullptr;
@@ -77,8 +80,9 @@ namespace fig::gui
 				if (_bCulling)
 				{
 					auto childRect = to_rect(renderable->GetRect());
-					if (!SDL_HasRectIntersection(&cullingRect, &childRect))
-						continue;
+					bool bVisible = SDL_HasRectIntersection(&cullingRect, &childRect);
+					if (child->IsCulled() == bVisible)
+						child->Cull(!bVisible);
 				}
 
 				renderable->Render(pRenderer);

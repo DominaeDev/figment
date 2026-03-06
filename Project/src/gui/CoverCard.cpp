@@ -1,7 +1,7 @@
 #include <pch.h>
+#include "fs/ImageLoader.h"
 #include "gui/CoverCard.h"
 #include "gui/TexturedBorder.h"
-#include "gui/ImageStore.h"
 #include "gui/TextureStore.h"
 #include "gui/NineGridImage.h"
 #include "gui/RoundedBorder.h"
@@ -22,13 +22,6 @@ namespace fig::gui
 		_assetId { assetId }
 	{
 		SetSize(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight);
-
-		if (ImageStore::LoadCoverImage(assetId))
-		{
-			auto coverId = ImageStore::GetCoverImageID(assetId);
-			if (auto pTexture = ImageStore::GetTexture(GetSDLRenderer(), coverId))
-				Image::SetTexture(pTexture);
-		}
 
 		_pFooter = new Area(this);
 		_pFooter->SetSize(GetSize());
@@ -215,4 +208,17 @@ namespace fig::gui
 			_pSimpleBorder->SetVisible(true);
 		}
 	}
+
+	void CoverCard::SetCoverImage(fig::sdl::Texture texture)
+	{
+		//if (ImageLoader::LoadCoverImage(assetId))
+		//{
+		//	auto coverId = ImageLoader::GetCoverImageID(assetId);
+		//	if (auto pTexture = ImageLoader::GetTexture(GetSDLRenderer(), coverId))
+		//		Image::SetTexture(pTexture);
+		//}
+
+		Image::SetTexture(texture.get());
+	}
+
 }

@@ -5,7 +5,7 @@
 #include "gui/CustomRenderers.h"
 
 #include "gui/TextureStore.h"
-#include "gui/CharacterImageStore.h"
+#include "gui/OldCharacterImageStore.h"
 #include "util/StringUtility.h"
 #include "Constants.h"
 #include <format>
@@ -76,9 +76,9 @@ ChatMessage::ChatMessage(Control* pParent, Role role, fig::string characterId, f
 
 	if (_bShowAvatar)
 	{
-		Texture* pTexture = CharacterImageStore::GetTexture(characterId, ImageType::Portrait_Square);
+		Texture* pTexture = OldCharacterImageStore::GetTexture(characterId, ImageType::Portrait_Square);
 		if (!pTexture)
-			pTexture = CharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);
+			pTexture = OldCharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);
 
 		Image* pPortrait = new Image(this, pTexture);
 		pPortrait->SetSize(52, 52);

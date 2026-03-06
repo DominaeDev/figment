@@ -1,14 +1,14 @@
 #include <pch.h>
-#include "gui/CharacterImageStore.h"
+#include "gui/OldCharacterImageStore.h"
 #include "util/StringUtility.h"
 #include <SDL3_image/SDL_image.h>
 
 using namespace fig::gui;
 using namespace fig::util;
 
-std::map<fig::string, CharacterImageStore::ImageList> CharacterImageStore::_imagesByCharacter;
+std::map<fig::string, OldCharacterImageStore::ImageList> OldCharacterImageStore::_imagesByCharacter;
 
-void CharacterImageStore::Init(RendererPtr pRenderer)
+void OldCharacterImageStore::Init(RendererPtr pRenderer)
 {
 	LoadTexture(pRenderer, "Default", ImageType::Portrait_Square, "./resources/images/avatar_default.png");
 	LoadTexture(pRenderer, "Female1", ImageType::Portrait_Square, "./resources/images/avatar_f1.png");
@@ -21,7 +21,7 @@ void CharacterImageStore::Init(RendererPtr pRenderer)
 	LoadTexture(pRenderer, "Male4", ImageType::Portrait_Square, "./resources/images/avatar_m4.png");
 }
 
-void CharacterImageStore::Release()
+void OldCharacterImageStore::Release()
 {
 	for (auto& character : _imagesByCharacter)
 	{
@@ -31,12 +31,12 @@ void CharacterImageStore::Release()
 	_imagesByCharacter.clear();
 }
 
-bool CharacterImageStore::LoadCharacterPortrait(RendererPtr pRenderer, fig::string characterId, fig::string filename)
+bool OldCharacterImageStore::LoadCharacterPortrait(RendererPtr pRenderer, fig::string characterId, fig::string filename)
 {
 	return LoadTexture(pRenderer, characterId, ImageType::Portrait_Square, filename);
 }
 
-bool CharacterImageStore::LoadTexture(RendererPtr pRenderer, fig::string characterId, ImageType imageType, fig::string filename)
+bool OldCharacterImageStore::LoadTexture(RendererPtr pRenderer, fig::string characterId, ImageType imageType, fig::string filename)
 {
 	if (imageType == ImageType::Undefined)
 		return false;
@@ -65,7 +65,7 @@ bool CharacterImageStore::LoadTexture(RendererPtr pRenderer, fig::string charact
 	}
 }
 
-Texture* CharacterImageStore::GetTexture(fig::string characterId, ImageType imageType)
+Texture* OldCharacterImageStore::GetTexture(fig::string characterId, ImageType imageType)
 {
 	if (characterId.empty())
 		return nullptr;

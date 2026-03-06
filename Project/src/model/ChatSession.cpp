@@ -8,7 +8,7 @@
 #include "llm/LLMUtility.h"
 #include "gui/GUIUtility.h"
 #include "gui/Window.h"
-#include "gui/CharacterImageStore.h"
+#include "gui/OldCharacterImageStore.h"
 
 #include <exception>
 #include <cassert>
@@ -64,7 +64,7 @@ namespace fig::io::data
 				character.characterId = "USR";
 
 			if (!empty_or_whitespace(character.smallPortraitFilename))
-				CharacterImageStore::LoadCharacterPortrait(pRenderer, character.characterId, "./characters/" + character.smallPortraitFilename);
+				OldCharacterImageStore::LoadCharacterPortrait(pRenderer, character.characterId, "./characters/" + character.smallPortraitFilename);
 			_characters[role] = std::move(character);
 			return true;
 		}

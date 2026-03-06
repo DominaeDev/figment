@@ -62,6 +62,9 @@ namespace fig::gui
 		inline LayoutElement* GetParent() { return _pParent; }
 		inline constexpr LayoutElement* GetParent() const { return _pParent; }
 
+		inline void Cull(bool bCulled) { _bCulled = bCulled; }
+		inline bool IsCulled() const { return _bCulled; }
+
 	protected:
 		void SetParent(LayoutElement* pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
@@ -79,6 +82,7 @@ namespace fig::gui
 		std::vector<LayoutElement*> _children;
 		LayoutElement* _pParent = nullptr;
 		Sizer* _pSizer = nullptr;
+		bool _bCulled = false;
 
 		Rectf _rect = {};
 		Pointf _position = {};

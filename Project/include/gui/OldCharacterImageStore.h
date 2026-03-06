@@ -14,7 +14,7 @@ namespace fig::gui
 		Background,
 	};
 
-	class CharacterImageStore
+	class OldCharacterImageStore
 	{
 	public:
 		static void Init(RendererPtr pRenderer);

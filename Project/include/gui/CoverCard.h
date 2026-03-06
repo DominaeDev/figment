@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Image.h"
+#include "fs/ImageSource.h"
 
 namespace fig::gui
 {
@@ -21,12 +22,13 @@ namespace fig::gui
 	class TexturedBorder;
 	class NineGridImage;
 
-	class CoverCard : public Image
+	class CoverCard : public Image, public fig::io::IImageSource
 	{
 	public:
 		CoverCard(Control* pParent, const fig::uuid& assetId);
 
 		void SetBorder(BorderStyle style);
+		void SetCoverImage(fig::sdl::Texture texture);
 
 	protected:
 		void SetLabel(const fig::string& text) noexcept;
