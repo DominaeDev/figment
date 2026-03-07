@@ -28,7 +28,7 @@ namespace fig::gui
 		CoverCard(Control* pParent, const fig::uuid& assetId);
 
 		void SetBorder(BorderStyle style);
-		void SetCoverImage(fig::sdl::Texture texture);
+		void SetCoverImage(fig::sdl::Surface&& texture);
 		void SetPendingCoverImage(fig::io::ImageFuture&& future);
 
 	protected:
@@ -37,6 +37,7 @@ namespace fig::gui
 		void CreateChatCounter(uint32_t count);
 		void AddTag(const fig::string& text, const Color& color);
 
+		void OnUpdate(float fDeltaTime) override;
 		void OnRender(Renderer* pRenderer) override;
 
 	private:
@@ -57,6 +58,9 @@ namespace fig::gui
 		fig::sdl::Surface _imageSurface {};
 		fig::sdl::Texture _imageTexture {};
 		fig::io::ImageFuture _pendingCover {};
+
+		bool _bHasError = false;
+		Image* _pErrorIcon {};
 	};
 }
 

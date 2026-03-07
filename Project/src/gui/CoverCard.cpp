@@ -69,9 +69,22 @@ namespace fig::gui
 		static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
 		SetBorder(borderWeights[dist(rng)]);
 
+		Image::SetTexture(TextureStore::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
+
 //		auto pSelectionBorder = new RoundedBorder(this, 8.0f, 6.0f, { 50, 200, 255 });
 //		pSelectionBorder->SetPosition(-1, -1);
 //		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
+	}
+
+	void CoverCard::OnUpdate(float fDeltaTime)
+	{
+		if (_bHasError && !_pErrorIcon)
+		{
+			// Create error icon
+			_pErrorIcon = new Image(this, TextureStore::GetTexture(TextureType::ICON_ERROR));
+			_pErrorIcon->SetPosition((GetWidth() - _pErrorIcon->GetWidth()) / 2, (GetHeight() - _pErrorIcon->GetHeight()) / 2);
+			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
+		}
 	}
 
 	void CoverCard::OnRender(Renderer* pRenderer)
@@ -217,16 +230,23 @@ namespace fig::gui
 		}
 	}
 
-	void CoverCard::SetCoverImage(fig::sdl::Texture texture)
+	void CoverCard::SetCoverImage(fig::sdl::Surface&& texture)
 	{
-		//if (ImageLoader::LoadCoverImage(assetId))
-		//{
-		//	auto coverId = ImageLoader::GetCoverImageID(assetId);
-		//	if (auto pTexture = ImageLoader::GetTexture(GetSDLRenderer(), coverId))
-		//		Image::SetTexture(pTexture);
-		//}
+		auto pRenderer = GetSDLRenderer();
+		auto pTexture = SDL_CreateTextureFromSurface(pRenderer, texture.get());
 
-		Image::SetTexture(texture.get());
+		if (pTexture)
+		{
+			Image::SetTexture(pTexture);
+			_imageTexture.reset(pTexture);
+			_imageSurface = std::move(texture);
+		}
+		else
+		{
+			Image::SetTexture(TextureStore::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
+			_imageTexture.clear();
+			_imageSurface.clear();
+		}
 	}
 
 	void CoverCard::SetPendingCoverImage(fig::io::ImageFuture&& future)
@@ -247,15 +267,11 @@ namespace fig::gui
 		{
 			if (auto result = _pendingCover.get(); result.has_value())
 			{
-				_imageSurface = std::move(result.value());
-
-				auto pRenderer = GetSDLRenderer();
-				auto pTexture = SDL_CreateTextureFromSurface(pRenderer, _imageSurface.get());
-				if (pTexture)
-				{
-					Image::SetTexture(pTexture);
-					_imageTexture.reset(pTexture);
-				}
+				SetCoverImage(std::move(result.value()));
+			}
+			else
+			{
+				_bHasError = true;
 			}
 		}
 	}

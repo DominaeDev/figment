@@ -14,6 +14,14 @@ namespace fig::io
 		ReadError,
 		WriteError,
 		ChecksumError,
+	};
+
+	enum class AsyncLoadError : uint32_t
+	{
+		NoError = 0,
+		LoadError,
+		FileNotFound,
+		FileAccessError,
 		Canceled,
 	};
 }

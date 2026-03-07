@@ -26,7 +26,9 @@ namespace fig::gui
 		CARD_ICON_CHAT_COUNTER,
 		CARD_ICON_FAVORITE_OFF,
 		CARD_ICON_FAVORITE_ON,
-		CARD_DEFAULT_BG,
+		
+		CARD_BACKGROUND_DEFAULT,
+		CARD_BACKGROUND_EMPTY,
 
 		CARD_BORDER_STYLE_01,
 		CARD_BORDER_STYLE_02,
@@ -34,6 +36,8 @@ namespace fig::gui
 		CARD_BORDER_STYLE_04,
 		CARD_BORDER_STYLE_05,
 		CARD_BORDER_STYLE_06,
+
+		ICON_ERROR,
 	};
 
 	class TextureStore
@@ -46,6 +50,7 @@ namespace fig::gui
 
 	private:
 		static bool LoadTexture(Renderer* pRenderer, TextureType textureId, const char* filename);
+		static bool LoadTextureAndMaskCorners(Renderer* pRenderer, TextureType textureId, const char* filename);
 
 		static std::map<TextureType, fig::sdl::Surface> _surfaces;
 		static std::map<TextureType, fig::sdl::Texture> _textures;

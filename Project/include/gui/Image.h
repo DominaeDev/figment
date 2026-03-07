@@ -12,7 +12,6 @@ namespace fig::gui
 		void SetTexture(Texture* pTexture);
 
 	protected:
-		void OnUpdate(float fDeltaTime) override {};
 		void OnRender(Renderer* pRenderer) override;
 
 	protected:

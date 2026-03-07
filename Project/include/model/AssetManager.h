@@ -22,8 +22,8 @@ namespace fig::user
 
 namespace fig::io
 {
-	using ImagePromise = std::promise<std::expected<fig::sdl::Surface, FileError>>;
-	using ImageFuture = std::future<std::expected<fig::sdl::Surface, FileError>>;
+	using ImagePromise = std::promise<std::expected<fig::sdl::Surface, AsyncLoadError>>;
+	using ImageFuture = std::future<std::expected<fig::sdl::Surface, AsyncLoadError>>;
 
 	class AssetManager
 	{
@@ -98,10 +98,9 @@ namespace fig::io
 		std::mutex _assetsMutex; // Protects reading and writing _assets.
 
 	private:
+		/* Asynchronous loading */
 		void __Worker(std::stop_token stop);
-		bool __LoadCoverImageTask(const fig::uuid& characterAssetID, fig::sdl::Surface& outSurface);
-
-		[[nodiscard]] bool IsRequestAlive(const fig::uuid& assetId, const ImagePromise* p) const;
+		AsyncLoadError __LoadCoverImageTask(const fig::uuid& characterAssetID, fig::sdl::Surface& outSurface) noexcept;
 
 		struct PendingRequest {
 			uint64_t id {};
@@ -117,6 +116,8 @@ namespace fig::io
 			}
 		};
 
+		[[nodiscard]] bool IsAsyncRequestAlive(const PendingRequest& request) const;
+
 		std::priority_queue<PendingRequest> _pending;
 		mutable std::mutex _pending_mutex;
 		std::condition_variable _pending_cv;
@@ -124,7 +125,6 @@ namespace fig::io
 		mutable std::mutex _active_mutex;
 		std::atomic<uint64_t>     _next_id { 0 };
 		std::vector<std::jthread> _workers;
-
 	};
 
 }

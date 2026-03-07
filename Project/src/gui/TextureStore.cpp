@@ -11,6 +11,8 @@ void TextureStore::Init(Renderer* pRenderer)
 {
 	LoadTexture(pRenderer, TextureType::BLANK, "./resources/gui/white.png");
 	LoadTexture(pRenderer, TextureType::BORDER, "./resources/gui/line.png");
+	LoadTexture(pRenderer, TextureType::ICON_ERROR, "./resources/gui/icon_error_2.png");
+
 	LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/bg_9grid.png");
 	LoadTexture(pRenderer, TextureType::TEXTBOX_BORDER, "./resources/gui/bg_9grid_border.png");
 	LoadTexture(pRenderer, TextureType::SPEECH_BUBBLE_LEFT_BG, "./resources/gui/speech_bubble_left_bg.png");
@@ -25,7 +27,8 @@ void TextureStore::Init(Renderer* pRenderer)
 	LoadTexture(pRenderer, TextureType::CARD_ICON_CHAT_COUNTER, "./resources/gui/icon_small_chat.png");
 	LoadTexture(pRenderer, TextureType::CARD_BOTTOM_FADE, "./resources/gui/card_bottom_fade.png");
 	LoadTexture(pRenderer, TextureType::CARD_ICON_FAVORITE_OFF, "./resources/gui/card_icon_favorite_off.png");
-	LoadTexture(pRenderer, TextureType::CARD_DEFAULT_BG, "./resources/gui/default_card_bg.png");
+	LoadTexture(pRenderer, TextureType::CARD_BACKGROUND_DEFAULT, "./resources/gui/card_bg_default.png");
+	LoadTextureAndMaskCorners(pRenderer, TextureType::CARD_BACKGROUND_EMPTY, "./resources/gui/card_bg_empty.png");
 
 	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_01, "./resources/card_borders/border_01.png");
 	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_02, "./resources/card_borders/border_02.png");
@@ -33,6 +36,7 @@ void TextureStore::Init(Renderer* pRenderer)
 	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_04, "./resources/card_borders/border_04.png");
 	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_05, "./resources/card_borders/border_05.png");
 	LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_06, "./resources/card_borders/border_06.png");
+	
 }
 
 void TextureStore::Release()
@@ -55,6 +59,35 @@ bool TextureStore::LoadTexture(Renderer* pRenderer, TextureType textureId, const
 		
 		auto& surface = _surfaces[textureId] = fig::sdl::Surface();
 		surface.reset(pSurface);
+	}
+
+	auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+	if (pTexture)
+	{
+		auto& texture = _textures[textureId] = fig::sdl::Texture();
+		texture.reset(pTexture);
+		return true;
+	}
+	return false;
+}
+
+bool TextureStore::LoadTextureAndMaskCorners(Renderer* pRenderer, TextureType textureId, const char* filename)
+{
+	SurfacePtr pSurface;
+	auto itFind = _surfaces.find(textureId);
+	if (itFind != _surfaces.cend())
+		pSurface = itFind->second.get();
+	else
+	{
+		pSurface = IMG_Load(filename);
+		if (not (bool)pSurface)
+			return false; // File not found
+
+		auto& surface = _surfaces[textureId] = fig::sdl::Surface();
+		surface.reset(pSurface);
+
+		if (gui::util::MaskCorners(surface, fig::gui::util::CornerStyle::Card))
+			pSurface = surface.get();
 	}
 
 	auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);

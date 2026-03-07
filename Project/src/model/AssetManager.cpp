@@ -46,7 +46,7 @@ namespace fig::io
 			{
 				PendingRequest request = std::move(const_cast<PendingRequest&>(_pending.top()));
 				_pending.pop();
-				request.promise->set_value(std::unexpected(FileError::Canceled));
+				request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
 			}
 		}
 
@@ -565,46 +565,55 @@ namespace fig::io
 		return false;
 	}
 
-	bool AssetManager::__LoadCoverImageTask(const fig::uuid& characterAssetID, fig::sdl::Surface& outSurface)
+	AsyncLoadError AssetManager::__LoadCoverImageTask(const fig::uuid& characterAssetID, fig::sdl::Surface& outSurface) noexcept
 	{
 		if (auto findCover = FindAsset(characterAssetID, ImageType::CoverImage))
 		{
 			Asset& cover = findCover.value();
-			if (LoadAsset(cover) == FileError::NoError)
+			auto result = LoadAsset(cover);
+			if (result == FileError::NoError)
 			{
 				fig::sdl::Surface surface;
 				if (CreateSurface(cover, surface))
 				{
 					outSurface = std::move(surface);
-					return true;
+					return AsyncLoadError::NoError;
 				}
 			}
+			else if (result == FileError::FileNotFound)
+				return AsyncLoadError::FileNotFound;
+			else
+				return AsyncLoadError::LoadError;
 		}
 
 		// Create cover from portrait
-		if (auto findPortrait = FindAsset(characterAssetID, ImageType::LargePortrait))
+		if constexpr (Enabled)
 		{
-			Asset& portraitAsset = findPortrait.value();
-			if (LoadAsset(portraitAsset) == FileError::NoError)
+			if (auto findPortrait = FindAsset(characterAssetID, ImageType::LargePortrait))
 			{
-				if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
+				Asset& portraitAsset = findPortrait.value();
+				if (LoadAsset(portraitAsset) == FileError::NoError)
 				{
-					auto coverImage = ScaleSurface(portraitImage, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
+					if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
+					{
+						auto coverImage = ScaleSurface(portraitImage, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
 
-					// Round corners
-					MaskCorners(coverImage, CornerStyle::Card);
+						// Round corners
+						MaskCorners(coverImage, CornerStyle::Card);
 
-					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage, characterAssetID);
-					coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
-					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+						// Save cover asset (bitmap)
+						auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage, characterAssetID);
+						coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
+						coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 
-					outSurface = std::move(coverImage);
-					return true;
+						outSurface = std::move(coverImage);
+						return AsyncLoadError::NoError;
+					}
 				}
 			}
 		}
-		return false;
+
+		return AsyncLoadError::FileNotFound;
 	}
 
 	void AssetManager::__Worker(std::stop_token stop)
@@ -625,39 +634,41 @@ namespace fig::io
 				_pending.pop();
 			}
 
-			if (not IsRequestAlive(request.assetId, request.promise.get()))
+			if (not IsAsyncRequestAlive(request))
 			{
-				request.promise->set_value(std::unexpected(FileError::Canceled));
+				request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
 				continue;
 			}
 
 			// Do work
-			bool bResult = false;
+			AsyncLoadError result;
 			fig::sdl::Surface surface;
 			switch (request.task)
 			{
 			case AsyncLoad::Task::LoadImage:
-			{
-				bResult = __LoadCoverImageTask(request.assetId, surface);
-			} break;
+				result = __LoadCoverImageTask(request.assetId, surface);
+				break;
+			default:
+				result = AsyncLoadError::LoadError;
+				break;
 			}
 
-			if (not IsRequestAlive(request.assetId, request.promise.get()))
-			{
-				request.promise->set_value(std::unexpected(FileError::Canceled));
-				continue;
-			}
-
+			if (IsAsyncRequestAlive(request))
 			{	
 				std::scoped_lock<std::mutex> lock(_active_mutex);
 				_active_promises.erase(request.assetId);
 			}
+			else
+			{
+				// Canceled
+				request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
+				continue;
+			}
 
-			// Fulfill promise
-			if (bResult)
+			if (result == AsyncLoadError::NoError)
 				request.promise->set_value(std::move(surface));
 			else
-				request.promise->set_value(std::unexpected(FileError::Canceled));
+				request.promise->set_value(std::unexpected(result));
 		}
 	}
 
@@ -670,7 +681,7 @@ namespace fig::io
 			std::scoped_lock lock(_active_mutex);
 			if (auto it = _active_promises.find(assetId); it != _active_promises.end())
 			{
-				it->second->set_value(std::unexpected(FileError::Canceled));
+				it->second->set_value(std::unexpected(AsyncLoadError::Canceled));
 				_active_promises.erase(it);
 			}
 		}
@@ -710,32 +721,30 @@ namespace fig::io
 		std::scoped_lock lock(_active_mutex);
 		if (auto it = _active_promises.find(assetId); it != _active_promises.end())
 		{
-			it->second->set_value(std::unexpected(FileError::Canceled));
+			it->second->set_value(std::unexpected(AsyncLoadError::Canceled));
 			_active_promises.erase(it);
 		}
 	}
 
 	void AssetManager::CancelAll()
 	{
-        {
-            std::scoped_lock lock(_pending_mutex);
-            while (!_pending.empty())
-			{
-				PendingRequest request = std::move(const_cast<PendingRequest&>(_pending.top()));
-				_pending.pop();
-                request.promise->set_value(std::unexpected(FileError::Canceled));
-            }
+        std::scoped_lock lock(_pending_mutex);
+        while (!_pending.empty())
+		{
+			PendingRequest request = std::move(const_cast<PendingRequest&>(_pending.top()));
+			_pending.pop();
+            request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
         }
         _pending_cv.notify_all();
 	}
 
-	bool AssetManager::IsRequestAlive(const fig::uuid& assetId, const ImagePromise* p) const
+	bool AssetManager::IsAsyncRequestAlive(const PendingRequest& request) const
 	{
 		std::scoped_lock lock(_active_mutex);
-		auto it = _active_promises.find(assetId);
+		auto it = _active_promises.find(request.assetId);
 		if (it == _active_promises.cend())
 			return false;
-		return it != _active_promises.end() && it->second == p;
+		return it != _active_promises.end();
 	}
 
 }

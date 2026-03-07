@@ -433,7 +433,7 @@ namespace fig::gui::util
 		cover.reset(pSurface);
 
 		// Draw background
-		auto pBGImage = TextureStore::GetImage(TextureType::CARD_DEFAULT_BG);
+		auto pBGImage = TextureStore::GetImage(TextureType::CARD_BACKGROUND_DEFAULT);
 		SDL_BlitSurface(pBGImage, NULL, pSurface, NULL);
 
 		auto pScaledImage = ScaleSurface(surface, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
