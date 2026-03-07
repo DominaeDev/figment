@@ -97,7 +97,7 @@ namespace fig::gui
 					| std::ranges::to<std::vector>();
 				assets.DeleteAssets(remove_characters);
 
-				assets.ImportCharacters(fig::path("./import/characters"));
+				assets.ImportCharactersInDirectory(fig::path("./import/characters"), fig::io::AssetManager::CharacterDataFormat::TavernV2);
 				userMngr.GetProfileAssets().SaveModified();
 			}
 		}

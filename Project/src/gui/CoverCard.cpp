@@ -74,6 +74,14 @@ namespace fig::gui
 //		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
 	}
 
+	void CoverCard::OnRender(Renderer* pRenderer)
+	{
+		if (_imageTexture.empty())
+			PollFuture();
+
+		Image::OnRender(pRenderer);
+	}
+
 	void CoverCard::SetLabel(const fig::string& text) noexcept
 	{
 		if (_pLabel)
@@ -219,6 +227,37 @@ namespace fig::gui
 		//}
 
 		Image::SetTexture(texture.get());
+	}
+
+	void CoverCard::SetPendingCoverImage(fig::io::ImageFuture&& future)
+	{
+		if (not future.valid())
+			return;
+
+		_pendingCover = std::move(future);
+		PollFuture();
+	}
+
+	void CoverCard::PollFuture()
+	{
+		if (not _pendingCover.valid())
+			return;
+
+		if (_pendingCover.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+		{
+			if (auto result = _pendingCover.get(); result.has_value())
+			{
+				_imageSurface = std::move(result.value());
+
+				auto pRenderer = GetSDLRenderer();
+				auto pTexture = SDL_CreateTextureFromSurface(pRenderer, _imageSurface.get());
+				if (pTexture)
+				{
+					Image::SetTexture(pTexture);
+					_imageTexture.reset(pTexture);
+				}
+			}
+		}
 	}
 
 }

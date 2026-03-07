@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Image.h"
-#include "fs/ImageSource.h"
+#include "model/AssetManager.h"
 
 namespace fig::gui
 {
@@ -22,13 +22,14 @@ namespace fig::gui
 	class TexturedBorder;
 	class NineGridImage;
 
-	class CoverCard : public Image, public fig::io::IImageSource
+	class CoverCard : public Image
 	{
 	public:
 		CoverCard(Control* pParent, const fig::uuid& assetId);
 
 		void SetBorder(BorderStyle style);
 		void SetCoverImage(fig::sdl::Texture texture);
+		void SetPendingCoverImage(fig::io::ImageFuture&& future);
 
 	protected:
 		void SetLabel(const fig::string& text) noexcept;
@@ -36,11 +37,13 @@ namespace fig::gui
 		void CreateChatCounter(uint32_t count);
 		void AddTag(const fig::string& text, const Color& color);
 
+		void OnRender(Renderer* pRenderer) override;
+
+	private:
+		void PollFuture();
+
 	private:
 		fig::uuid _assetId;
-		fig::sdl::Surface _imageSurface {};
-		fig::sdl::Texture _imageTexture {};
-		fig::sdl::Texture _borderTexture {};
 		StaticText* _pLabel {};
 		StaticText* _pSublabel {};
 		TexturedBorder* _pSimpleBorder {};
@@ -50,6 +53,10 @@ namespace fig::gui
 		NineGridImage* _pFooterFade {};
 		Pointf _tagPosition {};
 		int32_t _tagRows { 1 };
+		
+		fig::sdl::Surface _imageSurface {};
+		fig::sdl::Texture _imageTexture {};
+		fig::io::ImageFuture _pendingCover {};
 	};
 }
 

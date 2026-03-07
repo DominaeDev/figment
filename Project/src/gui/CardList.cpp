@@ -34,6 +34,7 @@ namespace fig::gui
 
 		RemoveChildren(true);
 
+		int32_t priority = 0;
 		if (cardType == CardType::Scenario)
 		{
 			// Find scenarios
@@ -43,6 +44,8 @@ namespace fig::gui
 			for (auto& asset : scenarios)
 			{
 				auto pCard = new ScenarioCard(this, asset.id);
+				auto request = assets.LoadAssetAsync(asset.id, AssetManager::AsyncLoad::Task::LoadImage, priority--);
+				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
 			}
 		}
@@ -56,6 +59,8 @@ namespace fig::gui
 			for (auto& asset : characters)
 			{
 				auto pCard = new CharacterCard(this, asset.id);
+				auto request = assets.LoadAssetAsync(asset.id, AssetManager::AsyncLoad::Task::LoadImage, priority--);
+				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
 			}
 		}

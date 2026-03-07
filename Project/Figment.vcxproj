@@ -353,7 +353,6 @@
     <ClInclude Include="include\fs\FileError.h" />
     <ClInclude Include="include\fs\FileUtility.h" />
     <ClInclude Include="include\fs\ImageLoader.h" />
-    <ClInclude Include="include\fs\ImageSource.h" />
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\TavernCardV2.h" />
     <ClInclude Include="include\fs\Xml.h" />

@@ -135,6 +135,9 @@
     <Filter Include="Source Files\Frontend\GUI\Frames\Screens">
       <UniqueIdentifier>{0b0e7823-493d-4e1c-9c9f-946893298eae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Controls\Cards">
+      <UniqueIdentifier>{0897e582-e3a2-4a2f-a8a6-b5f2d42ad6e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -338,9 +341,6 @@
     <ClCompile Include="src\gui\MainFrame.cpp">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\CharacterCard.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="include\gui\TexturedBorder.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
@@ -364,12 +364,6 @@
     </ClCompile>
     <ClCompile Include="src\model\ScenarioData.cpp">
       <Filter>Source Files\AppModel\Data\Character</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ScenarioCard.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CoverCard.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\NineGridImage.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
@@ -419,8 +413,17 @@
     <ClCompile Include="src\model\ContentDatabase.cpp">
       <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CoverCard.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ScenarioCard.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterCard.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
+    </ClCompile>
     <ClCompile Include="src\fs\ImageLoader.cpp">
-      <Filter>Source Files\Frontend\GUI\Resources</Filter>
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -934,9 +937,6 @@
     <ClInclude Include="include\gui\MainFrame.h">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\CharacterCard.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\TexturedBorder.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
@@ -960,12 +960,6 @@
     </ClInclude>
     <ClInclude Include="include\model\ScenarioData.h">
       <Filter>Source Files\AppModel\Data\Character</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ScenarioCard.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CoverCard.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\util\TypeId.h">
       <Filter>Source Files\AppModel\Common</Filter>
@@ -1030,11 +1024,17 @@
     <ClInclude Include="include\util\RecoverCodeLUT.h">
       <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
-    <ClInclude Include="include\fs\ImageLoader.h">
-      <Filter>Source Files\Frontend\GUI\Resources</Filter>
+    <ClInclude Include="include\gui\CoverCard.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
     </ClInclude>
-    <ClInclude Include="include\fs\ImageSource.h">
-      <Filter>Source Files\Frontend\GUI\Resources</Filter>
+    <ClInclude Include="include\gui\ScenarioCard.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterCard.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\ImageLoader.h">
+      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

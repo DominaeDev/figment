@@ -14,5 +14,6 @@ namespace fig::io
 		ReadError,
 		WriteError,
 		ChecksumError,
+		Canceled,
 	};
 }
