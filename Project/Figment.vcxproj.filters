@@ -422,9 +422,6 @@
     <ClCompile Include="src\gui\CharacterCard.cpp">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
     </ClCompile>
-    <ClCompile Include="src\fs\ImageLoader.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -1032,9 +1029,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterCard.h">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\ImageLoader.h">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,4 @@
 #include <pch.h>
-#include "fs/ImageLoader.h"
 #include "gui/CoverCard.h"
 #include "gui/TexturedBorder.h"
 #include "gui/TextureStore.h"
@@ -103,7 +102,7 @@ namespace fig::gui
 			delete _pLabel;
 		}
 
-		_pLabel = new StaticText(_pFooter, text, FontFace::CardHeader, 24.0, false);
+		_pLabel = new StaticText(_pFooter, text, FontFace::CardHeader, 28.0, false);
 		_pLabel->SetMaxSize(GetWidth() - (Margin * 2), -1);
 		_pLabel->SetSize(GetWidth() - (Margin * 2), 80);
 		_pLabel->SetPosition(Margin, GetHeight() - Margin - 62); // 58
@@ -112,6 +111,12 @@ namespace fig::gui
 		_pLabel->EnableDropShadow(true);
 		_pLabel->EnableWordWrap(false);
 		_pLabel->EnableEllipsis(true);
+
+		if (_pLabel->MeasureText(false).x > _pLabel->GetMaxSize().x)
+		{
+			_pLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 24.0));
+			_pLabel->SetY(_pLabel->GetY() + 4);
+		}
 	}
 
 	void CoverCard::SetSublabel(const fig::string& text) noexcept

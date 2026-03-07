@@ -47,6 +47,7 @@ namespace fig::gui
 		fig::string GetText() const { return _text; }
 
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
+		void SetFont(TTF_Font* pFont) { _pFont = pFont; }
 
 		void SetForegroundColor(Color color) override;
 		void SetBackgroundColor(Color color) override;
@@ -54,7 +55,7 @@ namespace fig::gui
 		void EnableWordWrap(bool bEnable) noexcept { _bWordWrap = bEnable; _bInvalidated = true; }
 		void EnableEllipsis(bool bEnable) noexcept { _bEllipsis = bEnable; _bInvalidated = true; }
 
-		std::pair<int, int> MeasureText() const;
+		Point MeasureText(bool bAllowEllipsis = true) const;
 
 	protected:
 		Rectf GetAlignedRect() const;

@@ -60,12 +60,12 @@ namespace fig::gui::util
 	fig::sdl::Surface LoadImageFromMemory(fig::byte_span data);
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
 	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
-	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface);
+	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha);
 
 	enum class CornerStyle {
 		Card,
 	};
-	bool MaskCorners(fig::sdl::Surface& surface, CornerStyle style);
+	bool MaskCorners(fig::sdl::Surface& surface, fig::gui::MaskType style);
 	void AlphaToMask(fig::path filename);
 
 }

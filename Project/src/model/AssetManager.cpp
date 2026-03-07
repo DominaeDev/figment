@@ -13,10 +13,12 @@
 #include "fs/Serialization.h"
 #include "fs/FileUtility.h"
 #include "fs/CardImporter.h"
+#include "gui/TextureStore.h"
 #include <cassert>
 
 using namespace fig::io::data;
 using namespace fig::util;
+using namespace fig::gui;
 using namespace fig::gui::util;
 
 namespace fig::io
@@ -384,7 +386,7 @@ namespace fig::io
 					// Create cover card
 					if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
 						.transform([](auto img) {
-						return CreateCoverImage(img);
+						return CreateCoverImage(img, false);
 					}))
 					{
 						// Save cover asset (bitmap)
@@ -398,54 +400,27 @@ namespace fig::io
 
 	}
 
+	bool AssetManager::DeleteAsset(const fig::uuid& assetID) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return DeleteAsset_Internal(assetID);
+	}
+
 	uint32_t AssetManager::DeleteAssets(std::span<fig::uuid> assetIDs) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
+		std::set<fig::uuid> allAssetIDs;
+		for (auto& assetID : assetIDs)
+			allAssetIDs.insert_range(FindRelatedAssets(assetID));
 	
 		uint32_t count = 0;
-		for (auto& id : assetIDs)
-			count += DeleteAsset_Internal(id);
-		return count;
-	}
-
-	uint32_t AssetManager::DeleteAsset(const fig::uuid& assetID) noexcept
-	{
-		std::set<fig::uuid> assetIDs;
-		std::set<fig::uuid> openList;
-
-		{
-			std::scoped_lock lock { _assetsMutex };
-
-			// Find all related assets
-			openList.insert(assetID);
-
-			while (not openList.empty())
-			{
-				fig::uuid id = *openList.begin();
-				openList.erase(id);
-				auto itAsset = _assets.find(id);
-				if (itAsset == _assets.end())
-					continue;
-
-				assetIDs.insert(id);
-
-				// Scan children
-				openList.insert_range(_assets
-					| std::views::filter([&id](auto const& kvp) { return kvp.second.parent_id == id; })
-					| std::views::transform([](auto const& kvp) -> fig::uuid { return kvp.second.id; }));
-			}
-		}
-
 		auto& db = GetDatabase();
-
-		// Delete
-		uint32_t count = 0;
-		for (auto& id : assetIDs)
+		for (auto& assetID : allAssetIDs)
 		{
-			if (DeleteAsset_Internal(id))
+			if (DeleteAssetFile(assetID))
 			{
-				db.DeleteAsset(id);
-				++count;
+				db.DeleteAsset(assetID);
+				count++;
 			}
 		}
 		return count;
@@ -453,9 +428,17 @@ namespace fig::io
 
 	bool AssetManager::DeleteAsset_Internal(const fig::uuid& assetID) noexcept
 	{
-		// Find asset and all related assets
-		std::vector<fig::uuid> assetIds;
+		if (DeleteAssetFile(assetID))
+		{
+			auto& db = GetDatabase();
+			db.DeleteAsset(assetID);
+			return false;
+		}
+		return false;
+	}
 
+	bool AssetManager::DeleteAssetFile(const fig::uuid& assetID) noexcept
+	{
 		auto itAsset = _assets.find(assetID);
 		if (itAsset == _assets.end())
 			return false;
@@ -472,6 +455,33 @@ namespace fig::io
 			}
 		}
 		return false;
+	}
+
+	std::set<fig::uuid> AssetManager::FindRelatedAssets(const fig::uuid& assetID) noexcept
+	{
+		std::set<fig::uuid> assetIDs;
+		std::set<fig::uuid> openList;
+
+		// Find all related assets
+		openList.insert(assetID);
+
+		while (not openList.empty())
+		{
+			fig::uuid id = *openList.begin();
+			openList.erase(id);
+			auto itAsset = _assets.find(id);
+			if (itAsset == _assets.end())
+				continue;
+
+			assetIDs.insert(id);
+
+			// Scan children
+			openList.insert_range(_assets
+				| std::views::filter([&id](auto const& kvp) { return kvp.second.parent_id == id; })
+				| std::views::transform([](auto const& kvp) -> fig::uuid { return kvp.second.id; }));
+		}
+
+		return assetIDs;
 	}
 
 	void AssetManager::ImportCharactersInDirectory(fig::path directory, CharacterDataFormat format, size_t max_count)
@@ -509,7 +519,7 @@ namespace fig::io
 					// Create cover card
 					if (auto coverImage = LoadImage(filename)
 						.transform([](auto img) {
-						return CreateCoverImage(img);
+						return CreateCoverImage(img, false);
 					}))
 					{
 						// Save cover asset (bitmap)
@@ -545,7 +555,7 @@ namespace fig::io
 
 		try
 		{
-			fig::gui::SurfacePtr pSurface = SDL_CreateSurface(width, height, depth == 3 ? SDL_PIXELFORMAT_RGB24 : SDL_PIXELFORMAT_RGBA8888);
+			SurfacePtr pSurface = SDL_CreateSurface(width, height, depth == 3 ? SDL_PIXELFORMAT_RGB24 : SDL_PIXELFORMAT_RGBA8888);
 			if (!pSurface)
 				return false;
 
@@ -576,6 +586,9 @@ namespace fig::io
 				fig::sdl::Surface surface;
 				if (CreateSurface(cover, surface))
 				{
+					// Round corners
+					MaskCorners(surface, MaskType::CARD_CORNER_MASK);
+
 					outSurface = std::move(surface);
 					return AsyncLoadError::NoError;
 				}
@@ -597,9 +610,6 @@ namespace fig::io
 					if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
 					{
 						auto coverImage = ScaleSurface(portraitImage, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
-
-						// Round corners
-						MaskCorners(coverImage, CornerStyle::Card);
 
 						// Save cover asset (bitmap)
 						auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage, characterAssetID);

@@ -53,4 +53,54 @@ namespace fig::gui
 	using TexturePtr = SDL_Texture*;
 	using VertexPtr = SDL_Vertex*;
 	using TextEnginePtr = TTF_TextEngine*;
+
+	enum class TextureType
+	{
+		BLANK,
+		BORDER,
+
+		TEXTBOX_BG,
+		TEXTBOX_BORDER,
+
+		SPEECH_BUBBLE_LEFT_BG,
+		SPEECH_BUBBLE_LEFT_BORDER,
+		SPEECH_BUBBLE_CENTER_BG,
+		SPEECH_BUBBLE_CENTER_BORDER,
+		SPEECH_BUBBLE_RIGHT_BG,
+		SPEECH_BUBBLE_RIGHT_BORDER,
+
+		CARD_BORDER,
+		CARD_BOTTOM_FADE,
+		CARD_TAG_BG,
+		CARD_ICON_CHAT_COUNTER,
+		CARD_ICON_FAVORITE_OFF,
+		CARD_ICON_FAVORITE_ON,
+
+		CARD_BACKGROUND_DEFAULT,
+		CARD_BACKGROUND_EMPTY,
+
+		CARD_BORDER_STYLE_01,
+		CARD_BORDER_STYLE_02,
+		CARD_BORDER_STYLE_03,
+		CARD_BORDER_STYLE_04,
+		CARD_BORDER_STYLE_05,
+		CARD_BORDER_STYLE_06,
+
+		ICON_ERROR,
+	};
+
+	enum class MaskType
+	{
+		CARD_CORNER_MASK,
+	};
+
+	struct Mask
+	{
+		std::vector<uint8_t> pixels;
+		size_t width;
+		size_t height;
+		size_t pitch;
+	};
+
+	using MaskPtr = const Mask*;
 }

@@ -6,7 +6,6 @@
 #include "model/UserProfile.h"
 #include "model/AssetManager.h"
 #include "model/ContentDatabase.h"
-#include "fs/ImageLoader.h"
 #include "util/ProfileDatabase.h"
 
 namespace fig::user
@@ -57,7 +56,6 @@ namespace fig::user
 
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 		std::unique_ptr<fig::io::ContentDatabase> _pContentDatabase;
-		std::unique_ptr<fig::io::ImageLoader> _pImageLoader;
 	};
 }
 #endif

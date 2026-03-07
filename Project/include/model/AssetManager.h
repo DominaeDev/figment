@@ -7,6 +7,7 @@
 #include "fs/AssetDatabase.h"
 #include <expected>
 #include <ranges>
+#include <set>
 #include <mutex>
 #include <future>
 
@@ -39,7 +40,7 @@ namespace fig::io
 		const Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateImageAsset(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
 
-		uint32_t DeleteAsset(const fig::uuid& assetID) noexcept;
+		bool DeleteAsset(const fig::uuid& assetID) noexcept;
 		uint32_t DeleteAssets(std::span<fig::uuid> assetIDs) noexcept;
 
 		std::optional<AssetRef> FindAsset(const fig::uuid& id) noexcept;
@@ -49,7 +50,6 @@ namespace fig::io
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
 		auto GetAllCharacters() const noexcept { return _assets | std::views::values | std::views::filter([](auto& a) { return a.asset_type == AssetType::Character; }); }
 		auto GetAllScenarios() const noexcept { return _assets | std::views::values | std::views::filter([](auto& a) { return a.asset_type == AssetType::Scenario; }); }
-
 		std::optional<AssetRef> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
 
 		void SaveModified();
@@ -87,7 +87,8 @@ namespace fig::io
 		bool WriteAsset(Asset& asset);
 		bool UpdateAsset(Asset& asset);
 		bool DeleteAsset_Internal(const fig::uuid& assetID) noexcept;
-
+		bool DeleteAssetFile(const fig::uuid& assetID) noexcept;
+		std::set<fig::uuid> FindRelatedAssets(const fig::uuid& assetId) noexcept;
 	private:
 		fig::uuid _profileID;
 		fig::path _profilePath;

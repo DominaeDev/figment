@@ -1,10 +1,11 @@
 #include <pch.h>
-#include "gui/GUIUtility.h"
 #include <algorithm>
+#include "gui/GUIUtility.h"
 #include "gui/TextureStore.h"
 #include "util/Common.h"
 #include "util/StringUtility.h"
 #include "fs/FileUtility.h"
+
 #include <SDL3_image/SDL_image.h>
 #include <c_resource.h>
 #include <tuple>
@@ -233,7 +234,6 @@ namespace fig::gui::util
 			auto pSurface = IMG_Load(filename.u8string().c_str());
 			if (!pSurface)
 				return std::nullopt;
-
 			return fig::make_cresource<fig::sdl::Surface>(pSurface);
 		}
 		catch (...)
@@ -351,25 +351,15 @@ namespace fig::gui::util
 		}
 	}
 
-	bool MaskCorners(fig::sdl::Surface& surface, CornerStyle style)
+	bool MaskCorners(fig::sdl::Surface& surface, MaskType mask)
 	{
 		auto pImage = surface.get();
 		if (pImage == nullptr || pImage->w <= 0 || pImage->h <= 0)
 			return false;
 
 		// Load mask
-		fig::path maskPath;
-		switch (style)
-		{
-		case CornerStyle::Card:
-			maskPath = fig::path("./resources/masks/card_corners.mask");
-			break;
-		default:
-			return false;
-		}
-
-		auto maybe_mask = fig::io::ReadFile(maskPath); //! @todo cache
-		if (not maybe_mask.has_value())
+		auto pMask = TextureStore::GetMask(mask);
+		if (!pMask)
 			return false;
 
 		// Convert to RGBA
@@ -382,10 +372,10 @@ namespace fig::gui::util
 			}
 		}
 
-		uint8_t* mask_pixels = (uint8_t*)maybe_mask.value().data();
-		size_t mask_width	= toUZ(std::sqrt(toI(maybe_mask.value().size()))); // assumes square mask
-		size_t mask_pitch	= mask_width;
-		size_t corner_size	= mask_width / 2;
+		const uint8_t* mask_pixels = pMask->pixels.data();
+		size_t mask_width = pMask->width;
+		size_t mask_pitch = mask_width;
+		size_t corner_size = mask_width / 2;
 
 		if (SDL_LockSurface(pImage))
 		{
@@ -423,9 +413,9 @@ namespace fig::gui::util
 		return true;
 	}
 
-	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface)
+	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha)
 	{
-		auto pSurface = SDL_CreateSurface(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, SDL_PIXELFORMAT_RGBA8888);
+		auto pSurface = SDL_CreateSurface(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, SDL_PIXELFORMAT_RGB24);
 		if (not (bool)pSurface)
 			return {};
 		
@@ -439,8 +429,16 @@ namespace fig::gui::util
 		auto pScaledImage = ScaleSurface(surface, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
 		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
 
-		// Round corners
-		MaskCorners(cover, CornerStyle::Card);
+		if (bAlpha)
+		{
+			if (auto newSurface = SDL_ConvertSurface(pSurface, SDL_PIXELFORMAT_RGBA8888)) // Add alpha channel
+			{
+				SDL_DestroySurface(pSurface);
+				cover.reset(newSurface);
+
+				MaskCorners(cover, MaskType::CARD_CORNER_MASK);
+			}
+		}
 
 		return cover;
 	}
