@@ -10,7 +10,7 @@
 #include "gui/StaticText.h"
 #include "gui/StatusBar.h"
 #include "gui/TextBox.h"
-#include "gui/IconButton.h"
+#include "gui/ButtonWithIcon.h"
 
 #include "gui/HorizontalSizer.h"
 #include "gui/VerticalSizer.h"

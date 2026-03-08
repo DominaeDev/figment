@@ -168,7 +168,7 @@
     <ClCompile Include="src\fs\TavernCardV2.cpp" />
     <ClCompile Include="src\fs\XmlReader.cpp" />
     <ClCompile Include="src\fs\XmlWriter.cpp" />
-    <ClCompile Include="src\gui\IconButton.cpp" />
+    <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\ButtonBase.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
     <ClCompile Include="src\gui\CardList.cpp" />
@@ -358,7 +358,7 @@
     <ClInclude Include="include\fs\TavernCardV2.h" />
     <ClInclude Include="include\fs\Xml.h" />
     <ClInclude Include="include\gui\GUIConstants.h" />
-    <ClInclude Include="include\gui\IconButton.h" />
+    <ClInclude Include="include\gui\ButtonWithIcon.h" />
     <ClInclude Include="include\gui\ButtonBase.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\TexturedBorder.h" />

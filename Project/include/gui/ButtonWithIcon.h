@@ -9,18 +9,18 @@ namespace fig::gui
 {
 	class NineGridRenderer;
 
-	class IconButton : public ThemedButton
+	class ButtonWithIcon : public ThemedButton
 	{
-		IconButton() = delete;
+		ButtonWithIcon() = delete;
 	public:
-		IconButton(LayoutElement* pParent, TextureType icon);
+		ButtonWithIcon(LayoutElement* pParent, TextureType icon);
 
 	protected:
 		void OnSize() override;
 		void OnButtonState() override;
 
 	private:
-		NineGridRenderer* _pFaceRenderer;
+		NineGridRenderer* _pBGRenderer;
 		Image* _pIcon {};
 	};
 }

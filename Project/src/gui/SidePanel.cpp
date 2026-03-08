@@ -16,19 +16,16 @@ namespace fig::gui
 		auto pLogo = new Image(pHeaderPanel, AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
 		pLogo->SetX(44);
 
-		auto pMenuButton = new Panel(pHeaderPanel);
+		auto pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);
 		pMenuButton->SetSize(36, 36);
 		pMenuButton->SetX(4.0f);
 		pMenuButton->CenterVertically();
-		auto pMenuIcon = new Image(pMenuButton, AppResources::GetTexture(TextureType::ICON_MENU), Colors::Black);
-		pMenuIcon->Center();
 
-		auto pCollapseButton = new Panel(pHeaderPanel);
+		auto pCollapseButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SIDEBAR);
 		pCollapseButton->SetSize(36, 36);
 		pCollapseButton->SetX(GetWidth() - pCollapseButton->GetWidth() - 4.0f);
 		pCollapseButton->CenterVertically();
-		auto pCollapseIcon = new Image(pCollapseButton, AppResources::GetTexture(TextureType::ICON_SIDEBAR), Colors::Black);
-		pCollapseIcon->Center();
+		pCollapseButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(false); });
 
 		auto pMainArea = new Area(this);
 
@@ -40,10 +37,6 @@ namespace fig::gui
 		pTopSizer->Add(pMainArea, -1, Sizer::Expand);
 		pTopSizer->Add(pFooterPanel, 0, Sizer::Expand);
 		
-		auto pButton = new IconButton(this, TextureType::ICON_MENU);
-		pButton->SetPosition(50, 50);
-		pButton->SetSize(100, 50);
-
 		SetSizer(pTopSizer);
 	}
 }
