@@ -31,8 +31,11 @@ namespace fig::gui
 	public:
 		Screen(Frame* pParent);
 
+		void NotifySidePanelShown(bool showing);
+
 	protected:
 		bool OnEvent(Event& event) override;
+		virtual void OnSidePanel(bool show) {};
 		virtual bool OnKeyboardEvent(KeyboardEvent& event) = 0;
 	};
 

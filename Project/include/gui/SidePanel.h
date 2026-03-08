@@ -10,6 +10,12 @@ namespace fig::gui
 	{
 	public:
 		SidePanel(LayoutElement* pParent);
+	
+	protected:
+		void OnAfterLayout() override;
+
+	private:
+		LayoutElement* _pGradient;
 	};
 }
 #endif

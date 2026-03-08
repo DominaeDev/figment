@@ -18,12 +18,14 @@ namespace fig::gui
 
 		TYPE_ID(1);
 	protected:
-		virtual void OnRender(Renderer* pRenderer) override;
+		void OnRender(Renderer* pRenderer) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
+		void OnSidePanel(bool show) override;
 
 	private:
 		CardList* _pCardList {};
+		Control* _pExpandButton;
 	};
 }
 

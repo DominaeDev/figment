@@ -40,4 +40,9 @@ namespace fig::gui
 
 		return false;
 	}
+
+	void Screen::NotifySidePanelShown(bool bShow)
+	{
+		OnSidePanel(bShow);
+	}
 }

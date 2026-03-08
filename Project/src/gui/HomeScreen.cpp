@@ -13,6 +13,13 @@ namespace fig::gui
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
+		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR);
+		pExpandButton->SetSize(36, 36);
+		pExpandButton->SetX(4.0f);
+		pExpandButton->CenterVertically();
+		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
+		_pExpandButton = pExpandButton;
+
 		_pCardList = new CardList(this);
 
 		auto topSizer = new VerticalSizer();
@@ -47,5 +54,10 @@ namespace fig::gui
 //		MainFrame::SetStatusBar(std::format("Duration: {}ms", toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
 
 		InvalidateLayout();
+	}
+
+	void HomeScreen::OnSidePanel(bool bShown)
+	{
+		_pExpandButton->SetVisible(!bShown);
 	}
 }

@@ -211,6 +211,8 @@ namespace fig::gui
 		sizer->Add(_pActiveScreen, -1, Sizer::Expand);
 		_pMainArea->SetSizer(sizer);
 
+		_pActiveScreen->NotifySidePanelShown(_pSidePanel->GetVisible());
+
 		LayoutNow();
 	}
 
@@ -243,6 +245,9 @@ namespace fig::gui
 	{
 		_pSidePanel->SetVisible(bShow);
 		_pSidePanel->EnableLayout(bShow);
+
+		if (_pActiveScreen)
+			_pActiveScreen->NotifySidePanelShown(bShow);
 		InvalidateLayout();
 	}
 }

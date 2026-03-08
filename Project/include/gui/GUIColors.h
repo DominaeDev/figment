@@ -22,6 +22,8 @@ namespace fig::gui
 		inline constexpr Color TextSelectionForeground { 0xFF, 0xFF, 0xFF, 0xFF };
 		inline constexpr Color TextSelectionBackground { 0x99, 0xC9, 0xEF, 0xFF };
 		inline constexpr Color AppBackground { 0xfa, 0xf9, 0xf5, 255 };
+		inline constexpr Color SidePanelBackground { 0xEE, 0xEC, 0xE4, 0xFF };
+		inline constexpr Color SidePanelGradient { 0xe0, 0xdc, 0xcb, 0xFF };
 		inline constexpr Color ChatBackground { 0xfa, 0xf9, 0xf5, 255 };
 		inline constexpr Color MessageBorderDefault { 0x9f, 0x9f, 0x9f, 0xff };
 		inline constexpr Color MessageBackgroundDefault { 0xf4, 0xf4, 0xf4, 0xff };

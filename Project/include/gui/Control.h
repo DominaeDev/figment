@@ -28,7 +28,7 @@ namespace fig::gui
 		void EnableCulling(bool bEnable) { _bCulling = bEnable; }
 
 		bool GetVisible() { return _bVisible; }
-		void SetVisible(bool bVisible) { _bVisible = bVisible; }
+		void SetVisible(bool bVisible);
 
 		bool ProcessEvent(Event& event);
 
@@ -38,6 +38,7 @@ namespace fig::gui
 	protected:
 		virtual void OnRender(Renderer* pRenderer);
 		virtual void OnPostRender() {};
+		virtual void OnVisibility() {};
 		virtual void OnParent();
 		virtual bool OnEvent(Event& event) { return false; }
 

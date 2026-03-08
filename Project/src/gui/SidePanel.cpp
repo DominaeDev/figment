@@ -3,18 +3,23 @@
 #include "gui/AppResources.h"
 #include "gui/MainFrame.h"
 
+using namespace fig::gui::util;
+
 namespace fig::gui
 {
 	SidePanel::SidePanel(LayoutElement* pParent) : Control(pParent)
 	{
 		SetWidth(Constants::GUI::SidePanel::Width);
-		SetBackgroundColor(Color { 0xEE, 0xEC, 0xE4, 0xFF });
+		SetBackgroundColor(Colors::SidePanelBackground);
 
 		auto pHeaderPanel = new Panel(this);
 		pHeaderPanel->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
 		auto pLogo = new Image(pHeaderPanel, AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
 		pLogo->SetX(44);
+
+		auto pGradient = new HorizontalGradient(this, with_alpha(Colors::SidePanelGradient, 0x00), with_alpha(Colors::SidePanelGradient, 0xA0));
+		_pGradient = pGradient;
 
 		auto pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);
 		pMenuButton->SetSize(36, 36);
@@ -29,7 +34,7 @@ namespace fig::gui
 
 		auto pMainArea = new Area(this);
 
-		auto pFooterPanel = new Panel(this);
+		auto pFooterPanel = new Area(this);
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);
 		
 		auto pTopSizer = new VerticalSizer();
@@ -38,5 +43,12 @@ namespace fig::gui
 		pTopSizer->Add(pFooterPanel, 0, Sizer::Expand);
 		
 		SetSizer(pTopSizer);
+	}
+
+	void SidePanel::OnAfterLayout()
+	{
+		const float kGradientSize = 7.0f;
+		_pGradient->SetX(GetWidth() - kGradientSize);
+		_pGradient->SetSize(kGradientSize, GetHeight());
 	}
 }

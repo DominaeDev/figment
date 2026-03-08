@@ -207,4 +207,13 @@ namespace fig::gui
 		}
 		_pBorderRenderer = pCustom;
 	}
+
+	void Control::SetVisible(bool bVisible)
+	{ 
+		if (_bVisible != bVisible)
+		{
+			_bVisible = bVisible;
+			OnVisibility();
+		}
+	}
 }
