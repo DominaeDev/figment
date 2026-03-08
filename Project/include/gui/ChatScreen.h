@@ -42,12 +42,14 @@ namespace fig::gui
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void SetStatusBar(fig::string_view message);
+		void OnSidePanel(bool show) override;
 
 	private:
 
-		ChatScroll* _pChatScroll = nullptr;
-		TextBox* _pTextBox;
-		VariableList* _pVariableList;
+		ChatScroll* _pChatScroll {};
+		TextBox* _pTextBox {};
+		VariableList* _pVariableList {};
+		Control* _pExpandButton {};
 
 		float _fPollingCounter = 0.0f;
 		bool _bStartedChat = false; // Used to trigger greeting

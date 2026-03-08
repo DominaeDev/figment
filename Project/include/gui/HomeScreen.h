@@ -25,7 +25,7 @@ namespace fig::gui
 
 	private:
 		CardList* _pCardList {};
-		Control* _pExpandButton;
+		Control* _pExpandButton {};
 	};
 }
 

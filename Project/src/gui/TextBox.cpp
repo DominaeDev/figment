@@ -1106,6 +1106,8 @@ bool TextBox::HandleMouseDown(float x, float y)
 
 bool TextBox::HandleMouseMotion(float x, float y)
 {
+	bool bHandled = false;
+
 	if (_bIsHighlighting)
 	{
 		/* Set the highlight position */
@@ -1124,8 +1126,11 @@ bool TextBox::HandleMouseMotion(float x, float y)
 
 			SetCursorPosition(pos);
 			highlight_end = _cursor;
+
+			bHandled = true;
 		}
 	}
+
 
 	// Change cursor
 	Pointf pt = { x, y };
@@ -1134,9 +1139,10 @@ bool TextBox::HandleMouseMotion(float x, float y)
 	{
 		_bIBeamCursor = bInRect;
 		Global::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
+		bHandled = true;
 	}
 
-	return true;
+	return bHandled;
 }
 
 bool TextBox::HandleMouseUp(float x, float y)
@@ -1275,14 +1281,25 @@ bool TextBox::OnEvent(Event& event)
 
 	switch (event.type)
 	{
-	case SDL_EVENT_MOUSE_BUTTON_DOWN:
-		return HandleMouseDown(event.button.x, event.button.y);
 
 	case SDL_EVENT_MOUSE_MOTION:
+	{
 		return HandleMouseMotion(event.motion.x, event.motion.y);
-
+	}
+	case SDL_EVENT_MOUSE_BUTTON_DOWN:
+	{
+		auto& rect = GetRect();
+		if (is_inside(rect, event.button.x, event.button.y))
+			return HandleMouseDown(event.button.x, event.button.y);
+		break;
+	}
 	case SDL_EVENT_MOUSE_BUTTON_UP:
-		return HandleMouseUp(event.button.x, event.button.y);
+	{
+		auto& rect = GetRect();
+		if (is_inside(rect, event.button.x, event.button.y))
+			return HandleMouseUp(event.button.x, event.button.y);
+		break;
+	}
 
 	case SDL_EVENT_KEY_DOWN:
 		if (!_bFocused)

@@ -194,6 +194,7 @@ namespace fig::gui
 	{
 		if (_pActiveScreen)
 		{
+			_pActiveScreen->SetVisible(false);
 			// Detach
 			auto pParent = _pActiveScreen->GetParent();
 			if (pParent)
@@ -211,6 +212,7 @@ namespace fig::gui
 		sizer->Add(_pActiveScreen, -1, Sizer::Expand);
 		_pMainArea->SetSizer(sizer);
 
+		_pActiveScreen->SetVisible(true);
 		_pActiveScreen->NotifySidePanelShown(_pSidePanel->GetVisible());
 
 		LayoutNow();

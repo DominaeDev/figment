@@ -11,9 +11,7 @@ namespace fig::gui
 
 	bool ThemedButton::OnEvent(Event& event)
 	{
-		if (GetVisible() and !IsCulled())
-			return HandleMouseEvents(event);
-		return false;
+		return HandleMouseEvents(event);
 	}
 
 	void ThemedButton::SetTheme(const ButtonTheme& theme) noexcept

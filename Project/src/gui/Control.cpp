@@ -176,6 +176,9 @@ namespace fig::gui
 
 	bool Control::ProcessEvent(Event& event)
 	{
+		if (not _bVisible)
+			return false;
+
 		if (OnEvent(event))
 			return true;
 

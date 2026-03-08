@@ -57,14 +57,20 @@ namespace fig::gui
 		SetForegroundColor(Colors::Black);
 		SetBackgroundColor(Colors::AppBackground);
 
-		auto leftPanel = new Panel(this);
+		auto leftPanel = new Area(this);
 		leftPanel->SetSize(200, -1);
 
-		auto centerPanel = new Panel(this);
+		auto pExpandButton = new ButtonWithIcon(leftPanel, TextureType::ICON_SIDEBAR);
+		pExpandButton->SetSize(36, 36);
+		pExpandButton->SetPosition(4.0f, 6.0f);
+		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
+		_pExpandButton = pExpandButton;
+
+		auto centerPanel = new Area(this);
 		centerPanel->SetBackgroundColor(Colors::ChatBackground);
 		centerPanel->SetSize(toF(Constants::GUI::ChatScrollWidth), -1);
 
-		auto rightPanel = new Panel(this);
+		auto rightPanel = new Area(this);
 		rightPanel->SetSize(200, -1);
 		rightPanel->SetMinSize(200, -1);
 
@@ -498,5 +504,10 @@ namespace fig::gui
 		SDL_zero(quit_event);  /* SDL will copy this entire struct! Initialize to keep memory checkers happy. */
 		quit_event.type = SDL_EVENT_QUIT;
 		SDL_PushEvent(&quit_event);
+	}
+
+	void ChatScreen::OnSidePanel(bool bShown)
+	{
+		_pExpandButton->SetVisible(!bShown);
 	}
 }
