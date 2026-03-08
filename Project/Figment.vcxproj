@@ -185,6 +185,7 @@
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
     <ClCompile Include="src\gui\SidePanel.cpp" />
+    <ClCompile Include="src\gui\ThemedButton.cpp" />
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
@@ -356,6 +357,7 @@
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\TavernCardV2.h" />
     <ClInclude Include="include\fs\Xml.h" />
+    <ClInclude Include="include\gui\GUIConstants.h" />
     <ClInclude Include="include\gui\IconButton.h" />
     <ClInclude Include="include\gui\ButtonBase.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
@@ -377,6 +379,7 @@
     <ClInclude Include="include\gui\NineGridImage.h" />
     <ClInclude Include="include\gui\ScrollPanel.h" />
     <ClInclude Include="include\gui\SidePanel.h" />
+    <ClInclude Include="include\gui\ThemedButton.h" />
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />

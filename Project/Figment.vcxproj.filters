@@ -138,6 +138,9 @@
     <Filter Include="Source Files\Frontend\GUI\Controls\Cards">
       <UniqueIdentifier>{0897e582-e3a2-4a2f-a8a6-b5f2d42ad6e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Primitives\Buttons">
+      <UniqueIdentifier>{6325b74e-0c6b-4ac3-8573-b5efbb98cf20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -422,11 +425,14 @@
     <ClCompile Include="src\gui\CharacterCard.cpp">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ButtonBase.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\IconButton.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Primitives\Buttons</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ButtonBase.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives\Buttons</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ThemedButton.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives\Buttons</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1036,11 +1042,17 @@
     <ClInclude Include="include\gui\CharacterCard.h">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ButtonBase.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\IconButton.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Primitives\Buttons</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ButtonBase.h">
+      <Filter>Source Files\Frontend\GUI\Primitives\Buttons</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ThemedButton.h">
+      <Filter>Source Files\Frontend\GUI\Primitives\Buttons</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\GUIConstants.h">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

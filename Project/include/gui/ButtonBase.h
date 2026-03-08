@@ -22,19 +22,21 @@ namespace fig::gui
 		ButtonBase(LayoutElement* pOwner);
 		bool HandleMouseEvents(const Event& event) noexcept;
 
+		virtual void OnButtonState() {}
 		virtual void OnMouseEnter() {}
 		virtual void OnMouseExit() {}
 		virtual void OnButtonDown() {}
 		virtual void OnButtonUp() {}
 
 	protected:
-		enum class State
+		enum class ButtonState
 		{
 			Default,
 			Pressed,
 			Hover,
 			Disabled,
 		} _state {};
+		void SetButtonState(ButtonState state);
 
 	private:
 		ButtonDelegate _fn {};

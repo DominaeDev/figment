@@ -3,22 +3,21 @@
 #pragma once
 
 #include "gui/Control.h"
-#include "gui/ButtonBase.h"
+#include "gui/ThemedButton.h"
 
 namespace fig::gui
 {
 	class NineGridBackgroundRenderer;
 
-	class IconButton : public Control, public ButtonBase
+	class IconButton : public ThemedButton
 	{
 		IconButton() = delete;
 	public:
 		IconButton(LayoutElement* pParent, TextureType icon);
 
 	protected:
-		void OnUpdate(float fElapsed) override;
-		bool OnEvent(Event& event) override;
 		void OnSize() override;
+		void OnButtonState() override;
 
 	private:
 		NineGridBackgroundRenderer* _pFaceRenderer;

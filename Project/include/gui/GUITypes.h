@@ -108,4 +108,18 @@ namespace fig::gui
 	};
 
 	using MaskPtr = const Mask*;
+
+	struct ColorPair
+	{
+		Color foreground;
+		Color background;
+	};
+
+	struct ButtonTheme
+	{
+		ColorPair defaultColor;
+		ColorPair hoverColor;
+		ColorPair pressedColor;
+		ColorPair disabledColor;
+	};
 }

@@ -17,16 +17,16 @@ namespace fig::gui
 
 	void ButtonBase::SetEnabled(bool bEnabled) noexcept
 	{
-		if (bEnabled != (_state == State::Disabled))
+		if (bEnabled != (_state == ButtonState::Disabled))
 		{
-			_state = bEnabled ? State::Default : State::Disabled;
+			SetButtonState(bEnabled ? ButtonState::Default : ButtonState::Disabled);
 			_bMouseDown = false;
 		}		
 	}
 
 	bool ButtonBase::IsEnabled() const noexcept 
 	{ 
-		return _state != State::Disabled; 
+		return _state != ButtonState::Disabled; 
 	}
 
 	void ButtonBase::SetExpandedArea(float size) noexcept
@@ -36,7 +36,7 @@ namespace fig::gui
 
 	bool ButtonBase::HandleMouseEvents(const Event& event) noexcept
 	{
-		if (_state == State::Disabled)
+		if (_state == ButtonState::Disabled)
 			return false;
 
 		auto& rect = _pOwner->GetRect();
@@ -48,7 +48,7 @@ namespace fig::gui
 			{
 				if (not _bMouseInside)
 				{
-					_state = State::Hover;
+					SetButtonState(ButtonState::Hover);
 					_bMouseInside = true;
 					OnMouseEnter();
 				}
@@ -57,7 +57,7 @@ namespace fig::gui
 			{
 				if (_bMouseInside)
 				{
-					_state = State::Default;
+					SetButtonState(ButtonState::Default);
 					_bMouseInside = false;
 					_bMouseDown = false;
 					OnMouseExit();
@@ -77,7 +77,7 @@ namespace fig::gui
 				if (_bMouseDown and !mouseEvent.down and _fn)
 					_fn(); // Click!
 
-				_state = mouseEvent.down ? State::Pressed : State::Hover;
+				SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Hover);
 				_bMouseDown = mouseEvent.down;
 
 				_bMouseDown ? OnButtonDown() : OnButtonUp();
@@ -86,6 +86,12 @@ namespace fig::gui
 		}
 
 		return false;
+	}
+
+	void ButtonBase::SetButtonState(ButtonState state)
+	{
+		_state = state;
+		OnButtonState();
 	}
 
 }
