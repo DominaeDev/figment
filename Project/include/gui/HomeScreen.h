@@ -9,10 +9,10 @@ namespace fig::gui
 {
 	class CardList;
 
-	class HomeFrame : public Screen
+	class HomeScreen : public Screen
 	{
 	public:
-		HomeFrame(Frame* pParent);
+		HomeScreen(Frame* pParent);
 
 		void CreateCards();
 

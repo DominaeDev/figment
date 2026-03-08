@@ -13,7 +13,7 @@
 #include "fs/Serialization.h"
 #include "fs/FileUtility.h"
 #include "fs/CardImporter.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include <cassert>
 
 using namespace fig::io::data;

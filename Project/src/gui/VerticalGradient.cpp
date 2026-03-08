@@ -1,13 +1,13 @@
 #include <pch.h>
 #include "gui/VerticalGradient.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 
 using namespace fig::gui;
 
 VerticalGradient::VerticalGradient(Control* pParent, Color colorTop, Color colorBottom) : Control(pParent)
 {
 	SetColors(colorTop, colorBottom);
-	_pTexture = TextureStore::GetTexture(TextureType::BLANK);
+	_pTexture = AppResources::GetTexture(TextureType::BLANK);
 }
 
 void VerticalGradient::SetColors(Color colorTop, Color colorBottom)

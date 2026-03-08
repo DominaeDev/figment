@@ -2,7 +2,7 @@
 #include "gui/VariableList.h"
 #include "gui/StaticText.h"
 #include "gui/NineGridBackgroundRenderer.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "Constants.h"
 #include "util/StringUtility.h"
 #include <format>
@@ -15,7 +15,7 @@ constexpr float Margin { 8.0f };
 VariableList::VariableList(Control* pParent) : Control(pParent)
 {
 	auto pBG = new NineGridBackgroundRenderer({ 30, 72, 64, 30 });
-	pBG->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
+	pBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
 	pBG->SetColors(Colors::MessageBackgroundDefault, Colors::MessageBorderDefault);
 	pBG->SetCornerSize(6);
 	SetBackgroundRenderer(pBG);

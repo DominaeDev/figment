@@ -18,11 +18,11 @@ namespace fig::gui
 	class TextBox;
 	class VariableList;
 
-	class ChatFrame : public Screen
+	class ChatScreen : public Screen
 	{
 		friend bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor::Context context);
 	public:
-		ChatFrame(Frame* pParent);
+		ChatScreen(Frame* pParent);
 
 		void InitializeModel();
 		void UnloadModel();

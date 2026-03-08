@@ -7,7 +7,7 @@
 #include "util/StringUtility.h"
 #include "llm/LLMUtility.h"
 #include "gui/MainFrame.h"
-#include "gui/ChatFrame.h"
+#include "gui/ChatScreen.h"
 #include "gui/ChatScroll.h"
 #include "gui/TextBox.h"
 #include <map>

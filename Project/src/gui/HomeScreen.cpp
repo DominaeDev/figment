@@ -1,11 +1,11 @@
 #include <pch.h>
-#include "gui/HomeFrame.h"
+#include "gui/HomeScreen.h"
 #include "gui/CardList.h"
 #include "gui/MainFrame.h"
 
 namespace fig::gui
 {
-	HomeFrame::HomeFrame(Frame* pParent) : Screen(pParent)
+	HomeScreen::HomeScreen(Frame* pParent) : Screen(pParent)
 	{
 		SetForegroundColor(Colors::Black);
 		SetBackgroundColor(Colors::AppBackground);
@@ -21,12 +21,12 @@ namespace fig::gui
 		SetSizer(topSizer);
 	}
 
-	void HomeFrame::OnRender(Renderer* pRenderer)
+	void HomeScreen::OnRender(Renderer* pRenderer)
 	{
 		DrawBackground(pRenderer);
 	}
 
-	bool HomeFrame::OnKeyboardEvent(KeyboardEvent& event)
+	bool HomeScreen::OnKeyboardEvent(KeyboardEvent& event)
 	{
 		if (event.pressed) // Press
 		{
@@ -37,7 +37,7 @@ namespace fig::gui
 		return false;
 	}
 
-	void HomeFrame::CreateCards()
+	void HomeScreen::CreateCards()
 	{
 //		auto startTime = std::chrono::steady_clock::now();
 

@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/MainFrame.h"
-#include "gui/HomeFrame.h"
-#include "gui/ChatFrame.h"
+#include "gui/HomeScreen.h"
+#include "gui/ChatScreen.h"
 #include "gui/SidePanel.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
@@ -33,8 +33,8 @@ namespace fig::gui
 		SetSizer(topSizer);
 		s_pInstance = this;
 
-		RegisterScreen<HomeFrame>();
-		RegisterScreen<ChatFrame>();
+		RegisterScreen<HomeScreen>();
+		RegisterScreen<ChatScreen>();
 
 		// Sign in
 		auto& userMngr = Global::GetUserManager();
@@ -105,7 +105,7 @@ namespace fig::gui
 		// Show home screen
 		if (userMngr.IsSignedIn())
 		{
-			auto pScreen = ChangeScreen<HomeFrame>();
+			auto pScreen = ChangeScreen<HomeScreen>();
 			pScreen->CreateCards();
 		}
 
@@ -161,12 +161,12 @@ namespace fig::gui
 
 				if (keyEvent.key == SDLK_1 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
 				{
-					ChangeScreen<HomeFrame>();
+					ChangeScreen<HomeScreen>();
 					return true;
 				}
 				else if (keyEvent.key == SDLK_2 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
 				{
-					ChangeScreen<ChatFrame>();
+					ChangeScreen<ChatScreen>();
 					return true;
 				}
 				else if (keyEvent.key == SDLK_3 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))

@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "gui/NineGridBackgroundRenderer.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "gui/GUIUtility.h"
 
 using namespace fig::gui;

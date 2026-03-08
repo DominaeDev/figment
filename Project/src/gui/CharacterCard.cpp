@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "gui/CharacterCard.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 

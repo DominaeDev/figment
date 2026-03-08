@@ -1,7 +1,7 @@
 #include <pch.h>
 #include <algorithm>
 #include "gui/GUIUtility.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "util/Common.h"
 #include "util/StringUtility.h"
 #include "fs/FileUtility.h"
@@ -358,7 +358,7 @@ namespace fig::gui::util
 			return false;
 
 		// Load mask
-		auto pMask = TextureStore::GetMask(mask);
+		auto pMask = AppResources::GetMask(mask);
 		if (!pMask)
 			return false;
 
@@ -423,7 +423,7 @@ namespace fig::gui::util
 		cover.reset(pSurface);
 
 		// Draw background
-		auto pBGImage = TextureStore::GetImage(TextureType::CARD_BACKGROUND_DEFAULT);
+		auto pBGImage = AppResources::GetImage(TextureType::CARD_BACKGROUND_DEFAULT);
 		SDL_BlitSurface(pBGImage, NULL, pSurface, NULL);
 
 		auto pScaledImage = ScaleSurface(surface, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);

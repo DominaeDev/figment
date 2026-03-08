@@ -3,7 +3,7 @@
 #include "gui/Frame.h"
 #include "model/GlobalStrings.h"
 #include "Constants.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "gui/OldCharacterImageStore.h"
 
 using namespace fig::gui;
@@ -37,7 +37,7 @@ Window::Window(fig::string_view title, int32_t width, int32_t height) :
 	SDL_SetRenderVSync(_renderer.get(), 1);
 
 	// Load textures
-	TextureStore::Init(_renderer.get()); //! @temp
+	AppResources::Init(_renderer.get()); //! @temp
 
 	// Load character images
 	OldCharacterImageStore::Init(_renderer.get());	//! @temp
@@ -46,7 +46,7 @@ Window::Window(fig::string_view title, int32_t width, int32_t height) :
 Window::~Window()
 {
 	OldCharacterImageStore::Release();
-	TextureStore::Release();
+	AppResources::Release();
 }
 
 SDL_WindowID Window::GetWindowID() const

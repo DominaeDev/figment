@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/CoverCard.h"
 #include "gui/TexturedBorder.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "gui/NineGridImage.h"
 #include "gui/RoundedBorder.h"
 
@@ -25,7 +25,7 @@ namespace fig::gui
 		_pFooter = new Area(this);
 		_pFooter->SetSize(GetSize());
 
-		_pSimpleBorder = new TexturedBorder(this, TextureStore::GetTexture(TextureType::CARD_BORDER), 16);
+		_pSimpleBorder = new TexturedBorder(this, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
 		_pSimpleBorder->SetSize(GetSize());
 		_pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 
@@ -33,7 +33,7 @@ namespace fig::gui
 		_pStyledBorder->SetPosition(-16, -16);
 		_pStyledBorder->SetVisible(false);
 
-		_pFooterFade = new NineGridImage(_pFooter, TextureStore::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
+		_pFooterFade = new NineGridImage(_pFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
 		_pFooterFade->SetWidth(GetWidth());
 		_pFooterFade->SetY(GetHeight() - _pFooterFade->GetHeight());
 		_pFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x40 });
@@ -41,7 +41,7 @@ namespace fig::gui
 		_tagPosition.x = kTagLeftMargin;
 		_tagPosition.y = GetHeight() - 35;
 
-//		auto pFavoriteOff = new Image(this, TextureStore::GetTexture(TextureType::CARD_ICON_FAVORITE_OFF));
+//		auto pFavoriteOff = new Image(this, AppResources::GetTexture(TextureType::CARD_ICON_FAVORITE_OFF));
 //		pFavoriteOff->SetPosition(GetWidth() - 42, 8);
 //		pFavoriteOff->SetForegroundColor(Color { 0x60, 0x60, 0x60, 0x60 });
 
@@ -68,7 +68,7 @@ namespace fig::gui
 		static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
 		SetBorder(borderWeights[dist(rng)]);
 
-		Image::SetTexture(TextureStore::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
+		Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 
 //		auto pSelectionBorder = new RoundedBorder(this, 8.0f, 6.0f, { 50, 200, 255 });
 //		pSelectionBorder->SetPosition(-1, -1);
@@ -80,7 +80,7 @@ namespace fig::gui
 		if (_bHasError && !_pErrorIcon)
 		{
 			// Create error icon
-			_pErrorIcon = new Image(this, TextureStore::GetTexture(TextureType::ICON_ERROR));
+			_pErrorIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_ERROR));
 			_pErrorIcon->SetPosition((GetWidth() - _pErrorIcon->GetWidth()) / 2, (GetHeight() - _pErrorIcon->GetHeight()) / 2);
 			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
 		}
@@ -142,11 +142,11 @@ namespace fig::gui
 	{
 		auto position = _tagPosition;
 		
-		auto pCounterBG = new NineGridImage(_pFooter, TextureStore::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		auto pCounterBG = new NineGridImage(_pFooter, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
 		pCounterBG->SetPosition(position);
 		pCounterBG->SetForegroundColor(Color { 0, 0, 0, 0xA0 });
 
-		auto pCounterIcon = new Image(_pFooter, TextureStore::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
+		auto pCounterIcon = new Image(_pFooter, AppResources::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
 		pCounterIcon->SetPosition(position.x + 6, position.y + 6);
 		pCounterIcon->SetForegroundColor(Colors::White);
 		pCounterIcon->SetBackgroundColor(Colors::Transparent);
@@ -180,7 +180,7 @@ namespace fig::gui
 			position = _tagPosition;
 		}
 
-		auto pTagBG = new NineGridImage(_pFooter, TextureStore::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		auto pTagBG = new NineGridImage(_pFooter, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
 		pTagBG->SetPosition(position);
 		pTagBG->SetForegroundColor(Color { color.r, color.g, color.b, 0xA0 });
 
@@ -220,7 +220,7 @@ namespace fig::gui
 			return;
 		};
 
-		if (auto pTexture = TextureStore::GetTexture(textureType))
+		if (auto pTexture = AppResources::GetTexture(textureType))
 		{
 			_pStyledBorder->SetTexture(pTexture);
 			_pStyledBorder->SetSize(toF(pTexture->w), toF(pTexture->h));
@@ -248,7 +248,7 @@ namespace fig::gui
 		}
 		else
 		{
-			Image::SetTexture(TextureStore::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
+			Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 			_imageTexture.clear();
 			_imageSurface.clear();
 		}

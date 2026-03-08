@@ -4,7 +4,7 @@
 #include "gui/GUICommon.h"
 #include "gui/CustomRenderers.h"
 
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "gui/OldCharacterImageStore.h"
 #include "util/StringUtility.h"
 #include "Constants.h"
@@ -92,18 +92,18 @@ ChatMessage::ChatMessage(Control* pParent, Role role, fig::string characterId, f
 		if (bRight)
 		{
 			_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 30, 72, 64, 30 });
-			_pSpeechBubbleBG->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BORDER));
+			_pSpeechBubbleBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BORDER));
 		}
 		else
 		{
 			_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 72, 30, 64, 30 });
-			_pSpeechBubbleBG->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BORDER));
+			_pSpeechBubbleBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BORDER));
 		}
 	}
 	else
 	{
 		_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 30, 30, 64, 30 });
-		_pSpeechBubbleBG->SetTextures(TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), TextureStore::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
+		_pSpeechBubbleBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
 	}
 	_pSpeechBubbleBG->SetCornerSize(7.0f);
 

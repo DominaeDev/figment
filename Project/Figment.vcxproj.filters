@@ -206,7 +206,7 @@
     <ClCompile Include="src\gui\Frame.cpp">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\TextureStore.cpp">
+    <ClCompile Include="src\gui\AppResources.cpp">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\OldCharacterImageStore.cpp">
@@ -329,10 +329,10 @@
     <ClCompile Include="src\util\Security.cpp">
       <Filter>Source Files\Frontend\User\Authentication</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\HomeFrame.cpp">
+    <ClCompile Include="src\gui\HomeScreen.cpp">
       <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ChatFrame.cpp">
+    <ClCompile Include="src\gui\ChatScreen.cpp">
       <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Screen.cpp">
@@ -472,7 +472,7 @@
     <ClInclude Include="include\gui\Frame.h">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\TextureStore.h">
+    <ClInclude Include="include\gui\AppResources.h">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\OldCharacterImageStore.h">
@@ -925,10 +925,10 @@
     <ClInclude Include="include\gui\Screen.h">
       <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\HomeFrame.h">
+    <ClInclude Include="include\gui\HomeScreen.h">
       <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ChatFrame.h">
+    <ClInclude Include="include\gui\ChatScreen.h">
       <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\MainFrame.h">

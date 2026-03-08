@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "gui/TexturedBorder.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "gui/GUIUtility.h"
 
 using namespace fig::gui;

@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "gui/RoundedBorder.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 
 namespace fig::gui
 {
@@ -9,7 +9,7 @@ namespace fig::gui
 		_radius(radius),
 		_color(color)
 	{
-		_pTexture = TextureStore::GetTexture(TextureType::BORDER);
+		_pTexture = AppResources::GetTexture(TextureType::BORDER);
 	}
 
 	void RoundedBorder::OnRender(Renderer* pRenderer)

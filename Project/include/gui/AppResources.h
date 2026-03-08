@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	class TextureStore
+	class AppResources
 	{
 	public:
 		static void Init(Renderer* pRenderer);

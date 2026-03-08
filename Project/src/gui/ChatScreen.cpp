@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "gui/ChatFrame.h"
+#include "gui/ChatScreen.h"
 
 #include "gui/MainFrame.h"
 #include "gui/GUICommon.h"
@@ -7,7 +7,7 @@
 #include "gui/ChatScroll.h"
 #include "gui/ChatMessage.h"
 #include "gui/StatusBar.h"
-#include "gui/TextureStore.h"
+#include "gui/AppResources.h"
 #include "gui/VariableList.h"
 #include "model/AppState.h"
 #include "model/ChatCommands.h"
@@ -52,7 +52,7 @@ constexpr ChatOptions DefaultChatOptions {
 
 namespace fig::gui
 {
-	ChatFrame::ChatFrame(Frame* pParent) : Screen(pParent)
+	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
 		SetForegroundColor(Colors::Black);
 		SetBackgroundColor(Colors::AppBackground);
@@ -100,7 +100,7 @@ namespace fig::gui
 		auto pTextBoxBG = new NineGridBackgroundRenderer();
 		pTextBoxBG->SetCornerSize(10.0f);
 		pTextBoxBG->SetColors(Colors::White, Color { 0xb9, 0xb2, 0x8f, 0xFF });
-		pTextBoxBG->SetTextures(TextureStore::GetTexture(TextureType::TEXTBOX_BG), TextureStore::GetTexture(TextureType::TEXTBOX_BORDER));
+		pTextBoxBG->SetTextures(AppResources::GetTexture(TextureType::TEXTBOX_BG), AppResources::GetTexture(TextureType::TEXTBOX_BORDER));
 		_pTextBox->SetBackgroundRenderer(pTextBoxBG);
 
 		_pTextBox->SetFocus(true);
@@ -117,7 +117,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void ChatFrame::OnUpdate(float fDeltaTime)
+	void ChatScreen::OnUpdate(float fDeltaTime)
 	{
 		if (_bStartedChat)
 		{
@@ -140,12 +140,12 @@ namespace fig::gui
 #endif
 	}
 
-	void ChatFrame::OnRender(Renderer* pRenderer)
+	void ChatScreen::OnRender(Renderer* pRenderer)
 	{
 		DrawBackground(pRenderer);
 	}
 
-	void ChatFrame::InitializeModel()
+	void ChatScreen::InitializeModel()
 	{
 		auto& engine = Global::GetLLMEngine();
 
@@ -170,7 +170,7 @@ namespace fig::gui
 		}
 	}
 
-	void ChatFrame::UnloadModel()
+	void ChatScreen::UnloadModel()
 	{
 		auto& engine = Global::GetLLMEngine();
 		if (engine.IsInitialized())
@@ -184,7 +184,7 @@ namespace fig::gui
 		}
 	}
 
-	void ChatFrame::StartChat()
+	void ChatScreen::StartChat()
 	{
 		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
@@ -211,12 +211,12 @@ namespace fig::gui
 		}
 	}
 
-	void ChatFrame::SetStatusBar(fig::string_view message)
+	void ChatScreen::SetStatusBar(fig::string_view message)
 	{
 		MainFrame::GetInstance().SetStatusBar(toStr(message));
 	}
 
-	bool ChatFrame::OnCommand(ParsedChatCommand cmd)
+	bool ChatScreen::OnCommand(ParsedChatCommand cmd)
 	{
 		return ChatCommandExecutor::Execute(cmd,
 			ChatCommandExecutor::Context {
@@ -226,7 +226,7 @@ namespace fig::gui
 	}
 
 #if ENABLE_AUTO_CHAT
-	void ChatFrame::AutoChat()
+	void ChatScreen::AutoChat()
 	{
 		auto& engine = Global::GetLLMEngine();
 		static std::mt19937 rng {};
@@ -282,7 +282,7 @@ namespace fig::gui
 	}
 #endif
 
-	void ChatFrame::PollStatus()
+	void ChatScreen::PollStatus()
 	{
 		auto pChannel = Global::GetLLMEngine().GetStatusChannel();
 		if (!pChannel)
@@ -349,7 +349,7 @@ namespace fig::gui
 		}
 	}
 
-	bool ChatFrame::OnKeyboardEvent(KeyboardEvent& event)
+	bool ChatScreen::OnKeyboardEvent(KeyboardEvent& event)
 	{
 		bool bModNone = event.modifiers == KeyModifiers::None;
 
@@ -460,7 +460,7 @@ namespace fig::gui
 		return false;
 	}
 
-	void ChatFrame::EnqueueCommand(ParsedChatCommand cmd)
+	void ChatScreen::EnqueueCommand(ParsedChatCommand cmd)
 	{
 		auto pLLM = Global::GetLLMInstance();
 
@@ -473,7 +473,7 @@ namespace fig::gui
 			OnCommand(cmd);
 	}
 
-	void ChatFrame::NextQueuedCommand()
+	void ChatScreen::NextQueuedCommand()
 	{
 		while (!_commandQueue.empty())
 		{
@@ -485,7 +485,7 @@ namespace fig::gui
 		}
 	}
 
-	void ChatFrame::Close()
+	void ChatScreen::Close()
 	{
 		SDL_Event quit_event;
 		SDL_zero(quit_event);  /* SDL will copy this entire struct! Initialize to keep memory checkers happy. */
