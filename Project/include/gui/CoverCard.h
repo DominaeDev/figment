@@ -37,7 +37,7 @@ namespace fig::gui
 		void CreateChatCounter(uint32_t count);
 		void AddTag(const fig::string& text, const Color& color);
 
-		void OnUpdate(float fDeltaTime) override;
+		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 
 	private:

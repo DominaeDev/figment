@@ -36,6 +36,30 @@ namespace fig::gui::util
 		};
 	}
 
+	inline constexpr bool is_inside(const fig::gui::Rect& rect, int x, int y, int expand = 0)
+	{
+		return x - expand >= rect.x and x + expand < rect.x + rect.w
+			and y - expand >= rect.y and y + expand < rect.y + rect.h;
+	}
+
+	inline constexpr bool is_inside(const fig::gui::Rectf& rect, float x, float y, float expand = 0.0f)
+	{
+		return x - expand >= rect.x and x + expand< rect.x + rect.w
+			and y - expand >= rect.y and y + expand< rect.y + rect.h;
+	}
+
+	inline constexpr bool is_inside(const fig::gui::Rect& rect, const fig::gui::Point& p, int expand = 0)
+	{
+		return p.x - expand >= rect.x and p.x + expand< rect.x + rect.w
+			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
+	}
+
+	inline constexpr bool is_inside(const fig::gui::Rectf& rect, const fig::gui::Pointf& p, float expand = 0.0f)
+	{
+		return p.x - expand >= rect.x and p.x + expand< rect.x + rect.w
+			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
+	}
+
 	bool is_defined(fig::gui::Color color);
 	fig::gui::Color add_rgb(fig::gui::Color colorA, fig::gui::Color colorB);
 	fig::gui::Color add_rgb(fig::gui::Color colorA, int value);

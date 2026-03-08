@@ -87,11 +87,11 @@ SDL_AppResult SDL_AppIterate(void* state)
     Uint64 delta = now - lastTick;
 	lastTick = now;
 
-	float fDeltaTime = static_cast<float>(delta) / 1000.0f;
+	float fElapsed = static_cast<float>(delta) / 1000.0f;
 
 	if (pAppState->pMainWindow)
 	{
-		pAppState->pMainWindow->Update(fDeltaTime);
+		pAppState->pMainWindow->Update(fElapsed);
 		pAppState->pMainWindow->Render();
 	}
 

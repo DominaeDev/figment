@@ -172,10 +172,10 @@ std::tuple<fig::string, fig::string> ChatScroll::GetLastMessage() const
 	return std::make_tuple(message.responseId, message.subMessageId);
 }
 
-void ChatScroll::OnUpdate(float fDeltaTime)
+void ChatScroll::OnUpdate(float fElapsed)
 {
 	// Poll LLM for new messages
-	_fPollTimer += fDeltaTime;
+	_fPollTimer += fElapsed;
 	if (_fPollTimer >= POLL_INTERVAL)
 	{
 		_fPollTimer = 0.0f;
@@ -185,7 +185,7 @@ void ChatScroll::OnUpdate(float fDeltaTime)
 	// Animated scrolling
 	if (_fAnimatedScroll > 0.0f)
 	{
-		_fAnimatedScroll -= _fAnimatedScroll * fDeltaTime * ANIMATED_SCROLL_SPEED;
+		_fAnimatedScroll -= _fAnimatedScroll * fElapsed * ANIMATED_SCROLL_SPEED;
 		if (_fAnimatedScroll < 1.0f)
 			_fAnimatedScroll = 0.0f;
 		_pScrollSizer->SetOffset(_fScrollY + _fAnimatedScroll);

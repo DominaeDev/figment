@@ -8,7 +8,7 @@ namespace fig::gui
 	class CustomRenderer
 	{
 	public:
-		virtual void Render(Renderer* pRenderer, Rectf rect) = 0;
+		virtual void Render(Renderer* pRenderer, const Rectf& rect) = 0;
 		virtual ~CustomRenderer() = default;
 	};
 }

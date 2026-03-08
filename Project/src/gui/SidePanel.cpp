@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/SidePanel.h"
 #include "gui/AppResources.h"
+#include "gui/MainFrame.h"
 
 namespace fig::gui
 {
@@ -39,6 +40,10 @@ namespace fig::gui
 		pTopSizer->Add(pMainArea, -1, Sizer::Expand);
 		pTopSizer->Add(pFooterPanel, 0, Sizer::Expand);
 		
+		auto pButton = new IconButton(this, TextureType::ICON_MENU);
+		pButton->SetPosition(50, 50);
+		pButton->SetSize(100, 50);
+
 		SetSizer(pTopSizer);
 	}
 }

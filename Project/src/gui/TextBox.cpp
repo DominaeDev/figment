@@ -76,7 +76,7 @@ TTF_Text* TextBox::GetRenderedText()
 	return _flags.IsSet(Flag::Password) && _pPassword ? _pPassword : _pText;
 }
 
-void TextBox::OnUpdate(float fDeltaTime)
+void TextBox::OnUpdate(float fElapsed)
 {
 	uint64_t now = SDL_GetTicks();
 	if ((now - _last_cursor_change) >= CursorBlinkIntervalMS)

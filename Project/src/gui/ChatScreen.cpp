@@ -117,7 +117,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void ChatScreen::OnUpdate(float fDeltaTime)
+	void ChatScreen::OnUpdate(float fElapsed)
 	{
 		if (_bStartedChat)
 		{
@@ -131,7 +131,7 @@ namespace fig::gui
 		}
 
 		// Poll llm status
-		_fPollingCounter += fDeltaTime;
+		_fPollingCounter += fElapsed;
 		if (_fPollingCounter > 0.1f)
 			PollStatus();
 

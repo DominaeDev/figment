@@ -26,7 +26,7 @@ namespace fig::gui
 		std::tuple<fig::string, fig::string> GetLastMessage() const;
 
 	protected:
-		void OnUpdate(float fDeltaTime) override;
+		void OnUpdate(float fElapsed) override;
 		bool OnEvent(Event& event) override;
 		void OnAfterLayout() override;
 		void OnAddedChild(LayoutElement* pChild) override;

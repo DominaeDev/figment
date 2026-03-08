@@ -19,7 +19,7 @@ namespace fig::gui
 
 	protected:
 		void OnRender(Renderer* pRenderer) override;
-		void OnUpdate(float fDeltaTime) override {};
+		void OnUpdate(float fElapsed) override {};
 
 	protected:
 		std::array<float, 4> _cornerPixels { 16.0f, 16.0f, 16.0f, 16.0f };

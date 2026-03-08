@@ -6,6 +6,6 @@ namespace fig::gui
 	{
 	public:
 		virtual ~IUpdateable() = default;
-		virtual void Update(float fDeltaTime) = 0;
+		virtual void Update(float fElapsed) = 0;
 	};
 }

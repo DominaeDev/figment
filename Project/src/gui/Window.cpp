@@ -54,9 +54,9 @@ SDL_WindowID Window::GetWindowID() const
 	return SDL_GetWindowID(_window.get());
 }
 
-void Window::Update(float fDeltaTime)
+void Window::Update(float fElapsed)
 {
-	_pFrame->Update(fDeltaTime);
+	_pFrame->Update(fElapsed);
 }
 
 void Window::Render()

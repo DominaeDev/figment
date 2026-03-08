@@ -12,7 +12,7 @@ namespace fig::gui
 		void SetColors(Color colorTop, Color colorBottom);
 
 	protected:
-		void OnUpdate(float fDeltaTime) override {};
+		void OnUpdate(float fElapsed) override {};
 		void OnRender(Renderer* pRenderer) override;
 
 		void RefreshGeometry(Rectf rect);

@@ -210,9 +210,9 @@ void LayoutElement::OnParent()
 	SetPosition(_position);
 }
 
-void LayoutElement::Update(float fDeltaTime)
+void LayoutElement::Update(float fElapsed)
 {
-	OnUpdate(fDeltaTime);
+	OnUpdate(fElapsed);
 }
 
 void LayoutElement::InvalidateLayout()

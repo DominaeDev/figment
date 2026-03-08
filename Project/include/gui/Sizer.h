@@ -61,7 +61,7 @@ namespace fig::gui
 		}
 
 		virtual void OnLayout(Rectf rect) = 0;
-		void Update(float fDeltaTime) override {};
+		void Update(float fElapsed) override {};
 
 	private:
 		std::vector<LayoutInfo> _items;

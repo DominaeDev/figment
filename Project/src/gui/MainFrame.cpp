@@ -124,7 +124,7 @@ namespace fig::gui
 		_screensByType.clear();
 	}
 
-	void MainFrame::OnUpdate(float fDeltaTime)
+	void MainFrame::OnUpdate(float fElapsed)
 	{
 	}
 

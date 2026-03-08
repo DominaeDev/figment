@@ -61,7 +61,7 @@ namespace fig::gui
 		Rectf GetAlignedRect() const;
 		void InvalidateText();
 
-		void OnUpdate(float fDeltaTime) override;
+		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 		void OnParent() override;
 

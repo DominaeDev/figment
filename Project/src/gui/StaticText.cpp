@@ -63,7 +63,7 @@ namespace fig::gui
 		_bInvalidated = true;
 	}
 
-	void StaticText::OnUpdate(float fDeltaTime)
+	void StaticText::OnUpdate(float fElapsed)
 	{
 		if (_bInvalidated)
 		{

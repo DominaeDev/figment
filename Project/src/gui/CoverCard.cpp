@@ -75,7 +75,7 @@ namespace fig::gui
 //		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
 	}
 
-	void CoverCard::OnUpdate(float fDeltaTime)
+	void CoverCard::OnUpdate(float fElapsed)
 	{
 		if (_bHasError && !_pErrorIcon)
 		{

@@ -50,7 +50,7 @@ namespace fig::gui
 		void Redo();
 
 	protected:
-		void OnUpdate(float fDeltaTime) override;
+		void OnUpdate(float fElapsed) override;
 		void OnRender(RendererPtr pRenderer) override;
 		bool OnEvent(Event& event) override;
 		void OnSize() override;

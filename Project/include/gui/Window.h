@@ -24,7 +24,7 @@ namespace fig::gui
 		SDL_WindowID GetWindowID() const;
 
 		void Render();
-		void Update(float fDeltaTime);
+		void Update(float fElapsed);
 		void SetTitle(fig::string_view title);
 		
 		template <typename T>

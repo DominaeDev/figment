@@ -11,9 +11,11 @@ namespace fig::gui
 		NineGridBackgroundRenderer(int cornerPixels = 64);
 		NineGridBackgroundRenderer(std::array<float, 4> corners);
 
-		void Render(Renderer* pRenderer, Rectf rect);
+		void Render(Renderer* pRenderer, const Rectf& rect) override;
 		void SetCornerSize(float cornerSize);
+		void SetColor(Color bgColor);
 		void SetColors(Color bgColor, Color borderColor);
+		void SetTexture(Texture* bgTexture);
 		void SetTextures(Texture* bgTexture, Texture* borderTexture);
 
 	private:

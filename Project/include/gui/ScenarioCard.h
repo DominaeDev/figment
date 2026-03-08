@@ -13,7 +13,7 @@ namespace fig::gui
 		ScenarioCard(LayoutElement* pParent, const fig::uuid& scenarioId);
 
 	protected:
-		void OnUpdate(float fDeltaTime) override {};
+		void OnUpdate(float fElapsed) override {};
 
 	private:
 		fig::uuid _scenarioId;

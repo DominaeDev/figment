@@ -70,7 +70,7 @@ namespace fig::gui
 
 		void ChangeScreen(Screen* pScreen);
 
-		virtual void OnUpdate(float fDeltaTime) override;
+		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 		
 		bool OnEvent(SDL_Event& event) override;

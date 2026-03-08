@@ -30,7 +30,7 @@ namespace fig::gui
 		delete _pBGRenderer;
 	}
 
-	void Control::Update(float fDeltaTime)
+	void Control::Update(float fElapsed)
 	{
 		if (_bCulled)
 			return;
@@ -39,11 +39,11 @@ namespace fig::gui
 			Layout();
 
 		// Update this
-		OnUpdate(fDeltaTime);
+		OnUpdate(fElapsed);
 
 		// Update children
 		for (auto& child : _children)
-			child->Update(fDeltaTime);
+			child->Update(fElapsed);
 	}
 
 	void Control::Render(Renderer* pRenderer)

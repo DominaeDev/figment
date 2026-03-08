@@ -15,7 +15,7 @@ namespace fig::gui
 	public:
 		virtual ~LayoutElement();
 
-		virtual void Update(float fDeltaTime);
+		virtual void Update(float fElapsed);
 
 		inline Rectf& GetRect() noexcept { return _rect; }
 		inline const Rectf& GetRect() const noexcept { return _rect; }
@@ -76,7 +76,7 @@ namespace fig::gui
 
 		virtual void OnSize();
 		virtual void OnParent();
-		virtual void OnUpdate(float fDeltaTime) {};
+		virtual void OnUpdate(float fElapsed) {};
 		virtual void OnAfterLayout() {};
 		virtual void OnAddedChild(LayoutElement* pChild) {}
 		virtual void OnRemovedChild(LayoutElement* pChild) {}

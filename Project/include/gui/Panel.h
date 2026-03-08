@@ -10,7 +10,7 @@ namespace fig::gui
 		Panel(LayoutElement* pParent);
 
 	protected:
-		void OnUpdate(float fDeltaTime) override {};
+		void OnUpdate(float fElapsed) override {};
 		void OnRender(Renderer* pRenderer) override;
 	};
 }

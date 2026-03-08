@@ -16,7 +16,7 @@ NineGridBackgroundRenderer::NineGridBackgroundRenderer(std::array<float, 4> corn
 	_cornerPixels = corners;
 }
 
-void NineGridBackgroundRenderer::Render(Renderer* pRenderer, Rectf rect)
+void NineGridBackgroundRenderer::Render(Renderer* pRenderer, const Rectf& rect)
 {
 	auto expandedRect = expand_rect(rect, 5.0f);
 	
@@ -33,6 +33,16 @@ void NineGridBackgroundRenderer::Render(Renderer* pRenderer, Rectf rect)
 		SDL_SetTextureAlphaMod(_pBorderTexture, _borderColor.a);
 		SDL_RenderTexture9Grid(pRenderer, _pBorderTexture, nullptr, _cornerPixels[0], _cornerPixels[1], _cornerPixels[2], _cornerPixels[3], _cornerSize / 20.0f, &expandedRect);
 	}
+}
+
+void NineGridBackgroundRenderer::SetColor(Color bgColor)
+{
+	_bgColor = bgColor;
+}
+
+void NineGridBackgroundRenderer::SetTexture(Texture* pBGTexture)
+{
+	_pBGTexture = pBGTexture;
 }
 
 void NineGridBackgroundRenderer::SetColors(Color bgColor, Color borderColor)
