@@ -14,7 +14,7 @@ namespace fig::gui
 		Area(LayoutElement* pParent);
 
 	protected:
-		void OnUpdate(float fElapsed) override {};
+		void OnUpdate(float fElapsed) override {}
 		void OnRender(Renderer* pRenderer) override {}
 	};
 }

@@ -28,6 +28,7 @@ namespace fig::gui
 	Control::~Control()
 	{
 		delete _pBGRenderer;
+		delete _pBorderRenderer;
 	}
 
 	void Control::Update(float fElapsed)
@@ -71,6 +72,8 @@ namespace fig::gui
 		// Draw this
 		OnRender(pRenderer);
 
+		DrawBorder(pRenderer);
+
 		// Draw children
 		for (auto& child : _children)
 		{
@@ -100,7 +103,6 @@ namespace fig::gui
 	void Control::OnRender(Renderer* pRenderer)
 	{
 		DrawBackground(pRenderer);
-		DrawBorder(pRenderer);
 	}
 
 	void Control::DrawBorder(Renderer* pRenderer)

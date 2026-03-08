@@ -4,10 +4,10 @@
 
 namespace fig::gui
 {
-	class RoundedBackgroundRenderer : public CustomRenderer
+	class RoundedFillRenderer : public CustomRenderer
 	{
 	public:
-		RoundedBackgroundRenderer(float radius, Color color);
+		RoundedFillRenderer(float radius, Color color);
 
 		void Render(Renderer* pRenderer, Rectf rect);
 		void SetColor(Color color);

@@ -97,11 +97,18 @@ namespace fig::gui
 			EnqueueCommand(ChatCommands::Parse(text));
 		});
 
-		auto pTextBoxBG = new NineGridBackgroundRenderer();
+		auto pTextBoxBG = new NineGridRenderer();
 		pTextBoxBG->SetCornerSize(10.0f);
-		pTextBoxBG->SetColors(Colors::White, Color { 0xb9, 0xb2, 0x8f, 0xFF });
-		pTextBoxBG->SetTextures(AppResources::GetTexture(TextureType::TEXTBOX_BG), AppResources::GetTexture(TextureType::TEXTBOX_BORDER));
+		pTextBoxBG->SetExtend(5.0f);
+		pTextBoxBG->SetColor(Colors::White);
+		pTextBoxBG->SetTexture(AppResources::GetTexture(TextureType::TEXTBOX_BG));
 		_pTextBox->SetBackgroundRenderer(pTextBoxBG);
+		auto pTextBoxBorder = new NineGridRenderer();
+		pTextBoxBorder->SetCornerSize(10.0f);
+		pTextBoxBorder->SetExtend(5.0f);
+		pTextBoxBorder->SetColor(Color { 0xb9, 0xb2, 0x8f, 0xFF });
+		pTextBoxBorder->SetTexture(AppResources::GetTexture(TextureType::TEXTBOX_BORDER));
+		_pTextBox->SetBorderRenderer(pTextBoxBorder);
 
 		_pTextBox->SetFocus(true);
 

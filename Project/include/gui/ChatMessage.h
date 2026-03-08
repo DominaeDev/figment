@@ -8,7 +8,7 @@ namespace fig::gui
 {
 	class Panel;
 	class StaticText;
-	class NineGridBackgroundRenderer;
+	class NineGridRenderer;
 
 	class ChatMessage : public Control
 	{
@@ -33,7 +33,8 @@ namespace fig::gui
 		Panel* _pMessagePanel;
 		StaticText* _pMessageText = nullptr;
 		StaticText* _pNameText = nullptr;
-		NineGridBackgroundRenderer* _pSpeechBubbleBG;
+		NineGridRenderer* _pSpeechBubbleBG = nullptr;
+		NineGridRenderer* _pSpeechBubbleBorder = nullptr;
 
 		Role _role = Role::Undefined;
 		bool _bShowAvatar = false;

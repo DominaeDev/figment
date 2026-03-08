@@ -5,22 +5,22 @@
 
 namespace fig::gui
 {
-	class NineGridBackgroundRenderer : public CustomRenderer
+	class NineGridRenderer : public CustomRenderer
 	{
 	public:
-		NineGridBackgroundRenderer(int cornerPixels = 64);
-		NineGridBackgroundRenderer(std::array<float, 4> corners);
+		NineGridRenderer(int cornerPixels = 64);
+		NineGridRenderer(std::array<float, 4> corners);
 
 		void Render(Renderer* pRenderer, const Rectf& rect) override;
-		void SetCornerSize(float cornerSize);
 		void SetColor(Color bgColor);
-		void SetColors(Color bgColor, Color borderColor);
 		void SetTexture(Texture* bgTexture);
-		void SetTextures(Texture* bgTexture, Texture* borderTexture);
+		void SetCornerSize(float cornerSize);
+		void SetExtend(float size);
 
 	private:
 		std::array<float, 4> _cornerPixels = { 64, 64, 64, 64 };
-		float _cornerSize = 20.0f;
+		float _fCornerSize = 20.0f;
+		float _fExtend = 0.0f;
 		Color _bgColor {};
 		Color _borderColor {};
 		Texture* _pBGTexture = nullptr;

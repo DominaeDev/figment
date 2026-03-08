@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/VariableList.h"
 #include "gui/StaticText.h"
-#include "gui/NineGridBackgroundRenderer.h"
+#include "gui/NineGridRenderer.h"
 #include "gui/AppResources.h"
 #include "Constants.h"
 #include "util/StringUtility.h"
@@ -14,11 +14,19 @@ constexpr float Margin { 8.0f };
 
 VariableList::VariableList(LayoutElement* pParent) : Control(pParent)
 {
-	auto pBG = new NineGridBackgroundRenderer({ 30, 72, 64, 30 });
-	pBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
-	pBG->SetColors(Colors::MessageBackgroundDefault, Colors::MessageBorderDefault);
+	auto pBG = new NineGridRenderer({ 30, 72, 64, 30 });
+	pBG->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG));
+	pBG->SetColor(Colors::MessageBackgroundDefault);
 	pBG->SetCornerSize(6);
+	pBG->SetExtend(5);
 	SetBackgroundRenderer(pBG);
+
+	auto pBorder = new NineGridRenderer({ 30, 72, 64, 30 });
+	pBorder->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
+	pBorder->SetColor(Colors::MessageBorderDefault);
+	pBorder->SetCornerSize(6);
+	pBorder->SetExtend(5);
+	SetBorderRenderer(pBorder);
 
 	SetForegroundColor(Colors::TextForeground);
 	SetBackgroundColor(Colors::MessageBackgroundDefault);

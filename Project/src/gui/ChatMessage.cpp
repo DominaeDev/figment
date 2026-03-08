@@ -10,7 +10,6 @@
 #include "Constants.h"
 #include <format>
 
-using namespace fig::gui;
 using namespace fig::gui::util;
 using namespace fig::util;
 
@@ -38,229 +37,245 @@ using namespace fig::util;
 #define TEXT_HMARGIN		(TEXT_LEFT_MARGIN + TEXT_RIGHT_MARGIN)
 #define TEXT_VMARGIN		(TEXT_TOP_MARGIN + TEXT_BOTTOM_MARGIN)
 
-ChatMessage::ChatMessage(LayoutElement* pParent, Role role, fig::string characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
-	_name(name),
-	_messageType(msgType),
-	_role(role),
-	_bShowAvatar(bShowAvatar),
-	_bgColor {},
-	_borderColor {},
-	_nameColor {},
-	_textColor {}
+namespace fig::gui
 {
-	_style = Style::Default;
-	if (msgType == MessageType::Dialogue)
-		_style |= Style::Dialogue;
-	else if (msgType == MessageType::Action)
-		_style |= Style::Action;
-	else if (msgType == MessageType::SystemMessage)
-		_style |= Style::System;
-
-	if (is_bot(role))
-		_style |= Style::Left;
-	else if (role == Role::User)
+	ChatMessage::ChatMessage(LayoutElement* pParent, Role role, fig::string characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
+		_name(name),
+		_messageType(msgType),
+		_role(role),
+		_bShowAvatar(bShowAvatar),
+		_bgColor {},
+		_borderColor {},
+		_nameColor {},
+		_textColor {}
 	{
+		_style = Style::Default;
+		if (msgType == MessageType::Dialogue)
+			_style |= Style::Dialogue;
+		else if (msgType == MessageType::Action)
+			_style |= Style::Action;
+		else if (msgType == MessageType::SystemMessage)
+			_style |= Style::System;
+
+		if (is_bot(role))
+			_style |= Style::Left;
+		else if (role == Role::User)
+		{
 #if USER_RIGHT_ALIGNED
-		_style |= Style::Right;
+			_style |= Style::Right;
 #else
-		_style |= Style::Left;
+			_style |= Style::Left;
 #endif
 #if USER_YOU
-		if (!name.empty())
-			name = "You";
+			if (!name.empty())
+				name = "You";
 #endif
-	}
+		}
 
-	bool bRight = (_style & Style::Right) == Style::Right;
-	bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
+		bool bRight = (_style & Style::Right) == Style::Right;
+		bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
 
-	if (_bShowAvatar)
-	{
-		Texture* pTexture = OldCharacterImageStore::GetTexture(characterId, ImageType::Portrait_Square);
-		if (!pTexture)
-			pTexture = OldCharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);
-
-		Image* pPortrait = new Image(this, pTexture);
-		pPortrait->SetSize(52, 52);
-		pPortrait->SetPosition(bRight ? Constants::GUI::ChatScrollWidth - pPortrait->GetWidth() : 0, 0);
-	}
-
-	_pMessagePanel = new Panel(this);
-
-	if ((_style & Style::Dialogue) == Style::Dialogue)
-	{
-		if (bRight)
+		if (_bShowAvatar)
 		{
-			_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 30, 72, 64, 30 });
-			_pSpeechBubbleBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BORDER));
+			Texture* pTexture = OldCharacterImageStore::GetTexture(characterId, ImageType::Portrait_Square);
+			if (!pTexture)
+				pTexture = OldCharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);
+
+			Image* pPortrait = new Image(this, pTexture);
+			pPortrait->SetSize(52, 52);
+			pPortrait->SetPosition(bRight ? Constants::GUI::ChatScrollWidth - pPortrait->GetWidth() : 0, 0);
+		}
+
+		_pMessagePanel = new Panel(this);
+
+		if ((_style & Style::Dialogue) == Style::Dialogue)
+		{
+			if (bRight)
+			{
+				_pSpeechBubbleBG = new NineGridRenderer({ 30, 72, 64, 30 });
+				_pSpeechBubbleBorder = new NineGridRenderer({ 30, 72, 64, 30 });
+				_pSpeechBubbleBG->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BG));
+				_pSpeechBubbleBorder->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BORDER));
+			}
+			else
+			{
+				_pSpeechBubbleBG = new NineGridRenderer({ 72, 30, 64, 30 });
+				_pSpeechBubbleBorder = new NineGridRenderer({ 72, 30, 64, 30 });
+				_pSpeechBubbleBG->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BG));
+				_pSpeechBubbleBorder->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BORDER));
+			}
 		}
 		else
 		{
-			_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 72, 30, 64, 30 });
-			_pSpeechBubbleBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BORDER));
+			_pSpeechBubbleBG = new NineGridRenderer({ 30, 30, 64, 30 });
+			_pSpeechBubbleBorder = new NineGridRenderer({ 30, 30, 64, 30 });
+			_pSpeechBubbleBG->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG));
+			_pSpeechBubbleBorder->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
+		}
+		_pSpeechBubbleBG->SetCornerSize(7.0f);
+		_pSpeechBubbleBorder->SetCornerSize(7.0f);
+		_pSpeechBubbleBG->SetExtend(5.0f);
+		_pSpeechBubbleBorder->SetExtend(5.0f);
+
+		_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), _name.empty() ? 0 : TOP_OFFSET); // Left
+		_pMessagePanel->SetBackgroundRenderer(_pSpeechBubbleBG);
+		_pMessagePanel->SetBorderRenderer(_pSpeechBubbleBorder);
+
+		SetSize(-1, 38);
+
+		FontFace font = FontFace::Default;
+		if (msgType != MessageType::Dialogue)
+			font = FontFace::Italic;
+
+		_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::GUI::ChatMessageFontSize, true);
+		_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
+		_pMessageText->SetBackgroundColor(Colors::Transparent);
+		_pMessageText->SetMaxSize(toF(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2), -1);
+
+		// Name label
+		if (!name.empty())
+		{
+			_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
+			_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
+			_pNameText->SetBackgroundColor(Colors::Transparent);
+			_pNameText->SetPosition(LEFT_MARGIN, -1);
+			_pNameText->SetSize(Constants::GUI::ChatScrollWidth - HMARGIN, -1);
 		}
 	}
-	else
+
+	static void strip_ends(fig::string& text, MessageType msgType)
 	{
-		_pSpeechBubbleBG = new NineGridBackgroundRenderer({ 30, 30, 64, 30 });
-		_pSpeechBubbleBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
-	}
-	_pSpeechBubbleBG->SetCornerSize(7.0f);
+		fig::string begin, end;
+		switch (msgType)
+		{
+		case MessageType::Dialogue:
+			begin = "\"";
+			end = "\"";
+			break;
+		case MessageType::Action:
+			begin = "*";
+			end = "*";
+			break;
+		case MessageType::Direction:
+			begin = "{";
+			end = "}";
+			break;
+		case MessageType::Narration:
+			begin = "[";
+			end = "]";
+			break;
+		case MessageType::Thought:
+			begin = "(";
+			end = ")";
+			break;
+		default:
+			return;
+		}
 
-	_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), _name.empty() ? 0 : TOP_OFFSET); // Left
-	_pMessagePanel->SetBackgroundRenderer(_pSpeechBubbleBG);
-
-	SetSize(-1, 38);
-
-	FontFace font = FontFace::Default;
-	if (msgType != MessageType::Dialogue)
-		font = FontFace::Italic;
-
-	_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::GUI::ChatMessageFontSize, true);
-	_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
-	_pMessageText->SetBackgroundColor(Colors::Transparent);
-	_pMessageText->SetMaxSize(toF(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2), -1);
-
-	// Name label
-	if (!name.empty())
-	{
-		_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
-		_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
-		_pNameText->SetBackgroundColor(Colors::Transparent);
-		_pNameText->SetPosition(LEFT_MARGIN, -1);
-		_pNameText->SetSize(Constants::GUI::ChatScrollWidth - HMARGIN, -1);
-	}
-}
-
-static void strip_ends(fig::string& text, MessageType msgType)
-{
-	fig::string begin, end;
-	switch (msgType)
-	{
-	case MessageType::Dialogue:
-		begin = "\"";
-		end = "\"";
-		break;
-	case MessageType::Action:
-		begin = "*";
-		end = "*";
-		break;
-	case MessageType::Direction:
-		begin = "{";
-		end = "}";
-		break;
-	case MessageType::Narration:
-		begin = "[";
-		end = "]";
-		break;
-	case MessageType::Thought:
-		begin = "(";
-		end = ")";
-		break;
-	default:
-		return;
+		while (ends_with(text, end))
+			text = text.substr(0, text.length() - 1);
+		while (begins_with(text, begin))
+			text = text.substr(1);
 	}
 
-	while (ends_with(text, end))
-		text = text.substr(0, text.length() - 1);
-	while (begins_with(text, begin))
-		text = text.substr(1);
-}
-
-void ChatMessage::SetMessage(fig::string text, bool complete)
-{
-	bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
-	bool bRight = (_style & Style::Right) == Style::Right;
-
-	strip_ends(text, _messageType);
-
-	float w, h;
-	_message = text;
-	if (_messageType == MessageType::Dialogue)
+	void ChatMessage::SetMessage(fig::string text, bool complete)
 	{
-		text = "\u201C" + text;
-		if (complete)
-			text += "\u201D";
+		bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
+		bool bRight = (_style & Style::Right) == Style::Right;
+
+		strip_ends(text, _messageType);
+
+		float w, h;
+		_message = text;
+		if (_messageType == MessageType::Dialogue)
+		{
+			text = "\u201C" + text;
+			if (complete)
+				text += "\u201D";
+		}
+		else if (_messageType == MessageType::Action)
+		{
+			text = "*" + text;
+			if (complete)
+				text += "*";
+		}
+		else if (_messageType == MessageType::Thought)
+		{
+			text = "(" + text;
+			if (complete)
+				text += ")";
+		}
+
+		_pMessageText->SetTextAndResize(trim(text), w, h);
+		w += TEXT_HMARGIN + (bDialogue ? DIALOGUE_OFFSET : 0);
+		h += TEXT_VMARGIN;
+
+		// Resize/position bubble
+		int currentHeight = toI(_pMessagePanel->GetHeight());
+		if (currentHeight < h)
+		{
+			_pMessagePanel->SetHeight(toF(h));
+			SetHeight(std::max(_pMessagePanel->GetHeight() + (_name.empty() ? 0 : TOP_OFFSET) + BOTTOM_MARGIN, MIN_HEIGHT));
+		}
+
+		int currentWidth = toI(_pMessagePanel->GetWidth());
+		if (currentWidth < w)
+		{
+			_pMessagePanel->SetWidth(std::clamp(toF(w), MIN_WIDTH, Constants::GUI::ChatScrollWidth - HMARGIN));
+			if (bRight)
+				_pMessagePanel->SetX(Constants::GUI::ChatScrollWidth - _pMessagePanel->GetWidth() - RIGHT_MARGIN + (bDialogue ? DIALOGUE_OFFSET : 0));
+		}
+		InvalidateParentLayout(true);
+		InvalidateLayout();
 	}
-	else if (_messageType == MessageType::Action)
+
+	void ChatMessage::AppendMessage(const fig::string& text, bool complete)
 	{
-		text = "*" + text;
-		if (complete)
-			text += "*";
+		if (_pMessageText)
+			SetMessage(_message + text, complete);
 	}
-	else if (_messageType == MessageType::Thought)
+
+	void ChatMessage::SetActive(bool bActive)
 	{
-		text = "(" + text;
-		if (complete)
-			text += ")";
+		if (_bActive == bActive)
+			return;
+		_bActive = bActive;
+		RefreshColors();
 	}
 
-	_pMessageText->SetTextAndResize(trim(text), w, h);
-	w += TEXT_HMARGIN + (bDialogue ? DIALOGUE_OFFSET : 0);
-	h += TEXT_VMARGIN;
-
-	// Resize/position bubble
-	int currentHeight = toI(_pMessagePanel->GetHeight());
-	if (currentHeight < h)
+	void ChatMessage::SetColors(std::pair<Color, Color> colors)
 	{
-		_pMessagePanel->SetHeight(toF(h));
-		SetHeight(std::max(_pMessagePanel->GetHeight() + (_name.empty() ? 0 : TOP_OFFSET) + BOTTOM_MARGIN, MIN_HEIGHT));
+		SetColors(colors.first, colors.second);
 	}
-	
-	int currentWidth = toI(_pMessagePanel->GetWidth());
-	if (currentWidth < w)
+
+	void ChatMessage::SetColors(Color bgColor, Color borderColor)
 	{
-		_pMessagePanel->SetWidth(std::clamp(toF(w), MIN_WIDTH, Constants::GUI::ChatScrollWidth - HMARGIN));
-		if (bRight)
-			_pMessagePanel->SetX(Constants::GUI::ChatScrollWidth - _pMessagePanel->GetWidth() - RIGHT_MARGIN + (bDialogue ? DIALOGUE_OFFSET : 0));
+		_bgColor = bgColor;
+		_borderColor = borderColor;
+		if ((_style & Style::Dialogue) == Style::Dialogue)
+			_textColor = Colors::Black;
+		else
+			_textColor = multiply_rgb(borderColor, 0.5f);
+		_nameColor = add_rgb(borderColor, -0.1f);
+		RefreshColors();
 	}
-	InvalidateParentLayout(true);
-	InvalidateLayout();
-}
 
-void ChatMessage::AppendMessage(const fig::string& text, bool complete)
-{
-	if (_pMessageText)
-		SetMessage(_message + text, complete);
-}
+	void ChatMessage::RefreshColors()
+	{
+		const uint8_t fadedAlpha = 120;
+		bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
 
-void ChatMessage::SetActive(bool bActive)
-{
-	if (_bActive == bActive)
-		return;
-	_bActive = bActive;
-	RefreshColors();
-}
+		uint8_t alpha = (uint8_t)(_bActive ? 255 : fadedAlpha);
 
-void ChatMessage::SetColors(std::pair<Color, Color> colors)
-{
-	SetColors(colors.first, colors.second);
-}
+		SetForegroundColor(Color { 0, 0, 0, alpha });
 
-void ChatMessage::SetColors(Color bgColor, Color borderColor)
-{
-	_bgColor = bgColor;
-	_borderColor = borderColor;
-	if ((_style & Style::Dialogue) == Style::Dialogue)
-		_textColor = Colors::Black;
-	else
-		_textColor = multiply_rgb(borderColor, 0.5f);
-	_nameColor = add_rgb(borderColor, -0.1f);
-	RefreshColors();
-}
+		_pSpeechBubbleBG->SetColor(with_alpha(_bgColor, alpha));
+		_pSpeechBubbleBorder->SetColor(with_alpha(_borderColor, alpha));
 
-void ChatMessage::RefreshColors()
-{
-	const uint8_t fadedAlpha = 120;
-	bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
+		_pMessagePanel->SetBackgroundColor(with_alpha(_pMessagePanel->GetBackgroundColor(), alpha));
+		_pMessageText->SetForegroundColor(with_alpha(_textColor, alpha));
 
-	uint8_t alpha = (uint8_t)(_bActive ? 255 : fadedAlpha);
-	
-	SetForegroundColor(Color { 0, 0, 0, alpha });
-
-	_pSpeechBubbleBG->SetColors(with_alpha(_bgColor, alpha), with_alpha(_borderColor, alpha));
-	_pMessagePanel->SetBackgroundColor(with_alpha(_pMessagePanel->GetBackgroundColor(), alpha));
-	_pMessageText->SetForegroundColor(with_alpha(_textColor, alpha));
-	if (_pNameText)
-		_pNameText->SetForegroundColor(with_alpha(_nameColor, alpha));
+		if (_pNameText)
+			_pNameText->SetForegroundColor(with_alpha(_nameColor, alpha));
+	}
 }

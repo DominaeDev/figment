@@ -5,10 +5,10 @@
 
 namespace fig::gui
 {
-	class SolidBackgroundRenderer : public CustomRenderer
+	class SolidFillRenderer : public CustomRenderer
 	{
 	public:
-		SolidBackgroundRenderer(Color color);
+		SolidFillRenderer(Color color);
 
 		void Render(Renderer* pRenderer, Rectf rect);
 		void SetColor(Color color);

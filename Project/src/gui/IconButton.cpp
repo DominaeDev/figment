@@ -1,13 +1,13 @@
 #include <pch.h>
 #include "gui/IconButton.h"
-#include "gui/NineGridBackgroundRenderer.h"
+#include "gui/NineGridRenderer.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
 {
 	IconButton::IconButton(LayoutElement* pParent, TextureType icon) : ThemedButton(pParent)
 	{
-		_pFaceRenderer = new NineGridBackgroundRenderer(8);
+		_pFaceRenderer = new NineGridRenderer(8);
 		_pFaceRenderer->SetTexture(AppResources::GetTexture(TextureType::BUTTON_BACKGROUND));
 		_pFaceRenderer->SetColor(GetThemeBackground());
 		SetBackgroundRenderer(_pFaceRenderer);

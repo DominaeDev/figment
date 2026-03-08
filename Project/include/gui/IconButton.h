@@ -7,7 +7,7 @@
 
 namespace fig::gui
 {
-	class NineGridBackgroundRenderer;
+	class NineGridRenderer;
 
 	class IconButton : public ThemedButton
 	{
@@ -20,7 +20,7 @@ namespace fig::gui
 		void OnButtonState() override;
 
 	private:
-		NineGridBackgroundRenderer* _pFaceRenderer;
+		NineGridRenderer* _pFaceRenderer;
 		Image* _pIcon {};
 	};
 }

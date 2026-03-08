@@ -17,7 +17,7 @@ namespace fig::gui
 
 	void ButtonBase::SetEnabled(bool bEnabled) noexcept
 	{
-		if (bEnabled != (_state == ButtonState::Disabled))
+		if (bEnabled == (_state == ButtonState::Disabled))
 		{
 			SetButtonState(bEnabled ? ButtonState::Default : ButtonState::Disabled);
 			_bMouseDown = false;
