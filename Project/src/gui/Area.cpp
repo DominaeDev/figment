@@ -3,6 +3,6 @@
 
 using namespace fig::gui;
 
-Area::Area(Control* pParent) : Control(pParent)
+Area::Area(LayoutElement* pParent) : Control(pParent)
 {
 }

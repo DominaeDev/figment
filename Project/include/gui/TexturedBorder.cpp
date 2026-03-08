@@ -6,13 +6,13 @@
 using namespace fig::gui;
 using namespace fig::gui::util;
 
-TexturedBorder::TexturedBorder(Control* pParent, Texture* borderTexture, int cornerPixels) : Control(pParent)
+TexturedBorder::TexturedBorder(LayoutElement* pParent, Texture* borderTexture, int cornerPixels) : Control(pParent)
 {
 	_cornerPixels = { toF(cornerPixels), toF(cornerPixels), toF(cornerPixels), toF(cornerPixels) };
 	_pBorderTexture = borderTexture;
 }
 
-TexturedBorder::TexturedBorder(Control* pParent, Texture* borderTexture, std::array<float, 4> corners) : Control(pParent)
+TexturedBorder::TexturedBorder(LayoutElement* pParent, Texture* borderTexture, std::array<float, 4> corners) : Control(pParent)
 {
 	_cornerPixels = corners;
 	_pBorderTexture = borderTexture;

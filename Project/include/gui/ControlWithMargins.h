@@ -7,7 +7,7 @@ namespace fig::gui
 	class ControlWithMargins : public Control
 	{
 	public:
-		ControlWithMargins(Control* pParent);
+		ControlWithMargins(LayoutElement* pParent);
 
 		void SetMargins(float left, float top, float right, float bottom);
 		void SetMargins(Rectf rect);

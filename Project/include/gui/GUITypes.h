@@ -58,6 +58,7 @@ namespace fig::gui
 	{
 		BLANK,
 		BORDER,
+		LOGO_SMALL,
 
 		TEXTBOX_BG,
 		TEXTBOX_BORDER,
@@ -87,6 +88,8 @@ namespace fig::gui
 		CARD_BORDER_STYLE_06,
 
 		ICON_ERROR,
+		ICON_SIDEBAR,
+		ICON_MENU,
 	};
 
 	enum class MaskType

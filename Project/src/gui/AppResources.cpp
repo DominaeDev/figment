@@ -17,9 +17,12 @@ namespace fig::gui
 		// Generic
 		LoadTexture(pRenderer, TextureType::BLANK, "./resources/gui/white.png");
 		LoadTexture(pRenderer, TextureType::BORDER, "./resources/gui/line.png");
+		LoadTexture(pRenderer, TextureType::LOGO_SMALL, "./resources/gui/logo_small.png");
 
 		// Icons
 		LoadTexture(pRenderer, TextureType::ICON_ERROR, "./resources/gui/icons/icon_error_2.png");
+		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR, "./resources/gui/icons/icon_sidebar.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU, "./resources/gui/icons/icon_menu.png");
 
 		// Chat
 		LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/chat/bg_9grid.png");

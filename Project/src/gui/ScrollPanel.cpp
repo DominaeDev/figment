@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	ScrollPanel::ScrollPanel(Control* pParent) : Control(pParent)
+	ScrollPanel::ScrollPanel(LayoutElement* pParent) : Control(pParent)
 	{
 		EnableCulling(true);
 		EnableClipping(true);
@@ -49,12 +49,12 @@ namespace fig::gui
 				_fMaxExtent = maxY - minY;
 			}
 
-			float maxExtent = std::max(_fMaxExtent - GetHeight() + _fBottomMargin, 0.0f);
+			float maxExtent = std::max(_fMaxExtent - GetHeight() + _fTopMargin + _fBottomMargin, 0.0f);
 			_fScrollY = std::clamp(_fScrollY, 0.0f, maxExtent);
 
 			// Move vertically
 			for (auto& child : _children)
-				child->SetY(child->GetY() - _fScrollY);
+				child->SetY(child->GetY() - _fScrollY + _fTopMargin);
 		}
 	}
 }

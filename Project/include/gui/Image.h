@@ -8,7 +8,7 @@ namespace fig::gui
 	class Image : public Control
 	{
 	public:
-		Image(Control* pParent, Texture* pTexture);
+		Image(LayoutElement* pParent, Texture* pTexture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
 		void SetTexture(Texture* pTexture);
 
 	protected:

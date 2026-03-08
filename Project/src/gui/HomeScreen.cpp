@@ -11,7 +11,7 @@ namespace fig::gui
 		SetBackgroundColor(Colors::AppBackground);
 
 		auto pTopBar = new Panel(this);
-		pTopBar->SetHeight(48);
+		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
 		_pCardList = new CardList(this);
 

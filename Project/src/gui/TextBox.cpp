@@ -45,7 +45,7 @@ static int BytesUTF8Length(const char* text, int num_bytes)
 	return num_codepoints;
 }
 
-TextBox::TextBox(Control* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : ControlWithMargins(pParent),
+TextBox::TextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : ControlWithMargins(pParent),
 	_flags { flags }
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);

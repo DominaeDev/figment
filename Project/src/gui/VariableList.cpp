@@ -12,7 +12,7 @@ using namespace fig::util;
 
 constexpr float Margin { 8.0f };
 
-VariableList::VariableList(Control* pParent) : Control(pParent)
+VariableList::VariableList(LayoutElement* pParent) : Control(pParent)
 {
 	auto pBG = new NineGridBackgroundRenderer({ 30, 72, 64, 30 });
 	pBG->SetTextures(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG), AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));

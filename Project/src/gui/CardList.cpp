@@ -12,18 +12,20 @@ using namespace fig::io;
 
 namespace fig::gui
 {
+	constexpr float TopMargin = 8.0f;
 	constexpr float BottomMargin = 120.0f;
 
-	CardList::CardList(Control* pParent) : ScrollPanel(pParent)
+	CardList::CardList(LayoutElement* pParent) : ScrollPanel(pParent)
 	{
 		_pGridSizer = new GridSizer(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight);
 		_pGridSizer->SetSpacing(Constants::GUI::HomeScreen::CardSpacingX, Constants::GUI::HomeScreen::CardSpacingY);
 		_pGridSizer->EnableCentering(true);
-		SetSizer(_pGridSizer);
+		SetTopMargin(TopMargin);
+		SetBottomMargin(BottomMargin);
 
+		SetSizer(_pGridSizer);
 		EnableClipping(true);
 		EnableCulling(true);
-		SetBottomMargin(BottomMargin);
 	}
 
 	void CardList::CreateCards(CardType cardType)

@@ -29,6 +29,8 @@ namespace Constants
 
 		namespace SidePanel
 		{
+			constexpr float HeaderHeight = 48.0f;
+			constexpr float FooterHeight = 80.0f;
 			constexpr float Width = 240.0f;
 		}
 	}

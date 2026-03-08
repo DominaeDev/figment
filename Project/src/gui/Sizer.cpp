@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	void Sizer::Add(Control* pControl, int proportion, int flags, int border)
+	void Sizer::Add(LayoutElement* pControl, int proportion, int flags, int border)
 	{
 		_items.push_back(LayoutInfo { pControl, proportion, flags, border });
 	}
@@ -46,7 +46,7 @@ namespace fig::gui
 
 	void Sizer::AddStretchSpacer()
 	{
-		Add(nullptr, -1);
+		Add(new Area(_pOwner), -1);
 	}
 
 }

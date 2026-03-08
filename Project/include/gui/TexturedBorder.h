@@ -9,8 +9,8 @@ namespace fig::gui
 	class TexturedBorder : public Control
 	{
 	public:
-		TexturedBorder(Control* pParent, Texture* borderTexture, int cornerPixels = 64);
-		TexturedBorder(Control* pParent, Texture* borderTexture, std::array<float, 4> corners);
+		TexturedBorder(LayoutElement* pParent, Texture* borderTexture, int cornerPixels = 64);
+		TexturedBorder(LayoutElement* pParent, Texture* borderTexture, std::array<float, 4> corners);
 
 		void SetCornerSize(float cornerSize);
 		void SetColors(Color bgColor, Color borderColor);

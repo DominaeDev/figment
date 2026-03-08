@@ -21,7 +21,7 @@ using namespace fig::io::data;
 #define ANIMATED_SCROLL_SPEED 15.0f
 #define GRADIENT_HEIGHT 40.0f
 
-ChatScroll::ChatScroll(Control* pParent) : Control(pParent)
+ChatScroll::ChatScroll(LayoutElement* pParent) : Control(pParent)
 {
 	_pScrollSizer = new VerticalScrollSizer();
 	_pScrollSizer->SetBottomMargin(50);

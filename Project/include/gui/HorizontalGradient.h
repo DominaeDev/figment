@@ -8,7 +8,7 @@ namespace fig::gui
 	class HorizontalGradient : public Control
 	{
 	public:
-		HorizontalGradient(Control* pParent, Color colorLeft, Color colorRight);
+		HorizontalGradient(LayoutElement* pParent, Color colorLeft, Color colorRight);
 		void SetColors(Color colorLeft, Color colorRight);
 
 	protected:

@@ -3,7 +3,7 @@
 
 using namespace fig::gui;
 
-ControlWithMargins::ControlWithMargins(Control* pParent) : Control(pParent)
+ControlWithMargins::ControlWithMargins(LayoutElement* pParent) : Control(pParent)
 {
 }
 

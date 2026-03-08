@@ -17,7 +17,7 @@ namespace fig::gui
 	constexpr float kTagMinWidth = 36;
 	constexpr float kTagRowHeight = 32;
 
-	CoverCard::CoverCard(Control* pParent, const fig::uuid& assetId) : Image(pParent, nullptr),
+	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId) : Image(pParent, nullptr),
 		_assetId { assetId }
 	{
 		SetSize(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight);

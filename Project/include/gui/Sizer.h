@@ -36,7 +36,7 @@ namespace fig::gui
 		void Layout();
 		void SetOwner(LayoutElement* pOwner);
 
-		void Add(Control* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
+		void Add(LayoutElement* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
 		Control* Add(Sizer* pControl, Control* pParent, int proportion = 0, int flags = Flag::Default, int border = 0);
 		void AddStretchSpacer();
 		void Remove(Control* pControl);
@@ -45,7 +45,7 @@ namespace fig::gui
 	protected:
 		struct LayoutInfo
 		{
-			Control* pControl;
+			LayoutElement* pControl;
 			int prop = 0;
 			int flags = Flag::None;
 			int border = 0;

@@ -9,7 +9,7 @@ namespace fig::gui
 	class SidePanel : public Control
 	{
 	public:
-		SidePanel(Control* parent);
+		SidePanel(LayoutElement* pParent);
 	};
 }
 #endif

@@ -24,7 +24,7 @@ namespace fig::gui
 		};
 		using Flags = EnumFlags<Flag>;
 
-		TextBox(Control* pParent, FontFace fontFace, double ptSize, Flags flags);
+		TextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, Flags flags);
 		~TextBox();
 
 		void SetText(fig::string text);

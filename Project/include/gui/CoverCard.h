@@ -25,7 +25,7 @@ namespace fig::gui
 	class CoverCard : public Image
 	{
 	public:
-		CoverCard(Control* pParent, const fig::uuid& assetId);
+		CoverCard(LayoutElement* pParent, const fig::uuid& assetId);
 
 		void SetBorder(BorderStyle style);
 		void SetCoverImage(fig::sdl::Surface&& texture);

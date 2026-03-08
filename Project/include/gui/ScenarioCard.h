@@ -10,7 +10,7 @@ namespace fig::gui
 	class ScenarioCard : public CoverCard
 	{
 	public:
-		ScenarioCard(Control* pParent, const fig::uuid& scenarioId);
+		ScenarioCard(LayoutElement* pParent, const fig::uuid& scenarioId);
 
 	protected:
 		void OnUpdate(float fDeltaTime) override {};

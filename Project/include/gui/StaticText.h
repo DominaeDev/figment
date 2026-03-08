@@ -37,7 +37,7 @@ namespace fig::gui
 	class StaticText : public ControlWithMargins
 	{
 	public:
-		StaticText(Control* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize = true);
+		StaticText(LayoutElement* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize = true);
 		virtual ~StaticText();
 
 		TTF_Font* GetFont() const { return _pFont; }

@@ -7,7 +7,7 @@ namespace fig::gui
 	class Panel : public Control
 	{
 	public:
-		Panel(Control* pParent);
+		Panel(LayoutElement* pParent);
 
 	protected:
 		void OnUpdate(float fDeltaTime) override {};

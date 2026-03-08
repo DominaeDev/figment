@@ -8,7 +8,7 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	CharacterCard::CharacterCard(Control* pParent, const fig::uuid& characterId) : CoverCard(pParent, characterId),
+	CharacterCard::CharacterCard(LayoutElement* pParent, const fig::uuid& characterId) : CoverCard(pParent, characterId),
 		_characterId { characterId }
 	{
 		if (auto character = Global::GetUserManager().GetContent().GetCharacter(characterId))

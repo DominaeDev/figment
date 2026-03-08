@@ -8,7 +8,7 @@
 using namespace fig::gui;
 using namespace fig::llm;
 
-StatusBar::StatusBar(Control* pParent) : Control(pParent)
+StatusBar::StatusBar(LayoutElement* pParent) : Control(pParent)
 {
 	SetSize(pParent->GetWidth(), 24);
 

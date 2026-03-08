@@ -9,14 +9,14 @@ using namespace fig::gui::util;
 
 namespace fig::gui
 {
-	Control::Control(Control* pParent)
+	Control::Control(LayoutElement* pParent)
 	{
 		if (pParent)
 			pParent->AddChild(this);
 		_pParent = pParent;
 	}
 
-	Control::Control(Control* pParent, Window* pHostWindow) : Control(pParent)
+	Control::Control(LayoutElement* pParent, Window* pHostWindow) : Control(pParent)
 	{
 		_renderContext = ControlRenderContext {
 			.pWindow = pHostWindow->GetSDLWindow().get(),

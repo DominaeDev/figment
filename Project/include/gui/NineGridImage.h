@@ -11,8 +11,8 @@ namespace fig::gui
 	class NineGridImage : public Control
 	{
 	public:
-		NineGridImage(Control* pParent, Texture* pTexture, float cornerPixels = 16.0f);
-		NineGridImage(Control* pParent, Texture* pTexture, std::array<float, 4> corners);
+		NineGridImage(LayoutElement* pParent, Texture* pTexture, float cornerPixels = 16.0f);
+		NineGridImage(LayoutElement* pParent, Texture* pTexture, std::array<float, 4> corners);
 
 		void SetTexture(Texture* pTexture);
 		void SetCornerSize(float cornerSize);

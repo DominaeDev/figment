@@ -13,7 +13,7 @@ namespace fig::gui
 	class ChatScroll : public Control
 	{
 	public:
-		ChatScroll(Control* pParent);
+		ChatScroll(LayoutElement* pParent);
 
 		void SetSession(fig::io::data::ChatSession session) { _session = session; }
 

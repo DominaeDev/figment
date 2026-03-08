@@ -38,7 +38,7 @@ using namespace fig::util;
 #define TEXT_HMARGIN		(TEXT_LEFT_MARGIN + TEXT_RIGHT_MARGIN)
 #define TEXT_VMARGIN		(TEXT_TOP_MARGIN + TEXT_BOTTOM_MARGIN)
 
-ChatMessage::ChatMessage(Control* pParent, Role role, fig::string characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
+ChatMessage::ChatMessage(LayoutElement* pParent, Role role, fig::string characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
 	_name(name),
 	_messageType(msgType),
 	_role(role),

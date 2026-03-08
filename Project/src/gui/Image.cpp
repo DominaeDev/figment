@@ -5,13 +5,13 @@
 using namespace fig::gui;
 using namespace fig::gui::util;
 
-Image::Image(Control* pParent, Texture* pTexture) : Control(pParent),
+Image::Image(LayoutElement* pParent, Texture* pTexture, Color tint) : Control(pParent),
 	_pTexture(pTexture)
 {
 	if (pTexture)
 		SetSize(toF(pTexture->w), toF(pTexture->h));
 	
-	SetForegroundColor(Colors::White);
+	SetForegroundColor(tint);
 	SetBackgroundColor(Colors::Transparent);
 }
 

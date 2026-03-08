@@ -89,6 +89,27 @@ void LayoutElement::SetPosition(Pointf position)
 	OnSize();
 }
 
+void LayoutElement::Center()
+{
+	if (_pParent)
+	{
+		_position.x = (_pParent->_size.x - _size.x) / 2.0f;
+		_position.y = (_pParent->_size.y - _size.y) / 2.0f;
+	}
+}
+
+void LayoutElement::CenterHorizontally()
+{
+	if (_pParent)
+		_position.x = (_pParent->_size.x - _size.x) / 2.0f;
+}
+
+void LayoutElement::CenterVertically()
+{
+	if (_pParent)
+		_position.y = (_pParent->_size.y - _size.y) / 2.0f;
+}
+
 void LayoutElement::SetSize(Pointf size)
 {
 	_size = size;
