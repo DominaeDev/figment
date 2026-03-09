@@ -2,6 +2,7 @@
 #include "gui/AppResources.h"
 #include "fs/FileUtility.h"
 #include <SDL3_image/SDL_image.h>
+#include <cassert>
 
 namespace fig::gui
 {
@@ -22,8 +23,13 @@ namespace fig::gui
 
 		// Icons
 		LoadTexture(pRenderer, TextureType::ICON_ERROR, "./resources/gui/icons/icon_error_2.png");
-		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR, "./resources/gui/icons/icon_sidebar.png");
+		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR_COLLAPSE, "./resources/gui/icons/icon_side_panel_collapse.png");
+		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR_EXPAND, "./resources/gui/icons/icon_side_panel_expand.png");
+		LoadTexture(pRenderer, TextureType::ICON_SETTINGS, "./resources/gui/icons/icon_settings.png");
 		LoadTexture(pRenderer, TextureType::ICON_MENU, "./resources/gui/icons/icon_menu.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU_CHATS, "./resources/gui/icons/icon_chats.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU_CHARACTERS, "./resources/gui/icons/icon_characters.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU_SCENARIOS, "./resources/gui/icons/icon_scenarios.png");
 
 		// Chat
 		LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/chat/bg_9grid.png");
@@ -80,6 +86,8 @@ namespace fig::gui
 			texture.reset(pTexture);
 			return true;
 		}
+
+		assert(false);
 		return false;
 	}
 

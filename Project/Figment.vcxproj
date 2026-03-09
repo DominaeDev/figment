@@ -185,6 +185,7 @@
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
     <ClCompile Include="src\gui\SidePanel.cpp" />
+    <ClCompile Include="src\gui\SidePanelButton.cpp" />
     <ClCompile Include="src\gui\ThemedButton.cpp" />
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
@@ -361,6 +362,7 @@
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
     <ClInclude Include="include\gui\ButtonBase.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\SidePanelButton.h" />
     <ClInclude Include="include\gui\TexturedBorder.h" />
     <ClInclude Include="include\gui\CardList.h" />
     <ClInclude Include="include\gui\CharacterCard.h" />

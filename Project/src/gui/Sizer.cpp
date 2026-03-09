@@ -2,6 +2,7 @@
 #include "gui/Sizer.h"
 #include "gui/LayoutElement.h"
 #include "gui/Area.h"
+#include <cassert>
 
 namespace fig::gui
 {
@@ -44,8 +45,17 @@ namespace fig::gui
 		_pOwner = pOwner;
 	}
 
+	void Sizer::AddSpacer(float size)
+	{
+		assert(_pOwner);
+		auto spacer = new Area(_pOwner);
+		spacer->SetSize(size, size);
+		Add(spacer, 0);
+	}
+
 	void Sizer::AddStretchSpacer()
 	{
+		assert(_pOwner);
 		Add(new Area(_pOwner), -1);
 	}
 

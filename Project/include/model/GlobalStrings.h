@@ -40,6 +40,16 @@ namespace fig::strings
 			"Default User";
 	}
 
+	namespace UI
+	{
+		inline constexpr fig::const_string MenuRecentChats =
+			"Recent chats";
+		inline constexpr fig::const_string MenuCharacters =
+			"Characters";
+		inline constexpr fig::const_string MenuScenarios =
+			"Scenarios";
+	}
+
 	namespace Errors
 	{
 		// ...
