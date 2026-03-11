@@ -63,8 +63,12 @@ namespace fig::gui
 
 		virtual void OnLayout(Rectf rect) = 0;
 		void Update(float fElapsed) override {};
+	
+	private:
+		LayoutElement* MakeDummy();
 
 	private:
 		std::vector<LayoutInfo> _items;
+		std::vector<std::unique_ptr<LayoutElement>> _dummies;
 	};
 }

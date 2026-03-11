@@ -34,7 +34,7 @@ static CommandDefinition s_Commands[]
 
 ParsedChatCommand ChatCommands::Parse(fig::string text)
 {
-	trim_implace(text);
+	trim_inplace(text);
 	if (text.empty())
 	{
 		return ParsedChatCommand { ChatCommand::Invalid };

@@ -43,6 +43,12 @@ namespace fig::gui
 	concept IsScreen = std::derived_from<T, fig::gui::Screen>
 		and HasTypeId<T>;
 	
+	enum EScreen : size_t
+	{
+		Home,
+		Chat,
+	};
+
 }
 
 #endif

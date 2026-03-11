@@ -12,20 +12,25 @@ namespace fig::gui
 	class HomeScreen : public Screen
 	{
 	public:
+		TYPE_ID(EScreen::Home);
 		HomeScreen(Frame* pParent);
 
 		void CreateCards();
-
-		TYPE_ID(1);
+		CardList& GetCardList();
 	protected:
+		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void OnSidePanel(bool show) override;
-
+		void OnFilter(fig::string search_text);
 	private:
 		CardList* _pCardList {};
 		Control* _pExpandButton {};
+		TextBox* _pFilterTextBox {};
+		fig::string _search_text;
+		float _fSearchTimer {};
+
 	};
 }
 

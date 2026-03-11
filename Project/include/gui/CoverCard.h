@@ -5,6 +5,7 @@
 
 #include "Image.h"
 #include "model/AssetManager.h"
+#include "util/Dictionary.h"
 
 namespace fig::gui
 {
@@ -30,6 +31,7 @@ namespace fig::gui
 		void SetBorder(BorderStyle style);
 		void SetCoverImage(fig::sdl::Surface&& texture);
 		void SetPendingCoverImage(fig::io::ImageFuture&& future);
+		bool IsFilteredBy(const fig::string& search_string) const noexcept;
 
 	protected:
 		void SetLabel(const fig::string& text) noexcept;
@@ -39,7 +41,7 @@ namespace fig::gui
 
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
-
+		void AddSearchText(const fig::string& text) noexcept;
 	private:
 		void PollFuture();
 
@@ -61,6 +63,8 @@ namespace fig::gui
 
 		bool _bHasError = false;
 		Image* _pErrorIcon {};
+
+		std::vector<fig::string> _searchWords {};
 	};
 }
 

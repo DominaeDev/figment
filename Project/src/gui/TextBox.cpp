@@ -45,7 +45,7 @@ static int BytesUTF8Length(const char* text, int num_bytes)
 	return num_codepoints;
 }
 
-TextBox::TextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : ControlWithMargins(pParent),
+TextBox::TextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : Control(pParent),
 	_flags { flags }
 {
 	_pFont = Fonts::GetFont(fontFace, ptSize);
@@ -142,9 +142,9 @@ void TextBox::OnRender(RendererPtr pRenderer)
 		int textWidth, _;
 		TTF_GetTextSize(GetRenderedText(), &textWidth, &_);
 		int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
-		while (cursorX - _scroll.x > maxCursorX)
+		while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
 			_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
-		while (cursorX - _scroll.x < 0.0f)
+		while (cursorX > 0 and cursorX - _scroll.x < 0.0f)
 			_scroll.x = std::max(_scroll.x - kScrollStep, 0.0f);
 		_scroll.y = 0;
 	}
@@ -286,6 +286,7 @@ void TextBox::HandleComposition(const SDL_TextEditingEvent* event)
 			composition_cursor_length = 0;
 		}
 		PushUndo(UndoAction::Write);
+		DidChange();
 	}
 }
 
@@ -910,6 +911,7 @@ void TextBox::Backspace()
 
 		ResetCursorBlink();
 		PushUndo(UndoAction::Erase);
+		DidChange();
 	}
 }
 
@@ -927,6 +929,7 @@ void TextBox::BackspaceToPriorWord()
 
 		ResetCursorBlink();
 		PushUndo(UndoAction::Erase, false);
+		DidChange();
 	}
 }
 
@@ -941,6 +944,7 @@ void TextBox::BackspaceToBeginning()
 		SetCursorPosition(0);
 
 		PushUndo(UndoAction::Erase, false);
+		DidChange();
 	}
 }
 
@@ -961,6 +965,7 @@ void TextBox::BackspaceToBeginningOfLine()
 			OnMoveCursor(last_cursor);
 
 			PushUndo(UndoAction::Erase, false);
+			DidChange();
 		}
 	}
 }
@@ -981,6 +986,7 @@ void TextBox::Delete()
 
 		ResetCursorBlink();
 		PushUndo(UndoAction::Erase);
+		DidChange();
 	}
 }
 
@@ -997,6 +1003,7 @@ void TextBox::DeleteToNextWord()
 
 		ResetCursorBlink();
 		PushUndo(UndoAction::Erase, false);
+		DidChange();
 	}
 }
 
@@ -1011,6 +1018,7 @@ void TextBox::DeleteToEnd()
 
 		ResetCursorBlink();
 		PushUndo(UndoAction::Erase, false);
+		DidChange();
 	}
 }
 
@@ -1033,6 +1041,7 @@ void TextBox::DeleteToEndOfLine()
 
 			ResetCursorBlink();
 			PushUndo(UndoAction::Erase, false);
+			DidChange();
 		}
 	}
 }
@@ -1050,6 +1059,7 @@ bool TextBox::DeleteHighlight()
 		Deselect();
 
 		PushUndo(UndoAction::Erase);
+		DidChange();
 		return true;
 	}
 	return false;
@@ -1223,6 +1233,7 @@ void TextBox::Cut()
 	}
 
 	PushUndo(UndoAction::Erase, false);
+	DidChange();
 }
 
 void TextBox::Paste()
@@ -1245,6 +1256,7 @@ void TextBox::Paste()
 	}
 
 	PushUndo(UndoAction::Write, false);
+	DidChange();
 }
 
 void TextBox::Insert(const char* text)
@@ -1484,6 +1496,7 @@ bool TextBox::OnEvent(Event& event)
 			{
 				Insert("\n");
 				PushUndo(UndoAction::Write, false);
+				DidChange();
 				return true;
 			}
 			else if (bModNone and _pOnEnter and _pText->text)
@@ -1524,6 +1537,7 @@ bool TextBox::OnEvent(Event& event)
 				PushUndo(UndoAction::WhitespacePunctuation);
 			else
 				PushUndo(UndoAction::Write);
+			DidChange();
 		}
 		return true;
 
@@ -1559,6 +1573,11 @@ void TextBox::OnSize()
 	}
 }
 
+void TextBox::SetTextChangedCallback(TextChangedCallback cb)
+{
+	_pOnChanged = cb;
+}
+
 void TextBox::SetEnterPressedCallback(EnterPressedCallback cb)
 {
 	_pOnEnter = cb;
@@ -1570,6 +1589,7 @@ void TextBox::Clear()
 	Deselect();
 	SetCursorPosition(0);
 	InitUndo();
+	DidChange();
 	_scroll = {};
 }
 
@@ -1578,6 +1598,7 @@ void TextBox::SetText(fig::string text)
 	Clear();
 	Insert(text.c_str());
 	InitUndo();
+	DidChange();
 }
 
 fig::string TextBox::GetText() const
@@ -1750,4 +1771,10 @@ void TextBox::OnPostRender()
 {
 	// Autosize
 	Autosize();
+}
+
+void TextBox::DidChange()
+{
+	if (_pOnChanged and _pText)
+		_pOnChanged(_pText->text ? _pText->text : "");
 }

@@ -66,13 +66,18 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 			borderRect.h -= item.border;
 		}
 		if ((item.flags & Flag::Right) != 0)
+		{
 			borderRect.w -= item.border;
+		}
 		if ((item.flags & Flag::Bottom) != 0)
+		{
 			borderRect.h -= item.border;
+		}
 
 		rect.x = borderRect.x;
 		rect.y = borderRect.y;
-		rect.w = borderRect.w;
+		if (item.prop != 0)
+			rect.w = borderRect.w;
 
 		if ((item.flags & Flag::Expand) != 0)
 		{

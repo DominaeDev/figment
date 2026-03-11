@@ -23,7 +23,11 @@ namespace fig::gui
 	{
 		auto count = GetCount();
 		if (count == 0)
+		{
+			last_columns = 0;
+			last_rows = 0;
 			return;
+		}
 
 		int totalWidth = ceil_int(std::max(parentRect.w, 0.0f));
 		int columns;
@@ -46,10 +50,11 @@ namespace fig::gui
 
 			control.SetPosition(offsetX + toF(col * (_cellWidth + _spacingX)), toF(row * (_cellHeight + _spacingY)));
 			index++;
+
+			last_columns = col;
+			last_rows = row;
 		}
 
-		last_columns = columns;
-		last_rows = rows;
 	}
 
 	void GridSizer::EnableCentering(bool bEnable)

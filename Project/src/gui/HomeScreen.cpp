@@ -13,6 +13,20 @@ namespace fig::gui
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
+		_pFilterTextBox = new TextBox(pTopBar, FontFace::Default, 16.0);
+		_pFilterTextBox->SetPosition(0, 0);
+		_pFilterTextBox->SetSize(250, 34);
+		_pFilterTextBox->SetMaxSize(250, -1);
+		_pFilterTextBox->SetBackgroundColor(Colors::White);
+		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
+			this->OnFilter(s); 
+		});
+		auto pTopSizer = new HorizontalSizer();
+		pTopSizer->AddStretchSpacer();
+		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
+
+		pTopBar->SetSizer(pTopSizer);
+
 		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR_EXPAND);
 		pExpandButton->SetSize(36, 36);
 		pExpandButton->SetX(4.0f);
@@ -22,10 +36,19 @@ namespace fig::gui
 
 		_pCardList = new CardList(this);
 
-		auto topSizer = new VerticalSizer();
-		topSizer->Add(pTopBar, 0, Sizer::Expand);
-		topSizer->Add(_pCardList, -1, Sizer::Expand | Sizer::Left | Sizer::Right, 6);
-		SetSizer(topSizer);
+		auto mainSizer = new VerticalSizer();
+		mainSizer->Add(pTopBar, 0, Sizer::Expand);
+		mainSizer->Add(_pCardList, -1, Sizer::Expand | Sizer::Left | Sizer::Right, 6);
+		SetSizer(mainSizer);
+	}
+
+	void HomeScreen::OnUpdate(float fElapsed)
+	{
+		if (_fSearchTimer > 0.0f)
+		{
+			if ((_fSearchTimer -= fElapsed) <= 0.0f)
+				_pCardList->SetFilter(_search_text);
+		}
 	}
 
 	void HomeScreen::OnRender(Renderer* pRenderer)
@@ -60,4 +83,25 @@ namespace fig::gui
 	{
 		_pExpandButton->SetVisible(!bShown);
 	}
+
+	CardList& HomeScreen::GetCardList()
+	{
+		return *_pCardList;
+	}
+
+	void HomeScreen::OnFilter(fig::string search_text)
+	{
+		if (search_text.empty())
+		{
+			_pCardList->ClearFilter();
+			_fSearchTimer = 0.0f;
+		}
+		else
+		{
+			_search_text = std::move(search_text);
+			_fSearchTimer = 0.25f;
+		}
+	}
+
+
 }

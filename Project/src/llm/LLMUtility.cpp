@@ -430,7 +430,7 @@ namespace fig::llm::util
 		size_t pos = 0;
 		size_t length = message.size();
 
-		trim_implace(message);
+		trim_inplace(message);
 		char first = message[0];
 		char last = 0;
 		if (first == '"' || first == '*')

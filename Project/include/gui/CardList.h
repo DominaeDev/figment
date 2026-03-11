@@ -7,6 +7,7 @@
 namespace fig::gui
 {
 	class GridSizer;
+	class CoverCard;
 
 	class CardList : public ScrollPanel
 	{
@@ -16,10 +17,15 @@ namespace fig::gui
 		enum class CardType { Character, Scenario };
 		void CreateCards(CardType cardType);
 
+		void SetFilter(const fig::string&) noexcept;
+		void ClearFilter() noexcept;
+
 	protected:
 		void OnUpdate(float fElapsed) override;
 
 	private:
+		std::vector<CoverCard*> _cards;
+
 		GridSizer* _pGridSizer {};
 		int32_t _last_rows {};
 	};

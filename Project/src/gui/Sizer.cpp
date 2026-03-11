@@ -6,6 +6,8 @@
 
 namespace fig::gui
 {
+	class LayoutDummy : public LayoutElement {};
+
 	void Sizer::Add(LayoutElement* pControl, int proportion, int flags, int border)
 	{
 		_items.push_back(LayoutInfo { pControl, proportion, flags, border });
@@ -45,18 +47,23 @@ namespace fig::gui
 		_pOwner = pOwner;
 	}
 
+	LayoutElement* Sizer::MakeDummy()
+	{
+		auto pDummy = std::make_unique<LayoutDummy>();
+		_dummies.emplace_back(std::move(pDummy));
+		return _dummies.back().get();
+	}
+
 	void Sizer::AddSpacer(float size)
 	{
-		assert(_pOwner);
-		auto spacer = new Area(_pOwner);
-		spacer->SetSize(size, size);
-		Add(spacer, 0);
+		auto dummy = MakeDummy();
+		dummy->SetSize(size, size);
+		_items.push_back(LayoutInfo { MakeDummy(), 0, {}, 0 });
 	}
 
 	void Sizer::AddStretchSpacer()
 	{
-		assert(_pOwner);
-		Add(new Area(_pOwner), -1);
+		_items.push_back(LayoutInfo { MakeDummy(), -1, {}, 0});
 	}
 
 }

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ControlWithMargins.h"
-#include "Fonts.h"
 #include "Types.h"
+#include "Fonts.h"
+#include "Control.h"
 
 namespace fig::gui
 {
@@ -34,7 +34,7 @@ namespace fig::gui
 		Default = Left_Top,
 	};
 
-	class StaticText : public ControlWithMargins
+	class StaticText : public Control
 	{
 	public:
 		StaticText(LayoutElement* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize = true);

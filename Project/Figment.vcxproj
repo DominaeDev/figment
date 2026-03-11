@@ -214,7 +214,6 @@
     <ClCompile Include="src\model\ChatCommandExecutor.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
-    <ClCompile Include="src\gui\ControlWithMargins.cpp" />
     <ClCompile Include="src\gui\Fonts.cpp" />
     <ClCompile Include="src\llm\LLMUtility.cpp" />
     <ClCompile Include="src\gui\Frame.cpp" />
@@ -238,6 +237,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\util\Dictionary.cpp" />
     <ClCompile Include="src\util\ProfileDatabase.cpp" />
     <ClCompile Include="src\util\Security.cpp" />
     <ClCompile Include="src\util\Hash.cpp" />
@@ -426,7 +426,6 @@
     <ClInclude Include="include\gui\GUIColors.h" />
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\gui\Control.h" />
-    <ClInclude Include="include\gui\ControlWithMargins.h" />
     <ClInclude Include="include\gui\Fonts.h" />
     <ClInclude Include="include\gui\Frame.h" />
     <ClInclude Include="include\gui\GUITypes.h" />
@@ -456,6 +455,7 @@
     <ClInclude Include="include\gui\VerticalSizer.h" />
     <ClInclude Include="include\util\TypeId.h" />
     <ClInclude Include="include\util\UndoStack.h" />
+    <ClInclude Include="include\util\Dictionary.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

@@ -35,6 +35,14 @@ namespace fig::gui
 		void SetBackgroundRenderer(CustomRenderer* pCustom);
 		void SetBorderRenderer(CustomRenderer* pCustom);
 
+		void SetMargins(float left, float top, float right, float bottom);
+		void SetMargins(Rectf rect);
+		Rectf GetClientRect() const noexcept;
+		inline float GetMarginLeft() const noexcept { return _marginLeft; }
+		inline float GetMarginTop() const noexcept { return _marginTop; }
+		inline float GetMarginRight() const noexcept { return _marginRight; }
+		inline float GetMarginBottom() const noexcept { return _marginBottom; }
+
 	protected:
 		virtual void OnRender(Renderer* pRenderer);
 		virtual void OnPostRender() {};
@@ -44,6 +52,8 @@ namespace fig::gui
 
 		void DrawBackground(Renderer* pRenderer);
 		void DrawBorder(Renderer* pRenderer);
+		inline float GetMarginHorizontal() const noexcept { return _marginLeft + _marginRight; }
+		inline float GetMarginVertical() const noexcept { return _marginTop + _marginBottom; }
 
 		inline WindowPtr GetSDLWindow() { return _renderContext.pWindow; }
 		inline RendererPtr GetSDLRenderer() { return _renderContext.pRenderer; }
@@ -61,6 +71,11 @@ namespace fig::gui
 		CustomRenderer* _pBGRenderer = nullptr;
 		CustomRenderer* _pBorderRenderer = nullptr;
 	
+		// Margin
+		float _marginLeft = 0;
+		float _marginTop = 0;
+		float _marginRight = 0;
+		float _marginBottom = 0;
 	private:
 		struct ControlRenderContext
 		{

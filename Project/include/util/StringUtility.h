@@ -9,7 +9,7 @@ namespace fig::util
 {
 	void ltrim_inplace(string& s);
 	void rtrim_inplace(string& s);
-	inline void trim_implace(string& s) { ltrim_inplace(s); rtrim_inplace(s); }
+	inline void trim_inplace(string& s) { ltrim_inplace(s); rtrim_inplace(s); }
 
 	[[nodiscard]] string ltrim(const string& s);
 	[[nodiscard]] string rtrim(const string& s);
@@ -17,6 +17,9 @@ namespace fig::util
 
 	[[nodiscard]] string lcase(const string& s);
 	[[nodiscard]] string ucase(const string& s);
+	string& lcase_inplace(string& s);
+	string& ucase_inplace(string& s);
+
 	[[nodiscard]] wstring lcase(const wstring& s);
 	[[nodiscard]] wstring ucase(const wstring& s);
 	[[nodiscard]] int compare(const string& a, const string& b, bool ignore_case = false);

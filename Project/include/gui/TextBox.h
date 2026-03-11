@@ -4,15 +4,16 @@
 
 #include <functional>
 
-#include "gui/ControlWithMargins.h"
+#include "gui/Control.h"
 #include "util/UndoStack.h"
 #include "util/StringUtility.h"
 
 namespace fig::gui
 {
+	using TextChangedCallback = std::function<void(fig::string)>;
 	using EnterPressedCallback = std::function<void(fig::string)>;
 
-	class TextBox : public ControlWithMargins
+	class TextBox : public Control
 	{
 	public:
 		enum class Flag
@@ -24,10 +25,11 @@ namespace fig::gui
 		};
 		using Flags = EnumFlags<Flag>;
 
-		TextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, Flags flags);
+		TextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, Flags flags = {});
 		~TextBox();
 
 		void SetText(fig::string text);
+		void SetTextChangedCallback(TextChangedCallback cb);
 		void SetEnterPressedCallback(EnterPressedCallback cb);
 		void SetMinRows(int32_t rows);
 		void SetMaxRows(int32_t rows);
@@ -96,6 +98,7 @@ namespace fig::gui
 		void ApplyScroll(float& x, float& y) const;
 		void ApplyScroll(Rectf& rect) const;
 		void Autosize();
+		void DidChange();
 
 		inline bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
 		inline bool IsMultiline() const noexcept { return _flags.IsSet(Flag::Multi) && not IsPassword(); }
@@ -123,6 +126,7 @@ namespace fig::gui
 
 		Texture* _pTexture = nullptr;
 		Surface* _pSurface = nullptr;
+		TextChangedCallback _pOnChanged = nullptr;
 		EnterPressedCallback _pOnEnter = nullptr;
 
 		// Cursor

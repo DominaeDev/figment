@@ -1,8 +1,8 @@
 #ifndef CHARACTER_CARD_H__
 #define CHARACTER_CARD_H__
-
 #pragma once
 
+#include <set>
 #include "CoverCard.h"
 
 namespace fig::gui
@@ -11,9 +11,11 @@ namespace fig::gui
 	{
 	public:
 		CharacterCard(LayoutElement* pParent, const fig::uuid& characterId);
+		inline const fig::uuid& GetUUID() const noexcept { return _characterId; }
 
 	private:
 		fig::uuid _characterId;
+		std::unique_ptr<fig::util::Dictionary> _searchWords;
 	};
 }
 

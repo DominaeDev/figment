@@ -3,27 +3,39 @@
 #include "gui/AppResources.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
+#include "util/StringUtility.h"
 
 using namespace fig::io;
+using namespace fig::util;
 
 namespace fig::gui
 {
 	CharacterCard::CharacterCard(LayoutElement* pParent, const fig::uuid& characterId) : CoverCard(pParent, characterId),
 		_characterId { characterId }
 	{
-		if (auto character = Global::GetUserManager().GetContent().GetCharacter(characterId))
+		_searchWords = std::make_unique<Dictionary>();
+
+		if (auto try_character = Global::GetUserManager().GetContent().GetCharacter(characterId); try_character.has_value())
 		{
-			SetLabel(character.value().fullName);
+			auto& character = try_character.value();
+			SetLabel(character.fullName);
 //			SetSublabel(character.value().subheader);
 
 			CreateChatCounter(0);
 
-			for (auto& tag : character.value().tags)
+			for (auto& tag : character.tags)
 				AddTag(tag, Color { 0x31, 0x90, 0xc8 });
+
+			AddSearchText(character.shortName);
+			AddSearchText(character.fullName);
+			AddSearchText(character.description);
+//			AddSearchText(character.tags);
 		}
 
 //		AddTag("#Tag", Color { 0x31, 0x90, 0xc8 });
 //		AddTag("#Another tag", Color { 0xc8, 0x31, 0xad });
 //		AddTag("#Yet another", Color { 0x45, 0xc8, 0x45 });
 	}
+
+
 }

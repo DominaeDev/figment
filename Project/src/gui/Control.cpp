@@ -219,4 +219,27 @@ namespace fig::gui
 			OnVisibility();
 		}
 	}
+
+	void Control::SetMargins(float left, float top, float right, float bottom)
+	{
+		_marginLeft = left;
+		_marginTop = top;
+		_marginRight = right;
+		_marginBottom = bottom;
+	}
+
+	void Control::SetMargins(Rectf rect)
+	{
+		SetMargins(rect.x, rect.y, rect.w, rect.h);
+	}
+
+	Rectf Control::GetClientRect() const noexcept
+	{
+		Rectf clientRect = GetRect();
+		clientRect.x += _marginLeft;
+		clientRect.y += _marginTop;
+		clientRect.w -= _marginLeft + _marginRight;
+		clientRect.h -= _marginTop + _marginBottom;
+		return clientRect;
+	}
 }

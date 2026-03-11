@@ -4,8 +4,11 @@
 #include "gui/AppResources.h"
 #include "gui/NineGridImage.h"
 #include "gui/RoundedBorder.h"
+#include "util/StringUtility.h"
 
 #include <cassert>
+
+using namespace fig::util;
 
 namespace fig::gui
 {
@@ -281,4 +284,41 @@ namespace fig::gui
 		}
 	}
 
+	void CoverCard::AddSearchText(const fig::string& text) noexcept
+	{
+		if (not text.empty())
+			_searchWords.emplace_back(fig::util::lcase(text));
+	}
+
+	static std::vector<fig::string> filter_search(const fig::string& text)
+	{
+		static constexpr auto is_delimiter = [](char c) {
+			return std::ispunct(static_cast<unsigned char>(c))
+				or std::isspace(static_cast<unsigned char>(c));
+		};
+
+		auto chunks = text
+			| std::views::chunk_by([&](char a, char b) { return !is_delimiter(a) && !is_delimiter(b); })
+			| std::views::transform([](auto&& range) { auto s = fig::string(std::ranges::begin(range), std::ranges::end(range)); lcase_inplace(s); return s; })
+			| std::ranges::to<std::vector>();
+
+		return chunks
+			| std::views::filter([&](auto& s) { return not empty_or_whitespace(s); })
+			| std::ranges::to<std::vector>();
+	}
+
+	bool CoverCard::IsFilteredBy(const fig::string& search_string) const noexcept
+	{
+		auto search_words = filter_search(search_string);
+
+		for (auto& word : search_words)
+		{
+			bool bFound = false;
+			for (auto& s : _searchWords)
+				bFound |= s.contains(word);
+			if (!bFound)
+				return true;
+		}
+		return false;
+	}
 }

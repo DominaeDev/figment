@@ -34,21 +34,6 @@ namespace fig::gui
 	{
 		if (_pSizer and not _children.empty())
 		{
-			if constexpr (Disabled) // Doesn't work as expected
-			{
-				float minY = std::numeric_limits<float>::max();
-				float maxY = std::numeric_limits<float>::min();
-				for (auto& child : _children)
-				{
-					auto& pos = child->GetPosition();
-					auto& size = child->GetSize();
-					minY = std::min(minY, pos.y);
-					maxY = std::max(maxY, pos.y + size.y);
-				}
-
-				_fMaxExtent = maxY - minY;
-			}
-
 			float maxExtent = std::max(_fMaxExtent - GetHeight() + _fTopMargin + _fBottomMargin, 0.0f);
 			_fScrollY = std::clamp(_fScrollY, 0.0f, maxExtent);
 

@@ -49,6 +49,7 @@ namespace fig::gui
 				auto request = assets.LoadAssetAsync(asset.id, AssetManager::AsyncLoad::Task::LoadImage, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
+				_cards.push_back(pCard);
 			}
 		}
 
@@ -64,6 +65,7 @@ namespace fig::gui
 				auto request = assets.LoadAssetAsync(asset.id, AssetManager::AsyncLoad::Task::LoadImage, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
+				_cards.push_back(pCard);
 			}
 		}
 
@@ -90,5 +92,33 @@ namespace fig::gui
 				LayoutNow();
 			}
 		}
+	}
+
+	void CardList::SetFilter(const fig::string& search_string) noexcept
+	{
+		if (fig::util::empty_or_whitespace(search_string))
+		{
+			ClearFilter();
+			return;
+		}
+
+		for (auto& card : _cards)
+		{
+			bool bFiltered = card->IsFilteredBy(search_string);
+			card->SetVisible(not bFiltered);
+			card->EnableLayout(not bFiltered);
+		}
+
+		InvalidateLayout();
+	}
+
+	void CardList::ClearFilter() noexcept
+	{
+		for (auto& card : _cards)
+		{
+			card->SetVisible(true);
+			card->EnableLayout(true);
+		}
+		InvalidateLayout();
 	}
 }
