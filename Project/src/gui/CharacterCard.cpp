@@ -24,7 +24,7 @@ namespace fig::gui
 			CreateChatCounter(0);
 
 			for (auto& tag : character.tags)
-				AddTag(tag, Color { 0x31, 0x90, 0xc8 });
+				AddTag(tag);
 
 			AddSearchText(character.shortName);
 			AddSearchText(character.fullName);

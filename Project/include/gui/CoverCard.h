@@ -37,7 +37,8 @@ namespace fig::gui
 		void SetLabel(const fig::string& text) noexcept;
 		void SetSublabel(const fig::string& text) noexcept;
 		void CreateChatCounter(uint32_t count);
-		bool AddTag(const fig::string& text, const Color& color);
+		bool AddTag(const fig::string& tag);
+		bool AddTag(const fig::string& tag, const Color& color);
 
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
@@ -68,6 +69,7 @@ namespace fig::gui
 		Image* _pErrorIcon {};
 
 		std::vector<fig::wstring> _searchWords {};
+
 	};
 }
 

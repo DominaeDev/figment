@@ -166,7 +166,14 @@ namespace fig::gui
 		_tagPosition.x += pCounterBG->GetWidth() + kTagSpacing;
 	}
 
-	bool CoverCard::AddTag(const fig::string& text, const Color& color)
+	static Color GetTagColor(const fig::string& tag);
+
+	bool CoverCard::AddTag(const fig::string& tag)
+	{
+		return AddTag(tag, GetTagColor(tag));
+	}
+
+	bool CoverCard::AddTag(const fig::string& tag, const Color& color)
 	{
 		auto position = _tagPosition;
 
@@ -187,7 +194,7 @@ namespace fig::gui
 		pTagBG->SetPosition(position);
 		pTagBG->SetForegroundColor(Color { color.r, color.g, color.b, 0xA0 });
 
-		auto pLabel = new StaticText(_pFooter, text, FontFace::Default, 14.0, true);
+		auto pLabel = new StaticText(_pFooter, tag, FontFace::Default, 14.0, true);
 		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);
 		pLabel->SetForegroundColor(Colors::White);
 		pLabel->SetBackgroundColor(Colors::Transparent);
@@ -344,4 +351,34 @@ namespace fig::gui
 		}
 		return false;
 	}
+
+	static std::map<fig::string, Color> s_TagColors;
+	static std::array<Color, 12> s_Colors {
+		Color { 0x31, 0x90, 0xC8, 0xFF },
+		Color { 0xB3, 0x42, 0xC4, 0xFF },
+		Color { 0xC3, 0x30, 0x30, 0xFF },
+		Color { 0x2C, 0xC6, 0xC4, 0xFF },
+		Color { 0x00, 0x95, 0x12, 0xFF },
+		Color { 0xF0, 0xAA, 0x46, 0xFF },
+		Color { 0xE6, 0x45, 0xA4, 0xFF },
+		Color { 0x90, 0x5D, 0x14, 0xFF },
+		Color { 0x43, 0xD0, 0xA3, 0xFF },
+		Color { 0x3C, 0x36, 0xB8, 0xFF },
+		Color { 0x66, 0xCC, 0x35, 0xFF },
+		Color { 0x86, 0x1E, 0x1E, 0xFF },
+	};
+
+	static Color GetTagColor(const fig::string& tag)
+	{
+		string tagLower = lcase(tag);
+		if (auto itFind = s_TagColors.find(tagLower); itFind != s_TagColors.end())
+			return itFind->second;
+
+		auto hash = GetHash(tagLower);
+		assert(hash.parts.size() == 8);
+		auto nColor = hash.parts.at(7) % s_Colors.size();
+		s_TagColors[tagLower] = s_Colors[nColor];
+		return s_Colors[nColor];
+	}
+
 }

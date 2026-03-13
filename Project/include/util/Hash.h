@@ -8,7 +8,7 @@ namespace fig
 {
 	struct Hash 
 	{
-		uint32_t parts[8] = {0};
+		std::array<uint32_t, 8> parts = {};
 		static Hash Empty;
 
 		Hash() = default;
