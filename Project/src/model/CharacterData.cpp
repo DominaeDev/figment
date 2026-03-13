@@ -73,6 +73,9 @@ namespace fig::io::data
 				data.bgColor = hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 		}
 
+		// Tags
+		data.tags = rootNode.GetElementList("Tags").value_or({});
+
 		return !data.characterId.empty() && !data.shortName.empty();
 	}
 
@@ -127,6 +130,9 @@ namespace fig::io::data
 		default:
 			break;
 		}
+
+		if (not tags.empty())
+			root.SetElementValue("Tags", tags);
 
 		if (not brief.empty())
 			root.SetElementValue("Brief", brief);

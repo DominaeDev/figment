@@ -8,7 +8,7 @@ namespace fig::gui
 	ButtonWithIcon::ButtonWithIcon(LayoutElement* pParent, TextureType icon) : ThemedButton(pParent)
 	{
 		_pBGRenderer = new NineGridRenderer(8);
-		_pBGRenderer->SetTexture(AppResources::GetTexture(TextureType::BUTTON_BACKGROUND));
+		_pBGRenderer->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND));
 		_pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundRenderer(_pBGRenderer);
 

@@ -35,9 +35,22 @@ namespace fig::util
 		return s;
 	}
 
+	string trim(string&& in)
+	{
+		string s(std::move(in));
+		trim_inplace(s);
+		return s;
+	}
+
 	bool empty_or_whitespace(const string& s) noexcept
 	{
 		static constexpr const_string ws { " \t\r\n\v\f" };
+		return s.size() == 0 || s.find_first_not_of(ws.data(), 0, ws.length()) == fig::npos;
+	}
+
+	bool empty_or_whitespace(const wstring& s) noexcept
+	{
+		static constexpr std::wstring_view ws { L" \t\r\n\v\f" };
 		return s.size() == 0 || s.find_first_not_of(ws.data(), 0, ws.length()) == fig::npos;
 	}
 
@@ -93,6 +106,20 @@ namespace fig::util
 		wstring s = str;
 		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towupper(c); });
 		return s;
+	}
+
+	wstring& lcase_inplace(wstring& str)
+	{
+		for (size_t i = 0; i < str.length(); ++i)
+			str[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(str[i])));
+		return str;
+	}
+
+	wstring& ucase_inplace(wstring& str)
+	{
+		for (size_t i = 0; i < str.length(); ++i)
+			str[i] = static_cast<wchar_t>(std::towupper(static_cast<wint_t>(str[i])));
+		return str;
 	}
 
 	int compare(const string& a, const string& b, bool ignore_case)
@@ -339,5 +366,129 @@ namespace fig::util
 
 		// If no cut-off multi-byte character is found, return full length
 		return len;
+	}
+	
+	bool find_in(const std::string_view substr, const std::string_view text, bool case_insensitive, bool whole_words)
+	{
+		std::wstring substrUtf8 = from_utf8(fig::string(substr));
+		std::wstring textUtf8 = from_utf8(fig::string(text));
+		return find_in(substrUtf8, textUtf8, case_insensitive, whole_words);
+	}
+
+	bool find_in(const std::wstring_view substr, const std::wstring_view text, bool case_insensitive, bool whole_words)
+	{
+		if (substr.empty() or text.size() < substr.size())
+			return false;
+
+		const auto char_equal = [&](wchar_t a, wchar_t b) -> bool
+		{
+			if (case_insensitive)
+				return std::towlower(a) == std::towlower(b);
+			return a == b;
+		};
+
+		const auto is_word_char = [](wchar_t c) -> bool
+		{
+			return std::iswalnum(c) || c == L'_' || c == '\'';
+		};
+
+		auto it = text.cbegin();
+
+		while (it != text.cend())
+		{
+			auto found = std::ranges::search(std::ranges::subrange(it, text.cend()), substr, char_equal);
+
+			if (found.empty())
+				return false;
+
+			if (!whole_words)
+				return true;
+
+			const std::size_t pos = static_cast<std::size_t>(found.begin() - text.cbegin());
+			const std::size_t len = substr.size();
+
+			const bool left_ok = (pos == 0) || !is_word_char(text[pos - 1]);
+			const bool right_ok = (pos + len >= text.size()) || !is_word_char(text[pos + len]);
+
+			if (left_ok and right_ok)
+				return true;
+
+			it = found.begin() + 1;
+		}
+
+		return false;
+	}
+
+	fig::string encode_csv(std::span<const fig::string> values)
+	{
+		auto encode_value = [](const fig::string& value) {
+			if (not (value.contains(',') or value.contains('"')))
+				return value;
+
+			// Quote value, escape quotes
+			fig::string quoted;
+			quoted.reserve(value.size() + 2);
+			quoted += '"';
+			for (const char c : value)
+			{
+				if (c == '"')
+					quoted += "\"\"";
+				else
+					quoted += c;
+			}
+			quoted += '"';
+			return quoted;
+		};
+
+		fig::string result;
+		for (const auto& field : values)
+		{
+			if (!result.empty())
+				result += ',';
+			result += trim(encode_value(field));
+		}
+		return result;
+	}
+
+	std::vector<fig::string> decode_csv(const fig::string& csv)
+	{
+		std::vector<fig::string> fields;
+		fig::string current;
+		bool in_quotes = false;
+
+		for (size_t i = 0; i < csv.size(); ++i)
+		{
+			const char ch = csv[i];
+
+			if (in_quotes)
+			{
+				if (ch == '"' && i + 1 < csv.size() && csv[i + 1] == '"')
+				{
+					// Unescape
+					current += '"';
+					++i;
+				}
+				else if (ch == '"')
+					in_quotes = false;
+				else
+					current += ch;
+			}
+			else
+			{
+				if (ch == '"') 
+					in_quotes = true;
+				else if (ch == ',')
+				{
+					fields.emplace_back(trim(std::move(current)));
+					current.clear();
+				}
+				else 
+					current += ch;
+			}
+		}
+
+		if (not current.empty())
+			fields.emplace_back(current);
+		return fields;
 	}
 }

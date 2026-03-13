@@ -2,6 +2,7 @@
 #include "gui/HomeScreen.h"
 #include "gui/CardList.h"
 #include "gui/MainFrame.h"
+#include "gui/SimpleTextBox.h"
 
 namespace fig::gui
 {
@@ -13,9 +14,9 @@ namespace fig::gui
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		_pFilterTextBox = new TextBox(pTopBar, FontFace::Default, 16.0);
+		_pFilterTextBox = new SimpleTextBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
-		_pFilterTextBox->SetSize(250, 34);
+		_pFilterTextBox->SetSize(250, 30);
 		_pFilterTextBox->SetMaxSize(250, -1);
 		_pFilterTextBox->SetBackgroundColor(Colors::White);
 		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
@@ -69,12 +70,12 @@ namespace fig::gui
 
 	void HomeScreen::CreateCards()
 	{
-//		auto startTime = std::chrono::steady_clock::now();
+		auto startTime = std::chrono::steady_clock::now();
 
 		_pCardList->CreateCards(CardList::CardType::Character);
 
-//		auto endTime = std::chrono::steady_clock::now();
-//		MainFrame::SetStatusBar(std::format("Duration: {}ms", toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
+		auto endTime = std::chrono::steady_clock::now();
+		MainFrame::SetStatusBar(std::format("Duration: {}ms", toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
 
 		InvalidateLayout();
 	}
@@ -91,7 +92,7 @@ namespace fig::gui
 
 	void HomeScreen::OnFilter(fig::string search_text)
 	{
-		if (search_text.empty())
+		if (search_text.size() < 2)
 		{
 			_pCardList->ClearFilter();
 			_fSearchTimer = 0.0f;
@@ -99,7 +100,7 @@ namespace fig::gui
 		else
 		{
 			_search_text = std::move(search_text);
-			_fSearchTimer = 0.25f;
+			_fSearchTimer = 0.2f;
 		}
 	}
 

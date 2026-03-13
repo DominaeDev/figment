@@ -7,6 +7,7 @@
 #include <format>
 
 using namespace tinyxml2;
+using namespace fig::util;
 
 namespace fig::io
 {
@@ -97,6 +98,12 @@ namespace fig::io
 		_pElement->InsertNewText(value.str().c_str());
 	}
 
+	void XmlWriterElement::SetValue(std::span<const fig::string> values) noexcept
+	{
+		DeleteValue();
+		_pElement->InsertNewText(encode_csv(values).c_str());
+	}
+
 	void XmlWriterElement::SetAttribute(const fig::string& name, bool value) noexcept
 	{
 		_pElement->SetAttribute(name.c_str(), value);
@@ -127,10 +134,9 @@ namespace fig::io
 		_pElement->SetAttribute(name.c_str(), value.str().c_str());
 	}
 
-	XmlWriterElement XmlWriterElement::AddChild(const fig::string& name) noexcept
+	void XmlWriterElement::SetAttribute(const fig::string& name, std::span<const fig::string> values) noexcept
 	{
-		auto pElement = _pElement->InsertNewChildElement(name.c_str());
-		return XmlWriterElement(pElement);
+		_pElement->SetAttribute(name.c_str(), encode_csv(values).c_str());
 	}
 
 	void XmlWriterElement::SetElementValue(const fig::string& name, bool value) noexcept
@@ -161,6 +167,17 @@ namespace fig::io
 	void XmlWriterElement::SetElementValue(const fig::string& name, const fig::uuid& value) noexcept
 	{
 		AddChild(name).SetValue(value);
+	}
+
+	void XmlWriterElement::SetElementValue(const fig::string& name, std::span<const fig::string> values) noexcept
+	{
+		AddChild(name).SetValue(encode_csv(values));
+	}
+
+	XmlWriterElement XmlWriterElement::AddChild(const fig::string& name) noexcept
+	{
+		auto pElement = _pElement->InsertNewChildElement(name.c_str());
+		return XmlWriterElement(pElement);
 	}
 
 	XmlWriterAttribute XmlWriterElement::operator[] (const std::string& key) noexcept

@@ -8,7 +8,7 @@ namespace fig::gui
 	SidePanelButton::SidePanelButton(LayoutElement* pParent, TextureType icon, const fig::string& label) : ThemedButton(pParent)
 	{
 		_pBGRenderer = new NineGridRenderer(8);
-		_pBGRenderer->SetTexture(AppResources::GetTexture(TextureType::BUTTON_BACKGROUND));
+		_pBGRenderer->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND));
 		_pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundRenderer(_pBGRenderer);
 

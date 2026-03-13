@@ -29,7 +29,26 @@ namespace fig::gui
 			AddSearchText(character.shortName);
 			AddSearchText(character.fullName);
 			AddSearchText(character.description);
-//			AddSearchText(character.tags);
+			AddSearchText(character.tags);
+
+			switch (character.gender)
+			{
+			case data::CharacterGender::Male:
+				AddSearchText("male");
+				AddSearchText("m");
+				break;
+			case data::CharacterGender::Female:
+				AddSearchText("female");
+				AddSearchText("f");
+				break;
+			}
+
+			Color tagColor = { 0x31, 0x90, 0xc8 };
+			for (auto& tag : character.tags)
+			{
+				if (not AddTag(tag, tagColor))
+					break;
+			}
 		}
 
 //		AddTag("#Tag", Color { 0x31, 0x90, 0xc8 });

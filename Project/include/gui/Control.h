@@ -76,6 +76,7 @@ namespace fig::gui
 		float _marginTop = 0;
 		float _marginRight = 0;
 		float _marginBottom = 0;
+
 	private:
 		struct ControlRenderContext
 		{

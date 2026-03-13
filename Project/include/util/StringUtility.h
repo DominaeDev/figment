@@ -7,21 +7,23 @@
 
 namespace fig::util
 {
-	void ltrim_inplace(string& s);
-	void rtrim_inplace(string& s);
-	inline void trim_inplace(string& s) { ltrim_inplace(s); rtrim_inplace(s); }
-
 	[[nodiscard]] string ltrim(const string& s);
 	[[nodiscard]] string rtrim(const string& s);
 	[[nodiscard]] inline string trim(const string& s) { return ltrim(rtrim(s)); }
+	void ltrim_inplace(string& s);
+	void rtrim_inplace(string& s);
+	inline void trim_inplace(string& s) { ltrim_inplace(s); rtrim_inplace(s); }
+	string trim(string&& s);
 
 	[[nodiscard]] string lcase(const string& s);
 	[[nodiscard]] string ucase(const string& s);
 	string& lcase_inplace(string& s);
 	string& ucase_inplace(string& s);
-
 	[[nodiscard]] wstring lcase(const wstring& s);
 	[[nodiscard]] wstring ucase(const wstring& s);
+	wstring& lcase_inplace(wstring& s);
+	wstring& ucase_inplace(wstring& s);
+
 	[[nodiscard]] int compare(const string& a, const string& b, bool ignore_case = false);
 	[[nodiscard]] bool equals(const string& a, const string& b, bool ignore_case = false);
 
@@ -34,6 +36,7 @@ namespace fig::util
 	bool is_whitespace(char ch) noexcept;
 	bool is_punctuation(char ch) noexcept;
 	bool empty_or_whitespace(const string& s) noexcept;
+	bool empty_or_whitespace(const wstring& s) noexcept;
 	bool begins_with(const string& str, const string& prefix, bool ignore_case = false);
 	bool ends_with(const string& str, const string& suffix, bool ignore_case = false);
 	std::vector<string> split(string s, char delimiter, bool removeEmpty = true);
@@ -76,6 +79,12 @@ namespace fig::util
 			return toI(std::distance(str.cbegin(), it));
 		return fig::npos;
 	};
+
+	[[nodiscard]] bool find_in(const std::string_view substr, const std::string_view text, bool case_insensitive = false, bool whole_words = false);
+	[[nodiscard]] bool find_in(const std::wstring_view substr, const std::wstring_view text, bool case_insensitive = false, bool whole_words = false);
+
+	[[nodiscard]] fig::string encode_csv(std::span<const fig::string> values);
+	[[nodiscard]] std::vector<fig::string> decode_csv(const fig::string& csv);
 }
 
 #endif 

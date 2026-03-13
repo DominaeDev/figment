@@ -166,14 +166,14 @@ namespace fig::gui
 		_tagPosition.x += pCounterBG->GetWidth() + kTagSpacing;
 	}
 
-	void CoverCard::AddTag(const fig::string& text, const Color& color)
+	bool CoverCard::AddTag(const fig::string& text, const Color& color)
 	{
 		auto position = _tagPosition;
 
 		if (position.x + kTagInnerMargin * 2 + kTagLeftMargin + kTagMinWidth >= GetWidth())
 		{
 			if (++_tagRows > 2)
-				return;
+				return false;
 
 			_tagPosition.x = kTagLeftMargin;
 			_tagPosition.y += kTagRowHeight;
@@ -199,6 +199,7 @@ namespace fig::gui
 		pTagBG->SetSize(toF(w + kTagInnerMargin * 2), 26);
 
 		_tagPosition.x += pTagBG->GetWidth() + kTagSpacing;
+		return true;
 	}
 
 	void CoverCard::SetBorder(BorderStyle style)
@@ -287,10 +288,28 @@ namespace fig::gui
 	void CoverCard::AddSearchText(const fig::string& text) noexcept
 	{
 		if (not text.empty())
-			_searchWords.emplace_back(fig::util::lcase(text));
+			_searchWords.emplace_back(lcase(from_utf8(text)));
 	}
 
-	static std::vector<fig::string> filter_search(const fig::string& text)
+	void CoverCard::AddSearchText(const std::span<fig::string> texts) noexcept
+	{
+		for (auto& t : texts)
+			AddSearchText(t);
+	}
+
+	void CoverCard::AddSearchText(const fig::wstring& text) noexcept
+	{
+		if (not text.empty())
+			_searchWords.emplace_back(lcase(text));
+	}
+
+	void CoverCard::AddSearchText(const std::span<fig::wstring> texts) noexcept
+	{
+		for (auto& t : texts)
+			AddSearchText(t);
+	}
+
+	static std::vector<fig::wstring> filter_search(const fig::string& text)
 	{
 		static constexpr auto is_delimiter = [](char c) {
 			return std::ispunct(static_cast<unsigned char>(c))
@@ -299,7 +318,11 @@ namespace fig::gui
 
 		auto chunks = text
 			| std::views::chunk_by([&](char a, char b) { return !is_delimiter(a) && !is_delimiter(b); })
-			| std::views::transform([](auto&& range) { auto s = fig::string(std::ranges::begin(range), std::ranges::end(range)); lcase_inplace(s); return s; })
+			| std::views::transform([](auto&& range) { 
+				auto s = from_utf8(fig::string(std::ranges::begin(range), std::ranges::end(range)));
+				lcase_inplace(s); 
+				return s; 
+			})
 			| std::ranges::to<std::vector>();
 
 		return chunks
@@ -315,7 +338,7 @@ namespace fig::gui
 		{
 			bool bFound = false;
 			for (auto& s : _searchWords)
-				bFound |= s.contains(word);
+				bFound |= fig::util::find_in(word, s, false, true);
 			if (!bFound)
 				return true;
 		}

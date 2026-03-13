@@ -37,11 +37,14 @@ namespace fig::gui
 		void SetLabel(const fig::string& text) noexcept;
 		void SetSublabel(const fig::string& text) noexcept;
 		void CreateChatCounter(uint32_t count);
-		void AddTag(const fig::string& text, const Color& color);
+		bool AddTag(const fig::string& text, const Color& color);
 
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 		void AddSearchText(const fig::string& text) noexcept;
+		void AddSearchText(const std::span<fig::string> texts) noexcept;
+		void AddSearchText(const fig::wstring& text) noexcept;
+		void AddSearchText(const std::span<fig::wstring> texts) noexcept;
 	private:
 		void PollFuture();
 
@@ -64,7 +67,7 @@ namespace fig::gui
 		bool _bHasError = false;
 		Image* _pErrorIcon {};
 
-		std::vector<fig::string> _searchWords {};
+		std::vector<fig::wstring> _searchWords {};
 	};
 }
 

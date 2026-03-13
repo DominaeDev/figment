@@ -5,6 +5,7 @@
 #include <tinyxml2.h>
 
 using namespace tinyxml2;
+using namespace fig::util;
 
 namespace fig::io
 {
@@ -86,6 +87,13 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	std::optional<std::vector<fig::string>> XmlReaderAttribute::AsList() const noexcept
+	{
+		if (auto str = AsText(); str.has_value())
+			return std::make_optional(decode_csv(str.value()));
+		return std::nullopt;
+	}
+
 	bool XmlReaderAttribute::AsBool(bool default_value) const noexcept
 	{
 		return AsBool().value_or(default_value);
@@ -104,6 +112,11 @@ namespace fig::io
 	fig::string XmlReaderAttribute::AsText(const fig::string& default_value) const noexcept
 	{
 		return AsText().value_or(default_value);
+	}
+
+	std::vector<fig::string> XmlReaderAttribute::AsList(const std::vector<fig::string>& default_value) const noexcept
+	{
+		return AsList().value_or(default_value);
 	}
 
 	XmlReaderElement::XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot) noexcept :
@@ -197,6 +210,13 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	std::optional<std::vector<fig::string>> XmlReaderElement::GetList() const noexcept
+	{
+		if (auto str = GetText(); str.has_value())
+			return std::make_optional(decode_csv(str.value()));
+		return std::nullopt;
+	}
+
 	bool XmlReaderElement::GetBool(bool default_value) const noexcept
 	{
 		return GetBool().value_or(default_value);
@@ -215,6 +235,11 @@ namespace fig::io
 	fig::string XmlReaderElement::GetText(const fig::string& default_value) const noexcept
 	{
 		return GetText().value_or(default_value);
+	}
+
+	std::vector<fig::string> XmlReaderElement::GetList(const std::vector<fig::string>& default_value) const noexcept
+	{
+		return GetList().value_or(default_value);
 	}
 
 	XmlReaderAttribute XmlReaderElement::operator[] (const std::string& key) const noexcept
@@ -277,6 +302,13 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	std::optional<std::vector<fig::string>> XmlReaderElement::GetElementList(const fig::string& name) const noexcept
+	{
+		if (auto str = GetElementText(name); str.has_value())
+			return std::make_optional(decode_csv(str.value()));
+		return std::nullopt;
+	}
+
 	bool XmlReaderElement::GetElementBool(const fig::string& name, bool default_value) const noexcept
 	{
 		return GetElementBool(name).value_or(default_value);
@@ -295,6 +327,11 @@ namespace fig::io
 	fig::string XmlReaderElement::GetElementText(const fig::string& name, const fig::string& default_value) const noexcept
 	{
 		return GetElementText(name).value_or(default_value);
+	}
+
+	std::vector<fig::string> XmlReaderElement::GetElementList(const fig::string& name, const std::vector<fig::string>& default_value) const noexcept
+	{
+		return GetElementList(name).value_or(default_value);
 	}
 
 	XmlReader::XmlReader(const fig::path& path)

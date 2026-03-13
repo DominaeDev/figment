@@ -28,11 +28,13 @@ namespace fig::io
 		std::optional<fig::string> AsText() const noexcept;
 		std::optional<fig::bytes> AsBytes() const noexcept;
 		std::optional<fig::uuid> AsUUID() const noexcept;
+		std::optional<std::vector<fig::string>> AsList() const noexcept;
 
 		bool AsBool(bool default_value) const noexcept;
 		int32_t AsInt(int32_t default_value) const noexcept;
 		float AsFloat(float default_value) const noexcept;
 		fig::string AsText(const fig::string& default_value) const noexcept;
+		std::vector<fig::string> AsList(const std::vector<fig::string>& default_value) const noexcept;
 
 	private:
 		const tinyxml2::XMLAttribute* _pAttrib;
@@ -57,12 +59,14 @@ namespace fig::io
 		std::optional<fig::string> GetText() const noexcept;
 		std::optional<fig::bytes> GetBytes() const noexcept;
 		std::optional<fig::uuid> GetUUID() const noexcept;
+		std::optional<std::vector<fig::string>> GetList() const noexcept;
 
 		fig::string GetName() const noexcept;
 		bool GetBool(bool default_value) const noexcept;
 		int32_t GetInt(int32_t default_value) const noexcept;
 		float GetFloat(float default_value) const noexcept;
 		fig::string GetText(const fig::string& default_value) const noexcept;
+		std::vector<fig::string> GetList(const std::vector<fig::string>& default_value) const noexcept;
 
 		std::optional<bool> GetElementBool(const fig::string& name) const noexcept;
 		std::optional<int32_t> GetElementInt(const fig::string& name) const noexcept;
@@ -70,11 +74,13 @@ namespace fig::io
 		std::optional<fig::string> GetElementText(const fig::string& name) const noexcept;
 		std::optional<fig::bytes> GetElementBytes(const fig::string& name) const noexcept;
 		std::optional<fig::uuid> GetElementUUID(const fig::string& name) const noexcept;
+		std::optional<std::vector<fig::string>> GetElementList(const fig::string& name) const noexcept;
 
 		bool GetElementBool(const fig::string& name, bool default_value) const noexcept;
 		int32_t GetElementInt(const fig::string& name, int32_t default_value) const noexcept;
 		float GetElementFloat(const fig::string& name, float default_value) const noexcept;
 		fig::string GetElementText(const fig::string& name, const fig::string& default_value) const noexcept;
+		std::vector<fig::string> GetElementList(const fig::string& name, const std::vector<fig::string>& default_value) const noexcept;
 
 		XmlReaderAttribute operator[] (const std::string& key) const noexcept;
 
@@ -135,6 +141,7 @@ namespace fig::io
 		void SetValue(const fig::string& value) noexcept;
 		void SetValue(const fig::byte_span& value) noexcept;
 		void SetValue(const fig::uuid& value) noexcept;
+		void SetValue(std::span<const fig::string> values) noexcept;
 
 		void SetAttribute(const fig::string& name, bool value) noexcept;
 		void SetAttribute(const fig::string& name, int32_t value) noexcept;
@@ -142,6 +149,7 @@ namespace fig::io
 		void SetAttribute(const fig::string& name, const fig::string& value) noexcept;
 		void SetAttribute(const fig::string& name, const fig::byte_span& value) noexcept;
 		void SetAttribute(const fig::string& name, const fig::uuid& value) noexcept;
+		void SetAttribute(const fig::string& name, std::span<const fig::string> values) noexcept;
 
 		void SetElementValue(const fig::string& name, bool value) noexcept;
 		void SetElementValue(const fig::string& name, int32_t value) noexcept;
@@ -149,6 +157,7 @@ namespace fig::io
 		void SetElementValue(const fig::string& name, const fig::string& value) noexcept;
 		void SetElementValue(const fig::string& name, const fig::byte_span& value) noexcept;
 		void SetElementValue(const fig::string& name, const fig::uuid& value) noexcept;
+		void SetElementValue(const fig::string& name, std::span<const fig::string> values) noexcept;
 
 		XmlWriterAttribute operator[] (const std::string& key) noexcept;
 
