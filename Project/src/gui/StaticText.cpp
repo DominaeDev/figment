@@ -76,7 +76,7 @@ namespace fig::gui
 	void StaticText::OnRender(Renderer* pRenderer)
 	{
 		auto bgColor = GetBackgroundColor();
-		if (is_defined(bgColor) && bgColor.a != 0)
+		if (bgColor.IsDefined() && bgColor.a != 0)
 			DrawBackground(pRenderer);
 
 		bool test = SDL_RenderClipEnabled(pRenderer);
@@ -124,7 +124,7 @@ namespace fig::gui
 			DrawShadow(pText);
 
 
-		if (is_defined(fgColor))
+		if (fgColor.IsDefined())
 		{
 			// Opaque background: Use ClearType
 			if (bgColor.a == 0xFF)
@@ -218,7 +218,7 @@ namespace fig::gui
 
 		_shadow.clear();
 
-		if (is_defined(fgColor))
+		if (fgColor.IsDefined())
 		{
 			SDL_Surface* pSurface = _bWordWrap ?
 				TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, DropShadowColor, maxWidth)

@@ -443,6 +443,9 @@
     <ClCompile Include="src\gui\DebugScreen.cpp">
       <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\GUIColor.cpp">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -604,7 +607,7 @@
     <ClInclude Include="include\gui\GUICommon.h">
       <Filter>Source Files\Frontend\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\GUIColors.h">
+    <ClInclude Include="include\gui\GUIColor.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\GUITypes.h">

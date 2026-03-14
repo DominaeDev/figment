@@ -19,19 +19,19 @@ void Image::OnRender(Renderer* pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
 	auto fgColor = GetForegroundColor();
-	if (is_defined(bgColor) && bgColor.a != 0)
+	if (bgColor.IsDefined() && bgColor.a != 0)
 		DrawBackground(pRenderer);
 
 	if (_pTexture)
 	{
 		Rectf rect = GetRect();
 
-		if (is_defined(fgColor))
+		if (fgColor.IsDefined())
 			SDL_SetTextureColorMod(_pTexture, fgColor.r, fgColor.g, fgColor.b);
 		else
 			SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
 
-		if (is_defined(fgColor) && fgColor.a != 0)
+		if (fgColor.IsDefined() && fgColor.a != 0)
 			SDL_SetTextureAlphaMod(_pTexture, fgColor.a);
 		else
 			SDL_SetTextureAlphaMod(_pTexture, 0xFF);

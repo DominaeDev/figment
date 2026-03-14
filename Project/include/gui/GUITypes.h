@@ -3,8 +3,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Types.h"
+#include "gui/GUIColor.h"
 #include "c_resource.h"
-#include "gui/GUIColors.h"
 
 namespace fig::sdl
 {
@@ -47,6 +47,7 @@ namespace fig::gui
 	using Surface = SDL_Surface;
 	using Texture = SDL_Texture;
 	using Vertex = SDL_Vertex;
+	using Colorf = SDL_FColor;
 
 	using WindowPtr = SDL_Window*;
 	using RendererPtr = SDL_Renderer*;

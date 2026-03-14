@@ -15,7 +15,7 @@ namespace fig::gui
 	SidePanel::SidePanel(LayoutElement* pParent) : Control(pParent)
 	{
 		SetWidth(Constants::GUI::SidePanel::Width);
-		SetBackgroundColor(Colors::SidePanelBackground);
+		SetBackgroundColor(fig::gui::Colors::SidePanelBackground);
 
 		auto pHeaderPanel = new Panel(this);
 		pHeaderPanel->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
@@ -23,7 +23,7 @@ namespace fig::gui
 		auto pLogo = new Image(pHeaderPanel, AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
 		pLogo->SetX(44);
 
-		auto pGradient = new HorizontalGradient(this, with_alpha(Colors::SidePanelGradient, 0.0f), with_alpha(Colors::SidePanelGradient, 0.6f));
+		auto pGradient = new HorizontalGradient(this, Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.6f));
 		_pGradient = pGradient;
 
 		auto pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);

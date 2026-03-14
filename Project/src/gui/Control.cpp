@@ -114,7 +114,7 @@ namespace fig::gui
 			return;
 		}
 
-		if (!is_defined(_borderColor))
+		if (!_borderColor.IsDefined())
 			return;
 
 		SDL_SetRenderDrawColor(pRenderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
@@ -123,7 +123,7 @@ namespace fig::gui
 
 	Color Control::GetForegroundColor() const
 	{
-		if (!is_defined(_foregroundColor))
+		if (!_foregroundColor.IsDefined())
 		{
 			auto frameParent = dynamic_cast<Control*>(_pParent);
 			return frameParent ? frameParent->GetForegroundColor() : Color();
@@ -133,7 +133,7 @@ namespace fig::gui
 
 	Color Control::GetBackgroundColor() const
 	{
-		if (!is_defined(_backgroundColor))
+		if (!_backgroundColor.IsDefined())
 		{
 			auto parentControl = dynamic_cast<Control*>(_pParent);
 			return parentControl ? parentControl->GetBackgroundColor() : Color();
@@ -151,7 +151,7 @@ namespace fig::gui
 		}
 
 		auto bgColor = GetBackgroundColor();
-		if (is_defined(bgColor) && bgColor.a != 0)
+		if (bgColor.IsDefined() && bgColor.a != 0)
 		{
 			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
 			SDL_RenderFillRect(pRenderer, &_rect);
@@ -167,9 +167,9 @@ namespace fig::gui
 		{
 			_renderContext = pParent->_renderContext;
 
-			if (!is_defined(_foregroundColor))
+			if (!_foregroundColor.IsDefined())
 				_foregroundColor = pParent->GetForegroundColor();
-			if (!is_defined(_backgroundColor))
+			if (!_backgroundColor.IsDefined())
 				_backgroundColor = pParent->GetBackgroundColor();
 		}
 	}

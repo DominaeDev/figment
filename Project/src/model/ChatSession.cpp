@@ -146,7 +146,7 @@ namespace fig::io::data
 	{
 		if (auto character = GetCharacter(role))
 		{
-			if (is_defined(character.value().bgColor) && is_defined(character.value().borderColor))
+			if (character.value().bgColor.IsDefined() && character.value().borderColor.IsDefined())
 				return std::make_pair(character.value().bgColor, character.value().borderColor);
 		}
 

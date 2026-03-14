@@ -60,18 +60,25 @@ namespace fig::gui::util
 			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
 	}
 
-	bool is_defined(Color color);
-	Color add_rgb(Color colorA, Color colorB);
-	Color add_rgb(Color colorA, int value);
-	Color add_rgb(Color colorA, float value);
-	Color multiply_rgb(Color colorA, Color colorB);
-	Color multiply_rgb(Color colorA, float value);
-	Color with_alpha(Color color, Uint8 alpha);
-	Color with_alpha(Color color, float alpha);
+	inline constexpr fig::gui::Colorf to_colorf(fig::gui::Color color)
+	{
+		return fig::gui::Colorf {
+			color.r / 255.0f,
+			color.g / 255.0f,
+			color.b / 255.0f,
+			color.a / 255.0f,
+		};
+	}
 
-	Color color_from_string(fig::string hex);
-	void color_to_hsv(Color color, float& h, float& s, float& v);
-	Color hsv_to_color(float h, float s, float v);
+	inline constexpr fig::gui::Color to_color(fig::gui::Colorf color)
+	{
+		return fig::gui::Color {
+			std::clamp(static_cast<uint8_t>(color.r * 255.0f), 0_u8, 255_u8),
+			std::clamp(static_cast<uint8_t>(color.g * 255.0f), 0_u8, 255_u8),
+			std::clamp(static_cast<uint8_t>(color.b * 255.0f), 0_u8, 255_u8),
+			std::clamp(static_cast<uint8_t>(color.a * 255.0f), 0_u8, 255_u8),
+		};
+	}
 
 	enum class ImageFit {
 		None,

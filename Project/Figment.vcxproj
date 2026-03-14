@@ -171,6 +171,7 @@
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\ButtonBase.cpp" />
     <ClCompile Include="src\gui\DebugScreen.cpp" />
+    <ClCompile Include="src\gui\GUIColor.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
     <ClCompile Include="src\gui\CardList.cpp" />
     <ClCompile Include="src\gui\CharacterCard.cpp" />
@@ -429,7 +430,7 @@
     <ClInclude Include="include\gui\CustomRenderer.h" />
     <ClInclude Include="include\gui\ChatMessage.h" />
     <ClInclude Include="include\gui\ChatScroll.h" />
-    <ClInclude Include="include\gui\GUIColors.h" />
+    <ClInclude Include="include\gui\GUIColor.h" />
     <ClInclude Include="include\Constants.h" />
     <ClInclude Include="include\gui\Control.h" />
     <ClInclude Include="include\gui\Fonts.h" />

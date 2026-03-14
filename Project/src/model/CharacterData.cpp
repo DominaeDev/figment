@@ -62,15 +62,14 @@ namespace fig::io::data
 
 		if (auto colorText = rootNode.GetElementText("Color"))
 		{
-			data.borderColor = color_from_string(colorText.value());
+			data.borderColor = Color::FromString(colorText.value());
 
-			float h, s, v;
-			color_to_hsv(data.borderColor, h, s, v);
+			auto [h, s, v] = data.borderColor.GetHSV();
 
 			if (s > 0.0f)
-				data.bgColor = hsv_to_color(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
+				data.bgColor = Color::FromHSV(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
 			else
-				data.bgColor = hsv_to_color(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
+				data.bgColor = Color::FromHSV(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 		}
 
 		// Tags

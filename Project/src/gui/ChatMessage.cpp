@@ -255,8 +255,8 @@ namespace fig::gui
 		if ((_style & Style::Dialogue) == Style::Dialogue)
 			_textColor = Colors::Black;
 		else
-			_textColor = multiply_rgb(borderColor, 0.5f);
-		_nameColor = add_rgb(borderColor, -0.1f);
+			_textColor = borderColor.Multiply(0.5f);
+		_nameColor = borderColor.Add(-0.1f);
 		RefreshColors();
 	}
 
@@ -269,13 +269,13 @@ namespace fig::gui
 
 		SetForegroundColor(Color { 0, 0, 0, alpha });
 
-		_pSpeechBubbleBG->SetColor(with_alpha(_bgColor, alpha));
-		_pSpeechBubbleBorder->SetColor(with_alpha(_borderColor, alpha));
+		_pSpeechBubbleBG->SetColor(_bgColor.WithAlpha(alpha));
+		_pSpeechBubbleBorder->SetColor(_borderColor.WithAlpha(alpha));
 
-		_pMessagePanel->SetBackgroundColor(with_alpha(_pMessagePanel->GetBackgroundColor(), alpha));
-		_pMessageText->SetForegroundColor(with_alpha(_textColor, alpha));
+		_pMessagePanel->SetBackgroundColor(_pMessagePanel->GetBackgroundColor().WithAlpha(alpha));
+		_pMessageText->SetForegroundColor(_textColor.WithAlpha(alpha));
 
 		if (_pNameText)
-			_pNameText->SetForegroundColor(with_alpha(_nameColor, alpha));
+			_pNameText->SetForegroundColor(_nameColor.WithAlpha(alpha));
 	}
 }
