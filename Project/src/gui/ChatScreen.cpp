@@ -57,7 +57,7 @@ namespace fig::gui
 		auto leftPanel = new Area(this);
 		leftPanel->SetSize(200, -1);
 
-		auto pExpandButton = new ButtonWithIcon(leftPanel, TextureType::ICON_SIDEBAR_EXPAND);
+		auto pExpandButton = new ButtonWithIcon(leftPanel, TextureType::ICON_SIDEBAR);
 		pExpandButton->SetSize(36, 36);
 		pExpandButton->SetPosition(4.0f, 6.0f);
 		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });

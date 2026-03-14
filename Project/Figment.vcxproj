@@ -169,7 +169,7 @@
     <ClCompile Include="src\fs\XmlReader.cpp" />
     <ClCompile Include="src\fs\XmlWriter.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
-    <ClCompile Include="src\gui\ButtonBase.cpp" />
+    <ClCompile Include="src\gui\BaseButton.cpp" />
     <ClCompile Include="src\gui\DebugScreen.cpp" />
     <ClCompile Include="src\gui\GUIColor.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
@@ -365,7 +365,7 @@
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\GUIConstants.h" />
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
-    <ClInclude Include="include\gui\ButtonBase.h" />
+    <ClInclude Include="include\gui\BaseButton.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\SearchBox.h" />
     <ClInclude Include="include\gui\SidePanelButton.h" />

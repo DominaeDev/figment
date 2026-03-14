@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "gui/ButtonBase.h"
+#include "gui/BaseButton.h"
 #include "gui/GUIUtility.h"
 
 using namespace fig::gui::util;
@@ -96,4 +96,11 @@ namespace fig::gui
 		OnButtonState();
 	}
 
+	void BaseButton::DropState() noexcept
+	{
+		if (IsEnabled())
+			SetButtonState(ButtonState::Default);
+		_bMouseInside = false;
+		_bMouseDown = false;
+	}
 }

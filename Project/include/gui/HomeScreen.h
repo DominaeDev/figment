@@ -17,13 +17,15 @@ namespace fig::gui
 
 		void CreateCards();
 		CardList& GetCardList();
-	protected:
+
+	private:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void OnSidePanel(bool show) override;
 		void OnFilter(fig::string search_text);
+		void SetSmallGridSize(bool bSmall);
 	private:
 		CardList* _pCardList {};
 		Control* _pExpandButton {};

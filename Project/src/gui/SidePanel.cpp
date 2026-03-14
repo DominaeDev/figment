@@ -27,16 +27,19 @@ namespace fig::gui
 		_pGradient = pGradient;
 
 		auto pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);
+		pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
 		pMenuButton->SetSize(36, 36);
 		pMenuButton->SetX(4.0f);
 		pMenuButton->CenterVertically();
 
 		auto pSettingsButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SETTINGS);
+		pSettingsButton->SetTheme(Themes::SidePanelButtonStyle);
 		pSettingsButton->SetSize(36, 36);
 		pSettingsButton->SetX(GetWidth() - pSettingsButton->GetWidth() - 40.0f);
 		pSettingsButton->CenterVertically();
 
-		auto pCollapseButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SIDEBAR_COLLAPSE);
+		auto pCollapseButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SIDEBAR);
+		pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
 		pCollapseButton->SetSize(36, 36);
 		pCollapseButton->SetX(GetWidth() - pCollapseButton->GetWidth() - 4.0f);
 		pCollapseButton->CenterVertically();
@@ -45,14 +48,17 @@ namespace fig::gui
 		auto pMainArea = new Area(this);
 
 		auto pChatButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
+		pChatButton->SetTheme(Themes::SidePanelButtonStyle);
 		pChatButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen<ChatScreen>(); });
 		pChatButton->SetHeight(58);
 
 		auto pCharactersButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
+		pCharactersButton->SetTheme(Themes::SidePanelButtonStyle);
 		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen<HomeScreen>(); });
 		pCharactersButton->SetHeight(58);
 
 		auto pScenariosButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
+		pScenariosButton->SetTheme(Themes::SidePanelButtonStyle);
 		pScenariosButton->SetHeight(58);
 
 		auto pButtonSizer = new VerticalSizer();

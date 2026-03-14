@@ -48,4 +48,9 @@ namespace fig::gui
 			return _theme.disabledColor.background;
 		}
 	}
+
+	void ThemedButton::OnAfterLayout()
+	{
+		DropState();
+	}
 }

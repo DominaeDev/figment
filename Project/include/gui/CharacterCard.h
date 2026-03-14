@@ -10,7 +10,7 @@ namespace fig::gui
 	class CharacterCard : public CoverCard
 	{
 	public:
-		CharacterCard(LayoutElement* pParent, const fig::uuid& characterId);
+		CharacterCard(LayoutElement* pParent, const fig::uuid& characterId, CardSize cardSize);
 		inline const fig::uuid& GetUUID() const noexcept { return _characterId; }
 
 	private:

@@ -9,7 +9,7 @@
 
 namespace fig::gui
 {
-	enum BorderStyle
+	enum CardBorderStyle
 	{
 		None,
 		Style01,
@@ -20,15 +20,22 @@ namespace fig::gui
 		Style06,
 	};
 
+	enum class CardSize
+	{
+		Default,
+		Half,
+	};
+
 	class TexturedBorder;
 	class NineGridImage;
 
 	class CoverCard : public Image
 	{
 	public:
-		CoverCard(LayoutElement* pParent, const fig::uuid& assetId);
+		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Default);
 
-		void SetBorder(BorderStyle style);
+		void SetBorder(CardBorderStyle style);
+		void SetCardSize(CardSize cardSize);
 		void SetCoverImage(fig::sdl::Surface&& texture);
 		void SetPendingCoverImage(fig::io::ImageFuture&& future);
 		bool IsFilteredBy(const fig::string& search_string) const noexcept;
@@ -51,16 +58,19 @@ namespace fig::gui
 
 	private:
 		fig::uuid _assetId;
-		StaticText* _pLabel {};
-		StaticText* _pSublabel {};
 		TexturedBorder* _pSimpleBorder {};
 		Image* _pStyledBorder {};
 
-		Area* _pFooter {};
-		NineGridImage* _pFooterFade {};
+		Area* _pLargeFooter {};
+		NineGridImage* _pLargeFooterFade {};
+		StaticText* _pLabel {};
+		StaticText* _pSublabel {};
 		Pointf _tagPosition {};
 		int32_t _tagRows { 1 };
-		
+
+		Area* _pSmallFooter {};
+		StaticText* _pSmallLabel {};
+
 		fig::sdl::Surface _imageSurface {};
 		fig::sdl::Texture _imageTexture {};
 		fig::io::ImageFuture _pendingCover {};

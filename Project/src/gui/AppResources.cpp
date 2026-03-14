@@ -24,6 +24,7 @@ namespace fig::gui
 
 		// Icons
 		LoadTexture(pRenderer, TextureType::ICON_ERROR, "./resources/gui/icons/icon_error_2.png");
+		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR, "./resources/gui/icons/icon_side_panel.png");
 		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR_COLLAPSE, "./resources/gui/icons/icon_side_panel_collapse.png");
 		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR_EXPAND, "./resources/gui/icons/icon_side_panel_expand.png");
 		LoadTexture(pRenderer, TextureType::ICON_SETTINGS, "./resources/gui/icons/icon_settings.png");
@@ -32,6 +33,8 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_MENU_CHATS, "./resources/gui/icons/icon_chats.png");
 		LoadTexture(pRenderer, TextureType::ICON_MENU_CHARACTERS, "./resources/gui/icons/icon_characters.png");
 		LoadTexture(pRenderer, TextureType::ICON_MENU_SCENARIOS, "./resources/gui/icons/icon_scenarios.png");
+		LoadTexture(pRenderer, TextureType::ICON_GRID_SMALL, "./resources/gui/icons/icon_grid_small.png");
+		LoadTexture(pRenderer, TextureType::ICON_GRID_LARGE, "./resources/gui/icons/icon_grid_large.png");
 
 		// Chat
 		LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/chat/bg_9grid.png");

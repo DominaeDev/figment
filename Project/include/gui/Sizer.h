@@ -47,9 +47,14 @@ namespace fig::gui
 		struct LayoutInfo
 		{
 			LayoutElement* pControl;
-			int prop = 0;
-			int flags = Flag::None;
-			int border = 0;
+			int32_t prop = 0;
+			int32_t flags = Flag::None;
+			int32_t border = 0;
+
+			inline int32_t leftBorder() const	{ return (flags & Flag::Left) != 0 ? border : 0; };
+			inline int32_t rightBorder() const	{ return (flags & Flag::Right) != 0 ? border : 0; };
+			inline int32_t topBorder() const	{ return (flags & Flag::Top) != 0 ? border : 0; };
+			inline int32_t bottomBorder() const	{ return (flags & Flag::Bottom) != 0 ? border : 0; };
 		};
 
 		LayoutElement* _pOwner = nullptr;

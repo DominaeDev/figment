@@ -14,6 +14,8 @@ namespace fig::gui
 
 		_pIcon = new Image(this, AppResources::GetTexture(icon));
 		_pIcon->SetForegroundColor(GetThemeForeground());
+
+		SetSize(36, 36);
 	}
 
 	void ButtonWithIcon::OnSize()

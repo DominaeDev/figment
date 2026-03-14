@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Control.h"
-#include "gui/ButtonBase.h"
+#include "gui/BaseButton.h"
 
 namespace fig::gui
 {
@@ -20,6 +20,7 @@ namespace fig::gui
 		const Color& GetThemeBackground() const noexcept;
 
 		bool OnEvent(Event& event) override;
+		void OnAfterLayout() override;
 
 	private:
 		ButtonTheme _theme {};

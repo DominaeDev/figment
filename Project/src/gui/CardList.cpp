@@ -15,10 +15,13 @@ namespace fig::gui
 	constexpr float TopMargin = 8.0f;
 	constexpr float BottomMargin = 120.0f;
 
-	CardList::CardList(LayoutElement* pParent) : ScrollPanel(pParent)
+	CardList::CardList(LayoutElement* pParent, CardSize cardSize) : ScrollPanel(pParent),
+		_cardSize { cardSize }
 	{
-		_pGridSizer = new GridSizer(Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight);
-		_pGridSizer->SetSpacing(Constants::GUI::HomeScreen::CardSpacingX, Constants::GUI::HomeScreen::CardSpacingY);
+		int divide = cardSize == CardSize::Default ? 1 : 2;
+
+		_pGridSizer = new GridSizer(Constants::GUI::HomeScreen::CardWidth / divide, Constants::GUI::HomeScreen::CardHeight / divide);
+		_pGridSizer->SetSpacing(Constants::GUI::HomeScreen::CardSpacingX / divide, Constants::GUI::HomeScreen::CardSpacingY / divide);
 		_pGridSizer->EnableCentering(true);
 		SetTopMargin(TopMargin);
 		SetBottomMargin(BottomMargin);
@@ -45,7 +48,7 @@ namespace fig::gui
 
 			for (auto& asset : scenarios)
 			{
-				auto pCard = new ScenarioCard(this, asset.id);
+				auto pCard = new ScenarioCard(this, asset.id, _cardSize);
 				auto request = assets.LoadAssetAsync(asset.id, AssetManager::AsyncLoad::Task::LoadImage, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
@@ -61,7 +64,7 @@ namespace fig::gui
 
 			for (auto& asset : characters)
 			{
-				auto pCard = new CharacterCard(this, asset.id);
+				auto pCard = new CharacterCard(this, asset.id, _cardSize);
 				auto request = assets.LoadAssetAsync(asset.id, AssetManager::AsyncLoad::Task::LoadImage, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
@@ -75,12 +78,13 @@ namespace fig::gui
 	void CardList::OnUpdate(float fElapsed)
 	{
 		int32_t curr_rows = toI(_pGridSizer->GetRows());
+		int divide = _cardSize == CardSize::Default ? 1 : 2;
 
 		if (_last_rows != curr_rows)
 		{
 			auto height = GetHeight();
-			auto last_extent = _last_rows * Constants::GUI::HomeScreen::CardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY;
-			auto curr_extent = curr_rows * Constants::GUI::HomeScreen::CardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY;
+			auto last_extent = (_last_rows * Constants::GUI::HomeScreen::CardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY) / divide;
+			auto curr_extent = (curr_rows * Constants::GUI::HomeScreen::CardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY) / divide;
 
 			_fMaxExtent = toF(curr_extent);
 			_last_rows = curr_rows;
@@ -119,6 +123,25 @@ namespace fig::gui
 			card->SetVisible(true);
 			card->EnableLayout(true);
 		}
+		InvalidateLayout();
+	}
+
+	void CardList::SetCardSize(CardSize cardSize)
+	{
+		if (cardSize == _cardSize)
+			return;
+
+		_cardSize = cardSize;
+		_last_rows = -1;
+
+		for (auto& card : _cards)
+			card->SetCardSize(cardSize);
+
+		int divide = cardSize == CardSize::Default ? 1 : 2;
+
+		_pGridSizer->SetCellSize(Constants::GUI::HomeScreen::CardWidth / divide, Constants::GUI::HomeScreen::CardHeight / divide);
+		_pGridSizer->SetSpacing(Constants::GUI::HomeScreen::CardSpacingX, Constants::GUI::HomeScreen::CardSpacingY);
+
 		InvalidateLayout();
 	}
 }

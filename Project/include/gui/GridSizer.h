@@ -10,6 +10,7 @@ namespace fig::gui
 	{
 	public:
 		GridSizer(int32_t cellWidth, int32_t cellHeight);
+		void SetCellSize(int32_t x, int32_t y);
 		void SetSpacing(int32_t x, int32_t y);
 		void EnableCentering(bool bEnable);
 

@@ -11,6 +11,11 @@ namespace fig::gui
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
+		auto gridSmall = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_SMALL);
+		gridSmall->SetDelegate([this]() { SetSmallGridSize(true); });
+		auto gridLarge = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
+		gridLarge->SetDelegate([this]() { SetSmallGridSize(false); });
+
 		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
 		_pFilterTextBox->SetSize(250, 30);
@@ -22,10 +27,12 @@ namespace fig::gui
 
 		auto pTopSizer = new HorizontalSizer();
 		pTopSizer->AddStretchSpacer();
+		pTopSizer->Add(gridSmall, 0, Sizer::AlignCenterVertical | Sizer::Right, 0);
+		pTopSizer->Add(gridLarge, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopBar->SetSizer(pTopSizer);
 
-		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR_EXPAND);
+		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR);
 		pExpandButton->SetSize(36, 36);
 		pExpandButton->SetX(4.0f);
 		pExpandButton->CenterVertically();
@@ -101,5 +108,8 @@ namespace fig::gui
 		}
 	}
 
-
+	void HomeScreen::SetSmallGridSize(bool bSmall)
+	{
+		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Default);
+	}
 }

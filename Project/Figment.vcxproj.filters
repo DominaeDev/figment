@@ -132,11 +132,11 @@
     <Filter Include="Source Files\Frontend\User\Authentication">
       <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Frames\Screens">
-      <UniqueIdentifier>{0b0e7823-493d-4e1c-9c9f-946893298eae}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\GUI\Controls\Cards">
       <UniqueIdentifier>{0897e582-e3a2-4a2f-a8a6-b5f2d42ad6e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens">
+      <UniqueIdentifier>{0b0e7823-493d-4e1c-9c9f-946893298eae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -318,13 +318,13 @@
       <Filter>Source Files\Frontend\User\Authentication</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HomeScreen.cpp">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ChatScreen.cpp">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Screen.cpp">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MainFrame.cpp">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
@@ -360,7 +360,7 @@
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SidePanel.cpp">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CardList.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -434,14 +434,14 @@
     <ClCompile Include="src\gui\SearchBox.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ButtonBase.cpp">
+    <ClCompile Include="src\gui\BaseButton.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ThemedButton.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\DebugScreen.cpp">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\GUIColor.cpp">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
@@ -935,13 +935,13 @@
       <Filter>Source Files\Frontend\User\Authentication</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Screen.h">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\HomeScreen.h">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ChatScreen.h">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\MainFrame.h">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
@@ -980,7 +980,7 @@
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SidePanel.h">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CardList.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -1059,14 +1059,14 @@
     <ClInclude Include="include\gui\SearchBox.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ButtonBase.h">
+    <ClInclude Include="include\gui\BaseButton.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ThemedButton.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\DebugScreen.h">
-      <Filter>Source Files\Frontend\GUI\Frames\Screens</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

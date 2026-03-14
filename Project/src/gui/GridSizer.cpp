@@ -13,6 +13,12 @@ namespace fig::gui
 	{
 	}
 
+	void GridSizer::SetCellSize(int32_t x, int32_t y)
+	{
+		_cellWidth = std::max(x, 0);
+		_cellHeight = std::max(y, 0);
+	}
+
 	void GridSizer::SetSpacing(int32_t x, int32_t y)
 	{
 		_spacingX = std::max(x, 0);

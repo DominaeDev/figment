@@ -10,7 +10,7 @@ using namespace fig::util;
 
 namespace fig::gui
 {
-	CharacterCard::CharacterCard(LayoutElement* pParent, const fig::uuid& characterId) : CoverCard(pParent, characterId),
+	CharacterCard::CharacterCard(LayoutElement* pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
 		_characterId { characterId }
 	{
 		_searchWords = std::make_unique<Dictionary>();

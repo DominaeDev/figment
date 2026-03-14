@@ -21,6 +21,7 @@ namespace fig::gui
 	protected:
 		BaseButton(LayoutElement* pOwner);
 		bool HandleMouseEvents(const Event& event) noexcept;
+		void DropState() noexcept;
 
 		virtual void OnButtonState() {}
 		virtual void OnMouseEnter() {}

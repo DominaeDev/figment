@@ -11,17 +11,17 @@ namespace fig::gui
 		constexpr ButtonTheme DefaultButtonStyle
 		{
 			.defaultColor	{ Color { 0x4e4431 }, Color { 0xFFFFFF, 0x00 } },
-			.hoverColor		{ Color { 0x4e4431 }, Color { 0xFFFFFF, 0x80 } },
+			.hoverColor		{ Color { 0x4e4431 }, Color { 0xefece3, 0xFF } },
 			.pressedColor	{ Color { 0x4e4431 }, Color { 0xFFFFFF, 0xC0 } },
-			.disabledColor	{ Color { 0x808080 }, Color { 0xCCCCCC, 0x80 } },
+			.disabledColor	{ Color { 0x4e4431 }, Color { 0xCCCCCC, 0x80 } },
 		};
 
 		constexpr ButtonTheme SidePanelButtonStyle
 		{
 			.defaultColor	{ Color { 0x4e4431 }, Color { 0xFFFFFF, 0x00 } },
-			.hoverColor		{ Color { 0x4e4431 }, Color { 0xe4e0d1, 0xff } },
-			.pressedColor	{ Color { 0x4e4431 }, Color { 0xdfd5c3, 0xff } },
-			.disabledColor	{ Color { 0x4e4431 }, Color { 0xe1dfd8, 0xff } },
+			.hoverColor		{ Color { 0x4e4431 }, Color { 0xFFFFFF, 0x80 } },
+			.pressedColor	{ Color { 0x4e4431 }, Color { 0xFFFFFF, 0xC0 } },
+			.disabledColor	{ Color { 0x808080 }, Color { 0xCCCCCC, 0x80 } },
 		};
 	}
 
