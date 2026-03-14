@@ -27,6 +27,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR_COLLAPSE, "./resources/gui/icons/icon_side_panel_collapse.png");
 		LoadTexture(pRenderer, TextureType::ICON_SIDEBAR_EXPAND, "./resources/gui/icons/icon_side_panel_expand.png");
 		LoadTexture(pRenderer, TextureType::ICON_SETTINGS, "./resources/gui/icons/icon_settings.png");
+		LoadTexture(pRenderer, TextureType::ICON_SEARCH, "./resources/gui/icons/icon_search.png");
 		LoadTexture(pRenderer, TextureType::ICON_MENU, "./resources/gui/icons/icon_menu.png");
 		LoadTexture(pRenderer, TextureType::ICON_MENU_CHATS, "./resources/gui/icons/icon_chats.png");
 		LoadTexture(pRenderer, TextureType::ICON_MENU_CHARACTERS, "./resources/gui/icons/icon_characters.png");

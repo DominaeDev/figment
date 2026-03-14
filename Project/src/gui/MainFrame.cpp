@@ -2,6 +2,7 @@
 #include "gui/MainFrame.h"
 #include "gui/HomeScreen.h"
 #include "gui/ChatScreen.h"
+#include "gui/DebugScreen.h"
 #include "gui/SidePanel.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
@@ -169,11 +170,13 @@ namespace fig::gui
 					ChangeScreen<ChatScreen>();
 					return true;
 				}
+#if _DEBUG
 				else if (keyEvent.key == SDLK_3 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
 				{
-					ShowSidePanel(not _pSidePanel->GetVisible());
+					ChangeScreen<DebugScreen>();
 					return true;
 				}
+#endif
 			}
 		}
 

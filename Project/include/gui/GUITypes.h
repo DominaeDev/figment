@@ -41,6 +41,7 @@ namespace fig::gui
 	using Rectf = SDL_FRect;
 	using Rect = SDL_Rect;
 	using Event = SDL_Event;
+	using Font = TTF_Font;
 
 	using Renderer = SDL_Renderer;
 	using Surface = SDL_Surface;
@@ -93,6 +94,7 @@ namespace fig::gui
 		ICON_SIDEBAR_COLLAPSE,
 		ICON_SIDEBAR_EXPAND,
 		ICON_SETTINGS,
+		ICON_SEARCH,
 		ICON_MENU,
 		ICON_MENU_CHATS,
 		ICON_MENU_CHARACTERS,

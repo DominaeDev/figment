@@ -9,9 +9,9 @@ namespace fig::gui
 {
 	using ButtonDelegate = std::function<void()>;
 
-	class ButtonBase
+	class BaseButton
 	{
-		ButtonBase() = delete;
+		BaseButton() = delete;
 	public:
 		void SetDelegate(ButtonDelegate pDelegate) noexcept;
 		void SetEnabled(bool bEnabled) noexcept;
@@ -19,7 +19,7 @@ namespace fig::gui
 		inline bool IsEnabled() const noexcept;
 
 	protected:
-		ButtonBase(LayoutElement* pOwner);
+		BaseButton(LayoutElement* pOwner);
 		bool HandleMouseEvents(const Event& event) noexcept;
 
 		virtual void OnButtonState() {}

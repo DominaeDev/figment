@@ -38,6 +38,10 @@ namespace fig::gui
 		void SetMargins(float left, float top, float right, float bottom);
 		void SetMargins(Rectf rect);
 		Rectf GetClientRect() const noexcept;
+		inline void SetMarginLeft(float margin) noexcept { _marginLeft = margin; }
+		inline void SetMarginTop(float margin) noexcept { _marginTop = margin; }
+		inline void SetMarginRight(float margin) noexcept { _marginRight = margin; }
+		inline void SetMarginBottom(float margin) noexcept { _marginBottom = margin; }
 		inline float GetMarginLeft() const noexcept { return _marginLeft; }
 		inline float GetMarginTop() const noexcept { return _marginTop; }
 		inline float GetMarginRight() const noexcept { return _marginRight; }

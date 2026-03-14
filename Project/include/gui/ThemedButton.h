@@ -7,7 +7,7 @@
 
 namespace fig::gui
 {
-	class ThemedButton : public Control, public ButtonBase
+	class ThemedButton : public Control, public BaseButton
 	{
 		ThemedButton() = delete;
 	public:

@@ -6,19 +6,19 @@
 
 namespace fig::gui::util
 {
-	inline constexpr fig::gui::Rect expand_rect(const fig::gui::Rect& rect, int pixels)
+	inline constexpr Rect expand_rect(const Rect& rect, int pixels)
 	{
-		return fig::gui::Rect { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
+		return Rect { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
 	}
 
-	inline constexpr fig::gui::Rectf expand_rect(const fig::gui::Rectf& rect, float pixels)
+	inline constexpr Rectf expand_rect(const Rectf& rect, float pixels)
 	{
-		return fig::gui::Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
+		return Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
 	}
 
-	inline constexpr fig::gui::Rect to_rect(const fig::gui::Rectf& rect)
+	inline constexpr Rect to_rect(const Rectf& rect)
 	{
-		return fig::gui::Rect {
+		return Rect {
 			(int32_t)rect.x,
 			(int32_t)rect.y,
 			(int32_t)rect.w,
@@ -26,9 +26,9 @@ namespace fig::gui::util
 		};
 	}
 
-	inline constexpr fig::gui::Rectf to_rectf(const fig::gui::Rect& rect)
+	inline constexpr Rectf to_rectf(const Rect& rect)
 	{
-		return fig::gui::Rectf {
+		return Rectf {
 			(float)rect.x,
 			(float)rect.y,
 			(float)rect.w,
@@ -36,41 +36,42 @@ namespace fig::gui::util
 		};
 	}
 
-	inline constexpr bool is_inside(const fig::gui::Rect& rect, int x, int y, int expand = 0)
+	inline constexpr bool is_inside(const Rect& rect, int x, int y, int expand = 0)
 	{
 		return x - expand >= rect.x and x + expand < rect.x + rect.w
 			and y - expand >= rect.y and y + expand < rect.y + rect.h;
 	}
 
-	inline constexpr bool is_inside(const fig::gui::Rectf& rect, float x, float y, float expand = 0.0f)
+	inline constexpr bool is_inside(const Rectf& rect, float x, float y, float expand = 0.0f)
 	{
 		return x - expand >= rect.x and x + expand< rect.x + rect.w
 			and y - expand >= rect.y and y + expand< rect.y + rect.h;
 	}
 
-	inline constexpr bool is_inside(const fig::gui::Rect& rect, const fig::gui::Point& p, int expand = 0)
+	inline constexpr bool is_inside(const Rect& rect, const Point& p, int expand = 0)
 	{
 		return p.x - expand >= rect.x and p.x + expand< rect.x + rect.w
 			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
 	}
 
-	inline constexpr bool is_inside(const fig::gui::Rectf& rect, const fig::gui::Pointf& p, float expand = 0.0f)
+	inline constexpr bool is_inside(const Rectf& rect, const Pointf& p, float expand = 0.0f)
 	{
 		return p.x - expand >= rect.x and p.x + expand< rect.x + rect.w
 			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
 	}
 
-	bool is_defined(fig::gui::Color color);
-	fig::gui::Color add_rgb(fig::gui::Color colorA, fig::gui::Color colorB);
-	fig::gui::Color add_rgb(fig::gui::Color colorA, int value);
-	fig::gui::Color add_rgb(fig::gui::Color colorA, float value);
-	fig::gui::Color multiply_rgb(fig::gui::Color colorA, fig::gui::Color colorB);
-	fig::gui::Color multiply_rgb(fig::gui::Color colorA, float value);
-	fig::gui::Color with_alpha(fig::gui::Color color, Uint8 alpha);
+	bool is_defined(Color color);
+	Color add_rgb(Color colorA, Color colorB);
+	Color add_rgb(Color colorA, int value);
+	Color add_rgb(Color colorA, float value);
+	Color multiply_rgb(Color colorA, Color colorB);
+	Color multiply_rgb(Color colorA, float value);
+	Color with_alpha(Color color, Uint8 alpha);
+	Color with_alpha(Color color, float alpha);
 
-	fig::gui::Color color_from_string(fig::string hex);
-	void color_to_hsv(fig::gui::Color color, float& h, float& s, float& v);
-	fig::gui::Color hsv_to_color(float h, float s, float v);
+	Color color_from_string(fig::string hex);
+	void color_to_hsv(Color color, float& h, float& s, float& v);
+	Color hsv_to_color(float h, float s, float v);
 
 	enum class ImageFit {
 		None,
@@ -89,9 +90,11 @@ namespace fig::gui::util
 	enum class CornerStyle {
 		Card,
 	};
-	bool MaskCorners(fig::sdl::Surface& surface, fig::gui::MaskType style);
+	bool MaskCorners(fig::sdl::Surface& surface, MaskType style);
 	void AlphaToMask(fig::path filename);
 
+	Point MeasureText(Font& font, const fig::string& text);
+	int MeasureFontHeight(Font& font);
 }
 
 #endif

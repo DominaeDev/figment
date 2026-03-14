@@ -2,7 +2,7 @@
 #include "gui/HomeScreen.h"
 #include "gui/CardList.h"
 #include "gui/MainFrame.h"
-#include "gui/SimpleTextBox.h"
+#include "gui/SearchBox.h"
 
 namespace fig::gui
 {
@@ -14,7 +14,7 @@ namespace fig::gui
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		_pFilterTextBox = new SimpleTextBox(pTopBar, FontFace::Default, 16.0);
+		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
 		_pFilterTextBox->SetSize(250, 30);
 		_pFilterTextBox->SetMaxSize(250, -1);
@@ -22,10 +22,10 @@ namespace fig::gui
 		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
 			this->OnFilter(s); 
 		});
+
 		auto pTopSizer = new HorizontalSizer();
 		pTopSizer->AddStretchSpacer();
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
-
 		pTopBar->SetSizer(pTopSizer);
 
 		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR_EXPAND);

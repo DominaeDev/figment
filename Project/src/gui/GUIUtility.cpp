@@ -25,6 +25,11 @@ namespace fig::gui::util
 		return Color { color.r, color.g, color.b, alpha };
 	}
 
+	Color with_alpha(Color color, float alpha)
+	{
+		return Color { color.r, color.g, color.b, static_cast<Uint8>(alpha * 255.0f) };
+	}
+
 	Color add_rgb(Color colorA, Color colorB)
 	{
 		float r = std::clamp(toF(colorA.r) + toF(colorB.r), 0.0f, 255.0f);
@@ -441,5 +446,18 @@ namespace fig::gui::util
 		}
 
 		return cover;
+	}
+
+	Point MeasureText(Font& font, const fig::string& text)
+	{
+		int w, h;
+		if (TTF_GetStringSize(&font, text.c_str(), 0, &w, &h))
+			return Point { w, h };
+		return {};
+	}
+
+	int MeasureFontHeight(Font& font)
+	{
+		return TTF_GetFontHeight(&font);
 	}
 }

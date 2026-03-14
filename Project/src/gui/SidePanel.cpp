@@ -23,7 +23,7 @@ namespace fig::gui
 		auto pLogo = new Image(pHeaderPanel, AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
 		pLogo->SetX(44);
 
-		auto pGradient = new HorizontalGradient(this, with_alpha(Colors::SidePanelGradient, 0x00), with_alpha(Colors::SidePanelGradient, 0xA0));
+		auto pGradient = new HorizontalGradient(this, with_alpha(Colors::SidePanelGradient, 0.0f), with_alpha(Colors::SidePanelGradient, 0.6f));
 		_pGradient = pGradient;
 
 		auto pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);

@@ -28,7 +28,7 @@ ChatScroll::ChatScroll(LayoutElement* pParent) : Control(pParent)
 	_pScrollSizer->SetSpacing(12);
 	SetSizer(_pScrollSizer);
 
-	_pBottomGradient = new VerticalGradient(this, with_alpha(Colors::ChatBackground, 0), Colors::ChatBackground);
+	_pBottomGradient = new VerticalGradient(this, with_alpha(Colors::ChatBackground, 0.0f), Colors::ChatBackground);
 	EnableClipping(true);
 	EnableCulling(true);
 }

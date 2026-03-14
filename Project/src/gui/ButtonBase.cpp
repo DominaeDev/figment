@@ -6,16 +6,16 @@ using namespace fig::gui::util;
 
 namespace fig::gui
 {
-	ButtonBase::ButtonBase(LayoutElement* pOwner) : _pOwner { pOwner }
+	BaseButton::BaseButton(LayoutElement* pOwner) : _pOwner { pOwner }
 	{
 	}
 
-	void ButtonBase::SetDelegate(ButtonDelegate pDelegate) noexcept
+	void BaseButton::SetDelegate(ButtonDelegate pDelegate) noexcept
 	{
 		_fn = pDelegate;
 	}
 
-	void ButtonBase::SetEnabled(bool bEnabled) noexcept
+	void BaseButton::SetEnabled(bool bEnabled) noexcept
 	{
 		if (bEnabled == (_state == ButtonState::Disabled))
 		{
@@ -24,17 +24,17 @@ namespace fig::gui
 		}		
 	}
 
-	bool ButtonBase::IsEnabled() const noexcept 
+	bool BaseButton::IsEnabled() const noexcept 
 	{ 
 		return _state != ButtonState::Disabled; 
 	}
 
-	void ButtonBase::SetExpandedArea(float size) noexcept
+	void BaseButton::SetExpandedArea(float size) noexcept
 	{
 		_fExpand = std::max(size, 0.0f);
 	}
 
-	bool ButtonBase::HandleMouseEvents(const Event& event) noexcept
+	bool BaseButton::HandleMouseEvents(const Event& event) noexcept
 	{
 		if (_state == ButtonState::Disabled)
 			return false;
@@ -68,10 +68,11 @@ namespace fig::gui
 
 		if ((event.type == SDL_EVENT_MOUSE_BUTTON_DOWN or event.type == SDL_EVENT_MOUSE_BUTTON_UP) and event.button.button == SDL_BUTTON_LEFT)
 		{
-			if (not _bMouseInside)
+			auto mouseEvent = event.button;
+
+			if (not is_inside(rect, mouseEvent.x, mouseEvent.y, _fExpand))
 				return false; // Ignore
 
-			auto mouseEvent = event.button;
 			if (mouseEvent.down != _bMouseDown)
 			{
 				if (_bMouseDown and !mouseEvent.down and _fn)
@@ -79,6 +80,7 @@ namespace fig::gui
 
 				SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Hover);
 				_bMouseDown = mouseEvent.down;
+				_bMouseInside = false;
 
 				_bMouseDown ? OnButtonDown() : OnButtonUp();
 			}
@@ -88,7 +90,7 @@ namespace fig::gui
 		return false;
 	}
 
-	void ButtonBase::SetButtonState(ButtonState state)
+	void BaseButton::SetButtonState(ButtonState state)
 	{
 		_state = state;
 		OnButtonState();
