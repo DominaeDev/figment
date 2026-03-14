@@ -491,4 +491,90 @@ namespace fig::util
 			fields.emplace_back(current);
 		return fields;
 	}
+
+	[[nodiscard]] std::string strip_diacritics(const fig::string& input)
+	{
+		return to_utf8(strip_diacritics(from_utf8(input)));
+	}
+
+	[[nodiscard]] std::wstring strip_diacritics(const fig::wstring& input)
+	{
+		fig::wstring copy { input };
+		return strip_diacritics(std::move(copy));
+	}
+
+	fig::wstring strip_diacritics(fig::wstring&& input)
+	{
+		static const std::unordered_map<wchar_t, wchar_t> diacritic_map {
+			// a
+			{ L'\u00E0', L'a' }, { L'\u00E1', L'a' }, { L'\u00E2', L'a' }, { L'\u00E3', L'a' },
+			{ L'\u00E4', L'a' }, { L'\u00E5', L'a' }, { L'\u0101', L'a' }, { L'\u0103', L'a' },
+			{ L'\u0105', L'a' }, { L'\u01CE', L'a' }, { L'\u01DF', L'a' }, { L'\u01E1', L'a' },
+			{ L'\u01FB', L'a' }, { L'\u0201', L'a' }, { L'\u0203', L'a' }, { L'\u0227', L'a' },
+			{ L'\u00E6', L'a' },
+			// c
+			{ L'\u00E7', L'c' }, { L'\u0107', L'c' }, { L'\u0109', L'c' }, { L'\u010D', L'c' },
+			{ L'\u010B', L'c' },
+			// d
+			{ L'\u010F', L'd' }, { L'\u0111', L'd' },
+			// e
+			{ L'\u00E8', L'e' }, { L'\u00E9', L'e' }, { L'\u00EA', L'e' }, { L'\u00EB', L'e' },
+			{ L'\u0113', L'e' }, { L'\u0115', L'e' }, { L'\u0117', L'e' }, { L'\u0119', L'e' },
+			{ L'\u011B', L'e' }, { L'\u0205', L'e' }, { L'\u0207', L'e' }, { L'\u0229', L'e' },
+			// g
+			{ L'\u011D', L'g' }, { L'\u011F', L'g' }, { L'\u0121', L'g' }, { L'\u0123', L'g' },
+			{ L'\u01E7', L'g' }, { L'\u01F5', L'g' },
+			// h
+			{ L'\u0125', L'h' }, { L'\u0127', L'h' },
+			// i
+			{ L'\u00EC', L'i' }, { L'\u00ED', L'i' }, { L'\u00EE', L'i' }, { L'\u00EF', L'i' },
+			{ L'\u0129', L'i' }, { L'\u012B', L'i' }, { L'\u012D', L'i' }, { L'\u012F', L'i' },
+			{ L'\u0131', L'i' }, { L'\u01D0', L'i' }, { L'\u0209', L'i' }, { L'\u020B', L'i' },
+			// j
+			{ L'\u0135', L'j' },
+			// k
+			{ L'\u0137', L'k' }, { L'\u01E9', L'k' },
+			// l
+			{ L'\u013A', L'l' }, { L'\u013C', L'l' }, { L'\u013E', L'l' }, { L'\u0140', L'l' },
+			{ L'\u0142', L'l' },
+			// n
+			{ L'\u00F1', L'n' }, { L'\u0144', L'n' }, { L'\u0146', L'n' }, { L'\u0148', L'n' },
+			{ L'\u0149', L'n' }, { L'\u01F9', L'n' },
+			// o
+			{ L'\u00F2', L'o' }, { L'\u00F3', L'o' }, { L'\u00F4', L'o' }, { L'\u00F5', L'o' },
+			{ L'\u00F6', L'o' }, { L'\u00F8', L'o' }, { L'\u014D', L'o' }, { L'\u014F', L'o' },
+			{ L'\u0151', L'o' }, { L'\u01D2', L'o' }, { L'\u01EB', L'o' }, { L'\u01ED', L'o' },
+			{ L'\u020D', L'o' }, { L'\u020F', L'o' }, { L'\u022B', L'o' }, { L'\u022D', L'o' },
+			{ L'\u022F', L'o' }, { L'\u0231', L'o' },
+			// r
+			{ L'\u0155', L'r' }, { L'\u0157', L'r' }, { L'\u0159', L'r' }, { L'\u0211', L'r' },
+			{ L'\u0213', L'r' },
+			// s
+			{ L'\u015B', L's' }, { L'\u015D', L's' }, { L'\u015F', L's' }, { L'\u0161', L's' },
+			{ L'\u0219', L's' }, { L'\u00DF', L's' }, // eszett -> 's' (lossy but conventional)
+			// t
+			{ L'\u0163', L't' }, { L'\u0165', L't' }, { L'\u0167', L't' }, { L'\u021B', L't' },
+			// u
+			{ L'\u00F9', L'u' }, { L'\u00FA', L'u' }, { L'\u00FB', L'u' }, { L'\u00FC', L'u' },
+			{ L'\u0169', L'u' }, { L'\u016B', L'u' }, { L'\u016D', L'u' }, { L'\u016F', L'u' },
+			{ L'\u0171', L'u' }, { L'\u0173', L'u' }, { L'\u01D4', L'u' }, { L'\u01D6', L'u' },
+			{ L'\u01D8', L'u' }, { L'\u01DA', L'u' }, { L'\u01DC', L'u' }, { L'\u0215', L'u' },
+			{ L'\u0217', L'u' },
+			// w
+			{ L'\u0175', L'w' },
+			// y
+			{ L'\u00FD', L'y' }, { L'\u00FF', L'y' }, { L'\u0177', L'y' }, { L'\u0233', L'y' },
+			// z
+			{ L'\u017A', L'z' }, { L'\u017C', L'z' }, { L'\u017E', L'z' },
+		};
+
+		std::ranges::transform(input, input.begin(),
+			[](auto& ch) -> wchar_t {
+				if (const auto it = diacritic_map.find(ch); it != diacritic_map.end())
+					return it->second;
+				return ch;
+			});
+
+		return input;
+	}
 }

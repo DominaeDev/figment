@@ -85,6 +85,10 @@ namespace fig::util
 
 	[[nodiscard]] fig::string encode_csv(std::span<const fig::string> values);
 	[[nodiscard]] std::vector<fig::string> decode_csv(const fig::string& csv);
+
+	[[nodiscard]] fig::string strip_diacritics(const fig::string& input);
+	[[nodiscard]] fig::wstring strip_diacritics(const fig::wstring& input);
+	fig::wstring strip_diacritics(fig::wstring&& input);
 }
 
 #endif 

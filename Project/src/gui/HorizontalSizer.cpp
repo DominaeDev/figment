@@ -21,7 +21,13 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 	for (auto& item : items)
 	{
 		if (item.prop == 0 && item.pControl != nullptr)
+		{
 			remainingWidth = ceil_int(std::max(remainingWidth - item.pControl->GetWidth(), 0.0f));
+			if ((item.flags & Flag::Right) != 0)
+				remainingWidth -= item.border;
+			if ((item.flags & Flag::Left) != 0)
+				remainingWidth -= item.border;
+		}
 		else if (item.prop > 0)
 			totalProportion += item.prop;
 		else

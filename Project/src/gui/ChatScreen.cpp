@@ -41,22 +41,19 @@ constexpr ChatOptions DefaultChatOptions {
 	.flags = {
 		ChatOptions::Flag::GreetUser,
 		ChatOptions::Flag::Uncensored,
-		//		ChatOptions::Flag::LimitMessages,
-		//		ChatOptions::Flag::RandomizeMessageCount,
-		//		ChatOptions::Flag::StateVariables,
-		//		ChatOptions::Flag::ReportStateChanges,
-		//		ChatOptions::Flag::Embeddings,
-			},
-			.groupChatMode = ChatOptions::GroupChatMode::SwapSequences,
+//		ChatOptions::Flag::LimitMessages,
+//		ChatOptions::Flag::RandomizeMessageCount,
+//		ChatOptions::Flag::StateVariables,
+//		ChatOptions::Flag::ReportStateChanges,
+//		ChatOptions::Flag::Embeddings,
+		},
+	.groupChatMode = ChatOptions::GroupChatMode::SwapSequences,
 };
 
 namespace fig::gui
 {
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
-		SetForegroundColor(Colors::Black);
-		SetBackgroundColor(Colors::AppBackground);
-
 		auto leftPanel = new Area(this);
 		leftPanel->SetSize(200, -1);
 

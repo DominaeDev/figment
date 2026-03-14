@@ -16,7 +16,7 @@ namespace fig::gui
 		SetMarginLeft(30);
 
 		_pIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_SEARCH));
-		_pIcon->SetForegroundColor(with_alpha(Colors::Black, 0.6f));
+		_pIcon->SetForegroundColor(with_alpha(Colors::Black, 0.3f));
 
 		auto pTextBoxBG = new NineGridRenderer(8);
 		pTextBoxBG->SetCornerSize(20.0f);

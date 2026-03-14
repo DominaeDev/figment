@@ -8,9 +8,6 @@ namespace fig::gui
 {
 	HomeScreen::HomeScreen(Frame* pParent) : Screen(pParent)
 	{
-		SetForegroundColor(Colors::Black);
-		SetBackgroundColor(Colors::AppBackground);
-
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 

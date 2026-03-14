@@ -23,7 +23,13 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 	for (auto& item : items)
 	{
 		if (item.prop == 0 && item.pControl != nullptr)
+		{
 			remainingHeight = ceil_int(std::max(remainingHeight - item.pControl->GetHeight(), 0.0f));
+			if ((item.flags & Flag::Top) != 0)
+				remainingHeight -= item.border;
+			if ((item.flags & Flag::Bottom) != 0)
+				remainingHeight -= item.border;
+		}
 		else if (item.prop > 0)
 			totalProportion += item.prop;
 		else

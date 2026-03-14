@@ -36,6 +36,7 @@ namespace fig::gui
 
 		RegisterScreen<HomeScreen>();
 		RegisterScreen<ChatScreen>();
+		RegisterScreen<DebugScreen>();
 
 		// Sign in
 		auto& userMngr = Global::GetUserManager();
@@ -106,8 +107,9 @@ namespace fig::gui
 		// Show home screen
 		if (userMngr.IsSignedIn())
 		{
-			auto pScreen = ChangeScreen<HomeScreen>();
-			pScreen->CreateCards();
+//			ChangeScreen<DebugScreen>();
+
+			ChangeScreen<HomeScreen>()->CreateCards();
 		}
 
 		userMngr.GetProfileAssets().SaveModified();

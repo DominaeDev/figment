@@ -6,6 +6,8 @@ namespace fig::gui
 {
 	Screen::Screen(Frame* pParent) : Control(pParent)
 	{
+		SetForegroundColor(Colors::Black);
+		SetBackgroundColor(Colors::AppBackground);
 	}
 
 	bool Screen::OnEvent(Event& event)

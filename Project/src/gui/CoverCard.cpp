@@ -292,28 +292,16 @@ namespace fig::gui
 		}
 	}
 
-	void CoverCard::AddSearchText(const fig::string& text) noexcept
+	static fig::wstring normalize_search_term(const fig::string& text)
 	{
-		if (not text.empty())
-			_searchWords.emplace_back(lcase(from_utf8(text)));
+		auto result = lcase(from_utf8(text));
+		return strip_diacritics(std::move(result));
 	}
 
-	void CoverCard::AddSearchText(const std::span<fig::string> texts) noexcept
+	static fig::wstring normalize_search_term(const fig::wstring& text)
 	{
-		for (auto& t : texts)
-			AddSearchText(t);
-	}
-
-	void CoverCard::AddSearchText(const fig::wstring& text) noexcept
-	{
-		if (not text.empty())
-			_searchWords.emplace_back(lcase(text));
-	}
-
-	void CoverCard::AddSearchText(const std::span<fig::wstring> texts) noexcept
-	{
-		for (auto& t : texts)
-			AddSearchText(t);
+		auto result = lcase(text);
+		return strip_diacritics(std::move(result));
 	}
 
 	static std::vector<fig::wstring> filter_search(const fig::string& text)
@@ -326,15 +314,38 @@ namespace fig::gui
 		auto chunks = text
 			| std::views::chunk_by([&](char a, char b) { return !is_delimiter(a) && !is_delimiter(b); })
 			| std::views::transform([](auto&& range) { 
-				auto s = from_utf8(fig::string(std::ranges::begin(range), std::ranges::end(range)));
-				lcase_inplace(s); 
-				return s; 
+				auto s = fig::string(std::ranges::begin(range), std::ranges::end(range));
+				return normalize_search_term(s);
 			})
 			| std::ranges::to<std::vector>();
 
 		return chunks
 			| std::views::filter([&](auto& s) { return not empty_or_whitespace(s); })
 			| std::ranges::to<std::vector>();
+	}
+
+	void CoverCard::AddSearchText(const fig::string& text) noexcept
+	{
+		if (not text.empty())
+			_searchWords.emplace_back(normalize_search_term(text));
+	}
+
+	void CoverCard::AddSearchText(const std::span<fig::string> texts) noexcept
+	{
+		for (auto& t : texts)
+			AddSearchText(t);
+	}
+
+	void CoverCard::AddSearchText(const std::span<fig::wstring> texts) noexcept
+	{
+		for (auto& t : texts)
+			AddSearchText(t);
+	}
+
+	void CoverCard::AddSearchText(const fig::wstring& text) noexcept
+	{
+		if (not text.empty())
+			_searchWords.emplace_back(normalize_search_term(text));
 	}
 
 	bool CoverCard::IsFilteredBy(const fig::string& search_string) const noexcept
