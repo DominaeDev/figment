@@ -10,6 +10,7 @@ namespace fig::gui
 	public:
 		Image(LayoutElement* pParent, Texture* pTexture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
 		void SetTexture(Texture* pTexture);
+		Point GetTextureSize() const noexcept;
 
 	protected:
 		void OnRender(Renderer* pRenderer) override;

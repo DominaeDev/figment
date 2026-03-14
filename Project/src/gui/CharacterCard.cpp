@@ -23,37 +23,33 @@ namespace fig::gui
 
 			CreateChatCounter(0);
 
-			for (auto& tag : character.tags)
-				AddTag(tag);
+			switch (character.gender)
+			{
+			case data::CharacterGender::Male:
+				AddTag("Male");
+				AddSearchText("male");
+				break;
+			case data::CharacterGender::Female:
+				AddTag("Female");
+				AddSearchText("female");
+				break;
+			case data::CharacterGender::Custom:
+				AddTag(character.properties[Constants::CharacterProperties::Gender].value);
+				AddSearchText(character.properties[Constants::CharacterProperties::Gender].value);
+				break;
+			}
+
+			for (size_t i = 0; i < character.tags.size() && i < 16; ++i)
+			{
+				if (AddTag(character.tags[i]) == CoverCard::AddTagResult::Stop)
+					break;
+			}
 
 			AddSearchText(character.shortName);
 			AddSearchText(character.fullName);
 			AddSearchText(character.description);
 			AddSearchText(character.tags);
-
-			switch (character.gender)
-			{
-			case data::CharacterGender::Male:
-				AddSearchText("male");
-				AddSearchText("m");
-				break;
-			case data::CharacterGender::Female:
-				AddSearchText("female");
-				AddSearchText("f");
-				break;
-			}
-
-			Color tagColor = { 0x31, 0x90, 0xc8 };
-			for (auto& tag : character.tags)
-			{
-				if (not AddTag(tag, tagColor))
-					break;
-			}
 		}
-
-//		AddTag("#Tag", Color { 0x31, 0x90, 0xc8 });
-//		AddTag("#Another tag", Color { 0xc8, 0x31, 0xad });
-//		AddTag("#Yet another", Color { 0x45, 0xc8, 0x45 });
 	}
 
 

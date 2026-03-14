@@ -50,7 +50,10 @@ namespace fig::io::data
 			else if (not gender.empty())
 			{
 				data.gender = CharacterGender::Custom;
-				data.properties[Constants::CharacterProperties::Gender] = CharacterProperty { "Gender", gender };
+				data.properties[Constants::CharacterProperties::Gender] = CharacterProperty { 
+					.label = "Gender", 
+					.value = gender 
+				};
 			}
 			else
 				data.gender = CharacterGender::Undefined;

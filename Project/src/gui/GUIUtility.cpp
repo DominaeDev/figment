@@ -65,7 +65,7 @@ namespace fig::gui::util
 		}
 	}
 
-	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit)
+	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit, bool bLinear)
 	{
 		auto pImage = surface.get();
 		if (pImage == nullptr || width <= 0 || height <= 0)
@@ -87,7 +87,7 @@ namespace fig::gui::util
 		{
 			fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
 			fig::gui::Rect dstRect { 0, 0, width, height };
-			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, SDL_SCALEMODE_LINEAR);
+			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
 		}
 		else
 		{
@@ -131,7 +131,7 @@ namespace fig::gui::util
 			if (SDL_GetRectIntersection(&dstRect, &fixedRect, &tmp))
 				dstRect = tmp;
 
-			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, SDL_SCALEMODE_LINEAR);
+			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
 		}
 
 		return pScaledSurface;

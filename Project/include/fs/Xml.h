@@ -150,14 +150,22 @@ namespace fig::io
 		void SetAttribute(const fig::string& name, const fig::byte_span& value) noexcept;
 		void SetAttribute(const fig::string& name, const fig::uuid& value) noexcept;
 		void SetAttribute(const fig::string& name, std::span<const fig::string> values) noexcept;
+		void SetAttribute(const fig::string& name, const fig::string_like auto& value) noexcept
+		{
+			SetAttribute(name, fig::string(value));
+		}
 
 		void SetElementValue(const fig::string& name, bool value) noexcept;
+		void SetElementValue(const fig::string& name, const fig::string& value) noexcept;
 		void SetElementValue(const fig::string& name, int32_t value) noexcept;
 		void SetElementValue(const fig::string& name, float value) noexcept;
-		void SetElementValue(const fig::string& name, const fig::string& value) noexcept;
 		void SetElementValue(const fig::string& name, const fig::byte_span& value) noexcept;
 		void SetElementValue(const fig::string& name, const fig::uuid& value) noexcept;
 		void SetElementValue(const fig::string& name, std::span<const fig::string> values) noexcept;
+		void SetElementValue(const fig::string& name, const fig::string_like auto& value) noexcept
+		{
+			SetElementValue(name, fig::string(value));
+		}
 
 		XmlWriterAttribute operator[] (const std::string& key) noexcept;
 

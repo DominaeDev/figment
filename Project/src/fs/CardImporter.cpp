@@ -22,6 +22,36 @@ namespace fig::io
 		character.fullName = card.data.name;
 		character.description = card.data.description;
 		character.tags = card.data.tags;
+
+		// Check for gender tags
+		for (auto& tag : card.data.tags)
+		{
+			if (util::equals(tag, "male", true) || util::equals(tag, "man", true) || util::equals(tag, "boy", true))
+			{
+				character.gender = CharacterGender::Male;
+				break;
+			}
+			else if (util::equals(tag, "female", true) || util::equals(tag, "woman", true) || util::equals(tag, "girl", true))
+			{
+				character.gender = CharacterGender::Female;
+				break;
+			}
+
+			static const std::array<fig::string, 4> custom_genders = { "Futanari", "Shemale", "Trans", "Asexual" };
+			for (auto& custom_gender : custom_genders)
+			{
+				if (util::equals(tag, custom_gender, true))
+				{
+					character.gender = CharacterGender::Custom;
+					character.properties[Constants::CharacterProperties::Gender] = CharacterProperty {
+						.label = "Gender",
+						.value = custom_gender,
+					};
+					break;
+				}
+			}
+		}
+
 		return character;
 	}
 }

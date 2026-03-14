@@ -7,6 +7,7 @@
 #include "model/UserManager.h"
 #include "model/AssetManager.h"
 #include "fs/Serialization.h"
+#include "util/Common.h"
 
 using namespace fig::io;
 
@@ -49,7 +50,7 @@ namespace fig::gui
 			for (auto& asset : scenarios)
 			{
 				auto pCard = new ScenarioCard(this, asset.id, _cardSize);
-				auto request = assets.LoadAssetAsync(asset.id, AssetManager::AsyncLoad::Task::LoadImage, priority--);
+				auto request = assets.LoadAssetAsync(asset.id, AsyncTask::LoadCover, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
@@ -65,7 +66,7 @@ namespace fig::gui
 			for (auto& asset : characters)
 			{
 				auto pCard = new CharacterCard(this, asset.id, _cardSize);
-				auto request = assets.LoadAssetAsync(asset.id, AssetManager::AsyncLoad::Task::LoadImage, priority--);
+				auto request = assets.LoadAssetAsync(asset.id, AsyncTask::LoadCover, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
@@ -83,8 +84,9 @@ namespace fig::gui
 		if (_last_rows != curr_rows)
 		{
 			auto height = GetHeight();
-			auto last_extent = (_last_rows * Constants::GUI::HomeScreen::CardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY) / divide;
-			auto curr_extent = (curr_rows * Constants::GUI::HomeScreen::CardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY) / divide;
+			auto kCardHeight = Constants::GUI::HomeScreen::CardHeight / divide;
+			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY);
+			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY);
 
 			_fMaxExtent = toF(curr_extent);
 			_last_rows = curr_rows;
@@ -132,7 +134,6 @@ namespace fig::gui
 			return;
 
 		_cardSize = cardSize;
-		_last_rows = -1;
 
 		for (auto& card : _cards)
 			card->SetCardSize(cardSize);
@@ -142,6 +143,7 @@ namespace fig::gui
 		_pGridSizer->SetCellSize(Constants::GUI::HomeScreen::CardWidth / divide, Constants::GUI::HomeScreen::CardHeight / divide);
 		_pGridSizer->SetSpacing(Constants::GUI::HomeScreen::CardSpacingX, Constants::GUI::HomeScreen::CardSpacingY);
 
+		_fScrollY = 0;
 		InvalidateLayout();
 	}
 }

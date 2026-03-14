@@ -23,8 +23,26 @@ namespace fig::user
 
 namespace fig::io
 {
-	using ImagePromise = std::promise<std::expected<fig::sdl::Surface, AsyncLoadError>>;
-	using ImageFuture = std::future<std::expected<fig::sdl::Surface, AsyncLoadError>>;
+	using AsyncResult_Image		= fig::sdl::Surface;
+	using AsyncResult_CoverPair	= std::pair<fig::sdl::Surface, fig::sdl::Surface>;
+	using AsyncResultVariant = std::variant<AsyncResult_Image, AsyncResult_CoverPair>;
+
+	using AsyncPromise = std::promise<std::expected<AsyncResultVariant, AsyncLoadError>>;
+	using AsyncFuture = std::future<std::expected<AsyncResultVariant, AsyncLoadError>>;
+
+	enum class AsyncTask {
+		None,
+		LoadPortrait,
+		LoadCover,
+	};
+
+	struct AsyncLoad
+	{
+		uint64_t id;
+		fig::uuid assetId;
+		AsyncTask task {};
+		AsyncFuture future;
+	};
 
 	class AssetManager
 	{
@@ -59,16 +77,7 @@ namespace fig::io
 		std::expected<fig::io::data::CharacterData, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		std::expected<AssetRef, FileError> ImportScenario(fig::path filename);
 
-		struct AsyncLoad
-		{
-			uint64_t id;
-			fig::uuid assetId;
-			enum class Task {
-				LoadImage,
-			} task = {};
-			ImageFuture future;
-		};
-		[[nodiscard]] AsyncLoad LoadAssetAsync(const fig::uuid& assetId, AsyncLoad::Task task, int32_t priority);
+		[[nodiscard]] AsyncLoad LoadAssetAsync(const fig::uuid& assetId, AsyncTask task, int32_t priority);
 		void Cancel(const fig::uuid& assetId);
 		void CancelAll();
 
@@ -101,15 +110,16 @@ namespace fig::io
 	private:
 		/* Asynchronous loading */
 		void __Worker(std::stop_token stop);
-		AsyncLoadError __LoadCoverImageTask(const fig::uuid& characterAssetID, fig::sdl::Surface& outSurface) noexcept;
+		AsyncLoadError __LoadImageTask(const fig::uuid& characterAssetID, ImageType imageType, AsyncResultVariant& outResult) noexcept;
+		AsyncLoadError __LoadCoverImageTask(const fig::uuid& characterAssetID, AsyncResultVariant& outResult) noexcept;
 
 		struct PendingRequest {
 			uint64_t id {};
 			fig::uuid assetId {};
 			int32_t priority {};
-			AsyncLoad::Task task {};
+			AsyncTask task {};
 
-			std::unique_ptr<ImagePromise> promise;
+			std::unique_ptr<AsyncPromise> promise;
 
 			bool operator<(const PendingRequest& rhs) const noexcept
 			{
@@ -122,7 +132,7 @@ namespace fig::io
 		std::priority_queue<PendingRequest> _pending;
 		mutable std::mutex _pending_mutex;
 		std::condition_variable _pending_cv;
-		std::map<fig::uuid, ImagePromise*> _active_promises;
+		std::map<fig::uuid, AsyncPromise*> _active_promises;
 		mutable std::mutex _active_mutex;
 		std::atomic<uint64_t>     _next_id { 0 };
 		std::vector<std::jthread> _workers;

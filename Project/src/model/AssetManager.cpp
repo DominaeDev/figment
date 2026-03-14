@@ -575,21 +575,16 @@ namespace fig::io
 		return false;
 	}
 
-	AsyncLoadError AssetManager::__LoadCoverImageTask(const fig::uuid& characterAssetID, fig::sdl::Surface& outSurface) noexcept
+	AsyncLoadError AssetManager::__LoadImageTask(const fig::uuid& characterAssetID, ImageType imageType, AsyncResultVariant& outResult) noexcept
 	{
-		if (auto findCover = FindAsset(characterAssetID, ImageType::CoverImage))
+		if (auto findImage = FindAsset(characterAssetID, imageType))
 		{
-			Asset& cover = findCover.value();
-			auto result = LoadAsset(cover);
-			if (result == FileError::NoError)
+			Asset& imageAsset = findImage.value();
+			if (auto result = LoadAsset(imageAsset); result == FileError::NoError)
 			{
-				fig::sdl::Surface surface;
-				if (CreateSurface(cover, surface))
+				if (auto image = LoadImageFromMemory(imageAsset.data))
 				{
-					// Round corners
-					MaskCorners(surface, MaskType::CARD_CORNER_MASK);
-
-					outSurface = std::move(surface);
+					outResult.emplace<fig::sdl::Surface>(std::move(image));
 					return AsyncLoadError::NoError;
 				}
 			}
@@ -599,31 +594,70 @@ namespace fig::io
 				return AsyncLoadError::LoadError;
 		}
 
-		// Create cover from portrait
-		if constexpr (Enabled)
+		return AsyncLoadError::FileNotFound;
+	}
+
+	AsyncLoadError AssetManager::__LoadCoverImageTask(const fig::uuid& characterAssetID, AsyncResultVariant& outResult) noexcept
+	{
+		fig::sdl::Surface fullSurface {};
+		fig::sdl::Surface halfSurface {};
+
+		if (auto findCover = FindAsset(characterAssetID, ImageType::CoverImage))
 		{
-			if (auto findPortrait = FindAsset(characterAssetID, ImageType::LargePortrait))
+			Asset& cover = findCover.value();
+			auto result = LoadAsset(cover);
+			if (result == FileError::FileNotFound)
+				return AsyncLoadError::FileNotFound;
+			else if (result != FileError::NoError)
+				return AsyncLoadError::LoadError;
+
+			CreateSurface(cover, fullSurface);
+		}
+
+		if constexpr (Disabled)
+		{
+			if (fullSurface.empty())
 			{
-				Asset& portraitAsset = findPortrait.value();
-				if (LoadAsset(portraitAsset) == FileError::NoError)
+				// Create cover from portrait
+				if (auto findPortrait = FindAsset(characterAssetID, ImageType::LargePortrait))
 				{
-					if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
+					Asset& portraitAsset = findPortrait.value();
+					if (LoadAsset(portraitAsset) == FileError::NoError)
 					{
-						auto coverImage = ScaleSurface(portraitImage, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
+						if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
+						{
+							auto coverImage = ScaleSurface(portraitImage, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
 
-						// Save cover asset (bitmap)
-						auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage, characterAssetID);
-						coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
-						coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+							// Save cover asset (bitmap)
+							{
+								std::scoped_lock lock { _assetsMutex };
+								auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage, characterAssetID);
+								coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
+								coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+							}
 
-						outSurface = std::move(coverImage);
-						return AsyncLoadError::NoError;
+							fullSurface = std::move(coverImage);
+						}
 					}
 				}
 			}
 		}
 
-		return AsyncLoadError::FileNotFound;
+		if (fullSurface.empty())
+			return AsyncLoadError::FileNotFound;
+
+		// Half-version
+		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HomeScreen::CardWidth / 2, Constants::GUI::HomeScreen::CardHeight / 2, ImageFit::Stretch, false);
+		MaskCorners(halfSurface, MaskType::CARD_CORNER_MASK);
+
+		// Round corners
+		MaskCorners(fullSurface, MaskType::CARD_CORNER_MASK);
+
+		outResult.emplace<AsyncResult_CoverPair>(AsyncResult_CoverPair {
+			std::move(fullSurface),
+			std::move(halfSurface),
+		});
+		return AsyncLoadError::NoError;
 	}
 
 	void AssetManager::__Worker(std::stop_token stop)
@@ -651,15 +685,18 @@ namespace fig::io
 			}
 
 			// Do work
-			AsyncLoadError result;
-			fig::sdl::Surface surface;
+			AsyncLoadError error;
+			AsyncResultVariant result;
 			switch (request.task)
 			{
-			case AsyncLoad::Task::LoadImage:
-				result = __LoadCoverImageTask(request.assetId, surface);
+			case AsyncTask::LoadCover:
+				error = __LoadCoverImageTask(request.assetId, result);
+				break;
+			case AsyncTask::LoadPortrait:
+				error = __LoadImageTask(request.assetId, ImageType::LargePortrait, result);
 				break;
 			default:
-				result = AsyncLoadError::LoadError;
+				error = AsyncLoadError::LoadError;
 				break;
 			}
 
@@ -675,15 +712,24 @@ namespace fig::io
 				continue;
 			}
 
-			if (result == AsyncLoadError::NoError)
-				request.promise->set_value(std::move(surface));
+			if (error == AsyncLoadError::NoError)
+				request.promise->set_value(std::move(result));
 			else
-				request.promise->set_value(std::unexpected(result));
+				request.promise->set_value(std::unexpected(error));
 		}
 	}
 
-	[[nodiscard]] AssetManager::AsyncLoad AssetManager::LoadAssetAsync(const fig::uuid& assetId, AsyncLoad::Task task, int32_t priority)
+	[[nodiscard]] AsyncLoad AssetManager::LoadAssetAsync(const fig::uuid& assetId, AsyncTask task, int32_t priority)
 	{
+		if (task == AsyncTask::None)
+		{
+			return AsyncLoad {
+				.assetId = assetId,
+				.task = task,
+				.future = {},
+			};
+		}
+
 		const uint64_t id = _next_id.fetch_add(1, std::memory_order_relaxed);
 
 		// Cancel the previous request for this card, if any
@@ -697,7 +743,7 @@ namespace fig::io
 		}
 
 		// Create the promise
-		auto promise = std::make_unique<ImagePromise>();
+		auto promise = std::make_unique<AsyncPromise>();
 		auto future = promise->get_future();
 		auto promise_ptr = promise.get();
 

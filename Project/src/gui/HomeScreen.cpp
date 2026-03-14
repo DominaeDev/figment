@@ -11,10 +11,10 @@ namespace fig::gui
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		auto gridSmall = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_SMALL);
-		gridSmall->SetDelegate([this]() { SetSmallGridSize(true); });
 		auto gridLarge = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
 		gridLarge->SetDelegate([this]() { SetSmallGridSize(false); });
+		auto gridSmall = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_SMALL);
+		gridSmall->SetDelegate([this]() { SetSmallGridSize(true); });
 
 		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
@@ -27,8 +27,8 @@ namespace fig::gui
 
 		auto pTopSizer = new HorizontalSizer();
 		pTopSizer->AddStretchSpacer();
-		pTopSizer->Add(gridSmall, 0, Sizer::AlignCenterVertical | Sizer::Right, 0);
-		pTopSizer->Add(gridLarge, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
+		pTopSizer->Add(gridLarge, 0, Sizer::AlignCenterVertical | Sizer::Right, 0);
+		pTopSizer->Add(gridSmall, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopBar->SetSizer(pTopSizer);
 
