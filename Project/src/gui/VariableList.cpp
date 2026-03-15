@@ -10,7 +10,7 @@
 using namespace fig::gui;
 using namespace fig::util;
 
-constexpr float Margin { 8.0f };
+constexpr Coord Margin = 8;
 
 VariableList::VariableList(LayoutElement* pParent) : Control(pParent)
 {
@@ -51,10 +51,10 @@ void VariableList::SetVariables(const std::map<fig::string, fig::string>& variab
 		text = text + std::format("{} = {}\n", kvp.first, kvp.second);
 	text = rtrim(text);
 
-	float w, h;
+	Coord w, h;
 	_pText->SetTextAndResize(text, w, h);
 	
-	SetSize(w + Margin * 2.0f, h + Margin * 2.0f);
+	SetSize(w + Margin * 2, h + Margin * 2);
 }
 
 bool VariableList::IsEmpty() const

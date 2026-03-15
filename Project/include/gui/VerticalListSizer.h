@@ -13,7 +13,7 @@ namespace fig::gui
 		float GetListHeight() const { return _totalListHeight; }
 
 	protected:
-		virtual void OnLayout(Rectf rect) override;
+		virtual void OnLayout(Rect rect) override;
 
 		float _totalListHeight;
 		int _marginBottom = 0;

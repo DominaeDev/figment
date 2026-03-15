@@ -29,9 +29,9 @@ namespace fig::gui
 		return _state != ButtonState::Disabled; 
 	}
 
-	void BaseButton::SetExpandedArea(float size) noexcept
+	void BaseButton::SetExpandedArea(Coord size) noexcept
 	{
-		_fExpand = std::max(size, 0.0f);
+		_expand = std::max(size, 0);
 	}
 
 	bool BaseButton::HandleMouseEvents(const Event& event) noexcept
@@ -44,7 +44,7 @@ namespace fig::gui
 		if (event.type == SDL_EVENT_MOUSE_MOTION)
 		{
 			auto motionEvent = event.motion;
-			if (is_inside(rect, motionEvent.x, motionEvent.y, _fExpand))
+			if (is_inside(rect, toI(motionEvent.x), toI(motionEvent.y), _expand))
 			{
 				if (not _bMouseInside)
 				{
@@ -70,7 +70,7 @@ namespace fig::gui
 		{
 			auto mouseEvent = event.button;
 
-			if (not is_inside(rect, mouseEvent.x, mouseEvent.y, _fExpand))
+			if (not is_inside(rect, toI(mouseEvent.x), toI(mouseEvent.y), _expand))
 				return false; // Ignore
 
 			if (mouseEvent.down != _bMouseDown)

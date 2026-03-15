@@ -60,7 +60,7 @@ namespace fig::gui
 
 	private:
 		void Insert(const char* text);
-		void DrawText(RendererPtr pRenderer, TTF_Text* pText, float x, float y);
+		void DrawText(RendererPtr pRenderer, TTF_Text* pText, int x, int y);
 		void DrawCursor(RendererPtr pRenderer);
 		void DrawCandidates(RendererPtr pRenderer);
 		void DrawComposition(RendererPtr pRenderer);
@@ -91,11 +91,12 @@ namespace fig::gui
 		void Delete();
 		void ResetCursorBlink();
 
-		bool HandleMouseDown(float x, float y);
-		bool HandleMouseMotion(float x, float y);
-		bool HandleMouseUp(float x, float y);
+		bool HandleMouseDown(int x, int y);
+		bool HandleMouseMotion(int x, int y);
+		bool HandleMouseUp(int x, int y);
 		void ApplyScroll(int& x, int& y) const;
 		void ApplyScroll(float& x, float& y) const;
+		void ApplyScroll(Rect& rect) const;
 		void ApplyScroll(Rectf& rect) const;
 		void Autosize();
 		void DidChange();
@@ -120,7 +121,7 @@ namespace fig::gui
 		bool _bIBeamCursor = false;
 		Flags _flags {};
 		bool _bAutoSize = false;
-		Pointf _scroll {};
+		Point _scroll {};
 		int _minRows = 1;
 		int _maxRows = 1;
 

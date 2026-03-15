@@ -19,7 +19,7 @@ using namespace fig::io::data;
 
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f
-#define GRADIENT_HEIGHT 40.0f
+#define GRADIENT_HEIGHT 40
 
 ChatScroll::ChatScroll(LayoutElement* pParent) : Control(pParent)
 {
@@ -188,7 +188,7 @@ void ChatScroll::OnUpdate(float fElapsed)
 		_fAnimatedScroll -= _fAnimatedScroll * fElapsed * ANIMATED_SCROLL_SPEED;
 		if (_fAnimatedScroll < 1.0f)
 			_fAnimatedScroll = 0.0f;
-		_pScrollSizer->SetOffset(_fScrollY + _fAnimatedScroll);
+		_pScrollSizer->SetOffset(toI(_fScrollY + _fAnimatedScroll));
 	}
 }
 
@@ -291,12 +291,12 @@ bool ChatScroll::OnEvent(Event& event)
 bool ChatScroll::HandleMouseWheel(SDL_MouseWheelEvent event)
 {
 	auto& rect = GetRect();
-	Pointf pt = { event.mouse_x, event.mouse_y };
-	if (!SDL_PointInRectFloat(&pt, &rect))
+	Point pt = { toI(event.mouse_x), toI(event.mouse_y) };
+	if (!SDL_PointInRect(&pt, &rect))
 		return false;
 
 	_fScrollY = std::max(_fScrollY + toF(event.integer_y) * Constants::GUI::MouseScrollSpeed, 0.0f);
-	_pScrollSizer->SetOffset(_fScrollY + _fAnimatedScroll);
+	_pScrollSizer->SetOffset(toI(_fScrollY + _fAnimatedScroll));
 	return true;
 }
 
@@ -307,7 +307,7 @@ void ChatScroll::OnAfterLayout()
 	{
 		// Animate scroll
 		_fAnimatedScroll += (listHeight - _fLastListHeight);
-		_pScrollSizer->SetOffset(_fAnimatedScroll);
+		_pScrollSizer->SetOffset(toI(_fAnimatedScroll));
 	}
 	_fLastListHeight = listHeight;
 

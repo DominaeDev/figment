@@ -54,7 +54,7 @@ namespace fig::gui
 		return _dummies.back().get();
 	}
 
-	void Sizer::AddSpacer(float size)
+	void Sizer::AddSpacer(Coord size)
 	{
 		auto dummy = MakeDummy();
 		dummy->SetSize(size, size);

@@ -55,22 +55,22 @@ namespace fig::gui
 		Layout();
 	}
 
-	void LayoutElement::SetPosition(float x, float y)
+	void LayoutElement::SetPosition(Coord x, Coord y)
 	{
-		SetPosition(Pointf(x, y));
+		SetPosition(Point { x, y });
 	}
 
-	void LayoutElement::SetX(float x)
+	void LayoutElement::SetX(Coord x)
 	{
-		SetPosition(Pointf(x, _localPosition.y));
+		SetPosition(Point { x, _localPosition.y });
 	}
 
-	void LayoutElement::SetY(float y)
+	void LayoutElement::SetY(Coord y)
 	{
-		SetPosition(Pointf(_localPosition.x, y));
+		SetPosition(Point { _localPosition.x, y });
 	}
 
-	void LayoutElement::SetPosition(Pointf position)
+	void LayoutElement::SetPosition(Point position)
 	{
 		_localPosition = position;
 
@@ -94,22 +94,22 @@ namespace fig::gui
 		SetPosition(_localPosition);
 	}
 
-	void LayoutElement::SetSize(float width, float height)
+	void LayoutElement::SetSize(Coord width, Coord height)
 	{
-		SetSize(Pointf(width, height));
+		SetSize(Point(width, height));
 	}
 
-	void LayoutElement::SetWidth(float width)
+	void LayoutElement::SetWidth(Coord width)
 	{
-		SetSize(Pointf(width, _rect.h));
+		SetSize(Point(width, _rect.h));
 	}
 
-	void LayoutElement::SetHeight(float height)
+	void LayoutElement::SetHeight(Coord height)
 	{
-		SetSize(Pointf(_rect.w, height));
+		SetSize(Point(_rect.w, height));
 	}
 
-	void LayoutElement::SetSize(Pointf size)
+	void LayoutElement::SetSize(Point size)
 	{
 		_rect.w = size.x;
 		_rect.h = size.y;
@@ -121,17 +121,17 @@ namespace fig::gui
 		OnSize();
 	}
 
-	void LayoutElement::SetRect(float x, float y, float width, float height)
+	void LayoutElement::SetRect(Coord x, Coord y, Coord width, Coord height)
 	{
-		SetRect(Rectf { x, y, width, height });
+		SetRect(Rect { x, y, width, height });
 	}
 
-	void LayoutElement::SetRect(Rectf rect)
+	void LayoutElement::SetRect(Rect rect)
 	{
 		_rect = rect;
 
-		_localPosition.x = _rect.x - (_pParent ? _pParent->GetRect().x : 0.0f);
-		_localPosition.y = _rect.y - (_pParent ? _pParent->GetRect().y : 0.0f);
+		_localPosition.x = _rect.x - (_pParent ? _pParent->GetRect().x : 0);
+		_localPosition.y = _rect.y - (_pParent ? _pParent->GetRect().y : 0);
 
 		for (auto& child : _children)
 		{
@@ -146,9 +146,9 @@ namespace fig::gui
 	{
 		if (_pParent)
 		{
-			SetPosition(Pointf {
-				.x = (_pParent->GetWidth() - GetWidth()) / 2.0f,
-				.y = (_pParent->GetHeight() - GetHeight()) / 2.0f,
+			SetPosition(Point {
+				.x = (_pParent->GetWidth() - GetWidth()) / 2,
+				.y = (_pParent->GetHeight() - GetHeight()) / 2,
 			});
 		}
 	}
@@ -156,13 +156,13 @@ namespace fig::gui
 	void LayoutElement::CenterHorizontally()
 	{
 		if (_pParent)
-			SetX((_pParent->GetWidth() - GetWidth()) / 2.0f);
+			SetX((_pParent->GetWidth() - GetWidth()) / 2);
 	}
 
 	void LayoutElement::CenterVertically()
 	{
 		if (_pParent)
-			SetY((_pParent->GetHeight() - GetHeight()) / 2.0f);
+			SetY((_pParent->GetHeight() - GetHeight()) / 2);
 	}
 
 	void LayoutElement::FillParent()
@@ -278,5 +278,4 @@ namespace fig::gui
 		_children.erase(it);
 		_children.insert(_children.begin(), pChild);
 	}
-
 }

@@ -29,19 +29,19 @@ namespace fig::gui
 		auto pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);
 		pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
 		pMenuButton->SetSize(36, 36);
-		pMenuButton->SetX(4.0f);
+		pMenuButton->SetX(4);
 		pMenuButton->CenterVertically();
 
 		auto pSettingsButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SETTINGS);
 		pSettingsButton->SetTheme(Themes::SidePanelButtonStyle);
 		pSettingsButton->SetSize(36, 36);
-		pSettingsButton->SetX(GetWidth() - pSettingsButton->GetWidth() - 40.0f);
+		pSettingsButton->SetX(GetWidth() - pSettingsButton->GetWidth() - 40);
 		pSettingsButton->CenterVertically();
 
 		auto pCollapseButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SIDEBAR);
 		pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
 		pCollapseButton->SetSize(36, 36);
-		pCollapseButton->SetX(GetWidth() - pCollapseButton->GetWidth() - 4.0f);
+		pCollapseButton->SetX(GetWidth() - pCollapseButton->GetWidth() - 4);
 		pCollapseButton->CenterVertically();
 		pCollapseButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(false); });
 
@@ -85,7 +85,7 @@ namespace fig::gui
 
 	void SidePanel::OnAfterLayout()
 	{
-		const float kGradientSize = 7.0f;
+		constexpr Coord kGradientSize = 7;
 		_pGradient->SetX(GetWidth() - kGradientSize);
 		_pGradient->SetSize(kGradientSize, GetHeight());
 	}

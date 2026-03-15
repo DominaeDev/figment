@@ -25,7 +25,7 @@ namespace fig::gui
 		_spacingY = std::max(y, 0);
 	}
 
-	void GridSizer::OnLayout(Rectf parentRect)
+	void GridSizer::OnLayout(Rect parentRect)
 	{
 		auto count = GetCount();
 		if (count == 0)
@@ -35,14 +35,14 @@ namespace fig::gui
 			return;
 		}
 
-		int totalWidth = ceil_int(std::max(parentRect.w, 0.0f));
+		int totalWidth = std::max(parentRect.w, 0);
 		int columns;
 		if (totalWidth > 0 && _cellWidth > 0)
 			columns = std::max((totalWidth + _spacingX) / toI(_cellWidth + _spacingX), 1);
 		else
 			columns = 1;
 
-		float offsetX = _bCenterX ? toF(totalWidth - (columns * _cellWidth + std::max(columns - 1, 0) * _spacingX)) / 2 : 0.0f;
+		Coord offsetX = _bCenterX ? (totalWidth - (columns * _cellWidth + std::max(columns - 1, 0) * _spacingX)) / 2 : 0;
 
 		int32_t index = 0;
 		for (auto& item : GetLayoutItems())
@@ -52,7 +52,7 @@ namespace fig::gui
 
 			auto& control = *item.pControl;
 
-			control.SetPosition(offsetX + toF(col * (_cellWidth + _spacingX)), toF(row * (_cellHeight + _spacingY)));
+			control.SetPosition(offsetX + col * (_cellWidth + _spacingX), row * (_cellHeight + _spacingY));
 			index++;
 
 		}

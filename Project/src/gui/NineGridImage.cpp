@@ -10,7 +10,7 @@ namespace fig::gui
 		_cornerPixels = { cornerPixels, cornerPixels, cornerPixels, cornerPixels };
 
 		if (pTexture)
-			SetSize(toF(pTexture->w), toF(pTexture->h));
+			SetSize(pTexture->w, pTexture->h);
 	}
 
 	NineGridImage::NineGridImage(LayoutElement* pParent, Texture* pTexture, std::array<float, 4> corners) : Control(pParent),
@@ -19,7 +19,7 @@ namespace fig::gui
 		_cornerPixels = corners;
 
 		if (pTexture)
-			SetSize(toF(pTexture->w), toF(pTexture->h));
+			SetSize(pTexture->w, pTexture->h);
 	}
 
 	void NineGridImage::SetTexture(Texture* pTexture)
@@ -34,7 +34,7 @@ namespace fig::gui
 
 	void NineGridImage::OnRender(Renderer* pRenderer)
 	{
-		auto& rect = GetRect();
+		auto rect = GetDrawRect();
 
 		if (_pTexture)
 		{

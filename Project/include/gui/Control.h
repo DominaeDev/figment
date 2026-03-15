@@ -34,17 +34,17 @@ namespace fig::gui
 		void SetBackgroundRenderer(CustomRenderer* pCustom);
 		void SetBorderRenderer(CustomRenderer* pCustom);
 
-		void SetMargins(float left, float top, float right, float bottom);
-		void SetMargins(Rectf rect);
-		Rectf GetClientRect() const noexcept;
-		inline void SetMarginLeft(float margin) noexcept { _marginLeft = margin; }
-		inline void SetMarginTop(float margin) noexcept { _marginTop = margin; }
-		inline void SetMarginRight(float margin) noexcept { _marginRight = margin; }
-		inline void SetMarginBottom(float margin) noexcept { _marginBottom = margin; }
-		inline float GetMarginLeft() const noexcept { return _marginLeft; }
-		inline float GetMarginTop() const noexcept { return _marginTop; }
-		inline float GetMarginRight() const noexcept { return _marginRight; }
-		inline float GetMarginBottom() const noexcept { return _marginBottom; }
+		void SetMargins(Coord left, Coord top, Coord right, Coord bottom);
+		void SetMargins(Rect rect);
+		Rect GetClientRect() const noexcept;
+		inline void SetMarginLeft(Coord margin) noexcept { _marginLeft = margin; }
+		inline void SetMarginTop(Coord margin) noexcept { _marginTop = margin; }
+		inline void SetMarginRight(Coord margin) noexcept { _marginRight = margin; }
+		inline void SetMarginBottom(Coord margin) noexcept { _marginBottom = margin; }
+		inline Coord GetMarginLeft() const noexcept { return _marginLeft; }
+		inline Coord GetMarginTop() const noexcept { return _marginTop; }
+		inline Coord GetMarginRight() const noexcept { return _marginRight; }
+		inline Coord GetMarginBottom() const noexcept { return _marginBottom; }
 
 	protected:
 		virtual void OnRender(Renderer* pRenderer);
@@ -55,8 +55,8 @@ namespace fig::gui
 
 		void DrawBackground(Renderer* pRenderer);
 		void DrawBorder(Renderer* pRenderer);
-		inline float GetMarginHorizontal() const noexcept { return _marginLeft + _marginRight; }
-		inline float GetMarginVertical() const noexcept { return _marginTop + _marginBottom; }
+		inline Coord GetMarginHorizontal() const noexcept { return _marginLeft + _marginRight; }
+		inline Coord GetMarginVertical() const noexcept { return _marginTop + _marginBottom; }
 
 		inline WindowPtr GetSDLWindow() { return _renderContext.pWindow; }
 		inline RendererPtr GetSDLRenderer() { return _renderContext.pRenderer; }
@@ -75,10 +75,10 @@ namespace fig::gui
 		CustomRenderer* _pBorderRenderer = nullptr;
 	
 		// Margin
-		float _marginLeft = 0;
-		float _marginTop = 0;
-		float _marginRight = 0;
-		float _marginBottom = 0;
+		Coord _marginLeft = 0;
+		Coord _marginTop = 0;
+		Coord _marginRight = 0;
+		Coord _marginBottom = 0;
 
 	private:
 		struct ControlRenderContext

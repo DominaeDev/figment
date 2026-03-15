@@ -22,8 +22,8 @@ void HorizontalGradient::OnRender(Renderer* pRenderer)
 	auto bgColor = GetBackgroundColor();
 	auto fgColor = GetForegroundColor();
 
-	Rectf rect = GetRect();
-	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
+	auto& rect = GetRect();
+	if (!SDL_RectsEqual(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);
 
 	static int indices[6] = { 0, 1, 2, 2, 3, 0 };
@@ -31,17 +31,17 @@ void HorizontalGradient::OnRender(Renderer* pRenderer)
 	SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), indices, 6);
 }
 
-void HorizontalGradient::RefreshGeometry(Rectf rect)
+void HorizontalGradient::RefreshGeometry(const Rect& rect)
 {
 	_lastRect = rect;
 
 	_vertices.clear();
 	_vertices.reserve(4);
 	
-	float left = rect.x;
-	float right = rect.x + rect.w;
-	float top = rect.y;
-	float bottom = rect.y + rect.h;
+	float left = toF(rect.x);
+	float right = toF(rect.x + rect.w);
+	float top = toF(rect.y);
+	float bottom = toF(rect.y + rect.h);
 
 	_vertices.push_back(Vertex { Pointf { left, bottom }, _colorLeft });
 	_vertices.push_back(Vertex { Pointf { right, bottom }, _colorRight });

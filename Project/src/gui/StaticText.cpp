@@ -43,12 +43,12 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void StaticText::SetTextAndResize(fig::string text, float& newWidth, float& newHeight)
+	void StaticText::SetTextAndResize(fig::string text, Coord& newWidth, Coord& newHeight)
 	{
 		_text = text;
 		_bInvalidated = false;
 		DrawText(newWidth, newHeight);
-		SetSize(toF(newWidth), toF(newHeight));
+		SetSize(newWidth, newHeight);
 	}
 
 	void StaticText::InvalidateText()
@@ -61,7 +61,7 @@ namespace fig::gui
 		if (_bInvalidated)
 		{
 			_bInvalidated = false;
-			float tmp;
+			Coord tmp;
 			DrawText(tmp, tmp);
 		}
 	}
@@ -89,7 +89,7 @@ namespace fig::gui
 		}
 	}
 
-	void StaticText::DrawText(float& newWidth, float& newHeight)
+	void StaticText::DrawText(Coord& newWidth, Coord& newHeight)
 	{
 		auto fgColor = GetForegroundColor();
 		auto bgColor = GetBackgroundColor();
@@ -136,7 +136,7 @@ namespace fig::gui
 					newWidth = _textWidth + GetMarginHorizontal();
 					newHeight = _textHeight + GetMarginVertical();
 					if (_bAutoSize)
-						SetSize(toF(newWidth), toF(newHeight));
+						SetSize(newWidth, newHeight);
 					return;
 				}
 			}
@@ -155,7 +155,7 @@ namespace fig::gui
 					newWidth = _textWidth + GetMarginHorizontal();
 					newHeight = _textHeight + GetMarginVertical();
 					if (_bAutoSize)
-						SetSize(toF(newWidth), toF(newHeight));
+						SetSize(newWidth, newHeight);
 					return;
 				}
 			}
@@ -188,7 +188,7 @@ namespace fig::gui
 					newWidth = _textWidth + GetMarginHorizontal();
 					newHeight = _textHeight + GetMarginVertical();
 					if (_bAutoSize)
-						SetSize(toF(newWidth), toF(newHeight));
+						SetSize(newWidth, newHeight);
 					return;
 				}
 			}
@@ -240,7 +240,7 @@ namespace fig::gui
 		int y = toI(rect.y + GetMarginTop());
 		int w = _textWidth;
 		int h = _textHeight;
-		Rectf aligned_rect(toF(x), toF(y), toF(w), toF(h));
+		Rect aligned_rect(x, y, w, h);
 
 		if ((_alignment & HorizontalAlignment::Center) != 0)
 			aligned_rect.x = x + (rect.w - w) / 2;
@@ -250,7 +250,7 @@ namespace fig::gui
 			aligned_rect.y = y + (rect.h - h) / 2;
 		else if ((_alignment & VerticalAlignment::Bottom) != 0)
 			aligned_rect.y = y + rect.h - h;
-		return aligned_rect;
+		return to_rectf(aligned_rect);
 	}
 
 	void StaticText::SetForegroundColor(Color color)

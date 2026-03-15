@@ -6,13 +6,13 @@
 using namespace fig::gui;
 using namespace fig::util;
 
-void VerticalSizer::OnLayout(Rectf parentRect)
+void VerticalSizer::OnLayout(Rect parentRect)
 {
 	auto count = GetCount();
 	if (count == 0)
 		return;
 
-	int totalHeight = ceil_int(std::max(parentRect.h, 0.0f));
+	int totalHeight = std::max(parentRect.h, 0);
 	int itemHeight= ceil_int((float)totalHeight/ count);
 	int remainingHeight = totalHeight;
 	int totalProportion = 0;
@@ -24,7 +24,7 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 	{
 		if (item.prop == 0 && item.pControl != nullptr)
 		{
-			remainingHeight = ceil_int(std::max(remainingHeight - (item.pControl->GetHeight() + item.topBorder() + item.bottomBorder()), 0.0f));
+			remainingHeight = std::max(remainingHeight - (item.pControl->GetHeight() + item.topBorder() + item.bottomBorder()), 0);
 		}
 		else if (item.prop > 0)
 			totalProportion += item.prop;
@@ -41,22 +41,22 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 		auto rect = control.GetRect();
 		int height = 0;
 		if (item.prop == 0)
-			height = ceil_int(control.GetHeight() + item.topBorder() + item.bottomBorder());
+			height = control.GetHeight() + item.topBorder() + item.bottomBorder();
 		else if (item.prop > 0)
 			height = ceil_int(item.prop * remainingHeight / (float)totalProportion);
 		else
 			height = ceil_int(remainingHeight / (float)numStretch);
 
 		if (control.GetMinSize().y > 0)
-			height = ceil_int(std::max((float)height, control.GetMinSize().y));
+			height = std::max(height, control.GetMinSize().y);
 		if (control.GetMaxSize().y > 0)
-			height = ceil_int(std::min((float)height, control.GetMaxSize().y));
+			height = std::min(height, control.GetMaxSize().y);
 
-		Rectf borderRect {
+		Rect borderRect {
 			parentRect.x,
 			parentRect.y + y,
 			parentRect.w,
-			(float)height,
+			height,
 		};
 
 		if ((item.flags & Flag::Left) != 0)

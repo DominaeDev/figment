@@ -56,6 +56,8 @@ namespace fig::gui
 	using VertexPtr = SDL_Vertex*;
 	using TextEnginePtr = TTF_TextEngine*;
 
+	using Coord = int32_t;
+
 	struct Mask
 	{
 		std::vector<uint8_t> pixels;

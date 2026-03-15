@@ -1,5 +1,8 @@
 #include <pch.h>
 #include "gui/ScrollPanel.h"
+#include "gui/GUIUtility.h"
+
+using namespace fig::gui::util;
 
 namespace fig::gui
 {
@@ -21,10 +24,11 @@ namespace fig::gui
 	bool ScrollPanel::HandleMouseWheel(SDL_MouseWheelEvent event)
 	{
 		Pointf pt = { event.mouse_x, event.mouse_y };
-		if (!SDL_PointInRectFloat(&pt, &GetRect()))
+		auto rect = to_rectf(GetRect());
+		if (!SDL_PointInRectFloat(&pt, &rect))
 			return false;
 
-		_fScrollY -= toF(event.integer_y * Constants::GUI::MouseScrollSpeed * 1.5f);
+		_fScrollY -= toF(event.integer_y) * Constants::GUI::MouseScrollSpeed * 1.5f;
 		
 		InvalidateLayout();
 		return true;
@@ -34,12 +38,12 @@ namespace fig::gui
 	{
 		if (_pSizer and not _children.empty())
 		{
-			float maxExtent = std::max(_fMaxExtent - GetHeight() + _fTopMargin + _fBottomMargin, 0.0f);
-			_fScrollY = std::clamp(_fScrollY, 0.0f, maxExtent);
+			Coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
+			_fScrollY = std::clamp(_fScrollY, 0.0f, toF(maxExtent));
 
 			// Move vertically
 			for (auto& child : _children)
-				child->SetY(child->GetY() - _fScrollY + _fTopMargin);
+				child->SetY(child->GetY() - toI(_fScrollY) + _topMargin);
 		}
 	}
 }

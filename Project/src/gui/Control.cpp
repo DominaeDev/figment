@@ -39,11 +39,11 @@ namespace fig::gui
 		static Rect* s_pClippingRect = nullptr;
 		Rect* lastClippingRect = s_pClippingRect;
 		Rect clippingRect;
-		Rect cullingRect = expand_rect(to_rect(GetRect()), 64);
+		Rect cullingRect = expand_rect(GetRect(), 64);
 
 		if (_bClipping)
 		{
-			Rect rect = to_rect(GetRect());
+			Rect rect = GetRect();
 			if (s_pClippingRect)
 				SDL_GetRectIntersection(s_pClippingRect, &rect, &clippingRect);
 			else
@@ -66,7 +66,7 @@ namespace fig::gui
 			{
 				if (_bCulling)
 				{
-					auto childRect = to_rect(renderable->GetRect());
+					auto childRect = renderable->GetRect();
 					bool bVisible = SDL_HasRectIntersection(&cullingRect, &childRect);
 					if (child->IsCulled() == bVisible)
 						child->Cull(!bVisible);
@@ -94,15 +94,16 @@ namespace fig::gui
 		// Custom renderer
 		if (_pBorderRenderer)
 		{
-			_pBorderRenderer->Render(pRenderer, GetRect());
+			_pBorderRenderer->Render(pRenderer, GetDrawRect());
 			return;
 		}
 
 		if (!_borderColor.IsDefined())
 			return;
 
+		auto rect = to_rectf(GetRect());
 		SDL_SetRenderDrawColor(pRenderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
-		SDL_RenderRect(pRenderer, &GetRect());
+		SDL_RenderRect(pRenderer, &rect);
 	}
 
 	Color Control::GetForegroundColor() const
@@ -130,15 +131,16 @@ namespace fig::gui
 		// Custom renderer
 		if (_pBGRenderer)
 		{
-			_pBGRenderer->Render(pRenderer, GetRect());
+			_pBGRenderer->Render(pRenderer, GetDrawRect());
 			return;
 		}
 
 		auto bgColor = GetBackgroundColor();
 		if (bgColor.IsDefined() && bgColor.a != 0)
 		{
+			auto rect = to_rectf(GetRect());
 			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
-			SDL_RenderFillRect(pRenderer, &GetRect());
+			SDL_RenderFillRect(pRenderer, &rect);
 		}
 	}
 
@@ -204,7 +206,7 @@ namespace fig::gui
 		}
 	}
 
-	void Control::SetMargins(float left, float top, float right, float bottom)
+	void Control::SetMargins(Coord left, Coord top, Coord right, Coord bottom)
 	{
 		_marginLeft = left;
 		_marginTop = top;
@@ -212,14 +214,14 @@ namespace fig::gui
 		_marginBottom = bottom;
 	}
 
-	void Control::SetMargins(Rectf rect)
+	void Control::SetMargins(Rect rect)
 	{
 		SetMargins(rect.x, rect.y, rect.w, rect.h);
 	}
 
-	Rectf Control::GetClientRect() const noexcept
+	Rect Control::GetClientRect() const noexcept
 	{
-		Rectf clientRect = GetRect();
+		Rect clientRect = GetRect();
 		clientRect.x += _marginLeft;
 		clientRect.y += _marginTop;
 		clientRect.w -= _marginLeft + _marginRight;

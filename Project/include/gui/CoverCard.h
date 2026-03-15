@@ -77,7 +77,7 @@ namespace fig::gui
 		Image* _pSmallBorder;
 		StaticText* _pSmallLabel {};
 
-		Pointf _tagPosition {};
+		Point _tagPosition {};
 		int32_t _tagRows { 1 };
 
 		fig::sdl::Surface _imageSurface {};

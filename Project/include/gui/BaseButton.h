@@ -15,7 +15,7 @@ namespace fig::gui
 	public:
 		void SetDelegate(ButtonDelegate pDelegate) noexcept;
 		void SetEnabled(bool bEnabled) noexcept;
-		void SetExpandedArea(float size) noexcept;
+		void SetExpandedArea(Coord size) noexcept;
 		inline bool IsEnabled() const noexcept;
 
 	protected:
@@ -44,7 +44,7 @@ namespace fig::gui
 		LayoutElement* _pOwner;
 		bool _bMouseInside = false;
 		bool _bMouseDown = false;
-		float _fExpand = 0.0f;
+		Coord _expand = 0;
 	};
 
 }

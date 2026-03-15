@@ -38,7 +38,7 @@ namespace fig::gui
 
 		void Add(LayoutElement* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
 		Control* Add(Sizer* pControl, Control* pParent, int proportion = 0, int flags = Flag::Default, int border = 0);
-		void AddSpacer(float size);
+		void AddSpacer(Coord size);
 		void AddStretchSpacer();
 		void Remove(Control* pControl);
 		void Clear();
@@ -66,7 +66,7 @@ namespace fig::gui
 				| std::views::filter([](auto& i) { return (bool)i.pControl and i.pControl->IsLayoutEnabled(); });
 		}
 
-		virtual void OnLayout(Rectf rect) = 0;
+		virtual void OnLayout(Rect rect) = 0;
 		void Update(float fElapsed) override {};
 	
 	private:

@@ -18,40 +18,41 @@ namespace fig::gui
 		void Update(float fElapsed);
 		void Layout();
 
-		inline const Rectf& GetRect() const noexcept { return _rect; }
+		inline const Rect& GetRect() const noexcept { return _rect; }
+		inline constexpr Rectf GetDrawRect() const noexcept { return Rectf { toF(_rect.x), toF(_rect.y), toF(_rect.w), toF(_rect.h) }; }
 
-		inline float GetX() const noexcept { return _localPosition.x; }
-		inline float GetY() const noexcept { return _localPosition.y; }
-		inline Pointf GetPosition() const noexcept { return Pointf { _localPosition.x, _localPosition.y }; }
-		inline float GetAbsoluteX() const noexcept { return _rect.x; }
-		inline float GetAbsoluteY() const noexcept { return _rect.y; }
-		inline Pointf GetAbsolutePosition() const noexcept { return Pointf { _rect.x, _rect.y }; }
+		inline Coord GetX() const noexcept { return _localPosition.x; }
+		inline Coord GetY() const noexcept { return _localPosition.y; }
+		inline Point GetPosition() const noexcept { return Point { _localPosition.x, _localPosition.y }; }
+		inline Coord GetAbsoluteX() const noexcept { return _rect.x; }
+		inline Coord GetAbsoluteY() const noexcept { return _rect.y; }
+		inline Point GetAbsolutePosition() const noexcept { return Point { _rect.x, _rect.y }; }
 
-		inline Pointf GetSize() const noexcept { return Pointf { _rect.w, _rect.h }; }
-		inline float GetWidth() const noexcept { return _rect.w; }
-		inline float GetHeight() const noexcept { return _rect.h; }
-		inline const Pointf& GetMinSize() const noexcept { return _minSize; }
-		inline const Pointf& GetMaxSize() const noexcept { return _maxSize; }
+		inline Point GetSize() const noexcept { return Point { _rect.w, _rect.h }; }
+		inline Coord GetWidth() const noexcept { return _rect.w; }
+		inline Coord GetHeight() const noexcept { return _rect.h; }
+		inline const Point& GetMinSize() const noexcept { return _minSize; }
+		inline const Point& GetMaxSize() const noexcept { return _maxSize; }
 
-		void SetRect(Rectf rect);
-		void SetRect(float x, float y, float width, float height);
-		void SetPosition(Pointf position);
-		void SetPosition(float x, float y);
-		void SetX(float x);
-		void SetY(float y);
-		void SetSize(Pointf size);
-		void SetSize(float width, float height);
-		void SetWidth(float width);
-		void SetHeight(float height);
+		void SetRect(Rect rect);
+		void SetRect(Coord x, Coord y, Coord width, Coord height);
+		void SetPosition(Point position);
+		void SetPosition(Coord x, Coord y);
+		void SetX(Coord x);
+		void SetY(Coord y);
+		void SetSize(Point size);
+		void SetSize(Coord width, Coord height);
+		void SetWidth(Coord width);
+		void SetHeight(Coord height);
 		void Center();
 		void CenterHorizontally();
 		void CenterVertically();
 		void FillParent();
 
-		void SetMinSize(Pointf size) { _minSize = size; }
-		void SetMinSize(float width, float height) { _minSize = Pointf { width, height }; }
-		void SetMaxSize(Pointf size) { _maxSize = size; }
-		void SetMaxSize(float width, float height) { _maxSize = Pointf { width, height }; }
+		void SetMinSize(Point size) { _minSize = size; }
+		void SetMinSize(Coord width, Coord height) { _minSize = Point { width, height }; }
+		void SetMaxSize(Point size) { _maxSize = size; }
+		void SetMaxSize(Coord width, Coord height) { _maxSize = Point { width, height }; }
 
 		void AddChild(LayoutElement* pChild);
 		bool RemoveChild(LayoutElement* pChild);
@@ -93,10 +94,10 @@ namespace fig::gui
 	private:
 		void OnParentMoved();
 
-		Rectf _rect = {};
-		Pointf _localPosition {};
-		Pointf _minSize = {};
-		Pointf _maxSize = {};
+		Rect _rect = {};
+		Point _localPosition {};
+		Point _minSize = {};
+		Point _maxSize = {};
 		bool _bLayoutEnabled = true;
 		bool _bInvalidLayout = false;
 	};

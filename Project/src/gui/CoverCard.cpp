@@ -12,16 +12,16 @@ using namespace fig::util;
 
 namespace fig::gui
 {
-	constexpr float kMargin = 12.0f;
+	constexpr Coord kMargin = 12;
 
-	constexpr float kTagMargin = 10;
-	constexpr float kTagSpacing = 6;
-	constexpr float kTagInnerMargin = 8;
-	constexpr float kTagMinWidth = 36;
-	constexpr float kTagRowHeight = 32;
-	constexpr float kTagY = 70;
-	constexpr float kTagMaxRows = 2;
-	constexpr float kFooterHeight = 106;
+	constexpr Coord kTagMargin = 10;
+	constexpr Coord kTagSpacing = 6;
+	constexpr Coord kTagInnerMargin = 8;
+	constexpr Coord kTagMinWidth = 36;
+	constexpr Coord kTagRowHeight = 32;
+	constexpr Coord kTagY = 70;
+	constexpr Coord kTagMaxRows = 2;
+	constexpr Coord kFooterHeight = 106;
 	constexpr auto kLargeWidth = Constants::GUI::HomeScreen::CardWidth;
 	constexpr auto kLargeHeight = Constants::GUI::HomeScreen::CardHeight;
 	constexpr auto kSmallWidth = Constants::GUI::HomeScreen::CardWidth / 2;
@@ -76,9 +76,9 @@ namespace fig::gui
 		pSmallFooterFade->SetY(kSmallHeight - pSmallFooterFade->GetHeight());
 
 		_pSmallLabel = new StaticText(pSmallFooter, "", FontFace::CardHeader, 16.5, false);
-		_pSmallLabel->SetPosition(toF(kSmallMargin), toF(kSmallHeight - kSmallMargin - 22));
-		_pSmallLabel->SetMaxSize(toF(kSmallWidth - (kSmallMargin * 2)), -1);
-		_pSmallLabel->SetSize(toF(kSmallWidth - (kSmallMargin * 2)), 40);
+		_pSmallLabel->SetPosition(kSmallMargin, kSmallHeight - kSmallMargin - 22);
+		_pSmallLabel->SetMaxSize(kSmallWidth - (kSmallMargin * 2), -1);
+		_pSmallLabel->SetSize(kSmallWidth - (kSmallMargin * 2), 40);
 		_pSmallLabel->SetForegroundColor(Colors::White);
 		_pSmallLabel->SetBackgroundColor(Colors::Transparent);
 		_pSmallLabel->EnableDropShadow(true);
@@ -142,7 +142,7 @@ namespace fig::gui
 			// Create error icon
 			int divide = _cardSize == CardSize::Default ? 1 : 2;
 			_pErrorIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_ERROR));
-			_pErrorIcon->SetSize(toF(_pErrorIcon->GetTextureSize().x / divide), toF(_pErrorIcon->GetTextureSize().x / divide));
+			_pErrorIcon->SetSize(_pErrorIcon->GetTextureSize().x / divide, _pErrorIcon->GetTextureSize().x / divide);
 			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
 			_pErrorIcon->Center();
 		}
@@ -202,7 +202,7 @@ namespace fig::gui
 		pLabel->SetBackgroundColor(Colors::Transparent);
 
 		auto [w, h] = pLabel->MeasureText();
-		_pCounterBG->SetSize(toF(std::max(w + 35, 32)), 26);
+		_pCounterBG->SetSize(std::max(w + 35, 32), 26);
 	}
 
 	static const Color& GetTagColor(const fig::string& tag)
@@ -272,7 +272,7 @@ namespace fig::gui
 		pLabel->SetMaxSize(kLargeWidth - (position.x + kTagInnerMargin * 2 + kTagMargin), 0);
 
 		auto [w, h] = pLabel->MeasureText();
-		pTagBG->SetSize(toF(w + kTagInnerMargin * 2), 26);
+		pTagBG->SetSize(w + kTagInnerMargin * 2, 26);
 
 		_tagPosition.x += pTagBG->GetWidth() + kTagSpacing;
 		_tags.insert(lower_tag);
@@ -486,7 +486,7 @@ namespace fig::gui
 		if (_pErrorIcon)
 		{
 			int divide = _cardSize == CardSize::Default ? 1 : 2;
-			_pErrorIcon->SetSize(toF(_pErrorIcon->GetTextureSize().x / divide), toF(_pErrorIcon->GetTextureSize().x / divide));
+			_pErrorIcon->SetSize(_pErrorIcon->GetTextureSize().x / divide, _pErrorIcon->GetTextureSize().x / divide);
 			_pErrorIcon->Center();
 		}
 		Image::OnSize();

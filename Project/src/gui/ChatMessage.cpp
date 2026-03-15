@@ -16,24 +16,24 @@ using namespace fig::util;
 #define USER_RIGHT_ALIGNED	1
 #define USER_YOU			1
 
-#define LEFT_MARGIN			80.0f
+#define LEFT_MARGIN			80
 #if USER_RIGHT_ALIGNED
-#define RIGHT_MARGIN		80.0f
+#define RIGHT_MARGIN		80
 #else
 #define RIGHT_MARGIN		0.0f
 #endif
 #define HMARGIN				(LEFT_MARGIN + RIGHT_MARGIN)
-#define TOP_OFFSET			20.0f
-#define BOTTOM_MARGIN		2.0f
-#define MIN_WIDTH			40.0f
-#define MIN_HEIGHT			40.0f
+#define TOP_OFFSET			20
+#define BOTTOM_MARGIN		2
+#define MIN_WIDTH			40
+#define MIN_HEIGHT			40
 
-#define NAME_OFFSET			20.0f
-#define DIALOGUE_OFFSET		15.0f
-#define TEXT_LEFT_MARGIN	16.0f
-#define TEXT_RIGHT_MARGIN	18.0f
-#define TEXT_TOP_MARGIN		8.0f
-#define TEXT_BOTTOM_MARGIN	10.0f
+#define NAME_OFFSET			20
+#define DIALOGUE_OFFSET		15
+#define TEXT_LEFT_MARGIN	16
+#define TEXT_RIGHT_MARGIN	18
+#define TEXT_TOP_MARGIN		8
+#define TEXT_BOTTOM_MARGIN	10
 #define TEXT_HMARGIN		(TEXT_LEFT_MARGIN + TEXT_RIGHT_MARGIN)
 #define TEXT_VMARGIN		(TEXT_TOP_MARGIN + TEXT_BOTTOM_MARGIN)
 
@@ -130,7 +130,7 @@ namespace fig::gui
 		_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::GUI::ChatMessageFontSize, true);
 		_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
 		_pMessageText->SetBackgroundColor(Colors::Transparent);
-		_pMessageText->SetMaxSize(toF(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2), -1);
+		_pMessageText->SetMaxSize(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2, -1);
 
 		// Name label
 		if (!name.empty())
@@ -185,7 +185,7 @@ namespace fig::gui
 
 		strip_ends(text, _messageType);
 
-		float w, h;
+		int32_t w, h;
 		_message = text;
 		if (_messageType == MessageType::Dialogue)
 		{
@@ -214,14 +214,14 @@ namespace fig::gui
 		int currentHeight = toI(_pMessagePanel->GetHeight());
 		if (currentHeight < h)
 		{
-			_pMessagePanel->SetHeight(toF(h));
+			_pMessagePanel->SetHeight(h);
 			SetHeight(std::max(_pMessagePanel->GetHeight() + (_name.empty() ? 0 : TOP_OFFSET) + BOTTOM_MARGIN, MIN_HEIGHT));
 		}
 
 		int currentWidth = toI(_pMessagePanel->GetWidth());
 		if (currentWidth < w)
 		{
-			_pMessagePanel->SetWidth(std::clamp(toF(w), MIN_WIDTH, Constants::GUI::ChatScrollWidth - HMARGIN));
+			_pMessagePanel->SetWidth(std::clamp(w, MIN_WIDTH, Constants::GUI::ChatScrollWidth - HMARGIN));
 			if (bRight)
 				_pMessagePanel->SetX(Constants::GUI::ChatScrollWidth - _pMessagePanel->GetWidth() - RIGHT_MARGIN + (bDialogue ? DIALOGUE_OFFSET : 0));
 		}

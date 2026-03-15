@@ -15,11 +15,11 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override {};
 		void OnRender(Renderer* pRenderer) override;
 
-		void RefreshGeometry(Rectf rect);
+		void RefreshGeometry(const Rect& rect);
 	private:
 		Colorf _colorLeft {};
 		Colorf _colorRight {};
-		Rectf _lastRect {};
+		Rect _lastRect {};
 		Texture* _pTexture {};
 
 		std::vector<Vertex> _vertices {};

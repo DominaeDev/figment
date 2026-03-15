@@ -10,7 +10,7 @@ namespace fig::gui
 	SimpleTextBox::SimpleTextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, Flags flags) : TextBox(pParent, fontFace, ptSize, flags)
 	{
 		if (_pFont)
-			SetSize(300, toF(MeasureFontHeight(*_pFont)) + GetMarginVertical());
+			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
 		
 		auto pTextBoxBG = new NineGridRenderer(8);
 		pTextBoxBG->SetCornerSize(20.0f);

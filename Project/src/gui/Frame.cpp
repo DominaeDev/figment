@@ -9,7 +9,7 @@ Frame::Frame(Window* pHostWindow) : Control(nullptr, pHostWindow)
 {
 	int w, h;
 	SDL_GetWindowSizeInPixels(pHostWindow->GetSDLWindow().get(), &w, &h);
-	SetSize(toF(w), toF(h));
+	SetSize(w, h);
 }
 
 void Frame::Render(Renderer* pRenderer)

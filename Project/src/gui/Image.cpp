@@ -10,7 +10,7 @@ namespace fig::gui
 		_pTexture(pTexture)
 	{
 		if (pTexture)
-			SetSize(toF(pTexture->w), toF(pTexture->h));
+			SetSize(pTexture->w, pTexture->h);
 
 		SetForegroundColor(tint);
 		SetBackgroundColor(Colors::Transparent);
@@ -25,7 +25,7 @@ namespace fig::gui
 
 		if (_pTexture)
 		{
-			Rectf rect = GetRect();
+			auto rect = GetDrawRect();
 
 			if (fgColor.IsDefined())
 				SDL_SetTextureColorMod(_pTexture, fgColor.r, fgColor.g, fgColor.b);

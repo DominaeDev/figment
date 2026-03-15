@@ -35,7 +35,7 @@ namespace fig::gui
 
 		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR);
 		pExpandButton->SetSize(36, 36);
-		pExpandButton->SetX(4.0f);
+		pExpandButton->SetX(4);
 		pExpandButton->CenterVertically();
 		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
 		_pExpandButton = pExpandButton;

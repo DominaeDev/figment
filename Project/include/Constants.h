@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "gui/GUITypes.h"
 #include "model/ChatTypes.h"
 #include "model/GlobalStrings.h"
 
@@ -8,30 +9,30 @@ namespace Constants
 {
 	namespace GUI
 	{
-		constexpr int32_t WindowWidth = 1320;
-		constexpr int32_t WindowHeight = 900;
+		constexpr fig::gui::Coord WindowWidth = 1320;
+		constexpr fig::gui::Coord WindowHeight = 900;
 
 		constexpr double DefaultFontSize = 18.5;
 		constexpr double StatusBarFontSize = 14.5;
 		constexpr double CharacterNameFontSize = 12.0;
 		constexpr double ChatMessageFontSize = 16.0; //15.5;
-		constexpr int32_t ChatScrollWidth = 800;
+		constexpr fig::gui::Coord ChatScrollWidth = 800;
 		
 		constexpr float MouseScrollSpeed = 80.0f;
 
 		namespace HomeScreen
 		{
-			constexpr int32_t CardWidth = 320;
-			constexpr int32_t CardHeight = 412;
-			constexpr int32_t CardSpacingX = 18;
-			constexpr int32_t CardSpacingY = 20;
+			constexpr fig::gui::Coord CardWidth = 320;
+			constexpr fig::gui::Coord CardHeight = 412;
+			constexpr fig::gui::Coord CardSpacingX = 18;
+			constexpr fig::gui::Coord CardSpacingY = 20;
 		}
 
 		namespace SidePanel
 		{
-			constexpr float HeaderHeight = 48.0f;
-			constexpr float FooterHeight = 80.0f;
-			constexpr float Width = 240.0f;
+			constexpr fig::gui::Coord HeaderHeight = 48;
+			constexpr fig::gui::Coord FooterHeight = 80;
+			constexpr fig::gui::Coord Width = 240;
 		}
 	}
 

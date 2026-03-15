@@ -13,8 +13,8 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	constexpr float TopMargin = 8.0f;
-	constexpr float BottomMargin = 120.0f;
+	constexpr Coord TopMargin = 8;
+	constexpr Coord BottomMargin = 120;
 
 	CardList::CardList(LayoutElement* pParent, CardSize cardSize) : ScrollPanel(pParent),
 		_cardSize { cardSize }
@@ -92,13 +92,13 @@ namespace fig::gui
 			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY);
 			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY);
 
-			_fMaxExtent = toF(curr_extent);
+			_maxExtent = curr_extent;
 			_last_rows = curr_rows;
 
 			if (last_extent > 0)
 			{
-				float ratio = _fScrollY  / last_extent;
-				_fScrollY = ratio * _fMaxExtent;
+				float ratio = _fScrollY / last_extent;
+				_fScrollY = ratio * toF(_maxExtent);
 //				LayoutNow();
 			}
 		}

@@ -6,7 +6,7 @@
 using namespace fig::gui;
 using namespace fig::util;
 
-void VerticalListSizer::OnLayout(Rectf parentRect)
+void VerticalListSizer::OnLayout(Rect parentRect)
 {
 	auto count = GetCount();
 	if (count == 0)
@@ -22,7 +22,7 @@ void VerticalListSizer::OnLayout(Rectf parentRect)
 
 		auto& control = *item.pControl;
 		auto rect = control.GetRect();
-		int height = ceil_int(control.GetHeight());
+		int height = control.GetHeight();
 
 		rect.x = parentRect.x;
 

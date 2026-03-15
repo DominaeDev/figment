@@ -6,14 +6,14 @@
 using namespace fig::gui;
 using namespace fig::util;
 
-void HorizontalSizer::OnLayout(Rectf parentRect)
+void HorizontalSizer::OnLayout(Rect parentRect)
 {
 	auto count = GetCount();
 	if (count == 0)
 		return;
 
 	auto items = GetLayoutItems();
-	int totalWidth = ceil_int(std::max(parentRect.w, 0.0f));
+	int totalWidth = std::max(parentRect.w, 0);
 	int itemWidth = ceil_int((float)totalWidth / count);
 	int remainingWidth = totalWidth;
 	int totalProportion = 0;
@@ -21,7 +21,7 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 	for (auto& item : items)
 	{
 		if (item.prop == 0 && item.pControl != nullptr)
-			remainingWidth = ceil_int(std::max(remainingWidth - (item.pControl->GetWidth() + item.leftBorder() + item.rightBorder()), 0.0f));
+			remainingWidth = std::max(remainingWidth - (item.pControl->GetWidth() + item.leftBorder() + item.rightBorder()), 0);
 		else if (item.prop > 0)
 			totalProportion += item.prop;
 		else
@@ -30,28 +30,28 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 	if (totalProportion == 0)
 		totalProportion = 1;
 
-	int x = 0;
+	Coord x = 0;
 	for (auto& item : items)
 	{
 		auto& control = *item.pControl;
 		auto rect = control.GetRect();
-		int width = 0;
+		Coord width = 0;
 		if (item.prop == 0)
-			width = ceil_int(control.GetWidth() + item.leftBorder() + item.rightBorder());
+			width = control.GetWidth() + item.leftBorder() + item.rightBorder();
 		else if (item.prop > 0)
 			width = ceil_int(item.prop * remainingWidth / (float)totalProportion);
 		else
 			width = ceil_int(remainingWidth / (float)numStretch);
 
 		if (control.GetMinSize().x > 0)
-			width = ceil_int(std::max(toF(width), control.GetMinSize().x));
+			width = std::max(width, control.GetMinSize().x);
 		if (control.GetMaxSize().x > 0)
-			width = ceil_int(std::min(toF(width), control.GetMaxSize().x));
+			width = std::min(width, control.GetMaxSize().x);
 
-		Rectf borderRect {
+		Rect borderRect {
 			parentRect.x + x,
 			parentRect.y,
-			(float)width,
+			width,
 			parentRect.h,
 		};
 

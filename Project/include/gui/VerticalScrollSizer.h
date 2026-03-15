@@ -7,11 +7,11 @@ namespace fig::gui
 	class VerticalScrollSizer : public VerticalListSizer
 	{
 	public:
-		void SetOffset(float offset);
+		void SetOffset(Coord offset);
 
 	protected:
-		void OnLayout(Rectf rect) override;
+		void OnLayout(Rect rect) override;
 
-		float _offset = 0.0f;
+		Coord _offset = 0;
 	};
 }

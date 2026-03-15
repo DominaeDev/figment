@@ -4,9 +4,9 @@
 
 using namespace fig::gui;
 
-void VerticalScrollSizer::SetOffset(float offset)
+void VerticalScrollSizer::SetOffset(Coord offset)
 {
-	float diff = offset - _offset;
+	Coord diff = offset - _offset;
 	auto items = GetLayoutItems();
 
 	for (auto it = items.begin(); it != items.end(); ++it)
@@ -18,7 +18,7 @@ void VerticalScrollSizer::SetOffset(float offset)
 	_offset = offset;
 }
 
-void VerticalScrollSizer::OnLayout(Rectf rect)
+void VerticalScrollSizer::OnLayout(Rect rect)
 {
 	VerticalListSizer::OnLayout(rect);
 	if (_offset == 0.0f)

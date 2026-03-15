@@ -23,7 +23,7 @@ void TexturedBorder::OnRender(Renderer* pRenderer)
 	if (_pBorderTexture)
 	{
 		auto fgColor = GetForegroundColor();
-		Rectf rect = GetRect();
+		Rectf rect = GetDrawRect();
 		SDL_SetTextureColorMod(_pBorderTexture, fgColor.r, fgColor.g, fgColor.b);
 		SDL_SetTextureAlphaMod(_pBorderTexture, fgColor.a);
 		SDL_RenderTexture9Grid(pRenderer, _pBorderTexture, nullptr, _cornerPixels[0], _cornerPixels[1], _cornerPixels[2], _cornerPixels[3], _cornerSize / 20.0f, &rect);

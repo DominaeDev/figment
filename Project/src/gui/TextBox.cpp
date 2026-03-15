@@ -120,11 +120,12 @@ void TextBox::OnRender(RendererPtr pRenderer)
 	int maxRows = IsMultiline() ? std::max(_maxRows, 1) : 1;
 
 	auto& rect = GetRect();
-	Rectf clientRect = GetClientRect();
+	auto clientRect = GetClientRect();
+
 	// Clipping
 	Rect prevClippingRect;
 	bool restoreClipping = SDL_GetRenderClipRect(pRenderer, &prevClippingRect) && prevClippingRect.w > 0;
-	Rect clippingRect = to_rect(clientRect);
+	Rect clippingRect = clientRect;
 	clippingRect.h = std::min(clippingRect.h, lineSkip * maxRows);
 	SDL_SetRenderClipRect(pRenderer, &clippingRect);
 
@@ -140,16 +141,16 @@ void TextBox::OnRender(RendererPtr pRenderer)
 	}
 	else // Single line (Horizontal scrolling)
 	{
-		constexpr float kScrollStep = 80.0f;
+		constexpr int32_t kScrollStep = 80;
 
-		float maxCursorX = clientRect.w;
+		int maxCursorX = clientRect.w;
 		int textWidth, _;
 		TTF_GetTextSize(GetRenderedText(), &textWidth, &_);
 		int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
 		while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
 			_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
-		while (cursorX > 0 and cursorX - _scroll.x < 0.0f)
-			_scroll.x = std::max(_scroll.x - kScrollStep, 0.0f);
+		while (cursorX > 0 and cursorX - _scroll.x < 0)
+			_scroll.x = std::max(_scroll.x - kScrollStep, 0);
 		_scroll.y = 0;
 	}
 
@@ -200,16 +201,16 @@ void TextBox::OnRender(RendererPtr pRenderer)
 	SDL_SetRenderClipRect(pRenderer, restoreClipping ? &prevClippingRect : nullptr);
 }
 
-void TextBox::DrawText(RendererPtr pRenderer, TTF_Text* pText,  float x, float y)
+void TextBox::DrawText(RendererPtr pRenderer, TTF_Text* pText, int x, int y)
 {
 	auto fgColor = GetForegroundColor();
 	TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
 
 	auto& rect = GetRect();
-	float xx = rect.x + GetMarginLeft();
-	float yy = rect.y + GetMarginTop();
+	int xx = rect.x + GetMarginLeft();
+	int yy = rect.y + GetMarginTop();
 	ApplyScroll(xx, yy);
-	TTF_DrawRendererText(pText, xx, yy);
+	TTF_DrawRendererText(pText, toF(xx), toF(yy));
 }
 
 void TextBox::DrawCursor(RendererPtr pRenderer)
@@ -459,7 +460,6 @@ void TextBox::DrawCandidates(RendererPtr pRenderer)
 	Rectf candidates_rect;
 	int candidates_w;
 	int candidates_h;
-	float x, y;
 	
 	auto& rect = GetRect();
 
@@ -476,8 +476,8 @@ void TextBox::DrawCandidates(RendererPtr pRenderer)
 
 	SDL_GetRenderSafeArea(pRenderer, &safe_rect);
 	TTF_GetTextSize(candidates, &candidates_w, &candidates_h);
-	candidates_rect.x = rect.x + GetMarginLeft() + cursor.rect.x;
-	candidates_rect.y = rect.y + GetMarginTop() + cursor.rect.y + cursor.rect.h + 2.0f;
+	candidates_rect.x = toF(rect.x + GetMarginLeft() + cursor.rect.x);
+	candidates_rect.y = toF(rect.y + GetMarginTop() + cursor.rect.y + cursor.rect.h + 2);
 	candidates_rect.w = 1.0f + 2.0f + candidates_w + 2.0f + 1.0f;
 	candidates_rect.h = 1.0f + 2.0f + candidates_h + 2.0f + 1.0f;
 	if ((candidates_rect.x + candidates_rect.w) > safe_rect.w)
@@ -498,8 +498,8 @@ void TextBox::DrawCandidates(RendererPtr pRenderer)
 	SDL_RenderRect(pRenderer, &candidates_rect);
 
 	/* Draw the candidates */
-	x = candidates_rect.x + 3.0f;
-	y = candidates_rect.y + 3.0f;
+	int x = toI(candidates_rect.x + 3);
+	int y = toI(candidates_rect.y + 3);
 	DrawText(pRenderer, candidates, x, y);
 
 	/* Underline the selected candidate */
@@ -535,9 +535,9 @@ void TextBox::UpdateTextInputArea()
 	Pointf window_edit_rect_min;
 	Pointf window_edit_rect_max;
 	Pointf window_cursor;
-	if (!SDL_RenderCoordinatesToWindow(pRenderer, rect.x + GetMarginLeft(), rect.y + GetMarginTop(), &window_edit_rect_min.x, &window_edit_rect_min.y) or
-		!SDL_RenderCoordinatesToWindow(pRenderer, rect.x + GetMarginLeft() + rect.w, rect.y + GetMarginTop() + rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) or
-		!SDL_RenderCoordinatesToWindow(pRenderer, _cursor_rect.x, _cursor_rect.y, &window_cursor.x, &window_cursor.y))
+	if (!SDL_RenderCoordinatesToWindow(pRenderer, toF(rect.x + GetMarginLeft()), toF(rect.y + GetMarginTop()), &window_edit_rect_min.x, &window_edit_rect_min.y) or
+		!SDL_RenderCoordinatesToWindow(pRenderer, toF(rect.x + GetMarginLeft() + rect.w), toF(rect.y + GetMarginTop() + rect.h), &window_edit_rect_max.x, &window_edit_rect_max.y) or
+		!SDL_RenderCoordinatesToWindow(pRenderer, toF(_cursor_rect.x), toF(_cursor_rect.y), &window_cursor.x, &window_cursor.y))
 	{
 		return;
 	}
@@ -1073,11 +1073,11 @@ bool TextBox::DeleteHighlight()
 }
 
 #pragma region Selection
-bool TextBox::HandleMouseDown(float x, float y)
+bool TextBox::HandleMouseDown(int x, int y)
 {
-	Pointf pt = { x, y };
+	Point pt = { x, y };
 	auto& rect = GetRect();
-	if (!SDL_PointInRectFloat(&pt, &rect))
+	if (!SDL_PointInRect(&pt, &rect))
 	{
 		if (_bFocused)
 		{
@@ -1093,8 +1093,8 @@ bool TextBox::HandleMouseDown(float x, float y)
 	}
 
 	TTF_SubString substring;
-	int textX = (int)SDL_roundf(x - rect.x - GetMarginLeft() + _scroll.x);
-	int textY = (int)SDL_roundf(y - rect.y - GetMarginTop() + _scroll.y);
+	int textX = x - rect.x - GetMarginLeft() + _scroll.x;
+	int textY = y - rect.y - GetMarginTop() + _scroll.y;
 	if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
 	{
 		int32_t pos = GetCursorTextIndex(textX, &substring);
@@ -1122,7 +1122,7 @@ bool TextBox::HandleMouseDown(float x, float y)
 	return true;
 }
 
-bool TextBox::HandleMouseMotion(float x, float y)
+bool TextBox::HandleMouseMotion(int x, int y)
 {
 	bool bHandled = false;
 	auto& rect = GetRect();
@@ -1131,8 +1131,8 @@ bool TextBox::HandleMouseMotion(float x, float y)
 	{
 		/* Set the highlight position */
 		TTF_SubString substring;
-		int textX = (int)SDL_roundf(x - rect.x - GetMarginLeft() + _scroll.x);
-		int textY = (int)SDL_roundf(y - rect.y - GetMarginTop() + _scroll.y);
+		int textX = x - rect.x - GetMarginLeft() + _scroll.x;
+		int textY = y - rect.y - GetMarginTop() + _scroll.y;
 		if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
 		{
 			int32_t pos = GetCursorTextIndex(textX, &substring);
@@ -1152,8 +1152,8 @@ bool TextBox::HandleMouseMotion(float x, float y)
 
 
 	// Change cursor
-	Pointf pt = { x, y };
-	bool bInRect = SDL_PointInRectFloat(&pt, &rect);
+	Point pt = { x, y };
+	bool bInRect = SDL_PointInRect(&pt, &rect);
 	if (bInRect != _bIBeamCursor)
 	{
 		_bIBeamCursor = bInRect;
@@ -1164,7 +1164,7 @@ bool TextBox::HandleMouseMotion(float x, float y)
 	return bHandled;
 }
 
-bool TextBox::HandleMouseUp(float x, float y)
+bool TextBox::HandleMouseUp(int x, int y)
 {
 	if (!_bIsHighlighting)
 		return false;
@@ -1305,20 +1305,20 @@ bool TextBox::OnEvent(Event& event)
 
 	case SDL_EVENT_MOUSE_MOTION:
 	{
-		return HandleMouseMotion(event.motion.x, event.motion.y);
+		return HandleMouseMotion(toI(event.motion.x), toI(event.motion.y));
 	}
 	case SDL_EVENT_MOUSE_BUTTON_DOWN:
 	{
 		auto& rect = GetRect();
-		if (is_inside(rect, event.button.x, event.button.y))
-			return HandleMouseDown(event.button.x, event.button.y);
+		if (is_inside(rect, toI(event.button.x), toI(event.button.y)))
+			return HandleMouseDown(toI(event.button.x), toI(event.button.y));
 		break;
 	}
 	case SDL_EVENT_MOUSE_BUTTON_UP:
 	{
 		auto& rect = GetRect();
-		if (is_inside(rect, event.button.x, event.button.y))
-			return HandleMouseUp(event.button.x, event.button.y);
+		if (is_inside(rect, toI(event.button.x), toI(event.button.y)))
+			return HandleMouseUp(toI(event.button.x), toI(event.button.y));
 		break;
 	}
 
@@ -1571,7 +1571,7 @@ void TextBox::OnSize()
 {
 	if (IsMultiline())
 	{
-		int width = toI(std::max(GetWidth() - GetMarginHorizontal(), 0.0f));
+		int width = std::max(GetWidth() - GetMarginHorizontal(), 0);
 		int currWrapWidth;
 		if (TTF_GetTextWrapWidth(GetRenderedText(), &currWrapWidth) && currWrapWidth != width)
 			TTF_SetTextWrapWidth(GetRenderedText(), width);
@@ -1629,6 +1629,12 @@ void TextBox::ApplyScroll(float& x, float& y) const
 	y -= _scroll.y;
 }
 
+void TextBox::ApplyScroll(Rect& rect) const
+{
+	rect.x -= _scroll.x;
+	rect.y -= _scroll.y;
+}
+
 void TextBox::ApplyScroll(Rectf& rect) const
 {
 	rect.x -= _scroll.x;
@@ -1652,7 +1658,7 @@ void TextBox::Autosize()
 	if (!IsAutosized())
 		return;
 
-	Rect clientRect = to_rect(GetClientRect());
+	auto clientRect = GetClientRect();
 	int lineSkip = TTF_GetFontLineSkip(_pFont);
 	size_t textLen = _pText->text ? SDL_strlen(_pText->text) : 0;
 	int numRows;

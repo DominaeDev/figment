@@ -11,7 +11,7 @@ namespace fig::gui
 	SearchBox::SearchBox(LayoutElement* pParent, FontFace fontFace, double ptSize) : TextBox(pParent, fontFace, ptSize)
 	{
 		if (_pFont)
-			SetSize(300, toF(MeasureFontHeight(*_pFont)) + GetMarginVertical());
+			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
 		
 		SetMarginLeft(30);
 

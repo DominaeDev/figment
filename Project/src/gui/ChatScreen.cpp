@@ -59,13 +59,13 @@ namespace fig::gui
 
 		auto pExpandButton = new ButtonWithIcon(leftPanel, TextureType::ICON_SIDEBAR);
 		pExpandButton->SetSize(36, 36);
-		pExpandButton->SetPosition(4.0f, 6.0f);
+		pExpandButton->SetPosition(4, 6);
 		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
 		_pExpandButton = pExpandButton;
 
 		auto centerPanel = new Area(this);
 		centerPanel->SetBackgroundColor(Colors::ChatBackground);
-		centerPanel->SetSize(toF(Constants::GUI::ChatScrollWidth), -1);
+		centerPanel->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
 		auto rightPanel = new Area(this);
 		rightPanel->SetSize(200, -1);

@@ -80,7 +80,7 @@ bool Window::HandleEvent(fig::gui::Event& event)
 	{
 		if (GetWindowID() == event.window.windowID)
 		{
-			_pFrame->SetSize((float)event.window.data1, (float)event.window.data2);
+			_pFrame->SetSize((Coord)event.window.data1, (Coord)event.window.data2);
 			return true;
 		}
 	}

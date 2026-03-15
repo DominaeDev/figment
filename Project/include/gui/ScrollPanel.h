@@ -15,14 +15,14 @@ namespace fig::gui
 		bool OnEvent(Event& event) override;
 		void OnAfterLayout() override;
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
-		void SetTopMargin(float margin) { _fTopMargin = margin; };
-		void SetBottomMargin(float margin) { _fBottomMargin = margin; };
+		void SetTopMargin(Coord margin) { _topMargin = margin; };
+		void SetBottomMargin(Coord margin) { _bottomMargin = margin; };
 
 	protected:
-		float _fTopMargin {};
-		float _fBottomMargin {};
+		Coord _topMargin {};
+		Coord _bottomMargin {};
 		float _fScrollY {};
-		float _fMaxExtent {};
+		Coord _maxExtent {};
 	};
 }
 
