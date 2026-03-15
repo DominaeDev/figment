@@ -99,7 +99,7 @@ namespace fig::gui
 			{
 				float ratio = _fScrollY / last_extent;
 				_fScrollY = ratio * toF(_maxExtent);
-//				LayoutNow();
+				LayoutNow();
 			}
 		}
 	}
