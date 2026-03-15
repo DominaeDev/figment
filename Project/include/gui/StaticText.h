@@ -75,7 +75,7 @@ namespace fig::gui
 		bool _bInvalidated = false;
 		bool _bAutoSize = true;
 		bool _bDropShadow = false;
-		bool _bWordWrap = true;
+		bool _bWordWrap = false;
 		bool _bEllipsis = false;
 
 		TTF_Font* _pFont = nullptr;

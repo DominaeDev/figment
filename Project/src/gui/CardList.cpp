@@ -66,12 +66,18 @@ namespace fig::gui
 			for (auto& asset : characters)
 			{
 				auto pCard = new CharacterCard(this, asset.id, _cardSize);
-				auto request = assets.LoadAssetAsync(asset.id, AsyncTask::LoadCover, priority--);
-				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
 			}
 		}
+
+		for (auto& pCard : _cards)
+		{
+			auto request = assets.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCover, priority--);
+			pCard->SetPendingCoverImage(std::move(request.future));
+		}
+
+		assets.CancelAll();
 
 		InvalidateLayout();
 	}

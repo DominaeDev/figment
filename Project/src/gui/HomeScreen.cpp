@@ -3,6 +3,7 @@
 #include "gui/CardList.h"
 #include "gui/MainFrame.h"
 #include "gui/SearchBox.h"
+#include "gui/AppResources.h"
 
 namespace fig::gui
 {
@@ -18,8 +19,8 @@ namespace fig::gui
 
 		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
-		_pFilterTextBox->SetSize(250, 30);
-		_pFilterTextBox->SetMaxSize(250, -1);
+		_pFilterTextBox->SetSize(220, 30);
+		_pFilterTextBox->SetMaxSize(220, -1);
 		_pFilterTextBox->SetBackgroundColor(Colors::White);
 		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
 			this->OnFilter(s); 
@@ -40,6 +41,7 @@ namespace fig::gui
 		_pExpandButton = pExpandButton;
 
 		_pCardList = new CardList(this);
+//		_pCardList->SetCardSize(CardSize::Half);
 
 		auto mainSizer = new VerticalSizer();
 		mainSizer->Add(pTopBar, 0, Sizer::Expand);

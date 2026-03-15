@@ -39,6 +39,8 @@ namespace fig::gui
 		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
 		bool IsFilteredBy(const fig::string& search_string) const noexcept;
 
+		const fig::uuid& GetAssetID() const { return _assetId; }
+
 	protected:
 		void SetCoverImages(fig::sdl::Surface&& surface, fig::sdl::Surface&& half);
 
@@ -46,8 +48,7 @@ namespace fig::gui
 		void CreateChatCounter(uint32_t count);
 
 		enum class AddTagResult { Ok, Reject, Stop };
-		AddTagResult AddTag(const fig::string& tag);
-		AddTagResult AddTag(const fig::string& tag, const Color& color);
+		AddTagResult AddTag(const fig::string& tag, const Color& color = {});
 
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
@@ -63,19 +64,21 @@ namespace fig::gui
 
 	private:
 		fig::uuid _assetId;
-		TexturedBorder* _pSimpleBorder {};
-		Image* _pStyledBorder {};
 		CardSize _cardSize {};
 		Control* _pCounterBG;
 
-		Area* _pLargeFooter {};
-		NineGridImage* _pLargeFooterFade {};
-		StaticText* _pLabel {};
+		Control* _pLargeRoot;
+		Control* _pLargeFooter;
+		Control* _pLargeFooterFade;
+		Image* _pLargeBorder;
+		StaticText* _pLargeLabel {};
+
+		Control* _pSmallRoot;
+		Image* _pSmallBorder;
+		StaticText* _pSmallLabel {};
+
 		Pointf _tagPosition {};
 		int32_t _tagRows { 1 };
-
-		Area* _pSmallFooter {};
-		StaticText* _pSmallLabel {};
 
 		fig::sdl::Surface _imageSurface {};
 		fig::sdl::Texture _imageTexture {};

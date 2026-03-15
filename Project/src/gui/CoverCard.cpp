@@ -12,67 +12,91 @@ using namespace fig::util;
 
 namespace fig::gui
 {
-	constexpr float Margin = 12.0f;
+	constexpr float kMargin = 12.0f;
 
 	constexpr float kTagMargin = 10;
 	constexpr float kTagSpacing = 6;
 	constexpr float kTagInnerMargin = 8;
 	constexpr float kTagMinWidth = 36;
 	constexpr float kTagRowHeight = 32;
+	constexpr float kTagY = 70;
+	constexpr float kTagMaxRows = 3;
+	constexpr float kFooterHeight = 106;
+	constexpr auto kLargeWidth = Constants::GUI::HomeScreen::CardWidth;
+	constexpr auto kLargeHeight = Constants::GUI::HomeScreen::CardHeight;
+	constexpr auto kSmallWidth = Constants::GUI::HomeScreen::CardWidth / 2;
+	constexpr auto kSmallHeight = Constants::GUI::HomeScreen::CardHeight / 2;
+	constexpr auto kSmallMargin = kMargin / 2;
 
 	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : Image(pParent, nullptr),
 		_assetId { assetId },
 		_cardSize { cardSize }
 	{
-		int divide = cardSize == CardSize::Default ? 1 : 2;
-		SetSize(toF(Constants::GUI::HomeScreen::CardWidth / divide), toF(Constants::GUI::HomeScreen::CardHeight / divide));
+		_pLargeRoot = new Area(this);
+		_pLargeRoot->SetSize(kLargeWidth, kLargeHeight);
+		_pSmallRoot = new Area(this);
+		_pSmallRoot->SetSize(kLargeWidth / 2, kLargeHeight / 2);
 
-		_pLargeFooter = new Area(this);
-		_pLargeFooter->SetSize(GetSize());
-
-		_pSimpleBorder = new TexturedBorder(this, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
-		_pSimpleBorder->SetSize(GetSize());
-		_pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
-
-		_pStyledBorder = new Image(this, nullptr);
-		_pStyledBorder->SetPosition(-16, -16);
-		_pStyledBorder->SetSize(GetWidth() + 32, GetHeight() + 32);
-		_pStyledBorder->SetVisible(false);
+		// Footer (large)
+		_pLargeFooter = new Area(_pLargeRoot);
+		_pLargeFooter->SetY(kLargeHeight - kFooterHeight);
+		_pLargeFooter->SetSize(kLargeWidth, kFooterHeight);
 
 		_pLargeFooterFade = new NineGridImage(_pLargeFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
-		_pLargeFooterFade->SetWidth(GetWidth());
-		_pLargeFooterFade->SetY(GetHeight() - _pLargeFooterFade->GetHeight());
 		_pLargeFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x40 });
+		_pLargeFooterFade->Fill();
 
-		_pSmallFooter = new Area(this);
-		_pSmallFooter->SetSize(toF(GetWidth() / 2),toF(GetHeight() / 2));
+		// Label (large)
+		_pLargeLabel = new StaticText(_pLargeFooter, "", FontFace::CardHeader, 28.0, false);
+		_pLargeLabel->SetPosition(kMargin, kFooterHeight - kMargin - 64);
+		_pLargeLabel->SetMaxSize(kLargeWidth - (kMargin * 2), -1);
+		_pLargeLabel->SetSize(kLargeWidth - (kMargin * 2), 80);
+		_pLargeLabel->SetForegroundColor(Colors::White);
+		_pLargeLabel->SetBackgroundColor(Colors::Transparent);
+		_pLargeLabel->EnableDropShadow(true);
+		_pLargeLabel->EnableEllipsis(true);
+
+		// Border (large)
+		auto pSimpleBorder = new TexturedBorder(_pLargeRoot, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		pSimpleBorder->Fill();
+		pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+
+		// Styled border (large)
+		_pLargeBorder = new Image(_pLargeRoot, nullptr);
+		_pLargeBorder->SetPosition(-16, -16);
+		_pLargeBorder->SetSize(kLargeWidth + 32, kLargeHeight + 32);
+		_pLargeBorder->SetVisible(false);
+
+		// Footer (small)
+		auto pSmallFooter = new Area(_pSmallRoot);
+		pSmallFooter->SetSize(kSmallWidth, kSmallHeight);
+		auto pSmallFooterFade = new NineGridImage(pSmallFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE_SMALL), { 16, 16, 40, 16 });
+		pSmallFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+		pSmallFooterFade->SetWidth(kSmallWidth);
+		pSmallFooterFade->SetY(kSmallHeight - pSmallFooterFade->GetHeight());
+
+		_pSmallLabel = new StaticText(pSmallFooter, "", FontFace::CardHeader, 16.5, false);
+		_pSmallLabel->SetPosition(toF(kSmallMargin), toF(kSmallHeight - kSmallMargin - 22));
+		_pSmallLabel->SetMaxSize(toF(kSmallWidth - (kSmallMargin * 2)), -1);
+		_pSmallLabel->SetSize(toF(kSmallWidth - (kSmallMargin * 2)), 40);
+		_pSmallLabel->SetForegroundColor(Colors::White);
+		_pSmallLabel->SetBackgroundColor(Colors::Transparent);
+		_pSmallLabel->EnableDropShadow(true);
+		_pSmallLabel->EnableEllipsis(true);
+
+		// Border (small)
+		auto pSmallSimpleBorder = new TexturedBorder(_pSmallRoot, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		pSmallSimpleBorder->Fill();
+		pSmallSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+
+		// Styled border (small)
+		_pSmallBorder = new Image(_pSmallRoot, nullptr);
+		_pSmallBorder->SetPosition(-6, -6);
+		_pSmallBorder->SetSize(kSmallWidth + 12, kSmallHeight + 12);
+		_pSmallBorder->SetVisible(false);
 
 		_tagPosition.x = kTagMargin;
-		_tagPosition.y = GetHeight() - 35;
-
-		// Randomized border
-		static std::mt19937_64 rng { std::default_random_engine{}() };
-
-		constexpr std::array<CardBorderStyle, 16> borderWeights {
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::None,
-			 CardBorderStyle::Style01,
-			 CardBorderStyle::Style02,
-			 CardBorderStyle::Style03,
-			 CardBorderStyle::Style04,
-			 CardBorderStyle::Style05,
-			 CardBorderStyle::Style06,
-		};
-		static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
-		SetBorder(borderWeights[dist(rng)]);
+		_tagPosition.y = kTagY;
 
 		Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 
@@ -81,6 +105,34 @@ namespace fig::gui
 //		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
 
 		SetCardSize(cardSize);
+
+		if constexpr (Enabled)
+		{
+			// Randomized border
+			static std::mt19937_64 rng { std::default_random_engine{}() };
+
+			constexpr std::array<CardBorderStyle, 16> borderWeights {
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::Style01,
+				 CardBorderStyle::Style02,
+				 CardBorderStyle::Style03,
+				 CardBorderStyle::Style04,
+				 CardBorderStyle::Style05,
+				 CardBorderStyle::Style06,
+			};
+
+			static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
+			SetBorder(borderWeights[dist(rng)]);
+		}
 	}
 
 	void CoverCard::OnUpdate(float fElapsed)
@@ -106,35 +158,37 @@ namespace fig::gui
 
 	void CoverCard::SetLabel(const fig::string& text) noexcept
 	{
-		// Name label (large)
-		if (_pLabel)
+		// Large label
+		if (_pLargeLabel)
 		{
-			_pLabel->SetText(text);
-		}
-		else
-		{
-			_pLabel = new StaticText(_pLargeFooter, text, FontFace::CardHeader, 28.0, false);
-			_pLabel->SetPosition(Margin, GetHeight() - Margin - 64); // 58
-			_pLabel->SetMaxSize(GetWidth() - (Margin * 2), -1);
-			_pLabel->SetSize(GetWidth() - (Margin * 2), 80);
-			_pLabel->SetForegroundColor(Colors::White);
-			_pLabel->SetBackgroundColor(Colors::Transparent);
-			_pLabel->EnableDropShadow(true);
-			_pLabel->EnableWordWrap(false);
-			_pLabel->EnableEllipsis(true);
+			_pLargeLabel->SetText(text);
+
+			// Adjust font size
+			if (_pLargeLabel->MeasureText(false).x > _pLargeLabel->GetMaxSize().x)
+			{
+				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 24.0));
+				_pLargeLabel->SetY(kFooterHeight - kMargin - 60);
+			}
+			else
+			{
+				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 28.0));
+				_pLargeLabel->SetY(kFooterHeight - kMargin - 64);
+			}
 		}
 
-		if (_pLabel->MeasureText(false).x > _pLabel->GetMaxSize().x)
-		{
-			_pLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 24.0));
-			_pLabel->SetY(_pLabel->GetY() + 4);
-		}
+		// Small label
+		if (_pSmallLabel)
+			_pSmallLabel->SetText(text);
 	}
 
 	void CoverCard::CreateChatCounter(uint32_t count)
 	{
 		_pCounterBG = new NineGridImage(this, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
-		_pCounterBG->SetPosition(kTagMargin, kTagMargin);
+		if (_cardSize == CardSize::Half)
+			_pCounterBG->SetPosition(6, 6);
+		else
+			_pCounterBG->SetPosition(kTagMargin, kTagMargin);
+
 		_pCounterBG->SetForegroundColor(Color { 0, 0, 0, 0xA0 });
 
 		auto pCounterIcon = new Image(_pCounterBG, AppResources::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
@@ -146,7 +200,6 @@ namespace fig::gui
 		pLabel->SetPosition(27, 3);
 		pLabel->SetForegroundColor(Colors::White);
 		pLabel->SetBackgroundColor(Colors::Transparent);
-		pLabel->EnableWordWrap(_pLargeFooter);
 
 		auto [w, h] = pLabel->MeasureText();
 		_pCounterBG->SetSize(toF(std::max(w + 35, 32)), 26);
@@ -154,6 +207,9 @@ namespace fig::gui
 
 	static const Color& GetTagColor(const fig::string& tag)
 	{
+		static constexpr Color Black { 0x00, 0x00, 0x00, 0xA0 };
+		return Black;
+
 		static constexpr std::array<Color, 12> s_Colors {
 			Color { 0xB3, 0x42, 0xC4, 0xB0 },
 			Color { 0xC3, 0x30, 0x30, 0xB0 },
@@ -176,11 +232,6 @@ namespace fig::gui
 		return s_Colors.at(n);
 	}
 
-	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag)
-	{
-		return AddTag(tag, {});
-	}
-
 	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, const Color& color)
 	{
 		if (tag.size() > 20)
@@ -192,16 +243,17 @@ namespace fig::gui
 
 		auto position = _tagPosition;
 
-		if (position.x + kTagInnerMargin * 2 + kTagMargin + kTagMinWidth >= GetWidth())
+		if (kLargeWidth < position.x + kTagInnerMargin * 2 + kTagMargin + kTagMinWidth)
 		{
-			if (++_tagRows > 2)
+			if (++_tagRows > kTagMaxRows)
 				return AddTagResult::Stop;
 
 			_tagPosition.x = kTagMargin;
 			_tagPosition.y += kTagRowHeight;
 
-			_pLargeFooter->SetY(_pLargeFooter->GetY() - kTagRowHeight);
-			_pLargeFooterFade->SetHeight(_pLargeFooterFade->GetHeight() + kTagRowHeight);
+			_pLargeFooter->SetHeight(kFooterHeight + kTagRowHeight * (_tagRows - 1));
+			_pLargeFooter->SetY(kLargeHeight - _pLargeFooter->GetHeight());
+			_pLargeFooterFade->Fill();
 			position = _tagPosition;
 		}
 
@@ -213,12 +265,11 @@ namespace fig::gui
 			pTagBG->SetForegroundColor(GetTagColor(tag));
 
 		auto pLabel = new StaticText(_pLargeFooter, tag, FontFace::Default, 14.0, true);
-		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);
 		pLabel->SetForegroundColor(Colors::White);
-		pLabel->SetBackgroundColor(Colors::Transparent);
+		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);
 		pLabel->EnableWordWrap(false);
 		pLabel->EnableEllipsis(true);
-		pLabel->SetMaxSize(GetWidth() - (position.x + kTagInnerMargin * 2 + kTagMargin), 0);
+		pLabel->SetMaxSize(kLargeWidth - (position.x + kTagInnerMargin * 2 + kTagMargin), 0);
 
 		auto [w, h] = pLabel->MeasureText();
 		pTagBG->SetSize(toF(w + kTagInnerMargin * 2), 26);
@@ -232,9 +283,11 @@ namespace fig::gui
 	{
 		if (style == None)
 		{
-			_pStyledBorder->SetTexture(nullptr);
-			_pStyledBorder->SetVisible(false);
-			_pSimpleBorder->SetVisible(true);
+			_pLargeBorder->SetTexture(nullptr);
+			_pLargeBorder->SetVisible(false);
+			_pSmallBorder->SetTexture(nullptr);
+			_pSmallBorder->SetVisible(false);
+			return;
 		}
 
 		TextureType textureType;
@@ -252,16 +305,17 @@ namespace fig::gui
 
 		if (auto pTexture = AppResources::GetTexture(textureType))
 		{
-			_pStyledBorder->SetTexture(pTexture);
-			_pStyledBorder->SetSize(toF(pTexture->w), toF(pTexture->h));
-			_pStyledBorder->SetVisible((bool)pTexture);
-			_pSimpleBorder->SetVisible(false);
+			_pLargeBorder->SetTexture(pTexture);
+			_pLargeBorder->SetVisible((bool)pTexture);
+			_pSmallBorder->SetTexture(pTexture);
+			_pSmallBorder->SetVisible((bool)pTexture);
 		}
 		else
 		{
-			_pStyledBorder->SetTexture(nullptr);
-			_pStyledBorder->SetVisible(false);
-			_pSimpleBorder->SetVisible(true);
+			_pLargeBorder->SetTexture(nullptr);
+			_pLargeBorder->SetVisible(false);
+			_pSmallBorder->SetTexture(nullptr);
+			_pSmallBorder->SetVisible(false);
 		}
 	}
 
@@ -405,53 +459,24 @@ namespace fig::gui
 	{
 		_cardSize = cardSize;
 
-		// Create small label
-		if (cardSize == CardSize::Half and not (bool)_pSmallLabel and (bool)_pLabel)
-		{
-			int32_t kWidth = toI(GetWidth()) / 2;
-			int32_t kHeight = toI(GetHeight()) / 2;
-			constexpr int32_t kMargin = toI(Margin / 2);
-
-			_pSmallLabel = new StaticText(_pSmallFooter, _pLabel->GetText(), FontFace::CardHeader, 16.5, false);
-			_pSmallLabel->SetPosition(toF(kMargin), toF(kHeight - kMargin - 22));
-			_pSmallLabel->SetMaxSize(toF(kWidth - (kMargin * 2)), -1);
-			_pSmallLabel->SetSize(toF(kWidth - (kMargin * 2)), 40);
-			_pSmallLabel->SetForegroundColor(Colors::White);
-			_pSmallLabel->SetBackgroundColor(Colors::Transparent);
-			_pSmallLabel->EnableDropShadow(true);
-			_pSmallLabel->EnableWordWrap(false);
-			_pSmallLabel->EnableEllipsis(true);
-
-		}
-
-		int divide;
 		switch (cardSize)
 		{
 		default:
-			if (_pLargeFooter)
-				_pLargeFooter->SetVisible(true);
-			if (_pSmallFooter)
-				_pSmallFooter->SetVisible(false);
+			_pLargeRoot->SetVisible(true);
+			_pSmallRoot->SetVisible(false);
 			if (_pCounterBG)
 				_pCounterBG->SetPosition(kTagMargin, kTagMargin);
-			divide = 1;
+			SetSize(kLargeWidth, kLargeHeight);
 			break;
+
 		case CardSize::Half:
-			if (_pLargeFooter)
-				_pLargeFooter->SetVisible(false);
-			if (_pSmallFooter)
-				_pSmallFooter->SetVisible(true);
+			_pLargeRoot->SetVisible(false);
+			_pSmallRoot->SetVisible(true);
 			if (_pCounterBG)
 				_pCounterBG->SetPosition(6, 6);
-			divide = 2;
+			SetSize(kSmallWidth, kSmallHeight);
 			break;
 		}
-
-		SetSize(toF(Constants::GUI::HomeScreen::CardWidth / divide), toF(Constants::GUI::HomeScreen::CardHeight / divide));
-		_pSimpleBorder->SetSize(GetSize());
-		float borderMargin = cardSize == CardSize::Default ? 16.0f : 6.0f;
-		_pStyledBorder->SetPosition(-borderMargin, -borderMargin);
-		_pStyledBorder->SetSize(GetWidth() + borderMargin * 2, GetHeight() + borderMargin * 2);
 
 		RefreshImage();
 	}
@@ -464,7 +489,6 @@ namespace fig::gui
 			_pErrorIcon->SetSize(toF(_pErrorIcon->GetTextureSize().x / divide), toF(_pErrorIcon->GetTextureSize().x / divide));
 			_pErrorIcon->Center();
 		}
-
 		Image::OnSize();
 	}
 

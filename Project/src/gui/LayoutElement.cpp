@@ -118,6 +118,15 @@ void LayoutElement::SetSize(Pointf size)
 	OnSize();
 }
 
+void LayoutElement::Fill()
+{
+	if (_pParent)
+	{
+		SetPosition(0, 0);
+		SetSize(_pParent->GetSize());
+	}
+}
+
 void LayoutElement::SetSize(float width, float height)
 {
 	SetSize(Pointf(width, height));

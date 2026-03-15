@@ -16,6 +16,8 @@ namespace fig::gui
 		_bAutoSize(bAutoSize)
 	{
 		_pFont = Fonts::GetFont(fontFace, ptSize);
+		SetForegroundColor(Colors::Black);
+		SetBackgroundColor(Colors::Transparent);
 
 		// Set text and measure
 		_text = text;

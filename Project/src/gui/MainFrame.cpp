@@ -172,6 +172,11 @@ namespace fig::gui
 					ChangeScreen<ChatScreen>();
 					return true;
 				}
+				else if (keyEvent.key == SDLK_TAB and ((keyEvent.mod & (SDL_KMOD_CTRL | SDL_KMOD_SHIFT | SDL_KMOD_ALT)) == 0))
+				{
+					ShowSidePanel(!_pSidePanel->GetVisible());
+					return true;
+				}
 #if _DEBUG
 				else if (keyEvent.key == SDLK_3 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
 				{

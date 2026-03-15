@@ -43,6 +43,7 @@ namespace fig::gui
 		void Center();
 		void CenterHorizontally();
 		void CenterVertically();
+		void Fill();
 
 		void SetMinSize(Pointf size) { _minSize = size; }
 		void SetMinSize(float width, float height) { _minSize = Pointf { width, height }; }
