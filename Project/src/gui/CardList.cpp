@@ -77,8 +77,6 @@ namespace fig::gui
 			pCard->SetPendingCoverImage(std::move(request.future));
 		}
 
-		assets.CancelAll();
-
 		InvalidateLayout();
 	}
 
@@ -101,7 +99,7 @@ namespace fig::gui
 			{
 				float ratio = _fScrollY  / last_extent;
 				_fScrollY = ratio * _fMaxExtent;
-				LayoutNow();
+//				LayoutNow();
 			}
 		}
 	}

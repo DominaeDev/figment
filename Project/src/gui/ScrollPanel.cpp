@@ -21,7 +21,7 @@ namespace fig::gui
 	bool ScrollPanel::HandleMouseWheel(SDL_MouseWheelEvent event)
 	{
 		Pointf pt = { event.mouse_x, event.mouse_y };
-		if (!SDL_PointInRectFloat(&pt, &_rect))
+		if (!SDL_PointInRectFloat(&pt, &GetRect()))
 			return false;
 
 		_fScrollY -= toF(event.integer_y * Constants::GUI::MouseScrollSpeed * 1.5f);

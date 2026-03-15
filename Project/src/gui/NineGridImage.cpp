@@ -34,7 +34,7 @@ namespace fig::gui
 
 	void NineGridImage::OnRender(Renderer* pRenderer)
 	{
-		auto rect = GetRect();
+		auto& rect = GetRect();
 
 		if (_pTexture)
 		{

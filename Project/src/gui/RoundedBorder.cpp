@@ -14,7 +14,7 @@ namespace fig::gui
 
 	void RoundedBorder::OnRender(Renderer* pRenderer)
 	{
-		auto rect = GetRect();
+		auto& rect = GetRect();
 		if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 			RefreshGeometry(rect);
 

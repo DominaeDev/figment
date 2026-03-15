@@ -31,8 +31,8 @@ namespace fig::io::data
 		fig::string subheader;
 		fig::string brief;
 		fig::string description;
-		gui::Color bgColor {};
-		gui::Color borderColor {};
+		fig::gui::Color bgColor {};
+		fig::gui::Color borderColor {};
 		CharacterGender gender {};
 
 		fig::string largePortraitFilename;	//! @temp

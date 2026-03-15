@@ -20,7 +20,7 @@ namespace fig::gui
 	constexpr float kTagMinWidth = 36;
 	constexpr float kTagRowHeight = 32;
 	constexpr float kTagY = 70;
-	constexpr float kTagMaxRows = 3;
+	constexpr float kTagMaxRows = 2;
 	constexpr float kFooterHeight = 106;
 	constexpr auto kLargeWidth = Constants::GUI::HomeScreen::CardWidth;
 	constexpr auto kLargeHeight = Constants::GUI::HomeScreen::CardHeight;
@@ -44,7 +44,7 @@ namespace fig::gui
 
 		_pLargeFooterFade = new NineGridImage(_pLargeFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
 		_pLargeFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x40 });
-		_pLargeFooterFade->Fill();
+		_pLargeFooterFade->FillParent();
 
 		// Label (large)
 		_pLargeLabel = new StaticText(_pLargeFooter, "", FontFace::CardHeader, 28.0, false);
@@ -58,7 +58,7 @@ namespace fig::gui
 
 		// Border (large)
 		auto pSimpleBorder = new TexturedBorder(_pLargeRoot, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
-		pSimpleBorder->Fill();
+		pSimpleBorder->FillParent();
 		pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 
 		// Styled border (large)
@@ -86,7 +86,7 @@ namespace fig::gui
 
 		// Border (small)
 		auto pSmallSimpleBorder = new TexturedBorder(_pSmallRoot, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
-		pSmallSimpleBorder->Fill();
+		pSmallSimpleBorder->FillParent();
 		pSmallSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 
 		// Styled border (small)
@@ -253,7 +253,7 @@ namespace fig::gui
 
 			_pLargeFooter->SetHeight(kFooterHeight + kTagRowHeight * (_tagRows - 1));
 			_pLargeFooter->SetY(kLargeHeight - _pLargeFooter->GetHeight());
-			_pLargeFooterFade->Fill();
+			_pLargeFooterFade->FillParent();
 			position = _tagPosition;
 		}
 

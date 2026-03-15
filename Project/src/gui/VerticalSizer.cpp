@@ -38,7 +38,7 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 	for (auto& item : items)
 	{
 		auto& control = *item.pControl;
-		auto& rect = control.GetRect();
+		auto rect = control.GetRect();
 		int height = 0;
 		if (item.prop == 0)
 			height = ceil_int(control.GetHeight() + item.topBorder() + item.bottomBorder());
@@ -104,7 +104,6 @@ void VerticalSizer::OnLayout(Rectf parentRect)
 
 		y += height;
 
-		control.SetPosition(rect.x - parentRect.x, rect.y - parentRect.y);
-		control.SetSize(rect.w, rect.h);
+		control.SetRect(rect);
 	}	
 }

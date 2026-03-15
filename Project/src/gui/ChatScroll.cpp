@@ -290,8 +290,9 @@ bool ChatScroll::OnEvent(Event& event)
 
 bool ChatScroll::HandleMouseWheel(SDL_MouseWheelEvent event)
 {
+	auto& rect = GetRect();
 	Pointf pt = { event.mouse_x, event.mouse_y };
-	if (!SDL_PointInRectFloat(&pt, &_rect))
+	if (!SDL_PointInRectFloat(&pt, &rect))
 		return false;
 
 	_fScrollY = std::max(_fScrollY + toF(event.integer_y) * Constants::GUI::MouseScrollSpeed, 0.0f);

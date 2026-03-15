@@ -48,6 +48,9 @@ static int BytesUTF8Length(const char* text, int num_bytes)
 TextBox::TextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : Control(pParent),
 	_flags { flags }
 {
+	SetForegroundColor(Colors::Black);
+	SetBackgroundColor(Colors::White);
+
 	_pFont = Fonts::GetFont(fontFace, ptSize);
 	_pText = TTF_CreateText(GetSDLTextEngine(), _pFont, "", 0);
 	TTF_SetTextWrapWhitespaceVisible(_pText, true);
@@ -95,10 +98,10 @@ void TextBox::OnUpdate(float fElapsed)
 		TTF_SubString cursor;
 		if (TTF_GetTextSubString(GetRenderedText(), cursor_pos, &cursor))
 		{
-			Rectf cursor_rect;
-			SDL_RectToFRect(&cursor.rect, &cursor_rect);
-			cursor_rect.x += _rect.x + GetMarginLeft();
-			cursor_rect.y += _rect.y + GetMarginTop();
+			auto& rect = GetRect();
+			Rectf cursor_rect = to_rectf(cursor.rect);
+			cursor_rect.x += rect.x + GetMarginLeft();
+			cursor_rect.y += rect.y + GetMarginTop();
 			cursor_rect.w = 1.0f;
 			cursor_rect.h = std::max(cursor_rect.h, (float)TTF_GetFontLineSkip(_pFont));
 			SDL_copyp(&_cursor_rect, &cursor_rect);
@@ -116,6 +119,7 @@ void TextBox::OnRender(RendererPtr pRenderer)
 	int lineSkip = TTF_GetFontLineSkip(_pFont);
 	int maxRows = IsMultiline() ? std::max(_maxRows, 1) : 1;
 
+	auto& rect = GetRect();
 	Rectf clientRect = GetClientRect();
 	// Clipping
 	Rect prevClippingRect;
@@ -167,19 +171,19 @@ void TextBox::OnRender(RendererPtr pRenderer)
 			SDL_SetRenderDrawColor(pRenderer, Colors::TextSelectionBackground.r, Colors::TextSelectionBackground.g, Colors::TextSelectionBackground.b, Colors::TextSelectionBackground.a);
 			for (int i = 0; pHighlights[i]; ++i)
 			{
-				Rectf rect = to_rectf(pHighlights[i]->rect);
-				rect.w = std::max(rect.w, 3.0f);
-				rect.x += _rect.x + GetMarginLeft();
-				rect.y += _rect.y + GetMarginTop();
+				Rectf highlight_rect = to_rectf(pHighlights[i]->rect);
+				highlight_rect.w = std::max(highlight_rect.w, 3.0f);
+				highlight_rect.x += rect.x + GetMarginLeft();
+				highlight_rect.y += rect.y + GetMarginTop();
 
-				ApplyScroll(rect);
-				SDL_RenderFillRect(pRenderer, &rect);
+				ApplyScroll(highlight_rect);
+				SDL_RenderFillRect(pRenderer, &highlight_rect);
 			}
 			SDL_free(pHighlights);
 		}
 	}
 
-	DrawText(pRenderer, GetRenderedText(), _rect.x, _rect.y + 8);
+	DrawText(pRenderer, GetRenderedText(), rect.x, rect.y + 8);
 
 	if (_bFocused)
 	{
@@ -201,8 +205,9 @@ void TextBox::DrawText(RendererPtr pRenderer, TTF_Text* pText,  float x, float y
 	auto fgColor = GetForegroundColor();
 	TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
 
-	float xx = _rect.x + GetMarginLeft();
-	float yy = _rect.y + GetMarginTop();
+	auto& rect = GetRect();
+	float xx = rect.x + GetMarginLeft();
+	float yy = rect.y + GetMarginTop();
 	ApplyScroll(xx, yy);
 	TTF_DrawRendererText(pText, xx, yy);
 }
@@ -343,8 +348,7 @@ void TextBox::DrawCompositionCursor(RendererPtr pRenderer)
 		TTF_SubString cursor;
 		if (TTF_GetTextSubString(_pText, composition_start + composition_cursor, &cursor))
 		{
-			Rectf rect;
-			SDL_RectToFRect(&cursor.rect, &rect);
+			Rectf rect = to_rectf(cursor.rect);
 			rect.x += rect.x;
 			rect.y += rect.y;
 			rect.w = 1.0f;
@@ -456,6 +460,8 @@ void TextBox::DrawCandidates(RendererPtr pRenderer)
 	int candidates_w;
 	int candidates_h;
 	float x, y;
+	
+	auto& rect = GetRect();
 
 	/* Position the candidate window */
 	TTF_SubString cursor;
@@ -470,8 +476,8 @@ void TextBox::DrawCandidates(RendererPtr pRenderer)
 
 	SDL_GetRenderSafeArea(pRenderer, &safe_rect);
 	TTF_GetTextSize(candidates, &candidates_w, &candidates_h);
-	candidates_rect.x = _rect.x + GetMarginLeft() + cursor.rect.x;
-	candidates_rect.y = _rect.y + GetMarginTop() + cursor.rect.y + cursor.rect.h + 2.0f;
+	candidates_rect.x = rect.x + GetMarginLeft() + cursor.rect.x;
+	candidates_rect.y = rect.y + GetMarginTop() + cursor.rect.y + cursor.rect.h + 2.0f;
 	candidates_rect.w = 1.0f + 2.0f + candidates_w + 2.0f + 1.0f;
 	candidates_rect.h = 1.0f + 2.0f + candidates_h + 2.0f + 1.0f;
 	if ((candidates_rect.x + candidates_rect.w) > safe_rect.w)
@@ -523,25 +529,26 @@ void TextBox::UpdateTextInputArea()
 {
 	SDL_Window* pWindow = GetSDLWindow();
 	RendererPtr pRenderer = GetSDLRenderer();
+	auto& rect = GetRect();
 
 	/* Convert the text input area and cursor into window coordinates */
 	Pointf window_edit_rect_min;
 	Pointf window_edit_rect_max;
 	Pointf window_cursor;
-	if (!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + GetMarginLeft(), _rect.y + GetMarginTop(), &window_edit_rect_min.x, &window_edit_rect_min.y) or
-		!SDL_RenderCoordinatesToWindow(pRenderer, _rect.x + GetMarginLeft() + _rect.w, _rect.y + GetMarginTop() + _rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) or
+	if (!SDL_RenderCoordinatesToWindow(pRenderer, rect.x + GetMarginLeft(), rect.y + GetMarginTop(), &window_edit_rect_min.x, &window_edit_rect_min.y) or
+		!SDL_RenderCoordinatesToWindow(pRenderer, rect.x + GetMarginLeft() + rect.w, rect.y + GetMarginTop() + rect.h, &window_edit_rect_max.x, &window_edit_rect_max.y) or
 		!SDL_RenderCoordinatesToWindow(pRenderer, _cursor_rect.x, _cursor_rect.y, &window_cursor.x, &window_cursor.y))
 	{
 		return;
 	}
 
-	SDL_Rect rect;
-	rect.x = (int)SDL_roundf(window_edit_rect_min.x);
-	rect.y = (int)SDL_roundf(window_edit_rect_min.y);
-	rect.w = (int)SDL_roundf(window_edit_rect_max.x - window_edit_rect_min.x);
-	rect.h = (int)SDL_roundf(window_edit_rect_max.y - window_edit_rect_min.y);
+	SDL_Rect input_rect;
+	input_rect.x = (int)SDL_roundf(window_edit_rect_min.x);
+	input_rect.y = (int)SDL_roundf(window_edit_rect_min.y);
+	input_rect.w = (int)SDL_roundf(window_edit_rect_max.x - window_edit_rect_min.x);
+	input_rect.h = (int)SDL_roundf(window_edit_rect_max.y - window_edit_rect_min.y);
 	int cursor_offset = (int)SDL_roundf(window_cursor.x - window_edit_rect_min.x);
-	SDL_SetTextInputArea(pWindow, &rect, cursor_offset);
+	SDL_SetTextInputArea(pWindow, &input_rect, cursor_offset);
 }
 
 void TextBox::SetFocus(bool focus)
@@ -1069,7 +1076,8 @@ bool TextBox::DeleteHighlight()
 bool TextBox::HandleMouseDown(float x, float y)
 {
 	Pointf pt = { x, y };
-	if (!SDL_PointInRectFloat(&pt, &_rect))
+	auto& rect = GetRect();
+	if (!SDL_PointInRectFloat(&pt, &rect))
 	{
 		if (_bFocused)
 		{
@@ -1085,8 +1093,8 @@ bool TextBox::HandleMouseDown(float x, float y)
 	}
 
 	TTF_SubString substring;
-	int textX = (int)SDL_roundf(x - _rect.x - GetMarginLeft() + _scroll.x);
-	int textY = (int)SDL_roundf(y - _rect.y - GetMarginTop() + _scroll.y);
+	int textX = (int)SDL_roundf(x - rect.x - GetMarginLeft() + _scroll.x);
+	int textY = (int)SDL_roundf(y - rect.y - GetMarginTop() + _scroll.y);
 	if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
 	{
 		int32_t pos = GetCursorTextIndex(textX, &substring);
@@ -1117,13 +1125,14 @@ bool TextBox::HandleMouseDown(float x, float y)
 bool TextBox::HandleMouseMotion(float x, float y)
 {
 	bool bHandled = false;
+	auto& rect = GetRect();
 
 	if (_bIsHighlighting)
 	{
 		/* Set the highlight position */
 		TTF_SubString substring;
-		int textX = (int)SDL_roundf(x - _rect.x - GetMarginLeft() + _scroll.x);
-		int textY = (int)SDL_roundf(y - _rect.y - GetMarginTop() + _scroll.y);
+		int textX = (int)SDL_roundf(x - rect.x - GetMarginLeft() + _scroll.x);
+		int textY = (int)SDL_roundf(y - rect.y - GetMarginTop() + _scroll.y);
 		if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
 		{
 			int32_t pos = GetCursorTextIndex(textX, &substring);
@@ -1144,7 +1153,7 @@ bool TextBox::HandleMouseMotion(float x, float y)
 
 	// Change cursor
 	Pointf pt = { x, y };
-	bool bInRect = SDL_PointInRectFloat(&pt, &_rect);
+	bool bInRect = SDL_PointInRectFloat(&pt, &rect);
 	if (bInRect != _bIBeamCursor)
 	{
 		_bIBeamCursor = bInRect;
@@ -1562,7 +1571,7 @@ void TextBox::OnSize()
 {
 	if (IsMultiline())
 	{
-		int width = toI(std::max(GetWidth() - (GetMarginHorizontal()), 0.0f));
+		int width = toI(std::max(GetWidth() - GetMarginHorizontal(), 0.0f));
 		int currWrapWidth;
 		if (TTF_GetTextWrapWidth(GetRenderedText(), &currWrapWidth) && currWrapWidth != width)
 			TTF_SetTextWrapWidth(GetRenderedText(), width);

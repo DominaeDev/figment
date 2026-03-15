@@ -34,7 +34,7 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 	for (auto& item : items)
 	{
 		auto& control = *item.pControl;
-		auto& rect = control.GetRect();
+		auto rect = control.GetRect();
 		int width = 0;
 		if (item.prop == 0)
 			width = ceil_int(control.GetWidth() + item.leftBorder() + item.rightBorder());
@@ -99,8 +99,7 @@ void HorizontalSizer::OnLayout(Rectf parentRect)
 				rect.y = borderRect.y + borderRect.h - rect.h;
 		}
 
-		control.SetPosition(rect.x - parentRect.x, rect.y - parentRect.y);
-		control.SetSize(rect.w, rect.h);
+		control.SetRect(rect);
 
 		x += width;
 	}

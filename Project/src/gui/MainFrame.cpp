@@ -225,7 +225,7 @@ namespace fig::gui
 		_pActiveScreen->SetVisible(true);
 		_pActiveScreen->NotifySidePanelShown(_pSidePanel->GetVisible());
 
-		LayoutNow();
+		InvalidateLayout();
 	}
 
 	template<IsScreen T>
@@ -237,7 +237,7 @@ namespace fig::gui
 		auto pScreen = new T(this);	// Must pass this to receive renderer
 		RemoveChild(pScreen);
 		_screensByType[type_id<T>()] = pScreen;
-		pScreen->SetSize(this->_size);
+		pScreen->SetSize(GetSize());
 	}
 
 	template<IsScreen T>

@@ -59,9 +59,9 @@ namespace fig::io::data
 				data.gender = CharacterGender::Undefined;
 		}
 
-		// Color
-		data.bgColor = (Color)0;
-		data.borderColor = (Color)0;
+		// Colors
+		data.bgColor = {};
+		data.borderColor = {};
 
 		if (auto colorText = rootNode.GetElementText("Color"))
 		{

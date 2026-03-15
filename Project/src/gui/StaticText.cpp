@@ -22,15 +22,6 @@ namespace fig::gui
 		// Set text and measure
 		_text = text;
 		InvalidateText();
-
-		/*	if (_pFont && bAutoSize)
-			{
-				int w, h;
-				if (TTF_GetStringSize(_pFont, _text.c_str(), 0, &w, &h))
-					SetSize(w, h);
-			}
-
-			DrawText(); */
 	}
 
 	StaticText::~StaticText()
@@ -112,7 +103,7 @@ namespace fig::gui
 			return;
 		}
 
-		int maxWidth = std::max(toI(_maxSize.x), 0);
+		int maxWidth = std::max(toI(GetMaxSize().x), 0);
 		const char* pText = _text.c_str();
 
 		std::string altText;
@@ -216,7 +207,7 @@ namespace fig::gui
 		auto pRenderer = GetSDLRenderer();
 		auto fgColor = GetForegroundColor();
 
-		int maxWidth = std::max(toI(_maxSize.x), 0);
+		int maxWidth = std::max(toI(GetMaxSize().x), 0);
 
 		_shadow.clear();
 
@@ -244,21 +235,22 @@ namespace fig::gui
 
 	Rectf StaticText::GetAlignedRect() const
 	{
-		int x = toI(_rect.x + GetMarginLeft());
-		int y = toI(_rect.y + GetMarginTop());
+		auto& rect = GetRect();
+		int x = toI(rect.x + GetMarginLeft());
+		int y = toI(rect.y + GetMarginTop());
 		int w = _textWidth;
 		int h = _textHeight;
-		Rectf rect(toF(x), toF(y), toF(w), toF(h));
+		Rectf aligned_rect(toF(x), toF(y), toF(w), toF(h));
 
 		if ((_alignment & HorizontalAlignment::Center) != 0)
-			rect.x = x + (_rect.w - w) / 2;
+			aligned_rect.x = x + (rect.w - w) / 2;
 		else if ((_alignment & HorizontalAlignment::Right) != 0)
-			rect.x = x + _rect.w - w;
+			aligned_rect.x = x + rect.w - w;
 		if ((_alignment & VerticalAlignment::Middle) != 0)
-			rect.y = y + (_rect.h - h) / 2;
+			aligned_rect.y = y + (rect.h - h) / 2;
 		else if ((_alignment & VerticalAlignment::Bottom) != 0)
-			rect.y = y + _rect.h - h;
-		return rect;
+			aligned_rect.y = y + rect.h - h;
+		return aligned_rect;
 	}
 
 	void StaticText::SetForegroundColor(Color color)
@@ -283,7 +275,7 @@ namespace fig::gui
 		if (text.empty())
 			return "";
 
-		int maxWidth = std::max(toI(_maxSize.x), 0);
+		int maxWidth = std::max(toI(GetMaxSize().x), 0);
 		if (maxWidth == 0)
 			return text;
 

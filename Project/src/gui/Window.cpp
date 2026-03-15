@@ -57,6 +57,7 @@ SDL_WindowID Window::GetWindowID() const
 void Window::Update(float fElapsed)
 {
 	_pFrame->Update(fElapsed);
+	_pFrame->Layout();
 }
 
 void Window::Render()

@@ -15,18 +15,21 @@ namespace fig::gui
 	public:
 		virtual ~LayoutElement();
 
-		virtual void Update(float fElapsed);
+		void Update(float fElapsed);
+		void Layout();
 
-		inline Rectf& GetRect() noexcept { return _rect; }
 		inline const Rectf& GetRect() const noexcept { return _rect; }
-		inline const Pointf& GetPosition() const noexcept { return _position; }
-		inline const Pointf& GetSize() const noexcept { return _size; }
 
-		inline Pointf GetAbsolutePosition() const noexcept;
-		inline float GetX() const noexcept { return _position.x; }
-		inline float GetY() const noexcept { return _position.y; }
-		inline float GetWidth() const noexcept { return _size.x; }
-		inline float GetHeight() const noexcept { return _size.y; }
+		inline float GetX() const noexcept { return _localPosition.x; }
+		inline float GetY() const noexcept { return _localPosition.y; }
+		inline Pointf GetPosition() const noexcept { return Pointf { _localPosition.x, _localPosition.y }; }
+		inline float GetAbsoluteX() const noexcept { return _rect.x; }
+		inline float GetAbsoluteY() const noexcept { return _rect.y; }
+		inline Pointf GetAbsolutePosition() const noexcept { return Pointf { _rect.x, _rect.y }; }
+
+		inline Pointf GetSize() const noexcept { return Pointf { _rect.w, _rect.h }; }
+		inline float GetWidth() const noexcept { return _rect.w; }
+		inline float GetHeight() const noexcept { return _rect.h; }
 		inline const Pointf& GetMinSize() const noexcept { return _minSize; }
 		inline const Pointf& GetMaxSize() const noexcept { return _maxSize; }
 
@@ -43,7 +46,7 @@ namespace fig::gui
 		void Center();
 		void CenterHorizontally();
 		void CenterVertically();
-		void Fill();
+		void FillParent();
 
 		void SetMinSize(Pointf size) { _minSize = size; }
 		void SetMinSize(float width, float height) { _minSize = Pointf { width, height }; }
@@ -72,25 +75,26 @@ namespace fig::gui
 	protected:
 		void SetParent(LayoutElement* pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
-		void Layout();
-		Sizer* const GetSizer() const { return _pSizer; }
+		Sizer* const GetSizer() const { return _pSizer.get(); }
 
-		virtual void OnSize();
-		virtual void OnParent();
 		virtual void OnUpdate(float fElapsed) {};
+		virtual void OnParent() {};
+		virtual void OnSize() {};
 		virtual void OnAfterLayout() {};
 		virtual void OnAddedChild(LayoutElement* pChild) {}
 		virtual void OnRemovedChild(LayoutElement* pChild) {}
 
 	protected:
 		std::vector<LayoutElement*> _children;
+		std::unique_ptr<Sizer> _pSizer {};
 		LayoutElement* _pParent = nullptr;
-		Sizer* _pSizer = nullptr;
 		bool _bCulled = false;
 
+	private:
+		void OnParentMoved();
+
 		Rectf _rect = {};
-		Pointf _position = {};
-		Pointf _size = {};
+		Pointf _localPosition {};
 		Pointf _minSize = {};
 		Pointf _maxSize = {};
 		bool _bLayoutEnabled = true;

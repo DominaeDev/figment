@@ -23,19 +23,17 @@ namespace fig::gui
 
 			CreateChatCounter(0);
 
+			// Tags
 			switch (character.gender)
 			{
 			case data::CharacterGender::Male:
 				AddTag("Male");
-				AddSearchText("male");
 				break;
 			case data::CharacterGender::Female:
 				AddTag("Female");
-				AddSearchText("female");
 				break;
 			case data::CharacterGender::Custom:
 				AddTag(character.properties[Constants::CharacterProperties::Gender].value);
-				AddSearchText(character.properties[Constants::CharacterProperties::Gender].value);
 				break;
 			}
 
@@ -45,10 +43,26 @@ namespace fig::gui
 					break;
 			}
 
-			AddSearchText(character.shortName);
-			AddSearchText(character.fullName);
-			AddSearchText(character.description);
-			AddSearchText(character.tags);
+			if constexpr (Disabled)
+			{
+				switch (character.gender)
+				{
+				case data::CharacterGender::Male:
+					AddSearchText("male");
+					break;
+				case data::CharacterGender::Female:
+					AddSearchText("female");
+					break;
+				case data::CharacterGender::Custom:
+					AddSearchText(character.properties[Constants::CharacterProperties::Gender].value);
+					break;
+				}
+
+				AddSearchText(character.shortName);
+				AddSearchText(character.fullName);
+				AddSearchText(character.description);
+				AddSearchText(character.tags);
+			}
 		}
 	}
 

@@ -31,22 +31,6 @@ namespace fig::gui
 		delete _pBorderRenderer;
 	}
 
-	void Control::Update(float fElapsed)
-	{
-		if (_bCulled)
-			return;
-
-		if (_bInvalidLayout)
-			Layout();
-
-		// Update this
-		OnUpdate(fElapsed);
-
-		// Update children
-		for (auto& child : _children)
-			child->Update(fElapsed);
-	}
-
 	void Control::Render(Renderer* pRenderer)
 	{
 		if (not _bVisible or _bCulled)
@@ -59,7 +43,7 @@ namespace fig::gui
 
 		if (_bClipping)
 		{
-			Rect rect { (int)_rect.x, (int)_rect.y, (int)_rect.w, (int)_rect.h };
+			Rect rect = to_rect(GetRect());
 			if (s_pClippingRect)
 				SDL_GetRectIntersection(s_pClippingRect, &rect, &clippingRect);
 			else
@@ -110,7 +94,7 @@ namespace fig::gui
 		// Custom renderer
 		if (_pBorderRenderer)
 		{
-			_pBorderRenderer->Render(pRenderer, _rect);
+			_pBorderRenderer->Render(pRenderer, GetRect());
 			return;
 		}
 
@@ -118,7 +102,7 @@ namespace fig::gui
 			return;
 
 		SDL_SetRenderDrawColor(pRenderer, _borderColor.r, _borderColor.g, _borderColor.b, _borderColor.a);
-		SDL_RenderRect(pRenderer, &_rect);
+		SDL_RenderRect(pRenderer, &GetRect());
 	}
 
 	Color Control::GetForegroundColor() const
@@ -146,7 +130,7 @@ namespace fig::gui
 		// Custom renderer
 		if (_pBGRenderer)
 		{
-			_pBGRenderer->Render(pRenderer, _rect);
+			_pBGRenderer->Render(pRenderer, GetRect());
 			return;
 		}
 
@@ -154,7 +138,7 @@ namespace fig::gui
 		if (bgColor.IsDefined() && bgColor.a != 0)
 		{
 			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
-			SDL_RenderFillRect(pRenderer, &_rect);
+			SDL_RenderFillRect(pRenderer, &GetRect());
 		}
 	}
 

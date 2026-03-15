@@ -16,7 +16,6 @@ namespace fig::gui
 		virtual ~Control();
 
 		virtual void Render(Renderer* pRenderer);
-		virtual void Update(float fElapsed) override;
 
 		Color GetForegroundColor() const;
 		Color GetBackgroundColor() const;
