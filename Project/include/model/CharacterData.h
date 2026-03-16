@@ -5,6 +5,7 @@
 
 #include "Types.h"
 #include "gui/GUITypes.h"
+#include "util/SearchIndex.h"
 
 namespace fig::io::data
 {
@@ -40,6 +41,7 @@ namespace fig::io::data
 
 		std::vector<fig::string> tags;
 		std::map<fig::string, CharacterProperty> properties;
+		SearchIndex searchIndex;
 
 		bool LoadFromXml(const fig::path& filename);
 		bool LoadFromXml(const fig::string& doc);

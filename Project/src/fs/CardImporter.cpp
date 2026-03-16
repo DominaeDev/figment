@@ -52,6 +52,24 @@ namespace fig::io
 			}
 		}
 
+		switch (character.gender)
+		{
+		case data::CharacterGender::Male:
+			character.searchIndex.AddTerm("male");
+			break;
+		case data::CharacterGender::Female:
+			character.searchIndex.AddTerm("female");
+			break;
+		case data::CharacterGender::Custom:
+			character.searchIndex.AddTerm(character.properties[Constants::CharacterProperties::Gender].value);
+			break;
+		}
+
+		character.searchIndex.AddTerm(character.shortName);
+		character.searchIndex.AddTerm(character.fullName);
+		character.searchIndex.AddTerm(character.description);
+		character.searchIndex.AddTerms(character.tags);
+
 		return character;
 	}
 }

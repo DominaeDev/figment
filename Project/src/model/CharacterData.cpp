@@ -78,6 +78,9 @@ namespace fig::io::data
 		// Tags
 		data.tags = rootNode.GetElementList("Tags").value_or({});
 
+		// Search
+		data.searchIndex.Deserialize(rootNode.GetElementText("SearchIndex").value_or(""));
+
 		return !data.characterId.empty() && !data.shortName.empty();
 	}
 
@@ -140,6 +143,8 @@ namespace fig::io::data
 			root.SetElementValue("Brief", brief);
 		if (not description.empty())
 			root.SetElementValue("Description", description);
+		if (not searchIndex.IsEmpty())
+			root.SetElementValue("SearchIndex", searchIndex.Serialize());
 
 		xml.SaveToMemory(buffer);
 	}

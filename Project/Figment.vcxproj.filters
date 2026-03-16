@@ -410,21 +410,6 @@
     <ClCompile Include="src\gui\CharacterCard.cpp">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ButtonWithIcon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\SidePanelButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\NineGridRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\RoundedFillRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\SolidFillRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\Dictionary.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
@@ -445,6 +430,24 @@
     </ClCompile>
     <ClCompile Include="src\gui\GUIColor.cpp">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\SearchIndex.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\RoundedFillRenderer.cpp">
+      <Filter>Source Files\Frontend\GUI\Theme</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\NineGridRenderer.cpp">
+      <Filter>Source Files\Frontend\GUI\Theme</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\SolidFillRenderer.cpp">
+      <Filter>Source Files\Frontend\GUI\Theme</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\SidePanelButton.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ButtonWithIcon.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1045,11 +1048,6 @@
     <ClInclude Include="include\gui\GUIConstants.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ButtonWithIcon.h" />
-    <ClInclude Include="include\gui\SidePanelButton.h" />
-    <ClInclude Include="include\gui\NineGridRenderer.h" />
-    <ClInclude Include="include\gui\RoundedFillRenderer.h" />
-    <ClInclude Include="include\gui\SolidFillRenderer.h" />
     <ClInclude Include="include\util\Dictionary.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
@@ -1067,6 +1065,24 @@
     </ClInclude>
     <ClInclude Include="include\gui\DebugScreen.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\SearchIndex.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\RoundedFillRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\NineGridRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\SolidFillRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Theme</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ButtonWithIcon.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\SidePanelButton.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

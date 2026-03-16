@@ -15,7 +15,6 @@ namespace fig::gui
 
 	private:
 		fig::uuid _characterId;
-		std::unique_ptr<fig::util::Dictionary> _searchWords;
 	};
 }
 

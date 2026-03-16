@@ -32,6 +32,8 @@ namespace fig::gui
 		_assetId { assetId },
 		_cardSize { cardSize }
 	{
+		_searchIndex = std::make_unique<SearchIndex>();
+
 		_pLargeRoot = new Area(this);
 		_pLargeRoot->SetSize(kLargeWidth, kLargeHeight);
 		_pSmallRoot = new Area(this);
@@ -383,76 +385,20 @@ namespace fig::gui
 			}
 		}
 	}
-
-	static fig::wstring normalize_search_term(const fig::string& text)
+	
+	void CoverCard::AddSearchTerms(const fig::string& text) noexcept
 	{
-		auto result = lcase(from_utf8(text));
-		return strip_diacritics(std::move(result));
+		_searchIndex->AddTerm(text);
 	}
 
-	static fig::wstring normalize_search_term(const fig::wstring& text)
+	void CoverCard::AddSearchTerms(std::span<const fig::string> texts) noexcept
 	{
-		auto result = lcase(text);
-		return strip_diacritics(std::move(result));
-	}
-
-	static std::unordered_set<fig::wstring> filter_search(const fig::string& text)
-	{
-		static constexpr auto is_delimiter = [](char c) {
-			return std::ispunct(static_cast<unsigned char>(c))
-				or std::isspace(static_cast<unsigned char>(c));
-		};
-
-		auto chunks = text
-			| std::views::chunk_by([&](char a, char b) { return !is_delimiter(a) && !is_delimiter(b); })
-			| std::views::transform([](auto&& range) { 
-				auto s = fig::string(std::ranges::begin(range), std::ranges::end(range));
-				return normalize_search_term(s);
-			})
-			| std::ranges::to<std::unordered_set>();
-
-		return chunks
-			| std::views::filter([&](auto& s) { return not empty_or_whitespace(s); })
-			| std::ranges::to<std::unordered_set>();
-	}
-
-	void CoverCard::AddSearchText(const fig::string& text) noexcept
-	{
-		if (not text.empty())
-			_searchWords.emplace_back(normalize_search_term(text));
-	}
-
-	void CoverCard::AddSearchText(const std::span<fig::string> texts) noexcept
-	{
-		for (auto& t : texts)
-			AddSearchText(t);
-	}
-
-	void CoverCard::AddSearchText(const std::span<fig::wstring> texts) noexcept
-	{
-		for (auto& t : texts)
-			AddSearchText(t);
-	}
-
-	void CoverCard::AddSearchText(const fig::wstring& text) noexcept
-	{
-		if (not text.empty())
-			_searchWords.emplace_back(normalize_search_term(text));
+		_searchIndex->AddTerms(texts);
 	}
 
 	bool CoverCard::IsFilteredBy(const fig::string& search_string) const noexcept
 	{
-		auto search_words = filter_search(search_string);
-
-		for (auto& word : search_words)
-		{
-			bool bFound = false;
-			for (auto& s : _searchWords)
-				bFound |= fig::util::find_in(word, s, false, true);
-			if (!bFound)
-				return true;
-		}
-		return false;
+		return !_searchIndex->Match(search_string);
 	}
 
 	void CoverCard::SetCardSize(CardSize cardSize)
@@ -508,6 +454,10 @@ namespace fig::gui
 			else
 				Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 		}
+	}
 
+	void CoverCard::SetIndex(const SearchIndex& index) noexcept
+	{
+		_searchIndex = std::make_unique<SearchIndex>(index);
 	}
 }

@@ -5,7 +5,7 @@
 
 #include "Image.h"
 #include "model/AssetManager.h"
-#include "util/Dictionary.h"
+#include "util/SearchIndex.h"
 
 namespace fig::gui
 {
@@ -53,10 +53,10 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 		void OnSize() override;
-		void AddSearchText(const fig::string& text) noexcept;
-		void AddSearchText(const std::span<fig::string> texts) noexcept;
-		void AddSearchText(const fig::wstring& text) noexcept;
-		void AddSearchText(const std::span<fig::wstring> texts) noexcept;
+		
+		void SetIndex(const SearchIndex& index) noexcept;
+		void AddSearchTerms(const fig::string& text) noexcept;
+		void AddSearchTerms(std::span<const fig::string> texts) noexcept;
 
 	private:
 		void PollFuture();
@@ -89,7 +89,7 @@ namespace fig::gui
 		bool _bHasError = false;
 		Image* _pErrorIcon {};
 
-		std::vector<fig::wstring> _searchWords {};
+		std::unique_ptr<SearchIndex> _searchIndex;
 		std::set<fig::string> _tags {};
 
 	};

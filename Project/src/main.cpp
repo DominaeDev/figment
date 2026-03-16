@@ -51,6 +51,8 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 	}
 
+	setlocale(LC_CTYPE, "");
+
 	auto pAppState = fig::Global::CreateState();
 	if (!pAppState)
 		return SDL_APP_FAILURE;

@@ -647,7 +647,7 @@ namespace fig::io
 			return AsyncLoadError::FileNotFound;
 
 		// Half-version
-		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HomeScreen::CardWidth / 2, Constants::GUI::HomeScreen::CardHeight / 2, ImageFit::Stretch, false);
+		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HomeScreen::CardWidth / 2, Constants::GUI::HomeScreen::CardHeight / 2, ImageFit::Stretch, true);
 		MaskCorners(halfSurface, MaskType::CARD_CORNER_MASK);
 
 		// Round corners

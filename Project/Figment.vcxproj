@@ -243,6 +243,7 @@
     </ClCompile>
     <ClCompile Include="src\util\Dictionary.cpp" />
     <ClCompile Include="src\util\ProfileDatabase.cpp" />
+    <ClCompile Include="src\util\SearchIndex.cpp" />
     <ClCompile Include="src\util\Security.cpp" />
     <ClCompile Include="src\util\Hash.cpp" />
     <ClCompile Include="src\util\StringUtility.cpp" />
@@ -425,6 +426,7 @@
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\util\ProfileDatabase.h" />
     <ClInclude Include="include\util\RecoverCodeLUT.h" />
+    <ClInclude Include="include\util\SearchIndex.h" />
     <ClInclude Include="include\util\Security.h" />
     <ClInclude Include="include\util\EnumFlags.h" />
     <ClInclude Include="include\gui\CustomRenderer.h" />
