@@ -106,7 +106,7 @@ namespace fig::gui
 		else
 		{
 			_search_text = std::move(search_text);
-			_fSearchTimer = 0.2f;
+			_fSearchTimer = 0.005f;
 		}
 	}
 

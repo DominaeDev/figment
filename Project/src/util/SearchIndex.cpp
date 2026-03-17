@@ -125,10 +125,10 @@ namespace fig
 		for (auto& word : search_words)
 		{
 			auto it = std::ranges::lower_bound(_index, word);
-			if (it != _index.end() && it->starts_with(word))
-				return true;
+			if (it == _index.end() or not it->starts_with(word))
+				return false;
 		}
-		return false;
+		return true;
 	}
 
 	fig::string SearchIndex::Serialize() const noexcept
