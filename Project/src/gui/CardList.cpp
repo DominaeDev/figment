@@ -81,6 +81,8 @@ namespace fig::gui
 
 	void CardList::OnUpdate(float fElapsed)
 	{
+		ScrollPanel::OnUpdate(fElapsed);
+
 		int32_t curr_rows = toI(_pGridSizer->GetRows());
 		int divide = _cardSize == CardSize::Default ? 1 : 2;
 
@@ -98,6 +100,7 @@ namespace fig::gui
 			{
 				float ratio = _fScrollY / last_extent;
 				_fScrollY = ratio * toF(_maxExtent);
+				_fTargetScrollY = _fScrollY;
 				LayoutNow();
 			}
 		}

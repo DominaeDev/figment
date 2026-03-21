@@ -12,8 +12,10 @@ namespace fig::gui
 		ScrollPanel(LayoutElement* pParent);
 
 	protected:
+		void OnUpdate(float fElapsed) override;
 		bool OnEvent(Event& event) override;
 		void OnAfterLayout() override;
+
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
 		void SetTopMargin(Coord margin) { _topMargin = margin; };
 		void SetBottomMargin(Coord margin) { _bottomMargin = margin; };
@@ -22,6 +24,7 @@ namespace fig::gui
 		Coord _topMargin {};
 		Coord _bottomMargin {};
 		float _fScrollY {};
+		float _fTargetScrollY {};
 		Coord _maxExtent {};
 	};
 }
