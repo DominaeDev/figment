@@ -6,7 +6,6 @@
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "model/AssetManager.h"
-#include "fs/Serialization.h"
 #include "util/Common.h"
 
 using namespace fig::io;

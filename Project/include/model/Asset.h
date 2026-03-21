@@ -37,7 +37,7 @@ namespace fig::io
 
 	enum class ImageType : uint8_t
 	{
-		Unspecified			= 0x00,
+		Undefined			= 0x00,
 		ProfileImage		= 0x01,
 		CoverImage			= 0x02,	// card
 		SmallPortrait		= 0x03,

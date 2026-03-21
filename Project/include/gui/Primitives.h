@@ -4,6 +4,7 @@
 
 #include "gui/Area.h"
 #include "gui/Panel.h"
+#include "gui/ImageWithMask.h"
 #include "gui/Image.h"
 #include "gui/HorizontalGradient.h"
 #include "gui/VerticalGradient.h"

@@ -41,9 +41,11 @@ namespace fig::gui
 		}
 	}
 
-	void Image::SetTexture(Texture* pTexture)
+	void Image::SetTexture(Texture* pTexture, bool bResize)
 	{
 		_pTexture = pTexture;
+		if (bResize and pTexture)
+			SetSize(pTexture->w, pTexture->h);
 	}
 
 	Point Image::GetTextureSize() const noexcept

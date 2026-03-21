@@ -8,8 +8,5 @@ namespace fig::gui
 	{
 	public:
 		SimpleTextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, Flags flags = {});
-
-	private:
-		void Init();
 	};
 }

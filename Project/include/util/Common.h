@@ -169,11 +169,22 @@ namespace fig::util
 	}
 
 	template <typename T>
-	bool is_empty(std::span<T> data) noexcept
+	bool is_zero(std::span<T> data) noexcept
 	{
 		for (T& value : data)
 		{
 			if (value != (T)0)
+				return false;
+		}
+		return true;
+	}
+
+	template <typename T, size_t N>
+	bool is_zero(std::array<T, N> arr) noexcept
+	{
+		for (auto it = std::begin(arr); it != std::end(arr); ++it)
+		{
+			if (*it != (T)0)
 				return false;
 		}
 		return true;

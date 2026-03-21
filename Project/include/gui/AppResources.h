@@ -3,6 +3,11 @@
 #include "gui/GUITypes.h"
 #include <map>
 
+namespace fig::user
+{
+	struct UserProfile;
+}
+
 namespace fig::gui
 {
 	enum class TextureType
@@ -53,6 +58,9 @@ namespace fig::gui
 		ICON_MENU_SCENARIOS,
 		ICON_GRID_SMALL,
 		ICON_GRID_LARGE,
+
+		PROFILE_DEFAULT_IMAGE,
+		PROFILE_MASK,
 	};
 
 	enum class MaskType
@@ -69,6 +77,8 @@ namespace fig::gui
 		static SurfacePtr GetImage(TextureType id) noexcept;
 		static MaskPtr GetMask(MaskType maskId);
 
+		static TexturePtr GetUserProfileImage(Renderer* pRenderer, const fig::user::UserProfile& profile);
+
 	private:
 		static bool LoadTexture(Renderer* pRenderer, TextureType textureId, fig::path filename);
 		static bool LoadTextureAndMaskCorners(Renderer* pRenderer, TextureType textureId, MaskType maskId, fig::path filename);
@@ -77,5 +87,7 @@ namespace fig::gui
 		static std::map<TextureType, fig::sdl::Surface> _surfaces;
 		static std::map<TextureType, fig::sdl::Texture> _textures;
 		static std::map<MaskType, Mask> _masks;
+		static std::map<fig::uuid, fig::sdl::Surface> _profileSurfaces;
+		static std::map<fig::uuid, fig::sdl::Texture> _profileTextures;
 	};
 }

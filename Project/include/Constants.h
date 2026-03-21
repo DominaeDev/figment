@@ -19,6 +19,9 @@ namespace Constants
 		constexpr fig::gui::Coord ChatScrollWidth = 800;
 		
 		constexpr float MouseScrollSpeed = 80.0f;
+		
+		constexpr int32_t ProfileImageWidth = 256;
+		constexpr int32_t ProfileImageHeight = 256;
 
 		namespace HomeScreen
 		{
@@ -86,6 +89,8 @@ namespace Constants
 		constexpr fig::const_string AssetIndexFileExt = "";
 		constexpr fig::const_string RecoveryFileName = "recovery";
 		constexpr fig::const_string RecoveryFileExt = "";
+		constexpr fig::const_string ProfileImageFileName = "image";
+		constexpr fig::const_string ProfileImageFileExt = "";
 		constexpr fig::const_string AssetFileExt = "";
 	}
 

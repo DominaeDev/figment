@@ -43,6 +43,15 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
+	void StaticText::SetTextAndResize(fig::string text)
+	{
+		_text = text;
+		_bInvalidated = false;
+		Coord newWidth, newHeight;
+		DrawText(newWidth, newHeight);
+		SetSize(newWidth, newHeight);
+	}
+
 	void StaticText::SetTextAndResize(fig::string text, Coord& newWidth, Coord& newHeight)
 	{
 		_text = text;

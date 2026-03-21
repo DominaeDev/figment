@@ -3,6 +3,7 @@
 #pragma once
 
 #include "gui/GUITypes.h"
+#include "model/Asset.h"
 
 namespace fig::gui::util
 {
@@ -80,6 +81,19 @@ namespace fig::gui::util
 		};
 	}
 
+	inline constexpr SDL_PixelFormat to_sdl_format(ImageFormat format)
+	{
+		switch (format)
+		{
+		case ImageFormat::RGB24:
+			return SDL_PIXELFORMAT_RGB24;
+		case ImageFormat::RGBA32:
+			return SDL_PIXELFORMAT_RGBA8888;
+		default:
+			return SDL_PIXELFORMAT_UNKNOWN;
+		}
+	}
+
 	enum class ImageFit {
 		None,
 		Stretch,
@@ -91,8 +105,10 @@ namespace fig::gui::util
 	std::optional<fig::sdl::Surface> LoadImage(fig::path filename);
 	fig::sdl::Surface LoadImageFromMemory(fig::byte_span data);
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
+	fig::sdl::Surface SurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data);
 	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit = ImageFit::None, bool bLinear = true);
 	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha);
+	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface);
 
 	enum class CornerStyle {
 		Card,

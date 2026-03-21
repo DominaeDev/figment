@@ -9,6 +9,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <c_resource.h>
 #include <tuple>
+#include <cassert>
 
 using namespace fig::gui;
 using namespace fig::util;
@@ -244,6 +245,45 @@ namespace fig::gui::util
 		}
 
 		return cover;
+	}
+
+	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface)
+	{
+		auto pSurface = SDL_CreateSurface(Constants::GUI::ProfileImageWidth, Constants::GUI::ProfileImageWidth, SDL_PIXELFORMAT_RGBA8888);
+		if (not (bool)pSurface)
+			return {};
+
+		return ScaleSurface(surface, Constants::GUI::ProfileImageWidth, Constants::GUI::ProfileImageWidth, ImageFit::Portrait);
+	}
+
+	fig::sdl::Surface SurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data)
+	{
+		if (width <= 0 || height <= 0 || format == ImageFormat::Undefined)
+			return {};
+
+		try
+		{
+			// Create SDL surface
+			SurfacePtr pSurface = SDL_CreateSurface(width, height, to_sdl_format(format));
+			if (!pSurface)
+				return {};
+
+			if (pSurface->pitch * pSurface->h != data.size())
+				return {}; // Invalid data length
+
+			// Write pixel data
+			if (SDL_LockSurface(pSurface))
+			{
+				std::memcpy(pSurface->pixels, data.data(), data.size());
+				SDL_UnlockSurface(pSurface);
+
+				return std::move(fig::sdl::Surface::create_and_claim(pSurface));
+			}
+		}
+		catch (...)
+		{
+		}
+		return {};
 	}
 
 	Point MeasureText(Font& font, const fig::string& text)

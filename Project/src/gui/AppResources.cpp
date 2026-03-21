@@ -1,19 +1,25 @@
 #include <pch.h>
 #include "gui/AppResources.h"
 #include "fs/FileUtility.h"
+#include "fs/BinaryReader.h"
+#include "model/UserProfile.h"
 #include <SDL3_image/SDL_image.h>
 #include <cassert>
+
+using namespace fig::io;
 
 namespace fig::gui
 {
 	std::map<TextureType, fig::sdl::Surface> AppResources::_surfaces;
 	std::map<TextureType, fig::sdl::Texture> AppResources::_textures;
 	std::map<MaskType, Mask> AppResources::_masks;
+	std::map<fig::uuid, fig::sdl::Surface> AppResources::_profileSurfaces;
+	std::map<fig::uuid, fig::sdl::Texture> AppResources::_profileTextures;
 
 	void AppResources::Init(Renderer* pRenderer)
 	{
 		// Masks
-		LoadMask(MaskType::CARD_CORNER_MASK, "./resources/gui/card/masks/card_corners.mask");
+		LoadMask(MaskType::CARD_CORNER_MASK, "./resources/gui/masks/mask_card_corners.mask");
 
 		// Generic
 		LoadTexture(pRenderer, TextureType::BLANK, "./resources/gui/white.png");
@@ -61,6 +67,9 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_05, "./resources/gui/card/borders/border_05.png");
 		LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_06, "./resources/gui/card/borders/border_06.png");
 		LoadTextureAndMaskCorners(pRenderer, TextureType::CARD_BACKGROUND_EMPTY, MaskType::CARD_CORNER_MASK, "./resources/gui/card/card_bg_empty.png");
+
+		LoadTexture(pRenderer, TextureType::PROFILE_DEFAULT_IMAGE, "./resources/gui/images/default_portrait.png");
+		LoadTexture(pRenderer, TextureType::PROFILE_MASK, "./resources/gui/masks/mask_circle256.png");
 	}
 
 	void AppResources::Release()
@@ -166,6 +175,47 @@ namespace fig::gui
 		auto itFind = _masks.find(id);
 		if (itFind != _masks.end())
 			return &itFind->second;
+		return nullptr;
+	}
+
+	TexturePtr AppResources::GetUserProfileImage(Renderer* pRenderer, const fig::user::UserProfile& profile)
+	{
+		auto itFind = _profileTextures.find(profile.id);
+		if (itFind != _profileTextures.end())
+			return itFind->second.get();
+
+		SurfacePtr pSurface = nullptr;
+		if (auto itSurf = _profileSurfaces.find(profile.id); itSurf != _profileSurfaces.end())
+		{
+			pSurface = itSurf->second.get();
+		}
+		else
+		{
+			// Load from disk
+			if (auto result = BinaryReader::ReadProfileFile(profile, std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt)); result.has_value())
+			{
+				const auto& asset = result.value();
+				auto width = asset.get_meta<uint16_t>(fig::io::data::MetaTag::ImageWidth).value_or(0);
+				auto height = asset.get_meta<uint16_t>(fig::io::data::MetaTag::ImageHeight).value_or(0);
+				auto format = static_cast<fig::gui::ImageFormat>(asset.get_meta<uint8_t>(fig::io::data::MetaTag::ImageFormat).value_or(0));
+
+				if (auto image = fig::gui::util::SurfaceFromBytes(width, height, format, asset.data); not image.empty())
+				{
+					pSurface = image.get();
+					_profileSurfaces[profile.id] = std::move(image);
+				}
+			}
+		}
+
+		if (pSurface)
+		{
+			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface))
+			{
+				auto& texture = _profileTextures[profile.id] = fig::sdl::Texture::create_and_claim(pTexture);
+				return texture.get();
+			}
+		}
+
 		return nullptr;
 	}
 }

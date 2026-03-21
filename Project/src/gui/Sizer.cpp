@@ -58,7 +58,7 @@ namespace fig::gui
 	{
 		auto dummy = MakeDummy();
 		dummy->SetSize(size, size);
-		_items.push_back(LayoutInfo { MakeDummy(), 0, {}, 0 });
+		_items.push_back(LayoutInfo { dummy, 0, {}, 0 });
 	}
 
 	void Sizer::AddStretchSpacer()

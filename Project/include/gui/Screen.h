@@ -46,6 +46,7 @@ namespace fig::gui
 	enum EScreen : size_t
 	{
 		Debug,
+		Login,
 		Home,
 		Chat,
 	};

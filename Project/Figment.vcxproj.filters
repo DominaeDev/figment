@@ -449,6 +449,18 @@
     <ClCompile Include="src\gui\ButtonWithIcon.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\LoginScreen.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\PasswordBox.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\IniFile.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ImageWithMask.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -1083,6 +1095,24 @@
     </ClInclude>
     <ClInclude Include="include\gui\SidePanelButton.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\LoginScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\PasswordBox.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\IniFile.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\BinaryReader.h">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\BinaryWriter.h">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ImageWithMask.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

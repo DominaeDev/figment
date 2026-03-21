@@ -29,7 +29,7 @@ namespace fig::gui
 
 		void Close();
 
-		TYPE_ID(EScreen::Chat);
+		SCREEN_ID(EScreen::Chat);
 	protected:
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;

@@ -11,12 +11,12 @@ namespace fig::user
 {
 	struct UserProfile
 	{
+		unsigned short version { 0 };
+
 		fig::uuid id { 0, 0 };
 		fig::string name;
 		fig::user::auth::UserAuth auth {};
 		fig::user::auth::UserAuth recovery {};
-
-		unsigned short version { 0 };
 
 		inline constexpr bool IsValid() const noexcept
 		{

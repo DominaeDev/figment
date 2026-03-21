@@ -12,6 +12,8 @@
 #include "util/Hash.h"
 #include "util/Security.h"
 #include "fs/Xml.h"
+#include "fs/BinaryWriter.h"
+#include "fs/BinaryReader.h"
 #include "model/AssetManager.h"
 #include "model/GlobalStrings.h"
 #include "util/RecoverCodeLUT.h"
@@ -128,7 +130,7 @@ namespace fig::user
 
 		if (db.CreateProfile(profile) == DatabaseError::NoError)
 		{
-			_profiles.emplace_back(profile);
+			_profiles.emplace_back(std::move(profile));
 			return std::make_optional(std::cref(_profiles.back()));
 		}
 
@@ -334,7 +336,7 @@ namespace fig::user
 			return false; // Not found
 
 		auto& profile = *itProfile;
-		if (is_empty(std::span { profile.recovery.challenge.data(), profile.recovery.challenge.size() }))
+		if (is_zero(profile.recovery.challenge))
 			return false;
 
 		// Recover key
@@ -409,4 +411,5 @@ namespace fig::user
 		}
 		return true;
 	}
+
 }

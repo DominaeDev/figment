@@ -4,6 +4,7 @@
 #include "gui/ChatScreen.h"
 #include "gui/DebugScreen.h"
 #include "gui/SidePanel.h"
+#include "gui/LoginScreen.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "fs/FileUtility.h"
@@ -34,6 +35,7 @@ namespace fig::gui
 		SetSizer(topSizer);
 		s_pInstance = this;
 
+		RegisterScreen<LoginScreen>();
 		RegisterScreen<HomeScreen>();
 		RegisterScreen<ChatScreen>();
 		RegisterScreen<DebugScreen>();
@@ -41,14 +43,7 @@ namespace fig::gui
 		// Sign in
 		auto& userMngr = Global::GetUserManager();
 		if (not userMngr.LoadProfiles())
-		{
 			userMngr.CreateDefaultProfile();
-			userMngr.SignInDefaultProfile();
-		}
-		else
-		{
-			userMngr.SignInDefaultProfile();
-		}
 
 		// Import test characters
 		if constexpr (Debugging and Disabled)
@@ -104,15 +99,14 @@ namespace fig::gui
 			}
 		}
 
+		ShowLoginScreen();
+
 		// Show home screen
 		if (userMngr.IsSignedIn())
 		{
-//			ChangeScreen<DebugScreen>();
 
-			ChangeScreen<HomeScreen>()->CreateCards();
+//			ChangeScreen<HomeScreen>()->CreateCards();
 		}
-
-		userMngr.GetProfileAssets().SaveModified();
 	}
 
 	MainFrame::~MainFrame()
@@ -226,6 +220,9 @@ namespace fig::gui
 		_pActiveScreen->NotifySidePanelShown(_pSidePanel->GetVisible());
 
 		InvalidateLayout();
+
+		// Reset cursor
+		Global::SetCursor(SDL_SYSTEM_CURSOR_DEFAULT);
 	}
 
 	template<IsScreen T>
@@ -261,5 +258,12 @@ namespace fig::gui
 		if (_pActiveScreen)
 			_pActiveScreen->NotifySidePanelShown(bShow);
 		InvalidateLayout();
+	}
+
+	void MainFrame::ShowLoginScreen()
+	{
+		// Show login screen
+		ChangeScreen<LoginScreen>();
+		ShowSidePanel(false);
 	}
 }

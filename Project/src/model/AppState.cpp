@@ -29,7 +29,11 @@ namespace fig
 		_pIBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 
 		__appState->pLLMEngine = std::make_shared<LLMBackend>();
+
+		// Load user profiles
 		__appState->pUserManager = std::make_shared<fig::user::UserManager>();
+		if (not __appState->pUserManager->LoadProfiles())
+			__appState->pUserManager->CreateDefaultProfile();
 
 		try
 		{

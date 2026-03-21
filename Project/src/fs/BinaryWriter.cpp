@@ -1,6 +1,7 @@
 #include <pch.h>
-#include "fs/Serialization.h"
+#include "fs/BinaryWriter.h"
 #include "model/UserProfile.h"
+#include "model/Asset.h"
 #include <Crc32.h>
 #include <cassert>
 
@@ -194,6 +195,33 @@ namespace fig::io
 			profile.id.bytes(reinterpret_cast<char*>(&file.profile_id));
 
 			fs.write((const char*)(&file), sizeof(file));
+			return FileError::NoError;
+		}
+		catch (...)
+		{
+			return FileError::WriteError;
+		}
+	}
+
+	FileError BinaryWriter::WriteProfileFile(const fig::user::UserProfile& profile, const fig::path& filename, const fig::io::data::AssetFile& assetFile) noexcept
+	{
+		auto directory = profile.GetPath();
+		auto const path = directory / filename;
+
+		try
+		{
+			// Create subfolder
+			auto const parentPath = path.parent_path();
+			if (not std::filesystem::exists(parentPath))
+				std::filesystem::create_directory(parentPath);
+
+			std::ofstream fs(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
+			if (not fs.is_open())
+				return FileError::WriteError;
+
+			WriteHeader(fs, assetFile);
+			WriteMeta(fs, assetFile);
+			fs.write((const char*)assetFile.data.data(), assetFile.data.size());
 			return FileError::NoError;
 		}
 		catch (...)

@@ -1,5 +1,5 @@
-#ifndef DEBUG_FRAME_H__
-#define DEBUG_FRAME_H__
+#ifndef LOGIN_SCREEN_H__
+#define LOGIN_SCREEN_H__
 #pragma once
 
 #include "Screen.h"
@@ -7,16 +7,20 @@
 
 namespace fig::gui
 {
-	class DebugScreen : public Screen
+	class LoginScreen : public Screen
 	{
 	public:
-		SCREEN_ID(EScreen::Debug);
-		DebugScreen(Frame* pParent);
+		LoginScreen(Frame* pParent);
 
+		SCREEN_ID(EScreen::Login);
+	
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
+
+	private:
+		bool TrySignIn(const fig::string& password);
 	};
 }
 

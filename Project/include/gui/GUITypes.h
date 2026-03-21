@@ -84,4 +84,11 @@ namespace fig::gui
 
 	enum class TextureType;
 	enum class MaskType;
+
+	enum class ImageFormat : uint8_t
+	{
+		Undefined = 0x00,
+		RGB24 = 0x03,	// SDL_PIXELFORMAT_RGB24
+		RGBA32 = 0x04,	// SDL_PIXELFORMAT_RGBA8888
+	};
 }

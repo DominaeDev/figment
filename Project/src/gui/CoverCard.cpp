@@ -405,6 +405,11 @@ namespace fig::gui
 	{
 		_cardSize = cardSize;
 
+		if (cardSize == CardSize::Half)
+			SetSize(kSmallWidth, kSmallHeight);
+		else
+			SetSize(kLargeWidth, kLargeHeight);
+
 		switch (cardSize)
 		{
 		default:

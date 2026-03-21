@@ -18,7 +18,7 @@ type_id_t type_id()
     return T::type_id;
 };
 
-#define TYPE_ID(x) inline static constexpr type_id_t type_id { x }
+#define SCREEN_ID(x) inline static constexpr type_id_t type_id { x }
 
 
 #endif

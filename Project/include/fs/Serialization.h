@@ -109,16 +109,16 @@ namespace fig::io::data
 	enum class MetaTag : uint8_t
 	{
 		Unknown = 0x00,
-		CreatedAt = 0x01,	// utc
-		UpdatedAt = 0x02,	// utc
-		Version = 0x03,
-		Checksum = 0x04,
+		CreatedAt = 0x01,				// fig::timestamp; utc
+		UpdatedAt = 0x02,				// fig::timestamp; utc
+		Version = 0x03,					// uint8_t
+		Checksum = 0x04,				// int32_t
 
-		ImageWidth = 0x10,
-		ImageHeight = 0x11,
-		ImageFormatDepth = 0x12,
+		ImageWidth = 0x10,				// uint16_t
+		ImageHeight = 0x11,				// uint16_t
+		ImageFormat = 0x12,				// uint8_t
 
-		ReferenceToOriginal = 0x40,
+		ReferenceToOriginal = 0x40,		// fig::uuid
 	};
 
 	using _meta_identifier = std::array<uint64_t, 2>;
@@ -144,7 +144,7 @@ namespace fig::io::data
 		switch (tag)
 		{
 		case MetaTag::Version:
-		case MetaTag::ImageFormatDepth:
+		case MetaTag::ImageFormat:
 			return MetaValueType::UChar;
 
 		case MetaTag::ImageWidth:
@@ -174,9 +174,10 @@ namespace fig::io::data
 		uint8_t asset_subtype { 0 };
 		uint8_t data_format { 0 };
 
-		fig::bytes data {};
 		size_t data_length {};
 		bool data_encrypted { true };
+		fig::bytes data {};
+
 		std::map<MetaTag, MetaValue> meta {};
 
 		bool has_meta(MetaTag tag) const
@@ -243,36 +244,6 @@ namespace fig::io::data
 		fig::user::auth::AuthChallenge recovery_challenge {};
 		fig::user::auth::AuthChallenge auth_challenge {};
 		fig::user::auth::AuthSalt auth_salt {};
-	};
-}
-
-namespace fig::io
-{
-	class BinaryReader
-	{
-		BinaryReader() = delete;
-	public:
-		explicit BinaryReader(const fig::path& directory, fig::user::auth::AuthKey key) noexcept;
-		std::expected<fig::io::data::AssetFile, FileError> ReadFile(const fig::path& filename, bool read_data = true) noexcept;
-
-	private:
-		fig::path _directory {};
-		fig::user::auth::AuthKey _authKey {};
-	};
-
-	class BinaryWriter
-	{
-		BinaryWriter() = delete;
-	public:
-		explicit BinaryWriter(const fig::path& directory) noexcept;
-		explicit BinaryWriter(const fig::path& directory, fig::user::auth::AuthKey key) noexcept;
-		FileError WriteFile(const fig::io::data::AssetFile& file) noexcept;
-
-		static FileError WriteRecoveryFile(const fig::user::UserProfile& profile, const fig::user::auth::AuthChallenge& recoveryChallenge) noexcept;
-
-	private:
-		fig::path _directory {};
-		fig::user::auth::AuthKey _authKey {};
 	};
 }
 

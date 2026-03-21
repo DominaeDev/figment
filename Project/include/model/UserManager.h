@@ -17,7 +17,7 @@ namespace fig::user
 		~UserManager() = default;
 
 		bool LoadProfiles();
-
+		const std::vector<UserProfile>& GetProfiles() const noexcept { return _profiles; };
 		std::optional<UserProfileCRef> CreateDefaultProfile();
 		std::optional<UserProfileCRef> CreateProfile(const fig::string& profileName, const fig::string& password);
 
@@ -33,9 +33,7 @@ namespace fig::user
 		const fig::user::auth::AuthKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };
 		
 		bool ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword);
-
 		bool CreateRecoveryFile(const UserProfile& profile, const fig::string& password, fig::user::auth::AuthChallenge& recoveryChallenge, fig::user::auth::AuthKey& recoveryKey);
-		
 		bool RecoverProfile(const fig::uuid& profileID, const fig::string& recoveryCode);
 		bool RecoverProfile(const fig::uuid& profileID, const fig::user::auth::AuthKey& recoveryKey);
 

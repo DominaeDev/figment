@@ -223,6 +223,13 @@ namespace stdex
 			return ptr;
 		}
 
+		static constexpr c_resource create_and_claim(pointer ptr) noexcept
+		{
+			c_resource r {};
+			r.reset(ptr);
+			return r;
+		}
+
 		template <auto* CleanupFunction>
 		struct guard {
 			using cleaner = decltype(CleanupFunction);

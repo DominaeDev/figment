@@ -43,6 +43,7 @@ namespace fig::gui
 		TTF_Font* GetFont() const { return _pFont; }
 
 		void SetText(fig::string text);
+		void SetTextAndResize(fig::string text);
 		void SetTextAndResize(fig::string text, Coord& newWidth, Coord& newHeight);
 		fig::string GetText() const { return _text; }
 

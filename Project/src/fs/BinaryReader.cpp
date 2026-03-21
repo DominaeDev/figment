@@ -1,5 +1,6 @@
 #include <pch.h>
-#include "fs/Serialization.h"
+#include "fs/BinaryReader.h"
+#include "model/UserProfile.h"
 #include <Crc32.h>
 #include <format>
 
@@ -102,7 +103,7 @@ namespace fig::io
 	{
 		size_t length = file.data_length;
 		file.data.resize(length);
-		if (file.data_encrypted)
+		if (file.data_encrypted and !fig::util::is_zero(authKey))
 		{
 			// Read encrypted
 			fig::user::auth::Decrypt(fs, file.data, authKey);
@@ -114,12 +115,10 @@ namespace fig::io
 		}
 	}
 
-	std::expected<AssetFile, FileError> BinaryReader::ReadFile(const fig::path& filename, bool read_data) noexcept
+	static std::expected<AssetFile, FileError> __ReadFile(const fig::path& path, bool read_data, fig::user::auth::AuthKey authKey) noexcept
 	{
 		try
 		{
-			auto const path = _directory / filename;
-
 			std::ifstream fs(path.wstring(), std::ios::binary | std::ios::in | std::ios::ate);
 			if (fs.fail())
 			{
@@ -168,7 +167,7 @@ namespace fig::io
 			if (read_data and header.data_length > 0)
 			{
 				fs.seekg(header.data_offset + sizeof(FileHeader), std::ios::beg);
-				ReadData(fs, file, _authKey);
+				ReadData(fs, file, authKey);
 
 				int32_t checksum;
 				if ((bool)(header.flags & FileHeaderFlag::Checksum) and file.try_get_meta(MetaTag::Checksum, checksum))
@@ -185,5 +184,17 @@ namespace fig::io
 		{
 			return std::unexpected(FileError::ReadError);
 		}
+	}
+
+	std::expected<AssetFile, FileError> BinaryReader::ReadFile(const fig::path& filename, bool read_data) noexcept
+	{
+		auto const path = _directory / filename;
+		return __ReadFile(path, read_data, _authKey);
+	}
+
+	std::expected<fig::io::data::AssetFile, FileError> BinaryReader::ReadProfileFile(const fig::user::UserProfile& profile, const fig::path& filename) noexcept
+	{
+		auto const path = profile.GetPath() / filename;
+		return __ReadFile(path, true, {});
 	}
 }

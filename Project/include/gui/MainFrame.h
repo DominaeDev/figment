@@ -59,6 +59,7 @@ namespace fig::gui
 			return pScreen;
 		}
 
+		void ShowLoginScreen();
 		void ShowSidePanel(bool bShow) noexcept;
 
 	protected:

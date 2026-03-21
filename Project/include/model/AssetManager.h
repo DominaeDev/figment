@@ -19,6 +19,7 @@ namespace fig::io::data
 namespace fig::user
 {
 	class UserManager;
+	struct UserProfile;
 }
 
 namespace fig::io
@@ -76,6 +77,8 @@ namespace fig::io
 		void ImportCharactersInDirectory(fig::path directory, CharacterDataFormat format, size_t max_count = 0);
 		std::expected<fig::io::data::CharacterData, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		std::expected<AssetRef, FileError> ImportScenario(fig::path filename);
+		
+		static FileError CreateProfilePicture(const fig::user::UserProfile& profile, fig::path imageFilename);
 
 		[[nodiscard]] AsyncLoad LoadAssetAsync(const fig::uuid& assetId, AsyncTask task, int32_t priority);
 		void Cancel(const fig::uuid& assetId);

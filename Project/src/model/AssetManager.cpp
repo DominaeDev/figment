@@ -8,9 +8,11 @@
 #include "model/AppState.h"
 #include "model/CharacterData.h"
 #include "model/ScenarioData.h"
+#include "model/UserProfile.h"
 #include "util/Common.h"
 #include "fs/Xml.h"
-#include "fs/Serialization.h"
+#include "fs/BinaryWriter.h"
+#include "fs/BinaryReader.h"
 #include "fs/FileUtility.h"
 #include "fs/CardImporter.h"
 #include "gui/AppResources.h"
@@ -86,8 +88,9 @@ namespace fig::io
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
 		asset.file_status = AssetFileStatus::PartiallyLoaded;
-		asset.SetMeta(MetaTag::CreatedAt, util::utc_now());
-		asset.SetMeta(MetaTag::UpdatedAt, util::utc_now());
+		auto now = util::utc_now();
+		asset.SetMeta(MetaTag::CreatedAt, now);
+		asset.SetMeta(MetaTag::UpdatedAt, now);
 		return asset;
 	}
 	
@@ -108,8 +111,9 @@ namespace fig::io
 		asset.data = std::move(data); // Move data
 		asset.data_format = format;
 		asset.file_status = AssetFileStatus::PartiallyLoaded;
-		asset.SetMeta(MetaTag::CreatedAt, util::utc_now());
-		asset.SetMeta(MetaTag::UpdatedAt, util::utc_now());
+		auto now = util::utc_now();
+		asset.SetMeta(MetaTag::CreatedAt, now);
+		asset.SetMeta(MetaTag::UpdatedAt, now);
 		return asset;
 	}
 
@@ -129,8 +133,9 @@ namespace fig::io
 		asset.asset_type = type;
 		asset.data_format = format;
 		asset.file_status = AssetFileStatus::PartiallyLoaded;
-		asset.SetMeta(MetaTag::CreatedAt, util::utc_now());
-		asset.SetMeta(MetaTag::UpdatedAt, util::utc_now());
+		auto now = util::utc_now();
+		asset.SetMeta(MetaTag::CreatedAt, now);
+		asset.SetMeta(MetaTag::UpdatedAt, now);
 
 		// Copy data
 		asset.data.resize(data.size());
@@ -180,10 +185,24 @@ namespace fig::io
 
 		auto pSurface = surface.get();
 		int32_t stride = pSurface->pitch / pSurface->w;
+		assert(stride == 3 or stride == 4);
+
+		ImageFormat format;
+		switch (stride)
+		{
+		case 3:
+			format = ImageFormat::RGB24;
+			break;
+		case 4:
+			format = ImageFormat::RGBA32;
+			break;
+		default:
+			format = ImageFormat::Undefined;
+		}
 
 		asset.SetMeta(MetaTag::ImageWidth, static_cast<uint16_t>(pSurface->w));
 		asset.SetMeta(MetaTag::ImageHeight, static_cast<uint16_t>(pSurface->h));
-		asset.SetMeta(MetaTag::ImageFormatDepth, static_cast<uint8_t>(stride));
+		asset.SetMeta(MetaTag::ImageFormat, static_cast<uint8_t>(format));
 
 		if (SDL_LockSurface(pSurface))
 		{
@@ -381,7 +400,7 @@ namespace fig::io
 				if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
 				{
 					// Create portrait asset
-					auto& scenarioImageAsset = CreateImageAsset_Internal(ImageType::Unspecified, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
+					auto& scenarioImageAsset = CreateImageAsset_Internal(ImageType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
 
 					// Create cover card
 					if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
@@ -531,6 +550,52 @@ namespace fig::io
 		}
 	}
 
+	FileError AssetManager::CreateProfilePicture(const fig::user::UserProfile& profile, fig::path filename)
+	{
+		// Create profile image
+		if (auto profileImage = LoadImage(filename)
+			.transform([](auto img) { return CreateProfileImage(img); });
+			profileImage.has_value() && profileImage.value()->w > 0)
+		{
+			auto pSurface = profileImage.value().get();
+			fig::bytes data;
+			if (SDL_LockSurface(pSurface))
+			{
+				size_t data_length = toUZ(pSurface->h * pSurface->pitch);
+
+				// Copy pixel data
+				data.resize(data_length);
+				std::memcpy(data.data(), (fig::byte*)pSurface->pixels, data_length);
+				SDL_UnlockSurface(pSurface);
+			}
+			else
+			{
+				return FileError::WriteError;
+			}
+
+			AssetFile image_file {
+				.parent_id {profile.id},
+				.asset_type { static_cast<uint8_t>(AssetType::Image) },
+				.asset_subtype { static_cast<uint8_t>(ImageType::ProfileImage) },
+				.data_format { static_cast<uint8_t>(DataFormat::ImageUncompressed) },
+				.data_length { data.size() },
+				.data_encrypted { false },
+				.data { std::move(data) },
+			};
+			auto now = util::utc_now();
+			image_file.meta[MetaTag::CreatedAt] = now;
+			image_file.meta[MetaTag::UpdatedAt] = now;
+			image_file.meta[MetaTag::ImageWidth] = static_cast<uint16_t>(pSurface->w);
+			image_file.meta[MetaTag::ImageHeight] = static_cast<uint16_t>(pSurface->h);
+			image_file.meta[MetaTag::ImageFormat] = static_cast<uint8_t>(0x04);
+
+			auto filename = fig::path(std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt));
+			return BinaryWriter::WriteProfileFile(profile, filename, image_file);
+		}
+
+		return FileError::ReadError;
+	}
+
 	fig::uuid AssetManager::NewUUID() const noexcept
 	{
 		auto id = CreateUUID();
@@ -551,17 +616,19 @@ namespace fig::io
 		// Create SDL surface
 		int32_t width = cover.GetMeta<uint16_t>(MetaTag::ImageWidth).value_or(Constants::GUI::HomeScreen::CardWidth);
 		int32_t height = cover.GetMeta<uint16_t>(MetaTag::ImageHeight).value_or(Constants::GUI::HomeScreen::CardHeight);
-		int32_t depth = cover.GetMeta<uint8_t>(MetaTag::ImageFormatDepth).value_or(4);
+		ImageFormat format = static_cast<ImageFormat>(cover.GetMeta<uint8_t>(MetaTag::ImageFormat).value_or(0));
 
 		try
 		{
-			SurfacePtr pSurface = SDL_CreateSurface(width, height, depth == 3 ? SDL_PIXELFORMAT_RGB24 : SDL_PIXELFORMAT_RGBA8888);
+			SurfacePtr pSurface = SDL_CreateSurface(width, height, to_sdl_format(format));
 			if (!pSurface)
 				return false;
 
+			if (pSurface->pitch * pSurface->h != cover.data.size())
+				return {}; // Invalid data length
+
 			if (SDL_LockSurface(pSurface))
 			{
-				assert(pSurface->pitch * pSurface->h == cover.data.size());
 				std::memcpy(pSurface->pixels, cover.data.data(), cover.data.size());
 				SDL_UnlockSurface(pSurface);
 

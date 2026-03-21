@@ -64,17 +64,18 @@ namespace fig::gui
 
 	private:
 		fig::uuid _assetId;
-		CardSize _cardSize {};
-		Control* _pCounterBG;
 
-		Control* _pLargeRoot;
-		Control* _pLargeFooter;
-		Control* _pLargeFooterFade;
-		Image* _pLargeBorder;
+		CardSize _cardSize {};
+		Control* _pCounterBG {};
+
+		Control* _pLargeRoot {};
+		Control* _pLargeFooter {};
+		Control* _pLargeFooterFade {};
+		Image* _pLargeBorder {};
 		StaticText* _pLargeLabel {};
 
-		Control* _pSmallRoot;
-		Image* _pSmallBorder;
+		Control* _pSmallRoot {};
+		Image* _pSmallBorder {};
 		StaticText* _pSmallLabel {};
 
 		Point _tagPosition {};
