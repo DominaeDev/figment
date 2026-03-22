@@ -33,6 +33,7 @@ namespace fig::gui
 	{
 	public:
 		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Default);
+		void Init();
 
 		void SetBorder(CardBorderStyle style);
 		void SetCardSize(CardSize cardSize);
@@ -64,6 +65,7 @@ namespace fig::gui
 
 	private:
 		fig::uuid _assetId;
+		bool _bInitialized = false;
 
 		CardSize _cardSize {};
 		Control* _pCounterBG {};
@@ -92,6 +94,14 @@ namespace fig::gui
 
 		std::unique_ptr<SearchIndex> _searchIndex;
 		std::set<fig::string> _tags {};
+
+		struct PendingTag
+		{
+			fig::string tag;
+			Color color;
+		};
+		fig::string _pendingLabel {};
+		std::vector<PendingTag> _pendingTags {};
 
 	};
 }

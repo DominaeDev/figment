@@ -17,8 +17,7 @@ namespace fig::gui
 		{
 			auto& character = try_character.value();
 			SetLabel(character.fullName);
-
-			CreateChatCounter(0);
+			SetIndex(character.searchIndex);
 
 			// Tags
 			switch (character.gender)
@@ -38,31 +37,6 @@ namespace fig::gui
 			{
 				if (AddTag(character.tags[i]) == CoverCard::AddTagResult::Stop)
 					break;
-			}
-
-			if constexpr (Disabled)
-			{
-				switch (character.gender)
-				{
-				case data::CharacterGender::Male:
-					AddSearchTerms("male");
-					break;
-				case data::CharacterGender::Female:
-					AddSearchTerms("female");
-					break;
-				case data::CharacterGender::Custom:
-					AddSearchTerms(character.properties[Constants::CharacterProperties::Gender].value);
-					break;
-				}
-
-				AddSearchTerms(character.shortName);
-				AddSearchTerms(character.fullName);
-				AddSearchTerms(character.description);
-				AddSearchTerms(character.tags);
-			}
-			else
-			{
-				SetIndex(character.searchIndex);
 			}
 		}
 	}

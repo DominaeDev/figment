@@ -33,6 +33,18 @@ namespace fig::gui
 		_cardSize { cardSize }
 	{
 		_searchIndex = std::make_unique<SearchIndex>();
+		
+		if (cardSize == CardSize::Half)
+			SetSize(kSmallWidth, kSmallHeight);
+		else
+			SetSize(kLargeWidth, kLargeHeight);
+	}
+
+	void CoverCard::Init()
+	{
+		if (_bInitialized)
+			return;
+		_bInitialized = true;
 
 		_pLargeRoot = new Area(this);
 		_pLargeRoot->SetSize(kLargeWidth, kLargeHeight);
@@ -106,7 +118,7 @@ namespace fig::gui
 //		pSelectionBorder->SetPosition(-1, -1);
 //		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
 
-		SetCardSize(cardSize);
+		SetCardSize(_cardSize);
 
 		if constexpr (Enabled)
 		{
@@ -135,10 +147,31 @@ namespace fig::gui
 			static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
 			SetBorder(borderWeights[dist(rng)]);
 		}
+
+		if (not _pendingTags.empty())
+		{
+			for (auto& tag : _pendingTags)
+			{
+				if (AddTag(tag.tag, tag.color) == AddTagResult::Stop)
+					break;
+			}
+			_pendingTags.clear();
+		}
+
+		if (not _pendingLabel.empty())
+		{
+			SetLabel(_pendingLabel);
+			_pendingLabel.clear();
+		}
 	}
 
 	void CoverCard::OnUpdate(float fElapsed)
 	{
+		if (!_bInitialized)
+		{
+			Init();
+		}
+
 		if (_bHasError && !_pErrorIcon)
 		{
 			// Create error icon
@@ -160,6 +193,12 @@ namespace fig::gui
 
 	void CoverCard::SetLabel(const fig::string& text) noexcept
 	{
+		if (!_bInitialized)
+		{
+			_pendingLabel = text;
+			return;
+		}
+
 		// Large label
 		if (_pLargeLabel)
 		{
@@ -236,6 +275,12 @@ namespace fig::gui
 
 	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, const Color& color)
 	{
+		if (!_bInitialized)
+		{
+			_pendingTags.push_back(PendingTag { tag, color });
+			return CoverCard::AddTagResult::Reject;
+		}
+
 		if (tag.size() > 20)
 			return AddTagResult::Reject; // Too long
 
@@ -409,6 +454,9 @@ namespace fig::gui
 			SetSize(kSmallWidth, kSmallHeight);
 		else
 			SetSize(kLargeWidth, kLargeHeight);
+
+		if (!_bInitialized)
+			return;
 
 		switch (cardSize)
 		{

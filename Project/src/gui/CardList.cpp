@@ -70,13 +70,19 @@ namespace fig::gui
 			}
 		}
 
+		size_t initCounter = 0;
 		for (auto& pCard : _cards)
 		{
 			auto request = assets.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCover, priority--);
 			pCard->SetPendingCoverImage(std::move(request.future));
+
+			if (initCounter++ < 8)
+				pCard->Init();
+			else
+				pCard->Cull(true);
 		}
 
-		InvalidateLayout();
+		LayoutNow();
 	}
 
 	void CardList::OnUpdate(float fElapsed)
