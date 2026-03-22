@@ -41,6 +41,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_MENU_SCENARIOS, "./resources/gui/icons/icon_scenarios.png");
 		LoadTexture(pRenderer, TextureType::ICON_GRID_SMALL, "./resources/gui/icons/icon_grid_small.png");
 		LoadTexture(pRenderer, TextureType::ICON_GRID_LARGE, "./resources/gui/icons/icon_grid_large.png");
+		LoadTexture(pRenderer, TextureType::ICON_TAG, "./resources/gui/icons/icon_tag.png");
 
 		// Chat
 		LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/chat/bg_9grid.png");

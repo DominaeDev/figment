@@ -194,6 +194,7 @@
     <ClCompile Include="src\gui\SidePanelButton.cpp" />
     <ClCompile Include="src\gui\SimpleTextBox.cpp" />
     <ClCompile Include="src\gui\ThemedButton.cpp" />
+    <ClCompile Include="src\gui\UserProfileWidget.cpp" />
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
@@ -209,6 +210,7 @@
     <ClCompile Include="src\llm\LLMStateVariables.cpp" />
     <ClCompile Include="src\llm\ModelState.cpp" />
     <ClCompile Include="src\llm\LLMStatus.cpp" />
+    <ClCompile Include="src\model\AppSettings.cpp" />
     <ClCompile Include="src\model\AppState.cpp" />
     <ClCompile Include="src\gui\Area.cpp" />
     <ClCompile Include="src\model\Asset.cpp" />
@@ -240,6 +242,7 @@
     <ClCompile Include="src\model\ChatCommands.cpp" />
     <ClCompile Include="src\model\ScenarioData.cpp" />
     <ClCompile Include="src\model\UserManager.cpp" />
+    <ClCompile Include="src\model\UserSettings.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -399,6 +402,7 @@
     <ClInclude Include="include\gui\ScrollPanel.h" />
     <ClInclude Include="include\gui\SidePanel.h" />
     <ClInclude Include="include\gui\ThemedButton.h" />
+    <ClInclude Include="include\gui\UserProfileWidget.h" />
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
@@ -417,6 +421,8 @@
     <ClInclude Include="include\llm\ModelState.h" />
     <ClInclude Include="include\llm\LLMStatus.h" />
     <ClInclude Include="include\llm\PromptTemplateTypes.h" />
+    <ClInclude Include="include\model\AppSettings.h" />
+    <ClInclude Include="include\model\Settings.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\model\Asset.h" />
@@ -432,6 +438,7 @@
     <ClInclude Include="include\model\ScenarioData.h" />
     <ClInclude Include="include\model\UserManager.h" />
     <ClInclude Include="include\model\UserProfile.h" />
+    <ClInclude Include="include\model\UserSettings.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\util\IniFile.h" />
     <ClInclude Include="include\util\ProfileDatabase.h" />

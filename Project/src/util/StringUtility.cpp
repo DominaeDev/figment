@@ -577,4 +577,22 @@ namespace fig::util
 
 		return input;
 	}
+
+	fig::string int_to_string(int32_t value)
+	{
+		char buf[16];
+		auto [parse_end, parse_err] = std::to_chars(buf, buf + sizeof(buf), value);
+		return fig::string(buf, parse_end);
+	}
+
+	fig::string float_to_string(float value)
+	{
+		char buf[32];
+		auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value,
+			std::chars_format::general, 8);
+		fig::string s(buf, ptr);
+		if (s.find_first_of(".eEnNiI") == fig::string::npos)
+			s += ".0";
+		return s;
+	}
 }

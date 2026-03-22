@@ -11,11 +11,13 @@ namespace fig::gui
 	{
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
-
-		auto gridLarge = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
-		gridLarge->SetDelegate([this]() { SetSmallGridSize(false); });
-		auto gridSmall = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_SMALL);
-		gridSmall->SetDelegate([this]() { SetSmallGridSize(true); });
+		
+		auto toggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
+		toggleTagsButton->SetDelegate([this]() { });
+		auto gridLargeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
+		gridLargeButton->SetDelegate([this]() { SetSmallGridSize(false); });
+		auto gridSmallButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_SMALL);
+		gridSmallButton->SetDelegate([this]() { SetSmallGridSize(true); });
 
 		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
@@ -28,8 +30,9 @@ namespace fig::gui
 
 		auto pTopSizer = new HorizontalSizer();
 		pTopSizer->AddStretchSpacer();
-		pTopSizer->Add(gridLarge, 0, Sizer::AlignCenterVertical | Sizer::Right, 0);
-		pTopSizer->Add(gridSmall, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
+		pTopSizer->Add(toggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(gridLargeButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(gridSmallButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopBar->SetSizer(pTopSizer);
 

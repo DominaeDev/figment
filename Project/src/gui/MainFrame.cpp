@@ -260,6 +260,16 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
+	void MainFrame::OnSignedIn(const fig::user::UserProfile& profile) noexcept
+	{
+		if (_pSidePanel)
+			_pSidePanel->SetUserProfile(profile);
+		MainFrame::GetInstance().ShowSidePanel(true);
+
+		auto pHomeScreen = MainFrame::GetInstance().ChangeScreen<HomeScreen>();
+		pHomeScreen->CreateCards();
+	}
+
 	void MainFrame::ShowLoginScreen()
 	{
 		// Show login screen

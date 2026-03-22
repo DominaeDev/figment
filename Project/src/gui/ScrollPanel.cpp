@@ -26,8 +26,7 @@ namespace fig::gui
 		// Smooth scrolling
 		if (_fScrollY != _fTargetScrollY)
 		{
-			constexpr float kSpeed = 18.f;
-			_fScrollY += (_fTargetScrollY - _fScrollY) * kSpeed * fElapsed;
+			_fScrollY += (_fTargetScrollY - _fScrollY) * Constants::GUI::MouseScrollSmoothing * fElapsed;
 
 			if (std::abs(_fTargetScrollY - _fScrollY) < 0.5f)
 				_fScrollY = _fTargetScrollY;

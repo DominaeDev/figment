@@ -3,6 +3,7 @@
 #include "gui/AppResources.h"
 #include "gui/MainFrame.h"
 #include "gui/SidePanelButton.h"
+#include "gui/UserProfileWidget.h"
 
 #include "gui/HomeScreen.h"
 #include "gui/ChatScreen.h"
@@ -71,9 +72,16 @@ namespace fig::gui
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pScenariosButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
 
-
 		auto pFooterPanel = new Area(this);
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);
+
+		_pUserWidget = new UserProfileWidget(pFooterPanel);
+		_pUserWidget->SetHeight(60);
+
+		auto pFooterSizer = new VerticalSizer();
+		pFooterSizer->AddStretchSpacer();
+		pFooterSizer->Add(_pUserWidget, 0, Sizer::Expand);
+		pFooterPanel->SetSizer(pFooterSizer);
 		
 		auto pTopSizer = new VerticalSizer();
 		pTopSizer->Add(pHeaderPanel, 0, Sizer::Expand);
@@ -89,4 +97,10 @@ namespace fig::gui
 		_pGradient->SetX(GetWidth() - kGradientSize);
 		_pGradient->SetSize(kGradientSize, GetHeight());
 	}
+
+	void SidePanel::SetUserProfile(const fig::user::UserProfile& profile)
+	{
+		_pUserWidget->SetUser(profile);
+	}
+
 }

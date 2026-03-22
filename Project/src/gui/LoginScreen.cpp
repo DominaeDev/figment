@@ -4,7 +4,6 @@
 #include "gui/VerticalSizer.h"
 #include "gui/PasswordBox.h"
 #include "gui/MainFrame.h"
-#include "gui/HomeScreen.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 
@@ -37,7 +36,7 @@ namespace fig::gui
 		pVerticalSizer->AddStretchSpacer();
 
 		auto pProfileImage = new ImageWithMask(center, nullptr, nullptr);
-		pProfileImage->SetSize(128, 128);
+		pProfileImage->SetSize(160, 160);
 
 		auto pProfileName = new StaticText(center, "", FontFace::Default, 24.0, true);
 		pProfileName->SetAlignment(TextAlignment::Middle_Top);
@@ -102,9 +101,9 @@ namespace fig::gui
 		auto& profile = userMngr.GetProfiles().front();
 		if (userMngr.SignIn(profile.id, ""))
 		{
-			auto pHomeScreen = MainFrame::GetInstance().ChangeScreen<HomeScreen>();
-			MainFrame::GetInstance().ShowSidePanel(true);
-			pHomeScreen->CreateCards();
+			MainFrame::GetInstance().OnSignedIn(profile);
+
+
 			return true;
 		}
 

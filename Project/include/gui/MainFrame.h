@@ -15,6 +15,11 @@ namespace fig::llm
 	struct LLMStatus;
 }
 
+namespace fig::user
+{
+	struct UserProfile;
+}
+
 namespace fig::gui
 {
 	class SidePanel;
@@ -61,6 +66,7 @@ namespace fig::gui
 
 		void ShowLoginScreen();
 		void ShowSidePanel(bool bShow) noexcept;
+		void OnSignedIn(const fig::user::UserProfile& profile) noexcept;
 
 	protected:
 		template<IsScreen T>

@@ -5,6 +5,7 @@
 
 #include <memory>
 #include "gui/GUITypes.h"
+#include "model/AppSettings.h"
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -39,6 +40,7 @@ namespace fig
 			std::shared_ptr<fig::llm::LLMBackend> pLLMEngine;
 			std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
 			std::shared_ptr<fig::user::UserManager> pUserManager;
+			std::unique_ptr<fig::AppSettings> pAppSettings;
 		};
 
 		static State* CreateState();
@@ -47,6 +49,7 @@ namespace fig
 		static fig::gui::Window& GetMainWindow();
 		static fig::llm::LLMBackend& GetLLMEngine();
 		static fig::user::UserManager& GetUserManager();
+		static fig::AppSettings& GetSettings();
 
 		[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
 		static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);

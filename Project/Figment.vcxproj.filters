@@ -138,6 +138,9 @@
     <Filter Include="Source Files\Frontend\GUI\Screens">
       <UniqueIdentifier>{0b0e7823-493d-4e1c-9c9f-946893298eae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Widgets">
+      <UniqueIdentifier>{df64db93-71b3-42f9-a95f-1347111b58b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -460,6 +463,15 @@
     </ClCompile>
     <ClCompile Include="src\gui\ImageWithMask.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\UserSettings.cpp">
+      <Filter>Source Files\AppModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\AppSettings.cpp">
+      <Filter>Source Files\AppModel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\UserProfileWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Widgets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1113,6 +1125,18 @@
     </ClInclude>
     <ClInclude Include="include\gui\ImageWithMask.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\Settings.h">
+      <Filter>Source Files\AppModel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\AppSettings.h">
+      <Filter>Source Files\AppModel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\UserSettings.h">
+      <Filter>Source Files\AppModel</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserProfileWidget.h">
+      <Filter>Source Files\Frontend\GUI\Widgets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

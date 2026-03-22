@@ -28,6 +28,9 @@ namespace fig
 
 		_pIBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 
+		__appState->pAppSettings = std::make_unique<AppSettings>(Constants::Paths::AppSettings);
+		__appState->pAppSettings->Load();
+
 		__appState->pLLMEngine = std::make_shared<LLMBackend>();
 
 		// Load user profiles
@@ -38,7 +41,9 @@ namespace fig
 		try
 		{
 			// Create main frame
-			__appState->pMainWindow = std::make_shared<Window>(fig::strings::ApplicationTitle, Constants::GUI::WindowWidth, Constants::GUI::WindowHeight);
+			__appState->pMainWindow = std::make_shared<Window>(fig::strings::ApplicationTitle, 
+				GetSettings().GetIntVector<2>(AppSetting::WindowSize)[0], 
+				GetSettings().GetIntVector<2>(AppSetting::WindowSize)[1]);
 			__appState->pMainWindow->CreateFrame<MainFrame>();
 
 #if !_DEBUG
@@ -59,11 +64,14 @@ namespace fig
 		__appState->pMainWindow.reset();
 		__appState->pLLMInstance.reset();
 
-		if (__appState->pUserManager)
+		if (__appState->pAppSettings)
 		{
-			__appState->pUserManager->SignOut();
-			__appState->pUserManager.reset();
+			__appState->pAppSettings->Save();
+			__appState->pAppSettings.reset();
 		}
+
+		if (__appState->pUserManager)
+			__appState->pUserManager.reset();
 
 		if (__appState->pLLMEngine)
 		{
@@ -92,6 +100,12 @@ namespace fig
 	{
 		assert(__appState);
 		return __appState->pLLMInstance;
+	}
+
+	AppSettings& Global::GetSettings()
+	{
+		assert(__appState);
+		return *(__appState->pAppSettings.get());
 	}
 
 	fig::user::UserManager& Global::GetUserManager()

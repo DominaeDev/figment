@@ -9,8 +9,10 @@ namespace Constants
 {
 	namespace GUI
 	{
-		constexpr fig::gui::Coord WindowWidth = 1320;
-		constexpr fig::gui::Coord WindowHeight = 900;
+		constexpr fig::gui::Coord WindowDefaultWidth = 1320;
+		constexpr fig::gui::Coord WindowDefaultHeight = 900;
+		constexpr fig::gui::Coord WindowMinWidth = 800;
+		constexpr fig::gui::Coord WindowMinHeight = 600;
 
 		constexpr double DefaultFontSize = 18.5;
 		constexpr double StatusBarFontSize = 14.5;
@@ -18,7 +20,8 @@ namespace Constants
 		constexpr double ChatMessageFontSize = 16.0; //15.5;
 		constexpr fig::gui::Coord ChatScrollWidth = 800;
 		
-		constexpr float MouseScrollSpeed = 140.0f;
+		constexpr float MouseScrollSpeed = 200.0f;
+		constexpr float MouseScrollSmoothing = 14.0f;
 		
 		constexpr int32_t ProfileImageWidth = 256;
 		constexpr int32_t ProfileImageHeight = 256;
@@ -82,6 +85,8 @@ namespace Constants
 
 	namespace Paths
 	{
+		constexpr fig::const_string AppSettings = "./settings.ini";
+		constexpr fig::const_string UserSettings = "settings.ini";
 		constexpr fig::const_string ProfilesFolder = "./profiles";
 		constexpr fig::const_string ProfilesFileName = "profiles";
 		constexpr fig::const_string ProfilesFileExt = "";

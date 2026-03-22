@@ -1,6 +1,5 @@
 #include <pch.h>
 #include "util/IniFile.h"
-
 #include <cerrno>
 #include <charconv>
 #include <fstream>
@@ -126,28 +125,17 @@ namespace fig::util
 		return r;
 	}
 
-	static fig::string FloatStr(float value)
-	{
-		char buf[32];
-		auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value,
-			std::chars_format::general, 8);
-		fig::string s(buf, ptr);
-		if (s.find_first_of(".eEnNiI") == fig::string::npos)
-			s += ".0";
-		return s;
-	}
-
 	static fig::string SerializeValue(const IniFile::Value& val)
 	{
 		return std::visit([]<typename T>(const T & value) -> fig::string
 		{
 			if constexpr (std::is_same_v<T, int32_t>)
 			{
-				return std::to_string(value);
+				return int_to_string(value);
 			}
 			else if constexpr (std::is_same_v<T, float>)
 			{
-				return FloatStr(value);
+				return float_to_string(value);
 			}
 			else if constexpr (std::is_same_v<T, fig::string>)
 			{
@@ -163,7 +151,7 @@ namespace fig::util
 				for (size_t i = 0; i < value.size(); ++i)
 				{
 					if (i) r += ", ";
-					r += std::to_string(value[i]);
+					r += int_to_string(value[i]);
 				}
 				return r + "]";
 			}
@@ -173,7 +161,7 @@ namespace fig::util
 				for (size_t i = 0; i < value.size(); ++i)
 				{
 					if (i) r += ", ";
-					r += FloatStr(value[i]);
+					r += float_to_string(value[i]);
 				}
 				return r + "]";
 			}
@@ -383,7 +371,7 @@ namespace fig::util
 		return itSection->second.values.contains(key);
 	}
 
-	[[nodiscard]] bool IniFile::HasGroup(const fig::string& section) const
+	[[nodiscard]] bool IniFile::HasSection(const fig::string& section) const
 	{
 		return _sections.contains(section);
 	}
@@ -398,7 +386,7 @@ namespace fig::util
 		std::erase(itSection->second.key_order, key);
 	}
 
-	void IniFile::RemoveGroup(const fig::string& section)
+	void IniFile::RemoveSection(const fig::string& section)
 	{
 		_sections.erase(section);
 		std::erase(_section_order, section);
@@ -477,7 +465,7 @@ namespace fig::util
 				continue;
 
 			if (!in_group)
-				return std::unexpected(IniError::KeyBeforeGroup);
+				return std::unexpected(IniError::KeyBeforeSection);
 
 			auto key_sv = Trim(trimmed.substr(0, eq));
 			if (key_sv.empty())
@@ -554,5 +542,5 @@ namespace fig::util
 		newSection.values[key] = std::move(value);
 	}
 
-
+	
 }

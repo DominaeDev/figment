@@ -8,10 +8,11 @@
 
 using namespace fig::gui;
 
-Window::Window(fig::string_view title, int32_t width, int32_t height) :
-	_width { width },
-	_height { height }
+Window::Window(fig::string_view title, int32_t width, int32_t height)
 {
+	_width = std::max(width, Constants::GUI::WindowMinWidth);
+	_height = std::max(height, Constants::GUI::WindowMinHeight);
+
 	_window = fig::sdl::Window(toCStr(title), width, height, SDL_WINDOW_RESIZABLE);
 	if (!_window)
 	{
@@ -33,7 +34,7 @@ Window::Window(fig::string_view title, int32_t width, int32_t height) :
 		throw std::runtime_error("Couldn't create text engine");
 	}
 
-	SDL_SetWindowMinimumSize(_window.get(), 800, 400);
+	SDL_SetWindowMinimumSize(_window.get(), Constants::GUI::WindowMinWidth, Constants::GUI::WindowMinHeight);
 	SDL_SetRenderVSync(_renderer.get(), 1);
 
 	// Load textures

@@ -48,6 +48,9 @@ namespace fig::util
 	wstring& normalize_newlines(wstring& text);
 	[[nodiscard]] wstring normalize_newlines(wstring&& s);
 
+	fig::string int_to_string(int32_t value);
+	fig::string float_to_string(float value);
+
 	size_t validate_utf8(const string& text) noexcept;
 	wstring from_utf8(const string& str);
 	string to_utf8(const wstring& str);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "util/StringUtility.h"
 
 #include <variant>
 #include <map>
@@ -16,9 +17,9 @@ namespace fig::util
 		FileWriteError,
 		MalformedSection,
 		UnclosedMultilineString,
-		KeyBeforeGroup,
+		KeyBeforeSection,
 		EmptyKeyName,
-		GroupNotFound,
+		SectionNotFound,
 		KeyNotFound,
 		TypeMismatch,
 	};
@@ -45,12 +46,12 @@ namespace fig::util
 		template<typename T>
 		[[nodiscard]] std::expected<T, IniError> Get(const fig::string& section, const fig::string& key) const
 		{
-			auto itGroup = _sections.find(fig::string(section));
-			if (itGroup == _sections.end())
-				return std::unexpected(IniError::GroupNotFound);
+			auto itSection = _sections.find(fig::string(section));
+			if (itSection == _sections.end())
+				return std::unexpected(IniError::SectionNotFound);
 
-			auto itKey = itGroup->second.values.find(fig::string(key));
-			if (itKey == itGroup->second.values.end())
+			auto itKey = itSection->second.values.find(fig::string(key));
+			if (itKey == itSection->second.values.end())
 				return std::unexpected(IniError::KeyNotFound);
 
 			auto result = Coerce<T>(itKey->second);
@@ -60,11 +61,38 @@ namespace fig::util
 			return *result;
 		}
 
+		template<typename T>
+		static std::optional<T> Coerce(const Value& val)
+		{
+			if (const T* exact = std::get_if<T>(&val))
+				return *exact;
+
+			else if constexpr (std::is_same_v<T, float>)
+			{
+				if (const auto* int_val = std::get_if<int32_t>(&val))
+					return static_cast<float>(*int_val);
+			}
+			else if constexpr (std::is_same_v<T, int32_t>)
+			{
+				if (const auto* float_val = std::get_if<float>(&val))
+					return static_cast<int32_t>(*float_val);
+			}
+			else if constexpr (std::is_same_v<T, std::string>)
+			{
+				if (const auto* int_val = std::get_if<int32_t>(&val))
+					return int_to_string(*int_val);
+				if (const auto* float_val = std::get_if<float>(&val))
+					return float_to_string(*float_val);
+			}
+
+			return std::nullopt;
+		}
+
 		[[nodiscard]] bool HasKey(const fig::string& section, const fig::string& key) const;
-		[[nodiscard]] bool HasGroup(const fig::string& section) const;
+		[[nodiscard]] bool HasSection(const fig::string& section) const;
 
 		void Remove(const fig::string& section, const fig::string& key);
-		void RemoveGroup(const fig::string& section);
+		void RemoveSection(const fig::string& section);
 		void Clear();
 
 		[[nodiscard]] std::expected<void, IniError> Load(const fig::path& path);

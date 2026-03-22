@@ -88,6 +88,11 @@ namespace fig::user
 	{
 	}
 
+	UserManager::~UserManager()
+	{
+		SignOut();
+	}
+
 	std::optional<UserProfileCRef> UserManager::CreateDefaultProfile()
 	{
 		return CreateProfile(fig::string(fig::strings::UserProfile::DefaultUser), "");
@@ -197,6 +202,7 @@ namespace fig::user
 			return false; // Incorrect password
 
 		_signedInProfile = &profile;
+		_pUserSettings = std::make_unique<UserSettings>(profile.GetPath() / Constants::Paths::UserSettings);
 		_pAssetMngr = std::make_unique<AssetManager>(*this);
 		_pContentDatabase = std::make_unique<ContentDatabase>(*_pAssetMngr.get());
 
@@ -214,6 +220,8 @@ namespace fig::user
 			return false;
 
 		_pContentDatabase.reset();
+
+		_pUserSettings->Save();
 
 		_pAssetMngr->SaveModified();
 		_pAssetMngr.reset();

@@ -6,6 +6,7 @@
 #include "model/UserProfile.h"
 #include "model/AssetManager.h"
 #include "model/ContentDatabase.h"
+#include "model/UserSettings.h"
 #include "util/ProfileDatabase.h"
 
 namespace fig::user
@@ -14,7 +15,7 @@ namespace fig::user
 	{
 	public:
 		UserManager();
-		~UserManager() = default;
+		virtual ~UserManager();
 
 		bool LoadProfiles();
 		const std::vector<UserProfile>& GetProfiles() const noexcept { return _profiles; };
@@ -54,6 +55,7 @@ namespace fig::user
 
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 		std::unique_ptr<fig::io::ContentDatabase> _pContentDatabase;
+		std::unique_ptr<fig::UserSettings> _pUserSettings;
 	};
 }
 #endif
