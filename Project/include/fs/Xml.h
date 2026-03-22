@@ -97,6 +97,7 @@ namespace fig::io
 		XmlReader(const fig::path& path);
 		XmlReader(const fig::path& path, const fig::string& root);
 		XmlReader(const fig::string& document);
+		XmlReader(fig::string_view document);
 		~XmlReader();
 
 		bool IsOk() const noexcept;

@@ -45,6 +45,7 @@ namespace fig::io::data
 
 		bool LoadFromXml(const fig::path& filename);
 		bool LoadFromXml(const fig::string& doc);
+		bool LoadFromXml(fig::string_view doc);
 		void SaveToXml(fig::bytes& buffer) const;
 	};
 }

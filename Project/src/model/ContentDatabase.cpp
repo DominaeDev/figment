@@ -25,7 +25,7 @@ namespace fig::io
 			if (asset.data_format == DataFormat::DataXml && asset.HasData())
 			{
 				CharacterData character;
-				if (character.LoadFromXml(asset.AsString()))
+				if (character.LoadFromXml(asset.AsStringView()))
 					_characters[asset.id] = std::move(character);
 			}
 			else

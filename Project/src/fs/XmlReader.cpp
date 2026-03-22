@@ -376,6 +376,19 @@ namespace fig::io
 		_pRoot = _pDoc->RootElement();
 	}
 
+	XmlReader::XmlReader(fig::string_view document)
+	{
+		_pDoc = new XMLDocument();
+		if (_pDoc->Parse((char*)document.data(), document.size()) != XML_SUCCESS)
+		{
+			// Error
+			delete _pDoc;
+			_pDoc = nullptr;
+			_pRoot = nullptr;
+			return;
+		}
+		_pRoot = _pDoc->RootElement();
+	}
 
 	XmlReader::~XmlReader()
 	{

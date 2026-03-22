@@ -105,6 +105,7 @@ namespace fig::io
 		constexpr bool IsOfImageType(ImageType subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
 		constexpr bool HasData() const noexcept { return not data.empty(); }
 		fig::string AsString() const;
+		fig::string_view AsStringView() const;
 
 		template <typename T>
 		std::optional<T> GetMeta(MetaTag tag) const

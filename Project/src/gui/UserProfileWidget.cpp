@@ -2,17 +2,22 @@
 #include "gui/UserProfileWidget.h"
 #include "gui/ImageWithMask.h"
 #include "gui/AppResources.h"
+#include "gui/ButtonWithIcon.h"
 
 namespace fig::gui
 {
 	UserProfileWidget::UserProfileWidget(LayoutElement* pParent) noexcept : Area(pParent)
 	{
 		_pImage = new ImageWithMask(this, nullptr, nullptr);
-		_pImage->SetX(4);
 		_pImage->SetSize(48, 48);
 
-		_pLabel = new StaticText(this, "", FontFace::Default, 16.0, false);
+		_pLabel = new StaticText(this, "", FontFace::Default, 14.0, false);
 		_pLabel->EnableEllipsis(true);
+
+		_pButton = new ButtonWithIcon(this, TextureType::ICON_LOGOUT);
+		_pButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pButton->SetSize(36, 36);
+		_pButton->CenterVertically();
 	}
 
 	void UserProfileWidget::SetUser(const fig::user::UserProfile& profile) noexcept
@@ -32,11 +37,21 @@ namespace fig::gui
 	void UserProfileWidget::OnSize()
 	{
 		if (_pImage)
+		{
+			_pImage->SetX(8);
 			_pImage->CenterVertically();
+		}
+		
 		if (_pLabel)
 		{
-			_pLabel->SetPosition(58, 4);
-			_pLabel->SetMaxSize(GetWidth() - _pLabel->GetX() - 4, -1);
+			_pLabel->SetPosition(66, 6);
+			_pLabel->SetMaxSize(GetWidth() - _pLabel->GetX() - 34, -1);
+		}
+
+		if (_pButton)
+		{
+			_pButton->SetX(GetWidth() - _pButton->GetWidth() - 8);
+			_pButton->CenterVertically();
 		}
 	}
 

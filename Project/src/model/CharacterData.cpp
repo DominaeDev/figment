@@ -102,6 +102,15 @@ namespace fig::io::data
 		return ReadXml(xml, *this);
 	}
 
+	bool CharacterData::LoadFromXml(fig::string_view doc)
+	{
+		XmlReader xml(doc);
+		if (not xml.IsOk() or xml.GetRootElement().GetName() != "Character")
+			return false; // Invalid document type
+
+		return ReadXml(xml, *this);
+	}
+
 	void CharacterData::SaveToXml(fig::bytes& buffer) const
 	{
 		XmlWriter xml("Character");

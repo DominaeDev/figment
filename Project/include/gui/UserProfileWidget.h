@@ -12,6 +12,7 @@ namespace fig::gui
 {
 	class ImageWithMask;
 	class StaticText;
+	class ButtonWithIcon;
 
 	class UserProfileWidget : public Area
 	{
@@ -26,6 +27,7 @@ namespace fig::gui
 	private:
 		ImageWithMask* _pImage;
 		StaticText* _pLabel;
+		ButtonWithIcon* _pButton;
 	};
 
 

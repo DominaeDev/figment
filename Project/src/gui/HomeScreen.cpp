@@ -84,7 +84,7 @@ namespace fig::gui
 		_pCardList->CreateCards(CardList::CardType::Character);
 
 		auto endTime = std::chrono::steady_clock::now();
-		MainFrame::SetStatusBar(std::format("Duration: {}ms", toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
+//		MainFrame::SetStatusBar(std::format("Duration: {}ms", toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
 
 		InvalidateLayout();
 	}

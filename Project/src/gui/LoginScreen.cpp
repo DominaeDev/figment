@@ -99,11 +99,15 @@ namespace fig::gui
 	{
 		auto& userMngr = Global::GetUserManager();
 		auto& profile = userMngr.GetProfiles().front();
+
+		auto startTime = std::chrono::steady_clock::now();
+
 		if (userMngr.SignIn(profile.id, ""))
 		{
 			MainFrame::GetInstance().OnSignedIn(profile);
 
-
+			auto endTime = std::chrono::steady_clock::now();
+			MainFrame::SetStatusBar(std::format("Duration: {}ms", toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
 			return true;
 		}
 
