@@ -13,7 +13,7 @@ namespace fig::gui
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 		
 		auto toggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
-		toggleTagsButton->SetDelegate([this]() { });
+		toggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 		auto gridLargeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
 		gridLargeButton->SetDelegate([this]() { SetSmallGridSize(false); });
 		auto gridSmallButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_SMALL);
@@ -116,5 +116,10 @@ namespace fig::gui
 	void HomeScreen::SetSmallGridSize(bool bSmall)
 	{
 		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Default);
+	}
+
+	void HomeScreen::ToggleTags()
+	{
+		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
 	}
 }

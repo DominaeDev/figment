@@ -21,12 +21,12 @@ namespace fig::gui
 	constexpr Coord kTagRowHeight = 32;
 	constexpr Coord kTagY = 70;
 	constexpr Coord kTagMaxRows = 2;
-	constexpr Coord kFooterHeight = 106;
+	constexpr Coord kFooterHeight = 80;
 	constexpr auto kLargeWidth = Constants::GUI::HomeScreen::CardWidth;
 	constexpr auto kLargeHeight = Constants::GUI::HomeScreen::CardHeight;
 	constexpr auto kSmallWidth = Constants::GUI::HomeScreen::CardWidth / 2;
 	constexpr auto kSmallHeight = Constants::GUI::HomeScreen::CardHeight / 2;
-	constexpr auto kSmallMargin = kMargin / 2;
+	constexpr auto kSmallMargin = 8;
 
 	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : Image(pParent, nullptr),
 		_assetId { assetId },
@@ -44,6 +44,7 @@ namespace fig::gui
 	{
 		if (_bInitialized)
 			return;
+
 		_bInitialized = true;
 
 		_pLargeRoot = new Area(this);
@@ -73,13 +74,18 @@ namespace fig::gui
 		// Border (large)
 		auto pSimpleBorder = new TexturedBorder(_pLargeRoot, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
-		pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+		pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x40 });
 
 		// Styled border (large)
 		_pLargeBorder = new Image(_pLargeRoot, nullptr);
 		_pLargeBorder->SetPosition(-16, -16);
 		_pLargeBorder->SetSize(kLargeWidth + 32, kLargeHeight + 32);
 		_pLargeBorder->SetVisible(false);
+
+		// Tags
+		_tagPosition.x = kTagMargin;
+		_tagPosition.y = kTagY;
+		_pTagsRoot = new Area(_pLargeFooter);
 
 		// Footer (small)
 		auto pSmallFooter = new Area(_pSmallRoot);
@@ -109,15 +115,13 @@ namespace fig::gui
 		_pSmallBorder->SetSize(kSmallWidth + 12, kSmallHeight + 12);
 		_pSmallBorder->SetVisible(false);
 
-		_tagPosition.x = kTagMargin;
-		_tagPosition.y = kTagY;
-
 		Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 
 //		auto pSelectionBorder = new RoundedBorder(this, 8.0f, 6.0f, { 50, 200, 255 });
 //		pSelectionBorder->SetPosition(-1, -1);
 //		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
 
+		CreateChatCounter(0);
 		SetCardSize(_cardSize);
 
 		if constexpr (Enabled)
@@ -148,21 +152,8 @@ namespace fig::gui
 			SetBorder(borderWeights[dist(rng)]);
 		}
 
-		if (not _pendingTags.empty())
-		{
-			for (auto& tag : _pendingTags)
-			{
-				if (AddTag(tag.tag, tag.color) == AddTagResult::Stop)
-					break;
-			}
-			_pendingTags.clear();
-		}
-
-		if (not _pendingLabel.empty())
-		{
-			SetLabel(_pendingLabel);
-			_pendingLabel.clear();
-		}
+		CreatePendingTags();
+		CreatePendingLabel();
 	}
 
 	void CoverCard::OnUpdate(float fElapsed)
@@ -205,15 +196,15 @@ namespace fig::gui
 			_pLargeLabel->SetText(text);
 
 			// Adjust font size
-			if (_pLargeLabel->MeasureText(false).x > _pLargeLabel->GetMaxSize().x)
+			if (_pLargeLabel->MeasureText(false).x <= _pLargeLabel->GetMaxSize().x)
 			{
-				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 24.0));
-				_pLargeLabel->SetY(kFooterHeight - kMargin - 60);
+				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 28.0));
+				_pLargeLabel->SetY(kFooterHeight - kMargin - 64 + (_bEnableTags ? 22 : 32));
 			}
 			else
 			{
-				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 28.0));
-				_pLargeLabel->SetY(kFooterHeight - kMargin - 64);
+				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 24.0));
+				_pLargeLabel->SetY(kFooterHeight - kMargin - 60 + (_bEnableTags ? 22 : 32));
 			}
 		}
 
@@ -275,7 +266,7 @@ namespace fig::gui
 
 	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, const Color& color)
 	{
-		if (!_bInitialized)
+		if (!_bInitialized or !_bEnableTags)
 		{
 			_pendingTags.push_back(PendingTag { tag, color });
 			return CoverCard::AddTagResult::Reject;
@@ -292,26 +283,27 @@ namespace fig::gui
 
 		if (kLargeWidth < position.x + kTagInnerMargin * 2 + kTagMargin + kTagMinWidth)
 		{
-			if (++_tagRows > kTagMaxRows)
+			if (_tagRows + 1 > kTagMaxRows)
 				return AddTagResult::Stop;
 
 			_tagPosition.x = kTagMargin;
 			_tagPosition.y += kTagRowHeight;
+			_tagRows++;
 
-			_pLargeFooter->SetHeight(kFooterHeight + kTagRowHeight * (_tagRows - 1));
+			_pLargeFooter->SetHeight(kFooterHeight + kTagRowHeight * _tagRows - 1);
 			_pLargeFooter->SetY(kLargeHeight - _pLargeFooter->GetHeight());
 			_pLargeFooterFade->FillParent();
 			position = _tagPosition;
 		}
 
-		auto pTagBG = new NineGridImage(_pLargeFooter, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		auto pTagBG = new NineGridImage(_pTagsRoot, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
 		pTagBG->SetPosition(position);
 		if (color.IsDefined())
 			pTagBG->SetForegroundColor(color);
 		else
 			pTagBG->SetForegroundColor(GetTagColor(tag));
 
-		auto pLabel = new StaticText(_pLargeFooter, tag, FontFace::Default, 14.0, true);
+		auto pLabel = new StaticText(_pTagsRoot, tag, FontFace::Default, 14.0, true);
 		pLabel->SetForegroundColor(Colors::White);
 		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);
 		pLabel->EnableWordWrap(false);
@@ -512,5 +504,56 @@ namespace fig::gui
 	void CoverCard::SetIndex(const SearchIndex& index) noexcept
 	{
 		_searchIndex = std::make_unique<SearchIndex>(index);
+	}
+
+	void CoverCard::EnableTags(bool bEnable)
+	{
+		if (_bEnableTags == bEnable)
+			return;
+		_bEnableTags = bEnable;
+
+		if (!_bInitialized)
+			return;
+
+		_pTagsRoot->SetVisible(bEnable);
+		if (_bEnableTags)
+		{
+			CreatePendingTags();
+
+			auto height = kFooterHeight + kTagRowHeight * _tagRows;
+			_pLargeFooter->SetHeight(height);
+			_pLargeFooter->SetY(kLargeHeight - height);
+			_pLargeFooterFade->FillParent();
+		}
+		else
+		{
+			_pLargeFooter->SetHeight(kFooterHeight);
+			_pLargeFooter->SetY(kLargeHeight - kFooterHeight);
+			_pLargeFooterFade->FillParent();
+		}
+
+		_pLargeLabel->SetY(kFooterHeight - kMargin - 64 + (_bEnableTags ? 22 : 32));
+	}
+
+	void CoverCard::CreatePendingTags()
+	{
+		if (not _pendingTags.empty() and _bInitialized and _bEnableTags)
+		{
+			for (auto& tag : _pendingTags)
+			{
+				if (AddTag(tag.tag, tag.color) == AddTagResult::Stop)
+					break;
+			}
+			_pendingTags.clear();
+		}
+	}
+
+	void CoverCard::CreatePendingLabel()
+	{
+		if (not _pendingLabel.empty() and _bInitialized)
+		{
+			SetLabel(_pendingLabel);
+			_pendingLabel.clear();
+		}
 	}
 }

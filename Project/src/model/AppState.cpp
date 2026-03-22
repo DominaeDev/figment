@@ -47,7 +47,8 @@ namespace fig
 			__appState->pMainWindow->CreateFrame<MainFrame>();
 
 #if !_DEBUG
-			SDL_MaximizeWindow(__appState->pMainWindow->GetSDLWindow());
+			if (GetSettings().GetBool(AppSetting::WindowMaximized))
+				SDL_MaximizeWindow(__appState->pMainWindow->GetSDLWindow());
 #endif
 		}
 		catch (...)

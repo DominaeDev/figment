@@ -84,7 +84,7 @@ namespace fig::gui
 		// Import test characters
 		if constexpr (Debugging and Disabled)
 		{
-			if (userMngr.IsSignedIn())
+			if (userMngr.SignInDefaultProfile())
 			{
 				auto& assets = userMngr.GetProfileAssets();
 
@@ -96,17 +96,11 @@ namespace fig::gui
 
 				assets.ImportCharactersInDirectory(fig::path("./import/characters"), fig::io::AssetManager::CharacterDataFormat::TavernV2);
 				userMngr.GetProfileAssets().SaveModified();
+				userMngr.SignOut();
 			}
 		}
 
 		ShowLoginScreen();
-
-		// Show home screen
-		if (userMngr.IsSignedIn())
-		{
-
-//			ChangeScreen<HomeScreen>()->CreateCards();
-		}
 	}
 
 	MainFrame::~MainFrame()

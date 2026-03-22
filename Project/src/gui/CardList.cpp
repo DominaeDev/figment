@@ -75,6 +75,7 @@ namespace fig::gui
 		{
 			auto request = assets.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCover, priority--);
 			pCard->SetPendingCoverImage(std::move(request.future));
+			pCard->EnableTags(_bEnableTags);
 
 			if (initCounter++ < 8)
 				pCard->Init();
@@ -157,5 +158,15 @@ namespace fig::gui
 
 		_fScrollY = 0;
 		InvalidateLayout();
+	}
+
+	void CardList::EnableTags(bool bEnable) noexcept
+	{
+		if (_bEnableTags == bEnable)
+			return;
+		_bEnableTags = bEnable;
+
+		for (auto& card : _cards)
+			card->EnableTags(bEnable);
 	}
 }

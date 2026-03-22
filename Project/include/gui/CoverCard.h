@@ -38,8 +38,9 @@ namespace fig::gui
 		void SetBorder(CardBorderStyle style);
 		void SetCardSize(CardSize cardSize);
 		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
+		void EnableTags(bool bEnable);
+		
 		bool IsFilteredBy(const fig::string& search_string) const noexcept;
-
 		const fig::uuid& GetAssetID() const { return _assetId; }
 
 	protected:
@@ -62,6 +63,8 @@ namespace fig::gui
 	private:
 		void PollFuture();
 		void RefreshImage();
+		void CreatePendingTags();
+		void CreatePendingLabel();
 
 	private:
 		fig::uuid _assetId;
@@ -75,6 +78,7 @@ namespace fig::gui
 		Control* _pLargeFooterFade {};
 		Image* _pLargeBorder {};
 		StaticText* _pLargeLabel {};
+		Control* _pTagsRoot {};
 
 		Control* _pSmallRoot {};
 		Image* _pSmallBorder {};
@@ -94,6 +98,7 @@ namespace fig::gui
 
 		std::unique_ptr<SearchIndex> _searchIndex;
 		std::set<fig::string> _tags {};
+		bool _bEnableTags = true;
 
 		struct PendingTag
 		{

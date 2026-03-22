@@ -26,6 +26,8 @@ namespace fig::gui
 		void OnSidePanel(bool show) override;
 		void OnFilter(fig::string search_text);
 		void SetSmallGridSize(bool bSmall);
+		void ToggleTags();
+
 	private:
 		CardList* _pCardList {};
 		Control* _pExpandButton {};

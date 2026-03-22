@@ -21,6 +21,8 @@ namespace fig::gui
 		void ClearFilter() noexcept;
 
 		void SetCardSize(CardSize cardSize);
+		void EnableTags(bool bEnable) noexcept;
+		inline bool IsTagsEnabled() const noexcept { return _bEnableTags; }
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -31,6 +33,7 @@ namespace fig::gui
 		GridSizer* _pGridSizer {};
 		int32_t _last_rows {};
 		CardSize _cardSize;
+		bool _bEnableTags { true };
 	};
 }
 
