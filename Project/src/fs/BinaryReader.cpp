@@ -1,18 +1,11 @@
 #include <pch.h>
 #include "fs/BinaryReader.h"
+#include "fs/FileStream.h"
 #include "model/UserProfile.h"
 #include <Crc32.h>
 #include <format>
 
 using namespace fig::io::data;
-
-#if USE_WIN32_API
-using FileHandle = ::HANDLE;
-using DataPtr = char*;
-#else
-using FileHandle = std::ifstream&;
-using DataPtr = char*;
-#endif
 
 namespace fig::io
 {
@@ -24,16 +17,13 @@ namespace fig::io
 	{
 	}
 
-	static bool _ReadBytes(FileHandle h, DataPtr buf, size_t num_bytes) noexcept;
-	static bool _Seek(FileHandle h, size_t offset) noexcept;
-
-	static bool ReadMeta(FileHandle fs, uint8_t count, std::map<MetaTag, MetaValue>& outMeta)
+	static bool ReadMeta(FileStream& fs, uint8_t count, std::map<MetaTag, MetaValue>& outMeta)
 	{
-		char buf[16] = {};
+		std::vector<char> buf(16);
 		for (size_t i = 0; i < toUZ(count); ++i)
 		{
 			MetaTag tag;
-			if (!_ReadBytes(fs, (char*)(&tag), sizeof(MetaTag)))
+			if (!fs.ReadStruct(tag))
 				return false; // Error
 
 			MetaValueType type = get_meta_type(tag);
@@ -43,43 +33,42 @@ namespace fig::io
 			switch (type)
 			{
 			case MetaValueType::Boolean:
-				_ReadBytes(fs, buf, sizeof(uint8_t));
-				outMeta[tag] = (bool)(*reinterpret_cast<uint8_t*>(&buf));
+				fs.Read(buf, sizeof(uint8_t));
+				outMeta[tag] = (bool)(*reinterpret_cast<uint8_t*>(buf.data()));
 				break;
 			case MetaValueType::UChar:
-				_ReadBytes(fs, buf, sizeof(uint8_t));
-				outMeta[tag] = *reinterpret_cast<uint8_t*>(&buf);
+				fs.Read(buf, sizeof(uint8_t));
+				outMeta[tag] = *reinterpret_cast<uint8_t*>(buf.data());
 				break;
 			case MetaValueType::UShort:
-				_ReadBytes(fs, buf, sizeof(uint16_t));
-				outMeta[tag] = *reinterpret_cast<uint16_t*>(&buf);
+				fs.Read(buf, sizeof(uint16_t));
+				outMeta[tag] = *reinterpret_cast<uint16_t*>(buf.data());
 				break;
 			case MetaValueType::Integer:
-				_ReadBytes(fs, buf, sizeof(int32_t));
-				outMeta[tag] = *reinterpret_cast<int32_t*>(&buf);
+				fs.Read(buf, sizeof(int32_t));
+				outMeta[tag] = *reinterpret_cast<int32_t*>(buf.data());
 				break;
 			case MetaValueType::Float:
-				_ReadBytes(fs, buf, sizeof(float));
-				outMeta[tag] = *reinterpret_cast<float*>(&buf);
+				fs.Read(buf, sizeof(float));
+				outMeta[tag] = *reinterpret_cast<float*>(buf.data());
 				break;
 			case MetaValueType::TimeStamp:
-				_ReadBytes(fs, buf, sizeof(fig::timestamp));
-				outMeta[tag] = *reinterpret_cast<fig::timestamp*>(&buf);
+				fs.Read(buf, sizeof(fig::timestamp));
+				outMeta[tag] = *reinterpret_cast<fig::timestamp*>(buf.data());
 				break;
 			case MetaValueType::Identifier:
-				_ReadBytes(fs, buf, sizeof(_meta_identifier));
-				outMeta[tag] = *reinterpret_cast<_meta_identifier*>(&buf);
+				fs.Read(buf, sizeof(_meta_identifier));
+				outMeta[tag] = *reinterpret_cast<_meta_identifier*>(buf.data());
 				break;
 			case MetaValueType::String:
 			{
 				// Read length
-				_ReadBytes(fs, buf, sizeof(uint8_t));
-				uint8_t len;
-				len = *reinterpret_cast<uint8_t*>(&buf);
+				fs.Read(buf, sizeof(uint8_t));
+				uint8_t len = *reinterpret_cast<uint8_t*>(buf.data());
 
 				// Read data
 				std::vector<char> strbuf(len);
-				_ReadBytes(fs, strbuf.data(), len);
+				fs.Read(strbuf);
 				outMeta[tag] = fig::string(strbuf.cbegin(), strbuf.cend());
 				break;
 			}
@@ -90,10 +79,10 @@ namespace fig::io
 		return true;
 	}
 
-	static bool ReadHeader(FileHandle fs, size_t file_size, FileHeader& header)
+	static bool ReadHeader(FileStream& fs, size_t file_size, FileHeader& header)
 	{
 		// Read header
-		if (!_ReadBytes(fs, (char*)&header, sizeof(FileHeader)))
+		if (!fs.ReadStruct(header))
 			return false;
 
 		// Validate header
@@ -112,7 +101,7 @@ namespace fig::io
 		return valid;
 	}
 
-	static void ReadData(FileHandle fs, AssetFile& file, fig::user::auth::AuthKey authKey) noexcept
+	static void ReadData(FileStream& fs, AssetFile& file, fig::user::auth::AuthKey authKey) noexcept
 	{
 		size_t length = file.data_length;
 		file.data.resize(length);
@@ -124,111 +113,20 @@ namespace fig::io
 		else
 		{
 			// Read unencrypted
-			_ReadBytes(fs, (DataPtr)file.data.data(), file.data.size());
+			fs.Read(file.data, file.data.size());
 		}
 	}
-
-#if USE_WIN32_API
-	struct _File
-	{
-		HANDLE _handle = INVALID_HANDLE_VALUE;
-
-		explicit _File(HANDLE handle) : _handle(handle) {}
-		~_File()
-		{
-			if (_handle != INVALID_HANDLE_VALUE)
-				::CloseHandle(_handle);
-		}
-
-		_File(const _File&) = delete;
-		_File& operator=(const _File&) = delete;
-
-		bool ok()  const { return _handle != INVALID_HANDLE_VALUE; }
-		operator FileHandle() const { return _handle; }
-	};
-
-	static bool _ReadBytes(FileHandle h, DataPtr buf, size_t num_bytes) noexcept
-	{
-		size_t remaining = num_bytes;
-		while (remaining > 0)
-		{
-			DWORD read = 0;
-			if (!::ReadFile(h, (LPVOID)buf, (DWORD)remaining, &read, nullptr) || read == 0)
-				break;
-			buf += ptrdiff_t(read);
-			remaining -= read;
-		}
-		return remaining == 0;
-	}
-
-	static bool _Seek(FileHandle h, size_t offset) noexcept
-	{
-		LARGE_INTEGER li;
-		li.QuadPart = (LONGLONG)offset;
-		return ::SetFilePointerEx(h, li, nullptr, FILE_BEGIN) != FALSE;
-	}
-#else
-	static bool _ReadBytes(FileHandle fs, DataPtr buf, size_t num_bytes) noexcept
-	{
-		if (buf == nullptr)
-			return false;
-
-		fs.read((char*)buf, num_bytes);
-		if (static_cast<size_t>(fs.gcount()) < num_bytes)
-			return false;
-		return not (fs.eof() or fs.bad());
-	}
-
-	static bool _Seek(FileHandle h, size_t offset) noexcept
-	{
-		h.seekg(offset, std::ios::beg);
-		return true;
-	}
-#endif
 
 	[[nodiscard]] static std::expected<AssetFile, FileError> __ReadFile(const fig::path& path, bool read_data, fig::user::auth::AuthKey authKey) noexcept
 	{
 		try
 		{
+			FileStream fs(path, { FileStream::Flag::Sequential });
 
-#if USE_WIN32_API
-			_File fs { ::CreateFileW(path.wstring().c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr) };
-
-			if (!fs.ok())
-			{
-				switch (::GetLastError())
-				{
-				case ERROR_FILE_NOT_FOUND:
-				case ERROR_PATH_NOT_FOUND:
-					return std::unexpected(FileError::FileNotFound);
-				case ERROR_ACCESS_DENIED:
-					return std::unexpected(FileError::FileAccessError);
-				default:
-					return std::unexpected(FileError::ReadError);
-				}
-			}
-#else
-			std::ifstream fs(path.wstring(), std::ios::binary | std::ios::in);
-			if (fs.fail())
-			{
-				int err = errno;
-				switch (err)
-				{
-				case ENOENT:
-					return std::unexpected(FileError::FileNotFound);
-				case EACCES:
-					return std::unexpected(FileError::FileAccessError);
-				default:
-					return std::unexpected(FileError::ReadError);
-				}
-			}
-
-			if (not fs.is_open())
-				return std::unexpected(FileError::FileNotFound);
-#endif
-
-			// Get file size
-			size_t file_size = std::filesystem::file_size(path);
+			if (not fs.IsOk())
+				return std::unexpected(fs.GetError());
+			
+			size_t file_size = fs.Length();
 			if (file_size < sizeof(FileHeader))
 				return std::unexpected(FileError::UnrecognizedFormat);
 
@@ -255,7 +153,7 @@ namespace fig::io
 			// Read data
 			if (read_data and header.data_length > 0)
 			{
-				_Seek(fs, header.data_offset + sizeof(FileHeader));
+				fs.Seek(header.data_offset + sizeof(FileHeader));
 				ReadData(fs, file, authKey);
 
 				int32_t checksum;

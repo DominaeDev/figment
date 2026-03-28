@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/Fonts.h"
 #include "Constants.h"
+#include "util/Common.h"
 
 using namespace fig::gui;
 
@@ -61,7 +62,9 @@ std::list<TTF_Font*> Fonts::GetFallbackFonts(double ptSize)
 
 TTF_Font* Fonts::LoadFont(FontFace face, const char* filename, double ptSize)
 {
-	TTF_Font* pFont = TTF_OpenFont(filename, (float)ptSize);
+	TTF_Font* pFont;
+	DEBUG_MEASURE_BEGIN(std::format("Load font [{} {}]", filename, ptSize));
+	pFont = TTF_OpenFont(filename, (float)ptSize);
 	if (pFont != nullptr)
 	{
 		TTF_SetFontHinting(pFont, TTF_HINTING_LIGHT_SUBPIXEL);
@@ -71,22 +74,24 @@ TTF_Font* Fonts::LoadFont(FontFace face, const char* filename, double ptSize)
 		auto fallbacks = GetFallbackFonts(ptSize);
 		for (auto& pFallbackFont : fallbacks)
 			TTF_AddFallbackFont(pFont, pFallbackFont);
-		return pFont;
 	}
-	return nullptr;
+	DEBUG_MEASURE_END();
+	return pFont;
 }
 
 TTF_Font* Fonts::LoadFallbackFont(const char* filename, double ptSize)
 {
-	TTF_Font* pFont = TTF_OpenFont(filename, (float)ptSize);
+	TTF_Font* pFont;
+	DEBUG_MEASURE_BEGIN(std::format("Load font [{} {}]", filename, ptSize));
+	pFont = TTF_OpenFont(filename, (float)ptSize);
 	if (pFont != nullptr)
 	{
 		TTF_SetFontHinting(pFont, TTF_HINTING_LIGHT_SUBPIXEL);
 		TTF_SetFontKerning(pFont, true);
 		s_FallbackFonts.push_back(Font { pFont, FontFace::Default, (int)(ptSize * 10.0) });
-		return pFont;
 	}
-	return nullptr;
+	DEBUG_MEASURE_END();
+	return pFont;
 }
 
 TTF_Font* Fonts::GetFont(FontFace face, double ptSize)

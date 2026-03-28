@@ -94,10 +94,12 @@ namespace fig::io
 		Asset& CreateImageAsset_Internal(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
 		Asset& CreateImageAsset_Internal(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
 
-		bool LoadAssetIndex();
-		bool LoadAssetMetaData();
+		size_t LoadAssetIndex() noexcept;
+		bool LoadAssetMetaData() noexcept;
+		bool LoadDataAssets() noexcept;
 		bool WriteAsset(Asset& asset);
 		bool UpdateAsset(Asset& asset);
+		std::expected<AssetRef, FileError> LoadAsset_Internal(Asset& asset) noexcept;
 		bool DeleteAsset_Internal(const fig::uuid& assetID) noexcept;
 		bool DeleteAssetFile(const fig::uuid& assetID) noexcept;
 		std::set<fig::uuid> FindRelatedAssets(const fig::uuid& assetId) noexcept;

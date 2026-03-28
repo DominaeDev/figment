@@ -28,7 +28,7 @@ namespace fig::io
 		}
 		catch (...)
 		{
-			return std::unexpected(FileError::ReadError);
+			return std::unexpected(FileError::UnknownError);
 		}
 	}
 
@@ -69,7 +69,7 @@ namespace fig::io
 		}
 		catch (...)
 		{
-			return std::unexpected(FileError::ReadError);
+			return std::unexpected(FileError::UnknownError);
 		}
 	}
 
@@ -170,7 +170,7 @@ namespace fig::io
 		catch (...)
 		{
 			fclose(file);
-			return std::unexpected(FileError::ReadError);
+			return std::unexpected(FileError::UnknownError);
 		}
 
 		if (bDecodeBase64)
@@ -204,7 +204,7 @@ namespace fig::io
 		}
 		catch (...)
 		{
-			return std::unexpected(FileError::ReadError);
+			return std::unexpected(FileError::UnknownError);
 		}
 
 		auto itFind = std::find_if(texts.cbegin(), texts.cend(), [&keyword](auto& t) { return strcmp(t.keyword, keyword.c_str()) == 0; });

@@ -107,7 +107,6 @@ namespace fig::gui
 		};
 		fig::string _pendingLabel {};
 		std::vector<PendingTag> _pendingTags {};
-
 	};
 }
 

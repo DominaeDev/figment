@@ -15,13 +15,13 @@ namespace fig::io
 
 	void ContentDatabase::LoadAll()
 	{
+		DEBUG_MEASURE_BEGIN("ContentDatabase::LoadAll");
+
 		auto& assetMngr = *_pAssetMngr;
 
 		// Load characters
 		for (auto& asset : _pAssetMngr->GetAllCharacters())
 		{
-			assetMngr.LoadAsset(asset);
-
 			if (asset.data_format == DataFormat::DataXml && asset.HasData())
 			{
 				CharacterData character;
@@ -35,8 +35,6 @@ namespace fig::io
 		// Load scenarios
 		for (auto& asset : _pAssetMngr->GetAllScenarios())
 		{
-			assetMngr.LoadAsset(asset);
-
 			if (asset.data_format == DataFormat::DataXml && asset.HasData())
 			{
 				ScenarioData scenario;
@@ -46,6 +44,9 @@ namespace fig::io
 			else
 				continue; // Skip
 		}
+
+		DEBUG_MEASURE_END();
+
 	}
 
 	std::optional<fig::io::data::CharacterData> ContentDatabase::GetCharacter(const fig::uuid& id) const noexcept

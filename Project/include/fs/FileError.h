@@ -7,6 +7,7 @@ namespace fig::io
 	enum class FileError : uint32_t
 	{
 		NoError = 0,
+		UnknownError,
 		FileNotFound,
 		FileAccessError,
 		DirectoryDoesNotExist,

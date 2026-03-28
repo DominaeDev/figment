@@ -17,17 +17,17 @@
 #include "util/Common.h"
 #include "gui/GUICommon.h"
 
-#define USE_WIN32_API 1
+#if defined(_WIN32)
+#define USE_WIN32_API 0
+#endif
 
 #if USE_WIN32_API
-	#if defined(_WIN32)
-		#define WIN32_LEAN_AND_MEAN
-		#include <windows.h>
-		#undef min
-		#undef max
-		#undef LoadImage
-		#undef DrawText
-	#else
-		#undef USE_WIN32_API
-	#endif
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+
+	// Undefine troublesome macros
+	#undef min
+	#undef max
+	#undef LoadImage
+	#undef DrawText
 #endif

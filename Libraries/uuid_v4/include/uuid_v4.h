@@ -212,22 +212,24 @@ public:
 	std::string str() const
 	{
 		std::string mem;
-		str(mem);
+		to_str(mem);
 		return mem;
 	}
 
-	void str(std::string& s) const
+private:
+	void to_str(std::string& s) const
 	{
 		s.resize(36);
-		str((char*)s.data());
+		to_str((char*)s.data());
 	}
 
-	void str(char* res) const
+	void to_str(char* res) const
 	{
 		__m128i x = _mm_load_si128((__m128i*)data);
 		m128itos(x, res);
 	}
 
+public:
 	bool empty() const noexcept
 	{
 		for (size_t i = 0; i < sizeof(data); ++i)

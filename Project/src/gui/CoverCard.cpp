@@ -115,8 +115,6 @@ namespace fig::gui
 		_pSmallBorder->SetSize(kSmallWidth + 12, kSmallHeight + 12);
 		_pSmallBorder->SetVisible(false);
 
-		Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
-
 //		auto pSelectionBorder = new RoundedBorder(this, 8.0f, 6.0f, { 50, 200, 255 });
 //		pSelectionBorder->SetPosition(-1, -1);
 //		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
@@ -171,6 +169,8 @@ namespace fig::gui
 			_pErrorIcon->SetSize(_pErrorIcon->GetTextureSize().x / divide, _pErrorIcon->GetTextureSize().x / divide);
 			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
 			_pErrorIcon->Center();
+
+			Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 		}
 	}
 
@@ -415,10 +415,12 @@ namespace fig::gui
 					SetCoverImages(std::move(pair->first), std::move(pair->second));
 
 				RefreshImage();
+				SetVisible(true);
 			}
 			else
 			{
 				_bHasError = true;
+				SetVisible(true);
 			}
 		}
 	}
@@ -489,15 +491,11 @@ namespace fig::gui
 		{
 			if (!_imageTexture.empty())
 				Image::SetTexture(_imageTexture.get());
-			else
-				Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 		}
 		else
 		{
 			if (!_smallImageTexture.empty())
 				Image::SetTexture(_smallImageTexture.get());
-			else
-				Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 		}
 	}
 

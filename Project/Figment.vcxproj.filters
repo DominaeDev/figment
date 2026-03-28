@@ -473,6 +473,9 @@
     <ClCompile Include="src\gui\UserProfileWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="src\fs\FileStream.cpp">
+      <Filter>Source Files\Frontend\FileSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\Sizer.h">
@@ -1137,6 +1140,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\UserProfileWidget.h">
       <Filter>Source Files\Frontend\GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\FileStream.h">
+      <Filter>Source Files\Frontend\FileSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -48,11 +48,13 @@ namespace fig::gui
 
 			for (auto& asset : scenarios)
 			{
+				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}:", asset.id.str()));
 				auto pCard = new ScenarioCard(this, asset.id, _cardSize);
 				auto request = assets.LoadAssetAsync(asset.id, AsyncTask::LoadCover, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
+				DEBUG_MEASURE_END();
 			}
 		}
 
@@ -64,9 +66,11 @@ namespace fig::gui
 
 			for (auto& asset : characters)
 			{
+				DEBUG_MEASURE_BEGIN(std::format("Character card {}:", asset.id.str()));
 				auto pCard = new CharacterCard(this, asset.id, _cardSize);
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
+				DEBUG_MEASURE_END();
 			}
 		}
 

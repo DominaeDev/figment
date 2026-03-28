@@ -13,7 +13,7 @@
 
 namespace fig::util
 {
-#if _DEBUG
+#if _DEBUG || _CONSOLE
 	constexpr bool EnableLogging = true;
 #else
 	constexpr bool EnableLogging = false;
@@ -193,7 +193,7 @@ namespace fig::util
 		return true;
 	}
 
-#if _DEBUG && !NDEBUG
+#if _DEBUG || _CONSOLE
 	#define DEBUG_MEASURE_BEGIN(LABEL) fig::util::MeasureTime((LABEL), [&](){
 	#define DEBUG_MEASURE_END() });
 #else

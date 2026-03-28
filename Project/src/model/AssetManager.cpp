@@ -35,9 +35,13 @@ namespace fig::io
 		_profilePath = profile.GetPath();
 
 		if (LoadAssetIndex())
-			LoadAssetMetaData();
+		{
+			LoadDataAssets();
+		}
 		else
+		{
 			Log(std::format("No asset index found for profile '{}'.", profile.name));
+		}
 
 		_workers.reserve(worker_threads);
 		for (int i = 0; i < worker_threads; ++i)
@@ -60,23 +64,6 @@ namespace fig::io
 			worker.request_stop();
 
 		_pending_cv.notify_all();
-	}
-
-	bool AssetManager::LoadAssetIndex()
-	{
-		bool result;
-		DEBUG_MEASURE_BEGIN("LoadAssetIndex");
-		auto& db = GetDatabase();
-		if (auto assets = db.FetchAssets(); assets.has_value())
-		{
-			std::scoped_lock lock { _assetsMutex };
-			_assets = std::move(assets.value());
-			result = true;
-		}
-		else
-			result = false;
-		DEBUG_MEASURE_END();
-		return result;
 	}
 
 	const Asset& AssetManager::CreateEmptyAsset(AssetType type, const fig::uuid& parent) noexcept
@@ -297,7 +284,20 @@ namespace fig::io
 		return false;
 	}
 
-	bool AssetManager::LoadAssetMetaData()
+	size_t AssetManager::LoadAssetIndex() noexcept
+	{
+		DEBUG_MEASURE_BEGIN("LoadAssetIndex");
+		auto& db = GetDatabase();
+		if (auto assets = db.FetchAssets(); assets.has_value())
+		{
+			std::scoped_lock lock { _assetsMutex };
+			_assets = std::move(assets.value());
+		}
+		DEBUG_MEASURE_END();
+		return _assets.size();
+	}
+
+	bool AssetManager::LoadAssetMetaData() noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -308,7 +308,6 @@ namespace fig::io
 			| std::views::transform([](auto&& a) { return std::ref(a); })
 			| std::ranges::to<std::vector>();
 
-		auto startTime = std::chrono::steady_clock::now();
 		std::for_each(std::execution::par_unseq,
 			assets.begin(), assets.end(),
 			[&](AssetRef assetRef) {
@@ -339,6 +338,29 @@ namespace fig::io
 		return true;
 	}
 
+	bool AssetManager::LoadDataAssets() noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		// Read meta data of all asset files (in parallel)
+		DEBUG_MEASURE_BEGIN("LoadDataAssets");
+		std::vector<AssetRef> assets = _assets 
+			| std::views::values 
+			| std::views::filter([](auto&& a) { return a.asset_type == AssetType::Character || a.asset_type == AssetType::Scenario; })
+			| std::views::transform([](auto&& a) { return std::ref(a); })
+			| std::ranges::to<std::vector>();
+
+		std::for_each(std::execution::par_unseq,
+			assets.begin(), assets.end(),
+			[&](AssetRef assetRef) {
+				auto& asset = assetRef.get();
+				auto discard = LoadAsset_Internal(asset);
+			});
+		DEBUG_MEASURE_END();
+
+		return true;
+	}
+
 	FileError AssetManager::LoadAsset(const Asset& asset) noexcept
 	{
 		if (const auto result = LoadAsset(asset.id); result.has_value())
@@ -350,12 +372,19 @@ namespace fig::io
 	std::expected<AssetRef, FileError> AssetManager::LoadAsset(const fig::uuid& id) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-	
 		auto itFind = _assets.find(id);
 		if (itFind == _assets.cend())
 			return std::unexpected(FileError::FileNotFound);
-		
+
 		Asset& asset = itFind->second;
+		if (asset.file_status == AssetFileStatus::FullyLoaded)
+			return asset;
+
+		return LoadAsset_Internal(asset);
+	}
+
+	std::expected<AssetRef, FileError> AssetManager::LoadAsset_Internal(Asset& asset) noexcept
+	{
 		if (asset.file_status == AssetFileStatus::FullyLoaded)
 			return asset;
 
@@ -367,7 +396,7 @@ namespace fig::io
 		{
 			asset.FromFile(std::move(file.value()));
 			asset.file_status = AssetFileStatus::FullyLoaded;
-			return asset;
+			return std::ref(asset);
 		}
 		else
 		{
@@ -609,7 +638,7 @@ namespace fig::io
 			return BinaryWriter::WriteProfileFile(profile, filename, image_file);
 		}
 
-		return FileError::ReadError;
+		return FileError::UnknownError;
 	}
 
 	fig::uuid AssetManager::NewUUID() const noexcept

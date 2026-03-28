@@ -86,7 +86,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;USE_INTEL_AESNI;SPNG_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE=0;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;USE_INTEL_AESNI;SPNG_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -164,6 +164,7 @@
     <ClCompile Include="src\fs\BinaryReader.cpp" />
     <ClCompile Include="src\fs\BinaryWriter.cpp" />
     <ClCompile Include="src\fs\CardImporter.cpp" />
+    <ClCompile Include="src\fs\FileStream.cpp" />
     <ClCompile Include="src\fs\FileUtility.cpp" />
     <ClCompile Include="src\fs\TavernCardV2.cpp" />
     <ClCompile Include="src\fs\XmlReader.cpp" />
@@ -368,6 +369,7 @@
     <ClInclude Include="include\fs\CardImporter.h" />
     <ClInclude Include="include\fs\DatabaseError.h" />
     <ClInclude Include="include\fs\FileError.h" />
+    <ClInclude Include="include\fs\FileStream.h" />
     <ClInclude Include="include\fs\FileUtility.h" />
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\TavernCardV2.h" />
