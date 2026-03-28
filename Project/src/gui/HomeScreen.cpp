@@ -4,6 +4,7 @@
 #include "gui/MainFrame.h"
 #include "gui/SearchBox.h"
 #include "gui/AppResources.h"
+#include "util/Common.h"
 
 namespace fig::gui
 {
@@ -79,12 +80,9 @@ namespace fig::gui
 
 	void HomeScreen::CreateCards()
 	{
-		auto startTime = std::chrono::steady_clock::now();
-
+		DEBUG_MEASURE_BEGIN("CreateCards");
 		_pCardList->CreateCards(CardList::CardType::Character);
-
-		auto endTime = std::chrono::steady_clock::now();
-//		MainFrame::SetStatusBar(std::format("Duration: {}ms", toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
+		DEBUG_MEASURE_END();
 
 		InvalidateLayout();
 	}

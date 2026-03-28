@@ -3,6 +3,7 @@
 #include <format>
 #include <ranges>
 #include <set>
+#include <execution>
 #include "model/AssetManager.h"
 #include "model/UserManager.h"
 #include "model/AppState.h"
@@ -22,6 +23,7 @@ using namespace fig::io::data;
 using namespace fig::util;
 using namespace fig::gui;
 using namespace fig::gui::util;
+using namespace fig::util;
 
 namespace fig::io
 {
@@ -62,15 +64,19 @@ namespace fig::io
 
 	bool AssetManager::LoadAssetIndex()
 	{
+		bool result;
+		DEBUG_MEASURE_BEGIN("LoadAssetIndex");
 		auto& db = GetDatabase();
 		if (auto assets = db.FetchAssets(); assets.has_value())
 		{
 			std::scoped_lock lock { _assetsMutex };
 			_assets = std::move(assets.value());
-			return true;
+			result = true;
 		}
 		else
-			return false;
+			result = false;
+		DEBUG_MEASURE_END();
+		return result;
 	}
 
 	const Asset& AssetManager::CreateEmptyAsset(AssetType type, const fig::uuid& parent) noexcept
@@ -295,12 +301,18 @@ namespace fig::io
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		for (auto& kvp : _assets)
-		{
-			auto& asset = kvp.second;
-			if (asset.file_status > AssetFileStatus::NotLoaded)
-				continue;
+		// Read meta data of all asset files (in parallel)
+		DEBUG_MEASURE_BEGIN("LoadAssetMetaData");
+		std::vector<AssetRef> assets = _assets
+			| std::views::values
+			| std::views::transform([](auto&& a) { return std::ref(a); })
+			| std::ranges::to<std::vector>();
 
+		auto startTime = std::chrono::steady_clock::now();
+		std::for_each(std::execution::par_unseq,
+			assets.begin(), assets.end(),
+			[&](AssetRef assetRef) {
+			auto& asset = assetRef.get();
 			BinaryReader reader(_profilePath, _profileAuthKey);
 			if (auto file = reader.ReadFile(asset.GetFileName(), false))
 			{
@@ -311,15 +323,19 @@ namespace fig::io
 				asset.file_status = AssetFileStatus::Missing;
 			else
 				asset.file_status = AssetFileStatus::Invalid; // Failed to load for some reason, but the file exists.
-		}
+		});
+		DEBUG_MEASURE_END();
 
 		// Remove missing assets from index
+		DEBUG_MEASURE_BEGIN("Remove missing assets");
 		for (auto& id : _assets
 			| std::views::filter([](auto& kvp) { return kvp.second.file_status == AssetFileStatus::Missing; })
 			| std::views::keys
 			| std::ranges::to<std::vector>())
+		{
 			_assets.erase(id);
-
+		}
+		DEBUG_MEASURE_END();
 		return true;
 	}
 

@@ -35,6 +35,8 @@ namespace fig::user::auth
 
 	void Decrypt(fig::bytes& data, const AuthKey& key);
 	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const AuthKey& key);
+	void Decrypt(void* file_handle, fig::bytes& out_data, const AuthKey& key);
+
 	DecryptedData Decrypt(const EncryptedData& input, const AuthKey& key);
 	DecryptedData Decrypt(EncryptedData&& input, const AuthKey& key);
 	DecryptedData Decrypt(const AuthChallenge& input, const AuthKey& key);

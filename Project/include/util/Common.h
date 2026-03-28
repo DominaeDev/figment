@@ -41,6 +41,9 @@ namespace fig::util
 		}
 	}
 
+	using MeasureTimeFn = std::function<void()>;
+	void MeasureTime(const fig::string& label, MeasureTimeFn fn);
+
 	fig::uuid CreateUUID();
 	inline fig::string CreateStrUUID()
 	{
@@ -189,5 +192,14 @@ namespace fig::util
 		}
 		return true;
 	}
+
+#if _DEBUG && !NDEBUG
+	#define DEBUG_MEASURE_BEGIN(LABEL) fig::util::MeasureTime((LABEL), [&](){
+	#define DEBUG_MEASURE_END() });
+#else
+	#define DEBUG_MEASURE_BEGIN(LABEL)
+	#define DEBUG_MEASURE_END()
+#endif
+
 }
 #endif

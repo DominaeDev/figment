@@ -101,6 +101,7 @@ namespace fig::io
 		bool DeleteAsset_Internal(const fig::uuid& assetID) noexcept;
 		bool DeleteAssetFile(const fig::uuid& assetID) noexcept;
 		std::set<fig::uuid> FindRelatedAssets(const fig::uuid& assetId) noexcept;
+
 	private:
 		fig::uuid _profileID;
 		fig::path _profilePath;

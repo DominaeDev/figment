@@ -198,7 +198,12 @@ namespace fig::user
 
 	bool UserManager::SignIn(UserProfile& profile, const fig::string& password)
 	{
-		if (not Authenticate(profile, password, _signedInAuthKey))
+		bool success;
+		DEBUG_MEASURE_BEGIN("SignIn");
+		success = Authenticate(profile, password, _signedInAuthKey);
+		DEBUG_MEASURE_END();
+
+		if (not success)
 			return false; // Incorrect password
 
 		_signedInProfile = &profile;

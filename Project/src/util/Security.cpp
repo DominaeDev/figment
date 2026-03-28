@@ -235,6 +235,32 @@ namespace fig::user::auth
 		}
 	}
 
+#if USE_WIN32_API
+	void Decrypt(void* h, fig::bytes& out_data, const fig::user::auth::AuthKey& key)
+	{
+		static_assert(sizeof(unsigned char) == sizeof(std::byte));
+		static_assert(sizeof(key) == 16);
+
+		unsigned char u8Key[16];
+		std::memcpy(u8Key, key.data(), key.size());
+		Cipher::Aes<128> aes(u8Key);
+
+		constexpr size_t kBufferSize = 256;
+		std::array<uint8_t, kBufferSize> buffer { 0 };
+		size_t max_length = out_data.size();
+		for (size_t i = 0; i < max_length; i += kBufferSize)
+		{
+			DWORD did_read = 0;
+			if (!ReadFile(h, buffer.data(), kBufferSize, &did_read, nullptr))
+				break; // Error
+			constexpr size_t stride = 16;
+			for (size_t j = 0; j < kBufferSize; j += stride)
+				aes.decrypt_block(buffer.data() + ptrdiff_t(j));
+			std::memcpy(out_data.data() + ptrdiff_t(i), buffer.data(), std::min(kBufferSize, max_length - i));
+		}
+	}
+#endif
+
 	void Decrypt(fig::bytes& data, const AuthKey& key)
 	{
 		static_assert(sizeof(unsigned char) == sizeof(std::byte));

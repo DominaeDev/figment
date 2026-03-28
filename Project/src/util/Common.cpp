@@ -29,6 +29,14 @@ namespace fig::util
 		}
 	}
 
+	void MeasureTime(const fig::string& label, MeasureTimeFn fn)
+	{
+		auto startTime = std::chrono::steady_clock::now();
+		fn();
+		auto endTime = std::chrono::steady_clock::now();
+		LogLn(std::format("{}: {}ms", label, toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
+	}
+
 	fig::uuid CreateUUID()
 	{
 		static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
