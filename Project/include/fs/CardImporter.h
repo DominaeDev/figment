@@ -12,7 +12,7 @@ namespace fig::io
 	class CardImporter
 	{
 	public:
-		static std::expected<fig::io::data::CharacterData, FileError> Import(fig::path filename) noexcept;
+		static std::expected<fig::io::CharacterData, FileError> Import(fig::path filename) noexcept;
 	};
 }
 

@@ -9,8 +9,6 @@
 #include "gui/ChatScreen.h"
 #include "model/GlobalStrings.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	SidePanel::SidePanel(LayoutElement* pParent) : Control(pParent)

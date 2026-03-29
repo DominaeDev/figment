@@ -302,10 +302,10 @@
     <ClCompile Include="src\fs\XmlWriter.cpp">
       <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\fs\BinaryReader.cpp">
+    <ClCompile Include="src\fs\AssetFileReader.cpp">
       <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\fs\BinaryWriter.cpp">
+    <ClCompile Include="src\fs\AssetFileWriter.cpp">
       <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\fs\FileUtility.cpp">
@@ -1120,10 +1120,10 @@
     <ClInclude Include="include\util\IniFile.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\fs\BinaryReader.h">
+    <ClInclude Include="include\fs\AssetFileReader.h">
       <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="include\fs\BinaryWriter.h">
+    <ClInclude Include="include\fs\AssetFileWriter.h">
       <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ImageWithMask.h">

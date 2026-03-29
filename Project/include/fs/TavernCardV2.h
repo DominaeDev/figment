@@ -4,7 +4,7 @@
 
 #include "Types.h"
 
-namespace fig::io::data
+namespace fig::io
 {
 	struct TavernCardV2
 	{

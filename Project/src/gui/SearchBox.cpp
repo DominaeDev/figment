@@ -4,8 +4,6 @@
 #include "gui/CustomRenderers.h"
 #include "gui/GUIUtility.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	SearchBox::SearchBox(LayoutElement* pParent, FontFace fontFace, double ptSize) : TextBox(pParent, fontFace, ptSize)

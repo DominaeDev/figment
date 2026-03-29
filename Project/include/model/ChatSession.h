@@ -6,7 +6,7 @@
 #include <optional>
 #include <map>
 
-namespace fig::io::data
+namespace fig::io
 {
 	class ChatSession
 	{

@@ -3,7 +3,6 @@
 #include "gui/AppResources.h"
 
 using namespace fig::gui;
-using namespace fig::gui::util;
 
 VerticalGradient::VerticalGradient(LayoutElement* pParent, Color colorTop, Color colorBottom) : Control(pParent)
 {

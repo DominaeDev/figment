@@ -1,17 +1,15 @@
 #include <pch.h>
-#include "fs/BinaryReader.h"
+#include "fs/AssetFileReader.h"
 #include "fs/FileStream.h"
 #include "model/UserProfile.h"
 #include <Crc32.h>
 #include <format>
 
-using namespace fig::io::data;
-
 namespace fig::io
 {
 	constexpr uint8_t FileHeaderVersion = 1;
 
-	BinaryReader::BinaryReader(const fig::path& directory, fig::user::auth::AuthKey key) noexcept :
+	AssetFileReader::AssetFileReader(const fig::path& directory, fig::auth::AuthKey key) noexcept :
 		_directory { directory },
 		_authKey { key }
 	{
@@ -101,14 +99,14 @@ namespace fig::io
 		return valid;
 	}
 
-	static void ReadData(FileStream& fs, AssetFile& file, fig::user::auth::AuthKey authKey) noexcept
+	static void ReadData(FileStream& fs, AssetFile& file, fig::auth::AuthKey authKey) noexcept
 	{
 		size_t length = file.data_length;
 		file.data.resize(length);
 		if (file.data_encrypted and not fig::util::is_zero(authKey))
 		{
 			// Read encrypted
-			fig::user::auth::Decrypt(fs, file.data, authKey);
+			fig::auth::Decrypt(fs, file.data, authKey);
 		}
 		else
 		{
@@ -117,7 +115,7 @@ namespace fig::io
 		}
 	}
 
-	[[nodiscard]] static std::expected<AssetFile, FileError> __ReadFile(const fig::path& path, bool read_data, fig::user::auth::AuthKey authKey) noexcept
+	[[nodiscard]] static std::expected<AssetFile, FileError> __ReadFile(const fig::path& path, bool read_data, fig::auth::AuthKey authKey) noexcept
 	{
 		try
 		{
@@ -173,13 +171,13 @@ namespace fig::io
 		}
 	}
 
-	std::expected<AssetFile, FileError> BinaryReader::ReadFile(const fig::path& filename, bool read_data) noexcept
+	std::expected<AssetFile, FileError> AssetFileReader::ReadFile(const fig::path& filename, bool read_data) noexcept
 	{
 		auto const path = _directory / filename;
 		return __ReadFile(path, read_data, _authKey);
 	}
 
-	std::expected<fig::io::data::AssetFile, FileError> BinaryReader::ReadProfileFile(const fig::user::UserProfile& profile, const fig::path& filename) noexcept
+	std::expected<fig::io::AssetFile, FileError> AssetFileReader::ReadProfileFile(const fig::user::UserProfile& profile, const fig::path& filename) noexcept
 	{
 		auto const path = profile.GetPath() / filename;
 		return __ReadFile(path, true, {});

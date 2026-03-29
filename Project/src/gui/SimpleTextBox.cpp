@@ -3,8 +3,6 @@
 #include "gui/AppResources.h"
 #include "gui/CustomRenderers.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	SimpleTextBox::SimpleTextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, Flags flags) : TextBox(pParent, fontFace, ptSize, flags)

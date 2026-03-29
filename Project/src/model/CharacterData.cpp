@@ -4,11 +4,10 @@
 #include "fs/Xml.h"
 
 using namespace fig::gui;
-using namespace fig::gui::util;
 using namespace fig::util;
 using namespace fig::io;
 
-namespace fig::io::data
+namespace fig::io
 {
 	static bool ReadXml(XmlReader& xml, CharacterData& data)
 	{

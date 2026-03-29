@@ -6,7 +6,6 @@
 #include <algorithm>
 
 using namespace fig::gui;
-using namespace fig::gui::util;
 using namespace fig::util;
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ULL };

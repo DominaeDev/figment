@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/AppResources.h"
 #include "fs/FileUtility.h"
-#include "fs/BinaryReader.h"
+#include "fs/AssetFileReader.h"
 #include "model/UserProfile.h"
 #include <SDL3_image/SDL_image.h>
 #include <cassert>
@@ -43,6 +43,9 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_GRID_LARGE, "./resources/gui/icons/icon_grid_large.png");
 		LoadTexture(pRenderer, TextureType::ICON_TAG, "./resources/gui/icons/icon_tag.png");
 		LoadTexture(pRenderer, TextureType::ICON_LOGOUT, "./resources/gui/icons/icon_logout.png");
+		LoadTexture(pRenderer, TextureType::ICON_LOCK, "./resources/gui/icons/icon_lock.png");
+		LoadTexture(pRenderer, TextureType::ICON_ARROW_LEFT, "./resources/gui/icons/icon_arrow_left.png");
+		LoadTexture(pRenderer, TextureType::ICON_ARROW_RIGHT, "./resources/gui/icons/icon_arrow_right.png");
 
 		// Chat
 		LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/chat/bg_9grid.png");
@@ -123,7 +126,7 @@ namespace fig::gui
 			auto& surface = _surfaces[textureId] = fig::sdl::Surface();
 			surface.reset(pSurface);
 
-			if (gui::util::MaskCorners(surface, MaskType::CARD_CORNER_MASK))
+			if (MaskCorners(surface, MaskType::CARD_CORNER_MASK))
 				pSurface = surface.get();
 		}
 
@@ -194,14 +197,14 @@ namespace fig::gui
 		else
 		{
 			// Load from disk
-			if (auto result = BinaryReader::ReadProfileFile(profile, std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt)); result.has_value())
+			if (auto result = AssetFileReader::ReadProfileFile(profile, std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt)); result.has_value())
 			{
 				const auto& asset = result.value();
-				auto width = asset.get_meta<uint16_t>(fig::io::data::MetaTag::ImageWidth).value_or(0);
-				auto height = asset.get_meta<uint16_t>(fig::io::data::MetaTag::ImageHeight).value_or(0);
-				auto format = static_cast<fig::gui::ImageFormat>(asset.get_meta<uint8_t>(fig::io::data::MetaTag::ImageFormat).value_or(0));
+				auto width = asset.get_meta<uint16_t>(fig::io::MetaTag::ImageWidth).value_or(0);
+				auto height = asset.get_meta<uint16_t>(fig::io::MetaTag::ImageHeight).value_or(0);
+				auto format = static_cast<fig::gui::ImageFormat>(asset.get_meta<uint8_t>(fig::io::MetaTag::ImageFormat).value_or(0));
 
-				if (auto image = fig::gui::util::SurfaceFromBytes(width, height, format, asset.data); not image.empty())
+				if (auto image = SurfaceFromBytes(width, height, format, asset.data); not image.empty())
 				{
 					pSurface = image.get();
 					_profileSurfaces[profile.id] = std::move(image);

@@ -11,10 +11,9 @@
 #include <tuple>
 #include <cassert>
 
-using namespace fig::gui;
 using namespace fig::util;
 
-namespace fig::gui::util
+namespace fig::gui
 {
 	fig::sdl::Surface LoadImageFromMemory(fig::byte_span data)
 	{

@@ -2,8 +2,6 @@
 #include "gui/Image.h"
 #include "gui/GUIUtility.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	Image::Image(LayoutElement* pParent, Texture* pTexture, Color tint) : Control(pParent),

@@ -2,8 +2,6 @@
 #include "gui/BaseButton.h"
 #include "gui/GUIUtility.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	BaseButton::BaseButton(LayoutElement* pOwner) : _pOwner { pOwner }

@@ -7,7 +7,7 @@
 #include "gui/GUITypes.h"
 #include "util/SearchIndex.h"
 
-namespace fig::io::data
+namespace fig::io
 {
 	struct CharacterProperty
 	{

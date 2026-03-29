@@ -3,8 +3,6 @@
 #include "gui/AppResources.h"
 #include "gui/GUIUtility.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	NineGridRenderer::NineGridRenderer(int cornerPixels)

@@ -12,14 +12,14 @@
 #include "util/Hash.h"
 #include "util/Security.h"
 #include "fs/Xml.h"
-#include "fs/BinaryWriter.h"
-#include "fs/BinaryReader.h"
+#include "fs/AssetFileWriter.h"
+#include "fs/AssetFileReader.h"
 #include "model/AssetManager.h"
 #include "model/GlobalStrings.h"
 #include "util/RecoverCodeLUT.h"
 
 using namespace fig::io;
-using namespace fig::user::auth;
+using namespace fig::auth;
 using namespace fig::util;
 
 namespace fig::user
@@ -328,7 +328,7 @@ namespace fig::user
 		AuthKey encKey = DeriveKeyFromBytes(recoveryKey, salt);
 		recoveryChallenge = CreateAuthChallenge(authKey, salt, encKey);
 		
-		return BinaryWriter::WriteRecoveryFile(profile, recoveryChallenge) == FileError::NoError;
+		return AssetFileWriter::WriteRecoveryFile(profile, recoveryChallenge) == FileError::NoError;
 	}
 
 	bool UserManager::RecoverProfile(const fig::uuid& profileID, const fig::string& recoveryCode)

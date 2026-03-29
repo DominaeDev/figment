@@ -1,20 +1,18 @@
 #include <pch.h>
-#include "fs/BinaryWriter.h"
+#include "fs/AssetFileWriter.h"
 #include "model/UserProfile.h"
 #include "model/Asset.h"
 #include <Crc32.h>
 #include <cassert>
 
-using namespace fig::io::data;
-
 namespace fig::io
 {
-	BinaryWriter::BinaryWriter(const fig::path& directory) noexcept :
+	AssetFileWriter::AssetFileWriter(const fig::path& directory) noexcept :
 		_directory { directory }
 	{
 	}
 
-	BinaryWriter::BinaryWriter(const fig::path& directory, fig::user::auth::AuthKey key) noexcept :
+	AssetFileWriter::AssetFileWriter(const fig::path& directory, fig::auth::AuthKey key) noexcept :
 		_directory { directory },
 		_authKey { key }
 	{
@@ -126,7 +124,7 @@ namespace fig::io
 		}
 	}
 
-	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::user::auth::AuthKey authKey) noexcept
+	static void WriteData(std::ofstream& fs, const AssetFile& file, fig::auth::AuthKey authKey) noexcept
 	{
 		if (file.data.size() == 0uz)
 			return; // No data
@@ -134,7 +132,7 @@ namespace fig::io
 		if (file.data_encrypted)
 		{
 			// Write encrypted
-			fig::user::auth::Encrypt(fs, file.data, authKey);
+			fig::auth::Encrypt(fs, file.data, authKey);
 		}
 		else
 		{
@@ -143,7 +141,7 @@ namespace fig::io
 		}
 	}
 
-	FileError BinaryWriter::WriteFile(const AssetFile& file) noexcept
+	FileError AssetFileWriter::WriteFile(const AssetFile& file) noexcept
 	{
 		auto const path = _directory / file.GetFileName();
 
@@ -170,7 +168,7 @@ namespace fig::io
 		}
 	}
 
-	FileError BinaryWriter::WriteRecoveryFile(const fig::user::UserProfile& profile, const fig::user::auth::AuthChallenge& recoveryChallenge) noexcept
+	FileError AssetFileWriter::WriteRecoveryFile(const fig::user::UserProfile& profile, const fig::auth::AuthChallenge& recoveryChallenge) noexcept
 	{
 		auto directory = profile.GetPath();
 		auto const path = directory / fig::path(std::format("{}.{}", Constants::Paths::RecoveryFileName, Constants::Paths::RecoveryFileExt));
@@ -203,7 +201,7 @@ namespace fig::io
 		}
 	}
 
-	FileError BinaryWriter::WriteProfileFile(const fig::user::UserProfile& profile, const fig::path& filename, const fig::io::data::AssetFile& assetFile) noexcept
+	FileError AssetFileWriter::WriteProfileFile(const fig::user::UserProfile& profile, const fig::path& filename, const fig::io::AssetFile& assetFile) noexcept
 	{
 		auto directory = profile.GetPath();
 		auto const path = directory / filename;

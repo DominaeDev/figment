@@ -4,7 +4,6 @@
 #include "fs/FileUtility.h"
 #include "fs/TavernCardV2.h"
 
-using namespace fig::io::data;
 using json = nlohmann::json;
 
 namespace fig::io
@@ -54,13 +53,13 @@ namespace fig::io
 
 		switch (character.gender)
 		{
-		case data::CharacterGender::Male:
+		case CharacterGender::Male:
 			character.searchIndex.AddTerm("male");
 			break;
-		case data::CharacterGender::Female:
+		case CharacterGender::Female:
 			character.searchIndex.AddTerm("female");
 			break;
-		case data::CharacterGender::Custom:
+		case CharacterGender::Custom:
 			character.searchIndex.AddTerm(character.properties[Constants::CharacterProperties::Gender].value);
 			break;
 		}

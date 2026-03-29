@@ -5,7 +5,7 @@
 #include "Types.h"
 #include <fstream>
 
-namespace fig::user::auth
+namespace fig::auth
 {
 	using Bit128 = std::array<fig::byte, 16uz>;
 	using Bit256 = std::array<fig::byte, 32uz>;
@@ -23,8 +23,8 @@ namespace fig::user::auth
 
 	struct alignas(8) UserAuth
 	{
-		fig::user::auth::AuthChallenge challenge {};
-		fig::user::auth::AuthSalt salt {};
+		fig::auth::AuthChallenge challenge {};
+		fig::auth::AuthSalt salt {};
 	};
 
 	void Encrypt(fig::bytes& data, const AuthKey& key);
@@ -42,7 +42,7 @@ namespace fig::user::auth
 	DecryptedData Decrypt(const AuthChallenge& input, const AuthKey& key);
 
 	AuthKey DeriveKeyFromPassword(const fig::string& password, const AuthSalt& salt);
-	AuthKey DeriveKeyFromBytes(fig::byte_span data, const fig::user::auth::AuthSalt& salt);
+	AuthKey DeriveKeyFromBytes(fig::byte_span data, const fig::auth::AuthSalt& salt);
 
 	Bit128 Random128Bits();
 	Bit256 Random256Bits();

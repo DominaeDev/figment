@@ -22,13 +22,13 @@ namespace fig::gui
 			// Tags
 			switch (character.gender)
 			{
-			case data::CharacterGender::Male:
+			case CharacterGender::Male:
 				AddTag("Male");
 				break;
-			case data::CharacterGender::Female:
+			case CharacterGender::Female:
 				AddTag("Female");
 				break;
-			case data::CharacterGender::Custom:
+			case CharacterGender::Custom:
 				AddTag(character.properties[Constants::CharacterProperties::Gender].value);
 				break;
 			}

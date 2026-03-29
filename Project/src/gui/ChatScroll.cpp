@@ -12,10 +12,8 @@
 #include <set>
 
 using namespace fig::gui;
-using namespace fig::gui::util;
 using namespace fig::util;
 using namespace fig::llm;
-using namespace fig::io::data;
 
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f

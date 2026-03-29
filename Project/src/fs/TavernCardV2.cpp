@@ -2,7 +2,7 @@
 #include <json.hpp>
 #include "fs/TavernCardV2.h"
 
-namespace fig::io::data
+namespace fig::io
 {
 	bool TavernCardV2::Parse(const fig::string& json)
 	{

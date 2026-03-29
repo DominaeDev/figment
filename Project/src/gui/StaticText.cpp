@@ -5,8 +5,6 @@
 #include "Constants.h"
 #include <algorithm>
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	constexpr Color DropShadowColor { 0x00, 0x00, 0x00, 0xC0 };

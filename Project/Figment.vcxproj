@@ -161,8 +161,8 @@
     <ClCompile Include="include\gui\TexturedBorder.cpp" />
     <ClCompile Include="include\llm\LLMBackend.cpp" />
     <ClCompile Include="src\fs\AssetDatabase.cpp" />
-    <ClCompile Include="src\fs\BinaryReader.cpp" />
-    <ClCompile Include="src\fs\BinaryWriter.cpp" />
+    <ClCompile Include="src\fs\AssetFileReader.cpp" />
+    <ClCompile Include="src\fs\AssetFileWriter.cpp" />
     <ClCompile Include="src\fs\CardImporter.cpp" />
     <ClCompile Include="src\fs\FileStream.cpp" />
     <ClCompile Include="src\fs\FileUtility.cpp" />
@@ -364,8 +364,8 @@
     <ClInclude Include="..\Libraries\uuid_v4\include\endianness.h" />
     <ClInclude Include="..\Libraries\uuid_v4\include\uuid_v4.h" />
     <ClInclude Include="include\fs\AssetDatabase.h" />
-    <ClInclude Include="include\fs\BinaryReader.h" />
-    <ClInclude Include="include\fs\BinaryWriter.h" />
+    <ClInclude Include="include\fs\AssetFileReader.h" />
+    <ClInclude Include="include\fs\AssetFileWriter.h" />
     <ClInclude Include="include\fs\CardImporter.h" />
     <ClInclude Include="include\fs\DatabaseError.h" />
     <ClInclude Include="include\fs\FileError.h" />

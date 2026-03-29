@@ -16,7 +16,7 @@ namespace fig::user
 	struct UserProfile;
 }
 
-namespace fig::io::data
+namespace fig::io
 {
 	struct VersionNumber
 	{
@@ -241,9 +241,9 @@ namespace fig::io::data
 		uint16_t profile_version { 0 };
 		uint64_t profile_id[2];
 
-		fig::user::auth::AuthChallenge recovery_challenge {};
-		fig::user::auth::AuthChallenge auth_challenge {};
-		fig::user::auth::AuthSalt auth_salt {};
+		fig::auth::AuthChallenge recovery_challenge {};
+		fig::auth::AuthChallenge auth_challenge {};
+		fig::auth::AuthSalt auth_salt {};
 	};
 }
 

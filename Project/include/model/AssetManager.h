@@ -11,11 +11,6 @@
 #include <mutex>
 #include <future>
 
-namespace fig::io::data
-{
-	class CharacterData;
-}
-
 namespace fig::user
 {
 	class UserManager;
@@ -24,6 +19,8 @@ namespace fig::user
 
 namespace fig::io
 {
+	class CharacterData;
+
 	using AsyncResult_Image		= fig::sdl::Surface;
 	using AsyncResult_CoverPair	= std::pair<fig::sdl::Surface, fig::sdl::Surface>;
 	using AsyncResultVariant = std::variant<AsyncResult_Image, AsyncResult_CoverPair>;
@@ -75,7 +72,7 @@ namespace fig::io
 
 		enum class CharacterDataFormat { Default, TavernV2, };
 		void ImportCharactersInDirectory(fig::path directory, CharacterDataFormat format, size_t max_count = 0);
-		std::expected<fig::io::data::CharacterData, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		std::expected<fig::io::CharacterData, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		std::expected<AssetRef, FileError> ImportScenario(fig::path filename);
 		
 		static FileError CreateProfilePicture(const fig::user::UserProfile& profile, fig::path imageFilename);
@@ -107,7 +104,7 @@ namespace fig::io
 	private:
 		fig::uuid _profileID;
 		fig::path _profilePath;
-		fig::user::auth::AuthKey _profileAuthKey {};
+		fig::auth::AuthKey _profileAuthKey {};
 		std::map<fig::uuid, Asset> _assets {};
 		std::unique_ptr<AssetDatabase> _pAssetDB;
 

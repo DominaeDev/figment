@@ -10,7 +10,6 @@
 #include "Constants.h"
 #include <format>
 
-using namespace fig::gui::util;
 using namespace fig::util;
 
 #define USER_RIGHT_ALIGNED	1

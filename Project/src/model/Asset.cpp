@@ -10,8 +10,6 @@
 #include <limits>
 #include <crc32.h>
 
-using namespace fig::io::data;
-
 namespace fig::io
 {
 	fig::string AssetTypeToString(AssetType type, uint8_t subtype)

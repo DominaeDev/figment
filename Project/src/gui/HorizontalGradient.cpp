@@ -3,7 +3,6 @@
 #include "gui/AppResources.h"
 
 using namespace fig::gui;
-using namespace fig::gui::util;
 
 HorizontalGradient::HorizontalGradient(LayoutElement* pParent, Color colorLeft, Color colorRight) : Control(pParent)
 {

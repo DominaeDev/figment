@@ -72,9 +72,9 @@ namespace fig::io
 
 	class Asset
 	{
-		using AssetFile = fig::io::data::AssetFile;
-		using MetaTag = fig::io::data::MetaTag;
-		using MetaValue = fig::io::data::MetaValue;
+		using AssetFile = fig::io::AssetFile;
+		using MetaTag = fig::io::MetaTag;
+		using MetaValue = fig::io::MetaValue;
 	public:
 		void SetData(fig::bytes&& data);
 		void SetData(fig::byte_span data);

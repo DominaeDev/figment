@@ -6,7 +6,7 @@
 
 #pragma once
 
-namespace fig::io::data
+namespace fig::io
 {
 	class ChatSession;
 }
@@ -40,7 +40,7 @@ namespace fig::llm
 		void DiscardByTTL(int32_t current_turn);
 		void EraseChat();
 
-		void TokenizeUncached(fig::io::data::ChatSession& session);
+		void TokenizeUncached(fig::io::ChatSession& session);
 		bool DiscardBlock(const ContextBlock& block);
 		
 		void RebuildBatch();

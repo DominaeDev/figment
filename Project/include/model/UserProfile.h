@@ -15,8 +15,8 @@ namespace fig::user
 
 		fig::uuid id { 0, 0 };
 		fig::string name;
-		fig::user::auth::UserAuth auth {};
-		fig::user::auth::UserAuth recovery {};
+		fig::auth::UserAuth auth {};
+		fig::auth::UserAuth recovery {};
 
 		inline constexpr bool IsValid() const noexcept
 		{

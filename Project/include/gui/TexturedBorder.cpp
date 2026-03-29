@@ -4,7 +4,6 @@
 #include "gui/GUIUtility.h"
 
 using namespace fig::gui;
-using namespace fig::gui::util;
 
 TexturedBorder::TexturedBorder(LayoutElement* pParent, Texture* borderTexture, int cornerPixels) : Control(pParent)
 {

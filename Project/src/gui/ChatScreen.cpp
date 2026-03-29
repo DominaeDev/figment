@@ -27,7 +27,6 @@
 
 using namespace fig::util;
 using namespace fig::llm;
-using namespace fig::io::data;
 using namespace fig::io;
 
 template<typename T>

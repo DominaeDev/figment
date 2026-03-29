@@ -3,9 +3,8 @@
 #include "fs/FileUtility.h"
 #include <sqlite3.h>
 
-using namespace fig::user::auth;
+using namespace fig::auth;
 using namespace fig::util;
-using namespace fig::io::data;
 
 constexpr fig::const_string create_tables =
 	"CREATE TABLE Assets("

@@ -5,7 +5,7 @@
 #include "gui/GUITypes.h"
 #include "model/Asset.h"
 
-namespace fig::gui::util
+namespace fig::gui
 {
 	inline constexpr Rect expand_rect(const Rect& rect, int pixels)
 	{

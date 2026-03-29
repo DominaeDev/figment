@@ -17,7 +17,6 @@ using namespace std::chrono_literals;
 using namespace fig::util;
 using namespace fig::io;
 using namespace fig::llm::util;
-using namespace fig::io::data;
 
 template<typename T>
 void queue_clear(std::queue<T>& q)

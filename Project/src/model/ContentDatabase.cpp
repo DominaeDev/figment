@@ -2,8 +2,6 @@
 #include "model/ContentDatabase.h"
 #include "model/AssetManager.h"
 
-using namespace fig::io::data;
-
 namespace fig::io
 {
 	ContentDatabase::ContentDatabase(AssetManager& assetMngr)
@@ -49,14 +47,14 @@ namespace fig::io
 
 	}
 
-	std::optional<fig::io::data::CharacterData> ContentDatabase::GetCharacter(const fig::uuid& id) const noexcept
+	std::optional<fig::io::CharacterData> ContentDatabase::GetCharacter(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _characters.find(id); itFind != _characters.cend())
 			return std::make_optional(itFind->second);
 		return std::nullopt;
 	}
 
-	std::optional<fig::io::data::ScenarioData> ContentDatabase::GetScenario(const fig::uuid& id) const noexcept
+	std::optional<fig::io::ScenarioData> ContentDatabase::GetScenario(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _scenarios.find(id); itFind != _scenarios.cend())
 			return std::make_optional(itFind->second);

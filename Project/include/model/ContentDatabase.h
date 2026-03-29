@@ -14,10 +14,10 @@ namespace fig::io
 	public:
 		ContentDatabase(AssetManager& assetMngr);
 
-		std::optional<fig::io::data::CharacterData> GetCharacter(const fig::uuid& id) const noexcept;
+		std::optional<fig::io::CharacterData> GetCharacter(const fig::uuid& id) const noexcept;
 		auto GetCharacters() const noexcept { return _characters | std::views::values; }
 
-		std::optional<fig::io::data::ScenarioData> GetScenario(const fig::uuid& id) const noexcept;
+		std::optional<fig::io::ScenarioData> GetScenario(const fig::uuid& id) const noexcept;
 		auto GetScenarios() const noexcept { return _scenarios | std::views::values; }
 
 	protected:
@@ -26,8 +26,8 @@ namespace fig::io
 	private:
 		AssetManager* _pAssetMngr {};
 
-		std::map<fig::uuid, fig::io::data::CharacterData> _characters;
-		std::map<fig::uuid, fig::io::data::ScenarioData> _scenarios;
+		std::map<fig::uuid, fig::io::CharacterData> _characters;
+		std::map<fig::uuid, fig::io::ScenarioData> _scenarios;
 	};
 }
 #endif

@@ -13,7 +13,6 @@
 using namespace fig::util;
 using namespace fig::llm;
 using namespace fig::llm::util;
-using namespace fig::io::data;
 
 Context::Context(const ModelState& model, int32_t num_sequences)
 {
@@ -49,7 +48,7 @@ void Context::Initialize()
 	_cache->Clear();
 }
 
-void Context::TokenizeUncached(ChatSession& session)
+void Context::TokenizeUncached(fig::io::ChatSession& session)
 {
 	// Tokenize uncached messages
 	for (auto& block : _blocks)

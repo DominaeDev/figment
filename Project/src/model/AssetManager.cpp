@@ -12,17 +12,15 @@
 #include "model/UserProfile.h"
 #include "util/Common.h"
 #include "fs/Xml.h"
-#include "fs/BinaryWriter.h"
-#include "fs/BinaryReader.h"
+#include "fs/AssetFileWriter.h"
+#include "fs/AssetFileReader.h"
 #include "fs/FileUtility.h"
 #include "fs/CardImporter.h"
 #include "gui/AppResources.h"
 #include <cassert>
 
-using namespace fig::io::data;
 using namespace fig::util;
 using namespace fig::gui;
-using namespace fig::gui::util;
 using namespace fig::util;
 
 namespace fig::io
@@ -253,7 +251,7 @@ namespace fig::io
 	bool AssetManager::WriteAsset(Asset& asset)
 	{
 		auto file = asset.ToFile();
-		BinaryWriter writer(_profilePath, _profileAuthKey);
+		AssetFileWriter writer(_profilePath, _profileAuthKey);
 		if (auto error = writer.WriteFile(file); error == FileError::NoError)
 		{
 			asset.file_status = AssetFileStatus::FullyLoaded;
@@ -312,7 +310,7 @@ namespace fig::io
 			assets.begin(), assets.end(),
 			[&](AssetRef assetRef) {
 			auto& asset = assetRef.get();
-			BinaryReader reader(_profilePath, _profileAuthKey);
+			AssetFileReader reader(_profilePath, _profileAuthKey);
 			if (auto file = reader.ReadFile(asset.GetFileName(), false))
 			{
 				asset.FromFile(std::move(file.value()));
@@ -391,7 +389,7 @@ namespace fig::io
 		if (asset.file_status == AssetFileStatus::Invalid)
 			return std::unexpected(FileError::ReadError);
 
-		BinaryReader reader(_profilePath, _profileAuthKey);
+		AssetFileReader reader(_profilePath, _profileAuthKey);
 		if (auto file = reader.ReadFile(asset.GetFileName()))
 		{
 			asset.FromFile(std::move(file.value()));
@@ -635,7 +633,7 @@ namespace fig::io
 			image_file.meta[MetaTag::ImageFormat] = static_cast<uint8_t>(0x04);
 
 			auto filename = fig::path(std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt));
-			return BinaryWriter::WriteProfileFile(profile, filename, image_file);
+			return AssetFileWriter::WriteProfileFile(profile, filename, image_file);
 		}
 
 		return FileError::UnknownError;

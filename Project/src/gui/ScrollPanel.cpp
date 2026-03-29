@@ -2,8 +2,6 @@
 #include "gui/ScrollPanel.h"
 #include "gui/GUIUtility.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	ScrollPanel::ScrollPanel(LayoutElement* pParent) : Control(pParent)

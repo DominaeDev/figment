@@ -2,8 +2,6 @@
 #include "gui/ImageWithMask.h"
 #include "gui/GUIUtility.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	ImageWithMask::ImageWithMask(LayoutElement* pParent, TexturePtr pTexture, TexturePtr pMask, Color tint) : Control(pParent)

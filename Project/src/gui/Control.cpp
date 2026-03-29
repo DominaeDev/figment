@@ -5,8 +5,6 @@
 #include "gui/Sizer.h"
 #include "gui/CustomRenderer.h"
 
-using namespace fig::gui::util;
-
 namespace fig::gui
 {
 	Control::Control(LayoutElement* pParent)
