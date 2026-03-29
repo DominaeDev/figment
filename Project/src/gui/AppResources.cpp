@@ -46,6 +46,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_LOCK, "./resources/gui/icons/icon_lock.png");
 		LoadTexture(pRenderer, TextureType::ICON_ARROW_LEFT, "./resources/gui/icons/icon_arrow_left.png");
 		LoadTexture(pRenderer, TextureType::ICON_ARROW_RIGHT, "./resources/gui/icons/icon_arrow_right.png");
+		LoadTexture(pRenderer, TextureType::ICON_HOME, "./resources/gui/icons/icon_home.png");
 
 		// Chat
 		LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/chat/bg_9grid.png");

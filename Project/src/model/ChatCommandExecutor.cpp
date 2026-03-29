@@ -77,19 +77,22 @@ static Role RoleFromName(fig::string text, LLMInstancePtr pLLM)
 
 static bool cmdUserMessage(ParsedChatCommand cmd, Ctx ctx)
 {
-#if _DEBUG
-	if (!(ctx.pLLM && ctx.pLLM->IsReady()))
+	if constexpr (Debugging)
 	{
-		static int turn = 0;
-		auto [msgType, complete] = fig::llm::util::detect_message_type(fig::llm::util::process_message(cmd.text, ""));
-		ctx.pChatScroll->AddDummyMessage(turn % 2 == 0 ? "@USR" : "@BOT", turn % 2 == 0 ? Role::User : Role::Bot1, msgType, cmd.text);
-		++turn;
-		return true;
+		if (!(ctx.pLLM && ctx.pLLM->IsReady()))
+		{
+			static int turn = 0;
+			auto [msgType, complete] = fig::llm::util::detect_message_type(fig::llm::util::process_message(cmd.text, ""));
+			ctx.pChatScroll->AddDummyMessage(turn % 2 == 0 ? "@USR" : "@BOT", turn % 2 == 0 ? Role::User : Role::Bot1, msgType, cmd.text);
+			++turn;
+			return true;
+		}
 	}
-#else
-	if (!ctx.pLLM)
-		return false;
-#endif
+	else
+	{
+		if (!ctx.pLLM)
+			return false;
+	}
 	return ctx.pLLM->SendMessage(cmd.text);
 }
 

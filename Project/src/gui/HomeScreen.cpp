@@ -12,7 +12,21 @@ namespace fig::gui
 	{
 		auto pTopBar = new Panel(this);
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
+
+		_pHeader = new StaticText(pTopBar, "Characters", FontFace::Italic, 24, false);
+		_pHeader->SetX(52);
+		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
+		_pHeader->SetAlignment(TextAlignment::Left_Center);
 		
+		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR);
+//		pExpandButton->SetSize(36, 36);
+//		pExpandButton->SetX(4);
+//		pExpandButton->CenterVertically();
+		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
+		_pExpandButton = pExpandButton;
+
+		auto pHomeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_HOME);
+
 		auto toggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
 		toggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 		auto gridLargeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
@@ -30,19 +44,15 @@ namespace fig::gui
 		});
 
 		auto pTopSizer = new HorizontalSizer();
+		pTopSizer->Add(pExpandButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 4);
+		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 8);
+		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
 		pTopSizer->AddStretchSpacer();
 		pTopSizer->Add(toggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(gridLargeButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(gridSmallButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopBar->SetSizer(pTopSizer);
-
-		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR);
-		pExpandButton->SetSize(36, 36);
-		pExpandButton->SetX(4);
-		pExpandButton->CenterVertically();
-		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
-		_pExpandButton = pExpandButton;
 
 		_pCardList = new CardList(this);
 //		_pCardList->SetCardSize(CardSize::Half);
@@ -90,6 +100,7 @@ namespace fig::gui
 	void HomeScreen::OnSidePanel(bool bShown)
 	{
 		_pExpandButton->SetVisible(!bShown);
+		_pExpandButton->EnableLayout(!bShown);
 	}
 
 	CardList& HomeScreen::GetCardList()

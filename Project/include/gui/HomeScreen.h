@@ -32,6 +32,7 @@ namespace fig::gui
 		CardList* _pCardList {};
 		Control* _pExpandButton {};
 		TextBox* _pFilterTextBox {};
+		StaticText* _pHeader {};
 		fig::string _search_text;
 		float _fSearchTimer {};
 

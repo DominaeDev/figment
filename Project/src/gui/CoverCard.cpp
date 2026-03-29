@@ -54,6 +54,7 @@ namespace fig::gui
 
 		// Footer (large)
 		_pLargeFooter = new Area(_pLargeRoot);
+		_pLargeFooter->SetHeight(kFooterHeight);
 		_pLargeFooter->SetY(kLargeHeight - kFooterHeight);
 		_pLargeFooter->SetSize(kLargeWidth, kFooterHeight);
 
@@ -294,6 +295,12 @@ namespace fig::gui
 			_pLargeFooter->SetY(kLargeHeight - _pLargeFooter->GetHeight());
 			_pLargeFooterFade->FillParent();
 			position = _tagPosition;
+		}
+		else if (_tags.empty())
+		{
+			_pLargeFooter->SetHeight(kFooterHeight + kTagRowHeight);
+			_pLargeFooter->SetY(kLargeHeight - _pLargeFooter->GetHeight());
+			_pLargeFooterFade->FillParent();
 		}
 
 		auto pTagBG = new NineGridImage(_pTagsRoot, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });

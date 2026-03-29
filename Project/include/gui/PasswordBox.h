@@ -8,5 +8,11 @@ namespace fig::gui
 	{
 	public:
 		PasswordBox(LayoutElement* pParent);
+
+	protected:
+		void OnSize();
+
+	private:
+		Image* _pIcon;
 	};
 }
