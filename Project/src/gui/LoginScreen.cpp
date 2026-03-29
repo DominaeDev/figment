@@ -29,10 +29,13 @@ namespace fig::gui
 		pHorizontalSizer->Add(center, 0, Sizer::Expand);
 		pHorizontalSizer->AddStretchSpacer();
 
+		auto centerArea = new Area(this);
+		centerArea->SetSize(500, 260);
+		centerArea->SetSizer(pHorizontalSizer);
+
 		auto pVerticalSizer = new VerticalSizer();
 		pVerticalSizer->AddStretchSpacer();
-		auto centerArea = pVerticalSizer->Add(pHorizontalSizer, this, 0, Sizer::Expand);
-		centerArea->SetSize(500, 260);
+		pVerticalSizer->Add(centerArea, 0, Sizer::Expand);
 		pVerticalSizer->AddStretchSpacer();
 
 		auto pProfileImage = new ImageWithMask(center, nullptr, nullptr);
@@ -41,16 +44,29 @@ namespace fig::gui
 		auto pProfileName = new StaticText(center, "", FontFace::Default, 24.0, true);
 		pProfileName->SetAlignment(TextAlignment::Middle_Top);
 
-		auto pPassword = new PasswordBox(center);
+		auto pPasswordArea = new Panel(center);
+		pPasswordArea->SetBackgroundColor(Colors::Debug);
+		pPasswordArea->SetHeight(48);
+
+		auto pPassword = new PasswordBox(pPasswordArea);
 		pPassword->SetEnterPressedCallback([this](fig::string password) { TrySignIn(password); });
 		pPassword->SetFocus(true);
 
+		auto pLockIcon = new Image(pPasswordArea, AppResources::GetTexture(TextureType::ICON_LOCK));
+		pLockIcon->SetBackgroundColor(Colors::Red);
+
+		auto pPasswordSizer = new HorizontalSizer();
+		pPasswordSizer->Add(pLockIcon, -1, Sizer::AlignRight | Sizer::AlignCenterVertical | Sizer::Right, 8);
+		pPasswordSizer->Add(pPassword, 0, Sizer::AlignCenterVertical);
+		pPasswordSizer->AddStretchSpacer();
+		pPasswordArea->SetSizer(pPasswordSizer);
+
 		auto pCenterSizer = new VerticalSizer();
-		pCenterSizer->Add(pProfileImage, 0, Sizer::AlignCenterHorizontal, 0);
+		pCenterSizer->Add(pProfileImage, 0, Sizer::AlignCenterHorizontal);
 		pCenterSizer->AddSpacer(4);
-		pCenterSizer->Add(pProfileName, 0, Sizer::Expand, 0);
+		pCenterSizer->Add(pProfileName, 0, Sizer::Expand);
 		pCenterSizer->AddSpacer(28);
-		pCenterSizer->Add(pPassword, 0, Sizer::AlignCenterHorizontal, 0);
+		pCenterSizer->Add(pPasswordArea, 0, Sizer::Expand);
 		center->SetSizer(pCenterSizer);
 
 		SetSizer(pVerticalSizer);

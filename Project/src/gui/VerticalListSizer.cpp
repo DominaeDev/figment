@@ -3,37 +3,40 @@
 #include "gui/Control.h"
 #include "util/Common.h"
 
-using namespace fig::gui;
 using namespace fig::util;
 
-void VerticalListSizer::OnLayout(Rect parentRect)
+namespace fig::gui
 {
-	auto count = GetCount();
-	if (count == 0)
-		return;
-
-	auto items = GetLayoutItems()
-		| std::views::reverse;
-
-	int y = 0;
-	for (auto it = items.begin(); it != items.end(); ++it)
+	void VerticalListSizer::OnLayout(const Rect& parentRect)
 	{
-		auto& item = *it;
+		auto count = GetCount();
+		if (count == 0)
+			return;
 
-		auto& control = *item.pControl;
-		auto rect = control.GetRect();
-		int height = control.GetHeight();
+		auto items = GetLayoutItems()
+			| std::views::reverse;
 
-		rect.x = parentRect.x;
+		int y = 0;
+		for (auto& item : items)
+		{
+			auto pControl = item.GetControl();
 
-		if ((item.flags & Flag::Expand) != 0)
-			rect.w = parentRect.w;
+			if (pControl)
+			{
+				auto rect = pControl->GetRect();
+				int height = pControl->GetHeight();
 
-		rect.y = parentRect.y + parentRect.h - y - rect.h - _marginBottom;
+				rect.x = parentRect.x;
+				if ((item.info.flags & Flag::Expand) != 0)
+					rect.w = parentRect.w;
+				rect.y = parentRect.y + parentRect.h - y - rect.h - _marginBottom;
 
-		control.SetRect(rect);
+				pControl->SetRect(rect);
+				item.rect = rect;
 
-		y += height + _spacing;
+				y += height + _spacing;
+			}
+		}
+		_totalListHeight = toF(y - _spacing);
 	}
-	_totalListHeight = toF(y - _spacing);
 }

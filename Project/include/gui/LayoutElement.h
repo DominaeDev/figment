@@ -6,17 +6,15 @@
 
 namespace fig::gui
 {
-	class Sizer;
-
 	class LayoutElement : public IUpdateable
 	{
+		friend class Sizer;
 	protected:
 		LayoutElement() = default;
 	public:
 		virtual ~LayoutElement();
 
 		void Update(float fElapsed);
-		void Layout();
 
 		inline const Rect& GetRect() const noexcept { return _rect; }
 		inline constexpr Rectf GetDrawRect() const noexcept { return Rectf { toF(_rect.x), toF(_rect.y), toF(_rect.w), toF(_rect.h) }; }
@@ -77,6 +75,7 @@ namespace fig::gui
 		void SetParent(LayoutElement* pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
 		Sizer* const GetSizer() const { return _pSizer.get(); }
+		void Layout(const Rect* const pRect = nullptr);
 
 		virtual void OnUpdate(float fElapsed) {};
 		virtual void OnParent() {};

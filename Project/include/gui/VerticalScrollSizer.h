@@ -10,7 +10,7 @@ namespace fig::gui
 		void SetOffset(Coord offset);
 
 	protected:
-		void OnLayout(Rect rect) override;
+		void OnLayout(const Rect& rect) override;
 
 		Coord _offset = 0;
 	};

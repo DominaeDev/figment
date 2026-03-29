@@ -3,38 +3,84 @@
 #include "gui/LayoutElement.h"
 #include "gui/Area.h"
 #include <cassert>
+#include <cassert>
 
 namespace fig::gui
 {
-	class LayoutDummy : public LayoutElement {};
+	Sizer::~Sizer()
+	{
+		for (auto ppSizer : _items 
+			| std::views::transform([](auto& li) { return std::get_if<Sizer*>(&li.pControl); }))
+		{
+			if (ppSizer)
+				delete* ppSizer;
+		}
+	}
 
 	void Sizer::Add(LayoutElement* pControl, int proportion, int flags, int border)
 	{
-		_items.push_back(LayoutInfo { pControl, proportion, flags, border });
+		if (pControl)
+		{
+			_items.push_back(LayoutItem {
+				.info = LayoutProperties { proportion, flags, border },
+				.pControl = pControl,
+			});
+		}
 	}
 
-	Control* Sizer::Add(Sizer* pSizer, Control* pParent, int proportion, int flags, int border)
+	void Sizer::AddSizer(Sizer* pSizer, int proportion, int flags, int border)
 	{
-		auto pControl = new Area(pParent);
-		pControl->SetSizer(pSizer);
-		_items.push_back(LayoutInfo { pControl, proportion, flags, border });
-		return pControl;
+		if (pSizer)
+		{
+			_items.push_back(LayoutItem {
+				.info = LayoutProperties { proportion, flags | Sizer::Expand | Sizer::Fill, border },
+				.pControl = pSizer,
+			});
+		}
 	}
 
-	void Sizer::Remove(Control* pControl)
+	void Sizer::Remove(LayoutElement* pControl)
 	{
-		auto it = std::find_if(_items.cbegin(), _items.cend(), [pControl](const LayoutInfo& li) {
-			return li.pControl == pControl;
+		auto it = std::find_if(_items.cbegin(), _items.cend(), [pControl](const LayoutItem & li) {
+			if (auto pp = std::get_if<LayoutElement*>(&li.pControl); *pp and *pp == pControl)
+				return true;
+			return false;
 		});
 
 		if (it != _items.end())
 			_items.erase(it);
 	}
 
-	void Sizer::Layout()
+	void Sizer::RemoveSizer(Sizer* pSizer)
 	{
-		if (_pOwner)
-			OnLayout(_pOwner->GetRect());
+		auto it = std::find_if(_items.cbegin(), _items.cend(), [pSizer](const LayoutItem & li) {
+			if (auto pp = std::get_if<Sizer*>(&li.pControl); *pp and *pp == pSizer)
+				return true;
+			return false;
+		});
+
+		if (it != _items.end())
+		{
+			auto ppSizer = std::get_if<Sizer*>(&it->pControl);
+			if (ppSizer)
+				delete* ppSizer;
+			_items.erase(it);
+		}
+	}
+
+	void Sizer::Layout(const Rect& parentRect)
+	{
+		OnLayout(parentRect);
+
+		// Update childen
+		for (auto& li : _items)
+		{
+			if (auto pp = std::get_if<LayoutElement*>(&li.pControl))
+				(*pp)->Layout(&li.rect);
+			else if (auto pp = std::get_if<Sizer*>(&li.pControl))
+				(*pp)->Layout(li.rect);
+		}
+
 	}
 
 	void Sizer::Clear()
@@ -42,28 +88,27 @@ namespace fig::gui
 		_items.clear();
 	}
 
-	void Sizer::SetOwner(LayoutElement* pOwner)
-	{
-		_pOwner = pOwner;
-	}
-
-	LayoutElement* Sizer::MakeDummy()
-	{
-		auto pDummy = std::make_unique<LayoutDummy>();
-		_dummies.emplace_back(std::move(pDummy));
-		return _dummies.back().get();
-	}
-
 	void Sizer::AddSpacer(Coord size)
 	{
-		auto dummy = MakeDummy();
-		dummy->SetSize(size, size);
-		_items.push_back(LayoutInfo { dummy, 0, {}, 0 });
+		_items.emplace_back(LayoutItem {
+			.info = LayoutProperties {
+				.prop { 0 },
+				.flags {},
+				.border { 0 },
+				.fixed { size },
+			},
+		});
 	}
 
 	void Sizer::AddStretchSpacer()
 	{
-		_items.push_back(LayoutInfo { MakeDummy(), -1, {}, 0});
+		_items.emplace_back(LayoutItem {
+			.info = LayoutProperties { 
+				.prop { -1 },
+				.flags {}, 
+				.border { 0 },
+			},
+		});
 	}
 
 }

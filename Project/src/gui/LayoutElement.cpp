@@ -25,7 +25,7 @@ namespace fig::gui
 			child->Update(fElapsed);
 	}
 
-	void LayoutElement::Layout()
+	void LayoutElement::Layout(const Rect* const pRect)
 	{
 		if (not _bLayoutEnabled or _bCulled)
 			return;
@@ -33,15 +33,8 @@ namespace fig::gui
 		bool bLayout = _bInvalidLayout;
 		_bInvalidLayout = false;
 
-		if (bLayout)
-		{
-			if (bLayout and _pSizer)
-				_pSizer->Layout();
-		}
-
-		// Update childen
-		for (auto& child : _children)
-			child->Layout();
+		if (bLayout and _pSizer)
+			_pSizer->Layout(pRect ? *pRect : GetRect());
 		
 		if (bLayout)
 		{
@@ -227,10 +220,7 @@ namespace fig::gui
 		_pSizer.reset(pSizer);
 
 		if (pSizer)
-		{
-			pSizer->SetOwner(this);
 			InvalidateLayout();
-		}
 	}
 
 	void LayoutElement::SetParent(LayoutElement* pParent)
@@ -246,14 +236,14 @@ namespace fig::gui
 		_bInvalidLayout = true;
 	}
 
-	void LayoutElement::InvalidateParentLayout(bool bRefreshImmediately) //! @hmm?
+	void LayoutElement::InvalidateParentLayout(bool bRefreshImmediately)
 	{
 		if (!_pSizer && _pParent != nullptr)
 			_pParent->InvalidateParentLayout();
 		else
 		{
 			if (bRefreshImmediately && _pSizer)
-				_pSizer->Layout();
+				_pSizer->Layout(GetRect());
 			else
 				InvalidateLayout();
 		}

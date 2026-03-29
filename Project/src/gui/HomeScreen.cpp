@@ -49,7 +49,7 @@ namespace fig::gui
 
 		auto mainSizer = new VerticalSizer();
 		mainSizer->Add(pTopBar, 0, Sizer::Expand);
-		mainSizer->Add(_pCardList, -1, Sizer::Expand | Sizer::Left | Sizer::Right, 6);
+		mainSizer->Add(_pCardList, -1, Sizer::Fill | Sizer::Left | Sizer::Right, 6);
 		SetSizer(mainSizer);
 	}
 

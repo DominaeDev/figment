@@ -80,18 +80,18 @@ namespace fig::gui
 		_pChatScroll = new ChatScroll(centerPanel);
 
 		_pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::GUI::DefaultFontSize, { TextBox::Flag::Multi, TextBox::Flag::Autosize });
-		_pTextBox->SetSize(-1, 88);
+		_pTextBox->SetSize(Constants::GUI::ChatTextBoxWidth, 88);
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);
 
 		auto pCenterSizer = new VerticalSizer();
-		pCenterSizer->Add(_pChatScroll, -1, Sizer::Expand | Sizer::Bottom, 8);
-		pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::Expand);
+		pCenterSizer->Add(_pChatScroll, -1, Sizer::Fill | Sizer::Bottom, 8);
+		pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::AlignCenterHorizontal);
 		centerPanel->SetSizer(pCenterSizer);
 
 		auto mainSizer = new HorizontalSizer();
 		mainSizer->Add(leftPanel, -1, Sizer::Expand);
-		mainSizer->Add(centerPanel, 0, Sizer::Expand | Sizer::Bottom, 24);
+		mainSizer->Add(centerPanel, 0, Sizer::Fill | Sizer::Bottom, 24);
 		mainSizer->Add(rightPanel, -1, Sizer::Expand);
 		SetSizer(mainSizer);
 

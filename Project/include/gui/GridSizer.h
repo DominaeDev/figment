@@ -20,7 +20,7 @@ namespace fig::gui
 		size_t GetRows() const noexcept { return last_rows; };
 
 	protected:
-		void OnLayout(Rect rect) override;
+		void OnLayout(const Rect& rect) override;
 
 	private:
 		int32_t _cellWidth {};

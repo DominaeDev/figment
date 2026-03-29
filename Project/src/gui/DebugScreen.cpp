@@ -12,7 +12,7 @@ namespace fig::gui
 
 		auto left = new Panel(area);
 		left->SetBackgroundColor(Color { 0xC0, 0, 0, 0xFF });
-		left->SetSize(100, 100);
+		left->SetSize(50, 50);
 
 		auto center = new Panel(area);
 		center->SetBackgroundColor(Color { 0, 0xC0, 0, 0xFF });
@@ -23,8 +23,8 @@ namespace fig::gui
 		right->SetSize(100, 100);
 
 		auto sizer = new HorizontalSizer();
-		sizer->Add(left, 0);
-		sizer->Add(center, -1);
+		sizer->Add(left, -1, Sizer::AlignRight | Sizer::AlignCenterVertical);
+		sizer->Add(center, -1, Sizer::Fill);
 		sizer->Add(right, 0, Sizer::Expand | Sizer::All, 10);
 
 		area->SetSizer(sizer);

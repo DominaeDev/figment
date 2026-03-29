@@ -19,6 +19,7 @@ namespace Constants
 		constexpr double CharacterNameFontSize = 12.0;
 		constexpr double ChatMessageFontSize = 16.0; //15.5;
 		constexpr fig::gui::Coord ChatScrollWidth = 800;
+		constexpr fig::gui::Coord ChatTextBoxWidth = 600;
 		
 		constexpr float MouseScrollSpeed = 200.0f;
 		constexpr float MouseScrollSmoothing = 14.0f;

@@ -15,11 +15,12 @@ namespace fig::gui
 	public:
 		enum Flag : int {
 			None = 0,
-			Expand = 1 << 0,
-			Top = 1 << 1,
-			Bottom = 1 << 2,
-			Left = 1 << 3,
-			Right = 1 << 4,
+			Top = 1 << 0,
+			Bottom = 1 << 1,
+			Left = 1 << 2,
+			Right = 1 << 3,
+			Expand = 1 << 4,
+			Fill = 1 << 5,
 
 			AlignLeft = 1 << 10,
 			AlignRight = 1 << 11,
@@ -33,23 +34,24 @@ namespace fig::gui
 		};
 
 	public:
-		void Layout();
-		void SetOwner(LayoutElement* pOwner);
+		void Layout(const Rect& parentRect);
+		virtual ~Sizer();
 
 		void Add(LayoutElement* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
-		Control* Add(Sizer* pControl, Control* pParent, int proportion = 0, int flags = Flag::Default, int border = 0);
+		void AddSizer(Sizer* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
 		void AddSpacer(Coord size);
 		void AddStretchSpacer();
-		void Remove(Control* pControl);
+		void Remove(LayoutElement* pControl);
+		void RemoveSizer(Sizer* pSizer);
 		void Clear();
 
 	protected:
-		struct LayoutInfo
+		struct LayoutProperties
 		{
-			LayoutElement* pControl;
-			int32_t prop = 0;
-			int32_t flags = Flag::None;
-			int32_t border = 0;
+			int32_t prop { 0 };
+			int32_t flags { Flag::None };
+			int32_t border { 0 };
+			int32_t fixed { 0 };
 
 			inline int32_t leftBorder() const	{ return (flags & Flag::Left) != 0 ? border : 0; };
 			inline int32_t rightBorder() const	{ return (flags & Flag::Right) != 0 ? border : 0; };
@@ -57,23 +59,43 @@ namespace fig::gui
 			inline int32_t bottomBorder() const	{ return (flags & Flag::Bottom) != 0 ? border : 0; };
 		};
 
+		using ControlPtr = LayoutElement*;
+		using SizerPtr = Sizer*;
+		using Empty = std::monostate;
+		using LayoutTarget = std::variant<Empty, ControlPtr, SizerPtr>;
+
+		struct LayoutItem
+		{
+			LayoutProperties info {};
+			LayoutTarget pControl { Empty {} };
+			Rect rect {};
+
+			ControlPtr GetControl() const
+			{
+				if (auto ppCtrl = std::get_if<ControlPtr>(&pControl); ppCtrl)
+					return *ppCtrl;
+				return nullptr;
+			};
+		};
+
 		LayoutElement* _pOwner = nullptr;
 
 		unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }
-		auto GetLayoutItems() const noexcept
+		auto GetLayoutItems() noexcept
 		{
 			return _items
-				| std::views::filter([](auto& i) { return (bool)i.pControl and i.pControl->IsLayoutEnabled(); });
+				| std::views::filter([](auto& i) { 
+					if (auto ppCtrl = std::get_if<ControlPtr>(&i.pControl); ppCtrl)
+						return (*ppCtrl)->IsLayoutEnabled();
+					return true;
+				});
 		}
 
-		virtual void OnLayout(Rect rect) = 0;
+		virtual void OnLayout(const Rect& rect) = 0;
 		void Update(float fElapsed) override {};
 	
 	private:
-		LayoutElement* MakeDummy();
-
-	private:
-		std::vector<LayoutInfo> _items;
+		std::vector<LayoutItem> _items;
 		std::vector<std::unique_ptr<LayoutElement>> _dummies;
 	};
 }
