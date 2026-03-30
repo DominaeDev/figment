@@ -7,6 +7,8 @@
 
 namespace fig::gui
 {
+	class PasswordBox;
+
 	class LoginScreen : public Screen
 	{
 	public:
@@ -20,7 +22,7 @@ namespace fig::gui
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
 	private:
-		bool TrySignIn(const fig::string& password);
+		PasswordBox* _pPassword;
 	};
 }
 

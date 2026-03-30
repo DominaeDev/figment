@@ -16,6 +16,7 @@ namespace fig::gui
 
 		enum class CardType { Character, Scenario };
 		void CreateCards(CardType cardType);
+		void Reset();
 
 		void SetFilter(const fig::string&) noexcept;
 		void ClearFilter() noexcept;
@@ -23,7 +24,6 @@ namespace fig::gui
 		void SetCardSize(CardSize cardSize);
 		void EnableTags(bool bEnable) noexcept;
 		inline bool IsTagsEnabled() const noexcept { return _bEnableTags; }
-
 	protected:
 		void OnUpdate(float fElapsed) override;
 
@@ -33,7 +33,7 @@ namespace fig::gui
 		GridSizer* _pGridSizer {};
 		int32_t _last_rows {};
 		CardSize _cardSize;
-		bool _bEnableTags { true };
+		bool _bEnableTags { false };
 	};
 }
 

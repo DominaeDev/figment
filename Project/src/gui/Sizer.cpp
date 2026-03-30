@@ -42,7 +42,7 @@ namespace fig::gui
 	void Sizer::Remove(LayoutElement* pControl)
 	{
 		auto it = std::find_if(_items.cbegin(), _items.cend(), [pControl](const LayoutItem & li) {
-			if (auto pp = std::get_if<LayoutElement*>(&li.pControl); *pp and *pp == pControl)
+			if (auto pp = std::get_if<LayoutElement*>(&li.pControl); pp and *pp == pControl)
 				return true;
 			return false;
 		});
@@ -54,7 +54,7 @@ namespace fig::gui
 	void Sizer::RemoveSizer(Sizer* pSizer)
 	{
 		auto it = std::find_if(_items.cbegin(), _items.cend(), [pSizer](const LayoutItem & li) {
-			if (auto pp = std::get_if<Sizer*>(&li.pControl); *pp and *pp == pSizer)
+			if (auto pp = std::get_if<Sizer*>(&li.pControl); pp and *pp == pSizer)
 				return true;
 			return false;
 		});

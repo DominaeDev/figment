@@ -37,7 +37,8 @@ namespace fig::gui
 		auto& assets = Global::GetUserManager().GetProfileAssets();
 		const auto& profileId = Global::GetUserManager().GetActiveProfile().id;
 
-		RemoveChildren(true);
+		DestroyChildren();
+		_cards.clear();
 
 		int32_t priority = 0;
 		if (cardType == CardType::Scenario)
@@ -172,5 +173,11 @@ namespace fig::gui
 
 		for (auto& card : _cards)
 			card->EnableTags(bEnable);
+	}
+
+	void CardList::Reset()
+	{
+		DestroyChildren();
+		_cards.clear();
 	}
 }

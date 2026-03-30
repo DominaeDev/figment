@@ -33,6 +33,12 @@ namespace fig::gui
 		_shadow.clear();
 	}
 
+	void StaticText::Reset()
+	{
+		_text.clear();
+		ReleaseTexture();
+	};
+
 	void StaticText::SetText(fig::string text)
 	{
 		_text = text;

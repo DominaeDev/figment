@@ -101,4 +101,9 @@ namespace fig::gui
 		_pUserWidget->SetUser(profile);
 	}
 
+	void SidePanel::Reset()
+	{
+		_pUserWidget->Reset();
+	}
+
 }

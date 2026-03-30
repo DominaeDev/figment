@@ -11,6 +11,7 @@ namespace fig::gui
 		ImageWithMask(LayoutElement* pParent, TexturePtr pTexture, TexturePtr pMask, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
 		void SetTexture(TexturePtr pTexture, TexturePtr pMask, bool bResize = false);
 		Point GetTextureSize() const noexcept;
+		void Reset();
 
 	protected:
 		void OnRender(Renderer* pRenderer) override;

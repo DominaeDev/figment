@@ -254,20 +254,60 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void MainFrame::OnSignedIn(const fig::user::UserProfile& profile) noexcept
-	{
-		if (_pSidePanel)
-			_pSidePanel->SetUserProfile(profile);
-		MainFrame::GetInstance().ShowSidePanel(true);
-
-		auto pHomeScreen = MainFrame::GetInstance().ChangeScreen<HomeScreen>();
-		pHomeScreen->CreateCards();
-	}
-
 	void MainFrame::ShowLoginScreen()
 	{
 		// Show login screen
 		ChangeScreen<LoginScreen>();
 		ShowSidePanel(false);
 	}
+
+	bool MainFrame::TrySignIn(const fig::string& password) noexcept
+	{
+		auto& userMngr = Global::GetUserManager();
+		auto& profile = userMngr.GetProfiles().front();
+
+		auto startTime = std::chrono::steady_clock::now();
+
+		if (userMngr.SignIn(profile.id, ""))
+		{
+			OnSignedIn(profile);
+
+			auto endTime = std::chrono::steady_clock::now();
+			// MainFrame::SetStatusBar(std::format("Duration: {}ms", toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
+			return true;
+		}
+
+		return false;
+	}
+
+	bool MainFrame::SignOut() noexcept
+	{
+		auto& userMngr = Global::GetUserManager();
+		if (userMngr.SignOut())
+		{
+			OnSignedOut();
+			return true;
+		}
+		return false;
+	}
+
+	void MainFrame::OnSignedIn(const fig::user::UserProfile& profile) noexcept
+	{
+		if (_pSidePanel)
+			_pSidePanel->SetUserProfile(profile);
+		ShowSidePanel(true);
+
+		auto pHomeScreen = ChangeScreen<HomeScreen>();
+		pHomeScreen->CreateCards();
+	}
+
+	void MainFrame::OnSignedOut() noexcept
+	{
+		if (_pSidePanel)
+			_pSidePanel->Reset();
+
+		ShowSidePanel(false);
+		ChangeScreen<LoginScreen>();
+	}
+
 }

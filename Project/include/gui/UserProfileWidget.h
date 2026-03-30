@@ -20,6 +20,7 @@ namespace fig::gui
 		UserProfileWidget(LayoutElement* pParent) noexcept;
 
 		void SetUser(const fig::user::UserProfile& profile) noexcept;
+		void Reset();
 
 	protected:
 		void OnSize() override;

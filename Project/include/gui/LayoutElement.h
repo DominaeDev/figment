@@ -54,7 +54,9 @@ namespace fig::gui
 
 		void AddChild(LayoutElement* pChild);
 		bool RemoveChild(LayoutElement* pChild);
-		bool RemoveChildren(bool destroy = false);
+		bool RemoveChildren();
+		bool DestroyChild(LayoutElement* pChild);
+		bool DestroyChildren();
 		void MoveChildToTop(LayoutElement* pChild);
 		void MoveChildToBottom(LayoutElement* pChild);
 

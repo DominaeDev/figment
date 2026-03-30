@@ -185,6 +185,8 @@ namespace fig::gui
 		auto it = std::find(_children.begin(), _children.end(), pChild);
 		if (it != _children.end())
 		{
+			if (_pSizer)
+				_pSizer->Remove(*it);
 			OnRemovedChild(*it);
 			(*it)->SetParent(nullptr);
 			_children.erase(it);
@@ -194,7 +196,17 @@ namespace fig::gui
 		return false;
 	}
 
-	bool LayoutElement::RemoveChildren(bool destroy)
+	bool LayoutElement::DestroyChild(LayoutElement* pChild)
+	{
+		if (RemoveChild(pChild))
+		{
+			delete pChild;
+			return true;
+		}
+		return false;
+	}
+
+	bool LayoutElement::RemoveChildren()
 	{
 		if (_children.empty())
 			return false;
@@ -202,11 +214,24 @@ namespace fig::gui
 		for (auto& child : _children)
 		{
 			OnRemovedChild(child);
+			child->SetParent(nullptr);
+		}
+		_children.clear();
 
-			if (destroy)
-				delete child;
-			else
-				child->SetParent(nullptr);
+		if (_pSizer)
+			_pSizer->Clear();
+		return true;
+	}
+
+	bool LayoutElement::DestroyChildren()
+	{
+		if (_children.empty())
+			return false;
+
+		for (auto& child : _children)
+		{
+			OnRemovedChild(child);
+			delete child;
 		}
 		_children.clear();
 

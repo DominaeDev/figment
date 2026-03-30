@@ -66,7 +66,11 @@ namespace fig::gui
 
 		void ShowLoginScreen();
 		void ShowSidePanel(bool bShow) noexcept;
+
+		bool TrySignIn(const fig::string& password) noexcept;
+		bool SignOut() noexcept;
 		void OnSignedIn(const fig::user::UserProfile& profile) noexcept;
+		void OnSignedOut() noexcept;
 
 	protected:
 		template<IsScreen T>

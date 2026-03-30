@@ -57,6 +57,7 @@ namespace fig::gui
 		void EnableEllipsis(bool bEnable) noexcept { _bEllipsis = bEnable; _bInvalidated = true; }
 
 		Point MeasureText(bool bAllowEllipsis = true) const;
+		void Reset();
 
 	protected:
 		Rectf GetAlignedRect() const;

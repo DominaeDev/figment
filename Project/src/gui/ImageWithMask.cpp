@@ -80,4 +80,9 @@ namespace fig::gui
 			return Point { _texture.get()->w, _texture.get()->h };
 		return {};
 	}
+
+	void ImageWithMask::Reset()
+	{
+		_texture.clear();
+	}
 }

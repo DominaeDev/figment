@@ -3,6 +3,7 @@
 #include "gui/ImageWithMask.h"
 #include "gui/AppResources.h"
 #include "gui/ButtonWithIcon.h"
+#include "gui/MainFrame.h"
 
 namespace fig::gui
 {
@@ -18,6 +19,7 @@ namespace fig::gui
 		_pButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pButton->SetSize(36, 36);
 		_pButton->CenterVertically();
+		_pButton->SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
 	}
 
 	void UserProfileWidget::SetUser(const fig::user::UserProfile& profile) noexcept
@@ -55,4 +57,9 @@ namespace fig::gui
 		}
 	}
 
+	void UserProfileWidget::Reset()
+	{
+		_pImage->SetTexture(nullptr, nullptr);
+		_pLabel->Reset();
+	}
 }

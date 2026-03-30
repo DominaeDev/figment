@@ -19,6 +19,7 @@ namespace fig::gui
 		SidePanel(LayoutElement* pParent);
 	
 		void SetUserProfile(const fig::user::UserProfile& profile);
+		void Reset();
 	protected:
 		void OnAfterLayout() override;
 
