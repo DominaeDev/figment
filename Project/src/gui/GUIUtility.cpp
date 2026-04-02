@@ -239,7 +239,10 @@ namespace fig::gui
 				SDL_DestroySurface(pSurface);
 				cover.reset(newSurface);
 
-				MaskCorners(cover, MaskType::CARD_CORNER_MASK);
+				if constexpr (Disabled) 
+				{
+					MaskCorners(cover, MaskType::CARD_CORNER_MASK);
+				}
 			}
 		}
 

@@ -479,6 +479,9 @@
     <ClCompile Include="src\gui\VerticalSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CardImage.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1146,6 +1149,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\VerticalSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CardImage.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

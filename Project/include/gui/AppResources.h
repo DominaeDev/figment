@@ -67,6 +67,8 @@ namespace fig::gui
 
 		PROFILE_DEFAULT_IMAGE,
 		PROFILE_MASK,
+
+		MASK_CARD,
 	};
 
 	enum class MaskType

@@ -72,10 +72,12 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_04, "./resources/gui/card/borders/border_04.png");
 		LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_05, "./resources/gui/card/borders/border_05.png");
 		LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_06, "./resources/gui/card/borders/border_06.png");
-		LoadTextureAndMaskCorners(pRenderer, TextureType::CARD_BACKGROUND_EMPTY, MaskType::CARD_CORNER_MASK, "./resources/gui/card/card_bg_empty.png");
+		LoadTexture(pRenderer, TextureType::CARD_BACKGROUND_EMPTY, "./resources/gui/card/card_bg_empty.png");
 
 		LoadTexture(pRenderer, TextureType::PROFILE_DEFAULT_IMAGE, "./resources/gui/images/default_portrait.png");
 		LoadTexture(pRenderer, TextureType::PROFILE_MASK, "./resources/gui/masks/mask_circle256.png");
+		
+		LoadTexture(pRenderer, TextureType::MASK_CARD, "./resources/gui/masks/mask_card_corners.png");
 	}
 
 	void AppResources::Release()
@@ -127,8 +129,11 @@ namespace fig::gui
 			auto& surface = _surfaces[textureId] = fig::sdl::Surface();
 			surface.reset(pSurface);
 
-			if (MaskCorners(surface, MaskType::CARD_CORNER_MASK))
-				pSurface = surface.get();
+			if constexpr (Disabled)
+			{
+				if (MaskCorners(surface, MaskType::CARD_CORNER_MASK))
+					pSurface = surface.get();
+			}
 		}
 
 		auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);

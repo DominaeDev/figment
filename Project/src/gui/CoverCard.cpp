@@ -4,6 +4,7 @@
 #include "gui/AppResources.h"
 #include "gui/NineGridImage.h"
 #include "gui/RoundedBorder.h"
+#include "gui/GUIUtility.h"
 #include "util/StringUtility.h"
 
 #include <cassert>
@@ -38,7 +39,7 @@ namespace fig::gui
 	
 	constexpr uint8_t FadeAlpha = 0x60;
 
-	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : Image(pParent, nullptr),
+	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(TextureType::MASK_CARD)),
 		_assetId { assetId },
 		_cardSize { cardSize }
 	{
@@ -179,7 +180,18 @@ namespace fig::gui
 			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
 			_pErrorIcon->Center();
 
-			Image::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
+			CardImage::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
+		}
+
+		if (!flt_eq(_fHoverZoom, _fTargetZoom))
+		{
+			constexpr float ZoomAmount = 12.0f;
+			constexpr float ZoomSmoothing = 8.0f;
+			_fHoverZoom += (_fTargetZoom - _fHoverZoom) * ZoomSmoothing * fElapsed;
+
+			if (std::abs(_fTargetZoom - _fHoverZoom) < 0.01f)
+				_fHoverZoom = _fTargetZoom;
+			SetZoom(_fHoverZoom * ZoomAmount);
 		}
 	}
 
@@ -188,7 +200,7 @@ namespace fig::gui
 		if (_imageTexture.empty())
 			PollFuture();
 
-		Image::OnRender(pRenderer);
+		CardImage::OnRender(pRenderer);
 	}
 
 	void CoverCard::SetLabel(const fig::string& text) noexcept
@@ -497,7 +509,7 @@ namespace fig::gui
 			_pErrorIcon->SetSize(_pErrorIcon->GetTextureSize().x / divide, _pErrorIcon->GetTextureSize().x / divide);
 			_pErrorIcon->Center();
 		}
-		Image::OnSize();
+		CardImage::OnSize();
 	}
 
 	void CoverCard::RefreshImage()
@@ -505,12 +517,12 @@ namespace fig::gui
 		if (_cardSize == CardSize::Default)
 		{
 			if (!_imageTexture.empty())
-				Image::SetTexture(_imageTexture.get());
+				CardImage::SetTexture(_imageTexture.get());
 		}
 		else
 		{
 			if (!_smallImageTexture.empty())
-				Image::SetTexture(_smallImageTexture.get());
+				CardImage::SetTexture(_smallImageTexture.get());
 		}
 	}
 
@@ -568,5 +580,22 @@ namespace fig::gui
 			SetLabel(_pendingLabel);
 			_pendingLabel.clear();
 		}
+	}
+
+	bool CoverCard::OnEvent(Event& event)
+	{
+		if (event.type == SDL_EVENT_MOUSE_MOTION)
+		{
+			auto motionEvent = event.motion;
+			bool bHovered = is_inside(GetRect(), toI(motionEvent.x), toI(motionEvent.y));
+			if (bHovered != _bHovered)
+			{
+				_bHovered = bHovered;
+				_fTargetZoom = bHovered ? 1.0f : 0.0f;
+			}
+			return false; // Don't consume event
+		}
+
+		return false;
 	}
 }

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Types.h"
-#include "Control.h"
 #include <array>
 
 namespace fig::gui

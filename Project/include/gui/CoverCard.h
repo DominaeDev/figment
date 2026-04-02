@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Image.h"
+#include "CardImage.h"
 #include "model/AssetManager.h"
 #include "util/SearchIndex.h"
 
@@ -29,7 +29,7 @@ namespace fig::gui
 	class TexturedBorder;
 	class NineGridImage;
 
-	class CoverCard : public Image
+	class CoverCard : public CardImage
 	{
 	public:
 		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Default);
@@ -55,6 +55,7 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 		void OnSize() override;
+		bool OnEvent(Event& event) override;
 		
 		void SetIndex(const SearchIndex& index) noexcept;
 		void AddSearchTerms(const fig::string& text) noexcept;
@@ -107,6 +108,10 @@ namespace fig::gui
 		};
 		fig::string _pendingLabel {};
 		std::vector<PendingTag> _pendingTags {};
+		
+		bool _bHovered = false;
+		float _fTargetZoom = 0.0f;
+		float _fHoverZoom = 0.0f;
 	};
 }
 

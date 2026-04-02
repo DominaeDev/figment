@@ -758,10 +758,13 @@ namespace fig::io
 
 		// Half-version
 		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HalfCardWidth, Constants::GUI::HalfCardHeight, ImageFit::Stretch, true);
-		MaskCorners(halfSurface, MaskType::CARD_CORNER_MASK);
-
+		
 		// Round corners
-		MaskCorners(fullSurface, MaskType::CARD_CORNER_MASK);
+		if constexpr (Disabled)
+		{
+			MaskCorners(halfSurface, MaskType::CARD_CORNER_MASK);
+			MaskCorners(fullSurface, MaskType::CARD_CORNER_MASK);
+		}
 
 		outResult.emplace<AsyncResult_CoverPair>(AsyncResult_CoverPair {
 			std::move(fullSurface),

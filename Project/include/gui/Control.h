@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "gui/GUITypes.h"
 #include "LayoutElement.h"
 
 namespace fig::gui

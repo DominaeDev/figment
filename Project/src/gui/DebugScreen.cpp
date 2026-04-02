@@ -1,5 +1,7 @@
 #include <pch.h>
 #include "gui/DebugScreen.h"
+#include "gui/CardImage.h"
+#include "gui/AppResources.h"
 
 namespace fig::gui
 {
@@ -28,6 +30,11 @@ namespace fig::gui
 		sizer->Add(right, 0, Sizer::Expand | Sizer::All, 10);
 
 		area->SetSizer(sizer);
+
+		auto pCard = new CardImage(this, AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY), AppResources::GetTexture(TextureType::MASK_CARD));
+		pCard->SetSize(Constants::GUI::CardWidth, Constants::GUI::CardHeight);
+		pCard->SetPosition(500, 300);
+
 	}
 
 	void DebugScreen::OnUpdate(float fElapsed)

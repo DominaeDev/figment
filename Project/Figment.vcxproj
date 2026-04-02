@@ -171,6 +171,7 @@
     <ClCompile Include="src\fs\XmlWriter.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\BaseButton.cpp" />
+    <ClCompile Include="src\gui\CardImage.cpp" />
     <ClCompile Include="src\gui\ImageWithMask.cpp" />
     <ClCompile Include="src\gui\LoginScreen.cpp" />
     <ClCompile Include="src\gui\DebugScreen.cpp" />
@@ -374,6 +375,7 @@
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\TavernCardV2.h" />
     <ClInclude Include="include\fs\Xml.h" />
+    <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\GUIConstants.h" />
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
