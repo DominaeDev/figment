@@ -414,7 +414,7 @@ namespace fig::io
 				return character;
 		} break;
 		case CharacterDataFormat::TavernV2:
-			if (auto import = CardImporter::Import(filename); import.has_value())
+			if (auto import = CardImporter::Import(filename))
 				return import.value();
 			break;
 		default:
@@ -657,8 +657,8 @@ namespace fig::io
 	static bool CreateSurface(const Asset& cover, fig::sdl::Surface& out_surface)
 	{
 		// Create SDL surface
-		int32_t width = cover.GetMeta<uint16_t>(MetaTag::ImageWidth).value_or(Constants::GUI::HomeScreen::CardWidth);
-		int32_t height = cover.GetMeta<uint16_t>(MetaTag::ImageHeight).value_or(Constants::GUI::HomeScreen::CardHeight);
+		int32_t width = cover.GetMeta<uint16_t>(MetaTag::ImageWidth).value_or(Constants::GUI::CardWidth);
+		int32_t height = cover.GetMeta<uint16_t>(MetaTag::ImageHeight).value_or(Constants::GUI::CardHeight);
 		ImageFormat format = static_cast<ImageFormat>(cover.GetMeta<uint8_t>(MetaTag::ImageFormat).value_or(0));
 
 		try
@@ -736,7 +736,7 @@ namespace fig::io
 					{
 						if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
 						{
-							auto coverImage = ScaleSurface(portraitImage, Constants::GUI::HomeScreen::CardWidth, Constants::GUI::HomeScreen::CardHeight, ImageFit::Portrait);
+							auto coverImage = ScaleSurface(portraitImage, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait);
 
 							// Save cover asset (bitmap)
 							{
@@ -757,7 +757,7 @@ namespace fig::io
 			return AsyncLoadError::FileNotFound;
 
 		// Half-version
-		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HomeScreen::CardWidth / 2, Constants::GUI::HomeScreen::CardHeight / 2, ImageFit::Stretch, true);
+		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HalfCardWidth, Constants::GUI::HalfCardHeight, ImageFit::Stretch, true);
 		MaskCorners(halfSurface, MaskType::CARD_CORNER_MASK);
 
 		// Round corners

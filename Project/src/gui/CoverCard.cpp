@@ -12,7 +12,21 @@ using namespace fig::util;
 
 namespace fig::gui
 {
-	constexpr Coord kMargin = 12;
+	namespace Large
+	{
+		constexpr Coord Width = Constants::GUI::CardWidth;
+		constexpr Coord Height = Constants::GUI::CardHeight;
+		constexpr Coord Margin = 12;
+		constexpr Coord FooterHeight = 80;
+	}
+
+	namespace Small
+	{
+		constexpr Coord Width = Constants::GUI::HalfCardWidth;
+		constexpr Coord Height = Constants::GUI::HalfCardHeight;
+		constexpr Coord Margin = 10;
+		constexpr Coord FooterHeight = 60;
+	}
 
 	constexpr Coord kTagMargin = 10;
 	constexpr Coord kTagSpacing = 6;
@@ -21,12 +35,8 @@ namespace fig::gui
 	constexpr Coord kTagRowHeight = 32;
 	constexpr Coord kTagY = 70;
 	constexpr Coord kTagMaxRows = 2;
-	constexpr Coord kFooterHeight = 80;
-	constexpr auto kLargeWidth = Constants::GUI::HomeScreen::CardWidth;
-	constexpr auto kLargeHeight = Constants::GUI::HomeScreen::CardHeight;
-	constexpr auto kSmallWidth = Constants::GUI::HomeScreen::CardWidth / 2;
-	constexpr auto kSmallHeight = Constants::GUI::HomeScreen::CardHeight / 2;
-	constexpr auto kSmallMargin = 8;
+	
+	constexpr uint8_t FadeAlpha = 0x60;
 
 	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : Image(pParent, nullptr),
 		_assetId { assetId },
@@ -35,9 +45,9 @@ namespace fig::gui
 		_searchIndex = std::make_unique<SearchIndex>();
 		
 		if (cardSize == CardSize::Half)
-			SetSize(kSmallWidth, kSmallHeight);
+			SetSize(Small::Width, Small::Height);
 		else
-			SetSize(kLargeWidth, kLargeHeight);
+			SetSize(Large::Width, Large::Height);
 	}
 
 	void CoverCard::Init()
@@ -48,25 +58,24 @@ namespace fig::gui
 		_bInitialized = true;
 
 		_pLargeRoot = new Area(this);
-		_pLargeRoot->SetSize(kLargeWidth, kLargeHeight);
+		_pLargeRoot->SetSize(Large::Width, Large::Height);
 		_pSmallRoot = new Area(this);
-		_pSmallRoot->SetSize(kLargeWidth / 2, kLargeHeight / 2);
+		_pSmallRoot->SetSize(Small::Width, Small::Height);
 
 		// Footer (large)
 		_pLargeFooter = new Area(_pLargeRoot);
-		_pLargeFooter->SetHeight(kFooterHeight);
-		_pLargeFooter->SetY(kLargeHeight - kFooterHeight);
-		_pLargeFooter->SetSize(kLargeWidth, kFooterHeight);
+		_pLargeFooter->SetY(Large::Height - Large::FooterHeight);
+		_pLargeFooter->SetSize(Large::Width, Large::FooterHeight);
 
 		_pLargeFooterFade = new NineGridImage(_pLargeFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
-		_pLargeFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x40 });
+		_pLargeFooterFade->SetForegroundColor(Color { 0, 0, 0, FadeAlpha });
 		_pLargeFooterFade->FillParent();
 
 		// Label (large)
 		_pLargeLabel = new StaticText(_pLargeFooter, "", FontFace::CardHeader, 28.0, false);
-		_pLargeLabel->SetPosition(kMargin, kFooterHeight - kMargin - 64);
-		_pLargeLabel->SetMaxSize(kLargeWidth - (kMargin * 2), -1);
-		_pLargeLabel->SetSize(kLargeWidth - (kMargin * 2), 80);
+		_pLargeLabel->SetPosition(Large::Margin, Large::FooterHeight - Large::Margin - 68);
+		_pLargeLabel->SetMaxSize(Large::Width - (Large::Margin * 2), -1);
+		_pLargeLabel->SetSize(Large::Width - (Large::Margin * 2), 80);
 		_pLargeLabel->SetForegroundColor(Colors::White);
 		_pLargeLabel->SetBackgroundColor(Colors::Transparent);
 		_pLargeLabel->EnableDropShadow(true);
@@ -75,12 +84,12 @@ namespace fig::gui
 		// Border (large)
 		auto pSimpleBorder = new TexturedBorder(_pLargeRoot, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
-		pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x40 });
+		pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, FadeAlpha });
 
 		// Styled border (large)
 		_pLargeBorder = new Image(_pLargeRoot, nullptr);
 		_pLargeBorder->SetPosition(-16, -16);
-		_pLargeBorder->SetSize(kLargeWidth + 32, kLargeHeight + 32);
+		_pLargeBorder->SetSize(Large::Width + 32, Large::Height + 32);
 		_pLargeBorder->SetVisible(false);
 
 		// Tags
@@ -90,16 +99,18 @@ namespace fig::gui
 
 		// Footer (small)
 		auto pSmallFooter = new Area(_pSmallRoot);
-		pSmallFooter->SetSize(kSmallWidth, kSmallHeight);
+		pSmallFooter->SetY(Small::Height - Small::FooterHeight);
+		pSmallFooter->SetSize(Small::Width, Small::FooterHeight);
+
 		auto pSmallFooterFade = new NineGridImage(pSmallFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE_SMALL), { 16, 16, 40, 16 });
 		pSmallFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x80 });
-		pSmallFooterFade->SetWidth(kSmallWidth);
-		pSmallFooterFade->SetY(kSmallHeight - pSmallFooterFade->GetHeight());
+		pSmallFooterFade->FillParent();
 
-		_pSmallLabel = new StaticText(pSmallFooter, "", FontFace::CardHeader, 16.5, false);
-		_pSmallLabel->SetPosition(kSmallMargin, kSmallHeight - kSmallMargin - 22);
-		_pSmallLabel->SetMaxSize(kSmallWidth - (kSmallMargin * 2), -1);
-		_pSmallLabel->SetSize(kSmallWidth - (kSmallMargin * 2), 40);
+		// Label (small)
+		_pSmallLabel = new StaticText(pSmallFooter, "", FontFace::CardHeader, 24.0, false);
+		_pSmallLabel->SetPosition(Small::Margin, Small::FooterHeight - Small::Margin - 32);
+		_pSmallLabel->SetMaxSize(Small::Width - (Small::Margin * 2), -1);
+		_pSmallLabel->SetSize(Small::Width - (Small::Margin * 2), 40);
 		_pSmallLabel->SetForegroundColor(Colors::White);
 		_pSmallLabel->SetBackgroundColor(Colors::Transparent);
 		_pSmallLabel->EnableDropShadow(true);
@@ -112,13 +123,10 @@ namespace fig::gui
 
 		// Styled border (small)
 		_pSmallBorder = new Image(_pSmallRoot, nullptr);
-		_pSmallBorder->SetPosition(-6, -6);
-		_pSmallBorder->SetSize(kSmallWidth + 12, kSmallHeight + 12);
+		constexpr Coord borderOffset = static_cast<Coord>(16 * Constants::GUI::HalfScaleFactor);
+		_pSmallBorder->SetPosition(-borderOffset, -borderOffset);
+		_pSmallBorder->SetSize(Small::Width + borderOffset * 2, Small::Height + borderOffset * 2);
 		_pSmallBorder->SetVisible(false);
-
-//		auto pSelectionBorder = new RoundedBorder(this, 8.0f, 6.0f, { 50, 200, 255 });
-//		pSelectionBorder->SetPosition(-1, -1);
-//		pSelectionBorder->SetSize(GetWidth() + 2, GetHeight() + 2);
 
 		CreateChatCounter(0);
 		SetCardSize(_cardSize);
@@ -200,12 +208,12 @@ namespace fig::gui
 			if (_pLargeLabel->MeasureText(false).x <= _pLargeLabel->GetMaxSize().x)
 			{
 				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 28.0));
-				_pLargeLabel->SetY(kFooterHeight - kMargin - 64 + (_bEnableTags ? 22 : 32));
+				_pLargeLabel->SetY(Large::FooterHeight - Large::Margin - 64 + (_bEnableTags ? 22 : 32));
 			}
 			else
 			{
 				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 24.0));
-				_pLargeLabel->SetY(kFooterHeight - kMargin - 60 + (_bEnableTags ? 22 : 32));
+				_pLargeLabel->SetY(Large::FooterHeight - Large::Margin - 60 + (_bEnableTags ? 22 : 32));
 			}
 		}
 
@@ -282,7 +290,7 @@ namespace fig::gui
 
 		auto position = _tagPosition;
 
-		if (kLargeWidth < position.x + kTagInnerMargin * 2 + kTagMargin + kTagMinWidth)
+		if (Large::Width < position.x + kTagInnerMargin * 2 + kTagMargin + kTagMinWidth)
 		{
 			if (_tagRows + 1 > kTagMaxRows)
 				return AddTagResult::Stop;
@@ -291,15 +299,15 @@ namespace fig::gui
 			_tagPosition.y += kTagRowHeight;
 			_tagRows++;
 
-			_pLargeFooter->SetHeight(kFooterHeight + kTagRowHeight * _tagRows - 1);
-			_pLargeFooter->SetY(kLargeHeight - _pLargeFooter->GetHeight());
+			_pLargeFooter->SetHeight(Large::FooterHeight + kTagRowHeight * _tagRows - 1);
+			_pLargeFooter->SetY(Large::Height - _pLargeFooter->GetHeight());
 			_pLargeFooterFade->FillParent();
 			position = _tagPosition;
 		}
 		else if (_tags.empty())
 		{
-			_pLargeFooter->SetHeight(kFooterHeight + kTagRowHeight);
-			_pLargeFooter->SetY(kLargeHeight - _pLargeFooter->GetHeight());
+			_pLargeFooter->SetHeight(Large::FooterHeight + kTagRowHeight);
+			_pLargeFooter->SetY(Large::Height - _pLargeFooter->GetHeight());
 			_pLargeFooterFade->FillParent();
 		}
 
@@ -315,7 +323,7 @@ namespace fig::gui
 		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);
 		pLabel->EnableWordWrap(false);
 		pLabel->EnableEllipsis(true);
-		pLabel->SetMaxSize(kLargeWidth - (position.x + kTagInnerMargin * 2 + kTagMargin), 0);
+		pLabel->SetMaxSize(Large::Width - (position.x + kTagInnerMargin * 2 + kTagMargin), 0);
 
 		auto [w, h] = pLabel->MeasureText();
 		pTagBG->SetSize(w + kTagInnerMargin * 2, 26);
@@ -452,9 +460,9 @@ namespace fig::gui
 		_cardSize = cardSize;
 
 		if (cardSize == CardSize::Half)
-			SetSize(kSmallWidth, kSmallHeight);
+			SetSize(Small::Width, Small::Height);
 		else
-			SetSize(kLargeWidth, kLargeHeight);
+			SetSize(Large::Width, Large::Height);
 
 		if (!_bInitialized)
 			return;
@@ -466,7 +474,7 @@ namespace fig::gui
 			_pSmallRoot->SetVisible(false);
 			if (_pCounterBG)
 				_pCounterBG->SetPosition(kTagMargin, kTagMargin);
-			SetSize(kLargeWidth, kLargeHeight);
+			SetSize(Large::Width, Large::Height);
 			break;
 
 		case CardSize::Half:
@@ -474,7 +482,7 @@ namespace fig::gui
 			_pSmallRoot->SetVisible(true);
 			if (_pCounterBG)
 				_pCounterBG->SetPosition(6, 6);
-			SetSize(kSmallWidth, kSmallHeight);
+			SetSize(Small::Width, Small::Height);
 			break;
 		}
 
@@ -525,19 +533,19 @@ namespace fig::gui
 		{
 			CreatePendingTags();
 
-			auto height = kFooterHeight + kTagRowHeight * _tagRows;
+			auto height = Large::FooterHeight + kTagRowHeight * _tagRows;
 			_pLargeFooter->SetHeight(height);
-			_pLargeFooter->SetY(kLargeHeight - height);
+			_pLargeFooter->SetY(Large::Height - height);
 			_pLargeFooterFade->FillParent();
 		}
 		else
 		{
-			_pLargeFooter->SetHeight(kFooterHeight);
-			_pLargeFooter->SetY(kLargeHeight - kFooterHeight);
+			_pLargeFooter->SetHeight(Large::FooterHeight);
+			_pLargeFooter->SetY(Large::Height - Large::FooterHeight);
 			_pLargeFooterFade->FillParent();
 		}
 
-		_pLargeLabel->SetY(kFooterHeight - kMargin - 64 + (_bEnableTags ? 22 : 32));
+		_pLargeLabel->SetY(Large::FooterHeight - Large::Margin - 64 + (_bEnableTags ? 22 : 32));
 	}
 
 	void CoverCard::CreatePendingTags()

@@ -27,13 +27,14 @@ namespace Constants
 		constexpr int32_t ProfileImageWidth = 256;
 		constexpr int32_t ProfileImageHeight = 256;
 
-		namespace HomeScreen
-		{
-			constexpr fig::gui::Coord CardWidth = 320;
-			constexpr fig::gui::Coord CardHeight = 412;
-			constexpr fig::gui::Coord CardSpacingX = 18;
-			constexpr fig::gui::Coord CardSpacingY = 20;
-		}
+		constexpr fig::gui::Coord CardWidth = 320;
+		constexpr fig::gui::Coord CardHeight = 412;
+		constexpr fig::gui::Coord CardSpacingX = 18;
+		constexpr fig::gui::Coord CardSpacingY = 20;
+
+		constexpr float HalfScaleFactor = 0.75f;
+		constexpr fig::gui::Coord HalfCardWidth = static_cast<fig::gui::Coord>(CardWidth * HalfScaleFactor);
+		constexpr fig::gui::Coord HalfCardHeight = static_cast<fig::gui::Coord>(CardHeight * HalfScaleFactor);
 
 		namespace SidePanel
 		{

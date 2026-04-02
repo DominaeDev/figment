@@ -15,13 +15,21 @@ namespace fig::gui
 	constexpr Coord TopMargin = 8;
 	constexpr Coord BottomMargin = 120;
 
+	static constexpr Coord cardWidth(CardSize cardSize) noexcept
+	{
+		return cardSize == CardSize::Default ? Constants::GUI::CardWidth : Constants::GUI::HalfCardWidth;;
+	}
+
+	static constexpr Coord cardHeight(CardSize cardSize) noexcept
+	{
+		return cardSize == CardSize::Default ? Constants::GUI::CardHeight: Constants::GUI::HalfCardHeight;
+	}
+
 	CardList::CardList(LayoutElement* pParent, CardSize cardSize) : ScrollPanel(pParent),
 		_cardSize { cardSize }
 	{
-		int divide = cardSize == CardSize::Default ? 1 : 2;
-
-		_pGridSizer = new GridSizer(Constants::GUI::HomeScreen::CardWidth / divide, Constants::GUI::HomeScreen::CardHeight / divide);
-		_pGridSizer->SetSpacing(Constants::GUI::HomeScreen::CardSpacingX / divide, Constants::GUI::HomeScreen::CardSpacingY / divide);
+		_pGridSizer = new GridSizer(cardWidth(cardSize), cardHeight(cardSize));
+		_pGridSizer->SetSpacing(Constants::GUI::CardSpacingX, Constants::GUI::CardSpacingY);
 		_pGridSizer->EnableCentering(true);
 		SetTopMargin(TopMargin);
 		SetBottomMargin(BottomMargin);
@@ -96,14 +104,13 @@ namespace fig::gui
 		ScrollPanel::OnUpdate(fElapsed);
 
 		int32_t curr_rows = toI(_pGridSizer->GetRows());
-		int divide = _cardSize == CardSize::Default ? 1 : 2;
 
 		if (_last_rows != curr_rows)
 		{
 			auto height = GetHeight();
-			auto kCardHeight = Constants::GUI::HomeScreen::CardHeight / divide;
-			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY);
-			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::HomeScreen::CardSpacingY);
+			auto kCardHeight = cardHeight(_cardSize);
+			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::CardSpacingY);
+			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
 
 			_maxExtent = curr_extent;
 			_last_rows = curr_rows;
@@ -156,10 +163,8 @@ namespace fig::gui
 		for (auto& card : _cards)
 			card->SetCardSize(cardSize);
 
-		int divide = cardSize == CardSize::Default ? 1 : 2;
-
-		_pGridSizer->SetCellSize(Constants::GUI::HomeScreen::CardWidth / divide, Constants::GUI::HomeScreen::CardHeight / divide);
-		_pGridSizer->SetSpacing(Constants::GUI::HomeScreen::CardSpacingX, Constants::GUI::HomeScreen::CardSpacingY);
+		_pGridSizer->SetCellSize(cardWidth(cardSize), cardHeight(cardSize));
+		_pGridSizer->SetSpacing(Constants::GUI::CardSpacingX, Constants::GUI::CardSpacingY);
 
 		_fScrollY = 0;
 		InvalidateLayout();
