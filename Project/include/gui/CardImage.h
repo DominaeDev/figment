@@ -19,6 +19,7 @@ namespace fig::gui
 
 	protected:
 		bool _bRedraw = true;
+		bool _bRedrawAlpha = true;
 		float _fZoom = 0.0f;
 		fig::sdl::Texture _targetTexture;
 		TexturePtr _pTexture = nullptr;

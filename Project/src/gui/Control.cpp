@@ -226,4 +226,11 @@ namespace fig::gui
 		clientRect.h -= _marginTop + _marginBottom;
 		return clientRect;
 	}
+
+	Point Control::GetMousePos() const noexcept
+	{
+		float x, y;
+		auto _ = SDL_GetMouseState(&x, &y);
+		return Point { toI(x), toI(y) };
+	}
 }

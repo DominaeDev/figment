@@ -61,6 +61,7 @@ namespace fig::gui
 		inline WindowPtr GetSDLWindow() { return _renderContext.pWindow; }
 		inline RendererPtr GetSDLRenderer() { return _renderContext.pRenderer; }
 		inline TextEnginePtr GetSDLTextEngine() { return _renderContext.pTextEngine; }
+		Point GetMousePos() const noexcept;
 
 	private:
 		Color _foregroundColor {};

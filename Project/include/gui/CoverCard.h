@@ -55,7 +55,6 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 		void OnSize() override;
-		bool OnEvent(Event& event) override;
 		
 		void SetIndex(const SearchIndex& index) noexcept;
 		void AddSearchTerms(const fig::string& text) noexcept;

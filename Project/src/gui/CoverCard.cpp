@@ -174,21 +174,28 @@ namespace fig::gui
 		if (_bHasError && !_pErrorIcon)
 		{
 			// Create error icon
-			int divide = _cardSize == CardSize::Default ? 1 : 2;
+			float scale = _cardSize == CardSize::Default ? 1.0f : Constants::GUI::HalfScaleFactor;
 			_pErrorIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_ERROR));
-			_pErrorIcon->SetSize(_pErrorIcon->GetTextureSize().x / divide, _pErrorIcon->GetTextureSize().x / divide);
+			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
 			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
 			_pErrorIcon->Center();
 
 			CardImage::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 		}
 
+		bool bHovered = is_inside(GetRect(), GetMousePos());
+		if (bHovered != _bHovered)
+		{
+			_bHovered = bHovered;
+			_fTargetZoom = bHovered ? 1.0f : 0.0f;
+		}
+
 		if (!flt_eq(_fHoverZoom, _fTargetZoom))
 		{
 			constexpr float ZoomAmount = 12.0f;
 			constexpr float ZoomSmoothing = 8.0f;
-			_fHoverZoom += (_fTargetZoom - _fHoverZoom) * ZoomSmoothing * fElapsed;
 
+			_fHoverZoom = std::clamp(_fHoverZoom + (_fTargetZoom - _fHoverZoom) * ZoomSmoothing * fElapsed, 0.0f, 1.0f);
 			if (std::abs(_fTargetZoom - _fHoverZoom) < 0.01f)
 				_fHoverZoom = _fTargetZoom;
 			SetZoom(_fHoverZoom * ZoomAmount);
@@ -505,8 +512,8 @@ namespace fig::gui
 	{
 		if (_pErrorIcon)
 		{
-			int divide = _cardSize == CardSize::Default ? 1 : 2;
-			_pErrorIcon->SetSize(_pErrorIcon->GetTextureSize().x / divide, _pErrorIcon->GetTextureSize().x / divide);
+			float scale = _cardSize == CardSize::Default ? 1.0f : Constants::GUI::HalfScaleFactor;
+			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
 			_pErrorIcon->Center();
 		}
 		CardImage::OnSize();
@@ -580,22 +587,5 @@ namespace fig::gui
 			SetLabel(_pendingLabel);
 			_pendingLabel.clear();
 		}
-	}
-
-	bool CoverCard::OnEvent(Event& event)
-	{
-		if (event.type == SDL_EVENT_MOUSE_MOTION)
-		{
-			auto motionEvent = event.motion;
-			bool bHovered = is_inside(GetRect(), toI(motionEvent.x), toI(motionEvent.y));
-			if (bHovered != _bHovered)
-			{
-				_bHovered = bHovered;
-				_fTargetZoom = bHovered ? 1.0f : 0.0f;
-			}
-			return false; // Don't consume event
-		}
-
-		return false;
 	}
 }

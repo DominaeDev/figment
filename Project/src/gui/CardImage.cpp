@@ -49,6 +49,7 @@ namespace fig::gui
 	void CardImage::SetTexture(TexturePtr pTexture, bool bResize) noexcept
 	{
 		_pTexture = pTexture;
+		_bRedraw = true;
 		if (bResize and pTexture)
 			SetSize(pTexture->w, pTexture->h);
 	}
@@ -56,6 +57,8 @@ namespace fig::gui
 	void CardImage::SetMask(TexturePtr pTexture) noexcept
 	{
 		_pMask = pTexture;
+		_bRedraw = true;
+		_bRedrawAlpha = true;
 	}
 
 	void CardImage::RecreateTexture()
@@ -82,20 +85,24 @@ namespace fig::gui
 		// Render with alpha
 		if (_pMask)
 		{
-			SDL_SetTextureBlendMode(_pMask, SDL_BLENDMODE_NONE);
-			SDL_RenderTexture9Grid(pRenderer, _pMask, nullptr, fCorner, fCorner, fCorner, fCorner, 1.0f, NULL);
+			if (_bRedrawAlpha)
+			{
+				SDL_SetTextureBlendMode(_pMask, SDL_BLENDMODE_NONE);
+				SDL_RenderTexture9Grid(pRenderer, _pMask, nullptr, fCorner, fCorner, fCorner, fCorner, 1.0f, NULL);
 
-			SDL_BlendMode multiplyAlpha = SDL_ComposeCustomBlendMode(
-				SDL_BLENDFACTOR_DST_ALPHA,
-				SDL_BLENDFACTOR_ZERO,
-				SDL_BLENDOPERATION_ADD,
-				SDL_BLENDFACTOR_ZERO,
-				SDL_BLENDFACTOR_ONE,
-				SDL_BLENDOPERATION_ADD
-			);
-			SDL_SetTextureBlendMode(_pTexture, multiplyAlpha);
+				SDL_BlendMode multiplyAlpha = SDL_ComposeCustomBlendMode(
+					SDL_BLENDFACTOR_DST_ALPHA,
+					SDL_BLENDFACTOR_ZERO,
+					SDL_BLENDOPERATION_ADD,
+					SDL_BLENDFACTOR_ZERO,
+					SDL_BLENDFACTOR_ONE,
+					SDL_BLENDOPERATION_ADD
+				);
+				SDL_SetTextureBlendMode(_pTexture, multiplyAlpha);
+			}
 
 			auto rect = expand_rect(Rectf { 0, 0, toF(width), toF(height) }, _fZoom);
+			rect.y += _fZoom * 0.75f;
 			SDL_RenderTexture(pRenderer, _pTexture, NULL, &rect);
 			SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
 		}
