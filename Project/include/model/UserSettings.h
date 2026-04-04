@@ -9,6 +9,7 @@ namespace fig
 	enum class UserSetting
 	{
 		ShowTags,
+		HalfSizeCards,
 	};
 
 	extern template class SettingsCollection<UserSetting>;

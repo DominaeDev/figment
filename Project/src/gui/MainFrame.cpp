@@ -107,6 +107,7 @@ namespace fig::gui
 			{
 				auto& assets = userMngr.GetProfileAssets();
 				assets.CreateProfilePicture(userMngr.GetActiveProfile(), fig::path("./import/profile_pic.png"));
+				userMngr.SignOut();
 			}
 		}
 
@@ -325,8 +326,17 @@ namespace fig::gui
 
 	bool MainFrame::AutoSignIn() noexcept
 	{
-		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)); lastProfile.has_value() and not lastProfile.value().get().has_password)
-			return TrySignIn(lastProfile.value(), "");
-		return false;
+		auto& profiles = Global::GetUserManager().GetProfiles();
+		if (profiles.empty())
+			return false;
+
+		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)))
+		{
+			if (not lastProfile.value().get().has_password)
+				return TrySignIn(lastProfile.value(), "");
+			return false;
+		}
+
+		return TrySignIn(profiles.front(), "");
 	}
 }

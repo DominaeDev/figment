@@ -22,7 +22,7 @@ namespace fig::gui
 
 	enum class CardSize
 	{
-		Default,
+		Full,
 		Half,
 	};
 
@@ -32,7 +32,7 @@ namespace fig::gui
 	class CoverCard : public CardImage
 	{
 	public:
-		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Default);
+		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Full);
 		void Init();
 
 		void SetBorder(CardBorderStyle style);

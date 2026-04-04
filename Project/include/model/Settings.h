@@ -5,13 +5,6 @@
 #include "Types.h"
 #include <variant>
 
-enum class TestAppSetting
-{
-	LastUser,
-	WindowMaximized,
-	WindowSize,
-};
-
 namespace fig
 {
 	template <typename E>

@@ -174,7 +174,7 @@ namespace fig::gui
 		if (_bHasError && !_pErrorIcon)
 		{
 			// Create error icon
-			float scale = _cardSize == CardSize::Default ? 1.0f : Constants::GUI::HalfScaleFactor;
+			float scale = _cardSize == CardSize::Full ? 1.0f : Constants::GUI::HalfScaleFactor;
 			_pErrorIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_ERROR));
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
 			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
@@ -512,7 +512,7 @@ namespace fig::gui
 	{
 		if (_pErrorIcon)
 		{
-			float scale = _cardSize == CardSize::Default ? 1.0f : Constants::GUI::HalfScaleFactor;
+			float scale = _cardSize == CardSize::Full ? 1.0f : Constants::GUI::HalfScaleFactor;
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
 			_pErrorIcon->Center();
 		}
@@ -521,7 +521,7 @@ namespace fig::gui
 
 	void CoverCard::RefreshImage()
 	{
-		if (_cardSize == CardSize::Default)
+		if (_cardSize == CardSize::Full)
 		{
 			if (!_imageTexture.empty())
 				CardImage::SetTexture(_imageTexture.get());

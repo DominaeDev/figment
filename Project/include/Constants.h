@@ -88,7 +88,7 @@ namespace Constants
 	namespace Paths
 	{
 		constexpr fig::const_string AppSettings = "./settings.ini";
-		constexpr fig::const_string UserSettings = "settings.ini";
+		constexpr fig::const_string UserSettings = "user-settings.ini";
 		constexpr fig::const_string ProfilesFolder = "./profiles";
 		constexpr fig::const_string ProfilesFileName = "profiles";
 		constexpr fig::const_string ProfilesFileExt = "";

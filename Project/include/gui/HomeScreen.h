@@ -25,7 +25,7 @@ namespace fig::gui
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void OnSidePanel(bool show) override;
 		void OnFilter(fig::string search_text);
-		void SetSmallGridSize(bool bSmall);
+		void SetSmallCardSize(bool bSmall) noexcept;
 		void ToggleTags();
 
 	private:

@@ -9,7 +9,8 @@
 		using SettingTuple = std::tuple<UserSetting, fig::string, fig::string, SettingValue>;
 
 		static const std::vector<SettingTuple> _AllSettings {
-			std::tuple { UserSetting::ShowTags,		"Interface",	"ShowTags",		1 },
+			std::tuple { UserSetting::ShowTags,			"Interface",	"ShowTags",		1 },
+			std::tuple { UserSetting::HalfSizeCards,	"Interface",	"SmallCards",	0 },
 		};
 
 		void SettingsCollection<UserSetting>::Init() noexcept

@@ -33,6 +33,7 @@ namespace fig::user
 		const UserProfile& GetActiveProfile() const;
 		fig::io::AssetManager& GetProfileAssets();
 		fig::io::ContentDatabase& GetContent();
+		fig::UserSettings& GetSettings();
 		const fig::auth::AuthKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };
 		
 		bool ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword);

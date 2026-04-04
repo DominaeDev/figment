@@ -12,7 +12,7 @@ namespace fig::gui
 	class CardList : public ScrollPanel
 	{
 	public:
-		CardList(LayoutElement* pParent, CardSize cardSize = CardSize::Default);
+		CardList(LayoutElement* pParent, CardSize cardSize = CardSize::Full);
 
 		enum class CardType { Character, Scenario };
 		void CreateCards(CardType cardType);

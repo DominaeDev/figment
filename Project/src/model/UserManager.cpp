@@ -213,6 +213,7 @@ namespace fig::user
 
 		_signedInProfile = &profile;
 		_pUserSettings = std::make_unique<UserSettings>(profile.GetPath() / Constants::Paths::UserSettings);
+		_pUserSettings->Load();
 		_pAssetMngr = std::make_unique<AssetManager>(*this);
 		_pContentDatabase = std::make_unique<ContentDatabase>(*_pAssetMngr.get());
 		return true;
@@ -324,7 +325,7 @@ namespace fig::user
 
 	AssetManager& UserManager::GetProfileAssets()
 	{
-		if (_signedInProfile == nullptr || !_pAssetMngr)
+		if (_signedInProfile == nullptr or !_pAssetMngr)
 			throw std::runtime_error("Not signed in");
 
 		return static_cast<AssetManager&>(*_pAssetMngr);
@@ -332,10 +333,18 @@ namespace fig::user
 
 	ContentDatabase& UserManager::GetContent()
 	{
-		if (_signedInProfile == nullptr || !_pContentDatabase)
+		if (_signedInProfile == nullptr or !_pContentDatabase)
 			throw std::runtime_error("Not signed in");
 
 		return static_cast<ContentDatabase&>(*_pContentDatabase);
+	}
+
+	UserSettings& UserManager::GetSettings()
+	{
+		if (_signedInProfile == nullptr or !_pUserSettings)
+			throw std::runtime_error("Not signed in");
+
+		return static_cast<UserSettings&>(*_pUserSettings);
 	}
 
 	fig::io::ProfileDatabase& UserManager::GetDatabase() noexcept

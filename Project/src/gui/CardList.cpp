@@ -17,12 +17,12 @@ namespace fig::gui
 
 	static constexpr Coord cardWidth(CardSize cardSize) noexcept
 	{
-		return cardSize == CardSize::Default ? Constants::GUI::CardWidth : Constants::GUI::HalfCardWidth;;
+		return cardSize == CardSize::Full ? Constants::GUI::CardWidth : Constants::GUI::HalfCardWidth;;
 	}
 
 	static constexpr Coord cardHeight(CardSize cardSize) noexcept
 	{
-		return cardSize == CardSize::Default ? Constants::GUI::CardHeight: Constants::GUI::HalfCardHeight;
+		return cardSize == CardSize::Full ? Constants::GUI::CardHeight: Constants::GUI::HalfCardHeight;
 	}
 
 	CardList::CardList(LayoutElement* pParent, CardSize cardSize) : ScrollPanel(pParent),

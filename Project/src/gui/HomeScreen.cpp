@@ -4,6 +4,8 @@
 #include "gui/MainFrame.h"
 #include "gui/SearchBox.h"
 #include "gui/AppResources.h"
+#include "model/AppState.h"
+#include "model/UserManager.h"
 #include "util/Common.h"
 
 namespace fig::gui
@@ -19,9 +21,6 @@ namespace fig::gui
 		_pHeader->SetAlignment(TextAlignment::Left_Center);
 		
 		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR);
-//		pExpandButton->SetSize(36, 36);
-//		pExpandButton->SetX(4);
-//		pExpandButton->CenterVertically();
 		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
 		_pExpandButton = pExpandButton;
 
@@ -30,9 +29,9 @@ namespace fig::gui
 		auto toggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
 		toggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 		auto gridLargeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
-		gridLargeButton->SetDelegate([this]() { SetSmallGridSize(false); });
+		gridLargeButton->SetDelegate([this]() { SetSmallCardSize(false); });
 		auto gridSmallButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_SMALL);
-		gridSmallButton->SetDelegate([this]() { SetSmallGridSize(true); });
+		gridSmallButton->SetDelegate([this]() { SetSmallCardSize(true); });
 
 		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
@@ -55,7 +54,6 @@ namespace fig::gui
 		pTopBar->SetSizer(pTopSizer);
 
 		_pCardList = new CardList(this);
-//		_pCardList->SetCardSize(CardSize::Half);
 
 		auto mainSizer = new VerticalSizer();
 		mainSizer->Add(pTopBar, 0, Sizer::Expand);
@@ -79,10 +77,10 @@ namespace fig::gui
 
 	bool HomeScreen::OnKeyboardEvent(KeyboardEvent& event)
 	{
-		if (event.pressed) // Press
+		if (event.pressed)
 		{
 		}
-		else // Release
+		else // Released
 		{
 		}
 		return false;
@@ -90,6 +88,9 @@ namespace fig::gui
 
 	void HomeScreen::CreateCards()
 	{
+		_pCardList->SetCardSize(Global::GetUserManager().GetSettings().GetBool(UserSetting::HalfSizeCards) ? CardSize::Half : CardSize::Full);
+		_pCardList->EnableTags(Global::GetUserManager().GetSettings().GetBool(UserSetting::ShowTags));
+
 		DEBUG_MEASURE_BEGIN("CreateCards");
 		_pCardList->CreateCards(CardList::CardType::Character);
 		DEBUG_MEASURE_END();
@@ -122,13 +123,15 @@ namespace fig::gui
 		}
 	}
 
-	void HomeScreen::SetSmallGridSize(bool bSmall)
+	void HomeScreen::SetSmallCardSize(bool bSmall) noexcept
 	{
-		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Default);
+		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
+		Global::GetUserManager().GetSettings().SetBool(UserSetting::HalfSizeCards, bSmall);
 	}
 
 	void HomeScreen::ToggleTags()
 	{
 		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
+		Global::GetUserManager().GetSettings().SetBool(UserSetting::ShowTags, _pCardList->IsTagsEnabled());
 	}
 }
