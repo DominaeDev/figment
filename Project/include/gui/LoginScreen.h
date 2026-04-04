@@ -22,7 +22,16 @@ namespace fig::gui
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
 	private:
+		void SelectProfile(const fig::user::UserProfile& profile);
+		void CycleProfile(int32_t step);
+
+	private:
 		PasswordBox* _pPassword;
+		ImageWithMask* _pProfileImage;
+		StaticText* _pProfileName;
+		ButtonWithIcon* _pPrevProfileBtn;
+		ButtonWithIcon* _pNextProfileBtn;
+		fig::uuid _currentProfileId {};
 	};
 }
 

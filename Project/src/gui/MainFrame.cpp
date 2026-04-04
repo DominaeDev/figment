@@ -42,6 +42,7 @@ namespace fig::gui
 
 		// Sign in
 		auto& userMngr = Global::GetUserManager();
+
 		if (not userMngr.LoadProfiles())
 			userMngr.CreateDefaultProfile();
 
@@ -97,6 +98,16 @@ namespace fig::gui
 				assets.ImportCharactersInDirectory(fig::path("./import/characters"), fig::io::AssetManager::CharacterDataFormat::TavernV2);
 				userMngr.GetProfileAssets().SaveModified();
 				userMngr.SignOut();
+			}
+		}
+
+		// Create profile pic
+		if constexpr (Debugging and Disabled)
+		{
+			if (userMngr.SignInDefaultProfile())
+			{
+				auto& assets = userMngr.GetProfileAssets();
+				assets.CreateProfilePicture(userMngr.GetActiveProfile(), fig::path("./import/profile_pic.png"));
 			}
 		}
 

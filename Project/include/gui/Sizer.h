@@ -21,6 +21,7 @@ namespace fig::gui
 			Right = 1 << 3,
 			Expand = 1 << 4,
 			Fill = 1 << 5,
+			FixedSize = 1 << 6,
 
 			AlignLeft = 1 << 10,
 			AlignRight = 1 << 11,
@@ -37,8 +38,8 @@ namespace fig::gui
 		void Layout(const Rect& parentRect);
 		virtual ~Sizer();
 
-		void Add(LayoutElement* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
-		void AddSizer(Sizer* pControl, int proportion = 0, int flags = Flag::Default, int border = 0);
+		void Add(LayoutElement* pControl, int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0);
+		void AddSizer(Sizer* pControl, int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0);
 		void AddSpacer(Coord size);
 		void AddStretchSpacer();
 		void Remove(LayoutElement* pControl);
@@ -51,7 +52,7 @@ namespace fig::gui
 			int32_t prop { 0 };
 			int32_t flags { Flag::None };
 			int32_t border { 0 };
-			int32_t fixed { 0 };
+//			int32_t fixed { 0 };
 
 			inline int32_t leftBorder() const	{ return (flags & Flag::Left) != 0 ? border : 0; };
 			inline int32_t rightBorder() const	{ return (flags & Flag::Right) != 0 ? border : 0; };

@@ -24,10 +24,10 @@ namespace fig::gui
 			auto pControl = item.GetControl();
 			if (item.info.prop == 0)
 			{
-				if (pControl != nullptr)
+				if ((item.info.flags & Sizer::FixedSize) != 0)
+					remainingWidth = std::max(remainingWidth - item.info.border, 0);
+				else if (pControl != nullptr)
 					remainingWidth = std::max(remainingWidth - (pControl->GetWidth() + item.info.leftBorder() + item.info.rightBorder()), 0);
-				else
-					remainingWidth = std::max(remainingWidth - (item.info.fixed + item.info.leftBorder() + item.info.rightBorder()), 0);
 			}
 			else if (item.info.prop > 0)
 				totalProportion += item.info.prop;
@@ -45,10 +45,10 @@ namespace fig::gui
 			Coord width = 0;
 			if (info.prop == 0)
 			{
-				if (pControl)
+				if ((info.flags & Sizer::FixedSize) != 0)
+					width = info.border;
+				else if (pControl)
 					width = pControl->GetWidth() + info.leftBorder() + info.rightBorder();
-				else
-					width = info.fixed + info.leftBorder() + info.rightBorder();
 			}
 			else if (info.prop > 0)
 				width = ceil_int(info.prop * remainingWidth / (float)totalProportion);

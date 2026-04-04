@@ -27,9 +27,9 @@ namespace fig::gui
 		if (_pImage)
 		{
 			if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
-				_pImage->SetTexture(pTexture, AppResources::GetTexture(TextureType::PROFILE_MASK));
+				_pImage->SetTexture(pTexture, AppResources::GetTexture(TextureType::CIRCLE_MASK));
 			else
-				_pImage->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::PROFILE_MASK));
+				_pImage->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::CIRCLE_MASK));
 		}
 
 		if (_pLabel)

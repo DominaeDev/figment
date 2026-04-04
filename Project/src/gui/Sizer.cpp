@@ -17,26 +17,56 @@ namespace fig::gui
 		}
 	}
 
-	void Sizer::Add(LayoutElement* pControl, int proportion, int flags, int border)
+	void Sizer::Add(LayoutElement* pControl, int32_t proportion, int32_t flags, int border)
 	{
 		if (pControl)
 		{
 			_items.push_back(LayoutItem {
-				.info = LayoutProperties { proportion, flags, border },
+				.info = LayoutProperties { 
+					.prop = proportion, 
+					.flags = flags, 
+					.border = border
+				},
 				.pControl = pControl,
 			});
 		}
 	}
 
-	void Sizer::AddSizer(Sizer* pSizer, int proportion, int flags, int border)
+	void Sizer::AddSizer(Sizer* pSizer, int32_t proportion, int32_t flags, int border)
 	{
 		if (pSizer)
 		{
 			_items.push_back(LayoutItem {
-				.info = LayoutProperties { proportion, flags | Sizer::Expand | Sizer::Fill, border },
+				.info = LayoutProperties { 
+					.prop = proportion, 
+					.flags = flags | Sizer::Fill, 
+					.border = border 
+				},
 				.pControl = pSizer,
 			});
 		}
+	}
+
+	void Sizer::AddSpacer(Coord size)
+	{
+		_items.emplace_back(LayoutItem {
+			.info = LayoutProperties {
+				.prop { 0 },
+				.flags { Sizer::FixedSize },
+				.border { size },
+			},
+		});
+	}
+
+	void Sizer::AddStretchSpacer()
+	{
+		_items.emplace_back(LayoutItem {
+			.info = LayoutProperties {
+				.prop { -1 },
+				.flags {},
+				.border { 0 },
+			},
+		});
 	}
 
 	void Sizer::Remove(LayoutElement* pControl)
@@ -87,28 +117,4 @@ namespace fig::gui
 	{
 		_items.clear();
 	}
-
-	void Sizer::AddSpacer(Coord size)
-	{
-		_items.emplace_back(LayoutItem {
-			.info = LayoutProperties {
-				.prop { 0 },
-				.flags {},
-				.border { 0 },
-				.fixed { size },
-			},
-		});
-	}
-
-	void Sizer::AddStretchSpacer()
-	{
-		_items.emplace_back(LayoutItem {
-			.info = LayoutProperties { 
-				.prop { -1 },
-				.flags {}, 
-				.border { 0 },
-			},
-		});
-	}
-
 }

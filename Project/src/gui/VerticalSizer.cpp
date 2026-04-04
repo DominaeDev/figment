@@ -25,10 +25,10 @@ void VerticalSizer::OnLayout(const Rect& parentRect)
 
 		if (item.info.prop == 0)
 		{
-			if (pControl != nullptr)
+			if ((item.info.flags & Sizer::FixedSize) != 0)
+				remainingHeight = std::max(remainingHeight - item.info.border, 0);
+			else if (pControl != nullptr)
 				remainingHeight = std::max(remainingHeight - (pControl->GetHeight() + item.info.topBorder() + item.info.bottomBorder()), 0);
-			else
-				remainingHeight = std::max(remainingHeight - (item.info.fixed + item.info.topBorder() + item.info.bottomBorder()), 0);
 		}
 		else if (item.info.prop > 0)
 			totalProportion += item.info.prop;
@@ -46,10 +46,10 @@ void VerticalSizer::OnLayout(const Rect& parentRect)
 		int height = 0;
 		if (info.prop == 0)
 		{
-			if (pControl)
+			if ((info.flags & Sizer::FixedSize) != 0)
+				height = info.border;
+			else if (pControl)
 				height = pControl->GetHeight() + info.topBorder() + info.bottomBorder();
-			else
-				height = info.fixed + info.topBorder() + info.bottomBorder();
 		}
 		else if (info.prop > 0)
 			height = ceil_int(info.prop * remainingHeight / (float)totalProportion);

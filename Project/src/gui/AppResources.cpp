@@ -46,6 +46,8 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_LOCK, "./resources/gui/icons/icon_lock.png");
 		LoadTexture(pRenderer, TextureType::ICON_ARROW_LEFT, "./resources/gui/icons/icon_arrow_left.png");
 		LoadTexture(pRenderer, TextureType::ICON_ARROW_RIGHT, "./resources/gui/icons/icon_arrow_right.png");
+		LoadTexture(pRenderer, TextureType::ICON_CHEVRON_LEFT, "./resources/gui/icons/icon_chevron_left.png");
+		LoadTexture(pRenderer, TextureType::ICON_CHEVRON_RIGHT, "./resources/gui/icons/icon_chevron_right.png");
 		LoadTexture(pRenderer, TextureType::ICON_HOME, "./resources/gui/icons/icon_home.png");
 
 		// Chat
@@ -75,7 +77,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::CARD_BACKGROUND_EMPTY, "./resources/gui/card/card_bg_empty.png");
 
 		LoadTexture(pRenderer, TextureType::PROFILE_DEFAULT_IMAGE, "./resources/gui/images/default_portrait.png");
-		LoadTexture(pRenderer, TextureType::PROFILE_MASK, "./resources/gui/masks/mask_circle256.png");
+		LoadTexture(pRenderer, TextureType::CIRCLE_MASK, "./resources/gui/masks/mask_circle256.png");
 		
 		LoadTexture(pRenderer, TextureType::MASK_CARD, "./resources/gui/masks/mask_card_corners.png");
 	}
