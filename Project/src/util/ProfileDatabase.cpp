@@ -8,12 +8,13 @@ using namespace fig::util;
 
 constexpr fig::const_string create_tables =
 	"CREATE TABLE Profiles("
-		"id       TEXT    PRIMARY KEY NOT NULL,"
-		"version  INTEGER NOT NULL,"
-		"name     TEXT    NOT NULL,"
-		"settings TEXT    NOT NULL DEFAULT('{}'),"
-		"auth     BLOB    NOT NULL,"
-		"recovery BLOB"
+		"id         TEXT     PRIMARY KEY NOT NULL,"
+		"version    INTEGER  NOT NULL,"
+		"name       TEXT     NOT NULL,"
+		"settings   TEXT     NOT NULL DEFAULT('{}'),"
+		"protected  INTEGER  NOT NULL DEFAULT(0),"
+		"auth       BLOB     NOT NULL,"
+		"recovery   BLOB"
 	");";
 
 namespace fig::io
@@ -72,9 +73,9 @@ namespace fig::io
 	void ProfileDatabase::PrepareStatements() noexcept
 	{
 		// Prepare statements
-		SQL_PREPARE(SQL::FetchProfiles, "SELECT id, version, name, settings, auth, recovery FROM Profiles;");
-		SQL_PREPARE(SQL::CreateProfile, "INSERT INTO Profiles (id, version, name, settings, auth, recovery) VALUES (?, ?, ?, ?, ?, ?);");
-		SQL_PREPARE(SQL::UpdateProfile, "UPDATE Profiles SET version = ?, name = ?, settings = ?, auth = ? WHERE id = ?;");
+		SQL_PREPARE(SQL::FetchProfiles, "SELECT id, version, name, settings, protected, auth, recovery FROM Profiles;");
+		SQL_PREPARE(SQL::CreateProfile, "INSERT INTO Profiles (id, version, name, settings, protected, auth, recovery) VALUES (?, ?, ?, ?, ?, ?, ?);");
+		SQL_PREPARE(SQL::UpdateProfile, "UPDATE Profiles SET version = ?, name = ?, settings = ?, protected = ?, auth = ? WHERE id = ?;");
 		SQL_PREPARE(SQL::UpdateRecovery, "UPDATE Profiles SET recovery = ? WHERE id = ?;");
 	}
 
@@ -126,10 +127,11 @@ namespace fig::io
 			int version = sqlite3_column_int(stmt, 1);
 			const char* pName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
 			const char* pSettings = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-			const void* auth_data = sqlite3_column_blob(stmt, 4);
-			int auth_size = sqlite3_column_bytes(stmt, 4);
-			const void* recovery_data = sqlite3_column_blob(stmt, 5);
-			int recovery_size = sqlite3_column_bytes(stmt, 5);
+			bool has_password = sqlite3_column_int(stmt, 4) != 0;
+			const void* auth_data = sqlite3_column_blob(stmt, 5);
+			int auth_size = sqlite3_column_bytes(stmt, 5);
+			const void* recovery_data = sqlite3_column_blob(stmt, 6);
+			int recovery_size = sqlite3_column_bytes(stmt, 6);
 
 			fig::uuid id = fig::uuid::fromStrFactory(pID ? pID : "");
 			std::string name_str(pName ? pName : "");
@@ -138,7 +140,6 @@ namespace fig::io
 
 			if (auth_data && toUZ(auth_size) == sizeof(fig::auth::UserAuth))
 				std::memcpy(&userAuth, auth_data, sizeof(fig::auth::UserAuth));
-			
 			if (recovery_data && toUZ(recovery_size) == sizeof(fig::auth::UserAuth))
 				std::memcpy(&recoveryData, recovery_data, sizeof(fig::auth::UserAuth));
 
@@ -148,6 +149,7 @@ namespace fig::io
 				.name { std::move(name_str) },
 				.auth { std::move(userAuth) },
 				.recovery { std::move(recoveryData) },
+				.has_password { has_password },
 			};
 
 			if (profile.IsValid())
@@ -176,8 +178,9 @@ namespace fig::io
 		sqlite3_bind_int(stmt, 2, profile.version);
 		sqlite3_bind_text(stmt, 3, profile.name.c_str(), -1, SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 4, "{}", -1, SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 5, &profile.auth, sizeof(fig::auth::UserAuth), SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 6, &profile.recovery, sizeof(fig::auth::UserAuth), SQLITE_STATIC);
+		sqlite3_bind_int(stmt, 5, profile.has_password ? 1 : 0);
+		sqlite3_bind_blob(stmt, 6, &profile.auth, sizeof(fig::auth::UserAuth), SQLITE_STATIC);
+		sqlite3_bind_blob(stmt, 7, &profile.recovery, sizeof(fig::auth::UserAuth), SQLITE_STATIC);
 
 		int rc = sqlite3_step(stmt);
 		sqlite3_reset(stmt);
@@ -201,8 +204,9 @@ namespace fig::io
 		sqlite3_bind_int(stmt, 1, (int)profile.version);
 		sqlite3_bind_text(stmt, 2, profile.name.c_str(), -1, SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 3, "{}", -1, SQLITE_STATIC);
-		sqlite3_bind_blob(stmt, 4, &profile.auth, sizeof(fig::auth::UserAuth), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 5, profile.id.str().c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_int(stmt, 4, profile.has_password ? 1 : 0);
+		sqlite3_bind_blob(stmt, 5, &profile.auth, sizeof(fig::auth::UserAuth), SQLITE_STATIC);
+		sqlite3_bind_text(stmt, 6, profile.id.str().c_str(), -1, SQLITE_TRANSIENT);
 
 		int rc = sqlite3_step(stmt);
 		sqlite3_reset(stmt);

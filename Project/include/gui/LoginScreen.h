@@ -24,6 +24,7 @@ namespace fig::gui
 	private:
 		void SelectProfile(const fig::user::UserProfile& profile);
 		void CycleProfile(int32_t step);
+		bool TrySignIn();
 
 	private:
 		PasswordBox* _pPassword;

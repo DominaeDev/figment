@@ -72,7 +72,7 @@ namespace fig
 		fig::uuid GetUUID(E setting, const fig::uuid& defaultValue = {}) const noexcept
 		{
 			fig::string strDefault { defaultValue.str() };
-			return fig::uuid { GetValue<fig::string>(setting, strDefault).c_str() };
+			return fig::uuid::fromStrFactory(GetValue<fig::string>(setting, strDefault).c_str());
 		}
 
 		void SetBool(E setting, bool value) noexcept
@@ -97,7 +97,7 @@ namespace fig
 
 		void SetUUID(E setting, const fig::uuid& value) noexcept
 		{
-			return SetValue<fig::uuid>(setting, value);
+			return SetValue<fig::string>(setting, value.str());
 		}
 
 	private:

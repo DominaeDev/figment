@@ -45,8 +45,7 @@ namespace fig::gui
 		auto& assets = Global::GetUserManager().GetProfileAssets();
 		const auto& profileId = Global::GetUserManager().GetActiveProfile().id;
 
-		DestroyChildren();
-		_cards.clear();
+		Reset();
 
 		int32_t priority = 0;
 		if (cardType == CardType::Scenario)
@@ -184,5 +183,7 @@ namespace fig::gui
 	{
 		DestroyChildren();
 		_cards.clear();
+		_fScrollY = 0;
+		_fTargetScrollY = 0;
 	}
 }

@@ -100,9 +100,10 @@ namespace fig::user
 
 	std::optional<UserProfileCRef> UserManager::CreateProfile(const fig::string& name, const fig::string& password)
 	{
+		bool hasPassword = not password.empty();
 		auto authKey = Random128Bits();
-		auto authSalt = not password.empty() ? Random128Bits() : kDefaultAuthSalt;
-		auto encKey = not password.empty() ? DeriveKeyFromPassword(password, authSalt) : kDefaultAuthKey;
+		auto authSalt = hasPassword ? Random128Bits() : kDefaultAuthSalt;
+		auto encKey = hasPassword ? DeriveKeyFromPassword(password, authSalt) : kDefaultAuthKey;
 
 		auto id = CreateUUID();
 		auto& db = GetDatabase();
@@ -117,20 +118,24 @@ namespace fig::user
 				.challenge = authChallenge,
 				.salt = authSalt,
 			},
+			.has_password = hasPassword,
 		};
 
-		// Generate recovery key
-		AuthKey recoveryKey;
-		AuthChallenge recoveryChallenge;
-		if (CreateRecoveryFile(profile, password, recoveryChallenge, recoveryKey))
+		if (hasPassword)
 		{
-			profile.recovery = UserAuth {
-				.challenge = recoveryChallenge,
-				.salt = authSalt,
-			};
+			// Generate recovery key
+			AuthKey recoveryKey;
+			AuthChallenge recoveryChallenge;
+			if (CreateRecoveryFile(profile, password, recoveryChallenge, recoveryKey))
+			{
+				profile.recovery = UserAuth {
+					.challenge = recoveryChallenge,
+					.salt = authSalt,
+				};
 
-			auto code = RecoveryKeyToCode(recoveryKey);
-			LogLn(std::format("Recovery code for user {}: {}", profile.id.str(), code));
+				auto code = RecoveryKeyToCode(recoveryKey);
+				LogLn(std::format("Recovery code for user {}: {}", profile.id.str(), code));
+			}
 		}
 
 		if (db.CreateProfile(profile) == DatabaseError::NoError)
@@ -210,7 +215,6 @@ namespace fig::user
 		_pUserSettings = std::make_unique<UserSettings>(profile.GetPath() / Constants::Paths::UserSettings);
 		_pAssetMngr = std::make_unique<AssetManager>(*this);
 		_pContentDatabase = std::make_unique<ContentDatabase>(*_pAssetMngr.get());
-
 		return true;
 	}
 
@@ -291,6 +295,13 @@ namespace fig::user
 			throw std::runtime_error("Not signed in");
 
 		return std::cref(*_signedInProfile);
+	}
+
+	std::optional<UserProfileCRef> UserManager::GetProfile(const fig::uuid& id) const noexcept
+	{
+		if (auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&id](const UserProfile& profile) { return profile.id == id; }); itProfile != _profiles.end())
+			return std::cref(*itProfile);
+		return std::nullopt;
 	}
 
 	AssetManager& UserManager::GetProfileAssets()

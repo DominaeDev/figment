@@ -42,14 +42,13 @@ namespace fig::gui
 
 		// Sign in
 		auto& userMngr = Global::GetUserManager();
-
 		if (not userMngr.LoadProfiles())
 			userMngr.CreateDefaultProfile();
 
 		// Import test characters
 		if constexpr (Debugging and Disabled)
 		{
-			if (userMngr.IsSignedIn())
+			if (userMngr.SignInDefaultProfile())
 			{
 				auto& assets = userMngr.GetProfileAssets();
 
@@ -69,7 +68,7 @@ namespace fig::gui
 		// Import test scenario
 		if constexpr (Debugging and Disabled)
 		{
-			if (userMngr.IsSignedIn())
+			if (userMngr.SignInDefaultProfile())
 			{
 				auto& assets = userMngr.GetProfileAssets();
 				auto remove_scenarios = assets.GetAllScenarios()
@@ -111,7 +110,9 @@ namespace fig::gui
 			}
 		}
 
-		ShowLoginScreen();
+		// Try auto sign-in
+		if (not AutoSignIn())
+			ShowLoginScreen();
 	}
 
 	MainFrame::~MainFrame()
@@ -272,14 +273,12 @@ namespace fig::gui
 		ShowSidePanel(false);
 	}
 
-	bool MainFrame::TrySignIn(const fig::string& password) noexcept
+	bool MainFrame::TrySignIn(const fig::user::UserProfile& profile, const fig::string& password) noexcept
 	{
 		auto& userMngr = Global::GetUserManager();
-		auto& profile = userMngr.GetProfiles().front();
-
 		auto startTime = std::chrono::steady_clock::now();
 
-		if (userMngr.SignIn(profile.id, ""))
+		if (userMngr.SignIn(profile.id, password))
 		{
 			OnSignedIn(profile);
 
@@ -304,6 +303,9 @@ namespace fig::gui
 
 	void MainFrame::OnSignedIn(const fig::user::UserProfile& profile) noexcept
 	{
+		// Remember
+		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
+
 		if (_pSidePanel)
 			_pSidePanel->SetUserProfile(profile);
 		ShowSidePanel(true);
@@ -321,4 +323,10 @@ namespace fig::gui
 		ChangeScreen<LoginScreen>();
 	}
 
+	bool MainFrame::AutoSignIn() noexcept
+	{
+		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)); lastProfile.has_value() and not lastProfile.value().get().has_password)
+			return TrySignIn(lastProfile.value(), "");
+		return false;
+	}
 }

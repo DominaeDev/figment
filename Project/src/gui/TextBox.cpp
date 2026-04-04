@@ -1508,11 +1508,10 @@ namespace fig::gui
 					DidChange();
 					return true;
 				}
-				else if (bModNone and _pOnEnter and _pText->text)
+				else if (bModNone and _pOnEnter)
 				{
 					// Invoke
-					fig::string text = trim(fig::string(_pText->text));
-					Clear();
+					fig::string text = _pText->text ? trim(fig::string(_pText->text)) : "";
 					_pOnEnter(text);
 					return true;
 				}

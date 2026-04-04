@@ -17,6 +17,7 @@ namespace fig::user
 		fig::string name;
 		fig::auth::UserAuth auth {};
 		fig::auth::UserAuth recovery {};
+		bool has_password {};
 
 		inline constexpr bool IsValid() const noexcept
 		{

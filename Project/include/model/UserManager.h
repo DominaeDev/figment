@@ -18,6 +18,7 @@ namespace fig::user
 		virtual ~UserManager();
 
 		bool LoadProfiles();
+		std::optional<UserProfileCRef> GetProfile(const fig::uuid& id) const noexcept;
 		const std::vector<UserProfile>& GetProfiles() const noexcept { return _profiles; };
 		std::optional<UserProfileCRef> CreateDefaultProfile();
 		std::optional<UserProfileCRef> CreateProfile(const fig::string& profileName, const fig::string& password);

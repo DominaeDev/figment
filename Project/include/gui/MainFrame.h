@@ -67,10 +67,10 @@ namespace fig::gui
 		void ShowLoginScreen();
 		void ShowSidePanel(bool bShow) noexcept;
 
-		bool TrySignIn(const fig::string& password) noexcept;
+		bool TrySignIn(const fig::user::UserProfile& profile, const fig::string& password) noexcept;
 		bool SignOut() noexcept;
-		void OnSignedIn(const fig::user::UserProfile& profile) noexcept;
-		void OnSignedOut() noexcept;
+
+
 
 	protected:
 		template<IsScreen T>
@@ -80,11 +80,14 @@ namespace fig::gui
 		void UnregisterScreen();
 
 		void ChangeScreen(Screen* pScreen);
+		bool AutoSignIn() noexcept;
 
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 		
 		bool OnEvent(SDL_Event& event) override;
+		void OnSignedIn(const fig::user::UserProfile& profile) noexcept;
+		void OnSignedOut() noexcept;
 
 	private:
 		std::unordered_map<type_id_t, Screen*> _screensByType {};

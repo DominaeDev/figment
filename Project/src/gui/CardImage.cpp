@@ -102,7 +102,7 @@ namespace fig::gui
 			}
 
 			auto rect = expand_rect(Rectf { 0, 0, toF(width), toF(height) }, _fZoom);
-			rect.y += _fZoom * 0.75f;
+			rect.y += _fZoom * 0.65f;
 			SDL_RenderTexture(pRenderer, _pTexture, NULL, &rect);
 			SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
 		}
