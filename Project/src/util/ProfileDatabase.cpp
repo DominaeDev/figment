@@ -144,7 +144,7 @@ namespace fig::io
 				std::memcpy(&recoveryData, recovery_data, sizeof(fig::auth::UserAuth));
 
 			fig::user::UserProfile profile {
-				.version { static_cast<unsigned short>(version) },
+				.version { static_cast<AuthVersion>(version) },
 				.id { std::move(id) },
 				.name { std::move(name_str) },
 				.auth { std::move(userAuth) },

@@ -18,7 +18,7 @@
 #include "gui/GUICommon.h"
 
 #if defined(_WIN32)
-#define USE_WIN32_API 0
+	#define USE_WIN32_API 0 // Use native Win32 system calls
 #endif
 
 #if USE_WIN32_API

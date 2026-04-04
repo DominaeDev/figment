@@ -4,9 +4,6 @@
 #include "util/Hash.h"
 #include "AES.h"
 
-constexpr bool UsePBKDF2 = true;
-constexpr uint32_t PBKDF2Iterations = 1000;
-
 static fig::bytes hmac_compute(std::span<const std::byte> key, std::span<const std::byte> data)
 {
 	constexpr size_t block_size = 64;
@@ -313,14 +310,16 @@ namespace fig::auth
 
 	}
 
-	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::auth::AuthSalt& salt)
+	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::auth::AuthSalt& salt, AuthVersion version)
 	{
+		auto& authSettings = GetAuthSettings(version);
+		
 		fig::bytes derived_key;
-		if constexpr (UsePBKDF2)
+		if (authSettings.KDF.Type == KDFType::PBKDF2)
 		{
 			auto password_bytes = string_to_bytes(password);
 			auto salt_bytes = std::span { salt.data(), salt.size() };
-			derived_key = PBKDF2(password_bytes, salt_bytes, PBKDF2Iterations, sizeof(AuthKey));
+			derived_key = PBKDF2(password_bytes, salt_bytes, authSettings.KDF.Iterations, sizeof(AuthKey));
 		}
 		else
 		{
@@ -332,14 +331,16 @@ namespace fig::auth
 		return authKey;
 	}
 
-	AuthKey DeriveKeyFromBytes(fig::byte_span data, const fig::auth::AuthSalt& salt)
+	AuthKey DeriveKeyFromBytes(fig::byte_span data, const fig::auth::AuthSalt& salt, AuthVersion version)
 	{
+		auto& authSettings = GetAuthSettings(version);
+		
 		fig::bytes derived_key;
-		if constexpr (UsePBKDF2)
+		if (authSettings.KDF.Type == KDFType::PBKDF2)
 		{
 			auto password_bytes = data; // copy
 			auto salt_bytes = std::span { salt.data(), salt.size() };
-			derived_key = PBKDF2(password_bytes, salt_bytes, PBKDF2Iterations, sizeof(AuthKey));
+			derived_key = PBKDF2(password_bytes, salt_bytes, authSettings.KDF.Iterations, sizeof(AuthKey));
 		}
 		else
 		{
@@ -349,6 +350,16 @@ namespace fig::auth
 		AuthKey authKey;
 		std::memcpy(authKey.data(), derived_key.data(), std::min(sizeof(AuthKey), derived_key.size()));
 		return authKey;
+	}
+
+	AuthKey RandomKey()
+	{
+		return AuthKey { Random128Bits() };
+	}
+
+	AuthSalt RandomSalt()
+	{
+		return AuthSalt { Random128Bits() };
 	}
 
 	Bit128 Random128Bits()
@@ -375,5 +386,11 @@ namespace fig::auth
 			std::memcpy(&key[n], &r, u64_size);
 		}
 		return key;
+	}
+
+	const AuthSettings& GetAuthSettings(AuthVersion version)
+	{
+		assert(version < AuthSettingsByVersion.size());
+		return AuthSettingsByVersion[version];
 	}
 }

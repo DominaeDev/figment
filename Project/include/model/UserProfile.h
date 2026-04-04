@@ -11,7 +11,7 @@ namespace fig::user
 {
 	struct UserProfile
 	{
-		unsigned short version { 0 };
+		fig::auth::AuthVersion version { uint16_t(-1) };
 
 		fig::uuid id { 0, 0 };
 		fig::string name;
@@ -21,7 +21,7 @@ namespace fig::user
 
 		inline constexpr bool IsValid() const noexcept
 		{
-			return version == 0
+			return fig::auth::IsValidAuthVersion(version)
 				and not id.empty()
 				and not name.empty();
 		}

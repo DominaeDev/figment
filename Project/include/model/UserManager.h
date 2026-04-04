@@ -42,11 +42,11 @@ namespace fig::user
 
 	private:
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::auth::AuthKey& outKey);
-		static bool Authenticate(const fig::auth::AuthChallenge& challenge, const fig::auth::AuthSalt& salt, const fig::auth::AuthKey& key, fig::auth::AuthKey& outKey);
+		static bool Authenticate(const fig::auth::AuthChallenge& challenge, const fig::auth::AuthSalt& salt, const fig::auth::AuthKey& key, fig::auth::AuthKey& outKey, fig::auth::AuthVersion version = fig::auth::CurrentAuthVersion);
 		bool SignIn(UserProfile& profile, const fig::string& password);
 		fig::io::ProfileDatabase& GetDatabase() noexcept;
-		static fig::string RecoveryKeyToCode(const fig::auth::AuthKey& key) noexcept;
-		static bool RecoveryCodeToKey(const fig::string& code, fig::auth::AuthKey& outKey) noexcept;
+		static fig::string RecoveryKeyToCode(const fig::auth::AuthKey& key, fig::auth::AuthVersion version = fig::auth::CurrentAuthVersion) noexcept;
+		static bool RecoveryCodeToKey(const fig::string& code, fig::auth::AuthKey& outKey, fig::auth::AuthVersion version = fig::auth::CurrentAuthVersion) noexcept;
 
 	private:
 		std::unique_ptr<fig::io::ProfileDatabase> _pProfileDB;

@@ -566,6 +566,7 @@ namespace fig::io
 				if (not try_character.has_value())
 					continue;
 
+				LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
 				auto& character = try_character.value();
 
 				fig::bytes characterData;

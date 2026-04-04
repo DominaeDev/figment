@@ -17,7 +17,6 @@
 #include "model/AssetManager.h"
 #include "model/GlobalStrings.h"
 #include "model/AppState.h"
-#include "util/RecoverCodeLUT.h"
 
 using namespace fig::io;
 using namespace fig::auth;
@@ -25,15 +24,6 @@ using namespace fig::util;
 
 namespace fig::user
 {
-	static Bit128 kDefaultAuthKey { 
-		fig::byte { 0xA1 }, fig::byte { 0xB2 }, fig::byte { 0xC3 }, fig::byte { 0xD4 }, fig::byte { 0xE5 }, fig::byte { 0xF6 }, fig::byte { 0xAB }, fig::byte { 0xCD },
-		fig::byte { 0xEF }, fig::byte { 0x1A }, fig::byte { 0x2B }, fig::byte { 0x3C }, fig::byte { 0x4D }, fig::byte { 0x5E }, fig::byte { 0x6F }, fig::byte { 0xF0 },
-	};
-	static Bit128 kDefaultAuthSalt { 
-		fig::byte { 0xEF }, fig::byte { 0x1A }, fig::byte { 0x2B }, fig::byte { 0x3C }, fig::byte { 0x4D }, fig::byte { 0x5E }, fig::byte { 0x6F }, fig::byte { 0xF0 },
-		fig::byte { 0xA1 }, fig::byte { 0xB2 }, fig::byte { 0xC3 }, fig::byte { 0xD4 }, fig::byte { 0xE5 }, fig::byte { 0xF6 }, fig::byte { 0xAB }, fig::byte { 0xCD },
-	};
-
 	static AuthChallenge CreateAuthChallenge(Bit128 key, Bit128 salt, AuthKey encKey)
 	{
 		AuthChallenge challenge;
@@ -102,9 +92,9 @@ namespace fig::user
 	std::optional<UserProfileCRef> UserManager::CreateProfile(const fig::string& name, const fig::string& password)
 	{
 		bool hasPassword = not password.empty();
-		auto authKey = Random128Bits();
-		auto authSalt = hasPassword ? Random128Bits() : kDefaultAuthSalt;
-		auto encKey = hasPassword ? DeriveKeyFromPassword(password, authSalt) : kDefaultAuthKey;
+		auto authKey = RandomKey();
+		auto authSalt = hasPassword ? RandomSalt() : CurrentDefaultAuthSalt;
+		auto encKey = hasPassword ? DeriveKeyFromPassword(password, authSalt) : CurrentDefaultAuthKey;
 
 		auto id = CreateUUID();
 		auto& db = GetDatabase();
@@ -113,13 +103,14 @@ namespace fig::user
 		AuthChallenge authChallenge = CreateAuthChallenge(authKey, authSalt, encKey);
 
 		UserProfile profile {
-			.id = id,
-			.name = name,
-			.auth = UserAuth {
+			.version { CurrentAuthVersion },
+			.id { id },
+			.name { name },
+			.auth {
 				.challenge = authChallenge,
 				.salt = authSalt,
 			},
-			.has_password = hasPassword,
+			.has_password { hasPassword },
 		};
 
 		if (hasPassword)
@@ -168,14 +159,22 @@ namespace fig::user
 
 	bool UserManager::Authenticate(const UserProfile& profile, const fig::string& password, AuthKey& outKey)
 	{
-		auto encKey = not password.empty() ? DeriveKeyFromPassword(password, profile.auth.salt) : kDefaultAuthKey;
-		return __Authenticate(profile.auth.challenge, profile.auth.salt, encKey, outKey);
+		if (IsValidAuthVersion(profile.version))
+		{
+			auto encKey = not password.empty() ? DeriveKeyFromPassword(password, profile.auth.salt, profile.version) : GetAuthSettings(profile.version).DefaultAuthKey;
+			return __Authenticate(profile.auth.challenge, profile.auth.salt, encKey, outKey);
+		}
+		return false;
 	}
 
-	bool UserManager::Authenticate(const AuthChallenge& challenge, const AuthSalt& salt, const AuthKey& key, AuthKey& outKey)
+	bool UserManager::Authenticate(const AuthChallenge& challenge, const AuthSalt& salt, const AuthKey& key, AuthKey& outKey, AuthVersion version)
 	{
-		auto encKey = DeriveKeyFromBytes(key, salt);
-		return __Authenticate(challenge, salt, encKey, outKey);
+		if (IsValidAuthVersion(version))
+		{
+			auto encKey = DeriveKeyFromBytes(key, salt, version);
+			return __Authenticate(challenge, salt, encKey, outKey);
+		}
+		return false;
 	}
 
 	bool UserManager::SignIn(const fig::string& profileName, const fig::string& password)
@@ -272,24 +271,29 @@ namespace fig::user
 		if (not Authenticate(profile, oldPassword, authKey))
 			return false;
 
-		AuthKey newPasswordKey = not newPassword.empty() ? DeriveKeyFromPassword(newPassword, profile.auth.salt) : kDefaultAuthKey;
-
-		auto newChallenge = CreateAuthChallenge(authKey, profile.auth.salt, newPasswordKey);
+		AuthSalt newSalt = not newPassword.empty() ? RandomSalt() : CurrentDefaultAuthSalt;
+		AuthKey newPasswordKey = not newPassword.empty() ? DeriveKeyFromPassword(newPassword, newSalt) : CurrentDefaultAuthKey;
+		AuthChallenge newChallenge = CreateAuthChallenge(authKey, newSalt, newPasswordKey);
 
 		auto& db = GetDatabase();
 		if (db.UpdateProfile(UserProfile {
-			.id = profile.id,
-			.name = profile.name,
-			.auth = UserAuth {
-				.challenge = newChallenge,
-				.salt = profile.auth.salt,
+			.version { CurrentAuthVersion },
+			.id { profile.id },
+			.name { profile.name },
+			.auth {
+				.challenge { newChallenge },
+				.salt { newSalt },
 			},
 			.recovery = {},
-			.has_password = not newPassword.empty(),
+			.has_password { !newPassword.empty() },
 		}) == DatabaseError::NoError)
 		{
 			// Update local profile
-			profile.auth.challenge = newChallenge;
+			profile.version = CurrentAuthVersion;
+			profile.auth = UserAuth {
+				.challenge = newChallenge,
+				.salt = newSalt,
+			};
 			profile.has_password = not newPassword.empty();
 			return true;
 		}
@@ -348,7 +352,7 @@ namespace fig::user
 			return false;
 
 		auto& salt = profile.auth.salt;
-		recoveryKey = Random128Bits();
+		recoveryKey = RandomKey();
 	
 		AuthKey encKey = DeriveKeyFromBytes(recoveryKey, salt);
 		recoveryChallenge = CreateAuthChallenge(authKey, salt, encKey);
@@ -382,23 +386,25 @@ namespace fig::user
 		if (Authenticate(profile.recovery.challenge, profile.recovery.salt, recoveryKey, authKey))
 		{
 			// Reset password
-			auto newChallenge = CreateAuthChallenge(authKey, kDefaultAuthSalt, kDefaultAuthKey);
+			auto newChallenge = CreateAuthChallenge(authKey, CurrentDefaultAuthSalt, CurrentDefaultAuthKey);
 
 			auto& db = GetDatabase();
 			if (db.UpdateProfile(UserProfile {
-				.id = profile.id,
-				.name = profile.name,
-				.auth = UserAuth {
-					.challenge = newChallenge,
-					.salt = kDefaultAuthSalt,
+				.version { CurrentAuthVersion },
+				.id { profile.id },
+				.name { profile.name },
+				.auth {
+					.challenge { newChallenge },
+					.salt { CurrentDefaultAuthSalt },
 				},
-				.recovery = {},
-				.has_password = false,
+				.recovery {},
+				.has_password {},
 			}) == DatabaseError::NoError)
 			{
 				// Update local profile
+				profile.version = CurrentAuthVersion;
 				profile.auth.challenge = newChallenge;
-				profile.auth.salt = kDefaultAuthSalt;
+				profile.auth.salt = CurrentDefaultAuthSalt;
 				return true;
 			}
 			return false;
@@ -406,10 +412,13 @@ namespace fig::user
 		return false;
 	}
 
-	fig::string UserManager::RecoveryKeyToCode(const AuthKey& key) noexcept
+	fig::string UserManager::RecoveryKeyToCode(const AuthKey& key, AuthVersion version) noexcept
 	{
 		fig::string code;
 		code.reserve(35);
+
+		auto& authSettings = GetAuthSettings(version);
+		auto& recoveryLUT = authSettings.RecoveryKeyLUT;
 
 		char tmp[2] { 'x', 'x' };
 		const uint8_t* pKey = reinterpret_cast<const uint8_t*>(key.data());
@@ -418,7 +427,7 @@ namespace fig::user
 			if (i > 0 and i % 4 == 0)
 				code.append(" ");
 
-			auto& lut = RECOVERY_CODE_LUT[i % size(RECOVERY_CODE_LUT)];
+			auto& lut = recoveryLUT[i % recoveryLUT.size()];
 			assert(lut.size() == 512);
 			std::memcpy(tmp, lut.data() + ptrdiff_t((uint16_t)key[i] * 2), 2uz);
 			code.append(tmp, 2uz);
@@ -426,7 +435,7 @@ namespace fig::user
 		return code;
 	}
 
-	bool UserManager::RecoveryCodeToKey(const fig::string& code, AuthKey& outKey) noexcept
+	bool UserManager::RecoveryCodeToKey(const fig::string& code, AuthKey& outKey, AuthVersion version) noexcept
 	{
 		fig::string formatted = code
 			| std::views::filter([](auto& c) { return std::isalnum((int)c); })
@@ -436,10 +445,14 @@ namespace fig::user
 		if (formatted.size() != sizeof(AuthKey) * 2)
 			return false;
 
+		auto& authSettings = GetAuthSettings(version);
+		auto& recoveryLUT = authSettings.RecoveryKeyLUT;
+
+		static_assert(sizeof(AuthKey) == 16uz);
 		for (size_t i = 0; i < 16uz; ++i)
 		{
 			char ch[2] { formatted[i * 2 + 0], formatted[i * 2 + 1] };
-			auto& lut = RECOVERY_CODE_LUT[i % size(RECOVERY_CODE_LUT)];
+			auto& lut = recoveryLUT[i % recoveryLUT.size()];
 			assert(lut.size() == 512);
 			uint16_t n = 0;
 			while (n < 512 and not (lut[n + 0] == ch[0] and lut[n + 1] == ch[1]))
