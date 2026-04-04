@@ -57,6 +57,7 @@ namespace fig::gui
 		bool OnEvent(Event& event) override;
 		void OnSize() override;
 		void OnPostRender() override;
+		void OnEnabled(bool bEnabled) override;
 
 	private:
 		void Insert(const char* text);

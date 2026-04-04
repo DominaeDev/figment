@@ -10,7 +10,8 @@ namespace fig::gui
 		PasswordBox(LayoutElement* pParent);
 
 	protected:
-		void OnSize();
+		void OnSize() override;
+		void OnEnabled(bool bEnabled) override;
 
 	private:
 		Image* _pIcon;

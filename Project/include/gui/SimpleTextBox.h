@@ -8,5 +8,11 @@ namespace fig::gui
 	{
 	public:
 		SimpleTextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, Flags flags = {});
+
+	protected:
+		void OnEnabled(bool bEnabled) override;
+
+	private:
+		NineGridRenderer* _pTextBoxBG {};
 	};
 }

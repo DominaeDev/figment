@@ -20,4 +20,11 @@ namespace fig::gui
 			_pIcon->CenterVertically();
 		}
 	}
+
+	void PasswordBox::OnEnabled(bool bEnabled)
+	{
+		SimpleTextBox::OnEnabled(bEnabled);
+
+		_pIcon->SetForegroundColor(bEnabled ? Colors::SidePanelForeground : Colors::DisabledForeground);
+	}
 }

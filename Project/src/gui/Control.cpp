@@ -200,7 +200,16 @@ namespace fig::gui
 		if (_bVisible != bVisible)
 		{
 			_bVisible = bVisible;
-			OnVisibility();
+			OnVisibility(_bVisible);
+		}
+	}
+
+	void Control::SetEnabled(bool bEnabled)
+	{ 
+		if (_bEnabled != bEnabled)
+		{
+			_bEnabled = bEnabled;
+			OnEnabled(_bEnabled);
 		}
 	}
 

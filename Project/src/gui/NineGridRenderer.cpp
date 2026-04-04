@@ -30,13 +30,6 @@ namespace fig::gui
 			SDL_SetTextureAlphaMod(_pBGTexture, _bgColor.a);
 			SDL_RenderTexture9Grid(pRenderer, _pBGTexture, nullptr, _cornerPixels[0], _cornerPixels[1], _cornerPixels[2], _cornerPixels[3], _fCornerSize / 20.0f, &expandedRect);
 		}
-
-		if (_pBorderTexture)
-		{
-			SDL_SetTextureColorMod(_pBorderTexture, _borderColor.r, _borderColor.g, _borderColor.b);
-			SDL_SetTextureAlphaMod(_pBorderTexture, _borderColor.a);
-			SDL_RenderTexture9Grid(pRenderer, _pBorderTexture, nullptr, _cornerPixels[0], _cornerPixels[1], _cornerPixels[2], _cornerPixels[3], _fCornerSize / 20.0f, &expandedRect);
-		}
 	}
 
 	void NineGridRenderer::SetColor(Color bgColor)

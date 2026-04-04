@@ -123,6 +123,9 @@ namespace fig::gui
 		_currentProfileId = profile.id;
 		_pProfileName->SetText(profile.name);
 
+		_pPassword->Clear();
+		_pPassword->SetEnabled(profile.has_password);
+
 		if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
 			_pProfileImage->SetTexture(pTexture, AppResources::GetTexture(TextureType::CIRCLE_MASK));
 		else

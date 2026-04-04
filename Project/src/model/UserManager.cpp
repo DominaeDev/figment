@@ -16,6 +16,7 @@
 #include "fs/AssetFileReader.h"
 #include "model/AssetManager.h"
 #include "model/GlobalStrings.h"
+#include "model/AppState.h"
 #include "util/RecoverCodeLUT.h"
 
 using namespace fig::io;
@@ -220,7 +221,11 @@ namespace fig::user
 
 	bool UserManager::SignInDefaultProfile()
 	{
-		return SignIn(fig::string(fig::strings::UserProfile::DefaultUser), "");
+		if (_profiles.empty())
+			return false;
+		if (auto lastProfile = GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)); lastProfile.has_value() and not lastProfile.value().get().has_password)
+			return SignIn(lastProfile.value(), "");
+		return SignIn(_profiles.front(), "");
 	}
 
 	bool UserManager::SignOut()
@@ -280,10 +285,12 @@ namespace fig::user
 				.salt = profile.auth.salt,
 			},
 			.recovery = {},
+			.has_password = not newPassword.empty(),
 		}) == DatabaseError::NoError)
 		{
 			// Update local profile
 			profile.auth.challenge = newChallenge;
+			profile.has_password = not newPassword.empty();
 			return true;
 		}
 		return false;
@@ -297,9 +304,16 @@ namespace fig::user
 		return std::cref(*_signedInProfile);
 	}
 
-	std::optional<UserProfileCRef> UserManager::GetProfile(const fig::uuid& id) const noexcept
+	std::optional<UserProfileRef> UserManager::GetProfile(const fig::uuid& id) noexcept
 	{
 		if (auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&id](const UserProfile& profile) { return profile.id == id; }); itProfile != _profiles.end())
+			return std::ref(*itProfile);
+		return std::nullopt;
+	}
+
+	std::optional<UserProfileCRef> UserManager::GetProfile(const fig::uuid& id) const noexcept
+	{
+		if (auto itProfile = std::find_if(_profiles.cbegin(), _profiles.cend(), [&id](const UserProfile& profile) { return profile.id == id; }); itProfile != _profiles.end())
 			return std::cref(*itProfile);
 		return std::nullopt;
 	}
@@ -379,7 +393,8 @@ namespace fig::user
 					.salt = kDefaultAuthSalt,
 				},
 				.recovery = {},
-				}) == DatabaseError::NoError)
+				.has_password = false,
+			}) == DatabaseError::NoError)
 			{
 				// Update local profile
 				profile.auth.challenge = newChallenge;

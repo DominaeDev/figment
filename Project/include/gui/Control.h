@@ -19,16 +19,17 @@ namespace fig::gui
 
 		Color GetForegroundColor() const;
 		Color GetBackgroundColor() const;
-		bool GetClipping() const { return _bClipping; }
+		inline bool GetClipping() const { return _bClipping; }
 		virtual void SetForegroundColor(Color color) { _foregroundColor = color; }
 		virtual void SetBackgroundColor(Color color) { _backgroundColor = color; }
-		void SetBorderColor(Color color) { _borderColor = color; }
-		void EnableClipping(bool bEnable) { _bClipping = bEnable; }
-		void EnableCulling(bool bEnable) { _bCulling = bEnable; }
+		inline void SetBorderColor(Color color) noexcept { _borderColor = color; }
+		inline void EnableClipping(bool bEnable) noexcept { _bClipping = bEnable; }
+		inline void EnableCulling(bool bEnable) noexcept { _bCulling = bEnable; }
 
-		bool GetVisible() { return _bVisible; }
+		bool GetVisible() const noexcept { return _bVisible; }
 		void SetVisible(bool bVisible);
-
+		bool GetEnabled() const { return _bEnabled; }
+		void SetEnabled(bool bEnabled);
 		bool ProcessEvent(Event& event);
 
 		void SetBackgroundRenderer(CustomRenderer* pCustom);
@@ -49,7 +50,8 @@ namespace fig::gui
 	protected:
 		virtual void OnRender(Renderer* pRenderer);
 		virtual void OnPostRender() {};
-		virtual void OnVisibility() {};
+		virtual void OnVisibility(bool bVisible) {};
+		virtual void OnEnabled(bool bEnabled) {};
 		virtual void OnParent();
 		virtual bool OnEvent(Event& event) { return false; }
 
@@ -70,6 +72,7 @@ namespace fig::gui
 		bool _bClipping = false;
 		bool _bCulling = false;
 		bool _bVisible = true;
+		bool _bEnabled = true;
 
 		// Theming
 		CustomRenderer* _pBGRenderer = nullptr;

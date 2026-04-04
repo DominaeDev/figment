@@ -10,12 +10,12 @@ namespace fig::gui
 		if (_pFont)
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
 		
-		auto pTextBoxBG = new NineGridRenderer(8);
-		pTextBoxBG->SetCornerSize(20.0f);
-		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Colors::White);
-		pTextBoxBG->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND));
-		SetBackgroundRenderer(pTextBoxBG);
+		_pTextBoxBG = new NineGridRenderer(8);
+		_pTextBoxBG->SetCornerSize(20.0f);
+		_pTextBoxBG->SetExtend(0.0f);
+		_pTextBoxBG->SetColor(Colors::White);
+		_pTextBoxBG->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND));
+		SetBackgroundRenderer(_pTextBoxBG);
 
 		auto pTextBoxBorder = new NineGridRenderer(8);
 		pTextBoxBorder->SetCornerSize(20.0f);
@@ -23,5 +23,11 @@ namespace fig::gui
 		pTextBoxBorder->SetColor(Color { 0x61, 0x5a, 0x35, 0xFF });
 		pTextBoxBorder->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BORDER));
 		SetBorderRenderer(pTextBoxBorder);
+	}
+
+	void SimpleTextBox::OnEnabled(bool bEnabled)
+	{
+		TextBox::OnEnabled(bEnabled);
+		_pTextBoxBG->SetColor(bEnabled ? Colors::White : Colors::DisabledBackground);
 	}
 }

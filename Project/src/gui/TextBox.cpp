@@ -16,11 +16,8 @@ static int UTF8ByteLength(const char* text, int num_codepoints)
 	const char* start = text;
 	while (num_codepoints > 0)
 	{
-		Uint32 ch = SDL_StepUTF8(&text, NULL);
-		if (ch == 0)
-		{
+		if (SDL_StepUTF8(&text, NULL) == 0)
 			break;
-		}
 		--num_codepoints;
 	}
 	return (int)(uintptr_t)(text - start);
@@ -553,6 +550,7 @@ namespace fig::gui
 
 	void TextBox::SetFocus(bool focus)
 	{
+		focus &= GetEnabled();
 		if (_bFocused == focus)
 			return;
 
@@ -1300,6 +1298,9 @@ namespace fig::gui
 		bool bModCtrlShift	= bCtrl and bShift and not bAlt;
 		bool bModNone		= not (bCtrl or bShift or bAlt);
 
+		if (not GetEnabled())
+			return false; // Disabled
+
 		switch (event.type)
 		{
 
@@ -1791,5 +1792,19 @@ namespace fig::gui
 	{
 		if (_pOnChanged and _pText)
 			_pOnChanged(_pText->text ? _pText->text : "");
+	}
+
+	void TextBox::OnEnabled(bool bEnabled)
+	{
+		if (not bEnabled)
+		{
+			SetFocus(false);
+			Deselect();
+			SetForegroundColor(Colors::DisabledForeground);
+		}
+		else
+		{
+			SetForegroundColor(Colors::Black);
+		}
 	}
 }

@@ -19,6 +19,7 @@ namespace fig::user
 
 		bool LoadProfiles();
 		std::optional<UserProfileCRef> GetProfile(const fig::uuid& id) const noexcept;
+		std::optional<UserProfileRef> GetProfile(const fig::uuid& id) noexcept;
 		const std::vector<UserProfile>& GetProfiles() const noexcept { return _profiles; };
 		std::optional<UserProfileCRef> CreateDefaultProfile();
 		std::optional<UserProfileCRef> CreateProfile(const fig::string& profileName, const fig::string& password);

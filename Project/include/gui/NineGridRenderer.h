@@ -22,8 +22,6 @@ namespace fig::gui
 		float _fCornerSize = 20.0f;
 		float _fExtend = 0.0f;
 		Color _bgColor {};
-		Color _borderColor {};
 		Texture* _pBGTexture = nullptr;
-		Texture* _pBorderTexture = nullptr;
 	};
 }

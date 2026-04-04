@@ -39,6 +39,9 @@ namespace fig::gui
 		inline constexpr Color TextSelectionForeground	{ 0xFFFFFF };
 		inline constexpr Color TextSelectionBackground	{ 0x99C9EF };
 		inline constexpr Color AppBackground			{ 0xfaf9f5 };
+		
+		inline constexpr Color DisabledForeground		{ 0x808080 };
+		inline constexpr Color DisabledBackground		{ 0xe0e0e0 };
 
 		inline constexpr Color SidePanelForeground		{ 0x4e4431 };
 		inline constexpr Color SidePanelBackground		{ 0xEEECE4 };
