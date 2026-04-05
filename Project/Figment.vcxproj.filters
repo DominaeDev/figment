@@ -84,9 +84,6 @@
     <Filter Include="Source Files\Frontend\GUI\Layout">
       <UniqueIdentifier>{57755d10-8ebb-4dcb-baad-ffe8cd25fd40}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Theme">
-      <UniqueIdentifier>{a26ce618-0289-4dc6-9946-60431dc87d8b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\GUI\Resources">
       <UniqueIdentifier>{a03df242-3861-42f9-a5a1-d305c5eef703}</UniqueIdentifier>
     </Filter>
@@ -144,6 +141,9 @@
     <Filter Include="Source Files\Frontend\GUI\Layout\Sizers">
       <UniqueIdentifier>{5337a1e9-0b3d-42e9-bfb3-81797c6ee036}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Renderers">
+      <UniqueIdentifier>{9af3d36f-c958-412c-be51-1004c096af49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -184,9 +184,6 @@
     </ClCompile>
     <ClCompile Include="src\util\StringUtility.cpp">
       <Filter>Source Files\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\RoundedBorderRenderer.cpp">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Frame.cpp">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
@@ -422,15 +419,6 @@
     <ClCompile Include="src\util\SearchIndex.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\RoundedFillRenderer.cpp">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\NineGridRenderer.cpp">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\SolidFillRenderer.cpp">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\SidePanelButton.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
@@ -485,6 +473,18 @@
     <ClCompile Include="src\gui\ButtonWithLabel.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\TexturedBorderRenderer.cpp">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\RoundedBorderRenderer.cpp">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\RoundedFillRenderer.cpp">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\SolidFillRenderer.cpp">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -504,12 +504,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\StatusBar.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CustomRenderer.h">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\RoundedBorderRenderer.h">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Frame.h">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
@@ -621,9 +615,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\Window.h">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CustomRenderers.h">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Fonts.h">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
@@ -1084,15 +1075,6 @@
     <ClInclude Include="include\util\SearchIndex.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\RoundedFillRenderer.h">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\NineGridRenderer.h">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\SolidFillRenderer.h">
-      <Filter>Source Files\Frontend\GUI\Theme</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\ButtonWithIcon.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
@@ -1155,6 +1137,24 @@
     </ClInclude>
     <ClInclude Include="include\gui\ButtonWithLabel.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CustomRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CustomRenderers.h">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TexturedBorderRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\RoundedBorderRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\RoundedFillRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\SolidFillRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

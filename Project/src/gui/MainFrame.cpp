@@ -29,7 +29,7 @@ namespace fig::gui
 		mainSizer->Add(_pMainArea, -1, Sizer::Fill);
 
 		auto topSizer = new VerticalSizer();
-		topSizer->AddSizer(mainSizer, -1, Sizer::Expand);
+		topSizer->Add(mainSizer, -1, Sizer::Expand);
 		topSizer->Add(_pStatusBar, 0, Sizer::Expand);
 
 		SetSizer(topSizer);

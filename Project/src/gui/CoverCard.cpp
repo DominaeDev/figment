@@ -192,7 +192,7 @@ namespace fig::gui
 
 		if (!flt_eq(_fHoverZoom, _fTargetZoom))
 		{
-			constexpr float ZoomAmount = 12.0f;
+			constexpr float ZoomAmount = 18.0f;
 			constexpr float ZoomSmoothing = 8.0f;
 
 			_fHoverZoom = std::clamp(_fHoverZoom + (_fTargetZoom - _fHoverZoom) * ZoomSmoothing * fElapsed, 0.0f, 1.0f);

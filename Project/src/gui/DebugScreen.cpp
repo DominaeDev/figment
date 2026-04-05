@@ -42,7 +42,6 @@ namespace fig::gui
 		h->Add(c, -1, Sizer::AlignLeft | Sizer::AlignBottom, 4);
 
 		auto sizer = new VerticalSizer();
-		sizer->AddSizer(new HorizontalSizer(), 0, Sizer::FixedSize, 160);
 		sizer->Add(left, -1, Sizer::AlignRight | Sizer::AlignCenterVertical);
 		sizer->AddSpacer(4);
 		sizer->Add(center, -1, Sizer::Fill);

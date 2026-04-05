@@ -1,14 +1,13 @@
 #include <pch.h>
 #include "gui/ButtonWithIcon.h"
-#include "gui/NineGridRenderer.h"
+#include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
 {
 	ButtonWithIcon::ButtonWithIcon(LayoutElement* pParent, TextureType icon) : ThemedButton(pParent)
 	{
-		_pBGRenderer = new NineGridRenderer(8);
-		_pBGRenderer->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND));
+		_pBGRenderer = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND, 8);
 		_pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundRenderer(_pBGRenderer);
 

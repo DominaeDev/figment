@@ -7,7 +7,7 @@
 
 namespace fig::gui
 {
-	class NineGridRenderer;
+	class TexturedBorderRenderer;
 	class TexturedBorder;
 
 	class ButtonWithLabel : public ThemedButton
@@ -21,7 +21,7 @@ namespace fig::gui
 		void OnButtonState() override;
 
 	private:
-		NineGridRenderer* _pBGRenderer;
+		TexturedBorderRenderer* _pBGRenderer;
 		StaticText* _pLabel {};
 		TexturedBorder* _pBorder {};
 	};

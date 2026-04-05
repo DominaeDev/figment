@@ -232,7 +232,7 @@
     <ClCompile Include="src\gui\HorizontalSizer.cpp" />
     <ClCompile Include="src\llm\LLMInstance.cpp" />
     <ClCompile Include="src\gui\LayoutElement.cpp" />
-    <ClCompile Include="src\gui\NineGridRenderer.cpp" />
+    <ClCompile Include="src\gui\TexturedBorderRenderer.cpp" />
     <ClCompile Include="src\gui\RoundedFillRenderer.cpp" />
     <ClCompile Include="src\gui\RoundedBorderRenderer.cpp" />
     <ClCompile Include="src\gui\Sizer.cpp" />
@@ -465,7 +465,7 @@
     <ClInclude Include="include\gui\IUpdateable.h" />
     <ClInclude Include="include\gui\LayoutElement.h" />
     <ClInclude Include="include\llm\LLMUtility.h" />
-    <ClInclude Include="include\gui\NineGridRenderer.h" />
+    <ClInclude Include="include\gui\TexturedBorderRenderer.h" />
     <ClInclude Include="include\gui\CustomRenderers.h" />
     <ClInclude Include="include\gui\RoundedFillRenderer.h" />
     <ClInclude Include="include\gui\RoundedBorderRenderer.h" />

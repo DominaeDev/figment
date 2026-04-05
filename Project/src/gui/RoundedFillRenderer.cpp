@@ -3,9 +3,8 @@
 
 namespace fig::gui
 {
-	RoundedFillRenderer::RoundedFillRenderer(float radius, Color color) :
-		_radius(radius),
-		_color(color)
+	RoundedFillRenderer::RoundedFillRenderer(float radius, Color color) : CustomRenderer(color),
+		_radius(radius)
 	{
 	}
 
@@ -15,11 +14,6 @@ namespace fig::gui
 			RefreshGeometry(rect);
 
 		SDL_RenderGeometry(pRenderer, nullptr, _vertices.data(), toI(_vertices.size()), _indices.data(), toI(_indices.size()));
-	}
-
-	void RoundedFillRenderer::SetColor(Color color)
-	{
-		_color = color;
 	}
 
 #define CORNER_TRIANGLES 2

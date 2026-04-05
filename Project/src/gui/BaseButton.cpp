@@ -76,7 +76,7 @@ namespace fig::gui
 				if (_bMouseDown and !mouseEvent.down and _fn)
 					_fn(); // Click!
 
-				SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Hover);
+				SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Default);
 				_bMouseDown = mouseEvent.down;
 				_bMouseInside = false;
 

@@ -4,10 +4,9 @@
 
 namespace fig::gui
 {
-	RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, Color color) :
+	RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, Color color) : CustomRenderer(color),
 		_thickness(thickness),
-		_radius(radius),
-		_color(color)
+		_radius(radius)
 	{
 		_pTexture = AppResources::GetTexture(TextureType::BORDER);
 	}
@@ -18,11 +17,6 @@ namespace fig::gui
 			RefreshGeometry(rect);
 
 		SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), _indices.data(), toI(_indices.size()));
-	}
-
-	void RoundedBorderRenderer::SetColor(Color color)
-	{
-		_color = color;
 	}
 
 #define CORNER_TRIANGLES 8

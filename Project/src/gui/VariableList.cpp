@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/VariableList.h"
 #include "gui/StaticText.h"
-#include "gui/NineGridRenderer.h"
+#include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 #include "Constants.h"
 #include "util/StringUtility.h"
@@ -14,17 +14,15 @@ constexpr Coord Margin = 8;
 
 VariableList::VariableList(LayoutElement* pParent) : Control(pParent)
 {
-	auto pBG = new NineGridRenderer({ 30, 72, 64, 30 });
-	pBG->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG));
+	auto pBG = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_CENTER_BG , { 30, 72, 64, 30 });
 	pBG->SetColor(Colors::MessageBackgroundDefault);
-	pBG->SetCornerSize(6);
+	pBG->SetCornerScale(0.3f);
 	pBG->SetExtend(5);
 	SetBackgroundRenderer(pBG);
 
-	auto pBorder = new NineGridRenderer({ 30, 72, 64, 30 });
-	pBorder->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
+	auto pBorder = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_CENTER_BORDER, { 30, 72, 64, 30 });
 	pBorder->SetColor(Colors::MessageBorderDefault);
-	pBorder->SetCornerSize(6);
+	pBorder->SetCornerScale(0.3f);
 	pBorder->SetExtend(5);
 	SetBorderRenderer(pBorder);
 

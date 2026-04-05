@@ -91,28 +91,22 @@ namespace fig::gui
 		{
 			if (bRight)
 			{
-				_pSpeechBubbleBG = new NineGridRenderer({ 30, 72, 64, 30 });
-				_pSpeechBubbleBorder = new NineGridRenderer({ 30, 72, 64, 30 });
-				_pSpeechBubbleBG->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BG));
-				_pSpeechBubbleBorder->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_RIGHT_BORDER));
+				_pSpeechBubbleBG = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_RIGHT_BG , { 30, 72, 64, 30 });
+				_pSpeechBubbleBorder = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_RIGHT_BORDER , { 30, 72, 64, 30 });
 			}
 			else
 			{
-				_pSpeechBubbleBG = new NineGridRenderer({ 72, 30, 64, 30 });
-				_pSpeechBubbleBorder = new NineGridRenderer({ 72, 30, 64, 30 });
-				_pSpeechBubbleBG->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BG));
-				_pSpeechBubbleBorder->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_LEFT_BORDER));
+				_pSpeechBubbleBG = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_LEFT_BG , { 72, 30, 64, 30 });
+				_pSpeechBubbleBorder = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_LEFT_BORDER , { 72, 30, 64, 30 });
 			}
 		}
 		else
 		{
-			_pSpeechBubbleBG = new NineGridRenderer({ 30, 30, 64, 30 });
-			_pSpeechBubbleBorder = new NineGridRenderer({ 30, 30, 64, 30 });
-			_pSpeechBubbleBG->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BG));
-			_pSpeechBubbleBorder->SetTexture(AppResources::GetTexture(TextureType::SPEECH_BUBBLE_CENTER_BORDER));
+			_pSpeechBubbleBG = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_CENTER_BG , { 30, 30, 64, 30 });
+			_pSpeechBubbleBorder = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_CENTER_BORDER , { 30, 30, 64, 30 });
 		}
-		_pSpeechBubbleBG->SetCornerSize(7.0f);
-		_pSpeechBubbleBorder->SetCornerSize(7.0f);
+		_pSpeechBubbleBG->SetCornerScale(0.35f);
+		_pSpeechBubbleBorder->SetCornerScale(0.35f);
 		_pSpeechBubbleBG->SetExtend(5.0f);
 		_pSpeechBubbleBorder->SetExtend(5.0f);
 

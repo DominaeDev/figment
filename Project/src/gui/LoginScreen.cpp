@@ -83,7 +83,7 @@ namespace fig::gui
 
 		auto pCenterSizer = new VerticalSizer();
 		pCenter->SetSizer(pCenterSizer);
-		pCenterSizer->AddSizer(pProfileImageSizer, 0, Sizer::FixedSize, 160);
+		pCenterSizer->Add(pProfileImageSizer, 0, Sizer::FixedSize, 160);
 		pCenterSizer->AddSpacer(4);
 		pCenterSizer->Add(_pProfileName, 0, Sizer::Expand | Sizer::FixedSize, 24);
 		pCenterSizer->AddSpacer(28);

@@ -8,15 +8,13 @@ namespace fig::gui
 	class RoundedBorderRenderer : public CustomRenderer
 	{
 	public:
-		RoundedBorderRenderer(float radius, float thickness, Color color);
+		explicit RoundedBorderRenderer(float radius, float thickness, Color color = Colors::White);
 
 		void Render(Renderer* pRenderer, Rectf rect);
-		void SetColor(Color color);
 
 	private:
 		void RefreshGeometry(Rectf rect);
 
-		Color _color {};
 		Rectf _lastRect {};
 		Texture* _pTexture = nullptr;
 		float _thickness = 0;

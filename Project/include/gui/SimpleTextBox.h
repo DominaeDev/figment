@@ -13,6 +13,6 @@ namespace fig::gui
 		void OnEnabled(bool bEnabled) override;
 
 	private:
-		NineGridRenderer* _pTextBoxBG {};
+		TexturedBorderRenderer* _pTextBoxBG {};
 	};
 }

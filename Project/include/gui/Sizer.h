@@ -39,7 +39,7 @@ namespace fig::gui
 		virtual ~Sizer();
 
 		void Add(LayoutElement* pControl, int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0);
-		void AddSizer(Sizer* pControl, int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0);
+		void Add(Sizer* pControl, int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0);
 		void AddSpacer(Coord size);
 		void AddStretchSpacer();
 		void Remove(LayoutElement* pControl);
@@ -61,18 +61,18 @@ namespace fig::gui
 
 		using ControlPtr = LayoutElement*;
 		using SizerPtr = Sizer*;
-		using Empty = std::monostate;
-		using LayoutTarget = std::variant<Empty, ControlPtr, SizerPtr>;
+		using EmptyTarget = std::monostate;
+		using SizerTarget = std::variant<EmptyTarget, ControlPtr, SizerPtr>;
 
-		struct LayoutItem
+		struct SizerItem
 		{
 			LayoutProperties info {};
-			LayoutTarget pControl { Empty {} };
+			SizerTarget target { EmptyTarget {} };
 			Rect rect {};
 
 			ControlPtr GetControl() const
 			{
-				if (auto ppCtrl = std::get_if<ControlPtr>(&pControl); ppCtrl)
+				if (auto ppCtrl = std::get_if<ControlPtr>(&target); ppCtrl)
 					return *ppCtrl;
 				return nullptr;
 			};
@@ -84,8 +84,8 @@ namespace fig::gui
 		auto GetLayoutItems() noexcept
 		{
 			return _items
-				| std::views::filter([](auto& i) { 
-					if (auto ppCtrl = std::get_if<ControlPtr>(&i.pControl); ppCtrl)
+				| std::views::filter([](auto& it) { 
+					if (auto ppCtrl = std::get_if<ControlPtr>(&it.target); ppCtrl)
 						return (*ppCtrl)->IsLayoutEnabled();
 					return true;
 				});
@@ -95,7 +95,7 @@ namespace fig::gui
 		void Update(float fElapsed) override {};
 	
 	private:
-		std::vector<LayoutItem> _items;
+		std::vector<SizerItem> _items;
 		std::vector<std::unique_ptr<LayoutElement>> _dummies;
 	};
 }

@@ -1,16 +1,16 @@
 #include <pch.h>
 #include "gui/SidePanelButton.h"
-#include "gui/NineGridRenderer.h"
+#include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
 {
 	SidePanelButton::SidePanelButton(LayoutElement* pParent, TextureType icon, const fig::string& label) : ThemedButton(pParent)
 	{
-		_pBGRenderer = new NineGridRenderer(8);
-		_pBGRenderer->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND));
-		_pBGRenderer->SetColor(GetThemeBackground());
-		SetBackgroundRenderer(_pBGRenderer);
+		auto pBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND, 8);
+		pBorder->SetColor(GetThemeBackground());
+		SetBackgroundRenderer(pBorder);
+		_pBorder = pBorder;
 
 		_pIcon = new Image(this, AppResources::GetTexture(icon));
 		_pIcon->SetForegroundColor(GetThemeForeground());
@@ -35,7 +35,7 @@ namespace fig::gui
 
 	void SidePanelButton::OnButtonState()
 	{
-		_pBGRenderer->SetColor(GetThemeBackground());
+		_pBorder->SetColor(GetThemeBackground());
 		_pIcon->SetForegroundColor(GetThemeForeground());
 	}
 }

@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "gui/ButtonWithLabel.h"
-#include "gui/NineGridRenderer.h"
+#include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 #include "gui/TexturedBorder.h"
 
@@ -10,8 +10,7 @@ namespace fig::gui
 	{
 		SetSize(200, 36);
 
-		_pBGRenderer = new NineGridRenderer(8);
-		_pBGRenderer->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND));
+		_pBGRenderer = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND, 8);
 		_pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundRenderer(_pBGRenderer);
 		SetBackgroundColor(GetThemeBackground());

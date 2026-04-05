@@ -97,19 +97,19 @@ namespace fig::gui
 
 		_pTextBox->SetEnterPressedCallback([this](fig::string text) {
 			EnqueueCommand(ChatCommands::Parse(text));
+			_pTextBox->Clear();
 		});
 
-		auto pTextBoxBG = new NineGridRenderer();
-		pTextBoxBG->SetCornerSize(10.0f);
-		pTextBoxBG->SetExtend(5.0f);
+		auto pTextBoxBG = new TexturedBorderRenderer(TextureType::TEXTBOX_BG);
+		pTextBoxBG->SetCornerScale(0.5f);
+		pTextBoxBG->SetExtend(7.0f);
 		pTextBoxBG->SetColor(Colors::White);
-		pTextBoxBG->SetTexture(AppResources::GetTexture(TextureType::TEXTBOX_BG));
 		_pTextBox->SetBackgroundRenderer(pTextBoxBG);
-		auto pTextBoxBorder = new NineGridRenderer();
-		pTextBoxBorder->SetCornerSize(10.0f);
-		pTextBoxBorder->SetExtend(5.0f);
+
+		auto pTextBoxBorder = new TexturedBorderRenderer(TextureType::TEXTBOX_BORDER);
+		pTextBoxBorder->SetCornerScale(0.5f);
+		pTextBoxBorder->SetExtend(7.0f);
 		pTextBoxBorder->SetColor(Color { 0xb9, 0xb2, 0x8f, 0xFF });
-		pTextBoxBorder->SetTexture(AppResources::GetTexture(TextureType::TEXTBOX_BORDER));
 		_pTextBox->SetBorderRenderer(pTextBoxBorder);
 
 		_pTextBox->SetFocus(true);

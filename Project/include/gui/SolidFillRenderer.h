@@ -8,12 +8,8 @@ namespace fig::gui
 	class SolidFillRenderer : public CustomRenderer
 	{
 	public:
-		SolidFillRenderer(Color color);
+		explicit SolidFillRenderer(Color color = Colors::White);
 
 		void Render(Renderer* pRenderer, Rectf rect);
-		void SetColor(Color color);
-
-	private:
-		Color _color {};
 	};
 }

@@ -16,18 +16,14 @@ namespace fig::gui
 		_pIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_SEARCH));
 		_pIcon->SetForegroundColor(Colors::SidePanelForeground);
 
-		auto pTextBoxBG = new NineGridRenderer(8);
-		pTextBoxBG->SetCornerSize(20.0f);
+		auto pTextBoxBG = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND, 8);
 		pTextBoxBG->SetExtend(0.0f);
 		pTextBoxBG->SetColor(Colors::White);
-		pTextBoxBG->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND));
 		SetBackgroundRenderer(pTextBoxBG);
 
-		auto pTextBoxBorder = new NineGridRenderer(8);
-		pTextBoxBorder->SetCornerSize(20.0f);
+		auto pTextBoxBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BORDER, 8);
 		pTextBoxBorder->SetExtend(0.0f);
 		pTextBoxBorder->SetColor(Colors::SidePanelForeground);
-		pTextBoxBorder->SetTexture(AppResources::GetTexture(TextureType::ROUNDED_BORDER));
 		SetBorderRenderer(pTextBoxBorder);
 	}
 
