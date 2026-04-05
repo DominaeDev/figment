@@ -53,33 +53,33 @@ namespace fig::gui
 {
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
-		auto leftPanel = new Area(this);
-		leftPanel->SetSize(200, -1);
+		auto leftArea = new Area(this);
+		leftArea->SetSize(200, -1);
 
-		auto pExpandButton = new ButtonWithIcon(leftPanel, TextureType::ICON_SIDEBAR);
+		auto pExpandButton = new ButtonWithIcon(leftArea, TextureType::ICON_SIDEBAR);
 		pExpandButton->SetSize(36, 36);
 		pExpandButton->SetPosition(4, 6);
 		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
 		_pExpandButton = pExpandButton;
 
-		auto centerPanel = new Area(this);
-		centerPanel->SetBackgroundColor(Colors::ChatBackground);
-		centerPanel->SetSize(Constants::GUI::ChatScrollWidth, -1);
+		auto centerArea = new Area(this);
+		centerArea->SetBackgroundColor(Colors::ChatBackground);
+		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
-		auto rightPanel = new Area(this);
-		rightPanel->SetSize(200, -1);
-		rightPanel->SetMinSize(200, -1);
+		auto rightArea = new Area(this);
+		rightArea->SetSize(200, -1);
+		rightArea->SetMinSize(200, -1);
 
-		auto pStaticText = new StaticText(centerPanel, "", FontFace::Default, Constants::GUI::DefaultFontSize);
+		auto pStaticText = new StaticText(centerArea, "", FontFace::Default, Constants::GUI::DefaultFontSize);
 		pStaticText->SetAlignment(TextAlignment::Middle_Center);
 		pStaticText->SetSize(80, 80);
 		pStaticText->SetMinSize(-1, 80);
 		pStaticText->SetBackgroundColor(Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
 		pStaticText->SetVisible(false);
 
-		_pChatScroll = new ChatScroll(centerPanel);
+		_pChatScroll = new ChatScroll(centerArea);
 
-		_pTextBox = new TextBox(centerPanel, FontFace::Default, Constants::GUI::DefaultFontSize, { TextBox::Flag::Multi, TextBox::Flag::Autosize });
+		_pTextBox = new TextBox(centerArea, FontFace::Default, Constants::GUI::DefaultFontSize, { TextBox::Flag::Multi, TextBox::Flag::Autosize });
 		_pTextBox->SetSize(Constants::GUI::ChatTextBoxWidth, 88);
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);
@@ -87,12 +87,12 @@ namespace fig::gui
 		auto pCenterSizer = new VerticalSizer();
 		pCenterSizer->Add(_pChatScroll, -1, Sizer::Fill | Sizer::Bottom, 8);
 		pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::AlignCenterHorizontal);
-		centerPanel->SetSizer(pCenterSizer);
+		centerArea->SetSizer(pCenterSizer);
 
 		auto mainSizer = new HorizontalSizer();
-		mainSizer->Add(leftPanel, -1, Sizer::Expand);
-		mainSizer->Add(centerPanel, 0, Sizer::Fill | Sizer::Bottom, 24);
-		mainSizer->Add(rightPanel, -1, Sizer::Expand);
+		mainSizer->Add(leftArea, -1, Sizer::Expand);
+		mainSizer->Add(centerArea, 0, Sizer::Fill | Sizer::Bottom, 24);
+		mainSizer->Add(rightArea, -1, Sizer::Expand);
 		SetSizer(mainSizer);
 
 		_pTextBox->SetEnterPressedCallback([this](fig::string text) {

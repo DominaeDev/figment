@@ -26,7 +26,7 @@ namespace fig::gui
 
 		auto mainSizer = new HorizontalSizer();
 		mainSizer->Add(_pSidePanel, 0, Sizer::Expand);
-		mainSizer->Add(_pMainArea, -1, Sizer::Expand);
+		mainSizer->Add(_pMainArea, -1, Sizer::Fill);
 
 		auto topSizer = new VerticalSizer();
 		topSizer->AddSizer(mainSizer, -1, Sizer::Expand);
@@ -220,7 +220,7 @@ namespace fig::gui
 		_pMainArea->AddChild(_pActiveScreen);
 		
 		auto sizer = new VerticalSizer();
-		sizer->Add(_pActiveScreen, -1, Sizer::Expand);
+		sizer->Add(_pActiveScreen, -1, Sizer::Fill);
 		_pMainArea->SetSizer(sizer);
 
 		_pActiveScreen->SetVisible(true);

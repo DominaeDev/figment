@@ -102,15 +102,13 @@ namespace fig::gui
 	{
 		OnLayout(parentRect);
 
-		// Update childen
 		for (auto& li : _items)
 		{
 			if (auto pp = std::get_if<LayoutElement*>(&li.pControl))
-				(*pp)->Layout(&li.rect);
+				(*pp)->Layout();
 			else if (auto pp = std::get_if<Sizer*>(&li.pControl))
 				(*pp)->Layout(li.rect);
 		}
-
 	}
 
 	void Sizer::Clear()

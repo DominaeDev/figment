@@ -77,7 +77,7 @@ namespace fig::gui
 		void SetParent(LayoutElement* pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
 		Sizer* const GetSizer() const { return _pSizer.get(); }
-		void Layout(const Rect* const pRect = nullptr);
+		void Layout();
 
 		virtual void OnUpdate(float fElapsed) {};
 		virtual void OnParent() {};

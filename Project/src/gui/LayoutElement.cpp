@@ -25,21 +25,17 @@ namespace fig::gui
 			child->Update(fElapsed);
 	}
 
-	void LayoutElement::Layout(const Rect* const pRect)
+	void LayoutElement::Layout()
 	{
-		if (not _bLayoutEnabled or _bCulled)
+		if (not (_bInvalidLayout or _bLayoutEnabled) or _bCulled)
 			return;
 		
-		bool bLayout = _bInvalidLayout;
-		_bInvalidLayout = false;
-
-		if (bLayout and _pSizer)
-			_pSizer->Layout(pRect ? *pRect : GetRect());
-		
-		if (bLayout)
+		if (_pSizer)
 		{
+			_pSizer->Layout(GetRect());
 			OnAfterLayout();
 		}
+		_bInvalidLayout = false;
 	}
 
 	void LayoutElement::LayoutNow()

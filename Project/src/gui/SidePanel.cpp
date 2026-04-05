@@ -83,7 +83,7 @@ namespace fig::gui
 		
 		auto pTopSizer = new VerticalSizer();
 		pTopSizer->Add(pHeaderPanel, 0, Sizer::Expand);
-		pTopSizer->Add(pMainArea, -1, Sizer::Expand);
+		pTopSizer->Add(pMainArea, -1, Sizer::Fill);
 		pTopSizer->Add(pFooterPanel, 0, Sizer::Expand);
 		
 		SetSizer(pTopSizer);
