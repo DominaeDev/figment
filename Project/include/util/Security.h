@@ -53,7 +53,7 @@ namespace fig::auth
 		AuthKey DefaultAuthKey {};
 		AuthSalt DefaultAuthSalt {};
 		KDFInfo KDF {};
-		std::array<std::string_view, 8> RecoveryKeyLUT {};
+		std::array<fig::string_view, 8> RecoveryKeyLUT {};
 		size_t RecoveryKeyLUTLength {};
 	};
 

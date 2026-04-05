@@ -482,6 +482,9 @@
     <ClCompile Include="src\gui\CardImage.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ButtonWithLabel.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1048,9 +1051,6 @@
     <ClInclude Include="include\model\ContentDatabase.h">
       <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\RecoverCodeLUT.h">
-      <Filter>Source Files\Frontend\User</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\CoverCard.h">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
     </ClInclude>
@@ -1151,6 +1151,9 @@
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CardImage.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ButtonWithLabel.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>

@@ -134,7 +134,7 @@ namespace fig::io
 			int recovery_size = sqlite3_column_bytes(stmt, 6);
 
 			fig::uuid id = fig::uuid::fromStrFactory(pID ? pID : "");
-			std::string name_str(pName ? pName : "");
+			fig::string name_str(pName ? pName : "");
 			fig::auth::UserAuth userAuth {};
 			fig::auth::UserAuth recoveryData {};
 

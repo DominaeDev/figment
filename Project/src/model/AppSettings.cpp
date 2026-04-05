@@ -10,6 +10,7 @@ namespace fig
 
 	static const std::unordered_map<AppSetting, SettingTuple> _AllSettings = {
 		{ AppSetting::LastUser,			{ "Application", "LastUser", "" } },
+		{ AppSetting::SignedIn,			{ "Application", "SignedIn", 0 } },
 		{ AppSetting::WindowMaximized,	{ "Application", "WindowMaximized", 0 } },
 		{ AppSetting::WindowSize,		{ "Application", "WindowSize", std::vector { Constants::GUI::WindowDefaultWidth, Constants::GUI::WindowDefaultHeight } } },
 	};

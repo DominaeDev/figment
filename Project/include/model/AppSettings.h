@@ -9,6 +9,7 @@ namespace fig
 	enum class AppSetting
 	{
 		LastUser,
+		SignedIn,
 		WindowMaximized,
 		WindowSize,
 	};

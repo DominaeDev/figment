@@ -65,14 +65,14 @@ namespace fig
 		__appState->pMainWindow.reset();
 		__appState->pLLMInstance.reset();
 
+		if (__appState->pUserManager)
+			__appState->pUserManager.reset();
+
 		if (__appState->pAppSettings)
 		{
 			__appState->pAppSettings->Save();
 			__appState->pAppSettings.reset();
 		}
-
-		if (__appState->pUserManager)
-			__appState->pUserManager.reset();
 
 		if (__appState->pLLMEngine)
 		{

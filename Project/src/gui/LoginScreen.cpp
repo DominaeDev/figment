@@ -5,6 +5,7 @@
 #include "gui/PasswordBox.h"
 #include "gui/MainFrame.h"
 #include "gui/TexturedBorder.h"
+#include "gui/ButtonWithLabel.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "util/StringUtility.h"
@@ -41,9 +42,14 @@ namespace fig::gui
 		_pPrevProfileBtn = new ButtonWithIcon(pCenter, TextureType::ICON_CHEVRON_LEFT);
 		_pPrevProfileBtn->SetSize(35, 56);
 		_pPrevProfileBtn->SetDelegate([this]() { CycleProfile(-1); });
+
 		_pNextProfileBtn = new ButtonWithIcon(pCenter, TextureType::ICON_CHEVRON_RIGHT);
 		_pNextProfileBtn->SetSize(35, 56);
 		_pNextProfileBtn->SetDelegate([this]() { CycleProfile(+1); });
+
+		_pNoPassButton = new ButtonWithLabel(pCenter, "Sign in");
+		_pNoPassButton->SetHeight(35);
+		_pNoPassButton->SetDelegate([this]() { SignIn(); });
 
 		auto pProfileImageSizer = new HorizontalSizer();
 		pProfileImageSizer->Add(_pPrevProfileBtn, -1, Sizer::AlignCenterVertical | Sizer::AlignRight | Sizer::Right, 16);
@@ -53,28 +59,27 @@ namespace fig::gui
 		_pProfileName = new StaticText(pCenter, "", FontFace::Default, 24.0, false);
 		_pProfileName->SetAlignment(TextAlignment::Middle_Top);
 
-		auto pPasswordArea = new Panel(pCenter);
-//		pPasswordArea->SetBackgroundColor(Colors::Debug);
-		pPasswordArea->SetHeight(48);
+		_pPasswordPanel = new Panel(pCenter);
+		_pPasswordPanel->SetHeight(35);
 
-		_pPassword = new PasswordBox(pPasswordArea);
+		_pPassword = new PasswordBox(_pPasswordPanel);
 		_pPassword->SetWidth(240);
-		_pPassword->SetEnterPressedCallback([this](fig::string password) { TrySignIn(); });
+		_pPassword->SetEnterPressedCallback([this](fig::string password) { SignIn(); });
 		_pPassword->SetFocus(true);
 
-		auto pSignInButton = new ButtonWithIcon(pPasswordArea, TextureType::ICON_ARROW_RIGHT);
-		pSignInButton->SetSize(35, 35);
-		pSignInButton->SetDelegate([this]() { TrySignIn(); });
-		auto pSimpleBorder = new TexturedBorder(pSignInButton, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		_pSignInBtn = new ButtonWithIcon(_pPasswordPanel, TextureType::ICON_ARROW_RIGHT);
+		_pSignInBtn->SetSize(35, 35);
+		_pSignInBtn->SetDelegate([this]() { SignIn(); });
+		auto pSimpleBorder = new TexturedBorder(_pSignInBtn, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
 		pSimpleBorder->SetForegroundColor(Colors::SidePanelForeground);
 
 		auto pPasswordSizer = new HorizontalSizer();
 		pPasswordSizer->AddStretchSpacer();
 		pPasswordSizer->Add(_pPassword, 0, Sizer::AlignCenterVertical);
-		pPasswordSizer->Add(pSignInButton, 0, Sizer::AlignCenterVertical | Sizer::AlignLeft | Sizer::Left, 4);
+		pPasswordSizer->Add(_pSignInBtn, 0, Sizer::AlignCenterVertical | Sizer::AlignLeft | Sizer::Left, 4);
 		pPasswordSizer->AddStretchSpacer();
-		pPasswordArea->SetSizer(pPasswordSizer);
+		_pPasswordPanel->SetSizer(pPasswordSizer);
 
 		auto pCenterSizer = new VerticalSizer();
 		pCenter->SetSizer(pCenterSizer);
@@ -82,7 +87,8 @@ namespace fig::gui
 		pCenterSizer->AddSpacer(4);
 		pCenterSizer->Add(_pProfileName, 0, Sizer::Expand | Sizer::FixedSize, 24);
 		pCenterSizer->AddSpacer(28);
-		pCenterSizer->Add(pPasswordArea, 0, Sizer::Expand);
+		pCenterSizer->Add(_pPasswordPanel, 0, Sizer::Expand);
+		pCenterSizer->Add(_pNoPassButton, 0, Sizer::AlignCenterHorizontal);
 
 		SetSizer(pVerticalSizer);
 
@@ -124,12 +130,30 @@ namespace fig::gui
 		_pProfileName->SetText(profile.name);
 
 		_pPassword->Clear();
-		_pPassword->SetEnabled(profile.has_password);
+		if (profile.has_password)
+		{
+			_pPassword->SetEnabled(true);
+			_pPassword->SetFocus(true);
+			_pPasswordPanel->SetVisible(true);
+			_pPasswordPanel->EnableLayout(true);
+			_pNoPassButton->SetVisible(false);
+			_pNoPassButton->EnableLayout(false);
+		}
+		else
+		{
+			_pPassword->SetEnabled(false);
+			_pNoPassButton->SetVisible(true);
+			_pNoPassButton->EnableLayout(true);
+			_pPasswordPanel->SetVisible(false);
+			_pPasswordPanel->EnableLayout(false);
+		}
 
 		if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
 			_pProfileImage->SetTexture(pTexture, AppResources::GetTexture(TextureType::CIRCLE_MASK));
 		else
 			_pProfileImage->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::CIRCLE_MASK));
+
+		InvalidateLayout();
 	}
 
 	void LoginScreen::CycleProfile(int32_t step)
@@ -151,15 +175,20 @@ namespace fig::gui
 		SelectProfile(profiles[toUZ((toI(curr) + step)) % profiles.size()]);
 	}
 
-	bool LoginScreen::TrySignIn()
+	bool LoginScreen::SignIn()
 	{
-		if (auto profile = Global::GetUserManager().GetProfile(_currentProfileId))
+		if (auto tryProfile = Global::GetUserManager().GetProfile(_currentProfileId))
 		{
-			fig::string password = trim(_pPassword->GetText());
-			_pPassword->Clear();
-			if (MainFrame::GetInstance().TrySignIn(profile.value(), password))
+			auto& profile = tryProfile.value().get();
+			if (profile.has_password)
 			{
-				
+				fig::string password = trim(_pPassword->GetText());
+				_pPassword->Clear();
+				MainFrame::GetInstance().TrySignIn(profile, password);
+			}
+			else
+			{
+				MainFrame::GetInstance().TrySignIn(profile, "");
 			}
 		}
 		return false;

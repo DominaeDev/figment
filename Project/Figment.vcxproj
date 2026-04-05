@@ -171,6 +171,7 @@
     <ClCompile Include="src\fs\XmlWriter.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\BaseButton.cpp" />
+    <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\CardImage.cpp" />
     <ClCompile Include="src\gui\ImageWithMask.cpp" />
     <ClCompile Include="src\gui\LoginScreen.cpp" />
@@ -375,6 +376,7 @@
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\TavernCardV2.h" />
     <ClInclude Include="include\fs\Xml.h" />
+    <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\GUIConstants.h" />
@@ -446,7 +448,6 @@
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\util\IniFile.h" />
     <ClInclude Include="include\util\ProfileDatabase.h" />
-    <ClInclude Include="include\util\RecoverCodeLUT.h" />
     <ClInclude Include="include\util\SearchIndex.h" />
     <ClInclude Include="include\util\Security.h" />
     <ClInclude Include="include\util\EnumFlags.h" />

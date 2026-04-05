@@ -306,6 +306,7 @@ namespace fig::gui
 	{
 		// Remember
 		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
+		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
 		if (_pSidePanel)
 			_pSidePanel->SetUserProfile(profile);
@@ -322,10 +323,15 @@ namespace fig::gui
 
 		ShowSidePanel(false);
 		ChangeScreen<LoginScreen>();
+
+		Global::GetSettings().SetBool(AppSetting::SignedIn, false);
 	}
 
 	bool MainFrame::AutoSignIn() noexcept
 	{
+		if (not Global::GetSettings().GetBool(AppSetting::SignedIn))
+			return false;
+
 		auto& profiles = Global::GetUserManager().GetProfiles();
 		if (profiles.empty())
 			return false;
