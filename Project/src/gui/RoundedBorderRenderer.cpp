@@ -11,7 +11,7 @@ namespace fig::gui
 		_pTexture = AppResources::GetTexture(TextureType::BORDER);
 	}
 
-	void RoundedBorderRenderer::Render(Renderer* pRenderer, Rectf rect)
+	void RoundedBorderRenderer::Render(Renderer* pRenderer, const Rectf& rect)
 	{
 		if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 			RefreshGeometry(rect);
@@ -76,7 +76,6 @@ namespace fig::gui
 		float theta = SDL_PI_F / (2.0f * CORNER_TRIANGLES);
 		Pointf v0 { x0, y0 };
 		Pointf v1 { x1 - x0, y1 - y0 };
-		auto hej = Vec_Normalize(v1);
 		Pointf v2 = Vec_Add(Vec_Multiply(Vec_Normalize(v1), -thickness), v1);
 
 		int index = (int)vertices.size();

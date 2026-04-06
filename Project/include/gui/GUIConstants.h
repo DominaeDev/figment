@@ -46,7 +46,8 @@ namespace fig::gui
 		inline constexpr Color SidePanelForeground		{ 0x4e4431 };
 		inline constexpr Color SidePanelBackground		{ 0xEEECE4 };
 		inline constexpr Color SidePanelGradient		{ 0xe0dccb };
-		
+		inline constexpr Color LineColor				{ 0xc7bcaa };
+
 		// Chat
 		inline constexpr Color ChatBackground			{ 0xfaf9f5, 0xff };
 		inline constexpr Color MessageBorderDefault		{ 0x9f9f9f };

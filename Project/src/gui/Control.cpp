@@ -54,8 +54,6 @@ namespace fig::gui
 		// Draw this
 		OnRender(pRenderer);
 
-		DrawBorder(pRenderer);
-
 		// Draw children
 		for (auto& child : _children)
 		{
@@ -80,6 +78,8 @@ namespace fig::gui
 			s_pClippingRect = lastClippingRect;
 			SDL_SetRenderClipRect(pRenderer, s_pClippingRect);
 		}
+
+		DrawBorder(pRenderer);
 	}
 
 	void Control::OnRender(Renderer* pRenderer)

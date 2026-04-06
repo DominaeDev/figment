@@ -243,6 +243,9 @@ namespace fig::gui
 
 	void CoverCard::CreateChatCounter(uint32_t count)
 	{
+		if (_pCounterBG)
+			return;
+
 		_pCounterBG = new NineGridImage(this, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
 		if (_cardSize == CardSize::Half)
 			_pCounterBG->SetPosition(6, 6);

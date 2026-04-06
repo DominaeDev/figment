@@ -4,6 +4,7 @@
 #include "gui/AppResources.h"
 #include "gui/ButtonWithIcon.h"
 #include "gui/MainFrame.h"
+#include "gui/CustomRenderers.h"
 
 namespace fig::gui
 {
@@ -20,6 +21,8 @@ namespace fig::gui
 		_pButton->SetSize(36, 36);
 		_pButton->CenterVertically();
 		_pButton->SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
+
+		SetBorderRenderer(new LineBorderRenderer(Colors::LineColor, { Direction::North }));
 	}
 
 	void UserProfileWidget::SetUser(const fig::user::UserProfile& profile) noexcept

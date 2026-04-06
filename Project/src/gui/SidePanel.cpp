@@ -7,6 +7,7 @@
 
 #include "gui/HomeScreen.h"
 #include "gui/ChatScreen.h"
+#include "gui/LineBorderRenderer.h"
 #include "model/GlobalStrings.h"
 
 namespace fig::gui
@@ -22,7 +23,7 @@ namespace fig::gui
 		auto pLogo = new Image(pHeaderPanel, AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
 		pLogo->SetX(44);
 
-		auto pGradient = new HorizontalGradient(this, Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.6f));
+		auto pGradient = new HorizontalGradient(this, Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.8f));
 		_pGradient = pGradient;
 
 		auto pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);
@@ -87,11 +88,13 @@ namespace fig::gui
 		pTopSizer->Add(pFooterPanel, 0, Sizer::Expand);
 		
 		SetSizer(pTopSizer);
+
+		SetBorderRenderer(new LineBorderRenderer(Colors::LineColor, { Direction::East }));
 	}
 
 	void SidePanel::OnAfterLayout()
 	{
-		constexpr Coord kGradientSize = 7;
+		constexpr Coord kGradientSize = 8;
 		_pGradient->SetX(GetWidth() - kGradientSize);
 		_pGradient->SetSize(kGradientSize, GetHeight());
 	}

@@ -7,7 +7,7 @@ namespace fig::gui
 	{
 	}
 
-	void SolidFillRenderer::Render(Renderer* pRenderer, Rectf rect)
+	void SolidFillRenderer::Render(Renderer* pRenderer, const Rectf& rect)
 	{
 		SDL_SetRenderDrawColor(pRenderer, _color.r, _color.g, _color.b, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(pRenderer, &rect);

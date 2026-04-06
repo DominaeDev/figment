@@ -83,7 +83,6 @@ namespace fig::gui
 		float theta = SDL_PI_F / (2.0f * corner_triangles);
 		Pointf v0 { x0, y0 };
 		Pointf v1 { x1 - x0, y1 - y0 };
-		auto hej = Vec_Normalize(v1);
 		Pointf v2 = Vec_Add(Vec_Multiply(Vec_Normalize(v1), -thickness), v1);
 
 		int index = (int)vertices.size();

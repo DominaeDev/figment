@@ -10,7 +10,7 @@ namespace fig::gui
 	public:
 		explicit RoundedBorderRenderer(float radius, float thickness, Color color = Colors::White);
 
-		void Render(Renderer* pRenderer, Rectf rect);
+		void Render(Renderer* pRenderer, const Rectf& rect);
 
 	private:
 		void RefreshGeometry(Rectf rect);

@@ -485,6 +485,9 @@
     <ClCompile Include="src\gui\SolidFillRenderer.cpp">
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\LineBorderRenderer.cpp">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1154,6 +1157,9 @@
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SolidFillRenderer.h">
+      <Filter>Source Files\Frontend\GUI\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\LineBorderRenderer.h">
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClInclude>
   </ItemGroup>

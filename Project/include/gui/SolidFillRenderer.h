@@ -10,6 +10,6 @@ namespace fig::gui
 	public:
 		explicit SolidFillRenderer(Color color = Colors::White);
 
-		void Render(Renderer* pRenderer, Rectf rect);
+		void Render(Renderer* pRenderer, const Rectf& rect);
 	};
 }
