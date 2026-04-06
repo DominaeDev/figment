@@ -16,11 +16,11 @@ namespace fig::gui
 		_pLabel = new StaticText(this, "", FontFace::Default, 14.0, false);
 		_pLabel->EnableEllipsis(true);
 
-		_pButton = new ButtonWithIcon(this, TextureType::ICON_LOGOUT);
-		_pButton->SetTheme(Themes::SidePanelButtonStyle);
-		_pButton->SetSize(36, 36);
-		_pButton->CenterVertically();
-		_pButton->SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
+		_pSignOutButton = new ButtonWithIcon(this, TextureType::ICON_LOGOUT);
+		_pSignOutButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pSignOutButton->SetSize(36, 36);
+		_pSignOutButton->CenterVertically();
+		_pSignOutButton->SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
 
 		SetBorderRenderer(new LineBorderRenderer(Colors::LineColor, { Direction::North }));
 	}
@@ -53,10 +53,10 @@ namespace fig::gui
 			_pLabel->SetMaxSize(GetWidth() - _pLabel->GetX() - 34, -1);
 		}
 
-		if (_pButton)
+		if (_pSignOutButton)
 		{
-			_pButton->SetX(GetWidth() - _pButton->GetWidth() - 8);
-			_pButton->CenterVertically();
+			_pSignOutButton->SetX(GetWidth() - _pSignOutButton->GetWidth() - 4);
+			_pSignOutButton->CenterVertically();
 		}
 	}
 

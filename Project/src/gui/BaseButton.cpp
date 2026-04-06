@@ -81,8 +81,8 @@ namespace fig::gui
 				_bMouseInside = false;
 
 				_bMouseDown ? OnButtonDown() : OnButtonUp();
+				return true;
 			}
-			return true;
 		}
 
 		return false;

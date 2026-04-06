@@ -1317,9 +1317,7 @@ namespace fig::gui
 		}
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
-			auto& rect = GetRect();
-			if (is_inside(rect, toI(event.button.x), toI(event.button.y)))
-				return HandleMouseUp(toI(event.button.x), toI(event.button.y));
+			HandleMouseUp(toI(event.button.x), toI(event.button.y));
 			break;
 		}
 
