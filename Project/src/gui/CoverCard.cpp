@@ -472,9 +472,9 @@ namespace fig::gui
 		_searchIndex->AddTerms(texts);
 	}
 
-	bool CoverCard::IsFilteredBy(const fig::string& search_string) const noexcept
+	bool CoverCard::IsFilteredBy(const SearchQuery& query) const noexcept
 	{
-		return !_searchIndex->Match(search_string);
+		return !_searchIndex->Match(query);
 	}
 
 	void CoverCard::SetCardSize(CardSize cardSize)

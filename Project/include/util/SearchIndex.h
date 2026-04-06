@@ -6,20 +6,26 @@
 
 namespace fig
 {
+	struct SearchQuery
+	{
+		explicit SearchQuery(const fig::string& query);
+		std::vector<fig::string> terms;
+	};
+
 	class SearchIndex
 	{
 	public:
 		void AddTerm(const fig::string& text) noexcept;
 		void AddTerms(std::span<const fig::string> texts) noexcept;
 
-		bool Match(const fig::string& search_string) const noexcept;
+		bool Match(const SearchQuery& query) const noexcept;
 		inline bool IsEmpty() const noexcept { return _index.empty(); }
 
 		fig::string Serialize() const noexcept;
 		size_t Deserialize(const fig::string& data) noexcept;
 
 	private:
-		std::vector<fig::wstring> _index {};
+		std::vector<fig::string> _index {};
 	};
 }
 #endif

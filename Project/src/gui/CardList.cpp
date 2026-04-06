@@ -132,9 +132,11 @@ namespace fig::gui
 			return;
 		}
 
+		SearchQuery query { search_string };
+
 		for (auto& card : _cards)
 		{
-			bool bFiltered = card->IsFilteredBy(search_string);
+			bool bFiltered = card->IsFilteredBy(query);
 			card->SetVisible(not bFiltered);
 			card->EnableLayout(not bFiltered);
 		}

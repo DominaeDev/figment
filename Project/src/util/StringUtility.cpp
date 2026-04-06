@@ -492,17 +492,6 @@ namespace fig::util
 		return fields;
 	}
 
-	[[nodiscard]] std::string strip_diacritics(const fig::string& input)
-	{
-		return to_utf8(strip_diacritics(from_utf8(input)));
-	}
-
-	[[nodiscard]] std::wstring strip_diacritics(const fig::wstring& input)
-	{
-		fig::wstring copy { input };
-		return strip_diacritics(std::move(copy));
-	}
-
 	fig::wstring strip_diacritics(fig::wstring&& input)
 	{
 		static const std::unordered_map<wchar_t, wchar_t> diacritic_map {
@@ -576,6 +565,117 @@ namespace fig::util
 			});
 
 		return input;
+	}
+
+	fig::string strip_diacritics(fig::string&& input)
+	{
+		static const std::unordered_map<uint32_t, char> diacritic_map {
+			// a
+			{ 0x00E0, 'a' }, { 0x00E1, 'a' }, { 0x00E2, 'a' }, { 0x00E3, 'a' },
+			{ 0x00E4, 'a' }, { 0x00E5, 'a' }, { 0x0101, 'a' }, { 0x0103, 'a' },
+			{ 0x0105, 'a' }, { 0x01CE, 'a' }, { 0x01DF, 'a' }, { 0x01E1, 'a' },
+			{ 0x01FB, 'a' }, { 0x0201, 'a' }, { 0x0203, 'a' }, { 0x0227, 'a' },
+			{ 0x00E6, 'a' },
+			// c
+			{ 0x00E7, 'c' }, { 0x0107, 'c' }, { 0x0109, 'c' }, { 0x010D, 'c' },
+			{ 0x010B, 'c' },
+			// d
+			{ 0x010F, 'd' }, { 0x0111, 'd' },
+			// e
+			{ 0x00E8, 'e' }, { 0x00E9, 'e' }, { 0x00EA, 'e' }, { 0x00EB, 'e' },
+			{ 0x0113, 'e' }, { 0x0115, 'e' }, { 0x0117, 'e' }, { 0x0119, 'e' },
+			{ 0x011B, 'e' }, { 0x0205, 'e' }, { 0x0207, 'e' }, { 0x0229, 'e' },
+			// g
+			{ 0x011D, 'g' }, { 0x011F, 'g' }, { 0x0121, 'g' }, { 0x0123, 'g' },
+			{ 0x01E7, 'g' }, { 0x01F5, 'g' },
+			// h
+			{ 0x0125, 'h' }, { 0x0127, 'h' },
+			// i
+			{ 0x00EC, 'i' }, { 0x00ED, 'i' }, { 0x00EE, 'i' }, { 0x00EF, 'i' },
+			{ 0x0129, 'i' }, { 0x012B, 'i' }, { 0x012D, 'i' }, { 0x012F, 'i' },
+			{ 0x0131, 'i' }, { 0x01D0, 'i' }, { 0x0209, 'i' }, { 0x020B, 'i' },
+			// j
+			{ 0x0135, 'j' },
+			// k
+			{ 0x0137, 'k' }, { 0x01E9, 'k' },
+			// l
+			{ 0x013A, 'l' }, { 0x013C, 'l' }, { 0x013E, 'l' }, { 0x0140, 'l' },
+			{ 0x0142, 'l' },
+			// n
+			{ 0x00F1, 'n' }, { 0x0144, 'n' }, { 0x0146, 'n' }, { 0x0148, 'n' },
+			{ 0x0149, 'n' }, { 0x01F9, 'n' },
+			// o
+			{ 0x00F2, 'o' }, { 0x00F3, 'o' }, { 0x00F4, 'o' }, { 0x00F5, 'o' },
+			{ 0x00F6, 'o' }, { 0x00F8, 'o' }, { 0x014D, 'o' }, { 0x014F, 'o' },
+			{ 0x0151, 'o' }, { 0x01D2, 'o' }, { 0x01EB, 'o' }, { 0x01ED, 'o' },
+			{ 0x020D, 'o' }, { 0x020F, 'o' }, { 0x022B, 'o' }, { 0x022D, 'o' },
+			{ 0x022F, 'o' }, { 0x0231, 'o' },
+			// r
+			{ 0x0155, 'r' }, { 0x0157, 'r' }, { 0x0159, 'r' }, { 0x0211, 'r' },
+			{ 0x0213, 'r' },
+			// s
+			{ 0x015B, 's' }, { 0x015D, 's' }, { 0x015F, 's' }, { 0x0161, 's' },
+			{ 0x0219, 's' }, { 0x00DF, 's' }, // eszett -> 's' (lossy but conventional)
+			// t
+			{ 0x0163, 't' }, { 0x0165, 't' }, { 0x0167, 't' }, { 0x021B, 't' },
+			// u
+			{ 0x00F9, 'u' }, { 0x00FA, 'u' }, { 0x00FB, 'u' }, { 0x00FC, 'u' },
+			{ 0x0169, 'u' }, { 0x016B, 'u' }, { 0x016D, 'u' }, { 0x016F, 'u' },
+			{ 0x0171, 'u' }, { 0x0173, 'u' }, { 0x01D4, 'u' }, { 0x01D6, 'u' },
+			{ 0x01D8, 'u' }, { 0x01DA, 'u' }, { 0x01DC, 'u' }, { 0x0215, 'u' },
+			{ 0x0217, 'u' },
+			// w
+			{ 0x0175, 'w' },
+			// y
+			{ 0x00FD, 'y' }, { 0x00FF, 'y' }, { 0x0177, 'y' }, { 0x0233, 'y' },
+			// z
+			{ 0x017A, 'z' }, { 0x017C, 'z' }, { 0x017E, 'z' },
+		};
+
+		std::string output;
+		output.reserve(input.size());
+
+		for (size_t i = 0; i < input.size(); )
+		{
+			unsigned char c = input[i];
+			uint32_t codepoint;
+			int bytes;
+
+			// Decode utf-8 codepoint
+			if (c < 0x80)
+			{
+				codepoint = c;
+				bytes = 1;
+			}
+			else if (c < 0xE0)
+			{
+				codepoint = c & 0x1F;
+				bytes = 2;
+			}
+			else if (c < 0xF0)
+			{
+				codepoint = c & 0x0F;
+				bytes = 3;
+			}
+			else
+			{
+				codepoint = c & 0x07;
+				bytes = 4;
+			}
+
+			// Read remainder of codepoint
+			for (int b = 1; b < bytes && (i + b) < input.size(); ++b)
+				codepoint = (codepoint << 6) | (input[i + b] & 0x3F);
+
+			if (const auto it = diacritic_map.find(codepoint); it != diacritic_map.end())
+				output += it->second;
+			else
+				output.append(input, i, bytes);
+
+			i += bytes;
+		}
+
+		return output;
 	}
 
 	fig::string int_to_string(int32_t value)

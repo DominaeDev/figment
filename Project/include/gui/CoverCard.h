@@ -40,7 +40,7 @@ namespace fig::gui
 		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
 		void EnableTags(bool bEnable);
 		
-		bool IsFilteredBy(const fig::string& search_string) const noexcept;
+		bool IsFilteredBy(const SearchQuery& query) const noexcept;
 		const fig::uuid& GetAssetID() const { return _assetId; }
 
 	protected:

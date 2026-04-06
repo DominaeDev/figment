@@ -448,6 +448,7 @@
     <ClInclude Include="include\model\UserProfile.h" />
     <ClInclude Include="include\model\UserSettings.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\util\ExcludedSearchTerms.h" />
     <ClInclude Include="include\util\IniFile.h" />
     <ClInclude Include="include\util\ProfileDatabase.h" />
     <ClInclude Include="include\util\SearchIndex.h" />

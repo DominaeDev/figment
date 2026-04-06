@@ -1162,6 +1162,9 @@
     <ClInclude Include="include\gui\LineBorderRenderer.h">
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClInclude>
+    <ClInclude Include="include\util\ExcludedSearchTerms.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
