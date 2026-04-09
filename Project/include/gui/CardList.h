@@ -28,6 +28,7 @@ namespace fig::gui
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnScroll() override;
+		void OnAfterLayout() override;
 
 	private:
 		std::vector<CoverCard*> _cards;

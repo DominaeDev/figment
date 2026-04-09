@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/LayoutElement.h"
 #include "gui/Sizer.h"
+#include <cassert>
 
 namespace fig::gui
 {
@@ -27,7 +28,7 @@ namespace fig::gui
 
 	void LayoutElement::Layout()
 	{
-		if (not (_bInvalidLayout or _bLayoutEnabled) or _bCulled)
+		if (!_bInvalidLayout or !_bLayoutEnabled or _bCulled)
 			return;
 		
 		if (_pSizer)
@@ -76,6 +77,11 @@ namespace fig::gui
 
 		for (auto& child : _children)
 			child->OnParentMoved();
+	}
+
+	void LayoutElement::SetAbsolutePosition(Coord x, Coord y)
+	{
+		SetAbsolutePosition(Point { x, y });
 	}
 
 	void LayoutElement::SetAbsolutePosition(Point position)

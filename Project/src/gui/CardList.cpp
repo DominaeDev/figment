@@ -1,13 +1,13 @@
 #include <pch.h>
+#include "model/AppState.h"
+#include "model/UserManager.h"
+#include "model/AssetManager.h"
+#include "util/Common.h"
 #include "gui/CardList.h"
 #include "gui/GridSizer.h"
 #include "gui/ScenarioCard.h"
 #include "gui/CharacterCard.h"
 #include "gui/MainFrame.h"
-#include "model/AppState.h"
-#include "model/UserManager.h"
-#include "model/AssetManager.h"
-#include "util/Common.h"
 
 using namespace fig::io;
 
@@ -96,7 +96,7 @@ namespace fig::gui
 				pCard->Cull(true);
 		}
 
-		LayoutNow();
+		InvalidateLayout();
 	}
 
 	void CardList::OnUpdate(float fElapsed)
@@ -112,13 +112,13 @@ namespace fig::gui
 			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::CardSpacingY);
 			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
 
-			_maxExtent = curr_extent;
+			_fMaxExtent = curr_extent;
 			_last_rows = curr_rows;
 
 			if (last_extent > 0)
 			{
 				float ratio = _fScrollY / last_extent;
-				_fScrollY = ratio * toF(_maxExtent);
+				_fScrollY = ratio * toF(_fMaxExtent);
 				_fTargetScrollY = _fScrollY;
 				LayoutNow();
 			}
@@ -193,5 +193,14 @@ namespace fig::gui
 	void CardList::OnScroll()
 	{
 		MainFrame::GetInstance().DestroyOverlays(); // Hide context menu
+	}
+
+	void CardList::OnAfterLayout()
+	{
+		int32_t curr_rows = toI(_pGridSizer->GetRows());
+		Coord kCardHeight = cardHeight(_cardSize);
+		_fMaxExtent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
+
+		ScrollPanel::OnAfterLayout();
 	}
 }

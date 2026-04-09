@@ -6,10 +6,15 @@
 
 namespace fig::gui
 {
+	class VerticalScrollBar;
+
 	class ScrollPanel : public Control
 	{
 	public:
-		ScrollPanel(LayoutElement* pParent);
+		ScrollPanel(LayoutElement* pParent, bool bScrollBar = true);
+		~ScrollPanel();
+		void Render(Renderer* pRenderer) override;
+		inline void SetScrollBarOffset(Coord offset) noexcept { _fScrollBarOffset = offset; }
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -20,13 +25,18 @@ namespace fig::gui
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
 		void SetTopMargin(Coord margin) { _topMargin = margin; };
 		void SetBottomMargin(Coord margin) { _bottomMargin = margin; };
+		void RefreshScrollBar();
 
 	protected:
 		Coord _topMargin {};
 		Coord _bottomMargin {};
 		float _fScrollY {};
 		float _fTargetScrollY {};
-		Coord _maxExtent {};
+		Coord _fMaxExtent {};
+		Coord _fScrollBarOffset { -16 };
+
+	private:
+		VerticalScrollBar* _pScrollBar {};
 	};
 }
 

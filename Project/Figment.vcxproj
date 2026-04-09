@@ -195,6 +195,7 @@
     <ClCompile Include="src\gui\NineGridImage.cpp" />
     <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
+    <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
     <ClCompile Include="src\gui\SearchBox.cpp" />
     <ClCompile Include="src\gui\SidePanel.cpp" />
@@ -393,6 +394,7 @@
     <ClInclude Include="include\gui\Overlay.h" />
     <ClInclude Include="include\gui\PasswordBox.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\VerticalScrollBar.h" />
     <ClInclude Include="include\gui\SearchBox.h" />
     <ClInclude Include="include\gui\SidePanelButton.h" />
     <ClInclude Include="include\gui\LoginScreen.h" />

@@ -12,7 +12,7 @@ namespace fig::gui
 		TexturedBorder(LayoutElement* pParent, Texture* borderTexture, int cornerPixels = 64);
 		TexturedBorder(LayoutElement* pParent, Texture* borderTexture, std::array<float, 4> corners);
 
-		void SetCornerSize(float cornerSize);
+		void SetCornerScale(float cornerScale);
 		void SetColors(Color bgColor, Color borderColor);
 		void SetTexture(Texture* borderTexture);
 
@@ -21,7 +21,7 @@ namespace fig::gui
 
 	private:
 		std::array<float, 4> _cornerPixels = { 64, 64, 64, 64 };
-		float _cornerSize = 20.0f;
+		float _cornerScale = 1.0f;
 		Color _bgColor {};
 		Color _borderColor {};
 		Texture* _pBorderTexture = nullptr;

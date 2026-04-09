@@ -54,10 +54,11 @@ namespace fig::gui
 		pTopBar->SetSizer(pTopSizer);
 
 		_pCardList = new CardList(this);
+		_pCardList->SetScrollBarOffset(0);
 
 		auto mainSizer = new VerticalSizer();
 		mainSizer->Add(pTopBar, 0, Sizer::Expand);
-		mainSizer->Add(_pCardList, -1, Sizer::Fill | Sizer::Left | Sizer::Right, 6);
+		mainSizer->Add(_pCardList, -1, Sizer::Fill | Sizer::Left | Sizer::Right, 16);
 		SetSizer(mainSizer);
 	}
 
