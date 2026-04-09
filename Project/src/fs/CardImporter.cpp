@@ -18,6 +18,7 @@ namespace fig::io
 		card.Parse(try_import.value());
 		
 		CharacterData character;
+		character.shortName = card.data.name;
 		character.fullName = card.data.name;
 		character.description = card.data.description;
 		character.tags = card.data.tags;

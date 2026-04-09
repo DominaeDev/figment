@@ -85,8 +85,6 @@ namespace fig::gui
 		if (bgColor.IsDefined() && bgColor.a != 0)
 			DrawBackground(pRenderer);
 
-		bool test = SDL_RenderClipEnabled(pRenderer);
-
 		if (not _shadow.empty() and _bDropShadow)
 		{
 			Rectf alignRect = GetAlignedRect();

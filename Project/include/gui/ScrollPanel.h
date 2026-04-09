@@ -15,6 +15,7 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		bool OnEvent(Event& event) override;
 		void OnAfterLayout() override;
+		virtual void OnScroll() {};
 
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
 		void SetTopMargin(Coord margin) { _topMargin = margin; };

@@ -17,8 +17,8 @@ namespace fig::io
 		data.characterId = trim(rootNode.GetElementText("ID").value_or(""));
 
 		// Name(s)
-		data.shortName = trim(rootNode.GetElementText("FirstName").value_or(""));
 		data.fullName = trim(rootNode.GetElementText("FullName").value_or(""));
+		data.shortName = trim(rootNode.GetElementText("FirstName").value_or(data.fullName));
 
 		data.subheader = trim(rootNode.GetElementText("Subheader").value_or(""));
 

@@ -10,12 +10,12 @@ namespace fig::gui
 		if (_pFont)
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
 		
-		_pTextBoxBG = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND, 8);
+		_pTextBoxBG = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_6PX, 8);
 		_pTextBoxBG->SetExtend(0.0f);
 		_pTextBoxBG->SetColor(Colors::White);
 		SetBackgroundRenderer(_pTextBoxBG);
 
-		auto pTextBoxBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BORDER, 8);
+		auto pTextBoxBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
 		pTextBoxBorder->SetColor(Color { 0x61, 0x5a, 0x35, 0xFF });
 		SetBorderRenderer(pTextBoxBorder);

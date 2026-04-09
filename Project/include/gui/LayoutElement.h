@@ -34,6 +34,7 @@ namespace fig::gui
 
 		void SetRect(Rect rect);
 		void SetRect(Coord x, Coord y, Coord width, Coord height);
+		void SetAbsolutePosition(Point position);
 		void SetPosition(Point position);
 		void SetPosition(Coord x, Coord y);
 		void SetX(Coord x);

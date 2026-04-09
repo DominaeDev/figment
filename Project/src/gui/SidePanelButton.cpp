@@ -7,7 +7,7 @@ namespace fig::gui
 {
 	SidePanelButton::SidePanelButton(LayoutElement* pParent, TextureType icon, const fig::string& label) : ThemedButton(pParent)
 	{
-		auto pBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND, 8);
+		auto pBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_6PX, 8);
 		pBorder->SetColor(GetThemeBackground());
 		SetBackgroundRenderer(pBorder);
 		_pBorder = pBorder;

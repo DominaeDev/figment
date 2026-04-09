@@ -178,6 +178,9 @@
     <ClCompile Include="src\gui\LoginScreen.cpp" />
     <ClCompile Include="src\gui\DebugScreen.cpp" />
     <ClCompile Include="src\gui\GUIColor.cpp" />
+    <ClCompile Include="src\gui\Menu.cpp" />
+    <ClCompile Include="src\gui\MenuSeparator.cpp" />
+    <ClCompile Include="src\gui\Overlay.cpp" />
     <ClCompile Include="src\gui\PasswordBox.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
     <ClCompile Include="src\gui\CardList.cpp" />
@@ -385,6 +388,9 @@
     <ClInclude Include="include\gui\BaseButton.h" />
     <ClInclude Include="include\gui\ImageWithMask.h" />
     <ClInclude Include="include\gui\LineBorderRenderer.h" />
+    <ClInclude Include="include\gui\Menu.h" />
+    <ClInclude Include="include\gui\MenuSeparator.h" />
+    <ClInclude Include="include\gui\Overlay.h" />
     <ClInclude Include="include\gui\PasswordBox.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\SearchBox.h" />

@@ -6,6 +6,7 @@
 #include "gui/MainFrame.h"
 #include "gui/TexturedBorder.h"
 #include "gui/ButtonWithLabel.h"
+#include "gui/Menu.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "util/StringUtility.h"
@@ -21,10 +22,11 @@ namespace fig::gui
 		pLogo->SetPosition(44, 0);
 
 		// Menu button
-		auto pMenuButton = new ButtonWithIcon(this, TextureType::ICON_MENU);
-		pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
-		pMenuButton->SetSize(36, 36);
-		pMenuButton->SetPosition(4, 6);
+		_pMenuButton = new ButtonWithIcon(this, TextureType::ICON_MENU);
+		_pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pMenuButton->SetSize(36, 36);
+		_pMenuButton->SetPosition(4, 6);
+		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
 		// Center (login)
 		auto pCenter = new Panel(this);
@@ -192,5 +194,19 @@ namespace fig::gui
 			}
 		}
 		return false;
+	}
+
+	void LoginScreen::ShowMenu()
+	{
+		MainFrame::GetInstance().DestroyOverlays();
+
+		auto pMenu = new Menu(&MainFrame::GetInstance());
+		pMenu->AddItem("New profile\u2026");
+		pMenu->AddItem("Recover profile\u2026");
+		pMenu->AddSeparator();
+		pMenu->AddItem("Exit Figment")
+			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
+
+		pMenu->Show(Point { _pMenuButton->GetX() + 4, _pMenuButton->GetY() + _pMenuButton->GetHeight() - 2 });
 	}
 }

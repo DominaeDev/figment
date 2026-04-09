@@ -11,6 +11,7 @@ namespace fig::user
 
 namespace fig::gui
 {
+	class ButtonWithIcon;
 	class UserProfileWidget;
 
 	class SidePanel : public Control
@@ -20,12 +21,15 @@ namespace fig::gui
 	
 		void SetUserProfile(const fig::user::UserProfile& profile);
 		void Reset();
+
 	protected:
 		void OnAfterLayout() override;
+		void ShowMenu();
 
 	private:
 		LayoutElement* _pGradient;
 		UserProfileWidget* _pUserWidget;
+		ButtonWithIcon* _pMenuButton;
 	};
 }
 #endif

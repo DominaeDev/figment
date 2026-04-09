@@ -3,6 +3,7 @@
 #include "gui/GridSizer.h"
 #include "gui/ScenarioCard.h"
 #include "gui/CharacterCard.h"
+#include "gui/MainFrame.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "model/AssetManager.h"
@@ -187,5 +188,10 @@ namespace fig::gui
 		_cards.clear();
 		_fScrollY = 0;
 		_fTargetScrollY = 0;
+	}
+
+	void CardList::OnScroll()
+	{
+		MainFrame::GetInstance().DestroyOverlays(); // Hide context menu
 	}
 }

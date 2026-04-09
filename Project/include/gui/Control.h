@@ -30,7 +30,7 @@ namespace fig::gui
 		void SetVisible(bool bVisible);
 		bool GetEnabled() const { return _bEnabled; }
 		void SetEnabled(bool bEnabled);
-		bool ProcessEvent(Event& event);
+		virtual bool ProcessEvent(Event& event);
 
 		void SetBackgroundRenderer(CustomRenderer* pCustom);
 		void SetBorderRenderer(CustomRenderer* pCustom);

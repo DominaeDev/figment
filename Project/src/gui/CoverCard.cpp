@@ -19,6 +19,7 @@ namespace fig::gui
 		constexpr Coord Height = Constants::GUI::CardHeight;
 		constexpr Coord Margin = 12;
 		constexpr Coord FooterHeight = 80;
+		constexpr float ZoomAmount = 18.0f;
 	}
 
 	namespace Small
@@ -27,6 +28,7 @@ namespace fig::gui
 		constexpr Coord Height = Constants::GUI::HalfCardHeight;
 		constexpr Coord Margin = 10;
 		constexpr Coord FooterHeight = 60;
+		constexpr float ZoomAmount = 14.0f;
 	}
 
 	constexpr Coord kTagMargin = 10;
@@ -38,6 +40,8 @@ namespace fig::gui
 	constexpr Coord kTagMaxRows = 2;
 	
 	constexpr uint8_t FadeAlpha = 0x60;
+	constexpr float ZoomSmoothing = 8.0f;
+
 
 	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(TextureType::MASK_CARD)),
 		_assetId { assetId },
@@ -192,13 +196,10 @@ namespace fig::gui
 
 		if (!flt_eq(_fHoverZoom, _fTargetZoom))
 		{
-			constexpr float ZoomAmount = 18.0f;
-			constexpr float ZoomSmoothing = 8.0f;
-
 			_fHoverZoom = std::clamp(_fHoverZoom + (_fTargetZoom - _fHoverZoom) * ZoomSmoothing * fElapsed, 0.0f, 1.0f);
 			if (std::abs(_fTargetZoom - _fHoverZoom) < 0.01f)
 				_fHoverZoom = _fTargetZoom;
-			SetZoom(_fHoverZoom * ZoomAmount);
+			SetZoom(_fHoverZoom * (_cardSize == CardSize::Full ? Large::ZoomAmount : Small::ZoomAmount));
 		}
 	}
 

@@ -488,6 +488,15 @@
     <ClCompile Include="src\gui\LineBorderRenderer.cpp">
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\Menu.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Overlay.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\MenuSeparator.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1164,6 +1173,15 @@
     </ClInclude>
     <ClInclude Include="include\util\ExcludedSearchTerms.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Menu.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Overlay.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\MenuSeparator.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

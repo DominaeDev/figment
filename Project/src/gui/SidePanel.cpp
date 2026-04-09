@@ -4,10 +4,10 @@
 #include "gui/MainFrame.h"
 #include "gui/SidePanelButton.h"
 #include "gui/UserProfileWidget.h"
-
 #include "gui/HomeScreen.h"
 #include "gui/ChatScreen.h"
 #include "gui/LineBorderRenderer.h"
+#include "gui/Menu.h"
 #include "model/GlobalStrings.h"
 
 namespace fig::gui
@@ -26,17 +26,19 @@ namespace fig::gui
 		auto pGradient = new HorizontalGradient(this, Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.8f));
 		_pGradient = pGradient;
 
-		auto pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);
-		pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
-		pMenuButton->SetSize(36, 36);
-		pMenuButton->SetX(4);
-		pMenuButton->CenterVertically();
+		_pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);
+		_pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pMenuButton->SetSize(36, 36);
+		_pMenuButton->SetX(4);
+		_pMenuButton->CenterVertically();
+		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
-		auto pSettingsButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SETTINGS);
+/*		auto pSettingsButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SETTINGS);
 		pSettingsButton->SetTheme(Themes::SidePanelButtonStyle);
 		pSettingsButton->SetSize(36, 36);
 		pSettingsButton->SetX(GetWidth() - pSettingsButton->GetWidth() - 40);
-		pSettingsButton->CenterVertically();
+		pSettingsButton->CenterVertically(); 
+*/
 
 		auto pCollapseButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SIDEBAR);
 		pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
@@ -107,6 +109,27 @@ namespace fig::gui
 	void SidePanel::Reset()
 	{
 		_pUserWidget->Reset();
+	}
+
+	void SidePanel::ShowMenu()
+	{
+		MainFrame::GetInstance().DestroyOverlays();
+
+		auto pMenu = new Menu(&MainFrame::GetInstance());
+		pMenu->AddItem("New character\u2026");
+		pMenu->AddItem("New scenario\u2026");
+		pMenu->AddItem("Import character\u2026")
+			.SetEnabled(false);
+		pMenu->AddSeparator();
+		pMenu->AddItem("Profile settings\u2026", TextureType::ICON_USER_SETTINGS);
+		pMenu->AddItem("Preferences\u2026", TextureType::ICON_SETTINGS);
+		pMenu->AddSeparator();
+		pMenu->AddItem("Sign out", TextureType::ICON_LOGOUT)
+			.SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
+		pMenu->AddItem("Exit Figment")
+			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
+
+		pMenu->Show(Point { _pMenuButton->GetX() + 6, _pMenuButton->GetY() + _pMenuButton->GetHeight() + 2 });
 	}
 
 }

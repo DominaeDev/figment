@@ -42,6 +42,7 @@ namespace fig::gui
 
 		_fTargetScrollY -= toF(event.integer_y) * Constants::GUI::MouseScrollSpeed;
 		_fTargetScrollY = std::clamp(_fTargetScrollY, 0.f, (float)_maxExtent);
+		OnScroll();
 		return true;
 	}
 

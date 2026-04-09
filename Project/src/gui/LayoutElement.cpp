@@ -78,6 +78,26 @@ namespace fig::gui
 			child->OnParentMoved();
 	}
 
+	void LayoutElement::SetAbsolutePosition(Point position)
+	{
+		_rect.x = position.x;
+		_rect.y = position.y;
+
+		if (_pParent)
+		{
+			_localPosition.x = _rect.x - _pParent->GetAbsoluteX();
+			_localPosition.y = _rect.y - _pParent->GetAbsoluteY();
+		}
+		else
+		{
+			_localPosition.x = position.x;
+			_localPosition.y = position.y;
+		}
+
+		for (auto& child : _children)
+			child->OnParentMoved();
+	}
+
 	void LayoutElement::OnParentMoved()
 	{
 		SetPosition(_localPosition);

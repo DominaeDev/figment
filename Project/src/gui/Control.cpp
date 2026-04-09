@@ -57,7 +57,7 @@ namespace fig::gui
 		// Draw children
 		for (auto& child : _children)
 		{
-			auto renderable = dynamic_cast<Control*>(child);
+			auto renderable = dynamic_cast<Control*>(child); //! @todo: remove this cast
 			if (renderable)
 			{
 				if (_bCulling)
@@ -69,7 +69,6 @@ namespace fig::gui
 				}
 
 				renderable->Render(pRenderer);
-				renderable->OnPostRender();
 			}
 		}
 
@@ -80,6 +79,7 @@ namespace fig::gui
 		}
 
 		DrawBorder(pRenderer);
+		OnPostRender();
 	}
 
 	void Control::OnRender(Renderer* pRenderer)
@@ -166,7 +166,7 @@ namespace fig::gui
 		if (OnEvent(event))
 			return true;
 
-		for (auto it = _children.begin(); it != std::end(_children); ++it)
+		for (auto it = _children.rbegin(); it != std::rend(_children); ++it)
 		{
 			Control* pControl = dynamic_cast<Control*>(*it);
 			if (pControl && pControl->ProcessEvent(event))

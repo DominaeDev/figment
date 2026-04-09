@@ -26,9 +26,9 @@ namespace fig::gui
 		void OnSize() override;
 
 	private:
-		ImageWithMask* _pImage;
-		StaticText* _pLabel;
-		ButtonWithIcon* _pButton;
+		ImageWithMask* _pImage {};
+		StaticText* _pLabel {};
+		ButtonWithIcon* _pSignOutButton {};
 	};
 
 

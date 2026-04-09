@@ -25,8 +25,10 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::BLANK, "./resources/gui/white.png");
 		LoadTexture(pRenderer, TextureType::BORDER, "./resources/gui/line.png");
 		LoadTexture(pRenderer, TextureType::LOGO_SMALL, "./resources/gui/logo_small.png");
-		LoadTexture(pRenderer, TextureType::ROUNDED_BACKGROUND, "./resources/gui/bg_rounded.png");
-		LoadTexture(pRenderer, TextureType::ROUNDED_BORDER, "./resources/gui/border_rounded.png");
+		LoadTexture(pRenderer, TextureType::ROUNDED_BACKGROUND_6PX, "./resources/gui/rounded_bg_6px.png");
+		LoadTexture(pRenderer, TextureType::ROUNDED_BORDER_6PX, "./resources/gui/rounded_border_6px.png");
+		LoadTexture(pRenderer, TextureType::ROUNDED_BACKGROUND_10PX, "./resources/gui/rounded_bg_10px.png");
+		LoadTexture(pRenderer, TextureType::ROUNDED_BORDER_10PX, "./resources/gui/rounded_border_10px.png");
 
 		// Icons
 		LoadTexture(pRenderer, TextureType::ICON_ERROR, "./resources/gui/icons/icon_error_2.png");

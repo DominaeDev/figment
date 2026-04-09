@@ -7,7 +7,7 @@ namespace fig::gui
 {
 	ButtonWithIcon::ButtonWithIcon(LayoutElement* pParent, TextureType icon) : ThemedButton(pParent)
 	{
-		_pBGRenderer = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND, 8);
+		_pBGRenderer = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_6PX, 8);
 		_pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundRenderer(_pBGRenderer);
 

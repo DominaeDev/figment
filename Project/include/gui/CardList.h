@@ -24,8 +24,10 @@ namespace fig::gui
 		void SetCardSize(CardSize cardSize);
 		void EnableTags(bool bEnable) noexcept;
 		inline bool IsTagsEnabled() const noexcept { return _bEnableTags; }
+
 	protected:
 		void OnUpdate(float fElapsed) override;
+		void OnScroll() override;
 
 	private:
 		std::vector<CoverCard*> _cards;
