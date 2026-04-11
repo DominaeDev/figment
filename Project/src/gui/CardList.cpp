@@ -85,6 +85,8 @@ namespace fig::gui
 			}
 		}
 
+		Reorder();
+
 		size_t initCounter = 0;
 		for (auto& pCard : _cards)
 		{
