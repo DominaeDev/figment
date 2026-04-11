@@ -22,6 +22,13 @@ namespace fig::gui
 			SetLabel(character.fullName);
 			SetIndex(character.searchIndex);
 
+			SetMetaData(CardMetaData {
+				.name = _characterName,
+				.createdAt = character.createdAt,
+				.updatedAt = character.updatedAt,
+				.lastUsedAt = character.updatedAt, //! @wrong
+			});
+
 			// Tags
 			switch (character.gender)
 			{
@@ -62,7 +69,7 @@ namespace fig::gui
 		MainFrame::GetInstance().DestroyOverlays();
 
 		auto pMenu = new Menu(&MainFrame::GetInstance());
-		pMenu->AddItem(std::format("Chat with {}", _characterName));
+		pMenu->AddItem(std::format("Chat with {}", _characterName), TextureType::ICON_NEW_CHAT);
 		pMenu->AddItem("Resume chat\u2026")
 			.SetEnabled(false);
 		pMenu->AddSeparator();

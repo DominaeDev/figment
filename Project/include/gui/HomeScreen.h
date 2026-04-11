@@ -2,8 +2,8 @@
 #define HOME_FRAME_H__
 #pragma once
 
-#include "Screen.h"
-#include "GUICommon.h"
+#include "gui/Screen.h"
+#include "gui/GUICommon.h"
 
 namespace fig::gui
 {
@@ -27,6 +27,7 @@ namespace fig::gui
 		void OnFilter(fig::string search_text);
 		void SetSmallCardSize(bool bSmall) noexcept;
 		void ToggleTags();
+		void ShowSortingMenu();
 
 	private:
 		CardList* _pCardList {};
@@ -35,6 +36,7 @@ namespace fig::gui
 		StaticText* _pHeader {};
 		fig::string _search_text;
 		float _fSearchTimer {};
+		ButtonWithIcon* _pSortingButton {};
 
 	};
 }

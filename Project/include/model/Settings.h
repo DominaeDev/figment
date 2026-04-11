@@ -68,6 +68,15 @@ namespace fig
 			return fig::uuid::fromStrFactory(GetValue<fig::string>(setting, strDefault).c_str());
 		}
 
+		template<typename T>
+		T GetEnum(E setting, T defaultValue) const noexcept
+		{
+			auto value = GetValue<int32_t>(setting, {});
+			if (value >= 0 and value < static_cast<int32_t>(T::Count))
+				return static_cast<T>(value);
+			return defaultValue;
+		}
+
 		void SetBool(E setting, bool value) noexcept
 		{
 			SetValue<int32_t>(setting, value ? 1 : 0);
@@ -91,6 +100,12 @@ namespace fig
 		void SetUUID(E setting, const fig::uuid& value) noexcept
 		{
 			return SetValue<fig::string>(setting, value.str());
+		}
+
+		template<typename T>
+		void SetEnum(E setting, T value) noexcept
+		{
+			return SetValue<int32_t>(setting, static_cast<int32_t>(value));
 		}
 
 	private:

@@ -10,6 +10,28 @@ namespace fig
 	{
 		ShowTags,
 		HalfSizeCards,
+		Sorting,
+		Ordering,
+
+		Count,
+	};
+
+	enum class SortBy
+	{
+		Name = 0,
+		CreatedAt,
+		UpdatedAt,
+		MostRecentChat,
+
+		Count,
+	};
+
+	enum class OrderBy
+	{
+		Ascending = 0,
+		Descending,
+		
+		Count,
 	};
 
 	extern template class SettingsCollection<UserSetting>;

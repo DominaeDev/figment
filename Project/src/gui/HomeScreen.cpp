@@ -4,6 +4,7 @@
 #include "gui/MainFrame.h"
 #include "gui/SearchBox.h"
 #include "gui/AppResources.h"
+#include "gui/Menu.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "util/Common.h"
@@ -26,6 +27,8 @@ namespace fig::gui
 
 		auto pHomeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_HOME);
 
+		_pSortingButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SORTING);
+		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 		auto toggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
 		toggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 		auto gridLargeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
@@ -47,6 +50,7 @@ namespace fig::gui
 		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 8);
 		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
 		pTopSizer->AddStretchSpacer();
+		pTopSizer->Add(_pSortingButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(toggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(gridLargeButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(gridSmallButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
@@ -89,8 +93,8 @@ namespace fig::gui
 
 	void HomeScreen::CreateCards()
 	{
-		_pCardList->SetCardSize(Global::GetUserManager().GetSettings().GetBool(UserSetting::HalfSizeCards) ? CardSize::Half : CardSize::Full);
-		_pCardList->EnableTags(Global::GetUserManager().GetSettings().GetBool(UserSetting::ShowTags));
+		_pCardList->SetCardSize(Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards) ? CardSize::Half : CardSize::Full);
+		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::ShowTags));
 
 		DEBUG_MEASURE_BEGIN("CreateCards");
 		_pCardList->CreateCards(CardList::CardType::Character);
@@ -127,12 +131,48 @@ namespace fig::gui
 	void HomeScreen::SetSmallCardSize(bool bSmall) noexcept
 	{
 		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
-		Global::GetUserManager().GetSettings().SetBool(UserSetting::HalfSizeCards, bSmall);
+		Global::GetUserSettings().SetBool(UserSetting::HalfSizeCards, bSmall);
 	}
 
 	void HomeScreen::ToggleTags()
 	{
 		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
-		Global::GetUserManager().GetSettings().SetBool(UserSetting::ShowTags, _pCardList->IsTagsEnabled());
+		Global::GetUserSettings().SetBool(UserSetting::ShowTags, _pCardList->IsTagsEnabled());
 	}
+
+	void HomeScreen::ShowSortingMenu()
+	{
+		MainFrame::GetInstance().DestroyOverlays();
+
+		auto ChangeSorting = [](CardList* pCardList, SortBy sorting) {
+			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Sorting, sorting);
+			pCardList->Reorder();
+		};
+
+		auto ChangeOrdering = [](CardList* pCardList, OrderBy ordering) {
+			Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Ordering, ordering);
+			pCardList->Reorder();
+		};
+
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
+
+		auto pMenu = new Menu(&MainFrame::GetInstance());
+		pMenu->AddCheckItem("Sort by name", sortBy == SortBy::Name)
+			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::Name); });
+		pMenu->AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
+			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::CreatedAt); });
+		pMenu->AddCheckItem("Sort by last updated", sortBy == SortBy::UpdatedAt)
+			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::UpdatedAt); });
+		pMenu->AddCheckItem("Sort by most recent chat", sortBy == SortBy::MostRecentChat)
+			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::MostRecentChat); });
+		pMenu->AddSeparator();
+		pMenu->AddCheckItem("Ascending", orderBy == OrderBy::Ascending)
+			.SetDelegate([&]() { ChangeOrdering(_pCardList, OrderBy::Ascending); });
+		pMenu->AddCheckItem("Descending", orderBy == OrderBy::Descending)
+			.SetDelegate([&]() { ChangeOrdering(_pCardList, OrderBy::Descending); });
+
+		pMenu->Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
+	}
+	
 }

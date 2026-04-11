@@ -81,6 +81,17 @@ namespace fig::gui
 			_items.erase(it);
 	}
 
+	void Sizer::RemoveAll()
+	{
+		for (auto it = _items.begin(); it != _items.end(); ++it)
+		{
+			auto ppSizer = std::get_if<Sizer*>(&it->target);
+			if (ppSizer)
+				delete* ppSizer;
+		}
+		_items.clear();
+	}
+
 	void Sizer::RemoveSizer(Sizer* pSizer)
 	{
 		auto it = std::find_if(_items.cbegin(), _items.cend(), [pSizer](const SizerItem & li) {

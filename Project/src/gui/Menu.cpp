@@ -33,6 +33,15 @@ namespace fig::gui
 		return _subItems.back();
 	}
 
+	MenuItem& MenuItem::AddCheckItem(const fig::string& label, bool bChecked, MenuDelegate fn)
+	{
+		auto menuItem = MenuItem(label, TextureType::NONE, fn);
+		menuItem._bCheckable = true;
+		menuItem._bChecked = bChecked;
+		_subItems.emplace_back(menuItem);
+		return _subItems.back();
+	}
+
 	Menu::Menu(Frame* pHostFrame) : Overlay(pHostFrame)
 	{
 		auto pBackground = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_10PX, 16);
@@ -52,6 +61,15 @@ namespace fig::gui
 	MenuItem& Menu::AddItem(const fig::string& label, TextureType icon, MenuDelegate fn)
 	{
 		_items.emplace_back(MenuItem(label, icon, fn));
+		return _items.back();
+	}
+
+	MenuItem& Menu::AddCheckItem(const fig::string& label, bool bChecked, MenuDelegate fn)
+	{
+		auto menuItem = MenuItem(label, TextureType::NONE, fn);
+		menuItem._bCheckable = true;
+		menuItem._bChecked = bChecked;
+		_items.emplace_back(menuItem);
 		return _items.back();
 	}
 
@@ -106,7 +124,17 @@ namespace fig::gui
 		pItemLabel->SetMaxSize(pItemRoot->GetWidth() - 36, -1);
 		pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
 
-		if (menuItem._icon != TextureType::NONE)
+		if (menuItem._bCheckable)
+		{
+			if (menuItem._bChecked)
+			{
+				auto pIcon = new Image(pItemRoot, AppResources::GetTexture(TextureType::ICON_CHECKMARK));
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+				pIcon->SetSize(22, 22);
+				pIcon->SetPosition(4, 4);
+			}
+		}
+		else if (menuItem._icon != TextureType::NONE)
 		{
 			auto pIcon = new Image(pItemRoot, AppResources::GetTexture(menuItem._icon));
 			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);

@@ -17,7 +17,8 @@ namespace fig::gui
 		explicit MenuItem(const fig::string& label, TextureType icon = {}, MenuDelegate fn = {});
 		
 		MenuItem& AddItem(const fig::string& label, TextureType icon = {}, MenuDelegate fn = {});
-		
+		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
+
 		inline MenuItem& SetLabel(const fig::string& label) noexcept { _label = label; return *this; };
 		inline MenuItem& SetEnabled(bool bEnabled) noexcept { _state = bEnabled ? State::Default : State::Disabled; return *this; };
 		inline MenuItem& SetIcon(TextureType icon) noexcept { _icon = icon; return *this; };
@@ -53,6 +54,7 @@ namespace fig::gui
 		Menu(Frame* pHostFrame);
 
 		MenuItem& AddItem(const fig::string& label, TextureType icon = {}, MenuDelegate fn = {});
+		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
 		void AddSeparator();
 
 		void Show(Point position = {-1, -1});

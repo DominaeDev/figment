@@ -24,7 +24,11 @@ namespace fig::io
 			{
 				CharacterData character;
 				if (character.LoadFromXml(asset.AsStringView()))
+				{
+					character.createdAt = asset.GetCreatedAt();
+					character.updatedAt = asset.GetUpdatedAt();
 					_characters[asset.id] = std::move(character);
+				}
 			}
 			else
 				continue; // Skip

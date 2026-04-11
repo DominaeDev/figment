@@ -11,6 +11,8 @@
 		static const std::vector<SettingTuple> _AllSettings {
 			std::tuple { UserSetting::ShowTags,			"Interface",	"ShowTags",		1 },
 			std::tuple { UserSetting::HalfSizeCards,	"Interface",	"SmallCards",	0 },
+			std::tuple { UserSetting::Sorting,			"Interface",	"Sorting",		static_cast<int32_t>(SortBy::CreatedAt) },
+			std::tuple { UserSetting::Ordering,			"Interface",	"Ordering",		static_cast<int32_t>(OrderBy::Descending) },
 		};
 
 		void SettingsCollection<UserSetting>::Init() noexcept

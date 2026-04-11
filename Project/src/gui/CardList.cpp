@@ -3,6 +3,7 @@
 #include "model/UserManager.h"
 #include "model/AssetManager.h"
 #include "util/Common.h"
+#include "util/StringUtility.h"
 #include "gui/CardList.h"
 #include "gui/GridSizer.h"
 #include "gui/ScenarioCard.h"
@@ -10,6 +11,7 @@
 #include "gui/MainFrame.h"
 
 using namespace fig::io;
+using namespace fig::util;
 
 namespace fig::gui
 {
@@ -202,5 +204,47 @@ namespace fig::gui
 		_maxExtent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
 
 		ScrollPanel::OnAfterLayout();
+	}
+
+	void CardList::Reorder()
+	{
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
+
+		auto fnCompare = [](const fig::timestamp & a, const fig::timestamp & b) -> int {
+			return a < b ? -1 : (a > b ? 1 : 0);
+		};
+
+		std::ranges::stable_sort(_cards, [&](CoverCard* a, CoverCard* b) -> bool {
+			auto& meta_a = a->GetMetaData();
+			auto& meta_b = b->GetMetaData();
+			int cmp = 0;
+			switch (sortBy)
+			{
+			case SortBy::Name:
+				cmp = _stricmp(meta_a.name.c_str(), meta_b.name.c_str());
+				break;
+			case SortBy::CreatedAt:
+				cmp = fnCompare(meta_a.createdAt, meta_b.createdAt);
+				break;
+			case SortBy::UpdatedAt:
+				cmp = fnCompare(meta_a.updatedAt, meta_b.updatedAt);
+				break;
+			case SortBy::MostRecentChat:
+				cmp = fnCompare(meta_a.lastUsedAt, meta_b.lastUsedAt);
+				break;
+			}
+
+			if (orderBy == OrderBy::Descending)
+				cmp *= -1;
+
+			return cmp < 0; 
+		});
+
+		_pGridSizer->RemoveAll();
+		for (auto& card : _cards)
+			_pGridSizer->Add(card);
+
+		InvalidateLayout();
 	}
 }

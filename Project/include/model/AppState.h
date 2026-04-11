@@ -6,6 +6,7 @@
 #include <memory>
 #include "gui/GUITypes.h"
 #include "model/AppSettings.h"
+#include "model/UserSettings.h"
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -50,6 +51,7 @@ namespace fig
 		static fig::llm::LLMBackend& GetLLMEngine();
 		static fig::user::UserManager& GetUserManager();
 		static fig::AppSettings& GetSettings();
+		static fig::UserSettings& GetUserSettings();
 
 		[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
 		static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);

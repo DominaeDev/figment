@@ -52,6 +52,9 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_CHEVRON_RIGHT, "./resources/gui/icons/icon_chevron_right.png");
 		LoadTexture(pRenderer, TextureType::ICON_HOME, "./resources/gui/icons/icon_home.png");
 		LoadTexture(pRenderer, TextureType::ICON_USER_SETTINGS, "./resources/gui/icons/icon_user_settings.png");
+		LoadTexture(pRenderer, TextureType::ICON_NEW_CHAT, "./resources/gui/icons/icon_new_chat.png");
+		LoadTexture(pRenderer, TextureType::ICON_SORTING, "./resources/gui/icons/icon_sorting.png");
+		LoadTexture(pRenderer, TextureType::ICON_CHECKMARK, "./resources/gui/icons/icon_checkmark.png");
 
 		// Chat
 		LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/chat/bg_9grid.png");

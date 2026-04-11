@@ -43,6 +43,9 @@ namespace fig::io
 		std::map<fig::string, CharacterProperty> properties;
 		SearchIndex searchIndex;
 
+		fig::timestamp createdAt;
+		fig::timestamp updatedAt;
+
 		bool LoadFromXml(const fig::path& filename);
 		bool LoadFromXml(const fig::string& doc);
 		bool LoadFromXml(fig::string_view doc);

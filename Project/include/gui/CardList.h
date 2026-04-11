@@ -4,6 +4,7 @@
 
 #include "gui/ScrollPanel.h"
 #include "gui/CoverCard.h"
+#include "model/UserSettings.h"
 
 namespace fig::gui
 {
@@ -20,6 +21,8 @@ namespace fig::gui
 
 		void SetFilter(const fig::string&) noexcept;
 		void ClearFilter() noexcept;
+
+		void Reorder();
 
 		void SetCardSize(CardSize cardSize);
 		void EnableTags(bool bEnable) noexcept;

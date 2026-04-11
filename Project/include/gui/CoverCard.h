@@ -29,6 +29,14 @@ namespace fig::gui
 	class TexturedBorder;
 	class NineGridImage;
 
+	struct CardMetaData
+	{
+		fig::string name;
+		fig::timestamp createdAt;
+		fig::timestamp updatedAt;
+		fig::timestamp lastUsedAt;
+	};
+
 	class CoverCard : public CardImage
 	{
 	public:
@@ -42,9 +50,11 @@ namespace fig::gui
 		
 		bool IsFilteredBy(const SearchQuery& query) const noexcept;
 		const fig::uuid& GetAssetID() const { return _assetId; }
+		inline const CardMetaData& GetMetaData() const noexcept { return _metaData; };
 
 	protected:
 		void SetCoverImages(fig::sdl::Surface&& surface, fig::sdl::Surface&& half);
+
 
 		void SetLabel(const fig::string& text) noexcept;
 		void CreateChatCounter(uint32_t count);
@@ -60,6 +70,7 @@ namespace fig::gui
 		void AddSearchTerms(const fig::string& text) noexcept;
 		void AddSearchTerms(std::span<const fig::string> texts) noexcept;
 
+		inline void SetMetaData(const CardMetaData& metaData) noexcept { _metaData = metaData; };
 	private:
 		void PollFuture();
 		void RefreshImage();
@@ -111,6 +122,7 @@ namespace fig::gui
 		bool _bHovered = false;
 		float _fTargetZoom = 0.0f;
 		float _fHoverZoom = 0.0f;
+		CardMetaData _metaData {};
 	};
 }
 

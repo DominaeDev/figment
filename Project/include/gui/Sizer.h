@@ -43,6 +43,7 @@ namespace fig::gui
 		void AddSpacer(Coord size);
 		void AddStretchSpacer();
 		void Remove(LayoutElement* pControl);
+		void RemoveAll();
 		void RemoveSizer(Sizer* pSizer);
 		void Clear();
 

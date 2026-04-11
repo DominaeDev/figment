@@ -115,6 +115,12 @@ namespace fig
 		return *(__appState->pUserManager.get());
 	}
 
+	fig::UserSettings& Global::GetUserSettings()
+	{
+		assert(__appState);
+		return __appState->pUserManager.get()->GetSettings();
+	}
+
 	void Global::SetLLMInstance(std::shared_ptr<LLMInstance> pLLMInstance)
 	{
 		assert(__appState);
