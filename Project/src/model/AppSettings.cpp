@@ -13,6 +13,7 @@ namespace fig
 		{ AppSetting::SignedIn,			{ "Application", "SignedIn", 0 } },
 		{ AppSetting::WindowMaximized,	{ "Application", "WindowMaximized", 0 } },
 		{ AppSetting::WindowSize,		{ "Application", "WindowSize", std::vector { Constants::GUI::WindowDefaultWidth, Constants::GUI::WindowDefaultHeight } } },
+		{ AppSetting::SmoothScrolling,	{ "Application", "SmoothScrolling", 1 } },
 	};
 
 	void SettingsCollection<AppSetting>::Init() noexcept

@@ -2,6 +2,8 @@
 #include "gui/ScrollPanel.h"
 #include "gui/GUIUtility.h"
 #include "gui/VerticalScrollBar.h"
+#include "model/AppState.h"
+#include "model/AppSettings.h"
 
 namespace fig::gui
 {
@@ -24,6 +26,11 @@ namespace fig::gui
 	{
 		if (_pScrollBar)
 			delete _pScrollBar;
+	}
+
+	static bool IsSmoothScrollingEnabled()
+	{
+		return Global::GetSettings().GetBool(AppSetting::SmoothScrolling);
 	}
 
 	void ScrollPanel::Render(Renderer* pRenderer)
@@ -50,14 +57,21 @@ namespace fig::gui
 	void ScrollPanel::OnUpdate(float fElapsed)
 	{
 		// Smooth scrolling
-		if (_fScrollY != _fTargetScrollY)
+		if (IsSmoothScrollingEnabled())
 		{
-			_fScrollY += (_fTargetScrollY - _fScrollY) * Constants::GUI::MouseScrollSmoothing * fElapsed;
+			if (_fScrollY != _fTargetScrollY)
+			{
+				_fScrollY += (_fTargetScrollY - _fScrollY) * Constants::GUI::MouseScrollSmoothing * fElapsed;
 
-			if (std::abs(_fTargetScrollY - _fScrollY) < 0.5f)
-				_fScrollY = _fTargetScrollY;
-			else
+				if (std::abs(_fTargetScrollY - _fScrollY) < 0.5f)
+					_fScrollY = _fTargetScrollY;
 				InvalidateLayout();
+			}
+		}
+		else
+		{
+			_fScrollY = _fTargetScrollY;
+			InvalidateLayout();
 		}
 
 		if (_pScrollBar)
@@ -72,7 +86,8 @@ namespace fig::gui
 			return false;
 
 		_fTargetScrollY -= toF(event.integer_y) * Constants::GUI::MouseScrollSpeed;
-		_fTargetScrollY = std::clamp(_fTargetScrollY, 0.f, (float)_fMaxExtent);
+		_fTargetScrollY = std::clamp(_fTargetScrollY, 0.f, (float)_maxExtent);
+		
 		OnScroll();
 
 		RefreshScrollBar();
@@ -83,7 +98,7 @@ namespace fig::gui
 	{
 		if (_pSizer and not _children.empty())
 		{
-			Coord maxExtent = std::max(_fMaxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
+			Coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
 			_fScrollY = std::clamp(_fScrollY, 0.0f, toF(maxExtent));
 			_fTargetScrollY = std::clamp(_fTargetScrollY, 0.0f, toF(maxExtent));
 
@@ -99,10 +114,18 @@ namespace fig::gui
 	{
 		if (_pScrollBar)
 		{
-			Coord maxExtent = std::max(_fMaxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
+			Coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
 			_pScrollBar->SetHeight(GetHeight());
-			_pScrollBar->SetAbsolutePosition(GetAbsoluteX() + GetWidth() + _fScrollBarOffset, GetAbsoluteY()); // 16px offset??
-			_pScrollBar->SetScroll(_fScrollY, maxExtent);
+			_pScrollBar->SetAbsolutePosition(GetAbsoluteX() + GetWidth() + _scrollBarOffset, GetAbsoluteY()); // 16px offset??
+			_pScrollBar->SetScroll(*this, _fScrollY, maxExtent);
 		}
+	}
+
+	void ScrollPanel::ScrollTo(float position) noexcept
+	{
+		_fTargetScrollY = std::clamp(position, 0.0f, (float)_maxExtent);
+		OnScroll();
+
+		RefreshScrollBar();
 	}
 }

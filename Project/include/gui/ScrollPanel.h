@@ -14,7 +14,9 @@ namespace fig::gui
 		ScrollPanel(LayoutElement* pParent, bool bScrollBar = true);
 		~ScrollPanel();
 		void Render(Renderer* pRenderer) override;
-		inline void SetScrollBarOffset(Coord offset) noexcept { _fScrollBarOffset = offset; }
+		inline void SetScrollBarOffset(Coord offset) noexcept { _scrollBarOffset = offset; }
+		
+		void ScrollTo(float position) noexcept;
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -32,8 +34,8 @@ namespace fig::gui
 		Coord _bottomMargin {};
 		float _fScrollY {};
 		float _fTargetScrollY {};
-		Coord _fMaxExtent {};
-		Coord _fScrollBarOffset { -16 };
+		Coord _maxExtent {};
+		Coord _scrollBarOffset { -16 };
 
 	private:
 		VerticalScrollBar* _pScrollBar {};

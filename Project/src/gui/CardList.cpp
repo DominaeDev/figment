@@ -112,13 +112,13 @@ namespace fig::gui
 			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::CardSpacingY);
 			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
 
-			_fMaxExtent = curr_extent;
+			_maxExtent = curr_extent;
 			_last_rows = curr_rows;
 
 			if (last_extent > 0)
 			{
 				float ratio = _fScrollY / last_extent;
-				_fScrollY = ratio * toF(_fMaxExtent);
+				_fScrollY = ratio * toF(_maxExtent);
 				_fTargetScrollY = _fScrollY;
 				LayoutNow();
 			}
@@ -199,7 +199,7 @@ namespace fig::gui
 	{
 		int32_t curr_rows = toI(_pGridSizer->GetRows());
 		Coord kCardHeight = cardHeight(_cardSize);
-		_fMaxExtent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
+		_maxExtent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
 
 		ScrollPanel::OnAfterLayout();
 	}

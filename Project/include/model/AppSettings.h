@@ -12,6 +12,7 @@ namespace fig
 		SignedIn,
 		WindowMaximized,
 		WindowSize,
+		SmoothScrolling,
 	};
 
 	extern template class SettingsCollection<AppSetting>;
