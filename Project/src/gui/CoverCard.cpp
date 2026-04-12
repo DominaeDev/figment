@@ -5,6 +5,7 @@
 #include "gui/NineGridImage.h"
 #include "gui/RoundedBorder.h"
 #include "gui/GUIUtility.h"
+#include "gui/MainFrame.h"
 #include "util/StringUtility.h"
 
 #include <cassert>
@@ -187,7 +188,7 @@ namespace fig::gui
 			CardImage::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 		}
 
-		bool bHovered = is_inside(GetRect(), GetMousePos());
+		bool bHovered = _bSelected or (is_inside(GetRect(), GetMousePos()) and !MainFrame::GetInstance().IsMenuShowing());
 		if (bHovered != _bHovered)
 		{
 			_bHovered = bHovered;

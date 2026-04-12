@@ -55,7 +55,6 @@ namespace fig::gui
 	protected:
 		void SetCoverImages(fig::sdl::Surface&& surface, fig::sdl::Surface&& half);
 
-
 		void SetLabel(const fig::string& text) noexcept;
 		void CreateChatCounter(uint32_t count);
 
@@ -76,6 +75,9 @@ namespace fig::gui
 		void RefreshImage();
 		void CreatePendingTags();
 		void CreatePendingLabel();
+
+	protected:
+		bool _bSelected = false;
 
 	private:
 		fig::uuid _assetId;

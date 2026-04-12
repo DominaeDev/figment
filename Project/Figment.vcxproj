@@ -261,6 +261,7 @@
     <ClCompile Include="src\util\SearchIndex.cpp" />
     <ClCompile Include="src\util\Security.cpp" />
     <ClCompile Include="src\util\Hash.cpp" />
+    <ClCompile Include="src\util\Events.cpp" />
     <ClCompile Include="src\util\StringUtility.cpp" />
     <ClCompile Include="src\gui\TextBox.cpp" />
     <ClCompile Include="src\gui\AppResources.cpp" />
@@ -456,6 +457,7 @@
     <ClInclude Include="include\model\UserProfile.h" />
     <ClInclude Include="include\model\UserSettings.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\util\Events.h" />
     <ClInclude Include="include\util\ExcludedSearchTerms.h" />
     <ClInclude Include="include\util\IniFile.h" />
     <ClInclude Include="include\util\ProfileDatabase.h" />

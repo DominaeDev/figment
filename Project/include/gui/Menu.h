@@ -57,10 +57,11 @@ namespace fig::gui
 		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
 		void AddSeparator();
 
-		void Show(Point position = {-1, -1});
+		uint32_t Show(Point position = {-1, -1}, bool bPopAll = true);
 		void Reset();
 
 	protected:
+		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 		bool OnEvent(Event& event) override;
 
@@ -71,18 +72,20 @@ namespace fig::gui
 		void CreateItem(MenuItem& menuItem);
 		void CreateSeparator(MenuItem& menuItem);
 		void SetMenuItemState(int32_t index, MenuItem::State state);
+		void ShowSubmenu(size_t menuItemIndex);
 
 	protected:
 		fig::sdl::Texture _texture;
 		std::vector<MenuItem> _items;
-
 		bool _bInitialized = false;
 
 		int32_t _mouseHoverIndex = -1;
 		bool _bMouseDown = false;
 		int32_t _itemY = 0;
-		Point _position {};
-
+		float _fExpandTimer {};
+		float _fCollapseTimer {};
+		int32_t _submenuIndex = -1;
+		Menu* _pSubmenu = nullptr;
 	};
 }
 

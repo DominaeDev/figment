@@ -5,7 +5,9 @@
 namespace fig::gui
 {
 	class Window;
-	class Overlay;
+	class Menu;
+
+	using MenuPtr = Menu*;
 
 	class Frame : public Control
 	{
@@ -17,11 +19,23 @@ namespace fig::gui
 		void Update(float fElapsed) override;
 		bool ProcessEvent(Event& event) override;
 
-		void AddOverlay(Overlay* pOverlay);
-		void DestroyOverlay(Overlay* pOverlay);
-		void DestroyOverlays();
+		inline bool IsMenuShowing() const noexcept { return !_menus.empty(); };
+		int32_t PushMenu(MenuPtr pMenu);
+		void PopMenu(MenuPtr pMenu);
+		void PopAllMenus();
 
 	protected:
-		std::vector<Overlay*> _overlays;
+		bool HandleMouseDown(SDL_MouseButtonEvent& event);
+		void OnMenuOpen(int32_t id);
+		void OnMenuClose(int32_t id);
+
+	protected:
+		struct MenuInstance
+		{
+			int32_t id;
+			MenuPtr ptr;
+		};
+		std::vector<MenuInstance> _menus;
+		int32_t _nextMenuId {};
 	};
 }

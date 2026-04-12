@@ -29,6 +29,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ROUNDED_BORDER_6PX, "./resources/gui/rounded_border_6px.png");
 		LoadTexture(pRenderer, TextureType::ROUNDED_BACKGROUND_10PX, "./resources/gui/rounded_bg_10px.png");
 		LoadTexture(pRenderer, TextureType::ROUNDED_BORDER_10PX, "./resources/gui/rounded_border_10px.png");
+		LoadTexture(pRenderer, TextureType::SUBMENU_ARROW , "./resources/gui/submenu_arrow.png");
 
 		// Icons
 		LoadTexture(pRenderer, TextureType::ICON_ERROR, "./resources/gui/icons/icon_error_2.png");

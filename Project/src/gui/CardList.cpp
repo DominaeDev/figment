@@ -196,7 +196,7 @@ namespace fig::gui
 
 	void CardList::OnScroll()
 	{
-		MainFrame::GetInstance().DestroyOverlays(); //! @menu
+		MainFrame::GetInstance().PopAllMenus();
 	}
 
 	void CardList::OnAfterLayout()

@@ -108,8 +108,6 @@ namespace fig::gui
 
 	void SidePanel::ShowMenu()
 	{
-		MainFrame::GetInstance().DestroyOverlays(); //! @menu
-
 		auto pMenu = new Menu(&MainFrame::GetInstance());
 		pMenu->AddItem("New character\u2026");
 		pMenu->AddItem("New scenario\u2026");

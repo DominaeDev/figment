@@ -20,6 +20,7 @@ namespace fig::gui
 	private:
 		fig::uuid _characterId;
 		fig::string _characterName;
+		int32_t _menuId;
 	};
 }
 

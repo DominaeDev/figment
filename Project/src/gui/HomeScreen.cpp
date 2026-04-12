@@ -145,8 +145,6 @@ namespace fig::gui
 
 	void HomeScreen::ShowSortingMenu()
 	{
-		MainFrame::GetInstance().DestroyOverlays(); //! @menu
-
 		auto ChangeSorting = [](CardList* pCardList, SortBy sorting) {
 			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Sorting, sorting);
 			pCardList->Reorder();
@@ -182,16 +180,14 @@ namespace fig::gui
 
 	void HomeScreen::ShowFilteringMenu()
 	{
-		MainFrame::GetInstance().DestroyOverlays(); //! @menu
-
 		auto pMenu = new Menu(&MainFrame::GetInstance());
 		pMenu->AddCheckItem("Filter by new");
 		pMenu->AddCheckItem("Filter by starred");
 		pMenu->AddCheckItem("Filter by chats");
-		pMenu->AddSeparator();
-		pMenu->AddCheckItem("Show male", true);
-		pMenu->AddCheckItem("Show female", true);
-		pMenu->AddCheckItem("Show non-binary", true);
+		auto& genders = pMenu->AddItem("Filter by gender");
+		genders.AddCheckItem("Show male", true);
+		genders.AddCheckItem("Show female", true);
+		genders.AddCheckItem("Show non-binary", true);
 		pMenu->AddSeparator();
 		pMenu->AddCheckItem("Show hidden");
 

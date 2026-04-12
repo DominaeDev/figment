@@ -198,8 +198,6 @@ namespace fig::gui
 
 	void LoginScreen::ShowMenu()
 	{
-		MainFrame::GetInstance().DestroyOverlays(); //! @menu
-
 		auto pMenu = new Menu(&MainFrame::GetInstance());
 		pMenu->AddItem("New profile\u2026");
 		pMenu->AddItem("Recover profile\u2026");

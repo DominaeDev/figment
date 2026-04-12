@@ -5,6 +5,8 @@
 #include "gui/TexturedBorder.h"
 #include "gui/CustomRenderers.h"
 #include "gui/MenuSeparator.h"
+#include "model/AppState.h"
+#include "util/Events.h"
 
 using namespace fig::util;
 
@@ -19,6 +21,9 @@ namespace fig::gui
 	constexpr Color MenuBorderColor = Colors::LineColor;
 	constexpr Color MenuItemHoverColor = Color { 0xefece3, 0x80 };
 	constexpr Color MenuItemPressedColor = Color { 0xefece3, 0xFF };
+	constexpr float AutoExpandDelay = 0.3f;
+	constexpr float AutoCollapseDelay = 0.3f;
+	constexpr const char* Separator = "----";
 
 	MenuItem::MenuItem(const fig::string& label, TextureType icon, MenuDelegate fn) :
 		_label { label },
@@ -75,8 +80,42 @@ namespace fig::gui
 
 	void Menu::AddSeparator()
 	{
-		_items.emplace_back(MenuItem("----"));
+		_items.emplace_back(MenuItem(Separator));
 		_items.back().SetEnabled(false);
+	}
+
+	void Menu::OnUpdate(float fElapsed)
+	{
+		_fExpandTimer += fElapsed;
+		if (_fExpandTimer >= AutoExpandDelay)
+		{
+			_fExpandTimer = 0.0f; // jic
+
+			// Show hovered submenu
+			if (_mouseHoverIndex != -1 && _submenuIndex != _mouseHoverIndex)
+			{
+				if (_items[_mouseHoverIndex].HasSubMenu())
+					ShowSubmenu(_mouseHoverIndex);
+			}
+		}
+
+		if (_pSubmenu)
+		{
+			if (_mouseHoverIndex > 0)
+			{
+				if (_mouseHoverIndex != _submenuIndex)
+					_fCollapseTimer += fElapsed;
+				else
+					_fCollapseTimer = 0.0f;
+			}
+
+			if (_fCollapseTimer >= AutoCollapseDelay)
+			{
+				_pOwner->PopMenu(_pSubmenu);
+				_pSubmenu = nullptr;
+				_submenuIndex = -1;
+			}
+		}
 	}
 
 	void Menu::OnRender(Renderer* pRenderer)
@@ -85,21 +124,23 @@ namespace fig::gui
 		return;
 	}
 
-	void Menu::Show(Point position)
+	uint32_t Menu::Show(Point position, bool bPopAll)
 	{
-		_position = position;
-		if (_position.x == -1 and _position.y == -1)
+		if (_pOwner and bPopAll)
+			_pOwner->PopAllMenus();
+
+		if (position.x == -1 and position.y == -1)
 		{
 			float mx, my;
 			SDL_GetMouseState(&mx, &my);
-			_position = Point { toI(mx), toI(my) };
+			position = Point { toI(mx), toI(my) };
 		}
 
 		Reset();
 
 		for (auto& item : _items)
 		{
-			if (item._label == "----")
+			if (item._label == Separator)
 				CreateSeparator(item);
 			else
 				CreateItem(item);
@@ -107,8 +148,11 @@ namespace fig::gui
 
 		_bInitialized = true;
 
-		SetAbsolutePosition(_position);
+		SetAbsolutePosition(position);
 		SetVisible(true);
+
+		int32_t menuId = _pOwner->PushMenu(this);
+		return menuId;
 	}
 
 	void Menu::CreateItem(MenuItem& menuItem)
@@ -130,7 +174,6 @@ namespace fig::gui
 			{
 				auto pIcon = new Image(pItemRoot, AppResources::GetTexture(TextureType::ICON_CHECKMARK));
 				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
-				pIcon->SetSize(22, 22);
 				pIcon->SetPosition(4, 4);
 			}
 		}
@@ -138,8 +181,15 @@ namespace fig::gui
 		{
 			auto pIcon = new Image(pItemRoot, AppResources::GetTexture(menuItem._icon));
 			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
-			pIcon->SetSize(22, 22);
 			pIcon->SetPosition(4, 4);
+		}
+
+		if (menuItem.HasSubMenu())
+		{
+			auto pArrow = new Image(pItemRoot, AppResources::GetTexture(TextureType::SUBMENU_ARROW));
+			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+			pArrow->SetX(pItemRoot->GetWidth() - pArrow->GetWidth());
+			pArrow->CenterVertically();
 		}
 
 		_itemY += MenuItemHeight;
@@ -166,6 +216,10 @@ namespace fig::gui
 	void Menu::Reset()
 	{
 		DestroyChildren();
+		_pSubmenu = nullptr;
+		_submenuIndex = -1;
+		_fExpandTimer = 0.0f;
+		_fCollapseTimer = 0.0f;
 	}
 
 	bool Menu::OnEvent(Event& event)
@@ -194,6 +248,8 @@ namespace fig::gui
 			{
 				SetMenuItemState(_mouseHoverIndex, MenuItem::State::Default);
 				_mouseHoverIndex = -1;
+				_fExpandTimer = 0.0f;
+				_fCollapseTimer = 0.0f;
 			}
 			return false;
 		}
@@ -201,7 +257,7 @@ namespace fig::gui
 		int32_t hoverIndex = -1;
 		for (size_t i = 0; i < _items.size(); ++i)
 		{
-			if (is_inside(_items[i].rect, toI(motionEvent.x - _position.x), toI(motionEvent.y - _position.y)))
+			if (is_inside(_items[i].rect, toI(motionEvent.x - GetAbsoluteX()), toI(motionEvent.y - GetAbsoluteY())))
 			{
 				hoverIndex = toI(i);
 				break;
@@ -213,27 +269,28 @@ namespace fig::gui
 			SetMenuItemState(_mouseHoverIndex, MenuItem::State::Default);
 		}
 
+		if (_mouseHoverIndex != hoverIndex)
+			_fExpandTimer = 0.0f;
+
+		_mouseHoverIndex = hoverIndex;
+
 		if (hoverIndex >= 0 && _items[hoverIndex].IsEnabled())
 		{
 			if (_bMouseDown)
 				SetMenuItemState(hoverIndex, MenuItem::State::Pressed);
 			else
 				SetMenuItemState(hoverIndex, MenuItem::State::Hover);
+			return true;
 		}
-		
-		_mouseHoverIndex = hoverIndex;
 
-		return true;
+		return false;
 	}
 
 	bool Menu::HandleMouseDown(SDL_MouseButtonEvent& event)
 	{
 		auto rect = GetRect();
 		if (not is_inside(rect, toI(event.x), toI(event.y)))
-		{
-			Destroy();
 			return false;
-		}
 
 		if (event.button != SDL_BUTTON_LEFT)
 			return false;
@@ -241,7 +298,7 @@ namespace fig::gui
 		int32_t hoverIndex = -1;
 		for (size_t i = 0; i < _items.size(); ++i)
 		{
-			if (is_inside(_items[i].rect, toI(event.x - _position.x), toI(event.y - _position.y)))
+			if (is_inside(_items[i].rect, toI(event.x - GetAbsoluteX()), toI(event.y - GetAbsoluteY())))
 			{
 				hoverIndex = toI(i);
 				break;
@@ -250,9 +307,7 @@ namespace fig::gui
 
 		_bMouseDown = true;
 		if (hoverIndex >= 0 && _items[hoverIndex].IsEnabled())
-		{
 			SetMenuItemState(hoverIndex, MenuItem::State::Pressed);
-		}		
 
 		return true;
 	}
@@ -269,17 +324,22 @@ namespace fig::gui
 		if (_mouseHoverIndex < 0)
 			return false;
 
+		auto& menuItem = _items[_mouseHoverIndex];
+		if (not menuItem.IsEnabled())
+			return false;
+
 		SetMenuItemState(_mouseHoverIndex, MenuItem::State::Hover);
 
-		if (_items[_mouseHoverIndex].HasSubMenu())
+		if (menuItem.HasSubMenu())
 		{
+			ShowSubmenu(_mouseHoverIndex);
 			return true;
 		}
-		else if (_items[_mouseHoverIndex]._fnDelegate)
+		else if (menuItem._fnDelegate)
 		{
-			_items[_mouseHoverIndex]._fnDelegate();
+			menuItem._fnDelegate();
 		}
-		Destroy();
+		_pOwner->PopAllMenus();
 		return true;
 	}
 
@@ -308,4 +368,22 @@ namespace fig::gui
 		}
 	}
 
+	void Menu::ShowSubmenu(size_t menuItemIndex)
+	{
+		if (_pSubmenu)
+		{
+			_pOwner->PopMenu(_pSubmenu);
+			_pSubmenu = nullptr;
+			_submenuIndex = -1;
+		}
+
+		if (menuItemIndex >= _items.size())
+			return;
+
+		auto& menuItem = _items[menuItemIndex];
+		_submenuIndex = toI(menuItemIndex);
+		_pSubmenu = new Menu(_pOwner);
+		_pSubmenu->_items = menuItem._subItems;
+		_pSubmenu->Show(Point { GetX() + GetWidth(), GetY() + menuItem.rect.y }, false);
+	}
 }
