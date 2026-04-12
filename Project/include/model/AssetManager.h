@@ -105,6 +105,7 @@ namespace fig::io
 		fig::uuid _profileID;
 		fig::path _profilePath;
 		fig::auth::AuthKey _profileAuthKey {};
+		std::map<fig::uuid, AssetFolder> _folders {};
 		std::map<fig::uuid, Asset> _assets {};
 		std::unique_ptr<AssetDatabase> _pAssetDB;
 

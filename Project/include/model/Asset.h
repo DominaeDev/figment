@@ -70,6 +70,23 @@ namespace fig::io
 	DataFormat DataFormatFromString(const fig::string& str);
 	DataFormat DataFormatFromExt(const fig::string& ext);
 
+	enum class FolderCategory
+	{
+		Undefined = 0,
+		Character,
+		Scenario,
+	};
+	fig::string FolderCategoryToString(FolderCategory format) noexcept;
+	FolderCategory FolderCategoryFromString(const fig::string& str) noexcept;
+
+	struct AssetFolder
+	{
+		fig::uuid id {};
+		fig::uuid parent_id {};
+		fig::string name {};
+		FolderCategory category {};
+	};
+
 	class Asset
 	{
 		using AssetFile = fig::io::AssetFile;
@@ -125,6 +142,7 @@ namespace fig::io
 	public:
 		fig::uuid id {};
 		fig::uuid parent_id {};
+		fig::uuid folder_id {};
 		AssetType asset_type { AssetType::Undefined };
 		uint8_t asset_subtype {};
 		DataFormat data_format { DataFormat::Undefined };

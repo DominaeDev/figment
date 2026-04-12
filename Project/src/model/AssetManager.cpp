@@ -286,6 +286,14 @@ namespace fig::io
 	{
 		DEBUG_MEASURE_BEGIN("LoadAssetIndex");
 		auto& db = GetDatabase();
+		// Fetch folders
+		if (auto folders = db.FetchFolders(); folders.has_value())
+		{
+			std::scoped_lock lock { _assetsMutex };
+			_folders = std::move(folders.value());
+		}
+
+		// Fetch assets
 		if (auto assets = db.FetchAssets(); assets.has_value())
 		{
 			std::scoped_lock lock { _assetsMutex };

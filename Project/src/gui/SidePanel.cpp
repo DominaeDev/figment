@@ -50,18 +50,11 @@ namespace fig::gui
 		auto pMainArea = new Area(this);
 
 		auto pChatButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
-		pChatButton->SetTheme(Themes::SidePanelButtonStyle);
 		pChatButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen<ChatScreen>(); });
-		pChatButton->SetHeight(58);
-
 		auto pCharactersButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
-		pCharactersButton->SetTheme(Themes::SidePanelButtonStyle);
 		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen<HomeScreen>(); });
-		pCharactersButton->SetHeight(58);
-
 		auto pScenariosButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
-		pScenariosButton->SetTheme(Themes::SidePanelButtonStyle);
-		pScenariosButton->SetHeight(58);
+		auto pModelsButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_MODELS, "Models");
 
 		auto pButtonSizer = new VerticalSizer();
 		pMainArea->SetSizer(pButtonSizer);
@@ -72,6 +65,8 @@ namespace fig::gui
 		pButtonSizer->Add(pCharactersButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pScenariosButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
+		pButtonSizer->AddSpacer(4);
+		pButtonSizer->Add(pModelsButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
 
 		auto pFooterPanel = new Area(this);
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);

@@ -19,10 +19,14 @@ namespace fig::io
 		AssetDatabase(fig::path filename);
 		virtual ~AssetDatabase();
 
+		std::expected<std::map<fig::uuid, AssetFolder>, DatabaseError> FetchFolders() noexcept;
 		std::expected<std::map<fig::uuid, Asset>, DatabaseError> FetchAssets() noexcept;
 		DatabaseError CreateAsset(const Asset& asset) noexcept;
 		DatabaseError UpdateAsset(const Asset& asset) noexcept;
 		DatabaseError DeleteAsset(const fig::uuid& assetID) noexcept;
+		
+		DatabaseError CreateFolder(const AssetFolder& folder) noexcept;
+		DatabaseError DeleteFolder(const fig::uuid& assetID) noexcept;
 
 		bool IsConnected() const noexcept { return _pDB != nullptr; }
 
@@ -39,6 +43,8 @@ namespace fig::io
 			CreateAsset,
 			UpdateAsset,
 			DeleteAsset,
+			CreateFolder,
+			DeleteFolder,
 		};
 		DatabaseError BindAndExecute(SQL statement, std::function<void(sqlite3_stmt*)> fnBind);
 
