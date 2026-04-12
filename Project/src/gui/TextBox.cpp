@@ -1078,17 +1078,12 @@ namespace fig::gui
 		if (!SDL_PointInRect(&pt, &rect))
 		{
 			if (_bFocused)
-			{
 				SetFocus(false);
-				return true;
-			}
 			return false;
 		}
 
 		if (!_bFocused)
-		{
 			SetFocus(true);
-		}
 
 		TTF_SubString substring;
 		int textX = x - rect.x - GetMarginLeft() + _scroll.x;
@@ -1305,16 +1300,9 @@ namespace fig::gui
 		{
 
 		case SDL_EVENT_MOUSE_MOTION:
-		{
 			return HandleMouseMotion(toI(event.motion.x), toI(event.motion.y));
-		}
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-		{
-			auto& rect = GetRect();
-			if (is_inside(rect, toI(event.button.x), toI(event.button.y)))
-				return HandleMouseDown(toI(event.button.x), toI(event.button.y));
-			break;
-		}
+			return HandleMouseDown(toI(event.button.x), toI(event.button.y));
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
 			HandleMouseUp(toI(event.button.x), toI(event.button.y));

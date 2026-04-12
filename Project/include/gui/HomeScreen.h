@@ -28,6 +28,7 @@ namespace fig::gui
 		void SetSmallCardSize(bool bSmall) noexcept;
 		void ToggleTags();
 		void ShowSortingMenu();
+		void ShowFilteringMenu();
 
 	private:
 		CardList* _pCardList {};
@@ -37,7 +38,7 @@ namespace fig::gui
 		fig::string _search_text;
 		float _fSearchTimer {};
 		ButtonWithIcon* _pSortingButton {};
-
+		ButtonWithIcon* _pFilteringButton {};
 	};
 }
 

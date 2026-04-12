@@ -196,7 +196,7 @@ namespace fig::gui
 
 	void CardList::OnScroll()
 	{
-		MainFrame::GetInstance().DestroyOverlays(); // Hide context menu
+		MainFrame::GetInstance().DestroyOverlays(); //! @menu
 	}
 
 	void CardList::OnAfterLayout()
@@ -217,32 +217,46 @@ namespace fig::gui
 			return a < b ? -1 : (a > b ? 1 : 0);
 		};
 
+		// Initial sort (creation date)
 		std::ranges::stable_sort(_cards, [&](CoverCard* a, CoverCard* b) -> bool {
 			auto& meta_a = a->GetMetaData();
 			auto& meta_b = b->GetMetaData();
-			int cmp = 0;
-			switch (sortBy)
-			{
-			case SortBy::Name:
-				cmp = _stricmp(meta_a.name.c_str(), meta_b.name.c_str());
-				break;
-			case SortBy::CreatedAt:
-				cmp = fnCompare(meta_a.createdAt, meta_b.createdAt);
-				break;
-			case SortBy::UpdatedAt:
-				cmp = fnCompare(meta_a.updatedAt, meta_b.updatedAt);
-				break;
-			case SortBy::MostRecentChat:
-				cmp = fnCompare(meta_a.lastUsedAt, meta_b.lastUsedAt);
-				break;
-			}
-
+			int cmp = fnCompare(meta_a.createdAt, meta_b.createdAt);
 			if (orderBy == OrderBy::Descending)
 				cmp *= -1;
-
-			return cmp < 0; 
+			return cmp < 0;
 		});
 
+		// Then sort by...
+		if (sortBy != SortBy::CreatedAt)
+		{
+			std::ranges::stable_sort(_cards, [&](CoverCard* a, CoverCard* b) -> bool {
+				auto& meta_a = a->GetMetaData();
+				auto& meta_b = b->GetMetaData();
+				int cmp = 0;
+				switch (sortBy)
+				{
+				case SortBy::Name:
+					cmp = _stricmp(meta_a.name.c_str(), meta_b.name.c_str());
+					break;
+				case SortBy::UpdatedAt:
+					cmp = fnCompare(meta_a.updatedAt, meta_b.updatedAt);
+					break;
+				case SortBy::LastMessaged:
+					cmp = fnCompare(meta_a.lastUsedAt, meta_b.lastUsedAt);
+					break;
+				case SortBy::ChatCount:
+					cmp = 0; //!
+					break;
+				}
+
+				if (orderBy == OrderBy::Descending)
+					cmp *= -1;
+				return cmp < 0;
+			});
+		}
+
+		// Reorder grid
 		_pGridSizer->RemoveAll();
 		for (auto& card : _cards)
 			_pGridSizer->Add(card);

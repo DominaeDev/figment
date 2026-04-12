@@ -29,6 +29,8 @@ namespace fig::gui
 
 		_pSortingButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SORTING);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
+		_pFilteringButton = new ButtonWithIcon(pTopBar, TextureType::ICON_FILTERING);
+		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 		auto toggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
 		toggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 		auto gridLargeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
@@ -50,10 +52,11 @@ namespace fig::gui
 		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 8);
 		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
 		pTopSizer->AddStretchSpacer();
-		pTopSizer->Add(_pSortingButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(toggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(gridLargeButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(gridSmallButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
+		pTopSizer->Add(gridSmallButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(toggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(_pSortingButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(_pFilteringButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopBar->SetSizer(pTopSizer);
 
@@ -142,7 +145,7 @@ namespace fig::gui
 
 	void HomeScreen::ShowSortingMenu()
 	{
-		MainFrame::GetInstance().DestroyOverlays();
+		MainFrame::GetInstance().DestroyOverlays(); //! @menu
 
 		auto ChangeSorting = [](CardList* pCardList, SortBy sorting) {
 			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Sorting, sorting);
@@ -164,8 +167,10 @@ namespace fig::gui
 			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::CreatedAt); });
 		pMenu->AddCheckItem("Sort by last updated", sortBy == SortBy::UpdatedAt)
 			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::UpdatedAt); });
-		pMenu->AddCheckItem("Sort by most recent chat", sortBy == SortBy::MostRecentChat)
-			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::MostRecentChat); });
+		pMenu->AddCheckItem("Sort by most recent chat", sortBy == SortBy::LastMessaged)
+			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::LastMessaged); });
+		pMenu->AddCheckItem("Sort by chat count", sortBy == SortBy::ChatCount)
+			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::ChatCount); });
 		pMenu->AddSeparator();
 		pMenu->AddCheckItem("Ascending", orderBy == OrderBy::Ascending)
 			.SetDelegate([&]() { ChangeOrdering(_pCardList, OrderBy::Ascending); });
@@ -173,6 +178,24 @@ namespace fig::gui
 			.SetDelegate([&]() { ChangeOrdering(_pCardList, OrderBy::Descending); });
 
 		pMenu->Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
+	}
+
+	void HomeScreen::ShowFilteringMenu()
+	{
+		MainFrame::GetInstance().DestroyOverlays(); //! @menu
+
+		auto pMenu = new Menu(&MainFrame::GetInstance());
+		pMenu->AddCheckItem("Filter by new");
+		pMenu->AddCheckItem("Filter by starred");
+		pMenu->AddCheckItem("Filter by chats");
+		pMenu->AddSeparator();
+		pMenu->AddCheckItem("Show male", true);
+		pMenu->AddCheckItem("Show female", true);
+		pMenu->AddCheckItem("Show non-binary", true);
+		pMenu->AddSeparator();
+		pMenu->AddCheckItem("Show hidden");
+
+		pMenu->Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}
 	
 }

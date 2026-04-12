@@ -12,6 +12,7 @@ namespace fig
 		HalfSizeCards,
 		Sorting,
 		Ordering,
+		Filter,
 
 		Count,
 	};
@@ -21,7 +22,8 @@ namespace fig
 		Name = 0,
 		CreatedAt,
 		UpdatedAt,
-		MostRecentChat,
+		LastMessaged,
+		ChatCount,
 
 		Count,
 	};
@@ -33,6 +35,21 @@ namespace fig
 		
 		Count,
 	};
+
+	enum class FilterFlag : int32_t
+	{
+		Male		= 1 << 0,
+		Female		= 1 << 1,
+		Other		= 1 << 2,
+
+		New			= 1 << 4,
+		Starred		= 1 << 5,
+		Chats		= 1 << 6,
+		Hidden		= 1 << 7,
+
+		Exclusive	= New | Starred | Chats | Hidden,
+	};
+	using FilterFlags = EnumFlags<FilterFlag>;
 
 	extern template class SettingsCollection<UserSetting>;
 	using UserSettings = SettingsCollection<UserSetting>;

@@ -66,20 +66,21 @@ namespace fig::gui
 
 	void CharacterCard::ShowMenu()
 	{
-		MainFrame::GetInstance().DestroyOverlays();
+		MainFrame::GetInstance().DestroyOverlays(); //! @menu
 
 		auto pMenu = new Menu(&MainFrame::GetInstance());
 		pMenu->AddItem(std::format("Chat with {}", _characterName), TextureType::ICON_NEW_CHAT);
 		pMenu->AddItem("Resume chat\u2026")
 			.SetEnabled(false);
 		pMenu->AddSeparator();
-		pMenu->AddItem("Edit character\u2026");
+		pMenu->AddItem("Edit\u2026");
 		pMenu->AddItem("Set border\u2026");
 		pMenu->AddItem("Duplicate\u2026");
 		pMenu->AddItem("Export\u2026");
 		pMenu->AddItem("Move to folder\u2026");
 		pMenu->AddSeparator();
-		pMenu->AddItem("Delete character\u2026")
+		pMenu->AddItem("Hide");
+		pMenu->AddItem("Delete\u2026")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 
 		pMenu->Show();
