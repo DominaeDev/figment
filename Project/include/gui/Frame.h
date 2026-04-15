@@ -26,8 +26,8 @@ namespace fig::gui
 
 	protected:
 		bool HandleMouseDown(SDL_MouseButtonEvent& event);
-		void OnMenuOpen(int32_t id);
-		void OnMenuClose(int32_t id);
+		void OnMenuOpen(int32_t menuId);
+		void OnMenuClose(int32_t menuId);
 
 	protected:
 		struct MenuInstance

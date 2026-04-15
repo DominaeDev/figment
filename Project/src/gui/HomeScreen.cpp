@@ -5,6 +5,7 @@
 #include "gui/SearchBox.h"
 #include "gui/AppResources.h"
 #include "gui/Menu.h"
+#include "gui/ToggleWithIcon.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "util/Common.h"
@@ -29,14 +30,18 @@ namespace fig::gui
 
 		_pSortingButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SORTING);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
+
 		_pFilteringButton = new ButtonWithIcon(pTopBar, TextureType::ICON_FILTERING);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
-		auto toggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
-		toggleTagsButton->SetDelegate([this]() { ToggleTags(); });
-		auto gridLargeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
-		gridLargeButton->SetDelegate([this]() { SetSmallCardSize(false); });
-		auto gridSmallButton = new ButtonWithIcon(pTopBar, TextureType::ICON_GRID_SMALL);
-		gridSmallButton->SetDelegate([this]() { SetSmallCardSize(true); });
+
+		_pGridLargeButton = new ToggleWithIcon(pTopBar, TextureType::ICON_GRID_LARGE, ToggleWithIcon::ToggleBehavior::Radio);
+		_pGridLargeButton->SetDelegate([this](bool _) { SetSmallCardSize(false); });
+
+		_pGridSmallButton = new ToggleWithIcon(pTopBar, TextureType::ICON_GRID_SMALL, ToggleWithIcon::ToggleBehavior::Radio);
+		_pGridSmallButton->SetDelegate([this](bool _) { SetSmallCardSize(true); });
+
+		_pToggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
+		_pToggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 
 		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
@@ -52,9 +57,9 @@ namespace fig::gui
 		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 8);
 		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
 		pTopSizer->AddStretchSpacer();
-		pTopSizer->Add(gridLargeButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(gridSmallButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(toggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(_pGridLargeButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(_pGridSmallButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(_pToggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(_pSortingButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(_pFilteringButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
@@ -99,6 +104,10 @@ namespace fig::gui
 		_pCardList->SetCardSize(Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards) ? CardSize::Half : CardSize::Full);
 		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::ShowTags));
 
+		_pGridLargeButton->Toggle(!Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards), false);
+		_pGridSmallButton->Toggle(Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards), false);
+		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::ShowTags));
+
 		DEBUG_MEASURE_BEGIN("CreateCards");
 		_pCardList->CreateCards(CardList::CardType::Character);
 		DEBUG_MEASURE_END();
@@ -135,12 +144,15 @@ namespace fig::gui
 	{
 		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
 		Global::GetUserSettings().SetBool(UserSetting::HalfSizeCards, bSmall);
+		_pGridLargeButton->Toggle(!bSmall, false);
+		_pGridSmallButton->Toggle(bSmall, false);
 	}
 
 	void HomeScreen::ToggleTags()
 	{
 		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
 		Global::GetUserSettings().SetBool(UserSetting::ShowTags, _pCardList->IsTagsEnabled());
+		_pToggleTagsButton->EnableBorder(_pCardList->IsTagsEnabled());
 	}
 
 	void HomeScreen::ShowSortingMenu()
@@ -190,7 +202,6 @@ namespace fig::gui
 		genders.AddCheckItem("Show non-binary", true);
 		pMenu->AddSeparator();
 		pMenu->AddCheckItem("Show hidden");
-
 		pMenu->Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}
 	

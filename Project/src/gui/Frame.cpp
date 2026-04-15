@@ -3,7 +3,7 @@
 #include "gui/Menu.h"
 #include "gui/GUITypes.h"
 #include "gui/Window.h"
-#include "util/Events.h"
+#include "gui/Events.h"
 
 namespace fig::gui
 {
@@ -148,19 +148,13 @@ namespace fig::gui
 		return false;
 	}
 
-	void Frame::OnMenuOpen(int32_t id)
+	void Frame::OnMenuOpen(int32_t menuId)
 	{
-		SDL_Event event {};
-		event.type = USER_EVENT(EventType::MenuOpened);
-		event.user.code = id;
-		SDL_PeepEvents(&event, 1, SDL_ADDEVENT, 0, 0);
+		PushEvent(EventType::MenuOpened, menuId);
 	}
 
-	void Frame::OnMenuClose(int32_t id)
+	void Frame::OnMenuClose(int32_t menuId)
 	{
-		SDL_Event event {};
-		event.type = USER_EVENT(EventType::MenuClosed);
-		event.user.code = id;
-		SDL_PeepEvents(&event, 1, SDL_ADDEVENT, 0, 0);
+		PushEvent(EventType::MenuClosed, menuId);
 	}
 }

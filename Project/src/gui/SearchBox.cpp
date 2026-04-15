@@ -23,7 +23,7 @@ namespace fig::gui
 
 		auto pTextBoxBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Colors::SidePanelForeground);
+		pTextBoxBorder->SetColor(Colors::LineColor);
 		SetBorderRenderer(pTextBoxBorder);
 	}
 

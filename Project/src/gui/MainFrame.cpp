@@ -308,8 +308,8 @@ namespace fig::gui
 		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
-		if (_pSidePanel)
-			_pSidePanel->SetUserProfile(profile);
+		PushEvent(EventType::UserSignedIn, &profile);
+
 		ShowSidePanel(true);
 
 		auto pHomeScreen = ChangeScreen<HomeScreen>();
@@ -318,8 +318,7 @@ namespace fig::gui
 
 	void MainFrame::OnSignedOut() noexcept
 	{
-		if (_pSidePanel)
-			_pSidePanel->Reset();
+		PushEvent(EventType::UserSignedOut);
 
 		ShowSidePanel(false);
 		ChangeScreen<LoginScreen>();

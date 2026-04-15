@@ -96,16 +96,6 @@ namespace fig::gui
 		_pGradient->SetSize(kGradientSize, GetHeight());
 	}
 
-	void SidePanel::SetUserProfile(const fig::user::UserProfile& profile)
-	{
-		_pUserWidget->SetUser(profile);
-	}
-
-	void SidePanel::Reset()
-	{
-		_pUserWidget->Reset();
-	}
-
 	void SidePanel::ShowMenu()
 	{
 		auto pMenu = new Menu(&MainFrame::GetInstance());
@@ -122,7 +112,20 @@ namespace fig::gui
 		pMenu->AddItem("Exit Figment")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 
-		pMenu->Show(Point { _pMenuButton->GetX() + 6, _pMenuButton->GetY() + _pMenuButton->GetHeight() + 2 });
+		pMenu->Show(Point { _pMenuButton->GetX(), _pMenuButton->GetY() + _pMenuButton->GetHeight() });
+	}
+
+	bool SidePanel::OnEvent(Event& event)
+	{
+		if (event.type == USER_EVENT(EventType::UserSignedIn))
+		{
+			_pUserWidget->SetUser(*reinterpret_cast<fig::user::UserProfile*>(event.user.data1));
+		}
+		else if (event.type == USER_EVENT(EventType::UserSignedOut))
+		{
+			_pUserWidget->Reset();
+		}
+		return false;
 	}
 
 }

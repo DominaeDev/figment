@@ -40,7 +40,7 @@ namespace Constants
 		{
 			constexpr fig::gui::Coord HeaderHeight = 48;
 			constexpr fig::gui::Coord FooterHeight = 80;
-			constexpr fig::gui::Coord Width = 240;
+			constexpr fig::gui::Coord Width = 256;
 		}
 	}
 

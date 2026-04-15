@@ -8,6 +8,7 @@
 namespace fig::gui
 {
 	class CardList;
+	class ToggleWithIcon;
 
 	class HomeScreen : public Screen
 	{
@@ -39,6 +40,9 @@ namespace fig::gui
 		float _fSearchTimer {};
 		ButtonWithIcon* _pSortingButton {};
 		ButtonWithIcon* _pFilteringButton {};
+		ButtonWithIcon* _pToggleTagsButton {};
+		ToggleWithIcon* _pGridLargeButton {};
+		ToggleWithIcon* _pGridSmallButton {};
 	};
 }
 

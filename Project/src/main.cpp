@@ -14,7 +14,7 @@
 #include "gui/Window.h"
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
-#include "util/Events.h"
+#include "gui/Events.h"
 
 #if defined(_DEBUG)
 	#define DETECT_MEMORY_LEAKS
@@ -73,11 +73,6 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 	{
 		return SDL_APP_SUCCESS;
 	}
-
-	if (event->type == USER_EVENT(EventType::MenuOpened))
-		fig::util::LogLn(std::format("MenuOpened: {}", event->user.code));
-	else if (event->type == USER_EVENT(EventType::MenuClosed))
-		fig::util::LogLn(std::format("MenuClosed: {}", event->user.code));
 
 	if (pAppState->pMainWindow && pAppState->pMainWindow->HandleEvent(*event))
 	{

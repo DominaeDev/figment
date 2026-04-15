@@ -173,6 +173,7 @@
     <ClCompile Include="src\gui\BaseButton.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\CardImage.cpp" />
+    <ClCompile Include="src\gui\Events.cpp" />
     <ClCompile Include="src\gui\ImageWithMask.cpp" />
     <ClCompile Include="src\gui\LineBorderRenderer.cpp" />
     <ClCompile Include="src\gui\LoginScreen.cpp" />
@@ -195,6 +196,7 @@
     <ClCompile Include="src\gui\NineGridImage.cpp" />
     <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
+    <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
     <ClCompile Include="src\gui\SearchBox.cpp" />
@@ -261,7 +263,6 @@
     <ClCompile Include="src\util\SearchIndex.cpp" />
     <ClCompile Include="src\util\Security.cpp" />
     <ClCompile Include="src\util\Hash.cpp" />
-    <ClCompile Include="src\util\Events.cpp" />
     <ClCompile Include="src\util\StringUtility.cpp" />
     <ClCompile Include="src\gui\TextBox.cpp" />
     <ClCompile Include="src\gui\AppResources.cpp" />
@@ -385,6 +386,7 @@
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
+    <ClInclude Include="include\gui\Events.h" />
     <ClInclude Include="include\gui\GUIConstants.h" />
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
     <ClInclude Include="include\gui\BaseButton.h" />
@@ -395,6 +397,7 @@
     <ClInclude Include="include\gui\Overlay.h" />
     <ClInclude Include="include\gui\PasswordBox.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\ToggleWithIcon.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
     <ClInclude Include="include\gui\SearchBox.h" />
     <ClInclude Include="include\gui\SidePanelButton.h" />
@@ -457,7 +460,6 @@
     <ClInclude Include="include\model\UserProfile.h" />
     <ClInclude Include="include\model\UserSettings.h" />
     <ClInclude Include="include\pch.h" />
-    <ClInclude Include="include\util\Events.h" />
     <ClInclude Include="include\util\ExcludedSearchTerms.h" />
     <ClInclude Include="include\util\IniFile.h" />
     <ClInclude Include="include\util\ProfileDatabase.h" />

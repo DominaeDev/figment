@@ -160,7 +160,7 @@ namespace fig::gui
 
 	bool Control::ProcessEvent(Event& event)
 	{
-		if (not _bVisible)
+		if (_bCulled)
 			return false;
 
 		if (OnEvent(event))

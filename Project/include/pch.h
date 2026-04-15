@@ -16,9 +16,10 @@
 #include "Constants.h"
 #include "util/Common.h"
 #include "gui/GUICommon.h"
+#include "gui/Events.h"
 
 #if defined(_WIN32)
-	#define USE_WIN32_API 0 // Use native Win32 system calls
+	#define USE_WIN32_API 1 // Use native Win32 system calls
 #endif
 
 #if USE_WIN32_API

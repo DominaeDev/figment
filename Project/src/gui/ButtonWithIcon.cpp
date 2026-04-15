@@ -28,4 +28,19 @@ namespace fig::gui
 		_pBGRenderer->SetColor(GetThemeBackground());
 		_pIcon->SetForegroundColor(GetThemeForeground());
 	}
+
+	void ButtonWithIcon::EnableBorder(bool bEnable) noexcept
+	{
+		if (bEnable)
+		{
+			_pBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BORDER_6PX, 8);
+			_pBorder->SetColor(Colors::LineColor);
+			SetBorderRenderer(_pBorder);
+		}
+		else
+		{
+			SetBorderRenderer(nullptr);
+			_pBorder = nullptr;
+		}
+	}
 }

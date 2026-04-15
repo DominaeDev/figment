@@ -500,8 +500,11 @@
     <ClCompile Include="src\gui\VerticalScrollBar.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\Events.cpp">
-      <Filter>Source Files\Utility</Filter>
+    <ClCompile Include="src\gui\ToggleWithIcon.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Events.cpp">
+      <Filter>Source Files\Frontend\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1192,8 +1195,11 @@
     <ClInclude Include="include\gui\VerticalScrollBar.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\Events.h">
-      <Filter>Source Files\Utility</Filter>
+    <ClInclude Include="include\gui\ToggleWithIcon.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Events.h">
+      <Filter>Source Files\Frontend\GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

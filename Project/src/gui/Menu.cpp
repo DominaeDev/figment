@@ -6,7 +6,7 @@
 #include "gui/CustomRenderers.h"
 #include "gui/MenuSeparator.h"
 #include "model/AppState.h"
-#include "util/Events.h"
+#include "gui/Events.h"
 
 using namespace fig::util;
 
@@ -46,6 +46,13 @@ namespace fig::gui
 		_subItems.emplace_back(menuItem);
 		return _subItems.back();
 	}
+
+	void MenuItem::AddSeparator()
+	{
+		_subItems.emplace_back(MenuItem(Separator));
+		_subItems.back().SetEnabled(false);
+	}
+
 
 	Menu::Menu(Frame* pHostFrame) : Overlay(pHostFrame)
 	{

@@ -4,7 +4,7 @@
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "util/StringUtility.h"
-#include "util/Events.h"
+#include "gui/Events.h"
 #include "gui/Menu.h"
 #include "gui/MainFrame.h"
 
@@ -88,23 +88,27 @@ namespace fig::gui
 	void CharacterCard::ShowMenu()
 	{
 		auto pMenu = new Menu(&MainFrame::GetInstance());
-		pMenu->AddItem(std::format("Chat with {}", _characterName), TextureType::ICON_NEW_CHAT);
-		pMenu->AddItem("Resume chat\u2026")
+		pMenu->AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT);
+		pMenu->AddItem("Resume last chat")
+			.SetEnabled(false);
+		pMenu->AddItem(std::format("View chats with {}", _characterName))
 			.SetEnabled(false);
 		pMenu->AddSeparator();
-		pMenu->AddItem("Edit\u2026");
-		pMenu->AddItem("Duplicate\u2026");
+		pMenu->AddItem("View / Edit\u2026");
+		pMenu->AddItem("Clone\u2026");
 		pMenu->AddItem("Move to folder\u2026");
 		pMenu->AddItem("Export\u2026");
-		auto& borderMenu = pMenu->AddItem("Set border\u2026");
-			borderMenu.AddCheckItem("No border");
+		pMenu->AddSeparator();
+		auto& borderMenu = pMenu->AddItem("Set border");
+			borderMenu.AddCheckItem("No border", true);
+			borderMenu.AddSeparator();
 			borderMenu.AddCheckItem("Border #1");
 			borderMenu.AddCheckItem("Border #2");
 			borderMenu.AddCheckItem("Border #3");
 			borderMenu.AddCheckItem("Border #4");
-		pMenu->AddSeparator();
 		pMenu->AddItem("Star");
 		pMenu->AddItem("Hide");
+		pMenu->AddSeparator();
 		pMenu->AddItem("Delete\u2026")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 

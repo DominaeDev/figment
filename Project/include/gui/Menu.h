@@ -18,6 +18,7 @@ namespace fig::gui
 		
 		MenuItem& AddItem(const fig::string& label, TextureType icon = {}, MenuDelegate fn = {});
 		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
+		void AddSeparator();
 
 		inline MenuItem& SetLabel(const fig::string& label) noexcept { _label = label; return *this; };
 		inline MenuItem& SetEnabled(bool bEnabled) noexcept { _state = bEnabled ? State::Default : State::Disabled; return *this; };
