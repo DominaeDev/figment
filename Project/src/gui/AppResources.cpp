@@ -70,6 +70,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::SPEECH_BUBBLE_RIGHT_BORDER, "./resources/gui/chat/speech_bubble_right_border.png");
 
 		// Cards
+		LoadTexture(pRenderer, TextureType::CARD_FILL, "./resources/gui/card/card_fill.png");
 		LoadTexture(pRenderer, TextureType::CARD_BORDER, "./resources/gui/card/card_border.png");
 		LoadTexture(pRenderer, TextureType::CARD_TAG_BG, "./resources/gui/card/card_tag_bg.png");
 		LoadTexture(pRenderer, TextureType::CARD_ICON_CHAT_COUNTER, "./resources/gui/card/icon_small_chat.png");

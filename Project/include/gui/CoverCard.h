@@ -41,19 +41,22 @@ namespace fig::gui
 	{
 	public:
 		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Full);
-		void Init();
+		void Initialize();
 
 		void SetBorder(CardBorderStyle style);
 		void SetCardSize(CardSize cardSize);
 		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
 		void EnableTags(bool bEnable);
+		void SetHidden(bool bHidden);
+		inline bool IsHidden() const noexcept { return _bHidden; }
 		
 		bool IsFilteredBy(const SearchQuery& query) const noexcept;
 		const fig::uuid& GetAssetID() const { return _assetId; }
 		inline const CardMetaData& GetMetaData() const noexcept { return _metaData; };
 
 	protected:
-		void SetCoverImages(fig::sdl::Surface&& surface, fig::sdl::Surface&& half);
+		void SetCoverImages(fig::sdl::Surface&& fullCover, fig::sdl::Surface&& halfCover);
+		void RefreshState();
 
 		void SetLabel(const fig::string& text) noexcept;
 		void CreateChatCounter(uint32_t count);
@@ -77,11 +80,15 @@ namespace fig::gui
 		void CreatePendingLabel();
 
 	protected:
+		fig::uuid _assetId;
 		bool _bSelected = false;
+		bool _bInitialized = false;
+		bool _bHidden = false;
+		bool _bHasError = false;
 
 	private:
-		fig::uuid _assetId;
-		bool _bInitialized = false;
+		TexturedBorder* _pHiddenBG {};
+		TexturedBorder* _pHiddenBorder {};
 
 		CardSize _cardSize {};
 		Control* _pCounterBG {};
@@ -106,7 +113,6 @@ namespace fig::gui
 		fig::sdl::Texture _smallImageTexture {};
 		fig::io::AsyncFuture _pendingCover {};
 
-		bool _bHasError = false;
 		Image* _pErrorIcon {};
 
 		std::unique_ptr<SearchIndex> _searchIndex;

@@ -43,20 +43,22 @@ namespace fig::gui
 	constexpr uint8_t FadeAlpha = 0x60;
 	constexpr float ZoomSmoothing = 8.0f;
 
-
 	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(TextureType::MASK_CARD)),
 		_assetId { assetId },
 		_cardSize { cardSize }
 	{
 		_searchIndex = std::make_unique<SearchIndex>();
-		
-		if (cardSize == CardSize::Half)
-			SetSize(Small::Width, Small::Height);
-		else
-			SetSize(Large::Width, Large::Height);
+
+		_pHiddenBG = new TexturedBorder(this, TextureType::CARD_FILL, 8);
+		_pHiddenBG->SetForegroundColor(Color { 0x9b896a, 0x30 });
+		_pHiddenBorder = new TexturedBorder(_pHiddenBG, TextureType::CARD_BORDER, 16);
+		_pHiddenBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+
+		SetCardSize(cardSize);
+		SetHidden(false);
 	}
 
-	void CoverCard::Init()
+	void CoverCard::Initialize()
 	{
 		if (_bInitialized)
 			return;
@@ -167,13 +169,14 @@ namespace fig::gui
 
 		CreatePendingTags();
 		CreatePendingLabel();
+		RefreshState();
 	}
 
 	void CoverCard::OnUpdate(float fElapsed)
 	{
 		if (!_bInitialized)
 		{
-			Init();
+			Initialize();
 		}
 
 		if (_bHasError && !_pErrorIcon)
@@ -188,7 +191,10 @@ namespace fig::gui
 			CardImage::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 		}
 
-		bool bHovered = _bSelected or (is_inside(GetRect(), GetMousePos()) and !MainFrame::GetInstance().IsMenuShowing());
+		bool bHovered = (_bSelected or (is_inside(GetRect(), GetMousePos()))
+			and !MainFrame::GetInstance().IsMenuShowing())
+			and !_bHidden;
+
 		if (bHovered != _bHovered)
 		{
 			_bHovered = bHovered;
@@ -452,15 +458,12 @@ namespace fig::gui
 					SetCoverImages(std::move(*surface), {});
 				else if (auto pair = std::get_if<fig::io::AsyncResult_CoverPair>(&result.value()))
 					SetCoverImages(std::move(pair->first), std::move(pair->second));
-
-				RefreshImage();
-				SetVisible(true);
 			}
 			else
 			{
 				_bHasError = true;
-				SetVisible(true);
 			}
+			RefreshState();
 		}
 	}
 	
@@ -488,6 +491,11 @@ namespace fig::gui
 		else
 			SetSize(Large::Width, Large::Height);
 
+		if (_pHiddenBG)
+			_pHiddenBG->FillParent();
+		if (_pHiddenBorder)
+			_pHiddenBorder->FillParent();
+
 		if (!_bInitialized)
 			return;
 
@@ -510,7 +518,7 @@ namespace fig::gui
 			break;
 		}
 
-		RefreshImage();
+		RefreshState();
 	}
 
 	void CoverCard::OnSize()
@@ -592,5 +600,39 @@ namespace fig::gui
 			SetLabel(_pendingLabel);
 			_pendingLabel.clear();
 		}
+	}
+
+	void CoverCard::SetHidden(bool bHidden)
+	{
+		_bHidden = bHidden;
+		RefreshState();
+	}
+
+	void CoverCard::RefreshState()
+	{
+		if (_cardSize == CardSize::Half)
+			SetSize(Small::Width, Small::Height);
+		else
+			SetSize(Large::Width, Large::Height);
+
+		// Hidden?
+		if (_pHiddenBG)
+			_pHiddenBG->SetVisible(_bHidden);
+		if (_pLargeRoot)
+			_pLargeRoot->SetVisible(_cardSize == CardSize::Full && !_bHidden);
+		if (_pLargeBorder)
+			_pLargeBorder->SetVisible(_pLargeBorder->HasTexture() && !_bHidden);
+		if (_pSmallRoot)
+			_pSmallRoot->SetVisible(_cardSize == CardSize::Half && !_bHidden);
+		if (_pSmallBorder)
+			_pSmallBorder->SetVisible(_pSmallBorder->HasTexture() && !_bHidden);
+		if (_pCounterBG)
+			_pCounterBG->SetVisible(!_bHidden);
+
+		// Refresh image
+		if (!_bHidden)
+			RefreshImage();
+		else
+			CardImage::SetTexture(nullptr);
 	}
 }

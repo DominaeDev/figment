@@ -31,7 +31,7 @@ namespace fig::io
 	enum class AsyncTask {
 		None,
 		LoadPortrait,
-		LoadCover,
+		LoadCoverImage,
 	};
 
 	struct AsyncLoad

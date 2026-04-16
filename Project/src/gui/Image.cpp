@@ -1,14 +1,25 @@
 #include <pch.h>
 #include "gui/Image.h"
 #include "gui/GUIUtility.h"
+#include "gui/AppResources.h"
 
 namespace fig::gui
 {
 	Image::Image(LayoutElement* pParent, Texture* pTexture, Color tint) : Control(pParent),
 		_pTexture(pTexture)
 	{
-		if (pTexture)
-			SetSize(pTexture->w, pTexture->h);
+		if (_pTexture)
+			SetSize(_pTexture->w, _pTexture->h);
+
+		SetForegroundColor(tint);
+		SetBackgroundColor(Colors::Transparent);
+	}
+
+	Image::Image(LayoutElement* pParent, TextureType texture, Color tint) : Control(pParent)
+	{
+		_pTexture = AppResources::GetTexture(texture);
+		if (_pTexture)
+			SetSize(_pTexture->w, _pTexture->h);
 
 		SetForegroundColor(tint);
 		SetBackgroundColor(Colors::Transparent);

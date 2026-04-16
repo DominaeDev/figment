@@ -811,7 +811,7 @@ namespace fig::io
 			AsyncResultVariant result;
 			switch (request.task)
 			{
-			case AsyncTask::LoadCover:
+			case AsyncTask::LoadCoverImage:
 				error = __LoadCoverImageTask(request.assetId, result);
 				break;
 			case AsyncTask::LoadPortrait:

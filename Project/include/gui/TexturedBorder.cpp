@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/TexturedBorder.h"
-#include "gui/AppResources.h"
 #include "gui/GUIUtility.h"
+#include "gui/AppResources.h"
 
 namespace fig::gui
 {
@@ -15,6 +15,18 @@ namespace fig::gui
 	{
 		_cornerPixels = corners;
 		_pBorderTexture = borderTexture;
+	}
+
+	TexturedBorder::TexturedBorder(LayoutElement* pParent, TextureType borderTexture, int cornerPixels) : Control(pParent)
+	{
+		_cornerPixels = { toF(cornerPixels), toF(cornerPixels), toF(cornerPixels), toF(cornerPixels) };
+		_pBorderTexture = AppResources::GetTexture(borderTexture);
+	}
+
+	TexturedBorder::TexturedBorder(LayoutElement* pParent, TextureType borderTexture, std::array<float, 4> corners) : Control(pParent)
+	{
+		_cornerPixels = corners;
+		_pBorderTexture = AppResources::GetTexture(borderTexture);
 	}
 
 	void TexturedBorder::OnRender(Renderer* pRenderer)

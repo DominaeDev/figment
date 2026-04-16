@@ -13,6 +13,7 @@ namespace fig::gui
 		void SetTexture(TexturePtr pTexture, bool bResize = false) noexcept;
 		void SetMask(TexturePtr pTexture) noexcept;
 		void SetZoom(float value) noexcept;
+
 	protected:
 		void OnRender(Renderer* pRenderer) override;
 		void RecreateTexture();

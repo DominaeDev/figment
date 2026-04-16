@@ -127,21 +127,26 @@ namespace fig::gui
 
 	bool Frame::HandleMouseDown(SDL_MouseButtonEvent& event)
 	{
-		if (event.button == SDL_BUTTON_LEFT && !_menus.empty())
-		{
-			bool inside = false;
+		auto fnIsInsideAnyMenu = [this](const SDL_MouseButtonEvent& event) -> bool {
 			int32_t mx = toI(event.x);
 			int32_t my = toI(event.y);
 			for (auto& menu : _menus)
 			{
 				auto rect = menu.ptr->GetRect();
 				if (is_inside(rect, mx, my))
-				{
-					inside = true; 
-					break;
-				}
+					return true;
 			}
-			if (!inside)
+			return false;
+		};
+
+		if (event.button == SDL_BUTTON_LEFT && !_menus.empty())
+		{
+			if (!fnIsInsideAnyMenu(event))
+				PopAllMenus();
+		}
+		else if (event.button == SDL_BUTTON_RIGHT && !_menus.empty())
+		{
+			if (!fnIsInsideAnyMenu(event))
 				PopAllMenus();
 		}
 

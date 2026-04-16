@@ -61,7 +61,7 @@ namespace fig::gui
 			{
 				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}:", asset.id.str()));
 				auto pCard = new ScenarioCard(this, asset.id, _cardSize);
-				auto request = assets.LoadAssetAsync(asset.id, AsyncTask::LoadCover, priority--);
+				auto request = assets.LoadAssetAsync(asset.id, AsyncTask::LoadCoverImage, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
@@ -90,12 +90,12 @@ namespace fig::gui
 		size_t initCounter = 0;
 		for (auto& pCard : _cards)
 		{
-			auto request = assets.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCover, priority--);
+			auto request = assets.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, priority--);
 			pCard->SetPendingCoverImage(std::move(request.future));
 			pCard->EnableTags(_bEnableTags);
 
 			if (initCounter++ < 8)
-				pCard->Init();
+				pCard->Initialize();
 			else
 				pCard->Cull(true);
 		}
@@ -142,9 +142,21 @@ namespace fig::gui
 		for (auto& card : _cards)
 		{
 			bool bFiltered = card->IsFilteredBy(query);
-			card->SetVisible(not bFiltered);
-			card->EnableLayout(not bFiltered);
+//			card->SetVisible(not bFiltered);
+//			card->EnableLayout(not bFiltered);
+			card->SetHidden(bFiltered);
 		}
+
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
+		Sort(sortBy, orderBy);
+		
+		std::stable_partition(_cards.begin(), _cards.end(), [](auto& card) { return !card->IsHidden(); });
+
+		// Reorder grid
+		_pGridSizer->RemoveAll();
+		for (auto& card : _cards)
+			_pGridSizer->Add(card);
 
 		InvalidateLayout();
 	}
@@ -153,9 +165,11 @@ namespace fig::gui
 	{
 		for (auto& card : _cards)
 		{
-			card->SetVisible(true);
-			card->EnableLayout(true);
+//			card->SetVisible(true);
+//			card->EnableLayout(true);
+			card->SetHidden(false);
 		}
+		Reorder();
 		InvalidateLayout();
 	}
 
@@ -208,12 +222,9 @@ namespace fig::gui
 		ScrollPanel::OnAfterLayout();
 	}
 
-	void CardList::Reorder()
+	void CardList::Sort(SortBy sortBy, OrderBy orderBy)
 	{
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
-
-		auto fnCompare = [](const fig::timestamp & a, const fig::timestamp & b) -> int {
+		auto fnCompare = [](const fig::timestamp& a, const fig::timestamp& b) -> int {
 			return a < b ? -1 : (a > b ? 1 : 0);
 		};
 
@@ -255,6 +266,15 @@ namespace fig::gui
 				return cmp < 0;
 			});
 		}
+	}
+
+	void CardList::Reorder()
+	{
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
+		Sort(sortBy, orderBy);
+
+		std::stable_partition(_cards.begin(), _cards.end(), [](auto& card) { return !card->IsHidden(); });
 
 		// Reorder grid
 		_pGridSizer->RemoveAll();

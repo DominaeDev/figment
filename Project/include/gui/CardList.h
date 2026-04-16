@@ -34,6 +34,9 @@ namespace fig::gui
 		void OnAfterLayout() override;
 
 	private:
+		void Sort(SortBy sortBy, OrderBy orderBy);
+
+	private:
 		std::vector<CoverCard*> _cards;
 
 		GridSizer* _pGridSizer {};

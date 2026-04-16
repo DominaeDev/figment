@@ -57,7 +57,10 @@ namespace fig::gui
 		switch (event.type)
 		{
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			if (event.button.button == SDL_BUTTON_RIGHT and is_inside(GetRect(), toI(event.button.x), toI(event.button.y)))
+			if (event.button.button == SDL_BUTTON_RIGHT 
+				and is_inside(GetRect(), toI(event.button.x), toI(event.button.y))
+				and not _bHidden
+				and not _bHasError)
 			{
 				ShowMenu();
 				return true;

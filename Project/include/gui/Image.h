@@ -8,7 +8,9 @@ namespace fig::gui
 	{
 	public:
 		Image(LayoutElement* pParent, Texture* pTexture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
+		Image(LayoutElement* pParent, TextureType texture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
 		void SetTexture(Texture* pTexture, bool bResize = false);
+		inline bool HasTexture() const noexcept { return _pTexture != nullptr; }
 		Point GetTextureSize() const noexcept;
 
 	protected:
