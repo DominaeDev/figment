@@ -5,6 +5,7 @@
 
 #include "CardImage.h"
 #include "model/AssetManager.h"
+#include "model/CardMetaData.h"
 #include "util/SearchIndex.h"
 
 namespace fig::gui
@@ -29,14 +30,6 @@ namespace fig::gui
 	class TexturedBorder;
 	class NineGridImage;
 
-	struct CardMetaData
-	{
-		fig::string name;
-		fig::timestamp createdAt;
-		fig::timestamp updatedAt;
-		fig::timestamp lastUsedAt;
-	};
-
 	class CoverCard : public CardImage
 	{
 	public:
@@ -52,7 +45,7 @@ namespace fig::gui
 		
 		bool IsFilteredBy(const SearchQuery& query) const noexcept;
 		const fig::uuid& GetAssetID() const { return _assetId; }
-		inline const CardMetaData& GetMetaData() const noexcept { return _metaData; };
+		inline const fig::io::CardMetaData& GetMetaData() const noexcept { return _metaData; };
 
 	protected:
 		void SetCoverImages(fig::sdl::Surface&& fullCover, fig::sdl::Surface&& halfCover);
@@ -72,7 +65,7 @@ namespace fig::gui
 		void AddSearchTerms(const fig::string& text) noexcept;
 		void AddSearchTerms(std::span<const fig::string> texts) noexcept;
 
-		inline void SetMetaData(const CardMetaData& metaData) noexcept { _metaData = metaData; };
+		inline void SetMetaData(const fig::io::CardMetaData& metaData) noexcept { _metaData = metaData; };
 	private:
 		void PollFuture();
 		void RefreshImage();
@@ -88,7 +81,6 @@ namespace fig::gui
 
 	private:
 		TexturedBorder* _pHiddenBG {};
-		TexturedBorder* _pHiddenBorder {};
 
 		CardSize _cardSize {};
 		Control* _pCounterBG {};
@@ -130,7 +122,7 @@ namespace fig::gui
 		bool _bHovered = false;
 		float _fTargetZoom = 0.0f;
 		float _fHoverZoom = 0.0f;
-		CardMetaData _metaData {};
+		fig::io::CardMetaData _metaData {};
 	};
 }
 

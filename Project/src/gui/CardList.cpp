@@ -158,6 +158,7 @@ namespace fig::gui
 		for (auto& card : _cards)
 			_pGridSizer->Add(card);
 
+		ScrollTo(0, false);
 		InvalidateLayout();
 	}
 
@@ -169,7 +170,10 @@ namespace fig::gui
 //			card->EnableLayout(true);
 			card->SetHidden(false);
 		}
+
 		Reorder();
+		ScrollTo(0, false);
+
 		InvalidateLayout();
 	}
 

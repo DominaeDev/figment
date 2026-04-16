@@ -121,9 +121,11 @@ namespace fig::gui
 		}
 	}
 
-	void ScrollPanel::ScrollTo(float position) noexcept
+	void ScrollPanel::ScrollTo(float position, bool bSmooth) noexcept
 	{
-		_fTargetScrollY = std::clamp(position, 0.0f, (float)_maxExtent);
+			_fTargetScrollY = std::clamp(position, 0.0f, (float)_maxExtent);
+		if (!bSmooth)
+			_fScrollY = _fTargetScrollY;
 		OnScroll();
 
 		RefreshScrollBar();

@@ -41,6 +41,16 @@ namespace fig::gui
 			return false;
 		}
 
+		if (event.type == USER_EVENT(EventType::UserSignedIn))
+		{
+			OnUserSignedIn(*reinterpret_cast<const fig::user::UserProfile*>(event.user.data1));
+		}
+
+		if (event.type == USER_EVENT(EventType::UserSignedIn))
+		{
+			OnUserSignedOut();
+		}
+
 		return false;
 	}
 

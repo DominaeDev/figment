@@ -19,17 +19,20 @@ namespace fig::gui
 		void CreateCards();
 		CardList& GetCardList();
 
-	private:
+	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void OnSidePanel(bool show) override;
 		void OnFilter(fig::string search_text);
-		void SetSmallCardSize(bool bSmall) noexcept;
-		void ToggleTags();
-		void ShowSortingMenu();
-		void ShowFilteringMenu();
+		void OnUserSignedIn(const fig::user::UserProfile& profile) override;
+
+	private:
+		void ToggleCardSize() noexcept;
+		void ToggleTags() noexcept;
+		void ShowSortingMenu() noexcept;
+		void ShowFilteringMenu() noexcept;
 
 	private:
 		CardList* _pCardList {};
@@ -41,8 +44,7 @@ namespace fig::gui
 		ButtonWithIcon* _pSortingButton {};
 		ButtonWithIcon* _pFilteringButton {};
 		ButtonWithIcon* _pToggleTagsButton {};
-		ToggleWithIcon* _pGridLargeButton {};
-		ToggleWithIcon* _pGridSmallButton {};
+		ToggleWithIcon* _pGridButton {};
 	};
 }
 

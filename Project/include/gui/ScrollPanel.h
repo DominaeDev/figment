@@ -16,7 +16,7 @@ namespace fig::gui
 		void Render(Renderer* pRenderer) override;
 		inline void SetScrollBarOffset(Coord offset) noexcept { _scrollBarOffset = offset; }
 		
-		void ScrollTo(float position) noexcept;
+		void ScrollTo(float position, bool bSmooth = true) noexcept;
 
 	protected:
 		void OnUpdate(float fElapsed) override;

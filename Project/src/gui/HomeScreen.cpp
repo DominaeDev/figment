@@ -34,19 +34,16 @@ namespace fig::gui
 		_pFilteringButton = new ButtonWithIcon(pTopBar, TextureType::ICON_FILTERING);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 
-		_pGridLargeButton = new ToggleWithIcon(pTopBar, TextureType::ICON_GRID_LARGE, ToggleWithIcon::ToggleBehavior::Radio);
-		_pGridLargeButton->SetDelegate([this](bool _) { SetSmallCardSize(false); });
-
-		_pGridSmallButton = new ToggleWithIcon(pTopBar, TextureType::ICON_GRID_SMALL, ToggleWithIcon::ToggleBehavior::Radio);
-		_pGridSmallButton->SetDelegate([this](bool _) { SetSmallCardSize(true); });
+		_pGridButton = new ToggleWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
+		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
 		_pToggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
 		_pToggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 
 		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
-		_pFilterTextBox->SetSize(220, 30);
-		_pFilterTextBox->SetMaxSize(220, -1);
+		_pFilterTextBox->SetSize(192, 30);
+		_pFilterTextBox->SetMaxSize(192, -1);
 		_pFilterTextBox->SetBackgroundColor(Colors::White);
 		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
 			this->OnFilter(s); 
@@ -57,8 +54,7 @@ namespace fig::gui
 		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 8);
 		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
 		pTopSizer->AddStretchSpacer();
-		pTopSizer->Add(_pGridLargeButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(_pGridSmallButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
+		pTopSizer->Add(_pGridButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(_pToggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(_pSortingButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(_pFilteringButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
@@ -101,13 +97,6 @@ namespace fig::gui
 
 	void HomeScreen::CreateCards()
 	{
-		_pCardList->SetCardSize(Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards) ? CardSize::Half : CardSize::Full);
-		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::ShowTags));
-
-		_pGridLargeButton->Toggle(!Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards), false);
-		_pGridSmallButton->Toggle(Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards), false);
-		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::ShowTags));
-
 		DEBUG_MEASURE_BEGIN("CreateCards");
 		_pCardList->CreateCards(CardList::CardType::Character);
 		DEBUG_MEASURE_END();
@@ -119,6 +108,16 @@ namespace fig::gui
 	{
 		_pExpandButton->SetVisible(!bShown);
 		_pExpandButton->EnableLayout(!bShown);
+	}
+
+	void HomeScreen::OnUserSignedIn(const fig::user::UserProfile& profile)
+	{
+		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards);
+		_pCardList->SetCardSize(bHalfSize ? CardSize::Half : CardSize::Full);
+		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::ShowTags));
+		_pGridButton->SetIcon(bHalfSize ? TextureType::ICON_GRID_SMALL : TextureType::ICON_GRID_LARGE);
+		_pGridButton->Toggle(bHalfSize, false);
+		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::ShowTags));
 	}
 
 	CardList& HomeScreen::GetCardList()
@@ -140,22 +139,24 @@ namespace fig::gui
 		}
 	}
 
-	void HomeScreen::SetSmallCardSize(bool bSmall) noexcept
+	void HomeScreen::ToggleCardSize() noexcept
 	{
-		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
+		bool bSmall = Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards);
+		bSmall = !bSmall;
 		Global::GetUserSettings().SetBool(UserSetting::HalfSizeCards, bSmall);
-		_pGridLargeButton->Toggle(!bSmall, false);
-		_pGridSmallButton->Toggle(bSmall, false);
+
+		_pGridButton->SetIcon(bSmall ? TextureType::ICON_GRID_SMALL : TextureType::ICON_GRID_LARGE);
+		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
 	}
 
-	void HomeScreen::ToggleTags()
+	void HomeScreen::ToggleTags() noexcept
 	{
 		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
 		Global::GetUserSettings().SetBool(UserSetting::ShowTags, _pCardList->IsTagsEnabled());
 		_pToggleTagsButton->EnableBorder(_pCardList->IsTagsEnabled());
 	}
 
-	void HomeScreen::ShowSortingMenu()
+	void HomeScreen::ShowSortingMenu() noexcept
 	{
 		auto ChangeSorting = [](CardList* pCardList, SortBy sorting) {
 			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Sorting, sorting);
@@ -190,7 +191,7 @@ namespace fig::gui
 		pMenu->Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
 	}
 
-	void HomeScreen::ShowFilteringMenu()
+	void HomeScreen::ShowFilteringMenu() noexcept
 	{
 		auto pMenu = new Menu(&MainFrame::GetInstance());
 		pMenu->AddCheckItem("Filter by new");
@@ -200,6 +201,9 @@ namespace fig::gui
 		genders.AddCheckItem("Show male", true);
 		genders.AddCheckItem("Show female", true);
 		genders.AddCheckItem("Show non-binary", true);
+		auto& sources = pMenu->AddItem("Filter by source");
+		sources.AddCheckItem("Show imported", true);
+		sources.AddCheckItem("Hide imported");
 		pMenu->AddSeparator();
 		pMenu->AddCheckItem("Show hidden");
 		pMenu->Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });

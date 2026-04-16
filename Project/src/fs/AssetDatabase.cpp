@@ -260,10 +260,13 @@ namespace fig::io
 			sqlite3_bind_text(stmt, 1, asset.id.str().c_str(), -1, SQLITE_TRANSIENT);
 			/*parent*/
 			sqlite3_bind_text(stmt, 2, asset.parent_id.str().c_str(), -1, SQLITE_TRANSIENT);
-			/*folder*/
-			sqlite3_bind_text(stmt, 3, asset.folder_id.str().c_str(), -1, SQLITE_TRANSIENT);
 			/*type*/
-			sqlite3_bind_text(stmt, 4, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 3, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
+			/*folder*/
+			if (!asset.folder_id.empty())
+				sqlite3_bind_text(stmt, 4, asset.folder_id.str().c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
 			/*settings*/
 			sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
 			/*createdAt*/
@@ -284,7 +287,10 @@ namespace fig::io
 			/*type*/
 			sqlite3_bind_text(stmt, 2, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
 			/*folder*/
-			sqlite3_bind_text(stmt, 3, asset.folder_id.str().c_str(), -1, SQLITE_TRANSIENT);
+			if (!asset.folder_id.empty())
+				sqlite3_bind_text(stmt, 3, asset.folder_id.str().c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 3, nullptr, -1, SQLITE_STATIC);
 			/*settings*/
 			sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
 			/*updatedAt*/

@@ -442,6 +442,7 @@
     <ClInclude Include="include\llm\LLMStatus.h" />
     <ClInclude Include="include\llm\PromptTemplateTypes.h" />
     <ClInclude Include="include\model\AppSettings.h" />
+    <ClInclude Include="include\model\CardMetaData.h" />
     <ClInclude Include="include\model\Settings.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />

@@ -51,8 +51,6 @@ namespace fig::gui
 
 		_pHiddenBG = new TexturedBorder(this, TextureType::CARD_FILL, 8);
 		_pHiddenBG->SetForegroundColor(Color { 0x9b896a, 0x30 });
-		_pHiddenBorder = new TexturedBorder(_pHiddenBG, TextureType::CARD_BORDER, 16);
-		_pHiddenBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 
 		SetCardSize(cardSize);
 		SetHidden(false);
@@ -493,8 +491,6 @@ namespace fig::gui
 
 		if (_pHiddenBG)
 			_pHiddenBG->FillParent();
-		if (_pHiddenBorder)
-			_pHiddenBorder->FillParent();
 
 		if (!_bInitialized)
 			return;

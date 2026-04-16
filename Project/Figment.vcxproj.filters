@@ -1201,6 +1201,9 @@
     <ClInclude Include="include\gui\Events.h">
       <Filter>Source Files\Frontend\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="include\model\CardMetaData.h">
+      <Filter>Source Files\AppModel\Data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

@@ -17,6 +17,11 @@ namespace fig::gui
 		SetSize(36, 36);
 	}
 
+	void ButtonWithIcon::SetIcon(TextureType icon)
+	{
+		_pIcon->SetTexture(AppResources::GetTexture(icon));
+	}
+
 	void ButtonWithIcon::OnSize()
 	{
 		if (_pIcon)

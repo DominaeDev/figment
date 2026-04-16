@@ -37,6 +37,9 @@ namespace fig::gui
 		bool OnEvent(Event& event) override;
 		virtual void OnSidePanel(bool show) {};
 		virtual bool OnKeyboardEvent(KeyboardEvent& event) = 0;
+
+		virtual void OnUserSignedIn(const fig::user::UserProfile& profile) {};
+		virtual void OnUserSignedOut() {};
 	};
 
 	template <typename T>

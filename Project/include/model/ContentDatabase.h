@@ -4,6 +4,7 @@
 
 #include "model/CharacterData.h"
 #include "model/ScenarioData.h"
+#include "model/CardMetaData.h"
 
 namespace fig::io
 {

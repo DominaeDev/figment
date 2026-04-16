@@ -16,8 +16,9 @@ namespace fig::gui
 		ToggleWithIcon() = delete;
 	public:
 		enum class ToggleBehavior { Default, Radio };
-
 		ToggleWithIcon(LayoutElement* pParent, TextureType icon, ToggleBehavior behavior = ToggleBehavior::Default, bool bOn = false);
+
+		void SetIcon(TextureType icon);
 		void Toggle(bool bOn, bool bTrigger = true) noexcept;
 
 		void SetDelegate(ToggleDelegate pDelegate) noexcept;

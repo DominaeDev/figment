@@ -32,6 +32,11 @@ namespace fig::gui
 		}
 	}
 
+	void ToggleWithIcon::SetIcon(TextureType icon)
+	{
+		_pIcon->SetTexture(AppResources::GetTexture(icon));
+	}
+
 	void ToggleWithIcon::SetDelegate(ToggleDelegate pDelegate) noexcept
 	{
 		_fnToggle = pDelegate;

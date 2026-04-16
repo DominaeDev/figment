@@ -217,6 +217,7 @@ namespace fig::gui
 		if (not (bool)_pActiveScreen)
 			return;
 
+		_pMainArea->RemoveChildren();
 		_pMainArea->AddChild(_pActiveScreen);
 		
 		auto sizer = new VerticalSizer();
