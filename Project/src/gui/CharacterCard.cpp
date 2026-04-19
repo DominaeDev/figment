@@ -115,7 +115,7 @@ namespace fig::gui
 
 		if (!_metaData.flags.IsSet(CardMetaData::Flag::Favorite))
 		{
-			menu.AddCheckItem("Star", false)
+			menu.AddItem("Star", TextureType::ICON_STAR)
 				.SetDelegate([this] {
 					Global::GetUserManager().GetContent().MarkFavorite(_characterId, true);
 					_metaData.flags.Set(CardMetaData::Flag::Favorite);
@@ -124,7 +124,7 @@ namespace fig::gui
 		}
 		else
 		{
-			menu.AddCheckItem("Unstar", true)
+			menu.AddItem("Unstar", TextureType::ICON_UNSTAR)
 				.SetDelegate([this] {
 					Global::GetUserManager().GetContent().MarkFavorite(_characterId, false);
 					_metaData.flags.Unset(CardMetaData::Flag::Favorite);
@@ -133,7 +133,7 @@ namespace fig::gui
 		}
 		if (!_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
 		{
-			menu.AddCheckItem("Hide", false)
+			menu.AddItem("Hide", TextureType::ICON_HIDE)
 				.SetDelegate([this] { 
 					Global::GetUserManager().GetContent().MarkHidden(_characterId, true);
 					_metaData.flags.Set(CardMetaData::Flag::Hidden);
@@ -142,7 +142,7 @@ namespace fig::gui
 		}
 		else
 		{
-			menu.AddCheckItem("Unhide", true)
+			menu.AddItem("Unhide", TextureType::ICON_UNHIDE)
 				.SetDelegate([this] { 
 					Global::GetUserManager().GetContent().MarkHidden(_characterId, false);
 					_metaData.flags.Unset(CardMetaData::Flag::Hidden);
@@ -150,8 +150,7 @@ namespace fig::gui
 				});
 		}
 		menu.AddSeparator();
-		menu.AddItem("Delete\u2026")
-			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
+		menu.AddItem("Delete\u2026");
 
 		_menuId = menu.Show();
 	}
