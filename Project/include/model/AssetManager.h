@@ -46,7 +46,7 @@ namespace fig::io
 	{
 		AssetManager() = delete;
 	public:
-		explicit AssetManager(const fig::user::UserManager& userMngr, int32_t worker_threads = 2);
+		explicit AssetManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey, int32_t worker_threads = 2);
 		virtual ~AssetManager();
 
 		const Asset& CreateEmptyAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
@@ -63,17 +63,18 @@ namespace fig::io
 		FileError LoadAsset(const Asset& asset) noexcept;
 		std::expected<AssetRef, FileError> LoadAsset(const fig::uuid& id) noexcept;
 		
+		auto GetAssets() noexcept { return _assets | std::views::values; }
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
-		auto GetAllCharacters() const noexcept { return _assets | std::views::values | std::views::filter([](auto& a) { return a.asset_type == AssetType::Character; }); }
-		auto GetAllScenarios() const noexcept { return _assets | std::views::values | std::views::filter([](auto& a) { return a.asset_type == AssetType::Scenario; }); }
+		auto GetCharacterAssets() const noexcept { return _assets | std::views::values | std::views::filter([](auto& a) { return a.asset_type == AssetType::Character; }); }
+		auto GetScenarioAssets() const noexcept { return _assets | std::views::values | std::views::filter([](auto& a) { return a.asset_type == AssetType::Scenario; }); }
 		std::optional<AssetRef> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
 
 		void SaveModified();
 
 		enum class CharacterDataFormat { Default, TavernV2, };
-		void ImportCharactersInDirectory(fig::path directory, CharacterDataFormat format, size_t max_count = 0);
-		std::expected<fig::io::CharacterData, FileError> ImportCharacter(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
-		std::expected<AssetRef, FileError> ImportScenario(fig::path filename);
+		std::vector<AssetRef> ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format = CharacterDataFormat::Default);
+		std::expected<AssetRef, FileError> ImportCharacter(const fig::path& filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		std::expected<AssetRef, FileError> ImportScenario(const fig::path& filename);
 		
 		static FileError CreateProfilePicture(const fig::user::UserProfile& profile, fig::path imageFilename);
 
@@ -85,12 +86,7 @@ namespace fig::io
 		AssetDatabase& GetDatabase() noexcept;
 		fig::uuid NewUUID() const noexcept;
 		
-		Asset& CreateEmptyAsset_Internal(AssetType type, const fig::uuid& parent) noexcept;
-		Asset& CreateAsset_Internal(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
-		Asset& CreateAsset_Internal(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept;
-		Asset& CreateImageAsset_Internal(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
-		Asset& CreateImageAsset_Internal(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
-
+		std::expected<CharacterData, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		size_t LoadAssetIndex() noexcept;
 		bool LoadAssetMetaData() noexcept;
 		bool LoadDataAssets() noexcept;
@@ -109,8 +105,16 @@ namespace fig::io
 		std::map<fig::uuid, Asset> _assets {};
 		std::unique_ptr<AssetDatabase> _pAssetDB;
 
-		std::mutex _assetsMutex; // Protects reading and writing _assets.
+		std::mutex _assetsMutex; // Guards _assets
 
+		/* Internal; Mutex already held: */
+		Asset& CreateEmptyAsset_Internal(AssetType type, const fig::uuid& parent) noexcept;
+		Asset& CreateAsset_Internal(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
+		Asset& CreateAsset_Internal(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept;
+		Asset& CreateImageAsset_Internal(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
+		Asset& CreateImageAsset_Internal(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
+		std::expected<AssetRef, FileError> ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format);
+		std::expected<AssetRef, FileError> ImportScenario_Internal(const fig::path& filename);
 	private:
 		/* Asynchronous loading */
 		void __Worker(std::stop_token stop);

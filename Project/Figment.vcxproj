@@ -225,11 +225,12 @@
     <ClCompile Include="src\gui\Area.cpp" />
     <ClCompile Include="src\model\Asset.cpp" />
     <ClCompile Include="src\model\AssetManager.cpp" />
+    <ClCompile Include="src\model\CardMetaData.cpp" />
     <ClCompile Include="src\model\CharacterData.cpp" />
     <ClCompile Include="src\gui\ChatMessage.cpp" />
     <ClCompile Include="src\gui\ChatScroll.cpp" />
     <ClCompile Include="src\gui\GUIUtility.cpp" />
-    <ClCompile Include="src\model\ContentDatabase.cpp" />
+    <ClCompile Include="src\model\ContentManager.cpp" />
     <ClCompile Include="src\model\ChatCommandExecutor.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
     <ClCompile Include="src\gui\Control.cpp" />
@@ -449,7 +450,7 @@
     <ClInclude Include="include\model\Asset.h" />
     <ClInclude Include="include\model\AssetManager.h" />
     <ClInclude Include="include\model\CharacterData.h" />
-    <ClInclude Include="include\model\ContentDatabase.h" />
+    <ClInclude Include="include\model\ContentManager.h" />
     <ClInclude Include="include\model\ChatOptions.h" />
     <ClInclude Include="include\model\ChatSession.h" />
     <ClInclude Include="include\model\ChatCommands.h" />

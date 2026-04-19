@@ -5,7 +5,7 @@
 #include "Types.h"
 #include "model/UserProfile.h"
 #include "model/AssetManager.h"
-#include "model/ContentDatabase.h"
+#include "model/ContentManager.h"
 #include "model/UserSettings.h"
 #include "util/ProfileDatabase.h"
 
@@ -31,8 +31,7 @@ namespace fig::user
 		bool SignOut();
 		
 		const UserProfile& GetActiveProfile() const;
-		fig::io::AssetManager& GetProfileAssets();
-		fig::io::ContentDatabase& GetContent();
+		fig::io::UserContentManager& GetContent();
 		fig::UserSettings& GetSettings();
 		const fig::auth::AuthKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };
 		
@@ -56,8 +55,7 @@ namespace fig::user
 		UserProfile* _signedInProfile = nullptr;
 		fig::auth::AuthKey _signedInAuthKey {};
 
-		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
-		std::unique_ptr<fig::io::ContentDatabase> _pContentDatabase;
+		std::unique_ptr<fig::io::UserContentManager> _pContentManager;
 		std::unique_ptr<fig::UserSettings> _pUserSettings;
 	};
 }

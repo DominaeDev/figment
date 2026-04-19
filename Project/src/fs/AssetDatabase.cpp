@@ -8,13 +8,14 @@ using namespace fig::util;
 
 constexpr fig::const_string SQL_CreateTables =
 	"CREATE TABLE Assets ("
-	"	id        TEXT     PRIMARY KEY NOT NULL,"
-	"	parent    TEXT     NOT NULL,"
-	"	type      TEXT     NOT NULL,"
-	"   folder    TEXT,"
-	"	settings  TEXT     NOT NULL ON CONFLICT REPLACE DEFAULT [{}],"
-	"	createdAt DATETIME DEFAULT (CURRENT_TIMESTAMP) NOT NULL,"
-	"	updatedAt DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),"
+	"	id          TEXT     PRIMARY KEY NOT NULL,"
+	"	parent      TEXT     NOT NULL,"
+	"	type        TEXT     NOT NULL,"
+	"   folder      TEXT,"
+	"	settings    TEXT     NOT NULL ON CONFLICT REPLACE DEFAULT [{}],"
+	"	createdAt   INTEGER  DEFAULT (CURRENT_TIMESTAMP) NOT NULL,"
+	"	updatedAt   INTEGER  NOT NULL DEFAULT (CURRENT_TIMESTAMP),"
+	"	lastUsedAt  INTEGER  NOT NULL DEFAULT (CURRENT_TIMESTAMP),"
 	"	FOREIGN KEY (parent) REFERENCES Assets (id) ON DELETE RESTRICT ON UPDATE CASCADE,"
 	"   FOREIGN KEY (folder) REFERENCES Folders (id) ON DELETE SET NULL ON UPDATE CASCADE"
 	");"
@@ -121,10 +122,12 @@ namespace fig::io
 	void AssetDatabase::PrepareStatements() noexcept
 	{
 		// Prepare statements
-		SQL_PREPARE(SQL::FetchAssets, "SELECT id, parent, type, folder, settings, createdAt, updatedAt FROM Assets;");
-		SQL_PREPARE(SQL::CreateAsset, "INSERT INTO Assets (id, parent, type, folder, settings, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?);");
-		SQL_PREPARE(SQL::UpdateAsset, "UPDATE Assets SET parent = ?, type = ?, folder = ?, settings = ?, updatedAt = ? WHERE id = ?;");
+		SQL_PREPARE(SQL::FetchAssets, "SELECT id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt FROM Assets;");
+		SQL_PREPARE(SQL::CreateAsset, "INSERT INTO Assets (id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
+		SQL_PREPARE(SQL::UpdateAsset, "UPDATE Assets SET parent = ?, type = ?, folder = ?, settings = ?, updatedAt = ?, lastUsedAt = ? WHERE id = ?;");
 		SQL_PREPARE(SQL::DeleteAsset, "DELETE FROM Assets WHERE id = ?;");
+
+		SQL_PREPARE(SQL::FetchFolders, "SELECT id, parent, category, name, settings FROM Folders;");
 		SQL_PREPARE(SQL::CreateFolder, "INSERT INTO Folders (id, parent, category, name, settings) VALUES (?, ?, ?, ?, ?);");
 		SQL_PREPARE(SQL::DeleteFolder, "DELETE FROM Folders WHERE id = ?;");
 	}
@@ -176,6 +179,7 @@ namespace fig::io
 
 			int64_t createdAt = sqlite3_column_int64(stmt, 5);
 			int64_t updatedAt = sqlite3_column_int64(stmt, 6);
+			int64_t lastUsedAt = sqlite3_column_int64(stmt, 7);
 
 			fig::uuid assetID	= fig::uuid::fromStrFactory(pAssetID ? pAssetID : "");
 			fig::uuid parentID	= fig::uuid::fromStrFactory(pParentID ? pParentID : "");
@@ -190,6 +194,10 @@ namespace fig::io
 			asset.asset_subtype = subtype;
 			asset.SetMeta(MetaTag::CreatedAt, static_cast<fig::timestamp>(createdAt));
 			asset.SetMeta(MetaTag::UpdatedAt, static_cast<fig::timestamp>(updatedAt));
+			asset.SetMeta(MetaTag::LastUsedAt, static_cast<fig::timestamp>(lastUsedAt));
+			if (pSettings)
+				asset.settings = fig::string { pSettings };
+
 			asset.file_status = AssetFileStatus::NotLoaded;
 			asset.save_status = AssetSaveStatus::Saved;
 			if (!asset.id.empty())
@@ -215,7 +223,7 @@ namespace fig::io
 		std::map<fig::uuid, AssetFolder> result;
 
 		int rc;
-		auto stmt = _sqlStatements[SQL::FetchAssets];
+		auto stmt = _sqlStatements[SQL::FetchFolders];
 		while ((rc = sqlite3_step(stmt)) == SQLITE_ROW)
 		{
 			const char* pFolderID = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
@@ -263,16 +271,21 @@ namespace fig::io
 			/*type*/
 			sqlite3_bind_text(stmt, 3, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
 			/*folder*/
-			if (!asset.folder_id.empty())
+			if (not asset.folder_id.empty())
 				sqlite3_bind_text(stmt, 4, asset.folder_id.str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
 			/*settings*/
-			sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
+			if (not asset.settings.empty())
+				sqlite3_bind_text(stmt, 5, asset.settings.c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
 			/*createdAt*/
 			sqlite3_bind_int64(stmt, 6, static_cast<int64_t>(asset.GetCreatedAt()));
 			/*updatedAt*/
 			sqlite3_bind_int64(stmt, 7, static_cast<int64_t>(asset.GetUpdatedAt()));
+			/*lastUsedAt*/
+			sqlite3_bind_int64(stmt, 8, static_cast<int64_t>(asset.GetLastUsedAt()));
 		});
 	}
 
@@ -287,16 +300,21 @@ namespace fig::io
 			/*type*/
 			sqlite3_bind_text(stmt, 2, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
 			/*folder*/
-			if (!asset.folder_id.empty())
+			if (not asset.folder_id.empty())
 				sqlite3_bind_text(stmt, 3, asset.folder_id.str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 3, nullptr, -1, SQLITE_STATIC);
 			/*settings*/
-			sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
+			if (not asset.settings.empty())
+				sqlite3_bind_text(stmt, 4, asset.settings.c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
 			/*updatedAt*/
 			sqlite3_bind_int64(stmt, 5, static_cast<int64_t>(asset.GetUpdatedAt()));
+			/*lastUsedAt*/
+			sqlite3_bind_int64(stmt, 6, static_cast<int64_t>(asset.GetLastUsedAt()));
 			/*id*/
-			sqlite3_bind_text(stmt, 6, asset.id.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 7, asset.id.str().c_str(), -1, SQLITE_TRANSIENT);
 		});
 
 		return DatabaseError::NoError;

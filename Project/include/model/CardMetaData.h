@@ -6,6 +6,17 @@
 
 namespace fig::io
 {
+	enum CardBorderStyle
+	{
+		None,
+		Style01,
+		Style02,
+		Style03,
+		Style04,
+		Style05,
+		Style06,
+	};
+
 	struct CardMetaData
 	{
 		enum class Flag
@@ -17,14 +28,20 @@ namespace fig::io
 		};
 		using Flags = EnumFlags<Flag>;
 
-		fig::string name;
-		fig::timestamp createdAt {};
-		fig::timestamp updatedAt {};
-		fig::timestamp lastUsedAt {};
-		fig::string borderStyle {};
-		uint32_t chatCount {};
+		fig::string name; // Not serialized
+		fig::timestamp createdAt {}; // Not serialized
+		fig::timestamp updatedAt {}; // Not serialized
+		fig::timestamp lastUsedAt {}; // Not serialized
+		uint32_t chatCount {}; // Not serialized
+
+		CardBorderStyle borderStyle {};
 		Flags flags {};
+
+		static std::optional<CardMetaData> FromJson(const fig::string& json);
+		static fig::string ToJson(const CardMetaData& metaData);
 	};
+
+	using CardMetaDataRef = std::reference_wrapper<CardMetaData>;
 }
 
 #endif

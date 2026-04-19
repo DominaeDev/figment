@@ -59,7 +59,7 @@ namespace fig::io
 	enum class AssetSaveStatus : uint8_t
 	{
 		Created = 0,
-		Updated,
+		Modified,
 		Saved,
 		Invalid,
 	};
@@ -76,6 +76,7 @@ namespace fig::io
 		Character,
 		Scenario,
 	};
+
 	fig::string FolderCategoryToString(FolderCategory format) noexcept;
 	FolderCategory FolderCategoryFromString(const fig::string& str) noexcept;
 
@@ -105,6 +106,8 @@ namespace fig::io
 		void SetMeta(MetaTag tag, const char* value) noexcept;
 		void SetMeta(MetaTag tag, const fig::string& value) noexcept;
 		void SetMeta(MetaTag tag, const fig::uuid& value) noexcept;
+
+		void SetSettings(const fig::string& value) noexcept;
 
 		fig::path GetFileName() const noexcept
 		{
@@ -138,6 +141,7 @@ namespace fig::io
 
 		constexpr fig::timestamp GetCreatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::CreatedAt).value_or({}); }
 		constexpr fig::timestamp GetUpdatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::UpdatedAt).value_or({}); }
+		constexpr fig::timestamp GetLastUsedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::LastUsedAt).value_or({}); }
 	
 	public:
 		fig::uuid id {};
@@ -147,11 +151,12 @@ namespace fig::io
 		uint8_t asset_subtype {};
 		DataFormat data_format { DataFormat::Undefined };
 		fig::bytes data {};
+		fig::string settings;
 		AssetFileStatus file_status = { AssetFileStatus::NotLoaded };
 		AssetSaveStatus save_status = { AssetSaveStatus::Created };
 
 	private:
-		void Invalidate();
+		void SetUpdated();
 
 	private:
 		std::map<MetaTag, MetaValue> _parameters {};

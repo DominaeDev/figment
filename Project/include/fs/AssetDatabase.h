@@ -43,6 +43,8 @@ namespace fig::io
 			CreateAsset,
 			UpdateAsset,
 			DeleteAsset,
+
+			FetchFolders,
 			CreateFolder,
 			DeleteFolder,
 		};

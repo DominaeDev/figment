@@ -13,8 +13,8 @@ namespace fig::io
 		fig::string GetSystemPrompt(ChatOptions options) const;
 		fig::string GetScenarioPrompt(ChatOptions options) const;
 
-		bool LoadFromXml(const fig::path& filename);
-		bool LoadFromXml(const fig::string& doc);
+		FileError LoadFromXml(const fig::path& filename);
+		FileError LoadFromXml(const fig::string& doc);
 		void SaveToXml(fig::bytes& buffer) const;
 
 		constexpr bool is_valid() const;

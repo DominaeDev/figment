@@ -22,7 +22,7 @@ namespace fig
 		Name = 0,
 		CreatedAt,
 		UpdatedAt,
-		LastMessaged,
+		LastUsedAt,
 		ChatCount,
 
 		Count,

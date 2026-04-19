@@ -23,12 +23,15 @@ namespace fig::gui
 			SetLabel(character.fullName);
 			SetIndex(character.searchIndex);
 
-			SetMetaData(CardMetaData {
-				.name = _characterName,
-				.createdAt = character.createdAt,
-				.updatedAt = character.updatedAt,
-				.lastUsedAt = character.updatedAt, //! @wrong
-			});
+			if (auto meta = Global::GetUserManager().GetContent().GetMetaData(characterId))
+				SetMetaData(meta.value().get());
+			else
+				SetMetaData(CardMetaData {
+					.name = _characterName,
+					.createdAt = character.createdAt,
+					.updatedAt = character.updatedAt,
+					.lastUsedAt = character.updatedAt,
+				});
 
 			// Tags
 			switch (character.gender)

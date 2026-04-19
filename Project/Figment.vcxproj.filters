@@ -383,7 +383,7 @@
     <ClCompile Include="src\util\ProfileDatabase.cpp">
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\ContentDatabase.cpp">
+    <ClCompile Include="src\model\ContentManager.cpp">
       <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CoverCard.cpp">
@@ -505,6 +505,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\Events.cpp">
       <Filter>Source Files\Frontend\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\CardMetaData.cpp">
+      <Filter>Source Files\AppModel\Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1060,7 +1063,7 @@
     <ClInclude Include="include\util\ProfileDatabase.h">
       <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\ContentDatabase.h">
+    <ClInclude Include="include\model\ContentManager.h">
       <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CoverCard.h">

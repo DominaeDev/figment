@@ -178,8 +178,8 @@ namespace fig::gui
 			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::CreatedAt); });
 		pMenu->AddCheckItem("Sort by last updated", sortBy == SortBy::UpdatedAt)
 			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::UpdatedAt); });
-		pMenu->AddCheckItem("Sort by most recent chat", sortBy == SortBy::LastMessaged)
-			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::LastMessaged); });
+		pMenu->AddCheckItem("Sort by most recent chat", sortBy == SortBy::LastUsedAt)
+			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::LastUsedAt); });
 		pMenu->AddCheckItem("Sort by chat count", sortBy == SortBy::ChatCount)
 			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::ChatCount); });
 		pMenu->AddSeparator();

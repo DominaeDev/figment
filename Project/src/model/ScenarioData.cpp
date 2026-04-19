@@ -105,22 +105,25 @@ namespace fig::io
 		return scenario.is_valid();
 	}
 
-	bool ScenarioData::LoadFromXml(const fig::path& path)
+	FileError ScenarioData::LoadFromXml(const fig::path& path)
 	{
+		if (not (std::filesystem::exists(path) and std::filesystem::is_regular_file(path)))
+			return FileError::FileNotFound;
+
 		XmlReader xml(path, "Scenario");
 		if (not xml.IsOk())
-			return false; // Invalid document type
+			return FileError::UnrecognizedFormat; // Invalid document type
 
-		return ReadXml(xml, *this);
+		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
-	bool ScenarioData::LoadFromXml(const fig::string& doc)
+	FileError ScenarioData::LoadFromXml(const fig::string& doc)
 	{
 		XmlReader xml(doc);
 		if (not xml.IsOk() or xml.GetRootElement().GetName() != "Scenario")
-			return false; // Invalid document type
+			return FileError::UnrecognizedFormat; // Invalid document type
 
-		return ReadXml(xml, *this);
+		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
 	void ScenarioData::SaveToXml(fig::bytes& buffer) const

@@ -25,10 +25,9 @@ using namespace fig::util;
 
 namespace fig::io
 {
-	AssetManager::AssetManager(const fig::user::UserManager& userMngr, int32_t worker_threads)
+	AssetManager::AssetManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey, int32_t worker_threads)
 	{
-		auto const& profile = userMngr.GetActiveProfile();
-		_profileAuthKey = userMngr.GetActiveAuthKey();
+		_profileAuthKey = authKey;
 		_profileID = profile.id;
 		_profilePath = profile.GetPath();
 
@@ -82,6 +81,7 @@ namespace fig::io
 		auto now = util::utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
+		asset.SetMeta(MetaTag::LastUsedAt, now);
 		return asset;
 	}
 	
@@ -105,6 +105,7 @@ namespace fig::io
 		auto now = util::utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
+		asset.SetMeta(MetaTag::LastUsedAt, now);
 		return asset;
 	}
 
@@ -127,6 +128,7 @@ namespace fig::io
 		auto now = util::utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
+		asset.SetMeta(MetaTag::LastUsedAt, now);
 
 		// Copy data
 		asset.data.resize(data.size());
@@ -243,7 +245,7 @@ namespace fig::io
 			auto& asset = kvp.second;
 			if (asset.file_status == AssetFileStatus::Modified)
 				WriteAsset(asset);
-			if (asset.save_status != AssetSaveStatus::Saved)
+			if (asset.save_status < AssetSaveStatus::Saved)
 				UpdateAsset(asset);
 		}
 	}
@@ -271,7 +273,7 @@ namespace fig::io
 				return true;
 			}
 		}
-		else if (asset.save_status == AssetSaveStatus::Updated)
+		else if (asset.save_status == AssetSaveStatus::Modified)
 		{
 			if (db.UpdateAsset(asset) == DatabaseError::NoError)
 			{
@@ -411,63 +413,27 @@ namespace fig::io
 		}
 	}
 
-	std::expected<CharacterData, FileError> AssetManager::ImportCharacter(fig::path filename, CharacterDataFormat format)
+	std::expected<CharacterData, FileError> AssetManager::LoadCharacterData(fig::path filename, CharacterDataFormat format)
 	{
 		switch (format)
 		{
 		case CharacterDataFormat::Default:
 		{
 			CharacterData character;
-			if (character.LoadFromXml(filename))
+			if (auto error = character.LoadFromXml(filename); error == FileError::NoError)
 				return character;
-		} break;
+			else
+				return std::unexpected(error);
+		}
 		case CharacterDataFormat::TavernV2:
 			if (auto import = CardImporter::Import(filename))
 				return import.value();
-			break;
+			else
+				return std::unexpected(import.error());
 		default:
 			return std::unexpected(FileError::UnrecognizedFormat);
 		}		
 		return std::unexpected(FileError::UnrecognizedFormat);
-	}
-
-	std::expected<AssetRef, FileError> AssetManager::ImportScenario(fig::path filename)
-	{
-		ScenarioData scenario;
-		if (not scenario.LoadFromXml(filename))
-			return std::unexpected(FileError::UnrecognizedFormat);
-
-		fig::bytes scenarioData;
-		scenario.SaveToXml(scenarioData);
-
-		{
-			std::scoped_lock lock { _assetsMutex };
-
-			auto& scenarioAsset = CreateAsset_Internal(AssetType::Scenario, DataFormat::DataXml, scenarioData, _profileID);
-
-			// Load scenario image
-			if (not empty_or_whitespace(scenario.imageFilename))
-			{
-				if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
-				{
-					// Create portrait asset
-					auto& scenarioImageAsset = CreateImageAsset_Internal(ImageType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
-
-					// Create cover card
-					if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
-						.transform([](auto img) {
-						return CreateCoverImage(img, false);
-					}))
-					{
-						// Save cover asset (bitmap)
-						auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage.value(), scenarioAsset.id);
-						coverAsset.SetMeta(MetaTag::ReferenceToOriginal, scenarioImageAsset.id);
-					}
-				}
-			}
-			return scenarioAsset;
-		}
-
 	}
 
 	bool AssetManager::DeleteAsset(const fig::uuid& assetID) noexcept
@@ -554,52 +520,109 @@ namespace fig::io
 		return assetIDs;
 	}
 
-	void AssetManager::ImportCharactersInDirectory(fig::path directory, CharacterDataFormat format, size_t max_count)
+	std::vector<AssetRef> AssetManager::ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format)
 	{
 		std::vector<fig::path> files;
 		for (const auto& entry : std::filesystem::directory_iterator(directory))
 			files.push_back(entry.path());
 
-		auto rng = std::random_device {};
-		std::ranges::shuffle(files, rng);
+		std::vector<AssetRef> imported;
+		imported.reserve(files.size());
 
-		if (max_count > 0)
-			files.resize(std::min(max_count, files.size()));
-
-		{
+		{	// Mutex scope
 			std::scoped_lock lock { _assetsMutex };
 			for (auto& filename : files)
 			{
-				auto try_character = ImportCharacter(filename, format);
-				if (not try_character.has_value())
-					continue;
+				if (auto import = ImportCharacter_Internal(filename, format))
+					imported.push_back(import.value());
+			}
+		}
 
-				LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
-				auto& character = try_character.value();
+		return imported;
+	}
 
-				fig::bytes characterData;
-				character.SaveToXml(characterData);
-				auto& characterAsset = CreateAsset_Internal(AssetType::Character, DataFormat::DataXml, characterData, _profileID);
+	std::expected<AssetRef, FileError> AssetManager::ImportCharacter(const fig::path& filename, CharacterDataFormat format)
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return ImportCharacter_Internal(filename, format);
+	}
 
-				// Load portrait image(s)
-				if (auto file = fig::io::ReadFile(filename))
+	std::expected<AssetRef, FileError> AssetManager::ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format)
+	{
+		if (auto try_character = LoadCharacterData(filename, format))
+		{
+			auto& character = try_character.value();
+
+			// Create asset
+			fig::bytes characterData;
+			character.SaveToXml(characterData);
+			auto& characterAsset = CreateAsset_Internal(AssetType::Character, DataFormat::DataXml, characterData, _profileID);
+
+			// Load portrait image(s)
+			if (auto file = fig::io::ReadFile(filename))
+			{
+				// Create portrait asset
+				auto& portraitAsset = CreateImageAsset_Internal(ImageType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
+
+				// Create cover card
+				if (auto coverImage = LoadImage(filename)
+					.transform([](auto img) {
+					return CreateCoverImage(img, false);
+				}))
 				{
-					// Create portrait asset
-					auto& portraitAsset = CreateImageAsset_Internal(ImageType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
+					// Save cover asset (bitmap)
+					auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage.value(), characterAsset.id);
+					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+				}
+			}
 
-					// Create cover card
-					if (auto coverImage = LoadImage(filename)
-						.transform([](auto img) {
-						return CreateCoverImage(img, false);
-					}))
-					{
-						// Save cover asset (bitmap)
-						auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage.value(), characterAsset.id);
-						coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
-					}
+			LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
+			return std::ref(characterAsset);
+		}
+		else
+			return std::unexpected(try_character.error());
+	}
+
+	std::expected<AssetRef, FileError> AssetManager::ImportScenario(const fig::path& filename)
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return ImportScenario_Internal(filename);
+	}
+
+	std::expected<AssetRef, FileError> AssetManager::ImportScenario_Internal(const fig::path& filename)
+	{
+		ScenarioData scenario;
+		if (auto error = scenario.LoadFromXml(filename); error != FileError::NoError)
+			return std::unexpected(error);
+
+		// Create asset
+		fig::bytes scenarioData;
+		scenario.SaveToXml(scenarioData);
+		auto& scenarioAsset = CreateAsset_Internal(AssetType::Scenario, DataFormat::DataXml, scenarioData, _profileID);
+
+		// Load scenario image
+		if (not empty_or_whitespace(scenario.imageFilename))
+		{
+			if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
+			{
+				// Create portrait asset
+				auto& scenarioImageAsset = CreateImageAsset_Internal(ImageType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
+
+				// Create cover card
+				if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
+					.transform([](auto img) {
+					return CreateCoverImage(img, false);
+				}))
+				{
+					// Save cover asset (bitmap)
+					auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage.value(), scenarioAsset.id);
+					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, scenarioImageAsset.id);
 				}
 			}
 		}
+
+		LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
+		return std::ref(scenarioAsset);
 	}
 
 	FileError AssetManager::CreateProfilePicture(const fig::user::UserProfile& profile, fig::path filename)
@@ -637,6 +660,7 @@ namespace fig::io
 			auto now = util::utc_now();
 			image_file.meta[MetaTag::CreatedAt] = now;
 			image_file.meta[MetaTag::UpdatedAt] = now;
+			image_file.meta[MetaTag::LastUsedAt] = now;
 			image_file.meta[MetaTag::ImageWidth] = static_cast<uint16_t>(pSurface->w);
 			image_file.meta[MetaTag::ImageHeight] = static_cast<uint16_t>(pSurface->h);
 			image_file.meta[MetaTag::ImageFormat] = static_cast<uint8_t>(0x04);

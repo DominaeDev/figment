@@ -45,7 +45,7 @@ namespace fig::gui
 	void CardList::CreateCards(CardType cardType)
 	{
 		// Create cards
-		auto& assets = Global::GetUserManager().GetProfileAssets();
+		auto& assetMngr = Global::GetUserManager().GetContent().GetAssetManager();
 		const auto& profileId = Global::GetUserManager().GetActiveProfile().id;
 
 		Reset();
@@ -54,14 +54,14 @@ namespace fig::gui
 		if (cardType == CardType::Scenario)
 		{
 			// Find scenarios
-			auto scenarios = assets.GetAllScenarios() | std::ranges::to<std::vector>();
+			auto scenarios = assetMngr.GetScenarioAssets() | std::ranges::to<std::vector>();
 			std::sort(scenarios.begin(), scenarios.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
 
 			for (auto& asset : scenarios)
 			{
 				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}:", asset.id.str()));
 				auto pCard = new ScenarioCard(this, asset.id, _cardSize);
-				auto request = assets.LoadAssetAsync(asset.id, AsyncTask::LoadCoverImage, priority--);
+				auto request = assetMngr.LoadAssetAsync(asset.id, AsyncTask::LoadCoverImage, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
@@ -72,7 +72,7 @@ namespace fig::gui
 		// Find characters
 		if (cardType == CardType::Character)
 		{
-			auto characters = assets.GetAllCharacters() | std::ranges::to<std::vector>();
+			auto characters = assetMngr.GetCharacterAssets() | std::ranges::to<std::vector>();
 			std::sort(characters.begin(), characters.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
 
 			for (auto& asset : characters)
@@ -90,7 +90,7 @@ namespace fig::gui
 		size_t initCounter = 0;
 		for (auto& pCard : _cards)
 		{
-			auto request = assets.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, priority--);
+			auto request = assetMngr.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, priority--);
 			pCard->SetPendingCoverImage(std::move(request.future));
 			pCard->EnableTags(_bEnableTags);
 
@@ -257,7 +257,7 @@ namespace fig::gui
 				case SortBy::UpdatedAt:
 					cmp = fnCompare(meta_a.updatedAt, meta_b.updatedAt);
 					break;
-				case SortBy::LastMessaged:
+				case SortBy::LastUsedAt:
 					cmp = fnCompare(meta_a.lastUsedAt, meta_b.lastUsedAt);
 					break;
 				case SortBy::ChatCount:

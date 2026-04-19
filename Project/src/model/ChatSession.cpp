@@ -57,7 +57,7 @@ namespace fig::io
 		auto pRenderer = Global::GetMainWindow().GetSDLRenderer().get();
 
 		CharacterData character;
-		if (character.LoadFromXml(fig::path(filename)))
+		if (character.LoadFromXml(fig::path(filename)) == FileError::NoError)
 		{
 			if (role == Role::User)
 				character.characterId = "USR";

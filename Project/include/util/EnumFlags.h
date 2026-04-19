@@ -198,6 +198,29 @@ public:
 	static const UnderlyingType Zero;
 	static const UnderlyingType One;
 
+	template<std::ranges::range Map>
+	std::vector<std::string> Serialize(const Map& mapping) const
+	{
+		std::vector<std::string> result;
+		for (auto& [flag, name] : mapping)
+		{
+			if (IsSet(flag))
+				result.push_back(std::string { name });
+		}
+		return result;
+	}
+
+	template<std::ranges::range Map>
+	void Deserialize(const std::vector<std::string>& flags, const Map& mapping)
+	{
+		Clear();
+		for (auto& [flag, name] : mapping)
+		{
+			if (std::ranges::contains(flags, name))
+				Set(flag);
+		}
+	}
+
 private:
 	constexpr explicit EnumFlags(UnderlyingType flags) : _flags(flags) {}
 	static constexpr UnderlyingType ToUnderlying(T v) { return static_cast<UnderlyingType>(v); }

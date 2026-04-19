@@ -214,8 +214,7 @@ namespace fig::user
 		_signedInProfile = &profile;
 		_pUserSettings = std::make_unique<UserSettings>(profile.GetPath() / Constants::Paths::UserSettings);
 		_pUserSettings->Load();
-		_pAssetMngr = std::make_unique<AssetManager>(*this);
-		_pContentDatabase = std::make_unique<ContentDatabase>(*_pAssetMngr.get());
+		_pContentManager = std::make_unique<UserContentManager>(profile, _signedInAuthKey);
 		return true;
 	}
 
@@ -233,12 +232,9 @@ namespace fig::user
 		if (not IsSignedIn())
 			return false;
 
-		_pContentDatabase.reset();
+		_pContentManager.reset();
 
 		_pUserSettings->Save();
-
-		_pAssetMngr->SaveModified();
-		_pAssetMngr.reset();
 
 		_signedInProfile = nullptr;
 		_signedInAuthKey = AuthKey {};
@@ -323,20 +319,12 @@ namespace fig::user
 		return std::nullopt;
 	}
 
-	AssetManager& UserManager::GetProfileAssets()
+	UserContentManager& UserManager::GetContent()
 	{
-		if (_signedInProfile == nullptr or !_pAssetMngr)
+		if (_signedInProfile == nullptr or !_pContentManager)
 			throw std::runtime_error("Not signed in");
 
-		return static_cast<AssetManager&>(*_pAssetMngr);
-	}
-
-	ContentDatabase& UserManager::GetContent()
-	{
-		if (_signedInProfile == nullptr or !_pContentDatabase)
-			throw std::runtime_error("Not signed in");
-
-		return static_cast<ContentDatabase&>(*_pContentDatabase);
+		return static_cast<UserContentManager&>(*_pContentManager);
 	}
 
 	UserSettings& UserManager::GetSettings()

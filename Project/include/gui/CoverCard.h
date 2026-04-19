@@ -10,17 +10,6 @@
 
 namespace fig::gui
 {
-	enum CardBorderStyle
-	{
-		None,
-		Style01,
-		Style02,
-		Style03,
-		Style04,
-		Style05,
-		Style06,
-	};
-
 	enum class CardSize
 	{
 		Full,
@@ -36,7 +25,7 @@ namespace fig::gui
 		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Full);
 		void Initialize();
 
-		void SetBorder(CardBorderStyle style);
+		void SetBorder(fig::io::CardBorderStyle style);
 		void SetCardSize(CardSize cardSize);
 		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
 		void EnableTags(bool bEnable);

@@ -83,31 +83,34 @@ namespace fig::io
 		return !data.characterId.empty() && !data.shortName.empty();
 	}
 
-	bool CharacterData::LoadFromXml(const fig::path& path)
+	FileError CharacterData::LoadFromXml(const fig::path& path)
 	{
+		if (not (std::filesystem::exists(path) and std::filesystem::is_regular_file(path)))
+			return FileError::FileNotFound;
+
 		XmlReader xml(path, "Character");
 		if (not xml.IsOk())
-			return false; // Invalid document type
+			return FileError::UnrecognizedFormat;
 
-		return ReadXml(xml, *this);
+		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
-	bool CharacterData::LoadFromXml(const fig::string& doc)
+	FileError CharacterData::LoadFromXml(const fig::string& doc)
 	{
 		XmlReader xml(doc);
 		if (not xml.IsOk() or xml.GetRootElement().GetName() != "Character")
-			return false; // Invalid document type
+			return FileError::UnrecognizedFormat;
 
-		return ReadXml(xml, *this);
+		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
-	bool CharacterData::LoadFromXml(fig::string_view doc)
+	FileError CharacterData::LoadFromXml(fig::string_view doc)
 	{
 		XmlReader xml(doc);
 		if (not xml.IsOk() or xml.GetRootElement().GetName() != "Character")
-			return false; // Invalid document type
+			return  FileError::UnrecognizedFormat;
 
-		return ReadXml(xml, *this);
+		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
 	void CharacterData::SaveToXml(fig::bytes& buffer) const

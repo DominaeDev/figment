@@ -113,6 +113,7 @@ namespace fig::io
 		UpdatedAt = 0x02,				// fig::timestamp; utc
 		Version = 0x03,					// uint8_t
 		Checksum = 0x04,				// int32_t
+		LastUsedAt = 0x05,				// fig::timestamp; utc
 
 		ImageWidth = 0x10,				// uint16_t
 		ImageHeight = 0x11,				// uint16_t
@@ -153,6 +154,7 @@ namespace fig::io
 
 		case MetaTag::CreatedAt:
 		case MetaTag::UpdatedAt:
+		case MetaTag::LastUsedAt:
 			return MetaValueType::TimeStamp;
 
 		case MetaTag::ReferenceToOriginal:
@@ -217,6 +219,14 @@ namespace fig::io
 		{
 			fig::timestamp ts;
 			if (try_get_meta(MetaTag::UpdatedAt, ts))
+				return ts;
+			return fig::timestamp { 0 };
+		}
+
+		fig::timestamp GetLastUsedAt() const noexcept
+		{
+			fig::timestamp ts;
+			if (try_get_meta(MetaTag::LastUsedAt, ts))
 				return ts;
 			return fig::timestamp { 0 };
 		}

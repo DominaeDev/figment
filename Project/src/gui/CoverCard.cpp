@@ -142,23 +142,23 @@ namespace fig::gui
 			// Randomized border
 			static std::mt19937_64 rng { std::default_random_engine{}() };
 
-			constexpr std::array<CardBorderStyle, 16> borderWeights {
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::Style01,
-				 CardBorderStyle::Style02,
-				 CardBorderStyle::Style03,
-				 CardBorderStyle::Style04,
-				 CardBorderStyle::Style05,
-				 CardBorderStyle::Style06,
+			constexpr std::array<fig::io::CardBorderStyle, 16> borderWeights {
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::None,
+				 fig::io::CardBorderStyle::Style01,
+				 fig::io::CardBorderStyle::Style02,
+				 fig::io::CardBorderStyle::Style03,
+				 fig::io::CardBorderStyle::Style04,
+				 fig::io::CardBorderStyle::Style05,
+				 fig::io::CardBorderStyle::Style06,
 			};
 
 			static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
@@ -361,9 +361,9 @@ namespace fig::gui
 		return AddTagResult::Ok;
 	}
 
-	void CoverCard::SetBorder(CardBorderStyle style)
+	void CoverCard::SetBorder(fig::io::CardBorderStyle style)
 	{
-		if (style == None)
+		if (style == fig::io::None)
 		{
 			_pLargeBorder->SetTexture(nullptr);
 			_pLargeBorder->SetVisible(false);
@@ -375,12 +375,12 @@ namespace fig::gui
 		TextureType textureType;
 		switch (style)
 		{
-		case CardBorderStyle::Style01: textureType = TextureType::CARD_BORDER_STYLE_01; break;
-		case CardBorderStyle::Style02: textureType = TextureType::CARD_BORDER_STYLE_02; break;
-		case CardBorderStyle::Style03: textureType = TextureType::CARD_BORDER_STYLE_03; break;
-		case CardBorderStyle::Style04: textureType = TextureType::CARD_BORDER_STYLE_04; break;
-		case CardBorderStyle::Style05: textureType = TextureType::CARD_BORDER_STYLE_05; break;
-		case CardBorderStyle::Style06: textureType = TextureType::CARD_BORDER_STYLE_06; break;
+		case fig::io::CardBorderStyle::Style01: textureType = TextureType::CARD_BORDER_STYLE_01; break;
+		case fig::io::CardBorderStyle::Style02: textureType = TextureType::CARD_BORDER_STYLE_02; break;
+		case fig::io::CardBorderStyle::Style03: textureType = TextureType::CARD_BORDER_STYLE_03; break;
+		case fig::io::CardBorderStyle::Style04: textureType = TextureType::CARD_BORDER_STYLE_04; break;
+		case fig::io::CardBorderStyle::Style05: textureType = TextureType::CARD_BORDER_STYLE_05; break;
+		case fig::io::CardBorderStyle::Style06: textureType = TextureType::CARD_BORDER_STYLE_06; break;
 		default:
 			return;
 		};

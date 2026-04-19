@@ -45,39 +45,20 @@ namespace fig::gui
 		if (not userMngr.LoadProfiles())
 			userMngr.CreateDefaultProfile();
 
-		// Import test characters
-		if constexpr (Debugging and Disabled)
-		{
-			if (userMngr.SignInDefaultProfile())
-			{
-				auto& assets = userMngr.GetProfileAssets();
-
-				// Delete all characters
-				auto remove_characters = assets.GetAllCharacters()
-					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
-					| std::ranges::to<std::vector>();
-				assets.DeleteAssets(remove_characters);
-
-				auto x = assets.ImportCharacter(fig::path("./import/user.xml"));
-				auto y = assets.ImportCharacter(fig::path("./import/bot1.xml"));
-				auto z = assets.ImportCharacter(fig::path("./import/bot2.xml"));
-				userMngr.GetProfileAssets().SaveModified();
-			}
-		}
-
 		// Import test scenario
 		if constexpr (Debugging and Disabled)
 		{
 			if (userMngr.SignInDefaultProfile())
 			{
-				auto& assets = userMngr.GetProfileAssets();
-				auto remove_scenarios = assets.GetAllScenarios()
+				auto& content = userMngr.GetContent();
+
+				auto remove_scenarios = content.GetAssetManager().GetScenarioAssets()
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
 					| std::ranges::to<std::vector>();
-				assets.DeleteAssets(remove_scenarios);
+				content.GetAssetManager().DeleteAssets(remove_scenarios);
 
-				auto x = assets.ImportScenario(fig::path("./import/scenario.xml"));
-				userMngr.GetProfileAssets().SaveModified();
+				auto _ignored = content.ImportScenario(fig::path("./import/scenario.xml"));
+				userMngr.SignOut();
 			}
 		}
 
@@ -86,16 +67,47 @@ namespace fig::gui
 		{
 			if (userMngr.SignInDefaultProfile())
 			{
-				auto& assets = userMngr.GetProfileAssets();
+				auto& content = userMngr.GetContent();
 
 				// Delete all characters
-				auto remove_characters = assets.GetAllCharacters()
+				auto remove_characters = content.GetAssetManager().GetCharacterAssets()
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
 					| std::ranges::to<std::vector>();
-				assets.DeleteAssets(remove_characters);
+				content.GetAssetManager().DeleteAssets(remove_characters);
 
-				assets.ImportCharactersInDirectory(fig::path("./import/characters"), fig::io::AssetManager::CharacterDataFormat::TavernV2);
-				userMngr.GetProfileAssets().SaveModified();
+				auto _ignored = content.ImportCharactersInDirectory(fig::path("./import/characters"));
+				userMngr.SignOut();
+			}
+		}
+
+		// Shuffle cards
+		if constexpr (Debugging and Disabled)
+		{
+			if (userMngr.SignInDefaultProfile())
+			{
+				auto& content = userMngr.GetContent();
+
+				auto characterAssets = content.GetAssetManager().GetAssets() 
+					| std::views::filter([](auto& a) { return a.asset_type == fig::io::AssetType::Character; })
+					| std::views::transform([](auto& a) { return std::ref(a); })
+					| std::ranges::to<std::vector>();
+
+				auto rng = std::random_device {};
+				std::ranges::shuffle(characterAssets, rng);
+
+				int32_t count = 0;
+				auto timestamp = fig::util::utc_now();
+				for (auto& assetRef : characterAssets)
+				{
+					auto& asset = assetRef.get();
+					asset.SetMeta(fig::io::MetaTag::CreatedAt, timestamp);
+					asset.SetMeta(fig::io::MetaTag::UpdatedAt, timestamp);
+					asset.SetMeta(fig::io::MetaTag::LastUsedAt, timestamp);
+
+					content.MarkNew(asset.id, count++ < 10);
+					timestamp -= static_cast<fig::timestamp>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::milliseconds(100)).count());
+				}
+
 				userMngr.SignOut();
 			}
 		}
@@ -105,8 +117,8 @@ namespace fig::gui
 		{
 			if (userMngr.SignInDefaultProfile())
 			{
-				auto& assets = userMngr.GetProfileAssets();
-				assets.CreateProfilePicture(userMngr.GetActiveProfile(), fig::path("./import/profile_pic.png"));
+				auto& assetMngr = userMngr.GetContent().GetAssetManager();
+				assetMngr.CreateProfilePicture(userMngr.GetActiveProfile(), fig::path("./import/profile_pic.png"));
 				userMngr.SignOut();
 			}
 		}
@@ -155,13 +167,19 @@ namespace fig::gui
 
 			if (keyEvent.down and not keyEvent.repeat)
 			{
-#if _DEBUG
-				if (keyEvent.key == SDLK_F12 and ((keyEvent.mod & SDL_KMOD_CTRL) != 0))
+				if constexpr (Debugging)
 				{
-					Close();
-					return true;
+					if (keyEvent.key == SDLK_F12 and ((keyEvent.mod & SDL_KMOD_CTRL) != 0))
+					{
+						Close();
+						return true;
+					}
+					else if (keyEvent.key == SDLK_3 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
+					{
+						ChangeScreen<DebugScreen>();
+						return true;
+					}
 				}
-#endif
 
 				if (keyEvent.key == SDLK_1 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
 				{
@@ -178,13 +196,6 @@ namespace fig::gui
 					ShowSidePanel(!_pSidePanel->GetVisible());
 					return true;
 				}
-#if _DEBUG
-				else if (keyEvent.key == SDLK_3 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
-				{
-					ChangeScreen<DebugScreen>();
-					return true;
-				}
-#endif
 			}
 		}
 
