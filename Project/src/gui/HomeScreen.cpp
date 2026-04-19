@@ -177,18 +177,18 @@ namespace fig::gui
 			_pCardList->Reorder();
 		};
 
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::Default);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Default);
 
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 		menu.AddCheckItem("Sort alphabetically", sortBy == SortBy::Name)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::Name); });
+		menu.AddCheckItem("Sort by recency", sortBy == SortBy::LastUsedAt)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
 		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::CreatedAt); });
 		menu.AddCheckItem("Sort by update date", sortBy == SortBy::UpdatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::UpdatedAt); });
-		menu.AddCheckItem("Sort by recency", sortBy == SortBy::LastUsedAt)
-			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
 		menu.AddCheckItem("Sort by chats", sortBy == SortBy::ChatCount)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::ChatCount); });
 		menu.AddSeparator();
@@ -199,8 +199,8 @@ namespace fig::gui
 		menu.AddSeparator();
 		menu.AddItem("Reset")
 			.SetDelegate([this] { 
-				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
-				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
+				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Sorting, SortBy::Default);
+				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Default);
 				_pCardList->Reorder();
 			});
 

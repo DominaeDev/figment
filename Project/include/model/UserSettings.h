@@ -26,6 +26,7 @@ namespace fig
 		ChatCount,
 
 		Count,
+		Default = LastUsedAt,
 	};
 
 	enum class OrderBy
@@ -34,6 +35,7 @@ namespace fig
 		Descending,
 		
 		Count,
+		Default = Descending,
 	};
 
 	enum class FilterFlag : int32_t

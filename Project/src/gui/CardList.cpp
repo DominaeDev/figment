@@ -194,17 +194,20 @@ namespace fig::gui
 		auto fnCompare = [](const fig::timestamp& a, const fig::timestamp& b) -> int {
 			return a < b ? -1 : (a > b ? 1 : 0);
 		};
+		auto fnCompareCount = [](uint32_t a, uint32_t b) -> int {
+			return a < b ? -1 : (a > b ? 1 : 0);
+		};
 
 		// Initial sort (creation date)
 		std::ranges::stable_sort(cards, [&](CoverCard* a, CoverCard* b) -> bool {
 			auto& meta_a = a->GetMetaData();
 			auto& meta_b = b->GetMetaData();
-			int cmp = fnCompare(meta_b.createdAt, meta_a.createdAt);
+			int cmp = fnCompare(meta_b.lastUsedAt, meta_a.lastUsedAt);
 			return cmp < 0;
 		});
 
 		// Then sort by...
-		if (sortBy != SortBy::CreatedAt)
+		if (sortBy != SortBy::LastUsedAt)
 		{
 			std::ranges::stable_sort(cards, [&](CoverCard* a, CoverCard* b) -> bool {
 				auto& meta_a = a->GetMetaData();
@@ -215,17 +218,16 @@ namespace fig::gui
 				case SortBy::Name:
 					cmp = _stricmp(meta_a.name.c_str(), meta_b.name.c_str());
 					break;
+				case SortBy::CreatedAt:
+					cmp = fnCompare(meta_a.createdAt, meta_b.createdAt);
+					break;
 				case SortBy::UpdatedAt:
 					cmp = fnCompare(meta_a.updatedAt, meta_b.updatedAt);
 					break;
-				case SortBy::LastUsedAt:
-					cmp = fnCompare(meta_a.lastUsedAt, meta_b.lastUsedAt);
-					break;
 				case SortBy::ChatCount:
-					cmp = 0; //!
+					cmp = fnCompareCount(meta_a.chatCount, meta_b.chatCount);
 					break;
 				}
-
 				if (orderBy == OrderBy::Descending)
 					cmp *= -1;
 				return cmp < 0;
@@ -252,8 +254,8 @@ namespace fig::gui
 	void CardList::Reorder()
 	{
 		// Sort
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::Default);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Default);
 		Sort(_cards, sortBy, orderBy);
 
 		// Filter
