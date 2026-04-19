@@ -77,6 +77,20 @@ namespace fig
 			return defaultValue;
 		}
 
+		template<typename F, typename T = EnumFlags<F>>
+		T GetFlags(E setting, T defaultValue) const noexcept
+		{
+			auto value = GetValue<int32_t>(setting, static_cast<int32_t>(defaultValue.ToRaw()));
+			return T::FromRaw(static_cast<T::UnderlyingType>(value));
+		}
+
+		template<typename F, typename T = EnumFlags<F>, std::ranges::range Map>
+		T GetFlags(E setting, T defaultValue, const Map& mapping) const noexcept
+		{
+			auto value = GetValue<std::vector<fig::string>>(setting, T::Serialize(defaultValue, mapping));
+			return T::Deserialize(value, mapping);
+		}
+
 		void SetBool(E setting, bool value) noexcept
 		{
 			SetValue<int32_t>(setting, value ? 1 : 0);
@@ -106,6 +120,18 @@ namespace fig
 		void SetEnum(E setting, T value) noexcept
 		{
 			return SetValue<int32_t>(setting, static_cast<int32_t>(value));
+		}
+
+		template<typename F, typename T = EnumFlags<F>>
+		void SetFlags(E setting, T value) noexcept
+		{
+			return SetValue<int32_t>(setting, static_cast<int32_t>(value.ToRaw()));
+		}
+
+		template<typename F, typename T = EnumFlags<F>, std::ranges::range Map>
+		void SetFlags(E setting, T value, const Map& mapping) noexcept
+		{
+			return SetValue<std::vector<fig::string>>(setting, value.Serialized(mapping));
 		}
 
 	private:

@@ -19,9 +19,7 @@ namespace fig::gui
 		void CreateCards(CardType cardType);
 		void Reset();
 
-		void SetFilter(const fig::string&) noexcept;
-		void ClearFilter() noexcept;
-
+		void SetFilter(const fig::string& filter) noexcept;
 		void Reorder();
 
 		void SetCardSize(CardSize cardSize);
@@ -34,14 +32,12 @@ namespace fig::gui
 		void OnAfterLayout() override;
 
 	private:
-		void Sort(SortBy sortBy, OrderBy orderBy);
-
-	private:
 		std::vector<CoverCard*> _cards;
 
 		GridSizer* _pGridSizer {};
 		int32_t _last_rows {};
 		CardSize _cardSize;
+		fig::string _filterString;
 		bool _bEnableTags { false };
 	};
 }

@@ -10,6 +10,8 @@ namespace fig
 	{
 		explicit SearchQuery(const fig::string& query);
 		std::vector<fig::string> terms;
+
+		inline bool empty() const noexcept { return terms.empty(); };
 	};
 
 	class SearchIndex

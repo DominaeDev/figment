@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Types.h"
+#include "model/CharacterData.h"
 
 namespace fig::io
 {
@@ -33,6 +34,7 @@ namespace fig::io
 		fig::timestamp updatedAt {}; // Not serialized
 		fig::timestamp lastUsedAt {}; // Not serialized
 		uint32_t chatCount {}; // Not serialized
+		CharacterGender gender {}; // Not serialized
 
 		CardBorderStyle borderStyle {};
 		Flags flags {};

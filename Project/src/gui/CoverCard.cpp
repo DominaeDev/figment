@@ -11,6 +11,7 @@
 #include <cassert>
 
 using namespace fig::util;
+using namespace fig::io;
 
 namespace fig::gui
 {
@@ -39,7 +40,7 @@ namespace fig::gui
 	constexpr Coord kTagRowHeight = 32;
 	constexpr Coord kTagY = 70;
 	constexpr Coord kTagMaxRows = 2;
-	
+
 	constexpr uint8_t FadeAlpha = 0x60;
 	constexpr float ZoomSmoothing = 8.0f;
 
@@ -142,23 +143,23 @@ namespace fig::gui
 			// Randomized border
 			static std::mt19937_64 rng { std::default_random_engine{}() };
 
-			constexpr std::array<fig::io::CardBorderStyle, 16> borderWeights {
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::None,
-				 fig::io::CardBorderStyle::Style01,
-				 fig::io::CardBorderStyle::Style02,
-				 fig::io::CardBorderStyle::Style03,
-				 fig::io::CardBorderStyle::Style04,
-				 fig::io::CardBorderStyle::Style05,
-				 fig::io::CardBorderStyle::Style06,
+			constexpr std::array<CardBorderStyle, 16> borderWeights {
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::None,
+				 CardBorderStyle::Style01,
+				 CardBorderStyle::Style02,
+				 CardBorderStyle::Style03,
+				 CardBorderStyle::Style04,
+				 CardBorderStyle::Style05,
+				 CardBorderStyle::Style06,
 			};
 
 			static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
@@ -361,9 +362,9 @@ namespace fig::gui
 		return AddTagResult::Ok;
 	}
 
-	void CoverCard::SetBorder(fig::io::CardBorderStyle style)
+	void CoverCard::SetBorder(CardBorderStyle style)
 	{
-		if (style == fig::io::None)
+		if (style == None)
 		{
 			_pLargeBorder->SetTexture(nullptr);
 			_pLargeBorder->SetVisible(false);
@@ -375,12 +376,12 @@ namespace fig::gui
 		TextureType textureType;
 		switch (style)
 		{
-		case fig::io::CardBorderStyle::Style01: textureType = TextureType::CARD_BORDER_STYLE_01; break;
-		case fig::io::CardBorderStyle::Style02: textureType = TextureType::CARD_BORDER_STYLE_02; break;
-		case fig::io::CardBorderStyle::Style03: textureType = TextureType::CARD_BORDER_STYLE_03; break;
-		case fig::io::CardBorderStyle::Style04: textureType = TextureType::CARD_BORDER_STYLE_04; break;
-		case fig::io::CardBorderStyle::Style05: textureType = TextureType::CARD_BORDER_STYLE_05; break;
-		case fig::io::CardBorderStyle::Style06: textureType = TextureType::CARD_BORDER_STYLE_06; break;
+		case CardBorderStyle::Style01: textureType = TextureType::CARD_BORDER_STYLE_01; break;
+		case CardBorderStyle::Style02: textureType = TextureType::CARD_BORDER_STYLE_02; break;
+		case CardBorderStyle::Style03: textureType = TextureType::CARD_BORDER_STYLE_03; break;
+		case CardBorderStyle::Style04: textureType = TextureType::CARD_BORDER_STYLE_04; break;
+		case CardBorderStyle::Style05: textureType = TextureType::CARD_BORDER_STYLE_05; break;
+		case CardBorderStyle::Style06: textureType = TextureType::CARD_BORDER_STYLE_06; break;
 		default:
 			return;
 		};
@@ -434,7 +435,7 @@ namespace fig::gui
 		}
 	}
 
-	void CoverCard::SetPendingCoverImage(fig::io::AsyncFuture&& future)
+	void CoverCard::SetPendingCoverImage(AsyncFuture&& future)
 	{
 		if (not future.valid())
 			return;
@@ -452,9 +453,9 @@ namespace fig::gui
 		{
 			if (auto result = _pendingCover.get(); result.has_value())
 			{
-				if (auto surface = std::get_if<fig::io::AsyncResult_Image>(&result.value()))
+				if (auto surface = std::get_if<AsyncResult_Image>(&result.value()))
 					SetCoverImages(std::move(*surface), {});
-				else if (auto pair = std::get_if<fig::io::AsyncResult_CoverPair>(&result.value()))
+				else if (auto pair = std::get_if<AsyncResult_CoverPair>(&result.value()))
 					SetCoverImages(std::move(pair->first), std::move(pair->second));
 			}
 			else
@@ -464,7 +465,7 @@ namespace fig::gui
 			RefreshState();
 		}
 	}
-	
+
 	void CoverCard::AddSearchTerms(const fig::string& text) noexcept
 	{
 		_searchIndex->AddTerm(text);
@@ -475,9 +476,57 @@ namespace fig::gui
 		_searchIndex->AddTerms(texts);
 	}
 
-	bool CoverCard::IsFilteredBy(const SearchQuery& query) const noexcept
+	bool CoverCard::MatchesFlags(FilterFlags filter) const noexcept
 	{
-		return !_searchIndex->Match(query);
+		if (filter.IsSet(FilterFlag::Hidden))
+			return _metaData.flags.IsSet(CardMetaData::Flag::Hidden);
+		if (_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
+			return false;
+
+		switch (_metaData.gender)
+		{
+		case CharacterGender::Male:
+			if (not filter.IsSet(FilterFlag::GenderMale))
+				return false;
+			break;
+		case CharacterGender::Female:
+			if (not filter.IsSet(FilterFlag::GenderFemale))
+				return false;
+			break;
+		default:
+			if (not filter.IsSet(FilterFlag::GenderOther))
+				return false;
+			break;
+		}
+
+		if (filter.IsSet(FilterFlag::New) and not _metaData.flags.IsSet(CardMetaData::Flag::New))
+			return false;
+		if (filter.IsSet(FilterFlag::Starred) and not _metaData.flags.IsSet(CardMetaData::Flag::Favorite))
+			return false;
+		if (filter.IsSet(FilterFlag::Chats) and _metaData.chatCount == 0)
+			return false;
+		if (not filter.IsSet(FilterFlag::SourceCreated) and not _metaData.flags.IsSet(CardMetaData::Flag::Imported))
+			return false;
+		if (not filter.IsSet(FilterFlag::SourceImported) and _metaData.flags.IsSet(CardMetaData::Flag::Imported))
+			return false;
+
+		return true;
+	}
+
+	void CoverCard::SetDelegate(OnCardUpdatedDelegate onUpdated)
+	{
+		_fnOnUpdated = onUpdated;
+	}
+
+	void CoverCard::DidUpdate()
+	{
+		if (_fnOnUpdated)
+			_fnOnUpdated(*this);
+	}
+
+	bool CoverCard::MatchesSearch(const SearchQuery& query) const noexcept
+	{
+		return query.empty() or _searchIndex->Match(query);
 	}
 
 	void CoverCard::SetCardSize(CardSize cardSize)
@@ -630,5 +679,13 @@ namespace fig::gui
 			RefreshImage();
 		else
 			CardImage::SetTexture(nullptr);
+	}
+
+	void CoverCard::ResetHoverZoom()
+	{
+		_bHovered = false;
+		_fHoverZoom = 0.0f;
+		_fTargetZoom = 0.0f;
+		SetZoom(0.0f);
 	}
 }

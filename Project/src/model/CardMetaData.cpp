@@ -5,7 +5,7 @@
 
 namespace fig::io
 {
-	static constexpr auto FlagMapping = std::array<std::tuple<CardMetaData::Flag, std::string_view>, 4> {
+	static constexpr auto FlagMapping = std::array<std::pair<CardMetaData::Flag, std::string_view>, 4> {
 		std::pair { CardMetaData::Flag::New, "new" },
 		std::pair { CardMetaData::Flag::Imported, "imported" },
 		std::pair { CardMetaData::Flag::Hidden, "hidden" },
@@ -53,7 +53,7 @@ namespace fig::io
 			
 			std::vector<fig::string> f;
 			json.at("flags").get_to(f); 
-			data.flags.Deserialize(f, FlagMapping);
+			data.flags = Flags::Deserialize(f, FlagMapping);
 			return data;
 		}
 		catch (const nlohmann::json::exception&)
@@ -70,7 +70,7 @@ namespace fig::io
 			if (data.borderStyle != CardBorderStyle::None)
 				json["border"] = SerializeBorder(data.borderStyle);
 			if (!data.flags.IsEmpty())
-				json["flags"] = data.flags.Serialize(FlagMapping);
+				json["flags"] = Flags::Serialize(data.flags, FlagMapping);
 
 			return json.dump();
 		}

@@ -93,31 +93,66 @@ namespace fig::gui
 
 	void CharacterCard::ShowMenu()
 	{
-		auto pMenu = new Menu(&MainFrame::GetInstance());
-		pMenu->AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT);
-		pMenu->AddItem("Resume last chat")
+		auto& menu = MainFrame::GetInstance().CreateMenu();
+		menu.AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT);
+		menu.AddItem("Resume last chat")
 			.SetEnabled(false);
-		pMenu->AddItem(std::format("View chats with {}", _characterName))
+		menu.AddItem(std::format("View chats with {}", _characterName))
 			.SetEnabled(false);
-		pMenu->AddSeparator();
-		pMenu->AddItem("View / Edit\u2026");
-		pMenu->AddItem("Clone\u2026");
-		pMenu->AddItem("Move to folder\u2026");
-		pMenu->AddItem("Export\u2026");
-		pMenu->AddSeparator();
-		auto& borderMenu = pMenu->AddItem("Set border");
+		menu.AddSeparator();
+		menu.AddItem("View / Edit\u2026");
+		menu.AddItem("Clone\u2026");
+		menu.AddItem("Move to folder\u2026");
+		menu.AddItem("Export\u2026");
+		menu.AddSeparator();
+		auto& borderMenu = menu.AddItem("Set border");
 			borderMenu.AddCheckItem("No border", true);
 			borderMenu.AddSeparator();
 			borderMenu.AddCheckItem("Border #1");
 			borderMenu.AddCheckItem("Border #2");
 			borderMenu.AddCheckItem("Border #3");
 			borderMenu.AddCheckItem("Border #4");
-		pMenu->AddItem("Star");
-		pMenu->AddItem("Hide");
-		pMenu->AddSeparator();
-		pMenu->AddItem("Delete\u2026")
+
+		if (!_metaData.flags.IsSet(CardMetaData::Flag::Favorite))
+		{
+			menu.AddCheckItem("Star", false)
+				.SetDelegate([this] {
+					Global::GetUserManager().GetContent().MarkFavorite(_characterId, true);
+					_metaData.flags.Set(CardMetaData::Flag::Favorite);
+					DidUpdate();
+				});
+		}
+		else
+		{
+			menu.AddCheckItem("Unstar", true)
+				.SetDelegate([this] {
+					Global::GetUserManager().GetContent().MarkFavorite(_characterId, false);
+					_metaData.flags.Unset(CardMetaData::Flag::Favorite);
+					DidUpdate();
+				});
+		}
+		if (!_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
+		{
+			menu.AddCheckItem("Hide", false)
+				.SetDelegate([this] { 
+					Global::GetUserManager().GetContent().MarkHidden(_characterId, true);
+					_metaData.flags.Set(CardMetaData::Flag::Hidden);
+					DidUpdate();
+				});
+		}
+		else
+		{
+			menu.AddCheckItem("Unhide", true)
+				.SetDelegate([this] { 
+					Global::GetUserManager().GetContent().MarkHidden(_characterId, false);
+					_metaData.flags.Unset(CardMetaData::Flag::Hidden);
+					DidUpdate();
+				});
+		}
+		menu.AddSeparator();
+		menu.AddItem("Delete\u2026")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 
-		_menuId = pMenu->Show();
+		_menuId = menu.Show();
 	}
 }

@@ -63,6 +63,7 @@ namespace fig::gui
 				auto pCard = new ScenarioCard(this, asset.id, _cardSize);
 				auto request = assetMngr.LoadAssetAsync(asset.id, AsyncTask::LoadCoverImage, priority--);
 				pCard->SetPendingCoverImage(std::move(request.future));
+				pCard->SetDelegate([this](auto& card) { Reorder(); });
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
 				DEBUG_MEASURE_END();
@@ -79,6 +80,7 @@ namespace fig::gui
 			{
 				DEBUG_MEASURE_BEGIN(std::format("Character card {}:", asset.id.str()));
 				auto pCard = new CharacterCard(this, asset.id, _cardSize);
+				pCard->SetDelegate([this](auto& card) { Reorder(); });
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
 				DEBUG_MEASURE_END();
@@ -131,49 +133,10 @@ namespace fig::gui
 
 	void CardList::SetFilter(const fig::string& search_string) noexcept
 	{
-		if (fig::util::empty_or_whitespace(search_string))
-		{
-			ClearFilter();
-			return;
-		}
-
-		SearchQuery query { search_string };
-
-		for (auto& card : _cards)
-		{
-			bool bFiltered = card->IsFilteredBy(query);
-//			card->SetVisible(not bFiltered);
-//			card->EnableLayout(not bFiltered);
-			card->SetHidden(bFiltered);
-		}
-
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
-		Sort(sortBy, orderBy);
+		_filterString = search_string;
 		
-		std::stable_partition(_cards.begin(), _cards.end(), [](auto& card) { return !card->IsHidden(); });
-
-		// Reorder grid
-		_pGridSizer->RemoveAll();
-		for (auto& card : _cards)
-			_pGridSizer->Add(card);
-
-		ScrollTo(0, false);
-		InvalidateLayout();
-	}
-
-	void CardList::ClearFilter() noexcept
-	{
-		for (auto& card : _cards)
-		{
-//			card->SetVisible(true);
-//			card->EnableLayout(true);
-			card->SetHidden(false);
-		}
-
 		Reorder();
 		ScrollTo(0, false);
-
 		InvalidateLayout();
 	}
 
@@ -226,26 +189,24 @@ namespace fig::gui
 		ScrollPanel::OnAfterLayout();
 	}
 
-	void CardList::Sort(SortBy sortBy, OrderBy orderBy)
+	static void Sort(std::vector<CoverCard*>& cards, SortBy sortBy, OrderBy orderBy)
 	{
 		auto fnCompare = [](const fig::timestamp& a, const fig::timestamp& b) -> int {
 			return a < b ? -1 : (a > b ? 1 : 0);
 		};
 
 		// Initial sort (creation date)
-		std::ranges::stable_sort(_cards, [&](CoverCard* a, CoverCard* b) -> bool {
+		std::ranges::stable_sort(cards, [&](CoverCard* a, CoverCard* b) -> bool {
 			auto& meta_a = a->GetMetaData();
 			auto& meta_b = b->GetMetaData();
-			int cmp = fnCompare(meta_a.createdAt, meta_b.createdAt);
-			if (orderBy == OrderBy::Descending)
-				cmp *= -1;
+			int cmp = fnCompare(meta_b.createdAt, meta_a.createdAt);
 			return cmp < 0;
 		});
 
 		// Then sort by...
 		if (sortBy != SortBy::CreatedAt)
 		{
-			std::ranges::stable_sort(_cards, [&](CoverCard* a, CoverCard* b) -> bool {
+			std::ranges::stable_sort(cards, [&](CoverCard* a, CoverCard* b) -> bool {
 				auto& meta_a = a->GetMetaData();
 				auto& meta_b = b->GetMetaData();
 				int cmp = 0;
@@ -270,20 +231,45 @@ namespace fig::gui
 				return cmp < 0;
 			});
 		}
+		else if (orderBy == OrderBy::Ascending)
+		{
+			std::ranges::reverse(cards);
+		}
+	}
+
+	static void Filter(std::vector<CoverCard*>& cards, FilterFlags filterBy, const fig::string& search_string)
+	{
+		SearchQuery query { search_string };
+
+		auto fnFilter = [&](const CoverCard* card) {
+			return card->MatchesFlags(filterBy) and card->MatchesSearch(query);
+		};
+
+		for (auto& card : cards)
+			card->SetHidden(not fnFilter(card));
 	}
 
 	void CardList::Reorder()
 	{
+		// Sort
 		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
 		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
-		Sort(sortBy, orderBy);
+		Sort(_cards, sortBy, orderBy);
 
+		// Filter
+		auto filterBy = Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Filtering, DefaultFilterFlags, FilterFlagMapping);
+		Filter(_cards, filterBy, _filterString);
+
+		// Move visible cards to front
 		std::stable_partition(_cards.begin(), _cards.end(), [](auto& card) { return !card->IsHidden(); });
 
-		// Reorder grid
+		// Update grid
 		_pGridSizer->RemoveAll();
 		for (auto& card : _cards)
+		{
 			_pGridSizer->Add(card);
+			card->ResetHoverZoom();
+		}
 
 		InvalidateLayout();
 	}

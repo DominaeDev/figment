@@ -25,7 +25,7 @@ namespace fig::gui
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void OnSidePanel(bool show) override;
-		void OnFilter(fig::string search_text);
+		void OnSearchFilter(fig::string search_text);
 		void OnUserSignedIn(const fig::user::UserProfile& profile) override;
 
 	private:
@@ -43,6 +43,7 @@ namespace fig::gui
 		float _fSearchTimer {};
 		ButtonWithIcon* _pSortingButton {};
 		ButtonWithIcon* _pFilteringButton {};
+		Control* _pFilterBorder {};
 		ButtonWithIcon* _pToggleTagsButton {};
 		ToggleWithIcon* _pGridButton {};
 	};

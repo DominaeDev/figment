@@ -45,6 +45,11 @@ namespace fig::gui
 		SDL_RenderPresent(pRenderer);
 	}
 
+	Menu& Frame::CreateMenu() noexcept
+	{
+		return *new Menu(this);
+	}
+
 	int32_t Frame::PushMenu(MenuPtr pMenu)
 	{
 		int32_t menuId = ++_nextMenuId;

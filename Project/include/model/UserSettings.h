@@ -12,7 +12,7 @@ namespace fig
 		HalfSizeCards,
 		Sorting,
 		Ordering,
-		Filter,
+		Filtering,
 
 		Count,
 	};
@@ -38,19 +38,32 @@ namespace fig
 
 	enum class FilterFlag : int32_t
 	{
-		Male		= 1 << 0,
-		Female		= 1 << 1,
-		Other		= 1 << 2,
+		GenderMale		= 1 << 0,
+		GenderFemale	= 1 << 1,
+		GenderOther		= 1 << 2,
 
-		New			= 1 << 4,
-		Starred		= 1 << 5,
-		Chats		= 1 << 6,
-		Hidden		= 1 << 7,
-
-		Exclusive	= New | Starred | Chats | Hidden,
+		New				= 1 << 4,
+		Starred			= 1 << 5,
+		Chats			= 1 << 6,
+		Hidden			= 1 << 7,
+		SourceCreated	= 1 << 8,
+		SourceImported	= 1 << 9,
 	};
 	using FilterFlags = EnumFlags<FilterFlag>;
 
+	static auto FilterFlagMapping = std::array<std::pair<FilterFlag, std::string_view>, 9> {
+		std::pair { FilterFlag::GenderMale,		"male" },
+		std::pair { FilterFlag::GenderFemale,	"female" },
+		std::pair { FilterFlag::GenderOther,	"nonbinary" },
+		std::pair { FilterFlag::New,			"new" },
+		std::pair { FilterFlag::Starred,		"starred" },
+		std::pair { FilterFlag::Chats,			"chats" },
+		std::pair { FilterFlag::Hidden,			"hidden" },
+		std::pair { FilterFlag::SourceCreated,	"created" },
+		std::pair { FilterFlag::SourceImported,	"imported" },
+	};
+
+	constexpr FilterFlags DefaultFilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther, FilterFlag::SourceCreated, FilterFlag::SourceImported  };
 	extern template class SettingsCollection<UserSetting>;
 	using UserSettings = SettingsCollection<UserSetting>;
 }

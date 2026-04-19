@@ -279,7 +279,7 @@ namespace fig::io
 		auto meta_type = get_meta_type(tag);
 		assert(meta_type == MetaValueType::TimeStamp);
 		_parameters[tag] = value;
-		SetUpdated();
+		SetUpdated(tag != MetaTag::UpdatedAt);
 	}
 
 	void Asset::SetMeta(MetaTag tag, const fig::uuid& value) noexcept
@@ -340,7 +340,7 @@ namespace fig::io
 		SetMeta(MetaTag::Checksum, static_cast<int32_t>(crc32_fast(data.data(), data.size())));
 	}
 
-	void Asset::SetUpdated()
+	void Asset::SetUpdated(bool bWriteTimestamp)
 	{
 		if (file_status == AssetFileStatus::Invalid || file_status == AssetFileStatus::Missing)
 		{
@@ -348,7 +348,8 @@ namespace fig::io
 			return;
 		}
 
-		_parameters[MetaTag::UpdatedAt] = fig::util::utc_now();
+		if (bWriteTimestamp)
+			_parameters[MetaTag::UpdatedAt] = fig::util::utc_now();
 
 		file_status = AssetFileStatus::Modified;
 		if (save_status != AssetSaveStatus::Created)

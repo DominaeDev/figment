@@ -156,7 +156,7 @@ namespace fig::io
 		AssetSaveStatus save_status = { AssetSaveStatus::Created };
 
 	private:
-		void SetUpdated();
+		void SetUpdated(bool bWriteTimestamp = true);
 
 	private:
 		std::map<MetaTag, MetaValue> _parameters {};

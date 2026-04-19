@@ -6,6 +6,7 @@
 #include "CardImage.h"
 #include "model/AssetManager.h"
 #include "model/CardMetaData.h"
+#include "model/UserSettings.h"
 #include "util/SearchIndex.h"
 
 namespace fig::gui
@@ -18,6 +19,9 @@ namespace fig::gui
 
 	class TexturedBorder;
 	class NineGridImage;
+	class CoverCard;
+
+	using OnCardUpdatedDelegate = std::function<void(CoverCard&)>;
 
 	class CoverCard : public CardImage
 	{
@@ -32,9 +36,14 @@ namespace fig::gui
 		void SetHidden(bool bHidden);
 		inline bool IsHidden() const noexcept { return _bHidden; }
 		
-		bool IsFilteredBy(const SearchQuery& query) const noexcept;
+		bool MatchesFlags(FilterFlags filter) const noexcept;
+		bool MatchesSearch(const SearchQuery& query) const noexcept;
+
 		const fig::uuid& GetAssetID() const { return _assetId; }
 		inline const fig::io::CardMetaData& GetMetaData() const noexcept { return _metaData; };
+
+		void SetDelegate(OnCardUpdatedDelegate onUpdated);
+		void ResetHoverZoom();
 
 	protected:
 		void SetCoverImages(fig::sdl::Surface&& fullCover, fig::sdl::Surface&& halfCover);
@@ -55,18 +64,25 @@ namespace fig::gui
 		void AddSearchTerms(std::span<const fig::string> texts) noexcept;
 
 		inline void SetMetaData(const fig::io::CardMetaData& metaData) noexcept { _metaData = metaData; };
+		void DidUpdate();
+
 	private:
-		void PollFuture();
 		void RefreshImage();
+		void PollFuture();
 		void CreatePendingTags();
 		void CreatePendingLabel();
-
+		
 	protected:
 		fig::uuid _assetId;
 		bool _bSelected = false;
 		bool _bInitialized = false;
 		bool _bHidden = false;
 		bool _bHasError = false;
+		OnCardUpdatedDelegate _fnOnUpdated {};
+		fig::io::CardMetaData _metaData {};
+		bool _bHovered = false;
+		float _fHoverZoom = 0.0f;
+		float _fTargetZoom = 0.0f;
 
 	private:
 		TexturedBorder* _pHiddenBG {};
@@ -107,11 +123,6 @@ namespace fig::gui
 		};
 		fig::string _pendingLabel {};
 		std::vector<PendingTag> _pendingTags {};
-		
-		bool _bHovered = false;
-		float _fTargetZoom = 0.0f;
-		float _fHoverZoom = 0.0f;
-		fig::io::CardMetaData _metaData {};
 	};
 }
 

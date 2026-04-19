@@ -6,12 +6,18 @@
 #include "gui/AppResources.h"
 #include "gui/Menu.h"
 #include "gui/ToggleWithIcon.h"
+#include "gui/TexturedBorder.h"
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "util/Common.h"
 
 namespace fig::gui
 {
+	static FilterFlags GetFiltering()
+	{ 
+		return Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Filtering, DefaultFilterFlags, FilterFlagMapping);
+	};
+
 	HomeScreen::HomeScreen(Frame* pParent) : Screen(pParent)
 	{
 		auto pTopBar = new Panel(this);
@@ -33,6 +39,7 @@ namespace fig::gui
 
 		_pFilteringButton = new ButtonWithIcon(pTopBar, TextureType::ICON_FILTERING);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
+//		_pFilterBorder = new TexturedBorder(_pFilteringButton, TextureType::ROUNDED_BACKGROUND_6PX, 8);
 
 		_pGridButton = new ToggleWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
 		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
@@ -46,7 +53,7 @@ namespace fig::gui
 		_pFilterTextBox->SetMaxSize(192, -1);
 		_pFilterTextBox->SetBackgroundColor(Colors::White);
 		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
-			this->OnFilter(s); 
+			this->OnSearchFilter(s); 
 		});
 
 		auto pTopSizer = new HorizontalSizer();
@@ -118,6 +125,7 @@ namespace fig::gui
 		_pGridButton->SetIcon(bHalfSize ? TextureType::ICON_GRID_SMALL : TextureType::ICON_GRID_LARGE);
 		_pGridButton->Toggle(bHalfSize, false);
 		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::ShowTags));
+		_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
 	}
 
 	CardList& HomeScreen::GetCardList()
@@ -125,11 +133,12 @@ namespace fig::gui
 		return *_pCardList;
 	}
 
-	void HomeScreen::OnFilter(fig::string search_text)
+	void HomeScreen::OnSearchFilter(fig::string search_text)
 	{
 		if (search_text.size() < 2)
 		{
-			_pCardList->ClearFilter();
+			_pCardList->SetFilter("");
+			_search_text.clear();
 			_fSearchTimer = 0.0f;
 		}
 		else
@@ -158,55 +167,100 @@ namespace fig::gui
 
 	void HomeScreen::ShowSortingMenu() noexcept
 	{
-		auto ChangeSorting = [](CardList* pCardList, SortBy sorting) {
+		auto ChangeSorting = [this](SortBy sorting) {
 			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Sorting, sorting);
-			pCardList->Reorder();
+			_pCardList->Reorder();
 		};
 
-		auto ChangeOrdering = [](CardList* pCardList, OrderBy ordering) {
+		auto ChangeOrdering = [this](OrderBy ordering) {
 			Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Ordering, ordering);
-			pCardList->Reorder();
+			_pCardList->Reorder();
 		};
 
 		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
 		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
 
-		auto pMenu = new Menu(&MainFrame::GetInstance());
-		pMenu->AddCheckItem("Sort by name", sortBy == SortBy::Name)
-			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::Name); });
-		pMenu->AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
-			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::CreatedAt); });
-		pMenu->AddCheckItem("Sort by last updated", sortBy == SortBy::UpdatedAt)
-			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::UpdatedAt); });
-		pMenu->AddCheckItem("Sort by most recent chat", sortBy == SortBy::LastUsedAt)
-			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::LastUsedAt); });
-		pMenu->AddCheckItem("Sort by chat count", sortBy == SortBy::ChatCount)
-			.SetDelegate([&]() { ChangeSorting(_pCardList, SortBy::ChatCount); });
-		pMenu->AddSeparator();
-		pMenu->AddCheckItem("Ascending", orderBy == OrderBy::Ascending)
-			.SetDelegate([&]() { ChangeOrdering(_pCardList, OrderBy::Ascending); });
-		pMenu->AddCheckItem("Descending", orderBy == OrderBy::Descending)
-			.SetDelegate([&]() { ChangeOrdering(_pCardList, OrderBy::Descending); });
+		auto& menu = MainFrame::GetInstance().CreateMenu();
+		menu.AddCheckItem("Sort alphabetically", sortBy == SortBy::Name)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::Name); });
+		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::CreatedAt); });
+		menu.AddCheckItem("Sort by update date", sortBy == SortBy::UpdatedAt)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::UpdatedAt); });
+		menu.AddCheckItem("Sort by recency", sortBy == SortBy::LastUsedAt)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
+		menu.AddCheckItem("Sort by chats", sortBy == SortBy::ChatCount)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::ChatCount); });
+		menu.AddSeparator();
+		menu.AddCheckItem("Ascending", orderBy == OrderBy::Ascending)
+			.SetDelegate([ChangeOrdering, this] { ChangeOrdering(OrderBy::Ascending); });
+		menu.AddCheckItem("Descending", orderBy == OrderBy::Descending)
+			.SetDelegate([ChangeOrdering, this] { ChangeOrdering(OrderBy::Descending); });
+		menu.AddSeparator();
+		menu.AddItem("Reset")
+			.SetDelegate([this] { 
+				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Sorting, SortBy::CreatedAt);
+				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Descending);
+				_pCardList->Reorder();
+			});
 
-		pMenu->Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
+		menu.Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
 	}
 
 	void HomeScreen::ShowFilteringMenu() noexcept
 	{
-		auto pMenu = new Menu(&MainFrame::GetInstance());
-		pMenu->AddCheckItem("Filter by new");
-		pMenu->AddCheckItem("Filter by starred");
-		pMenu->AddCheckItem("Filter by chats");
-		auto& genders = pMenu->AddItem("Filter by gender");
-		genders.AddCheckItem("Show male", true);
-		genders.AddCheckItem("Show female", true);
-		genders.AddCheckItem("Show non-binary", true);
-		auto& sources = pMenu->AddItem("Filter by source");
-		sources.AddCheckItem("Show imported", true);
-		sources.AddCheckItem("Hide imported");
-		pMenu->AddSeparator();
-		pMenu->AddCheckItem("Show hidden");
-		pMenu->Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
+		auto SetFilter = [this](FilterFlags filtering) {
+			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Filtering, filtering, FilterFlagMapping);
+			_pCardList->Reorder();
+			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
+		};
+
+		auto ToggleFilter = [this](FilterFlag flag) {
+			auto filtering = GetFiltering();
+			filtering.Flip(flag);
+			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Filtering, filtering, FilterFlagMapping);
+			_pCardList->Reorder();
+			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
+		};
+
+		auto filtering = GetFiltering();
+		bool bShowHidden = filtering.IsSet(FilterFlag::Hidden);
+
+		auto& menu = MainFrame::GetInstance().CreateMenu();
+		menu.AddCheckItem("New", filtering.IsSet(FilterFlag::New))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::New); });
+		menu.AddCheckItem("Starred", filtering.IsSet(FilterFlag::Starred))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Starred); });
+		menu.AddCheckItem("At least one chat", filtering.IsSet(FilterFlag::Chats))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Chats); });
+		menu.AddSeparator();
+		auto& genders = menu.AddItem("By gender");
+		genders.AddCheckItem("Show male", filtering.IsSet(FilterFlag::GenderMale))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::GenderMale); });
+		genders.AddCheckItem("Show female", filtering.IsSet(FilterFlag::GenderFemale))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::GenderFemale); });
+		genders.AddCheckItem("Show non-binary", filtering.IsSet(FilterFlag::GenderOther))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::GenderOther); });
+		auto& sources = menu.AddItem("By source");
+		sources.AddCheckItem("Show created", filtering.IsSet(FilterFlag::SourceCreated))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::SourceCreated); });
+		sources.AddCheckItem("Show imported", filtering.IsSet(FilterFlag::SourceImported))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::SourceImported); });
+		menu.AddSeparator();
+		menu.AddCheckItem("Show hidden", bShowHidden)
+			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Hidden); });
+		menu.AddSeparator();
+		menu.AddItem("Reset")
+			.SetDelegate([SetFilter, this] { SetFilter(DefaultFilterFlags); });
+		menu.Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}
 	
 }

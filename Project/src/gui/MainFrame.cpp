@@ -100,11 +100,10 @@ namespace fig::gui
 				for (auto& assetRef : characterAssets)
 				{
 					auto& asset = assetRef.get();
-					asset.SetMeta(fig::io::MetaTag::CreatedAt, timestamp);
-					asset.SetMeta(fig::io::MetaTag::UpdatedAt, timestamp);
-					asset.SetMeta(fig::io::MetaTag::LastUsedAt, timestamp);
-
 					content.MarkNew(asset.id, count++ < 10);
+					asset.SetMeta(fig::io::MetaTag::CreatedAt, timestamp);
+					asset.SetMeta(fig::io::MetaTag::LastUsedAt, timestamp);
+					asset.SetMeta(fig::io::MetaTag::UpdatedAt, timestamp);
 					timestamp -= static_cast<fig::timestamp>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::milliseconds(100)).count());
 				}
 

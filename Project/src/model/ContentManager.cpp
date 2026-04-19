@@ -89,6 +89,7 @@ namespace fig::io
 			{
 				auto& character = itFind->second;
 				metaData.name = character.shortName;
+				metaData.gender = character.gender;
 				metaData.chatCount = static_cast<uint32_t>(std::ranges::count_if(_pAssetMngr->GetAssets(), [&id](auto&& a) { return a.asset_type == AssetType::ChatInstance and a.parent_id == id; }));
 			}
 			_metaData[id] = metaData;

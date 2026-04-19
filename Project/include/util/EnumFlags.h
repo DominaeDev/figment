@@ -72,6 +72,8 @@ public:
 	constexpr void Set(T v) noexcept { _flags |= ToUnderlying(v); }
 	// Unsets a single flag value.
 	constexpr void Unset(T v) noexcept { _flags &= ~ToUnderlying(v); }
+	// Toggle a single flag value.
+	constexpr void Flip(T v) noexcept { IsSet(v) ? Unset(v) : Set(v); }
 
 	// Unsets multiple flag values.
 	constexpr void Unset(std::initializer_list<T> vs) noexcept 
@@ -199,7 +201,7 @@ public:
 	static const UnderlyingType One;
 
 	template<std::ranges::range Map>
-	std::vector<std::string> Serialize(const Map& mapping) const
+	std::vector<std::string> Serialized(const Map& mapping) const
 	{
 		std::vector<std::string> result;
 		for (auto& [flag, name] : mapping)
@@ -211,7 +213,7 @@ public:
 	}
 
 	template<std::ranges::range Map>
-	void Deserialize(const std::vector<std::string>& flags, const Map& mapping)
+	void Deserialized(const std::vector<std::string>& flags, const Map& mapping)
 	{
 		Clear();
 		for (auto& [flag, name] : mapping)
@@ -219,6 +221,20 @@ public:
 			if (std::ranges::contains(flags, name))
 				Set(flag);
 		}
+	}
+
+	template<std::ranges::range Map>
+	static std::vector<std::string> Serialize(EnumFlags flags, const Map& mapping)
+	{
+		return flags.Serialized(mapping);
+	}
+
+	template<std::ranges::range Map>
+	static EnumFlags Deserialize(const std::vector<std::string>& values, const Map& mapping)
+	{
+		EnumFlags flags;
+		flags.Deserialized(values, mapping);
+		return flags;
 	}
 
 private:
