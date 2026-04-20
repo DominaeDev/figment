@@ -31,6 +31,7 @@ namespace fig::io
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);
 		bool MarkHidden(const fig::uuid& assetId, bool value = true);
+		bool SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle);
 
 		AssetManager& GetAssetManager();
 		void SaveModified();

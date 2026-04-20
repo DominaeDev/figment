@@ -258,7 +258,7 @@ namespace fig::gui
 		menu.AddCheckItem("Show hidden", bShowHidden)
 			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Hidden); });
 		menu.AddSeparator();
-		menu.AddItem("Reset")
+		menu.AddItem("Reset filter")
 			.SetDelegate([SetFilter, this] { SetFilter(DefaultFilterFlags); });
 		menu.Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}

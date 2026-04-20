@@ -49,7 +49,7 @@ namespace fig::io
 
 			CardMetaData data;
 
-			data.borderStyle = DeserializeBorder(json.value("border_style", ""));
+			data.borderStyle = DeserializeBorder(json.value("border", ""));
 			
 			std::vector<fig::string> f;
 			json.at("flags").get_to(f); 

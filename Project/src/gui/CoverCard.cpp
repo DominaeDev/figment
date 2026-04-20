@@ -138,33 +138,7 @@ namespace fig::gui
 		CreateChatCounter(0);
 		SetCardSize(_cardSize);
 
-		if constexpr (Enabled)
-		{
-			// Randomized border
-			static std::mt19937_64 rng { std::default_random_engine{}() };
-
-			constexpr std::array<CardBorderStyle, 16> borderWeights {
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::None,
-				 CardBorderStyle::Style01,
-				 CardBorderStyle::Style02,
-				 CardBorderStyle::Style03,
-				 CardBorderStyle::Style04,
-				 CardBorderStyle::Style05,
-				 CardBorderStyle::Style06,
-			};
-
-			static std::uniform_int_distribution<size_t> dist(0, borderWeights.size() - 1);
-			SetBorder(borderWeights[dist(rng)]);
-		}
+		SetBorder(_metaData.borderStyle);
 
 		CreatePendingTags();
 		CreatePendingLabel();

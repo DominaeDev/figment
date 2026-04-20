@@ -175,19 +175,19 @@ namespace fig::gui
 		pItemLabel->SetMaxSize(pItemRoot->GetWidth() - 36, -1);
 		pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
 
-		if (menuItem._bCheckable)
+		if (menuItem._bCheckable && menuItem._bChecked)
 		{
-			if (menuItem._bChecked)
-			{
-				auto pIcon = new Image(pItemRoot, AppResources::GetTexture(TextureType::ICON_CHECKMARK));
-				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
-				pIcon->SetPosition(4, 4);
-			}
+			auto pIcon = new Image(pItemRoot, AppResources::GetTexture(TextureType::ICON_CHECKMARK));
+			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+			pIcon->SetPosition(4, 4);
 		}
 		else if (menuItem._icon != TextureType::NONE)
 		{
 			auto pIcon = new Image(pItemRoot, AppResources::GetTexture(menuItem._icon));
-			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+			if (menuItem._bMonochromeIcon)
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+			else
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::White : Colors::White.WithAlpha(0x80));
 			pIcon->SetPosition(4, 4);
 		}
 

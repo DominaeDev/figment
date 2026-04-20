@@ -93,6 +93,12 @@ namespace fig::gui
 
 	void CharacterCard::ShowMenu()
 	{
+		auto ChangeBorder = [this](CardBorderStyle border) {
+			_metaData.borderStyle = border;
+			Global::GetUserManager().GetContent().SetBorder(_characterId, border);
+			SetBorder(border);
+		};
+
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 		menu.AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT);
 		menu.AddItem("Resume last chat")
@@ -106,12 +112,27 @@ namespace fig::gui
 		menu.AddItem("Export\u2026");
 		menu.AddSeparator();
 		auto& borderMenu = menu.AddItem("Set border");
-			borderMenu.AddCheckItem("No border", true);
+			borderMenu.AddCheckItem("No border", _metaData.borderStyle == CardBorderStyle::None)
+				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::None); });
 			borderMenu.AddSeparator();
-			borderMenu.AddCheckItem("Border #1");
-			borderMenu.AddCheckItem("Border #2");
-			borderMenu.AddCheckItem("Border #3");
-			borderMenu.AddCheckItem("Border #4");
+			borderMenu.AddCheckItem("Border #1", _metaData.borderStyle == CardBorderStyle::Style01)
+				.SetIcon(TextureType::ICON_BORDER_01, false)
+				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style01); });
+			borderMenu.AddCheckItem("Border #2", _metaData.borderStyle == CardBorderStyle::Style02)
+				.SetIcon(TextureType::ICON_BORDER_02, false)
+				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style02); });
+			borderMenu.AddCheckItem("Border #3", _metaData.borderStyle == CardBorderStyle::Style03)
+				.SetIcon(TextureType::ICON_BORDER_03, false)
+				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style03); });
+			borderMenu.AddCheckItem("Border #4", _metaData.borderStyle == CardBorderStyle::Style04)
+				.SetIcon(TextureType::ICON_BORDER_04, false)
+				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style04); });
+			borderMenu.AddCheckItem("Border #5", _metaData.borderStyle == CardBorderStyle::Style05)
+				.SetIcon(TextureType::ICON_BORDER_05, false)
+				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style05); });
+			borderMenu.AddCheckItem("Border #6", _metaData.borderStyle == CardBorderStyle::Style06)
+				.SetIcon(TextureType::ICON_BORDER_06, false)
+				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
 
 		if (!_metaData.flags.IsSet(CardMetaData::Flag::Favorite))
 		{

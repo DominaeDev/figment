@@ -62,6 +62,13 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_UNSTAR, "./resources/gui/icons/icon_unstar.png");
 		LoadTexture(pRenderer, TextureType::ICON_HIDE, "./resources/gui/icons/icon_hide.png");
 		LoadTexture(pRenderer, TextureType::ICON_UNHIDE, "./resources/gui/icons/icon_unhide.png");
+		
+		LoadTexture(pRenderer, TextureType::ICON_BORDER_01, "./resources/gui/card/borders/icon_border_01.png");
+		LoadTexture(pRenderer, TextureType::ICON_BORDER_02, "./resources/gui/card/borders/icon_border_02.png");
+		LoadTexture(pRenderer, TextureType::ICON_BORDER_03, "./resources/gui/card/borders/icon_border_03.png");
+		LoadTexture(pRenderer, TextureType::ICON_BORDER_04, "./resources/gui/card/borders/icon_border_04.png");
+		LoadTexture(pRenderer, TextureType::ICON_BORDER_05, "./resources/gui/card/borders/icon_border_05.png");
+		LoadTexture(pRenderer, TextureType::ICON_BORDER_06, "./resources/gui/card/borders/icon_border_06.png");
 
 		// Chat
 		LoadTexture(pRenderer, TextureType::TEXTBOX_BG, "./resources/gui/chat/bg_9grid.png");

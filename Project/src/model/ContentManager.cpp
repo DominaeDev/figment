@@ -137,6 +137,22 @@ namespace fig::io
 		return MarkFlag<CardMetaData::Flag::Hidden>(assetId, value);
 	}
 
+	bool UserContentManager::SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle)
+	{
+		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
+		{
+			auto& asset = tryAsset.value().get();
+			if (auto tryMeta = GetMetaData(assetId))
+			{
+				auto& meta = tryMeta.value().get();
+				meta.borderStyle = borderStyle;
+				asset.SetSettings(CardMetaData::ToJson(meta));
+				return true;
+			}
+		}
+		return false;
+	}
+
 	size_t UserContentManager::ImportCharactersInDirectory(const fig::path& directory)
 	{
 		auto imported = _pAssetMngr->ImportCharactersInDirectory(directory, AssetManager::CharacterDataFormat::TavernV2);

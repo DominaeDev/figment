@@ -22,7 +22,7 @@ namespace fig::gui
 
 		inline MenuItem& SetLabel(const fig::string& label) noexcept { _label = label; return *this; };
 		inline MenuItem& SetEnabled(bool bEnabled) noexcept { _state = bEnabled ? State::Default : State::Disabled; return *this; };
-		inline MenuItem& SetIcon(TextureType icon) noexcept { _icon = icon; return *this; };
+		inline MenuItem& SetIcon(TextureType icon, bool bMonochrome = true) noexcept { _icon = icon; _bMonochromeIcon = bMonochrome; return *this; };
 		inline MenuItem& SetDelegate(MenuDelegate delegate) noexcept { _fnDelegate = delegate; return *this; };
 		inline MenuItem& SetCheckable(bool bCheckable) noexcept { _bCheckable = bCheckable; return *this; };
 		inline MenuItem& SetChecked(bool bChecked) noexcept { _bChecked = _bCheckable && bChecked; return *this; };
@@ -43,6 +43,7 @@ namespace fig::gui
 		MenuDelegate _fnDelegate {};
 		bool _bCheckable {};
 		bool _bChecked {};
+		bool _bMonochromeIcon { true };
 
 		std::vector<MenuItem> _subItems;
 		Rect rect {};
