@@ -23,15 +23,21 @@ namespace fig::gui
 			SetLabel(character.fullName);
 			SetIndex(character.searchIndex);
 
-			if (auto meta = Global::GetUserManager().GetContent().GetMetaData(characterId))
-				SetMetaData(meta.value().get());
+			if (auto try_meta = Global::GetUserManager().GetContent().GetMetaData(characterId))
+			{
+				auto& meta = try_meta.value().get();
+				SetMetaData(meta);
+				ShowStar(meta.flags.IsSet(CardMetaData::Flag::Favorite));
+			}
 			else
+			{
 				SetMetaData(CardMetaData {
 					.name = _characterName,
 					.createdAt = character.createdAt,
 					.updatedAt = character.updatedAt,
 					.lastUsedAt = character.updatedAt,
 				});
+			}
 
 			// Tags
 			switch (character.gender)
@@ -140,7 +146,8 @@ namespace fig::gui
 				.SetDelegate([this] {
 					Global::GetUserManager().GetContent().MarkFavorite(_characterId, true);
 					_metaData.flags.Set(CardMetaData::Flag::Favorite);
-					DidUpdate();
+					ShowStar(true);
+					NotifyMetaUpdated();
 				});
 		}
 		else
@@ -149,25 +156,26 @@ namespace fig::gui
 				.SetDelegate([this] {
 					Global::GetUserManager().GetContent().MarkFavorite(_characterId, false);
 					_metaData.flags.Unset(CardMetaData::Flag::Favorite);
-					DidUpdate();
+					ShowStar(false);
+					NotifyMetaUpdated();
 				});
 		}
 		if (!_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
 		{
-			menu.AddItem("Hide", TextureType::ICON_HIDE)
+			menu.AddItem("Hide")
 				.SetDelegate([this] { 
 					Global::GetUserManager().GetContent().MarkHidden(_characterId, true);
 					_metaData.flags.Set(CardMetaData::Flag::Hidden);
-					DidUpdate();
+					NotifyMetaUpdated();
 				});
 		}
 		else
 		{
-			menu.AddItem("Unhide", TextureType::ICON_UNHIDE)
+			menu.AddItem("Unhide")
 				.SetDelegate([this] { 
 					Global::GetUserManager().GetContent().MarkHidden(_characterId, false);
 					_metaData.flags.Unset(CardMetaData::Flag::Hidden);
-					DidUpdate();
+					NotifyMetaUpdated();
 				});
 		}
 		menu.AddSeparator();

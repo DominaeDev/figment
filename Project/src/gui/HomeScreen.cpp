@@ -207,6 +207,11 @@ namespace fig::gui
 		menu.Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
 	}
 
+	static bool IsShiftDown()
+	{
+		return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
+	}
+
 	void HomeScreen::ShowFilteringMenu() noexcept
 	{
 		auto SetFilter = [this](FilterFlags filtering) {
@@ -223,40 +228,58 @@ namespace fig::gui
 			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
 		};
 
-		auto filtering = GetFiltering();
-		bool bShowHidden = filtering.IsSet(FilterFlag::Hidden);
+		auto filter = GetFiltering();
+		bool bShowHidden = filter.IsSet(FilterFlag::Hidden);
 
 		auto& menu = MainFrame::GetInstance().CreateMenu();
-		menu.AddCheckItem("New", filtering.IsSet(FilterFlag::New))
+		menu.AddCheckItem("New", filter.IsSet(FilterFlag::New))
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::New); });
-		menu.AddCheckItem("Starred", filtering.IsSet(FilterFlag::Starred))
+		menu.AddCheckItem("Starred", filter.IsSet(FilterFlag::Starred))
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Starred); });
-		menu.AddCheckItem("At least one chat", filtering.IsSet(FilterFlag::Chats))
+		menu.AddCheckItem("At least one chat", filter.IsSet(FilterFlag::Chats))
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Chats); });
 		menu.AddSeparator();
 		auto& genders = menu.AddItem("By gender");
-		genders.AddCheckItem("Show male", filtering.IsSet(FilterFlag::GenderMale))
+		genders.AddCheckItem("Show male", filter.IsSet(FilterFlag::GenderMale))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::GenderMale); });
-		genders.AddCheckItem("Show female", filtering.IsSet(FilterFlag::GenderFemale))
+			.SetDelegate([SetFilter, ToggleFilter, filter, this] {
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::GenderFemale, FilterFlag::GenderOther}) | FilterFlag::GenderMale);
+				else
+					ToggleFilter(FilterFlag::GenderMale);
+			});
+		genders.AddCheckItem("Show female", filter.IsSet(FilterFlag::GenderFemale))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::GenderFemale); });
-		genders.AddCheckItem("Show non-binary", filtering.IsSet(FilterFlag::GenderOther))
+			.SetDelegate([SetFilter, ToggleFilter, filter, this] {
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::GenderMale, FilterFlag::GenderOther }) | FilterFlag::GenderFemale);
+				else
+					ToggleFilter(FilterFlag::GenderFemale);
+			});
+		genders.AddCheckItem("Show non-binary", filter.IsSet(FilterFlag::GenderOther))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::GenderOther); });
+			.SetDelegate([SetFilter, ToggleFilter, filter, this] {
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale }) | FilterFlag::GenderOther);
+				else
+					ToggleFilter(FilterFlag::GenderOther);
+			});
 		auto& sources = menu.AddItem("By source");
-		sources.AddCheckItem("Show created", filtering.IsSet(FilterFlag::SourceCreated))
+		sources.AddCheckItem("Show created", filter.IsSet(FilterFlag::SourceCreated))
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::SourceCreated); });
-		sources.AddCheckItem("Show imported", filtering.IsSet(FilterFlag::SourceImported))
+		sources.AddCheckItem("Show imported", filter.IsSet(FilterFlag::SourceImported))
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::SourceImported); });
 		menu.AddSeparator();
 		menu.AddCheckItem("Show hidden", bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Hidden); });
+			.SetDelegate([ToggleFilter, this] { 
+				ToggleFilter(FilterFlag::Hidden); 
+				_pCardList->ResetScroll();
+			});
 		menu.AddSeparator();
 		menu.AddItem("Reset filter")
 			.SetDelegate([SetFilter, this] { SetFilter(DefaultFilterFlags); });

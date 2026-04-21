@@ -342,11 +342,11 @@ namespace fig::gui
 			ShowSubmenu(_mouseHoverIndex);
 			return true;
 		}
-		else if (menuItem._fnDelegate)
-		{
+		
+		if (menuItem._fnDelegate)
 			menuItem._fnDelegate();
-		}
-		_pOwner->PopAllMenus();
+
+		_bDestroyMe = true;
 		return true;
 	}
 

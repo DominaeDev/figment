@@ -87,7 +87,8 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::CARD_ICON_CHAT_COUNTER, "./resources/gui/card/icon_small_chat.png");
 		LoadTexture(pRenderer, TextureType::CARD_BOTTOM_FADE, "./resources/gui/card/card_bottom_fade.png");
 		LoadTexture(pRenderer, TextureType::CARD_BOTTOM_FADE_SMALL, "./resources/gui/card/card_bottom_fade_small.png");
-		LoadTexture(pRenderer, TextureType::CARD_ICON_FAVORITE_OFF, "./resources/gui/card/card_icon_favorite_off.png");
+		LoadTexture(pRenderer, TextureType::CARD_ICON_STAR, "./resources/gui/card/icon_star_large.png");
+		LoadTexture(pRenderer, TextureType::CARD_ICON_STAR_SMALL, "./resources/gui/card/icon_star_small.png");
 		LoadTexture(pRenderer, TextureType::CARD_BACKGROUND_DEFAULT, "./resources/gui/card/card_bg_default.png");
 		LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_01, "./resources/gui/card/borders/border_01.png");
 		LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_02, "./resources/gui/card/borders/border_02.png");

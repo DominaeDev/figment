@@ -50,7 +50,6 @@ namespace fig::gui
 
 		Reset();
 
-		int32_t priority = 0;
 		if (cardType == CardType::Scenario)
 		{
 			// Find scenarios
@@ -61,8 +60,6 @@ namespace fig::gui
 			{
 				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}:", asset.id.str()));
 				auto pCard = new ScenarioCard(this, asset.id, _cardSize);
-				auto request = assetMngr.LoadAssetAsync(asset.id, AsyncTask::LoadCoverImage, priority--);
-				pCard->SetPendingCoverImage(std::move(request.future));
 				pCard->SetDelegate([this](auto& card) { Reorder(); });
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
@@ -90,11 +87,12 @@ namespace fig::gui
 		Reorder();
 
 		size_t initCounter = 0;
+		int32_t priority = 0;
 		for (auto& pCard : _cards)
 		{
 			auto request = assetMngr.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, priority--);
 			pCard->SetPendingCoverImage(std::move(request.future));
-			pCard->EnableTags(_bEnableTags);
+			pCard->ShowTags(_bEnableTags);
 
 			if (initCounter++ < 8)
 				pCard->Initialize();
@@ -136,8 +134,7 @@ namespace fig::gui
 		_filterString = search_string;
 		
 		Reorder();
-		ScrollTo(0, false);
-		InvalidateLayout();
+		ResetScroll();
 	}
 
 	void CardList::SetCardSize(CardSize cardSize)
@@ -164,7 +161,7 @@ namespace fig::gui
 		_bEnableTags = bEnable;
 
 		for (auto& card : _cards)
-			card->EnableTags(bEnable);
+			card->ShowTags(bEnable);
 	}
 
 	void CardList::Reset()
@@ -273,6 +270,12 @@ namespace fig::gui
 			card->ResetHoverZoom();
 		}
 
+		InvalidateLayout();
+	}
+
+	void CardList::ResetScroll() noexcept
+	{
+		ScrollTo(0, false);
 		InvalidateLayout();
 	}
 }

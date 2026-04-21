@@ -13,7 +13,8 @@ namespace fig::gui
 		Overlay(Frame* pHostFrame);
 
 	protected:
-		Frame* _pOwner;
+		Frame* _pOwner = nullptr;
+		bool _bDestroyMe = false;
 	};
 }
 

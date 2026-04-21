@@ -99,6 +99,11 @@ namespace fig::gui
 		_pLargeBorder->SetSize(Large::Width + 32, Large::Height + 32);
 		_pLargeBorder->SetVisible(false);
 
+		// Star (large)
+		_pLargeStar = new Image(_pLargeRoot, TextureType::CARD_ICON_STAR);
+		_pLargeStar->SetPosition(Large::Width - _pLargeStar->GetWidth() - 8, 8);
+		_pLargeStar->SetVisible(false);
+
 		// Tags
 		_tagPosition.x = kTagMargin;
 		_tagPosition.y = kTagY;
@@ -135,10 +140,16 @@ namespace fig::gui
 		_pSmallBorder->SetSize(Small::Width + borderOffset * 2, Small::Height + borderOffset * 2);
 		_pSmallBorder->SetVisible(false);
 
+		// Star (small)
+		_pSmallStar = new Image(_pSmallRoot, TextureType::CARD_ICON_STAR_SMALL);
+		_pSmallStar->SetPosition(Small::Width - _pSmallStar->GetWidth() - 6, 6);
+		_pSmallStar->SetVisible(false);
+
 		CreateChatCounter(0);
 		SetCardSize(_cardSize);
 
 		SetBorder(_metaData.borderStyle);
+		ShowStar(_metaData.flags.IsSet(CardMetaData::Flag::Favorite));
 
 		CreatePendingTags();
 		CreatePendingLabel();
@@ -147,6 +158,9 @@ namespace fig::gui
 
 	void CoverCard::OnUpdate(float fElapsed)
 	{
+		if (_imageTexture.empty())
+			PollFuture();
+
 		if (!_bInitialized)
 		{
 			Initialize();
@@ -185,9 +199,6 @@ namespace fig::gui
 
 	void CoverCard::OnRender(Renderer* pRenderer)
 	{
-		if (_imageTexture.empty())
-			PollFuture();
-
 		CardImage::OnRender(pRenderer);
 	}
 
@@ -423,7 +434,7 @@ namespace fig::gui
 		if (not _pendingCover.valid())
 			return;
 
-		if (_pendingCover.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+		if (_pendingCover.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
 		{
 			if (auto result = _pendingCover.get(); result.has_value())
 			{
@@ -492,7 +503,7 @@ namespace fig::gui
 		_fnOnUpdated = onUpdated;
 	}
 
-	void CoverCard::DidUpdate()
+	void CoverCard::NotifyMetaUpdated()
 	{
 		if (_fnOnUpdated)
 			_fnOnUpdated(*this);
@@ -570,7 +581,7 @@ namespace fig::gui
 		_searchIndex = std::make_unique<SearchIndex>(index);
 	}
 
-	void CoverCard::EnableTags(bool bEnable)
+	void CoverCard::ShowTags(bool bEnable)
 	{
 		if (_bEnableTags == bEnable)
 			return;
@@ -597,6 +608,14 @@ namespace fig::gui
 		}
 
 		_pLargeLabel->SetY(Large::FooterHeight - Large::Margin - 64 + (_bEnableTags ? 22 : 32));
+	}
+
+	void CoverCard::ShowStar(bool bShow)
+	{
+		if (_pLargeStar)
+			_pLargeStar->SetVisible(bShow);
+		if (_pSmallStar)
+			_pSmallStar->SetVisible(bShow);
 	}
 
 	void CoverCard::CreatePendingTags()

@@ -830,6 +830,12 @@ namespace fig::io
 				continue;
 			}
 
+			if constexpr (Disabled)
+			{
+				// Simulated slowness
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
+
 			// Do work
 			AsyncLoadError error;
 			AsyncResultVariant result;

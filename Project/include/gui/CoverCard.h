@@ -32,7 +32,8 @@ namespace fig::gui
 		void SetBorder(fig::io::CardBorderStyle style);
 		void SetCardSize(CardSize cardSize);
 		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
-		void EnableTags(bool bEnable);
+		void ShowTags(bool bEnable);
+		void ShowStar(bool bShow);
 		void SetHidden(bool bHidden);
 		inline bool IsHidden() const noexcept { return _bHidden; }
 		
@@ -64,7 +65,7 @@ namespace fig::gui
 		void AddSearchTerms(std::span<const fig::string> texts) noexcept;
 
 		inline void SetMetaData(const fig::io::CardMetaData& metaData) noexcept { _metaData = metaData; };
-		void DidUpdate();
+		void NotifyMetaUpdated();
 
 	private:
 		void RefreshImage();
@@ -95,11 +96,13 @@ namespace fig::gui
 		Control* _pLargeFooterFade {};
 		Image* _pLargeBorder {};
 		StaticText* _pLargeLabel {};
+		Image* _pLargeStar {};
 		Control* _pTagsRoot {};
 
 		Control* _pSmallRoot {};
 		Image* _pSmallBorder {};
 		StaticText* _pSmallLabel {};
+		Image* _pSmallStar {};
 
 		Point _tagPosition {};
 		int32_t _tagRows { 1 };

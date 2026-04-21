@@ -119,8 +119,13 @@ namespace fig::gui
 	{
 		for (int32_t i = toI(_menus.size()) - 1; i >= 0; --i)
 		{
-			if (_menus[toUZ(i)].ptr->ProcessEvent(event))
+			Menu* pMenu = _menus[toUZ(i)].ptr;
+			if (pMenu->ProcessEvent(event))
+			{
+				if (pMenu->_bDestroyMe)
+					PopAllMenus();
 				return true;
+			}
 		}
 
 		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN 
