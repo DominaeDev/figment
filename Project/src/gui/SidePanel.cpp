@@ -4,8 +4,6 @@
 #include "gui/MainFrame.h"
 #include "gui/SidePanelButton.h"
 #include "gui/UserProfileWidget.h"
-#include "gui/HomeScreen.h"
-#include "gui/ChatScreen.h"
 #include "gui/LineBorderRenderer.h"
 #include "gui/Menu.h"
 #include "model/GlobalStrings.h"
@@ -50,9 +48,9 @@ namespace fig::gui
 		auto pMainArea = new Area(this);
 
 		auto pChatButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
-		pChatButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen<ChatScreen>(); });
+		pChatButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Chat); });
 		auto pCharactersButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
-		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen<HomeScreen>(); });
+		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
 		auto pScenariosButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
 		auto pModelsButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_MODELS, "Models");
 

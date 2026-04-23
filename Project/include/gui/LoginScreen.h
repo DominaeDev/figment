@@ -15,8 +15,6 @@ namespace fig::gui
 	public:
 		LoginScreen(Frame* pParent);
 
-		SCREEN_ID(EScreen::Login);
-	
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;

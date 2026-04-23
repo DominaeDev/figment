@@ -13,7 +13,6 @@ namespace fig::gui
 	class HomeScreen : public Screen
 	{
 	public:
-		SCREEN_ID(EScreen::Home);
 		HomeScreen(Frame* pParent);
 
 		void CreateCards();
