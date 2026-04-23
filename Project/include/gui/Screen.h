@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Control.h"
-#include "util/TypeId.h"
 
 namespace fig::gui
 {
@@ -43,17 +42,7 @@ namespace fig::gui
 	};
 
 	template <typename T>
-	concept IsScreen = std::derived_from<T, fig::gui::Screen>
-		and HasTypeId<T>;
-	
-	enum EScreen : size_t
-	{
-		Debug,
-		Login,
-		Home,
-		Chat,
-	};
-
+	concept IsScreen = std::derived_from<T, fig::gui::Screen>;
 }
 
 #endif

@@ -35,10 +35,10 @@ namespace fig::gui
 		SetSizer(topSizer);
 		s_pInstance = this;
 
-		RegisterScreen<LoginScreen>();
-		RegisterScreen<HomeScreen>();
-		RegisterScreen<ChatScreen>();
-		RegisterScreen<DebugScreen>();
+		RegisterScreen<LoginScreen>(ScreenType::Login);
+		RegisterScreen<HomeScreen>(ScreenType::Home);
+		RegisterScreen<ChatScreen>(ScreenType::Chat);
+		RegisterScreen<DebugScreen>(ScreenType::Debug);
 
 		// Sign in
 		auto& userMngr = Global::GetUserManager();
@@ -175,19 +175,19 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_3 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
 					{
-						ChangeScreen<DebugScreen>();
+						ChangeScreen(ScreenType::Debug);
 						return true;
 					}
 				}
 
 				if (keyEvent.key == SDLK_1 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
 				{
-					ChangeScreen<HomeScreen>();
+					ChangeScreen(ScreenType::Home);
 					return true;
 				}
 				else if (keyEvent.key == SDLK_2 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
 				{
-					ChangeScreen<ChatScreen>();
+					ChangeScreen(ScreenType::Chat);
 					return true;
 				}
 				else if (keyEvent.key == SDLK_TAB and ((keyEvent.mod & (SDL_KMOD_CTRL | SDL_KMOD_SHIFT | SDL_KMOD_ALT)) == 0))
@@ -211,11 +211,16 @@ namespace fig::gui
 		SDL_PushEvent(&quit_event);
 	}
 
-	void MainFrame::ChangeScreen(Screen* pScreen)
+	void MainFrame::ChangeScreen(ScreenType screen)
 	{
+		Screen* pScreen = nullptr;
+		if (auto itFind = _screensByType.find(screen); itFind != _screensByType.end())
+			pScreen = itFind->second;
+
 		if (_pActiveScreen)
 		{
 			_pActiveScreen->SetVisible(false);
+
 			// Detach
 			auto pParent = _pActiveScreen->GetParent();
 			if (pParent)
@@ -244,28 +249,27 @@ namespace fig::gui
 	}
 
 	template<IsScreen T>
-	void MainFrame::RegisterScreen()
+	void MainFrame::RegisterScreen(ScreenType screen)
 	{
-		if (_screensByType.contains(type_id<T>()))
-			UnregisterScreen<T>();
+		if (_screensByType.contains(screen))
+			UnregisterScreen(screen);
 
 		auto pScreen = new T(this);	// Must pass this to receive renderer
 		RemoveChild(pScreen);
-		_screensByType[type_id<T>()] = pScreen;
+		_screensByType[screen] = pScreen;
 		pScreen->SetSize(GetSize());
 	}
 
-	template<IsScreen T>
-	void MainFrame::UnregisterScreen()
+	void MainFrame::UnregisterScreen(ScreenType screen)
 	{
-		auto pScreen = GetScreen<T>();
-		if (!pScreen)
-			return;
-
-		_pMainArea->RemoveChild(pScreen);
-		RemoveChild(pScreen);
-		_screensByType.erase(type_id<T>());
-		delete pScreen;
+		if (auto itFind = _screensByType.find(screen); itFind != _screensByType.end())
+		{
+			auto pScreen = itFind->second;
+			_pMainArea->RemoveChild(pScreen);
+			RemoveChild(pScreen);
+			_screensByType.erase(screen);
+			delete pScreen;
+		}
 	}
 
 	void MainFrame::ShowSidePanel(bool bShow) noexcept
@@ -281,7 +285,7 @@ namespace fig::gui
 	void MainFrame::ShowLoginScreen()
 	{
 		// Show login screen
-		ChangeScreen<LoginScreen>();
+		ChangeScreen(ScreenType::Login);
 		ShowSidePanel(false);
 	}
 
@@ -323,7 +327,8 @@ namespace fig::gui
 
 		ShowSidePanel(true);
 
-		auto pHomeScreen = ChangeScreen<HomeScreen>();
+		ChangeScreen(ScreenType::Home);
+		auto pHomeScreen = GetScreen<HomeScreen>(ScreenType::Home);
 		pHomeScreen->CreateCards();
 	}
 
@@ -332,7 +337,7 @@ namespace fig::gui
 		PushEvent(EventType::UserSignedOut);
 
 		ShowSidePanel(false);
-		ChangeScreen<LoginScreen>();
+		ChangeScreen(ScreenType::Login);
 
 		Global::GetSettings().SetBool(AppSetting::SignedIn, false);
 	}

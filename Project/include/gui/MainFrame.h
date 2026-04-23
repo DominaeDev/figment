@@ -24,6 +24,14 @@ namespace fig::gui
 {
 	class SidePanel;
 
+	enum class ScreenType : size_t
+	{
+		Debug,
+		Login,
+		Home,
+		Chat,
+	};
+
 	class MainFrame : public Frame
 	{
 		friend bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor::Context context);
@@ -37,49 +45,36 @@ namespace fig::gui
 		static MainFrame& GetInstance() { return *s_pInstance; }
 
 		template <IsScreen T>
-		T* GetScreen()
+		T* GetScreen(ScreenType screen)
 		{
-			auto it = _screensByType.find(type_id<T>());
+			auto it = _screensByType.find(screen);
 			if (it != _screensByType.end())
-				return static_cast<T*>(it->second);
+				return dynamic_cast<T*>(it->second);
 			return nullptr;
 		}
 
 		template <IsScreen T>
-		const T* GetScreen() const
+		const T* GetScreen(ScreenType screen) const
 		{
-			auto it = _screensByType.find(type_id<T>());
+			auto it = _screensByType.find(screen);
 			if (it != _screensByType.end())
-				return static_cast<T*>(it->second);
+				return dynamic_cast<T*>(it->second);
 			return nullptr;
 		}
-
-		void Close();
-
-		template<IsScreen T>
-		T* ChangeScreen()
-		{
-			T* pScreen = GetScreen<T>();
-			ChangeScreen(pScreen);
-			return pScreen;
-		}
+		void ChangeScreen(ScreenType screen);
 
 		void ShowLoginScreen();
 		void ShowSidePanel(bool bShow) noexcept;
 
 		bool TrySignIn(const fig::user::UserProfile& profile, const fig::string& password) noexcept;
 		bool SignOut() noexcept;
-
-
+		void Close();
 
 	protected:
 		template<IsScreen T>
-		void RegisterScreen();
+		void RegisterScreen(ScreenType screen);
+		void UnregisterScreen(ScreenType screen);
 
-		template<IsScreen T>
-		void UnregisterScreen();
-
-		void ChangeScreen(Screen* pScreen);
 		bool AutoSignIn() noexcept;
 
 		virtual void OnUpdate(float fElapsed) override;
@@ -90,7 +85,7 @@ namespace fig::gui
 		void OnSignedOut() noexcept;
 
 	private:
-		std::unordered_map<type_id_t, Screen*> _screensByType {};
+		std::unordered_map<ScreenType, Screen*> _screensByType {};
 		Screen* _pActiveScreen = nullptr;
 
 		StatusBar* _pStatusBar = nullptr;

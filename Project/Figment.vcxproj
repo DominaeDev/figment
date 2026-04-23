@@ -503,7 +503,6 @@
     <ClInclude Include="include\util\Common.h" />
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
-    <ClInclude Include="include\util\TypeId.h" />
     <ClInclude Include="include\util\UndoStack.h" />
     <ClInclude Include="include\util\Dictionary.h" />
   </ItemGroup>

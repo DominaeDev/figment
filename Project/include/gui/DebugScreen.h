@@ -10,7 +10,6 @@ namespace fig::gui
 	class DebugScreen : public Screen
 	{
 	public:
-		SCREEN_ID(EScreen::Debug);
 		DebugScreen(Frame* pParent);
 
 	protected:
