@@ -75,6 +75,8 @@ namespace fig::io
 		auto& character = _characters[role] = characterData;
 		if (role == Role::User)
 			character.characterId = "USR";
+		if (is_bot(role))
+			_numBots = static_cast<int32_t>(std::count_if(_characters.begin(), _characters.end(), [](auto kvp) { return is_bot(kvp.first); }));
 		return true;
 	}
 
@@ -358,11 +360,6 @@ namespace fig::io
 	{
 		fig::string prompt = s_formatting_director;
 		return ApplyNames(prompt);
-	}
-
-	size_t ChatStaging::GetBotCount() const
-	{
-		return std::count_if(_characters.begin(), _characters.end(), [](auto kvp) { return is_bot(kvp.first); });
 	}
 
 	fig::string ChatStaging::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const

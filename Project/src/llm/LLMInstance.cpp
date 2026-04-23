@@ -65,8 +65,10 @@ namespace fig::llm
 	{
 		_pStatus->EmitSignal(LLMStatusSignal::ChatInitializing);
 
-		bool bMultiSequence = args.session.IsGroupChat() && args.options.groupChatMode == ChatOptions::GroupChatMode::SwapSequences;
-		int32_t n_bots = bMultiSequence ? (int32_t)args.session.GetStaging().GetBotCount() : 1;
+		auto& staging = args.session.GetStaging();
+
+		bool bMultiSequence = staging.IsGroupChat() && args.options.groupChatMode == ChatOptions::GroupChatMode::SwapSequences;
+		int32_t n_bots = bMultiSequence ? staging.GetBotCount() : 1;
 		if (n_bots == 0)
 			return false; // Error
 
@@ -78,11 +80,9 @@ namespace fig::llm
 		_turn_counter.store(0);
 		_options = args.options;
 
-		auto& staging = _session.GetStaging();
-
 		// Read personas
 		std::map<Role, fig::string> personas;
-		int32_t botCount = (int32_t)staging.GetBotCount();
+		int32_t botCount = staging.GetBotCount();
 		for (int32_t i = 0; i < botCount; ++i)
 		{
 			Role role = bot_from_index(i);
@@ -187,7 +187,7 @@ namespace fig::llm
 		}
 		else // Single sequence
 		{
-			if (_session.IsGroupChat())
+			if (staging.IsGroupChat())
 			{
 				// Tokenize all personas
 				for (const auto& kvp : personas)
@@ -355,7 +355,7 @@ namespace fig::llm
 			std::scoped_lock lock(_stateMutex, _resultMutex);
 			queue_clear(_resultQueue);
 
-			if (_session.IsGroupChat() && _options.groupChatMode == ChatOptions::GroupChatMode::SwapPersonas)
+			if (_session.GetStaging().IsGroupChat() && _options.groupChatMode == ChatOptions::GroupChatMode::SwapPersonas)
 				SwapPersona(Role::Undefined, true);
 
 			_contextState.EraseChat();
@@ -562,7 +562,7 @@ namespace fig::llm
 		Role responderRole = args.role;
 		bool isContinuation = args.flags.IsSet(GenerateFlag::Continuation);
 		bool isInstigation = args.flags.IsSet(GenerateFlag::Instigation);
-		bool isGroupChat = _session.IsGroupChat();
+		bool isGroupChat = _session.GetStaging().IsGroupChat();
 
 		fig::string responseId = args.responseId.empty() ? CreateStrUUID() : args.responseId;
 		fig::string subMessageId = args.subMessageId.empty() ? CreateStrUUID() : args.subMessageId;

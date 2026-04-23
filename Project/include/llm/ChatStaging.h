@@ -26,7 +26,8 @@ namespace fig::io
 		fig::string GetPersonaOf(Role role) const;
 		fig::string GetBriefOf(Role role) const;
 		Role GetRoleOf(const fig::string& characterId) const;
-		size_t GetBotCount() const;
+		inline int32_t GetBotCount() const noexcept { return _numBots; }
+		inline bool IsGroupChat() const noexcept { return _numBots > 1; }
 		
 		fig::string GetIdentifierOf(Role role) const;
 		fig::string GetNameOf(Role role) const;
@@ -39,6 +40,7 @@ namespace fig::io
 	private:
 		std::map<Role, CharacterData> _characters {};
 		ChatOptions _options {};
+		int32_t _numBots;
 	};
 }
 

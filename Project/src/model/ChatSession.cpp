@@ -86,8 +86,8 @@ namespace fig::io
 	fig::string ChatSession::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
 	{
 		fig::string pattern;
-		size_t botCount = _staging.GetBotCount();
-		for (size_t i = 0uz; i < botCount; ++i)
+		int32_t botCount = _staging.GetBotCount();
+		for (int32_t i = 0; i < botCount; ++i)
 		{
 			if (i > 0)
 				pattern += "| ";
@@ -104,11 +104,6 @@ namespace fig::io
 				pattern += std::format("| \"{}\"", GetNameOf(Role::User));
 		}
 		return pattern;
-	}
-
-	bool ChatSession::IsGroupChat() const noexcept
-	{
-		return _staging.GetBotCount() > 1;
 	}
 
 	fig::string ChatSession::ApplyNames(const fig::string& text) const

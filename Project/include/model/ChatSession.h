@@ -15,7 +15,6 @@ namespace fig::io
 		fig::string GetNameOf(Role role) const;
 		fig::string GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const;
 		fig::gui::ColorPair GetColorsOf(Role role) const;
-		bool IsGroupChat() const noexcept;
 
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text) const;
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text, Role role) const;
