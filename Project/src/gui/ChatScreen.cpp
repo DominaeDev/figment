@@ -195,14 +195,28 @@ namespace fig::gui
 
 	void ChatScreen::StartChat()
 	{
+		//! @temp
+		fig::io::ChatStaging staging(DefaultChatOptions);
+		CharacterData user;
+		user.LoadFromXml(fig::path { "./characters/user.xml" });
+		CharacterData bot1;
+		bot1.LoadFromXml(fig::path { "./characters/bot1.xml" });
+		CharacterData bot2;
+		bot2.LoadFromXml(fig::path { "./characters/bot2.xml" });
+		staging.AssignRole(Role::User, user);
+		staging.AssignRole(Role::Bot1, bot1);
+		staging.AssignRole(Role::Bot2, bot2);
+		
+		StartChat(staging);
+	}
+
+	void ChatScreen::StartChat(const fig::io::ChatStaging& staging)
+	{
 		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
 		{
 			ChatSession session;
-			session.Initialize(DefaultChatOptions);
-			session.LoadCharacter(Role::User, "./characters/user.xml");	//! @temp
-			session.LoadCharacter(Role::Bot1, "./characters/bot1.xml");	//! @temp
-			session.LoadCharacter(Role::Bot2, "./characters/bot2.xml");	//! @temp
+			session.Initialize(staging, DefaultChatOptions);
 
 			LLMChatArguments llmArgs {
 				/*session*/ session,

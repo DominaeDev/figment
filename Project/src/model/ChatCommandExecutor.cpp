@@ -67,12 +67,12 @@ static Role RoleFromName(fig::string text, LLMInstancePtr pLLM)
 	if (std::iswdigit(from_utf8(text)[0]))
 		return bot_from_index(std::stoi(text) - 1);
 
-	for (auto const& kvp : pLLM->GetSession().GetCharactersByRole())
+	for (auto const& kvp : pLLM->GetSession().GetStaging().GetCharacters())
 	{
 		if (begins_with(kvp.second.shortName, text, true))
 			return kvp.first;
 	}
-	return pLLM->GetSession().GetRoleOf(text);
+	return pLLM->GetSession().GetStaging().GetRoleOf(text);
 };
 
 static bool cmdUserMessage(ParsedChatCommand cmd, Ctx ctx)

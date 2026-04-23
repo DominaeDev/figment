@@ -16,7 +16,7 @@ namespace fig::gui
 		ChatMessage(LayoutElement* pParent, Role role, fig::string characterId, fig::string name, MessageType msgType, bool bShowAvatar);
 
 		void SetMessage(fig::string text, bool complete = false);
-		void SetColors(std::pair<Color, Color> colors);
+		void SetColors(const ColorPair& colors);
 		void SetColors(Color bgColor, Color borderColor);
 		void AppendMessage(const fig::string& text, bool complete = false);
 

@@ -27,9 +27,6 @@
     <Filter Include="Source Files\AppModel">
       <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\AppModel\Chat">
-      <UniqueIdentifier>{b9eb11aa-5e0c-4fd0-b6c2-875b3e43e5b5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Third-party\AES">
       <UniqueIdentifier>{d5aecc7a-a1e8-4108-a4b6-d0e441fd4344}</UniqueIdentifier>
     </Filter>
@@ -144,6 +141,9 @@
     <Filter Include="Source Files\Frontend\GUI\Renderers">
       <UniqueIdentifier>{9af3d36f-c958-412c-be51-1004c096af49}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Backend\Chat">
+      <UniqueIdentifier>{6fec36fd-514b-4b20-8daa-8d5ad3fd04e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -223,15 +223,6 @@
     </ClCompile>
     <ClCompile Include="src\llm\LLMInstance.cpp">
       <Filter>Source Files\Backend\LLM</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ChatSession.cpp">
-      <Filter>Source Files\AppModel\Chat</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ChatCommands.cpp">
-      <Filter>Source Files\AppModel\Chat</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ChatCommandExecutor.cpp">
-      <Filter>Source Files\AppModel\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\model\CharacterData.cpp">
       <Filter>Source Files\AppModel\Data\Character</Filter>
@@ -509,6 +500,18 @@
     <ClCompile Include="src\model\CardMetaData.cpp">
       <Filter>Source Files\AppModel\Data</Filter>
     </ClCompile>
+    <ClCompile Include="src\model\ChatCommandExecutor.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\ChatCommands.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model\ChatSession.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\llm\ChatStaging.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -576,21 +579,6 @@
     </ClInclude>
     <ClInclude Include="include\llm\LLMInstance.h">
       <Filter>Source Files\Backend\LLM</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatTypes.h">
-      <Filter>Source Files\AppModel\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatOptions.h">
-      <Filter>Source Files\AppModel\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatSession.h">
-      <Filter>Source Files\AppModel\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatCommandExecutor.h">
-      <Filter>Source Files\AppModel\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatCommands.h">
-      <Filter>Source Files\AppModel\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\model\CharacterData.h">
       <Filter>Source Files\AppModel\Data\Character</Filter>
@@ -1206,6 +1194,24 @@
     </ClInclude>
     <ClInclude Include="include\model\CardMetaData.h">
       <Filter>Source Files\AppModel\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatTypes.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatCommandExecutor.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatCommands.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatOptions.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ChatSession.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\llm\ChatStaging.h">
+      <Filter>Source Files\Backend\Chat</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

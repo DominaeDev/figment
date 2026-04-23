@@ -67,7 +67,7 @@ void Context::TokenizeUncached(fig::io::ChatSession& session)
 			fig::llm::util::complete_message(content);
 			content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 		}
-		content = session.ApplyNames(content, block.role); //! @move?
+		content = session.GetStaging().ApplyNames(content, block.role); //! @move?
 		block.tokens = llama::tokenize(_pVocab, content, false);
 
 		block.attn_position = -1;

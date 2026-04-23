@@ -209,6 +209,7 @@
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
     <ClCompile Include="src\gui\Window.cpp" />
+    <ClCompile Include="src\llm\ChatStaging.cpp" />
     <ClCompile Include="src\llm\Context.cpp" />
     <ClCompile Include="src\llm\ContextBlock.cpp" />
     <ClCompile Include="src\llm\ContextCache.cpp" />
@@ -428,6 +429,7 @@
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
     <ClInclude Include="include\gui\Window.h" />
+    <ClInclude Include="include\llm\ChatStaging.h" />
     <ClInclude Include="include\llm\Context.h" />
     <ClInclude Include="include\llm\ContextBlock.h" />
     <ClInclude Include="include\llm\ContextCache.h" />

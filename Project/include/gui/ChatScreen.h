@@ -9,6 +9,11 @@
 
 using ParsedChatCommandQueue = std::queue<ParsedChatCommand>;
 
+namespace fig::io
+{
+	class ChatStaging;
+}
+
 namespace fig::gui
 {
 	class Window;
@@ -30,12 +35,14 @@ namespace fig::gui
 		void Close();
 
 		SCREEN_ID(EScreen::Chat);
+
 	protected:
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 
 		void PollStatus();
 		void StartChat();
+		void StartChat(const fig::io::ChatStaging& staging);
 		bool OnCommand(ParsedChatCommand cmd);
 		void EnqueueCommand(ParsedChatCommand cmd);
 		void NextQueuedCommand();

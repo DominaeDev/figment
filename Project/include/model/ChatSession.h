@@ -1,53 +1,27 @@
 #pragma once
 
-#include "model/ChatTypes.h"
-#include "model/ChatOptions.h"
-#include "model/CharacterData.h"
-#include <optional>
-#include <map>
+#include "llm/ChatStaging.h"
 
 namespace fig::io
 {
 	class ChatSession
 	{
 	public:
-		bool Initialize(ChatOptions options);
-		bool LoadCharacter(Role role, fig::string filename);
+		void Initialize(const ChatStaging& staging, ChatOptions options);	
 
-		std::optional<CharacterData> GetCharacter(Role role) const;
-		std::optional<CharacterData> GetCharacterById(fig::string characterId) const;
-		std::optional<CharacterData> GetCharacterByName(fig::string name) const;
+		inline const ChatStaging& GetStaging() const noexcept { return _staging; }
 
-		fig::string GetSystemPrompt() const;
-		fig::string GetDirectorPrompt() const;
 		fig::string GetIdentifierOf(Role role) const;
 		fig::string GetNameOf(Role role) const;
-		fig::string GetPersonaOf(Role role) const;
-		fig::string GetBriefOf(Role role) const;
-		std::pair<fig::gui::Color, fig::gui::Color> GetColorsOf(Role role) const;
-		Role GetRoleOf(fig::string characterId) const;
-		size_t GetBotCount() const;
-		bool IsGroupChat() const { return GetBotCount() > 1; }
 		fig::string GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const;
+		fig::gui::ColorPair GetColorsOf(Role role) const;
+		bool IsGroupChat() const noexcept;
 
-		[[nodiscard]] fig::string ApplyNames(fig::string text) const;
-		[[nodiscard]] fig::string ApplyNames(fig::string text, Role characterRole) const;
-
-		const std::map<Role, CharacterData>& GetCharactersByRole() const { return _characters; }
+		[[nodiscard]] fig::string ApplyNames(const fig::string& text) const;
+		[[nodiscard]] fig::string ApplyNames(const fig::string& text, Role role) const;
 
 	protected:
-		std::map<Role, CharacterData> _characters {};
+		ChatStaging _staging {};
 		ChatOptions _options {};
-
-		// Prompts
-		fig::string _system_prompt_solo;
-		fig::string _system_prompt_group;
-		fig::string _system_prompt_character;
-		fig::string _system_prompt_user;
-		fig::string _system_prompt_uncensored;
-		fig::string _formatting_solo;
-		fig::string _formatting_group;
-		fig::string _formatting_director;
-		fig::string _formatting_state;
 	};
 }

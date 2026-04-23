@@ -96,12 +96,12 @@ namespace fig::gui
 			name = "System message";
 		}
 
-		if (auto character = _session.GetCharacterById(identifier))
+		if (auto character = _session.GetStaging().GetCharacterById(identifier))
 		{
 			id = character.value().characterId;
 			name = character.value().fullName;
 		}
-		else if (auto character = _session.GetCharacterByName(identifier))
+		else if (auto character = _session.GetStaging().GetCharacterByName(identifier))
 		{
 			id = character.value().characterId;
 			name = character.value().fullName;

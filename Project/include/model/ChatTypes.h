@@ -33,6 +33,8 @@ constexpr inline Role bot_from_index(int32_t botIndex)
 	return static_cast<Role>(first + botIndex);
 }
 
+constexpr inline Role bot_from_index(size_t botIndex) { return bot_from_index(static_cast<int32_t>(botIndex)); }
+
 enum class MessageType
 {
 	Undefined = 0,

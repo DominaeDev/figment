@@ -66,7 +66,7 @@ namespace fig::llm
 		_pStatus->EmitSignal(LLMStatusSignal::ChatInitializing);
 
 		bool bMultiSequence = args.session.IsGroupChat() && args.options.groupChatMode == ChatOptions::GroupChatMode::SwapSequences;
-		int32_t n_bots = bMultiSequence ? (int32_t)args.session.GetBotCount() : 1;
+		int32_t n_bots = bMultiSequence ? (int32_t)args.session.GetStaging().GetBotCount() : 1;
 		if (n_bots == 0)
 			return false; // Error
 
@@ -78,15 +78,17 @@ namespace fig::llm
 		_turn_counter.store(0);
 		_options = args.options;
 
+		auto& staging = _session.GetStaging();
+
 		// Read personas
 		std::map<Role, fig::string> personas;
-		int32_t botCount = (int32_t)_session.GetBotCount();
+		int32_t botCount = (int32_t)staging.GetBotCount();
 		for (int32_t i = 0; i < botCount; ++i)
 		{
 			Role role = bot_from_index(i);
-			personas[role] = _session.GetPersonaOf(role);
+			personas[role] = staging.GetPersonaOf(role);
 		}
-		fig::string user_persona = _session.GetPersonaOf(Role::User);
+		fig::string user_persona = staging.GetPersonaOf(Role::User);
 
 		if (!personas.contains(Role::Bot1))
 			return false; // No main character
@@ -110,7 +112,7 @@ namespace fig::llm
 		if (args.options.flags.IsSet(ChatOptions::Flag::StateVariables))
 		{
 			_stateVars.SetValue("Location", "Kitchen"); //! @temp
-			_stateVars.SetValue(_session.ApplyNames("{{char}}'s mood", Role::Bot1), "Neutral"); //! @temp
+			_stateVars.SetValue(staging.ApplyNames("{{char}}'s mood", Role::Bot1), "Neutral"); //! @temp
 		}
 
 		// Initialize context
@@ -122,7 +124,7 @@ namespace fig::llm
 		if (bMultiSequence) // Initialize a sequence for each bot
 		{
 			// Write (shared) system_prompt
-			fig::string system_prompt = _session.GetSystemPrompt(); //! @group
+			fig::string system_prompt = staging.GetSystemPrompt(); //! @group
 
 			std::vector<Token> system_prompt_tokens = llama::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
 
@@ -192,7 +194,7 @@ namespace fig::llm
 					_contextState.personas[kvp.first] = llama::tokenize(pVocab, kvp.second, false);
 			}
 
-			fig::string system_prompt = _session.GetSystemPrompt();
+			fig::string system_prompt = staging.GetSystemPrompt();
 			std::vector<Token> system_prompt_tokens = llama::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
 
 			_contextState.AppendBlock(ContextBlock {
@@ -274,7 +276,7 @@ namespace fig::llm
 
 		// Names
 		fig::string namesPattern;
-		int32_t botCount = (int32_t)_session.GetBotCount();
+		int32_t botCount = (int32_t)_session.GetStaging().GetBotCount();
 		for (int i = 0; i < botCount; ++i)
 		{
 			if (i > 0)
@@ -814,13 +816,13 @@ namespace fig::llm
 								partial.erase(fmt_start);
 								sendMsg = !partial.empty();
 								responderId = fig::llm::util::format_id(tagName);
-								responderRole = _session.GetRoleOf(responderId);
+								responderRole = _session.GetStaging().GetRoleOf(responderId);
 							}
 							else // No remainder: New message
 							{
 								sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
 								responderId = fig::llm::util::format_id(tagName);
-								responderRole = _session.GetRoleOf(responderId);
+								responderRole = _session.GetStaging().GetRoleOf(responderId);
 
 								if (tag == Constants::Chat::DialogueTag)
 									msgType = MessageType::Dialogue;
@@ -1659,7 +1661,7 @@ namespace fig::llm
 			_contextState.InsertBlock(ContextBlock {
 				.role = Role::System,
 				.name = "",
-				.content = _session.GetPersonaOf(role),
+				.content = _session.GetStaging().GetPersonaOf(role),
 				.tokens = new_persona_tokens,
 				.flags { ContextBlockFlag::Static, ContextBlockFlag::Persona },
 				.attn_position = -1,

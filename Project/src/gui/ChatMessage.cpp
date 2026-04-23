@@ -236,9 +236,9 @@ namespace fig::gui
 		RefreshColors();
 	}
 
-	void ChatMessage::SetColors(std::pair<Color, Color> colors)
+	void ChatMessage::SetColors(const ColorPair& colors)
 	{
-		SetColors(colors.first, colors.second);
+		SetColors(colors.background, colors.foreground);
 	}
 
 	void ChatMessage::SetColors(Color bgColor, Color borderColor)

@@ -59,6 +59,14 @@ namespace Constants
 		constexpr fig::const_string DirectionTagEnd = "/director";
 
 		constexpr int DefaultNarratorCooldown = 5;
+
+		namespace Names
+		{
+			constexpr fig::const_string System = "system";
+			constexpr fig::const_string Narrator = "Narrator";
+			constexpr fig::const_string Director = "Director";
+			constexpr fig::const_string Unknown = "Unknown";
+		}
 	}
 
 	// Sizes
@@ -101,7 +109,7 @@ namespace Constants
 		constexpr fig::const_string AssetFileExt = "";
 	}
 
-	constexpr fig::const_string DefaultModelLocation = "M:\\LLM\\default_model.gguf";
+	constexpr fig::const_string DefaultModelLocation = "F:\\AI\\Models\\default_model.gguf"; //! @temp
 	
 	namespace LLM
 	{
