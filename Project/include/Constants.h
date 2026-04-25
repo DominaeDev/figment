@@ -3,6 +3,7 @@
 #include "Types.h"
 #include "gui/GUITypes.h"
 #include "model/ChatTypes.h"
+#include "model/ChatOptions.h"
 #include "model/GlobalStrings.h"
 
 namespace Constants
@@ -115,6 +116,20 @@ namespace Constants
 	{
 		constexpr uint32_t RandomSeed = 0xFFFFFFFF;
 		constexpr uint32_t DebugSeed = 0xA1B2C3D4;
+
+
+		constexpr ChatOptions DefaultChatOptions {
+			.flags {
+				ChatOptions::Flag::GreetUser,
+				ChatOptions::Flag::Uncensored,
+		//		ChatOptions::Flag::LimitMessages,
+		//		ChatOptions::Flag::RandomizeMessageCount,
+		//		ChatOptions::Flag::StateVariables,
+		//		ChatOptions::Flag::ReportStateChanges,
+		//		ChatOptions::Flag::Embeddings,
+				},
+			.groupChatMode = ChatOptions::GroupChatMode::SwapSequences,
+		};
 	}
 
 	namespace Embedding

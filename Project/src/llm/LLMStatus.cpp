@@ -25,7 +25,7 @@ std::optional<LLMStatus> LLMStatusChannel::PollStatus()
 
 	if (!_statusSignals.empty())
 	{
-		status.signal = _statusSignals.front();
+		status.event = _statusSignals.front();
 		_statusSignals.pop();
 	};
 	lock.unlock();
@@ -39,7 +39,7 @@ std::optional<LLMStatus> LLMStatusChannel::PollStatus()
 	return status;
 }
 
-void LLMStatusChannel::EmitSignal(LLMStatusSignal signal)
+void LLMStatusChannel::EmitSignal(LLMStatusEvent signal)
 {
 	std::scoped_lock _ { _statusMutex };
 

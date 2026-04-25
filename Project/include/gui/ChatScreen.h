@@ -38,6 +38,9 @@ namespace fig::gui
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 
+		bool OnEvent(Event& event) override;
+		bool OnKeyboardEvent(KeyboardEvent& event) override;
+
 		void PollStatus();
 		void StartChat();
 		void StartChat(const fig::io::ChatStaging& staging);
@@ -45,7 +48,6 @@ namespace fig::gui
 		void EnqueueCommand(ParsedChatCommand cmd);
 		void NextQueuedCommand();
 
-		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void SetStatusBar(fig::string_view message);
 		void OnSidePanel(bool show) override;
 

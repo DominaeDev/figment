@@ -163,40 +163,64 @@ namespace fig::gui
 		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 		{
 			SDL_KeyboardEvent& keyEvent = event.key;
+			KeyboardMods mods { event };
 
 			if (keyEvent.down and not keyEvent.repeat)
 			{
 				if constexpr (Debugging)
 				{
-					if (keyEvent.key == SDLK_F12 and ((keyEvent.mod & SDL_KMOD_CTRL) != 0))
+					if (keyEvent.key == SDLK_F12 and mods.Control)
 					{
 						Close();
 						return true;
 					}
-					else if (keyEvent.key == SDLK_3 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
+					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{
 						ChangeScreen(ScreenType::Debug);
 						return true;
 					}
 				}
 
-				if (keyEvent.key == SDLK_1 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
+				if (keyEvent.key == SDLK_1 and mods.Alt)
 				{
 					ChangeScreen(ScreenType::Home);
 					return true;
 				}
-				else if (keyEvent.key == SDLK_2 and ((keyEvent.mod & SDL_KMOD_ALT) != 0))
+				else if (keyEvent.key == SDLK_2 and mods.Alt)
 				{
 					ChangeScreen(ScreenType::Chat);
 					return true;
 				}
-				else if (keyEvent.key == SDLK_TAB and ((keyEvent.mod & (SDL_KMOD_CTRL | SDL_KMOD_SHIFT | SDL_KMOD_ALT)) == 0))
+				else if (keyEvent.key == SDLK_TAB and mods.None)
 				{
 					ShowSidePanel(!_pSidePanel->GetVisible());
 					return true;
 				}
 			}
 		}
+
+		if (event.type == USER_EVENT(EventType::LLMStatusUpdate))
+			SetStatusBar(*reinterpret_cast<fig::llm::LLMStatus*>(event.user.data1));
+		if (event.type == USER_EVENT(EventType::LLMChatInitializing))
+			SetStatusBar(fig::strings::Status::InitializingChat);
+		else if (event.type == USER_EVENT(EventType::LLMChatInitialized))
+			SetStatusBar(fig::strings::Status::ChatInitialized);
+		else if (event.type == USER_EVENT(EventType::LLMChatInitializationFailure))
+			SetStatusBar(fig::strings::Status::FailedToInitializeChat);
+		else if (event.type == USER_EVENT(EventType::LLMModelLoading))
+			SetStatusBar(fig::strings::Status::LoadingModel);
+		else if (event.type == USER_EVENT(EventType::LLMModelLoaded))
+			SetStatusBar(fig::strings::Status::ModelLoaded);
+		else if (event.type == USER_EVENT(EventType::LLMModelUnloaded))
+			SetStatusBar(fig::strings::Status::ModelUnloaded);
+		else if (event.type == USER_EVENT(EventType::LLMModelLoadFailure))
+			SetStatusBar(fig::strings::Status::FailedToLoadModel);
+		else if (event.type == USER_EVENT(EventType::LLMGenerationStarted))
+			SetStatusBar(fig::strings::Status::GeneratingResponse);
+		else if (event.type == USER_EVENT(EventType::LLMRebuildingKVCache))
+			SetStatusBar(fig::strings::Status::RebuildingContext);
+		else if (event.type == USER_EVENT(EventType::LLMGenerationComplete))
+			SetStatusBar(fig::strings::Status::Ready);
 
 		if (_pActiveScreen)
 			return _pActiveScreen->ProcessEvent(event);

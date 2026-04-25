@@ -994,9 +994,6 @@
     <ClInclude Include="include\model\ScenarioData.h">
       <Filter>Source Files\AppModel\Data\Character</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\TypeId.h">
-      <Filter>Source Files\AppModel\Common</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\NineGridImage.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
@@ -1212,6 +1209,9 @@
     </ClInclude>
     <ClInclude Include="include\llm\ChatStaging.h">
       <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\KeyboardMods.h">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

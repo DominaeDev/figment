@@ -393,6 +393,7 @@
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
     <ClInclude Include="include\gui\BaseButton.h" />
     <ClInclude Include="include\gui\ImageWithMask.h" />
+    <ClInclude Include="include\gui\KeyboardMods.h" />
     <ClInclude Include="include\gui\LineBorderRenderer.h" />
     <ClInclude Include="include\gui\Menu.h" />
     <ClInclude Include="include\gui\MenuSeparator.h" />

@@ -30,7 +30,6 @@
 
 using namespace fig::gui;
 
-/* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 {
 #ifdef DETECT_MEMORY_LEAKS
@@ -64,7 +63,6 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	return SDL_APP_CONTINUE;
 }
 
-/* This function runs when a new event (mouse input, keypresses, etc) occurs. */
 SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 {
 	fig::AppState* pAppState = static_cast<fig::AppState*>(state);
@@ -82,8 +80,6 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 	return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
-/* This function runs once per frame, and is the heart of the program. */
-
 SDL_AppResult SDL_AppIterate(void* state)
 {
 	fig::AppState* pAppState = static_cast<fig::AppState*>(state);
@@ -94,31 +90,37 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 	float fElapsed = static_cast<float>(delta) / 1000.0f;
 
+	if (pAppState->pLLMBackend)
+	{
+		pAppState->pLLMBackend->Update(fElapsed);
+	}
+
 	if (pAppState->pMainWindow)
 	{
 		pAppState->pMainWindow->Update(fElapsed);
 		pAppState->pMainWindow->Render();
 	}
 
-#if _DEBUG
-	// Count fps
-	static Uint64 accu = 0;
-    static Uint64 last = 0;
-    static Uint64 past = 0;
-    Uint64 now_ns = SDL_GetTicksNS();
-    Uint64 dt_ns = now_ns - past;
-
-    if (now_ns - last > 999999999) 
+	if constexpr (Debugging)
 	{
-        last = now_ns;
-		fig::Global::GetMainWindow().SetTitle(std::format("{} {} fps", fig::strings::ApplicationTitle, accu));
-        accu = 0;
-    }
-    past = now_ns;
-    accu += 1;
-#endif
+		// Count fps
+		static Uint64 accu = 0;
+		static Uint64 last = 0;
+		static Uint64 past = 0;
+		Uint64 now_ns = SDL_GetTicksNS();
+		Uint64 dt_ns = now_ns - past;
 
-	return SDL_APP_CONTINUE;  /* carry on with the program! */
+		if (now_ns - last > 999999999)
+		{
+			last = now_ns;
+			fig::Global::GetMainWindow().SetTitle(std::format("{} {} fps", fig::strings::ApplicationTitle, accu));
+			accu = 0;
+		}
+		past = now_ns;
+		accu += 1;
+	}
+
+	return SDL_APP_CONTINUE;
 }
 
 void SDL_AppQuit(void* state, SDL_AppResult result)

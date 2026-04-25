@@ -19,6 +19,9 @@ namespace fig::llm
 	class LLMInstance;
 	class LLMEmbedding;
 
+	using LLMObserverCallback = std::function<void(const LLMStatus&)>;
+	using LLMObserverCallbackId = uint32_t;
+
 	class LLMBackend
 	{
 	public:
@@ -35,12 +38,17 @@ namespace fig::llm
 		LLMInstancePtr CreateInstance(int32_t ctx_size, bool embeddings);
 		bool DestroyInstance(LLMInstancePtr instance);
 
+		LLMObserverCallbackId RegisterObserver(LLMObserverCallback fnCallback);
+		void UnregisterObserver(LLMObserverCallbackId id);
+		void Update(float fElapsed);
+
 	private:
 		using __LoadModelCallback = std::function<void(std::shared_ptr<ModelState>)>;
 		void __LoadModel(fig::string modelFilename, fig::string embeddingFilename, __LoadModelCallback onComplete);
 		static bool OnLoadModelProgress(float progress, void* user_data);
 
 		void SetReadyState(ReadyState readyState);
+		void PollStatus();
 
 	private:
 		std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };
@@ -49,12 +57,14 @@ namespace fig::llm
 		std::unique_ptr<std::jthread> _workerThread;
 		std::shared_ptr<ModelState> _modelState {};
 		std::shared_ptr<LLMStatusChannel> _pStatus {};
+		std::list<LLMStatus> _statusCache {};
 
 		std::vector<LLMInstancePtr> _instances {};
-		LLMInstancePtr _mainInstance {};
-
 		LoadModelProgressCallback _pLoadModelProgressCallback = nullptr;
+		float _fPollingCounter = 0.0f;
 
+		std::unordered_map<LLMObserverCallbackId, LLMObserverCallback> _observers {};
+		LLMObserverCallbackId _nextId = 0;
 	public:
 		std::atomic<int64_t> usedVRAM; // As reported from llama.cpp
 		std::atomic<int64_t> usedRAM; // As reported from llama.cpp

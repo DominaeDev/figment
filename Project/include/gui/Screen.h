@@ -3,24 +3,16 @@
 #pragma once
 
 #include "Control.h"
+#include "gui/KeyboardMods.h"
 
 namespace fig::gui
 {
 	class Frame;
 
-	enum class KeyModifier
-	{
-		None = 0,
-		Control		= 1 << 0,
-		Shift		= 1 << 1,
-		Alt			= 1 << 2,
-	};
-	using KeyModifiers = EnumFlags<KeyModifier>;
-
 	struct KeyboardEvent
 	{
 		SDL_Keycode key;
-		KeyModifiers modifiers;
+		KeyboardMods modifiers;
 		bool pressed;
 	};
 

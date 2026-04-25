@@ -4,8 +4,10 @@
 #include "model/UserManager.h"
 #include "gui/MainFrame.h"
 #include "gui/Window.h"
+#include "gui/Events.h"
 #include "gui/GUITypes.h"
 #include "llm/LLMBackend.h"
+#include "llm/LLMStatus.h"
 #include "Constants.h"
 #include <SDL3/SDL.h>
 #include <cassert>
@@ -19,6 +21,8 @@ namespace fig
 	Global::State* Global::__appState = nullptr;
 	SDL_Cursor* Global::_pIBeamCursor = nullptr;
 
+	static void BackendSignalHandler(const LLMStatus& signal);
+
 	Global::State* Global::CreateState()
 	{
 		if (__appState)
@@ -31,7 +35,8 @@ namespace fig
 		__appState->pAppSettings = std::make_unique<AppSettings>(Constants::Paths::AppSettings);
 		__appState->pAppSettings->Load();
 
-		__appState->pLLMEngine = std::make_shared<LLMBackend>();
+		__appState->pLLMBackend = std::make_shared<LLMBackend>();
+		__appState->pLLMBackend->RegisterObserver(BackendSignalHandler);
 
 		// Load user profiles
 		__appState->pUserManager = std::make_shared<fig::user::UserManager>();
@@ -74,10 +79,10 @@ namespace fig
 			__appState->pAppSettings.reset();
 		}
 
-		if (__appState->pLLMEngine)
+		if (__appState->pLLMBackend)
 		{
-			__appState->pLLMEngine->Shutdown();
-			__appState->pLLMEngine.reset();
+			__appState->pLLMBackend->Shutdown();
+			__appState->pLLMBackend.reset();
 		}
 
 		SDL_free(__appState);
@@ -94,7 +99,7 @@ namespace fig
 	LLMBackend& Global::GetLLMEngine()
 	{
 		assert(__appState);
-		return *(__appState->pLLMEngine.get());
+		return *(__appState->pLLMBackend.get());
 	}
 
 	std::shared_ptr<LLMInstance> Global::GetLLMInstance()
@@ -143,5 +148,37 @@ namespace fig
 		SDL_Cursor* pCurrentCursor = SDL_GetCursor();
 		if (pCurrentCursor != pCursor)
 			SDL_SetCursor(pCursor);
+	}
+
+	static void BackendSignalHandler(const LLMStatus& status)
+	{
+		EventType eventType;
+		switch (status.event)
+		{
+		case LLMStatusEvent::Nothing:						break;
+		case LLMStatusEvent::ModelLoading:					eventType = EventType::LLMModelLoading; break;
+		case LLMStatusEvent::ModelLoaded:					eventType = EventType::LLMModelLoaded; break;
+		case LLMStatusEvent::ModelLoadFailure:				eventType = EventType::LLMModelLoadFailure; break;
+		case LLMStatusEvent::ModelUnloaded:
+		{
+			eventType = EventType::LLMModelUnloaded;
+			Global::SetLLMInstance(nullptr);
+		}
+		break;
+		case LLMStatusEvent::ModelUnloadRequest:			eventType = EventType::LLMModelUnloadRequest; break;
+		case LLMStatusEvent::ChatInitializing:				eventType = EventType::LLMChatInitializing; break;
+		case LLMStatusEvent::ChatInitialized:				eventType = EventType::LLMChatInitialized; break;
+		case LLMStatusEvent::ChatInitializationFailure:		eventType = EventType::LLMChatInitializationFailure; break;
+		case LLMStatusEvent::GenerationStarted:				eventType = EventType::LLMGenerationStarted; break;
+		case LLMStatusEvent::GenerationComplete:			eventType = EventType::LLMGenerationComplete; break;
+		case LLMStatusEvent::CompletedMessage:				eventType = EventType::LLMCompletedMessage; break;
+		case LLMStatusEvent::RebuildingKVCache:				eventType = EventType::LLMRebuildingKVCache; break;
+		default:
+			assert(false && "Missing signal handler");
+			break;
+		}
+
+		fig::gui::PushEvent(EventType::LLMStatusUpdate, 0, (void*)(&status));
+		fig::gui::PushEvent(eventType);
 	}
 }

@@ -36,19 +36,6 @@ void queue_clear(std::queue<T>& q)
 	std::swap(q, empty);
 }
 
-constexpr ChatOptions DefaultChatOptions {
-	.flags = {
-		ChatOptions::Flag::GreetUser,
-		ChatOptions::Flag::Uncensored,
-//		ChatOptions::Flag::LimitMessages,
-//		ChatOptions::Flag::RandomizeMessageCount,
-//		ChatOptions::Flag::StateVariables,
-//		ChatOptions::Flag::ReportStateChanges,
-//		ChatOptions::Flag::Embeddings,
-		},
-	.groupChatMode = ChatOptions::GroupChatMode::SwapSequences,
-};
-
 namespace fig::gui
 {
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
@@ -131,18 +118,13 @@ namespace fig::gui
 		if (_bStartedChat)
 		{
 			_bStartedChat = false;
-			if (DefaultChatOptions.flags.IsSet(ChatOptions::Flag::GreetUser))
+			if (Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::GreetUser))
 			{
 				auto pLLM = Global::GetLLMInstance();
 				if (pLLM)
 					pLLM->GreetUser();
 			}
 		}
-
-		// Poll llm status
-		_fPollingCounter += fElapsed;
-		if (_fPollingCounter > 0.1f)
-			PollStatus();
 
 #if ENABLE_AUTO_CHAT
 		if (_bAutoChat) AutoChat();
@@ -163,7 +145,7 @@ namespace fig::gui
 			SetStatusBar(fig::strings::Status::LoadingModel);
 
 			engine.Initialize(fig::string(Constants::DefaultModelLocation),
-				DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
+				Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
 				[this](int percent)
 			{
 				SetStatusBar(std::format(fig::strings::Status::LoadingModelPercentFmt, percent));
@@ -172,7 +154,7 @@ namespace fig::gui
 			{
 				if (bSuccess)
 				{
-					auto pInstance = engine.CreateInstance(Constants::Context::DefaultSize, DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings));
+					auto pInstance = engine.CreateInstance(Constants::Context::DefaultSize, Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings));
 					Global::SetLLMInstance(pInstance);
 				}
 			});
@@ -196,7 +178,7 @@ namespace fig::gui
 	void ChatScreen::StartChat()
 	{
 		//! @temp
-		fig::io::ChatStaging staging(DefaultChatOptions);
+		fig::io::ChatStaging staging(Constants::LLM::DefaultChatOptions);
 		CharacterData user;
 		user.LoadFromXml(fig::path { "./characters/user.xml" });
 		CharacterData bot1;
@@ -216,12 +198,12 @@ namespace fig::gui
 		if (pLLM && !pLLM->IsInitialized())
 		{
 			ChatSession session;
-			session.Initialize(staging, DefaultChatOptions);
+			session.Initialize(staging, Constants::LLM::DefaultChatOptions);
 
 			LLMChatArguments llmArgs {
 				/*session*/ session,
 				/*messages*/ {},
-				/*options*/ DefaultChatOptions,
+				/*options*/ Constants::LLM::DefaultChatOptions,
 			};
 			pLLM->Initialize(llmArgs);
 			_pChatScroll->SetSession(session);
@@ -315,80 +297,24 @@ namespace fig::gui
 		{
 			auto pLLMInstance = Global::GetLLMInstance();
 			MainFrame::GetInstance().SetStatusBar(status.value());
-
-			switch (status.value().signal)
-			{
-			case LLMStatusSignal::ChatInitializing:
-				SetStatusBar(fig::strings::Status::InitializingChat);
-				break;
-			case LLMStatusSignal::ChatInitialized:
-				SetStatusBar(fig::strings::Status::ChatInitialized);
-				_pChatScroll->ClearMessages();
-				if (pLLMInstance)
-				{
-					_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
-					_pVariableList->SetVisible(true);
-				}
-				queue_clear(_commandQueue);
-				break;
-			case LLMStatusSignal::ChatInitializationFailure:
-				SetStatusBar(fig::strings::Status::FailedToInitializeChat);
-				break;
-			case LLMStatusSignal::ModelLoading:
-				SetStatusBar(fig::strings::Status::LoadingModel);
-				break;
-			case LLMStatusSignal::ModelLoaded:
-				SetStatusBar(fig::strings::Status::ModelLoaded);
-				queue_clear(_commandQueue);
-				StartChat();
-				break;
-			case LLMStatusSignal::ModelUnloaded:
-				SetStatusBar(fig::strings::Status::ModelUnloaded);
-				_pVariableList->SetVisible(false);
-				Global::SetLLMInstance(nullptr);
-				queue_clear(_commandQueue);
-				break;
-			case LLMStatusSignal::ModelLoadFailure:
-				SetStatusBar(fig::strings::Status::FailedToLoadModel);
-				break;
-			case LLMStatusSignal::ModelUnloadRequest:
-				UnloadModel();
-				break;
-			case LLMStatusSignal::GenerationStarted:
-				SetStatusBar(fig::strings::Status::GeneratingResponse);
-				break;
-			case LLMStatusSignal::RebuildingKVCache:
-				SetStatusBar(fig::strings::Status::RebuildingContext);
-				break;
-			case LLMStatusSignal::GenerationComplete:
-				SetStatusBar(fig::strings::Status::Ready);
-				if (pLLMInstance)
-					_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
-				NextQueuedCommand();
-				break;
-			default:
-				break;
-			}
 		}
 	}
 
 	bool ChatScreen::OnKeyboardEvent(KeyboardEvent& event)
 	{
-		bool bModNone = event.modifiers == KeyModifiers::None;
-
 		if (event.pressed)
 		{
 			switch (event.key)
 			{
 			case SDLK_F2:
-				if (bModNone)
+				if (event.modifiers.None)
 				{
 					InitializeModel();
 					return true;
 				}
 				break;
 			case SDLK_F3:
-				if (bModNone)
+				if (event.modifiers.None)
 				{
 					UnloadModel();
 					return true;
@@ -396,7 +322,7 @@ namespace fig::gui
 				break;
 #if _DEBUG
 			case SDLK_F12:
-				if (event.modifiers == KeyModifiers { KeyModifier::Control })
+				if (event.modifiers.Control)
 				{
 					Close();
 					return true;
@@ -405,7 +331,7 @@ namespace fig::gui
 #endif
 #if ENABLE_AUTO_CHAT
 			case SDLK_F5:
-				if (bModNone)
+				if (event.modifiers.None)
 				{
 					_bAutoChat = !_bAutoChat;
 					return true;
@@ -419,7 +345,7 @@ namespace fig::gui
 			switch (event.key)
 			{
 			case SDLK_TAB:
-				if (bModNone)
+				if (event.modifiers.None)
 				{
 					_pVariableList->SetVisible(false);
 					return true;
@@ -437,7 +363,7 @@ namespace fig::gui
 				switch (event.key)
 				{
 				case SDLK_F9:
-					if (bModNone)
+					if (event.modifiers.None)
 					{
 						auto [responseId, subMessageId] = _pChatScroll->GetLastMessage();
 						if (!pLLM->Continue(responseId, subMessageId, true))
@@ -446,7 +372,7 @@ namespace fig::gui
 					}
 					break;
 				case SDLK_F10:
-					if (bModNone)
+					if (event.modifiers.None)
 					{
 						pLLM->Halt();
 						queue_clear(_commandQueue);
@@ -458,7 +384,7 @@ namespace fig::gui
 					break;
 #if _DEBUG
 				case SDLK_F11:
-					if (bModNone)
+					if (event.modifiers.None)
 					{
 						if (pLLM->IsReady())
 							pLLM->DumpContext();
@@ -467,7 +393,7 @@ namespace fig::gui
 					break;
 #endif
 				case SDLK_TAB:
-					if (bModNone)
+					if (event.modifiers.None)
 					{
 						if (pLLM->IsInitialized())
 						{
@@ -519,5 +445,44 @@ namespace fig::gui
 	void ChatScreen::OnSidePanel(bool bShown)
 	{
 		_pExpandButton->SetVisible(!bShown);
+	}
+
+	bool ChatScreen::OnEvent(Event& event)
+	{
+		if (event.type == USER_EVENT(EventType::LLMChatInitialized))
+		{
+			auto pLLMInstance = Global::GetLLMInstance();
+			_pChatScroll->ClearMessages();
+			if (pLLMInstance)
+			{
+				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
+				_pVariableList->SetVisible(true);
+			}
+			queue_clear(_commandQueue);
+		}
+		else if (event.type == USER_EVENT(EventType::LLMModelLoaded))
+		{
+			queue_clear(_commandQueue);
+			StartChat();
+		}
+		else if (event.type == USER_EVENT(EventType::LLMModelUnloaded))
+		{
+			_pVariableList->SetVisible(false);
+			Global::SetLLMInstance(nullptr);
+			queue_clear(_commandQueue);
+		}
+		else if (event.type == USER_EVENT(EventType::LLMModelUnloadRequest))
+		{
+			UnloadModel();
+		}
+		else if (event.type == USER_EVENT(EventType::LLMGenerationComplete))
+		{
+			auto pLLMInstance = Global::GetLLMInstance();
+			if (pLLMInstance)
+				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
+			NextQueuedCommand();
+		}
+
+		return Screen::OnEvent(event);
 	}
 }

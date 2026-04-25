@@ -63,7 +63,7 @@ namespace fig::llm
 
 	bool LLMInstance::Initialize(LLMChatArguments args)
 	{
-		_pStatus->EmitSignal(LLMStatusSignal::ChatInitializing);
+		_pStatus->EmitSignal(LLMStatusEvent::ChatInitializing);
 
 		auto& staging = args.session.GetStaging();
 
@@ -257,7 +257,7 @@ namespace fig::llm
 		_contextState.active_persona = Role::Bot1;
 	
 		SetReadyState(ReadyState::Ready);
-		_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
+		_pStatus->EmitSignal(LLMStatusEvent::ChatInitialized);
 
 		return true;
 	}
@@ -365,7 +365,7 @@ namespace fig::llm
 		if (seed > 0)
 			Reseed(seed);
 
-		_pStatus->EmitSignal(LLMStatusSignal::ChatInitialized);
+		_pStatus->EmitSignal(LLMStatusEvent::ChatInitialized);
 
 		if (_options.flags.IsSet(ChatOptions::Flag::GreetUser))
 			GreetUser();
@@ -919,7 +919,7 @@ namespace fig::llm
 				{
 					msgType = MessageType::Undefined;
 					subMessageId = CreateStrUUID();
-					_pStatus->EmitSignal(LLMStatusSignal::CompletedMessage);
+					_pStatus->EmitSignal(LLMStatusEvent::CompletedMessage);
 				}
 			}
 
@@ -1132,7 +1132,7 @@ namespace fig::llm
 			return; // Already running
 
 		SetReadyState(ReadyState::Generating);
-		_pStatus->EmitSignal(LLMStatusSignal::GenerationStarted);
+		_pStatus->EmitSignal(LLMStatusEvent::GenerationStarted);
 
 		_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMInstance::__ProcessTaskQueue, this),
 			[this](InternalError error, fig::string response) {
@@ -1145,7 +1145,7 @@ namespace fig::llm
 
 				SetReadyState(ReadyState::Ready);
 				RefreshActiveResponses();
-				_pStatus->EmitSignal(LLMStatusSignal::GenerationComplete);
+				_pStatus->EmitSignal(LLMStatusEvent::GenerationComplete);
 			}));
 	}
 
@@ -1810,14 +1810,14 @@ namespace fig::llm
 
 	bool LLMInstance::RebuildKVCache()
 	{
-		_pStatus->EmitSignal(LLMStatusSignal::RebuildingKVCache);
+		_pStatus->EmitSignal(LLMStatusEvent::RebuildingKVCache);
 		auto prevReadyState = _readyState.exchange(ReadyState::RebuildingKVCache);
 		_pStatus->ReportReadyState(ReadyState::RebuildingKVCache);
 
 		bool r = _contextState.RebuildKVCache();
 
 		SetReadyState(prevReadyState);
-		_pStatus->EmitSignal(LLMStatusSignal::GenerationStarted);
+		_pStatus->EmitSignal(LLMStatusEvent::GenerationStarted);
 		return r == 0;
 	}
 
@@ -1831,6 +1831,6 @@ namespace fig::llm
 	{
 		LogLn(std::format("\r\n>> Internal error 0x{:02X}: {}", toI(error), message));
 		SetReadyState(ReadyState::Invalid);
-		_pStatus->EmitSignal(LLMStatusSignal::ModelUnloadRequest);
+		_pStatus->EmitSignal(LLMStatusEvent::ModelUnloadRequest);
 	}
 }

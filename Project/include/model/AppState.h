@@ -38,7 +38,7 @@ namespace fig
 		struct State
 		{
 			std::shared_ptr<fig::gui::Window> pMainWindow;
-			std::shared_ptr<fig::llm::LLMBackend> pLLMEngine;
+			std::shared_ptr<fig::llm::LLMBackend> pLLMBackend;
 			std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
 			std::shared_ptr<fig::user::UserManager> pUserManager;
 			std::unique_ptr<fig::AppSettings> pAppSettings;

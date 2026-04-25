@@ -9,7 +9,7 @@
 
 namespace fig::llm
 {
-	enum class LLMStatusSignal : uint32_t
+	enum class LLMStatusEvent : uint32_t
 	{
 		Nothing = 0,
 		ModelLoading,
@@ -52,7 +52,7 @@ namespace fig::llm
 		int64_t usedRAM = 0;
 		ReadyState readyState { ReadyState::Uninitialized };
 		double tokensPerSec = 0.0;
-		LLMStatusSignal signal;
+		LLMStatusEvent event;
 
 		inline bool IsReady() const noexcept { return readyState >= ReadyState::Ready; }
 	};
@@ -62,7 +62,7 @@ namespace fig::llm
 	public:
 		std::optional<LLMStatus> PollStatus();
 
-		void EmitSignal(LLMStatusSignal signal);
+		void EmitSignal(LLMStatusEvent signal);
 		void ReportModelInfo(fig::string modelName, int32_t ctx_size, int32_t used_ctx);
 		void ReportTokensPerSec(double tokPerSec);
 		void ReportMemory(int64_t ram, int64_t vram, bool bIncrement);
@@ -75,7 +75,7 @@ namespace fig::llm
 		int32_t _ctx_size {};
 		int32_t _used_ctx {};
 
-		std::queue<LLMStatusSignal> _statusSignals;
+		std::queue<LLMStatusEvent> _statusSignals;
 		double _tokensPerSec {};
 		ReadyState _readyState { ReadyState::Uninitialized };
 		std::pair<int64_t, int64_t> _usedRAMVRAM {0, 0};

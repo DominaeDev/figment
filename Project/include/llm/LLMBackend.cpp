@@ -4,6 +4,7 @@
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMStatus.h"
 #include "llm/LLMUtility.h"
+#include "model/AppState.h"
 
 #include "util/Lockable.h"
 #include "util/StringUtility.h"
@@ -71,7 +72,7 @@ namespace fig::llm
 		SetReadyState(ReadyState::Initializing);
 		_pLoadModelProgressCallback = onProgress;
 
-		_pStatus->EmitSignal(LLMStatusSignal::ModelLoading);
+		_pStatus->EmitSignal(LLMStatusEvent::ModelLoading);
 
 		_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMBackend::__LoadModel, this),
 			modelFilename,
@@ -88,7 +89,7 @@ namespace fig::llm
 				onComplete(true);
 
 				_pStatus->ReportMemory(usedRAM.load(), usedVRAM.load(), false);
-				_pStatus->EmitSignal(LLMStatusSignal::ModelLoaded);
+				_pStatus->EmitSignal(LLMStatusEvent::ModelLoaded);
 				LogLn("Loaded model OK");
 			}
 			else // Failure
@@ -102,7 +103,7 @@ namespace fig::llm
 				onComplete(false);
 
 				_pStatus->ReportMemory(0, 0, false);
-				_pStatus->EmitSignal(LLMStatusSignal::ModelLoadFailure);
+				_pStatus->EmitSignal(LLMStatusEvent::ModelLoadFailure);
 				LogLn("Failed to load model");
 			}
 		}));
@@ -127,7 +128,7 @@ namespace fig::llm
 		}, _stateMutex);
 
 		SetReadyState(ReadyState::Uninitialized);
-		_pStatus->EmitSignal(LLMStatusSignal::ModelUnloaded);
+		_pStatus->EmitSignal(LLMStatusEvent::ModelUnloaded);
 
 		llama_backend_free();
 		return true;
@@ -225,5 +226,44 @@ namespace fig::llm
 			return true;
 		}
 		return false;
+	}
+
+	void LLMBackend::Update(float fElapsed)
+	{
+		// Poll llm status
+		_fPollingCounter += fElapsed;
+		if (_fPollingCounter > 0.1f)
+			PollStatus();
+	}
+
+	LLMObserverCallbackId LLMBackend::RegisterObserver(LLMObserverCallback fnCallback)
+	{
+		_observers.emplace(_nextId, std::move(fnCallback));
+		return _nextId++;
+	}
+
+	void LLMBackend::UnregisterObserver(LLMObserverCallbackId id)
+	{
+		_observers.erase(id);
+	}
+
+	void LLMBackend::PollStatus()
+	{
+		if (!_pStatus)
+			return;
+
+		_statusCache.clear();
+
+		while (true)
+		{
+			if (auto try_status = _pStatus->PollStatus(); try_status.has_value() && try_status.value().event != LLMStatusEvent::Nothing)
+			{
+				auto& status = _statusCache.emplace_front(try_status.value());
+				for (auto& kvp : _observers)
+					kvp.second(status);
+				continue;
+			}
+			break;
+		}
 	}
 }

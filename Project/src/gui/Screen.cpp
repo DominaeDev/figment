@@ -16,19 +16,9 @@ namespace fig::gui
 		// Key press or release
 		if ((event.type == SDL_EVENT_KEY_DOWN or event.type == SDL_EVENT_KEY_UP) and not event.key.repeat)
 		{
-			bool bCtrlDown = (event.key.mod & SDL_KMOD_CTRL) != 0;
-			bool bShiftDown = (event.key.mod & SDL_KMOD_SHIFT) != 0;
-			bool bAltDown = (event.key.mod & SDL_KMOD_ALT) != 0;
-
-			KeyModifiers mods = {
-				bCtrlDown ? KeyModifier::Control : KeyModifier::None,
-				bShiftDown ? KeyModifier::Shift : KeyModifier::None,
-				bAltDown ? KeyModifier::Alt : KeyModifier::None,
-			};
-			
 			KeyboardEvent keyEvent {
 				.key = event.key.key,
-				.modifiers = mods,
+				.modifiers = KeyboardMods { event },
 				.pressed = event.key.down,
 			};
 

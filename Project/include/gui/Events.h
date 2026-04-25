@@ -13,6 +13,20 @@ namespace fig::gui
 		MenuOpened,
 		MenuClosed,
 
+		LLMStatusUpdate,
+		LLMModelLoading,
+		LLMModelLoaded,
+		LLMModelLoadFailure,
+		LLMModelUnloaded,
+		LLMModelUnloadRequest,
+		LLMChatInitializing,
+		LLMChatInitialized,
+		LLMChatInitializationFailure,
+		LLMGenerationStarted,
+		LLMGenerationComplete,
+		LLMCompletedMessage,
+		LLMRebuildingKVCache,
+
 		Count,
 	};
 	
