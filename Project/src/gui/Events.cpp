@@ -3,11 +3,11 @@
 
 namespace fig::gui
 {
-	uint32_t USER_EVENT_BASE = SDL_EVENT_USER;
+	uint32_t UserEventBase = SDL_EVENT_USER;
 
 	void RegisterUserEvents()
 	{
-		USER_EVENT_BASE = SDL_RegisterEvents(EventType::Count);
+		UserEventBase = SDL_RegisterEvents(EventType::Count);
 	}
 
 }

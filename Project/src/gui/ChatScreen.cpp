@@ -30,7 +30,7 @@ using namespace fig::llm;
 using namespace fig::io;
 
 template<typename T>
-void queue_clear(std::queue<T>& q)
+constexpr void queue_clear(std::queue<T>& q)
 {
 	std::queue<T> empty;
 	std::swap(q, empty);
@@ -127,52 +127,14 @@ namespace fig::gui
 		}
 
 #if ENABLE_AUTO_CHAT
-		if (_bAutoChat) AutoChat();
+		if (_bAutoChat) 
+			AutoChat();
 #endif
 	}
 
 	void ChatScreen::OnRender(Renderer* pRenderer)
 	{
 		DrawBackground(pRenderer);
-	}
-
-	void ChatScreen::InitializeModel()
-	{
-		auto& engine = Global::GetLLMEngine();
-
-		if (!engine.IsInitialized())
-		{
-			SetStatusBar(fig::strings::Status::LoadingModel);
-
-			engine.Initialize(fig::string(Constants::DefaultModelLocation),
-				Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
-				[this](int percent)
-			{
-				SetStatusBar(std::format(fig::strings::Status::LoadingModelPercentFmt, percent));
-			},
-				[this, &engine](bool bSuccess)
-			{
-				if (bSuccess)
-				{
-					auto pInstance = engine.CreateInstance(Constants::Context::DefaultSize, Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings));
-					Global::SetLLMInstance(pInstance);
-				}
-			});
-		}
-	}
-
-	void ChatScreen::UnloadModel()
-	{
-		auto& engine = Global::GetLLMEngine();
-		if (engine.IsInitialized())
-		{
-			engine.Shutdown();
-			SetStatusBar(fig::strings::Status::ModelUnloaded);
-
-#if ENABLE_AUTO_CHAT
-			_bAutoChat = false;
-#endif
-		}
 	}
 
 	void ChatScreen::StartChat()
@@ -209,6 +171,7 @@ namespace fig::gui
 			_pChatScroll->SetSession(session);
 
 			_bStartedChat = true;
+			queue_clear(_commandQueue);
 		}
 		else
 		{
@@ -239,7 +202,7 @@ namespace fig::gui
 		if (!engine.IsInitialized())
 		{
 			if (!engine.IsInitializing())
-				InitializeModel();
+				MainFrame::GetInstance().InitializeModel();
 			return;
 		}
 
@@ -287,58 +250,17 @@ namespace fig::gui
 	}
 #endif
 
-	void ChatScreen::PollStatus()
-	{
-		auto pChannel = Global::GetLLMEngine().GetStatusChannel();
-		if (!pChannel)
-			return;
-
-		if (auto status = pChannel->PollStatus())
-		{
-			auto pLLMInstance = Global::GetLLMInstance();
-			MainFrame::GetInstance().SetStatusBar(status.value());
-		}
-	}
-
 	bool ChatScreen::OnKeyboardEvent(KeyboardEvent& event)
 	{
 		if (event.pressed)
 		{
-			switch (event.key)
-			{
-			case SDLK_F2:
-				if (event.modifiers.None)
-				{
-					InitializeModel();
-					return true;
-				}
-				break;
-			case SDLK_F3:
-				if (event.modifiers.None)
-				{
-					UnloadModel();
-					return true;
-				}
-				break;
-#if _DEBUG
-			case SDLK_F12:
-				if (event.modifiers.Control)
-				{
-					Close();
-					return true;
-				}
-				break;
-#endif
 #if ENABLE_AUTO_CHAT
-			case SDLK_F5:
-				if (event.modifiers.None)
-				{
-					_bAutoChat = !_bAutoChat;
-					return true;
-				}
-				break;
-#endif
+			if (event.key == SDLK_F5 && event.modifiers.None)
+			{
+				_bAutoChat = !_bAutoChat;
+				return true;
 			}
+#endif
 		}
 		else // Release
 		{
@@ -449,7 +371,7 @@ namespace fig::gui
 
 	bool ChatScreen::OnEvent(Event& event)
 	{
-		if (event.type == USER_EVENT(EventType::LLMChatInitialized))
+		if (SDLUserEvent(event, EventType::LLMChatInitialized))
 		{
 			auto pLLMInstance = Global::GetLLMInstance();
 			_pChatScroll->ClearMessages();
@@ -460,22 +382,20 @@ namespace fig::gui
 			}
 			queue_clear(_commandQueue);
 		}
-		else if (event.type == USER_EVENT(EventType::LLMModelLoaded))
+		else if (SDLUserEvent(event, EventType::LLMModelLoaded))
 		{
-			queue_clear(_commandQueue);
-			StartChat();
+//			StartChat();
 		}
-		else if (event.type == USER_EVENT(EventType::LLMModelUnloaded))
+		else if (SDLUserEvent(event, EventType::LLMModelUnloaded))
 		{
 			_pVariableList->SetVisible(false);
 			Global::SetLLMInstance(nullptr);
 			queue_clear(_commandQueue);
+#if ENABLE_AUTO_CHAT
+			_bAutoChat = false;
+#endif
 		}
-		else if (event.type == USER_EVENT(EventType::LLMModelUnloadRequest))
-		{
-			UnloadModel();
-		}
-		else if (event.type == USER_EVENT(EventType::LLMGenerationComplete))
+		else if (SDLUserEvent(event, EventType::LLMGenerationComplete))
 		{
 			auto pLLMInstance = Global::GetLLMInstance();
 			if (pLLMInstance)

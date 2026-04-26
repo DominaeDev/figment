@@ -121,6 +121,7 @@ namespace fig::gui
 			font = FontFace::Italic;
 
 		_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::GUI::ChatMessageFontSize, true);
+		_pMessageText->EnableWordWrap(true);
 		_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
 		_pMessageText->SetBackgroundColor(Colors::Transparent);
 		_pMessageText->SetMaxSize(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2, -1);

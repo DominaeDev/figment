@@ -108,6 +108,12 @@ namespace fig
 		return __appState->pLLMInstance;
 	}
 
+	bool Global::IsLLMInitialized() 
+	{ 
+		assert(__appState);
+		return __appState->pLLMBackend.get()->IsInitialized();
+	}
+
 	AppSettings& Global::GetSettings()
 	{
 		assert(__appState);

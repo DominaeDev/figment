@@ -17,7 +17,7 @@ namespace fig::gui
 	public:
 		StatusBar(LayoutElement* pParent);
 
-		void SetMessage(fig::string_view message);
+		void SetMessage(const fig::string& message);
 		void SetModelInfo(const fig::llm::LLMStatus& status);
 
 	private:

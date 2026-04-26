@@ -8,6 +8,11 @@
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "fs/FileUtility.h"
+#include "llm/LLMBackend.h"
+#include "llm/LLMInstance.h"
+#include "llm/LLMUtility.h"
+
+using namespace fig::io;
 
 namespace fig::gui
 {
@@ -88,7 +93,7 @@ namespace fig::gui
 				auto& content = userMngr.GetContent();
 
 				auto characterAssets = content.GetAssetManager().GetAssets() 
-					| std::views::filter([](auto& a) { return a.asset_type == fig::io::AssetType::Character; })
+					| std::views::filter([](auto& a) { return a.asset_type == AssetType::Character; })
 					| std::views::transform([](auto& a) { return std::ref(a); })
 					| std::ranges::to<std::vector>();
 
@@ -101,9 +106,9 @@ namespace fig::gui
 				{
 					auto& asset = assetRef.get();
 					content.MarkNew(asset.id, count++ < 10);
-					asset.SetMeta(fig::io::MetaTag::CreatedAt, timestamp);
-					asset.SetMeta(fig::io::MetaTag::LastUsedAt, timestamp);
-					asset.SetMeta(fig::io::MetaTag::UpdatedAt, timestamp);
+					asset.SetMeta(MetaTag::CreatedAt, timestamp);
+					asset.SetMeta(MetaTag::LastUsedAt, timestamp);
+					asset.SetMeta(MetaTag::UpdatedAt, timestamp);
 					timestamp -= static_cast<fig::timestamp>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::milliseconds(100)).count());
 				}
 
@@ -156,75 +161,6 @@ namespace fig::gui
 	void MainFrame::SetStatusBar(const fig::llm::LLMStatus& status)
 	{
 		s_pInstance->_pStatusBar->SetModelInfo(status);
-	}
-
-	bool MainFrame::OnEvent(SDL_Event& event)
-	{
-		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
-		{
-			SDL_KeyboardEvent& keyEvent = event.key;
-			KeyboardMods mods { event };
-
-			if (keyEvent.down and not keyEvent.repeat)
-			{
-				if constexpr (Debugging)
-				{
-					if (keyEvent.key == SDLK_F12 and mods.Control)
-					{
-						Close();
-						return true;
-					}
-					else if (keyEvent.key == SDLK_3 and mods.Alt)
-					{
-						ChangeScreen(ScreenType::Debug);
-						return true;
-					}
-				}
-
-				if (keyEvent.key == SDLK_1 and mods.Alt)
-				{
-					ChangeScreen(ScreenType::Home);
-					return true;
-				}
-				else if (keyEvent.key == SDLK_2 and mods.Alt)
-				{
-					ChangeScreen(ScreenType::Chat);
-					return true;
-				}
-				else if (keyEvent.key == SDLK_TAB and mods.None)
-				{
-					ShowSidePanel(!_pSidePanel->GetVisible());
-					return true;
-				}
-			}
-		}
-
-		if (event.type == USER_EVENT(EventType::LLMStatusUpdate))
-			SetStatusBar(*reinterpret_cast<fig::llm::LLMStatus*>(event.user.data1));
-		if (event.type == USER_EVENT(EventType::LLMChatInitializing))
-			SetStatusBar(fig::strings::Status::InitializingChat);
-		else if (event.type == USER_EVENT(EventType::LLMChatInitialized))
-			SetStatusBar(fig::strings::Status::ChatInitialized);
-		else if (event.type == USER_EVENT(EventType::LLMChatInitializationFailure))
-			SetStatusBar(fig::strings::Status::FailedToInitializeChat);
-		else if (event.type == USER_EVENT(EventType::LLMModelLoading))
-			SetStatusBar(fig::strings::Status::LoadingModel);
-		else if (event.type == USER_EVENT(EventType::LLMModelLoaded))
-			SetStatusBar(fig::strings::Status::ModelLoaded);
-		else if (event.type == USER_EVENT(EventType::LLMModelUnloaded))
-			SetStatusBar(fig::strings::Status::ModelUnloaded);
-		else if (event.type == USER_EVENT(EventType::LLMModelLoadFailure))
-			SetStatusBar(fig::strings::Status::FailedToLoadModel);
-		else if (event.type == USER_EVENT(EventType::LLMGenerationStarted))
-			SetStatusBar(fig::strings::Status::GeneratingResponse);
-		else if (event.type == USER_EVENT(EventType::LLMRebuildingKVCache))
-			SetStatusBar(fig::strings::Status::RebuildingContext);
-		else if (event.type == USER_EVENT(EventType::LLMGenerationComplete))
-			SetStatusBar(fig::strings::Status::Ready);
-
-		if (_pActiveScreen)
-			return _pActiveScreen->ProcessEvent(event);
-		return false;
 	}
 
 	void MainFrame::Close()
@@ -384,4 +320,152 @@ namespace fig::gui
 
 		return TrySignIn(profiles.front(), "");
 	}
+
+	void MainFrame::InitializeModel()
+	{
+		auto& engine = Global::GetLLMEngine();
+
+		if (!engine.IsInitialized() && !engine.IsInitializing())
+		{
+			SetStatusBar(fig::strings::Status::LoadingModel);
+
+			engine.Initialize(fig::string(Constants::DefaultModelLocation),
+				Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
+				[this](int percent) {
+					SetStatusBar(std::format(fig::strings::Status::LoadingModelPercentFmt, percent));
+				},
+				[this, &engine](bool bSuccess) {
+					if (bSuccess)
+					{
+						auto pInstance = engine.CreateInstance(Constants::Context::DefaultSize, Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings));
+						Global::SetLLMInstance(pInstance);
+					}
+				});
+		}
+	}
+
+	void MainFrame::UnloadModel()
+	{
+		auto& engine = Global::GetLLMEngine();
+		if (engine.IsInitialized())
+		{
+			engine.Shutdown();
+			SetStatusBar(fig::strings::Status::ModelUnloaded);
+		}
+	}
+
+	bool MainFrame::OnEvent(SDL_Event& event)
+	{
+		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
+		{
+			SDL_KeyboardEvent& keyEvent = event.key;
+			KeyboardMods mods { event };
+
+			if (keyEvent.down and not keyEvent.repeat)
+			{
+				if constexpr (Debugging)
+				{
+					if (keyEvent.key == SDLK_F12 and mods.Control)
+					{
+						Close();
+						return true;
+					}
+					else if (keyEvent.key == SDLK_3 and mods.Alt)
+					{
+						ChangeScreen(ScreenType::Debug);
+						return true;
+					}
+					else if (keyEvent.key == SDLK_F12 and mods.Control)
+					{
+						Close();
+						return true;
+					}
+				}
+
+				if (keyEvent.key == SDLK_1 and mods.Alt)
+				{
+					ChangeScreen(ScreenType::Home);
+					return true;
+				}
+				else if (keyEvent.key == SDLK_2 and mods.Alt)
+				{
+					ChangeScreen(ScreenType::Chat);
+					return true;
+				}
+				else if (keyEvent.key == SDLK_TAB and mods.None)
+				{
+					ShowSidePanel(!_pSidePanel->GetVisible());
+					return true;
+				}
+				else if (keyEvent.key == SDLK_F2 and mods.None)
+				{
+					InitializeModel();
+					return true;
+				}
+				else if (keyEvent.key == SDLK_F3 and mods.None)
+				{
+					UnloadModel();
+					return true;
+				}
+			}
+		}
+
+		if (SDLUserEvent(event, EventType::LLMStatusUpdate))
+		{
+			if (event.user.data1)
+				SetStatusBar(*reinterpret_cast<fig::llm::LLMStatus*>(event.user.data1));
+		}
+		else if (SDLUserEvent(event, EventType::LLMChatInitializing))
+			SetStatusBar(fig::strings::Status::InitializingChat);
+		else if (SDLUserEvent(event, EventType::LLMChatInitialized))
+			SetStatusBar(fig::strings::Status::ChatInitialized);
+		else if (SDLUserEvent(event, EventType::LLMChatInitializationFailure))
+			SetStatusBar(fig::strings::Status::FailedToInitializeChat);
+		else if (SDLUserEvent(event, EventType::LLMModelLoading))
+			SetStatusBar(fig::strings::Status::LoadingModel);
+		else if (SDLUserEvent(event, EventType::LLMModelLoaded))
+			SetStatusBar(fig::strings::Status::ModelLoaded);
+		else if (SDLUserEvent(event, EventType::LLMModelUnloaded))
+			SetStatusBar(fig::strings::Status::ModelUnloaded);
+		else if (SDLUserEvent(event, EventType::LLMModelLoadFailure))
+			SetStatusBar(fig::strings::Status::FailedToLoadModel);
+		else if (SDLUserEvent(event, EventType::LLMGenerationStarted))
+			SetStatusBar(fig::strings::Status::GeneratingResponse);
+		else if (SDLUserEvent(event, EventType::LLMRebuildingKVCache))
+			SetStatusBar(fig::strings::Status::RebuildingContext);
+		else if (SDLUserEvent(event, EventType::LLMGenerationComplete))
+			SetStatusBar(fig::strings::Status::Ready);
+		else if (SDLUserEvent(event, EventType::LLMModelUnloadRequest))
+			UnloadModel();
+
+		if (SDLUserEvent(event, EventType::StartChat))
+		{
+			const fig::uuid& characterId = *reinterpret_cast<fig::uuid*>(event.user.data1);
+			StartChat(characterId);
+		}
+
+		if (_pActiveScreen)
+			return _pActiveScreen->ProcessEvent(event);
+		return false;
+	}
+
+	void MainFrame::StartChat(const fig::uuid& characterId)
+	{
+		ChangeScreen(ScreenType::Chat);
+		auto pChatScreen = GetScreen<ChatScreen>(ScreenType::Chat);
+
+		if (auto character = Global::GetUserManager().GetContent().GetCharacter(characterId))
+		{
+			CharacterData user;
+			if (user.LoadFromXml(fig::path { "./characters/user.xml" }) != FileError::NoError) //! @temp
+				return;
+
+			ChatStaging staging(Constants::LLM::DefaultChatOptions);
+			staging.AssignRole(Role::User, user);
+			staging.AssignRole(Role::Bot1, character.value());
+
+			pChatScreen->StartChat(staging);
+		}
+	}
+
 }

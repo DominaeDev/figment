@@ -70,12 +70,16 @@ namespace fig::gui
 		bool SignOut() noexcept;
 		void Close();
 
+		void InitializeModel();
+		void UnloadModel();
+
 	protected:
 		template<IsScreen T>
 		void RegisterScreen(ScreenType screen);
 		void UnregisterScreen(ScreenType screen);
 
 		bool AutoSignIn() noexcept;
+		void StartChat(const fig::uuid& characterId);
 
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;

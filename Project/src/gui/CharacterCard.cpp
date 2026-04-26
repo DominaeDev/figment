@@ -77,7 +77,7 @@ namespace fig::gui
 			break;
 		}
 
-		if (event.type == USER_EVENT(EventType::MenuOpened))
+		if (event.type == SDLUserEvent(EventType::MenuOpened))
 		{
 			if (_menuId == event.user.code)
 			{
@@ -85,7 +85,7 @@ namespace fig::gui
 				return true;
 			}
 		}
-		else if (event.type == USER_EVENT(EventType::MenuClosed))
+		else if (event.type == SDLUserEvent(EventType::MenuClosed))
 		{
 			if (_menuId == event.user.code)
 			{
@@ -105,12 +105,18 @@ namespace fig::gui
 			SetBorder(border);
 		};
 
+		bool bLLM = Global::IsLLMInitialized();
+
 		auto& menu = MainFrame::GetInstance().CreateMenu();
-		menu.AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT);
+		menu.AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT)
+			.SetEnabled(bLLM)
+			.SetDelegate([this] { 
+				PushEvent(EventType::StartChat, &_characterId); 
+			});
 		menu.AddItem("Resume last chat")
-			.SetEnabled(false);
+			.SetEnabled(bLLM && _metaData.chatCount > 0);
 		menu.AddItem(std::format("View chats with {}", _characterName))
-			.SetEnabled(false);
+			.SetEnabled(_metaData.chatCount > 0);
 		menu.AddSeparator();
 		menu.AddItem("View / Edit\u2026");
 		menu.AddItem("Clone\u2026");

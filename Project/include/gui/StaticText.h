@@ -37,15 +37,15 @@ namespace fig::gui
 	class StaticText : public Control
 	{
 	public:
-		StaticText(LayoutElement* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize = true);
+		StaticText(LayoutElement* pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize = true);
 		virtual ~StaticText();
 
 		TTF_Font* GetFont() const { return _pFont; }
 
-		void SetText(fig::string text);
-		void SetTextAndResize(fig::string text);
-		void SetTextAndResize(fig::string text, Coord& newWidth, Coord& newHeight);
-		fig::string GetText() const { return _text; }
+		void SetText(const fig::string& text);
+		void SetTextAndResize(const fig::string& text);
+		void SetTextAndResize(const fig::string& text, Coord& newWidth, Coord& newHeight);
+		const fig::string& GetText() const { return _text; }
 
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
 		void SetFont(TTF_Font* pFont) { _pFont = pFont; }

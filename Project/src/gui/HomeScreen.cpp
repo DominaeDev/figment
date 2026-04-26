@@ -209,7 +209,8 @@ namespace fig::gui
 
 	static bool IsShiftDown()
 	{
-		return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
+		auto mod = SDL_GetModState();
+		return (mod & SDL_KMOD_SHIFT) != 0 and (mod & SDL_KMOD_CTRL) == 0 and (mod & SDL_KMOD_ALT) == 0;
 	}
 
 	void HomeScreen::ShowFilteringMenu() noexcept
@@ -228,24 +229,42 @@ namespace fig::gui
 			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
 		};
 
+
 		auto filter = GetFiltering();
 		bool bShowHidden = filter.IsSet(FilterFlag::Hidden);
 
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 		menu.AddCheckItem("New", filter.IsSet(FilterFlag::New))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::New); });
+			.SetDelegate([=, this] { 
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::Starred, FilterFlag::Chats }) | FilterFlag::New);
+				else
+					ToggleFilter(FilterFlag::New); 
+			});
 		menu.AddCheckItem("Starred", filter.IsSet(FilterFlag::Starred))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Starred); });
+			.SetDelegate([=, this] { 
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::New, FilterFlag::Chats }) | FilterFlag::Starred);
+				else
+					ToggleFilter(FilterFlag::Starred); 
+			});
 		menu.AddCheckItem("At least one chat", filter.IsSet(FilterFlag::Chats))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::Chats); });
+			.SetDelegate([=, this] { 
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::New, FilterFlag::Starred}) | FilterFlag::Chats);
+				else
+					ToggleFilter(FilterFlag::Chats); 
+			});
+		
 		menu.AddSeparator();
+
 		auto& genders = menu.AddItem("By gender");
 		genders.AddCheckItem("Show male", filter.IsSet(FilterFlag::GenderMale))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([SetFilter, ToggleFilter, filter, this] {
+			.SetDelegate([=, this] {
 				if (IsShiftDown())
 					SetFilter((filter & ~FilterFlags { FilterFlag::GenderFemale, FilterFlag::GenderOther}) | FilterFlag::GenderMale);
 				else
@@ -253,7 +272,7 @@ namespace fig::gui
 			});
 		genders.AddCheckItem("Show female", filter.IsSet(FilterFlag::GenderFemale))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([SetFilter, ToggleFilter, filter, this] {
+			.SetDelegate([=, this] {
 				if (IsShiftDown())
 					SetFilter((filter & ~FilterFlags { FilterFlag::GenderMale, FilterFlag::GenderOther }) | FilterFlag::GenderFemale);
 				else
@@ -261,28 +280,43 @@ namespace fig::gui
 			});
 		genders.AddCheckItem("Show non-binary", filter.IsSet(FilterFlag::GenderOther))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([SetFilter, ToggleFilter, filter, this] {
+			.SetDelegate([=, this] {
 				if (IsShiftDown())
 					SetFilter((filter & ~FilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale }) | FilterFlag::GenderOther);
 				else
 					ToggleFilter(FilterFlag::GenderOther);
 			});
+
 		auto& sources = menu.AddItem("By source");
 		sources.AddCheckItem("Show created", filter.IsSet(FilterFlag::SourceCreated))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::SourceCreated); });
+			.SetDelegate([=, this] {
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::SourceImported }) | FilterFlag::SourceCreated);
+				else
+					ToggleFilter(FilterFlag::SourceCreated); 
+			});
 		sources.AddCheckItem("Show imported", filter.IsSet(FilterFlag::SourceImported))
 			.SetEnabled(!bShowHidden)
-			.SetDelegate([ToggleFilter, this] { ToggleFilter(FilterFlag::SourceImported); });
+			.SetDelegate([=, this] {
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::SourceCreated }) | FilterFlag::SourceImported);
+				else
+					ToggleFilter(FilterFlag::SourceImported);
+			});
+
 		menu.AddSeparator();
+
 		menu.AddCheckItem("Show hidden", bShowHidden)
-			.SetDelegate([ToggleFilter, this] { 
+			.SetDelegate([=, this] { 
 				ToggleFilter(FilterFlag::Hidden); 
 				_pCardList->ResetScroll();
 			});
 		menu.AddSeparator();
 		menu.AddItem("Reset filter")
-			.SetDelegate([SetFilter, this] { SetFilter(DefaultFilterFlags); });
+			.SetDelegate([=, this] { 
+				SetFilter(DefaultFilterFlags);
+			});
 		menu.Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}
 	

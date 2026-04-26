@@ -115,11 +115,11 @@ namespace fig::gui
 
 	bool SidePanel::OnEvent(Event& event)
 	{
-		if (event.type == USER_EVENT(EventType::UserSignedIn))
+		if (event.type == SDLUserEvent(EventType::UserSignedIn))
 		{
 			_pUserWidget->SetUser(*reinterpret_cast<fig::user::UserProfile*>(event.user.data1));
 		}
-		else if (event.type == USER_EVENT(EventType::UserSignedOut))
+		else if (event.type == SDLUserEvent(EventType::UserSignedOut))
 		{
 			_pUserWidget->Reset();
 		}

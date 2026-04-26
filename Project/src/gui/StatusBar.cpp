@@ -23,9 +23,9 @@ StatusBar::StatusBar(LayoutElement* pParent) : Control(pParent)
 	AddChild(_pMessage);
 }
 
-void StatusBar::SetMessage(fig::string_view message)
+void StatusBar::SetMessage(const fig::string& message)
 {
-	_pMessage->SetText(toStr(message));
+	_pMessage->SetText(message);
 }
 
 void StatusBar::SetModelInfo(const fig::llm::LLMStatus& status)

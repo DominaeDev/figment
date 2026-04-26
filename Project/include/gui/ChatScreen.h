@@ -29,10 +29,9 @@ namespace fig::gui
 	public:
 		ChatScreen(Frame* pParent);
 
-		void InitializeModel();
-		void UnloadModel();
-
 		void Close();
+		void StartChat();
+		void StartChat(const fig::io::ChatStaging& staging);
 
 	protected:
 		virtual void OnUpdate(float fElapsed) override;
@@ -41,9 +40,6 @@ namespace fig::gui
 		bool OnEvent(Event& event) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
-		void PollStatus();
-		void StartChat();
-		void StartChat(const fig::io::ChatStaging& staging);
 		bool OnCommand(ParsedChatCommand cmd);
 		void EnqueueCommand(ParsedChatCommand cmd);
 		void NextQueuedCommand();
@@ -71,6 +67,7 @@ namespace fig::gui
 		size_t _autoScriptIndex = 0;
 #endif
 	};
+
 }
 
 #endif

@@ -10,7 +10,7 @@ namespace fig::gui
 	constexpr Color DropShadowColor { 0x00, 0x00, 0x00, 0xC0 };
 	constexpr float DropShadowDistance { 1.25f };
 
-	StaticText::StaticText(LayoutElement* pParent, fig::string text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent),
+	StaticText::StaticText(LayoutElement* pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent),
 		_bAutoSize(bAutoSize)
 	{
 		_pFont = Fonts::GetFont(fontFace, ptSize);
@@ -39,7 +39,7 @@ namespace fig::gui
 		ReleaseTexture();
 	};
 
-	void StaticText::SetText(fig::string text)
+	void StaticText::SetText(const fig::string& text)
 	{
 		_text = text;
 
@@ -47,7 +47,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void StaticText::SetTextAndResize(fig::string text)
+	void StaticText::SetTextAndResize(const fig::string& text)
 	{
 		_text = text;
 		_bInvalidated = false;
@@ -56,7 +56,7 @@ namespace fig::gui
 		SetSize(newWidth, newHeight);
 	}
 
-	void StaticText::SetTextAndResize(fig::string text, Coord& newWidth, Coord& newHeight)
+	void StaticText::SetTextAndResize(const fig::string& text, Coord& newWidth, Coord& newHeight)
 	{
 		_text = text;
 		_bInvalidated = false;
