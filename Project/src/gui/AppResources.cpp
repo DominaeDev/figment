@@ -30,6 +30,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ROUNDED_BACKGROUND_10PX, "./resources/gui/rounded_bg_10px.png");
 		LoadTexture(pRenderer, TextureType::ROUNDED_BORDER_10PX, "./resources/gui/rounded_border_10px.png");
 		LoadTexture(pRenderer, TextureType::SUBMENU_ARROW , "./resources/gui/submenu_arrow.png");
+		LoadTexture(pRenderer, TextureType::BACKGROUND_CIRCLE_48PX , "./resources/gui/circle_48.png");
 
 		// Icons
 		LoadTexture(pRenderer, TextureType::ICON_ERROR, "./resources/gui/icons/icon_error_2.png");
@@ -62,6 +63,11 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_UNSTAR, "./resources/gui/icons/icon_unstar.png");
 		LoadTexture(pRenderer, TextureType::ICON_HIDE, "./resources/gui/icons/icon_hide.png");
 		LoadTexture(pRenderer, TextureType::ICON_UNHIDE, "./resources/gui/icons/icon_unhide.png");
+		LoadTexture(pRenderer, TextureType::ICON_PLAY, "./resources/gui/icons/icon_play.png");
+		LoadTexture(pRenderer, TextureType::ICON_PAUSE, "./resources/gui/icons/icon_pause.png");
+		LoadTexture(pRenderer, TextureType::ICON_STOP, "./resources/gui/icons/icon_stop.png");
+		LoadTexture(pRenderer, TextureType::ICON_EJECT, "./resources/gui/icons/icon_eject.png");
+		LoadTexture(pRenderer, TextureType::ICON_SPINNER, "./resources/gui/icons/icon_spinner.png");
 		
 		LoadTexture(pRenderer, TextureType::ICON_BORDER_01, "./resources/gui/card/borders/icon_border_01.png");
 		LoadTexture(pRenderer, TextureType::ICON_BORDER_02, "./resources/gui/card/borders/icon_border_02.png");

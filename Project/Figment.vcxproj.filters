@@ -512,6 +512,12 @@
     <ClCompile Include="src\llm\ChatStaging.cpp">
       <Filter>Source Files\Backend\Chat</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\LoadModelWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\PlayButton.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1212,6 +1218,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\KeyboardMods.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\LoadModelWidget.h">
+      <Filter>Source Files\Frontend\GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\PlayButton.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -332,7 +332,7 @@ namespace fig::gui
 			engine.Initialize(fig::string(Constants::DefaultModelLocation),
 				Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
 				[this](int percent) {
-					SetStatusBar(std::format(fig::strings::Status::LoadingModelPercentFmt, percent));
+					PushEvent(EventType::LLMModelLoadingProgress, percent);
 				},
 				[this, &engine](bool bSuccess) {
 					if (bSuccess)

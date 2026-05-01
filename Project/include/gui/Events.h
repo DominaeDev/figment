@@ -15,6 +15,7 @@ namespace fig::gui
 
 		LLMStatusUpdate,
 		LLMModelLoading,
+		LLMModelLoadingProgress,
 		LLMModelLoaded,
 		LLMModelLoadFailure,
 		LLMModelUnloaded,

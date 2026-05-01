@@ -198,6 +198,11 @@ namespace fig::util
 		return std::fabs(a - b) <= std::numeric_limits<float>::epsilon() * std::max(std::fabs(a), std::fabs(b));
 	}
 
+	inline bool dbl_eq(double a, double b) noexcept
+	{
+		return std::abs(a - b) <= std::numeric_limits<double>::epsilon() * std::max(std::abs(a), std::abs(b));
+	}
+
 #if _DEBUG || _CONSOLE
 	#define DEBUG_MEASURE_BEGIN(LABEL) fig::util::MeasureTime((LABEL), [&](){
 	#define DEBUG_MEASURE_END() });

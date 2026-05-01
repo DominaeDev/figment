@@ -4,6 +4,7 @@
 #include "gui/MainFrame.h"
 #include "gui/SidePanelButton.h"
 #include "gui/UserProfileWidget.h"
+#include "gui/LoadModelWidget.h"
 #include "gui/LineBorderRenderer.h"
 #include "gui/Menu.h"
 #include "model/GlobalStrings.h"
@@ -69,19 +70,19 @@ namespace fig::gui
 		auto pFooterPanel = new Area(this);
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);
 
+		_pModelWidget = new LoadModelWidget(pFooterPanel);
+		_pModelWidget->SetHeight(60);
+		_pModelWidget->SetMaxSize(-1, 60);
+
 		_pUserWidget = new UserProfileWidget(pFooterPanel);
 		_pUserWidget->SetHeight(60);
-
-		auto pFooterSizer = new VerticalSizer();
-		pFooterSizer->AddStretchSpacer();
-		pFooterSizer->Add(_pUserWidget, 0, Sizer::Expand);
-		pFooterPanel->SetSizer(pFooterSizer);
 		
 		auto pTopSizer = new VerticalSizer();
-		pTopSizer->Add(pHeaderPanel, 0, Sizer::Expand);
+		pTopSizer->Add(pHeaderPanel, 0, Sizer::Expand | Sizer::Fill);
 		pTopSizer->Add(pMainArea, -1, Sizer::Fill);
-		pTopSizer->Add(pFooterPanel, 0, Sizer::Expand);
-		
+		pTopSizer->Add(_pModelWidget, 0, Sizer::Expand);
+		pTopSizer->Add(_pUserWidget, 0, Sizer::Expand);
+
 		SetSizer(pTopSizer);
 
 		SetBorderRenderer(new LineBorderRenderer(Colors::LineColor, { Direction::East }));

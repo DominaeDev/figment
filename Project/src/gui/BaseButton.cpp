@@ -44,7 +44,7 @@ namespace fig::gui
 			auto motionEvent = event.motion;
 			if (is_inside(rect, toI(motionEvent.x), toI(motionEvent.y), _expand))
 			{
-				if (not _bMouseInside)
+				if (not _bMouseInside and _state != ButtonState::Pressed)
 				{
 					SetButtonState(ButtonState::Hover);
 					_bMouseInside = true;
@@ -53,7 +53,7 @@ namespace fig::gui
 			}
 			else
 			{
-				if (_bMouseInside)
+				if (_bMouseInside or _state == ButtonState::Pressed)
 				{
 					SetButtonState(ButtonState::Default);
 					_bMouseInside = false;

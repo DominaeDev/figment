@@ -14,7 +14,7 @@ namespace fig::gui
 	class StaticText;
 	class ButtonWithIcon;
 
-	class UserProfileWidget : public Area
+	class UserProfileWidget : public Panel
 	{
 	public:
 		UserProfileWidget(LayoutElement* pParent) noexcept;

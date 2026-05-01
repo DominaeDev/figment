@@ -21,7 +21,7 @@ namespace fig::strings
 		inline constexpr fig::const_string FailedToInitializeChat = 
 			"Failed to initialize chat";
 		inline constexpr fig::const_string ModelLoaded = 
-			"Model loaded";
+			"Model loaded successfully";
 		inline constexpr fig::const_string ModelUnloaded = 
 			"Model unloaded";
 		inline constexpr fig::const_string FailedToLoadModel = 
@@ -38,6 +38,18 @@ namespace fig::strings
 	{
 		inline constexpr fig::const_string DefaultUser =
 			"Default User";
+	}
+
+	namespace LoadModelWidget
+	{
+		inline constexpr fig::const_string ModelLoading =
+			"Loading...";
+		inline constexpr fig::const_string ModelLoaded =
+			"Ready";
+		inline constexpr fig::const_string ModelUnloaded =
+			"Not ready";
+		inline constexpr fig::const_string ModelError =
+			"Load error";
 	}
 
 	namespace UI

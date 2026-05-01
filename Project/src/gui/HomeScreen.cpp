@@ -187,9 +187,9 @@ namespace fig::gui
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
 		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::CreatedAt); });
-		menu.AddCheckItem("Sort by update date", sortBy == SortBy::UpdatedAt)
+		menu.AddCheckItem("Sort by modified date", sortBy == SortBy::UpdatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::UpdatedAt); });
-		menu.AddCheckItem("Sort by chats", sortBy == SortBy::ChatCount)
+		menu.AddCheckItem("Sort by chat count", sortBy == SortBy::ChatCount)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::ChatCount); });
 		menu.AddSeparator();
 		menu.AddCheckItem("Ascending", orderBy == OrderBy::Ascending)
@@ -313,7 +313,7 @@ namespace fig::gui
 				_pCardList->ResetScroll();
 			});
 		menu.AddSeparator();
-		menu.AddItem("Reset filter")
+		menu.AddItem("Clear filter")
 			.SetDelegate([=, this] { 
 				SetFilter(DefaultFilterFlags);
 			});

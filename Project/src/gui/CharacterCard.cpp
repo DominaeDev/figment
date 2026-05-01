@@ -120,8 +120,8 @@ namespace fig::gui
 		menu.AddSeparator();
 		menu.AddItem("View / Edit\u2026");
 		menu.AddItem("Clone\u2026");
-		menu.AddItem("Move to folder\u2026");
 		menu.AddItem("Export\u2026");
+		menu.AddItem("Move to folder\u2026");
 		menu.AddSeparator();
 		auto& borderMenu = menu.AddItem("Set border");
 			borderMenu.AddCheckItem("No border", _metaData.borderStyle == CardBorderStyle::None)

@@ -2,6 +2,9 @@
 #include "gui/Image.h"
 #include "gui/GUIUtility.h"
 #include "gui/AppResources.h"
+#include "util/Common.h"
+
+using namespace fig::util;
 
 namespace fig::gui
 {
@@ -46,15 +49,23 @@ namespace fig::gui
 			else
 				SDL_SetTextureAlphaMod(_pTexture, 0xFF);
 
-			SDL_RenderTexture(pRenderer, _pTexture, NULL, &rect);
+			if (dbl_eq(_angle, 0.0))
+				SDL_RenderTexture(pRenderer, _pTexture, NULL, &rect);
+			else
+				SDL_RenderTextureRotated(pRenderer, _pTexture, NULL, &rect, _angle, NULL, SDL_FLIP_NONE);
 		}
 	}
 
-	void Image::SetTexture(Texture* pTexture, bool bResize)
+	void Image::SetTexture(TexturePtr pTexture, bool bResize)
 	{
 		_pTexture = pTexture;
 		if (bResize and pTexture)
 			SetSize(pTexture->w, pTexture->h);
+	}
+
+	void Image::SetTexture(TextureType texture, bool bResize)
+	{
+		SetTexture(AppResources::GetTexture(texture), bResize);
 	}
 
 	Point Image::GetTextureSize() const noexcept

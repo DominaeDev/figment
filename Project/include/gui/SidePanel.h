@@ -13,6 +13,7 @@ namespace fig::gui
 {
 	class ButtonWithIcon;
 	class UserProfileWidget;
+	class LoadModelWidget;
 
 	class SidePanel : public Control
 	{
@@ -27,6 +28,7 @@ namespace fig::gui
 	private:
 		LayoutElement* _pGradient;
 		UserProfileWidget* _pUserWidget;
+		LoadModelWidget* _pModelWidget;
 		ButtonWithIcon* _pMenuButton;
 	};
 }
