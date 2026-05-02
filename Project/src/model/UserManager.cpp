@@ -126,7 +126,7 @@ namespace fig::user
 				};
 
 				auto code = RecoveryKeyToCode(recoveryKey);
-				LogLn(std::format("Recovery code for user {}: {}", profile.id.str(), code));
+				LogLn(std::format("Recovery code for user {}: {}", profile.id.to_str(), code));
 			}
 		}
 

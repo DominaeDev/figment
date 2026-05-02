@@ -17,8 +17,8 @@ namespace fig::gui
 
 		void SetSession(fig::io::ChatSession session) { _session = session; }
 
-		void AddDummyMessage(fig::string name, Role role, MessageType msgType, fig::string message);
-		void AddSystemMessage(fig::string message);
+		void AddDummyMessage(StringCRef name, Role role, MessageType msgType, StringCRef message);
+		void AddSystemMessage(StringCRef message);
 
 		int RemoveMessages(std::span<fig::string> ids);
 		void ClearMessages();
@@ -32,7 +32,7 @@ namespace fig::gui
 		void OnAddedChild(LayoutElement* pChild) override;
 
 	private:
-		ChatMessage* AddMessage(fig::string name, Role role, MessageType msgType, fig::string message, bool complete);
+		ChatMessage* AddMessage(const fig::uuid& characterId, Role role, MessageType msgType, StringCRef message, bool complete);
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
 		void EnablePolling(bool bEnable);
 		void Poll();
@@ -45,12 +45,13 @@ namespace fig::gui
 
 		struct MessageEntry
 		{
-			fig::string characterId;
-			Role role;
+			fig::uuid characterId;
+			fig::string chatId;
+			Role role { Role::Undefined };
 			fig::string responseId;
 			fig::string subMessageId;
-			MessageType msgType;
-			ChatMessage* pChatMessage;
+			MessageType msgType { MessageType::Undefined };
+			ChatMessage* pChatMessage {};
 		};
 		std::vector<MessageEntry> _messages {};
 		std::map<fig::string, MessageEntry*> _messagesById {}; // Sub-message id

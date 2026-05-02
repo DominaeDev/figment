@@ -68,6 +68,8 @@ namespace Constants
 			constexpr fig::const_string Director = "Director";
 			constexpr fig::const_string Unknown = "Unknown";
 		}
+
+		constexpr fig::gui::Coord SmallPortraitWidth = 52;
 	}
 
 	// Sizes
@@ -151,5 +153,10 @@ namespace Constants
 	{
 		constexpr const char* const Gender = "gender";
 
+	}
+
+	namespace Data
+	{
+		constexpr int32_t SmallPortraitWidth = 128;
 	}
 }

@@ -61,7 +61,9 @@ namespace fig::gui
 		{
 			if (_fScrollY != _fTargetScrollY)
 			{
-				_fScrollY += (_fTargetScrollY - _fScrollY) * std::min(Constants::GUI::MouseScrollSmoothing * fElapsed, 1.0f);
+				_fScrollY += (_fTargetScrollY - _fScrollY) 
+					* Constants::GUI::MouseScrollSmoothing 
+					* std::min(fElapsed, 1.0f/30.0f); // Avoids stutter, overshooting at low frame rates
 
 				if (std::abs(_fTargetScrollY - _fScrollY) < 0.5f)
 					_fScrollY = _fTargetScrollY;

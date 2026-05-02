@@ -15,19 +15,35 @@ using namespace fig::util;
 
 namespace fig::gui
 {
-	fig::sdl::Surface LoadImageFromMemory(fig::byte_span data)
+	fig::sdl::Texture CreateTexture(RendererPtr pRenderer, SurfacePtr pSurface)
 	{
-		SDL_IOStream* io = SDL_IOFromConstMem(data.data(), data.size());
-		if (!io)
-			return {};
-
-		SDL_Surface* pSurface = IMG_Load_IO(io, true);
 		if (!pSurface)
 			return {};
 
-		fig::sdl::Surface surface;
-		surface.reset(pSurface);
-		return surface; // rvo
+		auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+		return fig::sdl::Texture::from_ptr(pTexture);
+	}
+
+	fig::sdl::Texture CreateTexture(RendererPtr pRenderer, const fig::sdl::Surface& surface)
+	{
+		if (surface.empty())
+			return {};
+
+		auto pTexture = SDL_CreateTextureFromSurface(pRenderer, surface.get());
+		return fig::sdl::Texture::from_ptr(pTexture);
+	}
+
+	std::optional<fig::sdl::Surface> LoadImageFromMemory(fig::byte_span data)
+	{
+		SDL_IOStream* io = SDL_IOFromConstMem(data.data(), data.size());
+		if (!io)
+			return std::nullopt;
+
+		SDL_Surface* pSurface = IMG_Load_IO(io, true);
+		if (!pSurface)
+			return std::nullopt;
+
+		return fig::sdl::Surface::from_ptr(pSurface);
 	}
 
 	std::optional<fig::sdl::Surface> LoadImage(fig::path filename)
@@ -88,6 +104,24 @@ namespace fig::gui
 			fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
 			fig::gui::Rect dstRect { 0, 0, width, height };
 			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
+		}
+		else if (fit == ImageFit::SquarePortrait)
+		{
+			if (pImage->w < 128 or pImage->h < 128)
+			{
+				fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
+				fig::gui::Rect dstRect { 0, 0, width, height };
+				SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
+			}
+			else
+			{
+				constexpr float fContract = 0.05f;
+				float size = std::max(toF(pImage->w) * (1.0f - 2.0f * fContract), 128.0f);
+				float offset = std::min(toF(pImage->w) * fContract, std::max(toF(pImage->h) - toF(pImage->w) * fContract, 0.0f));
+				fig::gui::Rect srcRect { toI(offset), toI(offset), toI(size), toI(size) };
+				fig::gui::Rect dstRect { 0, 0, width, height };
+				SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
+			}
 		}
 		else
 		{
@@ -249,6 +283,21 @@ namespace fig::gui
 		return cover;
 	}
 
+	fig::sdl::Surface CreateSquarePortrait(const fig::sdl::Surface& surface)
+	{
+		auto pSurface = SDL_CreateSurface(Constants::Data::SmallPortraitWidth, Constants::Data::SmallPortraitWidth, SDL_PIXELFORMAT_RGB24);
+		if (not (bool)pSurface)
+			return {};
+
+		// Draw background
+		auto pBGImage = AppResources::GetImage(TextureType::SQUARE_BACKGROUND_DEFAULT);
+		SDL_BlitSurface(pBGImage, NULL, pSurface, NULL);
+
+		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->w, ImageFit::SquarePortrait, true);
+		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
+		return fig::sdl::Surface::from_ptr(pSurface);
+	}
+
 	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface)
 	{
 		auto pSurface = SDL_CreateSurface(Constants::GUI::ProfileImageWidth, Constants::GUI::ProfileImageWidth, SDL_PIXELFORMAT_RGBA8888);
@@ -258,10 +307,22 @@ namespace fig::gui
 		return ScaleSurface(surface, Constants::GUI::ProfileImageWidth, Constants::GUI::ProfileImageWidth, ImageFit::Portrait);
 	}
 
-	fig::sdl::Surface SurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data)
+	fig::sdl::Surface CreateSurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data)
 	{
 		if (width <= 0 || height <= 0 || format == ImageFormat::Undefined)
 			return {};
+
+		int depth;
+		switch (format)
+		{
+			case ImageFormat::RGB24: depth = 3; break;
+			case ImageFormat::RGBA32: depth = 4; break;
+			default:
+				return {}; // Error
+		}
+
+		if (toUZ(width * height * depth) != data.size())
+			return {}; // Invalid data length
 
 		try
 		{
@@ -270,16 +331,13 @@ namespace fig::gui
 			if (!pSurface)
 				return {};
 
-			if (pSurface->pitch * pSurface->h != data.size())
-				return {}; // Invalid data length
-
 			// Write pixel data
 			if (SDL_LockSurface(pSurface))
 			{
 				std::memcpy(pSurface->pixels, data.data(), data.size());
 				SDL_UnlockSurface(pSurface);
 
-				return std::move(fig::sdl::Surface::create_and_claim(pSurface));
+				return std::move(fig::sdl::Surface::from_ptr(pSurface));
 			}
 		}
 		catch (...)

@@ -174,7 +174,7 @@ namespace fig::io
 
 		auto stmt = _sqlStatements[SQL::CreateProfile];
 
-		sqlite3_bind_text(stmt, 1, profile.id.str().c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_text(stmt, 1, profile.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 		sqlite3_bind_int(stmt, 2, profile.version);
 		sqlite3_bind_text(stmt, 3, profile.name.c_str(), -1, SQLITE_STATIC);
 		sqlite3_bind_text(stmt, 4, "{}", -1, SQLITE_STATIC);
@@ -206,7 +206,7 @@ namespace fig::io
 		sqlite3_bind_text(stmt, 3, "{}", -1, SQLITE_STATIC);
 		sqlite3_bind_int(stmt, 4, profile.has_password ? 1 : 0);
 		sqlite3_bind_blob(stmt, 5, &profile.auth, sizeof(fig::auth::UserAuth), SQLITE_STATIC);
-		sqlite3_bind_text(stmt, 6, profile.id.str().c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_text(stmt, 6, profile.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 
 		int rc = sqlite3_step(stmt);
 		sqlite3_reset(stmt);

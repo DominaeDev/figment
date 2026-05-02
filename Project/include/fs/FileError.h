@@ -8,8 +8,8 @@ namespace fig::io
 	{
 		NoError = 0,
 		UnknownError,
-		FileNotFound,
-		FileAccessError,
+		NotFound,
+		AccessDenied,
 		DirectoryDoesNotExist,
 		UnrecognizedFormat,
 		ReadError,

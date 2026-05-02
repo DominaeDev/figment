@@ -234,7 +234,7 @@ namespace fig::io
 		fig::string GetFileName() const noexcept
 		{
 			return std::format("{0}.{1}",
-				asset_id.str()
+				asset_id.to_str()
 				| std::ranges::views::filter([](char c) { return c != '-'; })
 				| std::ranges::to<fig::string>(),
 				fig::string(Constants::Paths::AssetFileExt));

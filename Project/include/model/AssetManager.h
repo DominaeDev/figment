@@ -19,7 +19,7 @@ namespace fig::user
 
 namespace fig::io
 {
-	class CharacterData;
+	struct CharacterData;
 
 	using AsyncResult_Image		= fig::sdl::Surface;
 	using AsyncResult_CoverPair	= std::pair<fig::sdl::Surface, fig::sdl::Surface>;

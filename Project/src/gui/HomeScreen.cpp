@@ -183,7 +183,7 @@ namespace fig::gui
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 		menu.AddCheckItem("Sort alphabetically", sortBy == SortBy::Name)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::Name); });
-		menu.AddCheckItem("Sort by recency", sortBy == SortBy::LastUsedAt)
+		menu.AddCheckItem("Sort by last chat", sortBy == SortBy::LastUsedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
 		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::CreatedAt); });

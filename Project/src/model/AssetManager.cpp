@@ -326,7 +326,7 @@ namespace fig::io
 				asset.FromFile(std::move(file.value()));
 				asset.file_status = AssetFileStatus::PartiallyLoaded;
 			}
-			else if (file.error() == FileError::FileNotFound)
+			else if (file.error() == FileError::NotFound)
 				asset.file_status = AssetFileStatus::Missing;
 			else
 				asset.file_status = AssetFileStatus::Invalid; // Failed to load for some reason, but the file exists.
@@ -382,7 +382,7 @@ namespace fig::io
 		std::scoped_lock lock { _assetsMutex };
 		auto itFind = _assets.find(id);
 		if (itFind == _assets.cend())
-			return std::unexpected(FileError::FileNotFound);
+			return std::unexpected(FileError::NotFound);
 
 		Asset& asset = itFind->second;
 		if (asset.file_status == AssetFileStatus::FullyLoaded)
@@ -565,14 +565,25 @@ namespace fig::io
 				auto& portraitAsset = CreateImageAsset_Internal(ImageType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
 
 				// Create cover card
-				if (auto coverImage = LoadImage(filename)
+				if (auto coverImage = LoadImage(filename) //! @todo: load only once
 					.transform([](auto img) {
-					return CreateCoverImage(img, false);
-				}))
+						return CreateCoverImage(img, false);
+					}))
 				{
 					// Save cover asset (bitmap)
 					auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage.value(), characterAsset.id);
 					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+				}
+
+				// Create square portrait
+				if (auto squarePortraitImage = LoadImage(filename) //! @todo: load only once
+					.transform([](auto img) {
+						return CreateSquarePortrait(img);
+					}))
+				{
+					// Save square portrait asset (bitmap)
+					auto& squarePortraitAsset = CreateImageAsset_Internal(ImageType::SmallPortrait, squarePortraitImage.value(), characterAsset.id);
+					squarePortraitAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 				}
 			}
 
@@ -727,11 +738,11 @@ namespace fig::io
 			{
 				if (auto image = LoadImageFromMemory(imageAsset.data))
 				{
-					outResult.emplace<fig::sdl::Surface>(std::move(image));
+					outResult.emplace<AsyncResult_Image>(std::move(image.value()));
 					return AsyncLoadError::NoError;
 				}
 			}
-			else if (result == FileError::FileNotFound)
+			else if (result == FileError::NotFound)
 				return AsyncLoadError::FileNotFound;
 			else
 				return AsyncLoadError::LoadError;
@@ -749,7 +760,7 @@ namespace fig::io
 		{
 			Asset& cover = findCover.value();
 			auto result = LoadAsset(cover);
-			if (result == FileError::FileNotFound)
+			if (result == FileError::NotFound)
 				return AsyncLoadError::FileNotFound;
 			else if (result != FileError::NoError)
 				return AsyncLoadError::LoadError;
@@ -769,7 +780,7 @@ namespace fig::io
 					{
 						if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
 						{
-							auto coverImage = ScaleSurface(portraitImage, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait);
+							auto coverImage = ScaleSurface(portraitImage.value(), Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait);
 
 							// Save cover asset (bitmap)
 							{

@@ -80,7 +80,7 @@ namespace fig::gui
 					| std::ranges::to<std::vector>();
 				content.GetAssetManager().DeleteAssets(remove_characters);
 
-				auto _ignored = content.ImportCharactersInDirectory(fig::path("./import/characters"));
+				content.ImportCharactersInDirectory(fig::path("./import/characters"));
 				userMngr.SignOut();
 			}
 		}

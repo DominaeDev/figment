@@ -108,7 +108,7 @@ namespace fig::io
 	FileError ScenarioData::LoadFromXml(const fig::path& path)
 	{
 		if (not (std::filesystem::exists(path) and std::filesystem::is_regular_file(path)))
-			return FileError::FileNotFound;
+			return FileError::NotFound;
 
 		XmlReader xml(path, "Scenario");
 		if (not xml.IsOk())

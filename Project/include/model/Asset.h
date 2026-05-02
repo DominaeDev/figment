@@ -111,7 +111,7 @@ namespace fig::io
 
 		fig::path GetFileName() const noexcept
 		{
-			return fig::path(id.str()
+			return fig::path(id.to_str()
 				| std::ranges::views::filter([](char c) { return c != '-'; })
 				| std::ranges::to<fig::string>());
 		}

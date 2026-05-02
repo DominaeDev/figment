@@ -223,7 +223,7 @@ namespace stdex
 			return ptr;
 		}
 
-		static constexpr c_resource create_and_claim(pointer ptr) noexcept
+		static constexpr c_resource from_ptr(pointer ptr) noexcept
 		{
 			c_resource r {};
 			r.reset(ptr);

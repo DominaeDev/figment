@@ -17,7 +17,8 @@ namespace fig::io
 		bool AssignRole(Role role, const CharacterData& character);
 
 		std::optional<CharacterData> GetCharacter(Role role) const noexcept;
-		std::optional<CharacterData> GetCharacterById(const fig::string& characterId) const noexcept;
+		std::optional<CharacterData> GetCharacterById(const fig::uuid& id) const noexcept;
+		std::optional<CharacterData> GetCharacterByChatId(const fig::string& characterId) const noexcept;
 		std::optional<CharacterData> GetCharacterByName(const fig::string& name) const noexcept;
 		const std::map<Role, CharacterData>& GetCharacters() const noexcept { return _characters; }
 
@@ -29,7 +30,7 @@ namespace fig::io
 		inline int32_t GetBotCount() const noexcept { return _numBots; }
 		inline bool IsGroupChat() const noexcept { return _numBots > 1; }
 		
-		fig::string GetIdentifierOf(Role role) const;
+		fig::string GetChatIdOf(Role role) const;
 		fig::string GetNameOf(Role role) const;
 		fig::string GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const;
 		fig::gui::ColorPair GetColorsOf(Role role) const;

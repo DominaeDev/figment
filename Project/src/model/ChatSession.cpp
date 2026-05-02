@@ -13,14 +13,20 @@ namespace fig::io
 		_staging = staging;
 	}
 
+	fig::uuid ChatSession::GetCharacterIdOf(Role role) const
+	{
+		if (auto try_character = _staging.GetCharacter(role))
+			return try_character.value().assetId;
+		return {};
+	}
+
 	fig::string ChatSession::GetIdentifierOf(Role role) const
 	{
 		if (role == Role::User)
 			return "USR";
 
-		auto optCharacter = _staging.GetCharacter(role);
-		if (optCharacter.has_value())
-			return ucase(optCharacter.value().characterId);
+		if (auto try_character = _staging.GetCharacter(role))
+			return ucase(try_character.value().chatId);
 		return "_UNK";
 	}
 

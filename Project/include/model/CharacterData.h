@@ -23,10 +23,10 @@ namespace fig::io
 		Custom,
 	};
 
-	class CharacterData
+	struct CharacterData
 	{
-	public:
-		fig::string characterId; // Chat id
+		fig::uuid assetId;
+		fig::string chatId;
 		fig::string shortName;
 		fig::string fullName;
 		fig::string subheader;

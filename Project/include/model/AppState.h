@@ -24,6 +24,11 @@ namespace fig::user
 	class UserManager;
 }
 
+namespace fig::io
+{
+	class UserContentManager;
+}
+
 namespace fig::llm
 {
 	class LLMBackend;
@@ -49,8 +54,10 @@ namespace fig
 
 		static fig::gui::Window& GetMainWindow();
 		static fig::llm::LLMBackend& GetLLMEngine();
-		static fig::user::UserManager& GetUserManager();
 		static fig::AppSettings& GetSettings();
+		
+		static fig::user::UserManager& GetUserManager();
+		static fig::io::UserContentManager& GetUserContent();
 		static fig::UserSettings& GetUserSettings();
 
 		[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();

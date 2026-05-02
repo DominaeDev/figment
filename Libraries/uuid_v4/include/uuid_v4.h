@@ -209,21 +209,21 @@ public:
 	}
 
 	/* Converts the uuid to its string representation */
-	std::string str() const
+	std::string to_str() const
 	{
 		std::string mem;
-		to_str(mem);
+		_to_str(mem);
 		return mem;
 	}
 
 private:
-	void to_str(std::string& s) const
+	void _to_str(std::string& s) const
 	{
 		s.resize(36);
-		to_str((char*)s.data());
+		_to_str((char*)s.data());
 	}
 
-	void to_str(char* res) const
+	void _to_str(char* res) const
 	{
 		__m128i x = _mm_load_si128((__m128i*)data);
 		m128itos(x, res);
@@ -242,7 +242,7 @@ public:
 
 	friend std::ostream& operator<< (std::ostream& stream, const UUID& uuid)
 	{
-		return stream << uuid.str();
+		return stream << uuid.to_str();
 	}
 
 	friend std::istream& operator>> (std::istream& stream, UUID& uuid)

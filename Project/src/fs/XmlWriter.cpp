@@ -47,7 +47,7 @@ namespace fig::io
 
 	XmlWriterAttribute& XmlWriterAttribute::operator=(const fig::uuid& value) noexcept
 	{
-		_pParent->SetAttribute(_name.c_str(), value.str().c_str());
+		_pParent->SetAttribute(_name.c_str(), value.to_str().c_str());
 		return *this;
 	}
 
@@ -94,7 +94,7 @@ namespace fig::io
 	void XmlWriterElement::SetValue(const fig::uuid& value) noexcept
 	{
 		DeleteValue();
-		_pElement->InsertNewText(value.str().c_str());
+		_pElement->InsertNewText(value.to_str().c_str());
 	}
 
 	void XmlWriterElement::SetValue(std::span<const fig::string> values) noexcept
@@ -130,7 +130,7 @@ namespace fig::io
 
 	void XmlWriterElement::SetAttribute(const fig::string& name, const fig::uuid& value) noexcept
 	{
-		_pElement->SetAttribute(name.c_str(), value.str().c_str());
+		_pElement->SetAttribute(name.c_str(), value.to_str().c_str());
 	}
 
 	void XmlWriterElement::SetAttribute(const fig::string& name, std::span<const fig::string> values) noexcept

@@ -27,6 +27,8 @@ namespace fig::io
 
 		std::optional<CardMetaDataRef> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
 
+		std::expected<fig::sdl::TextureRef, FileError> GetSmallPortraitForCharacter(fig::gui::RendererPtr pRenderer, const fig::uuid& characterId) noexcept;
+
 		bool MarkNew(const fig::uuid& assetId, bool value = true);
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);
@@ -45,6 +47,8 @@ namespace fig::io
 		std::map<fig::uuid, fig::io::CharacterData> _characters;
 		std::map<fig::uuid, fig::io::ScenarioData> _scenarios;
 		std::map<fig::uuid, fig::io::CardMetaData> _metaData;
+		std::map<fig::uuid, fig::sdl::Surface> _surfaces;
+		std::map<fig::uuid, fig::sdl::Texture> _textures;
 
 		template <CardMetaData::Flag E>
 		bool MarkFlag(const fig::uuid& assetId, bool value);

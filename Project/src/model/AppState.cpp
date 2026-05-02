@@ -126,6 +126,12 @@ namespace fig
 		return *(__appState->pUserManager.get());
 	}
 
+	fig::io::UserContentManager& Global::GetUserContent()
+	{
+		assert(__appState);
+		return GetUserManager().GetContent();
+	}
+
 	fig::UserSettings& Global::GetUserSettings()
 	{
 		assert(__appState);

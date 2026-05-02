@@ -11,6 +11,7 @@ namespace fig::io
 
 		inline const ChatStaging& GetStaging() const noexcept { return _staging; }
 
+		fig::uuid GetCharacterIdOf(Role role) const;
 		fig::string GetIdentifierOf(Role role) const;
 		fig::string GetNameOf(Role role) const;
 		fig::string GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const;

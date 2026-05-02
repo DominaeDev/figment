@@ -47,7 +47,7 @@ namespace fig::util
 	fig::uuid CreateUUID();
 	inline fig::string CreateStrUUID()
 	{
-		return CreateUUID().str();
+		return CreateUUID().to_str();
 	}
 
 	fig::string Base64Encode(fig::byte_span data) noexcept;

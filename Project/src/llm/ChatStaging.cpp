@@ -74,9 +74,9 @@ namespace fig::io
 	{
 		auto& character = _characters[role] = characterData;
 		if (role == Role::User)
-			character.characterId = "USR";
+			character.chatId = "USR";
 		if (is_bot(role))
-			_numBots = static_cast<int32_t>(std::count_if(_characters.begin(), _characters.end(), [](auto kvp) { return is_bot(kvp.first); }));
+			_numBots = static_cast<int32_t>(std::count_if(_characters.begin(), _characters.end(), [](auto& kvp) { return is_bot(kvp.first); }));
 		return true;
 	}
 
@@ -88,14 +88,25 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<CharacterData> ChatStaging::GetCharacterById(const fig::string& identifier) const noexcept
+	std::optional<CharacterData> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
 	{
 		if (identifier.empty() || _characters.empty())
 			return std::nullopt;
 
 		auto itFind = std::find_if(_characters.begin(), _characters.end(), [identifier](const auto& kvp) {
-			return equals(kvp.second.characterId, identifier, true);
+			return equals(kvp.second.chatId, identifier, true);
 		});
+		if (itFind != _characters.end())
+			return itFind->second;
+		return std::nullopt;
+	}
+
+	std::optional<CharacterData> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
+	{
+		if (_characters.empty())
+			return std::nullopt;
+
+		auto itFind = std::find_if(_characters.begin(), _characters.end(), [&id](const auto& kvp) { return kvp.second.assetId == id; });
 		if (itFind != _characters.end())
 			return itFind->second;
 		return std::nullopt;
@@ -120,20 +131,20 @@ namespace fig::io
 			return Role::Undefined;
 
 		auto itFind = std::find_if(_characters.begin(), _characters.end(), [characterId](const auto& kvp) {
-			return equals(kvp.second.characterId, characterId, true) || equals(kvp.second.shortName, characterId, true);
+			return equals(kvp.second.chatId, characterId, true) || equals(kvp.second.shortName, characterId, true);
 		});
 		if (itFind != _characters.end())
 			return itFind->first;
 		return Role::Undefined;
 	}
 
-	fig::string ChatStaging::GetIdentifierOf(Role role) const
+	fig::string ChatStaging::GetChatIdOf(Role role) const
 	{
 		if (role == Role::User)
 			return "USR";
 		auto optCharacter = GetCharacter(role);
 		if (optCharacter.has_value())
-			return ucase(optCharacter.value().characterId);
+			return ucase(optCharacter.value().chatId);
 		return "_UNK";
 	}
 
@@ -252,15 +263,15 @@ namespace fig::io
 		replace_all_inplace(s, "{{char7:name}}", GetNameOf(Role::Bot7));
 		replace_all_inplace(s, "{{char8:name}}", GetNameOf(Role::Bot8));
 
-		replace_all_inplace(s, "{{user:id}}", GetIdentifierOf(Role::User));
-		replace_all_inplace(s, "{{char1:id}}", GetIdentifierOf(Role::Bot1));
-		replace_all_inplace(s, "{{char2:id}}", GetIdentifierOf(Role::Bot2));
-		replace_all_inplace(s, "{{char3:id}}", GetIdentifierOf(Role::Bot3));
-		replace_all_inplace(s, "{{char4:id}}", GetIdentifierOf(Role::Bot4));
-		replace_all_inplace(s, "{{char5:id}}", GetIdentifierOf(Role::Bot5));
-		replace_all_inplace(s, "{{char6:id}}", GetIdentifierOf(Role::Bot6));
-		replace_all_inplace(s, "{{char7:id}}", GetIdentifierOf(Role::Bot7));
-		replace_all_inplace(s, "{{char8:id}}", GetIdentifierOf(Role::Bot8));
+		replace_all_inplace(s, "{{user:id}}", GetChatIdOf(Role::User));
+		replace_all_inplace(s, "{{char1:id}}", GetChatIdOf(Role::Bot1));
+		replace_all_inplace(s, "{{char2:id}}", GetChatIdOf(Role::Bot2));
+		replace_all_inplace(s, "{{char3:id}}", GetChatIdOf(Role::Bot3));
+		replace_all_inplace(s, "{{char4:id}}", GetChatIdOf(Role::Bot4));
+		replace_all_inplace(s, "{{char5:id}}", GetChatIdOf(Role::Bot5));
+		replace_all_inplace(s, "{{char6:id}}", GetChatIdOf(Role::Bot6));
+		replace_all_inplace(s, "{{char7:id}}", GetChatIdOf(Role::Bot7));
+		replace_all_inplace(s, "{{char8:id}}", GetChatIdOf(Role::Bot8));
 
 		replace_all_inplace(s, "{{user:brief}}", GetBriefOf(Role::User));
 		replace_all_inplace(s, "{{char1:brief}}", GetBriefOf(Role::Bot1));
@@ -313,7 +324,7 @@ namespace fig::io
 					auto& character = kvp.second;
 					if (is_bot(kvp.first))
 					{
-						prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", ucase(character.characterId), character.shortName));
+						prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", ucase(character.chatId), character.shortName));
 						if (!empty_or_whitespace(character.brief))
 							prompt.append(std::format(", \"info\": \"{0}\"", character.brief));
 						prompt.append("}},\n");
@@ -371,14 +382,14 @@ namespace fig::io
 			if (i > 0)
 				pattern += "| ";
 			if (useCharacterIds)
-				pattern += std::format("| \"@{}\"", GetIdentifierOf(bot_from_index(i)));
+				pattern += std::format("| \"@{}\"", GetChatIdOf(bot_from_index(i)));
 			else
 				pattern += std::format("| \"{}\"", GetNameOf(bot_from_index(i)));
 		}
 		if (bIncludeUser)
 		{
 			if (useCharacterIds)
-				pattern += std::format("| \"@{}\"", GetIdentifierOf(Role::User));
+				pattern += std::format("| \"@{}\"", GetChatIdOf(Role::User));
 			else
 				pattern += std::format("| \"{}\"", GetNameOf(Role::User));
 		}

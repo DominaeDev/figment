@@ -9,12 +9,14 @@ using namespace fig::io;
 
 namespace fig::io
 {
+	static const fig::string XmlRootName { "Character" };
+
 	static bool ReadXml(XmlReader& xml, CharacterData& data)
 	{
 		auto rootNode = xml.GetRootElement();
 
 		// Identifier
-		data.characterId = trim(rootNode.GetElementText("ID").value_or(""));
+		data.chatId = trim(rootNode.GetElementText("ID").value_or(""));
 
 		// Name(s)
 		data.fullName = trim(rootNode.GetElementText("FullName").value_or(""));
@@ -22,8 +24,8 @@ namespace fig::io
 
 		data.subheader = trim(rootNode.GetElementText("Subheader").value_or(""));
 
-		if (data.characterId.empty())
-			data.characterId = data.shortName;
+		if (data.chatId.empty())
+			data.chatId = data.shortName;
 		if (data.fullName.empty())
 			data.fullName = data.shortName;
 
@@ -80,15 +82,15 @@ namespace fig::io
 		// Search
 		data.searchIndex.Deserialize(rootNode.GetElementText("SearchIndex").value_or(""));
 
-		return !data.characterId.empty() && !data.shortName.empty();
+		return !data.chatId.empty() && !data.shortName.empty();
 	}
 
 	FileError CharacterData::LoadFromXml(const fig::path& path)
 	{
 		if (not (std::filesystem::exists(path) and std::filesystem::is_regular_file(path)))
-			return FileError::FileNotFound;
+			return FileError::NotFound;
 
-		XmlReader xml(path, "Character");
+		XmlReader xml(path, XmlRootName);
 		if (not xml.IsOk())
 			return FileError::UnrecognizedFormat;
 
@@ -98,7 +100,7 @@ namespace fig::io
 	FileError CharacterData::LoadFromXml(const fig::string& doc)
 	{
 		XmlReader xml(doc);
-		if (not xml.IsOk() or xml.GetRootElement().GetName() != "Character")
+		if (not xml.IsOk() or xml.GetRootElement().GetName() != XmlRootName)
 			return FileError::UnrecognizedFormat;
 
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
@@ -107,7 +109,7 @@ namespace fig::io
 	FileError CharacterData::LoadFromXml(fig::string_view doc)
 	{
 		XmlReader xml(doc);
-		if (not xml.IsOk() or xml.GetRootElement().GetName() != "Character")
+		if (not xml.IsOk() or xml.GetRootElement().GetName() != XmlRootName)
 			return  FileError::UnrecognizedFormat;
 
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
@@ -115,10 +117,10 @@ namespace fig::io
 
 	void CharacterData::SaveToXml(fig::bytes& buffer) const
 	{
-		XmlWriter xml("Character");
+		XmlWriter xml(XmlRootName);
 
 		auto root = xml.GetRoot();
-		root.SetElementValue("ID", characterId);
+		root.SetElementValue("ID", chatId);
 		
 		if (not shortName.empty())
 			root.SetElementValue("FirstName", shortName);

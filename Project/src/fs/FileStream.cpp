@@ -27,10 +27,10 @@ namespace fig::io
 			{
 			case ERROR_FILE_NOT_FOUND:
 			case ERROR_PATH_NOT_FOUND:
-				_error = FileError::FileNotFound;
+				_error = FileError::NotFound;
 				break;
 			case ERROR_ACCESS_DENIED:
-				_error = FileError::FileAccessError;
+				_error = FileError::AccessDenied;
 				break;
 			default:
 				_error = FileError::UnknownError;
@@ -90,9 +90,9 @@ namespace fig::io
 			switch (err)
 			{
 			case ENOENT:
-				_error = FileError::FileNotFound;
+				_error = FileError::NotFound;
 			case EACCES:
-				_error = FileError::FileAccessError;
+				_error = FileError::AccessDenied;
 			default:
 				_error = FileError::UnknownError;
 			}

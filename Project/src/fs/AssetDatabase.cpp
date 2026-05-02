@@ -265,14 +265,14 @@ namespace fig::io
 
 		return BindAndExecute(SQL::CreateAsset, [&asset](sqlite3_stmt* stmt) {
 			/*id*/
-			sqlite3_bind_text(stmt, 1, asset.id.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 1, asset.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/*parent*/
-			sqlite3_bind_text(stmt, 2, asset.parent_id.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/*type*/
 			sqlite3_bind_text(stmt, 3, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
 			/*folder*/
 			if (not asset.folder_id.empty())
-				sqlite3_bind_text(stmt, 4, asset.folder_id.str().c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 4, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
 			/*settings*/
@@ -296,12 +296,12 @@ namespace fig::io
 
 		return BindAndExecute(SQL::UpdateAsset, [&asset](sqlite3_stmt* stmt) {
 			/*parent*/
-			sqlite3_bind_text(stmt, 1, asset.parent_id.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 1, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/*type*/
 			sqlite3_bind_text(stmt, 2, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
 			/*folder*/
 			if (not asset.folder_id.empty())
-				sqlite3_bind_text(stmt, 3, asset.folder_id.str().c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 3, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 3, nullptr, -1, SQLITE_STATIC);
 			/*settings*/
@@ -314,7 +314,7 @@ namespace fig::io
 			/*lastUsedAt*/
 			sqlite3_bind_int64(stmt, 6, static_cast<int64_t>(asset.GetLastUsedAt()));
 			/*id*/
-			sqlite3_bind_text(stmt, 7, asset.id.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 7, asset.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 		});
 
 		return DatabaseError::NoError;
@@ -327,7 +327,7 @@ namespace fig::io
 
 		return BindAndExecute(SQL::DeleteAsset, [&assetID](sqlite3_stmt* stmt) {
 			/*id*/
-			sqlite3_bind_text(stmt, 1, assetID.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 1, assetID.to_str().c_str(), -1, SQLITE_TRANSIENT);
 		});
 	}
 
@@ -338,9 +338,9 @@ namespace fig::io
 
 		return BindAndExecute(SQL::CreateFolder, [&folder](sqlite3_stmt* stmt) {
 			/*id*/
-			sqlite3_bind_text(stmt, 1, folder.id.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 1, folder.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/*parent*/
-			sqlite3_bind_text(stmt, 2, folder.parent_id.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, folder.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/*category*/
 			sqlite3_bind_text(stmt, 3, FolderCategoryToString(folder.category).c_str(), -1, SQLITE_TRANSIENT);
 			/*name*/
@@ -357,7 +357,7 @@ namespace fig::io
 
 		return BindAndExecute(SQL::DeleteFolder, [&folderID](sqlite3_stmt* stmt) {
 			/*id*/
-			sqlite3_bind_text(stmt, 1, folderID.str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 1, folderID.to_str().c_str(), -1, SQLITE_TRANSIENT);
 		});
 	}
 

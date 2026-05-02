@@ -15,7 +15,7 @@ namespace fig::io
 		{
 			std::ifstream file(filename.wstring(), std::ios::binary | std::ios::in | std::ios::ate);
 			if (!file)
-				return std::unexpected(FileError::FileNotFound);
+				return std::unexpected(FileError::NotFound);
 
 			std::streamsize size = file.tellg();
 			file.seekg(0, std::ios::beg);
@@ -55,7 +55,7 @@ namespace fig::io
 		{
 			std::ifstream file(filename.c_str(), std::ios::binary | std::ios::in | std::ios::ate);
 			if (!file)
-				return std::unexpected(FileError::FileNotFound);
+				return std::unexpected(FileError::NotFound);
 
 			std::streamsize size = file.tellg();
 			file.seekg(0, std::ios::beg);
@@ -138,11 +138,11 @@ namespace fig::io
 #if defined(_MSC_VER)
 		FILE* file = nullptr;
 		if (_wfopen_s(&file, filename.wstring().c_str(), L"rb") != 0 or !file)
-			return std::unexpected(FileError::FileNotFound);
+			return std::unexpected(FileError::NotFound);
 #else
 		FILE* file = fopen(filename.string().c_str(), "rb");
 		if (!file)
-			return std::unexpected(FileError::FileNotFound);
+			return std::unexpected(FileError::NotFound);
 #endif
 		
 		fig::string content;

@@ -6,6 +6,9 @@
 
 #include "gui/AppResources.h"
 #include "gui/OldCharacterImageStore.h"
+#include "model/AppState.h"
+#include "model/UserManager.h"
+
 #include "util/StringUtility.h"
 #include "Constants.h"
 #include <format>
@@ -38,7 +41,7 @@ using namespace fig::util;
 
 namespace fig::gui
 {
-	ChatMessage::ChatMessage(LayoutElement* pParent, Role role, fig::string characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
+	ChatMessage::ChatMessage(LayoutElement* pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
 		_name(name),
 		_messageType(msgType),
 		_role(role),
@@ -76,12 +79,15 @@ namespace fig::gui
 
 		if (_bShowAvatar)
 		{
-			Texture* pTexture = OldCharacterImageStore::GetTexture(characterId, ImageType::Portrait_Square);
+			TexturePtr pTexture = nullptr;
+			if (auto try_portrait = Global::GetUserContent().GetSmallPortraitForCharacter(GetSDLRenderer(), characterId))
+				pTexture = try_portrait.value().get().get();
+
 			if (!pTexture)
 				pTexture = OldCharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);
 
 			Image* pPortrait = new Image(this, pTexture);
-			pPortrait->SetSize(52, 52);
+			pPortrait->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitWidth);
 			pPortrait->SetPosition(bRight ? Constants::GUI::ChatScrollWidth - pPortrait->GetWidth() : 0, 0);
 		}
 
@@ -170,6 +176,11 @@ namespace fig::gui
 			text = text.substr(0, text.length() - 1);
 		while (begins_with(text, begin))
 			text = text.substr(1);
+	}
+
+	void ChatMessage::SetName(StringCRef name)
+	{
+		_name = name;
 	}
 
 	void ChatMessage::SetMessage(fig::string text, bool complete)

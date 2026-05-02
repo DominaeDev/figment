@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "model/ContentManager.h"
 #include "model/AssetManager.h"
+#include "gui/AppResources.h"
 
 namespace fig::io
 {
@@ -30,6 +31,7 @@ namespace fig::io
 				CharacterData character;
 				if (character.LoadFromXml(asset.AsStringView()) == FileError::NoError)
 				{
+					character.assetId = asset.id;
 					character.createdAt = asset.GetCreatedAt();
 					character.updatedAt = asset.GetUpdatedAt();
 					_characters[asset.id] = std::move(character);
@@ -199,5 +201,45 @@ namespace fig::io
 	void UserContentManager::SaveModified()
 	{
 		_pAssetMngr->SaveModified();
+	}
+
+	std::expected<fig::sdl::TextureRef, FileError> UserContentManager::GetSmallPortraitForCharacter(fig::gui::RendererPtr pRenderer, const fig::uuid& characterId) noexcept
+	{
+		if (auto find_asset = _pAssetMngr->FindAsset(characterId, ImageType::SmallPortrait))
+		{
+			auto& asset = find_asset.value().get();
+			const fig::uuid& assetId = asset.id;
+			int32_t width = asset.GetMeta<int32_t>(MetaTag::ImageWidth).value_or(Constants::Data::SmallPortraitWidth);
+			int32_t height = asset.GetMeta<int32_t>(MetaTag::ImageHeight).value_or(Constants::Data::SmallPortraitWidth);
+
+			if (auto itFind = _textures.find(assetId); itFind != _textures.cend())
+				return std::ref(itFind->second);
+
+			if (auto try_load = _pAssetMngr->LoadAsset(assetId))
+			{
+				auto& imageAsset = try_load.value().get();
+				if (auto image = fig::gui::CreateSurfaceFromBytes(width, height, fig::gui::ImageFormat::RGB24, imageAsset.data); not image.empty())
+				{
+					auto pNewSurface = SDL_CreateSurface(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitWidth, SDL_PIXELFORMAT_RGBA8888);
+					SDL_BlitSurfaceScaled(image.get(), NULL, pNewSurface, NULL, SDL_SCALEMODE_LINEAR);
+
+					image.reset(pNewSurface);
+					fig::gui::MaskCorners(image, fig::gui::MaskType::CARD_CORNER_MASK);
+
+					auto& surface = _surfaces[assetId] = std::move(image);
+					if (auto texture = fig::gui::CreateTexture(pRenderer, surface))
+					{
+						auto& result = _textures[assetId] = std::move(texture);
+						return std::ref(result);
+					}
+				}
+				return std::unexpected(FileError::UnrecognizedFormat);
+			}
+			else
+			{
+				return std::unexpected(try_load.error());
+			}
+		}
+		return std::unexpected(FileError::NotFound);
 	}
 }

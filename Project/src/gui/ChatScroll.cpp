@@ -32,36 +32,37 @@ namespace fig::gui
 		EnableCulling(true);
 	}
 
-	void ChatScroll::AddDummyMessage(fig::string name, Role role, MessageType msgType, fig::string message)
+	void ChatScroll::AddDummyMessage(StringCRef name, Role role, MessageType msgType, StringCRef message)
 	{
-		ChatMessage* pMessage = AddMessage(name, role, msgType, message, true);
+		ChatMessage* pMessage = AddMessage({}, role, msgType, message, true);
+		pMessage->SetName(name);
 		pMessage->SetActive(false);
 		_messages.push_back(MessageEntry {
-			"dummy",
-			role,
-			"",
-			"",
-			msgType,
-			pMessage,
-			});
+			.chatId = "dummy",
+			.role = role,
+			.responseId = "",
+			.subMessageId = "",
+			.msgType = msgType,
+			.pChatMessage = pMessage,
+		});
 	}
 
-	void ChatScroll::AddSystemMessage(fig::string message)
+	void ChatScroll::AddSystemMessage(StringCRef message)
 	{
-		ChatMessage* pMessage = AddMessage("", Role::System, MessageType::SystemMessage, message, true);
+		ChatMessage* pMessage = AddMessage({}, Role::System, MessageType::SystemMessage, message, true);
 		pMessage->SetActive(false);
 		pMessage->SetColors(Colors::MessageBackgroundNavy, Colors::MessageBorderNavy);
 		_messages.push_back(MessageEntry {
-			"dummy",
-			Role::System,
-			"",
-			"",
-			MessageType::SystemMessage,
-			pMessage,
-			});
+			.chatId = "dummy",
+			.role = Role::System,
+			.responseId = "",
+			.subMessageId = "",
+			.msgType = MessageType::SystemMessage,
+			.pChatMessage = pMessage,
+		});
 	}
 
-	ChatMessage* ChatScroll::AddMessage(fig::string identifier, Role role, MessageType msgType, fig::string message, bool complete)
+	ChatMessage* ChatScroll::AddMessage(const fig::uuid& characterId, Role role, MessageType msgType, StringCRef message, bool complete)
 	{
 		if (msgType == MessageType::Narration)
 			role = Role::Narrator;
@@ -74,7 +75,7 @@ namespace fig::gui
 		});
 
 		Role lastRole = Role::Undefined;
-		fig::string lastId = "";
+		fig::uuid lastId {};
 		if (itLast != _messages.crend())
 		{
 			if ((*itLast).msgType == MessageType::Narration)
@@ -85,26 +86,14 @@ namespace fig::gui
 				lastId = (*itLast).characterId;
 			}
 		}
-		bShowAvatar &= (role != lastRole) || (identifier != lastId);
+		bShowAvatar &= (role != lastRole) || (characterId != lastId);
 		bool bShowName = bShowAvatar;
 
-		fig::string id = identifier;
 		fig::string name = _session.GetNameOf(role);
 		if (role == Role::System)
 		{
 			bShowName = true;
 			name = "System message";
-		}
-
-		if (auto character = _session.GetStaging().GetCharacterById(identifier))
-		{
-			id = character.value().characterId;
-			name = character.value().fullName;
-		}
-		else if (auto character = _session.GetStaging().GetCharacterByName(identifier))
-		{
-			id = character.value().characterId;
-			name = character.value().fullName;
 		}
 
 		if (msgType == MessageType::Narration)
@@ -113,8 +102,12 @@ namespace fig::gui
 			bShowName = true;
 			bShowAvatar = false;
 		}
+		else if (auto character = _session.GetStaging().GetCharacterById(characterId))
+			name = character.value().fullName;
+		else
+			name = "Unknown";
 
-		auto pMessage = new ChatMessage(this, role, id, bShowName ? name : "", msgType, bShowAvatar);
+		auto pMessage = new ChatMessage(this, role, characterId, bShowName ? name : "", msgType, bShowAvatar);
 		pMessage->SetY(-1000); // Move off-screen
 		pMessage->SetMessage(message, complete);
 		pMessage->SetColors(_session.GetColorsOf(role));
@@ -151,7 +144,7 @@ namespace fig::gui
 
 	void ChatScroll::ClearMessages()
 	{
-		for (auto entry : _messages)
+		for (auto& entry : _messages)
 		{
 			RemoveChild(entry.pChatMessage);
 			delete entry.pChatMessage;
@@ -219,7 +212,8 @@ namespace fig::gui
 				{
 					(*itMsg).second->role = piece.role;
 					(*itMsg).second->msgType = piece.msgType;
-					pEntry->pChatMessage = AddMessage(piece.identifier, piece.role, piece.msgType, piece.content, piece.isComplete);
+					auto characterId = _session.GetCharacterIdOf(piece.role);
+					pEntry->pChatMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, piece.isComplete);
 				}
 				else
 					continue; // Skip until we receive some text
@@ -231,31 +225,35 @@ namespace fig::gui
 			}
 			else
 			{
+				auto characterId = _session.GetCharacterIdOf(piece.role);
 				fig::string text = trim(piece.content);
 				if (text.empty() || (text.length() == 1 && (text[0] == '"' || text[0] == '*' || text[0] == '['))) // Empty or scaffolding
 				{
 					_messages.push_back(MessageEntry {
-						piece.identifier,
-						piece.role,
-						piece.responseId,
-						piece.subMessageId,
-						piece.msgType,
-						nullptr,
-						});
+						.characterId = characterId,
+						.chatId = piece.identifier,
+						.role = piece.role,
+						.responseId = piece.responseId,
+						.subMessageId = piece.subMessageId,
+						.msgType = piece.msgType,
+						.pChatMessage = nullptr,
+					});
 					_messagesById[piece.subMessageId] = &_messages.back();
 				}
 				else
 				{
+
 					// Create new message to hold the piece
-					ChatMessage* pMessage = AddMessage(piece.identifier, piece.role, piece.msgType, piece.content, piece.isComplete);
+					ChatMessage* pMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, piece.isComplete);
 					_messages.push_back(MessageEntry {
-						piece.identifier,
-						piece.role,
-						piece.responseId,
-						piece.subMessageId,
-						piece.msgType,
-						pMessage,
-						});
+						.characterId = characterId,
+						.chatId = piece.identifier,
+						.role = piece.role,
+						.responseId = piece.responseId,
+						.subMessageId = piece.subMessageId,
+						.msgType = piece.msgType,
+						.pChatMessage = pMessage,
+					});
 					_messagesById[piece.subMessageId] = &_messages.back();
 				}
 			}

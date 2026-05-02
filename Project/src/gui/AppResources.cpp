@@ -16,7 +16,7 @@ namespace fig::gui
 	std::map<fig::uuid, fig::sdl::Surface> AppResources::_profileSurfaces;
 	std::map<fig::uuid, fig::sdl::Texture> AppResources::_profileTextures;
 
-	void AppResources::Init(Renderer* pRenderer)
+	void AppResources::Init(RendererPtr pRenderer)
 	{
 		// Masks
 		LoadMask(MaskType::CARD_CORNER_MASK, "./resources/gui/masks/mask_card_corners.mask");
@@ -104,6 +104,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::CARD_BORDER_STYLE_06, "./resources/gui/card/borders/border_06.png");
 		LoadTexture(pRenderer, TextureType::CARD_BACKGROUND_EMPTY, "./resources/gui/card/card_bg_empty.png");
 
+		LoadTexture(pRenderer, TextureType::SQUARE_BACKGROUND_DEFAULT, "./resources/gui/chat/square_bg_default.png");
 		LoadTexture(pRenderer, TextureType::PROFILE_DEFAULT_IMAGE, "./resources/gui/images/default_portrait.png");
 		LoadTexture(pRenderer, TextureType::CIRCLE_MASK, "./resources/gui/masks/mask_circle256.png");
 		
@@ -116,7 +117,7 @@ namespace fig::gui
 		_surfaces.clear();
 	}
 
-	bool AppResources::LoadTexture(Renderer* pRenderer, TextureType textureId, fig::path filename)
+	bool AppResources::LoadTexture(RendererPtr pRenderer, TextureType textureId, fig::path filename)
 	{
 		SurfacePtr pSurface;
 		auto itFind = _surfaces.find(textureId);
@@ -128,15 +129,13 @@ namespace fig::gui
 			if (not (bool)pSurface)
 				return false; // File not found
 
-			auto& surface = _surfaces[textureId] = fig::sdl::Surface();
-			surface.reset(pSurface);
+			_surfaces[textureId] = fig::sdl::Surface::from_ptr(pSurface);
 		}
 
-		auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface);
+		auto pTexture = CreateTexture(pRenderer, pSurface);
 		if (pTexture)
 		{
-			auto& texture = _textures[textureId] = fig::sdl::Texture();
-			texture.reset(pTexture);
+			_textures[textureId] = std::move(pTexture);
 			return true;
 		}
 
@@ -144,7 +143,7 @@ namespace fig::gui
 		return false;
 	}
 
-	bool AppResources::LoadTextureAndMaskCorners(Renderer* pRenderer, TextureType textureId, MaskType maskId, fig::path filename)
+	bool AppResources::LoadTextureAndMaskCorners(RendererPtr pRenderer, TextureType textureId, MaskType maskId, fig::path filename)
 	{
 		SurfacePtr pSurface;
 		auto itFind = _surfaces.find(textureId);
@@ -219,7 +218,7 @@ namespace fig::gui
 		return nullptr;
 	}
 
-	TexturePtr AppResources::GetUserProfileImage(Renderer* pRenderer, const fig::user::UserProfile& profile)
+	TexturePtr AppResources::GetUserProfileImage(RendererPtr pRenderer, const fig::user::UserProfile& profile)
 	{
 		auto itFind = _profileTextures.find(profile.id);
 		if (itFind != _profileTextures.end())
@@ -240,7 +239,7 @@ namespace fig::gui
 				auto height = asset.get_meta<uint16_t>(fig::io::MetaTag::ImageHeight).value_or(0);
 				auto format = static_cast<fig::gui::ImageFormat>(asset.get_meta<uint8_t>(fig::io::MetaTag::ImageFormat).value_or(0));
 
-				if (auto image = SurfaceFromBytes(width, height, format, asset.data); not image.empty())
+				if (auto image = CreateSurfaceFromBytes(width, height, format, asset.data); not image.empty())
 				{
 					pSurface = image.get();
 					_profileSurfaces[profile.id] = std::move(image);
@@ -252,7 +251,7 @@ namespace fig::gui
 		{
 			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface))
 			{
-				auto& texture = _profileTextures[profile.id] = fig::sdl::Texture::create_and_claim(pTexture);
+				auto& texture = _profileTextures[profile.id] = fig::sdl::Texture::from_ptr(pTexture);
 				return texture.get();
 			}
 		}

@@ -13,8 +13,9 @@ namespace fig::gui
 	class ChatMessage : public Control
 	{
 	public:
-		ChatMessage(LayoutElement* pParent, Role role, fig::string characterId, fig::string name, MessageType msgType, bool bShowAvatar);
+		ChatMessage(LayoutElement* pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar);
 
+		void SetName(StringCRef name);
 		void SetMessage(fig::string text, bool complete = false);
 		void SetColors(const ColorPair& colors);
 		void SetColors(Color bgColor, Color borderColor);

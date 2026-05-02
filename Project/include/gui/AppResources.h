@@ -53,6 +53,8 @@ namespace fig::gui
 		CARD_BORDER_STYLE_05,
 		CARD_BORDER_STYLE_06,
 
+		SQUARE_BACKGROUND_DEFAULT,
+
 		ICON_ERROR,
 		ICON_SIDEBAR,
 		ICON_SIDEBAR_COLLAPSE,
@@ -110,17 +112,17 @@ namespace fig::gui
 	class AppResources
 	{
 	public:
-		static void Init(Renderer* pRenderer);
+		static void Init(RendererPtr pRenderer);
 		static void Release();
 		static TexturePtr GetTexture(TextureType id);
 		static SurfacePtr GetImage(TextureType id) noexcept;
 		static MaskPtr GetMask(MaskType maskId);
 
-		static TexturePtr GetUserProfileImage(Renderer* pRenderer, const fig::user::UserProfile& profile);
+		static TexturePtr GetUserProfileImage(RendererPtr pRenderer, const fig::user::UserProfile& profile);
 
 	private:
-		static bool LoadTexture(Renderer* pRenderer, TextureType textureId, fig::path filename);
-		static bool LoadTextureAndMaskCorners(Renderer* pRenderer, TextureType textureId, MaskType maskId, fig::path filename);
+		static bool LoadTexture(RendererPtr pRenderer, TextureType textureId, fig::path filename);
+		static bool LoadTextureAndMaskCorners(RendererPtr pRenderer, TextureType textureId, MaskType maskId, fig::path filename);
 		static bool LoadMask(MaskType textureId, fig::path filename);
 
 		static std::map<TextureType, fig::sdl::Surface> _surfaces;

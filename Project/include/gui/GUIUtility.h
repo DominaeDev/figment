@@ -100,19 +100,20 @@ namespace fig::gui
 		Inside,
 		Outside,
 		Portrait,
+		SquarePortrait,
 	};
 
 	std::optional<fig::sdl::Surface> LoadImage(fig::path filename);
-	fig::sdl::Surface LoadImageFromMemory(fig::byte_span data);
+	std::optional<fig::sdl::Surface> LoadImageFromMemory(fig::byte_span data);
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
-	fig::sdl::Surface SurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data);
 	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit = ImageFit::None, bool bLinear = true);
 	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha);
+	fig::sdl::Surface CreateSquarePortrait(const fig::sdl::Surface& surface);
 	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface);
+	fig::sdl::Texture CreateTexture(RendererPtr pRenderer, SurfacePtr pSurface);
+	fig::sdl::Texture CreateTexture(RendererPtr pRenderer, const fig::sdl::Surface& surface);
+	fig::sdl::Surface CreateSurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data);
 
-	enum class CornerStyle {
-		Card,
-	};
 	bool MaskCorners(fig::sdl::Surface& surface, MaskType style);
 	void AlphaToMask(fig::path filename);
 
