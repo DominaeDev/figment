@@ -89,7 +89,7 @@ namespace Constants
 
 	namespace Context
 	{
-		constexpr int32_t DefaultSize = static_cast<int32_t>(ContextSize::_3K);
+		constexpr int32_t DefaultSize = static_cast<int32_t>(ContextSize::_8K);
 		constexpr int32_t MaxResponseLength = 256;
 		constexpr int32_t MicroBatchSize = 512;
 		constexpr float WindowKeepRatio = 0.75f;
@@ -118,7 +118,6 @@ namespace Constants
 	{
 		constexpr uint32_t RandomSeed = 0xFFFFFFFF;
 		constexpr uint32_t DebugSeed = 0xA1B2C3D4;
-
 
 		constexpr ChatOptions DefaultChatOptions {
 			.flags {

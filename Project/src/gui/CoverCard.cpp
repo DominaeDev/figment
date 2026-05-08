@@ -77,6 +77,7 @@ namespace fig::gui
 		_pLargeFooterFade = new NineGridImage(_pLargeFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
 		_pLargeFooterFade->SetForegroundColor(Color { 0, 0, 0, FadeAlpha });
 		_pLargeFooterFade->FillParent();
+		_pLargeFooterFade->SetVisible(false);
 
 		// Label (large)
 		_pLargeLabel = new StaticText(_pLargeFooter, "", FontFace::CardHeader, 28.0, false);
@@ -114,9 +115,10 @@ namespace fig::gui
 		pSmallFooter->SetY(Small::Height - Small::FooterHeight);
 		pSmallFooter->SetSize(Small::Width, Small::FooterHeight);
 
-		auto pSmallFooterFade = new NineGridImage(pSmallFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE_SMALL), { 16, 16, 40, 16 });
-		pSmallFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x80 });
-		pSmallFooterFade->FillParent();
+		_pSmallFooterFade = new NineGridImage(pSmallFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE_SMALL), { 16, 16, 40, 16 });
+		_pSmallFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+		_pSmallFooterFade->FillParent();
+		_pSmallFooterFade->SetVisible(false);
 
 		// Label (small)
 		_pSmallLabel = new StaticText(pSmallFooter, "", FontFace::CardHeader, 24.0, false);
@@ -158,7 +160,7 @@ namespace fig::gui
 
 	void CoverCard::OnUpdate(float fElapsed)
 	{
-		if (_imageTexture.empty())
+		if (_largeImageTexture.empty())
 			PollFuture();
 
 		if (!_bInitialized)
@@ -395,12 +397,12 @@ namespace fig::gui
 		{
 			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, full.get()))
 			{
-				_imageTexture.reset(pTexture);
+				_largeImageTexture.reset(pTexture);
 				_imageSurface = std::move(full);
 			}
 			else
 			{
-				_imageTexture.clear();
+				_largeImageTexture.clear();
 				_imageSurface.clear();
 			}
 		}
@@ -566,8 +568,8 @@ namespace fig::gui
 	{
 		if (_cardSize == CardSize::Full)
 		{
-			if (!_imageTexture.empty())
-				CardImage::SetTexture(_imageTexture.get());
+			if (!_largeImageTexture.empty())
+				CardImage::SetTexture(_largeImageTexture.get());
 		}
 		else
 		{
@@ -660,10 +662,14 @@ namespace fig::gui
 			_pLargeRoot->SetVisible(_cardSize == CardSize::Full && !_bHidden);
 		if (_pLargeBorder)
 			_pLargeBorder->SetVisible(_pLargeBorder->HasTexture() && !_bHidden);
+		if (_pLargeFooterFade)
+			_pLargeFooterFade->SetVisible(!_largeImageTexture.empty());
 		if (_pSmallRoot)
 			_pSmallRoot->SetVisible(_cardSize == CardSize::Half && !_bHidden);
 		if (_pSmallBorder)
 			_pSmallBorder->SetVisible(_pSmallBorder->HasTexture() && !_bHidden);
+		if (_pSmallFooterFade)
+			_pSmallFooterFade->SetVisible(!_smallImageTexture.empty());
 		if (_pCounterBG)
 			_pCounterBG->SetVisible(!_bHidden);
 

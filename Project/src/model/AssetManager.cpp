@@ -316,21 +316,21 @@ namespace fig::io
 			| std::views::transform([](auto&& a) { return std::ref(a); })
 			| std::ranges::to<std::vector>();
 
-		std::for_each(std::execution::par_unseq,
+		std::for_each(std::execution::par,
 			assets.begin(), assets.end(),
 			[&](AssetRef assetRef) {
-			auto& asset = assetRef.get();
-			AssetFileReader reader(_profilePath, _profileAuthKey);
-			if (auto file = reader.ReadFile(asset.GetFileName(), false))
-			{
-				asset.FromFile(std::move(file.value()));
-				asset.file_status = AssetFileStatus::PartiallyLoaded;
-			}
-			else if (file.error() == FileError::NotFound)
-				asset.file_status = AssetFileStatus::Missing;
-			else
-				asset.file_status = AssetFileStatus::Invalid; // Failed to load for some reason, but the file exists.
-		});
+				auto& asset = assetRef.get();
+				AssetFileReader reader(_profilePath, _profileAuthKey);
+				if (auto file = reader.ReadFile(asset.GetFileName(), false))
+				{
+					asset.FromFile(std::move(file.value()));
+					asset.file_status = AssetFileStatus::PartiallyLoaded;
+				}
+				else if (file.error() == FileError::NotFound)
+					asset.file_status = AssetFileStatus::Missing;
+				else
+					asset.file_status = AssetFileStatus::Invalid; // Failed to load for some reason, but the file exists.
+			});
 		DEBUG_MEASURE_END();
 
 		// Remove missing assets from index

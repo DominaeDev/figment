@@ -100,6 +100,7 @@ namespace fig::gui
 		Control* _pTagsRoot {};
 
 		Control* _pSmallRoot {};
+		Control* _pSmallFooterFade {};
 		Image* _pSmallBorder {};
 		StaticText* _pSmallLabel {};
 		Image* _pSmallStar {};
@@ -108,7 +109,7 @@ namespace fig::gui
 		int32_t _tagRows { 1 };
 
 		fig::sdl::Surface _imageSurface {};
-		fig::sdl::Texture _imageTexture {};
+		fig::sdl::Texture _largeImageTexture {};
 		fig::sdl::Surface _smallImageSurface {};
 		fig::sdl::Texture _smallImageTexture {};
 		fig::io::AsyncFuture _pendingCover {};

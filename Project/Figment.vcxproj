@@ -261,6 +261,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\util\DebugUtils.cpp" />
     <ClCompile Include="src\util\Dictionary.cpp" />
     <ClCompile Include="src\util\IniFile.cpp" />
     <ClCompile Include="src\util\ProfileDatabase.cpp" />
@@ -469,6 +470,7 @@
     <ClInclude Include="include\model\UserProfile.h" />
     <ClInclude Include="include\model\UserSettings.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\util\DebugUtils.h" />
     <ClInclude Include="include\util\ExcludedSearchTerms.h" />
     <ClInclude Include="include\util\IniFile.h" />
     <ClInclude Include="include\util\ProfileDatabase.h" />
