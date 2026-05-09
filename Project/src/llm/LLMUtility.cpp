@@ -16,19 +16,19 @@ using namespace fig::util;
 using namespace fig::io;
 
 static std::vector<fig::string> const opening_tags {
-	std::format("<{0}=\"", Constants::Chat::DialogueTag),
-	std::format("<{0}=\"", Constants::Chat::ActionTag),
-	std::format("<{0}=\"", Constants::Chat::ThoughtTag),
-	std::format("<{0}>", Constants::Chat::NarrationTag),
-	std::format("<{0}>", Constants::Chat::DirectionTag),
-};
+	std::format("<{0}=\"", fig::Constants::Chat::DialogueTag),
+	std::format("<{0}=\"", fig::Constants::Chat::ActionTag),
+	std::format("<{0}=\"", fig::Constants::Chat::ThoughtTag),
+	std::format("<{0}>",   fig::Constants::Chat::NarrationTag),
+	std::format("<{0}>",   fig::Constants::Chat::DirectionTag),
+};	
 
 static std::vector<fig::string> const closing_tags {
-	std::format("</{0}>", Constants::Chat::DialogueTag),
-	std::format("</{0}>", Constants::Chat::ActionTag),
-	std::format("</{0}>", Constants::Chat::ThoughtTag),
-	std::format("</{0}>", Constants::Chat::NarrationTag),
-	std::format("</{0}>", Constants::Chat::DirectionTag),
+	std::format("</{0}>", fig::Constants::Chat::DialogueTag),
+	std::format("</{0}>", fig::Constants::Chat::ActionTag),
+	std::format("</{0}>", fig::Constants::Chat::ThoughtTag),
+	std::format("</{0}>", fig::Constants::Chat::NarrationTag),
+	std::format("</{0}>", fig::Constants::Chat::DirectionTag),
 };
 
 namespace fig::llm::util
@@ -1527,7 +1527,7 @@ namespace fig::llm::util
 
 		if (!_template.empty())
 		{
-			std::vector<char> formatted(Constants::Context::MaxResponseLength * 2);
+			std::vector<char> formatted(Constants::DefaultModelSettings::MaxResponseLength * 2);
 			int new_len = llama_chat_apply_template(_template.c_str(), msgs.data(), msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
 			if (new_len > (int)formatted.size())
 			{

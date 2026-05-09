@@ -23,6 +23,7 @@ namespace fig::llm
 		std::mt19937 rng {};
 		int32_t max_sequences {};
 		int32_t ctx_size {};
+		ModelSettings settings {};
 
 		LLMEmbedding* pEmbedding = nullptr;
 

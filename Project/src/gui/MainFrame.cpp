@@ -11,6 +11,7 @@
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
+#include "model/ModelSettings.h"
 #include "util/DebugUtils.h"
 
 using namespace fig::io;
@@ -256,15 +257,17 @@ namespace fig::gui
 		{
 			SetStatusBar(fig::strings::Status::LoadingModel);
 
-			engine.Initialize(fig::string(Constants::DefaultModelLocation),
-				Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings) ? toStr(Constants::Embedding::DefaultModelLocation) : "",
+			fig::llm::ModelSettings modelSettings {};
+			modelSettings.modelFilename = Constants::DefaultModelLocation;
+
+			engine.Initialize(modelSettings,
 				[this](int percent) {
 					PushEvent(EventType::LLMModelLoadingProgress, percent);
 				},
 				[this, &engine](bool bSuccess) {
 					if (bSuccess)
 					{
-						auto pInstance = engine.CreateInstance(Constants::Context::DefaultSize, Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::Embeddings));
+						auto pInstance = engine.CreateInstance();
 						Global::SetLLMInstance(pInstance);
 					}
 				});

@@ -7,7 +7,7 @@ using namespace fig::llm;
 
 Sequence ContextBlock::get_any_sequence_id() const noexcept
 {
-	for (size_t i = 0; i < AllSequenceSlots.size() && i < Constants::Context::MaxSequences; ++i)
+	for (size_t i = 0; i < AllSequenceSlots.size() && i < Constants::DefaultModelSettings::MaxSequences; ++i)
 	{
 		if (sequenceSlots.IsSet(AllSequenceSlots[i]))
 			return static_cast<llama_seq_id>(i);

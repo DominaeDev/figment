@@ -521,6 +521,9 @@
     <ClCompile Include="src\util\DebugUtils.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\model\ModelSettings.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1230,6 +1233,9 @@
     </ClInclude>
     <ClInclude Include="include\util\DebugUtils.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\ModelSettings.h">
+      <Filter>Source Files\Backend\Chat</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

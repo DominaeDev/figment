@@ -74,7 +74,7 @@ namespace fig::llm
 
 		std::scoped_lock _(_stateMutex); // Lock for the entire duration of the scope
 
-		_contextState = Context(_modelState, _modelState.max_sequences);
+		_contextState = Context { _modelState };
 		_session = args.session;
 		_stateVars = {};
 		_turn_counter.store(0);
@@ -481,7 +481,7 @@ namespace fig::llm
 		}
 
 		// Reserve space for response
-		int32_t ctx_reserve = Constants::Context::MaxResponseLength;
+		int32_t ctx_reserve = Constants::DefaultModelSettings::MaxResponseLength;
 		int n_ctx_used = llama::ctx_used_cells(state.pCtx);
 		if (n_ctx_used + ctx_reserve >= state.ctx_size)
 		{
@@ -527,7 +527,7 @@ namespace fig::llm
 			}
 		}
 
-		assert(llama::ctx_used_cells(_contextState.GetCtxPtr()) + Constants::Context::MaxResponseLength <= _modelState.ctx_size);
+		assert(llama::ctx_used_cells(_contextState.GetCtxPtr()) + Constants::DefaultModelSettings::MaxResponseLength <= _modelState.ctx_size);
 		DumpContext();
 		return InternalError::NoError;
 	}
@@ -544,6 +544,7 @@ namespace fig::llm
 		std::vector<Token> sampled_tokens;
 		ContextPtr pCtx = _modelState.pCtx;
 		VocabPtr pVocab = _modelState.pVocab;
+		ModelSettings& settings = _modelState.settings;
 
 		Token sampled_token;
 		fig::string partial;
@@ -614,8 +615,8 @@ namespace fig::llm
 			current_sequence_indices = { 0 };
 		}
 
-		assert(current_sequence_index >= 0 && current_sequence_index < Constants::Context::MaxSequences);
-		assert(llama::ctx_used_cells(pCtx) + Constants::Context::MaxResponseLength <= _modelState.ctx_size);
+		assert(current_sequence_index >= 0 && current_sequence_index < _modelState.max_sequences);
+		assert(llama::ctx_used_cells(pCtx) + Constants::DefaultModelSettings::MaxResponseLength <= _modelState.ctx_size);
 
 		if (!args.history.empty() && _modelState.pEmbedding)
 		{
@@ -768,7 +769,7 @@ namespace fig::llm
 				stop_reason = StopReason::Completed;
 			}
 
-			if (sampled_tokens.size() >= Constants::Context::MaxResponseLength || cursor_pos >= _modelState.ctx_size - 1)
+			if (sampled_tokens.size() >= Constants::DefaultModelSettings::MaxResponseLength || cursor_pos >= _modelState.ctx_size - 1)
 			{
 				bHalt = true;
 				stop_reason = StopReason::ResponseLengthLimit;
@@ -1655,7 +1656,7 @@ namespace fig::llm
 			// Ensure there's enough space to fit the new persona + response
 			if (new_persona_length > prev_persona_length)
 			{
-				_contextState.ReserveTokens(Constants::Context::MaxResponseLength + (prev_persona_length - new_persona_length));
+				_contextState.ReserveTokens(Constants::DefaultModelSettings::MaxResponseLength + (prev_persona_length - new_persona_length));
 			}
 
 			_contextState.InsertBlock(ContextBlock {

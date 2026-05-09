@@ -51,6 +51,13 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 	}
 
+	SDL_SetHint(SDL_HINT_APP_NAME, "Figment");
+	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1"); // Generate mouse events for clicks that activate the window
+	SDL_SetHint(SDL_HINT_MAC_OPTION_AS_ALT, "both");
+	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition,candidates");
+//	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON, "0");
+//	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON_SMALL, "0");
+
 	RegisterUserEvents();
 
 	setlocale(LC_CTYPE, "");

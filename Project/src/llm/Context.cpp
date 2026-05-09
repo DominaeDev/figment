@@ -14,13 +14,14 @@ using namespace fig::util;
 using namespace fig::llm;
 using namespace fig::llm::util;
 
-Context::Context(const ModelState& model, int32_t num_sequences)
+Context::Context(const ModelState& modelState)
 {
-	_pModel = &model;
-	_cache = std::make_shared<ContextCache>(model.ctx_size, num_sequences);
-	_pCtx = model.pCtx;
-	_pVocab = model.pVocab;
-	_num_sequences = num_sequences;
+	_pModel = &modelState;
+	_cache = std::make_shared<ContextCache>(modelState.ctx_size, modelState.max_sequences);
+	_pCtx = modelState.pCtx;
+	_pVocab = modelState.pVocab;
+	_num_sequences = modelState.max_sequences;
+	_fKeepRatio = modelState.settings.contextWindowKeepRatio;
 }
 
 int32_t Context::GetUsedKVCacheCells() const
@@ -402,7 +403,7 @@ int32_t Context::AllocateKVCache(int32_t min_reserve)
 	int32_t ctx_size = llama::ctx_size(_pCtx);
 
 	int32_t ctx_chat_max = ctx_size - GetChatBeginOffset().as_int(); // Exclude system prompt
-	int32_t free_tokens = std::max(min_reserve, toI(ctx_chat_max * (1.0f - Constants::Context::WindowKeepRatio)));
+	int32_t free_tokens = std::max(min_reserve, toI(ctx_chat_max * (1.0f - _fKeepRatio)));
 
 	auto itFirst = std::find_if(_blocks.begin(), _blocks.end(), [](auto& block) { return !block.is_static(); });
 	assert(itFirst != _blocks.end());

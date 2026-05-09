@@ -55,11 +55,13 @@ namespace fig::strings
 	namespace UI
 	{
 		inline constexpr fig::const_string MenuRecentChats =
-			"Recent chats";
+			"Chats";
 		inline constexpr fig::const_string MenuCharacters =
 			"Characters";
 		inline constexpr fig::const_string MenuScenarios =
 			"Scenarios";
+		inline constexpr fig::const_string MenuWorlds =
+			"Worlds";
 	}
 
 	namespace Errors

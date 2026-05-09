@@ -18,7 +18,7 @@ namespace fig::llm
 	class Context
 	{
 	public:
-		Context(const ModelState& model, int32_t num_sequences);
+		Context(const ModelState& modelState);
 
 		Context() = default;
 		Context(Context&& other) = default;
@@ -93,6 +93,7 @@ namespace fig::llm
 		ContextPtr _pCtx = nullptr;
 		VocabPtr _pVocab = nullptr;
 		int32_t _num_sequences {};
+		float _fKeepRatio {};
 		std::vector<ContextBlock> _blocks {};
 		std::shared_ptr<ContextCache> _cache {};
 	};

@@ -53,6 +53,7 @@ namespace fig::gui
 		auto pCharactersButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
 		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
 		auto pScenariosButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
+		auto pWorldsButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
 		auto pModelsButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_MODELS, "Models");
 
 		auto pButtonSizer = new VerticalSizer();
@@ -64,6 +65,8 @@ namespace fig::gui
 		pButtonSizer->Add(pCharactersButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pScenariosButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
+		pButtonSizer->AddSpacer(4);
+		pButtonSizer->Add(pWorldsButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pModelsButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
 
@@ -97,21 +100,25 @@ namespace fig::gui
 
 	void SidePanel::ShowMenu()
 	{
-		auto pMenu = new Menu(&MainFrame::GetInstance());
-		pMenu->AddItem("New character\u2026");
-		pMenu->AddItem("New scenario\u2026");
-		pMenu->AddItem("Import character\u2026")
+		auto& menu = MainFrame::GetInstance().CreateMenu();
+		menu.AddItem("New chat\u2026");
+		auto& createMenu = menu.AddItem("Create");
+		createMenu.AddItem("New character\u2026");
+		createMenu.AddItem("New scenario\u2026");
+		createMenu.AddItem("New world\u2026");
+		createMenu.AddSeparator();
+		createMenu.AddItem("From file\u2026")
 			.SetEnabled(false);
-		pMenu->AddSeparator();
-		pMenu->AddItem("Profile settings\u2026", TextureType::ICON_USER_SETTINGS);
-		pMenu->AddItem("Preferences\u2026", TextureType::ICON_SETTINGS);
-		pMenu->AddSeparator();
-		pMenu->AddItem("Sign out", TextureType::ICON_LOGOUT)
+		menu.AddSeparator();
+		menu.AddItem("User profile\u2026", TextureType::ICON_USER_SETTINGS);
+		menu.AddItem("Settings\u2026", TextureType::ICON_SETTINGS);
+		menu.AddSeparator();
+		menu.AddItem("Sign out", TextureType::ICON_LOGOUT)
 			.SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
-		pMenu->AddItem("Exit Figment")
+		menu.AddItem("Exit Figment")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 
-		pMenu->Show(Point { _pMenuButton->GetX(), _pMenuButton->GetY() + _pMenuButton->GetHeight() });
+		menu.Show(Point { _pMenuButton->GetX(), _pMenuButton->GetY() + _pMenuButton->GetHeight() });
 	}
 
 	bool SidePanel::OnEvent(Event& event)

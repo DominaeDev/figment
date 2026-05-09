@@ -4,9 +4,10 @@
 #include "gui/GUITypes.h"
 #include "model/ChatTypes.h"
 #include "model/ChatOptions.h"
+#include "model/ModelSettings.h"
 #include "model/GlobalStrings.h"
 
-namespace Constants
+namespace fig::Constants
 {
 	namespace GUI
 	{
@@ -72,28 +73,17 @@ namespace Constants
 		constexpr fig::gui::Coord SmallPortraitWidth = 52;
 	}
 
-	// Sizes
-	enum class ContextSize : int32_t
+	namespace DefaultModelSettings
 	{
-		_2K  = 1024 * 2,
-		_3K  = 1024 * 3,
-		_4K  = 1024 * 4,
-		_6K  = 1024 * 6,
-		_8K  = 1024 * 8,
-		_10K = 1024 * 10,
-		_12K = 1024 * 12,
-		_16K = 1024 * 16,
-		_24K = 1024 * 24,
-		_32K = 1024 * 32,
-	};
+		constexpr fig::llm::ContextSize ContextSize = fig::llm::ContextSize::_8K;
+		constexpr float ContextWindowKeepRatio = 0.75f;
 
-	namespace Context
-	{
-		constexpr int32_t DefaultSize = static_cast<int32_t>(ContextSize::_8K);
+		constexpr int32_t GPULayers = 99;
 		constexpr int32_t MaxResponseLength = 256;
 		constexpr int32_t MicroBatchSize = 512;
-		constexpr float WindowKeepRatio = 0.75f;
 		constexpr int32_t MaxSequences = 4;
+		constexpr bool UseMlock = true;
+		constexpr bool UseMmap = true;
 	}
 
 	namespace Paths

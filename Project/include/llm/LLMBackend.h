@@ -5,6 +5,7 @@
 #include "llm/LLMTypes.h"
 #include "llm/ModelState.h"
 #include "llm/LLMStatus.h"
+#include "model/ModelSettings.h"
 
 #include <functional>
 #include <thread>
@@ -28,14 +29,14 @@ namespace fig::llm
 		LLMBackend();
 		~LLMBackend() = default;
 
-		bool Initialize(fig::string modelFilename, fig::string embeddingFilename, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
+		bool Initialize(const ModelSettings& settings, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 		bool Shutdown();
 
 		bool IsInitialized() const { return _readyState.load() == ReadyState::Ready; }
 		bool IsInitializing() const { return _readyState.load() == ReadyState::Initializing; }
 
 		std::shared_ptr<LLMStatusChannel> GetStatusChannel() noexcept { return _pStatus; }
-		LLMInstancePtr CreateInstance(int32_t ctx_size, bool embeddings);
+		LLMInstancePtr CreateInstance();
 		bool DestroyInstance(LLMInstancePtr instance);
 
 		LLMObserverCallbackId RegisterObserver(LLMObserverCallback fnCallback);
@@ -44,7 +45,7 @@ namespace fig::llm
 
 	private:
 		using __LoadModelCallback = std::function<void(std::shared_ptr<ModelState>)>;
-		void __LoadModel(fig::string modelFilename, fig::string embeddingFilename, __LoadModelCallback onComplete);
+		void __LoadModel(fig::llm::ModelSettings settings, __LoadModelCallback onComplete);
 		static bool OnLoadModelProgress(float progress, void* user_data);
 
 		void SetReadyState(ReadyState readyState);

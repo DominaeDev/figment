@@ -254,6 +254,7 @@
     <ClCompile Include="src\gui\StaticText.cpp" />
     <ClCompile Include="src\gui\StatusBar.cpp" />
     <ClCompile Include="src\model\ChatCommands.cpp" />
+    <ClCompile Include="src\model\ModelSettings.cpp" />
     <ClCompile Include="src\model\ScenarioData.cpp" />
     <ClCompile Include="src\model\UserManager.cpp" />
     <ClCompile Include="src\model\UserSettings.cpp" />
@@ -452,6 +453,7 @@
     <ClInclude Include="include\llm\PromptTemplateTypes.h" />
     <ClInclude Include="include\model\AppSettings.h" />
     <ClInclude Include="include\model\CardMetaData.h" />
+    <ClInclude Include="include\model\ModelSettings.h" />
     <ClInclude Include="include\model\Settings.h" />
     <ClInclude Include="include\model\AppState.h" />
     <ClInclude Include="include\gui\Area.h" />
