@@ -3,6 +3,7 @@
 #include "model/AppState.h"
 #include "model/UserManager.h"
 #include "model/Asset.h"
+#include "model/ModelSettings.h"
 
 using namespace fig::io;
 
@@ -12,9 +13,9 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
-			// ShuffleCards();
+//			ShuffleCards();
 
-			// ...
+//			CreateModelSettings();
 		}
 	}
 
@@ -48,7 +49,6 @@ namespace fig
 				content.ImportCharactersInDirectory(path);
 				userMngr.SignOut();
 			}
-
 		}
 	}
 
@@ -118,6 +118,35 @@ namespace fig
 			{
 				auto& assetMngr = userMngr.GetContent().GetAssetManager();
 				assetMngr.CreateProfilePicture(userMngr.GetActiveProfile(), path);
+				userMngr.SignOut();
+			}
+		}
+	}
+
+	void DebugUtility::CreateModelSettings()
+	{
+		if constexpr (Debugging)
+		{
+			auto& userMngr = Global::GetUserManager();
+
+			fig::llm::ModelSettings modelSettings;
+			if (not Success(modelSettings.LoadFromXml("./import/model_settings.xml")))
+				modelSettings = fig::llm::ModelSettings {};
+
+			if (userMngr.SignInDefaultProfile())
+			{
+				auto& content = userMngr.GetContent();
+				auto& assetMngr = userMngr.GetContent().GetAssetManager();
+
+				auto remove_settings = assetMngr.GetAssetsOfType(AssetType::ModelSettings)
+					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+					| std::ranges::to<std::vector>();
+				content.GetAssetManager().DeleteAssets(remove_settings);
+
+				fig::bytes buf;
+				modelSettings.SaveToXml(buf);
+				assetMngr.CreateAsset(fig::io::AssetType::ModelSettings, buf);
+
 				userMngr.SignOut();
 			}
 		}

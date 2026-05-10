@@ -257,8 +257,15 @@ namespace fig::gui
 		{
 			SetStatusBar(fig::strings::Status::LoadingModel);
 
+			// Read model settings
 			fig::llm::ModelSettings modelSettings {};
-			modelSettings.modelFilename = Constants::DefaultModelLocation;
+			if (auto try_model_settings = Global::GetUserContent().GetActiveModelSettings())
+				modelSettings = try_model_settings.value();
+			else
+			{
+				PushEvent(EventType::LLMModelLoadFailure);
+				return;
+			}
 
 			engine.Initialize(modelSettings,
 				[this](int percent) {

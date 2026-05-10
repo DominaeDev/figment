@@ -203,6 +203,15 @@ namespace fig::util
 		return std::abs(a - b) <= std::numeric_limits<double>::epsilon() * std::max(std::abs(a), std::abs(b));
 	}
 
+	template <typename K, typename T>
+	inline std::optional<K> find_key(const std::map<K, T>& map, const T& value)
+	{
+		for (auto& kvp : map)
+			if (kvp.second == value)
+				return kvp.first;
+		return std::nullopt;
+	}
+
 #if _DEBUG || _CONSOLE
 	#define DEBUG_MEASURE_BEGIN(LABEL) fig::util::MeasureTime((LABEL), [&](){
 	#define DEBUG_MEASURE_END() });

@@ -30,6 +30,9 @@ namespace fig::io
 		std::optional<fig::uuid> AsUUID() const noexcept;
 		std::optional<std::vector<fig::string>> AsList() const noexcept;
 
+		template<std::integral T>
+		std::optional<T> AsInt() const noexcept;
+
 		bool AsBool(bool default_value) const noexcept;
 		int32_t AsInt(int32_t default_value) const noexcept;
 		float AsFloat(float default_value) const noexcept;

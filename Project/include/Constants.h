@@ -101,8 +101,6 @@ namespace fig::Constants
 		constexpr fig::const_string ProfileImageFileExt = "";
 		constexpr fig::const_string AssetFileExt = "";
 	}
-
-	constexpr fig::const_string DefaultModelLocation = "F:\\AI\\Models\\default_model.gguf"; //! @temp
 	
 	namespace LLM
 	{

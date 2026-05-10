@@ -13,6 +13,8 @@ namespace fig
 		Sorting,
 		Ordering,
 		Filtering,
+		
+		ModelPreset,
 
 		Count,
 	};

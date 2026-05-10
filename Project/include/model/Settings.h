@@ -65,7 +65,7 @@ namespace fig
 		fig::uuid GetUUID(E setting, const fig::uuid& defaultValue = {}) const noexcept
 		{
 			fig::string strDefault { defaultValue.to_str() };
-			return fig::uuid::fromStrFactory(GetValue<fig::string>(setting, strDefault).c_str());
+			return fig::uuid::from_str(GetValue<fig::string>(setting, strDefault).c_str());
 		}
 
 		template<typename T>

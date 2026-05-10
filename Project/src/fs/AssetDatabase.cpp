@@ -181,9 +181,9 @@ namespace fig::io
 			int64_t updatedAt = sqlite3_column_int64(stmt, 6);
 			int64_t lastUsedAt = sqlite3_column_int64(stmt, 7);
 
-			fig::uuid assetID	= fig::uuid::fromStrFactory(pAssetID ? pAssetID : "");
-			fig::uuid parentID	= fig::uuid::fromStrFactory(pParentID ? pParentID : "");
-			fig::uuid folderID	= fig::uuid::fromStrFactory(pFolder ? pFolder : "");
+			fig::uuid assetID	= fig::uuid::from_str(pAssetID ? pAssetID : "");
+			fig::uuid parentID	= fig::uuid::from_str(pParentID ? pParentID : "");
+			fig::uuid folderID	= fig::uuid::from_str(pFolder ? pFolder : "");
 
 			Asset asset;
 			asset.id = assetID;
@@ -232,8 +232,8 @@ namespace fig::io
 			const char* pName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
 			const char* pSettings = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
 
-			fig::uuid folderID	= fig::uuid::fromStrFactory(pFolderID ? pFolderID : "");
-			fig::uuid parentID	= fig::uuid::fromStrFactory(pParentID ? pParentID : "");
+			fig::uuid folderID	= fig::uuid::from_str(pFolderID ? pFolderID : "");
+			fig::uuid parentID	= fig::uuid::from_str(pParentID ? pParentID : "");
 
 			AssetFolder folder;
 			folder.id = folderID;

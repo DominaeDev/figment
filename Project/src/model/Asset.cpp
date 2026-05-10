@@ -25,6 +25,8 @@ namespace fig::io
 			strType = "data/chat";
 		else if (type == AssetType::ChatLog)
 			strType = "data/log";
+		else if (type == AssetType::ModelSettings)
+			strType = "data/config";
 		else if (type == AssetType::Image)
 		{
 			strType = "image";
@@ -72,12 +74,16 @@ namespace fig::io
 				type = AssetType::Character;
 			else if (strSubtype == "scenario")
 				type = AssetType::Scenario;
+			else if (strSubtype == "world")
+				type = AssetType::Concept;
 			else if (strSubtype == "concept")
 				type = AssetType::Concept;
 			else if (strSubtype == "chat")
 				type = AssetType::ChatInstance;
 			else if (strSubtype == "log")
 				type = AssetType::ChatLog;
+			else if (strSubtype == "config")
+				type = AssetType::ModelSettings;
 		}
 		else if (strType == "image")
 		{

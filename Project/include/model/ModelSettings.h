@@ -4,6 +4,7 @@
 
 #include "Types.h"
 #include "llm/PromptTemplateTypes.h"
+#include "fs/FileError.h"
 
 namespace fig::llm
 {
@@ -22,6 +23,19 @@ namespace fig::llm
 		_32K = 1024 * 32,
 	};
 
+	const std::map<ContextSize, fig::string> ContextSizeMapping {
+		{ ContextSize::_2K, "2K" },
+		{ ContextSize::_3K, "3K" },
+		{ ContextSize::_4K, "4K" },
+		{ ContextSize::_6K, "6K" },
+		{ ContextSize::_8K, "8K" },
+		{ ContextSize::_10K, "10K" },
+		{ ContextSize::_12K, "12K" },
+		{ ContextSize::_16K, "16K" },
+		{ ContextSize::_24K, "24K" },
+		{ ContextSize::_32K, "32K" },
+	};
+
 	struct ModelSettings
 	{
 		ModelSettings();
@@ -31,6 +45,15 @@ namespace fig::llm
 		ModelSettings& operator=(const ModelSettings&) = default;
 		ModelSettings& operator=(ModelSettings&&) = default;
 
+		fig::io::FileError LoadFromXml(const fig::path& path) noexcept;
+		fig::io::FileError LoadFromXml(const fig::bytes& buffer) noexcept;
+
+		fig::io::FileError SaveToXml(const fig::path& path) const;
+		void SaveToXml(fig::bytes& buffer) const;
+		
+	public:
+		uint8_t version;
+		fig::string name;
 		fig::path modelFilename;
 		fig::path embeddingModelFilename;
 
@@ -43,7 +66,6 @@ namespace fig::llm
 		bool bUseMmap;
 		int32_t microBatchSize;
 		int32_t maxSequences;
-
 	};
 }
 

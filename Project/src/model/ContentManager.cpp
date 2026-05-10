@@ -2,6 +2,7 @@
 #include "model/ContentManager.h"
 #include "model/AssetManager.h"
 #include "gui/AppResources.h"
+#include "model/AppState.h"
 
 namespace fig::io
 {
@@ -68,6 +69,33 @@ namespace fig::io
 	{
 		if (auto itFind = _scenarios.find(id); itFind != _scenarios.cend())
 			return std::make_optional(itFind->second);
+		return std::nullopt;
+	}
+
+	std::optional<fig::llm::ModelSettings> UserContentManager::GetActiveModelSettings() const noexcept
+	{
+		fig::uuid activePresetId = Global::GetUserSettings().GetUUID(UserSetting::ModelPreset);
+		if (activePresetId.empty())
+		{
+			auto model_settings = _pAssetMngr->GetAssetsOfType(AssetType::ModelSettings)
+				| std::ranges::to<std::vector>();
+			if (model_settings.size() > 0)
+				activePresetId = model_settings.front().id;
+			else
+				return std::nullopt;
+		}
+
+		if (auto try_find = _pAssetMngr->FindAsset(activePresetId, AssetType::ModelSettings))
+		{
+			if (auto try_load = _pAssetMngr->LoadAsset(try_find.value().get().id))
+			{
+				auto& modelSettingsAsset = try_load.value().get();
+
+				fig::llm::ModelSettings settings {};
+				if (Success(settings.LoadFromXml(modelSettingsAsset.data)))
+					return settings;
+			}
+		}
 		return std::nullopt;
 	}
 

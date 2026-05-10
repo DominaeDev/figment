@@ -50,8 +50,11 @@ namespace fig::io
 		virtual ~AssetManager();
 
 		const Asset& CreateEmptyAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
+		const Asset& CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
+		const Asset& CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
+
 		const Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateImageAsset(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
@@ -60,14 +63,18 @@ namespace fig::io
 		uint32_t DeleteAssets(std::span<fig::uuid> assetIDs) noexcept;
 
 		std::optional<AssetRef> FindAsset(const fig::uuid& id) noexcept;
+		std::optional<AssetRef> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;
+		std::optional<AssetRef> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
+
 		FileError LoadAsset(const Asset& asset) noexcept;
 		std::expected<AssetRef, FileError> LoadAsset(const fig::uuid& id) noexcept;
 		
 		auto GetAssets() noexcept { return _assets | std::views::values; }
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
-		auto GetCharacterAssets() const noexcept { return _assets | std::views::values | std::views::filter([](auto& a) { return a.asset_type == AssetType::Character; }); }
-		auto GetScenarioAssets() const noexcept { return _assets | std::views::values | std::views::filter([](auto& a) { return a.asset_type == AssetType::Scenario; }); }
-		std::optional<AssetRef> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
+		auto GetAssetsOfType(AssetType assetType) const noexcept { return _assets | std::views::values | std::views::filter([assetType](auto& a) { return a.asset_type == assetType; }); }
+		auto GetCharacterAssets() const noexcept { return GetAssetsOfType(AssetType::Character); }
+		auto GetScenarioAssets() const noexcept { return GetAssetsOfType(AssetType::Scenario); }
+		
 
 		void SaveModified();
 

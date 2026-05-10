@@ -25,4 +25,7 @@ namespace fig::io
 		FileAccessError,
 		Canceled,
 	};
+
+	inline constexpr bool Success(FileError error) { return error == FileError::NoError; };
+	inline constexpr bool Success(AsyncLoadError error) { return error == AsyncLoadError::NoError; };
 }

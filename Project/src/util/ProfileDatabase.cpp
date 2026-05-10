@@ -133,7 +133,7 @@ namespace fig::io
 			const void* recovery_data = sqlite3_column_blob(stmt, 6);
 			int recovery_size = sqlite3_column_bytes(stmt, 6);
 
-			fig::uuid id = fig::uuid::fromStrFactory(pID ? pID : "");
+			fig::uuid id = fig::uuid::from_str(pID ? pID : "");
 			fig::string name_str(pName ? pName : "");
 			fig::auth::UserAuth userAuth {};
 			fig::auth::UserAuth recoveryData {};

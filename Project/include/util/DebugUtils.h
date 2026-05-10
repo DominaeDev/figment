@@ -14,5 +14,6 @@ namespace fig
 		static void ImportTestScenario();
 		static void ShuffleCards();
 		static void CreateProfilePic(const fig::path& path = fig::path("./import/profile_pic.png"));
+		static void CreateModelSettings();
 	};
 }

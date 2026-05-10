@@ -14,6 +14,8 @@
 			std::tuple { UserSetting::Sorting,			"Interface",	"Sorting",		static_cast<int32_t>(SortBy::Default) },
 			std::tuple { UserSetting::Ordering,			"Interface",	"Ordering",		static_cast<int32_t>(OrderBy::Default) },
 			std::tuple { UserSetting::Filtering,		"Interface",	"Filter",		FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
+
+			std::tuple { UserSetting::ModelPreset,		"Model",		"Preset",		"" },
 		};
 
 		void SettingsCollection<UserSetting>::Init() noexcept

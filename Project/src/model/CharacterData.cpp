@@ -110,7 +110,7 @@ namespace fig::io
 	{
 		XmlReader xml(doc);
 		if (not xml.IsOk() or xml.GetRootElement().GetName() != XmlRootName)
-			return  FileError::UnrecognizedFormat;
+			return FileError::UnrecognizedFormat;
 
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}

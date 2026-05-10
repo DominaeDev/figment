@@ -5,6 +5,7 @@
 #include "model/CharacterData.h"
 #include "model/ScenarioData.h"
 #include "model/CardMetaData.h"
+#include "model/ModelSettings.h"
 
 namespace fig::io
 {
@@ -24,6 +25,8 @@ namespace fig::io
 		auto GetCharacters() const noexcept { return _characters | std::views::values; }
 		std::optional<fig::io::ScenarioData> GetScenario(const fig::uuid& id) const noexcept;
 		auto GetScenarios() const noexcept { return _scenarios | std::views::values; }
+
+		std::optional<fig::llm::ModelSettings> GetActiveModelSettings() const noexcept;
 
 		std::optional<CardMetaDataRef> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
 

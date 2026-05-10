@@ -85,11 +85,32 @@ namespace fig::io
 		return asset;
 	}
 	
+	const Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_Internal(type, DataFormat::Undefined, std::move(data), parent);
+	}
+
+	const Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_Internal(type, DataFormat::Undefined, data, parent);
+	}
+	
 	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
 		return CreateAsset_Internal(type, format, std::move(data), parent);
+	}
+
+	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_Internal(type, format, data, parent);
 	}
 
 	Asset& AssetManager::CreateAsset_Internal(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
@@ -107,13 +128,6 @@ namespace fig::io
 		asset.SetMeta(MetaTag::UpdatedAt, now);
 		asset.SetMeta(MetaTag::LastUsedAt, now);
 		return asset;
-	}
-
-	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-
-		return CreateAsset_Internal(type, format, data, parent);
 	}
 
 	Asset& AssetManager::CreateAsset_Internal(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
@@ -216,6 +230,16 @@ namespace fig::io
 
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend())
+			return std::make_optional<AssetRef>(static_cast<Asset&>(std::ref(itFind->second)));
+		return std::nullopt;
+	}
+
+	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		auto itFind = _assets.find(id);
+		if (itFind != _assets.cend() and itFind->second.asset_type == assetType)
 			return std::make_optional<AssetRef>(static_cast<Asset&>(std::ref(itFind->second)));
 		return std::nullopt;
 	}

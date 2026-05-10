@@ -14,11 +14,15 @@ namespace fig::io
 		Undefined			= 0x00,
 		Character			= 0x01,
 		Scenario			= 0x02,
-		Concept				= 0x03,
+		World				= 0x03,
+		Concept				= 0x04,
 
-		Image				= 0x0A,
+		ModelSettings		= 0x08,
+
 		ChatInstance		= 0x14,
 		ChatLog				= 0x15,
+
+		Image = 0x0A,
 	};
 
 	enum class DataFormat : uint8_t

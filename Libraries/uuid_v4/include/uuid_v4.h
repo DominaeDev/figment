@@ -138,22 +138,6 @@ public:
 		_mm_store_si128((__m128i*)data, x);
 	}
 
-	/* Static factory to parse an UUID from its string representation */
-	static UUID fromStrFactory(const std::string& s)
-	{
-		return fromStrFactory(s.c_str());
-	}
-
-	static UUID fromStrFactory(const char* raw)
-	{
-		return UUID(stom128i(raw));
-	}
-
-	void fromStr(const char* raw)
-	{
-		_mm_store_si128((__m128i*)data, stom128i(raw));
-	}
-
 	UUID& operator=(const UUID& other)
 	{
 		if (&other == this)
@@ -216,6 +200,13 @@ public:
 		return mem;
 	}
 
+	static UUID from_str(const std::string& str)
+	{
+		if (str.length() == 36)
+			return _fromStrFactory(str.c_str());
+		return {};
+	}
+
 private:
 	void _to_str(std::string& s) const
 	{
@@ -227,6 +218,22 @@ private:
 	{
 		__m128i x = _mm_load_si128((__m128i*)data);
 		m128itos(x, res);
+	}
+
+	/* Static factory to parse an UUID from its string representation */
+	static UUID _fromStrFactory(const std::string& s)
+	{
+		return _fromStrFactory(s.c_str());
+	}
+
+	static UUID _fromStrFactory(const char* raw)
+	{
+		return UUID(stom128i(raw));
+	}
+
+	void _fromStr(const char* raw)
+	{
+		_mm_store_si128((__m128i*)data, stom128i(raw));
 	}
 
 public:
@@ -249,7 +256,7 @@ public:
 	{
 		std::string s;
 		stream >> s;
-		uuid = fromStrFactory(s);
+		uuid = _fromStrFactory(s);
 		return stream;
 	}
 

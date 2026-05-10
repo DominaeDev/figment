@@ -30,16 +30,45 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<int32_t> XmlReaderAttribute::AsInt() const noexcept
+	template<std::integral T>
+	std::optional<T> XmlReaderAttribute::AsInt() const noexcept
 	{
 		if (_pAttrib)
 		{
-			int32_t value;
-			if (_pAttrib->QueryIntValue(&value) == XML_SUCCESS)
+			int64_t value;
+			if (_pAttrib->QueryInt64Value(&value) == XML_SUCCESS)
+			{
+				value = std::clamp(value, static_cast<int64_t>(std::numeric_limits<T>::min()), static_cast<int64_t>(std::numeric_limits<T>::max()));
+				return std::make_optional(static_cast<T>(value));
+			}
+		}
+		return std::nullopt;
+	}
+
+	template<>
+	std::optional<uint64_t> XmlReaderAttribute::AsInt<uint64_t>() const noexcept
+	{
+		if (_pAttrib)
+		{
+			uint64_t value;
+			if (_pAttrib->QueryUnsigned64Value(&value) == XML_SUCCESS)
 				return std::make_optional(value);
 		}
 		return std::nullopt;
 	}
+
+	std::optional<int32_t> XmlReaderAttribute::AsInt() const noexcept
+	{
+		return AsInt<int32_t>();
+	}
+
+	template std::optional<uint8_t> XmlReaderAttribute::AsInt<uint8_t>() const noexcept;
+	template std::optional<uint16_t> XmlReaderAttribute::AsInt<uint16_t>() const noexcept;
+	template std::optional<uint32_t> XmlReaderAttribute::AsInt<uint32_t>() const noexcept;
+	template std::optional<int8_t> XmlReaderAttribute::AsInt<int8_t>() const noexcept;
+	template std::optional<int16_t> XmlReaderAttribute::AsInt<int16_t>() const noexcept;
+	template std::optional<int32_t> XmlReaderAttribute::AsInt<int32_t>() const noexcept;
+	template std::optional<int64_t> XmlReaderAttribute::AsInt<int64_t>() const noexcept;
 
 	std::optional<float> XmlReaderAttribute::AsFloat() const noexcept
 	{
@@ -79,8 +108,7 @@ namespace fig::io
 			const char* value = _pAttrib->Value();
 			if (value)
 			{
-				fig::uuid uuid {};
-				uuid.fromStr(value);
+				fig::uuid uuid = fig::uuid::from_str(value);
 				return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
 			}
 		}
@@ -203,8 +231,7 @@ namespace fig::io
 		const char* value = _pElement->GetText();
 		if (value)
 		{
-			fig::uuid uuid {};
-			uuid.fromStr(value);
+			fig::uuid uuid = fig::uuid::from_str(value);
 			return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
 		}
 		return std::nullopt;
@@ -294,8 +321,7 @@ namespace fig::io
 			auto value = elem.value().GetText();
 			if (value.has_value())
 			{
-				fig::uuid uuid {};
-				uuid.fromStr(value.value().c_str());
+				fig::uuid uuid = fig::uuid::from_str(value.value());
 				return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
 			}
 		}
