@@ -147,7 +147,7 @@ namespace fig::gui
 		_pSmallStar->SetPosition(Small::Width - _pSmallStar->GetWidth() - 6, 6);
 		_pSmallStar->SetVisible(false);
 
-		CreateChatCounter(0);
+		SetChatCount(0);
 		SetCardSize(_cardSize);
 
 		SetBorder(_metaData.borderStyle);
@@ -235,7 +235,7 @@ namespace fig::gui
 			_pSmallLabel->SetText(text);
 	}
 
-	void CoverCard::CreateChatCounter(uint32_t count)
+	void CoverCard::SetChatCount(uint32_t count)
 	{
 		if (_pCounterBG)
 			return;
@@ -246,7 +246,7 @@ namespace fig::gui
 		else
 			_pCounterBG->SetPosition(kTagMargin, kTagMargin);
 
-		_pCounterBG->SetForegroundColor(Color { 0, 0, 0, 0xA0 });
+		_pCounterBG->SetForegroundColor(0xA0_rgba);
 
 		auto pCounterIcon = new Image(_pCounterBG, AppResources::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
 		pCounterIcon->SetPosition(6, 6);
@@ -262,31 +262,26 @@ namespace fig::gui
 		_pCounterBG->SetSize(std::max(w + 35, 32), 26);
 	}
 
-	static const Color& GetTagColor(const fig::string& tag)
+	void CoverCard::ShowNew()
 	{
-		static constexpr Color Black { 0x00, 0x00, 0x00, 0xA0 };
-		return Black;
+		if (_pNewIndicator)
+			return;
 
-		static constexpr std::array<Color, 12> s_Colors {
-			Color { 0xB3, 0x42, 0xC4, 0xB0 },
-			Color { 0xC3, 0x30, 0x30, 0xB0 },
-			Color { 0xF0, 0xAA, 0x46, 0xB0 },
-			Color { 0x2C, 0xC6, 0xC4, 0xB0 },
-			Color { 0x00, 0x95, 0x12, 0xB0 },
-			Color { 0x90, 0x5D, 0x14, 0xB0 },
-			Color { 0x43, 0xD0, 0xA3, 0xB0 },
-			Color { 0x3C, 0x36, 0xB8, 0xB0 },
-			Color { 0x66, 0xCC, 0x35, 0xB0 },
-			Color { 0x86, 0x1E, 0x1E, 0xB0 },
-			Color { 0xE6, 0x45, 0xA4, 0xB0 },
-			Color { 0x31, 0x90, 0xC8, 0xB0 },
-		};
+		_pNewIndicator = new NineGridImage(this, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		if (_cardSize == CardSize::Half)
+			_pNewIndicator->SetPosition(6, 6);
+		else
+			_pNewIndicator->SetPosition(kTagMargin, kTagMargin);
 
-		uint32_t n = 0uz;
-		for (size_t i = 0; i < tag.size() && i < 16; ++i)
-			n += static_cast<uint32_t>(tag[i]);
-		n %= s_Colors.size();
-		return s_Colors.at(n);
+		_pNewIndicator->SetForegroundColor(0x1065b4E0_rgba);
+
+		auto pLabel = new StaticText(_pNewIndicator, fig::string { fig::strings::UI::New }, FontFace::Default, 14.0, true);
+		pLabel->SetPosition(6, 3);
+		pLabel->SetForegroundColor(Colors::White);
+		pLabel->SetBackgroundColor(Colors::Transparent);
+
+		auto [w, h] = pLabel->MeasureText();
+		_pNewIndicator->SetSize(w + 12, 26);
 	}
 
 	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, const Color& color)
@@ -332,7 +327,7 @@ namespace fig::gui
 		if (color.IsDefined())
 			pTagBG->SetForegroundColor(color);
 		else
-			pTagBG->SetForegroundColor(GetTagColor(tag));
+			pTagBG->SetForegroundColor(Colors::Black);
 
 		auto pLabel = new StaticText(_pTagsRoot, tag, FontFace::Default, 14.0, true);
 		pLabel->SetForegroundColor(Colors::White);
@@ -538,6 +533,8 @@ namespace fig::gui
 			_pSmallRoot->SetVisible(false);
 			if (_pCounterBG)
 				_pCounterBG->SetPosition(kTagMargin, kTagMargin);
+			if (_pNewIndicator)
+				_pNewIndicator->SetPosition(kTagMargin + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), kTagMargin);
 			SetSize(Large::Width, Large::Height);
 			break;
 
@@ -546,6 +543,8 @@ namespace fig::gui
 			_pSmallRoot->SetVisible(true);
 			if (_pCounterBG)
 				_pCounterBG->SetPosition(6, 6);
+			if (_pNewIndicator)
+				_pNewIndicator->SetPosition(6 + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), 6);
 			SetSize(Small::Width, Small::Height);
 			break;
 		}
@@ -672,6 +671,8 @@ namespace fig::gui
 			_pSmallFooterFade->SetVisible(!_smallImageTexture.empty());
 		if (_pCounterBG)
 			_pCounterBG->SetVisible(!_bHidden);
+		if (_pNewIndicator)
+			_pNewIndicator->SetVisible(!_bHidden);
 
 		// Refresh image
 		if (!_bHidden)

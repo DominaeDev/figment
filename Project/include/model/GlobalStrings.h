@@ -62,6 +62,8 @@ namespace fig::strings
 			"Scenarios";
 		inline constexpr fig::const_string MenuWorlds =
 			"Worlds";
+		inline constexpr fig::const_string New =
+			"New";
 	}
 
 	namespace Errors

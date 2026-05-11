@@ -28,6 +28,9 @@ namespace fig::gui
 				auto& meta = try_meta.value().get();
 				SetMetaData(meta);
 				ShowStar(meta.flags.IsSet(CardMetaData::Flag::Favorite));
+
+				if (meta.flags.IsSet(CardMetaData::Flag::New))
+					ShowNew();
 			}
 			else
 			{

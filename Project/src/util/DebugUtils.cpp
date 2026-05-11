@@ -130,18 +130,17 @@ namespace fig
 			auto& userMngr = Global::GetUserManager();
 
 			fig::llm::ModelSettings modelSettings;
-			if (not Success(modelSettings.LoadFromXml("./import/model_settings.xml")))
+			if (not Success(modelSettings.LoadFromXml("./import/model_settings.xml"))) //! @temp
 				modelSettings = fig::llm::ModelSettings {};
 
 			if (userMngr.SignInDefaultProfile())
 			{
-				auto& content = userMngr.GetContent();
 				auto& assetMngr = userMngr.GetContent().GetAssetManager();
 
 				auto remove_settings = assetMngr.GetAssetsOfType(AssetType::ModelSettings)
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
 					| std::ranges::to<std::vector>();
-				content.GetAssetManager().DeleteAssets(remove_settings);
+				assetMngr.DeleteAssets(remove_settings);
 
 				fig::bytes buf;
 				modelSettings.SaveToXml(buf);

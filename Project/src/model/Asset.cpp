@@ -12,47 +12,60 @@
 
 namespace fig::io
 {
-	fig::string AssetTypeToString(AssetType type, uint8_t subtype)
+	struct AssetTypeInfo
 	{
-		string strType, strSubtype;
-		if (type == AssetType::Character)
-			strType = "data/character";
-		else if (type == AssetType::Scenario)
-			strType = "data/scenario";
-		else if (type == AssetType::Concept)
-			strType = "data/concept";
-		else if (type == AssetType::ChatInstance)
-			strType = "data/chat";
-		else if (type == AssetType::ChatLog)
-			strType = "data/log";
-		else if (type == AssetType::ModelSettings)
-			strType = "data/config";
-		else if (type == AssetType::Image)
+		fig::string_view category;
+		fig::string_view subname;
+		uint8_t type;
+		uint8_t sub;
+	};
+
+	static constexpr std::array<AssetTypeInfo, 11> AssetTypes {
+		AssetTypeInfo { "data",		"character",		static_cast<uint8_t>(AssetType::Character) },
+		AssetTypeInfo { "data",		"scenario",			static_cast<uint8_t>(AssetType::Scenario) },
+		AssetTypeInfo { "data",		"chat",				static_cast<uint8_t>(AssetType::ChatInstance) },
+		AssetTypeInfo { "data",		"log",				static_cast<uint8_t>(AssetType::ChatLog) },
+		AssetTypeInfo { "data",		"model_config",		static_cast<uint8_t>(AssetType::ModelSettings) },
+		AssetTypeInfo { "image",	"profile",			static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::ProfileImage) },
+		AssetTypeInfo { "image",	"cover",			static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::CoverImage) },
+		AssetTypeInfo { "image",	"portrait",			static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::LargePortrait) },
+		AssetTypeInfo { "image",	"small",			static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::SmallPortrait) },
+		AssetTypeInfo { "image",	"background",		static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::Background) },
+		AssetTypeInfo { "image",	"expression",		static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::Expression) },
+	};
+
+	using DataFormatInfo = std::pair<fig::string_view, DataFormat>;
+
+	static constexpr std::array<DataFormatInfo, 7> DataFormats {
+		DataFormatInfo { "text/default",	DataFormat::Text },
+		DataFormatInfo { "text/xml",		DataFormat::DataXml },
+		DataFormatInfo { "text/json",		DataFormat::DataJson },
+		DataFormatInfo { "image/bitmap",	DataFormat::ImageUncompressed },
+		DataFormatInfo { "image/jpeg",		DataFormat::ImageJpeg },
+		DataFormatInfo { "image/png",		DataFormat::ImagePng },
+		DataFormatInfo { "image/webp",		DataFormat::ImageWebp },
+	};
+
+	fig::string AssetTypeToString(AssetType assetType, uint8_t subtype) noexcept
+	{
+		uint8_t type = static_cast<uint8_t>(assetType);
+		if (auto itFind = std::find_if(AssetTypes.cbegin(), AssetTypes.cend(),
+			[type, subtype](auto& t) { return t.type == type && t.sub == subtype; }); 
+			itFind != AssetTypes.cend())
 		{
-			strType = "image";
-			if (subtype == static_cast<uint8_t>(ImageType::ProfileImage))
-				strSubtype = "profile";
-			else if (subtype == static_cast<uint8_t>(ImageType::CoverImage))
-				strSubtype = "cover";
-			else if (subtype == static_cast<uint8_t>(ImageType::LargePortrait))
-				strSubtype = "portrait";
-			else if (subtype == static_cast<uint8_t>(ImageType::SmallPortrait))
-				strSubtype = "small";
-			else if (subtype == static_cast<uint8_t>(ImageType::Background))
-				strSubtype = "background";
-			else if (subtype == static_cast<uint8_t>(ImageType::Expression))
-				strSubtype = "expression";
+			auto& assetType = *itFind;
+			if (assetType.subname.empty())
+				return fig::string { assetType.category };
+			else
+				return std::format("{}/{}", assetType.category, assetType.subname);
 		}
 		else
-			strType = "unknown";
-
-		if (not strSubtype.empty())
-			return std::format("{}/{}", strType, strSubtype);
-		else
-			return strType;
+		{
+			return "unknown";
+		}
 	}
 
-	std::pair<AssetType, uint8_t> AssetTypeFromString(const fig::string& str)
+	std::pair<AssetType, uint8_t> AssetTypeFromString(const fig::string& str) noexcept
 	{
 		fig::string strType, strSubtype;
 		size_t pos_slash = str.find('/');
@@ -66,72 +79,44 @@ namespace fig::io
 			strType = str;
 		}
 
-		AssetType type;
-		uint8_t subtype = 0u;
-		if (strType == "data")
+		if (auto itFind = std::find_if(AssetTypes.cbegin(), AssetTypes.cend(),
+			[&strType, &strSubtype](auto& t) { return t.category == strType && t.subname == strSubtype; }); 
+			itFind != AssetTypes.cend())
 		{
-			if (strSubtype == "character")
-				type = AssetType::Character;
-			else if (strSubtype == "scenario")
-				type = AssetType::Scenario;
-			else if (strSubtype == "world")
-				type = AssetType::Concept;
-			else if (strSubtype == "concept")
-				type = AssetType::Concept;
-			else if (strSubtype == "chat")
-				type = AssetType::ChatInstance;
-			else if (strSubtype == "log")
-				type = AssetType::ChatLog;
-			else if (strSubtype == "config")
-				type = AssetType::ModelSettings;
-		}
-		else if (strType == "image")
-		{
-			type = AssetType::Image;
-			if (strSubtype == "profile")
-				subtype = static_cast<uint8_t>(ImageType::ProfileImage);
-			else if (strSubtype == "cover")
-				subtype = static_cast<uint8_t>(ImageType::CoverImage);
-			else if (strSubtype == "portrait")
-				subtype = static_cast<uint8_t>(ImageType::LargePortrait);
-			else if (strSubtype == "small")
-				subtype = static_cast<uint8_t>(ImageType::SmallPortrait);
-			else if (strSubtype == "background")
-				subtype = static_cast<uint8_t>(ImageType::Background);
-			else if (strSubtype == "expression")
-				subtype = static_cast<uint8_t>(ImageType::Expression);
+			return std::make_pair(static_cast<AssetType>(itFind->type), itFind->sub);
 		}
 		else
-			type = AssetType::Undefined;
-
-		return std::make_pair(type, subtype);
-	}
-
-	fig::string DataFormatToString(DataFormat format)
-	{
-		switch (format)
 		{
-		case DataFormat::Text:				return "text/default";
-		case DataFormat::DataXml:			return "text/xml";
-		case DataFormat::DataJson:			return "text/json";
-		case DataFormat::ImageUncompressed:	return "image/bitmap";
-		case DataFormat::ImageJpeg:			return "image/jpeg";
-		case DataFormat::ImagePng:			return "image/png";
-		case DataFormat::ImageWebp:			return "image/webp";
-		default:							return "unknown";
+			return std::make_pair(AssetType::Undefined, 0);
 		}
 	}
 
-	DataFormat DataFormatFromString(const fig::string& str)
+	fig::string DataFormatToString(DataFormat format) noexcept
 	{
-		if (str == "text/default")			return DataFormat::Text;
-		else if (str == "text/xml")			return DataFormat::DataXml;
-		else if (str == "text/json")		return DataFormat::DataJson;
-		else if (str == "image/bitmap")		return DataFormat::ImageUncompressed;
-		else if (str == "image/jpeg")		return DataFormat::ImageJpeg;
-		else if (str == "image/png")		return DataFormat::ImagePng;
-		else if (str == "image/webp")		return DataFormat::ImageWebp;
-		else								return DataFormat::Undefined;
+		if (auto itFind = std::find_if(DataFormats.cbegin(), DataFormats.cend(),
+			[format](auto& f) { return f.second == format; });
+			itFind != DataFormats.cend())
+		{
+			return fig::string { itFind->first };
+		}
+		else
+		{
+			return "unknown";
+		}
+	}
+
+	DataFormat DataFormatFromString(const fig::string& str) noexcept
+	{
+		if (auto itFind = std::find_if(DataFormats.cbegin(), DataFormats.cend(),
+			[&str](auto& f) { return f.first == str; });
+			itFind != DataFormats.cend())
+		{
+			return itFind->second;
+		}
+		else
+		{
+			return DataFormat::Undefined;
+		}
 	}
 
 	DataFormat DataFormatFromExt(const fig::string& ext)
@@ -156,9 +141,9 @@ namespace fig::io
 
 	FolderCategory FolderCategoryFromString(const fig::string& str) noexcept
 	{
-		if (str == "character")				return FolderCategory::Character;
-		else if (str == "scenario")			return FolderCategory::Scenario;
-		else								return FolderCategory::Undefined;
+		if (str == "character")			return FolderCategory::Character;
+		else if (str == "scenario")		return FolderCategory::Scenario;
+		else							return FolderCategory::Undefined;
 	}
 
 	fig::string FolderCategoryToString(FolderCategory category) noexcept
@@ -188,7 +173,7 @@ namespace fig::io
 	{
 		fig::string str;
 		str.assign(reinterpret_cast<const char*>(data.data()), data.size());
-		return str; // rvo
+		return str;
 	}
 
 	fig::string_view Asset::AsStringView() const

@@ -68,10 +68,10 @@ namespace fig::io
 		Invalid,
 	};
 
-	fig::string AssetTypeToString(AssetType type, uint8_t subtype);
-	std::pair<AssetType, uint8_t> AssetTypeFromString(const fig::string& str);
-	fig::string DataFormatToString(DataFormat format);
-	DataFormat DataFormatFromString(const fig::string& str);
+	fig::string AssetTypeToString(AssetType type, uint8_t subtype) noexcept;
+	std::pair<AssetType, uint8_t> AssetTypeFromString(const fig::string& str) noexcept;
+	fig::string DataFormatToString(DataFormat format) noexcept;
+	DataFormat DataFormatFromString(const fig::string& str) noexcept;
 	DataFormat DataFormatFromExt(const fig::string& ext);
 
 	enum class FolderCategory

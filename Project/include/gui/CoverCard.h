@@ -51,7 +51,8 @@ namespace fig::gui
 		void RefreshState();
 
 		void SetLabel(const fig::string& text) noexcept;
-		void CreateChatCounter(uint32_t count);
+		void SetChatCount(uint32_t count);
+		void ShowNew();
 
 		enum class AddTagResult { Ok, Reject, Stop };
 		AddTagResult AddTag(const fig::string& tag, const Color& color = {});
@@ -90,6 +91,7 @@ namespace fig::gui
 
 		CardSize _cardSize {};
 		Control* _pCounterBG {};
+		Control* _pNewIndicator {};
 
 		Control* _pLargeRoot {};
 		Control* _pLargeFooter {};
