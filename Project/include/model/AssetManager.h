@@ -79,7 +79,7 @@ namespace fig::io
 		void SaveModified();
 
 		enum class CharacterDataFormat { Default, TavernV2, };
-		std::vector<AssetRef> ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format = CharacterDataFormat::Default);
+		std::vector<AssetRef> ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format = CharacterDataFormat::Default, size_t max_count = 0uz);
 		std::expected<AssetRef, FileError> ImportCharacter(const fig::path& filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		std::expected<AssetRef, FileError> ImportScenario(const fig::path& filename);
 		
@@ -97,8 +97,8 @@ namespace fig::io
 		size_t LoadAssetIndex() noexcept;
 		bool LoadAssetMetaData() noexcept;
 		bool LoadDataAssets() noexcept;
-		bool WriteAsset(Asset& asset);
-		bool UpdateAsset(Asset& asset);
+		bool UpdateAssetOnDisk(Asset& asset);
+		bool UpdateAssetInDatabase(Asset& asset);
 		std::expected<AssetRef, FileError> LoadAsset_Internal(Asset& asset) noexcept;
 		bool DeleteAsset_Internal(const fig::uuid& assetID) noexcept;
 		bool DeleteAssetFile(const fig::uuid& assetID) noexcept;

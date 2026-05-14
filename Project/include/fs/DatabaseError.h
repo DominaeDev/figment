@@ -12,4 +12,6 @@ namespace fig::io
 		FailedContraint,
 		SQLError,
 	};
+
+	inline constexpr bool Success(DatabaseError error) { return error == DatabaseError::NoError; };
 }

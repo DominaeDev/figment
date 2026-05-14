@@ -22,10 +22,9 @@ namespace fig::io
 	{
 		enum class Flag
 		{
-			New			= 1 << 0,
-			Imported	= 1 << 1,
-			Hidden		= 1 << 2,
-			Favorite	= 1 << 3,
+			Imported	= 1 << 0,
+			Hidden		= 1 << 1,
+			Favorite	= 1 << 2,
 		};
 		using Flags = EnumFlags<Flag>;
 
@@ -41,6 +40,8 @@ namespace fig::io
 
 		static std::optional<CardMetaData> FromJson(const fig::string& json);
 		static fig::string ToJson(const CardMetaData& metaData);
+
+		bool IsNew() const noexcept;
 	};
 
 	using CardMetaDataRef = std::reference_wrapper<CardMetaData>;

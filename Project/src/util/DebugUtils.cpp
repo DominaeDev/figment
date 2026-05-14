@@ -13,6 +13,7 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
+//			ImportTestCharacters();
 //			ShuffleCards();
 
 //			CreateModelSettings();
@@ -46,7 +47,7 @@ namespace fig
 					| std::ranges::to<std::vector>();
 				content.GetAssetManager().DeleteAssets(remove_characters);
 
-				content.ImportCharactersInDirectory(path);
+				content.ImportCharactersInDirectory(path, 10uz);
 				userMngr.SignOut();
 			}
 		}
@@ -92,15 +93,14 @@ namespace fig
 				std::ranges::shuffle(characterAssets, rng);
 
 				int32_t count = 0;
-				auto timestamp = fig::util::utc_now();
+				auto now = fig::util::utc_now();
 				for (auto& assetRef : characterAssets)
 				{
 					auto& asset = assetRef.get();
-					content.MarkNew(asset.id, count++ < 10);
-					asset.SetMeta(MetaTag::CreatedAt, timestamp);
-					asset.SetMeta(MetaTag::LastUsedAt, timestamp);
-					asset.SetMeta(MetaTag::UpdatedAt, timestamp);
-					timestamp -= static_cast<fig::timestamp>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::milliseconds(100)).count());
+					asset.SetMeta(MetaTag::CreatedAt, now);
+					asset.SetMeta(MetaTag::LastUsedAt, now);
+					asset.SetMeta(MetaTag::UpdatedAt, now);
+					now -= static_cast<fig::timestamp>(std::chrono::milliseconds(100).count());
 				}
 
 				userMngr.SignOut();

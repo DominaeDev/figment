@@ -33,7 +33,7 @@ namespace fig
     using buffer = std::array<byte, N>;
 
     using uuid = UUIDv4::UUID;
-    using timestamp = uint64_t;
+    using timestamp = uint64_t; // unix epoch (milliseconds)
     using path = std::filesystem::path;
 
     template <typename T>

@@ -5,36 +5,34 @@
 
 namespace fig::io
 {
-	static constexpr auto FlagMapping = std::array<std::pair<CardMetaData::Flag, std::string_view>, 4> {
-		std::pair { CardMetaData::Flag::New, "new" },
-		std::pair { CardMetaData::Flag::Imported, "imported" },
-		std::pair { CardMetaData::Flag::Hidden, "hidden" },
-		std::pair { CardMetaData::Flag::Favorite, "favorite" },
+	static constexpr auto FlagMapping = std::array<std::pair<CardMetaData::Flag, std::string_view>, 3> {
+		std::pair { CardMetaData::Flag::Imported,	"imported" },
+		std::pair { CardMetaData::Flag::Hidden,		"hidden" },
+		std::pair { CardMetaData::Flag::Favorite,	"favorite" },
 	};
 
 	static fig::string SerializeBorder(CardBorderStyle border)
 	{
-		switch (border) //! @temp
+		switch (border)
 		{
-		case CardBorderStyle::Style01: return "1";
-		case CardBorderStyle::Style02: return "2";
-		case CardBorderStyle::Style03: return "3";
-		case CardBorderStyle::Style04: return "4";
-		case CardBorderStyle::Style05: return "5";
-		case CardBorderStyle::Style06: return "6";
+		case CardBorderStyle::Style01: return "1";	//! @temp
+		case CardBorderStyle::Style02: return "2";	//! @temp
+		case CardBorderStyle::Style03: return "3";	//! @temp
+		case CardBorderStyle::Style04: return "4";	//! @temp
+		case CardBorderStyle::Style05: return "5";	//! @temp
+		case CardBorderStyle::Style06: return "6";	//! @temp
 		default: return "";
 		}
 	}
 
 	static CardBorderStyle DeserializeBorder(const fig::string& border)
 	{
-		//! @temp
-		if (border == "1") return CardBorderStyle::Style01;
-		if (border == "2") return CardBorderStyle::Style02;
-		if (border == "3") return CardBorderStyle::Style03;
-		if (border == "4") return CardBorderStyle::Style04;
-		if (border == "5") return CardBorderStyle::Style05;
-		if (border == "6") return CardBorderStyle::Style06;
+		if (border == "1") return CardBorderStyle::Style01;	//! @temp
+		if (border == "2") return CardBorderStyle::Style02;	//! @temp
+		if (border == "3") return CardBorderStyle::Style03;	//! @temp
+		if (border == "4") return CardBorderStyle::Style04;	//! @temp
+		if (border == "5") return CardBorderStyle::Style05;	//! @temp
+		if (border == "6") return CardBorderStyle::Style06;	//! @temp
 		return CardBorderStyle::None;
 	}
 
@@ -78,5 +76,16 @@ namespace fig::io
 		{
 			return "{}";
 		}
+	}
+
+	bool CardMetaData::IsNew() const noexcept
+	{
+		if (createdAt != updatedAt or createdAt != lastUsedAt)
+			return false;
+		
+		fig::timestamp now = fig::util::utc_now();
+		if (static_cast<long long>(now - createdAt) > std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::days(3)).count())
+			return false;
+		return true;
 	}
 }

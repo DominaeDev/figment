@@ -77,7 +77,7 @@ namespace fig::io
 		asset.id = id;
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
-		asset.file_status = AssetFileStatus::PartiallyLoaded;
+		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Modified;
 		auto now = util::utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
@@ -122,7 +122,8 @@ namespace fig::io
 		asset.asset_type = type;
 		asset.data = std::move(data); // Move data
 		asset.data_format = format;
-		asset.file_status = AssetFileStatus::PartiallyLoaded;
+		asset.sync_state.has_meta = true;
+		asset.sync_state.has_data = not data.empty();
 		auto now = util::utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
@@ -138,7 +139,8 @@ namespace fig::io
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
 		asset.data_format = format;
-		asset.file_status = AssetFileStatus::PartiallyLoaded;
+		asset.sync_state.has_meta = true;
+		asset.sync_state.has_data = not data.empty();
 		auto now = util::utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
@@ -187,8 +189,9 @@ namespace fig::io
 			return asset; // Error
 
 		asset.asset_subtype = static_cast<uint8_t>(subtype);
-		asset.file_status = AssetFileStatus::PartiallyLoaded;
 		asset.data_format = DataFormat::ImageUncompressed;
+		asset.sync_state.has_meta = true;
+		asset.sync_state.has_data = true;
 
 		auto pSurface = surface.get();
 		int32_t stride = pSurface->pitch / pSurface->w;
@@ -267,43 +270,50 @@ namespace fig::io
 		for (auto& kvp : _assets)
 		{
 			auto& asset = kvp.second;
-			if (asset.file_status == AssetFileStatus::Modified)
-				WriteAsset(asset);
-			if (asset.save_status < AssetSaveStatus::Saved)
-				UpdateAsset(asset);
+			if (asset.sync_state.error == AssetSyncState::Error::NoError)
+			{
+				if (asset.sync_state.file_sync != AssetSyncState::SyncStatus::Synchronized)
+					UpdateAssetOnDisk(asset);
+				if (asset.sync_state.db_sync != AssetSyncState::SyncStatus::Synchronized)
+					UpdateAssetInDatabase(asset);
+			}
 		}
 	}
 
-	bool AssetManager::WriteAsset(Asset& asset)
+	bool AssetManager::UpdateAssetOnDisk(Asset& asset)
 	{
 		auto file = asset.ToFile();
 		AssetFileWriter writer(_profilePath, _profileAuthKey);
 		if (auto error = writer.WriteFile(file); error == FileError::NoError)
 		{
-			asset.file_status = AssetFileStatus::FullyLoaded;
+			asset.sync_state.file_sync = AssetSyncState::SyncStatus::Synchronized;
 			return true;
 		}
 		return false;
 	}
 
-	bool AssetManager::UpdateAsset(Asset& asset)
+	bool AssetManager::UpdateAssetInDatabase(Asset& asset)
 	{
 		auto& db = GetDatabase();
-		if (asset.save_status == AssetSaveStatus::Created)
+		if (asset.sync_state.db_sync == AssetSyncState::SyncStatus::Created)
 		{
 			if (db.CreateAsset(asset) == DatabaseError::NoError)
 			{
-				asset.save_status = AssetSaveStatus::Saved;
+				asset.sync_state.db_sync = AssetSyncState::SyncStatus::Synchronized;
 				return true;
 			}
 		}
-		else if (asset.save_status == AssetSaveStatus::Modified)
+		else if (asset.sync_state.db_sync == AssetSyncState::SyncStatus::Modified)
 		{
 			if (db.UpdateAsset(asset) == DatabaseError::NoError)
 			{
-				asset.save_status = AssetSaveStatus::Saved;
+				asset.sync_state.db_sync = AssetSyncState::SyncStatus::Synchronized;
 				return true;
 			}
+		}
+		else
+		{
+			assert(false && "Invalid asset syncronization state");
 		}
 		return false;
 	}
@@ -348,19 +358,19 @@ namespace fig::io
 				if (auto file = reader.ReadFile(asset.GetFileName(), false))
 				{
 					asset.FromFile(std::move(file.value()));
-					asset.file_status = AssetFileStatus::PartiallyLoaded;
+					asset.sync_state.has_meta = true;
 				}
 				else if (file.error() == FileError::NotFound)
-					asset.file_status = AssetFileStatus::Missing;
-				else
-					asset.file_status = AssetFileStatus::Invalid; // Failed to load for some reason, but the file exists.
+					asset.sync_state.error = AssetSyncState::Error::Missing;
+				else // File exists but failed to read
+					asset.sync_state.error = AssetSyncState::Error::Invalid;
 			});
 		DEBUG_MEASURE_END();
 
-		// Remove missing assets from index
+		// Purge missing assets from index
 		DEBUG_MEASURE_BEGIN("Remove missing assets");
 		for (auto& id : _assets
-			| std::views::filter([](auto& kvp) { return kvp.second.file_status == AssetFileStatus::Missing; })
+			| std::views::filter([](auto& kvp) { return kvp.second.sync_state.error == AssetSyncState::Error::Missing; })
 			| std::views::keys
 			| std::ranges::to<std::vector>())
 		{
@@ -409,7 +419,7 @@ namespace fig::io
 			return std::unexpected(FileError::NotFound);
 
 		Asset& asset = itFind->second;
-		if (asset.file_status == AssetFileStatus::FullyLoaded)
+		if (asset.sync_state.has_data)
 			return asset;
 
 		return LoadAsset_Internal(asset);
@@ -417,22 +427,28 @@ namespace fig::io
 
 	std::expected<AssetRef, FileError> AssetManager::LoadAsset_Internal(Asset& asset) noexcept
 	{
-		if (asset.file_status == AssetFileStatus::FullyLoaded)
+		if (asset.sync_state.has_data)
 			return asset;
 
-		if (asset.file_status == AssetFileStatus::Invalid)
+		if (asset.sync_state.error != AssetSyncState::Error::NoError)
 			return std::unexpected(FileError::ReadError);
 
 		AssetFileReader reader(_profilePath, _profileAuthKey);
 		if (auto file = reader.ReadFile(asset.GetFileName()))
 		{
 			asset.FromFile(std::move(file.value()));
-			asset.file_status = AssetFileStatus::FullyLoaded;
+			asset.sync_state.has_meta = true;
+			asset.sync_state.has_data = true;
 			return std::ref(asset);
+		}
+		else if (file.error() == FileError::NotFound)
+		{
+			asset.sync_state.error = AssetSyncState::Error::Missing;
+			return std::unexpected(FileError::ReadError);
 		}
 		else
 		{
-			asset.file_status = AssetFileStatus::Invalid;
+			asset.sync_state.error = AssetSyncState::Error::Invalid;
 			return std::unexpected(FileError::ReadError);
 		}
 	}
@@ -477,11 +493,9 @@ namespace fig::io
 		auto& db = GetDatabase();
 		for (auto& assetID : allAssetIDs)
 		{
-			if (DeleteAssetFile(assetID))
-			{
-				db.DeleteAsset(assetID);
+			DeleteAssetFile(assetID);
+			if (Success(db.DeleteAsset(assetID)))
 				count++;
-			}
 		}
 		return count;
 	}
@@ -544,11 +558,14 @@ namespace fig::io
 		return assetIDs;
 	}
 
-	std::vector<AssetRef> AssetManager::ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format)
+	std::vector<AssetRef> AssetManager::ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format, size_t max_count)
 	{
 		std::vector<fig::path> files;
 		for (const auto& entry : std::filesystem::directory_iterator(directory))
 			files.push_back(entry.path());
+
+		if (max_count > 0)
+			files.resize(std::min(files.size(), max_count));
 
 		std::vector<AssetRef> imported;
 		imported.reserve(files.size());

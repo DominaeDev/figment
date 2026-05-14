@@ -17,7 +17,7 @@ namespace fig::io
 		UserContentManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey);
 		~UserContentManager();
 
-		size_t ImportCharactersInDirectory(const fig::path& directory);
+		size_t ImportCharactersInDirectory(const fig::path& directory, size_t max_count = 0uz);
 		std::expected<AssetRef, FileError> ImportCharacter(const fig::path& filename);
 		std::expected<AssetRef, FileError> ImportScenario(const fig::path& filename);
 
@@ -32,7 +32,6 @@ namespace fig::io
 
 		std::expected<fig::sdl::TextureRef, FileError> GetSmallPortraitForCharacter(fig::gui::RendererPtr pRenderer, const fig::uuid& characterId) noexcept;
 
-		bool MarkNew(const fig::uuid& assetId, bool value = true);
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);
 		bool MarkHidden(const fig::uuid& assetId, bool value = true);

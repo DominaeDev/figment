@@ -209,25 +209,25 @@ namespace fig::io
 
 		fig::timestamp GetCreatedAt() const noexcept
 		{
-			fig::timestamp ts;
-			if (try_get_meta(MetaTag::CreatedAt, ts))
-				return ts;
+			fig::timestamp value;
+			if (try_get_meta(MetaTag::CreatedAt, value))
+				return value;
 			return fig::timestamp { 0 };
 		}
 
 		fig::timestamp GetUpdatedAt() const noexcept
 		{
-			fig::timestamp ts;
-			if (try_get_meta(MetaTag::UpdatedAt, ts))
-				return ts;
+			fig::timestamp value;
+			if (try_get_meta(MetaTag::UpdatedAt, value))
+				return value;
 			return fig::timestamp { 0 };
 		}
 
 		fig::timestamp GetLastUsedAt() const noexcept
 		{
-			fig::timestamp ts;
-			if (try_get_meta(MetaTag::LastUsedAt, ts))
-				return ts;
+			fig::timestamp value;
+			if (try_get_meta(MetaTag::LastUsedAt, value))
+				return value;
 			return fig::timestamp { 0 };
 		}
 

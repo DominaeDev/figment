@@ -262,9 +262,14 @@ namespace fig::gui
 		_pCounterBG->SetSize(std::max(w + 35, 32), 26);
 	}
 
-	void CoverCard::ShowNew()
+	void CoverCard::ShowNew(bool bShow)
 	{
 		if (_pNewIndicator)
+		{
+			_pNewIndicator->SetVisible(bShow);
+			return;
+		}
+		else if (!bShow)
 			return;
 
 		_pNewIndicator = new NineGridImage(this, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
@@ -481,7 +486,7 @@ namespace fig::gui
 			break;
 		}
 
-		if (filter.IsSet(FilterFlag::New) and not _metaData.flags.IsSet(CardMetaData::Flag::New))
+		if (filter.IsSet(FilterFlag::New) and not _metaData.IsNew())
 			return false;
 		if (filter.IsSet(FilterFlag::Starred) and not _metaData.flags.IsSet(CardMetaData::Flag::Favorite))
 			return false;

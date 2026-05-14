@@ -147,11 +147,6 @@ namespace fig::io
 		return false;
 	}
 
-	bool UserContentManager::MarkNew(const fig::uuid& assetId, bool value)
-	{
-		return MarkFlag<CardMetaData::Flag::New>(assetId, value);
-	}
-
 	bool UserContentManager::MarkImported(const fig::uuid& assetId, bool value)
 	{
 		return MarkFlag<CardMetaData::Flag::Imported>(assetId, value);
@@ -183,13 +178,12 @@ namespace fig::io
 		return false;
 	}
 
-	size_t UserContentManager::ImportCharactersInDirectory(const fig::path& directory)
+	size_t UserContentManager::ImportCharactersInDirectory(const fig::path& directory, size_t max_count)
 	{
-		auto imported = _pAssetMngr->ImportCharactersInDirectory(directory, AssetManager::CharacterDataFormat::TavernV2);
+		auto imported = _pAssetMngr->ImportCharactersInDirectory(directory, AssetManager::CharacterDataFormat::TavernV2, max_count);
 		for (auto& import : imported)
 		{
 			auto& asset = import.get();
-			MarkNew(asset.id);
 			MarkImported(asset.id);
 		}
 		return imported.size();
@@ -200,7 +194,6 @@ namespace fig::io
 		if (auto imported = _pAssetMngr->ImportCharacter(filename, AssetManager::CharacterDataFormat::TavernV2))
 		{
 			auto& asset = imported.value().get();
-			MarkNew(asset.id);
 			MarkImported(asset.id);
 			return std::ref(asset);
 		}
@@ -213,7 +206,6 @@ namespace fig::io
 		if (auto imported = _pAssetMngr->ImportScenario(filename))
 		{
 			auto& asset = imported.value().get();
-			MarkNew(asset.id);
 			MarkImported(asset.id);
 			return std::ref(asset);
 		}

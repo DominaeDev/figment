@@ -198,8 +198,7 @@ namespace fig::io
 			if (pSettings)
 				asset.settings = fig::string { pSettings };
 
-			asset.file_status = AssetFileStatus::NotLoaded;
-			asset.save_status = AssetSaveStatus::Saved;
+			asset.sync_state.db_sync = AssetSyncState::SyncStatus::Synchronized;
 			if (!asset.id.empty())
 				result[asset.id] = std::move(asset);
 		}

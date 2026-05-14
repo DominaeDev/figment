@@ -50,22 +50,40 @@ namespace fig::io
 		Expression			= 0x0A, // ...
 	};
 
-	enum class AssetFileStatus : uint8_t
+	struct AssetSyncState
 	{
-		NotLoaded = 0,
-		PartiallyLoaded,
-		FullyLoaded,
-		Missing,
-		Invalid,
-		Modified,
-	};
+		enum class SyncStatus
+		{
+			Created = 0,
+			Modified,
+			Synchronized,
+		};
 
-	enum class AssetSaveStatus : uint8_t
-	{
-		Created = 0,
-		Modified,
-		Saved,
-		Invalid,
+		enum class Error
+		{
+			NoError = 0,
+			Missing,
+			Invalid,
+		};
+
+		bool has_meta {};
+		bool has_data {};
+		SyncStatus file_sync { SyncStatus::Created };
+		SyncStatus db_sync { SyncStatus::Created };
+		Error error {};
+
+		inline void Modified() noexcept
+		{
+			file_sync = AssetSyncState::SyncStatus::Modified;
+			if (db_sync != AssetSyncState::SyncStatus::Created)
+				db_sync = AssetSyncState::SyncStatus::Modified;
+		}
+
+		inline constexpr bool ShouldWriteToDisk() const noexcept
+		{
+			return has_meta and has_data and file_sync != SyncStatus::Synchronized and error == Error::NoError;
+		}
+
 	};
 
 	fig::string AssetTypeToString(AssetType type, uint8_t subtype) noexcept;
@@ -156,8 +174,7 @@ namespace fig::io
 		DataFormat data_format { DataFormat::Undefined };
 		fig::bytes data {};
 		fig::string settings;
-		AssetFileStatus file_status = { AssetFileStatus::NotLoaded };
-		AssetSaveStatus save_status = { AssetSaveStatus::Created };
+		AssetSyncState sync_state {};
 
 	private:
 		void SetUpdated(bool bWriteTimestamp = true);

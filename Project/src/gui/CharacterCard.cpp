@@ -29,8 +29,7 @@ namespace fig::gui
 				SetMetaData(meta);
 				ShowStar(meta.flags.IsSet(CardMetaData::Flag::Favorite));
 
-				if (meta.flags.IsSet(CardMetaData::Flag::New))
-					ShowNew();
+				ShowNew(meta.IsNew());
 			}
 			else
 			{

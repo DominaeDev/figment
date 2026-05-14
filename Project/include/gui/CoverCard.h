@@ -52,7 +52,7 @@ namespace fig::gui
 
 		void SetLabel(const fig::string& text) noexcept;
 		void SetChatCount(uint32_t count);
-		void ShowNew();
+		void ShowNew(bool bShow);
 
 		enum class AddTagResult { Ok, Reject, Stop };
 		AddTagResult AddTag(const fig::string& tag, const Color& color = {});
