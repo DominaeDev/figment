@@ -389,6 +389,9 @@
     <ClInclude Include="include\fs\Serialization.h" />
     <ClInclude Include="include\fs\TavernCardV2.h" />
     <ClInclude Include="include\fs\Xml.h" />
+    <ClInclude Include="include\fs\XmlReader.h" />
+    <ClInclude Include="include\fs\XmlSerializable.h" />
+    <ClInclude Include="include\fs\XmlWriter.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />

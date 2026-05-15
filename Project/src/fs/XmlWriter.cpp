@@ -1,12 +1,11 @@
 #include <pch.h>
-#include "fs/Xml.h"
+#include "fs/XmlWriter.h"
 #include "util/Common.h"
 #include <tinyxml2.h>
 #include <limits>
 #include <format>
 
 using namespace tinyxml2;
-using namespace fig::util;
 
 namespace fig::io
 {
@@ -15,40 +14,66 @@ namespace fig::io
 		_pParent { pParent }
 	{}
 
-	XmlWriterAttribute& XmlWriterAttribute::operator=(bool value) noexcept
-	{
-		_pParent->SetAttribute(_name.c_str(), value);
-		return *this;
-	}
-
-	XmlWriterAttribute& XmlWriterAttribute::operator=(int32_t value) noexcept
-	{
-		_pParent->SetAttribute(_name.c_str(), value);
-		return *this;
-	}
-
-	XmlWriterAttribute& XmlWriterAttribute::operator=(float value) noexcept
+	template<>
+	void XmlWriterAttribute::Set<float>(const float& value) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), std::format("{:g}", value).c_str());
-		return *this;
 	}
 
-	XmlWriterAttribute& XmlWriterAttribute::operator=(fig::string value) noexcept
+	template<>
+	void XmlWriterAttribute::Set<double>(const double& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), std::format("{:g}", value).c_str());
+	}
+
+	template<>
+	void XmlWriterAttribute::Set<fig::string>(const fig::string& value) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), value.c_str());
-		return *this;
 	}
 
-	XmlWriterAttribute& XmlWriterAttribute::operator=(const fig::byte_span& value) noexcept
+	template<>
+	void XmlWriterAttribute::Set<fig::path>(const fig::path& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), value.u8string().c_str());
+	}
+
+	template<>
+	void XmlWriterAttribute::Set<fig::byte_span>(const fig::byte_span& value) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), util::Base64Encode(value).c_str());
-		return *this;
 	}
 
-	XmlWriterAttribute& XmlWriterAttribute::operator=(const fig::uuid& value) noexcept
+	template<>
+	void XmlWriterAttribute::Set<fig::uuid>(const fig::uuid& value) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), value.to_str().c_str());
-		return *this;
+	}
+
+	template<>
+	void XmlWriterAttribute::Set<fig::string_span>(const fig::string_span& values) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), fig::util::encode_csv(values).c_str());
+	}
+
+	template<>
+	void XmlWriterAttribute::Set<bool>(const bool& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), value);
+	}
+
+	template<typename T>
+		requires (std::signed_integral<T> and not std::same_as<T, bool>)
+	void XmlWriterAttribute::Set(const T& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), static_cast<int64_t>(value));
+	}
+
+	template<typename T>
+		requires (std::unsigned_integral<T> and not std::same_as<T, bool>)
+	void XmlWriterAttribute::Set(const T& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), static_cast<uint64_t>(value));
 	}
 
 	XmlWriterElement::XmlWriterElement(tinyxml2::XMLElement* pElement) noexcept :
@@ -61,116 +86,67 @@ namespace fig::io
 		_pElement->DeleteChildren();
 	}
 
-	void XmlWriterElement::SetValue(bool value) noexcept
+	template<> 
+	void XmlWriterElement::SetValue<bool>(const bool& value) noexcept
 	{
 		DeleteValue();
 		_pElement->InsertNewText(value ? "true" : "false");
 	}
 
-	void XmlWriterElement::SetValue(int32_t value) noexcept
+	template<typename T> requires (std::integral<T> and not std::same_as<T, bool>)
+	void XmlWriterElement::SetValue(const T& value) noexcept
 	{
 		DeleteValue();
 		_pElement->InsertNewText(std::format("{}", value).c_str());
 	}
 
-	void XmlWriterElement::SetValue(float value) noexcept
+	template<>
+	void XmlWriterElement::SetValue<float>(const float& value) noexcept
 	{
 		DeleteValue();
 		_pElement->InsertNewText(std::format("{:g}", value).c_str());
 	}
 
-	void XmlWriterElement::SetValue(const fig::string& value) noexcept
+	template<>
+	void XmlWriterElement::SetValue<double>(const double& value) noexcept
+	{
+		DeleteValue();
+		_pElement->InsertNewText(std::format("{:g}", value).c_str());
+	}
+
+	template<>
+	void XmlWriterElement::SetValue<fig::string>(const fig::string& value) noexcept
 	{
 		DeleteValue();
 		_pElement->InsertNewText(value.c_str());
 	}
 
-	void XmlWriterElement::SetValue(const fig::byte_span& value) noexcept
+	template<>
+	void XmlWriterElement::SetValue<fig::path>(const fig::path& value) noexcept
+	{
+		DeleteValue();
+		_pElement->InsertNewText(value.u8string().c_str());
+	}
+
+	template<>
+	void XmlWriterElement::SetValue<fig::byte_span>(const fig::byte_span& value) noexcept
 	{
 		DeleteValue();
 		_pElement->InsertNewText(util::Base64Encode(value).c_str());
 	}
 
-	void XmlWriterElement::SetValue(const fig::uuid& value) noexcept
+	template<>
+	void XmlWriterElement::SetValue<fig::uuid>(const fig::uuid& value) noexcept
 	{
 		DeleteValue();
 		_pElement->InsertNewText(value.to_str().c_str());
 	}
 
-	void XmlWriterElement::SetValue(std::span<const fig::string> values) noexcept
+	template<>
+	void XmlWriterElement::SetValue<fig::string_span>(const fig::string_span& values) noexcept
 	{
 		DeleteValue();
-		_pElement->InsertNewText(encode_csv(values).c_str());
-	}
-
-	void XmlWriterElement::SetAttribute(const fig::string& name, bool value) noexcept
-	{
-		_pElement->SetAttribute(name.c_str(), value);
-	}
-
-	void XmlWriterElement::SetAttribute(const fig::string& name, int32_t value) noexcept
-	{
-		_pElement->SetAttribute(name.c_str(), value);
-	}
-
-	void XmlWriterElement::SetAttribute(const fig::string& name, float value) noexcept
-	{
-		_pElement->SetAttribute(name.c_str(), std::format("{:g}", value).c_str());
-	}
-
-	void XmlWriterElement::SetAttribute(const fig::string& name, const fig::string& value) noexcept
-	{
-		_pElement->SetAttribute(name.c_str(), value.c_str());
-	}
-
-	void XmlWriterElement::SetAttribute(const fig::string& name, const fig::byte_span& value) noexcept
-	{
-		_pElement->SetAttribute(name.c_str(), util::Base64Encode(value).c_str());
-	}
-
-	void XmlWriterElement::SetAttribute(const fig::string& name, const fig::uuid& value) noexcept
-	{
-		_pElement->SetAttribute(name.c_str(), value.to_str().c_str());
-	}
-
-	void XmlWriterElement::SetAttribute(const fig::string& name, std::span<const fig::string> values) noexcept
-	{
-		_pElement->SetAttribute(name.c_str(), encode_csv(values).c_str());
-	}
-
-	void XmlWriterElement::SetElementValue(const fig::string& name, bool value) noexcept
-	{
-		AddChild(name).SetValue(value);
-	}
-
-	void XmlWriterElement::SetElementValue(const fig::string& name, int32_t value) noexcept
-	{
-		AddChild(name).SetValue(value);
-	}
-
-	void XmlWriterElement::SetElementValue(const fig::string& name, float value) noexcept
-	{
-		AddChild(name).SetValue(value);
-	}
-
-	void XmlWriterElement::SetElementValue(const fig::string& name, const fig::string& value) noexcept
-	{
-		AddChild(name).SetValue(value);
-	}
-
-	void XmlWriterElement::SetElementValue(const fig::string& name, const fig::byte_span& value) noexcept
-	{
-		AddChild(name).SetValue(value);
-	}
-
-	void XmlWriterElement::SetElementValue(const fig::string& name, const fig::uuid& value) noexcept
-	{
-		AddChild(name).SetValue(value);
-	}
-
-	void XmlWriterElement::SetElementValue(const fig::string& name, std::span<const fig::string> values) noexcept
-	{
-		AddChild(name).SetValue(encode_csv(values));
+		_pElement->InsertNewText(fig::util::encode_csv(values).c_str());
 	}
 
 	XmlWriterElement XmlWriterElement::AddChild(const fig::string& name) noexcept
@@ -210,16 +186,35 @@ namespace fig::io
 		return XmlWriterElement(pElement);
 	}
 
-	bool XmlWriter::Save(const fig::path& path) const
+	bool XmlWriter::WriteToFile(const fig::path& path) const
 	{
 		return _pDoc->SaveFile(path.u8string().c_str()) == XML_SUCCESS;
 	}
 
-	void XmlWriter::SaveToMemory(fig::bytes& buffer) const
+	void XmlWriter::WriteToMemory(fig::bytes& buffer) const
 	{
 		XMLPrinter printer;
 		_pDoc->Print(&printer);
 		buffer.resize(printer.CStrSize());
 		std::memcpy(buffer.data(), printer.CStr(), buffer.size());
 	}
+
+	// Explicit template instantiations
+	template void XmlWriterAttribute::Set<bool>(const bool&) noexcept;
+	template void XmlWriterAttribute::Set<uint8_t>(const uint8_t&) noexcept;
+	template void XmlWriterAttribute::Set<uint16_t>(const uint16_t&) noexcept;
+	template void XmlWriterAttribute::Set<uint32_t>(const uint32_t&) noexcept;
+	template void XmlWriterAttribute::Set<uint64_t>(const uint64_t&) noexcept;
+	template void XmlWriterAttribute::Set<int8_t>(const int8_t&) noexcept;
+	template void XmlWriterAttribute::Set<int16_t>(const int16_t&) noexcept;
+	template void XmlWriterAttribute::Set<int32_t>(const int32_t&) noexcept;
+	template void XmlWriterAttribute::Set<int64_t>(const int64_t&) noexcept;
+	template void XmlWriterElement::SetValue<uint8_t>(const uint8_t& value) noexcept;
+	template void XmlWriterElement::SetValue<uint16_t>(const uint16_t& value) noexcept;
+	template void XmlWriterElement::SetValue<uint32_t>(const uint32_t& value) noexcept;
+	template void XmlWriterElement::SetValue<uint64_t>(const uint64_t& value) noexcept;
+	template void XmlWriterElement::SetValue<int8_t>(const int8_t& value) noexcept;
+	template void XmlWriterElement::SetValue<int16_t>(const int16_t& value) noexcept;
+	template void XmlWriterElement::SetValue<int32_t>(const int32_t& value) noexcept;
+	template void XmlWriterElement::SetValue<int64_t>(const int64_t& value) noexcept;
 }

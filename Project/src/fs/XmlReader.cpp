@@ -1,11 +1,10 @@
 #include <pch.h>
 
-#include "fs/Xml.h"
+#include "fs/XmlReader.h"
 #include "util/Common.h"
 #include <tinyxml2.h>
 
 using namespace tinyxml2;
-using namespace fig::util;
 
 namespace fig::io
 {
@@ -14,12 +13,8 @@ namespace fig::io
 	{
 	}
 
-	bool XmlReaderAttribute::IsOk() const noexcept
-	{
-		return (bool)_pAttrib;
-	}
-
-	std::optional<bool> XmlReaderAttribute::AsBool() const noexcept
+	template<>
+	std::optional<bool> XmlReaderAttribute::TryGet<bool>() const noexcept
 	{
 		if (_pAttrib)
 		{
@@ -30,8 +25,8 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	template<std::integral T>
-	std::optional<T> XmlReaderAttribute::AsInt() const noexcept
+	template<typename T> requires (std::signed_integral<T> and not std::same_as<T, bool> )
+	std::optional<T> XmlReaderAttribute::TryGet() const noexcept
 	{
 		if (_pAttrib)
 		{
@@ -45,32 +40,24 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	template<>
-	std::optional<uint64_t> XmlReaderAttribute::AsInt<uint64_t>() const noexcept
+	template<typename T>
+		requires (std::unsigned_integral<T> and not std::same_as<T, bool> )
+	std::optional<T> XmlReaderAttribute::TryGet() const noexcept
 	{
 		if (_pAttrib)
 		{
 			uint64_t value;
 			if (_pAttrib->QueryUnsigned64Value(&value) == XML_SUCCESS)
-				return std::make_optional(value);
+			{
+				value = std::clamp(value, static_cast<uint64_t>(std::numeric_limits<T>::min()), static_cast<uint64_t>(std::numeric_limits<T>::max()));
+				return std::make_optional(static_cast<T>(value));
+			}
 		}
 		return std::nullopt;
 	}
 
-	std::optional<int32_t> XmlReaderAttribute::AsInt() const noexcept
-	{
-		return AsInt<int32_t>();
-	}
-
-	template std::optional<uint8_t> XmlReaderAttribute::AsInt<uint8_t>() const noexcept;
-	template std::optional<uint16_t> XmlReaderAttribute::AsInt<uint16_t>() const noexcept;
-	template std::optional<uint32_t> XmlReaderAttribute::AsInt<uint32_t>() const noexcept;
-	template std::optional<int8_t> XmlReaderAttribute::AsInt<int8_t>() const noexcept;
-	template std::optional<int16_t> XmlReaderAttribute::AsInt<int16_t>() const noexcept;
-	template std::optional<int32_t> XmlReaderAttribute::AsInt<int32_t>() const noexcept;
-	template std::optional<int64_t> XmlReaderAttribute::AsInt<int64_t>() const noexcept;
-
-	std::optional<float> XmlReaderAttribute::AsFloat() const noexcept
+	template<>
+	std::optional<float> XmlReaderAttribute::TryGet<float>() const noexcept
 	{
 		if (_pAttrib)
 		{
@@ -81,7 +68,20 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<fig::string> XmlReaderAttribute::AsText() const noexcept
+	template<>
+	std::optional<double> XmlReaderAttribute::TryGet<double>() const noexcept
+	{
+		if (_pAttrib)
+		{
+			double value;
+			if (_pAttrib->QueryDoubleValue(&value) == XML_SUCCESS)
+				return std::make_optional(value);
+		}
+		return std::nullopt;
+	}
+
+	template<>
+	std::optional<fig::string> XmlReaderAttribute::TryGet<fig::string>() const noexcept
 	{
 		if (_pAttrib)
 		{
@@ -91,7 +91,19 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<fig::bytes> XmlReaderAttribute::AsBytes() const noexcept
+	template<>
+	std::optional<fig::path> XmlReaderAttribute::TryGet<fig::path>() const noexcept
+	{
+		if (_pAttrib)
+		{
+			const char* value = _pAttrib->Value();
+			return value ? std::make_optional(fig::path(value)) : std::nullopt;
+		}
+		return std::nullopt;
+	}
+
+	template<>
+	std::optional<fig::bytes> XmlReaderAttribute::TryGet<fig::bytes>() const noexcept
 	{
 		if (_pAttrib)
 		{
@@ -101,7 +113,8 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<fig::uuid> XmlReaderAttribute::AsUUID() const noexcept
+	template<>
+	std::optional<fig::uuid> XmlReaderAttribute::TryGet<fig::uuid>() const noexcept
 	{
 		if (_pAttrib)
 		{
@@ -115,36 +128,12 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<std::vector<fig::string>> XmlReaderAttribute::AsList() const noexcept
+	template<>
+	std::optional<fig::string_list> XmlReaderAttribute::TryGet<fig::string_list>() const noexcept
 	{
-		if (auto str = AsText(); str.has_value())
-			return std::make_optional(decode_csv(str.value()));
+		if (auto str = TryGet<fig::string>(); str.has_value())
+			return std::make_optional(fig::util::decode_csv(str.value()));
 		return std::nullopt;
-	}
-
-	bool XmlReaderAttribute::AsBool(bool default_value) const noexcept
-	{
-		return AsBool().value_or(default_value);
-	}
-
-	int32_t XmlReaderAttribute::AsInt(int32_t default_value) const noexcept
-	{
-		return AsInt().value_or(default_value);
-	}
-
-	float XmlReaderAttribute::AsFloat(float default_value) const noexcept
-	{
-		return AsFloat().value_or(default_value);
-	}
-
-	fig::string XmlReaderAttribute::AsText(const fig::string& default_value) const noexcept
-	{
-		return AsText().value_or(default_value);
-	}
-
-	std::vector<fig::string> XmlReaderAttribute::AsList(const std::vector<fig::string>& default_value) const noexcept
-	{
-		return AsList().value_or(default_value);
 	}
 
 	XmlReaderElement::XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot) noexcept :
@@ -189,7 +178,15 @@ namespace fig::io
 		return "";
 	}
 
-	std::optional<bool> XmlReaderElement::GetBool() const noexcept
+	bool XmlReaderElement::Contains(fig::string_view attributeKey) const noexcept
+	{
+		if (_pElement)
+			return _pElement->FindAttribute(fig::string(attributeKey).c_str()) != nullptr;
+		return false;
+	}
+
+	template<>
+	std::optional<bool> XmlReaderElement::TryGetValue<bool>() const noexcept
 	{
 		bool value;
 		if (_pElement->QueryBoolText(&value) == XML_SUCCESS)
@@ -197,15 +194,33 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<int32_t> XmlReaderElement::GetInt() const noexcept
+	template<typename T> requires (std::signed_integral<T> and not std::same_as<T, bool>)
+		std::optional<T> XmlReaderElement::TryGetValue() const noexcept
 	{
-		int32_t value;
-		if (_pElement->QueryIntText(&value) == XML_SUCCESS)
-			return std::make_optional(value);
+		int64_t value;
+		if (_pElement->QueryInt64Text(&value) == XML_SUCCESS)
+		{
+			value = std::clamp(value, static_cast<int64_t>(std::numeric_limits<T>::min()), static_cast<int64_t>(std::numeric_limits<T>::max()));
+			return std::make_optional(static_cast<T>(value));
+		}
 		return std::nullopt;
 	}
 
-	std::optional<float> XmlReaderElement::GetFloat() const noexcept
+	template<typename T>
+		requires (std::unsigned_integral<T> and not std::same_as<T, bool>)
+	std::optional<T> XmlReaderElement::TryGetValue() const noexcept
+	{
+		uint64_t value;
+		if (_pElement->QueryUnsigned64Text(&value) == XML_SUCCESS)
+		{
+			value = std::clamp(value, static_cast<uint64_t>(std::numeric_limits<T>::min()), static_cast<uint64_t>(std::numeric_limits<T>::max()));
+			return std::make_optional(static_cast<T>(value));
+		}
+		return std::nullopt;
+	}
+
+	template<>
+	std::optional<float> XmlReaderElement::TryGetValue<float>() const noexcept
 	{
 		float value;
 		if (_pElement->QueryFloatText(&value) == XML_SUCCESS)
@@ -213,20 +228,40 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<fig::string> XmlReaderElement::GetText() const noexcept
+	template<>
+	std::optional<double> XmlReaderElement::TryGetValue<double>() const noexcept
+	{
+		double value;
+		if (_pElement->QueryDoubleText(&value) == XML_SUCCESS)
+			return std::make_optional(value);
+		return std::nullopt;
+	}
+
+	template<>
+	std::optional<fig::string> XmlReaderElement::TryGetValue<fig::string>() const noexcept
 	{
 		//! @todo: Resolve mix of CDATA, XMLText, and XMLComment.
 		const char* value = _pElement->GetText();
 		return value ? std::make_optional(fig::string(value)) : std::nullopt;
 	}
 
-	std::optional<fig::bytes> XmlReaderElement::GetBytes() const noexcept
+	template<>
+	std::optional<fig::path> XmlReaderElement::TryGetValue<fig::path>() const noexcept
+	{
+		//! @todo: Resolve mix of CDATA, XMLText, and XMLComment.
+		const char* value = _pElement->GetText();
+		return value ? std::make_optional(fig::path(value)) : std::nullopt;
+	}
+
+	template<>
+	std::optional<fig::bytes> XmlReaderElement::TryGetValue<fig::bytes>() const noexcept
 	{
 		const char* value = _pElement->GetText();
 		return value ? std::make_optional(util::Base64Decode(value)) : std::nullopt;
 	}
 
-	std::optional<fig::uuid> XmlReaderElement::GetUUID() const noexcept
+	template<>
+	std::optional<fig::uuid> XmlReaderElement::TryGetValue<fig::uuid>() const noexcept
 	{
 		const char* value = _pElement->GetText();
 		if (value)
@@ -237,127 +272,18 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<std::vector<fig::string>> XmlReaderElement::GetList() const noexcept
+	template<>
+	std::optional<fig::string_list> XmlReaderElement::TryGetValue<fig::string_list>() const noexcept
 	{
-		if (auto str = GetText(); str.has_value())
-			return std::make_optional(decode_csv(str.value()));
+		if (auto str = TryGetValue<fig::string>(); str.has_value())
+			return std::make_optional(fig::util::decode_csv(str.value()));
 		return std::nullopt;
-	}
-
-	bool XmlReaderElement::GetBool(bool default_value) const noexcept
-	{
-		return GetBool().value_or(default_value);
-	}
-
-	int32_t XmlReaderElement::GetInt(int32_t default_value) const noexcept
-	{
-		return GetInt().value_or(default_value);
-	}
-
-	float XmlReaderElement::GetFloat(float default_value) const noexcept
-	{
-		return GetFloat().value_or(default_value);
-	}
-
-	fig::string XmlReaderElement::GetText(const fig::string& default_value) const noexcept
-	{
-		return GetText().value_or(default_value);
-	}
-
-	std::vector<fig::string> XmlReaderElement::GetList(const std::vector<fig::string>& default_value) const noexcept
-	{
-		return GetList().value_or(default_value);
 	}
 
 	XmlReaderAttribute XmlReaderElement::operator[] (const std::string& key) const noexcept
 	{
 		auto pAttrib = _pElement->FindAttribute(key.c_str());
 		return XmlReaderAttribute(pAttrib);
-	}
-
-	std::optional<bool> XmlReaderElement::GetElementBool(const fig::string& name) const noexcept
-	{
-		if (auto elem = GetFirstElement(name))
-			return elem.value().GetBool();
-		return std::nullopt;
-	}
-
-	std::optional<int32_t> XmlReaderElement::GetElementInt(const fig::string& name) const noexcept
-	{
-		if (auto elem = GetFirstElement(name))
-			return elem.value().GetInt();
-		return std::nullopt;
-	}
-
-	std::optional<float> XmlReaderElement::GetElementFloat(const fig::string& name) const noexcept
-	{
-		if (auto elem = GetFirstElement(name))
-			return elem.value().GetFloat();
-		return std::nullopt;
-	}
-
-	std::optional<fig::string> XmlReaderElement::GetElementText(const fig::string& name) const noexcept
-	{
-		if (auto elem = GetFirstElement(name))
-			return elem.value().GetText();
-		return std::nullopt;
-	}
-
-	std::optional<fig::bytes> XmlReaderElement::GetElementBytes(const fig::string& name) const noexcept
-	{
-		if (auto elem = GetFirstElement(name))
-		{
-			auto value = elem.value().GetText();
-			if (value.has_value())
-				return std::make_optional(util::Base64Decode(value.value()));
-		}
-		return std::nullopt;
-	}
-
-	std::optional<fig::uuid> XmlReaderElement::GetElementUUID(const fig::string& name) const noexcept
-	{
-		if (auto elem = GetFirstElement(name))
-		{
-			auto value = elem.value().GetText();
-			if (value.has_value())
-			{
-				fig::uuid uuid = fig::uuid::from_str(value.value());
-				return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
-			}
-		}
-		return std::nullopt;
-	}
-
-	std::optional<std::vector<fig::string>> XmlReaderElement::GetElementList(const fig::string& name) const noexcept
-	{
-		if (auto str = GetElementText(name); str.has_value())
-			return std::make_optional(decode_csv(str.value()));
-		return std::nullopt;
-	}
-
-	bool XmlReaderElement::GetElementBool(const fig::string& name, bool default_value) const noexcept
-	{
-		return GetElementBool(name).value_or(default_value);
-	}
-
-	int32_t XmlReaderElement::GetElementInt(const fig::string& name, int32_t default_value) const noexcept
-	{
-		return GetElementInt(name).value_or(default_value);
-	}
-
-	float XmlReaderElement::GetElementFloat(const fig::string& name, float default_value) const noexcept
-	{
-		return GetElementFloat(name).value_or(default_value);
-	}
-
-	fig::string XmlReaderElement::GetElementText(const fig::string& name, const fig::string& default_value) const noexcept
-	{
-		return GetElementText(name).value_or(default_value);
-	}
-
-	std::vector<fig::string> XmlReaderElement::GetElementList(const fig::string& name, const std::vector<fig::string>& default_value) const noexcept
-	{
-		return GetElementList(name).value_or(default_value);
 	}
 
 	XmlReader::XmlReader(const fig::path& path)
@@ -421,11 +347,6 @@ namespace fig::io
 		delete _pDoc;
 	}
 
-	bool XmlReader::IsOk() const noexcept
-	{
-		return (bool)_pDoc and (bool)_pRoot;
-	}
-
 	XmlReaderElement XmlReader::GetRootElement() const noexcept
 	{
 		return IsOk() ? XmlReaderElement { _pRoot, _pRoot } : XmlReaderElement { nullptr, nullptr };
@@ -439,4 +360,23 @@ namespace fig::io
 		auto pElement = _pRoot->FirstChildElement(name.c_str());
 		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
 	}
+
+	// Explicit template instantiations
+	template std::optional<uint8_t> XmlReaderAttribute::TryGet<uint8_t>() const noexcept;
+	template std::optional<uint16_t> XmlReaderAttribute::TryGet<uint16_t>() const noexcept;
+	template std::optional<uint32_t> XmlReaderAttribute::TryGet<uint32_t>() const noexcept;
+	template std::optional<uint64_t> XmlReaderAttribute::TryGet<uint64_t>() const noexcept;
+	template std::optional<int8_t> XmlReaderAttribute::TryGet<int8_t>() const noexcept;
+	template std::optional<int16_t> XmlReaderAttribute::TryGet<int16_t>() const noexcept;
+	template std::optional<int32_t> XmlReaderAttribute::TryGet<int32_t>() const noexcept;
+	template std::optional<int64_t> XmlReaderAttribute::TryGet<int64_t>() const noexcept;
+	template std::optional<uint8_t> XmlReaderElement::TryGetValue<uint8_t>() const noexcept;
+	template std::optional<uint16_t> XmlReaderElement::TryGetValue<uint16_t>() const noexcept;
+	template std::optional<uint32_t> XmlReaderElement::TryGetValue<uint32_t>() const noexcept;
+	template std::optional<uint64_t> XmlReaderElement::TryGetValue<uint64_t>() const noexcept;
+	template std::optional<int8_t> XmlReaderElement::TryGetValue<int8_t>() const noexcept;
+	template std::optional<int16_t> XmlReaderElement::TryGetValue<int16_t>() const noexcept;
+	template std::optional<int32_t> XmlReaderElement::TryGetValue<int32_t>() const noexcept;
+	template std::optional<int64_t> XmlReaderElement::TryGetValue<int64_t>() const noexcept;
+
 }

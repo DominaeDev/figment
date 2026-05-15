@@ -75,19 +75,23 @@ namespace fig::io
 	std::optional<fig::llm::ModelSettings> UserContentManager::GetActiveModelSettings() const noexcept
 	{
 		fig::uuid activePresetId = Global::GetUserSettings().GetUUID(UserSetting::ModelPreset);
-		if (activePresetId.empty())
+		std::optional<AssetRef> settingsAsset = std::nullopt;
+
+		if (not activePresetId.empty())
+			settingsAsset = _pAssetMngr->FindAsset(activePresetId, AssetType::ModelSettings);
+
+		if (not settingsAsset.has_value())
 		{
+			// Find first
 			auto model_settings = _pAssetMngr->GetAssetsOfType(AssetType::ModelSettings)
 				| std::ranges::to<std::vector>();
 			if (model_settings.size() > 0)
-				activePresetId = model_settings.front().id;
-			else
-				return std::nullopt;
+				settingsAsset = _pAssetMngr->FindAsset(model_settings.front().id);
 		}
 
-		if (auto try_find = _pAssetMngr->FindAsset(activePresetId, AssetType::ModelSettings))
+		if (settingsAsset.has_value())
 		{
-			if (auto try_load = _pAssetMngr->LoadAsset(try_find.value().get().id))
+			if (auto try_load = _pAssetMngr->LoadAsset(settingsAsset.value().get().id))
 			{
 				auto& modelSettingsAsset = try_load.value().get();
 

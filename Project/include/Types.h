@@ -35,6 +35,8 @@ namespace fig
     using uuid = UUIDv4::UUID;
     using timestamp = uint64_t; // unix epoch (milliseconds)
     using path = std::filesystem::path;
+    using string_list = std::vector<string>;
+    using string_span = std::span<const string>;
 
     template <typename T>
     concept string_like = std::constructible_from<fig::string, T>;

@@ -1237,6 +1237,15 @@
     <ClInclude Include="include\model\ModelSettings.h">
       <Filter>Source Files\Backend\Chat</Filter>
     </ClInclude>
+    <ClInclude Include="include\fs\XmlSerializable.h">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\XmlReader.h">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fs\XmlWriter.h">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

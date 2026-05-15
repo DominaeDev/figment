@@ -39,7 +39,7 @@ namespace fig::io
 		fig::string largePortraitFilename;	//! @temp
 		fig::string smallPortraitFilename;	//! @temp
 
-		std::vector<fig::string> tags;
+		string_list tags {};
 		std::map<fig::string, CharacterProperty> properties;
 		SearchIndex searchIndex;
 

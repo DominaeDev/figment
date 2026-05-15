@@ -5,12 +5,15 @@
 #include "Types.h"
 #include "llm/PromptTemplateTypes.h"
 #include "fs/FileError.h"
+#include "fs/XmlSerializable.h"
+#include "util/Common.h"
 
 namespace fig::llm
 {
 	// Sizes
 	enum class ContextSize : int32_t
 	{
+		Undefined = 0,
 		_2K = 1024 * 2,
 		_3K = 1024 * 3,
 		_4K = 1024 * 4,
@@ -24,6 +27,7 @@ namespace fig::llm
 	};
 
 	const std::map<ContextSize, fig::string> ContextSizeMapping {
+		{ ContextSize::Undefined, "Undefined" },
 		{ ContextSize::_2K, "2K" },
 		{ ContextSize::_3K, "3K" },
 		{ ContextSize::_4K, "4K" },
@@ -66,6 +70,32 @@ namespace fig::llm
 		bool bUseMmap;
 		int32_t microBatchSize;
 		int32_t maxSequences;
+	
+	public:
+		static constexpr auto XmlFields()
+		{
+			return std::make_tuple(
+				fig::io::AsAttribute	{ "version",			&ModelSettings::version },
+				fig::io::AsElement		{ "Name",				&ModelSettings::name },
+				fig::io::AsElement		{ "Model",				&ModelSettings::modelFilename},
+				fig::io::AsElement		{ "PromptTemplate",		&ModelSettings::promptTemplate, 
+					[](auto& value) { return fig::util::enum_serialize(value, PromptTemplateMapping); },
+					[](auto& value) { return fig::util::enum_deserialize(value, PromptTemplateMapping, PromptTemplateType::Undefined); }
+				},
+
+				fig::io::AsElement		{ "ContextSize",		&ModelSettings::contextSize, 
+					[](auto& value) { return fig::util::enum_serialize(value, ContextSizeMapping); },
+					[](auto& value) { return fig::util::enum_deserialize(value, ContextSizeMapping, ContextSize::Undefined); }
+				},
+				fig::io::AsElement		{ "ContextKeepRatio",	&ModelSettings::contextWindowKeepRatio },
+				fig::io::AsElement		{ "GPULayers",			&ModelSettings::gpuLayers },
+				fig::io::AsElement		{ "UseMLock",			&ModelSettings::bUseMlock },
+				fig::io::AsElement		{ "UseMMap",			&ModelSettings::bUseMmap },
+				fig::io::AsElement		{ "MicroBatchSize",		&ModelSettings::microBatchSize},
+				fig::io::AsElement		{ "MaxSequences",		&ModelSettings::maxSequences },
+				fig::io::AsElement		{ "EmbeddingModel",		&ModelSettings::embeddingModelFilename }
+			);
+		}
 	};
 }
 

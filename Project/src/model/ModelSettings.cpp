@@ -29,50 +29,14 @@ namespace fig::llm
 			return false;
 
 		auto rootNode = xml.GetRootElement();
-
-		data.version = rootNode["version"].AsInt<uint8_t>().value_or(0);
-		data.name = trim(rootNode.GetElementText("Name").value_or("Untitled"));
-		data.modelFilename = trim(rootNode.GetElementText("Model").value_or(""));
-		data.embeddingModelFilename = trim(rootNode.GetElementText("EmbeddingModel").value_or(""));
-
-		if (auto try_prompt = rootNode.GetElementText("PromptTemplate"))
-			data.promptTemplate = find_key(PromptTemplateMapping, try_prompt.value()).value_or(PromptTemplateType::Default);
-		else
-			data.promptTemplate = PromptTemplateType::Default;
-
-		if (auto try_context_size = rootNode.GetElementText("ContextSize"))
-			data.contextSize = find_key(ContextSizeMapping, try_context_size.value()).value_or(Constants::DefaultModelSettings::ContextSize);
-		else
-			data.contextSize = Constants::DefaultModelSettings::ContextSize;
-
-		data.contextWindowKeepRatio = std::clamp(rootNode.GetElementFloat("ContextKeepRatio", Constants::DefaultModelSettings::ContextWindowKeepRatio), 0.0f, 1.0f);
-		data.gpuLayers = std::max(rootNode.GetElementInt("GPULayers", Constants::DefaultModelSettings::GPULayers), 0);
-		data.bUseMlock = rootNode.GetElementBool("UseMLock", Constants::DefaultModelSettings::UseMlock);
-		data.bUseMmap = rootNode.GetElementBool("UseMMap", Constants::DefaultModelSettings::UseMmap);
-		data.microBatchSize = std::max(rootNode.GetElementInt("MicroBatchSize", Constants::DefaultModelSettings::MicroBatchSize), 0);
-		data.maxSequences = std::max(rootNode.GetElementInt("MaxSequences", Constants::DefaultModelSettings::MaxSequences), 0);
+		XmlDeserialize(rootNode, data);
 		return true;
 	}
 
 	static bool WriteXml(XmlWriter& xml, const ModelSettings& data)
 	{
 		auto rootNode = xml.GetRoot();
-
-		rootNode["version"] = static_cast<int32_t>(data.version);
-		rootNode.SetElementValue("Name", data.name);
-		rootNode.SetElementValue("Model", data.modelFilename.u8string());
-		rootNode.SetElementValue("EmbeddingModel", data.embeddingModelFilename.u8string());
-		if (PromptTemplateMapping.contains(data.promptTemplate))
-			rootNode.SetElementValue("PromptTemplate", PromptTemplateMapping.at(data.promptTemplate));
-		if (ContextSizeMapping.contains(data.contextSize))
-			rootNode.SetElementValue("ContextSize", ContextSizeMapping.at(data.contextSize));
-		rootNode.SetElementValue("ContextKeepRatio", data.contextWindowKeepRatio);
-		rootNode.SetElementValue("GPULayers", data.gpuLayers);
-		rootNode.SetElementValue("UseMLock", data.bUseMlock);
-		rootNode.SetElementValue("UseMMap", data.bUseMmap);
-		rootNode.SetElementValue("MicroBatchSize", data.microBatchSize);
-		rootNode.SetElementValue("MaxSequences", data.maxSequences);
-
+		XmlSerialize(rootNode, data);
 		return true;
 	}
 
@@ -102,7 +66,7 @@ namespace fig::llm
 		XmlWriter xml(XmlRootName);
 		WriteXml(xml, *this);
 
-		if (xml.Save(path))
+		if (xml.WriteToFile(path))
 			return FileError::NoError;
 		return FileError::WriteError;
 	}
@@ -111,6 +75,6 @@ namespace fig::llm
 	{
 		XmlWriter xml(XmlRootName);
 		WriteXml(xml, *this);
-		xml.SaveToMemory(buffer);
+		xml.WriteToMemory(buffer);
 	}
 }

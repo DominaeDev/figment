@@ -204,12 +204,28 @@ namespace fig::util
 	}
 
 	template <typename K, typename T>
-	inline std::optional<K> find_key(const std::map<K, T>& map, const T& value)
+	inline std::optional<K> find_key(const std::map<K, T>& mapping, const T& value)
 	{
-		for (auto& kvp : map)
+		for (auto& kvp : mapping)
 			if (kvp.second == value)
 				return kvp.first;
 		return std::nullopt;
+	}
+
+	template <typename K, typename T> requires std::is_enum_v<K>
+	inline T enum_serialize(const K& enum_value, const std::map<K, T>& mapping, const T& default_value = {})
+	{
+		if (auto itFind = mapping.find(enum_value); itFind != mapping.cend())
+			return itFind->second;
+		return default_value;
+	}
+
+	template <typename K, typename T> requires std::is_enum_v<K>
+	inline K enum_deserialize(const T& enum_value, const std::map<K, T>& mapping, const K& default_value = {})
+	{
+		if (auto key = find_key(mapping, enum_value); key.has_value())
+			return key.value();
+		return default_value;
 	}
 
 #if _DEBUG || _CONSOLE

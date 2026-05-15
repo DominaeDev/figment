@@ -16,13 +16,13 @@ namespace fig::io
 		auto rootNode = xml.GetRootElement();
 
 		// Identifier
-		data.chatId = trim(rootNode.GetElementText("ID").value_or(""));
+		data.chatId = trim(rootNode.TryGetElement<fig::string>("ID").value_or(""));
 
 		// Name(s)
-		data.fullName = trim(rootNode.GetElementText("FullName").value_or(""));
-		data.shortName = trim(rootNode.GetElementText("FirstName").value_or(data.fullName));
+		data.fullName = trim(rootNode.TryGetElement<fig::string>("FullName").value_or(""));
+		data.shortName = trim(rootNode.TryGetElement<fig::string>("FirstName").value_or(data.fullName));
 
-		data.subheader = trim(rootNode.GetElementText("Subheader").value_or(""));
+		data.subheader = trim(rootNode.TryGetElement<fig::string>("Subheader").value_or(""));
 
 		if (data.chatId.empty())
 			data.chatId = data.shortName;
@@ -30,17 +30,17 @@ namespace fig::io
 			data.fullName = data.shortName;
 
 		// Portrait
-		data.largePortraitFilename = trim(rootNode.GetElementText("LargePortrait").value_or(""));
-		data.smallPortraitFilename = trim(rootNode.GetElementText("SmallPortrait").value_or(""));
+		data.largePortraitFilename = trim(rootNode.TryGetElement<fig::string>("LargePortrait").value_or(""));
+		data.smallPortraitFilename = trim(rootNode.TryGetElement<fig::string>("SmallPortrait").value_or(""));
 
 		// Read brief
-		data.brief = trim(rootNode.GetElementText("Brief").value_or(""));
+		data.brief = trim(rootNode.TryGetElement<fig::string>("Brief").value_or(""));
 
 		// Read description
-		data.description = trim(rootNode.GetElementText("Description").value_or(""));
+		data.description = trim(rootNode.TryGetElement<fig::string>("Description").value_or(""));
 
 		// Read gender
-		if (auto genderText = rootNode.GetElementText("Gender"))
+		if (auto genderText = rootNode.TryGetElement<fig::string>("Gender"))
 		{
 			fig::string gender = trim(genderText.value());
 
@@ -64,7 +64,7 @@ namespace fig::io
 		data.bgColor = {};
 		data.borderColor = {};
 
-		if (auto colorText = rootNode.GetElementText("Color"))
+		if (auto colorText = rootNode.TryGetElement<fig::string>("Color"))
 		{
 			data.borderColor = Color::FromString(colorText.value());
 
@@ -77,10 +77,10 @@ namespace fig::io
 		}
 
 		// Tags
-		data.tags = rootNode.GetElementList("Tags").value_or({});
+		data.tags = rootNode.TryGetElement<fig::string_list>("Tags").value_or({});
 
 		// Search
-		data.searchIndex.Deserialize(rootNode.GetElementText("SearchIndex").value_or(""));
+		data.searchIndex.Deserialize(rootNode.TryGetElement<fig::string>("SearchIndex").value_or(""));
 
 		return !data.chatId.empty() && !data.shortName.empty();
 	}
@@ -159,6 +159,6 @@ namespace fig::io
 		if (not searchIndex.IsEmpty())
 			root.SetElementValue("SearchIndex", searchIndex.Serialize());
 
-		xml.SaveToMemory(buffer);
+		xml.WriteToMemory(buffer);
 	}
 }

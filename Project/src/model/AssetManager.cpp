@@ -272,7 +272,7 @@ namespace fig::io
 			auto& asset = kvp.second;
 			if (asset.sync_state.error == AssetSyncState::Error::NoError)
 			{
-				if (asset.sync_state.file_sync != AssetSyncState::SyncStatus::Synchronized)
+				if (asset.sync_state.ShouldWriteToDisk())
 					UpdateAssetOnDisk(asset);
 				if (asset.sync_state.db_sync != AssetSyncState::SyncStatus::Synchronized)
 					UpdateAssetInDatabase(asset);

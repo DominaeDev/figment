@@ -419,7 +419,7 @@ namespace fig::util
 		return false;
 	}
 
-	fig::string encode_csv(std::span<const fig::string> values)
+	fig::string encode_csv(fig::string_span values)
 	{
 		auto encode_value = [](const fig::string& value) {
 			if (not (value.contains(',') or value.contains('"')))
@@ -450,9 +450,9 @@ namespace fig::util
 		return result;
 	}
 
-	std::vector<fig::string> decode_csv(const fig::string& csv)
+	fig::string_list decode_csv(const fig::string& csv)
 	{
-		std::vector<fig::string> fields;
+		fig::string_list fields;
 		fig::string current;
 		bool in_quotes = false;
 

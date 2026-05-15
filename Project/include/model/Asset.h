@@ -81,9 +81,13 @@ namespace fig::io
 
 		inline constexpr bool ShouldWriteToDisk() const noexcept
 		{
-			return has_meta and has_data and file_sync != SyncStatus::Synchronized and error == Error::NoError;
+			return has_meta and has_data and file_sync < SyncStatus::Synchronized and error == Error::NoError;
 		}
 
+		inline constexpr bool ShouldWriteToDatabase() const noexcept
+		{
+			return db_sync < SyncStatus::Synchronized and error == Error::NoError;
+		}
 	};
 
 	fig::string AssetTypeToString(AssetType type, uint8_t subtype) noexcept;
@@ -186,7 +190,6 @@ namespace fig::io
 
 	using AssetRef = std::reference_wrapper<Asset>;
 	using AssetCRef = std::reference_wrapper<const Asset>;
-
 }
 
 #endif

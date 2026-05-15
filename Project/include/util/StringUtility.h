@@ -86,8 +86,8 @@ namespace fig::util
 	[[nodiscard]] bool find_in(const std::string_view substr, const std::string_view text, bool case_insensitive = false, bool whole_words = false);
 	[[nodiscard]] bool find_in(const std::wstring_view substr, const std::wstring_view text, bool case_insensitive = false, bool whole_words = false);
 
-	[[nodiscard]] fig::string encode_csv(std::span<const fig::string> values);
-	[[nodiscard]] std::vector<fig::string> decode_csv(const fig::string& csv);
+	[[nodiscard]] fig::string encode_csv(fig::string_span values);
+	[[nodiscard]] fig::string_list decode_csv(const fig::string& csv);
 
 	[[nodiscard]] fig::wstring strip_diacritics(fig::wstring&& input);
 	[[nodiscard]] fig::string strip_diacritics(fig::string&& input);

@@ -19,7 +19,7 @@ namespace fig::io
 
 	static bool ReadXml(XmlReaderElement& node, ScenarioData::Prompt& prompt) noexcept
 	{
-		auto prompt_type = node.GetElementText("Type").value_or("");
+		auto prompt_type = node.TryGetElement<fig::string>("Type").value_or("");
 		if (prompt_type.empty())
 			return false;
 
@@ -28,8 +28,8 @@ namespace fig::io
 			return false; // Unknown type
 		
 		prompt.type = itType->second;
-		prompt.value = node.GetElementText("Value").value_or("");
-		prompt.condition = node.GetElementText("Rule").value_or("");
+		prompt.value = node.TryGetElement<fig::string>("Value").value_or("");
+		prompt.condition = node.TryGetElement<fig::string>("Rule").value_or("");
 
 		if (prompt.type == ScenarioData::PromptType::System)
 			prompt.is_static = true;
@@ -46,7 +46,7 @@ namespace fig::io
 				break;
 			};
 
-			prompt.is_static = node.GetElementBool("Static").value_or(implicit_static);
+			prompt.is_static = node.TryGetElement<bool>("Static").value_or(implicit_static);
 		}
 		return not prompt.value.empty();
 	}
@@ -56,10 +56,10 @@ namespace fig::io
 		auto rootNode = xml.GetRootElement();
 
 		// Identifier
-		scenario.title = trim(rootNode.GetElementText("Title").value_or(""));
+		scenario.title = trim(rootNode.TryGetElement<fig::string>("Title").value_or(""));
 
 		// Image
-		scenario.imageFilename = trim(rootNode.GetElementText("Image").value_or(""));
+		scenario.imageFilename = trim(rootNode.TryGetElement<fig::string>("Image").value_or(""));
 
 		// Prompt(s)
 		if (auto node = rootNode.GetFirstElement("Prompt"))
@@ -80,18 +80,18 @@ namespace fig::io
 			{
 				auto& role = roleNode.value();
 				ScenarioData::RoleSlot slot {
-					.id = role.GetElementText("ID").value_or(""),
-					.label = role.GetElementText("Label").value_or(""),
-					.relationship = role.GetElementText("Relationship").value_or(""),
-					.is_required = role.GetElementBool("Required").value_or(false),
-					.is_user = role.GetElementBool("User").value_or(false),
+					.id = role.TryGetElement<fig::string>("ID").value_or(""),
+					.label = role.TryGetElement<fig::string>("Label").value_or(""),
+					.relationship = role.TryGetElement<fig::string>("Relationship").value_or(""),
+					.is_required = role.TryGetElement<bool>("Required").value_or(false),
+					.is_user = role.TryGetElement<bool>("User").value_or(false),
 				};
 
 				if (auto validationNode = roleNode.value().GetFirstElement("Validation"); validationNode.has_value())
 				{
 					slot.validation = ScenarioData::RoleValidation {
-						.rule = validationNode.value().GetElementText("Rule").value_or(""),
-						.errorMessage = validationNode.value().GetElementText("ErrorMessage").value_or(""),
+						.rule = validationNode.value().TryGetElement<fig::string>("Rule").value_or(""),
+						.errorMessage = validationNode.value().TryGetElement<fig::string>("ErrorMessage").value_or(""),
 					};
 				}
 
@@ -176,7 +176,7 @@ namespace fig::io
 			promptNode.SetElementValue("Value", prompt.value);
 		}
 
-		xml.SaveToMemory(buffer);
+		xml.WriteToMemory(buffer);
 	}
 
 	fig::string ScenarioData::GetSystemPrompt(ChatOptions options) const
