@@ -1,7 +1,6 @@
 #include <pch.h>
 #include "Constants.h"
 #include "model/ModelSettings.h"
-#include "fs/Xml.h"
 #include "util/StringUtility.h"
 
 using namespace fig::io;
@@ -30,7 +29,10 @@ namespace fig::llm
 
 		auto rootNode = xml.GetRootElement();
 		XmlDeserialize(rootNode, data);
-		return true;
+	
+		return data.version <= FormatVersion
+			and not data.modelFilename.empty()
+			and data.gpuLayers > 0u;
 	}
 
 	static bool WriteXml(XmlWriter& xml, const ModelSettings& data)

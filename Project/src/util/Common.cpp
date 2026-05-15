@@ -45,14 +45,12 @@ namespace fig::util
 
 	fig::string Base64Encode(fig::byte_span data) noexcept
 	{
-		return base64::encode_into<fig::string>(std::begin(data), std::end(data))
-			.value_or("");
+		return base64::encode_into<fig::string>(std::begin(data), std::end(data)).value_or("");
 	}
 
 	fig::bytes Base64Decode(fig::string_view text) noexcept
 	{
-		return base64::decode_into<fig::bytes>(text)
-			.value_or(fig::bytes()); // rvo
+		return base64::decode_into<fig::bytes>(text).value_or(fig::bytes());
 	}
 
 	std::optional<fig::bytes> TryBase64Decode(fig::string_view text) noexcept

@@ -2,6 +2,7 @@
 
 #include "fs/XmlReader.h"
 #include "util/Common.h"
+#include "util/StringUtility.h"
 #include <tinyxml2.h>
 
 using namespace tinyxml2;
@@ -85,8 +86,12 @@ namespace fig::io
 	{
 		if (_pAttrib)
 		{
-			const char* value = _pAttrib->Value();
-			return value ? std::make_optional(fig::string(value)) : std::nullopt;
+			const char* pValue = _pAttrib->Value();
+			if (pValue)
+			{
+				auto value = fig::util::trim(fig::string(pValue));
+				return std::make_optional(value);
+			}
 		}
 		return std::nullopt;
 	}
@@ -96,8 +101,12 @@ namespace fig::io
 	{
 		if (_pAttrib)
 		{
-			const char* value = _pAttrib->Value();
-			return value ? std::make_optional(fig::path(value)) : std::nullopt;
+			const char* pValue = _pAttrib->Value();
+			if (pValue)
+			{
+				auto value = fig::util::trim(fig::string(pValue));
+				return std::make_optional(fig::path(value));
+			}
 		}
 		return std::nullopt;
 	}
@@ -107,8 +116,12 @@ namespace fig::io
 	{
 		if (_pAttrib)
 		{
-			const char* value = _pAttrib->Value();
-			return value ? std::make_optional(util::Base64Decode(value)) : std::nullopt;
+			const char* pValue = _pAttrib->Value();
+			if (pValue)
+			{
+				auto value = fig::util::trim(fig::string(pValue));
+				return std::make_optional(util::Base64Decode(value));
+			}
 		}
 		return std::nullopt;
 	}
@@ -118,9 +131,10 @@ namespace fig::io
 	{
 		if (_pAttrib)
 		{
-			const char* value = _pAttrib->Value();
-			if (value)
+			const char* pValue = _pAttrib->Value();
+			if (pValue)
 			{
+				auto value = fig::util::trim(fig::string(pValue));
 				fig::uuid uuid = fig::uuid::from_str(value);
 				return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
 			}
@@ -241,31 +255,47 @@ namespace fig::io
 	std::optional<fig::string> XmlReaderElement::TryGetValue<fig::string>() const noexcept
 	{
 		//! @todo: Resolve mix of CDATA, XMLText, and XMLComment.
-		const char* value = _pElement->GetText();
-		return value ? std::make_optional(fig::string(value)) : std::nullopt;
+		const char* pValue = _pElement->GetText();
+		if (pValue)
+		{
+			auto value = fig::util::trim(fig::string(pValue));
+			return std::make_optional(value);
+		}
+		return std::nullopt;
 	}
 
 	template<>
 	std::optional<fig::path> XmlReaderElement::TryGetValue<fig::path>() const noexcept
 	{
 		//! @todo: Resolve mix of CDATA, XMLText, and XMLComment.
-		const char* value = _pElement->GetText();
-		return value ? std::make_optional(fig::path(value)) : std::nullopt;
+		const char* pValue = _pElement->GetText();
+		if (pValue)
+		{
+			auto value = fig::util::trim(fig::string(pValue));
+			return std::make_optional(fig::path(value));
+		}
+		return std::nullopt;
 	}
 
 	template<>
 	std::optional<fig::bytes> XmlReaderElement::TryGetValue<fig::bytes>() const noexcept
 	{
-		const char* value = _pElement->GetText();
-		return value ? std::make_optional(util::Base64Decode(value)) : std::nullopt;
+		const char* pValue = _pElement->GetText();
+		if (pValue)
+		{
+			auto value = fig::util::trim(fig::string(pValue));
+			return std::make_optional(fig::util::Base64Decode(value));
+		}
+		return std::nullopt;
 	}
 
 	template<>
 	std::optional<fig::uuid> XmlReaderElement::TryGetValue<fig::uuid>() const noexcept
 	{
-		const char* value = _pElement->GetText();
-		if (value)
+		const char* pValue = _pElement->GetText();
+		if (pValue)
 		{
+			auto value = fig::util::trim(fig::string(pValue));
 			fig::uuid uuid = fig::uuid::from_str(value);
 			return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
 		}

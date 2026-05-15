@@ -4,8 +4,8 @@
 #include "gui/GUITypes.h"
 #include "model/ChatTypes.h"
 #include "model/ChatOptions.h"
-#include "model/ModelSettings.h"
 #include "model/GlobalStrings.h"
+#include "llm/ContextSize.h"
 
 namespace fig::Constants
 {

@@ -2,6 +2,7 @@
 
 #include "llm/LLMTypes.h"
 #include "llm/Grammar.h"
+#include "model/ModelSettings.h"
 #include <random>
 #include <map>
 

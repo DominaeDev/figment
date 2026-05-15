@@ -444,6 +444,7 @@
     <ClInclude Include="include\llm\ContextBlock.h" />
     <ClInclude Include="include\llm\ContextCache.h" />
     <ClInclude Include="include\llm\ContextCursor.h" />
+    <ClInclude Include="include\llm\ContextSize.h" />
     <ClInclude Include="include\llm\Embedding.h" />
     <ClInclude Include="include\llm\Grammar.h" />
     <ClInclude Include="include\llm\LlamaApi.h" />

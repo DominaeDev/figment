@@ -15,29 +15,14 @@ namespace fig::io
 	{
 		auto rootNode = xml.GetRootElement();
 
-		// Identifier
-		data.chatId = trim(rootNode.TryGetElement<fig::string>("ID").value_or(""));
+		XmlDeserialize(rootNode, data);
 
-		// Name(s)
-		data.fullName = trim(rootNode.TryGetElement<fig::string>("FullName").value_or(""));
-		data.shortName = trim(rootNode.TryGetElement<fig::string>("FirstName").value_or(data.fullName));
-
-		data.subheader = trim(rootNode.TryGetElement<fig::string>("Subheader").value_or(""));
-
-		if (data.chatId.empty())
-			data.chatId = data.shortName;
+		if (data.shortName.empty())
+			data.shortName = data.fullName;
 		if (data.fullName.empty())
 			data.fullName = data.shortName;
-
-		// Portrait
-		data.largePortraitFilename = trim(rootNode.TryGetElement<fig::string>("LargePortrait").value_or(""));
-		data.smallPortraitFilename = trim(rootNode.TryGetElement<fig::string>("SmallPortrait").value_or(""));
-
-		// Read brief
-		data.brief = trim(rootNode.TryGetElement<fig::string>("Brief").value_or(""));
-
-		// Read description
-		data.description = trim(rootNode.TryGetElement<fig::string>("Description").value_or(""));
+		if (data.chatId.empty())
+			data.chatId = data.shortName;
 
 		// Read gender
 		if (auto genderText = rootNode.TryGetElement<fig::string>("Gender"))
@@ -120,19 +105,9 @@ namespace fig::io
 		XmlWriter xml(XmlRootName);
 
 		auto root = xml.GetRoot();
-		root.SetElementValue("ID", chatId);
+
+		XmlSerialize(root, *this);
 		
-		if (not shortName.empty())
-			root.SetElementValue("FirstName", shortName);
-		else
-			root.SetElementValue("FirstName", "Unnamed");
-
-		if (not fullName.empty())
-			root.SetElementValue("FullName", fullName);
-
-		if (not subheader.empty())
-			root.SetElementValue("Subheader", subheader);
-
 		switch (gender)
 		{
 		case CharacterGender::Male:
@@ -149,13 +124,6 @@ namespace fig::io
 			break;
 		}
 
-		if (not tags.empty())
-			root.SetElementValue("Tags", tags);
-
-		if (not brief.empty())
-			root.SetElementValue("Brief", brief);
-		if (not description.empty())
-			root.SetElementValue("Description", description);
 		if (not searchIndex.IsEmpty())
 			root.SetElementValue("SearchIndex", searchIndex.Serialize());
 
