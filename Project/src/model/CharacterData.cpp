@@ -4,16 +4,33 @@
 #include "fs/Xml.h"
 
 using namespace fig::gui;
-using namespace fig::util;
 using namespace fig::io;
 
 namespace fig::io
 {
 	static const fig::string XmlRootName { "Character" };
 
+	auto CharacterData::XmlFields()
+	{
+		return std::make_tuple(
+			XmlElement { &CharacterData::chatId, "ID" }
+				.MustExist(),
+			XmlElement { &CharacterData::shortName, "ShortName" }
+				.MustExist(),
+			XmlElement { &CharacterData::fullName, "FullName" },
+			XmlElement { &CharacterData::brief, "Brief" },
+			XmlElement { &CharacterData::description, "Description" },
+			XmlElement { &CharacterData::tags, "Tags" },
+			XmlElement { &CharacterData::gender, "Gender",
+				[](auto& g) { return g.GetName(); },
+				[](auto& s) { return CharacterGender { s }; }
+			}
+		);
+	}
+
 	static bool ReadXml(XmlReader& xml, CharacterData& data)
 	{
-		auto rootNode = xml.GetRootElement();
+		auto rootNode = xml.GetRoot();
 
 		XmlDeserialize(rootNode, data);
 
@@ -25,24 +42,12 @@ namespace fig::io
 			data.chatId = data.shortName;
 
 		// Read gender
-		if (auto genderText = rootNode.TryGetElement<fig::string>("Gender"))
+		if (data.gender.IsDefined())
 		{
-			fig::string gender = trim(genderText.value());
-
-			if (equals(gender, "male", true))
-				data.gender = CharacterGender::Male;
-			else if (equals(gender, "female", true))
-				data.gender = CharacterGender::Female;
-			else if (not gender.empty())
-			{
-				data.gender = CharacterGender::Custom;
-				data.properties[Constants::CharacterProperties::Gender] = CharacterProperty { 
-					.label = "Gender", 
-					.value = gender 
-				};
-			}
-			else
-				data.gender = CharacterGender::Undefined;
+			data.properties[Constants::CharacterProperties::Gender] = CharacterProperty {
+				.label = "Gender",
+				.value = data.gender.GetName(),
+			};
 		}
 
 		// Colors
@@ -85,7 +90,7 @@ namespace fig::io
 	FileError CharacterData::LoadFromXml(const fig::string& doc)
 	{
 		XmlReader xml(doc);
-		if (not xml.IsOk() or xml.GetRootElement().GetName() != XmlRootName)
+		if (not xml.IsOk() or xml.GetRoot().GetName() != XmlRootName)
 			return FileError::UnrecognizedFormat;
 
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
@@ -94,7 +99,7 @@ namespace fig::io
 	FileError CharacterData::LoadFromXml(fig::string_view doc)
 	{
 		XmlReader xml(doc);
-		if (not xml.IsOk() or xml.GetRootElement().GetName() != XmlRootName)
+		if (not xml.IsOk() or xml.GetRoot().GetName() != XmlRootName)
 			return FileError::UnrecognizedFormat;
 
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
@@ -108,22 +113,6 @@ namespace fig::io
 
 		XmlSerialize(root, *this);
 		
-		switch (gender)
-		{
-		case CharacterGender::Male:
-			root.SetElementValue("Gender", "Male");
-			break;
-		case CharacterGender::Female:
-			root.SetElementValue("Gender", "Female");
-			break;
-		case CharacterGender::Custom:
-			if (auto it = properties.find(Constants::CharacterProperties::Gender); it != properties.cend())
-				root.SetElementValue("Gender", it->second.value);
-			break;
-		default:
-			break;
-		}
-
 		if (not searchIndex.IsEmpty())
 			root.SetElementValue("SearchIndex", searchIndex.Serialize());
 

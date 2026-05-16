@@ -329,17 +329,17 @@ namespace fig::gui
 
 		auto pTagBG = new NineGridImage(_pTagsRoot, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
 		pTagBG->SetPosition(position);
-		if (color.IsDefined())
-			pTagBG->SetForegroundColor(color);
-		else
-			pTagBG->SetForegroundColor(Colors::Black);
+		pTagBG->SetForegroundColor(Colors::Black);
 
 		auto pLabel = new StaticText(_pTagsRoot, tag, FontFace::Default, 14.0, true);
-		pLabel->SetForegroundColor(Colors::White);
 		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);
 		pLabel->EnableWordWrap(false);
 		pLabel->EnableEllipsis(true);
 		pLabel->SetMaxSize(Large::Width - (position.x + kTagInnerMargin * 2 + kTagMargin), 0);
+		if (color.IsDefined())
+			pLabel->SetForegroundColor(color);
+		else
+			pLabel->SetForegroundColor(Colors::White);
 
 		auto [w, h] = pLabel->MeasureText();
 		pTagBG->SetSize(w + kTagInnerMargin * 2, 26);
@@ -470,7 +470,8 @@ namespace fig::gui
 		if (_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
 			return false;
 
-		switch (_metaData.gender)
+		auto [gender, _] = _metaData.gender.Get();
+		switch (gender)
 		{
 		case CharacterGender::Male:
 			if (not filter.IsSet(FilterFlag::GenderMale))

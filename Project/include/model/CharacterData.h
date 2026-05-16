@@ -5,8 +5,8 @@
 
 #include "Types.h"
 #include "gui/GUITypes.h"
+#include "model/CharacterGender.h"
 #include "util/SearchIndex.h"
-#include "fs/XmlSerializable.h"
 
 namespace fig::io
 {
@@ -14,14 +14,6 @@ namespace fig::io
 	{
 		fig::string label;
 		fig::string value;
-	};
-
-	enum class CharacterGender
-	{
-		Undefined = 0,
-		Male,
-		Female,
-		Custom,
 	};
 
 	struct CharacterData
@@ -51,17 +43,7 @@ namespace fig::io
 		void SaveToXml(fig::bytes& buffer) const;
 
 	public:
-		static constexpr auto XmlFields()
-		{
-			return std::make_tuple(
-				fig::io::XmlElement { &CharacterData::chatId, "ID" },
-				fig::io::XmlElement { &CharacterData::shortName, "ShortName" },
-				fig::io::XmlElement { &CharacterData::fullName, "FullName" },
-				fig::io::XmlElement { &CharacterData::brief, "Brief" },
-				fig::io::XmlElement { &CharacterData::description, "Description" },
-				fig::io::XmlElement { &CharacterData::tags, "Tags" }
-			);
-		}
+		static auto XmlFields();
 	};
 }
 

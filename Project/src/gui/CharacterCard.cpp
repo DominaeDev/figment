@@ -42,17 +42,17 @@ namespace fig::gui
 			}
 
 			// Tags
-			switch (character.gender)
+			if (character.gender.IsDefined())
 			{
-			case CharacterGender::Male:
-				AddTag("Male");
-				break;
-			case CharacterGender::Female:
-				AddTag("Female");
-				break;
-			case CharacterGender::Custom:
-				AddTag(character.properties[Constants::CharacterProperties::Gender].value);
-				break;
+				fig::gui::Color color;
+				if (character.gender == CharacterGender::Male)
+					color = Colors::MessageBorderBlue;
+				else if (character.gender == CharacterGender::Female)
+					color = Colors::MessageBorderPink;
+				else
+					color = Colors::White;
+
+				AddTag(character.gender.GetName(), color);
 			}
 
 			for (size_t i = 0; i < character.tags.size() && i < 16; ++i)

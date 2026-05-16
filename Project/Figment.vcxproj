@@ -233,6 +233,7 @@
     <ClCompile Include="src\gui\ChatMessage.cpp" />
     <ClCompile Include="src\gui\ChatScroll.cpp" />
     <ClCompile Include="src\gui\GUIUtility.cpp" />
+    <ClCompile Include="src\model\CharacterGender.cpp" />
     <ClCompile Include="src\model\ContentManager.cpp" />
     <ClCompile Include="src\model\ChatCommandExecutor.cpp" />
     <ClCompile Include="src\model\ChatSession.cpp" />
@@ -457,6 +458,7 @@
     <ClInclude Include="include\llm\PromptTemplateTypes.h" />
     <ClInclude Include="include\model\AppSettings.h" />
     <ClInclude Include="include\model\CardMetaData.h" />
+    <ClInclude Include="include\model\CharacterGender.h" />
     <ClInclude Include="include\model\ModelSettings.h" />
     <ClInclude Include="include\model\Settings.h" />
     <ClInclude Include="include\model\AppState.h" />

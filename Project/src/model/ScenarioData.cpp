@@ -53,7 +53,7 @@ namespace fig::io
 
 	static bool ReadXml(XmlReader& xml, ScenarioData& scenario) noexcept
 	{
-		auto rootNode = xml.GetRootElement();
+		auto rootNode = xml.GetRoot();
 
 		// Identifier
 		scenario.title = trim(rootNode.TryGetElement<fig::string>("Title").value_or(""));
@@ -120,7 +120,7 @@ namespace fig::io
 	FileError ScenarioData::LoadFromXml(const fig::string& doc)
 	{
 		XmlReader xml(doc);
-		if (not xml.IsOk() or xml.GetRootElement().GetName() != "Scenario")
+		if (not xml.IsOk() or xml.GetRoot().GetName() != "Scenario")
 			return FileError::UnrecognizedFormat; // Invalid document type
 
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;

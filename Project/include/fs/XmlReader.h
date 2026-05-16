@@ -163,7 +163,7 @@ namespace fig::io
 
 		inline bool IsOk() const noexcept { return (bool)_pDoc and (bool)_pRoot; }
 
-		XmlReaderElement GetRootElement() const noexcept;
+		XmlReaderElement GetRoot() const noexcept;
 		[[nodiscard]] std::optional<XmlReaderElement> GetFirstElement(const fig::string& name) const noexcept;
 
 	private:

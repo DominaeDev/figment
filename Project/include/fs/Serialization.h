@@ -23,12 +23,12 @@ namespace fig::io
 		uint8_t major { 0 };
 		uint8_t minor { 0 };
 
-		VersionNumber(uint8_t maj = 0, uint8_t min = 0)
+		constexpr VersionNumber(uint8_t maj = 0, uint8_t min = 0)
 			: major(maj), minor(min)
 		{
 		}
 
-		explicit VersionNumber(uint16_t packed)
+		constexpr explicit VersionNumber(uint16_t packed)
 		{
 			from_uint16(packed);
 		}

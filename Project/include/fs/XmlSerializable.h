@@ -25,10 +25,11 @@ namespace fig::io
 
 		TMemberPointer member_ptr;
 		const char* name;
-		TDeserializer custom_deserializer {};
 		TSerializer custom_serializer {};
+		TDeserializer custom_deserializer {};
 		ValueType default_value {};
 		TValidator validator {};
+		bool must_exist {};
 
 		XmlAttribute& Default(ValueType default_value)
 		{
@@ -39,6 +40,12 @@ namespace fig::io
 		XmlAttribute& Validator(TValidator validator)
 		{
 			this->validator = validator;
+			return *this;
+		}
+
+		XmlAttribute& MustExist()
+		{
+			this->must_exist = true;
 			return *this;
 		}
 	};
@@ -52,10 +59,11 @@ namespace fig::io
 
 		TMemberPointer member_ptr;
 		const char* name;
-		TDeserializer custom_deserializer {};
 		TSerializer custom_serializer {};
+		TDeserializer custom_deserializer {};
 		ValueType default_value {};
 		TValidator validator {};
+		bool must_exist {};
 
 		XmlElement& Default(ValueType default_value)
 		{
@@ -66,6 +74,12 @@ namespace fig::io
 		XmlElement& Validator(TValidator validator)
 		{
 			this->validator = validator;
+			return *this;
+		}
+
+		XmlElement& MustExist()
+		{
+			this->must_exist = true;
 			return *this;
 		}
 	};
@@ -93,26 +107,30 @@ namespace fig::io
 		std::apply([&](auto&&... field) {
 			([&] {
 				using FieldType = std::decay_t<decltype(field)>;
+				auto& member = object.*(field.member_ptr);
+
 				if constexpr (IsSpecializationOf<FieldType, XmlAttribute>::value)
-					element.SetAttribute(field.name, field.custom_serializer(object.*(field.member_ptr)));
+				{
+					element.SetAttribute(field.name, field.custom_serializer(member));
+				}
 				else if constexpr (IsSpecializationOf<FieldType, XmlElement>::value)
 				{
-					if constexpr (XmlSerializableRange<typename FieldType::ValueType>)
+					if constexpr (XmlSerializable<typename FieldType::ValueType>)
 					{
-						for (const auto& item : object.*(field.member_ptr))
+						auto child = element.AddChild(field.name);
+						XmlSerialize(child, (member));
+					}
+					else if constexpr (XmlSerializableRange<typename FieldType::ValueType>)
+					{
+						for (const auto& item : member)
 						{
 							auto child = element.AddChild(field.name);
 							XmlSerialize(child, item);
 						}
 					}
-					else if constexpr (XmlSerializable<typename FieldType::ValueType>)
-					{
-						auto child = element.AddChild(field.name);
-						XmlSerialize(child, (object.*(field.member_ptr)));
-					}
 					else
 					{
-						element.SetElementValue(field.name, field.custom_serializer(object.*(field.member_ptr)));
+						element.SetElementValue(field.name, field.custom_serializer(member));
 					}
 				}
 				else
@@ -126,15 +144,21 @@ namespace fig::io
 	bool XmlDeserialize(const XmlReaderElement& element, T& object)
 	{
 		bool bValid = true;
+
 		std::apply([&](auto&&... field) {
 			([&] {
 				using FieldType = std::decay_t<decltype(field)>;
+				auto& member = object.*(field.member_ptr);
+
 				if constexpr (IsSpecializationOf<FieldType, XmlAttribute>::value)
 				{
 					if (auto value = element[field.name].TryGet<FieldType::SerializedType>())
-						object.*(field.member_ptr) = field.custom_deserializer(*value);
+						member = field.custom_deserializer(*value);
 					else
-						object.*(field.member_ptr) = field.default_value;
+					{
+						member = field.default_value;
+						bValid &= !field.must_exist;
+					}
 				}
 				else if constexpr (IsSpecializationOf<FieldType, XmlElement>::value)
 				{
@@ -146,39 +170,78 @@ namespace fig::io
 
 						auto child = element.GetFirstElement(field.name);
 						if (child)
-							XmlDeserialize(*child, (object.*(field.member_ptr)));
+							bValid &= XmlDeserialize(*child, member);
+						else 
+							bValid &= !field.must_exist;
 					}
 					// Nested objects
 					else if constexpr (XmlSerializableRange<typename FieldType::ValueType>)
 					{
 						using ItemType = std::ranges::range_value_t<typename FieldType::ValueType>;
-						auto& container = object.*(field.member_ptr);
-						container.clear();
-						auto child = element.GetFirstElement(field.name);
-						while (child)
+						member.clear();
+						if (auto child = element.GetFirstElement(field.name))
 						{
-							XmlDeserialize(*child, container.emplace_back());
-							child = child->GetNextSibling();
+							while (child)
+							{
+								bValid &= XmlDeserialize(*child, member.emplace_back());
+								child = child->GetNextSibling();
+							}
 						}
+						else
+							bValid &= !field.must_exist;
 					}
 					else
 					{
 						if (auto value = element.TryGetElement<FieldType::SerializedType>(field.name))
-							object.*(field.member_ptr) = field.custom_deserializer(*value);
+							member = field.custom_deserializer(*value);
 						else
-							object.*(field.member_ptr) = field.default_value;
+						{
+							member = field.default_value;
+							bValid &= !field.must_exist;
+						}
 					}
 				}
 				else
 					static_assert(false, "Serializable field must be either an element or an attribute");
 
 				if (field.validator)
-				{
-					bValid &= field.validator(object.*(field.member_ptr));
-				}
+					bValid &= field.validator(member);
 			}(), ...);
 		}, T::XmlFields());
+
 		return bValid;
+	}
+
+	template<XmlSerializable T>
+	[[nodiscard]] XmlWriter XmlSerialize(const fig::string& rootName, const T& object)
+	{
+		XmlWriter writer(rootName);
+		auto root = writer.GetRoot();
+		XmlSerialize<T>(root, object);
+		return writer;
+	}
+
+	template<XmlSerializable T>
+	[[nodiscard]] std::optional<T> XmlDeserialize(fig::string_view const doc, const fig::string& rootName = {})
+	{
+		XmlReader reader(doc);
+		if (not reader.IsOk())
+			return std::nullopt;
+
+		auto& root = reader.GetRoot();
+		if (not rootName.empty() and root.GetName() != rootName)
+			return std::nullopt;
+
+		T object {};
+		if (XmlDeserialize<T>(root, object))
+			return object;
+		return std::nullopt;
+	}
+
+	template<XmlSerializable T>
+	[[nodiscard]] std::optional<T> XmlDeserialize(const fig::byte_span& doc, const fig::string& rootName = {})
+	{
+		return XmlDeserialize<T>(fig::string_view { reinterpret_cast<const char*>(doc.data()), doc.size() }, rootName);
 	}
 }
 #endif

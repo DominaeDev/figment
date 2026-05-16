@@ -524,6 +524,9 @@
     <ClCompile Include="src\model\ModelSettings.cpp">
       <Filter>Source Files\Backend\Chat</Filter>
     </ClCompile>
+    <ClCompile Include="src\model\CharacterGender.cpp">
+      <Filter>Source Files\AppModel\Data\Character</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1248,6 +1251,9 @@
     </ClInclude>
     <ClInclude Include="include\llm\ContextSize.h">
       <Filter>Source Files\Backend\LLM</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model\CharacterGender.h">
+      <Filter>Source Files\AppModel\Data\Character</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

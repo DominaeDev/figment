@@ -425,7 +425,7 @@ namespace fig::io
 		delete _pDoc;
 	}
 
-	XmlReaderElement XmlReader::GetRootElement() const noexcept
+	XmlReaderElement XmlReader::GetRoot() const noexcept
 	{
 		return IsOk() ? XmlReaderElement { _pRoot, _pRoot } : XmlReaderElement { nullptr, nullptr };
 	}

@@ -42,7 +42,7 @@ namespace fig::io
 			{
 				if (util::equals(tag, custom_gender, true))
 				{
-					character.gender = CharacterGender::Custom;
+					character.gender = CharacterGender::Other;
 					character.properties[Constants::CharacterProperties::Gender] = CharacterProperty {
 						.label = "Gender",
 						.value = custom_gender,
@@ -52,18 +52,8 @@ namespace fig::io
 			}
 		}
 
-		switch (character.gender)
-		{
-		case CharacterGender::Male:
-			character.searchIndex.AddTerm("male");
-			break;
-		case CharacterGender::Female:
-			character.searchIndex.AddTerm("female");
-			break;
-		case CharacterGender::Custom:
-			character.searchIndex.AddTerm(character.properties[Constants::CharacterProperties::Gender].value);
-			break;
-		}
+		if (character.gender.IsDefined())
+			character.searchIndex.AddTerm(fig::util::lcase(character.gender.GetName()));
 
 		character.searchIndex.AddTerm(character.shortName);
 		character.searchIndex.AddTerm(character.fullName);
