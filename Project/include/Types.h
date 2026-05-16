@@ -39,7 +39,23 @@ namespace fig
     using string_span = std::span<const string>;
 
     template <typename T>
-    concept string_like = std::constructible_from<fig::string, T>;
+    concept is_string_like = std::constructible_from<fig::string, T>;
+
+    template<typename T>
+    concept is_number = (std::integral<T> || std::floating_point<T>)
+        && !std::same_as<T, bool>
+        && !std::same_as<T, char>
+        && !std::same_as<T, wchar_t>
+        && !std::same_as<T, char16_t>
+        && !std::same_as<T, char32_t>;
+
+    template<typename T>
+    concept is_number_range = std::ranges::range<T>
+        && is_number<std::ranges::range_value_t<T>>;
+
+    template<typename T>
+    concept is_string_range = std::ranges::range<T>
+        && (std::same_as<std::ranges::range_value_t<T>, fig::string> || is_string_like<std::ranges::range_value_t<T>>);
 }
 
 // Type conversion functions

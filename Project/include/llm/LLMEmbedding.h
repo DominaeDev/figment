@@ -15,7 +15,7 @@ namespace fig::llm
 	public:
 		~LLMEmbedding();
 
-		bool LoadModel(fig::string filename);
+		bool LoadModel(const fig::path& filename);
 		void Shutdown();
 		bool IsReady() const;
 

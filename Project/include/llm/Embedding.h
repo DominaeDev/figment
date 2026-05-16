@@ -10,14 +10,14 @@ namespace fig::llm
 		fig::string content;
 		std::vector<float> vec;
 
-		bool LoadFromFile(fig::string filename);
-		bool SaveToFile(fig::string filename) const;
+		bool LoadFromFile(const fig::path& filename);
+		bool SaveToFile(const fig::path& filename) const;
 	};
 
 	class Embeddings
 	{
 	public:
-		static void Initialize(fig::string filePath, fig::string modelName);
+		static void Initialize(const fig::path& filePath, fig::string modelName);
 
 		static const std::vector<EmbeddingVector>& GetEmbeddings();
 		static void AddEmbedding(EmbeddingVector embedding);

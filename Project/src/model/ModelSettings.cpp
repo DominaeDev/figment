@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "Constants.h"
 #include "model/ModelSettings.h"
+#include "fs/XmlSerializable.h"
 #include "util/StringUtility.h"
 
 using namespace fig::io;
@@ -13,26 +14,80 @@ namespace fig::llm
 
 	ModelSettings::ModelSettings() :
 		version { FormatVersion },
+		model {},
+		embeddingModel {}
+	{
+	}
+
+	ModelSettings::LLMModel::LLMModel() :
 		contextSize { Constants::DefaultModelSettings::ContextSize },
 		contextWindowKeepRatio { Constants::DefaultModelSettings::ContextWindowKeepRatio },
 		gpuLayers { Constants::DefaultModelSettings::GPULayers },
-		bUseMlock { Constants::DefaultModelSettings::UseMlock },
-		bUseMmap { Constants::DefaultModelSettings::UseMmap },
+		bUseMlock { Constants::DefaultModelSettings::UseMLock },
+		bUseMmap { Constants::DefaultModelSettings::UseMMap },
 		microBatchSize { Constants::DefaultModelSettings::MicroBatchSize },
 		maxSequences { Constants::DefaultModelSettings::MaxSequences }
-	{}
+	{
+	}
+
+	auto ModelSettings::XmlFields()
+	{
+		static ModelSettings Defaults {};
+		return std::make_tuple(
+			XmlAttribute	{ &ModelSettings::version,	"version" }
+				.Default(uint8_t(-1))
+				.Validator([](auto& v) { return v <= FormatVersion; }),
+			XmlElement { &ModelSettings::name, "Name" },
+			XmlElement { &ModelSettings::model, "Model" },
+			XmlElement { &ModelSettings::embeddingModel, "Embedding" }
+		);
+	}
+
+	auto ModelSettings::LLMModel::XmlFields()
+	{
+		static ModelSettings::LLMModel Defaults {};
+		return std::make_tuple(
+			XmlElement { &LLMModel::filename, "Path" },
+			XmlElement { &LLMModel::promptTemplate, "PromptTemplate",
+				[](auto& value) { return fig::util::enum_deserialize(value, fig::llm::PromptTemplateMapping); },
+				[](auto& value) { return fig::util::enum_serialize(value, fig::llm::PromptTemplateMapping); } }
+				.Default(PromptTemplateType::Default),
+			XmlElement { &LLMModel::contextSize, "ContextSize",
+				[](auto& value) { return fig::util::enum_deserialize(value, ContextSizeMapping, ContextSize::Undefined); },
+				[](auto& value) { return fig::util::enum_serialize(value, ContextSizeMapping); } }
+				.Default(Defaults.contextSize),
+			XmlElement { &LLMModel::contextWindowKeepRatio, "ContextKeepRatio"}
+				.Default(Defaults.contextWindowKeepRatio)
+				.Validator([](auto& value) { return value >= 0.0f and value <= 1.0f; }),
+			XmlElement { &LLMModel::gpuLayers, "GPULayers" }
+				.Default(Defaults.gpuLayers),
+			XmlElement { &LLMModel::bUseMlock, "UseMLock" }
+				.Default(Defaults.bUseMlock),
+			XmlElement { &LLMModel::bUseMmap, "UseMMap" }
+				.Default(Defaults.bUseMmap),
+			XmlElement { &LLMModel::microBatchSize, "MicroBatchSize" }
+				.Default(Defaults.microBatchSize),
+			XmlElement { &LLMModel::maxSequences, "MaxSequences" }
+				.Default(Defaults.maxSequences)
+		);
+	}
+
+	auto ModelSettings::EmbeddingModel::XmlFields()
+	{
+		return std::make_tuple(
+			XmlElement { &EmbeddingModel::filename, "Path" }
+		);
+	}
 
 	static bool ReadXml(XmlReader& xml, ModelSettings& data)
 	{
-		if (not xml.IsOk())
-			return false;
-
 		auto rootNode = xml.GetRootElement();
-		XmlDeserialize(rootNode, data);
+		if (!XmlDeserialize(rootNode, data))
+			return false;
 	
 		return data.version <= FormatVersion
-			and not data.modelFilename.empty()
-			and data.gpuLayers > 0u;
+			and not data.model.filename.empty()
+			and data.model.gpuLayers > 0u;
 	}
 
 	static bool WriteXml(XmlWriter& xml, const ModelSettings& data)
@@ -54,7 +109,7 @@ namespace fig::llm
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
-	FileError ModelSettings::LoadFromXml(const fig::bytes& buffer) noexcept
+	FileError ModelSettings::LoadFromXml(const fig::byte_span& buffer) noexcept
 	{
 		XmlReader xml(fig::string_view { (const char*)buffer.data(), buffer.size() });
 		if (not xml.IsOk() or xml.GetRootElement().GetName() != XmlRootName)

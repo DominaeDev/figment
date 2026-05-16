@@ -575,7 +575,7 @@ namespace fig::llm::util
 		return lcase(id);
 	}
 
-	bool dump_batch_text(const Context& context, int32_t seq_index, fig::string filename)
+	bool dump_batch_text(const Context& context, int32_t seq_index, const fig::path& filename)
 	{
 		auto [batch_ref, batch_n] = context.GetCache().GetBatch();
 		auto& batch = batch_ref.get();
@@ -655,14 +655,14 @@ namespace fig::llm::util
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	bool dump_batch_tokens(const Context& context, int32_t seq_id, fig::string filename)
+	bool dump_batch_tokens(const Context& context, int32_t seq_id, const fig::path& filename)
 	{
 		auto [batch_ref, batch_n] = context.GetCache().GetBatch();
 
 		return dump_batch_tokens(batch_ref, batch_n, seq_id, context.GetVocabPtr(), filename);
 	}
 
-	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_index, VocabPtr pVocab, fig::string filename)
+	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_index, VocabPtr pVocab, const fig::path& filename)
 	{
 		auto fnTokenStr = [pVocab](Token token) -> fig::string {
 			if (token == llama_vocab_bos(pVocab))
@@ -731,7 +731,7 @@ namespace fig::llm::util
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	bool dump_kv_cache(const Context& context, int32_t seq_id, fig::string filename)
+	bool dump_kv_cache(const Context& context, int32_t seq_id, const fig::path& filename)
 	{
 		auto cache_view = llama_kv_cache_view_init(context.GetCtxPtr(), context.GetCache().n_seq_max());
 		llama_kv_cache_view_update(context.GetCtxPtr(), &cache_view);
@@ -813,12 +813,12 @@ namespace fig::llm::util
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	bool dump_kv_cache_cells(const Context& contextState, fig::string filename)
+	bool dump_kv_cache_cells(const Context& contextState, const fig::path& filename)
 	{
 		return dump_kv_cache_cells(contextState.GetCtxPtr(), contextState.GetNumSequences(), filename);
 	}
 
-	bool dump_kv_cache_cells(ContextPtr pCtx, int32_t num_sequences, fig::string filename)
+	bool dump_kv_cache_cells(ContextPtr pCtx, int32_t num_sequences, const fig::path& filename)
 	{
 		auto cache_view = llama_kv_cache_view_init(pCtx, num_sequences);
 

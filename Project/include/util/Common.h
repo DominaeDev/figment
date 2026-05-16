@@ -213,7 +213,7 @@ namespace fig::util
 	}
 
 	template <typename K, typename T> requires std::is_enum_v<K>
-	inline T enum_serialize(const K& enum_value, const std::map<K, T>& mapping, const T& default_value = {})
+	inline T constexpr enum_serialize(const K& enum_value, const std::map<K, T>& mapping, const T& default_value = {})
 	{
 		if (auto itFind = mapping.find(enum_value); itFind != mapping.cend())
 			return itFind->second;
@@ -221,7 +221,7 @@ namespace fig::util
 	}
 
 	template <typename K, typename T> requires std::is_enum_v<K>
-	inline K enum_deserialize(const T& enum_value, const std::map<K, T>& mapping, const K& default_value = {})
+	inline constexpr K enum_deserialize(const T& enum_value, const std::map<K, T>& mapping, const K& default_value = {})
 	{
 		if (auto key = find_key(mapping, enum_value); key.has_value())
 			return key.value();

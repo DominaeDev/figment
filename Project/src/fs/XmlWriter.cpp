@@ -199,7 +199,8 @@ namespace fig::io
 		std::memcpy(buffer.data(), printer.CStr(), buffer.size());
 	}
 
-	// Explicit template instantiations
+	// Explicit template instantiation
+
 	template void XmlWriterAttribute::Set<bool>(const bool&) noexcept;
 	template void XmlWriterAttribute::Set<uint8_t>(const uint8_t&) noexcept;
 	template void XmlWriterAttribute::Set<uint16_t>(const uint16_t&) noexcept;

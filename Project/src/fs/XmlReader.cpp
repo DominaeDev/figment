@@ -150,6 +150,30 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	template<is_number_range T>
+	std::optional<T> XmlReaderAttribute::TryGet() const noexcept
+	{
+		using TValue = std::ranges::range_value_t<T>;
+
+		if (auto str = TryGet<fig::string>(); str.has_value())
+		{
+			auto values = fig::util::decode_csv(str.value());
+
+			T result {};
+			result.reserve(values.size());
+
+			for (const auto& v : values)
+			{
+				TValue value {};
+				std::from_chars(v.data(), v.data() + v.size(), value);
+				result.push_back(value);
+			}
+
+			return std::make_optional(result);
+		}
+		return std::nullopt;
+	}
+
 	XmlReaderElement::XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot) noexcept :
 		_pElement { pElement },
 		_pRoot { pRoot }
@@ -310,6 +334,30 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	template<is_number_range T>
+	std::optional<T> XmlReaderElement::TryGetValue() const noexcept
+	{
+		using TValue = std::ranges::range_value_t<T>;
+
+		if (auto str = TryGetValue<fig::string>(); str.has_value())
+		{
+			auto values = fig::util::decode_csv(str.value());
+
+			T result {};
+			result.reserve(values.size());
+
+			for (const auto& v : values)
+			{
+				TValue value {};
+				std::from_chars(v.data(), v.data() + v.size(), value);
+				result.push_back(value);
+			}
+
+			return std::make_optional(result);
+		}
+		return std::nullopt;
+	}
+
 	XmlReaderAttribute XmlReaderElement::operator[] (const std::string& key) const noexcept
 	{
 		auto pAttrib = _pElement->FindAttribute(key.c_str());
@@ -391,7 +439,8 @@ namespace fig::io
 		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
 	}
 
-	// Explicit template instantiations
+	// Explicit template instantiation
+
 	template std::optional<uint8_t> XmlReaderAttribute::TryGet<uint8_t>() const noexcept;
 	template std::optional<uint16_t> XmlReaderAttribute::TryGet<uint16_t>() const noexcept;
 	template std::optional<uint32_t> XmlReaderAttribute::TryGet<uint32_t>() const noexcept;
@@ -400,6 +449,16 @@ namespace fig::io
 	template std::optional<int16_t> XmlReaderAttribute::TryGet<int16_t>() const noexcept;
 	template std::optional<int32_t> XmlReaderAttribute::TryGet<int32_t>() const noexcept;
 	template std::optional<int64_t> XmlReaderAttribute::TryGet<int64_t>() const noexcept;
+	template std::optional<std::vector<uint8_t>> XmlReaderAttribute::TryGet<std::vector<uint8_t>>() const noexcept;
+	template std::optional<std::vector<uint16_t>> XmlReaderAttribute::TryGet<std::vector<uint16_t>>() const noexcept;
+	template std::optional<std::vector<uint32_t>> XmlReaderAttribute::TryGet<std::vector<uint32_t>>() const noexcept;
+	template std::optional<std::vector<uint64_t>> XmlReaderAttribute::TryGet<std::vector<uint64_t>>() const noexcept;
+	template std::optional<std::vector<int8_t>> XmlReaderAttribute::TryGet<std::vector<int8_t>>() const noexcept;
+	template std::optional<std::vector<int16_t>> XmlReaderAttribute::TryGet<std::vector<int16_t>>() const noexcept;
+	template std::optional<std::vector<int32_t>> XmlReaderAttribute::TryGet<std::vector<int32_t>>() const noexcept;
+	template std::optional<std::vector<int64_t>> XmlReaderAttribute::TryGet<std::vector<int64_t>>() const noexcept;
+	template std::optional<std::vector<float>> XmlReaderAttribute::TryGet<std::vector<float>>() const noexcept;
+	template std::optional<std::vector<double>> XmlReaderAttribute::TryGet<std::vector<double>>() const noexcept;
 	template std::optional<uint8_t> XmlReaderElement::TryGetValue<uint8_t>() const noexcept;
 	template std::optional<uint16_t> XmlReaderElement::TryGetValue<uint16_t>() const noexcept;
 	template std::optional<uint32_t> XmlReaderElement::TryGetValue<uint32_t>() const noexcept;
@@ -408,5 +467,14 @@ namespace fig::io
 	template std::optional<int16_t> XmlReaderElement::TryGetValue<int16_t>() const noexcept;
 	template std::optional<int32_t> XmlReaderElement::TryGetValue<int32_t>() const noexcept;
 	template std::optional<int64_t> XmlReaderElement::TryGetValue<int64_t>() const noexcept;
-
+	template std::optional<std::vector<uint8_t>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<uint16_t>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<uint32_t>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<uint64_t>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<int8_t>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<int16_t>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<int32_t>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<int64_t>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<float>> XmlReaderElement::TryGetValue() const noexcept;
+	template std::optional<std::vector<double>> XmlReaderElement::TryGetValue() const noexcept;
 }

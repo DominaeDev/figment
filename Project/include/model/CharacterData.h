@@ -54,12 +54,12 @@ namespace fig::io
 		static constexpr auto XmlFields()
 		{
 			return std::make_tuple(
-				fig::io::AsElement { &CharacterData::chatId, "ID" },
-				fig::io::AsElement { &CharacterData::shortName, "ShortName" },
-				fig::io::AsElement { &CharacterData::fullName, "FullName" },
-				fig::io::AsElement { &CharacterData::brief, "Brief" },
-				fig::io::AsElement { &CharacterData::description, "Description" },
-				fig::io::AsElement { &CharacterData::tags, "Tags" }
+				fig::io::XmlElement { &CharacterData::chatId, "ID" },
+				fig::io::XmlElement { &CharacterData::shortName, "ShortName" },
+				fig::io::XmlElement { &CharacterData::fullName, "FullName" },
+				fig::io::XmlElement { &CharacterData::brief, "Brief" },
+				fig::io::XmlElement { &CharacterData::description, "Description" },
+				fig::io::XmlElement { &CharacterData::tags, "Tags" }
 			);
 		}
 	};

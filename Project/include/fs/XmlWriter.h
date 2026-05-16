@@ -42,9 +42,28 @@ namespace fig::io
 		template<typename T> requires (std::unsigned_integral<T> and not std::same_as<T, bool>)
 		void Set(const T& value) noexcept;
 		
-		void Set(const fig::string& name, const fig::string_like auto& value) noexcept
+		template<fig::is_string_like T> requires (!std::same_as<T, fig::string>)
+		void Set(const fig::string& name, const T& value) noexcept
 		{
-			Set(name, fig::string { value });
+			Set<fig::string>(name, fig::string { value });
+		}
+
+		void Set(const fig::is_number_range auto& value) noexcept
+		{
+			if constexpr (std::floating_point<decltype(value)>)
+			{
+				Set<fig::string_span>(value
+					| std::views::transform([](auto& n) -> fig::string { return std::format("{:g}", n); })
+					| std::ranges::to<std::vector>()
+				);
+			}
+			else
+			{
+				Set<fig::string_span>(value
+					| std::views::transform([](auto& n) -> fig::string { return std::format("{}", n); })
+					| std::ranges::to<std::vector>()
+				);
+			}
 		}
 
 	private:
@@ -75,16 +94,37 @@ namespace fig::io
 		template<typename T> requires (std::integral<T> and not std::same_as<T, bool>)
 		void SetValue(const T& value) noexcept;
 
-		void SetValue(const fig::string& name, const fig::string_like auto& value) noexcept
+		template<fig::is_string_like T> requires (!std::same_as<T, fig::string>)
+		void SetValue(const T& value) noexcept
 		{
-			SetValue(name, fig::string { value });
+			SetValue(fig::string { value });
 		}
 
-		template<std::ranges::range TRange>
-			requires std::constructible_from<fig::string, std::ranges::range_value_t<TRange>>
-		void SetValue(const fig::string& name, const TRange& value) noexcept
+		void SetValue(const fig::is_number_range auto& value) noexcept
 		{
-			SetValue(std::span { value.cbegin(), value.cend() });
+			if constexpr (std::floating_point<decltype(value)>)
+			{
+				SetValue<fig::string_span>(value
+					| std::views::transform([](auto& n) -> fig::string { return std::format("{:g}", n); })
+					| std::ranges::to<std::vector>()
+				);
+			}
+			else
+			{
+				SetValue<fig::string_span>(value
+					| std::views::transform([](auto& n) -> fig::string { return std::format("{}", n); })
+					| std::ranges::to<std::vector>()
+				);
+			}
+		}
+
+		template<is_string_range T> requires (!std::same_as<T, fig::string_span>)
+		void SetValue(const T& value) noexcept
+		{
+			SetValue<fig::string_span>(value
+				| std::views::transform([](auto& s) -> fig::string { return fig::string { s }; })
+				| std::ranges::to<std::vector>()
+			);
 		}
 
 		template <typename T>
@@ -93,14 +133,19 @@ namespace fig::io
 			AddChild(name).SetValue<T>(value);
 		}
 
-		void SetElementValue(const fig::string& name, const fig::string_like auto& value) noexcept
+		void SetElementValue(const fig::string& name, const is_number_range auto& value) noexcept
+		{
+			AddChild(name).SetValue(value);
+		}
+
+		void SetElementValue(const fig::string& name, const fig::is_string_like auto& value) noexcept
 		{
 			AddChild(name).SetValue(fig::string { value });
 		}
 
-		template<std::ranges::range TRange>
-			requires std::constructible_from<fig::string, std::ranges::range_value_t<TRange>>
-		void SetElementValue(const fig::string& name, const TRange& value) noexcept
+		template<std::ranges::range T>
+			requires std::constructible_from<fig::string, std::ranges::range_value_t<T>>
+		void SetElementValue(const fig::string& name, const T& value) noexcept
 		{
 			AddChild(name).SetValue(std::span { value.cbegin(), value.cend() });
 		}

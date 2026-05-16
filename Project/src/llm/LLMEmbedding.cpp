@@ -19,7 +19,7 @@ LLMEmbedding::~LLMEmbedding()
 	Shutdown();
 }
 
-bool LLMEmbedding::LoadModel(fig::string filename)
+bool LLMEmbedding::LoadModel(const fig::path& filename)
 {
 	const int ngl = 99; // All layers
 	const int n_ctx = Constants::Embedding::ContextSize;
@@ -29,8 +29,8 @@ bool LLMEmbedding::LoadModel(fig::string filename)
 	model_params.n_gpu_layers = ngl;
 	model_params.use_mmap = false;
 	model_params.use_mlock = false;
-	_pModel = llama_model_load_from_file(filename.c_str(), model_params);
-	_modelName = GetFilename(filename);
+	_pModel = llama_model_load_from_file(filename.u8string().c_str(), model_params);
+	_modelName = filename.filename().u8string();
 
 	if (!_pModel)
 	{

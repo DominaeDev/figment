@@ -82,8 +82,8 @@ namespace fig::Constants
 		constexpr int32_t MaxResponseLength = 256;
 		constexpr int32_t MicroBatchSize = 512;
 		constexpr int32_t MaxSequences = 4;
-		constexpr bool UseMlock = true;
-		constexpr bool UseMmap = true;
+		constexpr bool UseMLock = true;
+		constexpr bool UseMMap = true;
 	}
 
 	namespace Paths

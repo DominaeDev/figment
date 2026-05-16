@@ -18,12 +18,12 @@ namespace fig::llm::util
 	fig::string process_message(fig::string message, fig::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
 	std::pair<MessageType, bool> detect_message_type(fig::string text) noexcept;
 
-	bool dump_batch_text(const fig::llm::Context& context, int32_t seq_id, fig::string filename);
-	bool dump_batch_tokens(const fig::llm::Context& context, int32_t seq_id, fig::string filename);
-	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_id, fig::llm::VocabPtr pVocab, fig::string filename);
-	bool dump_kv_cache(const fig::llm::Context& context, int32_t seq_id, fig::string filename);
-	bool dump_kv_cache_cells(const fig::llm::Context& contextState, fig::string filename);	
-	bool dump_kv_cache_cells(fig::llm::ContextPtr pCtx, int32_t num_sequences, fig::string filename);
+	bool dump_batch_text(const fig::llm::Context& context, int32_t seq_id, const fig::path& filename);
+	bool dump_batch_tokens(const fig::llm::Context& context, int32_t seq_id, const fig::path& filename);
+	bool dump_batch_tokens(const llama_batch& batch, int32_t num_tokens, int32_t seq_id, fig::llm::VocabPtr pVocab, const fig::path& filename);
+	bool dump_kv_cache(const fig::llm::Context& context, int32_t seq_id, const fig::path& filename);
+	bool dump_kv_cache_cells(const fig::llm::Context& contextState, const fig::path& filename);
+	bool dump_kv_cache_cells(fig::llm::ContextPtr pCtx, int32_t num_sequences, const fig::path& filename);
 	
 	bool validate_kv_cache(const fig::llm::Context& context, fig::llm::Sequence sequence, int32_t turn);
 

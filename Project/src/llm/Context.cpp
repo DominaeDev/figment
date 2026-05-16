@@ -21,7 +21,7 @@ Context::Context(const ModelState& modelState)
 	_pCtx = modelState.pCtx;
 	_pVocab = modelState.pVocab;
 	_num_sequences = modelState.max_sequences;
-	_fKeepRatio = modelState.settings.contextWindowKeepRatio;
+	_fKeepRatio = modelState.settings.model.contextWindowKeepRatio;
 }
 
 int32_t Context::GetUsedKVCacheCells() const

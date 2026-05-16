@@ -49,6 +49,9 @@ namespace fig::io
 		template<>
 		std::optional<fig::string_list> TryGet<fig::string_list>() const noexcept;
 
+		template<is_number_range T>
+		[[nodiscard]] std::optional<T> TryGet() const noexcept;
+
 		template<typename T>
 			requires (std::signed_integral<T> and not std::same_as<T, bool>)
 		std::optional<T> TryGet() const noexcept;
@@ -111,6 +114,9 @@ namespace fig::io
 
 		template<>
 		[[nodiscard]] std::optional<fig::string_list> TryGetValue<fig::string_list>() const noexcept;
+
+		template<is_number_range T>
+		[[nodiscard]] std::optional<T> TryGetValue() const noexcept;
 
 		template<typename T>
 			requires (std::unsigned_integral<T> and not std::same_as<T, bool>)

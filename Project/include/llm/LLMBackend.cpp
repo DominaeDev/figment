@@ -150,14 +150,14 @@ namespace fig::llm
 
 		// initialize the model
 		llama_model_params model_params = llama_model_default_params();
-		model_params.n_gpu_layers = settings.gpuLayers;
-		model_params.use_mmap = settings.bUseMmap;
-		model_params.use_mlock = settings.bUseMlock;
+		model_params.n_gpu_layers = settings.model.gpuLayers;
+		model_params.use_mmap = settings.model.bUseMmap;
+		model_params.use_mlock = settings.model.bUseMlock;
 		model_params.progress_callback = (llama_progress_callback)&OnLoadModelProgress;
 		model_params.progress_callback_user_data = (void*)this;
 
 		auto state = std::make_shared<ModelState>();
-		state->pModel = llama_model_load_from_file(settings.modelFilename.u8string().c_str(), model_params);
+		state->pModel = llama_model_load_from_file(settings.model.filename.u8string().c_str(), model_params);
 		if (!state->pModel)
 		{
 			fprintf(stderr, "%s: error: unable to load model\n", __func__);
@@ -166,18 +166,18 @@ namespace fig::llm
 		}
 
 		state->pVocab = llama_model_get_vocab(state->pModel);
-		state->modelName = settings.modelFilename.filename().u8string().c_str();
+		state->modelName = settings.model.filename.u8string();
 		state->settings = settings;
 		auto_detect_template(state->pModel);
 
 		// initialize the context
 		llama_context_params ctx_params = llama_context_default_params();
-		int32_t n_ctx = std::min(llama_model_n_ctx_train(state->pModel), static_cast<int32_t>(settings.contextSize));
-		int32_t n_seq_max = settings.maxSequences;
+		int32_t n_ctx = std::min(llama_model_n_ctx_train(state->pModel), static_cast<int32_t>(settings.model.contextSize));
+		int32_t n_seq_max = settings.model.maxSequences;
 		ctx_params.n_ctx = n_ctx;
 		ctx_params.n_seq_max = n_seq_max;
 		ctx_params.n_batch = n_ctx;
-		ctx_params.n_ubatch = settings.microBatchSize;
+		ctx_params.n_ubatch = settings.model.microBatchSize;
 
 		state->pCtx = llama_init_from_model(state->pModel, ctx_params);
 		state->ctx_size = llama_n_ctx(state->pCtx);
@@ -191,10 +191,10 @@ namespace fig::llm
 		}
 
 		// Initialize embedder
-		if (not settings.embeddingModelFilename.empty())
+		if (not settings.embeddingModel.filename.empty())
 		{
 			state->pEmbedding = new LLMEmbedding {};
-			if (state->pEmbedding->LoadModel(settings.embeddingModelFilename.u8string().c_str()))
+			if (state->pEmbedding->LoadModel(settings.embeddingModel.filename.u8string()))
 				LogLn("Loaded embedding model");
 			else
 			{

@@ -49,7 +49,7 @@ namespace fig::io
 		}
 	}
 
-	std::expected<fig::string, FileError> ReadTextFile(const fig::string& filename, bool normalizeNewlines)
+	std::expected<fig::string, FileError> ReadTextFile(const fig::path& filename, bool normalizeNewlines)
 	{
 		try
 		{
@@ -73,7 +73,7 @@ namespace fig::io
 		}
 	}
 
-	FileError ReadTextFile(const fig::string& filename, fig::string& out_content, bool normalizeNewlines)
+	FileError ReadTextFile(const fig::path& filename, fig::string& out_content, bool normalizeNewlines)
 	{
 		auto content = ReadTextFile(filename, normalizeNewlines);
 		if (content.has_value())
@@ -84,7 +84,7 @@ namespace fig::io
 		return content.error();
 	}
 
-	FileError WriteTextFile(const fig::string& filename, const fig::string& content, bool append)
+	FileError WriteTextFile(const fig::path& filename, const fig::string& content, bool append)
 	{
 		try
 		{
@@ -101,9 +101,9 @@ namespace fig::io
 		}
 	}
 
-	std::expected<std::vector<fig::string>, FileError> FindFilesInPath(const fig::string& dirPath, const fig::string& extension)
+	std::expected<std::vector<fig::path>, FileError> FindFilesInPath(const fig::path& dirPath, const fig::string& extension)
 	{
-		std::vector<fig::string> matchingFiles;
+		std::vector<fig::path> matchingFiles;
 		fig::path directory(dirPath);
 
 		if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory))
@@ -112,7 +112,7 @@ namespace fig::io
 		for (const auto& entry : std::filesystem::directory_iterator(directory))
 		{
 			if (std::filesystem::is_regular_file(entry) && (extension.empty() || equals(entry.path().extension().u8string(), extension, true)))
-				matchingFiles.push_back(entry.path().u8string());
+				matchingFiles.push_back(entry.path());
 		}
 
 		return matchingFiles;

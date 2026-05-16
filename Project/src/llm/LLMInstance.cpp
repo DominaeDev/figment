@@ -1752,7 +1752,7 @@ namespace fig::llm
 			Embeddings::AddEmbedding(embedding);
 
 			// Save to disk
-			fig::string filename = std::format("./embeddings/{}.txt", CreateStrUUID());
+			fig::path filename = std::format("./embeddings/{}.txt", CreateStrUUID());
 			embedding.SaveToFile(filename);
 		}
 		return true; // Break here
