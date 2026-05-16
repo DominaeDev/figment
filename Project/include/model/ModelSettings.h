@@ -41,17 +41,17 @@ namespace fig::llm
 			int32_t microBatchSize;
 			int32_t maxSequences;
 
-			static auto XmlFields();
+			static auto GetXmlFields();
 		} model;
 
 		struct EmbeddingModel {
 			fig::path filename;
 
-			static auto XmlFields();
+			static auto GetXmlFields();
 		} embeddingModel;
 	
 	public:
-		static auto XmlFields();
+		static auto GetXmlFields();
 	};
 }
 

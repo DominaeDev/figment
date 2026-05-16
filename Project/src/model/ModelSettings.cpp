@@ -30,53 +30,53 @@ namespace fig::llm
 	{
 	}
 
-	auto ModelSettings::XmlFields()
+	auto ModelSettings::GetXmlFields()
 	{
-		return std::make_tuple(
-			XmlAttribute { &ModelSettings::version,	"version" }
+		return XmlFields(
+			XmlAttribute { "version",	&ModelSettings::version }
 				.Default(uint8_t(-1))
 				.Validator([](auto& v) { return v <= FormatVersion; }),
-			XmlElement { &ModelSettings::name, "Name" },
-			XmlElement { &ModelSettings::model, "Model" },
-			XmlElement { &ModelSettings::embeddingModel, "Embedding" }
+			XmlElement { "Name",		&ModelSettings::name, },
+			XmlElement { "Model",		&ModelSettings::model, },
+			XmlElement { "Embedding",	&ModelSettings::embeddingModel, }
 		);
 	}
 
-	auto ModelSettings::LLMModel::XmlFields()
+	auto ModelSettings::LLMModel::GetXmlFields()
 	{
-		static ModelSettings::LLMModel Defaults {};
-		return std::make_tuple(
-			XmlElement { &LLMModel::filename, "Path" },
-			XmlElement { &LLMModel::promptTemplate, "PromptTemplate",
+		namespace Defaults = fig::Constants::DefaultModelSettings;
+		return XmlFields(
+			XmlElement { "Path", &LLMModel::filename},
+			XmlElement { "PromptTemplate", &LLMModel::promptTemplate,
 				[](auto& value) { return fig::util::enum_serialize(value, fig::llm::PromptTemplateMapping); },
 				[](auto& value) { return fig::util::enum_deserialize(value, fig::llm::PromptTemplateMapping); } }
 				.Default(PromptTemplateType::Default),
-			XmlElement { &LLMModel::contextSize, "ContextSize",
-				[](auto& value) { return fig::util::enum_serialize(value, ContextSizeMapping); },
-				[](auto& value) { return fig::util::enum_deserialize(value, ContextSizeMapping, ContextSize::Undefined); } }
-				.Default(Defaults.contextSize),
-			XmlElement { &LLMModel::contextWindowKeepRatio, "ContextKeepRatio"}
-				.Default(Defaults.contextWindowKeepRatio)
+			XmlElement { "ContextSize", &LLMModel::contextSize, XmlConvertEnum<ContextSize>, XmlParseEnum<ContextSize> }
+				.Default(Defaults::ContextSize)
+				.Validator([](auto& n) { return static_cast<int32_t>(n) >= static_cast<int32_t>(ContextSize::_2K) and static_cast<int32_t>(n) <= static_cast<int32_t>(ContextSize::_32K); }),
+			XmlElement { "ContextKeepRatio", &LLMModel::contextWindowKeepRatio, }
+				.Default(Defaults::ContextWindowKeepRatio)
 				.Validator([](auto& value) { return value >= 0.0f and value <= 1.0f; }),
-			XmlElement { &LLMModel::gpuLayers, "GPULayers" }
-				.Default(Defaults.gpuLayers),
-			XmlElement { &LLMModel::bUseMlock, "UseMLock" }
-				.Default(Defaults.bUseMlock),
-			XmlElement { &LLMModel::bUseMmap, "UseMMap" }
-				.Default(Defaults.bUseMmap),
-			XmlElement { &LLMModel::microBatchSize, "MicroBatchSize" }
-				.Default(Defaults.microBatchSize),
-			XmlElement { &LLMModel::maxSequences, "MaxSequences" }
-				.Default(Defaults.maxSequences)
+			XmlElement { "GPULayers", &LLMModel::gpuLayers }
+				.Default(Defaults::GPULayers),
+			XmlElement { "UseMLock", &LLMModel::bUseMlock }
+				.Default(Defaults::UseMLock),
+			XmlElement { "UseMMap", &LLMModel::bUseMmap }
+				.Default(Defaults::UseMMap),
+			XmlElement { "MicroBatchSize", &LLMModel::microBatchSize }
+				.Default(Defaults::MicroBatchSize),
+			XmlElement { "MaxSequences", &LLMModel::maxSequences }
+				.Default(Defaults::MaxSequences)
 		);
 	}
 
-	auto ModelSettings::EmbeddingModel::XmlFields()
+	auto ModelSettings::EmbeddingModel::GetXmlFields()
 	{
-		return std::make_tuple(
-			XmlElement { &EmbeddingModel::filename, "Path" }
+		return XmlFields(
+			XmlElement { "Path", &EmbeddingModel::filename }
 		);
 	}
+
 	FileError ModelSettings::LoadFromXml(const fig::path& path) noexcept
 	{
 		if (not (std::filesystem::exists(path) and std::filesystem::is_regular_file(path)))

@@ -52,7 +52,7 @@ namespace fig::gui
 				else
 					color = Colors::White;
 
-				AddTag(character.gender.GetName(), color);
+				AddTag(character.gender, color);
 			}
 
 			for (size_t i = 0; i < character.tags.size() && i < 16; ++i)

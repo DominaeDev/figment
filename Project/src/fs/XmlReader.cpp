@@ -143,6 +143,21 @@ namespace fig::io
 	}
 
 	template<>
+	std::optional<fig::gui::Color> XmlReaderAttribute::TryGet<fig::gui::Color>() const noexcept
+	{
+		if (_pAttrib)
+		{
+			const char* pValue = _pAttrib->Value();
+			if (pValue)
+			{
+				auto value = fig::util::trim(fig::string(pValue));
+				return std::make_optional(fig::gui::Color::FromString(value));
+			}
+		}
+		return std::nullopt;
+	}
+
+	template<>
 	std::optional<fig::string_list> XmlReaderAttribute::TryGet<fig::string_list>() const noexcept
 	{
 		if (auto str = TryGet<fig::string>(); str.has_value())
@@ -322,6 +337,18 @@ namespace fig::io
 			auto value = fig::util::trim(fig::string(pValue));
 			fig::uuid uuid = fig::uuid::from_str(value);
 			return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
+		}
+		return std::nullopt;
+	}
+
+	template<>
+	std::optional<fig::gui::Color> XmlReaderElement::TryGetValue<fig::gui::Color>() const noexcept
+	{
+		const char* pValue = _pElement->GetText();
+		if (pValue)
+		{
+			auto value = fig::util::trim(fig::string(pValue));
+			return std::make_optional(fig::gui::Color::FromString(value));
 		}
 		return std::nullopt;
 	}

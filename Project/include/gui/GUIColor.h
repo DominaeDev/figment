@@ -82,7 +82,8 @@ namespace fig::gui
 			return WithAlpha(static_cast<uint8_t>(std::clamp(alpha, T(0), T(1)) * T(255)));
 		}
 
-		static Color FromString(fig::string hex) noexcept;
+		fig::string ToString() const noexcept;
+		static Color FromString(const fig::string& hex) noexcept;
 		static Color FromHSV(float h, float s, float v) noexcept;
 	};
 

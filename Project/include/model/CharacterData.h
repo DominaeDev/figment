@@ -43,7 +43,7 @@ namespace fig::io
 		void SaveToXml(fig::bytes& buffer) const;
 
 	public:
-		static auto XmlFields();
+		static auto GetXmlFields();
 	};
 }
 

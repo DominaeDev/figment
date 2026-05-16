@@ -53,7 +53,7 @@ namespace fig::io
 		}
 
 		if (character.gender.IsDefined())
-			character.searchIndex.AddTerm(fig::util::lcase(character.gender.GetName()));
+			character.searchIndex.AddTerm(fig::util::lcase(character.gender));
 
 		character.searchIndex.AddTerm(character.shortName);
 		character.searchIndex.AddTerm(character.fullName);

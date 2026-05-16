@@ -25,7 +25,6 @@ namespace fig::io
 		CharacterGender(CharacterGender&& value) = default;
 
 		std::pair<Gender, fig::string> Get() const noexcept;
-		fig::string GetName() const noexcept;
 		inline bool IsDefined() const noexcept { return _gender != Gender::Undefined; };
 
 		CharacterGender& operator= (const CharacterGender& other) noexcept = default;
@@ -39,7 +38,12 @@ namespace fig::io
 		inline bool operator!= (Gender gender) const noexcept { return !operator==(gender); }
 		inline bool operator!= (const fig::string& gender) const noexcept { return !operator==(gender); }
 
+		operator fig::string() const { return GetName(); }
+		explicit operator Gender() const { return _gender; }
+
 	private:
+		fig::string GetName() const noexcept;
+
 		Gender _gender { Gender::Undefined };
 		fig::string _customName;
 	};

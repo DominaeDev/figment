@@ -23,13 +23,19 @@ namespace fig::io
 		using SerializedType = std::remove_cvref_t<std::invoke_result_t<TSerializer, const ValueType&>>;
 		using TValidator = std::function<bool(const ValueType&)>;
 
-		TMemberPointer member_ptr;
 		const char* name;
+		TMemberPointer member_ptr;
 		TSerializer custom_serializer {};
 		TDeserializer custom_deserializer {};
 		ValueType default_value {};
 		TValidator validator {};
 		bool must_exist {};
+
+		XmlAttribute& Name(const char* name)
+		{
+			this->name = name;
+			return *this;
+		}
 
 		XmlAttribute& Default(ValueType default_value)
 		{
@@ -57,13 +63,19 @@ namespace fig::io
 		using SerializedType = std::remove_cvref_t<std::invoke_result_t<TSerializer, const ValueType&>>;
 		using TValidator = std::function<bool(const ValueType&)>;
 
-		TMemberPointer member_ptr;
 		const char* name;
+		TMemberPointer member_ptr;
 		TSerializer custom_serializer {};
 		TDeserializer custom_deserializer {};
 		ValueType default_value {};
 		TValidator validator {};
 		bool must_exist {};
+
+		XmlElement& Name(const char* name)
+		{
+			this->name = name;
+			return *this;
+		}
 
 		XmlElement& Default(ValueType default_value)
 		{
@@ -95,7 +107,7 @@ namespace fig::io
 
 	template<typename T>
 	concept XmlSerializable = requires {
-		{ T::XmlFields() } -> IsTuple;
+		{ T::GetXmlFields() } -> IsTuple;
 	};
 
 	template<typename T>
@@ -137,7 +149,7 @@ namespace fig::io
 					static_assert(false, "Serializable field must be either an element or an attribute");
 
 			}(), ...);
-		}, T::XmlFields());
+		}, T::GetXmlFields());
 	}
 
 	template<XmlSerializable T>
@@ -207,7 +219,7 @@ namespace fig::io
 				if (field.validator)
 					bValid &= field.validator(member);
 			}(), ...);
-		}, T::XmlFields());
+		}, T::GetXmlFields());
 
 		return bValid;
 	}
@@ -242,6 +254,36 @@ namespace fig::io
 	[[nodiscard]] std::optional<T> XmlDeserialize(const fig::byte_span& doc, const fig::string& rootName = {})
 	{
 		return XmlDeserialize<T>(fig::string_view { reinterpret_cast<const char*>(doc.data()), doc.size() }, rootName);
+	}
+
+	template <typename T>
+	static fig::string XmlConvertString(const T& value)
+	{
+		return fig::string { value };
+	}
+
+	template <typename T>
+	static int32_t XmlConvertInteger(const T& value)
+	{
+		return static_cast<int32_t>(value);
+	}
+
+	template <typename T, typename U = std::underlying_type_t<T>> requires std::is_enum_v<T>
+	static U XmlConvertEnum(const T& value)
+	{
+		return static_cast<U>(value);
+	}
+
+	template <typename T, typename U = std::underlying_type_t<T>> requires std::is_enum_v<T>
+	static T XmlParseEnum(const U& value)
+	{
+		return static_cast<T>(value);
+	}
+
+	template<typename... TFields>
+	[[nodiscard]] auto XmlFields(TFields&&... fields)
+	{
+		return std::make_tuple(std::forward<TFields>(fields)...);
 	}
 }
 #endif

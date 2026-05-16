@@ -51,6 +51,12 @@ namespace fig::io
 	}
 
 	template<>
+	void XmlWriterAttribute::Set<fig::gui::Color>(const fig::gui::Color& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), value.ToString().c_str());
+	}
+
+	template<>
 	void XmlWriterAttribute::Set<fig::string_span>(const fig::string_span& values) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), fig::util::encode_csv(values).c_str());
@@ -140,6 +146,13 @@ namespace fig::io
 	{
 		DeleteValue();
 		_pElement->InsertNewText(value.to_str().c_str());
+	}
+
+	template<>
+	void XmlWriterElement::SetValue<fig::gui::Color>(const fig::gui::Color& value) noexcept
+	{
+		DeleteValue();
+		_pElement->InsertNewText(value.ToString().c_str());
 	}
 
 	template<>

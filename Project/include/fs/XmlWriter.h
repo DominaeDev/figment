@@ -35,6 +35,7 @@ namespace fig::io
 		template<> void Set<fig::path>(const fig::path& value) noexcept;
 		template<> void Set<fig::byte_span>(const fig::byte_span& value) noexcept;
 		template<> void Set<fig::uuid>(const fig::uuid& value) noexcept;
+		template<> void Set<fig::gui::Color>(const fig::gui::Color& value) noexcept;
 		template<> void Set<fig::string_span>(const fig::string_span& values) noexcept;
 
 		template<typename T> requires (std::signed_integral<T> and not std::same_as<T, bool>)
@@ -89,6 +90,7 @@ namespace fig::io
 		template<> void SetValue<fig::path>(const fig::path& value) noexcept;
 		template<> void SetValue<fig::byte_span>(const fig::byte_span& value) noexcept;
 		template<> void SetValue<fig::uuid>(const fig::uuid& value) noexcept;
+		template<> void SetValue<fig::gui::Color>(const fig::gui::Color& value) noexcept;
 		template<> void SetValue<fig::string_span>(const fig::string_span& values) noexcept;
 
 		template<typename T> requires (std::integral<T> and not std::same_as<T, bool>)

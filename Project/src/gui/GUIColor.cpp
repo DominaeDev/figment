@@ -113,9 +113,17 @@ namespace fig::gui
 		};
 	}
 
-	Color Color::FromString(fig::string hex) noexcept
+	fig::string Color::ToString() const noexcept
 	{
-		hex = fig::util::trim(hex);
+		if (a == 0xFF)
+			return std::format("#{:02X}{:02X}{:02X}", r, g, b);
+		else
+			return std::format("#{:02X}{:02X}{:02X}{:02X}", r, g, b, a);
+	}
+
+	Color Color::FromString(const fig::string& value) noexcept
+	{
+		fig::string hex = fig::util::trim(value);
 		if (hex.empty())
 			return (Color)0;
 		if (hex[0] == '#')
@@ -134,10 +142,10 @@ namespace fig::gui
 			}
 			else if (hex.length() == 8)
 			{
-				uint8_t a = static_cast<uint8_t>(std::stoi(hex.substr(0, 2), nullptr, 16));
-				uint8_t r = static_cast<uint8_t>(std::stoi(hex.substr(2, 2), nullptr, 16));
-				uint8_t g = static_cast<uint8_t>(std::stoi(hex.substr(4, 2), nullptr, 16));
-				uint8_t b = static_cast<uint8_t>(std::stoi(hex.substr(6, 2), nullptr, 16));
+				uint8_t r = static_cast<uint8_t>(std::stoi(hex.substr(0, 2), nullptr, 16));
+				uint8_t g = static_cast<uint8_t>(std::stoi(hex.substr(2, 2), nullptr, 16));
+				uint8_t b = static_cast<uint8_t>(std::stoi(hex.substr(4, 2), nullptr, 16));
+				uint8_t a = static_cast<uint8_t>(std::stoi(hex.substr(6, 2), nullptr, 16));
 				return Color { r, g, b, a };
 			}
 		}

@@ -10,20 +10,21 @@ namespace fig::io
 {
 	static const fig::string XmlRootName { "Character" };
 
-	auto CharacterData::XmlFields()
+	auto CharacterData::GetXmlFields()
 	{
-		return std::make_tuple(
-			XmlElement { &CharacterData::chatId, "ID" }
+		return XmlFields(
+			XmlElement { "ID",				&CharacterData::chatId  }
 				.MustExist(),
-			XmlElement { &CharacterData::shortName, "ShortName" }
+			XmlElement { "ShortName",		&CharacterData::shortName }
 				.MustExist(),
-			XmlElement { &CharacterData::fullName, "FullName" },
-			XmlElement { &CharacterData::brief, "Brief" },
-			XmlElement { &CharacterData::description, "Description" },
-			XmlElement { &CharacterData::tags, "Tags" },
-			XmlElement { &CharacterData::gender, "Gender",
-				[](auto& g) { return g.GetName(); },
-				[](auto& s) { return CharacterGender { s }; }
+			XmlElement { "FullName",		&CharacterData::fullName },
+			XmlElement { "Brief",			&CharacterData::brief },
+			XmlElement { "Description",		&CharacterData::description },
+			XmlElement { "Tags",			&CharacterData::tags },
+			XmlElement { "Gender",			&CharacterData::gender, XmlConvertString<CharacterGender> },
+			XmlElement { "SearchIndex",		&CharacterData::searchIndex, 
+				[](auto& value) -> fig::string { return value.Serialize(); },
+				[](auto& value) -> SearchIndex { SearchIndex s; s.Deserialize(value); return s; }
 			}
 		);
 	}
@@ -46,7 +47,7 @@ namespace fig::io
 		{
 			data.properties[Constants::CharacterProperties::Gender] = CharacterProperty {
 				.label = "Gender",
-				.value = data.gender.GetName(),
+				.value = data.gender,
 			};
 		}
 
@@ -65,12 +66,6 @@ namespace fig::io
 			else
 				data.bgColor = Color::FromHSV(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 		}
-
-		// Tags
-		data.tags = rootNode.TryGetElement<fig::string_list>("Tags").value_or({});
-
-		// Search
-		data.searchIndex.Deserialize(rootNode.TryGetElement<fig::string>("SearchIndex").value_or(""));
 
 		return !data.chatId.empty() && !data.shortName.empty();
 	}
@@ -113,9 +108,6 @@ namespace fig::io
 
 		XmlSerialize(root, *this);
 		
-		if (not searchIndex.IsEmpty())
-			root.SetElementValue("SearchIndex", searchIndex.Serialize());
-
 		xml.WriteToMemory(buffer);
 	}
 }

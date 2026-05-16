@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Types.h"
+#include "gui/GUIColor.h"
 
 namespace tinyxml2
 {
@@ -45,6 +46,9 @@ namespace fig::io
 
 		template<>
 		std::optional<fig::uuid> TryGet<fig::uuid>() const noexcept;
+
+		template<>
+		std::optional<fig::gui::Color> TryGet<fig::gui::Color>() const noexcept;
 
 		template<>
 		std::optional<fig::string_list> TryGet<fig::string_list>() const noexcept;
@@ -111,6 +115,9 @@ namespace fig::io
 
 		template<>
 		[[nodiscard]] std::optional<fig::uuid> TryGetValue<fig::uuid>() const noexcept;
+
+		template<>
+		[[nodiscard]] std::optional<fig::gui::Color> TryGetValue<fig::gui::Color>() const noexcept;
 
 		template<>
 		[[nodiscard]] std::optional<fig::string_list> TryGetValue<fig::string_list>() const noexcept;
