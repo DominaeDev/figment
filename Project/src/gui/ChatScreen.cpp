@@ -17,15 +17,14 @@
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
-#include "util/StringUtility.h"
 #include "io/Serialization.h"
 #include "io/FileUtility.h"
 #include <format>
 #include <ranges>
 
-using namespace fig::util;
 using namespace fig::llm;
 using namespace fig::io;
+using namespace fig::chat;
 
 template<typename T>
 constexpr void queue_clear(std::queue<T>& q)
@@ -138,7 +137,7 @@ namespace fig::gui
 	void ChatScreen::StartChat()
 	{
 		//! @temp
-		fig::io::ChatStaging staging(Constants::LLM::DefaultChatOptions);
+		fig::chat::ChatStaging staging(Constants::LLM::DefaultChatOptions);
 		CharacterData user;
 		user.LoadFromXml(fig::path { "./characters/user.xml" });
 		CharacterData bot1;
@@ -152,12 +151,12 @@ namespace fig::gui
 		StartChat(staging);
 	}
 
-	void ChatScreen::StartChat(const fig::io::ChatStaging& staging)
+	void ChatScreen::StartChat(const fig::chat::ChatStaging& staging)
 	{
 		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
 		{
-			ChatSession session;
+			fig::chat::ChatSession session;
 			session.Initialize(staging, Constants::LLM::DefaultChatOptions);
 
 			LLMChatArguments llmArgs {

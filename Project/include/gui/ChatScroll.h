@@ -15,9 +15,9 @@ namespace fig::gui
 	public:
 		ChatScroll(LayoutElement* pParent);
 
-		void SetSession(fig::io::ChatSession session) { _session = session; }
+		void SetSession(fig::chat::ChatSession session) { _session = session; }
 
-		void AddDummyMessage(StringCRef name, Role role, MessageType msgType, StringCRef message);
+		void AddDummyMessage(StringCRef name, fig::chat::Role role, fig::chat::MessageType msgType, StringCRef message);
 		void AddSystemMessage(StringCRef message);
 
 		int RemoveMessages(std::span<fig::string> ids);
@@ -32,7 +32,7 @@ namespace fig::gui
 		void OnAddedChild(LayoutElement* pChild) override;
 
 	private:
-		ChatMessage* AddMessage(const fig::uuid& characterId, Role role, MessageType msgType, StringCRef message, bool complete);
+		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, StringCRef message, bool complete);
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
 		void EnablePolling(bool bEnable);
 		void Poll();
@@ -47,10 +47,10 @@ namespace fig::gui
 		{
 			fig::uuid characterId;
 			fig::string chatId;
-			Role role { Role::Undefined };
+			fig::chat::Role role { fig::chat::Role::Undefined };
 			fig::string responseId;
 			fig::string subMessageId;
-			MessageType msgType { MessageType::Undefined };
+			fig::chat::MessageType msgType { fig::chat::MessageType::Undefined };
 			ChatMessage* pChatMessage {};
 		};
 		std::vector<MessageEntry> _messages {};
@@ -62,6 +62,6 @@ namespace fig::gui
 		float _fLastListHeight = 0.0f;
 		float _fAnimatedScroll = 0.0f;
 
-		fig::io::ChatSession _session {};
+		fig::chat::ChatSession _session {};
 	};
 }

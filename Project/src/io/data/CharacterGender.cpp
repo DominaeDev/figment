@@ -1,6 +1,5 @@
 #include <pch.h>
 #include "io/data/CharacterGender.h"
-#include "util/StringUtility.h"
 
 namespace fig::io
 {
@@ -27,13 +26,13 @@ namespace fig::io
 
 	CharacterGender& CharacterGender::operator= (const fig::string& name) noexcept
 	{
-		auto trimmed = util::trim(name);
-		if (util::equals(trimmed, kMale, true))
+		auto trimmed = trim(name);
+		if (equals(trimmed, kMale, true))
 		{
 			_gender = Gender::Male;
 			_customName.clear();
 		}
-		else if (util::equals(trimmed, kFemale, true))
+		else if (equals(trimmed, kFemale, true))
 		{
 			_gender = Gender::Female;
 			_customName.clear();
@@ -75,7 +74,7 @@ namespace fig::io
 	bool CharacterGender::operator== (const fig::string& gender) const noexcept
 	{
 		auto [g, s] = Get();
-		return util::equals(s, util::trim(gender), true);
+		return equals(s, trim(gender), true);
 	}
 
 	bool CharacterGender::operator== (Gender gender) const noexcept

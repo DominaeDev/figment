@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Figment.h"
-#include "util/StringUtility.h"
 
 #include <variant>
 #include <map>
 
-namespace fig::util
+namespace fig::io
 {
 	enum class IniError
 	{

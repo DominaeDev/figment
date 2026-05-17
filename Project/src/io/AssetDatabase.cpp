@@ -4,7 +4,6 @@
 #include <sqlite3.h>
 
 using namespace fig::auth;
-using namespace fig::util;
 
 constexpr fig::const_string SQL_CreateTables =
 	"CREATE TABLE Assets ("

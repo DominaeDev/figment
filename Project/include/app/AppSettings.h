@@ -15,8 +15,8 @@ namespace fig
 		SmoothScrolling,
 	};
 
-	extern template class SettingsCollection<AppSetting>;
-	using AppSettings = SettingsCollection<AppSetting>;
+	extern template class fig::io::SettingsCollection<AppSetting>;
+	using AppSettings = fig::io::SettingsCollection<AppSetting>;
 }
 
 #endif

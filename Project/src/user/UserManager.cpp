@@ -18,7 +18,6 @@
 
 using namespace fig::io;
 using namespace fig::auth;
-using namespace fig::util;
 
 namespace fig::user
 {

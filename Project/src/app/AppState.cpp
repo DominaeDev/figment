@@ -52,7 +52,7 @@ namespace fig
 
 #if !_DEBUG
 			if (GetSettings().GetBool(AppSetting::WindowMaximized))
-				SDL_MaximizeWindow(__appState->pMainWindow->GetSDLWindow());
+				SDL_MaximizeWindow(__appState->pMainWindow->GetSDLWindow().get());
 #endif
 		}
 		catch (...)
@@ -131,7 +131,7 @@ namespace fig
 		return GetUserManager().GetContent();
 	}
 
-	fig::UserSettings& Global::GetUserSettings()
+	UserSettings& Global::GetUserSettings()
 	{
 		assert(__appState);
 		return __appState->pUserManager.get()->GetSettings();

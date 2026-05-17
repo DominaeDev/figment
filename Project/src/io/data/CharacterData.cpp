@@ -1,6 +1,5 @@
 #include <pch.h>
 #include "io/data/CharacterData.h"
-#include "util/StringUtility.h"
 #include "io/Xml.h"
 
 using namespace fig::gui;

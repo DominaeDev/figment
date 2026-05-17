@@ -327,7 +327,7 @@ namespace fig::io
 			return; // Invalid state
 
 		if (bWriteTimestamp)
-			SetMeta(MetaTag::UpdatedAt, fig::util::utc_now());
+			SetMeta(MetaTag::UpdatedAt, utc_now());
 
 		sync_state.Modified();
 	}

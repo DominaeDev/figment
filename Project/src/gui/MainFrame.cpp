@@ -15,6 +15,7 @@
 #include "util/DebugUtils.h"
 
 using namespace fig::io;
+using namespace fig::chat;
 
 namespace fig::gui
 {

@@ -3,9 +3,6 @@
 #include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
 
-using namespace fig::llm;
-using namespace fig::util;
-
 namespace fig::llm::llama
 {
 	std::vector<Token> tokenize(VocabPtr pVocab, fig::string prompt, bool add_special)
@@ -169,7 +166,7 @@ namespace fig::llm::llama
 
 	bool ctx_remove(ContextPtr pCtx, SequenceSlots seq_slots, int32_t begin, int32_t end)
 	{
-		auto seq_ids = fig::llm::util::get_sequence_indices(seq_slots, toI(AllSequenceSlots.size()));
+		auto seq_ids = get_sequence_indices(seq_slots, toI(AllSequenceSlots.size()));
 		for (auto seq_id : seq_ids)
 		{
 			if (!ctx_remove(pCtx, seq_id, begin, end))
@@ -180,8 +177,8 @@ namespace fig::llm::llama
 
 	void ctx_copy_sequence(ContextPtr pCtx, SequenceSlots seq_from, SequenceSlots seq_to, int32_t begin, int32_t end)
 	{
-		auto from = fig::llm::util::get_sequence_indices(seq_from, toI(AllSequenceSlots.size()))[0];
-		auto to = fig::llm::util::get_sequence_indices(seq_to, toI(AllSequenceSlots.size()))[0];
+		auto from = get_sequence_indices(seq_from, toI(AllSequenceSlots.size()))[0];
+		auto to = get_sequence_indices(seq_to, toI(AllSequenceSlots.size()))[0];
 
 		if constexpr (Debugging)
 		{

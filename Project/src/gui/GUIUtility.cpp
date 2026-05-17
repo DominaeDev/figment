@@ -2,15 +2,12 @@
 #include <algorithm>
 #include "gui/GUIUtility.h"
 #include "gui/AppResources.h"
-#include "util/StringUtility.h"
 #include "io/FileUtility.h"
 
 #include <SDL3_image/SDL_image.h>
 #include <c_resource.h>
 #include <tuple>
 #include <cassert>
-
-using namespace fig::util;
 
 namespace fig::gui
 {

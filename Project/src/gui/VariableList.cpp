@@ -3,11 +3,9 @@
 #include "gui/StaticText.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
-#include "util/StringUtility.h"
 #include <format>
 
 using namespace fig::gui;
-using namespace fig::util;
 
 constexpr Coord Margin = 8;
 

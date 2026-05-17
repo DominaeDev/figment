@@ -103,7 +103,7 @@ namespace fig::io
 	{
 		size_t length = file.data_length;
 		file.data.resize(length);
-		if (file.data_encrypted and not fig::util::is_zero(authKey))
+		if (file.data_encrypted and not is_zero(authKey))
 		{
 			// Read encrypted
 			fig::auth::Decrypt(fs, file.data, authKey);

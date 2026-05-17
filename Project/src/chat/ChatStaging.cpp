@@ -1,22 +1,21 @@
 #include <pch.h>
 #include "chat/ChatStaging.h"
 #include "app/AppState.h"
-#include "util/StringUtility.h"
 #include "io/FileUtility.h"
 #include "llm/LLMUtility.h"
 #include "gui/GUIUtility.h"
 #include "gui/Window.h"
 #include "gui/OldCharacterImageStore.h"
+#include "io/data/CharacterData.h"
 
 #include <exception>
 #include <cassert>
 #include <format>
 
-using namespace fig::util;
 using namespace fig::io;
 using namespace fig::gui;
 
-namespace fig::io
+namespace fig::chat
 {
 	static bool s_bInitialized = false;
 	static fig::string s_system_prompt_solo;
@@ -71,7 +70,8 @@ namespace fig::io
 
 	bool ChatStaging::AssignRole(Role role, const CharacterData& characterData)
 	{
-		auto& character = _characters[role] = characterData;
+		auto& character = _characters[role];
+		character = characterData;
 		if (role == Role::User)
 			character.chatId = "USR";
 		if (is_bot(role))

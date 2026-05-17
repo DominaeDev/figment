@@ -6,7 +6,7 @@
 #include "chat/ChatOptions.h"
 #include "io/data/CharacterData.h"
 
-namespace fig::io
+namespace fig::chat
 {
 	class ChatStaging
 	{
@@ -14,13 +14,13 @@ namespace fig::io
 		ChatStaging() = default;
 		ChatStaging(ChatOptions options);
 
-		bool AssignRole(Role role, const CharacterData& character);
+		bool AssignRole(Role role, const fig::io::CharacterData& character);
 
-		std::optional<CharacterData> GetCharacter(Role role) const noexcept;
-		std::optional<CharacterData> GetCharacterById(const fig::uuid& id) const noexcept;
-		std::optional<CharacterData> GetCharacterByChatId(const fig::string& characterId) const noexcept;
-		std::optional<CharacterData> GetCharacterByName(const fig::string& name) const noexcept;
-		const std::map<Role, CharacterData>& GetCharacters() const noexcept { return _characters; }
+		std::optional<fig::io::CharacterData> GetCharacter(Role role) const noexcept;
+		std::optional<fig::io::CharacterData> GetCharacterById(const fig::uuid& id) const noexcept;
+		std::optional<fig::io::CharacterData> GetCharacterByChatId(const fig::string& characterId) const noexcept;
+		std::optional<fig::io::CharacterData> GetCharacterByName(const fig::string& name) const noexcept;
+		const std::map<Role, fig::io::CharacterData>& GetCharacters() const noexcept { return _characters; }
 
 		fig::string GetSystemPrompt() const;
 		fig::string GetDirectorPrompt() const;
@@ -39,7 +39,7 @@ namespace fig::io
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text, Role characterRole) const;
 
 	private:
-		std::map<Role, CharacterData> _characters {};
+		std::map<Role, fig::io::CharacterData> _characters {};
 		ChatOptions _options {};
 		int32_t _numBots;
 	};

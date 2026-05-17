@@ -4,8 +4,6 @@
 #include "util/Lockable.h"
 
 using namespace fig::llm;
-using namespace fig::util;
-
 using namespace std::chrono_literals;
 
 std::optional<LLMStatus> LLMStatusChannel::PollStatus()

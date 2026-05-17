@@ -1,5 +1,4 @@
 #include <pch.h>
-#include "util/StringUtility.h"
 
 #include <algorithm> 
 #include <cctype>
@@ -9,7 +8,7 @@
 #include <uuid_v4.h>
 #include <base64.h>
 
-namespace fig::util
+namespace fig
 {
 	void Log(fig::string message)
 	{

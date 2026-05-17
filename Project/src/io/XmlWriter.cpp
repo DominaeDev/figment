@@ -40,7 +40,7 @@ namespace fig::io
 	template<>
 	void XmlWriterAttribute::Set<fig::byte_span>(const fig::byte_span& value) noexcept
 	{
-		_pParent->SetAttribute(_name.c_str(), util::Base64Encode(value).c_str());
+		_pParent->SetAttribute(_name.c_str(), Base64Encode(value).c_str());
 	}
 
 	template<>
@@ -58,7 +58,7 @@ namespace fig::io
 	template<>
 	void XmlWriterAttribute::Set<fig::string_span>(const fig::string_span& values) noexcept
 	{
-		_pParent->SetAttribute(_name.c_str(), fig::util::encode_csv(values).c_str());
+		_pParent->SetAttribute(_name.c_str(), encode_csv(values).c_str());
 	}
 
 	template<>
@@ -137,7 +137,7 @@ namespace fig::io
 	void XmlWriterElement::SetValue<fig::byte_span>(const fig::byte_span& value) noexcept
 	{
 		DeleteValue();
-		_pElement->InsertNewText(util::Base64Encode(value).c_str());
+		_pElement->InsertNewText(Base64Encode(value).c_str());
 	}
 
 	template<>
@@ -158,7 +158,7 @@ namespace fig::io
 	void XmlWriterElement::SetValue<fig::string_span>(const fig::string_span& values) noexcept
 	{
 		DeleteValue();
-		_pElement->InsertNewText(fig::util::encode_csv(values).c_str());
+		_pElement->InsertNewText(encode_csv(values).c_str());
 	}
 
 	XmlWriterElement XmlWriterElement::AddChild(const fig::string& name) noexcept

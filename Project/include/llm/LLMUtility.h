@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace fig::llm::util
+namespace fig::llm
 {
 	size_t string_find_partial_stop(const fig::string& str, const fig::string& stop);
 	size_t find_one_of(const fig::string& text, const std::vector<fig::string>& words);
@@ -15,8 +15,8 @@ namespace fig::llm::util
 	fig::string& complete_message(fig::string& text);
 	
 	void process(fig::string& partial, fig::string str_token, bool* bWait, bool* bHalt, fig::string& stop_word);
-	fig::string process_message(fig::string message, fig::string actorName, std::vector<Submessage>* out_pSubmessages = nullptr) noexcept;
-	std::pair<MessageType, bool> detect_message_type(fig::string text) noexcept;
+	fig::string process_message(fig::string message, fig::string actorName, std::vector<fig::chat::Submessage>* out_pSubmessages = nullptr) noexcept;
+	std::pair<fig::chat::MessageType, bool> detect_message_type(fig::string text) noexcept;
 
 	bool dump_batch_text(const fig::llm::Context& context, int32_t seq_id, const fig::path& filename);
 	bool dump_batch_tokens(const fig::llm::Context& context, int32_t seq_id, const fig::path& filename);
@@ -39,9 +39,9 @@ namespace fig::llm::util
 	float embd_similarity_cos(const std::vector<float>& embd1, const std::vector<float>& embd2, int n);
 
 	fig::llm::PromptTemplateType auto_detect_template(llama_model* pModel);
-	fig::string apply_chat_template(Messages msg, bool add_assistant);
+	fig::string apply_chat_template(fig::chat::Messages msg, bool add_assistant);
 
-	std::pair<fig::string, fig::string> get_chat_template_prefix_suffix(Role role, fig::string name);
-	fig::string apply_chat_template_prefix(Role role, fig::string content, fig::string name);
+	std::pair<fig::string, fig::string> get_chat_template_prefix_suffix(fig::chat::Role role, fig::string name);
+	fig::string apply_chat_template_prefix(fig::chat::Role role, fig::string content, fig::string name);
 
 }

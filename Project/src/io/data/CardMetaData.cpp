@@ -82,7 +82,7 @@ namespace fig::io
 		if (createdAt != updatedAt or createdAt != lastUsedAt)
 			return false;
 		
-		fig::timestamp now = fig::util::utc_now();
+		fig::timestamp now = utc_now();
 		if (static_cast<long long>(now - createdAt) > std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::days(3)).count())
 			return false;
 		return true;

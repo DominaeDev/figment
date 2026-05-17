@@ -2,7 +2,7 @@
 
 #include "chat/ChatStaging.h"
 
-namespace fig::io
+namespace fig::chat
 {
 	class ChatSession
 	{

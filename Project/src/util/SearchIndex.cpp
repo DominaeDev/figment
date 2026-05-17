@@ -1,9 +1,6 @@
 #include <pch.h>
 #include "util/SearchIndex.h"
-#include "util/StringUtility.h"
 #include "io/data/ExcludedSearchTerms.h"
-
-using namespace fig::util;
 
 namespace fig
 {

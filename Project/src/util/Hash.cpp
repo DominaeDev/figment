@@ -29,7 +29,7 @@ extern "C" {
 #include <sha256.h>
 }
 
-namespace fig::util
+namespace fig
 {
 	fig::Hash GetHash(const fig::string& text)
 	{

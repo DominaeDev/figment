@@ -5,7 +5,7 @@
 #include "Figment.h"
 #include <variant>
 
-namespace fig
+namespace fig::io
 {
 	template <typename E>
 	concept IsEnum = std::is_enum_v<E>;

@@ -2,8 +2,6 @@
 #include "gui/GridSizer.h"
 #include "gui/Control.h"
 
-using namespace fig::util;
-
 namespace fig::gui
 {
 	GridSizer::GridSizer(int32_t cellWidth, int32_t cellHeight) :

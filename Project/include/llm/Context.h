@@ -6,7 +6,7 @@
 
 #pragma once
 
-namespace fig::io
+namespace fig::chat
 {
 	class ChatSession;
 }
@@ -40,7 +40,7 @@ namespace fig::llm
 		void DiscardByTTL(int32_t current_turn);
 		void EraseChat();
 
-		void TokenizeUncached(fig::io::ChatSession& session);
+		void TokenizeUncached(fig::chat::ChatSession& session);
 		bool DiscardBlock(const ContextBlock& block);
 		
 		void RebuildBatch();
@@ -73,8 +73,8 @@ namespace fig::llm
 		ContextCache& GetCache() { return *_cache.get(); }
 		const ContextCache& GetCache() const { return *_cache.get(); }
 
-		std::map<Role, std::vector<int32_t>> personas;
-		Role active_persona = Role::Undefined;
+		std::map<fig::chat::Role, std::vector<int32_t>> personas;
+		fig::chat::Role active_persona = fig::chat::Role::Undefined;
 		int32_t last_sequence_index = 0;
 
 		// Positions

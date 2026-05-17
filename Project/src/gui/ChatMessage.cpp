@@ -9,10 +9,8 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
-#include "util/StringUtility.h"
 #include <format>
 
-using namespace fig::util;
 
 #define USER_RIGHT_ALIGNED	1
 #define USER_YOU			1
@@ -37,6 +35,8 @@ using namespace fig::util;
 #define TEXT_BOTTOM_MARGIN	10
 #define TEXT_HMARGIN		(TEXT_LEFT_MARGIN + TEXT_RIGHT_MARGIN)
 #define TEXT_VMARGIN		(TEXT_TOP_MARGIN + TEXT_BOTTOM_MARGIN)
+
+using namespace fig::chat;
 
 namespace fig::gui
 {

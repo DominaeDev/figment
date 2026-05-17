@@ -2,8 +2,8 @@
 #define LOGIN_SCREEN_H__
 #pragma once
 
-#include "Screen.h"
-#include "GUICommon.h"
+#include "gui/Screen.h"
+#include "gui/GUICommon.h"
 
 namespace fig::gui
 {

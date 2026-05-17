@@ -20,7 +20,7 @@ namespace fig::llm
 		bool IsReady() const;
 
 		bool Generate(fig::string text, EmbeddingVector& out_embedding);
-		bool Search(const Sentences& sentences, bool bUser = true, bool bBot = true);
+		bool Search(const fig::chat::Sentences& sentences, bool bUser = true, bool bBot = true);
 
 	private:
 		enum class Mode

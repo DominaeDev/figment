@@ -4,7 +4,6 @@
 #include "llm/LLamaApi.h"
 #include "llm/LLMStatus.h"
 #include "llm/Embedding.h"
-#include "util/StringUtility.h"
 #include "io/FileUtility.h"
 #include "util/Lockable.h"
 #include <format>
@@ -13,9 +12,8 @@
 #include <chrono>
 
 using namespace std::chrono_literals;
-using namespace fig::util;
 using namespace fig::io;
-using namespace fig::llm::util;
+using namespace fig::chat;
 
 template<typename T>
 void queue_clear(std::queue<T>& q)
@@ -144,7 +142,7 @@ namespace fig::llm
 			for (int32_t i = 0; i < n_bots; ++i)
 			{
 				Role role = bot_from_index(i);
-				SequenceSlots seq_id = fig::llm::util::get_sequence_from_index(i);
+				SequenceSlots seq_id = get_sequence_from_index(i);
 
 				// Persona
 				std::vector<Token> persona_tokens = llama::tokenize(pVocab, personas[role], false);
@@ -604,8 +602,8 @@ namespace fig::llm
 				current_sequence_index = get_bot_index(responderRole);
 			}
 
-			current_sequence = fig::llm::util::get_sequence_from_index(current_sequence_index);
-			current_sequence_indices = fig::llm::util::get_sequence_indices(current_sequence, _contextState.GetNumSequences());
+			current_sequence = get_sequence_from_index(current_sequence_index);
+			current_sequence_indices = get_sequence_indices(current_sequence, _contextState.GetNumSequences());
 		}
 		else
 		{
@@ -690,7 +688,7 @@ namespace fig::llm
 			if (batch_view.n_tokens > 1) // First only
 			{
 				assert(token_pos == batch_view.pos[0]);
-				fig::llm::util::dump_batch_tokens(batch_view, batch_view.n_tokens, current_sequence_index, pVocab, "batch.txt");
+				dump_batch_tokens(batch_view, batch_view.n_tokens, current_sequence_index, pVocab, "batch.txt");
 			}
 
 			// Ensure enough space in the context to evaluate this batch
@@ -757,7 +755,7 @@ namespace fig::llm
 				// check if there is incomplete UTF-8 character at the end
 				bHalt = false;
 				bWait = false;
-				fig::llm::util::process(partial, str_token, &bWait, &bHalt, stop_word);
+				process(partial, str_token, &bWait, &bHalt, stop_word);
 
 				if (bHalt)
 					stop_reason = StopReason::Completed;
@@ -793,7 +791,7 @@ namespace fig::llm
 					if (fmt_end != fig::npos)
 					{
 						fig::string tag, tagName;
-						fig::llm::util::get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
+						get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
 						if (tagName == "@USR" || tagName == _session.GetNameOf(Role::User) && args.role != Role::User)
 						{
@@ -815,13 +813,13 @@ namespace fig::llm
 								carryOver = partial.substr(fmt_start);
 								partial.erase(fmt_start);
 								sendMsg = !partial.empty();
-								responderId = fig::llm::util::format_id(tagName);
+								responderId = format_id(tagName);
 								responderRole = _session.GetStaging().GetRoleOf(responderId);
 							}
 							else // No remainder: New message
 							{
 								sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
-								responderId = fig::llm::util::format_id(tagName);
+								responderId = format_id(tagName);
 								responderRole = _session.GetStaging().GetRoleOf(responderId);
 
 								if (tag == Constants::Chat::DialogueTag)
@@ -853,12 +851,12 @@ namespace fig::llm
 									{
 										_contextState.active_persona = responderRole;
 										int32_t bot_index = get_bot_index(responderRole);
-										SequenceSlots new_sequence = fig::llm::util::get_sequence_from_index(bot_index);
+										SequenceSlots new_sequence = get_sequence_from_index(bot_index);
 										if (!new_sequence.IsEmpty() && new_sequence != current_sequence)
 										{
 											int32_t prev_sequence_index = current_sequence_index;
 											current_sequence = new_sequence;
-											current_sequence_indices = fig::llm::util::get_sequence_indices(current_sequence, _contextState.GetNumSequences());
+											current_sequence_indices = get_sequence_indices(current_sequence, _contextState.GetNumSequences());
 											current_sequence_index = current_sequence_indices[0];
 
 											// Swap response over
@@ -957,7 +955,7 @@ namespace fig::llm
 		_contextState.last_sequence_index = current_sequence_index;
 
 
-		fig::llm::util::sanitize_response(response);
+		sanitize_response(response);
 
 		if (response.length() > 0)
 		{
@@ -1273,10 +1271,10 @@ namespace fig::llm
 		fig::string content = message;
 		content = _session.ApplyNames(content);
 		std::vector<Submessage> subMessages;
-		content = fig::llm::util::process_message(content, identifier, &subMessages);
+		content = process_message(content, identifier, &subMessages);
 
 		if (msgType == MessageType::Undefined)
-			msgType = fig::llm::util::detect_message_type(content).first;
+			msgType = detect_message_type(content).first;
 	
 		if (msgType == MessageType::SystemMessage) //! @correctness
 			role = Role::System;
@@ -1391,7 +1389,7 @@ namespace fig::llm
 		if (currBlock.responseId != responseId)
 			return false; // Not last message
 
-		auto [msgType, bComplete] = fig::llm::util::detect_message_type(currBlock.content);
+		auto [msgType, bComplete] = detect_message_type(currBlock.content);
 		if (msgType == MessageType::Undefined || (bComplete && !extend))
 			return false; // Not incomplete message
 
@@ -1537,11 +1535,11 @@ namespace fig::llm
 	#if _DEBUG
 		for (int32_t i = 0; i < _contextState.GetNumSequences(); ++i)
 		{
-			fig::llm::util::dump_batch_text(_contextState, i, std::format("prompt_text_{}.txt", i));
-			fig::llm::util::dump_batch_tokens(_contextState, i, std::format("prompt_full_{}.txt", i));
-			fig::llm::util::dump_kv_cache(_contextState, i, std::format("kvcache_{}.txt", i));
+			dump_batch_text(_contextState, i, std::format("prompt_text_{}.txt", i));
+			dump_batch_tokens(_contextState, i, std::format("prompt_full_{}.txt", i));
+			dump_kv_cache(_contextState, i, std::format("kvcache_{}.txt", i));
 		}
-		fig::llm::util::dump_kv_cache_cells(_contextState, "kvcache_alloc.txt");
+		dump_kv_cache_cells(_contextState, "kvcache_alloc.txt");
 	#endif 
 	}
 

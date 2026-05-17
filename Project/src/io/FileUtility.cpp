@@ -1,11 +1,8 @@
 #include <pch.h>
 #include "io/FileUtility.h"
-#include "util/StringUtility.h"
 #include "io/Asset.h"
 #include <spng.h>
 #include <fstream>
-
-using namespace fig::util;
 
 namespace fig::io
 {
@@ -175,7 +172,7 @@ namespace fig::io
 
 		if (bDecodeBase64)
 		{
-			auto decoded = fig::util::Base64Decode(content);
+			auto decoded = Base64Decode(content);
 			content.assign(reinterpret_cast<const char*>(decoded.data()), decoded.size());
 		}
 
@@ -214,7 +211,7 @@ namespace fig::io
 		fig::string content { itFind->text };
 		if (bDecodeBase64)
 		{
-			auto decoded = fig::util::Base64Decode(content);
+			auto decoded = Base64Decode(content);
 			content.assign(reinterpret_cast<const char*>(decoded.data()), decoded.size());
 		}
 

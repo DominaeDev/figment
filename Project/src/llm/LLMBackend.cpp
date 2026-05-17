@@ -7,48 +7,45 @@
 #include "app/AppState.h"
 
 #include "util/Lockable.h"
-#include "util/StringUtility.h"
 #include "io/FileUtility.h"
 
-using namespace fig::util;
 using namespace fig::io;
-using namespace fig::llm::util;
-
-using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;
-static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
-{
-	fig::llm::LLMBackend* pThis = static_cast<fig::llm::LLMBackend*>(user_data);
-
-	fig::string log(text);
-	size_t pos_eq = log.find('=');
-	bool bGPU = log.find("CUDA") != fig::npos;
-	bool bCPU = log.find("CPU") != fig::npos;
-
-	if (pos_eq != fig::npos && log.find("buffer size") != fig::npos)
-	{
-		fig::string value = trim(log.substr(pos_eq + 1));
-		double mul = 1024.0 * 1024.0; // MiB
-		if (ends_with(value, "GiB"))
-			mul *= 1024.0;
-		try
-		{
-			int64_t iValue = toI64(std::stod(value) * mul);
-			if (bGPU)
-				pThis->usedVRAM.fetch_add(iValue);
-			else if (bCPU)
-				pThis->usedRAM.fetch_add(iValue);
-		}
-		catch (...)
-		{
-			// Do nothing
-		}
-	}
-
-	Log(text);
-}
 
 namespace fig::llm
 {
+	using __LlamaLogCallback = std::function<void(ggml_log_level level, const char* text, void* user_data)>;
+	static void OnLlamaLog(ggml_log_level level, const char* text, void* user_data)
+	{
+		LLMBackend* pThis = static_cast<LLMBackend*>(user_data);
+
+		fig::string log(text);
+		size_t pos_eq = log.find('=');
+		bool bGPU = log.find("CUDA") != fig::npos;
+		bool bCPU = log.find("CPU") != fig::npos;
+
+		if (pos_eq != fig::npos && log.find("buffer size") != fig::npos)
+		{
+			fig::string value = trim(log.substr(pos_eq + 1));
+			double mul = 1024.0 * 1024.0; // MiB
+			if (ends_with(value, "GiB"))
+				mul *= 1024.0;
+			try
+			{
+				int64_t iValue = toI64(std::stod(value) * mul);
+				if (bGPU)
+					pThis->usedVRAM.fetch_add(iValue);
+				else if (bCPU)
+					pThis->usedRAM.fetch_add(iValue);
+			}
+			catch (...)
+			{
+				// Do nothing
+			}
+		}
+
+		Log(text);
+	}
+
 	bool LLMBackend::OnLoadModelProgress(float progress, void* user_data)
 	{
 		LLMBackend* pThis = static_cast<LLMBackend*>(user_data);

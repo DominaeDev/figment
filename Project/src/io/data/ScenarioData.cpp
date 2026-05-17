@@ -1,10 +1,9 @@
 #include <pch.h>
 #include "io/data/ScenarioData.h"
-#include "util/StringUtility.h"
 #include "io/Xml.h"
 #include <cassert>
 
-using namespace fig::util;
+using namespace fig::chat;
 
 namespace fig::io
 {

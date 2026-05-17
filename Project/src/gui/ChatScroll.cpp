@@ -7,12 +7,12 @@
 #include "chat/ChatSession.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
-#include "util/StringUtility.h"
+#include "io/data/CharacterData.h"
 #include <format>
 #include <set>
 
-using namespace fig::util;
 using namespace fig::llm;
+using namespace fig::chat;
 
 #define POLL_INTERVAL 0.1f
 #define ANIMATED_SCROLL_SPEED 15.0f

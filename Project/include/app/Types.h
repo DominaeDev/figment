@@ -10,9 +10,7 @@
 #include <map>
 #include <stdint.h>
 #include <filesystem>
-
 #include <uuid_v4.h>
-#include "util/EnumFlags.h"
 
 namespace fig
 {

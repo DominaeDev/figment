@@ -2,7 +2,6 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/AssetManager.h"
-#include "util/StringUtility.h"
 #include "gui/CardList.h"
 #include "gui/GridSizer.h"
 #include "gui/ScenarioCard.h"
@@ -10,7 +9,7 @@
 #include "gui/MainFrame.h"
 
 using namespace fig::io;
-using namespace fig::util;
+using namespace fig::user;
 
 namespace fig::gui
 {

@@ -57,8 +57,8 @@ namespace fig
 		static fig::AppSettings& GetSettings();
 		
 		static fig::user::UserManager& GetUserManager();
+		static UserSettings& GetUserSettings();
 		static fig::io::UserContentManager& GetUserContent();
-		static fig::UserSettings& GetUserSettings();
 
 		[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
 		static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);

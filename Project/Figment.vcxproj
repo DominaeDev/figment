@@ -267,13 +267,12 @@
     <ClCompile Include="src\user\UserManager.cpp" />
     <ClCompile Include="src\user\UserSettings.cpp" />
     <ClCompile Include="src\util\DebugUtils.cpp" />
-    <ClCompile Include="src\util\Dictionary.cpp" />
     <ClCompile Include="src\util\SearchIndex.cpp" />
     <ClCompile Include="src\util\Hash.cpp" />
-    <ClCompile Include="src\util\StringUtility.cpp" />
+    <ClCompile Include="src\util\StringUtils.cpp" />
     <ClCompile Include="src\gui\TextBox.cpp" />
     <ClCompile Include="src\gui\AppResources.cpp" />
-    <ClCompile Include="src\util\Common.cpp" />
+    <ClCompile Include="src\util\CommonUtils.cpp" />
     <ClCompile Include="src\gui\VerticalListSizer.cpp" />
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
   </ItemGroup>
@@ -514,14 +513,13 @@
     <ClInclude Include="include\gui\StatusBar.h" />
     <ClInclude Include="include\util\Hash.h" />
     <ClInclude Include="include\util\Lockable.h" />
-    <ClInclude Include="include\util\StringUtility.h" />
+    <ClInclude Include="include\util\StringUtils.h" />
     <ClInclude Include="include\gui\TextBox.h" />
     <ClInclude Include="include\gui\AppResources.h" />
-    <ClInclude Include="include\util\Common.h" />
+    <ClInclude Include="include\util\CommonUtils.h" />
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
     <ClInclude Include="include\util\UndoStack.h" />
-    <ClInclude Include="include\util\Dictionary.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

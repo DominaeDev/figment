@@ -123,7 +123,7 @@ namespace fig::gui
 
 	Color Color::FromString(const fig::string& value) noexcept
 	{
-		fig::string hex = fig::util::trim(value);
+		fig::string hex = trim(value);
 		if (hex.empty())
 			return (Color)0;
 		if (hex[0] == '#')

@@ -2,7 +2,7 @@
 #include "app/AppSettings.h"
 #include "io/IniFile.h"
 
-using namespace fig::util;
+using namespace fig::io;
 
 namespace fig
 {

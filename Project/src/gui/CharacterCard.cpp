@@ -3,13 +3,11 @@
 #include "gui/AppResources.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
-#include "util/StringUtility.h"
 #include "gui/Events.h"
 #include "gui/Menu.h"
 #include "gui/MainFrame.h"
 
 using namespace fig::io;
-using namespace fig::util;
 
 namespace fig::gui
 {

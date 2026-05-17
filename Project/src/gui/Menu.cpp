@@ -8,8 +8,6 @@
 #include "app/AppState.h"
 #include "gui/Events.h"
 
-using namespace fig::util;
-
 namespace fig::gui
 {
 	constexpr int32_t MenuMargin = 4;

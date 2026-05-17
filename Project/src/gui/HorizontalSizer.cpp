@@ -2,8 +2,6 @@
 #include "gui/HorizontalSizer.h"
 #include "gui/LayoutElement.h"
 
-using namespace fig::util;
-
 namespace fig::gui
 {
 	void HorizontalSizer::OnLayout(const Rect& parentRect)

@@ -6,11 +6,9 @@
 #include "gui/RoundedBorder.h"
 #include "gui/GUIUtility.h"
 #include "gui/MainFrame.h"
-#include "util/StringUtility.h"
 
 #include <cassert>
 
-using namespace fig::util;
 using namespace fig::io;
 
 namespace fig::gui

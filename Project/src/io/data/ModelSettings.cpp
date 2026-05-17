@@ -1,10 +1,8 @@
 #include <pch.h>
 #include "io/data/ModelSettings.h"
-#include "util/StringUtility.h"
 #include "io/Xml.h"
 
 using namespace fig::io;
-using namespace fig::util;
 
 namespace fig::llm
 {
@@ -33,11 +31,11 @@ namespace fig::llm
 
 	fig::string ModelSettings::LLMModel::SerializePromptTemplate(PromptTemplateType value)
 	{
-		return fig::util::enum_serialize(value, fig::llm::PromptTemplateMapping);
+		return enum_serialize(value, fig::llm::PromptTemplateMapping);
 	}
 
 	PromptTemplateType ModelSettings::LLMModel::DeserializePromptTemplate(const fig::string& value)
 	{
-		return fig::util::enum_deserialize(value, fig::llm::PromptTemplateMapping);
+		return enum_deserialize(value, fig::llm::PromptTemplateMapping);
 	}
 }

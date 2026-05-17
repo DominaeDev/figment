@@ -6,7 +6,6 @@
 
 #include "gui/Control.h"
 #include "util/UndoStack.h"
-#include "util/StringUtility.h"
 
 namespace fig::gui
 {

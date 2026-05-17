@@ -26,12 +26,12 @@ namespace fig::io
 		// Check for gender tags
 		for (auto& tag : card.data.tags)
 		{
-			if (util::equals(tag, "male", true) || util::equals(tag, "man", true) || util::equals(tag, "boy", true))
+			if (equals(tag, "male", true) || equals(tag, "man", true) || equals(tag, "boy", true))
 			{
 				character.gender = CharacterGender::Male;
 				break;
 			}
-			else if (util::equals(tag, "female", true) || util::equals(tag, "woman", true) || util::equals(tag, "girl", true))
+			else if (equals(tag, "female", true) || equals(tag, "woman", true) || equals(tag, "girl", true))
 			{
 				character.gender = CharacterGender::Female;
 				break;
@@ -40,7 +40,7 @@ namespace fig::io
 			static const std::array<fig::string, 4> custom_genders = { "Futanari", "Shemale", "Trans", "Asexual" };
 			for (auto& custom_gender : custom_genders)
 			{
-				if (util::equals(tag, custom_gender, true))
+				if (equals(tag, custom_gender, true))
 				{
 					character.gender = CharacterGender::Other;
 					character.properties[Constants::CharacterProperties::Gender] = CharacterProperty {
@@ -53,7 +53,7 @@ namespace fig::io
 		}
 
 		if (character.gender.IsDefined())
-			character.searchIndex.AddTerm(fig::util::lcase(character.gender));
+			character.searchIndex.AddTerm(lcase(character.gender));
 
 		character.searchIndex.AddTerm(character.shortName);
 		character.searchIndex.AddTerm(character.fullName);

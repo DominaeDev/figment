@@ -1,7 +1,6 @@
 #include <pch.h>
-#include "util/StringUtility.h"
 
-namespace fig::util
+namespace fig
 {
 	void ltrim_inplace(string& s)
 	{

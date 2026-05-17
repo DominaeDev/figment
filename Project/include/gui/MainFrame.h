@@ -8,8 +8,6 @@
 
 #include <unordered_map>
 
-using ParsedChatCommandQueue = std::queue<ParsedChatCommand>;
-
 namespace fig::llm
 {
 	struct LLMStatus;
@@ -34,7 +32,7 @@ namespace fig::gui
 
 	class MainFrame : public Frame
 	{
-		friend bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor::Context context);
+		friend bool fig::chat::ChatCommandExecutor::Execute(fig::chat::ParsedChatCommand command, fig::chat::ChatCommandExecutor::Context context);
 		static MainFrame* s_pInstance;
 	public:
 		MainFrame(Window* pWindow);

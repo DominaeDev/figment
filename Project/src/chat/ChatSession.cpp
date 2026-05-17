@@ -1,11 +1,11 @@
 #include <pch.h>
 #include "chat/ChatSession.h"
+#include "io/data/CharacterData.h"
 
-using namespace fig::util;
 using namespace fig::io;
 using namespace fig::gui;
 
-namespace fig::io
+namespace fig::chat
 {
 	void ChatSession::Initialize(const ChatStaging& staging, ChatOptions options)
 	{

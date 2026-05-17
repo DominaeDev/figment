@@ -1,6 +1,5 @@
 #include <pch.h>
 #include "llm/Embedding.h"
-#include "util/StringUtility.h"
 #include "io/FileUtility.h"
 #include <format>
 #include <iostream>
@@ -8,7 +7,6 @@
 
 using namespace fig::io;
 using namespace fig::llm;
-using namespace fig::util;
 
 union FloatToChar 
 {

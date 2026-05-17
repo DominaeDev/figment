@@ -9,9 +9,6 @@
 #include "gui/Menu.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
-#include "util/StringUtility.h"
-
-using namespace fig::util;
 
 namespace fig::gui
 {

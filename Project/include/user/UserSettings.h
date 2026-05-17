@@ -68,8 +68,8 @@ namespace fig
 	};
 
 	constexpr FilterFlags DefaultFilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther, FilterFlag::SourceCreated, FilterFlag::SourceImported  };
-	extern template class SettingsCollection<UserSetting>;
-	using UserSettings = SettingsCollection<UserSetting>;
+	extern template class fig::io::SettingsCollection<UserSetting>;
+	using UserSettings = fig::io::SettingsCollection<UserSetting>;
 }
 
 #endif

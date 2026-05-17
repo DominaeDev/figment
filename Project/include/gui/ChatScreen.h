@@ -4,14 +4,14 @@
 
 #include "Screen.h"
 #include "chat/ChatCommands.h"
+#include "chat/ChatStaging.h"
 #include "chat/ChatCommandExecutor.h"
 #include "llm/LLMStatus.h"
 
-using ParsedChatCommandQueue = std::queue<ParsedChatCommand>;
-
-namespace fig::io
+namespace fig::chat
 {
 	class ChatStaging;
+	using ParsedChatCommandQueue = std::queue<ParsedChatCommand>;
 }
 
 namespace fig::gui
@@ -25,13 +25,13 @@ namespace fig::gui
 
 	class ChatScreen : public Screen
 	{
-		friend bool ChatCommandExecutor::Execute(ParsedChatCommand command, ChatCommandExecutor::Context context);
+		friend bool fig::chat::ChatCommandExecutor::Execute(fig::chat::ParsedChatCommand command, fig::chat::ChatCommandExecutor::Context context);
 	public:
 		ChatScreen(Frame* pParent);
 
 		void Close();
 		void StartChat();
-		void StartChat(const fig::io::ChatStaging& staging);
+		void StartChat(const fig::chat::ChatStaging& staging);
 
 	protected:
 		virtual void OnUpdate(float fElapsed) override;
@@ -40,8 +40,8 @@ namespace fig::gui
 		bool OnEvent(Event& event) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
-		bool OnCommand(ParsedChatCommand cmd);
-		void EnqueueCommand(ParsedChatCommand cmd);
+		bool OnCommand(fig::chat::ParsedChatCommand cmd);
+		void EnqueueCommand(fig::chat::ParsedChatCommand cmd);
 		void NextQueuedCommand();
 
 		void SetStatusBar(fig::string_view message);
@@ -57,7 +57,7 @@ namespace fig::gui
 		float _fPollingCounter = 0.0f;
 		bool _bStartedChat = false; // Used to trigger greeting
 
-		ParsedChatCommandQueue _commandQueue;
+		fig::chat::ParsedChatCommandQueue _commandQueue;
 
 #if ENABLE_AUTO_CHAT
 	private:

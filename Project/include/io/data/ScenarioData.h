@@ -10,8 +10,8 @@ namespace fig::io
 	class ScenarioData
 	{
 	public:
-		fig::string GetSystemPrompt(ChatOptions options) const;
-		fig::string GetScenarioPrompt(ChatOptions options) const;
+		fig::string GetSystemPrompt(fig::chat::ChatOptions options) const;
+		fig::string GetScenarioPrompt(fig::chat::ChatOptions options) const;
 
 		FileError LoadFromXml(const fig::path& filename);
 		FileError LoadFromXml(const fig::string& doc);

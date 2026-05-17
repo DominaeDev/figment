@@ -1,10 +1,8 @@
 #include <pch.h>
 #include "gui/OldCharacterImageStore.h"
-#include "util/StringUtility.h"
 #include <SDL3_image/SDL_image.h>
 
 using namespace fig::gui;
-using namespace fig::util;
 
 std::map<fig::string, OldCharacterImageStore::ImageList> OldCharacterImageStore::_imagesByCharacter;
 

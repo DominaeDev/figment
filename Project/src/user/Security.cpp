@@ -4,126 +4,127 @@
 #include "util/Hash.h"
 #include "AES.h"
 
-static fig::bytes hmac_compute(std::span<const std::byte> key, std::span<const std::byte> data)
-{
-	constexpr size_t block_size = 64;
-	fig::bytes k(block_size, std::byte { 0 });
-
-	if (key.size() > block_size)
-	{
-		auto hashed = fig::util::GetHash(key).to_bytes();
-		std::copy(hashed.begin(), hashed.end(), k.begin());
-	}
-	else
-	{
-		std::copy(key.begin(), key.end(), k.begin());
-	}
-
-	fig::bytes o_key_pad(block_size), i_key_pad(block_size);
-	for (size_t i = 0; i < block_size; ++i)
-	{
-		o_key_pad[i] = k[i] ^ std::byte { 0x5c };
-		i_key_pad[i] = k[i] ^ std::byte { 0x36 };
-	}
-
-	fig::bytes inner_data;
-	inner_data.insert(inner_data.end(), i_key_pad.begin(), i_key_pad.end());
-	inner_data.insert(inner_data.end(), data.begin(), data.end());
-	auto inner_hash = fig::util::GetHash(inner_data).to_bytes();
-
-	fig::bytes outer_data;
-	outer_data.insert(outer_data.end(), o_key_pad.begin(), o_key_pad.end());
-	outer_data.insert(outer_data.end(), inner_hash.begin(), inner_hash.end());
-
-	return fig::util::GetHash(outer_data).to_bytes();
-}
-
-static fig::bytes PBKDF2(std::span<const std::byte> password, std::span<const std::byte> salt, uint32_t iterations, size_t output_length)
-{
-	constexpr size_t hash_len = 32; // SHA-256 output length
-	size_t blocks = (output_length + hash_len - 1) / hash_len;
-
-	fig::bytes derived_key;
-	derived_key.reserve(blocks * hash_len);
-
-	for (uint32_t block = 1; block <= blocks; ++block)
-	{
-		// Prepare salt || INT(i)
-		fig::bytes salt_block;
-		salt_block.reserve(salt.size() + 4uz);
-		salt_block.insert(salt_block.end(), salt.begin(), salt.end());
-		salt_block.push_back(std::byte((block >> 24) & 0xff));
-		salt_block.push_back(std::byte((block >> 16) & 0xff));
-		salt_block.push_back(std::byte((block >> 8) & 0xff));
-		salt_block.push_back(std::byte(block & 0xff));
-
-		// U_1 = PRF(password, salt || INT(i))
-		fig::bytes u = hmac_compute(password, salt_block);
-		fig::bytes result { u };
-
-		// U_j = PRF(password, U_{j-1})
-		for (uint32_t j = 1; j < iterations; ++j)
-		{
-			u = hmac_compute(password, u);
-			for (size_t k = 0; k < hash_len; ++k)
-				result[k] ^= u[k];
-		}
-
-		derived_key.insert(derived_key.end(), result.begin(), result.end());
-	}
-
-	derived_key.resize(output_length);
-	return derived_key;
-}
-
-static fig::bytes SimpleHash(fig::string password, fig::auth::AuthSalt salt)
-{
-	size_t seed;
-	fig::Hash hash = fig::util::GetHash(password);
-	hash = fig::util::HashCombine(hash, fig::util::GetHash(salt), seed);
-	return hash.to_bytes();
-}
-
-static fig::bytes SimpleHash(fig::byte_span data, fig::auth::AuthSalt salt)
-{
-	size_t seed;
-	fig::Hash hash = fig::util::GetHash(data);
-	hash = fig::util::HashCombine(hash, fig::util::GetHash(salt), seed);
-	return hash.to_bytes();
-}
-
-static void encrypt_data(unsigned char* pData, size_t length, const fig::auth::AuthKey& key)
-{
-	static_assert(sizeof(unsigned char) == sizeof(std::byte));
-	static_assert(sizeof(key) == 16);
-	assert(length % 16 == 0);
-
-	unsigned char u8Key[16];
-	std::memcpy(u8Key, key.data(), key.size());
-	Cipher::Aes<128> aes(u8Key);
-
-	constexpr size_t stride = 16;
-	for (size_t i = 0; i < length; i += stride)
-		aes.encrypt_block(pData + i);
-}
-
-static void decrypt_data(unsigned char* pData, size_t length, const fig::auth::AuthKey& key)
-{
-	static_assert(sizeof(unsigned char) == sizeof(std::byte));
-	static_assert(sizeof(key) == 16);
-	assert(length % 16 == 0);
-
-	unsigned char u8Key[16];
-	std::memcpy(u8Key, key.data(), key.size());
-	Cipher::Aes<128> aes(u8Key);
-
-	constexpr size_t stride = 16;
-	for (size_t i = 0; i < length; i += stride)
-		aes.decrypt_block(pData + i);
-}
-
 namespace fig::auth
 {
+
+	static fig::bytes hmac_compute(std::span<const std::byte> key, std::span<const std::byte> data)
+	{
+		constexpr size_t block_size = 64;
+		fig::bytes k(block_size, std::byte { 0 });
+
+		if (key.size() > block_size)
+		{
+			auto hashed = GetHash(key).to_bytes();
+			std::copy(hashed.begin(), hashed.end(), k.begin());
+		}
+		else
+		{
+			std::copy(key.begin(), key.end(), k.begin());
+		}
+
+		fig::bytes o_key_pad(block_size), i_key_pad(block_size);
+		for (size_t i = 0; i < block_size; ++i)
+		{
+			o_key_pad[i] = k[i] ^ std::byte { 0x5c };
+			i_key_pad[i] = k[i] ^ std::byte { 0x36 };
+		}
+
+		fig::bytes inner_data;
+		inner_data.insert(inner_data.end(), i_key_pad.begin(), i_key_pad.end());
+		inner_data.insert(inner_data.end(), data.begin(), data.end());
+		auto inner_hash = GetHash(inner_data).to_bytes();
+
+		fig::bytes outer_data;
+		outer_data.insert(outer_data.end(), o_key_pad.begin(), o_key_pad.end());
+		outer_data.insert(outer_data.end(), inner_hash.begin(), inner_hash.end());
+
+		return GetHash(outer_data).to_bytes();
+	}
+
+	static fig::bytes PBKDF2(std::span<const std::byte> password, std::span<const std::byte> salt, uint32_t iterations, size_t output_length)
+	{
+		constexpr size_t hash_len = 32; // SHA-256 output length
+		size_t blocks = (output_length + hash_len - 1) / hash_len;
+
+		fig::bytes derived_key;
+		derived_key.reserve(blocks * hash_len);
+
+		for (uint32_t block = 1; block <= blocks; ++block)
+		{
+			// Prepare salt || INT(i)
+			fig::bytes salt_block;
+			salt_block.reserve(salt.size() + 4uz);
+			salt_block.insert(salt_block.end(), salt.begin(), salt.end());
+			salt_block.push_back(std::byte((block >> 24) & 0xff));
+			salt_block.push_back(std::byte((block >> 16) & 0xff));
+			salt_block.push_back(std::byte((block >> 8) & 0xff));
+			salt_block.push_back(std::byte(block & 0xff));
+
+			// U_1 = PRF(password, salt || INT(i))
+			fig::bytes u = hmac_compute(password, salt_block);
+			fig::bytes result { u };
+
+			// U_j = PRF(password, U_{j-1})
+			for (uint32_t j = 1; j < iterations; ++j)
+			{
+				u = hmac_compute(password, u);
+				for (size_t k = 0; k < hash_len; ++k)
+					result[k] ^= u[k];
+			}
+
+			derived_key.insert(derived_key.end(), result.begin(), result.end());
+		}
+
+		derived_key.resize(output_length);
+		return derived_key;
+	}
+
+	static fig::bytes SimpleHash(fig::string password, fig::auth::AuthSalt salt)
+	{
+		size_t seed;
+		fig::Hash hash = GetHash(password);
+		hash = HashCombine(hash, GetHash(salt), seed);
+		return hash.to_bytes();
+	}
+
+	static fig::bytes SimpleHash(fig::byte_span data, fig::auth::AuthSalt salt)
+	{
+		size_t seed;
+		fig::Hash hash = GetHash(data);
+		hash = HashCombine(hash, GetHash(salt), seed);
+		return hash.to_bytes();
+	}
+
+	static void encrypt_data(unsigned char* pData, size_t length, const fig::auth::AuthKey& key)
+	{
+		static_assert(sizeof(unsigned char) == sizeof(std::byte));
+		static_assert(sizeof(key) == 16);
+		assert(length % 16 == 0);
+
+		unsigned char u8Key[16];
+		std::memcpy(u8Key, key.data(), key.size());
+		Cipher::Aes<128> aes(u8Key);
+
+		constexpr size_t stride = 16;
+		for (size_t i = 0; i < length; i += stride)
+			aes.encrypt_block(pData + i);
+	}
+
+	static void decrypt_data(unsigned char* pData, size_t length, const fig::auth::AuthKey& key)
+	{
+		static_assert(sizeof(unsigned char) == sizeof(std::byte));
+		static_assert(sizeof(key) == 16);
+		assert(length % 16 == 0);
+
+		unsigned char u8Key[16];
+		std::memcpy(u8Key, key.data(), key.size());
+		Cipher::Aes<128> aes(u8Key);
+
+		constexpr size_t stride = 16;
+		for (size_t i = 0; i < length; i += stride)
+			aes.decrypt_block(pData + i);
+	}
+
 	void Encrypt(std::ofstream& stream, fig::byte_span in_data, const fig::auth::AuthKey& key)
 	{
 		static_assert(sizeof(unsigned char) == sizeof(std::byte));

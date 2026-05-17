@@ -4,6 +4,8 @@
 #include "gui/AppResources.h"
 #include "app/AppState.h"
 
+using namespace fig::user;
+
 namespace fig::io
 {
 	UserContentManager::UserContentManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey)

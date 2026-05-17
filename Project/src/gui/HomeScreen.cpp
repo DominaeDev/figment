@@ -10,6 +10,8 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
+using namespace fig::user;
+
 namespace fig::gui
 {
 	static FilterFlags GetFiltering()

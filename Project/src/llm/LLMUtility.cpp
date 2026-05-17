@@ -2,35 +2,33 @@
 #include "llm/LLMUtility.h"
 #include "llm/LlamaApi.h"
 #include "llm/ModelState.h"
-#include "util/StringUtility.h"
 #include "io/FileUtility.h"
 #include <format>
 #include <cwctype>
 #include <cassert>
 #include <set>
 
-using namespace fig::llm;
-using namespace fig::util;
 using namespace fig::io;
+using namespace fig::chat;
 
-static std::vector<fig::string> const opening_tags {
-	std::format("<{0}=\"", fig::Constants::Chat::DialogueTag),
-	std::format("<{0}=\"", fig::Constants::Chat::ActionTag),
-	std::format("<{0}=\"", fig::Constants::Chat::ThoughtTag),
-	std::format("<{0}>",   fig::Constants::Chat::NarrationTag),
-	std::format("<{0}>",   fig::Constants::Chat::DirectionTag),
-};	
-
-static std::vector<fig::string> const closing_tags {
-	std::format("</{0}>", fig::Constants::Chat::DialogueTag),
-	std::format("</{0}>", fig::Constants::Chat::ActionTag),
-	std::format("</{0}>", fig::Constants::Chat::ThoughtTag),
-	std::format("</{0}>", fig::Constants::Chat::NarrationTag),
-	std::format("</{0}>", fig::Constants::Chat::DirectionTag),
-};
-
-namespace fig::llm::util
+namespace fig::llm
 {
+	static std::vector<fig::string> const opening_tags {
+		std::format("<{0}=\"", fig::Constants::Chat::DialogueTag),
+		std::format("<{0}=\"", fig::Constants::Chat::ActionTag),
+		std::format("<{0}=\"", fig::Constants::Chat::ThoughtTag),
+		std::format("<{0}>",   fig::Constants::Chat::NarrationTag),
+		std::format("<{0}>",   fig::Constants::Chat::DirectionTag),
+	};	
+
+	static std::vector<fig::string> const closing_tags {
+		std::format("</{0}>", fig::Constants::Chat::DialogueTag),
+		std::format("</{0}>", fig::Constants::Chat::ActionTag),
+		std::format("</{0}>", fig::Constants::Chat::ThoughtTag),
+		std::format("</{0}>", fig::Constants::Chat::NarrationTag),
+		std::format("</{0}>", fig::Constants::Chat::DirectionTag),
+	};
+
 	size_t string_find_partial_stop(const fig::string& str, const fig::string& stop)
 	{
 		if (!str.empty() && !stop.empty())

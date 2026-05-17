@@ -116,7 +116,7 @@ namespace fig::gui
 
 	void CardImage::SetZoom(float value) noexcept
 	{
-		if (fig::util::flt_eq(value, _fZoom))
+		if (flt_eq(value, _fZoom))
 			return;
 
 		_fZoom = std::max(value, 0.0f);

@@ -18,9 +18,7 @@
 #include "gui/AppResources.h"
 #include <cassert>
 
-using namespace fig::util;
 using namespace fig::gui;
-using namespace fig::util;
 
 namespace fig::io
 {
@@ -77,7 +75,7 @@ namespace fig::io
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
 		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Modified;
-		auto now = util::utc_now();
+		auto now = utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
 		asset.SetMeta(MetaTag::LastUsedAt, now);
@@ -123,7 +121,7 @@ namespace fig::io
 		asset.data_format = format;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not data.empty();
-		auto now = util::utc_now();
+		auto now = utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
 		asset.SetMeta(MetaTag::LastUsedAt, now);
@@ -140,7 +138,7 @@ namespace fig::io
 		asset.data_format = format;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not data.empty();
-		auto now = util::utc_now();
+		auto now = utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
 		asset.SetMeta(MetaTag::LastUsedAt, now);
@@ -708,7 +706,7 @@ namespace fig::io
 				.data_encrypted { false },
 				.data { std::move(data) },
 			};
-			auto now = util::utc_now();
+			auto now = utc_now();
 			image_file.meta[MetaTag::CreatedAt] = now;
 			image_file.meta[MetaTag::UpdatedAt] = now;
 			image_file.meta[MetaTag::LastUsedAt] = now;

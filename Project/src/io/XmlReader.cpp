@@ -1,7 +1,6 @@
 #include <pch.h>
 
 #include "io/XmlReader.h"
-#include "util/StringUtility.h"
 #include <tinyxml2.h>
 
 using namespace tinyxml2;
@@ -88,7 +87,7 @@ namespace fig::io
 			const char* pValue = _pAttrib->Value();
 			if (pValue)
 			{
-				auto value = fig::util::trim(fig::string(pValue));
+				auto value = trim(fig::string(pValue));
 				return std::make_optional(value);
 			}
 		}
@@ -103,7 +102,7 @@ namespace fig::io
 			const char* pValue = _pAttrib->Value();
 			if (pValue)
 			{
-				auto value = fig::util::trim(fig::string(pValue));
+				auto value = trim(fig::string(pValue));
 				return std::make_optional(fig::path(value));
 			}
 		}
@@ -118,8 +117,8 @@ namespace fig::io
 			const char* pValue = _pAttrib->Value();
 			if (pValue)
 			{
-				auto value = fig::util::trim(fig::string(pValue));
-				return std::make_optional(util::Base64Decode(value));
+				auto value = trim(fig::string(pValue));
+				return std::make_optional(Base64Decode(value));
 			}
 		}
 		return std::nullopt;
@@ -133,7 +132,7 @@ namespace fig::io
 			const char* pValue = _pAttrib->Value();
 			if (pValue)
 			{
-				auto value = fig::util::trim(fig::string(pValue));
+				auto value = trim(fig::string(pValue));
 				fig::uuid uuid = fig::uuid::from_str(value);
 				return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
 			}
@@ -149,7 +148,7 @@ namespace fig::io
 			const char* pValue = _pAttrib->Value();
 			if (pValue)
 			{
-				auto value = fig::util::trim(fig::string(pValue));
+				auto value = trim(fig::string(pValue));
 				return std::make_optional(fig::gui::Color::FromString(value));
 			}
 		}
@@ -160,7 +159,7 @@ namespace fig::io
 	std::optional<fig::string_list> XmlReaderAttribute::TryGet<fig::string_list>() const noexcept
 	{
 		if (auto str = TryGet<fig::string>(); str.has_value())
-			return std::make_optional(fig::util::decode_csv(str.value()));
+			return std::make_optional(decode_csv(str.value()));
 		return std::nullopt;
 	}
 
@@ -171,7 +170,7 @@ namespace fig::io
 
 		if (auto str = TryGet<fig::string>(); str.has_value())
 		{
-			auto values = fig::util::decode_csv(str.value());
+			auto values = decode_csv(str.value());
 
 			T result {};
 			result.reserve(values.size());
@@ -296,7 +295,7 @@ namespace fig::io
 		const char* pValue = _pElement->GetText();
 		if (pValue)
 		{
-			auto value = fig::util::trim(fig::string(pValue));
+			auto value = trim(fig::string(pValue));
 			return std::make_optional(value);
 		}
 		return std::nullopt;
@@ -309,7 +308,7 @@ namespace fig::io
 		const char* pValue = _pElement->GetText();
 		if (pValue)
 		{
-			auto value = fig::util::trim(fig::string(pValue));
+			auto value = trim(fig::string(pValue));
 			return std::make_optional(fig::path(value));
 		}
 		return std::nullopt;
@@ -321,8 +320,8 @@ namespace fig::io
 		const char* pValue = _pElement->GetText();
 		if (pValue)
 		{
-			auto value = fig::util::trim(fig::string(pValue));
-			return std::make_optional(fig::util::Base64Decode(value));
+			auto value = trim(fig::string(pValue));
+			return std::make_optional(Base64Decode(value));
 		}
 		return std::nullopt;
 	}
@@ -333,7 +332,7 @@ namespace fig::io
 		const char* pValue = _pElement->GetText();
 		if (pValue)
 		{
-			auto value = fig::util::trim(fig::string(pValue));
+			auto value = trim(fig::string(pValue));
 			fig::uuid uuid = fig::uuid::from_str(value);
 			return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
 		}
@@ -346,7 +345,7 @@ namespace fig::io
 		const char* pValue = _pElement->GetText();
 		if (pValue)
 		{
-			auto value = fig::util::trim(fig::string(pValue));
+			auto value = trim(fig::string(pValue));
 			return std::make_optional(fig::gui::Color::FromString(value));
 		}
 		return std::nullopt;
@@ -356,7 +355,7 @@ namespace fig::io
 	std::optional<fig::string_list> XmlReaderElement::TryGetValue<fig::string_list>() const noexcept
 	{
 		if (auto str = TryGetValue<fig::string>(); str.has_value())
-			return std::make_optional(fig::util::decode_csv(str.value()));
+			return std::make_optional(decode_csv(str.value()));
 		return std::nullopt;
 	}
 
@@ -367,7 +366,7 @@ namespace fig::io
 
 		if (auto str = TryGetValue<fig::string>(); str.has_value())
 		{
-			auto values = fig::util::decode_csv(str.value());
+			auto values = decode_csv(str.value());
 
 			T result {};
 			result.reserve(values.size());

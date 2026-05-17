@@ -3,18 +3,16 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include <algorithm>
 #include <ranges>
 #include <optional>
-#include <algorithm>
+#include <expected>
 #include <codecvt>
 #include <cwctype>
 #include <stack>
 #include <queue>
-#include <expected>
 
 #include "Figment.h"
-#include "gui/GUICommon.h"
-#include "gui/Events.h"
 
 #if defined(_WIN32)
 	#define USE_WIN32_API 1 // Use native Win32 system calls

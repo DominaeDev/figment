@@ -11,7 +11,7 @@
 #include <functional>
 #include <chrono>
 
-namespace fig::util
+namespace fig
 {
 #if _DEBUG || _CONSOLE
 	constexpr bool EnableLogging = true;
@@ -229,7 +229,7 @@ namespace fig::util
 	}
 
 #if _DEBUG || _CONSOLE
-	#define DEBUG_MEASURE_BEGIN(LABEL) fig::util::MeasureTime((LABEL), [&](){
+	#define DEBUG_MEASURE_BEGIN(LABEL) MeasureTime((LABEL), [&](){
 	#define DEBUG_MEASURE_END() });
 #else
 	#define DEBUG_MEASURE_BEGIN(LABEL)

@@ -4,7 +4,7 @@
 #include <charconv>
 #include <fstream>
 
-namespace fig::util
+namespace fig::io
 {
 	static fig::string NextLine(const fig::string& content, size_t& pos)
 	{

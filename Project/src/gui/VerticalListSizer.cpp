@@ -2,8 +2,6 @@
 #include "gui/VerticalListSizer.h"
 #include "gui/Control.h"
 
-using namespace fig::util;
-
 namespace fig::gui
 {
 	void VerticalListSizer::OnLayout(const Rect& parentRect)

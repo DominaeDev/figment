@@ -3,7 +3,6 @@
 #include "gui/Control.h"
 
 using namespace fig::gui;
-using namespace fig::util;
 
 void VerticalSizer::OnLayout(const Rect& parentRect)
 {

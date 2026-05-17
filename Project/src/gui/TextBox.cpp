@@ -2,10 +2,7 @@
 #include "gui/Textbox.h"
 #include "gui/Window.h"
 #include "app/AppState.h"
-#include "util/StringUtility.h"
 #include <algorithm>
-
-using namespace fig::util;
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ULL };
 

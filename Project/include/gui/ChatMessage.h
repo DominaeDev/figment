@@ -13,7 +13,7 @@ namespace fig::gui
 	class ChatMessage : public Control
 	{
 	public:
-		ChatMessage(LayoutElement* pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar);
+		ChatMessage(LayoutElement* pParent, fig::chat::Role role, const fig::uuid& characterId, fig::string name, fig::chat::MessageType msgType, bool bShowAvatar);
 
 		void SetName(StringCRef name);
 		void SetMessage(fig::string text, bool complete = false);
@@ -37,10 +37,10 @@ namespace fig::gui
 		TexturedBorderRenderer* _pSpeechBubbleBG = nullptr;
 		TexturedBorderRenderer* _pSpeechBubbleBorder = nullptr;
 
-		Role _role = Role::Undefined;
+		fig::chat::Role _role = fig::chat::Role::Undefined;
 		bool _bShowAvatar = false;
 		bool _bActive = true;
-		MessageType _messageType = MessageType::Undefined;
+		fig::chat::MessageType _messageType = fig::chat::MessageType::Undefined;
 
 		Color _bgColor {};
 		Color _borderColor {};

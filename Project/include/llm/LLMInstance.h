@@ -27,8 +27,8 @@ namespace fig::llm
 		fig::string subMessageId;	// shared id for pieces of the same message type
 		fig::string identifier {};	// who said this?
 		fig::string content {};
-		Role role = Role::Undefined;
-		MessageType msgType = MessageType::Undefined;
+		fig::chat::Role role = fig::chat::Role::Undefined;
+		fig::chat::MessageType msgType = fig::chat::MessageType::Undefined;
 		bool isComplete = false;
 	};
 
@@ -36,14 +36,14 @@ namespace fig::llm
 	{
 		fig::string responseId;
 		fig::string content;
-		Role role;
+		fig::chat::Role role;
 	};
 
 	struct LLMChatArguments
 	{
-		fig::io::ChatSession session;
-		Messages messages;
-		ChatOptions options;
+		fig::chat::ChatSession session;
+		fig::chat::Messages messages;
+		fig::chat::ChatOptions options;
 		int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
 	};
 
@@ -77,8 +77,8 @@ namespace fig::llm
 		// Tasks
 		bool GreetUser();
 		bool SendMessage(fig::string message);
-		bool PushMessage(Role role, fig::string message, MessageType msgType = MessageType::Undefined, bool visible = true, int ttl = 0);
-		bool Instigate(Role role, MessageType msgType, int messageCount = 0);
+		bool PushMessage(fig::chat::Role role, fig::string message, fig::chat::MessageType msgType = fig::chat::MessageType::Undefined, bool visible = true, int ttl = 0);
+		bool Instigate(fig::chat::Role role, fig::chat::MessageType msgType, int messageCount = 0);
 		bool Instruct(fig::string instructions);
 		std::vector<RemovedMessage> EraseMessages(int numMessages = 1);
 		std::vector<RemovedMessage> RollbackUserMessage();
@@ -96,7 +96,7 @@ namespace fig::llm
 		bool GenerateEmbedding(fig::string text);
 #endif
 
-		const fig::io::ChatSession& GetSession() const { return _session; }
+		const fig::chat::ChatSession& GetSession() const { return _session; }
 		std::map<fig::string, fig::string> GetStateVariables();
 
 	private:
@@ -137,7 +137,7 @@ namespace fig::llm
 
 		struct PrepareArguments
 		{
-			Role responder = Role::Bot1;
+			fig::chat::Role responder = fig::chat::Role::Bot1;
 			bool isContinuation = false;
 			bool progressTime = true;
 		};
@@ -145,24 +145,24 @@ namespace fig::llm
 
 		struct GenerateArguments
 		{
-			Role role = Role::Undefined;
-			MessageType msgType = MessageType::Undefined;
+			fig::chat::Role role = fig::chat::Role::Undefined;
+			fig::chat::MessageType msgType = fig::chat::MessageType::Undefined;
 			GenerateFlags flags = GenerateFlags::None;
-			ChatOptions::GroupChatMode groupChatMode {};
+			fig::chat::ChatOptions::GroupChatMode groupChatMode {};
 			int maxMessages = 0;
 			fig::string prepend {};
 			fig::string responseId {};
 			fig::string subMessageId {};
-			Sentences history; // Used for embedding
+			fig::chat::Sentences history; // Used for embedding
 		};
 		void __Generate(std::stop_token& stop, GenerateArguments args, __GenerationCompleteCallback onComplete);
 		void StartGeneration();
-		bool SwapPersona(Role persona, bool immediate = true);
+		bool SwapPersona(fig::chat::Role persona, bool immediate = true);
 
 		void RefreshActiveResponses();
 		bool RebuildKVCache();
 
-		Sentences GetHistory(size_t depth);
+		fig::chat::Sentences GetHistory(size_t depth);
 		SamplerPtr CompileGrammar(GrammarFlags grammarFlags);
 		void InitSamplers();
 
@@ -182,8 +182,8 @@ namespace fig::llm
 
 			// Parameters
 			fig::string input;
-			Role role = Role::Undefined;
-			MessageType msgType = MessageType::Undefined;
+			fig::chat::Role role = fig::chat::Role::Undefined;
+			fig::chat::MessageType msgType = fig::chat::MessageType::Undefined;
 			fig::string responseId {};
 			fig::string subMessageId {};
 
@@ -197,8 +197,8 @@ namespace fig::llm
 		void __ProcessTaskQueue(std::stop_token stop, __GenerationCompleteCallback onComplete);
 		bool __ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
-		bool __PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int32_t ttl);
-		bool __Instigate(Role role, MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
+		bool __PushMessage(fig::chat::Role role, fig::string message, fig::chat::MessageType msgType, bool visible, int32_t ttl);
+		bool __Instigate(fig::chat::Role role, fig::chat::MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __Continue(fig::string responseId, fig::string subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 
 		void Panic(InternalError error, const fig::string& message);
@@ -223,8 +223,8 @@ namespace fig::llm
 		std::queue<LLMTask> _tasks;
 
 		// Session
-		fig::io::ChatSession _session;
-		ChatOptions _options;
+		fig::chat::ChatSession _session;
+		fig::chat::ChatOptions _options;
 		std::atomic<int32_t> _turn_counter = 0;
 
 		// State

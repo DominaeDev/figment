@@ -2,10 +2,9 @@
 #define STRING_UTIL_H__
 
 #include "Figment.h"
-#include <vector>
 #include <unordered_set>
 
-namespace fig::util
+namespace fig
 {
 	[[nodiscard]] string ltrim(const string& s);
 	[[nodiscard]] string rtrim(const string& s);

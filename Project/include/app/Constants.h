@@ -106,17 +106,17 @@ namespace fig::Constants
 		constexpr uint32_t RandomSeed = 0xFFFFFFFF;
 		constexpr uint32_t DebugSeed = 0xA1B2C3D4;
 
-		constexpr ChatOptions DefaultChatOptions {
+		constexpr fig::chat::ChatOptions DefaultChatOptions {
 			.flags {
-				ChatOptions::Flag::GreetUser,
-				ChatOptions::Flag::Uncensored,
-		//		ChatOptions::Flag::LimitMessages,
-		//		ChatOptions::Flag::RandomizeMessageCount,
-		//		ChatOptions::Flag::StateVariables,
-		//		ChatOptions::Flag::ReportStateChanges,
-		//		ChatOptions::Flag::Embeddings,
+				fig::chat::ChatOptions::Flag::GreetUser,
+				fig::chat::ChatOptions::Flag::Uncensored,
+		//		fig::chat::ChatOptions::Flag::LimitMessages,
+		//		fig::chat::ChatOptions::Flag::RandomizeMessageCount,
+		//		fig::chat::ChatOptions::Flag::StateVariables,
+		//		fig::chat::ChatOptions::Flag::ReportStateChanges,
+		//		fig::chat::ChatOptions::Flag::Embeddings,
 				},
-			.groupChatMode = ChatOptions::GroupChatMode::SwapSequences,
+			.groupChatMode = fig::chat::ChatOptions::GroupChatMode::SwapSequences,
 		};
 	}
 

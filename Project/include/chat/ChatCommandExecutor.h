@@ -14,16 +14,19 @@ namespace fig::llm
 	class LLMInstance;
 }
 
-class ChatCommandExecutor
+namespace fig::chat
 {
-public:
-	struct Context
+	class ChatCommandExecutor
 	{
-		std::shared_ptr<fig::llm::LLMInstance> pLLM;
-		fig::gui::ChatScreen* pChatFrame;
-	};
+	public:
+		struct Context
+		{
+			std::shared_ptr<fig::llm::LLMInstance> pLLM;
+			fig::gui::ChatScreen* pChatFrame;
+		};
 
-	static bool Execute(ParsedChatCommand command, Context context);
-};
+		static bool Execute(ParsedChatCommand command, Context context);
+	};
+}
 
 #endif

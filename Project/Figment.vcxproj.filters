@@ -170,13 +170,13 @@
     <ClCompile Include="src\gui\ChatMessage.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\Common.cpp">
+    <ClCompile Include="src\util\CommonUtils.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StatusBar.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\StringUtility.cpp">
+    <ClCompile Include="src\util\StringUtils.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Frame.cpp">
@@ -319,9 +319,6 @@
     </ClCompile>
     <ClCompile Include="src\gui\CharacterCard.cpp">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\Dictionary.cpp">
-      <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SimpleTextBox.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -529,13 +526,13 @@
     <ClInclude Include="include\gui\ChatScroll.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\StringUtility.h">
+    <ClInclude Include="include\util\StringUtils.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ChatMessage.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\Common.h">
+    <ClInclude Include="include\util\CommonUtils.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\StatusBar.h">
@@ -1005,9 +1002,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\GUIConstants.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\Dictionary.h">
-      <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SimpleTextBox.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>

@@ -40,7 +40,7 @@ namespace fig
 	};
 }
 
-namespace fig::util
+namespace fig
 {
 	[[nodiscard]] fig::Hash GetHash(const fig::string& text);
 	[[nodiscard]] fig::Hash GetHash(fig::byte_span data);

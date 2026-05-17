@@ -20,7 +20,7 @@ namespace fig::llm
 
 	struct ContextBlock
 	{
-		Role role = Role::Undefined;
+		fig::chat::Role role = fig::chat::Role::Undefined;
 		fig::string name;
 		fig::string content;
 		std::vector<int32_t> tokens;
