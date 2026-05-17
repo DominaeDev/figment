@@ -1,8 +1,8 @@
 #include <pch.h>
 #include "gui/CharacterCard.h"
 #include "gui/AppResources.h"
-#include "model/AppState.h"
-#include "model/UserManager.h"
+#include "app/AppState.h"
+#include "user/UserManager.h"
 #include "util/StringUtility.h"
 #include "gui/Events.h"
 #include "gui/Menu.h"

@@ -1,7 +1,7 @@
 #ifndef STRING_UTIL_H__
 #define STRING_UTIL_H__
 
-#include "Types.h"
+#include "Figment.h"
 #include <vector>
 #include <unordered_set>
 

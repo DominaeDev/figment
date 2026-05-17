@@ -6,8 +6,7 @@
 #include "llm/LLMStateVariables.h"
 #include "llm/LLMStatus.h"
 #include "llm/Context.h"
-#include "Constants.h"
-#include "model/ChatSession.h"
+#include "chat/ChatSession.h"
 
 #include <vector>
 #include <set>

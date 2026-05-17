@@ -5,7 +5,7 @@
 #include "llm/LLMTypes.h"
 #include "llm/ModelState.h"
 #include "llm/LLMStatus.h"
-#include "model/ModelSettings.h"
+#include "io/data/ModelSettings.h"
 
 #include <functional>
 #include <thread>

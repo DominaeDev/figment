@@ -12,9 +12,7 @@
 #include <queue>
 #include <expected>
 
-#include "Types.h"
-#include "Constants.h"
-#include "util/Common.h"
+#include "Figment.h"
 #include "gui/GUICommon.h"
 #include "gui/Events.h"
 

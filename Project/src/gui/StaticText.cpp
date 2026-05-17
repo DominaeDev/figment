@@ -1,8 +1,7 @@
 #include <pch.h>
 #include "gui/StaticText.h"
 #include "gui/GUICommon.h"
-#include "model/AppState.h"
-#include "Constants.h"
+#include "app/AppState.h"
 #include <algorithm>
 
 namespace fig::gui

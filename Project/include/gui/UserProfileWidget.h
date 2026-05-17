@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gui/Panel.h"
-#include "model/UserProfile.h"
+#include "user/UserProfile.h"
 
 namespace fig::user
 {

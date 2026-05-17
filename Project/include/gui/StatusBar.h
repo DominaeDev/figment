@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Control.h"
-#include "Types.h"
+#include "Figment.h"
 
 namespace fig::llm
 {

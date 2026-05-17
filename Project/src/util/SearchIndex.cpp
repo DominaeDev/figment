@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "util/SearchIndex.h"
 #include "util/StringUtility.h"
-#include "util/ExcludedSearchTerms.h"
+#include "io/data/ExcludedSearchTerms.h"
 
 using namespace fig::util;
 

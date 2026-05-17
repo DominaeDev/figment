@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "Figment.h"
 #include "ContextCursor.h"
 #include "llm/PromptTemplateTypes.h"
 #include <llama.h>

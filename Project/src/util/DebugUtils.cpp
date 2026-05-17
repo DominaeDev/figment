@@ -1,9 +1,9 @@
 #include <pch.h>
 #include "util/DebugUtils.h"
-#include "model/AppState.h"
-#include "model/UserManager.h"
-#include "model/Asset.h"
-#include "model/ModelSettings.h"
+#include "app/AppState.h"
+#include "user/UserManager.h"
+#include "io/Asset.h"
+#include "io/data/ModelSettings.h"
 
 using namespace fig::io;
 

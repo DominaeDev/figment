@@ -1,8 +1,8 @@
 #include <pch.h>
 #include "gui/AppResources.h"
-#include "fs/FileUtility.h"
-#include "fs/AssetFileReader.h"
-#include "model/UserProfile.h"
+#include "io/FileUtility.h"
+#include "io/AssetFileReader.h"
+#include "user/UserProfile.h"
 #include <SDL3_image/SDL_image.h>
 #include <cassert>
 

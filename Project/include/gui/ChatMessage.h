@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/ChatTypes.h"
+#include "chat/ChatTypes.h"
 #include "gui/Control.h"
 #include "gui/GUITypes.h"
 

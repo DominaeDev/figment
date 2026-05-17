@@ -5,13 +5,13 @@
 #include "gui/DebugScreen.h"
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
-#include "model/AppState.h"
-#include "model/UserManager.h"
-#include "fs/FileUtility.h"
+#include "app/AppState.h"
+#include "user/UserManager.h"
+#include "io/FileUtility.h"
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
-#include "model/ModelSettings.h"
+#include "io/data/ModelSettings.h"
 #include "util/DebugUtils.h"
 
 using namespace fig::io;

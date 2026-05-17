@@ -3,9 +3,7 @@
 #include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
 #include "llm/ModelState.h"
-#include "util/Common.h"
-#include "model/ChatSession.h"
-#include "Constants.h"
+#include "chat/ChatSession.h"
 #include <cassert>
 #include <algorithm>
 #include <format>

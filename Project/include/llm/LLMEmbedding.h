@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/ChatSession.h"
+#include "chat/ChatSession.h"
 #include "llm/LLMTypes.h"
 #include "llm/Embedding.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "Figment.h"
 #include <map>
 namespace fig::llm
 {

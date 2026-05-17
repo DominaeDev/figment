@@ -2,8 +2,8 @@
 #include "gui/ScrollPanel.h"
 #include "gui/GUIUtility.h"
 #include "gui/VerticalScrollBar.h"
-#include "model/AppState.h"
-#include "model/AppSettings.h"
+#include "app/AppState.h"
+#include "app/AppSettings.h"
 
 namespace fig::gui
 {

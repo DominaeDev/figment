@@ -7,9 +7,8 @@
 #include "gui/Menu.h"
 #include "gui/ToggleWithIcon.h"
 #include "gui/TexturedBorder.h"
-#include "model/AppState.h"
-#include "model/UserManager.h"
-#include "util/Common.h"
+#include "app/AppState.h"
+#include "user/UserManager.h"
 
 namespace fig::gui
 {

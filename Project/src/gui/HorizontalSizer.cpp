@@ -1,7 +1,6 @@
 #include <pch.h>
 #include "gui/HorizontalSizer.h"
 #include "gui/LayoutElement.h"
-#include "util/Common.h"
 
 using namespace fig::util;
 

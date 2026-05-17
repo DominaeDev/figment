@@ -2,7 +2,7 @@
 #define SEARCH_INDEX_H__
 #pragma once
 
-#include "Types.h"
+#include "Figment.h"
 
 namespace fig
 {

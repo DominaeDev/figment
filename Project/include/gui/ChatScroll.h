@@ -1,8 +1,8 @@
 #pragma once
 
 #include "gui/Control.h"
-#include "model/ChatTypes.h"
-#include "model/ChatSession.h"
+#include "chat/ChatTypes.h"
+#include "chat/ChatSession.h"
 #include <map>
 
 namespace fig::gui

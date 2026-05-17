@@ -2,7 +2,7 @@
 #define KEYBOARD_MODIFIERS_H__
 #pragma once
 
-#include "Types.h"
+#include "Figment.h"
 
 namespace fig::gui
 {

@@ -2,7 +2,7 @@
 #define UNDO_STACK_H__
 #pragma once
 
-#include "Types.h"
+#include "Figment.h"
 #include "Hash.h"
 #include <stack>
 #include <list>

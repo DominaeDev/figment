@@ -4,9 +4,9 @@
 #pragma once
 
 #include "CardImage.h"
-#include "model/AssetManager.h"
-#include "model/CardMetaData.h"
-#include "model/UserSettings.h"
+#include "io/AssetManager.h"
+#include "io/data/CardMetaData.h"
+#include "user/UserSettings.h"
 #include "util/SearchIndex.h"
 
 namespace fig::gui

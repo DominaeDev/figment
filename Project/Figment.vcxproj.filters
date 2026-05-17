@@ -24,9 +24,6 @@
     <Filter Include="Source Files\Third-party\uuid">
       <UniqueIdentifier>{b5ea80b4-2914-45c0-82fe-8ed586dc861e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\AppModel">
-      <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Third-party\AES">
       <UniqueIdentifier>{d5aecc7a-a1e8-4108-a4b6-d0e441fd4344}</UniqueIdentifier>
     </Filter>
@@ -50,9 +47,6 @@
     </Filter>
     <Filter Include="Source Files\Third-party\DainelaE">
       <UniqueIdentifier>{ba3cd4cd-c48a-4ea8-a943-7c8f169f1062}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\AppModel\Common">
-      <UniqueIdentifier>{08ed38ef-c891-490c-b20a-88677d1ca92a}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Frontend">
       <UniqueIdentifier>{d3b1a8a7-b33d-4d6d-a5fc-2fa4c92addad}</UniqueIdentifier>
@@ -96,35 +90,14 @@
     <Filter Include="Source Files\Third-party\fast-crc32">
       <UniqueIdentifier>{7adc1fef-db02-42af-a1be-8a578e63bd50}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\FileSystem">
-      <UniqueIdentifier>{ba779378-b49f-4ec8-9178-0fbc6b173e3f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Frontend\FileSystem\Serialization">
-      <UniqueIdentifier>{eea3d39a-71b8-4c8b-b27c-1c3807000f83}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Frontend\FileSystem\Import">
-      <UniqueIdentifier>{7918e58f-670b-451a-bb45-c6d9b98f246c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Third-party\libspng">
       <UniqueIdentifier>{b39e232e-dcf5-487b-acfb-3a20538267a2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Third-party\miniz">
       <UniqueIdentifier>{bedbb7e8-502e-458f-9bdb-a2c59f44851b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\AppModel\Data">
-      <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\AppModel\Data\Character">
-      <UniqueIdentifier>{df4e26bf-3178-47fa-83ad-d6c77f16668d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\User">
       <UniqueIdentifier>{8e498fb3-7b47-4628-ba65-d85fd8f6c436}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Frontend\FileSystem\Assets">
-      <UniqueIdentifier>{267bc7c3-9a6f-4e7d-a7aa-d92284a5b061}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Frontend\User\Authentication">
-      <UniqueIdentifier>{02039172-0c57-451a-a294-f8f0e6ca4a9f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Frontend\GUI\Controls\Cards">
       <UniqueIdentifier>{0897e582-e3a2-4a2f-a8a6-b5f2d42ad6e6}</UniqueIdentifier>
@@ -143,6 +116,27 @@
     </Filter>
     <Filter Include="Source Files\Backend\Chat">
       <UniqueIdentifier>{6fec36fd-514b-4b20-8daa-8d5ad3fd04e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\IO">
+      <UniqueIdentifier>{ba779378-b49f-4ec8-9178-0fbc6b173e3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\IO\Serialization">
+      <UniqueIdentifier>{eea3d39a-71b8-4c8b-b27c-1c3807000f83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\IO\Import">
+      <UniqueIdentifier>{7918e58f-670b-451a-bb45-c6d9b98f246c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\IO\Assets">
+      <UniqueIdentifier>{267bc7c3-9a6f-4e7d-a7aa-d92284a5b061}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\IO\Data">
+      <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Application">
+      <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Application\Common">
+      <UniqueIdentifier>{08ed38ef-c891-490c-b20a-88677d1ca92a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -218,14 +212,8 @@
     <ClCompile Include="src\llm\ModelState.cpp">
       <Filter>Source Files\Backend\LLM</Filter>
     </ClCompile>
-    <ClCompile Include="include\llm\LLMBackend.cpp">
-      <Filter>Source Files\Backend\LLM</Filter>
-    </ClCompile>
     <ClCompile Include="src\llm\LLMInstance.cpp">
       <Filter>Source Files\Backend\LLM</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\CharacterData.cpp">
-      <Filter>Source Files\AppModel\Data\Character</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\SHA256\src\sha256.c">
       <Filter>Source Files\Third-party\SHA256</Filter>
@@ -275,27 +263,6 @@
     <ClCompile Include="src\llm\ContextCursor.cpp">
       <Filter>Source Files\Backend\LLM\Context</Filter>
     </ClCompile>
-    <ClCompile Include="src\fs\XmlWriter.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\AssetFileReader.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\AssetFileWriter.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\FileUtility.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\XmlReader.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\Hash.cpp">
-      <Filter>Source Files\Frontend\User\Authentication</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\Security.cpp">
-      <Filter>Source Files\Frontend\User\Authentication</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\HomeScreen.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
@@ -311,12 +278,6 @@
     <ClCompile Include="include\gui\TexturedBorder.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files\AppModel</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\AppState.cpp">
-      <Filter>Source Files\AppModel</Filter>
-    </ClCompile>
     <ClCompile Include="src\llm\LLMUtility.cpp">
       <Filter>Source Files\Backend\LLM\Utility</Filter>
     </ClCompile>
@@ -325,9 +286,6 @@
     </ClCompile>
     <ClCompile Include="src\llm\Grammar.cpp">
       <Filter>Source Files\Backend\LLM\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ScenarioData.cpp">
-      <Filter>Source Files\AppModel\Data\Character</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\NineGridImage.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
@@ -352,30 +310,6 @@
     </ClCompile>
     <ClCompile Include="..\Libraries\miniz\src\miniz.c">
       <Filter>Source Files\Third-party\miniz</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\CardImporter.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Import</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\TavernCardV2.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Import</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\UserManager.cpp">
-      <Filter>Source Files\Frontend\User</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\Asset.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\AssetManager.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\AssetDatabase.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\util\ProfileDatabase.cpp">
-      <Filter>Source Files\Frontend\User</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ContentManager.cpp">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CoverCard.cpp">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
@@ -422,23 +356,11 @@
     <ClCompile Include="src\gui\PasswordBox.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\IniFile.cpp">
-      <Filter>Source Files\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\ImageWithMask.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\UserSettings.cpp">
-      <Filter>Source Files\AppModel</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\AppSettings.cpp">
-      <Filter>Source Files\AppModel</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\UserProfileWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fs\FileStream.cpp">
-      <Filter>Source Files\Frontend\FileSystem</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\GridSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
@@ -497,21 +419,6 @@
     <ClCompile Include="src\gui\Events.cpp">
       <Filter>Source Files\Frontend\GUI</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\CardMetaData.cpp">
-      <Filter>Source Files\AppModel\Data</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ChatCommandExecutor.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ChatCommands.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClCompile>
-    <ClCompile Include="src\model\ChatSession.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClCompile>
-    <ClCompile Include="src\llm\ChatStaging.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\LoadModelWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Widgets</Filter>
     </ClCompile>
@@ -521,11 +428,98 @@
     <ClCompile Include="src\util\DebugUtils.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\ModelSettings.cpp">
+    <ClCompile Include="src\util\Hash.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\AppState.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\AppSettings.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\main.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\chat\ChatSession.cpp">
       <Filter>Source Files\Backend\Chat</Filter>
     </ClCompile>
-    <ClCompile Include="src\model\CharacterGender.cpp">
-      <Filter>Source Files\AppModel\Data\Character</Filter>
+    <ClCompile Include="src\chat\ChatStaging.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\chat\ChatCommandExecutor.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\chat\ChatCommands.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\llm\LLMBackend.cpp">
+      <Filter>Source Files\Backend\LLM</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\CardImporter.cpp">
+      <Filter>Source Files\Frontend\IO\Import</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\AssetDatabase.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\AssetFileReader.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\AssetFileWriter.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\AssetManager.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\ContentManager.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\Asset.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\IniFile.cpp">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\XmlReader.cpp">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\XmlWriter.cpp">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\FileStream.cpp">
+      <Filter>Source Files\Frontend\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\FileUtility.cpp">
+      <Filter>Source Files\Frontend\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\user\Security.cpp">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClCompile>
+    <ClCompile Include="src\user\UserManager.cpp">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClCompile>
+    <ClCompile Include="src\user\UserSettings.cpp">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClCompile>
+    <ClCompile Include="src\user\ProfileDatabase.cpp">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\data\CardMetaData.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\data\ModelSettings.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\data\CharacterData.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\data\CharacterGender.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\data\ScenarioData.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\data\TavernCardV2.cpp">
+      <Filter>Source Files\Frontend\IO\Import</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -594,18 +588,6 @@
     </ClInclude>
     <ClInclude Include="include\llm\LLMInstance.h">
       <Filter>Source Files\Backend\LLM</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\CharacterData.h">
-      <Filter>Source Files\AppModel\Data\Character</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Types.h">
-      <Filter>Source Files\AppModel\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\GlobalStrings.h">
-      <Filter>Source Files\AppModel\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Constants.h">
-      <Filter>Source Files\AppModel\Common</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\AES\include\AES.h">
       <Filter>Source Files\Third-party\AES</Filter>
@@ -961,21 +943,6 @@
     <ClInclude Include="..\Libraries\SDL3\3.2.30\include\SDL3\SDL_vulkan.h">
       <Filter>Source Files\Third-party\SDL3</Filter>
     </ClInclude>
-    <ClInclude Include="include\fs\FileUtility.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\Serialization.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\Xml.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\Hash.h">
-      <Filter>Source Files\Frontend\User\Authentication</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\Security.h">
-      <Filter>Source Files\Frontend\User\Authentication</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\Screen.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
@@ -991,9 +958,6 @@
     <ClInclude Include="include\gui\TexturedBorder.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\AppState.h">
-      <Filter>Source Files\AppModel</Filter>
-    </ClInclude>
     <ClInclude Include="include\llm\LLMUtility.h">
       <Filter>Source Files\Backend\LLM\Utility</Filter>
     </ClInclude>
@@ -1005,9 +969,6 @@
     </ClInclude>
     <ClInclude Include="include\llm\PromptTemplateTypes.h">
       <Filter>Source Files\Backend\LLM</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ScenarioData.h">
-      <Filter>Source Files\AppModel\Data\Character</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\NineGridImage.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
@@ -1027,44 +988,11 @@
     <ClInclude Include="..\Libraries\fast-crc32\include\crc32.h">
       <Filter>Source Files\Third-party\fast-crc32</Filter>
     </ClInclude>
-    <ClInclude Include="include\fs\FileError.h">
-      <Filter>Source Files\Frontend\FileSystem</Filter>
-    </ClInclude>
     <ClInclude Include="..\Libraries\libspng\include\spng.h">
       <Filter>Source Files\Third-party\libspng</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\miniz\include\miniz.h">
       <Filter>Source Files\Third-party\miniz</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\CardImporter.h">
-      <Filter>Source Files\Frontend\FileSystem\Import</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\TavernCardV2.h">
-      <Filter>Source Files\Frontend\FileSystem\Import</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\UserManager.h">
-      <Filter>Source Files\Frontend\User</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\UserProfile.h">
-      <Filter>Source Files\Frontend\User</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\DatabaseError.h">
-      <Filter>Source Files\Frontend\FileSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\Asset.h">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\AssetManager.h">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\AssetDatabase.h">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\util\ProfileDatabase.h">
-      <Filter>Source Files\Frontend\User</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ContentManager.h">
-      <Filter>Source Files\Frontend\FileSystem\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CoverCard.h">
       <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
@@ -1111,32 +1039,11 @@
     <ClInclude Include="include\gui\PasswordBox.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\IniFile.h">
-      <Filter>Source Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\AssetFileReader.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\AssetFileWriter.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\ImageWithMask.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\Settings.h">
-      <Filter>Source Files\AppModel</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\AppSettings.h">
-      <Filter>Source Files\AppModel</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\UserSettings.h">
-      <Filter>Source Files\AppModel</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\UserProfileWidget.h">
       <Filter>Source Files\Frontend\GUI\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\FileStream.h">
-      <Filter>Source Files\Frontend\FileSystem</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\GridSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
@@ -1183,9 +1090,6 @@
     <ClInclude Include="include\gui\LineBorderRenderer.h">
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\ExcludedSearchTerms.h">
-      <Filter>Source Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\Menu.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
@@ -1204,27 +1108,6 @@
     <ClInclude Include="include\gui\Events.h">
       <Filter>Source Files\Frontend\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\CardMetaData.h">
-      <Filter>Source Files\AppModel\Data</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatTypes.h">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatCommandExecutor.h">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatCommands.h">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatOptions.h">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\model\ChatSession.h">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\llm\ChatStaging.h">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\KeyboardMods.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
@@ -1237,26 +1120,140 @@
     <ClInclude Include="include\util\DebugUtils.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\ModelSettings.h">
-      <Filter>Source Files\Backend\Chat</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\XmlSerializable.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\XmlReader.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="include\fs\XmlWriter.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
-    </ClInclude>
     <ClInclude Include="include\llm\ContextSize.h">
       <Filter>Source Files\Backend\LLM</Filter>
     </ClInclude>
-    <ClInclude Include="include\model\CharacterGender.h">
-      <Filter>Source Files\AppModel\Data\Character</Filter>
+    <ClInclude Include="include\app\Constants.h">
+      <Filter>Source Files\Application\Common</Filter>
     </ClInclude>
-    <ClInclude Include="include\fs\IXmlSerializable.h">
-      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    <ClInclude Include="include\app\GlobalStrings.h">
+      <Filter>Source Files\Application\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\app\Types.h">
+      <Filter>Source Files\Application\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\Hash.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\app\AppSettings.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\app\AppState.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Figment.h">
+      <Filter>Source Files\Application\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\ChatCommandExecutor.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\ChatCommands.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\ChatOptions.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\ChatSession.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\ChatStaging.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\ChatTypes.h">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\CardImporter.h">
+      <Filter>Source Files\Frontend\IO\Import</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AssetDatabase.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AssetFileReader.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AssetFileWriter.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AssetManager.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\ContentManager.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\Asset.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\IniFile.h">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\IXmlSerializable.h">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\Serialization.h">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\Xml.h">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\XmlReader.h">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\XmlSerializable.h">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\XmlWriter.h">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\DatabaseError.h">
+      <Filter>Source Files\Frontend\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\FileError.h">
+      <Filter>Source Files\Frontend\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\FileStream.h">
+      <Filter>Source Files\Frontend\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\FileUtility.h">
+      <Filter>Source Files\Frontend\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\Settings.h">
+      <Filter>Source Files\Frontend\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\user\Security.h">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClInclude>
+    <ClInclude Include="include\user\UserManager.h">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClInclude>
+    <ClInclude Include="include\user\UserProfile.h">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClInclude>
+    <ClInclude Include="include\user\UserSettings.h">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClInclude>
+    <ClInclude Include="include\user\ProfileDatabase.h">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\data\ExcludedSearchTerms.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\data\ModelSettings.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\data\CardMetaData.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\data\CharacterData.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\data\CharacterGender.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\data\ScenarioData.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\data\TavernCardV2.h">
+      <Filter>Source Files\Frontend\IO\Import</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 #define DICTIONARY_H__
 #pragma once
 
-#include "Types.h"
+#include "Figment.h"
 #include <string>
 #include <string_view>
 #include <unordered_set>

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "gui/GUITypes.h"
-#include "model/Asset.h"
+#include "io/Asset.h"
 
 namespace fig::gui
 {

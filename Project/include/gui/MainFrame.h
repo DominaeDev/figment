@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Frame.h"
-#include "model/ChatCommands.h"
-#include "model/ChatCommandExecutor.h"
+#include "chat/ChatCommands.h"
+#include "chat/ChatCommandExecutor.h"
 #include "llm/LLMStatus.h"
 #include "gui/Screen.h"
 

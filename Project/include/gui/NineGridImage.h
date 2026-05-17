@@ -2,7 +2,7 @@
 #define NINE_GRID_IMAGE_H__
 #pragma once
 
-#include "Types.h"
+#include "Figment.h"
 #include <array>
 
 namespace fig::gui

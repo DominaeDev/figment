@@ -6,7 +6,7 @@
 #include "gui/PlayButton.h"
 #include "gui/MainFrame.h"
 #include "gui/CustomRenderers.h"
-#include "model/AppState.h"
+#include "app/AppState.h"
 #include "llm/LLMBackend.h"
 
 namespace fig::gui

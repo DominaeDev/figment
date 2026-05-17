@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/ScenarioCard.h"
-#include "model/AppState.h"
-#include "model/UserManager.h"
+#include "app/AppState.h"
+#include "user/UserManager.h"
 
 using namespace fig::io;
 

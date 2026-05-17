@@ -2,9 +2,8 @@
 #include <algorithm>
 #include "gui/GUIUtility.h"
 #include "gui/AppResources.h"
-#include "util/Common.h"
 #include "util/StringUtility.h"
-#include "fs/FileUtility.h"
+#include "io/FileUtility.h"
 
 #include <SDL3_image/SDL_image.h>
 #include <c_resource.h>

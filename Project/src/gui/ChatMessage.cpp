@@ -6,11 +6,10 @@
 
 #include "gui/AppResources.h"
 #include "gui/OldCharacterImageStore.h"
-#include "model/AppState.h"
-#include "model/UserManager.h"
+#include "app/AppState.h"
+#include "user/UserManager.h"
 
 #include "util/StringUtility.h"
-#include "Constants.h"
 #include <format>
 
 using namespace fig::util;

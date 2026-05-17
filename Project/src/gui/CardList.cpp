@@ -1,8 +1,7 @@
 #include <pch.h>
-#include "model/AppState.h"
-#include "model/UserManager.h"
-#include "model/AssetManager.h"
-#include "util/Common.h"
+#include "app/AppState.h"
+#include "user/UserManager.h"
+#include "io/AssetManager.h"
 #include "util/StringUtility.h"
 #include "gui/CardList.h"
 #include "gui/GridSizer.h"

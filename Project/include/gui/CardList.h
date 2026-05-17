@@ -4,7 +4,7 @@
 
 #include "gui/ScrollPanel.h"
 #include "gui/CoverCard.h"
-#include "model/UserSettings.h"
+#include "user/UserSettings.h"
 
 namespace fig::gui
 {

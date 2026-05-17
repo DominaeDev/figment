@@ -1,7 +1,6 @@
 #include <pch.h>
 #include <chrono>
 #include "llm/LLMStatus.h"
-#include "util/Common.h"
 #include "util/Lockable.h"
 
 using namespace fig::llm;

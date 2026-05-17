@@ -2,7 +2,6 @@
 #include <cassert>
 #include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
-#include "util/Common.h"
 
 using namespace fig::llm;
 using namespace fig::util;

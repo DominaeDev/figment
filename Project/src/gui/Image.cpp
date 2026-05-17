@@ -2,7 +2,6 @@
 #include "gui/Image.h"
 #include "gui/GUIUtility.h"
 #include "gui/AppResources.h"
-#include "util/Common.h"
 
 using namespace fig::util;
 

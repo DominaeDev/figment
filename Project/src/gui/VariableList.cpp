@@ -3,7 +3,6 @@
 #include "gui/StaticText.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
-#include "Constants.h"
 #include "util/StringUtility.h"
 #include <format>
 

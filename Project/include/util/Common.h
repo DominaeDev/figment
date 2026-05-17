@@ -1,7 +1,7 @@
 #ifndef COMMON_UTILITY_H__
 #define COMMON_UTILITY_H__
 
-#include "Types.h"
+#include "Figment.h"
 
 #include <optional>
 #include <vector>

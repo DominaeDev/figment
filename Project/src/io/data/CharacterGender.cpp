@@ -1,0 +1,85 @@
+#include <pch.h>
+#include "io/data/CharacterGender.h"
+#include "util/StringUtility.h"
+
+namespace fig::io
+{
+	static const fig::string kMale = "Male";
+	static const fig::string kFemale = "Female";
+
+	CharacterGender::CharacterGender(Gender value)
+	{
+		operator=(value);
+	}
+
+	CharacterGender::CharacterGender(const fig::string& value)
+	{
+		operator=(value);
+	}
+
+	CharacterGender& CharacterGender::operator= (Gender gender) noexcept
+	{
+		_gender = gender;
+		if (gender != Gender::Other)
+			_customName.clear();
+		return *this;
+	}
+
+	CharacterGender& CharacterGender::operator= (const fig::string& name) noexcept
+	{
+		auto trimmed = util::trim(name);
+		if (util::equals(trimmed, kMale, true))
+		{
+			_gender = Gender::Male;
+			_customName.clear();
+		}
+		else if (util::equals(trimmed, kFemale, true))
+		{
+			_gender = Gender::Female;
+			_customName.clear();
+		}
+		else if (not trimmed.empty())
+		{
+			_gender = Gender::Other;
+			_customName = trimmed;
+		}
+		else
+		{
+			_gender = Gender::Undefined;
+			_customName.clear();
+		}
+		return *this;
+	}
+
+	std::pair<CharacterGender::Gender, fig::string> CharacterGender::Get() const noexcept
+	{
+		switch (_gender)
+		{
+			case Gender::Male:
+				return std::make_pair(Gender::Male, kMale);
+			case Gender::Female:
+				return std::make_pair(Gender::Female, kFemale);
+			case Gender::Other:
+				return std::make_pair(Gender::Other, _customName);
+			default:
+				return std::make_pair(Gender::Undefined, "");
+		}
+	}
+
+	fig::string CharacterGender::GetName() const noexcept
+	{
+		auto [_, s] = Get();
+		return std::move(s);
+	}
+
+	bool CharacterGender::operator== (const fig::string& gender) const noexcept
+	{
+		auto [g, s] = Get();
+		return util::equals(s, util::trim(gender), true);
+	}
+
+	bool CharacterGender::operator== (Gender gender) const noexcept
+	{
+		return _gender == gender;
+	}
+}

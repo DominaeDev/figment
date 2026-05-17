@@ -2,7 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include "Types.h"
+#include "Figment.h"
 #include "gui/GUIColor.h"
 #include "c_resource.h"
 

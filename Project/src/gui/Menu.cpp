@@ -5,7 +5,7 @@
 #include "gui/TexturedBorder.h"
 #include "gui/CustomRenderers.h"
 #include "gui/MenuSeparator.h"
-#include "model/AppState.h"
+#include "app/AppState.h"
 #include "gui/Events.h"
 
 using namespace fig::util;

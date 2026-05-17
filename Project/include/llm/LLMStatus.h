@@ -2,7 +2,7 @@
 #define STATUS_SIGNAL_H__
 #pragma once
 
-#include "Types.h"
+#include "Figment.h"
 #include <queue>
 #include <mutex>
 #include <optional>

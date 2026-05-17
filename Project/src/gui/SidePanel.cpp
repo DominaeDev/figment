@@ -7,7 +7,6 @@
 #include "gui/LoadModelWidget.h"
 #include "gui/LineBorderRenderer.h"
 #include "gui/Menu.h"
-#include "model/GlobalStrings.h"
 
 namespace fig::gui
 {
