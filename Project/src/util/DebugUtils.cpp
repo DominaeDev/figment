@@ -130,7 +130,7 @@ namespace fig
 			auto& userMngr = Global::GetUserManager();
 
 			fig::llm::ModelSettings modelSettings;
-			if (not Success(modelSettings.LoadFromXml("./import/model_settings.xml"))) //! @temp
+			if (not Success(modelSettings.LoadFromXml(fig::path { "./import/model_settings.xml" }))) //! @temp
 				modelSettings = fig::llm::ModelSettings {};
 
 			if (userMngr.SignInDefaultProfile())

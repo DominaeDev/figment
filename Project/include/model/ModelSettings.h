@@ -5,30 +5,22 @@
 #include "Types.h"
 #include "llm/PromptTemplateTypes.h"
 #include "fs/FileError.h"
+#include "fs/IXmlSerializable.h"
 #include "util/Common.h"
 
 namespace fig::llm
 {
-	struct ModelSettings
+	struct ModelSettings : public fig::io::IXmlSerializable
 	{
+		static constexpr uint8_t FormatVersion { 0 };
+
 		ModelSettings();
-		ModelSettings(const ModelSettings&) = default;
-		ModelSettings(ModelSettings&&) = default;
-		ModelSettings& operator=(const ModelSettings&) = default;
-		ModelSettings& operator=(ModelSettings&&) = default;
-		~ModelSettings() = default;
 
-		fig::io::FileError LoadFromXml(const fig::path& path) noexcept;
-		fig::io::FileError LoadFromXml(const fig::byte_span& input_buffer) noexcept;
-
-		fig::io::FileError SaveToXml(const fig::path& path) const;
-		void SaveToXml(fig::bytes& output_buffer) const;
-		
-	public:
-		uint8_t version;
+		uint8_t version = FormatVersion;
 		fig::string name;
 
-		struct LLMModel {
+		struct LLMModel
+		{
 			LLMModel();
 
 			fig::path filename;
@@ -41,17 +33,62 @@ namespace fig::llm
 			int32_t microBatchSize;
 			int32_t maxSequences;
 
-			static auto GetXmlFields();
+		private:
+			static fig::string SerializePromptTemplate(PromptTemplateType value);
+			static PromptTemplateType DeserializePromptTemplate(const fig::string& value);
+
+		public:
+			static auto GetXmlFields()
+			{
+				using namespace fig::io;
+				LLMModel Defaults {};
+				return XmlFields(
+					XmlElement { "Path", &LLMModel::filename },
+					XmlElement { "PromptTemplate", &LLMModel::promptTemplate, SerializePromptTemplate, DeserializePromptTemplate }
+						.Default(PromptTemplateType::Default),
+
+					XmlElement { "ContextSize", &LLMModel::contextSize, XmlConvertEnum<ContextSize>, XmlParseEnum<ContextSize> }
+						.Default(Defaults.contextSize)
+						.Validator([](auto& n) { return static_cast<int32_t>(n) >= static_cast<int32_t>(ContextSize::_2K) and static_cast<int32_t>(n) <= static_cast<int32_t>(ContextSize::_32K); }),
+
+					XmlElement { "ContextKeepRatio", &LLMModel::contextWindowKeepRatio, }
+						.Default(Defaults.contextWindowKeepRatio)
+						.Validator([](auto& value) { return value >= 0.0f and value <= 1.0f; }),
+
+					XmlElement { "GPULayers", &LLMModel::gpuLayers }.Default(Defaults.gpuLayers),
+					XmlElement { "UseMLock", &LLMModel::bUseMlock }.Default(Defaults.bUseMlock),
+					XmlElement { "UseMMap", &LLMModel::bUseMmap }.Default(Defaults.bUseMmap),
+					XmlElement { "MicroBatchSize", &LLMModel::microBatchSize }.Default(Defaults.microBatchSize),
+					XmlElement { "MaxSequences", &LLMModel::maxSequences }.Default(Defaults.maxSequences)
+				);
+			}
 		} model;
 
-		struct EmbeddingModel {
+		struct EmbeddingModel
+		{
 			fig::path filename;
 
-			static auto GetXmlFields();
+			static auto GetXmlFields()
+			{
+				using namespace fig::io;
+				return XmlFields(
+					XmlElement { "Path",	&EmbeddingModel::filename }
+				);
+			}
 		} embeddingModel;
-	
-	public:
-		static auto GetXmlFields();
+
+		static auto GetXmlFields()
+		{
+			using namespace fig::io;
+			return XmlFields(
+				XmlAttribute { "version",	&ModelSettings::version }
+					.MustExist()
+					.Validator([](auto& v) { return v <= FormatVersion; }),
+				XmlElement { "Name",		&ModelSettings::name, },
+				XmlElement { "Model",		&ModelSettings::model, },
+				XmlElement { "Embedding",	&ModelSettings::embeddingModel, }
+			);
+		}
 	};
 }
 

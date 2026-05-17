@@ -1255,6 +1255,9 @@
     <ClInclude Include="include\model\CharacterGender.h">
       <Filter>Source Files\AppModel\Data\Character</Filter>
     </ClInclude>
+    <ClInclude Include="include\fs\IXmlSerializable.h">
+      <Filter>Source Files\Frontend\FileSystem\Serialization</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
