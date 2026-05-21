@@ -36,18 +36,15 @@ namespace fig::io
 				character.gender = CharacterGender::Female;
 				break;
 			}
-
-			static const std::array<fig::string, 4> custom_genders = { "Futanari", "Shemale", "Trans", "Asexual" };
-			for (auto& custom_gender : custom_genders)
+			else
 			{
-				if (equals(tag, custom_gender, true))
+				for (auto& custom_gender : CharacterGender::AlternativeLabels)
 				{
-					character.gender = CharacterGender::Other;
-					character.properties[Constants::CharacterProperties::Gender] = CharacterProperty {
-						.label = "Gender",
-						.value = custom_gender,
-					};
-					break;
+					if (equals(tag, custom_gender, true))
+					{
+						character.gender = toStr(custom_gender);
+						break;
+					}
 				}
 			}
 		}

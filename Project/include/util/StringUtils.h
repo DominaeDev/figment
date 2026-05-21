@@ -25,6 +25,7 @@ namespace fig
 
 	[[nodiscard]] int compare(const string& a, const string& b, bool ignore_case = false);
 	[[nodiscard]] bool equals(const string& a, const string& b, bool ignore_case = false);
+	[[nodiscard]] bool equals(const string_view& a, const string_view& b, bool ignore_case = false);
 
 	string replace(const string& str, const string& find, const string& replace);
 	string replace_all(const string& str, const string& find, const string& replace);

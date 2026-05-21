@@ -16,6 +16,12 @@ namespace fig::io
 		using Type = TValue;
 	};
 
+	template<typename T>
+	struct InnerValueType { using Type = T; };
+
+	template<typename T> requires XmlSerializableMap<T>
+	struct InnerValueType<T> { using Type = typename T::value_type; };
+
 	template<typename TMemberPointer, typename TSerializer = std::identity, typename TDeserializer = std::identity>
 	struct XmlAttribute
 	{
@@ -60,7 +66,8 @@ namespace fig::io
 	struct XmlElement
 	{
 		using ValueType = XmlMemberPointer<TMemberPointer>::Type;
-		using SerializedType = std::remove_cvref_t<std::invoke_result_t<TSerializer, const ValueType&>>;
+		using SerializerInputType = typename InnerValueType<ValueType>::Type;
+		using SerializedType = std::remove_cvref_t<std::invoke_result_t<TSerializer, const SerializerInputType&>>;
 		using TValidator = std::function<bool(const ValueType&)>;
 
 		const char* name;
@@ -113,6 +120,12 @@ namespace fig::io
 	template<typename T>
 	concept XmlSerializableRange = std::ranges::range<T> && XmlSerializable<std::ranges::range_value_t<T>>;
 
+	template<typename T>
+	concept XmlSerializableMap = requires {
+		typename T::key_type;
+		typename T::mapped_type;
+	};
+
 	template<XmlSerializable T>
 	void XmlSerialize(XmlWriterElement& element, const T& object)
 	{
@@ -121,17 +134,20 @@ namespace fig::io
 				using FieldType = std::decay_t<decltype(field)>;
 				auto& member = object.*(field.member_ptr);
 
+				// Attribute
 				if constexpr (IsSpecializationOf<FieldType, XmlAttribute>::value)
 				{
 					element.SetAttribute(field.name, field.custom_serializer(member));
 				}
 				else if constexpr (IsSpecializationOf<FieldType, XmlElement>::value)
 				{
+					// Nested object
 					if constexpr (XmlSerializable<typename FieldType::ValueType>)
 					{
 						auto child = element.AddChild(field.name);
-						XmlSerialize(child, (member));
+						XmlSerialize(child, member);
 					}
+					// List of objects
 					else if constexpr (XmlSerializableRange<typename FieldType::ValueType>)
 					{
 						for (const auto& item : member)
@@ -140,6 +156,24 @@ namespace fig::io
 							XmlSerialize(child, item);
 						}
 					}
+					// Associative container
+					else if constexpr (XmlSerializableMap<typename FieldType::ValueType>)
+					{
+						auto child = element.AddChild(field.name);
+						for (const auto& kvp : object.*(field.member_ptr))
+						{
+							auto item = child.AddChild("Item");
+
+							auto serialized_kvp = field.custom_serializer(kvp);
+							item.SetAttribute("key", serialized_kvp.first);
+
+							if constexpr (XmlSerializable<decltype(serialized_kvp.second)>)
+								XmlSerialize(item, serialized_kvp.second);
+							else
+								item.SetValue(serialized_kvp.second);
+						}
+					}
+					// Single value
 					else
 					{
 						element.SetElementValue(field.name, field.custom_serializer(member));
@@ -162,6 +196,7 @@ namespace fig::io
 				using FieldType = std::decay_t<decltype(field)>;
 				auto& member = object.*(field.member_ptr);
 
+				// Attribute
 				if constexpr (IsSpecializationOf<FieldType, XmlAttribute>::value)
 				{
 					if (auto value = element[field.name].TryGet<FieldType::SerializedType>())
@@ -177,6 +212,7 @@ namespace fig::io
 					// Nested object
 					if constexpr (XmlSerializable<typename FieldType::ValueType>)
 					{
+						// Mustn't have converters
 						static_assert(std::same_as<decltype(field.custom_serializer), std::identity>);
 						static_assert(std::same_as<decltype(field.custom_deserializer), std::identity>);
 
@@ -186,7 +222,7 @@ namespace fig::io
 						else 
 							bValid &= !field.must_exist;
 					}
-					// Nested objects
+					// List of objects
 					else if constexpr (XmlSerializableRange<typename FieldType::ValueType>)
 					{
 						using ItemType = std::ranges::range_value_t<typename FieldType::ValueType>;
@@ -202,6 +238,44 @@ namespace fig::io
 						else
 							bValid &= !field.must_exist;
 					}
+					// Associative container
+					else if constexpr (XmlSerializableMap<typename FieldType::ValueType>)
+					{
+						using MappedType = FieldType::ValueType::mapped_type;
+						using SerializedKeyType = FieldType::SerializedType::first_type;
+						using SerializedMappedType = FieldType::SerializedType::second_type;
+						
+						auto& map = object.*(field.member_ptr);
+						map.clear();
+
+						if (auto child = element.GetFirstElement(field.name))
+						{
+							std::optional<XmlReaderElement> item = child.value().GetFirstElement("Item");
+							while (item)
+							{
+								if (auto try_key = (*item)["key"].TryGet<std::remove_cvref_t<SerializedKeyType>>())
+								{
+									// Map of objects
+									if constexpr (XmlSerializable<MappedType>)
+									{
+										auto& value = map[field.custom_deserializer(typename FieldType::SerializedType { *try_key, {} }).first];
+										XmlDeserialize(*item, value);
+									}
+									// Map of trivial types
+									else
+									{
+										if (auto try_value = (*item).TryGetValue<std::remove_cvref_t<SerializedMappedType>>())
+										{
+											auto deserialized_kvp = field.custom_deserializer(typename FieldType::SerializedType { *try_key, *try_value });
+											map[deserialized_kvp.first] = deserialized_kvp.second;
+										}
+									}
+								}
+								item = item->GetNextSibling();
+							}
+						}
+					}
+					// Single values
 					else
 					{
 						if (auto value = element.TryGetElement<FieldType::SerializedType>(field.name))

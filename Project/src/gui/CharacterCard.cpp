@@ -44,16 +44,18 @@ namespace fig::gui
 			{
 				fig::gui::Color color;
 				if (character.gender == CharacterGender::Male)
-					color = Colors::MessageBorderBlue;
+					color = Colors::GenderTagMale;
 				else if (character.gender == CharacterGender::Female)
-					color = Colors::MessageBorderPink;
+					color = Colors::GenderTagFemale;
+				else if (character.gender == CharacterGender::Other)
+					color = Colors::GenderTagOther;
 				else
 					color = Colors::White;
 
 				AddTag(character.gender, color);
 			}
 
-			for (size_t i = 0; i < character.tags.size() && i < 16; ++i)
+			for (size_t i = 0; i < character.tags.size(); ++i)
 			{
 				if (AddTag(character.tags[i]) == CoverCard::AddTagResult::Stop)
 					break;

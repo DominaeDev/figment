@@ -327,7 +327,7 @@ namespace fig::gui
 
 		auto pTagBG = new NineGridImage(_pTagsRoot, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
 		pTagBG->SetPosition(position);
-		pTagBG->SetForegroundColor(Colors::Black);
+		pTagBG->SetForegroundColor(Colors::Black.WithAlpha(0.7f));
 
 		auto pLabel = new StaticText(_pTagsRoot, tag, FontFace::Default, 14.0, true);
 		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);

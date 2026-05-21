@@ -47,6 +47,10 @@ namespace fig::gui
 		inline constexpr Color SidePanelBackground		{ 0xEEECE4_rgb };
 		inline constexpr Color SidePanelGradient		{ 0xe0dccb_rgb };
 		inline constexpr Color LineColor				{ 0xc7bcaa_rgb };
+		
+		inline constexpr Color GenderTagMale			{ 0x45ccff_rgb };
+		inline constexpr Color GenderTagFemale			{ 0xff5abb_rgb };
+		inline constexpr Color GenderTagOther			{ 0x4cff8b_rgb };
 
 		// Chat
 		inline constexpr Color ChatBackground			{ 0xfaf9f5_rgb };

@@ -15,7 +15,7 @@ namespace fig::io
 			Undefined = 0,
 			Male,
 			Female,
-			Other
+			Other,
 		};
 
 		CharacterGender() = default;
@@ -38,11 +38,15 @@ namespace fig::io
 		inline bool operator!= (Gender gender) const noexcept { return !operator==(gender); }
 		inline bool operator!= (const fig::string& gender) const noexcept { return !operator==(gender); }
 
-		operator fig::string() const { return GetName(); }
-		explicit operator Gender() const { return _gender; }
+		inline operator fig::string() const { return GetLabel(); }
+		inline explicit operator Gender() const { return _gender; }
+
+		static constexpr std::array<fig::string_view, 10> AlternativeLabels {
+			"Futanari", "Futa", "Shemale", "Trans", "Transsexual", "Transgender", "Asexual", "Newhalf", "Nonbinary", "Non-binary"
+		};
 
 	private:
-		fig::string GetName() const noexcept;
+		fig::string GetLabel() const noexcept;
 
 		Gender _gender { Gender::Undefined };
 		fig::string _customName;

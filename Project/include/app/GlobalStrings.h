@@ -59,7 +59,7 @@ namespace fig::strings
 		inline constexpr fig::const_string MenuCharacters =
 			"Characters";
 		inline constexpr fig::const_string MenuScenarios =
-			"Scenarios";
+			"Stories";
 		inline constexpr fig::const_string MenuWorlds =
 			"Worlds";
 		inline constexpr fig::const_string New =

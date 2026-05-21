@@ -122,7 +122,6 @@ namespace fig::Constants
 
 	namespace Embedding
 	{
-		constexpr fig::const_string DefaultModelLocation = "M:\\Embedding\\all-MiniLM-L6-v2-Q6_K.gguf";
 		constexpr fig::const_string EmbeddingSaveLocation = ".\\embeddings\\";
 		constexpr int32_t ContextSize = 384;
 		constexpr int32_t Depth = 1;
@@ -137,8 +136,6 @@ namespace fig::Constants
 
 	namespace CharacterProperties
 	{
-		constexpr const char* const Gender = "gender";
-
 	}
 
 	namespace Data

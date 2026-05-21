@@ -31,7 +31,7 @@ namespace fig
 		}
 	}
 
-	void DebugUtility::ImportTestCharacters(const fig::path& path)
+	void DebugUtility::ImportTestCharacters(const fig::path& path, size_t max_count)
 	{
 		if constexpr (Debugging)
 		{
@@ -47,7 +47,7 @@ namespace fig
 					| std::ranges::to<std::vector>();
 				content.GetAssetManager().DeleteAssets(remove_characters);
 
-				content.ImportCharactersInDirectory(path, 10uz);
+				content.ImportCharactersInDirectory(path, max_count);
 				userMngr.SignOut();
 			}
 		}

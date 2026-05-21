@@ -19,13 +19,27 @@ namespace fig::io
 			XmlElement { "FullName",		&CharacterData::fullName },
 			XmlElement { "Brief",			&CharacterData::brief },
 			XmlElement { "Description",		&CharacterData::description },
-			XmlElement { "Tags",			&CharacterData::tags },
+			XmlElement { "Properties",		&CharacterData::properties },
 			XmlElement { "Gender",			&CharacterData::gender, XmlConvertString<CharacterGender> },
 			XmlElement { "SearchIndex",		&CharacterData::searchIndex, 
 				[](auto& value) -> fig::string { return value.Serialize(); },
 				[](auto& value) -> SearchIndex { SearchIndex s; s.Deserialize(value); return s; }
-			}
+			},
+			XmlElement { "Tags",			&CharacterData::tags }
 		);
+
+		static_assert(XmlSerializable<CharacterData>);
+	}
+
+	auto CharacterProperty::GetXmlFields()
+	{
+		return XmlFields(
+			XmlElement { "Label", &CharacterProperty::label }.MustExist(),
+			XmlElement { "Value", &CharacterProperty::value }.MustExist()
+		);
+
+		static_assert(XmlSerializable<CharacterProperty>);
+		static_assert(XmlSerializableMap<std::map<fig::string, CharacterProperty>>);
 	}
 
 	static bool ReadXml(XmlReader& xml, CharacterData& data)
@@ -40,15 +54,6 @@ namespace fig::io
 			data.fullName = data.shortName;
 		if (data.chatId.empty())
 			data.chatId = data.shortName;
-
-		// Read gender
-		if (data.gender.IsDefined())
-		{
-			data.properties[Constants::CharacterProperties::Gender] = CharacterProperty {
-				.label = "Gender",
-				.value = data.gender,
-			};
-		}
 
 		// Colors
 		data.bgColor = {};

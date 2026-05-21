@@ -145,6 +145,14 @@ namespace fig
 		return compare(a, b, true) == 0;
 	}
 
+	bool equals(const string_view& a, const string_view& b, bool ignore_case)
+	{
+		if (a.size() != b.size())
+			return false;
+
+		return std::ranges::equal(a, b, [](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
+	}
+
 	bool begins_with(const string& str, const string& prefix, bool ignore_case)
 	{
 		wstring wstr = from_utf8(str);

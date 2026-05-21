@@ -14,6 +14,9 @@ namespace fig::io
 	{
 		fig::string label;
 		fig::string value;
+
+	public:
+		static auto GetXmlFields();
 	};
 
 	struct CharacterData

@@ -39,6 +39,14 @@ namespace fig::io
 		}
 		else if (not trimmed.empty())
 		{
+			for (auto& alt : AlternativeLabels)
+			{
+				if (equals(alt, trimmed, true))
+				{
+					trimmed = alt;
+					break;
+				}
+			}
 			_gender = Gender::Other;
 			_customName = trimmed;
 		}
@@ -65,7 +73,7 @@ namespace fig::io
 		}
 	}
 
-	fig::string CharacterGender::GetName() const noexcept
+	fig::string CharacterGender::GetLabel() const noexcept
 	{
 		auto [_, s] = Get();
 		return std::move(s);
