@@ -41,7 +41,7 @@ namespace fig::chat
 	private:
 		std::map<Role, fig::io::CharacterData> _characters {};
 		ChatOptions _options {};
-		int32_t _numBots;
+		int32_t _numBots {};
 	};
 }
 

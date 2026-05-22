@@ -22,8 +22,8 @@ namespace fig::gui
 		void OnButtonState() override;
 
 	private:
-		TexturedBorderRenderer* _pBGRenderer;
-		TexturedBorderRenderer* _pBorder;
+		TexturedBorderRenderer* _pBGRenderer {};
+		TexturedBorderRenderer* _pBorder {};
 		Image* _pIcon {};
 	};
 }

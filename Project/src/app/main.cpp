@@ -137,4 +137,3 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 	TTF_Quit();
 	SDL_Quit();
 }
-

@@ -63,9 +63,9 @@ namespace fig::gui
 	struct Mask
 	{
 		std::vector<uint8_t> pixels;
-		size_t width;
-		size_t height;
-		size_t pitch;
+		size_t width {};
+		size_t height {};
+		size_t pitch {};
 	};
 
 	using MaskPtr = const Mask*;

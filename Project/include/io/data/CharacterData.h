@@ -23,8 +23,8 @@ namespace fig::io
 	{
 	public:
 		fig::uuid assetId;
-		fig::timestamp createdAt;
-		fig::timestamp updatedAt;
+		fig::timestamp createdAt {};
+		fig::timestamp updatedAt {};
 
 		fig::string chatId;
 		fig::string shortName;

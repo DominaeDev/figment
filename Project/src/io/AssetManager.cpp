@@ -120,7 +120,7 @@ namespace fig::io
 		asset.data = std::move(data); // Move data
 		asset.data_format = format;
 		asset.sync_state.has_meta = true;
-		asset.sync_state.has_data = not data.empty();
+		asset.sync_state.has_data = not asset.data.empty();
 		auto now = utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);

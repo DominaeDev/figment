@@ -15,8 +15,8 @@ namespace fig::gui
 	protected:
 		void OnLayout(const Rect& rect) override;
 
-		float _totalListHeight;
-		int _marginBottom = 0;
-		int _spacing = 0;
+		float _totalListHeight {};
+		int _marginBottom {};
+		int _spacing {};
 	};
 }

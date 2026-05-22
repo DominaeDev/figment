@@ -324,7 +324,7 @@ namespace fig::llm
 		if (pos == fig::npos)
 			return false;
 
-		for (auto s : spans)
+		for (auto const& s : spans)
 		{
 			if (pos >= s.start && pos < s.end)
 				return true;

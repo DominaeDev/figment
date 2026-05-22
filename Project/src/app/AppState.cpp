@@ -166,16 +166,14 @@ namespace fig
 		EventType eventType;
 		switch (status.event)
 		{
-		case LLMStatusEvent::Nothing:						break;
+		case LLMStatusEvent::Nothing:						return;
 		case LLMStatusEvent::ModelLoading:					eventType = EventType::LLMModelLoading; break;
 		case LLMStatusEvent::ModelLoaded:					eventType = EventType::LLMModelLoaded; break;
 		case LLMStatusEvent::ModelLoadFailure:				eventType = EventType::LLMModelLoadFailure; break;
 		case LLMStatusEvent::ModelUnloaded:
-		{
 			eventType = EventType::LLMModelUnloaded;
 			Global::SetLLMInstance(nullptr);
-		}
-		break;
+			break;
 		case LLMStatusEvent::ModelUnloadRequest:			eventType = EventType::LLMModelUnloadRequest; break;
 		case LLMStatusEvent::ChatInitializing:				eventType = EventType::LLMChatInitializing; break;
 		case LLMStatusEvent::ChatInitialized:				eventType = EventType::LLMChatInitialized; break;
@@ -186,7 +184,7 @@ namespace fig
 		case LLMStatusEvent::RebuildingKVCache:				eventType = EventType::LLMRebuildingKVCache; break;
 		default:
 			assert(false && "Missing signal handler");
-			break;
+			return;
 		}
 
 		fig::gui::PushEvent(EventType::LLMStatusUpdate, 0, (void*)(&status));
