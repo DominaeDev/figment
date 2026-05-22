@@ -134,8 +134,13 @@ namespace fig::Constants
 //		constexpr fig::const_string QueryPrefix		= "Represent the statement: ";
 	}
 
-	namespace CharacterProperties
+	namespace CharacterAttributes
 	{
+		const fig::const_string Age = "age";
+		const fig::const_string Appearance = "appearance";
+		const fig::const_string Background = "background";
+		const fig::const_string Persona = "persona";
+		const fig::const_string Personality = "personality";
 	}
 
 	namespace Data

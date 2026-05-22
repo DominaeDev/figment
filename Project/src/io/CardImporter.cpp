@@ -22,8 +22,9 @@ namespace fig::io
 		CharacterData character;
 		character.shortName = card.data.name;
 		character.fullName = card.data.name;
-		character.description = card.data.description;
-		character.tags = card.data.tags;
+		character.AddAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
+		character.AddAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Public);
+		character.AppendTags(card.data.tags);
 
 		// Check for gender tags
 		for (auto& tag : card.data.tags)
@@ -52,12 +53,12 @@ namespace fig::io
 		}
 
 		if (character.gender.IsDefined())
-			character.searchIndex.AddTerm(lcase(character.gender));
+			character.AddSearchTerm(character.gender);
 
-		character.searchIndex.AddTerm(character.shortName);
-		character.searchIndex.AddTerm(character.fullName);
-		character.searchIndex.AddTerm(character.description);
-		character.searchIndex.AddTerms(character.tags);
+		character.AddSearchTerm(character.shortName);
+		character.AddSearchTerm(character.fullName);
+		character.AddSearchTerm(card.data.persona);
+		character.AddSearchTerm(card.data.personality);
 
 		return character;
 	}

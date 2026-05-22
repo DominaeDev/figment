@@ -19,7 +19,7 @@ namespace fig::data
 
 			// Required
 			d.at("name").get_to(data.name);
-			d.at("description").get_to(data.description);
+			d.at("description").get_to(data.persona);
 			d.at("personality").get_to(data.personality);
 			d.at("scenario").get_to(data.scenario);
 			d.at("first_mes").get_to(data.greeting);
@@ -31,8 +31,8 @@ namespace fig::data
 			data.post_history_instructions = d.value("post_history_instructions", "");
 			data.creator = d.value("creator", "");
 			data.character_version = d.value("character_version", "");
-			data.alternate_greetings = d.value("alternate_greetings", std::vector<std::string>{});
-			data.tags = d.value("tags", std::vector<std::string>{});
+			data.alternate_greetings = d.value("alternate_greetings", std::vector<fig::string>{});
+			data.tags = d.value("tags", std::vector<fig::string>{});
 
 			return true;
 		}

@@ -19,7 +19,7 @@ namespace fig::gui
 			auto& character = try_character.value();
 			_characterName = character.shortName;
 			SetLabel(character.fullName);
-			SetIndex(character.searchIndex);
+			SetIndex(character.GetSearchIndex());
 
 			if (auto try_meta = Global::GetUserManager().GetContent().GetMetaData(characterId))
 			{
@@ -55,9 +55,10 @@ namespace fig::gui
 				AddTag(character.gender, color);
 			}
 
-			for (size_t i = 0; i < character.tags.size(); ++i)
+			auto& tags = character.GetTags();
+			for (size_t i = 0; i < tags.size(); ++i)
 			{
-				if (AddTag(character.tags[i]) == CoverCard::AddTagResult::Stop)
+				if (AddTag(tags[i]) == CoverCard::AddTagResult::Stop)
 					break;
 			}
 		}

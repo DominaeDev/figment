@@ -19,7 +19,7 @@ namespace fig::user
 
 namespace fig::data
 {
-	struct CharacterData;
+	class CharacterData;
 }
 
 namespace fig::io

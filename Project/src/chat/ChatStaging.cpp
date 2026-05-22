@@ -229,21 +229,21 @@ namespace fig::chat
 		if(auto try_character = GetCharacterByRole(role))
 		{
 			auto& character = (*try_character).get();
-			fig::string description = trim(character.description);
-			if (description.empty())
+			fig::string persona = trim(character.GetAttribute(Constants::CharacterAttributes::Persona).value_or(""));
+			if (persona.empty())
 				return "";
 
 			// Format
 			if (role == Role::User)
 			{
 				fig::string prompt = s_system_prompt_user;
-				replace_all_inplace(prompt, "##PERSONA##", description);
+				replace_all_inplace(prompt, "##PERSONA##", persona);
 				return ApplyNames(prompt);
 			}
 			else
 			{
 				fig::string prompt = s_system_prompt_character;
-				replace_all_inplace(prompt, "##PERSONA##", description);
+				replace_all_inplace(prompt, "##PERSONA##", persona);
 				replace_all_inplace(prompt, "{{user}}", GetNameOf(Role::User));
 				replace_all_inplace(prompt, "{{char}}", character.shortName);
 				return prompt;

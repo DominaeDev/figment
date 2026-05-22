@@ -10,25 +10,25 @@ namespace fig::data
 	{
 		struct Data
 		{
-			std::string name {};
-			std::string description {};
-			std::string personality {};
-			std::string scenario {};
-			std::string greeting {};
-			std::string example {};
-			std::string system {};
-			std::string creator_notes {};
-			std::string post_history_instructions {};
+			fig::string name {};
+			fig::string persona {};
+			fig::string personality {};
+			fig::string scenario {};
+			fig::string greeting {};
+			fig::string example {};
+			fig::string system {};
+			fig::string creator_notes {};
+			fig::string post_history_instructions {};
 			
 			std::vector<std::string> alternate_greetings;
 			std::vector<std::string> tags;
 
-			std::string creator {};
-			std::string character_version {};
+			fig::string creator {};
+			fig::string character_version {};
 		} data;
 
-		std::string spec { "chara_card_v2" };
-		std::string spec_version { "2.0" };
+		fig::string spec { "chara_card_v2" };
+		fig::string spec_version { "2.0" };
 
 		bool Parse(const fig::string& json);
 	};
