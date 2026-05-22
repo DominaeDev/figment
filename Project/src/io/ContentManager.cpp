@@ -35,9 +35,8 @@ namespace fig::io
 				CharacterData character;
 				if (character.LoadFromXml(asset.AsStringView()) == FileError::NoError)
 				{
-					character.assetId = asset.id;
-					character.createdAt = asset.GetCreatedAt();
-					character.updatedAt = asset.GetUpdatedAt();
+//					character.createdAt = asset.GetCreatedAt();
+//					character.updatedAt = asset.GetUpdatedAt();
 					_characters[asset.id] = std::move(character);
 				}
 			}

@@ -15,8 +15,8 @@ namespace fig::chat
 
 	fig::uuid ChatSession::GetCharacterIdOf(Role role) const
 	{
-		if (auto try_character = _staging.GetCharacter(role))
-			return try_character.value().assetId;
+		if (auto try_id = _staging.GetCharacterIdByRole(role))
+			return *try_id;
 		return {};
 	}
 
@@ -25,8 +25,8 @@ namespace fig::chat
 		if (role == Role::User)
 			return "USR";
 
-		if (auto try_character = _staging.GetCharacter(role))
-			return ucase(try_character.value().chatId);
+		if (auto try_character = _staging.GetCharacterByRole(role))
+			return ucase((*try_character).get().chatId);
 		return "_UNK";
 	}
 
@@ -39,22 +39,22 @@ namespace fig::chat
 		if (role == Role::Director)
 			return fig::string { Constants::Chat::Names::Director };
 
-		auto optCharacter = _staging.GetCharacter(role);
-		if (optCharacter.has_value())
-			return optCharacter.value().shortName;
+		if (auto try_character = _staging.GetCharacterByRole(role))
+			return (*try_character).get().shortName;
 
 		return fig::string { Constants::Chat::Names::Unknown };
 	}
 
 	fig::gui::ColorPair ChatSession::GetColorsOf(Role role) const
 	{
-		if (auto character = _staging.GetCharacter(role))
+		if (auto try_character = _staging.GetCharacterByRole(role))
 		{
-			if (character.value().bgColor.IsDefined() && character.value().borderColor.IsDefined())
+			auto& character = (*try_character).get();
+			if (character.bgColor.IsDefined() && character.borderColor.IsDefined())
 			{
 				return ColorPair {
-					.foreground = character.value().borderColor,
-					.background = character.value().bgColor,
+					.foreground = character.borderColor,
+					.background = character.bgColor,
 				};
 			}
 		}

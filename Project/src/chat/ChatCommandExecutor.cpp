@@ -60,20 +60,22 @@ namespace fig::chat
 			| std::ranges::to<std::vector<fig::string>>();
 	};
 
-	static Role RoleFromName(fig::string text, LLMInstancePtr pLLM)
+	static Role RoleFromName(fig::string partial_name, LLMInstancePtr pLLM)
 	{
-		if (empty_or_whitespace(text))
+		if (empty_or_whitespace(partial_name))
 			return Role::Undefined;
 
-		if (std::iswdigit(from_utf8(text)[0]))
-			return bot_from_index(std::stoi(text) - 1);
+		if (std::iswdigit(from_utf8(partial_name)[0]))
+			return bot_from_index(std::stoi(partial_name) - 1);
 
-		for (auto const& kvp : pLLM->GetSession().GetStaging().GetCharacters())
+		auto& staging = pLLM->GetSession().GetStaging();
+
+		for (auto const& character : staging.GetCharacters())
 		{
-			if (begins_with(kvp.second.shortName, text, true))
-				return kvp.first;
+			if (begins_with(character.shortName, partial_name, true))
+				return staging.GetRoleOf(character.chatId);
 		}
-		return pLLM->GetSession().GetStaging().GetRoleOf(text);
+		return staging.GetRoleOf(partial_name);
 	};
 
 	static bool cmdUserMessage(ParsedChatCommand cmd, Ctx ctx)

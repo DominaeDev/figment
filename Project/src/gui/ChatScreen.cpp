@@ -134,23 +134,6 @@ namespace fig::gui
 		DrawBackground(pRenderer);
 	}
 
-	void ChatScreen::StartChat()
-	{
-		//! @temp
-		fig::chat::ChatStaging staging(Constants::LLM::DefaultChatOptions);
-		CharacterData user;
-		user.LoadFromXml(fig::path { "./characters/user.xml" });
-		CharacterData bot1;
-		bot1.LoadFromXml(fig::path { "./characters/bot1.xml" });
-		CharacterData bot2;
-		bot2.LoadFromXml(fig::path { "./characters/bot2.xml" });
-		staging.AssignRole(Role::User, user);
-		staging.AssignRole(Role::Bot1, bot1);
-		staging.AssignRole(Role::Bot2, bot2);
-		
-		StartChat(staging);
-	}
-
 	void ChatScreen::StartChat(const fig::chat::ChatStaging& staging)
 	{
 		auto pLLM = Global::GetLLMInstance();

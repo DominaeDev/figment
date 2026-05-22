@@ -22,11 +22,7 @@ namespace fig::data
 	struct CharacterData
 	{
 	public:
-		fig::uuid assetId;
-		fig::timestamp createdAt {};
-		fig::timestamp updatedAt {};
-
-		fig::string chatId;
+		fig::string chatId;	//! @remove?
 		fig::string shortName;
 		fig::string fullName;
 		
@@ -48,6 +44,9 @@ namespace fig::data
 	public:
 		static auto GetXmlFields();
 	};
+
+	using CharacterDataRef = std::reference_wrapper<fig::data::CharacterData>;
+	using CharacterDataCRef = std::reference_wrapper<const fig::data::CharacterData>;
 }
 
 #endif

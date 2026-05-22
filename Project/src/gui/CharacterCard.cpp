@@ -26,16 +26,16 @@ namespace fig::gui
 				auto& meta = try_meta.value().get();
 				SetMetaData(meta);
 				ShowStar(meta.flags.IsSet(CardMetaData::Flag::Favorite));
-
 				ShowNew(meta.IsNew());
 			}
 			else
 			{
+				auto now = utc_now();
 				SetMetaData(CardMetaData {
 					.name = _characterName,
-					.createdAt = character.createdAt,
-					.updatedAt = character.updatedAt,
-					.lastUsedAt = character.updatedAt,
+					.createdAt = now,
+					.updatedAt = now,
+					.lastUsedAt = now,
 				});
 			}
 

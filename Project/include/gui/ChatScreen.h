@@ -30,7 +30,6 @@ namespace fig::gui
 		ChatScreen(Frame* pParent);
 
 		void Close();
-		void StartChat();
 		void StartChat(const fig::chat::ChatStaging& staging);
 
 	protected:

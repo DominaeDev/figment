@@ -204,18 +204,18 @@ namespace fig
 	}
 
 	template <typename K, typename T>
-	inline std::optional<K> find_key(const std::map<K, T>& mapping, const T& value)
+	inline std::optional<K> find_key(const std::map<K, T>& map, const T& value)
 	{
-		for (auto& kvp : mapping)
+		for (auto& kvp : map)
 			if (kvp.second == value)
 				return kvp.first;
 		return std::nullopt;
 	}
 
 	template <typename K, typename T> requires std::is_enum_v<K>
-	inline T constexpr enum_serialize(const K& enum_value, const std::map<K, T>& mapping, const T& default_value = {})
+	inline T constexpr enum_serialize(const K& enum_value, const std::map<K, T>& map, const T& default_value = {})
 	{
-		if (auto itFind = mapping.find(enum_value); itFind != mapping.cend())
+		if (auto itFind = map.find(enum_value); itFind != map.cend())
 			return itFind->second;
 		return default_value;
 	}

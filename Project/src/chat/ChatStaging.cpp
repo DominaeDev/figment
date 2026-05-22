@@ -69,59 +69,66 @@ namespace fig::chat
 			throw std::runtime_error("Failed to initialize chat staging.");
 	}
 
-	bool ChatStaging::AssignRole(Role role, const CharacterData& characterData)
+	bool ChatStaging::AddCharacter(const fig::uuid& characterId, Role role, const CharacterData& data)
 	{
-		auto& character = _characters[role];
-		character = characterData;
+		if (_charactersByRole.contains(role))
+			return false; // Role already assigned
+		if (_charactersByID.contains(characterId))
+			return false; // Character already added
+
+		_characters.push_back(data);
+		auto& character = _characters.back();
+		_charactersByID[characterId] = &character;
+		_charactersByRole[role] = &character;
+
 		if (role == Role::User)
 			character.chatId = "USR";
-		if (is_bot(role))
-			_numBots = static_cast<int32_t>(std::count_if(_characters.begin(), _characters.end(), [](auto& kvp) { return is_bot(kvp.first); }));
 		return true;
 	}
 
-	std::optional<CharacterData> ChatStaging::GetCharacter(Role role) const noexcept
+	int32_t ChatStaging::GetBotCount() const noexcept
 	{
-		auto itFind = _characters.find(role);
-		if (itFind != _characters.end())
-			return itFind->second;
+		return static_cast<int32_t>(std::ranges::count_if(_charactersByRole, [](auto& kvp) { return is_bot(kvp.first); }));
+	}
+
+	std::optional<CharacterDataCRef> ChatStaging::GetCharacterByRole(Role role) const noexcept
+	{
+		if (auto itFind = _charactersByRole.find(role); itFind != _charactersByRole.cend())
+			return std::cref(*itFind->second);
 		return std::nullopt;
 	}
 
-	std::optional<CharacterData> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
+	std::optional<fig::uuid> ChatStaging::GetCharacterIdByRole(Role role) const noexcept
+	{
+		if (auto itFind = _charactersByRole.find(role); itFind != _charactersByRole.cend())
+			return find_key(_charactersByID, itFind->second);
+		return std::nullopt;
+	}
+
+	std::optional<CharacterDataCRef> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
+	{
+		if (auto itFind = _charactersByID.find(id); itFind != _charactersByID.cend())
+			return std::cref(*itFind->second);
+		return std::nullopt;
+	}
+
+	std::optional<CharacterDataCRef> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
 	{
 		if (identifier.empty() || _characters.empty())
 			return std::nullopt;
 
-		auto itFind = std::find_if(_characters.begin(), _characters.end(), [identifier](const auto& kvp) {
-			return equals(kvp.second.chatId, identifier, true);
-		});
-		if (itFind != _characters.end())
-			return itFind->second;
+		if (auto itFind = std::ranges::find_if(_characters, [&identifier](auto& character) { return equals(character.chatId, identifier, true); }); itFind != _characters.cend())
+			return std::cref(*itFind);
 		return std::nullopt;
 	}
 
-	std::optional<CharacterData> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
-	{
-		if (_characters.empty())
-			return std::nullopt;
-
-		auto itFind = std::find_if(_characters.begin(), _characters.end(), [&id](const auto& kvp) { return kvp.second.assetId == id; });
-		if (itFind != _characters.end())
-			return itFind->second;
-		return std::nullopt;
-	}
-
-	std::optional<CharacterData> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
+	std::optional<CharacterDataCRef> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
 	{
 		if (name.empty() || _characters.empty())
 			return std::nullopt;
 
-		auto itFind = std::find_if(_characters.begin(), _characters.end(), [name](const auto& kvp) {
-			return equals(kvp.second.shortName, name, true);
-		});
-		if (itFind != _characters.end())
-			return itFind->second;
+		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& character) { return equals(character.shortName, name, true); }); itFind != _characters.cend())
+			return std::cref(*itFind);
 		return std::nullopt;
 	}
 
@@ -130,10 +137,7 @@ namespace fig::chat
 		if (characterId.empty() || _characters.empty())
 			return Role::Undefined;
 
-		auto itFind = std::find_if(_characters.begin(), _characters.end(), [characterId](const auto& kvp) {
-			return equals(kvp.second.chatId, characterId, true) || equals(kvp.second.shortName, characterId, true);
-		});
-		if (itFind != _characters.end())
+		if (auto itFind = std::ranges::find_if(_charactersByRole, [characterId](const auto& kvp) { return equals(kvp.second->chatId, characterId, true) || equals(kvp.second->shortName, characterId, true);}); itFind != _charactersByRole.cend())
 			return itFind->first;
 		return Role::Undefined;
 	}
@@ -142,9 +146,8 @@ namespace fig::chat
 	{
 		if (role == Role::User)
 			return "USR";
-		auto optCharacter = GetCharacter(role);
-		if (optCharacter.has_value())
-			return ucase(optCharacter.value().chatId);
+		if (auto try_find = GetCharacterByRole(role))
+			return ucase((*try_find).get().chatId);
 		return "_UNK";
 	}
 
@@ -157,22 +160,22 @@ namespace fig::chat
 		if (role == Role::Director)
 			return fig::string { Constants::Chat::Names::Director };
 
-		auto optCharacter = GetCharacter(role);
-		if (optCharacter.has_value())
-			return optCharacter.value().shortName;
+		if (auto try_find = GetCharacterByRole(role))
+			return ucase((*try_find).get().shortName);
 
 		return fig::string { Constants::Chat::Names::Unknown };
 	}
 
 	fig::gui::ColorPair ChatStaging::GetColorsOf(Role role) const
 	{
-		if (auto character = GetCharacter(role))
+		if (auto try_character = GetCharacterByRole(role))
 		{
-			if (character.value().bgColor.IsDefined() && character.value().borderColor.IsDefined())
+			auto& character = (*try_character).get();
+			if (character.bgColor.IsDefined() && character.borderColor.IsDefined())
 			{
 				return ColorPair {
-					.foreground = character.value().borderColor,
-					.background = character.value().bgColor,
+					.foreground = character.borderColor,
+					.background = character.bgColor,
 				};
 			}
 		}
@@ -209,41 +212,44 @@ namespace fig::chat
 
 	fig::string ChatStaging::GetBriefOf(Role role) const
 	{
-		auto optCharacter = GetCharacter(role);
-		if (!optCharacter.has_value())
-			return "";
+		if (auto try_character = GetCharacterByRole(role))
+		{
+			auto& character = (*try_character).get();
 
-		fig::string brief = trim(optCharacter.value().brief);
-		replace_all_inplace(brief, "{{user}}", GetNameOf(Role::User));
-		replace_all_inplace(brief, "{{char}}", optCharacter.value().shortName);
-		return brief;
+			fig::string brief = trim(character.brief);
+			replace_all_inplace(brief, "{{user}}", GetNameOf(Role::User));
+			replace_all_inplace(brief, "{{char}}", character.shortName);
+			return brief;
+		}
+		return "";
 	}
 
 	fig::string ChatStaging::GetPersonaOf(Role role) const
 	{
-		auto optCharacter = GetCharacter(role);
-		if (!optCharacter.has_value())
-			return "";
-
-		fig::string description = trim(optCharacter.value().description);
-		if (description.empty())
-			return "";
-
-		// Format
-		if (role == Role::User)
+		if(auto try_character = GetCharacterByRole(role))
 		{
-			fig::string prompt = s_system_prompt_user;
-			replace_all_inplace(prompt, "##PERSONA##", description);
-			return ApplyNames(prompt);
+			auto& character = (*try_character).get();
+			fig::string description = trim(character.description);
+			if (description.empty())
+				return "";
+
+			// Format
+			if (role == Role::User)
+			{
+				fig::string prompt = s_system_prompt_user;
+				replace_all_inplace(prompt, "##PERSONA##", description);
+				return ApplyNames(prompt);
+			}
+			else
+			{
+				fig::string prompt = s_system_prompt_character;
+				replace_all_inplace(prompt, "##PERSONA##", description);
+				replace_all_inplace(prompt, "{{user}}", GetNameOf(Role::User));
+				replace_all_inplace(prompt, "{{char}}", character.shortName);
+				return prompt;
+			}
 		}
-		else
-		{
-			fig::string prompt = s_system_prompt_character;
-			replace_all_inplace(prompt, "##PERSONA##", description);
-			replace_all_inplace(prompt, "{{user}}", GetNameOf(Role::User));
-			replace_all_inplace(prompt, "{{char}}", optCharacter.value().shortName);
-			return prompt;
-		}
+		return "";
 	}
 
 	fig::string ChatStaging::ApplyNames(const fig::string& text) const
@@ -319,24 +325,24 @@ namespace fig::chat
 			{
 				prompt.append("\n{\n");
 				// Bots
-				for (auto& kvp : _characters)
+				for (auto [role, pCharacter] : _charactersByRole)
 				{
-					auto& character = kvp.second;
-					if (is_bot(kvp.first))
+					if (is_bot(role))
 					{
-						prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", ucase(character.chatId), character.shortName));
-						if (!empty_or_whitespace(character.brief))
-							prompt.append(std::format(", \"info\": \"{0}\"", character.brief));
+						prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", ucase(pCharacter->chatId), pCharacter->shortName));
+						if (!empty_or_whitespace(pCharacter->brief))
+							prompt.append(std::format(", \"info\": \"{0}\"", pCharacter->brief));
 						prompt.append("}},\n");
 					}
 				}
 
 				// User
-				if (auto user = GetCharacter(Role::User))
+				if (auto try_user = GetCharacterByRole(Role::User))
 				{
-					prompt.append(std::format("\t\"@USR\": {{\"name\": \"{0}\"", user.value().shortName));
-					if (!empty_or_whitespace(user.value().brief))
-						prompt.append(std::format(", \"info\": \"{0}\"", user.value().brief));
+					auto& user = (*try_user).get();
+					prompt.append(std::format("\t\"@USR\": {{\"name\": \"{0}\"", user.shortName));
+					if (!empty_or_whitespace(user.brief))
+						prompt.append(std::format(", \"info\": \"{0}\"", user.brief));
 					prompt.append("}\n");
 				}
 				prompt.append("}");
@@ -344,23 +350,23 @@ namespace fig::chat
 			else
 			{
 				// Bots
-				for (auto& kvp : _characters)
+				for (auto [role, pCharacter] : _charactersByRole)
 				{
-					auto& character = kvp.second;
-					if (is_bot(kvp.first))
+					if (is_bot(role))
 					{
-						prompt.append(std::format("\n- {}", character.shortName));
-						if (!empty_or_whitespace(character.brief))
-							prompt.append(std::format(": {}", character.brief));
+						prompt.append(std::format("\n- {}", pCharacter->shortName));
+						if (!empty_or_whitespace(pCharacter->brief))
+							prompt.append(std::format(": {}", pCharacter->brief));
 					}
 				}
 
 				// User
-				if (auto user = GetCharacter(Role::User))
+				if (auto try_user = GetCharacterByRole(Role::User))
 				{
-					prompt.append(std::format("\n- {}", user.value().shortName));
-					if (!empty_or_whitespace(user.value().brief))
-						prompt.append(std::format(": {}", user.value().brief));
+					auto& user = (*try_user).get();
+					prompt.append(std::format("\n- {}", user.shortName));
+					if (!empty_or_whitespace(user.brief))
+						prompt.append(std::format(": {}", user.brief));
 				}
 			}
 		}

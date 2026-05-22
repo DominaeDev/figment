@@ -400,8 +400,8 @@ namespace fig::gui
 				return;
 
 			ChatStaging staging(Constants::LLM::DefaultChatOptions);
-			staging.AssignRole(Role::User, user);
-			staging.AssignRole(Role::Bot1, character.value());
+			staging.AddCharacter(fig::CreateUUID(), Role::User, user); //! @temp
+			staging.AddCharacter(characterId, Role::Bot1, character.value());
 
 			pChatScreen->StartChat(staging);
 		}

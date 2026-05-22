@@ -14,21 +14,22 @@ namespace fig::chat
 		ChatStaging() = default;
 		ChatStaging(ChatOptions options);
 
-		bool AssignRole(Role role, const fig::data::CharacterData& character);
+		bool AddCharacter(const fig::uuid& characterId, Role role, const fig::data::CharacterData& data);
 
-		std::optional<fig::data::CharacterData> GetCharacter(Role role) const noexcept;
-		std::optional<fig::data::CharacterData> GetCharacterById(const fig::uuid& id) const noexcept;
-		std::optional<fig::data::CharacterData> GetCharacterByChatId(const fig::string& characterId) const noexcept;
-		std::optional<fig::data::CharacterData> GetCharacterByName(const fig::string& name) const noexcept;
-		const std::map<Role, fig::data::CharacterData>& GetCharacters() const noexcept { return _characters; }
+		std::optional<fig::uuid> GetCharacterIdByRole(Role role) const noexcept;
+		std::optional<fig::data::CharacterDataCRef> GetCharacterByRole(Role role) const noexcept;
+		std::optional<fig::data::CharacterDataCRef> GetCharacterById(const fig::uuid& id) const noexcept;
+		std::optional<fig::data::CharacterDataCRef> GetCharacterByChatId(const fig::string& characterId) const noexcept;
+		std::optional<fig::data::CharacterDataCRef> GetCharacterByName(const fig::string& name) const noexcept;
+		const std::vector<fig::data::CharacterData>& GetCharacters() const noexcept { return _characters; }
 
 		fig::string GetSystemPrompt() const;
 		fig::string GetDirectorPrompt() const;
 		fig::string GetPersonaOf(Role role) const;
 		fig::string GetBriefOf(Role role) const;
 		Role GetRoleOf(const fig::string& characterId) const;
-		inline int32_t GetBotCount() const noexcept { return _numBots; }
-		inline bool IsGroupChat() const noexcept { return _numBots > 1; }
+		int32_t GetBotCount() const noexcept;
+		inline bool IsGroupChat() const noexcept { return GetBotCount() > 1; }
 		
 		fig::string GetChatIdOf(Role role) const;
 		fig::string GetNameOf(Role role) const;
@@ -39,9 +40,10 @@ namespace fig::chat
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text, Role characterRole) const;
 
 	private:
-		std::map<Role, fig::data::CharacterData> _characters {};
+		std::vector<fig::data::CharacterData> _characters {};
+		std::map<fig::uuid, fig::data::CharacterData*> _charactersByID {};
+		std::map<Role, fig::data::CharacterData*> _charactersByRole {};
 		ChatOptions _options {};
-		int32_t _numBots {};
 	};
 }
 
