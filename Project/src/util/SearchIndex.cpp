@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "util/SearchIndex.h"
-#include "io/data/ExcludedSearchTerms.h"
+#include "data/ExcludedSearchTerms.h"
 
 namespace fig
 {

@@ -1,8 +1,8 @@
 #include <pch.h>
 #include <json.hpp>
-#include "io/data/TavernCardV2.h"
+#include "data/TavernCardV2.h"
 
-namespace fig::io
+namespace fig::data
 {
 	bool TavernCardV2::Parse(const fig::string& json)
 	{

@@ -5,7 +5,7 @@
 
 #include "CardImage.h"
 #include "io/AssetManager.h"
-#include "io/data/CardMetaData.h"
+#include "data/CardMetaData.h"
 #include "user/UserSettings.h"
 #include "util/SearchIndex.h"
 
@@ -29,7 +29,7 @@ namespace fig::gui
 		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Full);
 		void Initialize();
 
-		void SetBorder(fig::io::CardBorderStyle style);
+		void SetBorder(fig::data::CardBorderStyle style);
 		void SetCardSize(CardSize cardSize);
 		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
 		void ShowTags(bool bEnable);
@@ -41,7 +41,7 @@ namespace fig::gui
 		bool MatchesSearch(const SearchQuery& query) const noexcept;
 
 		const fig::uuid& GetAssetID() const { return _assetId; }
-		inline const fig::io::CardMetaData& GetMetaData() const noexcept { return _metaData; };
+		inline const fig::data::CardMetaData& GetMetaData() const noexcept { return _metaData; };
 
 		void SetDelegate(OnCardUpdatedDelegate onUpdated);
 		void ResetHoverZoom();
@@ -65,7 +65,7 @@ namespace fig::gui
 		void AddSearchTerms(const fig::string& text) noexcept;
 		void AddSearchTerms(std::span<const fig::string> texts) noexcept;
 
-		inline void SetMetaData(const fig::io::CardMetaData& metaData) noexcept { _metaData = metaData; };
+		inline void SetMetaData(const fig::data::CardMetaData& metaData) noexcept { _metaData = metaData; };
 		void NotifyMetaUpdated();
 
 	private:
@@ -81,7 +81,7 @@ namespace fig::gui
 		bool _bHidden = false;
 		bool _bHasError = false;
 		OnCardUpdatedDelegate _fnOnUpdated {};
-		fig::io::CardMetaData _metaData {};
+		fig::data::CardMetaData _metaData {};
 		bool _bHovered = false;
 		float _fHoverZoom = 0.0f;
 		float _fTargetZoom = 0.0f;

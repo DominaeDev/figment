@@ -7,7 +7,7 @@
 #include "chat/ChatSession.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
-#include "io/data/CharacterData.h"
+#include "data/CharacterData.h"
 #include <format>
 #include <set>
 

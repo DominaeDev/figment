@@ -5,7 +5,7 @@
 
 #include "Figment.h"
 
-namespace fig::io
+namespace fig::data
 {
 	class CharacterGender
 	{

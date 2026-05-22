@@ -129,14 +129,14 @@
     <Filter Include="Source Files\Frontend\IO\Assets">
       <UniqueIdentifier>{267bc7c3-9a6f-4e7d-a7aa-d92284a5b061}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\IO\Data">
-      <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Application">
       <UniqueIdentifier>{43584bac-6f34-46cc-984a-5080e30d0816}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Application\Common">
       <UniqueIdentifier>{08ed38ef-c891-490c-b20a-88677d1ca92a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data">
+      <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -500,23 +500,23 @@
     <ClCompile Include="src\user\ProfileDatabase.cpp">
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\data\CardMetaData.cpp">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClCompile Include="src\data\CharacterData.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\data\ModelSettings.cpp">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClCompile Include="src\data\CharacterGender.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\data\CharacterData.cpp">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClCompile Include="src\data\ModelSettings.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\data\CharacterGender.cpp">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClCompile Include="src\data\ScenarioData.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\data\ScenarioData.cpp">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClCompile Include="src\data\TavernCardV2.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\data\TavernCardV2.cpp">
-      <Filter>Source Files\Frontend\IO\Import</Filter>
+    <ClCompile Include="src\data\CardMetaData.cpp">
+      <Filter>Source Files\Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1228,26 +1228,26 @@
     <ClInclude Include="include\user\ProfileDatabase.h">
       <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\data\ExcludedSearchTerms.h">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClInclude Include="include\data\ExcludedSearchTerms.h">
+      <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\data\ModelSettings.h">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClInclude Include="include\data\ModelSettings.h">
+      <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\data\CardMetaData.h">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClInclude Include="include\data\ScenarioData.h">
+      <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\data\CharacterData.h">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClInclude Include="include\data\TavernCardV2.h">
+      <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\data\CharacterGender.h">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClInclude Include="include\data\CardMetaData.h">
+      <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\data\ScenarioData.h">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
+    <ClInclude Include="include\data\CharacterData.h">
+      <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\data\TavernCardV2.h">
-      <Filter>Source Files\Frontend\IO\Import</Filter>
+    <ClInclude Include="include\data\CharacterGender.h">
+      <Filter>Source Files\Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

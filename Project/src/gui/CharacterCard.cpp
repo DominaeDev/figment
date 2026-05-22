@@ -7,7 +7,7 @@
 #include "gui/Menu.h"
 #include "gui/MainFrame.h"
 
-using namespace fig::io;
+using namespace fig::data;
 
 namespace fig::gui
 {

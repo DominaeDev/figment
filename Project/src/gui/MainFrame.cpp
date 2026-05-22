@@ -11,10 +11,11 @@
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
-#include "io/data/ModelSettings.h"
+#include "data/ModelSettings.h"
 #include "util/DebugUtils.h"
 
 using namespace fig::io;
+using namespace fig::data;
 using namespace fig::chat;
 
 namespace fig::gui
@@ -259,7 +260,7 @@ namespace fig::gui
 			SetStatusBar(fig::strings::Status::LoadingModel);
 
 			// Read model settings
-			fig::llm::ModelSettings modelSettings {};
+			fig::data::ModelSettings modelSettings {};
 			if (auto try_model_settings = Global::GetUserContent().GetActiveModelSettings())
 				modelSettings = try_model_settings.value();
 			else

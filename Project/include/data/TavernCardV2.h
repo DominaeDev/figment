@@ -4,7 +4,7 @@
 
 #include "Figment.h"
 
-namespace fig::io
+namespace fig::data
 {
 	struct TavernCardV2
 	{

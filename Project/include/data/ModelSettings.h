@@ -7,7 +7,7 @@
 #include "io/FileError.h"
 #include "io/IXmlSerializable.h"
 
-namespace fig::llm
+namespace fig::data
 {
 	struct ModelSettings : public fig::io::IXmlSerializable
 	{
@@ -23,8 +23,8 @@ namespace fig::llm
 			LLMModel();
 
 			fig::path filename;
-			PromptTemplateType promptTemplate { PromptTemplateType::Undefined };
-			ContextSize contextSize;
+			fig::llm::PromptTemplateType promptTemplate { fig::llm::PromptTemplateType::Undefined };
+			fig::llm::ContextSize contextSize;
 			float contextWindowKeepRatio;
 			uint8_t gpuLayers;
 			bool bUseMlock;
@@ -33,8 +33,8 @@ namespace fig::llm
 			int32_t maxSequences;
 
 		private:
-			static fig::string SerializePromptTemplate(PromptTemplateType value);
-			static PromptTemplateType DeserializePromptTemplate(const fig::string& value);
+			static fig::string SerializePromptTemplate(fig::llm::PromptTemplateType value);
+			static fig::llm::PromptTemplateType DeserializePromptTemplate(const fig::string& value);
 
 		public:
 			static auto GetXmlFields()
@@ -44,11 +44,11 @@ namespace fig::llm
 				return XmlFields(
 					XmlElement { "Path", &LLMModel::filename },
 					XmlElement { "PromptTemplate", &LLMModel::promptTemplate, SerializePromptTemplate, DeserializePromptTemplate }
-						.Default(PromptTemplateType::Default),
+						.Default(fig::llm::PromptTemplateType::Default),
 
-					XmlElement { "ContextSize", &LLMModel::contextSize, XmlConvertEnum<ContextSize>, XmlParseEnum<ContextSize> }
+					XmlElement { "ContextSize", &LLMModel::contextSize, XmlConvertEnum<fig::llm::ContextSize>, XmlParseEnum<fig::llm::ContextSize> }
 						.Default(Defaults.contextSize)
-						.Validator([](auto& n) { return static_cast<int32_t>(n) >= static_cast<int32_t>(ContextSize::_2K) and static_cast<int32_t>(n) <= static_cast<int32_t>(ContextSize::_32K); }),
+						.Validator([](auto& n) { return static_cast<int32_t>(n) >= static_cast<int32_t>(fig::llm::ContextSize::_2K) and static_cast<int32_t>(n) <= static_cast<int32_t>(fig::llm::ContextSize::_32K); }),
 
 					XmlElement { "ContextKeepRatio", &LLMModel::contextWindowKeepRatio, }
 						.Default(Defaults.contextWindowKeepRatio)

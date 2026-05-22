@@ -1,8 +1,8 @@
 #include <pch.h>
-#include "io/data/CardMetaData.h"
+#include "data/CardMetaData.h"
 #include <json.hpp>
 
-namespace fig::io
+namespace fig::data
 {
 	static constexpr auto FlagMapping = std::array<std::pair<CardMetaData::Flag, std::string_view>, 3> {
 		std::pair { CardMetaData::Flag::Imported,	"imported" },

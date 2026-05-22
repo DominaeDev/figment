@@ -5,6 +5,7 @@
 #include "app/AppState.h"
 
 using namespace fig::user;
+using namespace fig::data;
 
 namespace fig::io
 {
@@ -60,21 +61,21 @@ namespace fig::io
 		DEBUG_MEASURE_END();
 	}
 
-	std::optional<fig::io::CharacterData> UserContentManager::GetCharacter(const fig::uuid& id) const noexcept
+	std::optional<fig::data::CharacterData> UserContentManager::GetCharacter(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _characters.find(id); itFind != _characters.cend())
 			return std::make_optional(itFind->second);
 		return std::nullopt;
 	}
 
-	std::optional<fig::io::ScenarioData> UserContentManager::GetScenario(const fig::uuid& id) const noexcept
+	std::optional<fig::data::ScenarioData> UserContentManager::GetScenario(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _scenarios.find(id); itFind != _scenarios.cend())
 			return std::make_optional(itFind->second);
 		return std::nullopt;
 	}
 
-	std::optional<fig::llm::ModelSettings> UserContentManager::GetActiveModelSettings() const noexcept
+	std::optional<ModelSettings> UserContentManager::GetActiveModelSettings() const noexcept
 	{
 		fig::uuid activePresetId = Global::GetUserSettings().GetUUID(UserSetting::ModelPreset);
 		std::optional<AssetRef> settingsAsset = std::nullopt;
@@ -97,7 +98,7 @@ namespace fig::io
 			{
 				auto& modelSettingsAsset = try_load.value().get();
 
-				fig::llm::ModelSettings settings {};
+				fig::data::ModelSettings settings {};
 				if (Success(settings.LoadFromXml(modelSettingsAsset.data)))
 					return settings;
 			}
@@ -105,7 +106,7 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	std::optional<std::reference_wrapper<fig::io::CardMetaData>> UserContentManager::GetMetaData(const fig::uuid& id, bool bIgnoreCache) noexcept
+	std::optional<std::reference_wrapper<fig::data::CardMetaData>> UserContentManager::GetMetaData(const fig::uuid& id, bool bIgnoreCache) noexcept
 	{
 		if (not bIgnoreCache)
 		{

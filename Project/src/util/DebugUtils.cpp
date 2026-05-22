@@ -3,7 +3,7 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/Asset.h"
-#include "io/data/ModelSettings.h"
+#include "data/ModelSettings.h"
 
 using namespace fig::io;
 
@@ -129,9 +129,9 @@ namespace fig
 		{
 			auto& userMngr = Global::GetUserManager();
 
-			fig::llm::ModelSettings modelSettings;
+			fig::data::ModelSettings modelSettings;
 			if (not Success(modelSettings.LoadFromXml(fig::path { "./import/model_settings.xml" }))) //! @temp
-				modelSettings = fig::llm::ModelSettings {};
+				modelSettings = fig::data::ModelSettings {};
 
 			if (userMngr.SignInDefaultProfile())
 			{

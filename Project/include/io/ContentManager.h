@@ -2,10 +2,10 @@
 #define CHARACTER_DATABASE_H__
 #pragma once
 
-#include "io/data/CharacterData.h"
-#include "io/data/ScenarioData.h"
-#include "io/data/CardMetaData.h"
-#include "io/data/ModelSettings.h"
+#include "data/CharacterData.h"
+#include "data/ScenarioData.h"
+#include "data/CardMetaData.h"
+#include "data/ModelSettings.h"
 
 namespace fig::io
 {
@@ -21,21 +21,21 @@ namespace fig::io
 		std::expected<AssetRef, FileError> ImportCharacter(const fig::path& filename);
 		std::expected<AssetRef, FileError> ImportScenario(const fig::path& filename);
 
-		std::optional<fig::io::CharacterData> GetCharacter(const fig::uuid& id) const noexcept;
+		std::optional<fig::data::CharacterData> GetCharacter(const fig::uuid& id) const noexcept;
 		auto GetCharacters() const noexcept { return _characters | std::views::values; }
-		std::optional<fig::io::ScenarioData> GetScenario(const fig::uuid& id) const noexcept;
+		std::optional<fig::data::ScenarioData> GetScenario(const fig::uuid& id) const noexcept;
 		auto GetScenarios() const noexcept { return _scenarios | std::views::values; }
 
-		std::optional<fig::llm::ModelSettings> GetActiveModelSettings() const noexcept;
+		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
 
-		std::optional<CardMetaDataRef> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
+		std::optional<fig::data::CardMetaDataRef> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
 
 		std::expected<fig::sdl::TextureRef, FileError> GetSmallPortraitForCharacter(fig::gui::RendererPtr pRenderer, const fig::uuid& characterId) noexcept;
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);
 		bool MarkHidden(const fig::uuid& assetId, bool value = true);
-		bool SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle);
+		bool SetBorder(const fig::uuid& assetId, fig::data::CardBorderStyle borderStyle);
 
 		AssetManager& GetAssetManager();
 		void SaveModified();
@@ -46,13 +46,13 @@ namespace fig::io
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 
-		std::map<fig::uuid, fig::io::CharacterData> _characters;
-		std::map<fig::uuid, fig::io::ScenarioData> _scenarios;
-		std::map<fig::uuid, fig::io::CardMetaData> _metaData;
+		std::map<fig::uuid, fig::data::CharacterData> _characters;
+		std::map<fig::uuid, fig::data::ScenarioData> _scenarios;
+		std::map<fig::uuid, fig::data::CardMetaData> _metaData;
 		std::map<fig::uuid, fig::sdl::Surface> _surfaces;
 		std::map<fig::uuid, fig::sdl::Texture> _textures;
 
-		template <CardMetaData::Flag E>
+		template <fig::data::CardMetaData::Flag E>
 		bool MarkFlag(const fig::uuid& assetId, bool value);
 	};
 }

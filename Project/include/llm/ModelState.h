@@ -2,7 +2,7 @@
 
 #include "llm/LLMTypes.h"
 #include "llm/Grammar.h"
-#include "io/data/ModelSettings.h"
+#include "data/ModelSettings.h"
 #include <random>
 #include <map>
 
@@ -24,7 +24,7 @@ namespace fig::llm
 		std::mt19937 rng {};
 		int32_t max_sequences {};
 		int32_t ctx_size {};
-		ModelSettings settings {};
+		fig::data::ModelSettings settings {};
 
 		LLMEmbedding* pEmbedding = nullptr;
 

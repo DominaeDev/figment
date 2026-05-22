@@ -23,7 +23,7 @@
 #include <ranges>
 
 using namespace fig::llm;
-using namespace fig::io;
+using namespace fig::data;
 using namespace fig::chat;
 
 template<typename T>
@@ -209,7 +209,7 @@ namespace fig::gui
 
 		if (_autoScript.empty())
 		{
-			if (auto script = ReadTextFile("resources/auto_script.txt"))
+			if (auto script = fig::io::ReadTextFile("resources/auto_script.txt"))
 			{
 				fig::string text = script.value();
 				text = pLLMInstance->GetSession().ApplyNames(text);

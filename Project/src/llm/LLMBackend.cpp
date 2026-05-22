@@ -9,7 +9,7 @@
 #include "util/Lockable.h"
 #include "io/FileUtility.h"
 
-using namespace fig::io;
+using namespace fig::data;
 
 namespace fig::llm
 {
@@ -135,7 +135,7 @@ namespace fig::llm
 		_pStatus->ReportReadyState(readyState);
 	}
 
-	void LLMBackend::__LoadModel(fig::llm::ModelSettings settings, __LoadModelCallback onComplete)
+	void LLMBackend::__LoadModel(fig::data::ModelSettings settings, __LoadModelCallback onComplete)
 	{
 		usedVRAM.store(0);
 		usedRAM.store(0);

@@ -3,9 +3,9 @@
 #pragma once
 
 #include "Figment.h"
-#include "io/data/CharacterData.h"
+#include "data/CharacterData.h"
 
-namespace fig::io
+namespace fig::data
 {
 	enum CardBorderStyle
 	{

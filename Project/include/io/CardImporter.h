@@ -4,7 +4,7 @@
 
 #include "Figment.h"
 #include "io/FileError.h"
-#include "io/data/CharacterData.h"
+#include "data/CharacterData.h"
 #include <expected>
 
 namespace fig::io
@@ -12,7 +12,7 @@ namespace fig::io
 	class CardImporter
 	{
 	public:
-		static std::expected<fig::io::CharacterData, FileError> Import(fig::path filename) noexcept;
+		static std::expected<fig::data::CharacterData, FileError> Import(fig::path filename) noexcept;
 	};
 }
 

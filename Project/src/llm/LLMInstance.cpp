@@ -541,7 +541,7 @@ namespace fig::llm
 		std::vector<Token> sampled_tokens;
 		ContextPtr pCtx = _modelState.pCtx;
 		VocabPtr pVocab = _modelState.pVocab;
-		ModelSettings& settings = _modelState.settings;
+		fig::data::ModelSettings& settings = _modelState.settings;
 
 		Token sampled_token;
 		fig::string partial;

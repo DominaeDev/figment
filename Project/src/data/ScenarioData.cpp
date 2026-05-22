@@ -1,11 +1,12 @@
 #include <pch.h>
-#include "io/data/ScenarioData.h"
+#include "data/ScenarioData.h"
 #include "io/Xml.h"
 #include <cassert>
 
+using namespace fig::io;
 using namespace fig::chat;
 
-namespace fig::io
+namespace fig::data
 {
 	static constexpr std::array<std::pair<const char*, ScenarioData::PromptType>, 6> elements {
 		std::pair { "System",				ScenarioData::PromptType::System },

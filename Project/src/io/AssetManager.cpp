@@ -7,8 +7,8 @@
 #include "io/AssetManager.h"
 #include "user/UserManager.h"
 #include "app/AppState.h"
-#include "io/data/CharacterData.h"
-#include "io/data/ScenarioData.h"
+#include "data/CharacterData.h"
+#include "data/ScenarioData.h"
 #include "user/UserProfile.h"
 #include "io/Xml.h"
 #include "io/AssetFileWriter.h"
@@ -19,6 +19,7 @@
 #include <cassert>
 
 using namespace fig::gui;
+using namespace fig::data;
 
 namespace fig::io
 {

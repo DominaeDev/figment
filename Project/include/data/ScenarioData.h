@@ -5,7 +5,7 @@
 #include "Figment.h"
 #include "chat/ChatOptions.h"
 
-namespace fig::io
+namespace fig::data
 {
 	class ScenarioData
 	{
@@ -13,8 +13,8 @@ namespace fig::io
 		fig::string GetSystemPrompt(fig::chat::ChatOptions options) const;
 		fig::string GetScenarioPrompt(fig::chat::ChatOptions options) const;
 
-		FileError LoadFromXml(const fig::path& filename);
-		FileError LoadFromXml(const fig::string& doc);
+		fig::io::FileError LoadFromXml(const fig::path& filename);
+		fig::io::FileError LoadFromXml(const fig::string& doc);
 		void SaveToXml(fig::bytes& buffer) const;
 
 		constexpr bool is_valid() const;

@@ -17,10 +17,13 @@ namespace fig::user
 	struct UserProfile;
 }
 
-namespace fig::io
+namespace fig::data
 {
 	struct CharacterData;
+}
 
+namespace fig::io
+{
 	using AsyncResult_Image		= fig::sdl::Surface;
 	using AsyncResult_CoverPair	= std::pair<fig::sdl::Surface, fig::sdl::Surface>;
 	using AsyncResultVariant = std::variant<AsyncResult_Image, AsyncResult_CoverPair>;
@@ -93,7 +96,7 @@ namespace fig::io
 		AssetDatabase& GetDatabase() noexcept;
 		fig::uuid NewUUID() const noexcept;
 		
-		std::expected<CharacterData, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		std::expected<fig::data::CharacterData, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		size_t LoadAssetIndex() noexcept;
 		bool LoadAssetMetaData() noexcept;
 		bool LoadDataAssets() noexcept;
@@ -122,6 +125,7 @@ namespace fig::io
 		Asset& CreateImageAsset_Internal(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
 		std::expected<AssetRef, FileError> ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format);
 		std::expected<AssetRef, FileError> ImportScenario_Internal(const fig::path& filename);
+
 	private:
 		/* Asynchronous loading */
 		void __Worker(std::stop_token stop);

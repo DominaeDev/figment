@@ -5,10 +5,10 @@
 
 #include "Figment.h"
 #include "gui/GUITypes.h"
-#include "io/data/CharacterGender.h"
+#include "data/CharacterGender.h"
 #include "util/SearchIndex.h"
 
-namespace fig::io
+namespace fig::data
 {
 	struct CharacterProperty
 	{
@@ -40,9 +40,9 @@ namespace fig::io
 		std::map<fig::string, CharacterProperty> properties;
 		SearchIndex searchIndex;
 
-		FileError LoadFromXml(const fig::path& filename);
-		FileError LoadFromXml(const fig::string& doc);
-		FileError LoadFromXml(fig::string_view doc);
+		fig::io::FileError LoadFromXml(const fig::path& filename);
+		fig::io::FileError LoadFromXml(const fig::string& doc);
+		fig::io::FileError LoadFromXml(fig::string_view doc);
 		void SaveToXml(fig::bytes& buffer) const;
 
 	public:

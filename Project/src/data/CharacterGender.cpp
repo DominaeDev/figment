@@ -1,7 +1,7 @@
 #include <pch.h>
-#include "io/data/CharacterGender.h"
+#include "data/CharacterGender.h"
 
-namespace fig::io
+namespace fig::data
 {
 	static const fig::string kMale = "Male";
 	static const fig::string kFemale = "Female";

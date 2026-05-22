@@ -5,7 +5,7 @@
 #include "llm/LLMTypes.h"
 #include "llm/ModelState.h"
 #include "llm/LLMStatus.h"
-#include "io/data/ModelSettings.h"
+#include "data/ModelSettings.h"
 
 #include <functional>
 #include <thread>
@@ -29,7 +29,7 @@ namespace fig::llm
 		LLMBackend();
 		~LLMBackend() = default;
 
-		bool Initialize(const ModelSettings& settings, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
+		bool Initialize(const fig::data::ModelSettings& settings, LoadModelProgressCallback onProgress, LoadModelCallback onComplete);
 		bool Shutdown();
 
 		bool IsInitialized() const { return _readyState.load() == ReadyState::Ready; }
@@ -45,7 +45,7 @@ namespace fig::llm
 
 	private:
 		using __LoadModelCallback = std::function<void(std::shared_ptr<ModelState>)>;
-		void __LoadModel(fig::llm::ModelSettings settings, __LoadModelCallback onComplete);
+		void __LoadModel(fig::data::ModelSettings settings, __LoadModelCallback onComplete);
 		static bool OnLoadModelProgress(float progress, void* user_data);
 
 		void SetReadyState(ReadyState readyState);

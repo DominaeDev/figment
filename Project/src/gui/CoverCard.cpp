@@ -10,6 +10,7 @@
 #include <cassert>
 
 using namespace fig::io;
+using namespace fig::data;
 
 namespace fig::gui
 {

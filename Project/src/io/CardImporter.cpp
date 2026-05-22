@@ -2,9 +2,11 @@
 #include <json.hpp>
 #include "io/CardImporter.h"
 #include "io/FileUtility.h"
-#include "io/data/TavernCardV2.h"
+#include "data/TavernCardV2.h"
 
 using json = nlohmann::json;
+
+using namespace fig::data;
 
 namespace fig::io
 {

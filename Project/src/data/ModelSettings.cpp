@@ -1,10 +1,10 @@
 #include <pch.h>
-#include "io/data/ModelSettings.h"
+#include "data/ModelSettings.h"
 #include "io/Xml.h"
 
 using namespace fig::io;
 
-namespace fig::llm
+namespace fig::data
 {
 	static const fig::string XmlRootName { "ModelSettings" };
 
@@ -29,12 +29,12 @@ namespace fig::llm
 	{
 	}
 
-	fig::string ModelSettings::LLMModel::SerializePromptTemplate(PromptTemplateType value)
+	fig::string ModelSettings::LLMModel::SerializePromptTemplate(fig::llm::PromptTemplateType value)
 	{
 		return enum_serialize(value, fig::llm::PromptTemplateMapping);
 	}
 
-	PromptTemplateType ModelSettings::LLMModel::DeserializePromptTemplate(const fig::string& value)
+	fig::llm::PromptTemplateType ModelSettings::LLMModel::DeserializePromptTemplate(const fig::string& value)
 	{
 		return enum_deserialize(value, fig::llm::PromptTemplateMapping);
 	}

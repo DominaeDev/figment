@@ -6,13 +6,14 @@
 #include "gui/GUIUtility.h"
 #include "gui/Window.h"
 #include "gui/OldCharacterImageStore.h"
-#include "io/data/CharacterData.h"
+#include "data/CharacterData.h"
 
 #include <exception>
 #include <cassert>
 #include <format>
 
 using namespace fig::io;
+using namespace fig::data;
 using namespace fig::gui;
 
 namespace fig::chat
