@@ -38,6 +38,11 @@ namespace fig::io
 		size_t Read(fig::bytes& buffer, size_t nBytes) noexcept;
 		size_t Read(std::vector<char>& buffer) noexcept;
 		size_t Read(std::vector<char>& buffer, size_t nBytes) noexcept;
+		template<size_t N>
+		size_t Read(fig::buffer<N>& buffer) noexcept
+		{
+			return Read(reinterpret_cast<char*>(buffer.data()), buffer.size());
+		}
 
 		template <typename T>
 		bool ReadStruct(T& dst) noexcept {
@@ -58,6 +63,7 @@ namespace fig::io
 
 #if USE_WIN32_API
 		::HANDLE _fs = INVALID_HANDLE_VALUE;
+		::OVERLAPPED _overlapped {0};
 #else
 		std::ifstream _fs;
 #endif

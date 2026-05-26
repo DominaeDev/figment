@@ -3,6 +3,7 @@
 #include "user/Security.h"
 #include "util/Hash.h"
 #include "AES.h"
+#include "io/FileStream.h"
 
 namespace fig::auth
 {
@@ -309,6 +310,31 @@ namespace fig::auth
 			},
 			key);
 
+	}
+
+	void Decrypt(fig::io::FileStream& fs, fig::bytes& out_data, const fig::auth::AuthKey& key)
+	{
+		static_assert(sizeof(unsigned char) == sizeof(std::byte));
+		static_assert(sizeof(key) == 16);
+
+		unsigned char u8Key[16];
+		std::memcpy(u8Key, key.data(), key.size());
+		Cipher::Aes<128> aes(u8Key);
+
+		constexpr size_t kBufferSize = 256;
+		fig::buffer<kBufferSize> buffer {};
+		size_t max_length = out_data.size();
+		for (size_t i = 0; i < max_length; i += kBufferSize)
+		{
+			size_t read = fs.Read(buffer);
+			if (read == 0)
+				break; // Error
+
+			constexpr size_t stride = 16;
+			for (size_t j = 0; j < kBufferSize; j += stride)
+				aes.decrypt_block(reinterpret_cast<unsigned char*>(buffer.data()) + ptrdiff_t(j));
+			std::memcpy(out_data.data() + ptrdiff_t(i), buffer.data(), std::min(kBufferSize, max_length - i));
+		}
 	}
 
 	AuthKey DeriveKeyFromPassword(const fig::string& password, const fig::auth::AuthSalt& salt, AuthVersion version)

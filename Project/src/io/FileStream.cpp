@@ -9,8 +9,12 @@ namespace fig::io
 	{
 		DWORD dwFlags = FILE_ATTRIBUTE_NORMAL;
 		if (flags.IsSet(Flag::Sequential))
-			dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN;
+			dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
 		_fs = ::CreateFileW(path.wstring().c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlags, nullptr);
+
+		_overlapped.Offset = 0;
+		_overlapped.OffsetHigh = 0;
+		_overlapped.hEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
 
 		LARGE_INTEGER liSize {};
 		if (::GetFileSizeEx(_fs, &liSize))
@@ -42,7 +46,10 @@ namespace fig::io
 	FileStream::~FileStream()
 	{
 		if (_fs != INVALID_HANDLE_VALUE)
+		{
 			::CloseHandle(_fs);
+			::CloseHandle(_overlapped.hEvent);
+		}
 	}
 
 	bool FileStream::Seek(size_t offset) noexcept
@@ -50,9 +57,15 @@ namespace fig::io
 		if (!IsOk())
 			return false;
 
-		LARGE_INTEGER li;
-		li.QuadPart = (LONGLONG)offset;
-		return ::SetFilePointerEx(_fs, li, nullptr, FILE_BEGIN) != FALSE;
+//		LARGE_INTEGER li;
+//		li.QuadPart = (LONGLONG)offset;
+//		return ::SetFilePointerEx(_fs, li, nullptr, FILE_BEGIN) != FALSE;
+
+		ULARGE_INTEGER li;
+		li.QuadPart = (ULONGLONG)offset;
+		_overlapped.Offset = li.LowPart;
+		_overlapped.OffsetHigh = li.HighPart;
+		return true;
 	}
 
 	size_t FileStream::Read(char* pBuf, size_t nBytes) noexcept
@@ -64,8 +77,20 @@ namespace fig::io
 		while (nBytes > 0)
 		{
 			DWORD read = 0;
-			if (!::ReadFile(_fs, (LPVOID)pBuf, (DWORD)nBytes, &read, nullptr) || read == 0)
+			BOOL result = ::ReadFile(_fs, (LPVOID)pBuf, (DWORD)nBytes, &read, &_overlapped);
+			if (!result && ::GetLastError() != ERROR_IO_PENDING)
 				break;
+			::WaitForSingleObject(_overlapped.hEvent, INFINITE);
+			if (!::GetOverlappedResult(_fs, &_overlapped, &read, FALSE) || read == 0)
+				break;
+
+			// Advance the file offset manually
+			ULARGE_INTEGER offset;
+			offset.LowPart = _overlapped.Offset;
+			offset.HighPart = _overlapped.OffsetHigh;
+			offset.QuadPart += read;
+			_overlapped.Offset = offset.LowPart;
+			_overlapped.OffsetHigh = offset.HighPart;
 
 			std::advance(pBuf, read);
 			nBytes -= read;

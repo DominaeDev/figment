@@ -106,7 +106,7 @@ namespace fig::io
 		if (file.data_encrypted and not is_zero(authKey))
 		{
 			// Read encrypted
-			fig::auth::Decrypt(fs, file.data, authKey);
+			fig::auth::Decrypt((FileStream::Handle)fs, file.data, authKey);
 		}
 		else
 		{
