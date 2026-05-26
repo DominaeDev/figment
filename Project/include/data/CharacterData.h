@@ -25,10 +25,19 @@ namespace fig::data
 			Private,
 		};
 
+		enum class HintFlag
+		{
+			Trivial		= 1 << 0,	// Can be omitted
+			Important	= 1 << 1,	// Mustn't be omitted
+			Memory		= 1 << 2,	// Can be placed in memory
+		};
+		using HintFlags = EnumFlags<HintFlag>;
+
 		fig::string label;
 		fig::string value;
 		Format format {};
 		Visibility visibility {};
+		HintFlags flags {};
 
 	public:
 		static auto GetXmlFields();
@@ -57,9 +66,9 @@ namespace fig::data
 		fig::string chatId;	//! @remove?
 		fig::string shortName;
 		fig::string fullName;
+		fig::string brief;
 		
 		CharacterGender gender {};
-		fig::string brief;
 		fig::gui::Color bgColor {};
 		fig::gui::Color borderColor {};
 	

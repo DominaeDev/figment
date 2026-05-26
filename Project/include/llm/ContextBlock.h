@@ -30,7 +30,7 @@ namespace fig::llm
 		SequenceSlots sequenceSlots = SequenceSlots::None;
 		int turn = -1;
 		int ttl = 0;
-		fig::string responseId;
+		fig::uuid responseId;
 
 		inline int32_t length() const { return (int32_t)(tokens.size()); }
 		inline bool is_static() const { return flags.IsSet(ContextBlockFlag::Static); }

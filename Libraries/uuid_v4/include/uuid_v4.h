@@ -266,7 +266,7 @@ public:
 	}
 
 private:
-	alignas(128) uint8_t data[16] { 0 };
+	alignas(16) uint8_t data[16] { 0 };
 };
 
 /*

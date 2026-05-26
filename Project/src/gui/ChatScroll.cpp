@@ -40,8 +40,8 @@ namespace fig::gui
 		_messages.push_back(MessageEntry {
 			.chatId = "dummy",
 			.role = role,
-			.responseId = "",
-			.subMessageId = "",
+			.responseId {},
+			.subMessageId {},
 			.msgType = msgType,
 			.pChatMessage = pMessage,
 		});
@@ -55,8 +55,8 @@ namespace fig::gui
 		_messages.push_back(MessageEntry {
 			.chatId = "dummy",
 			.role = Role::System,
-			.responseId = "",
-			.subMessageId = "",
+			.responseId {},
+			.subMessageId {},
 			.msgType = MessageType::SystemMessage,
 			.pChatMessage = pMessage,
 		});
@@ -115,10 +115,10 @@ namespace fig::gui
 		return pMessage;
 	}
 
-	int ChatScroll::RemoveMessages(std::span<fig::string> ids)
+	int ChatScroll::RemoveMessages(std::span<fig::uuid> ids)
 	{
 		int removed = 0;
-		std::set<fig::string> removedIds;
+		std::set<fig::uuid> removedIds;
 		for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
 		{
 			MessageEntry& entry = _messages[i];
@@ -156,7 +156,7 @@ namespace fig::gui
 		GetSizer()->Clear();
 	}
 
-	std::tuple<fig::string, fig::string> ChatScroll::GetLastMessage() const
+	std::tuple<fig::uuid, fig::uuid> ChatScroll::GetLastMessage() const
 	{
 		if (_messages.empty())
 			return {};

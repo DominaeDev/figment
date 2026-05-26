@@ -77,7 +77,7 @@ namespace fig::gui
 		void UnregisterScreen(ScreenType screen);
 
 		bool AutoSignIn() noexcept;
-		void StartChat(const fig::uuid& characterId);
+		bool StartChat(const fig::uuid& characterId);
 
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;

@@ -14,7 +14,7 @@ namespace fig::data
 		return XmlFields(
 			XmlElement { "ID",				&CharacterData::chatId  }
 				.MustExist(),
-			XmlElement { "ShortName",		&CharacterData::shortName }
+			XmlElement { "Name",			&CharacterData::shortName }
 				.MustExist(),
 			XmlElement { "FullName",		&CharacterData::fullName },
 			XmlElement { "Gender",			&CharacterData::gender, XmlConvertString<CharacterGender> },
@@ -41,6 +41,12 @@ namespace fig::data
 		{ CharacterAttribute::Visibility::Private,	"private" }
 	};
 
+	static const std::map<CharacterAttribute::HintFlag, fig::string> FlagMapping {
+		{ CharacterAttribute::HintFlag::Trivial,	"trivial" },
+		{ CharacterAttribute::HintFlag::Important,	"important" },
+		{ CharacterAttribute::HintFlag::Memory,		"memory" }
+	};
+
 	auto CharacterAttribute::GetXmlFields()
 	{
 		return XmlFields(
@@ -51,6 +57,10 @@ namespace fig::data
 			XmlAttribute { "visibility", &CharacterAttribute::visibility, 
 				[](auto& value) { return enum_serialize(value, VisibilityMapping); },
 				[](auto& value) { return enum_deserialize(value, VisibilityMapping); }
+			},
+			XmlAttribute { "flags", &CharacterAttribute::flags,
+				[](auto& value) -> fig::string { return encode_csv(CharacterAttribute::HintFlags::Serialize(value, FlagMapping)); },
+				[](const fig::string& value) { return CharacterAttribute::HintFlags::Deserialize(decode_csv(value), FlagMapping); }
 			},
 			XmlElement { "Label", &CharacterAttribute::label }.MustExist(),
 			XmlElement { "Value", &CharacterAttribute::value }.MustExist()

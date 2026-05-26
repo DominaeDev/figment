@@ -87,7 +87,12 @@ namespace fig::gui
 
 			Image* pPortrait = new Image(this, pTexture);
 			pPortrait->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitWidth);
-			pPortrait->SetPosition(bRight ? Constants::GUI::ChatScrollWidth - pPortrait->GetWidth() : 0, 0);
+
+			constexpr int32_t spacing = 24;
+			if (bRight)
+				pPortrait->SetX(Constants::GUI::ChatScrollWidth - RIGHT_MARGIN + spacing);
+			else
+				pPortrait->SetX(LEFT_MARGIN - Constants::Chat::SmallPortraitWidth - spacing);
 		}
 
 		_pMessagePanel = new Panel(this);

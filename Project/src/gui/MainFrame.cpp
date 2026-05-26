@@ -388,23 +388,26 @@ namespace fig::gui
 		return false;
 	}
 
-	void MainFrame::StartChat(const fig::uuid& characterId)
+	bool MainFrame::StartChat(const fig::uuid& characterId)
 	{
 		ChangeScreen(ScreenType::Chat);
 		auto pChatScreen = GetScreen<ChatScreen>(ScreenType::Chat);
 
 		if (auto character = Global::GetUserManager().GetContent().GetCharacter(characterId))
 		{
-			CharacterData user;
-			if (user.LoadFromXml(fig::path { "./characters/user.xml" }) != FileError::NoError) //! @temp
-				return;
-
 			ChatStaging staging(Constants::LLM::DefaultChatOptions);
-			staging.AddCharacter(fig::CreateUUID(), Role::User, user); //! @temp
-			staging.AddCharacter(characterId, Role::Bot1, character.value());
+
+			if (!staging.AddCharacter(characterId, Role::Bot1, character.value()))
+				return false;
+
+			CharacterData user;
+			if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) and staging.AddCharacter({}, Role::User, user))) //! @temp
+				return false;
 
 			pChatScreen->StartChat(staging);
+			return true;
 		}
+		return false;
 	}
 
 }

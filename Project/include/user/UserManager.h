@@ -47,6 +47,7 @@ namespace fig::user
 		fig::io::ProfileDatabase& GetDatabase() noexcept;
 		static fig::string RecoveryKeyToCode(const fig::auth::AuthKey& key, fig::auth::AuthVersion version = fig::auth::CurrentAuthVersion) noexcept;
 		static bool RecoveryCodeToKey(const fig::string& code, fig::auth::AuthKey& outKey, fig::auth::AuthVersion version = fig::auth::CurrentAuthVersion) noexcept;
+		fig::uuid GenerateUUID() const noexcept;
 
 	private:
 		std::unique_ptr<fig::io::ProfileDatabase> _pProfileDB;

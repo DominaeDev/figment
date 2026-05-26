@@ -53,11 +53,11 @@ namespace fig::chat
 	};
 
 
-	static std::vector<fig::string> FilterMessageIDs(std::vector<RemovedMessage> msgs)
+	static std::vector<fig::uuid> FilterMessageIDs(std::vector<RemovedMessage> msgs)
 	{
 		return msgs
 			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
-			| std::ranges::to<std::vector<fig::string>>();
+			| std::ranges::to<std::vector>();
 	};
 
 	static Role RoleFromName(fig::string partial_name, LLMInstancePtr pLLM)

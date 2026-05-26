@@ -93,7 +93,7 @@ namespace fig::user
 		auto authSalt = hasPassword ? RandomSalt() : CurrentDefaultAuthSalt;
 		auto encKey = hasPassword ? DeriveKeyFromPassword(password, authSalt) : CurrentDefaultAuthKey;
 
-		auto id = CreateUUID();
+		auto id = GenerateUUID();
 		auto& db = GetDatabase();
 
 		// Create auth challenge
@@ -458,4 +458,11 @@ namespace fig::user
 		return true;
 	}
 
+	fig::uuid UserManager::GenerateUUID() const noexcept
+	{
+		fig::uuid uuid = _CreateUUID();
+		while (std::ranges::contains(_profiles, uuid, [](auto& profile) { return profile.id; }))
+			uuid = _CreateUUID();
+		return uuid;
+	}
 }

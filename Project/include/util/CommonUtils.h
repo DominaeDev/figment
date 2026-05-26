@@ -44,11 +44,7 @@ namespace fig
 	using MeasureTimeFn = std::function<void()>;
 	void MeasureTime(const fig::string& label, MeasureTimeFn fn);
 
-	fig::uuid CreateUUID();
-	inline fig::string CreateStrUUID()
-	{
-		return CreateUUID().to_str();
-	}
+	fig::uuid _CreateUUID();
 
 	fig::string Base64Encode(fig::byte_span data) noexcept;
 	fig::bytes Base64Decode(fig::string_view) noexcept;
@@ -212,20 +208,46 @@ namespace fig
 		return std::nullopt;
 	}
 
-	template <typename K, typename T> requires std::is_enum_v<K>
-	inline T constexpr enum_serialize(const K& enum_value, const std::map<K, T>& map, const T& default_value = {})
+	template <typename K, typename T> 
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline fig::string constexpr enum_serialize(const K& enum_value, const std::map<K, T>& map, const T& default_value = {})
 	{
 		if (auto itFind = map.find(enum_value); itFind != map.cend())
-			return itFind->second;
+			return fig::string { itFind->second };
 		return default_value;
 	}
 
-	template <typename K, typename T> requires std::is_enum_v<K>
+	template <typename K, typename T> 
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
 	inline constexpr K enum_deserialize(const T& enum_value, const std::map<K, T>& mapping, const K& default_value = {})
 	{
 		if (auto key = find_key(mapping, enum_value); key.has_value())
 			return key.value();
 		return default_value;
+	}
+
+	template <typename K, typename T, std::size_t N>
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline constexpr fig::string enum_serialize(const K& enumValue, const std::array<std::pair<K, T>, N>& map, const T& defaultValue = {})
+	{
+		for (const auto& [key, value] : map)
+		{
+			if (key == enumValue)
+				return fig::string { value };
+		}
+		return fig::string { defaultValue };
+	}
+
+	template <typename K, typename T, std::size_t N>
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline constexpr K enum_deserialize(const T& enumValue, const std::array<std::pair<K, T>, N>& map, const K& defaultValue = {})
+	{
+		for (const auto& [key, value] : map)
+		{
+			if (value == enumValue)
+				return key;
+		}
+		return defaultValue;
 	}
 
 #if _DEBUG || _CONSOLE

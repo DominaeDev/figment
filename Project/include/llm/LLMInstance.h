@@ -23,8 +23,8 @@ namespace fig::llm
 
 	struct MessagePiece
 	{
-		fig::string responseId;		// response block
-		fig::string subMessageId;	// shared id for pieces of the same message type
+		fig::uuid responseId;		// response block
+		fig::uuid subMessageId;		// shared id for pieces of the same message type
 		fig::string identifier {};	// who said this?
 		fig::string content {};
 		fig::chat::Role role = fig::chat::Role::Undefined;
@@ -34,7 +34,7 @@ namespace fig::llm
 
 	struct RemovedMessage
 	{
-		fig::string responseId;
+		fig::uuid responseId;
 		fig::string content;
 		fig::chat::Role role;
 	};
@@ -71,7 +71,7 @@ namespace fig::llm
 		bool IsReady() const;
 		bool IsGenerating() const;
 
-		bool Continue(fig::string responseId, fig::string subMessageId, bool extend);
+		bool Continue(fig::uuid responseId, fig::uuid subMessageId, bool extend);
 		bool Halt();
 
 		// Tasks
@@ -86,7 +86,7 @@ namespace fig::llm
 		bool ResetChat(int seed = -1);
 		bool Reseed(uint32_t seed = 0xFFFFFFFF);
 		int32_t RewindTime(int32_t rewind_turns);
-		std::set<fig::string> GetActiveMessages();
+		std::set<fig::uuid> GetActiveMessages();
 
 		bool SetStateVariable(fig::string name, fig::string value, bool allowCreate = true);
 		bool PollResponse(MessagePiece& piece);
@@ -151,8 +151,8 @@ namespace fig::llm
 			fig::chat::ChatOptions::GroupChatMode groupChatMode {};
 			int maxMessages = 0;
 			fig::string prepend {};
-			fig::string responseId {};
-			fig::string subMessageId {};
+			fig::uuid responseId {};
+			fig::uuid subMessageId {};
 			fig::chat::Sentences history; // Used for embedding
 		};
 		void __Generate(std::stop_token& stop, GenerateArguments args, __GenerationCompleteCallback onComplete);
@@ -184,8 +184,8 @@ namespace fig::llm
 			fig::string input;
 			fig::chat::Role role = fig::chat::Role::Undefined;
 			fig::chat::MessageType msgType = fig::chat::MessageType::Undefined;
-			fig::string responseId {};
-			fig::string subMessageId {};
+			fig::uuid responseId {};
+			fig::uuid subMessageId {};
 
 			LLMTaskFlags flags = LLMTaskFlags::None;
 			int msgCount = 0;
@@ -199,7 +199,7 @@ namespace fig::llm
 		bool __SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __PushMessage(fig::chat::Role role, fig::string message, fig::chat::MessageType msgType, bool visible, int32_t ttl);
 		bool __Instigate(fig::chat::Role role, fig::chat::MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
-		bool __Continue(fig::string responseId, fig::string subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
+		bool __Continue(fig::uuid responseId, fig::uuid subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 
 		void Panic(InternalError error, const fig::string& message);
 
@@ -213,7 +213,7 @@ namespace fig::llm
 
 		std::mutex _resultMutex; // Guards output queue
 		std::queue<MessagePiece> _resultQueue;
-		std::set<fig::string> _activeResponseIds;
+		std::set<fig::uuid> _activeResponseIds;
 
 		std::unique_ptr<std::jthread> _workerThread;
 		std::shared_ptr<LLMStatusChannel> _pStatus;

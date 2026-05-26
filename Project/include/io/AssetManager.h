@@ -94,7 +94,7 @@ namespace fig::io
 
 	private:
 		AssetDatabase& GetDatabase() noexcept;
-		fig::uuid NewUUID() const noexcept;
+		fig::uuid GenerateUUID() const noexcept;
 		
 		std::expected<fig::data::CharacterData, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		size_t LoadAssetIndex() noexcept;

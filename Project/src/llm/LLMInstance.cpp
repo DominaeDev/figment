@@ -457,7 +457,7 @@ namespace fig::llm
 					.tokens = state_tokens,
 					.flags { ContextBlockFlag::Volatile },
 					.sequenceSlots { SequenceSlot::Shared }, //! @seq
-					.responseId = "",
+					.responseId {},
 				});
 			}
 		}
@@ -562,8 +562,8 @@ namespace fig::llm
 		bool isInstigation = args.flags.IsSet(GenerateFlag::Instigation);
 		bool isGroupChat = _session.GetStaging().IsGroupChat();
 
-		fig::string responseId = args.responseId.empty() ? CreateStrUUID() : args.responseId;
-		fig::string subMessageId = args.subMessageId.empty() ? CreateStrUUID() : args.subMessageId;
+		fig::uuid responseId = args.responseId.empty() ? _CreateUUID() : args.responseId;
+		fig::uuid subMessageId = args.subMessageId.empty() ? _CreateUUID() : args.subMessageId;
 		fig::string userName = _session.GetNameOf(Role::User);
 
 		auto& response_pos = _contextState.response_pos; 
@@ -916,7 +916,7 @@ namespace fig::llm
 				if (bEndOfMessageType)
 				{
 					msgType = MessageType::Undefined;
-					subMessageId = CreateStrUUID();
+					subMessageId = _CreateUUID();
 					_pStatus->EmitSignal(LLMStatusEvent::CompletedMessage);
 				}
 			}
@@ -999,8 +999,8 @@ namespace fig::llm
 				varText = rtrim(varText);
 
 				_resultQueue.push(MessagePiece {
-					.responseId = CreateStrUUID(),
-					.subMessageId = CreateStrUUID(),
+					.responseId = _CreateUUID(),
+					.subMessageId = _CreateUUID(),
 					.identifier = "",
 					.content = varText,
 					.role = Role::System,
@@ -1100,9 +1100,9 @@ namespace fig::llm
 				generateArgs.maxMessages = 0;
 
 			if (generateArgs.responseId.empty())
-				generateArgs.responseId = CreateStrUUID();
+				generateArgs.responseId = _CreateUUID();
 			if (generateArgs.subMessageId.empty())
-				generateArgs.subMessageId = CreateStrUUID();
+				generateArgs.subMessageId = _CreateUUID();
 
 			_activeResponseIds.insert(generateArgs.responseId);
 
@@ -1221,7 +1221,7 @@ namespace fig::llm
 		});
 	}
 
-	bool LLMInstance::Continue(fig::string responseId, fig::string subMessageId, bool extend)
+	bool LLMInstance::Continue(fig::uuid responseId, fig::uuid subMessageId, bool extend)
 	{
 		if (!CanGenerate())
 			return false;
@@ -1283,7 +1283,7 @@ namespace fig::llm
 		else if (msgType == MessageType::Direction)
 			role = Role::Director;
 
-		fig::string responseId = CreateStrUUID();
+		fig::uuid responseId = _CreateUUID();
 		int32_t current_turn = _turn_counter.load();
 
 		LockAndDo([&]() {
@@ -1307,7 +1307,7 @@ namespace fig::llm
 				// Add message to result queue
 				for (auto const& subMsg : subMessages)
 				{
-					fig::string subMessageId = CreateStrUUID();
+					fig::uuid subMessageId = _CreateUUID();
 					_resultQueue.push(MessagePiece {
 						.responseId = responseId,
 						.subMessageId = subMessageId,
@@ -1379,7 +1379,7 @@ namespace fig::llm
 		return true;
 	}
 
-	bool LLMInstance::__Continue(fig::string responseId, fig::string subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
+	bool LLMInstance::__Continue(fig::uuid responseId, fig::uuid subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs)
 	{
 		auto& blocks = _contextState.GetBlocks();
 		if (blocks.size() == 0)
@@ -1571,10 +1571,10 @@ namespace fig::llm
 		return false;
 	}
 
-	std::set<fig::string> LLMInstance::GetActiveMessages()
+	std::set<fig::uuid> LLMInstance::GetActiveMessages()
 	{
 		std::scoped_lock _ { _resultMutex };
-		return std::set<fig::string>(_activeResponseIds.begin(), _activeResponseIds.end()); // Copy
+		return _activeResponseIds; // Copy
 	}
 
 	void LLMInstance::RefreshActiveResponses()
@@ -1749,7 +1749,7 @@ namespace fig::llm
 			Embeddings::AddEmbedding(embedding);
 
 			// Save to disk
-			fig::path filename = std::format("./embeddings/{}.txt", CreateStrUUID());
+			fig::path filename = std::format("./embeddings/{}.txt", _CreateUUID().to_str());
 			embedding.SaveToFile(filename);
 		}
 		return true; // Break here

@@ -20,10 +20,10 @@ namespace fig::gui
 		void AddDummyMessage(StringCRef name, fig::chat::Role role, fig::chat::MessageType msgType, StringCRef message);
 		void AddSystemMessage(StringCRef message);
 
-		int RemoveMessages(std::span<fig::string> ids);
+		int RemoveMessages(std::span<fig::uuid> ids);
 		void ClearMessages();
 
-		std::tuple<fig::string, fig::string> GetLastMessage() const;
+		std::tuple<fig::uuid, fig::uuid> GetLastMessage() const;
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -48,13 +48,13 @@ namespace fig::gui
 			fig::uuid characterId;
 			fig::string chatId;
 			fig::chat::Role role { fig::chat::Role::Undefined };
-			fig::string responseId;
-			fig::string subMessageId;
+			fig::uuid responseId;
+			fig::uuid subMessageId;
 			fig::chat::MessageType msgType { fig::chat::MessageType::Undefined };
 			ChatMessage* pChatMessage {};
 		};
 		std::vector<MessageEntry> _messages {};
-		std::map<fig::string, MessageEntry*> _messagesById {}; // Sub-message id
+		std::map<fig::uuid, MessageEntry*> _messagesById {}; // Sub-message id
 
 		// Scrolling
 		VerticalScrollSizer* _pScrollSizer;

@@ -160,7 +160,7 @@ namespace fig::io
 					else if constexpr (XmlSerializableMap<typename FieldType::ValueType>)
 					{
 						auto child = element.AddChild(field.name);
-						for (const auto& kvp : object.*(field.member_ptr))
+						for (const auto& kvp : member)
 						{
 							auto item = child.AddChild("Item");
 
@@ -245,8 +245,7 @@ namespace fig::io
 						using SerializedKeyType = FieldType::SerializedType::first_type;
 						using SerializedMappedType = FieldType::SerializedType::second_type;
 						
-						auto& map = object.*(field.member_ptr);
-						map.clear();
+						member.clear();
 
 						if (auto child = element.GetFirstElement(field.name))
 						{
@@ -258,7 +257,7 @@ namespace fig::io
 									// Map of objects
 									if constexpr (XmlSerializable<MappedType>)
 									{
-										auto& value = map[field.custom_deserializer(typename FieldType::SerializedType { *try_key, {} }).first];
+										auto& value = member[field.custom_deserializer(typename FieldType::SerializedType { *try_key, {} }).first];
 										XmlDeserialize(*item, value);
 									}
 									// Map of trivial types
@@ -267,7 +266,7 @@ namespace fig::io
 										if (auto try_value = (*item).TryGetValue<std::remove_cvref_t<SerializedMappedType>>())
 										{
 											auto deserialized_kvp = field.custom_deserializer(typename FieldType::SerializedType { *try_key, *try_value });
-											map[deserialized_kvp.first] = deserialized_kvp.second;
+											member[deserialized_kvp.first] = deserialized_kvp.second;
 										}
 									}
 								}

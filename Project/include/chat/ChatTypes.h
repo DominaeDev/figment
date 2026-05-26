@@ -5,15 +5,11 @@
 
 namespace fig::chat
 {
-	enum class Role : int32_t
+	enum class Role : uint8_t
 	{
-		Undefined = 0,
-		System,
-		Narrator,
-		Director,
-		User,
+		User = 0,
 
-		Bot1 = 10,
+		Bot1 = 1,
 		Bot2,
 		Bot3,
 		Bot4,
@@ -21,6 +17,28 @@ namespace fig::chat
 		Bot6,	// ?
 		Bot7,	// ?
 		Bot8,	// ?
+
+		System		= 0x20,
+		Narrator,
+		Director,
+
+		Undefined = 0xFF,
+	};
+
+	constexpr auto RoleMapping = std::array<std::pair<Role, std::string_view>, 13> {
+		std::pair { Role::User,			"user" },
+		std::pair { Role::Bot1,			"bot1" },
+		std::pair { Role::Bot2,			"bot2" },
+		std::pair { Role::Bot3,			"bot3" },
+		std::pair { Role::Bot4,			"bot4" },
+		std::pair { Role::Bot5,			"bot5" },
+		std::pair { Role::Bot6,			"bot6" },
+		std::pair { Role::Bot7,			"bot7" },
+		std::pair { Role::Bot8,			"bot8" },
+		std::pair { Role::System,		"system" },
+		std::pair { Role::Narrator,		"narrator" },
+		std::pair { Role::Director,		"director" },
+		std::pair { Role::Undefined,	"undefined" },
 	};
 
 	constexpr inline bool is_bot(Role role) { return role >= Role::Bot1 && role <= Role::Bot8; }
@@ -37,7 +55,7 @@ namespace fig::chat
 
 	constexpr inline Role bot_from_index(size_t botIndex) { return bot_from_index(static_cast<int32_t>(botIndex)); }
 
-	enum class MessageType
+	enum class MessageType : uint8_t
 	{
 		Undefined = 0,
 
@@ -50,6 +68,16 @@ namespace fig::chat
 		Direction,
 
 		StateReport,
+	};
+
+	constexpr auto MessageTypeMapping = std::array<std::pair<MessageType, std::string_view>, 8> {
+		std::pair { MessageType::Undefined,		"undefined" },
+		std::pair { MessageType::Dialogue,		"dialogue" },
+		std::pair { MessageType::Action,		"action" },
+		std::pair { MessageType::SystemMessage, "system" },
+		std::pair { MessageType::Narration,		"narration" },
+		std::pair { MessageType::Direction,		"direction" },
+		std::pair { MessageType::StateReport,	"report" },
 	};
 
 	struct Message

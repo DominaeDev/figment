@@ -69,7 +69,7 @@ namespace fig::Constants
 			constexpr fig::const_string Unknown = "Unknown";
 		}
 
-		constexpr fig::gui::Coord SmallPortraitWidth = 52;
+		constexpr fig::gui::Coord SmallPortraitWidth = 56;
 	}
 
 	namespace DefaultModelSettings

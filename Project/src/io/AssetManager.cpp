@@ -70,7 +70,7 @@ namespace fig::io
 
 	Asset& AssetManager::CreateEmptyAsset_Internal(AssetType type, const fig::uuid& parent) noexcept
 	{
-		fig::uuid id = NewUUID();
+		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
 		asset.parent_id = not parent.empty() ? parent : _profileID;
@@ -113,7 +113,7 @@ namespace fig::io
 
 	Asset& AssetManager::CreateAsset_Internal(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
-		fig::uuid id = NewUUID();
+		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
 		asset.parent_id = not parent.empty() ? parent : _profileID;
@@ -131,7 +131,7 @@ namespace fig::io
 
 	Asset& AssetManager::CreateAsset_Internal(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
-		fig::uuid id = NewUUID();
+		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
 		asset.parent_id = not parent.empty() ? parent : _profileID;
@@ -722,12 +722,12 @@ namespace fig::io
 		return FileError::UnknownError;
 	}
 
-	fig::uuid AssetManager::NewUUID() const noexcept
+	fig::uuid AssetManager::GenerateUUID() const noexcept
 	{
-		auto id = CreateUUID();
-		while (_assets.contains(id))
-			id = CreateUUID();
-		return id;
+		auto uuid = _CreateUUID();
+		while (_assets.contains(uuid))
+			uuid = _CreateUUID();
+		return uuid;
 	}
 
 	AssetDatabase& AssetManager::GetDatabase() noexcept

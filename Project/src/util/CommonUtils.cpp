@@ -34,7 +34,7 @@ namespace fig
 		LogLn(std::format("{}: {}ms", label, toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
 	}
 
-	fig::uuid CreateUUID()
+	fig::uuid _CreateUUID()
 	{
 		static UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 		return uuidGenerator.getUUID();

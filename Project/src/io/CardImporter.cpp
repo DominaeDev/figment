@@ -39,16 +39,10 @@ namespace fig::io
 				character.gender = CharacterGender::Female;
 				break;
 			}
-			else
+			else if (auto itFind = std::ranges::find_if(CharacterGender::AlternativeLabels, [&tag](auto& s) { return equals(tag, s, true); }); itFind != CharacterGender::AlternativeLabels.cend())
 			{
-				for (auto& custom_gender : CharacterGender::AlternativeLabels)
-				{
-					if (equals(tag, custom_gender, true))
-					{
-						character.gender = toStr(custom_gender);
-						break;
-					}
-				}
+				character.gender = toStr(*itFind);
+				break;
 			}
 		}
 

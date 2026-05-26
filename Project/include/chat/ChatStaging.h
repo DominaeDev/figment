@@ -40,9 +40,11 @@ namespace fig::chat
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text, Role characterRole) const;
 
 	private:
+		fig::uuid GenerateUUID() const noexcept;
+
 		std::vector<fig::data::CharacterData> _characters {};
-		std::map<fig::uuid, fig::data::CharacterData*> _charactersByID {};
-		std::map<Role, fig::data::CharacterData*> _charactersByRole {};
+		std::map<fig::uuid, size_t> _charactersByID {};
+		std::map<Role, size_t> _charactersByRole {};
 		ChatOptions _options {};
 	};
 }
