@@ -12,16 +12,16 @@ namespace fig::io
 			dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN;
 		_fs = ::CreateFileW(path.wstring().c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlags, nullptr);
 
-		_overlapped.Offset = 0;
-		_overlapped.OffsetHigh = 0;
-		_overlapped.hEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
-
-		LARGE_INTEGER liSize {};
-		if (::GetFileSizeEx(_fs, &liSize))
-			_length = static_cast<size_t>(liSize.QuadPart);
-
 		if (_fs != INVALID_HANDLE_VALUE)
 		{
+			_overlapped.Offset = 0;
+			_overlapped.OffsetHigh = 0;
+			_overlapped.hEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
+
+			LARGE_INTEGER liSize {};
+			if (::GetFileSizeEx(_fs, &liSize))
+				_length = static_cast<size_t>(liSize.QuadPart);
+
 			_error = FileError::NoError;
 			_bOpen = true;
 		}
@@ -47,8 +47,8 @@ namespace fig::io
 	{
 		if (_fs != INVALID_HANDLE_VALUE)
 		{
-			::CloseHandle(_fs);
 			::CloseHandle(_overlapped.hEvent);
+			::CloseHandle(_fs);
 		}
 	}
 
@@ -72,11 +72,11 @@ namespace fig::io
 		size_t total_read = 0uz;
 		while (nBytes > 0)
 		{
-			DWORD read = 0;
-			BOOL result = ::ReadFile(_fs, (LPVOID)pBuf, (DWORD)nBytes, &read, &_overlapped);
+			BOOL result = ::ReadFile(_fs, (LPVOID)pBuf, (DWORD)nBytes, nullptr, &_overlapped);
 			if (!result && ::GetLastError() != ERROR_IO_PENDING)
 				break;
 			::WaitForSingleObject(_overlapped.hEvent, INFINITE);
+			DWORD read = 0;
 			if (!::GetOverlappedResult(_fs, &_overlapped, &read, FALSE) || read == 0)
 				break;
 
