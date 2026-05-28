@@ -17,7 +17,7 @@ namespace fig::gui
 
 		void Render(Renderer* pRenderer) override;
 		void Update(float fElapsed) override;
-		bool ProcessEvent(Event& event) override;
+		EventResult ProcessEvent(Event& event) override;
 		Menu& CreateMenu() noexcept;
 
 		inline bool IsMenuShowing() const noexcept { return !_menus.empty(); };

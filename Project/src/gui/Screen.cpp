@@ -11,7 +11,7 @@ namespace fig::gui
 		SetBackgroundColor(Colors::AppBackground);
 	}
 
-	bool Screen::OnEvent(Event& event)
+	EventResult Screen::OnEvent(Event& event)
 	{
 		// Key press or release
 		if ((event.type == SDL_EVENT_KEY_DOWN or event.type == SDL_EVENT_KEY_UP) and not event.key.repeat)
@@ -23,29 +23,50 @@ namespace fig::gui
 			};
 
 			if (OnKeyboardEvent(keyEvent))
-				return true;
+				return EventResult::Handled;
 		}
 
 		if (event.type == SDL_EVENT_MOUSE_WHEEL)
 		{
-			return false;
+			return EventResult::Pass;
 		}
 
-		if (event.type == SDLUserEvent(EventType::UserSignedIn))
+		if (IsUserEvent(event, UserEvent::UserSignedIn))
 		{
 			OnUserSignedIn(*reinterpret_cast<const fig::user::UserProfile*>(event.user.data1));
+			return EventResult::Continue;
 		}
 
-		if (event.type == SDLUserEvent(EventType::UserSignedIn))
+		if (IsUserEvent(event, UserEvent::UserSignedOut))
 		{
 			OnUserSignedOut();
+			return EventResult::Continue;
 		}
 
-		return false;
+		return EventResult::Pass;
 	}
 
 	void Screen::NotifySidePanelShown(bool bShow)
 	{
 		OnSidePanel(bShow);
+	}
+
+	void Screen::PushEvent(UserEvent eventType, int32_t code, void* pData1, void* pData2)
+	{
+		Event event {};
+		event.type = SDLUserEvent(eventType);
+		event.user.code = code;
+		event.user.data1 = pData1;
+		event.user.data2 = pData2;
+		ProcessEvent(event);
+	}
+
+	template <typename T>
+	inline void Screen::PushEvent(UserEvent eventType, T* pData)
+	{
+		Event event {};
+		event.type = SDLUserEvent(eventType);
+		event.user.data1 = (void*)pData;
+		ProcessEvent(event);
 	}
 }

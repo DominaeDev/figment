@@ -58,23 +58,23 @@ namespace fig::gui
 		_pHandle->CenterHorizontally();
 	}
 
-	bool VerticalScrollBar::OnEvent(Event& event)
+	EventResult VerticalScrollBar::OnEvent(Event& event)
 	{
 		switch (event.type)
 		{
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			if (event.button.button == SDL_BUTTON_LEFT)
-				return HandleMouseDown(toI(event.button.x), toI(event.button.y));
+				return HandleMouseDown(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
 			break;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			if (event.button.button == SDL_BUTTON_LEFT)
-				HandleMouseUp(toI(event.button.x), toI(event.button.y));
+				HandleMouseUp(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
 			break;
 		case SDL_EVENT_MOUSE_MOTION:
-			return HandleMouseMotion(toI(event.motion.x), toI(event.motion.y));
+			return HandleMouseMotion(toI(event.motion.x), toI(event.motion.y)) ? EventResult::Handled : EventResult::Pass;
 		}
 
-		return false;
+		return EventResult::Pass;
 	}
 
 	bool VerticalScrollBar::HandleMouseDown(int32_t x, int32_t y)

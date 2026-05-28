@@ -22,13 +22,13 @@ namespace fig::data
 			fig::timestamp timestamp;
 			fig::string content;
 
-			static auto GetXmlFields();
+			static auto SerializeInfo();
 		};
 
 		fig::uuid assetId;
 		std::vector<Entry> entries;
 
-		static auto GetXmlFields();
+		static auto SerializeInfo();
 	};
 }
 

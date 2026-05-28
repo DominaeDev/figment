@@ -7,7 +7,7 @@ namespace fig::gui
 
 	void RegisterUserEvents()
 	{
-		UserEventBase = SDL_RegisterEvents(EventType::Count);
+		UserEventBase = SDL_RegisterEvents(UserEvent::Count);
 	}
 
 }

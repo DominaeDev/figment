@@ -9,19 +9,19 @@ namespace fig::data
 {
 	static const fig::string XmlRootName { "Character" };
 
-	auto CharacterData::GetXmlFields()
+	auto CharacterData::SerializeInfo()
 	{
 		return XmlFields(
-			XmlElement { "ID",				&CharacterData::chatId  }
+			AsElement { "ID", &CharacterData::chatId  }
 				.MustExist(),
-			XmlElement { "Name",			&CharacterData::shortName }
+			AsElement { "Name", &CharacterData::shortName }
 				.MustExist(),
-			XmlElement { "FullName",		&CharacterData::fullName },
-			XmlElement { "Gender",			&CharacterData::gender, XmlConvertString<CharacterGender> },
-			XmlElement { "Brief",			&CharacterData::brief },
-			XmlElement { "Attributes",		&CharacterData::_attributes },
-			XmlElement { "Tags",			&CharacterData::_tags },
-			XmlElement { "SearchIndex",		&CharacterData::_searchIndex,
+			AsElement { "FullName", &CharacterData::fullName },
+			AsElement { "Gender", &CharacterData::gender, XmlConvertString<CharacterGender> },
+			AsElement { "Brief", &CharacterData::brief },
+			AsElement { "Attributes", &CharacterData::_attributes },
+			AsElement { "Tags", &CharacterData::_tags },
+			AsElement { "SearchIndex", &CharacterData::_searchIndex,
 				[](auto& value) -> fig::string { return value.Serialize(); },
 				[](auto& value) -> SearchIndex { SearchIndex s; s.Deserialize(value); return s; }
 			}
@@ -47,23 +47,23 @@ namespace fig::data
 		{ CharacterAttribute::HintFlag::Memory,		"memory" }
 	};
 
-	auto CharacterAttribute::GetXmlFields()
+	auto CharacterAttribute::SerializeInfo()
 	{
 		return XmlFields(
-			XmlAttribute { "format", &CharacterAttribute::format, 
+			AsAttribute { "format", &CharacterAttribute::format, 
 				[](auto& value) { return enum_serialize(value, FormatMapping); }, 
 				[](auto& value) { return enum_deserialize(value, FormatMapping); } 
 			},
-			XmlAttribute { "visibility", &CharacterAttribute::visibility, 
+			AsAttribute { "visibility", &CharacterAttribute::visibility, 
 				[](auto& value) { return enum_serialize(value, VisibilityMapping); },
 				[](auto& value) { return enum_deserialize(value, VisibilityMapping); }
 			},
-			XmlAttribute { "flags", &CharacterAttribute::flags,
+			AsAttribute { "flags", &CharacterAttribute::flags,
 				[](auto& value) -> fig::string { return encode_csv(CharacterAttribute::HintFlags::Serialize(value, FlagMapping)); },
 				[](const fig::string& value) { return CharacterAttribute::HintFlags::Deserialize(decode_csv(value), FlagMapping); }
 			},
-			XmlElement { "Label", &CharacterAttribute::label }.MustExist(),
-			XmlElement { "Value", &CharacterAttribute::value }.MustExist()
+			AsElement { "Label", &CharacterAttribute::label }.MustExist(),
+			AsElement { "Value", &CharacterAttribute::value }.MustExist()
 		);
 
 		static_assert(XmlSerializable<CharacterAttribute>);

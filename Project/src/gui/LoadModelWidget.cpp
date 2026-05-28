@@ -62,39 +62,44 @@ namespace fig::gui
 		_pLabel->Reset();
 	}
 
-	bool LoadModelWidget::OnEvent(Event& event)
+	EventResult LoadModelWidget::OnEvent(Event& event)
 	{
-		if (SDLUserEvent(event, EventType::LLMModelLoading))
+		if (IsUserEvent(event, UserEvent::LLMModelLoading))
 		{
 			_pLabel->SetText(toStr(fig::strings::LoadModelWidget::ModelLoading));
 			_pLoadButton->SetIconState(PlayButton::IconState::Spinner);
 			SetProgress(0.0f);
+			return EventResult::Continue;
 		}
-		else if (SDLUserEvent(event, EventType::LLMModelLoadingProgress))
+		else if (IsUserEvent(event, UserEvent::LLMModelLoadingProgress))
 		{
 			_pLabel->SetText(std::format("{} {}%", fig::strings::LoadModelWidget::ModelLoading, event.user.code));
 			_pLoadButton->SetIconState(PlayButton::IconState::Spinner);
 			SetProgress(toF(event.user.code) / 100.0f);
+			return EventResult::Continue;
 		}
-		else if (SDLUserEvent(event, EventType::LLMModelLoaded))
+		else if (IsUserEvent(event, UserEvent::LLMModelLoaded))
 		{
 			_pLabel->SetText(toStr(fig::strings::LoadModelWidget::ModelLoaded));
 			_pLoadButton->SetIconState(PlayButton::IconState::Stop);
 			SetProgress(0.0f);
+			return EventResult::Continue;
 		}
-		else if (SDLUserEvent(event, EventType::LLMModelUnloaded))
+		else if (IsUserEvent(event, UserEvent::LLMModelUnloaded))
 		{
 			_pLoadButton->SetIconState(PlayButton::IconState::Play);
 			_pLabel->SetText(toStr(fig::strings::LoadModelWidget::ModelUnloaded));
 			SetProgress(0.0f);
+			return EventResult::Continue;
 		}
-		else if (SDLUserEvent(event, EventType::LLMModelLoadFailure))
+		else if (IsUserEvent(event, UserEvent::LLMModelLoadFailure))
 		{
 			_pLoadButton->SetIconState(PlayButton::IconState::Play);
 			_pLabel->SetText(toStr(fig::strings::LoadModelWidget::ModelError));
 			SetProgress(0.0f);
+			return EventResult::Continue;
 		}
-		return false;
+		return EventResult::Pass;
 	}
 
 	void LoadModelWidget::SetProgress(float fProgress)

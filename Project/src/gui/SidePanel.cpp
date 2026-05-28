@@ -120,17 +120,19 @@ namespace fig::gui
 		menu.Show(Point { _pMenuButton->GetX(), _pMenuButton->GetY() + _pMenuButton->GetHeight() });
 	}
 
-	bool SidePanel::OnEvent(Event& event)
+	EventResult SidePanel::OnEvent(Event& event)
 	{
-		if (event.type == SDLUserEvent(EventType::UserSignedIn))
+		if (IsUserEvent(event, UserEvent::UserSignedIn))
 		{
 			_pUserWidget->SetUser(*reinterpret_cast<fig::user::UserProfile*>(event.user.data1));
+			return EventResult::Continue;
 		}
-		else if (event.type == SDLUserEvent(EventType::UserSignedOut))
+		else if (IsUserEvent(event, UserEvent::UserSignedOut))
 		{
 			_pUserWidget->Reset();
+			return EventResult::Continue;
 		}
-		return false;
+		return EventResult::Pass;
 	}
 
 }

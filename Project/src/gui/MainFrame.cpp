@@ -110,6 +110,7 @@ namespace fig::gui
 		if (_pActiveScreen)
 		{
 			_pActiveScreen->SetVisible(false);
+			_pActiveScreen->PushEvent(UserEvent::Deactivated);
 
 			// Detach
 			auto pParent = _pActiveScreen->GetParent();
@@ -130,6 +131,7 @@ namespace fig::gui
 		_pMainArea->SetSizer(sizer);
 
 		_pActiveScreen->SetVisible(true);
+		_pActiveScreen->PushEvent(UserEvent::Activated);
 		_pActiveScreen->NotifySidePanelShown(_pSidePanel->GetVisible());
 
 		InvalidateLayout();
@@ -213,7 +215,7 @@ namespace fig::gui
 		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
-		PushEvent(EventType::UserSignedIn, &profile);
+		PushEvent(UserEvent::UserSignedIn, &profile);
 
 		ShowSidePanel(true);
 
@@ -224,7 +226,7 @@ namespace fig::gui
 
 	void MainFrame::OnSignedOut() noexcept
 	{
-		PushEvent(EventType::UserSignedOut);
+		PushEvent(UserEvent::UserSignedOut);
 
 		ShowSidePanel(false);
 		ChangeScreen(ScreenType::Login);
@@ -265,13 +267,13 @@ namespace fig::gui
 				modelSettings = try_model_settings.value();
 			else
 			{
-				PushEvent(EventType::LLMModelLoadFailure);
+				PushEvent(UserEvent::LLMModelLoadFailure);
 				return;
 			}
 
 			engine.Initialize(modelSettings,
 				[this](int percent) {
-					PushEvent(EventType::LLMModelLoadingProgress, percent);
+					PushEvent(UserEvent::LLMModelLoadingProgress, percent);
 				},
 				[this, &engine](bool bSuccess) {
 					if (bSuccess)
@@ -293,7 +295,7 @@ namespace fig::gui
 		}
 	}
 
-	bool MainFrame::OnEvent(SDL_Event& event)
+	EventResult MainFrame::OnEvent(Event& event)
 	{
 		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 		{
@@ -307,85 +309,120 @@ namespace fig::gui
 					if (keyEvent.key == SDLK_F12 and mods.Control)
 					{
 						Close();
-						return true;
+						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{
 						ChangeScreen(ScreenType::Debug);
-						return true;
+						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F12 and mods.Control)
 					{
 						Close();
-						return true;
+						return EventResult::Handled;
 					}
 				}
 
 				if (keyEvent.key == SDLK_1 and mods.Alt)
 				{
 					ChangeScreen(ScreenType::Home);
-					return true;
+					return EventResult::Handled;
 				}
 				else if (keyEvent.key == SDLK_2 and mods.Alt)
 				{
 					ChangeScreen(ScreenType::Chat);
-					return true;
+					return EventResult::Handled;
 				}
 				else if (keyEvent.key == SDLK_TAB and mods.None)
 				{
 					ShowSidePanel(!_pSidePanel->GetVisible());
-					return true;
+					return EventResult::Handled;
 				}
 				else if (keyEvent.key == SDLK_F2 and mods.None)
 				{
 					InitializeModel();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (keyEvent.key == SDLK_F3 and mods.None)
 				{
 					UnloadModel();
-					return true;
+					return EventResult::Handled;
 				}
 			}
 		}
 
-		if (SDLUserEvent(event, EventType::LLMStatusUpdate))
+		if (IsUserEvent(event, UserEvent::LLMStatusUpdate))
 		{
 			if (event.user.data1)
 				SetStatusBar(*reinterpret_cast<fig::llm::LLMStatus*>(event.user.data1));
+			return EventResult::Continue;
 		}
-		else if (SDLUserEvent(event, EventType::LLMChatInitializing))
+		else if (IsUserEvent(event, UserEvent::LLMChatInitializing))
+		{
 			SetStatusBar(fig::strings::Status::InitializingChat);
-		else if (SDLUserEvent(event, EventType::LLMChatInitialized))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMChatInitialized))
+		{
 			SetStatusBar(fig::strings::Status::ChatInitialized);
-		else if (SDLUserEvent(event, EventType::LLMChatInitializationFailure))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMChatInitializationFailure))
+		{
 			SetStatusBar(fig::strings::Status::FailedToInitializeChat);
-		else if (SDLUserEvent(event, EventType::LLMModelLoading))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelLoading))
+		{
 			SetStatusBar(fig::strings::Status::LoadingModel);
-		else if (SDLUserEvent(event, EventType::LLMModelLoaded))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelLoaded))
+		{
 			SetStatusBar(fig::strings::Status::ModelLoaded);
-		else if (SDLUserEvent(event, EventType::LLMModelUnloaded))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelUnloaded))
+		{
 			SetStatusBar(fig::strings::Status::ModelUnloaded);
-		else if (SDLUserEvent(event, EventType::LLMModelLoadFailure))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelLoadFailure))
+		{
 			SetStatusBar(fig::strings::Status::FailedToLoadModel);
-		else if (SDLUserEvent(event, EventType::LLMGenerationStarted))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMGenerationStarted))
+		{
 			SetStatusBar(fig::strings::Status::GeneratingResponse);
-		else if (SDLUserEvent(event, EventType::LLMRebuildingKVCache))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMRebuildingKVCache))
+		{
 			SetStatusBar(fig::strings::Status::RebuildingContext);
-		else if (SDLUserEvent(event, EventType::LLMGenerationComplete))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMGenerationComplete))
+		{
 			SetStatusBar(fig::strings::Status::Ready);
-		else if (SDLUserEvent(event, EventType::LLMModelUnloadRequest))
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelUnloadRequest))
+		{
 			UnloadModel();
+			return EventResult::Continue;
+		}
 
-		if (SDLUserEvent(event, EventType::StartChat))
+		if (IsUserEvent(event, UserEvent::StartChat))
 		{
 			const fig::uuid& characterId = *reinterpret_cast<fig::uuid*>(event.user.data1);
 			StartChat(characterId);
+			return EventResult::Handled;
 		}
 
 		if (_pActiveScreen)
 			return _pActiveScreen->ProcessEvent(event);
-		return false;
+		return EventResult::Pass;
 	}
 
 	bool MainFrame::StartChat(const fig::uuid& characterId)

@@ -23,7 +23,7 @@ namespace fig::io
 	struct InnerValueType<T> { using Type = typename T::value_type; };
 
 	template<typename TMemberPointer, typename TSerializer = std::identity, typename TDeserializer = std::identity>
-	struct XmlAttribute
+	struct AsAttribute
 	{
 		using ValueType = XmlMemberPointer<TMemberPointer>::Type;
 		using SerializedType = std::remove_cvref_t<std::invoke_result_t<TSerializer, const ValueType&>>;
@@ -37,25 +37,25 @@ namespace fig::io
 		TValidator validator {};
 		bool must_exist {};
 
-		XmlAttribute& Name(const char* name)
+		AsAttribute& Name(const char* name)
 		{
 			this->name = name;
 			return *this;
 		}
 
-		XmlAttribute& Default(ValueType default_value)
+		AsAttribute& Default(ValueType default_value)
 		{
 			this->default_value = default_value;
 			return *this;
 		}
 
-		XmlAttribute& Validator(TValidator validator)
+		AsAttribute& Validator(TValidator validator)
 		{
 			this->validator = validator;
 			return *this;
 		}
 
-		XmlAttribute& MustExist()
+		AsAttribute& MustExist()
 		{
 			this->must_exist = true;
 			return *this;
@@ -63,7 +63,7 @@ namespace fig::io
 	};
 
 	template<typename TMemberPointer, typename TSerializer = std::identity, typename TDeserializer = std::identity>
-	struct XmlElement
+	struct AsElement
 	{
 		using ValueType = XmlMemberPointer<TMemberPointer>::Type;
 		using SerializerInputType = typename InnerValueType<ValueType>::Type;
@@ -78,25 +78,25 @@ namespace fig::io
 		TValidator validator {};
 		bool must_exist {};
 
-		XmlElement& Name(const char* name)
+		AsElement& Name(const char* name)
 		{
 			this->name = name;
 			return *this;
 		}
 
-		XmlElement& Default(ValueType default_value)
+		AsElement& Default(ValueType default_value)
 		{
 			this->default_value = default_value;
 			return *this;
 		}
 
-		XmlElement& Validator(TValidator validator)
+		AsElement& Validator(TValidator validator)
 		{
 			this->validator = validator;
 			return *this;
 		}
 
-		XmlElement& MustExist()
+		AsElement& MustExist()
 		{
 			this->must_exist = true;
 			return *this;
@@ -114,7 +114,7 @@ namespace fig::io
 
 	template<typename T>
 	concept XmlSerializable = requires {
-		{ T::GetXmlFields() } -> IsTuple;
+		{ T::SerializeInfo() } -> IsTuple;
 	};
 
 	template<typename T>
@@ -135,11 +135,11 @@ namespace fig::io
 				auto& member = object.*(field.member_ptr);
 
 				// Attribute
-				if constexpr (IsSpecializationOf<FieldType, XmlAttribute>::value)
+				if constexpr (IsSpecializationOf<FieldType, AsAttribute>::value)
 				{
 					element.SetAttribute(field.name, field.custom_serializer(member));
 				}
-				else if constexpr (IsSpecializationOf<FieldType, XmlElement>::value)
+				else if constexpr (IsSpecializationOf<FieldType, AsElement>::value)
 				{
 					// Nested object
 					if constexpr (XmlSerializable<typename FieldType::ValueType>)
@@ -183,7 +183,7 @@ namespace fig::io
 					static_assert(false, "Serializable field must be either an element or an attribute");
 
 			}(), ...);
-		}, T::GetXmlFields());
+		}, T::SerializeInfo());
 	}
 
 	template<XmlSerializable T>
@@ -197,7 +197,7 @@ namespace fig::io
 				auto& member = object.*(field.member_ptr);
 
 				// Attribute
-				if constexpr (IsSpecializationOf<FieldType, XmlAttribute>::value)
+				if constexpr (IsSpecializationOf<FieldType, AsAttribute>::value)
 				{
 					if (auto value = element[field.name].TryGet<FieldType::SerializedType>())
 						member = field.custom_deserializer(*value);
@@ -207,7 +207,7 @@ namespace fig::io
 						bValid &= !field.must_exist;
 					}
 				}
-				else if constexpr (IsSpecializationOf<FieldType, XmlElement>::value)
+				else if constexpr (IsSpecializationOf<FieldType, AsElement>::value)
 				{
 					// Nested object
 					if constexpr (XmlSerializable<typename FieldType::ValueType>)
@@ -292,7 +292,7 @@ namespace fig::io
 				if (field.validator)
 					bValid &= field.validator(member);
 			}(), ...);
-		}, T::GetXmlFields());
+		}, T::SerializeInfo());
 
 		return bValid;
 	}

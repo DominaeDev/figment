@@ -14,6 +14,8 @@
 
 namespace fig
 {
+    // Type aliases
+
     using string = std::string;
     using string_view = std::string_view;
     using c_string = const char*;
@@ -35,6 +37,8 @@ namespace fig
     using path = std::filesystem::path;
     using string_list = std::vector<string>;
     using string_span = std::span<const string>;
+
+    // Concepts
 
     template <typename T>
     concept is_string_like = std::constructible_from<fig::string, T>;
@@ -122,7 +126,7 @@ inline constexpr fig::byte_span string_to_bytes(const fig::string_view& sv)
 constexpr bool Enabled = true;
 constexpr bool Disabled = false;
 
-#if defined(_DEBUG) && !defined(NDEBUG)
+#if defined(_DEBUG) || !defined(NDEBUG)
 constexpr bool Debugging = true;
 #else
 constexpr bool Debugging = false;

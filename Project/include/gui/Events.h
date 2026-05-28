@@ -6,12 +6,14 @@
 
 namespace fig::gui
 {
-	enum EventType : uint32_t
+	enum UserEvent : uint32_t
 	{
 		UserSignedIn,
 		UserSignedOut,
 		MenuOpened,
 		MenuClosed,
+		Activated,
+		Deactivated,
 
 		LLMStatusUpdate,
 		LLMModelLoading,
@@ -36,10 +38,10 @@ namespace fig::gui
 	void RegisterUserEvents();
 	extern uint32_t UserEventBase;
 
-	inline uint32_t SDLUserEvent(EventType e) { return UserEventBase + static_cast<uint32_t>(e); }
-	inline bool SDLUserEvent(SDL_Event& event, EventType e) { return event.type == SDLUserEvent(e); }
+	inline uint32_t SDLUserEvent(UserEvent e) { return UserEventBase + static_cast<uint32_t>(e); }
+	inline bool IsUserEvent(Event& event, UserEvent e) { return event.type == SDLUserEvent(e); }
 
-	inline void PushEvent(EventType eventType, int32_t code = 0, void* pData1 = nullptr, void* pData2 = nullptr)
+	inline void PushEvent(UserEvent eventType, int32_t code = 0, void* pData1 = nullptr, void* pData2 = nullptr)
 	{
 		Event event {};
 		event.type = SDLUserEvent(eventType);
@@ -50,12 +52,19 @@ namespace fig::gui
 	}
 
 	template <typename T>
-	inline void PushEvent(EventType eventType, T* pData)
+	inline void PushEvent(UserEvent eventType, T* pData)
 	{
 		Event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.data1 = (void*)pData;
 		SDL_PushEvent(&event);
 	}
+
+	enum class EventResult
+	{
+		Pass,		// Not handled
+		Continue,	// Handled, continue propagation
+		Handled,	// Handled, stop propagation
+	};
 }
 #endif

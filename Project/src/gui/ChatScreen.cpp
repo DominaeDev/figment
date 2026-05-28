@@ -96,8 +96,6 @@ namespace fig::gui
 		pTextBoxBorder->SetColor(Color { 0xb9, 0xb2, 0x8f, 0xFF });
 		_pTextBox->SetBorderRenderer(pTextBoxBorder);
 
-		_pTextBox->SetFocus(true);
-
 		_pVariableList = new VariableList(this);
 		_pVariableList->SetPosition(10, 10);
 		_pVariableList->SetVisible(false);
@@ -349,9 +347,9 @@ namespace fig::gui
 		_pExpandButton->SetVisible(!bShown);
 	}
 
-	bool ChatScreen::OnEvent(Event& event)
+	EventResult ChatScreen::OnEvent(Event& event)
 	{
-		if (SDLUserEvent(event, EventType::LLMChatInitialized))
+		if (IsUserEvent(event, UserEvent::LLMChatInitialized))
 		{
 			auto pLLMInstance = Global::GetLLMInstance();
 			_pChatScroll->ClearMessages();
@@ -362,11 +360,11 @@ namespace fig::gui
 			}
 			queue_clear(_commandQueue);
 		}
-		else if (SDLUserEvent(event, EventType::LLMModelLoaded))
+		else if (IsUserEvent(event, UserEvent::LLMModelLoaded))
 		{
 //			StartChat();
 		}
-		else if (SDLUserEvent(event, EventType::LLMModelUnloaded))
+		else if (IsUserEvent(event, UserEvent::LLMModelUnloaded))
 		{
 			_pVariableList->SetVisible(false);
 			Global::SetLLMInstance(nullptr);
@@ -375,12 +373,16 @@ namespace fig::gui
 			_bAutoChat = false;
 #endif
 		}
-		else if (SDLUserEvent(event, EventType::LLMGenerationComplete))
+		else if (IsUserEvent(event, UserEvent::LLMGenerationComplete))
 		{
 			auto pLLMInstance = Global::GetLLMInstance();
 			if (pLLMInstance)
 				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
 			NextQueuedCommand();
+		}
+		else if (IsUserEvent(event, UserEvent::Activated))
+		{
+			_pTextBox->SetFocus(true);
 		}
 
 		return Screen::OnEvent(event);

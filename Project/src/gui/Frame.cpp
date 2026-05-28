@@ -115,22 +115,21 @@ namespace fig::gui
 			OnMenuClose(*it);
 	}
 
-	bool Frame::ProcessEvent(Event& event)
+	EventResult Frame::ProcessEvent(Event& event)
 	{
 		for (int32_t i = toI(_menus.size()) - 1; i >= 0; --i)
 		{
 			Menu* pMenu = _menus[toUZ(i)].ptr;
-			if (pMenu->ProcessEvent(event))
+			if (pMenu->ProcessEvent(event) == EventResult::Handled)
 			{
 				if (pMenu->_bDestroyMe)
 					PopAllMenus();
-				return true;
+				return EventResult::Handled;
 			}
 		}
 
-		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN 
-			&& HandleMouseDown(event.button))
-			return true;
+		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && HandleMouseDown(event.button))
+			return EventResult::Handled;
 		
 		return Control::ProcessEvent(event);
 	}
@@ -165,11 +164,11 @@ namespace fig::gui
 
 	void Frame::OnMenuOpen(int32_t menuId)
 	{
-		PushEvent(EventType::MenuOpened, menuId);
+		PushEvent(UserEvent::MenuOpened, menuId);
 	}
 
 	void Frame::OnMenuClose(int32_t menuId)
 	{
-		PushEvent(EventType::MenuClosed, menuId);
+		PushEvent(UserEvent::MenuClosed, menuId);
 	}
 }

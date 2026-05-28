@@ -7,36 +7,37 @@ using namespace fig::chat;
 
 namespace fig::data
 {
-
-	auto ChatLog::GetXmlFields()
+	auto ChatLog::SerializeInfo()
 	{
 		return XmlFields(
-			XmlElement { "ID",			&ChatLog::assetId }.MustExist(),
-			XmlElement { "Entries",		&ChatLog::entries }.MustExist()
+			AsElement { "ID", &ChatLog::assetId }
+				.MustExist(),
+			AsElement { "Entries", &ChatLog::entries }
+				.MustExist()
 		);
 
 		static_assert(XmlSerializable<ChatLog>);
 	}
 
-	auto ChatLog::Entry::GetXmlFields()
+	auto ChatLog::Entry::SerializeInfo()
 	{
 		return XmlFields(
-			XmlElement { "ID",			&Entry::entryId }
+			AsElement { "ID", &Entry::entryId }
 				.MustExist(),
-			XmlElement { "Speaker",		&Entry::speakerId }
+			AsElement { "Speaker", &Entry::speakerId }
 				.MustExist(),
-			XmlElement { "Turn",		&Entry::turn }
+			AsElement { "Turn", &Entry::turn }
 				.MustExist(),
-			XmlElement { "Role",		&Entry::role,
+			AsElement { "Role", &Entry::role,
 				[](auto& value) { return enum_serialize(value, RoleMapping); },
 				[](auto& value) { return enum_deserialize(value, RoleMapping); }
 			}	.MustExist(),
-			XmlElement { "Type",		&Entry::msgType,
+			AsElement { "Type", &Entry::msgType,
 				[](auto& value) { return enum_serialize(value, MessageTypeMapping); },
 				[](auto& value) { return enum_deserialize(value, MessageTypeMapping); }
 			}	.MustExist(),
-			XmlElement { "Timestamp",	&Entry::timestamp },
-			XmlElement { "Content",		&Entry::content }
+			AsElement { "Timestamp", &Entry::timestamp },
+			AsElement { "Content", &Entry::content }
 				.MustExist()
 		);
 

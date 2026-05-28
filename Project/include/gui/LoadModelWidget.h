@@ -18,7 +18,7 @@ namespace fig::gui
 
 	protected:
 		void OnSize() override;
-		bool OnEvent(Event& event) override;
+		EventResult OnEvent(Event& event) override;
 		void SetProgress(float fProgress);
 		void OnButtonPressed();
 

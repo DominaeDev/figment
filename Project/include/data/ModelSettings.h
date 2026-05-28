@@ -37,28 +37,28 @@ namespace fig::data
 			static fig::llm::PromptTemplateType DeserializePromptTemplate(const fig::string& value);
 
 		public:
-			static auto GetXmlFields()
+			static auto SerializeInfo()
 			{
 				using namespace fig::io;
 				LLMModel Defaults {};
 				return XmlFields(
-					XmlElement { "Path", &LLMModel::filename },
-					XmlElement { "PromptTemplate", &LLMModel::promptTemplate, SerializePromptTemplate, DeserializePromptTemplate }
+					AsElement { "Path", &LLMModel::filename },
+					AsElement { "PromptTemplate", &LLMModel::promptTemplate, SerializePromptTemplate, DeserializePromptTemplate }
 						.Default(fig::llm::PromptTemplateType::Default),
 
-					XmlElement { "ContextSize", &LLMModel::contextSize, XmlConvertEnum<fig::llm::ContextSize>, XmlParseEnum<fig::llm::ContextSize> }
+					AsElement { "ContextSize", &LLMModel::contextSize, XmlConvertEnum<fig::llm::ContextSize>, XmlParseEnum<fig::llm::ContextSize> }
 						.Default(Defaults.contextSize)
 						.Validator([](auto& n) { return static_cast<int32_t>(n) >= static_cast<int32_t>(fig::llm::ContextSize::_2K) and static_cast<int32_t>(n) <= static_cast<int32_t>(fig::llm::ContextSize::_32K); }),
 
-					XmlElement { "ContextKeepRatio", &LLMModel::contextWindowKeepRatio, }
+					AsElement { "ContextKeepRatio", &LLMModel::contextWindowKeepRatio, }
 						.Default(Defaults.contextWindowKeepRatio)
 						.Validator([](auto& value) { return value >= 0.0f and value <= 1.0f; }),
 
-					XmlElement { "GPULayers", &LLMModel::gpuLayers }.Default(Defaults.gpuLayers),
-					XmlElement { "UseMLock", &LLMModel::bUseMlock }.Default(Defaults.bUseMlock),
-					XmlElement { "UseMMap", &LLMModel::bUseMmap }.Default(Defaults.bUseMmap),
-					XmlElement { "MicroBatchSize", &LLMModel::microBatchSize }.Default(Defaults.microBatchSize),
-					XmlElement { "MaxSequences", &LLMModel::maxSequences }.Default(Defaults.maxSequences)
+					AsElement { "GPULayers", &LLMModel::gpuLayers }.Default(Defaults.gpuLayers),
+					AsElement { "UseMLock", &LLMModel::bUseMlock }.Default(Defaults.bUseMlock),
+					AsElement { "UseMMap", &LLMModel::bUseMmap }.Default(Defaults.bUseMmap),
+					AsElement { "MicroBatchSize", &LLMModel::microBatchSize }.Default(Defaults.microBatchSize),
+					AsElement { "MaxSequences", &LLMModel::maxSequences }.Default(Defaults.maxSequences)
 				);
 			}
 		} model;
@@ -67,25 +67,25 @@ namespace fig::data
 		{
 			fig::path filename;
 
-			static auto GetXmlFields()
+			static auto SerializeInfo()
 			{
 				using namespace fig::io;
 				return XmlFields(
-					XmlElement { "Path",	&EmbeddingModel::filename }
+					AsElement { "Path",	&EmbeddingModel::filename }
 				);
 			}
 		} embeddingModel;
 
-		static auto GetXmlFields()
+		static auto SerializeInfo()
 		{
 			using namespace fig::io;
 			return XmlFields(
-				XmlAttribute { "version",	&ModelSettings::version }
+				AsAttribute { "version",	&ModelSettings::version }
 					.MustExist()
 					.Validator([](auto& v) { return v <= FormatVersion; }),
-				XmlElement { "Name",		&ModelSettings::name, },
-				XmlElement { "Model",		&ModelSettings::model, },
-				XmlElement { "Embedding",	&ModelSettings::embeddingModel, }
+				AsElement { "Name",		&ModelSettings::name, },
+				AsElement { "Model",		&ModelSettings::model, },
+				AsElement { "Embedding",	&ModelSettings::embeddingModel, }
 			);
 		}
 	};

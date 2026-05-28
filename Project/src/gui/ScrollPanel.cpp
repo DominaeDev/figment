@@ -41,17 +41,17 @@ namespace fig::gui
 			_pScrollBar->Render(pRenderer);
 	}
 
-	bool ScrollPanel::OnEvent(Event& event)
+	EventResult ScrollPanel::OnEvent(Event& event)
 	{
 		if (event.type == SDL_EVENT_MOUSE_WHEEL)
 		{
-			return HandleMouseWheel(event.wheel);
+			return HandleMouseWheel(event.wheel) ? EventResult::Handled : EventResult::Pass;
 		}
 
 		if (_pScrollBar)
 			return _pScrollBar->OnEvent(event);
 
-		return false;
+		return EventResult::Pass;
 	}
 
 	void ScrollPanel::OnUpdate(float fElapsed)

@@ -20,7 +20,7 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fElapsed) override;
-		bool OnEvent(Event& event) override;
+		EventResult OnEvent(Event& event) override;
 		void OnAfterLayout() override;
 		virtual void OnScroll() {};
 

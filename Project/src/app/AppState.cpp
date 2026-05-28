@@ -163,31 +163,31 @@ namespace fig
 
 	static void BackendSignalHandler(const LLMStatus& status)
 	{
-		EventType eventType;
+		UserEvent eventType;
 		switch (status.event)
 		{
 		case LLMStatusEvent::Nothing:						return;
-		case LLMStatusEvent::ModelLoading:					eventType = EventType::LLMModelLoading; break;
-		case LLMStatusEvent::ModelLoaded:					eventType = EventType::LLMModelLoaded; break;
-		case LLMStatusEvent::ModelLoadFailure:				eventType = EventType::LLMModelLoadFailure; break;
+		case LLMStatusEvent::ModelLoading:					eventType = UserEvent::LLMModelLoading; break;
+		case LLMStatusEvent::ModelLoaded:					eventType = UserEvent::LLMModelLoaded; break;
+		case LLMStatusEvent::ModelLoadFailure:				eventType = UserEvent::LLMModelLoadFailure; break;
 		case LLMStatusEvent::ModelUnloaded:
-			eventType = EventType::LLMModelUnloaded;
+			eventType = UserEvent::LLMModelUnloaded;
 			Global::SetLLMInstance(nullptr);
 			break;
-		case LLMStatusEvent::ModelUnloadRequest:			eventType = EventType::LLMModelUnloadRequest; break;
-		case LLMStatusEvent::ChatInitializing:				eventType = EventType::LLMChatInitializing; break;
-		case LLMStatusEvent::ChatInitialized:				eventType = EventType::LLMChatInitialized; break;
-		case LLMStatusEvent::ChatInitializationFailure:		eventType = EventType::LLMChatInitializationFailure; break;
-		case LLMStatusEvent::GenerationStarted:				eventType = EventType::LLMGenerationStarted; break;
-		case LLMStatusEvent::GenerationComplete:			eventType = EventType::LLMGenerationComplete; break;
-		case LLMStatusEvent::CompletedMessage:				eventType = EventType::LLMCompletedMessage; break;
-		case LLMStatusEvent::RebuildingKVCache:				eventType = EventType::LLMRebuildingKVCache; break;
+		case LLMStatusEvent::ModelUnloadRequest:			eventType = UserEvent::LLMModelUnloadRequest; break;
+		case LLMStatusEvent::ChatInitializing:				eventType = UserEvent::LLMChatInitializing; break;
+		case LLMStatusEvent::ChatInitialized:				eventType = UserEvent::LLMChatInitialized; break;
+		case LLMStatusEvent::ChatInitializationFailure:		eventType = UserEvent::LLMChatInitializationFailure; break;
+		case LLMStatusEvent::GenerationStarted:				eventType = UserEvent::LLMGenerationStarted; break;
+		case LLMStatusEvent::GenerationComplete:			eventType = UserEvent::LLMGenerationComplete; break;
+		case LLMStatusEvent::CompletedMessage:				eventType = UserEvent::LLMCompletedMessage; break;
+		case LLMStatusEvent::RebuildingKVCache:				eventType = UserEvent::LLMRebuildingKVCache; break;
 		default:
 			assert(false && "Missing signal handler");
 			return;
 		}
 
-		fig::gui::PushEvent(EventType::LLMStatusUpdate, 0, (void*)(&status));
+		fig::gui::PushEvent(UserEvent::LLMStatusUpdate, 0, (void*)(&status));
 		fig::gui::PushEvent(eventType);
 	}
 }

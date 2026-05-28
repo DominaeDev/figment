@@ -40,7 +40,7 @@ namespace fig::data
 		HintFlags flags {};
 
 	public:
-		static auto GetXmlFields();
+		static auto SerializeInfo();
 	};
 
 	class CharacterData
@@ -78,7 +78,7 @@ namespace fig::data
 		SearchIndex _searchIndex;
 
 	public:
-		static auto GetXmlFields();
+		static auto SerializeInfo();
 	};
 
 	using CharacterDataRef = std::reference_wrapper<fig::data::CharacterData>;

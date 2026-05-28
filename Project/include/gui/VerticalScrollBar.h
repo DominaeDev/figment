@@ -17,7 +17,7 @@ namespace fig::gui
 	
 	protected:
 		void OnUpdate(float fElapsed) override;
-		bool OnEvent(Event& event) override;
+		EventResult OnEvent(Event& event) override;
 		bool HandleMouseDown(int32_t x, int32_t y);
 		bool HandleMouseUp(int32_t x, int32_t y);
 		bool HandleMouseMotion(int32_t x, int32_t y);

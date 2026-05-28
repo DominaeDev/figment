@@ -64,7 +64,7 @@ namespace fig::gui
 		}
 	}
 
-	bool CharacterCard::OnEvent(Event& event)
+	EventResult CharacterCard::OnEvent(Event& event)
 	{
 		switch (event.type)
 		{
@@ -75,29 +75,29 @@ namespace fig::gui
 				and not _bHasError)
 			{
 				ShowMenu();
-				return true;
+				return EventResult::Handled;
 			}
 			break;
 		}
 
-		if (event.type == SDLUserEvent(EventType::MenuOpened))
+		if (IsUserEvent(event, UserEvent::MenuOpened))
 		{
 			if (_menuId == event.user.code)
 			{
 				_bSelected = true;
-				return true;
+				return EventResult::Continue;
 			}
 		}
-		else if (event.type == SDLUserEvent(EventType::MenuClosed))
+		else if (IsUserEvent(event, UserEvent::MenuClosed))
 		{
 			if (_menuId == event.user.code)
 			{
 				_bSelected = false;
-				return true;
+				return EventResult::Continue;
 			}
 		}
 
-		return false;
+		return EventResult::Pass;
 	}
 
 	void CharacterCard::ShowMenu()
@@ -114,7 +114,7 @@ namespace fig::gui
 		menu.AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] { 
-				PushEvent(EventType::StartChat, &_characterId); 
+				PushEvent(UserEvent::StartChat, &_characterId); 
 			});
 		menu.AddItem("Resume last chat")
 			.SetEnabled(bLLM && _metaData.chatCount > 0);

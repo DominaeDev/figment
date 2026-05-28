@@ -88,7 +88,7 @@ bool Window::HandleEvent(fig::gui::Event& event)
 			return true;
 	}
 
-	return _pFrame->ProcessEvent(event);
+	return _pFrame->ProcessEvent(event) > EventResult::Pass;
 }
 
 bool Window::OnKeyboardEvent(SDL_KeyboardEvent& event)

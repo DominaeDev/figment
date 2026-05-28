@@ -9,9 +9,9 @@ namespace fig::gui
 		SetTheme(Themes::DefaultButtonStyle);
 	}
 
-	bool ThemedButton::OnEvent(Event& event)
+	EventResult ThemedButton::OnEvent(Event& event)
 	{
-		return HandleMouseEvents(event);
+		return HandleMouseEvents(event) ? EventResult::Handled : EventResult::Pass;
 	}
 
 	void ThemedButton::SetTheme(const ButtonTheme& theme) noexcept

@@ -545,21 +545,20 @@ namespace fig::gui
 		SDL_SetTextInputArea(pWindow, &input_rect, cursor_offset);
 	}
 
-	void TextBox::SetFocus(bool focus)
+	void TextBox::SetFocus(bool bFocus)
 	{
-		focus &= GetEnabled();
-		if (_bFocused == focus)
+		bFocus &= GetEnabled();
+		if (_bFocused == bFocus)
 			return;
 
-		_bFocused = focus;
-		SDL_Window* pWindow = GetSDLWindow();
-		_cursor_visible = true;
+		_bFocused = bFocus;
+		_cursor_visible = bFocus;
 		_last_cursor_change = SDL_GetTicks();
 
 		if (_bFocused)
-			SDL_StartTextInput(pWindow);
+			SDL_StartTextInput(GetSDLWindow());
 		else
-			SDL_StopTextInput(pWindow);
+			SDL_StopTextInput(GetSDLWindow());
 	}
 
 	static int GetCursorTextIndex(int x, const TTF_SubString* substring)
@@ -1278,7 +1277,7 @@ namespace fig::gui
 
 	#pragma region Events
 
-	bool TextBox::OnEvent(Event& event)
+	EventResult TextBox::OnEvent(Event& event)
 	{
 		bool bCtrl = event.key.mod & SDL_KMOD_CTRL;
 		bool bShift = event.key.mod & SDL_KMOD_SHIFT;
@@ -1291,18 +1290,17 @@ namespace fig::gui
 		bool bModNone		= not (bCtrl or bShift or bAlt);
 
 		if (not GetEnabled())
-			return false; // Disabled
+			return EventResult::Pass; // Disabled
 
 		switch (event.type)
 		{
-
 		case SDL_EVENT_MOUSE_MOTION:
-			return HandleMouseMotion(toI(event.motion.x), toI(event.motion.y));
+			return HandleMouseMotion(toI(event.motion.x), toI(event.motion.y)) ? EventResult::Handled : EventResult::Pass;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			return HandleMouseDown(toI(event.button.x), toI(event.button.y));
+			return HandleMouseDown(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
-			HandleMouseUp(toI(event.button.x), toI(event.button.y));
+			HandleMouseUp(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
 			break;
 		}
 
@@ -1316,16 +1314,16 @@ namespace fig::gui
 				{
 				case SDLK_UP:
 					_scroll.y -= 10;
-					return true;
+					return EventResult::Handled;
 				case SDLK_DOWN:
 					_scroll.y += 10;
-					return true;
+					return EventResult::Handled;
 				case SDLK_LEFT:
 					_scroll.x -= 10;
-					return true;
+					return EventResult::Handled;
 				case SDLK_RIGHT:
 					_scroll.x += 10;
-					return true;
+					return EventResult::Handled;
 				}
 			}
 	#endif
@@ -1335,14 +1333,14 @@ namespace fig::gui
 				if (bModCtrl)
 				{
 					SelectAll();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 			case SDLK_C:
 				if (bModCtrl)
 				{
 					Copy();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1350,7 +1348,7 @@ namespace fig::gui
 				if (bModCtrl)
 				{
 					Paste();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1358,7 +1356,7 @@ namespace fig::gui
 				if (bModCtrl)
 				{
 					Cut();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1366,7 +1364,7 @@ namespace fig::gui
 				if (bModCtrl)
 				{
 					Undo();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1374,7 +1372,7 @@ namespace fig::gui
 				if (bModCtrl)
 				{
 					Redo();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1382,12 +1380,12 @@ namespace fig::gui
 				if (bModCtrl or bModCtrlShift)
 				{
 					MoveCursorToPriorWord();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (bModNone or bModShift)
 				{
 					MoveCursorLeft();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1395,12 +1393,12 @@ namespace fig::gui
 				if (bModCtrl or bModCtrlShift)
 				{
 					MoveCursorToNextWord();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (bModNone or bModShift)
 				{
 					MoveCursorRight();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1408,7 +1406,7 @@ namespace fig::gui
 				if (bModNone or bModShift)
 				{
 					MoveCursorUp();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1416,7 +1414,7 @@ namespace fig::gui
 				if (bModNone or bModShift)
 				{
 					MoveCursorDown();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1424,12 +1422,12 @@ namespace fig::gui
 				if (bModCtrl or bModCtrlShift)
 				{
 					MoveCursorBeginning();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (bModNone or bModShift)
 				{
 					MoveCursorBeginningOfLine();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1437,12 +1435,12 @@ namespace fig::gui
 				if (bModCtrl or bModCtrlShift)
 				{
 					MoveCursorEnd();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (bModNone or bModShift)
 				{
 					MoveCursorEndOfLine();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1450,18 +1448,18 @@ namespace fig::gui
 				if (bModCtrlShift)
 				{
 					BackspaceToBeginningOfLine();
-					return true;
+					return EventResult::Handled;
 				}
 				else
 				if (bModCtrl)
 				{
 					BackspaceToPriorWord();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (bModNone || bModShift)
 				{
 					Backspace();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1469,17 +1467,17 @@ namespace fig::gui
 				if (bModCtrlShift)
 				{
 					DeleteToEndOfLine();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (bModCtrl)
 				{
 					DeleteToNextWord();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (bModNone || bModShift)
 				{
 					Delete();
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1490,14 +1488,14 @@ namespace fig::gui
 					Insert("\n");
 					PushUndo(UndoAction::Write, false);
 					DidChange();
-					return true;
+					return EventResult::Handled;
 				}
 				else if (bModNone and _pOnEnter)
 				{
 					// Invoke
 					fig::string text = _pText->text ? trim(fig::string(_pText->text)) : "";
 					_pOnEnter(text);
-					return true;
+					return EventResult::Handled;
 				}
 				break;
 
@@ -1507,18 +1505,18 @@ namespace fig::gui
 					if (HasSelection())
 					{
 						Deselect();
-						return true;
+						return EventResult::Handled;
 					}
 					else
 					{
 						SetFocus(false);
-						return true;
+						return EventResult::Handled;
 					}
 				}
 				break;
 
 			default:
-				return false;
+				return EventResult::Pass;
 			}
 			break;
 		case SDL_EVENT_TEXT_INPUT:
@@ -1531,7 +1529,7 @@ namespace fig::gui
 					PushUndo(UndoAction::Write);
 				DidChange();
 			}
-			return true;
+			return EventResult::Handled;
 
 		case SDL_EVENT_TEXT_EDITING:
 			HandleComposition(&event.edit);
@@ -1546,7 +1544,13 @@ namespace fig::gui
 			break;
 		}
 
-		return false;
+		if (IsUserEvent(event, UserEvent::Deactivated))
+		{
+			SetFocus(false);
+			return EventResult::Continue;
+		}
+
+		return EventResult::Pass;
 	}
 
 	#pragma endregion Events

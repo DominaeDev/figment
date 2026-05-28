@@ -158,21 +158,27 @@ namespace fig::gui
 		}
 	}
 
-	bool Control::ProcessEvent(Event& event)
+	EventResult Control::ProcessEvent(Event& event)
 	{
 		if (_bCulled)
-			return false;
+			return EventResult::Pass;
 
-		if (OnEvent(event))
-			return true;
+		auto result = OnEvent(event);
+		if (result == EventResult::Handled)
+			return EventResult::Handled;
 
 		for (auto it = _children.rbegin(); it != std::rend(_children); ++it)
 		{
 			Control* pControl = dynamic_cast<Control*>(*it);
-			if (pControl && pControl->ProcessEvent(event))
-				return true;
+			if (pControl)
+			{
+				auto childResult = pControl->ProcessEvent(event);
+				if (childResult == EventResult::Handled)
+					return EventResult::Handled;
+				result = std::max(result, childResult);
+			}
 		}
-		return false;
+		return result;
 	}
 
 	void Control::SetBackgroundRenderer(CustomRenderer* pCustom)

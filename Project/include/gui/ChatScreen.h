@@ -36,7 +36,7 @@ namespace fig::gui
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 
-		bool OnEvent(Event& event) override;
+		EventResult OnEvent(Event& event) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
 		bool OnCommand(fig::chat::ParsedChatCommand cmd);

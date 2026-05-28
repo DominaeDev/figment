@@ -22,7 +22,7 @@ namespace fig::gui
 	
 	protected:
 		void OnAfterLayout() override;
-		bool OnEvent(Event& event) override;
+		EventResult OnEvent(Event& event) override;
 		void ShowMenu();
 
 	private:

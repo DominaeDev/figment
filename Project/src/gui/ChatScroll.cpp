@@ -276,13 +276,13 @@ namespace fig::gui
 			RefreshActive();
 	}
 
-	bool ChatScroll::OnEvent(Event& event)
+	EventResult ChatScroll::OnEvent(Event& event)
 	{
 		if (event.type == SDL_EVENT_MOUSE_WHEEL)
 		{
-			return HandleMouseWheel(event.wheel);
+			return HandleMouseWheel(event.wheel) ? EventResult::Handled : EventResult::Pass;
 		}
-		return false;
+		return EventResult::Pass;
 	}
 
 	bool ChatScroll::HandleMouseWheel(SDL_MouseWheelEvent event)

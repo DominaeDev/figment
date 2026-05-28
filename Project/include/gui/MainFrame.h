@@ -82,7 +82,7 @@ namespace fig::gui
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(Renderer* pRenderer) override;
 		
-		bool OnEvent(SDL_Event& event) override;
+		EventResult OnEvent(Event& event) override;
 		void OnSignedIn(const fig::user::UserProfile& profile) noexcept;
 		void OnSignedOut() noexcept;
 

@@ -19,7 +19,7 @@ namespace fig::gui
 		const Color& GetThemeForeground() const noexcept;
 		const Color& GetThemeBackground() const noexcept;
 
-		bool OnEvent(Event& event) override;
+		EventResult OnEvent(Event& event) override;
 		void OnAfterLayout() override;
 
 	private:

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gui/Events.h"
 #include "gui/GUITypes.h"
 #include "LayoutElement.h"
 
@@ -30,7 +31,7 @@ namespace fig::gui
 		void SetVisible(bool bVisible);
 		bool GetEnabled() const { return _bEnabled; }
 		void SetEnabled(bool bEnabled);
-		virtual bool ProcessEvent(Event& event);
+		virtual EventResult ProcessEvent(Event& event);
 
 		void SetBackgroundRenderer(CustomRenderer* pCustom);
 		void SetBorderRenderer(CustomRenderer* pCustom);
@@ -53,7 +54,7 @@ namespace fig::gui
 		virtual void OnVisibility(bool bVisible) {};
 		virtual void OnEnabled(bool bEnabled) {};
 		virtual void OnParent();
-		virtual bool OnEvent(Event& event) { return false; }
+		virtual EventResult OnEvent(Event& event) { return EventResult::Pass; }
 
 		void DrawBackground(Renderer* pRenderer);
 		void DrawBorder(Renderer* pRenderer);

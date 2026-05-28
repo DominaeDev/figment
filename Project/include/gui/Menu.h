@@ -65,7 +65,7 @@ namespace fig::gui
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;
-		bool OnEvent(Event& event) override;
+		EventResult OnEvent(Event& event) override;
 
 		bool HandleMouseMotion(SDL_MouseMotionEvent& event);
 		bool HandleMouseDown(SDL_MouseButtonEvent& event);

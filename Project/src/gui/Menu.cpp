@@ -227,21 +227,21 @@ namespace fig::gui
 		_fCollapseTimer = 0.0f;
 	}
 
-	bool Menu::OnEvent(Event& event)
+	EventResult Menu::OnEvent(Event& event)
 	{
 		if (!_bInitialized)
-			return false;
+			return EventResult::Pass;
 
 		switch (event.type)
 		{
 		case SDL_EVENT_MOUSE_MOTION:
-			return HandleMouseMotion(event.motion);
+			return HandleMouseMotion(event.motion) ? EventResult::Handled : EventResult::Pass;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			return HandleMouseDown(event.button);
+			return HandleMouseDown(event.button) ? EventResult::Handled : EventResult::Pass;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			return HandleMouseUp(event.button);
+			return HandleMouseUp(event.button) ? EventResult::Handled : EventResult::Pass;
 		}
-		return false;
+		return EventResult::Pass;
 	}
 
 	bool Menu::HandleMouseMotion(SDL_MouseMotionEvent& motionEvent)
