@@ -1,30 +1,15 @@
 #pragma once
 
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
-
-#include <algorithm>
-#include <ranges>
-#include <optional>
-#include <expected>
-#include <codecvt>
-#include <cwctype>
-#include <stack>
-#include <queue>
-
 #include "Figment.h"
 
-#if defined(_WIN32)
-	#define USE_WIN32_API 1 // Use native Win32 system calls
-#endif
+#define USE_WIN32_API 0 // Use Win32 calls for file i/o
 
-#if USE_WIN32_API
+#if defined(_WIN32) && USE_WIN32_API
 	#define WIN32_LEAN_AND_MEAN
+	#define NOMINMAX
 	#include <windows.h>
 
 	// Undefine troublesome macros
-	#undef min
-	#undef max
 	#undef LoadImage
 	#undef DrawText
 #endif

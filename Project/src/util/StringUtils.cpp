@@ -1,4 +1,6 @@
 #include <pch.h>
+#include <codecvt>
+#include <cwctype>
 
 namespace fig
 {
