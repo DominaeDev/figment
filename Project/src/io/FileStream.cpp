@@ -7,9 +7,9 @@ namespace fig::io
 	FileStream::FileStream(const fig::path& path, Flags flags) :
 		_path { path }
 	{
-		DWORD dwFlags = FILE_ATTRIBUTE_NORMAL;
+		DWORD dwFlags = FILE_FLAG_OVERLAPPED | FILE_ATTRIBUTE_NORMAL;
 		if (flags.IsSet(Flag::Sequential))
-			dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_OVERLAPPED;
+			dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN;
 		_fs = ::CreateFileW(path.wstring().c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlags, nullptr);
 
 		_overlapped.Offset = 0;
@@ -56,10 +56,6 @@ namespace fig::io
 	{
 		if (!IsOk())
 			return false;
-
-//		LARGE_INTEGER li;
-//		li.QuadPart = (LONGLONG)offset;
-//		return ::SetFilePointerEx(_fs, li, nullptr, FILE_BEGIN) != FALSE;
 
 		ULARGE_INTEGER li;
 		li.QuadPart = (ULONGLONG)offset;
