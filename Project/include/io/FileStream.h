@@ -50,7 +50,6 @@ namespace fig::io
 		}
 
 		inline size_t Length() const noexcept { return _length; }
-		inline operator Handle() noexcept { return _fs; }
 
 	private:
 		size_t Read(char* pBuf, size_t nBytes) noexcept;
@@ -62,7 +61,7 @@ namespace fig::io
 		FileError _error {};
 
 #if USE_WIN32_API
-		::HANDLE _fs = INVALID_HANDLE_VALUE;
+		::HANDLE _handle = INVALID_HANDLE_VALUE;
 		::OVERLAPPED _overlapped {0};
 #else
 		std::ifstream _fs;

@@ -234,13 +234,6 @@ namespace fig::auth
 		}
 	}
 
-#if USE_WIN32_API
-	void Decrypt(void* h, fig::bytes& out_data, const fig::auth::AuthKey& key)
-	{
-		assert(false && "This is the wrong function to call when USE_WIN32_API is enabled.");
-	}
-#endif
-
 	void Decrypt(fig::bytes& data, const AuthKey& key)
 	{
 		static_assert(sizeof(unsigned char) == sizeof(std::byte));

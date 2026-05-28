@@ -10,16 +10,16 @@ namespace fig::io
 		DWORD dwFlags = FILE_FLAG_OVERLAPPED | FILE_ATTRIBUTE_NORMAL;
 		if (flags.IsSet(Flag::Sequential))
 			dwFlags |= FILE_FLAG_SEQUENTIAL_SCAN;
-		_fs = ::CreateFileW(path.wstring().c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlags, nullptr);
+		_handle = ::CreateFileW(path.wstring().c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlags, nullptr);
 
-		if (_fs != INVALID_HANDLE_VALUE)
+		if (_handle != INVALID_HANDLE_VALUE)
 		{
 			_overlapped.Offset = 0;
 			_overlapped.OffsetHigh = 0;
 			_overlapped.hEvent = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
 
 			LARGE_INTEGER liSize {};
-			if (::GetFileSizeEx(_fs, &liSize))
+			if (::GetFileSizeEx(_handle, &liSize))
 				_length = static_cast<size_t>(liSize.QuadPart);
 
 			_error = FileError::NoError;
@@ -45,10 +45,10 @@ namespace fig::io
 
 	FileStream::~FileStream()
 	{
-		if (_fs != INVALID_HANDLE_VALUE)
+		if (_handle != INVALID_HANDLE_VALUE)
 		{
 			::CloseHandle(_overlapped.hEvent);
-			::CloseHandle(_fs);
+			::CloseHandle(_handle);
 		}
 	}
 
@@ -72,12 +72,12 @@ namespace fig::io
 		size_t total_read = 0uz;
 		while (nBytes > 0)
 		{
-			BOOL result = ::ReadFile(_fs, (LPVOID)pBuf, (DWORD)nBytes, nullptr, &_overlapped);
+			BOOL result = ::ReadFile(_handle, (LPVOID)pBuf, (DWORD)nBytes, nullptr, &_overlapped);
 			if (!result && ::GetLastError() != ERROR_IO_PENDING)
 				break;
 			::WaitForSingleObject(_overlapped.hEvent, INFINITE);
 			DWORD read = 0;
-			if (!::GetOverlappedResult(_fs, &_overlapped, &read, FALSE) || read == 0)
+			if (!::GetOverlappedResult(_handle, &_overlapped, &read, FALSE) || read == 0)
 				break;
 
 			// Advance the file offset manually
@@ -94,7 +94,8 @@ namespace fig::io
 		}
 		return total_read;
 	}
-#else
+#else // !USE_WIN32_API
+
 	FileStream::FileStream(const fig::path& path, Flags flags) :
 		_path { path }
 	{

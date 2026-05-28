@@ -70,7 +70,6 @@ namespace fig::auth
 
 	void Decrypt(fig::bytes& data, const AuthKey& key);
 	void Decrypt(std::ifstream& stream, fig::bytes& out_data, const AuthKey& key);
-	void Decrypt(void* file_handle, fig::bytes& out_data, const AuthKey& key);
 	void Decrypt(fig::io::FileStream& fs, fig::bytes& out_data, const fig::auth::AuthKey& key);
 
 	DecryptedData Decrypt(const EncryptedData& input, const AuthKey& key);
