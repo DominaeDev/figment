@@ -28,18 +28,51 @@ namespace fig::Constants
 		constexpr int32_t ProfileImageWidth = 256;
 		constexpr int32_t ProfileImageHeight = 256;
 
-		constexpr fig::gui::Coord CardWidth = 320;
-		constexpr fig::gui::Coord CardHeight = 412;
-		constexpr fig::gui::Coord CardSpacingX = 18;
-		constexpr fig::gui::Coord CardSpacingY = 20;
-		
-		constexpr fig::gui::Coord CardZoomPixelsLarge = 18;
-		constexpr fig::gui::Coord CardZoomPixelsSmall = 16;
+		namespace Cards
+		{
+			constexpr fig::gui::Coord SpacingX = 18;
+			constexpr fig::gui::Coord SpacingY = 20;
+			constexpr float ZoomSmoothing = 10.0f;
+			constexpr float ZoomVerticalShift = 0.65f;
 
-		constexpr float HalfScaleFactor = 0.75f;
-		constexpr fig::gui::Coord HalfCardWidth = static_cast<fig::gui::Coord>(CardWidth * HalfScaleFactor);
-		constexpr fig::gui::Coord HalfCardHeight = static_cast<fig::gui::Coord>(CardHeight * HalfScaleFactor);
-		constexpr float CardZoomVerticalShift = 0.65f;
+			namespace Full
+			{
+				constexpr fig::gui::Coord Width = 320;
+				constexpr fig::gui::Coord Height = 412;
+				constexpr fig::gui::Coord ZoomPixels = 18;
+				constexpr fig::gui::Coord BorderOffset = 16;
+
+				constexpr fig::gui::Coord InnerMargin = 12;
+				constexpr fig::gui::Coord FooterHeight = 80;
+
+				namespace Tags
+				{
+					constexpr fig::gui::Coord Margin = 10;
+					constexpr fig::gui::Coord Spacing = 6;
+					constexpr fig::gui::Coord InnerMargin = 8;
+					constexpr fig::gui::Coord MinWidth = 36;
+					constexpr fig::gui::Coord RowHeight = 32;
+					constexpr fig::gui::Coord Top = 70;
+					constexpr fig::gui::Coord MaxRows = 2;
+				}
+			}
+
+			namespace Half
+			{
+				constexpr fig::gui::Coord Width = 240;
+				constexpr fig::gui::Coord Height = 309;
+				constexpr fig::gui::Coord ZoomPixels = 16;
+				constexpr fig::gui::Coord BorderOffset = 12;
+
+				constexpr fig::gui::Coord InnerMargin = 10;
+				constexpr fig::gui::Coord FooterHeight = 60;
+			}
+		}
+
+		constexpr fig::gui::Coord CardWidth = Cards::Full::Width;
+		constexpr fig::gui::Coord CardHeight = Cards::Full::Height;
+		constexpr fig::gui::Coord HalfCardWidth = Cards::Half::Width;
+		constexpr fig::gui::Coord HalfCardHeight = Cards::Half::Height;
 
 		namespace SidePanel
 		{

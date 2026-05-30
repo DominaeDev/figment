@@ -18,7 +18,7 @@ namespace fig::gui
 
 	static constexpr Coord cardWidth(CardSize cardSize) noexcept
 	{
-		return cardSize == CardSize::Full ? Constants::GUI::CardWidth : Constants::GUI::HalfCardWidth;;
+		return cardSize == CardSize::Full ? Constants::GUI::CardWidth : Constants::GUI::HalfCardWidth;
 	}
 
 	static constexpr Coord cardHeight(CardSize cardSize) noexcept
@@ -30,7 +30,7 @@ namespace fig::gui
 		_cardSize { cardSize }
 	{
 		_pGridSizer = new GridSizer(cardWidth(cardSize), cardHeight(cardSize));
-		_pGridSizer->SetSpacing(Constants::GUI::CardSpacingX, Constants::GUI::CardSpacingY);
+		_pGridSizer->SetSpacing(Constants::GUI::Cards::SpacingX, Constants::GUI::Cards::SpacingY);
 		_pGridSizer->EnableCentering(true);
 		SetTopMargin(TopMargin);
 		SetBottomMargin(BottomMargin);
@@ -111,8 +111,8 @@ namespace fig::gui
 		{
 			auto height = GetHeight();
 			auto kCardHeight = cardHeight(_cardSize);
-			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::CardSpacingY);
-			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
+			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
+			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
 
 			_maxExtent = curr_extent;
 			_last_rows = curr_rows;
@@ -146,7 +146,7 @@ namespace fig::gui
 			card->SetCardSize(cardSize);
 
 		_pGridSizer->SetCellSize(cardWidth(cardSize), cardHeight(cardSize));
-		_pGridSizer->SetSpacing(Constants::GUI::CardSpacingX, Constants::GUI::CardSpacingY);
+		_pGridSizer->SetSpacing(Constants::GUI::Cards::SpacingX, Constants::GUI::Cards::SpacingY);
 
 		_fScrollY = 0;
 		InvalidateLayout();
@@ -179,7 +179,7 @@ namespace fig::gui
 	{
 		int32_t curr_rows = toI(_pGridSizer->GetRows());
 		Coord kCardHeight = cardHeight(_cardSize);
-		_maxExtent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::CardSpacingY);
+		_maxExtent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
 
 		ScrollPanel::OnAfterLayout();
 	}

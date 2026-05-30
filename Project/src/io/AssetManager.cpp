@@ -840,8 +840,8 @@ namespace fig::io
 			return AsyncLoadError::FileNotFound;
 
 		// Half-version
-		int32_t expandX = Constants::GUI::CardZoomPixelsSmall * 2;
-		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::CardZoomPixelsSmall * 2) * toF(Constants::GUI::HalfCardHeight) / toF(Constants::GUI::HalfCardWidth)));
+		int32_t expandX = Constants::GUI::Cards::Half::ZoomPixels * 2;
+		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::Cards::Half::ZoomPixels * 2) * toF(Constants::GUI::HalfCardHeight) / toF(Constants::GUI::HalfCardWidth)));
 		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HalfCardWidth + expandX, Constants::GUI::HalfCardHeight + expandY, ImageFit::Stretch, true);
 		
 		// Round corners

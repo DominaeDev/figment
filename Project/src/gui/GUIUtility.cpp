@@ -248,8 +248,8 @@ namespace fig::gui
 
 	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha)
 	{
-		int32_t expandX = Constants::GUI::CardZoomPixelsLarge * 2;
-		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::CardZoomPixelsLarge * 2) * toF(Constants::GUI::CardHeight) / toF(Constants::GUI::CardWidth)));
+		int32_t expandX = Constants::GUI::Cards::Full::ZoomPixels * 2;
+		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::Cards::Full::ZoomPixels * 2) * toF(Constants::GUI::CardHeight) / toF(Constants::GUI::CardWidth)));
 
 		auto pSurface = SDL_CreateSurface(Constants::GUI::CardWidth + expandX, Constants::GUI::CardHeight + expandY, SDL_PIXELFORMAT_RGB24);
 		if (not (bool)pSurface)

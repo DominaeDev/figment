@@ -14,34 +14,10 @@ using namespace fig::data;
 
 namespace fig::gui
 {
-	namespace Large
-	{
-		constexpr Coord Width = Constants::GUI::CardWidth;
-		constexpr Coord Height = Constants::GUI::CardHeight;
-		constexpr Coord Margin = 12;
-		constexpr Coord FooterHeight = 80;
-		constexpr float ZoomAmount = 18.0f;
-	}
-
-	namespace Small
-	{
-		constexpr Coord Width = Constants::GUI::HalfCardWidth;
-		constexpr Coord Height = Constants::GUI::HalfCardHeight;
-		constexpr Coord Margin = 10;
-		constexpr Coord FooterHeight = 60;
-		constexpr float ZoomAmount = 14.0f;
-	}
-
-	constexpr Coord kTagMargin = 10;
-	constexpr Coord kTagSpacing = 6;
-	constexpr Coord kTagInnerMargin = 8;
-	constexpr Coord kTagMinWidth = 36;
-	constexpr Coord kTagRowHeight = 32;
-	constexpr Coord kTagY = 70;
-	constexpr Coord kTagMaxRows = 2;
+	namespace Large = Constants::GUI::Cards::Full;
+	namespace Small = Constants::GUI::Cards::Half;
 
 	constexpr uint8_t FadeAlpha = 0x60;
-	constexpr float ZoomSmoothing = 12.0f;
 
 	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(TextureType::MASK_CARD)),
 		_assetId { assetId },
@@ -80,9 +56,9 @@ namespace fig::gui
 
 		// Label (large)
 		_pLargeLabel = new StaticText(_pLargeFooter, "", FontFace::CardHeader, 28.0, false);
-		_pLargeLabel->SetPosition(Large::Margin, Large::FooterHeight - Large::Margin - 68);
-		_pLargeLabel->SetMaxSize(Large::Width - (Large::Margin * 2), -1);
-		_pLargeLabel->SetSize(Large::Width - (Large::Margin * 2), 80);
+		_pLargeLabel->SetPosition(Large::InnerMargin, Large::FooterHeight - Large::InnerMargin - 68);
+		_pLargeLabel->SetMaxSize(Large::Width - (Large::InnerMargin * 2), -1);
+		_pLargeLabel->SetSize(Large::Width - (Large::InnerMargin * 2), 80);
 		_pLargeLabel->SetForegroundColor(Colors::White);
 		_pLargeLabel->SetBackgroundColor(Colors::Transparent);
 		_pLargeLabel->EnableDropShadow(true);
@@ -95,8 +71,8 @@ namespace fig::gui
 
 		// Styled border (large)
 		_pLargeBorder = new Image(_pLargeRoot, nullptr);
-		_pLargeBorder->SetPosition(-16, -16);
-		_pLargeBorder->SetSize(Large::Width + 32, Large::Height + 32);
+		_pLargeBorder->SetPosition(-Large::BorderOffset, -Large::BorderOffset);
+		_pLargeBorder->SetSize(Large::Width + Large::BorderOffset * 2, Large::Height + Large::BorderOffset * 2);
 		_pLargeBorder->SetVisible(false);
 
 		// Star (large)
@@ -105,8 +81,8 @@ namespace fig::gui
 		_pLargeStar->SetVisible(false);
 
 		// Tags
-		_tagPosition.x = kTagMargin;
-		_tagPosition.y = kTagY;
+		_tagPosition.x = Large::Tags::Margin;
+		_tagPosition.y = Large::Tags::Top;
 		_pTagsRoot = new Area(_pLargeFooter);
 
 		// Footer (small)
@@ -121,9 +97,9 @@ namespace fig::gui
 
 		// Label (small)
 		_pSmallLabel = new StaticText(pSmallFooter, "", FontFace::CardHeader, 24.0, false);
-		_pSmallLabel->SetPosition(Small::Margin, Small::FooterHeight - Small::Margin - 32);
-		_pSmallLabel->SetMaxSize(Small::Width - (Small::Margin * 2), -1);
-		_pSmallLabel->SetSize(Small::Width - (Small::Margin * 2), 40);
+		_pSmallLabel->SetPosition(Small::InnerMargin, Small::FooterHeight - Small::InnerMargin - 32);
+		_pSmallLabel->SetMaxSize(Small::Width - (Small::InnerMargin * 2), -1);
+		_pSmallLabel->SetSize(Small::Width - (Small::InnerMargin * 2), 40);
 		_pSmallLabel->SetForegroundColor(Colors::White);
 		_pSmallLabel->SetBackgroundColor(Colors::Transparent);
 		_pSmallLabel->EnableDropShadow(true);
@@ -136,9 +112,8 @@ namespace fig::gui
 
 		// Styled border (small)
 		_pSmallBorder = new Image(_pSmallRoot, nullptr);
-		constexpr Coord borderOffset = static_cast<Coord>(16 * Constants::GUI::HalfScaleFactor);
-		_pSmallBorder->SetPosition(-borderOffset, -borderOffset);
-		_pSmallBorder->SetSize(Small::Width + borderOffset * 2, Small::Height + borderOffset * 2);
+		_pSmallBorder->SetPosition(-Small::BorderOffset, -Small::BorderOffset);
+		_pSmallBorder->SetSize(Small::Width + Small::BorderOffset * 2, Small::Height + Small::BorderOffset * 2);
 		_pSmallBorder->SetVisible(false);
 
 		// Star (small)
@@ -170,7 +145,7 @@ namespace fig::gui
 		if (_bHasError && !_pErrorIcon)
 		{
 			// Create error icon
-			float scale = _cardSize == CardSize::Full ? 1.0f : Constants::GUI::HalfScaleFactor;
+			float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
 			_pErrorIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_ERROR));
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
 			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
@@ -191,8 +166,8 @@ namespace fig::gui
 
 		if (!flt_eq(_fHoverZoom, _fTargetZoom))
 		{
-			_fHoverZoom = std::clamp(_fHoverZoom + (_fTargetZoom - _fHoverZoom) * ZoomSmoothing * fElapsed, 0.0f, 1.0f);
-			if (std::abs(_fTargetZoom - _fHoverZoom) < 0.01f)
+			_fHoverZoom = std::clamp(_fHoverZoom + (_fTargetZoom - _fHoverZoom) * Constants::GUI::Cards::ZoomSmoothing * fElapsed, 0.0f, 1.0f);
+			if (std::abs(_fTargetZoom - _fHoverZoom) < 0.065f)
 				_fHoverZoom = _fTargetZoom;
 			SetZoom(_fHoverZoom);
 		}
@@ -215,12 +190,12 @@ namespace fig::gui
 			if (_pLargeLabel->MeasureText(false).x <= _pLargeLabel->GetMaxSize().x)
 			{
 				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 28.0));
-				_pLargeLabel->SetY(Large::FooterHeight - Large::Margin - 64 + (_bEnableTags ? 22 : 32));
+				_pLargeLabel->SetY(Large::FooterHeight - Large::InnerMargin - 64 + (_bEnableTags ? 22 : 32));
 			}
 			else
 			{
 				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 24.0));
-				_pLargeLabel->SetY(Large::FooterHeight - Large::Margin - 60 + (_bEnableTags ? 22 : 32));
+				_pLargeLabel->SetY(Large::FooterHeight - Large::InnerMargin - 60 + (_bEnableTags ? 22 : 32));
 			}
 		}
 
@@ -238,7 +213,7 @@ namespace fig::gui
 		if (_cardSize == CardSize::Half)
 			_pCounterBG->SetPosition(6, 6);
 		else
-			_pCounterBG->SetPosition(kTagMargin, kTagMargin);
+			_pCounterBG->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 
 		_pCounterBG->SetForegroundColor(0xA0_rgba);
 
@@ -270,7 +245,7 @@ namespace fig::gui
 		if (_cardSize == CardSize::Half)
 			_pNewIndicator->SetPosition(6, 6);
 		else
-			_pNewIndicator->SetPosition(kTagMargin, kTagMargin);
+			_pNewIndicator->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 
 		_pNewIndicator->SetForegroundColor(0x1065b4E0_rgba);
 
@@ -300,23 +275,23 @@ namespace fig::gui
 
 		auto position = _tagPosition;
 
-		if (Large::Width < position.x + kTagInnerMargin * 2 + kTagMargin + kTagMinWidth)
+		if (Large::Width < position.x + Large::Tags::InnerMargin * 2 + Large::Tags::Margin + Large::Tags::MinWidth)
 		{
-			if (_tagRows + 1 > kTagMaxRows)
+			if (_tagRows + 1 > Large::Tags::MaxRows)
 				return AddTagResult::Stop;
 
-			_tagPosition.x = kTagMargin;
-			_tagPosition.y += kTagRowHeight;
+			_tagPosition.x = Large::Tags::Margin;
+			_tagPosition.y += Large::Tags::RowHeight;
 			_tagRows++;
 
-			_pLargeFooter->SetHeight(Large::FooterHeight + kTagRowHeight * _tagRows - 1);
+			_pLargeFooter->SetHeight(Large::FooterHeight + Large::Tags::RowHeight * _tagRows - 1);
 			_pLargeFooter->SetY(Large::Height - _pLargeFooter->GetHeight());
 			_pLargeFooterFade->FillParent();
 			position = _tagPosition;
 		}
 		else if (_tags.empty())
 		{
-			_pLargeFooter->SetHeight(Large::FooterHeight + kTagRowHeight);
+			_pLargeFooter->SetHeight(Large::FooterHeight + Large::Tags::RowHeight);
 			_pLargeFooter->SetY(Large::Height - _pLargeFooter->GetHeight());
 			_pLargeFooterFade->FillParent();
 		}
@@ -326,19 +301,19 @@ namespace fig::gui
 		pTagBG->SetForegroundColor(Colors::Black.WithAlpha(0.7f));
 
 		auto pLabel = new StaticText(_pTagsRoot, tag, FontFace::Default, 14.0, true);
-		pLabel->SetPosition(position.x + kTagInnerMargin, position.y + 3);
+		pLabel->SetPosition(position.x + Large::Tags::InnerMargin, position.y + 3);
 		pLabel->EnableWordWrap(false);
 		pLabel->EnableEllipsis(true);
-		pLabel->SetMaxSize(Large::Width - (position.x + kTagInnerMargin * 2 + kTagMargin), 0);
+		pLabel->SetMaxSize(Large::Width - (position.x + Large::Tags::InnerMargin * 2 + Large::Tags::Margin), 0);
 		if (color.IsDefined())
 			pLabel->SetForegroundColor(color);
 		else
 			pLabel->SetForegroundColor(Colors::White);
 
 		auto [w, h] = pLabel->MeasureText();
-		pTagBG->SetSize(w + kTagInnerMargin * 2, 26);
+		pTagBG->SetSize(w + Large::Tags::InnerMargin * 2, 26);
 
-		_tagPosition.x += pTagBG->GetWidth() + kTagSpacing;
+		_tagPosition.x += pTagBG->GetWidth() + Large::Tags::Spacing;
 		_tags.insert(lower_tag);
 		return AddTagResult::Ok;
 	}
@@ -532,10 +507,10 @@ namespace fig::gui
 			_pLargeRoot->SetVisible(true);
 			_pSmallRoot->SetVisible(false);
 			if (_pCounterBG)
-				_pCounterBG->SetPosition(kTagMargin, kTagMargin);
+				_pCounterBG->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 			if (_pNewIndicator)
-				_pNewIndicator->SetPosition(kTagMargin + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), kTagMargin);
-			_fZoomExpand = toF(Constants::GUI::CardZoomPixelsLarge);
+				_pNewIndicator->SetPosition(Large::Tags::Margin + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), Large::Tags::Margin);
+			_fZoomExpand = toF(Constants::GUI::Cards::Full::ZoomPixels);
 			break;
 
 		case CardSize::Half:
@@ -545,7 +520,7 @@ namespace fig::gui
 				_pCounterBG->SetPosition(6, 6);
 			if (_pNewIndicator)
 				_pNewIndicator->SetPosition(6 + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), 6);
-			_fZoomExpand = toF(Constants::GUI::CardZoomPixelsSmall);
+			_fZoomExpand = toF(Constants::GUI::Cards::Half::ZoomPixels);
 			break;
 		}
 
@@ -556,7 +531,7 @@ namespace fig::gui
 	{
 		if (_pErrorIcon)
 		{
-			float scale = _cardSize == CardSize::Full ? 1.0f : Constants::GUI::HalfScaleFactor;
+			float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
 			_pErrorIcon->Center();
 		}
@@ -596,7 +571,7 @@ namespace fig::gui
 		{
 			CreatePendingTags();
 
-			auto height = Large::FooterHeight + kTagRowHeight * _tagRows;
+			auto height = Large::FooterHeight + Large::Tags::RowHeight * _tagRows;
 			_pLargeFooter->SetHeight(height);
 			_pLargeFooter->SetY(Large::Height - height);
 			_pLargeFooterFade->FillParent();
@@ -608,7 +583,7 @@ namespace fig::gui
 			_pLargeFooterFade->FillParent();
 		}
 
-		_pLargeLabel->SetY(Large::FooterHeight - Large::Margin - 64 + (_bEnableTags ? 22 : 32));
+		_pLargeLabel->SetY(Large::FooterHeight - Large::InnerMargin - 64 + (_bEnableTags ? 22 : 32));
 	}
 
 	void CoverCard::ShowStar(bool bShow)

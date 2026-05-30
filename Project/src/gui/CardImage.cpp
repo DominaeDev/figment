@@ -121,7 +121,7 @@ namespace fig::gui
 			drawRect.h += fExpandY * 2.0f;
 
 			// Shift upwards (towards the face)
-			drawRect.y += _fZoom * _fZoomExpand * fRatio * Constants::GUI::CardZoomVerticalShift;
+			drawRect.y += _fZoom * _fZoomExpand * fRatio * Constants::GUI::Cards::ZoomVerticalShift;
 
 			if (flt_eq(_fZoom, 1.0f))
 			{
