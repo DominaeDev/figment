@@ -163,19 +163,20 @@ namespace fig::gui
 		if (_bCulled)
 			return EventResult::Pass;
 
+		// Pass to self
 		auto result = OnEvent(event);
 		if (result == EventResult::Handled)
 			return EventResult::Handled;
 
+		// Pass to children (in reverse order)
 		for (auto it = _children.rbegin(); it != std::rend(_children); ++it)
 		{
 			Control* pControl = dynamic_cast<Control*>(*it);
 			if (pControl)
 			{
-				auto childResult = pControl->ProcessEvent(event);
-				if (childResult == EventResult::Handled)
+				result = std::max(result, pControl->ProcessEvent(event));
+				if (result == EventResult::Handled)
 					return EventResult::Handled;
-				result = std::max(result, childResult);
 			}
 		}
 		return result;

@@ -59,14 +59,5 @@ namespace fig::gui
 		event.user.data1 = pData1;
 		event.user.data2 = pData2;
 		ProcessEvent(event);
-	}
-
-	template <typename T>
-	inline void Screen::PushEvent(UserEvent eventType, T* pData)
-	{
-		Event event {};
-		event.type = SDLUserEvent(eventType);
-		event.user.data1 = (void*)pData;
-		ProcessEvent(event);
-	}
+	}	
 }

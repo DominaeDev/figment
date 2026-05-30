@@ -25,9 +25,6 @@ namespace fig::gui
 		void NotifySidePanelShown(bool showing);
 		
 		void PushEvent(UserEvent eventType, int32_t code = 0, void* pData1 = nullptr, void* pData2 = nullptr);
-		template <typename T>
-		void PushEvent(UserEvent eventType, T* pData);
-
 	protected:
 		EventResult OnEvent(Event& event) override;
 		virtual void OnSidePanel(bool show) {};

@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "gui/Events.h"
+#include <cassert>
 
 namespace fig::gui
 {
@@ -7,7 +8,8 @@ namespace fig::gui
 
 	void RegisterUserEvents()
 	{
-		UserEventBase = SDL_RegisterEvents(UserEvent::Count);
+		UserEventBase = SDL_RegisterEvents(static_cast<int32_t>(UserEvent::Count));
+		assert(UserEventBase);
 	}
 
 }

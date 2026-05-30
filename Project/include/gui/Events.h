@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	enum UserEvent : uint32_t
+	enum class UserEvent : uint32_t
 	{
 		UserSignedIn,
 		UserSignedOut,
@@ -38,16 +38,14 @@ namespace fig::gui
 	void RegisterUserEvents();
 	extern uint32_t UserEventBase;
 
-	inline uint32_t SDLUserEvent(UserEvent e) { return UserEventBase + static_cast<uint32_t>(e); }
-	inline bool IsUserEvent(Event& event, UserEvent e) { return event.type == SDLUserEvent(e); }
+	inline constexpr uint32_t SDLUserEvent(UserEvent e) { return UserEventBase + static_cast<uint32_t>(e); }
+	inline constexpr bool IsUserEvent(Event& event, UserEvent e) { return event.type == SDLUserEvent(e); }
 
-	inline void PushEvent(UserEvent eventType, int32_t code = 0, void* pData1 = nullptr, void* pData2 = nullptr)
+	inline void PushEvent(UserEvent eventType, int32_t code = 0)
 	{
 		Event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.code = code;
-		event.user.data1 = pData1;
-		event.user.data2 = pData2;
 		SDL_PushEvent(&event);
 	}
 
@@ -57,6 +55,37 @@ namespace fig::gui
 		Event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.data1 = (void*)pData;
+		SDL_PushEvent(&event);
+	}
+
+	template <typename T, typename U>
+	inline void PushEvent(UserEvent eventType, T* pData1, U* pData2)
+	{
+		Event event {};
+		event.type = SDLUserEvent(eventType);
+		event.user.data1 = (void*)pData1;
+		event.user.data2 = (void*)pData2;
+		SDL_PushEvent(&event);
+	}
+
+	template <typename T>
+	inline void PushEvent(UserEvent eventType, int32_t code, T* pData)
+	{
+		Event event {};
+		event.type = SDLUserEvent(eventType);
+		event.user.code = code;
+		event.user.data1 = (void*)pData;
+		SDL_PushEvent(&event);
+	}
+
+	template <typename T, typename U>
+	inline void PushEvent(UserEvent eventType, int32_t code, T* pData1, U* pData2)
+	{
+		Event event {};
+		event.type = SDLUserEvent(eventType);
+		event.user.code = code;
+		event.user.data1 = (void*)pData1;
+		event.user.data2 = (void*)pData2;
 		SDL_PushEvent(&event);
 	}
 
