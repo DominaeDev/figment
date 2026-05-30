@@ -100,9 +100,37 @@ namespace fig::gui
 				SDL_SetTextureBlendMode(_pTexture, multiplyAlpha);
 			}
 
-			auto rect = expand_rect(Rectf { 0, 0, toF(width), toF(height) }, _fZoom);
-			rect.y += _fZoom * 0.65f;
-			SDL_RenderTexture(pRenderer, _pTexture, NULL, &rect);
+			float fWidth = toF(width);
+			float fHeight = toF(height);
+
+			Rectf drawRect { 0, 0, toF(_pTexture->w), toF(_pTexture->h) };
+
+			// Center
+			drawRect.x -= toF(_pTexture->w - width) / 2.0f;
+			drawRect.y -= toF(_pTexture->h - height) / 2.0f;
+
+			float fZoom = _fZoom - 1.0f;
+			float fRatio = toF(_pTexture->h) / toF(_pTexture->w);
+
+			// Expand rect uniformally
+			float fExpandX = fZoom * _fZoomExpand;
+			float fExpandY = fZoom * _fZoomExpand * fRatio;
+			drawRect.x -= fExpandX;
+			drawRect.y -= fExpandY;
+			drawRect.w += fExpandX * 2.0f;
+			drawRect.h += fExpandY * 2.0f;
+
+			// Shift upwards (towards the face)
+			drawRect.y += _fZoom * _fZoomExpand * fRatio * Constants::GUI::CardZoomVerticalShift;
+
+			if (flt_eq(_fZoom, 1.0f))
+			{
+				drawRect.x = std::roundf(drawRect.x);
+				drawRect.y = std::roundf(drawRect.y);
+				drawRect.w = std::roundf(drawRect.w);
+				drawRect.h = std::roundf(drawRect.h);
+			}
+			SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
 			SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
 		}
 		else
@@ -116,11 +144,10 @@ namespace fig::gui
 
 	void CardImage::SetZoom(float value) noexcept
 	{
-		if (flt_eq(value, _fZoom))
-			return;
-
-		_fZoom = std::max(value, 0.0f);
-		_bRedraw = true;
+		if (not flt_eq(value, _fZoom))
+		{
+			_fZoom = value;
+			_bRedraw = true;
+		}
 	}
-
 }

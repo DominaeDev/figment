@@ -32,10 +32,14 @@ namespace fig::Constants
 		constexpr fig::gui::Coord CardHeight = 412;
 		constexpr fig::gui::Coord CardSpacingX = 18;
 		constexpr fig::gui::Coord CardSpacingY = 20;
+		
+		constexpr fig::gui::Coord CardZoomPixelsLarge = 18;
+		constexpr fig::gui::Coord CardZoomPixelsSmall = 16;
 
 		constexpr float HalfScaleFactor = 0.75f;
 		constexpr fig::gui::Coord HalfCardWidth = static_cast<fig::gui::Coord>(CardWidth * HalfScaleFactor);
 		constexpr fig::gui::Coord HalfCardHeight = static_cast<fig::gui::Coord>(CardHeight * HalfScaleFactor);
+		constexpr float CardZoomVerticalShift = 0.65f;
 
 		namespace SidePanel
 		{

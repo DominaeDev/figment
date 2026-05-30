@@ -13,7 +13,7 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
-//			ImportTestCharacters();
+//			ImportTestCharacters("./import/characters");
 //			ShuffleCards();
 
 //			CreateModelSettings();

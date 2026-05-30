@@ -248,7 +248,10 @@ namespace fig::gui
 
 	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha)
 	{
-		auto pSurface = SDL_CreateSurface(Constants::GUI::CardWidth, Constants::GUI::CardHeight, SDL_PIXELFORMAT_RGB24);
+		int32_t expandX = Constants::GUI::CardZoomPixelsLarge * 2;
+		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::CardZoomPixelsLarge * 2) * toF(Constants::GUI::CardHeight) / toF(Constants::GUI::CardWidth)));
+
+		auto pSurface = SDL_CreateSurface(Constants::GUI::CardWidth + expandX, Constants::GUI::CardHeight + expandY, SDL_PIXELFORMAT_RGB24);
 		if (not (bool)pSurface)
 			return {};
 		
@@ -259,7 +262,7 @@ namespace fig::gui
 		auto pBGImage = AppResources::GetImage(TextureType::CARD_BACKGROUND_DEFAULT);
 		SDL_BlitSurface(pBGImage, NULL, pSurface, NULL);
 
-		auto pScaledImage = ScaleSurface(surface, Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait);
+		auto pScaledImage = ScaleSurface(surface, Constants::GUI::CardWidth + 36, Constants::GUI::CardHeight + 48, ImageFit::Portrait);
 		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
 
 		if (bAlpha)

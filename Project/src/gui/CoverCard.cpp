@@ -41,7 +41,7 @@ namespace fig::gui
 	constexpr Coord kTagMaxRows = 2;
 
 	constexpr uint8_t FadeAlpha = 0x60;
-	constexpr float ZoomSmoothing = 8.0f;
+	constexpr float ZoomSmoothing = 12.0f;
 
 	CoverCard::CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(TextureType::MASK_CARD)),
 		_assetId { assetId },
@@ -194,13 +194,8 @@ namespace fig::gui
 			_fHoverZoom = std::clamp(_fHoverZoom + (_fTargetZoom - _fHoverZoom) * ZoomSmoothing * fElapsed, 0.0f, 1.0f);
 			if (std::abs(_fTargetZoom - _fHoverZoom) < 0.01f)
 				_fHoverZoom = _fTargetZoom;
-			SetZoom(_fHoverZoom * (_cardSize == CardSize::Full ? Large::ZoomAmount : Small::ZoomAmount));
+			SetZoom(_fHoverZoom);
 		}
-	}
-
-	void CoverCard::OnRender(Renderer* pRenderer)
-	{
-		CardImage::OnRender(pRenderer);
 	}
 
 	void CoverCard::SetLabel(const fig::string& text) noexcept
@@ -540,7 +535,7 @@ namespace fig::gui
 				_pCounterBG->SetPosition(kTagMargin, kTagMargin);
 			if (_pNewIndicator)
 				_pNewIndicator->SetPosition(kTagMargin + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), kTagMargin);
-			SetSize(Large::Width, Large::Height);
+			_fZoomExpand = toF(Constants::GUI::CardZoomPixelsLarge);
 			break;
 
 		case CardSize::Half:
@@ -550,7 +545,7 @@ namespace fig::gui
 				_pCounterBG->SetPosition(6, 6);
 			if (_pNewIndicator)
 				_pNewIndicator->SetPosition(6 + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), 6);
-			SetSize(Small::Width, Small::Height);
+			_fZoomExpand = toF(Constants::GUI::CardZoomPixelsSmall);
 			break;
 		}
 

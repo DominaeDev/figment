@@ -14,7 +14,7 @@ namespace fig::gui
 
 	inline constexpr Rectf expand_rect(const Rectf& rect, float pixels)
 	{
-		return Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
+		return Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2.0f, rect.h + pixels * 2.0f };
 	}
 
 	inline constexpr Rect to_rect(const Rectf& rect)

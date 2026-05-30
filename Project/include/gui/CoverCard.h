@@ -58,7 +58,6 @@ namespace fig::gui
 		AddTagResult AddTag(const fig::string& tag, const Color& color = {});
 
 		void OnUpdate(float fElapsed) override;
-		void OnRender(Renderer* pRenderer) override;
 		void OnSize() override;
 		
 		void SetIndex(const SearchIndex& index) noexcept;
