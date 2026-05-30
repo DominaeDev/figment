@@ -260,9 +260,9 @@ namespace fig::gui
 
 		// Draw background
 		auto pBGImage = AppResources::GetImage(TextureType::CARD_BACKGROUND_DEFAULT);
-		SDL_BlitSurface(pBGImage, NULL, pSurface, NULL);
+		SDL_BlitSurfaceScaled(pBGImage, NULL, pSurface, NULL, SDL_SCALEMODE_LINEAR);
 
-		auto pScaledImage = ScaleSurface(surface, Constants::GUI::CardWidth + 36, Constants::GUI::CardHeight + 48, ImageFit::Portrait);
+		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->h, ImageFit::Portrait);
 		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
 
 		if (bAlpha)
