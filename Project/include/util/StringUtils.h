@@ -13,6 +13,13 @@ namespace fig
 	void rtrim_inplace(string& s);
 	inline void trim_inplace(string& s) { ltrim_inplace(s); rtrim_inplace(s); }
 	string trim(string&& s);
+	[[nodiscard]] wstring ltrim(const wstring& s);
+	[[nodiscard]] wstring rtrim(const wstring& s);
+	[[nodiscard]] inline wstring trim(const wstring& s) { return ltrim(rtrim(s)); }
+	void ltrim_inplace(wstring& s);
+	void rtrim_inplace(wstring& s);
+	inline void trim_inplace(wstring& s) { ltrim_inplace(s); rtrim_inplace(s); }
+	wstring trim(wstring&& s);
 
 	[[nodiscard]] string lcase(const string& s);
 	[[nodiscard]] string ucase(const string& s);
@@ -50,6 +57,10 @@ namespace fig
 
 	fig::string int_to_string(int32_t value);
 	fig::string float_to_string(float value);
+	int32_t string_to_int(const fig::string_view& s, int32_t default_value);
+	float string_to_float(const fig::string_view& s, float default_value);
+	std::optional<int32_t> string_to_int(const fig::string_view& s);
+	std::optional<float> string_to_float(const fig::string_view& s);
 
 	size_t validate_utf8(const string& text) noexcept;
 	wstring from_utf8(const string& str);

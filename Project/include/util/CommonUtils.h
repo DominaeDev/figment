@@ -162,13 +162,13 @@ namespace fig
 		return fig::npos;
 	};
 
-	inline constexpr int32_t roundToInt(float value)
+	inline int32_t round_to_int(float value)
 	{
-		return toI(std::roundf(value));
+		return static_cast<int32_t>(std::roundf(value));
 	}
 
 	template <typename T>
-	bool is_zero(std::span<T> data) noexcept
+	inline constexpr bool is_zero(std::span<T> data) noexcept
 	{
 		for (T& value : data)
 		{
@@ -179,11 +179,11 @@ namespace fig
 	}
 
 	template <typename T, size_t N>
-	bool is_zero(std::array<T, N> arr) noexcept
+	inline constexpr bool is_zero(std::array<T, N> arr) noexcept
 	{
-		for (auto it = std::begin(arr); it != std::end(arr); ++it)
+		for (auto& x : arr)
 		{
-			if (*it != (T)0)
+			if (x != (T)0)
 				return false;
 		}
 		return true;

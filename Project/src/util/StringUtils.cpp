@@ -43,6 +43,45 @@ namespace fig
 		return s;
 	}
 
+	void ltrim_inplace(wstring& s)
+	{
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](wint_t ch) {
+			return !std::iswspace(ch); 
+		}));
+	}
+
+	wstring ltrim(const wstring& in)
+	{
+		wstring s(in);
+		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](wint_t ch) {
+			return !std::iswspace(ch); 
+		}));
+		return s;
+	}
+
+	void rtrim_inplace(wstring& s)
+	{
+		s.erase(std::find_if(s.rbegin(), s.rend(), [](wint_t ch) {
+			return !std::iswspace(ch);
+		}).base(), s.end());
+	}
+
+	wstring rtrim(const wstring& in)
+	{
+		wstring s(in);
+		s.erase(std::find_if(s.rbegin(), s.rend(), [](wint_t ch) {
+			return !std::iswspace(ch);
+		}).base(), s.end());
+		return s;
+	}
+
+	wstring trim(wstring&& in)
+	{
+		wstring s(std::move(in));
+		trim_inplace(s);
+		return s;
+	}
+
 	bool empty_or_whitespace(const string& s) noexcept
 	{
 		static constexpr const_string ws { " \t\r\n\v\f" };
@@ -703,5 +742,41 @@ namespace fig
 		if (s.find_first_of(".eEnNiI") == fig::string::npos)
 			s += ".0";
 		return s;
+	}
+
+	int32_t string_to_int(const fig::string_view& s, int32_t default_value)
+	{
+		int32_t value {};
+		auto [ptr, err] = std::from_chars(s.data(), s.data() + s.size(), value);
+		if (err != std::errc {} or ptr != s.data() + s.size())
+			return default_value;
+		return value;
+	}
+
+	float string_to_float(const fig::string_view& s, float default_value)
+	{
+		float value {};
+		auto [ptr, err] = std::from_chars(s.data(), s.data() + s.size(), value);
+		if (err != std::errc {} or ptr != s.data() + s.size())
+			return default_value;
+		return value;
+	}
+
+	std::optional<int32_t> string_to_int(const fig::string_view& s)
+	{
+		int32_t value {};
+		auto [ptr, err] = std::from_chars(s.data(), s.data() + s.size(), value);
+		if (err != std::errc {} or ptr != s.data() + s.size())
+			return std::nullopt;
+		return value;
+	}
+
+	std::optional<float> string_to_float(const fig::string_view& s)
+	{
+		float value {};
+		auto [ptr, err] = std::from_chars(s.data(), s.data() + s.size(), value);
+		if (err != std::errc {} or ptr != s.data() + s.size())
+			return std::nullopt;
+		return value;
 	}
 }

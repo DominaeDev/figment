@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <filesystem>
 #include <uuid_v4.h>
+#include "util/Handle.h"
 
 namespace fig
 {
@@ -24,6 +25,9 @@ namespace fig
     using wstring_view = std::wstring_view;
     using const_string = string_view const;
     using StringCRef = const string&;
+    using handle = basic_handle<char, 15>;
+    using whandle = basic_handle<wchar_t, 0>;
+
     static constexpr size_t npos = static_cast<size_t>(-1);
 
     using byte = std::byte;
