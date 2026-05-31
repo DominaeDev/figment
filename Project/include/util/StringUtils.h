@@ -102,14 +102,6 @@ namespace fig
 
 	[[nodiscard]] fig::wstring strip_diacritics(fig::wstring&& input);
 	[[nodiscard]] fig::string strip_diacritics(fig::string&& input);
-
-	[[nodiscard]] size_t find_scope_end(const fig::string& text, size_t start, char open = '{', char close = '}', char escape = '\\');
-	[[nodiscard]] size_t find_within_scope(const fig::string& text, size_t start, char needle, char open = '{', char close = '}', char escape = '\\', int32_t depth = 0);
-	fig::string& escape(fig::string& text, char escape = '\\');
-	fig::string& unescape(fig::string& text, char escape = '\\');
-	fig::string& unescape_whitespace(fig::string& text, char escape = '\\');
-	fig::string& collapse_whitespace(fig::string& text);
-	fig::string& clean_punctuation(fig::string& text);
 }
 
 #endif 

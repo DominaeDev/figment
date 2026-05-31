@@ -10,6 +10,267 @@ namespace fig::text
 		inline constexpr size_t length() const noexcept { return end - begin; }
 	};
 
+	static size_t find_scope_end(const fig::string& text, size_t start, char open = '{', char close = '}', char escape = '\\')
+	{
+		if (empty_or_whitespace(text))
+			return fig::npos;
+
+		int32_t scope = 0;
+		for (; start < text.size(); ++start)
+		{
+			auto c = text[start];
+			if (c == escape)
+			{
+				++start; // Skip next
+				continue;
+			}
+			if (c == open)
+				++scope;
+			else if (c == close)
+			{
+				if (--scope <= 0)
+					return start;
+			}
+		}
+		return -1;
+	}
+
+	static size_t find_within_scope(const fig::string& text, size_t start, char needle, char open = '{', char close = '}', char escape = '\\', int32_t depth = 0)
+	{
+		int32_t scope = 0;
+		for (; start < text.size(); ++start)
+		{
+			auto c = text[start];
+			if (c == escape)
+			{
+				++start; // Skip next
+				continue;
+			}
+			if (c == open)
+				++scope;
+			else if (c == close)
+				--scope;
+			else if (c == needle && scope == depth)
+				return start; // Found
+		}
+		return -1;
+	}
+
+	static fig::string& unescape(fig::string& text, char escape = '\\')
+	{
+		size_t pos_write = 0;
+
+		for (size_t pos_read = 0; pos_read < text.size(); ++pos_read)
+		{
+			if (text[pos_read] != escape || pos_read + 1 >= text.size())
+			{
+				text[pos_write++] = text[pos_read];
+				continue;
+			}
+
+			++pos_read;
+
+			auto ch = text[pos_read];
+			if (ch == escape)
+			{
+				text[pos_write++] = escape;
+				continue;
+			}
+			switch (ch)
+			{
+				case '{':
+				case '}':
+				case '?':
+				case ':':
+				case '|':
+					text[pos_write++] = ch;
+					break;
+				default:
+					text[pos_write++] = escape;
+					--pos_read;
+					break;
+			}
+		}
+
+		text.resize(pos_write);
+		return text;
+	}
+
+	static fig::string& escape(fig::string& text, char escape = '\\')
+	{
+		fig::string result;
+		result.reserve(text.size());
+
+		for (char ch : text)
+		{
+			if (ch == escape)
+			{
+				result += escape;
+				result += escape;
+				continue;
+			}
+
+			switch (ch)
+			{
+				case '\n':
+					result += escape;
+					result += 'n';
+					break;
+				case '\t':
+					result += escape;
+					result += 't';
+					break;
+				case '\r':
+					result += escape;
+					result += 'r';
+					break;
+				case '{':
+				case '}':
+				case '?':
+				case ':':
+				case '|':
+					result += escape;
+					result += ch;
+					break;
+				default:
+					result += ch;
+					break;
+			}
+		}
+
+		text = std::move(result);
+		return text;
+	}
+
+	static fig::string& unescape_whitespace(fig::string& text, char escape = '\\')
+	{
+		size_t pos_write = 0;
+
+		for (size_t pos_read = 0; pos_read < text.size(); ++pos_read)
+		{
+			if (text[pos_read] != escape || pos_read + 1 >= text.size())
+			{
+				text[pos_write++] = text[pos_read];
+				continue;
+			}
+
+			++pos_read;
+
+			auto ch = text[pos_read];
+			if (ch == escape)
+			{
+				text[pos_write++] = escape;
+				continue;
+			}
+			switch (ch)
+			{
+				case 't':
+					text[pos_write++] = '\t';
+					break;
+				case 'r':
+					text[pos_write++] = '\r';
+					break;
+				case 'n':
+					text[pos_write++] = '\n';
+					break;
+				case '_':
+					text[pos_write++] = ' ';
+					break;
+				default:
+					text[pos_write++] = escape;
+					--pos_read;
+					break;
+			}
+		}
+
+		text.resize(pos_write);
+		return text;
+	}
+
+	static fig::string& collapse_whitespace(fig::string& text)
+	{
+		size_t pos_write = 0;
+		bool lastWasSpace = false;
+
+		for (size_t pos_read = 0; pos_read < text.size(); ++pos_read)
+		{
+			char ch = text[pos_read];
+
+			if (ch == '\n')
+			{
+				text[pos_write++] = '\n';
+				lastWasSpace = false;
+			}
+			else if (ch == '\r')
+			{
+				lastWasSpace = false;
+			}
+			else if (ch == ' ' || ch == '\t')
+			{
+				if (!lastWasSpace)
+				{
+					text[pos_write++] = ' ';
+					lastWasSpace = true;
+				}
+			}
+			else
+			{
+				text[pos_write++] = ch;
+				lastWasSpace = false;
+			}
+		}
+
+		text.resize(pos_write);
+		return text;
+	}
+
+	static constexpr bool is_semantic_punctuation(char ch)
+	{
+		switch (ch)
+		{
+			case '.':
+			case ',':
+			case '!':
+			case '?':
+			case ';':
+			case ')':
+			case ']':
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	fig::string& clean_punctuation(fig::string& text)
+	{
+		size_t pos_write = 0;
+
+		for (size_t pos_read = 0; pos_read < text.size(); ++pos_read)
+		{
+			char ch = text[pos_read];
+
+			if (ch == ' ' || ch == '\t')
+			{
+				size_t peek = pos_read + 1;
+
+				while (peek < text.size() and (text[peek] == ' ' || text[peek] == '\t'))
+					++peek;
+
+				if (peek < text.size() and is_semantic_punctuation(text[peek]))
+					continue;
+
+				text[pos_write++] = ch;
+			}
+			else
+			{
+				text[pos_write++] = ch;
+			}
+		}
+
+		text.resize(pos_write);
+		return text;
+	}
+
 	static bool _evaluate_condition(fig::string_view condition, const Contextual& context) noexcept
 	{
 		return true; //! @temp
@@ -126,6 +387,5 @@ namespace fig::text
 		unescape_whitespace(collapse_whitespace(clean_punctuation(unescape(text))));
 		return text;
 	}
-
 
 }

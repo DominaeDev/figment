@@ -33,7 +33,7 @@ namespace fig::Constants
 			constexpr fig::gui::Coord SpacingX = 18;
 			constexpr fig::gui::Coord SpacingY = 20;
 			constexpr float ZoomSmoothing = 10.0f;
-			constexpr float ZoomVerticalShift = 0.65f;
+			constexpr float ZoomVerticalShift = 0.5f;
 
 			namespace Full
 			{
