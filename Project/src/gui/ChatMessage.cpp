@@ -182,7 +182,7 @@ namespace fig::gui
 			text = text.substr(1);
 	}
 
-	void ChatMessage::SetName(StringCRef name)
+	void ChatMessage::SetName(string_cref name)
 	{
 		_name = name;
 	}

@@ -138,7 +138,7 @@
     <Filter Include="Source Files\Data">
       <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Data\Context">
+    <Filter Include="Source Files\Text">
       <UniqueIdentifier>{18600501-ae27-4354-89a8-ce200a7a96cd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -524,11 +524,14 @@
     <ClCompile Include="src\data\ChatLog.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\data\Contextual.cpp">
-      <Filter>Source Files\Data\Context</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\Handle.cpp">
       <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text\Contextual.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\TextEvaluator.cpp">
+      <Filter>Source Files\Text</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1264,11 +1267,14 @@
     <ClInclude Include="include\data\ChatLog.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\data\Contextual.h">
-      <Filter>Source Files\Data\Context</Filter>
-    </ClInclude>
     <ClInclude Include="include\util\Handle.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text\TextEvaluator.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text\Contextual.h">
+      <Filter>Source Files\Text</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -18,12 +18,22 @@ namespace fig
     public:
         static_assert(std::is_same_v<T, char> || std::is_same_v<T, wchar_t>, "basic_handle requires either char or wchar_t type.");
 
-        using string = std::basic_string<T>;
-        using string_view = std::basic_string_view<T>;
+        using string_type = std::basic_string<T>;
+        using string_view_type = std::basic_string_view<T>;
 
         basic_handle() = default;
 
-        explicit basic_handle(string_view value)
+        basic_handle(const T* value)
+            : _value(normalize_handle(value, MaxLength))
+        {
+        }
+
+        basic_handle(string_view_type value)
+            : _value(normalize_handle(value, MaxLength))
+        {
+        }
+
+        basic_handle(string_type value)
             : _value(normalize_handle(value, MaxLength))
         {
         }
@@ -33,28 +43,20 @@ namespace fig
         basic_handle& operator=(const basic_handle&) = default;
         basic_handle& operator=(basic_handle&&) = default;
 
-        basic_handle& operator=(string_view value)
-        {
-            _value = normalize_handle(value, MaxLength);
-            return *this;
-        }
-
-        inline const string& to_string() const noexcept { return _value; }
+        inline const string_type& to_string() const noexcept { return _value; }
         inline const char* c_str() const noexcept { return _value.c_str(); }
         inline bool empty() const noexcept { return _value.empty(); }
 
-        explicit operator string() const { return _value; }
-        explicit operator string_view() const { return _value; }
-        explicit operator const char*() const { return _value.c_str(); }
+        operator string_type() const { return _value; }
 
         auto operator<=>(const basic_handle&) const = default;
         bool operator==(const basic_handle&) const = default;
 
-        bool operator==(string_view other) const { return _value == normalize_handle(other, MaxLength); }
-        auto operator<=>(string_view other) const { return _value <=> normalize_handle(other, MaxLength); }
+        bool operator==(string_view_type other) const { return _value == normalize_handle(other, MaxLength); }
+        auto operator<=>(string_view_type other) const { return _value <=> normalize_handle(other, MaxLength); }
         
     private:
-        string _value;        
+        string_type _value;
     };
 
 } // namespace

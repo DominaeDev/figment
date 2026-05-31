@@ -195,13 +195,15 @@ namespace fig::gui
 
 	void LoginScreen::ShowMenu()
 	{
-		auto pMenu = new Menu(&MainFrame::GetInstance());
-		pMenu->AddItem("New profile\u2026");
-		pMenu->AddItem("Recover profile\u2026");
-		pMenu->AddSeparator();
-		pMenu->AddItem("Exit Figment")
+		auto& menu = MainFrame::GetInstance().CreateMenu();
+		menu.AddItem("New profile\u2026");
+		menu.AddItem("Recover profile\u2026");
+		menu.AddSeparator();
+		menu.AddItem("Settings\u2026", TextureType::ICON_SETTINGS);
+		menu.AddSeparator();
+		menu.AddItem("Exit Figment")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 
-		pMenu->Show(Point { _pMenuButton->GetX() + 4, _pMenuButton->GetY() + _pMenuButton->GetHeight() - 2 });
+		menu.Show(Point { _pMenuButton->GetX() + 4, _pMenuButton->GetY() + _pMenuButton->GetHeight() - 2 });
 	}
 }

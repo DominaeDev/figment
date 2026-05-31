@@ -17,7 +17,7 @@ namespace fig
 
 			if (std::isalnum(c))
 				result += std::tolower(c);
-			else if (c == ' ' or c == '_')
+			else if (c == ' ' or std::ispunct(c))
 				result += '_';
 			else if (std::isspace(c))
 				continue;
@@ -42,7 +42,7 @@ namespace fig
 
 			if (std::iswalnum(c))
 				result += std::towlower(c);
-			else if (c == L' ' or c == L'_')
+			else if (c == L' ' or std::iswpunct(c))
 				result += L'_';
 			else if (std::iswspace(c))
 				continue;

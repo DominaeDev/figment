@@ -17,8 +17,8 @@ namespace fig::gui
 
 		void SetSession(fig::chat::ChatSession session) { _session = session; }
 
-		void AddDummyMessage(StringCRef name, fig::chat::Role role, fig::chat::MessageType msgType, StringCRef message);
-		void AddSystemMessage(StringCRef message);
+		void AddDummyMessage(string_cref name, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message);
+		void AddSystemMessage(string_cref message);
 
 		int RemoveMessages(std::span<fig::uuid> ids);
 		void ClearMessages();
@@ -32,7 +32,7 @@ namespace fig::gui
 		void OnAddedChild(LayoutElement* pChild) override;
 
 	private:
-		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, StringCRef message, bool complete);
+		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message, bool complete);
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
 		void EnablePolling(bool bEnable);
 		void Poll();

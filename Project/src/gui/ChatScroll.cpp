@@ -32,7 +32,7 @@ namespace fig::gui
 		EnableCulling(true);
 	}
 
-	void ChatScroll::AddDummyMessage(StringCRef name, Role role, MessageType msgType, StringCRef message)
+	void ChatScroll::AddDummyMessage(string_cref name, Role role, MessageType msgType, string_cref message)
 	{
 		ChatMessage* pMessage = AddMessage({}, role, msgType, message, true);
 		pMessage->SetName(name);
@@ -47,7 +47,7 @@ namespace fig::gui
 		});
 	}
 
-	void ChatScroll::AddSystemMessage(StringCRef message)
+	void ChatScroll::AddSystemMessage(string_cref message)
 	{
 		ChatMessage* pMessage = AddMessage({}, Role::System, MessageType::SystemMessage, message, true);
 		pMessage->SetActive(false);
@@ -62,7 +62,7 @@ namespace fig::gui
 		});
 	}
 
-	ChatMessage* ChatScroll::AddMessage(const fig::uuid& characterId, Role role, MessageType msgType, StringCRef message, bool complete)
+	ChatMessage* ChatScroll::AddMessage(const fig::uuid& characterId, Role role, MessageType msgType, string_cref message, bool complete)
 	{
 		if (msgType == MessageType::Narration)
 			role = Role::Narrator;

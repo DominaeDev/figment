@@ -177,4 +177,18 @@ namespace fig::data
 			.visibility = visibility,
 		};
 	}
+
+	Contextual CharacterData::GetContext() const noexcept
+	{
+		Contextual ctx;
+		ctx.SetValue("id", chatId);
+		ctx.SetValue("name", shortName);
+		ctx.SetValue("fullname", fullName);
+		ctx.SetValue("gender", fig::string { gender });
+		ctx.SetValue("brief", brief);
+
+		for (auto& attrib : _attributes)
+			ctx.SetValue(attrib.first, attrib.second.value);
+		return ctx;
+	}
 }

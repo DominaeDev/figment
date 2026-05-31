@@ -7,6 +7,7 @@
 #include "gui/GUITypes.h"
 #include "data/CharacterGender.h"
 #include "util/SearchIndex.h"
+#include "text/Contextual.h"
 
 namespace fig::data
 {
@@ -61,6 +62,8 @@ namespace fig::data
 		void AddAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format = CharacterAttribute::Format::Text, CharacterAttribute::Visibility visibility = CharacterAttribute::Visibility::Public);
 		void AppendTags(const fig::string_list& tags);
 		void AddSearchTerm(const fig::string& term);
+
+		Contextual GetContext() const noexcept;
 
 	public:
 		fig::string chatId;	//! @remove?

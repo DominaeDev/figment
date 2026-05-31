@@ -24,7 +24,7 @@ namespace fig
     using wstring = std::wstring;
     using wstring_view = std::wstring_view;
     using const_string = string_view const;
-    using StringCRef = const string&;
+    using string_cref = const string&;
     using handle = basic_handle<char, 15>;
     using whandle = basic_handle<wchar_t, 0>;
 
