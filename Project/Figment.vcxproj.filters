@@ -533,6 +533,15 @@
     <ClCompile Include="src\util\TextEvaluator.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
+    <ClCompile Include="src\text\ConditionNode.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text\ConditionParser.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text\Condition.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1274,6 +1283,15 @@
       <Filter>Source Files\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\text\Contextual.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text\ConditionNode.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text\ConditionParser.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text\Condition.h">
       <Filter>Source Files\Text</Filter>
     </ClInclude>
   </ItemGroup>

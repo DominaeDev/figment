@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "text/TextEvaluator.h"
+#include "text/Condition.h"
 
 namespace fig::text
 {
@@ -271,9 +272,9 @@ namespace fig::text
 		return text;
 	}
 
-	static bool _evaluate_condition(fig::string_view condition, const Contextual& context) noexcept
+	static bool _evaluate_condition(fig::string_view expression, const Contextual& context) noexcept
 	{
-		return true; //! @temp
+		return Condition { fig::string { expression } }.Evaluate(context);
 	}
 
 	static bool _substitute(fig::string& text, const TextSpan& span, const Contextual& context) noexcept

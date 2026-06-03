@@ -24,6 +24,7 @@ namespace fig
 
 		inline bool empty() const noexcept { return _value.empty(); }
 		inline auto GetKeys() const noexcept { return std::span { _value.data(), _value.size() }; }
+
 	private:
 		std::vector<fig::handle> _value;
 	};
@@ -62,7 +63,7 @@ namespace fig
 		inline const std::map<fig::handle, ContextualValue>& GetValues() const noexcept { return _values; }
 		void ClearValues() noexcept;
 
-		template<typename T> 
+		template<typename T>
 		inline T GetValue(fig::handle name, T default_value = {}) const
 		{
 			return TryGetValue<T>(name).value_or(default_value);

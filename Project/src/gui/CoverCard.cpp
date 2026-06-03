@@ -154,7 +154,7 @@ namespace fig::gui
 			CardImage::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
 		}
 
-		bool bHovered = (_bSelected or (is_inside(GetRect(), GetMousePos()))
+		bool bHovered = (_bSelected or is_inside(GetRect(), GetMousePos())
 			and !MainFrame::GetInstance().IsMenuShowing())
 			and !_bHidden;
 

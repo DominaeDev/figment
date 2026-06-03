@@ -263,6 +263,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\text\Condition.cpp" />
+    <ClCompile Include="src\text\ConditionNode.cpp" />
+    <ClCompile Include="src\text\ConditionParser.cpp" />
     <ClCompile Include="src\text\Contextual.cpp" />
     <ClCompile Include="src\user\ProfileDatabase.cpp" />
     <ClCompile Include="src\user\Security.cpp" />
@@ -485,6 +488,9 @@
     <ClInclude Include="include\llm\PromptTemplateTypes.h" />
     <ClInclude Include="include\gui\Area.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\text\Condition.h" />
+    <ClInclude Include="include\text\ConditionNode.h" />
+    <ClInclude Include="include\text\ConditionParser.h" />
     <ClInclude Include="include\text\Contextual.h" />
     <ClInclude Include="include\text\TextEvaluator.h" />
     <ClInclude Include="include\user\ProfileDatabase.h" />
