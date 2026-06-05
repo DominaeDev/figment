@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "text/ConditionNode.h"
-#include "text/Contextual.h"
+#include "text/Context.h"
 
 namespace fig
 {
@@ -9,7 +9,7 @@ namespace fig
 	{
 	}
 
-	bool AndCondition::Evaluate(const Contextual& context) const
+	bool AndCondition::Evaluate(const Context& context) const
 	{
 		for (const auto& child : _children)
 		{
@@ -24,7 +24,7 @@ namespace fig
 	{
 	}
 
-	bool OrCondition::Evaluate(const Contextual& context) const
+	bool OrCondition::Evaluate(const Context& context) const
 	{
 		for (const auto& child : _children)
 		{
@@ -39,7 +39,7 @@ namespace fig
 	{
 	}
 
-	bool NotCondition::Evaluate(const Contextual& context) const
+	bool NotCondition::Evaluate(const Context& context) const
 	{
 		return _child && !_child->Evaluate(context);
 	}
@@ -57,7 +57,7 @@ namespace fig
 			_key = trim(lhs);
 	}
 
-	bool ComparisonCondition::Evaluate(const Contextual& context) const
+	bool ComparisonCondition::Evaluate(const Context& context) const
 	{
 		if (auto try_ctx = context.TryGetContext(_selector))
 		{
@@ -122,7 +122,7 @@ namespace fig
 			_key = trim(name);
 	}
 
-	bool FlagCondition::Evaluate(const Contextual& context) const
+	bool FlagCondition::Evaluate(const Context& context) const
 	{
 		if (_key.empty())
 			return false;

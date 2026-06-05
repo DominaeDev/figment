@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Figment.h"
-#include "text/Contextual.h"
+#include "text/Context.h"
 
 namespace fig
 {
@@ -11,7 +11,7 @@ namespace fig
     {
     public:
         virtual ~ConditionNode() = default;
-        virtual bool Evaluate(const Contextual& context) const = 0;
+        virtual bool Evaluate(const Context& context) const = 0;
     };
 
     using ConditionPtr = std::unique_ptr<ConditionNode>;
@@ -20,7 +20,7 @@ namespace fig
     {
     public:
         explicit AndCondition(std::vector<ConditionPtr> children);
-        bool Evaluate(const Contextual& context) const override;
+        bool Evaluate(const Context& context) const override;
 
     private:
         std::vector<ConditionPtr> _children;
@@ -30,7 +30,7 @@ namespace fig
     {
     public:
         explicit OrCondition(std::vector<ConditionPtr> children);
-        bool Evaluate(const Contextual& context) const override;
+        bool Evaluate(const Context& context) const override;
 
     private:
         std::vector<ConditionPtr> _children;
@@ -40,7 +40,7 @@ namespace fig
     {
     public:
         explicit NotCondition(ConditionPtr child);
-        bool Evaluate(const Contextual& context) const override;
+        bool Evaluate(const Context& context) const override;
 
     private:
         ConditionPtr _child;
@@ -62,7 +62,7 @@ namespace fig
     {
     public:
         ComparisonCondition(const fig::string& lhs, CompareOperator op, RhsValue rhs);
-        bool Evaluate(const Contextual& context) const override;
+        bool Evaluate(const Context& context) const override;
 
     private:
         Selector _selector;
@@ -75,7 +75,7 @@ namespace fig
     {
     public:
         explicit FlagCondition(const fig::string& name);
-        bool Evaluate(const Contextual& context) const override;
+        bool Evaluate(const Context& context) const override;
 
     private:
         Selector _selector;

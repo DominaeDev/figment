@@ -2,8 +2,8 @@
 #define CONDITION_H__
 #pragma once
 
-#include "Contextual.h"
-#include "ConditionNode.h"
+#include "text/Context.h"
+#include "text/ConditionNode.h"
 
 namespace fig
 {
@@ -17,7 +17,7 @@ namespace fig
 		Condition& operator= (const Condition& other) noexcept = delete;
 		Condition& operator= (Condition&& other) noexcept = default;
 
-		bool Evaluate(const Contextual& context) const;
+		bool Evaluate(const Context& context) const;
 
 	private:
 		ConditionPtr _pCondition;

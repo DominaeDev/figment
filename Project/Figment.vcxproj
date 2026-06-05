@@ -227,7 +227,7 @@
     <ClCompile Include="src\io\IniFile.cpp" />
     <ClCompile Include="src\io\XmlReader.cpp" />
     <ClCompile Include="src\io\XmlWriter.cpp" />
-    <ClCompile Include="src\llm\Context.cpp" />
+    <ClCompile Include="src\llm\LLMContext.cpp" />
     <ClCompile Include="src\llm\ContextBlock.cpp" />
     <ClCompile Include="src\llm\ContextCache.cpp" />
     <ClCompile Include="src\llm\ContextCursor.cpp" />
@@ -266,7 +266,7 @@
     <ClCompile Include="src\text\Condition.cpp" />
     <ClCompile Include="src\text\ConditionNode.cpp" />
     <ClCompile Include="src\text\ConditionParser.cpp" />
-    <ClCompile Include="src\text\Contextual.cpp" />
+    <ClCompile Include="src\text\Context.cpp" />
     <ClCompile Include="src\user\ProfileDatabase.cpp" />
     <ClCompile Include="src\user\Security.cpp" />
     <ClCompile Include="src\user\UserManager.cpp" />
@@ -471,7 +471,7 @@
     <ClInclude Include="include\io\XmlReader.h" />
     <ClInclude Include="include\io\XmlSerializable.h" />
     <ClInclude Include="include\io\XmlWriter.h" />
-    <ClInclude Include="include\llm\Context.h" />
+    <ClInclude Include="include\llm\LLMContext.h" />
     <ClInclude Include="include\llm\ContextBlock.h" />
     <ClInclude Include="include\llm\ContextCache.h" />
     <ClInclude Include="include\llm\ContextCursor.h" />
@@ -491,7 +491,7 @@
     <ClInclude Include="include\text\Condition.h" />
     <ClInclude Include="include\text\ConditionNode.h" />
     <ClInclude Include="include\text\ConditionParser.h" />
-    <ClInclude Include="include\text\Contextual.h" />
+    <ClInclude Include="include\text\Context.h" />
     <ClInclude Include="include\text\TextEvaluator.h" />
     <ClInclude Include="include\user\ProfileDatabase.h" />
     <ClInclude Include="include\user\Security.h" />

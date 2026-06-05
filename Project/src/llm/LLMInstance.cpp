@@ -71,7 +71,7 @@ namespace fig::llm
 
 		std::scoped_lock _(_stateMutex); // Lock for the entire duration of the scope
 
-		_contextState = Context { _modelState };
+		_contextState = LLMContext { _modelState };
 		_session = args.session;
 		_stateVars = {};
 		_turn_counter.store(0);

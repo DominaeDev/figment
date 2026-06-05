@@ -19,6 +19,7 @@
 #include "llm/LLMUtility.h"
 #include "io/Serialization.h"
 #include "io/FileUtility.h"
+#include "text/TextEvaluator.h"
 #include <format>
 #include <ranges>
 
@@ -193,7 +194,7 @@ namespace fig::gui
 			if (auto script = fig::io::ReadTextFile("resources/auto_script.txt"))
 			{
 				fig::string text = script.value();
-				text = pLLMInstance->GetSession().ApplyNames(text);
+				TextEvaluator::Evaluate(text, pLLMInstance->GetSession().GetContext());
 				_autoScript = split(text, '\n');
 			}
 			_autoScriptIndex = 0;

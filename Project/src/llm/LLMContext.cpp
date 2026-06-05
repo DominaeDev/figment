@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "llm/Context.h"
+#include "llm/LLMContext.h"
 #include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
 #include "llm/ModelState.h"
@@ -12,7 +12,7 @@ using namespace fig::chat;
 
 namespace fig::llm
 {
-	Context::Context(const ModelState& modelState)
+	LLMContext::LLMContext(const ModelState& modelState)
 	{
 		_pModel = &modelState;
 		_cache = std::make_shared<ContextCache>(modelState.ctx_size, modelState.max_sequences);
@@ -22,12 +22,12 @@ namespace fig::llm
 		_fKeepRatio = modelState.settings.model.contextWindowKeepRatio;
 	}
 
-	int32_t Context::GetUsedKVCacheCells() const
+	int32_t LLMContext::GetUsedKVCacheCells() const
 	{
 		return llama::ctx_used_cells(_pCtx);
 	}
 
-	int32_t Context::ReserveTokens(int32_t ctx_reserve, bool bForce)
+	int32_t LLMContext::ReserveTokens(int32_t ctx_reserve, bool bForce)
 	{
 		int32_t ctx_size = _pModel->ctx_size;
 		int32_t n_ctx_used = GetUsedKVCacheCells();
@@ -40,14 +40,14 @@ namespace fig::llm
 		return 0;
 	}
 
-	void Context::Initialize()
+	void LLMContext::Initialize()
 	{
 		llama::ctx_clear(_pCtx);
 		_blocks.clear();
 		_cache->Clear();
 	}
 
-	void Context::TokenizeUncached(fig::chat::ChatSession& session)
+	void LLMContext::TokenizeUncached(fig::chat::ChatSession& session)
 	{
 		// Tokenize uncached messages
 		for (auto& block : _blocks)
@@ -74,7 +74,7 @@ namespace fig::llm
 		}
 	}
 
-	ContextCursor Context::DecodeUncached()
+	ContextCursor LLMContext::DecodeUncached()
 	{
 		if (_blocks.empty())
 		{
@@ -133,7 +133,7 @@ namespace fig::llm
 		return ContextCursor { attn_position };
 	}
 
-	std::optional<int32_t> Context::DecodeSingleUncached(ContextBlock& block)
+	std::optional<int32_t> LLMContext::DecodeSingleUncached(ContextBlock& block)
 	{
 		assert(block.length() > 0);
 		if (block.attn_position == -1)
@@ -152,7 +152,7 @@ namespace fig::llm
 		return length; // Shift
 	}
 
-	std::optional<int32_t> Context::RealizeUncachedBlocks()
+	std::optional<int32_t> LLMContext::RealizeUncachedBlocks()
 	{
 		int32_t tokens_added = 0;
 #if _DEBUG
@@ -240,7 +240,7 @@ namespace fig::llm
 		return tokens_added;
 	}
 
-	bool Context::RebuildKVCache()
+	bool LLMContext::RebuildKVCache()
 	{
 		int r;
 		if constexpr (Disabled)
@@ -265,7 +265,7 @@ namespace fig::llm
 		return r == 0;
 	}
 
-	std::optional<int32_t> Context::RemoveDiscardedBlocks()
+	std::optional<int32_t> LLMContext::RemoveDiscardedBlocks()
 	{
 		if (std::count_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return block.is_cached() && block.is_discarded(); }) == 0)
 			return 0;
@@ -363,7 +363,7 @@ namespace fig::llm
 		return tokens_removed;
 	}
 
-	bool Context::DiscardBlock(const ContextBlock& block)
+	bool LLMContext::DiscardBlock(const ContextBlock& block)
 	{
 		auto itFind = std::find(_blocks.begin(), _blocks.end(), block);
 		if (itFind != _blocks.end())
@@ -374,7 +374,7 @@ namespace fig::llm
 		return false;
 	}
 
-	void Context::ClearTokensBelow(int32_t pos)
+	void LLMContext::ClearTokensBelow(int32_t pos)
 	{
 		llama::ctx_remove(_pCtx, pos);
 
@@ -394,7 +394,7 @@ namespace fig::llm
 		_cache->ClearTokensFromIndex(cache_pos.as_int());
 	}
 
-	int32_t Context::AllocateKVCache(int32_t min_reserve)
+	int32_t LLMContext::AllocateKVCache(int32_t min_reserve)
 	{
 		// Allocate and shift context window
 		int n_ctx_used = llama::ctx_used_cells(_pCtx);
@@ -426,7 +426,7 @@ namespace fig::llm
 		return 0;
 	}
 
-	void Context::DiscardByTTL(int32_t current_turn)
+	void LLMContext::DiscardByTTL(int32_t current_turn)
 	{
 		int32_t offset = 0;
 		for (auto& block : _blocks)
@@ -439,12 +439,12 @@ namespace fig::llm
 		}
 	}
 
-	ContextCursor Context::GetBlockAppendOffset() const
+	ContextCursor LLMContext::GetBlockAppendOffset() const
 	{
 		return ContextCursor { GetCache().length() };
 	}
 
-	ContextCursor Context::GetUncachedOffset() const
+	ContextCursor LLMContext::GetUncachedOffset() const
 	{
 		int32_t pos = 0;
 		for (auto& block : _blocks)
@@ -455,7 +455,7 @@ namespace fig::llm
 		return ContextCursor { pos };
 	}
 
-	ContextCursor Context::GetChatBeginOffset() const
+	ContextCursor LLMContext::GetChatBeginOffset() const
 	{
 		auto itFind = std::find_if(_blocks.crbegin(), _blocks.crend(), [](const ContextBlock& block) { return not block.flags.IsSet(ContextBlockFlag::Static); });
 		if (itFind != _blocks.crend())
@@ -463,7 +463,7 @@ namespace fig::llm
 		return ContextCursor { GetCache().length() };
 	}
 
-	std::vector<ContextBlock>::const_iterator Context::GetLastCachedBlock() const
+	std::vector<ContextBlock>::const_iterator LLMContext::GetLastCachedBlock() const
 	{
 		auto itFind = std::find_if(_blocks.crbegin(), _blocks.crend(), [](const ContextBlock& block) { return block.flags.IsSet(ContextBlockFlag::Cached); });
 		if (itFind != _blocks.crend())
@@ -471,7 +471,7 @@ namespace fig::llm
 		return _blocks.cend();
 	}
 
-	void Context::EraseChat()
+	void LLMContext::EraseChat()
 	{
 		if (_blocks.empty())
 		{
@@ -504,17 +504,17 @@ namespace fig::llm
 		}
 	}
 
-	void Context::AppendBlock(const ContextBlock& block)
+	void LLMContext::AppendBlock(const ContextBlock& block)
 	{
 		_blocks.push_back(block);
 	}
 
-	void Context::AppendBlock(ContextBlock&& block)
+	void LLMContext::AppendBlock(ContextBlock&& block)
 	{
 		_blocks.emplace_back(std::move(block));
 	}
 
-	void Context::InsertBlock(ContextBlock&& block, size_t index)
+	void LLMContext::InsertBlock(ContextBlock&& block, size_t index)
 	{
 		if (index < _blocks.size())
 		{
@@ -526,7 +526,7 @@ namespace fig::llm
 			AppendBlock(std::move(block));
 	}
 
-	void Context::DumpContext()
+	void LLMContext::DumpContext()
 	{
 #if _DEBUG
 		for (int32_t i = 0; i < _num_sequences; ++i)
@@ -539,7 +539,7 @@ namespace fig::llm
 #endif
 	}
 
-	void Context::RebuildBatch()
+	void LLMContext::RebuildBatch()
 	{
 		auto& cache = GetCache();
 		cache.Clear();
@@ -551,7 +551,7 @@ namespace fig::llm
 		}
 	}
 
-	int32_t Context::Prepend(SequenceSlots seq_id, fig::string text)
+	int32_t LLMContext::Prepend(SequenceSlots seq_id, fig::string text)
 	{
 		auto& cache = GetCache();
 
@@ -565,7 +565,7 @@ namespace fig::llm
 		return toI(prepend_tokens.size());
 	}
 
-	Batch Context::GetCursorView() const
+	Batch LLMContext::GetCursorView() const
 	{
 		auto& cache = GetCache();
 		return cache.GetView(cursor_pos.as_int(), cache.length() - cursor_pos.as_int());

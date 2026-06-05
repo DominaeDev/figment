@@ -6,10 +6,10 @@
 
 namespace fig
 {
-	struct Contextual;
+	struct Context;
 	using ContextualValue = std::variant<int32_t, float, fig::string>;
-	using ContextualRef = std::reference_wrapper<Contextual>;
-	using ContextualCRef = std::reference_wrapper<const Contextual>;
+	using ContextualRef = std::reference_wrapper<Context>;
+	using ContextualCRef = std::reference_wrapper<const Context>;
 
 	class Selector
 	{
@@ -29,7 +29,17 @@ namespace fig
 		std::vector<fig::handle> _value;
 	};
 
-	struct Contextual
+	template <typename T>
+	concept IContextual = requires(T t)
+	{
+		{ t.GetContext() } -> std::same_as<Context>;
+	}
+	or requires(T t)
+	{
+		{ t.GetContext() } -> std::same_as<const Context&>;
+	};
+
+	struct Context
 	{
 		// Values
 		template<typename T>
@@ -80,26 +90,33 @@ namespace fig
 		inline const std::unordered_set<fig::handle>& GetFlags() const noexcept { return _flags; }
 
 		// (Sub-)contexts
-		Contextual& AddContext(fig::handle name) noexcept;
+		Context& AddContext(fig::handle name) noexcept;
+		Context& AddContext(fig::handle name, const Context& context) noexcept;
+		Context& AddContext(fig::handle name, Context&& context) noexcept;
+		inline Context& AddContext(fig::handle name, IContextual auto& contextual) noexcept 
+		{
+			return AddContext(name, contextual.GetContext());
+		}
+		inline Context& AddContext(fig::handle name, const IContextual auto& contextual) noexcept
+		{
+			return AddContext(name, contextual.GetContext());
+		}
+
 		bool RemoveContext(fig::handle name) noexcept;
 		std::optional<ContextualRef> TryGetContext(fig::handle name) noexcept;
 		std::optional<ContextualCRef> TryGetContext(fig::handle name) const noexcept;
 		std::optional<ContextualRef> TryGetContext(Selector selector) noexcept;
 		std::optional<ContextualCRef> TryGetContext(Selector selector) const noexcept;
-		Contextual GetContext() const noexcept;
+		Context GetContext() const noexcept;
 
 		bool operator[](fig::handle name) const noexcept;
+
+		void Clear() noexcept;
 
 	private:
 		std::map<fig::handle, ContextualValue> _values;
 		std::unordered_set<fig::handle> _flags;
-		std::map<fig::handle, Contextual> _contexts;
-	};
-
-	template <typename T>
-	concept IContextual = requires(T t)
-	{
-		{ t.GetContext() } -> std::same_as<Contextual>;
+		std::map<fig::handle, Context> _contexts;
 	};
 }
 

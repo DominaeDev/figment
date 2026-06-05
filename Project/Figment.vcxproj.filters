@@ -203,7 +203,7 @@
     <ClCompile Include="src\llm\LLMStateVariables.cpp">
       <Filter>Source Files\Backend\LLM\Context</Filter>
     </ClCompile>
-    <ClCompile Include="src\llm\Context.cpp">
+    <ClCompile Include="src\llm\LLMContext.cpp">
       <Filter>Source Files\Backend\LLM\Context</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\ContextCache.cpp">
@@ -527,7 +527,7 @@
     <ClCompile Include="src\util\Handle.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\text\Contextual.cpp">
+    <ClCompile Include="src\text\Context.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
     <ClCompile Include="src\util\TextEvaluator.cpp">
@@ -586,7 +586,7 @@
     <ClInclude Include="include\llm\LLMStateVariables.h">
       <Filter>Source Files\Backend\LLM\Context</Filter>
     </ClInclude>
-    <ClInclude Include="include\llm\Context.h">
+    <ClInclude Include="include\llm\LLMContext.h">
       <Filter>Source Files\Backend\LLM\Context</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\ContextCache.h">
@@ -1282,7 +1282,7 @@
     <ClInclude Include="include\text\TextEvaluator.h">
       <Filter>Source Files\Text</Filter>
     </ClInclude>
-    <ClInclude Include="include\text\Contextual.h">
+    <ClInclude Include="include\text\Context.h">
       <Filter>Source Files\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\text\ConditionNode.h">

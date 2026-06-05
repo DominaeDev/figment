@@ -269,7 +269,7 @@ namespace fig::llm
 		*bWait = false;
 	}
 	/*
-	std::optional<std::vector<Token>> tokenize_and_decode(Context& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
+	std::optional<std::vector<Token>> tokenize_and_decode(LLMContext& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
 	{
 		auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
 		int32_t n_tokens = toI(tokens.size());
@@ -280,7 +280,7 @@ namespace fig::llm
 		return tokens;
 	}
 
-	std::vector<Token> tokenize_and_batch(Context& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
+	std::vector<Token> tokenize_and_batch(LLMContext& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
 	{
 		// Add to context batch
 		auto tokens = llama::tokenize(context.GetVocabPtr(), content, add_special);
@@ -571,7 +571,7 @@ namespace fig::llm
 		return lcase(id);
 	}
 
-	bool dump_batch_text(const Context& context, int32_t seq_index, const fig::path& filename)
+	bool dump_batch_text(const LLMContext& context, int32_t seq_index, const fig::path& filename)
 	{
 		auto [batch_ref, batch_n] = context.GetCache().GetBatch();
 		auto& batch = batch_ref.get();
@@ -651,7 +651,7 @@ namespace fig::llm
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	bool dump_batch_tokens(const Context& context, int32_t seq_id, const fig::path& filename)
+	bool dump_batch_tokens(const LLMContext& context, int32_t seq_id, const fig::path& filename)
 	{
 		auto [batch_ref, batch_n] = context.GetCache().GetBatch();
 
@@ -727,7 +727,7 @@ namespace fig::llm
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	bool dump_kv_cache(const Context& context, int32_t seq_id, const fig::path& filename)
+	bool dump_kv_cache(const LLMContext& context, int32_t seq_id, const fig::path& filename)
 	{
 		auto cache_view = llama_kv_cache_view_init(context.GetCtxPtr(), context.GetCache().n_seq_max());
 		llama_kv_cache_view_update(context.GetCtxPtr(), &cache_view);
@@ -809,7 +809,7 @@ namespace fig::llm
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	bool dump_kv_cache_cells(const Context& contextState, const fig::path& filename)
+	bool dump_kv_cache_cells(const LLMContext& contextState, const fig::path& filename)
 	{
 		return dump_kv_cache_cells(contextState.GetCtxPtr(), contextState.GetNumSequences(), filename);
 	}
@@ -865,7 +865,7 @@ namespace fig::llm
 		return WriteTextFile(filename, result, false) == FileError::NoError;
 	}
 
-	bool validate_kv_cache(const fig::llm::Context& context, fig::llm::Sequence sequence, int32_t turn)
+	bool validate_kv_cache(const fig::llm::LLMContext& context, fig::llm::Sequence sequence, int32_t turn)
 	{
 #if !_DEBUG
 		return true;

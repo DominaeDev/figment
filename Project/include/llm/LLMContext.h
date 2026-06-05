@@ -15,16 +15,16 @@ namespace fig::llm
 {
 	class ModelState;
 
-	class Context
+	class LLMContext
 	{
 	public:
-		Context(const ModelState& modelState);
+		LLMContext(const ModelState& modelState);
 
-		Context() = default;
-		Context(Context&& other) = default;
-		Context& operator=(Context&& other) = default;
-		Context(const Context& other) = default;
-		Context& operator=(const Context& other) = default;
+		LLMContext() = default;
+		LLMContext(LLMContext&& other) = default;
+		LLMContext& operator=(LLMContext&& other) = default;
+		LLMContext(const LLMContext& other) = default;
+		LLMContext& operator=(const LLMContext& other) = default;
 
 		// ContextState
 		void Initialize();

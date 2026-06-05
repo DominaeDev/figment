@@ -92,6 +92,7 @@ namespace fig::chat
 		_charactersByID[characterId] = index;
 		_charactersByRole[role] = index;
 
+		UpdateContext();
 		return true;
 	}
 
@@ -419,5 +420,24 @@ namespace fig::chat
 		while (_charactersByID.contains(uuid))
 			uuid = _CreateUUID();
 		return uuid;
+	}
+
+	void ChatStaging::UpdateContext()
+	{
+		_context = {};
+		for (auto& kvp : _charactersByRole)
+		{
+			auto role = kvp.first;
+			auto& character = _characters[kvp.second];
+			if (is_bot(role))
+			{
+				size_t bot_index = get_bot_index(role) + 1;
+				_context.AddContext(std::format("char{}", bot_index), character);
+			}
+			else if (role == Role::User)
+			{
+				_context.AddContext("user", character);
+			}
+		}
 	}
 } // namespace

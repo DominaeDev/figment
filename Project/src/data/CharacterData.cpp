@@ -111,6 +111,7 @@ namespace fig::data
 		if (not xml.IsOk())
 			return FileError::UnrecognizedFormat;
 
+		_bDirtyContext = true;
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
@@ -120,6 +121,7 @@ namespace fig::data
 		if (not xml.IsOk() or xml.GetRoot().GetName() != XmlRootName)
 			return FileError::UnrecognizedFormat;
 
+		_bDirtyContext = true;
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
@@ -129,6 +131,7 @@ namespace fig::data
 		if (not xml.IsOk() or xml.GetRoot().GetName() != XmlRootName)
 			return FileError::UnrecognizedFormat;
 
+		_bDirtyContext = true;
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
@@ -161,11 +164,7 @@ namespace fig::data
 	{
 		_tags.append_range(tags);
 		_searchIndex.AddTerms(tags);
-	}
-
-	void CharacterData::AddSearchTerm(const fig::string& term)
-	{
-		_searchIndex.AddTerm(term);
+		_bDirtyContext = true;
 	}
 
 	void CharacterData::AddAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format, CharacterAttribute::Visibility visibility)
@@ -176,19 +175,33 @@ namespace fig::data
 			.format = format,
 			.visibility = visibility,
 		};
+		_bDirtyContext = true;
 	}
 
-	Contextual CharacterData::GetContext() const noexcept
+	void CharacterData::AddSearchTerm(const fig::string& term)
 	{
-		Contextual ctx;
-		ctx.SetValue("id", chatId);
-		ctx.SetValue("name", shortName);
-		ctx.SetValue("fullname", fullName);
-		ctx.SetValue("gender", fig::string { gender });
-		ctx.SetValue("brief", brief);
+		_searchIndex.AddTerm(term);
+	}
+
+	const Context& CharacterData::GetContext() noexcept
+	{
+		if (_bDirtyContext)
+			UpdateContext();
+		return _context;
+	}
+
+	void CharacterData::UpdateContext()
+	{
+		_context.Clear();
+		_context.SetValue("id", chatId);
+		_context.SetValue("name", shortName);
+		_context.SetValue("fullname", fullName);
+		_context.SetValue("gender", fig::string { gender });
+		_context.SetValue("brief", brief);
 
 		for (auto& attrib : _attributes)
-			ctx.SetValue(attrib.first, attrib.second.value);
-		return ctx;
+			_context.SetValue(attrib.first, attrib.second.value);
+
+		_bDirtyContext = false;
 	}
 }

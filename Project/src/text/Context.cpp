@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "text/Contextual.h"
+#include "text/Context.h"
 
 namespace fig
 {
@@ -16,25 +16,25 @@ namespace fig
 	}
 
 	template<>
-	void Contextual::SetValue<int32_t>(fig::handle name, const int32_t& value) noexcept
+	void Context::SetValue<int32_t>(fig::handle name, const int32_t& value) noexcept
 	{
 		_values[std::move(name)] = value;
 	}
 
 	template<>
-	void Contextual::SetValue<float>(fig::handle name, const float& value) noexcept
+	void Context::SetValue<float>(fig::handle name, const float& value) noexcept
 	{
 		_values[std::move(name)] = value;
 	}
 
 	template<>
-	void Contextual::SetValue<fig::string>(fig::handle name, const fig::string& value) noexcept
+	void Context::SetValue<fig::string>(fig::handle name, const fig::string& value) noexcept
 	{
 		_values[std::move(name)] = value;
 	}
 
 	template<>
-	[[nodiscard]] std::optional<bool> Contextual::TryGetValue<bool>(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<bool> Context::TryGetValue<bool>(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 		{
@@ -51,7 +51,7 @@ namespace fig
 	}
 
 	template<>
-	[[nodiscard]] std::optional<int32_t> Contextual::TryGetValue<int32_t>(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<int32_t> Context::TryGetValue<int32_t>(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 		{
@@ -68,7 +68,7 @@ namespace fig
 	}
 
 	template<>
-	[[nodiscard]] std::optional<float> Contextual::TryGetValue<float>(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<float> Context::TryGetValue<float>(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 		{
@@ -85,7 +85,7 @@ namespace fig
 	}
 
 	template<>
-	[[nodiscard]] std::optional<fig::string> Contextual::TryGetValue<fig::string>(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<fig::string> Context::TryGetValue<fig::string>(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 		{
@@ -101,48 +101,48 @@ namespace fig
 		return std::nullopt;
 	}
 
-	bool Contextual::HasValue(fig::handle name) const noexcept
+	bool Context::HasValue(fig::handle name) const noexcept
 	{
 		return _values.contains(name);
 	}
 
-	void Contextual::ClearValues() noexcept
+	void Context::ClearValues() noexcept
 	{
 		_values.clear();
 	}
 
-	void Contextual::SetFlag(fig::handle flag) noexcept
+	void Context::SetFlag(fig::handle flag) noexcept
 	{
 		_flags.insert(flag);
 	}
 
-	void Contextual::SetFlags(std::span<fig::handle> flags) noexcept
+	void Context::SetFlags(std::span<fig::handle> flags) noexcept
 	{
 		_flags.insert_range(flags);
 	}
 
-	void Contextual::UnsetFlag(fig::handle flag) noexcept
+	void Context::UnsetFlag(fig::handle flag) noexcept
 	{
 		_flags.erase(flag);
 	}
 
-	void Contextual::UnsetFlags(std::span<fig::handle> flags) noexcept
+	void Context::UnsetFlags(std::span<fig::handle> flags) noexcept
 	{
 		for (auto& f : flags)
 			_flags.erase(f);
 	}
 
-	bool Contextual::HasFlag(fig::handle flag) const noexcept
+	bool Context::HasFlag(fig::handle flag) const noexcept
 	{
 		return _flags.contains(flag);
 	}
 
-	void Contextual::ClearFlags() noexcept
+	void Context::ClearFlags() noexcept
 	{
 		_flags.clear();
 	}
 
-	bool Contextual::operator[](fig::handle name) const noexcept
+	bool Context::operator[](fig::handle name) const noexcept
 	{
 		// Check flags
 		if (_flags.contains(name))
@@ -158,13 +158,25 @@ namespace fig
 		return false;
 	}
 
-	Contextual& Contextual::AddContext(fig::handle name) noexcept
+	Context& Context::AddContext(fig::handle name) noexcept
 	{
-		_contexts.emplace(name, Contextual {});
+		_contexts.emplace(name, Context {});
 		return _contexts.at(name);
 	}
 
-	bool Contextual::RemoveContext(fig::handle name) noexcept
+	Context& Context::AddContext(fig::handle name, const Context& context) noexcept
+	{
+		auto [it, _] = _contexts.insert_or_assign(name, context);
+		return it->second;
+	}
+
+	Context& Context::AddContext(fig::handle name, Context&& context) noexcept
+	{
+		auto [it, _] = _contexts.insert_or_assign(name, std::move(context));
+		return it->second;
+	}
+
+	bool Context::RemoveContext(fig::handle name) noexcept
 	{
 		if (auto itFind = _contexts.find(name); itFind != _contexts.end())
 		{
@@ -174,7 +186,7 @@ namespace fig
 		return false;
 	}
 
-	std::optional<ContextualRef> Contextual::TryGetContext(fig::handle name) noexcept
+	std::optional<ContextualRef> Context::TryGetContext(fig::handle name) noexcept
 	{
 		if (name.empty())
 			return std::nullopt;
@@ -184,7 +196,7 @@ namespace fig
 		return std::nullopt;
 	}
 
-	std::optional<ContextualCRef> Contextual::TryGetContext(fig::handle name) const noexcept
+	std::optional<ContextualCRef> Context::TryGetContext(fig::handle name) const noexcept
 	{
 		if (name.empty())
 			return std::nullopt;
@@ -194,7 +206,7 @@ namespace fig
 		return std::nullopt;
 	}
 
-	std::optional<ContextualRef> Contextual::TryGetContext(Selector selector) noexcept
+	std::optional<ContextualRef> Context::TryGetContext(Selector selector) noexcept
 	{
 		if (selector.empty())
 			return std::ref(*this);
@@ -214,7 +226,7 @@ namespace fig
 		return std::ref(*pCtx);
 	}
 
-	std::optional<ContextualCRef> Contextual::TryGetContext(Selector selector) const noexcept
+	std::optional<ContextualCRef> Context::TryGetContext(Selector selector) const noexcept
 	{
 		if (selector.empty())
 			return std::ref(*this);
@@ -234,8 +246,15 @@ namespace fig
 		return std::cref(*pCtx);
 	}
 
-	Contextual Contextual::GetContext() const noexcept
+	Context Context::GetContext() const noexcept
 	{
-		return Contextual { *this };
+		return Context { *this };
+	}
+
+	void Context::Clear() noexcept
+	{
+		_values.clear();
+		_flags.clear();
+		_contexts.clear();
 	}
 }

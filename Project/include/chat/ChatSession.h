@@ -20,8 +20,11 @@ namespace fig::chat
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text) const;
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text, Role role) const;
 
+		inline const Context& GetContext() const noexcept { return _context; }
+
 	protected:
 		ChatStaging _staging {};
 		ChatOptions _options {};
+		Context _context {};
 	};
 }

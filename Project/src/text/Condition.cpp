@@ -18,7 +18,7 @@ namespace fig
 		}
 	}
 
-	bool Condition::Evaluate(const Contextual& context) const
+	bool Condition::Evaluate(const Context& context) const
 	{
 		return _pCondition && _pCondition->Evaluate(context);
 	}

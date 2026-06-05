@@ -7,7 +7,7 @@
 #include "gui/GUITypes.h"
 #include "data/CharacterGender.h"
 #include "util/SearchIndex.h"
-#include "text/Contextual.h"
+#include "text/Context.h"
 
 namespace fig::data
 {
@@ -63,7 +63,7 @@ namespace fig::data
 		void AppendTags(const fig::string_list& tags);
 		void AddSearchTerm(const fig::string& term);
 
-		Contextual GetContext() const noexcept;
+		const Context& GetContext() noexcept;
 
 	public:
 		fig::string chatId;	//! @remove?
@@ -76,9 +76,13 @@ namespace fig::data
 		fig::gui::Color borderColor {};
 	
 	private:
+		void UpdateContext();
+
 		std::map<fig::string, CharacterAttribute> _attributes;
 		string_list _tags {};
 		SearchIndex _searchIndex;
+		Context _context;
+		bool _bDirtyContext {};
 
 	public:
 		static auto SerializeInfo();

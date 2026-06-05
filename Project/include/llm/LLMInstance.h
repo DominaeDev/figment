@@ -5,7 +5,7 @@
 #include "llm/LLMEmbedding.h"
 #include "llm/LLMStateVariables.h"
 #include "llm/LLMStatus.h"
-#include "llm/Context.h"
+#include "llm/LLMContext.h"
 #include "chat/ChatSession.h"
 
 #include <vector>
@@ -209,7 +209,7 @@ namespace fig::llm
 
 		std::timed_mutex _stateMutex; // Guards state variables
 		ModelState _modelState {};
-		Context _contextState;
+		LLMContext _contextState;
 
 		std::mutex _resultMutex; // Guards output queue
 		std::queue<MessagePiece> _resultQueue;

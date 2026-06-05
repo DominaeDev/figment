@@ -2,7 +2,7 @@
 #include "text/TextEvaluator.h"
 #include "text/Condition.h"
 
-namespace fig::text
+namespace fig
 {
 	struct TextSpan
 	{
@@ -272,12 +272,12 @@ namespace fig::text
 		return text;
 	}
 
-	static bool _evaluate_condition(fig::string_view expression, const Contextual& context) noexcept
+	static bool _evaluate_condition(fig::string_view expression, const Context& context) noexcept
 	{
 		return Condition { fig::string { expression } }.Evaluate(context);
 	}
 
-	static bool _substitute(fig::string& text, const TextSpan& span, const Contextual& context) noexcept
+	static bool _substitute(fig::string& text, const TextSpan& span, const Context& context) noexcept
 	{
 		if (span.length() < 2)
 			return false;
@@ -346,7 +346,7 @@ namespace fig::text
 		return false;
 	}
 
-	static bool _evaluate(fig::string& text, const Contextual& context) noexcept
+	static bool _evaluate(fig::string& text, const Context& context) noexcept
 	{
 		// Find every instance of {...}
 		std::vector<TextSpan> spans;
@@ -379,7 +379,7 @@ namespace fig::text
 		return true;
 	}
 
-	fig::string TextEvaluator::Evaluate(const fig::string& source, const Contextual& context) noexcept
+	fig::string TextEvaluator::Evaluate(const fig::string& source, const Context& context) noexcept
 	{
 		fig::string text { source };
 		while (_evaluate(text, context)) {};

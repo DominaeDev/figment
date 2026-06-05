@@ -2,14 +2,13 @@
 #define TEXT_EVALUATOR_H__
 #pragma once
 
-#include "text/Contextual.h"
+#include "text/Context.h"
 
-namespace fig::text
+namespace fig
 {
-	class TextEvaluator
+	struct TextEvaluator
 	{
-	public:
-		static fig::string Evaluate(const fig::string& input, const Contextual& context) noexcept;
+		static fig::string Evaluate(const fig::string& input, const Context& context) noexcept;
 	};
 }
 
