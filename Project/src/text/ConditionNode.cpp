@@ -48,88 +48,69 @@ namespace fig
 		_operator(op),
 		_rhs(std::move(rhs))
 	{
-		if (size_t pos_selector = lhs.find(':'); pos_selector != npos)
-		{
-			_selector = Selector { trim(lhs.substr(0, pos_selector)) };
-			_key = trim(lhs.substr(pos_selector + 1));
-		}
-		else
-			_key = trim(lhs);
+		_location = { lhs };
 	}
 
 	bool ComparisonCondition::Evaluate(const Context& context) const
 	{
-		if (auto try_ctx = context.TryGetContext(_selector))
+		if (auto pNumber = std::get_if<float>(&_rhs))
 		{
-			auto& ctx = try_ctx.value().get();
-			if (auto pNumber = std::get_if<float>(&_rhs))
+			if (auto try_value = context.TryGetValue<float>(_location))
 			{
-				if (auto try_value = ctx.TryGetValue<float>(_key))
+				auto value = try_value.value();
+				switch (_operator)
 				{
-					auto value = try_value.value();
-					switch (_operator)
-					{
-						case CompareOperator::Equal:
-							return flt_eq(value, *pNumber);
-						case CompareOperator::NotEqual:
-							return !flt_eq(value, *pNumber);
-						case CompareOperator::LessThan:
-							return value < *pNumber;
-						case CompareOperator::LessOrEqual:
-							return value <= *pNumber;
-						case CompareOperator::GreaterThan:
-							return value > *pNumber;
-						case CompareOperator::GreaterOrEqual:
-							return value >= *pNumber;
-					}
-				}
-			}
-			else if (auto pText = std::get_if<fig::string>(&_rhs))
-			{
-				if (auto try_value = ctx.TryGetValue<fig::string>(_key))
-				{
-					auto& value = try_value.value();
-					switch (_operator)
-					{
-						case CompareOperator::Equal:
-							return equals(value, *pText, true);
-						case CompareOperator::NotEqual:
-							return !equals(value, *pText, true);
-						case CompareOperator::LessThan:
-							return value < *pText;
-						case CompareOperator::LessOrEqual:
-							return value <= *pText;
-						case CompareOperator::GreaterThan:
-							return value > *pText;
-						case CompareOperator::GreaterOrEqual:
-							return value >= *pText;
-					}
+					case CompareOperator::Equal:
+						return flt_eq(value, *pNumber);
+					case CompareOperator::NotEqual:
+						return !flt_eq(value, *pNumber);
+					case CompareOperator::LessThan:
+						return value < *pNumber;
+					case CompareOperator::LessOrEqual:
+						return value <= *pNumber;
+					case CompareOperator::GreaterThan:
+						return value > *pNumber;
+					case CompareOperator::GreaterOrEqual:
+						return value >= *pNumber;
 				}
 			}
 		}
-		
+		else if (auto pText = std::get_if<fig::string>(&_rhs))
+		{
+			if (auto try_value = context.TryGetValue<fig::string>(_location))
+			{
+				auto& value = try_value.value();
+				switch (_operator)
+				{
+					case CompareOperator::Equal:
+						return equals(value, *pText, true);
+					case CompareOperator::NotEqual:
+						return !equals(value, *pText, true);
+					case CompareOperator::LessThan:
+						return value < *pText;
+					case CompareOperator::LessOrEqual:
+						return value <= *pText;
+					case CompareOperator::GreaterThan:
+						return value > *pText;
+					case CompareOperator::GreaterOrEqual:
+						return value >= *pText;
+				}
+			}
+		}
 		return false;
 	}
 
-	FlagCondition::FlagCondition(const fig::string& name)
+	FlagCondition::FlagCondition(const fig::string& location)
 	{
-		if (size_t pos_selector = name.find(':'); pos_selector != npos)
-		{
-			_selector = Selector { trim(name.substr(0, pos_selector)) };
-			_key = trim(name.substr(pos_selector + 1));
-		}
-		else
-			_key = trim(name);
+		_location = { location };
 	}
 
 	bool FlagCondition::Evaluate(const Context& context) const
 	{
-		if (_key.empty())
+		if (_location.key.empty())
 			return false;
 
-		if (auto try_ctx = context.TryGetContext(_selector))
-			return try_ctx.value().get()[_key];
-		return false;
+		return context[_location];
 	}
 
 }

@@ -39,7 +39,7 @@ namespace fig::chat
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text) const;
 		[[nodiscard]] fig::string ApplyNames(const fig::string& text, Role characterRole) const;
 
-		inline const Context& GetContext() const noexcept { return _context; }
+		const Context& GetContext() noexcept;
 
 	private:
 		fig::uuid GenerateUUID() const noexcept;
@@ -51,6 +51,7 @@ namespace fig::chat
 
 		ChatOptions _options {};
 		Context _context {};
+		bool _bDirtyContext {};
 	};
 }
 

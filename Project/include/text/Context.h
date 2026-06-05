@@ -14,7 +14,7 @@ namespace fig
 	class Selector
 	{
 	public:
-		Selector(const fig::string& input);
+		Selector(const fig::string& source);
 		Selector() = default;
 		~Selector() = default;
 		Selector(const Selector&) = default;
@@ -22,9 +22,11 @@ namespace fig
 		Selector& operator=(const Selector&) = default;
 		Selector& operator=(Selector&&) = default;
 
+
 		inline bool empty() const noexcept { return _value.empty(); }
 		inline auto GetKeys() const noexcept { return std::span { _value.data(), _value.size() }; }
 
+		Selector Append(const fig::string& key) const noexcept;
 	private:
 		std::vector<fig::handle> _value;
 	};
@@ -37,6 +39,36 @@ namespace fig
 	or requires(T t)
 	{
 		{ t.GetContext() } -> std::same_as<const Context&>;
+	};
+
+	struct ContextLocation
+	{
+		ContextLocation() = default;
+		ContextLocation(const Selector& selector, const fig::handle& key = {})
+		{
+			this->selector = selector;
+			this->key = key;
+		}
+
+		ContextLocation(const is_string_like auto& location)
+		{
+			fig::string s { location };
+			if (size_t pos_selector = s.find(':'); pos_selector != npos)
+			{
+				selector = Selector { trim(s.substr(0, pos_selector)) };
+				key = trim(s.substr(pos_selector + 1));
+			}
+			else
+				key = trim(s);
+		}
+
+		inline explicit operator Selector() const noexcept
+		{
+			return selector.Append(key);
+		}
+
+		Selector selector;
+		fig::handle key;
 	};
 
 	struct Context
@@ -63,11 +95,17 @@ namespace fig
 			SetValue<int32_t>(name, value ? 1 : 0);
 		}
 
-		template<typename T> std::optional<T> TryGetValue(fig::handle name) const = delete;
-		template<> [[nodiscard]] std::optional<bool> TryGetValue<bool>(fig::handle name) const noexcept;
-		template<> [[nodiscard]] std::optional<int32_t> TryGetValue<int32_t>(fig::handle name) const noexcept;
-		template<> [[nodiscard]] std::optional<float> TryGetValue<float>(fig::handle name) const noexcept;
-		template<> [[nodiscard]] std::optional<fig::string> TryGetValue<fig::string>(fig::handle name) const noexcept;
+		template<typename T>
+		std::optional<T> TryGetValue(ContextLocation location) const
+		{
+			if (location.selector.empty() and not location.key.empty())
+			{
+				if (auto itAlias = _valueAliases.find(location.key); itAlias != _contextAliases.cend())
+					return TryGetValue_Internal<T>(itAlias->second);
+			}
+
+			return TryGetValue_Internal<T>(location);
+		};
 
 		bool HasValue(fig::handle flag) const noexcept;
 		inline const std::map<fig::handle, ContextualValue>& GetValues() const noexcept { return _values; }
@@ -101,22 +139,55 @@ namespace fig
 		{
 			return AddContext(name, contextual.GetContext());
 		}
-
 		bool RemoveContext(fig::handle name) noexcept;
 		std::optional<ContextualRef> TryGetContext(fig::handle name) noexcept;
 		std::optional<ContextualCRef> TryGetContext(fig::handle name) const noexcept;
 		std::optional<ContextualRef> TryGetContext(Selector selector) noexcept;
 		std::optional<ContextualCRef> TryGetContext(Selector selector) const noexcept;
-		Context GetContext() const noexcept;
 
-		bool operator[](fig::handle name) const noexcept;
+		inline bool operator[](fig::handle name) const noexcept
+		{
+			return operator[]({ {}, name });
+		}
+		bool operator[](ContextLocation location) const noexcept;
 
 		void Clear() noexcept;
 
+		void AddValueAlias(fig::handle alias, const ContextLocation& target) noexcept;
+		void AddContextAlias(fig::handle alias, const ContextLocation& target) noexcept;
+		void RemoveAlias(fig::handle alias) noexcept;
+
+		const Context& GetContext() const noexcept { return *this; }
+
 	private:
-		std::map<fig::handle, ContextualValue> _values;
+		std::optional<ContextualRef> TryGetContext(ContextLocation location) noexcept;
+		std::optional<ContextualCRef> TryGetContext(ContextLocation location) const noexcept;
+
+		template<typename T> 
+		std::optional<T> TryGetValue_Internal(ContextLocation location) const
+		{
+			if (auto try_ctx = TryGetContext(location.selector))
+			{
+				auto& ctx = try_ctx.value().get();
+				return ctx.TryGetValue_Internal<T>(location.key);
+			}
+			return std::nullopt;
+		};
+
+		template<typename T> std::optional<T> TryGetValue_Internal(fig::handle name) const = delete;
+		template<> [[nodiscard]] std::optional<bool> TryGetValue_Internal<bool>(fig::handle name) const noexcept;
+		template<> [[nodiscard]] std::optional<int32_t> TryGetValue_Internal<int32_t>(fig::handle name) const noexcept;
+		template<> [[nodiscard]] std::optional<float> TryGetValue_Internal<float>(fig::handle name) const noexcept;
+		template<> [[nodiscard]] std::optional<fig::string> TryGetValue_Internal<fig::string>(fig::handle name) const noexcept;
+		
+		bool GetBool_Internal(fig::handle name) const noexcept;
+		bool GetBool_Internal(ContextLocation location) const noexcept;
+
 		std::unordered_set<fig::handle> _flags;
+		std::map<fig::handle, ContextualValue> _values;
 		std::map<fig::handle, Context> _contexts;
+		std::map<fig::handle, ContextLocation> _valueAliases;
+		std::map<fig::handle, ContextLocation> _contextAliases;
 	};
 }
 

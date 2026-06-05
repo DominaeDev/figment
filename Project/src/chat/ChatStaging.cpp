@@ -92,7 +92,7 @@ namespace fig::chat
 		_charactersByID[characterId] = index;
 		_charactersByRole[role] = index;
 
-		UpdateContext();
+		_bDirtyContext = true;
 		return true;
 	}
 
@@ -422,9 +422,16 @@ namespace fig::chat
 		return uuid;
 	}
 
+	const Context& ChatStaging::GetContext() noexcept
+	{
+		if (_bDirtyContext)
+			UpdateContext();
+		return _context;
+	}
+
 	void ChatStaging::UpdateContext()
 	{
-		_context = {};
+		_context.Clear();
 		for (auto& kvp : _charactersByRole)
 		{
 			auto role = kvp.first;
@@ -432,12 +439,25 @@ namespace fig::chat
 			if (is_bot(role))
 			{
 				size_t bot_index = get_bot_index(role) + 1;
-				_context.AddContext(std::format("char{}", bot_index), character);
+				auto charKey = std::format("char{}", bot_index);
+				_context.AddContext(charKey, character);
+				_context.AddContextAlias(std::to_string(bot_index), charKey);
 			}
 			else if (role == Role::User)
 			{
 				_context.AddContext("user", character);
+				_context.AddContextAlias("u", "user");
+				_context.AddValueAlias("user", "user:name");
 			}
 		}
+
+		if (_charactersByRole.contains(Role::Bot1))
+		{
+			_context.AddContextAlias("char", "char1");
+			_context.AddContextAlias("c", "char1");
+			_context.AddValueAlias("char", "char1:name");
+		}
+
+		_bDirtyContext = false;
 	}
 } // namespace

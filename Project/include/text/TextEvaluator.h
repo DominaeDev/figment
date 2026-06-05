@@ -8,7 +8,7 @@ namespace fig
 {
 	struct TextEvaluator
 	{
-		static fig::string Evaluate(const fig::string& input, const Context& context) noexcept;
+		static fig::string Evaluate(const fig::string& source, const Context& context) noexcept;
 	};
 }
 

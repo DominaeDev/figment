@@ -15,6 +15,18 @@ namespace fig
 		_value.erase(first, last);
 	}
 
+	Selector Selector::Append(const fig::string& key) const noexcept
+	{
+		if (not key.empty())
+		{
+			Selector selector {};
+			selector._value = _value;
+			selector._value.push_back(key);
+			return selector;
+		}
+		return *this;
+	}
+
 	template<>
 	void Context::SetValue<int32_t>(fig::handle name, const int32_t& value) noexcept
 	{
@@ -34,7 +46,7 @@ namespace fig
 	}
 
 	template<>
-	[[nodiscard]] std::optional<bool> Context::TryGetValue<bool>(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<bool> Context::TryGetValue_Internal<bool>(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 		{
@@ -51,7 +63,7 @@ namespace fig
 	}
 
 	template<>
-	[[nodiscard]] std::optional<int32_t> Context::TryGetValue<int32_t>(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<int32_t> Context::TryGetValue_Internal<int32_t>(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 		{
@@ -68,7 +80,7 @@ namespace fig
 	}
 
 	template<>
-	[[nodiscard]] std::optional<float> Context::TryGetValue<float>(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<float> Context::TryGetValue_Internal<float>(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 		{
@@ -85,7 +97,7 @@ namespace fig
 	}
 
 	template<>
-	[[nodiscard]] std::optional<fig::string> Context::TryGetValue<fig::string>(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<fig::string> Context::TryGetValue_Internal<fig::string>(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 		{
@@ -142,7 +154,28 @@ namespace fig
 		_flags.clear();
 	}
 
-	bool Context::operator[](fig::handle name) const noexcept
+	bool Context::operator[](ContextLocation location) const noexcept
+	{
+		if (location.selector.empty() and not location.key.empty())
+		{
+			if (auto itAlias = _valueAliases.find(location.key); itAlias != _contextAliases.cend())
+				return GetBool_Internal(itAlias->second.key);
+		}
+
+		return GetBool_Internal(location.key);
+	}
+
+	bool Context::GetBool_Internal(ContextLocation location) const noexcept
+	{
+		if (auto try_ctx = TryGetContext(location.selector))
+		{
+			auto& ctx = try_ctx.value().get();
+			return ctx.GetBool_Internal(location.key);
+		}
+		return false;
+	}
+
+	bool Context::GetBool_Internal(fig::handle name) const noexcept
 	{
 		// Check flags
 		if (_flags.contains(name))
@@ -198,6 +231,9 @@ namespace fig
 
 	std::optional<ContextualCRef> Context::TryGetContext(fig::handle name) const noexcept
 	{
+		if (auto itAlias = _contextAliases.find(name); itAlias != _contextAliases.cend())
+			return TryGetContext((Selector)itAlias->second);
+
 		if (name.empty())
 			return std::nullopt;
 
@@ -208,6 +244,37 @@ namespace fig
 
 	std::optional<ContextualRef> Context::TryGetContext(Selector selector) noexcept
 	{
+		// Resolve alias
+		if (selector.GetKeys().size() == 1)
+		{
+			auto& key = selector.GetKeys()[0];
+			if (auto itAlias = _contextAliases.find(key); itAlias != _contextAliases.cend())
+				return TryGetContext(itAlias->second);
+		}
+
+		if (not selector.empty())
+			return TryGetContext(ContextLocation { selector });
+		return std::ref(*this);
+	}
+
+	std::optional<ContextualCRef> Context::TryGetContext(Selector selector) const noexcept
+	{
+		// Resolve alias
+		if (selector.GetKeys().size() == 1)
+		{
+			auto& key = selector.GetKeys()[0];
+			if (auto itAlias = _contextAliases.find(key); itAlias != _contextAliases.cend())
+				return TryGetContext(itAlias->second);
+		}
+
+		if (not selector.empty())
+			return TryGetContext(ContextLocation { selector });
+		return std::cref(*this);
+	}
+
+	std::optional<ContextualRef> Context::TryGetContext(ContextLocation location) noexcept
+	{
+		auto selector = (Selector)location;
 		if (selector.empty())
 			return std::ref(*this);
 
@@ -226,8 +293,9 @@ namespace fig
 		return std::ref(*pCtx);
 	}
 
-	std::optional<ContextualCRef> Context::TryGetContext(Selector selector) const noexcept
+	std::optional<ContextualCRef> Context::TryGetContext(ContextLocation location) const noexcept
 	{
+		auto selector = (Selector)location;
 		if (selector.empty())
 			return std::ref(*this);
 
@@ -246,15 +314,28 @@ namespace fig
 		return std::cref(*pCtx);
 	}
 
-	Context Context::GetContext() const noexcept
-	{
-		return Context { *this };
-	}
-
 	void Context::Clear() noexcept
 	{
 		_values.clear();
 		_flags.clear();
 		_contexts.clear();
+		_valueAliases.clear();
+		_contextAliases.clear();
+	}
+
+	void Context::AddValueAlias(fig::handle alias, const ContextLocation& target) noexcept
+	{
+		_valueAliases.insert_or_assign(alias, target);
+	}
+
+	void Context::AddContextAlias(fig::handle alias, const ContextLocation& target) noexcept
+	{
+		_contextAliases.insert_or_assign(alias, target);
+	}
+
+	void Context::RemoveAlias(fig::handle alias) noexcept
+	{
+		_valueAliases.erase(alias);
+		_contextAliases.erase(alias);
 	}
 }

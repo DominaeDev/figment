@@ -272,12 +272,12 @@ namespace fig
 		return text;
 	}
 
-	static bool _evaluate_condition(fig::string_view expression, const Context& context) noexcept
+	static bool evaluate_condition(fig::string_view expression, const Context& context) noexcept
 	{
 		return Condition { fig::string { expression } }.Evaluate(context);
 	}
 
-	static bool _substitute(fig::string& text, const TextSpan& span, const Context& context) noexcept
+	static bool substitute(fig::string& text, const TextSpan& span, const Context& context) noexcept
 	{
 		if (span.length() < 2)
 			return false;
@@ -311,7 +311,7 @@ namespace fig
 			{
 				result_true = expr.substr(pos_cond + 1);
 			}
-			bool r = _evaluate_condition(condition, context);
+			bool r = evaluate_condition(condition, context);
 			text.replace(span.begin, span.length(), r ? result_true : result_false);
 			return true;
 		}
@@ -331,14 +331,10 @@ namespace fig
 
 		if (not value_key.empty())
 		{
-			if (auto try_ctx = context.TryGetContext(selector))
+			if (auto value = context.TryGetValue<fig::string>({ selector, value_key }))
 			{
-				auto& ctx = try_ctx.value().get();
-				if (auto value = ctx.TryGetValue<fig::string>(value_key))
-				{
-					text.replace(span.begin, span.length(), escape(value.value()));
-					return true;
-				}
+				text.replace(span.begin, span.length(), escape(value.value()));
+				return true;
 			}
 		}
 		
@@ -346,19 +342,20 @@ namespace fig
 		return false;
 	}
 
-	static bool _evaluate(fig::string& text, const Context& context) noexcept
+	static bool evaluate(fig::string& text, const Context& context) noexcept
 	{
-		// Find every instance of {...}
+		// Find instances of "{...}"
 		std::vector<TextSpan> spans;
 		for (size_t pos = 0uz;;)
 		{
 			size_t pos_open = text.find('{', pos);
 			if (pos_open == npos)
 				break;
+
 			if (pos_open > 0 && text[pos_open - 1] == '\\')
 			{
 				pos = pos_open + 1;
-				continue;
+				continue; // Escaped
 			}
 
 			size_t pos_close = find_scope_end(text, pos_open);
@@ -374,7 +371,7 @@ namespace fig
 
 		// Evaluate them
 		for (auto& span : spans | std::views::reverse)
-			_substitute(text, span, context);
+			substitute(text, span, context);
 
 		return true;
 	}
@@ -382,7 +379,7 @@ namespace fig
 	fig::string TextEvaluator::Evaluate(const fig::string& source, const Context& context) noexcept
 	{
 		fig::string text { source };
-		while (_evaluate(text, context)) {};
+		while (evaluate(text, context)) {};
 
 		// Process result
 		unescape_whitespace(collapse_whitespace(clean_punctuation(unescape(text))));

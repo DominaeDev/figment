@@ -65,8 +65,7 @@ namespace fig
         bool Evaluate(const Context& context) const override;
 
     private:
-        Selector _selector;
-        fig::handle _key;
+        ContextLocation _location;
         CompareOperator _operator;
         RhsValue _rhs;
     };
@@ -74,12 +73,11 @@ namespace fig
     class FlagCondition : public ConditionNode
     {
     public:
-        explicit FlagCondition(const fig::string& name);
+        explicit FlagCondition(const fig::string& location);
         bool Evaluate(const Context& context) const override;
 
     private:
-        Selector _selector;
-        fig::handle _key;
+        ContextLocation _location;
     };
 
     enum class ConditionParseError
