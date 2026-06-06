@@ -15,6 +15,7 @@
 using namespace std::chrono_literals;
 using namespace fig::io;
 using namespace fig::chat;
+using namespace fig::text;
 
 template<typename T>
 void queue_clear(std::queue<T>& q)
@@ -110,7 +111,7 @@ namespace fig::llm
 		if (args.options.flags.IsSet(ChatOptions::Flag::StateVariables))
 		{
 			_stateVars.SetValue("Location", "Kitchen"); //! @temp
-			_stateVars.SetValue(TextEvaluator::Evaluate("{char}'s mood", staging.GetContext(Role::Bot1)), "Neutral"); //! @temp
+			_stateVars.SetValue(eval_text("{char}'s mood", staging.GetContext(Role::Bot1)), "Neutral"); //! @temp
 		}
 
 		// Initialize context
@@ -497,7 +498,7 @@ namespace fig::llm
 		if (!args.isContinuation)
 		{
 			auto [prelude, _] = get_chat_template_prefix_suffix(args.responder, "assistant"); //! @name?
-			prelude = TextEvaluator::Evaluate(prelude, _session.GetStaging().GetContext(args.responder));
+			prelude = eval_text(prelude, _session.GetStaging().GetContext(args.responder));
 			auto assistant_tokens = llama::tokenize(state.pVocab, prelude, false);
 			pre_prompt_tokens.insert(pre_prompt_tokens.end(), assistant_tokens.begin(), assistant_tokens.end());
 		}
@@ -1270,7 +1271,7 @@ namespace fig::llm
 		// Process
 		fig::string identifier = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
 		fig::string content = message;
-		content = TextEvaluator::Evaluate(content, _session.GetStaging().GetContext(role));
+		content = eval_text(content, _session.GetStaging().GetContext(role));
 		std::vector<Submessage> subMessages;
 		content = process_message(content, identifier, &subMessages);
 
@@ -1437,7 +1438,7 @@ namespace fig::llm
 	{
 		if (auto text = ReadTextFile("./resources/prompting/prompt_greeting.txt"))
 		{
-			fig::string greetingInstruction = TextEvaluator::Evaluate(text.value(), _session.GetStaging().GetContext());
+			fig::string greetingInstruction = eval_text(text.value(), _session.GetStaging().GetContext());
 
 			PushMessage(Role::Director, Direction(greetingInstruction), MessageType::Direction, false, 1);
 			Instigate(Role::Narrator, MessageType::Narration, 1);
@@ -1451,7 +1452,7 @@ namespace fig::llm
 	{
 		if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
 		{
-			fig::string prompt = TextEvaluator::Evaluate(text.value(), _session.GetStaging().GetContext());
+			fig::string prompt = eval_text(text.value(), _session.GetStaging().GetContext());
 			PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
 		}
 

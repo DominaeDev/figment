@@ -20,7 +20,7 @@ namespace fig
 	{
 		for (auto& [setting, tuple] : _AllSettings)
 		{
-			auto& [_, __, defaultValue] = tuple;
+			auto& [tmp0, tmp1, defaultValue] = tuple;
 			SetValue(setting, defaultValue);
 		}
 	}

@@ -33,7 +33,7 @@ namespace fig::gui
 
 		if (IsUserEvent(event, UserEvent::UserSignedIn))
 		{
-			OnUserSignedIn(*reinterpret_cast<const fig::user::UserProfile*>(event.user.data1));
+			OnUserSignedIn(GetUserData<fig::user::UserProfile>(event));
 			return EventResult::Continue;
 		}
 

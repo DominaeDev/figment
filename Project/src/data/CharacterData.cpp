@@ -87,6 +87,9 @@ namespace fig::data
 		data.bgColor = {};
 		data.borderColor = {};
 
+		if (auto description = rootNode.TryGetElement<fig::string>("Description"))
+			data.AddAttribute("persona", "Description", description.value(), CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
+
 		if (auto colorText = rootNode.TryGetElement<fig::string>("Color"))
 		{
 			data.borderColor = Color::FromString(colorText.value());

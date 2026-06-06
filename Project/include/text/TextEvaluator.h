@@ -4,19 +4,16 @@
 
 #include "text/Context.h"
 
-namespace fig
+namespace fig::text
 {
-	struct TextEvaluator
-	{
-		[[nodiscard]] static fig::string Evaluate(const fig::string& source, const Context& context) noexcept;
-		[[nodiscard]] static fig::string Evaluate(fig::string&& source, const Context& context) noexcept;
+	[[nodiscard]] fig::string eval_text(const fig::string& source, const Context& context) noexcept;
+	[[nodiscard]] fig::string eval_text(fig::string&& source, const Context& context) noexcept;
 
-		template <is_string_like T> requires (not std::same_as<T, fig::string>)
-			[[nodiscard]] static fig::string Evaluate(const T& source, const Context& context) noexcept
-		{
-			return Evaluate(fig::string { source }, context);
-		}
-	};
+	template <is_string_like T> requires (not std::same_as<T, fig::string>)
+		[[nodiscard]] fig::string eval_text(const T& source, const Context& context) noexcept
+	{
+		return eval_text(fig::string { source }, context);
+	}
 }
 
 #endif

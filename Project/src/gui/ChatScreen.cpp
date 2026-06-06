@@ -26,6 +26,7 @@
 using namespace fig::llm;
 using namespace fig::data;
 using namespace fig::chat;
+using namespace fig::text;
 
 template<typename T>
 constexpr void queue_clear(std::queue<T>& q)
@@ -193,7 +194,7 @@ namespace fig::gui
 		{
 			if (auto script = fig::io::ReadTextFile("resources/auto_script.txt"))
 			{
-				fig::string text = TextEvaluator::Evaluate(script.value(), pLLMInstance->GetSession().GetContext());
+				fig::string text = eval_text(script.value(), pLLMInstance->GetSession().GetContext());
 				_autoScript = split(text, '\n');
 			}
 			_autoScriptIndex = 0;

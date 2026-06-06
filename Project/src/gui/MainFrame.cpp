@@ -351,10 +351,9 @@ namespace fig::gui
 			}
 		}
 
-		if (IsUserEvent(event, UserEvent::LLMStatusUpdate))
+		if (IsUserEventWithData(event, UserEvent::LLMStatusUpdate))
 		{
-			if (event.user.data1)
-				SetStatusBar(*reinterpret_cast<fig::llm::LLMStatus*>(event.user.data1));
+			SetStatusBar(GetUserData<fig::llm::LLMStatus>(event));
 			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::LLMChatInitializing))
@@ -415,9 +414,19 @@ namespace fig::gui
 
 		if (IsUserEvent(event, UserEvent::StartChat))
 		{
-			const fig::uuid& characterId = *reinterpret_cast<fig::uuid*>(event.user.data1);
+			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			StartChat(characterId);
 			return EventResult::Handled;
+		}
+
+		if constexpr (Debugging)
+		{
+			if (IsUserEvent(event, UserEvent::DebugCharacter))
+			{
+				const fig::uuid& characterId = GetUserData<fig::uuid>(event);
+				DebugUtility::DebugCharacter(characterId);
+				return EventResult::Handled;
+			}
 		}
 
 		if (_pActiveScreen)

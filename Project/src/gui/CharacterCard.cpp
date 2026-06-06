@@ -111,6 +111,7 @@ namespace fig::gui
 		bool bLLM = Global::IsLLMInitialized();
 
 		auto& menu = MainFrame::GetInstance().CreateMenu();
+
 		menu.AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] { 
@@ -120,6 +121,15 @@ namespace fig::gui
 			.SetEnabled(bLLM && _metaData.chatCount > 0);
 		menu.AddItem(std::format("View chats with {}", _characterName))
 			.SetEnabled(_metaData.chatCount > 0);
+
+		if constexpr (Debugging)
+		{
+			menu.AddItem(std::format("Debug {}\u2026", _characterName))
+				.SetDelegate([this] {
+				PushEvent(UserEvent::DebugCharacter, &_characterId);
+			});
+		}
+
 		menu.AddSeparator();
 		menu.AddItem("View / Edit\u2026");
 		menu.AddItem("Clone\u2026");

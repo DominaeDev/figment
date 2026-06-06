@@ -2,7 +2,7 @@
 #include "text/TextEvaluator.h"
 #include "text/Condition.h"
 
-namespace fig
+namespace fig::text
 {
 	struct TextSpan
 	{
@@ -376,16 +376,19 @@ namespace fig
 		return true;
 	}
 
-	fig::string TextEvaluator::Evaluate(const fig::string& source, const Context& context) noexcept
+	fig::string eval_text(const fig::string& source, const Context& context) noexcept
 	{
+		if (not source.contains('{'))
+			return source; //noop
+
 		fig::string text = source; // copy
-		return Evaluate(std::move(text), context);
+		return eval_text(std::move(text), context);
 	}
 
-	fig::string TextEvaluator::Evaluate(fig::string&& text, const Context& context) noexcept
+	fig::string eval_text(fig::string&& text, const Context& context) noexcept
 	{
 		if (not text.contains('{'))
-			return text;
+			return text; //noop
 
 		while (evaluate(text, context)) {};
 

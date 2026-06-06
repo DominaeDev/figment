@@ -31,6 +31,7 @@ namespace fig::gui
 		LLMRebuildingKVCache,
 
 		StartChat,
+		DebugCharacter,
 
 		Count,
 	};
@@ -40,6 +41,21 @@ namespace fig::gui
 
 	inline constexpr uint32_t SDLUserEvent(UserEvent e) { return UserEventBase + static_cast<uint32_t>(e); }
 	inline constexpr bool IsUserEvent(Event& event, UserEvent e) { return event.type == SDLUserEvent(e); }
+	inline constexpr bool IsUserEventWithData(Event& event, UserEvent e) { return event.type == SDLUserEvent(e) and event.user.data1 != 0; }
+	
+	template <typename T>
+	inline constexpr const T& GetUserData(Event& event) { return *reinterpret_cast<T*>(event.user.data1); }
+	template <typename T, typename U>
+	inline constexpr std::pair<const T*, const U*> GetUserData(Event& event) { return std::pair { reinterpret_cast<T*>(event.user.data1), reinterpret_cast<T*>(event.user.data2) }; }
+
+	template <typename T>
+	inline constexpr const T& GetUserData1(Event& event) { return *reinterpret_cast<T*>(event.user.data1); }
+	template <typename T>
+	inline constexpr const T& GetUserData2(Event& event) { return *reinterpret_cast<T*>(event.user.data2); }
+
+	inline constexpr bool HasUserData(Event& event) { return (bool)event.user.data1; }
+	inline constexpr bool HasUserData1(Event& event) { return (bool)event.user.data1; }
+	inline constexpr bool HasUserData2(Event& event) { return (bool)event.user.data2; }
 
 	inline void PushEvent(UserEvent eventType, int32_t code = 0)
 	{

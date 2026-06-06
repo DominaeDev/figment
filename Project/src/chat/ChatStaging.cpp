@@ -16,6 +16,7 @@
 using namespace fig::io;
 using namespace fig::data;
 using namespace fig::gui;
+using namespace fig::text;
 
 namespace fig::chat
 {
@@ -228,7 +229,7 @@ namespace fig::chat
 			auto& character = (*try_character).get();
 
 			fig::string brief = trim(character.brief);
-			brief = TextEvaluator::Evaluate(brief, GetContext(role));
+			brief = eval_text(brief, GetContext(role));
 			return brief;
 		}
 		return "";
@@ -248,14 +249,14 @@ namespace fig::chat
 			{
 				fig::string prompt = s_system_prompt_user;
 				replace_all_inplace(prompt, "##PERSONA##", persona);
-				prompt = TextEvaluator::Evaluate(prompt, GetContext(role));
+				prompt = eval_text(prompt, GetContext(role));
 				return prompt;
 			}
 			else
 			{
 				fig::string prompt = s_system_prompt_character;
 				replace_all_inplace(prompt, "##PERSONA##", persona);
-				prompt = TextEvaluator::Evaluate(prompt, GetContext(role));
+				prompt = eval_text(prompt, GetContext(role));
 				return prompt;
 			}
 		}
@@ -336,14 +337,14 @@ namespace fig::chat
 			}
 		}
 
-		prompt = TextEvaluator::Evaluate(prompt, GetContext());
+		prompt = eval_text(prompt, GetContext());
 		return prompt;
 	}
 
 	fig::string ChatStaging::GetDirectorPrompt()
 	{
 		fig::string prompt = s_formatting_director;
-		prompt = TextEvaluator::Evaluate(prompt, GetContext());
+		prompt = eval_text(prompt, GetContext());
 		return prompt;
 	}
 

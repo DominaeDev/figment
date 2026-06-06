@@ -10,6 +10,7 @@
 #include <format>
 
 using namespace fig::chat;
+using namespace fig::text;
 
 namespace fig::llm
 {
@@ -67,7 +68,7 @@ namespace fig::llm
 				complete_message(content);
 				content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 			}
-			content = TextEvaluator::Evaluate(content, session.GetStaging().GetContext(block.role)); //! @move?
+			content = eval_text(content, session.GetStaging().GetContext(block.role)); //! @move?
 			block.tokens = llama::tokenize(_pVocab, content, false);
 
 			block.attn_position = -1;

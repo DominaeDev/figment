@@ -124,7 +124,7 @@ namespace fig::gui
 	{
 		if (IsUserEvent(event, UserEvent::UserSignedIn))
 		{
-			_pUserWidget->SetUser(*reinterpret_cast<fig::user::UserProfile*>(event.user.data1));
+			_pUserWidget->SetUser(GetUserData<fig::user::UserProfile>(event));
 			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::UserSignedOut))

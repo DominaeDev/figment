@@ -4,8 +4,12 @@
 #include "user/UserManager.h"
 #include "io/Asset.h"
 #include "data/ModelSettings.h"
+#include "data/CharacterData.h"
+#include "chat/ChatStaging.h"
 
 using namespace fig::io;
+using namespace fig::chat;
+using namespace fig::data;
 
 namespace fig
 {
@@ -146,6 +150,40 @@ namespace fig
 				assetMngr.CreateAsset(fig::io::AssetType::ModelSettings, buf);
 
 				userMngr.SignOut();
+			}
+		}
+	}
+
+	void DebugUtility::DebugCharacter(const fig::uuid& characterId)
+	{
+		if constexpr (Debugging)
+		{
+			auto& userMngr = Global::GetUserManager();
+			if (userMngr.IsSignedIn())
+			{
+				if (auto try_character = userMngr.GetContent().GetCharacter(characterId))
+				{
+					auto& character = try_character.value();
+
+					ChatStaging staging(Constants::LLM::DefaultChatOptions);
+					if (!staging.AddCharacter(characterId, Role::Bot1, character))
+						return;
+
+					CharacterData user;
+					if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) 
+						and staging.AddCharacter({}, Role::User, user))) //! @temp
+						return;
+
+					fig::string text = staging.GetSystemPrompt();
+					int32_t botCount = staging.GetBotCount();
+					for (int32_t i = 0; i < botCount; ++i)
+					{
+						Role role = bot_from_index(i);
+						text.append(staging.GetPersonaOf(role));
+					}
+					text.append(staging.GetPersonaOf(Role::User));
+					LogLn(text);
+				}
 			}
 		}
 	}
