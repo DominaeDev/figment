@@ -378,7 +378,15 @@ namespace fig
 
 	fig::string TextEvaluator::Evaluate(const fig::string& source, const Context& context) noexcept
 	{
-		fig::string text { source };
+		fig::string text = source; // copy
+		return Evaluate(std::move(text), context);
+	}
+
+	fig::string TextEvaluator::Evaluate(fig::string&& text, const Context& context) noexcept
+	{
+		if (not text.contains('{'))
+			return text;
+
 		while (evaluate(text, context)) {};
 
 		// Process result

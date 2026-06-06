@@ -7,6 +7,7 @@
 #include "gui/Window.h"
 #include "gui/OldCharacterImageStore.h"
 #include "data/CharacterData.h"
+#include "text/TextEvaluator.h"
 
 #include <exception>
 #include <cassert>
@@ -220,21 +221,20 @@ namespace fig::chat
 		}
 	}
 
-	fig::string ChatStaging::GetBriefOf(Role role) const
+	fig::string ChatStaging::GetBriefOf(Role role)
 	{
 		if (auto try_character = GetCharacterByRole(role))
 		{
 			auto& character = (*try_character).get();
 
 			fig::string brief = trim(character.brief);
-			replace_all_inplace(brief, "{{user}}", GetNameOf(Role::User));
-			replace_all_inplace(brief, "{{char}}", character.shortName);
+			brief = TextEvaluator::Evaluate(brief, GetContext(role));
 			return brief;
 		}
 		return "";
 	}
 
-	fig::string ChatStaging::GetPersonaOf(Role role) const
+	fig::string ChatStaging::GetPersonaOf(Role role)
 	{
 		if(auto try_character = GetCharacterByRole(role))
 		{
@@ -248,68 +248,21 @@ namespace fig::chat
 			{
 				fig::string prompt = s_system_prompt_user;
 				replace_all_inplace(prompt, "##PERSONA##", persona);
-				return ApplyNames(prompt);
+				prompt = TextEvaluator::Evaluate(prompt, GetContext(role));
+				return prompt;
 			}
 			else
 			{
 				fig::string prompt = s_system_prompt_character;
 				replace_all_inplace(prompt, "##PERSONA##", persona);
-				replace_all_inplace(prompt, "{{user}}", GetNameOf(Role::User));
-				replace_all_inplace(prompt, "{{char}}", character.shortName);
+				prompt = TextEvaluator::Evaluate(prompt, GetContext(role));
 				return prompt;
 			}
 		}
 		return "";
 	}
 
-	fig::string ChatStaging::ApplyNames(const fig::string& text) const
-	{
-		fig::string s = text;
-		replace_all_inplace(s, "{{user}}", GetNameOf(Role::User));
-		replace_all_inplace(s, "{{char}}", GetNameOf(Role::Bot1));
-		replace_all_inplace(s, "{{user:name}}", GetNameOf(Role::User));
-		replace_all_inplace(s, "{{char:name}}", GetNameOf(Role::Bot1));
-
-		replace_all_inplace(s, "{{char1:name}}", GetNameOf(Role::Bot1));
-		replace_all_inplace(s, "{{char2:name}}", GetNameOf(Role::Bot2));
-		replace_all_inplace(s, "{{char3:name}}", GetNameOf(Role::Bot3));
-		replace_all_inplace(s, "{{char4:name}}", GetNameOf(Role::Bot4));
-		replace_all_inplace(s, "{{char5:name}}", GetNameOf(Role::Bot5));
-		replace_all_inplace(s, "{{char6:name}}", GetNameOf(Role::Bot6));
-		replace_all_inplace(s, "{{char7:name}}", GetNameOf(Role::Bot7));
-		replace_all_inplace(s, "{{char8:name}}", GetNameOf(Role::Bot8));
-
-		replace_all_inplace(s, "{{user:id}}", GetChatIdOf(Role::User));
-		replace_all_inplace(s, "{{char1:id}}", GetChatIdOf(Role::Bot1));
-		replace_all_inplace(s, "{{char2:id}}", GetChatIdOf(Role::Bot2));
-		replace_all_inplace(s, "{{char3:id}}", GetChatIdOf(Role::Bot3));
-		replace_all_inplace(s, "{{char4:id}}", GetChatIdOf(Role::Bot4));
-		replace_all_inplace(s, "{{char5:id}}", GetChatIdOf(Role::Bot5));
-		replace_all_inplace(s, "{{char6:id}}", GetChatIdOf(Role::Bot6));
-		replace_all_inplace(s, "{{char7:id}}", GetChatIdOf(Role::Bot7));
-		replace_all_inplace(s, "{{char8:id}}", GetChatIdOf(Role::Bot8));
-
-		replace_all_inplace(s, "{{user:brief}}", GetBriefOf(Role::User));
-		replace_all_inplace(s, "{{char1:brief}}", GetBriefOf(Role::Bot1));
-		replace_all_inplace(s, "{{char2:brief}}", GetBriefOf(Role::Bot2));
-		replace_all_inplace(s, "{{char3:brief}}", GetBriefOf(Role::Bot3));
-		replace_all_inplace(s, "{{char4:brief}}", GetBriefOf(Role::Bot4));
-		replace_all_inplace(s, "{{char5:brief}}", GetBriefOf(Role::Bot5));
-		replace_all_inplace(s, "{{char6:brief}}", GetBriefOf(Role::Bot6));
-		replace_all_inplace(s, "{{char7:brief}}", GetBriefOf(Role::Bot7));
-		replace_all_inplace(s, "{{char8:brief}}", GetBriefOf(Role::Bot8));
-
-		return s;
-	}
-
-	fig::string ChatStaging::ApplyNames(const fig::string& text, Role characterRole) const
-	{
-		fig::string s = text;
-		replace_all_inplace(s, "{{char}}", GetNameOf(characterRole));
-		return ApplyNames(s);
-	}
-
-	fig::string ChatStaging::GetSystemPrompt() const
+	fig::string ChatStaging::GetSystemPrompt()
 	{
 		fig::string prompt;
 		if (GetBotCount() > 1)
@@ -335,7 +288,7 @@ namespace fig::chat
 			{
 				prompt.append("\n{\n");
 				// Bots
-				for (auto [role, idx] : _charactersByRole)
+				for (auto& [role, idx] : _charactersByRole)
 				{
 					auto& character = _characters[idx];
 					if (is_bot(role))
@@ -361,7 +314,7 @@ namespace fig::chat
 			else
 			{
 				// Bots
-				for (auto [role, idx] : _charactersByRole)
+				for (auto& [role, idx] : _charactersByRole)
 				{
 					auto& character = _characters[idx];
 					if (is_bot(role))
@@ -382,13 +335,16 @@ namespace fig::chat
 				}
 			}
 		}
-		return ApplyNames(prompt);
+
+		prompt = TextEvaluator::Evaluate(prompt, GetContext());
+		return prompt;
 	}
 
-	fig::string ChatStaging::GetDirectorPrompt() const
+	fig::string ChatStaging::GetDirectorPrompt()
 	{
 		fig::string prompt = s_formatting_director;
-		return ApplyNames(prompt);
+		prompt = TextEvaluator::Evaluate(prompt, GetContext());
+		return prompt;
 	}
 
 	fig::string ChatStaging::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
@@ -422,7 +378,22 @@ namespace fig::chat
 		return uuid;
 	}
 
-	const Context& ChatStaging::GetContext() noexcept
+	Context& ChatStaging::GetContext(Role primaryRole) noexcept
+	{
+		if (!is_bot(primaryRole))
+			return GetContext(fig::chat::Role::Bot1); // Fallback
+
+		// Update
+		auto& ctx = GetContext_Internal();
+
+		// Reassign {char} alias
+		size_t bot_index = get_bot_index(primaryRole) + 1;
+		auto charKey = std::format("char{}", bot_index);
+		ctx.AddSelectorAlias("char", charKey);
+		return ctx;
+	}
+
+	Context& ChatStaging::GetContext_Internal() noexcept
 	{
 		if (_bDirtyContext)
 			UpdateContext();
@@ -441,22 +412,22 @@ namespace fig::chat
 				size_t bot_index = get_bot_index(role) + 1;
 				auto charKey = std::format("char{}", bot_index);
 				_context.AddContext(charKey, character);
-				_context.AddContextAlias(std::to_string(bot_index), charKey);
+				_context.AddSelectorAlias(std::to_string(bot_index), charKey);
 			}
 			else if (role == Role::User)
 			{
 				_context.AddContext("user", character);
-				_context.AddContextAlias("u", "user");
-				_context.AddValueAlias("user", "user:name");
 			}
 		}
 
 		if (_charactersByRole.contains(Role::Bot1))
-		{
-			_context.AddContextAlias("char", "char1");
-			_context.AddContextAlias("c", "char1");
-			_context.AddValueAlias("char", "char1:name");
-		}
+			_context.AddSelectorAlias("char", "char1");
+		
+		// Default aliases
+		_context.AddValueAlias("char", "char:name");
+		_context.AddValueAlias("user", "user:name");
+		_context.AddSelectorAlias("c", "char");
+		_context.AddSelectorAlias("u", "user");
 
 		_bDirtyContext = false;
 	}

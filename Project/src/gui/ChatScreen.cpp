@@ -193,8 +193,7 @@ namespace fig::gui
 		{
 			if (auto script = fig::io::ReadTextFile("resources/auto_script.txt"))
 			{
-				fig::string text = script.value();
-				TextEvaluator::Evaluate(text, pLLMInstance->GetSession().GetContext());
+				fig::string text = TextEvaluator::Evaluate(script.value(), pLLMInstance->GetSession().GetContext());
 				_autoScript = split(text, '\n');
 			}
 			_autoScriptIndex = 0;

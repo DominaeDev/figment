@@ -2,11 +2,11 @@
 You must respond using the following XML schema:
 
 ## Dialogue (First person)
-<talk="{{char1:id}}">"Hi there!"</talk>
+<talk="{char1:id}">"Hi there!"</talk>
 Use to convey speech and dialogue.
 
 ## Acting (First person)
-<act="{{char1:id}}">*smiles*</act>
+<act="{char1:id}">*smiles*</act>
 Use for conveying actions, emoting, and facial expressions, in the first person only. (Do NOT use this for narrative or descriptive text.)
 
 ## Narration (Third person)

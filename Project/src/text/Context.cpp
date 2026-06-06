@@ -158,7 +158,7 @@ namespace fig
 	{
 		if (location.selector.empty() and not location.key.empty())
 		{
-			if (auto itAlias = _valueAliases.find(location.key); itAlias != _contextAliases.cend())
+			if (auto itAlias = _valueAliases.find(location.key); itAlias != _valueAliases.cend())
 				return GetBool_Internal(itAlias->second.key);
 		}
 
@@ -231,7 +231,7 @@ namespace fig
 
 	std::optional<ContextualCRef> Context::TryGetContext(fig::handle name) const noexcept
 	{
-		if (auto itAlias = _contextAliases.find(name); itAlias != _contextAliases.cend())
+		if (auto itAlias = _selectorAliases.find(name); itAlias != _selectorAliases.cend())
 			return TryGetContext((Selector)itAlias->second);
 
 		if (name.empty())
@@ -248,7 +248,7 @@ namespace fig
 		if (selector.GetKeys().size() == 1)
 		{
 			auto& key = selector.GetKeys()[0];
-			if (auto itAlias = _contextAliases.find(key); itAlias != _contextAliases.cend())
+			if (auto itAlias = _selectorAliases.find(key); itAlias != _selectorAliases.cend())
 				return TryGetContext(itAlias->second);
 		}
 
@@ -263,7 +263,7 @@ namespace fig
 		if (selector.GetKeys().size() == 1)
 		{
 			auto& key = selector.GetKeys()[0];
-			if (auto itAlias = _contextAliases.find(key); itAlias != _contextAliases.cend())
+			if (auto itAlias = _selectorAliases.find(key); itAlias != _selectorAliases.cend())
 				return TryGetContext(itAlias->second);
 		}
 
@@ -320,7 +320,7 @@ namespace fig
 		_flags.clear();
 		_contexts.clear();
 		_valueAliases.clear();
-		_contextAliases.clear();
+		_selectorAliases.clear();
 	}
 
 	void Context::AddValueAlias(fig::handle alias, const ContextLocation& target) noexcept
@@ -328,14 +328,18 @@ namespace fig
 		_valueAliases.insert_or_assign(alias, target);
 	}
 
-	void Context::AddContextAlias(fig::handle alias, const ContextLocation& target) noexcept
+	void Context::AddSelectorAlias(fig::handle alias, const ContextLocation& target) noexcept
 	{
-		_contextAliases.insert_or_assign(alias, target);
+		_selectorAliases.insert_or_assign(alias, target);
 	}
 
-	void Context::RemoveAlias(fig::handle alias) noexcept
+	void Context::RemoveValueAlias(fig::handle alias) noexcept
 	{
 		_valueAliases.erase(alias);
-		_contextAliases.erase(alias);
+	}
+
+	void Context::RemoveSelectorAlias(fig::handle alias) noexcept
+	{
+		_selectorAliases.erase(alias);
 	}
 }

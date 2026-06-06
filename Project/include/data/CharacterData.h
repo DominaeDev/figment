@@ -63,7 +63,7 @@ namespace fig::data
 		void AppendTags(const fig::string_list& tags);
 		void AddSearchTerm(const fig::string& term);
 
-		const Context& GetContext() noexcept;
+		[[nodiscard]] const Context& GetContext() noexcept;
 
 	public:
 		fig::string chatId;	//! @remove?

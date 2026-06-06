@@ -111,14 +111,4 @@ namespace fig::chat
 		}
 		return pattern;
 	}
-
-	fig::string ChatSession::ApplyNames(const fig::string& text) const
-	{
-		return _staging.ApplyNames(text);
-	}
-
-	fig::string ChatSession::ApplyNames(const fig::string& text, Role role) const
-	{
-		return _staging.ApplyNames(text, role);
-	}
 } // namespace

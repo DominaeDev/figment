@@ -165,7 +165,7 @@ namespace fig::llm
 		switch (msgType)
 		{
 		case MessageType::Undefined:
-			text = std::format("<{0}=\"{{{{char}}}}\">{1}</{0}>", Constants::Chat::DialogueTag, text);
+			text = std::format("<{0}=\"{{char}}\">{1}</{0}>", Constants::Chat::DialogueTag, text);
 			break;
 		case MessageType::Dialogue:
 			text.append(std::format("\"</{0}>", Constants::Chat::DialogueTag));

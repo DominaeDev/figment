@@ -4,6 +4,7 @@
 #include "llm/LLMUtility.h"
 #include "llm/ModelState.h"
 #include "chat/ChatSession.h"
+#include "text/TextEvaluator.h"
 #include <cassert>
 #include <algorithm>
 #include <format>
@@ -66,7 +67,7 @@ namespace fig::llm
 				complete_message(content);
 				content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 			}
-			content = session.GetStaging().ApplyNames(content, block.role); //! @move?
+			content = TextEvaluator::Evaluate(content, session.GetStaging().GetContext(block.role)); //! @move?
 			block.tokens = llama::tokenize(_pVocab, content, false);
 
 			block.attn_position = -1;

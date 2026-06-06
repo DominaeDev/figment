@@ -100,7 +100,7 @@ namespace fig
 		{
 			if (location.selector.empty() and not location.key.empty())
 			{
-				if (auto itAlias = _valueAliases.find(location.key); itAlias != _contextAliases.cend())
+				if (auto itAlias = _valueAliases.find(location.key); itAlias != _valueAliases.cend())
 					return TryGetValue_Internal<T>(itAlias->second);
 			}
 
@@ -154,10 +154,11 @@ namespace fig
 		void Clear() noexcept;
 
 		void AddValueAlias(fig::handle alias, const ContextLocation& target) noexcept;
-		void AddContextAlias(fig::handle alias, const ContextLocation& target) noexcept;
-		void RemoveAlias(fig::handle alias) noexcept;
+		void AddSelectorAlias(fig::handle alias, const ContextLocation& target) noexcept;
+		void RemoveValueAlias(fig::handle alias) noexcept;
+		void RemoveSelectorAlias(fig::handle alias) noexcept;
 
-		const Context& GetContext() const noexcept { return *this; }
+		[[nodiscard]] const Context& GetContext() const noexcept { return *this; }
 
 	private:
 		std::optional<ContextualRef> TryGetContext(ContextLocation location) noexcept;
@@ -187,7 +188,7 @@ namespace fig
 		std::map<fig::handle, ContextualValue> _values;
 		std::map<fig::handle, Context> _contexts;
 		std::map<fig::handle, ContextLocation> _valueAliases;
-		std::map<fig::handle, ContextLocation> _contextAliases;
+		std::map<fig::handle, ContextLocation> _selectorAliases;
 	};
 }
 
