@@ -62,6 +62,12 @@ namespace fig::io
 	}
 
 	template<>
+	void XmlWriterAttribute::Set<fig::handle>(const fig::handle& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), value.c_str());
+	}
+
+	template<>
 	void XmlWriterAttribute::Set<bool>(const bool& value) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), value);
@@ -159,6 +165,13 @@ namespace fig::io
 	{
 		DeleteValue();
 		_pElement->InsertNewText(encode_csv(values).c_str());
+	}
+
+	template<>
+	void XmlWriterElement::SetValue<fig::handle>(const fig::handle& value) noexcept
+	{
+		DeleteValue();
+		_pElement->InsertNewText(value.c_str());
 	}
 
 	XmlWriterElement XmlWriterElement::AddChild(const fig::string& name) noexcept

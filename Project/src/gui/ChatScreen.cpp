@@ -26,7 +26,6 @@
 using namespace fig::llm;
 using namespace fig::data;
 using namespace fig::chat;
-using namespace fig::text;
 
 template<typename T>
 constexpr void queue_clear(std::queue<T>& q)

@@ -4,6 +4,8 @@
 
 namespace fig
 {
+	const Condition Condition::Always { "always" };
+
 	Condition::Condition(const fig::string& expression)
 	{
 		if (auto try_parse = ConditionParser::Parse(expression))
@@ -18,8 +20,35 @@ namespace fig
 		}
 	}
 
+	Condition::Condition(const Condition& other)
+	{
+		operator=(other);
+	}
+
+	Condition& Condition::operator= (const Condition& other) noexcept
+	{
+		if (other._pCondition)
+			_pCondition = other._pCondition->Clone();
+		else
+			_pCondition.reset();
+		return *this;
+	}
+
 	bool Condition::Evaluate(const Context& context) const
 	{
-		return _pCondition && _pCondition->Evaluate(context);
+		return !_pCondition or _pCondition->Evaluate(context);
+	}
+
+	EvaluationResult Condition::Evaluate(const fig::string& expression, const Context& context)
+	{
+		Condition condition(expression);
+		if (condition._error != ConditionParseError::NoError)
+			return EvaluationResult::Error(condition._error);
+		return condition.Evaluate(context);
+	}
+
+	Condition::operator fig::string() const noexcept
+	{
+		return _pCondition ? (fig::string)(*_pCondition) : "";
 	}
 }

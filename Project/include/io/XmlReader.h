@@ -23,43 +23,36 @@ namespace fig::io
 	public:
 		inline bool IsOk() const noexcept { return (bool)_pAttrib; }
 
+		fig::string GetName() const noexcept;
+		inline bool Is(const fig::string& name) const noexcept { return GetName() == name; }
+
 		template<typename T>
 		std::optional<T> TryGet() const = delete;
-
 		template<>
 		std::optional<bool> TryGet<bool>() const noexcept;
-
 		template<>
 		std::optional<float> TryGet<float>() const noexcept;
-
 		template<>
 		std::optional<double> TryGet<double>() const noexcept;
-
 		template<>
 		std::optional<fig::string> TryGet<fig::string>() const noexcept;
-
 		template<>
 		std::optional<fig::path> TryGet<fig::path>() const noexcept;
-
 		template<>
 		std::optional<fig::bytes> TryGet<fig::bytes>() const noexcept;
-
 		template<>
 		std::optional<fig::uuid> TryGet<fig::uuid>() const noexcept;
-
 		template<>
 		std::optional<fig::gui::Color> TryGet<fig::gui::Color>() const noexcept;
-
 		template<>
 		std::optional<fig::string_list> TryGet<fig::string_list>() const noexcept;
-
+		template<>
+		std::optional<fig::handle> TryGet<fig::handle>() const noexcept;
 		template<is_number_range T>
 		[[nodiscard]] std::optional<T> TryGet() const noexcept;
-
 		template<typename T>
 			requires (std::signed_integral<T> and not std::same_as<T, bool>)
 		std::optional<T> TryGet() const noexcept;
-
 		template<typename T>
 			requires (std::unsigned_integral<T> and not std::same_as<T, bool>)
 		std::optional<T> TryGet() const noexcept;
@@ -82,53 +75,44 @@ namespace fig::io
 
 	public:
 		fig::string GetName() const noexcept;
+		inline bool Is(const fig::string& name) const noexcept { return GetName() == name; }
 
 		inline bool IsOk() const { return (bool)_pRoot and (bool)_pElement; }
 		bool Contains(fig::string_view attributeKey) const noexcept;
 
-		std::optional<XmlReaderElement> GetFirstElement() const noexcept;
-		std::optional<XmlReaderElement> GetFirstElement(const fig::string& name) const noexcept;
+		std::optional<XmlReaderElement> GetFirstElementAny() const noexcept;
 		std::optional<XmlReaderElement> GetNextSiblingAny() const noexcept;
+		std::optional<XmlReaderElement> GetFirstElement(const fig::string& name) const noexcept;
 		std::optional<XmlReaderElement> GetNextSibling() const noexcept;
 		std::optional<XmlReaderElement> GetNextSibling(const fig::string& name) const noexcept;
 
 		template<typename T>
 		std::optional<T> TryGetValue() const = delete;
-
 		template<>
 		[[nodiscard]] std::optional<bool> TryGetValue<bool>() const noexcept;
-
 		template<>
 		[[nodiscard]] std::optional<float> TryGetValue<float>() const noexcept;
-
 		template<>
 		[[nodiscard]] std::optional<double> TryGetValue<double>() const noexcept;
-
 		template<>
 		[[nodiscard]] std::optional<fig::string> TryGetValue<fig::string>() const noexcept;
-
 		template<>
 		[[nodiscard]] std::optional<fig::path> TryGetValue<fig::path>() const noexcept;
-
 		template<>
 		[[nodiscard]] std::optional<fig::bytes> TryGetValue<fig::bytes>() const noexcept;
-
 		template<>
 		[[nodiscard]] std::optional<fig::uuid> TryGetValue<fig::uuid>() const noexcept;
-
 		template<>
 		[[nodiscard]] std::optional<fig::gui::Color> TryGetValue<fig::gui::Color>() const noexcept;
-
 		template<>
 		[[nodiscard]] std::optional<fig::string_list> TryGetValue<fig::string_list>() const noexcept;
-
+		template<>
+		[[nodiscard]] std::optional<fig::handle> TryGetValue<fig::handle>() const noexcept;
 		template<is_number_range T>
 		[[nodiscard]] std::optional<T> TryGetValue() const noexcept;
-
 		template<typename T>
 			requires (std::unsigned_integral<T> and not std::same_as<T, bool>)
 		[[nodiscard]] std::optional<T> TryGetValue() const noexcept;
-
 		template<typename T>
 			requires (std::signed_integral<T> and not std::same_as<T, bool>)
 		[[nodiscard]] std::optional<T> TryGetValue() const noexcept;

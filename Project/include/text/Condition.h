@@ -7,22 +7,59 @@
 
 namespace fig
 {
+	enum class ConditionParseError;
+
+	struct EvaluationResult
+	{
+		EvaluationResult(bool value) :
+			_state(value ? State::True : State::False)
+		{
+		}
+
+		operator bool() const { return _state == State::True; }
+		bool IsError() const { return _state == State::Error; }
+
+		static EvaluationResult Error(ConditionParseError error) { return EvaluationResult(error); }
+
+	private:
+		enum class State : uint8_t { False, True, Error };
+
+		explicit EvaluationResult(State state) :
+			_state(state)
+		{
+		}
+
+		explicit EvaluationResult(ConditionParseError error) :
+			_state(State::Error),
+			_error(error)
+		{
+		}
+
+		State _state;
+		ConditionParseError _error {};
+	};
+
 	class Condition
 	{
 	public:
 		Condition() = default;
 		Condition(const fig::string& expression);
-		Condition(const Condition& other) = delete;
+		Condition(const Condition& other);
 		Condition(Condition&& other) = default;
-		Condition& operator= (const Condition& other) noexcept = delete;
+		Condition& operator= (const Condition& other) noexcept;
 		Condition& operator= (Condition&& other) noexcept = default;
 
 		bool Evaluate(const Context& context) const;
+		static EvaluationResult Evaluate(const fig::string& expression, const Context& context);
 
+		explicit operator fig::string() const noexcept;
+
+		static const Condition Always;
 	private:
 		ConditionPtr _pCondition;
 		ConditionParseError _error {};
 	};
+
 }
 
 #endif

@@ -12,6 +12,13 @@ namespace fig::io
 	{
 	}
 
+	fig::string XmlReaderAttribute::GetName() const noexcept
+	{
+		if (_pAttrib)
+			return fig::string(_pAttrib->Name());
+		return "";
+	}
+
 	template<>
 	std::optional<bool> XmlReaderAttribute::TryGet<bool>() const noexcept
 	{
@@ -163,6 +170,21 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	template<>
+	std::optional<fig::handle> XmlReaderAttribute::TryGet<fig::handle>() const noexcept
+	{
+		if (_pAttrib)
+		{
+			const char* pValue = _pAttrib->Value();
+			if (pValue)
+			{
+				auto value = trim(fig::string(pValue));
+				return std::make_optional(fig::handle(value));
+			}
+		}
+		return std::nullopt;
+	}
+
 	template<is_number_range T>
 	std::optional<T> XmlReaderAttribute::TryGet() const noexcept
 	{
@@ -192,7 +214,7 @@ namespace fig::io
 		_pRoot { pRoot }
 	{}
 
-	std::optional<XmlReaderElement> XmlReaderElement::GetFirstElement() const noexcept
+	std::optional<XmlReaderElement> XmlReaderElement::GetFirstElementAny() const noexcept
 	{
 		auto pElement = _pElement->FirstChildElement(nullptr);
 		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
@@ -291,7 +313,6 @@ namespace fig::io
 	template<>
 	std::optional<fig::string> XmlReaderElement::TryGetValue<fig::string>() const noexcept
 	{
-		//! @todo: Resolve mix of CDATA, XMLText, and XMLComment.
 		const char* pValue = _pElement->GetText();
 		if (pValue)
 		{
@@ -304,7 +325,6 @@ namespace fig::io
 	template<>
 	std::optional<fig::path> XmlReaderElement::TryGetValue<fig::path>() const noexcept
 	{
-		//! @todo: Resolve mix of CDATA, XMLText, and XMLComment.
 		const char* pValue = _pElement->GetText();
 		if (pValue)
 		{
@@ -356,6 +376,18 @@ namespace fig::io
 	{
 		if (auto str = TryGetValue<fig::string>(); str.has_value())
 			return std::make_optional(decode_csv(str.value()));
+		return std::nullopt;
+	}
+
+	template<>
+	std::optional<fig::handle> XmlReaderElement::TryGetValue<fig::handle>() const noexcept
+	{
+		const char* pValue = _pElement->GetText();
+		if (pValue)
+		{
+			auto value = trim(fig::string(pValue));
+			return std::make_optional(fig::handle(value));
+		}
 		return std::nullopt;
 	}
 

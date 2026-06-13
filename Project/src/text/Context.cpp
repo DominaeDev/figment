@@ -27,6 +27,21 @@ namespace fig
 		return *this;
 	}
 
+	ContextLocation::operator fig::string() const noexcept
+	{
+		if (selector.empty())
+			return key.to_string();
+
+		fig::string sel;
+		for (auto& key : selector.GetKeys())
+		{
+			if (not sel.empty())
+				sel.push_back('.');
+			sel.append(key);
+		}
+		return std::format("{}:{}", sel, key.to_string());
+	}
+
 	template<>
 	void Context::SetValue<int32_t>(fig::handle name, const int32_t& value) noexcept
 	{
@@ -45,12 +60,19 @@ namespace fig
 		_values[std::move(name)] = value;
 	}
 
+	[[nodiscard]] std::optional<ContextualValue> Context::TryGetRaw_Internal(fig::handle name) const noexcept
+	{
+		if (auto itFind = _values.find(name); itFind != _values.cend())
+			return itFind->second;
+		return std::nullopt;
+	}
+
 	template<>
 	[[nodiscard]] std::optional<bool> Context::TryGetValue_Internal<bool>(fig::handle name) const noexcept
 	{
-		if (auto itFind = _values.find(name); itFind != _values.cend())
+		if (auto try_value = TryGetRaw_Internal(name))
 		{
-			auto& var_value = itFind->second;
+			auto& var_value = try_value.value();
 			if (auto value = std::get_if<int32_t>(&var_value))
 				return (*value) != 0;
 			else if (auto value = std::get_if<float>(&var_value))
@@ -65,9 +87,9 @@ namespace fig
 	template<>
 	[[nodiscard]] std::optional<int32_t> Context::TryGetValue_Internal<int32_t>(fig::handle name) const noexcept
 	{
-		if (auto itFind = _values.find(name); itFind != _values.cend())
+		if (auto try_value = TryGetRaw_Internal(name))
 		{
-			auto& var_value = itFind->second;
+			auto& var_value = try_value.value();
 			if (auto value = std::get_if<int32_t>(&var_value))
 				return *value;
 			if (auto value = std::get_if<float>(&var_value))
@@ -82,9 +104,9 @@ namespace fig
 	template<>
 	[[nodiscard]] std::optional<float> Context::TryGetValue_Internal<float>(fig::handle name) const noexcept
 	{
-		if (auto itFind = _values.find(name); itFind != _values.cend())
+		if (auto try_value = TryGetRaw_Internal(name))
 		{
-			auto& var_value = itFind->second;
+			auto& var_value = try_value.value();
 			if (auto value = std::get_if<int32_t>(&var_value))
 				return toF(*value);
 			if (auto value = std::get_if<float>(&var_value))
@@ -99,9 +121,9 @@ namespace fig
 	template<>
 	[[nodiscard]] std::optional<fig::string> Context::TryGetValue_Internal<fig::string>(fig::handle name) const noexcept
 	{
-		if (auto itFind = _values.find(name); itFind != _values.cend())
+		if (auto try_value = TryGetRaw_Internal(name))
 		{
-			auto& var_value = itFind->second;
+			auto& var_value = try_value.value();
 			if (auto value = std::get_if<int32_t>(&var_value))
 				return int_to_string(*value);
 			if (auto value = std::get_if<float>(&var_value))
@@ -111,11 +133,6 @@ namespace fig
 		}
 
 		return std::nullopt;
-	}
-
-	bool Context::HasValue(fig::handle name) const noexcept
-	{
-		return _values.contains(name);
 	}
 
 	void Context::ClearValues() noexcept

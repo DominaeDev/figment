@@ -4,7 +4,7 @@
 
 #include "text/Context.h"
 
-namespace fig::text
+namespace fig
 {
 	[[nodiscard]] fig::string eval_text(const fig::string& source, const Context& context) noexcept;
 	[[nodiscard]] fig::string eval_text(fig::string&& source, const Context& context) noexcept;

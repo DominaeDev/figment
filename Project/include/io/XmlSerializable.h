@@ -17,6 +17,12 @@ namespace fig::io
 	};
 
 	template<typename T>
+	concept XmlSerializableMap = requires {
+		typename T::key_type;
+		typename T::mapped_type;
+	};
+
+	template<typename T>
 	struct InnerValueType { using Type = T; };
 
 	template<typename T> requires XmlSerializableMap<T>
@@ -77,6 +83,7 @@ namespace fig::io
 		ValueType default_value {};
 		TValidator validator {};
 		bool must_exist {};
+		const char* collection_name {};
 
 		AsElement& Name(const char* name)
 		{
@@ -101,6 +108,45 @@ namespace fig::io
 			this->must_exist = true;
 			return *this;
 		}
+
+		AsElement& Collection(const char* name)
+		{
+			this->collection_name = name;
+			return *this;
+		}
+	};
+
+	template<typename TMemberPointer, typename TSerializer = std::identity, typename TDeserializer = std::identity>
+	struct AsText
+	{
+		using ValueType = XmlMemberPointer<TMemberPointer>::Type;
+		using SerializedType = std::remove_cvref_t<std::invoke_result_t<TSerializer, const ValueType&>>;
+		using TValidator = std::function<bool(const ValueType&)>;
+
+		TMemberPointer member_ptr;
+		TSerializer custom_serializer {};
+		TDeserializer custom_deserializer {};
+		ValueType default_value {};
+		TValidator validator {};
+		bool must_exist {};
+
+		AsText& Default(ValueType default_value)
+		{
+			this->default_value = default_value;
+			return *this;
+		}
+
+		AsText& Validator(TValidator validator)
+		{
+			this->validator = validator;
+			return *this;
+		}
+
+		AsText& MustExist()
+		{
+			this->must_exist = true;
+			return *this;
+		}
 	};
 
 	template<typename T, template<typename...> typename Template>
@@ -120,12 +166,6 @@ namespace fig::io
 	template<typename T>
 	concept XmlSerializableRange = std::ranges::range<T> && XmlSerializable<std::ranges::range_value_t<T>>;
 
-	template<typename T>
-	concept XmlSerializableMap = requires {
-		typename T::key_type;
-		typename T::mapped_type;
-	};
-
 	template<XmlSerializable T>
 	void XmlSerialize(XmlWriterElement& element, const T& object)
 	{
@@ -139,6 +179,11 @@ namespace fig::io
 				{
 					element.SetAttribute(field.name, field.custom_serializer(member));
 				}
+				// AsText
+				else if constexpr (IsSpecializationOf<FieldType, AsText>::value)
+				{
+					element.SetValue(field.custom_serializer(member));
+				}
 				else if constexpr (IsSpecializationOf<FieldType, AsElement>::value)
 				{
 					// Nested object
@@ -150,9 +195,13 @@ namespace fig::io
 					// List of objects
 					else if constexpr (XmlSerializableRange<typename FieldType::ValueType>)
 					{
+						XmlWriterElement& parent = element;
+						if (field.collection_name)
+							parent = element.AddChild(field.collection_name);
+
 						for (const auto& item : member)
 						{
-							auto child = element.AddChild(field.name);
+							auto child = parent.AddChild(field.name);
 							XmlSerialize(child, item);
 						}
 					}
@@ -207,6 +256,17 @@ namespace fig::io
 						bValid &= !field.must_exist;
 					}
 				}
+				// Attribute
+				else if constexpr (IsSpecializationOf<FieldType, AsText>::value)
+				{
+					if (auto value = element.TryGetValue<FieldType::SerializedType>())
+						member = field.custom_deserializer(*value);
+					else
+					{
+						member = field.default_value;
+						bValid &= !field.must_exist;
+					}
+				}
 				else if constexpr (IsSpecializationOf<FieldType, AsElement>::value)
 				{
 					// Nested object
@@ -227,7 +287,11 @@ namespace fig::io
 					{
 						using ItemType = std::ranges::range_value_t<typename FieldType::ValueType>;
 						member.clear();
-						if (auto child = element.GetFirstElement(field.name))
+						const XmlReaderElement& parent = field.collection_name ? 
+							element.GetFirstElement(field.collection_name).value_or(element) :
+							element;
+
+						if (auto child = parent.GetFirstElement(field.name))
 						{
 							while (child)
 							{

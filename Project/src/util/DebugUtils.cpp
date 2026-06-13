@@ -6,6 +6,7 @@
 #include "data/ModelSettings.h"
 #include "data/CharacterData.h"
 #include "chat/ChatStaging.h"
+#include "chat/PromptScaffold.h"
 
 using namespace fig::io;
 using namespace fig::chat;
@@ -21,6 +22,9 @@ namespace fig
 //			ShuffleCards();
 //			CreateModelSettings();
 		}
+
+		PromptScaffold scaffold;
+		scaffold.LoadFromXml("./resources/prompting/chat.scaffold.xml");
 	}
 
 	void DebugUtility::CreateNewProfile(const fig::string& name, const fig::string& password)

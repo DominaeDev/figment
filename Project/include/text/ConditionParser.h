@@ -6,6 +6,16 @@
 
 namespace fig
 {
+	enum class ConditionParseError
+	{
+		NoError,
+		ParseError,
+		UnexpectedToken,
+		ExpectedIdentifier,
+		ExpectedParen,
+		InvalidValue,
+	};
+
 	class ConditionParser
 	{
 	public:
@@ -23,6 +33,8 @@ namespace fig
 			Not,
 			Identifier,
 			Number,
+			Always,
+			Never,
 			Equal,
 			NotEqual,
 			LessThan,
@@ -46,7 +58,7 @@ namespace fig
 		std::expected<ConditionPtr, ConditionParseError> ParseOr();
 		std::expected<ConditionPtr, ConditionParseError> ParseAnd();
 		std::expected<ConditionPtr, ConditionParseError> ParseNot();
-		std::expected<ConditionPtr, ConditionParseError> ParsePrimary();
+		std::expected<ConditionPtr, ConditionParseError> ParseParentheses();
 		std::expected<ConditionPtr, ConditionParseError> ParseAtom();
 
 		const char* _cursor;

@@ -166,6 +166,7 @@
     <ClCompile Include="src\chat\ChatCommands.cpp" />
     <ClCompile Include="src\chat\ChatSession.cpp" />
     <ClCompile Include="src\chat\ChatStaging.cpp" />
+    <ClCompile Include="src\chat\PromptScaffold.cpp" />
     <ClCompile Include="src\data\CardMetaData.cpp" />
     <ClCompile Include="src\data\CharacterData.cpp" />
     <ClCompile Include="src\data\CharacterGender.cpp" />
@@ -396,6 +397,7 @@
     <ClInclude Include="include\chat\ChatSession.h" />
     <ClInclude Include="include\chat\ChatStaging.h" />
     <ClInclude Include="include\chat\ChatTypes.h" />
+    <ClInclude Include="include\chat\PromptScaffold.h" />
     <ClInclude Include="include\data\CardMetaData.h" />
     <ClInclude Include="include\data\CharacterData.h" />
     <ClInclude Include="include\data\CharacterGender.h" />

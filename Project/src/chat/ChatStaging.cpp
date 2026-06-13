@@ -16,7 +16,6 @@
 using namespace fig::io;
 using namespace fig::data;
 using namespace fig::gui;
-using namespace fig::text;
 
 namespace fig::chat
 {

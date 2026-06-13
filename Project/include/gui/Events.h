@@ -45,13 +45,12 @@ namespace fig::gui
 	
 	template <typename T>
 	inline constexpr const T& GetUserData(Event& event) { return *reinterpret_cast<T*>(event.user.data1); }
-	template <typename T, typename U>
-	inline constexpr std::pair<const T*, const U*> GetUserData(Event& event) { return std::pair { reinterpret_cast<T*>(event.user.data1), reinterpret_cast<T*>(event.user.data2) }; }
-
 	template <typename T>
 	inline constexpr const T& GetUserData1(Event& event) { return *reinterpret_cast<T*>(event.user.data1); }
 	template <typename T>
 	inline constexpr const T& GetUserData2(Event& event) { return *reinterpret_cast<T*>(event.user.data2); }
+	template <typename T, typename U>
+	inline constexpr std::pair<const T*, const U*> GetUserData(Event& event) { return std::pair { reinterpret_cast<T*>(event.user.data1), reinterpret_cast<T*>(event.user.data2) }; }
 
 	inline constexpr bool HasUserData(Event& event) { return (bool)event.user.data1; }
 	inline constexpr bool HasUserData1(Event& event) { return (bool)event.user.data1; }

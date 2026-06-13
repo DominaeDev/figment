@@ -37,6 +37,7 @@ namespace fig::io
 		template<> void Set<fig::uuid>(const fig::uuid& value) noexcept;
 		template<> void Set<fig::gui::Color>(const fig::gui::Color& value) noexcept;
 		template<> void Set<fig::string_span>(const fig::string_span& values) noexcept;
+		template<> void Set<fig::handle>(const fig::handle& value) noexcept;
 
 		template<typename T> requires (std::signed_integral<T> and not std::same_as<T, bool>)
 		void Set(const T& value) noexcept;
@@ -92,6 +93,7 @@ namespace fig::io
 		template<> void SetValue<fig::uuid>(const fig::uuid& value) noexcept;
 		template<> void SetValue<fig::gui::Color>(const fig::gui::Color& value) noexcept;
 		template<> void SetValue<fig::string_span>(const fig::string_span& values) noexcept;
+		template<> void SetValue<fig::handle>(const fig::handle& value) noexcept;
 
 		template<typename T> requires (std::integral<T> and not std::same_as<T, bool>)
 		void SetValue(const T& value) noexcept;

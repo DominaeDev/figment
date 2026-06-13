@@ -2,7 +2,7 @@
 #include "text/TextEvaluator.h"
 #include "text/Condition.h"
 
-namespace fig::text
+namespace fig
 {
 	struct TextSpan
 	{
@@ -272,11 +272,6 @@ namespace fig::text
 		return text;
 	}
 
-	static bool evaluate_condition(fig::string_view expression, const Context& context) noexcept
-	{
-		return Condition { fig::string { expression } }.Evaluate(context);
-	}
-
 	static bool substitute(fig::string& text, const TextSpan& span, const Context& context) noexcept
 	{
 		if (span.length() < 2)
@@ -311,7 +306,8 @@ namespace fig::text
 			{
 				result_true = expr.substr(pos_cond + 1);
 			}
-			bool r = evaluate_condition(condition, context);
+
+			bool r = Condition::Evaluate(fig::string { condition }, context);
 			text.replace(span.begin, span.length(), r ? result_true : result_false);
 			return true;
 		}

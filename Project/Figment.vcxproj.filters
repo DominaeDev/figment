@@ -542,6 +542,9 @@
     <ClCompile Include="src\text\Condition.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
+    <ClCompile Include="src\chat\PromptScaffold.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1293,6 +1296,9 @@
     </ClInclude>
     <ClInclude Include="include\text\Condition.h">
       <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\PromptScaffold.h">
+      <Filter>Source Files\Backend\Chat</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

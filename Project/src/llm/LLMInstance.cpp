@@ -15,7 +15,6 @@
 using namespace std::chrono_literals;
 using namespace fig::io;
 using namespace fig::chat;
-using namespace fig::text;
 
 template<typename T>
 void queue_clear(std::queue<T>& q)

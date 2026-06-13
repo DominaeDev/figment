@@ -12,6 +12,9 @@ namespace fig
     public:
         virtual ~ConditionNode() = default;
         virtual bool Evaluate(const Context& context) const = 0;
+        virtual std::unique_ptr<ConditionNode> Clone() const = 0;
+
+        virtual explicit operator fig::string() const = 0;
     };
 
     using ConditionPtr = std::unique_ptr<ConditionNode>;
@@ -21,6 +24,9 @@ namespace fig
     public:
         explicit AndCondition(std::vector<ConditionPtr> children);
         bool Evaluate(const Context& context) const override;
+        ConditionPtr Clone() const override;
+
+        explicit operator fig::string() const override;
 
     private:
         std::vector<ConditionPtr> _children;
@@ -31,7 +37,9 @@ namespace fig
     public:
         explicit OrCondition(std::vector<ConditionPtr> children);
         bool Evaluate(const Context& context) const override;
+        ConditionPtr Clone() const override;
 
+        explicit operator fig::string() const override;
     private:
         std::vector<ConditionPtr> _children;
     };
@@ -41,7 +49,9 @@ namespace fig
     public:
         explicit NotCondition(ConditionPtr child);
         bool Evaluate(const Context& context) const override;
+        ConditionPtr Clone() const override;
 
+        explicit operator fig::string() const override;
     private:
         ConditionPtr _child;
     };
@@ -56,39 +66,52 @@ namespace fig
         GreaterOrEqual,
     };
 
-    using RhsValue = std::variant<float, fig::string>;
+    using CompareOperand = std::variant<float, fig::string>;
 
     class ComparisonCondition : public ConditionNode
     {
     public:
-        ComparisonCondition(const fig::string& lhs, CompareOperator op, RhsValue rhs);
+        ComparisonCondition(CompareOperand lhs, CompareOperand rhs, CompareOperator op);
         bool Evaluate(const Context& context) const override;
+        ConditionPtr Clone() const override;
 
+        explicit operator fig::string() const override;
     private:
-        ContextLocation _location;
+        CompareOperand _lhs;
+        CompareOperand _rhs;
         CompareOperator _operator;
-        RhsValue _rhs;
     };
 
     class FlagCondition : public ConditionNode
     {
     public:
-        explicit FlagCondition(const fig::string& location);
+        explicit FlagCondition(const fig::string& flag);
+        explicit FlagCondition(const ContextLocation& flag);
         bool Evaluate(const Context& context) const override;
+        ConditionPtr Clone() const override;
 
+        explicit operator fig::string() const override;
     private:
-        ContextLocation _location;
+        ContextLocation _flag;
     };
 
-    enum class ConditionParseError
+    class AlwaysCondition : public ConditionNode
     {
-        NoError,
-        ParseError,
-        UnexpectedToken,
-        ExpectedOperand,
-        ExpectedIdentifier,
-        ExpectedParen,
-        InvalidValue,
+    public:
+        bool Evaluate(const Context& context) const override;
+        ConditionPtr Clone() const override;
+
+        explicit operator fig::string() const override;
     };
+
+    class NeverCondition : public ConditionNode
+    {
+    public:
+        bool Evaluate(const Context& context) const override;
+        ConditionPtr Clone() const override;
+
+        explicit operator fig::string() const override;
+    };
+
 }
 #endif

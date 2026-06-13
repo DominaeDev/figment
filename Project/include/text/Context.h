@@ -22,7 +22,6 @@ namespace fig
 		Selector& operator=(const Selector&) = default;
 		Selector& operator=(Selector&&) = default;
 
-
 		inline bool empty() const noexcept { return _value.empty(); }
 		inline auto GetKeys() const noexcept { return std::span { _value.data(), _value.size() }; }
 
@@ -40,6 +39,11 @@ namespace fig
 	{
 		{ t.GetContext() } -> std::same_as<const Context&>;
 	};
+
+	constexpr bool IsNumber(const ContextualValue& value)
+	{
+		return std::holds_alternative<int32_t>(value) or std::holds_alternative<float>(value);
+	}
 
 	struct ContextLocation
 	{
@@ -66,6 +70,10 @@ namespace fig
 		{
 			return selector.Append(key);
 		}
+
+		explicit operator fig::string() const noexcept;
+
+		inline bool IsOk() const noexcept { return not key.empty(); }
 
 		Selector selector;
 		fig::handle key;
@@ -107,7 +115,42 @@ namespace fig
 			return TryGetValue_Internal<T>(location);
 		};
 
-		bool HasValue(fig::handle flag) const noexcept;
+		std::optional<ContextualValue> TryGetRaw(fig::handle name) const
+		{
+			if (auto itAlias = _valueAliases.find(name); itAlias != _valueAliases.cend())
+				return TryGetRaw_Internal(itAlias->second);
+			return TryGetRaw_Internal(name);
+		};
+
+		std::optional<ContextualValue> TryGetRaw(ContextLocation location) const
+		{
+			if (location.selector.empty() and not location.key.empty())
+			{
+				if (auto itAlias = _valueAliases.find(location.key); itAlias != _valueAliases.cend())
+					return TryGetRaw_Internal(itAlias->second);
+			}
+
+			return TryGetRaw_Internal(location);
+		};
+
+		bool HasValue(fig::handle flag) const noexcept
+		{
+			if (auto itAlias = _valueAliases.find(flag); itAlias != _valueAliases.cend())
+				return HasValue_Internal(itAlias->second);
+			return HasValue_Internal(flag);
+		}
+
+		bool HasValue(ContextLocation location) const
+		{
+			if (location.selector.empty() and not location.key.empty())
+			{
+				if (auto itAlias = _valueAliases.find(location.key); itAlias != _valueAliases.cend())
+					return HasValue_Internal(itAlias->second);
+			}
+
+			return HasValue_Internal(location);
+		};
+
 		inline const std::map<fig::handle, ContextualValue>& GetValues() const noexcept { return _values; }
 		void ClearValues() noexcept;
 
@@ -115,6 +158,12 @@ namespace fig
 		inline T GetValue(fig::handle name, T default_value = {}) const
 		{
 			return TryGetValue<T>(name).value_or(default_value);
+		};
+
+		template<typename T>
+		inline T GetValue(ContextLocation location, T default_value = {}) const
+		{
+			return TryGetValue<T>(location).value_or(default_value);
 		};
 
 		// Flags
@@ -165,7 +214,7 @@ namespace fig
 		std::optional<ContextualCRef> TryGetContext(ContextLocation location) const noexcept;
 
 		template<typename T> 
-		std::optional<T> TryGetValue_Internal(ContextLocation location) const
+		std::optional<T> TryGetValue_Internal(ContextLocation location) const noexcept
 		{
 			if (auto try_ctx = TryGetContext(location.selector))
 			{
@@ -174,6 +223,33 @@ namespace fig
 			}
 			return std::nullopt;
 		};
+
+		bool HasValue_Internal(ContextLocation location) const noexcept
+		{
+			if (auto try_ctx = TryGetContext(location.selector))
+			{
+				auto& ctx = try_ctx.value().get();
+				return ctx.HasValue_Internal(location.key);
+			}
+			return false;
+		};
+
+		bool HasValue_Internal(fig::handle name) const noexcept
+		{
+			return _values.contains(name);
+		}
+
+		std::optional<ContextualValue> TryGetRaw_Internal(ContextLocation location) const noexcept
+		{
+			if (auto try_ctx = TryGetContext(location.selector))
+			{
+				auto& ctx = try_ctx.value().get();
+				return ctx.TryGetRaw_Internal(location.key);
+			}
+			return std::nullopt;
+		};
+
+		[[nodiscard]] std::optional<ContextualValue> TryGetRaw_Internal(fig::handle name) const noexcept;
 
 		template<typename T> std::optional<T> TryGetValue_Internal(fig::handle name) const = delete;
 		template<> [[nodiscard]] std::optional<bool> TryGetValue_Internal<bool>(fig::handle name) const noexcept;

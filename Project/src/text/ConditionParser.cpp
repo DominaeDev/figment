@@ -6,6 +6,8 @@ namespace fig
 	constexpr const char* OpAnd = "and";
 	constexpr const char* OpOr = "or";
 	constexpr const char* OpNot = "not";
+	constexpr const char* OpAlways = "always";
+	constexpr const char* OpNever = "never";
 
 	std::expected<ConditionPtr, ConditionParseError> ConditionParser::Parse(const fig::string& expression)
 	{
@@ -134,7 +136,7 @@ namespace fig
 		if (std::isalpha(static_cast<unsigned char>(character)) || character == '_')
 		{
 			const char* start = _cursor;
-			while (_cursor < _end && (std::isalnum(static_cast<unsigned char>(*_cursor)) || *_cursor == '_' || *_cursor == ':' || *_cursor == '.'))
+			while (_cursor < _end && (std::isalnum(static_cast<unsigned char>(*_cursor)) || *_cursor == '_' || *_cursor == '-' || *_cursor == ':' || *_cursor == '.'))
 				++_cursor;
 
 			fig::string text(start, static_cast<size_t>(_cursor - start));
@@ -145,6 +147,10 @@ namespace fig
 				return { TokenType::Or };
 			if (text == OpNot)
 				return { TokenType::Not };
+			if (text == OpAlways)
+				return { TokenType::Always };
+			if (text == OpNever)
+				return { TokenType::Never };
 
 			return { TokenType::Identifier, std::move(text) };
 		}
@@ -197,7 +203,7 @@ namespace fig
 	std::expected<ConditionPtr, ConditionParseError> ConditionParser::ParseNot()
 	{
 		if (_current.type != TokenType::Not)
-			return ParsePrimary();
+			return ParseParentheses();
 
 		Advance();
 		auto operand = ParseNot();
@@ -206,7 +212,7 @@ namespace fig
 		return std::make_unique<NotCondition>(std::move(operand.value()));
 	}
 
-	std::expected<ConditionPtr, ConditionParseError> ConditionParser::ParsePrimary()
+	std::expected<ConditionPtr, ConditionParseError> ConditionParser::ParseParentheses()
 	{
 		if (_current.type != TokenType::LeftParen)
 			return ParseAtom();
@@ -224,53 +230,76 @@ namespace fig
 
 	std::expected<ConditionPtr, ConditionParseError> ConditionParser::ParseAtom()
 	{
-		if (_current.type != TokenType::Identifier)
-			return std::unexpected(ConditionParseError::ExpectedIdentifier);
-
-		fig::string name = std::move(_current.text);
-		Advance();
-
-		std::optional<CompareOperator> compareOperator;
-
-		switch (_current.type)
+		if (_current.type == TokenType::Identifier)
 		{
-			case TokenType::Equal:
-				compareOperator = CompareOperator::Equal;
-				break;
-			case TokenType::NotEqual:
-				compareOperator = CompareOperator::NotEqual;
-				break;
-			case TokenType::LessThan:
-				compareOperator = CompareOperator::LessThan;
-				break;
-			case TokenType::LessOrEqual:
-				compareOperator = CompareOperator::LessOrEqual;
-				break;
-			case TokenType::GreaterThan:
-				compareOperator = CompareOperator::GreaterThan;
-				break;
-			case TokenType::GreaterOrEqual:
-				compareOperator = CompareOperator::GreaterOrEqual;
-				break;
-			default:
-				break;
+			CompareOperand lhsValue;
+			if (_current.type == TokenType::Number)
+				lhsValue = _current.number;
+			else if (_current.type == TokenType::Identifier)
+				lhsValue = std::move(_current.text);
+			else
+				return std::unexpected(ConditionParseError::InvalidValue);
+
+			Advance();
+
+			std::optional<CompareOperator> compareOperator;
+
+			switch (_current.type)
+			{
+				case TokenType::Equal:
+					compareOperator = CompareOperator::Equal;
+					break;
+				case TokenType::NotEqual:
+					compareOperator = CompareOperator::NotEqual;
+					break;
+				case TokenType::LessThan:
+					compareOperator = CompareOperator::LessThan;
+					break;
+				case TokenType::LessOrEqual:
+					compareOperator = CompareOperator::LessOrEqual;
+					break;
+				case TokenType::GreaterThan:
+					compareOperator = CompareOperator::GreaterThan;
+					break;
+				case TokenType::GreaterOrEqual:
+					compareOperator = CompareOperator::GreaterOrEqual;
+					break;
+				default:
+					break;
+			}
+
+			if (!compareOperator.has_value())
+			{
+				if (auto name = std::get_if<fig::string>(&lhsValue))
+					return std::make_unique<FlagCondition>(std::move(*name));
+				return std::unexpected(ConditionParseError::ExpectedIdentifier);
+			}
+
+			Advance();
+
+			CompareOperand rhsValue;
+			if (_current.type == TokenType::Number)
+				rhsValue = _current.number;
+			else if (_current.type == TokenType::Identifier)
+				rhsValue = std::move(_current.text);
+			else
+				return std::unexpected(ConditionParseError::InvalidValue);
+
+			Advance();
+
+			return std::make_unique<ComparisonCondition>(std::move(lhsValue), std::move(rhsValue), *compareOperator);
 		}
+		else if (_current.type == TokenType::Always)
+		{
+			Advance();
+			return std::make_unique<AlwaysCondition>();
+		}
+		else if (_current.type == TokenType::Never)
+		{
+			Advance();
+			return std::make_unique<NeverCondition>();
+		}
+		return std::unexpected(ConditionParseError::ExpectedIdentifier);
 
-		if (!compareOperator.has_value())
-			return std::make_unique<FlagCondition>(std::move(name));
-
-		Advance();
-
-		RhsValue rhsValue;
-		if (_current.type == TokenType::Number)
-			rhsValue = _current.number;
-		else if (_current.type == TokenType::Identifier)
-			rhsValue = std::move(_current.text);
-		else
-			return std::unexpected(ConditionParseError::InvalidValue);
-
-		Advance();
-
-		return std::make_unique<ComparisonCondition>(std::move(name), *compareOperator, std::move(rhsValue));
 	}
 }

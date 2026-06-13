@@ -10,7 +10,6 @@
 #include <format>
 
 using namespace fig::chat;
-using namespace fig::text;
 
 namespace fig::llm
 {
