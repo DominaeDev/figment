@@ -51,4 +51,9 @@ namespace fig
 	{
 		return _pCondition ? (fig::string)(*_pCondition) : "";
 	}
+
+	bool Condition::IsOk() const noexcept
+	{
+		return _error == ConditionParseError::NoError;
+	}
 }

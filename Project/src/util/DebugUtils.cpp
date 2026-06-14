@@ -24,7 +24,8 @@ namespace fig
 		}
 
 		PromptScaffold scaffold;
-		scaffold.LoadFromXml("./resources/prompting/chat.scaffold.xml");
+		scaffold.LoadFromXml("./resources/prompting/chat.scaffold");
+		int k = 0;
 	}
 
 	void DebugUtility::CreateNewProfile(const fig::string& name, const fig::string& password)

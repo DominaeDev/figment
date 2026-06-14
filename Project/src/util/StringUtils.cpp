@@ -779,4 +779,83 @@ namespace fig
 			return std::nullopt;
 		return value;
 	}
+
+	fig::string unindent(const fig::string& s)
+	{
+		fig::string value { s };
+		unindent_inplace(value);
+		return value;
+	}
+
+	void unindent_inplace(fig::string& s)
+	{
+		size_t read = 0;
+		size_t write = 0;
+		size_t length = s.size();
+		bool bLineStart = true;
+		while (read < length)
+		{
+			char currentChar = s[read];
+			if (bLineStart and (currentChar == ' ' or currentChar == '\t'))
+			{
+				++read;
+				continue;
+			}
+			bLineStart = currentChar == '\n';
+			s[write] = currentChar;
+			++write;
+			++read;
+		}
+		s.resize(write);
+	}
+
+	fig::string unescape(const fig::string& s) noexcept
+	{
+		fig::string value { s };
+		unescape_inplace(value);
+		return value;
+	}
+
+	void unescape_inplace(fig::string& s) noexcept
+	{
+		size_t read = 0;
+		size_t write = 0;
+		size_t length = s.size();
+
+		static const std::array<std::pair<char, char>, 5> seqs {
+			std::pair { 'n', '\n' },
+			std::pair { 'r', '\r' },
+			std::pair { 't', '\t' },
+			std::pair { '\\', '\\' },
+			std::pair { '_', ' ' },
+		};
+
+		while (read < length)
+		{
+			char currentChar = s[read];
+			if (currentChar == '\\' and read + 1 < length)
+			{
+				char nextChar = s[read + 1];
+				
+				bool replaced = false;
+				for (auto& seq : seqs)
+				{
+					if (nextChar == seq.first)
+					{
+						s[write] = seq.second;
+						++write;
+						read += 2;
+						replaced = true;
+						break;
+					}
+				}
+				if (replaced)
+					continue;
+			}
+			s[write] = currentChar;
+			++write;
+			++read;
+		}
+		s.resize(write);
+	}
 }

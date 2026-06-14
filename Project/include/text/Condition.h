@@ -53,6 +53,7 @@ namespace fig
 		static EvaluationResult Evaluate(const fig::string& expression, const Context& context);
 
 		explicit operator fig::string() const noexcept;
+		bool IsOk() const noexcept;
 
 		static const Condition Always;
 	private:

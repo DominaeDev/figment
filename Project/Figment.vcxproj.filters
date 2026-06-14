@@ -545,6 +545,12 @@
     <ClCompile Include="src\chat\PromptScaffold.cpp">
       <Filter>Source Files\Backend\Chat</Filter>
     </ClCompile>
+    <ClCompile Include="src\text\MacroProvider.cpp">
+      <Filter>Source Files\Backend\LLM\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text\ContextLocator.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1299,6 +1305,12 @@
     </ClInclude>
     <ClInclude Include="include\chat\PromptScaffold.h">
       <Filter>Source Files\Backend\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text\MacroProvider.h">
+      <Filter>Source Files\Backend\LLM\Context</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text\ContextLocator.h">
+      <Filter>Source Files\Text</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

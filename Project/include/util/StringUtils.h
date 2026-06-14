@@ -6,54 +6,60 @@
 
 namespace fig
 {
-	[[nodiscard]] string ltrim(const string& s);
-	[[nodiscard]] string rtrim(const string& s);
-	[[nodiscard]] inline string trim(const string& s) { return ltrim(rtrim(s)); }
-	void ltrim_inplace(string& s);
-	void rtrim_inplace(string& s);
-	inline void trim_inplace(string& s) { ltrim_inplace(s); rtrim_inplace(s); }
-	string trim(string&& s);
-	[[nodiscard]] wstring ltrim(const wstring& s);
-	[[nodiscard]] wstring rtrim(const wstring& s);
-	[[nodiscard]] inline wstring trim(const wstring& s) { return ltrim(rtrim(s)); }
-	void ltrim_inplace(wstring& s);
-	void rtrim_inplace(wstring& s);
-	inline void trim_inplace(wstring& s) { ltrim_inplace(s); rtrim_inplace(s); }
-	wstring trim(wstring&& s);
+	[[nodiscard]] fig::string ltrim(const fig::string& s);
+	[[nodiscard]] fig::string rtrim(const fig::string& s);
+	[[nodiscard]] inline fig::string trim(const fig::string& s) { return ltrim(rtrim(s)); }
+	void ltrim_inplace(fig::string& s);
+	void rtrim_inplace(fig::string& s);
+	inline void trim_inplace(fig::string& s) { ltrim_inplace(s); rtrim_inplace(s); }
+	fig::string trim(fig::string&& s);
+	[[nodiscard]] fig::wstring ltrim(const fig::wstring& s);
+	[[nodiscard]] fig::wstring rtrim(const fig::wstring& s);
+	[[nodiscard]] inline fig::wstring trim(const fig::wstring& s) { return ltrim(rtrim(s)); }
+	void ltrim_inplace(fig::wstring& s);
+	void rtrim_inplace(fig::wstring& s);
+	inline void trim_inplace(fig::wstring& s) { ltrim_inplace(s); rtrim_inplace(s); }
+	fig::wstring trim(fig::wstring&& s);
 
-	[[nodiscard]] string lcase(const string& s);
-	[[nodiscard]] string ucase(const string& s);
-	string& lcase_inplace(string& s);
-	string& ucase_inplace(string& s);
-	[[nodiscard]] wstring lcase(const wstring& s);
-	[[nodiscard]] wstring ucase(const wstring& s);
-	wstring& lcase_inplace(wstring& s);
-	wstring& ucase_inplace(wstring& s);
+	[[nodiscard]] fig::string lcase(const fig::string& s);
+	[[nodiscard]] fig::string ucase(const fig::string& s);
+	fig::string& lcase_inplace(fig::string& s);
+	fig::string& ucase_inplace(fig::string& s);
+	[[nodiscard]] fig::wstring lcase(const fig::wstring& s);
+	[[nodiscard]] fig::wstring ucase(const fig::wstring& s);
+	fig::wstring& lcase_inplace(fig::wstring& s);
+	fig::wstring& ucase_inplace(fig::wstring& s);
 
-	[[nodiscard]] int compare(const string& a, const string& b, bool ignore_case = false);
-	[[nodiscard]] bool equals(const string& a, const string& b, bool ignore_case = false);
+	fig::string unindent(const fig::string& s);
+	void unindent_inplace(fig::string& s);
+
+	fig::string unescape(const fig::string& s) noexcept;
+	void unescape_inplace(fig::string& s) noexcept;
+
+	[[nodiscard]] int compare(const fig::string& a, const fig::string& b, bool ignore_case = false);
+	[[nodiscard]] bool equals(const fig::string& a, const fig::string& b, bool ignore_case = false);
 	[[nodiscard]] bool equals(const string_view& a, const string_view& b, bool ignore_case = false);
 
-	string replace(const string& str, const string& find, const string& replace);
-	string replace_all(const string& str, const string& find, const string& replace);
+	fig::string replace(const fig::string& str, const fig::string& find, const fig::string& replace);
+	fig::string replace_all(const fig::string& str, const fig::string& find, const fig::string& replace);
 
-	string& replace_inplace(string& str, const string& find, const string& replace);
-	string& replace_all_inplace(string& str, const string& find, const string& replace);
+	fig::string& replace_inplace(fig::string& str, const fig::string& find, const fig::string& replace);
+	fig::string& replace_all_inplace(fig::string& str, const fig::string& find, const fig::string& replace);
 
 	bool is_whitespace(char ch) noexcept;
 	bool is_punctuation(char ch) noexcept;
-	bool empty_or_whitespace(const string& s) noexcept;
-	bool empty_or_whitespace(const wstring& s) noexcept;
-	bool begins_with(const string& str, const string& prefix, bool ignore_case = false);
-	bool ends_with(const string& str, const string& suffix, bool ignore_case = false);
-	std::vector<string> split(string s, char delimiter, bool removeEmpty = true);
-	std::vector<string> split(const string& input, const std::unordered_set<char>& delimiters, bool removeEmpty);
+	bool empty_or_whitespace(const fig::string& s) noexcept;
+	bool empty_or_whitespace(const fig::wstring& s) noexcept;
+	bool begins_with(const fig::string& str, const fig::string& prefix, bool ignore_case = false);
+	bool ends_with(const fig::string& str, const fig::string& suffix, bool ignore_case = false);
+	std::vector<fig::string> split(fig::string s, char delimiter, bool removeEmpty = true);
+	std::vector<fig::string> split(const fig::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty);
 
-	string& normalize_newlines(string& text);
-	[[nodiscard]] string normalize_newlines(string&& s);
+	fig::string& normalize_newlines(fig::string& text);
+	[[nodiscard]] fig::string normalize_newlines(fig::string&& s);
 
-	wstring& normalize_newlines(wstring& text);
-	[[nodiscard]] wstring normalize_newlines(wstring&& s);
+	fig::wstring& normalize_newlines(fig::wstring& text);
+	[[nodiscard]] fig::wstring normalize_newlines(fig::wstring&& s);
 
 	fig::string int_to_string(int32_t value);
 	fig::string float_to_string(float value);
@@ -62,9 +68,9 @@ namespace fig
 	std::optional<int32_t> string_to_int(const fig::string_view& s);
 	std::optional<float> string_to_float(const fig::string_view& s);
 
-	size_t validate_utf8(const string& text) noexcept;
-	wstring from_utf8(const string& str);
-	string to_utf8(const wstring& str);
+	size_t validate_utf8(const fig::string& text) noexcept;
+	fig::wstring from_utf8(const fig::string& str);
+	fig::string to_utf8(const fig::wstring& str);
 
 	template<typename Str, typename Pred>
 	size_t find_index(const Str& str, int32_t pos, Pred pred)

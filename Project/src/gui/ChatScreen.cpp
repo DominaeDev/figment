@@ -175,12 +175,12 @@ namespace fig::gui
 #if ENABLE_AUTO_CHAT
 	void ChatScreen::AutoChat()
 	{
-		auto& engine = Global::GetLLMEngine();
+		auto& backend = Global::GetLLMBackend();
 		static std::mt19937 rng {};
 		static std::uniform_int_distribution<int> dist(0, 99);
-		if (!engine.IsInitialized())
+		if (!backend.IsInitialized())
 		{
-			if (!engine.IsInitializing())
+			if (!backend.IsInitializing())
 				MainFrame::GetInstance().InitializeModel();
 			return;
 		}

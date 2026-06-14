@@ -71,14 +71,12 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 
 SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 {
-	fig::AppState* pAppState = static_cast<fig::AppState*>(state);
-
 	if (event->type == SDL_EVENT_QUIT)
 	{
 		return SDL_APP_SUCCESS;
 	}
 
-	if (pAppState->pMainWindow && pAppState->pMainWindow->HandleEvent(*event))
+	if (fig::Global::GetMainWindow().HandleEvent(*event))
 	{
 		return SDL_APP_CONTINUE;
 	}
@@ -96,16 +94,11 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 	float fElapsed = static_cast<float>(delta) / 1000.0f;
 
-	if (pAppState->pLLMBackend)
-	{
-		pAppState->pLLMBackend->Update(fElapsed);
-	}
+	fig::Global::GetLLMBackend().Update(fElapsed);
 
-	if (pAppState->pMainWindow)
-	{
-		pAppState->pMainWindow->Update(fElapsed);
-		pAppState->pMainWindow->Render();
-	}
+	auto& mainWnd = fig::Global::GetMainWindow();
+	mainWnd.Update(fElapsed);
+	mainWnd.Render();
 
 	if constexpr (Debugging)
 	{

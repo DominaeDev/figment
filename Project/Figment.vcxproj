@@ -268,6 +268,8 @@
     <ClCompile Include="src\text\ConditionNode.cpp" />
     <ClCompile Include="src\text\ConditionParser.cpp" />
     <ClCompile Include="src\text\Context.cpp" />
+    <ClCompile Include="src\text\ContextLocator.cpp" />
+    <ClCompile Include="src\text\MacroProvider.cpp" />
     <ClCompile Include="src\user\ProfileDatabase.cpp" />
     <ClCompile Include="src\user\Security.cpp" />
     <ClCompile Include="src\user\UserManager.cpp" />
@@ -494,6 +496,8 @@
     <ClInclude Include="include\text\ConditionNode.h" />
     <ClInclude Include="include\text\ConditionParser.h" />
     <ClInclude Include="include\text\Context.h" />
+    <ClInclude Include="include\text\ContextLocator.h" />
+    <ClInclude Include="include\text\MacroProvider.h" />
     <ClInclude Include="include\text\TextEvaluator.h" />
     <ClInclude Include="include\user\ProfileDatabase.h" />
     <ClInclude Include="include\user\Security.h" />

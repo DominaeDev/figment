@@ -14,6 +14,14 @@ namespace tinyxml2
 
 namespace fig::io
 {
+	enum class XmlReaderOption
+	{
+		Trim,
+		Unindent,
+		Unescape,
+	};
+	using XmlReaderOptions = EnumFlags<XmlReaderOption>;
+
 	class XmlReaderAttribute
 	{
 		friend class XmlReaderElement;
@@ -71,7 +79,7 @@ namespace fig::io
 	{
 		friend class XmlReader;
 		XmlReaderElement() = delete;
-		XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot) noexcept;
+		XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot, XmlReaderOptions options) noexcept;
 
 	public:
 		fig::string GetName() const noexcept;
@@ -118,6 +126,12 @@ namespace fig::io
 		[[nodiscard]] std::optional<T> TryGetValue() const noexcept;
 
 		template<typename T>
+		[[nodiscard]] T GetValue(const T& default_value = {}) const noexcept
+		{
+			return TryGetValue<T>().value_or(default_value);
+		}
+
+		template<typename T>
 		[[nodiscard]] std::optional<T> TryGetElement(const fig::string& name) const noexcept
 		{
 			if (auto elem = GetFirstElement(name))
@@ -138,18 +152,21 @@ namespace fig::io
 		[[nodiscard]] XmlReaderAttribute operator[] (const std::string& key) const noexcept;
 
 	private:
+		std::optional<fig::string> ReadText() const noexcept;
+
 		const tinyxml2::XMLElement* _pRoot {};
 		const tinyxml2::XMLElement* _pElement {};
+		XmlReaderOptions _options {};
 	};
 
 	class XmlReader
 	{
 		XmlReader() = delete;
 	public:
-		XmlReader(const fig::path& path);
-		XmlReader(const fig::path& path, const fig::string& root);
-		XmlReader(const fig::string& document);
-		XmlReader(fig::string_view document);
+		XmlReader(const fig::path& path, XmlReaderOptions options = DefaultOptions);
+		XmlReader(const fig::path& path, const fig::string& root, XmlReaderOptions options = DefaultOptions);
+		XmlReader(const fig::string& document, XmlReaderOptions options = DefaultOptions);
+		XmlReader(fig::string_view document, XmlReaderOptions options = DefaultOptions);
 		~XmlReader();
 
 		inline bool IsOk() const noexcept { return (bool)_pDoc and (bool)_pRoot; }
@@ -157,9 +174,12 @@ namespace fig::io
 		XmlReaderElement GetRoot() const noexcept;
 		[[nodiscard]] std::optional<XmlReaderElement> GetFirstElement(const fig::string& name) const noexcept;
 
+		static const XmlReaderOptions DefaultOptions;
+
 	private:
 		tinyxml2::XMLDocument* _pDoc {};
 		tinyxml2::XMLElement* _pRoot {};
+		XmlReaderOptions _options {};
 	};
 }
 #endif

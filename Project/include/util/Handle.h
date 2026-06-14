@@ -43,11 +43,10 @@ namespace fig
         basic_handle& operator=(const basic_handle&) = default;
         basic_handle& operator=(basic_handle&&) = default;
 
-        inline const string_type& to_string() const noexcept { return _value; }
         inline const char* c_str() const noexcept { return _value.c_str(); }
         inline bool empty() const noexcept { return _value.empty(); }
 
-        operator string_type() const { return _value; }
+        explicit operator string_type() const { return _value; }
 
         auto operator<=>(const basic_handle&) const = default;
         bool operator==(const basic_handle&) const = default;
@@ -64,9 +63,11 @@ namespace fig
 template<typename T, size_t N>
 struct std::hash<fig::basic_handle<T, N>>
 {
-    size_t operator()(const fig::basic_handle<T, N>& basic_handle) const noexcept
+    using handle_type = fig::basic_handle<T, N>;
+    size_t operator()(const handle_type& basic_handle) const noexcept
     {
-        return std::hash<std::basic_string<T>>{}(basic_handle.to_string());
+        using string_type = handle_type::string_type;
+        return std::hash<string_type>{}((string_type)basic_handle);
     }
 };
 

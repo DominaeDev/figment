@@ -190,7 +190,7 @@ namespace fig
 		}
 		else if (auto lhs_str = std::get_if<fig::string>(&_lhs))
 		{
-			if (auto try_value = context.TryGetRaw(ContextLocation { *lhs_str }))
+			if (auto try_value = context.TryGetRaw(ContextLocator { *lhs_str }))
 			{
 				auto& value = try_value.value();
 				if (auto i = std::get_if<int32_t>(&value))
@@ -211,7 +211,7 @@ namespace fig
 		}
 		else if (auto rhs_str = std::get_if<fig::string>(&_rhs))
 		{
-			if (auto try_value = context.TryGetRaw(ContextLocation { *rhs_str }))
+			if (auto try_value = context.TryGetRaw(ContextLocator { *rhs_str }))
 			{
 				auto& value = try_value.value();
 				if (auto i = std::get_if<int32_t>(&value))
@@ -267,7 +267,7 @@ namespace fig
 	{
 	}
 
-	FlagCondition::FlagCondition(const ContextLocation& flag) :
+	FlagCondition::FlagCondition(const ContextLocator& flag) :
 		_flag(flag)
 	{
 	}

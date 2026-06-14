@@ -86,13 +86,13 @@ namespace fig
     {
     public:
         explicit FlagCondition(const fig::string& flag);
-        explicit FlagCondition(const ContextLocation& flag);
+        explicit FlagCondition(const ContextLocator& flag);
         bool Evaluate(const Context& context) const override;
         ConditionPtr Clone() const override;
 
         explicit operator fig::string() const override;
     private:
-        ContextLocation _flag;
+        ContextLocator _flag;
     };
 
     class AlwaysCondition : public ConditionNode

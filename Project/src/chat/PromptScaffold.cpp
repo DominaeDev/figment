@@ -59,7 +59,7 @@ namespace fig::chat
 					{
 						options.emplace_back(PromptOptionToggle {
 							.id = try_id.value(),
-							.label = node.TryGetValue<fig::string>().value_or(try_id.value()),
+							.label = node.TryGetValue<fig::string>().value_or((fig::string)try_id.value()),
 							.hint = node["hint"].TryGet<fig::string>().value_or({}),
 							.defaultValue = node["default"].TryGet<bool>().value_or({})
 						});
@@ -68,7 +68,7 @@ namespace fig::chat
 					{
 						options.emplace_back(PromptOptionNumber {
 							.id = try_id.value(),
-							.label = node.TryGetValue<fig::string>().value_or(try_id.value()),
+							.label = node.TryGetValue<fig::string>().value_or((fig::string)try_id.value()),
 							.hint = node["hint"].TryGet<fig::string>().value_or({}),
 							.defaultValue = node["default"].TryGet<int32_t>().value_or({})
 						});
@@ -77,7 +77,7 @@ namespace fig::chat
 					{
 						options.emplace_back(PromptOptionText {
 							.id = try_id.value(),
-							.label = node.TryGetValue<fig::string>().value_or(try_id.value()),
+							.label = node.TryGetValue<fig::string>().value_or((fig::string)try_id.value()),
 							.hint = node["hint"].TryGet<fig::string>().value_or({}),
 							.defaultValue = node["default"].TryGet<fig::string>().value_or({})
 						});

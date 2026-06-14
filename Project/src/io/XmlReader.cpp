@@ -209,39 +209,40 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	XmlReaderElement::XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot) noexcept :
+	XmlReaderElement::XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot, XmlReaderOptions options) noexcept :
 		_pElement { pElement },
-		_pRoot { pRoot }
+		_pRoot { pRoot },
+		_options { options }
 	{}
 
 	std::optional<XmlReaderElement> XmlReaderElement::GetFirstElementAny() const noexcept
 	{
 		auto pElement = _pElement->FirstChildElement(nullptr);
-		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
+		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot, _options }) : std::nullopt;
 	}
 
 	std::optional<XmlReaderElement> XmlReaderElement::GetFirstElement(const fig::string& name) const noexcept
 	{
 		auto pElement = _pElement->FirstChildElement(name.c_str());
-		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
+		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot, _options }) : std::nullopt;
 	}
 
 	std::optional<XmlReaderElement> XmlReaderElement::GetNextSiblingAny() const noexcept
 	{
 		auto pElement = _pElement->NextSiblingElement();
-		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
+		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot, _options }) : std::nullopt;
 	}
 
 	std::optional<XmlReaderElement> XmlReaderElement::GetNextSibling() const noexcept
 	{
 		auto pElement = _pElement->NextSiblingElement(_pElement->Name());
-		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
+		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot, _options }) : std::nullopt;
 	}
 
 	std::optional<XmlReaderElement> XmlReaderElement::GetNextSibling(const fig::string& name) const noexcept
 	{
 		auto pElement = _pElement->NextSiblingElement(name.c_str());
-		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
+		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot, _options }) : std::nullopt;
 	}
 
 	fig::string XmlReaderElement::GetName() const noexcept
@@ -313,47 +314,31 @@ namespace fig::io
 	template<>
 	std::optional<fig::string> XmlReaderElement::TryGetValue<fig::string>() const noexcept
 	{
-		const char* pValue = _pElement->GetText();
-		if (pValue)
-		{
-			auto value = trim(fig::string(pValue));
-			return std::make_optional(value);
-		}
-		return std::nullopt;
+		return ReadText();
 	}
 
 	template<>
 	std::optional<fig::path> XmlReaderElement::TryGetValue<fig::path>() const noexcept
 	{
-		const char* pValue = _pElement->GetText();
-		if (pValue)
-		{
-			auto value = trim(fig::string(pValue));
-			return std::make_optional(fig::path(value));
-		}
+		if (auto text = ReadText())
+			return std::make_optional(fig::path(text.value()));
 		return std::nullopt;
 	}
 
 	template<>
 	std::optional<fig::bytes> XmlReaderElement::TryGetValue<fig::bytes>() const noexcept
 	{
-		const char* pValue = _pElement->GetText();
-		if (pValue)
-		{
-			auto value = trim(fig::string(pValue));
-			return std::make_optional(Base64Decode(value));
-		}
+		if (auto text = ReadText())
+			return std::make_optional(Base64Decode(trim(text.value())));
 		return std::nullopt;
 	}
 
 	template<>
 	std::optional<fig::uuid> XmlReaderElement::TryGetValue<fig::uuid>() const noexcept
 	{
-		const char* pValue = _pElement->GetText();
-		if (pValue)
+		if (auto text = ReadText())
 		{
-			auto value = trim(fig::string(pValue));
-			fig::uuid uuid = fig::uuid::from_str(value);
+			fig::uuid uuid = fig::uuid::from_str(trim(text.value()));
 			return not uuid.empty() ? std::make_optional(uuid) : std::nullopt;
 		}
 		return std::nullopt;
@@ -362,12 +347,8 @@ namespace fig::io
 	template<>
 	std::optional<fig::gui::Color> XmlReaderElement::TryGetValue<fig::gui::Color>() const noexcept
 	{
-		const char* pValue = _pElement->GetText();
-		if (pValue)
-		{
-			auto value = trim(fig::string(pValue));
-			return std::make_optional(fig::gui::Color::FromString(value));
-		}
+		if (auto text = ReadText())
+			return std::make_optional(fig::gui::Color::FromString(trim(text.value())));
 		return std::nullopt;
 	}
 
@@ -421,7 +402,27 @@ namespace fig::io
 		return XmlReaderAttribute(pAttrib);
 	}
 
-	XmlReader::XmlReader(const fig::path& path)
+	std::optional<fig::string> XmlReaderElement::ReadText() const noexcept
+	{
+		const char* pValue = _pElement->GetText();
+		if (pValue)
+		{
+			fig::string text { pValue };
+			if (_options.IsSet(XmlReaderOption::Trim))
+				trim_inplace(text);
+			if (_options.IsSet(XmlReaderOption::Unindent))
+				unindent_inplace(text);
+			if (_options.IsSet(XmlReaderOption::Unescape))
+				unescape_inplace(text);
+			return text;
+		}
+		return std::nullopt;
+	}
+
+	const XmlReaderOptions XmlReader::DefaultOptions = { XmlReaderOption::Trim, XmlReaderOption::Unindent, XmlReaderOption::Unescape };
+
+	XmlReader::XmlReader(const fig::path& path, XmlReaderOptions options) :
+		_options(options)
 	{
 		_pDoc = new XMLDocument();
 		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS)
@@ -435,7 +436,8 @@ namespace fig::io
 		_pRoot = _pDoc->RootElement();
 	}
 
-	XmlReader::XmlReader(const fig::path& path, const fig::string& root)
+	XmlReader::XmlReader(const fig::path& path, const fig::string& root, XmlReaderOptions options) :
+		_options(options)
 	{
 		_pDoc = new XMLDocument();
 		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS 
@@ -449,7 +451,8 @@ namespace fig::io
 		_pRoot = _pDoc->RootElement();
 	}
 
-	XmlReader::XmlReader(const fig::string& document)
+	XmlReader::XmlReader(const fig::string& document, XmlReaderOptions options) :
+		_options(options)
 	{
 		_pDoc = new XMLDocument();
 		if (_pDoc->Parse(document.c_str()) != XML_SUCCESS)
@@ -463,7 +466,8 @@ namespace fig::io
 		_pRoot = _pDoc->RootElement();
 	}
 
-	XmlReader::XmlReader(fig::string_view document)
+	XmlReader::XmlReader(fig::string_view document, XmlReaderOptions options) :
+		_options(options)
 	{
 		_pDoc = new XMLDocument();
 		if (_pDoc->Parse((char*)document.data(), document.size()) != XML_SUCCESS)
@@ -484,7 +488,7 @@ namespace fig::io
 
 	XmlReaderElement XmlReader::GetRoot() const noexcept
 	{
-		return IsOk() ? XmlReaderElement { _pRoot, _pRoot } : XmlReaderElement { nullptr, nullptr };
+		return IsOk() ? XmlReaderElement { _pRoot, _pRoot, _options } : XmlReaderElement { nullptr, nullptr, {} };
 	}
 
 	std::optional<XmlReaderElement> XmlReader::GetFirstElement(const fig::string& name) const noexcept
@@ -493,7 +497,7 @@ namespace fig::io
 			return std::nullopt;
 
 		auto pElement = _pRoot->FirstChildElement(name.c_str());
-		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot }) : std::nullopt;
+		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot, _options }) : std::nullopt;
 	}
 
 	// Explicit template instantiation

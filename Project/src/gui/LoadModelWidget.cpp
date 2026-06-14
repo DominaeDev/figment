@@ -112,13 +112,13 @@ namespace fig::gui
 
 	void LoadModelWidget::OnButtonPressed()
 	{
-		auto& engine = Global::GetLLMEngine();
+		auto& backend = Global::GetLLMBackend();
 
-		if (not (engine.IsInitialized() or engine.IsInitializing()))
+		if (not (backend.IsInitialized() or backend.IsInitializing()))
 		{
 			MainFrame::GetInstance().InitializeModel();
 		}
-		else if (engine.IsInitialized())
+		else if (backend.IsInitialized())
 		{
 			MainFrame::GetInstance().UnloadModel();
 		}

@@ -35,6 +35,11 @@ namespace fig::llm
 	class LLMInstance;
 }
 
+namespace fig::text
+{
+	class MacroProvider;
+}
+
 namespace fig
 {
 	class Global
@@ -42,23 +47,29 @@ namespace fig
 	public:
 		struct State
 		{
+		private:
+			friend Global;
 			std::shared_ptr<fig::gui::Window> pMainWindow;
 			std::shared_ptr<fig::llm::LLMBackend> pLLMBackend;
 			std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
 			std::shared_ptr<fig::user::UserManager> pUserManager;
 			std::unique_ptr<fig::AppSettings> pAppSettings;
+			std::shared_ptr<fig::text::MacroProvider> pMacroProvider;
+			void Init();
+			void Release();
 		};
 
 		static State* CreateState();
 		static void ReleaseState();
 
 		static fig::gui::Window& GetMainWindow();
-		static fig::llm::LLMBackend& GetLLMEngine();
+		static fig::llm::LLMBackend& GetLLMBackend();
 		static fig::AppSettings& GetSettings();
 		
 		static fig::user::UserManager& GetUserManager();
 		static UserSettings& GetUserSettings();
 		static fig::io::UserContentManager& GetUserContent();
+		static std::weak_ptr<fig::text::MacroProvider> GetMacroProvider();
 
 		[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
 		static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);

@@ -313,11 +313,11 @@ namespace fig
 		}
 
 		// Value?
-		Selector selector;
+		ContextSelector selector;
 		fig::handle value_key;
 		if (pos_selector != npos)
 		{
-			selector = Selector { trim(expr.substr(0, pos_selector)) };
+			selector = ContextSelector { trim(expr.substr(0, pos_selector)) };
 			value_key = trim(expr.substr(pos_selector + 1));
 		}
 		else

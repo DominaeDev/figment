@@ -389,7 +389,7 @@ namespace fig::chat
 		// Reassign {char} alias
 		size_t bot_index = get_bot_index(primaryRole) + 1;
 		auto charKey = std::format("char{}", bot_index);
-		ctx.AddSelectorAlias("char", charKey);
+		ctx.AddAlias("char", ContextSelector { charKey });
 		return ctx;
 	}
 
@@ -408,27 +408,11 @@ namespace fig::chat
 			auto role = kvp.first;
 			auto& character = _characters[kvp.second];
 			if (is_bot(role))
-			{
-				size_t bot_index = get_bot_index(role) + 1;
-				auto charKey = std::format("char{}", bot_index);
-				_context.AddContext(charKey, character);
-				_context.AddSelectorAlias(std::to_string(bot_index), charKey);
-			}
+				_context.AddContext(std::format("bot{}", 1 + get_bot_index(role)), character);
 			else if (role == Role::User)
-			{
 				_context.AddContext("user", character);
-			}
 		}
-
-		if (_charactersByRole.contains(Role::Bot1))
-			_context.AddSelectorAlias("char", "char1");
-		
-		// Default aliases
-		_context.AddValueAlias("char", "char:name");
-		_context.AddValueAlias("user", "user:name");
-		_context.AddSelectorAlias("c", "char");
-		_context.AddSelectorAlias("u", "user");
-
+		_context.SetMacroProvider(Global::GetMacroProvider());
 		_bDirtyContext = false;
 	}
 } // namespace

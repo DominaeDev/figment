@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "app/AppState.h"
 #include "user/UserManager.h"
+#include "text/MacroProvider.h"
 #include "gui/MainFrame.h"
 #include "gui/Window.h"
 #include "gui/Events.h"
@@ -22,6 +23,53 @@ namespace fig
 
 	static void BackendSignalHandler(const LLMStatus& signal);
 
+	void Global::State::Init()
+	{
+		// Load application settings
+		pAppSettings = std::make_unique<AppSettings>(Constants::Paths::AppSettings);
+		pAppSettings->Load();
+
+		// Load user profiles
+		pUserManager = std::make_shared<fig::user::UserManager>();
+		if (not pUserManager->LoadProfiles())
+			pUserManager->CreateDefaultProfile();
+
+		// Load macros
+		pMacroProvider = std::make_unique<fig::text::MacroProvider>(fig::path { Constants::Paths::Macros });
+
+		// Create main frame
+		pMainWindow = std::make_shared<Window>(fig::strings::ApplicationTitle,
+			GetSettings().GetIntVector<2>(AppSetting::WindowSize)[0],
+			GetSettings().GetIntVector<2>(AppSetting::WindowSize)[1]);
+		pMainWindow->CreateFrame<MainFrame>();
+
+#if !_DEBUG
+		if (GetSettings().GetBool(AppSetting::WindowMaximized))
+			SDL_MaximizeWindow(pMainWindow->GetSDLWindow().get());
+#endif
+
+		// Init LLM
+		pLLMBackend = std::make_shared<LLMBackend>();
+		pLLMBackend->RegisterObserver(BackendSignalHandler);
+	}
+
+	void Global::State::Release()
+	{
+		if (pLLMBackend)
+			pLLMBackend->Shutdown();
+		pLLMBackend.reset();
+
+		pMainWindow.reset();
+		pLLMInstance.reset();
+
+		pUserManager.reset();
+		pMacroProvider.reset();
+
+		if (pAppSettings)
+			pAppSettings->Save();
+		pAppSettings.reset();
+	}
+
 	Global::State* Global::CreateState()
 	{
 		if (__appState)
@@ -31,29 +79,9 @@ namespace fig
 
 		_pIBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 
-		__appState->pAppSettings = std::make_unique<AppSettings>(Constants::Paths::AppSettings);
-		__appState->pAppSettings->Load();
-
-		__appState->pLLMBackend = std::make_shared<LLMBackend>();
-		__appState->pLLMBackend->RegisterObserver(BackendSignalHandler);
-
-		// Load user profiles
-		__appState->pUserManager = std::make_shared<fig::user::UserManager>();
-		if (not __appState->pUserManager->LoadProfiles())
-			__appState->pUserManager->CreateDefaultProfile();
-
 		try
 		{
-			// Create main frame
-			__appState->pMainWindow = std::make_shared<Window>(fig::strings::ApplicationTitle, 
-				GetSettings().GetIntVector<2>(AppSetting::WindowSize)[0], 
-				GetSettings().GetIntVector<2>(AppSetting::WindowSize)[1]);
-			__appState->pMainWindow->CreateFrame<MainFrame>();
-
-#if !_DEBUG
-			if (GetSettings().GetBool(AppSetting::WindowMaximized))
-				SDL_MaximizeWindow(__appState->pMainWindow->GetSDLWindow().get());
-#endif
+			__appState->Init();
 		}
 		catch (...)
 		{
@@ -66,27 +94,15 @@ namespace fig
 
 	void Global::ReleaseState()
 	{
-		__appState->pMainWindow.reset();
-		__appState->pLLMInstance.reset();
-
-		if (__appState->pUserManager)
-			__appState->pUserManager.reset();
-
-		if (__appState->pAppSettings)
+		if (__appState)
 		{
-			__appState->pAppSettings->Save();
-			__appState->pAppSettings.reset();
+			__appState->Release();
+			SDL_free(__appState);
+			__appState = nullptr;
 		}
 
-		if (__appState->pLLMBackend)
-		{
-			__appState->pLLMBackend->Shutdown();
-			__appState->pLLMBackend.reset();
-		}
-
-		SDL_free(__appState);
 		SDL_DestroyCursor(_pIBeamCursor);
-		__appState = nullptr;
+		_pIBeamCursor = nullptr;
 	}
 
 	fig::gui::Window& Global::GetMainWindow()
@@ -95,7 +111,7 @@ namespace fig
 		return *__appState->pMainWindow.get();
 	}
 
-	LLMBackend& Global::GetLLMEngine()
+	LLMBackend& Global::GetLLMBackend()
 	{
 		assert(__appState);
 		return *(__appState->pLLMBackend.get());
@@ -135,6 +151,12 @@ namespace fig
 	{
 		assert(__appState);
 		return __appState->pUserManager.get()->GetSettings();
+	}
+
+	std::weak_ptr<fig::text::MacroProvider> Global::GetMacroProvider()
+	{
+		assert(__appState);
+		return __appState->pMacroProvider;
 	}
 
 	void Global::SetLLMInstance(std::shared_ptr<LLMInstance> pLLMInstance)

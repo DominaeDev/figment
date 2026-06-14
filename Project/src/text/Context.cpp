@@ -1,45 +1,46 @@
 #include <pch.h>
 #include "text/Context.h"
+#include "text/MacroProvider.h"
 
 namespace fig
 {
-	Selector::Selector(const fig::string& input)
+	Context::Context()
 	{
-		_value.assign_range(input
-			| std::ranges::views::split('.')
-			| std::views::transform([](auto range) -> fig::handle {
-				return fig::handle { std::string_view(range.data(), range.size()) };
-			}));
-
-		const auto [first, last] = std::ranges::remove_if(_value, [](auto& h) { return h.empty(); });
-		_value.erase(first, last);
+		_pCustomMacroProvider = std::make_unique<fig::text::MacroProvider>();
 	}
 
-	Selector Selector::Append(const fig::string& key) const noexcept
+	Context::Context(const Context& other)
 	{
-		if (not key.empty())
-		{
-			Selector selector {};
-			selector._value = _value;
-			selector._value.push_back(key);
-			return selector;
-		}
+		operator=(other);
+	}
+
+	Context::Context(Context&& other) noexcept
+	{
+		operator=(std::move(other));
+	}
+
+	Context::~Context()
+	{
+	}
+
+	Context& Context::operator=(const Context& other)
+	{
+		_flags = other._flags;
+		_values = other._values;
+		_contexts = other._contexts;
+		_pGlobalMacroProvider = other._pGlobalMacroProvider;
+		_pCustomMacroProvider = other._pCustomMacroProvider ? std::make_unique<fig::text::MacroProvider>(*other._pCustomMacroProvider) : nullptr;
 		return *this;
 	}
 
-	ContextLocation::operator fig::string() const noexcept
+	Context& Context::operator=(Context&& other) noexcept
 	{
-		if (selector.empty())
-			return key.to_string();
-
-		fig::string sel;
-		for (auto& key : selector.GetKeys())
-		{
-			if (not sel.empty())
-				sel.push_back('.');
-			sel.append(key);
-		}
-		return std::format("{}:{}", sel, key.to_string());
+		_flags = std::move(other._flags);
+		_values = std::move(other._values);
+		_contexts = std::move(other._contexts);
+		_pGlobalMacroProvider = std::move(other._pGlobalMacroProvider);
+		_pCustomMacroProvider = std::move(other._pCustomMacroProvider);
+		return *this;
 	}
 
 	template<>
@@ -171,18 +172,33 @@ namespace fig
 		_flags.clear();
 	}
 
-	bool Context::operator[](ContextLocation location) const noexcept
+	void Context::ResolveAlias(ContextSelector& selector) const noexcept
 	{
-		if (location.selector.empty() and not location.key.empty())
+		if (auto pMacros = _pGlobalMacroProvider.lock())
 		{
-			if (auto itAlias = _valueAliases.find(location.key); itAlias != _valueAliases.cend())
-				return GetBool_Internal(itAlias->second.key);
+			if (pMacros->ApplyAlias(selector))
+				return;			
 		}
+		_pCustomMacroProvider->ApplyAlias(selector);
+	}
 
+	void Context::ResolveAlias(ContextLocator& location) const noexcept
+	{
+		if (auto pMacros = _pGlobalMacroProvider.lock())
+		{
+			if (pMacros->ApplyAlias(location))
+				return;
+		}
+		_pCustomMacroProvider->ApplyAlias(location);
+	}
+
+	bool Context::operator[](ContextLocator location) const noexcept
+	{
+		ResolveAlias(location);
 		return GetBool_Internal(location.key);
 	}
 
-	bool Context::GetBool_Internal(ContextLocation location) const noexcept
+	bool Context::GetBool_Internal(ContextLocator location) const noexcept
 	{
 		if (auto try_ctx = TryGetContext(location.selector))
 		{
@@ -236,70 +252,32 @@ namespace fig
 		return false;
 	}
 
-	std::optional<ContextualRef> Context::TryGetContext(fig::handle name) noexcept
+	std::optional<ContextualRef> Context::TryGetContext(ContextSelector selector) noexcept
 	{
-		if (name.empty())
-			return std::nullopt;
-
-		if (auto itFind = _contexts.find(name); itFind != _contexts.end())
-			return std::make_optional(std::ref(itFind->second));
-		return std::nullopt;
-	}
-
-	std::optional<ContextualCRef> Context::TryGetContext(fig::handle name) const noexcept
-	{
-		if (auto itAlias = _selectorAliases.find(name); itAlias != _selectorAliases.cend())
-			return TryGetContext((Selector)itAlias->second);
-
-		if (name.empty())
-			return std::nullopt;
-
-		if (auto itFind = _contexts.find(name); itFind != _contexts.cend())
-			return std::make_optional(std::cref(itFind->second));
-		return std::nullopt;
-	}
-
-	std::optional<ContextualRef> Context::TryGetContext(Selector selector) noexcept
-	{
-		// Resolve alias
-		if (selector.GetKeys().size() == 1)
-		{
-			auto& key = selector.GetKeys()[0];
-			if (auto itAlias = _selectorAliases.find(key); itAlias != _selectorAliases.cend())
-				return TryGetContext(itAlias->second);
-		}
-
+		ResolveAlias(selector);
 		if (not selector.empty())
-			return TryGetContext(ContextLocation { selector });
+			return TryGetContext_Internal( selector );
 		return std::ref(*this);
 	}
 
-	std::optional<ContextualCRef> Context::TryGetContext(Selector selector) const noexcept
+	std::optional<ContextualCRef> Context::TryGetContext(ContextSelector selector) const noexcept
 	{
-		// Resolve alias
-		if (selector.GetKeys().size() == 1)
-		{
-			auto& key = selector.GetKeys()[0];
-			if (auto itAlias = _selectorAliases.find(key); itAlias != _selectorAliases.cend())
-				return TryGetContext(itAlias->second);
-		}
-
+		ResolveAlias(selector);
 		if (not selector.empty())
-			return TryGetContext(ContextLocation { selector });
+			return TryGetContext_Internal(selector);
 		return std::cref(*this);
 	}
 
-	std::optional<ContextualRef> Context::TryGetContext(ContextLocation location) noexcept
+	std::optional<ContextualRef> Context::TryGetContext_Internal(ContextSelector selector) noexcept
 	{
-		auto selector = (Selector)location;
 		if (selector.empty())
 			return std::ref(*this);
 
 		auto pCtx = this;
-		auto keys = selector.GetKeys();
-		for (auto& key : keys)
+		for (size_t i = 0; i < selector.size(); ++i)
 		{
-			if (auto itNext = pCtx->TryGetContext(key))
+			auto& key = selector[i];
+			if (auto itNext = pCtx->TryGetContext_Internal(key))
 			{
 				pCtx = &itNext.value().get();
 				continue;
@@ -310,17 +288,16 @@ namespace fig
 		return std::ref(*pCtx);
 	}
 
-	std::optional<ContextualCRef> Context::TryGetContext(ContextLocation location) const noexcept
+	std::optional<ContextualCRef> Context::TryGetContext_Internal(ContextSelector selector) const noexcept
 	{
-		auto selector = (Selector)location;
 		if (selector.empty())
 			return std::ref(*this);
 
 		auto pCtx = this;
-		auto keys = selector.GetKeys();
-		for (auto& key : keys)
+		for (size_t i = 0; i < selector.size(); ++i)
 		{
-			if (auto itNext = pCtx->TryGetContext(key))
+			auto& key = selector[i];
+			if (auto itNext = pCtx->TryGetContext_Internal(key))
 			{
 				pCtx = &itNext.value().get();
 				continue;
@@ -331,32 +308,39 @@ namespace fig
 		return std::cref(*pCtx);
 	}
 
+	std::optional<ContextualRef> Context::TryGetContext_Internal(fig::handle key) noexcept
+	{
+		if (auto itFind = _contexts.find(key); itFind != _contexts.cend())
+			return std::ref((*itFind).second);
+		return std::nullopt;
+	}
+
+	std::optional<ContextualCRef> Context::TryGetContext_Internal(fig::handle key) const noexcept
+	{
+		if (auto itFind = _contexts.find(key); itFind != _contexts.cend())
+			return std::cref((*itFind).second);
+		return std::nullopt;
+	}
+
 	void Context::Clear() noexcept
 	{
 		_values.clear();
 		_flags.clear();
 		_contexts.clear();
-		_valueAliases.clear();
-		_selectorAliases.clear();
 	}
 
-	void Context::AddValueAlias(fig::handle alias, const ContextLocation& target) noexcept
+	void Context::AddAlias(fig::handle alias, const ContextLocator& target) noexcept
 	{
-		_valueAliases.insert_or_assign(alias, target);
+		_pCustomMacroProvider->AddValueAlias(alias, target);
 	}
 
-	void Context::AddSelectorAlias(fig::handle alias, const ContextLocation& target) noexcept
+	void Context::AddAlias(fig::handle alias, const ContextSelector& target) noexcept
 	{
-		_selectorAliases.insert_or_assign(alias, target);
+		_pCustomMacroProvider->AddSelectorAlias(alias, target);
 	}
 
-	void Context::RemoveValueAlias(fig::handle alias) noexcept
+	void Context::SetMacroProvider(std::weak_ptr<fig::text::MacroProvider> pMacroProvider)
 	{
-		_valueAliases.erase(alias);
-	}
-
-	void Context::RemoveSelectorAlias(fig::handle alias) noexcept
-	{
-		_selectorAliases.erase(alias);
+		_pGlobalMacroProvider = pMacroProvider;
 	}
 }

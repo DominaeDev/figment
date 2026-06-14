@@ -255,9 +255,9 @@ namespace fig::gui
 
 	void MainFrame::InitializeModel()
 	{
-		auto& engine = Global::GetLLMEngine();
+		auto& backend = Global::GetLLMBackend();
 
-		if (!engine.IsInitialized() && !engine.IsInitializing())
+		if (!backend.IsInitialized() && !backend.IsInitializing())
 		{
 			SetStatusBar(fig::strings::Status::LoadingModel);
 
@@ -271,14 +271,14 @@ namespace fig::gui
 				return;
 			}
 
-			engine.Initialize(modelSettings,
+			backend.Initialize(modelSettings,
 				[this](int percent) {
 					PushEvent(UserEvent::LLMModelLoadingProgress, percent);
 				},
-				[this, &engine](bool bSuccess) {
+				[this, &backend](bool bSuccess) {
 					if (bSuccess)
 					{
-						auto pInstance = engine.CreateInstance();
+						auto pInstance = backend.CreateInstance();
 						Global::SetLLMInstance(pInstance);
 					}
 				});
@@ -287,10 +287,10 @@ namespace fig::gui
 
 	void MainFrame::UnloadModel()
 	{
-		auto& engine = Global::GetLLMEngine();
-		if (engine.IsInitialized())
+		auto& backend = Global::GetLLMBackend();
+		if (backend.IsInitialized())
 		{
-			engine.Shutdown();
+			backend.Shutdown();
 			SetStatusBar(fig::strings::Status::ModelUnloaded);
 		}
 	}
