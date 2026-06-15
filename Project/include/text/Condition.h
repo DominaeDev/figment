@@ -2,11 +2,11 @@
 #define CONDITION_H__
 #pragma once
 
-#include "text/Context.h"
 #include "text/ConditionNode.h"
 
 namespace fig
 {
+	class Context;
 	enum class ConditionParseError;
 
 	struct EvaluationResult
@@ -49,7 +49,7 @@ namespace fig
 		Condition& operator= (const Condition& other) noexcept;
 		Condition& operator= (Condition&& other) noexcept = default;
 
-		bool Evaluate(const Context& context) const;
+		bool Evaluate(const Context& context, size_t cookie = 0uz) const;
 		static EvaluationResult Evaluate(const fig::string& expression, const Context& context);
 
 		explicit operator fig::string() const noexcept;
@@ -61,6 +61,7 @@ namespace fig
 		ConditionParseError _error {};
 	};
 
+	using ConditionRef = std::reference_wrapper<const Condition>;
 }
 
 #endif

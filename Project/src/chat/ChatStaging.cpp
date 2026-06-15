@@ -380,16 +380,15 @@ namespace fig::chat
 
 	Context& ChatStaging::GetContext(Role primaryRole) noexcept
 	{
-		if (!is_bot(primaryRole))
+		if (not (is_bot(primaryRole) or is_user(primaryRole)))
 			return GetContext(fig::chat::Role::Bot1); // Fallback
 
 		// Update
 		auto& ctx = GetContext_Internal();
 
-		// Reassign {char} alias
-		size_t bot_index = get_bot_index(primaryRole) + 1;
-		auto charKey = std::format("char{}", bot_index);
-		ctx.AddAlias("char", ContextSelector { charKey });
+		auto primarySelector = ContextSelector::FromRole(primaryRole);
+		ctx.AddAlias("current", primarySelector);
+		ctx.SetPrimarySelector(primarySelector);
 		return ctx;
 	}
 
@@ -407,10 +406,7 @@ namespace fig::chat
 		{
 			auto role = kvp.first;
 			auto& character = _characters[kvp.second];
-			if (is_bot(role))
-				_context.AddContext(std::format("bot{}", 1 + get_bot_index(role)), character);
-			else if (role == Role::User)
-				_context.AddContext("user", character);
+			_context.AddContext(ContextSelector::FromRole(role)[0], character);
 		}
 		_context.SetMacroProvider(Global::GetMacroProvider());
 		_bDirtyContext = false;

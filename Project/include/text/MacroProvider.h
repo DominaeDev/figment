@@ -13,29 +13,34 @@ namespace fig
 
 namespace fig::text
 {
+	using MacroRef = const string_view;
+
 	class MacroProvider
 	{
 	public:
 		MacroProvider() = default;
 		explicit MacroProvider(const fig::path& path);
 
-		void AddMacro(fig::handle alias, const fig::string& value) noexcept;
+		void AddMacro(fig::handle macro, const fig::string& value) noexcept;
 		void AddConditionAlias(fig::handle alias, const fig::string& expression) noexcept;
 		void AddSelectorAlias(fig::handle alias, const ContextSelector& target) noexcept;
 		void AddValueAlias(fig::handle alias, const ContextLocator& target) noexcept;
 
+		[[nodiscard]] std::optional<MacroRef> TryGetMacro(const fig::handle& macro) const;
+		[[nodiscard]] std::optional<fig::ConditionRef> TryGetCondition(const fig::handle& alias) const;
+
 		bool ApplyAlias(ContextSelector& selector) const;
 		bool ApplyAlias(ContextLocator& location) const;
-		[[nodiscard]] std::optional<ContextSelector> ResolveAlias(const ContextSelector& alias) const;
-		[[nodiscard]] std::optional<ContextLocator> ResolveAlias(const fig::handle& alias) const;
-		[[nodiscard]] std::optional<bool> ResolveCondition(const fig::handle& alias, const Context& context, ContextSelector selector = {}) const;
-		[[nodiscard]] std::optional<fig::string> ResolveMacro(const fig::handle& macro, const Context& context, ContextSelector selector = {}) const;
+		[[nodiscard]] std::optional<const ContextSelector> ResolveAlias(const ContextSelector& alias) const;
+		[[nodiscard]] std::optional<const ContextLocator> ResolveAlias(const fig::handle& alias) const;
+		[[nodiscard]] std::optional<bool> ResolveCondition(const fig::handle& alias, const Context& context) const;
+		[[nodiscard]] std::optional<fig::string> ResolveMacro(const fig::handle& macro, const Context& context) const;
 
 	private:
 		std::map<fig::handle, fig::string> _macros;
 		std::map<fig::handle, ContextSelector> _selectorAliases;
 		std::map<fig::handle, ContextLocator> _valueAliases;
-		std::map<fig::handle, Condition> _conditionAliases;
+		std::map<fig::handle, Condition> _conditions;
 	};
 }
 

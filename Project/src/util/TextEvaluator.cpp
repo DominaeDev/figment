@@ -4,6 +4,8 @@
 
 namespace fig
 {
+	TextEvaluationOptions DefaultTextEvaluationOptions { TextEvaluationOption::Unescape, TextEvaluationOption::CollapseWhitespace, TextEvaluationOption::CapitalizeFirst, TextEvaluationOption::CapitalizeSentences, TextEvaluationOption::FixPunctuation, };
+
 	struct TextSpan
 	{
 		size_t begin {};
@@ -272,7 +274,27 @@ namespace fig
 		return text;
 	}
 
-	static bool substitute(fig::string& text, const TextSpan& span, const Context& context) noexcept
+	static fig::string& capitalize_sentences(fig::string& text, bool bCapitalizeFirst)
+	{
+		auto bCapitalize = bCapitalizeFirst;
+		for (auto& ch : text)
+		{
+			if (bCapitalize and std::isalpha(static_cast<unsigned char>(ch)))
+			{
+				ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+				bCapitalize = false;
+			}
+			else if (ch == '.')
+			{
+				bCapitalize = true;
+			}
+		}
+		return text;
+	}
+
+	static bool evaluate(fig::string& text, const Context& context, size_t& cookie) noexcept;
+
+	static bool substitute(fig::string& text, const TextSpan& span, const Context& context, size_t& cookie) noexcept
 	{
 		if (span.length() < 2)
 			return false;
@@ -325,6 +347,20 @@ namespace fig
 			value_key = trim(expr);
 		}
 
+		// Macro?
+		if (auto try_macro = context.TryGetMacro(value_key))
+		{
+			fig::string macro { try_macro.value() };
+			
+			if (auto try_ctx = context.TryGetContext(selector))
+				evaluate(macro, try_ctx.value().get(), cookie);
+			else
+				macro = ""; // Error
+
+			text.replace(span.begin, span.length(), macro);
+			return true;
+		}
+
 		if (not value_key.empty())
 		{
 			if (auto value = context.TryGetValue<fig::string>({ selector, value_key }))
@@ -338,8 +374,14 @@ namespace fig
 		return false;
 	}
 
-	static bool evaluate(fig::string& text, const Context& context) noexcept
+	static bool evaluate(fig::string& text, const Context& context, size_t& cookie) noexcept
 	{
+		if (cookie++ > 64)
+		{
+			LogLn("Error: Text evaluation stack overflow!");
+			return false; // Bail!
+		}
+
 		// Find instances of "{...}"
 		std::vector<TextSpan> spans;
 		for (size_t pos = 0uz;;)
@@ -365,31 +407,41 @@ namespace fig
 		if (spans.empty())
 			return false;
 
-		// Evaluate them
+		bool changed = false;
 		for (auto& span : spans | std::views::reverse)
-			substitute(text, span, context);
+			changed |= substitute(text, span, context, cookie);
 
-		return true;
+		return changed;
 	}
 
-	fig::string eval_text(const fig::string& source, const Context& context) noexcept
+	fig::string eval_text(const fig::string& source, const Context& context, TextEvaluationOptions options) noexcept
 	{
 		if (not source.contains('{'))
 			return source; //noop
 
 		fig::string text = source; // copy
-		return eval_text(std::move(text), context);
+		return eval_text(std::move(text), context, options);
 	}
 
-	fig::string eval_text(fig::string&& text, const Context& context) noexcept
+	fig::string eval_text(fig::string&& text, const Context& context, TextEvaluationOptions options) noexcept
 	{
 		if (not text.contains('{'))
 			return text; //noop
 
-		while (evaluate(text, context)) {};
+		size_t cookie = 0uz;
+		while (evaluate(text, context, cookie)) {};
 
-		// Process result
-		unescape_whitespace(collapse_whitespace(clean_punctuation(unescape(text))));
+		// Processing
+		if (options.IsSet(TextEvaluationOption::Unescape))
+			unescape(text);
+		if (options.IsSet(TextEvaluationOption::FixPunctuation))
+			clean_punctuation(text);
+		if (options.IsSet(TextEvaluationOption::CapitalizeSentences))
+			capitalize_sentences(text, options.IsSet(TextEvaluationOption::CapitalizeFirst));
+		if (options.IsSet(TextEvaluationOption::CollapseWhitespace))
+			collapse_whitespace(text);
+		if (options.IsSet(TextEvaluationOption::Unescape))
+			unescape_whitespace(text);
 		return text;
 	}
 

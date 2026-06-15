@@ -53,4 +53,14 @@ namespace fig
 		else
 			return std::format("{}:{}", (fig::string)selector, (fig::string)key);
 	}
+
+	ContextSelector ContextSelector::FromRole(fig::chat::Role role) noexcept
+	{
+		if (is_bot(role))
+			return ContextSelector { std::format("bot{}", 1 + get_bot_index(role)) };
+		else if (role == fig::chat::Role::User)
+			return ContextSelector { "user" };
+		else
+			return FromRole(fig::chat::Role::Bot1);
+	}
 }

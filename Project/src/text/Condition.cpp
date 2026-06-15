@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "text/Condition.h"
+#include "text/Context.h"
 #include "text/ConditionParser.h"
 
 namespace fig
@@ -34,9 +35,16 @@ namespace fig
 		return *this;
 	}
 
-	bool Condition::Evaluate(const Context& context) const
+	bool Condition::Evaluate(const Context& context, size_t cookie) const
 	{
-		return !_pCondition or _pCondition->Evaluate(context);
+		if (cookie >= 100)
+		{
+			LogLn("Error: Condition evaluation stack overflow!");
+			return false;
+		}
+
+		EvaluationArgs eval { context, cookie };
+		return !_pCondition or _pCondition->Evaluate(eval);
 	}
 
 	EvaluationResult Condition::Evaluate(const fig::string& expression, const Context& context)

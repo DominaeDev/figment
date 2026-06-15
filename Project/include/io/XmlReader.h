@@ -16,9 +16,9 @@ namespace fig::io
 {
 	enum class XmlReaderOption
 	{
-		Trim,
-		Unindent,
-		Unescape,
+		Trim		= 1 << 0,
+		Unindent	= 1 << 1,
+		Unescape	= 1 << 2,
 	};
 	using XmlReaderOptions = EnumFlags<XmlReaderOption>;
 

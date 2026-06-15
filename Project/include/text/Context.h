@@ -4,18 +4,20 @@
 
 #include "Figment.h"
 #include "text/ContextLocator.h"
+#include "text/Condition.h"
 
 namespace fig::text
 {
 	class MacroProvider;
+	using MacroRef = const string_view;
 }
 
 namespace fig
 {
 	class Context;
-	using ContextualValue = std::variant<int32_t, float, fig::string>;
-	using ContextualRef = std::reference_wrapper<Context>;
-	using ContextualCRef = std::reference_wrapper<const Context>;
+	using ContextValue = std::variant<int32_t, float, fig::string>;
+	using ContextRef = std::reference_wrapper<Context>;
+	using ContextCRef = std::reference_wrapper<const Context>;
 
 	template <typename T>
 	concept IContextual = requires(T t)
@@ -27,7 +29,7 @@ namespace fig
 		{ t.GetContext() } -> std::same_as<const Context&>;
 	};
 
-	constexpr bool IsNumber(const ContextualValue& value)
+	constexpr bool IsNumber(const ContextValue& value)
 	{
 		return std::holds_alternative<int32_t>(value) or std::holds_alternative<float>(value);
 	}
@@ -72,14 +74,14 @@ namespace fig
 			return TryGetValue_Internal<T>(location);
 		};
 
-		std::optional<ContextualValue> TryGetRaw(fig::handle name) const
+		std::optional<ContextValue> TryGetRaw(fig::handle name) const
 		{
 			ContextLocator location { {}, name };
 			ResolveAlias(location);
 			return TryGetRaw_Internal(location);
 		};
 
-		std::optional<ContextualValue> TryGetRaw(ContextLocator location) const
+		std::optional<ContextValue> TryGetRaw(ContextLocator location) const
 		{
 			ResolveAlias(location);
 			return TryGetRaw_Internal(location);
@@ -98,7 +100,7 @@ namespace fig
 			return HasValue_Internal(location);
 		};
 
-		inline const std::map<fig::handle, ContextualValue>& GetValues() const noexcept { return _values; }
+		inline const std::map<fig::handle, ContextValue>& GetValues() const noexcept { return _values; }
 		void ClearValues() noexcept;
 
 		template<typename T>
@@ -136,10 +138,10 @@ namespace fig
 			return AddContext(name, contextual.GetContext());
 		}
 		bool RemoveContext(fig::handle name) noexcept;
-		inline std::optional<ContextualRef> TryGetContext(fig::handle name) noexcept { return TryGetContext(ContextSelector { name }); }
-		inline std::optional<ContextualCRef> TryGetContext(fig::handle name) const noexcept { return TryGetContext(ContextSelector { name }); }
-		std::optional<ContextualRef> TryGetContext(ContextSelector selector) noexcept;
-		std::optional<ContextualCRef> TryGetContext(ContextSelector selector) const noexcept;
+		inline std::optional<ContextRef> TryGetContext(fig::handle name) noexcept { return TryGetContext(ContextSelector { name }); }
+		inline std::optional<ContextCRef> TryGetContext(fig::handle name) const noexcept { return TryGetContext(ContextSelector { name }); }
+		std::optional<ContextRef> TryGetContext(ContextSelector selector) noexcept;
+		std::optional<ContextCRef> TryGetContext(ContextSelector selector) const noexcept;
 
 		inline bool operator[](fig::handle name) const noexcept
 		{
@@ -148,18 +150,25 @@ namespace fig
 		bool operator[](ContextLocator location) const noexcept;
 
 		void Clear() noexcept;
+		[[nodiscard]] const Context& GetContext() const noexcept { return *this; }
 
 		void SetMacroProvider(std::weak_ptr<fig::text::MacroProvider> pMacroProvider);
+		std::optional<fig::text::MacroRef> TryGetMacro(const fig::handle& macro) const noexcept;
+		std::optional<ConditionRef> TryGetCondition(const fig::handle& alias) const noexcept;
+
 		void AddAlias(fig::handle alias, const ContextLocator& target) noexcept;
 		void AddAlias(fig::handle alias, const ContextSelector& target) noexcept;
 
-		[[nodiscard]] const Context& GetContext() const noexcept { return *this; }
-
+		void SetPrimarySelector(ContextSelector selector) { _primarySelector = selector; }
+		inline std::optional<ContextRef> TryGetPrimaryContext(fig::handle name) noexcept 
+		{ 
+			return _primarySelector.empty() ? std::nullopt : TryGetContext(_primarySelector);
+		}
 	private:
-		std::optional<ContextualRef> TryGetContext_Internal(ContextSelector location) noexcept;
-		std::optional<ContextualCRef> TryGetContext_Internal(ContextSelector location) const noexcept;
-		std::optional<ContextualRef> TryGetContext_Internal(fig::handle key) noexcept;
-		std::optional<ContextualCRef> TryGetContext_Internal(fig::handle key) const noexcept;
+		std::optional<ContextRef> TryGetContext_Internal(ContextSelector location) noexcept;
+		std::optional<ContextCRef> TryGetContext_Internal(ContextSelector location) const noexcept;
+		std::optional<ContextRef> TryGetContext_Internal(fig::handle key) noexcept;
+		std::optional<ContextCRef> TryGetContext_Internal(fig::handle key) const noexcept;
 
 		template<typename T> 
 		std::optional<T> TryGetValue_Internal(ContextLocator location) const noexcept
@@ -187,7 +196,7 @@ namespace fig
 			return _values.contains(name);
 		}
 
-		std::optional<ContextualValue> TryGetRaw_Internal(ContextLocator location) const noexcept
+		std::optional<ContextValue> TryGetRaw_Internal(ContextLocator location) const noexcept
 		{
 			if (auto try_ctx = TryGetContext(location.selector))
 			{
@@ -197,7 +206,7 @@ namespace fig
 			return std::nullopt;
 		};
 
-		[[nodiscard]] std::optional<ContextualValue> TryGetRaw_Internal(fig::handle name) const noexcept;
+		[[nodiscard]] std::optional<ContextValue> TryGetRaw_Internal(fig::handle name) const noexcept;
 
 		template<typename T> std::optional<T> TryGetValue_Internal(fig::handle name) const = delete;
 		template<> [[nodiscard]] std::optional<bool> TryGetValue_Internal<bool>(fig::handle name) const noexcept;
@@ -209,8 +218,9 @@ namespace fig
 		bool GetBool_Internal(ContextLocator location) const noexcept;
 
 		std::unordered_set<fig::handle> _flags;
-		std::map<fig::handle, ContextualValue> _values;
+		std::map<fig::handle, ContextValue> _values;
 		std::map<fig::handle, Context> _contexts;
+		ContextSelector _primarySelector;
 
 		std::weak_ptr<fig::text::MacroProvider> _pGlobalMacroProvider {};
 		std::unique_ptr<fig::text::MacroProvider> _pCustomMacroProvider {};

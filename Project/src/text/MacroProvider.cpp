@@ -33,7 +33,7 @@ namespace fig::text
 			{
 				Condition condition(node.GetValue<fig::string>());
 				if (condition.IsOk())
-					_conditionAliases[try_id.value()] = std::move(condition);
+					_conditions.insert_or_assign(try_id.value(), std::move(condition));
 				else
 					LogLn(std::format("Failed to parse condition macro {}", try_id.value().c_str()));
 			}
@@ -53,11 +53,11 @@ namespace fig::text
 					if (auto idx_selector = id.find(':'); idx_selector != npos)
 					{
 						id = id.substr(0, idx_selector);
-						_selectorAliases[id] = fig::ContextSelector(value);
+						_selectorAliases.insert_or_assign(id, fig::ContextSelector(value));
 					}
 					else
 					{
-						_valueAliases[id] = ContextLocator(value);
+						_valueAliases.insert_or_assign(id, ContextLocator(value));
 					}
 				}
 			}
@@ -75,17 +75,17 @@ namespace fig::text
 	{
 		Condition condition(expression);
 		if (condition.IsOk())
-			_conditionAliases.insert_or_assign(alias, std::move(condition));
+			_conditions.insert_or_assign(alias, std::move(condition));
 	}
 
 	void MacroProvider::AddSelectorAlias(fig::handle alias, const ContextSelector& target) noexcept
 	{
-		_selectorAliases[alias] = target;
+		_selectorAliases.insert_or_assign(alias, target);
 	}
 
 	void MacroProvider::AddValueAlias(fig::handle alias, const ContextLocator& target) noexcept
 	{
-		_valueAliases[alias] = target;
+		_valueAliases.insert_or_assign(alias, target);
 	}
 
 	bool MacroProvider::ApplyAlias(ContextSelector& selector) const
@@ -119,52 +119,53 @@ namespace fig::text
 		return false;
 	}
 
-	std::optional<ContextSelector> MacroProvider::ResolveAlias(const ContextSelector& selector) const
+	std::optional<const ContextSelector> MacroProvider::ResolveAlias(const ContextSelector& selector) const
 	{
 		if (selector.size() == 1)
 		{
-			auto alias = selector[0];
+			auto& alias = selector[0];
 			if (auto try_selector = _selectorAliases.find(alias); try_selector != _selectorAliases.cend())
 				return (*try_selector).second;
 		}
 		return std::nullopt;
 	}
 
-	std::optional<ContextLocator> MacroProvider::ResolveAlias(const fig::handle& alias) const
+	std::optional<const ContextLocator> MacroProvider::ResolveAlias(const fig::handle& alias) const
 	{
 		if (auto try_value = _valueAliases.find(alias); try_value != _valueAliases.cend())
 			return (*try_value).second;
 		return std::nullopt;
 	}
 
-	std::optional<bool> MacroProvider::ResolveCondition(const fig::handle& alias, const Context& context, ContextSelector selector) const
+	std::optional<bool> MacroProvider::ResolveCondition(const fig::handle& alias, const Context& context) const
 	{
-		auto itFind = _conditionAliases.find(alias);
-		if (itFind == _conditionAliases.cend())
+		auto itFind = _conditions.find(alias);
+		if (itFind == _conditions.cend())
 			return std::nullopt;
 
-		if (not selector.empty())
-		{
-			if (auto try_ctx = context.TryGetContext(selector))
-				return (*itFind).second.Evaluate(try_ctx.value().get());
-			return false; // Invalid selector
-		}
 		return (*itFind).second.Evaluate(context);
 	}
 
-	std::optional<fig::string> MacroProvider::ResolveMacro(const fig::handle& macro, const Context& context, ContextSelector selector) const
+	std::optional<fig::string> MacroProvider::ResolveMacro(const fig::handle& macro, const Context& context) const
 	{
 		auto itFind = _macros.find(macro);
 		if (itFind == _macros.cend())
 			return std::nullopt;
-
-		if (not selector.empty())
-		{
-			if (auto try_ctx = context.TryGetContext(selector))
-				return eval_text((*itFind).second, try_ctx.value().get());
-			return ""; // Invalid selector
-		}
 		return eval_text((*itFind).second, context);
+	}
+
+	[[nodiscard]] std::optional<MacroRef> MacroProvider::TryGetMacro(const fig::handle& macro) const
+	{
+		if (auto itFind = _macros.find(macro); itFind != _macros.cend())
+			return (*itFind).second;
+		return std::nullopt;
+	}
+
+	[[nodiscard]] std::optional<ConditionRef> MacroProvider::TryGetCondition(const fig::handle& alias) const
+	{
+		if (auto itFind = _conditions.find(alias); itFind != _conditions.cend())
+			return std::cref((*itFind).second);
+		return std::nullopt;
 	}
 
 }

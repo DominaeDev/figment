@@ -1,5 +1,7 @@
 #include <pch.h>
 #include "text/Context.h"
+#include "text/TextEvaluator.h"
+#include "text/Condition.h"
 #include "text/MacroProvider.h"
 
 namespace fig
@@ -61,10 +63,16 @@ namespace fig
 		_values[std::move(name)] = value;
 	}
 
-	[[nodiscard]] std::optional<ContextualValue> Context::TryGetRaw_Internal(fig::handle name) const noexcept
+	[[nodiscard]] std::optional<ContextValue> Context::TryGetRaw_Internal(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
 			return itFind->second;
+		
+		if (_primarySelector)
+		{
+			if (auto primary_ctx = TryGetContext_Internal(_primarySelector); primary_ctx.has_value() and &primary_ctx.value().get() != this)
+				return primary_ctx.value().get().TryGetRaw_Internal(name);
+		}
 		return std::nullopt;
 	}
 
@@ -177,7 +185,7 @@ namespace fig
 		if (auto pMacros = _pGlobalMacroProvider.lock())
 		{
 			if (pMacros->ApplyAlias(selector))
-				return;			
+				return;
 		}
 		_pCustomMacroProvider->ApplyAlias(selector);
 	}
@@ -190,6 +198,30 @@ namespace fig
 				return;
 		}
 		_pCustomMacroProvider->ApplyAlias(location);
+	}
+
+	std::optional<fig::text::MacroRef> Context::TryGetMacro(const fig::handle& macro) const noexcept
+	{
+		if (auto pMacros = _pGlobalMacroProvider.lock())
+		{
+			if (auto try_macro = pMacros->TryGetMacro(macro))
+				return try_macro;
+		}
+		if (auto try_macro = _pCustomMacroProvider->TryGetMacro(macro))
+			return try_macro;
+		return std::nullopt;
+	}
+
+	std::optional<ConditionRef> Context::TryGetCondition(const fig::handle& alias) const noexcept
+	{
+		if (auto pMacros = _pGlobalMacroProvider.lock())
+		{
+			if (auto try_macro = pMacros->TryGetCondition(alias))
+				return try_macro;
+		}
+		if (auto try_macro = _pCustomMacroProvider->TryGetCondition(alias))
+			return try_macro;
+		return std::nullopt;
 	}
 
 	bool Context::operator[](ContextLocator location) const noexcept
@@ -221,6 +253,14 @@ namespace fig
 		// Check contexts
 		if (_contexts.contains(name))
 			return true;
+
+		// Check primary
+		if (_primarySelector)
+		{
+			if (auto primary_ctx = TryGetContext_Internal(_primarySelector); primary_ctx.has_value() and &primary_ctx.value().get() != this)
+				return primary_ctx.value().get().GetBool_Internal(name);
+		}
+
 		return false;
 	}
 
@@ -252,15 +292,15 @@ namespace fig
 		return false;
 	}
 
-	std::optional<ContextualRef> Context::TryGetContext(ContextSelector selector) noexcept
+	std::optional<ContextRef> Context::TryGetContext(ContextSelector selector) noexcept
 	{
 		ResolveAlias(selector);
 		if (not selector.empty())
-			return TryGetContext_Internal( selector );
+			return TryGetContext_Internal(selector);
 		return std::ref(*this);
 	}
 
-	std::optional<ContextualCRef> Context::TryGetContext(ContextSelector selector) const noexcept
+	std::optional<ContextCRef> Context::TryGetContext(ContextSelector selector) const noexcept
 	{
 		ResolveAlias(selector);
 		if (not selector.empty())
@@ -268,7 +308,7 @@ namespace fig
 		return std::cref(*this);
 	}
 
-	std::optional<ContextualRef> Context::TryGetContext_Internal(ContextSelector selector) noexcept
+	std::optional<ContextRef> Context::TryGetContext_Internal(ContextSelector selector) noexcept
 	{
 		if (selector.empty())
 			return std::ref(*this);
@@ -288,7 +328,7 @@ namespace fig
 		return std::ref(*pCtx);
 	}
 
-	std::optional<ContextualCRef> Context::TryGetContext_Internal(ContextSelector selector) const noexcept
+	std::optional<ContextCRef> Context::TryGetContext_Internal(ContextSelector selector) const noexcept
 	{
 		if (selector.empty())
 			return std::ref(*this);
@@ -308,14 +348,14 @@ namespace fig
 		return std::cref(*pCtx);
 	}
 
-	std::optional<ContextualRef> Context::TryGetContext_Internal(fig::handle key) noexcept
+	std::optional<ContextRef> Context::TryGetContext_Internal(fig::handle key) noexcept
 	{
 		if (auto itFind = _contexts.find(key); itFind != _contexts.cend())
 			return std::ref((*itFind).second);
 		return std::nullopt;
 	}
 
-	std::optional<ContextualCRef> Context::TryGetContext_Internal(fig::handle key) const noexcept
+	std::optional<ContextCRef> Context::TryGetContext_Internal(fig::handle key) const noexcept
 	{
 		if (auto itFind = _contexts.find(key); itFind != _contexts.cend())
 			return std::cref((*itFind).second);
@@ -327,6 +367,9 @@ namespace fig
 		_values.clear();
 		_flags.clear();
 		_contexts.clear();
+		_primarySelector = {};
+		_pGlobalMacroProvider.reset();
+		_pCustomMacroProvider = std::make_unique<fig::text::MacroProvider>();
 	}
 
 	void Context::AddAlias(fig::handle alias, const ContextLocator& target) noexcept

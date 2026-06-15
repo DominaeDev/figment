@@ -22,10 +22,13 @@ namespace fig
 		auto& operator[](size_t index) const { return _keys[index]; }
 		size_t size() const noexcept { return _keys.size(); }
 		bool empty() const noexcept { return _keys.empty(); }
+		operator bool() const noexcept { return not _keys.empty(); }
 
 		explicit operator fig::string() const noexcept;
 
 		ContextSelector& Append(const fig::handle& key) noexcept;
+
+		static ContextSelector FromRole(fig::chat::Role role) noexcept;
 
 	private:
 		std::vector<fig::handle> _keys;

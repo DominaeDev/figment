@@ -1,0 +1,59 @@
+<Macros>
+	<!-- Characters -->
+	<Macro id="char">{current:name}</Macro>
+
+	<Alias id="char">current:name</Alias>
+	<Alias id="char:">current</Alias>
+	<Alias id="c:">current</Alias>
+	<Alias id="char1:">bot1</Alias>
+	<Alias id="char2:">bot2</Alias>
+	<Alias id="char3:">bot3</Alias>
+	<Alias id="char4:">bot4</Alias>
+	
+	<Alias id="user">user:name</Alias>
+	<Alias id="u:">user</Alias>
+	
+	<Condition id="solo">bot1 and not (bot2 or bot3 or bot4)</Condition>
+	<Condition id="group">bot1 and (bot2 or bot3 or bot4)</Condition>
+
+	<!-- Pronouns -->
+	<Condition id="pronoun_mas">male or use_male_pronouns</Condition>
+	<Condition id="pronoun_fem">female or shemale or futanari or use_female_pronouns</Condition>
+	<Condition id="pronoun_neu">not (pronoun_fem or pronoun_mas) or use_neuter_pronouns</Condition>
+	<Condition id="pronoun_cus">custom_they or custom_them or custom_their or custom_theirs or custom_themselves</Condition>
+
+	<Macro id="they">{custom_they?{custom_they}|{pronoun_fem?she|{pronoun_mas?he|they}}}</Macro>
+	<Macro id="them">{custom_them?{custom_them}|{pronoun_fem?her|{pronoun_mas?him|them}}}</Macro>
+	<Macro id="their">{custom_their?{custom_their}|{pronoun_fem?her|{pronoun_mas?his|their}}}</Macro>
+	<Macro id="theirs">{custom_theirs?{custom_theirs}|{pronoun_fem?hers|{pronoun_mas?his|theirs}}}</Macro>
+	<Macro id="themselves">{custom_themselves?{custom_themselves}|{pronoun_fem?herself|{pronoun_mas?himself|themselves}}}</Macro>
+
+	<!-- Grammar macros -->
+	<Condition id="conj_plural">pronoun_neu or use_plural</Condition>
+	<Macro id="is">{conj_plural?are|is}</Macro>						<!-- {they} {is} -->
+	<Macro id="isn't">{conj_plural?aren't|isn't}</Macro>			<!-- {they} {isn't} -->
+	<Macro id="are">{conj_plural?are|is}</Macro>					<!-- {they} {are} -->
+	<Macro id="aren't">{conj_plural?aren't|isn't}</Macro>			<!-- {they} {aren't} -->
+	<Macro id="was">{conj_plural?were|was}</Macro>					<!-- {they} {was} -->
+	<Macro id="wasn't">{conj_plural?weren't|wasn't}</Macro>			<!-- {they} {wasn't} -->
+	<Macro id="were">{conj_plural?were|was}</Macro>					<!-- {they} {were} -->
+	<Macro id="weren't">{conj_plural?weren't|wasn't}</Macro>		<!-- {they} {weren't} -->
+	<Macro id="has">{conj_plural?have|has}</Macro>					<!-- {they} {has} -->
+	<Macro id="hasn't">{conj_plural?haven't|hasn't}</Macro>			<!-- {they} {hasn't} -->
+	<Macro id="have">{conj_plural?have|has}</Macro>					<!-- {they} {have} -->
+	<Macro id="haven't">{conj_plural?haven't|hasn't}</Macro>		<!-- {they} {haven't} -->
+	<Macro id="s">{not conj_plural?s}</Macro>						<!-- {they} like{s} -->
+	<Macro id="es">{not conj_plural?es}</Macro>						<!-- {they} possess{es} -->
+	<Macro id="y">{conj_plural?y|ies}</Macro>						<!-- {they} tr{y} -->
+	<Macro id="ies">{conj_plural?y|ies}</Macro>						<!-- {they} tr{ies} -->
+	<Macro id="does">{conj_plural?do|does}</Macro>					<!-- {they} {does} -->
+	<Macro id="does not">{conj_plural?do|does} not</Macro>			<!-- {they} {does not} -->
+	<Macro id="doesn't">{conj_plural?don't|doesn't}</Macro>			<!-- {they} {doesn't} -->
+	<Macro id="do">{conj_plural?do|does}</Macro>					<!-- {they} {do} -->
+	<Macro id="do not">{conj_plural?do|does} not</Macro>			<!-- {they} {do not} -->
+	<Macro id="don't">{conj_plural?don't|doesn't}</Macro>			<!-- {they} {don't} -->
+	<Macro id="they've">{they}{conj_plural?'ve|'s}</Macro>			<!-- {they've} made pancakes -->
+	<Macro id="they're">{they}{conj_plural?'re|'s}</Macro>			<!-- {they're} happier still -->
+	<Macro id="they'd">{they}'d</Macro>								<!-- {they'd} rather leave -->
+
+</Macros>

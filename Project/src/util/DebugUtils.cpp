@@ -7,6 +7,7 @@
 #include "data/CharacterData.h"
 #include "chat/ChatStaging.h"
 #include "chat/PromptScaffold.h"
+#include "text/TextEvaluator.h"
 
 using namespace fig::io;
 using namespace fig::chat;
@@ -26,6 +27,7 @@ namespace fig
 		PromptScaffold scaffold;
 		scaffold.LoadFromXml("./resources/prompting/chat.scaffold");
 		int k = 0;
+
 	}
 
 	void DebugUtility::CreateNewProfile(const fig::string& name, const fig::string& password)

@@ -42,6 +42,7 @@ namespace fig::chat
 	};
 
 	constexpr inline bool is_bot(Role role) { return role >= Role::Bot1 && role <= Role::Bot8; }
+	constexpr inline bool is_user(Role role) { return role == Role::User; }
 	constexpr inline bool is_npc(Role role) { return role == Role::Director || role == Role::Narrator || role == Role::System; }
 	constexpr inline int32_t get_bot_index(Role role) { return is_bot(role) ? static_cast<int32_t>(role) - static_cast<int32_t>(Role::Bot1) : -1; }
 	constexpr inline Role bot_from_index(int32_t botIndex)

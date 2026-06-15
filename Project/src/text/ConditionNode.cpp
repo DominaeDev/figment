@@ -10,11 +10,11 @@ namespace fig
 	{
 	}
 
-	bool AndCondition::Evaluate(const Context& context) const
+	bool AndCondition::Evaluate(const EvaluationArgs& eval) const
 	{
 		for (const auto& child : _children)
 		{
-			if (!child->Evaluate(context))
+			if (!child->Evaluate(eval))
 				return false;
 		}
 		return !_children.empty();
@@ -49,11 +49,11 @@ namespace fig
 	{
 	}
 
-	bool OrCondition::Evaluate(const Context& context) const
+	bool OrCondition::Evaluate(const EvaluationArgs& eval) const
 	{
 		for (const auto& child : _children)
 		{
-			if (child->Evaluate(context))
+			if (child->Evaluate(eval))
 				return true;
 		}
 		return false;
@@ -86,9 +86,9 @@ namespace fig
 	{
 	}
 
-	bool NotCondition::Evaluate(const Context& context) const
+	bool NotCondition::Evaluate(const EvaluationArgs& eval) const
 	{
-		return _child && !_child->Evaluate(context);
+		return _child && !_child->Evaluate(eval);
 	}
 
 	ConditionPtr NotCondition::Clone() const
@@ -181,7 +181,7 @@ namespace fig
 		return false; // Error
 	}
 
-	bool ComparisonCondition::Evaluate(const Context& context) const
+	bool ComparisonCondition::Evaluate(const EvaluationArgs& eval) const
 	{
 		CompareOperand lhs {};
 		if (auto lhs_flt = std::get_if<float>(&_lhs))
@@ -190,7 +190,7 @@ namespace fig
 		}
 		else if (auto lhs_str = std::get_if<fig::string>(&_lhs))
 		{
-			if (auto try_value = context.TryGetRaw(ContextLocator { *lhs_str }))
+			if (auto try_value = eval.context.TryGetRaw(ContextLocator { *lhs_str }))
 			{
 				auto& value = try_value.value();
 				if (auto i = std::get_if<int32_t>(&value))
@@ -211,7 +211,7 @@ namespace fig
 		}
 		else if (auto rhs_str = std::get_if<fig::string>(&_rhs))
 		{
-			if (auto try_value = context.TryGetRaw(ContextLocator { *rhs_str }))
+			if (auto try_value = eval.context.TryGetRaw(ContextLocator { *rhs_str }))
 			{
 				auto& value = try_value.value();
 				if (auto i = std::get_if<int32_t>(&value))
@@ -272,12 +272,25 @@ namespace fig
 	{
 	}
 
-	bool FlagCondition::Evaluate(const Context& context) const
+	bool FlagCondition::Evaluate(const EvaluationArgs& eval) const
 	{
-		if (_flag.key.empty())
+		if (!_flag)
 			return false;
 
-		return context[_flag];
+		if (!_flag.selector and eval.context[_flag.key])
+			return true;
+
+		if (auto try_ctx = eval.context.TryGetContext(_flag.selector))
+		{
+			auto& ctx = try_ctx.value().get();
+
+			// Alias?
+			if (auto try_cond = eval.context.TryGetCondition(_flag.key))
+				return try_cond.value().get().Evaluate(ctx, eval.cookie + 1);
+			return ctx[_flag.key];
+		}
+
+		return false; // Invalid selector
 	}
 
 	ConditionPtr FlagCondition::Clone() const
@@ -290,7 +303,7 @@ namespace fig
 		return (fig::string)_flag;
 	}
 
-	bool AlwaysCondition::Evaluate(const Context& context) const
+	bool AlwaysCondition::Evaluate(const EvaluationArgs& eval) const
 	{
 		return true;
 	}
@@ -305,7 +318,7 @@ namespace fig
 		return "always";
 	}
 
-	bool NeverCondition::Evaluate(const Context& context) const
+	bool NeverCondition::Evaluate(const EvaluationArgs& eval) const
 	{
 		return false;
 	}

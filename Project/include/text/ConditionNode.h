@@ -3,15 +3,22 @@
 #pragma once
 
 #include "Figment.h"
-#include "text/Context.h"
+#include "text/ContextLocator.h"
 
 namespace fig
 {
+    class Context;
+    struct EvaluationArgs
+    {
+        const Context& context;
+        size_t cookie = 0uz;
+    };
+
     class ConditionNode
     {
     public:
         virtual ~ConditionNode() = default;
-        virtual bool Evaluate(const Context& context) const = 0;
+        virtual bool Evaluate(const EvaluationArgs& eval) const = 0;
         virtual std::unique_ptr<ConditionNode> Clone() const = 0;
 
         virtual explicit operator fig::string() const = 0;
@@ -23,7 +30,7 @@ namespace fig
     {
     public:
         explicit AndCondition(std::vector<ConditionPtr> children);
-        bool Evaluate(const Context& context) const override;
+        bool Evaluate(const EvaluationArgs& eval) const override;
         ConditionPtr Clone() const override;
 
         explicit operator fig::string() const override;
@@ -36,7 +43,7 @@ namespace fig
     {
     public:
         explicit OrCondition(std::vector<ConditionPtr> children);
-        bool Evaluate(const Context& context) const override;
+        bool Evaluate(const EvaluationArgs& eval) const override;
         ConditionPtr Clone() const override;
 
         explicit operator fig::string() const override;
@@ -48,7 +55,7 @@ namespace fig
     {
     public:
         explicit NotCondition(ConditionPtr child);
-        bool Evaluate(const Context& context) const override;
+        bool Evaluate(const EvaluationArgs& eval) const override;
         ConditionPtr Clone() const override;
 
         explicit operator fig::string() const override;
@@ -72,7 +79,7 @@ namespace fig
     {
     public:
         ComparisonCondition(CompareOperand lhs, CompareOperand rhs, CompareOperator op);
-        bool Evaluate(const Context& context) const override;
+        bool Evaluate(const EvaluationArgs& eval) const override;
         ConditionPtr Clone() const override;
 
         explicit operator fig::string() const override;
@@ -87,7 +94,7 @@ namespace fig
     public:
         explicit FlagCondition(const fig::string& flag);
         explicit FlagCondition(const ContextLocator& flag);
-        bool Evaluate(const Context& context) const override;
+        bool Evaluate(const EvaluationArgs& eval) const override;
         ConditionPtr Clone() const override;
 
         explicit operator fig::string() const override;
@@ -98,7 +105,7 @@ namespace fig
     class AlwaysCondition : public ConditionNode
     {
     public:
-        bool Evaluate(const Context& context) const override;
+        bool Evaluate(const EvaluationArgs& eval) const override;
         ConditionPtr Clone() const override;
 
         explicit operator fig::string() const override;
@@ -107,7 +114,7 @@ namespace fig
     class NeverCondition : public ConditionNode
     {
     public:
-        bool Evaluate(const Context& context) const override;
+        bool Evaluate(const EvaluationArgs& eval) const override;
         ConditionPtr Clone() const override;
 
         explicit operator fig::string() const override;

@@ -205,6 +205,9 @@ namespace fig::data
 		for (auto& attrib : _attributes)
 			_context.SetValue(attrib.first, attrib.second.value);
 
+		if (gender.IsDefined())
+			_context.SetFlag((fig::string)gender);
+
 		_bDirtyContext = false;
 	}
 }
