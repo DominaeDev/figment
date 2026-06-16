@@ -1,23 +1,44 @@
 #include <pch.h>
 #include "chat/PromptScaffold.h"
 #include "io/XmlSerializable.h"
+#include "text/TextEvaluator.h"
 
 using namespace fig::io;
 
 namespace fig::chat
 {
-	auto PromptBlock::SerializeInfo()
+	static const std::map<PromptBlockInfo::Type, fig::string> TypeMapping {
+		{ PromptBlockInfo::Type::Static,	"static" },
+		{ PromptBlockInfo::Type::Persona,	"persona" },
+		{ PromptBlockInfo::Type::User,		"user" },
+	};
+
+	static const std::map<PromptPriority, fig::string> PriorityMapping {
+		{ PromptPriority::Normal,	"normal" },
+		{ PromptPriority::Low,		"low" },
+		{ PromptPriority::High,		"high" },
+	};
+
+	auto PromptBlockInfo::SerializeInfo()
 	{
 		return XmlFields(
-			AsAttribute { "condition",	&PromptBlock::condition,
+			AsAttribute { "type",		&PromptBlockInfo::type,
+				[](auto& value) { return enum_serialize(value, TypeMapping); },
+				[](auto& value) { return enum_deserialize(value, TypeMapping); }
+			},
+			AsAttribute { "priority",	&PromptBlockInfo::priority,
+				[](auto& value) { return enum_serialize(value, PriorityMapping); },
+				[](auto& value) { return enum_deserialize(value, PriorityMapping); }
+			},
+			AsAttribute { "condition",	&PromptBlockInfo::condition,
 				[](auto&& value) -> fig::string { return value.to_string(); },
 				[](auto&& value) -> Condition { return Condition { value }; }
 			}	.Default(Condition::Always),
-			AsAttribute { "order",		&PromptBlock::order },
-			AsText		{				&PromptBlock::content }
+			AsAttribute { "order",		&PromptBlockInfo::order },
+			AsText		{				&PromptBlockInfo::content }
 		);
 		
-		static_assert(XmlSerializable<PromptBlock>);
+		static_assert(XmlSerializable<PromptBlockInfo>);
 	}
 
 	auto PromptScaffold::SerializeInfo()
@@ -87,6 +108,10 @@ namespace fig::chat
 			}
 		}
 
+		// Sort blocks
+		std::ranges::stable_sort(blocks, std::ranges::less {}, &PromptBlockInfo::order);
+
 		return FileError::NoError;
 	}
+
 }

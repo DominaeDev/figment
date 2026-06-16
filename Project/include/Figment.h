@@ -6,6 +6,7 @@
 #include <stack>
 #include <queue>
 #include <ranges>
+#include <set>
 
 #include "app/Types.h"
 #include "util/EnumFlags.h"

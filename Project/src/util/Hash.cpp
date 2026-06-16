@@ -15,14 +15,6 @@ namespace fig
 		std::memcpy(&parts, &other.parts, sizeof(parts));
 		return *this;
 	}
-
-	auto Hash::operator<=>(const Hash& rhs) const
-	{
-		auto cmp = std::memcmp(&parts, &rhs.parts, sizeof(parts));
-		return cmp == 0 ? std::strong_ordering::equal :
-			cmp < 0 ? std::strong_ordering::less :
-			std::strong_ordering::greater;
-	}
 }
 
 extern "C" {

@@ -1,7 +1,6 @@
 #include <pch.h>
 #include "llm/Grammar.h"
 #include "io/FileUtility.h"
-#include <set>
 #include <cassert>
 
 using namespace fig::io;

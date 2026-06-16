@@ -277,8 +277,9 @@ namespace fig
 	static fig::string& capitalize_sentences(fig::string& text, bool bCapitalizeFirst)
 	{
 		auto bCapitalize = bCapitalizeFirst;
-		for (auto& ch : text)
+		for (size_t i = 0uz; i < text.size(); ++i)
 		{
+			auto& ch = text[i];
 			if (bCapitalize and std::isalpha(static_cast<unsigned char>(ch)))
 			{
 				ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
@@ -436,12 +437,12 @@ namespace fig
 			unescape(text);
 		if (options.IsSet(TextEvaluationOption::FixPunctuation))
 			clean_punctuation(text);
-		if (options.IsSet(TextEvaluationOption::CapitalizeSentences))
-			capitalize_sentences(text, options.IsSet(TextEvaluationOption::CapitalizeFirst));
 		if (options.IsSet(TextEvaluationOption::CollapseWhitespace))
 			collapse_whitespace(text);
 		if (options.IsSet(TextEvaluationOption::Unescape))
 			unescape_whitespace(text);
+		if (options.IsSet(TextEvaluationOption::CapitalizeSentences))
+			capitalize_sentences(text, options.IsSet(TextEvaluationOption::CapitalizeFirst));
 		return text;
 	}
 

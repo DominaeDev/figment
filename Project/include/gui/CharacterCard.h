@@ -2,7 +2,6 @@
 #define CHARACTER_CARD_H__
 #pragma once
 
-#include <set>
 #include "CoverCard.h"
 
 namespace fig::gui

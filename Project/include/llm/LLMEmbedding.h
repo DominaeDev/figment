@@ -4,10 +4,6 @@
 #include "llm/LLMTypes.h"
 #include "llm/Embedding.h"
 
-#include <vector>
-#include <set>
-#include <functional>
-
 namespace fig::llm
 {
 	class LLMEmbedding

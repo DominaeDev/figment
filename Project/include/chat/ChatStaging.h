@@ -5,6 +5,7 @@
 #include "chat/ChatTypes.h"
 #include "chat/ChatOptions.h"
 #include "data/CharacterData.h"
+#include "chat/PromptScaffold.h"
 
 namespace fig::chat
 {
@@ -12,9 +13,12 @@ namespace fig::chat
 	{
 	public:
 		ChatStaging() = default;
-		ChatStaging(ChatOptions options);
+		ChatStaging(const PromptScaffold& scaffold, ChatOptions options);
+		ChatStaging(PromptScaffold&& scaffold, ChatOptions options);
 
 		bool AddCharacter(const fig::uuid& characterId, Role role, const fig::data::CharacterData& data);
+		bool HasCharacter(Role role) const noexcept { return _charactersByRole.contains(role); }
+		bool HasCharacter(fig::uuid id) const noexcept { return _charactersByID.contains(id); }
 
 		std::optional<fig::uuid> GetCharacterIdByRole(Role role) const noexcept;
 		std::optional<fig::data::CharacterDataCRef> GetCharacterByRole(Role role) const noexcept;
@@ -24,7 +28,6 @@ namespace fig::chat
 		const std::vector<fig::data::CharacterData>& GetCharacters() const noexcept { return _characters; }
 
 		fig::string GetSystemPrompt();
-		fig::string GetDirectorPrompt();
 		fig::string GetPersonaOf(Role role);
 		fig::string GetBriefOf(Role role);
 		Role GetRoleOf(const fig::string& characterId) const;
@@ -48,6 +51,7 @@ namespace fig::chat
 		std::vector<fig::data::CharacterData> _characters {};
 		std::map<fig::uuid, size_t> _charactersByID {};
 		std::map<Role, size_t> _charactersByRole {};
+		PromptScaffold _promptScaffold;
 
 		ChatOptions _options {};
 		Context _context {};

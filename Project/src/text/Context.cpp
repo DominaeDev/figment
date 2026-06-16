@@ -63,6 +63,11 @@ namespace fig
 		_values[std::move(name)] = value;
 	}
 
+	void Context::RemoveValue(fig::handle name) noexcept
+	{
+		_values.erase(name);
+	}
+
 	[[nodiscard]] std::optional<ContextValue> Context::TryGetRaw_Internal(fig::handle name) const noexcept
 	{
 		if (auto itFind = _values.find(name); itFind != _values.cend())
@@ -154,17 +159,17 @@ namespace fig
 		_flags.insert(flag);
 	}
 
-	void Context::SetFlags(std::span<fig::handle> flags) noexcept
+	void Context::SetFlags(const std::set<fig::handle>& flags) noexcept
 	{
 		_flags.insert_range(flags);
 	}
 
-	void Context::UnsetFlag(fig::handle flag) noexcept
+	void Context::RemoveFlag(fig::handle flag) noexcept
 	{
 		_flags.erase(flag);
 	}
 
-	void Context::UnsetFlags(std::span<fig::handle> flags) noexcept
+	void Context::RemoveFlags(const std::set<fig::handle>& flags) noexcept
 	{
 		for (auto& f : flags)
 			_flags.erase(f);
@@ -372,12 +377,12 @@ namespace fig
 		_pCustomMacroProvider = std::make_unique<fig::text::MacroProvider>();
 	}
 
-	void Context::AddAlias(fig::handle alias, const ContextLocator& target) noexcept
+	void Context::SetAlias(fig::handle alias, const ContextLocator& target) noexcept
 	{
 		_pCustomMacroProvider->AddValueAlias(alias, target);
 	}
 
-	void Context::AddAlias(fig::handle alias, const ContextSelector& target) noexcept
+	void Context::SetAlias(fig::handle alias, const ContextSelector& target) noexcept
 	{
 		_pCustomMacroProvider->AddSelectorAlias(alias, target);
 	}

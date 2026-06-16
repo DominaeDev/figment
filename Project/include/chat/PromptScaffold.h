@@ -21,12 +21,26 @@ namespace fig::chat
 	using PromptOptionText = PromptOptionOf<fig::string>;
 	using PromptOption = std::variant<PromptOptionToggle, PromptOptionNumber, PromptOptionText>;
 
-	struct PromptBlock
+	enum class PromptPriority : int8_t
 	{
+		Low = -1,
+		Normal = 0,
+		High = 1,
+	};
+
+	struct PromptBlockInfo
+	{
+		enum class Type
+		{
+			Static,
+			Persona,
+			User,
+		} type {};
+
+		int32_t order = 0;
+		PromptPriority priority { PromptPriority:: Normal };
 		Condition condition;
 		fig::string content;
-		int32_t order = 0;
-
 	public:
 		static auto SerializeInfo();
 	};
@@ -35,11 +49,10 @@ namespace fig::chat
 	{
 		fig::string name;
 
-		std::vector<PromptBlock> blocks;
+		std::vector<PromptBlockInfo> blocks;
 		std::vector<PromptOption> options;
 
 		fig::io::FileError LoadFromXml(const fig::path& filename);
-
 	public:
 		static auto SerializeInfo();
 	};

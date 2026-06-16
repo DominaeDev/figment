@@ -441,7 +441,11 @@ namespace fig::gui
 
 		if (auto character = Global::GetUserManager().GetContent().GetCharacter(characterId))
 		{
-			ChatStaging staging(Constants::LLM::DefaultChatOptions);
+			PromptScaffold scaffold;
+			if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
+				return false;
+
+			ChatStaging staging(std::move(scaffold), Constants::LLM::DefaultChatOptions);
 
 			if (!staging.AddCharacter(characterId, Role::Bot1, character.value()))
 				return false;

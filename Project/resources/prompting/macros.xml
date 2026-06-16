@@ -13,8 +13,8 @@
 	<Alias id="user">user:name</Alias>
 	<Alias id="u:">user</Alias>
 	
-	<Condition id="solo">bot1 and not (bot2 or bot3 or bot4)</Condition>
-	<Condition id="group">bot1 and (bot2 or bot3 or bot4)</Condition>
+	<Condition id="solo">not group</Condition>
+	<Condition id="group">__num_bots gt 1</Condition>
 
 	<!-- Pronouns -->
 	<Condition id="pronoun_mas">male or use_male_pronouns</Condition>

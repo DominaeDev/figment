@@ -101,6 +101,7 @@ namespace fig
 		};
 
 		inline const std::map<fig::handle, ContextValue>& GetValues() const noexcept { return _values; }
+		void RemoveValue(fig::handle name) noexcept;
 		void ClearValues() noexcept;
 
 		template<typename T>
@@ -117,9 +118,9 @@ namespace fig
 
 		// Flags
 		void SetFlag(fig::handle flag) noexcept;
-		void SetFlags(std::span<fig::handle> flags) noexcept;
-		void UnsetFlag(fig::handle flag) noexcept;
-		void UnsetFlags(std::span<fig::handle> flags) noexcept;
+		void SetFlags(const std::set<fig::handle>& flags) noexcept;
+		void RemoveFlag(fig::handle flag) noexcept;
+		void RemoveFlags(const std::set<fig::handle>& flags) noexcept;
 		void ClearFlags() noexcept;
 
 		bool HasFlag(fig::handle flag) const noexcept;
@@ -156,8 +157,8 @@ namespace fig
 		std::optional<fig::text::MacroRef> TryGetMacro(const fig::handle& macro) const noexcept;
 		std::optional<ConditionRef> TryGetCondition(const fig::handle& alias) const noexcept;
 
-		void AddAlias(fig::handle alias, const ContextLocator& target) noexcept;
-		void AddAlias(fig::handle alias, const ContextSelector& target) noexcept;
+		void SetAlias(fig::handle alias, const ContextLocator& target) noexcept;
+		void SetAlias(fig::handle alias, const ContextSelector& target) noexcept;
 
 		void SetPrimarySelector(ContextSelector selector) { _primarySelector = selector; }
 		inline std::optional<ContextRef> TryGetPrimaryContext(fig::handle name) noexcept 

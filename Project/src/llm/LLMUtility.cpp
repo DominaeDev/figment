@@ -3,10 +3,7 @@
 #include "llm/LlamaApi.h"
 #include "llm/ModelState.h"
 #include "io/FileUtility.h"
-#include <format>
-#include <cwctype>
 #include <cassert>
-#include <set>
 
 using namespace fig::io;
 using namespace fig::chat;

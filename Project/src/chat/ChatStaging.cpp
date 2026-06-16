@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "chat/ChatStaging.h"
+#include "chat/PromptBuilder.h"
 #include "app/AppState.h"
 #include "io/FileUtility.h"
 #include "llm/LLMUtility.h"
@@ -19,7 +20,7 @@ using namespace fig::gui;
 
 namespace fig::chat
 {
-	static bool s_bInitialized = false;
+	/*static bool s_bInitialized = false;
 	static fig::string s_system_prompt_solo;
 	static fig::string s_system_prompt_group;
 	static fig::string s_system_prompt_character;
@@ -61,13 +62,18 @@ namespace fig::chat
 		return !s_system_prompt_solo.empty()
 			&& !s_system_prompt_character.empty()
 			&& !s_system_prompt_user.empty();
-	}
+	}*/
 
-	ChatStaging::ChatStaging(ChatOptions options) :
+	ChatStaging::ChatStaging(const PromptScaffold& scaffold, ChatOptions options) :
+		_promptScaffold { scaffold },
 		_options { options }
 	{
-		if (!Initialize())
-			throw std::runtime_error("Failed to initialize chat staging.");
+	}
+
+	ChatStaging::ChatStaging(PromptScaffold&& scaffold, ChatOptions options) :
+		_promptScaffold { std::move(scaffold) },
+		_options { options }
+	{
 	}
 
 	bool ChatStaging::AddCharacter(const fig::uuid& in_characterId, Role role, const CharacterData& data)
@@ -236,115 +242,26 @@ namespace fig::chat
 
 	fig::string ChatStaging::GetPersonaOf(Role role)
 	{
-		if(auto try_character = GetCharacterByRole(role))
+		if (auto try_character = GetCharacterByRole(role))
 		{
 			auto& character = (*try_character).get();
-			fig::string persona = trim(character.GetAttribute(Constants::CharacterAttributes::Persona).value_or(""));
-			if (persona.empty())
-				return "";
-
-			// Format
-			if (role == Role::User)
-			{
-				fig::string prompt = s_system_prompt_user;
-				replace_all_inplace(prompt, "##PERSONA##", persona);
-				prompt = eval_text(prompt, GetContext(role));
-				return prompt;
-			}
-			else
-			{
-				fig::string prompt = s_system_prompt_character;
-				replace_all_inplace(prompt, "##PERSONA##", persona);
-				prompt = eval_text(prompt, GetContext(role));
-				return prompt;
-			}
+			fig::string persona = character.GetAttribute(Constants::CharacterAttributes::Persona).value_or("");
+			return eval_text(persona, GetContext(role));
 		}
 		return "";
 	}
 
 	fig::string ChatStaging::GetSystemPrompt()
 	{
-		fig::string prompt;
-		if (GetBotCount() > 1)
-		{
-			prompt = s_system_prompt_group;
-			replace_all_inplace(prompt, "##FORMATTING##", s_formatting_group);
-		}
-		else
-		{
-			prompt = s_system_prompt_solo;
-			replace_all_inplace(prompt, "##FORMATTING##", s_formatting_solo);
-		}
+		auto& context = GetContext();
+		auto blocks = PromptBuilder::GetBlocks(_promptScaffold, *this);
 
-		replace_all_inplace(prompt, "##STATE_FORMATTING##", _options.flags.IsSet(ChatOptions::Flag::StateVariables) ? s_formatting_state : "");
-		replace_all_inplace(prompt, "##UNCENSOR_INSTRUCTIONS##", _options.flags.IsSet(ChatOptions::Flag::Uncensored) ? s_system_prompt_uncensored : "");
-		prompt = trim(prompt);
-
-		if (GetBotCount() > 1)
-		{
-			prompt.append("\n\n# Characters");
-
-			if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
-			{
-				prompt.append("\n{\n");
-				// Bots
-				for (auto& [role, idx] : _charactersByRole)
-				{
-					auto& character = _characters[idx];
-					if (is_bot(role))
-					{
-						prompt.append(std::format("\t\"@{0}\": {{\"name\": \"{1}\"", ucase(character.chatId), character.shortName));
-						if (!empty_or_whitespace(character.brief))
-							prompt.append(std::format(", \"info\": \"{0}\"", character.brief));
-						prompt.append("}},\n");
-					}
-				}
-
-				// User
-				if (auto try_user = GetCharacterByRole(Role::User))
-				{
-					auto& user = (*try_user).get();
-					prompt.append(std::format("\t\"@USR\": {{\"name\": \"{0}\"", user.shortName));
-					if (!empty_or_whitespace(user.brief))
-						prompt.append(std::format(", \"info\": \"{0}\"", user.brief));
-					prompt.append("}\n");
-				}
-				prompt.append("}");
-			}
-			else
-			{
-				// Bots
-				for (auto& [role, idx] : _charactersByRole)
-				{
-					auto& character = _characters[idx];
-					if (is_bot(role))
-					{
-						prompt.append(std::format("\n- {}", character.shortName));
-						if (!empty_or_whitespace(character.brief))
-							prompt.append(std::format(": {}", character.brief));
-					}
-				}
-
-				// User
-				if (auto try_user = GetCharacterByRole(Role::User))
-				{
-					auto& user = (*try_user).get();
-					prompt.append(std::format("\n- {}", user.shortName));
-					if (!empty_or_whitespace(user.brief))
-						prompt.append(std::format(": {}", user.brief));
-				}
-			}
-		}
-
-		prompt = eval_text(prompt, GetContext());
-		return prompt;
-	}
-
-	fig::string ChatStaging::GetDirectorPrompt()
-	{
-		fig::string prompt = s_formatting_director;
-		prompt = eval_text(prompt, GetContext());
-		return prompt;
+		return blocks
+			| std::views::transform([this](auto&& b) { 
+				return b.content; 
+			})
+			| std::views::join
+			| std::ranges::to<std::string>();
 	}
 
 	fig::string ChatStaging::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
@@ -380,14 +297,15 @@ namespace fig::chat
 
 	Context& ChatStaging::GetContext(Role primaryRole) noexcept
 	{
-		if (not (is_bot(primaryRole) or is_user(primaryRole)))
+		if (not is_bot(primaryRole))
 			return GetContext(fig::chat::Role::Bot1); // Fallback
 
 		// Update
 		auto& ctx = GetContext_Internal();
 
+		// Set primary
 		auto primarySelector = ContextSelector::FromRole(primaryRole);
-		ctx.AddAlias("current", primarySelector);
+		ctx.SetAlias("current", primarySelector);
 		ctx.SetPrimarySelector(primarySelector);
 		return ctx;
 	}
@@ -402,13 +320,15 @@ namespace fig::chat
 	void ChatStaging::UpdateContext()
 	{
 		_context.Clear();
+		_context.SetMacroProvider(Global::GetMacroProvider());
+
 		for (auto& kvp : _charactersByRole)
 		{
 			auto role = kvp.first;
 			auto& character = _characters[kvp.second];
 			_context.AddContext(ContextSelector::FromRole(role)[0], character);
 		}
-		_context.SetMacroProvider(Global::GetMacroProvider());
+		_context.SetValue("__num_bots", GetBotCount());
 		_bDirtyContext = false;
 	}
 } // namespace

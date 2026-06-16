@@ -137,6 +137,7 @@ namespace fig::Constants
 		constexpr fig::const_string ProfileImageFileExt = "";
 		constexpr fig::const_string AssetFileExt = "";
 		constexpr fig::const_string Macros = "./resources/prompting/macros.xml";
+		constexpr fig::const_string PromptScaffold = "./resources/prompting/chat.scaffold";
 	}
 	
 	namespace LLM

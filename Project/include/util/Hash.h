@@ -16,7 +16,13 @@ namespace fig
 		Hash(Hash&& other) = default;
 		Hash& operator=(const Hash& other);
 		Hash& operator=(Hash&& other) = default;
-		auto operator<=>(const Hash& rhs) const;
+		auto operator<=>(const Hash& rhs) const
+		{
+			auto cmp = std::memcmp(&parts, &rhs.parts, sizeof(parts));
+			return cmp == 0 ? std::strong_ordering::equal :
+				cmp < 0 ? std::strong_ordering::less :
+				std::strong_ordering::greater;
+		}
 
 		fig::string to_string() const noexcept
 		{
@@ -38,6 +44,8 @@ namespace fig
 			return result;
 		}
 	};
+
+	using hash = Hash;
 }
 
 namespace fig

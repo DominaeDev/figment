@@ -551,6 +551,9 @@
     <ClCompile Include="src\text\ContextLocator.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
+    <ClCompile Include="src\chat\PromptBuilder.cpp">
+      <Filter>Source Files\Backend\Chat</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1311,6 +1314,9 @@
     </ClInclude>
     <ClInclude Include="include\text\ContextLocator.h">
       <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\PromptBuilder.h">
+      <Filter>Source Files\Backend\Chat</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -9,7 +9,6 @@
 #include "llm/LLMUtility.h"
 #include "data/CharacterData.h"
 #include <format>
-#include <set>
 
 using namespace fig::llm;
 using namespace fig::chat;

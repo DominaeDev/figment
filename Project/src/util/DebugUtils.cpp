@@ -172,7 +172,11 @@ namespace fig
 				{
 					auto& character = try_character.value();
 
-					ChatStaging staging(Constants::LLM::DefaultChatOptions);
+					PromptScaffold scaffold;
+					if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
+						return;
+
+					ChatStaging staging(std::move(scaffold), Constants::LLM::DefaultChatOptions);
 					if (!staging.AddCharacter(characterId, Role::Bot1, character))
 						return;
 
@@ -182,13 +186,6 @@ namespace fig
 						return;
 
 					fig::string text = staging.GetSystemPrompt();
-					int32_t botCount = staging.GetBotCount();
-					for (int32_t i = 0; i < botCount; ++i)
-					{
-						Role role = bot_from_index(i);
-						text.append(staging.GetPersonaOf(role));
-					}
-					text.append(staging.GetPersonaOf(Role::User));
 					LogLn(text);
 				}
 			}

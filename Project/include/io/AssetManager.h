@@ -7,7 +7,6 @@
 #include "io/AssetDatabase.h"
 #include <expected>
 #include <ranges>
-#include <set>
 #include <mutex>
 #include <future>
 

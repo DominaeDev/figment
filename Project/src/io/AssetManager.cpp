@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <format>
 #include <ranges>
-#include <set>
 #include <execution>
 #include "io/AssetManager.h"
 #include "user/UserManager.h"

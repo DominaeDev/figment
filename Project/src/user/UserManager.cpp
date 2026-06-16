@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <cassert>
 #include <print>
-#include <set>
 
 #include "util/Hash.h"
 #include "user/Security.h"
