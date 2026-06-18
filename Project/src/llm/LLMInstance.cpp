@@ -7,6 +7,7 @@
 #include "io/FileUtility.h"
 #include "util/Lockable.h"
 #include "text/TextEvaluator.h"
+#include "chat/PromptBuilder.h"
 #include <format>
 #include <algorithm>
 #include <cassert>
@@ -121,58 +122,57 @@ namespace fig::llm
 
 		if (bMultiSequence) // Initialize a sequence for each bot
 		{
-			// Write (shared) system_prompt
-			fig::string system_prompt = staging.GetSystemPrompt(); //! @group
-
-			std::vector<Token> system_prompt_tokens = llama::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
-
-			// System prompt
+			// Prefix
+			auto template_prefix_tokens = llama::tokenize(pVocab, template_prefix, false); // <BOS>?;
 			_contextState.AppendBlock(ContextBlock {
 				.role = Role::System,
 				.name = "",
-				.content = template_prefix + system_prompt,
-				.tokens =  system_prompt_tokens,
+				.content = template_prefix,
+				.tokens = template_prefix_tokens,
 				.flags { ContextBlockFlag::Static },
-				.attn_position = 0,
 				.sequenceSlots { SequenceSlot::Shared },
 			});
+
+			int32_t attn_pos = toI(template_prefix_tokens.size());
+
+			auto promptBlocks = staging.GetPromptBlocks();
+			int32_t persona_pos = -1;
+
+			for (auto& pb : promptBlocks)
+			{
+				std::vector<Token> pb_tokens = llama::tokenize(pVocab, pb.content);
+
+				attn_pos += toI(pb_tokens.size());
+
+				if (pb.blockType == PromptBlockInfo::Type::Persona)
+				{
+					SequenceSlots seq_id = get_sequence_from_index(get_bot_index(pb.role));
+
+					if (persona_pos < 0)
+						persona_pos = attn_pos; // Personas overlap
+
+					_contextState.AppendBlock(ContextBlock {
+						.role = Role::System,
+						.content = pb.content,
+						.tokens = pb_tokens,
+						.flags { ContextBlockFlag::Static,  ContextBlockFlag::Persona },
+						.attn_position = persona_pos,
+						.sequenceSlots = seq_id,
+					});
+				}
+				else
+				{
+					_contextState.AppendBlock(ContextBlock {
+						.role = Role::System,
+						.content = pb.content,
+						.tokens = pb_tokens,
+						.flags { ContextBlockFlag::Static },
+						.sequenceSlots { SequenceSlot::Shared },
+					});
+				}
+			}
 		
-			int32_t persona_pos = toI(system_prompt_tokens.size());
-
-			// Write persona(s)
-			for (int32_t i = 0; i < n_bots; ++i)
-			{
-				Role role = bot_from_index(i);
-				SequenceSlots seq_id = get_sequence_from_index(i);
-
-				// Persona
-				std::vector<Token> persona_tokens = llama::tokenize(pVocab, personas[role], false);
-				_contextState.AppendBlock(ContextBlock {
-					.role = Role::System,
-					.name = "",
-					.content = personas[role],
-					.tokens = persona_tokens,
-					.flags { ContextBlockFlag::Static,  ContextBlockFlag::Persona },
-					.attn_position = persona_pos,
-					.sequenceSlots = seq_id,
-				});
-			}
-
-			// User persona
-			if (!empty_or_whitespace(user_persona))
-			{
-				auto user_persona_tokens = llama::tokenize(pVocab, user_persona);
-				_contextState.AppendBlock(ContextBlock {
-					.role = Role::System,
-					.name = "",
-					.content = user_persona,
-					.tokens = user_persona_tokens,
-					.flags { ContextBlockFlag::Static },
-					.sequenceSlots { SequenceSlot::Shared },
-				});
-			}
-
-			// Template suffix
+			// Suffix
 			auto template_suffix_tokens = llama::tokenize(pVocab, template_suffix);
 			_contextState.AppendBlock(ContextBlock {
 				.role = Role::System,
@@ -192,47 +192,47 @@ namespace fig::llm
 					_contextState.personas[kvp.first] = llama::tokenize(pVocab, kvp.second, false);
 			}
 
-			fig::string system_prompt = staging.GetSystemPrompt();
-			std::vector<Token> system_prompt_tokens = llama::tokenize(pVocab, template_prefix + system_prompt, false); // <BOS>?;
-
+			// Prefix
+			auto template_prefix_tokens = llama::tokenize(pVocab, template_prefix, false); // <BOS>?;
 			_contextState.AppendBlock(ContextBlock {
 				.role = Role::System,
 				.name = "",
-				.content = template_prefix + system_prompt,
-				.tokens = system_prompt_tokens,
+				.content = template_prefix,
+				.tokens = template_prefix_tokens,
 				.flags { ContextBlockFlag::Static },
-				.attn_position = 0,
 				.sequenceSlots { SequenceSlot::Default },
 			});
 
-			int32_t persona_pos = toI(system_prompt_tokens.size());
+			int32_t attn_pos = toI(template_prefix_tokens.size());
 
-			std::vector<Token> persona_tokens = llama::tokenize(pVocab, personas[Role::Bot1], false);
-			_contextState.AppendBlock(ContextBlock {
-				.role = Role::System,
-				.name = "",
-				.content = personas[Role::Bot1],
-				.tokens = persona_tokens,
-				.flags { ContextBlockFlag::Static, ContextBlockFlag::Persona },
-				.attn_position = persona_pos,
-				.sequenceSlots { SequenceSlot::Default },
-			});
+			auto promptBlocks = staging.GetPromptBlocks();
+			int32_t persona_pos = -1;
 
-			// User persona
-			if (!empty_or_whitespace(user_persona))
+			for (auto& pb : promptBlocks)
 			{
-				auto user_persona_tokens = llama::tokenize(pVocab, user_persona);
+				std::vector<Token> pb_tokens = llama::tokenize(pVocab, pb.content);
+
+				ContextBlockFlags pb_flags { ContextBlockFlag::Static };
+				if (pb.blockType == PromptBlockInfo::Type::Persona)
+				{
+					pb_flags |= ContextBlockFlag::Persona;
+					if (persona_pos < 0)
+						persona_pos = attn_pos; // Personas overlap
+				}
+
+				attn_pos += toI(pb_tokens.size());
+
 				_contextState.AppendBlock(ContextBlock {
 					.role = Role::System,
-					.name = "",
-					.content = user_persona,
-					.tokens = user_persona_tokens,
-					.flags { ContextBlockFlag::Static },
+					.content = pb.content,
+					.tokens = pb_tokens,
+					.flags = pb_flags,
+					.attn_position = pb.blockType == PromptBlockInfo::Type::Persona ? persona_pos : -1,
 					.sequenceSlots { SequenceSlot::Default },
 				});
 			}
 
-			// Template suffix
+			// Suffix
 			auto template_suffix_tokens = llama::tokenize(pVocab, template_suffix);
 			_contextState.AppendBlock(ContextBlock {
 				.role = Role::System,

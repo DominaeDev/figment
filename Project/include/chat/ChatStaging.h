@@ -27,7 +27,7 @@ namespace fig::chat
 		std::optional<fig::data::CharacterDataCRef> GetCharacterByName(const fig::string& name) const noexcept;
 		const std::vector<fig::data::CharacterData>& GetCharacters() const noexcept { return _characters; }
 
-		fig::string GetSystemPrompt();
+		std::vector<PromptBlock> GetPromptBlocks();
 		fig::string GetPersonaOf(Role role);
 		fig::string GetBriefOf(Role role);
 		Role GetRoleOf(const fig::string& characterId) const;

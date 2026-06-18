@@ -56,5 +56,14 @@ namespace fig::chat
 	public:
 		static auto SerializeInfo();
 	};
+
+	struct PromptBlock
+	{
+		size_t id;
+		fig::string content;
+		fig::hash hash;
+		PromptBlockInfo::Type blockType;
+		Role role = Role::Undefined;
+	};
 }
 #endif

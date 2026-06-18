@@ -179,16 +179,6 @@ namespace fig::data
 		xml.WriteToMemory(buffer);
 	}
 
-	fig::string ScenarioData::GetSystemPrompt(ChatOptions options) const
-	{
-		return "";
-	}
-
-	fig::string ScenarioData::GetScenarioPrompt(ChatOptions options) const
-	{
-		return "";
-	}
-
 	constexpr bool ScenarioData::is_valid() const
 	{
 		if (prompts.empty() or title.empty() or role_slots.empty())

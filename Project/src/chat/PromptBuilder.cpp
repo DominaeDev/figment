@@ -11,15 +11,15 @@ namespace fig::chat
 		{
 			if (auto pToggle = std::get_if<PromptOptionToggle>(&option))
 			{
-				pToggle->defaultValue ? context.SetFlag(pToggle->id) : context.RemoveFlag(pToggle->id);
+				pToggle->defaultValue ? context.SetFlag(pToggle->id) : context.RemoveFlag(pToggle->id); //! @wrong defaultValue
 			}
 			else if (auto pNumber = std::get_if<PromptOptionNumber>(&option))
 			{
-				context.SetValue(pNumber->id, pNumber->defaultValue);
+				context.SetValue(pNumber->id, pNumber->defaultValue); //! @wrong defaultValue
 			}
 			else if (auto pText = std::get_if<PromptOptionText>(&option))
 			{
-				context.SetValue(pText->id, pText->defaultValue);
+				context.SetValue(pText->id, pText->defaultValue); //! @wrong defaultValue
 			}
 		}
 	}
@@ -31,7 +31,7 @@ namespace fig::chat
 		{
 			auto& block = scaffold.blocks[i];
 			
-			if (block.type == PromptBlockInfo::Type::Persona) // Repeat for each bot
+			if (block.type == PromptBlockInfo::Type::Persona) // Persona, repeat for each bot
 			{
 				int32_t bot_idx = 0;
 				for (Role role = bot_from_index(bot_idx); role != Role::Undefined; role = bot_from_index(++bot_idx))
@@ -53,6 +53,8 @@ namespace fig::chat
 						.id = i * 1000 + bot_idx,
 						.content = std::move(content),
 						.hash = std::move(hash),
+						.blockType = PromptBlockInfo::Type::Persona,
+						.role = role,
 					});
 				}
 			}
@@ -72,9 +74,10 @@ namespace fig::chat
 					.id = i * 1000,
 					.content = std::move(content),
 					.hash = std::move(hash),
+					.blockType = PromptBlockInfo::Type::User,
 				});
 			}
-			else
+			else // Static instructions
 			{
 				Context context = staging.GetContext();
 				ApplyOptions(context, scaffold);
@@ -89,6 +92,7 @@ namespace fig::chat
 					.id = i * 1000,
 					.content = std::move(content),
 					.hash = std::move(hash),
+					.blockType = PromptBlockInfo::Type::Static,
 				});
 			}
 		}

@@ -251,17 +251,9 @@ namespace fig::chat
 		return "";
 	}
 
-	fig::string ChatStaging::GetSystemPrompt()
+	std::vector<PromptBlock> ChatStaging::GetPromptBlocks()
 	{
-		auto& context = GetContext();
-		auto blocks = PromptBuilder::GetBlocks(_promptScaffold, *this);
-
-		return blocks
-			| std::views::transform([this](auto&& b) { 
-				return b.content; 
-			})
-			| std::views::join
-			| std::ranges::to<std::string>();
+		return PromptBuilder::GetBlocks(_promptScaffold, *this);
 	}
 
 	fig::string ChatStaging::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
