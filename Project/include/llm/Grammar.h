@@ -27,6 +27,6 @@ namespace fig::llm
 
 	namespace Grammar
 	{
-		SamplerPtr compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, fig::string names, fig::string stateVars);
+		SamplerPtr compile_grammar(const fig::string& grammar, GrammarFlags grammarFlags, VocabPtr pVocab, fig::string names, fig::string stateVars);
 	}
 }

@@ -91,37 +91,37 @@
 
 		# Stubs
 		{stub?
-		{talk?root ::= "\\"" [^"*&gt;|&lt;@\\n]* "\\"&gt;/talk&lt;" more}
-		{act?root ::= "*" [^"*&gt;|&lt;@\\n]* "*&gt;/act&lt;" more}
-		{narrate?root ::= "[" [^"*&gt;|&lt;@\\]]* "]&gt;/narrator&lt;" more}
+		{talk?root ::= "\\"" [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/talk&gt;" more}
+		{act?root ::= "*" [^"*&lt;\\|&gt;@\\n]* "*&lt;/act&gt;" more}
+		{narrate?root ::= "[" [^"*&lt;\\|&gt;@\\]]* "]&lt;/narrator&gt;" more}
 		}
 
 		# Continuations
 		{continue?
-		{talk?root ::= [^"*&gt;|&lt;@\\n]* "\\"&gt;/talk&lt;" more}
-		{act?root ::= [^"*&gt;|&lt;@\\n]* "*&gt;/act&lt;" more}
-		{narrate?root ::= [^"*&gt;|&lt;\\]]* "]&gt;/narrator&lt;" more}
+		{talk?root ::= [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/talk&gt;" more}
+		{act?root ::= [^"*&lt;\\|&gt;@\\n]* "*&lt;/act&gt;" more}
+		{narrate?root ::= [^"*&lt;\\|&gt;\\]]* "]&lt;/narrator&gt;" more}
 		}
 
 		# State variables
 		{enable-state?
-		stat		::= ("&gt;edit&lt;" (var-expr | "None") "&gt;/edit&lt;")*
+		stat		::= ("&lt;edit&gt;" (var-expr \\| "None") "&lt;/edit&gt;")*
 		var-expr	::= var-name " = " var-value
-		var-name 	::= {_STATE_VARS_}
-		var-value 	::= [^\\n\\t&gt;&lt;|=,.;@"*()\{\}[\\]]+
+		var-name 	::= {state_vars}
+		var-value 	::= [^\\n\\t&lt;&gt;\\|=,.;@"*()\\{\\}[\\]]+
 		}
 
 		# Message types
-		dlg ::= "&gt;talk=\\"" name "\\"&lt;\\"" text "\\"&gt;/talk&lt;"
-		act ::= "&gt;act=\\"" name "\\"&lt;*" text "*&gt;/act&lt;"
-		narr ::= "&gt;narrator&lt;[" text "]&gt;/narrator&lt;"
-		any ::= (dlg | act{enable-narrator? \| narr} | ws)
+		dlg ::= "&lt;talk=\\"" name "\\"&gt;\\"" text "\\"&lt;/talk&gt;"
+		act ::= "&lt;act=\\"" name "\\"&gt;*" text "*&lt;/act&gt;"
+		narr ::= "&lt;narrator&gt;[" text "]&lt;/narrator&gt;"
+		any ::= (dlg | act{enable-narrator? \\| narr} | ws)
 
-		text ::= [^\\t&gt;|&lt;@"*\\]]*
+		text ::= [^\\t&lt;|&gt;@"*\\]]*
 		ws ::= [ \\n]
-		name ::= {_NAMES_}
+		name ::= {names}
 		more ::= any\{0,2\}{enable-state? stat} end?
-		end ::= ( "&gt;|im_end|&lt;" | "&gt;/s&lt;" | "&gt;s&lt;" | "&gt;end_of_turn&lt;" | "&gt;EOT&lt;" | "_&gt;EOT&lt;" | "###" | "&gt;｜end▁of▁sentence｜&lt;" )
+		end ::= ( "&lt;|im_end|&gt;" | "&lt;/s&gt;" | "&lt;s&gt;" | "&lt;end_of_turn&gt;" | "&lt;EOT&gt;" | "_&lt;EOT&gt;" | "###" | "&lt;｜end▁of▁sentence｜&gt;" )
 	</Grammar>
 
 </PromptScaffold>

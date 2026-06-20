@@ -33,6 +33,8 @@ namespace fig
 	fig::string unindent(const fig::string& s);
 	void unindent_inplace(fig::string& s);
 
+	fig::string escape(const fig::string& s) noexcept;
+	void escape_inplace(fig::string& s) noexcept;
 	fig::string unescape(const fig::string& s) noexcept;
 	void unescape_inplace(fig::string& s) noexcept;
 

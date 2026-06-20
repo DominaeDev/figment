@@ -159,6 +159,14 @@ namespace fig
 		_flags.insert(flag);
 	}
 
+	void Context::SetFlag(fig::handle flag, bool bEnabled) noexcept
+	{
+		if (bEnabled)
+			_flags.insert(flag);
+		else
+			_flags.erase(flag);
+	}
+
 	void Context::SetFlags(const std::set<fig::handle>& flags) noexcept
 	{
 		_flags.insert_range(flags);

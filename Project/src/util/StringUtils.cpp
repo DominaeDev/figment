@@ -818,17 +818,17 @@ namespace fig
 
 	void unescape_inplace(fig::string& s) noexcept
 	{
-		size_t read = 0;
-		size_t write = 0;
-		size_t length = s.size();
-
-		static const std::array<std::pair<char, char>, 5> seqs {
+		static const std::array<std::pair<char, char>, 5> escape_sequences {
 			std::pair { 'n', '\n' },
 			std::pair { 'r', '\r' },
 			std::pair { 't', '\t' },
 			std::pair { '\\', '\\' },
 			std::pair { '_', ' ' },
 		};
+
+		size_t read = 0;
+		size_t write = 0;
+		size_t length = s.size();
 
 		while (read < length)
 		{
@@ -838,7 +838,7 @@ namespace fig
 				char nextChar = s[read + 1];
 				
 				bool replaced = false;
-				for (auto& seq : seqs)
+				for (auto& seq : escape_sequences)
 				{
 					if (nextChar == seq.first)
 					{
@@ -857,5 +857,65 @@ namespace fig
 			++read;
 		}
 		s.resize(write);
+	}
+
+	fig::string escape(const fig::string& s) noexcept
+	{
+		fig::string value { s };
+		escape_inplace(value);
+		return value;
+	}
+
+	void escape_inplace(fig::string& s) noexcept
+	{
+		static const std::array<std::pair<char, char>, 4> escape_sequences {
+			std::pair { '\n', 'n' },
+			std::pair { '\r', 'r' },
+			std::pair { '\t', 't' },
+			std::pair { '\\', '\\' },
+		};
+
+		size_t length = s.size();
+
+		// Count additional characters
+		size_t added = 0;
+		for (size_t i = 0; i < length; ++i)
+		{
+			for (auto& seq : escape_sequences)
+			{
+				if (s[i] == seq.first)
+				{
+					++added;
+					break;
+				}
+			}
+		}
+
+		if (added == 0)
+			return; // No escapes
+
+		size_t newLength = s.size() + added;
+		size_t read = length;
+		size_t write = newLength;
+		s.resize(newLength);
+
+		while (read > 0)
+		{
+			--read;
+			char ch = s[read];
+			bool replaced = false;
+			for (auto& seq : escape_sequences)
+			{
+				if (ch == seq.first)
+				{
+					s[--write] = seq.second;
+					s[--write] = '\\';
+					replaced = true;
+					break;
+				}
+			}
+			if (not replaced)
+				s[--write] = ch;
+		}
 	}
 }

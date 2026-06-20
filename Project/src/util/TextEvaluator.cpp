@@ -59,7 +59,51 @@ namespace fig
 		return -1;
 	}
 
-	static fig::string& unescape(fig::string& text, char escape = '\\')
+	fig::string& unescape_symbols(fig::string& s) noexcept
+	{
+		static const std::array<std::pair<char, char>, 5> escape_sequences {
+			std::pair { '{', '{' },
+			std::pair { '}', '}' },
+			std::pair { '?', '?' },
+			std::pair { ':', ':' },
+			std::pair { '|', '|' },
+		};
+
+		size_t read = 0;
+		size_t write = 0;
+		size_t length = s.size();
+
+		while (read < length)
+		{
+			char currentChar = s[read];
+			if (currentChar == '\\' and read + 1 < length)
+			{
+				char nextChar = s[read + 1];
+
+				bool replaced = false;
+				for (auto& seq : escape_sequences)
+				{
+					if (nextChar == seq.first)
+					{
+						s[write] = seq.second;
+						++write;
+						read += 2;
+						replaced = true;
+						break;
+					}
+				}
+				if (replaced)
+					continue;
+			}
+			s[write] = currentChar;
+			++write;
+			++read;
+		}
+		s.resize(write);
+		return s;
+	}
+
+	/*static fig::string& unescape(fig::string& text, char escape = '\\')
 	{
 		size_t pos_write = 0;
 
@@ -87,6 +131,18 @@ namespace fig
 				case ':':
 				case '|':
 					text[pos_write++] = ch;
+					break;
+				case 't':
+					text[pos_write++] = '\t';
+					break;
+				case 'r':
+					text[pos_write++] = '\r';
+					break;
+				case 'n':
+					text[pos_write++] = '\n';
+					break;
+				case '_':
+					text[pos_write++] = ' ';
 					break;
 				default:
 					text[pos_write++] = escape;
@@ -188,7 +244,7 @@ namespace fig
 
 		text.resize(pos_write);
 		return text;
-	}
+	}*/
 
 	static fig::string& collapse_whitespace(fig::string& text)
 	{
@@ -432,15 +488,15 @@ namespace fig
 		size_t cookie = 0uz;
 		while (evaluate(text, context, cookie)) {};
 
+		unescape_symbols(text);
+
 		// Processing
-		if (options.IsSet(TextEvaluationOption::Unescape))
-			unescape(text);
 		if (options.IsSet(TextEvaluationOption::FixPunctuation))
 			clean_punctuation(text);
 		if (options.IsSet(TextEvaluationOption::CollapseWhitespace))
 			collapse_whitespace(text);
 		if (options.IsSet(TextEvaluationOption::Unescape))
-			unescape_whitespace(text);
+			unescape_inplace(text);
 		if (options.IsSet(TextEvaluationOption::CapitalizeSentences))
 			capitalize_sentences(text, options.IsSet(TextEvaluationOption::CapitalizeFirst));
 		return text;

@@ -33,10 +33,11 @@ namespace fig::chat
 		Role GetRoleOf(const fig::string& characterId) const;
 		int32_t GetBotCount() const noexcept;
 		inline bool IsGroupChat() const noexcept { return GetBotCount() > 1; }
+
+		const fig::string& GetGrammar() const;
 		
 		fig::string GetChatIdOf(Role role) const;
 		fig::string GetNameOf(Role role) const;
-		fig::string GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const;
 		fig::gui::ColorPair GetColorsOf(Role role) const;
 
 		[[nodiscard]] inline Context& GetContext() noexcept { return GetContext(Role::Bot1); }

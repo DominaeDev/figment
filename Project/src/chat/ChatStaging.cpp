@@ -256,29 +256,6 @@ namespace fig::chat
 		return PromptBuilder::GetBlocks(_promptScaffold, *this);
 	}
 
-	fig::string ChatStaging::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
-	{
-		fig::string pattern;
-		int32_t botCount = (int32_t)GetBotCount();
-		for (int i = 0; i < botCount; ++i)
-		{
-			if (i > 0)
-				pattern += "| ";
-			if (useCharacterIds)
-				pattern += std::format("| \"@{}\"", GetChatIdOf(bot_from_index(i)));
-			else
-				pattern += std::format("| \"{}\"", GetNameOf(bot_from_index(i)));
-		}
-		if (bIncludeUser)
-		{
-			if (useCharacterIds)
-				pattern += std::format("| \"@{}\"", GetChatIdOf(Role::User));
-			else
-				pattern += std::format("| \"{}\"", GetNameOf(Role::User));
-		}
-		return pattern;
-	}
-
 	fig::uuid ChatStaging::GenerateUUID() const noexcept
 	{
 		fig::uuid uuid = _CreateUUID();
@@ -322,5 +299,10 @@ namespace fig::chat
 		}
 		_context.SetValue("__num_bots", GetBotCount());
 		_bDirtyContext = false;
+	}
+
+	const fig::string& ChatStaging::GetGrammar() const
+	{
+		return _promptScaffold.grammar;
 	}
 } // namespace

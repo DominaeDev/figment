@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "llm/Grammar.h"
 #include "io/FileUtility.h"
+#include "text/TextEvaluator.h"
 #include <cassert>
 
 using namespace fig::io;
@@ -52,46 +53,26 @@ namespace fig::llm
 		return true;
 	}
 
-	SamplerPtr Grammar::compile_grammar(GrammarFlags grammarFlags, VocabPtr pVocab, fig::string names, fig::string stateVars)
+	SamplerPtr Grammar::compile_grammar(const fig::string& grammar, GrammarFlags grammarFlags, VocabPtr pVocab, fig::string names, fig::string stateVars)
 	{
-		fig::string grammar = ReadTextFile("./resources/grammar/formatting_grammar.gbnf").value_or("");
-		if (grammar.size() == 0)
+		if (grammar.empty())
 			return nullptr;
 
-		replace_all_inplace(grammar, "{{_NAMES_}}", names);
-		replace_all_inplace(grammar, "{{_STATE_VARS_}}", stateVars);
+		Context ctx;
+		ctx.SetFlag("default", grammarFlags.IsSet(GrammarFlag::Default));
+		ctx.SetFlag("stub", grammarFlags.IsSet(GrammarFlag::Stub));
+		ctx.SetFlag("continue", grammarFlags.IsSet(GrammarFlag::Continue));
+		ctx.SetFlag("talk", grammarFlags.IsSet(GrammarFlag::Talk));
+		ctx.SetFlag("act", grammarFlags.IsSet(GrammarFlag::Act));
+		ctx.SetFlag("narrate", grammarFlags.IsSet(GrammarFlag::Narrate));
+		ctx.SetFlag("enable_narrator", grammarFlags.IsSet(GrammarFlag::EnableNarrator));
+		ctx.SetFlag("enable_state", grammarFlags.IsSet(GrammarFlag::EnableState));
+		ctx.SetValue("names", names);
+		ctx.SetValue("state_vars", stateVars);
 
-		std::set<fig::string> flags;
-		if (grammarFlags.IsSet(GrammarFlag::Default))
-			flags.insert("default");
-		if (grammarFlags.IsSet(GrammarFlag::Stub))
-			flags.insert("stub");
-		if (grammarFlags.IsSet(GrammarFlag::Continue))
-			flags.insert("continue");
-		if (grammarFlags.IsSet(GrammarFlag::Talk))
-			flags.insert("talk");
-		if (grammarFlags.IsSet(GrammarFlag::Act))
-			flags.insert("act");
-		if (grammarFlags.IsSet(GrammarFlag::Narrate))
-			flags.insert("narrate");
-		if (grammarFlags.IsSet(GrammarFlag::EnableNarrator))
-			flags.insert("enable-narrator");
-		if (grammarFlags.IsSet(GrammarFlag::EnableState))
-			flags.insert("enable-state");
+		auto compiled_grammar = eval_text(grammar, ctx, TextEvaluationOptions::None);
 
-		size_t pos = grammar.find("{{", 0);
-		while (pos != fig::npos && pos < grammar.size())
-		{
-			if (_evaluate(grammar, pos, flags))
-			{
-				assert(grammar[pos] != '{');
-				pos = grammar.find("{{", pos);
-			}
-			else
-				pos = grammar.find("{{", pos + 2);
-		}
-
-		auto pGrammar = llama_sampler_init_grammar(pVocab, grammar.c_str(), "root");
+		auto pGrammar = llama_sampler_init_grammar(pVocab, compiled_grammar.c_str(), "root");
 		assert(pGrammar);
 		return pGrammar;
 	}

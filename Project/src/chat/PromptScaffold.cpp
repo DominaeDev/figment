@@ -46,7 +46,8 @@ namespace fig::chat
 		return XmlFields(
 			AsElement { "Name",		&PromptScaffold::name },
 			AsElement { "Block",	&PromptScaffold::blocks }
-				.Collection("Blocks")
+				.Collection("Blocks"),
+			AsElement { "Grammar",	&PromptScaffold::grammar }
 		);
 
 		static_assert(XmlSerializable<PromptScaffold>);

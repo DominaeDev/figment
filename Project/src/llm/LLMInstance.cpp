@@ -1771,6 +1771,7 @@ namespace fig::llm
 
 		LogLn(std::format("Compiling grammar variant 0x{:02X}", (uint32_t)flags));
 		SamplerPtr pGrammar = Grammar::compile_grammar(
+			_session.GetStaging().GetGrammar(),
 			flags,
 			_modelState.pVocab, 
 			_session.GetNameGrammar(_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds), _options.flags.IsSet(ChatOptions::Flag::AllowUserResponse)),

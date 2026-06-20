@@ -118,6 +118,7 @@ namespace fig
 
 		// Flags
 		void SetFlag(fig::handle flag) noexcept;
+		void SetFlag(fig::handle flag, bool bEnabled) noexcept;
 		void SetFlags(const std::set<fig::handle>& flags) noexcept;
 		void RemoveFlag(fig::handle flag) noexcept;
 		void RemoveFlags(const std::set<fig::handle>& flags) noexcept;

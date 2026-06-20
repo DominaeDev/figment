@@ -51,6 +51,7 @@ namespace fig::chat
 
 		std::vector<PromptBlockInfo> blocks;
 		std::vector<PromptOption> options;
+		fig::string grammar;
 
 		fig::io::FileError LoadFromXml(const fig::path& filename);
 	public:

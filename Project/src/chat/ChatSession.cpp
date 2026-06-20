@@ -96,18 +96,20 @@ namespace fig::chat
 		for (int32_t i = 0; i < botCount; ++i)
 		{
 			if (i > 0)
-				pattern += "| ";
+				pattern += " | ";
 			if (useCharacterIds)
-				pattern += std::format("| \"@{}\"", GetIdentifierOf(bot_from_index(i)));
+				pattern += std::format("\"@{}\"", GetIdentifierOf(bot_from_index(i)));
 			else
-				pattern += std::format("| \"{}\"", GetNameOf(bot_from_index(i)));
+				pattern += std::format("\"{}\"", GetNameOf(bot_from_index(i)));
 		}
 		if (bIncludeUser)
 		{
+			if (not pattern.empty())
+				pattern += " | ";
 			if (useCharacterIds)
-				pattern += std::format("| \"@{}\"", GetIdentifierOf(Role::User));
+				pattern += std::format("\"@{}\"", GetIdentifierOf(Role::User));
 			else
-				pattern += std::format("| \"{}\"", GetNameOf(Role::User));
+				pattern += std::format("\"{}\"", GetNameOf(Role::User));
 		}
 		return pattern;
 	}
