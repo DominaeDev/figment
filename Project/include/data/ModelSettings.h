@@ -41,12 +41,12 @@ namespace fig::data
 			{
 				using namespace fig::io;
 				LLMModel Defaults {};
-				return XmlFields(
+				return Fields(
 					AsElement { "Path", &LLMModel::filename },
 					AsElement { "PromptTemplate", &LLMModel::promptTemplate, SerializePromptTemplate, DeserializePromptTemplate }
 						.Default(fig::llm::PromptTemplateType::Default),
 
-					AsElement { "ContextSize", &LLMModel::contextSize, XmlConvertEnum<fig::llm::ContextSize>, XmlParseEnum<fig::llm::ContextSize> }
+					AsElement { "ContextSize", &LLMModel::contextSize, SerializeEnum<fig::llm::ContextSize>, DeserializeEnum<fig::llm::ContextSize> }
 						.Default(Defaults.contextSize)
 						.Validator([](auto& n) { return static_cast<int32_t>(n) >= static_cast<int32_t>(fig::llm::ContextSize::_2K) and static_cast<int32_t>(n) <= static_cast<int32_t>(fig::llm::ContextSize::_32K); }),
 
@@ -70,7 +70,7 @@ namespace fig::data
 			static auto SerializeInfo()
 			{
 				using namespace fig::io;
-				return XmlFields(
+				return Fields(
 					AsElement { "Path",	&EmbeddingModel::filename }
 				);
 			}
@@ -79,7 +79,7 @@ namespace fig::data
 		static auto SerializeInfo()
 		{
 			using namespace fig::io;
-			return XmlFields(
+			return Fields(
 				AsAttribute { "version",	&ModelSettings::version }
 					.MustExist()
 					.Validator([](auto& v) { return v <= FormatVersion; }),

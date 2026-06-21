@@ -5,6 +5,7 @@
 #include "chat/ChatTypes.h"
 #include "chat/ChatOptions.h"
 #include "data/CharacterData.h"
+#include "data/ScenarioData.h"
 #include "chat/PromptScaffold.h"
 
 namespace fig::chat
@@ -13,8 +14,8 @@ namespace fig::chat
 	{
 	public:
 		ChatStaging() = default;
-		ChatStaging(const PromptScaffold& scaffold, ChatOptions options);
-		ChatStaging(PromptScaffold&& scaffold, ChatOptions options);
+		ChatStaging(const fig::data::ScenarioData& scenario, const PromptScaffold& scaffold, ChatOptions options);
+		ChatStaging(fig::data::ScenarioData&& scenario, PromptScaffold&& scaffold, ChatOptions options);
 
 		bool AddCharacter(const fig::uuid& characterId, Role role, const fig::data::CharacterData& data);
 		bool HasCharacter(Role role) const noexcept { return _charactersByRole.contains(role); }
@@ -52,7 +53,8 @@ namespace fig::chat
 		std::vector<fig::data::CharacterData> _characters {};
 		std::map<fig::uuid, size_t> _charactersByID {};
 		std::map<Role, size_t> _charactersByRole {};
-		PromptScaffold _promptScaffold;
+		fig::data::ScenarioData _scenario {};
+		PromptScaffold _promptScaffold {};
 
 		ChatOptions _options {};
 		Context _context {};

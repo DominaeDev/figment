@@ -2,6 +2,7 @@
 #define COMMON_UTILITY_H__
 
 #include "Figment.h"
+#include "util/StringUtils.h"
 
 #include <optional>
 #include <vector>
@@ -217,15 +218,6 @@ namespace fig
 		return default_value;
 	}
 
-	template <typename K, typename T> 
-		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
-	inline constexpr K enum_deserialize(const T& enum_value, const std::map<K, T>& mapping, const K& default_value = {})
-	{
-		if (auto key = find_key(mapping, enum_value); key.has_value())
-			return key.value();
-		return default_value;
-	}
-
 	template <typename K, typename T, std::size_t N>
 		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
 	inline constexpr fig::string enum_serialize(const K& enumValue, const std::array<std::pair<K, T>, N>& map, const T& defaultValue = {})
@@ -238,16 +230,54 @@ namespace fig
 		return fig::string { defaultValue };
 	}
 
+	template <typename K, typename T>
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline fig::string enum_serialize_flags(const EnumFlags<K>& flags, const std::map<K, T>& mapping)
+	{
+		return encode_csv(flags.Serialized(mapping));
+	}
+
+
 	template <typename K, typename T, std::size_t N>
 		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
-	inline constexpr K enum_deserialize(const T& enumValue, const std::array<std::pair<K, T>, N>& map, const K& defaultValue = {})
+	inline fig::string enum_serialize_flags(const EnumFlags<K>& flags, const std::array<std::pair<K, T>, N>& mapping)
+	{
+		return encode_csv(flags.Serialized(mapping));
+	}
+
+	template <typename K, typename T>
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline constexpr K enum_deserialize(const T& enum_value, const std::map<K, T>& mapping, const K& default_value = {})
+	{
+		if (auto key = find_key(mapping, enum_value); key.has_value())
+			return key.value();
+		return default_value;
+	}
+
+	template <typename K, typename T, std::size_t N>
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline constexpr K enum_deserialize(const fig::string& name, const std::array<std::pair<K, T>, N>& map, const K& defaultValue = {})
 	{
 		for (const auto& [key, value] : map)
 		{
-			if (value == enumValue)
+			if (value == name)
 				return key;
 		}
 		return defaultValue;
+	}
+
+	template <typename K, typename T>
+		requires std::is_enum_v<K>
+	inline EnumFlags<K> enum_deserialize_flags(const fig::string& value, const std::map<K, T>& mapping)
+	{
+		return EnumFlags<K>::Deserialize(decode_csv(value), mapping);
+	}
+
+	template <typename K, typename T, std::size_t N>
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline EnumFlags<K> enum_deserialize_flags(const fig::string& value, const std::array<std::pair<K, T>, N>& mapping)
+	{
+		return EnumFlags<K>::Deserialize(decode_csv(value), mapping);
 	}
 
 #if _DEBUG || _CONSOLE

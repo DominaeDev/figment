@@ -650,7 +650,7 @@ namespace fig::io
 		auto& scenarioAsset = CreateAsset_Internal(AssetType::Scenario, DataFormat::DataXml, scenarioData, _profileID);
 
 		// Load scenario image
-		if (not empty_or_whitespace(scenario.imageFilename))
+/*		if (not empty_or_whitespace(scenario.imageFilename))
 		{
 			if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
 			{
@@ -668,7 +668,7 @@ namespace fig::io
 					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, scenarioImageAsset.id);
 				}
 			}
-		}
+		} */
 
 		LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
 		return std::ref(scenarioAsset);

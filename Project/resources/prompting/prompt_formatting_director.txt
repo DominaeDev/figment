@@ -1,4 +1,0 @@
-## Direction
-The Director can interject at important moments to provide direction and guide events that are unfolding.
-It's very important that you follow his direction exactly.
-Syntax: <director>...</director>

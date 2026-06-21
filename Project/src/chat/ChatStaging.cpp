@@ -20,57 +20,15 @@ using namespace fig::gui;
 
 namespace fig::chat
 {
-	/*static bool s_bInitialized = false;
-	static fig::string s_system_prompt_solo;
-	static fig::string s_system_prompt_group;
-	static fig::string s_system_prompt_character;
-	static fig::string s_system_prompt_user;
-	static fig::string s_system_prompt_uncensored;
-	static fig::string s_formatting_solo;
-	static fig::string s_formatting_group;
-	static fig::string s_formatting_director;
-	static fig::string s_formatting_state;
-	
-	static bool Initialize()
-	{
-		if (s_bInitialized)
-			return true;
-
-		// System prompt
-		s_system_prompt_solo = ReadTextFile("./resources/prompting/prompt_system_solo.txt").value_or("");
-		s_system_prompt_group = ReadTextFile("./resources/prompting/prompt_system_group.txt").value_or("");
-
-		// System prompt (character)
-		s_system_prompt_character = ReadTextFile("./resources/prompting/prompt_system_character.txt").value_or("");
-
-		// System prompt (user)
-		s_system_prompt_user = ReadTextFile("./resources/prompting/prompt_system_user.txt").value_or("");
-
-		// Formatting spec
-		s_formatting_solo = ReadTextFile("./resources/prompting/prompt_formatting_solo.txt").value_or("");
-		s_formatting_group = ReadTextFile("./resources/prompting/prompt_formatting_group.txt").value_or("");
-
-		// State tracking
-		s_formatting_state = ReadTextFile("./resources/prompting/prompt_formatting_state.txt").value_or("");
-
-		// Director prompt
-		s_formatting_director = ReadTextFile("./resources/prompting/prompt_formatting_director.txt").value_or("");
-
-		// (Optional) Uncensored instructions
-		s_system_prompt_uncensored = ReadTextFile("./resources/prompting/prompt_system_uncensored.txt").value_or("");
-
-		return !s_system_prompt_solo.empty()
-			&& !s_system_prompt_character.empty()
-			&& !s_system_prompt_user.empty();
-	}*/
-
-	ChatStaging::ChatStaging(const PromptScaffold& scaffold, ChatOptions options) :
+	ChatStaging::ChatStaging(const ScenarioData& scenario, const PromptScaffold& scaffold, ChatOptions options) :
+		_scenario { scenario },
 		_promptScaffold { scaffold },
 		_options { options }
 	{
 	}
 
-	ChatStaging::ChatStaging(PromptScaffold&& scaffold, ChatOptions options) :
+	ChatStaging::ChatStaging(ScenarioData&& scenario, PromptScaffold&& scaffold, ChatOptions options) :
+		_scenario { std::move(scenario) },
 		_promptScaffold { std::move(scaffold) },
 		_options { options }
 	{

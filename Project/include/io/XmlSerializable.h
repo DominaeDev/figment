@@ -23,6 +23,20 @@ namespace fig::io
 	};
 
 	template<typename T>
+	concept XmlSavable =
+		requires (const T t, XmlWriterElement x) { { t.SaveToXml(x) } -> std::same_as<void>; };
+
+	template<typename T>
+	concept XmlLoadable =
+		(requires (T t, XmlReaderElement x) { { t.LoadFromXml(x) } -> std::same_as<std::remove_cvref_t<bool>>; }
+		or requires (T t, XmlReaderElement x) { { t.LoadFromXml(x) } -> std::same_as<FileError>; });
+
+	template<typename T>
+	concept IsStringConvertible =
+		std::constructible_from<T, fig::string> and
+		std::constructible_from<fig::string, T>;
+
+	template<typename T>
 	struct InnerValueType { using Type = T; };
 
 	template<typename T> requires XmlSerializableMap<T>
@@ -177,12 +191,18 @@ namespace fig::io
 				// Attribute
 				if constexpr (IsSpecializationOf<FieldType, AsAttribute>::value)
 				{
-					element.SetAttribute(field.name, field.custom_serializer(member));
+					if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+						element.SetAttribute(field.name, (fig::string)member);
+					else
+						element.SetAttribute(field.name, field.custom_serializer(member));
 				}
 				// AsText
 				else if constexpr (IsSpecializationOf<FieldType, AsText>::value)
 				{
-					element.SetValue(field.custom_serializer(member));
+					if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+						element.SetValue((fig::string)member);
+					else
+						element.SetValue(field.custom_serializer(member));
 				}
 				else if constexpr (IsSpecializationOf<FieldType, AsElement>::value)
 				{
@@ -225,7 +245,15 @@ namespace fig::io
 					// Single value
 					else
 					{
-						element.SetElementValue(field.name, field.custom_serializer(member));
+						if constexpr (XmlSavable<typename FieldType::ValueType>)
+						{
+							auto child = element.AddChild(field.name);
+							member.SaveToXml(child);
+						}
+						else
+						{
+							element.SetElementValue(field.name, field.custom_serializer(member));
+						}
 					}
 				}
 				else
@@ -248,23 +276,53 @@ namespace fig::io
 				// Attribute
 				if constexpr (IsSpecializationOf<FieldType, AsAttribute>::value)
 				{
-					if (auto value = element[field.name].TryGet<FieldType::SerializedType>())
-						member = field.custom_deserializer(*value);
+					if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+					{
+						if (auto value = element[field.name].TryGet<fig::string>())
+							member = typename FieldType::ValueType(*value);
+						else
+						{
+							member = field.default_value;
+							bValid &= !field.must_exist;
+						}
+					}
 					else
 					{
-						member = field.default_value;
-						bValid &= !field.must_exist;
+						if (auto value = element[field.name].TryGet<FieldType::SerializedType>())
+						{
+							member = field.custom_deserializer(*value);
+						}
+						else
+						{
+							member = field.default_value;
+							bValid &= !field.must_exist;
+						}
 					}
 				}
-				// Attribute
+				// AsText
 				else if constexpr (IsSpecializationOf<FieldType, AsText>::value)
 				{
-					if (auto value = element.TryGetValue<FieldType::SerializedType>())
-						member = field.custom_deserializer(*value);
+					if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+					{
+						if (auto value = element.TryGetValue<fig::string>())
+							member = typename FieldType::ValueType(*value);
+						else
+						{
+							member = field.default_value;
+							bValid &= !field.must_exist;
+						}
+					}
 					else
 					{
-						member = field.default_value;
-						bValid &= !field.must_exist;
+						if (auto value = element.TryGetValue<FieldType::SerializedType>())
+						{
+							member = field.custom_deserializer(*value);
+						}
+						else
+						{
+							member = field.default_value;
+							bValid &= !field.must_exist;
+						}
 					}
 				}
 				else if constexpr (IsSpecializationOf<FieldType, AsElement>::value)
@@ -337,16 +395,28 @@ namespace fig::io
 								item = item->GetNextSibling();
 							}
 						}
+						else
+							bValid &= !field.must_exist;
 					}
 					// Single values
 					else
 					{
-						if (auto value = element.TryGetElement<FieldType::SerializedType>(field.name))
-							member = field.custom_deserializer(*value);
+						if constexpr (XmlLoadable<typename FieldType::ValueType>)
+						{
+							if (auto child = element.GetFirstElement(field.name))
+								bValid &= Success(member.LoadFromXml(child.value())) or !field.must_exist;
+							else
+								bValid &= !field.must_exist;
+						}
 						else
 						{
-							member = field.default_value;
-							bValid &= !field.must_exist;
+							if (auto value = element.TryGetElement<FieldType::SerializedType>(field.name))
+								member = field.custom_deserializer(*value);
+							else
+							{
+								member = field.default_value;
+								bValid &= !field.must_exist;
+							}
 						}
 					}
 				}
@@ -406,19 +476,19 @@ namespace fig::io
 	}
 
 	template <typename T, typename U = std::underlying_type_t<T>> requires std::is_enum_v<T>
-	static U XmlConvertEnum(const T& value)
+	static U SerializeEnum(const T& value)
 	{
 		return static_cast<U>(value);
 	}
 
 	template <typename T, typename U = std::underlying_type_t<T>> requires std::is_enum_v<T>
-	static T XmlParseEnum(const U& value)
+	static T DeserializeEnum(const U& value)
 	{
 		return static_cast<T>(value);
 	}
 
 	template<typename... TFields>
-	[[nodiscard]] auto XmlFields(TFields&&... fields)
+	[[nodiscard]] auto Fields(TFields&&... fields)
 	{
 		return std::make_tuple(std::forward<TFields>(fields)...);
 	}

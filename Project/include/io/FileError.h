@@ -28,4 +28,5 @@ namespace fig::io
 
 	inline constexpr bool Success(FileError error) { return error == FileError::NoError; };
 	inline constexpr bool Success(AsyncLoadError error) { return error == AsyncLoadError::NoError; };
+	inline constexpr bool Success(bool result) { return result; };
 }

@@ -2,6 +2,7 @@
 #define CONDITION_H__
 #pragma once
 
+#include "io/Xml.h"
 #include "text/ConditionNode.h"
 
 namespace fig
@@ -43,7 +44,7 @@ namespace fig
 	{
 	public:
 		Condition() = default;
-		Condition(const fig::string& expression);
+		Condition(const fig::string& expression, bool defaultToAlways = false);
 		Condition(const Condition& other);
 		Condition(Condition&& other) = default;
 		Condition& operator= (const Condition& other) noexcept;
@@ -56,12 +57,34 @@ namespace fig
 		bool IsOk() const noexcept;
 
 		static const Condition Always;
+		
+		bool LoadFromXml(fig::io::XmlReaderElement xml) noexcept;
+		void SaveToXml(fig::io::XmlWriterElement xml) const noexcept;
+
 	private:
 		ConditionPtr _pCondition;
 		ConditionParseError _error {};
 	};
 
 	using ConditionRef = std::reference_wrapper<const Condition>;
+
+	struct Validation
+	{
+		Condition condition;
+		fig::string errorMessage;
+
+		static auto SerializeInfo() noexcept
+		{
+			using namespace fig::io;
+
+			return Fields(
+				AsElement { "Condition",	&Validation::condition }
+					.Default(Condition::Always),
+				AsAttribute { "error",		&Validation::errorMessage }
+			);
+		}
+	};
+
 }
 
 #endif

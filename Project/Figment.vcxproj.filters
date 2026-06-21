@@ -114,9 +114,6 @@
     <Filter Include="Source Files\Frontend\GUI\Renderers">
       <UniqueIdentifier>{9af3d36f-c958-412c-be51-1004c096af49}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Backend\Chat">
-      <UniqueIdentifier>{6fec36fd-514b-4b20-8daa-8d5ad3fd04e6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\IO">
       <UniqueIdentifier>{ba779378-b49f-4ec8-9178-0fbc6b173e3f}</UniqueIdentifier>
     </Filter>
@@ -138,7 +135,10 @@
     <Filter Include="Source Files\Data">
       <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Text">
+    <Filter Include="Source Files\Chat">
+      <UniqueIdentifier>{6fec36fd-514b-4b20-8daa-8d5ad3fd04e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Chat\Text">
       <UniqueIdentifier>{18600501-ae27-4354-89a8-ce200a7a96cd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -441,16 +441,16 @@
       <Filter>Source Files\Application</Filter>
     </ClCompile>
     <ClCompile Include="src\chat\ChatSession.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\chat\ChatStaging.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\chat\ChatCommandExecutor.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\chat\ChatCommands.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMBackend.cpp">
       <Filter>Source Files\Backend\LLM</Filter>
@@ -528,31 +528,34 @@
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\text\Context.cpp">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
     <ClCompile Include="src\util\TextEvaluator.cpp">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
     <ClCompile Include="src\text\ConditionNode.cpp">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
     <ClCompile Include="src\text\ConditionParser.cpp">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
     <ClCompile Include="src\text\Condition.cpp">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
     <ClCompile Include="src\chat\PromptScaffold.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\text\ContextLocator.cpp">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
     <ClCompile Include="src\chat\PromptBuilder.cpp">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClCompile>
     <ClCompile Include="src\text\MacroProvider.cpp">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\chat\UserDefinedOptions.cpp">
+      <Filter>Source Files\Chat</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1175,22 +1178,22 @@
       <Filter>Source Files\Application\Common</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\ChatCommandExecutor.h">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\ChatCommands.h">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\ChatOptions.h">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\ChatSession.h">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\ChatStaging.h">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\ChatTypes.h">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\io\CardImporter.h">
       <Filter>Source Files\Frontend\IO\Import</Filter>
@@ -1292,31 +1295,34 @@
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\text\TextEvaluator.h">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\text\Context.h">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\text\ConditionNode.h">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\text\ConditionParser.h">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\text\Condition.h">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\PromptScaffold.h">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\text\ContextLocator.h">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\PromptBuilder.h">
-      <Filter>Source Files\Backend\Chat</Filter>
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\text\MacroProvider.h">
-      <Filter>Source Files\Text</Filter>
+      <Filter>Source Files\Chat\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\UserDefinedOptions.h">
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

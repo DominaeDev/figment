@@ -1,4 +1,0 @@
-
-# State variables
-When a variable no longer reflects the state of the world, end your response with a list of suggested changes, like this:
-<change>State -> New value</change>

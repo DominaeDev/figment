@@ -35,8 +35,8 @@ namespace fig::chat
 		ParsedChatCommandQueue& commandQueue;
 	};
 
-	using Ctx = ChatCommandFunctionContext;
-	using ChatCommandFunction = std::function<bool(ParsedChatCommand, Ctx)>;
+	using CmdCtx = ChatCommandFunctionContext;
+	using ChatCommandFunction = std::function<bool(ParsedChatCommand, CmdCtx)>;
 
 	enum class Requirement : uint32_t
 	{
@@ -78,7 +78,7 @@ namespace fig::chat
 		return staging.GetRoleOf(partial_name);
 	};
 
-	static bool cmdUserMessage(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdUserMessage(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		if constexpr (Debugging)
 		{
@@ -99,35 +99,35 @@ namespace fig::chat
 		return ctx.pLLM->SendMessage(cmd.text);
 	}
 
-	static bool cmdSystemMessage(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdSystemMessage(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		return ctx.pLLM->PushMessage(Role::System, cmd.text, MessageType::SystemMessage);
 	}
 
-	static bool cmdInstigateDialogue(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdInstigateDialogue(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		Role targetRole = RoleFromName(cmd.text, ctx.pLLM);
 		return ctx.pLLM->Instigate(targetRole, MessageType::Dialogue, 1);
 	}
 
-	static bool cmdInstigateAction(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdInstigateAction(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		Role targetRole = RoleFromName(cmd.text, ctx.pLLM);
 		return ctx.pLLM->Instigate(targetRole, MessageType::Action, 1);
 	}
 
-	static bool cmdPassTurn(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdPassTurn(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		Role targetRole = RoleFromName(cmd.text, ctx.pLLM);
 		return ctx.pLLM->Instigate(targetRole, MessageType::Undefined, 3);
 	}
 
-	static bool cmdImpersonate(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdImpersonate(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		return ctx.pLLM->Instigate(Role::User, MessageType::Dialogue, 1);
 	}
 
-	static bool cmdNarrate(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdNarrate(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		if (cmd.text.empty())
 			return ctx.pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
@@ -135,14 +135,14 @@ namespace fig::chat
 			return ctx.pLLM->PushMessage(Role::Narrator, "[" + cmd.text + "]", MessageType::Narration);
 	}
 
-	static bool cmdInstruct(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdInstruct(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		if (!cmd.text.empty())
 			return ctx.pLLM->Instruct(cmd.text);
 		return false;
 	}
 
-	static bool cmdErase(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdErase(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		int n = atoi(cmd.text.c_str());
 		auto removedMsgs = ctx.pLLM->EraseMessages(std::max(n, 1));
@@ -150,7 +150,7 @@ namespace fig::chat
 		return ctx.pChatScroll->RemoveMessages(removedIds);
 	}
 
-	static bool cmdRedoResponse(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdRedoResponse(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		auto removedMsgs = ctx.pLLM->EraseMessages(1);
 		if (removedMsgs.empty())
@@ -165,7 +165,7 @@ namespace fig::chat
 		return ctx.pLLM->Instigate(responder, MessageType::Undefined, 3);
 	}
 
-	static bool cmdRollbackUserMessage(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdRollbackUserMessage(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		auto removedMsgs = ctx.pLLM->RollbackUserMessage();
 		if (removedMsgs.empty())
@@ -177,7 +177,7 @@ namespace fig::chat
 		return true;
 	}
 
-	static bool cmdReset(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdReset(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
 		if (not ctx.pLLM or not ctx.pLLM->IsReady() or ctx.pLLM->ResetChat(seed))
@@ -186,7 +186,7 @@ namespace fig::chat
 		return true;
 	}
 
-	static bool cmdReseed(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdReseed(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
 		if (seed == 0)
@@ -195,7 +195,7 @@ namespace fig::chat
 		return true;
 	}
 
-	static bool cmdLook(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdLook(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		if (!cmd.text.empty())
 		{
@@ -210,7 +210,7 @@ namespace fig::chat
 		return ctx.pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 	}
 
-	static bool cmdExamine(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdExamine(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		if (!cmd.text.empty())
 		{
@@ -221,7 +221,7 @@ namespace fig::chat
 		return false;
 	}
 
-	static bool cmdGenerateEmbedding(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdGenerateEmbedding(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 #if _DEBUG
 		return ctx.pLLM->GenerateEmbedding(cmd.text);
@@ -230,7 +230,7 @@ namespace fig::chat
 #endif
 	}
 
-	static bool cmdNewStateVariable(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdNewStateVariable(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		if (!cmd.text.empty())
 		{
@@ -249,7 +249,7 @@ namespace fig::chat
 		return false;
 	}
 
-	static bool cmdSetStateVariable(ParsedChatCommand cmd, Ctx ctx)
+	static bool cmdSetStateVariable(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		if (!cmd.text.empty())
 		{
@@ -313,7 +313,7 @@ namespace fig::chat
 			return false; // Requires non-null pointer to GUI
 
 		// Pick out gui controls for commands to access
-		auto functionCtx = Ctx
+		auto functionCtx = CmdCtx
 		{
 			.pChatScroll = context.pChatFrame->_pChatScroll,
 			.pTextBox = context.pChatFrame->_pTextBox,

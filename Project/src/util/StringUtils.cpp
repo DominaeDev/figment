@@ -536,7 +536,7 @@ namespace fig
 		}
 
 		if (not current.empty())
-			fields.emplace_back(current);
+			fields.emplace_back(trim(std::move(current)));
 		return fields;
 	}
 

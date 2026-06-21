@@ -3,13 +3,42 @@
 #include "text/Context.h"
 #include "text/ConditionParser.h"
 
+using namespace fig::io;
+
 namespace fig
 {
 	const Condition Condition::Always { "always" };
 
-	Condition::Condition(const fig::string& expression)
+	bool Condition::LoadFromXml(XmlReaderElement xml) noexcept
 	{
-		if (auto try_parse = ConditionParser::Parse(expression))
+		if (auto try_value = xml.TryGetValue<fig::string>())
+		{
+			if (auto try_parse = ConditionParser::Parse(try_value.value()))
+			{
+				_pCondition = std::move(try_parse.value());
+				_error = {};
+				return true;
+			}
+			else
+				_error = try_parse.error();
+		}
+		_pCondition.reset();
+		return false;
+	}
+
+	void Condition::SaveToXml(XmlWriterElement xml) const noexcept
+	{
+		xml.SetValue((fig::string)(*this));
+	}
+
+	Condition::Condition(const fig::string& expression, bool defaultToAlways)
+	{
+		if (empty_or_whitespace(expression) and defaultToAlways)
+		{
+			_pCondition = std::make_unique<AlwaysCondition>();
+			_error = {};
+		}
+		else if (auto try_parse = ConditionParser::Parse(expression))
 		{
 			_pCondition = std::move(try_parse.value());
 			_error = {};

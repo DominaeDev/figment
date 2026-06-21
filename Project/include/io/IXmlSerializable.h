@@ -43,7 +43,7 @@ namespace fig::io
 				return FileError::UnrecognizedFormat;
 			
 			if (not self.Validate())
-				return FileError::UnrecognizedFormat;
+				return FileError::ReadError;
 
 			return FileError::NoError;
 		}

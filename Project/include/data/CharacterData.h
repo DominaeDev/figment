@@ -41,7 +41,7 @@ namespace fig::data
 		HintFlags flags {};
 
 	public:
-		static auto SerializeInfo();
+		static auto SerializeInfo() noexcept;
 	};
 
 	class CharacterData
@@ -85,7 +85,7 @@ namespace fig::data
 		bool _bDirtyContext {};
 
 	public:
-		static auto SerializeInfo();
+		static auto SerializeInfo() noexcept;
 	};
 
 	using CharacterDataRef = std::reference_wrapper<fig::data::CharacterData>;

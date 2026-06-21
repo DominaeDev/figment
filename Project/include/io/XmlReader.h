@@ -66,7 +66,7 @@ namespace fig::io
 		std::optional<T> TryGet() const noexcept;
 
 		template<typename T>
-		T Get(const T& default_value) const noexcept
+		T Get(const T& default_value = {}) const noexcept
 		{
 			return TryGet<T>().value_or(default_value);
 		}

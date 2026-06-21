@@ -1,0 +1,41 @@
+<Scenario>
+	<Title>Default scenario</Title>
+	<Description>A casual chat</Description>
+	
+	<Tags>default</Tags>
+	
+	<Role id="ai">
+		<Label>AI</Label>
+		<Flags>required</Flags>
+		<Brief>{user:name}'s friend and companion.</Brief>
+		<Condition error="Requires a female character">female</Condition>
+	</Role>
+	
+	<Role id="user">
+		<Label>User</Label>
+		<Flags>required, user</Flags>
+		<Brief>{ai:name}'s best friend.</Brief>
+		<Condition error="Requires a male character">male</Condition>
+	</Role>
+	
+	<Story>
+		<Intro>
+			<UserMessage>{ai} joined the conversation.</UserMessage>
+			<UserMessage>{user} joined the conversation.</UserMessage>
+			<Director ttl="1">{user} is here. {ai:name} introduces {ai:themselves} and suggests a topic.</Director>
+			<Narrator/>
+			<Message role="ai"/>
+		</Intro>
+		<Outro>
+			<UserMessage>The end.</UserMessage>
+		</Outro>
+		<Chapter>
+			<Title>Chapter I</Title>
+			<Step id="first">
+				<Condition>always</Condition>
+				<Duration>10</Duration>
+				<Content>{user} and {ai:name} are having a casual conversation.</Content>
+			</Step>
+		</Chapter>
+	</Story>
+</Scenario>

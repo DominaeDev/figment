@@ -9,15 +9,15 @@ namespace fig::chat
 	{
 		for (auto& option : scaffold.options)
 		{
-			if (auto pToggle = std::get_if<PromptOptionToggle>(&option))
+			if (auto pToggle = std::get_if<UserDefinedToggle>(&option))
 			{
 				pToggle->defaultValue ? context.SetFlag(pToggle->id) : context.RemoveFlag(pToggle->id); //! @wrong defaultValue
 			}
-			else if (auto pNumber = std::get_if<PromptOptionNumber>(&option))
+			else if (auto pNumber = std::get_if<UserDefinedNumber>(&option))
 			{
 				context.SetValue(pNumber->id, pNumber->defaultValue); //! @wrong defaultValue
 			}
-			else if (auto pText = std::get_if<PromptOptionText>(&option))
+			else if (auto pText = std::get_if<UserDefinedText>(&option))
 			{
 				context.SetValue(pText->id, pText->defaultValue); //! @wrong defaultValue
 			}
@@ -55,6 +55,7 @@ namespace fig::chat
 						.hash = std::move(hash),
 						.blockType = PromptBlockInfo::Type::Persona,
 						.role = role,
+						.ttl = block.ttl,
 					});
 				}
 			}
@@ -75,6 +76,7 @@ namespace fig::chat
 					.content = std::move(content),
 					.hash = std::move(hash),
 					.blockType = PromptBlockInfo::Type::User,
+					.ttl = block.ttl,
 				});
 			}
 			else // Static instructions
@@ -93,6 +95,7 @@ namespace fig::chat
 					.content = std::move(content),
 					.hash = std::move(hash),
 					.blockType = PromptBlockInfo::Type::Static,
+					.ttl = block.ttl,
 				});
 			}
 		}

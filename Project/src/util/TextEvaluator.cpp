@@ -4,7 +4,7 @@
 
 namespace fig
 {
-	TextEvaluationOptions DefaultTextEvaluationOptions { TextEvaluationOption::Unescape, TextEvaluationOption::CollapseWhitespace, TextEvaluationOption::CapitalizeFirst, TextEvaluationOption::CapitalizeSentences, TextEvaluationOption::FixPunctuation, };
+	TextEvaluationOptions DefaultTextEvalOptions { TextEvaluationOption::Unescape, TextEvaluationOption::CollapseWhitespace, TextEvaluationOption::CapitalizeFirst, TextEvaluationOption::CapitalizeSentences, TextEvaluationOption::FixPunctuation, };
 
 	struct TextSpan
 	{

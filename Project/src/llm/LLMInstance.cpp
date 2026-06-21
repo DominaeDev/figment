@@ -1449,12 +1449,6 @@ namespace fig::llm
 
 	bool LLMInstance::Instruct(fig::string instructions)
 	{
-		if (auto text = ReadTextFile("./resources/prompting/prompt_formatting_director.txt"))
-		{
-			fig::string prompt = eval_text(text.value(), _session.GetStaging().GetContext());
-			PushMessage(Role::System, prompt, MessageType::SystemMessage, false, 1);
-		}
-
 		PushMessage(Role::Director, Direction(instructions), MessageType::Direction, false, 4);
 		Instigate(Role::Undefined, MessageType::Undefined, 3);
 		return true;

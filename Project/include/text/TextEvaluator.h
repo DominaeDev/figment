@@ -15,13 +15,13 @@ namespace fig
 		FixPunctuation			= 1 << 4,
 	};
 	using TextEvaluationOptions = EnumFlags<TextEvaluationOption>;
-	extern TextEvaluationOptions DefaultTextEvaluationOptions;
+	extern TextEvaluationOptions DefaultTextEvalOptions;
 
-	[[nodiscard]] fig::string eval_text(const fig::string& source, const Context& context, TextEvaluationOptions options = DefaultTextEvaluationOptions) noexcept;
-	[[nodiscard]] fig::string eval_text(fig::string&& source, const Context& context, TextEvaluationOptions options = DefaultTextEvaluationOptions) noexcept;
+	[[nodiscard]] fig::string eval_text(const fig::string& source, const Context& context, TextEvaluationOptions options = DefaultTextEvalOptions) noexcept;
+	[[nodiscard]] fig::string eval_text(fig::string&& source, const Context& context, TextEvaluationOptions options = DefaultTextEvalOptions) noexcept;
 
 	template <is_string_like T> requires (not std::same_as<T, fig::string>)
-		[[nodiscard]] fig::string eval_text(const T& source, const Context& context, TextEvaluationOptions options = DefaultTextEvaluationOptions) noexcept
+		[[nodiscard]] fig::string eval_text(const T& source, const Context& context, TextEvaluationOptions options = DefaultTextEvalOptions) noexcept
 	{
 		return eval_text(fig::string { source }, context, options);
 	}

@@ -7,9 +7,9 @@ using namespace fig::chat;
 
 namespace fig::data
 {
-	auto ChatLog::SerializeInfo()
+	auto ChatLog::SerializeInfo() noexcept
 	{
-		return XmlFields(
+		return Fields(
 			AsElement { "ID", &ChatLog::assetId }
 				.MustExist(),
 			AsElement { "Entries", &ChatLog::entries }
@@ -19,9 +19,9 @@ namespace fig::data
 		static_assert(XmlSerializable<ChatLog>);
 	}
 
-	auto ChatLog::Entry::SerializeInfo()
+	auto ChatLog::Entry::SerializeInfo() noexcept
 	{
-		return XmlFields(
+		return Fields(
 			AsElement { "ID", &Entry::entryId }
 				.MustExist(),
 			AsElement { "Speaker", &Entry::speakerId }

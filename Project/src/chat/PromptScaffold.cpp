@@ -19,9 +19,9 @@ namespace fig::chat
 		{ PromptPriority::High,		"high" },
 	};
 
-	auto PromptBlockInfo::SerializeInfo()
+	auto PromptBlockInfo::SerializeInfo() noexcept
 	{
-		return XmlFields(
+		return Fields(
 			AsAttribute { "type",		&PromptBlockInfo::type,
 				[](auto& value) { return enum_serialize(value, TypeMapping); },
 				[](auto& value) { return enum_deserialize(value, TypeMapping); }
@@ -30,10 +30,8 @@ namespace fig::chat
 				[](auto& value) { return enum_serialize(value, PriorityMapping); },
 				[](auto& value) { return enum_deserialize(value, PriorityMapping); }
 			},
-			AsAttribute { "condition",	&PromptBlockInfo::condition,
-				[](auto&& value) -> fig::string { return value.to_string(); },
-				[](auto&& value) -> Condition { return Condition { value }; }
-			}	.Default(Condition::Always),
+			AsAttribute { "condition",	&PromptBlockInfo::condition }
+				.Default(Condition::Always),
 			AsAttribute { "order",		&PromptBlockInfo::order },
 			AsText		{				&PromptBlockInfo::content }
 		);
@@ -41,13 +39,14 @@ namespace fig::chat
 		static_assert(XmlSerializable<PromptBlockInfo>);
 	}
 
-	auto PromptScaffold::SerializeInfo()
+	auto PromptScaffold::SerializeInfo() noexcept
 	{
-		return XmlFields(
+		return Fields(
 			AsElement { "Name",		&PromptScaffold::name },
 			AsElement { "Block",	&PromptScaffold::blocks }
 				.Collection("Blocks"),
-			AsElement { "Grammar",	&PromptScaffold::grammar }
+			AsElement { "Grammar",	&PromptScaffold::grammar },
+			AsElement { "Options",	&PromptScaffold::options }
 		);
 
 		static_assert(XmlSerializable<PromptScaffold>);
@@ -62,54 +61,10 @@ namespace fig::chat
 		if (not xml.IsOk())
 			return FileError::UnrecognizedFormat;
 
-		auto rootNode = xml.GetRoot();
-
-		if (!XmlDeserialize(rootNode, *this))
+		if (!XmlDeserialize(xml.GetRoot(), *this))
 			return FileError::ReadError;
 
-		// Read options
-		if (auto optionsNode = xml.GetFirstElement("Options"))
-		{
-			auto optionNode = optionsNode.value().GetFirstElementAny();
-			while (optionNode.has_value())
-			{
-				auto& node = optionNode.value();
-
-				if (auto try_id = node["id"].TryGet<fig::handle>())
-				{
-					if (node.Is("Toggle"))
-					{
-						options.emplace_back(PromptOptionToggle {
-							.id = try_id.value(),
-							.label = node.TryGetValue<fig::string>().value_or((fig::string)try_id.value()),
-							.hint = node["hint"].TryGet<fig::string>().value_or({}),
-							.defaultValue = node["default"].TryGet<bool>().value_or({})
-						});
-					}
-					else if (node.Is("Number"))
-					{
-						options.emplace_back(PromptOptionNumber {
-							.id = try_id.value(),
-							.label = node.TryGetValue<fig::string>().value_or((fig::string)try_id.value()),
-							.hint = node["hint"].TryGet<fig::string>().value_or({}),
-							.defaultValue = node["default"].TryGet<int32_t>().value_or({})
-						});
-					}
-					else if (node.Is("Text"))
-					{
-						options.emplace_back(PromptOptionText {
-							.id = try_id.value(),
-							.label = node.TryGetValue<fig::string>().value_or((fig::string)try_id.value()),
-							.hint = node["hint"].TryGet<fig::string>().value_or({}),
-							.defaultValue = node["default"].TryGet<fig::string>().value_or({})
-						});
-					}
-				}
-				optionNode = optionNode.value().GetNextSiblingAny();
-			}
-		}
-
-		// Sort blocks
+		// Sort blocks by order
 		std::ranges::stable_sort(blocks, std::ranges::less {}, &PromptBlockInfo::order);
 
 		return FileError::NoError;

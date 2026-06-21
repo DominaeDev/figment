@@ -5,6 +5,7 @@
 #include "io/Asset.h"
 #include "data/ModelSettings.h"
 #include "data/CharacterData.h"
+#include "data/ScenarioData.h"
 #include "chat/ChatStaging.h"
 #include "chat/PromptScaffold.h"
 #include "text/TextEvaluator.h"
@@ -23,11 +24,6 @@ namespace fig
 //			ShuffleCards();
 //			CreateModelSettings();
 		}
-
-		PromptScaffold scaffold;
-		scaffold.LoadFromXml("./resources/prompting/chat.scaffold");
-		int k = 0;
-
 	}
 
 	void DebugUtility::CreateNewProfile(const fig::string& name, const fig::string& password)
@@ -176,7 +172,11 @@ namespace fig
 					if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
 						return;
 
-					ChatStaging staging(std::move(scaffold), Constants::LLM::DefaultChatOptions);
+					ScenarioData scenario;
+					if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
+						return;
+
+					ChatStaging staging(std::move(scenario), std::move(scaffold), Constants::LLM::DefaultChatOptions);
 					if (!staging.AddCharacter(characterId, Role::Bot1, character))
 						return;
 

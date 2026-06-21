@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "data/ScenarioData.h"
+#include "text/ConditionParser.h"
 #include "io/Xml.h"
 #include <cassert>
 
@@ -8,195 +9,24 @@ using namespace fig::chat;
 
 namespace fig::data
 {
-	static constexpr std::array<std::pair<const char*, ScenarioData::PromptType>, 6> elements {
-		std::pair { "System",				ScenarioData::PromptType::System },
-		std::pair { "Scenario",				ScenarioData::PromptType::Scenario },
-		std::pair { "InitialMessage",		ScenarioData::PromptType::FirstMessage },
-		std::pair { "InitialUserMessage",	ScenarioData::PromptType::UserMessage },
-		std::pair { "InitialInstruction",	ScenarioData::PromptType::Instruction },
-		std::pair { "InitialNarration",		ScenarioData::PromptType::Narration },
-	};
-
-	static bool ReadXml(XmlReaderElement& node, ScenarioData::Prompt& prompt) noexcept
+	bool ScenarioData::Validate() const noexcept
 	{
-		auto prompt_type = node.TryGetElement<fig::string>("Type").value_or("");
-		if (prompt_type.empty())
-			return false;
-
-		auto itType = std::find_if(elements.cbegin(), elements.cend(), [&prompt_type](auto& e) { return std::strcmp(e.first, prompt_type.c_str()) == 0; });
-		if (itType == elements.cend())
-			return false; // Unknown type
-		
-		prompt.type = itType->second;
-		prompt.value = node.TryGetElement<fig::string>("Value").value_or("");
-		prompt.condition = node.TryGetElement<fig::string>("Rule").value_or("");
-
-		if (prompt.type == ScenarioData::PromptType::System)
-			prompt.is_static = true;
-		else
-		{
-			bool implicit_static;
-			switch (prompt.type)
-			{
-			case ScenarioData::PromptType::Scenario:
-				implicit_static = true;
-				break;
-			default:
-				implicit_static = false;
-				break;
-			};
-
-			prompt.is_static = node.TryGetElement<bool>("Static").value_or(implicit_static);
-		}
-		return not prompt.value.empty();
-	}
-
-	static bool ReadXml(XmlReader& xml, ScenarioData& scenario) noexcept
-	{
-		auto rootNode = xml.GetRoot();
-
-		// Identifier
-		scenario.title = trim(rootNode.TryGetElement<fig::string>("Title").value_or(""));
-
-		// Image
-		scenario.imageFilename = trim(rootNode.TryGetElement<fig::string>("Image").value_or(""));
-
-		// Prompt(s)
-		if (auto node = rootNode.GetFirstElement("Prompt"))
-		{
-			while (node.has_value())
-			{
-				ScenarioData::Prompt prompt {};
-				if (ReadXml(node.value(), prompt))
-					scenario.prompts.emplace_back(prompt);
-				node = node.value().GetNextSibling();
-			}
-		}
-
-		// Roles
-		if (auto roleNode = rootNode.GetFirstElement("Role"); roleNode.has_value())
-		{
-			while (roleNode.has_value())
-			{
-				auto& role = roleNode.value();
-				ScenarioData::RoleSlot slot {
-					.id = role.TryGetElement<fig::string>("ID").value_or(""),
-					.label = role.TryGetElement<fig::string>("Label").value_or(""),
-					.relationship = role.TryGetElement<fig::string>("Relationship").value_or(""),
-					.is_required = role.TryGetElement<bool>("Required").value_or(false),
-					.is_user = role.TryGetElement<bool>("User").value_or(false),
-				};
-
-				if (auto validationNode = roleNode.value().GetFirstElement("Validation"); validationNode.has_value())
-				{
-					slot.validation = ScenarioData::RoleValidation {
-						.rule = validationNode.value().TryGetElement<fig::string>("Rule").value_or(""),
-						.errorMessage = validationNode.value().TryGetElement<fig::string>("ErrorMessage").value_or(""),
-					};
-				}
-
-				if (slot.is_valid())
-					scenario.role_slots.emplace_back(slot);
-
-				roleNode = roleNode.value().GetNextSibling();
-			}
-		}
-
-		return scenario.is_valid();
-	}
-
-	FileError ScenarioData::LoadFromXml(const fig::path& path)
-	{
-		if (not (std::filesystem::exists(path) and std::filesystem::is_regular_file(path)))
-			return FileError::NotFound;
-
-		XmlReader xml(path, "Scenario");
-		if (not xml.IsOk())
-			return FileError::UnrecognizedFormat; // Invalid document type
-
-		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
-	}
-
-	FileError ScenarioData::LoadFromXml(const fig::string& doc)
-	{
-		XmlReader xml(doc);
-		if (not xml.IsOk() or xml.GetRoot().GetName() != "Scenario")
-			return FileError::UnrecognizedFormat; // Invalid document type
-
-		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
-	}
-
-	void ScenarioData::SaveToXml(fig::bytes& buffer) const
-	{
-		XmlWriter xml("Scenario");
-
-		auto root = xml.GetRoot();
-		if (not title.empty())
-			root.SetElementValue("Title", title);
-
-		// Roles
-		for (auto& role : role_slots)
-		{
-			auto roleNode = root.AddChild("Role");
-			roleNode.SetElementValue("ID", role.id);
-			if (not role.label.empty())
-				roleNode.SetElementValue("Label", role.label);
-			if (not role.relationship.empty())
-				roleNode.SetElementValue("Relationship", role.relationship);
-			roleNode.SetElementValue("Required", true);
-			roleNode.SetElementValue("User", true);
-
-			if (not role.validation.rule.empty())
-			{
-				auto validationNode = roleNode.AddChild("Validation");
-				validationNode.SetElementValue("Rule", role.validation.rule);
-				validationNode.SetElementValue("ErrorMessage", role.validation.errorMessage);
-			}
-		}
-
-		auto fnEnumName = [](ScenarioData::PromptType type) -> fig::string {
-			auto itType = std::find_if(elements.cbegin(), elements.cend(), [&type](auto& e) { return e.second == type; });
-			if (itType != elements.cend())
-				return itType->first;
-			assert(false && "Unknown type");
-			return "";
-		};
-
-		// Prompts
-		for (auto& prompt : prompts)
-		{
-			if (prompt.value.empty())
-				continue;
-
-			auto promptNode = root.AddChild("Prompt");
-			promptNode.SetElementValue("Type", fnEnumName(prompt.type));
-			promptNode.SetElementValue("Static", prompt.is_static);
-			if (prompt.is_conditional())
-				promptNode.SetElementValue("Rule", prompt.condition);
-			promptNode.SetElementValue("Value", prompt.value);
-		}
-
-		xml.WriteToMemory(buffer);
-	}
-
-	constexpr bool ScenarioData::is_valid() const
-	{
-		if (prompts.empty() or title.empty() or role_slots.empty())
+		if (roles.empty())
 			return false;
 		
 		// Ensure the scenario can assign roles to at least one bot and one user
 		int32_t idx_bot { -1 };
 		int32_t idx_user { -1 };
-		for (size_t i = 0; i < role_slots.size(); ++i)
+		for (size_t idx = 0; idx < roles.size(); ++idx)
 		{
-			if (idx_user < 0 and role_slots[i].is_user)
+			if (idx_user < 0 and roles[idx].flags.IsSet(RoleSlot::Flag::User))
 			{
-				idx_user = static_cast<int32_t>(i);
+				idx_user = static_cast<int32_t>(idx);
 				continue;
 			}
-			if (idx_bot < 0 and i != idx_user)
+			if (idx_bot < 0 and idx != idx_user)
 			{
-				idx_bot = static_cast<int32_t>(i);
+				idx_bot = static_cast<int32_t>(idx);
 				continue;
 			}
 		}
@@ -204,5 +34,80 @@ namespace fig::data
 		if (idx_bot == -1 or idx_user == -1)
 			return false; // No exclusive roles
 		return true;
+	}
+
+	static void ReadBlockSequences(XmlReaderElement xml, std::vector<ScenarioData::BlockSequence>& seqs)
+	{
+		auto try_node = xml.GetFirstElementAny();
+		while (try_node)
+		{
+			auto& node = try_node.value();
+			auto nodeName = node.GetName();
+			ScenarioData::BlockSequence blockSeq;
+
+			if (nodeName == "UserMessage")
+			{
+				blockSeq.type = ScenarioData::BlockSequence::Type::UserMessage;
+				blockSeq.role = Role::Undefined;
+			}
+			else if (nodeName == "Message")
+			{
+				blockSeq.type = ScenarioData::BlockSequence::Type::Message;
+				blockSeq.role = enum_deserialize(node["role"].Get<fig::string>(), RoleMapping, Role::Undefined);
+			}
+			else if (nodeName == "Director")
+			{
+				blockSeq.type = ScenarioData::BlockSequence::Type::Message;
+				blockSeq.role = Role::Director;
+			}
+			else if (nodeName == "Narrator")
+			{
+				blockSeq.type = ScenarioData::BlockSequence::Type::Message;
+				blockSeq.role = Role::Narrator;
+			}
+			else
+				goto next;
+
+			blockSeq.content = node.GetValue<fig::string>();
+			blockSeq.ttl = node["duration"].Get<int32_t>(-1);
+			blockSeq.condition = Condition(node["duration"].Get<fig::string>(), true);
+
+			seqs.emplace_back(std::move(blockSeq));
+
+		next:
+			try_node = node.GetNextSiblingAny();
+		}
+	}
+
+	FileError ScenarioData::Story::LoadFromXml(fig::io::XmlReaderElement xml) noexcept
+	{
+		// Read chapters
+		chapters.clear();
+		if (auto chapterNode = xml.GetFirstElement("Chapter"))
+		{
+			while (chapterNode)
+			{
+				Chapter chapter;
+				if (XmlDeserialize(chapterNode.value(), chapter))
+					chapters.emplace_back(std::move(chapter));
+
+				chapterNode = chapterNode.value().GetNextSibling();
+			}
+		}
+
+		// Read intro
+		if (auto introNode = xml.GetFirstElement("Intro"))
+			ReadBlockSequences(introNode.value(), introBlocks);
+
+		// Read outro
+		if (auto outroNode = xml.GetFirstElement("Outro"))
+			ReadBlockSequences(outroNode.value(), outroBlocks);
+
+		return FileError::NoError;
+	}
+
+	void ScenarioData::Story::SaveToXml(fig::io::XmlWriterElement xml) const noexcept
+	{
+		// ...
 	}
 }

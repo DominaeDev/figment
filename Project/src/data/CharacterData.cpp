@@ -9,9 +9,9 @@ namespace fig::data
 {
 	static const fig::string XmlRootName { "Character" };
 
-	auto CharacterData::SerializeInfo()
+	auto CharacterData::SerializeInfo() noexcept
 	{
-		return XmlFields(
+		return Fields(
 			AsElement { "ID", &CharacterData::chatId  }
 				.MustExist(),
 			AsElement { "Name", &CharacterData::shortName }
@@ -47,9 +47,9 @@ namespace fig::data
 		{ CharacterAttribute::HintFlag::Memory,		"memory" }
 	};
 
-	auto CharacterAttribute::SerializeInfo()
+	auto CharacterAttribute::SerializeInfo() noexcept
 	{
-		return XmlFields(
+		return Fields(
 			AsAttribute { "format", &CharacterAttribute::format, 
 				[](auto& value) { return enum_serialize(value, FormatMapping); }, 
 				[](auto& value) { return enum_deserialize(value, FormatMapping); } 

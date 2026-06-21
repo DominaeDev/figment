@@ -445,7 +445,11 @@ namespace fig::gui
 			if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
 				return false;
 
-			ChatStaging staging(std::move(scaffold), Constants::LLM::DefaultChatOptions);
+			ScenarioData scenario;
+			if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
+				return false;
+
+			ChatStaging staging(std::move(scenario), std::move(scaffold), Constants::LLM::DefaultChatOptions);
 
 			if (!staging.AddCharacter(characterId, Role::Bot1, character.value()))
 				return false;

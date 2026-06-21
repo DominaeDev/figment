@@ -4,23 +4,10 @@
 
 #include "Figment.h"
 #include "text/Condition.h"
+#include "chat/UserDefinedOptions.h"
 
 namespace fig::chat
 {
-	template <typename T>
-	struct PromptOptionOf
-	{
-		fig::handle id;
-		fig::string label;
-		fig::string hint;
-		T defaultValue {};
-	};
-
-	using PromptOptionToggle = PromptOptionOf<bool>;
-	using PromptOptionNumber = PromptOptionOf<int32_t>;
-	using PromptOptionText = PromptOptionOf<fig::string>;
-	using PromptOption = std::variant<PromptOptionToggle, PromptOptionNumber, PromptOptionText>;
-
 	enum class PromptPriority : int8_t
 	{
 		Low = -1,
@@ -41,21 +28,9 @@ namespace fig::chat
 		PromptPriority priority { PromptPriority:: Normal };
 		Condition condition;
 		fig::string content;
+		int32_t ttl = 0;
 	public:
-		static auto SerializeInfo();
-	};
-
-	struct PromptScaffold
-	{
-		fig::string name;
-
-		std::vector<PromptBlockInfo> blocks;
-		std::vector<PromptOption> options;
-		fig::string grammar;
-
-		fig::io::FileError LoadFromXml(const fig::path& filename);
-	public:
-		static auto SerializeInfo();
+		static auto SerializeInfo() noexcept;
 	};
 
 	struct PromptBlock
@@ -65,6 +40,20 @@ namespace fig::chat
 		fig::hash hash;
 		PromptBlockInfo::Type blockType;
 		Role role = Role::Undefined;
+		int32_t ttl = 0;
+	};
+
+	struct PromptScaffold
+	{
+		fig::string name;
+
+		std::vector<PromptBlockInfo> blocks;
+		UserDefinedOptions options;
+		fig::string grammar;
+
+		fig::io::FileError LoadFromXml(const fig::path& filename);
+	public:
+		static auto SerializeInfo() noexcept;
 	};
 }
 #endif
