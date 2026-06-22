@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "chat/ChatSession.h"
 #include "chat/ChatCommandExecutor.h"
-#include "data/CharacterData.h"
+#include "data/Character.h"
 #include "app/AppState.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"

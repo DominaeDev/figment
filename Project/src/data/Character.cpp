@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "data/CharacterData.h"
+#include "data/Character.h"
 #include "io/Xml.h"
 
 using namespace fig::gui;
@@ -9,25 +9,25 @@ namespace fig::data
 {
 	static const fig::string XmlRootName { "Character" };
 
-	auto CharacterData::SerializeInfo() noexcept
+	auto Character::SerializeInfo() noexcept
 	{
 		return Fields(
-			AsElement { "ID", &CharacterData::chatId  }
+			AsElement { "ID", &Character::chatId  }
 				.MustExist(),
-			AsElement { "Name", &CharacterData::shortName }
+			AsElement { "Name", &Character::shortName }
 				.MustExist(),
-			AsElement { "FullName", &CharacterData::fullName },
-			AsElement { "Gender", &CharacterData::gender, XmlConvertString<CharacterGender> },
-			AsElement { "Brief", &CharacterData::brief },
-			AsElement { "Attributes", &CharacterData::_attributes },
-			AsElement { "Tags", &CharacterData::_tags },
-			AsElement { "SearchIndex", &CharacterData::_searchIndex,
+			AsElement { "FullName", &Character::fullName },
+			AsElement { "Gender", &Character::gender, XmlConvertString<CharacterGender> },
+			AsElement { "Brief", &Character::brief },
+			AsElement { "Attributes", &Character::_attributes },
+			AsElement { "Tags", &Character::_tags },
+			AsElement { "SearchIndex", &Character::_searchIndex,
 				[](auto& value) -> fig::string { return value.Serialize(); },
 				[](auto& value) -> SearchIndex { SearchIndex s; s.Deserialize(value); return s; }
 			}
 		);
 
-		static_assert(XmlSerializable<CharacterData>);
+		static_assert(XmlSerializable<Character>);
 	}
 
 	static const std::map<CharacterAttribute::Format, fig::string> FormatMapping {
@@ -70,7 +70,7 @@ namespace fig::data
 		static_assert(XmlSerializableMap<std::map<fig::string, CharacterAttribute>>);
 	}
 
-	static bool ReadXml(XmlReader& xml, CharacterData& data)
+	static bool ReadXml(XmlReader& xml, Character& data)
 	{
 		auto rootNode = xml.GetRoot();
 
@@ -105,7 +105,7 @@ namespace fig::data
 		return !data.chatId.empty() && !data.shortName.empty();
 	}
 
-	FileError CharacterData::LoadFromXml(const fig::path& path)
+	FileError Character::LoadFromXml(const fig::path& path)
 	{
 		if (not (std::filesystem::exists(path) and std::filesystem::is_regular_file(path)))
 			return FileError::NotFound;
@@ -118,7 +118,7 @@ namespace fig::data
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
-	FileError CharacterData::LoadFromXml(const fig::string& doc)
+	FileError Character::LoadFromXml(const fig::string& doc)
 	{
 		XmlReader xml(doc);
 		if (not xml.IsOk() or xml.GetRoot().GetName() != XmlRootName)
@@ -128,7 +128,7 @@ namespace fig::data
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
-	FileError CharacterData::LoadFromXml(fig::string_view doc)
+	FileError Character::LoadFromXml(fig::string_view doc)
 	{
 		XmlReader xml(doc);
 		if (not xml.IsOk() or xml.GetRoot().GetName() != XmlRootName)
@@ -138,7 +138,7 @@ namespace fig::data
 		return ReadXml(xml, *this) ? FileError::NoError : FileError::UnrecognizedFormat;
 	}
 
-	void CharacterData::SaveToXml(fig::bytes& buffer) const
+	void Character::SaveToXml(fig::bytes& buffer) const
 	{
 		XmlWriter xml(XmlRootName);
 
@@ -149,28 +149,28 @@ namespace fig::data
 		xml.WriteToMemory(buffer);
 	}
 
-	std::optional<CharacterAttribute> CharacterData::FindAttribute(const fig::string_view& attributeId) const noexcept
+	std::optional<CharacterAttribute> Character::FindAttribute(const fig::string_view& attributeId) const noexcept
 	{
 		if (auto itFind = _attributes.find(lcase(toStr(attributeId))); itFind != _attributes.cend())
 			return itFind->second;
 		return std::nullopt;
 	}
 
-	std::optional<fig::string> CharacterData::GetAttribute(const fig::string_view& attributeId) const noexcept
+	std::optional<fig::string> Character::GetAttribute(const fig::string_view& attributeId) const noexcept
 	{
 		if (auto try_attrib = FindAttribute(attributeId))
 			return try_attrib.value().value;
 		return "";
 	}
 
-	void CharacterData::AppendTags(const fig::string_list& tags)
+	void Character::AppendTags(const fig::string_list& tags)
 	{
 		_tags.append_range(tags);
 		_searchIndex.AddTerms(tags);
 		_bDirtyContext = true;
 	}
 
-	void CharacterData::AddAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format, CharacterAttribute::Visibility visibility)
+	void Character::AddAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format, CharacterAttribute::Visibility visibility)
 	{
 		_attributes[lcase(attributeId)] = CharacterAttribute {
 			.label = label,
@@ -181,19 +181,19 @@ namespace fig::data
 		_bDirtyContext = true;
 	}
 
-	void CharacterData::AddSearchTerm(const fig::string& term)
+	void Character::AddSearchTerm(const fig::string& term)
 	{
 		_searchIndex.AddTerm(term);
 	}
 
-	const Context& CharacterData::GetContext() noexcept
+	const Context& Character::GetContext() noexcept
 	{
 		if (_bDirtyContext)
 			UpdateContext();
 		return _context;
 	}
 
-	void CharacterData::UpdateContext()
+	void Character::UpdateContext()
 	{
 		_context.Clear();
 		_context.SetValue("id", chatId);

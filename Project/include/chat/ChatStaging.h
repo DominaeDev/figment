@@ -4,8 +4,8 @@
 
 #include "chat/ChatTypes.h"
 #include "chat/ChatOptions.h"
-#include "data/CharacterData.h"
-#include "data/ScenarioData.h"
+#include "data/Character.h"
+#include "data/Scenario.h"
 #include "chat/PromptScaffold.h"
 
 namespace fig::chat
@@ -14,19 +14,19 @@ namespace fig::chat
 	{
 	public:
 		ChatStaging() = default;
-		ChatStaging(const fig::data::ScenarioData& scenario, const PromptScaffold& scaffold, ChatOptions options);
-		ChatStaging(fig::data::ScenarioData&& scenario, PromptScaffold&& scaffold, ChatOptions options);
+		ChatStaging(const fig::data::Scenario& scenario, const PromptScaffold& scaffold, ChatOptions options);
+		ChatStaging(fig::data::Scenario&& scenario, PromptScaffold&& scaffold, ChatOptions options);
 
-		bool AddCharacter(const fig::uuid& characterId, Role role, const fig::data::CharacterData& data);
+		bool AddCharacter(const fig::uuid& characterId, Role role, const fig::data::Character& data);
 		bool HasCharacter(Role role) const noexcept { return _charactersByRole.contains(role); }
 		bool HasCharacter(fig::uuid id) const noexcept { return _charactersByID.contains(id); }
 
 		std::optional<fig::uuid> GetCharacterIdByRole(Role role) const noexcept;
-		fig::optional_cref<fig::data::CharacterData> GetCharacterByRole(Role role) const noexcept;
-		fig::optional_cref<fig::data::CharacterData> GetCharacterById(const fig::uuid& id) const noexcept;
-		fig::optional_cref<fig::data::CharacterData> GetCharacterByChatId(const fig::string& characterId) const noexcept;
-		fig::optional_cref<fig::data::CharacterData> GetCharacterByName(const fig::string& name) const noexcept;
-		const std::vector<fig::data::CharacterData>& GetCharacters() const noexcept { return _characters; }
+		fig::optional_cref<fig::data::Character> GetCharacterByRole(Role role) const noexcept;
+		fig::optional_cref<fig::data::Character> GetCharacterById(const fig::uuid& id) const noexcept;
+		fig::optional_cref<fig::data::Character> GetCharacterByChatId(const fig::string& characterId) const noexcept;
+		fig::optional_cref<fig::data::Character> GetCharacterByName(const fig::string& name) const noexcept;
+		const std::vector<fig::data::Character>& GetCharacters() const noexcept { return _characters; }
 
 		std::vector<PromptBlock> GetPromptBlocks();
 		fig::string GetPersonaOf(Role role);
@@ -50,10 +50,10 @@ namespace fig::chat
 		fig::uuid GenerateUUID() const noexcept;
 		void UpdateContext();
 
-		std::vector<fig::data::CharacterData> _characters {};
+		std::vector<fig::data::Character> _characters {};
 		std::map<fig::uuid, size_t> _charactersByID {};
 		std::map<Role, size_t> _charactersByRole {};
-		fig::data::ScenarioData _scenario {};
+		fig::data::Scenario _scenario {};
 		PromptScaffold _promptScaffold {};
 
 		ChatOptions _options {};

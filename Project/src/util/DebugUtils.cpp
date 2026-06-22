@@ -4,8 +4,8 @@
 #include "user/UserManager.h"
 #include "io/Asset.h"
 #include "data/ModelSettings.h"
-#include "data/CharacterData.h"
-#include "data/ScenarioData.h"
+#include "data/Character.h"
+#include "data/Scenario.h"
 #include "chat/ChatStaging.h"
 #include "chat/PromptScaffold.h"
 #include "text/TextEvaluator.h"
@@ -175,7 +175,7 @@ namespace fig
 					if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
 						return;
 
-					ScenarioData scenario;
+					Scenario scenario;
 					if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
 						return;
 
@@ -183,7 +183,7 @@ namespace fig
 					if (!staging.AddCharacter(characterId, Role::Bot1, character))
 						return;
 
-					CharacterData user;
+					Character user;
 					if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) 
 						and staging.AddCharacter({}, Role::User, user))) //! @temp
 						return;

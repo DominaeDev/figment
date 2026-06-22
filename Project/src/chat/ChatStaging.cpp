@@ -7,7 +7,7 @@
 #include "gui/GUIUtility.h"
 #include "gui/Window.h"
 #include "gui/OldCharacterImageStore.h"
-#include "data/CharacterData.h"
+#include "data/Character.h"
 #include "text/TextEvaluator.h"
 
 #include <exception>
@@ -20,21 +20,21 @@ using namespace fig::gui;
 
 namespace fig::chat
 {
-	ChatStaging::ChatStaging(const ScenarioData& scenario, const PromptScaffold& scaffold, ChatOptions options) :
+	ChatStaging::ChatStaging(const Scenario& scenario, const PromptScaffold& scaffold, ChatOptions options) :
 		_scenario { scenario },
 		_promptScaffold { scaffold },
 		_options { options }
 	{
 	}
 
-	ChatStaging::ChatStaging(ScenarioData&& scenario, PromptScaffold&& scaffold, ChatOptions options) :
+	ChatStaging::ChatStaging(Scenario&& scenario, PromptScaffold&& scaffold, ChatOptions options) :
 		_scenario { std::move(scenario) },
 		_promptScaffold { std::move(scaffold) },
 		_options { options }
 	{
 	}
 
-	bool ChatStaging::AddCharacter(const fig::uuid& in_characterId, Role role, const CharacterData& data)
+	bool ChatStaging::AddCharacter(const fig::uuid& in_characterId, Role role, const Character& data)
 	{
 		fig::uuid characterId = in_characterId;
 		if (characterId.empty())
@@ -66,7 +66,7 @@ namespace fig::chat
 		return static_cast<int32_t>(std::ranges::count_if(_charactersByRole, [](auto& kvp) { return is_bot(kvp.first); }));
 	}
 
-	fig::optional_cref<CharacterData> ChatStaging::GetCharacterByRole(Role role) const noexcept
+	fig::optional_cref<Character> ChatStaging::GetCharacterByRole(Role role) const noexcept
 	{
 		if (auto itFind = _charactersByRole.find(role); itFind != _charactersByRole.cend())
 			return make_optional_cref(_characters[itFind->second]);
@@ -80,14 +80,14 @@ namespace fig::chat
 		return std::nullopt;
 	}
 
-	fig::optional_cref<CharacterData> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
+	fig::optional_cref<Character> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _charactersByID.find(id); itFind != _charactersByID.cend())
 			return make_optional_cref(_characters[itFind->second]);
 		return fig::nullref;
 	}
 
-	fig::optional_cref<CharacterData> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
+	fig::optional_cref<Character> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
 	{
 		if (identifier.empty() || _characters.empty())
 			return fig::nullref;
@@ -97,7 +97,7 @@ namespace fig::chat
 		return fig::nullref;
 	}
 
-	fig::optional_cref<CharacterData> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
+	fig::optional_cref<Character> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
 	{
 		if (name.empty() || _characters.empty())
 			return std::nullopt;

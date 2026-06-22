@@ -503,7 +503,7 @@
     <ClCompile Include="src\user\ProfileDatabase.cpp">
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
-    <ClCompile Include="src\data\CharacterData.cpp">
+    <ClCompile Include="src\data\Character.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
     <ClCompile Include="src\data\CharacterGender.cpp">
@@ -512,7 +512,7 @@
     <ClCompile Include="src\data\ModelSettings.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\data\ScenarioData.cpp">
+    <ClCompile Include="src\data\Scenario.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
     <ClCompile Include="src\data\TavernCardV2.cpp">
@@ -1273,7 +1273,7 @@
     <ClInclude Include="include\data\ModelSettings.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\data\ScenarioData.h">
+    <ClInclude Include="include\data\Scenario.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\TavernCardV2.h">
@@ -1282,7 +1282,7 @@
     <ClInclude Include="include\data\CardMetaData.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\data\CharacterData.h">
+    <ClInclude Include="include\data\Character.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\CharacterGender.h">

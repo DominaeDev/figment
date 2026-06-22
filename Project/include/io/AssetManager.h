@@ -18,7 +18,7 @@ namespace fig::user
 
 namespace fig::data
 {
-	class CharacterData;
+	class Character;
 }
 
 namespace fig::io
@@ -95,7 +95,7 @@ namespace fig::io
 		AssetDatabase& GetDatabase() noexcept;
 		fig::uuid GenerateUUID() const noexcept;
 		
-		std::expected<fig::data::CharacterData, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		std::expected<fig::data::Character, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		size_t LoadAssetIndex() noexcept;
 		bool LoadAssetMetaData() noexcept;
 		bool LoadDataAssets() noexcept;

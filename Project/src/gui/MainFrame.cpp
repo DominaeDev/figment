@@ -445,7 +445,7 @@ namespace fig::gui
 			if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
 				return false;
 
-			ScenarioData scenario;
+			Scenario scenario;
 			if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
 				return false;
 
@@ -454,7 +454,7 @@ namespace fig::gui
 			if (!staging.AddCharacter(characterId, Role::Bot1, character.value()))
 				return false;
 
-			CharacterData user;
+			Character user;
 			if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) and staging.AddCharacter({}, Role::User, user))) //! @temp
 				return false;
 

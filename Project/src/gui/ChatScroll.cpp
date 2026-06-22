@@ -7,7 +7,7 @@
 #include "chat/ChatSession.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
-#include "data/CharacterData.h"
+#include "data/Character.h"
 #include <format>
 
 using namespace fig::llm;

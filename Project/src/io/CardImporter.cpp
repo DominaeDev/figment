@@ -17,7 +17,7 @@ namespace fig::io
 		return text;
 	}
 
-	std::expected<CharacterData, FileError> CardImporter::Import(fig::path filename) noexcept
+	std::expected<Character, FileError> CardImporter::Import(fig::path filename) noexcept
 	{
 		if (auto try_import = fig::io::ReadPNGMeta(filename, "chara", true))
 		{
@@ -27,7 +27,7 @@ namespace fig::io
 			TavernCardV2 card;
 			card.Parse(json);
 
-			CharacterData character;
+			Character character;
 			character.shortName = card.data.name;
 			character.fullName = card.data.name;
 			character.AddAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);

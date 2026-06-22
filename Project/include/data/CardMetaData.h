@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Figment.h"
-#include "data/CharacterData.h"
+#include "data/Character.h"
 
 namespace fig::data
 {

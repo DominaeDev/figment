@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "data/ScenarioData.h"
+#include "data/Scenario.h"
 #include "text/ConditionParser.h"
 #include "io/Xml.h"
 #include <cassert>
@@ -9,7 +9,7 @@ using namespace fig::chat;
 
 namespace fig::data
 {
-	bool ScenarioData::Validate() const noexcept
+	bool Scenario::Validate() const noexcept
 	{
 		if (roles.empty())
 			return false;

@@ -6,8 +6,8 @@
 #include "io/AssetManager.h"
 #include "user/UserManager.h"
 #include "app/AppState.h"
-#include "data/CharacterData.h"
-#include "data/ScenarioData.h"
+#include "data/Character.h"
+#include "data/Scenario.h"
 #include "user/UserProfile.h"
 #include "io/Xml.h"
 #include "io/AssetFileWriter.h"
@@ -449,13 +449,13 @@ namespace fig::io
 		}
 	}
 
-	std::expected<CharacterData, FileError> AssetManager::LoadCharacterData(fig::path filename, CharacterDataFormat format)
+	std::expected<Character, FileError> AssetManager::LoadCharacterData(fig::path filename, CharacterDataFormat format)
 	{
 		switch (format)
 		{
 		case CharacterDataFormat::Default:
 		{
-			CharacterData character;
+			Character character;
 			if (auto error = character.LoadFromXml(filename); error == FileError::NoError)
 				return character;
 			else
@@ -639,7 +639,7 @@ namespace fig::io
 
 	fig::expected_ref<Asset, FileError> AssetManager::ImportScenario_Internal(const fig::path& filename)
 	{
-		ScenarioData scenario;
+		Scenario scenario;
 		if (auto error = scenario.LoadFromXml(filename); error != FileError::NoError)
 			return std::unexpected(error);
 

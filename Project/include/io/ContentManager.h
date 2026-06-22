@@ -2,8 +2,8 @@
 #define CHARACTER_DATABASE_H__
 #pragma once
 
-#include "data/CharacterData.h"
-#include "data/ScenarioData.h"
+#include "data/Character.h"
+#include "data/Scenario.h"
 #include "data/CardMetaData.h"
 #include "data/ModelSettings.h"
 
@@ -21,8 +21,8 @@ namespace fig::io
 		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename);
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 
-		fig::optional_cref<fig::data::CharacterData> GetCharacter(const fig::uuid& id) const noexcept;
-		fig::optional_cref<fig::data::ScenarioData> GetScenario(const fig::uuid& id) const noexcept;
+		fig::optional_cref<fig::data::Character> GetCharacter(const fig::uuid& id) const noexcept;
+		fig::optional_cref<fig::data::Scenario> GetScenario(const fig::uuid& id) const noexcept;
 		auto GetCharacters() const noexcept { return _characters | std::views::values; }
 		auto GetScenarios() const noexcept { return _scenarios | std::views::values; }
 
@@ -46,8 +46,8 @@ namespace fig::io
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 
-		std::map<fig::uuid, fig::data::CharacterData> _characters;
-		std::map<fig::uuid, fig::data::ScenarioData> _scenarios;
+		std::map<fig::uuid, fig::data::Character> _characters;
+		std::map<fig::uuid, fig::data::Scenario> _scenarios;
 		std::map<fig::uuid, fig::data::CardMetaData> _metaData;
 		std::map<fig::uuid, fig::sdl::Surface> _surfaces;
 		std::map<fig::uuid, fig::sdl::Texture> _textures;

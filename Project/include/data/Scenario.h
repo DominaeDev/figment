@@ -79,7 +79,7 @@ namespace fig::data
 		fig::optional_cref<Step> GetStep(size_t chapter, size_t step) const noexcept;
 	};
 
-	class ScenarioData : public fig::io::IXmlSerializable
+	class Scenario : public fig::io::IXmlSerializable
 	{
 	public:
 		struct RoleSlot
@@ -126,7 +126,7 @@ namespace fig::data
 			}
 		};
 
-		ScenarioData() : fig::io::IXmlSerializable("Scenario")
+		Scenario() : fig::io::IXmlSerializable("Scenario")
 		{
 		}
 		bool Validate() const noexcept override;
@@ -148,14 +148,14 @@ namespace fig::data
 			using namespace fig::io;
 
 			return Fields(
-				AsElement { "Title",		&ScenarioData::title },
-				AsElement { "Description",	&ScenarioData::description },
-				AsElement { "Options",		&ScenarioData::userOptions },
-				AsElement { "Role",			&ScenarioData::roles },
-				AsElement { "Story",		&ScenarioData::story }
+				AsElement { "Title",		&Scenario::title },
+				AsElement { "Description",	&Scenario::description },
+				AsElement { "Options",		&Scenario::userOptions },
+				AsElement { "Role",			&Scenario::roles },
+				AsElement { "Story",		&Scenario::story }
 			);
 
-			static_assert(XmlSerializable<ScenarioData>);
+			static_assert(XmlSerializable<Scenario>);
 		}
 	};
 }

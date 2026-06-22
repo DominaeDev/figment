@@ -44,7 +44,7 @@ namespace fig::data
 		static auto SerializeInfo() noexcept;
 	};
 
-	class CharacterData
+	class Character
 	{
 	public:
 		fig::io::FileError LoadFromXml(const fig::path& filename);

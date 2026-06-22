@@ -32,7 +32,7 @@ namespace fig::io
 		{
 			if (asset.data_format == DataFormat::DataXml && asset.HasData())
 			{
-				CharacterData character;
+				Character character;
 				if (character.LoadFromXml(asset.AsStringView()) == FileError::NoError)
 				{
 //					character.createdAt = asset.GetCreatedAt();
@@ -49,7 +49,7 @@ namespace fig::io
 		{
 			if (asset.data_format == DataFormat::DataXml && asset.HasData())
 			{
-				ScenarioData scenario;
+				Scenario scenario;
 				if (scenario.LoadFromXml(asset.AsString()) == FileError::NoError)
 					_scenarios[asset.id] = std::move(scenario);
 			}
@@ -60,14 +60,14 @@ namespace fig::io
 		DEBUG_MEASURE_END();
 	}
 
-	fig::optional_cref<fig::data::CharacterData> UserContentManager::GetCharacter(const fig::uuid& id) const noexcept
+	fig::optional_cref<fig::data::Character> UserContentManager::GetCharacter(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _characters.find(id); itFind != _characters.cend())
 			return make_optional_cref(itFind->second);
 		return fig::nullref;
 	}
 
-	fig::optional_cref<fig::data::ScenarioData> UserContentManager::GetScenario(const fig::uuid& id) const noexcept
+	fig::optional_cref<fig::data::Scenario> UserContentManager::GetScenario(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _scenarios.find(id); itFind != _scenarios.cend())
 			return make_optional_cref(itFind->second);

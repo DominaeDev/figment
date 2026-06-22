@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "chat/ChatSession.h"
-#include "data/CharacterData.h"
+#include "data/Character.h"
 
 using namespace fig::io;
 using namespace fig::gui;
