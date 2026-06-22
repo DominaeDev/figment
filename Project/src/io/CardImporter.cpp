@@ -39,23 +39,23 @@ namespace fig::io
 			{
 				if (equals(tag, "male", true) || equals(tag, "man", true) || equals(tag, "boy", true))
 				{
-					character.gender = CharacterGender::Male;
+					character.gender = Gender::Male;
 					break;
 				}
 				else if (equals(tag, "female", true) || equals(tag, "woman", true) || equals(tag, "girl", true))
 				{
-					character.gender = CharacterGender::Female;
+					character.gender = Gender::Female;
 					break;
 				}
-				else if (auto itFind = std::ranges::find_if(CharacterGender::AlternativeLabels, [&tag](auto& s) { return equals(tag, s, true); }); itFind != CharacterGender::AlternativeLabels.cend())
+				else if (auto gender = Gender(tag); gender.IsConventional())
 				{
-					character.gender = toStr(*itFind);
+					character.gender = gender;
 					break;
 				}
 			}
 
-			if (character.gender.IsDefined())
-				character.AddSearchTerm(character.gender);
+			if (character.gender.IsConventional())
+				character.AddSearchTerm(character.gender.GetLabel());
 
 			character.AddSearchTerm(character.shortName);
 			character.AddSearchTerm(character.fullName);

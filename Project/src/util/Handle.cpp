@@ -6,7 +6,7 @@ namespace fig
 {
 	std::string normalize_handle(std::string_view raw_handle, size_t max_length)
 	{
-		auto value = trim(std::string { raw_handle });
+		auto value = trim( raw_handle );
 		std::string result;
 		result.reserve(value.size());
 

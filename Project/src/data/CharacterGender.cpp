@@ -3,90 +3,108 @@
 
 namespace fig::data
 {
-	static const fig::string kMale = "Male";
-	static const fig::string kFemale = "Female";
+	Gender Gender::Male			{ "Male" };
+	Gender Gender::Female		{ "Female" };
+	Gender Gender::Nonbinary	{ "Non-binary" };
 
-	CharacterGender::CharacterGender(Gender value)
+	constexpr std::array<std::tuple<ConventionalGender, fig::string_view, Pronouns, std::array<fig::string_view, 10>>, 4> ConventionalGenders
+	{
+		std::tuple { ConventionalGender::Male,			"Male",			Pronouns::Masculine,	std::array<fig::string_view, 10> { "male", "man", "boy", "gentleman" } },
+		std::tuple { ConventionalGender::Female,		"Female",		Pronouns::Feminine,		std::array<fig::string_view, 10> { "female", "woman", "girl", "lady" } },
+		std::tuple { ConventionalGender::Nonbinary,		"Non-binary",	Pronouns::Nonbinary,	std::array<fig::string_view, 10> { "nonbinary", "non-binary", "none", "non", "asexual", "trans", "transsexual", "trans-sexual", "trans-gender", "transgender" } },
+		std::tuple { ConventionalGender::Newhalf,		"Futanari",		Pronouns::Feminine,		std::array<fig::string_view, 10> { "futanari", "futa", "shemale", "newhalf", "hermaphrodite", "herm", } },
+	};
+
+	static size_t find_conventional(string_view name)
+	{
+		if (name.empty())
+			return npos;
+
+		fig::handle normalized { name };
+		for (size_t i = 0; i < ConventionalGenders.size(); ++i)
+		{
+			auto& labels = std::get<3>(ConventionalGenders[i]);
+			if (auto itFind = std::ranges::find(labels, normalized, [](auto& value) { return fig::handle { value }; }); itFind != std::cend(labels))
+				return i;
+		}
+		return npos;
+	}
+
+	static size_t find_conventional(ConventionalGender gender)
+	{
+		for (size_t i = 0; i < ConventionalGenders.size(); ++i)
+		{
+			if (gender == std::get<0>(ConventionalGenders[i]))
+				return i;
+		}
+		return npos;
+	}
+
+	static ConventionalGender to_conventional(string_view name)
+	{
+		if (size_t conv_idx = find_conventional(name); conv_idx != npos)
+			return std::get<0>(ConventionalGenders[conv_idx]);
+		return ConventionalGender::Undefined;
+	}
+
+	Gender::Gender(ConventionalGender value)
 	{
 		operator=(value);
 	}
 
-	CharacterGender::CharacterGender(const fig::string& value)
+	Gender::Gender(const fig::string& value)
 	{
 		operator=(value);
 	}
 
-	CharacterGender& CharacterGender::operator= (Gender gender) noexcept
+	Gender& Gender::operator= (ConventionalGender gender) noexcept
 	{
-		_gender = gender;
-		if (gender != Gender::Other)
-			_customName.clear();
+		_conventional = gender;
+		if (size_t conv_idx = find_conventional(gender); conv_idx != npos)
+		{
+			const auto& conv = ConventionalGenders[conv_idx];
+			_label = std::get<1>(conv);
+			_pronouns = std::get<2>(conv);
+		}
 		return *this;
 	}
 
-	CharacterGender& CharacterGender::operator= (const fig::string& name) noexcept
+	Gender& Gender::operator= (fig::string_view name) noexcept
 	{
-		auto trimmed = trim(name);
-		if (equals(trimmed, kMale, true))
+		_label = trim(name);
+
+		if (size_t conv_idx = find_conventional(name); conv_idx != npos)
 		{
-			_gender = Gender::Male;
-			_customName.clear();
-		}
-		else if (equals(trimmed, kFemale, true))
-		{
-			_gender = Gender::Female;
-			_customName.clear();
-		}
-		else if (not trimmed.empty())
-		{
-			for (auto& alt : AlternativeLabels)
-			{
-				if (equals(alt, trimmed, true))
-				{
-					trimmed = alt;
-					break;
-				}
-			}
-			_gender = Gender::Other;
-			_customName = trimmed;
+			const auto& conv = ConventionalGenders[conv_idx];
+			_conventional = std::get<0>(conv);
+			_pronouns = std::get<2>(conv);
 		}
 		else
 		{
-			_gender = Gender::Undefined;
-			_customName.clear();
+			_conventional = ConventionalGender::Undefined;
+			_pronouns = Pronouns::Nonbinary;
 		}
 		return *this;
 	}
 
-	std::pair<CharacterGender::Gender, fig::string> CharacterGender::Get() const noexcept
+	std::tuple<fig::string, ConventionalGender, Pronouns> Gender::Get() const noexcept
 	{
-		switch (_gender)
+		return std::make_tuple(_label, _conventional, _pronouns);
+	}
+
+	bool Gender::operator== (const fig::string& name) const noexcept
+	{
+		if (IsConventional())
 		{
-			case Gender::Male:
-				return std::make_pair(Gender::Male, kMale);
-			case Gender::Female:
-				return std::make_pair(Gender::Female, kFemale);
-			case Gender::Other:
-				return std::make_pair(Gender::Other, _customName);
-			default:
-				return std::make_pair(Gender::Undefined, "");
+			if (auto conv = to_conventional(name); conv != ConventionalGender::Undefined)
+				return _conventional == conv;
 		}
+
+		return equals(_label, trim(name), true);
 	}
 
-	fig::string CharacterGender::GetLabel() const noexcept
+	bool Gender::operator== (ConventionalGender gender) const noexcept
 	{
-		auto [_, s] = Get();
-		return std::move(s);
-	}
-
-	bool CharacterGender::operator== (const fig::string& gender) const noexcept
-	{
-		auto [g, s] = Get();
-		return equals(s, trim(gender), true);
-	}
-
-	bool CharacterGender::operator== (Gender gender) const noexcept
-	{
-		return _gender == gender;
+		return _conventional == gender;
 	}
 }

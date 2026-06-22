@@ -7,49 +7,60 @@
 
 namespace fig::data
 {
-	class CharacterGender
+	enum class ConventionalGender
+	{
+		Undefined,
+		Male,
+		Female,
+		Nonbinary,
+		Newhalf,
+	};
+
+	enum class Pronouns
+	{
+		Undefined,
+		Masculine,	// He/Him
+		Feminine,	// She/Her
+		Nonbinary,	// They/Them
+		Neuter,		// It/It
+	};
+
+	class Gender
 	{
 	public:
-		enum Gender
-		{
-			Undefined = 0,
-			Male,
-			Female,
-			Other,
-		};
+		Gender() = default;
+		explicit Gender(ConventionalGender gender);
+		explicit Gender(const fig::string& gender);
+		Gender(const Gender& value) = default;
+		Gender(Gender&& value) = default;
 
-		CharacterGender() = default;
-		explicit CharacterGender(Gender gender);
-		explicit CharacterGender(const fig::string& gender);
-		CharacterGender(const CharacterGender& value) = default;
-		CharacterGender(CharacterGender&& value) = default;
+		std::tuple<fig::string, ConventionalGender, Pronouns> Get() const noexcept;
+		inline bool IsConventional() const noexcept { return _conventional != ConventionalGender::Undefined; };
 
-		std::pair<Gender, fig::string> Get() const noexcept;
-		inline bool IsDefined() const noexcept { return _gender != Gender::Undefined; };
+		fig::string GetLabel() const noexcept { return _label; }
+		Pronouns GetPronouns() const noexcept { return _pronouns; }
 
-		CharacterGender& operator= (const CharacterGender& other) noexcept = default;
-		CharacterGender& operator= (CharacterGender&& other) noexcept = default;
+		Gender& operator= (const Gender& other) noexcept = default;
+		Gender& operator= (Gender&& other) noexcept = default;
+		Gender& operator= (fig::string_view gender) noexcept;
+		Gender& operator= (ConventionalGender gender) noexcept;
 
-		CharacterGender& operator= (const fig::string& gender) noexcept;
-		CharacterGender& operator= (Gender gender) noexcept;
-
-		bool operator== (Gender gender) const noexcept;
+		bool operator== (ConventionalGender gender) const noexcept;
 		bool operator== (const fig::string& gender) const noexcept;
-		inline bool operator!= (Gender gender) const noexcept { return !operator==(gender); }
-		inline bool operator!= (const fig::string& gender) const noexcept { return !operator==(gender); }
+		bool operator!= (ConventionalGender gender) const noexcept { return !operator==(gender); }
+		bool operator!= (const fig::string& gender) const noexcept { return !operator==(gender); }
 
-		inline operator fig::string() const { return GetLabel(); }
-		inline explicit operator Gender() const { return _gender; }
+		explicit operator fig::string() const { return GetLabel(); }
+		explicit operator ConventionalGender() const { return _conventional; }
 
-		static constexpr std::array<fig::string_view, 10> AlternativeLabels {
-			"Futanari", "Futa", "Shemale", "Trans", "Transsexual", "Transgender", "Asexual", "Newhalf", "Nonbinary", "Non-binary"
-		};
+		static Gender Male;
+		static Gender Female;
+		static Gender Nonbinary;
 
 	private:
-		fig::string GetLabel() const noexcept;
-
-		Gender _gender { Gender::Undefined };
-		fig::string _customName;
+		fig::string _label;
+		ConventionalGender _conventional {};
+		Pronouns _pronouns {};
 	};
 }
 #endif

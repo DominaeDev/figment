@@ -71,7 +71,7 @@ namespace fig::data
 		fig::string fullName;
 		fig::string brief;
 		
-		CharacterGender gender {};
+		Gender gender {};
 		fig::gui::Color bgColor {};
 		fig::gui::Color borderColor {};
 	

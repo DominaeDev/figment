@@ -43,6 +43,34 @@ namespace fig
 		return s;
 	}
 
+	std::string_view rtrim(std::string_view text)
+	{
+		constexpr std::string_view whitespace = " \t\n\r\f\v";
+		auto end = text.find_last_not_of(whitespace);
+		if (end == std::string_view::npos)
+			return {};
+		return text.substr(0, end + 1);
+	}
+
+	std::string_view ltrim(std::string_view text)
+	{
+		constexpr std::string_view whitespace = " \t\n\r\f\v";
+		auto start = text.find_first_not_of(whitespace);
+		if (start == std::string_view::npos)
+			return {};
+		return text.substr(start);
+	}
+
+	std::string_view trim(std::string_view text)
+	{
+		constexpr std::string_view whitespace = " \t\n\r\f\v";
+		auto start = text.find_first_not_of(whitespace);
+		if (start == std::string_view::npos)
+			return {};
+		auto end = text.find_last_not_of(whitespace);
+		return text.substr(start, end - start + 1);
+	}
+
 	void ltrim_inplace(wstring& s)
 	{
 		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](wint_t ch) {
@@ -81,6 +109,7 @@ namespace fig
 		trim_inplace(s);
 		return s;
 	}
+
 
 	bool empty_or_whitespace(const string& s) noexcept
 	{

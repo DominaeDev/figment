@@ -439,14 +439,14 @@ namespace fig::gui
 		if (_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
 			return false;
 
-		auto [gender, _] = _metaData.gender.Get();
+		auto [name, gender, _] = _metaData.gender.Get();
 		switch (gender)
 		{
-		case CharacterGender::Male:
+		case ConventionalGender::Male:
 			if (not filter.IsSet(FilterFlag::GenderMale))
 				return false;
 			break;
-		case CharacterGender::Female:
+		case ConventionalGender::Female:
 			if (not filter.IsSet(FilterFlag::GenderFemale))
 				return false;
 			break;

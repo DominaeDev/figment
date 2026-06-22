@@ -17,7 +17,7 @@ namespace fig::data
 			AsElement { "Name", &Character::shortName }
 				.MustExist(),
 			AsElement { "FullName", &Character::fullName },
-			AsElement { "Gender", &Character::gender, XmlConvertString<CharacterGender> },
+			AsElement { "Gender", &Character::gender },
 			AsElement { "Brief", &Character::brief },
 			AsElement { "Attributes", &Character::_attributes },
 			AsElement { "Tags", &Character::_tags },
@@ -205,7 +205,7 @@ namespace fig::data
 		for (auto& attrib : _attributes)
 			_context.SetValue(attrib.first, attrib.second.value);
 
-		if (gender.IsDefined())
+		if (gender.IsConventional())
 			_context.SetFlag((fig::string)gender);
 
 		_bDirtyContext = false;

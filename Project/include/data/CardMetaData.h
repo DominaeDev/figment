@@ -33,7 +33,7 @@ namespace fig::data
 		fig::timestamp updatedAt {}; // Not serialized
 		fig::timestamp lastUsedAt {}; // Not serialized
 		uint32_t chatCount {}; // Not serialized
-		CharacterGender gender {}; // Not serialized
+		Gender gender {}; // Not serialized
 
 		CardBorderStyle borderStyle {};
 		Flags flags {};

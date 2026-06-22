@@ -40,19 +40,19 @@ namespace fig::gui
 			}
 
 			// Tags
-			if (character.gender.IsDefined())
+			if (character.gender.IsConventional())
 			{
 				fig::gui::Color color;
-				if (character.gender == CharacterGender::Male)
+				if (character.gender == ConventionalGender::Male)
 					color = Colors::GenderTagMale;
-				else if (character.gender == CharacterGender::Female)
+				else if (character.gender == ConventionalGender::Female)
 					color = Colors::GenderTagFemale;
-				else if (character.gender == CharacterGender::Other)
+				else if (character.gender.IsConventional())
 					color = Colors::GenderTagOther;
 				else
 					color = Colors::White;
 
-				AddTag(character.gender, color);
+				AddTag(character.gender.GetLabel(), color);
 			}
 
 			auto& tags = character.GetTags();

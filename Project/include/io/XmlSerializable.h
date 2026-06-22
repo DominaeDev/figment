@@ -250,6 +250,10 @@ namespace fig::io
 							auto child = element.AddChild(field.name);
 							member.SaveToXml(child);
 						}
+						else if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+						{
+							element.SetElementValue(field.name, (fig::string)member);
+						}
 						else
 						{
 							element.SetElementValue(field.name, field.custom_serializer(member));
@@ -407,6 +411,16 @@ namespace fig::io
 								bValid &= Success(member.LoadFromXml(child.value())) or !field.must_exist;
 							else
 								bValid &= !field.must_exist;
+						}
+						else if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+						{
+							if (auto value = element.TryGetElement<fig::string>(field.name))
+								member = typename FieldType::ValueType(*value);
+							else
+							{
+								member = field.default_value;
+								bValid &= !field.must_exist;
+							}
 						}
 						else
 						{

@@ -1232,7 +1232,7 @@ namespace fig::llm
 			ss << "[INST] ";
 			for (auto message : chat)
 			{
-				fig::string content = strip_message ? trim(message->content) : message->content;
+				fig::string content = strip_message ? trim(fig::string { message->content }) : message->content;
 				fig::string role(message->role);
 				if (!is_inside_turn)
 				{
@@ -1299,7 +1299,7 @@ namespace fig::llm
 					// there is no system message for gemma, but we will merge it with user prompt, so nothing is broken
 					if (chat.size() > 1)
 					{
-						system_prompt = trim(message->content);
+						system_prompt = trim(fig::string_view { message->content });
 						continue;
 					}
 					else
@@ -1313,7 +1313,7 @@ namespace fig::llm
 					ss << system_prompt << "\n\n";
 					system_prompt = "";
 				}
-				ss << trim(message->content) << "<end_of_turn>\n";
+				ss << trim(fig::string_view { message->content }) << "<end_of_turn>\n";
 			}
 			if (add_ass)
 			{
@@ -1352,15 +1352,15 @@ namespace fig::llm
 				fig::string role(message->role);
 				if (role == "system")
 				{
-					ss << "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+					ss << "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>" << trim(string_view { message->content }) << "<|END_OF_TURN_TOKEN|>";
 				}
 				else if (role == "user")
 				{
-					ss << "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+					ss << "<|START_OF_TURN_TOKEN|><|USER_TOKEN|>" << trim(string_view { message->content }) << "<|END_OF_TURN_TOKEN|>";
 				}
 				else if (role == "assistant")
 				{
-					ss << "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>" << trim(message->content) << "<|END_OF_TURN_TOKEN|>";
+					ss << "<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>" << trim(string_view { message->content }) << "<|END_OF_TURN_TOKEN|>";
 				}
 			}
 			if (add_ass)
@@ -1374,7 +1374,7 @@ namespace fig::llm
 			for (auto message : chat)
 			{
 				fig::string role(message->role);
-				ss << "<|start_header_id|>" << role << "<|end_header_id|>\n\n" << trim(message->content) << "<|eot_id|>";
+				ss << "<|start_header_id|>" << role << "<|end_header_id|>\n\n" << trim(string_view { message->content }) << "<|eot_id|>";
 			}
 			if (add_ass)
 			{
@@ -1435,7 +1435,7 @@ namespace fig::llm
 			for (auto message : chat)
 			{
 				fig::string role(message->role);
-				ss << "<|header_start|>" << role << "<|header_end|>\n\n" << trim(message->content) << "<|eot|>";
+				ss << "<|header_start|>" << role << "<|header_end|>\n\n" << trim(string_view { message->content }) << "<|eot|>";
 			}
 			if (add_ass)
 			{

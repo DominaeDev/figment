@@ -13,6 +13,10 @@ namespace fig
 	void rtrim_inplace(fig::string& s);
 	inline void trim_inplace(fig::string& s) { ltrim_inplace(s); rtrim_inplace(s); }
 	fig::string trim(fig::string&& s);
+	fig::string_view ltrim(fig::string_view s);
+	fig::string_view rtrim(fig::string_view s);
+	fig::string_view trim(fig::string_view s);
+
 	[[nodiscard]] fig::wstring ltrim(const fig::wstring& s);
 	[[nodiscard]] fig::wstring rtrim(const fig::wstring& s);
 	[[nodiscard]] inline fig::wstring trim(const fig::wstring& s) { return ltrim(rtrim(s)); }
