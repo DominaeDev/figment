@@ -37,8 +37,8 @@ namespace fig::llm
 		int32_t max_size() const { return _max_size; }
 		int32_t n_seq_max() const { return _n_seq_max; }
 
-		std::pair<std::reference_wrapper<Batch>, int32_t> GetBatch() { return std::make_pair<std::reference_wrapper<Batch>, int32_t>(static_cast<Batch&>(*_batch.get()), static_cast<int32_t>(_length)); }
-		std::pair<std::reference_wrapper<Batch>, int32_t> GetBatch() const { return std::make_pair<std::reference_wrapper<Batch>, int32_t>(static_cast<Batch&>(*_batch.get()), static_cast<int32_t>(_length)); }
+		std::pair<BatchRef, int32_t> GetBatch() { return std::make_pair<BatchRef, int32_t>(std::ref(*_batch.get()), static_cast<int32_t>(_length)); }
+		std::pair<BatchCRef, int32_t> GetBatch() const { return std::make_pair<BatchCRef, int32_t>(std::cref(*_batch.get()), static_cast<int32_t>(_length)); }
 
 	private:
 		void CopyTokens(int32_t begin, int32_t end, int32_t offset);

@@ -80,7 +80,7 @@ namespace fig::gui
 		{
 			TexturePtr pTexture = nullptr;
 			if (auto try_portrait = Global::GetUserContent().GetSmallPortraitForCharacter(GetSDLRenderer(), characterId))
-				pTexture = try_portrait.value().get().get();
+				pTexture = (*try_portrait).get();
 
 			if (!pTexture)
 				pTexture = OldCharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);

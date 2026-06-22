@@ -509,6 +509,8 @@
     <ClInclude Include="include\user\UserProfile.h" />
     <ClInclude Include="include\user\UserSettings.h" />
     <ClInclude Include="include\util\DebugUtils.h" />
+    <ClInclude Include="include\util\ExpectedRef.h" />
+    <ClInclude Include="include\util\OptionalRef.h" />
     <ClInclude Include="include\util\SearchIndex.h" />
     <ClInclude Include="include\util\EnumFlags.h" />
     <ClInclude Include="include\gui\CustomRenderer.h" />

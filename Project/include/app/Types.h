@@ -12,6 +12,8 @@
 #include <filesystem>
 #include <uuid_v4.h>
 #include "util/Handle.h"
+#include "util/OptionalRef.h"
+#include "util/ExpectedRef.h"
 
 namespace fig
 {
@@ -41,6 +43,11 @@ namespace fig
     using path = std::filesystem::path;
     using string_list = std::vector<string>;
     using string_span = std::span<const string>;
+
+    template<typename T>
+    using ref_vector = std::vector<std::reference_wrapper<T>>;
+    template<typename T>
+    using cref_vector = std::vector<std::reference_wrapper<const T>>;
 
     // Concepts
 

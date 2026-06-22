@@ -33,8 +33,5 @@ namespace fig::user
 					| std::ranges::to<fig::string>());
 		}
 	};
-
-	using UserProfileRef = std::reference_wrapper<UserProfile>;
-	using UserProfileCRef = std::reference_wrapper<const UserProfile>;
 }
 #endif

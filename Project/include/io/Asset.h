@@ -187,9 +187,6 @@ namespace fig::io
 		std::map<MetaTag, MetaValue> _parameters {};
 
 	};
-
-	using AssetRef = std::reference_wrapper<Asset>;
-	using AssetCRef = std::reference_wrapper<const Asset>;
 }
 
 #endif

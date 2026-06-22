@@ -22,10 +22,10 @@ namespace fig::chat
 		bool HasCharacter(fig::uuid id) const noexcept { return _charactersByID.contains(id); }
 
 		std::optional<fig::uuid> GetCharacterIdByRole(Role role) const noexcept;
-		std::optional<fig::data::CharacterDataCRef> GetCharacterByRole(Role role) const noexcept;
-		std::optional<fig::data::CharacterDataCRef> GetCharacterById(const fig::uuid& id) const noexcept;
-		std::optional<fig::data::CharacterDataCRef> GetCharacterByChatId(const fig::string& characterId) const noexcept;
-		std::optional<fig::data::CharacterDataCRef> GetCharacterByName(const fig::string& name) const noexcept;
+		fig::optional_cref<fig::data::CharacterData> GetCharacterByRole(Role role) const noexcept;
+		fig::optional_cref<fig::data::CharacterData> GetCharacterById(const fig::uuid& id) const noexcept;
+		fig::optional_cref<fig::data::CharacterData> GetCharacterByChatId(const fig::string& characterId) const noexcept;
+		fig::optional_cref<fig::data::CharacterData> GetCharacterByName(const fig::string& name) const noexcept;
 		const std::vector<fig::data::CharacterData>& GetCharacters() const noexcept { return _characters; }
 
 		std::vector<PromptBlock> GetPromptBlocks();

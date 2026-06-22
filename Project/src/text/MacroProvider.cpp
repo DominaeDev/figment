@@ -154,18 +154,18 @@ namespace fig::text
 		return eval_text((*itFind).second, context);
 	}
 
-	[[nodiscard]] std::optional<MacroRef> MacroProvider::TryGetMacro(const fig::handle& macro) const
+	[[nodiscard]] std::optional<const string_view> MacroProvider::TryGetMacro(const fig::handle& macro) const
 	{
 		if (auto itFind = _macros.find(macro); itFind != _macros.cend())
 			return (*itFind).second;
 		return std::nullopt;
 	}
 
-	[[nodiscard]] std::optional<ConditionRef> MacroProvider::TryGetCondition(const fig::handle& alias) const
+	[[nodiscard]] fig::optional_cref<Condition> MacroProvider::TryGetCondition(const fig::handle& alias) const
 	{
 		if (auto itFind = _conditions.find(alias); itFind != _conditions.cend())
-			return std::cref((*itFind).second);
-		return std::nullopt;
+			return make_optional_cref((*itFind).second);
+		return fig::nullref;
 	}
 
 }

@@ -18,11 +18,12 @@ namespace fig::user
 		virtual ~UserManager();
 
 		bool LoadProfiles();
-		std::optional<UserProfileCRef> GetProfile(const fig::uuid& id) const noexcept;
-		std::optional<UserProfileRef> GetProfile(const fig::uuid& id) noexcept;
+		fig::optional_cref<UserProfile> GetActiveProfile() const noexcept;
+		fig::optional_cref<UserProfile> GetProfile(const fig::uuid& id) const noexcept;
+		fig::optional_ref<UserProfile> GetProfile(const fig::uuid& id) noexcept;
 		const std::vector<UserProfile>& GetProfiles() const noexcept { return _profiles; };
-		std::optional<UserProfileCRef> CreateDefaultProfile();
-		std::optional<UserProfileCRef> CreateProfile(const fig::string& profileName, const fig::string& password);
+		fig::optional_cref<UserProfile> CreateDefaultProfile();
+		fig::optional_cref<UserProfile> CreateProfile(const fig::string& profileName, const fig::string& password);
 
 		bool IsSignedIn() const noexcept { return _signedInProfile != nullptr; };
 		bool SignIn(const fig::uuid& profileID, const fig::string& password);
@@ -30,7 +31,6 @@ namespace fig::user
 		bool SignInDefaultProfile();
 		bool SignOut();
 		
-		const UserProfile& GetActiveProfile() const;
 		fig::io::UserContentManager& GetContent();
 		UserSettings& GetSettings();
 		const fig::auth::AuthKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };

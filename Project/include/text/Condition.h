@@ -66,8 +66,6 @@ namespace fig
 		ConditionParseError _error {};
 	};
 
-	using ConditionRef = std::reference_wrapper<const Condition>;
-
 	struct Validation
 	{
 		Condition condition;

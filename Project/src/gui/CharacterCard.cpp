@@ -23,7 +23,7 @@ namespace fig::gui
 
 			if (auto try_meta = Global::GetUserManager().GetContent().GetMetaData(characterId))
 			{
-				auto& meta = try_meta.value().get();
+				auto& meta = *try_meta;
 				SetMetaData(meta);
 				ShowStar(meta.flags.IsSet(CardMetaData::Flag::Favorite));
 				ShowNew(meta.IsNew());

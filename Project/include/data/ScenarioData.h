@@ -11,15 +11,8 @@
 
 namespace fig::data
 {
-	class ScenarioData : public fig::io::IXmlSerializable
+	struct Story
 	{
-	public:
-		ScenarioData() : fig::io::IXmlSerializable("Scenario")
-		{
-		}
-		bool Validate() const noexcept override;
-
-	public:
 		struct BlockSequence
 		{
 			enum class Type {
@@ -35,12 +28,66 @@ namespace fig::data
 			int32_t ttl { -1 };
 		};
 
+		struct Step
+		{
+			fig::handle id;
+			Condition condition;
+			int32_t ttl = -1;
+			fig::string content;
+
+			static auto SerializeInfo() noexcept
+			{
+				using namespace fig::io;
+
+				return Fields(
+					AsAttribute { "id",				&Step::id },
+					AsElement { "Condition",		&Step::condition },
+					AsElement { "Duration",		&Step::ttl },
+					AsText { &Step::content }
+				);
+
+				static_assert(XmlSerializable<Step>);
+			}
+		};
+
+		struct Chapter
+		{
+			fig::string title;
+			std::vector<Step> steps;
+
+			static auto SerializeInfo() noexcept
+			{
+				using namespace fig::io;
+
+				return Fields(
+					AsElement { "Title",		&Chapter::title },
+					AsElement { "Step",			&Chapter::steps }
+					.Collection("Steps")
+				);
+
+				static_assert(XmlSerializable<Chapter>);
+			}
+		};
+
+		std::vector<Chapter> chapters;
+		std::vector<BlockSequence> introBlocks;
+		std::vector<BlockSequence> outroBlocks;
+
+		fig::io::FileError LoadFromXml(fig::io::XmlReaderElement xml) noexcept;
+		void SaveToXml(fig::io::XmlWriterElement xml) const noexcept;
+
+		fig::optional_cref<Step> GetStep(size_t chapter, size_t step) const noexcept;
+	};
+
+	class ScenarioData : public fig::io::IXmlSerializable
+	{
+	public:
 		struct RoleSlot
 		{
 			enum class Flag
 			{
-				Required	= 1 << 0,	// Musn't be empty
-				User		= 1 << 1,	// Is user
+				Required = 1 << 0,	// Musn't be empty
+				User = 1 << 1,	// Is user
 			};
 			using Flags = EnumFlags<Flag>;
 
@@ -65,11 +112,11 @@ namespace fig::data
 				using namespace fig::io;
 
 				return Fields(
-					AsAttribute	{ "id",			&RoleSlot::id },
-					AsElement	{ "Label",		&RoleSlot::label },
-					AsElement	{ "Brief",		&RoleSlot::brief},
-					AsElement	{ "Condition",	&RoleSlot::validation },
-					AsElement	{ "Flags",		&RoleSlot::flags,
+					AsAttribute { "id",			&RoleSlot::id },
+					AsElement { "Label",		&RoleSlot::label },
+					AsElement { "Brief",		&RoleSlot::brief },
+					AsElement { "Condition",	&RoleSlot::validation },
+					AsElement { "Flags",		&RoleSlot::flags,
 						[](const Flags& value) { return enum_serialize_flags(value, FlagMapping); },
 						[](auto& value) { return enum_deserialize_flags(value, FlagMapping); }
 					}
@@ -79,63 +126,23 @@ namespace fig::data
 			}
 		};
 
-		struct Story
+		ScenarioData() : fig::io::IXmlSerializable("Scenario")
 		{
-			struct Step
-			{
-				fig::handle id;
-				Condition condition;
-				int32_t ttl = -1;
-				fig::string content;
+		}
+		bool Validate() const noexcept override;
 
-				static auto SerializeInfo() noexcept
-				{
-					using namespace fig::io;
+		const std::vector<RoleSlot>& GetRoleSlots() const noexcept { return roles; }
+		std::pair<fig::string, fig::string> GetInfo() const noexcept { return std::make_pair(title, description); }
+		const Story& GetStory() const noexcept { return story; }
 
-					return Fields(
-						AsAttribute	{ "id",				&Step::id },
-						AsElement	{ "Condition",		&Step::condition },
-						AsElement	{ "Duration",		&Step::ttl },
-						AsText		{					&Step::content }
-					);
-
-					static_assert(XmlSerializable<Step>);
-				}
-			};
-
-			struct Chapter
-			{
-				fig::string title;
-				std::vector<Step> steps;
-
-				static auto SerializeInfo() noexcept
-				{
-					using namespace fig::io;
-
-					return Fields(
-						AsElement { "Title",		&Chapter::title },
-						AsElement { "Step",			&Chapter::steps }
-							.Collection("Steps")
-					);
-
-					static_assert(XmlSerializable<Chapter>);
-				}
-			};
-
-			std::vector<Chapter> chapters;
-			std::vector<BlockSequence> introBlocks;
-			std::vector<BlockSequence> outroBlocks;
-
-			fig::io::FileError LoadFromXml(fig::io::XmlReaderElement xml) noexcept;
-			void SaveToXml(fig::io::XmlWriterElement xml) const noexcept;
-		};
-
+	private:
 		fig::string title;
 		fig::string description;
 		fig::chat::UserDefinedOptions userOptions;
 		std::vector<RoleSlot> roles {};
 		Story story {};
 
+	public:
 		static auto SerializeInfo() noexcept
 		{
 			using namespace fig::io;

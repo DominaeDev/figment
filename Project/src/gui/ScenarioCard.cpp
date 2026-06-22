@@ -14,7 +14,8 @@ namespace fig::gui
 	{
 		if (auto scenario = Global::GetUserManager().GetContent().GetScenario(scenarioId))
 		{
-			SetLabel(scenario.value().title);
+			auto [title, desc] = scenario.value().GetInfo();
+			SetLabel(title);
 			SetChatCount(0);
 		}
 	}

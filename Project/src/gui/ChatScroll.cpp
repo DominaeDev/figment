@@ -102,7 +102,7 @@ namespace fig::gui
 			bShowAvatar = false;
 		}
 		else if (auto try_character = _session.GetStaging().GetCharacterById(characterId))
-			name = (*try_character).get().fullName;
+			name = (*try_character).fullName;
 		else
 			name = "Unknown";
 

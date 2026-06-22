@@ -44,7 +44,6 @@ namespace fig::gui
 	{
 		// Create cards
 		auto& assetMngr = Global::GetUserManager().GetContent().GetAssetManager();
-		const auto& profileId = Global::GetUserManager().GetActiveProfile().id;
 
 		Reset();
 

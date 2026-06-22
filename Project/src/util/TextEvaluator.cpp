@@ -410,7 +410,7 @@ namespace fig
 			fig::string macro { try_macro.value() };
 			
 			if (auto try_ctx = context.TryGetContext(selector))
-				evaluate(macro, try_ctx.value().get(), cookie);
+				evaluate(macro, *try_ctx, cookie);
 			else
 				macro = ""; // Error
 

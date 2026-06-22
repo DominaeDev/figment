@@ -178,7 +178,7 @@ namespace fig::gui
 	{
 		if (auto tryProfile = Global::GetUserManager().GetProfile(_currentProfileId))
 		{
-			auto& profile = tryProfile.value().get();
+			auto& profile = *tryProfile;
 			if (profile.has_password)
 			{
 				fig::string password = trim(_pPassword->GetText());

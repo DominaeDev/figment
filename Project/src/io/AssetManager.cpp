@@ -224,27 +224,27 @@ namespace fig::io
 		return asset;
 	}
 
-	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& id) noexcept
+	fig::optional_ref<Asset> AssetManager::FindAsset(const fig::uuid& id) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend())
-			return std::make_optional<AssetRef>(static_cast<Asset&>(std::ref(itFind->second)));
-		return std::nullopt;
+			return make_optional_ref(itFind->second);
+		return fig::nullref;
 	}
 
-	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) noexcept
+	fig::optional_ref<Asset> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend() and itFind->second.asset_type == assetType)
-			return std::make_optional<AssetRef>(static_cast<Asset&>(std::ref(itFind->second)));
-		return std::nullopt;
+			return make_optional_ref(itFind->second);
+		return fig::nullref;
 	}
 
-	std::optional<AssetRef> AssetManager::FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept
+	fig::optional_ref<Asset> AssetManager::FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -256,8 +256,8 @@ namespace fig::io
 			});
 
 		if (itFind != _assets.cend())
-			return std::make_optional<AssetRef>(static_cast<Asset&>(std::ref(itFind->second)));
-		return std::nullopt;
+			return make_optional_ref(itFind->second);
+		return fig::nullref;
 	}
 
 	void AssetManager::SaveModified()
@@ -342,15 +342,15 @@ namespace fig::io
 
 		// Read meta data of all asset files (in parallel)
 		DEBUG_MEASURE_BEGIN("LoadAssetMetaData");
-		std::vector<AssetRef> assets = _assets
+		std::vector<Asset*> assets = _assets
 			| std::views::values
-			| std::views::transform([](auto&& a) { return std::ref(a); })
+			| std::views::transform([](auto&& a) { return &a; })
 			| std::ranges::to<std::vector>();
 
 		std::for_each(std::execution::par,
 			assets.begin(), assets.end(),
-			[&](AssetRef assetRef) {
-				auto& asset = assetRef.get();
+			[&](Asset* pAsset) {
+				auto& asset = *pAsset;
 				AssetFileReader reader(_profilePath, _profileAuthKey);
 				if (auto file = reader.ReadFile(asset.GetFileName(), false))
 				{
@@ -383,17 +383,16 @@ namespace fig::io
 
 		// Read meta data of all asset files (in parallel)
 		DEBUG_MEASURE_BEGIN("LoadDataAssets");
-		std::vector<AssetRef> assets = _assets 
+		std::vector<Asset*> assets = _assets 
 			| std::views::values 
 			| std::views::filter([](auto&& a) { return a.asset_type == AssetType::Character || a.asset_type == AssetType::Scenario; })
-			| std::views::transform([](auto&& a) { return std::ref(a); })
+			| std::views::transform([](auto&& a) { return &a; })
 			| std::ranges::to<std::vector>();
 
 		std::for_each(std::execution::par_unseq,
 			assets.begin(), assets.end(),
-			[&](AssetRef assetRef) {
-				auto& asset = assetRef.get();
-				auto discard = LoadAsset_Internal(asset);
+			[&](Asset* pAsset) {
+				auto discard = LoadAsset_Internal(*pAsset);
 			});
 		DEBUG_MEASURE_END();
 
@@ -408,7 +407,7 @@ namespace fig::io
 			return result.error();
 	}
 
-	std::expected<AssetRef, FileError> AssetManager::LoadAsset(const fig::uuid& id) noexcept
+	fig::expected_ref<Asset, FileError> AssetManager::LoadAsset(const fig::uuid& id) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 		auto itFind = _assets.find(id);
@@ -422,7 +421,7 @@ namespace fig::io
 		return LoadAsset_Internal(asset);
 	}
 
-	std::expected<AssetRef, FileError> AssetManager::LoadAsset_Internal(Asset& asset) noexcept
+	fig::expected_ref<Asset, FileError> AssetManager::LoadAsset_Internal(Asset& asset) noexcept
 	{
 		if (asset.sync_state.has_data)
 			return asset;
@@ -436,7 +435,7 @@ namespace fig::io
 			asset.FromFile(std::move(file.value()));
 			asset.sync_state.has_meta = true;
 			asset.sync_state.has_data = true;
-			return std::ref(asset);
+			return asset;
 		}
 		else if (file.error() == FileError::NotFound)
 		{
@@ -555,7 +554,7 @@ namespace fig::io
 		return assetIDs;
 	}
 
-	std::vector<AssetRef> AssetManager::ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format, size_t max_count)
+	fig::ref_vector<Asset> AssetManager::ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format, size_t max_count)
 	{
 		std::vector<fig::path> files;
 		for (const auto& entry : std::filesystem::directory_iterator(directory))
@@ -564,7 +563,7 @@ namespace fig::io
 		if (max_count > 0)
 			files.resize(std::min(files.size(), max_count));
 
-		std::vector<AssetRef> imported;
+		fig::ref_vector<Asset> imported;
 		imported.reserve(files.size());
 
 		{	// Mutex scope
@@ -572,20 +571,20 @@ namespace fig::io
 			for (auto& filename : files)
 			{
 				if (auto import = ImportCharacter_Internal(filename, format))
-					imported.push_back(import.value());
+					imported.push_back(std::ref(import.value()));
 			}
 		}
 
 		return imported;
 	}
 
-	std::expected<AssetRef, FileError> AssetManager::ImportCharacter(const fig::path& filename, CharacterDataFormat format)
+	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter(const fig::path& filename, CharacterDataFormat format)
 	{
 		std::scoped_lock lock { _assetsMutex };
 		return ImportCharacter_Internal(filename, format);
 	}
 
-	std::expected<AssetRef, FileError> AssetManager::ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format)
+	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format)
 	{
 		if (auto try_character = LoadCharacterData(filename, format))
 		{
@@ -626,19 +625,19 @@ namespace fig::io
 			}
 
 			LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
-			return std::ref(characterAsset);
+			return characterAsset;
 		}
 		else
 			return std::unexpected(try_character.error());
 	}
 
-	std::expected<AssetRef, FileError> AssetManager::ImportScenario(const fig::path& filename)
+	fig::expected_ref<Asset, FileError> AssetManager::ImportScenario(const fig::path& filename)
 	{
 		std::scoped_lock lock { _assetsMutex };
 		return ImportScenario_Internal(filename);
 	}
 
-	std::expected<AssetRef, FileError> AssetManager::ImportScenario_Internal(const fig::path& filename)
+	fig::expected_ref<Asset, FileError> AssetManager::ImportScenario_Internal(const fig::path& filename)
 	{
 		ScenarioData scenario;
 		if (auto error = scenario.LoadFromXml(filename); error != FileError::NoError)
@@ -671,17 +670,17 @@ namespace fig::io
 		} */
 
 		LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
-		return std::ref(scenarioAsset);
+		return scenarioAsset;
 	}
 
 	FileError AssetManager::CreateProfilePicture(const fig::user::UserProfile& profile, fig::path filename)
 	{
 		// Create profile image
 		if (auto profileImage = LoadImage(filename)
-			.transform([](auto img) { return CreateProfileImage(img); });
+				.transform([](auto img) { return CreateProfileImage(img); });
 			profileImage.has_value() && profileImage.value()->w > 0)
 		{
-			auto pSurface = profileImage.value().get();
+			auto pSurface = (*profileImage).get();
 			fig::bytes data;
 			if (SDL_LockSurface(pSurface))
 			{

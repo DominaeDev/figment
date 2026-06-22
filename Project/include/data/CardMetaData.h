@@ -43,8 +43,6 @@ namespace fig::data
 
 		bool IsNew() const noexcept;
 	};
-
-	using CardMetaDataRef = std::reference_wrapper<CardMetaData>;
 }
 
 #endif

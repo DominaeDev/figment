@@ -87,9 +87,6 @@ namespace fig::data
 	public:
 		static auto SerializeInfo() noexcept;
 	};
-
-	using CharacterDataRef = std::reference_wrapper<fig::data::CharacterData>;
-	using CharacterDataCRef = std::reference_wrapper<const fig::data::CharacterData>;
 }
 
 #endif

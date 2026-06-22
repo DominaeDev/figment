@@ -282,11 +282,11 @@ namespace fig
 
 		if (auto try_ctx = eval.context.TryGetContext(_flag.selector))
 		{
-			auto& ctx = try_ctx.value().get();
+			auto& ctx = *try_ctx;
 
 			// Alias?
 			if (auto try_cond = eval.context.TryGetCondition(_flag.key))
-				return try_cond.value().get().Evaluate(ctx, eval.cookie + 1);
+				return (*try_cond).Evaluate(ctx, eval.cookie + 1);
 			return ctx[_flag.key];
 		}
 

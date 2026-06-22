@@ -18,19 +18,19 @@ namespace fig::io
 		~UserContentManager();
 
 		size_t ImportCharactersInDirectory(const fig::path& directory, size_t max_count = 0uz);
-		std::expected<AssetRef, FileError> ImportCharacter(const fig::path& filename);
-		std::expected<AssetRef, FileError> ImportScenario(const fig::path& filename);
+		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename);
+		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 
-		std::optional<fig::data::CharacterData> GetCharacter(const fig::uuid& id) const noexcept;
+		fig::optional_cref<fig::data::CharacterData> GetCharacter(const fig::uuid& id) const noexcept;
+		fig::optional_cref<fig::data::ScenarioData> GetScenario(const fig::uuid& id) const noexcept;
 		auto GetCharacters() const noexcept { return _characters | std::views::values; }
-		std::optional<fig::data::ScenarioData> GetScenario(const fig::uuid& id) const noexcept;
 		auto GetScenarios() const noexcept { return _scenarios | std::views::values; }
 
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
 
-		std::optional<fig::data::CardMetaDataRef> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
+		fig::optional_ref<fig::data::CardMetaData> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
 
-		std::expected<fig::sdl::TextureRef, FileError> GetSmallPortraitForCharacter(fig::gui::RendererPtr pRenderer, const fig::uuid& characterId) noexcept;
+		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(fig::gui::RendererPtr pRenderer, const fig::uuid& characterId) noexcept;
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);

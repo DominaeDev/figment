@@ -26,8 +26,8 @@ namespace fig::text
 		void AddSelectorAlias(fig::handle alias, const ContextSelector& target) noexcept;
 		void AddValueAlias(fig::handle alias, const ContextLocator& target) noexcept;
 
-		[[nodiscard]] std::optional<MacroRef> TryGetMacro(const fig::handle& macro) const;
-		[[nodiscard]] std::optional<fig::ConditionRef> TryGetCondition(const fig::handle& alias) const;
+		[[nodiscard]] std::optional<const string_view> TryGetMacro(const fig::handle& macro) const;
+		[[nodiscard]] fig::optional_cref<Condition> TryGetCondition(const fig::handle& alias) const;
 
 		bool ApplyAlias(ContextSelector& selector) const;
 		bool ApplyAlias(ContextLocator& location) const;

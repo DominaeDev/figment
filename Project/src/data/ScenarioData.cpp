@@ -36,33 +36,33 @@ namespace fig::data
 		return true;
 	}
 
-	static void ReadBlockSequences(XmlReaderElement xml, std::vector<ScenarioData::BlockSequence>& seqs)
+	static void ReadBlockSequences(XmlReaderElement xml, std::vector<Story::BlockSequence>& seqs)
 	{
 		auto try_node = xml.GetFirstElementAny();
 		while (try_node)
 		{
 			auto& node = try_node.value();
 			auto nodeName = node.GetName();
-			ScenarioData::BlockSequence blockSeq;
+			Story::BlockSequence blockSeq;
 
 			if (nodeName == "UserMessage")
 			{
-				blockSeq.type = ScenarioData::BlockSequence::Type::UserMessage;
+				blockSeq.type = Story::BlockSequence::Type::UserMessage;
 				blockSeq.role = Role::Undefined;
 			}
 			else if (nodeName == "Message")
 			{
-				blockSeq.type = ScenarioData::BlockSequence::Type::Message;
+				blockSeq.type = Story::BlockSequence::Type::Message;
 				blockSeq.role = enum_deserialize(node["role"].Get<fig::string>(), RoleMapping, Role::Undefined);
 			}
 			else if (nodeName == "Director")
 			{
-				blockSeq.type = ScenarioData::BlockSequence::Type::Message;
+				blockSeq.type = Story::BlockSequence::Type::Message;
 				blockSeq.role = Role::Director;
 			}
 			else if (nodeName == "Narrator")
 			{
-				blockSeq.type = ScenarioData::BlockSequence::Type::Message;
+				blockSeq.type = Story::BlockSequence::Type::Message;
 				blockSeq.role = Role::Narrator;
 			}
 			else
@@ -79,7 +79,32 @@ namespace fig::data
 		}
 	}
 
-	FileError ScenarioData::Story::LoadFromXml(fig::io::XmlReaderElement xml) noexcept
+	static void WriteBlockSequences(XmlWriterElement xml, const std::vector<Story::BlockSequence>& seqs)
+	{
+		for (auto& blockSeq : seqs)
+		{
+			fig::string elementName;
+			switch (blockSeq.type)
+			{
+				case Story::BlockSequence::Type::Message:
+					elementName = "Message";
+					break;
+				case Story::BlockSequence::Type::UserMessage:
+					elementName = "UserMessage";
+					break;
+				default:
+					continue;
+			}
+			auto node = xml.AddChild(elementName);
+
+			if (blockSeq.role != Role::Undefined)
+				node["role"].Set(enum_serialize(blockSeq.role, RoleMapping));
+			node["duration"].Set(blockSeq.ttl);
+			node["condition"].Set((fig::string)blockSeq.condition);
+		}
+	}
+
+	FileError Story::LoadFromXml(fig::io::XmlReaderElement xml) noexcept
 	{
 		// Read chapters
 		chapters.clear();
@@ -106,8 +131,36 @@ namespace fig::data
 		return FileError::NoError;
 	}
 
-	void ScenarioData::Story::SaveToXml(fig::io::XmlWriterElement xml) const noexcept
+	void Story::SaveToXml(fig::io::XmlWriterElement xml) const noexcept
 	{
-		// ...
+		if (not introBlocks.empty())
+		{
+			auto introNode = xml.AddChild("Intro");
+			WriteBlockSequences(introNode, introBlocks);
+		}
+
+		if (not outroBlocks.empty())
+		{
+			auto outroNode = xml.AddChild("Outro");
+			WriteBlockSequences(outroNode, outroBlocks);
+		}
+
+		for (auto& chapter : chapters)
+		{
+			auto chapterNode = xml.AddChild("Chapter");
+			XmlSerialize(chapterNode, chapter);
+		}
+	}
+
+	fig::optional_cref<Story::Step> Story::GetStep(size_t idx_chapter, size_t idx_step) const noexcept
+	{
+		if (idx_chapter >= chapters.size())
+			return std::nullopt;
+
+		auto& chapter = chapters[idx_chapter];
+		if (idx_step >= chapter.steps.size())
+			return std::nullopt;
+
+		return chapter.steps[idx_step];
 	}
 }

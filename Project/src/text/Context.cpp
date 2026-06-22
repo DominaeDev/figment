@@ -75,8 +75,8 @@ namespace fig
 		
 		if (_primarySelector)
 		{
-			if (auto primary_ctx = TryGetContext_Internal(_primarySelector); primary_ctx.has_value() and &primary_ctx.value().get() != this)
-				return primary_ctx.value().get().TryGetRaw_Internal(name);
+			if (auto primary_ctx = TryGetContext_Internal(_primarySelector); primary_ctx.has_value() and &primary_ctx.value() != this)
+				return (*primary_ctx).TryGetRaw_Internal(name);
 		}
 		return std::nullopt;
 	}
@@ -213,7 +213,7 @@ namespace fig
 		_pCustomMacroProvider->ApplyAlias(location);
 	}
 
-	std::optional<fig::text::MacroRef> Context::TryGetMacro(const fig::handle& macro) const noexcept
+	std::optional<const string_view> Context::TryGetMacro(const fig::handle& macro) const noexcept
 	{
 		if (auto pMacros = _pGlobalMacroProvider.lock())
 		{
@@ -225,16 +225,16 @@ namespace fig
 		return std::nullopt;
 	}
 
-	std::optional<ConditionRef> Context::TryGetCondition(const fig::handle& alias) const noexcept
+	fig::optional_cref<Condition> Context::TryGetCondition(const fig::handle& alias) const noexcept
 	{
 		if (auto pMacros = _pGlobalMacroProvider.lock())
 		{
 			if (auto try_macro = pMacros->TryGetCondition(alias))
-				return try_macro;
+				return make_optional_cref(*try_macro);
 		}
 		if (auto try_macro = _pCustomMacroProvider->TryGetCondition(alias))
-			return try_macro;
-		return std::nullopt;
+			return make_optional_cref(*try_macro);
+		return fig::nullref;
 	}
 
 	bool Context::operator[](ContextLocator location) const noexcept
@@ -247,7 +247,7 @@ namespace fig
 	{
 		if (auto try_ctx = TryGetContext(location.selector))
 		{
-			auto& ctx = try_ctx.value().get();
+			auto& ctx = try_ctx.value();
 			return ctx.GetBool_Internal(location.key);
 		}
 		return false;
@@ -270,8 +270,8 @@ namespace fig
 		// Check primary
 		if (_primarySelector)
 		{
-			if (auto primary_ctx = TryGetContext_Internal(_primarySelector); primary_ctx.has_value() and &primary_ctx.value().get() != this)
-				return primary_ctx.value().get().GetBool_Internal(name);
+			if (auto primary_ctx = TryGetContext_Internal(_primarySelector); primary_ctx.has_value() and &primary_ctx.value() != this)
+				return (*primary_ctx).GetBool_Internal(name);
 		}
 
 		return false;
@@ -305,26 +305,26 @@ namespace fig
 		return false;
 	}
 
-	std::optional<ContextRef> Context::TryGetContext(ContextSelector selector) noexcept
+	fig::optional_ref<Context> Context::TryGetContext(ContextSelector selector) noexcept
 	{
 		ResolveAlias(selector);
 		if (not selector.empty())
 			return TryGetContext_Internal(selector);
-		return std::ref(*this);
+		return make_optional_ref(*this);
 	}
 
-	std::optional<ContextCRef> Context::TryGetContext(ContextSelector selector) const noexcept
+	fig::optional_cref<Context> Context::TryGetContext(ContextSelector selector) const noexcept
 	{
 		ResolveAlias(selector);
 		if (not selector.empty())
 			return TryGetContext_Internal(selector);
-		return std::cref(*this);
+		return make_optional_cref(*this);
 	}
 
-	std::optional<ContextRef> Context::TryGetContext_Internal(ContextSelector selector) noexcept
+	fig::optional_ref<Context> Context::TryGetContext_Internal(ContextSelector selector) noexcept
 	{
 		if (selector.empty())
-			return std::ref(*this);
+			return make_optional_ref(*this);
 
 		auto pCtx = this;
 		for (size_t i = 0; i < selector.size(); ++i)
@@ -332,19 +332,19 @@ namespace fig
 			auto& key = selector[i];
 			if (auto itNext = pCtx->TryGetContext_Internal(key))
 			{
-				pCtx = &itNext.value().get();
+				pCtx = &itNext.value();
 				continue;
 			}
 			else
-				return std::nullopt;
+				return fig::nullref;
 		}
-		return std::ref(*pCtx);
+		return make_optional_ref(*pCtx);
 	}
 
-	std::optional<ContextCRef> Context::TryGetContext_Internal(ContextSelector selector) const noexcept
+	fig::optional_cref<Context> Context::TryGetContext_Internal(ContextSelector selector) const noexcept
 	{
 		if (selector.empty())
-			return std::ref(*this);
+			return make_optional_cref(*this);
 
 		auto pCtx = this;
 		for (size_t i = 0; i < selector.size(); ++i)
@@ -352,27 +352,27 @@ namespace fig
 			auto& key = selector[i];
 			if (auto itNext = pCtx->TryGetContext_Internal(key))
 			{
-				pCtx = &itNext.value().get();
+				pCtx = &itNext.value();
 				continue;
 			}
 			else
-				return std::nullopt;
+				return fig::nullref;
 		}
-		return std::cref(*pCtx);
+		return make_optional_cref(*pCtx);
 	}
 
-	std::optional<ContextRef> Context::TryGetContext_Internal(fig::handle key) noexcept
+	fig::optional_ref<Context> Context::TryGetContext_Internal(fig::handle key) noexcept
 	{
 		if (auto itFind = _contexts.find(key); itFind != _contexts.cend())
-			return std::ref((*itFind).second);
-		return std::nullopt;
+			return make_optional_ref((*itFind).second);
+		return fig::nullref;
 	}
 
-	std::optional<ContextCRef> Context::TryGetContext_Internal(fig::handle key) const noexcept
+	fig::optional_cref<Context> Context::TryGetContext_Internal(fig::handle key) const noexcept
 	{
 		if (auto itFind = _contexts.find(key); itFind != _contexts.cend())
-			return std::cref((*itFind).second);
-		return std::nullopt;
+			return make_optional_cref((*itFind).second);
+		return fig::nullref;
 	}
 
 	void Context::Clear() noexcept

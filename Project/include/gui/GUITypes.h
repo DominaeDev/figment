@@ -14,8 +14,6 @@ namespace fig::sdl
 	using Surface = stdex::c_resource<SDL_Surface, SDL_CreateSurface, SDL_DestroySurface>;
 	using Cursor = stdex::c_resource<SDL_Cursor, SDL_CreateCursor, SDL_DestroyCursor>;
 	using TextEngine = stdex::c_resource<TTF_TextEngine, TTF_CreateRendererTextEngine, TTF_DestroyRendererTextEngine>;
-
-	using TextureRef = const std::reference_wrapper<Texture>;
 }
 
 namespace fig

@@ -17,6 +17,9 @@ namespace fig::llm
 	using Sequence = llama_seq_id;
 	using Sequences = std::vector<Sequence>;
 
+	using BatchRef = std::reference_wrapper<Batch>;
+	using BatchCRef = std::reference_wrapper<const Batch>;
+
 	enum class SequenceSlot : int32_t
 	{
 		None = 0,

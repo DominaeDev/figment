@@ -66,11 +66,11 @@ namespace fig::chat
 		return static_cast<int32_t>(std::ranges::count_if(_charactersByRole, [](auto& kvp) { return is_bot(kvp.first); }));
 	}
 
-	std::optional<CharacterDataCRef> ChatStaging::GetCharacterByRole(Role role) const noexcept
+	fig::optional_cref<CharacterData> ChatStaging::GetCharacterByRole(Role role) const noexcept
 	{
 		if (auto itFind = _charactersByRole.find(role); itFind != _charactersByRole.cend())
-			return std::cref(_characters[itFind->second]);
-		return std::nullopt;
+			return make_optional_cref(_characters[itFind->second]);
+		return fig::nullref;
 	}
 
 	std::optional<fig::uuid> ChatStaging::GetCharacterIdByRole(Role role) const noexcept
@@ -80,31 +80,31 @@ namespace fig::chat
 		return std::nullopt;
 	}
 
-	std::optional<CharacterDataCRef> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
+	fig::optional_cref<CharacterData> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _charactersByID.find(id); itFind != _charactersByID.cend())
-			return std::cref(_characters[itFind->second]);
-		return std::nullopt;
+			return make_optional_cref(_characters[itFind->second]);
+		return fig::nullref;
 	}
 
-	std::optional<CharacterDataCRef> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
+	fig::optional_cref<CharacterData> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
 	{
 		if (identifier.empty() || _characters.empty())
-			return std::nullopt;
+			return fig::nullref;
 
 		if (auto itFind = std::ranges::find_if(_characters, [&identifier](auto& character) { return equals(character.chatId, identifier, true); }); itFind != _characters.cend())
-			return std::cref(*itFind);
-		return std::nullopt;
+			return make_optional_cref(*itFind);
+		return fig::nullref;
 	}
 
-	std::optional<CharacterDataCRef> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
+	fig::optional_cref<CharacterData> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
 	{
 		if (name.empty() || _characters.empty())
 			return std::nullopt;
 
 		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& character) { return equals(character.shortName, name, true); }); itFind != _characters.cend())
-			return std::cref(*itFind);
-		return std::nullopt;
+			return make_optional_cref(*itFind);
+		return fig::nullref;
 	}
 
 	Role ChatStaging::GetRoleOf(const fig::string& characterId) const
@@ -122,7 +122,7 @@ namespace fig::chat
 		if (role == Role::User)
 			return "USR";
 		if (auto try_find = GetCharacterByRole(role))
-			return ucase((*try_find).get().chatId);
+			return ucase((*try_find).chatId);
 		return "UNK?";
 	}
 
@@ -136,7 +136,7 @@ namespace fig::chat
 			return fig::string { Constants::Chat::Names::Director };
 
 		if (auto try_find = GetCharacterByRole(role))
-			return (*try_find).get().shortName;
+			return (*try_find).shortName;
 
 		return fig::string { Constants::Chat::Names::Unknown };
 	}
@@ -145,7 +145,7 @@ namespace fig::chat
 	{
 		if (auto try_character = GetCharacterByRole(role))
 		{
-			auto& character = (*try_character).get();
+			auto& character = *try_character;
 			if (character.bgColor.IsDefined() && character.borderColor.IsDefined())
 			{
 				return ColorPair {
@@ -189,7 +189,7 @@ namespace fig::chat
 	{
 		if (auto try_character = GetCharacterByRole(role))
 		{
-			auto& character = (*try_character).get();
+			auto& character = *try_character;
 
 			fig::string brief = trim(character.brief);
 			brief = eval_text(brief, GetContext(role));
@@ -202,7 +202,7 @@ namespace fig::chat
 	{
 		if (auto try_character = GetCharacterByRole(role))
 		{
-			auto& character = (*try_character).get();
+			auto& character = *try_character;
 			fig::string persona = character.GetAttribute(Constants::CharacterAttributes::Persona).value_or("");
 			return eval_text(persona, GetContext(role));
 		}
@@ -246,6 +246,8 @@ namespace fig::chat
 
 	void ChatStaging::UpdateContext()
 	{
+		_bDirtyContext = false;
+
 		_context.Clear();
 		_context.SetMacroProvider(Global::GetMacroProvider());
 
@@ -255,8 +257,8 @@ namespace fig::chat
 			auto& character = _characters[kvp.second];
 			_context.AddContext(ContextSelector::FromRole(role)[0], character);
 		}
+
 		_context.SetValue("__num_bots", GetBotCount());
-		_bDirtyContext = false;
 	}
 
 	const fig::string& ChatStaging::GetGrammar() const

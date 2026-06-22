@@ -64,12 +64,12 @@ namespace fig::io
 		bool DeleteAsset(const fig::uuid& assetID) noexcept;
 		uint32_t DeleteAssets(std::span<fig::uuid> assetIDs) noexcept;
 
-		std::optional<AssetRef> FindAsset(const fig::uuid& id) noexcept;
-		std::optional<AssetRef> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;
-		std::optional<AssetRef> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
+		fig::optional_ref<Asset> FindAsset(const fig::uuid& id) noexcept;
+		fig::optional_ref<Asset> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;
+		fig::optional_ref<Asset> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
 
 		FileError LoadAsset(const Asset& asset) noexcept;
-		std::expected<AssetRef, FileError> LoadAsset(const fig::uuid& id) noexcept;
+		fig::expected_ref<Asset, FileError> LoadAsset(const fig::uuid& id) noexcept;
 		
 		auto GetAssets() noexcept { return _assets | std::views::values; }
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
@@ -81,9 +81,9 @@ namespace fig::io
 		void SaveModified();
 
 		enum class CharacterDataFormat { Default, TavernV2, };
-		std::vector<AssetRef> ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format = CharacterDataFormat::Default, size_t max_count = 0uz);
-		std::expected<AssetRef, FileError> ImportCharacter(const fig::path& filename, CharacterDataFormat format = CharacterDataFormat::Default);
-		std::expected<AssetRef, FileError> ImportScenario(const fig::path& filename);
+		fig::ref_vector<Asset> ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format = CharacterDataFormat::Default, size_t max_count = 0uz);
+		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 		
 		static FileError CreateProfilePicture(const fig::user::UserProfile& profile, fig::path imageFilename);
 
@@ -101,7 +101,7 @@ namespace fig::io
 		bool LoadDataAssets() noexcept;
 		bool UpdateAssetOnDisk(Asset& asset);
 		bool UpdateAssetInDatabase(Asset& asset);
-		std::expected<AssetRef, FileError> LoadAsset_Internal(Asset& asset) noexcept;
+		fig::expected_ref<Asset, FileError> LoadAsset_Internal(Asset& asset) noexcept;
 		bool DeleteAsset_Internal(const fig::uuid& assetID) noexcept;
 		bool DeleteAssetFile(const fig::uuid& assetID) noexcept;
 		std::set<fig::uuid> FindRelatedAssets(const fig::uuid& assetId) noexcept;
@@ -122,8 +122,8 @@ namespace fig::io
 		Asset& CreateAsset_Internal(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept;
 		Asset& CreateImageAsset_Internal(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
 		Asset& CreateImageAsset_Internal(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
-		std::expected<AssetRef, FileError> ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format);
-		std::expected<AssetRef, FileError> ImportScenario_Internal(const fig::path& filename);
+		fig::expected_ref<Asset, FileError> ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format);
+		fig::expected_ref<Asset, FileError> ImportScenario_Internal(const fig::path& filename);
 
 	private:
 		/* Asynchronous loading */

@@ -245,8 +245,8 @@ namespace fig::gui
 
 		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)))
 		{
-			if (not lastProfile.value().get().has_password)
-				return TrySignIn(lastProfile.value(), "");
+			if (not (*lastProfile).has_password)
+				return TrySignIn(*lastProfile, "");
 			return false;
 		}
 

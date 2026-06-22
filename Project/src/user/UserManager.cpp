@@ -80,12 +80,12 @@ namespace fig::user
 		SignOut();
 	}
 
-	std::optional<UserProfileCRef> UserManager::CreateDefaultProfile()
+	fig::optional_cref<UserProfile> UserManager::CreateDefaultProfile()
 	{
 		return CreateProfile(fig::string(fig::strings::UserProfile::DefaultUser), "");
 	}
 
-	std::optional<UserProfileCRef> UserManager::CreateProfile(const fig::string& name, const fig::string& password)
+	fig::optional_cref<UserProfile> UserManager::CreateProfile(const fig::string& name, const fig::string& password)
 	{
 		bool hasPassword = not password.empty();
 		auto authKey = RandomKey();
@@ -129,10 +129,10 @@ namespace fig::user
 		if (db.CreateProfile(profile) == DatabaseError::NoError)
 		{
 			_profiles.emplace_back(std::move(profile));
-			return std::make_optional(std::cref(_profiles.back()));
+			return make_optional_cref(_profiles.back());
 		}
 
-		return std::nullopt;
+		return fig::nullref;
 	}
 
 	static bool __Authenticate(const AuthChallenge& challenge, const AuthSalt& salt, const AuthKey& key, AuthKey& outKey)
@@ -218,7 +218,7 @@ namespace fig::user
 	{
 		if (_profiles.empty())
 			return false;
-		if (auto lastProfile = GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)); lastProfile.has_value() and not lastProfile.value().get().has_password)
+		if (auto lastProfile = GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)); lastProfile.has_value() and not (*lastProfile).has_password)
 			return SignIn(lastProfile.value(), "");
 		return SignIn(_profiles.front(), "");
 	}
@@ -293,26 +293,25 @@ namespace fig::user
 		return false;
 	}
 
-	const UserProfile& UserManager::GetActiveProfile() const
+	fig::optional_cref<UserProfile> UserManager::GetActiveProfile() const noexcept
 	{
 		if (_signedInProfile == nullptr)
-			throw std::runtime_error("Not signed in");
-
-		return std::cref(*_signedInProfile);
+			return make_optional_cref(*_signedInProfile);
+		return fig::nullref;
 	}
 
-	std::optional<UserProfileRef> UserManager::GetProfile(const fig::uuid& id) noexcept
+	fig::optional_ref<UserProfile> UserManager::GetProfile(const fig::uuid& id) noexcept
 	{
 		if (auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&id](const UserProfile& profile) { return profile.id == id; }); itProfile != _profiles.end())
-			return std::ref(*itProfile);
-		return std::nullopt;
+			return make_optional_ref(*itProfile);
+		return fig::nullref;
 	}
 
-	std::optional<UserProfileCRef> UserManager::GetProfile(const fig::uuid& id) const noexcept
+	fig::optional_cref<UserProfile> UserManager::GetProfile(const fig::uuid& id) const noexcept
 	{
 		if (auto itProfile = std::find_if(_profiles.cbegin(), _profiles.cend(), [&id](const UserProfile& profile) { return profile.id == id; }); itProfile != _profiles.end())
-			return std::cref(*itProfile);
-		return std::nullopt;
+			return make_optional_cref(*itProfile);
+		return fig::nullref;
 	}
 
 	UserContentManager& UserManager::GetContent()

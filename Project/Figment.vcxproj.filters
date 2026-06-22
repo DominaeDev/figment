@@ -1324,6 +1324,12 @@
     <ClInclude Include="include\chat\UserDefinedOptions.h">
       <Filter>Source Files\Chat</Filter>
     </ClInclude>
+    <ClInclude Include="include\util\OptionalRef.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\ExpectedRef.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

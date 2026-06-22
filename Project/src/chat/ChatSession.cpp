@@ -26,7 +26,7 @@ namespace fig::chat
 			return "USR";
 
 		if (auto try_character = _staging.GetCharacterByRole(role))
-			return ucase((*try_character).get().chatId);
+			return ucase((*try_character).chatId);
 		return "_UNK";
 	}
 
@@ -40,7 +40,7 @@ namespace fig::chat
 			return fig::string { Constants::Chat::Names::Director };
 
 		if (auto try_character = _staging.GetCharacterByRole(role))
-			return (*try_character).get().shortName;
+			return (*try_character).shortName;
 
 		return fig::string { Constants::Chat::Names::Unknown };
 	}
@@ -49,7 +49,7 @@ namespace fig::chat
 	{
 		if (auto try_character = _staging.GetCharacterByRole(role))
 		{
-			auto& character = (*try_character).get();
+			auto& character = *try_character;
 			if (character.bgColor.IsDefined() && character.borderColor.IsDefined())
 			{
 				return ColorPair {

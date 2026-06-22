@@ -122,9 +122,12 @@ namespace fig
 
 			if (userMngr.SignInDefaultProfile())
 			{
-				auto& assetMngr = userMngr.GetContent().GetAssetManager();
-				assetMngr.CreateProfilePicture(userMngr.GetActiveProfile(), path);
-				userMngr.SignOut();
+				if (auto profile = userMngr.GetActiveProfile())
+				{
+					auto& assetMngr = userMngr.GetContent().GetAssetManager();
+					assetMngr.CreateProfilePicture(*profile, path);
+					userMngr.SignOut();
+				}
 			}
 		}
 	}
