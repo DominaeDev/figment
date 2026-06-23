@@ -11,7 +11,6 @@
 
 #include <format>
 
-
 #define USER_RIGHT_ALIGNED	1
 #define USER_YOU			1
 
@@ -69,12 +68,15 @@ namespace fig::gui
 #endif
 #if USER_YOU
 			if (!name.empty())
-				name = "You";
+				name = Constants::Chat::Names::User;
 #endif
 		}
+		if (!name.empty() and msgType != MessageType::SystemMessage)
+			_style |= Style::Name;
 
 		bool bRight = (_style & Style::Right) == Style::Right;
 		bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
+		bool bShowName = (_style & Style::Name) == Style::Name;
 
 		if (_bShowAvatar)
 		{
@@ -97,7 +99,7 @@ namespace fig::gui
 
 		_pMessagePanel = new Panel(this);
 
-		if ((_style & Style::Dialogue) == Style::Dialogue)
+		if (bDialogue)
 		{
 			if (bRight)
 			{
@@ -120,7 +122,7 @@ namespace fig::gui
 		_pSpeechBubbleBG->SetExtend(5.0f);
 		_pSpeechBubbleBorder->SetExtend(5.0f);
 
-		_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), _name.empty() ? 0 : TOP_OFFSET); // Left
+		_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), bShowName ? TOP_OFFSET : 0); // Left
 		_pMessagePanel->SetBackgroundRenderer(_pSpeechBubbleBG);
 		_pMessagePanel->SetBorderRenderer(_pSpeechBubbleBorder);
 
@@ -137,7 +139,7 @@ namespace fig::gui
 		_pMessageText->SetMaxSize(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2, -1);
 
 		// Name label
-		if (!name.empty())
+		if ((_style & Style::Name) == Style::Name)
 		{
 			_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
 			_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
@@ -191,6 +193,7 @@ namespace fig::gui
 	{
 		bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
 		bool bRight = (_style & Style::Right) == Style::Right;
+		bool bShowName = (_style & Style::Name) == Style::Name;
 
 		strip_ends(text, _messageType);
 
@@ -224,7 +227,7 @@ namespace fig::gui
 		if (currentHeight < h)
 		{
 			_pMessagePanel->SetHeight(h);
-			SetHeight(std::max(_pMessagePanel->GetHeight() + (_name.empty() ? 0 : TOP_OFFSET) + BOTTOM_MARGIN, MIN_HEIGHT));
+			SetHeight(std::max(_pMessagePanel->GetHeight() + (bShowName ? TOP_OFFSET : 0) + BOTTOM_MARGIN, MIN_HEIGHT));
 		}
 
 		int currentWidth = toI(_pMessagePanel->GetWidth());

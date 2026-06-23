@@ -3,6 +3,8 @@
 #include "chat/ChatStaging.h"
 #include "text/TextEvaluator.h"
 
+using namespace fig::data;
+
 namespace fig::chat
 {
 	static void ApplyOptions(Context& context, const PromptScaffold& scaffold)
@@ -24,9 +26,11 @@ namespace fig::chat
 		}
 	}
 
-	std::vector<PromptBlock> PromptBuilder::GetBlocks(const PromptScaffold& scaffold, ChatStaging& staging) noexcept
+	std::vector<PromptBlock> PromptBuilder::GetStagingBlocks(ChatStaging& staging) noexcept
 	{
+		auto& scaffold = staging.GetPromptScaffold();
 		std::vector<PromptBlock> out_blocks;
+
 		for (size_t i = 0; i < scaffold.blocks.size(); ++i)
 		{
 			auto& block = scaffold.blocks[i];
@@ -99,6 +103,7 @@ namespace fig::chat
 				});
 			}
 		}
+
 		return out_blocks;
 	}
 }

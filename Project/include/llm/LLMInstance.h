@@ -71,7 +71,7 @@ namespace fig::llm
 		// Tasks
 		bool GreetUser();
 		bool SendMessage(fig::string message);
-		bool PushMessage(fig::chat::Role role, fig::string message, fig::chat::MessageType msgType = fig::chat::MessageType::Undefined, bool visible = true, int ttl = 0);
+		bool PushMessage(fig::chat::Role role, const fig::string& message, fig::chat::MessageType msgType = fig::chat::MessageType::Undefined, bool visible = true, int ttl = 0);
 		bool Instigate(fig::chat::Role role, fig::chat::MessageType msgType, int messageCount = 0);
 		bool Instruct(fig::string instructions);
 		std::vector<RemovedMessage> EraseMessages(int numMessages = 1);
@@ -96,7 +96,10 @@ namespace fig::llm
 	private:
 		void ClearResponseQueue();
 		bool CanGenerate() const;
-
+		bool PushDirection(const fig::string& message, int32_t ttl = 1);
+		bool PushNarration(const fig::string& message);
+		bool PushUserDialogue(const fig::string& message);
+		bool PushUserMessage(const fig::string& message); // User-facing
 	public:
 		enum class GenerateFlag : int32_t
 		{

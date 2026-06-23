@@ -53,6 +53,7 @@ namespace fig
 
         bool operator==(string_view_type other) const { return _value == normalize_handle(other, MaxLength); }
         auto operator<=>(string_view_type other) const { return _value <=> normalize_handle(other, MaxLength); }
+        bool operator==(const T* value) const { return _value == normalize_handle(value, MaxLength); }
         
     private:
         string_type _value;

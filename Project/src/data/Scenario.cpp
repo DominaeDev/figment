@@ -9,6 +9,20 @@ using namespace fig::chat;
 
 namespace fig::data
 {
+	bool Scenario::OnLoadFromXml(fig::io::XmlReaderElement xml)
+	{
+		size_t bot_index = 0uz;
+		for (auto& slot : roles)
+		{
+			if (slot.flags.IsSet(RoleSlot::Flag::User))
+				slot.role = Role::User;
+			else
+				slot.role = bot_from_index(bot_index++);
+		}
+
+		return true;
+	}
+
 	bool Scenario::Validate() const noexcept
 	{
 		if (roles.empty())
@@ -36,60 +50,61 @@ namespace fig::data
 		return true;
 	}
 
-	static void ReadBlockSequences(XmlReaderElement xml, std::vector<Story::BlockSequence>& seqs)
+	static void ReadMessages(XmlReaderElement xml, std::vector<Story::Message>& messages)
 	{
 		auto try_node = xml.GetFirstElementAny();
 		while (try_node)
 		{
 			auto& node = try_node.value();
 			auto nodeName = node.GetName();
-			Story::BlockSequence blockSeq;
+			Story::Message message;
 
 			if (nodeName == "UserMessage")
 			{
-				blockSeq.type = Story::BlockSequence::Type::UserMessage;
-				blockSeq.role = Role::Undefined;
+				message.type = Story::Message::Type::UserMessage;
 			}
 			else if (nodeName == "Message")
 			{
-				blockSeq.type = Story::BlockSequence::Type::Message;
-				blockSeq.role = enum_deserialize(node["role"].Get<fig::string>(), RoleMapping, Role::Undefined);
+				message.type = Story::Message::Type::Message;
+				message.role_handle = node["role"].Get<fig::string>();
+				message.ttl = node["duration"].Get<int32_t>(-1);
 			}
 			else if (nodeName == "Director")
 			{
-				blockSeq.type = Story::BlockSequence::Type::Message;
-				blockSeq.role = Role::Director;
+				message.type = Story::Message::Type::Message;
+				message.role_handle = "director";
+				message.ttl = node["duration"].Get<int32_t>(2);
 			}
 			else if (nodeName == "Narrator")
 			{
-				blockSeq.type = Story::BlockSequence::Type::Message;
-				blockSeq.role = Role::Narrator;
+				message.type = Story::Message::Type::Message;
+				message.role_handle = "narrator";
+				message.ttl = node["duration"].Get<int32_t>(-1);
 			}
 			else
 				goto next;
 
-			blockSeq.content = node.GetValue<fig::string>();
-			blockSeq.ttl = node["duration"].Get<int32_t>(-1);
-			blockSeq.condition = Condition(node["duration"].Get<fig::string>(), true);
+			message.condition = Condition(node["condition"].Get<fig::string>(), true);
+			message.content = node.GetValue<fig::string>();
 
-			seqs.emplace_back(std::move(blockSeq));
+			messages.emplace_back(std::move(message));
 
 		next:
 			try_node = node.GetNextSiblingAny();
 		}
 	}
 
-	static void WriteBlockSequences(XmlWriterElement xml, const std::vector<Story::BlockSequence>& seqs)
+	static void WriteMessages(XmlWriterElement xml, const std::vector<Story::Message>& messages)
 	{
-		for (auto& blockSeq : seqs)
+		for (auto& message : messages)
 		{
 			fig::string elementName;
-			switch (blockSeq.type)
+			switch (message.type)
 			{
-				case Story::BlockSequence::Type::Message:
+				case Story::Message::Type::Message:
 					elementName = "Message";
 					break;
-				case Story::BlockSequence::Type::UserMessage:
+				case Story::Message::Type::UserMessage:
 					elementName = "UserMessage";
 					break;
 				default:
@@ -97,10 +112,10 @@ namespace fig::data
 			}
 			auto node = xml.AddChild(elementName);
 
-			if (blockSeq.role != Role::Undefined)
-				node["role"].Set(enum_serialize(blockSeq.role, RoleMapping));
-			node["duration"].Set(blockSeq.ttl);
-			node["condition"].Set((fig::string)blockSeq.condition);
+			if (not message.role_handle.empty())
+				node["role"].Set(message.role_handle);
+			node["duration"].Set(message.ttl);
+			node["condition"].Set((fig::string)message.condition);
 		}
 	}
 
@@ -122,27 +137,27 @@ namespace fig::data
 
 		// Read intro
 		if (auto introNode = xml.GetFirstElement("Intro"))
-			ReadBlockSequences(introNode.value(), introBlocks);
+			ReadMessages(introNode.value(), intro);
 
 		// Read outro
 		if (auto outroNode = xml.GetFirstElement("Outro"))
-			ReadBlockSequences(outroNode.value(), outroBlocks);
+			ReadMessages(outroNode.value(), outro);
 
 		return FileError::NoError;
 	}
 
 	void Story::SaveToXml(fig::io::XmlWriterElement xml) const noexcept
 	{
-		if (not introBlocks.empty())
+		if (not intro.empty())
 		{
 			auto introNode = xml.AddChild("Intro");
-			WriteBlockSequences(introNode, introBlocks);
+			WriteMessages(introNode, intro);
 		}
 
-		if (not outroBlocks.empty())
+		if (not outro.empty())
 		{
 			auto outroNode = xml.AddChild("Outro");
-			WriteBlockSequences(outroNode, outroBlocks);
+			WriteMessages(outroNode, outro);
 		}
 
 		for (auto& chapter : chapters)

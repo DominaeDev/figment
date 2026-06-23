@@ -104,9 +104,11 @@ namespace fig::Constants
 			constexpr fig::const_string Narrator = "Narrator";
 			constexpr fig::const_string Director = "Director";
 			constexpr fig::const_string Unknown = "Unknown";
+			constexpr fig::const_string User = "You";
 		}
 
 		constexpr fig::gui::Coord SmallPortraitWidth = 56;
+		constexpr std::array<fig::const_string, 23> ReservedCharacterIDs { "user", "char", "current", "director", "narrator", "system", "char1", "char2", "char3", "char4", "char5", "char6", "char7", "char8", "char", "bot1", "bot2", "bot3", "bot4", "bot5", "bot6", "bot7", "bot8"};
 	}
 
 	namespace DefaultModelSettings

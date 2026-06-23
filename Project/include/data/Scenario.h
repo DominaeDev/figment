@@ -8,22 +8,24 @@
 #include "text/Condition.h"
 #include "io/Xml.h"
 #include "io/IXmlSerializable.h"
+#include "chat/ChatTypes.h"
 
 namespace fig::data
 {
 	struct Story
 	{
-		struct BlockSequence
+		struct Message
 		{
-			enum class Type {
+			enum class Type 
+			{
 				Undefined,
-				UserMessage,
 				Message,
+				UserMessage,
 			};
 
 			Type type {};
+			fig::handle role_handle {};
 			fig::string content {};
-			fig::chat::Role role {};
 			Condition condition {};
 			int32_t ttl { -1 };
 		};
@@ -41,9 +43,9 @@ namespace fig::data
 
 				return Fields(
 					AsAttribute { "id",				&Step::id },
-					AsElement { "Condition",		&Step::condition },
-					AsElement { "Duration",		&Step::ttl },
-					AsText { &Step::content }
+					AsElement	{ "Condition",		&Step::condition },
+					AsElement	{ "Duration",		&Step::ttl },
+					AsElement	{ "Content",		&Step::content }
 				);
 
 				static_assert(XmlSerializable<Step>);
@@ -62,7 +64,7 @@ namespace fig::data
 				return Fields(
 					AsElement { "Title",		&Chapter::title },
 					AsElement { "Step",			&Chapter::steps }
-					.Collection("Steps")
+						.Collection("Steps")
 				);
 
 				static_assert(XmlSerializable<Chapter>);
@@ -70,8 +72,8 @@ namespace fig::data
 		};
 
 		std::vector<Chapter> chapters;
-		std::vector<BlockSequence> introBlocks;
-		std::vector<BlockSequence> outroBlocks;
+		std::vector<Message> intro;
+		std::vector<Message> outro;
 
 		fig::io::FileError LoadFromXml(fig::io::XmlReaderElement xml) noexcept;
 		void SaveToXml(fig::io::XmlWriterElement xml) const noexcept;
@@ -96,13 +98,14 @@ namespace fig::data
 				std::pair { Flag::User,		"user" },
 			};
 
-			fig::string id;
+			fig::chat::Role role;
+			fig::handle id;
 			fig::string label;
 			fig::string brief;
 			Validation validation {};
 			Flags flags {};
 
-			constexpr bool IsValid() const
+			inline bool IsValid() const
 			{
 				return not (id.empty() or label.empty());
 			}
@@ -113,10 +116,10 @@ namespace fig::data
 
 				return Fields(
 					AsAttribute { "id",			&RoleSlot::id },
-					AsElement { "Label",		&RoleSlot::label },
-					AsElement { "Brief",		&RoleSlot::brief },
-					AsElement { "Condition",	&RoleSlot::validation },
-					AsElement { "Flags",		&RoleSlot::flags,
+					AsElement	{ "Label",		&RoleSlot::label },
+					AsElement	{ "Brief",		&RoleSlot::brief },
+					AsElement	{ "Condition",	&RoleSlot::validation },
+					AsElement	{ "Flags",		&RoleSlot::flags,
 						[](const Flags& value) { return enum_serialize_flags(value, FlagMapping); },
 						[](auto& value) { return enum_deserialize_flags(value, FlagMapping); }
 					}
@@ -134,6 +137,8 @@ namespace fig::data
 		const std::vector<RoleSlot>& GetRoleSlots() const noexcept { return roles; }
 		std::pair<fig::string, fig::string> GetInfo() const noexcept { return std::make_pair(title, description); }
 		const Story& GetStory() const noexcept { return story; }
+
+		bool OnLoadFromXml(fig::io::XmlReaderElement xml) override;
 
 	private:
 		fig::string title;

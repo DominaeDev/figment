@@ -56,6 +56,7 @@ namespace fig::gui
 
 			Left = 1 << 3,
 			Right = 1 << 4,
+			Name = 1 << 5,
 		};
 		int _style = Style::Default;
 	};

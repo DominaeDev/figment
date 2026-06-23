@@ -1,6 +1,16 @@
 <Macros>
 	<!-- Characters -->
 	<Macro id="char">{current:name}</Macro>
+	<Macro id="char's">{bot1:name}'s</Macro>
+	<Macro id="user's">{user:name}'s</Macro>
+	<Macro id="char1's">{bot1:name}'s</Macro>
+	<Macro id="char2's">{bot2:name}'s</Macro>
+	<Macro id="char3's">{bot3:name}'s</Macro>
+	<Macro id="char4's">{bot4:name}'s</Macro>
+	<Macro id="char5's">{bot5:name}'s</Macro>
+	<Macro id="char6's">{bot6:name}'s</Macro>
+	<Macro id="char7's">{bot7:name}'s</Macro>
+	<Macro id="char8's">{bot8:name}'s</Macro>
 
 	<Alias id="char">current:name</Alias>
 	<Alias id="char:">current</Alias>
@@ -9,6 +19,10 @@
 	<Alias id="char2:">bot2</Alias>
 	<Alias id="char3:">bot3</Alias>
 	<Alias id="char4:">bot4</Alias>
+	<Alias id="char5:">bot5</Alias>
+	<Alias id="char6:">bot6</Alias>
+	<Alias id="char7:">bot7</Alias>
+	<Alias id="char8:">bot8</Alias>
 	
 	<Alias id="user">user:name</Alias>
 	<Alias id="u:">user</Alias>

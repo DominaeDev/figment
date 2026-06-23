@@ -11,7 +11,7 @@ namespace fig::chat
 	class PromptBuilder
 	{
 	public:
-		static std::vector<PromptBlock> GetBlocks(const PromptScaffold& scaffold, ChatStaging& staging) noexcept;
+		static std::vector<PromptBlock> GetStagingBlocks(ChatStaging& staging) noexcept;
 	};
 }
 #endif

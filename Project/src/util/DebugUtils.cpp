@@ -188,7 +188,7 @@ namespace fig
 						and staging.AddCharacter({}, Role::User, user))) //! @temp
 						return;
 
-					auto blocks = staging.GetPromptBlocks();
+					auto blocks = staging.GetStagingBlocks();
 
 					fig::string text = blocks
 						| std::views::transform([](auto&& b) { return b.content; })

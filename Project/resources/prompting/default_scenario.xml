@@ -22,7 +22,7 @@
 		<Intro>
 			<UserMessage>{ai} joined the conversation.</UserMessage>
 			<UserMessage>{user} joined the conversation.</UserMessage>
-			<Director ttl="1">{user} is here. {ai:name} introduces {ai:themselves} and suggests a topic.</Director>
+			<Director ttl="1">{user} is here. Introduce yourself and suggests a topic for your conversation.</Director>
 			<Narrator/>
 			<Message role="ai"/>
 		</Intro>

@@ -37,11 +37,14 @@ namespace fig::io
 			return self.LoadFromXml(xml.GetRoot());
 		}
 
-		FileError LoadFromXml(this XmlSerializable auto& self, const XmlReaderElement& node) noexcept
+		FileError LoadFromXml(this XmlSerializable auto& self, XmlReaderElement node) noexcept
 		{
 			if (not XmlDeserialize(node, self))
 				return FileError::UnrecognizedFormat;
 			
+			if (not self.OnLoadFromXml(node))
+				return FileError::ReadError;
+
 			if (not self.Validate())
 				return FileError::ReadError;
 
@@ -66,13 +69,14 @@ namespace fig::io
 			xml.WriteToMemory(buffer);
 		}
 
-		void SaveToXml(this const XmlSerializable auto& self, XmlWriterElement& node) noexcept
+		void SaveToXml(this const XmlSerializable auto& self, XmlWriterElement node) noexcept
 		{
 			XmlSerialize(node, self);
 		}
 
 	protected:
 		virtual bool Validate() const noexcept { return true; }
+		virtual bool OnLoadFromXml(XmlReaderElement node) { return true; }
 
 	private:
 		fig::string _rootName;

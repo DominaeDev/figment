@@ -15,6 +15,7 @@
 
 using namespace std::chrono_literals;
 using namespace fig::io;
+using namespace fig::data;
 using namespace fig::chat;
 
 template<typename T>
@@ -22,6 +23,11 @@ void queue_clear(std::queue<T>& q)
 {
 	std::queue<T> empty;
 	std::swap(q, empty);
+}
+
+inline constexpr fig::string Dialogue(fig::string_view text)
+{
+	return "\"" + toStr(text) + "\"";
 }
 
 inline constexpr fig::string Direction(fig::string_view text)
@@ -60,7 +66,7 @@ namespace fig::llm
 		Halt();
 	}
 
-	bool LLMInstance::Initialize(LLMChatArguments args)
+	bool LLMInstance::Initialize(LLMChatArguments args) //! @todo: Run in background thread
 	{
 		_pStatus->EmitSignal(LLMStatusEvent::ChatInitializing);
 
@@ -119,6 +125,7 @@ namespace fig::llm
 		ContextCursor& cursor_pos = _contextState.cursor_pos = 0;
 
 		auto [template_prefix, template_suffix] = get_chat_template_prefix_suffix(Role::System, "");
+		auto promptBlocks = staging.GetStagingBlocks();
 
 		if (bMultiSequence) // Initialize a sequence for each bot
 		{
@@ -134,8 +141,6 @@ namespace fig::llm
 			});
 
 			int32_t attn_pos = toI(template_prefix_tokens.size());
-
-			auto promptBlocks = staging.GetPromptBlocks();
 			int32_t persona_pos = -1;
 
 			for (auto& pb : promptBlocks)
@@ -204,8 +209,6 @@ namespace fig::llm
 			});
 
 			int32_t attn_pos = toI(template_prefix_tokens.size());
-
-			auto promptBlocks = staging.GetPromptBlocks();
 			int32_t persona_pos = -1;
 
 			for (auto& pb : promptBlocks)
@@ -436,7 +439,7 @@ namespace fig::llm
 
 		if constexpr (Disabled) // State vars
 		{
-			// Add state block (preface)
+			// Add state msg (preface)
 			if (!args.isContinuation && _options.flags.IsSet(ChatOptions::Flag::StateVariables) && !_stateVars.IsEmpty())
 			{
 				auto itState = find_last_if(blocks, [](const ContextBlock& block) { return block.role == Role::User && !block.is_static() && !block.is_cached(); });
@@ -1191,7 +1194,41 @@ namespace fig::llm
 		});
 	}
 
-	bool LLMInstance::PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int ttl)
+	bool LLMInstance::PushDirection(const fig::string& message, int32_t ttl)
+	{
+		return PushMessage(Role::Director, Direction(message), MessageType::Direction, false, ttl);
+	}
+
+	bool LLMInstance::PushNarration(const fig::string& message)
+	{
+		return PushMessage(Role::Narrator, Narration(message), MessageType::Narration);
+	}
+
+	bool LLMInstance::PushUserDialogue(const fig::string& message)
+	{
+		return PushMessage(Role::User, Dialogue(message), MessageType::Dialogue);
+	}
+
+	bool LLMInstance::PushUserMessage(const fig::string& message)
+	{
+		if (empty_or_whitespace(message))
+			return false;
+
+		fig::uuid subMessageId = _CreateUUID();
+		LockAndDo([&]() {
+			_resultQueue.push(MessagePiece {
+				.subMessageId = subMessageId,
+				.identifier = "system",
+				.content = message,
+				.role = Role::System,
+				.msgType = MessageType::SystemMessage,
+				.isComplete = true,
+			});
+		}, _resultMutex);
+		return true;
+	}
+
+	bool LLMInstance::PushMessage(Role role, const fig::string& message, MessageType msgType, bool visible, int ttl)
 	{
 		if (empty_or_whitespace(message))
 			return false;
@@ -1412,7 +1449,7 @@ namespace fig::llm
 					newBlock.content.pop_back(); // Trim scaffolding char
 			}
 		}
-		_contextState.AppendBlock(newBlock); // Reinsert block
+		_contextState.AppendBlock(newBlock); // Reinsert msg
 		_contextState.response_pos = _contextState.token_pos; // Beginning of continued message
 
 		prepareArgs = PrepareArguments {
@@ -1435,16 +1472,50 @@ namespace fig::llm
 
 	bool LLMInstance::GreetUser()
 	{
-		if (auto text = ReadTextFile("./resources/prompting/prompt_greeting.txt"))
+		// Story introduction
+		auto& staging = _session.GetStaging();
+		auto& story = staging.GetScenario().GetStory();
+		if (not story.intro.empty())
 		{
-			fig::string greetingInstruction = eval_text(text.value(), _session.GetStaging().GetContext());
+			auto& ctx = staging.GetContext();
+			for (auto& msg : story.intro)
+			{
+				if (not msg.condition.Evaluate(ctx))
+					continue; // Skip
 
-			PushMessage(Role::Director, Direction(greetingInstruction), MessageType::Direction, false, 1);
-			Instigate(Role::Narrator, MessageType::Narration, 1);
-			Instigate(Role::Undefined, MessageType::Dialogue, 3);
-			return true;
+				if (msg.type == Story::Message::Type::Message)
+				{
+					fig::string content = eval_text(msg.content, ctx);
+					auto role = staging.GetRoleFromHandle(msg.role_handle);
+					if (role == Role::Director)
+						PushDirection(content, msg.ttl);
+					else if (role == Role::Narrator)
+					{
+						if (not content.empty())
+							PushNarration(content);
+						else
+							Instigate(Role::Narrator, MessageType::Narration, 1);
+					}
+					else if (is_bot(role))
+					{
+						if (not content.empty())
+							PushMessage(role, content, MessageType::Undefined); //! @todo: split message by type
+						else
+							Instigate(role, MessageType::Dialogue);
+					}
+					else if (is_user(role))
+					{
+						PushUserDialogue(content); //! @todo: split message by type
+					}
+				}
+				else if (msg.type == Story::Message::Type::UserMessage)
+				{
+					fig::string content = eval_text(msg.content, ctx);
+					PushUserMessage(content);
+				}
+			}
 		}
-		return false;
+		return true;
 	}
 
 	bool LLMInstance::Instruct(fig::string instructions)
@@ -1605,7 +1676,7 @@ namespace fig::llm
 		auto& blocks = _contextState.GetBlocks();
 		size_t persona_idx = find_index(blocks, [](const ContextBlock& b) { return b.flags.IsSet(ContextBlockFlag::Persona); });
 		if (persona_idx == fig::npos)
-			return false; // No persona block
+			return false; // No persona msg
 
 		LogLn();
 		LogLn(std::format(">> Swapping persona -> {}", get_bot_index(role)));

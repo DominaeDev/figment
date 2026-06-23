@@ -157,6 +157,7 @@ namespace fig
 
 		void SetAlias(fig::handle alias, const ContextLocator& target) noexcept;
 		void SetAlias(fig::handle alias, const ContextSelector& target) noexcept;
+		void SetMacro(fig::handle macro, const fig::string& value) noexcept;
 
 		void SetPrimarySelector(ContextSelector selector) { _primarySelector = selector; }
 		inline fig::optional_ref<Context> TryGetPrimaryContext(fig::handle name) noexcept 

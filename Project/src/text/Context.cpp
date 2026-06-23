@@ -395,6 +395,11 @@ namespace fig
 		_pCustomMacroProvider->AddSelectorAlias(alias, target);
 	}
 
+	void Context::SetMacro(fig::handle macro, const fig::string& value) noexcept
+	{
+		_pCustomMacroProvider->AddMacro(macro, value);
+	}
+
 	void Context::SetMacroProvider(std::weak_ptr<fig::text::MacroProvider> pMacroProvider)
 	{
 		_pGlobalMacroProvider = pMacroProvider;

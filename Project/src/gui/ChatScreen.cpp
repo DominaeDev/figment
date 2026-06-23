@@ -349,10 +349,13 @@ namespace fig::gui
 
 	EventResult ChatScreen::OnEvent(Event& event)
 	{
+		if (IsUserEvent(event, UserEvent::LLMChatInitializing))
+		{
+//			_pChatScroll->ClearMessages(); //! @todo: Uncomment when chat initialization is asynchronous
+		}
 		if (IsUserEvent(event, UserEvent::LLMChatInitialized))
 		{
 			auto pLLMInstance = Global::GetLLMInstance();
-			_pChatScroll->ClearMessages();
 			if (pLLMInstance)
 			{
 				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());

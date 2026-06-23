@@ -97,6 +97,45 @@ namespace fig::chat
 		return fig::nullref;
 	}
 
+	Role ChatStaging::GetRoleFromHandle(const fig::handle& handle) const
+	{
+		if (handle == "char" || handle == "char1" || handle == "bot1")
+			return Role::Bot1;
+		else if (handle == "user")
+			return Role::User;
+		else if (handle == "narrator")
+			return Role::Narrator;
+		else if (handle == "director")
+			return Role::Director;
+		else if (handle == "system")
+			return Role::System;
+		else if (handle == "char2" || handle == "bot2")
+			return Role::Bot2;
+		else if (handle == "char3" || handle == "bot3")
+			return Role::Bot3;
+		else if (handle == "char4" || handle == "bot4")
+			return Role::Bot4;
+		else if (handle == "char5" || handle == "bot5")
+			return Role::Bot5;
+		else if (handle == "char6" || handle == "bot6")
+			return Role::Bot6;
+		else if (handle == "char7" || handle == "bot7")
+			return Role::Bot7;
+		else if (handle == "char8" || handle == "bot8")
+			return Role::Bot8;
+
+		// Role slots
+		auto& slots = _scenario.GetRoleSlots();
+		if (auto itSlot = std::ranges::find_if(slots, [&](auto& s) { return s.id == handle; }); itSlot != std::cend(slots))
+			return (*itSlot).role;
+		return Role::Undefined;
+	}
+
+	fig::optional_cref<Character> ChatStaging::GetCharacterByRole(fig::handle handle) const noexcept
+	{
+		return GetCharacterByRole(GetRoleFromHandle(handle));
+	}
+
 	fig::optional_cref<Character> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
 	{
 		if (name.empty() || _characters.empty())
@@ -209,9 +248,9 @@ namespace fig::chat
 		return "";
 	}
 
-	std::vector<PromptBlock> ChatStaging::GetPromptBlocks()
+	std::vector<PromptBlock> ChatStaging::GetStagingBlocks()
 	{
-		return PromptBuilder::GetBlocks(_promptScaffold, *this);
+		return PromptBuilder::GetStagingBlocks(*this);
 	}
 
 	fig::uuid ChatStaging::GenerateUUID() const noexcept
@@ -251,18 +290,36 @@ namespace fig::chat
 		_context.Clear();
 		_context.SetMacroProvider(Global::GetMacroProvider());
 
+		// Characters
 		for (auto& kvp : _charactersByRole)
 		{
 			auto role = kvp.first;
 			auto& character = _characters[kvp.second];
 			_context.AddContext(ContextSelector::FromRole(role)[0], character);
 		}
-
 		_context.SetValue("__num_bots", GetBotCount());
+
+		// Set role aliases
+		for (auto& slot : _scenario.GetRoleSlots())
+		{
+			if (std::ranges::find(Constants::Chat::ReservedCharacterIDs, slot.id) == std::cend(Constants::Chat::ReservedCharacterIDs))
+			{
+				_context.SetAlias(slot.id, ContextSelector::FromRole(slot.role));
+				_context.SetMacro(slot.id, std::format("{{{}:name}}", (fig::string)slot.id));
+			}
+		}
+
+		// Scenario
+		if (auto firstStep = _scenario.GetStory().GetStep(0uz, 0uz)) //! @todo: current step
+		{
+			fig::string scenario = eval_text((*firstStep).content, _context);
+			_context.SetValue("scenario", scenario);
+		}
 	}
 
 	const fig::string& ChatStaging::GetGrammar() const
 	{
 		return _promptScaffold.grammar;
 	}
+
 } // namespace
