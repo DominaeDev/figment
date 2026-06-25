@@ -33,6 +33,7 @@ namespace fig
 			Not,
 			Identifier,
 			Number,
+			Probability,
 			Always,
 			Never,
 			Equal,
@@ -47,7 +48,7 @@ namespace fig
 		{
 			TokenType type = TokenType::End;
 			fig::string text;
-			float number {};
+			fig::fixed number {};
 		};
 
 		explicit ConditionParser(const fig::string& source);

@@ -156,7 +156,8 @@ namespace fig::data
 				AsElement { "Title",		&Scenario::title },
 				AsElement { "Description",	&Scenario::description },
 				AsElement { "Options",		&Scenario::userOptions },
-				AsElement { "Role",			&Scenario::roles },
+				AsElement { "Role",			&Scenario::roles }
+					.Collection("Roles"),
 				AsElement { "Story",		&Scenario::story }
 			);
 

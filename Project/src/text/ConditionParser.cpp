@@ -1,4 +1,5 @@
 #include <pch.h>
+#include <math.hpp>
 #include "text/ConditionParser.h"
 
 namespace fig
@@ -31,9 +32,21 @@ namespace fig
 		_current = NextToken();
 	}
 
+	static bool stricmp(const char* s, std::string_view word) noexcept
+	{
+		for (size_t i = 0; i < word.size(); ++i)
+		{
+			if (s[i] == '\0'
+				or (word[i] == ' ' and std::isspace(static_cast<unsigned char>(s[i]) == 0))
+				or std::tolower(static_cast<unsigned char>(s[i])) != std::tolower(static_cast<unsigned char>(word[i])))
+				return false;
+		}
+		return true;
+	}
+
 	ConditionParser::Token ConditionParser::NextToken()
 	{
-		while (_cursor < _end && std::isspace(static_cast<unsigned char>(*_cursor)))
+		while (_cursor < _end and std::isspace(static_cast<unsigned char>(*_cursor)))
 			++_cursor;
 
 		if (_cursor >= _end)
@@ -50,7 +63,7 @@ namespace fig
 				++_cursor;
 				return { TokenType::RightParen };
 			case '>':
-				if (_cursor + 1 < _end && _cursor[1] == '=')	// a >= b
+				if (_cursor + 1 < _end and _cursor[1] == '=')	// a >= b
 				{
 					_cursor += 2;
 					return { TokenType::GreaterOrEqual };
@@ -58,66 +71,71 @@ namespace fig
 				++_cursor;
 				return { TokenType::GreaterThan };
 			case '<':
-				if (_cursor + 1 < _end && _cursor[1] == '=')	// a <= b
+				if (stricmp(_cursor, "<="))	// a <= b
 				{
 					_cursor += 2;
 					return { TokenType::LessOrEqual };
 				}
-				if (_cursor + 1 < _end && _cursor[1] == '>')	// a <> b
+				if (stricmp(_cursor, "<>"))	// a <> b
 				{
 					_cursor += 2;
 					return { TokenType::NotEqual };
 				}
 				++_cursor;
 				return { TokenType::LessThan };
-			case '=':											// a = b
+			case '=': // a = b
 				++_cursor;
 				return { TokenType::Equal };
 			case '!':
-				if (_cursor + 1 < _end && _cursor[1] == '=')	// a != b
+				if (stricmp(_cursor, "!="))	// a != b
 				{
 					_cursor += 2;
 					return { TokenType::NotEqual };
 				}
 				return { TokenType::Error };
 			case 'g':
-				if (_cursor + 1 < _end && _cursor[1] == 't')	// a gt b
+			case 'G':
+				if (stricmp(_cursor, "gt ")) // a gt b
 				{
-					_cursor += 2;
+					_cursor += 3;
 					return { TokenType::GreaterThan };
 				}
-				if (_cursor + 1 < _end && _cursor[1] == 'e')	// a ge b
+				else if (stricmp(_cursor, "ge ")) // a ge b
 				{
-					_cursor += 2;
+					_cursor += 3;
 					return { TokenType::GreaterOrEqual };
 				}
 			case 'l':
-				if (_cursor + 1 < _end && _cursor[1] == 't')	// a lt b
+			case 'L':
+				if (stricmp(_cursor, "lt "))	// a lt b
 				{
-					_cursor += 2;
+					_cursor += 3;
 					return { TokenType::LessThan };
 				}
-				if (_cursor + 1 < _end && _cursor[1] == 'e')	// a le b
+				else if (stricmp(_cursor, "le "))	// a le b
 				{
-					_cursor += 2;
+					_cursor += 3;
 					return { TokenType::LessOrEqual };
 				}
 			case 'e':
-				if (_cursor + 1 < _end && _cursor[1] == 'q')	// a eq b
+			case 'E':
+				if (stricmp(_cursor, "eq "))	// a eq b
 				{
-					_cursor += 2;
+					_cursor += 3;
 					return { TokenType::Equal };
 				}
 			case 'i':
-				if (_cursor + 1 < _end && _cursor[1] == 's')	// a is b
+			case 'I':
+				if (stricmp(_cursor, "is "))	// a is b
 				{
-					_cursor += 2;
+					_cursor += 3;
 					return { TokenType::Equal };
 				}
 			case 'n':
-				if (_cursor + 2 < _end && _cursor[1] == 'e' && _cursor[2] == 'q')	// a neq b
+			case 'N':
+				if (stricmp(_cursor, "neq "))	// a neq b
 				{
-					_cursor += 3;
+					_cursor += 4;
 					return { TokenType::NotEqual };
 				}
 			default:
@@ -128,15 +146,28 @@ namespace fig
 		{
 			const char* start = _cursor;
 			char* parseEnd;
-			float value = std::strtof(_cursor, &parseEnd);
+			fig::fixed value = toFixed(std::strtof(_cursor, &parseEnd));
 			_cursor = parseEnd;
+
+			if (_cursor + 1 < _end and (*_cursor == ':' or *_cursor == 'd') and trunc(value) == value) // 1:2, 1d6
+			{
+				const char* denomStart = _cursor + 1;
+				char* denomEnd;
+				fig::fixed denom = toFixed(std::strtof(denomStart, &denomEnd));
+				if (denom >= 0_fp and trunc(denom) == denom) // b is integer
+				{
+					_cursor = denomEnd;
+					return { TokenType::Probability, fig::string(start, static_cast<size_t>(_cursor - start)) };
+				}
+			}
+
 			return { TokenType::Number, fig::string(start, static_cast<size_t>(_cursor - start)), value };
 		}
 
 		if (std::isalpha(static_cast<unsigned char>(character)) || character == '_')
 		{
 			const char* start = _cursor;
-			while (_cursor < _end && (std::isalnum(static_cast<unsigned char>(*_cursor)) || *_cursor == '_' || *_cursor == '-' || *_cursor == ':' || *_cursor == '.'))
+			while (_cursor < _end and (std::isalnum(static_cast<unsigned char>(*_cursor)) || *_cursor == '_' || *_cursor == '-' || *_cursor == ':' || *_cursor == '.'))
 				++_cursor;
 
 			fig::string text(start, static_cast<size_t>(_cursor - start));
@@ -228,66 +259,45 @@ namespace fig
 		return inner;
 	}
 
+	static std::optional<Fraction> parse_fraction(fig::string_view text, fig::string delimiters)
+	{
+		auto pos_delim = text.find_first_of(delimiters);
+		if (pos_delim == fig::string_view::npos)
+			return std::nullopt;
+
+		auto count = text.substr(0, pos_delim);
+		auto sides = text.substr(pos_delim + 1);
+		if (count.empty() or sides.empty())
+			return std::nullopt;
+
+		auto try_count = string_to_int(count);
+		auto try_sides = string_to_int(sides);
+		if (not try_count or not try_sides or *try_count <= 0 or *try_sides <= 0)
+			return std::nullopt;
+
+		return Fraction { *try_count, *try_sides };
+	}
+
 	std::expected<ConditionPtr, ConditionParseError> ConditionParser::ParseAtom()
 	{
-		if (_current.type == TokenType::Identifier)
+		CompareOperand lhsValue;
+		if (_current.type == TokenType::Number)
+			lhsValue = _current.number;
+		else if (_current.type == TokenType::Identifier)
 		{
-			CompareOperand lhsValue;
-			if (_current.type == TokenType::Number)
-				lhsValue = _current.number;
-			else if (_current.type == TokenType::Identifier)
-				lhsValue = std::move(_current.text);
+			lhsValue = std::move(_current.text);
+		}
+		else if (_current.type == TokenType::Probability)
+		{
+			if (auto try_prob = parse_fraction(_current.text, ":"); try_prob.has_value() and (*try_prob).numerator > 0 and (*try_prob).denominator > 0) // a:b
+			{
+				Advance();
+				return std::make_unique<RandomCondition>((*try_prob).numerator, (*try_prob).denominator);
+			}
+			else if (auto try_dice = parse_fraction(_current.text, "dD"); try_dice.has_value() and (*try_dice).numerator > 0 and (*try_dice).denominator > 0) // a:b
+				lhsValue = *try_dice;
 			else
 				return std::unexpected(ConditionParseError::InvalidValue);
-
-			Advance();
-
-			std::optional<CompareOperator> compareOperator;
-
-			switch (_current.type)
-			{
-				case TokenType::Equal:
-					compareOperator = CompareOperator::Equal;
-					break;
-				case TokenType::NotEqual:
-					compareOperator = CompareOperator::NotEqual;
-					break;
-				case TokenType::LessThan:
-					compareOperator = CompareOperator::LessThan;
-					break;
-				case TokenType::LessOrEqual:
-					compareOperator = CompareOperator::LessOrEqual;
-					break;
-				case TokenType::GreaterThan:
-					compareOperator = CompareOperator::GreaterThan;
-					break;
-				case TokenType::GreaterOrEqual:
-					compareOperator = CompareOperator::GreaterOrEqual;
-					break;
-				default:
-					break;
-			}
-
-			if (!compareOperator.has_value())
-			{
-				if (auto name = std::get_if<fig::string>(&lhsValue))
-					return std::make_unique<FlagCondition>(std::move(*name));
-				return std::unexpected(ConditionParseError::ExpectedIdentifier);
-			}
-
-			Advance();
-
-			CompareOperand rhsValue;
-			if (_current.type == TokenType::Number)
-				rhsValue = _current.number;
-			else if (_current.type == TokenType::Identifier)
-				rhsValue = std::move(_current.text);
-			else
-				return std::unexpected(ConditionParseError::InvalidValue);
-
-			Advance();
-
-			return std::make_unique<ComparisonCondition>(std::move(lhsValue), std::move(rhsValue), *compareOperator);
 		}
 		else if (_current.type == TokenType::Always)
 		{
@@ -299,7 +309,61 @@ namespace fig
 			Advance();
 			return std::make_unique<NeverCondition>();
 		}
-		return std::unexpected(ConditionParseError::ExpectedIdentifier);
+		else
+			return std::unexpected(ConditionParseError::InvalidValue);
 
+		Advance();
+
+		std::optional<CompareOperator> compareOperator;
+
+		switch (_current.type)
+		{
+			case TokenType::Equal:
+				compareOperator = CompareOperator::Equal;
+				break;
+			case TokenType::NotEqual:
+				compareOperator = CompareOperator::NotEqual;
+				break;
+			case TokenType::LessThan:
+				compareOperator = CompareOperator::LessThan;
+				break;
+			case TokenType::LessOrEqual:
+				compareOperator = CompareOperator::LessOrEqual;
+				break;
+			case TokenType::GreaterThan:
+				compareOperator = CompareOperator::GreaterThan;
+				break;
+			case TokenType::GreaterOrEqual:
+				compareOperator = CompareOperator::GreaterOrEqual;
+				break;
+			default:
+				break;
+		}
+
+		if (not compareOperator.has_value())
+		{
+			if (auto name = std::get_if<fig::string>(&lhsValue))
+				return std::make_unique<FlagCondition>(std::move(*name));
+			return std::unexpected(ConditionParseError::ExpectedIdentifier);
+		}
+
+		Advance();
+
+		CompareOperand rhsValue;
+		if (_current.type == TokenType::Number)
+			rhsValue = _current.number;
+		else if (_current.type == TokenType::Identifier)
+		{
+			if (auto dice = parse_fraction(_current.text, "dD"); dice.has_value() and (*dice).numerator > 0 and (*dice).denominator > 0) // a:b
+				rhsValue = *dice;
+			else
+				rhsValue = std::move(_current.text);
+		}
+		else
+			return std::unexpected(ConditionParseError::InvalidValue);
+
+		Advance();
+
+		return std::make_unique<ComparisonCondition>(std::move(lhsValue), std::move(rhsValue), *compareOperator);
 	}
 }

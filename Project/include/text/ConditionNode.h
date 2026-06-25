@@ -73,7 +73,12 @@ namespace fig
         GreaterOrEqual,
     };
 
-    using CompareOperand = std::variant<float, fig::string>;
+	struct Fraction
+	{
+        int32_t numerator;
+        int32_t denominator;
+	};
+	using CompareOperand = std::variant<fig::fixed, fig::string, Fraction>;
 
     class ComparisonCondition : public ConditionNode
     {
@@ -100,6 +105,19 @@ namespace fig
         explicit operator fig::string() const override;
     private:
         ContextLocator _flag;
+    };
+
+    class RandomCondition : public ConditionNode
+    {
+    public:
+        explicit RandomCondition(int32_t num, int32_t denom);
+        bool Evaluate(const EvaluationArgs& eval) const override;
+        ConditionPtr Clone() const override;
+
+        explicit operator fig::string() const override;
+    private:
+        int32_t _num;
+        int32_t _denom;
     };
 
     class AlwaysCondition : public ConditionNode

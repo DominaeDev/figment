@@ -10,9 +10,10 @@ namespace fig
 	{
 		Unescape				= 1 << 0,
 		CollapseWhitespace		= 1 << 1,
-		CapitalizeFirst			= 1 << 2,
-		CapitalizeSentences		= 1 << 3,
-		FixPunctuation			= 1 << 4,
+		CollapseNewlines		= 1 << 2,
+		CapitalizeFirst			= 1 << 3,
+		CapitalizeSentences		= 1 << 4,
+		FixPunctuation			= 1 << 5,
 	};
 	using TextEvaluationOptions = EnumFlags<TextEvaluationOption>;
 	extern TextEvaluationOptions DefaultTextEvalOptions;

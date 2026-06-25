@@ -59,27 +59,27 @@ namespace fig::data
 			auto nodeName = node.GetName();
 			Story::Message message;
 
-			if (nodeName == "UserMessage")
+			if (nodeName == "Info")
 			{
 				message.type = Story::Message::Type::UserMessage;
 			}
-			else if (nodeName == "Message")
+			else if (nodeName == "InvokeBot")
 			{
 				message.type = Story::Message::Type::Message;
 				message.role_handle = node["role"].Get<fig::string>();
 				message.ttl = node["duration"].Get<int32_t>(-1);
 			}
-			else if (nodeName == "Director")
-			{
-				message.type = Story::Message::Type::Message;
-				message.role_handle = "director";
-				message.ttl = node["duration"].Get<int32_t>(2);
-			}
-			else if (nodeName == "Narrator")
+			else if (nodeName == "InvokeNarrator")
 			{
 				message.type = Story::Message::Type::Message;
 				message.role_handle = "narrator";
 				message.ttl = node["duration"].Get<int32_t>(-1);
+			}
+			else if (nodeName == "Instruct")
+			{
+				message.type = Story::Message::Type::Message;
+				message.role_handle = "director";
+				message.ttl = node["duration"].Get<int32_t>(2);
 			}
 			else
 				goto next;
@@ -123,15 +123,18 @@ namespace fig::data
 	{
 		// Read chapters
 		chapters.clear();
-		if (auto chapterNode = xml.GetFirstElement("Chapter"))
+		if (auto chaptersNode = xml.GetFirstElement("Chapters"))
 		{
-			while (chapterNode)
+			if (auto chapterNode = (*chaptersNode).GetFirstElement("Chapter"))
 			{
-				Chapter chapter;
-				if (XmlDeserialize(chapterNode.value(), chapter))
-					chapters.emplace_back(std::move(chapter));
+				while (chapterNode)
+				{
+					Chapter chapter;
+					if (XmlDeserialize(chapterNode.value(), chapter))
+						chapters.emplace_back(std::move(chapter));
 
-				chapterNode = chapterNode.value().GetNextSibling();
+					chapterNode = chapterNode.value().GetNextSibling();
+				}
 			}
 		}
 
@@ -160,10 +163,14 @@ namespace fig::data
 			WriteMessages(outroNode, outro);
 		}
 
-		for (auto& chapter : chapters)
+		if (not chapters.empty())
 		{
-			auto chapterNode = xml.AddChild("Chapter");
-			XmlSerialize(chapterNode, chapter);
+			auto chaptersNode = xml.AddChild("Chapters");
+			for (auto& chapter : chapters)
+			{
+				auto chapterNode = chaptersNode.AddChild("Chapter");
+				XmlSerialize(chapterNode, chapter);
+			}
 		}
 	}
 

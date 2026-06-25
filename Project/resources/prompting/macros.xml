@@ -1,8 +1,6 @@
 <Macros>
 	<!-- Characters -->
 	<Macro id="char">{current:name}</Macro>
-	<Macro id="char's">{bot1:name}'s</Macro>
-	<Macro id="user's">{user:name}'s</Macro>
 	<Macro id="char1's">{bot1:name}'s</Macro>
 	<Macro id="char2's">{bot2:name}'s</Macro>
 	<Macro id="char3's">{bot3:name}'s</Macro>
@@ -27,8 +25,11 @@
 	<Alias id="user">user:name</Alias>
 	<Alias id="u:">user</Alias>
 	
+	<!-- Standard conditions -->
 	<Condition id="solo">not group</Condition>
 	<Condition id="group">__num_bots gt 1</Condition>
+	<Condition id="is_male">male or gender = male</Condition>
+	<Condition id="is_female">female or gender = female</Condition>
 
 	<!-- Pronouns -->
 	<Condition id="pronoun_mas">male or use_male_pronouns</Condition>

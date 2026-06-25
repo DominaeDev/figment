@@ -141,6 +141,9 @@
     <Filter Include="Source Files\Chat\Text">
       <UniqueIdentifier>{18600501-ae27-4354-89a8-ce200a7a96cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Third-party\fpm">
+      <UniqueIdentifier>{5c9890a5-1a01-45e7-91a1-61f4246ebe3f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -1329,6 +1332,15 @@
     </ClInclude>
     <ClInclude Include="include\util\ExpectedRef.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\fpm\include\ios.hpp">
+      <Filter>Source Files\Third-party\fpm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\fpm\include\math.hpp">
+      <Filter>Source Files\Third-party\fpm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\fpm\include\fixed.hpp">
+      <Filter>Source Files\Third-party\fpm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

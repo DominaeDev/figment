@@ -4,7 +4,7 @@
 
 namespace fig
 {
-	TextEvaluationOptions DefaultTextEvalOptions { TextEvaluationOption::Unescape, TextEvaluationOption::CollapseWhitespace, TextEvaluationOption::CapitalizeFirst, TextEvaluationOption::CapitalizeSentences, TextEvaluationOption::FixPunctuation, };
+	TextEvaluationOptions DefaultTextEvalOptions { TextEvaluationOption::Unescape, TextEvaluationOption::CollapseWhitespace, TextEvaluationOption::CapitalizeFirst, TextEvaluationOption::CapitalizeSentences, TextEvaluationOption::FixPunctuation };
 
 	struct TextSpan
 	{
@@ -283,6 +283,53 @@ namespace fig
 		return text;
 	}
 
+	void collapse_newlines(fig::string& text)
+	{
+		size_t trailing_newl = 0;
+		for (size_t i = text.size(); i > 0 and trailing_newl < 2; --i)
+		{
+			if (text[i - 1] == '\n')
+				++trailing_newl;
+			else
+				break;
+		}
+
+		size_t pos_read = 0;
+		size_t pos_write = 0;
+		size_t pos_line = 0;
+
+		for (; pos_read <= text.size(); ++pos_read)
+		{
+			if (pos_read == text.size() or text[pos_read] == '\n')
+			{
+				size_t const lineLength = pos_read - pos_line;
+
+				if (lineLength > 0)
+				{
+					if (pos_write > 0)
+					{
+						text[pos_write] = '\n';
+						++pos_write;
+					}
+
+					std::copy_n(text.begin() + pos_line, lineLength, text.begin() + pos_write);
+					pos_write += lineLength;
+				}
+
+				pos_line = pos_read + 1;
+			}
+		}
+
+		// Restore trailing newlines (at most two)
+		for (size_t i = 0; i < trailing_newl and pos_write > 0; ++i)
+		{
+			text[pos_write] = '\n';
+			++pos_write;
+		}
+
+		text.resize(pos_write);
+	}
+
 	static constexpr bool is_semantic_punctuation(char ch)
 	{
 		switch (ch)
@@ -495,6 +542,8 @@ namespace fig
 			clean_punctuation(text);
 		if (options.IsSet(TextEvaluationOption::CollapseWhitespace))
 			collapse_whitespace(text);
+		if (options.IsSet(TextEvaluationOption::CollapseNewlines))
+			collapse_newlines(text);
 		if (options.IsSet(TextEvaluationOption::Unescape))
 			unescape_inplace(text);
 		if (options.IsSet(TextEvaluationOption::CapitalizeSentences))

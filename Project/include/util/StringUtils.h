@@ -69,10 +69,13 @@ namespace fig
 
 	fig::string int_to_string(int32_t value);
 	fig::string float_to_string(float value);
+	fig::string fixed_to_string(fig::fixed value);
 	int32_t string_to_int(const fig::string_view& s, int32_t default_value);
 	float string_to_float(const fig::string_view& s, float default_value);
+	fig::fixed string_to_fixed(const fig::string_view& s, fig::fixed default_value);
 	std::optional<int32_t> string_to_int(const fig::string_view& s);
 	std::optional<float> string_to_float(const fig::string_view& s);
+	std::optional<fig::fixed> string_to_fixed(const fig::string_view& s);
 
 	size_t validate_utf8(const fig::string& text) noexcept;
 	fig::wstring from_utf8(const fig::string& str);

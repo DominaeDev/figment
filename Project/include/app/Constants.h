@@ -84,17 +84,18 @@ namespace fig::Constants
 
 	namespace Chat
 	{
-		constexpr fig::const_string DialogueTag = "talk";
-		constexpr fig::const_string ActionTag = "act";
-		constexpr fig::const_string ThoughtTag = "think";
-		constexpr fig::const_string NarrationTag = "narrator";
-		constexpr fig::const_string DirectionTag = "director";
-		constexpr fig::const_string StateReportTag = "change";
-		constexpr fig::const_string DialogueTagEnd = "/talk";
-		constexpr fig::const_string ActionTagEnd = "/act";
-		constexpr fig::const_string ThoughtTagEnd = "/think";
+		constexpr fig::const_string DialogueTag		= "dialogue";
+		constexpr fig::const_string DialogueTagEnd	= "/dialogue";
+		constexpr fig::const_string ActionTag		= "emote";
+		constexpr fig::const_string ActionTagEnd	= "/emote";
+		constexpr fig::const_string ThoughtTag		= "thinking";
+		constexpr fig::const_string ThoughtTagEnd	= "/thinking";
+		constexpr fig::const_string NarrationTag	= "narrator";
 		constexpr fig::const_string NarrationTagEnd = "/narrator";
+		constexpr fig::const_string DirectionTag	= "director";
 		constexpr fig::const_string DirectionTagEnd = "/director";
+
+		constexpr fig::const_string StateReportTag = "change";
 
 		constexpr int DefaultNarratorCooldown = 5;
 

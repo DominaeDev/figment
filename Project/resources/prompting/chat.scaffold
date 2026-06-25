@@ -2,60 +2,61 @@
 	<Name>Default chat</Name>
 	
 	<Options>
-		<Toggle id="enable-narrator" default="true">Enable Narrator</Toggle>
-		<Toggle id="enable-director" default="true">Enable Director</Toggle>
-		<Toggle id="enable-nsfw" default="true">Enable NSFW</Toggle>
+		<Toggle id="enable-narrator" default="true">
+			<Label>Enable Narrator</Label>
+			<Default>true</Default>
+		</Toggle>
+		<Toggle id="enable-director" default="true">
+			<Label>Enable Director</Label>
+			<Default>true</Default>
+		</Toggle>
+		<Toggle id="enable-think" default="true">
+			<Label>Enable Inner Monologue</Label>
+			<Default>true</Default>
+		</Toggle>
+		<Toggle id="enable-nsfw" default="true">
+			<Label>Enable NSFW instructions</Label>
+			<Default>true</Default>
+		</Toggle>
 	</Options>
 	
 	<Blocks>
 		<Block type="static" condition="solo" order="100" priority="high">
 			# Rules
-			You are an expert actor playing the role of "{char:name}". Respond only as {char}, and in accordance with their personality, mannerisms, behavior and quirks. You must not break character for any reason, even when you believe it's helpful, as this upset the audience and the user. Do not ask for permission before taking action or speaking. Do not ask the user for direction or consent. As an expert actor, you already know perfectly well what to say and do in accordance to the role you play. Beyond these rules you are free to say and do anything that your character would say or do.\n\n
+			You are an expert actor playing the role of "{char:name}". Respond only as {char}, and in accordance with their personality, mannerisms, behavior and quirks.
 		</Block>
 
 		<Block type="static" condition="group" order="100" priority="high">
 			# Rules
-			Respond as either {char1:name} or {char2:name} {char3? or {char3:name}} {char4? or {char4:name}} in accordance with their personality, character, and behavior. You must not break character for any reason, even when you believe it's helpful, as this upset the audience and the user. Do not ask for permission before taking action or speaking. Do not ask the user for direction or consent. As an expert actor, you already know perfectly well what to say and do in accordance to the role you play. Beyond these rules you are free to say and do anything that your character would say or do.\n\n
+			Respond as either {char1:name} or {char2:name} {char3? or {char3:name}} {char4? or {char4:name}} in accordance with their personality, character, and behavior.
+		</Block>
+		
+		<Block type="static" order="101" priority="high">
+			You must not break character for any reason, even when you believe it's helpful, as this upset the audience and the user. Do not ask for permission before taking action or speaking. Do not ask the user for direction or consent. As an expert actor, you already know perfectly well what to say and do in accordance to the role you play. Beyond these rules you are free to say and do anything that your character would say or do.\n\n
 		</Block>
 
 		<Block type="static" order="200" priority="high">
-			# Format Specification
-			Apply the following XML schema in your responses.\n\n
-		</Block>
-
-		<Block type="static" condition="solo" order="201" priority="high">
-			## Actions, Emoting (First person)
-			&lt;act="{char:id}"&gt;*smiles*&lt;/act&gt;
-			Use for conveying actions, emoting, and facial expressions, in the first person only. (Do NOT use this for narrative or descriptive text.)
-
-			## Speaking (First person)
-			&lt;talk="{char:id}"&gt;"Hi there!"&lt;/talk&gt;
-			Use to convey speech and dialogue.\n\n
-		</Block>
-
-		<Block type="static" condition="group" order="201" priority="high">
-			## Actions
-			Use when you are acting, or emoting, in the first person only. (Only for actions; narration is forbidden.)
-			Ex: &lt;act="@ID"&gt;*smiles*&lt;/act&gt;
-
-			## Speaking
-			Use when you are speaking, in the first person only. Always specify who is talking.
-			Ex: &lt;talk="@ID"&gt;"Hi there!"&lt;/talk&gt;\n\n
+			# Output Format
+			The transcript uses an XML-based schema, where each element is assigned to a specific participant:
+			
+			Dialogue: &lt;dialogue="{group?@}{char:id}"&gt;"Hi there!"&lt;/dialogue&gt;
+			{enable-narrator?\nNarration: &lt;narrator&gt;[...]&lt;/narrator&gt;}
+			{enable-director?\nDirection: &lt;director&gt;...&lt;/director&gt;}
+			Emoting: &lt;emote="{group?@}{char:id}"&gt;*smiles*&lt;/emote&gt;
+			{enable-think?\nInner monologue: &lt;thought="{group?@}{char:id}"&gt;I wonder...&lt;/thought&gt;}
+			\n\n
 		</Block>
 
 		<Block type="static" condition="enable-narrator" order="202" priority="high">
-			## Narration (Third person)
-			The narrator is an anonymous voice that occasionally chimes in to summarize ongoing events, but only when necessary and appropriate.
-			The narrator is capable of reading between the lines and provide further details that couldn't be conveyed through spoken words or actions alone.
-			However, the narrator must never divulge secret or private information, and never break the fourth wall.
-			Ex: &lt;narrator&gt;[Narration...]&lt;/narrator&gt;\n\n
+			## Narration 
+			The narrator is an anonymous third-person voice that occasionally chimes in to summarize ongoing events and important story details, though only when it is appropriate or necessary.
+			The narrator is very careful to never break the fourth wall nor make predictions of what {user} will do or say.\n\n
 		</Block>
 
 		<Block type="static" condition="enable-director" order="203" priority="high">
 			## Direction
-			The Director can interject at important moments to provide direction and guide events that are unfolding.
-			Alays follow the instructions from the director.
-			Ex: &lt;director&gt;...&lt;/director&gt;\n\n
+			The director will occasionally interject at important moments to provide direction and guide events in the story.
+			All participants must follow the director's instructions.\n\n
 		</Block>
 
 		<Block type="static" condition="enable-state" order="204" priority="high">
@@ -96,16 +97,17 @@
 
 		# Stubs
 		{stub?
-		{talk?root ::= "\\"" [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/talk&gt;" more}
-		{act?root ::= "*" [^"*&lt;\\|&gt;@\\n]* "*&lt;/act&gt;" more}
+		{talk?root ::= "\\"" [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/dialogue&gt;" more}
+		{act?root ::= "*" [^"*&lt;\\|&gt;@\\n]* "*&lt;/emote&gt;" more}
 		{narrate?root ::= "[" [^"*&lt;\\|&gt;@\\]]* "]&lt;/narrator&gt;" more}
 		}
 
 		# Continuations
 		{continue?
-		{talk?root ::= [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/talk&gt;" more}
-		{act?root ::= [^"*&lt;\\|&gt;@\\n]* "*&lt;/act&gt;" more}
+		{talk?root ::= [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/dialogue&gt;" more}
+		{act?root ::= [^"*&lt;\\|&gt;@\\n]* "*&lt;/emote&gt;" more}
 		{narrate?root ::= [^"*&lt;\\|&gt;\\]]* "]&lt;/narrator&gt;" more}
+		{think?root ::= [^"*&lt;\\|&gt;\\]]* "]&lt;/thought&gt;" more}
 		}
 
 		# State variables
@@ -117,8 +119,8 @@
 		}
 
 		# Message types
-		dlg ::= "&lt;talk=\\"" name "\\"&gt;\\"" text "\\"&lt;/talk&gt;"
-		act ::= "&lt;act=\\"" name "\\"&gt;*" text "*&lt;/act&gt;"
+		dlg ::= "&lt;dialogue=\\"" name "\\"&gt;\\"" text "\\"&lt;/dialogue&gt;"
+		act ::= "&lt;emote=\\"" name "\\"&gt;*" text "*&lt;/emote&gt;"
 		narr ::= "&lt;narrator&gt;[" text "]&lt;/narrator&gt;"
 		any ::= (dlg | act{enable-narrator? \\| narr} | ws)
 

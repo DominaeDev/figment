@@ -1,6 +1,8 @@
 #include <pch.h>
 #include <codecvt>
 #include <cwctype>
+#include <sstream>
+#include <ios.hpp>
 
 namespace fig
 {
@@ -773,6 +775,13 @@ namespace fig
 		return s;
 	}
 
+	fig::string fixed_to_string(fig::fixed value)
+	{
+		std::ostringstream os;
+		os << value;
+		return fig::string { os.str() };
+	}
+
 	int32_t string_to_int(const fig::string_view& s, int32_t default_value)
 	{
 		int32_t value {};
@@ -791,6 +800,16 @@ namespace fig
 		return value;
 	}
 
+	fig::fixed string_to_fixed(const fig::string_view& s, fig::fixed default_value)
+	{
+		std::istringstream is { fig::string { s } };
+		fpm::fixed_16_16 value;
+		is >> value;
+		if (!is.fail())
+			return value;
+		return fig::fixed { 0 };
+	}
+
 	std::optional<int32_t> string_to_int(const fig::string_view& s)
 	{
 		int32_t value {};
@@ -807,6 +826,16 @@ namespace fig
 		if (err != std::errc {} or ptr != s.data() + s.size())
 			return std::nullopt;
 		return value;
+	}
+
+	std::optional<fig::fixed> string_to_fixed(const fig::string_view& s)
+	{
+		std::istringstream is { fig::string { s } };
+		fpm::fixed_16_16 value;
+		is >> value;
+		if (!is.fail())
+			return value;
+		return std::nullopt;
 	}
 
 	fig::string unindent(const fig::string& s)

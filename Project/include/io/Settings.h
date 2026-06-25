@@ -106,6 +106,11 @@ namespace fig::io
 			return SetValue<float>(setting, value);
 		}
 
+		void SetFixed(E setting, fig::fixed value) noexcept
+		{
+			return SetValue<fig::fixed>(setting, value);
+		}
+
 		void SetString(E setting, const fig::string& value) noexcept
 		{
 			return SetValue<fig::string>(setting, value);

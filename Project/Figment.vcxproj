@@ -46,12 +46,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\3.2.30\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llama.cpp\b5237\include;$(ProjectDir)\..\Libraries\llama.cpp\b5237\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4\include;$(ProjectDir)\..\Libraries\tinyxml2\include;$(ProjectDir)\..\Libraries\aes\include;$(ProjectDir)\..\Libraries\sha256\include;$(ProjectDir)\..\Libraries\base64\include;$(ProjectDir)\..\Libraries\DanielaE\include;$(ProjectDir)\..\Libraries\fast-crc32\include;$(ProjectDir)\..\Libraries\libspng\include;$(ProjectDir)\..\Libraries\miniz\include;$(ProjectDir)\..\Libraries\nlohmann_json\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\3.2.30\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llama.cpp\b5237\include;$(ProjectDir)\..\Libraries\llama.cpp\b5237\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4\include;$(ProjectDir)\..\Libraries\tinyxml2\include;$(ProjectDir)\..\Libraries\aes\include;$(ProjectDir)\..\Libraries\sha256\include;$(ProjectDir)\..\Libraries\base64\include;$(ProjectDir)\..\Libraries\DanielaE\include;$(ProjectDir)\..\Libraries\fast-crc32\include;$(ProjectDir)\..\Libraries\libspng\include;$(ProjectDir)\..\Libraries\miniz\include;$(ProjectDir)\..\Libraries\fpm\include;$(ProjectDir)\..\Libraries\nlohmann_json\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\3.2.30\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llama.cpp\b5237\lib\x64;$(ProjectDir)\..\Libraries\llama.cpp\b5237\lib\ggml\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\3.2.30\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llama.cpp\b5237\include;$(ProjectDir)\..\Libraries\llama.cpp\b5237\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4\include;$(ProjectDir)\..\Libraries\tinyxml2\include;$(ProjectDir)\..\Libraries\aes\include;$(ProjectDir)\..\Libraries\sha256\include;$(ProjectDir)\..\Libraries\base64\include;$(ProjectDir)\..\Libraries\DanielaE\include;$(ProjectDir)\..\Libraries\fast-crc32\include;$(ProjectDir)\..\Libraries\libspng\include;$(ProjectDir)\..\Libraries\miniz\include;$(ProjectDir)\..\Libraries\nlohmann_json\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include;$(ProjectDir)\..\Libraries\SDL3\3.2.30\include;$(ProjectDir)\..\Libraries\SDL_image\include;$(ProjectDir)\..\Libraries\SDL3_ttf\include;$(ProjectDir)\..\Libraries\llama.cpp\b5237\include;$(ProjectDir)\..\Libraries\llama.cpp\b5237\ggml\include;$(ProjectDir)\..\Libraries\SQLite3\include;$(ProjectDir)\..\Libraries\uuid_v4\include;$(ProjectDir)\..\Libraries\tinyxml2\include;$(ProjectDir)\..\Libraries\aes\include;$(ProjectDir)\..\Libraries\sha256\include;$(ProjectDir)\..\Libraries\base64\include;$(ProjectDir)\..\Libraries\DanielaE\include;$(ProjectDir)\..\Libraries\fast-crc32\include;$(ProjectDir)\..\Libraries\libspng\include;$(ProjectDir)\..\Libraries\miniz\include;$(ProjectDir)\..\Libraries\fpm\include;$(ProjectDir)\..\Libraries\nlohmann_json\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\..\Libraries\SDL3\3.2.30\lib\x64;$(ProjectDir)\..\Libraries\SDL_image\lib\x64;$(ProjectDir)\..\Libraries\SDL3_ttf\lib\x64;$(ProjectDir)\..\Libraries\SQLite3\lib\x64;$(ProjectDir)\..\Libraries\llama.cpp\b5237\lib\x64;$(ProjectDir)\..\Libraries\llama.cpp\b5237\lib\ggml\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -293,6 +293,9 @@
     <ClInclude Include="..\Libraries\base64\include\base64.h" />
     <ClInclude Include="..\Libraries\DanielaE\include\c_resource.h" />
     <ClInclude Include="..\Libraries\fast-crc32\include\crc32.h" />
+    <ClInclude Include="..\Libraries\fpm\include\fixed.hpp" />
+    <ClInclude Include="..\Libraries\fpm\include\ios.hpp" />
+    <ClInclude Include="..\Libraries\fpm\include\math.hpp" />
     <ClInclude Include="..\Libraries\libspng\include\spng.h" />
     <ClInclude Include="..\Libraries\llama.cpp\b5237\include\llama-cpp.h" />
     <ClInclude Include="..\Libraries\llama.cpp\b5237\include\llama.h" />

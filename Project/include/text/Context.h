@@ -14,7 +14,7 @@ namespace fig::text
 namespace fig
 {
 	class Context;
-	using ContextValue = std::variant<int32_t, float, fig::string>;
+	using ContextValue = std::variant<int32_t, fig::fixed, fig::string>;
 
 	template <typename T>
 	concept IContextual = requires(T t)
@@ -28,7 +28,7 @@ namespace fig
 
 	constexpr bool IsNumber(const ContextValue& value)
 	{
-		return std::holds_alternative<int32_t>(value) or std::holds_alternative<float>(value);
+		return std::holds_alternative<int32_t>(value) or std::holds_alternative<fig::fixed>(value);
 	}
 
 	class Context
@@ -48,6 +48,7 @@ namespace fig
 		
 		template<> void SetValue<int32_t>(fig::handle name, const int32_t& value) noexcept;
 		template<> void SetValue<float>(fig::handle name, const float& value) noexcept;
+		template<> void SetValue<fig::fixed>(fig::handle name, const fig::fixed& value) noexcept;
 		template<> void SetValue<fig::string>(fig::handle name, const fig::string& value) noexcept;
 
 		template<fig::is_string_like T> 
@@ -100,6 +101,12 @@ namespace fig
 		inline const std::map<fig::handle, ContextValue>& GetValues() const noexcept { return _values; }
 		void RemoveValue(fig::handle name) noexcept;
 		void ClearValues() noexcept;
+
+		template<typename T>
+		inline T GetValue(const char* name, T default_value = {}) const
+		{
+			return TryGetValue<T>(name).value_or(default_value);
+		};
 
 		template<typename T>
 		inline T GetValue(fig::handle name, T default_value = {}) const
@@ -212,6 +219,7 @@ namespace fig
 		template<> [[nodiscard]] std::optional<bool> TryGetValue_Internal<bool>(fig::handle name) const noexcept;
 		template<> [[nodiscard]] std::optional<int32_t> TryGetValue_Internal<int32_t>(fig::handle name) const noexcept;
 		template<> [[nodiscard]] std::optional<float> TryGetValue_Internal<float>(fig::handle name) const noexcept;
+		template<> [[nodiscard]] std::optional<fig::fixed> TryGetValue_Internal<fig::fixed>(fig::handle name) const noexcept;
 		template<> [[nodiscard]] std::optional<fig::string> TryGetValue_Internal<fig::string>(fig::handle name) const noexcept;
 		
 		bool GetBool_Internal(fig::handle name) const noexcept;

@@ -112,17 +112,17 @@ namespace fig
 
 	static bool compare_variants(CompareOperand lhs, CompareOperand rhs, CompareOperator op)
 	{
-		// Float
-		if (auto try_lhs_flt = std::get_if<float>(&lhs))
+		// Number
+		if (auto try_lhs_flt = std::get_if<fig::fixed>(&lhs))
 		{
-			float lhs_flt { *try_lhs_flt };
-			float rhs_flt;
-			if (auto try_rhs_flt = std::get_if<float>(&rhs))
+			fig::fixed lhs_flt { *try_lhs_flt };
+			fig::fixed rhs_flt;
+			if (auto try_rhs_flt = std::get_if<fig::fixed>(&rhs))
 				rhs_flt = *try_rhs_flt;
 			else if (auto try_rhs_str = std::get_if<fig::string>(&rhs))
 			{
 				if (auto try_parse = string_to_float(*try_rhs_str))
-					rhs_flt = try_parse.value();
+					rhs_flt = toFixed(*try_parse);
 				else
 					return false; // Error
 			}
@@ -132,9 +132,9 @@ namespace fig
 			switch (op)
 			{
 				case CompareOperator::Equal:
-					return flt_eq(lhs_flt, rhs_flt);
+					return lhs_flt == rhs_flt;
 				case CompareOperator::NotEqual:
-					return !flt_eq(lhs_flt, rhs_flt);
+					return lhs_flt != rhs_flt;
 				case CompareOperator::LessThan:
 					return lhs_flt < rhs_flt;
 				case CompareOperator::LessOrEqual:
@@ -152,8 +152,8 @@ namespace fig
 		{
 			fig::string lhs_str { *try_lhs_str };
 			fig::string rhs_str;
-			if (auto try_rhs_flt = std::get_if<float>(&rhs))
-				rhs_str = float_to_string(*try_rhs_flt);
+			if (auto try_rhs_flt = std::get_if<fig::fixed>(&rhs))
+				rhs_str = fixed_to_string(*try_rhs_flt);
 			else if (auto try_rhs_str = std::get_if<fig::string>(&rhs))
 				rhs_str = *try_rhs_str;
 			else
@@ -183,8 +183,10 @@ namespace fig
 
 	bool ComparisonCondition::Evaluate(const EvaluationArgs& eval) const
 	{
+		static std::mt19937_64 rng { std::random_device{}() };
+
 		CompareOperand lhs {};
-		if (auto lhs_flt = std::get_if<float>(&_lhs))
+		if (auto lhs_flt = std::get_if<fig::fixed>(&_lhs))
 		{
 			lhs = *lhs_flt;
 		}
@@ -194,8 +196,8 @@ namespace fig
 			{
 				auto& value = try_value.value();
 				if (auto i = std::get_if<int32_t>(&value))
-					lhs = static_cast<float>(*i);
-				else if (auto f = std::get_if<float>(&value))
+					lhs = static_cast<fig::fixed>(*i);
+				else if (auto f = std::get_if<fig::fixed>(&value))
 					lhs = *f;
 				else if (auto s = std::get_if<fig::string>(&value))
 					lhs = *s;
@@ -203,9 +205,17 @@ namespace fig
 			else
 				lhs = *lhs_str;
 		}
+		else if (auto lhs_dice = std::get_if<Fraction>(&_lhs))
+		{
+			std::uniform_int_distribution<int32_t> dist(1, (*lhs_dice).denominator);
+			int32_t sum = 0;
+			for (int32_t n = 0; n < (*lhs_dice).numerator; ++n)
+				sum += dist(rng);
+			lhs = toFixed(sum);
+		}
 
 		CompareOperand rhs {};
-		if (auto rhs_flt = std::get_if<float>(&_rhs))
+		if (auto rhs_flt = std::get_if<fig::fixed>(&_rhs))
 		{
 			rhs = *rhs_flt;
 		}
@@ -215,8 +225,8 @@ namespace fig
 			{
 				auto& value = try_value.value();
 				if (auto i = std::get_if<int32_t>(&value))
-					rhs = static_cast<float>(*i);
-				else if (auto f = std::get_if<float>(&value))
+					rhs = static_cast<fig::fixed>(*i);
+				else if (auto f = std::get_if<fig::fixed>(&value))
 					rhs = *f;
 				else if (auto s = std::get_if<fig::string>(&value))
 					rhs = *s;
@@ -224,7 +234,14 @@ namespace fig
 			else
 				rhs = *rhs_str;
 		}
-
+		else if (auto rhs_dice = std::get_if<Fraction>(&_lhs))
+		{
+			std::uniform_int_distribution<int32_t> dist(1, (*rhs_dice).denominator);
+			int32_t sum = 0;
+			for (int32_t n = 0; n < (*rhs_dice).numerator; ++n)
+				sum += dist(rng);
+			lhs = toFixed(sum);
+		}
 		return compare_variants(lhs, rhs, _operator);
 	}
 
@@ -236,14 +253,14 @@ namespace fig
 	ComparisonCondition::operator fig::string() const
 	{
 		fig::string lhs;
-		if (auto lhs_flt = std::get_if<float>(&_lhs))
-			lhs = std::format("{:g}", *lhs_flt);
+		if (auto lhs_flt = std::get_if<fig::fixed>(&_lhs))
+			lhs = fixed_to_string(*lhs_flt);
 		else if (auto lhs_str = std::get_if<fig::string>(&_lhs))
 			lhs = *lhs_str;
 		
 		fig::string rhs;
-		if (auto rhs_flt = std::get_if<float>(&_rhs))
-			rhs = std::format("{:g}", *rhs_flt);
+		if (auto rhs_flt = std::get_if<fig::fixed>(&_rhs))
+			rhs = fixed_to_string(*rhs_flt);
 		else if (auto rhs_str = std::get_if<fig::string>(&_rhs))
 			rhs = *rhs_str;
 
@@ -301,6 +318,33 @@ namespace fig
 	FlagCondition::operator fig::string() const
 	{
 		return (fig::string)_flag;
+	}
+
+	RandomCondition::RandomCondition(int32_t num, int32_t denom) :
+		_num(num),
+		_denom(denom)
+	{
+	}
+	
+	bool RandomCondition::Evaluate(const EvaluationArgs& eval) const
+	{
+		if (_num <= 0 or _denom <= 0)
+			return false;
+
+		static std::mt19937_64 rng { std::random_device{}() };
+		std::uniform_int_distribution<int32_t> dist(1, _denom);
+		auto roll = dist(rng);
+		return roll <= _num;
+	}
+
+	ConditionPtr RandomCondition::Clone() const
+	{
+		return std::make_unique<RandomCondition>(_num, _denom);
+	}
+
+	RandomCondition::operator fig::string() const
+	{
+		return std::format("{}:{}", _num, _denom);
 	}
 
 	bool AlwaysCondition::Evaluate(const EvaluationArgs& eval) const

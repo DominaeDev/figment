@@ -52,6 +52,9 @@ namespace fig::chat
 
 					auto content = eval_text(block.content, context);
 
+					if (not (content.ends_with('\n') or content.ends_with(' ')))
+						content.append(" ");
+
 					auto hash = GetHash(content);
 					out_blocks.emplace_back(PromptBlock {
 						.id = i * 1000 + bot_idx,
@@ -91,7 +94,7 @@ namespace fig::chat
 				if (not block.condition.Evaluate(context))
 					continue;
 
-				auto content = eval_text(block.content, context);
+				auto content = eval_text(block.content, context, DefaultTextEvalOptions | TextEvaluationOption::CollapseNewlines);
 
 				auto hash = GetHash(content);
 				out_blocks.emplace_back(PromptBlock {

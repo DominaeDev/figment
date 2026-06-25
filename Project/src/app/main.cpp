@@ -16,18 +16,40 @@
 #include "gui/Events.h"
 
 #if defined(_DEBUG)
-	#define DETECT_MEMORY_LEAKS
-	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
-	#include <crtdbg.h>
+#define DETECT_MEMORY_LEAKS
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
+#if _WIN32 && _DEBUG
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+static HANDLE shutdownEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+
+BOOL WINAPI OnConsoleCtrl(DWORD controlType)
+{
+	// Handle console close event
+	if (controlType == CTRL_CLOSE_EVENT
+		or controlType == CTRL_C_EVENT
+		or controlType == CTRL_BREAK_EVENT)
+	{
+		SDL_Event quitEvent = {};
+		quitEvent.type = SDL_EVENT_QUIT;
+		SDL_PushEvent(&quitEvent);
+
+		WaitForSingleObject(shutdownEvent, 5000);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 #endif
 
 // Set this to break on the specified allocation index. 0 = off
 #define MEMORY_LEAK_ALLOC 0
 
 #define APP_STATE(P) static_cast<AppState*>(P);
-
-using namespace fig::gui;
 
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 {
@@ -36,6 +58,10 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 #if defined(MEMORY_LEAK_ALLOC) && MEMORY_LEAK_ALLOC > 0
 	_CrtSetBreakAlloc(MEMORY_LEAK_ALLOC);
 #endif
+#endif
+
+#if _WIN32 && _DEBUG
+	SetConsoleCtrlHandler(OnConsoleCtrl, TRUE);
 #endif
 
 	if (!SDL_Init(SDL_INIT_VIDEO))
@@ -57,7 +83,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 //	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON, "0");
 //	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON_SMALL, "0");
 
-	RegisterUserEvents();
+	fig::gui::RegisterUserEvents();
 
 	setlocale(LC_CTYPE, "");
 
@@ -124,7 +150,7 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 void SDL_AppQuit(void* state, SDL_AppResult result)
 {
-	Fonts::ReleaseFonts();
+	fig::gui::Fonts::ReleaseFonts();
 	fig::Global::ReleaseState();
 
 	TTF_Quit();

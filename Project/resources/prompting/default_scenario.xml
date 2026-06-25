@@ -1,41 +1,52 @@
 <Scenario>
 	<Title>Default scenario</Title>
-	<Description>A casual chat</Description>
+	<Description>This is a simple scenario of the AI having a conversation with the user.</Description>
 	
-	<Tags>default</Tags>
+	<Tags>default, casual</Tags>
 	
-	<Role id="ai">
-		<Label>AI</Label>
-		<Flags>required</Flags>
-		<Brief>{user:name}'s friend and companion.</Brief>
-		<Condition error="Requires a female character">female</Condition>
-	</Role>
-	
-	<Role id="user">
-		<Label>User</Label>
-		<Flags>required, user</Flags>
-		<Brief>{ai:name}'s best friend.</Brief>
-		<Condition error="Requires a male character">male</Condition>
-	</Role>
+	<Roles>
+		<Role id="ai">
+			<Label>AI character</Label>
+			<Flags>required</Flags>
+			<Brief>{user}'s friend and companion.</Brief>
+			<Condition error="Requires a female character">female</Condition>
+		</Role>
+		
+		<Role id="user">
+			<Label>User</Label>
+			<Flags>required, user</Flags>
+			<Brief>{ai}'s best friend.</Brief>
+			<Condition error="Requires a male character">male</Condition>
+		</Role>
+	</Roles>
 	
 	<Story>
 		<Intro>
-			<UserMessage>{ai} joined the conversation.</UserMessage>
-			<UserMessage>{user} joined the conversation.</UserMessage>
-			<Director ttl="1">{user} is here. Introduce yourself and suggests a topic for your conversation.</Director>
-			<Narrator/>
-			<Message role="ai"/>
+			<Info>{ai} joined the conversation.</Info>
+			<Info>{user} joined the conversation.</Info>
+			<Instruct>First, introduce yourself, then greet {user} with a compliment, then suggests a topic for your conversation.</Instruct>
+			<InvokeNarrator/>
+			<InvokeBot role="ai"/>
 		</Intro>
+		
 		<Outro>
-			<UserMessage>The end.</UserMessage>
+			<Info>The end</Info>
 		</Outro>
-		<Chapter>
-			<Title>Chapter I</Title>
-			<Step id="first">
-				<Condition>always</Condition>
-				<Duration>10</Duration>
-				<Content>{user} and {ai:name} are having a casual conversation.</Content>
-			</Step>
-		</Chapter>
+		
+		<Chapters>
+			<Chapter id="beginning">		
+				<Title>Chapter I</Title>
+				<Step>
+					<Content>{user} and {ai} are having a casual conversation.</Content>
+					
+					<Trigger>
+						<Condition>story:turn &gt;= 10</Condition>
+						<Actions>
+							<NextStep/>
+						</Actions>
+					</Trigger>
+				</Step>
+			</Chapter>
+		</Chapters>
 	</Story>
 </Scenario>
