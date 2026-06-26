@@ -9,8 +9,8 @@ namespace fig::data
 
 	constexpr std::array<std::tuple<ConventionalGender, fig::string_view, Pronouns, std::array<fig::string_view, 10>>, 4> ConventionalGenders
 	{
-		std::tuple { ConventionalGender::Male,			"Male",			Pronouns::Masculine,	std::array<fig::string_view, 10> { "male", "man", "boy", "gentleman" } },
-		std::tuple { ConventionalGender::Female,		"Female",		Pronouns::Feminine,		std::array<fig::string_view, 10> { "female", "woman", "girl", "lady" } },
+		std::tuple { ConventionalGender::Male,			"Male",			Pronouns::Masculine,	std::array<fig::string_view, 10> { "male", "man" } },
+		std::tuple { ConventionalGender::Female,		"Female",		Pronouns::Feminine,		std::array<fig::string_view, 10> { "female", "woman" } },
 		std::tuple { ConventionalGender::Nonbinary,		"Non-binary",	Pronouns::Nonbinary,	std::array<fig::string_view, 10> { "nonbinary", "non-binary", "none", "non", "asexual", "trans", "transsexual", "trans-sexual", "trans-gender", "transgender" } },
 		std::tuple { ConventionalGender::Newhalf,		"Futanari",		Pronouns::Feminine,		std::array<fig::string_view, 10> { "futanari", "futa", "shemale", "newhalf", "hermaphrodite", "herm", } },
 	};

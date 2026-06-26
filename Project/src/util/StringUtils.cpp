@@ -803,7 +803,7 @@ namespace fig
 	fig::fixed string_to_fixed(const fig::string_view& s, fig::fixed default_value)
 	{
 		std::istringstream is { fig::string { s } };
-		fpm::fixed_16_16 value;
+		fig::fixed value;
 		is >> value;
 		if (!is.fail())
 			return value;
@@ -831,7 +831,7 @@ namespace fig
 	std::optional<fig::fixed> string_to_fixed(const fig::string_view& s)
 	{
 		std::istringstream is { fig::string { s } };
-		fpm::fixed_16_16 value;
+		fig::fixed value;
 		is >> value;
 		if (!is.fail())
 			return value;

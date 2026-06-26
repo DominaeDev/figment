@@ -1,18 +1,9 @@
 <Macros>
-	<!-- Characters -->
-	<Macro id="char">{current:name}</Macro>
-	<Macro id="char1's">{bot1:name}'s</Macro>
-	<Macro id="char2's">{bot2:name}'s</Macro>
-	<Macro id="char3's">{bot3:name}'s</Macro>
-	<Macro id="char4's">{bot4:name}'s</Macro>
-	<Macro id="char5's">{bot5:name}'s</Macro>
-	<Macro id="char6's">{bot6:name}'s</Macro>
-	<Macro id="char7's">{bot7:name}'s</Macro>
-	<Macro id="char8's">{bot8:name}'s</Macro>
-
+	<!-- Character aliases -->
 	<Alias id="char">current:name</Alias>
+	<Alias id="character">current:name</Alias>
+	<Alias id="character:">current:name</Alias>
 	<Alias id="char:">current</Alias>
-	<Alias id="c:">current</Alias>
 	<Alias id="char1:">bot1</Alias>
 	<Alias id="char2:">bot2</Alias>
 	<Alias id="char3:">bot3</Alias>
@@ -21,30 +12,37 @@
 	<Alias id="char6:">bot6</Alias>
 	<Alias id="char7:">bot7</Alias>
 	<Alias id="char8:">bot8</Alias>
-	
+	<Alias id="c:">current</Alias>
 	<Alias id="user">user:name</Alias>
 	<Alias id="u:">user</Alias>
 	
 	<!-- Standard conditions -->
-	<Condition id="solo">not group</Condition>
-	<Condition id="group">__num_bots gt 1</Condition>
-	<Condition id="is_male">male or gender = male</Condition>
-	<Condition id="is_female">female or gender = female</Condition>
+	<Condition id="single_chat">__num_bots eq 1</Condition>
+	<Condition id="group_chat">__num_bots gt 1</Condition>
+	<Condition id="is_male">male or gender eq male</Condition>
+	<Condition id="is_female">female or gender eq female</Condition>
+	<Condition id="is_futa">futanari or futa or shemale or newhalf or hermaphrodite or herm</Condition>
+	<Condition id="is_non_binary">non-binary or nonbinary or trans or transsexual or transgender or gender eq none or gender eq asexual</Condition>
 
 	<!-- Pronouns -->
-	<Condition id="pronoun_mas">male or use_male_pronouns</Condition>
-	<Condition id="pronoun_fem">female or shemale or futanari or use_female_pronouns</Condition>
-	<Condition id="pronoun_neu">not (pronoun_fem or pronoun_mas) or use_neuter_pronouns</Condition>
-	<Condition id="pronoun_cus">custom_they or custom_them or custom_their or custom_theirs or custom_themselves</Condition>
+	<Condition id="presumed_masculine">is_male</Condition>
+	<Condition id="presumed_feminine">is_female or is_futa</Condition>
+	<Condition id="presumed_non_binary">is_non_binary or not (presumed_masculine or presumed_feminine)</Condition>
+	<Condition id="m_pronouns">__masculine_pronouns or (not (__feminine_pronouns or __non_binary_pronouns) and presumed_masculine)</Condition>
+	<Condition id="f_pronouns">__feminine_pronouns or (not (__masculine_pronouns or __non_binary_pronouns) and presumed_feminine)</Condition>
+	<Condition id="nb_pronouns">__non_binary_pronouns or (not (__masculine_pronouns or __feminine_pronouns) and presumed_non_binary)</Condition>
+	<Condition id="nt_pronouns">__neuter_pronouns</Condition>
+	<Condition id="c_pronouns">custom_they or custom_them or custom_their or custom_theirs or custom_themselves</Condition>
+	<Condition id="pl_pronouns">nb_pronouns</Condition>
 
-	<Macro id="they">{custom_they?{custom_they}|{pronoun_fem?she|{pronoun_mas?he|they}}}</Macro>
-	<Macro id="them">{custom_them?{custom_them}|{pronoun_fem?her|{pronoun_mas?him|them}}}</Macro>
-	<Macro id="their">{custom_their?{custom_their}|{pronoun_fem?her|{pronoun_mas?his|their}}}</Macro>
-	<Macro id="theirs">{custom_theirs?{custom_theirs}|{pronoun_fem?hers|{pronoun_mas?his|theirs}}}</Macro>
-	<Macro id="themselves">{custom_themselves?{custom_themselves}|{pronoun_fem?herself|{pronoun_mas?himself|themselves}}}</Macro>
+	<Macro id="they">{custom_they?{custom_they}|{f_pronouns?she|{m_pronouns?he|{nt_pronouns?it|they}}}}</Macro>
+	<Macro id="them">{custom_them?{custom_them}|{f_pronouns?her|{m_pronouns?him|{nt_pronouns?it|them}}}}</Macro>
+	<Macro id="their">{custom_their?{custom_their}|{f_pronouns?her|{m_pronouns?his|{nt_pronouns?its|their}}}}</Macro>
+	<Macro id="theirs">{custom_theirs?{custom_theirs}|{f_pronouns?hers|{m_pronouns?his|{nt_pronouns?its|theirs}}}}</Macro>
+	<Macro id="themselves">{custom_themselves?{custom_themselves}|{f_pronouns?herself|{m_pronouns?himself|{nt_pronouns?itself|themselves}}}}</Macro>
 
 	<!-- Grammar macros -->
-	<Condition id="conj_plural">pronoun_neu or use_plural</Condition>
+	<Condition id="conj_plural">pl_pronouns</Condition>
 	<Macro id="is">{conj_plural?are|is}</Macro>						<!-- {they} {is} -->
 	<Macro id="isn't">{conj_plural?aren't|isn't}</Macro>			<!-- {they} {isn't} -->
 	<Macro id="are">{conj_plural?are|is}</Macro>					<!-- {they} {are} -->

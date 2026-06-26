@@ -14,7 +14,7 @@ namespace fig::text
 namespace fig
 {
 	class Context;
-	using ContextValue = std::variant<int32_t, fig::fixed, fig::string>;
+	using ContextValue = std::variant<fig::fixed, fig::string>;
 
 	template <typename T>
 	concept IContextual = requires(T t)
@@ -28,7 +28,7 @@ namespace fig
 
 	constexpr bool IsNumber(const ContextValue& value)
 	{
-		return std::holds_alternative<int32_t>(value) or std::holds_alternative<fig::fixed>(value);
+		return std::holds_alternative<fig::fixed>(value);
 	}
 
 	class Context

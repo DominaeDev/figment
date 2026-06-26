@@ -48,7 +48,7 @@ namespace fig
 	template<>
 	void Context::SetValue<int32_t>(fig::handle name, const int32_t& value) noexcept
 	{
-		_values[std::move(name)] = value;
+		_values[std::move(name)] = toFixed(value);
 	}
 
 	template<>
@@ -93,9 +93,7 @@ namespace fig
 		if (auto try_value = TryGetRaw_Internal(name))
 		{
 			auto& var_value = try_value.value();
-			if (auto value = std::get_if<int32_t>(&var_value))
-				return (*value) != 0;
-			else if (auto value = std::get_if<fig::fixed>(&var_value))
+			if (auto value = std::get_if<fig::fixed>(&var_value))
 				return (*value) != 0_fp;
 			else if (auto value = std::get_if<fig::string>(&var_value))
 				return not (*value).empty();
@@ -110,11 +108,9 @@ namespace fig
 		if (auto try_value = TryGetRaw_Internal(name))
 		{
 			auto& var_value = try_value.value();
-			if (auto value = std::get_if<int32_t>(&var_value))
-				return *value;
 			if (auto value = std::get_if<fig::fixed>(&var_value))
 				return toI(*value);
-			if (auto value = std::get_if<fig::string>(&var_value))
+			else if (auto value = std::get_if<fig::string>(&var_value))
 				return string_to_int(*value, 0);
 		}
 
@@ -127,11 +123,9 @@ namespace fig
 		if (auto try_value = TryGetRaw_Internal(name))
 		{
 			auto& var_value = try_value.value();
-			if (auto value = std::get_if<int32_t>(&var_value))
-				return toF(*value);
 			if (auto value = std::get_if<fig::fixed>(&var_value))
 				return toF(*value);
-			if (auto value = std::get_if<fig::string>(&var_value))
+			else if (auto value = std::get_if<fig::string>(&var_value))
 				return string_to_float(*value, 0.0f);
 		}
 
@@ -144,11 +138,9 @@ namespace fig
 		if (auto try_value = TryGetRaw_Internal(name))
 		{
 			auto& var_value = try_value.value();
-			if (auto value = std::get_if<int32_t>(&var_value))
-				return toFixed(*value);
 			if (auto value = std::get_if<fig::fixed>(&var_value))
 				return *value;
-			if (auto value = std::get_if<fig::string>(&var_value))
+			else if (auto value = std::get_if<fig::string>(&var_value))
 				return string_to_fixed(*value, 0_fp);
 		}
 
@@ -161,11 +153,9 @@ namespace fig
 		if (auto try_value = TryGetRaw_Internal(name))
 		{
 			auto& var_value = try_value.value();
-			if (auto value = std::get_if<int32_t>(&var_value))
-				return int_to_string(*value);
 			if (auto value = std::get_if<fig::fixed>(&var_value))
 				return fixed_to_string(*value);
-			if (auto value = std::get_if<fig::string>(&var_value))
+			else if (auto value = std::get_if<fig::string>(&var_value))
 				return *value;
 		}
 

@@ -62,37 +62,83 @@ namespace fig
 			case ')':
 				++_cursor;
 				return { TokenType::RightParen };
+			case '"':
+			{
+				++_cursor;
+				const char* start = _cursor;
+				while (_cursor < _end && *_cursor != '"' && *_cursor != '\n' && *_cursor != '\r')
+					++_cursor;
+				if (_cursor >= _end || *_cursor != '"')
+					return { TokenType::Error };
+
+				fig::string text(start, static_cast<size_t>(_cursor - start));
+				++_cursor;
+				return { TokenType::String, std::move(text) };
+			}
 			case '>':
-				if (_cursor + 1 < _end and _cursor[1] == '=')	// a >= b
+				if (stricmp(_cursor, ">="))	// a >= b
 				{
 					_cursor += 2;
 					return { TokenType::GreaterOrEqual };
 				}
-				++_cursor;
-				return { TokenType::GreaterThan };
+				else
+				{
+					++_cursor;
+					return { TokenType::GreaterThan };
+				}
 			case '<':
 				if (stricmp(_cursor, "<="))	// a <= b
 				{
 					_cursor += 2;
 					return { TokenType::LessOrEqual };
 				}
-				if (stricmp(_cursor, "<>"))	// a <> b
+				else if (stricmp(_cursor, "<>"))	// a <> b
 				{
 					_cursor += 2;
 					return { TokenType::NotEqual };
 				}
-				++_cursor;
-				return { TokenType::LessThan };
-			case '=': // a = b
-				++_cursor;
-				return { TokenType::Equal };
+				else
+				{
+					++_cursor;
+					return { TokenType::LessThan };
+				}
+			case '=':
+				if (stricmp(_cursor, "=="))	// a == b
+				{
+					_cursor += 2;
+					return { TokenType::EqualStrict };
+				}
+				else  // a = b
+				{
+					++_cursor;
+					return { TokenType::Equal };
+				}
 			case '!':
-				if (stricmp(_cursor, "!="))	// a != b
+				if (stricmp(_cursor, "!=="))	// a !== b
+				{
+					_cursor += 3;
+					return { TokenType::NotEqualStrict };
+				}
+				else if (stricmp(_cursor, "!="))	// a != b
 				{
 					_cursor += 2;
 					return { TokenType::NotEqual };
 				}
-				return { TokenType::Error };
+				else if (stricmp(_cursor, "!~="))	// a !~= b
+				{
+					_cursor += 3;
+					return { TokenType::NotEqualApprox };
+				}
+				else
+					return { TokenType::Error };
+			case '~':
+				if (stricmp(_cursor, "~="))	// a ~= b
+				{
+					_cursor += 2;
+					return { TokenType::EqualApprox };
+				}
+				else
+					return { TokenType::Error };
 			case 'g':
 			case 'G':
 				if (stricmp(_cursor, "gt ")) // a gt b
@@ -130,6 +176,11 @@ namespace fig
 				{
 					_cursor += 3;
 					return { TokenType::Equal };
+				}
+				else if (stricmp(_cursor, "is not ")) // a is not b
+				{
+					_cursor += 7;
+					return { TokenType::NotEqual };
 				}
 			case 'n':
 			case 'N':
@@ -284,9 +335,9 @@ namespace fig
 		if (_current.type == TokenType::Number)
 			lhsValue = _current.number;
 		else if (_current.type == TokenType::Identifier)
-		{
+			lhsValue = ContextLocator { _current.text };
+		else if (_current.type == TokenType::String)
 			lhsValue = std::move(_current.text);
-		}
 		else if (_current.type == TokenType::Probability)
 		{
 			if (auto try_prob = parse_fraction(_current.text, ":"); try_prob.has_value() and (*try_prob).numerator > 0 and (*try_prob).denominator > 0) // a:b
@@ -321,8 +372,20 @@ namespace fig
 			case TokenType::Equal:
 				compareOperator = CompareOperator::Equal;
 				break;
+			case TokenType::EqualStrict:
+				compareOperator = CompareOperator::EqualStrict;
+				break;
+			case TokenType::EqualApprox:
+				compareOperator = CompareOperator::EqualApprox;
+				break;
 			case TokenType::NotEqual:
 				compareOperator = CompareOperator::NotEqual;
+				break;
+			case TokenType::NotEqualStrict:
+				compareOperator = CompareOperator::NotEqualStrict;
+				break;
+			case TokenType::NotEqualApprox:
+				compareOperator = CompareOperator::NotEqualApprox;
 				break;
 			case TokenType::LessThan:
 				compareOperator = CompareOperator::LessThan;
@@ -342,7 +405,7 @@ namespace fig
 
 		if (not compareOperator.has_value())
 		{
-			if (auto name = std::get_if<fig::string>(&lhsValue))
+			if (auto name = std::get_if<ContextLocator>(&lhsValue))
 				return std::make_unique<FlagCondition>(std::move(*name));
 			return std::unexpected(ConditionParseError::ExpectedIdentifier);
 		}
@@ -352,12 +415,20 @@ namespace fig
 		CompareOperand rhsValue;
 		if (_current.type == TokenType::Number)
 			rhsValue = _current.number;
+		else if (_current.type == TokenType::Probability)
+		{
+			if (auto try_dice = parse_fraction(_current.text, "dD"); try_dice.has_value() and (*try_dice).numerator > 0 and (*try_dice).denominator > 0) // a:b
+				rhsValue = *try_dice;
+			else
+				return std::unexpected(ConditionParseError::InvalidValue);
+		}
 		else if (_current.type == TokenType::Identifier)
 		{
-			if (auto dice = parse_fraction(_current.text, "dD"); dice.has_value() and (*dice).numerator > 0 and (*dice).denominator > 0) // a:b
-				rhsValue = *dice;
-			else
-				rhsValue = std::move(_current.text);
+			rhsValue = ContextLocator { _current.text };
+		}
+		else if (_current.type == TokenType::String)
+		{
+			rhsValue = std::move(_current.text);
 		}
 		else
 			return std::unexpected(ConditionParseError::InvalidValue);

@@ -2,6 +2,7 @@
 #include "text/ConditionNode.h"
 #include "text/Context.h"
 #include <cassert>
+#include <math.hpp>
 
 namespace fig
 {
@@ -110,7 +111,9 @@ namespace fig
 	{
 	}
 
-	static bool compare_variants(CompareOperand lhs, CompareOperand rhs, CompareOperator op)
+	using CompareValue = std::variant<fig::fixed, fig::string>;
+
+	static bool compare_variants(CompareValue lhs, CompareValue rhs, CompareOperator op)
 	{
 		// Number
 		if (auto try_lhs_flt = std::get_if<fig::fixed>(&lhs))
@@ -132,9 +135,15 @@ namespace fig
 			switch (op)
 			{
 				case CompareOperator::Equal:
+				case CompareOperator::EqualStrict:
 					return lhs_flt == rhs_flt;
+				case CompareOperator::EqualApprox:
+					return rint(lhs_flt) == rint(rhs_flt);
 				case CompareOperator::NotEqual:
+				case CompareOperator::NotEqualStrict:
 					return lhs_flt != rhs_flt;
+				case CompareOperator::NotEqualApprox:
+					return rint(lhs_flt) != rint(rhs_flt);
 				case CompareOperator::LessThan:
 					return lhs_flt < rhs_flt;
 				case CompareOperator::LessOrEqual:
@@ -162,9 +171,15 @@ namespace fig
 			switch (op)
 			{
 				case CompareOperator::Equal:
+				case CompareOperator::EqualApprox:
 					return equals(lhs_str, rhs_str, true);
+				case CompareOperator::EqualStrict:
+					return equals(lhs_str, rhs_str, false);
 				case CompareOperator::NotEqual:
+				case CompareOperator::NotEqualApprox:
 					return !equals(lhs_str, rhs_str, true);
+				case CompareOperator::NotEqualStrict:
+					return !equals(lhs_str, rhs_str, false);
 				case CompareOperator::LessThan:
 					return lhs_str < rhs_str;
 				case CompareOperator::LessOrEqual:
@@ -185,25 +200,27 @@ namespace fig
 	{
 		static std::mt19937_64 rng { std::random_device{}() };
 
-		CompareOperand lhs {};
+		CompareValue lhs {};
 		if (auto lhs_flt = std::get_if<fig::fixed>(&_lhs))
 		{
 			lhs = *lhs_flt;
 		}
 		else if (auto lhs_str = std::get_if<fig::string>(&_lhs))
 		{
-			if (auto try_value = eval.context.TryGetRaw(ContextLocator { *lhs_str }))
+			lhs = *lhs_str;
+		}
+		else if (auto lhs_loc = std::get_if<ContextLocator>(&_lhs))
+		{
+			if (auto try_value = eval.context.TryGetRaw(*lhs_loc))
 			{
 				auto& value = try_value.value();
-				if (auto i = std::get_if<int32_t>(&value))
-					lhs = static_cast<fig::fixed>(*i);
-				else if (auto f = std::get_if<fig::fixed>(&value))
+				if (auto f = std::get_if<fig::fixed>(&value))
 					lhs = *f;
 				else if (auto s = std::get_if<fig::string>(&value))
 					lhs = *s;
 			}
 			else
-				lhs = *lhs_str;
+				lhs = fig::string { *lhs_loc };
 		}
 		else if (auto lhs_dice = std::get_if<Fraction>(&_lhs))
 		{
@@ -214,25 +231,27 @@ namespace fig
 			lhs = toFixed(sum);
 		}
 
-		CompareOperand rhs {};
+		CompareValue rhs {};
 		if (auto rhs_flt = std::get_if<fig::fixed>(&_rhs))
 		{
 			rhs = *rhs_flt;
 		}
-		else if (auto rhs_str = std::get_if<fig::string>(&_rhs))
+		else if (auto rhs_flt = std::get_if<fig::string>(&_rhs))
 		{
-			if (auto try_value = eval.context.TryGetRaw(ContextLocator { *rhs_str }))
+			rhs = *rhs_flt;
+		}
+		else if (auto rhs_loc = std::get_if<ContextLocator>(&_rhs))
+		{
+			if (auto try_value = eval.context.TryGetRaw(*rhs_loc))
 			{
 				auto& value = try_value.value();
-				if (auto i = std::get_if<int32_t>(&value))
-					rhs = static_cast<fig::fixed>(*i);
-				else if (auto f = std::get_if<fig::fixed>(&value))
+				if (auto f = std::get_if<fig::fixed>(&value))
 					rhs = *f;
 				else if (auto s = std::get_if<fig::string>(&value))
 					rhs = *s;
 			}
 			else
-				rhs = *rhs_str;
+				rhs = fig::string { *rhs_loc };
 		}
 		else if (auto rhs_dice = std::get_if<Fraction>(&_lhs))
 		{
@@ -257,31 +276,37 @@ namespace fig
 			lhs = fixed_to_string(*lhs_flt);
 		else if (auto lhs_str = std::get_if<fig::string>(&_lhs))
 			lhs = *lhs_str;
+		else if (auto lhs_loc = std::get_if<ContextLocator>(&_lhs))
+			lhs = static_cast<fig::string>(*lhs_loc);
 		
 		fig::string rhs;
 		if (auto rhs_flt = std::get_if<fig::fixed>(&_rhs))
 			rhs = fixed_to_string(*rhs_flt);
 		else if (auto rhs_str = std::get_if<fig::string>(&_rhs))
 			rhs = *rhs_str;
+		else if (auto rhs_loc = std::get_if<ContextLocator>(&_rhs))
+			rhs = fig::string { *rhs_loc };
 
 		fig::string op;
 		switch (_operator)
 		{
 			case CompareOperator::Equal: op = "="; break;
+			case CompareOperator::EqualStrict: op = "=="; break;
+			case CompareOperator::EqualApprox: op = "~="; break;
 			case CompareOperator::NotEqual: op = "!="; break;
+			case CompareOperator::NotEqualStrict: op = "!=="; break;
+			case CompareOperator::NotEqualApprox: op = "!~="; break;
 			case CompareOperator::LessThan: op = "<"; break;
 			case CompareOperator::LessOrEqual: op = "<="; break;
 			case CompareOperator::GreaterThan: op = ">"; break;
 			case CompareOperator::GreaterOrEqual: op = ">="; break;
-			default: op = "#error"; break;
+			default: 
+				assert(false && "Invalid operator");
+				op = "??"; 
+				break;
 		}
 
 		return std::format("{} {} {}", lhs, op, rhs);
-	}
-
-	FlagCondition::FlagCondition(const fig::string& flag) :
-		_flag(flag)
-	{
 	}
 
 	FlagCondition::FlagCondition(const ContextLocator& flag) :

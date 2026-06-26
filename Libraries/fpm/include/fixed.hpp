@@ -436,10 +436,12 @@ template <typename B, typename I, unsigned int F>
 constexpr bool numeric_limits<fpm::fixed<B,I,F>>::has_quiet_NaN;
 template <typename B, typename I, unsigned int F>
 constexpr bool numeric_limits<fpm::fixed<B,I,F>>::has_signaling_NaN;
-// template <typename B, typename I, unsigned int F>
-// constexpr bool numeric_limits<fpm::fixed<B,I,F>>::has_denorm;
-// template <typename B, typename I, unsigned int F>
-// constexpr bool numeric_limits<fpm::fixed<B,I,F>>::has_denorm_loss;
+/* Deprecated in C++23:
+template <typename B, typename I, unsigned int F>
+constexpr bool numeric_limits<fpm::fixed<B,I,F>>::has_denorm;
+template <typename B, typename I, unsigned int F>
+constexpr bool numeric_limits<fpm::fixed<B,I,F>>::has_denorm_loss;
+*/
 template <typename B, typename I, unsigned int F>
 constexpr std::float_round_style numeric_limits<fpm::fixed<B,I,F>>::round_style;
 template <typename B, typename I, unsigned int F>

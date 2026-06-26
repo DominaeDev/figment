@@ -66,7 +66,11 @@ namespace fig
     enum class CompareOperator
     {
         Equal,
+        EqualStrict,
+        EqualApprox,
         NotEqual,
+        NotEqualStrict,
+        NotEqualApprox,
         LessThan,
         LessOrEqual,
         GreaterThan,
@@ -78,7 +82,7 @@ namespace fig
         int32_t numerator;
         int32_t denominator;
 	};
-	using CompareOperand = std::variant<fig::fixed, fig::string, Fraction>;
+	using CompareOperand = std::variant<fig::fixed, fig::string, ContextLocator, Fraction>;
 
     class ComparisonCondition : public ConditionNode
     {
@@ -97,7 +101,6 @@ namespace fig
     class FlagCondition : public ConditionNode
     {
     public:
-        explicit FlagCondition(const fig::string& flag);
         explicit FlagCondition(const ContextLocator& flag);
         bool Evaluate(const EvaluationArgs& eval) const override;
         ConditionPtr Clone() const override;

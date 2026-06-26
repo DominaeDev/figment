@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <uuid_v4.h>
 #include <fixed.hpp>
+#include <math.hpp>
 #include "util/Handle.h"
 #include "util/OptionalRef.h"
 #include "util/ExpectedRef.h"
@@ -44,7 +45,7 @@ namespace fig
     using path = std::filesystem::path;
     using string_list = std::vector<string>;
     using string_span = std::span<const string>;
-    using fixed = fpm::fixed_16_16;
+    using fixed = fpm::fixed<std::int32_t, std::int64_t, 10>;
 
     template<typename T>
     using ref_vector = std::vector<std::reference_wrapper<T>>;
@@ -87,8 +88,21 @@ template<typename T>
 inline constexpr size_t toUZ(T x) { return static_cast<size_t>(x); }
 template<typename T>
 inline constexpr size_t castEnum(T x) { return static_cast<size_t>(x); }
-template<typename T>
-inline constexpr fig::fixed toFixed(T x) { return static_cast<fig::fixed>(x); }
+
+template <typename T>
+inline constexpr fig::fixed toFixed(T x)
+{
+	if constexpr (static_cast<double>(std::numeric_limits<T>::max()) > static_cast<double>(std::numeric_limits<fig::fixed>::max()))
+	{
+		constexpr T min = static_cast<T>(std::numeric_limits<fig::fixed>::min());
+		constexpr T max = static_cast<T>(std::numeric_limits<fig::fixed>::max());
+		return static_cast<fig::fixed>(std::clamp(x, min, max));
+	}
+    else
+    {
+        return static_cast<fig::fixed>(x);
+    }
+}
 
 inline constexpr uint8_t operator "" _u8( unsigned long long arg ) noexcept
 {
