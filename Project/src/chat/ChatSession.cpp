@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "chat/ChatSession.h"
+#include "chat/MessagePoller.h"
 #include "data/Character.h"
 
 using namespace fig::io;
@@ -7,10 +8,17 @@ using namespace fig::gui;
 
 namespace fig::chat
 {
+	ChatSession::ChatSession()
+	{}
+
+	ChatSession::~ChatSession()
+	{}
+
 	void ChatSession::Initialize(const ChatStaging& staging, ChatOptions options)
 	{
 		_options = options;
 		_staging = staging;
+		_messagePoller = std::make_unique<MessagePoller>();
 	}
 
 	fig::uuid ChatSession::GetCharacterIdOf(Role role) const
@@ -113,4 +121,18 @@ namespace fig::chat
 		}
 		return pattern;
 	}
+
+	fig::optional_ref<MessagePoller> ChatSession::GetPoller() noexcept
+	{
+		if (_messagePoller)
+			return *_messagePoller;
+		return nullref;
+	}
+
+	void ChatSession::Update(float fElapsed) noexcept
+	{
+		if (_messagePoller)
+			_messagePoller->Update(fElapsed);
+	}
+
 } // namespace

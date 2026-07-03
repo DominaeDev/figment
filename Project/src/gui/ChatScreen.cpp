@@ -122,6 +122,8 @@ namespace fig::gui
 			}
 		}
 
+
+
 #if ENABLE_AUTO_CHAT
 		if (_bAutoChat) 
 			AutoChat();
@@ -138,16 +140,16 @@ namespace fig::gui
 		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
 		{
-			fig::chat::ChatSession session;
-			session.Initialize(staging, Constants::LLM::DefaultChatOptions);
+			auto pSession = std::make_shared<fig::chat::ChatSession>();
+			pSession->Initialize(staging, Constants::LLM::DefaultChatOptions);
 
 			LLMChatArguments llmArgs {
-				/*session*/ session,
+				/*session*/ pSession,
 				/*messages*/ {},
 				/*options*/ Constants::LLM::DefaultChatOptions,
 			};
 			pLLM->Initialize(llmArgs);
-			_pChatScroll->SetSession(session);
+			_pChatScroll->SetSession(pSession);
 
 			_bStartedChat = true;
 			queue_clear(_commandQueue);
@@ -193,7 +195,7 @@ namespace fig::gui
 		{
 			if (auto script = fig::io::ReadTextFile("resources/auto_script.txt"))
 			{
-				fig::string text = eval_text(script.value(), pLLMInstance->GetSession().GetContext());
+				fig::string text = eval_text(script.value(), pLLMInstance->GetSession()->GetContext());
 				_autoScript = split(text, '\n');
 			}
 			_autoScriptIndex = 0;

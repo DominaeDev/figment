@@ -11,7 +11,7 @@ namespace tinyxml2
 	class XMLAttribute;
 }
 
-namespace fig::io
+namespace fig::data
 {
 	class XmlWriterAttribute
 	{

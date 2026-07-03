@@ -3,6 +3,8 @@
 #include "gui/Control.h"
 #include "chat/ChatTypes.h"
 #include "chat/ChatSession.h"
+#include "chat/MessagePoller.h"
+
 #include <map>
 
 namespace fig::gui
@@ -15,7 +17,7 @@ namespace fig::gui
 	public:
 		ChatScroll(LayoutElement* pParent);
 
-		void SetSession(fig::chat::ChatSession session) { _session = session; }
+		void SetSession(fig::chat::ChatSessionPtr pSession);
 
 		void AddDummyMessage(string_cref name, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message);
 		void AddSystemMessage(string_cref message);
@@ -34,14 +36,11 @@ namespace fig::gui
 	private:
 		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message, bool complete);
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
-		void EnablePolling(bool bEnable);
-		void Poll();
 		void RefreshActive();
 
+		void OnMessage(const fig::chat::MessagePoller::Message& msg);
 	private:
 		Control* _pBottomGradient;
-		bool _bPolling = true;
-		float _fPollTimer = 0.0f;
 
 		struct MessageEntry
 		{
@@ -62,6 +61,6 @@ namespace fig::gui
 		float _fLastListHeight = 0.0f;
 		float _fAnimatedScroll = 0.0f;
 
-		fig::chat::ChatSession _session {};
+		fig::chat::ChatSessionPtr _pSession {};
 	};
 }

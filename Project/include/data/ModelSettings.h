@@ -4,18 +4,15 @@
 
 #include "Figment.h"
 #include "llm/PromptTemplateTypes.h"
-#include "io/FileError.h"
+#include "io/Error.h"
 #include "io/IXmlSerializable.h"
 
 namespace fig::data
 {
-	struct ModelSettings : public fig::io::IXmlSerializable
+	struct ModelSettings : public IXmlSerializable<"ModelSettings", 0>
 	{
-		static constexpr uint8_t FormatVersion { 0 };
-
 		ModelSettings();
 
-		uint8_t version = FormatVersion;
 		fig::string name;
 
 		struct LLMModel
@@ -39,8 +36,8 @@ namespace fig::data
 		public:
 			static auto SerializeInfo()
 			{
-				using namespace fig::io;
 				LLMModel Defaults {};
+
 				return Fields(
 					AsElement { "Path", &LLMModel::filename },
 					AsElement { "PromptTemplate", &LLMModel::promptTemplate, SerializePromptTemplate, DeserializePromptTemplate }
@@ -69,7 +66,6 @@ namespace fig::data
 
 			static auto SerializeInfo()
 			{
-				using namespace fig::io;
 				return Fields(
 					AsElement { "Path",	&EmbeddingModel::filename }
 				);
@@ -78,12 +74,8 @@ namespace fig::data
 
 		static auto SerializeInfo()
 		{
-			using namespace fig::io;
 			return Fields(
-				AsAttribute { "version",	&ModelSettings::version }
-					.MustExist()
-					.Validator([](auto& v) { return v <= FormatVersion; }),
-				AsElement { "Name",		&ModelSettings::name, },
+				AsElement { "Name",			&ModelSettings::name, },
 				AsElement { "Model",		&ModelSettings::model, },
 				AsElement { "Embedding",	&ModelSettings::embeddingModel, }
 			);

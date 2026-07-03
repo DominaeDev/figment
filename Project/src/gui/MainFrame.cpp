@@ -76,6 +76,11 @@ namespace fig::gui
 
 	void MainFrame::OnUpdate(float fElapsed)
 	{
+		if (auto pLLM = Global::GetLLMInstance())
+		{
+			if (auto pSession = pLLM->GetSession())
+				pSession->Update(fElapsed);
+		}
 	}
 
 	void MainFrame::OnRender(Renderer* pRenderer)

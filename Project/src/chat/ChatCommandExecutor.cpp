@@ -68,7 +68,7 @@ namespace fig::chat
 		if (std::iswdigit(from_utf8(partial_name)[0]))
 			return bot_from_index(std::stoi(partial_name) - 1);
 
-		auto& staging = pLLM->GetSession().GetStaging();
+		auto& staging = pLLM->GetSession()->GetStaging();
 
 		for (auto const& character : staging.GetCharacters())
 		{

@@ -4,31 +4,68 @@
 
 #include "Figment.h"
 #include "chat/ChatTypes.h"
+#include "io/IXmlSerializable.h"
 
 namespace fig::data
 {
-	class ChatLog
+	class ChatLog : public IXmlSerializable<"ChatLog", 0>
 	{
 	public:
-		struct Entry
+		struct Message
 		{
-			fig::uuid entryId;
+			fig::uuid messageId;
 			fig::uuid speakerId;
-			size_t turn;
 			fig::chat::Role role;
-			fig::chat::MessageType msgType;
-			uint16_t subindex;
-			uint32_t _reserved;
+			int32_t turn;
+			int16_t subindex;
 			fig::timestamp timestamp;
+			fig::chat::MessageType msgType;
 			fig::string content;
 
-			static auto SerializeInfo() noexcept;
+			static auto SerializeInfo() noexcept
+			{
+				using namespace fig::chat;
+
+				return Fields(
+					AsAttribute { "id", &Message::messageId }
+						.MustExist(),
+					AsAttribute { "from", &Message::speakerId }
+						.MustExist(),
+					AsAttribute { "turn", &Message::turn }
+						.MustExist(),
+
+					AsAttribute { "role", &Message::role,
+						[](auto& value) { return enum_serialize(value, RoleMapping); },
+						[](auto& value) { return enum_deserialize(value, RoleMapping); }
+					}	.MustExist(),
+					AsAttribute { "type", &Message::msgType,
+						[](auto& value) { return enum_serialize(value, MessageTypeMapping); },
+						[](auto& value) { return enum_deserialize(value, MessageTypeMapping); }
+					}	.MustExist(),
+					AsElement { "timestamp", &Message::timestamp },
+					AsText { &Message::content }
+						.MustExist()
+				);
+
+				static_assert(XmlSerializable<Message>);
+			}
 		};
 
 		fig::uuid assetId;
-		std::vector<Entry> entries;
+		std::vector<Message> messages;
 
-		static auto SerializeInfo() noexcept;
+		static auto SerializeInfo() noexcept
+		{
+			return Fields(
+				AsAttribute { "id", &ChatLog::assetId }
+					.MustExist(),
+				AsElement { "Message", &ChatLog::messages }
+					.Collection("Messages")
+					.MustExist()
+			);
+
+			static_assert(XmlSerializable<ChatLog>);
+		}
 	};
 }
 

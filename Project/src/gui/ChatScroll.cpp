@@ -13,9 +13,8 @@
 using namespace fig::llm;
 using namespace fig::chat;
 
-#define POLL_INTERVAL 0.1f
-#define ANIMATED_SCROLL_SPEED 15.0f
-#define GRADIENT_HEIGHT 40
+static constexpr float kAnimatedScrollSpeed = 15.0f;
+static constexpr fig::gui::Coord kGradientHeight = 40;
 
 namespace fig::gui
 {
@@ -29,6 +28,13 @@ namespace fig::gui
 		_pBottomGradient = new VerticalGradient(this, Colors::ChatBackground.WithAlpha(0.0f), Colors::ChatBackground);
 		EnableClipping(true);
 		EnableCulling(true);
+	}
+
+	void ChatScroll::SetSession(fig::chat::ChatSessionPtr pSession)
+	{ 
+		_pSession = pSession;
+
+		_pSession->GetPoller()->RegisterObserver(std::bind_front(&ChatScroll::OnMessage, this));
 	}
 
 	void ChatScroll::AddDummyMessage(string_cref name, Role role, MessageType msgType, string_cref message)
@@ -73,6 +79,8 @@ namespace fig::gui
 			return entry.pChatMessage != nullptr;
 		});
 
+		auto& session = *_pSession;
+
 		Role lastRole = Role::Undefined;
 		fig::uuid lastId {};
 		if (itLast != _messages.crend())
@@ -88,7 +96,7 @@ namespace fig::gui
 		bShowAvatar &= (role != lastRole) || (characterId != lastId);
 		bool bShowName = bShowAvatar;
 
-		fig::string name = _session.GetNameOf(role);
+		fig::string name = session.GetNameOf(role);
 		if (role == Role::System)
 		{
 			bShowName = true;
@@ -97,11 +105,11 @@ namespace fig::gui
 
 		if (msgType == MessageType::Narration)
 		{
-			name = _session.GetNameOf(Role::Narrator);
+			name = session.GetNameOf(Role::Narrator);
 			bShowName = true;
 			bShowAvatar = false;
 		}
-		else if (auto try_character = _session.GetStaging().GetCharacterById(characterId))
+		else if (auto try_character = session.GetStaging().GetCharacterById(characterId))
 			name = (*try_character).fullName;
 		else
 			name = "Unknown";
@@ -109,7 +117,7 @@ namespace fig::gui
 		auto pMessage = new ChatMessage(this, role, characterId, bShowName ? name : "", msgType, bShowAvatar);
 		pMessage->SetY(-1000); // Move off-screen
 		pMessage->SetMessage(message, complete);
-		pMessage->SetColors(_session.GetColorsOf(role));
+		pMessage->SetColors(session.GetColorsOf(role));
 		GetSizer()->Add(pMessage, 0, Sizer::Expand);
 		return pMessage;
 	}
@@ -165,114 +173,13 @@ namespace fig::gui
 
 	void ChatScroll::OnUpdate(float fElapsed)
 	{
-		// Poll LLM for new messages
-		_fPollTimer += fElapsed;
-		if (_fPollTimer >= POLL_INTERVAL)
-		{
-			_fPollTimer = 0.0f;
-			Poll();
-		}
-
-		// Animated scrolling
 		if (_fAnimatedScroll > 0.0f)
 		{
-			_fAnimatedScroll -= _fAnimatedScroll * fElapsed * ANIMATED_SCROLL_SPEED;
+			_fAnimatedScroll -= _fAnimatedScroll * fElapsed * kAnimatedScrollSpeed;
 			if (_fAnimatedScroll < 1.0f)
 				_fAnimatedScroll = 0.0f;
 			_pScrollSizer->SetOffset(toI(_fScrollY + _fAnimatedScroll));
 		}
-	}
-
-	void ChatScroll::EnablePolling(bool bEnable)
-	{
-		_bPolling = bEnable;
-	}
-
-	void ChatScroll::Poll()
-	{
-		auto pLLM = Global::GetLLMInstance();
-		if (!pLLM)
-			return;
-
-		bool bNewResponse = false;
-
-		MessagePiece piece;
-		while (pLLM->PollResponse(piece))
-		{
-			auto itMsg = _messagesById.find(piece.subMessageId);
-			if (itMsg != _messagesById.end())
-			{
-				// Append piece
-				MessageEntry* pEntry = itMsg->second;
-
-				if (pEntry->pChatMessage != nullptr)
-					pEntry->pChatMessage->AppendMessage(piece.content, piece.isComplete);
-				else if (!empty_or_whitespace(piece.content))
-				{
-					(*itMsg).second->role = piece.role;
-					(*itMsg).second->msgType = piece.msgType;
-					auto characterId = _session.GetCharacterIdOf(piece.role);
-					pEntry->pChatMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, piece.isComplete);
-				}
-				else
-					continue; // Skip until we receive some text
-			}
-			else if (empty_or_whitespace(piece.content) && piece.isComplete)
-			{
-				// Ignore complete empty messages
-				continue;
-			}
-			else
-			{
-				auto characterId = _session.GetCharacterIdOf(piece.role);
-				fig::string text = trim(piece.content);
-				if (text.empty() || (text.length() == 1 && (text[0] == '"' || text[0] == '*' || text[0] == '['))) // Empty or scaffolding
-				{
-					_messages.push_back(MessageEntry {
-						.characterId = characterId,
-						.chatId = piece.identifier,
-						.role = piece.role,
-						.responseId = piece.responseId,
-						.subMessageId = piece.subMessageId,
-						.msgType = piece.msgType,
-						.pChatMessage = nullptr,
-					});
-					_messagesById[piece.subMessageId] = &_messages.back();
-				}
-				else
-				{
-
-					// Create new message to hold the piece
-					ChatMessage* pMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, piece.isComplete);
-					_messages.push_back(MessageEntry {
-						.characterId = characterId,
-						.chatId = piece.identifier,
-						.role = piece.role,
-						.responseId = piece.responseId,
-						.subMessageId = piece.subMessageId,
-						.msgType = piece.msgType,
-						.pChatMessage = pMessage,
-					});
-					_messagesById[piece.subMessageId] = &_messages.back();
-				}
-			}
-
-			// Clean up empty
-			if (piece.isComplete && itMsg != _messagesById.end() && itMsg->second->pChatMessage == nullptr)
-			{
-				_messagesById.erase(itMsg);
-				for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
-				{
-					if (_messages[i].subMessageId == itMsg->first)
-						_messages.erase(_messages.begin() + (ptrdiff_t)i);
-				}
-				continue;
-			}
-			bNewResponse |= piece.isComplete;
-		}
-
-		if (bNewResponse)
-			RefreshActive();
 	}
 
 	EventResult ChatScroll::OnEvent(Event& event)
@@ -307,8 +214,8 @@ namespace fig::gui
 		}
 		_fLastListHeight = listHeight;
 
-		_pBottomGradient->SetPosition(0, GetHeight() - GRADIENT_HEIGHT);
-		_pBottomGradient->SetSize(GetWidth(), GRADIENT_HEIGHT);
+		_pBottomGradient->SetPosition(0, GetHeight() - kGradientHeight);
+		_pBottomGradient->SetSize(GetWidth(), kGradientHeight);
 	}
 
 	void ChatScroll::OnAddedChild(LayoutElement* pChild)
@@ -334,5 +241,70 @@ namespace fig::gui
 				|| activeMessages.find(message.responseId) != activeMessages.end();
 			message.pChatMessage->SetActive(bActive);
 		}
+	}
+
+	void ChatScroll::OnMessage(const MessagePoller::Message& piece)
+	{
+		// Ignore empty messages
+		if (empty_or_whitespace(piece.content) && piece.complete)
+			return;
+
+		auto itMsg = _messagesById.find(piece.subMessageId);
+		if (itMsg != _messagesById.end())
+		{
+			// Append piece
+			MessageEntry* pEntry = itMsg->second;
+
+			if (pEntry->pChatMessage != nullptr)
+			{
+				// Update bubble
+				pEntry->pChatMessage->SetMessage(piece.content, piece.complete);
+			}
+			else if (!empty_or_whitespace(piece.content))
+			{
+				// New bubble
+				(*itMsg).second->role = piece.role;
+				(*itMsg).second->msgType = piece.msgType;
+				auto characterId = _pSession->GetCharacterIdOf(piece.role);
+				pEntry->pChatMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, piece.complete);
+			}
+		}
+		else
+		{
+			auto characterId = _pSession->GetCharacterIdOf(piece.role);
+			auto identifier = _pSession->GetIdentifierOf(piece.role);
+			fig::string text = trim(piece.content);
+			if (text.empty() || (text.length() == 1 && (text[0] == '"' || text[0] == '*' || text[0] == '['))) // Empty or scaffolding
+			{
+				_messages.push_back(MessageEntry {
+					.characterId = characterId,
+					.chatId = identifier,
+					.role = piece.role,
+					.responseId = piece.responseId,
+					.subMessageId = piece.subMessageId,
+					.msgType = piece.msgType,
+					.pChatMessage = nullptr,
+				});
+				_messagesById[piece.subMessageId] = &_messages.back();
+			}
+			else
+			{
+				// Create new message to hold the piece
+				ChatMessage* pMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, piece.complete);
+				_messages.push_back(MessageEntry {
+					.characterId = characterId,
+					.chatId = identifier,
+					.role = piece.role,
+					.responseId = piece.responseId,
+					.subMessageId = piece.subMessageId,
+					.msgType = piece.msgType,
+					.pChatMessage = pMessage,
+					});
+				_messagesById[piece.subMessageId] = &_messages.back();
+			}
+		}
+
+		if (piece.complete)
+			RefreshActive();
 	}
 }

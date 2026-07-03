@@ -3,7 +3,7 @@
 
 #include "Figment.h"
 #include <expected>
-#include "io/FileError.h"
+#include "io/Error.h"
 
 namespace fig::io
 {

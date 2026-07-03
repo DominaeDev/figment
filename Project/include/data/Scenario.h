@@ -39,8 +39,6 @@ namespace fig::data
 
 			static auto SerializeInfo() noexcept
 			{
-				using namespace fig::io;
-
 				return Fields(
 					AsAttribute { "id",				&Step::id },
 					AsElement	{ "Condition",		&Step::condition },
@@ -59,8 +57,6 @@ namespace fig::data
 
 			static auto SerializeInfo() noexcept
 			{
-				using namespace fig::io;
-
 				return Fields(
 					AsElement { "Title",		&Chapter::title },
 					AsElement { "Step",			&Chapter::steps }
@@ -75,13 +71,13 @@ namespace fig::data
 		std::vector<Message> intro;
 		std::vector<Message> outro;
 
-		fig::io::FileError LoadFromXml(fig::io::XmlReaderElement xml) noexcept;
-		void SaveToXml(fig::io::XmlWriterElement xml) const noexcept;
+		fig::io::FileError LoadFromXml(XmlReaderElement xml) noexcept;
+		void SaveToXml(XmlWriterElement xml) const noexcept;
 
 		fig::optional_cref<Step> GetStep(size_t chapter, size_t step) const noexcept;
 	};
 
-	class Scenario : public fig::io::IXmlSerializable
+	class Scenario : public IXmlSerializable<"Scenario", 0>
 	{
 	public:
 		struct RoleSlot
@@ -112,8 +108,6 @@ namespace fig::data
 
 			static auto SerializeInfo() noexcept
 			{
-				using namespace fig::io;
-
 				return Fields(
 					AsAttribute { "id",			&RoleSlot::id },
 					AsElement	{ "Label",		&RoleSlot::label },
@@ -129,16 +123,13 @@ namespace fig::data
 			}
 		};
 
-		Scenario() : fig::io::IXmlSerializable("Scenario")
-		{
-		}
-		bool Validate() const noexcept override;
+		bool OnValidate() const noexcept override;
 
 		const std::vector<RoleSlot>& GetRoleSlots() const noexcept { return roles; }
 		std::pair<fig::string, fig::string> GetInfo() const noexcept { return std::make_pair(title, description); }
 		const Story& GetStory() const noexcept { return story; }
 
-		bool OnLoadFromXml(fig::io::XmlReaderElement xml) override;
+		bool OnLoadFromXml(XmlReaderElement xml) override;
 
 	private:
 		fig::string title;

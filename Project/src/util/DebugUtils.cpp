@@ -22,7 +22,7 @@ namespace fig
 		{
 //			ImportTestCharacters("./import/characters");
 //			ShuffleCards();
-//			CreateModelSettings();
+			CreateModelSettings();
 		}
 	}
 

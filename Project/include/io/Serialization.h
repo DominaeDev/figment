@@ -4,7 +4,7 @@
 
 #include "Figment.h"
 #include "user/Security.h"
-#include "io/FileError.h"
+#include "io/Error.h"
 #include <variant>
 #include <map>
 #include <chrono>

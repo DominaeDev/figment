@@ -48,8 +48,10 @@ namespace fig::llm
 		_cache->Clear();
 	}
 
-	void LLMContext::TokenizeUncached(fig::chat::ChatSession& session)
+	void LLMContext::TokenizeUncached(std::shared_ptr<fig::chat::ChatSession> pSession)
 	{
+		auto& staging = pSession->GetStaging();
+
 		// Tokenize uncached messages
 		for (auto& block : _blocks)
 		{
@@ -67,7 +69,7 @@ namespace fig::llm
 				complete_message(content);
 				content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 			}
-			content = eval_text(content, session.GetStaging().GetContext(block.role)); //! @move?
+			content = eval_text(content, staging.GetContext(block.role)); //! @move?
 			block.tokens = llama::tokenize(_pVocab, content, false);
 
 			block.attn_position = -1;

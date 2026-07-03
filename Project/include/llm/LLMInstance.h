@@ -35,7 +35,7 @@ namespace fig::llm
 
 	struct LLMChatArguments
 	{
-		fig::chat::ChatSession session;
+		std::shared_ptr<fig::chat::ChatSession> session;
 		fig::chat::Messages messages;
 		fig::chat::ChatOptions options;
 		int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
@@ -90,7 +90,7 @@ namespace fig::llm
 		bool GenerateEmbedding(fig::string text);
 #endif
 
-		const fig::chat::ChatSession& GetSession() const { return _session; }
+		fig::chat::ChatSessionPtr GetSession() const { return _pSession; }
 		std::map<fig::string, fig::string> GetStateVariables();
 
 	private:
@@ -220,7 +220,7 @@ namespace fig::llm
 		std::queue<LLMTask> _tasks;
 
 		// Session
-		fig::chat::ChatSession _session;
+		fig::chat::ChatSessionPtr _pSession {};
 		fig::chat::ChatOptions _options;
 		std::atomic<int32_t> _turn_counter = 0;
 

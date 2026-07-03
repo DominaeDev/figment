@@ -16,6 +16,7 @@
 #include "util/Handle.h"
 #include "util/OptionalRef.h"
 #include "util/ExpectedRef.h"
+#include "util/FixedString.h"
 
 namespace fig
 {

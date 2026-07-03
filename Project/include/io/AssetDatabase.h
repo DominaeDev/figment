@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Figment.h"
-#include "io/DatabaseError.h"
 #include "io/Asset.h"
 #include <expected>
 #include <functional>

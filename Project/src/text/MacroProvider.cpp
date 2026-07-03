@@ -4,7 +4,7 @@
 #include "text/TextEvaluator.h"
 #include "io/Xml.h"
 
-using namespace fig::io;
+using namespace fig::data;
 
 namespace fig::text
 {

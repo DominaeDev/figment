@@ -4,9 +4,16 @@
 
 namespace fig::chat
 {
+	class MessagePoller;
+
 	class ChatSession
 	{
 	public:
+		ChatSession();
+		ChatSession(const ChatSession&) = delete;
+		ChatSession(ChatSession&&) = default;
+		~ChatSession();
+
 		void Initialize(const ChatStaging& staging, ChatOptions options);	
 
 		inline const ChatStaging& GetStaging() const noexcept { return _staging; }
@@ -20,9 +27,17 @@ namespace fig::chat
 
 		inline const Context& GetContext() const noexcept { return _context; }
 
+		void Update(float fElapsed) noexcept;
+
+		fig::optional_ref<MessagePoller> GetPoller() noexcept;
+
 	protected:
 		ChatStaging _staging {};
 		ChatOptions _options {};
 		Context _context {};
+		std::unique_ptr<MessagePoller> _messagePoller {};
 	};
+
+	using ChatSessionPtr = std::shared_ptr<fig::chat::ChatSession>;
+	using ChatSessionCPtr = std::shared_ptr<const fig::chat::ChatSession>;
 }

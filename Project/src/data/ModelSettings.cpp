@@ -6,10 +6,7 @@ using namespace fig::io;
 
 namespace fig::data
 {
-	static const fig::string XmlRootName { "ModelSettings" };
-
-	ModelSettings::ModelSettings() : IXmlSerializable(XmlRootName),
-		version { FormatVersion },
+	ModelSettings::ModelSettings() :
 		model {},
 		embeddingModel {}
 	{

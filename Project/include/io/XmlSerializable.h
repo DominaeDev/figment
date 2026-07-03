@@ -5,7 +5,7 @@
 #include "io/Xml.h"
 #include <cassert>
 
-namespace fig::io
+namespace fig::data
 {
 	template<typename T>
 	struct XmlMemberPointer;
@@ -29,7 +29,7 @@ namespace fig::io
 	template<typename T>
 	concept XmlLoadable =
 		(requires (T t, XmlReaderElement x) { { t.LoadFromXml(x) } -> std::same_as<std::remove_cvref_t<bool>>; }
-		or requires (T t, XmlReaderElement x) { { t.LoadFromXml(x) } -> std::same_as<FileError>; });
+		or requires (T t, XmlReaderElement x) { { t.LoadFromXml(x) } -> std::same_as<fig::io::FileError>; });
 
 	template<typename T>
 	concept IsStringConvertible =

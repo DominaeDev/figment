@@ -6,65 +6,78 @@
 #include "io/XmlReader.h"
 #include "io/XmlWriter.h"
 #include "io/XmlSerializable.h"
+#include "util/FixedString.h"
 
-namespace fig::io
+namespace fig::data
 {
+	template <fixed_string ROOT_NAME, int16_t VERSION = -1>
 	class IXmlSerializable 
 	{
-		IXmlSerializable() = delete;
 	public:
-		IXmlSerializable(const fig::string& rootName) : _rootName { rootName } {}
 		virtual ~IXmlSerializable() = default;
 
-		FileError LoadFromXml(this XmlSerializable auto& self, const fig::path& path) noexcept
-		{
-			if (not (std::filesystem::exists(path) and std::filesystem::is_regular_file(path)))
-				return FileError::NotFound;
+		static constexpr auto format_version { VERSION };
 
-			XmlReader xml(path, self._rootName);
+		fig::io::FileError LoadFromXml(this XmlSerializable auto& self, const fig::path& path) noexcept
+		{
+			XmlReader xml(path, ROOT_NAME.c_str());
 			if (not xml.IsOk())
-				return FileError::UnrecognizedFormat;
+				return fig::io::FileError::UnrecognizedFormat;
+
+			auto root = xml.GetRoot();
+			if (root.GetName() != ROOT_NAME.c_str())
+				return fig::io::FileError::UnrecognizedFormat;
+
+			self._format_version = root["format"].Get<int16_t>(-1);
 
 			return self.LoadFromXml(xml.GetRoot());
 		}
 
-		FileError LoadFromXml(this XmlSerializable auto& self, const fig::byte_span& buffer) noexcept
+		fig::io::FileError LoadFromXml(this XmlSerializable auto& self, const fig::byte_span& buffer) noexcept
 		{
 			XmlReader xml(fig::string_view { (const char*)buffer.data(), buffer.size() });
-			if (not xml.IsOk() or xml.GetRoot().GetName() != self._rootName)
-				return FileError::UnrecognizedFormat;
+			if (not xml.IsOk())
+				return fig::io::FileError::UnrecognizedFormat;
+
+			auto root = xml.GetRoot();
+			if (root.GetName() != ROOT_NAME.c_str())
+				return fig::io::FileError::UnrecognizedFormat;
+
+			self._format_version = root["format"].Get<int16_t>(-1);
 
 			return self.LoadFromXml(xml.GetRoot());
 		}
 
-		FileError LoadFromXml(this XmlSerializable auto& self, XmlReaderElement node) noexcept
+		fig::io::FileError LoadFromXml(this XmlSerializable auto& self, XmlReaderElement node) noexcept
 		{
 			if (not XmlDeserialize(node, self))
-				return FileError::UnrecognizedFormat;
+				return fig::io::FileError::UnrecognizedFormat;
 			
 			if (not self.OnLoadFromXml(node))
-				return FileError::ReadError;
+				return fig::io::FileError::ReadError;
 
 			if (not self.Validate())
-				return FileError::ReadError;
+				return fig::io::FileError::ReadError;
 
-			return FileError::NoError;
+			return fig::io::FileError::NoError;
 		}
 
-		FileError SaveToXml(this const XmlSerializable auto& self, const fig::path& path) noexcept
+		fig::io::FileError SaveToXml(this const XmlSerializable auto& self, const fig::path& path) noexcept
 		{
-			XmlWriter xml { self._rootName };
+			XmlWriter xml { ROOT_NAME.c_str() };
 			auto root = xml.GetRoot();
+			root["format"] = VERSION;
 			self.SaveToXml(root);
 			if (not xml.WriteToFile(path))
-				return FileError::WriteError;
-			return FileError::NoError;
+				return fig::io::FileError::WriteError;
+			return fig::io::FileError::NoError;
 		}
 
 		void SaveToXml(this const XmlSerializable auto& self, fig::bytes& buffer) noexcept
 		{
-			XmlWriter xml { self._rootName };
+			XmlWriter xml { ROOT_NAME.c_str() };
 			auto root = xml.GetRoot();
+			root["format"] = VERSION;
 			self.SaveToXml(root);
 			xml.WriteToMemory(buffer);
 		}
@@ -75,11 +88,19 @@ namespace fig::io
 		}
 
 	protected:
-		virtual bool Validate() const noexcept { return true; }
-		virtual bool OnLoadFromXml(XmlReaderElement node) { return true; }
+		int16_t _format_version { VERSION };
 
-	private:
-		fig::string _rootName;
+		bool Validate() const noexcept 
+		{ 
+			if constexpr (VERSION >= 0)
+			{
+				if (_format_version < 0 or _format_version > VERSION)
+					return false;
+			}
+			return OnValidate();
+		}
+		virtual bool OnValidate() const noexcept { return true; }
+		virtual bool OnLoadFromXml(XmlReaderElement node) { return true; }
 	};
 }
 

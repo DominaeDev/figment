@@ -58,8 +58,8 @@ namespace fig
 
 		static const Condition Always;
 		
-		bool LoadFromXml(fig::io::XmlReaderElement xml) noexcept;
-		void SaveToXml(fig::io::XmlWriterElement xml) const noexcept;
+		bool LoadFromXml(fig::data::XmlReaderElement xml) noexcept;
+		void SaveToXml(fig::data::XmlWriterElement xml) const noexcept;
 
 	private:
 		ConditionPtr _pCondition;
@@ -73,7 +73,7 @@ namespace fig
 
 		static auto SerializeInfo() noexcept
 		{
-			using namespace fig::io;
+			using namespace fig::data;
 
 			return Fields(
 				AsElement { "Condition",	&Validation::condition }

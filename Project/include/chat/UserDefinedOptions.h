@@ -21,8 +21,8 @@ namespace fig::chat
 
 	struct UserDefinedOptions
 	{
-		bool LoadFromXml(fig::io::XmlReaderElement xml);
-		void SaveToXml(fig::io::XmlWriterElement xml) const;
+		bool LoadFromXml(fig::data::XmlReaderElement xml);
+		void SaveToXml(fig::data::XmlWriterElement xml) const;
 
 		inline size_t size() const noexcept { return options.size(); }
 		inline auto begin() const noexcept { return std::begin(options); }

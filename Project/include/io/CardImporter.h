@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Figment.h"
-#include "io/FileError.h"
+#include "io/Error.h"
 #include "data/Character.h"
 #include <expected>
 

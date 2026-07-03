@@ -9,7 +9,7 @@ using namespace fig::chat;
 
 namespace fig::data
 {
-	bool Scenario::OnLoadFromXml(fig::io::XmlReaderElement xml)
+	bool Scenario::OnLoadFromXml(XmlReaderElement xml)
 	{
 		size_t bot_index = 0uz;
 		for (auto& slot : roles)
@@ -23,7 +23,7 @@ namespace fig::data
 		return true;
 	}
 
-	bool Scenario::Validate() const noexcept
+	bool Scenario::OnValidate() const noexcept
 	{
 		if (roles.empty())
 			return false;
@@ -119,7 +119,7 @@ namespace fig::data
 		}
 	}
 
-	FileError Story::LoadFromXml(fig::io::XmlReaderElement xml) noexcept
+	FileError Story::LoadFromXml(XmlReaderElement xml) noexcept
 	{
 		// Read chapters
 		chapters.clear();
@@ -149,7 +149,7 @@ namespace fig::data
 		return FileError::NoError;
 	}
 
-	void Story::SaveToXml(fig::io::XmlWriterElement xml) const noexcept
+	void Story::SaveToXml(XmlWriterElement xml) const noexcept
 	{
 		if (not intro.empty())
 		{

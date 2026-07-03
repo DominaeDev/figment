@@ -70,7 +70,7 @@ namespace fig::llm
 	{
 		_pStatus->EmitSignal(LLMStatusEvent::ChatInitializing);
 
-		auto& staging = args.session.GetStaging();
+		auto& staging = args.session->GetStaging();
 
 		bool bMultiSequence = staging.IsGroupChat() && args.options.groupChatMode == ChatOptions::GroupChatMode::SwapSequences;
 		int32_t n_bots = bMultiSequence ? staging.GetBotCount() : 1;
@@ -80,7 +80,7 @@ namespace fig::llm
 		std::scoped_lock _(_stateMutex); // Lock for the entire duration of the scope
 
 		_contextState = LLMContext { _modelState };
-		_session = args.session;
+		_pSession = args.session;
 		_stateVars = {};
 		_turn_counter.store(0);
 		_options = args.options;
@@ -247,7 +247,7 @@ namespace fig::llm
 			});
 		}
 
-		_contextState.TokenizeUncached(_session);
+		_contextState.TokenizeUncached(_pSession);
 		auto pos_attn = _contextState.DecodeUncached();
 		if (not pos_attn.is_valid())
 			return false; // Error
@@ -277,22 +277,22 @@ namespace fig::llm
 
 		// Names
 		fig::string namesPattern;
-		int32_t botCount = (int32_t)_session.GetStaging().GetBotCount();
+		int32_t botCount = (int32_t)_pSession->GetStaging().GetBotCount();
 		for (int i = 0; i < botCount; ++i)
 		{
 			if (i > 0)
 				namesPattern += "| ";
 			if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
-				namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(bot_from_index(i)));
+				namesPattern += std::format("| \"@{}\"", _pSession->GetIdentifierOf(bot_from_index(i)));
 			else
-				namesPattern += std::format("| \"{}\"", _session.GetNameOf(bot_from_index(i)));
+				namesPattern += std::format("| \"{}\"", _pSession->GetNameOf(bot_from_index(i)));
 		}
 		if (_options.flags.IsSet(ChatOptions::Flag::AllowUserResponse))
 		{
 			if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
-				namesPattern += std::format("| \"@{}\"", _session.GetIdentifierOf(Role::User));
+				namesPattern += std::format("| \"@{}\"", _pSession->GetIdentifierOf(Role::User));
 			else
-				namesPattern += std::format("| \"{}\"", _session.GetNameOf(Role::User));
+				namesPattern += std::format("| \"{}\"", _pSession->GetNameOf(Role::User));
 		}
 		replace_all_inplace(grammar, "##NAMES##", namesPattern);
 
@@ -356,7 +356,7 @@ namespace fig::llm
 			std::scoped_lock lock(_stateMutex, _resultMutex);
 			queue_clear(_resultQueue);
 
-			if (_session.GetStaging().IsGroupChat() && _options.groupChatMode == ChatOptions::GroupChatMode::SwapPersonas)
+			if (_pSession->GetStaging().IsGroupChat() && _options.groupChatMode == ChatOptions::GroupChatMode::SwapPersonas)
 				SwapPersona(Role::Undefined, true);
 
 			_contextState.EraseChat();
@@ -435,7 +435,7 @@ namespace fig::llm
 		LogLn(std::format("## Turn: {}", current_turn));
 
 		// Tokenize uncached messages
-		_contextState.TokenizeUncached(_session);
+		_contextState.TokenizeUncached(_pSession);
 
 		if constexpr (Disabled) // State vars
 		{
@@ -500,7 +500,7 @@ namespace fig::llm
 		if (!args.isContinuation)
 		{
 			auto [prelude, _] = get_chat_template_prefix_suffix(args.responder, "assistant"); //! @name?
-			prelude = eval_text(prelude, _session.GetStaging().GetContext(args.responder));
+			prelude = eval_text(prelude, _pSession->GetStaging().GetContext(args.responder));
 			auto assistant_tokens = llama::tokenize(state.pVocab, prelude, false);
 			pre_prompt_tokens.insert(pre_prompt_tokens.end(), assistant_tokens.begin(), assistant_tokens.end());
 		}
@@ -564,11 +564,11 @@ namespace fig::llm
 		Role responderRole = args.role;
 		bool isContinuation = args.flags.IsSet(GenerateFlag::Continuation);
 		bool isInstigation = args.flags.IsSet(GenerateFlag::Instigation);
-		bool isGroupChat = _session.GetStaging().IsGroupChat();
+		bool isGroupChat = _pSession->GetStaging().IsGroupChat();
 
 		fig::uuid responseId = args.responseId.empty() ? _CreateUUID() : args.responseId;
 		fig::uuid subMessageId = args.subMessageId.empty() ? _CreateUUID() : args.subMessageId;
-		fig::string userName = _session.GetNameOf(Role::User);
+		fig::string userName = _pSession->GetNameOf(Role::User);
 
 		auto& response_pos = _contextState.response_pos; 
 		auto& cursor_pos = _contextState.cursor_pos;
@@ -797,7 +797,7 @@ namespace fig::llm
 						fig::string tag, tagName;
 						get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
 
-						if (tagName == "@USR" || tagName == _session.GetNameOf(Role::User) && args.role != Role::User)
+						if (tagName == "@USR" || tagName == _pSession->GetNameOf(Role::User) && args.role != Role::User)
 						{
 							stop_reason = StopReason::ImpersonatingUser;
 							break; // Stop if talking/acting for the user
@@ -818,13 +818,13 @@ namespace fig::llm
 								partial.erase(fmt_start);
 								sendMsg = !partial.empty();
 								responderId = format_id(tagName);
-								responderRole = _session.GetStaging().GetRoleOf(responderId);
+								responderRole = _pSession->GetStaging().GetRoleOf(responderId);
 							}
 							else // No remainder: New message
 							{
 								sendMsg.erase(fmt_start, fmt_end - fmt_start + 1);
 								responderId = format_id(tagName);
-								responderRole = _session.GetStaging().GetRoleOf(responderId);
+								responderRole = _pSession->GetStaging().GetRoleOf(responderId);
 
 								if (tag == Constants::Chat::DialogueTag)
 									msgType = MessageType::Dialogue;
@@ -1305,9 +1305,9 @@ namespace fig::llm
 			return false;
 
 		// Process
-		fig::string identifier = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" +_session.GetIdentifierOf(role) : _session.GetNameOf(role);
+		fig::string identifier = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" +_pSession->GetIdentifierOf(role) : _pSession->GetNameOf(role);
 		fig::string content = message;
-		content = eval_text(content, _session.GetStaging().GetContext(role));
+		content = eval_text(content, _pSession->GetStaging().GetContext(role));
 		std::vector<Submessage> subMessages;
 		content = process_message(content, identifier, &subMessages);
 
@@ -1373,7 +1373,7 @@ namespace fig::llm
 		};
 
 		int32_t current_turn = _turn_counter.load();
-		fig::string responder = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" + _session.GetIdentifierOf(role) : _session.GetNameOf(role);
+		fig::string responder = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" + _pSession->GetIdentifierOf(role) : _pSession->GetNameOf(role);
 
 		bool bAllowNarration = true;
 
@@ -1473,7 +1473,7 @@ namespace fig::llm
 	bool LLMInstance::GreetUser()
 	{
 		// Story introduction
-		auto& staging = _session.GetStaging();
+		auto& staging = _pSession->GetStaging();
 		auto& story = staging.GetScenario().GetStory();
 		if (not story.intro.empty())
 		{
@@ -1725,7 +1725,7 @@ namespace fig::llm
 			_contextState.InsertBlock(ContextBlock {
 				.role = Role::System,
 				.name = "",
-				.content = _session.GetStaging().GetPersonaOf(role),
+				.content = _pSession->GetStaging().GetPersonaOf(role),
 				.tokens = new_persona_tokens,
 				.flags { ContextBlockFlag::Static, ContextBlockFlag::Persona },
 				.attn_position = -1,
@@ -1836,10 +1836,10 @@ namespace fig::llm
 
 		LogLn(std::format("Compiling grammar variant 0x{:02X}", (uint32_t)flags));
 		SamplerPtr pGrammar = Grammar::compile_grammar(
-			_session.GetStaging().GetGrammar(),
+			_pSession->GetStaging().GetGrammar(),
 			flags,
 			_modelState.pVocab, 
-			_session.GetNameGrammar(_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds), _options.flags.IsSet(ChatOptions::Flag::AllowUserResponse)),
+			_pSession->GetNameGrammar(_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds), _options.flags.IsSet(ChatOptions::Flag::AllowUserResponse)),
 			_stateVars.GetGrammarPattern());
 	
 		_modelState.grammars[flags] = pGrammar;

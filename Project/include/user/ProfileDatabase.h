@@ -4,7 +4,7 @@
 
 #include "Figment.h"
 #include "user/UserProfile.h"
-#include "io/DatabaseError.h"
+#include "io/Error.h"
 #include <expected>
 
 struct sqlite3;

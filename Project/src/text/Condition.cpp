@@ -3,7 +3,7 @@
 #include "text/Context.h"
 #include "text/ConditionParser.h"
 
-using namespace fig::io;
+using namespace fig::data;
 
 namespace fig
 {

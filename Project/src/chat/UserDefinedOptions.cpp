@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "chat/UserDefinedOptions.h"
 
-using namespace fig::io;
+using namespace fig::data;
 
 namespace fig::chat
 {
@@ -50,7 +50,7 @@ namespace fig::chat
 		return not options.empty();
 	}
 
-	void UserDefinedOptions::SaveToXml(fig::io::XmlWriterElement xml) const
+	void UserDefinedOptions::SaveToXml(XmlWriterElement xml) const
 	{
 		for (auto& option : options)
 		{
