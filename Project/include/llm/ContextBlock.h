@@ -1,7 +1,7 @@
+#pragma once
+
 #include "llm/LLMTypes.h"
 #include "chat/ChatTypes.h"
-
-#pragma once
 
 namespace fig::llm
 {

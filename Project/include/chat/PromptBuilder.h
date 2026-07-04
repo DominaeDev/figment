@@ -1,5 +1,3 @@
-#ifndef PROMPT_BUILDER_H__
-#define PROMPT_BUILDER_H__
 #pragma once
 
 #include "chat/PromptScaffold.h"
@@ -14,4 +12,3 @@ namespace fig::chat
 		static std::vector<PromptBlock> GetStagingBlocks(ChatStaging& staging) noexcept;
 	};
 }
-#endif

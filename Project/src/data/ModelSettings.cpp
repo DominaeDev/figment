@@ -10,9 +10,9 @@ namespace fig::data
 		model {},
 		embeddingModel {}
 	{
-		static_assert(XmlSerializable<ModelSettings>);
-		static_assert(XmlSerializable<ModelSettings::LLMModel>);
-		static_assert(XmlSerializable<ModelSettings::EmbeddingModel>);
+		static_assert(IsXmlSerializable<ModelSettings>);
+		static_assert(IsXmlSerializable<ModelSettings::LLMModel>);
+		static_assert(IsXmlSerializable<ModelSettings::EmbeddingModel>);
 	}
 
 	ModelSettings::LLMModel::LLMModel() :

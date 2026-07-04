@@ -1,5 +1,3 @@
-#ifndef PLAY_BUTTON_H__
-#define PLAY_BUTTON_H__
 #pragma once
 
 #include "gui/ThemedButton.h"
@@ -35,5 +33,3 @@ namespace fig::gui
 		IconState _iconState {};
 	};
 }
-
-#endif

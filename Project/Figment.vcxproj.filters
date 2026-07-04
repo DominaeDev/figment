@@ -1228,7 +1228,7 @@
     <ClInclude Include="include\io\IniFile.h">
       <Filter>Source Files\Frontend\IO\Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\IXmlSerializable.h">
+    <ClInclude Include="include\io\XmlData.h">
       <Filter>Source Files\Frontend\IO\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\io\Serialization.h">
@@ -1240,7 +1240,7 @@
     <ClInclude Include="include\io\XmlReader.h">
       <Filter>Source Files\Frontend\IO\Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\XmlSerializable.h">
+    <ClInclude Include="include\io\XmlSerialize.h">
       <Filter>Source Files\Frontend\IO\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="include\io\XmlWriter.h">

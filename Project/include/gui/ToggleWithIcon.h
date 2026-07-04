@@ -1,5 +1,3 @@
-#ifndef TOGGLE_WITH_ICON_H__
-#define TOGGLE_WITH_ICON_H__
 #pragma once
 
 #include "gui/Control.h"
@@ -35,5 +33,3 @@ namespace fig::gui
 		ToggleBehavior _behavior {};
 	};
 }
-
-#endif

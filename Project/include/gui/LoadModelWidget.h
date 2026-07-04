@@ -1,5 +1,3 @@
-#ifndef LOAD_MODEL_WIDGET_H__
-#define LOAD_MODEL_WIDGET_H__
 #pragma once
 
 #include "gui/Panel.h"
@@ -30,5 +28,3 @@ namespace fig::gui
 		float _fProgress {};
 	};
 }
-
-#endif

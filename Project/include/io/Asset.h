@@ -1,5 +1,3 @@
-#ifndef ASSET_H__
-#define ASSET_H__
 #pragma once
 
 #include "Figment.h"
@@ -188,5 +186,3 @@ namespace fig::io
 
 	};
 }
-
-#endif

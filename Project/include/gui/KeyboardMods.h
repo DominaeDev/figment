@@ -1,5 +1,3 @@
-#ifndef KEYBOARD_MODIFIERS_H__
-#define KEYBOARD_MODIFIERS_H__
 #pragma once
 
 #include "Figment.h"
@@ -61,4 +59,3 @@ namespace fig::gui
 		const bool ControlShiftAlt;
 	};
 }
-#endif

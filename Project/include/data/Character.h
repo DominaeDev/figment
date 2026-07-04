@@ -1,6 +1,3 @@
-#ifndef CHARACTER_DATA_H__
-#define CHARACTER_DATA_H__
-
 #pragma once
 
 #include "Figment.h"
@@ -41,7 +38,7 @@ namespace fig::data
 		HintFlags flags {};
 
 	public:
-		static auto SerializeInfo() noexcept;
+		static auto XmlFields() noexcept;
 	};
 
 	class Character
@@ -85,8 +82,6 @@ namespace fig::data
 		bool _bDirtyContext {};
 
 	public:
-		static auto SerializeInfo() noexcept;
+		static auto XmlFields() noexcept;
 	};
 }
-
-#endif

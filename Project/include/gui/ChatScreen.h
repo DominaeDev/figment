@@ -1,5 +1,3 @@
-#ifndef CHAT_FRAME_H__
-#define CHAT_FRAME_H__
 #pragma once
 
 #include "Screen.h"
@@ -68,5 +66,3 @@ namespace fig::gui
 	};
 
 }
-
-#endif

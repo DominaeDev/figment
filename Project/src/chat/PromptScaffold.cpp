@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "chat/PromptScaffold.h"
-#include "io/XmlSerializable.h"
+#include "io/XmlSerialize.h"
 #include "text/TextEvaluator.h"
 
 using namespace fig::io;
@@ -20,37 +20,37 @@ namespace fig::chat
 		{ PromptPriority::High,		"high" },
 	};
 
-	auto PromptBlockInfo::SerializeInfo() noexcept
+	auto PromptBlockInfo::XmlFields() noexcept
 	{
 		return Fields(
-			AsAttribute { "type",		&PromptBlockInfo::type,
+			Attribute { "type",		&PromptBlockInfo::type,
 				[](auto& value) { return enum_serialize(value, TypeMapping); },
 				[](auto& value) { return enum_deserialize(value, TypeMapping); }
 			},
-			AsAttribute { "priority",	&PromptBlockInfo::priority,
+			Attribute { "priority",	&PromptBlockInfo::priority,
 				[](auto& value) { return enum_serialize(value, PriorityMapping); },
 				[](auto& value) { return enum_deserialize(value, PriorityMapping); }
 			},
-			AsAttribute { "condition",	&PromptBlockInfo::condition }
+			Attribute { "condition",	&PromptBlockInfo::condition }
 				.Default(Condition::Always),
-			AsAttribute { "order",		&PromptBlockInfo::order },
-			AsText		{				&PromptBlockInfo::content }
+			Attribute { "order",		&PromptBlockInfo::order },
+			Text		{				&PromptBlockInfo::content }
 		);
 		
-		static_assert(XmlSerializable<PromptBlockInfo>);
+		static_assert(IsXmlSerializable<PromptBlockInfo>);
 	}
 
-	auto PromptScaffold::SerializeInfo() noexcept
+	auto PromptScaffold::XmlFields() noexcept
 	{
 		return Fields(
-			AsElement { "Name",		&PromptScaffold::name },
-			AsElement { "Block",	&PromptScaffold::blocks }
+			Element { "Name",		&PromptScaffold::name },
+			Element { "Block",	&PromptScaffold::blocks }
 				.Collection("Blocks"),
-			AsElement { "Grammar",	&PromptScaffold::grammar },
-			AsElement { "Options",	&PromptScaffold::options }
+			Element { "Grammar",	&PromptScaffold::grammar },
+			Element { "Options",	&PromptScaffold::options }
 		);
 
-		static_assert(XmlSerializable<PromptScaffold>);
+		static_assert(IsXmlSerializable<PromptScaffold>);
 	}
 
 	FileError PromptScaffold::LoadFromXml(const fig::path& path)
@@ -62,7 +62,7 @@ namespace fig::chat
 		if (not xml.IsOk())
 			return FileError::UnrecognizedFormat;
 
-		if (!XmlDeserialize(xml.GetRoot(), *this))
+		if (!Deserialize(xml.GetRoot(), *this))
 			return FileError::ReadError;
 
 		// Sort blocks by order

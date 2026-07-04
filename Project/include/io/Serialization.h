@@ -1,5 +1,3 @@
-#ifndef SERIALIZATION_H__
-#define SERIALIZATION_H__
 #pragma once
 
 #include "Figment.h"
@@ -255,5 +253,3 @@ namespace fig::io
 		fig::auth::AuthSalt auth_salt {};
 	};
 }
-
-#endif

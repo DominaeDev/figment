@@ -1,5 +1,3 @@
-#ifndef STATUS_SIGNAL_H__
-#define STATUS_SIGNAL_H__
 #pragma once
 
 #include "Figment.h"
@@ -81,4 +79,3 @@ namespace fig::llm
 		std::pair<int64_t, int64_t> _usedRAMVRAM {0, 0};
 	};
 }
-#endif

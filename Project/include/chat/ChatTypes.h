@@ -1,5 +1,4 @@
-#ifndef CHAT_TYPES_H__
-#define CHAT_TYPES_H__
+#pragma once
 
 #include "Figment.h"
 
@@ -102,4 +101,3 @@ namespace fig::chat
 	};
 	using Sentences = std::vector<Sentence>;
 }
-#endif

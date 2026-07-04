@@ -1,5 +1,3 @@
-#ifndef MESSAGE_POLLER_H__
-#define MESSAGE_POLLER_H__
 #pragma once
 
 namespace fig::chat
@@ -37,4 +35,3 @@ namespace fig::chat
 		CallbackId _nextCallbackId = 0;
 	};
 }
-#endif

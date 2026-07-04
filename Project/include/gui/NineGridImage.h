@@ -1,5 +1,3 @@
-#ifndef NINE_GRID_IMAGE_H__
-#define NINE_GRID_IMAGE_H__
 #pragma once
 
 #include "Figment.h"
@@ -28,4 +26,3 @@ namespace fig::gui
 		Texture* _pTexture = nullptr;
 	};
 }
-#endif

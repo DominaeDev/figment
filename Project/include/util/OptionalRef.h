@@ -1,5 +1,3 @@
-#ifndef OPTIONAL_REF_H__
-#define OPTIONAL_REF_H__
 #pragma once
 
 #include <optional>
@@ -78,5 +76,3 @@ namespace fig
 	using nullopt_t = std::nullopt_t;
 	constexpr nullopt_t nullref = std::nullopt;
 }
-
-#endif

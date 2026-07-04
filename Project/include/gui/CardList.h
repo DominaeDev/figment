@@ -1,5 +1,3 @@
-#ifndef CARD_LIST_H__
-#define CARD_LIST_H__
 #pragma once
 
 #include "gui/ScrollPanel.h"
@@ -42,5 +40,3 @@ namespace fig::gui
 		bool _bEnableTags { false };
 	};
 }
-
-#endif

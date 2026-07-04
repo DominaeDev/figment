@@ -1,5 +1,3 @@
-#ifndef LLAMA_API_H__
-#define LLAMA_API_H__
 #pragma once
 
 #include "llm/LLMTypes.h"
@@ -95,5 +93,3 @@ namespace fig::llm::llama
 		batch.n_tokens = 0;
 	}
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef COMMON_UTILITY_H__
-#define COMMON_UTILITY_H__
+#pragma once
 
 #include "Figment.h"
 #include "util/StringUtils.h"
@@ -289,4 +288,3 @@ namespace fig
 #endif
 
 }
-#endif

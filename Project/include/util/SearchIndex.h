@@ -1,5 +1,3 @@
-#ifndef SEARCH_INDEX_H__
-#define SEARCH_INDEX_H__
 #pragma once
 
 #include "Figment.h"
@@ -30,4 +28,3 @@ namespace fig
 		std::vector<fig::string> _index {};
 	};
 }
-#endif

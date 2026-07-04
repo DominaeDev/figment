@@ -1,5 +1,3 @@
-#ifndef CHAT_STAGING_H__
-#define CHAT_STAGING_H__
 #pragma once
 
 #include "chat/ChatTypes.h"
@@ -65,5 +63,3 @@ namespace fig::chat
 		bool _bDirtyContext {};
 	};
 }
-
-#endif

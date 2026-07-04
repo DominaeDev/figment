@@ -1,5 +1,3 @@
-#ifndef GRID_SIZER_H__
-#define GRID_SIZER_H__
 #pragma once
 
 #include "Sizer.h"
@@ -33,5 +31,3 @@ namespace fig::gui
 		
 	};
 }
-
-#endif

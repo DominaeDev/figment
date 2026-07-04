@@ -1,5 +1,3 @@
-#ifndef TEXT_BOX_H__
-#define TEXT_BOX_H__
 #pragma once
 
 #include <functional>
@@ -172,4 +170,3 @@ namespace fig::gui
 		void PushUndo(UndoAction action, bool allowCoalesce = true);
 	};
 }
-#endif

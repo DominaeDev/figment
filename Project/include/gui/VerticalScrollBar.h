@@ -1,5 +1,3 @@
-#ifndef SCROLLBAR_H__
-#define SCROLLBAR_H__
 #pragma once
 
 #include "gui/Control.h"
@@ -34,5 +32,3 @@ namespace fig::gui
 		bool _bScrolling {};
 	};
 }
-
-#endif

@@ -1,5 +1,3 @@
-#ifndef OVERLAY_H__
-#define OVERLAY_H__
 #pragma once
 
 #include "gui/Control.h"
@@ -17,5 +15,3 @@ namespace fig::gui
 		bool _bDestroyMe = false;
 	};
 }
-
-#endif

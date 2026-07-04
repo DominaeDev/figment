@@ -1,5 +1,3 @@
-#ifndef WINDOW_H__
-#define WINDOW_H__
 #pragma once
 
 #include "GUITypes.h"
@@ -54,4 +52,3 @@ namespace fig::gui
 		int32_t _height;
 	};
 }
-#endif

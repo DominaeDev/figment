@@ -1,5 +1,3 @@
-#ifndef CHAT_COMMAND_EXECUTOR_H__
-#define CHAT_COMMAND_EXECUTOR_H__
 #pragma once
 
 #include "ChatCommands.h"
@@ -28,5 +26,3 @@ namespace fig::chat
 		static bool Execute(ParsedChatCommand command, Context context);
 	};
 }
-
-#endif

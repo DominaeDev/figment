@@ -1,5 +1,3 @@
-#ifndef CARD_IMAGE_H__
-#define CARD_IMAGE_H__
 #pragma once
 
 #include "Control.h"
@@ -28,5 +26,3 @@ namespace fig::gui
 		TexturePtr _pMask = nullptr;
 	};
 }
-
-#endif

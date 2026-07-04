@@ -1,5 +1,3 @@
-#ifndef LLM_ENGINE_H__
-#define LLM_ENGINE_H__
 #pragma once
 
 #include "llm/LLMTypes.h"
@@ -71,5 +69,3 @@ namespace fig::llm
 		std::atomic<int64_t> usedRAM; // As reported from llama.cpp
 	};
 }
-
-#endif

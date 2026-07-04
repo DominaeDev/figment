@@ -1,5 +1,3 @@
-#ifndef CONDITION_NODE_H__
-#define CONDITION_NODE_H__
 #pragma once
 
 #include "Figment.h"
@@ -142,4 +140,3 @@ namespace fig
     };
 
 }
-#endif

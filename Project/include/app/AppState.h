@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef APPLICATION_STATE_H__
-#define APPLICATION_STATE_H__
-
 #include <memory>
 #include "gui/GUITypes.h"
 #include "app/AppSettings.h"
@@ -84,6 +81,3 @@ namespace fig
 
 	using AppState = Global::State;
 }
-
-
-#endif

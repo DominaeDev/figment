@@ -1,5 +1,4 @@
-#ifndef STRING_UTIL_H__
-#define STRING_UTIL_H__
+#pragma once
 
 #include "Figment.h"
 #include <unordered_set>
@@ -118,5 +117,3 @@ namespace fig
 	[[nodiscard]] fig::wstring strip_diacritics(fig::wstring&& input);
 	[[nodiscard]] fig::string strip_diacritics(fig::string&& input);
 }
-
-#endif 

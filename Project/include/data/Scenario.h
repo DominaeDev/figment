@@ -1,14 +1,12 @@
-#ifndef SCENARIO_DATA_H__
-#define SCENARIO_DATA_H__
 #pragma once
 
 #include "Figment.h"
 #include "chat/ChatOptions.h"
 #include "chat/UserDefinedOptions.h"
+#include "chat/ChatTypes.h"
 #include "text/Condition.h"
 #include "io/Xml.h"
-#include "io/IXmlSerializable.h"
-#include "chat/ChatTypes.h"
+#include "io/XmlData.h"
 
 namespace fig::data
 {
@@ -37,16 +35,16 @@ namespace fig::data
 			int32_t ttl = -1;
 			fig::string content;
 
-			static auto SerializeInfo() noexcept
+			static auto XmlFields() noexcept
 			{
 				return Fields(
-					AsAttribute { "id",				&Step::id },
-					AsElement	{ "Condition",		&Step::condition },
-					AsElement	{ "Duration",		&Step::ttl },
-					AsElement	{ "Content",		&Step::content }
+					Attribute { "id",				&Step::id },
+					Element	{ "Condition",		&Step::condition },
+					Element	{ "Duration",		&Step::ttl },
+					Element	{ "Content",		&Step::content }
 				);
 
-				static_assert(XmlSerializable<Step>);
+				static_assert(IsXmlSerializable<Step>);
 			}
 		};
 
@@ -55,15 +53,15 @@ namespace fig::data
 			fig::string title;
 			std::vector<Step> steps;
 
-			static auto SerializeInfo() noexcept
+			static auto XmlFields() noexcept
 			{
 				return Fields(
-					AsElement { "Title",		&Chapter::title },
-					AsElement { "Step",			&Chapter::steps }
+					Element { "Title",		&Chapter::title },
+					Element { "Step",			&Chapter::steps }
 						.Collection("Steps")
 				);
 
-				static_assert(XmlSerializable<Chapter>);
+				static_assert(IsXmlSerializable<Chapter>);
 			}
 		};
 
@@ -77,7 +75,7 @@ namespace fig::data
 		fig::optional_cref<Step> GetStep(size_t chapter, size_t step) const noexcept;
 	};
 
-	class Scenario : public IXmlSerializable<"Scenario", 0>
+	class Scenario : public XmlData<"Scenario", 0>
 	{
 	public:
 		struct RoleSlot
@@ -106,20 +104,20 @@ namespace fig::data
 				return not (id.empty() or label.empty());
 			}
 
-			static auto SerializeInfo() noexcept
+			static auto XmlFields() noexcept
 			{
 				return Fields(
-					AsAttribute { "id",			&RoleSlot::id },
-					AsElement	{ "Label",		&RoleSlot::label },
-					AsElement	{ "Brief",		&RoleSlot::brief },
-					AsElement	{ "Condition",	&RoleSlot::validation },
-					AsElement	{ "Flags",		&RoleSlot::flags,
+					Attribute { "id",			&RoleSlot::id },
+					Element	{ "Label",		&RoleSlot::label },
+					Element	{ "Brief",		&RoleSlot::brief },
+					Element	{ "Condition",	&RoleSlot::validation },
+					Element	{ "Flags",		&RoleSlot::flags,
 						[](const Flags& value) { return enum_serialize_flags(value, FlagMapping); },
 						[](auto& value) { return enum_deserialize_flags(value, FlagMapping); }
 					}
 				);
 
-				static_assert(XmlSerializable<RoleSlot>);
+				static_assert(IsXmlSerializable<RoleSlot>);
 			}
 		};
 
@@ -139,22 +137,20 @@ namespace fig::data
 		Story story {};
 
 	public:
-		static auto SerializeInfo() noexcept
+		static auto XmlFields() noexcept
 		{
 			using namespace fig::io;
 
 			return Fields(
-				AsElement { "Title",		&Scenario::title },
-				AsElement { "Description",	&Scenario::description },
-				AsElement { "Options",		&Scenario::userOptions },
-				AsElement { "Role",			&Scenario::roles }
+				Element { "Title",		&Scenario::title },
+				Element { "Description",	&Scenario::description },
+				Element { "Options",		&Scenario::userOptions },
+				Element { "Role",			&Scenario::roles }
 					.Collection("Roles"),
-				AsElement { "Story",		&Scenario::story }
+				Element { "Story",		&Scenario::story }
 			);
 
-			static_assert(XmlSerializable<Scenario>);
+			static_assert(IsXmlSerializable<Scenario>);
 		}
 	};
 }
-
-#endif

@@ -1,5 +1,3 @@
-#ifndef PROMPT_SCAFFOLD_H__
-#define PROMPT_SCAFFOLD_H__
 #pragma once
 
 #include "Figment.h"
@@ -30,7 +28,7 @@ namespace fig::chat
 		fig::string content;
 		int32_t ttl = 0;
 	public:
-		static auto SerializeInfo() noexcept;
+		static auto XmlFields() noexcept;
 	};
 
 	struct PromptBlock
@@ -53,7 +51,6 @@ namespace fig::chat
 
 		fig::io::FileError LoadFromXml(const fig::path& filename);
 	public:
-		static auto SerializeInfo() noexcept;
+		static auto XmlFields() noexcept;
 	};
 }
-#endif

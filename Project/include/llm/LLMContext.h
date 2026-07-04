@@ -1,10 +1,10 @@
+#pragma once
+
 #include "llm/LLMTypes.h"
 #include "llm/ContextBlock.h"
 #include "llm/ContextCache.h"
 #include <optional>
 #include <map>
-
-#pragma once
 
 namespace fig::chat
 {

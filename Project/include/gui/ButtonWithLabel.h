@@ -1,5 +1,3 @@
-#ifndef BUTTON_WITH_LABEL_H__
-#define BUTTON_WITH_LABEL_H__
 #pragma once
 
 #include "gui/Control.h"
@@ -26,5 +24,3 @@ namespace fig::gui
 		TexturedBorder* _pBorder {};
 	};
 }
-
-#endif

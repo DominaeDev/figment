@@ -1,5 +1,3 @@
-#ifndef TEXT_EVALUATOR_H__
-#define TEXT_EVALUATOR_H__
 #pragma once
 
 #include "text/Context.h"
@@ -28,5 +26,3 @@ namespace fig
 	}
 
 }
-
-#endif

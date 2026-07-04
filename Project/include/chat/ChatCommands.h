@@ -1,5 +1,4 @@
-#ifndef CHAT_COMMANDS_H__
-#define CHAT_COMMANDS_H__
+#pragma once
 
 #include "Figment.h"
 
@@ -40,4 +39,3 @@ namespace fig::chat
 		static ParsedChatCommand Parse(fig::string text);
 	};
 }
-#endif

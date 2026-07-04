@@ -1,5 +1,3 @@
-#ifndef FIXED_STRING_H__
-#define FIXED_STRING_H__
 #pragma once
 
 #include <array>
@@ -23,5 +21,3 @@ namespace fig
 		std::array<char, N> value {};
 	};
 }
-
-#endif

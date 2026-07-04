@@ -1,5 +1,3 @@
-#ifndef STRING_HANDLE_H__
-#define STRING_HANDLE_H__
 #pragma once
 
 #include <string>
@@ -71,5 +69,3 @@ struct std::hash<fig::basic_handle<T, N>>
         return std::hash<string_type>{}((string_type)basic_handle);
     }
 };
-
-#endif

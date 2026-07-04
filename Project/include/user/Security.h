@@ -1,5 +1,3 @@
-#ifndef SECURITY_H__
-#define SECURITY_H__
 #pragma once
 
 #include "Figment.h"
@@ -144,5 +142,3 @@ namespace fig::auth
 	constexpr const AuthKey& CurrentDefaultAuthKey { CurrentAuthSettings().DefaultAuthKey };
 	constexpr const AuthSalt& CurrentDefaultAuthSalt { CurrentAuthSettings().DefaultAuthSalt };
 }
-
-#endif

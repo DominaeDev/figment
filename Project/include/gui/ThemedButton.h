@@ -1,5 +1,3 @@
-#ifndef THEMED_BUTTON_BASE_H__
-#define THEMED_BUTTON_BASE_H__
 #pragma once
 
 #include "Control.h"
@@ -26,5 +24,3 @@ namespace fig::gui
 		ButtonTheme _theme {};
 	};
 }
-
-#endif

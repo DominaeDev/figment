@@ -1,5 +1,3 @@
-#ifndef CONTEXT_CURSOR_H__
-#define CONTEXT_CURSOR_H__
 #pragma once
 
 #include <stdint.h>
@@ -97,4 +95,3 @@ struct std::formatter<fig::llm::ContextCursor> : std::formatter<std::string>
 		return std::formatter<string>::format(std::format("{}", c.as_int()), ctx);
 	}
 };
-#endif

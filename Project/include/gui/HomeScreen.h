@@ -1,5 +1,3 @@
-#ifndef HOME_FRAME_H__
-#define HOME_FRAME_H__
 #pragma once
 
 #include "gui/Screen.h"
@@ -47,6 +45,3 @@ namespace fig::gui
 		ToggleWithIcon* _pGridButton {};
 	};
 }
-
-
-#endif

@@ -1,5 +1,3 @@
-#ifndef PROMPT_TEMPLATE_TYPES_H__
-#define PROMPT_TEMPLATE_TYPES_H__
 #pragma once
 
 namespace fig::llm
@@ -74,4 +72,3 @@ namespace fig::llm
 		{ PromptTemplateType::CommandR, "CommandR" },
 	};
 }
-#endif

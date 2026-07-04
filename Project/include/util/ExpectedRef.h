@@ -1,5 +1,3 @@
-#ifndef EXPECTED_REF_H__
-#define EXPECTED_REF_H__
 #pragma once
 
 #include <expected>
@@ -76,5 +74,3 @@ namespace fig
 		return std::unexpected<std::remove_cvref_t<E>>(std::forward<E>(error));
 	}
 }
-
-#endif

@@ -1,5 +1,3 @@
-#ifndef GUI_CONSTANTS_H__
-#define GUI_CONSTANTS_H__
 #pragma once
 
 #include "GUITypes.h"
@@ -101,5 +99,3 @@ namespace fig::gui
 		};
 	}
 }
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef COVER_CARD_H__
-#define COVER_CARD_H__
-
 #pragma once
 
 #include "CardImage.h"
@@ -130,5 +127,3 @@ namespace fig::gui
 		std::vector<PendingTag> _pendingTags {};
 	};
 }
-
-#endif

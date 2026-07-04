@@ -1,5 +1,3 @@
-#ifndef TEXTURED_BORDER_H__
-#define TEXTURED_BORDER_H__
 #pragma once
 
 #include "Control.h"
@@ -29,5 +27,3 @@ namespace fig::gui
 		Texture* _pBorderTexture = nullptr;
 	};
 }
-
-#endif

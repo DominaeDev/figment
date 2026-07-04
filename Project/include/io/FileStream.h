@@ -1,5 +1,3 @@
-#ifndef FILE_STREAM_H__
-#define FILE_STREAM_H__
 #pragma once
 
 #include "Figment.h"
@@ -68,4 +66,3 @@ namespace fig::io
 #endif
 	};
 }
-#endif

@@ -1,5 +1,3 @@
-#ifndef CARD_IMPORTER_H__
-#define CARD_IMPORTER_H__
 #pragma once
 
 #include "Figment.h"
@@ -15,5 +13,3 @@ namespace fig::io
 		static std::expected<fig::data::Character, FileError> Import(fig::path filename) noexcept;
 	};
 }
-
-#endif

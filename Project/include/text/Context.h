@@ -1,5 +1,3 @@
-#ifndef CONTEXTUAL_H__
-#define CONTEXTUAL_H__
 #pragma once
 
 #include "Figment.h"
@@ -237,5 +235,3 @@ namespace fig
 		void ResolveAlias(ContextLocator& location) const noexcept;
 	};
 }
-
-#endif

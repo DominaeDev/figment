@@ -1,5 +1,3 @@
-#ifndef TAVERN_V2_CARD_H__
-#define TAVERN_V2_CARD_H__
 #pragma once
 
 #include "Figment.h"
@@ -33,5 +31,3 @@ namespace fig::data
 		bool Parse(const fig::string& json);
 	};
 }
-
-#endif

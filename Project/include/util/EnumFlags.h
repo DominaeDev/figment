@@ -25,8 +25,6 @@
 // https://voithos.io/articles/type-safe-enum-class-bit-flags/
 //
 
-#ifndef ENUM_FLAGS_H__
-#define ENUM_FLAGS_H__
 #pragma once
 
 #include <bitset>
@@ -251,4 +249,3 @@ namespace fig
 	template <typename T>
 	const std::underlying_type_t<T> EnumFlags<T>::Zero { static_cast<std::underlying_type_t<T>>(0) };
 }
-#endif

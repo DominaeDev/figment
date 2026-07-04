@@ -1,5 +1,3 @@
-#ifndef CHARACTER_CARD_H__
-#define CHARACTER_CARD_H__
 #pragma once
 
 #include "CoverCard.h"
@@ -22,5 +20,3 @@ namespace fig::gui
 		int32_t _menuId { -1 };
 	};
 }
-
-#endif

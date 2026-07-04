@@ -1,5 +1,3 @@
-#ifndef BUTTON_BASE_H__
-#define BUTTON_BASE_H__
 #pragma once
 
 #include "gui/LayoutElement.h"
@@ -48,5 +46,3 @@ namespace fig::gui
 	};
 
 }
-
-#endif

@@ -1,6 +1,3 @@
-#ifndef TYPES_H__
-#define TYPES_H__
-
 #pragma once
 
 #include <string>
@@ -171,5 +168,3 @@ constexpr bool Debugging = true;
 #else
 constexpr bool Debugging = false;
 #endif
-
-#endif // TYPES_H__

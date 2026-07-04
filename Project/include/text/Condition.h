@@ -1,5 +1,3 @@
-#ifndef CONDITION_H__
-#define CONDITION_H__
 #pragma once
 
 #include "io/Xml.h"
@@ -71,18 +69,16 @@ namespace fig
 		Condition condition;
 		fig::string errorMessage;
 
-		static auto SerializeInfo() noexcept
+		static auto XmlFields() noexcept
 		{
 			using namespace fig::data;
 
 			return Fields(
-				AsElement { "Condition",	&Validation::condition }
+				Element { "Condition",	&Validation::condition }
 					.Default(Condition::Always),
-				AsAttribute { "error",		&Validation::errorMessage }
+				Attribute { "error",		&Validation::errorMessage }
 			);
 		}
 	};
 
 }
-
-#endif

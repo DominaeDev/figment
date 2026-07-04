@@ -1,5 +1,3 @@
-#ifndef DEBUG_FRAME_H__
-#define DEBUG_FRAME_H__
 #pragma once
 
 #include "gui/Screen.h"
@@ -18,6 +16,3 @@ namespace fig::gui
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 	};
 }
-
-
-#endif

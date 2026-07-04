@@ -1,5 +1,4 @@
-#ifndef LOCKABLE_H__
-#define LOCKABLE_H__
+#pragma once
 
 #include <functional>
 #include <mutex>
@@ -25,4 +24,3 @@ template <typename ReturnType, Lockable MutexType>
 	std::scoped_lock _ { mutex };
 	return fn();
 }
-#endif

@@ -1,5 +1,3 @@
-#ifndef GUI_UTILITY_H__
-#define GUI_UTILITY_H__
 #pragma once
 
 #include "gui/GUITypes.h"
@@ -120,5 +118,3 @@ namespace fig::gui
 	Point MeasureText(Font& font, const fig::string& text);
 	int MeasureFontHeight(Font& font);
 }
-
-#endif

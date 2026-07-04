@@ -1,5 +1,3 @@
-#ifndef EVENTS_H__
-#define EVENTS_H__
 #pragma once
 
 #include "gui/GUITypes.h"
@@ -111,4 +109,3 @@ namespace fig::gui
 		Handled,	// Handled, stop propagation
 	};
 }
-#endif

@@ -1,6 +1,3 @@
-#ifndef SCENARIO_CARD_H__
-#define SCENARIO_CARD_H__
-
 #pragma once
 
 #include "gui/CoverCard.h"
@@ -19,5 +16,3 @@ namespace fig::gui
 		fig::uuid _scenarioId;
 	};
 }
-
-#endif

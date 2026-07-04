@@ -1,5 +1,3 @@
-#ifndef BINARY_WRITER_H__
-#define BINARY_WRITER_H__
 #pragma once
 
 #include "Figment.h"
@@ -24,4 +22,3 @@ namespace fig::io
 		fig::auth::AuthKey _authKey {};
 	};
 }
-#endif

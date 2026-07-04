@@ -1,5 +1,3 @@
-#ifndef MACRO_PROVIDER_H__
-#define MACRO_PROVIDER_H__
 #pragma once
 
 #include "Figment.h"
@@ -43,5 +41,3 @@ namespace fig::text
 		std::map<fig::handle, Condition> _conditions;
 	};
 }
-
-#endif

@@ -1,5 +1,3 @@
-#ifndef CHAT_LOGGER_H__
-#define CHAT_LOGGER_H__
 #pragma once
 
 #include "Figment.h"
@@ -26,5 +24,3 @@ namespace fig::chat
 
 	};
 }
-
-#endif

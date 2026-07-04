@@ -114,7 +114,7 @@ namespace fig::Constants
 
 	namespace DefaultModelSettings
 	{
-		constexpr fig::llm::ContextSize ContextSize = fig::llm::ContextSize::_8K;
+		constexpr int32_t ContextSize = static_cast<int32_t>(fig::llm::ContextSize::_8K);
 		constexpr float ContextWindowKeepRatio = 0.75f;
 
 		constexpr int32_t GPULayers = 99;

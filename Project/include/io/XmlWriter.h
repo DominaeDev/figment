@@ -1,5 +1,3 @@
-#ifndef XML_WRITER_H__
-#define XML_WRITER_H__
 #pragma once
 
 #include "Figment.h"
@@ -182,4 +180,3 @@ namespace fig::data
 		tinyxml2::XMLElement* _pRoot {};
 	};
 }
-#endif

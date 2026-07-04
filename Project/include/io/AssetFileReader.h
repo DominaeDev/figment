@@ -1,5 +1,3 @@
-#ifndef BINARY_READER_H__
-#define BINARY_READER_H__
 #pragma once
 
 #include "Figment.h"
@@ -21,5 +19,3 @@ namespace fig::io
 		fig::auth::AuthKey _authKey {};
 	};
 }
-
-#endif

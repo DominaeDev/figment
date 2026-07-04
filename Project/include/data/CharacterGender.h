@@ -1,6 +1,3 @@
-#ifndef CHARACTER_GENDER_H__
-#define CHARACTER_GENDER_H__
-
 #pragma once
 
 #include "Figment.h"
@@ -63,4 +60,3 @@ namespace fig::data
 		Pronouns _pronouns {};
 	};
 }
-#endif

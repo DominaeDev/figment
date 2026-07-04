@@ -1,5 +1,3 @@
-#ifndef CONTEXT_LOCATOR_H__
-#define CONTEXT_LOCATOR_H__
 #pragma once
 
 #include "Figment.h"
@@ -66,5 +64,3 @@ namespace fig
 		fig::handle key;
 	};
 }
-
-#endif

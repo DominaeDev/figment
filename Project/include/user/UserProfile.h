@@ -1,5 +1,3 @@
-#ifndef USER_PROFILE_H__
-#define USER_PROFILE_H__
 #pragma once
 
 #include "Figment.h"
@@ -34,4 +32,3 @@ namespace fig::user
 		}
 	};
 }
-#endif

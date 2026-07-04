@@ -2,6 +2,7 @@
 
 #include "Figment.h"
 #include <map>
+
 namespace fig::llm
 {
 	class LLMStateVariables

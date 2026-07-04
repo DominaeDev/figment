@@ -1,5 +1,3 @@
-#ifndef SCREEN_H__
-#define SCREEN_H__
 #pragma once
 
 #include "Control.h"
@@ -37,5 +35,3 @@ namespace fig::gui
 	template <typename T>
 	concept IsScreen = std::derived_from<T, fig::gui::Screen>;
 }
-
-#endif

@@ -130,7 +130,7 @@ namespace fig::data
 				while (chapterNode)
 				{
 					Chapter chapter;
-					if (XmlDeserialize(chapterNode.value(), chapter))
+					if (Deserialize(chapterNode.value(), chapter))
 						chapters.emplace_back(std::move(chapter));
 
 					chapterNode = chapterNode.value().GetNextSibling();
@@ -169,7 +169,7 @@ namespace fig::data
 			for (auto& chapter : chapters)
 			{
 				auto chapterNode = chaptersNode.AddChild("Chapter");
-				XmlSerialize(chapterNode, chapter);
+				Serialize(chapterNode, chapter);
 			}
 		}
 	}

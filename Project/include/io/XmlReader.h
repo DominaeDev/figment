@@ -1,5 +1,3 @@
-#ifndef XML_READER_H__
-#define XML_READER_H__
 #pragma once
 
 #include "Figment.h"
@@ -182,4 +180,3 @@ namespace fig::data
 		XmlReaderOptions _options {};
 	};
 }
-#endif

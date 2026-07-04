@@ -1,5 +1,3 @@
-#ifndef BORDER_H__
-#define BORDER_H__
 #pragma once
 
 #include "Control.h"
@@ -27,5 +25,3 @@ namespace fig::gui
 		std::vector<int> _indices {};
 	};
 }
-
-#endif

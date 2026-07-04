@@ -1,5 +1,3 @@
-#ifndef CARD_META_DATA_H__
-#define CARD_META_DATA_H__
 #pragma once
 
 #include "Figment.h"
@@ -44,5 +42,3 @@ namespace fig::data
 		bool IsNew() const noexcept;
 	};
 }
-
-#endif

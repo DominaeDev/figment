@@ -1,6 +1,3 @@
-#ifndef GUI_COLOR_H__
-#define GUI_COLOR_H__
-
 #pragma once
 
 #include <SDL3/SDL.h>
@@ -104,4 +101,3 @@ namespace fig::gui
 		return Color { static_cast<int32_t>(arg & 0xFFFFFF) };
 	}
 }
-#endif

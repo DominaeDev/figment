@@ -1,5 +1,3 @@
-#ifndef CONDITION_PARSER_H__
-#define CONDITION_PARSER_H__
 #pragma once
 
 #include "ConditionNode.h"
@@ -72,4 +70,3 @@ namespace fig
 		Token _current {};
 	};
 }
-#endif

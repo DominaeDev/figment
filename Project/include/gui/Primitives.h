@@ -1,5 +1,3 @@
-#ifndef CONTROLS_H__
-#define CONTROLS_H__
 #pragma once
 
 #include "gui/Area.h"
@@ -17,5 +15,3 @@
 #include "gui/VerticalSizer.h"
 #include "gui/VerticalListSizer.h"
 #include "gui/VerticalScrollSizer.h"
-
-#endif

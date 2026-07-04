@@ -1,5 +1,3 @@
-#ifndef HASH_H__
-#define HASH_H__
 #pragma once
 
 #include "Figment.h"
@@ -61,4 +59,3 @@ namespace fig
 		(hash_combine(seed, rest), ...);
 	}
 }
-#endif

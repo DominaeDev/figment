@@ -1,5 +1,3 @@
-#ifndef USER_SETTINGS_H__
-#define USER_SETTINGS_H__
 #pragma once
 
 #include "io/Settings.h"
@@ -71,5 +69,3 @@ namespace fig
 	extern template class fig::io::SettingsCollection<UserSetting>;
 	using UserSettings = fig::io::SettingsCollection<UserSetting>;
 }
-
-#endif

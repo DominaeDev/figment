@@ -1,5 +1,3 @@
-#ifndef ASSET_DATABASE_H__
-#define ASSET_DATABASE_H__
 #pragma once
 
 #include "Figment.h"
@@ -55,5 +53,3 @@ namespace fig::io
 		std::map<SQL, sqlite3_stmt*> _sqlStatements;
 	};
 }
-
-#endif

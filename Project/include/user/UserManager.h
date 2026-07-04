@@ -1,5 +1,3 @@
-#ifndef USER_MANAGER_H__
-#define USER_MANAGER_H__
 #pragma once
 
 #include "Figment.h"
@@ -60,4 +58,3 @@ namespace fig::user
 		std::unique_ptr<UserSettings> _pUserSettings;
 	};
 }
-#endif

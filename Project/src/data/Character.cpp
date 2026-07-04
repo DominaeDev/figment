@@ -9,25 +9,24 @@ namespace fig::data
 {
 	static const fig::string XmlRootName { "Character" };
 
-	auto Character::SerializeInfo() noexcept
+	auto Character::XmlFields() noexcept
 	{
 		return Fields(
-			AsElement { "ID", &Character::chatId  }
+			Element { "ID", &Character::chatId  },
+			Element { "Name", &Character::shortName }
 				.MustExist(),
-			AsElement { "Name", &Character::shortName }
-				.MustExist(),
-			AsElement { "FullName", &Character::fullName },
-			AsElement { "Gender", &Character::gender },
-			AsElement { "Brief", &Character::brief },
-			AsElement { "Attributes", &Character::_attributes },
-			AsElement { "Tags", &Character::_tags },
-			AsElement { "SearchIndex", &Character::_searchIndex,
+			Element { "FullName", &Character::fullName },
+			Element { "Gender", &Character::gender },
+			Element { "Brief", &Character::brief },
+			Element { "Attributes", &Character::_attributes },
+			Element { "Tags", &Character::_tags },
+			Element { "SearchIndex", &Character::_searchIndex,
 				[](auto& value) -> fig::string { return value.Serialize(); },
 				[](auto& value) -> SearchIndex { SearchIndex s; s.Deserialize(value); return s; }
 			}
 		);
 
-		static_assert(XmlSerializable<Character>);
+		static_assert(IsXmlSerializable<Character>);
 	}
 
 	static const std::map<CharacterAttribute::Format, fig::string> FormatMapping {
@@ -47,37 +46,35 @@ namespace fig::data
 		{ CharacterAttribute::HintFlag::Memory,		"memory" }
 	};
 
-	auto CharacterAttribute::SerializeInfo() noexcept
+	auto CharacterAttribute::XmlFields() noexcept
 	{
 		return Fields(
-			AsAttribute { "format", &CharacterAttribute::format, 
+			Attribute { "format", &CharacterAttribute::format, 
 				[](auto& value) { return enum_serialize(value, FormatMapping); }, 
 				[](auto& value) { return enum_deserialize(value, FormatMapping); } 
 			},
-			AsAttribute { "visibility", &CharacterAttribute::visibility, 
+			Attribute { "visibility", &CharacterAttribute::visibility, 
 				[](auto& value) { return enum_serialize(value, VisibilityMapping); },
 				[](auto& value) { return enum_deserialize(value, VisibilityMapping); }
 			},
-			AsAttribute { "flags", &CharacterAttribute::flags,
+			Attribute { "flags", &CharacterAttribute::flags,
 				[](auto& value) -> fig::string { return encode_csv(CharacterAttribute::HintFlags::Serialize(value, FlagMapping)); },
 				[](const fig::string& value) { return CharacterAttribute::HintFlags::Deserialize(decode_csv(value), FlagMapping); }
 			},
-			AsElement { "Label", &CharacterAttribute::label }.MustExist(),
-			AsElement { "Value", &CharacterAttribute::value }.MustExist()
+			Element { "Label", &CharacterAttribute::label }.MustExist(),
+			Element { "Value", &CharacterAttribute::value }.MustExist()
 		);
 
-		static_assert(XmlSerializable<CharacterAttribute>);
-		static_assert(XmlSerializableMap<std::map<fig::string, CharacterAttribute>>);
+		static_assert(IsXmlSerializable<CharacterAttribute>);
 	}
 
 	static bool ReadXml(XmlReader& xml, Character& data)
 	{
 		auto rootNode = xml.GetRoot();
 
-		XmlDeserialize(rootNode, data);
+		if (!Deserialize(rootNode, data))
+			return false;
 
-		if (data.shortName.empty())
-			data.shortName = data.fullName;
 		if (data.fullName.empty())
 			data.fullName = data.shortName;
 		if (data.chatId.empty())
@@ -144,7 +141,7 @@ namespace fig::data
 
 		auto root = xml.GetRoot();
 
-		XmlSerialize(root, *this);
+		Serialize(root, *this);
 		
 		xml.WriteToMemory(buffer);
 	}

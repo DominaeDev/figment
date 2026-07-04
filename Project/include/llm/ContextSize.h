@@ -1,5 +1,3 @@
-#ifndef CONTEXT_SIZE_H__
-#define CONTEXT_SIZE_H__
 #pragma once
 
 namespace fig::llm
@@ -33,4 +31,3 @@ namespace fig::llm
 		{ ContextSize::_32K, "32K" },
 	};
 }
-#endif

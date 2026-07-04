@@ -1,5 +1,3 @@
-#ifndef SCROLL_PANEL_H__
-#define SCROLL_PANEL_H__
 #pragma once
 
 #include "Control.h"
@@ -41,5 +39,3 @@ namespace fig::gui
 		VerticalScrollBar* _pScrollBar {};
 	};
 }
-
-#endif

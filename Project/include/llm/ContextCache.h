@@ -1,5 +1,6 @@
-#include "llm/LLMTypes.h"
 #pragma once
+
+#include "llm/LLMTypes.h"
 
 namespace fig::llm
 {

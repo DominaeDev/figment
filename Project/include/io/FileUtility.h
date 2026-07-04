@@ -1,5 +1,4 @@
-#ifndef FILE_UTILITY_H__
-#define FILE_UTILITY_H__
+#pragma once
 
 #include "Figment.h"
 #include <expected>
@@ -24,5 +23,3 @@ namespace fig::io
 	std::expected<fig::string, FileError> ReadPNGMeta(fig::path filename, const fig::string& keyword = "chara", bool bDecodeBase64 = true) noexcept;
 	std::expected<fig::string, FileError> ReadPNGMeta(const fig::bytes& buffer, const fig::string& keyword = "chara", bool bDecodeBase64 = true) noexcept;
 }
-
-#endif

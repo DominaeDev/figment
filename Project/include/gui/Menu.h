@@ -1,5 +1,3 @@
-#ifndef MENU_H__
-#define MENU_H__
 #pragma once
 
 #include "gui/Overlay.h"
@@ -90,5 +88,3 @@ namespace fig::gui
 		Menu* _pSubmenu = nullptr;
 	};
 }
-
-#endif

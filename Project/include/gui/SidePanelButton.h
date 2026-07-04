@@ -1,5 +1,3 @@
-#ifndef SIDE_PANEL_BUTTON_H__
-#define SIDE_PANEL_BUTTON_H__
 #pragma once
 
 #include "gui/Control.h"
@@ -25,5 +23,3 @@ namespace fig::gui
 		StaticText* _pLabel {};
 	};
 }
-
-#endif

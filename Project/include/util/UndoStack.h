@@ -1,5 +1,3 @@
-#ifndef UNDO_STACK_H__
-#define UNDO_STACK_H__
 #pragma once
 
 #include "Figment.h"
@@ -122,5 +120,3 @@ namespace fig
 		size_t _capacity = 512uz;
 	};
 }
-
-#endif

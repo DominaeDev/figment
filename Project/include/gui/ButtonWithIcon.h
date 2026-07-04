@@ -1,5 +1,3 @@
-#ifndef BUTTON_WITH_ICON_H__
-#define BUTTON_WITH_ICON_H__
 #pragma once
 
 #include "gui/Control.h"
@@ -27,5 +25,3 @@ namespace fig::gui
 		Image* _pIcon {};
 	};
 }
-
-#endif

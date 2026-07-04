@@ -1,5 +1,3 @@
-#ifndef GLOBAL_STRINGS_H__
-#define GLOBAL_STRINGS_H__
 #pragma once
 
 #include "Figment.h"
@@ -71,4 +69,3 @@ namespace fig::strings
 		// ...
 	}
 }
-#endif

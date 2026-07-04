@@ -1,5 +1,3 @@
-#ifndef LOGIN_SCREEN_H__
-#define LOGIN_SCREEN_H__
 #pragma once
 
 #include "gui/Screen.h"
@@ -39,6 +37,3 @@ namespace fig::gui
 		fig::uuid _currentProfileId {};
 	};
 }
-
-
-#endif

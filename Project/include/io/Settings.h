@@ -1,5 +1,3 @@
-#ifndef SETTINGS_H__
-#define SETTINGS_H__
 #pragma once
 
 #include "Figment.h"
@@ -161,5 +159,3 @@ namespace fig::io
 		std::map<E, SettingValue> _values {};
 	};
 }
-
-#endif

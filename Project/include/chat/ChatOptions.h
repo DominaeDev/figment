@@ -1,6 +1,3 @@
-#ifndef CHAT_OPTIONS_H__
-#define CHAT_OPTIONS_H__
-
 #pragma once
 
 #include "Figment.h"
@@ -35,4 +32,3 @@ namespace fig::chat
 		GroupChatMode groupChatMode = GroupChatMode::SwapSequences;
 	};
 }
-#endif

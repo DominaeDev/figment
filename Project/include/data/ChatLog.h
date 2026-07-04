@@ -1,14 +1,12 @@
-#ifndef CHAT_LOG_H__
-#define CHAT_LOG_H__
 #pragma once
 
 #include "Figment.h"
 #include "chat/ChatTypes.h"
-#include "io/IXmlSerializable.h"
+#include "io/XmlData.h"
 
 namespace fig::data
 {
-	class ChatLog : public IXmlSerializable<"ChatLog", 0>
+	class ChatLog : public XmlData<"ChatLog", 0>
 	{
 	public:
 		struct Message
@@ -22,52 +20,49 @@ namespace fig::data
 			fig::chat::MessageType msgType;
 			fig::string content;
 
-			static auto SerializeInfo() noexcept
+			static auto XmlFields() noexcept
 			{
 				using namespace fig::chat;
 
 				return Fields(
-					AsAttribute { "id", &Message::messageId }
+					Attribute { "id", &Message::messageId }
 						.MustExist(),
-					AsAttribute { "from", &Message::speakerId }
+					Attribute { "from", &Message::speakerId }
 						.MustExist(),
-					AsAttribute { "turn", &Message::turn }
+					Attribute { "turn", &Message::turn }
 						.MustExist(),
 
-					AsAttribute { "role", &Message::role,
+					Attribute { "role", &Message::role,
 						[](auto& value) { return enum_serialize(value, RoleMapping); },
 						[](auto& value) { return enum_deserialize(value, RoleMapping); }
 					}	.MustExist(),
-					AsAttribute { "type", &Message::msgType,
+					Attribute { "type", &Message::msgType,
 						[](auto& value) { return enum_serialize(value, MessageTypeMapping); },
 						[](auto& value) { return enum_deserialize(value, MessageTypeMapping); }
 					}	.MustExist(),
-					AsElement { "timestamp", &Message::timestamp },
-					AsText { &Message::content }
+					Element { "timestamp", &Message::timestamp },
+					Text { &Message::content }
 						.MustExist()
 				);
 
-				static_assert(XmlSerializable<Message>);
+				static_assert(IsXmlSerializable<Message>);
 			}
 		};
 
 		fig::uuid assetId;
 		std::vector<Message> messages;
 
-		static auto SerializeInfo() noexcept
+		static auto XmlFields() noexcept
 		{
 			return Fields(
-				AsAttribute { "id", &ChatLog::assetId }
+				Attribute { "id", &ChatLog::assetId }
 					.MustExist(),
-				AsElement { "Message", &ChatLog::messages }
+				Element { "Message", &ChatLog::messages }
 					.Collection("Messages")
 					.MustExist()
 			);
 
-			static_assert(XmlSerializable<ChatLog>);
+			static_assert(IsXmlSerializable<ChatLog>);
 		}
 	};
 }
-
-
-#endif

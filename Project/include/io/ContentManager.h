@@ -1,5 +1,3 @@
-#ifndef CHARACTER_DATABASE_H__
-#define CHARACTER_DATABASE_H__
 #pragma once
 
 #include "data/Character.h"
@@ -56,4 +54,3 @@ namespace fig::io
 		bool MarkFlag(const fig::uuid& assetId, bool value);
 	};
 }
-#endif
