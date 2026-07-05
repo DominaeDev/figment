@@ -1,6 +1,7 @@
 #pragma once
 
 #include "io/Xml.h"
+#include "io/Error.h"
 #include <cassert>
 
 namespace fig::data

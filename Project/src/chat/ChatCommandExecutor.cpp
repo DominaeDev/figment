@@ -68,14 +68,19 @@ namespace fig::chat
 		if (std::iswdigit(from_utf8(partial_name)[0]))
 			return bot_from_index(std::stoi(partial_name) - 1);
 
-		auto& staging = pLLM->GetSession()->GetStaging();
-
-		for (auto const& character : staging.GetCharacters())
+		if (auto pSession = pLLM->GetSession().lock())
 		{
-			if (begins_with(character.shortName, partial_name, true))
-				return staging.GetRoleOf(character.chatId);
+			auto& staging = pSession->GetStaging();
+
+			for (auto const& character : staging.GetCharacters())
+			{
+				if (begins_with(character.shortName, partial_name, true))
+					return staging.GetRoleOf(character.chatId);
+			}
+			return staging.GetRoleOf(partial_name);
 		}
-		return staging.GetRoleOf(partial_name);
+
+		return Role::Undefined;
 	};
 
 	static bool cmdUserMessage(ParsedChatCommand cmd, CmdCtx ctx)

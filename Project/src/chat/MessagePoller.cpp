@@ -32,10 +32,6 @@ namespace fig::chat
 		MessagePiece piece;
 		while (pLLM->PollResponse(piece))
 		{
-			// Ignore empty messages
-			if (piece.isComplete and empty_or_whitespace(piece.content))
-				return;
-
 			auto findMsg = _messagesById.find(piece.subMessageId);
 			if (findMsg != _messagesById.end())
 			{
@@ -49,7 +45,7 @@ namespace fig::chat
 
 				modifiedMessages.insert(findMsg->second);
 			}
-			else
+			else if (not (piece.isComplete and empty_or_whitespace(piece.content))) // Ignore (new) empty messages
 			{
 				// New message
 				_messages.push_back(std::make_shared<Message>(Message {

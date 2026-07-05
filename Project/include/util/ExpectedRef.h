@@ -64,9 +64,19 @@ namespace fig
 			return std::unexpected(std::invoke(std::forward<F>(function), _inner.error()));
 		}
 
+		operator expected_ref<const T, E>() const
+		{
+			if (has_value())
+				return **_inner;
+			return std::unexpected(_inner.error());
+		}
+
 	private:
 		std::expected<T*, E> _inner;
 	};
+
+	template <typename T, typename E>
+	using expected_cref = expected_ref<const T, E>;
 
 	template <typename E>
 	std::unexpected<std::remove_cvref_t<E>> unexpected(E&& error)

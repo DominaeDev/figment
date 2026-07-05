@@ -14,11 +14,12 @@
 #include "chat/ChatCommandExecutor.h"
 #include "user/UserManager.h"
 #include "io/AssetManager.h"
+#include "io/Serialization.h"
+#include "io/FileUtility.h"
+#include "data/ChatInstance.h"
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
-#include "io/Serialization.h"
-#include "io/FileUtility.h"
 #include "text/TextEvaluator.h"
 #include <format>
 #include <ranges>
@@ -135,13 +136,13 @@ namespace fig::gui
 		DrawBackground(pRenderer);
 	}
 
-	void ChatScreen::StartChat(const fig::chat::ChatStaging& staging)
+	void ChatScreen::StartChat(const fig::chat::ChatStaging& staging, fig::uuid chatInstanceID)
 	{
 		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
 		{
 			auto pSession = std::make_shared<fig::chat::ChatSession>();
-			pSession->Initialize(staging, Constants::LLM::DefaultChatOptions);
+			pSession->Initialize(staging, Constants::LLM::DefaultChatOptions, chatInstanceID);
 
 			LLMChatArguments llmArgs {
 				/*session*/ pSession,
@@ -195,8 +196,11 @@ namespace fig::gui
 		{
 			if (auto script = fig::io::ReadTextFile("resources/auto_script.txt"))
 			{
-				fig::string text = eval_text(script.value(), pLLMInstance->GetSession()->GetContext());
-				_autoScript = split(text, '\n');
+				if (auto pSession = pLLMInstance->GetSession().lock())
+				{
+					fig::string text = eval_text(script.value(), pSession->GetContext());
+					_autoScript = split(text, '\n');
+				}
 			}
 			_autoScriptIndex = 0;
 			rng.seed(Constants::LLM::DebugSeed);

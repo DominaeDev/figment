@@ -64,6 +64,8 @@ namespace fig::llm
 	void LLMInstance::Shutdown()
 	{
 		Halt();
+
+		_pSession.reset();
 	}
 
 	bool LLMInstance::Initialize(LLMChatArguments args) //! @todo: Run in background thread

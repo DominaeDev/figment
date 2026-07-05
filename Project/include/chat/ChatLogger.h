@@ -11,7 +11,7 @@ namespace fig::chat
 	class ChatLogger
 	{
 	public:
-		ChatLogger(std::weak_ptr<ChatSession> pSession, fig::uuid assetId = {});
+		ChatLogger(ChatSession& session, fig::uuid parentID, fig::uuid assetId = {});
 
 		bool Save();
 
@@ -19,7 +19,7 @@ namespace fig::chat
 		void OnMessage(const MessagePoller::Message& piece);
 		
 		fig::uuid _assetId;
-		std::weak_ptr<ChatSession> _pSession {};
+		fig::uuid _parentId;
 		fig::data::ChatLog _log {};
 
 	};

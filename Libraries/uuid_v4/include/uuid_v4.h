@@ -207,6 +207,8 @@ public:
 		return {};
 	}
 
+	explicit operator std::string() const { return to_str(); }
+
 private:
 	void _to_str(std::string& s) const
 	{

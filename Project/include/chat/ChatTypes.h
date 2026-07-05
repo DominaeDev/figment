@@ -53,6 +53,8 @@ namespace fig::chat
 		return static_cast<Role>(first + botIndex);
 	}
 
+	constexpr size_t MaxBots = 8;
+
 	constexpr inline Role bot_from_index(size_t botIndex) { return bot_from_index(static_cast<int32_t>(botIndex)); }
 
 	enum class MessageType : uint8_t

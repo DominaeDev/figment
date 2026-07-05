@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chat/ChatStaging.h"
+#include "chat/ChatLogger.h"
 
 namespace fig::chat
 {
@@ -14,7 +15,7 @@ namespace fig::chat
 		ChatSession(ChatSession&&) = default;
 		~ChatSession();
 
-		void Initialize(const ChatStaging& staging, ChatOptions options);	
+		void Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceID);	
 
 		inline const ChatStaging& GetStaging() const noexcept { return _staging; }
 		inline ChatStaging& GetStaging() noexcept { return _staging; }
@@ -36,8 +37,6 @@ namespace fig::chat
 		ChatOptions _options {};
 		Context _context {};
 		std::unique_ptr<MessagePoller> _messagePoller {};
+		std::unique_ptr<ChatLogger> _logger {};
 	};
-
-	using ChatSessionPtr = std::shared_ptr<fig::chat::ChatSession>;
-	using ChatSessionCPtr = std::shared_ptr<const fig::chat::ChatSession>;
 }

@@ -42,7 +42,7 @@ namespace fig::data
 		template<typename T> requires (std::unsigned_integral<T> and not std::same_as<T, bool>)
 		void Set(const T& value) noexcept;
 		
-		template<fig::is_string_like T> requires (!std::same_as<T, fig::string>)
+		template<fig::is_string_like T> requires (not std::same_as<T, fig::string>)
 		void Set(const fig::string& name, const T& value) noexcept
 		{
 			Set<fig::string>(name, fig::string { value });
@@ -120,11 +120,11 @@ namespace fig::data
 			}
 		}
 
-		template<is_string_range T> requires (!std::same_as<T, fig::string_span>)
+		template<is_string_range T> requires (not std::same_as<T, fig::string_span>)
 		void SetValue(const T& value) noexcept
 		{
 			SetValue<fig::string_span>(value
-				| std::views::transform([](auto& s) -> fig::string { return fig::string { s }; })
+				| std::views::transform([](auto& s) { return fig::string { s }; })
 				| std::ranges::to<std::vector>()
 			);
 		}
@@ -145,8 +145,8 @@ namespace fig::data
 			AddChild(name).SetValue(fig::string { value });
 		}
 
-		template<std::ranges::range T>
-			requires std::constructible_from<fig::string, std::ranges::range_value_t<T>>
+		template<is_string_range T> 
+			requires (not std::same_as<T, fig::string_span>)
 		void SetElementValue(const fig::string& name, const T& value) noexcept
 		{
 			AddChild(name).SetValue(std::span { value.cbegin(), value.cend() });

@@ -1,6 +1,14 @@
 #pragma once
 
 #include "Figment.h"
+#include "text/Context.h"
+#include "chat/ChatStaging.h"
+#include "app/AppSettings.h"
+#include "app/AppState.h"
+#include "user/UserManager.h"
+
+#include "llm/LLMTypes.h"
+#include "llm/LLMStatus.h"
 
 #define USE_WIN32_API 0 // Use Win32 calls for file i/o
 

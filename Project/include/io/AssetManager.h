@@ -62,19 +62,36 @@ namespace fig::io
 		bool DeleteAsset(const fig::uuid& assetID) noexcept;
 		uint32_t DeleteAssets(std::span<fig::uuid> assetIDs) noexcept;
 
-		fig::optional_ref<Asset> FindAsset(const fig::uuid& id) noexcept;
-		fig::optional_ref<Asset> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;
-		fig::optional_ref<Asset> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& id) noexcept;
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
 
 		FileError LoadAsset(const Asset& asset) noexcept;
-		fig::expected_ref<Asset, FileError> LoadAsset(const fig::uuid& id) noexcept;
+		fig::expected_cref<Asset, FileError> LoadAsset(const fig::uuid& id) noexcept;
 		
 		auto GetAssets() noexcept { return _assets | std::views::values; }
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
 		auto GetAssetsOfType(AssetType assetType) const noexcept { return _assets | std::views::values | std::views::filter([assetType](auto& a) { return a.asset_type == assetType; }); }
 		auto GetCharacterAssets() const noexcept { return GetAssetsOfType(AssetType::Character); }
 		auto GetScenarioAssets() const noexcept { return GetAssetsOfType(AssetType::Scenario); }
-		
+
+		template <typename Fn>
+		decltype(auto) ModifyAsset(const fig::uuid& assetID, Fn fn)
+		{
+			if constexpr (std::is_invocable_r_v<bool, Fn, Asset&>)
+				return ModifyAsset_Internal_Bool(assetID, fn);
+			else
+				return ModifyAsset_Internal(assetID, fn);
+		}
+
+		template <typename Fn>
+		decltype(auto) ModifyAsset(const Asset& asset, Fn fn)
+		{
+			if constexpr (std::is_invocable_r_v<bool, Fn, Asset&>)
+				return ModifyAsset_Internal_Bool(asset, fn);
+			else
+				return ModifyAsset_Internal(asset, fn);
+		}
 
 		void SaveModified();
 
@@ -113,6 +130,12 @@ namespace fig::io
 		std::unique_ptr<AssetDatabase> _pAssetDB;
 
 		std::mutex _assetsMutex; // Guards _assets
+
+		void ModifyAsset_Internal(const fig::uuid& assetID, std::function<void(Asset&)> fn);
+		void ModifyAsset_Internal(const Asset& asset, std::function<void(Asset&)> fn);
+		bool ModifyAsset_Internal_Bool(const fig::uuid& assetID, std::function<bool(Asset&)> fn);
+		bool ModifyAsset_Internal_Bool(const Asset& asset, std::function<bool(Asset&)> fn);
+
 
 		/* Internal; Mutex already held: */
 		Asset& CreateEmptyAsset_Internal(AssetType type, const fig::uuid& parent) noexcept;

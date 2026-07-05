@@ -55,6 +55,10 @@ namespace fig
     template <typename T>
     concept is_string_like = std::constructible_from<fig::string, T>;
 
+    template <typename T>
+    concept is_string_convertible =
+        std::constructible_from<T, fig::string> and std::constructible_from<fig::string, T>;
+
     template<typename T>
     concept is_number = (std::integral<T> || std::floating_point<T>)
         && !std::same_as<T, bool>

@@ -28,7 +28,7 @@ namespace fig::gui
 		ChatScreen(Frame* pParent);
 
 		void Close();
-		void StartChat(const fig::chat::ChatStaging& staging);
+		void StartChat(const fig::chat::ChatStaging& staging, fig::uuid instanceID);
 
 	protected:
 		virtual void OnUpdate(float fElapsed) override;

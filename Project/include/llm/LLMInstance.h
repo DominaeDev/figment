@@ -90,7 +90,7 @@ namespace fig::llm
 		bool GenerateEmbedding(fig::string text);
 #endif
 
-		fig::chat::ChatSessionPtr GetSession() const { return _pSession; }
+		std::weak_ptr<fig::chat::ChatSession> GetSession() const { return _pSession; }
 		std::map<fig::string, fig::string> GetStateVariables();
 
 	private:
@@ -220,7 +220,7 @@ namespace fig::llm
 		std::queue<LLMTask> _tasks;
 
 		// Session
-		fig::chat::ChatSessionPtr _pSession {};
+		std::shared_ptr<fig::chat::ChatSession> _pSession {};
 		fig::chat::ChatOptions _options;
 		std::atomic<int32_t> _turn_counter = 0;
 

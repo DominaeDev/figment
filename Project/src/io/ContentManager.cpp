@@ -1,8 +1,9 @@
 #include <pch.h>
+#include "app/AppState.h"
 #include "io/ContentManager.h"
 #include "io/AssetManager.h"
 #include "gui/AppResources.h"
-#include "app/AppState.h"
+#include "data/ChatInstance.h"
 
 using namespace fig::user;
 using namespace fig::data;
@@ -77,7 +78,7 @@ namespace fig::io
 	std::optional<ModelSettings> UserContentManager::GetActiveModelSettings() const noexcept
 	{
 		fig::uuid activePresetId = Global::GetUserSettings().GetUUID(UserSetting::ModelPreset);
-		fig::optional_ref<Asset> settingsAsset;
+		fig::optional_cref<Asset> settingsAsset;
 
 		if (not activePresetId.empty())
 			settingsAsset = _pAssetMngr->FindAsset(activePresetId, AssetType::ModelSettings);
@@ -140,15 +141,17 @@ namespace fig::io
 	{
 		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
 		{
-			auto& asset = *tryAsset;
-			if (auto tryMeta = GetMetaData(assetId))
-			{
-				auto& meta = *tryMeta;
-				value ? meta.flags.Set(E) : meta.flags.Unset(E);
+			return _pAssetMngr->ModifyAsset(*tryAsset, [&](Asset& asset) -> bool {
+				if (auto tryMeta = GetMetaData(assetId))
+				{
+					auto& meta = *tryMeta;
+					value ? meta.flags.Set(E) : meta.flags.Unset(E);
 
-				asset.SetSettings(CardMetaData::ToJson(meta));
-				return true;
-			}
+					asset.SetSettings(CardMetaData::ToJson(meta));
+					return true;
+				}
+				return false;
+			});
 		}
 		return false;
 	}
@@ -172,14 +175,16 @@ namespace fig::io
 	{
 		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
 		{
-			auto& asset = *tryAsset;
-			if (auto tryMeta = GetMetaData(assetId))
-			{
-				auto& meta = *tryMeta;
-				meta.borderStyle = borderStyle;
-				asset.SetSettings(CardMetaData::ToJson(meta));
-				return true;
-			}
+			return _pAssetMngr->ModifyAsset(*tryAsset, [&](auto& asset) -> bool {
+				if (auto tryMeta = GetMetaData(assetId))
+				{
+					auto& meta = *tryMeta;
+					meta.borderStyle = borderStyle;
+					asset.SetSettings(CardMetaData::ToJson(meta));
+					return true;
+				}
+				return false;
+			});
 		}
 		return false;
 	}
@@ -267,5 +272,29 @@ namespace fig::io
 			}
 		}
 		return unexpected(FileError::NotFound);
+	}
+
+	const Asset& UserContentManager::CreateAsset(const fig::data::ChatInstance& chatInstance)
+	{
+		fig::bytes data;
+		chatInstance.SaveToXml(data);
+		auto& newAsset = _pAssetMngr->CreateAsset(AssetType::ChatInstance, data);
+
+		_pAssetMngr->ModifyAsset(newAsset, [&chatInstance](Asset& asset) {
+			for (size_t idx = 0; idx < chatInstance.characterIds.size() && idx < fig::chat::MaxBots; ++idx)
+			{
+				auto& id = chatInstance.characterIds[idx];
+				if (not id.empty())
+					asset.SetMeta(static_cast<fig::io::MetaTag>(static_cast<uint8_t>(fig::io::MetaTag::ReferenceToCharacter) + static_cast<uint8_t>(idx)), id);
+			}
+			if (not chatInstance.userId.empty())
+				asset.SetMeta(fig::io::MetaTag::ReferenceToUser, chatInstance.userId);
+			if (not chatInstance.scenarioId.empty())
+				asset.SetMeta(fig::io::MetaTag::ReferenceToScenario, chatInstance.scenarioId);
+			if (not chatInstance.worldId.empty())
+				asset.SetMeta(fig::io::MetaTag::ReferenceToWorld, chatInstance.worldId);
+		});
+
+		return newAsset;
 	}
 }

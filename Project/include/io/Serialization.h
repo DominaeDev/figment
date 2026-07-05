@@ -117,6 +117,11 @@ namespace fig::io
 		ImageFormat = 0x12,				// uint8_t
 
 		ReferenceToOriginal = 0x40,		// fig::uuid
+		
+		ReferenceToCharacter = 0x50,	// fig::uuid
+		ReferenceToUser = 0x58,			// fig::uuid
+		ReferenceToScenario = 0x59,		// fig::uuid
+		ReferenceToWorld = 0x60,		// fig::uuid
 	};
 
 	using _meta_identifier = std::array<uint64_t, 2>;
@@ -139,6 +144,9 @@ namespace fig::io
 
 	constexpr MetaValueType get_meta_type(MetaTag tag) noexcept
 	{
+		if (static_cast<uint8_t>(tag) >= static_cast<uint8_t>(MetaTag::ReferenceToCharacter) and static_cast<uint8_t>(tag) < static_cast<uint8_t>(MetaTag::ReferenceToCharacter) + fig::chat::MaxBots)
+			return MetaValueType::Identifier;
+
 		switch (tag)
 		{
 		case MetaTag::Version:
@@ -155,6 +163,9 @@ namespace fig::io
 			return MetaValueType::TimeStamp;
 
 		case MetaTag::ReferenceToOriginal:
+		case MetaTag::ReferenceToUser:
+		case MetaTag::ReferenceToScenario:
+		case MetaTag::ReferenceToWorld:
 			return MetaValueType::Identifier;
 
 		case MetaTag::Checksum:

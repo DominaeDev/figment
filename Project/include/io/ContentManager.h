@@ -5,6 +5,11 @@
 #include "data/CardMetaData.h"
 #include "data/ModelSettings.h"
 
+namespace fig::data
+{
+	struct ChatInstance;
+}
+
 namespace fig::io
 {
 	class AssetManager;
@@ -18,6 +23,8 @@ namespace fig::io
 		size_t ImportCharactersInDirectory(const fig::path& directory, size_t max_count = 0uz);
 		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename);
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
+
+		const Asset& CreateAsset(const fig::data::ChatInstance& chatInstance);
 
 		fig::optional_cref<fig::data::Character> GetCharacter(const fig::uuid& id) const noexcept;
 		fig::optional_cref<fig::data::Scenario> GetScenario(const fig::uuid& id) const noexcept;

@@ -12,13 +12,16 @@ namespace fig::chat
 	{}
 
 	ChatSession::~ChatSession()
-	{}
+	{
+		_logger->Save();
+	}
 
-	void ChatSession::Initialize(const ChatStaging& staging, ChatOptions options)
+	void ChatSession::Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceID)
 	{
 		_options = options;
 		_staging = staging;
 		_messagePoller = std::make_unique<MessagePoller>();
+		_logger = std::make_unique<ChatLogger>(*this, chatInstanceID);
 	}
 
 	fig::uuid ChatSession::GetCharacterIdOf(Role role) const

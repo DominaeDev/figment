@@ -224,27 +224,27 @@ namespace fig::io
 		return asset;
 	}
 
-	fig::optional_ref<Asset> AssetManager::FindAsset(const fig::uuid& id) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend())
-			return make_optional_ref(itFind->second);
+			return make_optional_cref(itFind->second);
 		return fig::nullref;
 	}
 
-	fig::optional_ref<Asset> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend() and itFind->second.asset_type == assetType)
-			return make_optional_ref(itFind->second);
+			return make_optional_cref(itFind->second);
 		return fig::nullref;
 	}
 
-	fig::optional_ref<Asset> AssetManager::FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -256,7 +256,7 @@ namespace fig::io
 			});
 
 		if (itFind != _assets.cend())
-			return make_optional_ref(itFind->second);
+			return make_optional_cref(itFind->second);
 		return fig::nullref;
 	}
 
@@ -350,18 +350,18 @@ namespace fig::io
 		std::for_each(std::execution::par,
 			assets.begin(), assets.end(),
 			[&](Asset* pAsset) {
-				auto& asset = *pAsset;
-				AssetFileReader reader(_profilePath, _profileAuthKey);
-				if (auto file = reader.ReadFile(asset.GetFileName(), false))
-				{
-					asset.FromFile(std::move(file.value()));
-					asset.sync_state.has_meta = true;
-				}
-				else if (file.error() == FileError::NotFound)
-					asset.sync_state.error = AssetSyncState::Error::Missing;
-				else // File exists but failed to read
-					asset.sync_state.error = AssetSyncState::Error::Invalid;
-			});
+			auto& asset = *pAsset;
+			AssetFileReader reader(_profilePath, _profileAuthKey);
+			if (auto file = reader.ReadFile(asset.GetFileName(), false))
+			{
+				asset.FromFile(std::move(file.value()));
+				asset.sync_state.has_meta = true;
+			}
+			else if (file.error() == FileError::NotFound)
+				asset.sync_state.error = AssetSyncState::Error::Missing;
+			else // File exists but failed to read
+				asset.sync_state.error = AssetSyncState::Error::Invalid;
+		});
 		DEBUG_MEASURE_END();
 
 		// Purge missing assets from index
@@ -383,8 +383,8 @@ namespace fig::io
 
 		// Read meta data of all asset files (in parallel)
 		DEBUG_MEASURE_BEGIN("LoadDataAssets");
-		std::vector<Asset*> assets = _assets 
-			| std::views::values 
+		std::vector<Asset*> assets = _assets
+			| std::views::values
 			| std::views::filter([](auto&& a) { return a.asset_type == AssetType::Character || a.asset_type == AssetType::Scenario; })
 			| std::views::transform([](auto&& a) { return &a; })
 			| std::ranges::to<std::vector>();
@@ -392,8 +392,8 @@ namespace fig::io
 		std::for_each(std::execution::par_unseq,
 			assets.begin(), assets.end(),
 			[&](Asset* pAsset) {
-				auto discard = LoadAsset_Internal(*pAsset);
-			});
+			auto discard = LoadAsset_Internal(*pAsset);
+		});
 		DEBUG_MEASURE_END();
 
 		return true;
@@ -407,7 +407,7 @@ namespace fig::io
 			return result.error();
 	}
 
-	fig::expected_ref<Asset, FileError> AssetManager::LoadAsset(const fig::uuid& id) noexcept
+	fig::expected_cref<Asset, FileError> AssetManager::LoadAsset(const fig::uuid& id) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 		auto itFind = _assets.find(id);
@@ -453,22 +453,22 @@ namespace fig::io
 	{
 		switch (format)
 		{
-		case CharacterDataFormat::Default:
-		{
-			Character character;
-			if (auto error = character.LoadFromXml(filename); error == FileError::NoError)
-				return character;
-			else
-				return std::unexpected(error);
+			case CharacterDataFormat::Default:
+			{
+				Character character;
+				if (auto error = character.LoadFromXml(filename); error == FileError::NoError)
+					return character;
+				else
+					return std::unexpected(error);
+			}
+			case CharacterDataFormat::TavernV2:
+				if (auto import = CardImporter::Import(filename))
+					return import.value();
+				else
+					return std::unexpected(import.error());
+			default:
+				return std::unexpected(FileError::UnrecognizedFormat);
 		}
-		case CharacterDataFormat::TavernV2:
-			if (auto import = CardImporter::Import(filename))
-				return import.value();
-			else
-				return std::unexpected(import.error());
-		default:
-			return std::unexpected(FileError::UnrecognizedFormat);
-		}		
 		return std::unexpected(FileError::UnrecognizedFormat);
 	}
 
@@ -484,7 +484,7 @@ namespace fig::io
 		std::set<fig::uuid> allAssetIDs;
 		for (auto& assetID : assetIDs)
 			allAssetIDs.insert_range(FindRelatedAssets(assetID));
-	
+
 		uint32_t count = 0;
 		auto& db = GetDatabase();
 		for (auto& assetID : allAssetIDs)
@@ -604,8 +604,8 @@ namespace fig::io
 				// Create cover card
 				if (auto coverImage = LoadImage(filename) //! @todo: load only once
 					.transform([](auto img) {
-						return CreateCoverImage(img, false);
-					}))
+					return CreateCoverImage(img, false);
+				}))
 				{
 					// Save cover asset (bitmap)
 					auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage.value(), characterAsset.id);
@@ -615,8 +615,8 @@ namespace fig::io
 				// Create square portrait
 				if (auto squarePortraitImage = LoadImage(filename) //! @todo: load only once
 					.transform([](auto img) {
-						return CreateSquarePortrait(img);
-					}))
+					return CreateSquarePortrait(img);
+				}))
 				{
 					// Save square portrait asset (bitmap)
 					auto& squarePortraitAsset = CreateImageAsset_Internal(ImageType::SmallPortrait, squarePortraitImage.value(), characterAsset.id);
@@ -677,7 +677,7 @@ namespace fig::io
 	{
 		// Create profile image
 		if (auto profileImage = LoadImage(filename)
-				.transform([](auto img) { return CreateProfileImage(img); });
+			.transform([](auto img) { return CreateProfileImage(img); });
 			profileImage.has_value() && profileImage.value()->w > 0)
 		{
 			auto pSurface = (*profileImage).get();
@@ -770,7 +770,7 @@ namespace fig::io
 	{
 		if (auto findImage = FindAsset(characterAssetID, imageType))
 		{
-			Asset& imageAsset = findImage.value();
+			auto& imageAsset = findImage.value();
 			if (auto result = LoadAsset(imageAsset); result == FileError::NoError)
 			{
 				if (auto image = LoadImageFromMemory(imageAsset.data))
@@ -795,7 +795,7 @@ namespace fig::io
 
 		if (auto findCover = FindAsset(characterAssetID, ImageType::CoverImage))
 		{
-			Asset& cover = findCover.value();
+			auto& cover = findCover.value();
 			auto result = LoadAsset(cover);
 			if (result == FileError::NotFound)
 				return AsyncLoadError::FileNotFound;
@@ -812,7 +812,7 @@ namespace fig::io
 				// Create cover from portrait
 				if (auto findPortrait = FindAsset(characterAssetID, ImageType::LargePortrait))
 				{
-					Asset& portraitAsset = findPortrait.value();
+					auto& portraitAsset = findPortrait.value();
 					if (LoadAsset(portraitAsset) == FileError::NoError)
 					{
 						if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
@@ -841,7 +841,7 @@ namespace fig::io
 		int32_t expandX = Constants::GUI::Cards::Half::ZoomPixels * 2;
 		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::Cards::Half::ZoomPixels * 2) * toF(Constants::GUI::HalfCardHeight) / toF(Constants::GUI::HalfCardWidth)));
 		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HalfCardWidth + expandX, Constants::GUI::HalfCardHeight + expandY, ImageFit::Stretch, true);
-		
+
 		// Round corners
 		if constexpr (Disabled)
 		{
@@ -852,7 +852,7 @@ namespace fig::io
 		outResult.emplace<AsyncResult_CoverPair>(AsyncResult_CoverPair {
 			std::move(fullSurface),
 			std::move(halfSurface),
-		});
+			});
 		return AsyncLoadError::NoError;
 	}
 
@@ -891,19 +891,19 @@ namespace fig::io
 			AsyncResultVariant result;
 			switch (request.task)
 			{
-			case AsyncTask::LoadCoverImage:
-				error = __LoadCoverImageTask(request.assetId, result);
-				break;
-			case AsyncTask::LoadPortrait:
-				error = __LoadImageTask(request.assetId, ImageType::LargePortrait, result);
-				break;
-			default:
-				error = AsyncLoadError::LoadError;
-				break;
+				case AsyncTask::LoadCoverImage:
+					error = __LoadCoverImageTask(request.assetId, result);
+					break;
+				case AsyncTask::LoadPortrait:
+					error = __LoadImageTask(request.assetId, ImageType::LargePortrait, result);
+					break;
+				default:
+					error = AsyncLoadError::LoadError;
+					break;
 			}
 
 			if (IsAsyncRequestAlive(request))
-			{	
+			{
 				std::scoped_lock<std::mutex> lock(_active_mutex);
 				_active_promises.erase(request.assetId);
 			}
@@ -962,7 +962,7 @@ namespace fig::io
 				.priority = priority,
 				.task = task,
 				.promise = std::move(promise),
-			});
+				});
 		}
 		_pending_cv.notify_one();
 
@@ -986,14 +986,14 @@ namespace fig::io
 
 	void AssetManager::CancelAll()
 	{
-        std::scoped_lock lock(_pending_mutex);
-        while (!_pending.empty())
+		std::scoped_lock lock(_pending_mutex);
+		while (!_pending.empty())
 		{
 			PendingRequest request = std::move(const_cast<PendingRequest&>(_pending.top()));
 			_pending.pop();
-            request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
-        }
-        _pending_cv.notify_all();
+			request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
+		}
+		_pending_cv.notify_all();
 	}
 
 	bool AssetManager::IsAsyncRequestAlive(const PendingRequest& request) const
@@ -1005,4 +1005,47 @@ namespace fig::io
 		return it != _active_promises.end();
 	}
 
+	void AssetManager::ModifyAsset_Internal(const fig::uuid& assetID, std::function<void(Asset&)> fn)
+	{
+		if (auto itFind = _assets.find(assetID); itFind != _assets.cend())
+		{
+			if (fn)
+			{
+				std::scoped_lock lock { _assetsMutex };
+				fn(itFind->second);
+			}
+		}
+	}
+
+	void AssetManager::ModifyAsset_Internal(const Asset& asset, std::function<void(Asset&)> fn)
+	{
+		if (fn)
+		{
+			std::scoped_lock lock { _assetsMutex };
+			fn(const_cast<Asset&>(asset));
+		}
+	}
+
+	bool AssetManager::ModifyAsset_Internal_Bool(const fig::uuid& assetID, std::function<bool(Asset&)> fn)
+	{
+		if (auto itFind = _assets.find(assetID); itFind != _assets.cend())
+		{
+			if (fn)
+			{
+				std::scoped_lock lock { _assetsMutex };
+				return fn(itFind->second);
+			}
+		}
+		return false;
+	}
+
+	bool AssetManager::ModifyAsset_Internal_Bool(const Asset& asset, std::function<bool(Asset&)> fn)
+	{
+		if (fn)
+		{
+			std::scoped_lock lock { _assetsMutex };
+			return fn(const_cast<Asset&>(asset));
+		}
+		return false;
+	}
 }

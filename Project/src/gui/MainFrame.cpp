@@ -12,6 +12,7 @@
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "data/ModelSettings.h"
+#include "data/ChatInstance.h"
 #include "util/DebugUtils.h"
 
 using namespace fig::io;
@@ -78,7 +79,7 @@ namespace fig::gui
 	{
 		if (auto pLLM = Global::GetLLMInstance())
 		{
-			if (auto pSession = pLLM->GetSession())
+			if (auto pSession = pLLM->GetSession().lock())
 				pSession->Update(fElapsed);
 		}
 	}
@@ -463,7 +464,16 @@ namespace fig::gui
 			if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) and staging.AddCharacter({}, Role::User, user))) //! @temp
 				return false;
 
-			pChatScreen->StartChat(staging);
+			// Create instance
+			ChatInstance instance;
+			instance.characterIds = staging.GetCharacterIds();
+			instance.userId = {}; //! @todo
+			instance.scenarioId = {}; //! @todo
+			instance.options = Constants::LLM::DefaultChatOptions; //! @todo
+			
+			auto& chatInstanceAsset = Global::GetUserManager().GetContent().CreateAsset(instance);
+
+			pChatScreen->StartChat(staging, chatInstanceAsset.id);
 			return true;
 		}
 		return false;

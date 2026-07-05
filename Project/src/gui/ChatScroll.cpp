@@ -30,7 +30,7 @@ namespace fig::gui
 		EnableCulling(true);
 	}
 
-	void ChatScroll::SetSession(fig::chat::ChatSessionPtr pSession)
+	void ChatScroll::SetSession(std::shared_ptr<fig::chat::ChatSession> pSession)
 	{ 
 		_pSession = pSession;
 
@@ -187,6 +187,11 @@ namespace fig::gui
 		if (event.type == SDL_EVENT_MOUSE_WHEEL)
 		{
 			return HandleMouseWheel(event.wheel) ? EventResult::Handled : EventResult::Pass;
+		}
+
+		if (IsUserEvent(event, fig::gui::UserEvent::LLMModelUnloaded)) //! @todo: EndOfChat
+		{
+			_pSession.reset();
 		}
 		return EventResult::Pass;
 	}
