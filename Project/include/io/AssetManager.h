@@ -71,7 +71,7 @@ namespace fig::io
 		
 		auto GetAssets() noexcept { return _assets | std::views::values; }
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
-		auto GetAssetsOfType(AssetType assetType) const noexcept { return _assets | std::views::values | std::views::filter([assetType](auto& a) { return a.asset_type == assetType; }); }
+		auto GetAssetsOfType(AssetType assetType) const noexcept { return _assets | std::views::filter([assetType](auto&& kvp) { return kvp.second.asset_type == assetType; }) | std::views::values; }
 		auto GetCharacterAssets() const noexcept { return GetAssetsOfType(AssetType::Character); }
 		auto GetScenarioAssets() const noexcept { return GetAssetsOfType(AssetType::Scenario); }
 
@@ -116,7 +116,10 @@ namespace fig::io
 		bool LoadDataAssets() noexcept;
 		bool UpdateAssetOnDisk(Asset& asset);
 		bool UpdateAssetInDatabase(Asset& asset);
+
 		fig::expected_ref<Asset, FileError> LoadAsset_Internal(Asset& asset) noexcept;
+		fig::expected_ref<Asset, FileError> LoadAssetMeta_Internal(Asset& asset) noexcept;
+
 		bool DeleteAsset_Internal(const fig::uuid& assetID) noexcept;
 		bool DeleteAssetFile(const fig::uuid& assetID) noexcept;
 		std::set<fig::uuid> FindRelatedAssets(const fig::uuid& assetId) noexcept;

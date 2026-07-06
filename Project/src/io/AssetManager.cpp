@@ -74,7 +74,10 @@ namespace fig::io
 		asset.id = id;
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
-		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Modified;
+		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Created;
+		asset.sync_state.db_sync = AssetSyncState::SyncStatus::Created;
+		asset.sync_state.has_meta = true;
+
 		auto now = utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
@@ -119,6 +122,8 @@ namespace fig::io
 		asset.asset_type = type;
 		asset.data = std::move(data); // Move data
 		asset.data_format = format;
+		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Created;
+		asset.sync_state.db_sync = AssetSyncState::SyncStatus::Created;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not asset.data.empty();
 		auto now = utc_now();
@@ -136,8 +141,11 @@ namespace fig::io
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
 		asset.data_format = format;
+		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Created;
+		asset.sync_state.db_sync = AssetSyncState::SyncStatus::Created;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not data.empty();
+
 		auto now = utc_now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
@@ -271,7 +279,7 @@ namespace fig::io
 			{
 				if (asset.sync_state.ShouldWriteToDisk())
 					UpdateAssetOnDisk(asset);
-				if (asset.sync_state.db_sync != AssetSyncState::SyncStatus::Synchronized)
+				if (asset.sync_state.ShouldWriteToDatabase())
 					UpdateAssetInDatabase(asset);
 			}
 		}
@@ -350,18 +358,19 @@ namespace fig::io
 		std::for_each(std::execution::par,
 			assets.begin(), assets.end(),
 			[&](Asset* pAsset) {
-			auto& asset = *pAsset;
-			AssetFileReader reader(_profilePath, _profileAuthKey);
-			if (auto file = reader.ReadFile(asset.GetFileName(), false))
-			{
-				asset.FromFile(std::move(file.value()));
-				asset.sync_state.has_meta = true;
-			}
-			else if (file.error() == FileError::NotFound)
-				asset.sync_state.error = AssetSyncState::Error::Missing;
-			else // File exists but failed to read
-				asset.sync_state.error = AssetSyncState::Error::Invalid;
-		});
+				auto& asset = *pAsset;
+				AssetFileReader reader(_profilePath, _profileAuthKey);
+				if (auto file = reader.ReadFile(asset.GetFileName(), false))
+				{
+					asset.FromFile(std::move(file.value()));
+					asset.sync_state.file_sync = AssetSyncState::SyncStatus::Synchronized;
+					asset.sync_state.has_meta = true;
+				}
+				else if (file.error() == FileError::NotFound)
+					asset.sync_state.error = AssetSyncState::Error::Missing;
+				else // File exists but failed to read
+					asset.sync_state.error = AssetSyncState::Error::Invalid;
+			});
 		DEBUG_MEASURE_END();
 
 		// Purge missing assets from index
@@ -382,10 +391,24 @@ namespace fig::io
 		std::scoped_lock lock { _assetsMutex };
 
 		// Read meta data of all asset files (in parallel)
-		DEBUG_MEASURE_BEGIN("LoadDataAssets");
-		std::vector<Asset*> assets = _assets
+		DEBUG_MEASURE_BEGIN("LoadAssets (Meta)");
+		std::vector<Asset*> meta_assets = _assets
+			| std::views::filter([](auto& kvp) { return kvp.second.asset_type == AssetType::ChatInstance; })
 			| std::views::values
-			| std::views::filter([](auto&& a) { return a.asset_type == AssetType::Character || a.asset_type == AssetType::Scenario; })
+			| std::views::transform([](auto&& a) { return &a; })
+			| std::ranges::to<std::vector>();
+
+		std::for_each(std::execution::par_unseq,
+			meta_assets.begin(), meta_assets.end(),
+			[&](Asset* pAsset) {
+				auto discard = LoadAssetMeta_Internal(*pAsset);
+			});
+		DEBUG_MEASURE_END();
+
+		DEBUG_MEASURE_BEGIN("LoadAssets (Full)");
+		std::vector<Asset*> assets = _assets
+			| std::views::filter([](auto& kvp) { return kvp.second.asset_type == AssetType::Character || kvp.second.asset_type == AssetType::Scenario; })
+			| std::views::values
 			| std::views::transform([](auto&& a) { return &a; })
 			| std::ranges::to<std::vector>();
 
@@ -433,8 +456,38 @@ namespace fig::io
 		if (auto file = reader.ReadFile(asset.GetFileName()))
 		{
 			asset.FromFile(std::move(file.value()));
+			asset.sync_state.file_sync = AssetSyncState::SyncStatus::Synchronized;
 			asset.sync_state.has_meta = true;
 			asset.sync_state.has_data = true;
+			return asset;
+		}
+		else if (file.error() == FileError::NotFound)
+		{
+			asset.sync_state.error = AssetSyncState::Error::Missing;
+			return std::unexpected(FileError::ReadError);
+		}
+		else
+		{
+			asset.sync_state.error = AssetSyncState::Error::Invalid;
+			return std::unexpected(FileError::ReadError);
+		}
+	}
+
+	fig::expected_ref<Asset, FileError> AssetManager::LoadAssetMeta_Internal(Asset& asset) noexcept
+	{
+		if (asset.sync_state.has_meta)
+			return asset;
+
+		if (asset.sync_state.error != AssetSyncState::Error::NoError)
+			return std::unexpected(FileError::ReadError);
+
+		AssetFileReader reader(_profilePath, _profileAuthKey);
+		if (auto file = reader.ReadFile(asset.GetFileName(), false))
+		{
+			asset.FromFile(std::move(file.value()));
+			asset.sync_state.file_sync = AssetSyncState::SyncStatus::Synchronized;
+			asset.sync_state.has_meta = true;
+			asset.sync_state.has_data = false;
 			return asset;
 		}
 		else if (file.error() == FileError::NotFound)
@@ -962,7 +1015,7 @@ namespace fig::io
 				.priority = priority,
 				.task = task,
 				.promise = std::move(promise),
-				});
+			});
 		}
 		_pending_cv.notify_one();
 

@@ -45,6 +45,9 @@ namespace fig::io
 		AssetManager& GetAssetManager();
 		void SaveModified();
 
+		size_t GetChatCount(const fig::uuid& assetId);
+		void RefreshChatCount();
+
 	protected:
 		void LoadAll();
 
@@ -56,6 +59,8 @@ namespace fig::io
 		std::map<fig::uuid, fig::data::CardMetaData> _metaData;
 		std::map<fig::uuid, fig::sdl::Surface> _surfaces;
 		std::map<fig::uuid, fig::sdl::Texture> _textures;
+
+		std::map<fig::uuid, std::vector<fig::uuid>> _chatsByAsset; // <asset id, chat ids>
 
 		template <fig::data::CardMetaData::Flag E>
 		bool MarkFlag(const fig::uuid& assetId, bool value);

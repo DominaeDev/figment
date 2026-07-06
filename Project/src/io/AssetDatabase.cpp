@@ -197,6 +197,7 @@ namespace fig::io
 			if (pSettings)
 				asset.settings = fig::string { pSettings };
 
+			asset.sync_state.file_sync = AssetSyncState::SyncStatus::Indetermined;
 			asset.sync_state.db_sync = AssetSyncState::SyncStatus::Synchronized;
 			if (!asset.id.empty())
 				result[asset.id] = std::move(asset);

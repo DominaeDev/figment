@@ -55,6 +55,7 @@ namespace fig::io
 			Created = 0,
 			Modified,
 			Synchronized,
+			Indetermined,
 		};
 
 		enum class Error
@@ -66,8 +67,8 @@ namespace fig::io
 
 		bool has_meta {};
 		bool has_data {};
-		SyncStatus file_sync { SyncStatus::Created };
-		SyncStatus db_sync { SyncStatus::Created };
+		SyncStatus file_sync { SyncStatus::Indetermined };
+		SyncStatus db_sync { SyncStatus::Indetermined };
 		Error error {};
 
 		inline void Modified() noexcept
@@ -160,6 +161,14 @@ namespace fig::io
 				if (const T* x = std::get_if<T>(&it->second))
 					return std::make_optional(*x);
 			}
+			return std::nullopt;
+		}
+
+		template <>
+		std::optional<fig::uuid> GetMeta(MetaTag tag) const
+		{
+			if (auto try_get = GetMeta<_meta_identifier>(tag))
+				return fig::uuid((*try_get)[1], (*try_get)[0]);
 			return std::nullopt;
 		}
 

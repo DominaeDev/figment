@@ -58,6 +58,8 @@ namespace fig::io
 				continue; // Skip
 		}
 
+		RefreshChatCount();
+
 		DEBUG_MEASURE_END();
 	}
 
@@ -127,7 +129,7 @@ namespace fig::io
 				auto& character = itFind->second;
 				metaData.name = character.shortName;
 				metaData.gender = character.gender;
-				metaData.chatCount = static_cast<uint32_t>(std::ranges::count_if(_pAssetMngr->GetAssets(), [&id](auto&& a) { return a.asset_type == AssetType::ChatInstance and a.parent_id == id; }));
+				metaData.chatCount = static_cast<uint32_t>(GetChatCount(id));
 			}
 			_metaData[id] = metaData;
 			return make_optional_ref(_metaData.at(id));
@@ -296,5 +298,36 @@ namespace fig::io
 		});
 
 		return newAsset;
+	}
+
+	size_t UserContentManager::GetChatCount(const fig::uuid& assetId)
+	{
+		if (auto itFind = _chatsByAsset.find(assetId); itFind != _chatsByAsset.cend())
+			return itFind->second.size();
+		return 0uz;
+	}
+
+	void UserContentManager::RefreshChatCount()
+	{
+		_chatsByAsset.clear();
+		auto assets = _pAssetMngr->GetAssetsOfType(AssetType::ChatInstance);
+
+		for (auto& asset : assets)
+		{
+			for (size_t i = 0; i < fig::chat::MaxBots; ++i)
+			{
+				if (auto characterId = asset.GetMeta<fig::uuid>(static_cast<MetaTag>(static_cast<uint8_t>(MetaTag::ReferenceToCharacter) + static_cast<uint8_t>(i))))
+					_chatsByAsset[*characterId].push_back(asset.id);
+			}
+
+			if (auto userId = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToUser))
+				_chatsByAsset[*userId].push_back(asset.id);
+
+			if (auto scenarioId = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToScenario))
+				_chatsByAsset[*scenarioId].push_back(asset.id);
+
+			if (auto worldId = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToWorld))
+				_chatsByAsset[*worldId].push_back(asset.id);
+		}
 	}
 }

@@ -22,7 +22,8 @@ namespace fig
 		{
 //			ImportTestCharacters("./import/characters");
 //			ShuffleCards();
-			CreateModelSettings();
+//			CreateModelSettings();
+//			EraseChats();
 		}
 	}
 
@@ -196,6 +197,26 @@ namespace fig
 						| std::ranges::to<std::string>();
 					LogLn(text);
 				}
+			}
+		}
+	}
+
+	void DebugUtility::EraseChats()
+	{
+		if constexpr (Debugging)
+		{
+			auto& userMngr = Global::GetUserManager();
+
+			if (userMngr.SignInDefaultProfile())
+			{
+				auto& assetMngr = userMngr.GetContent().GetAssetManager();
+
+				auto remove_chats = assetMngr.GetAssetsOfType(AssetType::ChatLog)
+					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+					| std::ranges::to<std::vector>();
+				assetMngr.DeleteAssets(remove_chats);
+
+				userMngr.SignOut();
 			}
 		}
 	}

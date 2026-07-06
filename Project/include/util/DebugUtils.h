@@ -17,5 +17,7 @@ namespace fig
 		static void CreateModelSettings();
 		
 		static void DebugCharacter(const fig::uuid& characterId);
+
+		static void EraseChats();
 	};
 }
