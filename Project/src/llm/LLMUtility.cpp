@@ -265,25 +265,6 @@ namespace fig::llm
 		*bHalt = false;
 		*bWait = false;
 	}
-	/*
-	std::optional<std::vector<Token>> tokenize_and_decode(LLMContext& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
-	{
-		auto tokens = tokenize_and_batch(context, content, seq_id, pos, add_special);
-		int32_t n_tokens = toI(tokens.size());
-
-		llama_batch batch_view = context.GetCache().GetView(pos, n_tokens);
-		if (batch_view.n_tokens > 0 && llama_decode(context.GetCtxPtr(), batch_view) != 0)
-			return std::nullopt;
-		return tokens;
-	}
-
-	std::vector<Token> tokenize_and_batch(LLMContext& context, fig::string content, SequenceSlots seq_id, int32_t pos, bool add_special)
-	{
-		// Add to context batch
-		auto tokens = llama::tokenize(context.GetVocabPtr(), content, add_special);
-		context.GetCache().BatchWrite(tokens, seq_id, pos);
-		return tokens;
-	}*/
 
 	struct Span
 	{

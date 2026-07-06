@@ -9,6 +9,7 @@
 namespace fig::chat
 {
 	class ChatStaging;
+	class ChatSession;
 	using ParsedChatCommandQueue = std::queue<ParsedChatCommand>;
 }
 
@@ -27,7 +28,6 @@ namespace fig::gui
 	public:
 		ChatScreen(Frame* pParent);
 
-		void Close();
 		void StartChat(const fig::chat::ChatStaging& staging, fig::uuid instanceID);
 
 	protected:
@@ -45,7 +45,6 @@ namespace fig::gui
 		void OnSidePanel(bool show) override;
 
 	private:
-
 		ChatScroll* _pChatScroll {};
 		TextBox* _pTextBox {};
 		VariableList* _pVariableList {};
@@ -55,6 +54,7 @@ namespace fig::gui
 		bool _bStartedChat = false; // Used to trigger greeting
 
 		fig::chat::ParsedChatCommandQueue _commandQueue;
+		std::shared_ptr<fig::chat::ChatSession> _pSession;
 
 #if ENABLE_AUTO_CHAT
 	private:

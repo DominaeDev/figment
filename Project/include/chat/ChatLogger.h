@@ -12,6 +12,7 @@ namespace fig::chat
 	{
 	public:
 		ChatLogger(ChatSession& session, fig::uuid parentID, fig::uuid assetId = {});
+		~ChatLogger();
 
 		bool Save();
 
@@ -21,6 +22,7 @@ namespace fig::chat
 		fig::uuid _assetId;
 		fig::uuid _parentId;
 		fig::data::ChatLog _log {};
-
+		ChatSession* _pSession {};
+		uint32_t _pollerId {};
 	};
 }

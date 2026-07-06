@@ -13,7 +13,7 @@ namespace fig::chat
 
 	ChatSession::~ChatSession()
 	{
-		_logger->Save();
+		Shutdown();
 	}
 
 	void ChatSession::Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceID)
@@ -22,6 +22,13 @@ namespace fig::chat
 		_staging = staging;
 		_messagePoller = std::make_unique<MessagePoller>();
 		_logger = std::make_unique<ChatLogger>(*this, chatInstanceID);
+	}
+
+	void ChatSession::Shutdown()
+	{
+		_logger->Save();
+		_logger.reset();
+		_messagePoller.reset();
 	}
 
 	fig::uuid ChatSession::GetCharacterIdOf(Role role) const

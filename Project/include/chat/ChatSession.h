@@ -16,6 +16,7 @@ namespace fig::chat
 		~ChatSession();
 
 		void Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceID);	
+		void Shutdown();
 
 		inline const ChatStaging& GetStaging() const noexcept { return _staging; }
 		inline ChatStaging& GetStaging() noexcept { return _staging; }

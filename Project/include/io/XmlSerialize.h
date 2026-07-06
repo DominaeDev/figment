@@ -33,6 +33,14 @@ namespace fig::data
 		or requires (T t, XmlReaderElement x) { { t.LoadFromXml(x) } -> std::same_as<fig::io::FileError>; });
 
 		template<typename T>
+		concept HasEmpty =
+			requires (const T t) { { t.empty() } -> std::same_as<bool>; };
+
+		template<typename T>
+		concept HasDefault =
+			requires (const T t) { { t == T {} } -> std::same_as<bool>; };
+
+		template<typename T>
 		concept IsStringConvertible =
 			std::constructible_from<T, fig::string> and
 			std::constructible_from<fig::string, T>;
@@ -57,6 +65,7 @@ namespace fig::data
 			ValueType default_value {};
 			TValidator validator {};
 			bool must_exist {};
+			bool skip_empty {};
 
 			Attribute& Name(const char* name)
 			{
@@ -81,6 +90,12 @@ namespace fig::data
 				this->must_exist = true;
 				return *this;
 			}
+
+			Attribute& SkipEmpty()
+			{
+				this->skip_empty = true;
+				return *this;
+			}
 		};
 
 		template<typename TMemberPointer, typename TSerializer = std::identity, typename TDeserializer = std::identity>
@@ -98,6 +113,7 @@ namespace fig::data
 			ValueType default_value {};
 			TValidator validator {};
 			bool must_exist {};
+			bool skip_empty {};
 			const char* collection_name {};
 
 			Element& Name(const char* name)
@@ -124,6 +140,12 @@ namespace fig::data
 				return *this;
 			}
 
+			Element& SkipEmpty()
+			{
+				this->skip_empty = true;
+				return *this;
+			}
+
 			Element& Collection(const char* name)
 			{
 				this->collection_name = name;
@@ -144,6 +166,7 @@ namespace fig::data
 			ValueType default_value {};
 			TValidator validator {};
 			bool must_exist {};
+			bool skip_empty {};
 
 			Text& Default(ValueType default_value)
 			{
@@ -160,6 +183,12 @@ namespace fig::data
 			Text& MustExist()
 			{
 				this->must_exist = true;
+				return *this;
+			}
+
+			Text& SkipEmpty()
+			{
+				this->skip_empty = true;
 				return *this;
 			}
 		};
@@ -187,12 +216,31 @@ namespace fig::data
 			std::apply([&](auto&&... field) {
 				([&] {
 					using FieldType = std::decay_t<decltype(field)>;
+					using ValueType = FieldType::ValueType;
 					auto& member = object.*(field.member_ptr);
 
 					// Attribute
 					if constexpr (IsSpecializationOf<FieldType, Attribute>::value)
 					{
-						if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+						if (field.skip_empty and !field.must_exist)
+						{
+							if constexpr (HasEmpty<ValueType>)
+							{
+								if (member.empty())
+									return;
+							}
+							else if constexpr (HasDefault<ValueType>)
+							{
+								if (member == ValueType {})
+									return;
+							}
+							else
+							{
+								assert(false && "SkipEmpty() doesn't work for this type.");
+							}
+						}
+
+						if constexpr (IsStringConvertible<ValueType>)
 							element.SetAttribute(field.name, (fig::string)member);
 						else
 							element.SetAttribute(field.name, field.custom_serializer(member));
@@ -200,21 +248,57 @@ namespace fig::data
 					// Text
 					else if constexpr (IsSpecializationOf<FieldType, Text>::value)
 					{
-						if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+						if (field.skip_empty and !field.must_exist)
+						{
+							if constexpr (HasEmpty<ValueType>)
+							{
+								if (member.empty())
+									return;
+							}
+							else if constexpr (HasDefault<ValueType>)
+							{
+								if (member == ValueType {})
+									return;
+							}
+							else
+							{
+								assert(false && "SkipEmpty() doesn't work for this type.");
+							}
+						}
+
+						if constexpr (IsStringConvertible<ValueType>)
 							element.SetValue((fig::string)member);
 						else
 							element.SetValue(field.custom_serializer(member));
 					}
 					else if constexpr (IsSpecializationOf<FieldType, Element>::value)
 					{
+						if (field.skip_empty and !field.must_exist)
+						{
+							if constexpr (HasEmpty<ValueType>)
+							{
+								if (member.empty())
+									return;
+							}
+							else if constexpr (HasDefault<ValueType>)
+							{
+								if (member == ValueType {})
+									return;
+							}
+							else
+							{
+								assert(false && "SkipEmpty() doesn't work for this type.");
+							}
+						}
+
 						// Nested object
-						if constexpr (Serializable<typename FieldType::ValueType>)
+						if constexpr (Serializable<ValueType>)
 						{
 							auto child = element.AddChild(field.name);
 							xml::Serialize(child, member);
 						}
 						// List of objects
-						else if constexpr (SerializableRange<typename FieldType::ValueType>)
+						else if constexpr (SerializableRange<ValueType>)
 						{
 							XmlWriterElement& parent = element;
 							if (field.collection_name)
@@ -227,7 +311,7 @@ namespace fig::data
 							}
 						}
 						// Associative container
-						else if constexpr (SerializableMap<typename FieldType::ValueType>)
+						else if constexpr (SerializableMap<ValueType>)
 						{
 							auto child = element.AddChild(field.name);
 							for (const auto& kvp : member)
@@ -246,12 +330,30 @@ namespace fig::data
 						// Single value
 						else
 						{
-							if constexpr (HasSaveToXml<typename FieldType::ValueType>)
+							if (field.skip_empty and !field.must_exist)
+							{
+								if constexpr (HasEmpty<ValueType>)
+								{
+									if (member.empty())
+										return;
+								}
+								else if constexpr (HasDefault<ValueType>)
+								{
+									if (member == ValueType {})
+										return;
+								}
+								else
+								{
+									assert(false && "SkipEmpty() doesn't work for this type.");
+								}
+							}
+
+							if constexpr (HasSaveToXml<ValueType>)
 							{
 								auto child = element.AddChild(field.name);
 								member.SaveToXml(child);
 							}
-							else if constexpr (IsStringConvertible<typename FieldType::ValueType>)
+							else if constexpr (IsStringConvertible<ValueType>)
 							{
 								element.SetElementValue(field.name, (fig::string)member);
 							}

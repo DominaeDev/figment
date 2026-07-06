@@ -155,4 +155,10 @@ void SDL_AppQuit(void* state, SDL_AppResult result)
 
 	TTF_Quit();
 	SDL_Quit();
+
+#if defined(_DEBUG) && defined(_MSC_VER)
+	// https://github.com/microsoft/STL/issues/2504
+	// to prevent the tzdb allocations from being reported as memory leaks
+	std::chrono::get_tzdb_list().~tzdb_list();
+#endif
 }

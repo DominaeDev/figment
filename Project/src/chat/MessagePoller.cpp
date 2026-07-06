@@ -8,7 +8,7 @@ using namespace fig::data;
 
 namespace fig::chat
 {
-	static constexpr float kPollInterval = 0.2f;
+	static constexpr float kPollInterval = 0.1f;
 
 	void MessagePoller::Update(float fElapsed)
 	{
@@ -27,7 +27,7 @@ namespace fig::chat
 		if (!pLLM)
 			return;
 
-		std::unordered_set<std::shared_ptr<Message>> modifiedMessages;
+		std::unordered_set<size_t> modifiedMessages;
 
 		MessagePiece piece;
 		while (pLLM->PollResponse(piece))
@@ -36,36 +36,42 @@ namespace fig::chat
 			if (findMsg != _messagesById.end())
 			{
 				// Append piece
-				auto& entry = *(findMsg->second);
+				auto& entry = _messages[findMsg->second];
 
 				entry.role = piece.role;
 				entry.msgType = piece.msgType;
 				entry.complete = piece.isComplete;
 				entry.content += piece.content;
+				entry.turn = piece.turn;
+				entry.subTurn = piece.subMessageIndex;
 
 				modifiedMessages.insert(findMsg->second);
 			}
 			else if (not (piece.isComplete and empty_or_whitespace(piece.content))) // Ignore (new) empty messages
 			{
 				// New message
-				_messages.push_back(std::make_shared<Message>(Message {
+				_messages.emplace_back(Message {
 					.responseId = piece.responseId,
 					.subMessageId = piece.subMessageId,
 					.role = piece.role,
 					.msgType = piece.msgType,
 					.content = piece.content,
-				}));
+					.complete = piece.isComplete,
+					.turn = piece.turn,
+					.subTurn = piece.subMessageIndex,
+				});
 
-				_messagesById[piece.subMessageId] = _messages.back();
-				modifiedMessages.insert(_messages.back());
+				_messagesById[piece.subMessageId] = _messages.size() - 1uz;
+				modifiedMessages.insert(_messages.size() - 1uz);
 			}
 		}
 
 		// Notify observers
-		for (auto& message : modifiedMessages)
+		for (auto index : modifiedMessages)
 		{
+			const auto& message = _messages[index];
 			for (auto& observer : _observers)
-				observer.second(*message);
+				observer.second(message);
 		}
 	}
 

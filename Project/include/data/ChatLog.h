@@ -15,7 +15,7 @@ namespace fig::data
 			fig::uuid speakerId;
 			fig::chat::Role role;
 			int32_t turn;
-			int16_t subindex;
+			int32_t subTurn;
 			fig::timestamp timestamp;
 			fig::chat::MessageType msgType;
 			fig::string content;
@@ -28,38 +28,35 @@ namespace fig::data
 					Attribute { "id", &Message::messageId }
 						.MustExist(),
 					Attribute { "from", &Message::speakerId }
-						.MustExist(),
+						.SkipEmpty(),
 					Attribute { "turn", &Message::turn }
 						.MustExist(),
-
 					Attribute { "role", &Message::role,
 						[](auto& value) { return enum_serialize(value, RoleMapping); },
 						[](auto& value) { return enum_deserialize(value, RoleMapping); }
-					}	.MustExist(),
+					}	.SkipEmpty(),
 					Attribute { "type", &Message::msgType,
 						[](auto& value) { return enum_serialize(value, MessageTypeMapping); },
 						[](auto& value) { return enum_deserialize(value, MessageTypeMapping); }
 					}	.MustExist(),
-					Element { "timestamp", &Message::timestamp },
+					Element { "timestamp", &Message::timestamp }
+						.SkipEmpty(),
 					Text { &Message::content }
-						.MustExist()
 				);
 
 				static_assert(IsXmlSerializable<Message>);
 			}
 		};
 
-		fig::uuid assetId;
+		fig::string title { "Untitled chat" };
 		std::vector<Message> messages;
 
 		static auto XmlFields() noexcept
 		{
 			return Fields(
-				Attribute { "id", &ChatLog::assetId }
-					.MustExist(),
-				Element { "Message", &ChatLog::messages }
+				Element { "Title",		&ChatLog::title },
+				Element { "Message",	&ChatLog::messages }
 					.Collection("Messages")
-					.MustExist()
 			);
 
 			static_assert(IsXmlSerializable<ChatLog>);

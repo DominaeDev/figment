@@ -10,6 +10,7 @@
 #include "gui/AppResources.h"
 #include "gui/VariableList.h"
 #include "app/AppState.h"
+#include "chat/ChatSession.h"
 #include "chat/ChatCommands.h"
 #include "chat/ChatCommandExecutor.h"
 #include "user/UserManager.h"
@@ -141,16 +142,16 @@ namespace fig::gui
 		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
 		{
-			auto pSession = std::make_shared<fig::chat::ChatSession>();
-			pSession->Initialize(staging, Constants::LLM::DefaultChatOptions, chatInstanceID);
+			_pSession = std::make_shared<fig::chat::ChatSession>();
+			_pSession->Initialize(staging, Constants::LLM::DefaultChatOptions, chatInstanceID);
 
 			LLMChatArguments llmArgs {
-				/*session*/ pSession,
+				/*session*/ _pSession,
 				/*messages*/ {},
 				/*options*/ Constants::LLM::DefaultChatOptions,
 			};
 			pLLM->Initialize(llmArgs);
-			_pChatScroll->SetSession(pSession);
+			_pChatScroll->SetSession(_pSession);
 
 			_bStartedChat = true;
 			queue_clear(_commandQueue);
@@ -340,14 +341,6 @@ namespace fig::gui
 		}
 	}
 
-	void ChatScreen::Close()
-	{
-		SDL_Event quit_event;
-		SDL_zero(quit_event);  /* SDL will copy this entire struct! Initialize to keep memory checkers happy. */
-		quit_event.type = SDL_EVENT_QUIT;
-		SDL_PushEvent(&quit_event);
-	}
-
 	void ChatScreen::OnSidePanel(bool bShown)
 	{
 		_pExpandButton->SetVisible(!bShown);
@@ -369,12 +362,17 @@ namespace fig::gui
 			}
 			queue_clear(_commandQueue);
 		}
+		else if (IsUserEvent(event, UserEvent::LLMChatUnloaded))
+		{
+			_pSession.reset();
+		}
 		else if (IsUserEvent(event, UserEvent::LLMModelLoaded))
 		{
 //			StartChat();
 		}
 		else if (IsUserEvent(event, UserEvent::LLMModelUnloaded))
 		{
+			_pSession.reset();
 			_pVariableList->SetVisible(false);
 			Global::SetLLMInstance(nullptr);
 			queue_clear(_commandQueue);

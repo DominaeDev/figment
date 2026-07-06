@@ -14,21 +14,71 @@ namespace fig::chat
 {
 	ChatLogger::ChatLogger(ChatSession& session, fig::uuid parentID, fig::uuid assetId) :
 		_parentId { parentID },
-		_assetId { assetId }
+		_assetId { assetId },
+		_pSession { &session }
 	{
 		if (auto poller = session.GetPoller())
-			(*poller).RegisterObserver(std::bind_front(&ChatLogger::OnMessage, this));
+			_pollerId = (*poller).RegisterObserver(std::bind_front(&ChatLogger::OnMessage, this));
+		else
+			_pollerId = static_cast<uint32_t>(-1);
+	}
+
+	ChatLogger::~ChatLogger()
+	{
+		if (auto poller = _pSession->GetPoller())
+			(*poller).UnregisterObserver(_pollerId);
+	}
+
+	static fig::string strip_ends(const fig::string& text, MessageType msgType)
+	{
+		fig::string begin, end;
+		switch (msgType)
+		{
+			case MessageType::Dialogue:
+				begin = "\"";
+				end = "\"";
+				break;
+			case MessageType::Action:
+				begin = "*";
+				end = "*";
+				break;
+			case MessageType::Direction:
+				begin = "{";
+				end = "}";
+				break;
+			case MessageType::Narration:
+				begin = "[";
+				end = "]";
+				break;
+			case MessageType::Thought:
+				begin = "(";
+				end = ")";
+				break;
+			default:
+				return text;
+		}
+
+		fig::string stripped = text;
+		while (ends_with(stripped, end))
+			stripped = stripped.substr(0, stripped.length() - 1);
+		while (begins_with(stripped, begin))
+			stripped = stripped.substr(1);
+		return stripped;
 	}
 
 	void ChatLogger::OnMessage(const MessagePoller::Message& piece)
 	{
 		if (piece.complete)
 		{
-			_log.messages.push_back(ChatLog::Message {
+			_log.messages.emplace_back(ChatLog::Message {
 				.messageId = piece.subMessageId,
+				.speakerId = _pSession->GetCharacterIdOf(piece.role),
+				.role = piece.role,
+				.turn = piece.turn,
+				.subTurn = piece.subTurn,
 				.timestamp = local_now(),
 				.msgType = piece.msgType,
-				.content = piece.content,
+				.content = strip_ends(piece.content, piece.msgType),
 			});
 		}
 	}
@@ -48,6 +98,9 @@ namespace fig::chat
 			// Create new asset
 			fig::bytes xmlData;
 			_log.SaveToXml(xmlData);
+
+			fig::string tmp;
+			tmp.assign(reinterpret_cast<const char*>(xmlData.data()), xmlData.size()); //! @temp
 
 			auto& asset = assetMngr.CreateAsset(AssetType::ChatLog, DataFormat::DataXml, xmlData, _parentId);
 			_assetId = asset.id;

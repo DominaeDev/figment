@@ -40,7 +40,7 @@ namespace fig::llm
 		void DiscardByTTL(int32_t current_turn);
 		void EraseChat();
 
-		void TokenizeUncached(std::shared_ptr<fig::chat::ChatSession> pSession);
+		void TokenizeUncached(std::weak_ptr<fig::chat::ChatSession> pSession);
 		bool DiscardBlock(const ContextBlock& block);
 		
 		void RebuildBatch();

@@ -19,6 +19,7 @@ namespace fig::llm
 		ChatInitializing,
 		ChatInitialized,
 		ChatInitializationFailure,
+		ChatUnloaded,
 
 		GenerationStarted,
 		GenerationComplete,

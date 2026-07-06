@@ -200,6 +200,7 @@ namespace fig
 		case LLMStatusEvent::ChatInitializing:				eventType = UserEvent::LLMChatInitializing; break;
 		case LLMStatusEvent::ChatInitialized:				eventType = UserEvent::LLMChatInitialized; break;
 		case LLMStatusEvent::ChatInitializationFailure:		eventType = UserEvent::LLMChatInitializationFailure; break;
+		case LLMStatusEvent::ChatUnloaded:					eventType = UserEvent::LLMChatUnloaded; break;
 		case LLMStatusEvent::GenerationStarted:				eventType = UserEvent::LLMGenerationStarted; break;
 		case LLMStatusEvent::GenerationComplete:			eventType = UserEvent::LLMGenerationComplete; break;
 		case LLMStatusEvent::CompletedMessage:				eventType = UserEvent::LLMCompletedMessage; break;

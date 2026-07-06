@@ -24,6 +24,8 @@ namespace fig::llm
 		fig::chat::Role role = fig::chat::Role::Undefined;
 		fig::chat::MessageType msgType = fig::chat::MessageType::Undefined;
 		bool isComplete = false;
+		int32_t turn {};
+		int32_t subMessageIndex {};
 	};
 
 	struct RemovedMessage
@@ -35,7 +37,7 @@ namespace fig::llm
 
 	struct LLMChatArguments
 	{
-		std::shared_ptr<fig::chat::ChatSession> session;
+		std::weak_ptr<fig::chat::ChatSession> wpSession;
 		fig::chat::Messages messages;
 		fig::chat::ChatOptions options;
 		int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
@@ -200,8 +202,12 @@ namespace fig::llm
 
 		void Panic(InternalError error, const fig::string& message);
 
-	private:
 		void SetReadyState(ReadyState readyState);
+
+		fig::string GetIdentifierOf(fig::chat::Role role);
+		fig::string GetNameOf(fig::chat::Role role);
+
+	private:
 		std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };
 
 		std::timed_mutex _stateMutex; // Guards state variables
@@ -220,7 +226,8 @@ namespace fig::llm
 		std::queue<LLMTask> _tasks;
 
 		// Session
-		std::shared_ptr<fig::chat::ChatSession> _pSession {};
+		std::weak_ptr<fig::chat::ChatSession> _pSession {};
+		fig::chat::ChatStaging _staging {};
 		fig::chat::ChatOptions _options;
 		std::atomic<int32_t> _turn_counter = 0;
 

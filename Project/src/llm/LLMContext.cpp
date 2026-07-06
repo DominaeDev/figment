@@ -48,32 +48,35 @@ namespace fig::llm
 		_cache->Clear();
 	}
 
-	void LLMContext::TokenizeUncached(std::shared_ptr<fig::chat::ChatSession> pSession)
+	void LLMContext::TokenizeUncached(std::weak_ptr<fig::chat::ChatSession> wpSession)
 	{
-		auto& staging = pSession->GetStaging();
-
-		// Tokenize uncached messages
-		for (auto& block : _blocks)
+		if (auto pSession = wpSession.lock())
 		{
-			if (block.is_static() || block.is_cached() || !block.tokens.empty())
-				continue;
+			auto& staging = pSession->GetStaging();
 
-			fig::string content = block.content;
-
-			if (block.is_continuation()) // Continue response
-				content = apply_chat_template_prefix(block.role, content, block.name); //! name?
-			else if (block.role == Role::System)
-				content = apply_chat_template({ Message { block.role, content, block.name } }, false);
-			else
+			// Tokenize uncached messages
+			for (auto& block : _blocks)
 			{
-				complete_message(content);
-				content = apply_chat_template({ Message { block.role, content, block.name } }, false);
-			}
-			content = eval_text(content, staging.GetContext(block.role)); //! @move?
-			block.tokens = llama::tokenize(_pVocab, content, false);
+				if (block.is_static() || block.is_cached() || !block.tokens.empty())
+					continue;
 
-			block.attn_position = -1;
-			block.cache_position = -1;
+				fig::string content = block.content;
+
+				if (block.is_continuation()) // Continue response
+					content = apply_chat_template_prefix(block.role, content, block.name); //! name?
+				else if (block.role == Role::System)
+					content = apply_chat_template({ Message { block.role, content, block.name } }, false);
+				else
+				{
+					complete_message(content);
+					content = apply_chat_template({ Message { block.role, content, block.name } }, false);
+				}
+				content = eval_text(content, staging.GetContext(block.role)); //! @move?
+				block.tokens = llama::tokenize(_pVocab, content, false);
+
+				block.attn_position = -1;
+				block.cache_position = -1;
+			}
 		}
 	}
 

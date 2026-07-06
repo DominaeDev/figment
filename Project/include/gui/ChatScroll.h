@@ -17,7 +17,7 @@ namespace fig::gui
 	public:
 		ChatScroll(LayoutElement* pParent);
 
-		void SetSession(std::shared_ptr<fig::chat::ChatSession> pSession);
+		void SetSession(std::weak_ptr<fig::chat::ChatSession> pSession);
 
 		void AddDummyMessage(string_cref name, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message);
 		void AddSystemMessage(string_cref message);
@@ -61,6 +61,6 @@ namespace fig::gui
 		float _fLastListHeight = 0.0f;
 		float _fAnimatedScroll = 0.0f;
 
-		std::shared_ptr<fig::chat::ChatSession> _pSession {};
+		std::weak_ptr<fig::chat::ChatSession> _pSession {};
 	};
 }

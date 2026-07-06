@@ -23,6 +23,7 @@ namespace fig::gui
 		LLMChatInitializing,
 		LLMChatInitialized,
 		LLMChatInitializationFailure,
+		LLMChatUnloaded,
 		LLMGenerationStarted,
 		LLMGenerationComplete,
 		LLMCompletedMessage,
