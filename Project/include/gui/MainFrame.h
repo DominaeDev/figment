@@ -89,10 +89,10 @@ namespace fig::gui
 
 	private:
 		std::unordered_map<ScreenType, Screen*> _screensByType {};
-		Screen* _pActiveScreen = nullptr;
+		fig::observer_ptr<Screen> _pActiveScreen;
 
-		StatusBar* _pStatusBar = nullptr;
-		Control* _pMainArea = nullptr;
-		SidePanel* _pSidePanel;
+		fig::observer_ptr<StatusBar> _pStatusBar;
+		fig::observer_ptr<Control> _pMainArea;
+		fig::observer_ptr<SidePanel> _pSidePanel;
 	};
 }

@@ -39,7 +39,7 @@ namespace fig::gui
 
 	private:
 		ButtonDelegate _fn {};
-		LayoutElement* _pOwner;
+		fig::observer_ptr<LayoutElement> _pOwner;
 		bool _bMouseInside = false;
 		bool _bMouseDown = false;
 		Coord _expand = 0;

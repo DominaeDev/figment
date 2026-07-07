@@ -45,10 +45,10 @@ namespace fig::gui
 		void OnSidePanel(bool show) override;
 
 	private:
-		ChatScroll* _pChatScroll {};
-		TextBox* _pTextBox {};
-		VariableList* _pVariableList {};
-		Control* _pExpandButton {};
+		fig::observer_ptr<ChatScroll> _pChatScroll {};
+		fig::observer_ptr<TextBox> _pTextBox {};
+		fig::observer_ptr<VariableList> _pVariableList {};
+		fig::observer_ptr<Control> _pExpandButton {};
 
 		float _fPollingCounter = 0.0f;
 		bool _bStartedChat = false; // Used to trigger greeting

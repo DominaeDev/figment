@@ -21,10 +21,10 @@ namespace fig::gui
 		void OnButtonPressed();
 
 	private:
-		PlayButton* _pLoadButton {};
-		StaticText* _pLabel {};
-		ButtonWithIcon* _pSettingsButton {};
-		Panel* _pProgressBar {};
-		float _fProgress {};
+		fig::observer_ptr<PlayButton> _pLoadButton;
+		fig::observer_ptr<StaticText> _pLabel;
+		fig::observer_ptr<ButtonWithIcon> _pSettingsButton;
+		fig::observer_ptr<Panel> _pProgressBar;
+		float _fProgress { 0 };
 	};
 }

@@ -79,7 +79,7 @@ namespace fig::gui
 			};
 		};
 
-		LayoutElement* _pOwner = nullptr;
+		fig::observer_ptr<LayoutElement> _pOwner;
 
 		unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }
 		auto GetLayoutItems() noexcept

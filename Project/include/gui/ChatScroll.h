@@ -40,7 +40,7 @@ namespace fig::gui
 
 		void OnMessage(const fig::chat::MessagePoller::Message& msg);
 	private:
-		Control* _pBottomGradient;
+		fig::observer_ptr<Control> _pBottomGradient;
 
 		struct MessageEntry
 		{
@@ -56,7 +56,7 @@ namespace fig::gui
 		std::map<fig::uuid, MessageEntry*> _messagesById {}; // Sub-message id
 
 		// Scrolling
-		VerticalScrollSizer* _pScrollSizer;
+		fig::observer_ptr<VerticalScrollSizer> _pScrollSizer;
 		float _fScrollY = 0.0f;
 		float _fLastListHeight = 0.0f;
 		float _fAnimatedScroll = 0.0f;

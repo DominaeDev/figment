@@ -14,12 +14,11 @@ StatusBar::StatusBar(LayoutElement* pParent) : Control(pParent)
 	SetForegroundColor(Color { 0x51, 0x4a, 0x2f, SDL_ALPHA_OPAQUE });
 	SetBackgroundColor(Color { 0xde, 0xd9, 0xc5, SDL_ALPHA_OPAQUE });
 
-	_pMessage = new StaticText(this, "", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
+	_pMessage = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
 	_pMessage->SetPosition(8, 2);
 
-	_pModelInfo = new StaticText(this, "", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
+	_pModelInfo = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
 	_pModelInfo->SetPosition(400, 2);
-	AddChild(_pMessage);
 }
 
 void StatusBar::SetMessage(const fig::string& message)

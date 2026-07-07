@@ -16,7 +16,7 @@ namespace fig::gui
 		void RefreshGeometry(Rectf rect);
 
 		Rectf _lastRect {};
-		Texture* _pTexture = nullptr;
+		fig::observer_ptr<Texture> _pTexture;
 		float _thickness = 0;
 		float _radius = 0;
 

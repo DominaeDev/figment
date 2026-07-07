@@ -38,6 +38,6 @@ namespace fig::gui
 		Coord _scrollBarOffset { -16 };
 
 	private:
-		VerticalScrollBar* _pScrollBar {};
+		fig::observer_ptr<VerticalScrollBar> _pScrollBar;
 	};
 }

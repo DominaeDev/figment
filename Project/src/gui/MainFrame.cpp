@@ -31,11 +31,11 @@ namespace fig::gui
 		SetForegroundColor(Colors::Black);
 		SetBackgroundColor(Colors::AppBackground);
 
-		_pMainArea = new Area(this);
-		_pSidePanel = new SidePanel(this);
+		_pMainArea = CreateControl<Area>();
+		_pSidePanel = CreateControl<SidePanel>();
 
 		// Status bar
-		_pStatusBar = new StatusBar(this);
+		_pStatusBar = CreateControl<StatusBar>();
 
 		auto mainSizer = new HorizontalSizer();
 		mainSizer->Add(_pSidePanel, 0, Sizer::Expand);

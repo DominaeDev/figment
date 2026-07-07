@@ -16,9 +16,9 @@ namespace fig::gui
 		void ShowMenu() noexcept;
 
 	private:
-		ImageWithMask* _pPortrait {};
-		StaticText* _pTitle;
-		StaticText* _pMessage;
-		StaticText* _pTimestamp;
+		fig::observer_ptr<ImageWithMask> _pPortrait;
+		fig::observer_ptr<StaticText> _pTitle;
+		fig::observer_ptr<StaticText> _pMessage;
+		fig::observer_ptr<StaticText> _pTimestamp;
 	};
 }

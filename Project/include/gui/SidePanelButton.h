@@ -18,8 +18,8 @@ namespace fig::gui
 		void OnButtonState() override;
 
 	private:
-		CustomRenderer* _pBorder;
-		Image* _pIcon {};
-		StaticText* _pLabel {};
+		fig::observer_ptr<CustomRenderer> _pBorder;
+		fig::observer_ptr<Image> _pIcon {};
+		fig::observer_ptr<StaticText> _pLabel {};
 	};
 }

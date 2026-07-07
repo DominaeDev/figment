@@ -8,32 +8,33 @@ namespace fig::gui
 {
 	DebugScreen::DebugScreen(Frame* pParent) : Screen(pParent)
 	{
-		auto area = new Panel(this);
+		auto area = CreateControl<Panel>();
 		area->SetBackgroundColor(Colors::Black);
 		area->SetPosition(200, 200);
 		area->SetSize(500, 500);
 
-		auto left = new Panel(area);
+		auto left = area->CreateControl<Panel>();
 		left->SetBackgroundColor(Color { 0xC0, 0, 0, 0xFF });
 		left->SetSize(50, 50);
 
-		auto center = new Panel(area);
+		auto center = area->CreateControl<Panel>();
 		center->SetBackgroundColor(Color { 0, 0xC0, 0, 0xFF });
 		center->SetSize(100, 100);
 
-		auto right = new Area(area);
+		auto right = area->CreateControl<Panel>();
 		right->SetBackgroundColor(Color { 0, 0, 0xC0, 0xFF });
 		right->SetSize(100, 100);
+
 		auto h = new HorizontalSizer();
 		right->SetSizer(h);
 
-		auto a = new Panel(right);
+		auto a = right->CreateControl<Panel>();
 		a->SetBackgroundColor(Colors::Red);
 		a->SetSize(50, 50);
-		auto b = new Panel(right);
+		auto b = right->CreateControl<Panel>();
 		b->SetBackgroundColor(Colors::Green);
 		b->SetSize(50, 50);
-		auto c = new Panel(right);
+		auto c = right->CreateControl<Panel>();
 		c->SetBackgroundColor(Colors::Blue);
 		c->SetSize(50, 50);
 
@@ -48,7 +49,7 @@ namespace fig::gui
 		sizer->AddSpacer(4);
 		sizer->Add(right, 0, Sizer::Expand | Sizer::AlignCenterVertical | Sizer::FixedSize, 100);
 
-		auto pButton = new ButtonWithLabel(this, "Invalidate");
+		auto pButton = CreateControl<ButtonWithLabel>("Invalidate");
 		pButton->SetHeight(35);
 		pButton->SetDelegate([this]() { InvalidateLayout(); });
 

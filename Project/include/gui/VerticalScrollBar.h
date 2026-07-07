@@ -24,8 +24,8 @@ namespace fig::gui
 		void RefreshHandle();
 
 	protected:
-		TexturedBorder* _pHandle {};
-		ScrollPanel* _pScrollPanel {};
+		fig::observer_ptr<TexturedBorder> _pHandle;
+		fig::observer_ptr<ScrollPanel> _pScrollPanel;
 		float _fPosition {};
 		float _fExtent {};
 		bool _bDirty {};

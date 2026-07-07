@@ -24,24 +24,24 @@ namespace fig::gui
 		SetBorderRenderer(pBorder);
 
 		// Title
-		_pTitle = new StaticText(this, "Yuki", FontFace::Bold, 14.0, false);
+		_pTitle = CreateControl<StaticText>("Yuki", FontFace::Bold, 14.0, false);
 		_pTitle->EnableEllipsis(true);
 		_pTitle->SetPosition(66, 6);
 
 		// Message
-		_pMessage = new StaticText(this, "Yuki: \"I've been meaning to talk to you for some time, but it's been really hard to get in touch with you, you know?\"", FontFace::Italic, 14.0, false);
+		_pMessage = CreateControl<StaticText>("Yuki: \"I've been meaning to talk to you for some time, but it's been really hard to get in touch with you, you know?\"", FontFace::Italic, 14.0, false);
 		_pMessage->EnableEllipsis(true);
 		_pMessage->SetPosition(66, 28);
 
 		// Timestamp
-		_pTimestamp = new StaticText(this, "", FontFace::Italic, 11.0, true);
+		_pTimestamp = CreateControl<StaticText>("", FontFace::Italic, 11.0, true);
 		_pTimestamp->SetForegroundColor(Colors::SidePanelForeground.WithAlpha(0.5f));
 		_pTimestamp->SetY(8);
 		_pTimestamp->SetMaxSize(100, -1);
 		_pTimestamp->SetTextAndResize("1:30 p.m.");
 
 		// Portrait
-		_pPortrait = new ImageWithMask(this, nullptr, nullptr);
+		_pPortrait = CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pPortrait->SetSize(48, 48);
 		_pPortrait->SetPosition(8, 6);
 		_pPortrait->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::CIRCLE_MASK));

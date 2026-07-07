@@ -13,6 +13,6 @@ namespace fig::gui
 		void OnSize();
 
 	private:
-		Image* _pIcon;
+		fig::observer_ptr<Image> _pIcon;
 	};
 }

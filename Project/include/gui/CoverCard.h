@@ -83,25 +83,25 @@ namespace fig::gui
 		float _fTargetZoom = 0.0f;
 
 	private:
-		TexturedBorder* _pHiddenBG {};
+		fig::observer_ptr<TexturedBorder> _pHiddenBG;
 
 		CardSize _cardSize {};
-		Control* _pCounterBG {};
-		Control* _pNewIndicator {};
+		fig::observer_ptr<Control> _pCounterBG;
+		fig::observer_ptr<Control> _pNewIndicator;
 
-		Control* _pLargeRoot {};
-		Control* _pLargeFooter {};
-		Control* _pLargeFooterFade {};
-		Image* _pLargeBorder {};
-		StaticText* _pLargeLabel {};
-		Image* _pLargeStar {};
-		Control* _pTagsRoot {};
+		fig::observer_ptr<Control> _pLargeRoot;
+		fig::observer_ptr<Control> _pLargeFooter;
+		fig::observer_ptr<Control> _pLargeFooterFade;
+		fig::observer_ptr<Image> _pLargeBorder;
+		fig::observer_ptr<StaticText> _pLargeLabel;
+		fig::observer_ptr<Image> _pLargeStar;
+		fig::observer_ptr<Control> _pTagsRoot;
 
-		Control* _pSmallRoot {};
-		Control* _pSmallFooterFade {};
-		Image* _pSmallBorder {};
-		StaticText* _pSmallLabel {};
-		Image* _pSmallStar {};
+		fig::observer_ptr<Control> _pSmallRoot;
+		fig::observer_ptr<Control> _pSmallFooterFade;
+		fig::observer_ptr<Image> _pSmallBorder;
+		fig::observer_ptr<StaticText> _pSmallLabel;
+		fig::observer_ptr<Image> _pSmallStar;
 
 		Point _tagPosition {};
 		int32_t _tagRows { 1 };
@@ -112,7 +112,7 @@ namespace fig::gui
 		fig::sdl::Texture _smallImageTexture {};
 		fig::io::AsyncFuture _pendingCover {};
 
-		Image* _pErrorIcon {};
+		fig::observer_ptr<Image> _pErrorIcon;
 
 		std::unique_ptr<SearchIndex> _searchIndex;
 		std::set<fig::string> _tags {};

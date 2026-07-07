@@ -25,7 +25,7 @@ namespace fig::gui
 		_pScrollSizer->SetSpacing(12);
 		SetSizer(_pScrollSizer);
 
-		_pBottomGradient = new VerticalGradient(this, Colors::ChatBackground.WithAlpha(0.0f), Colors::ChatBackground);
+		_pBottomGradient = CreateControl<VerticalGradient>(Colors::ChatBackground.WithAlpha(0.0f), Colors::ChatBackground);
 		EnableClipping(true);
 		EnableCulling(true);
 	}
@@ -118,7 +118,7 @@ namespace fig::gui
 			else
 				name = "Unknown";
 
-			auto pMessage = new ChatMessage(this, role, characterId, bShowName ? name : "", msgType, bShowAvatar);
+			auto pMessage = CreateControl<ChatMessage>(role, characterId, bShowName ? name : "", msgType, bShowAvatar);
 			pMessage->SetY(-1000); // Move off-screen
 			pMessage->SetMessage(message, complete);
 			pMessage->SetColors(session.GetColorsOf(role));
@@ -127,7 +127,7 @@ namespace fig::gui
 		}
 		else
 		{
-			auto pMessage = new ChatMessage(this, role, characterId, "", msgType, bShowAvatar);
+			auto pMessage = CreateControl<ChatMessage>(role, characterId, "", msgType, bShowAvatar);
 			pMessage->SetY(-1000); // Move off-screen
 			pMessage->SetMessage(message, complete);
 			pMessage->SetColors(ChatSession::GetDefaultColorsOf(role));

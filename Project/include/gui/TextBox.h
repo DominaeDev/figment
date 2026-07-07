@@ -110,9 +110,9 @@ namespace fig::gui
 		int32_t ConvertFromPasswordPosition(int32_t position);
 
 	protected:
-		TTF_Font* _pFont = nullptr;
-		TTF_Text* _pText = nullptr;
-		TTF_Text* _pPassword = nullptr;
+		fig::observer_ptr<TTF_Font> _pFont;
+		fig::observer_ptr<TTF_Text> _pText;
+		fig::observer_ptr<TTF_Text> _pPassword;
 		size_t _lastLength = 0uz;
 		
 		bool _bFocused = false;
@@ -123,8 +123,8 @@ namespace fig::gui
 		int _minRows = 1;
 		int _maxRows = 1;
 
-		Texture* _pTexture = nullptr;
-		Surface* _pSurface = nullptr;
+		fig::observer_ptr<Texture> _pTexture;
+		fig::observer_ptr<Surface> _pSurface;
 		TextChangedCallback _pOnChanged = nullptr;
 		EnterPressedCallback _pOnEnter = nullptr;
 

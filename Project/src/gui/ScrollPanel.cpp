@@ -14,7 +14,7 @@ namespace fig::gui
 
 		if (bScrollBar)
 		{
-			_pScrollBar = new VerticalScrollBar(this);
+			_pScrollBar = CreateControl<VerticalScrollBar>();
 			_pScrollBar->SetWidth(16);
 			_pScrollBar->SetHeight(GetHeight());
 			_pScrollBar->SetX(GetWidth() - _pScrollBar->GetWidth());

@@ -8,11 +8,11 @@ namespace fig::gui
 	class NineGridImage : public Control
 	{
 	public:
-		NineGridImage(LayoutElement* pParent, Texture* pTexture, float cornerPixels = 16.0f);
-		NineGridImage(LayoutElement* pParent, Texture* pTexture, std::array<float, 4> corners);
+		NineGridImage(LayoutElement* pParent, TexturePtr pTexture, Coord cornerPixels = 16);
+		NineGridImage(LayoutElement* pParent, TexturePtr pTexture, Corners corners);
 
-		void SetTexture(Texture* pTexture);
-		void SetCornerSize(float cornerSize);
+		void SetTexture(TexturePtr pTexture);
+		void SetCornerSize(Coord cornerSize);
 
 	protected:
 		void OnRender(Renderer* pRenderer) override;
@@ -23,6 +23,6 @@ namespace fig::gui
 		float _cornerSize = 20.0f;
 		Color _bgColor {};
 		Color _borderColor {};
-		Texture* _pTexture = nullptr;
+		TexturePtr _pTexture = nullptr;
 	};
 }

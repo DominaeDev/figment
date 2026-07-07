@@ -11,7 +11,7 @@ namespace fig::gui
 		Image(LayoutElement* pParent, TextureType texture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
 		void SetTexture(TexturePtr pTexture, bool bResize = false);
 		void SetTexture(TextureType texture, bool bResize = false);
-		inline bool HasTexture() const noexcept { return _pTexture != nullptr; }
+		inline bool HasTexture() const noexcept { return (bool)_pTexture; }
 		Point GetTextureSize() const noexcept;
 
 		inline void Rotate(double angle) { _angle = angle; }
@@ -20,7 +20,7 @@ namespace fig::gui
 		void OnRender(Renderer* pRenderer) override;
 
 	protected:
-		Texture* _pTexture {};
+		fig::observer_ptr<Texture> _pTexture;
 		double _angle {};
 	};
 }

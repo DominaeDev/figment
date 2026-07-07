@@ -27,8 +27,8 @@ namespace fig::gui
 		void OnButtonState() override;
 
 	private:
-		Image* _pBackground {};
-		Image* _pIcon {};
+		fig::observer_ptr<Image> _pBackground;
+		fig::observer_ptr<Image> _pIcon;
 		double _spinnerAngle {};
 		IconState _iconState {};
 	};

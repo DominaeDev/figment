@@ -21,34 +21,33 @@ namespace fig::gui
 
 	HomeScreen::HomeScreen(Frame* pParent) : Screen(pParent)
 	{
-		auto pTopBar = new Panel(this);
+		auto pTopBar = CreateControl<Panel>();
 		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		_pHeader = new StaticText(pTopBar, "Characters", FontFace::Italic, 24, false);
+		_pHeader = pTopBar->CreateControl<StaticText>("Characters", FontFace::Italic, 24, false);
 		_pHeader->SetX(52);
 		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 		_pHeader->SetAlignment(TextAlignment::Left_Center);
 		
-		auto pExpandButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SIDEBAR);
+		auto pExpandButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_SIDEBAR);
 		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
 		_pExpandButton = pExpandButton;
 
-		auto pHomeButton = new ButtonWithIcon(pTopBar, TextureType::ICON_HOME);
+		auto pHomeButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_HOME);
 
-		_pSortingButton = new ButtonWithIcon(pTopBar, TextureType::ICON_SORTING);
+		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_SORTING);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
-		_pFilteringButton = new ButtonWithIcon(pTopBar, TextureType::ICON_FILTERING);
+		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_FILTERING);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
-//		_pFilterBorder = new TexturedBorder(_pFilteringButton, TextureType::ROUNDED_BACKGROUND_6PX, 8);
 
-		_pGridButton = new ToggleWithIcon(pTopBar, TextureType::ICON_GRID_LARGE);
+		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(TextureType::ICON_GRID_LARGE);
 		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
-		_pToggleTagsButton = new ButtonWithIcon(pTopBar, TextureType::ICON_TAG);
+		_pToggleTagsButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_TAG);
 		_pToggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 
-		_pFilterTextBox = new SearchBox(pTopBar, FontFace::Default, 16.0);
+		_pFilterTextBox = pTopBar->CreateControl<SearchBox>(FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
 		_pFilterTextBox->SetSize(192, 30);
 		_pFilterTextBox->SetMaxSize(192, -1);
@@ -69,7 +68,7 @@ namespace fig::gui
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopBar->SetSizer(pTopSizer);
 
-		_pCardList = new CardList(this);
+		_pCardList = CreateControl<CardList>();
 		_pCardList->SetScrollBarOffset(0);
 
 		auto mainSizer = new VerticalSizer();

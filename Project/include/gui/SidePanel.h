@@ -24,9 +24,9 @@ namespace fig::gui
 		void ShowMenu();
 
 	private:
-		LayoutElement* _pGradient;
-		UserProfileWidget* _pUserWidget;
-		LoadModelWidget* _pModelWidget;
-		ButtonWithIcon* _pMenuButton;
+		fig::observer_ptr<LayoutElement> _pGradient;
+		fig::observer_ptr<UserProfileWidget> _pUserWidget;
+		fig::observer_ptr<LoadModelWidget> _pModelWidget;
+		fig::observer_ptr<ButtonWithIcon> _pMenuButton;
 	};
 }

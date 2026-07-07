@@ -1387,7 +1387,7 @@
     <ClInclude Include="include\gui\ChatListItem.h">
       <Filter>Source Files\Frontend\GUI\Screens\ChatListing\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\NonOwningPtr.h">
+    <ClInclude Include="include\util\ObserverPtr.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>

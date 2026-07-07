@@ -13,7 +13,7 @@ namespace fig::gui
 		
 		SetMarginLeft(30);
 
-		_pIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_SEARCH));
+		_pIcon = CreateControl<Image>(AppResources::GetTexture(TextureType::ICON_SEARCH));
 		_pIcon->SetForegroundColor(Colors::SidePanelForeground);
 
 		auto pTextBoxBG = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_6PX, 8);

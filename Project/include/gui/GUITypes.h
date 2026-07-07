@@ -57,6 +57,7 @@ namespace fig::gui
 	using TextEnginePtr = TTF_TextEngine*;
 
 	using Coord = int32_t;
+	using Corners = std::array<Coord, 4>;
 
 	struct Mask
 	{

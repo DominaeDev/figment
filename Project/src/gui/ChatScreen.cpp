@@ -40,33 +40,33 @@ namespace fig::gui
 {
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
-		auto leftArea = new Area(this);
+		auto leftArea = CreateControl<Area>();
 		leftArea->SetSize(200, -1);
 
-		auto pExpandButton = new ButtonWithIcon(leftArea, TextureType::ICON_SIDEBAR);
+		auto pExpandButton = leftArea->CreateControl<ButtonWithIcon>(TextureType::ICON_SIDEBAR);
 		pExpandButton->SetSize(36, 36);
 		pExpandButton->SetPosition(4, 6);
 		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
 		_pExpandButton = pExpandButton;
 
-		auto centerArea = new Area(this);
+		auto centerArea = CreateControl<Area>();
 		centerArea->SetBackgroundColor(Colors::ChatBackground);
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
-		auto rightArea = new Area(this);
+		auto rightArea = CreateControl<Area>();
 		rightArea->SetSize(200, -1);
 		rightArea->SetMinSize(200, -1);
 
-		auto pStaticText = new StaticText(centerArea, "", FontFace::Default, Constants::GUI::DefaultFontSize);
+		auto pStaticText = centerArea->CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize);
 		pStaticText->SetAlignment(TextAlignment::Middle_Center);
 		pStaticText->SetSize(80, 80);
 		pStaticText->SetMinSize(-1, 80);
 		pStaticText->SetBackgroundColor(Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
 		pStaticText->SetVisible(false);
 
-		_pChatScroll = new ChatScroll(centerArea);
+		_pChatScroll = centerArea->CreateControl<ChatScroll>();
 
-		_pTextBox = new TextBox(centerArea, FontFace::Default, Constants::GUI::DefaultFontSize, { TextBox::Flag::Multi, TextBox::Flag::Autosize });
+		_pTextBox = centerArea->CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi, TextBox::Flag::Autosize });
 		_pTextBox->SetSize(Constants::GUI::ChatTextBoxWidth, 88);
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);
@@ -99,7 +99,7 @@ namespace fig::gui
 		pTextBoxBorder->SetColor(Color { 0xb9, 0xb2, 0x8f, 0xFF });
 		_pTextBox->SetBorderRenderer(pTextBoxBorder);
 
-		_pVariableList = new VariableList(this);
+		_pVariableList = CreateControl<VariableList>();
 		_pVariableList->SetPosition(10, 10);
 		_pVariableList->SetVisible(false);
 

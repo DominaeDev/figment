@@ -15,18 +15,18 @@ namespace fig::gui
 	LoginScreen::LoginScreen(Frame* pParent) : Screen(pParent)
 	{
 		// Logo
-		auto pLogo = new Image(this, AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
+		auto pLogo = CreateControl<Image>(AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
 		pLogo->SetPosition(44, 0);
 
 		// Menu button
-		_pMenuButton = new ButtonWithIcon(this, TextureType::ICON_MENU);
+		_pMenuButton = CreateControl<ButtonWithIcon>(TextureType::ICON_MENU);
 		_pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pMenuButton->SetSize(36, 36);
 		_pMenuButton->SetPosition(4, 6);
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
 		// Center (login)
-		auto pCenter = new Panel(this);
+		auto pCenter = CreateControl<Panel>();
 //		pCenter->SetBackgroundColor(Colors::Green);
 		pCenter->SetSize(500, 260);
 
@@ -35,18 +35,18 @@ namespace fig::gui
 		pVerticalSizer->Add(pCenter, 0, Sizer::AlignCenterHorizontal);
 		pVerticalSizer->AddStretchSpacer();
 
-		_pProfileImage = new ImageWithMask(pCenter, nullptr, nullptr);
+		_pProfileImage = pCenter->CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pProfileImage->SetSize(160, 160);
 
-		_pPrevProfileBtn = new ButtonWithIcon(pCenter, TextureType::ICON_CHEVRON_LEFT);
+		_pPrevProfileBtn = pCenter->CreateControl<ButtonWithIcon>(TextureType::ICON_CHEVRON_LEFT);
 		_pPrevProfileBtn->SetSize(35, 56);
 		_pPrevProfileBtn->SetDelegate([this]() { CycleProfile(-1); });
 
-		_pNextProfileBtn = new ButtonWithIcon(pCenter, TextureType::ICON_CHEVRON_RIGHT);
+		_pNextProfileBtn = pCenter->CreateControl<ButtonWithIcon>(TextureType::ICON_CHEVRON_RIGHT);
 		_pNextProfileBtn->SetSize(35, 56);
 		_pNextProfileBtn->SetDelegate([this]() { CycleProfile(+1); });
 
-		_pNoPassButton = new ButtonWithLabel(pCenter, "Sign in");
+		_pNoPassButton = pCenter->CreateControl<ButtonWithLabel>("Sign in");
 		_pNoPassButton->SetHeight(35);
 		_pNoPassButton->SetDelegate([this]() { SignIn(); });
 
@@ -55,21 +55,21 @@ namespace fig::gui
 		pProfileImageSizer->Add(_pProfileImage, 0);
 		pProfileImageSizer->Add(_pNextProfileBtn, -1, Sizer::AlignCenterVertical | Sizer::AlignLeft | Sizer::Left, 16);
 
-		_pProfileName = new StaticText(pCenter, "", FontFace::Default, 24.0, false);
+		_pProfileName = pCenter->CreateControl<StaticText>("", FontFace::Default, 24.0, false);
 		_pProfileName->SetAlignment(TextAlignment::Middle_Top);
 
-		_pPasswordPanel = new Panel(pCenter);
+		_pPasswordPanel = pCenter->CreateControl<Panel>();
 		_pPasswordPanel->SetHeight(35);
 
-		_pPassword = new PasswordBox(_pPasswordPanel);
+		_pPassword = _pPasswordPanel->CreateControl<PasswordBox>();
 		_pPassword->SetWidth(240);
 		_pPassword->SetEnterPressedCallback([this](fig::string password) { SignIn(); });
 		_pPassword->SetFocus(true);
 
-		_pSignInBtn = new ButtonWithIcon(_pPasswordPanel, TextureType::ICON_ARROW_RIGHT);
+		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_ARROW_RIGHT);
 		_pSignInBtn->SetSize(35, 35);
 		_pSignInBtn->SetDelegate([this]() { SignIn(); });
-		auto pSimpleBorder = new TexturedBorder(_pSignInBtn, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		auto pSimpleBorder = _pSignInBtn->CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
 		pSimpleBorder->SetForegroundColor(Colors::SidePanelForeground);
 

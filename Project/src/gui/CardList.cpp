@@ -15,6 +15,8 @@ namespace fig::gui
 	constexpr Coord TopMargin = 8;
 	constexpr Coord BottomMargin = 120;
 
+	using CoverCardPtr = fig::observer_ptr<CoverCard>;
+
 	static constexpr Coord cardWidth(CardSize cardSize) noexcept
 	{
 		return cardSize == CardSize::Full ? Constants::GUI::CardWidth : Constants::GUI::HalfCardWidth;
@@ -55,7 +57,7 @@ namespace fig::gui
 			for (auto& asset : scenarios)
 			{
 				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}:", asset.id.to_str()));
-				auto pCard = new ScenarioCard(this, asset.id, _cardSize);
+				auto pCard = CreateControl<ScenarioCard>(asset.id, _cardSize);
 				pCard->SetDelegate([this](auto& card) { Reorder(); });
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
@@ -72,7 +74,7 @@ namespace fig::gui
 			for (auto& asset : characters)
 			{
 				DEBUG_MEASURE_BEGIN(std::format("Character card {}:", asset.id.to_str()));
-				auto pCard = new CharacterCard(this, asset.id, _cardSize);
+				auto pCard = CreateControl<CharacterCard>(asset.id, _cardSize);
 				pCard->SetDelegate([this](auto& card) { Reorder(); });
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
@@ -182,7 +184,7 @@ namespace fig::gui
 		ScrollPanel::OnAfterLayout();
 	}
 
-	static void Sort(std::vector<CoverCard*>& cards, SortBy sortBy, OrderBy orderBy)
+	static void Sort(std::vector<CoverCardPtr>& cards, SortBy sortBy, OrderBy orderBy)
 	{
 		auto fnCompare = [](const fig::timestamp& a, const fig::timestamp& b) -> int {
 			return a < b ? -1 : (a > b ? 1 : 0);
@@ -192,7 +194,7 @@ namespace fig::gui
 		};
 
 		// Initial sort (creation date)
-		std::ranges::stable_sort(cards, [&](CoverCard* a, CoverCard* b) -> bool {
+		std::ranges::stable_sort(cards, [&](CoverCardPtr a, CoverCardPtr b) -> bool {
 			auto& meta_a = a->GetMetaData();
 			auto& meta_b = b->GetMetaData();
 			int cmp = fnCompare(meta_b.lastUsedAt, meta_a.lastUsedAt);
@@ -202,7 +204,7 @@ namespace fig::gui
 		// Then sort by...
 		if (sortBy != SortBy::LastUsedAt)
 		{
-			std::ranges::stable_sort(cards, [&](CoverCard* a, CoverCard* b) -> bool {
+			std::ranges::stable_sort(cards, [&](CoverCardPtr a, CoverCardPtr b) -> bool {
 				auto& meta_a = a->GetMetaData();
 				auto& meta_b = b->GetMetaData();
 				int cmp = 0;
@@ -232,11 +234,11 @@ namespace fig::gui
 		}
 	}
 
-	static void Filter(std::vector<CoverCard*>& cards, FilterFlags filterBy, const fig::string& search_string)
+	static void Filter(std::vector<CoverCardPtr>& cards, FilterFlags filterBy, const fig::string& search_string)
 	{
 		SearchQuery query { search_string };
 
-		auto fnFilter = [&](const CoverCard* card) {
+		auto fnFilter = [&](auto&& card) {
 			return card->MatchesFlags(filterBy) and card->MatchesSearch(query);
 		};
 

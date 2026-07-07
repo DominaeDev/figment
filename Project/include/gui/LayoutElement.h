@@ -58,7 +58,7 @@ namespace fig::gui
 
 		template <typename T, typename... Args> 
 			requires std::derived_from<T, LayoutElement>
-		fig::non_owning_ptr<T> AddChild(Args&&... args)
+		fig::observer_ptr<T> CreateControl(Args&&... args)
 		{
 			T* child = new T(this, std::forward<Args>(args)...);
 			AddChild((LayoutElement*) child);
@@ -76,7 +76,7 @@ namespace fig::gui
 
 		template <typename T, typename... Args>
 			requires std::derived_from<T, Sizer>
-		fig::non_owning_ptr<T> SetSizer(Args&&... args)
+		fig::observer_ptr<T> SetSizer(Args&&... args)
 		{
 			T* child = new T(std::forward<Args>(args)...);
 			SetSizer((Sizer*)child);
@@ -88,8 +88,8 @@ namespace fig::gui
 		void InvalidateLayout();
 		void LayoutNow();
 
-		inline LayoutElement* GetParent() { return _pParent; }
-		inline constexpr LayoutElement* GetParent() const { return _pParent; }
+		fig::observer_ptr<LayoutElement> GetParent() { return _pParent; }
+		fig::observer_ptr<const LayoutElement> GetParent() const { return _pParent; }
 
 		inline void Cull(bool bCulled) { _bCulled = bCulled; }
 		inline bool IsCulled() const { return _bCulled; }
@@ -110,7 +110,7 @@ namespace fig::gui
 	protected:
 		std::vector<LayoutElement*> _children;
 		std::unique_ptr<Sizer> _pSizer {};
-		LayoutElement* _pParent = nullptr;
+		fig::observer_ptr<LayoutElement> _pParent;
 		bool _bCulled = false;
 
 	private:
@@ -124,5 +124,5 @@ namespace fig::gui
 		bool _bInvalidLayout = false;
 	};
 
-	using ControlPtr = fig::non_owning_ptr<LayoutElement>;
+	using ControlPtr = fig::observer_ptr<LayoutElement>;
 }

@@ -13,7 +13,7 @@ namespace fig::gui
 		_pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundRenderer(_pBGRenderer);
 
-		_pIcon = new Image(this, AppResources::GetTexture(icon));
+		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
 		_pIcon->SetForegroundColor(GetThemeForeground());
 
 		Toggle(bOn, false);

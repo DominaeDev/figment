@@ -15,10 +15,10 @@ namespace fig::gui
 		SetBackgroundRenderer(pBorder);
 		_pBorder = pBorder;
 
-		_pIcon = new Image(this, AppResources::GetTexture(icon));
+		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
 		_pIcon->SetForegroundColor(GetThemeForeground());
 
-		_pLabel = new StaticText(this, label, FontFace::Default, 20, false);
+		_pLabel = CreateControl<StaticText>(label, FontFace::Default, 20, false);
 		_pLabel->SetForegroundColor(GetThemeForeground());
 		_pLabel->SetBackgroundColor(Colors::Transparent);
 		_pLabel->EnableEllipsis(true);

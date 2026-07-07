@@ -7,10 +7,10 @@ namespace fig::gui
 {
 	PlayButton::PlayButton(LayoutElement* pParent) : ThemedButton(pParent)
 	{
-		_pBackground = new Image(this, TextureType::BACKGROUND_CIRCLE_48PX);
+		_pBackground = CreateControl<Image>(TextureType::BACKGROUND_CIRCLE_48PX);
 		_pBackground->SetSize(36, 36);
 
-		_pIcon = new Image(_pBackground, TextureType::ICON_PLAY);
+		_pIcon = _pBackground->CreateControl<Image>(TextureType::ICON_PLAY);
 		_pIcon->Center();
 
 		SetSize(36, 36);

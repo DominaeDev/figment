@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "gui/ChatList.h"
+#include "gui/Area.h"
 
 #include "app/AppState.h"
 #include "gui/VerticalSizer.h"
@@ -42,8 +43,9 @@ namespace fig::gui
 				_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
 			}
 
-			auto pItem = AddChild<ChatListItem>();
+			auto pItem = CreateControl<ChatListItem>();
 			_pVerticalSizer->Add(pItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
+			_items.push_back(pItem);
 		}
 
 		InvalidateLayout();
@@ -51,16 +53,15 @@ namespace fig::gui
 
 	ControlPtr ChatList::CreateHeader(const fig::string& text)
 	{
-		auto panel = AddChild<Area>();
+		auto panel = CreateControl<Area>();
 		panel->SetMaxSize(700, -1);
 		panel->SetHeight(40);
 
-		auto label = panel->AddChild<StaticText>("", FontFace::Italic, 18.0);
+		auto label = panel->CreateControl<StaticText>("", FontFace::Italic, 18.0);
 		label->SetTextAndResize(text);
 		label->CenterVertically();
 		return panel;
 	}
-
 
 	void ChatList::Reset()
 	{

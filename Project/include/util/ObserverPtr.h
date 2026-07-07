@@ -4,11 +4,16 @@
 
 namespace fig
 {
+	// Explicit non-owning pointer
+
 	template <typename T>
-	class non_owning_ptr
+	struct observer_ptr
 	{
-	public:
-		non_owning_ptr(T* ptr) : _ptr(ptr)
+		constexpr observer_ptr() : _ptr(nullptr)
+		{
+		}
+
+		constexpr observer_ptr(T* ptr) : _ptr(ptr)
 		{
 		}
 
@@ -19,9 +24,9 @@ namespace fig
 		T* get() const { return _ptr; }
 		explicit operator bool() const { return _ptr != nullptr; }
 
-		template <typename U>
+		template <typename U> 
 			requires std::derived_from<U, T>
-		non_owning_ptr<U> As() const
+		observer_ptr<U> as() const
 		{
 			U* pDerived = dynamic_cast<U*>(_ptr);
 			assert(pDerived != nullptr);
@@ -29,11 +34,13 @@ namespace fig
 		}
 
 		template <typename U>
-			requires std::derived_from<T, U>
-		operator non_owning_ptr<U>() const { return _ptr; }
+			requires std::derived_from<T, U> and (not std::same_as<T, U>)
+		operator observer_ptr<U>() const { return _ptr; }
+
+		void reset() { _ptr = nullptr; }
+		void reset(T* ptr) { _ptr = ptr; }
 
 	private:
 		T* _ptr;
 	};
-
 }

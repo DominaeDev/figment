@@ -8,7 +8,7 @@ namespace fig::gui
 	{
 		SetMarginLeft(34);
 
-		_pIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_LOCK));
+		_pIcon = CreateControl<Image>(AppResources::GetTexture(TextureType::ICON_LOCK));
 		_pIcon->SetForegroundColor(Colors::SidePanelForeground);
 	}
 

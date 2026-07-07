@@ -14,6 +14,6 @@ namespace fig::gui
 		void OnEnabled(bool bEnabled) override;
 
 	private:
-		Image* _pIcon;
+		fig::observer_ptr<Image> _pIcon;
 	};
 }

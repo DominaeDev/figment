@@ -26,7 +26,7 @@ VariableList::VariableList(LayoutElement* pParent) : Control(pParent)
 	SetForegroundColor(Colors::TextForeground);
 	SetBackgroundColor(Colors::MessageBackgroundDefault);
 
-	_pText = new StaticText(this, "", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
+	_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
 	_pText->SetPosition(Margin, Margin);
 	_pText->SetMaxSize(250, -1);
 }

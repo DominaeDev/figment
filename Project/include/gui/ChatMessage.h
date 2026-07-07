@@ -31,11 +31,11 @@ namespace fig::gui
 		fig::string _message;
 		fig::string _characterId;
 
-		Panel* _pMessagePanel;
-		StaticText* _pMessageText = nullptr;
-		StaticText* _pNameText = nullptr;
-		TexturedBorderRenderer* _pSpeechBubbleBG = nullptr;
-		TexturedBorderRenderer* _pSpeechBubbleBorder = nullptr;
+		fig::observer_ptr<Panel> _pMessagePanel;
+		fig::observer_ptr<StaticText> _pMessageText;
+		fig::observer_ptr<StaticText> _pNameText;
+		fig::observer_ptr<TexturedBorderRenderer> _pSpeechBubbleBG;
+		fig::observer_ptr<TexturedBorderRenderer> _pSpeechBubbleBorder;
 
 		fig::chat::Role _role = fig::chat::Role::Undefined;
 		bool _bShowAvatar = false;

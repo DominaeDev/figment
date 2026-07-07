@@ -19,7 +19,7 @@ namespace fig::gui
 		Colorf _colorLeft {};
 		Colorf _colorRight {};
 		Rect _lastRect {};
-		Texture* _pTexture {};
+		fig::observer_ptr<Texture> _pTexture;
 
 		std::vector<Vertex> _vertices {};
 	};

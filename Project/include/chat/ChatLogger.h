@@ -22,7 +22,7 @@ namespace fig::chat
 		fig::uuid _assetId;
 		fig::uuid _parentId;
 		fig::data::ChatLog _log {};
-		ChatSession* _pSession {};
+		fig::observer_ptr<ChatSession> _pSession;
 		uint32_t _pollerId {};
 	};
 }

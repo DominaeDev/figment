@@ -13,6 +13,6 @@ namespace fig::gui
 		void OnEnabled(bool bEnabled) override;
 
 	private:
-		TexturedBorderRenderer* _pTextBoxBG {};
+		fig::observer_ptr<TexturedBorderRenderer> _pTextBoxBG {};
 	};
 }

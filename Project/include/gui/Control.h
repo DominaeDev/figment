@@ -61,9 +61,9 @@ namespace fig::gui
 		inline Coord GetMarginHorizontal() const noexcept { return _marginLeft + _marginRight; }
 		inline Coord GetMarginVertical() const noexcept { return _marginTop + _marginBottom; }
 
-		inline WindowPtr GetSDLWindow() { return _renderContext.pWindow; }
-		inline RendererPtr GetSDLRenderer() { return _renderContext.pRenderer; }
-		inline TextEnginePtr GetSDLTextEngine() { return _renderContext.pTextEngine; }
+		WindowPtr GetSDLWindow();
+		RendererPtr GetSDLRenderer();
+		TextEnginePtr GetSDLTextEngine();
 		Point GetMousePos() const noexcept;
 
 	private:
@@ -76,8 +76,8 @@ namespace fig::gui
 		bool _bEnabled = true;
 
 		// Theming
-		CustomRenderer* _pBGRenderer = nullptr;
-		CustomRenderer* _pBorderRenderer = nullptr;
+		fig::observer_ptr<CustomRenderer> _pBGRenderer;
+		fig::observer_ptr<CustomRenderer> _pBorderRenderer;
 	
 		// Margin
 		Coord _marginLeft = 0;
@@ -92,6 +92,7 @@ namespace fig::gui
 			RendererPtr pRenderer {};	// weak
 			TextEnginePtr pTextEngine {};	// weak
 		};
-		ControlRenderContext _renderContext {};
+		std::shared_ptr<ControlRenderContext> _renderContext {};
+		std::shared_ptr<ControlRenderContext> GetRenderContext();
 	};
 }

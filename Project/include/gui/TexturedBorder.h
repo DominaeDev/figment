@@ -24,6 +24,6 @@ namespace fig::gui
 		float _cornerScale = 1.0f;
 		Color _bgColor {};
 		Color _borderColor {};
-		Texture* _pBorderTexture = nullptr;
+		fig::observer_ptr<Texture> _pBorderTexture;
 	};
 }

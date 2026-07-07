@@ -10,13 +10,13 @@ namespace fig::gui
 {
 	UserProfileWidget::UserProfileWidget(LayoutElement* pParent) noexcept : Panel(pParent)
 	{
-		_pImage = new ImageWithMask(this, nullptr, nullptr);
+		_pImage = CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pImage->SetSize(48, 48);
 
-		_pLabel = new StaticText(this, "", FontFace::Default, 14.0, false);
+		_pLabel = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
 		_pLabel->EnableEllipsis(true);
 
-		_pSignOutButton = new ButtonWithIcon(this, TextureType::ICON_LOGOUT);
+		_pSignOutButton = CreateControl<ButtonWithIcon>(TextureType::ICON_LOGOUT);
 		_pSignOutButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pSignOutButton->SetSize(36, 36);
 		_pSignOutButton->CenterVertically();

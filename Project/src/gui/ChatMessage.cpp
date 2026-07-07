@@ -87,7 +87,7 @@ namespace fig::gui
 			if (!pTexture)
 				pTexture = OldCharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);
 
-			Image* pPortrait = new Image(this, pTexture);
+			Image* pPortrait = CreateControl<Image>(pTexture);
 			pPortrait->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitWidth);
 
 			constexpr int32_t spacing = 24;
@@ -97,7 +97,7 @@ namespace fig::gui
 				pPortrait->SetX(LEFT_MARGIN - Constants::Chat::SmallPortraitWidth - spacing);
 		}
 
-		_pMessagePanel = new Panel(this);
+		_pMessagePanel = CreateControl<Panel>();
 
 		if (bDialogue)
 		{
@@ -132,7 +132,7 @@ namespace fig::gui
 		if (msgType != MessageType::Dialogue)
 			font = FontFace::Italic;
 
-		_pMessageText = new StaticText(_pMessagePanel, "", font, Constants::GUI::ChatMessageFontSize, true);
+		_pMessageText = _pMessagePanel->CreateControl<StaticText>("", font, Constants::GUI::ChatMessageFontSize, true);
 		_pMessageText->EnableWordWrap(true);
 		_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
 		_pMessageText->SetBackgroundColor(Colors::Transparent);
@@ -141,7 +141,7 @@ namespace fig::gui
 		// Name label
 		if ((_style & Style::Name) == Style::Name)
 		{
-			_pNameText = new StaticText(this, name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
+			_pNameText = CreateControl<StaticText>(name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
 			_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
 			_pNameText->SetBackgroundColor(Colors::Transparent);
 			_pNameText->SetPosition(LEFT_MARGIN, -1);

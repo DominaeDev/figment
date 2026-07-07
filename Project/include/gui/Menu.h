@@ -85,6 +85,7 @@ namespace fig::gui
 		float _fExpandTimer {};
 		float _fCollapseTimer {};
 		int32_t _submenuIndex = -1;
-		Menu* _pSubmenu = nullptr;
+
+		fig::observer_ptr<Menu> _pSubmenu;
 	};
 }

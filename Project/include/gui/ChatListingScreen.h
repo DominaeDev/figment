@@ -19,6 +19,6 @@ namespace fig::gui
 		EventResult OnEvent(Event& event) override;
 
 	private:
-		ChatList* _pChatList {};
+		fig::observer_ptr<ChatList> _pChatList;
 	};
 }

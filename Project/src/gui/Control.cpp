@@ -9,18 +9,16 @@ namespace fig::gui
 {
 	Control::Control(LayoutElement* pParent)
 	{
-		if (pParent)
-			pParent->AddChild(this);
 		_pParent = pParent;
 	}
 
 	Control::Control(LayoutElement* pParent, Window* pHostWindow) : Control(pParent)
 	{
-		_renderContext = ControlRenderContext {
+		_renderContext = std::make_shared<ControlRenderContext>(ControlRenderContext {
 			.pWindow = pHostWindow->GetSDLWindow().get(),
 			.pRenderer = pHostWindow->GetSDLRenderer().get(),
 			.pTextEngine = pHostWindow->GetSDLTextEngine().get(),
-		};
+		});
 	}
 
 	Control::~Control()
@@ -108,7 +106,7 @@ namespace fig::gui
 	{
 		if (!_foregroundColor.IsDefined())
 		{
-			auto frameParent = dynamic_cast<Control*>(_pParent);
+			auto frameParent = dynamic_cast<Control*>(_pParent.get());
 			return frameParent ? frameParent->GetForegroundColor() : Color();
 		}
 		return _foregroundColor;
@@ -118,7 +116,7 @@ namespace fig::gui
 	{
 		if (!_backgroundColor.IsDefined())
 		{
-			auto parentControl = dynamic_cast<Control*>(_pParent);
+			auto parentControl = dynamic_cast<Control*>(_pParent.get());
 			return parentControl ? parentControl->GetBackgroundColor() : Color();
 		}
 		return _backgroundColor;
@@ -146,10 +144,10 @@ namespace fig::gui
 	{
 		LayoutElement::OnParent();
 
-		auto pParent = dynamic_cast<Control*>(_pParent);
+		auto pParent = dynamic_cast<Control*>(_pParent.get());
 		if (pParent)
 		{
-			_renderContext = pParent->_renderContext;
+			_renderContext = pParent->GetRenderContext();
 
 			if (!_foregroundColor.IsDefined())
 				_foregroundColor = pParent->GetForegroundColor();
@@ -248,5 +246,48 @@ namespace fig::gui
 		float x, y;
 		auto _ = SDL_GetMouseState(&x, &y);
 		return Point { toI(x), toI(y) };
+	}
+
+	std::shared_ptr<Control::ControlRenderContext> Control::GetRenderContext()
+	{
+		if (_renderContext)
+			return _renderContext;
+
+		if (auto pControlParent = dynamic_cast<Control*>(_pParent.get()))
+		{
+			_renderContext = pControlParent->GetRenderContext();
+			return _renderContext;
+		}
+		return nullptr;
+	}
+
+	WindowPtr Control::GetSDLWindow() 
+	{
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+
+		if (_renderContext)
+			return _renderContext->pWindow;
+		return nullptr;
+	}
+
+	RendererPtr Control::GetSDLRenderer()
+	{ 
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+
+		if (_renderContext)
+			return _renderContext->pRenderer;
+		return nullptr;
+	}
+
+	TextEnginePtr Control::GetSDLTextEngine() 
+	{ 
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+
+		if (_renderContext)
+			return _renderContext->pTextEngine;
+		return nullptr;
 	}
 }

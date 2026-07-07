@@ -19,6 +19,6 @@ namespace fig::gui
 		void OnRender(Renderer* pRenderer) override;
 
 	private:
-		StaticText* _pText = nullptr;
+		fig::observer_ptr<StaticText> _pText;
 	};
 }

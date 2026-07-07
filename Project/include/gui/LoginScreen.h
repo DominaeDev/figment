@@ -25,15 +25,16 @@ namespace fig::gui
 		void ShowMenu();
 
 	private:
-		PasswordBox* _pPassword;
-		ImageWithMask* _pProfileImage;
-		StaticText* _pProfileName;
-		ButtonWithIcon* _pPrevProfileBtn;
-		ButtonWithIcon* _pNextProfileBtn;
-		ButtonWithIcon* _pSignInBtn;
-		ButtonWithIcon* _pMenuButton;
-		ButtonWithLabel* _pNoPassButton;
-		Panel* _pPasswordPanel {};
+		fig::observer_ptr<PasswordBox> _pPassword;
+		fig::observer_ptr<ImageWithMask> _pProfileImage;
+		fig::observer_ptr<StaticText> _pProfileName;
+		fig::observer_ptr<ButtonWithIcon> _pPrevProfileBtn;
+		fig::observer_ptr<ButtonWithIcon>_pNextProfileBtn;
+		fig::observer_ptr<ButtonWithIcon>_pSignInBtn;
+		fig::observer_ptr<ButtonWithIcon>_pMenuButton;
+		fig::observer_ptr<ButtonWithLabel> _pNoPassButton;
+		fig::observer_ptr<Panel> _pPasswordPanel;
+
 		fig::uuid _currentProfileId {};
 	};
 }

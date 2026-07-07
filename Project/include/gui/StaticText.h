@@ -40,7 +40,7 @@ namespace fig::gui
 		StaticText(LayoutElement* pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize = true);
 		virtual ~StaticText();
 
-		TTF_Font* GetFont() const { return _pFont; }
+		TTF_Font* GetFont() const { return _pFont.get(); }
 
 		void SetText(const fig::string& text);
 		void SetTextAndResize(const fig::string& text);
@@ -48,7 +48,7 @@ namespace fig::gui
 		const fig::string& GetText() const { return _text; }
 
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
-		void SetFont(TTF_Font* pFont) { _pFont = pFont; }
+		void SetFont(TTF_Font* pFont) { _pFont.reset(pFont); }
 
 		void SetForegroundColor(Color color) override;
 		void SetBackgroundColor(Color color) override;
@@ -80,7 +80,7 @@ namespace fig::gui
 		bool _bWordWrap = false;
 		bool _bEllipsis = false;
 
-		TTF_Font* _pFont = nullptr;
+		fig::observer_ptr<TTF_Font> _pFont;
 		fig::sdl::Texture _texture {};
 		fig::sdl::Texture _shadow {};
 		int _textWidth;

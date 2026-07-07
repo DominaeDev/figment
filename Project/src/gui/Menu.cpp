@@ -162,12 +162,12 @@ namespace fig::gui
 
 	void Menu::CreateItem(MenuItem& menuItem)
 	{
-		auto pItemRoot = new TexturedBorder(this, AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND_6PX), 8);
+		auto pItemRoot = CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND_6PX), 8);
 		pItemRoot->SetPosition(MenuMargin, MenuMargin + _itemY);
 		pItemRoot->SetSize(MenuWidth - MenuMargin * 2, MenuItemHeight);
 		pItemRoot->SetForegroundColor(MenuBackgroundColor);
 
-		auto pItemLabel = new StaticText(pItemRoot, menuItem._label, FontFace::Default, 14.5, false);
+		auto pItemLabel = pItemRoot->CreateControl<StaticText>(menuItem._label, FontFace::Default, 14.5, false);
 		pItemLabel->EnableEllipsis(true);
 		pItemLabel->SetPosition(32, 5);
 		pItemLabel->SetMaxSize(pItemRoot->GetWidth() - 36, -1);
@@ -175,13 +175,13 @@ namespace fig::gui
 
 		if (menuItem._bCheckable && menuItem._bChecked)
 		{
-			auto pIcon = new Image(pItemRoot, AppResources::GetTexture(TextureType::ICON_CHECKMARK));
+			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(TextureType::ICON_CHECKMARK));
 			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
 			pIcon->SetPosition(4, 4);
 		}
 		else if (menuItem._icon != TextureType::NONE)
 		{
-			auto pIcon = new Image(pItemRoot, AppResources::GetTexture(menuItem._icon));
+			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(menuItem._icon));
 			if (menuItem._bMonochromeIcon)
 				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
 			else
@@ -191,7 +191,7 @@ namespace fig::gui
 
 		if (menuItem.HasSubMenu())
 		{
-			auto pArrow = new Image(pItemRoot, AppResources::GetTexture(TextureType::SUBMENU_ARROW));
+			auto pArrow = pItemRoot->CreateControl<Image>(AppResources::GetTexture(TextureType::SUBMENU_ARROW));
 			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
 			pArrow->SetX(pItemRoot->GetWidth() - pArrow->GetWidth());
 			pArrow->CenterVertically();
@@ -206,7 +206,7 @@ namespace fig::gui
 
 	void Menu::CreateSeparator(MenuItem& menuItem)
 	{
-		auto pItemRoot = new MenuSeparator(this);
+		auto pItemRoot = CreateControl<MenuSeparator>();
 		pItemRoot->SetPosition(MenuSeparatorMargin, MenuMargin + _itemY);
 		pItemRoot->SetSize(MenuWidth - MenuSeparatorMargin * 2, MenuSeparatorHeight);
 		pItemRoot->SetForegroundColor(Colors::LineColor);

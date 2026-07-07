@@ -25,7 +25,7 @@ namespace fig::gui
 	{
 		_searchIndex = std::make_unique<SearchIndex>();
 
-		_pHiddenBG = new TexturedBorder(this, TextureType::CARD_FILL, 8);
+		_pHiddenBG = CreateControl<TexturedBorder>(TextureType::CARD_FILL, 8);
 		_pHiddenBG->SetForegroundColor(Color { 0x9b896a, 0x30 });
 
 		SetCardSize(cardSize);
@@ -39,23 +39,23 @@ namespace fig::gui
 
 		_bInitialized = true;
 
-		_pLargeRoot = new Area(this);
+		_pLargeRoot = CreateControl<Area>();
 		_pLargeRoot->SetSize(Large::Width, Large::Height);
-		_pSmallRoot = new Area(this);
+		_pSmallRoot = CreateControl<Area>();
 		_pSmallRoot->SetSize(Small::Width, Small::Height);
 
 		// Footer (large)
-		_pLargeFooter = new Area(_pLargeRoot);
+		_pLargeFooter = _pLargeRoot->CreateControl<Area>();
 		_pLargeFooter->SetY(Large::Height - Large::FooterHeight);
 		_pLargeFooter->SetSize(Large::Width, Large::FooterHeight);
 
-		_pLargeFooterFade = new NineGridImage(_pLargeFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE), { 16, 16, 64, 16 });
+		_pLargeFooterFade = _pLargeFooter->CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE), Corners { 16, 16, 64, 16 });
 		_pLargeFooterFade->SetForegroundColor(Color { 0, 0, 0, FadeAlpha });
 		_pLargeFooterFade->FillParent();
 		_pLargeFooterFade->SetVisible(false);
 
 		// Label (large)
-		_pLargeLabel = new StaticText(_pLargeFooter, "", FontFace::CardHeader, 28.0, false);
+		_pLargeLabel = _pLargeFooter->CreateControl<StaticText>("", FontFace::CardHeader, 28.0, false);
 		_pLargeLabel->SetPosition(Large::InnerMargin, Large::FooterHeight - Large::InnerMargin - 68);
 		_pLargeLabel->SetMaxSize(Large::Width - (Large::InnerMargin * 2), -1);
 		_pLargeLabel->SetSize(Large::Width - (Large::InnerMargin * 2), 80);
@@ -65,38 +65,38 @@ namespace fig::gui
 		_pLargeLabel->EnableEllipsis(true);
 
 		// Border (large)
-		auto pSimpleBorder = new TexturedBorder(_pLargeRoot, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		auto pSimpleBorder = _pLargeRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
 		pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, FadeAlpha });
 
 		// Styled border (large)
-		_pLargeBorder = new Image(_pLargeRoot, nullptr);
+		_pLargeBorder = _pLargeRoot->CreateControl<Image>(nullptr);
 		_pLargeBorder->SetPosition(-Large::BorderOffset, -Large::BorderOffset);
 		_pLargeBorder->SetSize(Large::Width + Large::BorderOffset * 2, Large::Height + Large::BorderOffset * 2);
 		_pLargeBorder->SetVisible(false);
 
 		// Star (large)
-		_pLargeStar = new Image(_pLargeRoot, TextureType::CARD_ICON_STAR);
+		_pLargeStar = _pLargeRoot->CreateControl<Image>(TextureType::CARD_ICON_STAR);
 		_pLargeStar->SetPosition(Large::Width - _pLargeStar->GetWidth() - 8, 8);
 		_pLargeStar->SetVisible(false);
 
 		// Tags
 		_tagPosition.x = Large::Tags::Margin;
 		_tagPosition.y = Large::Tags::Top;
-		_pTagsRoot = new Area(_pLargeFooter);
+		_pTagsRoot = _pLargeFooter->CreateControl<Area>();
 
 		// Footer (small)
-		auto pSmallFooter = new Area(_pSmallRoot);
+		auto pSmallFooter = _pSmallRoot->CreateControl<Area>();
 		pSmallFooter->SetY(Small::Height - Small::FooterHeight);
 		pSmallFooter->SetSize(Small::Width, Small::FooterHeight);
 
-		_pSmallFooterFade = new NineGridImage(pSmallFooter, AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE_SMALL), { 16, 16, 40, 16 });
+		_pSmallFooterFade = pSmallFooter->CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE_SMALL), Corners { 16, 16, 40, 16 });
 		_pSmallFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 		_pSmallFooterFade->FillParent();
 		_pSmallFooterFade->SetVisible(false);
 
 		// Label (small)
-		_pSmallLabel = new StaticText(pSmallFooter, "", FontFace::CardHeader, 24.0, false);
+		_pSmallLabel = pSmallFooter->CreateControl<StaticText>("", FontFace::CardHeader, 24.0, false);
 		_pSmallLabel->SetPosition(Small::InnerMargin, Small::FooterHeight - Small::InnerMargin - 32);
 		_pSmallLabel->SetMaxSize(Small::Width - (Small::InnerMargin * 2), -1);
 		_pSmallLabel->SetSize(Small::Width - (Small::InnerMargin * 2), 40);
@@ -106,18 +106,18 @@ namespace fig::gui
 		_pSmallLabel->EnableEllipsis(true);
 
 		// Border (small)
-		auto pSmallSimpleBorder = new TexturedBorder(_pSmallRoot, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		auto pSmallSimpleBorder = _pSmallRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::CARD_BORDER), 16);
 		pSmallSimpleBorder->FillParent();
 		pSmallSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
 
 		// Styled border (small)
-		_pSmallBorder = new Image(_pSmallRoot, nullptr);
+		_pSmallBorder = _pSmallRoot->CreateControl<Image>(nullptr);
 		_pSmallBorder->SetPosition(-Small::BorderOffset, -Small::BorderOffset);
 		_pSmallBorder->SetSize(Small::Width + Small::BorderOffset * 2, Small::Height + Small::BorderOffset * 2);
 		_pSmallBorder->SetVisible(false);
 
 		// Star (small)
-		_pSmallStar = new Image(_pSmallRoot, TextureType::CARD_ICON_STAR_SMALL);
+		_pSmallStar = _pSmallRoot->CreateControl<Image>(TextureType::CARD_ICON_STAR_SMALL);
 		_pSmallStar->SetPosition(Small::Width - _pSmallStar->GetWidth() - 6, 6);
 		_pSmallStar->SetVisible(false);
 
@@ -146,7 +146,7 @@ namespace fig::gui
 		{
 			// Create error icon
 			float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
-			_pErrorIcon = new Image(this, AppResources::GetTexture(TextureType::ICON_ERROR));
+			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(TextureType::ICON_ERROR));
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
 			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
 			_pErrorIcon->Center();
@@ -209,7 +209,7 @@ namespace fig::gui
 		if (_pCounterBG)
 			return;
 
-		_pCounterBG = new NineGridImage(this, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		_pCounterBG = CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_TAG_BG), Corners { 16, 16, 13, 13 });
 		if (_cardSize == CardSize::Half)
 			_pCounterBG->SetPosition(6, 6);
 		else
@@ -217,12 +217,12 @@ namespace fig::gui
 
 		_pCounterBG->SetForegroundColor(0xA0_rgba);
 
-		auto pCounterIcon = new Image(_pCounterBG, AppResources::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
+		auto pCounterIcon = _pCounterBG->CreateControl<Image>(AppResources::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
 		pCounterIcon->SetPosition(6, 6);
 		pCounterIcon->SetForegroundColor(Colors::White);
 		pCounterIcon->SetBackgroundColor(Colors::Transparent);
 
-		auto pLabel = new StaticText(_pCounterBG, std::format("{}", count), FontFace::Default, 14.0, true);
+		auto pLabel = _pCounterBG->CreateControl<StaticText>(std::format("{}", count), FontFace::Default, 14.0, true);
 		pLabel->SetPosition(27, 3);
 		pLabel->SetForegroundColor(Colors::White);
 		pLabel->SetBackgroundColor(Colors::Transparent);
@@ -241,7 +241,7 @@ namespace fig::gui
 		else if (!bShow)
 			return;
 
-		_pNewIndicator = new NineGridImage(this, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		_pNewIndicator = CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_TAG_BG), Corners { 16, 16, 13, 13 });
 		if (_cardSize == CardSize::Half)
 			_pNewIndicator->SetPosition(6, 6);
 		else
@@ -249,7 +249,7 @@ namespace fig::gui
 
 		_pNewIndicator->SetForegroundColor(0x1065b4E0_rgba);
 
-		auto pLabel = new StaticText(_pNewIndicator, fig::string { fig::strings::UI::New }, FontFace::Default, 14.0, true);
+		auto pLabel = _pNewIndicator->CreateControl<StaticText>(fig::string { fig::strings::UI::New }, FontFace::Default, 14.0, true);
 		pLabel->SetPosition(6, 3);
 		pLabel->SetForegroundColor(Colors::White);
 		pLabel->SetBackgroundColor(Colors::Transparent);
@@ -296,11 +296,11 @@ namespace fig::gui
 			_pLargeFooterFade->FillParent();
 		}
 
-		auto pTagBG = new NineGridImage(_pTagsRoot, AppResources::GetTexture(TextureType::CARD_TAG_BG), { 16, 16, 13, 13 });
+		auto pTagBG = _pTagsRoot->CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_TAG_BG), Corners { 16, 16, 13, 13 });
 		pTagBG->SetPosition(position);
 		pTagBG->SetForegroundColor(Colors::Black.WithAlpha(0.7f));
 
-		auto pLabel = new StaticText(_pTagsRoot, tag, FontFace::Default, 14.0, true);
+		auto pLabel = _pTagsRoot->CreateControl<StaticText>(tag, FontFace::Default, 14.0, true);
 		pLabel->SetPosition(position.x + Large::Tags::InnerMargin, position.y + 3);
 		pLabel->EnableWordWrap(false);
 		pLabel->EnableEllipsis(true);

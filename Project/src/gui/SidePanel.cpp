@@ -15,45 +15,45 @@ namespace fig::gui
 		SetWidth(Constants::GUI::SidePanel::Width);
 		SetBackgroundColor(fig::gui::Colors::SidePanelBackground);
 
-		auto pHeaderPanel = new Panel(this);
+		auto pHeaderPanel = CreateControl<Panel>();
 		pHeaderPanel->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		auto pLogo = new Image(pHeaderPanel, AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
+		auto pLogo = pHeaderPanel->CreateControl<Image>(AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
 		pLogo->SetX(44);
 
-		auto pGradient = new HorizontalGradient(this, Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.8f));
+		auto pGradient = CreateControl<HorizontalGradient>(Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.8f));
 		_pGradient = pGradient;
 
-		_pMenuButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_MENU);
+		_pMenuButton = pHeaderPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_MENU);
 		_pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pMenuButton->SetSize(36, 36);
 		_pMenuButton->SetX(4);
 		_pMenuButton->CenterVertically();
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
-/*		auto pSettingsButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SETTINGS);
+/*		auto pSettingsButton = pHeaderPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_SETTINGS);
 		pSettingsButton->SetTheme(Themes::SidePanelButtonStyle);
 		pSettingsButton->SetSize(36, 36);
 		pSettingsButton->SetX(GetWidth() - pSettingsButton->GetWidth() - 40);
 		pSettingsButton->CenterVertically(); 
 */
 
-		auto pCollapseButton = new ButtonWithIcon(pHeaderPanel, TextureType::ICON_SIDEBAR);
+		auto pCollapseButton = pHeaderPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_SIDEBAR);
 		pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
 		pCollapseButton->SetSize(36, 36);
 		pCollapseButton->SetX(GetWidth() - pCollapseButton->GetWidth() - 4);
 		pCollapseButton->CenterVertically();
 		pCollapseButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(false); });
 
-		auto pMainArea = new Area(this);
+		auto pMainArea = CreateControl<Area>();
 
-		auto pChatButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
+		auto pChatButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
 		pChatButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::ChatListing); });
-		auto pCharactersButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
+		auto pCharactersButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
 		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
-		auto pScenariosButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
-		auto pWorldsButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
-		auto pModelsButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_MODELS, "Models");
+		auto pScenariosButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
+		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
+		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_MODELS, "Models");
 
 		auto pButtonSizer = new VerticalSizer();
 		pMainArea->SetSizer(pButtonSizer);
@@ -69,14 +69,14 @@ namespace fig::gui
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pModelsButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
 
-		auto pFooterPanel = new Area(this);
+		auto pFooterPanel = CreateControl<Area>();
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);
 
-		_pModelWidget = new LoadModelWidget(pFooterPanel);
+		_pModelWidget = pFooterPanel->CreateControl<LoadModelWidget>();
 		_pModelWidget->SetHeight(60);
 		_pModelWidget->SetMaxSize(-1, 60);
 
-		_pUserWidget = new UserProfileWidget(pFooterPanel);
+		_pUserWidget = pFooterPanel->CreateControl<UserProfileWidget>();
 		_pUserWidget->SetHeight(60);
 		
 		auto pTopSizer = new VerticalSizer();

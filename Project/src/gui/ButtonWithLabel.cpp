@@ -15,12 +15,12 @@ namespace fig::gui
 		SetBackgroundRenderer(_pBGRenderer);
 		SetBackgroundColor(GetThemeBackground());
 
-		_pLabel = new StaticText(this, "", FontFace::Default, 16.0, true);
+		_pLabel = CreateControl<StaticText>("", FontFace::Default, 16.0, true);
 		_pLabel->SetForegroundColor(GetThemeForeground());
 		_pLabel->SetTextAndResize(text);
 		_pLabel->Center();
 
-		_pBorder = new TexturedBorder(this, AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		_pBorder = CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::CARD_BORDER), 16);
 		_pBorder->SetForegroundColor(Colors::SidePanelForeground);
 		_pBorder->FillParent();
 

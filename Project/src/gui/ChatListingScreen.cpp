@@ -8,7 +8,7 @@ namespace fig::gui
 {
 	ChatListingScreen::ChatListingScreen(Frame* pParent) : Screen(pParent)
 	{
-		_pChatList = new ChatList(this);
+		_pChatList = CreateControl<ChatList>();
 
 		auto mainSizer = new VerticalSizer();
 		mainSizer->Add(_pChatList, -1, Sizer::Fill | Sizer::Left, 12);

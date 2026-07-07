@@ -15,17 +15,17 @@ namespace fig::gui
 
 	LoadModelWidget::LoadModelWidget(LayoutElement* pParent) noexcept : Panel(pParent)
 	{
-		_pProgressBar = new Panel(this);
+		_pProgressBar = CreateControl<Panel>();
 		_pProgressBar->SetBackgroundRenderer(new SolidFillRenderer(Color { 0x57caff, 0xff }));
 
-		_pLoadButton = new PlayButton(this);
+		_pLoadButton = CreateControl<PlayButton>();
 		_pLoadButton->SetDelegate(std::bind(&LoadModelWidget::OnButtonPressed, this));
 
-		_pLabel = new StaticText(this, toStr(fig::strings::LoadModelWidget::ModelUnloaded), FontFace::Default, 14.0, false);
+		_pLabel = CreateControl<StaticText>(toStr(fig::strings::LoadModelWidget::ModelUnloaded), FontFace::Default, 14.0, false);
 		_pLabel->SetHeight(20);
 		_pLabel->EnableEllipsis(true);
 
-		_pSettingsButton = new ButtonWithIcon(this, TextureType::ICON_SETTINGS);
+		_pSettingsButton = CreateControl<ButtonWithIcon>(TextureType::ICON_SETTINGS);
 		_pSettingsButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pSettingsButton->SetSize(36, 36);
 		_pSettingsButton->CenterVertically();

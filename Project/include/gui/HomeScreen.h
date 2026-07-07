@@ -32,16 +32,17 @@ namespace fig::gui
 		void ShowFilteringMenu() noexcept;
 
 	private:
-		CardList* _pCardList {};
-		Control* _pExpandButton {};
-		TextBox* _pFilterTextBox {};
-		StaticText* _pHeader {};
+		fig::observer_ptr<CardList> _pCardList;
+		fig::observer_ptr<Control> _pExpandButton;
+		fig::observer_ptr<TextBox> _pFilterTextBox;
+		fig::observer_ptr<StaticText> _pHeader;
+		fig::observer_ptr<ButtonWithIcon> _pSortingButton;
+		fig::observer_ptr<ButtonWithIcon> _pFilteringButton;
+		fig::observer_ptr<Control> _pFilterBorder;
+		fig::observer_ptr<ButtonWithIcon> _pToggleTagsButton;
+		fig::observer_ptr<ToggleWithIcon> _pGridButton;
+
 		fig::string _search_text;
 		float _fSearchTimer {};
-		ButtonWithIcon* _pSortingButton {};
-		ButtonWithIcon* _pFilteringButton {};
-		Control* _pFilterBorder {};
-		ButtonWithIcon* _pToggleTagsButton {};
-		ToggleWithIcon* _pGridButton {};
 	};
 }

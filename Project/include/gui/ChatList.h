@@ -21,8 +21,8 @@ namespace fig::gui
 		ControlPtr CreateHeader(const fig::string& text);
 
 	private:
-		std::vector<ChatListItem*> _items;
+		std::vector<fig::observer_ptr<ChatListItem>> _items;
 
-		VerticalSizer* _pVerticalSizer {};
+		fig::observer_ptr<VerticalSizer> _pVerticalSizer;
 	};
 }

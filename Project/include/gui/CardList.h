@@ -30,9 +30,9 @@ namespace fig::gui
 		void OnAfterLayout() override;
 
 	private:
-		std::vector<CoverCard*> _cards;
+		std::vector<fig::observer_ptr<CoverCard>> _cards;
 
-		GridSizer* _pGridSizer {};
+		fig::observer_ptr<GridSizer> _pGridSizer;
 		int32_t _last_rows {};
 		CardSize _cardSize;
 		fig::string _filterString;

@@ -13,7 +13,7 @@ namespace fig::gui
 	{
 		SetBackgroundColor(Colors::Transparent);
 
-		auto pHandle = new TexturedBorder(this, AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND_6PX), 8);
+		auto pHandle = CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND_6PX), 8);
 		pHandle->SetWidth(8);
 		pHandle->SetCornerScale(0.5f);
 		pHandle->SetForegroundColor(Colors::Black.WithAlpha(HandleAlpha[0]));

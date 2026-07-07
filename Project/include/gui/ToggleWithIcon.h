@@ -26,10 +26,10 @@ namespace fig::gui
 		void OnButtonState() override;
 
 	private:
-		TexturedBorderRenderer* _pBGRenderer;
+		fig::observer_ptr<TexturedBorderRenderer> _pBGRenderer;
+		fig::observer_ptr<Image> _pIcon {};
 		ToggleDelegate _fnToggle {};
-		Image* _pIcon {};
-		bool _bOn {};
 		ToggleBehavior _behavior {};
+		bool _bOn {};
 	};
 }

@@ -21,7 +21,7 @@ namespace fig::gui
 		void SetModelInfo(const fig::llm::LLMStatus& status);
 
 	private:
-		StaticText* _pMessage;
-		StaticText* _pModelInfo;
+		fig::observer_ptr<StaticText> _pMessage;
+		fig::observer_ptr<StaticText> _pModelInfo;
 	};
 }
