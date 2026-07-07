@@ -12,6 +12,7 @@ namespace fig::gui
 		MenuClosed,
 		Activated,
 		Deactivated,
+		Scrolling,
 
 		LLMStatusUpdate,
 		LLMModelLoading,

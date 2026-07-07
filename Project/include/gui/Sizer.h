@@ -13,7 +13,7 @@ namespace fig::gui
 	class Sizer : public IUpdateable
 	{
 	public:
-		enum Flag : int {
+		enum Flag : int32_t {
 			None = 0,
 			Top = 1 << 0,
 			Bottom = 1 << 1,

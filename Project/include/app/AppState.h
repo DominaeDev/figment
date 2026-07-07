@@ -71,6 +71,7 @@ namespace fig
 		[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
 		static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);
 		static bool IsLLMInitialized();
+		static bool IsSignedIn();
 
 		static void SetCursor(SDL_SystemCursor cursor);
 

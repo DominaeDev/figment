@@ -58,10 +58,10 @@ namespace fig::gui
 
 		Point MeasureText(bool bAllowEllipsis = true) const;
 		void Reset();
+		void InvalidateText();
 
 	protected:
 		Rectf GetAlignedRect() const;
-		void InvalidateText();
 
 		void OnUpdate(float fElapsed) override;
 		void OnRender(Renderer* pRenderer) override;

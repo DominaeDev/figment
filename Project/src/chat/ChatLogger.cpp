@@ -85,7 +85,7 @@ namespace fig::chat
 
 	bool ChatLogger::Save()
 	{
-		if (not Global::GetUserManager().IsSignedIn())
+		if (not Global::IsSignedIn())
 		{
 			assert(false && "Not logged in");
 			return false;

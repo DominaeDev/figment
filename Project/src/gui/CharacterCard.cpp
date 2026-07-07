@@ -4,8 +4,8 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "gui/Events.h"
-#include "gui/Menu.h"
 #include "gui/MainFrame.h"
+#include "gui/Menu.h"
 
 using namespace fig::data;
 
@@ -132,10 +132,10 @@ namespace fig::gui
 
 		menu.AddSeparator();
 		menu.AddItem("View / Edit\u2026");
-		menu.AddItem("Clone\u2026");
+		menu.AddItem("Duplicate\u2026");
 		menu.AddItem("Export\u2026");
 		auto& moveMenu = menu.AddItem("Move to folder\u2026");
-			moveMenu.AddItem("Create new folder\u2026");
+			moveMenu.AddItem("New folder\u2026");
 		menu.AddSeparator();
 		auto& borderMenu = menu.AddItem("Set border");
 			borderMenu.AddCheckItem("No border", _metaData.borderStyle == CardBorderStyle::None)
@@ -180,6 +180,7 @@ namespace fig::gui
 					NotifyMetaUpdated();
 				});
 		}
+
 		if (!_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
 		{
 			menu.AddItem("Hide")

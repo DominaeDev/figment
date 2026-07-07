@@ -129,6 +129,12 @@ namespace fig
 		return __appState->pLLMBackend.get()->IsInitialized();
 	}
 
+	bool Global::IsSignedIn() 
+	{ 
+		assert(__appState);
+		return __appState->pUserManager.get()->IsSignedIn();
+	}
+
 	AppSettings& Global::GetSettings()
 	{
 		assert(__appState);

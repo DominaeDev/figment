@@ -48,7 +48,7 @@ namespace fig::gui
 		auto pMainArea = new Area(this);
 
 		auto pChatButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
-		pChatButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Chat); });
+		pChatButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::ChatListing); });
 		auto pCharactersButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
 		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
 		auto pScenariosButton = new SidePanelButton(pMainArea, TextureType::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));

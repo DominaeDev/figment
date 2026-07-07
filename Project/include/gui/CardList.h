@@ -19,7 +19,6 @@ namespace fig::gui
 
 		void SetFilter(const fig::string& filter) noexcept;
 		void Reorder();
-		void ResetScroll() noexcept;
 
 		void SetCardSize(CardSize cardSize);
 		void EnableTags(bool bEnable) noexcept;

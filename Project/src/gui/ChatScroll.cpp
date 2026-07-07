@@ -125,8 +125,15 @@ namespace fig::gui
 			GetSizer()->Add(pMessage, 0, Sizer::Expand);
 			return pMessage;
 		}
-
-		return nullptr;
+		else
+		{
+			auto pMessage = new ChatMessage(this, role, characterId, "", msgType, bShowAvatar);
+			pMessage->SetY(-1000); // Move off-screen
+			pMessage->SetMessage(message, complete);
+			pMessage->SetColors(ChatSession::GetDefaultColorsOf(role));
+			GetSizer()->Add(pMessage, 0, Sizer::Expand);
+			return pMessage;
+		}
 	}
 
 	int ChatScroll::RemoveMessages(std::span<fig::uuid> ids)

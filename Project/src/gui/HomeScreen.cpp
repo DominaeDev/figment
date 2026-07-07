@@ -220,6 +220,7 @@ namespace fig::gui
 			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Filtering, filtering, FilterFlagMapping);
 			_pCardList->Reorder();
 			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
+			_pCardList->ScrollTo(0, false);
 		};
 
 		auto ToggleFilter = [this](FilterFlag flag) {
@@ -228,8 +229,8 @@ namespace fig::gui
 			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Filtering, filtering, FilterFlagMapping);
 			_pCardList->Reorder();
 			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
+			_pCardList->ScrollTo(0, false);
 		};
-
 
 		auto filter = GetFiltering();
 		bool bShowHidden = filter.IsSet(FilterFlag::Hidden);
@@ -311,7 +312,6 @@ namespace fig::gui
 		menu.AddCheckItem("Show hidden", bShowHidden)
 			.SetDelegate([=, this] { 
 				ToggleFilter(FilterFlag::Hidden); 
-				_pCardList->ResetScroll();
 			});
 		menu.AddSeparator();
 		menu.AddItem("Clear filter")

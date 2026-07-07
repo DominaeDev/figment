@@ -1,0 +1,24 @@
+#pragma once
+
+#include "gui/Screen.h"
+#include "gui/GUICommon.h"
+
+namespace fig::gui
+{
+	class ChatList;
+
+	class ChatListingScreen : public Screen
+	{
+	public:
+		ChatListingScreen(Frame* pParent);
+
+		void ShowAllChats();
+	
+	protected:
+		bool OnKeyboardEvent(KeyboardEvent& event) override;
+		EventResult OnEvent(Event& event) override;
+
+	private:
+		ChatList* _pChatList {};
+	};
+}

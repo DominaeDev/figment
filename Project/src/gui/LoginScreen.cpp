@@ -114,12 +114,6 @@ namespace fig::gui
 
 	bool LoginScreen::OnKeyboardEvent(KeyboardEvent& event)
 	{
-		if (event.pressed) // Press
-		{
-		}
-		else // Release
-		{
-		}
 		return false;
 	}
 

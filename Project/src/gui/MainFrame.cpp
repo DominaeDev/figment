@@ -3,6 +3,7 @@
 #include "gui/HomeScreen.h"
 #include "gui/ChatScreen.h"
 #include "gui/DebugScreen.h"
+#include "gui/ChatListingScreen.h"
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
 #include "app/AppState.h"
@@ -50,6 +51,7 @@ namespace fig::gui
 		RegisterScreen<HomeScreen>(ScreenType::Home);
 		RegisterScreen<ChatScreen>(ScreenType::Chat);
 		RegisterScreen<DebugScreen>(ScreenType::Debug);
+		RegisterScreen<ChatListingScreen>(ScreenType::ChatListing);
 
 		DebugUtility::Initialize();
 
@@ -417,12 +419,16 @@ namespace fig::gui
 			UnloadModel();
 			return EventResult::Continue;
 		}
-
-		if (IsUserEvent(event, UserEvent::StartChat))
+		else if (IsUserEvent(event, UserEvent::StartChat))
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			StartChat(characterId);
 			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::Scrolling))
+		{
+			PopAllMenus();
+			return EventResult::Continue;
 		}
 
 		if constexpr (Debugging)

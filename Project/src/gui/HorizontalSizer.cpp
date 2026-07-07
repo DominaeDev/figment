@@ -100,6 +100,17 @@ namespace fig::gui
 					rect.h = innerRect.h;
 				}
 
+				auto minSize = pControl->GetMinSize();
+				auto maxSize = pControl->GetMaxSize();
+				if (maxSize.x > 0)
+					rect.w = std::min(rect.w, maxSize.x);
+				if (maxSize.y > 0)
+					rect.h = std::min(rect.h, maxSize.y);
+				if (minSize.x > 0)
+					rect.w = std::max(rect.w, minSize.x);
+				if (minSize.y > 0)
+					rect.h = std::max(rect.h, minSize.y);
+
 				if ((info.flags & Flag::AlignLeft) != 0)
 					rect.x = innerRect.x;
 				else if ((info.flags & Flag::AlignCenterHorizontal) != 0)

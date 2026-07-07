@@ -181,6 +181,9 @@
     <ClCompile Include="src\gui\BaseButton.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\CardImage.cpp" />
+    <ClCompile Include="src\gui\ChatList.cpp" />
+    <ClCompile Include="src\gui\ChatListingScreen.cpp" />
+    <ClCompile Include="src\gui\ChatListItem.cpp" />
     <ClCompile Include="src\gui\Events.cpp" />
     <ClCompile Include="src\gui\ImageWithMask.cpp" />
     <ClCompile Include="src\gui\LineBorderRenderer.cpp" />
@@ -422,6 +425,9 @@
     <ClInclude Include="include\Figment.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\CardImage.h" />
+    <ClInclude Include="include\gui\ChatList.h" />
+    <ClInclude Include="include\gui\ChatListingScreen.h" />
+    <ClInclude Include="include\gui\ChatListItem.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\Events.h" />
     <ClInclude Include="include\gui\GUIConstants.h" />
@@ -517,6 +523,7 @@
     <ClInclude Include="include\util\DebugUtils.h" />
     <ClInclude Include="include\util\ExpectedRef.h" />
     <ClInclude Include="include\util\FixedString.h" />
+    <ClInclude Include="include\util\NonOwningPtr.h" />
     <ClInclude Include="include\util\OptionalRef.h" />
     <ClInclude Include="include\util\SearchIndex.h" />
     <ClInclude Include="include\util\EnumFlags.h" />

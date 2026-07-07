@@ -28,6 +28,7 @@ namespace fig::gui
 		Login,
 		Home,
 		Chat,
+		ChatListing,
 	};
 
 	class MainFrame : public Frame

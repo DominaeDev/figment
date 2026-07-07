@@ -99,9 +99,6 @@
     <Filter Include="Source Files\Frontend\User">
       <UniqueIdentifier>{8e498fb3-7b47-4628-ba65-d85fd8f6c436}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Controls\Cards">
-      <UniqueIdentifier>{0897e582-e3a2-4a2f-a8a6-b5f2d42ad6e6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\GUI\Screens">
       <UniqueIdentifier>{0b0e7823-493d-4e1c-9c9f-946893298eae}</UniqueIdentifier>
     </Filter>
@@ -144,6 +141,24 @@
     <Filter Include="Source Files\Third-party\fpm">
       <UniqueIdentifier>{5c9890a5-1a01-45e7-91a1-61f4246ebe3f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\ChatListing">
+      <UniqueIdentifier>{4f5345cc-8d81-4d49-9369-a40e594444b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\ChatListing\Controls">
+      <UniqueIdentifier>{af3c373c-e1f9-4fe3-8f58-583525875ebb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\Chat">
+      <UniqueIdentifier>{44be9f97-9310-4dba-b1b1-15bceee15a45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\Chat\Controls">
+      <UniqueIdentifier>{0924a918-e3aa-403d-a36b-456ea5fa7239}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\Home">
+      <UniqueIdentifier>{d5a481cc-0b10-4773-9886-59a6d7127668}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\Home\Controls">
+      <UniqueIdentifier>{ae61212c-9433-4ebf-8df8-2deae22720ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -170,12 +185,6 @@
     <ClCompile Include="src\gui\LayoutElement.cpp">
       <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ChatScroll.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ChatMessage.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\CommonUtils.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
@@ -199,9 +208,6 @@
     </ClCompile>
     <ClCompile Include="src\llm\LLMEmbedding.cpp">
       <Filter>Source Files\Backend\LLM\Embeddings</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\VariableList.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMStateVariables.cpp">
       <Filter>Source Files\Backend\LLM\Context</Filter>
@@ -269,12 +275,6 @@
     <ClCompile Include="src\llm\ContextCursor.cpp">
       <Filter>Source Files\Backend\LLM\Context</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\HomeScreen.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ChatScreen.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\Screen.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
@@ -302,9 +302,6 @@
     <ClCompile Include="src\gui\SidePanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\CardList.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\RoundedBorder.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
@@ -316,15 +313,6 @@
     </ClCompile>
     <ClCompile Include="..\Libraries\miniz\src\miniz.c">
       <Filter>Source Files\Third-party\miniz</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CoverCard.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ScenarioCard.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterCard.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SimpleTextBox.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -382,9 +370,6 @@
     </ClCompile>
     <ClCompile Include="src\gui\VerticalSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CardImage.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ButtonWithLabel.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -563,19 +548,52 @@
     <ClCompile Include="src\chat\ChatLogger.cpp">
       <Filter>Source Files\Chat</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ChatListingScreen.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\ChatListing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ChatScreen.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ChatMessage.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ChatScroll.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\VariableList.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\HomeScreen.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Home</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CardImage.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterCard.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CoverCard.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ScenarioCard.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CardList.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ChatList.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\ChatListing\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ChatListItem.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\ChatListing\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
       <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ChatScroll.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\util\StringUtils.h">
       <Filter>Source Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ChatMessage.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\util\CommonUtils.h">
       <Filter>Source Files\Utility</Filter>
@@ -600,9 +618,6 @@
     </ClInclude>
     <ClInclude Include="include\llm\Embedding.h">
       <Filter>Source Files\Backend\LLM\Embeddings</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\VariableList.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMStateVariables.h">
       <Filter>Source Files\Backend\LLM\Context</Filter>
@@ -988,12 +1003,6 @@
     <ClInclude Include="include\gui\Screen.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\HomeScreen.h">
-      <Filter>Source Files\Frontend\GUI\Screens</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ChatScreen.h">
-      <Filter>Source Files\Frontend\GUI\Screens</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\MainFrame.h">
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
     </ClInclude>
@@ -1021,9 +1030,6 @@
     <ClInclude Include="include\gui\SidePanel.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\CardList.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\RoundedBorder.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
@@ -1035,15 +1041,6 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\miniz\include\miniz.h">
       <Filter>Source Files\Third-party\miniz</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CoverCard.h">
-      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ScenarioCard.h">
-      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterCard.h">
-      <Filter>Source Files\Frontend\GUI\Controls\Cards</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\GUIConstants.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
@@ -1101,9 +1098,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\VerticalSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CardImage.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ButtonWithLabel.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -1352,6 +1346,48 @@
       <Filter>Source Files\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\util\FixedString.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatListingScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens\ChatListing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatList.h">
+      <Filter>Source Files\Frontend\GUI\Screens\ChatListing\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatMessage.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatScroll.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\VariableList.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\HomeScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Home</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CardImage.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterCard.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CoverCard.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ScenarioCard.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CardList.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatListItem.h">
+      <Filter>Source Files\Frontend\GUI\Screens\ChatListing\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\NonOwningPtr.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>

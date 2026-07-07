@@ -55,6 +55,16 @@ namespace fig::gui
 		void SetMaxSize(Coord width, Coord height) { _maxSize = Point { width, height }; }
 
 		void AddChild(LayoutElement* pChild);
+
+		template <typename T, typename... Args> 
+			requires std::derived_from<T, LayoutElement>
+		fig::non_owning_ptr<T> AddChild(Args&&... args)
+		{
+			T* child = new T(this, std::forward<Args>(args)...);
+			AddChild((LayoutElement*) child);
+			return child;
+		}
+
 		bool RemoveChild(LayoutElement* pChild);
 		bool RemoveChildren();
 		bool DestroyChild(LayoutElement* pChild);
@@ -63,6 +73,15 @@ namespace fig::gui
 		void MoveChildToBottom(LayoutElement* pChild);
 
 		void SetSizer(Sizer* sizer);
+
+		template <typename T, typename... Args>
+			requires std::derived_from<T, Sizer>
+		fig::non_owning_ptr<T> SetSizer(Args&&... args)
+		{
+			T* child = new T(std::forward<Args>(args)...);
+			SetSizer((Sizer*)child);
+			return child;
+		}
 
 		void EnableLayout(bool bEnable) noexcept { _bLayoutEnabled = bEnable; }
 		bool IsLayoutEnabled() const noexcept { return _bLayoutEnabled; }
@@ -104,4 +123,6 @@ namespace fig::gui
 		bool _bLayoutEnabled = true;
 		bool _bInvalidLayout = false;
 	};
+
+	using ControlPtr = fig::non_owning_ptr<LayoutElement>;
 }

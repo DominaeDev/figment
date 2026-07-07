@@ -77,6 +77,11 @@ namespace fig::chat
 			}
 		}
 
+		return GetDefaultColorsOf(role);
+	}
+
+	fig::gui::ColorPair ChatSession::GetDefaultColorsOf(Role role)
+	{
 		if (is_bot(role))
 		{
 			return ColorPair {
@@ -106,6 +111,7 @@ namespace fig::chat
 			};
 		}
 	}
+
 
 	fig::string ChatSession::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
 	{

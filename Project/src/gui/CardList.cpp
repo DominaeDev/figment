@@ -6,7 +6,6 @@
 #include "gui/GridSizer.h"
 #include "gui/ScenarioCard.h"
 #include "gui/CharacterCard.h"
-#include "gui/MainFrame.h"
 
 using namespace fig::io;
 using namespace fig::user;
@@ -171,7 +170,7 @@ namespace fig::gui
 
 	void CardList::OnScroll()
 	{
-		MainFrame::GetInstance().PopAllMenus();
+		PushEvent(UserEvent::Scrolling);
 	}
 
 	void CardList::OnAfterLayout()
@@ -270,9 +269,4 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CardList::ResetScroll() noexcept
-	{
-		ScrollTo(0, false);
-		InvalidateLayout();
-	}
 }

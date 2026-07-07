@@ -191,10 +191,14 @@ namespace fig::gui
 
 	void LayoutElement::AddChild(LayoutElement* pLayoutElement)
 	{
+#ifdef _DEBUG
 		auto itFind = std::find(_children.cbegin(), _children.cend(), pLayoutElement);
 		if (itFind != _children.cend())
+		{
+			assert(false && "Already added");
 			return; // Already added
-
+		}
+#endif
 		_children.push_back(pLayoutElement);
 		pLayoutElement->SetParent(this);
 		InvalidateLayout();

@@ -103,6 +103,17 @@ void VerticalSizer::OnLayout(const Rect& parentRect)
 				rect.w = innerRect.w;
 			}
 
+			auto minSize = pControl->GetMinSize();
+			auto maxSize = pControl->GetMaxSize();
+			if (maxSize.x > 0)
+				rect.w = std::min(rect.w, maxSize.x);
+			if (maxSize.y > 0)
+				rect.h = std::min(rect.h, maxSize.y);
+			if (minSize.x > 0)
+				rect.w = std::max(rect.w, minSize.x);
+			if (minSize.y > 0)
+				rect.h = std::max(rect.h, minSize.y);
+
 			if ((info.flags & Flag::AlignTop) != 0)
 				rect.y = innerRect.y;
 			else if ((info.flags & Flag::AlignCenterVertical) != 0)

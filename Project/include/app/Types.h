@@ -14,6 +14,7 @@
 #include "util/OptionalRef.h"
 #include "util/ExpectedRef.h"
 #include "util/FixedString.h"
+#include "util/NonOwningPtr.h"
 
 namespace fig
 {
