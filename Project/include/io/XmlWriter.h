@@ -15,7 +15,7 @@ namespace fig::data
 	{
 		friend class XmlWriterElement;
 		XmlWriterAttribute() = delete;
-		XmlWriterAttribute(const fig::string& name, tinyxml2::XMLElement* pParent) noexcept;
+		XmlWriterAttribute(const fig::string& name, fig::observer_ptr<tinyxml2::XMLElement> pParent) noexcept;
 
 	public:
 		template<typename T>
@@ -68,14 +68,14 @@ namespace fig::data
 
 	private:
 		fig::string _name;
-		tinyxml2::XMLElement* _pParent;
+		fig::observer_ptr<tinyxml2::XMLElement> _pParent;
 	};
 
 	class XmlWriterElement
 	{
 		friend class XmlWriter;
 		XmlWriterElement() = delete;
-		XmlWriterElement(tinyxml2::XMLElement* pElement) noexcept;
+		XmlWriterElement(fig::observer_ptr<tinyxml2::XMLElement> pElement) noexcept;
 
 	public:
 		template<typename T>
@@ -159,7 +159,7 @@ namespace fig::data
 		void DeleteValue();
 
 	private:
-		tinyxml2::XMLElement* _pElement {};
+		fig::observer_ptr<tinyxml2::XMLElement> _pElement {};
 	};
 
 	class XmlWriter
@@ -176,7 +176,7 @@ namespace fig::data
 		void WriteToMemory(fig::bytes& buffer) const;
 
 	private:
-		tinyxml2::XMLDocument* _pDoc {};
-		tinyxml2::XMLElement* _pRoot {};
+		std::unique_ptr<tinyxml2::XMLDocument> _pDoc {};
+		fig::observer_ptr<tinyxml2::XMLElement> _pRoot {};
 	};
 }

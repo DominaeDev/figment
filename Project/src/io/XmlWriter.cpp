@@ -8,7 +8,7 @@ using namespace tinyxml2;
 
 namespace fig::data
 {
-	XmlWriterAttribute::XmlWriterAttribute(const fig::string& name, tinyxml2::XMLElement* pParent) noexcept :
+	XmlWriterAttribute::XmlWriterAttribute(const fig::string& name, fig::observer_ptr<tinyxml2::XMLElement> pParent) noexcept :
 		_name { name },
 		_pParent { pParent }
 	{}
@@ -87,7 +87,7 @@ namespace fig::data
 		_pParent->SetAttribute(_name.c_str(), static_cast<uint64_t>(value));
 	}
 
-	XmlWriterElement::XmlWriterElement(tinyxml2::XMLElement* pElement) noexcept :
+	XmlWriterElement::XmlWriterElement(fig::observer_ptr<tinyxml2::XMLElement> pElement) noexcept :
 		_pElement { pElement }
 	{
 	}
@@ -187,7 +187,7 @@ namespace fig::data
 
 	XmlWriter::XmlWriter(const fig::string& root)
 	{
-		_pDoc = new XMLDocument();
+		_pDoc = std::make_unique<XMLDocument>();
 		auto pDecl = _pDoc->NewDeclaration(nullptr);
 		_pDoc->InsertFirstChild(pDecl);
 
@@ -197,7 +197,6 @@ namespace fig::data
 
 	XmlWriter::~XmlWriter()
 	{
-		delete _pDoc;
 	}
 
 	XmlWriterElement XmlWriter::GetRoot() noexcept

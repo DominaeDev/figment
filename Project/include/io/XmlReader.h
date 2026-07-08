@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Figment.h"
-#include "gui/GUIColor.h"
 
 namespace tinyxml2
 {
@@ -24,7 +23,7 @@ namespace fig::data
 	{
 		friend class XmlReaderElement;
 		XmlReaderAttribute() = delete;
-		XmlReaderAttribute(const tinyxml2::XMLAttribute* pAttribute) noexcept;
+		XmlReaderAttribute(fig::observer_ptr<const tinyxml2::XMLAttribute> pAttribute) noexcept;
 
 	public:
 		inline bool IsOk() const noexcept { return (bool)_pAttrib; }
@@ -70,14 +69,14 @@ namespace fig::data
 		}
 
 	private:
-		const tinyxml2::XMLAttribute* _pAttrib;
+		fig::observer_ptr<const tinyxml2::XMLAttribute> _pAttrib;
 	};
 
 	class XmlReaderElement
 	{
 		friend class XmlReader;
 		XmlReaderElement() = delete;
-		XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot, XmlReaderOptions options) noexcept;
+		XmlReaderElement(fig::observer_ptr<const tinyxml2::XMLElement> pElement, fig::observer_ptr<const tinyxml2::XMLElement> pRoot, XmlReaderOptions options) noexcept;
 
 	public:
 		fig::string GetName() const noexcept;
@@ -152,8 +151,8 @@ namespace fig::data
 	private:
 		std::optional<fig::string> ReadText() const noexcept;
 
-		const tinyxml2::XMLElement* _pRoot {};
-		const tinyxml2::XMLElement* _pElement {};
+		fig::observer_ptr<const tinyxml2::XMLElement> _pRoot {};
+		fig::observer_ptr<const tinyxml2::XMLElement> _pElement {};
 		XmlReaderOptions _options {};
 	};
 
@@ -175,8 +174,8 @@ namespace fig::data
 		static const XmlReaderOptions DefaultOptions;
 
 	private:
-		tinyxml2::XMLDocument* _pDoc {};
-		tinyxml2::XMLElement* _pRoot {};
+		std::unique_ptr<tinyxml2::XMLDocument> _pDoc {};
+		fig::observer_ptr<tinyxml2::XMLElement> _pRoot {};
 		XmlReaderOptions _options {};
 	};
 }

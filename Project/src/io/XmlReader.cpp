@@ -7,7 +7,7 @@ using namespace tinyxml2;
 
 namespace fig::data
 {
-	XmlReaderAttribute::XmlReaderAttribute(const tinyxml2::XMLAttribute* pAttribute) noexcept :
+	XmlReaderAttribute::XmlReaderAttribute(fig::observer_ptr<const tinyxml2::XMLAttribute> pAttribute) noexcept :
 		_pAttrib { pAttribute }
 	{
 	}
@@ -209,7 +209,7 @@ namespace fig::data
 		return std::nullopt;
 	}
 
-	XmlReaderElement::XmlReaderElement(const tinyxml2::XMLElement* pElement, const tinyxml2::XMLElement* pRoot, XmlReaderOptions options) noexcept :
+	XmlReaderElement::XmlReaderElement(fig::observer_ptr<const tinyxml2::XMLElement> pElement, fig::observer_ptr<const tinyxml2::XMLElement> pRoot, XmlReaderOptions options) noexcept :
 		_pElement { pElement },
 		_pRoot { pRoot },
 		_options { options }
@@ -424,13 +424,12 @@ namespace fig::data
 	XmlReader::XmlReader(const fig::path& path, XmlReaderOptions options) :
 		_options(options)
 	{
-		_pDoc = new XMLDocument();
+		_pDoc = std::make_unique<XMLDocument>();
 		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS)
 		{
 			// Error
-			delete _pDoc;
-			_pDoc = nullptr;
-			_pRoot = nullptr;
+			_pDoc.reset();
+			_pRoot.reset();
 			return;
 		}
 		_pRoot = _pDoc->RootElement();
@@ -439,13 +438,13 @@ namespace fig::data
 	XmlReader::XmlReader(const fig::path& path, const fig::string& root, XmlReaderOptions options) :
 		_options(options)
 	{
-		_pDoc = new XMLDocument();
+		_pDoc = std::make_unique<XMLDocument>();
 		if (_pDoc->LoadFile(path.u8string().c_str()) != XML_SUCCESS 
 			or std::strcmp(_pDoc->RootElement()->Name(), root.c_str()) != 0)
 		{
-			delete _pDoc;
-			_pDoc = nullptr;
-			_pRoot = nullptr;
+			// Error
+			_pDoc.reset();
+			_pRoot.reset();
 			return;
 		}
 		_pRoot = _pDoc->RootElement();
@@ -454,13 +453,12 @@ namespace fig::data
 	XmlReader::XmlReader(const fig::string& document, XmlReaderOptions options) :
 		_options(options)
 	{
-		_pDoc = new XMLDocument();
+		_pDoc = std::make_unique<XMLDocument>();
 		if (_pDoc->Parse(document.c_str()) != XML_SUCCESS)
 		{
 			// Error
-			delete _pDoc;
-			_pDoc = nullptr;
-			_pRoot = nullptr;
+			_pDoc.reset();
+			_pRoot.reset();
 			return;
 		}
 		_pRoot = _pDoc->RootElement();
@@ -469,13 +467,12 @@ namespace fig::data
 	XmlReader::XmlReader(fig::string_view document, XmlReaderOptions options) :
 		_options(options)
 	{
-		_pDoc = new XMLDocument();
+		_pDoc = std::make_unique<XMLDocument>();
 		if (_pDoc->Parse((char*)document.data(), document.size()) != XML_SUCCESS)
 		{
 			// Error
-			delete _pDoc;
-			_pDoc = nullptr;
-			_pRoot = nullptr;
+			_pDoc.reset();
+			_pRoot.reset();
 			return;
 		}
 		_pRoot = _pDoc->RootElement();
@@ -483,12 +480,11 @@ namespace fig::data
 
 	XmlReader::~XmlReader()
 	{
-		delete _pDoc;
 	}
 
 	XmlReaderElement XmlReader::GetRoot() const noexcept
 	{
-		return IsOk() ? XmlReaderElement { _pRoot, _pRoot, _options } : XmlReaderElement { nullptr, nullptr, {} };
+		return IsOk() ? XmlReaderElement { fig::observer_ptr<const tinyxml2::XMLElement>(_pRoot), fig::observer_ptr<const tinyxml2::XMLElement>(_pRoot), _options } : XmlReaderElement { nullptr, nullptr, {} };
 	}
 
 	std::optional<XmlReaderElement> XmlReader::GetFirstElement(const fig::string& name) const noexcept
@@ -497,7 +493,7 @@ namespace fig::data
 			return std::nullopt;
 
 		auto pElement = _pRoot->FirstChildElement(name.c_str());
-		return pElement ? std::make_optional<XmlReaderElement>({ pElement, _pRoot, _options }) : std::nullopt;
+		return pElement ? std::make_optional<XmlReaderElement>({ fig::observer_ptr<const tinyxml2::XMLElement>(pElement), fig::observer_ptr<const tinyxml2::XMLElement>(_pRoot), _options }) : std::nullopt;
 	}
 
 	// Explicit template instantiation

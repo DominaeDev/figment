@@ -91,7 +91,7 @@ namespace fig::gui
 		void LayoutNow();
 
 		fig::observer_ptr<LayoutElement> GetParent() { return _pParent; }
-		fig::observer_ptr<const LayoutElement> GetParent() const { return _pParent; }
+		fig::observer_ptr<const LayoutElement> GetParent() const { return fig::observer_ptr<const LayoutElement>(_pParent); }
 
 		inline void Cull(bool bCulled) { _bCulled = bCulled; }
 		inline bool IsCulled() const { return _bCulled; }

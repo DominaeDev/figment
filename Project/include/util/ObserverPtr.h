@@ -35,7 +35,7 @@ namespace fig
 		}
 
 		template <typename U>
-			requires std::derived_from<T, U> and (not std::same_as<T, U>)
+			requires std::derived_from<T, U> and (not std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>)
 		operator observer_ptr<U>() const { return _ptr; }
 
 		void reset(T* ptr = nullptr) { _ptr = ptr; }
