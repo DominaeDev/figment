@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	BaseButton::BaseButton(LayoutElement* pOwner) : _pOwner { pOwner }
+	BaseButton::BaseButton(ControlPtr pOwner) : _pOwner { pOwner }
 	{
 	}
 

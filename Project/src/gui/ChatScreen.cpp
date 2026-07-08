@@ -71,33 +71,29 @@ namespace fig::gui
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);
 
-		auto pCenterSizer = new VerticalSizer();
+		auto pCenterSizer = centerArea->SetSizer<VerticalSizer>();
 		pCenterSizer->Add(_pChatScroll, -1, Sizer::Fill | Sizer::Bottom, 8);
 		pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::AlignCenterHorizontal);
-		centerArea->SetSizer(pCenterSizer);
 
-		auto mainSizer = new HorizontalSizer();
+		auto mainSizer = SetSizer<HorizontalSizer>();
 		mainSizer->Add(leftArea, -1, Sizer::Expand);
 		mainSizer->Add(centerArea, 0, Sizer::Fill | Sizer::Bottom, 24);
 		mainSizer->Add(rightArea, -1, Sizer::Expand);
-		SetSizer(mainSizer);
 
 		_pTextBox->SetEnterPressedCallback([this](fig::string text) {
 			EnqueueCommand(ChatCommands::Parse(text));
 			_pTextBox->Clear();
 		});
 
-		auto pTextBoxBG = new TexturedBorderRenderer(TextureType::TEXTBOX_BG);
+		auto pTextBoxBG = _pTextBox->SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::TEXTBOX_BG);
 		pTextBoxBG->SetCornerScale(0.5f);
 		pTextBoxBG->SetExtend(7.0f);
 		pTextBoxBG->SetColor(Colors::White);
-		_pTextBox->SetBackgroundRenderer(pTextBoxBG);
 
-		auto pTextBoxBorder = new TexturedBorderRenderer(TextureType::TEXTBOX_BORDER);
+		auto pTextBoxBorder = _pTextBox->SetBorderRenderer<TexturedBorderRenderer>(TextureType::TEXTBOX_BORDER);
 		pTextBoxBorder->SetCornerScale(0.5f);
 		pTextBoxBorder->SetExtend(7.0f);
 		pTextBoxBorder->SetColor(Color { 0xb9, 0xb2, 0x8f, 0xFF });
-		_pTextBox->SetBorderRenderer(pTextBoxBorder);
 
 		_pVariableList = CreateControl<VariableList>();
 		_pVariableList->SetPosition(10, 10);

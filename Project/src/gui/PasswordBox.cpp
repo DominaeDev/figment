@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	PasswordBox::PasswordBox(LayoutElement* pParent) : SimpleTextBox(pParent, FontFace::Default, 18, { TextBox::Flag::Password, TextBox::Flag::Single })
+	PasswordBox::PasswordBox(ParentPtr pParent) : SimpleTextBox(pParent, FontFace::Default, 18, { TextBox::Flag::Password, TextBox::Flag::Single })
 	{
 		SetMarginLeft(34);
 

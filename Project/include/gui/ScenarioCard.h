@@ -7,7 +7,7 @@ namespace fig::gui
 	class ScenarioCard : public CoverCard
 	{
 	public:
-		ScenarioCard(LayoutElement* pParent, const fig::uuid& scenarioId, CardSize cardSize);
+		ScenarioCard(ParentPtr pParent, const fig::uuid& scenarioId, CardSize cardSize);
 
 	protected:
 		void OnUpdate(float fElapsed) override {};

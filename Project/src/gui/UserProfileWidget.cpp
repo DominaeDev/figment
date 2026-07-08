@@ -8,7 +8,7 @@
 
 namespace fig::gui
 {
-	UserProfileWidget::UserProfileWidget(LayoutElement* pParent) noexcept : Panel(pParent)
+	UserProfileWidget::UserProfileWidget(ParentPtr pParent) noexcept : Panel(pParent)
 	{
 		_pImage = CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pImage->SetSize(48, 48);
@@ -22,7 +22,7 @@ namespace fig::gui
 		_pSignOutButton->CenterVertically();
 		_pSignOutButton->SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
 
-		SetBorderRenderer(new LineBorderRenderer(Colors::LineColor, { Direction::North }));
+		SetBorderRenderer<LineBorderRenderer>(Colors::LineColor, Direction::North);
 	}
 
 	void UserProfileWidget::SetUser(const fig::user::UserProfile& profile) noexcept

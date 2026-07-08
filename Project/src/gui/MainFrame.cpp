@@ -37,15 +37,13 @@ namespace fig::gui
 		// Status bar
 		_pStatusBar = CreateControl<StatusBar>();
 
-		auto mainSizer = new HorizontalSizer();
+		auto topSizer = SetSizer<VerticalSizer>();
+		auto mainSizer = topSizer->Add<HorizontalSizer>(-1, Sizer::Expand);
+
 		mainSizer->Add(_pSidePanel, 0, Sizer::Expand);
 		mainSizer->Add(_pMainArea, -1, Sizer::Fill);
 
-		auto topSizer = new VerticalSizer();
-		topSizer->Add(mainSizer, -1, Sizer::Expand);
 		topSizer->Add(_pStatusBar, 0, Sizer::Expand);
-
-		SetSizer(topSizer);
 
 		RegisterScreen<LoginScreen>(ScreenType::Login);
 		RegisterScreen<HomeScreen>(ScreenType::Home);
@@ -134,9 +132,8 @@ namespace fig::gui
 		_pMainArea->RemoveChildren();
 		_pMainArea->AddChild(_pActiveScreen);
 		
-		auto sizer = new VerticalSizer();
+		auto sizer = _pMainArea->SetSizer<VerticalSizer>();
 		sizer->Add(_pActiveScreen, -1, Sizer::Fill);
-		_pMainArea->SetSizer(sizer);
 
 		_pActiveScreen->SetVisible(true);
 		_pActiveScreen->PushEvent(UserEvent::Activated);

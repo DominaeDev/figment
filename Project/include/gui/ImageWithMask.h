@@ -7,7 +7,7 @@ namespace fig::gui
 	class ImageWithMask : public Control
 	{
 	public:
-		ImageWithMask(LayoutElement* pParent, TexturePtr pTexture, TexturePtr pMask, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
+		ImageWithMask(ParentPtr pParent, TexturePtr pTexture, TexturePtr pMask, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
 		void SetTexture(TexturePtr pTexture, TexturePtr pMask, bool bResize = false);
 		Point GetTextureSize() const noexcept;
 		void Reset();

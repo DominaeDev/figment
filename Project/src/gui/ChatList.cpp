@@ -15,13 +15,12 @@ namespace fig::gui
 	static constexpr Coord Spacing = 8;
 	static constexpr Coord BottomMargin = 120;
 
-	ChatList::ChatList(LayoutElement* pParent) : ScrollPanel(pParent)
+	ChatList::ChatList(ParentPtr pParent) : ScrollPanel(pParent)
 	{
-		_pVerticalSizer = new VerticalSizer();
+		_pVerticalSizer = SetSizer<VerticalSizer>();
 		SetTopMargin(TopMargin);
 		SetBottomMargin(BottomMargin);
 
-		SetSizer(_pVerticalSizer);
 		EnableClipping(true);
 		EnableCulling(true);
 	}

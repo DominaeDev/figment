@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <memory>
 
 namespace fig
 {
@@ -37,8 +38,7 @@ namespace fig
 			requires std::derived_from<T, U> and (not std::same_as<T, U>)
 		operator observer_ptr<U>() const { return _ptr; }
 
-		void reset() { _ptr = nullptr; }
-		void reset(T* ptr) { _ptr = ptr; }
+		void reset(T* ptr = nullptr) { _ptr = ptr; }
 
 	private:
 		T* _ptr;

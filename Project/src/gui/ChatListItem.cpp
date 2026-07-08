@@ -7,7 +7,7 @@
 
 namespace fig::gui
 {
-	ChatListItem::ChatListItem(LayoutElement* pParent) : Panel(pParent)
+	ChatListItem::ChatListItem(ParentPtr pParent) : Panel(pParent)
 	{
 		SetMaxSize(700, -1);
 		SetHeight(60);
@@ -15,13 +15,11 @@ namespace fig::gui
 		// Background
 		SetForegroundColor(Colors::SidePanelForeground);
 
-		auto pBGRenderer = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_10PX, 8);
+		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_10PX, 8);
 		pBGRenderer->SetColor(Colors::SidePanelBackground);
-		SetBackgroundRenderer(pBGRenderer);
 
-		auto pBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BORDER_10PX, 16);
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_10PX, 16);
 		pBorder->SetColor(Colors::LineColor);
-		SetBorderRenderer(pBorder);
 
 		// Title
 		_pTitle = CreateControl<StaticText>("Yuki", FontFace::Bold, 14.0, false);
@@ -81,7 +79,35 @@ namespace fig::gui
 				break;
 		}
 
+		if (IsUserEvent(event, UserEvent::MenuOpened))
+		{
+			if (_menuId == event.user.code)
+			{
+				_bSelected = true;
+				return EventResult::Continue;
+			}
+		}
+		else if (IsUserEvent(event, UserEvent::MenuClosed))
+		{
+			if (_menuId == event.user.code)
+			{
+				_bSelected = false;
+				return EventResult::Continue;
+			}
+		}
 		return EventResult::Pass;
+	}
+
+	void ChatListItem::OnUpdate(float fElapsed)
+	{
+		bool bHovered = (_bSelected or is_inside(GetRect(), GetMousePos())
+			and !MainFrame::GetInstance().IsMenuShowing());
+
+		if (_bHovered != bHovered)
+		{
+			_bHovered = bHovered;
+			GetBackgroundRenderer()->SetColor(_bHovered ? 0xFFFFFF80_rgba : 0xEEECE480_rgba);
+		}
 	}
 
 	void ChatListItem::ShowMenu() noexcept
@@ -102,7 +128,6 @@ namespace fig::gui
 		menu.AddItem("Star", TextureType::ICON_STAR);
 		menu.AddSeparator();
 		menu.AddItem("Delete\u2026");
-		menu.Show();
+		_menuId = menu.Show();
 	}
-	
 }

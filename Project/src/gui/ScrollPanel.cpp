@@ -7,7 +7,7 @@
 
 namespace fig::gui
 {
-	ScrollPanel::ScrollPanel(LayoutElement* pParent, bool bScrollBar) : Control(pParent)
+	ScrollPanel::ScrollPanel(ParentPtr pParent, bool bScrollBar) : Control(pParent)
 	{
 		EnableCulling(true);
 		EnableClipping(true);
@@ -18,7 +18,7 @@ namespace fig::gui
 			_pScrollBar->SetWidth(16);
 			_pScrollBar->SetHeight(GetHeight());
 			_pScrollBar->SetX(GetWidth() - _pScrollBar->GetWidth());
-			RemoveChild(_pScrollBar);
+			RemoveChild(_pScrollBar); // Unparented
 		}
 	}
 

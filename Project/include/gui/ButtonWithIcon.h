@@ -11,7 +11,7 @@ namespace fig::gui
 	{
 		ButtonWithIcon() = delete;
 	public:
-		ButtonWithIcon(LayoutElement* pParent, TextureType icon);
+		ButtonWithIcon(ParentPtr pParent, TextureType icon);
 		void SetIcon(TextureType icon);
 		void EnableBorder(bool bEnable) noexcept;
 
@@ -20,8 +20,6 @@ namespace fig::gui
 		void OnButtonState() override;
 
 	private:
-		fig::observer_ptr<TexturedBorderRenderer> _pBGRenderer;
-		fig::observer_ptr<TexturedBorderRenderer> _pBorder;
 		fig::observer_ptr<Image> _pIcon;
 	};
 }

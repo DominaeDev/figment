@@ -7,7 +7,7 @@ namespace fig::gui
 	class VerticalGradient : public Control
 	{
 	public:
-		VerticalGradient(LayoutElement* pParent, Color colorTop, Color colorBottom);
+		VerticalGradient(ParentPtr pParent, Color colorTop, Color colorBottom);
 		void SetColors(Color colorTop, Color colorBottom);
 
 	protected:

@@ -11,7 +11,7 @@ namespace fig::gui
 	class Area : public Control
 	{
 	public:
-		Area(LayoutElement* pParent);
+		Area(ParentPtr pParent);
 
 	protected:
 		void OnUpdate(float fElapsed) override {}

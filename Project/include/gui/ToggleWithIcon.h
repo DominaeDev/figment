@@ -14,7 +14,7 @@ namespace fig::gui
 		ToggleWithIcon() = delete;
 	public:
 		enum class ToggleBehavior { Default, Radio };
-		ToggleWithIcon(LayoutElement* pParent, TextureType icon, ToggleBehavior behavior = ToggleBehavior::Default, bool bOn = false);
+		ToggleWithIcon(ParentPtr pParent, TextureType icon, ToggleBehavior behavior = ToggleBehavior::Default, bool bOn = false);
 
 		void SetIcon(TextureType icon);
 		void Toggle(bool bOn, bool bTrigger = true) noexcept;
@@ -26,7 +26,6 @@ namespace fig::gui
 		void OnButtonState() override;
 
 	private:
-		fig::observer_ptr<TexturedBorderRenderer> _pBGRenderer;
 		fig::observer_ptr<Image> _pIcon {};
 		ToggleDelegate _fnToggle {};
 		ToggleBehavior _behavior {};

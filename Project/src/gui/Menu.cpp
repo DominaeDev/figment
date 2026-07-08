@@ -54,13 +54,11 @@ namespace fig::gui
 
 	Menu::Menu(Frame* pHostFrame) : Overlay(pHostFrame)
 	{
-		auto pBackground = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_10PX, 16);
+		auto pBackground = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_10PX, 16);
 		pBackground->SetColor(MenuBackgroundColor);
-		SetBackgroundRenderer(pBackground);
 
-		auto pBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BORDER_10PX, 16);
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_10PX, 16);
 		pBorder->SetColor(Colors::LineColor);
-		SetBorderRenderer(pBorder);
 
 		SetBackgroundColor(Colors::White);
 		SetForegroundColor(Colors::Black);

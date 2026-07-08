@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	Area::Area(LayoutElement* pParent) : Control(pParent)
+	Area::Area(ParentPtr pParent) : Control(pParent)
 	{
 	}
 }

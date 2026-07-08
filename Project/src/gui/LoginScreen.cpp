@@ -30,7 +30,7 @@ namespace fig::gui
 //		pCenter->SetBackgroundColor(Colors::Green);
 		pCenter->SetSize(500, 260);
 
-		auto pVerticalSizer = new VerticalSizer();
+		auto pVerticalSizer = SetSizer<VerticalSizer>();
 		pVerticalSizer->AddStretchSpacer();
 		pVerticalSizer->Add(pCenter, 0, Sizer::AlignCenterHorizontal);
 		pVerticalSizer->AddStretchSpacer();
@@ -50,11 +50,6 @@ namespace fig::gui
 		_pNoPassButton->SetHeight(35);
 		_pNoPassButton->SetDelegate([this]() { SignIn(); });
 
-		auto pProfileImageSizer = new HorizontalSizer();
-		pProfileImageSizer->Add(_pPrevProfileBtn, -1, Sizer::AlignCenterVertical | Sizer::AlignRight | Sizer::Right, 16);
-		pProfileImageSizer->Add(_pProfileImage, 0);
-		pProfileImageSizer->Add(_pNextProfileBtn, -1, Sizer::AlignCenterVertical | Sizer::AlignLeft | Sizer::Left, 16);
-
 		_pProfileName = pCenter->CreateControl<StaticText>("", FontFace::Default, 24.0, false);
 		_pProfileName->SetAlignment(TextAlignment::Middle_Top);
 
@@ -73,23 +68,23 @@ namespace fig::gui
 		pSimpleBorder->FillParent();
 		pSimpleBorder->SetForegroundColor(Colors::SidePanelForeground);
 
-		auto pPasswordSizer = new HorizontalSizer();
+		auto pPasswordSizer = _pPasswordPanel->SetSizer<HorizontalSizer>();
 		pPasswordSizer->AddStretchSpacer();
 		pPasswordSizer->Add(_pPassword, 0, Sizer::AlignCenterVertical);
 		pPasswordSizer->Add(_pSignInBtn, 0, Sizer::AlignCenterVertical | Sizer::AlignLeft | Sizer::Left, 4);
 		pPasswordSizer->AddStretchSpacer();
-		_pPasswordPanel->SetSizer(pPasswordSizer);
 
-		auto pCenterSizer = new VerticalSizer();
-		pCenter->SetSizer(pCenterSizer);
-		pCenterSizer->Add(pProfileImageSizer, 0, Sizer::FixedSize, 160);
+		auto pCenterSizer = pCenter->SetSizer<VerticalSizer>();
+		auto pProfileImageSizer = pCenterSizer->Add<HorizontalSizer>(0, Sizer::FixedSize, 160);
 		pCenterSizer->AddSpacer(4);
 		pCenterSizer->Add(_pProfileName, 0, Sizer::Expand | Sizer::FixedSize, 24);
 		pCenterSizer->AddSpacer(28);
 		pCenterSizer->Add(_pPasswordPanel, 0, Sizer::Expand);
 		pCenterSizer->Add(_pNoPassButton, 0, Sizer::AlignCenterHorizontal);
 
-		SetSizer(pVerticalSizer);
+		pProfileImageSizer->Add(_pPrevProfileBtn, -1, Sizer::AlignCenterVertical | Sizer::AlignRight | Sizer::Right, 16);
+		pProfileImageSizer->Add(_pProfileImage, 0);
+		pProfileImageSizer->Add(_pNextProfileBtn, -1, Sizer::AlignCenterVertical | Sizer::AlignLeft | Sizer::Left, 16);
 
 		auto& profiles = Global::GetUserManager().GetProfiles();
 		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)))

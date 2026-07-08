@@ -7,9 +7,11 @@ namespace fig::gui
 	class ChatListItem : public Panel
 	{
 	public:
-		ChatListItem(LayoutElement* pParent);
+		ChatListItem(ParentPtr pParent);
 
 	protected:
+		void OnUpdate(float fElapsed);
+
 		void OnSize() override;
 		EventResult OnEvent(Event& event);
 
@@ -20,5 +22,8 @@ namespace fig::gui
 		fig::observer_ptr<StaticText> _pTitle;
 		fig::observer_ptr<StaticText> _pMessage;
 		fig::observer_ptr<StaticText> _pTimestamp;
+		bool _bSelected {};
+		bool _bHovered {};
+		int32_t _menuId { -1 };
 	};
 }

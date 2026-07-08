@@ -18,6 +18,7 @@ namespace fig::gui
 	{
 	public:
 		explicit LineBorderRenderer(Color color = Colors::White, Directions directions = { Direction::North, Direction::East, Direction::South, Direction::West });
+		LineBorderRenderer(Color color, Direction direction);
 
 		void Render(Renderer* pRenderer, const Rectf& rect);
 

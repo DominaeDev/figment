@@ -39,7 +39,7 @@ static int BytesUTF8Length(const char* text, int num_bytes)
 
 namespace fig::gui
 {
-	TextBox::TextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : Control(pParent),
+	TextBox::TextBox(ParentPtr pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : Control(pParent),
 		_flags { flags }
 	{
 		SetForegroundColor(Colors::Black);

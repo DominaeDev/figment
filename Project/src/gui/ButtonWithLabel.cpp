@@ -6,13 +6,12 @@
 
 namespace fig::gui
 {
-	ButtonWithLabel::ButtonWithLabel(LayoutElement* pParent, const fig::string& text) : ThemedButton(pParent)
+	ButtonWithLabel::ButtonWithLabel(ParentPtr pParent, const fig::string& text) : ThemedButton(pParent)
 	{
 		SetSize(200, 36);
 
-		_pBGRenderer = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_6PX, 8);
-		_pBGRenderer->SetColor(GetThemeBackground());
-		SetBackgroundRenderer(_pBGRenderer);
+		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_6PX, 8);
+		pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundColor(GetThemeBackground());
 
 		_pLabel = CreateControl<StaticText>("", FontFace::Default, 16.0, true);
@@ -34,7 +33,7 @@ namespace fig::gui
 
 	void ButtonWithLabel::OnButtonState()
 	{
-		_pBGRenderer->SetColor(GetThemeBackground());
+		GetBackgroundRenderer()->SetColor(GetThemeBackground());
 		_pLabel->SetForegroundColor(GetThemeForeground());
 	}
 }

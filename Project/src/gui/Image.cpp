@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	Image::Image(LayoutElement* pParent, Texture* pTexture, Color tint) : Control(pParent),
+	Image::Image(ParentPtr pParent, Texture* pTexture, Color tint) : Control(pParent),
 		_pTexture(pTexture)
 	{
 		if (_pTexture)
@@ -15,7 +15,7 @@ namespace fig::gui
 		SetBackgroundColor(Colors::Transparent);
 	}
 
-	Image::Image(LayoutElement* pParent, TextureType texture, Color tint) : Control(pParent)
+	Image::Image(ParentPtr pParent, TextureType texture, Color tint) : Control(pParent)
 	{
 		_pTexture = AppResources::GetTexture(texture);
 		if (_pTexture)

@@ -4,7 +4,7 @@
 
 using namespace fig::gui;
 
-HorizontalGradient::HorizontalGradient(LayoutElement* pParent, Color colorLeft, Color colorRight) : Control(pParent)
+HorizontalGradient::HorizontalGradient(ParentPtr pParent, Color colorLeft, Color colorRight) : Control(pParent)
 {
 	SetColors(colorLeft, colorRight);
 	_pTexture = AppResources::GetTexture(TextureType::BLANK);

@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	ThemedButton::ThemedButton(LayoutElement* pParent) : Control(pParent), BaseButton(this)
+	ThemedButton::ThemedButton(ParentPtr pParent) : Control(pParent), BaseButton(this)
 	{
 		SetTheme(Themes::DefaultButtonStyle);
 	}

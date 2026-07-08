@@ -25,8 +25,7 @@ namespace fig::gui
 		right->SetBackgroundColor(Color { 0, 0, 0xC0, 0xFF });
 		right->SetSize(100, 100);
 
-		auto h = new HorizontalSizer();
-		right->SetSizer(h);
+		auto h = right->SetSizer<HorizontalSizer>();
 
 		auto a = right->CreateControl<Panel>();
 		a->SetBackgroundColor(Colors::Red);
@@ -42,7 +41,7 @@ namespace fig::gui
 		h->Add(b, 0, Sizer::AlignCenterHorizontal | Sizer::AlignCenterVertical, 4);
 		h->Add(c, -1, Sizer::AlignLeft | Sizer::AlignBottom, 4);
 
-		auto sizer = new VerticalSizer();
+		auto sizer = area->SetSizer<VerticalSizer>();
 		sizer->Add(left, -1, Sizer::AlignRight | Sizer::AlignCenterVertical);
 		sizer->AddSpacer(4);
 		sizer->Add(center, -1, Sizer::Fill);
@@ -52,8 +51,6 @@ namespace fig::gui
 		auto pButton = CreateControl<ButtonWithLabel>("Invalidate");
 		pButton->SetHeight(35);
 		pButton->SetDelegate([this]() { InvalidateLayout(); });
-
-		area->SetSizer(sizer);
 	}
 
 	void DebugScreen::OnUpdate(float fElapsed)

@@ -6,6 +6,9 @@
 
 namespace fig::gui
 {
+	using ControlPtr = fig::observer_ptr<class LayoutElement>;
+	using ParentPtr = fig::observer_ptr<class LayoutElement>;
+
 	class LayoutElement : public IUpdateable
 	{
 		friend class Sizer;
@@ -54,33 +57,32 @@ namespace fig::gui
 		void SetMaxSize(Point size) { _maxSize = size; }
 		void SetMaxSize(Coord width, Coord height) { _maxSize = Point { width, height }; }
 
-		void AddChild(LayoutElement* pChild);
+		void AddChild(ControlPtr pChild);
 
 		template <typename T, typename... Args> 
 			requires std::derived_from<T, LayoutElement>
 		fig::observer_ptr<T> CreateControl(Args&&... args)
 		{
 			T* child = new T(this, std::forward<Args>(args)...);
-			AddChild((LayoutElement*) child);
+			AddChild(child);
 			return child;
 		}
 
-		bool RemoveChild(LayoutElement* pChild);
+		bool RemoveChild(ControlPtr pChild);
 		bool RemoveChildren();
-		bool DestroyChild(LayoutElement* pChild);
+		bool DestroyChild(ControlPtr pChild);
 		bool DestroyChildren();
-		void MoveChildToTop(LayoutElement* pChild);
-		void MoveChildToBottom(LayoutElement* pChild);
-
-		void SetSizer(Sizer* sizer);
+		void MoveChildToTop(ControlPtr pChild);
+		void MoveChildToBottom(ControlPtr pChild);
 
 		template <typename T, typename... Args>
 			requires std::derived_from<T, Sizer>
 		fig::observer_ptr<T> SetSizer(Args&&... args)
 		{
-			T* child = new T(std::forward<Args>(args)...);
-			SetSizer((Sizer*)child);
-			return child;
+			_pSizer = std::make_unique<T>(std::forward<Args>(args)...);
+			if ((bool)_pSizer)
+				InvalidateLayout();
+			return fig::observer_ptr<T>((T*)_pSizer.get());
 		}
 
 		void EnableLayout(bool bEnable) noexcept { _bLayoutEnabled = bEnable; }
@@ -95,17 +97,17 @@ namespace fig::gui
 		inline bool IsCulled() const { return _bCulled; }
 
 	protected:
-		void SetParent(LayoutElement* pParent);
+		void SetParent(ParentPtr pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
-		Sizer* const GetSizer() const { return _pSizer.get(); }
+		fig::observer_ptr<Sizer> const GetSizer() const { return _pSizer.get(); }
 		void Layout();
 
 		virtual void OnUpdate(float fElapsed) {};
 		virtual void OnParent() {};
 		virtual void OnSize() {};
 		virtual void OnAfterLayout() {};
-		virtual void OnAddedChild(LayoutElement* pChild) {}
-		virtual void OnRemovedChild(LayoutElement* pChild) {}
+		virtual void OnAddedChild(ControlPtr pChild) {}
+		virtual void OnRemovedChild(ControlPtr pChild) {}
 
 	protected:
 		std::vector<LayoutElement*> _children;
@@ -124,5 +126,4 @@ namespace fig::gui
 		bool _bInvalidLayout = false;
 	};
 
-	using ControlPtr = fig::observer_ptr<LayoutElement>;
 }

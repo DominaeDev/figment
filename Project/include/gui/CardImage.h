@@ -7,7 +7,7 @@ namespace fig::gui
 	class CardImage : public Control
 	{
 	public:
-		CardImage(LayoutElement* pParent, TexturePtr pTexture, TexturePtr pMask = nullptr) noexcept;
+		CardImage(ParentPtr pParent, TexturePtr pTexture, TexturePtr pMask = nullptr) noexcept;
 		void SetTexture(TexturePtr pTexture, bool bResize = false) noexcept;
 		void SetMask(TexturePtr pTexture) noexcept;
 		void SetZoom(float value) noexcept;

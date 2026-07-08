@@ -7,8 +7,8 @@ namespace fig::gui
 	class Image : public Control
 	{
 	public:
-		Image(LayoutElement* pParent, TexturePtr pTexture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
-		Image(LayoutElement* pParent, TextureType texture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
+		Image(ParentPtr pParent, TexturePtr pTexture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
+		Image(ParentPtr pParent, TextureType texture, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
 		void SetTexture(TexturePtr pTexture, bool bResize = false);
 		void SetTexture(TextureType texture, bool bResize = false);
 		inline bool HasTexture() const noexcept { return (bool)_pTexture; }

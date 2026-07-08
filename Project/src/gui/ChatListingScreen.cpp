@@ -10,9 +10,8 @@ namespace fig::gui
 	{
 		_pChatList = CreateControl<ChatList>();
 
-		auto mainSizer = new VerticalSizer();
+		auto mainSizer = SetSizer<VerticalSizer>();
 		mainSizer->Add(_pChatList, -1, Sizer::Fill | Sizer::Left, 12);
-		SetSizer(mainSizer);
 
 		InvalidateLayout();
 	}

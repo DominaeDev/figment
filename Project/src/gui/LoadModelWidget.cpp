@@ -13,10 +13,10 @@ namespace fig::gui
 {
 	constexpr int32_t ProgressBarHeight = 5;
 
-	LoadModelWidget::LoadModelWidget(LayoutElement* pParent) noexcept : Panel(pParent)
+	LoadModelWidget::LoadModelWidget(ParentPtr pParent) noexcept : Panel(pParent)
 	{
 		_pProgressBar = CreateControl<Panel>();
-		_pProgressBar->SetBackgroundRenderer(new SolidFillRenderer(Color { 0x57caff, 0xff }));
+		_pProgressBar->SetBackgroundRenderer<SolidFillRenderer>(Color { 0x57caff, 0xff });
 
 		_pLoadButton = CreateControl<PlayButton>();
 		_pLoadButton->SetDelegate(std::bind(&LoadModelWidget::OnButtonPressed, this));
@@ -30,7 +30,7 @@ namespace fig::gui
 		_pSettingsButton->SetSize(36, 36);
 		_pSettingsButton->CenterVertically();
 
-		SetBorderRenderer(new LineBorderRenderer(Colors::LineColor, { Direction::North }));
+		SetBorderRenderer<LineBorderRenderer>(Colors::LineColor,  Direction::North);
 	}
 
 	void LoadModelWidget::OnSize()

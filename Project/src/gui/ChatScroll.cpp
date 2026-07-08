@@ -18,12 +18,11 @@ static constexpr fig::gui::Coord kGradientHeight = 40;
 
 namespace fig::gui
 {
-	ChatScroll::ChatScroll(LayoutElement* pParent) : Control(pParent)
+	ChatScroll::ChatScroll(ParentPtr pParent) : Control(pParent)
 	{
-		_pScrollSizer = new VerticalScrollSizer();
+		_pScrollSizer = SetSizer<VerticalScrollSizer>();
 		_pScrollSizer->SetBottomMargin(50);
 		_pScrollSizer->SetSpacing(12);
-		SetSizer(_pScrollSizer);
 
 		_pBottomGradient = CreateControl<VerticalGradient>(Colors::ChatBackground.WithAlpha(0.0f), Colors::ChatBackground);
 		EnableClipping(true);
@@ -232,7 +231,7 @@ namespace fig::gui
 		_pBottomGradient->SetSize(GetWidth(), kGradientHeight);
 	}
 
-	void ChatScroll::OnAddedChild(LayoutElement* pChild)
+	void ChatScroll::OnAddedChild(ControlPtr pChild)
 	{
 		MoveChildToTop(_pBottomGradient);
 	}

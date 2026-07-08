@@ -47,6 +47,19 @@ namespace fig::gui
 		void RemoveSizer(Sizer* pSizer);
 		void Clear();
 
+		template <typename T>
+			requires std::derived_from<T, Sizer>
+		void Add(fig::observer_ptr<T> pControl, int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0) = delete;
+
+		template <typename T>
+			requires std::derived_from<T, Sizer>
+		fig::observer_ptr<T> Add(int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0)
+		{
+			auto pSizer = new T();
+			Add(pSizer, proportion, flags, border);
+			return fig::observer_ptr<T>(pSizer);
+		}
+
 	protected:
 		struct LayoutProperties
 		{
@@ -60,10 +73,10 @@ namespace fig::gui
 			inline int32_t bottomBorder() const	{ return (flags & Flag::Bottom) != 0 ? border : 0; };
 		};
 
-		using ControlPtr = LayoutElement*;
+		using LayoutElementPtr = LayoutElement*;
 		using SizerPtr = Sizer*;
 		using EmptyTarget = std::monostate;
-		using SizerTarget = std::variant<EmptyTarget, ControlPtr, SizerPtr>;
+		using SizerTarget = std::variant<EmptyTarget, LayoutElementPtr, SizerPtr>;
 
 		struct SizerItem
 		{
@@ -71,9 +84,9 @@ namespace fig::gui
 			SizerTarget target { EmptyTarget {} };
 			Rect rect {};
 
-			ControlPtr GetControl() const
+			LayoutElementPtr GetControl() const
 			{
-				if (auto ppCtrl = std::get_if<ControlPtr>(&target); ppCtrl)
+				if (auto ppCtrl = std::get_if<LayoutElementPtr>(&target); ppCtrl)
 					return *ppCtrl;
 				return nullptr;
 			};
@@ -86,7 +99,7 @@ namespace fig::gui
 		{
 			return _items
 				| std::views::filter([](auto& it) { 
-					if (auto ppCtrl = std::get_if<ControlPtr>(&it.target); ppCtrl)
+					if (auto ppCtrl = std::get_if<LayoutElementPtr>(&it.target); ppCtrl)
 						return (*ppCtrl)->IsLayoutEnabled();
 					return true;
 				});

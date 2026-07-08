@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	MenuSeparator::MenuSeparator(LayoutElement* pParent) : Control(pParent)
+	MenuSeparator::MenuSeparator(ParentPtr pParent) : Control(pParent)
 	{
 	}
 

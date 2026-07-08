@@ -3,14 +3,13 @@
 #include "gui/LayoutElement.h"
 #include "gui/Area.h"
 #include <cassert>
-#include <cassert>
 
 namespace fig::gui
 {
 	Sizer::~Sizer()
 	{
 		for (auto ppSizer : _items 
-			| std::views::transform([](auto& li) { return std::get_if<Sizer*>(&li.target); }))
+			| std::views::transform([](auto& li) { return std::get_if<SizerPtr>(&li.target); }))
 		{
 			if (ppSizer)
 				delete* ppSizer;
@@ -72,7 +71,7 @@ namespace fig::gui
 	void Sizer::Remove(LayoutElement* pControl)
 	{
 		auto it = std::find_if(_items.cbegin(), _items.cend(), [pControl](const SizerItem & li) {
-			if (auto pp = std::get_if<LayoutElement*>(&li.target); pp and *pp == pControl)
+			if (auto pp = std::get_if<LayoutElementPtr>(&li.target); pp and *pp == pControl)
 				return true;
 			return false;
 		});
@@ -85,7 +84,7 @@ namespace fig::gui
 	{
 		for (auto it = _items.begin(); it != _items.end(); ++it)
 		{
-			auto ppSizer = std::get_if<Sizer*>(&it->target);
+			auto ppSizer = std::get_if<SizerPtr>(&it->target);
 			if (ppSizer)
 				delete* ppSizer;
 		}
@@ -95,14 +94,14 @@ namespace fig::gui
 	void Sizer::RemoveSizer(Sizer* pSizer)
 	{
 		auto it = std::find_if(_items.cbegin(), _items.cend(), [pSizer](const SizerItem & li) {
-			if (auto pp = std::get_if<Sizer*>(&li.target); pp and *pp == pSizer)
+			if (auto pp = std::get_if<SizerPtr>(&li.target); pp and *pp == pSizer)
 				return true;
 			return false;
 		});
 
 		if (it != _items.end())
 		{
-			auto ppSizer = std::get_if<Sizer*>(&it->target);
+			auto ppSizer = std::get_if<SizerPtr>(&it->target);
 			if (ppSizer)
 				delete* ppSizer;
 			_items.erase(it);
@@ -115,9 +114,9 @@ namespace fig::gui
 
 		for (auto& li : _items)
 		{
-			if (auto pp = std::get_if<LayoutElement*>(&li.target))
+			if (auto pp = std::get_if<LayoutElementPtr>(&li.target))
 				(*pp)->Layout();
-			else if (auto pp = std::get_if<Sizer*>(&li.target))
+			else if (auto pp = std::get_if<SizerPtr>(&li.target))
 				(*pp)->Layout(li.rect);
 		}
 	}

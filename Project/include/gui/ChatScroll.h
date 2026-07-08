@@ -15,7 +15,7 @@ namespace fig::gui
 	class ChatScroll : public Control
 	{
 	public:
-		ChatScroll(LayoutElement* pParent);
+		ChatScroll(ParentPtr pParent);
 
 		void SetSession(std::weak_ptr<fig::chat::ChatSession> pSession);
 
@@ -31,7 +31,7 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		EventResult OnEvent(Event& event) override;
 		void OnAfterLayout() override;
-		void OnAddedChild(LayoutElement* pChild) override;
+		void OnAddedChild(ControlPtr pChild) override;
 
 	private:
 		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message, bool complete);

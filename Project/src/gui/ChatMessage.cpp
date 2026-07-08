@@ -39,7 +39,7 @@ using namespace fig::chat;
 
 namespace fig::gui
 {
-	ChatMessage::ChatMessage(LayoutElement* pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
+	ChatMessage::ChatMessage(ParentPtr pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
 		_name(name),
 		_messageType(msgType),
 		_role(role),
@@ -103,19 +103,19 @@ namespace fig::gui
 		{
 			if (bRight)
 			{
-				_pSpeechBubbleBG = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_RIGHT_BG , { 30, 72, 64, 30 });
-				_pSpeechBubbleBorder = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_RIGHT_BORDER , { 30, 72, 64, 30 });
+				_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_RIGHT_BG, Corners { 30, 72, 64, 30 });
+				_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_RIGHT_BORDER, Corners { 30, 72, 64, 30 });
 			}
 			else
 			{
-				_pSpeechBubbleBG = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_LEFT_BG , { 72, 30, 64, 30 });
-				_pSpeechBubbleBorder = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_LEFT_BORDER , { 72, 30, 64, 30 });
+				_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_LEFT_BG, Corners { 72, 30, 64, 30 });
+				_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_LEFT_BORDER, Corners { 72, 30, 64, 30 });
 			}
 		}
 		else
 		{
-			_pSpeechBubbleBG = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_CENTER_BG , { 30, 30, 64, 30 });
-			_pSpeechBubbleBorder = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_CENTER_BORDER , { 30, 30, 64, 30 });
+			_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_CENTER_BG, Corners { 30, 30, 64, 30 });
+			_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_CENTER_BORDER, Corners { 30, 30, 64, 30 });
 		}
 		_pSpeechBubbleBG->SetCornerScale(0.35f);
 		_pSpeechBubbleBorder->SetCornerScale(0.35f);
@@ -123,8 +123,6 @@ namespace fig::gui
 		_pSpeechBubbleBorder->SetExtend(5.0f);
 
 		_pMessagePanel->SetPosition(LEFT_MARGIN - (bDialogue ? DIALOGUE_OFFSET : 0), bShowName ? TOP_OFFSET : 0); // Left
-		_pMessagePanel->SetBackgroundRenderer(_pSpeechBubbleBG);
-		_pMessagePanel->SetBorderRenderer(_pSpeechBubbleBorder);
 
 		SetSize(-1, 38);
 

@@ -10,7 +10,7 @@
 
 namespace fig::gui
 {
-	SidePanel::SidePanel(LayoutElement* pParent) : Control(pParent)
+	SidePanel::SidePanel(ParentPtr pParent) : Control(pParent)
 	{
 		SetWidth(Constants::GUI::SidePanel::Width);
 		SetBackgroundColor(fig::gui::Colors::SidePanelBackground);
@@ -55,8 +55,7 @@ namespace fig::gui
 		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
 		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_MODELS, "Models");
 
-		auto pButtonSizer = new VerticalSizer();
-		pMainArea->SetSizer(pButtonSizer);
+		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
 
 		pButtonSizer->AddSpacer(20);
 		pButtonSizer->Add(pChatButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
@@ -79,15 +78,13 @@ namespace fig::gui
 		_pUserWidget = pFooterPanel->CreateControl<UserProfileWidget>();
 		_pUserWidget->SetHeight(60);
 		
-		auto pTopSizer = new VerticalSizer();
+		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->Add(pHeaderPanel, 0, Sizer::Expand | Sizer::Fill);
 		pTopSizer->Add(pMainArea, -1, Sizer::Fill);
 		pTopSizer->Add(_pModelWidget, 0, Sizer::Expand);
 		pTopSizer->Add(_pUserWidget, 0, Sizer::Expand);
 
-		SetSizer(pTopSizer);
-
-		SetBorderRenderer(new LineBorderRenderer(Colors::LineColor, { Direction::East }));
+		SetBorderRenderer<LineBorderRenderer>(Colors::LineColor, Direction::East);
 	}
 
 	void SidePanel::OnAfterLayout()

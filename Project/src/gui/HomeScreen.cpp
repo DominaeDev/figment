@@ -56,7 +56,7 @@ namespace fig::gui
 			this->OnSearchFilter(s); 
 		});
 
-		auto pTopSizer = new HorizontalSizer();
+		auto pTopSizer = pTopBar->SetSizer<HorizontalSizer>();
 		pTopSizer->Add(pExpandButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 4);
 		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 8);
 		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
@@ -66,15 +66,13 @@ namespace fig::gui
 		pTopSizer->Add(_pSortingButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
 		pTopSizer->Add(_pFilteringButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
 		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
-		pTopBar->SetSizer(pTopSizer);
 
 		_pCardList = CreateControl<CardList>();
 		_pCardList->SetScrollBarOffset(0);
 
-		auto mainSizer = new VerticalSizer();
+		auto mainSizer = SetSizer<VerticalSizer>();
 		mainSizer->Add(pTopBar, 0, Sizer::Expand);
 		mainSizer->Add(_pCardList, -1, Sizer::Fill | Sizer::Left | Sizer::Right, 16);
-		SetSizer(mainSizer);
 	}
 
 	void HomeScreen::OnUpdate(float fElapsed)

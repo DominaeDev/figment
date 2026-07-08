@@ -23,7 +23,7 @@ namespace fig::gui
 	class CoverCard : public CardImage
 	{
 	public:
-		CoverCard(LayoutElement* pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Full);
+		CoverCard(ParentPtr pParent, const fig::uuid& assetId, CardSize cardSize = CardSize::Full);
 		void Initialize();
 
 		void SetBorder(fig::data::CardBorderStyle style);

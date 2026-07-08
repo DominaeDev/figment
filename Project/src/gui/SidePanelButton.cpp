@@ -5,14 +5,13 @@
 
 namespace fig::gui
 {
-	SidePanelButton::SidePanelButton(LayoutElement* pParent, TextureType icon, const fig::string& label) : ThemedButton(pParent)
+	SidePanelButton::SidePanelButton(ParentPtr pParent, TextureType icon, const fig::string& label) : ThemedButton(pParent)
 	{
 		SetTheme(Themes::SidePanelButtonStyle);
 		SetHeight(58);
 
-		auto pBorder = new TexturedBorderRenderer(TextureType::ROUNDED_BACKGROUND_6PX, 8);
+		auto pBorder = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_6PX, 8);
 		pBorder->SetColor(GetThemeBackground());
-		SetBackgroundRenderer(pBorder);
 		_pBorder = pBorder;
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));

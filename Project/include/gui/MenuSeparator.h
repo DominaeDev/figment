@@ -7,7 +7,7 @@ namespace fig::gui
 	class MenuSeparator : public Control
 	{
 	public:
-		MenuSeparator(LayoutElement* pParent);
+		MenuSeparator(ParentPtr pParent);
 
 	protected:
 		void OnRender(Renderer* pRenderer) override;

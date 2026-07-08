@@ -7,12 +7,9 @@ namespace fig::gui
 	class SimpleTextBox : public TextBox
 	{
 	public:
-		SimpleTextBox(LayoutElement* pParent, FontFace fontFace, double ptSize, Flags flags = {});
+		SimpleTextBox(ParentPtr pParent, FontFace fontFace, double ptSize, Flags flags = {});
 
 	protected:
 		void OnEnabled(bool bEnabled) override;
-
-	private:
-		fig::observer_ptr<TexturedBorderRenderer> _pTextBoxBG {};
 	};
 }

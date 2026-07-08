@@ -27,16 +27,15 @@ namespace fig::gui
 		return cardSize == CardSize::Full ? Constants::GUI::CardHeight: Constants::GUI::HalfCardHeight;
 	}
 
-	CardList::CardList(LayoutElement* pParent, CardSize cardSize) : ScrollPanel(pParent),
+	CardList::CardList(ParentPtr pParent, CardSize cardSize) : ScrollPanel(pParent),
 		_cardSize { cardSize }
 	{
-		_pGridSizer = new GridSizer(cardWidth(cardSize), cardHeight(cardSize));
+		_pGridSizer = SetSizer<GridSizer>(cardWidth(cardSize), cardHeight(cardSize));
 		_pGridSizer->SetSpacing(Constants::GUI::Cards::SpacingX, Constants::GUI::Cards::SpacingY);
 		_pGridSizer->EnableCentering(true);
 		SetTopMargin(TopMargin);
 		SetBottomMargin(BottomMargin);
 
-		SetSizer(_pGridSizer);
 		EnableClipping(true);
 		EnableCulling(true);
 	}

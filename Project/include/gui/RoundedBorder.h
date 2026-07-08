@@ -7,7 +7,7 @@ namespace fig::gui
 	class RoundedBorder : public Control
 	{
 	public:
-		RoundedBorder(LayoutElement* pParent, float radius, float thickness, Color color);
+		RoundedBorder(ParentPtr pParent, float radius, float thickness, Color color);
 
 		void OnRender(Renderer* pRenderer);
 		void SetColor(Color color);

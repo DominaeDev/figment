@@ -2,19 +2,19 @@
 
 #include "gui/Events.h"
 #include "gui/GUITypes.h"
+#include "gui/CustomRenderer.h"
 #include "LayoutElement.h"
 
 namespace fig::gui
 {
-	class CustomRenderer;
 	class Window;
 
 	class Control : public LayoutElement
 	{
 	public:
-		Control(LayoutElement* pParent);
-		Control(LayoutElement* pParent, Window* pHostWindow);
-		virtual ~Control();
+		Control(ParentPtr pParent);
+		Control(ParentPtr pParent, Window* pHostWindow);
+		virtual ~Control() = default;
 
 		virtual void Render(Renderer* pRenderer);
 
@@ -35,6 +35,27 @@ namespace fig::gui
 
 		void SetBackgroundRenderer(CustomRenderer* pCustom);
 		void SetBorderRenderer(CustomRenderer* pCustom);
+		fig::observer_ptr<CustomRenderer> GetBackgroundRenderer() { return _pBGRenderer.get(); }
+		fig::observer_ptr<CustomRenderer> GetBorderRenderer() { return _pBorderRenderer.get(); }
+
+		template <typename T, typename... Args>
+			requires std::derived_from<T, CustomRenderer>
+		fig::observer_ptr<T> SetBackgroundRenderer(Args&&... args)
+		{
+			_pBGRenderer = std::make_unique<T>(std::forward<Args>(args)...);
+			return fig::observer_ptr<T>((T*)_pBGRenderer.get());
+		}
+
+		template <typename T, typename... Args>
+			requires std::derived_from<T, CustomRenderer>
+		fig::observer_ptr<T> SetBorderRenderer(Args&&... args)
+		{
+			_pBorderRenderer = std::make_unique<T>(std::forward<Args>(args)...);
+			return fig::observer_ptr<T>((T*)_pBorderRenderer.get());
+		}
+
+		void ClearBackgroundRenderer();
+		void ClearBorderRenderer();
 
 		void SetMargins(Coord left, Coord top, Coord right, Coord bottom);
 		void SetMargins(Rect rect);
@@ -76,8 +97,8 @@ namespace fig::gui
 		bool _bEnabled = true;
 
 		// Theming
-		fig::observer_ptr<CustomRenderer> _pBGRenderer;
-		fig::observer_ptr<CustomRenderer> _pBorderRenderer;
+		std::unique_ptr<CustomRenderer> _pBGRenderer;
+		std::unique_ptr<CustomRenderer> _pBorderRenderer;
 	
 		// Margin
 		Coord _marginLeft = 0;

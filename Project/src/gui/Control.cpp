@@ -7,24 +7,18 @@
 
 namespace fig::gui
 {
-	Control::Control(LayoutElement* pParent)
+	Control::Control(ParentPtr pParent)
 	{
 		_pParent = pParent;
 	}
 
-	Control::Control(LayoutElement* pParent, Window* pHostWindow) : Control(pParent)
+	Control::Control(ParentPtr pParent, Window* pHostWindow) : Control(pParent)
 	{
 		_renderContext = std::make_shared<ControlRenderContext>(ControlRenderContext {
 			.pWindow = pHostWindow->GetSDLWindow().get(),
 			.pRenderer = pHostWindow->GetSDLRenderer().get(),
 			.pTextEngine = pHostWindow->GetSDLTextEngine().get(),
 		});
-	}
-
-	Control::~Control()
-	{
-		delete _pBGRenderer;
-		delete _pBorderRenderer;
 	}
 
 	void Control::Render(Renderer* pRenderer)
@@ -180,24 +174,24 @@ namespace fig::gui
 		return result;
 	}
 
-	void Control::SetBackgroundRenderer(CustomRenderer* pCustom)
+	void Control::SetBackgroundRenderer(CustomRenderer* pRenderer)
 	{
-		if (_pBGRenderer != nullptr)
-		{
-			delete _pBGRenderer;
-			_pBGRenderer = nullptr;
-		}
-		_pBGRenderer = pCustom;
+		_pBGRenderer.reset(pRenderer);
 	}
 
-	void Control::SetBorderRenderer(CustomRenderer* pCustom)
+	void Control::SetBorderRenderer(CustomRenderer* pRenderer)
 	{
-		if (_pBorderRenderer != nullptr)
-		{
-			delete _pBorderRenderer;
-			_pBorderRenderer = nullptr;
-		}
-		_pBorderRenderer = pCustom;
+		_pBorderRenderer.reset(pRenderer);
+	}
+
+	void Control::ClearBackgroundRenderer()
+	{
+		_pBGRenderer.reset();
+	}
+
+	void Control::ClearBorderRenderer()
+	{
+		_pBorderRenderer.reset();
 	}
 
 	void Control::SetVisible(bool bVisible)

@@ -9,7 +9,7 @@ namespace fig::gui
 	class ScrollPanel : public Control
 	{
 	public:
-		ScrollPanel(LayoutElement* pParent, bool bScrollBar = true);
+		ScrollPanel(ParentPtr pParent, bool bScrollBar = true);
 		~ScrollPanel();
 		void Render(Renderer* pRenderer) override;
 		inline void SetScrollBarOffset(Coord offset) noexcept { _scrollBarOffset = offset; }

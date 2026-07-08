@@ -16,7 +16,7 @@ namespace fig::gui
 	class SidePanel : public Control
 	{
 	public:
-		SidePanel(LayoutElement* pParent);
+		SidePanel(ParentPtr pParent);
 	
 	protected:
 		void OnAfterLayout() override;

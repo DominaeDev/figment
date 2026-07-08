@@ -9,19 +9,17 @@ using namespace fig::gui;
 
 constexpr Coord Margin = 8;
 
-VariableList::VariableList(LayoutElement* pParent) : Control(pParent)
+VariableList::VariableList(ParentPtr pParent) : Control(pParent)
 {
-	auto pBG = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_CENTER_BG , { 30, 72, 64, 30 });
+	auto pBG = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_CENTER_BG, Corners { 30, 72, 64, 30 });
 	pBG->SetColor(Colors::MessageBackgroundDefault);
 	pBG->SetCornerScale(0.3f);
 	pBG->SetExtend(5);
-	SetBackgroundRenderer(pBG);
 
-	auto pBorder = new TexturedBorderRenderer(TextureType::SPEECH_BUBBLE_CENTER_BORDER, { 30, 72, 64, 30 });
+	auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_CENTER_BORDER, Corners { 30, 72, 64, 30 });
 	pBorder->SetColor(Colors::MessageBorderDefault);
 	pBorder->SetCornerScale(0.3f);
 	pBorder->SetExtend(5);
-	SetBorderRenderer(pBorder);
 
 	SetForegroundColor(Colors::TextForeground);
 	SetBackgroundColor(Colors::MessageBackgroundDefault);

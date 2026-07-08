@@ -9,7 +9,7 @@ namespace fig::gui
 {
 	constexpr float Margin = 12.0f;
 
-	ScenarioCard::ScenarioCard(LayoutElement* pParent, const fig::uuid& scenarioId, CardSize cardSize) : CoverCard(pParent, scenarioId, cardSize),
+	ScenarioCard::ScenarioCard(ParentPtr pParent, const fig::uuid& scenarioId, CardSize cardSize) : CoverCard(pParent, scenarioId, cardSize),
 		_scenarioId { scenarioId }
 	{
 		if (auto scenario = Global::GetUserManager().GetContent().GetScenario(scenarioId))

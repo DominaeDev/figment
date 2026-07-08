@@ -7,6 +7,10 @@ namespace fig::gui
 		_directions { directions }
 	{
 	}
+	LineBorderRenderer::LineBorderRenderer(Color color, Direction direction) : CustomRenderer(color),
+		_directions { direction }
+	{
+	}
 
 	void LineBorderRenderer::Render(Renderer* pRenderer, const Rectf& rect)
 	{

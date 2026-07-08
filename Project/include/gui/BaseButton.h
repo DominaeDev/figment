@@ -17,7 +17,7 @@ namespace fig::gui
 		inline bool IsEnabled() const noexcept;
 
 	protected:
-		BaseButton(LayoutElement* pOwner);
+		BaseButton(ControlPtr pOwner);
 		bool HandleMouseEvents(const Event& event) noexcept;
 		void DropState() noexcept;
 
