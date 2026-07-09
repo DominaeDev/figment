@@ -18,7 +18,7 @@ namespace fig::gui
 	protected:
 		void OnScroll() override;
 		void OnAfterLayout() override;
-		ControlPtr CreateHeader(const fig::string& text);
+		ControlPtr CreateHeader(fig::string_view text);
 
 	private:
 		std::vector<fig::observer_ptr<ChatListItem>> _items;

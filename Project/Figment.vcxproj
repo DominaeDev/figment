@@ -291,6 +291,7 @@
     <ClCompile Include="src\gui\VerticalListSizer.cpp" />
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
     <ClCompile Include="src\util\TextEvaluator.cpp" />
+    <ClCompile Include="src\util\Timestamp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\AES\include\AES.h" />
@@ -559,6 +560,7 @@
     <ClInclude Include="include\util\CommonUtils.h" />
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
+    <ClInclude Include="include\util\Timestamp.h" />
     <ClInclude Include="include\util\UndoStack.h" />
   </ItemGroup>
   <ItemGroup>

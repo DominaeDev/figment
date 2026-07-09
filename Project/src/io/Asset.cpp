@@ -168,13 +168,6 @@ namespace fig::io
 		SetUpdated();
 	}
 
-	fig::string Asset::AsString() const
-	{
-		fig::string str;
-		str.assign(reinterpret_cast<const char*>(data.data()), data.size());
-		return str;
-	}
-
 	fig::string_view Asset::AsStringView() const
 	{
 		return fig::string_view { (const char*)data.data(), data.size() };

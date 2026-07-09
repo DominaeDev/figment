@@ -25,32 +25,82 @@ namespace fig::gui
 		EnableCulling(true);
 	}
 
+	enum class TimeBucket
+	{
+		LessThan5Minutes = 0,
+		LessThan1Day,
+		LessThan2Days,
+		LessThan1Week,
+		LessThan1Month,
+		Older,
+	};
+
+	static std::array<fig::string_view, 6> TimeBucketNames {
+		"Just now",
+		"Today",
+		"Yesterday",
+		"This week",
+		"This month",
+		"Older chats",
+	};
+
+	static TimeBucket GetTimeBucket(fig::timestamp then, fig::timestamp now)
+	{
+		auto minDiff = (now.to_local() - then.to_local()).minutes();
+		auto dayDiff = (now.to_local() - then.to_local()).days();
+		auto monthDiff = (now.to_local() - then.to_local()).months();
+
+		if (minDiff < 10)
+			return TimeBucket::LessThan5Minutes;
+		else if (dayDiff < 1)
+			return TimeBucket::LessThan1Day;
+		else if (dayDiff < 2)
+			return TimeBucket::LessThan2Days;
+		else if (dayDiff < 7)
+			return TimeBucket::LessThan1Week;
+		else if (monthDiff < 1)
+			return TimeBucket::LessThan1Month;
+		return TimeBucket::Older;
+	}
+
 	void ChatList::ShowAllChats()
 	{
 		Reset();
 
-		auto& assetMngr = Global::GetUserManager().GetContent().GetAssetManager();
+		auto chatInstances = Global::GetUserManager().GetContent().GetChats(true)
+			| std::views::transform([](auto& a) { return std::cref(a); })
+			| std::ranges::to<std::vector>();
+
+		auto now = utc_now();
+		auto chatsByTime = chatInstances
+			| fig::group_by([&now](auto& a) { return GetTimeBucket(a.get().GetCreatedAt(), now); });
 		
-		for (int i = 0; i < 30; i++) //! @temp
+		for (auto& kvp : chatsByTime)
 		{
-			if (i > 0)
+			if (not _items.empty())
 				_pVerticalSizer->AddSpacer(Spacing);
 
-			if (i % 6 == 0) 
-			{
-				auto pHeader = CreateHeader("Yesterday");
-				_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
-			}
+			// Header
+			auto pHeader = CreateHeader(TimeBucketNames[static_cast<size_t>(kvp.first)]);
+			_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
 
-			auto pItem = CreateControl<ChatListItem>();
-			_pVerticalSizer->Add(pItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
-			_items.push_back(pItem);
+			// Chats
+			auto& chats = kvp.second;
+			for (size_t i = 0uz; i < chats.size(); i++)
+			{
+				if (i > 0)
+					_pVerticalSizer->AddSpacer(Spacing);
+
+				auto pItem = CreateControl<ChatListItem>(chats[i]);
+				_pVerticalSizer->Add(pItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
+				_items.push_back(pItem);
+			}
 		}
 
 		InvalidateLayout();
 	}
 
-	ControlPtr ChatList::CreateHeader(const fig::string& text)
+	ControlPtr ChatList::CreateHeader(fig::string_view text)
 	{
 		auto panel = CreateControl<Area>();
 		panel->SetMaxSize(700, -1);

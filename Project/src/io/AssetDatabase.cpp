@@ -191,9 +191,9 @@ namespace fig::io
 			auto [type, subtype] = AssetTypeFromString(pType ? pType : "");
 			asset.asset_type = type;
 			asset.asset_subtype = subtype;
-			asset.SetMeta(MetaTag::CreatedAt, static_cast<fig::timestamp>(createdAt));
-			asset.SetMeta(MetaTag::UpdatedAt, static_cast<fig::timestamp>(updatedAt));
-			asset.SetMeta(MetaTag::LastUsedAt, static_cast<fig::timestamp>(lastUsedAt));
+			asset.SetMeta(MetaTag::CreatedAt, fig::timestamp(createdAt));
+			asset.SetMeta(MetaTag::UpdatedAt, fig::timestamp(updatedAt));
+			asset.SetMeta(MetaTag::LastUsedAt, fig::timestamp(lastUsedAt));
 			if (pSettings)
 				asset.settings = fig::string { pSettings };
 

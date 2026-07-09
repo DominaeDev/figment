@@ -30,12 +30,14 @@ namespace fig::io
 		fig::optional_cref<fig::data::Scenario> GetScenario(const fig::uuid& id) const noexcept;
 		auto GetCharacters() const noexcept { return _characters | std::views::values; }
 		auto GetScenarios() const noexcept { return _scenarios | std::views::values; }
+		
+		fig::cref_vector<Asset> GetChatsWithCharacter(const fig::uuid& characterId, bool bLoad = false);
+		fig::cref_vector<Asset> GetChats(bool bLoad = false);
 
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
-
 		fig::optional_ref<fig::data::CardMetaData> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
-
 		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(fig::gui::RendererPtr pRenderer, const fig::uuid& characterId) noexcept;
+		std::optional<fig::string> GetCharacterName(const fig::uuid& characterId) const;
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);
@@ -56,6 +58,7 @@ namespace fig::io
 
 		std::map<fig::uuid, fig::data::Character> _characters;
 		std::map<fig::uuid, fig::data::Scenario> _scenarios;
+		std::map<fig::uuid, fig::data::ChatInstance> _chats;
 		std::map<fig::uuid, fig::data::CardMetaData> _metaData;
 		std::map<fig::uuid, fig::sdl::Surface> _surfaces;
 		std::map<fig::uuid, fig::sdl::Texture> _textures;

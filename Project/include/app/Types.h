@@ -15,6 +15,7 @@
 #include "util/ExpectedRef.h"
 #include "util/ObserverPtr.h"
 #include "util/FixedString.h"
+#include "util/TimeStamp.h"
 
 namespace fig
 {
@@ -40,7 +41,6 @@ namespace fig
     using buffer = std::array<byte, N>;
 
     using uuid = UUIDv4::UUID;
-    using timestamp = uint64_t; // unix epoch (milliseconds)
     using path = std::filesystem::path;
     using string_list = std::vector<string>;
     using string_span = std::span<const string>;

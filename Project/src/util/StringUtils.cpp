@@ -112,6 +112,12 @@ namespace fig
 		return s;
 	}
 
+	std::string_view trunc(std::string_view text, size_t length)
+	{
+		if (text.length() <= length)
+			return text;
+		return text.substr(0, length);
+	}
 
 	bool empty_or_whitespace(const string& s) noexcept
 	{

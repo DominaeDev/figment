@@ -38,7 +38,7 @@ namespace fig::gui
 		ReleaseTexture();
 	};
 
-	void StaticText::SetText(const fig::string& text)
+	void StaticText::SetText(fig::string_view text)
 	{
 		_text = text;
 
@@ -46,7 +46,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void StaticText::SetTextAndResize(const fig::string& text)
+	void StaticText::SetTextAndResize(fig::string_view text)
 	{
 		_text = text;
 		_bInvalidated = false;
@@ -55,7 +55,7 @@ namespace fig::gui
 		SetSize(newWidth, newHeight);
 	}
 
-	void StaticText::SetTextAndResize(const fig::string& text, Coord& newWidth, Coord& newHeight)
+	void StaticText::SetTextAndResize(fig::string_view text, Coord& newWidth, Coord& newHeight)
 	{
 		_text = text;
 		_bInvalidated = false;

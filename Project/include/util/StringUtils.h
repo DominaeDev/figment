@@ -15,6 +15,7 @@ namespace fig
 	fig::string_view ltrim(fig::string_view s);
 	fig::string_view rtrim(fig::string_view s);
 	fig::string_view trim(fig::string_view s);
+	fig::string_view trunc(fig::string_view s, size_t length);
 
 	[[nodiscard]] fig::wstring ltrim(const fig::wstring& s);
 	[[nodiscard]] fig::wstring rtrim(const fig::wstring& s);

@@ -68,6 +68,8 @@ namespace fig::io
 
 		FileError LoadAsset(const Asset& asset) noexcept;
 		fig::expected_cref<Asset, FileError> LoadAsset(const fig::uuid& id) noexcept;
+		void LoadDataAssets(const std::vector<fig::uuid>& assetIds) noexcept;
+		void LoadDataAssets(const fig::ref_vector<Asset>& assets) noexcept;
 		
 		auto GetAssets() noexcept { return _assets | std::views::values; }
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
@@ -79,18 +81,18 @@ namespace fig::io
 		decltype(auto) ModifyAsset(const fig::uuid& assetID, Fn fn)
 		{
 			if constexpr (std::is_invocable_r_v<bool, Fn, Asset&>)
-				return ModifyAsset_Internal_Bool(assetID, fn);
+				return ModifyAsset_Bool(assetID, fn);
 			else
-				return ModifyAsset_Internal(assetID, fn);
+				return ModifyAsset_Void(assetID, fn);
 		}
 
 		template <typename Fn>
 		decltype(auto) ModifyAsset(const Asset& asset, Fn fn)
 		{
 			if constexpr (std::is_invocable_r_v<bool, Fn, Asset&>)
-				return ModifyAsset_Internal_Bool(asset, fn);
+				return ModifyAsset_Bool(asset, fn);
 			else
-				return ModifyAsset_Internal(asset, fn);
+				return ModifyAsset_Void(asset, fn);
 		}
 
 		void SaveModified();
@@ -119,6 +121,8 @@ namespace fig::io
 
 		fig::expected_ref<Asset, FileError> LoadAsset_Internal(Asset& asset) noexcept;
 		fig::expected_ref<Asset, FileError> LoadAssetMeta_Internal(Asset& asset) noexcept;
+		fig::optional_cref<Asset> FindAsset_Internal(const fig::uuid& id) noexcept;
+		fig::optional_cref<Asset> FindAsset_Internal(const fig::uuid& id, AssetType assetType) noexcept;
 
 		bool DeleteAsset_Internal(const fig::uuid& assetID) noexcept;
 		bool DeleteAssetFile(const fig::uuid& assetID) noexcept;
@@ -134,10 +138,10 @@ namespace fig::io
 
 		std::mutex _assetsMutex; // Guards _assets
 
-		void ModifyAsset_Internal(const fig::uuid& assetID, std::function<void(Asset&)> fn);
-		void ModifyAsset_Internal(const Asset& asset, std::function<void(Asset&)> fn);
-		bool ModifyAsset_Internal_Bool(const fig::uuid& assetID, std::function<bool(Asset&)> fn);
-		bool ModifyAsset_Internal_Bool(const Asset& asset, std::function<bool(Asset&)> fn);
+		void ModifyAsset_Void(const fig::uuid& assetID, std::function<void(Asset&)> fn);
+		void ModifyAsset_Void(const Asset& asset, std::function<void(Asset&)> fn);
+		bool ModifyAsset_Bool(const fig::uuid& assetID, std::function<bool(Asset&)> fn);
+		bool ModifyAsset_Bool(const Asset& asset, std::function<bool(Asset&)> fn);
 
 
 		/* Internal; Mutex already held: */

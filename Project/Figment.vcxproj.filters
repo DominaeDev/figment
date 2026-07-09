@@ -587,6 +587,9 @@
     <ClCompile Include="src\gui\ChatListItem.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\ChatListing\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\util\Timestamp.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1388,6 +1391,9 @@
       <Filter>Source Files\Frontend\GUI\Screens\ChatListing\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\util\ObserverPtr.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\Timestamp.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>

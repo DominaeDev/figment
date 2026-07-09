@@ -24,5 +24,13 @@ namespace fig::data
 				Element { "Options",		&ChatInstance::options }
 			);
 		}
+
+		bool contains(fig::uuid id) const
+		{
+			return std::ranges::find(characterIds, id) != std::cend(characterIds)
+				or userId == id
+				or scenarioId == id
+				or worldId == id;
+		}
 	};
 }

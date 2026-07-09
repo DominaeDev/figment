@@ -4,6 +4,10 @@
 #include "gui/AppResources.h"
 #include "gui/MainFrame.h"
 #include "gui/Menu.h"
+#include "data/ChatLog.h"
+
+using namespace fig::io;
+using namespace fig::data;
 
 namespace fig::gui
 {
@@ -22,12 +26,12 @@ namespace fig::gui
 		pBorder->SetColor(Colors::LineColor);
 
 		// Title
-		_pTitle = CreateControl<StaticText>("Yuki", FontFace::Bold, 14.0, false);
+		_pTitle = CreateControl<StaticText>("", FontFace::Bold, 14.0, false);
 		_pTitle->EnableEllipsis(true);
 		_pTitle->SetPosition(66, 6);
 
 		// Message
-		_pMessage = CreateControl<StaticText>("Yuki: \"I've been meaning to talk to you for some time, but it's been really hard to get in touch with you, you know?\"", FontFace::Italic, 14.0, false);
+		_pMessage = CreateControl<StaticText>("", FontFace::Italic, 14.0, false);
 		_pMessage->EnableEllipsis(true);
 		_pMessage->SetPosition(66, 28);
 
@@ -36,13 +40,39 @@ namespace fig::gui
 		_pTimestamp->SetForegroundColor(Colors::SidePanelForeground.WithAlpha(0.5f));
 		_pTimestamp->SetY(8);
 		_pTimestamp->SetMaxSize(100, -1);
-		_pTimestamp->SetTextAndResize("1:30 p.m.");
 
 		// Portrait
 		_pPortrait = CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pPortrait->SetSize(48, 48);
 		_pPortrait->SetPosition(8, 6);
 		_pPortrait->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::CIRCLE_MASK));
+	}
+
+	ChatListItem::ChatListItem(ParentPtr pParent, const fig::io::Asset& asset) : ChatListItem(pParent)
+	{
+		_assetId = asset.id;
+
+		if (asset.HasData())
+		{
+			ChatLog chatLog;
+			if (chatLog.LoadFromXml(asset.AsStringView()) == FileError::NoError) //! @todo: Not this, here.
+			{
+				if (not empty_or_whitespace(chatLog.title))
+					_pTitle->SetText(chatLog.title);
+				else
+					_pTitle->SetText("Untitled chat");
+
+				if (not chatLog.messages.empty())
+				{
+					auto& lastMessage = chatLog.messages.back();
+					auto name = Global::GetUserManager().GetContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
+
+					_pMessage->SetText(std::format("{}: \"{}\"", name, trunc(chatLog.messages.back().content, 80uz)));
+				}
+
+				_pTimestamp->SetTextAndResize(asset.GetLastUsedAt().get_time_string(false));
+			}
+		}
 	}
 
 	void ChatListItem::OnSize()

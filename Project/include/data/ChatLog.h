@@ -48,7 +48,7 @@ namespace fig::data
 			}
 		};
 
-		fig::string title { "Untitled chat" };
+		fig::string title;
 		std::vector<Message> messages;
 
 		static auto XmlFields() noexcept

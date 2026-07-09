@@ -125,18 +125,24 @@ public:
 		_mm_store_si128((__m128i*)data, z);
 	}
 
-	UUID(const uint8_t* bytes)
+	explicit UUID(const uint8_t* bytes)
 	{
 		__m128i x = _mm_loadu_si128((__m128i*)bytes);
 		_mm_store_si128((__m128i*)data, x);
 	}
 
+	explicit UUID(const std::string& value)
+	{
+		operator=(from_str(value));
+	}
+
 	/* Builds an UUID from a byte string (16 bytes long) */
-	explicit UUID(const std::string& bytes)
+/*	explicit UUID(const std::string& bytes)
 	{
 		__m128i x = betole128(_mm_loadu_si128((__m128i*)bytes.data()));
 		_mm_store_si128((__m128i*)data, x);
 	}
+	*/
 
 	UUID& operator=(const UUID& other)
 	{
@@ -264,7 +270,7 @@ public:
 
 	size_t hash() const
 	{
-		return *((uint64_t*)data) ^ *((uint64_t*)data + 8);
+		return *((uint64_t*)data) ^ *((uint64_t*)(data + 8));
 	}
 
 private:
@@ -306,12 +312,14 @@ class UUIDGenerator {
 
 }
 
-namespace std {
-  template <> struct hash<UUIDv4::UUID>
-  {
-    size_t operator()(const UUIDv4::UUID & uuid) const
-    {
-      return uuid.hash();
-    }
-  };
+namespace std
+{
+	template<>
+	struct hash<UUIDv4::UUID>
+	{
+		size_t operator()(const UUIDv4::UUID& uuid) const
+		{
+			return uuid.hash();
+		}
+	};
 }

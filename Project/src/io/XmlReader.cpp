@@ -185,6 +185,18 @@ namespace fig::data
 		return std::nullopt;
 	}
 
+	template<>
+	std::optional<fig::timestamp> XmlReaderAttribute::TryGet<fig::timestamp>() const noexcept
+	{
+		if (_pAttrib)
+		{
+			int64_t value;
+			if (_pAttrib->QueryInt64Value(&value) == XML_SUCCESS)
+				return std::make_optional(fig::timestamp(value, fig::timezone::global));
+		}
+		return std::nullopt;
+	}
+
 	template<is_number_range T>
 	std::optional<T> XmlReaderAttribute::TryGet() const noexcept
 	{
@@ -345,6 +357,20 @@ namespace fig::data
 	}
 
 	template<>
+	std::optional<std::vector<fig::uuid>> XmlReaderElement::TryGetValue<std::vector<fig::uuid>>() const noexcept
+	{
+		if (auto str = TryGetValue<fig::string>(); str.has_value())
+		{
+			auto values = decode_csv(str.value());
+			auto ids = values
+				| std::views::transform([](auto&& v) { return fig::uuid::from_str(trim(v)); })
+				| std::ranges::to<std::vector>();
+			return std::make_optional(ids);
+		}
+		return std::nullopt;
+	}
+
+	template<>
 	std::optional<fig::gui::Color> XmlReaderElement::TryGetValue<fig::gui::Color>() const noexcept
 	{
 		if (auto text = ReadText())
@@ -369,6 +395,15 @@ namespace fig::data
 			auto value = trim(fig::string(pValue));
 			return std::make_optional(fig::handle(value));
 		}
+		return std::nullopt;
+	}
+
+	template<>
+		std::optional<fig::timestamp> XmlReaderElement::TryGetValue<fig::timestamp>() const noexcept
+	{
+		int64_t value;
+		if (_pElement->QueryInt64Text(&value) == XML_SUCCESS)
+			return std::make_optional(fig::timestamp(value, fig::timezone::global));
 		return std::nullopt;
 	}
 

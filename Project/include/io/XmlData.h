@@ -34,7 +34,12 @@ namespace fig::data
 
 		fig::io::FileError LoadFromXml(this IsXmlSerializable auto& self, const fig::byte_span& buffer) noexcept
 		{
-			XmlReader xml(fig::string_view { (const char*)buffer.data(), buffer.size() });
+			return self.LoadFromXml(fig::string_view { (const char*)buffer.data(), buffer.size() });
+		}
+
+		fig::io::FileError LoadFromXml(this IsXmlSerializable auto& self, fig::string_view doc) noexcept
+		{
+			XmlReader xml(doc);
 			if (not xml.IsOk())
 				return fig::io::FileError::UnrecognizedFormat;
 

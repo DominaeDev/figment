@@ -42,9 +42,10 @@ namespace fig::gui
 
 		TTF_Font* GetFont() const { return _pFont.get(); }
 
-		void SetText(const fig::string& text);
-		void SetTextAndResize(const fig::string& text);
-		void SetTextAndResize(const fig::string& text, Coord& newWidth, Coord& newHeight);
+		void SetText(fig::string_view text);
+		void SetTextAndResize(fig::string_view text);
+		void SetTextAndResize(fig::string_view text, Coord& newWidth, Coord& newHeight);
+
 		const fig::string& GetText() const { return _text; }
 
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }

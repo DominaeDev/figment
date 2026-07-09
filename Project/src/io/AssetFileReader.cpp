@@ -51,9 +51,12 @@ namespace fig::io
 				outMeta[tag] = *reinterpret_cast<float*>(buf.data());
 				break;
 			case MetaValueType::TimeStamp:
-				fs.Read(buf, sizeof(fig::timestamp));
-				outMeta[tag] = *reinterpret_cast<fig::timestamp*>(buf.data());
+			{
+				fs.Read(buf, sizeof(int64_t));
+				int64_t valuei64 = *reinterpret_cast<int64_t*>(buf.data());
+				outMeta[tag] = fig::timestamp(valuei64, fig::timezone::global);
 				break;
+			}
 			case MetaValueType::Identifier:
 				fs.Read(buf, sizeof(_meta_identifier));
 				outMeta[tag] = *reinterpret_cast<_meta_identifier*>(buf.data());

@@ -53,6 +53,8 @@ namespace fig::data
 		std::optional<fig::string_list> TryGet<fig::string_list>() const noexcept;
 		template<>
 		std::optional<fig::handle> TryGet<fig::handle>() const noexcept;
+		template<>
+		std::optional<fig::timestamp> TryGet<fig::timestamp>() const noexcept;
 		template<is_number_range T>
 		[[nodiscard]] std::optional<T> TryGet() const noexcept;
 		template<typename T>
@@ -108,11 +110,15 @@ namespace fig::data
 		template<>
 		[[nodiscard]] std::optional<fig::uuid> TryGetValue<fig::uuid>() const noexcept;
 		template<>
+		[[nodiscard]] std::optional<std::vector<fig::uuid>> TryGetValue<std::vector<fig::uuid>>() const noexcept;
+		template<>
 		[[nodiscard]] std::optional<fig::gui::Color> TryGetValue<fig::gui::Color>() const noexcept;
 		template<>
 		[[nodiscard]] std::optional<fig::string_list> TryGetValue<fig::string_list>() const noexcept;
 		template<>
 		[[nodiscard]] std::optional<fig::handle> TryGetValue<fig::handle>() const noexcept;
+		template<>
+		[[nodiscard]] std::optional<fig::timestamp> TryGetValue<fig::timestamp>() const noexcept;
 		template<is_number_range T>
 		[[nodiscard]] std::optional<T> TryGetValue() const noexcept;
 		template<typename T>

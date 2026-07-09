@@ -36,7 +36,7 @@ namespace fig::io
 			else if (const float* x = std::get_if<float>(&value))
 				offset += sizeof(float);
 			else if (const fig::timestamp* x = std::get_if<fig::timestamp>(&value))
-				offset += sizeof(fig::timestamp);
+				offset += sizeof(int64_t);
 			else if (const _meta_identifier* x = std::get_if<_meta_identifier>(&value))
 				offset += sizeof(_meta_identifier);
 			else if (const fig::string* s = std::get_if<fig::string>(&value))
@@ -107,7 +107,8 @@ namespace fig::io
 			else if (const fig::timestamp* t = std::get_if<fig::timestamp>(&value))
 			{
 				fs << tag;
-				fs.write((const char*)(t), sizeof(fig::timestamp));
+				int64_t valuei64 { (*t).utc_epoch() };
+				fs.write((const char*)(&valuei64), sizeof(int64_t));
 			}
 			else if (const _meta_identifier* t = std::get_if<_meta_identifier>(&value))
 			{

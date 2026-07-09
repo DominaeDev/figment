@@ -287,4 +287,35 @@ namespace fig
 	#define DEBUG_MEASURE_END()
 #endif
 
+	template<class Range, class KeyFn>
+	auto group_by(const Range& range, KeyFn keyFn)
+	{
+		using T = std::ranges::range_value_t<Range>;
+		using Key = std::decay_t<std::invoke_result_t<KeyFn, T const&>>;
+
+		std::unordered_map<Key, std::vector<T>> groups;
+		for (auto const& element : range)
+			groups[keyFn(element)].push_back(element);
+
+		return groups;
+	}
+
+	template<class KeyFn>
+	struct GroupByAdaptor
+	{
+		KeyFn keyFn;
+	};
+
+	template<class KeyFn>
+	auto group_by(KeyFn keyFn)
+	{
+		return GroupByAdaptor<KeyFn>{ keyFn };
+	}
+
+	template<std::ranges::range Range, class KeyFn>
+	auto operator|(Range&& range, GroupByAdaptor<KeyFn> adaptor)
+	{
+		return group_by(range, adaptor.keyFn);
+	}
+
 }

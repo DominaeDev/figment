@@ -68,6 +68,12 @@ namespace fig::data
 	}
 
 	template<>
+	void XmlWriterAttribute::Set<fig::timestamp>(const fig::timestamp& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), value.utc_epoch());
+	}
+
+	template<>
 	void XmlWriterAttribute::Set<bool>(const bool& value) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), value);
@@ -172,6 +178,13 @@ namespace fig::data
 	{
 		DeleteValue();
 		_pElement->InsertNewText(value.c_str());
+	}
+
+	template<>
+	void XmlWriterElement::SetValue<fig::timestamp>(const fig::timestamp& value) noexcept
+	{
+		DeleteValue();
+		_pElement->InsertNewText(std::format("{}", value.utc_epoch()).c_str());
 	}
 
 	XmlWriterElement XmlWriterElement::AddChild(const fig::string& name) noexcept

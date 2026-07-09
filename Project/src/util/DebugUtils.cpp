@@ -107,7 +107,7 @@ namespace fig
 					asset.SetMeta(MetaTag::CreatedAt, now);
 					asset.SetMeta(MetaTag::LastUsedAt, now);
 					asset.SetMeta(MetaTag::UpdatedAt, now);
-					now -= static_cast<fig::timestamp>(std::chrono::milliseconds(100).count());
+					now -= std::chrono::milliseconds(100);
 				}
 
 				userMngr.SignOut();
@@ -211,7 +211,7 @@ namespace fig
 			{
 				auto& assetMngr = userMngr.GetContent().GetAssetManager();
 
-				auto remove_chats = assetMngr.GetAssetsOfType(AssetType::ChatLog)
+				auto remove_chats = assetMngr.GetAssetsOfType(AssetType::ChatInstance)
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
 					| std::ranges::to<std::vector>();
 				assetMngr.DeleteAssets(remove_chats);

@@ -235,21 +235,13 @@ namespace fig::io
 	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-
-		auto itFind = _assets.find(id);
-		if (itFind != _assets.cend())
-			return make_optional_cref(itFind->second);
-		return fig::nullref;
+		return FindAsset_Internal(id);
 	}
 
 	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-
-		auto itFind = _assets.find(id);
-		if (itFind != _assets.cend() and itFind->second.asset_type == assetType)
-			return make_optional_cref(itFind->second);
-		return fig::nullref;
+		return FindAsset_Internal(id, assetType);
 	}
 
 	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept
@@ -264,6 +256,22 @@ namespace fig::io
 			});
 
 		if (itFind != _assets.cend())
+			return make_optional_cref(itFind->second);
+		return fig::nullref;
+	}
+
+	fig::optional_cref<Asset> AssetManager::FindAsset_Internal(const fig::uuid& id) noexcept
+	{
+		auto itFind = _assets.find(id);
+		if (itFind != _assets.cend())
+			return make_optional_cref(itFind->second);
+		return fig::nullref;
+	}
+
+	fig::optional_cref<Asset> AssetManager::FindAsset_Internal(const fig::uuid& id, AssetType assetType) noexcept
+	{
+		auto itFind = _assets.find(id);
+		if (itFind != _assets.cend() and itFind->second.asset_type == assetType)
 			return make_optional_cref(itFind->second);
 		return fig::nullref;
 	}
@@ -390,24 +398,27 @@ namespace fig::io
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		// Read meta data of all asset files (in parallel)
-		DEBUG_MEASURE_BEGIN("LoadAssets (Meta)");
-		std::vector<Asset*> meta_assets = _assets
-			| std::views::filter([](auto& kvp) { return kvp.second.asset_type == AssetType::ChatInstance; })
-			| std::views::values
-			| std::views::transform([](auto&& a) { return &a; })
-			| std::ranges::to<std::vector>();
+		if constexpr (Disabled)
+		{
+			// Read meta data of all asset files (in parallel)
+			DEBUG_MEASURE_BEGIN("LoadAssets (Meta)");
+			std::vector<Asset*> meta_assets = _assets
+				| std::views::filter([](auto& kvp) { return kvp.second.asset_type == AssetType::ChatInstance; })
+				| std::views::values
+				| std::views::transform([](auto&& a) { return &a; })
+				| std::ranges::to<std::vector>();
 
-		std::for_each(std::execution::par_unseq,
-			meta_assets.begin(), meta_assets.end(),
-			[&](Asset* pAsset) {
+			std::for_each(std::execution::par_unseq,
+				meta_assets.begin(), meta_assets.end(),
+				[&](Asset* pAsset) {
 				auto discard = LoadAssetMeta_Internal(*pAsset);
 			});
-		DEBUG_MEASURE_END();
+			DEBUG_MEASURE_END();
+		}
 
 		DEBUG_MEASURE_BEGIN("LoadAssets (Full)");
 		std::vector<Asset*> assets = _assets
-			| std::views::filter([](auto& kvp) { return kvp.second.asset_type == AssetType::Character || kvp.second.asset_type == AssetType::Scenario; })
+			| std::views::filter([](auto& kvp) { return kvp.second.asset_type == AssetType::Character || kvp.second.asset_type == AssetType::Scenario || kvp.second.asset_type == AssetType::ChatInstance; })
 			| std::views::values
 			| std::views::transform([](auto&& a) { return &a; })
 			| std::ranges::to<std::vector>();
@@ -420,6 +431,32 @@ namespace fig::io
 		DEBUG_MEASURE_END();
 
 		return true;
+	}
+
+	void AssetManager::LoadDataAssets(const std::vector<fig::uuid>& assetIds) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		std::vector<Asset*> assets = assetIds
+			| std::views::transform([&](auto&& id) { return &_assets.at(id); })
+			| std::ranges::to<std::vector>();
+
+		std::for_each(std::execution::par_unseq,
+			assets.begin(), assets.end(),
+			[&](Asset* pAsset) {
+			auto discard = LoadAsset_Internal(*pAsset);
+		});
+	}
+
+	void AssetManager::LoadDataAssets(const fig::ref_vector<Asset>& assets) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		std::for_each(std::execution::par_unseq,
+			assets.cbegin(), assets.cend(),
+			[&](auto&& asset) {
+			auto discard = LoadAsset_Internal(asset.get());
+		});
 	}
 
 	FileError AssetManager::LoadAsset(const Asset& asset) noexcept
@@ -1058,47 +1095,35 @@ namespace fig::io
 		return it != _active_promises.end();
 	}
 
-	void AssetManager::ModifyAsset_Internal(const fig::uuid& assetID, std::function<void(Asset&)> fn)
+	void AssetManager::ModifyAsset_Void(const fig::uuid& assetID, std::function<void(Asset&)> fn)
 	{
 		if (auto itFind = _assets.find(assetID); itFind != _assets.cend())
 		{
 			if (fn)
-			{
-				std::scoped_lock lock { _assetsMutex };
 				fn(itFind->second);
-			}
 		}
 	}
 
-	void AssetManager::ModifyAsset_Internal(const Asset& asset, std::function<void(Asset&)> fn)
+	void AssetManager::ModifyAsset_Void(const Asset& asset, std::function<void(Asset&)> fn)
 	{
 		if (fn)
-		{
-			std::scoped_lock lock { _assetsMutex };
 			fn(const_cast<Asset&>(asset));
-		}
 	}
 
-	bool AssetManager::ModifyAsset_Internal_Bool(const fig::uuid& assetID, std::function<bool(Asset&)> fn)
+	bool AssetManager::ModifyAsset_Bool(const fig::uuid& assetID, std::function<bool(Asset&)> fn)
 	{
 		if (auto itFind = _assets.find(assetID); itFind != _assets.cend())
 		{
 			if (fn)
-			{
-				std::scoped_lock lock { _assetsMutex };
 				return fn(itFind->second);
-			}
 		}
 		return false;
 	}
 
-	bool AssetManager::ModifyAsset_Internal_Bool(const Asset& asset, std::function<bool(Asset&)> fn)
+	bool AssetManager::ModifyAsset_Bool(const Asset& asset, std::function<bool(Asset&)> fn)
 	{
 		if (fn)
-		{
-			std::scoped_lock lock { _assetsMutex };
 			return fn(const_cast<Asset&>(asset));
-		}
 		return false;
 	}
 }

@@ -16,7 +16,10 @@ namespace fig::data
 			Element { "Name", &Character::shortName }
 				.MustExist(),
 			Element { "FullName", &Character::fullName },
-			Element { "Gender", &Character::gender },
+			Element { "Gender", &Character::gender,
+				[](auto& value) { return (fig::string)value; },
+				[](auto& value) { return Gender(value); }
+			},
 			Element { "Brief", &Character::brief },
 			Element { "Attributes", &Character::_attributes },
 			Element { "Tags", &Character::_tags },

@@ -21,6 +21,8 @@ namespace fig::chat
 			_pollerId = (*poller).RegisterObserver(std::bind_front(&ChatLogger::OnMessage, this));
 		else
 			_pollerId = static_cast<uint32_t>(-1);
+
+		_log.title = session.GetNameOf(Role::Bot1);
 	}
 
 	ChatLogger::~ChatLogger()

@@ -8,6 +8,7 @@ namespace fig::gui
 	{
 	public:
 		ChatListItem(ParentPtr pParent);
+		ChatListItem(ParentPtr pParent, const fig::io::Asset& asset);
 
 	protected:
 		void OnUpdate(float fElapsed);
@@ -18,6 +19,7 @@ namespace fig::gui
 		void ShowMenu() noexcept;
 
 	private:
+		fig::uuid _assetId;
 		fig::observer_ptr<ImageWithMask> _pPortrait;
 		fig::observer_ptr<StaticText> _pTitle;
 		fig::observer_ptr<StaticText> _pMessage;

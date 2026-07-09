@@ -31,7 +31,10 @@ namespace fig::chat
 				[](auto& value) { return enum_serialize(value, PriorityMapping); },
 				[](auto& value) { return enum_deserialize(value, PriorityMapping); }
 			},
-			Attribute { "condition",	&PromptBlockInfo::condition }
+			Attribute { "condition",	&PromptBlockInfo::condition,
+				[](auto& value) { return (fig::string)value; },
+				[](auto& value) { return Condition(value); }
+			}
 				.Default(Condition::Always),
 			Attribute { "order",		&PromptBlockInfo::order },
 			Text		{				&PromptBlockInfo::content }
