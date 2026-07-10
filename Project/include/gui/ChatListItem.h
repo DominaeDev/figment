@@ -2,13 +2,18 @@
 
 #include "gui/Panel.h"
 
+namespace fig::data
+{
+	class ChatLog;
+}
+
 namespace fig::gui
 {
 	class ChatListItem : public Panel
 	{
 	public:
 		ChatListItem(ParentPtr pParent);
-		ChatListItem(ParentPtr pParent, const fig::io::Asset& asset);
+		ChatListItem(ParentPtr pParent, const fig::data::ChatLog& asset, fig::timestamp lastUsed);
 
 	protected:
 		void OnUpdate(float fElapsed);

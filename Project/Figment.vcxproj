@@ -229,6 +229,7 @@
     <ClCompile Include="src\io\AssetManager.cpp" />
     <ClCompile Include="src\io\CardImporter.cpp" />
     <ClCompile Include="src\io\ContentManager.cpp" />
+    <ClCompile Include="src\io\ContentTypes.cpp" />
     <ClCompile Include="src\io\FileStream.cpp" />
     <ClCompile Include="src\io\FileUtility.cpp" />
     <ClCompile Include="src\io\IniFile.cpp" />
@@ -475,12 +476,14 @@
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
     <ClInclude Include="include\gui\Window.h" />
     <ClInclude Include="include\io\Asset.h" />
+    <ClInclude Include="include\io\AssetCache.h" />
     <ClInclude Include="include\io\AssetDatabase.h" />
     <ClInclude Include="include\io\AssetFileReader.h" />
     <ClInclude Include="include\io\AssetFileWriter.h" />
     <ClInclude Include="include\io\AssetManager.h" />
     <ClInclude Include="include\io\CardImporter.h" />
     <ClInclude Include="include\io\ContentManager.h" />
+    <ClInclude Include="include\io\ContentTypes.h" />
     <ClInclude Include="include\io\Error.h" />
     <ClInclude Include="include\io\FileStream.h" />
     <ClInclude Include="include\io\FileUtility.h" />

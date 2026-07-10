@@ -55,7 +55,7 @@ namespace fig::io
 			Created = 0,
 			Modified,
 			Synchronized,
-			Indetermined,
+			Indeterminate,
 		};
 
 		enum class Error
@@ -67,8 +67,8 @@ namespace fig::io
 
 		bool has_meta {};
 		bool has_data {};
-		SyncStatus file_sync { SyncStatus::Indetermined };
-		SyncStatus db_sync { SyncStatus::Indetermined };
+		SyncStatus file_sync { SyncStatus::Indeterminate };
+		SyncStatus db_sync { SyncStatus::Indeterminate };
 		Error error {};
 
 		inline void Modified() noexcept

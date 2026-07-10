@@ -48,31 +48,22 @@ namespace fig::gui
 		_pPortrait->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::CIRCLE_MASK));
 	}
 
-	ChatListItem::ChatListItem(ParentPtr pParent, const fig::io::Asset& asset) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(ParentPtr pParent, const ChatLog& chatLog, fig::timestamp lastUsed) : ChatListItem(pParent)
 	{
-		_assetId = asset.id;
+		if (not empty_or_whitespace(chatLog.title))
+			_pTitle->SetText(chatLog.title);
+		else
+			_pTitle->SetText("Untitled chat");
 
-		if (asset.HasData())
+		if (not chatLog.messages.empty())
 		{
-			ChatLog chatLog;
-			if (chatLog.LoadFromXml(asset.AsStringView()) == FileError::NoError) //! @todo: Not this, here.
-			{
-				if (not empty_or_whitespace(chatLog.title))
-					_pTitle->SetText(chatLog.title);
-				else
-					_pTitle->SetText("Untitled chat");
+			auto& lastMessage = chatLog.messages.back();
+			auto name = Global::GetUserManager().GetContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
 
-				if (not chatLog.messages.empty())
-				{
-					auto& lastMessage = chatLog.messages.back();
-					auto name = Global::GetUserManager().GetContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
-
-					_pMessage->SetText(std::format("{}: \"{}\"", name, trunc(chatLog.messages.back().content, 80uz)));
-				}
-
-				_pTimestamp->SetTextAndResize(asset.GetLastUsedAt().get_time_string(false));
-			}
+			_pMessage->SetText(std::format("{}: \"{}\"", name, trunc(chatLog.messages.back().content, 80uz)));
 		}
+
+		_pTimestamp->SetTextAndResize(lastUsed.get_time_string(false));
 	}
 
 	void ChatListItem::OnSize()

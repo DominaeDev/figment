@@ -67,13 +67,18 @@ namespace fig::gui
 	{
 		Reset();
 
-		auto chatInstances = Global::GetUserManager().GetContent().GetChats(true)
+		auto& content = Global::GetUserManager().GetContent();
+		auto chatInstances = content.GetChatLogs(true)
 			| std::views::transform([](auto& a) { return std::cref(a); })
 			| std::ranges::to<std::vector>();
 
 		auto now = utc_now();
 		auto chatsByTime = chatInstances
-			| fig::group_by([&now](auto& a) { return GetTimeBucket(a.get().GetCreatedAt(), now); });
+			| std::views::transform([&content](auto& a) {
+				auto chat = content.Get<fig::data::ChatLog>(a.get().id);
+				return std::make_pair(chat, a.get().GetCreatedAt());
+			})
+			| fig::group_by([&now](auto& p) { return GetTimeBucket(p.second, now); });
 		
 		for (auto& kvp : chatsByTime)
 		{
@@ -88,10 +93,13 @@ namespace fig::gui
 			auto& chats = kvp.second;
 			for (size_t i = 0uz; i < chats.size(); i++)
 			{
+				auto& chat = *chats[i].first;
+				auto& time = chats[i].second;
+
 				if (i > 0)
 					_pVerticalSizer->AddSpacer(Spacing);
 
-				auto pItem = CreateControl<ChatListItem>(chats[i]);
+				auto pItem = CreateControl<ChatListItem>(chat, time);
 				_pVerticalSizer->Add(pItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
 				_items.push_back(pItem);
 			}

@@ -590,6 +590,9 @@
     <ClCompile Include="src\util\Timestamp.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\io\ContentTypes.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1395,6 +1398,12 @@
     </ClInclude>
     <ClInclude Include="include\util\Timestamp.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AssetCache.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\ContentTypes.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

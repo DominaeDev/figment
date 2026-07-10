@@ -1,9 +1,9 @@
 #pragma once
 
-#include "data/Character.h"
-#include "data/Scenario.h"
 #include "data/CardMetaData.h"
 #include "data/ModelSettings.h"
+#include "io/AssetCache.h"
+#include "io/ContentTypes.h"
 
 namespace fig::data
 {
@@ -30,9 +30,9 @@ namespace fig::io
 		fig::optional_cref<fig::data::Scenario> GetScenario(const fig::uuid& id) const noexcept;
 		auto GetCharacters() const noexcept { return _characters | std::views::values; }
 		auto GetScenarios() const noexcept { return _scenarios | std::views::values; }
-		
+
 		fig::cref_vector<Asset> GetChatsWithCharacter(const fig::uuid& characterId, bool bLoad = false);
-		fig::cref_vector<Asset> GetChats(bool bLoad = false);
+		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
 
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
 		fig::optional_ref<fig::data::CardMetaData> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
@@ -50,11 +50,26 @@ namespace fig::io
 		size_t GetChatCount(const fig::uuid& assetId);
 		void RefreshChatCount();
 
+		template <typename T>
+		fig::optional_cref<T> Get(const fig::uuid& assetId) noexcept
+		{
+			auto& cache = GetCache<T>();
+			return cache.Get(assetId);
+		}
+
 	protected:
 		void LoadAll();
 
+		template <typename T>
+		AssetCacheBase<T>& GetCache()
+		{
+			auto& entry = _caches[AssetTypeOf<T>];
+			return static_cast<AssetCacheBase<T>&>(*entry);
+		}
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
+
+		std::unordered_map<AssetType, std::unique_ptr<IAssetCache>> _caches;
 
 		std::map<fig::uuid, fig::data::Character> _characters;
 		std::map<fig::uuid, fig::data::Scenario> _scenarios;

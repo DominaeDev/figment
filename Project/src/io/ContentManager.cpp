@@ -14,6 +14,12 @@ namespace fig::io
 	{
 		_pAssetMngr = std::make_unique<AssetManager>(profile, authKey);
 
+		// Instantiate caches
+		_caches[AssetTypeOf<fig::data::Character>] = std::make_unique<AssetCache<fig::data::Character, AssetType::Character, DataFormat::DataXml>>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::Scenario>] = std::make_unique<AssetCache<fig::data::Scenario, AssetType::Scenario, DataFormat::DataXml>>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::ChatInstance>] = std::make_unique<AssetCache<fig::data::ChatInstance, AssetType::ChatInstance, DataFormat::DataXml>>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::ChatLog>] = std::make_unique<AssetCache<fig::data::ChatLog, AssetType::ChatLog, DataFormat::DataXml>>(_pAssetMngr.get());
+
 		LoadAll();
 	}
 
@@ -362,7 +368,7 @@ namespace fig::io
 		return logAssets;
 	}
 
-	fig::cref_vector<Asset> UserContentManager::GetChats(bool bLoad)
+	fig::cref_vector<Asset> UserContentManager::GetChatLogs(bool bLoad)
 	{
 		auto chatInstanceIds = _chats
 			| std::views::keys
@@ -393,4 +399,5 @@ namespace fig::io
 			return (*itFind).second.shortName;
 		return std::nullopt;
 	}
+
 }

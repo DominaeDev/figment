@@ -61,6 +61,7 @@ namespace fig::io
 
 		bool DeleteAsset(const fig::uuid& assetID) noexcept;
 		uint32_t DeleteAssets(std::span<fig::uuid> assetIDs) noexcept;
+		bool ReleaseAssetData(const fig::uuid& assetID) noexcept;
 
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& id) noexcept;
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;

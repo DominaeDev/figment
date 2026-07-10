@@ -617,6 +617,19 @@ namespace fig::io
 		return false;
 	}
 
+	bool AssetManager::ReleaseAssetData(const fig::uuid& assetID) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+		auto itAsset = _assets.find(assetID);
+		if (itAsset == _assets.end())
+			return false;
+
+		auto& asset = itAsset->second;
+		asset.data.clear();
+		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Indeterminate;
+		return true;
+	}
+
 	std::set<fig::uuid> AssetManager::FindRelatedAssets(const fig::uuid& assetID) noexcept
 	{
 		std::set<fig::uuid> assetIDs;
