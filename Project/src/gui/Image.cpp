@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	Image::Image(ParentPtr pParent, Texture* pTexture, Color tint) : Control(pParent),
+	Image::Image(ParentPtr pParent, TexturePtr pTexture, Color tint) : Control(pParent),
 		_pTexture(pTexture)
 	{
 		if (_pTexture)

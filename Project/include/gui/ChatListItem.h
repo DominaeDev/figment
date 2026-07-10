@@ -25,7 +25,7 @@ namespace fig::gui
 
 	private:
 		fig::uuid _assetId;
-		fig::observer_ptr<ImageWithMask> _pPortrait;
+		fig::observer_ptr<Image> _pPortrait;
 		fig::observer_ptr<StaticText> _pTitle;
 		fig::observer_ptr<StaticText> _pMessage;
 		fig::observer_ptr<StaticText> _pTimestamp;

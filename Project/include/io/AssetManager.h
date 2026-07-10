@@ -65,12 +65,12 @@ namespace fig::io
 
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& id) noexcept;
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;
-		fig::optional_cref<Asset> FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
+		fig::optional_cref<Asset> FindImageAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
 
 		FileError LoadAsset(const Asset& asset) noexcept;
 		fig::expected_cref<Asset, FileError> LoadAsset(const fig::uuid& id) noexcept;
-		void LoadDataAssets(const std::vector<fig::uuid>& assetIds) noexcept;
-		void LoadDataAssets(const fig::ref_vector<Asset>& assets) noexcept;
+		void LoadAssetData(const std::vector<fig::uuid>& assetIds) noexcept;
+		void LoadAssetData(const fig::ref_vector<Asset>& assets) noexcept;
 		
 		auto GetAssets() noexcept { return _assets | std::views::values; }
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
@@ -115,8 +115,10 @@ namespace fig::io
 		
 		std::expected<fig::data::Character, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		size_t LoadAssetIndex() noexcept;
-		bool LoadAssetMetaData() noexcept;
-		bool LoadDataAssets() noexcept;
+
+		bool LoadMetaData(AssetType assetType) noexcept;
+		bool LoadAssetData() noexcept;
+
 		bool UpdateAssetOnDisk(Asset& asset);
 		bool UpdateAssetInDatabase(Asset& asset);
 

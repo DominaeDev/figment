@@ -14,7 +14,7 @@ namespace fig::gui
 	CharacterCard::CharacterCard(ParentPtr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
 		_characterId { characterId }
 	{
-		if (auto try_character = Global::GetUserManager().GetContent().GetCharacter(characterId); try_character.has_value())
+		if (auto try_character = Global::GetUserManager().GetContent().Get<Character>(characterId); try_character.has_value())
 		{
 			auto& character = try_character.value();
 			_characterName = character.shortName;

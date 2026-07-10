@@ -13,7 +13,7 @@ namespace fig::gui
 {
 	ChatListItem::ChatListItem(ParentPtr pParent) : Panel(pParent)
 	{
-		SetMaxSize(700, -1);
+		SetMaxSize(760, -1);
 		SetHeight(60);
 
 		// Background
@@ -42,10 +42,10 @@ namespace fig::gui
 		_pTimestamp->SetMaxSize(100, -1);
 
 		// Portrait
-		_pPortrait = CreateControl<ImageWithMask>(nullptr, nullptr);
+		_pPortrait = CreateControl<Image>(nullptr);
 		_pPortrait->SetSize(48, 48);
 		_pPortrait->SetPosition(8, 6);
-		_pPortrait->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::CIRCLE_MASK));
+		_pPortrait->SetVisible(false);
 	}
 
 	ChatListItem::ChatListItem(ParentPtr pParent, const ChatLog& chatLog, fig::timestamp lastUsed) : ChatListItem(pParent)
@@ -58,12 +58,22 @@ namespace fig::gui
 		if (not chatLog.messages.empty())
 		{
 			auto& lastMessage = chatLog.messages.back();
+			auto& speakerId = lastMessage.speakerId;
 			auto name = Global::GetUserManager().GetContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
 
-			_pMessage->SetText(std::format("{}: \"{}\"", name, trunc(chatLog.messages.back().content, 80uz)));
+			if (lastMessage.msgType == fig::chat::MessageType::Action)
+				_pMessage->SetText(std::format("{}: *{}*", name, trunc(lastMessage.content, 256uz)));
+			else
+				_pMessage->SetText(std::format("{}: \"{}\"", name, trunc(lastMessage.content, 256uz)));
+
+			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(speakerId, AppResources::GetTexture(TextureType::MASK_CIRCLE), GetSDLRenderer()))
+			{
+				_pPortrait->SetTexture((*portrait).get());
+				_pPortrait->SetVisible(true);
+			}
 		}
 
-		_pTimestamp->SetTextAndResize(lastUsed.get_time_string(false));
+		_pTimestamp->SetTextAndResize(lastUsed.get_time_string());
 	}
 
 	void ChatListItem::OnSize()
@@ -137,16 +147,23 @@ namespace fig::gui
 
 		bool bLLM = Global::IsLLMInitialized();
 
-		menu.AddItem("Resume chat\u2026", TextureType::ICON_NEW_CHAT)
+		menu.AddItem("Resume chat", TextureType::ICON_NEW_CHAT)
+			.SetEnabled(bLLM)
+			.SetDelegate([this] {
+//			PushEvent(UserEvent::StartChat, &_characterId);
+		});
+		menu.AddItem("Start another chat\u2026")
 			.SetEnabled(bLLM)
 			.SetDelegate([this] {
 //			PushEvent(UserEvent::StartChat, &_characterId);
 		});
 
-		menu.AddItem("Duplicate\u2026");
-		menu.AddItem("Export\u2026");
 		menu.AddSeparator();
 		menu.AddItem("Star", TextureType::ICON_STAR);
+		menu.AddSeparator();
+		menu.AddItem("Find similar");
+		menu.AddItem("Duplicate\u2026");
+		menu.AddItem("Export\u2026");
 		menu.AddSeparator();
 		menu.AddItem("Delete\u2026");
 		_menuId = menu.Show();

@@ -4,6 +4,7 @@
 #include "data/Scenario.h"
 #include "data/ChatInstance.h"
 #include "data/ChatLog.h"
+#include "gui/GUITypes.h"
 
 namespace fig::io
 {
@@ -15,6 +16,8 @@ namespace fig::io
 	constexpr AssetType AssetTypeOf<fig::data::ChatInstance> = AssetType::ChatInstance;
 	template <> 
 	constexpr AssetType AssetTypeOf<fig::data::ChatLog> = AssetType::ChatLog;
+	template <> 
+	constexpr AssetType AssetTypeOf<fig::sdl::Surface> = AssetType::Image;
 
 	template <>
 	struct AssetLoader<fig::data::Character>
@@ -38,5 +41,11 @@ namespace fig::io
 	struct AssetLoader<fig::data::ChatLog>
 	{
 		std::expected<fig::data::ChatLog, FileError> Load(const Asset& asset);
+	};
+
+	template <>
+	struct AssetLoader<fig::sdl::Surface>
+	{
+		std::expected<fig::sdl::Surface, FileError> Load(const Asset& asset);
 	};
 }

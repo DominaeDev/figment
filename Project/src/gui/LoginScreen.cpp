@@ -137,9 +137,9 @@ namespace fig::gui
 		}
 
 		if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
-			_pProfileImage->SetTexture(pTexture, AppResources::GetTexture(TextureType::CIRCLE_MASK));
+			_pProfileImage->SetTexture(pTexture, AppResources::GetTexture(TextureType::MASK_CIRCLE));
 		else
-			_pProfileImage->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::CIRCLE_MASK));
+			_pProfileImage->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::MASK_CIRCLE));
 
 		InvalidateLayout();
 	}

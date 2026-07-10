@@ -30,7 +30,9 @@ namespace fig::io
 
 		if (LoadAssetIndex())
 		{
-			LoadDataAssets();
+			LoadMetaData(AssetType::Character);
+			LoadMetaData(AssetType::Scenario);
+			LoadMetaData(AssetType::ChatInstance);
 		}
 		else
 		{
@@ -244,7 +246,7 @@ namespace fig::io
 		return FindAsset_Internal(id, assetType);
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& parentId, ImageType imageType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindImageAsset(const fig::uuid& parentId, ImageType imageType) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -352,69 +354,47 @@ namespace fig::io
 		return _assets.size();
 	}
 
-	bool AssetManager::LoadAssetMetaData() noexcept
+	bool AssetManager::LoadMetaData(AssetType assetType) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
 		// Read meta data of all asset files (in parallel)
-		DEBUG_MEASURE_BEGIN("LoadAssetMetaData");
-		std::vector<Asset*> assets = _assets
+		DEBUG_MEASURE_BEGIN("Load meta data (all)");
+		std::vector<Asset*> meta_assets = _assets
+			| std::views::filter([assetType](auto& kvp) { return kvp.second.asset_type == assetType; })
 			| std::views::values
 			| std::views::transform([](auto&& a) { return &a; })
 			| std::ranges::to<std::vector>();
 
-		std::for_each(std::execution::par,
-			assets.begin(), assets.end(),
+		std::for_each(std::execution::par_unseq,
+			meta_assets.begin(), meta_assets.end(),
 			[&](Asset* pAsset) {
-				auto& asset = *pAsset;
-				AssetFileReader reader(_profilePath, _profileAuthKey);
-				if (auto file = reader.ReadFile(asset.GetFileName(), false))
-				{
-					asset.FromFile(std::move(file.value()));
-					asset.sync_state.file_sync = AssetSyncState::SyncStatus::Synchronized;
-					asset.sync_state.has_meta = true;
-				}
-				else if (file.error() == FileError::NotFound)
-					asset.sync_state.error = AssetSyncState::Error::Missing;
-				else // File exists but failed to read
-					asset.sync_state.error = AssetSyncState::Error::Invalid;
+				auto discard = LoadAssetMeta_Internal(*pAsset);
 			});
 		DEBUG_MEASURE_END();
 
 		// Purge missing assets from index
-		DEBUG_MEASURE_BEGIN("Remove missing assets");
-		for (auto& id : _assets
+		auto missingAssets = _assets
 			| std::views::filter([](auto& kvp) { return kvp.second.sync_state.error == AssetSyncState::Error::Missing; })
 			| std::views::keys
-			| std::ranges::to<std::vector>())
+			| std::ranges::to<std::vector>();
+
+		if (not missingAssets.empty())
 		{
-			_assets.erase(id);
+			DEBUG_MEASURE_BEGIN("Remove missing assets");
+			for (auto& id : missingAssets)
+			{
+				_assets.erase(id);
+				_pAssetDB->DeleteAsset(id);
+			}
+			DEBUG_MEASURE_END();
 		}
-		DEBUG_MEASURE_END();
 		return true;
 	}
 
-	bool AssetManager::LoadDataAssets() noexcept
+	bool AssetManager::LoadAssetData() noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-
-		if constexpr (Disabled)
-		{
-			// Read meta data of all asset files (in parallel)
-			DEBUG_MEASURE_BEGIN("LoadAssets (Meta)");
-			std::vector<Asset*> meta_assets = _assets
-				| std::views::filter([](auto& kvp) { return kvp.second.asset_type == AssetType::ChatInstance; })
-				| std::views::values
-				| std::views::transform([](auto&& a) { return &a; })
-				| std::ranges::to<std::vector>();
-
-			std::for_each(std::execution::par_unseq,
-				meta_assets.begin(), meta_assets.end(),
-				[&](Asset* pAsset) {
-				auto discard = LoadAssetMeta_Internal(*pAsset);
-			});
-			DEBUG_MEASURE_END();
-		}
 
 		DEBUG_MEASURE_BEGIN("LoadAssets (Full)");
 		std::vector<Asset*> assets = _assets
@@ -429,11 +409,10 @@ namespace fig::io
 			auto discard = LoadAsset_Internal(*pAsset);
 		});
 		DEBUG_MEASURE_END();
-
 		return true;
 	}
 
-	void AssetManager::LoadDataAssets(const std::vector<fig::uuid>& assetIds) noexcept
+	void AssetManager::LoadAssetData(const std::vector<fig::uuid>& assetIds) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -448,7 +427,7 @@ namespace fig::io
 		});
 	}
 
-	void AssetManager::LoadDataAssets(const fig::ref_vector<Asset>& assets) noexcept
+	void AssetManager::LoadAssetData(const fig::ref_vector<Asset>& assets) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -843,7 +822,7 @@ namespace fig::io
 		// Create SDL surface
 		int32_t width = cover.GetMeta<uint16_t>(MetaTag::ImageWidth).value_or(Constants::GUI::CardWidth);
 		int32_t height = cover.GetMeta<uint16_t>(MetaTag::ImageHeight).value_or(Constants::GUI::CardHeight);
-		ImageFormat format = static_cast<ImageFormat>(cover.GetMeta<uint8_t>(MetaTag::ImageFormat).value_or(0));
+		fig::gui::ImageFormat format = static_cast<ImageFormat>(cover.GetMeta<uint8_t>(MetaTag::ImageFormat).value_or(0));
 
 		try
 		{
@@ -871,7 +850,7 @@ namespace fig::io
 
 	AsyncLoadError AssetManager::__LoadImageTask(const fig::uuid& characterAssetID, ImageType imageType, AsyncResultVariant& outResult) noexcept
 	{
-		if (auto findImage = FindAsset(characterAssetID, imageType))
+		if (auto findImage = FindImageAsset(characterAssetID, imageType))
 		{
 			auto& imageAsset = findImage.value();
 			if (auto result = LoadAsset(imageAsset); result == FileError::NoError)
@@ -896,7 +875,7 @@ namespace fig::io
 		fig::sdl::Surface fullSurface {};
 		fig::sdl::Surface halfSurface {};
 
-		if (auto findCover = FindAsset(characterAssetID, ImageType::CoverImage))
+		if (auto findCover = FindImageAsset(characterAssetID, ImageType::CoverImage))
 		{
 			auto& cover = findCover.value();
 			auto result = LoadAsset(cover);
@@ -913,7 +892,7 @@ namespace fig::io
 			if (fullSurface.empty())
 			{
 				// Create cover from portrait
-				if (auto findPortrait = FindAsset(characterAssetID, ImageType::LargePortrait))
+				if (auto findPortrait = FindImageAsset(characterAssetID, ImageType::LargePortrait))
 				{
 					auto& portraitAsset = findPortrait.value();
 					if (LoadAsset(portraitAsset) == FileError::NoError)

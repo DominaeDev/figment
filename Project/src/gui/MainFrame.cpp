@@ -448,7 +448,7 @@ namespace fig::gui
 		ChangeScreen(ScreenType::Chat);
 		auto pChatScreen = GetScreen<ChatScreen>(ScreenType::Chat);
 
-		if (auto character = Global::GetUserManager().GetContent().GetCharacter(characterId))
+		if (auto character = Global::GetUserManager().GetContent().Get<Character>(characterId))
 		{
 			PromptScaffold scaffold;
 			if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))

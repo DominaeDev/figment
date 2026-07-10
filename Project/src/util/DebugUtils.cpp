@@ -168,7 +168,7 @@ namespace fig
 			auto& userMngr = Global::GetUserManager();
 			if (userMngr.IsSignedIn())
 			{
-				if (auto try_character = userMngr.GetContent().GetCharacter(characterId))
+				if (auto try_character = userMngr.GetContent().Get<Character>(characterId))
 				{
 					auto& character = try_character.value();
 

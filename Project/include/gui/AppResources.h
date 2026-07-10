@@ -100,9 +100,10 @@ namespace fig::gui
 		ICON_BORDER_06,
 
 		PROFILE_DEFAULT_IMAGE,
-		CIRCLE_MASK,
 
 		MASK_CARD,
+		MASK_CIRCLE,
+		MASK_SMALL_PORTRAIT_56PX,
 	};
 
 	enum class MaskType

@@ -81,7 +81,7 @@ namespace fig::gui
 		if (_bShowAvatar)
 		{
 			TexturePtr pTexture = nullptr;
-			if (auto try_portrait = Global::GetUserContent().GetSmallPortraitForCharacter(GetSDLRenderer(), characterId))
+			if (auto try_portrait = Global::GetUserContent().GetSmallPortraitForCharacter(characterId, AppResources::GetTexture(TextureType::MASK_SMALL_PORTRAIT_56PX), GetSDLRenderer()))
 				pTexture = (*try_portrait).get();
 
 			if (!pTexture)

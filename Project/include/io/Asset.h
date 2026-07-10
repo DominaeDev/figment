@@ -20,7 +20,7 @@ namespace fig::io
 		ChatInstance		= 0x14,
 		ChatLog				= 0x15,
 
-		Image = 0x0A,
+		Image				= 0x0A,
 	};
 
 	enum class DataFormat : uint8_t

@@ -7,6 +7,7 @@
 
 using namespace fig::user;
 using namespace fig::data;
+using namespace fig::gui;
 
 namespace fig::io
 {
@@ -15,10 +16,11 @@ namespace fig::io
 		_pAssetMngr = std::make_unique<AssetManager>(profile, authKey);
 
 		// Instantiate caches
-		_caches[AssetTypeOf<fig::data::Character>] = std::make_unique<AssetCache<fig::data::Character, AssetType::Character, DataFormat::DataXml>>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::Scenario>] = std::make_unique<AssetCache<fig::data::Scenario, AssetType::Scenario, DataFormat::DataXml>>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::ChatInstance>] = std::make_unique<AssetCache<fig::data::ChatInstance, AssetType::ChatInstance, DataFormat::DataXml>>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::ChatLog>] = std::make_unique<AssetCache<fig::data::ChatLog, AssetType::ChatLog, DataFormat::DataXml>>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::Character>] = std::make_unique<AssetCache<fig::data::Character, AssetType::Character, DataFormat::DataXml, "Character">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::Scenario>] = std::make_unique<AssetCache<fig::data::Scenario, AssetType::Scenario, DataFormat::DataXml, "Scenario">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::ChatInstance>] = std::make_unique<AssetCache<fig::data::ChatInstance, AssetType::ChatInstance, DataFormat::DataXml, "ChatInstance">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::ChatLog>] = std::make_unique<AssetCache<fig::data::ChatLog, AssetType::ChatLog, DataFormat::DataXml, "ChatLog">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::sdl::Surface>] = std::make_unique<AssetCache<fig::sdl::Surface, AssetType::Image, DataFormat::Undefined, "Image">>(_pAssetMngr.get());
 
 		LoadAll();
 	}
@@ -32,7 +34,7 @@ namespace fig::io
 	{
 		DEBUG_MEASURE_BEGIN("UserContentManager::LoadAll");
 
-		auto& assetMngr = *_pAssetMngr;
+		/*auto& assetMngr = *_pAssetMngr;
 
 		// Load characters
 		for (auto& asset : _pAssetMngr->GetCharacterAssets())
@@ -67,25 +69,15 @@ namespace fig::io
 				if (chatInstance.LoadFromXml(asset.AsStringView()) == FileError::NoError)
 					_chats[asset.id] = std::move(chatInstance);
 			}
-		}
+		}*/
+
+		GetCache<fig::data::Character>().Preload();
+		GetCache<fig::data::Scenario>().Preload();
+		GetCache<fig::data::ChatInstance>().Preload();
 
 		RefreshChatCount();
 
 		DEBUG_MEASURE_END();
-	}
-
-	fig::optional_cref<fig::data::Character> UserContentManager::GetCharacter(const fig::uuid& id) const noexcept
-	{
-		if (auto itFind = _characters.find(id); itFind != _characters.cend())
-			return make_optional_cref(itFind->second);
-		return fig::nullref;
-	}
-
-	fig::optional_cref<fig::data::Scenario> UserContentManager::GetScenario(const fig::uuid& id) const noexcept
-	{
-		if (auto itFind = _scenarios.find(id); itFind != _scenarios.cend())
-			return make_optional_cref(itFind->second);
-		return fig::nullref;
 	}
 
 	std::optional<ModelSettings> UserContentManager::GetActiveModelSettings() const noexcept
@@ -134,14 +126,15 @@ namespace fig::io
 			metaData.createdAt = asset.GetCreatedAt();
 			metaData.updatedAt = asset.GetUpdatedAt();
 			metaData.lastUsedAt = asset.GetLastUsedAt();
+			metaData.chatCount = static_cast<uint32_t>(GetChatCount(id));
 
-			if (auto itFind = _characters.find(id); itFind != _characters.cend())
+			/*if (auto itFind = _characters.find(id); itFind != _characters.cend())
 			{
 				auto& character = itFind->second;
 				metaData.name = character.shortName;
 				metaData.gender = character.gender;
 				metaData.chatCount = static_cast<uint32_t>(GetChatCount(id));
-			}
+			}*/
 			_metaData[id] = metaData;
 			return make_optional_ref(_metaData.at(id));
 		}
@@ -247,43 +240,68 @@ namespace fig::io
 		_pAssetMngr->SaveModified();
 	}
 
-	fig::expected_ref<fig::sdl::Texture, FileError> UserContentManager::GetSmallPortraitForCharacter(fig::gui::RendererPtr pRenderer, const fig::uuid& characterId) noexcept
+	fig::expected_ref<fig::sdl::Texture, FileError> UserContentManager::GetSmallPortraitForCharacter(const fig::uuid& characterId, TexturePtr pMask, RendererPtr pRenderer) noexcept
 	{
-		if (auto find_asset = _pAssetMngr->FindAsset(characterId, ImageType::SmallPortrait))
+		if (auto itRenderer = _cachedTextures.find(pRenderer); itRenderer != _cachedTextures.cend())
 		{
-			auto& asset = *find_asset;
-			const fig::uuid& assetId = asset.id;
-			int32_t width = asset.GetMeta<int32_t>(MetaTag::ImageWidth).value_or(Constants::Data::SmallPortraitWidth);
-			int32_t height = asset.GetMeta<int32_t>(MetaTag::ImageHeight).value_or(Constants::Data::SmallPortraitWidth);
-
-			if (auto itFind = _textures.find(assetId); itFind != _textures.cend())
-				return itFind->second;
-
-			if (auto try_load = _pAssetMngr->LoadAsset(assetId))
+			if (auto itTextures = (*itRenderer).second.find(characterId); itTextures != (*itRenderer).second.cend())
 			{
-				auto& imageAsset = *try_load;
-				if (auto image = fig::gui::CreateSurfaceFromBytes(width, height, fig::gui::ImageFormat::RGB24, imageAsset.data); not image.empty())
+				for (auto& t : (*itTextures).second)
 				{
-					auto pNewSurface = SDL_CreateSurface(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitWidth, SDL_PIXELFORMAT_RGBA8888);
-					SDL_BlitSurfaceScaled(image.get(), NULL, pNewSurface, NULL, SDL_SCALEMODE_LINEAR);
-
-					image.reset(pNewSurface);
-					fig::gui::MaskCorners(image, fig::gui::MaskType::CARD_CORNER_MASK);
-
-					auto& surface = _surfaces[assetId] = std::move(image);
-					if (auto texture = fig::gui::CreateTexture(pRenderer, surface))
-					{
-						auto& result = _textures[assetId] = std::move(texture);
-						return result;
-					}
+					if (t.pMask == pMask)
+						return t.pTexture;
 				}
-				return unexpected(FileError::UnrecognizedFormat);
-			}
-			else
-			{
-				return unexpected(try_load.error());
 			}
 		}
+
+		if (auto find_asset = _pAssetMngr->FindImageAsset(characterId, ImageType::SmallPortrait))
+		{
+			auto& asset = *find_asset;
+			if (auto try_surface = GetCache<fig::sdl::Surface>().Get(asset.id))
+			{
+				auto& surface = try_surface.value();
+
+				if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, surface.get()))
+				{
+					fig::sdl::Texture texture = fig::sdl::Texture::from_ptr(pTexture);
+
+					if (pMask)
+					{
+						// Bake mask into texture
+						TexturePtr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
+						SDL_SetRenderTarget(pRenderer, pTarget);
+						SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
+						SDL_RenderClear(pRenderer);
+						SDL_SetTextureBlendMode(pMask, SDL_BLENDMODE_NONE);
+						SDL_RenderTexture(pRenderer, pMask, NULL, NULL);
+
+						SDL_BlendMode multiplyAlpha = SDL_ComposeCustomBlendMode(
+							SDL_BLENDFACTOR_DST_ALPHA,
+							SDL_BLENDFACTOR_ZERO,
+							SDL_BLENDOPERATION_ADD,
+							SDL_BLENDFACTOR_ZERO,
+							SDL_BLENDFACTOR_ONE,
+							SDL_BLENDOPERATION_ADD
+						);
+
+						SDL_SetTextureBlendMode(pTexture, multiplyAlpha);
+						SDL_RenderTexture(pRenderer, pTexture, NULL, NULL);
+						SDL_SetRenderTarget(pRenderer, NULL);
+						SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
+						texture.reset(pTarget);
+					}
+
+					auto& textures = _cachedTextures[pRenderer][characterId];
+					textures.emplace_back(CachedTexture {
+						.pTexture = std::move(texture),
+						.pMask = pMask,
+					});
+
+					return textures.back().pTexture;
+				}
+			}
+		}
+
 		return unexpected(FileError::NotFound);
 	}
 
@@ -321,7 +339,9 @@ namespace fig::io
 	void UserContentManager::RefreshChatCount()
 	{
 		_chatsByAsset.clear();
-		for (auto& kvp : _chats)
+		auto& chats = GetCache<ChatInstance>().GetAll();
+
+		for (auto& kvp : chats)
 		{
 			auto& assetId = kvp.first;
 			auto& chat = kvp.second;
@@ -346,7 +366,8 @@ namespace fig::io
 	fig::cref_vector<Asset> UserContentManager::GetChatsWithCharacter(const fig::uuid& characterId, bool bLoad)
 	{
 		std::unordered_set<fig::uuid> instanceIds;
-		for (auto& kvp : _chats)
+		auto& chats = GetCache<ChatInstance>().GetAll();
+		for (auto& kvp : chats)
 		{
 			if (kvp.second.contains(characterId))
 				instanceIds.insert(kvp.first);
@@ -362,7 +383,7 @@ namespace fig::io
 			std::vector<fig::uuid> logIds = logAssets
 				| std::views::transform([](auto&& a) { return a.get().id; })
 				| std::ranges::to<std::vector>();
-			_pAssetMngr->LoadDataAssets(logIds);
+			_pAssetMngr->LoadAssetData(logIds);
 		}
 
 		return logAssets;
@@ -370,7 +391,9 @@ namespace fig::io
 
 	fig::cref_vector<Asset> UserContentManager::GetChatLogs(bool bLoad)
 	{
-		auto chatInstanceIds = _chats
+		auto& chats = GetCache<ChatInstance>().GetAll();
+
+		auto chatInstanceIds = chats
 			| std::views::keys
 			| std::ranges::to<std::unordered_set>();
 
@@ -387,7 +410,7 @@ namespace fig::io
 				| std::views::filter([](auto& a) { return !a.get().HasData(); })
 				| std::views::transform([](auto& a) { return a.get().id; })
 				| std::ranges::to<std::vector>();
-			_pAssetMngr->LoadDataAssets(logIds);
+			_pAssetMngr->LoadAssetData(logIds);
 		}
 
 		return chatLogAssets;
@@ -395,8 +418,8 @@ namespace fig::io
 
 	std::optional<fig::string> UserContentManager::GetCharacterName(const fig::uuid& characterId) const
 	{
-		if (auto itFind = _characters.find(characterId); itFind != _characters.cend())
-			return (*itFind).second.shortName;
+		if (auto try_character = GetCache<Character>().TryGet(characterId))
+			return (*try_character).shortName;
 		return std::nullopt;
 	}
 
