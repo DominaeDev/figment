@@ -171,7 +171,7 @@
     <ClCompile Include="src\chat\PromptBuilder.cpp" />
     <ClCompile Include="src\chat\PromptScaffold.cpp" />
     <ClCompile Include="src\chat\UserDefinedOptions.cpp" />
-    <ClCompile Include="src\data\CardMetaData.cpp" />
+    <ClCompile Include="src\data\ContentMetaData.cpp" />
     <ClCompile Include="src\data\Character.cpp" />
     <ClCompile Include="src\data\CharacterGender.cpp" />
     <ClCompile Include="src\data\ModelSettings.cpp" />
@@ -230,6 +230,7 @@
     <ClCompile Include="src\io\CardImporter.cpp" />
     <ClCompile Include="src\io\ContentManager.cpp" />
     <ClCompile Include="src\io\ContentTypes.cpp" />
+    <ClCompile Include="src\io\ContentUserSettings.cpp" />
     <ClCompile Include="src\io\FileStream.cpp" />
     <ClCompile Include="src\io\FileUtility.cpp" />
     <ClCompile Include="src\io\IniFile.cpp" />
@@ -415,7 +416,7 @@
     <ClInclude Include="include\chat\ChatTypes.h" />
     <ClInclude Include="include\chat\PromptBuilder.h" />
     <ClInclude Include="include\chat\PromptScaffold.h" />
-    <ClInclude Include="include\data\CardMetaData.h" />
+    <ClInclude Include="include\data\ContentMetaData.h" />
     <ClInclude Include="include\data\Character.h" />
     <ClInclude Include="include\data\CharacterGender.h" />
     <ClInclude Include="include\data\ChatInstance.h" />
@@ -484,6 +485,7 @@
     <ClInclude Include="include\io\CardImporter.h" />
     <ClInclude Include="include\io\ContentManager.h" />
     <ClInclude Include="include\io\ContentTypes.h" />
+    <ClInclude Include="include\io\ContentUserSettings.h" />
     <ClInclude Include="include\io\Error.h" />
     <ClInclude Include="include\io\FileStream.h" />
     <ClInclude Include="include\io\FileUtility.h" />

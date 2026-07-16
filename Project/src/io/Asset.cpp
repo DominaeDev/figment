@@ -291,12 +291,18 @@ namespace fig::io
 		}
 	}
 
-	void Asset::SetSettings(const fig::string& value) noexcept
+	ContentUserSettings Asset::GetUserSettings() const noexcept
 	{
-		if (settings != value)
+		return ContentUserSettings::FromJson(_settings).value_or({});
+	}
+
+	void Asset::SetUserSettings(const ContentUserSettings& value) noexcept
+	{
+		auto json = ContentUserSettings::ToJson(value);
+		if (_settings != json)
 		{
-			settings = value;
-			sync_state.Modified();
+			_settings = json;
+			sync_state.InvalidateMetadata();
 		}
 	}
 
@@ -322,6 +328,6 @@ namespace fig::io
 		if (bWriteTimestamp)
 			SetMeta(MetaTag::UpdatedAt, utc_now());
 
-		sync_state.Modified();
+		sync_state.InvalidateData();
 	}
 }

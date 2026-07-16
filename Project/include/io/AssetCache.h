@@ -2,15 +2,10 @@
 
 #include "Figment.h"
 #include "io/Asset.h"
+#include "io/ContentTypes.h"
 
 namespace fig::io
 {
-	template <typename T>
-	struct AssetLoader
-	{
-		std::expected<T, FileError> Load(const Asset& asset);
-	};
-
 	class IAssetCache
 	{
 	public:
@@ -27,21 +22,18 @@ namespace fig::io
 		virtual optional_cref<T> TryGet(const fig::uuid& assetId) const = 0;
 		virtual std::map<fig::uuid, T>& GetAll() = 0;
 		virtual const std::map<fig::uuid, T>& GetAll() const = 0;
+		virtual bool Erase(const fig::uuid& id) = 0;
+		virtual void Clear() = 0;
 	};
-
-	template <typename TAsset>
-	inline constexpr AssetType AssetTypeOf = []<bool Flag = false>()
-	{
-		static_assert(Flag, "no AssetType mapping for this type");
-	}();
 
 	template <typename T, AssetType A, DataFormat F, fixed_string LOG>
 	class AssetCache : public AssetCacheBase<T>
 	{
 		using data_type = T;
-		static constexpr AssetType asset_type = A;
-		static constexpr DataFormat data_format = F;
-		static constexpr auto log_name { LOG.c_str() };
+		static constexpr AssetType _asset_type = A;
+		static constexpr DataFormat _data_format = F;
+		static constexpr auto _log_name { LOG.c_str() };
+
 	public:
 		AssetCache(fig::observer_ptr<AssetManager> pAssetMngr) :
 			_pAssetMngr(pAssetMngr)
@@ -50,7 +42,7 @@ namespace fig::io
 
 		void Preload() override
 		{
-			auto assets = _pAssetMngr->GetAssetsOfType(asset_type);
+			auto assets = _pAssetMngr->GetAssetsOfType(_asset_type);
 			auto assetIds = assets
 				| std::views::transform([](auto& a) { return a.id; })
 				| std::ranges::to<std::vector>();
@@ -71,30 +63,29 @@ namespace fig::io
 				AssetLoader<data_type> loader;
 				if (auto try_load = loader.Load(asset))
 				{
-					auto [it, _] = _assets.emplace(asset.id, std::move(try_load.value()));
-
+					_assets.emplace(asset.id, std::move(try_load.value()));
 					_pAssetMngr->ReleaseAssetData(asset.id); // Data no longer needed
-					LogLn(std::format("Preloaded asset [{}] {} into cache.", log_name, (fig::string)asset.id));
+					LogLn(std::format("Preloaded asset [{}] {} into cache.", _log_name, (fig::string)asset.id));
 					continue;
 				}
 
 			fail:
-				LogLn(std::format("Failed to preload asset [{}] {}.", log_name, (fig::string)asset.id));
-				assert(false);
+				LogLn(std::format("Failed to preload asset [{}] {}.", _log_name, (fig::string)asset.id));
+//				assert(false && "Failed to preload asset");
 			}
 
 		}
 
 		optional_cref<T> Get(const fig::uuid& assetId) override
 		{
-			if (auto itFind = _assets.find(assetId); itFind != _assets.cend())
-				return itFind->second;
+			if (auto itCache = _assets.find(assetId); itCache != _assets.cend())
+				return itCache->second;
 
-			if (auto try_asset = _pAssetMngr->FindAsset(assetId, asset_type))
+			if (auto try_asset = _pAssetMngr->FindAsset(assetId, _asset_type))
 			{
 				auto& asset = *try_asset;
 
-				if (data_format != DataFormat::Undefined and asset.data_format != data_format)
+				if (_data_format != DataFormat::Undefined and asset.data_format != _data_format)
 					goto fail;
 
 				if (not asset.HasData())
@@ -109,14 +100,14 @@ namespace fig::io
 					auto [it, _] = _assets.emplace(assetId, std::move(try_load.value()));
 
 					_pAssetMngr->ReleaseAssetData(assetId); // Data no longer needed
-					LogLn(std::format("Loaded asset [{}] {} into cache.", log_name, (fig::string)assetId));
+					LogLn(std::format("Loaded asset [{}] {} into cache.", _log_name, (fig::string)assetId));
 					return fig::optional_cref<data_type>((*it).second);
 				}
 			}
 
 		fail:
-			LogLn(std::format("Failed to load asset [{}] {}.", log_name, (fig::string)assetId));
-			assert(false);
+			LogLn(std::format("Failed to load asset [{}] {}.", _log_name, (fig::string)assetId));
+//			assert(false && "Failed to load asset");
 			return fig::nullref;
 		}
 
@@ -143,7 +134,12 @@ namespace fig::io
 		{
 			return _assets;
 		}
-		
+
+		bool Erase(const fig::uuid& id) override
+		{
+			return _assets.erase(id) != 0uz;
+		}
+				
 		void Clear()
 		{
 			_assets.clear();

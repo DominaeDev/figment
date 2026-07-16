@@ -2,6 +2,7 @@
 
 #include "Figment.h"
 #include "io/Serialization.h"
+#include "io/ContentUserSettings.h"
 #include <map>
 #include <variant>
 
@@ -50,12 +51,12 @@ namespace fig::io
 
 	struct AssetSyncState
 	{
-		enum class SyncStatus
+		enum class Status
 		{
-			Created = 0,
-			Modified,
-			Synchronized,
-			Indeterminate,
+			Created = 0,		// Modified, nonexisting (INSERT, not UPDATE)
+			Modified,			// Modified, existing (UPDATE)
+			Synchronized,		// Saved
+			Indeterminate,		// Partial or missing data in otherwise valid asset
 		};
 
 		enum class Error
@@ -65,27 +66,31 @@ namespace fig::io
 			Invalid,
 		};
 
-		bool has_meta {};
-		bool has_data {};
-		SyncStatus file_sync { SyncStatus::Indeterminate };
-		SyncStatus db_sync { SyncStatus::Indeterminate };
-		Error error {};
+		Status file_sync { Status::Indeterminate };
+		Status db_sync { Status::Indeterminate };
+		bool has_meta { false };
+		bool has_data { false };
+		Error error { Error::NoError };
 
-		inline void Modified() noexcept
+		inline constexpr void InvalidateData() noexcept
 		{
-			file_sync = AssetSyncState::SyncStatus::Modified;
-			if (db_sync != AssetSyncState::SyncStatus::Created)
-				db_sync = AssetSyncState::SyncStatus::Modified;
+			file_sync = AssetSyncState::Status::Modified;
+		}
+
+		inline constexpr void InvalidateMetadata() noexcept
+		{
+			if (db_sync != AssetSyncState::Status::Created)
+				db_sync = AssetSyncState::Status::Modified;
 		}
 
 		inline constexpr bool ShouldWriteToDisk() const noexcept
 		{
-			return has_meta and has_data and file_sync < SyncStatus::Synchronized and error == Error::NoError;
+			return error == Error::NoError and has_meta and has_data and file_sync < Status::Synchronized;
 		}
 
 		inline constexpr bool ShouldWriteToDatabase() const noexcept
 		{
-			return db_sync < SyncStatus::Synchronized and error == Error::NoError;
+			return error == Error::NoError and db_sync < Status::Synchronized;
 		}
 	};
 
@@ -115,9 +120,9 @@ namespace fig::io
 
 	class Asset
 	{
-		using AssetFile = fig::io::AssetFile;
-		using MetaTag = fig::io::MetaTag;
-		using MetaValue = fig::io::MetaValue;
+		using AssetFile = AssetFile;
+		using MetaTag = MetaTag;
+		using MetaValue = MetaValue;
 	public:
 		void SetData(fig::bytes&& data);
 		void SetData(fig::byte_span data);
@@ -132,7 +137,10 @@ namespace fig::io
 		void SetMeta(MetaTag tag, const fig::string& value) noexcept;
 		void SetMeta(MetaTag tag, const fig::uuid& value) noexcept;
 
-		void SetSettings(const fig::string& value) noexcept;
+		ContentUserSettings GetUserSettings() const noexcept;
+		inline constexpr const fig::string& GetUserSettingsJson() const { return _settings; }
+		void SetUserSettings(const ContentUserSettings& settings) noexcept;
+		void SetUserSettingsJson(const fig::string& json) noexcept { _settings = json; }
 
 		fig::path GetFileName() const noexcept
 		{
@@ -174,7 +182,25 @@ namespace fig::io
 		constexpr fig::timestamp GetCreatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::CreatedAt).value_or({}); }
 		constexpr fig::timestamp GetUpdatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::UpdatedAt).value_or({}); }
 		constexpr fig::timestamp GetLastUsedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::LastUsedAt).value_or({}); }
-	
+
+		bool HasReferenceTo(const fig::uuid& assetId) const
+		{
+			for (auto& kvp : _parameters)
+			{
+				auto key = kvp.first;
+				if ((static_cast<uint8_t>(key) >= static_cast<uint8_t>(MetaTag::ReferenceToCharacter)
+					and static_cast<uint8_t>(key) < static_cast<uint8_t>(MetaTag::ReferenceToCharacter) + fig::chat::MaxBots)
+					or key == MetaTag::ReferenceToUser
+					or key == MetaTag::ReferenceToScenario
+					or key == MetaTag::ReferenceToWorld)
+				{
+					if (GetMeta<fig::uuid>(key) == assetId)
+						return true;
+				}
+			}
+			return false;
+		}
+
 	public:
 		fig::uuid id {};
 		fig::uuid parent_id {};
@@ -183,8 +209,10 @@ namespace fig::io
 		uint8_t asset_subtype {};
 		DataFormat data_format { DataFormat::Undefined };
 		fig::bytes data {};
-		fig::string settings;
 		AssetSyncState sync_state {};
+
+	private:
+		fig::string _settings;
 
 	private:
 		void SetUpdated(bool bWriteTimestamp = true);

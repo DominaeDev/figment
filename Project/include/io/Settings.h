@@ -75,6 +75,14 @@ namespace fig::io
 			return defaultValue;
 		}
 
+		template <typename K, typename T, size_t N>
+			requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+		K GetEnum(E setting, const std::array<std::pair<K, T>, N>& mapping, const K& default_value = {}) const noexcept
+		{
+			auto value = GetString(setting, {});
+			return enum_deserialize(value, mapping, default_value);
+		}
+
 		template<typename F, typename T = EnumFlags<F>>
 		T GetFlags(E setting, T defaultValue) const noexcept
 		{
@@ -123,6 +131,13 @@ namespace fig::io
 		void SetEnum(E setting, T value) noexcept
 		{
 			return SetValue<int32_t>(setting, static_cast<int32_t>(value));
+		}
+
+		template <typename K, typename T, std::size_t N>
+			requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+		void SetEnum(E setting, const fig::string& value, const std::array<std::pair<K, T>, N>& map) noexcept
+		{
+			return SetValue<fig::string>(setting, enum_serialize(value, map));
 		}
 
 		template<typename F, typename T = EnumFlags<F>>

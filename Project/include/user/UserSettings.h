@@ -11,6 +11,7 @@ namespace fig
 		Sorting,
 		Ordering,
 		Filtering,
+		Clock,
 		
 		ModelPreset,
 
@@ -66,6 +67,7 @@ namespace fig
 	};
 
 	constexpr FilterFlags DefaultFilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther, FilterFlag::SourceCreated, FilterFlag::SourceImported  };
+	
 	extern template class fig::io::SettingsCollection<UserSetting>;
 	using UserSettings = fig::io::SettingsCollection<UserSetting>;
 }

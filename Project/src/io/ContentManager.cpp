@@ -34,43 +34,6 @@ namespace fig::io
 	{
 		DEBUG_MEASURE_BEGIN("UserContentManager::LoadAll");
 
-		/*auto& assetMngr = *_pAssetMngr;
-
-		// Load characters
-		for (auto& asset : _pAssetMngr->GetCharacterAssets())
-		{
-			if (asset.data_format == DataFormat::DataXml && asset.HasData())
-			{
-				Character character;
-				if (character.LoadFromXml(asset.AsStringView()) == FileError::NoError)
-					_characters[asset.id] = std::move(character);
-				else
-					assert(false && "Failed to load character");
-			}
-		}
-
-		// Load scenarios
-		for (auto& asset : _pAssetMngr->GetScenarioAssets())
-		{
-			if (asset.data_format == DataFormat::DataXml && asset.HasData())
-			{
-				Scenario scenario;
-				if (scenario.LoadFromXml(asset.AsStringView()) == FileError::NoError)
-					_scenarios[asset.id] = std::move(scenario);
-			}
-		}
-
-		// Load chats
-		for (auto& asset : _pAssetMngr->GetAssetsOfType(AssetType::ChatInstance))
-		{
-			if (asset.data_format == DataFormat::DataXml && asset.HasData())
-			{
-				ChatInstance chatInstance;
-				if (chatInstance.LoadFromXml(asset.AsStringView()) == FileError::NoError)
-					_chats[asset.id] = std::move(chatInstance);
-			}
-		}*/
-
 		GetCache<fig::data::Character>().Preload();
 		GetCache<fig::data::Scenario>().Preload();
 		GetCache<fig::data::ChatInstance>().Preload();
@@ -111,30 +74,30 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	fig::optional_ref<fig::data::CardMetaData> UserContentManager::GetMetaData(const fig::uuid& id, bool bIgnoreCache) noexcept
+	fig::optional_ref<ContentMetaData> UserContentManager::GetMetaData(const fig::uuid& id) noexcept
 	{
-		if (not bIgnoreCache)
-		{
-			if (auto itFind = _metaData.find(id); itFind != _metaData.cend())
-				return make_optional_ref(itFind->second);
-		}
+		if (auto itFind = _metaData.find(id); itFind != _metaData.cend())
+			return make_optional_ref(itFind->second);
 
 		if (auto tryAsset = _pAssetMngr->FindAsset(id))
 		{
 			auto& asset = tryAsset.value();
-			CardMetaData metaData = CardMetaData::FromJson(asset.settings).value_or({});
+
+			ContentMetaData metaData;
 			metaData.createdAt = asset.GetCreatedAt();
 			metaData.updatedAt = asset.GetUpdatedAt();
 			metaData.lastUsedAt = asset.GetLastUsedAt();
-			metaData.chatCount = static_cast<uint32_t>(GetChatCount(id));
 
-			/*if (auto itFind = _characters.find(id); itFind != _characters.cend())
+			if (asset.asset_type == AssetType::Character)
 			{
-				auto& character = itFind->second;
-				metaData.name = character.shortName;
-				metaData.gender = character.gender;
+				// Count chats
 				metaData.chatCount = static_cast<uint32_t>(GetChatCount(id));
-			}*/
+
+				// Last used => last chat
+				if (auto lastChat = FindLastChatWith(asset.id))
+					metaData.lastUsedAt = std::max(metaData.lastUsedAt, lastChat.value().GetLastUsedAt());
+			}
+
 			_metaData[id] = metaData;
 			return make_optional_ref(_metaData.at(id));
 		}
@@ -142,55 +105,60 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	template <CardMetaData::Flag E>
+	ContentUserSettings UserContentManager::GetUserSettings(const fig::uuid& id) noexcept
+	{
+		if (auto itFind = _userSettings.find(id); itFind != _userSettings.cend())
+			return itFind->second;
+
+		if (auto tryAsset = _pAssetMngr->FindAsset(id))
+		{
+			auto& asset = tryAsset.value();
+			return _userSettings[id] = asset.GetUserSettings();
+		}
+		return {};
+	}
+
+	template <ContentUserSettings::Flag E>
 	bool UserContentManager::MarkFlag(const fig::uuid& assetId, bool value)
 	{
 		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
 		{
-			return _pAssetMngr->ModifyAsset(*tryAsset, [&](Asset& asset) -> bool {
-				if (auto tryMeta = GetMetaData(assetId))
-				{
-					auto& meta = *tryMeta;
-					value ? meta.flags.Set(E) : meta.flags.Unset(E);
-
-					asset.SetSettings(CardMetaData::ToJson(meta));
-					return true;
-				}
-				return false;
+			_pAssetMngr->ModifyAsset(*tryAsset, [&](Asset& asset) {
+				auto settings = GetUserSettings(assetId);
+				value ? settings.flags.Set(E) : settings.flags.Unset(E);
+				asset.SetUserSettings(settings);
 			});
+			InvalidateUserSettings((*tryAsset).id);
+			return true;
 		}
 		return false;
 	}
 
 	bool UserContentManager::MarkImported(const fig::uuid& assetId, bool value)
 	{
-		return MarkFlag<CardMetaData::Flag::Imported>(assetId, value);
+		return MarkFlag<ContentUserSettings::Flag::Imported>(assetId, value);
 	}
 
 	bool UserContentManager::MarkFavorite(const fig::uuid& assetId, bool value)
 	{
-		return MarkFlag<CardMetaData::Flag::Favorite>(assetId, value);
+		return MarkFlag<ContentUserSettings::Flag::Favorite>(assetId, value);
 	}
 
 	bool UserContentManager::MarkHidden(const fig::uuid& assetId, bool value)
 	{
-		return MarkFlag<CardMetaData::Flag::Hidden>(assetId, value);
+		return MarkFlag<ContentUserSettings::Flag::Hidden>(assetId, value);
 	}
 
 	bool UserContentManager::SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle)
 	{
 		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
 		{
-			return _pAssetMngr->ModifyAsset(*tryAsset, [&](auto& asset) -> bool {
-				if (auto tryMeta = GetMetaData(assetId))
-				{
-					auto& meta = *tryMeta;
-					meta.borderStyle = borderStyle;
-					asset.SetSettings(CardMetaData::ToJson(meta));
-					return true;
-				}
-				return false;
+			_pAssetMngr->ModifyAsset(*tryAsset, [&](auto& asset) {
+				auto settings = asset.GetUserSettings();
+				settings.borderStyle = borderStyle;
+				asset.SetUserSettings(settings);
 			});
+			InvalidateUserSettings((*tryAsset).id);
 		}
 		return false;
 	}
@@ -423,4 +391,23 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	fig::optional_cref<Asset> UserContentManager::FindLastChatWith(const fig::uuid& characterId) const
+	{
+		auto chatInstanceIds = _pAssetMngr->GetAssetsOfType(AssetType::ChatInstance)
+			| std::views::filter([&](auto& a) { return a.HasReferenceTo(characterId); })
+			| std::views::transform([](auto& a) { return a.id; })
+			| std::ranges::to<std::unordered_set>();
+
+		auto chatLogs = _pAssetMngr->GetAssetsOfType(AssetType::ChatLog)
+			| std::views::filter([&](auto& a) { return chatInstanceIds.contains(a.parent_id); })
+			| std::views::transform([](auto& a) { return std::cref(a); })
+			| std::ranges::to<std::vector>();
+
+		if (not chatLogs.empty())
+		{
+			std::ranges::sort(chatLogs, std::ranges::greater(), [](auto& a) { return a.get().GetLastUsedAt(); });
+			return chatLogs[0].get();
+		}
+		return nullref;
+	}
 }

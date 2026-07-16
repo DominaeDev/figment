@@ -1,26 +1,26 @@
 #include <pch.h>
-#include "data/CardMetaData.h"
+#include "io/ContentUserSettings.h"
 #include <json.hpp>
 
-namespace fig::data
+namespace fig::io
 {
-	static constexpr auto FlagMapping = std::array<std::pair<CardMetaData::Flag, std::string_view>, 3> {
-		std::pair { CardMetaData::Flag::Imported,	"imported" },
-		std::pair { CardMetaData::Flag::Hidden,		"hidden" },
-		std::pair { CardMetaData::Flag::Favorite,	"favorite" },
+	static constexpr auto FlagMapping = std::array<std::pair<ContentUserSettings::Flag, std::string_view>, 3> {
+		std::pair { ContentUserSettings::Flag::Imported,	"imported" },
+		std::pair { ContentUserSettings::Flag::Hidden,		"hidden" },
+		std::pair { ContentUserSettings::Flag::Favorite,	"favorite" },
 	};
 
 	static fig::string SerializeBorder(CardBorderStyle border)
 	{
 		switch (border)
 		{
-		case CardBorderStyle::Style01: return "1";	//! @temp
-		case CardBorderStyle::Style02: return "2";	//! @temp
-		case CardBorderStyle::Style03: return "3";	//! @temp
-		case CardBorderStyle::Style04: return "4";	//! @temp
-		case CardBorderStyle::Style05: return "5";	//! @temp
-		case CardBorderStyle::Style06: return "6";	//! @temp
-		default: return "";
+			case CardBorderStyle::Style01: return "1";	//! @temp
+			case CardBorderStyle::Style02: return "2";	//! @temp
+			case CardBorderStyle::Style03: return "3";	//! @temp
+			case CardBorderStyle::Style04: return "4";	//! @temp
+			case CardBorderStyle::Style05: return "5";	//! @temp
+			case CardBorderStyle::Style06: return "6";	//! @temp
+			default: return "";
 		}
 	}
 
@@ -35,7 +35,7 @@ namespace fig::data
 		return CardBorderStyle::None;
 	}
 
-	std::optional<CardMetaData> CardMetaData::FromJson(const fig::string& strJson)
+	std::optional<ContentUserSettings> ContentUserSettings::FromJson(const fig::string& strJson)
 	{
 		if (strJson.empty())
 			return std::nullopt;
@@ -44,12 +44,12 @@ namespace fig::data
 		{
 			auto json = nlohmann::json::parse(strJson);
 
-			CardMetaData data;
+			ContentUserSettings data;
 
 			data.borderStyle = DeserializeBorder(json.value("border", ""));
-			
+
 			std::vector<fig::string> f;
-			json.at("flags").get_to(f); 
+			json.at("flags").get_to(f);
 			data.flags = Flags::Deserialize(f, FlagMapping);
 			return data;
 		}
@@ -59,7 +59,7 @@ namespace fig::data
 		}
 	}
 
-	fig::string CardMetaData::ToJson(const CardMetaData& data)
+	fig::string ContentUserSettings::ToJson(const ContentUserSettings& data)
 	{
 		try
 		{
@@ -75,16 +75,5 @@ namespace fig::data
 		{
 			return "{}";
 		}
-	}
-
-	bool CardMetaData::IsNew() const noexcept
-	{
-		if (createdAt != updatedAt or createdAt != lastUsedAt)
-			return false;
-		
-		fig::timestamp now = utc_now();
-		if ((now - createdAt) > fig::timespan::days(3))
-			return false;
-		return true;
 	}
 }

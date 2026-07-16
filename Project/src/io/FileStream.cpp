@@ -113,10 +113,13 @@ namespace fig::io
 			{
 			case ENOENT:
 				_error = FileError::NotFound;
+				break;
 			case EACCES:
 				_error = FileError::AccessDenied;
+				break;
 			default:
 				_error = FileError::UnknownError;
+				break;
 			}
 		}
 	}

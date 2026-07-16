@@ -41,6 +41,7 @@ namespace fig::Constants
 				constexpr fig::gui::Coord Height = 412;
 				constexpr fig::gui::Coord ZoomPixels = 18;
 				constexpr fig::gui::Coord BorderOffset = 16;
+				constexpr fig::gui::Coord TextY = 32;
 
 				constexpr fig::gui::Coord InnerMargin = 12;
 				constexpr fig::gui::Coord FooterHeight = 80;
@@ -64,7 +65,8 @@ namespace fig::Constants
 				constexpr fig::gui::Coord ZoomPixels = 16;
 				constexpr fig::gui::Coord BorderOffset = 12;
 
-				constexpr fig::gui::Coord InnerMargin = 10;
+				constexpr fig::gui::Coord InnerMargin = 12;
+				constexpr fig::gui::Coord TextY = 28;
 				constexpr fig::gui::Coord FooterHeight = 60;
 			}
 		}
@@ -79,6 +81,11 @@ namespace fig::Constants
 			constexpr fig::gui::Coord HeaderHeight = 48;
 			constexpr fig::gui::Coord FooterHeight = 80;
 			constexpr fig::gui::Coord Width = 256;
+		}
+
+		namespace ChatList
+		{
+			constexpr fig::gui::Coord Width = 760;
 		}
 	}
 

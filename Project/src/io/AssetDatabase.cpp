@@ -195,10 +195,10 @@ namespace fig::io
 			asset.SetMeta(MetaTag::UpdatedAt, fig::timestamp(updatedAt));
 			asset.SetMeta(MetaTag::LastUsedAt, fig::timestamp(lastUsedAt));
 			if (pSettings)
-				asset.settings = fig::string { pSettings };
+				asset.SetUserSettingsJson(fig::string { pSettings });
 
-			asset.sync_state.file_sync = AssetSyncState::SyncStatus::Indeterminate;
-			asset.sync_state.db_sync = AssetSyncState::SyncStatus::Synchronized;
+			asset.sync_state.file_sync = AssetSyncState::Status::Indeterminate;
+			asset.sync_state.db_sync = AssetSyncState::Status::Synchronized;
 			if (!asset.id.empty())
 				result[asset.id] = std::move(asset);
 		}
@@ -275,8 +275,8 @@ namespace fig::io
 			else
 				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
 			/*settings*/
-			if (not asset.settings.empty())
-				sqlite3_bind_text(stmt, 5, asset.settings.c_str(), -1, SQLITE_TRANSIENT);
+			if (auto& settings = asset.GetUserSettingsJson(); not settings.empty())
+				sqlite3_bind_text(stmt, 5, settings.c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
 			/*createdAt*/
@@ -304,8 +304,8 @@ namespace fig::io
 			else
 				sqlite3_bind_text(stmt, 3, nullptr, -1, SQLITE_STATIC);
 			/*settings*/
-			if (not asset.settings.empty())
-				sqlite3_bind_text(stmt, 4, asset.settings.c_str(), -1, SQLITE_TRANSIENT);
+			if (auto& settings = asset.GetUserSettingsJson(); not settings.empty())
+				sqlite3_bind_text(stmt, 4, settings.c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
 			/*updatedAt*/

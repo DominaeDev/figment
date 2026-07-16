@@ -10,9 +10,9 @@
 
 namespace fig
 {
-	std::string timestamp::get_time_string(bool use_locale)
+	std::string timestamp::get_time_string(Clock clock)
 	{
-		if (use_locale)
+		if (clock == Clock::Default)
 		{
 #if _WIN32
 			// Call OS to get the system locale format
@@ -41,7 +41,10 @@ namespace fig
 		}
 
 		auto localTime = std::chrono::local_time<std::chrono::milliseconds>(*this);
-		return trim(std::format("{:%I:%M %p}", localTime));
+		if (clock == Clock::H12)
+			return trim(std::format("{:%I:%M %p}", localTime));
+		else
+			return trim(std::format("{:%H:%M}", localTime));
 	}
 
 	std::string timestamp::get_date_string()
@@ -49,7 +52,7 @@ namespace fig
 		auto localTime = std::chrono::local_time<std::chrono::milliseconds>(*this);
 		auto day = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(localTime)).day();
 
-		return std::format("{:%b} {}", localTime, static_cast<unsigned>(day));
+		return std::format("{0:%a}, {0:%b} {1}", localTime, static_cast<unsigned>(day));
 	}
 
 	timestamp timestamp::to_local() const

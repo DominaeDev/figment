@@ -76,8 +76,8 @@ namespace fig::io
 		asset.id = id;
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
-		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Created;
-		asset.sync_state.db_sync = AssetSyncState::SyncStatus::Created;
+		asset.sync_state.file_sync = AssetSyncState::Status::Created;
+		asset.sync_state.db_sync = AssetSyncState::Status::Created;
 		asset.sync_state.has_meta = true;
 
 		auto now = utc_now();
@@ -124,8 +124,8 @@ namespace fig::io
 		asset.asset_type = type;
 		asset.data = std::move(data); // Move data
 		asset.data_format = format;
-		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Created;
-		asset.sync_state.db_sync = AssetSyncState::SyncStatus::Created;
+		asset.sync_state.file_sync = AssetSyncState::Status::Created;
+		asset.sync_state.db_sync = AssetSyncState::Status::Created;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not asset.data.empty();
 		auto now = utc_now();
@@ -143,8 +143,8 @@ namespace fig::io
 		asset.parent_id = not parent.empty() ? parent : _profileID;
 		asset.asset_type = type;
 		asset.data_format = format;
-		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Created;
-		asset.sync_state.db_sync = AssetSyncState::SyncStatus::Created;
+		asset.sync_state.file_sync = AssetSyncState::Status::Created;
+		asset.sync_state.db_sync = AssetSyncState::Status::Created;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not data.empty();
 
@@ -288,7 +288,10 @@ namespace fig::io
 			if (asset.sync_state.error == AssetSyncState::Error::NoError)
 			{
 				if (asset.sync_state.ShouldWriteToDisk())
+				{
+					assert(asset.sync_state.has_data and not asset.data.empty());
 					UpdateAssetOnDisk(asset);
+				}
 				if (asset.sync_state.ShouldWriteToDatabase())
 					UpdateAssetInDatabase(asset);
 			}
@@ -301,7 +304,7 @@ namespace fig::io
 		AssetFileWriter writer(_profilePath, _profileAuthKey);
 		if (auto error = writer.WriteFile(file); error == FileError::NoError)
 		{
-			asset.sync_state.file_sync = AssetSyncState::SyncStatus::Synchronized;
+			asset.sync_state.file_sync = AssetSyncState::Status::Synchronized;
 			return true;
 		}
 		return false;
@@ -310,19 +313,19 @@ namespace fig::io
 	bool AssetManager::UpdateAssetInDatabase(Asset& asset)
 	{
 		auto& db = GetDatabase();
-		if (asset.sync_state.db_sync == AssetSyncState::SyncStatus::Created)
+		if (asset.sync_state.db_sync == AssetSyncState::Status::Created)
 		{
 			if (db.CreateAsset(asset) == DatabaseError::NoError)
 			{
-				asset.sync_state.db_sync = AssetSyncState::SyncStatus::Synchronized;
+				asset.sync_state.db_sync = AssetSyncState::Status::Synchronized;
 				return true;
 			}
 		}
-		else if (asset.sync_state.db_sync == AssetSyncState::SyncStatus::Modified)
+		else if (asset.sync_state.db_sync == AssetSyncState::Status::Modified)
 		{
 			if (db.UpdateAsset(asset) == DatabaseError::NoError)
 			{
-				asset.sync_state.db_sync = AssetSyncState::SyncStatus::Synchronized;
+				asset.sync_state.db_sync = AssetSyncState::Status::Synchronized;
 				return true;
 			}
 		}
@@ -471,10 +474,17 @@ namespace fig::io
 		AssetFileReader reader(_profilePath, _profileAuthKey);
 		if (auto file = reader.ReadFile(asset.GetFileName()))
 		{
+			if (file.value().data.empty())
+			{
+				auto k = asset.GetFileName();
+				asset.sync_state.error = AssetSyncState::Error::Invalid;
+				return std::unexpected(FileError::ReadError);
+			}
+
 			asset.FromFile(std::move(file.value()));
-			asset.sync_state.file_sync = AssetSyncState::SyncStatus::Synchronized;
+			asset.sync_state.file_sync = AssetSyncState::Status::Synchronized;
 			asset.sync_state.has_meta = true;
-			asset.sync_state.has_data = true;
+			asset.sync_state.has_data = not asset.data.empty();
 			return asset;
 		}
 		else if (file.error() == FileError::NotFound)
@@ -501,7 +511,7 @@ namespace fig::io
 		if (auto file = reader.ReadFile(asset.GetFileName(), false))
 		{
 			asset.FromFile(std::move(file.value()));
-			asset.sync_state.file_sync = AssetSyncState::SyncStatus::Synchronized;
+			asset.sync_state.file_sync = AssetSyncState::Status::Synchronized;
 			asset.sync_state.has_meta = true;
 			asset.sync_state.has_data = false;
 			return asset;
@@ -605,7 +615,8 @@ namespace fig::io
 
 		auto& asset = itAsset->second;
 		asset.data.clear();
-		asset.sync_state.file_sync = AssetSyncState::SyncStatus::Indeterminate;
+		asset.sync_state.has_data = false;
+		asset.sync_state.file_sync = AssetSyncState::Status::Indeterminate;
 		return true;
 	}
 

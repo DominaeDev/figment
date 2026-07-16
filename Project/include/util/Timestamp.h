@@ -21,6 +21,19 @@ namespace fig
 		local,
 	};
 
+	enum class Clock
+	{
+		Default,
+		H12,
+		H24,
+	};
+
+	static auto ClockMapping = std::array<std::pair<Clock, std::string_view>, 3> {
+		std::pair { Clock::Default,	"default" },
+		std::pair { Clock::H12,	"12h" },
+		std::pair { Clock::H24,	"24h" }
+	};
+
 	struct timespan
 	{
 		timespan() = default;
@@ -77,7 +90,8 @@ namespace fig
 		timestamp to_global() const;
 		int64_t utc_epoch() const { return static_cast<int64_t>(to_global()); }
 
-		std::string get_time_string(bool use_locale = true);
+
+		std::string get_time_string(Clock clock);
 		std::string get_date_string();
 
 		template <chrono_duration Dur>

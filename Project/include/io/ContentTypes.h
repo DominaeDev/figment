@@ -5,42 +5,53 @@
 #include "data/ChatInstance.h"
 #include "data/ChatLog.h"
 #include "gui/GUITypes.h"
+#include "io/Asset.h"
 
 namespace fig::io
 {
+	template <typename TAsset>
+	inline constexpr AssetType AssetTypeOf = []<bool Flag = false>()
+	{
+		static_assert(Flag, "No AssetType mapping for this type");
+	}();
+
 	template <> 
 	constexpr AssetType AssetTypeOf<fig::data::Character> = AssetType::Character;
 	template <> 
 	constexpr AssetType AssetTypeOf<fig::data::Scenario> = AssetType::Scenario;
 	template <> 
+	constexpr AssetType AssetTypeOf<fig::sdl::Surface> = AssetType::Image;
+	template <> 
 	constexpr AssetType AssetTypeOf<fig::data::ChatInstance> = AssetType::ChatInstance;
 	template <> 
 	constexpr AssetType AssetTypeOf<fig::data::ChatLog> = AssetType::ChatLog;
-	template <> 
-	constexpr AssetType AssetTypeOf<fig::sdl::Surface> = AssetType::Image;
 
-	template <>
-	struct AssetLoader<fig::data::Character>
+	template<typename T>
+	concept XmlLoadableAsset = requires (T& value)
 	{
-		std::expected<fig::data::Character, FileError> Load(const Asset& asset);
+		{ value.LoadFromXml(string_view {}) } -> std::same_as<FileError>;
 	};
 
-	template <>
-	struct AssetLoader<fig::data::Scenario>
+	template<typename T>
+	struct AssetLoader 
 	{
-		std::expected<fig::data::Scenario, FileError> Load(const Asset& asset);
+		std::expected<T, FileError> Load(const Asset& asset)
+		{
+			static_assert(false, "No asset loader implemented for this type");
+		}
 	};
 
-	template <>
-	struct AssetLoader<fig::data::ChatInstance>
+	template <XmlLoadableAsset T>
+	struct AssetLoader<T>
 	{
-		std::expected<fig::data::ChatInstance, FileError> Load(const Asset& asset);
-	};
-
-	template <>
-	struct AssetLoader<fig::data::ChatLog>
-	{
-		std::expected<fig::data::ChatLog, FileError> Load(const Asset& asset);
+		std::expected<T, FileError> Load(const Asset& asset)
+		{
+			T value;
+			if (auto error = value.LoadFromXml(asset.AsStringView()); error == FileError::NoError)
+				return value;
+			else
+				return std::unexpected(error);
+		}
 	};
 
 	template <>

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "data/CardMetaData.h"
+#include "data/ContentMetaData.h"
+#include "io/ContentUserSettings.h"
 #include "data/ModelSettings.h"
 #include "io/AssetCache.h"
-#include "io/ContentTypes.h"
 
 namespace fig::data
 {
@@ -30,15 +30,17 @@ namespace fig::io
 		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
 
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
-		fig::optional_ref<fig::data::CardMetaData> GetMetaData(const fig::uuid& id, bool bIgnoreCache = false) noexcept;
 		std::optional<fig::string> GetCharacterName(const fig::uuid& characterId) const;
+		fig::optional_ref<ContentMetaData> GetMetaData(const fig::uuid& id) noexcept;
+		ContentUserSettings GetUserSettings(const fig::uuid& id) noexcept;
 		
 		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::gui::TexturePtr pMask, fig::gui::RendererPtr pRenderer) noexcept;
+		fig::optional_cref<Asset> FindLastChatWith(const fig::uuid& characterId) const;
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);
 		bool MarkHidden(const fig::uuid& assetId, bool value = true);
-		bool SetBorder(const fig::uuid& assetId, fig::data::CardBorderStyle borderStyle);
+		bool SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle);
 
 		AssetManager& GetAssetManager();
 		void SaveModified();
@@ -49,8 +51,23 @@ namespace fig::io
 		template <typename T>
 		fig::optional_cref<T> Get(const fig::uuid& assetId) noexcept
 		{
-			auto& cache = GetCache<T>();
-			return cache.Get(assetId);
+			return GetCache<T>().Get(assetId);
+		}
+
+		template <typename T>
+		void InvalidateCache(const fig::uuid& assetId) noexcept
+		{
+			GetCache<T>().Erase(assetId);
+		}
+
+		void InvalidateMeta(const fig::uuid& assetId) noexcept
+		{
+			_metaData.erase(assetId);
+		}
+
+		void InvalidateUserSettings(const fig::uuid& assetId) noexcept
+		{
+			_userSettings.erase(assetId);
 		}
 
 	protected:
@@ -72,7 +89,8 @@ namespace fig::io
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 		std::unordered_map<AssetType, std::unique_ptr<IAssetCache>> _caches;
-		std::map<fig::uuid, fig::data::CardMetaData> _metaData;
+		std::map<fig::uuid, ContentMetaData> _metaData;
+		std::map<fig::uuid, ContentUserSettings> _userSettings;
 		
 		struct CachedTexture
 		{
@@ -83,7 +101,7 @@ namespace fig::io
 
 		std::map<fig::uuid, std::vector<fig::uuid>> _chatsByAsset; // <asset id, chat ids>
 
-		template <fig::data::CardMetaData::Flag E>
+		template <ContentUserSettings::Flag E>
 		bool MarkFlag(const fig::uuid& assetId, bool value);
 	};
 }

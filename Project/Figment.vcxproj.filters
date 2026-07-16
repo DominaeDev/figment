@@ -506,9 +506,6 @@
     <ClCompile Include="src\data\TavernCardV2.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\data\CardMetaData.cpp">
-      <Filter>Source Files\Data</Filter>
-    </ClCompile>
     <ClCompile Include="src\util\Handle.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
@@ -591,6 +588,12 @@
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\io\ContentTypes.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\ContentMetaData.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\ContentUserSettings.cpp">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1282,9 +1285,6 @@
     <ClInclude Include="include\data\TavernCardV2.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
-    <ClInclude Include="include\data\CardMetaData.h">
-      <Filter>Source Files\Data</Filter>
-    </ClInclude>
     <ClInclude Include="include\data\Character.h">
       <Filter>Source Files\Data</Filter>
     </ClInclude>
@@ -1403,6 +1403,12 @@
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\io\ContentTypes.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\ContentMetaData.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\ContentUserSettings.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
   </ItemGroup>

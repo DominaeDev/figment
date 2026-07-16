@@ -13,7 +13,7 @@ namespace fig::gui
 	ScenarioCard::ScenarioCard(ParentPtr pParent, const fig::uuid& scenarioId, CardSize cardSize) : CoverCard(pParent, scenarioId, cardSize),
 		_scenarioId { scenarioId }
 	{
-		if (auto scenario = Global::GetUserManager().GetContent().Get<Scenario>(scenarioId))
+		if (auto scenario = Global::GetUserContent().Get<Scenario>(scenarioId))
 		{
 			auto [title, desc] = scenario.value().GetInfo();
 			SetLabel(title);

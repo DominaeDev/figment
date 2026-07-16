@@ -12,9 +12,20 @@ namespace fig::gui
 	class ChatListItem : public Panel
 	{
 	public:
-		ChatListItem(ParentPtr pParent);
-		ChatListItem(ParentPtr pParent, const fig::data::ChatLog& asset, fig::timestamp lastUsed);
+		enum class TimeBucket
+		{
+			LessThan5Minutes = 0,
+			LessThan1Day,
+			LessThan2Days,
+			LessThan1Week,
+			LessThan1Month,
+			Older,
+		};
+		static std::array<fig::string_view, 6> TimeBucketLabels;
 
+		ChatListItem(ParentPtr pParent);
+		ChatListItem(ParentPtr pParent, const fig::data::ChatLog& asset, fig::timestamp lastUsed, TimeBucket bucket);
+		
 	protected:
 		void OnUpdate(float fElapsed);
 

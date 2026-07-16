@@ -97,7 +97,7 @@ namespace fig::gui
 
 		// Label (small)
 		_pSmallLabel = pSmallFooter->CreateControl<StaticText>("", FontFace::CardHeader, 24.0, false);
-		_pSmallLabel->SetPosition(Small::InnerMargin, Small::FooterHeight - Small::InnerMargin - 32);
+		_pSmallLabel->SetPosition(Small::InnerMargin, Small::FooterHeight - Small::InnerMargin - Small::TextY);
 		_pSmallLabel->SetMaxSize(Small::Width - (Small::InnerMargin * 2), -1);
 		_pSmallLabel->SetSize(Small::Width - (Small::InnerMargin * 2), 40);
 		_pSmallLabel->SetForegroundColor(Colors::White);
@@ -124,8 +124,8 @@ namespace fig::gui
 		SetChatCount(_metaData.chatCount);
 		SetCardSize(_cardSize);
 
-		SetBorder(_metaData.borderStyle);
-		ShowStar(_metaData.flags.IsSet(CardMetaData::Flag::Favorite));
+		SetBorder(_userSettings.borderStyle);
+		ShowStar(_userSettings.HasFlag(ContentUserSettings::Flag::Favorite));
 
 		CreatePendingTags();
 		CreatePendingLabel();
@@ -435,8 +435,8 @@ namespace fig::gui
 	bool CoverCard::MatchesFlags(FilterFlags filter) const noexcept
 	{
 		if (filter.IsSet(FilterFlag::Hidden))
-			return _metaData.flags.IsSet(CardMetaData::Flag::Hidden);
-		if (_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
+			return _userSettings.HasFlag(ContentUserSettings::Flag::Hidden);
+		if (_userSettings.HasFlag(ContentUserSettings::Flag::Hidden))
 			return false;
 
 		auto [name, gender, _] = _metaData.gender.Get();
@@ -458,13 +458,13 @@ namespace fig::gui
 
 		if (filter.IsSet(FilterFlag::New) and not _metaData.IsNew())
 			return false;
-		if (filter.IsSet(FilterFlag::Starred) and not _metaData.flags.IsSet(CardMetaData::Flag::Favorite))
-			return false;
 		if (filter.IsSet(FilterFlag::Chats) and _metaData.chatCount == 0)
 			return false;
-		if (not filter.IsSet(FilterFlag::SourceCreated) and not _metaData.flags.IsSet(CardMetaData::Flag::Imported))
+		if (filter.IsSet(FilterFlag::Starred) and not _userSettings.HasFlag(ContentUserSettings::Flag::Favorite))
 			return false;
-		if (not filter.IsSet(FilterFlag::SourceImported) and _metaData.flags.IsSet(CardMetaData::Flag::Imported))
+		if (not filter.IsSet(FilterFlag::SourceCreated) and not _userSettings.HasFlag(ContentUserSettings::Flag::Imported))
+			return false;
+		if (not filter.IsSet(FilterFlag::SourceImported) and _userSettings.HasFlag(ContentUserSettings::Flag::Imported))
 			return false;
 
 		return true;
@@ -662,5 +662,17 @@ namespace fig::gui
 		_fHoverZoom = 0.0f;
 		_fTargetZoom = 0.0f;
 		SetZoom(0.0f);
+	}
+
+	void CoverCard::SetMetaData(const fig::io::ContentMetaData& metaData) noexcept
+	{
+		_metaData = metaData;
+		ShowNew(metaData.IsNew());
+	}
+
+	void CoverCard::SetUserSettings(const ContentUserSettings& userSettings) noexcept
+	{
+		_userSettings = userSettings;
+		ShowStar(userSettings.HasFlag(ContentUserSettings::Flag::Favorite));
 	}
 }

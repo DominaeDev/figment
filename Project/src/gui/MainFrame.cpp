@@ -448,7 +448,7 @@ namespace fig::gui
 		ChangeScreen(ScreenType::Chat);
 		auto pChatScreen = GetScreen<ChatScreen>(ScreenType::Chat);
 
-		if (auto character = Global::GetUserManager().GetContent().Get<Character>(characterId))
+		if (auto character = Global::GetUserContent().Get<Character>(characterId))
 		{
 			PromptScaffold scaffold;
 			if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
@@ -474,7 +474,7 @@ namespace fig::gui
 			instance.scenarioId = {}; //! @todo
 			instance.options = Constants::LLM::DefaultChatOptions; //! @todo
 			
-			auto& chatInstanceAsset = Global::GetUserManager().GetContent().CreateAsset(instance);
+			auto& chatInstanceAsset = Global::GetUserContent().CreateAsset(instance);
 
 			pChatScreen->StartChat(staging, chatInstanceAsset.id);
 			return true;

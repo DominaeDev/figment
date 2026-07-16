@@ -2,10 +2,10 @@
 
 #include "Figment.h"
 #include "text/Context.h"
-#include "chat/ChatStaging.h"
 #include "app/AppSettings.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
+#include "chat/ChatStaging.h"
 
 #include "llm/LLMTypes.h"
 #include "llm/LLMStatus.h"

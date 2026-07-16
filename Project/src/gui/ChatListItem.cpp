@@ -11,9 +11,18 @@ using namespace fig::data;
 
 namespace fig::gui
 {
+	std::array<fig::string_view, 6> ChatListItem::TimeBucketLabels {
+		"Just now",
+		"Today",
+		"Yesterday",
+		"This week",
+		"This month",
+		"Older chats",
+	};
+
 	ChatListItem::ChatListItem(ParentPtr pParent) : Panel(pParent)
 	{
-		SetMaxSize(760, -1);
+		SetMaxSize(Constants::GUI::ChatList::Width, -1);
 		SetHeight(60);
 
 		// Background
@@ -48,7 +57,7 @@ namespace fig::gui
 		_pPortrait->SetVisible(false);
 	}
 
-	ChatListItem::ChatListItem(ParentPtr pParent, const ChatLog& chatLog, fig::timestamp lastUsed) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(ParentPtr pParent, const ChatLog& chatLog, fig::timestamp lastUsed, TimeBucket bucket) : ChatListItem(pParent)
 	{
 		if (not empty_or_whitespace(chatLog.title))
 			_pTitle->SetText(chatLog.title);
@@ -59,7 +68,7 @@ namespace fig::gui
 		{
 			auto& lastMessage = chatLog.messages.back();
 			auto& speakerId = lastMessage.speakerId;
-			auto name = Global::GetUserManager().GetContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
+			auto name = Global::GetUserContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
 
 			if (lastMessage.msgType == fig::chat::MessageType::Action)
 				_pMessage->SetText(std::format("{}: *{}*", name, trunc(lastMessage.content, 256uz)));
@@ -73,7 +82,12 @@ namespace fig::gui
 			}
 		}
 
-		_pTimestamp->SetTextAndResize(lastUsed.get_time_string());
+		Clock user_clock_setting = Global::GetUserSettings().GetEnum<Clock>(UserSetting::Clock, ClockMapping);
+
+		if (bucket < TimeBucket::LessThan1Week)
+			_pTimestamp->SetTextAndResize(lastUsed.get_time_string(user_clock_setting));
+		else
+			_pTimestamp->SetTextAndResize(lastUsed.get_date_string());
 	}
 
 	void ChatListItem::OnSize()

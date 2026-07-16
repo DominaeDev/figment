@@ -8,30 +8,30 @@
 #include "gui/Menu.h"
 
 using namespace fig::data;
+using namespace fig::io;
 
 namespace fig::gui
 {
 	CharacterCard::CharacterCard(ParentPtr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
 		_characterId { characterId }
 	{
-		if (auto try_character = Global::GetUserManager().GetContent().Get<Character>(characterId); try_character.has_value())
+		if (auto try_character = Global::GetUserContent().Get<Character>(characterId); try_character.has_value())
 		{
 			auto& character = try_character.value();
 			_characterName = character.shortName;
 			SetLabel(character.fullName);
 			SetIndex(character.GetSearchIndex());
 
-			if (auto try_meta = Global::GetUserManager().GetContent().GetMetaData(characterId))
+			// Meta data
+			if (auto try_meta = Global::GetUserContent().GetMetaData(characterId))
 			{
 				auto& meta = *try_meta;
 				SetMetaData(meta);
-				ShowStar(meta.flags.IsSet(CardMetaData::Flag::Favorite));
-				ShowNew(meta.IsNew());
 			}
 			else
 			{
 				auto now = utc_now();
-				SetMetaData(CardMetaData {
+				SetMetaData(ContentMetaData {
 					.name = _characterName,
 					.createdAt = now,
 					.updatedAt = now,
@@ -39,6 +39,9 @@ namespace fig::gui
 				});
 			}
 
+			// User settings
+			SetUserSettings(Global::GetUserContent().GetUserSettings(characterId));
+			
 			// Tags
 			if (character.gender.IsConventional())
 			{
@@ -103,8 +106,8 @@ namespace fig::gui
 	void CharacterCard::ShowMenu()
 	{
 		auto ChangeBorder = [this](CardBorderStyle border) {
-			_metaData.borderStyle = border;
-			Global::GetUserManager().GetContent().SetBorder(_characterId, border);
+			_userSettings.borderStyle = border;
+			Global::GetUserContent().SetBorder(_characterId, border);
 			SetBorder(border);
 		};
 
@@ -138,34 +141,34 @@ namespace fig::gui
 			moveMenu.AddItem("New folder\u2026");
 		menu.AddSeparator();
 		auto& borderMenu = menu.AddItem("Set border");
-			borderMenu.AddCheckItem("No border", _metaData.borderStyle == CardBorderStyle::None)
+			borderMenu.AddCheckItem("No border", _userSettings.borderStyle == CardBorderStyle::None)
 				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::None); });
 			borderMenu.AddSeparator();
-			borderMenu.AddCheckItem("Border #1", _metaData.borderStyle == CardBorderStyle::Style01)
+			borderMenu.AddCheckItem("Border #1", _userSettings.borderStyle == CardBorderStyle::Style01)
 				.SetIcon(TextureType::ICON_BORDER_01, false)
 				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style01); });
-			borderMenu.AddCheckItem("Border #2", _metaData.borderStyle == CardBorderStyle::Style02)
+			borderMenu.AddCheckItem("Border #2", _userSettings.borderStyle == CardBorderStyle::Style02)
 				.SetIcon(TextureType::ICON_BORDER_02, false)
 				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style02); });
-			borderMenu.AddCheckItem("Border #3", _metaData.borderStyle == CardBorderStyle::Style03)
+			borderMenu.AddCheckItem("Border #3", _userSettings.borderStyle == CardBorderStyle::Style03)
 				.SetIcon(TextureType::ICON_BORDER_03, false)
 				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style03); });
-			borderMenu.AddCheckItem("Border #4", _metaData.borderStyle == CardBorderStyle::Style04)
+			borderMenu.AddCheckItem("Border #4", _userSettings.borderStyle == CardBorderStyle::Style04)
 				.SetIcon(TextureType::ICON_BORDER_04, false)
 				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style04); });
-			borderMenu.AddCheckItem("Border #5", _metaData.borderStyle == CardBorderStyle::Style05)
+			borderMenu.AddCheckItem("Border #5", _userSettings.borderStyle == CardBorderStyle::Style05)
 				.SetIcon(TextureType::ICON_BORDER_05, false)
 				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style05); });
-			borderMenu.AddCheckItem("Border #6", _metaData.borderStyle == CardBorderStyle::Style06)
+			borderMenu.AddCheckItem("Border #6", _userSettings.borderStyle == CardBorderStyle::Style06)
 				.SetIcon(TextureType::ICON_BORDER_06, false)
 				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
 
-		if (!_metaData.flags.IsSet(CardMetaData::Flag::Favorite))
+		if (!_userSettings.HasFlag(ContentUserSettings::Flag::Favorite))
 		{
 			menu.AddItem("Star", TextureType::ICON_STAR)
 				.SetDelegate([this] {
-					Global::GetUserManager().GetContent().MarkFavorite(_characterId, true);
-					_metaData.flags.Set(CardMetaData::Flag::Favorite);
+					Global::GetUserContent().MarkFavorite(_characterId, true);
+					_userSettings.flags.Set(ContentUserSettings::Flag::Favorite);
 					ShowStar(true);
 					NotifyMetaUpdated();
 				});
@@ -174,19 +177,19 @@ namespace fig::gui
 		{
 			menu.AddItem("Unstar", TextureType::ICON_UNSTAR)
 				.SetDelegate([this] {
-					Global::GetUserManager().GetContent().MarkFavorite(_characterId, false);
-					_metaData.flags.Unset(CardMetaData::Flag::Favorite);
+					Global::GetUserContent().MarkFavorite(_characterId, false);
+					_userSettings.flags.Unset(ContentUserSettings::Flag::Favorite);
 					ShowStar(false);
 					NotifyMetaUpdated();
 				});
 		}
 
-		if (!_metaData.flags.IsSet(CardMetaData::Flag::Hidden))
+		if (!_userSettings.HasFlag(ContentUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Hide")
 				.SetDelegate([this] { 
-					Global::GetUserManager().GetContent().MarkHidden(_characterId, true);
-					_metaData.flags.Set(CardMetaData::Flag::Hidden);
+					Global::GetUserContent().MarkHidden(_characterId, true);
+					_userSettings.flags.Set(ContentUserSettings::Flag::Hidden);
 					NotifyMetaUpdated();
 				});
 		}
@@ -194,8 +197,8 @@ namespace fig::gui
 		{
 			menu.AddItem("Unhide")
 				.SetDelegate([this] { 
-					Global::GetUserManager().GetContent().MarkHidden(_characterId, false);
-					_metaData.flags.Unset(CardMetaData::Flag::Hidden);
+					Global::GetUserContent().MarkHidden(_characterId, false);
+					_userSettings.flags.Unset(ContentUserSettings::Flag::Hidden);
 					NotifyMetaUpdated();
 				});
 		}

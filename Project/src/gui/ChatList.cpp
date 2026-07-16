@@ -25,42 +25,23 @@ namespace fig::gui
 		EnableCulling(true);
 	}
 
-	enum class TimeBucket
-	{
-		LessThan5Minutes = 0,
-		LessThan1Day,
-		LessThan2Days,
-		LessThan1Week,
-		LessThan1Month,
-		Older,
-	};
-
-	static std::array<fig::string_view, 6> TimeBucketNames {
-		"Just now",
-		"Today",
-		"Yesterday",
-		"This week",
-		"This month",
-		"Older chats",
-	};
-
-	static TimeBucket GetTimeBucket(fig::timestamp then, fig::timestamp now)
+	static ChatListItem::TimeBucket GetTimeBucket(fig::timestamp then, fig::timestamp now)
 	{
 		auto minDiff = (now.to_local() - then.to_local()).minutes();
 		auto dayDiff = (now.to_local() - then.to_local()).days();
 		auto monthDiff = (now.to_local() - then.to_local()).months();
 
 		if (minDiff < 10)
-			return TimeBucket::LessThan5Minutes;
+			return ChatListItem::TimeBucket::LessThan5Minutes;
 		else if (dayDiff < 1)
-			return TimeBucket::LessThan1Day;
+			return ChatListItem::TimeBucket::LessThan1Day;
 		else if (dayDiff < 2)
-			return TimeBucket::LessThan2Days;
+			return ChatListItem::TimeBucket::LessThan2Days;
 		else if (dayDiff < 7)
-			return TimeBucket::LessThan1Week;
+			return ChatListItem::TimeBucket::LessThan1Week;
 		else if (monthDiff < 1)
-			return TimeBucket::LessThan1Month;
-		return TimeBucket::Older;
+			return ChatListItem::TimeBucket::LessThan1Month;
+		return ChatListItem::TimeBucket::Older;
 	}
 
 	void ChatList::ShowAllChats()
@@ -86,7 +67,7 @@ namespace fig::gui
 				_pVerticalSizer->AddSpacer(Spacing);
 
 			// Header
-			auto pHeader = CreateHeader(TimeBucketNames[static_cast<size_t>(kvp.first)]);
+			auto pHeader = CreateHeader(ChatListItem::TimeBucketLabels[static_cast<size_t>(kvp.first)]);
 			_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
 
 			// Chats
@@ -99,7 +80,7 @@ namespace fig::gui
 				if (i > 0)
 					_pVerticalSizer->AddSpacer(Spacing);
 
-				auto pItem = CreateControl<ChatListItem>(chat, time);
+				auto pItem = CreateControl<ChatListItem>(chat, time, kvp.first);
 				_pVerticalSizer->Add(pItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
 				_items.push_back(pItem);
 			}
@@ -111,7 +92,7 @@ namespace fig::gui
 	ControlPtr ChatList::CreateHeader(fig::string_view text)
 	{
 		auto panel = CreateControl<Area>();
-		panel->SetMaxSize(700, -1);
+		panel->SetMaxSize(Constants::GUI::ChatList::Width, -1);
 		panel->SetHeight(40);
 
 		auto label = panel->CreateControl<StaticText>("", FontFace::Italic, 18.0);

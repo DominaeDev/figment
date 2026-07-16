@@ -43,7 +43,7 @@ namespace fig::gui
 	void CardList::CreateCards(CardType cardType)
 	{
 		// Create cards
-		auto& assetMngr = Global::GetUserManager().GetContent().GetAssetManager();
+		auto& assetMngr = Global::GetUserContent().GetAssetManager();
 
 		Reset();
 
@@ -201,36 +201,32 @@ namespace fig::gui
 		});
 
 		// Then sort by...
-		if (sortBy != SortBy::LastUsedAt)
-		{
-			std::ranges::stable_sort(cards, [&](CoverCardPtr a, CoverCardPtr b) -> bool {
-				auto& meta_a = a->GetMetaData();
-				auto& meta_b = b->GetMetaData();
-				int cmp = 0;
-				switch (sortBy)
-				{
-				case SortBy::Name:
-					cmp = _stricmp(meta_a.name.c_str(), meta_b.name.c_str());
-					break;
-				case SortBy::CreatedAt:
-					cmp = fnCompare(meta_a.createdAt, meta_b.createdAt);
-					break;
-				case SortBy::UpdatedAt:
-					cmp = fnCompare(meta_a.updatedAt, meta_b.updatedAt);
-					break;
-				case SortBy::ChatCount:
-					cmp = fnCompareCount(meta_a.chatCount, meta_b.chatCount);
-					break;
-				}
-				if (orderBy == OrderBy::Descending)
-					cmp *= -1;
-				return cmp < 0;
-			});
-		}
-		else if (orderBy == OrderBy::Ascending)
-		{
-			std::ranges::reverse(cards);
-		}
+		std::ranges::stable_sort(cards, [&](CoverCardPtr a, CoverCardPtr b) -> bool {
+			auto& meta_a = a->GetMetaData();
+			auto& meta_b = b->GetMetaData();
+			int cmp = 0;
+			switch (sortBy)
+			{
+			case SortBy::Name:
+				cmp = _stricmp(meta_a.name.c_str(), meta_b.name.c_str());
+				break;
+			case SortBy::CreatedAt:
+				cmp = fnCompare(meta_a.createdAt, meta_b.createdAt);
+				break;
+			case SortBy::UpdatedAt:
+				cmp = fnCompare(meta_a.updatedAt, meta_b.updatedAt);
+				break;
+			case SortBy::LastUsedAt:
+				cmp = fnCompare(meta_a.lastUsedAt, meta_b.lastUsedAt);
+				break;
+			case SortBy::ChatCount:
+				cmp = fnCompareCount(meta_a.chatCount, meta_b.chatCount);
+				break;
+			}
+			if (orderBy == OrderBy::Descending)
+				cmp *= -1;
+			return cmp < 0;
+		});
 	}
 
 	static void Filter(std::vector<CoverCardPtr>& cards, FilterFlags filterBy, const fig::string& search_string)
