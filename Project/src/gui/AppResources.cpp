@@ -64,6 +64,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_UNSTAR, "./resources/gui/icons/icon_unstar.png");
 		LoadTexture(pRenderer, TextureType::ICON_HIDE, "./resources/gui/icons/icon_hide.png");
 		LoadTexture(pRenderer, TextureType::ICON_UNHIDE, "./resources/gui/icons/icon_unhide.png");
+		LoadTexture(pRenderer, TextureType::ICON_DELETE, "./resources/gui/icons/icon_delete.png");
 		LoadTexture(pRenderer, TextureType::ICON_PLAY, "./resources/gui/icons/icon_play.png");
 		LoadTexture(pRenderer, TextureType::ICON_PAUSE, "./resources/gui/icons/icon_pause.png");
 		LoadTexture(pRenderer, TextureType::ICON_STOP, "./resources/gui/icons/icon_stop.png");

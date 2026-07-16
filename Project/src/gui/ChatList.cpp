@@ -46,21 +46,32 @@ namespace fig::gui
 
 	void ChatList::ShowAllChats()
 	{
+		auto chats = Global::GetUserManager().GetContent().GetChatLogs(true)
+			| std::ranges::to<std::vector>();
+		ShowChats(chats);
+	}
+
+	void ChatList::ShowChatsWith(const fig::uuid& characterId)
+	{
+		auto chats = Global::GetUserManager().GetContent().GetChatLogsWith(characterId, true)
+			| std::ranges::to<std::vector>();
+		ShowChats(chats);
+	}
+
+	void ChatList::ShowChats(const fig::cref_vector<Asset>& chats)
+	{
 		Reset();
 
 		auto& content = Global::GetUserManager().GetContent();
-		auto chatInstances = content.GetChatLogs(true)
-			| std::views::transform([](auto& a) { return std::cref(a); })
-			| std::ranges::to<std::vector>();
 
 		auto now = utc_now();
-		auto chatsByTime = chatInstances
+		auto chatsByTime = chats
 			| std::views::transform([&content](auto& a) {
 				auto chat = content.Get<fig::data::ChatLog>(a.get().id);
 				return std::make_pair(chat, a.get().GetCreatedAt());
 			})
 			| fig::group_by([&now](auto& p) { return GetTimeBucket(p.second, now); });
-		
+
 		for (auto& kvp : chatsByTime)
 		{
 			if (not _items.empty())

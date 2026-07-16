@@ -418,12 +418,27 @@ namespace fig::gui
 		}
 		else if (IsUserEvent(event, UserEvent::StartChat))
 		{
-			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
+			auto& characterId = GetUserData<fig::uuid>(event);
 			StartChat(characterId);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::Scrolling))
 		{
+			PopAllMenus();
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::NavigateToChatList))
+		{
+			ChangeScreen(ScreenType::ChatListing);
+			if (HasUserData1(event))
+			{
+				auto& characterId = GetUserData1<fig::uuid>(event);
+				GetScreen<ChatListingScreen>(ScreenType::ChatListing)->ShowChatsWith(characterId);
+			}
+			else
+			{
+				GetScreen<ChatListingScreen>(ScreenType::ChatListing)->ShowAllChats();
+			}
 			PopAllMenus();
 			return EventResult::Continue;
 		}

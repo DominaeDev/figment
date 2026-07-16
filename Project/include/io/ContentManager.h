@@ -26,8 +26,8 @@ namespace fig::io
 
 		const Asset& CreateAsset(const fig::data::ChatInstance& chatInstance);
 
-		fig::cref_vector<Asset> GetChatsWithCharacter(const fig::uuid& characterId, bool bLoad = false);
 		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
+		fig::cref_vector<Asset> GetChatLogsWith(const fig::uuid& characterId, bool bLoad = false);
 
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
 		std::optional<fig::string> GetCharacterName(const fig::uuid& characterId) const;

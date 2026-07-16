@@ -86,6 +86,7 @@ namespace fig::gui
 		ICON_UNSTAR,
 		ICON_HIDE,
 		ICON_UNHIDE,
+		ICON_DELETE,
 		ICON_PLAY,
 		ICON_PAUSE,
 		ICON_STOP,

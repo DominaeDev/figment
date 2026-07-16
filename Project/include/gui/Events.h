@@ -31,6 +31,7 @@ namespace fig::gui
 		LLMRebuildingKVCache,
 
 		StartChat,
+		NavigateToChatList,
 		DebugCharacter,
 
 		Count,

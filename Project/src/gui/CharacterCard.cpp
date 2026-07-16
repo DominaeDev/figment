@@ -123,7 +123,10 @@ namespace fig::gui
 		menu.AddItem("Resume last chat")
 			.SetEnabled(bLLM && _metaData.chatCount > 0);
 		menu.AddItem(std::format("View chats with {}", _characterName))
-			.SetEnabled(_metaData.chatCount > 0);
+			.SetEnabled(_metaData.chatCount > 0)
+			.SetDelegate([this] { 
+				PushEvent(UserEvent::NavigateToChatList, &_characterId); 
+			});
 
 		if constexpr (Debugging)
 		{
@@ -203,7 +206,7 @@ namespace fig::gui
 				});
 		}
 		menu.AddSeparator();
-		menu.AddItem("Delete\u2026");
+		menu.AddItem("Delete\u2026", TextureType::ICON_DELETE);
 
 		_menuId = menu.Show();
 	}

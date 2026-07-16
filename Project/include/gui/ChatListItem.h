@@ -36,6 +36,7 @@ namespace fig::gui
 
 	private:
 		fig::uuid _assetId;
+		fig::uuid _primaryCharacterId;
 		fig::observer_ptr<Image> _pPortrait;
 		fig::observer_ptr<StaticText> _pTitle;
 		fig::observer_ptr<StaticText> _pMessage;

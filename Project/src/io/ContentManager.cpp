@@ -331,32 +331,6 @@ namespace fig::io
 		}
 	}
 
-	fig::cref_vector<Asset> UserContentManager::GetChatsWithCharacter(const fig::uuid& characterId, bool bLoad)
-	{
-		std::unordered_set<fig::uuid> instanceIds;
-		auto& chats = GetCache<ChatInstance>().GetAll();
-		for (auto& kvp : chats)
-		{
-			if (kvp.second.contains(characterId))
-				instanceIds.insert(kvp.first);
-		}
-
-		auto logAssets = _pAssetMngr->GetAssetsOfType(AssetType::ChatLog)
-			| std::views::filter([&](auto&& a) { return instanceIds.contains(a.parent_id); })
-			| std::views::transform([](auto&& a) { return std::cref(a); })
-			| std::ranges::to<std::vector>();
-
-		if (bLoad)
-		{
-			std::vector<fig::uuid> logIds = logAssets
-				| std::views::transform([](auto&& a) { return a.get().id; })
-				| std::ranges::to<std::vector>();
-			_pAssetMngr->LoadAssetData(logIds);
-		}
-
-		return logAssets;
-	}
-
 	fig::cref_vector<Asset> UserContentManager::GetChatLogs(bool bLoad)
 	{
 		auto& chats = GetCache<ChatInstance>().GetAll();
@@ -384,6 +358,31 @@ namespace fig::io
 		return chatLogAssets;
 	}
 
+	fig::cref_vector<Asset> UserContentManager::GetChatLogsWith(const fig::uuid& characterId, bool bLoad)
+	{
+		std::unordered_set<fig::uuid> instanceIds;
+		auto& chats = GetCache<ChatInstance>().GetAll();
+		for (auto& kvp : chats)
+		{
+			if (kvp.second.contains(characterId))
+				instanceIds.insert(kvp.first);
+		}
+
+		auto logAssets = _pAssetMngr->GetAssetsOfType(AssetType::ChatLog)
+			| std::views::filter([&](auto&& a) { return instanceIds.contains(a.parent_id); })
+			| std::views::transform([](auto&& a) { return std::cref(a); })
+			| std::ranges::to<std::vector>();
+
+		if (bLoad)
+		{
+			std::vector<fig::uuid> logIds = logAssets
+				| std::views::transform([](auto&& a) { return a.get().id; })
+				| std::ranges::to<std::vector>();
+			_pAssetMngr->LoadAssetData(logIds);
+		}
+
+		return logAssets;
+	}
 	std::optional<fig::string> UserContentManager::GetCharacterName(const fig::uuid& characterId) const
 	{
 		if (auto try_character = GetCache<Character>().TryGet(characterId))

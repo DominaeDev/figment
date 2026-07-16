@@ -13,6 +13,7 @@ namespace fig::gui
 		ChatListingScreen(Frame* pParent);
 
 		void ShowAllChats();
+		void ShowChatsWith(const fig::uuid& characterId);
 	
 	protected:
 		bool OnKeyboardEvent(KeyboardEvent& event) override;

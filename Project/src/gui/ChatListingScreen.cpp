@@ -24,6 +24,14 @@ namespace fig::gui
 		_pChatList->ShowAllChats();
 	}
 
+	void ChatListingScreen::ShowChatsWith(const fig::uuid& characterId)
+	{
+		if (not Global::IsSignedIn())
+			return;
+
+		_pChatList->ShowChatsWith(characterId);
+	}
+
 	bool ChatListingScreen::OnKeyboardEvent(KeyboardEvent& event)
 	{
 		return false;
@@ -31,10 +39,7 @@ namespace fig::gui
 
 	EventResult ChatListingScreen::OnEvent(Event& event)
 	{
-		if (IsUserEvent(event, UserEvent::Activated))
-		{
-			ShowAllChats();
-		}
+		// ...
 
 		return Screen::OnEvent(event);
 	}
