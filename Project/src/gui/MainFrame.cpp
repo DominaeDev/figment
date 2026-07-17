@@ -129,6 +129,7 @@ namespace fig::gui
 		if (not (bool)_pActiveScreen)
 			return;
 
+		_currentScreen = screen;
 		_pMainArea->RemoveChildren();
 		_pMainArea->AddChild(_pActiveScreen);
 		
@@ -137,7 +138,7 @@ namespace fig::gui
 
 		_pActiveScreen->SetVisible(true);
 		_pActiveScreen->PushEvent(UserEvent::Activated);
-		_pActiveScreen->NotifySidePanelShown(_pSidePanel->GetVisible());
+		PushEvent(UserEvent::ChangedScreen, &_currentScreen);
 
 		InvalidateLayout();
 
@@ -171,12 +172,13 @@ namespace fig::gui
 
 	void MainFrame::ShowSidePanel(bool bShow) noexcept
 	{
-		_pSidePanel->SetVisible(bShow);
-		_pSidePanel->EnableLayout(bShow);
-
-		if (_pActiveScreen)
-			_pActiveScreen->NotifySidePanelShown(bShow);
-		InvalidateLayout();
+		if (_pSidePanel->GetVisible() != bShow)
+		{
+			_pSidePanel->SetVisible(bShow);
+			_pSidePanel->EnableLayout(bShow);
+			_pSidePanel->Cull(!bShow);
+			InvalidateLayout();
+		}
 	}
 
 	void MainFrame::ShowLoginScreen()
@@ -221,8 +223,6 @@ namespace fig::gui
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
 		PushEvent(UserEvent::UserSignedIn, &profile);
-
-		ShowSidePanel(true);
 
 		ChangeScreen(ScreenType::Home);
 		auto pHomeScreen = GetScreen<HomeScreen>(ScreenType::Home);
@@ -338,11 +338,6 @@ namespace fig::gui
 					ChangeScreen(ScreenType::Chat);
 					return EventResult::Handled;
 				}
-				else if (keyEvent.key == SDLK_TAB and mods.None)
-				{
-					ShowSidePanel(!_pSidePanel->GetVisible());
-					return EventResult::Handled;
-				}
 				else if (keyEvent.key == SDLK_F2 and mods.None)
 				{
 					InitializeModel();
@@ -440,6 +435,27 @@ namespace fig::gui
 				GetScreen<ChatListingScreen>(ScreenType::ChatListing)->ShowAllChats();
 			}
 			PopAllMenus();
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::ChangedScreen))
+		{
+			auto& screen = GetUserData1<ScreenType>(event);
+			switch (screen)
+			{
+				case ScreenType::Login:
+					ShowSidePanel(false);
+					break;
+				default:
+					ShowSidePanel(true);
+					break;
+			}
+			PopAllMenus();
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::SidePanelCollapsed) or IsUserEvent(event, UserEvent::SidePanelExpanded))
+		{
+			PopAllMenus();
+			InvalidateLayout();
 			return EventResult::Continue;
 		}
 

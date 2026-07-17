@@ -42,13 +42,11 @@ namespace fig::gui
 		void NextQueuedCommand();
 
 		void SetStatusBar(fig::string_view message);
-		void OnSidePanel(bool show) override;
 
 	private:
 		fig::observer_ptr<ChatScroll> _pChatScroll {};
 		fig::observer_ptr<TextBox> _pTextBox {};
 		fig::observer_ptr<VariableList> _pVariableList {};
-		fig::observer_ptr<Control> _pExpandButton {};
 
 		float _fPollingCounter = 0.0f;
 		bool _bStartedChat = false; // Used to trigger greeting

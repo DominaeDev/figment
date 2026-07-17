@@ -15,13 +15,15 @@ namespace fig::gui
 		SetWidth(Constants::GUI::SidePanel::Width);
 		SetBackgroundColor(fig::gui::Colors::SidePanelBackground);
 
-		auto pHeaderPanel = CreateControl<Panel>();
+		_pRootPanel = CreateControl<Area>();
+
+		auto pHeaderPanel = _pRootPanel->CreateControl<Panel>();
 		pHeaderPanel->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
 		auto pLogo = pHeaderPanel->CreateControl<Image>(AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
 		pLogo->SetX(44);
 
-		auto pGradient = CreateControl<HorizontalGradient>(Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.8f));
+		auto pGradient = _pRootPanel->CreateControl<HorizontalGradient>(Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.8f));
 		_pGradient = pGradient;
 
 		_pMenuButton = pHeaderPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_MENU);
@@ -31,21 +33,14 @@ namespace fig::gui
 		_pMenuButton->CenterVertically();
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
-/*		auto pSettingsButton = pHeaderPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_SETTINGS);
-		pSettingsButton->SetTheme(Themes::SidePanelButtonStyle);
-		pSettingsButton->SetSize(36, 36);
-		pSettingsButton->SetX(GetWidth() - pSettingsButton->GetWidth() - 40);
-		pSettingsButton->CenterVertically(); 
-*/
+		_pCollapseButton = CreateControl<ButtonWithIcon>(TextureType::ICON_SIDEBAR);
+		_pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pCollapseButton->SetSize(36, 36);
+		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
+		_pCollapseButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pCollapseButton->GetHeight()) / 2);
+		_pCollapseButton->SetDelegate([]() { PushEvent(UserEvent::ToggleSidePanel); });
 
-		auto pCollapseButton = pHeaderPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_SIDEBAR);
-		pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
-		pCollapseButton->SetSize(36, 36);
-		pCollapseButton->SetX(GetWidth() - pCollapseButton->GetWidth() - 4);
-		pCollapseButton->CenterVertically();
-		pCollapseButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(false); });
-
-		auto pMainArea = CreateControl<Area>();
+		auto pMainArea = _pRootPanel->CreateControl<Area>();
 
 		auto pChatButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
 		pChatButton->SetDelegate([]() { 
@@ -70,7 +65,7 @@ namespace fig::gui
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pModelsButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
 
-		auto pFooterPanel = CreateControl<Area>();
+		auto pFooterPanel = _pRootPanel->CreateControl<Area>();
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);
 
 		_pModelWidget = pFooterPanel->CreateControl<LoadModelWidget>();
@@ -80,11 +75,14 @@ namespace fig::gui
 		_pUserWidget = pFooterPanel->CreateControl<UserProfileWidget>();
 		_pUserWidget->SetHeight(60);
 		
+		auto pMainSizer =_pRootPanel->SetSizer<VerticalSizer>();
+		pMainSizer->Add(pHeaderPanel, 0, Sizer::Expand | Sizer::Fill);
+		pMainSizer->Add(pMainArea, -1, Sizer::Fill);
+		pMainSizer->Add(_pModelWidget, 0, Sizer::Expand);
+		pMainSizer->Add(_pUserWidget, 0, Sizer::Expand);
+
 		auto pTopSizer = SetSizer<VerticalSizer>();
-		pTopSizer->Add(pHeaderPanel, 0, Sizer::Expand | Sizer::Fill);
-		pTopSizer->Add(pMainArea, -1, Sizer::Fill);
-		pTopSizer->Add(_pModelWidget, 0, Sizer::Expand);
-		pTopSizer->Add(_pUserWidget, 0, Sizer::Expand);
+		pTopSizer->Add(_pRootPanel, -1, Sizer::Expand | Sizer::Fill);
 
 		SetBorderRenderer<LineBorderRenderer>(Colors::LineColor, Direction::East);
 	}
@@ -131,7 +129,53 @@ namespace fig::gui
 			_pUserWidget->Reset();
 			return EventResult::Continue;
 		}
+		else if (IsUserEvent(event, UserEvent::ToggleSidePanel))
+		{
+			_bExpanded ? Collapse() : Expand();
+			return EventResult::Continue;
+		}
+
+		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
+		{
+			SDL_KeyboardEvent& keyEvent = event.key;
+			KeyboardMods mods { event };
+
+			if (keyEvent.down and not keyEvent.repeat)
+			{
+				if (keyEvent.key == SDLK_TAB and mods.None)
+				{
+					_bExpanded ? Collapse() : Expand();
+					return EventResult::Handled;
+				}
+			}
+		}
+
 		return EventResult::Pass;
 	}
 
+	void SidePanel::Expand() noexcept
+	{
+		if (_bExpanded)
+			return;
+		_bExpanded = true;
+
+		SetWidth(Constants::GUI::SidePanel::Width);
+		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
+		_pRootPanel->Cull(false);
+
+		PushEvent(UserEvent::SidePanelExpanded);
+	}
+
+	void SidePanel::Collapse() noexcept
+	{
+		if (not _bExpanded)
+			return;
+		_bExpanded = false;
+
+		SetWidth(42);
+		_pCollapseButton->CenterHorizontally();
+		_pRootPanel->Cull(true);
+
+		PushEvent(UserEvent::SidePanelCollapsed);
+	}
 }

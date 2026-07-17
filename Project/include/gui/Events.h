@@ -6,14 +6,6 @@ namespace fig::gui
 {
 	enum class UserEvent : uint32_t
 	{
-		UserSignedIn,
-		UserSignedOut,
-		MenuOpened,
-		MenuClosed,
-		Activated,
-		Deactivated,
-		Scrolling,
-
 		LLMStatusUpdate,
 		LLMModelLoading,
 		LLMModelLoadingProgress,
@@ -28,8 +20,19 @@ namespace fig::gui
 		LLMGenerationStarted,
 		LLMGenerationComplete,
 		LLMCompletedMessage,
-		LLMRebuildingKVCache,
+		LLMRebuildingKVCache, 
 
+		UserSignedIn,
+		UserSignedOut,
+		MenuOpened,
+		MenuClosed,
+		Activated,
+		Deactivated,
+		ChangedScreen,
+		Scrolling,
+		ToggleSidePanel,
+		SidePanelExpanded,
+		SidePanelCollapsed,
 		StartChat,
 		NavigateToChatList,
 		DebugCharacter,

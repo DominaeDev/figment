@@ -29,10 +29,6 @@ namespace fig::gui
 		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 		_pHeader->SetAlignment(TextAlignment::Left_Center);
 		
-		auto pExpandButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_SIDEBAR);
-		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
-		_pExpandButton = pExpandButton;
-
 		auto pHomeButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_HOME);
 
 		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_SORTING);
@@ -57,8 +53,7 @@ namespace fig::gui
 		});
 
 		auto pTopSizer = pTopBar->SetSizer<HorizontalSizer>();
-		pTopSizer->Add(pExpandButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 4);
-		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 8);
+		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
 		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
 		pTopSizer->AddStretchSpacer();
 		pTopSizer->Add(_pGridButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
@@ -109,12 +104,6 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void HomeScreen::OnSidePanel(bool bShown)
-	{
-		_pExpandButton->SetVisible(!bShown);
-		_pExpandButton->EnableLayout(!bShown);
-	}
-
 	void HomeScreen::OnUserSignedIn(const fig::user::UserProfile& profile)
 	{
 		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::HalfSizeCards);
@@ -163,6 +152,12 @@ namespace fig::gui
 		_pToggleTagsButton->EnableBorder(_pCardList->IsTagsEnabled());
 	}
 
+	static bool IsShiftDown()
+	{
+		auto mod = SDL_GetModState();
+		return (mod & SDL_KMOD_SHIFT) != 0 and (mod & SDL_KMOD_CTRL) == 0 and (mod & SDL_KMOD_ALT) == 0;
+	}
+
 	void HomeScreen::ShowSortingMenu() noexcept
 	{
 		auto ChangeSorting = [this](SortBy sorting) {
@@ -181,12 +176,12 @@ namespace fig::gui
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 		menu.AddCheckItem("Sort alphabetically", sortBy == SortBy::Name)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::Name); });
-		menu.AddCheckItem("Sort by last chat", sortBy == SortBy::LastUsedAt)
-			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
 		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::CreatedAt); });
 		menu.AddCheckItem("Sort by modified date", sortBy == SortBy::UpdatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::UpdatedAt); });
+		menu.AddCheckItem("Sort by last chat", sortBy == SortBy::LastUsedAt)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
 		menu.AddCheckItem("Sort by chat count", sortBy == SortBy::ChatCount)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::ChatCount); });
 		menu.AddSeparator();
@@ -203,12 +198,6 @@ namespace fig::gui
 			});
 
 		menu.Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
-	}
-
-	static bool IsShiftDown()
-	{
-		auto mod = SDL_GetModState();
-		return (mod & SDL_KMOD_SHIFT) != 0 and (mod & SDL_KMOD_CTRL) == 0 and (mod & SDL_KMOD_ALT) == 0;
 	}
 
 	void HomeScreen::ShowFilteringMenu() noexcept
@@ -249,7 +238,7 @@ namespace fig::gui
 				else
 					ToggleFilter(FilterFlag::Starred); 
 			});
-		menu.AddCheckItem("At least one chat", filter.IsSet(FilterFlag::Chats))
+		menu.AddCheckItem("In chats", filter.IsSet(FilterFlag::Chats))
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([=, this] { 
 				if (IsShiftDown())
@@ -257,7 +246,11 @@ namespace fig::gui
 				else
 					ToggleFilter(FilterFlag::Chats); 
 			});
-		
+		menu.AddCheckItem("Hidden", bShowHidden)
+			.SetDelegate([=, this] {
+			ToggleFilter(FilterFlag::Hidden);
+		});
+
 		menu.AddSeparator();
 
 		auto& genders = menu.AddItem("By gender");
@@ -304,12 +297,6 @@ namespace fig::gui
 					ToggleFilter(FilterFlag::SourceImported);
 			});
 
-		menu.AddSeparator();
-
-		menu.AddCheckItem("Show hidden", bShowHidden)
-			.SetDelegate([=, this] { 
-				ToggleFilter(FilterFlag::Hidden); 
-			});
 		menu.AddSeparator();
 		menu.AddItem("Clear filter")
 			.SetDelegate([=, this] { 

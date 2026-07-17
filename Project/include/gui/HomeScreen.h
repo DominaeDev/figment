@@ -21,7 +21,6 @@ namespace fig::gui
 		void OnRender(Renderer* pRenderer) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
-		void OnSidePanel(bool show) override;
 		void OnSearchFilter(fig::string search_text);
 		void OnUserSignedIn(const fig::user::UserProfile& profile) override;
 
@@ -33,7 +32,6 @@ namespace fig::gui
 
 	private:
 		fig::observer_ptr<CardList> _pCardList;
-		fig::observer_ptr<Control> _pExpandButton;
 		fig::observer_ptr<TextBox> _pFilterTextBox;
 		fig::observer_ptr<StaticText> _pHeader;
 		fig::observer_ptr<ButtonWithIcon> _pSortingButton;

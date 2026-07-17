@@ -43,12 +43,6 @@ namespace fig::gui
 		auto leftArea = CreateControl<Area>();
 		leftArea->SetSize(200, -1);
 
-		auto pExpandButton = leftArea->CreateControl<ButtonWithIcon>(TextureType::ICON_SIDEBAR);
-		pExpandButton->SetSize(36, 36);
-		pExpandButton->SetPosition(4, 6);
-		pExpandButton->SetDelegate([]() { MainFrame::GetInstance().ShowSidePanel(true); });
-		_pExpandButton = pExpandButton;
-
 		auto centerArea = CreateControl<Area>();
 		centerArea->SetBackgroundColor(Colors::ChatBackground);
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
@@ -335,11 +329,6 @@ namespace fig::gui
 			if (OnCommand(command))
 				break;
 		}
-	}
-
-	void ChatScreen::OnSidePanel(bool bShown)
-	{
-		_pExpandButton->SetVisible(!bShown);
 	}
 
 	EventResult ChatScreen::OnEvent(Event& event)

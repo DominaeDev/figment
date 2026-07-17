@@ -24,6 +24,7 @@ namespace fig::gui
 
 	enum class ScreenType : size_t
 	{
+		Undefined,
 		Debug,
 		Login,
 		Home,
@@ -90,9 +91,9 @@ namespace fig::gui
 	private:
 		std::unordered_map<ScreenType, Screen*> _screensByType {};
 		fig::observer_ptr<Screen> _pActiveScreen;
-
 		fig::observer_ptr<StatusBar> _pStatusBar;
 		fig::observer_ptr<Control> _pMainArea;
 		fig::observer_ptr<SidePanel> _pSidePanel;
+		ScreenType _currentScreen {};
 	};
 }

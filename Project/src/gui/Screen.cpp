@@ -46,11 +46,6 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
-	void Screen::NotifySidePanelShown(bool bShow)
-	{
-		OnSidePanel(bShow);
-	}
-
 	void Screen::PushEvent(UserEvent eventType, int32_t code, void* pData1, void* pData2)
 	{
 		Event event {};

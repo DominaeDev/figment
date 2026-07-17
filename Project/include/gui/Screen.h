@@ -19,13 +19,10 @@ namespace fig::gui
 		friend class Frame;
 	public:
 		Screen(Frame* pParent);
-
-		void NotifySidePanelShown(bool showing);
 		
 		void PushEvent(UserEvent eventType, int32_t code = 0, void* pData1 = nullptr, void* pData2 = nullptr);
 	protected:
 		EventResult OnEvent(Event& event) override;
-		virtual void OnSidePanel(bool show) {};
 		virtual bool OnKeyboardEvent(KeyboardEvent& event) = 0;
 
 		virtual void OnUserSignedIn(const fig::user::UserProfile& profile) {};

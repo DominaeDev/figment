@@ -18,8 +18,12 @@ namespace fig::gui
 	protected:
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		EventResult OnEvent(Event& event) override;
+		void ShowSortingMenu() noexcept;
+		void ShowFilteringMenu() noexcept;
 
 	private:
 		fig::observer_ptr<ChatList> _pChatList;
+		fig::observer_ptr<ButtonWithIcon> _pSortingButton;
+		fig::observer_ptr<ButtonWithIcon> _pFilteringButton;
 	};
 }

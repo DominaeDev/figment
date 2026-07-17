@@ -18,6 +18,9 @@ namespace fig::gui
 	public:
 		SidePanel(ParentPtr pParent);
 	
+		void Expand() noexcept;
+		void Collapse() noexcept;
+
 	protected:
 		void OnAfterLayout() override;
 		EventResult OnEvent(Event& event) override;
@@ -28,5 +31,9 @@ namespace fig::gui
 		fig::observer_ptr<UserProfileWidget> _pUserWidget;
 		fig::observer_ptr<LoadModelWidget> _pModelWidget;
 		fig::observer_ptr<ButtonWithIcon> _pMenuButton;
+		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;
+		bool _bExpanded { true };
+		
+		Control* _pRootPanel;
 	};
 }
