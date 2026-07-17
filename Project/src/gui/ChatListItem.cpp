@@ -76,7 +76,7 @@ namespace fig::gui
 			else
 				_pMessage->SetText(std::format("{}: \"{}\"", name, trunc(lastMessage.content, 256uz)));
 
-			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(speakerId, AppResources::GetTexture(TextureType::MASK_CIRCLE), GetSDLRenderer()))
+			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(speakerId, AppResources::GetTexture(TextureType::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
 			{
 				_pPortrait->SetTexture((*portrait).get());
 				_pPortrait->SetVisible(true);

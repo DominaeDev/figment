@@ -45,6 +45,11 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::ICON_MENU_SCENARIOS, "./resources/gui/icons/icon_scenarios.png");
 		LoadTexture(pRenderer, TextureType::ICON_MENU_WORLDS, "./resources/gui/icons/icon_worlds.png");
 		LoadTexture(pRenderer, TextureType::ICON_MENU_MODELS, "./resources/gui/icons/icon_models.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU_CHATS_SMALL, "./resources/gui/icons/icon_chats_small.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU_CHARACTERS_SMALL, "./resources/gui/icons/icon_characters_small.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU_SCENARIOS_SMALL, "./resources/gui/icons/icon_scenarios_small.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU_WORLDS_SMALL, "./resources/gui/icons/icon_worlds_small.png");
+		LoadTexture(pRenderer, TextureType::ICON_MENU_MODELS_SMALL, "./resources/gui/icons/icon_models_small.png");
 		LoadTexture(pRenderer, TextureType::ICON_GRID_SMALL, "./resources/gui/icons/icon_grid_small.png");
 		LoadTexture(pRenderer, TextureType::ICON_GRID_LARGE, "./resources/gui/icons/icon_grid_large.png");
 		LoadTexture(pRenderer, TextureType::ICON_TAG, "./resources/gui/icons/icon_tag.png");
@@ -111,7 +116,8 @@ namespace fig::gui
 		
 		LoadTexture(pRenderer, TextureType::MASK_CARD, "./resources/gui/masks/mask_card_corners.png");
 		LoadTexture(pRenderer, TextureType::MASK_CIRCLE, "./resources/gui/masks/mask_circle256.png");
-		LoadTexture(pRenderer, TextureType::MASK_SMALL_PORTRAIT_56PX, "./resources/gui/masks/mask_small_portrait.png");
+		LoadTexture(pRenderer, TextureType::MASK_SMALL_PORTRAIT_48PX, "./resources/gui/masks/mask_small_portrait_48px.png");
+		LoadTexture(pRenderer, TextureType::MASK_SMALL_PORTRAIT_56PX, "./resources/gui/masks/mask_small_portrait_56px.png");
 	}
 
 	void AppResources::Release()

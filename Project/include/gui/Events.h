@@ -30,7 +30,6 @@ namespace fig::gui
 		Deactivated,
 		ChangedScreen,
 		Scrolling,
-		ToggleSidePanel,
 		SidePanelExpanded,
 		SidePanelCollapsed,
 		StartChat,

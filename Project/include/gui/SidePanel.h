@@ -34,6 +34,7 @@ namespace fig::gui
 		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;
 		bool _bExpanded { true };
 		
-		Control* _pRootPanel;
+		Control* _pExpandedRoot;
+		Control* _pCollapsedRoot;
 	};
 }
