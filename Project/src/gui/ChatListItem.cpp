@@ -5,21 +5,13 @@
 #include "gui/MainFrame.h"
 #include "gui/Menu.h"
 #include "data/ChatLog.h"
+#include "io/ContentUserSettings.h"
 
 using namespace fig::io;
 using namespace fig::data;
 
 namespace fig::gui
 {
-	std::array<fig::string_view, 6> ChatListItem::TimeBucketLabels {
-		"Just now",
-		"Today",
-		"Yesterday",
-		"This week",
-		"This month",
-		"Older chats",
-	};
-
 	ChatListItem::ChatListItem(ParentPtr pParent) : Panel(pParent)
 	{
 		SetMaxSize(Constants::GUI::ChatList::Width, -1);
@@ -29,7 +21,7 @@ namespace fig::gui
 		SetForegroundColor(Colors::SidePanelForeground);
 
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_10PX, 8);
-		pBGRenderer->SetColor(Colors::SidePanelBackground);
+		pBGRenderer->SetColor(0xEEECE480_rgba);
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_10PX, 16);
 		pBorder->SetColor(Colors::LineColor);
@@ -57,16 +49,16 @@ namespace fig::gui
 		_pPortrait->SetVisible(false);
 	}
 
-	ChatListItem::ChatListItem(ParentPtr pParent, const ChatLog& chatLog, fig::timestamp lastUsed, TimeBucket bucket) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(ParentPtr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
 	{
-		if (not empty_or_whitespace(chatLog.title))
-			_pTitle->SetText(chatLog.title);
+		if (not empty_or_whitespace(chatLog.GetTitle()))
+			_pTitle->SetText(chatLog.GetTitle());
 		else
 			_pTitle->SetText("Untitled chat");
 
-		if (not chatLog.messages.empty())
+		if (not chatLog.GetMessages().empty())
 		{
-			auto& lastMessage = chatLog.messages.back();
+			auto& lastMessage = chatLog.GetMessages().back();
 			auto& speakerId = lastMessage.speakerId;
 			_primaryCharacterId = speakerId;
 
@@ -81,14 +73,15 @@ namespace fig::gui
 				_pPortrait->SetTexture((*portrait).get());
 				_pPortrait->SetVisible(true);
 			}
+
+//			_createdAt = Global::GetUserContent().GetMetaData(
 		}
 
-		Clock user_clock_setting = Global::GetUserSettings().GetEnum<Clock>(UserSetting::Clock, ClockMapping);
+		if (Global::GetUserContent().GetUserSettings(assetId).flags.IsSet(ContentUserSettings::Flag::Favorite))
+			ShowStar(true);
 
-		if (bucket < TimeBucket::LessThan1Week)
-			_pTimestamp->SetTextAndResize(lastUsed.get_time_string(user_clock_setting));
-		else
-			_pTimestamp->SetTextAndResize(lastUsed.get_date_string());
+		_assetId = assetId;
+		_pTimestamp->SetTextAndResize(timeString);
 	}
 
 	void ChatListItem::OnSize()
@@ -106,9 +99,11 @@ namespace fig::gui
 		}
 
 		if (_pTimestamp)
-		{
 			_pTimestamp->SetX(GetWidth() - _pTimestamp->GetWidth() - 8);
-		}
+
+		if (_pStar)
+			_pStar->SetX(GetWidth() - _pStar->GetWidth() - 8);
+
 	}
 
 	EventResult ChatListItem::OnEvent(Event& event)
@@ -162,6 +157,8 @@ namespace fig::gui
 
 		bool bLLM = Global::IsLLMInitialized();
 
+		auto userSettings = Global::GetUserContent().GetUserSettings(_assetId);
+
 		menu.AddItem("Resume chat", TextureType::ICON_NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] {
@@ -172,7 +169,7 @@ namespace fig::gui
 			.SetDelegate([this] {
 //			PushEvent(UserEvent::StartChat, &_characterId);
 		});
-		menu.AddItem("Filter similar")
+		menu.AddItem("Filter by character")
 			.SetEnabled(not _primaryCharacterId.empty())
 			.SetDelegate([this]() {
 				PushEvent(UserEvent::NavigateToChatList, &_primaryCharacterId);
@@ -182,10 +179,73 @@ namespace fig::gui
 		menu.AddItem("Duplicate\u2026");
 		menu.AddItem("Export\u2026");
 		menu.AddSeparator();
-		menu.AddItem("Star", TextureType::ICON_STAR);
-		menu.AddItem("Archive\u2026");
+
+		if (!userSettings.HasFlag(ContentUserSettings::Flag::Favorite))
+		{
+			menu.AddItem("Star", TextureType::ICON_STAR)
+				.SetDelegate([this] {
+				Global::GetUserContent().MarkFavorite(_assetId, true);
+				ShowStar(true);
+				NotifyMetaUpdated();
+			});
+		}
+		else
+		{
+			menu.AddItem("Unstar", TextureType::ICON_UNSTAR)
+				.SetDelegate([this] {
+				Global::GetUserContent().MarkFavorite(_assetId, false);
+				ShowStar(false);
+				NotifyMetaUpdated();
+			});
+		}
+
+		if (!userSettings.HasFlag(ContentUserSettings::Flag::Hidden))
+		{
+			menu.AddItem("Archive")
+				.SetDelegate([this] {
+					Global::GetUserContent().MarkHidden(_assetId, true);
+					NotifyMetaUpdated();
+				});
+		}
+		else
+		{
+			menu.AddItem("Unarchive")
+				.SetDelegate([this] {
+					Global::GetUserContent().MarkHidden(_assetId, false);
+					NotifyMetaUpdated();
+				});
+		}
 		menu.AddSeparator();
 		menu.AddItem("Delete\u2026", TextureType::ICON_DELETE);
 		_menuId = menu.Show();
+	}
+
+
+	void ChatListItem::SetDelegate(OnChatUpdatedDelegate onUpdated)
+	{
+		_fnOnUpdated = onUpdated;
+	}
+
+	void ChatListItem::NotifyMetaUpdated()
+	{
+		if (_fnOnUpdated)
+			_fnOnUpdated(*this);
+	}
+
+	void ChatListItem::ShowStar(bool bShow)
+	{
+		if (!_pStar)
+		{
+			if (bShow)
+			{
+				_pStar = CreateControl<Image>(TextureType::CARD_ICON_STAR_SMALL);
+				_pStar->SetSize(24, 24);
+				_pStar->SetY(28);
+			}
+		}
+		else
+		{
+			_pStar->SetVisible(bShow);
+		}
 	}
 }

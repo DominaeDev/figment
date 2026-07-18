@@ -30,7 +30,7 @@ namespace fig::gui
 			}
 			else
 			{
-				auto now = utc_now();
+				auto now = fig::now();
 				SetMetaData(ContentMetaData {
 					.name = _characterName,
 					.createdAt = now,
@@ -115,14 +115,15 @@ namespace fig::gui
 
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 
-		menu.AddItem(std::format("Chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT)
+		menu.AddItem("Resume last chat")
+			.SetEnabled(bLLM && _metaData.chatCount > 0);
+		menu.AddItem(std::format("New chat with {}\u2026", _characterName), TextureType::ICON_NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] { 
 				PushEvent(UserEvent::StartChat, &_characterId); 
 			});
-		menu.AddItem("Resume last chat")
-			.SetEnabled(bLLM && _metaData.chatCount > 0);
-		menu.AddItem(std::format("View chats with {}", _characterName))
+
+		menu.AddItem("Show all chats")
 			.SetEnabled(_metaData.chatCount > 0)
 			.SetDelegate([this] { 
 				PushEvent(UserEvent::NavigateToChatList, &_characterId); 

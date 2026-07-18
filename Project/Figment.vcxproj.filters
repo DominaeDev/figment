@@ -596,6 +596,9 @@
     <ClCompile Include="src\io\ContentUserSettings.cpp">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClCompile>
+    <ClCompile Include="src\data\ChatLog.cpp">
+      <Filter>Source Files\Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">

@@ -100,7 +100,7 @@ namespace fig
 				std::ranges::shuffle(characterAssets, rng);
 
 				int32_t count = 0;
-				auto now = utc_now();
+				auto now = fig::now();
 				for (auto& assetRef : characterAssets)
 				{
 					auto& asset = assetRef.get();

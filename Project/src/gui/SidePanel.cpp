@@ -125,7 +125,7 @@ namespace fig::gui
 		menu.AddItem("New chat\u2026");
 		auto& createMenu = menu.AddItem("Create");
 		createMenu.AddItem("New character\u2026");
-		createMenu.AddItem("New scenario\u2026");
+		createMenu.AddItem("New story\u2026");
 		createMenu.AddItem("New world\u2026");
 		createMenu.AddSeparator();
 		createMenu.AddItem("From file\u2026")

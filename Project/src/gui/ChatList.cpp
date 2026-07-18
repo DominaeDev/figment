@@ -15,6 +15,15 @@ namespace fig::gui
 	static constexpr Coord Spacing = 8;
 	static constexpr Coord BottomMargin = 120;
 
+	static constexpr std::array<fig::string_view, 6> TimeBucketLabels {
+		"Just now",
+		"Earlier today",
+		"Yesterday",
+		"Past week",
+		"Past month",
+		"Older than a month",
+	};
+
 	ChatList::ChatList(ParentPtr pParent) : ScrollPanel(pParent)
 	{
 		_pVerticalSizer = SetSizer<VerticalSizer>();
@@ -25,35 +34,38 @@ namespace fig::gui
 		EnableCulling(true);
 	}
 
-	static ChatListItem::TimeBucket GetTimeBucket(fig::timestamp then, fig::timestamp now)
+	ChatList::TimeBucket ChatList::GetTimeBucket(fig::timestamp then, fig::timestamp now) noexcept
 	{
 		auto minDiff = (now.to_local() - then.to_local()).minutes();
-		auto dayDiff = (now.to_local() - then.to_local()).days();
 		auto monthDiff = (now.to_local() - then.to_local()).months();
 
+		auto thenDay = std::chrono::floor<std::chrono::days>(static_cast<std::chrono::local_time<std::chrono::milliseconds>>(then));
+		auto nowDay = std::chrono::floor<std::chrono::days>(static_cast<std::chrono::local_time<std::chrono::milliseconds>>(now));
+		auto dayDiff = nowDay - thenDay;
+
 		if (minDiff < 10)
-			return ChatListItem::TimeBucket::LessThan5Minutes;
-		else if (dayDiff < 1)
-			return ChatListItem::TimeBucket::LessThan1Day;
-		else if (dayDiff < 2)
-			return ChatListItem::TimeBucket::LessThan2Days;
-		else if (dayDiff < 7)
-			return ChatListItem::TimeBucket::LessThan1Week;
+			return TimeBucket::LessThan5Minutes;
+		else if (dayDiff < std::chrono::days(1))
+			return TimeBucket::LessThan1Day;
+		else if (dayDiff < std::chrono::days(2))
+			return TimeBucket::LessThan2Days;
+		else if (dayDiff < std::chrono::days(7))
+			return TimeBucket::LessThan1Week;
 		else if (monthDiff < 1)
-			return ChatListItem::TimeBucket::LessThan1Month;
-		return ChatListItem::TimeBucket::Older;
+			return TimeBucket::LessThan1Month;
+		return TimeBucket::Older;
 	}
 
 	void ChatList::ShowAllChats()
 	{
-		auto chats = Global::GetUserManager().GetContent().GetChatLogs(true)
+		auto chats = Global::GetUserContent().GetChatLogs(true)
 			| std::ranges::to<std::vector>();
 		ShowChats(chats);
 	}
 
 	void ChatList::ShowChatsWith(const fig::uuid& characterId)
 	{
-		auto chats = Global::GetUserManager().GetContent().GetChatLogsWith(characterId, true)
+		auto chats = Global::GetUserContent().GetChatLogsWith(characterId, true)
 			| std::ranges::to<std::vector>();
 		ShowChats(chats);
 	}
@@ -62,42 +74,24 @@ namespace fig::gui
 	{
 		Reset();
 
-		auto& content = Global::GetUserManager().GetContent();
+		auto& content = Global::GetUserContent();
 
-		auto now = utc_now();
-		auto chatsByTime = chats
-			| std::views::transform([&content](auto& a) {
-				auto chat = content.Get<fig::data::ChatLog>(a.get().id);
-				return std::make_pair(chat, a.get().GetCreatedAt());
+		auto now = fig::now();
+		_items = chats
+			| std::views::transform([&content, now](auto& a) {
+				auto& asset = a.get();
+				auto chat = content.Get<fig::data::ChatLog>(asset.id);
+				return Item {
+					.assetId = asset.id,
+					.chatLog = chat,
+					.createdAt = asset.GetCreatedAt(),
+					.updatedAt = asset.GetUpdatedAt(),
+					.timeBucket = GetTimeBucket(asset.GetUpdatedAt(), now),
+				};
 			})
-			| fig::group_by([&now](auto& p) { return GetTimeBucket(p.second, now); });
+			| std::ranges::to<std::vector>();
 
-		for (auto& kvp : chatsByTime)
-		{
-			if (not _items.empty())
-				_pVerticalSizer->AddSpacer(Spacing);
-
-			// Header
-			auto pHeader = CreateHeader(ChatListItem::TimeBucketLabels[static_cast<size_t>(kvp.first)]);
-			_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
-
-			// Chats
-			auto& chats = kvp.second;
-			for (size_t i = 0uz; i < chats.size(); i++)
-			{
-				auto& chat = *chats[i].first;
-				auto& time = chats[i].second;
-
-				if (i > 0)
-					_pVerticalSizer->AddSpacer(Spacing);
-
-				auto pItem = CreateControl<ChatListItem>(chat, time, kvp.first);
-				_pVerticalSizer->Add(pItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
-				_items.push_back(pItem);
-			}
-		}
-
-		InvalidateLayout();
+		Reorder();
 	}
 
 	ControlPtr ChatList::CreateHeader(fig::string_view text)
@@ -136,5 +130,120 @@ namespace fig::gui
 
 		ScrollPanel::OnAfterLayout();
 	}
-	
+
+	void ChatList::SetFilter(const fig::string& search_string) noexcept
+	{
+		_filterString = search_string;
+
+		Reorder();
+		ResetScroll();
+	}
+
+	void ChatList::Sort(SortBy sortBy, OrderBy orderBy)
+	{
+		auto fnCompare = [](const fig::timestamp& a, const fig::timestamp& b) -> int {
+			return a < b ? -1 : (a > b ? 1 : 0);
+		};
+		auto fnCompareCount = [](uint32_t a, uint32_t b) -> int {
+			return a < b ? -1 : (a > b ? 1 : 0);
+		};
+
+		std::ranges::stable_sort(_items, [&](const Item& a, const Item& b) -> bool {
+			int cmp = 0;
+			switch (sortBy)
+			{
+				case SortBy::CreatedAt:
+					cmp = fnCompare(a.createdAt, b.createdAt);
+					break;
+				case SortBy::UpdatedAt:
+					cmp = fnCompare(a.updatedAt, b.updatedAt);
+					break;
+			}
+			if (orderBy == OrderBy::Descending)
+				cmp *= -1;
+			return cmp < 0;
+		});
+	}
+
+	bool ChatList::Item::MatchesFlags(ChatFilterFlags filter) noexcept
+	{
+		auto userSettings = Global::GetUserContent().GetUserSettings(assetId);
+
+		if (filter.IsSet(ChatFilterFlag::Hidden) != userSettings.HasFlag(ContentUserSettings::Flag::Hidden))
+			return false;
+
+		if (filter.IsSet(ChatFilterFlag::Starred))
+			return userSettings.HasFlag(ContentUserSettings::Flag::Favorite);
+
+		return true;
+	}
+
+	void ChatList::Filter(ChatFilterFlags filterBy, const fig::string& search_string)
+	{
+		SearchQuery query { search_string };
+
+		for (auto& item : _items)
+		{
+			item.filtered = !item.chatLog 
+				or not item.MatchesFlags(filterBy)
+				or !(*item.chatLog).GetSearchIndex().Match(query);
+		}
+	}
+
+	void ChatList::Reorder()
+	{
+		// Filter
+		auto filterBy = Global::GetUserSettings().GetFlags<ChatFilterFlags>(UserSetting::ChatList_Filtering, DefaultChatFilterFlags, ChatFilterFlagMapping);
+		Filter(filterBy, _filterString);
+
+		// Sort
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::ChatList_Sorting, SortBy::LastUsedAt);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::ChatList_Ordering, OrderBy::Default);
+		Sort(sortBy, orderBy);
+
+		DestroyChildren();
+
+		auto chatsByTime = _items
+			| std::views::filter([](auto& it) { return not it.filtered; })
+			| std::ranges::to<std::vector>()
+			| fig::group_by([](auto& it) { return it.timeBucket; });
+
+		Clock user_clock_setting = Global::GetUserSettings().GetEnum<Clock>(UserSetting::Clock, ClockMapping);
+
+		for (auto& kvp : chatsByTime)
+		{
+			auto bucket = kvp.first;
+			auto& items = kvp.second;
+
+			if (not _items.empty())
+				_pVerticalSizer->AddSpacer(Spacing);
+
+			// Header
+			auto pHeader = CreateHeader(TimeBucketLabels[static_cast<size_t>(bucket)]);
+			_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
+
+			// Chats
+			for (size_t i = 0uz; i < items.size(); i++)
+			{
+				auto& item = items[i];
+
+				if (i > 0)
+					_pVerticalSizer->AddSpacer(Spacing);
+
+				fig::string timeString;
+				if (item.timeBucket < TimeBucket::LessThan1Week)
+					timeString = item.updatedAt.get_time_string(user_clock_setting);
+				else
+					timeString = item.updatedAt.get_date_string();
+
+				auto pListItem = CreateControl<ChatListItem>(item.assetId, *item.chatLog, timeString);
+				pListItem->SetDelegate([this](auto& card) { Reorder(); });
+				item.pListItem = pListItem;
+
+				_pVerticalSizer->Add(pListItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
+			}
+		}
+
+		InvalidateLayout();
+	}
 }

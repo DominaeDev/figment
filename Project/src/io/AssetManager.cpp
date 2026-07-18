@@ -80,7 +80,7 @@ namespace fig::io
 		asset.sync_state.db_sync = AssetSyncState::Status::Created;
 		asset.sync_state.has_meta = true;
 
-		auto now = utc_now();
+		auto now = fig::now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
 		asset.SetMeta(MetaTag::LastUsedAt, now);
@@ -128,7 +128,7 @@ namespace fig::io
 		asset.sync_state.db_sync = AssetSyncState::Status::Created;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not asset.data.empty();
-		auto now = utc_now();
+		auto now = fig::now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
 		asset.SetMeta(MetaTag::LastUsedAt, now);
@@ -148,7 +148,7 @@ namespace fig::io
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not data.empty();
 
-		auto now = utc_now();
+		auto now = fig::now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
 		asset.SetMeta(MetaTag::LastUsedAt, now);
@@ -798,7 +798,7 @@ namespace fig::io
 				.data_encrypted { false },
 				.data { std::move(data) },
 			};
-			auto now = utc_now();
+			auto now = fig::now();
 			image_file.meta[MetaTag::CreatedAt] = now;
 			image_file.meta[MetaTag::UpdatedAt] = now;
 			image_file.meta[MetaTag::LastUsedAt] = now;

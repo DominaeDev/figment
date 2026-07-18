@@ -1,5 +1,7 @@
 #pragma once
 
+#define _ENABLE_EXTENDED_ALIGNED_STORAGE // Resolves error C2338 on VS2026
+
 #include "Figment.h"
 #include "text/Context.h"
 #include "app/AppSettings.h"

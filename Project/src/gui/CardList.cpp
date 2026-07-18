@@ -243,14 +243,14 @@ namespace fig::gui
 
 	void CardList::Reorder()
 	{
-		// Sort
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Sorting, SortBy::Default);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Ordering, OrderBy::Default);
-		Sort(_cards, sortBy, orderBy);
-
 		// Filter
-		auto filterBy = Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Filtering, DefaultFilterFlags, FilterFlagMapping);
+		auto filterBy = Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::CharacterList_Filtering, DefaultFilterFlags, FilterFlagMapping);
 		Filter(_cards, filterBy, _filterString);
+
+		// Sort
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::CharacterList_Sorting, SortBy::Default);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::CharacterList_Ordering, OrderBy::Default);
+		Sort(_cards, sortBy, orderBy);
 
 		// Move visible cards to front
 		std::stable_partition(_cards.begin(), _cards.end(), [](auto& card) { return !card->IsHidden(); });

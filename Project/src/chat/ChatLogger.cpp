@@ -22,7 +22,13 @@ namespace fig::chat
 		else
 			_pollerId = static_cast<uint32_t>(-1);
 
-		_log.title = std::format("Chat with {}", session.GetNameOf(Role::Bot1)); //! @temp
+		_log.SetTitle(std::format("Chat with {}", session.GetNameOf(Role::Bot1))); //! @temp
+
+		_log.AddSearchTerm(session.GetNameOf(Role::Bot1));
+		_log.AddSearchTerm(session.GetNameOf(Role::Bot2));
+		_log.AddSearchTerm(session.GetNameOf(Role::Bot3));
+		_log.AddSearchTerm(session.GetNameOf(Role::Bot4));
+		_log.AddSearchTerm(session.GetNameOf(Role::User));
 	}
 
 	ChatLogger::~ChatLogger()
@@ -72,13 +78,13 @@ namespace fig::chat
 	{
 		if (piece.complete)
 		{
-			_log.messages.emplace_back(ChatLog::Message {
+			_log.AddMessage(ChatLog::Message {
 				.messageId = piece.subMessageId,
 				.speakerId = _pSession->GetCharacterIdOf(piece.role),
 				.role = piece.role,
 				.turn = piece.turn,
 				.subTurn = piece.subTurn,
-				.timestamp = local_now(),
+				.timestamp = now(),
 				.msgType = piece.msgType,
 				.content = strip_ends(piece.content, piece.msgType),
 			});

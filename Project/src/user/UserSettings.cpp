@@ -9,13 +9,16 @@ namespace fig
 	using SettingTuple = std::tuple<UserSetting, fig::string, fig::string, SettingValue>;
 
 	static const std::vector<SettingTuple> _AllSettings {
-		std::tuple { UserSetting::ShowTags,			"Interface",	"ShowTags",		1 },
-		std::tuple { UserSetting::HalfSizeCards,	"Interface",	"SmallCards",	0 },
-		std::tuple { UserSetting::Sorting,			"Interface",	"Sorting",		static_cast<int32_t>(SortBy::Default) },
-		std::tuple { UserSetting::Ordering,			"Interface",	"Ordering",		static_cast<int32_t>(OrderBy::Default) },
-		std::tuple { UserSetting::Filtering,		"Interface",	"Filter",		FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
-		std::tuple { UserSetting::Clock,			"Interface",	"Clock",		enum_serialize(Clock::Default, ClockMapping) },
-		std::tuple { UserSetting::ModelPreset,		"Model",		"Preset",		"" },
+		std::tuple { UserSetting::Clock,						"Interface",				"Clock",		enum_serialize(Clock::Default, ClockMapping) },
+		std::tuple { UserSetting::CharacterList_HalfSizeCards,	"Interface.Characters",		"SmallCards",	0 },
+		std::tuple { UserSetting::CharacterList_ShowTags,		"Interface.Characters",		"ShowTags",		1 },
+		std::tuple { UserSetting::CharacterList_Sorting,		"Interface.Characters",		"Sorting",		static_cast<int32_t>(SortBy::LastUsedAt) },
+		std::tuple { UserSetting::CharacterList_Ordering,		"Interface.Characters",		"Ordering",		static_cast<int32_t>(OrderBy::Default) },
+		std::tuple { UserSetting::CharacterList_Filtering,		"Interface.Characters",		"Filter",		FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
+		std::tuple { UserSetting::ChatList_Sorting,				"Interface.Chats",			"Sorting",		static_cast<int32_t>(SortBy::Default) },
+		std::tuple { UserSetting::ChatList_Ordering,			"Interface.Chats",			"Ordering",		static_cast<int32_t>(OrderBy::Default) },
+		std::tuple { UserSetting::ChatList_Filtering,			"Interface.Chats",			"Filter",		ChatFilterFlags::Serialize(DefaultChatFilterFlags, ChatFilterFlagMapping) },
+		std::tuple { UserSetting::ModelPreset,					"Model",					"Preset",		"" },
 	};
 
 	void SettingsCollection<UserSetting>::Init() noexcept

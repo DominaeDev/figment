@@ -6,17 +6,23 @@ namespace fig
 {
 	enum class UserSetting
 	{
-		ShowTags,
-		HalfSizeCards,
-		Sorting,
-		Ordering,
-		Filtering,
+		CharacterList_ShowTags,
+		CharacterList_HalfSizeCards,
+		CharacterList_Sorting,
+		CharacterList_Ordering,
+		CharacterList_Filtering,
+		ChatList_Sorting,
+		ChatList_Ordering,
+		ChatList_Filtering,
+
 		Clock,
-		
 		ModelPreset,
 
 		Count,
 	};
+
+	extern template class fig::io::SettingsCollection<UserSetting>;
+	using UserSettings = fig::io::SettingsCollection<UserSetting>;
 
 	enum class SortBy
 	{
@@ -27,7 +33,7 @@ namespace fig
 		ChatCount,
 
 		Count,
-		Default = LastUsedAt,
+		Default = UpdatedAt,
 	};
 
 	enum class OrderBy
@@ -68,6 +74,19 @@ namespace fig
 
 	constexpr FilterFlags DefaultFilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther, FilterFlag::SourceCreated, FilterFlag::SourceImported  };
 	
-	extern template class fig::io::SettingsCollection<UserSetting>;
-	using UserSettings = fig::io::SettingsCollection<UserSetting>;
+	enum class ChatFilterFlag : int32_t
+	{
+		Starred			= 1 << 1,
+		Hidden			= 1 << 2,
+	};
+	using ChatFilterFlags = EnumFlags<ChatFilterFlag>;
+
+	static auto ChatFilterFlagMapping = std::array<std::pair<ChatFilterFlag, std::string_view>, 3> {
+		std::pair { ChatFilterFlag::Starred,	"starred" },
+		std::pair { ChatFilterFlag::Hidden,		"hidden" },
+	};
+
+	constexpr ChatFilterFlags DefaultChatFilterFlags {};
+
+
 }

@@ -300,14 +300,23 @@ namespace fig::data
 						// List of objects
 						else if constexpr (SerializableRange<ValueType>)
 						{
-							XmlWriterElement& parent = element;
 							if (field.collection_name)
-								parent = element.AddChild(field.collection_name);
-
-							for (const auto& item : member)
 							{
-								auto child = parent.AddChild(field.name);
-								xml::Serialize(child, item);
+								auto collection = element.AddChild(field.collection_name);
+
+								for (const auto& item : member)
+								{
+									auto child = collection.AddChild(field.name);
+									xml::Serialize(child, item);
+								}
+							}
+							else
+							{
+								for (const auto& item : member)
+								{
+									auto child = element.AddChild(field.name);
+									xml::Serialize(child, item);
+								}
 							}
 						}
 						// Associative container

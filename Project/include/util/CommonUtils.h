@@ -49,14 +49,9 @@ namespace fig
 	fig::string Base64Encode(fig::byte_span data) noexcept;
 	fig::bytes Base64Decode(fig::string_view) noexcept;
 
-	inline fig::timestamp utc_now() noexcept
+	inline fig::timestamp now() noexcept
 	{
-		return static_cast<fig::timestamp>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
-	}
-
-	inline fig::timestamp local_now() noexcept
-	{
-		return static_cast<fig::timestamp>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::current_zone()->to_local(std::chrono::system_clock::now()).time_since_epoch()).count());
+		return fig::timestamp(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 	}
 
 	template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>

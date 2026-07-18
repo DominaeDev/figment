@@ -8,8 +8,8 @@ namespace fig::io
 		if (createdAt != updatedAt or createdAt != lastUsedAt)
 			return false;
 		
-		fig::timestamp now = utc_now();
-		if ((now - createdAt) > fig::timespan::days(3))
+		fig::timestamp now = fig::now();
+		if ((now - createdAt) > fig::duration::days(3))
 			return false;
 		return true;
 	}
