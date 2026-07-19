@@ -33,7 +33,7 @@ namespace fig::gui
 		_pMenuButton->CenterVertically();
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
-		_pCollapseButton = CreateControl<ButtonWithIcon>(TextureType::ICON_SIDEBAR);
+		_pCollapseButton = CreateControl<ButtonWithIcon>(TextureType::ICON_COLLAPSE_ARROW);
 		_pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
@@ -94,15 +94,15 @@ namespace fig::gui
 		pMainSizer->Add(_pUserWidget, 0, Sizer::Expand);
 
 		auto pSmallButtonSizer = _pCollapsedRoot->SetSizer<VerticalSizer>();
-		pSmallButtonSizer->AddSpacer(58);
+		pSmallButtonSizer->AddSpacer(56);
 		pSmallButtonSizer->Add(pChatButtonSmall, 0, Sizer::AlignCenterHorizontal);
-		pSmallButtonSizer->AddSpacer(6);
+		pSmallButtonSizer->AddSpacer(8);
 		pSmallButtonSizer->Add(pCharactersButtonSmall, 0, Sizer::AlignCenterHorizontal);
-		pSmallButtonSizer->AddSpacer(6);
+		pSmallButtonSizer->AddSpacer(8);
 		pSmallButtonSizer->Add(pScenariosButtonSmall, 0, Sizer::AlignCenterHorizontal);
-		pSmallButtonSizer->AddSpacer(6);
+		pSmallButtonSizer->AddSpacer(8);
 		pSmallButtonSizer->Add(pWorldsButtonSmall, 0, Sizer::AlignCenterHorizontal);
-		pSmallButtonSizer->AddSpacer(6);
+		pSmallButtonSizer->AddSpacer(8);
 		pSmallButtonSizer->Add(pModelsButtonSmall, 0, Sizer::AlignCenterHorizontal);
 //		_pCollapsedRoot->Cull(true);
 
@@ -181,6 +181,7 @@ namespace fig::gui
 
 		SetWidth(Constants::GUI::SidePanel::Width);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
+		_pCollapseButton->SetIcon(TextureType::ICON_COLLAPSE_ARROW);
 		_pExpandedRoot->Cull(false);
 		_pCollapsedRoot->Cull(true);
 
@@ -198,6 +199,7 @@ namespace fig::gui
 
 		SetWidth(42);
 		_pCollapseButton->CenterHorizontally();
+		_pCollapseButton->SetIcon(TextureType::ICON_EXPAND_ARROW);
 		_pExpandedRoot->Cull(true);
 		_pCollapsedRoot->Cull(false);
 

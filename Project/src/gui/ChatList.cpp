@@ -215,7 +215,7 @@ namespace fig::gui
 			auto bucket = kvp.first;
 			auto& items = kvp.second;
 
-			if (not _items.empty())
+			if (not _children.empty())
 				_pVerticalSizer->AddSpacer(Spacing);
 
 			// Header
@@ -242,6 +242,12 @@ namespace fig::gui
 
 				_pVerticalSizer->Add(pListItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
 			}
+		}
+
+		if (_children.empty())
+		{
+			auto pHeader = CreateHeader("No chats");
+			_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
 		}
 
 		InvalidateLayout();

@@ -120,9 +120,6 @@ namespace fig::io
 
 	class Asset
 	{
-		using AssetFile = AssetFile;
-		using MetaTag = MetaTag;
-		using MetaValue = MetaValue;
 	public:
 		void SetData(fig::bytes&& data);
 		void SetData(fig::byte_span data);
@@ -201,6 +198,9 @@ namespace fig::io
 			return false;
 		}
 
+	private:
+		void SetUpdated(bool bWriteTimestamp = true);
+
 	public:
 		fig::uuid id {};
 		fig::uuid parent_id {};
@@ -213,11 +213,6 @@ namespace fig::io
 
 	private:
 		fig::string _settings;
-
-	private:
-		void SetUpdated(bool bWriteTimestamp = true);
-
-	private:
 		std::map<MetaTag, MetaValue> _parameters {};
 
 	};

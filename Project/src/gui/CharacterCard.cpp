@@ -123,7 +123,7 @@ namespace fig::gui
 				PushEvent(UserEvent::StartChat, &_characterId); 
 			});
 
-		menu.AddItem("Show all chats")
+		menu.AddItem("View chats")
 			.SetEnabled(_metaData.chatCount > 0)
 			.SetDelegate([this] { 
 				PushEvent(UserEvent::NavigateToChatList, &_characterId); 
@@ -138,7 +138,7 @@ namespace fig::gui
 		}
 
 		menu.AddSeparator();
-		menu.AddItem("View / Edit\u2026");
+		menu.AddItem("Edit character\u2026", TextureType::ICON_EDIT);
 		menu.AddItem("Duplicate\u2026");
 		menu.AddItem("Export\u2026");
 		auto& moveMenu = menu.AddItem("Move to folder\u2026");

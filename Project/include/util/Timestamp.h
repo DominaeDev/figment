@@ -36,8 +36,8 @@ namespace fig
 
 	struct duration
 	{
-		constexpr duration() = default;
 		constexpr duration(const duration& other) = default;
+		constexpr duration() = default;
 
 		constexpr explicit duration(int64_t duration_ms) :
 			_duration { duration_ms }
@@ -76,7 +76,7 @@ namespace fig
 		static duration years(int64_t count) { return duration(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::years(count)).count()); }
 
 	private:
-		int64_t _duration;
+		int64_t _duration {};
 	};
 
 	struct timestamp
@@ -92,7 +92,6 @@ namespace fig
 		timestamp to_local() const;
 		timestamp to_global() const;
 		int64_t utc_epoch() const { return static_cast<int64_t>(to_global()); }
-
 
 		std::string get_time_string(Clock clock);
 		std::string get_date_string();
