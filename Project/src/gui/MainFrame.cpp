@@ -335,7 +335,7 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_2 and mods.Alt)
 					{
 						ChangeScreen(ScreenType::Chat);
-						GetScreen<ChatScreen>(ScreenType::Chat)->GetSidePanel()->SetImage(fig::uuid::from_str("6d24f1e3-2ee0-4092-b903-6f346ef4189e"));
+						GetScreen<ChatScreen>(ScreenType::Chat)->GetSidePanel()->SetImage(fig::uuid::from_str("6d24f1e3-2ee0-4092-b903-6f346ef4189e")); //! @temp
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)
