@@ -83,6 +83,15 @@ namespace fig::gui
 		return 1.0f;
 	}
 
+	void ImageViewport::ClampOffset()
+	{
+		Rectf drawRect = CalcDrawRect(_fZoom, _offset);
+		float maxOffsetX = std::max(0.0f, (drawRect.w - toF(GetWidth())) / 2.0f);
+		float maxOffsetY = std::max(0.0f, (drawRect.h - toF(GetHeight())) / 2.0f);
+		_offset.x = std::clamp(_offset.x, toI(-maxOffsetX), toI(maxOffsetX));
+		_offset.y = std::clamp(_offset.y, toI(-maxOffsetY), toI(maxOffsetY));
+	}
+
 	Rectf ImageViewport::CalcDrawRect(float zoom, Point offset) const
 	{
 		float dstWidth = toF(GetWidth());
@@ -137,10 +146,7 @@ namespace fig::gui
 		_offset.x = toI(newDrawRect.x - newDrawRectX);
 		_offset.y = toI(newDrawRect.y - newDrawRectY);
 
-		float maxOffsetX = std::max(0.0f, (newDrawRect.w - toF(GetWidth())) / 2.0f);
-		float maxOffsetY = std::max(0.0f, (newDrawRect.h - toF(GetHeight())) / 2.0f);
-		_offset.x = std::clamp(_offset.x, toI(-maxOffsetX), toI(maxOffsetX));
-		_offset.y = std::clamp(_offset.y, toI(-maxOffsetY), toI(maxOffsetY));
+		ClampOffset();
 		SetDirty();
 		return true;
 	}
@@ -175,11 +181,7 @@ namespace fig::gui
 		_offset.x = _mouseDownOffset.x - (toI(motionEvent.x) - _mouseDownPos.x);
 		_offset.y = _mouseDownOffset.y - (toI(motionEvent.y) - _mouseDownPos.y);
 
-		Rectf drawRect = CalcDrawRect(_fZoom, _offset);
-		float maxOffsetX = std::max(0.0f, (drawRect.w - toF(GetWidth())) / 2.0f);
-		float maxOffsetY = std::max(0.0f, (drawRect.h - toF(GetHeight())) / 2.0f);
-		_offset.x = std::clamp(_offset.x, toI(-maxOffsetX), toI(maxOffsetX));
-		_offset.y = std::clamp(_offset.y, toI(-maxOffsetY), toI(maxOffsetY));
+		ClampOffset();
 		SetDirty();
 
 		return true;
@@ -215,6 +217,14 @@ namespace fig::gui
 	{
 		auto width = std::min(GetWidth(), 2048);
 		auto height = std::min(GetHeight(), 2048);
+
+		if (width != _lastSize.x or height != _lastSize.y)
+		{
+			_lastSize = Point { width, height };
+			_bRedrawAlpha = true;
+			_targetTexture.clear();
+			ClampOffset();
+		}
 
 		auto pRenderer = GetSDLRenderer();
 		SDL_assert(pRenderer);
@@ -284,5 +294,11 @@ namespace fig::gui
 	void ImageViewport::SetDirty()
 	{
 		_bRedraw = true;
+	}
+
+	void ImageViewport::OnSize()
+	{
+		SetDirty();
+		_lastSize = {};
 	}
 }

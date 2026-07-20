@@ -16,6 +16,7 @@ namespace fig::gui
 	protected:
 		void OnRender(Renderer* pRenderer) override;
 		EventResult OnEvent(Event& event);
+		void OnSize() override;
 		bool HandleMouseWheel(SDL_MouseWheelEvent& event);
 		bool HandleMouseMotion(SDL_MouseMotionEvent& event);
 		bool HandleMouseDown(SDL_MouseButtonEvent& event);
@@ -23,6 +24,7 @@ namespace fig::gui
 
 		float GetFitScale() const;
 		Rectf CalcDrawRect(float zoom, Point offset) const;
+		void ClampOffset();
 		void RecreateTexture();
 		void SetDirty();
 
@@ -38,6 +40,7 @@ namespace fig::gui
 		Point _mouseDownPos {};
 		Point _mouseDownOffset {};
 		bool _bMouseDown {};
+		Point _lastSize {};
 
 		fig::sdl::Texture _targetTexture;
 		TexturePtr _pTexture = nullptr;

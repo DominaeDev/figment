@@ -20,7 +20,7 @@ namespace fig::gui
 		_pGradient = pGradient;
 
 		_pCollapseButton = CreateControl<ButtonWithIcon>(TextureType::ICON_EXPAND_ARROW_LEFT);
-		_pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pCollapseButton->SetTheme(Themes::DefaultButtonStyle);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
 		_pCollapseButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pCollapseButton->GetHeight()) / 2);
@@ -28,21 +28,16 @@ namespace fig::gui
 			_bExpanded ? Collapse() : Expand();
 		});
 
-		//_pImage = _pExpandedRoot->CreateControl<TexturedBorder>(nullptr, nullptr);
-		//_pImage->SetHeight(380);
-
 		_pViewport = _pExpandedRoot->CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(TextureType::MASK_CARD));
 		_pViewport->SetMaxSize(-1, 600);
 
-		auto pBottom = _pExpandedRoot->CreateControl<Panel>();
-		pBottom->SetBorderRenderer<LineBorderRenderer>(Colors::LineColor, Direction::North);
-		pBottom->SetSize(-1, 180);
+		_pBottomPanel = _pExpandedRoot->CreateControl<Panel>();
+		_pBottomPanel->SetBorderRenderer<LineBorderRenderer>(Colors::LineColor, Direction::North);
+		_pBottomPanel->SetSize(-1, 180);
 
 		auto pMainSizer = _pExpandedRoot->SetSizer<VerticalSizer>();
-		auto pTopSizer = pMainSizer->Add<VerticalSizer>(-1, Sizer::Fill | Sizer::FlexSize, 600);
-		pTopSizer->Add(_pViewport, -1, Sizer::Fill | Sizer::All, 6);
-		pMainSizer->AddStretchSpacer();
-		pMainSizer->Add(pBottom, -1, Sizer::Fill | Sizer::FlexSize, pBottom->GetHeight());
+		pMainSizer->Add(_pBottomPanel, 0, Sizer::Fill | Sizer::FixedSize, _pBottomPanel->GetHeight());
+		pMainSizer->Add(_pViewport, -1, Sizer::Fill | Sizer::All, 6);
 
 		_bExpanded = false;
 		Expand();
@@ -52,6 +47,9 @@ namespace fig::gui
 	{
 		constexpr Coord kGradientSize = 8;
 		_pGradient->SetSize(kGradientSize, GetHeight());
+
+		_pViewport->SetY(6);
+		_pBottomPanel->SetY(GetHeight() - _pBottomPanel->GetHeight());
 	}
 
 	EventResult ChatSidePanel::OnEvent(Event& event)
@@ -128,4 +126,5 @@ namespace fig::gui
 	{
 		_pViewport->SetTexture(nullptr);
 	}
+
 }

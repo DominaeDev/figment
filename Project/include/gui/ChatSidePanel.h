@@ -22,12 +22,14 @@ namespace fig::gui
 		EventResult OnEvent(Event& event) override;
 
 	private:
-		fig::observer_ptr<ImageViewport> _pViewport;
-		fig::observer_ptr<LayoutElement> _pGradient;
-		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;
 		bool _bExpanded { true };
 
-		Control* _pExpandedRoot;
-		Control* _pCollapsedRoot;
+		fig::observer_ptr<ImageViewport> _pViewport;
+		fig::observer_ptr<Control> _pBottomPanel;
+		fig::observer_ptr<LayoutElement> _pGradient;
+		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;
+
+		fig::observer_ptr<Control> _pExpandedRoot;
+		fig::observer_ptr<Control> _pCollapsedRoot;
 	};
 }
