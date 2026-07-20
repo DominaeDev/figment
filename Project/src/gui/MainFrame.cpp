@@ -4,6 +4,7 @@
 #include "gui/ChatScreen.h"
 #include "gui/DebugScreen.h"
 #include "gui/ChatListingScreen.h"
+#include "gui/ChatSidePanel.h"
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
 #include "app/AppState.h"
@@ -326,28 +327,29 @@ namespace fig::gui
 						Close();
 						return EventResult::Handled;
 					}
+					else if (keyEvent.key == SDLK_1 and mods.Alt)
+					{
+						ChangeScreen(ScreenType::Home);
+						return EventResult::Handled;
+					}
+					else if (keyEvent.key == SDLK_2 and mods.Alt)
+					{
+						ChangeScreen(ScreenType::Chat);
+						GetScreen<ChatScreen>(ScreenType::Chat)->GetSidePanel()->SetImage(fig::uuid::from_str("6d24f1e3-2ee0-4092-b903-6f346ef4189e"));
+						return EventResult::Handled;
+					}
+					else if (keyEvent.key == SDLK_F2 and mods.None)
+					{
+						InitializeModel();
+						return EventResult::Handled;
+					}
+					else if (keyEvent.key == SDLK_F3 and mods.None)
+					{
+						UnloadModel();
+						return EventResult::Handled;
+					}
 				}
 
-				if (keyEvent.key == SDLK_1 and mods.Alt)
-				{
-					ChangeScreen(ScreenType::Home);
-					return EventResult::Handled;
-				}
-				else if (keyEvent.key == SDLK_2 and mods.Alt)
-				{
-					ChangeScreen(ScreenType::Chat);
-					return EventResult::Handled;
-				}
-				else if (keyEvent.key == SDLK_F2 and mods.None)
-				{
-					InitializeModel();
-					return EventResult::Handled;
-				}
-				else if (keyEvent.key == SDLK_F3 and mods.None)
-				{
-					UnloadModel();
-					return EventResult::Handled;
-				}
 			}
 		}
 

@@ -273,6 +273,44 @@ namespace fig::io
 		return unexpected(FileError::NotFound);
 	}
 
+	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, RendererPtr pRenderer) noexcept
+	{
+		if (auto itRenderer = _cachedTextures.find(pRenderer); itRenderer != _cachedTextures.cend())
+		{
+			if (auto itTextures = (*itRenderer).second.find(assetId); itTextures != (*itRenderer).second.cend())
+			{
+				for (auto& t : (*itTextures).second)
+				{
+					if (t.pMask == nullptr)
+						return t.pTexture;
+				}
+			}
+		}
+
+		if (auto find_asset = _pAssetMngr->FindAsset(assetId, AssetType::Image))
+		{
+			auto& asset = *find_asset;
+			if (auto try_surface = GetCache<fig::sdl::Surface>().Get(asset.id))
+			{
+				auto& surface = try_surface.value();
+
+				if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, surface.get()))
+				{
+					fig::sdl::Texture texture = fig::sdl::Texture::from_ptr(pTexture);
+
+					auto& textures = _cachedTextures[pRenderer][assetId];
+					auto& value = textures.emplace_back(CachedTexture {
+						.pTexture = std::move(texture),
+					});
+
+					return value.pTexture;
+				}
+			}
+		}
+
+		return unexpected(FileError::NotFound);
+	}
+
 	const Asset& UserContentManager::CreateAsset(const fig::data::ChatInstance& chatInstance)
 	{
 		fig::bytes data;

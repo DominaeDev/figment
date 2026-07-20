@@ -53,6 +53,7 @@ namespace fig::gui
 	using RendererPtr = SDL_Renderer*;
 	using SurfacePtr = SDL_Surface*;
 	using TexturePtr = SDL_Texture*;
+	using TexturePtr = SDL_Texture*;
 	using VertexPtr = SDL_Vertex*;
 	using TextEnginePtr = TTF_TextEngine*;
 

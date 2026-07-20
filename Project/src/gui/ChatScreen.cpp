@@ -9,6 +9,7 @@
 #include "gui/StatusBar.h"
 #include "gui/AppResources.h"
 #include "gui/VariableList.h"
+#include "gui/ChatSidePanel.h"
 #include "app/AppState.h"
 #include "chat/ChatSession.h"
 #include "chat/ChatCommands.h"
@@ -40,16 +41,9 @@ namespace fig::gui
 {
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
-		auto leftArea = CreateControl<Area>();
-		leftArea->SetSize(200, -1);
-
 		auto centerArea = CreateControl<Area>();
 		centerArea->SetBackgroundColor(Colors::ChatBackground);
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
-
-		auto rightArea = CreateControl<Area>();
-		rightArea->SetSize(200, -1);
-		rightArea->SetMinSize(200, -1);
 
 		auto pStaticText = centerArea->CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize);
 		pStaticText->SetAlignment(TextAlignment::Middle_Center);
@@ -69,10 +63,13 @@ namespace fig::gui
 		pCenterSizer->Add(_pChatScroll, -1, Sizer::Fill | Sizer::Bottom, 8);
 		pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::AlignCenterHorizontal);
 
+		_pSidePanel = CreateControl<ChatSidePanel>();
+
 		auto mainSizer = SetSizer<HorizontalSizer>();
-		mainSizer->Add(leftArea, -1, Sizer::Expand);
+		mainSizer->AddStretchSpacer();
 		mainSizer->Add(centerArea, 0, Sizer::Fill | Sizer::Bottom, 24);
-		mainSizer->Add(rightArea, -1, Sizer::Expand);
+		mainSizer->AddStretchSpacer();
+		mainSizer->Add(_pSidePanel, 0, Sizer::Expand);
 
 		_pTextBox->SetEnterPressedCallback([this](fig::string text) {
 			EnqueueCommand(ChatCommands::Parse(text));
@@ -136,12 +133,16 @@ namespace fig::gui
 			_pSession->Initialize(staging, Constants::LLM::DefaultChatOptions, chatInstanceID);
 
 			LLMChatArguments llmArgs {
-				/*session*/ _pSession,
-				/*messages*/ {},
-				/*options*/ Constants::LLM::DefaultChatOptions,
+				.wpSession = _pSession,
+				.options = Constants::LLM::DefaultChatOptions,
 			};
 			pLLM->Initialize(llmArgs);
 			_pChatScroll->SetSession(_pSession);
+
+			if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindImageAsset(_pSession->GetCharacterIdOf(Role::Bot1), fig::io::ImageType::LargePortrait))
+				_pSidePanel->SetImage((*try_portrait).id);
+			else
+				_pSidePanel->ClearImage();
 
 			_bStartedChat = true;
 			queue_clear(_commandQueue);

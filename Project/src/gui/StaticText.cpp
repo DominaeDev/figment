@@ -126,7 +126,6 @@ namespace fig::gui
 		if (_bDropShadow)
 			DrawShadow(pText);
 
-
 		if (fgColor.IsDefined())
 		{
 			// Opaque background: Use ClearType

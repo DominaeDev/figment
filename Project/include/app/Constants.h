@@ -19,7 +19,7 @@ namespace fig::Constants
 		constexpr double StatusBarFontSize = 14.5;
 		constexpr double CharacterNameFontSize = 12.0;
 		constexpr double ChatMessageFontSize = 16.0;
-		constexpr fig::gui::Coord ChatScrollWidth = 800;
+		constexpr fig::gui::Coord ChatScrollWidth = 720;
 		constexpr fig::gui::Coord ChatTextBoxWidth = 680;
 		
 		constexpr float MouseScrollSpeed = 200.0f;
@@ -83,9 +83,19 @@ namespace fig::Constants
 			constexpr fig::gui::Coord Width = 256;
 		}
 
+		namespace ChatSidePanel
+		{
+			constexpr fig::gui::Coord Width = 340;
+		}
+
 		namespace ChatList
 		{
 			constexpr fig::gui::Coord Width = 760;
+		}
+
+		namespace Chat
+		{
+			constexpr float ImageZoomFactor = 1.1f;
 		}
 	}
 

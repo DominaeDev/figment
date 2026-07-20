@@ -165,6 +165,8 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
+			LogLn((fig::string)characterId);
+
 			auto& userMngr = Global::GetUserManager();
 			if (userMngr.IsSignedIn())
 			{

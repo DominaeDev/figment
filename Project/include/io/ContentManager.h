@@ -54,6 +54,8 @@ namespace fig::io
 			return GetCache<T>().Get(assetId);
 		}
 
+		fig::expected_cref<fig::sdl::Texture, FileError> GetTexture(const fig::uuid& assetId, struct SDL_Renderer* pRenderer) noexcept;
+
 		template <typename T>
 		void InvalidateCache(const fig::uuid& assetId) noexcept
 		{

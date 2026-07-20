@@ -21,6 +21,7 @@ namespace fig::gui
 	class ChatScroll;
 	class TextBox;
 	class VariableList;
+	class ChatSidePanel;
 
 	class ChatScreen : public Screen
 	{
@@ -29,6 +30,7 @@ namespace fig::gui
 		ChatScreen(Frame* pParent);
 
 		void StartChat(const fig::chat::ChatStaging& staging, fig::uuid instanceID);
+		fig::observer_ptr<ChatSidePanel> GetSidePanel() { return _pSidePanel; }
 
 	protected:
 		virtual void OnUpdate(float fElapsed) override;
@@ -47,6 +49,7 @@ namespace fig::gui
 		fig::observer_ptr<ChatScroll> _pChatScroll {};
 		fig::observer_ptr<TextBox> _pTextBox {};
 		fig::observer_ptr<VariableList> _pVariableList {};
+		fig::observer_ptr<ChatSidePanel> _pSidePanel {};
 
 		float _fPollingCounter = 0.0f;
 		bool _bStartedChat = false; // Used to trigger greeting

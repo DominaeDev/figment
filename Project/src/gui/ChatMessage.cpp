@@ -274,6 +274,7 @@ namespace fig::gui
 	{
 		const uint8_t fadedAlpha = 120;
 		bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
+		Color chatBG = GetBackgroundColor();
 
 		uint8_t alpha = (uint8_t)(_bActive ? 255 : fadedAlpha);
 
@@ -282,8 +283,21 @@ namespace fig::gui
 		_pSpeechBubbleBG->SetColor(_bgColor.WithAlpha(alpha));
 		_pSpeechBubbleBorder->SetColor(_borderColor.WithAlpha(alpha));
 
-		_pMessagePanel->SetBackgroundColor(_pMessagePanel->GetBackgroundColor().WithAlpha(alpha));
+		_pMessagePanel->SetBackgroundColor(chatBG.WithAlpha(alpha));
 		_pMessageText->SetForegroundColor(_textColor.WithAlpha(alpha));
+		
+		if (_bActive)
+		{
+			_pMessageText->SetBackgroundColor(_bgColor);
+			if (_pNameText)
+				_pNameText->SetBackgroundColor(chatBG);
+		}
+		else
+		{
+			_pMessageText->SetBackgroundColor(Colors::Transparent);
+			if (_pNameText)
+				_pNameText->SetBackgroundColor(Colors::Transparent);
+		}
 
 		if (_pNameText)
 			_pNameText->SetForegroundColor(_nameColor.WithAlpha(alpha));

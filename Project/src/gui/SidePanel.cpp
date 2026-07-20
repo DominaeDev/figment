@@ -33,7 +33,7 @@ namespace fig::gui
 		_pMenuButton->CenterVertically();
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
-		_pCollapseButton = CreateControl<ButtonWithIcon>(TextureType::ICON_COLLAPSE_ARROW);
+		_pCollapseButton = CreateControl<ButtonWithIcon>(TextureType::ICON_EXPAND_ARROW_LEFT);
 		_pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
@@ -122,7 +122,6 @@ namespace fig::gui
 	void SidePanel::ShowMenu()
 	{
 		auto& menu = MainFrame::GetInstance().CreateMenu();
-		menu.AddItem("New chat\u2026");
 		auto& createMenu = menu.AddItem("Create");
 		createMenu.AddItem("New character\u2026");
 		createMenu.AddItem("New story\u2026");
@@ -181,7 +180,7 @@ namespace fig::gui
 
 		SetWidth(Constants::GUI::SidePanel::Width);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
-		_pCollapseButton->SetIcon(TextureType::ICON_COLLAPSE_ARROW);
+		_pCollapseButton->SetIcon(TextureType::ICON_EXPAND_ARROW_LEFT);
 		_pExpandedRoot->Cull(false);
 		_pCollapsedRoot->Cull(true);
 
@@ -199,7 +198,7 @@ namespace fig::gui
 
 		SetWidth(42);
 		_pCollapseButton->CenterHorizontally();
-		_pCollapseButton->SetIcon(TextureType::ICON_EXPAND_ARROW);
+		_pCollapseButton->SetIcon(TextureType::ICON_EXPAND_ARROW_RIGHT);
 		_pExpandedRoot->Cull(true);
 		_pCollapsedRoot->Cull(false);
 

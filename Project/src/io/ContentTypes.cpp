@@ -1,5 +1,7 @@
 #include <pch.h>
+#include <SDL3_image/SDL_image.h>
 #include "io/ContentTypes.h"
+#include "gui/GUIUtility.h"
 
 using namespace fig::gui;
 using namespace fig::data;
@@ -20,9 +22,13 @@ namespace fig::io
 				return surface;
 			return unexpected(FileError::ReadError);
 		}
-		else
+		else if (asset.data_format == DataFormat::ImagePng
+			or asset.data_format == DataFormat::ImageJpeg
+			or asset.data_format == DataFormat::ImageWebp)
 		{
-			//! @todo: png, jpeg...
+			if (auto try_load = LoadImageFromMemory(asset.data))
+				return std::move(try_load.value());
+			return unexpected(FileError::ReadError);
 		}
 		return unexpected(FileError::UnrecognizedFormat);
 	}

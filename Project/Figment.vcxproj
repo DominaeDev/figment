@@ -185,7 +185,9 @@
     <ClCompile Include="src\gui\ChatList.cpp" />
     <ClCompile Include="src\gui\ChatListingScreen.cpp" />
     <ClCompile Include="src\gui\ChatListItem.cpp" />
+    <ClCompile Include="src\gui\ChatSidePanel.cpp" />
     <ClCompile Include="src\gui\Events.cpp" />
+    <ClCompile Include="src\gui\ImageViewport.cpp" />
     <ClCompile Include="src\gui\ImageWithMask.cpp" />
     <ClCompile Include="src\gui\LineBorderRenderer.cpp" />
     <ClCompile Include="src\gui\LoadModelWidget.cpp" />
@@ -432,11 +434,13 @@
     <ClInclude Include="include\gui\ChatList.h" />
     <ClInclude Include="include\gui\ChatListingScreen.h" />
     <ClInclude Include="include\gui\ChatListItem.h" />
+    <ClInclude Include="include\gui\ChatSidePanel.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\Events.h" />
     <ClInclude Include="include\gui\GUIConstants.h" />
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
     <ClInclude Include="include\gui\BaseButton.h" />
+    <ClInclude Include="include\gui\ImageViewport.h" />
     <ClInclude Include="include\gui\ImageWithMask.h" />
     <ClInclude Include="include\gui\KeyboardMods.h" />
     <ClInclude Include="include\gui\LineBorderRenderer.h" />

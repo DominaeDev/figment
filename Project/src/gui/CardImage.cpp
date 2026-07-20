@@ -64,7 +64,6 @@ namespace fig::gui
 	{
 		auto width = std::min(GetWidth(), 2048);
 		auto height = std::min(GetHeight(), 2048);
-		_targetTexture.clear();
 
 		if (not (_pTexture and width > 0 and height > 0))
 			return; // Error
@@ -74,9 +73,12 @@ namespace fig::gui
 
 		TexturePtr pTarget = _targetTexture.get();
 		if (!pTarget)
+		{
 			pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
+			_targetTexture.reset(pTarget);
+		}
 		SDL_SetRenderTarget(pRenderer, pTarget);
-		SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
+		SDL_SetRenderDrawColor(pRenderer, 0, 255, 0, 0);
 		SDL_RenderClear(pRenderer);
 		
 		constexpr float fCorner = 8.0f;
@@ -139,7 +141,6 @@ namespace fig::gui
 		}
 
 		SDL_SetRenderTarget(pRenderer, NULL);
-		_targetTexture.reset(pTarget);
 	}
 
 	void CardImage::SetZoom(float value) noexcept

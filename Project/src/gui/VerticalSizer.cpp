@@ -15,6 +15,8 @@ void VerticalSizer::OnLayout(const Rect& parentRect)
 	int totalProportion = 0;
 	int numStretch = 0;
 
+	std::map<SizerTarget*, Coord> flexItems;
+
 	auto items = GetLayoutItems();
 
 	for (auto& item : items)
@@ -30,6 +32,12 @@ void VerticalSizer::OnLayout(const Rect& parentRect)
 		}
 		else if (item.info.prop > 0)
 			totalProportion += item.info.prop;
+		else if ((item.info.flags & Sizer::FlexSize) != 0)
+		{
+			auto height = std::min(item.info.border, remainingHeight);
+			flexItems[&item.target] = height;
+			remainingHeight -= height;
+		}
 		else
 			numStretch++;
 	}
@@ -51,6 +59,8 @@ void VerticalSizer::OnLayout(const Rect& parentRect)
 		}
 		else if (info.prop > 0)
 			height = ceil_int(info.prop * remainingHeight / (float)totalProportion);
+		else if ((item.info.flags & Sizer::FlexSize) != 0)
+			height = flexItems[&item.target];
 		else
 			height = ceil_int(remainingHeight / (float)numStretch);
 
