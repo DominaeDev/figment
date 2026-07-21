@@ -5,6 +5,7 @@
 #include "gui/DebugScreen.h"
 #include "gui/ChatListingScreen.h"
 #include "gui/ChatSidePanel.h"
+#include "gui/ChatBackground.h"
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
 #include "app/AppState.h"
@@ -336,6 +337,7 @@ namespace fig::gui
 					{
 						ChangeScreen(ScreenType::Chat);
 						GetScreen<ChatScreen>(ScreenType::Chat)->GetSidePanel()->SetImage(fig::uuid::from_str("6d24f1e3-2ee0-4092-b903-6f346ef4189e")); //! @temp
+						GetScreen<ChatScreen>(ScreenType::Chat)->GetBackground()->SetImage(fig::uuid::from_str("a90918fc-879e-44fa-bd7f-db3a8ad93e74")); //! @temp
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)

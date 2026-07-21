@@ -273,12 +273,16 @@ namespace fig::gui
 			if (_pTexture)
 			{
 				SDL_SetTextureBlendMode(_pTexture, blendMode);
+				SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
+				SDL_SetTextureAlphaMod(_pTexture, 0xFF);
 				SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
-				SDL_SetTextureBlendMode(_pTexture, SDL_BLENDMODE_BLEND);
 			}
 		}
 		else if (_pTexture)
 		{
+			SDL_SetTextureBlendMode(_pTexture, SDL_BLENDMODE_BLEND);
+			SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
+			SDL_SetTextureAlphaMod(_pTexture, 0xFF);
 			SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
 		}
 

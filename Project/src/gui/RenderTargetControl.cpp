@@ -46,7 +46,7 @@ namespace fig::gui
 		SDL_SetRenderTarget(pRenderer, pTexture);
 
 		// Clear
-		SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
+		SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0x00);
 		SDL_RenderClear(pRenderer);
 
 		// Draw children
@@ -75,6 +75,7 @@ namespace fig::gui
 		// Render target texture
 		auto rect = GetDrawRect();
 		SDL_SetTextureBlendMode(pTexture, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
+		SDL_SetTextureColorMod(pTexture, _alpha, _alpha, _alpha);
 		SDL_SetTextureAlphaMod(pTexture, _alpha);
 		SDL_RenderTexture(pRenderer, pTexture, NULL, &rect);
 		

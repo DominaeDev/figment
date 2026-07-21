@@ -32,6 +32,7 @@ namespace fig::gui
 
 		void StartChat(const fig::chat::ChatStaging& staging, fig::uuid instanceID);
 		fig::observer_ptr<ChatSidePanel> GetSidePanel() { return _pSidePanel; }
+		fig::observer_ptr<ChatBackground> GetBackground() { return _pBackground; }
 
 	protected:
 		void OnUpdate(float fElapsed) override;

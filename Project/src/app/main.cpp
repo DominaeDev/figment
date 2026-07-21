@@ -64,6 +64,14 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	SetConsoleCtrlHandler(OnConsoleCtrl, TRUE);
 #endif
 
+	SDL_SetHint(SDL_HINT_APP_NAME, "Figment");
+	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1"); // Generate mouse events for clicks that activate the window
+	SDL_SetHint(SDL_HINT_MAC_OPTION_AS_ALT, "both");
+	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition,candidates");
+	SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "1");
+//	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON, "0");
+//	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON_SMALL, "0");
+
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
 		SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
@@ -75,13 +83,6 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		SDL_Log("Couldn't initialise SDL_ttf: %s\n", SDL_GetError());
 		return SDL_APP_FAILURE;
 	}
-
-	SDL_SetHint(SDL_HINT_APP_NAME, "Figment");
-	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1"); // Generate mouse events for clicks that activate the window
-	SDL_SetHint(SDL_HINT_MAC_OPTION_AS_ALT, "both");
-	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition,candidates");
-//	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON, "0");
-//	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON_SMALL, "0");
 
 	fig::gui::RegisterUserEvents();
 

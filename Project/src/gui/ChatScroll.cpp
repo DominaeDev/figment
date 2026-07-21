@@ -14,7 +14,7 @@ using namespace fig::llm;
 using namespace fig::chat;
 
 static constexpr float kAnimatedScrollSpeed = 15.0f;
-static constexpr fig::gui::Coord kGradientHeight = 40;
+static constexpr fig::gui::Coord kGradientHeight = 36;
 
 namespace fig::gui
 {
@@ -28,6 +28,8 @@ namespace fig::gui
 		_pBottomGradient->SetTexture(nullptr);
 		EnableClipping(true);
 		EnableCulling(true);
+
+		SetAlpha(0.90f);
 	}
 
 	void ChatScroll::SetSession(std::weak_ptr<fig::chat::ChatSession> wpSession)
@@ -327,12 +329,15 @@ namespace fig::gui
 		SDL_GetRenderDrawBlendMode(pRenderer, &blendMode);
 
 		SDL_BlendMode writeAlpha = SDL_ComposeCustomBlendMode(
-			SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
-			SDL_BLENDFACTOR_DST_ALPHA, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD);
+			SDL_BLENDFACTOR_ZERO, 
+			SDL_BLENDFACTOR_SRC_ALPHA, 
+			SDL_BLENDOPERATION_ADD,
+			SDL_BLENDFACTOR_DST_ALPHA, 
+			SDL_BLENDFACTOR_ZERO, 
+			SDL_BLENDOPERATION_ADD);
 		
 		SDL_SetRenderDrawBlendMode(pRenderer, writeAlpha);
 		_pBottomGradient->OnRender(pRenderer);
-
-		SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
+		SDL_SetRenderDrawBlendMode(pRenderer, blendMode); //! @todo: Do this rigorously before every render instead
 	}
 }

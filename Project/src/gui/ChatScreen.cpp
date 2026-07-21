@@ -36,9 +36,10 @@ namespace fig::gui
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
 		_pBackground = CreateControl<ChatBackground>();
+		_pBackground->SetBrightness(0.65f);
+		_pBackground->SetAlpha(0.85f);
 
-		auto centerArea = CreateControl<Area>();
-		centerArea->SetBackgroundColor(Colors::ChatBackground);
+		auto centerArea = _pBackground->CreateControl<Area>();
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
 		auto pStaticText = centerArea->CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize);
@@ -61,10 +62,13 @@ namespace fig::gui
 		pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::AlignCenterHorizontal);
 
 		auto mainSizer = SetSizer<HorizontalSizer>();
-		mainSizer->AddStretchSpacer();
-		mainSizer->Add(centerArea, 0, Sizer::Fill | Sizer::Bottom, 24);
-		mainSizer->AddStretchSpacer();
+		mainSizer->Add(_pBackground, -1, Sizer::Fill);
 		mainSizer->Add(_pSidePanel, 0, Sizer::Expand);
+
+		auto bgSizer = _pBackground->SetSizer<HorizontalSizer>();
+		bgSizer->AddStretchSpacer();
+		bgSizer->Add(centerArea, 0, Sizer::Fill | Sizer::Bottom, 24);
+		bgSizer->AddStretchSpacer();
 
 		_pTextBox->SetEnterPressedCallback([this](fig::string text) {
 			EnqueueCommand(ChatCommands::Parse(text));
@@ -378,6 +382,7 @@ namespace fig::gui
 
 	void ChatScreen::OnAfterLayout()
 	{
-		_pBackground->SetSize(GetSize());
+	//	_pBackground->SetSize(GetSize());
 	}
+
 }
