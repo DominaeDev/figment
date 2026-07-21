@@ -23,8 +23,9 @@ namespace fig::gui
 
 		if (_bRedraw)
 		{
-			RecreateTexture();
+			Redraw();
 			_bRedraw = false;
+			_bRedrawAlpha = false;
 		}
 
 		if (auto pTexture = _targetTexture.get())
@@ -48,9 +49,9 @@ namespace fig::gui
 	void CardImage::SetTexture(TexturePtr pTexture, bool bResize) noexcept
 	{
 		_pTexture = pTexture;
-		_bRedraw = true;
 		if (bResize and pTexture)
 			SetSize(pTexture->w, pTexture->h);
+		SetDirty();
 	}
 
 	void CardImage::SetMask(TexturePtr pTexture) noexcept
@@ -60,13 +61,22 @@ namespace fig::gui
 		_bRedrawAlpha = true;
 	}
 
-	void CardImage::RecreateTexture()
+	void CardImage::Redraw()
 	{
 		auto width = std::min(GetWidth(), 2048);
 		auto height = std::min(GetHeight(), 2048);
 
 		if (not (_pTexture and width > 0 and height > 0))
+		{
+			_targetTexture.clear();
 			return; // Error
+		}
+
+		if (width != _lastSize.x or height != _lastSize.y)
+		{
+			_lastSize = Point { width, height };
+			_targetTexture.clear();
+		}
 
 		auto pRenderer = GetSDLRenderer();
 		SDL_assert(pRenderer);
@@ -75,11 +85,13 @@ namespace fig::gui
 		if (!pTarget)
 		{
 			pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
+			SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
+
 			_targetTexture.reset(pTarget);
+			_bRedrawAlpha = true;
 		}
+
 		SDL_SetRenderTarget(pRenderer, pTarget);
-		SDL_SetRenderDrawColor(pRenderer, 0, 255, 0, 0);
-		SDL_RenderClear(pRenderer);
 		
 		constexpr float fCorner = 8.0f;
 
@@ -88,6 +100,8 @@ namespace fig::gui
 		{
 			if (_bRedrawAlpha)
 			{
+				SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
+				SDL_RenderClear(pRenderer);
 				SDL_SetTextureBlendMode(_pMask, SDL_BLENDMODE_NONE);
 				SDL_RenderTexture9Grid(pRenderer, _pMask, nullptr, fCorner, fCorner, fCorner, fCorner, 1.0f, NULL);
 
@@ -132,8 +146,8 @@ namespace fig::gui
 				drawRect.w = std::roundf(drawRect.w);
 				drawRect.h = std::roundf(drawRect.h);
 			}
+
 			SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
-			SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
 		}
 		else
 		{
@@ -148,7 +162,17 @@ namespace fig::gui
 		if (not flt_eq(value, _fZoom))
 		{
 			_fZoom = value;
-			_bRedraw = true;
+			SetDirty();
 		}
+	}
+
+	void CardImage::SetDirty()
+	{
+		_bRedraw = true;
+	}
+
+	void CardImage::OnSize()
+	{
+		SetDirty();
 	}
 }

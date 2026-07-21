@@ -25,7 +25,7 @@ namespace fig::gui
 		float GetFitScale() const;
 		Rectf CalcDrawRect(float zoom, Point offset) const;
 		void ClampOffset();
-		void RecreateTexture();
+		void Redraw();
 		void SetDirty();
 
 	protected:

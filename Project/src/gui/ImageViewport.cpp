@@ -30,7 +30,7 @@ namespace fig::gui
 
 		if (_bRedraw)
 		{
-			RecreateTexture();
+			Redraw();
 			_bRedraw = false;
 			_bRedrawAlpha = false;
 		}
@@ -213,7 +213,7 @@ namespace fig::gui
 		_bRedrawAlpha = true;
 	}
 
-	void ImageViewport::RecreateTexture()
+	void ImageViewport::Redraw()
 	{
 		auto width = std::min(GetWidth(), 2048);
 		auto height = std::min(GetHeight(), 2048);
@@ -221,7 +221,6 @@ namespace fig::gui
 		if (width != _lastSize.x or height != _lastSize.y)
 		{
 			_lastSize = Point { width, height };
-			_bRedrawAlpha = true;
 			_targetTexture.clear();
 			ClampOffset();
 		}
@@ -234,6 +233,7 @@ namespace fig::gui
 		{
 			pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
 			_targetTexture.reset(pTarget);
+			_bRedrawAlpha = true;
 		}
 
 		SDL_SetRenderTarget(pRenderer, pTarget);
@@ -299,6 +299,5 @@ namespace fig::gui
 	void ImageViewport::OnSize()
 	{
 		SetDirty();
-		_lastSize = {};
 	}
 }
