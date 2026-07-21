@@ -115,7 +115,7 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::CARD_BACKGROUND_EMPTY, "./resources/gui/card/card_bg_empty.png");
 
 		LoadTexture(pRenderer, TextureType::SQUARE_BACKGROUND_DEFAULT, "./resources/gui/chat/square_bg_default.png");
-		LoadTexture(pRenderer, TextureType::PROFILE_DEFAULT_IMAGE, "./resources/gui/images/default_portrait.png");
+		LoadTexture(pRenderer, TextureType::PROFILE_DEFAULT_IMAGE, "./resources/gui/chat/default_portrait.png");
 		
 		LoadTexture(pRenderer, TextureType::MASK_CARD, "./resources/gui/masks/mask_card_corners.png");
 		LoadTexture(pRenderer, TextureType::MASK_CIRCLE, "./resources/gui/masks/mask_circle256.png");

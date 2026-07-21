@@ -18,13 +18,14 @@ static constexpr fig::gui::Coord kGradientHeight = 40;
 
 namespace fig::gui
 {
-	ChatScroll::ChatScroll(ParentPtr pParent) : Control(pParent)
+	ChatScroll::ChatScroll(ParentPtr pParent) : RenderTargetControl(pParent)
 	{
 		_pScrollSizer = SetSizer<VerticalScrollSizer>();
 		_pScrollSizer->SetBottomMargin(50);
 		_pScrollSizer->SetSpacing(12);
 
-		_pBottomGradient = CreateControl<VerticalGradient>(Colors::ChatBackground.WithAlpha(0.0f), Colors::ChatBackground);
+		_pBottomGradient = std::make_unique<VerticalGradient>(nullptr, Colors::White, Colors::White.WithAlpha(0.0f));
+		_pBottomGradient->SetTexture(nullptr);
 		EnableClipping(true);
 		EnableCulling(true);
 	}
@@ -231,11 +232,6 @@ namespace fig::gui
 		_pBottomGradient->SetSize(GetWidth(), kGradientHeight);
 	}
 
-	void ChatScroll::OnAddedChild(ControlPtr pChild)
-	{
-		MoveChildToTop(_pBottomGradient);
-	}
-
 	void ChatScroll::RefreshActive()
 	{
 		auto pLLM = Global::GetLLMInstance();
@@ -323,5 +319,20 @@ namespace fig::gui
 
 		if (piece.complete)
 			RefreshActive();
+	}
+
+	void ChatScroll::OnRenderMask(RendererPtr pRenderer, fig::sdl::Texture& texture)
+	{
+		SDL_BlendMode blendMode;
+		SDL_GetRenderDrawBlendMode(pRenderer, &blendMode);
+
+		SDL_BlendMode writeAlpha = SDL_ComposeCustomBlendMode(
+			SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+			SDL_BLENDFACTOR_DST_ALPHA, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD);
+		
+		SDL_SetRenderDrawBlendMode(pRenderer, writeAlpha);
+		_pBottomGradient->OnRender(pRenderer);
+
+		SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
 	}
 }

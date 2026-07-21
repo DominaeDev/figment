@@ -200,9 +200,6 @@
     <ClCompile Include="src\gui\AppResources.cpp">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\OldCharacterImageStore.cpp">
-      <Filter>Source Files\Frontend\GUI\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="src\llm\Embedding.cpp">
       <Filter>Source Files\Backend\LLM\Embeddings</Filter>
     </ClCompile>
@@ -605,6 +602,12 @@
     <ClCompile Include="src\gui\ImageViewport.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ChatBackground.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\RenderTargetControl.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -623,9 +626,6 @@
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\AppResources.h">
-      <Filter>Source Files\Frontend\GUI\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\OldCharacterImageStore.h">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMTypes.h">
@@ -1425,6 +1425,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\ImageViewport.h">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatBackground.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\RenderTargetControl.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

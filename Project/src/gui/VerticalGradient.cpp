@@ -16,17 +16,18 @@ void VerticalGradient::SetColors(Color colorTop, Color colorBottom)
 	_colorBottom = to_colorf(colorBottom);
 }
 
+void VerticalGradient::SetTexture(fig::observer_ptr<Texture> pTexture)
+{
+	_pTexture = pTexture;
+}
+
 void VerticalGradient::OnRender(Renderer* pRenderer)
 {
-	auto bgColor = GetBackgroundColor();
-	auto fgColor = GetForegroundColor();
-
 	Rectf rect = GetDrawRect();
 	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);
 
 	static constexpr int indices[6] = { 0, 1, 2, 2, 3, 0 };
-
 	SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), indices, 6);
 }
 

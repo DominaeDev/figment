@@ -5,7 +5,6 @@
 #include "gui/CustomRenderers.h"
 
 #include "gui/AppResources.h"
-#include "gui/OldCharacterImageStore.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
@@ -85,7 +84,7 @@ namespace fig::gui
 				pTexture = (*try_portrait).get();
 
 			if (!pTexture)
-				pTexture = OldCharacterImageStore::GetTexture("Default", ImageType::Portrait_Square);
+				pTexture = AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE);
 
 			Image* pPortrait = CreateControl<Image>(pTexture);
 			pPortrait->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitWidth);

@@ -2,7 +2,6 @@
 #include "gui/Window.h"
 #include "gui/Frame.h"
 #include "gui/AppResources.h"
-#include "gui/OldCharacterImageStore.h"
 
 using namespace fig::gui;
 
@@ -37,14 +36,10 @@ Window::Window(fig::string_view title, int32_t width, int32_t height)
 
 	// Load textures
 	AppResources::Init(_renderer.get()); //! @temp
-
-	// Load character images
-	OldCharacterImageStore::Init(_renderer.get());	//! @temp
 }
 
 Window::~Window()
 {
-	OldCharacterImageStore::Release();
 	AppResources::Release();
 }
 

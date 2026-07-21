@@ -77,6 +77,8 @@ namespace fig::gui
 			pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
 			_targetTexture.reset(pTarget);
 		}
+
+		auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
 		SDL_SetRenderTarget(pRenderer, pTarget);
 		SDL_SetRenderDrawColor(pRenderer, 0, 255, 0, 0);
 		SDL_RenderClear(pRenderer);
@@ -140,7 +142,7 @@ namespace fig::gui
 			SDL_RenderTexture(pRenderer, _pTexture, NULL, NULL);
 		}
 
-		SDL_SetRenderTarget(pRenderer, NULL);
+		SDL_SetRenderTarget(pRenderer, priorRenderTarget);
 	}
 
 	void CardImage::SetZoom(float value) noexcept

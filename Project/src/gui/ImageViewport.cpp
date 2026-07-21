@@ -30,7 +30,7 @@ namespace fig::gui
 
 		if (_bRedraw)
 		{
-			RecreateTexture();
+			Redraw();
 			_bRedraw = false;
 			_bRedrawAlpha = false;
 		}
@@ -213,7 +213,7 @@ namespace fig::gui
 		_bRedrawAlpha = true;
 	}
 
-	void ImageViewport::RecreateTexture()
+	void ImageViewport::Redraw()
 	{
 		auto width = std::min(GetWidth(), 2048);
 		auto height = std::min(GetHeight(), 2048);
@@ -236,6 +236,7 @@ namespace fig::gui
 			_targetTexture.reset(pTarget);
 		}
 
+		auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
 		SDL_SetRenderTarget(pRenderer, pTarget);
 
 		constexpr float fCorner = toF(CornerSize);
@@ -281,7 +282,7 @@ namespace fig::gui
 			SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
 		}
 
-		SDL_SetRenderTarget(pRenderer, NULL);
+		SDL_SetRenderTarget(pRenderer, priorRenderTarget);
 	}
 
 	void ImageViewport::ResetTransform()

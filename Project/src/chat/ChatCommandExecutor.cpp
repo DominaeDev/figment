@@ -10,7 +10,6 @@
 #include "gui/ChatScroll.h"
 #include "gui/TextBox.h"
 #include <map>
-#include <queue>
 #include <cwctype>
 #include <ranges>
 

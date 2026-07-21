@@ -53,6 +53,8 @@ namespace fig::gui
 		if (pMask)
 		{
 			TexturePtr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
+			auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
+
 			SDL_SetRenderTarget(pRenderer, pTarget);
 			SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
 			SDL_RenderClear(pRenderer);
@@ -70,7 +72,7 @@ namespace fig::gui
 
 			SDL_SetTextureBlendMode(pTexture, multiplyAlpha);
 			SDL_RenderTexture(pRenderer, pTexture, NULL, NULL);
-			SDL_SetRenderTarget(pRenderer, NULL);
+			SDL_SetRenderTarget(pRenderer, priorRenderTarget);
 			SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
 			_texture.reset(pTarget);
 		}

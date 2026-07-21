@@ -6,7 +6,6 @@
 #include "llm/LLMUtility.h"
 #include "gui/GUIUtility.h"
 #include "gui/Window.h"
-#include "gui/OldCharacterImageStore.h"
 #include "data/Character.h"
 #include "text/TextEvaluator.h"
 

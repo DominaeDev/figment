@@ -10,6 +10,7 @@
 #include "gui/AppResources.h"
 #include "gui/VariableList.h"
 #include "gui/ChatSidePanel.h"
+#include "gui/ChatBackground.h"
 #include "app/AppState.h"
 #include "chat/ChatSession.h"
 #include "chat/ChatCommands.h"
@@ -30,17 +31,12 @@ using namespace fig::llm;
 using namespace fig::data;
 using namespace fig::chat;
 
-template<typename T>
-constexpr void queue_clear(std::queue<T>& q)
-{
-	std::queue<T> empty;
-	std::swap(q, empty);
-}
-
 namespace fig::gui
 {
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
+		_pBackground = CreateControl<ChatBackground>();
+
 		auto centerArea = CreateControl<Area>();
 		centerArea->SetBackgroundColor(Colors::ChatBackground);
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
@@ -52,6 +48,7 @@ namespace fig::gui
 		pStaticText->SetBackgroundColor(Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
 		pStaticText->SetVisible(false);
 
+		_pSidePanel = CreateControl<ChatSidePanel>();
 		_pChatScroll = centerArea->CreateControl<ChatScroll>();
 
 		_pTextBox = centerArea->CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi, TextBox::Flag::Autosize });
@@ -62,8 +59,6 @@ namespace fig::gui
 		auto pCenterSizer = centerArea->SetSizer<VerticalSizer>();
 		pCenterSizer->Add(_pChatScroll, -1, Sizer::Fill | Sizer::Bottom, 8);
 		pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::AlignCenterHorizontal);
-
-		_pSidePanel = CreateControl<ChatSidePanel>();
 
 		auto mainSizer = SetSizer<HorizontalSizer>();
 		mainSizer->AddStretchSpacer();
@@ -379,5 +374,10 @@ namespace fig::gui
 		}
 
 		return Screen::OnEvent(event);
+	}
+
+	void ChatScreen::OnAfterLayout()
+	{
+		_pBackground->SetSize(GetSize());
 	}
 }

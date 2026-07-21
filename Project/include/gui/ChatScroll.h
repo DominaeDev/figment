@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/Control.h"
+#include "gui/RenderTargetControl.h"
 #include "chat/ChatTypes.h"
 #include "chat/ChatSession.h"
 #include "chat/MessagePoller.h"
@@ -11,8 +11,9 @@ namespace fig::gui
 {
 	class ChatMessage;
 	class VerticalScrollSizer;
+	class VerticalGradient;
 
-	class ChatScroll : public Control
+	class ChatScroll : public RenderTargetControl
 	{
 	public:
 		ChatScroll(ParentPtr pParent);
@@ -31,7 +32,7 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		EventResult OnEvent(Event& event) override;
 		void OnAfterLayout() override;
-		void OnAddedChild(ControlPtr pChild) override;
+		void OnRenderMask(RendererPtr pRenderer, fig::sdl::Texture& texture) override;
 
 	private:
 		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message, bool complete);
@@ -40,7 +41,7 @@ namespace fig::gui
 
 		void OnMessage(const fig::chat::MessagePoller::Message& msg);
 	private:
-		fig::observer_ptr<Control> _pBottomGradient;
+		std::unique_ptr<VerticalGradient> _pBottomGradient;
 
 		struct MessageEntry
 		{

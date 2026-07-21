@@ -25,6 +25,9 @@ namespace fig::gui
 
 	namespace Colors
 	{
+		inline constexpr Color Debug					{ 0xC000C0_rgb };
+		inline constexpr Color Debug2					{ 0x00C0C0_rgb };
+		inline constexpr Color Debug3					{ 0xC0C000_rgb };
 		inline constexpr Color White					{ 0xFFFFFF_rgb };
 		inline constexpr Color Black					{ 0x000000_rgb };
 		inline constexpr Color Red						{ 0x800000_rgb };
@@ -32,7 +35,6 @@ namespace fig::gui
 		inline constexpr Color Blue						{ 0x000080_rgb };
 		inline constexpr Color DarkGray					{ 0x646464_rgb };
 		inline constexpr Color Transparent				{ 0xFFFFFF00_rgba };
-		inline constexpr Color Debug					{ 0xC000C0_rgb };
 		inline constexpr Color TextForeground			{ 0x000000_rgb };
 		inline constexpr Color TextSelectionForeground	{ 0xFFFFFF_rgb };
 		inline constexpr Color TextSelectionBackground	{ 0x99C9EF_rgb };

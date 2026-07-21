@@ -33,7 +33,7 @@ namespace fig::gui
 		
 		if (_pSizer)
 		{
-			_pSizer->Layout(GetRect());
+			_pSizer->Layout(GetSizerRect());
 			OnAfterLayout();
 		}
 		_bInvalidLayout = false;
@@ -66,8 +66,8 @@ namespace fig::gui
 
 		if (_pParent)
 		{
-			_rect.x = _localPosition.x + _pParent->GetAbsoluteX();
-			_rect.y = _localPosition.y + _pParent->GetAbsoluteY();
+			_rect.x = _localPosition.x + _pParent->GetOriginX();
+			_rect.y = _localPosition.y + _pParent->GetOriginY();
 		}
 		else
 		{
@@ -91,8 +91,8 @@ namespace fig::gui
 
 		if (_pParent)
 		{
-			_localPosition.x = _rect.x - _pParent->GetAbsoluteX();
-			_localPosition.y = _rect.y - _pParent->GetAbsoluteY();
+			_localPosition.x = _rect.x - _pParent->GetOriginX();
+			_localPosition.y = _rect.y - _pParent->GetOriginY();
 		}
 		else
 		{
@@ -145,8 +145,8 @@ namespace fig::gui
 	{
 		_rect = rect;
 
-		_localPosition.x = _rect.x - (_pParent ? _pParent->GetRect().x : 0);
-		_localPosition.y = _rect.y - (_pParent ? _pParent->GetRect().y : 0);
+		_localPosition.x = _rect.x - (_pParent ? _pParent->GetOriginX() : 0);
+		_localPosition.y = _rect.y - (_pParent ? _pParent->GetOriginY() : 0);
 
 		for (auto& child : _children)
 		{
@@ -286,7 +286,7 @@ namespace fig::gui
 		else
 		{
 			if (bRefreshImmediately && _pSizer)
-				_pSizer->Layout(GetRect());
+				_pSizer->Layout(GetSizerRect());
 			else
 				InvalidateLayout();
 		}

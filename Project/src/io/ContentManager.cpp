@@ -235,6 +235,8 @@ namespace fig::io
 
 					if (pMask)
 					{
+						auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
+
 						// Bake mask into texture
 						TexturePtr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
 						SDL_SetRenderTarget(pRenderer, pTarget);
@@ -254,7 +256,7 @@ namespace fig::io
 
 						SDL_SetTextureBlendMode(pTexture, multiplyAlpha);
 						SDL_RenderTexture(pRenderer, pTexture, NULL, NULL);
-						SDL_SetRenderTarget(pRenderer, NULL);
+						SDL_SetRenderTarget(pRenderer, priorRenderTarget);
 						SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
 						texture.reset(pTarget);
 					}

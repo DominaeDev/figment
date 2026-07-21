@@ -182,6 +182,7 @@
     <ClCompile Include="src\gui\BaseButton.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\CardImage.cpp" />
+    <ClCompile Include="src\gui\ChatBackground.cpp" />
     <ClCompile Include="src\gui\ChatList.cpp" />
     <ClCompile Include="src\gui\ChatListingScreen.cpp" />
     <ClCompile Include="src\gui\ChatListItem.cpp" />
@@ -199,10 +200,10 @@
     <ClCompile Include="src\gui\Overlay.cpp" />
     <ClCompile Include="src\gui\PasswordBox.cpp" />
     <ClCompile Include="src\gui\PlayButton.cpp" />
+    <ClCompile Include="src\gui\RenderTargetControl.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
     <ClCompile Include="src\gui\CardList.cpp" />
     <ClCompile Include="src\gui\CharacterCard.cpp" />
-    <ClCompile Include="src\gui\OldCharacterImageStore.cpp" />
     <ClCompile Include="src\gui\ChatScreen.cpp" />
     <ClCompile Include="src\gui\CoverCard.cpp" />
     <ClCompile Include="src\gui\GridSizer.cpp" />
@@ -431,6 +432,7 @@
     <ClInclude Include="include\Figment.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\CardImage.h" />
+    <ClInclude Include="include\gui\ChatBackground.h" />
     <ClInclude Include="include\gui\ChatList.h" />
     <ClInclude Include="include\gui\ChatListingScreen.h" />
     <ClInclude Include="include\gui\ChatListItem.h" />
@@ -450,6 +452,7 @@
     <ClInclude Include="include\gui\Overlay.h" />
     <ClInclude Include="include\gui\PasswordBox.h" />
     <ClInclude Include="include\gui\PlayButton.h" />
+    <ClInclude Include="include\gui\RenderTargetControl.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
@@ -460,7 +463,6 @@
     <ClInclude Include="include\gui\TexturedBorder.h" />
     <ClInclude Include="include\gui\CardList.h" />
     <ClInclude Include="include\gui\CharacterCard.h" />
-    <ClInclude Include="include\gui\OldCharacterImageStore.h" />
     <ClInclude Include="include\gui\ChatScreen.h" />
     <ClInclude Include="include\gui\CoverCard.h" />
     <ClInclude Include="include\gui\GridSizer.h" />

@@ -114,8 +114,13 @@ namespace fig::gui
 		std::unique_ptr<Sizer> _pSizer {};
 		fig::observer_ptr<LayoutElement> _pParent;
 		bool _bCulled = false;
+		bool _bLocalFromOrigin = false; // for render targets
 
 	private:
+		inline Coord GetOriginX() const noexcept { return _bLocalFromOrigin ? 0 : _rect.x; }
+		inline Coord GetOriginY() const noexcept { return _bLocalFromOrigin ? 0 : _rect.y; }
+		inline Rect GetSizerRect() const noexcept { return _bLocalFromOrigin ? Rect { 0, 0, _rect.w, _rect.h } : _rect; }
+
 		void OnParentMoved();
 
 		Rect _rect = {};

@@ -87,7 +87,7 @@ namespace fig::gui
 		TextEnginePtr GetSDLTextEngine();
 		Point GetMousePos() const noexcept;
 
-	private:
+	protected:
 		Color _foregroundColor {};
 		Color _backgroundColor {};
 		Color _borderColor {};

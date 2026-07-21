@@ -9,7 +9,6 @@
 #include "text/TextEvaluator.h"
 #include "chat/PromptBuilder.h"
 #include <format>
-#include <algorithm>
 #include <cassert>
 #include <chrono>
 
@@ -17,13 +16,6 @@ using namespace std::chrono_literals;
 using namespace fig::io;
 using namespace fig::data;
 using namespace fig::chat;
-
-template<typename T>
-void queue_clear(std::queue<T>& q)
-{
-	std::queue<T> empty;
-	std::swap(q, empty);
-}
 
 inline constexpr fig::string Dialogue(fig::string_view text)
 {

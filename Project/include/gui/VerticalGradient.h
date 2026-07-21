@@ -9,10 +9,11 @@ namespace fig::gui
 	public:
 		VerticalGradient(ParentPtr pParent, Color colorTop, Color colorBottom);
 		void SetColors(Color colorTop, Color colorBottom);
+		void SetTexture(fig::observer_ptr<Texture> pTexture);
 
+		void OnRender(Renderer* pRenderer) override;
 	protected:
 		void OnUpdate(float fElapsed) override {};
-		void OnRender(Renderer* pRenderer) override;
 
 		void RefreshGeometry(Rectf rect);
 	private:

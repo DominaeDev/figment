@@ -313,4 +313,11 @@ namespace fig
 		return group_by(range, adaptor.keyFn);
 	}
 
+	template<typename T>
+	constexpr void queue_clear(std::queue<T>& q)
+	{
+		std::queue<T> empty;
+		std::swap(q, empty);
+	}
+
 }

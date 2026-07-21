@@ -18,10 +18,11 @@ namespace fig::gui
 	class Window;
 	class Sizer;
 	class StatusBar;
-	class ChatScroll;
 	class TextBox;
 	class VariableList;
+	class ChatScroll;
 	class ChatSidePanel;
+	class ChatBackground;
 
 	class ChatScreen : public Screen
 	{
@@ -33,8 +34,9 @@ namespace fig::gui
 		fig::observer_ptr<ChatSidePanel> GetSidePanel() { return _pSidePanel; }
 
 	protected:
-		virtual void OnUpdate(float fElapsed) override;
-		virtual void OnRender(Renderer* pRenderer) override;
+		void OnUpdate(float fElapsed) override;
+		void OnRender(Renderer* pRenderer) override;
+		void OnAfterLayout() override;
 
 		EventResult OnEvent(Event& event) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
@@ -50,6 +52,7 @@ namespace fig::gui
 		fig::observer_ptr<TextBox> _pTextBox {};
 		fig::observer_ptr<VariableList> _pVariableList {};
 		fig::observer_ptr<ChatSidePanel> _pSidePanel {};
+		fig::observer_ptr<ChatBackground> _pBackground {};
 
 		float _fPollingCounter = 0.0f;
 		bool _bStartedChat = false; // Used to trigger greeting
