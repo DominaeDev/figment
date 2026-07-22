@@ -121,6 +121,11 @@ namespace fig::gui
 		LoadTexture(pRenderer, TextureType::MASK_CIRCLE, "./resources/gui/masks/mask_circle256.png");
 		LoadTexture(pRenderer, TextureType::MASK_SMALL_PORTRAIT_48PX, "./resources/gui/masks/mask_small_portrait_48px.png");
 		LoadTexture(pRenderer, TextureType::MASK_SMALL_PORTRAIT_56PX, "./resources/gui/masks/mask_small_portrait_56px.png");
+		
+		LoadTexture(pRenderer, TextureType::MASK_GRADIENT_EASE_IN_CUBIC_LEFT, "./resources/gui/masks/mask_gradient_ease_in_cubic_l.png");
+		LoadTexture(pRenderer, TextureType::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT, "./resources/gui/masks/mask_gradient_ease_in_cubic_r.png");
+		LoadTexture(pRenderer, TextureType::MASK_GRADIENT_EASE_IN_OUT_SINE_LEFT, "./resources/gui/masks/mask_gradient_ease_in_out_sine_l.png");
+		LoadTexture(pRenderer, TextureType::MASK_GRADIENT_EASE_IN_OUT_SINE_RIGHT, "./resources/gui/masks/mask_gradient_ease_in_out_sine_r.png");
 	}
 
 	void AppResources::Release()

@@ -1,47 +1,94 @@
 #include <pch.h>
+#include <execution>
 #include "gui/ChatBackground.h"
+
+#include "fast_gaussian_blur_template.h"
 
 namespace fig::gui
 {
 	ChatBackground::ChatBackground(ParentPtr parent) : Control(parent)
 	{
 		EnableClipping(true);
+		SetBackgroundColor(Colors::Transparent);
 	}
 
-	void ChatBackground::SetTexture(TexturePtr pTexture) noexcept
+	void ChatBackground::SetBrightness(float value)
 	{
-		_pTexture = pTexture;
-
-		if (_pTexture)
-		{
-			_imageSize = Point { _pTexture->w, _pTexture->h };
-			_fImageRatio = toF(_imageSize.x) / toF(_imageSize.y);
-		}
-		else
-		{
-			_imageSize = Point {};
-			_fImageRatio = 1.0f;
-		}
+		_value = static_cast<uint8_t>(std::clamp(value, 0.0f, 1.0f) * 255.0f);
+		_bDirty = true;
 	}
 
-	void ChatBackground::SetBrightness(float alpha)
+	void ChatBackground::SetBrightness(uint8_t value)
 	{
-		_value = static_cast<uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
+		_value = value;
+		_bDirty = true;
 	}
 
-	void ChatBackground::SetBrightness(uint8_t alpha)
+	void ChatBackground::SetSaturation(float value)
 	{
-		_value = alpha;
+		_saturation = static_cast<uint8_t>(std::clamp(value, 0.0f, 1.0f) * 255.0f);
+		_bDirty = true;
 	}
 
 	void ChatBackground::SetAlpha(float alpha)
 	{
 		_alpha = static_cast<uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
+		_bDirty = true;
 	}
 
 	void ChatBackground::SetAlpha(uint8_t alpha)
 	{
 		_alpha = alpha;
+		_bDirty = true;
+	}
+
+	void ChatBackground::SetBlur(float sigma)
+	{
+		_fBlurSigma = std::max(sigma, 0.0f);
+		_bDirty = true;
+	}
+
+	void ChatBackground::SetImage(const fig::uuid& assetId)
+	{
+		if (auto try_surface = Global::GetUserContent().Get<fig::sdl::Surface>(assetId))
+		{
+			auto pNewSurface = SDL_CreateSurface((*try_surface)->w, (*try_surface)->h, SDL_PIXELFORMAT_RGB24);
+			SDL_BlitSurface((*try_surface).get(), NULL, pNewSurface, NULL);
+			_surface.reset(pNewSurface);
+			_processedSurface.clear();
+
+			_imageSize = Point { pNewSurface->w, pNewSurface->h };
+			_fImageRatio = toF(_imageSize.x) / toF(_imageSize.y);
+		}
+
+		_texture.clear();
+		_bDirty = true;
+	}
+
+	void ChatBackground::OnUpdate(float fElapsed)
+	{
+		if (_bDirty)
+			ProcessImage();
+	}
+
+	void ChatBackground::OnRender(RendererPtr pRenderer)
+	{
+		if (_surface.empty())
+			return;
+
+		auto& surface = not _processedSurface.empty() ? _processedSurface : _surface;
+		if (_texture.empty())
+		{
+			auto pTexture = SDL_CreateTextureFromSurface(pRenderer, surface.get());
+			_texture.reset(pTexture);
+		}
+
+		SDL_SetTextureBlendMode(_texture.get(), SDL_BLENDMODE_BLEND);
+		SDL_SetTextureColorMod(_texture.get(), _value, _value, _value);
+		SDL_SetTextureAlphaMod(_texture.get(), _alpha);
+
+		auto drawRect = GetImageRect();
+		SDL_RenderTexture(pRenderer, _texture.get(), NULL, &drawRect);
 	}
 
 	Rectf ChatBackground::GetImageRect() const
@@ -82,24 +129,104 @@ namespace fig::gui
 		return drawRect;
 	}
 
-	void ChatBackground::SetImage(const fig::uuid& assetId)
+	void ChatBackground::ProcessImage()
 	{
-		if (auto try_image = Global::GetUserContent().GetTexture(assetId, GetSDLRenderer()))
-			SetTexture((*try_image).get());
-	}
+		_processedSurface.reset();
+		_texture.clear();
+		_bDirty = false;
 
-	void ChatBackground::OnRender(RendererPtr pRenderer)
-	{
-		if (!(bool)_pTexture)
+		if (_surface.empty())
+			return;
+		if (_saturation == 0xFF and _fBlurSigma <= 0.0f)
 			return;
 
-		Color bg = _backgroundColor;
-		bg.Add(255 - _backgroundColor.a);
+		auto pNewSurface = SDL_CreateSurface(_surface->w, _surface->h, SDL_PIXELFORMAT_RGBA8888); // fast_gaussian_blur doesn't appear to work with RGB24
+		SDL_BlitSurface(_surface.get(), NULL, pNewSurface, NULL); // Copy original surface
+		_processedSurface.reset(pNewSurface);
+		Saturate();
+		Blur();
+	}
 
-		auto drawRect = GetImageRect();
-		SDL_SetTextureBlendMode(_pTexture, SDL_BLENDMODE_BLEND);
-		SDL_SetTextureColorMod(_pTexture, _value, _value, _value);
-		SDL_SetTextureAlphaMod(_pTexture, _alpha);
-		SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
+	void ChatBackground::Blur()
+	{
+		if (_processedSurface.empty() or _fBlurSigma <= 0.0f)
+			return;
+
+		auto pSurface = _processedSurface.get();
+
+		DEBUG_MEASURE_BEGIN("Blur");
+
+		// Rescale image
+		constexpr int32_t MaxSize = 768;
+		Point size { _surface->w, _surface->h };
+		if (size.x > MaxSize or size.y > MaxSize)
+		{
+			float scale = std::min(toF(MaxSize) / size.x, toF(MaxSize) / size.y);
+			size.x = static_cast<int32_t>(toF(size.x) * scale);
+			size.y = static_cast<int32_t>(toF(size.y) * scale);
+
+			pSurface = SDL_ScaleSurface(pSurface, size.x, size.y, SDL_SCALEMODE_NEAREST);
+			_processedSurface.reset(pSurface);
+		}
+		
+		// Blur
+		if (SDL_LockSurface(pSurface))
+		{
+			auto components = pSurface->pitch / pSurface->w;
+			auto pixels = static_cast<unsigned char*>(pSurface->pixels);
+			size_t length = pSurface->w * pSurface->h * components;
+			
+			std::vector<unsigned char> new_pixels(length);
+			unsigned char* new_pixel_data = new_pixels.data();
+			fast_gaussian_blur(pixels, new_pixel_data, pSurface->w, pSurface->h, components, _fBlurSigma, 2U, kExtend);
+			std::memcpy(pixels, new_pixels.data(), length);
+			SDL_UnlockSurface(pSurface);
+		}
+		DEBUG_MEASURE_END();
+	}
+
+	void ChatBackground::Saturate()
+	{
+		if (_processedSurface.empty() or _saturation == 0xFF)
+			return;
+
+		auto pSurface = _processedSurface.get();
+		auto pFormatDetails = SDL_GetPixelFormatDetails(pSurface->format);
+		auto pitchInPixels = pSurface->pitch / 4;
+
+		DEBUG_MEASURE_BEGIN("Desaturate");
+
+		if (SDL_LockSurface(pSurface))
+		{
+			auto pPixels = static_cast<uint32_t*>(pSurface->pixels);
+
+			auto rowIndices = std::views::iota(0, pSurface->h);
+			std::for_each(std::execution::par_unseq, 
+				rowIndices.begin(), rowIndices.end(), 
+				[&](int row) 
+				{
+					auto pRow = pPixels + row * pitchInPixels;
+					for (int col = 0; col < pSurface->w; col++)
+					{
+						uint32_t pixel = pRow[col];
+						uint8_t r = static_cast<uint8_t>((pixel & pFormatDetails->Rmask) >> pFormatDetails->Rshift);
+						uint8_t g = static_cast<uint8_t>((pixel & pFormatDetails->Gmask) >> pFormatDetails->Gshift);
+						uint8_t b = static_cast<uint8_t>((pixel & pFormatDetails->Bmask) >> pFormatDetails->Bshift);
+
+						uint8_t luma = static_cast<uint8_t>((77 * r + 151 * g + 28 * b) >> 8);
+						uint8_t newR = static_cast<uint8_t>(luma + (((r - luma) * _saturation) >> 8));
+						uint8_t newG = static_cast<uint8_t>(luma + (((g - luma) * _saturation) >> 8));
+						uint8_t newB = static_cast<uint8_t>(luma + (((b - luma) * _saturation) >> 8));
+
+						pRow[col] = (pixel & ~(pFormatDetails->Rmask | pFormatDetails->Gmask | pFormatDetails->Bmask))
+							| (static_cast<uint32_t>(newR) << pFormatDetails->Rshift)
+							| (static_cast<uint32_t>(newG) << pFormatDetails->Gshift)
+							| (static_cast<uint32_t>(newB) << pFormatDetails->Bshift);
+					}
+				}
+			);
+			SDL_UnlockSurface(pSurface);
+		}
+		DEBUG_MEASURE_END();
 	}
 }

@@ -36,12 +36,29 @@ namespace fig::gui
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
 		_pBackground = CreateControl<ChatBackground>();
-		_pBackground->SetBrightness(0.65f);
-		_pBackground->SetAlpha(0.85f);
+		_pBackground->SetBrightness(0.85f);
+//		_pBackground->SetAlpha(0.85f);
+//		_pBackground->SetSaturation(0.5f);
+		_pBackground->SetBlur(3.0f);
 
 		auto centerArea = _pBackground->CreateControl<Area>();
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
+		auto underColor = Colors::Black.WithAlpha(0.45f);
+		constexpr Coord underGradientWidth = 80;
+		_pUnderScroll = centerArea->CreateControl<Area>();
+		_pUnderScroll->SetBackgroundColor(underColor);
+		_pUnderScroll->SetWidth(Constants::GUI::ChatScrollWidth + (underGradientWidth * 2) + 40);
+		auto pUnderSizer = _pUnderScroll->SetSizer<HorizontalSizer>();
+		auto pLeftGradient = _pUnderScroll->CreateControl<Image>(TextureType::MASK_GRADIENT_EASE_IN_CUBIC_LEFT, underColor);
+		auto pUnderBG = _pUnderScroll->CreateControl<Image>(TextureType::BLANK, underColor);
+		auto pRightGradient = _pUnderScroll->CreateControl<Image>(TextureType::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT, underColor);
+		pLeftGradient->SetWidth(underGradientWidth);
+		pRightGradient->SetWidth(underGradientWidth);
+		pUnderSizer->Add(pLeftGradient, 0, Sizer::Expand);
+		pUnderSizer->Add(pUnderBG, -1, Sizer::Fill);
+		pUnderSizer->Add(pRightGradient, 0, Sizer::Expand);
+		
 		auto pStaticText = centerArea->CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize);
 		pStaticText->SetAlignment(TextAlignment::Middle_Center);
 		pStaticText->SetSize(80, 80);
@@ -85,14 +102,17 @@ namespace fig::gui
 		pTextBoxBorder->SetExtend(7.0f);
 		pTextBoxBorder->SetColor(Color { 0xb9, 0xb2, 0x8f, 0xFF });
 
-		_pVariableList = CreateControl<VariableList>();
-		_pVariableList->SetPosition(10, 10);
-		_pVariableList->SetVisible(false);
+		if constexpr (Disabled)
+		{
+			_pVariableList = CreateControl<VariableList>();
+			_pVariableList->SetPosition(10, 10);
+			_pVariableList->SetVisible(false);
 
-		std::map<fig::string, fig::string> test;
-		test["Location"] = "Nice beach";
-		test["Mood"] = "Terrible weather";
-		_pVariableList->SetVariables(test);
+			std::map<fig::string, fig::string> test;
+			test["Location"] = "Nice beach";
+			test["Mood"] = "Terrible weather";
+			_pVariableList->SetVariables(test);
+		}
 
 		InvalidateLayout();
 	}
@@ -138,10 +158,16 @@ namespace fig::gui
 			pLLM->Initialize(llmArgs);
 			_pChatScroll->SetSession(_pSession);
 
+			// Set portrait
 			if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindImageAsset(_pSession->GetCharacterIdOf(Role::Bot1), fig::io::ImageType::LargePortrait))
+			{
 				_pSidePanel->SetImage((*try_portrait).id);
+				_pBackground->SetImage((*try_portrait).id);
+			}
 			else
+			{
 				_pSidePanel->ClearImage();
+			}
 
 			_bStartedChat = true;
 			queue_clear(_commandQueue);
@@ -239,16 +265,6 @@ namespace fig::gui
 		}
 		else // Release
 		{
-			switch (event.key)
-			{
-			case SDLK_TAB:
-				if (event.modifiers.None)
-				{
-					_pVariableList->SetVisible(false);
-					return true;
-				}
-				break;
-			}
 		}
 
 		// LLM shortcuts
@@ -292,7 +308,7 @@ namespace fig::gui
 				case SDLK_TAB:
 					if (event.modifiers.None)
 					{
-						if (pLLM->IsInitialized())
+						if (pLLM->IsInitialized() and _pVariableList)
 						{
 							_pVariableList->SetVariables(pLLM->GetStateVariables());
 							_pVariableList->SetVisible(!_pVariableList->IsEmpty());
@@ -340,7 +356,7 @@ namespace fig::gui
 		if (IsUserEvent(event, UserEvent::LLMChatInitialized))
 		{
 			auto pLLMInstance = Global::GetLLMInstance();
-			if (pLLMInstance)
+			if (pLLMInstance and _pVariableList)
 			{
 				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
 				_pVariableList->SetVisible(true);
@@ -358,7 +374,8 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::LLMModelUnloaded))
 		{
 			_pSession.reset();
-			_pVariableList->SetVisible(false);
+			if (_pVariableList)
+				_pVariableList->SetVisible(false);
 			Global::SetLLMInstance(nullptr);
 			queue_clear(_commandQueue);
 #if ENABLE_AUTO_CHAT
@@ -368,7 +385,7 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::LLMGenerationComplete))
 		{
 			auto pLLMInstance = Global::GetLLMInstance();
-			if (pLLMInstance)
+			if (pLLMInstance and _pVariableList)
 				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
 			NextQueuedCommand();
 		}
@@ -382,7 +399,11 @@ namespace fig::gui
 
 	void ChatScreen::OnAfterLayout()
 	{
-	//	_pBackground->SetSize(GetSize());
+		if (_pUnderScroll)
+		{
+			_pUnderScroll->SetHeight(GetHeight());
+			_pUnderScroll->CenterHorizontally();
+		}
 	}
 
 }

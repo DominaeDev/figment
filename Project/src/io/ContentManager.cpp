@@ -275,7 +275,7 @@ namespace fig::io
 		return unexpected(FileError::NotFound);
 	}
 
-	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, RendererPtr pRenderer) noexcept
+	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, SDL_Renderer* pRenderer) noexcept
 	{
 		if (auto itRenderer = _cachedTextures.find(pRenderer); itRenderer != _cachedTextures.cend())
 		{

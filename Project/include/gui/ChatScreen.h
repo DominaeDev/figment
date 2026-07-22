@@ -50,6 +50,7 @@ namespace fig::gui
 
 	private:
 		fig::observer_ptr<ChatScroll> _pChatScroll {};
+		fig::observer_ptr<Control> _pUnderScroll {};
 		fig::observer_ptr<TextBox> _pTextBox {};
 		fig::observer_ptr<VariableList> _pVariableList {};
 		fig::observer_ptr<ChatSidePanel> _pSidePanel {};

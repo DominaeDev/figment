@@ -178,6 +178,8 @@ namespace fig::gui
 		menu.AddItem("Clear filter")
 			.SetDelegate([=, this] {
 				SetFilter(DefaultChatFilterFlags);
+				_filterByCharacter.clear();
+				ShowAllChats();
 			});
 		menu.Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}
