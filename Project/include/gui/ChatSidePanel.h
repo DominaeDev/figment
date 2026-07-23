@@ -19,7 +19,7 @@ namespace fig::gui
 
 	protected:
 		void OnAfterLayout() override;
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 
 	private:
 		bool _bExpanded { true };

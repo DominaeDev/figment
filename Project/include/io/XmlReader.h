@@ -48,7 +48,7 @@ namespace fig::data
 		template<>
 		std::optional<fig::uuid> TryGet<fig::uuid>() const noexcept;
 		template<>
-		std::optional<fig::gui::Color> TryGet<fig::gui::Color>() const noexcept;
+		std::optional<fig::color> TryGet<fig::color>() const noexcept;
 		template<>
 		std::optional<fig::string_list> TryGet<fig::string_list>() const noexcept;
 		template<>
@@ -112,7 +112,7 @@ namespace fig::data
 		template<>
 		[[nodiscard]] std::optional<std::vector<fig::uuid>> TryGetValue<std::vector<fig::uuid>>() const noexcept;
 		template<>
-		[[nodiscard]] std::optional<fig::gui::Color> TryGetValue<fig::gui::Color>() const noexcept;
+		[[nodiscard]] std::optional<fig::color> TryGetValue<fig::color>() const noexcept;
 		template<>
 		[[nodiscard]] std::optional<fig::string_list> TryGetValue<fig::string_list>() const noexcept;
 		template<>

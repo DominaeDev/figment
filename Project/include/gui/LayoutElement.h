@@ -19,43 +19,43 @@ namespace fig::gui
 
 		void Update(float fElapsed);
 
-		inline const Rect& GetRect() const noexcept { return _rect; }
-		inline constexpr Rectf GetDrawRect() const noexcept { return Rectf { toF(_rect.x), toF(_rect.y), toF(_rect.w), toF(_rect.h) }; }
+		inline const fig::rect& GetRect() const noexcept { return _rect; }
+		inline constexpr fig::rectf GetDrawRect() const noexcept { return fig::rectf { toF(_rect.x), toF(_rect.y), toF(_rect.w), toF(_rect.h) }; }
 
-		inline Coord GetX() const noexcept { return _localPosition.x; }
-		inline Coord GetY() const noexcept { return _localPosition.y; }
-		inline Point GetPosition() const noexcept { return Point { _localPosition.x, _localPosition.y }; }
-		inline Coord GetAbsoluteX() const noexcept { return _rect.x; }
-		inline Coord GetAbsoluteY() const noexcept { return _rect.y; }
-		inline Point GetAbsolutePosition() const noexcept { return Point { _rect.x, _rect.y }; }
+		inline fig::coord GetX() const noexcept { return _localPosition.x; }
+		inline fig::coord GetY() const noexcept { return _localPosition.y; }
+		inline fig::point GetPosition() const noexcept { return fig::point { _localPosition.x, _localPosition.y }; }
+		inline fig::coord GetAbsoluteX() const noexcept { return _rect.x; }
+		inline fig::coord GetAbsoluteY() const noexcept { return _rect.y; }
+		inline fig::point GetAbsolutePosition() const noexcept { return fig::point { _rect.x, _rect.y }; }
 
-		inline Point GetSize() const noexcept { return Point { _rect.w, _rect.h }; }
-		inline Coord GetWidth() const noexcept { return _rect.w; }
-		inline Coord GetHeight() const noexcept { return _rect.h; }
-		inline const Point& GetMinSize() const noexcept { return _minSize; }
-		inline const Point& GetMaxSize() const noexcept { return _maxSize; }
+		inline fig::point GetSize() const noexcept { return fig::point { _rect.w, _rect.h }; }
+		inline fig::coord GetWidth() const noexcept { return _rect.w; }
+		inline fig::coord GetHeight() const noexcept { return _rect.h; }
+		inline const fig::point& GetMinSize() const noexcept { return _minSize; }
+		inline const fig::point& GetMaxSize() const noexcept { return _maxSize; }
 
-		void SetRect(Rect rect);
-		void SetRect(Coord x, Coord y, Coord width, Coord height);
-		void SetAbsolutePosition(Coord x, Coord y);
-		void SetAbsolutePosition(Point position);
-		void SetPosition(Point position);
-		void SetPosition(Coord x, Coord y);
-		void SetX(Coord x);
-		void SetY(Coord y);
-		void SetSize(Point size);
-		void SetSize(Coord width, Coord height);
-		void SetWidth(Coord width);
-		void SetHeight(Coord height);
+		void SetRect(fig::rect rect);
+		void SetRect(fig::coord x, fig::coord y, fig::coord width, fig::coord height);
+		void SetAbsolutePosition(fig::coord x, fig::coord y);
+		void SetAbsolutePosition(fig::point position);
+		void SetPosition(fig::point position);
+		void SetPosition(fig::coord x, fig::coord y);
+		void SetX(fig::coord x);
+		void SetY(fig::coord y);
+		void SetSize(fig::point size);
+		void SetSize(fig::coord width, fig::coord height);
+		void SetWidth(fig::coord width);
+		void SetHeight(fig::coord height);
 		void Center();
 		void CenterHorizontally();
 		void CenterVertically();
 		void FillParent();
 
-		void SetMinSize(Point size) { _minSize = size; }
-		void SetMinSize(Coord width, Coord height) { _minSize = Point { width, height }; }
-		void SetMaxSize(Point size) { _maxSize = size; }
-		void SetMaxSize(Coord width, Coord height) { _maxSize = Point { width, height }; }
+		void SetMinSize(fig::point size) { _minSize = size; }
+		void SetMinSize(fig::coord width, fig::coord height) { _minSize = fig::point { width, height }; }
+		void SetMaxSize(fig::point size) { _maxSize = size; }
+		void SetMaxSize(fig::coord width, fig::coord height) { _maxSize = fig::point { width, height }; }
 
 		void AddChild(ControlPtr pChild);
 
@@ -117,16 +117,16 @@ namespace fig::gui
 		bool _bLocalFromOrigin = false; // for render targets
 
 	private:
-		inline Coord GetOriginX() const noexcept { return _bLocalFromOrigin ? 0 : _rect.x; }
-		inline Coord GetOriginY() const noexcept { return _bLocalFromOrigin ? 0 : _rect.y; }
-		inline Rect GetSizerRect() const noexcept { return _bLocalFromOrigin ? Rect { 0, 0, _rect.w, _rect.h } : _rect; }
+		inline fig::coord GetOriginX() const noexcept { return _bLocalFromOrigin ? 0 : _rect.x; }
+		inline fig::coord GetOriginY() const noexcept { return _bLocalFromOrigin ? 0 : _rect.y; }
+		inline fig::rect GetSizerRect() const noexcept { return _bLocalFromOrigin ? fig::rect { 0, 0, _rect.w, _rect.h } : _rect; }
 
 		void OnParentMoved();
 
-		Rect _rect = {};
-		Point _localPosition {};
-		Point _minSize = {};
-		Point _maxSize = {};
+		fig::rect _rect = {};
+		fig::point _localPosition {};
+		fig::point _minSize = {};
+		fig::point _maxSize = {};
 		bool _bLayoutEnabled = true;
 		bool _bInvalidLayout = false;
 	};

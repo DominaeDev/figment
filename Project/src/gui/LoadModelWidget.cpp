@@ -16,7 +16,7 @@ namespace fig::gui
 	LoadModelWidget::LoadModelWidget(ParentPtr pParent) noexcept : Panel(pParent)
 	{
 		_pProgressBar = CreateControl<Panel>();
-		_pProgressBar->SetBackgroundRenderer<SolidFillRenderer>(Color { 0x57caff, 0xff });
+		_pProgressBar->SetBackgroundRenderer<SolidFillRenderer>(fig::color { 0x57caff, 0xff });
 
 		_pLoadButton = CreateControl<PlayButton>();
 		_pLoadButton->SetDelegate(std::bind(&LoadModelWidget::OnButtonPressed, this));
@@ -25,7 +25,7 @@ namespace fig::gui
 		_pLabel->SetHeight(20);
 		_pLabel->EnableEllipsis(true);
 
-		_pSettingsButton = CreateControl<ButtonWithIcon>(TextureType::ICON_SETTINGS);
+		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_SETTINGS);
 		_pSettingsButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pSettingsButton->SetSize(36, 36);
 		_pSettingsButton->CenterVertically();
@@ -62,7 +62,7 @@ namespace fig::gui
 		_pLabel->Reset();
 	}
 
-	EventResult LoadModelWidget::OnEvent(Event& event)
+	EventResult LoadModelWidget::OnEvent(fig::event& event)
 	{
 		if (IsUserEvent(event, UserEvent::LLMModelLoading))
 		{

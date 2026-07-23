@@ -40,36 +40,36 @@ namespace fig::gui
 		StaticText(ParentPtr pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize = true);
 		virtual ~StaticText();
 
-		TTF_Font* GetFont() const { return _pFont.get(); }
+		fig::font_ptr GetFont() const { return _pFont.get(); }
 
 		void SetText(fig::string_view text);
 		void SetTextAndResize(fig::string_view text);
-		void SetTextAndResize(fig::string_view text, Coord& newWidth, Coord& newHeight);
+		void SetTextAndResize(fig::string_view text, fig::coord& newWidth, fig::coord& newHeight);
 
 		const fig::string& GetText() const { return _text; }
 
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
-		void SetFont(TTF_Font* pFont) { _pFont.reset(pFont); }
+		void SetFont(fig::font_ptr pFont) { _pFont.reset(pFont); }
 
-		void SetForegroundColor(Color color) override;
-		void SetBackgroundColor(Color color) override;
+		void SetForegroundColor(fig::color color) override;
+		void SetBackgroundColor(fig::color color) override;
 		void EnableDropShadow(bool bEnable) noexcept { _bDropShadow = bEnable; _bInvalidated = true; }
 		void EnableWordWrap(bool bEnable) noexcept { _bWordWrap = bEnable; _bInvalidated = true; }
 		void EnableEllipsis(bool bEnable) noexcept { _bEllipsis = bEnable; _bInvalidated = true; }
 
-		Point MeasureText(bool bAllowEllipsis = true) const;
+		fig::point MeasureText(bool bAllowEllipsis = true) const;
 		void Reset();
 		void InvalidateText();
 
 	protected:
-		Rectf GetAlignedRect() const;
+		fig::rectf GetAlignedRect() const;
 
 		void OnUpdate(float fElapsed) override;
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnParent() override;
 
 	private:
-		void DrawText(Coord& textWidth, Coord& textHeight);
+		void DrawText(fig::coord& textWidth, fig::coord& textHeight);
 		void DrawShadow(const char* pText);
 		fig::string GetEllipsisText(const fig::string& text) const;
 		void ReleaseTexture();

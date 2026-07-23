@@ -10,6 +10,6 @@ namespace fig::gui
 		MenuSeparator(ParentPtr pParent);
 
 	protected:
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 	};
 }

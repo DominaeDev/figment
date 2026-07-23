@@ -82,9 +82,9 @@ namespace fig::gui
 		bool StartChat(const fig::uuid& characterId);
 
 		virtual void OnUpdate(float fElapsed) override;
-		virtual void OnRender(Renderer* pRenderer) override;
+		virtual void OnRender(fig::renderer_ptr pRenderer) override;
 		
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 		void OnSignedIn(const fig::user::UserProfile& profile) noexcept;
 		void OnSignedOut() noexcept;
 

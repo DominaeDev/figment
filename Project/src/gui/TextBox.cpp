@@ -93,7 +93,7 @@ namespace fig::gui
 			if (TTF_GetTextSubString(GetRenderedText(), cursor_pos, &cursor))
 			{
 				auto& rect = GetRect();
-				Rectf cursor_rect = to_rectf(cursor.rect);
+				fig::rectf cursor_rect = to_rectf(cursor.rect);
 				cursor_rect.x += rect.x + GetMarginLeft();
 				cursor_rect.y += rect.y + GetMarginTop();
 				cursor_rect.w = 1.0f;
@@ -105,7 +105,7 @@ namespace fig::gui
 		}
 	}
 
-	void TextBox::OnRender(RendererPtr pRenderer)
+	void TextBox::OnRender(fig::renderer_ptr pRenderer)
 	{
 		DrawBackground(pRenderer);
 		DrawBorder(pRenderer);
@@ -117,9 +117,9 @@ namespace fig::gui
 		auto clientRect = GetClientRect();
 
 		// Clipping
-		Rect prevClippingRect;
+		fig::rect prevClippingRect;
 		bool restoreClipping = SDL_GetRenderClipRect(pRenderer, &prevClippingRect) && prevClippingRect.w > 0;
-		Rect clippingRect = clientRect;
+		fig::rect clippingRect = clientRect;
 		clippingRect.h = std::min(clippingRect.h, lineSkip * maxRows);
 		SDL_SetRenderClipRect(pRenderer, &clippingRect);
 
@@ -166,7 +166,7 @@ namespace fig::gui
 				SDL_SetRenderDrawColor(pRenderer, Colors::TextSelectionBackground.r, Colors::TextSelectionBackground.g, Colors::TextSelectionBackground.b, Colors::TextSelectionBackground.a);
 				for (int i = 0; pHighlights[i]; ++i)
 				{
-					Rectf highlight_rect = to_rectf(pHighlights[i]->rect);
+					fig::rectf highlight_rect = to_rectf(pHighlights[i]->rect);
 					highlight_rect.w = std::max(highlight_rect.w, 3.0f);
 					highlight_rect.x += rect.x + GetMarginLeft();
 					highlight_rect.y += rect.y + GetMarginTop();
@@ -195,7 +195,7 @@ namespace fig::gui
 		SDL_SetRenderClipRect(pRenderer, restoreClipping ? &prevClippingRect : nullptr);
 	}
 
-	void TextBox::DrawText(RendererPtr pRenderer, TTF_Text* pText, int x, int y)
+	void TextBox::DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y)
 	{
 		auto fgColor = GetForegroundColor();
 		TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
@@ -207,7 +207,7 @@ namespace fig::gui
 		TTF_DrawRendererText(pText, toF(xx), toF(yy));
 	}
 
-	void TextBox::DrawCursor(RendererPtr pRenderer)
+	void TextBox::DrawCursor(fig::renderer_ptr pRenderer)
 	{
 		if (composition_length > 0)
 		{
@@ -297,7 +297,7 @@ namespace fig::gui
 		SDL_ClearComposition(GetSDLWindow());
 	}
 
-	void TextBox::DrawComposition(RendererPtr pRenderer)
+	void TextBox::DrawComposition(fig::renderer_ptr pRenderer)
 	{
 		/* Draw an underline under the composed text */
 		int font_height = TTF_GetFontHeight(_pFont);
@@ -306,7 +306,7 @@ namespace fig::gui
 		{
 			for (int i = 0; substrings[i]; ++i)
 			{
-				Rectf rect;
+				fig::rectf rect;
 				SDL_RectToFRect(&substrings[i]->rect, &rect);
 				rect.x += rect.x;
 				rect.y += (rect.y + font_height);
@@ -324,7 +324,7 @@ namespace fig::gui
 			{
 				for (int i = 0; substrings[i]; ++i)
 				{
-					Rectf rect;
+					fig::rectf rect;
 					SDL_RectToFRect(&substrings[i]->rect, &rect);
 					rect.x += rect.x;
 					rect.y += (rect.y + font_height) - 1;
@@ -336,14 +336,14 @@ namespace fig::gui
 		}
 	}
 
-	void TextBox::DrawCompositionCursor(RendererPtr pRenderer)
+	void TextBox::DrawCompositionCursor(fig::renderer_ptr pRenderer)
 	{
 		if (composition_cursor_length == 0)
 		{
 			TTF_SubString cursor;
 			if (TTF_GetTextSubString(_pText, composition_start + composition_cursor, &cursor))
 			{
-				Rectf rect = to_rectf(cursor.rect);
+				fig::rectf rect = to_rectf(cursor.rect);
 				rect.x += rect.x;
 				rect.y += rect.y;
 				rect.w = 1.0f;
@@ -448,10 +448,10 @@ namespace fig::gui
 		}
 	}
 
-	void TextBox::DrawCandidates(RendererPtr pRenderer)
+	void TextBox::DrawCandidates(fig::renderer_ptr pRenderer)
 	{
 		SDL_Rect safe_rect;
-		Rectf candidates_rect;
+		fig::rectf candidates_rect;
 		int candidates_w;
 		int candidates_h;
 	
@@ -505,7 +505,7 @@ namespace fig::gui
 			{
 				for (int i = 0; substrings[i]; ++i)
 				{
-					Rectf rect;
+					fig::rectf rect;
 					SDL_RectToFRect(&substrings[i]->rect, &rect);
 					rect.x += x;
 					rect.y += (y + font_height);
@@ -522,13 +522,13 @@ namespace fig::gui
 	void TextBox::UpdateTextInputArea()
 	{
 		SDL_Window* pWindow = GetSDLWindow();
-		RendererPtr pRenderer = GetSDLRenderer();
+		fig::renderer_ptr pRenderer = GetSDLRenderer();
 		auto& rect = GetRect();
 
 		/* Convert the text input area and cursor into window coordinates */
-		Pointf window_edit_rect_min;
-		Pointf window_edit_rect_max;
-		Pointf window_cursor;
+		fig::pointf window_edit_rect_min;
+		fig::pointf window_edit_rect_max;
+		fig::pointf window_cursor;
 		if (!SDL_RenderCoordinatesToWindow(pRenderer, toF(rect.x + GetMarginLeft()), toF(rect.y + GetMarginTop()), &window_edit_rect_min.x, &window_edit_rect_min.y) or
 			!SDL_RenderCoordinatesToWindow(pRenderer, toF(rect.x + GetMarginLeft() + rect.w), toF(rect.y + GetMarginTop() + rect.h), &window_edit_rect_max.x, &window_edit_rect_max.y) or
 			!SDL_RenderCoordinatesToWindow(pRenderer, toF(_cursor_rect.x), toF(_cursor_rect.y), &window_cursor.x, &window_cursor.y))
@@ -1069,7 +1069,7 @@ namespace fig::gui
 	#pragma region Selection
 	bool TextBox::HandleMouseDown(int x, int y)
 	{
-		Point pt = { x, y };
+		fig::point pt = { x, y };
 		auto& rect = GetRect();
 		if (!SDL_PointInRect(&pt, &rect))
 		{
@@ -1141,7 +1141,7 @@ namespace fig::gui
 
 
 		// Change cursor
-		Point pt = { x, y };
+		fig::point pt = { x, y };
 		bool bInRect = SDL_PointInRect(&pt, &rect);
 		if (bInRect != _bIBeamCursor)
 		{
@@ -1277,7 +1277,7 @@ namespace fig::gui
 
 	#pragma region Events
 
-	EventResult TextBox::OnEvent(Event& event)
+	EventResult TextBox::OnEvent(fig::event& event)
 	{
 		bool bCtrl = event.key.mod & SDL_KMOD_CTRL;
 		bool bShift = event.key.mod & SDL_KMOD_SHIFT;
@@ -1616,13 +1616,13 @@ namespace fig::gui
 		y -= _scroll.y;
 	}
 
-	void TextBox::ApplyScroll(Rect& rect) const
+	void TextBox::ApplyScroll(fig::rect& rect) const
 	{
 		rect.x -= _scroll.x;
 		rect.y -= _scroll.y;
 	}
 
-	void TextBox::ApplyScroll(Rectf& rect) const
+	void TextBox::ApplyScroll(fig::rectf& rect) const
 	{
 		rect.x -= _scroll.x;
 		rect.y -= _scroll.y;

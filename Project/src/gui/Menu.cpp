@@ -15,22 +15,22 @@ namespace fig::gui
 	constexpr int32_t MenuItemHeight = 30;
 	constexpr int32_t MenuSeparatorHeight = 5;
 	constexpr int32_t MenuSeparatorMargin = 8;
-	constexpr Color MenuBackgroundColor = Colors::White;
-	constexpr Color MenuBorderColor = Colors::LineColor;
-	constexpr Color MenuItemHoverColor = Color { 0xefece3, 0x80 };
-	constexpr Color MenuItemPressedColor = Color { 0xefece3, 0xFF };
+	constexpr fig::color MenuBackgroundColor = Colors::White;
+	constexpr fig::color MenuBorderColor = Colors::LineColor;
+	constexpr fig::color MenuItemHoverColor = fig::color { 0xefece3, 0x80 };
+	constexpr fig::color MenuItemPressedColor = fig::color { 0xefece3, 0xFF };
 	constexpr float AutoExpandDelay = 0.3f;
 	constexpr float AutoCollapseDelay = 0.3f;
 	constexpr const char* Separator = "----";
 
-	MenuItem::MenuItem(const fig::string& label, TextureType icon, MenuDelegate fn) :
+	MenuItem::MenuItem(const fig::string& label, Resource icon, MenuDelegate fn) :
 		_label { label },
 		_icon { icon },
 		_fnDelegate { fn }
 	{
 	}
 
-	MenuItem& MenuItem::AddItem(const fig::string& label, TextureType icon, MenuDelegate fn)
+	MenuItem& MenuItem::AddItem(const fig::string& label, Resource icon, MenuDelegate fn)
 	{
 		_subItems.emplace_back(MenuItem(label, icon, fn));
 		return _subItems.back();
@@ -38,7 +38,7 @@ namespace fig::gui
 
 	MenuItem& MenuItem::AddCheckItem(const fig::string& label, bool bChecked, MenuDelegate fn)
 	{
-		auto menuItem = MenuItem(label, TextureType::NONE, fn);
+		auto menuItem = MenuItem(label, Resource::NONE, fn);
 		menuItem._bCheckable = true;
 		menuItem._bChecked = bChecked;
 		_subItems.emplace_back(menuItem);
@@ -54,10 +54,10 @@ namespace fig::gui
 
 	Menu::Menu(Frame* pHostFrame) : Overlay(pHostFrame)
 	{
-		auto pBackground = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_10PX, 16);
+		auto pBackground = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
 		pBackground->SetColor(MenuBackgroundColor);
 
-		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_10PX, 16);
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
 		pBorder->SetColor(Colors::LineColor);
 
 		SetBackgroundColor(Colors::White);
@@ -66,7 +66,7 @@ namespace fig::gui
 		SetVisible(false);
 	}
 
-	MenuItem& Menu::AddItem(const fig::string& label, TextureType icon, MenuDelegate fn)
+	MenuItem& Menu::AddItem(const fig::string& label, Resource icon, MenuDelegate fn)
 	{
 		_items.emplace_back(MenuItem(label, icon, fn));
 		return _items.back();
@@ -74,7 +74,7 @@ namespace fig::gui
 
 	MenuItem& Menu::AddCheckItem(const fig::string& label, bool bChecked, MenuDelegate fn)
 	{
-		auto menuItem = MenuItem(label, TextureType::NONE, fn);
+		auto menuItem = MenuItem(label, Resource::NONE, fn);
 		menuItem._bCheckable = true;
 		menuItem._bChecked = bChecked;
 		_items.emplace_back(menuItem);
@@ -121,13 +121,13 @@ namespace fig::gui
 		}
 	}
 
-	void Menu::OnRender(Renderer* pRenderer)
+	void Menu::OnRender(fig::renderer_ptr pRenderer)
 	{
 		Control::OnRender(pRenderer);
 		return;
 	}
 
-	uint32_t Menu::Show(Point position, bool bPopAll)
+	uint32_t Menu::Show(fig::point position, bool bPopAll)
 	{
 		if (_pOwner and bPopAll)
 			_pOwner->PopAllMenus();
@@ -136,7 +136,7 @@ namespace fig::gui
 		{
 			float mx, my;
 			SDL_GetMouseState(&mx, &my);
-			position = Point { toI(mx), toI(my) };
+			position = fig::point { toI(mx), toI(my) };
 		}
 
 		Reset();
@@ -160,7 +160,7 @@ namespace fig::gui
 
 	void Menu::CreateItem(MenuItem& menuItem)
 	{
-		auto pItemRoot = CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::ROUNDED_BACKGROUND_6PX), 8);
+		auto pItemRoot = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::ROUNDED_BACKGROUND_6PX), 8);
 		pItemRoot->SetPosition(MenuMargin, MenuMargin + _itemY);
 		pItemRoot->SetSize(MenuWidth - MenuMargin * 2, MenuItemHeight);
 		pItemRoot->SetForegroundColor(MenuBackgroundColor);
@@ -173,11 +173,11 @@ namespace fig::gui
 
 		if (menuItem._bCheckable && menuItem._bChecked)
 		{
-			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(TextureType::ICON_CHECKMARK));
+			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CHECKMARK));
 			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
 			pIcon->SetPosition(4, 4);
 		}
-		else if (menuItem._icon != TextureType::NONE)
+		else if (menuItem._icon != Resource::NONE)
 		{
 			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(menuItem._icon));
 			if (menuItem._bMonochromeIcon)
@@ -189,7 +189,7 @@ namespace fig::gui
 
 		if (menuItem.HasSubMenu())
 		{
-			auto pArrow = pItemRoot->CreateControl<Image>(AppResources::GetTexture(TextureType::SUBMENU_ARROW));
+			auto pArrow = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::SUBMENU_ARROW));
 			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
 			pArrow->SetX(pItemRoot->GetWidth() - pArrow->GetWidth());
 			pArrow->CenterVertically();
@@ -225,7 +225,7 @@ namespace fig::gui
 		_fCollapseTimer = 0.0f;
 	}
 
-	EventResult Menu::OnEvent(Event& event)
+	EventResult Menu::OnEvent(fig::event& event)
 	{
 		if (!_bInitialized)
 			return EventResult::Pass;
@@ -387,6 +387,6 @@ namespace fig::gui
 		_submenuIndex = toI(menuItemIndex);
 		_pSubmenu = new Menu(_pOwner);
 		_pSubmenu->_items = menuItem._subItems;
-		_pSubmenu->Show(Point { GetX() + GetWidth(), GetY() + menuItem.rect.y }, false);
+		_pSubmenu->Show(fig::point { GetX() + GetWidth(), GetY() + menuItem.rect.y }, false);
 	}
 }

@@ -64,7 +64,7 @@ void Window::SetTitle(fig::string_view title)
 	SDL_SetWindowTitle(_window.get(), str.c_str());
 }
 
-bool Window::HandleEvent(fig::gui::Event& event)
+bool Window::HandleEvent(fig::event& event)
 {
 	if (!_pFrame)
 		return false;
@@ -73,7 +73,7 @@ bool Window::HandleEvent(fig::gui::Event& event)
 	{
 		if (GetWindowID() == event.window.windowID)
 		{
-			_pFrame->SetSize((Coord)event.window.data1, (Coord)event.window.data2);
+			_pFrame->SetSize((fig::coord)event.window.data1, (fig::coord)event.window.data2);
 			return true;
 		}
 	}

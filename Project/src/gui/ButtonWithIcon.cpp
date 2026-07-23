@@ -5,9 +5,9 @@
 
 namespace fig::gui
 {
-	ButtonWithIcon::ButtonWithIcon(ParentPtr pParent, TextureType icon) : ThemedButton(pParent)
+	ButtonWithIcon::ButtonWithIcon(ParentPtr pParent, Resource icon) : ThemedButton(pParent)
 	{
-		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_6PX, 8);
+		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
@@ -16,7 +16,7 @@ namespace fig::gui
 		SetSize(36, 36);
 	}
 
-	void ButtonWithIcon::SetIcon(TextureType icon)
+	void ButtonWithIcon::SetIcon(Resource icon)
 	{
 		_pIcon->SetTexture(AppResources::GetTexture(icon));
 	}
@@ -37,7 +37,7 @@ namespace fig::gui
 	{
 		if (bEnable)
 		{
-			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_6PX, 8);
+			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 			pBorder->SetColor(Colors::LineColor);
 		}
 		else

@@ -15,9 +15,9 @@ namespace fig::gui
 		Frame(Window* pHostWindow);
 		~Frame();
 
-		void Render(Renderer* pRenderer) override;
+		void Render(fig::renderer_ptr pRenderer) override;
 		void Update(float fElapsed) override;
-		EventResult ProcessEvent(Event& event) override;
+		EventResult ProcessEvent(fig::event& event) override;
 		Menu& CreateMenu() noexcept;
 
 		inline bool IsMenuShowing() const noexcept { return !_menus.empty(); };

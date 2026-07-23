@@ -17,8 +17,8 @@ namespace fig::gui
 
 		void SetName(string_cref name);
 		void SetMessage(fig::string text, bool complete = false);
-		void SetColors(const ColorPair& colors);
-		void SetColors(Color bgColor, Color borderColor);
+		void SetColors(const fig::color_pair& colors);
+		void SetColors(fig::color bgColor, fig::color borderColor);
 		void AppendMessage(const fig::string& text, bool complete = false);
 
 		void SetActive(bool bActive);
@@ -42,10 +42,10 @@ namespace fig::gui
 		bool _bActive = true;
 		fig::chat::MessageType _messageType = fig::chat::MessageType::Undefined;
 
-		Color _bgColor {};
-		Color _borderColor {};
-		Color _nameColor {};
-		Color _textColor {};
+		fig::color _bgColor {};
+		fig::color _borderColor {};
+		fig::color _nameColor {};
+		fig::color _textColor {};
 
 		enum Style
 		{

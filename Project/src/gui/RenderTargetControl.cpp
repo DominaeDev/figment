@@ -9,7 +9,7 @@ namespace fig::gui
 		_bLocalFromOrigin = true;
 	}
 
-	void RenderTargetControl::Render(RendererPtr pRenderer)
+	void RenderTargetControl::Render(fig::renderer_ptr pRenderer)
 	{
 		if (not _bVisible or _bCulled)
 			return;
@@ -21,8 +21,8 @@ namespace fig::gui
 
 		if (_targetTexture.empty() or _lastSize.x != width or _lastSize.y != height)
 		{
-			_lastSize = Point { width, height };
-			TexturePtr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
+			_lastSize = fig::point { width, height };
+			fig::texture_ptr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
 			if (pTarget)
 			{
 				SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND);
@@ -50,7 +50,7 @@ namespace fig::gui
 		SDL_RenderClear(pRenderer);
 
 		// Draw children
-		Rect cullingRect = expand_rect(GetRect(), 64);
+		fig::rect cullingRect = expand_rect(GetRect(), 64);
 		for (auto& child : _children)
 		{
 			auto renderable = dynamic_cast<Control*>(child); //! @todo: remove this cast

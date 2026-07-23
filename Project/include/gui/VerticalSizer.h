@@ -7,6 +7,6 @@ namespace fig::gui
 	class VerticalSizer : public Sizer
 	{
 	protected:
-		void OnLayout(const Rect& rect) override;
+		void OnLayout(const fig::rect& rect) override;
 	};
 }

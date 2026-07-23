@@ -4,14 +4,14 @@
 
 namespace fig::gui
 {
-	ImageWithMask::ImageWithMask(ParentPtr pParent, TexturePtr pTexture, TexturePtr pMask, Color tint) : Control(pParent)
+	ImageWithMask::ImageWithMask(ParentPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask, fig::color tint) : Control(pParent)
 	{
 		SetTexture(pTexture, pMask, true);
 		SetForegroundColor(tint);
 		SetBackgroundColor(Colors::Transparent);
 	}
 
-	void ImageWithMask::OnRender(Renderer* pRenderer)
+	void ImageWithMask::OnRender(fig::renderer_ptr pRenderer)
 	{
 		auto bgColor = GetBackgroundColor();
 		auto fgColor = GetForegroundColor();
@@ -36,7 +36,7 @@ namespace fig::gui
 		}
 	}
 
-	void ImageWithMask::SetTexture(TexturePtr pTexture, TexturePtr pMask, bool bResize)
+	void ImageWithMask::SetTexture(fig::texture_ptr pTexture, fig::texture_ptr pMask, bool bResize)
 	{
 		if (!pTexture)
 		{
@@ -52,7 +52,7 @@ namespace fig::gui
 		// Bake mask into texture
 		if (pMask)
 		{
-			TexturePtr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
+			fig::texture_ptr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
 			auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
 
 			SDL_SetRenderTarget(pRenderer, pTarget);
@@ -82,10 +82,10 @@ namespace fig::gui
 		}
 	}
 
-	Point ImageWithMask::GetTextureSize() const noexcept
+	fig::point ImageWithMask::GetTextureSize() const noexcept
 	{
 		if (_texture)
-			return Point { _texture.get()->w, _texture.get()->h };
+			return fig::point { _texture.get()->w, _texture.get()->h };
 		return {};
 	}
 

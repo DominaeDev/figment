@@ -13,6 +13,7 @@ namespace fig::io
 		fig::timestamp lastUsedAt {};
 		uint32_t chatCount {};
 		fig::data::Gender gender {};
+		fig::string_list tags {};
 
 		bool IsNew() const noexcept;
 	};

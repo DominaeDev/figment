@@ -7,16 +7,16 @@
 
 using namespace fig::gui;
 
-constexpr Coord Margin = 8;
+constexpr fig::coord Margin = 8;
 
 VariableList::VariableList(ParentPtr pParent) : Control(pParent)
 {
-	auto pBG = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_CENTER_BG, Corners { 30, 72, 64, 30 });
+	auto pBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BG, fig::corners { 30, 72, 64, 30 });
 	pBG->SetColor(Colors::MessageBackgroundDefault);
 	pBG->SetCornerScale(0.3f);
 	pBG->SetExtend(5);
 
-	auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_CENTER_BORDER, Corners { 30, 72, 64, 30 });
+	auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BORDER, fig::corners { 30, 72, 64, 30 });
 	pBorder->SetColor(Colors::MessageBorderDefault);
 	pBorder->SetCornerScale(0.3f);
 	pBorder->SetExtend(5);
@@ -29,7 +29,7 @@ VariableList::VariableList(ParentPtr pParent) : Control(pParent)
 	_pText->SetMaxSize(250, -1);
 }
 
-void VariableList::OnRender(Renderer* pRenderer)
+void VariableList::OnRender(fig::renderer_ptr pRenderer)
 {
 	if (_pText->GetText().empty())
 		return;
@@ -44,7 +44,7 @@ void VariableList::SetVariables(const std::map<fig::string, fig::string>& variab
 		text = text + std::format("{} = {}\n", kvp.first, kvp.second);
 	text = rtrim(text);
 
-	Coord w, h;
+	fig::coord w, h;
 	_pText->SetTextAndResize(text, w, h);
 	
 	SetSize(w + Margin * 2, h + Margin * 2);

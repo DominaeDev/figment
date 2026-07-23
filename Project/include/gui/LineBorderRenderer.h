@@ -17,10 +17,10 @@ namespace fig::gui
 	class LineBorderRenderer : public CustomRenderer
 	{
 	public:
-		explicit LineBorderRenderer(Color color = Colors::White, Directions directions = { Direction::North, Direction::East, Direction::South, Direction::West });
-		LineBorderRenderer(Color color, Direction direction);
+		explicit LineBorderRenderer(fig::color color = Colors::White, Directions directions = { Direction::North, Direction::East, Direction::South, Direction::West });
+		LineBorderRenderer(fig::color color, Direction direction);
 
-		void Render(Renderer* pRenderer, const Rectf& rect);
+		void Render(fig::renderer_ptr pRenderer, const fig::rectf& rect);
 
 	private:
 		Directions _directions {};

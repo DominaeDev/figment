@@ -3,21 +3,21 @@
 #include "gui/GUITypes.h"
 #include "io/Asset.h"
 
-namespace fig::gui
+namespace fig
 {
-	inline constexpr Rect expand_rect(const Rect& rect, int pixels)
+	inline constexpr fig::rect expand_rect(const fig::rect& rect, int pixels)
 	{
-		return Rect { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
+		return fig::rect { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2, rect.h + pixels * 2 };
 	}
 
-	inline constexpr Rectf expand_rect(const Rectf& rect, float pixels)
+	inline constexpr fig::rectf expand_rect(const fig::rectf& rect, float pixels)
 	{
-		return Rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2.0f, rect.h + pixels * 2.0f };
+		return fig::rectf { rect.x - pixels, rect.y - pixels, rect.w + pixels * 2.0f, rect.h + pixels * 2.0f };
 	}
 
-	inline constexpr Rect to_rect(const Rectf& rect)
+	inline constexpr fig::rect to_rect(const fig::rectf& rect)
 	{
-		return Rect {
+		return fig::rect {
 			(int32_t)rect.x,
 			(int32_t)rect.y,
 			(int32_t)rect.w,
@@ -25,9 +25,9 @@ namespace fig::gui
 		};
 	}
 
-	inline constexpr Rectf to_rectf(const Rect& rect)
+	inline constexpr fig::rectf to_rectf(const fig::rect& rect)
 	{
-		return Rectf {
+		return fig::rectf {
 			(float)rect.x,
 			(float)rect.y,
 			(float)rect.w,
@@ -35,33 +35,33 @@ namespace fig::gui
 		};
 	}
 
-	inline constexpr bool is_inside(const Rect& rect, int x, int y, int expand = 0)
+	inline constexpr bool is_inside(const fig::rect& rect, int x, int y, int expand = 0)
 	{
 		return x - expand >= rect.x and x + expand < rect.x + rect.w
 			and y - expand >= rect.y and y + expand < rect.y + rect.h;
 	}
 
-	inline constexpr bool is_inside(const Rectf& rect, float x, float y, float expand = 0.0f)
+	inline constexpr bool is_inside(const fig::rectf& rect, float x, float y, float expand = 0.0f)
 	{
 		return x - expand >= rect.x and x + expand< rect.x + rect.w
 			and y - expand >= rect.y and y + expand< rect.y + rect.h;
 	}
 
-	inline constexpr bool is_inside(const Rect& rect, const Point& p, int expand = 0)
+	inline constexpr bool is_inside(const fig::rect& rect, const fig::point& p, int expand = 0)
 	{
 		return p.x - expand >= rect.x and p.x + expand< rect.x + rect.w
 			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
 	}
 
-	inline constexpr bool is_inside(const Rectf& rect, const Pointf& p, float expand = 0.0f)
+	inline constexpr bool is_inside(const fig::rectf& rect, const fig::pointf& p, float expand = 0.0f)
 	{
 		return p.x - expand >= rect.x and p.x + expand< rect.x + rect.w
 			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
 	}
 
-	inline constexpr fig::gui::Colorf to_colorf(fig::gui::Color color)
+	inline constexpr fig::colorf to_colorf(fig::color color)
 	{
-		return fig::gui::Colorf {
+		return fig::colorf {
 			color.r / 255.0f,
 			color.g / 255.0f,
 			color.b / 255.0f,
@@ -69,9 +69,9 @@ namespace fig::gui
 		};
 	}
 
-	inline constexpr fig::gui::Color to_color(fig::gui::Colorf color)
+	inline constexpr fig::color to_color(fig::colorf color)
 	{
-		return fig::gui::Color {
+		return fig::color {
 			std::clamp(static_cast<uint8_t>(color.r * 255.0f), 0_u8, 255_u8),
 			std::clamp(static_cast<uint8_t>(color.g * 255.0f), 0_u8, 255_u8),
 			std::clamp(static_cast<uint8_t>(color.b * 255.0f), 0_u8, 255_u8),
@@ -108,13 +108,13 @@ namespace fig::gui
 	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha);
 	fig::sdl::Surface CreateSquarePortrait(const fig::sdl::Surface& surface);
 	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface);
-	fig::sdl::Texture CreateTexture(RendererPtr pRenderer, SurfacePtr pSurface);
-	fig::sdl::Texture CreateTexture(RendererPtr pRenderer, const fig::sdl::Surface& surface);
+	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, fig::surface_ptr pSurface);
+	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, const fig::sdl::Surface& surface);
 	fig::sdl::Surface CreateSurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data);
 
 	bool MaskCorners(fig::sdl::Surface& surface, MaskType style);
 	void AlphaToMask(fig::path filename);
 
-	Point MeasureText(Font& font, const fig::string& text);
-	int MeasureFontHeight(Font& font);
+	fig::point MeasureText(fig::font& font, const fig::string& text);
+	int MeasureFontHeight(fig::font& font);
 }

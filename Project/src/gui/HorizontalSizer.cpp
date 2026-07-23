@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	void HorizontalSizer::OnLayout(const Rect& parentRect)
+	void HorizontalSizer::OnLayout(const fig::rect& parentRect)
 	{
 		auto count = GetCount();
 		if (count == 0)
@@ -34,12 +34,12 @@ namespace fig::gui
 		if (totalProportion == 0)
 			totalProportion = 1;
 
-		Coord x = 0;
+		fig::coord x = 0;
 		for (auto& item : items)
 		{
 			auto pControl = item.GetControl();
 			auto& info = item.info;
-			Coord width = 0;
+			fig::coord width = 0;
 			if (info.prop == 0)
 			{
 				if ((info.flags & Sizer::FixedSize) != 0)
@@ -57,7 +57,7 @@ namespace fig::gui
 			if (pControl and pControl->GetMaxSize().x > 0) //! Move?
 				width = std::min(width, pControl->GetMaxSize().x);
 
-			Rect innerRect {
+			fig::rect innerRect {
 				parentRect.x + x,
 				parentRect.y,
 				width,

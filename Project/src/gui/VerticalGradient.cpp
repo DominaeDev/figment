@@ -4,26 +4,26 @@
 
 using namespace fig::gui;
 
-VerticalGradient::VerticalGradient(ParentPtr pParent, Color colorTop, Color colorBottom) : Control(pParent)
+VerticalGradient::VerticalGradient(ParentPtr pParent, fig::color colorTop, fig::color colorBottom) : Control(pParent)
 {
 	SetColors(colorTop, colorBottom);
-	_pTexture = AppResources::GetTexture(TextureType::BLANK);
+	_pTexture = AppResources::GetTexture(Resource::BLANK);
 }
 
-void VerticalGradient::SetColors(Color colorTop, Color colorBottom)
+void VerticalGradient::SetColors(fig::color colorTop, fig::color colorBottom)
 {
 	_colorTop = to_colorf(colorTop);
 	_colorBottom = to_colorf(colorBottom);
 }
 
-void VerticalGradient::SetTexture(fig::observer_ptr<Texture> pTexture)
+void VerticalGradient::SetTexture(fig::texture_ptr pTexture)
 {
 	_pTexture = pTexture;
 }
 
-void VerticalGradient::OnRender(Renderer* pRenderer)
+void VerticalGradient::OnRender(fig::renderer_ptr pRenderer)
 {
-	Rectf rect = GetDrawRect();
+	fig::rectf rect = GetDrawRect();
 	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);
 
@@ -31,7 +31,7 @@ void VerticalGradient::OnRender(Renderer* pRenderer)
 	SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), indices, 6);
 }
 
-void VerticalGradient::RefreshGeometry(Rectf rect)
+void VerticalGradient::RefreshGeometry(fig::rectf rect)
 {
 	_lastRect = rect;
 
@@ -43,8 +43,8 @@ void VerticalGradient::RefreshGeometry(Rectf rect)
 	float top = rect.y;
 	float bottom = rect.y + rect.h;
 
-	_vertices.push_back(Vertex { Pointf { left, bottom }, _colorBottom });
-	_vertices.push_back(Vertex { Pointf { right, bottom }, _colorBottom });
-	_vertices.push_back(Vertex { Pointf { right, top }, _colorTop });
-	_vertices.push_back(Vertex { Pointf { left, top }, _colorTop });
+	_vertices.push_back(fig::vertex { fig::pointf { left, bottom }, _colorBottom });
+	_vertices.push_back(fig::vertex { fig::pointf { right, bottom }, _colorBottom });
+	_vertices.push_back(fig::vertex { fig::pointf { right, top }, _colorTop });
+	_vertices.push_back(fig::vertex { fig::pointf { left, top }, _colorTop });
 }

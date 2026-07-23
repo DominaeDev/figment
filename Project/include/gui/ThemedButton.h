@@ -14,10 +14,10 @@ namespace fig::gui
 	protected:
 		ThemedButton(ParentPtr pParent);
 
-		const Color& GetThemeForeground() const noexcept;
-		const Color& GetThemeBackground() const noexcept;
+		const fig::color& GetThemeForeground() const noexcept;
+		const fig::color& GetThemeBackground() const noexcept;
 
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 		void OnAfterLayout() override;
 
 	private:

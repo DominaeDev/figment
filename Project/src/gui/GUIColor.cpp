@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/GUIColor.h"
 
-namespace fig::gui
+namespace fig
 {
 	static void RGBtoHSV(uint8_t src_r, uint8_t src_g, uint8_t src_b, float& dst_h, float& dst_s, float& dst_v)
 	{
@@ -78,15 +78,15 @@ namespace fig::gui
 		dst_b = (uint8_t)(b * 255);
 	}
 
-	Color Color::WithAlpha(uint8_t alpha) const noexcept
+	fig::color fig::color::WithAlpha(uint8_t alpha) const noexcept
 	{
-		return Color { r, g, b, alpha };
+		return fig::color { r, g, b, alpha };
 	}
 
-	Color Color::Add(Color other) const noexcept
+	fig::color fig::color::Add(fig::color other) const noexcept
 	{
 
-		return Color {
+		return fig::color {
 			static_cast<uint8_t>(std::clamp(toF(r) + toF(other.r), 0.0f, 255.0f)),
 			static_cast<uint8_t>(std::clamp(toF(g) + toF(other.g), 0.0f, 255.0f)),
 			static_cast<uint8_t>(std::clamp(toF(b) + toF(other.b), 0.0f, 255.0f)),
@@ -94,9 +94,9 @@ namespace fig::gui
 		};
 	}
 
-	Color Color::Add(int32_t value) const noexcept
+	fig::color fig::color::Add(int32_t value) const noexcept
 	{
-		return Color {
+		return fig::color {
 			static_cast<uint8_t>(std::clamp(r + value, 0, 255)),
 			static_cast<uint8_t>(std::clamp(g + value, 0, 255)),
 			static_cast<uint8_t>(std::clamp(b + value, 0, 255)),
@@ -104,9 +104,9 @@ namespace fig::gui
 		};
 	}
 
-	Color Color::Multiply(Color other) const noexcept
+	fig::color fig::color::Multiply(fig::color other) const noexcept
 	{
-		return Color {
+		return fig::color {
 			static_cast<uint8_t>(toF(r) * toF(other.r) / 255.0f),
 			static_cast<uint8_t>(toF(g) * toF(other.g) / 255.0f),
 			static_cast<uint8_t>(toF(b) * toF(other.b) / 255.0f),
@@ -114,7 +114,7 @@ namespace fig::gui
 		};
 	}
 
-	fig::string Color::ToString() const noexcept
+	fig::string fig::color::ToString() const noexcept
 	{
 		if (a == 0xFF)
 			return std::format("#{:02X}{:02X}{:02X}", r, g, b);
@@ -122,15 +122,15 @@ namespace fig::gui
 			return std::format("#{:02X}{:02X}{:02X}{:02X}", r, g, b, a);
 	}
 
-	Color Color::FromString(const fig::string& value) noexcept
+	fig::color fig::color::FromString(const fig::string& value) noexcept
 	{
 		fig::string hex = trim(value);
 		if (hex.empty())
-			return (Color)0;
+			return (fig::color)0;
 		if (hex[0] == '#')
 			hex = hex.erase(0, 1);
 		if (hex.length() != 6 && hex.length() != 8)
-			return (Color)0;
+			return (fig::color)0;
 
 		try
 		{
@@ -139,7 +139,7 @@ namespace fig::gui
 				uint8_t r = static_cast<uint8_t>(std::stoi(hex.substr(0, 2), nullptr, 16));
 				uint8_t g = static_cast<uint8_t>(std::stoi(hex.substr(2, 2), nullptr, 16));
 				uint8_t b = static_cast<uint8_t>(std::stoi(hex.substr(4, 2), nullptr, 16));
-				return Color { r, g, b, 0xff };
+				return fig::color { r, g, b, 0xff };
 			}
 			else if (hex.length() == 8)
 			{
@@ -147,27 +147,32 @@ namespace fig::gui
 				uint8_t g = static_cast<uint8_t>(std::stoi(hex.substr(2, 2), nullptr, 16));
 				uint8_t b = static_cast<uint8_t>(std::stoi(hex.substr(4, 2), nullptr, 16));
 				uint8_t a = static_cast<uint8_t>(std::stoi(hex.substr(6, 2), nullptr, 16));
-				return Color { r, g, b, a };
+				return fig::color { r, g, b, a };
 			}
 		}
 		catch (...)
 		{
-			return (Color)0;
+			return (fig::color)0;
 		}
-		return (Color)0;
+		return (fig::color)0;
 	}
 
-	std::tuple<float, float, float> Color::GetHSV() const noexcept
+	std::tuple<float, float, float> fig::color::GetHSV() const noexcept
 	{
 		float h, s, v;
 		RGBtoHSV(r, g, b, h, s, v);
 		return std::make_tuple(h, s, v);
 	}
 
-	Color Color::FromHSV(float h, float s, float v) noexcept
+	fig::color fig::color::FromHSV(float h, float s, float v) noexcept
 	{
 		uint8_t r, g, b;
 		HSVtoRGB(h, s, v, r, g, b);
-		return Color { r, g, b, 0xff };
+		return fig::color { r, g, b, 0xff };
+	}
+
+	fig::color::operator fig::colorf() const noexcept
+	{
+		return to_colorf(*this); 
 	}
 }

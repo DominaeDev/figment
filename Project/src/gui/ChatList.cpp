@@ -11,9 +11,9 @@ using namespace fig::user;
 
 namespace fig::gui
 {
-	static constexpr Coord TopMargin = 8;
-	static constexpr Coord Spacing = 8;
-	static constexpr Coord BottomMargin = 120;
+	static constexpr fig::coord TopMargin = 8;
+	static constexpr fig::coord Spacing = 8;
+	static constexpr fig::coord BottomMargin = 120;
 
 	static constexpr std::array<fig::string_view, 6> TimeBucketLabels {
 		"Just now",

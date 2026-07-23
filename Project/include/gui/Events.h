@@ -43,25 +43,25 @@ namespace fig::gui
 	extern uint32_t UserEventBase;
 
 	inline constexpr uint32_t SDLUserEvent(UserEvent e) { return UserEventBase + static_cast<uint32_t>(e); }
-	inline constexpr bool IsUserEvent(Event& event, UserEvent e) { return event.type == SDLUserEvent(e); }
-	inline constexpr bool IsUserEventWithData(Event& event, UserEvent e) { return event.type == SDLUserEvent(e) and event.user.data1 != 0; }
+	inline constexpr bool IsUserEvent(fig::event& event, UserEvent e) { return event.type == SDLUserEvent(e); }
+	inline constexpr bool IsUserEventWithData(fig::event& event, UserEvent e) { return event.type == SDLUserEvent(e) and event.user.data1 != 0; }
 	
 	template <typename T>
-	inline constexpr const T& GetUserData(Event& event) { return *reinterpret_cast<T*>(event.user.data1); }
+	inline constexpr const T& GetUserData(fig::event& event) { return *reinterpret_cast<T*>(event.user.data1); }
 	template <typename T>
-	inline constexpr const T& GetUserData1(Event& event) { return *reinterpret_cast<T*>(event.user.data1); }
+	inline constexpr const T& GetUserData1(fig::event& event) { return *reinterpret_cast<T*>(event.user.data1); }
 	template <typename T>
-	inline constexpr const T& GetUserData2(Event& event) { return *reinterpret_cast<T*>(event.user.data2); }
+	inline constexpr const T& GetUserData2(fig::event& event) { return *reinterpret_cast<T*>(event.user.data2); }
 	template <typename T, typename U>
-	inline constexpr std::pair<const T*, const U*> GetUserData(Event& event) { return std::pair { reinterpret_cast<T*>(event.user.data1), reinterpret_cast<T*>(event.user.data2) }; }
+	inline constexpr std::pair<const T*, const U*> GetUserData(fig::event& event) { return std::pair { reinterpret_cast<T*>(event.user.data1), reinterpret_cast<T*>(event.user.data2) }; }
 
-	inline constexpr bool HasUserData(Event& event) { return (bool)event.user.data1; }
-	inline constexpr bool HasUserData1(Event& event) { return (bool)event.user.data1; }
-	inline constexpr bool HasUserData2(Event& event) { return (bool)event.user.data2; }
+	inline constexpr bool HasUserData(fig::event& event) { return (bool)event.user.data1; }
+	inline constexpr bool HasUserData1(fig::event& event) { return (bool)event.user.data1; }
+	inline constexpr bool HasUserData2(fig::event& event) { return (bool)event.user.data2; }
 
 	inline void PushEvent(UserEvent eventType, int32_t code = 0)
 	{
-		Event event {};
+		fig::event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.code = code;
 		SDL_PushEvent(&event);
@@ -70,7 +70,7 @@ namespace fig::gui
 	template <typename T>
 	inline void PushEvent(UserEvent eventType, T* pData)
 	{
-		Event event {};
+		fig::event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.data1 = (void*)pData;
 		SDL_PushEvent(&event);
@@ -79,7 +79,7 @@ namespace fig::gui
 	template <typename T, typename U>
 	inline void PushEvent(UserEvent eventType, T* pData1, U* pData2)
 	{
-		Event event {};
+		fig::event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.data1 = (void*)pData1;
 		event.user.data2 = (void*)pData2;
@@ -89,7 +89,7 @@ namespace fig::gui
 	template <typename T>
 	inline void PushEvent(UserEvent eventType, int32_t code, T* pData)
 	{
-		Event event {};
+		fig::event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.code = code;
 		event.user.data1 = (void*)pData;
@@ -99,7 +99,7 @@ namespace fig::gui
 	template <typename T, typename U>
 	inline void PushEvent(UserEvent eventType, int32_t code, T* pData1, U* pData2)
 	{
-		Event event {};
+		fig::event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.code = code;
 		event.user.data1 = (void*)pData1;

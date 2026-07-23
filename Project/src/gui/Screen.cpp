@@ -11,7 +11,7 @@ namespace fig::gui
 		SetBackgroundColor(Colors::AppBackground);
 	}
 
-	EventResult Screen::OnEvent(Event& event)
+	EventResult Screen::OnEvent(fig::event& event)
 	{
 		// Key press or release
 		if ((event.type == SDL_EVENT_KEY_DOWN or event.type == SDL_EVENT_KEY_UP) and not event.key.repeat)
@@ -48,7 +48,7 @@ namespace fig::gui
 
 	void Screen::PushEvent(UserEvent eventType, int32_t code, void* pData1, void* pData2)
 	{
-		Event event {};
+		fig::event event {};
 		event.type = SDLUserEvent(eventType);
 		event.user.code = code;
 		event.user.data1 = pData1;

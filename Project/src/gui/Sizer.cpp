@@ -46,7 +46,7 @@ namespace fig::gui
 		}
 	}
 
-	void Sizer::AddSpacer(Coord size)
+	void Sizer::AddSpacer(fig::coord size)
 	{
 		_items.emplace_back(SizerItem {
 			.info = LayoutProperties {
@@ -108,7 +108,7 @@ namespace fig::gui
 		}
 	}
 
-	void Sizer::Layout(const Rect& parentRect)
+	void Sizer::Layout(const fig::rect& parentRect)
 	{
 		OnLayout(parentRect);
 

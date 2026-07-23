@@ -22,7 +22,7 @@ namespace fig::gui
 		_spacingY = std::max(y, 0);
 	}
 
-	void GridSizer::OnLayout(const Rect& parentRect)
+	void GridSizer::OnLayout(const fig::rect& parentRect)
 	{
 		auto count = GetCount();
 		if (count == 0)
@@ -39,7 +39,7 @@ namespace fig::gui
 		else
 			columns = 1;
 
-		Coord offsetX = _bCenterX ? (totalWidth - (columns * _cellWidth + std::max(columns - 1, 0) * _spacingX)) / 2 : 0;
+		fig::coord offsetX = _bCenterX ? (totalWidth - (columns * _cellWidth + std::max(columns - 1, 0) * _spacingX)) / 2 : 0;
 
 		int32_t index = 0;
 		for (auto& item : GetLayoutItems())

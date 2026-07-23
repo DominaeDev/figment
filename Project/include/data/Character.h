@@ -69,8 +69,8 @@ namespace fig::data
 		fig::string brief;
 		
 		Gender gender {};
-		fig::gui::Color bgColor {};
-		fig::gui::Color borderColor {};
+		fig::color bgColor {};
+		fig::color borderColor {};
 	
 	private:
 		void UpdateContext();

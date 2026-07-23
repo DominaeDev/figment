@@ -10,7 +10,7 @@ namespace fig::gui
 	{
 		SetSize(200, 36);
 
-		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_6PX, 8);
+		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundColor(GetThemeBackground());
 
@@ -19,7 +19,7 @@ namespace fig::gui
 		_pLabel->SetTextAndResize(text);
 		_pLabel->Center();
 
-		_pBorder = CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		_pBorder = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		_pBorder->SetForegroundColor(Colors::SidePanelForeground);
 		_pBorder->FillParent();
 

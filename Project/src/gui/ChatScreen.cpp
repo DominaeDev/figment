@@ -45,14 +45,14 @@ namespace fig::gui
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
 		auto underColor = Colors::Black.WithAlpha(0.45f);
-		constexpr Coord underGradientWidth = 80;
+		constexpr fig::coord underGradientWidth = 80;
 		_pUnderScroll = centerArea->CreateControl<Area>();
 		_pUnderScroll->SetBackgroundColor(underColor);
 		_pUnderScroll->SetWidth(Constants::GUI::ChatScrollWidth + (underGradientWidth * 2) + 40);
 		auto pUnderSizer = _pUnderScroll->SetSizer<HorizontalSizer>();
-		auto pLeftGradient = _pUnderScroll->CreateControl<Image>(TextureType::MASK_GRADIENT_EASE_IN_CUBIC_LEFT, underColor);
-		auto pUnderBG = _pUnderScroll->CreateControl<Image>(TextureType::BLANK, underColor);
-		auto pRightGradient = _pUnderScroll->CreateControl<Image>(TextureType::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT, underColor);
+		auto pLeftGradient = _pUnderScroll->CreateControl<Image>(Resource::MASK_GRADIENT_EASE_IN_CUBIC_LEFT, underColor);
+		auto pUnderBG = _pUnderScroll->CreateControl<Image>(Resource::BLANK, underColor);
+		auto pRightGradient = _pUnderScroll->CreateControl<Image>(Resource::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT, underColor);
 		pLeftGradient->SetWidth(underGradientWidth);
 		pRightGradient->SetWidth(underGradientWidth);
 		pUnderSizer->Add(pLeftGradient, 0, Sizer::Expand);
@@ -63,7 +63,7 @@ namespace fig::gui
 		pStaticText->SetAlignment(TextAlignment::Middle_Center);
 		pStaticText->SetSize(80, 80);
 		pStaticText->SetMinSize(-1, 80);
-		pStaticText->SetBackgroundColor(Color { 255, 255, 0, SDL_ALPHA_OPAQUE });
+		pStaticText->SetBackgroundColor(fig::color { 255, 255, 0, SDL_ALPHA_OPAQUE });
 		pStaticText->SetVisible(false);
 
 		_pSidePanel = CreateControl<ChatSidePanel>();
@@ -92,15 +92,15 @@ namespace fig::gui
 			_pTextBox->Clear();
 		});
 
-		auto pTextBoxBG = _pTextBox->SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::TEXTBOX_BG);
+		auto pTextBoxBG = _pTextBox->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::TEXTBOX_BG);
 		pTextBoxBG->SetCornerScale(0.5f);
 		pTextBoxBG->SetExtend(7.0f);
 		pTextBoxBG->SetColor(Colors::White);
 
-		auto pTextBoxBorder = _pTextBox->SetBorderRenderer<TexturedBorderRenderer>(TextureType::TEXTBOX_BORDER);
+		auto pTextBoxBorder = _pTextBox->SetBorderRenderer<TexturedBorderRenderer>(Resource::TEXTBOX_BORDER);
 		pTextBoxBorder->SetCornerScale(0.5f);
 		pTextBoxBorder->SetExtend(7.0f);
-		pTextBoxBorder->SetColor(Color { 0xb9, 0xb2, 0x8f, 0xFF });
+		pTextBoxBorder->SetColor(fig::color { 0xb9, 0xb2, 0x8f, 0xFF });
 
 		if constexpr (Disabled)
 		{
@@ -138,7 +138,7 @@ namespace fig::gui
 #endif
 	}
 
-	void ChatScreen::OnRender(Renderer* pRenderer)
+	void ChatScreen::OnRender(fig::renderer_ptr pRenderer)
 	{
 		DrawBackground(pRenderer);
 	}
@@ -347,7 +347,7 @@ namespace fig::gui
 		}
 	}
 
-	EventResult ChatScreen::OnEvent(Event& event)
+	EventResult ChatScreen::OnEvent(fig::event& event)
 	{
 		if (IsUserEvent(event, UserEvent::LLMChatInitializing))
 		{

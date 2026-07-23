@@ -10,13 +10,13 @@ namespace fig::gui
 		if (_pFont)
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
 		
-		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_6PX, 8);
+		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
 		pTextBoxBG->SetColor(Colors::White);
 
-		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_6PX, 8);
+		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Color { 0x61, 0x5a, 0x35, 0xFF });
+		pTextBoxBorder->SetColor(fig::color { 0x61, 0x5a, 0x35, 0xFF });
 	}
 
 	void SimpleTextBox::OnEnabled(bool bEnabled)

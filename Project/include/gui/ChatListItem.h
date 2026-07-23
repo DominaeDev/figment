@@ -31,7 +31,7 @@ namespace fig::gui
 		void OnUpdate(float fElapsed);
 
 		void OnSize() override;
-		EventResult OnEvent(Event& event);
+		EventResult OnEvent(fig::event& event);
 
 		void ShowMenu() noexcept;
 		void NotifyMetaUpdated();

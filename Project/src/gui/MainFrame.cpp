@@ -86,7 +86,7 @@ namespace fig::gui
 		}
 	}
 
-	void MainFrame::OnRender(Renderer* pRenderer)
+	void MainFrame::OnRender(fig::renderer_ptr pRenderer)
 	{
 		DrawBackground(pRenderer);
 	}
@@ -302,7 +302,7 @@ namespace fig::gui
 		}
 	}
 
-	EventResult MainFrame::OnEvent(Event& event)
+	EventResult MainFrame::OnEvent(fig::event& event)
 	{
 		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 		{

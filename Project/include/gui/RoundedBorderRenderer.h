@@ -8,19 +8,19 @@ namespace fig::gui
 	class RoundedBorderRenderer : public CustomRenderer
 	{
 	public:
-		explicit RoundedBorderRenderer(float radius, float thickness, Color color = Colors::White);
+		explicit RoundedBorderRenderer(float radius, float thickness, fig::color color = Colors::White);
 
-		void Render(Renderer* pRenderer, const Rectf& rect);
+		void Render(fig::renderer_ptr pRenderer, const fig::rectf& rect);
 
 	private:
-		void RefreshGeometry(Rectf rect);
+		void RefreshGeometry(fig::rectf rect);
 
-		Rectf _lastRect {};
-		fig::observer_ptr<Texture> _pTexture;
+		fig::rectf _lastRect {};
+		fig::texture_ptr _pTexture;
 		float _thickness = 0;
 		float _radius = 0;
 
-		std::vector<Vertex> _vertices {};
+		std::vector<fig::vertex> _vertices {};
 		std::vector<int> _indices {};
 	};
 }

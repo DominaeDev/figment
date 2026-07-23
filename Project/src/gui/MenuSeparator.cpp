@@ -7,7 +7,7 @@ namespace fig::gui
 	{
 	}
 
-	void MenuSeparator::OnRender(Renderer* pRenderer)
+	void MenuSeparator::OnRender(fig::renderer_ptr pRenderer)
 	{
 		auto fgColor = GetForegroundColor();
 		auto rect = GetRect();

@@ -16,7 +16,7 @@ namespace fig::gui
 		_pLabel = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
 		_pLabel->EnableEllipsis(true);
 
-		_pSignOutButton = CreateControl<ButtonWithIcon>(TextureType::ICON_LOGOUT);
+		_pSignOutButton = CreateControl<ButtonWithIcon>(Resource::ICON_LOGOUT);
 		_pSignOutButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pSignOutButton->SetSize(36, 36);
 		_pSignOutButton->CenterVertically();
@@ -30,9 +30,9 @@ namespace fig::gui
 		if (_pImage)
 		{
 			if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
-				_pImage->SetTexture(pTexture, AppResources::GetTexture(TextureType::MASK_CIRCLE));
+				_pImage->SetTexture(pTexture, AppResources::GetTexture(Resource::MASK_CIRCLE));
 			else
-				_pImage->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::MASK_CIRCLE));
+				_pImage->SetTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(Resource::MASK_CIRCLE));
 		}
 
 		if (_pLabel)

@@ -33,59 +33,36 @@ namespace fig
 	};
 }
 
-namespace fig::gui
+namespace fig
 {
-	// SDL types
-	using Pointf = SDL_FPoint;
-	using Point = SDL_Point;
-	using Rectf = SDL_FRect;
-	using Rect = SDL_Rect;
-	using Event = SDL_Event;
-	using Font = TTF_Font;
+	using point = SDL_Point;
+	using pointf = SDL_FPoint;
+	using rect = SDL_Rect;
+	using rectf = SDL_FRect;
+	using vertex = SDL_Vertex;
+	using event = SDL_Event;
+	using font = TTF_Font;
 
-	using Renderer = SDL_Renderer;
-	using Surface = SDL_Surface;
-	using Texture = SDL_Texture;
-	using Vertex = SDL_Vertex;
-	using Colorf = SDL_FColor;
+	using window_ptr = fig::observer_ptr<SDL_Window>;
+	using renderer_ptr = fig::observer_ptr<SDL_Renderer>;
+	using surface_ptr = fig::observer_ptr<SDL_Surface>;
+	using texture_ptr = fig::observer_ptr<SDL_Texture>;
+	using text_engine_ptr = fig::observer_ptr<TTF_TextEngine>;
+	using font_ptr = fig::observer_ptr<TTF_Font>;
 
-	using WindowPtr = SDL_Window*;
-	using RendererPtr = SDL_Renderer*;
-	using SurfacePtr = SDL_Surface*;
-	using TexturePtr = SDL_Texture*;
-	using TexturePtr = SDL_Texture*;
-	using VertexPtr = SDL_Vertex*;
-	using TextEnginePtr = TTF_TextEngine*;
-
-	using Coord = int32_t;
-	using Corners = std::array<Coord, 4>;
-
-	struct Mask
-	{
-		std::vector<uint8_t> pixels;
-		size_t width {};
-		size_t height {};
-		size_t pitch {};
-	};
-
-	using MaskPtr = const Mask*;
-
-	struct ColorPair
-	{
-		Color foreground;
-		Color background;
-	};
+	using coord = int32_t;
+	using corners = std::array<coord, 4>;
 
 	struct ButtonTheme
 	{
-		ColorPair defaultColor;
-		ColorPair hoverColor;
-		ColorPair pressedColor;
-		ColorPair disabledColor;
+		fig::color_pair defaultColor;
+		fig::color_pair hoverColor;
+		fig::color_pair pressedColor;
+		fig::color_pair disabledColor;
 	};
 
-	enum class TextureType;	//! @hmm
-	enum class MaskType; //! @hmm
+	enum class Resource;
+	enum class MaskType;
 
 	enum class ImageFormat : uint8_t
 	{

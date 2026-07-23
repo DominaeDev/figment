@@ -53,7 +53,7 @@ namespace fig::gui
 		void ShowNew(bool bShow);
 
 		enum class AddTagResult { Ok, Reject, Stop };
-		AddTagResult AddTag(const fig::string& tag, const Color& color = {});
+		AddTagResult AddTag(const fig::string& tag, const fig::color& color = {});
 
 		void OnUpdate(float fElapsed) override;
 		void OnSize() override;
@@ -106,7 +106,7 @@ namespace fig::gui
 		fig::observer_ptr<StaticText> _pSmallLabel;
 		fig::observer_ptr<Image> _pSmallStar;
 
-		Point _tagPosition {};
+		fig::point _tagPosition {};
 		int32_t _tagRows { 1 };
 
 		fig::sdl::Surface _imageSurface {};
@@ -124,7 +124,7 @@ namespace fig::gui
 		struct PendingTag
 		{
 			fig::string tag;
-			Color color;
+			fig::color color;
 		};
 		fig::string _pendingLabel {};
 		std::vector<PendingTag> _pendingTags {};

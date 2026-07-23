@@ -1,8 +1,6 @@
 #pragma once
 
-#include <SDL3_ttf/SDL_ttf.h>
-#include <map>
-#include <list>
+#include "GUITypes.h"
 
 namespace fig::gui
 {
@@ -23,23 +21,21 @@ namespace fig::gui
 		static void Init();
 		static void ReleaseFonts();
 
-		static TTF_Font* GetFont(FontFace, double ptSize);
+		static fig::font_ptr GetFont(FontFace, double ptSize);
 
 	private:
-		static TTF_Font* LoadFont(FontFace face, const char* filename, double ptSize);
-		static std::list<TTF_Font*> GetFallbackFonts(double ptSize);
-		static TTF_Font* LoadFallbackFont(const char* filename, double ptSize);
+		static fig::font_ptr LoadFont(FontFace face, const char* filename, double ptSize);
+		static std::list<fig::font_ptr> GetFallbackFonts(double ptSize);
+		static fig::font_ptr LoadFallbackFont(const char* filename, double ptSize);
 
 	private:
-
-		struct Font
+		struct font_face
 		{
-			TTF_Font* pFont;
+			fig::font_ptr pFont;
 			FontFace face;
 			int size;
 		};
-		static std::map<FontFace, std::list<Font>> s_Fonts;
-
-		static std::list<Font> s_FallbackFonts;
+		static std::map<FontFace, std::list<font_face>> s_Fonts;
+		static std::list<font_face> s_FallbackFonts;
 	};
 }

@@ -23,6 +23,7 @@ namespace fig::gui
 	class ChatScroll;
 	class ChatSidePanel;
 	class ChatBackground;
+	class Image;
 
 	class ChatScreen : public Screen
 	{
@@ -36,10 +37,10 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fElapsed) override;
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnAfterLayout() override;
 
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
 		bool OnCommand(fig::chat::ParsedChatCommand cmd);

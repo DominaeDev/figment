@@ -11,11 +11,11 @@ namespace fig::gui
 	public:
 		VerticalScrollBar(ParentPtr pParent);
 
-		void SetScroll(ScrollPanel& scrollPanel, float fPosition, Coord maxExtent);
+		void SetScroll(ScrollPanel& scrollPanel, float fPosition, fig::coord maxExtent);
 	
 	protected:
 		void OnUpdate(float fElapsed) override;
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 		bool HandleMouseDown(int32_t x, int32_t y);
 		bool HandleMouseUp(int32_t x, int32_t y);
 		bool HandleMouseMotion(int32_t x, int32_t y);

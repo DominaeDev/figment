@@ -10,17 +10,17 @@ namespace fig::Constants
 {
 	namespace GUI
 	{
-		constexpr fig::gui::Coord WindowDefaultWidth = 1320;
-		constexpr fig::gui::Coord WindowDefaultHeight = 900;
-		constexpr fig::gui::Coord WindowMinWidth = 800;
-		constexpr fig::gui::Coord WindowMinHeight = 600;
+		constexpr fig::coord WindowDefaultWidth = 1320;
+		constexpr fig::coord WindowDefaultHeight = 900;
+		constexpr fig::coord WindowMinWidth = 800;
+		constexpr fig::coord WindowMinHeight = 600;
 
 		constexpr double DefaultFontSize = 18.5;
 		constexpr double StatusBarFontSize = 14.5;
 		constexpr double CharacterNameFontSize = 12.0;
 		constexpr double ChatMessageFontSize = 16.0;
-		constexpr fig::gui::Coord ChatScrollWidth = 720;
-		constexpr fig::gui::Coord ChatTextBoxWidth = 680;
+		constexpr fig::coord ChatScrollWidth = 720;
+		constexpr fig::coord ChatTextBoxWidth = 680;
 		
 		constexpr float MouseScrollSpeed = 200.0f;
 		constexpr float MouseScrollSmoothing = 14.0f;
@@ -30,67 +30,67 @@ namespace fig::Constants
 
 		namespace Cards
 		{
-			constexpr fig::gui::Coord SpacingX = 18;
-			constexpr fig::gui::Coord SpacingY = 20;
+			constexpr fig::coord SpacingX = 18;
+			constexpr fig::coord SpacingY = 20;
 			constexpr float ZoomSmoothing = 10.0f;
 			constexpr float ZoomVerticalShift = 0.5f;
 
 			namespace Full
 			{
-				constexpr fig::gui::Coord Width = 320;
-				constexpr fig::gui::Coord Height = 412;
-				constexpr fig::gui::Coord ZoomPixels = 18;
-				constexpr fig::gui::Coord BorderOffset = 16;
-				constexpr fig::gui::Coord TextY = 32;
+				constexpr fig::coord Width = 320;
+				constexpr fig::coord Height = 412;
+				constexpr fig::coord ZoomPixels = 18;
+				constexpr fig::coord BorderOffset = 16;
+				constexpr fig::coord TextY = 32;
 
-				constexpr fig::gui::Coord InnerMargin = 12;
-				constexpr fig::gui::Coord FooterHeight = 80;
+				constexpr fig::coord InnerMargin = 12;
+				constexpr fig::coord FooterHeight = 80;
 
 				namespace Tags
 				{
-					constexpr fig::gui::Coord Margin = 10;
-					constexpr fig::gui::Coord Spacing = 6;
-					constexpr fig::gui::Coord InnerMargin = 8;
-					constexpr fig::gui::Coord MinWidth = 36;
-					constexpr fig::gui::Coord RowHeight = 32;
-					constexpr fig::gui::Coord Top = 70;
-					constexpr fig::gui::Coord MaxRows = 2;
+					constexpr fig::coord Margin = 10;
+					constexpr fig::coord Spacing = 6;
+					constexpr fig::coord InnerMargin = 8;
+					constexpr fig::coord MinWidth = 36;
+					constexpr fig::coord RowHeight = 32;
+					constexpr fig::coord Top = 70;
+					constexpr fig::coord MaxRows = 2;
 				}
 			}
 
 			namespace Half
 			{
-				constexpr fig::gui::Coord Width = 240;
-				constexpr fig::gui::Coord Height = 309;
-				constexpr fig::gui::Coord ZoomPixels = 16;
-				constexpr fig::gui::Coord BorderOffset = 12;
+				constexpr fig::coord Width = 240;
+				constexpr fig::coord Height = 309;
+				constexpr fig::coord ZoomPixels = 16;
+				constexpr fig::coord BorderOffset = 12;
 
-				constexpr fig::gui::Coord InnerMargin = 12;
-				constexpr fig::gui::Coord TextY = 28;
-				constexpr fig::gui::Coord FooterHeight = 60;
+				constexpr fig::coord InnerMargin = 12;
+				constexpr fig::coord TextY = 28;
+				constexpr fig::coord FooterHeight = 60;
 			}
 		}
 
-		constexpr fig::gui::Coord CardWidth = Cards::Full::Width;
-		constexpr fig::gui::Coord CardHeight = Cards::Full::Height;
-		constexpr fig::gui::Coord HalfCardWidth = Cards::Half::Width;
-		constexpr fig::gui::Coord HalfCardHeight = Cards::Half::Height;
+		constexpr fig::coord CardWidth = Cards::Full::Width;
+		constexpr fig::coord CardHeight = Cards::Full::Height;
+		constexpr fig::coord HalfCardWidth = Cards::Half::Width;
+		constexpr fig::coord HalfCardHeight = Cards::Half::Height;
 
 		namespace SidePanel
 		{
-			constexpr fig::gui::Coord HeaderHeight = 48;
-			constexpr fig::gui::Coord FooterHeight = 80;
-			constexpr fig::gui::Coord Width = 256;
+			constexpr fig::coord HeaderHeight = 48;
+			constexpr fig::coord FooterHeight = 80;
+			constexpr fig::coord Width = 256;
 		}
 
 		namespace ChatSidePanel
 		{
-			constexpr fig::gui::Coord Width = 340;
+			constexpr fig::coord Width = 340;
 		}
 
 		namespace ChatList
 		{
-			constexpr fig::gui::Coord Width = 760;
+			constexpr fig::coord Width = 760;
 		}
 
 		namespace Chat
@@ -125,7 +125,7 @@ namespace fig::Constants
 			constexpr fig::const_string User = "You";
 		}
 
-		constexpr fig::gui::Coord SmallPortraitWidth = 56;
+		constexpr fig::coord SmallPortraitWidth = 56;
 		constexpr std::array<fig::const_string, 23> ReservedCharacterIDs { "user", "char", "current", "director", "narrator", "system", "char1", "char2", "char3", "char4", "char5", "char6", "char7", "char8", "char", "bot1", "bot2", "bot3", "bot4", "bot5", "bot6", "bot7", "bot8"};
 	}
 

@@ -14,15 +14,15 @@ namespace fig::gui
 		area->SetSize(500, 500);
 
 		auto left = area->CreateControl<Panel>();
-		left->SetBackgroundColor(Color { 0xC0, 0, 0, 0xFF });
+		left->SetBackgroundColor(fig::color { 0xC0, 0, 0, 0xFF });
 		left->SetSize(50, 50);
 
 		auto center = area->CreateControl<Panel>();
-		center->SetBackgroundColor(Color { 0, 0xC0, 0, 0xFF });
+		center->SetBackgroundColor(fig::color { 0, 0xC0, 0, 0xFF });
 		center->SetSize(100, 100);
 
 		auto right = area->CreateControl<Panel>();
-		right->SetBackgroundColor(Color { 0, 0, 0xC0, 0xFF });
+		right->SetBackgroundColor(fig::color { 0, 0, 0xC0, 0xFF });
 		right->SetSize(100, 100);
 
 		auto h = right->SetSizer<HorizontalSizer>();
@@ -57,7 +57,7 @@ namespace fig::gui
 	{
 	}
 
-	void DebugScreen::OnRender(Renderer* pRenderer)
+	void DebugScreen::OnRender(fig::renderer_ptr pRenderer)
 	{
 	}
 

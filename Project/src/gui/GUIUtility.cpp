@@ -1,17 +1,17 @@
 #include <pch.h>
 #include <algorithm>
+#include <c_resource.h>
+#include <tuple>
+#include <cassert>
+#include <SDL3_image/SDL_image.h>
+
 #include "gui/GUIUtility.h"
 #include "gui/AppResources.h"
 #include "io/FileUtility.h"
 
-#include <SDL3_image/SDL_image.h>
-#include <c_resource.h>
-#include <tuple>
-#include <cassert>
-
-namespace fig::gui
+namespace fig
 {
-	fig::sdl::Texture CreateTexture(RendererPtr pRenderer, SurfacePtr pSurface)
+	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, fig::surface_ptr pSurface)
 	{
 		if (!pSurface)
 			return {};
@@ -20,7 +20,7 @@ namespace fig::gui
 		return fig::sdl::Texture::from_ptr(pTexture);
 	}
 
-	fig::sdl::Texture CreateTexture(RendererPtr pRenderer, const fig::sdl::Surface& surface)
+	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, const fig::sdl::Surface& surface)
 	{
 		if (surface.empty())
 			return {};
@@ -90,23 +90,23 @@ namespace fig::gui
 
 		if (fit == ImageFit::None)
 		{
-			fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
-			fig::gui::Rect dstRect { 0, 0, width, height };
+			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::rect dstRect { 0, 0, width, height };
 			SDL_BlitSurface(pImage, &srcRect, pSurface, &dstRect);
 
 		}
 		else if (fit == ImageFit::Stretch)
 		{
-			fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
-			fig::gui::Rect dstRect { 0, 0, width, height };
+			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::rect dstRect { 0, 0, width, height };
 			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
 		}
 		else if (fit == ImageFit::SquarePortrait)
 		{
 			if (pImage->w < 128 or pImage->h < 128)
 			{
-				fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
-				fig::gui::Rect dstRect { 0, 0, width, height };
+				fig::rect srcRect { 0, 0, pImage->w, pImage->h };
+				fig::rect dstRect { 0, 0, width, height };
 				SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
 			}
 			else
@@ -114,8 +114,8 @@ namespace fig::gui
 				constexpr float fContract = 0.05f;
 				float size = std::max(toF(pImage->w) * (1.0f - 2.0f * fContract), 128.0f);
 				float offset = std::min(toF(pImage->w) * fContract, std::max(toF(pImage->h) - toF(pImage->w) * fContract, 0.0f));
-				fig::gui::Rect srcRect { toI(offset), toI(offset), toI(size), toI(size) };
-				fig::gui::Rect dstRect { 0, 0, width, height };
+				fig::rect srcRect { toI(offset), toI(offset), toI(size), toI(size) };
+				fig::rect dstRect { 0, 0, width, height };
 				SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
 			}
 		}
@@ -139,8 +139,8 @@ namespace fig::gui
 			if (fit == ImageFit::Portrait)
 				newY = 0;
 
-			fig::gui::Rect srcRect { 0, 0, pImage->w, pImage->h };
-			fig::gui::Rect dstRect { toI(newX), toI(newY), toI(newWidth), toI(newHeight) };
+			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::rect dstRect { toI(newX), toI(newY), toI(newWidth), toI(newHeight) };
 
 			if (fit != ImageFit::Inside)
 			{
@@ -151,13 +151,13 @@ namespace fig::gui
 			}
 
 			// clip src
-			fig::gui::Rect tmp;
-			fig::gui::Rect fullRect { 0, 0, pImage->w, pImage->h };
+			fig::rect tmp;
+			fig::rect fullRect { 0, 0, pImage->w, pImage->h };
 			if (SDL_GetRectIntersection(&srcRect, &fullRect, &tmp))
 				srcRect = tmp;
 
 			// clip dst
-			fig::gui::Rect fixedRect { 0, 0, width, height };
+			fig::rect fixedRect { 0, 0, width, height };
 			if (SDL_GetRectIntersection(&dstRect, &fixedRect, &tmp))
 				dstRect = tmp;
 
@@ -259,7 +259,7 @@ namespace fig::gui
 		cover.reset(pSurface);
 
 		// Draw background
-		auto pBGImage = AppResources::GetImage(TextureType::CARD_BACKGROUND_DEFAULT);
+		auto pBGImage = AppResources::GetImage(Resource::CARD_BACKGROUND_DEFAULT);
 		SDL_BlitSurfaceScaled(pBGImage, NULL, pSurface, NULL, SDL_SCALEMODE_LINEAR);
 
 		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->h, ImageFit::Portrait);
@@ -289,7 +289,7 @@ namespace fig::gui
 			return {};
 
 		// Draw background
-		auto pBGImage = AppResources::GetImage(TextureType::SQUARE_BACKGROUND_DEFAULT);
+		auto pBGImage = AppResources::GetImage(Resource::SQUARE_BACKGROUND_DEFAULT);
 		SDL_BlitSurface(pBGImage, NULL, pSurface, NULL);
 
 		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->w, ImageFit::SquarePortrait, true);
@@ -326,7 +326,7 @@ namespace fig::gui
 		try
 		{
 			// Create SDL surface
-			SurfacePtr pSurface = SDL_CreateSurface(width, height, to_sdl_format(format));
+			fig::surface_ptr pSurface = SDL_CreateSurface(width, height, to_sdl_format(format));
 			if (!pSurface)
 				return {};
 
@@ -345,15 +345,15 @@ namespace fig::gui
 		return {};
 	}
 
-	Point MeasureText(Font& font, const fig::string& text)
+	fig::point MeasureText(fig::font& font, const fig::string& text)
 	{
 		int w, h;
 		if (TTF_GetStringSize(&font, text.c_str(), 0, &w, &h))
-			return Point { w, h };
+			return fig::point { w, h };
 		return {};
 	}
 
-	int MeasureFontHeight(Font& font)
+	int MeasureFontHeight(fig::font& font)
 	{
 		return TTF_GetFontHeight(&font);
 	}

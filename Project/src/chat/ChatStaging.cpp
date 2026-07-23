@@ -179,14 +179,14 @@ namespace fig::chat
 		return fig::string { Constants::Chat::Names::Unknown };
 	}
 
-	fig::gui::ColorPair ChatStaging::GetColorsOf(Role role) const
+	fig::color_pair ChatStaging::GetColorsOf(Role role) const
 	{
 		if (auto try_character = GetCharacterByRole(role))
 		{
 			auto& character = *try_character;
 			if (character.bgColor.IsDefined() && character.borderColor.IsDefined())
 			{
-				return ColorPair {
+				return fig::color_pair {
 					.foreground = character.borderColor,
 					.background = character.bgColor,
 				};
@@ -195,28 +195,28 @@ namespace fig::chat
 
 		if (is_bot(role))
 		{
-			return ColorPair {
+			return fig::color_pair {
 				.foreground = Colors::DefaultBotMessageBorders[get_bot_index(role) % 8],
 				.background = Colors::DefaultBotMessageBackgrounds[get_bot_index(role) % 8],
 			};
 		}
 		else if (role == Role::User)
 		{
-			return ColorPair {
+			return fig::color_pair {
 				.foreground = Colors::DefaultUserMessageBorder,
 				.background = Colors::DefaultUserMessageBackground,
 			};
 		}
 		else if (role == Role::System)
 		{
-			return ColorPair {
+			return fig::color_pair {
 				.foreground = Colors::MessageBorderNavy,
 				.background = Colors::MessageBackgroundNavy,
 			};
 		}
 		else
 		{
-			return ColorPair {
+			return fig::color_pair {
 				.foreground = Colors::MessageBorderDefault,
 				.background = Colors::MessageBackgroundDefault,
 			};

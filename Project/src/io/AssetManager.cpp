@@ -389,6 +389,7 @@ namespace fig::io
 			{
 				_assets.erase(id);
 				_pAssetDB->DeleteAsset(id);
+				LogLn(std::format("Removed missing asset {}", (fig::string)id));
 			}
 			DEBUG_MEASURE_END();
 		}
@@ -833,11 +834,11 @@ namespace fig::io
 		// Create SDL surface
 		int32_t width = cover.GetMeta<uint16_t>(MetaTag::ImageWidth).value_or(Constants::GUI::CardWidth);
 		int32_t height = cover.GetMeta<uint16_t>(MetaTag::ImageHeight).value_or(Constants::GUI::CardHeight);
-		fig::gui::ImageFormat format = static_cast<ImageFormat>(cover.GetMeta<uint8_t>(MetaTag::ImageFormat).value_or(0));
+		ImageFormat format = static_cast<ImageFormat>(cover.GetMeta<uint8_t>(MetaTag::ImageFormat).value_or(0));
 
 		try
 		{
-			SurfacePtr pSurface = SDL_CreateSurface(width, height, to_sdl_format(format));
+			fig::surface_ptr pSurface = SDL_CreateSurface(width, height, to_sdl_format(format));
 			if (!pSurface)
 				return false;
 

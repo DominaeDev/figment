@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	Image::Image(ParentPtr pParent, TexturePtr pTexture, Color tint) : Control(pParent),
+	Image::Image(ParentPtr pParent, fig::texture_ptr pTexture, fig::color tint) : Control(pParent),
 		_pTexture(pTexture)
 	{
 		if (_pTexture)
@@ -15,7 +15,7 @@ namespace fig::gui
 		SetBackgroundColor(Colors::Transparent);
 	}
 
-	Image::Image(ParentPtr pParent, TextureType texture, Color tint) : Control(pParent)
+	Image::Image(ParentPtr pParent, Resource texture, fig::color tint) : Control(pParent)
 	{
 		_pTexture = AppResources::GetTexture(texture);
 		if (_pTexture)
@@ -25,7 +25,7 @@ namespace fig::gui
 		SetBackgroundColor(Colors::Transparent);
 	}
 
-	void Image::OnRender(Renderer* pRenderer)
+	void Image::OnRender(fig::renderer_ptr pRenderer)
 	{
 		auto bgColor = GetBackgroundColor();
 		auto fgColor = GetForegroundColor();
@@ -53,22 +53,22 @@ namespace fig::gui
 		}
 	}
 
-	void Image::SetTexture(TexturePtr pTexture, bool bResize)
+	void Image::SetTexture(fig::texture_ptr pTexture, bool bResize)
 	{
 		_pTexture = pTexture;
 		if (bResize and pTexture)
 			SetSize(pTexture->w, pTexture->h);
 	}
 
-	void Image::SetTexture(TextureType texture, bool bResize)
+	void Image::SetTexture(Resource texture, bool bResize)
 	{
 		SetTexture(AppResources::GetTexture(texture), bResize);
 	}
 
-	Point Image::GetTextureSize() const noexcept
+	fig::point Image::GetTextureSize() const noexcept
 	{
 		if (_pTexture)
-			return Point { _pTexture->w, _pTexture->h };
+			return fig::point { _pTexture->w, _pTexture->h };
 		return {};
 	}
 }

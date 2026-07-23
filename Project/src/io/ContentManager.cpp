@@ -74,12 +74,12 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	fig::optional_ref<ContentMetaData> UserContentManager::GetMetaData(const fig::uuid& id) noexcept
+	fig::optional_ref<ContentMetaData> UserContentManager::GetMetaData(const fig::uuid& assetId) noexcept
 	{
-		if (auto itFind = _metaData.find(id); itFind != _metaData.cend())
+		if (auto itFind = _metaData.find(assetId); itFind != _metaData.cend())
 			return make_optional_ref(itFind->second);
 
-		if (auto tryAsset = _pAssetMngr->FindAsset(id))
+		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
 		{
 			auto& asset = tryAsset.value();
 
@@ -90,16 +90,23 @@ namespace fig::io
 
 			if (asset.asset_type == AssetType::Character)
 			{
+				if (auto try_character = Get<Character>(assetId))
+				{
+					metaData.name = (*try_character).shortName;
+					metaData.gender = (*try_character).gender;
+					metaData.tags = (*try_character).GetTags();
+				}
+
 				// Count chats
-				metaData.chatCount = static_cast<uint32_t>(GetChatCount(id));
+				metaData.chatCount = static_cast<uint32_t>(GetChatCount(assetId));
 
 				// Last used => last chat
 				if (auto lastChat = FindLastChatWith(asset.id))
 					metaData.lastUsedAt = std::max(metaData.lastUsedAt, lastChat.value().GetLastUsedAt());
 			}
 
-			_metaData[id] = metaData;
-			return make_optional_ref(_metaData.at(id));
+			_metaData[assetId] = metaData;
+			return make_optional_ref(_metaData.at(assetId));
 		}
 
 		return fig::nullref;
@@ -208,7 +215,7 @@ namespace fig::io
 		_pAssetMngr->SaveModified();
 	}
 
-	fig::expected_ref<fig::sdl::Texture, FileError> UserContentManager::GetSmallPortraitForCharacter(const fig::uuid& characterId, TexturePtr pMask, RendererPtr pRenderer) noexcept
+	fig::expected_ref<fig::sdl::Texture, FileError> UserContentManager::GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept
 	{
 		if (auto itRenderer = _cachedTextures.find(pRenderer); itRenderer != _cachedTextures.cend())
 		{
@@ -238,7 +245,7 @@ namespace fig::io
 						auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
 
 						// Bake mask into texture
-						TexturePtr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
+						fig::texture_ptr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
 						SDL_SetRenderTarget(pRenderer, pTarget);
 						SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
 						SDL_RenderClear(pRenderer);

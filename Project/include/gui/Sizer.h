@@ -36,12 +36,12 @@ namespace fig::gui
 		};
 
 	public:
-		void Layout(const Rect& parentRect);
+		void Layout(const fig::rect& parentRect);
 		virtual ~Sizer();
 
 		void Add(LayoutElement* pControl, int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0);
 		void Add(Sizer* pControl, int32_t proportion = 0, int32_t flags = Flag::Default, int border = 0);
-		void AddSpacer(Coord size);
+		void AddSpacer(fig::coord size);
 		void AddStretchSpacer();
 		void Remove(LayoutElement* pControl);
 		void RemoveAll();
@@ -83,7 +83,7 @@ namespace fig::gui
 		{
 			LayoutProperties info {};
 			SizerTarget target { EmptyTarget {} };
-			Rect rect {};
+			fig::rect rect {};
 
 			LayoutElementPtr GetControl() const
 			{
@@ -106,7 +106,7 @@ namespace fig::gui
 				});
 		}
 
-		virtual void OnLayout(const Rect& rect) = 0;
+		virtual void OnLayout(const fig::rect& rect) = 0;
 		void Update(float fElapsed) override {};
 	
 	private:

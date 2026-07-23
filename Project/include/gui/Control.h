@@ -16,14 +16,14 @@ namespace fig::gui
 		Control(ParentPtr pParent, Window* pHostWindow);
 		virtual ~Control() = default;
 
-		virtual void Render(Renderer* pRenderer);
+		virtual void Render(fig::renderer_ptr pRenderer);
 
-		Color GetForegroundColor() const;
-		Color GetBackgroundColor() const;
+		fig::color GetForegroundColor() const;
+		fig::color GetBackgroundColor() const;
 		inline bool GetClipping() const { return _bClipping; }
-		virtual void SetForegroundColor(Color color) { _foregroundColor = color; }
-		virtual void SetBackgroundColor(Color color) { _backgroundColor = color; }
-		inline void SetBorderColor(Color color) noexcept { _borderColor = color; }
+		virtual void SetForegroundColor(fig::color color) { _foregroundColor = color; }
+		virtual void SetBackgroundColor(fig::color color) { _backgroundColor = color; }
+		inline void SetBorderColor(fig::color color) noexcept { _borderColor = color; }
 		inline void EnableClipping(bool bEnable) noexcept { _bClipping = bEnable; }
 		inline void EnableCulling(bool bEnable) noexcept { _bCulling = bEnable; }
 
@@ -31,7 +31,7 @@ namespace fig::gui
 		void SetVisible(bool bVisible);
 		bool GetEnabled() const { return _bEnabled; }
 		void SetEnabled(bool bEnabled);
-		virtual EventResult ProcessEvent(Event& event);
+		virtual EventResult ProcessEvent(fig::event& event);
 
 		void SetBackgroundRenderer(CustomRenderer* pCustom);
 		void SetBorderRenderer(CustomRenderer* pCustom);
@@ -57,40 +57,40 @@ namespace fig::gui
 		void ClearBackgroundRenderer();
 		void ClearBorderRenderer();
 
-		void SetMargins(Coord left, Coord top, Coord right, Coord bottom);
-		void SetMargins(Rect rect);
-		Rect GetClientRect() const noexcept;
-		inline void SetMarginLeft(Coord margin) noexcept { _marginLeft = margin; }
-		inline void SetMarginTop(Coord margin) noexcept { _marginTop = margin; }
-		inline void SetMarginRight(Coord margin) noexcept { _marginRight = margin; }
-		inline void SetMarginBottom(Coord margin) noexcept { _marginBottom = margin; }
-		inline Coord GetMarginLeft() const noexcept { return _marginLeft; }
-		inline Coord GetMarginTop() const noexcept { return _marginTop; }
-		inline Coord GetMarginRight() const noexcept { return _marginRight; }
-		inline Coord GetMarginBottom() const noexcept { return _marginBottom; }
+		void SetMargins(fig::coord left, fig::coord top, fig::coord right, fig::coord bottom);
+		void SetMargins(fig::rect rect);
+		fig::rect GetClientRect() const noexcept;
+		inline void SetMarginLeft(fig::coord margin) noexcept { _marginLeft = margin; }
+		inline void SetMarginTop(fig::coord margin) noexcept { _marginTop = margin; }
+		inline void SetMarginRight(fig::coord margin) noexcept { _marginRight = margin; }
+		inline void SetMarginBottom(fig::coord margin) noexcept { _marginBottom = margin; }
+		inline fig::coord GetMarginLeft() const noexcept { return _marginLeft; }
+		inline fig::coord GetMarginTop() const noexcept { return _marginTop; }
+		inline fig::coord GetMarginRight() const noexcept { return _marginRight; }
+		inline fig::coord GetMarginBottom() const noexcept { return _marginBottom; }
 
 	protected:
-		virtual void OnRender(Renderer* pRenderer);
+		virtual void OnRender(fig::renderer_ptr pRenderer);
 		virtual void OnPostRender() {};
 		virtual void OnVisibility(bool bVisible) {};
 		virtual void OnEnabled(bool bEnabled) {};
 		virtual void OnParent();
-		virtual EventResult OnEvent(Event& event) { return EventResult::Pass; }
+		virtual EventResult OnEvent(fig::event& event) { return EventResult::Pass; }
 
-		void DrawBackground(Renderer* pRenderer);
-		void DrawBorder(Renderer* pRenderer);
-		inline Coord GetMarginHorizontal() const noexcept { return _marginLeft + _marginRight; }
-		inline Coord GetMarginVertical() const noexcept { return _marginTop + _marginBottom; }
+		void DrawBackground(fig::renderer_ptr pRenderer);
+		void DrawBorder(fig::renderer_ptr pRenderer);
+		inline fig::coord GetMarginHorizontal() const noexcept { return _marginLeft + _marginRight; }
+		inline fig::coord GetMarginVertical() const noexcept { return _marginTop + _marginBottom; }
 
-		WindowPtr GetSDLWindow();
-		RendererPtr GetSDLRenderer();
-		TextEnginePtr GetSDLTextEngine();
-		Point GetMousePos() const noexcept;
+		fig::window_ptr GetSDLWindow();
+		fig::renderer_ptr GetSDLRenderer();
+		fig::text_engine_ptr GetSDLTextEngine();
+		fig::point GetMousePos() const noexcept;
 
 	protected:
-		Color _foregroundColor {};
-		Color _backgroundColor {};
-		Color _borderColor {};
+		fig::color _foregroundColor {};
+		fig::color _backgroundColor {};
+		fig::color _borderColor {};
 		bool _bClipping = false;
 		bool _bCulling = false;
 		bool _bVisible = true;
@@ -101,17 +101,17 @@ namespace fig::gui
 		std::unique_ptr<CustomRenderer> _pBorderRenderer;
 	
 		// Margin
-		Coord _marginLeft = 0;
-		Coord _marginTop = 0;
-		Coord _marginRight = 0;
-		Coord _marginBottom = 0;
+		fig::coord _marginLeft = 0;
+		fig::coord _marginTop = 0;
+		fig::coord _marginRight = 0;
+		fig::coord _marginBottom = 0;
 
 	private:
 		struct ControlRenderContext
 		{
-			WindowPtr pWindow {};	// weak
-			RendererPtr pRenderer {};	// weak
-			TextEnginePtr pTextEngine {};	// weak
+			fig::window_ptr pWindow {};	// weak
+			fig::renderer_ptr pRenderer {};	// weak
+			fig::text_engine_ptr pTextEngine {};	// weak
 		};
 		std::shared_ptr<ControlRenderContext> _renderContext {};
 		std::shared_ptr<ControlRenderContext> GetRenderContext();

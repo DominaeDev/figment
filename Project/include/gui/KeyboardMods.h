@@ -16,7 +16,7 @@ namespace fig::gui
 	struct KeyboardMods
 	{
 		KeyboardMods() = delete;
-		constexpr explicit KeyboardMods(const Event& event) : 
+		constexpr explicit KeyboardMods(const fig::event& event) : 
 			None((event.key.mod & (SDL_KMOD_CTRL | SDL_KMOD_SHIFT | SDL_KMOD_ALT)) == 0),
 			ControlDown((event.key.mod & SDL_KMOD_CTRL) != 0),
 			ShiftDown((event.key.mod & SDL_KMOD_SHIFT) != 0),

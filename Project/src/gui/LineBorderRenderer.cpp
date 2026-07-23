@@ -3,16 +3,16 @@
 
 namespace fig::gui
 {
-	LineBorderRenderer::LineBorderRenderer(Color color, Directions directions) : CustomRenderer(color),
+	LineBorderRenderer::LineBorderRenderer(fig::color color, Directions directions) : CustomRenderer(color),
 		_directions { directions }
 	{
 	}
-	LineBorderRenderer::LineBorderRenderer(Color color, Direction direction) : CustomRenderer(color),
+	LineBorderRenderer::LineBorderRenderer(fig::color color, Direction direction) : CustomRenderer(color),
 		_directions { direction }
 	{
 	}
 
-	void LineBorderRenderer::Render(Renderer* pRenderer, const Rectf& rect)
+	void LineBorderRenderer::Render(fig::renderer_ptr pRenderer, const fig::rectf& rect)
 	{
 		SDL_SetRenderDrawColor(pRenderer, _color.r, _color.g, _color.b, _color.a);
 		

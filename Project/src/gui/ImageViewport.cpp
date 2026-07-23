@@ -5,9 +5,9 @@
 
 namespace fig::gui
 {
-	static constexpr Coord CornerSize = 8;
+	static constexpr fig::coord CornerSize = 8;
 
-	ImageViewport::ImageViewport(ParentPtr pParent, TexturePtr pTexture, TexturePtr pMask) noexcept : Control(pParent),
+	ImageViewport::ImageViewport(ParentPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
 		_pTexture(pTexture),
 		_pMask(pMask)
 	{
@@ -17,11 +17,11 @@ namespace fig::gui
 		SetForegroundColor(Colors::White);
 		SetBackgroundColor(Colors::Transparent);
  
-		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_6PX, CornerSize);
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, CornerSize);
 		pBorder->SetColor(Colors::LineColor);
 	}
 
-	void ImageViewport::OnRender(Renderer* pRenderer)
+	void ImageViewport::OnRender(fig::renderer_ptr pRenderer)
 	{
 		auto bgColor = GetBackgroundColor();
 		auto fgColor = GetForegroundColor();
@@ -53,7 +53,7 @@ namespace fig::gui
 		}
 	}
 
-	EventResult ImageViewport::OnEvent(Event& event)
+	EventResult ImageViewport::OnEvent(fig::event& event)
 	{
 		switch (event.type)
 		{
@@ -85,14 +85,14 @@ namespace fig::gui
 
 	void ImageViewport::ClampOffset()
 	{
-		Rectf drawRect = CalcDrawRect(_fZoom, _offset);
+		fig::rectf drawRect = CalcDrawRect(_fZoom, _offset);
 		float maxOffsetX = std::max(0.0f, (drawRect.w - toF(GetWidth())) / 2.0f);
 		float maxOffsetY = std::max(0.0f, (drawRect.h - toF(GetHeight())) / 2.0f);
 		_offset.x = std::clamp(_offset.x, toI(-maxOffsetX), toI(maxOffsetX));
 		_offset.y = std::clamp(_offset.y, toI(-maxOffsetY), toI(maxOffsetY));
 	}
 
-	Rectf ImageViewport::CalcDrawRect(float zoom, Point offset) const
+	fig::rectf ImageViewport::CalcDrawRect(float zoom, fig::point offset) const
 	{
 		float dstWidth = toF(GetWidth());
 		float dstHeight = toF(GetHeight());
@@ -102,7 +102,7 @@ namespace fig::gui
 
 		scale = std::min(scale, 1.0f);
 
-		Rectf drawRect;
+		fig::rectf drawRect;
 		drawRect.w = srcWidth * scale;
 		drawRect.h = srcHeight * scale;
 		drawRect.x = (dstWidth - drawRect.w) / 2.0f - toF(offset.x);
@@ -123,15 +123,15 @@ namespace fig::gui
 	bool ImageViewport::HandleMouseWheel(SDL_MouseWheelEvent& event)
 	{
 		auto& rect = GetRect();
-		Point pt = { toI(event.mouse_x), toI(event.mouse_y) };
+		fig::point pt = { toI(event.mouse_x), toI(event.mouse_y) };
 		if (!SDL_PointInRect(&pt, &rect))
 			return false;
 
 		if (_fZoom == 1.0f && event.integer_y < 0)
 			return true; // Ignore, clamped
 
-		Rectf oldDrawRect = CalcDrawRect(_fZoom, _offset);
-		Point mouseLocal = { pt.x - rect.x, pt.y - rect.y };
+		fig::rectf oldDrawRect = CalcDrawRect(_fZoom, _offset);
+		fig::point mouseLocal = { pt.x - rect.x, pt.y - rect.y };
 		float fractionX = (toF(mouseLocal.x) - oldDrawRect.x) / oldDrawRect.w;
 		float fractionY = (toF(mouseLocal.y) - oldDrawRect.y) / oldDrawRect.h;
 
@@ -139,7 +139,7 @@ namespace fig::gui
 		_fZoom = std::max(newZoom, 1.0f);
 		_fZoom = std::min(_fZoom, 1.0f / GetFitScale());
 		
-		Rectf newDrawRect = CalcDrawRect(newZoom, { 0, 0 });
+		fig::rectf newDrawRect = CalcDrawRect(newZoom, { 0, 0 });
 		float newDrawRectX = toF(mouseLocal.x) - fractionX * newDrawRect.w;
 		float newDrawRectY = toF(mouseLocal.y) - fractionY * newDrawRect.h;
 
@@ -158,7 +158,7 @@ namespace fig::gui
 			return false;
 
 		_bMouseDown = true;
-		_mouseDownPos = Point { toI(event.x), toI(event.y) };
+		_mouseDownPos = fig::point { toI(event.x), toI(event.y) };
 		_mouseDownOffset = _offset;
 
 		return true;
@@ -187,18 +187,18 @@ namespace fig::gui
 		return true;
 	}
 
-	void ImageViewport::SetTexture(TexturePtr pTexture) noexcept
+	void ImageViewport::SetTexture(fig::texture_ptr pTexture) noexcept
 	{
 		_pTexture = pTexture;
 		
 		if (_pTexture)
 		{
-			_imageSize = Point { _pTexture->w, _pTexture->h };
+			_imageSize = fig::point { _pTexture->w, _pTexture->h };
 			_fImageRatio = toF(_imageSize.x) / toF(_imageSize.y);
 		}
 		else
 		{
-			_imageSize = Point {};
+			_imageSize = fig::point {};
 			_fImageRatio = 1.0f;
 		}
 
@@ -206,7 +206,7 @@ namespace fig::gui
 		SetDirty();
 	}
 
-	void ImageViewport::SetMask(TexturePtr pTexture) noexcept
+	void ImageViewport::SetMask(fig::texture_ptr pTexture) noexcept
 	{
 		_pMask = pTexture;
 		_bRedraw = true;
@@ -220,7 +220,7 @@ namespace fig::gui
 
 		if (width != _lastSize.x or height != _lastSize.y)
 		{
-			_lastSize = Point { width, height };
+			_lastSize = fig::point { width, height };
 			_targetTexture.clear();
 			ClampOffset();
 		}
@@ -228,7 +228,7 @@ namespace fig::gui
 		auto pRenderer = GetSDLRenderer();
 		SDL_assert(pRenderer);
 
-		TexturePtr pTarget = _targetTexture.get();
+		fig::texture_ptr pTarget = _targetTexture.get();
 		if (!pTarget)
 		{
 			pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
@@ -241,7 +241,7 @@ namespace fig::gui
 
 		constexpr float fCorner = toF(CornerSize);
 
-		Rectf drawRect = CalcDrawRect(_fZoom, _offset);
+		fig::rectf drawRect = CalcDrawRect(_fZoom, _offset);
 
 		// Render with alpha
 		if (_pMask)

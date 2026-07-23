@@ -8,9 +8,9 @@ namespace fig::user
 	struct UserProfile;
 }
 
-namespace fig::gui
+namespace fig
 {
-	enum class TextureType
+	enum class Resource
 	{
 		NONE,
 
@@ -127,24 +127,34 @@ namespace fig::gui
 		CARD_CORNER_MASK,
 	};
 
+	struct Mask
+	{
+		std::vector<uint8_t> pixels;
+		size_t width {};
+		size_t height {};
+		size_t pitch {};
+	};
+
+	using MaskPtr = const Mask*;
+
 	class AppResources
 	{
 	public:
-		static void Init(RendererPtr pRenderer);
+		static void Init(fig::renderer_ptr pRenderer);
 		static void Release();
-		static TexturePtr GetTexture(TextureType id);
-		static SurfacePtr GetImage(TextureType id) noexcept;
+		static fig::texture_ptr GetTexture(Resource id);
+		static fig::surface_ptr GetImage(Resource id) noexcept;
 		static MaskPtr GetMask(MaskType maskId);
 
-		static TexturePtr GetUserProfileImage(RendererPtr pRenderer, const fig::user::UserProfile& profile);
+		static fig::texture_ptr GetUserProfileImage(fig::renderer_ptr pRenderer, const fig::user::UserProfile& profile);
 
 	private:
-		static bool LoadTexture(RendererPtr pRenderer, TextureType textureId, fig::path filename);
-		static bool LoadTextureAndMaskCorners(RendererPtr pRenderer, TextureType textureId, MaskType maskId, fig::path filename);
+		static bool LoadTexture(fig::renderer_ptr pRenderer, Resource textureId, fig::path filename);
+		static bool LoadTextureAndMaskCorners(fig::renderer_ptr pRenderer, Resource textureId, MaskType maskId, fig::path filename);
 		static bool LoadMask(MaskType textureId, fig::path filename);
 
-		static std::map<TextureType, fig::sdl::Surface> _surfaces;
-		static std::map<TextureType, fig::sdl::Texture> _textures;
+		static std::map<Resource, fig::sdl::Surface> _surfaces;
+		static std::map<Resource, fig::sdl::Texture> _textures;
 		static std::map<MaskType, Mask> _masks;
 		static std::map<fig::uuid, fig::sdl::Surface> _profileSurfaces;
 		static std::map<fig::uuid, fig::sdl::Texture> _profileTextures;

@@ -3,11 +3,11 @@
 
 namespace fig::gui
 {
-	SolidFillRenderer::SolidFillRenderer(Color color) : CustomRenderer(color)
+	SolidFillRenderer::SolidFillRenderer(fig::color color) : CustomRenderer(color)
 	{
 	}
 
-	void SolidFillRenderer::Render(Renderer* pRenderer, const Rectf& rect)
+	void SolidFillRenderer::Render(fig::renderer_ptr pRenderer, const fig::rectf& rect)
 	{
 		if (_color.a == 0xFF)
 		{

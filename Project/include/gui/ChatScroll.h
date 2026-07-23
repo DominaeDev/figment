@@ -30,9 +30,9 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fElapsed) override;
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 		void OnAfterLayout() override;
-		void OnRenderMask(RendererPtr pRenderer, fig::sdl::Texture& texture) override;
+		void OnRenderMask(fig::renderer_ptr pRenderer, fig::sdl::Texture& texture) override;
 
 	private:
 		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message, bool complete);

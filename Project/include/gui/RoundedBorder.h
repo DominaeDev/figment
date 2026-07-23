@@ -7,21 +7,21 @@ namespace fig::gui
 	class RoundedBorder : public Control
 	{
 	public:
-		RoundedBorder(ParentPtr pParent, float radius, float thickness, Color color);
+		RoundedBorder(ParentPtr pParent, float radius, float thickness, fig::color color);
 
-		void OnRender(Renderer* pRenderer);
-		void SetColor(Color color);
+		void OnRender(fig::renderer_ptr pRenderer);
+		void SetColor(fig::color color);
 
 	private:
-		void RefreshGeometry(Rectf rect);
+		void RefreshGeometry(fig::rectf rect);
 
-		Color _color {};
-		Rectf _lastRect {};
-		fig::observer_ptr<Texture> _pTexture;
+		fig::color _color {};
+		fig::rectf _lastRect {};
+		fig::texture_ptr _pTexture;
 		float _thickness = 0;
 		float _radius = 0;
 
-		std::vector<Vertex> _vertices {};
+		std::vector<fig::vertex> _vertices {};
 		std::vector<int> _indices {};
 	};
 }

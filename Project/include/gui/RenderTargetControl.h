@@ -9,15 +9,15 @@ namespace fig::gui
 	protected:
 		RenderTargetControl(ParentPtr parent);
 
-		void Render(RendererPtr pRenderer) override;
+		void Render(fig::renderer_ptr pRenderer) override;
 		void SetAlpha(float alpha);
 		void SetAlpha(uint8_t alpha);
 	
-		virtual void OnRenderMask(RendererPtr pRenderer, fig::sdl::Texture& texture) {};
+		virtual void OnRenderMask(fig::renderer_ptr pRenderer, fig::sdl::Texture& texture) {};
 
 	private:
 		fig::sdl::Texture _targetTexture;
 		uint8_t _alpha { 0xFF };
-		Point _lastSize { -1, -1 };
+		fig::point _lastSize { -1, -1 };
 	};
 }

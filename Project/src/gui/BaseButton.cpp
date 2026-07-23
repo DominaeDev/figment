@@ -27,12 +27,12 @@ namespace fig::gui
 		return _state != ButtonState::Disabled; 
 	}
 
-	void BaseButton::SetExpandedArea(Coord size) noexcept
+	void BaseButton::SetExpandedArea(fig::coord size) noexcept
 	{
 		_expand = std::max(size, 0);
 	}
 
-	bool BaseButton::HandleMouseEvents(const Event& event) noexcept
+	bool BaseButton::HandleMouseEvents(const fig::event& event) noexcept
 	{
 		if (_state == ButtonState::Disabled)
 			return false;

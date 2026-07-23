@@ -21,19 +21,19 @@ namespace fig::gui
 		});
 	}
 
-	void Control::Render(Renderer* pRenderer)
+	void Control::Render(fig::renderer_ptr pRenderer)
 	{
 		if (not _bVisible or _bCulled)
 			return;
 
-		static Rect* s_pClippingRect = nullptr;
-		Rect* lastClippingRect = s_pClippingRect;
-		Rect clippingRect;
-		Rect cullingRect = expand_rect(GetRect(), 64);
+		static fig::rect* s_pClippingRect = nullptr;
+		fig::rect* lastClippingRect = s_pClippingRect;
+		fig::rect clippingRect;
+		fig::rect cullingRect = expand_rect(GetRect(), 64);
 
 		if (_bClipping)
 		{
-			Rect rect = GetRect();
+			fig::rect rect = GetRect();
 			if (s_pClippingRect)
 				SDL_GetRectIntersection(s_pClippingRect, &rect, &clippingRect);
 			else
@@ -74,12 +74,12 @@ namespace fig::gui
 		OnPostRender();
 	}
 
-	void Control::OnRender(Renderer* pRenderer)
+	void Control::OnRender(fig::renderer_ptr pRenderer)
 	{
 		DrawBackground(pRenderer); //! @todo: Move
 	}
 
-	void Control::DrawBorder(Renderer* pRenderer)
+	void Control::DrawBorder(fig::renderer_ptr pRenderer)
 	{
 		// Custom renderer
 		if (_pBorderRenderer)
@@ -96,27 +96,27 @@ namespace fig::gui
 		SDL_RenderRect(pRenderer, &rect);
 	}
 
-	Color Control::GetForegroundColor() const
+	fig::color Control::GetForegroundColor() const
 	{
 		if (!_foregroundColor.IsDefined())
 		{
 			auto frameParent = dynamic_cast<Control*>(_pParent.get());
-			return frameParent ? frameParent->GetForegroundColor() : Color();
+			return frameParent ? frameParent->GetForegroundColor() : fig::color();
 		}
 		return _foregroundColor;
 	}
 
-	Color Control::GetBackgroundColor() const
+	fig::color Control::GetBackgroundColor() const
 	{
 		if (!_backgroundColor.IsDefined())
 		{
 			auto parentControl = dynamic_cast<Control*>(_pParent.get());
-			return parentControl ? parentControl->GetBackgroundColor() : Color();
+			return parentControl ? parentControl->GetBackgroundColor() : fig::color();
 		}
 		return _backgroundColor;
 	}
 
-	void Control::DrawBackground(Renderer* pRenderer)
+	void Control::DrawBackground(fig::renderer_ptr pRenderer)
 	{
 		// Custom renderer
 		if (_pBGRenderer)
@@ -150,7 +150,7 @@ namespace fig::gui
 		}
 	}
 
-	EventResult Control::ProcessEvent(Event& event)
+	EventResult Control::ProcessEvent(fig::event& event)
 	{
 		if (_bCulled)
 			return EventResult::Pass;
@@ -212,7 +212,7 @@ namespace fig::gui
 		}
 	}
 
-	void Control::SetMargins(Coord left, Coord top, Coord right, Coord bottom)
+	void Control::SetMargins(fig::coord left, fig::coord top, fig::coord right, fig::coord bottom)
 	{
 		_marginLeft = left;
 		_marginTop = top;
@@ -220,14 +220,14 @@ namespace fig::gui
 		_marginBottom = bottom;
 	}
 
-	void Control::SetMargins(Rect rect)
+	void Control::SetMargins(fig::rect rect)
 	{
 		SetMargins(rect.x, rect.y, rect.w, rect.h);
 	}
 
-	Rect Control::GetClientRect() const noexcept
+	fig::rect Control::GetClientRect() const noexcept
 	{
-		Rect clientRect = GetRect();
+		fig::rect clientRect = GetRect();
 		clientRect.x += _marginLeft;
 		clientRect.y += _marginTop;
 		clientRect.w -= _marginLeft + _marginRight;
@@ -235,11 +235,11 @@ namespace fig::gui
 		return clientRect;
 	}
 
-	Point Control::GetMousePos() const noexcept
+	fig::point Control::GetMousePos() const noexcept
 	{
 		float x, y;
 		auto _ = SDL_GetMouseState(&x, &y);
-		return Point { toI(x), toI(y) };
+		return fig::point { toI(x), toI(y) };
 	}
 
 	std::shared_ptr<Control::ControlRenderContext> Control::GetRenderContext()
@@ -255,7 +255,7 @@ namespace fig::gui
 		return nullptr;
 	}
 
-	WindowPtr Control::GetSDLWindow() 
+	fig::window_ptr Control::GetSDLWindow() 
 	{
 		if (!_renderContext)
 			_renderContext = GetRenderContext();
@@ -265,7 +265,7 @@ namespace fig::gui
 		return nullptr;
 	}
 
-	RendererPtr Control::GetSDLRenderer()
+	fig::renderer_ptr Control::GetSDLRenderer()
 	{ 
 		if (!_renderContext)
 			_renderContext = GetRenderContext();
@@ -275,7 +275,7 @@ namespace fig::gui
 		return nullptr;
 	}
 
-	TextEnginePtr Control::GetSDLTextEngine() 
+	fig::text_engine_ptr Control::GetSDLTextEngine() 
 	{ 
 		if (!_renderContext)
 			_renderContext = GetRenderContext();

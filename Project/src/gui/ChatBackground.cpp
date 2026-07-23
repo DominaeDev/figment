@@ -57,7 +57,7 @@ namespace fig::gui
 			_surface.reset(pNewSurface);
 			_processedSurface.clear();
 
-			_imageSize = Point { pNewSurface->w, pNewSurface->h };
+			_imageSize = fig::point { pNewSurface->w, pNewSurface->h };
 			_fImageRatio = toF(_imageSize.x) / toF(_imageSize.y);
 		}
 
@@ -71,7 +71,7 @@ namespace fig::gui
 			ProcessImage();
 	}
 
-	void ChatBackground::OnRender(RendererPtr pRenderer)
+	void ChatBackground::OnRender(fig::renderer_ptr pRenderer)
 	{
 		if (_surface.empty())
 			return;
@@ -91,7 +91,7 @@ namespace fig::gui
 		SDL_RenderTexture(pRenderer, _texture.get(), NULL, &drawRect);
 	}
 
-	Rectf ChatBackground::GetImageRect() const
+	fig::rectf ChatBackground::GetImageRect() const
 	{
 		float dstWidth = toF(GetWidth());
 		float dstHeight = toF(GetHeight());
@@ -106,7 +106,7 @@ namespace fig::gui
 		else
 			scale = 1.0f;
 
-		Rectf drawRect;
+		fig::rectf drawRect;
 		drawRect.w = srcWidth * scale;
 		drawRect.h = srcHeight * scale;
 		drawRect.x = (dstWidth - drawRect.w) / 2.0f;
@@ -158,7 +158,7 @@ namespace fig::gui
 
 		// Rescale image
 		constexpr int32_t MaxSize = 768;
-		Point size { _surface->w, _surface->h };
+		fig::point size { _surface->w, _surface->h };
 		if (size.x > MaxSize or size.y > MaxSize)
 		{
 			float scale = std::min(toF(MaxSize) / size.x, toF(MaxSize) / size.y);

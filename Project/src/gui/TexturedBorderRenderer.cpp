@@ -6,24 +6,24 @@
 
 namespace fig::gui
 {
-	TexturedBorderRenderer::TexturedBorderRenderer(TextureType borderTexture, int32_t cornerPixels) : CustomRenderer()
+	TexturedBorderRenderer::TexturedBorderRenderer(Resource borderTexture, int32_t cornerPixels) : CustomRenderer()
 	{
 		_cornerPixels = { toF(cornerPixels), toF(cornerPixels), toF(cornerPixels), toF(cornerPixels) };
 		SetTexture(AppResources::GetTexture(borderTexture));
 	}
 
-	TexturedBorderRenderer::TexturedBorderRenderer(TextureType borderTexture, std::array<int32_t, 4> cornerPixels) : CustomRenderer()
+	TexturedBorderRenderer::TexturedBorderRenderer(Resource borderTexture, std::array<int32_t, 4> cornerPixels) : CustomRenderer()
 	{
 		_cornerPixels = { toF(cornerPixels[0]), toF(cornerPixels[1]), toF(cornerPixels[2]), toF(cornerPixels[3]) };
 		SetTexture(AppResources::GetTexture(borderTexture));
 	}
 
-	TexturedBorderRenderer::TexturedBorderRenderer(TexturePtr borderTexture, int32_t cornerPixels) : CustomRenderer()
+	TexturedBorderRenderer::TexturedBorderRenderer(fig::texture_ptr borderTexture, int32_t cornerPixels) : CustomRenderer()
 	{
 		_cornerPixels = { toF(cornerPixels), toF(cornerPixels), toF(cornerPixels), toF(cornerPixels) };
 	}
 
-	TexturedBorderRenderer::TexturedBorderRenderer(TexturePtr borderTexture, std::array<int32_t, 4> cornerPixels) : CustomRenderer()
+	TexturedBorderRenderer::TexturedBorderRenderer(fig::texture_ptr borderTexture, std::array<int32_t, 4> cornerPixels) : CustomRenderer()
 	{
 		_cornerPixels = { toF(cornerPixels[0]), toF(cornerPixels[1]), toF(cornerPixels[2]), toF(cornerPixels[3]) };
 	}
@@ -33,7 +33,7 @@ namespace fig::gui
 		_fExtend = std::max(size, 0.0f);
 	}
 
-	void TexturedBorderRenderer::Render(Renderer* pRenderer, const Rectf& rect)
+	void TexturedBorderRenderer::Render(fig::renderer_ptr pRenderer, const fig::rectf& rect)
 	{
 		auto expandedRect = expand_rect(rect, _fExtend);
 
@@ -45,7 +45,7 @@ namespace fig::gui
 		}
 	}
 
-	void TexturedBorderRenderer::SetTexture(TexturePtr pTexture)
+	void TexturedBorderRenderer::SetTexture(fig::texture_ptr pTexture)
 	{
 		_pTexture = pTexture;
 	}

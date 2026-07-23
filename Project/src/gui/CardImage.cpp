@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	CardImage::CardImage(ParentPtr pParent, TexturePtr pTexture, TexturePtr pMask) noexcept : Control(pParent),
+	CardImage::CardImage(ParentPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
 		_pTexture(pTexture),
 		_pMask(pMask)
 	{
@@ -14,7 +14,7 @@ namespace fig::gui
 		SetBackgroundColor(Colors::Transparent);
 	}
 
-	void CardImage::OnRender(Renderer* pRenderer)
+	void CardImage::OnRender(fig::renderer_ptr pRenderer)
 	{
 		auto bgColor = GetBackgroundColor();
 		auto fgColor = GetForegroundColor();
@@ -46,7 +46,7 @@ namespace fig::gui
 		}
 	}
 
-	void CardImage::SetTexture(TexturePtr pTexture, bool bResize) noexcept
+	void CardImage::SetTexture(fig::texture_ptr pTexture, bool bResize) noexcept
 	{
 		_pTexture = pTexture;
 		if (bResize and pTexture)
@@ -54,7 +54,7 @@ namespace fig::gui
 		SetDirty();
 	}
 
-	void CardImage::SetMask(TexturePtr pTexture) noexcept
+	void CardImage::SetMask(fig::texture_ptr pTexture) noexcept
 	{
 		_pMask = pTexture;
 		_bRedraw = true;
@@ -74,14 +74,14 @@ namespace fig::gui
 
 		if (width != _lastSize.x or height != _lastSize.y)
 		{
-			_lastSize = Point { width, height };
+			_lastSize = fig::point { width, height };
 			_targetTexture.clear();
 		}
 
 		auto pRenderer = GetSDLRenderer();
 		SDL_assert(pRenderer);
 
-		TexturePtr pTarget = _targetTexture.get();
+		fig::texture_ptr pTarget = _targetTexture.get();
 		if (!pTarget)
 		{
 			pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
@@ -120,7 +120,7 @@ namespace fig::gui
 			float fWidth = toF(width);
 			float fHeight = toF(height);
 
-			Rectf drawRect { 0, 0, toF(_pTexture->w), toF(_pTexture->h) };
+			fig::rectf drawRect { 0, 0, toF(_pTexture->w), toF(_pTexture->h) };
 
 			// Center
 			drawRect.x -= toF(_pTexture->w - width) / 2.0f;

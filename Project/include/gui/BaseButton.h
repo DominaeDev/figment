@@ -13,12 +13,12 @@ namespace fig::gui
 	public:
 		void SetDelegate(ButtonDelegate pDelegate) noexcept;
 		void SetEnabled(bool bEnabled) noexcept;
-		void SetExpandedArea(Coord size) noexcept;
+		void SetExpandedArea(fig::coord size) noexcept;
 		inline bool IsEnabled() const noexcept;
 
 	protected:
 		BaseButton(ControlPtr pOwner);
-		bool HandleMouseEvents(const Event& event) noexcept;
+		bool HandleMouseEvents(const fig::event& event) noexcept;
 		void DropState() noexcept;
 
 		virtual void OnButtonState() {}
@@ -42,7 +42,7 @@ namespace fig::gui
 		fig::observer_ptr<LayoutElement> _pOwner;
 		bool _bMouseInside = false;
 		bool _bMouseDown = false;
-		Coord _expand = 0;
+		fig::coord _expand = 0;
 	};
 
 }

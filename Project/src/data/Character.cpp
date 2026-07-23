@@ -92,14 +92,14 @@ namespace fig::data
 
 		if (auto colorText = rootNode.TryGetElement<fig::string>("Color"))
 		{
-			data.borderColor = Color::FromString(colorText.value());
+			data.borderColor = fig::color::FromString(colorText.value());
 
 			auto [h, s, v] = data.borderColor.GetHSV();
 
 			if (s > 0.0f)
-				data.bgColor = Color::FromHSV(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
+				data.bgColor = fig::color::FromHSV(h, 0.05f, std::clamp(v + 0.25f, 0.8f, 1.0f));
 			else
-				data.bgColor = Color::FromHSV(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
+				data.bgColor = fig::color::FromHSV(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 		}
 
 		return !data.chatId.empty() && !data.shortName.empty();

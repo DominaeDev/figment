@@ -33,7 +33,7 @@ namespace fig::gui
 		return Global::GetSettings().GetBool(AppSetting::SmoothScrolling);
 	}
 
-	void ScrollPanel::Render(Renderer* pRenderer)
+	void ScrollPanel::Render(fig::renderer_ptr pRenderer)
 	{
 		Control::Render(pRenderer);
 
@@ -41,7 +41,7 @@ namespace fig::gui
 			_pScrollBar->Render(pRenderer);
 	}
 
-	EventResult ScrollPanel::OnEvent(Event& event)
+	EventResult ScrollPanel::OnEvent(fig::event& event)
 	{
 		if (event.type == SDL_EVENT_MOUSE_WHEEL)
 		{
@@ -82,7 +82,7 @@ namespace fig::gui
 
 	bool ScrollPanel::HandleMouseWheel(SDL_MouseWheelEvent event)
 	{
-		Pointf pt = { event.mouse_x, event.mouse_y };
+		fig::pointf pt = { event.mouse_x, event.mouse_y };
 		auto rect = to_rectf(GetRect());
 		if (!SDL_PointInRectFloat(&pt, &rect))
 			return false;
@@ -100,7 +100,7 @@ namespace fig::gui
 	{
 		if (_pSizer and not _children.empty())
 		{
-			Coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
+			fig::coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
 			_fScrollY = std::clamp(_fScrollY, 0.0f, toF(maxExtent));
 			_fTargetScrollY = std::clamp(_fTargetScrollY, 0.0f, toF(maxExtent));
 
@@ -116,7 +116,7 @@ namespace fig::gui
 	{
 		if (_pScrollBar)
 		{
-			Coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
+			fig::coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
 			_pScrollBar->SetHeight(GetHeight());
 			_pScrollBar->SetAbsolutePosition(GetAbsoluteX() + GetWidth() + _scrollBarOffset, GetAbsoluteY()); // 16px offset??
 			_pScrollBar->SetScroll(*this, _fScrollY, maxExtent);

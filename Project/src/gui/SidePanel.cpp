@@ -13,7 +13,7 @@ namespace fig::gui
 	SidePanel::SidePanel(ParentPtr pParent) : Control(pParent)
 	{
 		SetWidth(Constants::GUI::SidePanel::Width);
-		SetBackgroundColor(fig::gui::Colors::SidePanelBackground);
+		SetBackgroundColor(Colors::SidePanelBackground);
 
 		_pExpandedRoot = CreateControl<Area>();
 		_pCollapsedRoot = CreateControl<Area>();
@@ -21,19 +21,19 @@ namespace fig::gui
 		auto pHeaderPanel = _pExpandedRoot->CreateControl<Panel>();
 		pHeaderPanel->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		auto pLogo = pHeaderPanel->CreateControl<Image>(AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
+		auto pLogo = pHeaderPanel->CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL), Colors::Black);
 		pLogo->SetX(44);
 
 		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.8f));
 		_pGradient = pGradient;
 
-		_pMenuButton = pHeaderPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_MENU);
+		_pMenuButton = pHeaderPanel->CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
 		_pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pMenuButton->SetX(4);
 		_pMenuButton->CenterVertically();
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
-		_pCollapseButton = CreateControl<ButtonWithIcon>(TextureType::ICON_EXPAND_ARROW_LEFT);
+		_pCollapseButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
 		_pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
@@ -44,25 +44,25 @@ namespace fig::gui
 
 		auto pMainArea = _pExpandedRoot->CreateControl<Area>();
 
-		auto pChatButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
+		auto pChatButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
 		pChatButton->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
-		auto pCharactersButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
+		auto pCharactersButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
 		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
-		auto pScenariosButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
-		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
-		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(TextureType::ICON_MENU_MODELS, "Models");
+		auto pScenariosButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
+		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
+		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_MODELS, "Models");
 
-		auto pChatButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(TextureType::ICON_MENU_CHATS_SMALL);
+		auto pChatButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHATS_SMALL);
 		pChatButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
 		pChatButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
-		auto pCharactersButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(TextureType::ICON_MENU_CHARACTERS_SMALL);
+		auto pCharactersButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHARACTERS_SMALL);
 		pCharactersButtonSmall->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
 		pCharactersButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
-		auto pScenariosButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(TextureType::ICON_MENU_SCENARIOS_SMALL);
+		auto pScenariosButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_SCENARIOS_SMALL);
 		pScenariosButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
-		auto pWorldsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(TextureType::ICON_MENU_WORLDS_SMALL);
+		auto pWorldsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_WORLDS_SMALL);
 		pWorldsButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
-		auto pModelsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(TextureType::ICON_MENU_MODELS_SMALL);
+		auto pModelsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_MODELS_SMALL);
 		pModelsButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
@@ -114,7 +114,7 @@ namespace fig::gui
 
 	void SidePanel::OnAfterLayout()
 	{
-		constexpr Coord kGradientSize = 8;
+		constexpr fig::coord kGradientSize = 8;
 		_pGradient->SetX(GetWidth() - kGradientSize);
 		_pGradient->SetSize(kGradientSize, GetHeight());
 	}
@@ -130,18 +130,18 @@ namespace fig::gui
 		createMenu.AddItem("From file\u2026")
 			.SetEnabled(false);
 		menu.AddSeparator();
-		menu.AddItem("User profile\u2026", TextureType::ICON_USER_SETTINGS);
-		menu.AddItem("Settings\u2026", TextureType::ICON_SETTINGS);
+		menu.AddItem("User profile\u2026", Resource::ICON_USER_SETTINGS);
+		menu.AddItem("Settings\u2026", Resource::ICON_SETTINGS);
 		menu.AddSeparator();
-		menu.AddItem("Sign out", TextureType::ICON_LOGOUT)
+		menu.AddItem("Sign out", Resource::ICON_LOGOUT)
 			.SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
 		menu.AddItem("Exit Figment")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 
-		menu.Show(Point { _pMenuButton->GetX(), _pMenuButton->GetY() + _pMenuButton->GetHeight() });
+		menu.Show(fig::point { _pMenuButton->GetX(), _pMenuButton->GetY() + _pMenuButton->GetHeight() });
 	}
 
-	EventResult SidePanel::OnEvent(Event& event)
+	EventResult SidePanel::OnEvent(fig::event& event)
 	{
 		if (IsUserEvent(event, UserEvent::UserSignedIn))
 		{
@@ -180,7 +180,7 @@ namespace fig::gui
 
 		SetWidth(Constants::GUI::SidePanel::Width);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
-		_pCollapseButton->SetIcon(TextureType::ICON_EXPAND_ARROW_LEFT);
+		_pCollapseButton->SetIcon(Resource::ICON_EXPAND_ARROW_LEFT);
 		_pExpandedRoot->Cull(false);
 		_pCollapsedRoot->Cull(true);
 
@@ -198,7 +198,7 @@ namespace fig::gui
 
 		SetWidth(42);
 		_pCollapseButton->CenterHorizontally();
-		_pCollapseButton->SetIcon(TextureType::ICON_EXPAND_ARROW_RIGHT);
+		_pCollapseButton->SetIcon(Resource::ICON_EXPAND_ARROW_RIGHT);
 		_pExpandedRoot->Cull(true);
 		_pCollapsedRoot->Cull(false);
 

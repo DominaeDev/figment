@@ -18,19 +18,19 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fElapsed);
-		void OnRender(RendererPtr pRenderer);
+		void OnRender(fig::renderer_ptr pRenderer);
 	
 	private:
 		void ProcessImage();
 		void Saturate();
 		void Blur();
-		Rectf GetImageRect() const;
+		fig::rectf GetImageRect() const;
 
 	protected:
 		fig::sdl::Surface _surface {};
 		fig::sdl::Texture _texture {};
 		fig::sdl::Surface _processedSurface {};
-		Point _imageSize {};
+		fig::point _imageSize {};
 		float _fImageRatio {};
 		uint8_t _value { 0xFF };
 		uint8_t _saturation { 0xFF };

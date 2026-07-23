@@ -13,14 +13,14 @@ namespace fig::gui
 		
 		SetMarginLeft(30);
 
-		_pIcon = CreateControl<Image>(AppResources::GetTexture(TextureType::ICON_SEARCH));
+		_pIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_SEARCH));
 		_pIcon->SetForegroundColor(Colors::SidePanelForeground);
 
-		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_6PX, 8);
+		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
 		pTextBoxBG->SetColor(Colors::White);
 
-		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_6PX, 8);
+		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
 		pTextBoxBorder->SetColor(Colors::LineColor);
 	}

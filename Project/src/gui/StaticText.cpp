@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	constexpr Color DropShadowColor { 0x00, 0x00, 0x00, 0xC0 };
+	constexpr fig::color DropShadowColor { 0x00, 0x00, 0x00, 0xC0 };
 	constexpr float DropShadowDistance { 1.25f };
 
 	StaticText::StaticText(ParentPtr pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent),
@@ -50,12 +50,12 @@ namespace fig::gui
 	{
 		_text = text;
 		_bInvalidated = false;
-		Coord newWidth, newHeight;
+		fig::coord newWidth, newHeight;
 		DrawText(newWidth, newHeight);
 		SetSize(newWidth, newHeight);
 	}
 
-	void StaticText::SetTextAndResize(fig::string_view text, Coord& newWidth, Coord& newHeight)
+	void StaticText::SetTextAndResize(fig::string_view text, fig::coord& newWidth, fig::coord& newHeight)
 	{
 		_text = text;
 		_bInvalidated = false;
@@ -73,12 +73,12 @@ namespace fig::gui
 		if (_bInvalidated)
 		{
 			_bInvalidated = false;
-			Coord tmp;
+			fig::coord tmp;
 			DrawText(tmp, tmp);
 		}
 	}
 
-	void StaticText::OnRender(Renderer* pRenderer)
+	void StaticText::OnRender(fig::renderer_ptr pRenderer)
 	{
 		auto bgColor = GetBackgroundColor();
 		if (bgColor.IsDefined() && bgColor.a != 0)
@@ -86,7 +86,7 @@ namespace fig::gui
 
 		if (not _shadow.empty() and _bDropShadow)
 		{
-			Rectf alignRect = GetAlignedRect();
+			fig::rectf alignRect = GetAlignedRect();
 			alignRect.x += DropShadowDistance;
 			alignRect.y += DropShadowDistance;
 			SDL_RenderTexture(pRenderer, _shadow.get(), NULL, &alignRect);
@@ -94,12 +94,12 @@ namespace fig::gui
 
 		if (not _texture.empty())
 		{
-			Rectf alignRect = GetAlignedRect();
+			fig::rectf alignRect = GetAlignedRect();
 			SDL_RenderTexture(pRenderer, _texture.get(), NULL, &alignRect);
 		}
 	}
 
-	void StaticText::DrawText(Coord& newWidth, Coord& newHeight)
+	void StaticText::DrawText(fig::coord& newWidth, fig::coord& newHeight)
 	{
 		auto fgColor = GetForegroundColor();
 		auto bgColor = GetBackgroundColor();
@@ -242,14 +242,14 @@ namespace fig::gui
 		SetText(_text);
 	}
 
-	Rectf StaticText::GetAlignedRect() const
+	fig::rectf StaticText::GetAlignedRect() const
 	{
 		auto& rect = GetRect();
 		int x = toI(rect.x + GetMarginLeft());
 		int y = toI(rect.y + GetMarginTop());
 		int w = _textWidth;
 		int h = _textHeight;
-		Rect aligned_rect(x, y, w, h);
+		fig::rect aligned_rect(x, y, w, h);
 
 		if ((_alignment & HorizontalAlignment::Center) != 0)
 			aligned_rect.x = x + (rect.w - w) / 2;
@@ -262,13 +262,13 @@ namespace fig::gui
 		return to_rectf(aligned_rect);
 	}
 
-	void StaticText::SetForegroundColor(Color color)
+	void StaticText::SetForegroundColor(fig::color color)
 	{
 		Control::SetForegroundColor(color);
 		InvalidateText();
 	}
 
-	void StaticText::SetBackgroundColor(Color color)
+	void StaticText::SetBackgroundColor(fig::color color)
 	{
 		Control::SetBackgroundColor(color);
 		InvalidateText();
@@ -312,21 +312,21 @@ namespace fig::gui
 		return text;
 	}
 
-	Point StaticText::MeasureText(bool bAllowEllipsis) const
+	fig::point StaticText::MeasureText(bool bAllowEllipsis) const
 	{
 		if (_bEllipsis and bAllowEllipsis)
 		{
 			auto text = GetEllipsisText(_text);
 			int w, h;
 			if (TTF_GetStringSize(_pFont, text.c_str(), 0, &w, &h))
-				return Point(w, h);
+				return fig::point(w, h);
 		}
 		else
 		{
 			int w, h;
 			if (TTF_GetStringSize(_pFont, _text.c_str(), 0, &w, &h))
-				return Point(w, h);
+				return fig::point(w, h);
 		}
-		return Point(0, 0);
+		return fig::point(0, 0);
 	}
 }

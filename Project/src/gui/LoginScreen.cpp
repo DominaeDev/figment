@@ -15,11 +15,11 @@ namespace fig::gui
 	LoginScreen::LoginScreen(Frame* pParent) : Screen(pParent)
 	{
 		// Logo
-		auto pLogo = CreateControl<Image>(AppResources::GetTexture(TextureType::LOGO_SMALL), Colors::Black);
+		auto pLogo = CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL), Colors::Black);
 		pLogo->SetPosition(44, 0);
 
 		// Menu button
-		_pMenuButton = CreateControl<ButtonWithIcon>(TextureType::ICON_MENU);
+		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
 		_pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
 		_pMenuButton->SetSize(36, 36);
 		_pMenuButton->SetPosition(4, 6);
@@ -38,11 +38,11 @@ namespace fig::gui
 		_pProfileImage = pCenter->CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pProfileImage->SetSize(160, 160);
 
-		_pPrevProfileBtn = pCenter->CreateControl<ButtonWithIcon>(TextureType::ICON_CHEVRON_LEFT);
+		_pPrevProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Resource::ICON_CHEVRON_LEFT);
 		_pPrevProfileBtn->SetSize(35, 56);
 		_pPrevProfileBtn->SetDelegate([this]() { CycleProfile(-1); });
 
-		_pNextProfileBtn = pCenter->CreateControl<ButtonWithIcon>(TextureType::ICON_CHEVRON_RIGHT);
+		_pNextProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Resource::ICON_CHEVRON_RIGHT);
 		_pNextProfileBtn->SetSize(35, 56);
 		_pNextProfileBtn->SetDelegate([this]() { CycleProfile(+1); });
 
@@ -61,10 +61,10 @@ namespace fig::gui
 		_pPassword->SetEnterPressedCallback([this](fig::string password) { SignIn(); });
 		_pPassword->SetFocus(true);
 
-		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(TextureType::ICON_ARROW_RIGHT);
+		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(Resource::ICON_ARROW_RIGHT);
 		_pSignInBtn->SetSize(35, 35);
 		_pSignInBtn->SetDelegate([this]() { SignIn(); });
-		auto pSimpleBorder = _pSignInBtn->CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		auto pSimpleBorder = _pSignInBtn->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
 		pSimpleBorder->SetForegroundColor(Colors::SidePanelForeground);
 
@@ -103,7 +103,7 @@ namespace fig::gui
 	{
 	}
 
-	void LoginScreen::OnRender(Renderer* pRenderer)
+	void LoginScreen::OnRender(fig::renderer_ptr pRenderer)
 	{
 	}
 
@@ -137,9 +137,9 @@ namespace fig::gui
 		}
 
 		if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
-			_pProfileImage->SetTexture(pTexture, AppResources::GetTexture(TextureType::MASK_CIRCLE));
+			_pProfileImage->SetTexture(pTexture, AppResources::GetTexture(Resource::MASK_CIRCLE));
 		else
-			_pProfileImage->SetTexture(AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(TextureType::MASK_CIRCLE));
+			_pProfileImage->SetTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(Resource::MASK_CIRCLE));
 
 		InvalidateLayout();
 	}
@@ -188,11 +188,11 @@ namespace fig::gui
 		menu.AddItem("New profile\u2026");
 		menu.AddItem("Recover profile\u2026");
 		menu.AddSeparator();
-		menu.AddItem("Settings\u2026", TextureType::ICON_SETTINGS);
+		menu.AddItem("Settings\u2026", Resource::ICON_SETTINGS);
 		menu.AddSeparator();
 		menu.AddItem("Exit Figment")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 
-		menu.Show(Point { _pMenuButton->GetX() + 4, _pMenuButton->GetY() + _pMenuButton->GetHeight() - 2 });
+		menu.Show(fig::point { _pMenuButton->GetX() + 4, _pMenuButton->GetY() + _pMenuButton->GetHeight() - 2 });
 	}
 }

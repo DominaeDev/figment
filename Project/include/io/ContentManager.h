@@ -34,7 +34,7 @@ namespace fig::io
 		fig::optional_ref<ContentMetaData> GetMetaData(const fig::uuid& id) noexcept;
 		ContentUserSettings GetUserSettings(const fig::uuid& id) noexcept;
 		
-		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::gui::TexturePtr pMask, fig::gui::RendererPtr pRenderer) noexcept;
+		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept;
 		fig::optional_cref<Asset> FindLastChatWith(const fig::uuid& characterId) const;
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
@@ -97,9 +97,9 @@ namespace fig::io
 		struct CachedTexture
 		{
 			fig::sdl::Texture pTexture;
-			fig::gui::TexturePtr pMask {};
+			fig::texture_ptr pMask {};
 		};
-		std::map<fig::gui::RendererPtr, std::map<fig::uuid, std::vector<CachedTexture>>> _cachedTextures;
+		std::map<fig::renderer_ptr, std::map<fig::uuid, std::vector<CachedTexture>>> _cachedTextures;
 
 		std::map<fig::uuid, std::vector<fig::uuid>> _chatsByAsset; // <asset id, chat ids>
 

@@ -29,18 +29,18 @@ namespace fig::gui
 		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 		_pHeader->SetAlignment(TextAlignment::Left_Center);
 		
-		auto pHomeButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_HOME);
+		auto pHomeButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_HOME);
 
-		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_SORTING);
+		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
-		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_FILTERING);
+		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 
-		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(TextureType::ICON_GRID_LARGE);
+		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_GRID_LARGE);
 		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
-		_pToggleTagsButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_TAG);
+		_pToggleTagsButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_TAG);
 		_pToggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 
 		_pFilterTextBox = pTopBar->CreateControl<SearchBox>(FontFace::Default, 16.0);
@@ -79,7 +79,7 @@ namespace fig::gui
 		}
 	}
 
-	void HomeScreen::OnRender(Renderer* pRenderer)
+	void HomeScreen::OnRender(fig::renderer_ptr pRenderer)
 	{
 		DrawBackground(pRenderer);
 	}
@@ -109,7 +109,7 @@ namespace fig::gui
 		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::CharacterList_HalfSizeCards);
 		_pCardList->SetCardSize(bHalfSize ? CardSize::Half : CardSize::Full);
 		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::CharacterList_ShowTags));
-		_pGridButton->SetIcon(bHalfSize ? TextureType::ICON_GRID_SMALL : TextureType::ICON_GRID_LARGE);
+		_pGridButton->SetIcon(bHalfSize ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
 		_pGridButton->Toggle(bHalfSize, false);
 		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::CharacterList_ShowTags));
 		_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
@@ -141,7 +141,7 @@ namespace fig::gui
 		bSmall = !bSmall;
 		Global::GetUserSettings().SetBool(UserSetting::CharacterList_HalfSizeCards, bSmall);
 
-		_pGridButton->SetIcon(bSmall ? TextureType::ICON_GRID_SMALL : TextureType::ICON_GRID_LARGE);
+		_pGridButton->SetIcon(bSmall ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
 		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
 	}
 
@@ -176,14 +176,14 @@ namespace fig::gui
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 		menu.AddCheckItem("Sort alphabetically", sortBy == SortBy::Name)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::Name); });
+		menu.AddCheckItem("Sort by most recent chat", sortBy == SortBy::LastUsedAt)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
+		menu.AddCheckItem("Sort by chat count", sortBy == SortBy::ChatCount)
+			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::ChatCount); });
 		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::CreatedAt); });
 		menu.AddCheckItem("Sort by modified date", sortBy == SortBy::UpdatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::UpdatedAt); });
-		menu.AddCheckItem("Sort by last chat", sortBy == SortBy::LastUsedAt)
-			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
-		menu.AddCheckItem("Sort by chat count", sortBy == SortBy::ChatCount)
-			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::ChatCount); });
 		menu.AddSeparator();
 		menu.AddCheckItem("Ascending", orderBy == OrderBy::Ascending)
 			.SetDelegate([ChangeOrdering, this] { ChangeOrdering(OrderBy::Ascending); });
@@ -197,7 +197,7 @@ namespace fig::gui
 				_pCardList->Reorder();
 			});
 
-		menu.Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
+		menu.Show(fig::point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
 	}
 
 	void HomeScreen::ShowFilteringMenu() noexcept
@@ -302,7 +302,7 @@ namespace fig::gui
 			.SetDelegate([=, this] { 
 				SetFilter(DefaultFilterFlags);
 			});
-		menu.Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
+		menu.Show(fig::point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}
 	
 }

@@ -4,19 +4,19 @@
 
 using namespace fig::gui;
 
-HorizontalGradient::HorizontalGradient(ParentPtr pParent, Color colorLeft, Color colorRight) : Control(pParent)
+HorizontalGradient::HorizontalGradient(ParentPtr pParent, fig::color colorLeft, fig::color colorRight) : Control(pParent)
 {
 	SetColors(colorLeft, colorRight);
-	_pTexture = AppResources::GetTexture(TextureType::BLANK);
+	_pTexture = AppResources::GetTexture(Resource::BLANK);
 }
 
-void HorizontalGradient::SetColors(Color colorLeft, Color colorRight)
+void HorizontalGradient::SetColors(fig::color colorLeft, fig::color colorRight)
 {
-	_colorLeft = to_colorf(colorLeft);
-	_colorRight = to_colorf(colorRight);
+	_colorLeft = colorLeft;
+	_colorRight = colorRight;
 }
 
-void HorizontalGradient::OnRender(Renderer* pRenderer)
+void HorizontalGradient::OnRender(fig::renderer_ptr pRenderer)
 {
 	auto bgColor = GetBackgroundColor();
 	auto fgColor = GetForegroundColor();
@@ -30,7 +30,7 @@ void HorizontalGradient::OnRender(Renderer* pRenderer)
 	SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), indices, 6);
 }
 
-void HorizontalGradient::RefreshGeometry(const Rect& rect)
+void HorizontalGradient::RefreshGeometry(const fig::rect& rect)
 {
 	_lastRect = rect;
 
@@ -42,8 +42,8 @@ void HorizontalGradient::RefreshGeometry(const Rect& rect)
 	float top = toF(rect.y);
 	float bottom = toF(rect.y + rect.h);
 
-	_vertices.push_back(Vertex { Pointf { left, bottom }, _colorLeft });
-	_vertices.push_back(Vertex { Pointf { right, bottom }, _colorRight });
-	_vertices.push_back(Vertex { Pointf { right, top }, _colorRight });
-	_vertices.push_back(Vertex { Pointf { left, top }, _colorLeft });
+	_vertices.push_back(fig::vertex { fig::pointf { left, bottom }, _colorLeft });
+	_vertices.push_back(fig::vertex { fig::pointf { right, bottom }, _colorRight });
+	_vertices.push_back(fig::vertex { fig::pointf { right, top }, _colorRight });
+	_vertices.push_back(fig::vertex { fig::pointf { left, top }, _colorLeft });
 }

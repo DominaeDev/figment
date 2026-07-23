@@ -19,7 +19,7 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 		void ShowSortingMenu() noexcept;
 		void ShowFilteringMenu() noexcept;
 		void OnSearchFilter(fig::string search_text);

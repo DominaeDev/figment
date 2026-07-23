@@ -20,10 +20,10 @@ namespace fig::gui
 		// Background
 		SetForegroundColor(Colors::SidePanelForeground);
 
-		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_10PX, 8);
+		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 8);
 		pBGRenderer->SetColor(0xEEECE480_rgba);
 
-		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_10PX, 16);
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
 		pBorder->SetColor(Colors::LineColor);
 
 		// Title
@@ -68,7 +68,7 @@ namespace fig::gui
 			else
 				_pMessage->SetText(std::format("{}: \"{}\"", name, trunc(lastMessage.content, 256uz)));
 
-			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(speakerId, AppResources::GetTexture(TextureType::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
+			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(speakerId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
 			{
 				_pPortrait->SetTexture((*portrait).get());
 				_pPortrait->SetVisible(true);
@@ -106,7 +106,7 @@ namespace fig::gui
 
 	}
 
-	EventResult ChatListItem::OnEvent(Event& event)
+	EventResult ChatListItem::OnEvent(fig::event& event)
 	{
 		switch (event.type)
 		{
@@ -159,7 +159,7 @@ namespace fig::gui
 
 		auto userSettings = Global::GetUserContent().GetUserSettings(_assetId);
 
-		menu.AddItem("Resume chat", TextureType::ICON_NEW_CHAT)
+		menu.AddItem("Resume chat", Resource::ICON_NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] {
 //			PushEvent(UserEvent::StartChat, &_characterId);
@@ -176,14 +176,14 @@ namespace fig::gui
 			});
 
 		menu.AddSeparator();
-		menu.AddItem("Edit chat settings\u2026", TextureType::ICON_EDIT);
+		menu.AddItem("Edit chat settings\u2026", Resource::ICON_EDIT);
 		menu.AddItem("Duplicate\u2026");
 		menu.AddItem("Export\u2026");
 		menu.AddSeparator();
 
 		if (!userSettings.HasFlag(ContentUserSettings::Flag::Favorite))
 		{
-			menu.AddItem("Star", TextureType::ICON_STAR)
+			menu.AddItem("Star", Resource::ICON_STAR)
 				.SetDelegate([this] {
 				Global::GetUserContent().MarkFavorite(_assetId, true);
 				ShowStar(true);
@@ -192,7 +192,7 @@ namespace fig::gui
 		}
 		else
 		{
-			menu.AddItem("Unstar", TextureType::ICON_UNSTAR)
+			menu.AddItem("Unstar", Resource::ICON_UNSTAR)
 				.SetDelegate([this] {
 				Global::GetUserContent().MarkFavorite(_assetId, false);
 				ShowStar(false);
@@ -217,7 +217,7 @@ namespace fig::gui
 				});
 		}
 		menu.AddSeparator();
-		menu.AddItem("Delete\u2026", TextureType::ICON_DELETE);
+		menu.AddItem("Delete\u2026", Resource::ICON_DELETE);
 		_menuId = menu.Show();
 	}
 
@@ -239,7 +239,7 @@ namespace fig::gui
 		{
 			if (bShow)
 			{
-				_pStar = CreateControl<Image>(TextureType::CARD_ICON_STAR_SMALL);
+				_pStar = CreateControl<Image>(Resource::CARD_ICON_STAR_SMALL);
 				_pStar->SetSize(24, 24);
 				_pStar->SetY(28);
 			}

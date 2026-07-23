@@ -14,7 +14,7 @@ using namespace fig::llm;
 using namespace fig::chat;
 
 static constexpr float kAnimatedScrollSpeed = 15.0f;
-static constexpr fig::gui::Coord kGradientHeight = 36;
+static constexpr fig::coord kGradientHeight = 36;
 
 namespace fig::gui
 {
@@ -198,7 +198,7 @@ namespace fig::gui
 		}
 	}
 
-	EventResult ChatScroll::OnEvent(Event& event)
+	EventResult ChatScroll::OnEvent(fig::event& event)
 	{
 		if (event.type == SDL_EVENT_MOUSE_WHEEL)
 		{
@@ -210,7 +210,7 @@ namespace fig::gui
 	bool ChatScroll::HandleMouseWheel(SDL_MouseWheelEvent event)
 	{
 		auto& rect = GetRect();
-		Point pt = { toI(event.mouse_x), toI(event.mouse_y) };
+		fig::point pt = { toI(event.mouse_x), toI(event.mouse_y) };
 		if (!SDL_PointInRect(&pt, &rect))
 			return false;
 
@@ -323,7 +323,7 @@ namespace fig::gui
 			RefreshActive();
 	}
 
-	void ChatScroll::OnRenderMask(RendererPtr pRenderer, fig::sdl::Texture& texture)
+	void ChatScroll::OnRenderMask(fig::renderer_ptr pRenderer, fig::sdl::Texture& texture)
 	{
 		SDL_BlendMode blendMode;
 		SDL_GetRenderDrawBlendMode(pRenderer, &blendMode);

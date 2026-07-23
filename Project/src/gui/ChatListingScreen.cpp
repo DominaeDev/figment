@@ -24,10 +24,10 @@ namespace fig::gui
 		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 		_pHeader->SetAlignment(TextAlignment::Left_Center);
 
-		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_SORTING);
+		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
-		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(TextureType::ICON_FILTERING);
+		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 
 		auto _pFilterTextBox = pTopBar->CreateControl<SearchBox>(FontFace::Default, 16.0);
@@ -90,7 +90,7 @@ namespace fig::gui
 		return false;
 	}
 
-	EventResult ChatListingScreen::OnEvent(Event& event)
+	EventResult ChatListingScreen::OnEvent(fig::event& event)
 	{
 		// ...
 
@@ -130,7 +130,7 @@ namespace fig::gui
 				_pChatList->Reorder();
 			});
 
-		menu.Show(Point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
+		menu.Show(fig::point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
 	}
 
 	void ChatListingScreen::ShowFilteringMenu() noexcept
@@ -181,7 +181,7 @@ namespace fig::gui
 				_filterByCharacter.clear();
 				ShowAllChats();
 			});
-		menu.Show(Point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
+		menu.Show(fig::point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}
 
 	void ChatListingScreen::OnSearchFilter(fig::string search_text)

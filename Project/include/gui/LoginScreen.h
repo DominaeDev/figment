@@ -15,7 +15,7 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fElapsed) override;
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
 	private:

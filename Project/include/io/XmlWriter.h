@@ -33,7 +33,7 @@ namespace fig::data
 		template<> void Set<fig::path>(const fig::path& value) noexcept;
 		template<> void Set<fig::byte_span>(const fig::byte_span& value) noexcept;
 		template<> void Set<fig::uuid>(const fig::uuid& value) noexcept;
-		template<> void Set<fig::gui::Color>(const fig::gui::Color& value) noexcept;
+		template<> void Set<fig::color>(const fig::color& value) noexcept;
 		template<> void Set<fig::string_span>(const fig::string_span& values) noexcept;
 		template<> void Set<fig::handle>(const fig::handle& value) noexcept;
 		template<> void Set<fig::timestamp>(const fig::timestamp& value) noexcept;
@@ -90,7 +90,7 @@ namespace fig::data
 		template<> void SetValue<fig::path>(const fig::path& value) noexcept;
 		template<> void SetValue<fig::byte_span>(const fig::byte_span& value) noexcept;
 		template<> void SetValue<fig::uuid>(const fig::uuid& value) noexcept;
-		template<> void SetValue<fig::gui::Color>(const fig::gui::Color& value) noexcept;
+		template<> void SetValue<fig::color>(const fig::color& value) noexcept;
 		template<> void SetValue<fig::string_span>(const fig::string_span& values) noexcept;
 		template<> void SetValue<fig::handle>(const fig::handle& value) noexcept;
 		template<> void SetValue<fig::timestamp>(const fig::timestamp& value) noexcept;

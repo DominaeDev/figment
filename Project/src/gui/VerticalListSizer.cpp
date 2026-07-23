@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	void VerticalListSizer::OnLayout(const Rect& parentRect)
+	void VerticalListSizer::OnLayout(const fig::rect& parentRect)
 	{
 		auto count = GetCount();
 		if (count == 0)

@@ -50,7 +50,7 @@ namespace fig::data
 	}
 
 	template<>
-	void XmlWriterAttribute::Set<fig::gui::Color>(const fig::gui::Color& value) noexcept
+	void XmlWriterAttribute::Set<fig::color>(const fig::color& value) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), value.ToString().c_str());
 	}
@@ -160,7 +160,7 @@ namespace fig::data
 	}
 
 	template<>
-	void XmlWriterElement::SetValue<fig::gui::Color>(const fig::gui::Color& value) noexcept
+	void XmlWriterElement::SetValue<fig::color>(const fig::color& value) noexcept
 	{
 		DeleteValue();
 		_pElement->InsertNewText(value.ToString().c_str());

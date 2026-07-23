@@ -105,7 +105,7 @@ namespace fig
 		_pIBeamCursor = nullptr;
 	}
 
-	fig::gui::Window& Global::GetMainWindow()
+	Window& Global::GetMainWindow()
 	{
 		assert(__appState && __appState->pMainWindow);
 		return *__appState->pMainWindow.get();
@@ -216,7 +216,7 @@ namespace fig
 			return;
 		}
 
-		fig::gui::PushEvent(UserEvent::LLMStatusUpdate, 0, (void*)(&status));
-		fig::gui::PushEvent(eventType);
+		PushEvent(UserEvent::LLMStatusUpdate, 0, (void*)(&status));
+		PushEvent(eventType);
 	}
 }

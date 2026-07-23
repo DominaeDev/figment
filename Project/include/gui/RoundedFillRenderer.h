@@ -7,17 +7,17 @@ namespace fig::gui
 	class RoundedFillRenderer : public CustomRenderer
 	{
 	public:
-		explicit RoundedFillRenderer(float radius, Color color = Colors::White);
+		explicit RoundedFillRenderer(float radius, fig::color color = Colors::White);
 
-		void Render(Renderer* pRenderer, Rectf rect);
+		void Render(fig::renderer_ptr pRenderer, fig::rectf rect);
 
 	private:
-		void RefreshGeometry(Rectf rect);
+		void RefreshGeometry(fig::rectf rect);
 
-		Rectf _lastRect {};
+		fig::rectf _lastRect {};
 		float _radius = 0;
 
-		std::vector<Vertex> _vertices {};
+		std::vector<fig::vertex> _vertices {};
 		std::vector<int> _indices {};
 	};
 }

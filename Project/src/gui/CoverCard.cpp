@@ -19,14 +19,14 @@ namespace fig::gui
 
 	constexpr uint8_t FadeAlpha = 0x60;
 
-	CoverCard::CoverCard(ParentPtr pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(TextureType::MASK_CARD)),
+	CoverCard::CoverCard(ParentPtr pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(Resource::MASK_CARD)),
 		_assetId { assetId },
 		_cardSize { cardSize }
 	{
 		_searchIndex = std::make_unique<SearchIndex>();
 
-		_pHiddenBG = CreateControl<TexturedBorder>(TextureType::CARD_FILL, 8);
-		_pHiddenBG->SetForegroundColor(Color { 0x9b896a, 0x30 });
+		_pHiddenBG = CreateControl<TexturedBorder>(Resource::CARD_FILL, 8);
+		_pHiddenBG->SetForegroundColor(fig::color { 0x9b896a, 0x30 });
 
 		SetCardSize(cardSize);
 		SetHidden(false);
@@ -49,8 +49,8 @@ namespace fig::gui
 		_pLargeFooter->SetY(Large::Height - Large::FooterHeight);
 		_pLargeFooter->SetSize(Large::Width, Large::FooterHeight);
 
-		_pLargeFooterFade = _pLargeFooter->CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE), Corners { 16, 16, 64, 16 });
-		_pLargeFooterFade->SetForegroundColor(Color { 0, 0, 0, FadeAlpha });
+		_pLargeFooterFade = _pLargeFooter->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_BOTTOM_FADE), fig::corners { 16, 16, 64, 16 });
+		_pLargeFooterFade->SetForegroundColor(fig::color { 0, 0, 0, FadeAlpha });
 		_pLargeFooterFade->FillParent();
 		_pLargeFooterFade->SetVisible(false);
 
@@ -65,9 +65,9 @@ namespace fig::gui
 		_pLargeLabel->EnableEllipsis(true);
 
 		// Border (large)
-		auto pSimpleBorder = _pLargeRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		auto pSimpleBorder = _pLargeRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
-		pSimpleBorder->SetForegroundColor(Color { 0, 0, 0, FadeAlpha });
+		pSimpleBorder->SetForegroundColor(fig::color { 0, 0, 0, FadeAlpha });
 
 		// Styled border (large)
 		_pLargeBorder = _pLargeRoot->CreateControl<Image>(nullptr);
@@ -76,7 +76,7 @@ namespace fig::gui
 		_pLargeBorder->SetVisible(false);
 
 		// Star (large)
-		_pLargeStar = _pLargeRoot->CreateControl<Image>(TextureType::CARD_ICON_STAR);
+		_pLargeStar = _pLargeRoot->CreateControl<Image>(Resource::CARD_ICON_STAR);
 		_pLargeStar->SetPosition(Large::Width - _pLargeStar->GetWidth() - 8, 8);
 		_pLargeStar->SetVisible(false);
 
@@ -90,8 +90,8 @@ namespace fig::gui
 		pSmallFooter->SetY(Small::Height - Small::FooterHeight);
 		pSmallFooter->SetSize(Small::Width, Small::FooterHeight);
 
-		_pSmallFooterFade = pSmallFooter->CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_BOTTOM_FADE_SMALL), Corners { 16, 16, 40, 16 });
-		_pSmallFooterFade->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+		_pSmallFooterFade = pSmallFooter->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_BOTTOM_FADE_SMALL), fig::corners { 16, 16, 40, 16 });
+		_pSmallFooterFade->SetForegroundColor(fig::color { 0, 0, 0, 0x80 });
 		_pSmallFooterFade->FillParent();
 		_pSmallFooterFade->SetVisible(false);
 
@@ -106,9 +106,9 @@ namespace fig::gui
 		_pSmallLabel->EnableEllipsis(true);
 
 		// Border (small)
-		auto pSmallSimpleBorder = _pSmallRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(TextureType::CARD_BORDER), 16);
+		auto pSmallSimpleBorder = _pSmallRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSmallSimpleBorder->FillParent();
-		pSmallSimpleBorder->SetForegroundColor(Color { 0, 0, 0, 0x80 });
+		pSmallSimpleBorder->SetForegroundColor(fig::color { 0, 0, 0, 0x80 });
 
 		// Styled border (small)
 		_pSmallBorder = _pSmallRoot->CreateControl<Image>(nullptr);
@@ -117,7 +117,7 @@ namespace fig::gui
 		_pSmallBorder->SetVisible(false);
 
 		// Star (small)
-		_pSmallStar = _pSmallRoot->CreateControl<Image>(TextureType::CARD_ICON_STAR_SMALL);
+		_pSmallStar = _pSmallRoot->CreateControl<Image>(Resource::CARD_ICON_STAR_SMALL);
 		_pSmallStar->SetPosition(Small::Width - _pSmallStar->GetWidth() - 6, 6);
 		_pSmallStar->SetVisible(false);
 
@@ -146,12 +146,12 @@ namespace fig::gui
 		{
 			// Create error icon
 			float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
-			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(TextureType::ICON_ERROR));
+			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
-			_pErrorIcon->SetForegroundColor(Color { 0xC0, 0xC0, 0xC0, });
+			_pErrorIcon->SetForegroundColor(fig::color { 0xC0, 0xC0, 0xC0, });
 			_pErrorIcon->Center();
 
-			CardImage::SetTexture(AppResources::GetTexture(TextureType::CARD_BACKGROUND_EMPTY));
+			CardImage::SetTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY));
 		}
 
 		bool bHovered = (_bSelected or is_inside(GetRect(), GetMousePos())
@@ -209,7 +209,7 @@ namespace fig::gui
 		if (_pCounterBG)
 			return;
 
-		_pCounterBG = CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_TAG_BG), Corners { 16, 16, 13, 13 });
+		_pCounterBG = CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
 		if (_cardSize == CardSize::Half)
 			_pCounterBG->SetPosition(6, 6);
 		else
@@ -217,7 +217,7 @@ namespace fig::gui
 
 		_pCounterBG->SetForegroundColor(0xA0_rgba);
 
-		auto pCounterIcon = _pCounterBG->CreateControl<Image>(AppResources::GetTexture(TextureType::CARD_ICON_CHAT_COUNTER));
+		auto pCounterIcon = _pCounterBG->CreateControl<Image>(AppResources::GetTexture(Resource::CARD_ICON_CHAT_COUNTER));
 		pCounterIcon->SetPosition(6, 6);
 		pCounterIcon->SetForegroundColor(Colors::White);
 		pCounterIcon->SetBackgroundColor(Colors::Transparent);
@@ -241,7 +241,7 @@ namespace fig::gui
 		else if (!bShow)
 			return;
 
-		_pNewIndicator = CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_TAG_BG), Corners { 16, 16, 13, 13 });
+		_pNewIndicator = CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
 		if (_cardSize == CardSize::Half)
 			_pNewIndicator->SetPosition(6, 6);
 		else
@@ -258,7 +258,7 @@ namespace fig::gui
 		_pNewIndicator->SetSize(w + 12, 26);
 	}
 
-	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, const Color& color)
+	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, const fig::color& color)
 	{
 		if (!_bInitialized or !_bEnableTags)
 		{
@@ -296,7 +296,7 @@ namespace fig::gui
 			_pLargeFooterFade->FillParent();
 		}
 
-		auto pTagBG = _pTagsRoot->CreateControl<NineGridImage>(AppResources::GetTexture(TextureType::CARD_TAG_BG), Corners { 16, 16, 13, 13 });
+		auto pTagBG = _pTagsRoot->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
 		pTagBG->SetPosition(position);
 		pTagBG->SetForegroundColor(Colors::Black.WithAlpha(0.7f));
 
@@ -329,15 +329,15 @@ namespace fig::gui
 			return;
 		}
 
-		TextureType textureType;
+		Resource textureType;
 		switch (style)
 		{
-		case CardBorderStyle::Style01: textureType = TextureType::CARD_BORDER_STYLE_01; break;
-		case CardBorderStyle::Style02: textureType = TextureType::CARD_BORDER_STYLE_02; break;
-		case CardBorderStyle::Style03: textureType = TextureType::CARD_BORDER_STYLE_03; break;
-		case CardBorderStyle::Style04: textureType = TextureType::CARD_BORDER_STYLE_04; break;
-		case CardBorderStyle::Style05: textureType = TextureType::CARD_BORDER_STYLE_05; break;
-		case CardBorderStyle::Style06: textureType = TextureType::CARD_BORDER_STYLE_06; break;
+		case CardBorderStyle::Style01: textureType = Resource::CARD_BORDER_STYLE_01; break;
+		case CardBorderStyle::Style02: textureType = Resource::CARD_BORDER_STYLE_02; break;
+		case CardBorderStyle::Style03: textureType = Resource::CARD_BORDER_STYLE_03; break;
+		case CardBorderStyle::Style04: textureType = Resource::CARD_BORDER_STYLE_04; break;
+		case CardBorderStyle::Style05: textureType = Resource::CARD_BORDER_STYLE_05; break;
+		case CardBorderStyle::Style06: textureType = Resource::CARD_BORDER_STYLE_06; break;
 		default:
 			return;
 		};

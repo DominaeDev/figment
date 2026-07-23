@@ -7,20 +7,20 @@ namespace fig::gui
 	class HorizontalGradient : public Control
 	{
 	public:
-		HorizontalGradient(ParentPtr pParent, Color colorLeft, Color colorRight);
-		void SetColors(Color colorLeft, Color colorRight);
+		HorizontalGradient(ParentPtr pParent, fig::color colorLeft, fig::color colorRight);
+		void SetColors(fig::color colorLeft, fig::color colorRight);
 
 	protected:
 		void OnUpdate(float fElapsed) override {};
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 
-		void RefreshGeometry(const Rect& rect);
+		void RefreshGeometry(const fig::rect& rect);
 	private:
-		Colorf _colorLeft {};
-		Colorf _colorRight {};
-		Rect _lastRect {};
-		fig::observer_ptr<Texture> _pTexture;
+		fig::color _colorLeft {};
+		fig::color _colorRight {};
+		fig::rect _lastRect {};
+		fig::texture_ptr _pTexture;
 
-		std::vector<Vertex> _vertices {};
+		std::vector<fig::vertex> _vertices {};
 	};
 }

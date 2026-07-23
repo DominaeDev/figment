@@ -12,15 +12,15 @@ namespace fig::gui
 	{
 		friend class Menu;
 	public:
-		explicit MenuItem(const fig::string& label, TextureType icon = {}, MenuDelegate fn = {});
+		explicit MenuItem(const fig::string& label, Resource icon = {}, MenuDelegate fn = {});
 		
-		MenuItem& AddItem(const fig::string& label, TextureType icon = {}, MenuDelegate fn = {});
+		MenuItem& AddItem(const fig::string& label, Resource icon = {}, MenuDelegate fn = {});
 		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
 		void AddSeparator();
 
 		inline MenuItem& SetLabel(const fig::string& label) noexcept { _label = label; return *this; };
 		inline MenuItem& SetEnabled(bool bEnabled) noexcept { _state = bEnabled ? State::Default : State::Disabled; return *this; };
-		inline MenuItem& SetIcon(TextureType icon, bool bMonochrome = true) noexcept { _icon = icon; _bMonochromeIcon = bMonochrome; return *this; };
+		inline MenuItem& SetIcon(Resource icon, bool bMonochrome = true) noexcept { _icon = icon; _bMonochromeIcon = bMonochrome; return *this; };
 		inline MenuItem& SetDelegate(MenuDelegate delegate) noexcept { _fnDelegate = delegate; return *this; };
 		inline MenuItem& SetCheckable(bool bCheckable) noexcept { _bCheckable = bCheckable; return *this; };
 		inline MenuItem& SetChecked(bool bChecked) noexcept { _bChecked = _bCheckable && bChecked; return *this; };
@@ -37,14 +37,14 @@ namespace fig::gui
 		} _state {};
 
 		fig::string _label;
-		TextureType _icon {};
+		Resource _icon {};
 		MenuDelegate _fnDelegate {};
 		bool _bCheckable {};
 		bool _bChecked {};
 		bool _bMonochromeIcon { true };
 
 		std::vector<MenuItem> _subItems;
-		Rect rect {};
+		fig::rect rect {};
 		Control* pControl {};
 	};
 
@@ -53,17 +53,17 @@ namespace fig::gui
 	public:
 		Menu(Frame* pHostFrame);
 
-		MenuItem& AddItem(const fig::string& label, TextureType icon = {}, MenuDelegate fn = {});
+		MenuItem& AddItem(const fig::string& label, Resource icon = {}, MenuDelegate fn = {});
 		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
 		void AddSeparator();
 
-		uint32_t Show(Point position = {-1, -1}, bool bPopAll = true);
+		uint32_t Show(fig::point position = {-1, -1}, bool bPopAll = true);
 		void Reset();
 
 	protected:
 		void OnUpdate(float fElapsed) override;
-		void OnRender(Renderer* pRenderer) override;
-		EventResult OnEvent(Event& event) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
+		EventResult OnEvent(fig::event& event) override;
 
 		bool HandleMouseMotion(SDL_MouseMotionEvent& event);
 		bool HandleMouseDown(SDL_MouseButtonEvent& event);

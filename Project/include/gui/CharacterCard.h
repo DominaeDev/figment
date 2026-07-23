@@ -11,7 +11,7 @@ namespace fig::gui
 		inline const fig::uuid& GetUUID() const noexcept { return _characterId; }
 
 	protected:
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 		void ShowMenu();
 
 	private:

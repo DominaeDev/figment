@@ -37,7 +37,7 @@ namespace fig::gui
 
 		std::weak_ptr<Frame> GetFrame() { return _pFrame; }
 		
-		bool HandleEvent(fig::gui::Event& event);
+		bool HandleEvent(fig::event& event);
 
 	protected:
 		bool OnKeyboardEvent(SDL_KeyboardEvent& event);

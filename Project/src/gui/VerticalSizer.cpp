@@ -4,7 +4,7 @@
 
 using namespace fig::gui;
 
-void VerticalSizer::OnLayout(const Rect& parentRect)
+void VerticalSizer::OnLayout(const fig::rect& parentRect)
 {
 	auto count = GetCount();
 	if (count == 0)
@@ -15,7 +15,7 @@ void VerticalSizer::OnLayout(const Rect& parentRect)
 	int totalProportion = 0;
 	int numStretch = 0;
 
-	std::map<SizerTarget*, Coord> flexItems;
+	std::map<SizerTarget*, fig::coord> flexItems;
 
 	auto items = GetLayoutItems();
 
@@ -69,7 +69,7 @@ void VerticalSizer::OnLayout(const Rect& parentRect)
 		if (pControl and pControl->GetMaxSize().y > 0) //! Move?
 			height = std::min(height, pControl->GetMaxSize().y);
 
-		Rect innerRect {
+		fig::rect innerRect {
 			parentRect.x,
 			parentRect.y + y,
 			parentRect.w,

@@ -22,7 +22,7 @@ namespace fig::gui
 		
 		void PushEvent(UserEvent eventType, int32_t code = 0, void* pData1 = nullptr, void* pData2 = nullptr);
 	protected:
-		EventResult OnEvent(Event& event) override;
+		EventResult OnEvent(fig::event& event) override;
 		virtual bool OnKeyboardEvent(KeyboardEvent& event) = 0;
 
 		virtual void OnUserSignedIn(const fig::user::UserProfile& profile) {};
@@ -30,5 +30,5 @@ namespace fig::gui
 	};
 
 	template <typename T>
-	concept IsScreen = std::derived_from<T, fig::gui::Screen>;
+	concept IsScreen = std::derived_from<T, Screen>;
 }

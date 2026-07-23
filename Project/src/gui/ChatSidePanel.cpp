@@ -11,7 +11,7 @@ namespace fig::gui
 	ChatSidePanel::ChatSidePanel(ParentPtr pParent) : Panel(pParent)
 	{
 		SetWidth(Constants::GUI::ChatSidePanel::Width);
-		SetBackgroundColor(fig::gui::Colors::SidePanelBackground);
+		SetBackgroundColor(Colors::SidePanelBackground);
 
 		_pExpandedRoot = CreateControl<Area>();
 		_pCollapsedRoot = CreateControl<Area>();
@@ -19,7 +19,7 @@ namespace fig::gui
 		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(Colors::SidePanelGradient.WithAlpha(0.8f), Colors::SidePanelGradient.WithAlpha(0.0f));
 		_pGradient = pGradient;
 
-		_pCollapseButton = CreateControl<ButtonWithIcon>(TextureType::ICON_EXPAND_ARROW_LEFT);
+		_pCollapseButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
 		_pCollapseButton->SetTheme(Themes::DefaultButtonStyle);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
@@ -28,7 +28,7 @@ namespace fig::gui
 			_bExpanded ? Collapse() : Expand();
 		});
 
-		_pViewport = _pExpandedRoot->CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(TextureType::MASK_CARD));
+		_pViewport = _pExpandedRoot->CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
 		_pViewport->SetMaxSize(-1, 600);
 
 		_pBottomPanel = _pExpandedRoot->CreateControl<Panel>();
@@ -45,14 +45,14 @@ namespace fig::gui
 
 	void ChatSidePanel::OnAfterLayout()
 	{
-		constexpr Coord kGradientSize = 8;
+		constexpr fig::coord kGradientSize = 8;
 		_pGradient->SetSize(kGradientSize, GetHeight());
 
 		_pViewport->SetY(6);
 		_pBottomPanel->SetY(GetHeight() - _pBottomPanel->GetHeight());
 	}
 
-	EventResult ChatSidePanel::OnEvent(Event& event)
+	EventResult ChatSidePanel::OnEvent(fig::event& event)
 	{
 		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 		{
@@ -79,10 +79,10 @@ namespace fig::gui
 		_bExpanded = true;
 
 		SetWidth(Constants::GUI::ChatSidePanel::Width);
-		SetBackgroundColor(fig::gui::Colors::SidePanelBackground);
+		SetBackgroundColor(Colors::SidePanelBackground);
 
 		_pCollapseButton->SetX(-_pCollapseButton->GetWidth() - 4);
-		_pCollapseButton->SetIcon(TextureType::ICON_SIDEBAR);
+		_pCollapseButton->SetIcon(Resource::ICON_SIDEBAR);
 		_pExpandedRoot->Cull(false);
 		_pCollapsedRoot->Cull(true);
 
@@ -101,10 +101,10 @@ namespace fig::gui
 		_bExpanded = false;
 
 		SetWidth(42);
-		SetBackgroundColor(fig::gui::Colors::AppBackground);
+		SetBackgroundColor(Colors::AppBackground);
 
 		_pCollapseButton->CenterHorizontally();
-		_pCollapseButton->SetIcon(TextureType::ICON_EXPAND_ARROW_LEFT);
+		_pCollapseButton->SetIcon(Resource::ICON_EXPAND_ARROW_LEFT);
 		_pExpandedRoot->Cull(true);
 		_pCollapsedRoot->Cull(false);
 

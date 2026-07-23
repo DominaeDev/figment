@@ -18,7 +18,7 @@ namespace fig::io
 			if (width <= 0 or height <= 0 or format == ImageFormat::Undefined)
 				return unexpected(FileError::UnrecognizedFormat);
 
-			if (auto surface = fig::gui::CreateSurfaceFromBytes(width, height, format, asset.data); not surface.empty())
+			if (auto surface = CreateSurfaceFromBytes(width, height, format, asset.data); not surface.empty())
 				return surface;
 			return unexpected(FileError::ReadError);
 		}

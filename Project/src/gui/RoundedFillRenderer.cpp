@@ -3,12 +3,12 @@
 
 namespace fig::gui
 {
-	RoundedFillRenderer::RoundedFillRenderer(float radius, Color color) : CustomRenderer(color),
+	RoundedFillRenderer::RoundedFillRenderer(float radius, fig::color color) : CustomRenderer(color),
 		_radius(radius)
 	{
 	}
 
-	void RoundedFillRenderer::Render(Renderer* pRenderer, Rectf rect)
+	void RoundedFillRenderer::Render(fig::renderer_ptr pRenderer, fig::rectf rect)
 	{
 		if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 			RefreshGeometry(rect);
@@ -18,9 +18,9 @@ namespace fig::gui
 
 #define CORNER_TRIANGLES 2
 
-	static void AddPoint(float x, float y, std::vector<Vertex>& vertices, Colorf color)
+	static void AddPoint(float x, float y, std::vector<fig::vertex>& vertices, fig::colorf color)
 	{
-		vertices.push_back(Vertex { Pointf { x, y }, color });
+		vertices.push_back(fig::vertex { fig::pointf { x, y }, color });
 	}
 
 	static void AddQuad(int p0, int p1, int p2, int p3, std::vector<int>& indices)
@@ -40,28 +40,28 @@ namespace fig::gui
 		indices.push_back(p2);
 	}
 
-	static Pointf Rotate(Pointf vec, float theta)
+	static fig::pointf Rotate(fig::pointf vec, float theta)
 	{
 		float sinTheta = SDL_sinf(-theta);
 		float cosTheta = SDL_cosf(-theta);
 
-		return Pointf {
+		return fig::pointf {
 			vec.x * cosTheta - vec.y * sinTheta,
 			vec.x * sinTheta + vec.y * cosTheta,
 		};
 	}
 
-	static void AddCorner(float x0, float y0, float x1, float y1, std::vector<Vertex>& vertices, std::vector<int>& indices, Colorf color)
+	static void AddCorner(float x0, float y0, float x1, float y1, std::vector<fig::vertex>& vertices, std::vector<int>& indices, fig::colorf color)
 	{
 		float theta = SDL_PI_F / (2.0f * CORNER_TRIANGLES);
-		Pointf v0 { x1 - x0, y1 - y0 };
+		fig::pointf v0 { x1 - x0, y1 - y0 };
 		int index = (int)vertices.size();
 
 		for (int i = 0; i < CORNER_TRIANGLES; ++i)
 		{
-			Pointf p0 { x0, y0 };
-			Pointf p1 = Rotate(v0, (float)(i + 0) * theta);
-			Pointf p2 = Rotate(v0, (float)(i + 1) * theta);
+			fig::pointf p0 { x0, y0 };
+			fig::pointf p1 = Rotate(v0, (float)(i + 0) * theta);
+			fig::pointf p2 = Rotate(v0, (float)(i + 1) * theta);
 			AddPoint(p0.x, p0.y, vertices, color);
 			AddPoint(p0.x + p1.x, p0.y + p1.y, vertices, color);
 			AddPoint(p0.x + p2.x, p0.y + p2.y, vertices, color);
@@ -70,14 +70,14 @@ namespace fig::gui
 		}
 	}
 
-	void RoundedFillRenderer::RefreshGeometry(Rectf rect)
+	void RoundedFillRenderer::RefreshGeometry(fig::rectf rect)
 	{
 		float radius = SDL_min(_radius, SDL_min(rect.w, rect.h) / 2.0f);
 
 		if (radius <= 0.0f)
 			return;
 
-		Colorf color = {
+		fig::colorf color = {
 			_color.r / 255.0f,
 			_color.g / 255.0f,
 			_color.b / 255.0f,

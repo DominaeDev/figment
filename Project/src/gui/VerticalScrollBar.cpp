@@ -6,21 +6,21 @@
 
 namespace fig::gui
 {
-	constexpr Coord Margin = 8;
+	constexpr fig::coord Margin = 8;
 	constexpr std::array<float, 2> HandleAlpha { 0.25f, 0.5f };
 
 	VerticalScrollBar::VerticalScrollBar(ParentPtr pParent) : Control(pParent)
 	{
 		SetBackgroundColor(Colors::Transparent);
 
-		auto pHandle = CreateControl<TexturedBorder>(TextureType::ROUNDED_BACKGROUND_6PX, 8);
+		auto pHandle = CreateControl<TexturedBorder>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pHandle->SetWidth(8);
 		pHandle->SetCornerScale(0.5f);
 		pHandle->SetForegroundColor(Colors::Black.WithAlpha(HandleAlpha[0]));
 		_pHandle = pHandle;
 	}
 
-	void VerticalScrollBar::SetScroll(ScrollPanel& scrollPanel, float fPosition, Coord maxExtent)
+	void VerticalScrollBar::SetScroll(ScrollPanel& scrollPanel, float fPosition, fig::coord maxExtent)
 	{
 		if (_bScrolling)
 			return; // Ignore
@@ -58,7 +58,7 @@ namespace fig::gui
 		_pHandle->CenterHorizontally();
 	}
 
-	EventResult VerticalScrollBar::OnEvent(Event& event)
+	EventResult VerticalScrollBar::OnEvent(fig::event& event)
 	{
 		switch (event.type)
 		{

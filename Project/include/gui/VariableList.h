@@ -16,7 +16,7 @@ namespace fig::gui
 		bool IsEmpty() const;
 
 	protected:
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 
 	private:
 		fig::observer_ptr<StaticText> _pText;

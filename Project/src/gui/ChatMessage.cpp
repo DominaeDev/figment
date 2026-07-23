@@ -79,12 +79,12 @@ namespace fig::gui
 
 		if (_bShowAvatar)
 		{
-			TexturePtr pTexture = nullptr;
-			if (auto try_portrait = Global::GetUserContent().GetSmallPortraitForCharacter(characterId, AppResources::GetTexture(TextureType::MASK_SMALL_PORTRAIT_56PX), GetSDLRenderer()))
+			fig::texture_ptr pTexture = nullptr;
+			if (auto try_portrait = Global::GetUserContent().GetSmallPortraitForCharacter(characterId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX), GetSDLRenderer()))
 				pTexture = (*try_portrait).get();
 
 			if (!pTexture)
-				pTexture = AppResources::GetTexture(TextureType::PROFILE_DEFAULT_IMAGE);
+				pTexture = AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE);
 
 			Image* pPortrait = CreateControl<Image>(pTexture);
 			pPortrait->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitWidth);
@@ -102,19 +102,19 @@ namespace fig::gui
 		{
 			if (bRight)
 			{
-				_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_RIGHT_BG, Corners { 30, 72, 64, 30 });
-				_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_RIGHT_BORDER, Corners { 30, 72, 64, 30 });
+				_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_RIGHT_BG, fig::corners { 30, 72, 64, 30 });
+				_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_RIGHT_BORDER, fig::corners { 30, 72, 64, 30 });
 			}
 			else
 			{
-				_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_LEFT_BG, Corners { 72, 30, 64, 30 });
-				_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_LEFT_BORDER, Corners { 72, 30, 64, 30 });
+				_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_LEFT_BG, fig::corners { 72, 30, 64, 30 });
+				_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_LEFT_BORDER, fig::corners { 72, 30, 64, 30 });
 			}
 		}
 		else
 		{
-			_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_CENTER_BG, Corners { 30, 30, 64, 30 });
-			_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(TextureType::SPEECH_BUBBLE_CENTER_BORDER, Corners { 30, 30, 64, 30 });
+			_pSpeechBubbleBG = _pMessagePanel->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BG, fig::corners { 30, 30, 64, 30 });
+			_pSpeechBubbleBorder = _pMessagePanel->SetBorderRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BORDER, fig::corners { 30, 30, 64, 30 });
 		}
 		_pSpeechBubbleBG->SetCornerScale(0.35f);
 		_pSpeechBubbleBorder->SetCornerScale(0.35f);
@@ -252,12 +252,12 @@ namespace fig::gui
 		RefreshColors();
 	}
 
-	void ChatMessage::SetColors(const ColorPair& colors)
+	void ChatMessage::SetColors(const fig::color_pair& colors)
 	{
 		SetColors(colors.background, colors.foreground);
 	}
 
-	void ChatMessage::SetColors(Color bgColor, Color borderColor)
+	void ChatMessage::SetColors(fig::color bgColor, fig::color borderColor)
 	{
 		_bgColor = bgColor;
 		_borderColor = borderColor;
@@ -273,11 +273,11 @@ namespace fig::gui
 	{
 		const uint8_t fadedAlpha = 120;
 		bool bDialogue = (_style & Style::Dialogue) == Style::Dialogue;
-		Color chatBG = GetBackgroundColor();
+		fig::color chatBG = GetBackgroundColor();
 
 		uint8_t alpha = (uint8_t)(_bActive ? 255 : fadedAlpha);
 
-		SetForegroundColor(Color { 0, 0, 0, alpha });
+		SetForegroundColor(fig::color { 0, 0, 0, alpha });
 
 		_pSpeechBubbleBG->SetColor(_bgColor.WithAlpha(alpha));
 		_pSpeechBubbleBorder->SetColor(_borderColor.WithAlpha(alpha));

@@ -31,7 +31,7 @@ namespace fig::gui
 		}
 	}
 
-	void Frame::Render(Renderer* pRenderer)
+	void Frame::Render(fig::renderer_ptr pRenderer)
 	{
 		SDL_SetRenderDrawColor(pRenderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
 		SDL_RenderClear(pRenderer);
@@ -62,7 +62,7 @@ namespace fig::gui
 		// Clamp to edge
 		auto& frameRect = GetRect();
 		auto& menuRect = pMenu->GetRect();
-		Point pos { menuRect.x, menuRect.y };
+		fig::point pos { menuRect.x, menuRect.y };
 
 		if (menuRect.x + menuRect.w > frameRect.w)
 		{
@@ -115,7 +115,7 @@ namespace fig::gui
 			OnMenuClose(*it);
 	}
 
-	EventResult Frame::ProcessEvent(Event& event)
+	EventResult Frame::ProcessEvent(fig::event& event)
 	{
 		for (int32_t i = toI(_menus.size()) - 1; i >= 0; --i)
 		{

@@ -7,13 +7,13 @@ namespace fig::gui
 	class ImageWithMask : public Control
 	{
 	public:
-		ImageWithMask(ParentPtr pParent, TexturePtr pTexture, TexturePtr pMask, Color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
-		void SetTexture(TexturePtr pTexture, TexturePtr pMask, bool bResize = false);
-		Point GetTextureSize() const noexcept;
+		ImageWithMask(ParentPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask, fig::color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
+		void SetTexture(fig::texture_ptr pTexture, fig::texture_ptr pMask, bool bResize = false);
+		fig::point GetTextureSize() const noexcept;
 		void Reset();
 
 	protected:
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 
 	protected:
 		fig::sdl::Texture _texture;

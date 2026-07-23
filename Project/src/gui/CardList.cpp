@@ -12,17 +12,17 @@ using namespace fig::user;
 
 namespace fig::gui
 {
-	constexpr Coord TopMargin = 8;
-	constexpr Coord BottomMargin = 120;
+	constexpr fig::coord TopMargin = 8;
+	constexpr fig::coord BottomMargin = 120;
 
 	using CoverCardPtr = fig::observer_ptr<CoverCard>;
 
-	static constexpr Coord cardWidth(CardSize cardSize) noexcept
+	static constexpr fig::coord cardWidth(CardSize cardSize) noexcept
 	{
 		return cardSize == CardSize::Full ? Constants::GUI::CardWidth : Constants::GUI::HalfCardWidth;
 	}
 
-	static constexpr Coord cardHeight(CardSize cardSize) noexcept
+	static constexpr fig::coord cardHeight(CardSize cardSize) noexcept
 	{
 		return cardSize == CardSize::Full ? Constants::GUI::CardHeight: Constants::GUI::HalfCardHeight;
 	}
@@ -177,7 +177,7 @@ namespace fig::gui
 	void CardList::OnAfterLayout()
 	{
 		int32_t curr_rows = toI(_pGridSizer->GetRows());
-		Coord kCardHeight = cardHeight(_cardSize);
+		fig::coord kCardHeight = cardHeight(_cardSize);
 		_maxExtent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
 
 		ScrollPanel::OnAfterLayout();

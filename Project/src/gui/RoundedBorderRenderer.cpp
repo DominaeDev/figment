@@ -4,14 +4,14 @@
 
 namespace fig::gui
 {
-	RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, Color color) : CustomRenderer(color),
+	RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, fig::color color) : CustomRenderer(color),
 		_thickness(thickness),
 		_radius(radius)
 	{
-		_pTexture = AppResources::GetTexture(TextureType::BORDER);
+		_pTexture = AppResources::GetTexture(Resource::BORDER);
 	}
 
-	void RoundedBorderRenderer::Render(Renderer* pRenderer, const Rectf& rect)
+	void RoundedBorderRenderer::Render(fig::renderer_ptr pRenderer, const fig::rectf& rect)
 	{
 		if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 			RefreshGeometry(rect);
@@ -21,9 +21,9 @@ namespace fig::gui
 
 #define CORNER_TRIANGLES 8
 
-	static void AddPoint(float x, float y, float u, float v, std::vector<Vertex>& vertices, Colorf color)
+	static void AddPoint(float x, float y, float u, float v, std::vector<fig::vertex>& vertices, fig::colorf color)
 	{
-		vertices.push_back(Vertex { Pointf { x, y }, color,  Pointf { u, v } });
+		vertices.push_back(fig::vertex { fig::pointf { x, y }, color,  fig::pointf { u, v } });
 	}
 
 	static void AddQuad(int p0, int p1, int p2, int p3, std::vector<int>& indices)
@@ -43,49 +43,49 @@ namespace fig::gui
 		indices.push_back(p2);
 	}
 
-	static Pointf Vec_Rotate(Pointf vec, float theta)
+	static fig::pointf Vec_Rotate(fig::pointf vec, float theta)
 	{
 		float sinTheta = SDL_sinf(-theta);
 		float cosTheta = SDL_cosf(-theta);
 
-		return Pointf {
+		return fig::pointf {
 			vec.x * cosTheta - vec.y * sinTheta,
 			vec.x * sinTheta + vec.y * cosTheta,
 		};
 	}
 
-	static Pointf Vec_Normalize(Pointf v)
+	static fig::pointf Vec_Normalize(fig::pointf v)
 	{
 		float l = SDL_sqrtf(v.x * v.x + v.y * v.y);
-		return Pointf { v.x / l, v.y / l };
+		return fig::pointf { v.x / l, v.y / l };
 	}
 
-	static Pointf Vec_Add(Pointf a, Pointf b)
+	static fig::pointf Vec_Add(fig::pointf a, fig::pointf b)
 	{
-		return Pointf { a.x + b.x, a.y + b.y };
+		return fig::pointf { a.x + b.x, a.y + b.y };
 	}
 
-	static Pointf Vec_Multiply(Pointf v, float factor)
+	static fig::pointf Vec_Multiply(fig::pointf v, float factor)
 	{
-		return Pointf { v.x * factor, v.y * factor };
+		return fig::pointf { v.x * factor, v.y * factor };
 	}
 
 	// Takes an origin and a vector, then rotates that vector 90d, tracing a line with thickness
-	static void AddCorner(float x0, float y0, float x1, float y1, float thickness, std::vector<Vertex>& vertices, std::vector<int>& indices, Colorf color)
+	static void AddCorner(float x0, float y0, float x1, float y1, float thickness, std::vector<fig::vertex>& vertices, std::vector<int>& indices, fig::colorf color)
 	{
 		float theta = SDL_PI_F / (2.0f * CORNER_TRIANGLES);
-		Pointf v0 { x0, y0 };
-		Pointf v1 { x1 - x0, y1 - y0 };
-		Pointf v2 = Vec_Add(Vec_Multiply(Vec_Normalize(v1), -thickness), v1);
+		fig::pointf v0 { x0, y0 };
+		fig::pointf v1 { x1 - x0, y1 - y0 };
+		fig::pointf v2 = Vec_Add(Vec_Multiply(Vec_Normalize(v1), -thickness), v1);
 
 		int index = (int)vertices.size();
 
 		for (int i = 0; i < CORNER_TRIANGLES; ++i)
 		{
-			Pointf p0 = Vec_Add(Vec_Rotate(v2, (float)(i + 1) * theta), v0);
-			Pointf p1 = Vec_Add(Vec_Rotate(v2, (float)(i + 0) * theta), v0);
-			Pointf p2 = Vec_Add(Vec_Rotate(v1, (float)(i + 0) * theta), v0);
-			Pointf p3 = Vec_Add(Vec_Rotate(v1, (float)(i + 1) * theta), v0);
+			fig::pointf p0 = Vec_Add(Vec_Rotate(v2, (float)(i + 1) * theta), v0);
+			fig::pointf p1 = Vec_Add(Vec_Rotate(v2, (float)(i + 0) * theta), v0);
+			fig::pointf p2 = Vec_Add(Vec_Rotate(v1, (float)(i + 0) * theta), v0);
+			fig::pointf p3 = Vec_Add(Vec_Rotate(v1, (float)(i + 1) * theta), v0);
 
 			AddPoint(p0.x, p0.y, 0.0f, 0.0f, vertices, color);
 			AddPoint(p1.x, p1.y, 1.0f, 0.0f, vertices, color);
@@ -97,14 +97,14 @@ namespace fig::gui
 		}
 	}
 
-	void RoundedBorderRenderer::RefreshGeometry(Rectf rect)
+	void RoundedBorderRenderer::RefreshGeometry(fig::rectf rect)
 	{
 		float radius = SDL_min(_radius, SDL_min(rect.w, rect.h) / 2.0f);
 
 		if (radius <= 0.0f)
 			return;
 
-		Colorf color = {
+		fig::colorf color = {
 			_color.r / 255.0f,
 			_color.g / 255.0f,
 			_color.b / 255.0f,

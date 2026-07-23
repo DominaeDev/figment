@@ -4,9 +4,9 @@
 
 namespace fig::gui
 {
-	void VerticalScrollSizer::SetOffset(Coord offset)
+	void VerticalScrollSizer::SetOffset(fig::coord offset)
 	{
-		Coord diff = offset - _offset;
+		fig::coord diff = offset - _offset;
 		auto items = GetLayoutItems();
 
 		for (auto& item : items)
@@ -18,7 +18,7 @@ namespace fig::gui
 		_offset = offset;
 	}
 
-	void VerticalScrollSizer::OnLayout(const Rect& rect)
+	void VerticalScrollSizer::OnLayout(const fig::rect& rect)
 	{
 		VerticalListSizer::OnLayout(rect);
 		if (_offset == 0.0f)

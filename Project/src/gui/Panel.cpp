@@ -7,7 +7,7 @@ Panel::Panel(ParentPtr pParent) : Control(pParent)
 {
 }
 
-void Panel::OnRender(Renderer* pRenderer)
+void Panel::OnRender(fig::renderer_ptr pRenderer)
 {
 	DrawBackground(pRenderer);
 }

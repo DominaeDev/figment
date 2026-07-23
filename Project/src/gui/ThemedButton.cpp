@@ -9,7 +9,7 @@ namespace fig::gui
 		SetTheme(Themes::DefaultButtonStyle);
 	}
 
-	EventResult ThemedButton::OnEvent(Event& event)
+	EventResult ThemedButton::OnEvent(fig::event& event)
 	{
 		return HandleMouseEvents(event) ? EventResult::Handled : EventResult::Pass;
 	}
@@ -19,7 +19,7 @@ namespace fig::gui
 		_theme = theme;
 	}
 
-	const Color& ThemedButton::GetThemeForeground() const noexcept
+	const fig::color& ThemedButton::GetThemeForeground() const noexcept
 	{
 		switch (_state)
 		{
@@ -34,7 +34,7 @@ namespace fig::gui
 		}
 	}
 
-	const Color& ThemedButton::GetThemeBackground() const noexcept
+	const fig::color& ThemedButton::GetThemeBackground() const noexcept
 	{
 		switch (_state)
 		{

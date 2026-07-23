@@ -50,19 +50,19 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fElapsed) override;
-		void OnRender(RendererPtr pRenderer) override;
-		EventResult OnEvent(Event& event) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
+		EventResult OnEvent(fig::event& event) override;
 		void OnSize() override;
 		void OnPostRender() override;
 		void OnEnabled(bool bEnabled) override;
 
 	private:
 		void Insert(const char* text);
-		void DrawText(RendererPtr pRenderer, TTF_Text* pText, int x, int y);
-		void DrawCursor(RendererPtr pRenderer);
-		void DrawCandidates(RendererPtr pRenderer);
-		void DrawComposition(RendererPtr pRenderer);
-		void DrawCompositionCursor(RendererPtr pRenderer);
+		void DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y);
+		void DrawCursor(fig::renderer_ptr pRenderer);
+		void DrawCandidates(fig::renderer_ptr pRenderer);
+		void DrawComposition(fig::renderer_ptr pRenderer);
+		void DrawCompositionCursor(fig::renderer_ptr pRenderer);
 		void ClearCandidates();
 		void SaveCandidates(const SDL_Event* event);
 		bool GetHighlightExtents(int* marker, int* length);
@@ -94,8 +94,8 @@ namespace fig::gui
 		bool HandleMouseUp(int x, int y);
 		void ApplyScroll(int& x, int& y) const;
 		void ApplyScroll(float& x, float& y) const;
-		void ApplyScroll(Rect& rect) const;
-		void ApplyScroll(Rectf& rect) const;
+		void ApplyScroll(fig::rect& rect) const;
+		void ApplyScroll(fig::rectf& rect) const;
 		void Autosize();
 		void DidChange();
 
@@ -119,12 +119,12 @@ namespace fig::gui
 		bool _bIBeamCursor = false;
 		Flags _flags {};
 		bool _bAutoSize = false;
-		Point _scroll {};
+		fig::point _scroll {};
 		int _minRows = 1;
 		int _maxRows = 1;
 
-		fig::observer_ptr<Texture> _pTexture;
-		fig::observer_ptr<Surface> _pSurface;
+		fig::texture_ptr _pTexture;
+		fig::surface_ptr _pSurface;
 		TextChangedCallback _pOnChanged = nullptr;
 		EnterPressedCallback _pOnEnter = nullptr;
 
@@ -132,7 +132,7 @@ namespace fig::gui
 		int _cursor = 0;
 		bool _cursor_visible = false;
 		uint64_t _last_cursor_change = 0ULL;
-		Rectf _cursor_rect {};
+		fig::rectf _cursor_rect {};
 
 		// Selection
 		bool _bIsHighlighting = false;

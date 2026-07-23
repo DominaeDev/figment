@@ -5,11 +5,11 @@
 
 namespace fig::gui
 {
-	ToggleWithIcon::ToggleWithIcon(ParentPtr pParent, TextureType icon, ToggleBehavior behavior, bool bOn) : ThemedButton(pParent),
+	ToggleWithIcon::ToggleWithIcon(ParentPtr pParent, Resource icon, ToggleBehavior behavior, bool bOn) : ThemedButton(pParent),
 		_bOn { bOn },
 		_behavior { behavior }
 	{
-		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BACKGROUND_6PX, 8);
+		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
@@ -31,7 +31,7 @@ namespace fig::gui
 		}
 	}
 
-	void ToggleWithIcon::SetIcon(TextureType icon)
+	void ToggleWithIcon::SetIcon(Resource icon)
 	{
 		_pIcon->SetTexture(AppResources::GetTexture(icon));
 	}
@@ -58,7 +58,7 @@ namespace fig::gui
 		_bOn = bOn;
 		if (bOn)
 		{
-			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(TextureType::ROUNDED_BORDER_6PX, 8);
+			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 			pBorder->SetColor(Colors::LineColor);
 		}
 		else

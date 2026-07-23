@@ -7,21 +7,21 @@ namespace fig::gui
 	class VerticalGradient : public Control
 	{
 	public:
-		VerticalGradient(ParentPtr pParent, Color colorTop, Color colorBottom);
-		void SetColors(Color colorTop, Color colorBottom);
-		void SetTexture(fig::observer_ptr<Texture> pTexture);
+		VerticalGradient(ParentPtr pParent, fig::color colorTop, fig::color colorBottom);
+		void SetColors(fig::color colorTop, fig::color colorBottom);
+		void SetTexture(fig::texture_ptr pTexture);
 
-		void OnRender(Renderer* pRenderer) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 	protected:
 		void OnUpdate(float fElapsed) override {};
 
-		void RefreshGeometry(Rectf rect);
+		void RefreshGeometry(fig::rectf rect);
 	private:
-		Colorf _colorTop {};
-		Colorf _colorBottom {};
-		Rectf _lastRect {};
-		fig::observer_ptr<Texture> _pTexture;
+		fig::colorf _colorTop {};
+		fig::colorf _colorBottom {};
+		fig::rectf _lastRect {};
+		fig::texture_ptr _pTexture;
 
-		std::vector<Vertex> _vertices {};
+		std::vector<fig::vertex> _vertices {};
 	};
 }
