@@ -18,7 +18,6 @@ namespace fig::io
 	{
 	public:
 		UserContentManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey);
-		~UserContentManager();
 
 		size_t ImportCharactersInDirectory(const fig::path& directory, size_t max_count = 0uz);
 		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename);
@@ -43,7 +42,6 @@ namespace fig::io
 		bool SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle);
 
 		AssetManager& GetAssetManager();
-		void SaveModified();
 
 		size_t GetChatCount(const fig::uuid& assetId);
 		void RefreshChatCount();

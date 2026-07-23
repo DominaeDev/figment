@@ -96,7 +96,8 @@ namespace fig::io
 				return ModifyAsset_Void(asset, fn);
 		}
 
-		void SaveModified();
+		void SaveNow();
+		void Shutdown();
 
 		enum class CharacterDataFormat { Default, TavernV2, };
 		fig::ref_vector<Asset> ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format = CharacterDataFormat::Default, size_t max_count = 0uz);
@@ -157,6 +158,8 @@ namespace fig::io
 		fig::expected_ref<Asset, FileError> ImportScenario_Internal(const fig::path& filename);
 
 	private:
+		bool SaveModifiedAssets();
+
 		/* Asynchronous loading */
 		void __Worker(std::stop_token stop);
 		AsyncLoadError __LoadImageTask(const fig::uuid& characterAssetID, ImageType imageType, AsyncResultVariant& outResult) noexcept;
@@ -178,13 +181,19 @@ namespace fig::io
 
 		[[nodiscard]] bool IsAsyncRequestAlive(const PendingRequest& request) const;
 
+		/* Autosave*/
+		void __Autosave(std::stop_token stopToken, std::chrono::seconds interval);
+
+	private:
 		std::priority_queue<PendingRequest> _pending;
 		mutable std::mutex _pending_mutex;
 		std::condition_variable _pending_cv;
 		std::map<fig::uuid, AsyncPromise*> _active_promises;
 		mutable std::mutex _active_mutex;
-		std::atomic<uint64_t>     _next_id { 0 };
+		std::atomic<uint64_t> _next_id { 0 };
 		std::vector<std::jthread> _workers;
+		std::jthread _autosave_worker {};
+		std::condition_variable_any _autosave_cv {};
 	};
 
 }

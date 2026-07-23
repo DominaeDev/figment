@@ -25,11 +25,6 @@ namespace fig::io
 		LoadAll();
 	}
 
-	UserContentManager::~UserContentManager()
-	{
-		_pAssetMngr->SaveModified();
-	}
-
 	void UserContentManager::LoadAll()
 	{
 		DEBUG_MEASURE_BEGIN("UserContentManager::LoadAll");
@@ -208,11 +203,6 @@ namespace fig::io
 	AssetManager& UserContentManager::GetAssetManager()
 	{
 		return *_pAssetMngr;
-	}
-
-	void UserContentManager::SaveModified()
-	{
-		_pAssetMngr->SaveModified();
 	}
 
 	fig::expected_ref<fig::sdl::Texture, FileError> UserContentManager::GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept

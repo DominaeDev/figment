@@ -42,12 +42,19 @@ namespace fig::io
 		_workers.reserve(worker_threads);
 		for (int i = 0; i < worker_threads; ++i)
 			_workers.emplace_back([this](std::stop_token stop) { __Worker(stop); });
+
+		_autosave_worker = std::jthread(std::bind_front(&AssetManager::__Autosave, this), std::chrono::seconds(120));
 	}
 
 	AssetManager::~AssetManager()
 	{
-		{
-			std::scoped_lock lock(_pending_mutex);
+		Shutdown();
+	}
+
+	void AssetManager::Shutdown()
+	{
+		// Cancel all worker threads
+		{	std::scoped_lock lock(_pending_mutex);
 			while (!_pending.empty())
 			{
 				PendingRequest request = std::move(const_cast<PendingRequest&>(_pending.top()));
@@ -58,8 +65,20 @@ namespace fig::io
 
 		for (auto& worker : _workers)
 			worker.request_stop();
-
 		_pending_cv.notify_all();
+		_workers.clear();
+
+		// Stop auto save
+		_autosave_worker.request_stop();
+		_autosave_cv.notify_all();
+		_autosave_worker = {}; // join
+
+		SaveModifiedAssets();
+	}
+
+	void AssetManager::SaveNow()
+	{
+		SaveModifiedAssets();
 	}
 
 	const Asset& AssetManager::CreateEmptyAsset(AssetType type, const fig::uuid& parent) noexcept
@@ -278,10 +297,11 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	void AssetManager::SaveModified()
+	bool AssetManager::SaveModifiedAssets()
 	{
 		std::scoped_lock lock { _assetsMutex };
-
+		
+		bool bSaved = false;
 		for (auto& kvp : _assets)
 		{
 			auto& asset = kvp.second;
@@ -291,11 +311,16 @@ namespace fig::io
 				{
 					assert(asset.sync_state.has_data and not asset.data.empty());
 					UpdateAssetOnDisk(asset);
+					bSaved = true;
 				}
 				if (asset.sync_state.ShouldWriteToDatabase())
+				{
 					UpdateAssetInDatabase(asset);
+					bSaved = true;
+				}
 			}
 		}
+		return bSaved;
 	}
 
 	bool AssetManager::UpdateAssetOnDisk(Asset& asset)
@@ -1129,5 +1154,20 @@ namespace fig::io
 		if (fn)
 			return fn(const_cast<Asset&>(asset));
 		return false;
+	}
+
+	void AssetManager::__Autosave(std::stop_token stopToken, std::chrono::seconds interval)
+	{
+		std::mutex wait_mutex;
+		std::unique_lock wait_lock(wait_mutex);
+		while (not stopToken.stop_requested())
+		{
+			_autosave_cv.wait_for(wait_lock, stopToken, interval, [] { return false; });
+			if (not stopToken.stop_requested())
+			{
+				if (SaveModifiedAssets())
+					LogLn("Auto-saved");
+			}
+		}
 	}
 }
