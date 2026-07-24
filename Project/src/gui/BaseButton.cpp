@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	BaseButton::BaseButton(ControlPtr pOwner) : _pOwner { pOwner }
+	BaseButton::BaseButton(fig::observer_ptr<Control> pOwner) : _pOwner { pOwner }
 	{
 	}
 

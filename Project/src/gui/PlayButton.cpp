@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	PlayButton::PlayButton(ParentPtr pParent) : ThemedButton(pParent)
+	PlayButton::PlayButton(control_ptr pParent) : ThemedButton(pParent)
 	{
 		_pBackground = CreateControl<Image>(Resource::BACKGROUND_CIRCLE_48PX);
 		_pBackground->SetSize(36, 36);
@@ -15,7 +15,7 @@ namespace fig::gui
 
 		SetSize(36, 36);
 		OnButtonState();
-		SetBackgroundColor(Colors::Transparent);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	void PlayButton::OnUpdate(float fElapsed)
@@ -41,15 +41,15 @@ namespace fig::gui
 		{
 		case ButtonState::Default:
 			_pBackground->SetForegroundColor(fig::color { offColor, 0x40 });
-			_pIcon->SetForegroundColor(Colors::SidePanelForeground);
+			_pIcon->SetForegroundColor(Color::SidePanelForeground);
 			break;
 		case ButtonState::Hover:
 			_pBackground->SetForegroundColor(fig::color { offColor, 0x80 });
-			_pIcon->SetForegroundColor(Colors::SidePanelForeground);
+			_pIcon->SetForegroundColor(Color::SidePanelForeground);
 			break;
 		case ButtonState::Pressed:
 			_pBackground->SetForegroundColor(fig::color { offColor, 0xC0 });
-			_pIcon->SetForegroundColor(Colors::SidePanelForeground);
+			_pIcon->SetForegroundColor(Color::SidePanelForeground);
 			break;
 		case ButtonState::Disabled:
 			_pBackground->SetForegroundColor(fig::color { 0xCCCCCC, 0x80 });

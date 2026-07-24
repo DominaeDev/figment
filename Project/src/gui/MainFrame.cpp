@@ -30,8 +30,8 @@ namespace fig::gui
 	{
 		s_pInstance = this;
 
-		SetForegroundColor(Colors::Black);
-		SetBackgroundColor(Colors::AppBackground);
+		SetForegroundColor(Color::Black);
+		SetBackgroundColor(Color::AppBackground);
 
 		_pMainArea = CreateControl<Area>();
 		_pSidePanel = CreateControl<SidePanel>();
@@ -224,9 +224,9 @@ namespace fig::gui
 		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
-		PushEvent(UserEvent::UserSignedIn, &profile);
-
 		ChangeScreen(ScreenType::Home);
+
+		PushEvent(UserEvent::UserSignedIn, &profile);
 		auto pHomeScreen = GetScreen<HomeScreen>(ScreenType::Home);
 		pHomeScreen->CreateCards();
 	}
@@ -336,8 +336,6 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_2 and mods.Alt)
 					{
 						ChangeScreen(ScreenType::Chat);
-						GetScreen<ChatScreen>(ScreenType::Chat)->GetSidePanel()->SetImage(fig::uuid::from_str("6d24f1e3-2ee0-4092-b903-6f346ef4189e")); //! @temp
-						GetScreen<ChatScreen>(ScreenType::Chat)->GetBackground()->SetImage(fig::uuid::from_str("a90918fc-879e-44fa-bd7f-db3a8ad93e74")); //! @temp
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/LayoutElement.h"
+#include "gui/Control.h"
 #include <functional>
 
 namespace fig::gui
@@ -17,7 +17,7 @@ namespace fig::gui
 		inline bool IsEnabled() const noexcept;
 
 	protected:
-		BaseButton(ControlPtr pOwner);
+		BaseButton(fig::observer_ptr<Control> pOwner);
 		bool HandleMouseEvents(const fig::event& event) noexcept;
 		void DropState() noexcept;
 
@@ -39,7 +39,7 @@ namespace fig::gui
 
 	private:
 		ButtonDelegate _fn {};
-		fig::observer_ptr<LayoutElement> _pOwner;
+		fig::observer_ptr<Control> _pOwner;
 		bool _bMouseInside = false;
 		bool _bMouseDown = false;
 		fig::coord _expand = 0;

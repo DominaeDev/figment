@@ -37,7 +37,7 @@ namespace fig::gui
 	class StaticText : public Control
 	{
 	public:
-		StaticText(ParentPtr pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize = true);
+		StaticText(control_ptr pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize = true);
 		virtual ~StaticText();
 
 		fig::font_ptr GetFont() const { return _pFont.get(); }

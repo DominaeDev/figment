@@ -20,10 +20,10 @@ namespace fig::gui
 
 	class ChatListItem : public Panel
 	{
-		ChatListItem(ParentPtr pParent);
+		ChatListItem(control_ptr pParent);
 	
 	public:
-		ChatListItem(ParentPtr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString);
+		ChatListItem(control_ptr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString);
 		void SetDelegate(OnChatUpdatedDelegate onUpdated);
 		void ShowStar(bool bShow);
 

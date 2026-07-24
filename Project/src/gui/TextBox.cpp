@@ -39,11 +39,11 @@ static int BytesUTF8Length(const char* text, int num_bytes)
 
 namespace fig::gui
 {
-	TextBox::TextBox(ParentPtr pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : Control(pParent),
+	TextBox::TextBox(control_ptr pParent, FontFace fontFace, double ptSize, TextBox::Flags flags) : Control(pParent),
 		_flags { flags }
 	{
-		SetForegroundColor(Colors::Black);
-		SetBackgroundColor(Colors::White);
+		SetForegroundColor(Color::Black);
+		SetBackgroundColor(Color::White);
 
 		_pFont = Fonts::GetFont(fontFace, ptSize);
 		_pText = TTF_CreateText(GetSDLTextEngine(), _pFont, "", 0);
@@ -163,7 +163,7 @@ namespace fig::gui
 			TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(GetRenderedText(), marker, length, NULL);
 			if (pHighlights)
 			{
-				SDL_SetRenderDrawColor(pRenderer, Colors::TextSelectionBackground.r, Colors::TextSelectionBackground.g, Colors::TextSelectionBackground.b, Colors::TextSelectionBackground.a);
+				SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
 				for (int i = 0; pHighlights[i]; ++i)
 				{
 					fig::rectf highlight_rect = to_rectf(pHighlights[i]->rect);
@@ -1787,11 +1787,11 @@ namespace fig::gui
 		{
 			SetFocus(false);
 			Deselect();
-			SetForegroundColor(Colors::DisabledForeground);
+			SetForegroundColor(Color::DisabledForeground);
 		}
 		else
 		{
-			SetForegroundColor(Colors::Black);
+			SetForegroundColor(Color::Black);
 		}
 	}
 }

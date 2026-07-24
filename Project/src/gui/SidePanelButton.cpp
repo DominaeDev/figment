@@ -5,9 +5,9 @@
 
 namespace fig::gui
 {
-	SidePanelButton::SidePanelButton(ParentPtr pParent, Resource icon, const fig::string& label) : ThemedButton(pParent)
+	SidePanelButton::SidePanelButton(control_ptr pParent, Resource icon, const fig::string& label) : ThemedButton(pParent)
 	{
-		SetTheme(Themes::SidePanelButtonStyle);
+		SetTheme(Theme::SidePanelButtonStyle);
 		SetHeight(58);
 
 		auto pBorder = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
@@ -19,7 +19,7 @@ namespace fig::gui
 
 		_pLabel = CreateControl<StaticText>(label, FontFace::Default, 20, false);
 		_pLabel->SetForegroundColor(GetThemeForeground());
-		_pLabel->SetBackgroundColor(Colors::Transparent);
+		_pLabel->SetBackgroundColor(Color::Transparent);
 		_pLabel->EnableEllipsis(true);
 		_pLabel->SetPosition(60, 16);
 	}

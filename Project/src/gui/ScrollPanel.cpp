@@ -7,7 +7,7 @@
 
 namespace fig::gui
 {
-	ScrollPanel::ScrollPanel(ParentPtr pParent, bool bScrollBar) : Control(pParent)
+	ScrollPanel::ScrollPanel(control_ptr pParent, bool bScrollBar) : Control(pParent)
 	{
 		EnableCulling(true);
 		EnableClipping(true);

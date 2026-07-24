@@ -44,7 +44,7 @@ namespace fig::gui
 		auto centerArea = _pBackground->CreateControl<Area>();
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
-		auto underColor = Colors::Black.WithAlpha(0.45f);
+		auto underColor = Color::Black.WithAlpha(0.45f);
 		constexpr fig::coord underGradientWidth = 80;
 		_pUnderScroll = centerArea->CreateControl<Area>();
 		_pUnderScroll->SetBackgroundColor(underColor);
@@ -95,7 +95,7 @@ namespace fig::gui
 		auto pTextBoxBG = _pTextBox->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::TEXTBOX_BG);
 		pTextBoxBG->SetCornerScale(0.5f);
 		pTextBoxBG->SetExtend(7.0f);
-		pTextBoxBG->SetColor(Colors::White);
+		pTextBoxBG->SetColor(Color::White);
 
 		auto pTextBoxBorder = _pTextBox->SetBorderRenderer<TexturedBorderRenderer>(Resource::TEXTBOX_BORDER);
 		pTextBoxBorder->SetCornerScale(0.5f);

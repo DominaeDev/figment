@@ -16,7 +16,7 @@ namespace fig::gui
 		~Frame();
 
 		void Render(fig::renderer_ptr pRenderer) override;
-		void Update(float fElapsed) override;
+		void Update(float fElapsed);
 		EventResult ProcessEvent(fig::event& event) override;
 		Menu& CreateMenu() noexcept;
 

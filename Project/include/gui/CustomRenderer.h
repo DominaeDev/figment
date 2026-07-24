@@ -24,6 +24,6 @@ namespace fig::gui
 		}
 
 	protected:
-		fig::color _color { Colors::White };
+		fig::color _color { Color::White };
 	};
 }

@@ -7,7 +7,7 @@ namespace fig::gui
 	class VerticalGradient : public Control
 	{
 	public:
-		VerticalGradient(ParentPtr pParent, fig::color colorTop, fig::color colorBottom);
+		VerticalGradient(control_ptr pParent, fig::color colorTop, fig::color colorBottom);
 		void SetColors(fig::color colorTop, fig::color colorBottom);
 		void SetTexture(fig::texture_ptr pTexture);
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GUITypes.h"
-#include "IUpdateable.h"
 
 namespace fig::gui
 {
@@ -13,7 +12,7 @@ concept DerivesFromFrame = std::derived_from<T, fig::gui::Frame>;
 
 namespace fig::gui
 {
-	class Window : IUpdateable
+	class Window
 	{
 	public:
 		Window(fig::string_view title, int32_t width, int32_t height);

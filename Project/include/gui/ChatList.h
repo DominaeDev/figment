@@ -10,7 +10,7 @@ namespace fig::gui
 	class ChatList : public ScrollPanel
 	{
 	public:
-		ChatList(ParentPtr pParent);
+		ChatList(control_ptr pParent);
 
 		void ShowAllChats();
 		void ShowChatsWith(const fig::uuid& characterId);
@@ -22,7 +22,7 @@ namespace fig::gui
 		void Reset();
 		void OnScroll() override;
 		void OnAfterLayout() override;
-		ControlPtr CreateHeader(fig::string_view text);
+		fig::observer_ptr<Control> CreateHeader(fig::string_view text);
 
 		void ShowChats(const fig::cref_vector<fig::io::Asset>& chats);
 

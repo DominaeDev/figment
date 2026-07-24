@@ -2,7 +2,6 @@
 
 #include "Figment.h"
 #include "gui/GUITypes.h"
-#include "IUpdateable.h"
 #include <ranges>
 
 namespace fig::gui
@@ -10,7 +9,7 @@ namespace fig::gui
 	class Control;
 	class LayoutElement;
 
-	class Sizer : public IUpdateable
+	class Sizer
 	{
 	public:
 		enum Flag : int32_t {
@@ -107,7 +106,6 @@ namespace fig::gui
 		}
 
 		virtual void OnLayout(const fig::rect& rect) = 0;
-		void Update(float fElapsed) override {};
 	
 	private:
 		std::vector<SizerItem> _items;

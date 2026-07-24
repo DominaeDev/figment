@@ -8,19 +8,19 @@
 
 namespace fig::gui
 {
-	ChatSidePanel::ChatSidePanel(ParentPtr pParent) : Panel(pParent)
+	ChatSidePanel::ChatSidePanel(control_ptr pParent) : Panel(pParent)
 	{
 		SetWidth(Constants::GUI::ChatSidePanel::Width);
-		SetBackgroundColor(Colors::SidePanelBackground);
+		SetBackgroundColor(Color::SidePanelBackground);
 
 		_pExpandedRoot = CreateControl<Area>();
 		_pCollapsedRoot = CreateControl<Area>();
 
-		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(Colors::SidePanelGradient.WithAlpha(0.8f), Colors::SidePanelGradient.WithAlpha(0.0f));
+		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(Color::SidePanelGradient.WithAlpha(0.8f), Color::SidePanelGradient.WithAlpha(0.0f));
 		_pGradient = pGradient;
 
 		_pCollapseButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
-		_pCollapseButton->SetTheme(Themes::DefaultButtonStyle);
+		_pCollapseButton->SetTheme(Theme::DefaultButtonStyle);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
 		_pCollapseButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pCollapseButton->GetHeight()) / 2);
@@ -32,7 +32,7 @@ namespace fig::gui
 		_pViewport->SetMaxSize(-1, 600);
 
 		_pBottomPanel = _pExpandedRoot->CreateControl<Panel>();
-		_pBottomPanel->SetBorderRenderer<LineBorderRenderer>(Colors::LineColor, Direction::North);
+		_pBottomPanel->SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::North);
 		_pBottomPanel->SetSize(-1, 180);
 
 		auto pMainSizer = _pExpandedRoot->SetSizer<VerticalSizer>();
@@ -79,7 +79,7 @@ namespace fig::gui
 		_bExpanded = true;
 
 		SetWidth(Constants::GUI::ChatSidePanel::Width);
-		SetBackgroundColor(Colors::SidePanelBackground);
+		SetBackgroundColor(Color::SidePanelBackground);
 
 		_pCollapseButton->SetX(-_pCollapseButton->GetWidth() - 4);
 		_pCollapseButton->SetIcon(Resource::ICON_SIDEBAR);
@@ -89,7 +89,7 @@ namespace fig::gui
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->Add(_pExpandedRoot, -1, Sizer::Expand | Sizer::Fill);
 
-		SetBorderRenderer<LineBorderRenderer>(Colors::LineColor, Direction::West);
+		SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::West);
 
 		PushEvent(UserEvent::SidePanelExpanded);
 	}
@@ -101,7 +101,7 @@ namespace fig::gui
 		_bExpanded = false;
 
 		SetWidth(42);
-		SetBackgroundColor(Colors::AppBackground);
+		SetBackgroundColor(Color::AppBackground);
 
 		_pCollapseButton->CenterHorizontally();
 		_pCollapseButton->SetIcon(Resource::ICON_EXPAND_ARROW_LEFT);

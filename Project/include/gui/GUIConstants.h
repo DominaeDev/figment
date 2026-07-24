@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	namespace Themes
+	namespace Theme
 	{
 		constexpr ButtonTheme DefaultButtonStyle
 		{
@@ -23,7 +23,7 @@ namespace fig::gui
 		};
 	}
 
-	namespace Colors
+	namespace Color
 	{
 		inline constexpr fig::color Debug						{ 0xC000C0_rgb };
 		inline constexpr fig::color Debug2						{ 0x00C0C0_rgb };
@@ -75,8 +75,8 @@ namespace fig::gui
 		inline constexpr fig::color MessageBorderNavy			{ 0x4d55c1_rgb };
 		inline constexpr fig::color MessageBackgroundNavy		{ 0xf2faff_rgb };
 
-		inline constexpr fig::color DefaultUserMessageBorder = Colors::MessageBorderBlue;
-		inline constexpr fig::color DefaultUserMessageBackground = Colors::MessageBackgroundBlue;
+		inline constexpr fig::color DefaultUserMessageBorder = Color::MessageBorderBlue;
+		inline constexpr fig::color DefaultUserMessageBackground = Color::MessageBackgroundBlue;
 
 		inline constexpr std::array<fig::color, 8> DefaultBotMessageBorders {
 			MessageBorderPink,

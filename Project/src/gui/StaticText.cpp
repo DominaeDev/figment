@@ -9,12 +9,12 @@ namespace fig::gui
 	constexpr fig::color DropShadowColor { 0x00, 0x00, 0x00, 0xC0 };
 	constexpr float DropShadowDistance { 1.25f };
 
-	StaticText::StaticText(ParentPtr pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent),
+	StaticText::StaticText(control_ptr pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent),
 		_bAutoSize(bAutoSize)
 	{
 		_pFont = Fonts::GetFont(fontFace, ptSize);
-//		SetForegroundColor(Colors::Black);
-		SetBackgroundColor(Colors::Transparent);
+//		SetForegroundColor(Color::Black);
+		SetBackgroundColor(Color::Transparent);
 
 		// Set text and measure
 		_text = text;
@@ -172,8 +172,8 @@ namespace fig::gui
 			{
 				// Recreate text
 				SDL_Surface* pSurface = _bWordWrap ?
-					TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, Colors::White, maxWidth)
-					: TTF_RenderText_Blended(_pFont, pText, 0, Colors::White);
+					TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, Color::White, maxWidth)
+					: TTF_RenderText_Blended(_pFont, pText, 0, Color::White);
 				if (pSurface)
 				{
 					_textWidth = pSurface->w;

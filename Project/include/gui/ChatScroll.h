@@ -16,7 +16,7 @@ namespace fig::gui
 	class ChatScroll : public RenderTargetControl
 	{
 	public:
-		ChatScroll(ParentPtr pParent);
+		ChatScroll(control_ptr pParent);
 
 		void SetSession(std::weak_ptr<fig::chat::ChatSession> pSession);
 

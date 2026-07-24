@@ -12,7 +12,7 @@ namespace fig::gui
 	{
 		ButtonWithLabel() = delete;
 	public:
-		ButtonWithLabel(ParentPtr pParent, const fig::string& text);
+		ButtonWithLabel(control_ptr pParent, const fig::string& text);
 
 	protected:
 		void OnAfterLayout() override;

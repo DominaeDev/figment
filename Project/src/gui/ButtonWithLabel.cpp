@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	ButtonWithLabel::ButtonWithLabel(ParentPtr pParent, const fig::string& text) : ThemedButton(pParent)
+	ButtonWithLabel::ButtonWithLabel(control_ptr pParent, const fig::string& text) : ThemedButton(pParent)
 	{
 		SetSize(200, 36);
 
@@ -20,7 +20,7 @@ namespace fig::gui
 		_pLabel->Center();
 
 		_pBorder = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
-		_pBorder->SetForegroundColor(Colors::SidePanelForeground);
+		_pBorder->SetForegroundColor(Color::SidePanelForeground);
 		_pBorder->FillParent();
 
 	}

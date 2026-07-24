@@ -7,10 +7,10 @@ namespace fig::gui
 	class TexturedBorder : public Control
 	{
 	public:
-		TexturedBorder(ParentPtr pParent, fig::texture_ptr borderTexture, int cornerPixels = 64);
-		TexturedBorder(ParentPtr pParent, fig::texture_ptr borderTexture, std::array<float, 4> corners);
-		TexturedBorder(ParentPtr pParent, Resource borderTexture, int cornerPixels = 64);
-		TexturedBorder(ParentPtr pParent, Resource borderTexture, std::array<float, 4> corners);
+		TexturedBorder(control_ptr pParent, fig::texture_ptr borderTexture, int cornerPixels = 64);
+		TexturedBorder(control_ptr pParent, fig::texture_ptr borderTexture, std::array<float, 4> corners);
+		TexturedBorder(control_ptr pParent, Resource borderTexture, int cornerPixels = 64);
+		TexturedBorder(control_ptr pParent, Resource borderTexture, std::array<float, 4> corners);
 
 		void SetCornerScale(float cornerScale);
 		void SetColors(fig::color bgColor, fig::color borderColor);

@@ -16,7 +16,7 @@ namespace fig::gui
 	class SidePanel : public Control
 	{
 	public:
-		SidePanel(ParentPtr pParent);
+		SidePanel(control_ptr pParent);
 	
 		void Expand() noexcept;
 		void Collapse() noexcept;

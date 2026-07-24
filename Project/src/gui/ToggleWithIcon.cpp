@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	ToggleWithIcon::ToggleWithIcon(ParentPtr pParent, Resource icon, ToggleBehavior behavior, bool bOn) : ThemedButton(pParent),
+	ToggleWithIcon::ToggleWithIcon(control_ptr pParent, Resource icon, ToggleBehavior behavior, bool bOn) : ThemedButton(pParent),
 		_bOn { bOn },
 		_behavior { behavior }
 	{
@@ -59,7 +59,7 @@ namespace fig::gui
 		if (bOn)
 		{
 			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-			pBorder->SetColor(Colors::LineColor);
+			pBorder->SetColor(Color::LineColor);
 		}
 		else
 			ClearBorderRenderer();

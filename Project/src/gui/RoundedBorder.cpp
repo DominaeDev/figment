@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	RoundedBorder::RoundedBorder(ParentPtr pParent, float radius, float thickness, fig::color color) : Control(pParent),
+	RoundedBorder::RoundedBorder(control_ptr pParent, float radius, float thickness, fig::color color) : Control(pParent),
 		_thickness(thickness),
 		_radius(radius),
 		_color(color)

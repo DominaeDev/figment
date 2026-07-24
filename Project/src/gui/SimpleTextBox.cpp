@@ -5,14 +5,14 @@
 
 namespace fig::gui
 {
-	SimpleTextBox::SimpleTextBox(ParentPtr pParent, FontFace fontFace, double ptSize, Flags flags) : TextBox(pParent, fontFace, ptSize, flags)
+	SimpleTextBox::SimpleTextBox(control_ptr pParent, FontFace fontFace, double ptSize, Flags flags) : TextBox(pParent, fontFace, ptSize, flags)
 	{
 		if (_pFont)
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
 		
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Colors::White);
+		pTextBoxBG->SetColor(Color::White);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
@@ -22,6 +22,6 @@ namespace fig::gui
 	void SimpleTextBox::OnEnabled(bool bEnabled)
 	{
 		TextBox::OnEnabled(bEnabled);
-		GetBackgroundRenderer()->SetColor(bEnabled ? Colors::White : Colors::DisabledBackground);
+		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
 	}
 }

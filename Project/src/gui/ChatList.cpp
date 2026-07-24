@@ -24,7 +24,7 @@ namespace fig::gui
 		"Older than a month",
 	};
 
-	ChatList::ChatList(ParentPtr pParent) : ScrollPanel(pParent)
+	ChatList::ChatList(control_ptr pParent) : ScrollPanel(pParent)
 	{
 		_pVerticalSizer = SetSizer<VerticalSizer>();
 		SetTopMargin(TopMargin);
@@ -94,7 +94,7 @@ namespace fig::gui
 		Reorder();
 	}
 
-	ControlPtr ChatList::CreateHeader(fig::string_view text)
+	fig::observer_ptr<Control> ChatList::CreateHeader(fig::string_view text)
 	{
 		auto panel = CreateControl<Area>();
 		panel->SetMaxSize(Constants::GUI::ChatList::Width, -1);

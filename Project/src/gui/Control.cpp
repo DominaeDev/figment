@@ -7,12 +7,12 @@
 
 namespace fig::gui
 {
-	Control::Control(ParentPtr pParent)
+	Control::Control(control_ptr pParent)
 	{
 		_pParent = pParent;
 	}
 
-	Control::Control(ParentPtr pParent, Window* pHostWindow) : Control(pParent)
+	Control::Control(control_ptr pParent, Window* pHostWindow) : Control(pParent)
 	{
 		_renderContext = std::make_shared<ControlRenderContext>(ControlRenderContext {
 			.pWindow = pHostWindow->GetSDLWindow().get(),

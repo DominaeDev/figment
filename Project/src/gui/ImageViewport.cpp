@@ -7,18 +7,18 @@ namespace fig::gui
 {
 	static constexpr fig::coord CornerSize = 8;
 
-	ImageViewport::ImageViewport(ParentPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
+	ImageViewport::ImageViewport(control_ptr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
 		_pTexture(pTexture),
 		_pMask(pMask)
 	{
 		if (pTexture)
 			SetSize(pTexture->w, pTexture->h);
 
-		SetForegroundColor(Colors::White);
-		SetBackgroundColor(Colors::Transparent);
+		SetForegroundColor(Color::White);
+		SetBackgroundColor(Color::Transparent);
  
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, CornerSize);
-		pBorder->SetColor(Colors::LineColor);
+		pBorder->SetColor(Color::LineColor);
 	}
 
 	void ImageViewport::OnRender(fig::renderer_ptr pRenderer)
@@ -263,7 +263,7 @@ namespace fig::gui
 				SDL_BLENDOPERATION_ADD);
 
 			// Background color
-			constexpr auto bgColor = Colors::LineColor;
+			constexpr auto bgColor = Color::LineColor;
 			SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
 			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
 			SDL_RenderFillRect(pRenderer, NULL);

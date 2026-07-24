@@ -18,13 +18,13 @@ static constexpr fig::coord kGradientHeight = 36;
 
 namespace fig::gui
 {
-	ChatScroll::ChatScroll(ParentPtr pParent) : RenderTargetControl(pParent)
+	ChatScroll::ChatScroll(control_ptr pParent) : RenderTargetControl(pParent)
 	{
 		_pScrollSizer = SetSizer<VerticalScrollSizer>();
 		_pScrollSizer->SetBottomMargin(50);
 		_pScrollSizer->SetSpacing(12);
 
-		_pBottomGradient = std::make_unique<VerticalGradient>(nullptr, Colors::White, Colors::White.WithAlpha(0.0f));
+		_pBottomGradient = std::make_unique<VerticalGradient>(nullptr, Color::White, Color::White.WithAlpha(0.0f));
 		_pBottomGradient->SetTexture(nullptr);
 		EnableClipping(true);
 		EnableCulling(true);
@@ -60,7 +60,7 @@ namespace fig::gui
 	{
 		ChatMessage* pMessage = AddMessage({}, Role::System, MessageType::SystemMessage, message, true);
 		pMessage->SetActive(false);
-		pMessage->SetColors(Colors::MessageBackgroundNavy, Colors::MessageBorderNavy);
+		pMessage->SetColors(Color::MessageBackgroundNavy, Color::MessageBorderNavy);
 		_messages.push_back(MessageEntry {
 			.chatId = "dummy",
 			.role = Role::System,

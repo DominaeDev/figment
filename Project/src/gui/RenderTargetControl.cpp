@@ -3,9 +3,9 @@
 
 namespace fig::gui
 {
-	RenderTargetControl::RenderTargetControl(ParentPtr parent) : Control(parent)
+	RenderTargetControl::RenderTargetControl(control_ptr parent) : Control(parent)
 	{
-		SetBackgroundColor(Colors::Transparent);
+		SetBackgroundColor(Color::Transparent);
 		_bLocalFromOrigin = true;
 	}
 

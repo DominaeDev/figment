@@ -10,11 +10,11 @@ struct sqlite3_stmt;
 
 namespace fig::io
 {
-	class AssetDatabase
+	class IndexDatabase
 	{
 	public:
-		AssetDatabase(fig::path filename);
-		virtual ~AssetDatabase();
+		IndexDatabase(fig::path filename);
+		virtual ~IndexDatabase();
 
 		std::expected<std::map<fig::uuid, AssetFolder>, DatabaseError> FetchFolders() noexcept;
 		std::expected<std::map<fig::uuid, Asset>, DatabaseError> FetchAssets() noexcept;

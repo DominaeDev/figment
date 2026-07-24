@@ -22,19 +22,15 @@ using namespace fig::data;
 
 namespace fig::io
 {
+	constexpr auto AutosaveInterval = std::chrono::seconds(120);
+
 	AssetManager::AssetManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey, int32_t worker_threads)
 	{
 		_profileAuthKey = authKey;
 		_profileID = profile.id;
 		_profilePath = profile.GetPath();
 
-		if (LoadAssetIndex())
-		{
-			LoadMetaData(AssetType::Character);
-			LoadMetaData(AssetType::Scenario);
-			LoadMetaData(AssetType::ChatInstance);
-		}
-		else
+		if (not LoadIndexDatabase())
 		{
 			Log(std::format("No asset index found for profile '{}'.", profile.name));
 		}
@@ -43,7 +39,7 @@ namespace fig::io
 		for (int i = 0; i < worker_threads; ++i)
 			_workers.emplace_back([this](std::stop_token stop) { __Worker(stop); });
 
-		_autosave_worker = std::jthread(std::bind_front(&AssetManager::__Autosave, this), std::chrono::seconds(120));
+		_autosave_worker = std::jthread(std::bind_front(&AssetManager::__Autosave, this), AutosaveInterval);
 	}
 
 	AssetManager::~AssetManager()
@@ -361,10 +357,11 @@ namespace fig::io
 		return false;
 	}
 
-	size_t AssetManager::LoadAssetIndex() noexcept
+	size_t AssetManager::LoadIndexDatabase() noexcept
 	{
-		DEBUG_MEASURE_BEGIN("LoadAssetIndex");
+		DEBUG_MEASURE_BEGIN("Load index database");
 		auto& db = GetDatabase();
+
 		// Fetch folders
 		if (auto folders = db.FetchFolders(); folders.has_value())
 		{
@@ -387,7 +384,7 @@ namespace fig::io
 		std::scoped_lock lock { _assetsMutex };
 
 		// Read meta data of all asset files (in parallel)
-		DEBUG_MEASURE_BEGIN("Load meta data (all)");
+		DEBUG_MEASURE_BEGIN(std::format("Load meta data (0x{:02X})", (int32_t)assetType));
 		std::vector<Asset*> meta_assets = _assets
 			| std::views::filter([assetType](auto& kvp) { return kvp.second.asset_type == assetType; })
 			| std::views::values
@@ -847,10 +844,10 @@ namespace fig::io
 		return uuid;
 	}
 
-	AssetDatabase& AssetManager::GetDatabase() noexcept
+	IndexDatabase& AssetManager::GetDatabase() noexcept
 	{
 		if (!_pAssetDB)
-			_pAssetDB = std::make_unique<AssetDatabase>(_profilePath / fig::path(std::format("{}.{}", Constants::Paths::AssetIndexFileName, Constants::Paths::AssetIndexFileExt)));
+			_pAssetDB = std::make_unique<IndexDatabase>(_profilePath / fig::path(std::format("{}.{}", Constants::Paths::AssetIndexFileName, Constants::Paths::AssetIndexFileExt)));
 		return *_pAssetDB.get();
 	}
 

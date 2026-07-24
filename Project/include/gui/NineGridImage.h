@@ -8,8 +8,8 @@ namespace fig::gui
 	class NineGridImage : public Control
 	{
 	public:
-		NineGridImage(ParentPtr pParent, fig::texture_ptr pTexture, fig::coord cornerPixels = 16);
-		NineGridImage(ParentPtr pParent, fig::texture_ptr pTexture, fig::corners corners);
+		NineGridImage(control_ptr pParent, fig::texture_ptr pTexture, fig::coord cornerPixels = 16);
+		NineGridImage(control_ptr pParent, fig::texture_ptr pTexture, fig::corners corners);
 
 		void SetTexture(fig::texture_ptr pTexture);
 		void SetCornerSize(fig::coord cornerSize);

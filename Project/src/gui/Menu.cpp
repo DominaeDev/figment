@@ -15,8 +15,8 @@ namespace fig::gui
 	constexpr int32_t MenuItemHeight = 30;
 	constexpr int32_t MenuSeparatorHeight = 5;
 	constexpr int32_t MenuSeparatorMargin = 8;
-	constexpr fig::color MenuBackgroundColor = Colors::White;
-	constexpr fig::color MenuBorderColor = Colors::LineColor;
+	constexpr fig::color MenuBackgroundColor = Color::White;
+	constexpr fig::color MenuBorderColor = Color::LineColor;
 	constexpr fig::color MenuItemHoverColor = fig::color { 0xefece3, 0x80 };
 	constexpr fig::color MenuItemPressedColor = fig::color { 0xefece3, 0xFF };
 	constexpr float AutoExpandDelay = 0.3f;
@@ -58,10 +58,10 @@ namespace fig::gui
 		pBackground->SetColor(MenuBackgroundColor);
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
-		pBorder->SetColor(Colors::LineColor);
+		pBorder->SetColor(Color::LineColor);
 
-		SetBackgroundColor(Colors::White);
-		SetForegroundColor(Colors::Black);
+		SetBackgroundColor(Color::White);
+		SetForegroundColor(Color::Black);
 
 		SetVisible(false);
 	}
@@ -169,28 +169,28 @@ namespace fig::gui
 		pItemLabel->EnableEllipsis(true);
 		pItemLabel->SetPosition(32, 5);
 		pItemLabel->SetMaxSize(pItemRoot->GetWidth() - 36, -1);
-		pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+		pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
 
 		if (menuItem._bCheckable && menuItem._bChecked)
 		{
 			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CHECKMARK));
-			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
 			pIcon->SetPosition(4, 4);
 		}
 		else if (menuItem._icon != Resource::NONE)
 		{
 			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(menuItem._icon));
 			if (menuItem._bMonochromeIcon)
-				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
 			else
-				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colors::White : Colors::White.WithAlpha(0x80));
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::White : Color::White.WithAlpha(0x80));
 			pIcon->SetPosition(4, 4);
 		}
 
 		if (menuItem.HasSubMenu())
 		{
 			auto pArrow = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::SUBMENU_ARROW));
-			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Colors::SidePanelForeground : Colors::DisabledForeground);
+			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
 			pArrow->SetX(pItemRoot->GetWidth() - pArrow->GetWidth());
 			pArrow->CenterVertically();
 		}
@@ -207,7 +207,7 @@ namespace fig::gui
 		auto pItemRoot = CreateControl<MenuSeparator>();
 		pItemRoot->SetPosition(MenuSeparatorMargin, MenuMargin + _itemY);
 		pItemRoot->SetSize(MenuWidth - MenuSeparatorMargin * 2, MenuSeparatorHeight);
-		pItemRoot->SetForegroundColor(Colors::LineColor);
+		pItemRoot->SetForegroundColor(Color::LineColor);
 
 		_itemY += MenuSeparatorHeight;
 		SetSize(MenuWidth, _itemY + MenuMargin * 2);

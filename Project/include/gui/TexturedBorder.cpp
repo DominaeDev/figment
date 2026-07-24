@@ -5,25 +5,25 @@
 
 namespace fig::gui
 {
-	TexturedBorder::TexturedBorder(ParentPtr pParent, fig::texture_ptr borderTexture, int cornerPixels) : Control(pParent)
+	TexturedBorder::TexturedBorder(control_ptr pParent, fig::texture_ptr borderTexture, int cornerPixels) : Control(pParent)
 	{
 		_cornerPixels = { toF(cornerPixels), toF(cornerPixels), toF(cornerPixels), toF(cornerPixels) };
 		_pBorderTexture = borderTexture;
 	}
 
-	TexturedBorder::TexturedBorder(ParentPtr pParent, fig::texture_ptr borderTexture, std::array<float, 4> corners) : Control(pParent)
+	TexturedBorder::TexturedBorder(control_ptr pParent, fig::texture_ptr borderTexture, std::array<float, 4> corners) : Control(pParent)
 	{
 		_cornerPixels = corners;
 		_pBorderTexture = borderTexture;
 	}
 
-	TexturedBorder::TexturedBorder(ParentPtr pParent, Resource borderTexture, int cornerPixels) : Control(pParent)
+	TexturedBorder::TexturedBorder(control_ptr pParent, Resource borderTexture, int cornerPixels) : Control(pParent)
 	{
 		_cornerPixels = { toF(cornerPixels), toF(cornerPixels), toF(cornerPixels), toF(cornerPixels) };
 		_pBorderTexture = AppResources::GetTexture(borderTexture);
 	}
 
-	TexturedBorder::TexturedBorder(ParentPtr pParent, Resource borderTexture, std::array<float, 4> corners) : Control(pParent)
+	TexturedBorder::TexturedBorder(control_ptr pParent, Resource borderTexture, std::array<float, 4> corners) : Control(pParent)
 	{
 		_cornerPixels = corners;
 		_pBorderTexture = AppResources::GetTexture(borderTexture);

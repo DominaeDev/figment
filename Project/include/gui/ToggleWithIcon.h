@@ -14,7 +14,7 @@ namespace fig::gui
 		ToggleWithIcon() = delete;
 	public:
 		enum class ToggleBehavior { Default, Radio };
-		ToggleWithIcon(ParentPtr pParent, Resource icon, ToggleBehavior behavior = ToggleBehavior::Default, bool bOn = false);
+		ToggleWithIcon(control_ptr pParent, Resource icon, ToggleBehavior behavior = ToggleBehavior::Default, bool bOn = false);
 
 		void SetIcon(Resource icon);
 		void Toggle(bool bOn, bool bTrigger = true) noexcept;

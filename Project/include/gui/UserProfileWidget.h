@@ -17,7 +17,7 @@ namespace fig::gui
 	class UserProfileWidget : public Panel
 	{
 	public:
-		UserProfileWidget(ParentPtr pParent) noexcept;
+		UserProfileWidget(control_ptr pParent) noexcept;
 
 		void SetUser(const fig::user::UserProfile& profile) noexcept;
 		void Reset();

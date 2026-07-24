@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	SearchBox::SearchBox(ParentPtr pParent, FontFace fontFace, double ptSize) : TextBox(pParent, fontFace, ptSize)
+	SearchBox::SearchBox(control_ptr pParent, FontFace fontFace, double ptSize) : TextBox(pParent, fontFace, ptSize)
 	{
 		if (_pFont)
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
@@ -14,15 +14,15 @@ namespace fig::gui
 		SetMarginLeft(30);
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_SEARCH));
-		_pIcon->SetForegroundColor(Colors::SidePanelForeground);
+		_pIcon->SetForegroundColor(Color::SidePanelForeground);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Colors::White);
+		pTextBoxBG->SetColor(Color::White);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Colors::LineColor);
+		pTextBoxBorder->SetColor(Color::LineColor);
 	}
 
 	void SearchBox::OnSize()

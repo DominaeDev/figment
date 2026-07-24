@@ -27,7 +27,7 @@ namespace fig::gui
 		return cardSize == CardSize::Full ? Constants::GUI::CardHeight: Constants::GUI::HalfCardHeight;
 	}
 
-	CardList::CardList(ParentPtr pParent, CardSize cardSize) : ScrollPanel(pParent),
+	CardList::CardList(control_ptr pParent, CardSize cardSize) : ScrollPanel(pParent),
 		_cardSize { cardSize }
 	{
 		_pGridSizer = SetSizer<GridSizer>(cardWidth(cardSize), cardHeight(cardSize));

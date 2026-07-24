@@ -2,14 +2,12 @@
 
 #include "Figment.h"
 #include "gui/GUITypes.h"
-#include "IUpdateable.h"
 
 namespace fig::gui
 {
-	using ControlPtr = fig::observer_ptr<class LayoutElement>;
-	using ParentPtr = fig::observer_ptr<class LayoutElement>;
+	using control_ptr = fig::observer_ptr<class LayoutElement>;
 
-	class LayoutElement : public IUpdateable
+	class LayoutElement
 	{
 		friend class Sizer;
 	protected:
@@ -57,7 +55,7 @@ namespace fig::gui
 		void SetMaxSize(fig::point size) { _maxSize = size; }
 		void SetMaxSize(fig::coord width, fig::coord height) { _maxSize = fig::point { width, height }; }
 
-		void AddChild(ControlPtr pChild);
+		void AddChild(control_ptr pChild);
 
 		template <typename T, typename... Args> 
 			requires std::derived_from<T, LayoutElement>
@@ -68,12 +66,12 @@ namespace fig::gui
 			return child;
 		}
 
-		bool RemoveChild(ControlPtr pChild);
+		bool RemoveChild(control_ptr pChild);
 		bool RemoveChildren();
-		bool DestroyChild(ControlPtr pChild);
+		bool DestroyChild(control_ptr pChild);
 		bool DestroyChildren();
-		void MoveChildToTop(ControlPtr pChild);
-		void MoveChildToBottom(ControlPtr pChild);
+		void MoveChildToTop(control_ptr pChild);
+		void MoveChildToBottom(control_ptr pChild);
 
 		template <typename T, typename... Args>
 			requires std::derived_from<T, Sizer>
@@ -97,7 +95,7 @@ namespace fig::gui
 		inline bool IsCulled() const { return _bCulled; }
 
 	protected:
-		void SetParent(ParentPtr pParent);
+		void SetParent(control_ptr pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
 		fig::observer_ptr<Sizer> const GetSizer() const { return _pSizer.get(); }
 		void Layout();
@@ -106,8 +104,8 @@ namespace fig::gui
 		virtual void OnParent() {};
 		virtual void OnSize() {};
 		virtual void OnAfterLayout() {};
-		virtual void OnAddedChild(ControlPtr pChild) {}
-		virtual void OnRemovedChild(ControlPtr pChild) {}
+		virtual void OnAddedChild(control_ptr pChild) {}
+		virtual void OnRemovedChild(control_ptr pChild) {}
 
 	protected:
 		std::vector<LayoutElement*> _children;

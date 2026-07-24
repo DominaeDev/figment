@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "io/AssetDatabase.h"
+#include "io/IndexDatabase.h"
 #include "io/FileUtility.h"
 #include <sqlite3.h>
 
@@ -22,6 +22,7 @@ constexpr fig::const_string SQL_CreateTables =
 	"CREATE TABLE Folders ("
 	"	id       TEXT PRIMARY KEY NOT NULL,"
 	"	parent   TEXT,"
+	"	category TEXT NOT NULL,"
 	"	name     TEXT NOT NULL,"
 	"	settings TEXT NOT NULL DEFAULT [{}],"
 	"	FOREIGN KEY (parent) REFERENCES Folders(id) ON DELETE SET NULL ON UPDATE CASCADE"
@@ -29,7 +30,7 @@ constexpr fig::const_string SQL_CreateTables =
 
 namespace fig::io
 {
-	AssetDatabase::AssetDatabase(fig::path filename) :
+	IndexDatabase::IndexDatabase(fig::path filename) :
 		_filename { filename }
 	{
 		// Create database file
@@ -39,12 +40,12 @@ namespace fig::io
 			Connect();
 	}
 
-	AssetDatabase::~AssetDatabase()
+	IndexDatabase::~IndexDatabase()
 	{
 		Disconnect();
 	}
 
-	bool AssetDatabase::Connect() noexcept
+	bool IndexDatabase::Connect() noexcept
 	{
 		if (_pDB)
 			return true; // Already connected
@@ -66,7 +67,7 @@ namespace fig::io
 	}
 
 
-	bool AssetDatabase::CreateDatabaseAndConnect() noexcept
+	bool IndexDatabase::CreateDatabaseAndConnect() noexcept
 	{
 		if (_pDB)
 			return SQLITE_OK; // Already exists
@@ -101,7 +102,7 @@ namespace fig::io
 		return true;
 	}
 
-	bool AssetDatabase::Disconnect() noexcept
+	bool IndexDatabase::Disconnect() noexcept
 	{
 		if (_pDB)
 		{
@@ -118,7 +119,7 @@ namespace fig::io
 
 	#define SQL_PREPARE(ENUM, SQL) sqlite3_prepare_v2(_pDB, SQL, -1, &_sqlStatements[ENUM], nullptr)
 
-	void AssetDatabase::PrepareStatements() noexcept
+	void IndexDatabase::PrepareStatements() noexcept
 	{
 		// Prepare statements
 		SQL_PREPARE(SQL::FetchAssets, "SELECT id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt FROM Assets;");
@@ -131,7 +132,7 @@ namespace fig::io
 		SQL_PREPARE(SQL::DeleteFolder, "DELETE FROM Folders WHERE id = ?;");
 	}
 
-	DatabaseError AssetDatabase::BindAndExecute(SQL statement, std::function<void(sqlite3_stmt*)> fnBind)
+	DatabaseError IndexDatabase::BindAndExecute(SQL statement, std::function<void(sqlite3_stmt*)> fnBind)
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;
@@ -159,7 +160,7 @@ namespace fig::io
 		return DatabaseError::NoError;
 	}
 
-	std::expected<std::map<fig::uuid, Asset>, DatabaseError> AssetDatabase::FetchAssets() noexcept
+	std::expected<std::map<fig::uuid, Asset>, DatabaseError> IndexDatabase::FetchAssets() noexcept
 	{
 		if (!_pDB)
 			return std::unexpected(DatabaseError::NotConnected);
@@ -214,7 +215,7 @@ namespace fig::io
 		return result;
 	}
 
-	std::expected<std::map<fig::uuid, AssetFolder>, DatabaseError> AssetDatabase::FetchFolders() noexcept
+	std::expected<std::map<fig::uuid, AssetFolder>, DatabaseError> IndexDatabase::FetchFolders() noexcept
 	{
 		if (!_pDB)
 			return std::unexpected(DatabaseError::NotConnected);
@@ -257,7 +258,7 @@ namespace fig::io
 		return result;
 	}
 
-	DatabaseError AssetDatabase::CreateAsset(const Asset& asset) noexcept
+	DatabaseError IndexDatabase::CreateAsset(const Asset& asset) noexcept
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;
@@ -288,7 +289,7 @@ namespace fig::io
 		});
 	}
 
-	DatabaseError AssetDatabase::UpdateAsset(const Asset& asset) noexcept
+	DatabaseError IndexDatabase::UpdateAsset(const Asset& asset) noexcept
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;
@@ -319,7 +320,7 @@ namespace fig::io
 		return DatabaseError::NoError;
 	}
 
-	DatabaseError AssetDatabase::DeleteAsset(const fig::uuid& assetID) noexcept
+	DatabaseError IndexDatabase::DeleteAsset(const fig::uuid& assetID) noexcept
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;
@@ -330,7 +331,7 @@ namespace fig::io
 		});
 	}
 
-	DatabaseError AssetDatabase::CreateFolder(const AssetFolder& folder) noexcept
+	DatabaseError IndexDatabase::CreateFolder(const AssetFolder& folder) noexcept
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;
@@ -349,7 +350,7 @@ namespace fig::io
 		});
 	}
 
-	DatabaseError AssetDatabase::DeleteFolder(const fig::uuid& folderID) noexcept
+	DatabaseError IndexDatabase::DeleteFolder(const fig::uuid& folderID) noexcept
 	{
 		if (!_pDB)
 			return DatabaseError::NotConnected;

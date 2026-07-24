@@ -11,7 +11,7 @@ namespace fig::gui
 	class VariableList : public Control
 	{
 	public:
-		VariableList(ParentPtr pParent);
+		VariableList(control_ptr pParent);
 		void SetVariables(const std::map<fig::string, fig::string>& variables);
 		bool IsEmpty() const;
 

@@ -38,7 +38,7 @@ using namespace fig::chat;
 
 namespace fig::gui
 {
-	ChatMessage::ChatMessage(ParentPtr pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
+	ChatMessage::ChatMessage(control_ptr pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
 		_name(name),
 		_messageType(msgType),
 		_role(role),
@@ -132,7 +132,7 @@ namespace fig::gui
 		_pMessageText = _pMessagePanel->CreateControl<StaticText>("", font, Constants::GUI::ChatMessageFontSize, true);
 		_pMessageText->EnableWordWrap(true);
 		_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
-		_pMessageText->SetBackgroundColor(Colors::Transparent);
+		_pMessageText->SetBackgroundColor(Color::Transparent);
 		_pMessageText->SetMaxSize(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2, -1);
 
 		// Name label
@@ -140,7 +140,7 @@ namespace fig::gui
 		{
 			_pNameText = CreateControl<StaticText>(name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
 			_pNameText->SetAlignment(bRight ? TextAlignment::Right_Top : TextAlignment::Default);
-			_pNameText->SetBackgroundColor(Colors::Transparent);
+			_pNameText->SetBackgroundColor(Color::Transparent);
 			_pNameText->SetPosition(LEFT_MARGIN, -1);
 			_pNameText->SetSize(Constants::GUI::ChatScrollWidth - HMARGIN, -1);
 		}
@@ -262,7 +262,7 @@ namespace fig::gui
 		_bgColor = bgColor;
 		_borderColor = borderColor;
 		if ((_style & Style::Dialogue) == Style::Dialogue)
-			_textColor = Colors::Black;
+			_textColor = Color::Black;
 		else
 			_textColor = borderColor.Multiply(0.5f);
 		_nameColor = borderColor.Add(-0.1f);
@@ -293,9 +293,9 @@ namespace fig::gui
 		}
 		else
 		{
-			_pMessageText->SetBackgroundColor(Colors::Transparent);
+			_pMessageText->SetBackgroundColor(Color::Transparent);
 			if (_pNameText)
-				_pNameText->SetBackgroundColor(Colors::Transparent);
+				_pNameText->SetBackgroundColor(Color::Transparent);
 		}
 
 		if (_pNameText)

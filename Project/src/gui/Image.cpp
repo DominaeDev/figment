@@ -5,24 +5,24 @@
 
 namespace fig::gui
 {
-	Image::Image(ParentPtr pParent, fig::texture_ptr pTexture, fig::color tint) : Control(pParent),
+	Image::Image(control_ptr pParent, fig::texture_ptr pTexture, fig::color tint) : Control(pParent),
 		_pTexture(pTexture)
 	{
 		if (_pTexture)
 			SetSize(_pTexture->w, _pTexture->h);
 
 		SetForegroundColor(tint);
-		SetBackgroundColor(Colors::Transparent);
+		SetBackgroundColor(Color::Transparent);
 	}
 
-	Image::Image(ParentPtr pParent, Resource texture, fig::color tint) : Control(pParent)
+	Image::Image(control_ptr pParent, Resource texture, fig::color tint) : Control(pParent)
 	{
 		_pTexture = AppResources::GetTexture(texture);
 		if (_pTexture)
 			SetSize(_pTexture->w, _pTexture->h);
 
 		SetForegroundColor(tint);
-		SetBackgroundColor(Colors::Transparent);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	void Image::OnRender(fig::renderer_ptr pRenderer)

@@ -3,15 +3,15 @@
 
 namespace fig::gui
 {
-	CardImage::CardImage(ParentPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
+	CardImage::CardImage(control_ptr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
 		_pTexture(pTexture),
 		_pMask(pMask)
 	{
 		if (pTexture)
 			SetSize(pTexture->w, pTexture->h);
 
-		SetForegroundColor(Colors::White);
-		SetBackgroundColor(Colors::Transparent);
+		SetForegroundColor(Color::White);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	void CardImage::OnRender(fig::renderer_ptr pRenderer)

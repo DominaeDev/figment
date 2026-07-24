@@ -4,7 +4,7 @@
 
 using namespace fig::gui;
 
-VerticalGradient::VerticalGradient(ParentPtr pParent, fig::color colorTop, fig::color colorBottom) : Control(pParent)
+VerticalGradient::VerticalGradient(control_ptr pParent, fig::color colorTop, fig::color colorBottom) : Control(pParent)
 {
 	SetColors(colorTop, colorBottom);
 	_pTexture = AppResources::GetTexture(Resource::BLANK);

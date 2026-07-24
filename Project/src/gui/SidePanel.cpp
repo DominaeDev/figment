@@ -10,10 +10,10 @@
 
 namespace fig::gui
 {
-	SidePanel::SidePanel(ParentPtr pParent) : Control(pParent)
+	SidePanel::SidePanel(control_ptr pParent) : Control(pParent)
 	{
 		SetWidth(Constants::GUI::SidePanel::Width);
-		SetBackgroundColor(Colors::SidePanelBackground);
+		SetBackgroundColor(Color::SidePanelBackground);
 
 		_pExpandedRoot = CreateControl<Area>();
 		_pCollapsedRoot = CreateControl<Area>();
@@ -21,20 +21,20 @@ namespace fig::gui
 		auto pHeaderPanel = _pExpandedRoot->CreateControl<Panel>();
 		pHeaderPanel->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		auto pLogo = pHeaderPanel->CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL), Colors::Black);
+		auto pLogo = pHeaderPanel->CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL), Color::Black);
 		pLogo->SetX(44);
 
-		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(Colors::SidePanelGradient.WithAlpha(0.0f), Colors::SidePanelGradient.WithAlpha(0.8f));
+		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(Color::SidePanelGradient.WithAlpha(0.0f), Color::SidePanelGradient.WithAlpha(0.8f));
 		_pGradient = pGradient;
 
 		_pMenuButton = pHeaderPanel->CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
-		_pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pMenuButton->SetTheme(Theme::SidePanelButtonStyle);
 		_pMenuButton->SetX(4);
 		_pMenuButton->CenterVertically();
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
 		_pCollapseButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
-		_pCollapseButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pCollapseButton->SetTheme(Theme::SidePanelButtonStyle);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
 		_pCollapseButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pCollapseButton->GetHeight()) / 2);
@@ -54,16 +54,16 @@ namespace fig::gui
 
 		auto pChatButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHATS_SMALL);
 		pChatButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
-		pChatButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
+		pChatButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
 		auto pCharactersButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHARACTERS_SMALL);
 		pCharactersButtonSmall->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
-		pCharactersButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
+		pCharactersButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
 		auto pScenariosButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_SCENARIOS_SMALL);
-		pScenariosButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
+		pScenariosButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
 		auto pWorldsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_WORLDS_SMALL);
-		pWorldsButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
+		pWorldsButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
 		auto pModelsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_MODELS_SMALL);
-		pModelsButtonSmall->SetTheme(Themes::SidePanelButtonStyle);
+		pModelsButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
 		pButtonSizer->AddSpacer(20);
@@ -106,7 +106,7 @@ namespace fig::gui
 		pSmallButtonSizer->Add(pModelsButtonSmall, 0, Sizer::AlignCenterHorizontal);
 //		_pCollapsedRoot->Cull(true);
 
-		SetBorderRenderer<LineBorderRenderer>(Colors::LineColor, Direction::East);
+		SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::East);
 		
 		_bExpanded = false;
 		Expand();

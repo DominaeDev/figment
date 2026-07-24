@@ -85,29 +85,29 @@ namespace fig::chat
 		if (is_bot(role))
 		{
 			return fig::color_pair {
-				.foreground = Colors::DefaultBotMessageBorders[get_bot_index(role) % 8],
-				.background = Colors::DefaultBotMessageBackgrounds[get_bot_index(role) % 8],
+				.foreground = Color::DefaultBotMessageBorders[get_bot_index(role) % 8],
+				.background = Color::DefaultBotMessageBackgrounds[get_bot_index(role) % 8],
 			};
 		}
 		else if (role == Role::User)
 		{
 			return fig::color_pair {
-				.foreground = Colors::DefaultUserMessageBorder,
-				.background = Colors::DefaultUserMessageBackground,
+				.foreground = Color::DefaultUserMessageBorder,
+				.background = Color::DefaultUserMessageBackground,
 			};
 		}
 		else if (role == Role::System)
 		{
 			return fig::color_pair {
-				.foreground = Colors::MessageBorderNavy,
-				.background = Colors::MessageBackgroundNavy,
+				.foreground = Color::MessageBorderNavy,
+				.background = Color::MessageBackgroundNavy,
 			};
 		}
 		else
 		{
 			return fig::color_pair {
-				.foreground = Colors::MessageBorderDefault,
-				.background = Colors::MessageBackgroundDefault,
+				.foreground = Color::MessageBorderDefault,
+				.background = Color::MessageBackgroundDefault,
 			};
 		}
 	}

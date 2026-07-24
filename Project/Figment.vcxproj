@@ -227,7 +227,7 @@
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
     <ClCompile Include="src\gui\Window.cpp" />
     <ClCompile Include="src\io\Asset.cpp" />
-    <ClCompile Include="src\io\AssetDatabase.cpp" />
+    <ClCompile Include="src\io\IndexDatabase.cpp" />
     <ClCompile Include="src\io\AssetFileReader.cpp" />
     <ClCompile Include="src\io\AssetFileWriter.cpp" />
     <ClCompile Include="src\io\AssetManager.cpp" />
@@ -486,7 +486,7 @@
     <ClInclude Include="include\gui\Window.h" />
     <ClInclude Include="include\io\Asset.h" />
     <ClInclude Include="include\io\AssetCache.h" />
-    <ClInclude Include="include\io\AssetDatabase.h" />
+    <ClInclude Include="include\io\IndexDatabase.h" />
     <ClInclude Include="include\io\AssetFileReader.h" />
     <ClInclude Include="include\io\AssetFileWriter.h" />
     <ClInclude Include="include\io\AssetManager.h" />

@@ -12,7 +12,7 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	CharacterCard::CharacterCard(ParentPtr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
+	CharacterCard::CharacterCard(control_ptr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
 		_characterId { characterId }
 	{
 		if (auto try_character = Global::GetUserContent().Get<Character>(characterId); try_character.has_value())
@@ -47,13 +47,13 @@ namespace fig::gui
 			{
 				fig::color color;
 				if (character.gender == ConventionalGender::Male)
-					color = Colors::GenderTagMale;
+					color = Color::GenderTagMale;
 				else if (character.gender == ConventionalGender::Female)
-					color = Colors::GenderTagFemale;
+					color = Color::GenderTagFemale;
 				else if (character.gender.IsConventional())
-					color = Colors::GenderTagOther;
+					color = Color::GenderTagOther;
 				else
-					color = Colors::White;
+					color = Color::White;
 
 				AddTag(character.gender.GetLabel(), color);
 			}

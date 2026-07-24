@@ -12,19 +12,19 @@ using namespace fig::data;
 
 namespace fig::gui
 {
-	ChatListItem::ChatListItem(ParentPtr pParent) : Panel(pParent)
+	ChatListItem::ChatListItem(control_ptr pParent) : Panel(pParent)
 	{
 		SetMaxSize(Constants::GUI::ChatList::Width, -1);
 		SetHeight(60);
 
 		// Background
-		SetForegroundColor(Colors::SidePanelForeground);
+		SetForegroundColor(Color::SidePanelForeground);
 
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 8);
 		pBGRenderer->SetColor(0xEEECE480_rgba);
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
-		pBorder->SetColor(Colors::LineColor);
+		pBorder->SetColor(Color::LineColor);
 
 		// Title
 		_pTitle = CreateControl<StaticText>("", FontFace::Bold, 14.0, false);
@@ -38,7 +38,7 @@ namespace fig::gui
 
 		// Timestamp
 		_pTimestamp = CreateControl<StaticText>("", FontFace::Italic, 11.0, true);
-		_pTimestamp->SetForegroundColor(Colors::SidePanelForeground.WithAlpha(0.5f));
+		_pTimestamp->SetForegroundColor(Color::SidePanelForeground.WithAlpha(0.5f));
 		_pTimestamp->SetY(8);
 		_pTimestamp->SetMaxSize(100, -1);
 
@@ -49,7 +49,7 @@ namespace fig::gui
 		_pPortrait->SetVisible(false);
 	}
 
-	ChatListItem::ChatListItem(ParentPtr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(control_ptr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
 	{
 		if (not empty_or_whitespace(chatLog.GetTitle()))
 			_pTitle->SetText(chatLog.GetTitle());

@@ -12,7 +12,7 @@ namespace fig::gui
 		void SetTheme(const ButtonTheme& theme) noexcept;
 
 	protected:
-		ThemedButton(ParentPtr pParent);
+		ThemedButton(control_ptr pParent);
 
 		const fig::color& GetThemeForeground() const noexcept;
 		const fig::color& GetThemeBackground() const noexcept;

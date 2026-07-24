@@ -2,7 +2,7 @@
 
 #include "io/Asset.h"
 #include "user/Security.h"
-#include "io/AssetDatabase.h"
+#include "io/IndexDatabase.h"
 #include <expected>
 #include <ranges>
 #include <mutex>
@@ -111,11 +111,11 @@ namespace fig::io
 		void CancelAll();
 
 	private:
-		AssetDatabase& GetDatabase() noexcept;
+		IndexDatabase& GetDatabase() noexcept;
 		fig::uuid GenerateUUID() const noexcept;
 		
 		std::expected<fig::data::Character, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
-		size_t LoadAssetIndex() noexcept;
+		size_t LoadIndexDatabase() noexcept;
 
 		bool LoadMetaData(AssetType assetType) noexcept;
 		bool LoadAssetData() noexcept;
@@ -138,7 +138,7 @@ namespace fig::io
 		fig::auth::AuthKey _profileAuthKey {};
 		std::map<fig::uuid, AssetFolder> _folders {};
 		std::map<fig::uuid, Asset> _assets {};
-		std::unique_ptr<AssetDatabase> _pAssetDB;
+		std::unique_ptr<IndexDatabase> _pAssetDB;
 
 		std::mutex _assetsMutex; // Guards _assets
 

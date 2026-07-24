@@ -9,7 +9,7 @@ namespace fig::gui
 	DebugScreen::DebugScreen(Frame* pParent) : Screen(pParent)
 	{
 		auto area = CreateControl<Panel>();
-		area->SetBackgroundColor(Colors::Black);
+		area->SetBackgroundColor(Color::Black);
 		area->SetPosition(200, 200);
 		area->SetSize(500, 500);
 
@@ -28,13 +28,13 @@ namespace fig::gui
 		auto h = right->SetSizer<HorizontalSizer>();
 
 		auto a = right->CreateControl<Panel>();
-		a->SetBackgroundColor(Colors::Red);
+		a->SetBackgroundColor(Color::Red);
 		a->SetSize(50, 50);
 		auto b = right->CreateControl<Panel>();
-		b->SetBackgroundColor(Colors::Green);
+		b->SetBackgroundColor(Color::Green);
 		b->SetSize(50, 50);
 		auto c = right->CreateControl<Panel>();
-		c->SetBackgroundColor(Colors::Blue);
+		c->SetBackgroundColor(Color::Blue);
 		c->SetSize(50, 50);
 
 		h->Add(a, -1, Sizer::AlignRight | Sizer::AlignTop, 4);

@@ -159,6 +159,9 @@
     <Filter Include="Source Files\Frontend\GUI\Screens\Home\Controls">
       <UniqueIdentifier>{ae61212c-9433-4ebf-8df8-2deae22720ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Third-party\fast_gaussian_blur">
+      <UniqueIdentifier>{8ff397de-7dd3-44d2-8594-7d6b6a218bf4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -443,7 +446,7 @@
     <ClCompile Include="src\io\CardImporter.cpp">
       <Filter>Source Files\Frontend\IO\Import</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\AssetDatabase.cpp">
+    <ClCompile Include="src\io\IndexDatabase.cpp">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\io\AssetFileReader.cpp">
@@ -1216,7 +1219,7 @@
     <ClInclude Include="include\io\CardImporter.h">
       <Filter>Source Files\Frontend\IO\Import</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\AssetDatabase.h">
+    <ClInclude Include="include\io\IndexDatabase.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\io\AssetFileReader.h">
@@ -1431,6 +1434,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\RenderTargetControl.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\fast_gaussian_blur\include\fast_gaussian_blur_template.h">
+      <Filter>Source Files\Third-party\fast_gaussian_blur</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

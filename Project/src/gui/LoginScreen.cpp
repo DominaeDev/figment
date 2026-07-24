@@ -15,19 +15,19 @@ namespace fig::gui
 	LoginScreen::LoginScreen(Frame* pParent) : Screen(pParent)
 	{
 		// Logo
-		auto pLogo = CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL), Colors::Black);
+		auto pLogo = CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL), Color::Black);
 		pLogo->SetPosition(44, 0);
 
 		// Menu button
 		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
-		_pMenuButton->SetTheme(Themes::SidePanelButtonStyle);
+		_pMenuButton->SetTheme(Theme::SidePanelButtonStyle);
 		_pMenuButton->SetSize(36, 36);
 		_pMenuButton->SetPosition(4, 6);
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
 		// Center (login)
 		auto pCenter = CreateControl<Panel>();
-//		pCenter->SetBackgroundColor(Colors::Green);
+//		pCenter->SetBackgroundColor(Color::Green);
 		pCenter->SetSize(500, 260);
 
 		auto pVerticalSizer = SetSizer<VerticalSizer>();
@@ -66,7 +66,7 @@ namespace fig::gui
 		_pSignInBtn->SetDelegate([this]() { SignIn(); });
 		auto pSimpleBorder = _pSignInBtn->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
-		pSimpleBorder->SetForegroundColor(Colors::SidePanelForeground);
+		pSimpleBorder->SetForegroundColor(Color::SidePanelForeground);
 
 		auto pPasswordSizer = _pPasswordPanel->SetSizer<HorizontalSizer>();
 		pPasswordSizer->AddStretchSpacer();
