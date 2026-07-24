@@ -9,15 +9,18 @@ namespace fig
 	using SettingTuple = std::tuple<UserSetting, fig::string, fig::string, SettingValue>;
 
 	static const std::vector<SettingTuple> _AllSettings {
-		std::tuple { UserSetting::Clock,						"Interface",				"Clock",		enum_serialize(Clock::Default, ClockMapping) },
-		std::tuple { UserSetting::CharacterList_HalfSizeCards,	"Interface.Characters",		"SmallCards",	0 },
-		std::tuple { UserSetting::CharacterList_ShowTags,		"Interface.Characters",		"ShowTags",		1 },
-		std::tuple { UserSetting::CharacterList_Sorting,		"Interface.Characters",		"Sorting",		static_cast<int32_t>(SortBy::LastUsedAt) },
-		std::tuple { UserSetting::CharacterList_Ordering,		"Interface.Characters",		"Ordering",		static_cast<int32_t>(OrderBy::Default) },
-		std::tuple { UserSetting::CharacterList_Filtering,		"Interface.Characters",		"Filter",		FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
-		std::tuple { UserSetting::ChatList_Sorting,				"Interface.Chats",			"Sorting",		static_cast<int32_t>(SortBy::Default) },
-		std::tuple { UserSetting::ChatList_Ordering,			"Interface.Chats",			"Ordering",		static_cast<int32_t>(OrderBy::Default) },
-		std::tuple { UserSetting::ChatList_Filtering,			"Interface.Chats",			"Filter",		ChatFilterFlags::Serialize(DefaultChatFilterFlags, ChatFilterFlagMapping) },
+		std::tuple { UserSetting::Clock,						"Interface",					"Clock",		enum_serialize(Clock::Default, ClockMapping) },
+		std::tuple { UserSetting::SidePanel_Collapsed,			"Interface",					"SidePanel.Collapsed",		0 },
+		std::tuple { UserSetting::ChatSidePanel_Collapsed,		"Interface.Chat",				"InfoPanel.Collapsed",		0 },
+		std::tuple { UserSetting::ChatSidePanel_Width,			"Interface.Chat",				"InfoPanel.Width",			Constants::GUI::ChatSidePanel::DefaultWidth },
+		std::tuple { UserSetting::CharacterList_HalfSizeCards,	"Interface.CharacterList",		"SmallCards",	0 },
+		std::tuple { UserSetting::CharacterList_ShowTags,		"Interface.CharacterList",		"ShowTags",		1 },
+		std::tuple { UserSetting::CharacterList_Sorting,		"Interface.CharacterList",		"Sorting",		static_cast<int32_t>(SortBy::LastUsedAt) },
+		std::tuple { UserSetting::CharacterList_Ordering,		"Interface.CharacterList",		"Ordering",		static_cast<int32_t>(OrderBy::Default) },
+		std::tuple { UserSetting::CharacterList_Filtering,		"Interface.CharacterList",		"Filter",		FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
+		std::tuple { UserSetting::ChatList_Sorting,				"Interface.ChatList",			"Sorting",		static_cast<int32_t>(SortBy::Default) },
+		std::tuple { UserSetting::ChatList_Ordering,			"Interface.ChatList",			"Ordering",		static_cast<int32_t>(OrderBy::Default) },
+		std::tuple { UserSetting::ChatList_Filtering,			"Interface.ChatList",			"Filter",		ChatFilterFlags::Serialize(DefaultChatFilterFlags, ChatFilterFlagMapping) },
 		std::tuple { UserSetting::ModelPreset,					"Model",					"Preset",		"" },
 	};
 

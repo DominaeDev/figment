@@ -99,6 +99,12 @@ namespace fig::gui
 				return EventResult::Continue;
 			}
 		}
+		else if (IsUserEvent(event, UserEvent::Deactivated))
+		{
+			_bSelected = false;
+			ResetHoverZoom();
+			return EventResult::Continue;
+		}
 
 		return EventResult::Pass;
 	}

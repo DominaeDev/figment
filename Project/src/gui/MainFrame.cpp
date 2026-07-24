@@ -336,6 +336,8 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_2 and mods.Alt)
 					{
 						ChangeScreen(ScreenType::Chat);
+						GetScreen<ChatScreen>(ScreenType::Chat)->GetSidePanel()->SetImage(fig::uuid::from_str("6971c78f-e870-4baf-8fa9-3a277a880b0c")); //! @temp
+						GetScreen<ChatScreen>(ScreenType::Chat)->GetBackground()->SetImage(fig::uuid::from_str("6971c78f-e870-4baf-8fa9-3a277a880b0c")); //! @temp
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)
@@ -454,7 +456,7 @@ namespace fig::gui
 			PopAllMenus();
 			return EventResult::Continue;
 		}
-		else if (IsUserEvent(event, UserEvent::SidePanelCollapsed) or IsUserEvent(event, UserEvent::SidePanelExpanded))
+		else if (IsUserEvent(event, UserEvent::SidePanelResized))
 		{
 			PopAllMenus();
 			InvalidateLayout();

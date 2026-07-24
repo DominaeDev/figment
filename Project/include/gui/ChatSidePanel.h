@@ -5,6 +5,7 @@
 namespace fig::gui
 {
 	class ImageViewport;
+	class ResizeHandle;
 
 	class ChatSidePanel : public Panel
 	{
@@ -19,7 +20,10 @@ namespace fig::gui
 
 	protected:
 		void OnAfterLayout() override;
+		void OnSize() override;
 		EventResult OnEvent(fig::event& event) override;
+
+		void Resize(fig::coord size) noexcept;
 
 	private:
 		bool _bExpanded { true };
@@ -28,6 +32,7 @@ namespace fig::gui
 		fig::observer_ptr<Control> _pBottomPanel;
 		fig::observer_ptr<LayoutElement> _pGradient;
 		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;
+		fig::observer_ptr<ResizeHandle> _pResizeHandle;
 
 		fig::observer_ptr<Control> _pExpandedRoot;
 		fig::observer_ptr<Control> _pCollapsedRoot;

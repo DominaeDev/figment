@@ -140,6 +140,8 @@ namespace fig::gui
 		if (IsUserEvent(event, UserEvent::UserSignedIn))
 		{
 			_pUserWidget->SetUser(GetUserData<fig::user::UserProfile>(event));
+
+			Global::GetUserSettings().GetBool(UserSetting::SidePanel_Collapsed) ? Collapse() : Expand();
 			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::UserSignedOut))
@@ -176,10 +178,13 @@ namespace fig::gui
 		_pExpandedRoot->Cull(false);
 		_pCollapsedRoot->Cull(true);
 
+		if (Global::IsSignedIn())
+			Global::GetUserSettings().SetBool(UserSetting::SidePanel_Collapsed, false);
+
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->Add(_pExpandedRoot, -1, Sizer::Expand | Sizer::Fill);
 
-		PushEvent(UserEvent::SidePanelExpanded);
+		PushEvent(UserEvent::SidePanelResized);
 	}
 
 	void SidePanel::Collapse() noexcept
@@ -192,10 +197,13 @@ namespace fig::gui
 		_pExpandedRoot->Cull(true);
 		_pCollapsedRoot->Cull(false);
 
+		if (Global::IsSignedIn())
+			Global::GetUserSettings().SetBool(UserSetting::SidePanel_Collapsed, true);
+
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->Add(_pCollapsedRoot, -1, Sizer::Expand | Sizer::Fill);
 
-		PushEvent(UserEvent::SidePanelCollapsed);
+		PushEvent(UserEvent::SidePanelResized);
 	}
 
 	void SidePanel::OnSize()
