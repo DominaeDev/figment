@@ -22,7 +22,7 @@ namespace fig::gui
 		};
 		using Flags = EnumFlags<Flag>;
 
-		TextBox(control_ptr pParent, FontFace fontFace, double ptSize, Flags flags = {});
+		TextBox(ControlPtr pParent, FontFace fontFace, double ptSize, Flags flags = {});
 		~TextBox();
 
 		void SetText(fig::string text);

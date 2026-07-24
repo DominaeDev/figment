@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	Image::Image(control_ptr pParent, fig::texture_ptr pTexture, fig::color tint) : Control(pParent),
+	Image::Image(ControlPtr pParent, fig::texture_ptr pTexture, fig::color tint) : Control(pParent),
 		_pTexture(pTexture)
 	{
 		if (_pTexture)
@@ -15,7 +15,7 @@ namespace fig::gui
 		SetBackgroundColor(Color::Transparent);
 	}
 
-	Image::Image(control_ptr pParent, Resource texture, fig::color tint) : Control(pParent)
+	Image::Image(ControlPtr pParent, Resource texture, fig::color tint) : Control(pParent)
 	{
 		_pTexture = AppResources::GetTexture(texture);
 		if (_pTexture)

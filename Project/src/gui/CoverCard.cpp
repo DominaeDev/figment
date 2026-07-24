@@ -19,7 +19,7 @@ namespace fig::gui
 
 	constexpr uint8_t FadeAlpha = 0x60;
 
-	CoverCard::CoverCard(control_ptr pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(Resource::MASK_CARD)),
+	CoverCard::CoverCard(ControlPtr pParent, const fig::uuid& assetId, CardSize cardSize) : CardImage(pParent, nullptr, AppResources::GetTexture(Resource::MASK_CARD)),
 		_assetId { assetId },
 		_cardSize { cardSize }
 	{

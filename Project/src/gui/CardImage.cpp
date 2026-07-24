@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	CardImage::CardImage(control_ptr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
+	CardImage::CardImage(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
 		_pTexture(pTexture),
 		_pMask(pMask)
 	{

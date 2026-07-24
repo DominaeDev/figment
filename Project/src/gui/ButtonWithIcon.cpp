@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	ButtonWithIcon::ButtonWithIcon(control_ptr pParent, Resource icon) : ThemedButton(pParent)
+	ButtonWithIcon::ButtonWithIcon(ControlPtr pParent, Resource icon) : ThemedButton(pParent)
 	{
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());

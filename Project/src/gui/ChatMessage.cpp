@@ -38,7 +38,7 @@ using namespace fig::chat;
 
 namespace fig::gui
 {
-	ChatMessage::ChatMessage(control_ptr pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
+	ChatMessage::ChatMessage(ControlPtr pParent, Role role, const fig::uuid& characterId, fig::string name, MessageType msgType, bool bShowAvatar) : Control(pParent),
 		_name(name),
 		_messageType(msgType),
 		_role(role),

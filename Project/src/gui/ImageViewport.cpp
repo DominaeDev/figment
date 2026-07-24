@@ -7,7 +7,7 @@ namespace fig::gui
 {
 	static constexpr fig::coord CornerSize = 8;
 
-	ImageViewport::ImageViewport(control_ptr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
+	ImageViewport::ImageViewport(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
 		_pTexture(pTexture),
 		_pMask(pMask)
 	{

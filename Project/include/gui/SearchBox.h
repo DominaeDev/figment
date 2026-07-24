@@ -7,7 +7,7 @@ namespace fig::gui
 	class SearchBox : public TextBox
 	{
 	public:
-		SearchBox(control_ptr pParent, FontFace fontFace, double ptSize);
+		SearchBox(ControlPtr pParent, FontFace fontFace, double ptSize);
 
 	protected:
 		void OnSize();

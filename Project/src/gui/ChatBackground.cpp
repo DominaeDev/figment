@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	ChatBackground::ChatBackground(control_ptr parent) : Control(parent)
+	ChatBackground::ChatBackground(ControlPtr parent) : Control(parent)
 	{
 		EnableClipping(true);
 		SetBackgroundColor(Color::Transparent);

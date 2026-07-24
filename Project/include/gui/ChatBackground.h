@@ -7,7 +7,7 @@ namespace fig::gui
 	class ChatBackground : public Control
 	{
 	public:
-		ChatBackground(control_ptr pParent);
+		ChatBackground(ControlPtr pParent);
 		void SetImage(const fig::uuid& assetId);
 		void SetBrightness(float alpha);
 		void SetBrightness(uint8_t alpha);

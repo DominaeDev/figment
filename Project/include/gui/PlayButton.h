@@ -11,7 +11,7 @@ namespace fig::gui
 		PlayButton() = delete;
 
 	public:
-		PlayButton(control_ptr pParent);
+		PlayButton(ControlPtr pParent);
 
 		enum IconState
 		{

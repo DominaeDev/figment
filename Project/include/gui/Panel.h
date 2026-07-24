@@ -7,7 +7,7 @@ namespace fig::gui
 	class Panel : public Control
 	{
 	public:
-		Panel(control_ptr pParent);
+		Panel(ControlPtr pParent);
 
 	protected:
 		void OnUpdate(float fElapsed) override {};

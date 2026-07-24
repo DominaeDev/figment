@@ -7,7 +7,7 @@ namespace fig::gui
 	class RenderTargetControl : public Control
 	{
 	protected:
-		RenderTargetControl(control_ptr parent);
+		RenderTargetControl(ControlPtr parent);
 
 		void Render(fig::renderer_ptr pRenderer) override;
 		void SetAlpha(float alpha);

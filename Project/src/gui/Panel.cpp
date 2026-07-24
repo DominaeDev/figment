@@ -3,7 +3,7 @@
 
 using namespace fig::gui;
 
-Panel::Panel(control_ptr pParent) : Control(pParent)
+Panel::Panel(ControlPtr pParent) : Control(pParent)
 {
 }
 

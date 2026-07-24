@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	NineGridImage::NineGridImage(control_ptr pParent, fig::texture_ptr pTexture, fig::coord cornerSize) : Control(pParent),
+	NineGridImage::NineGridImage(ControlPtr pParent, fig::texture_ptr pTexture, fig::coord cornerSize) : Control(pParent),
 		_pTexture { pTexture }
 	{
 		// Left, Right, Top, Bottom
@@ -13,7 +13,7 @@ namespace fig::gui
 			SetSize(pTexture->w, pTexture->h);
 	}
 
-	NineGridImage::NineGridImage(control_ptr pParent, fig::texture_ptr pTexture, fig::corners corners) : Control(pParent),
+	NineGridImage::NineGridImage(ControlPtr pParent, fig::texture_ptr pTexture, fig::corners corners) : Control(pParent),
 		_pTexture { pTexture }
 	{
 		_cornerPixels = std::array<float, 4> { toF(corners[0]), toF(corners[1]), toF(corners[2]), toF(corners[3]) };

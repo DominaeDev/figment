@@ -7,7 +7,7 @@ namespace fig::gui
 	class PasswordBox : public SimpleTextBox
 	{
 	public:
-		PasswordBox(control_ptr pParent);
+		PasswordBox(ControlPtr pParent);
 
 	protected:
 		void OnSize() override;

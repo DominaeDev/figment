@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	ToggleWithIcon::ToggleWithIcon(control_ptr pParent, Resource icon, ToggleBehavior behavior, bool bOn) : ThemedButton(pParent),
+	ToggleWithIcon::ToggleWithIcon(ControlPtr pParent, Resource icon, ToggleBehavior behavior, bool bOn) : ThemedButton(pParent),
 		_bOn { bOn },
 		_behavior { behavior }
 	{

@@ -10,7 +10,7 @@
 
 namespace fig::gui
 {
-	SidePanel::SidePanel(control_ptr pParent) : Control(pParent)
+	SidePanel::SidePanel(ControlPtr pParent) : Control(pParent)
 	{
 		SetWidth(Constants::GUI::SidePanel::Width);
 		SetBackgroundColor(Color::SidePanelBackground);

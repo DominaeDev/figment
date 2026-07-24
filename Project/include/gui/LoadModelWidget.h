@@ -10,7 +10,7 @@ namespace fig::gui
 	class LoadModelWidget : public Panel
 	{
 	public:
-		LoadModelWidget(control_ptr pParent) noexcept;
+		LoadModelWidget(ControlPtr pParent) noexcept;
 
 		void Reset();
 

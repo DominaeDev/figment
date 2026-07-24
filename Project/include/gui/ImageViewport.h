@@ -7,7 +7,7 @@ namespace fig::gui
 	class ImageViewport : public Control
 	{
 	public:
-		ImageViewport(control_ptr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask = nullptr) noexcept;
+		ImageViewport(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask = nullptr) noexcept;
 		void SetTexture(fig::texture_ptr pTexture) noexcept;
 		void SetMask(fig::texture_ptr pTexture) noexcept;
 

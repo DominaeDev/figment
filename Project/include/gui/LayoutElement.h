@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	using control_ptr = fig::observer_ptr<class LayoutElement>;
+	using ControlPtr = fig::observer_ptr<class LayoutElement>;
 
 	class LayoutElement
 	{
@@ -55,7 +55,7 @@ namespace fig::gui
 		void SetMaxSize(fig::point size) { _maxSize = size; }
 		void SetMaxSize(fig::coord width, fig::coord height) { _maxSize = fig::point { width, height }; }
 
-		void AddChild(control_ptr pChild);
+		void AddChild(ControlPtr pChild);
 
 		template <typename T, typename... Args> 
 			requires std::derived_from<T, LayoutElement>
@@ -66,12 +66,12 @@ namespace fig::gui
 			return child;
 		}
 
-		bool RemoveChild(control_ptr pChild);
+		bool RemoveChild(ControlPtr pChild);
 		bool RemoveChildren();
-		bool DestroyChild(control_ptr pChild);
+		bool DestroyChild(ControlPtr pChild);
 		bool DestroyChildren();
-		void MoveChildToTop(control_ptr pChild);
-		void MoveChildToBottom(control_ptr pChild);
+		void MoveChildToTop(ControlPtr pChild);
+		void MoveChildToBottom(ControlPtr pChild);
 
 		template <typename T, typename... Args>
 			requires std::derived_from<T, Sizer>
@@ -95,7 +95,7 @@ namespace fig::gui
 		inline bool IsCulled() const { return _bCulled; }
 
 	protected:
-		void SetParent(control_ptr pParent);
+		void SetParent(ControlPtr pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
 		fig::observer_ptr<Sizer> const GetSizer() const { return _pSizer.get(); }
 		void Layout();
@@ -104,8 +104,8 @@ namespace fig::gui
 		virtual void OnParent() {};
 		virtual void OnSize() {};
 		virtual void OnAfterLayout() {};
-		virtual void OnAddedChild(control_ptr pChild) {}
-		virtual void OnRemovedChild(control_ptr pChild) {}
+		virtual void OnAddedChild(ControlPtr pChild) {}
+		virtual void OnRemovedChild(ControlPtr pChild) {}
 
 	protected:
 		std::vector<LayoutElement*> _children;

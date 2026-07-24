@@ -9,7 +9,7 @@ namespace fig::gui
 	class ChatSidePanel : public Panel
 	{
 	public:
-		ChatSidePanel(control_ptr pParent);
+		ChatSidePanel(ControlPtr pParent);
 
 		void Expand() noexcept;
 		void Collapse() noexcept;

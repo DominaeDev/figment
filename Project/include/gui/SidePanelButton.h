@@ -11,7 +11,7 @@ namespace fig::gui
 	{
 		SidePanelButton() = delete;
 	public:
-		SidePanelButton(control_ptr pParent, Resource icon, const fig::string& label);
+		SidePanelButton(ControlPtr pParent, Resource icon, const fig::string& label);
 
 	protected:
 		void OnSize() override;

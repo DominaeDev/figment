@@ -12,7 +12,7 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	CharacterCard::CharacterCard(control_ptr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
+	CharacterCard::CharacterCard(ControlPtr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
 		_characterId { characterId }
 	{
 		if (auto try_character = Global::GetUserContent().Get<Character>(characterId); try_character.has_value())

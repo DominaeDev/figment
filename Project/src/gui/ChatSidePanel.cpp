@@ -8,7 +8,7 @@
 
 namespace fig::gui
 {
-	ChatSidePanel::ChatSidePanel(control_ptr pParent) : Panel(pParent)
+	ChatSidePanel::ChatSidePanel(ControlPtr pParent) : Panel(pParent)
 	{
 		SetWidth(Constants::GUI::ChatSidePanel::Width);
 		SetBackgroundColor(Color::SidePanelBackground);

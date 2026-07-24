@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	PlayButton::PlayButton(control_ptr pParent) : ThemedButton(pParent)
+	PlayButton::PlayButton(ControlPtr pParent) : ThemedButton(pParent)
 	{
 		_pBackground = CreateControl<Image>(Resource::BACKGROUND_CIRCLE_48PX);
 		_pBackground->SetSize(36, 36);

@@ -12,8 +12,8 @@ namespace fig::gui
 	class Control : public LayoutElement
 	{
 	public:
-		Control(control_ptr pParent);
-		Control(control_ptr pParent, Window* pHostWindow);
+		Control(ControlPtr pParent);
+		Control(ControlPtr pParent, Window* pHostWindow);
 		virtual ~Control() = default;
 
 		virtual void Render(fig::renderer_ptr pRenderer);

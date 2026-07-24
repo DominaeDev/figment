@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	SidePanelButton::SidePanelButton(control_ptr pParent, Resource icon, const fig::string& label) : ThemedButton(pParent)
+	SidePanelButton::SidePanelButton(ControlPtr pParent, Resource icon, const fig::string& label) : ThemedButton(pParent)
 	{
 		SetTheme(Theme::SidePanelButtonStyle);
 		SetHeight(58);

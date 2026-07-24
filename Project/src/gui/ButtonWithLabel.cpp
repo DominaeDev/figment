@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	ButtonWithLabel::ButtonWithLabel(control_ptr pParent, const fig::string& text) : ThemedButton(pParent)
+	ButtonWithLabel::ButtonWithLabel(ControlPtr pParent, const fig::string& text) : ThemedButton(pParent)
 	{
 		SetSize(200, 36);
 

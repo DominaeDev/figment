@@ -9,7 +9,7 @@ using namespace fig::gui;
 
 constexpr fig::coord Margin = 8;
 
-VariableList::VariableList(control_ptr pParent) : Control(pParent)
+VariableList::VariableList(ControlPtr pParent) : Control(pParent)
 {
 	auto pBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BG, fig::corners { 30, 72, 64, 30 });
 	pBG->SetColor(Color::MessageBackgroundDefault);

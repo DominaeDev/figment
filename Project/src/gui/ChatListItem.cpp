@@ -12,7 +12,7 @@ using namespace fig::data;
 
 namespace fig::gui
 {
-	ChatListItem::ChatListItem(control_ptr pParent) : Panel(pParent)
+	ChatListItem::ChatListItem(ControlPtr pParent) : Panel(pParent)
 	{
 		SetMaxSize(Constants::GUI::ChatList::Width, -1);
 		SetHeight(60);
@@ -49,7 +49,7 @@ namespace fig::gui
 		_pPortrait->SetVisible(false);
 	}
 
-	ChatListItem::ChatListItem(control_ptr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
 	{
 		if (not empty_or_whitespace(chatLog.GetTitle()))
 			_pTitle->SetText(chatLog.GetTitle());

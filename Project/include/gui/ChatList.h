@@ -10,7 +10,7 @@ namespace fig::gui
 	class ChatList : public ScrollPanel
 	{
 	public:
-		ChatList(control_ptr pParent);
+		ChatList(ControlPtr pParent);
 
 		void ShowAllChats();
 		void ShowChatsWith(const fig::uuid& characterId);

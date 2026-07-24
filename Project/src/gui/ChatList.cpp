@@ -24,7 +24,7 @@ namespace fig::gui
 		"Older than a month",
 	};
 
-	ChatList::ChatList(control_ptr pParent) : ScrollPanel(pParent)
+	ChatList::ChatList(ControlPtr pParent) : ScrollPanel(pParent)
 	{
 		_pVerticalSizer = SetSizer<VerticalSizer>();
 		SetTopMargin(TopMargin);

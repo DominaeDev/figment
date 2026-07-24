@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	ImageWithMask::ImageWithMask(control_ptr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask, fig::color tint) : Control(pParent)
+	ImageWithMask::ImageWithMask(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask, fig::color tint) : Control(pParent)
 	{
 		SetTexture(pTexture, pMask, true);
 		SetForegroundColor(tint);

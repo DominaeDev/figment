@@ -18,7 +18,7 @@ static constexpr fig::coord kGradientHeight = 36;
 
 namespace fig::gui
 {
-	ChatScroll::ChatScroll(control_ptr pParent) : RenderTargetControl(pParent)
+	ChatScroll::ChatScroll(ControlPtr pParent) : RenderTargetControl(pParent)
 	{
 		_pScrollSizer = SetSizer<VerticalScrollSizer>();
 		_pScrollSizer->SetBottomMargin(50);

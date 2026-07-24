@@ -9,7 +9,7 @@ namespace fig::gui
 	constexpr fig::coord Margin = 8;
 	constexpr std::array<float, 2> HandleAlpha { 0.25f, 0.5f };
 
-	VerticalScrollBar::VerticalScrollBar(control_ptr pParent) : Control(pParent)
+	VerticalScrollBar::VerticalScrollBar(ControlPtr pParent) : Control(pParent)
 	{
 		SetBackgroundColor(Color::Transparent);
 

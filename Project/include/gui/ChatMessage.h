@@ -13,7 +13,7 @@ namespace fig::gui
 	class ChatMessage : public Control
 	{
 	public:
-		ChatMessage(control_ptr pParent, fig::chat::Role role, const fig::uuid& characterId, fig::string name, fig::chat::MessageType msgType, bool bShowAvatar);
+		ChatMessage(ControlPtr pParent, fig::chat::Role role, const fig::uuid& characterId, fig::string name, fig::chat::MessageType msgType, bool bShowAvatar);
 
 		void SetName(string_cref name);
 		void SetMessage(fig::string text, bool complete = false);

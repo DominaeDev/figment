@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	SimpleTextBox::SimpleTextBox(control_ptr pParent, FontFace fontFace, double ptSize, Flags flags) : TextBox(pParent, fontFace, ptSize, flags)
+	SimpleTextBox::SimpleTextBox(ControlPtr pParent, FontFace fontFace, double ptSize, Flags flags) : TextBox(pParent, fontFace, ptSize, flags)
 	{
 		if (_pFont)
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());

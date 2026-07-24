@@ -13,7 +13,7 @@ namespace fig::gui
 {
 	constexpr int32_t ProgressBarHeight = 5;
 
-	LoadModelWidget::LoadModelWidget(control_ptr pParent) noexcept : Panel(pParent)
+	LoadModelWidget::LoadModelWidget(ControlPtr pParent) noexcept : Panel(pParent)
 	{
 		_pProgressBar = CreateControl<Panel>();
 		_pProgressBar->SetBackgroundRenderer<SolidFillRenderer>(fig::color { 0x57caff, 0xff });

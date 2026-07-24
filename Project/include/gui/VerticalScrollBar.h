@@ -9,7 +9,7 @@ namespace fig::gui
 	{
 		friend class ScrollPanel;
 	public:
-		VerticalScrollBar(control_ptr pParent);
+		VerticalScrollBar(ControlPtr pParent);
 
 		void SetScroll(ScrollPanel& scrollPanel, float fPosition, fig::coord maxExtent);
 	

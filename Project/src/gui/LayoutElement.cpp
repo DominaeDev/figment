@@ -189,7 +189,7 @@ namespace fig::gui
 		}
 	}
 
-	void LayoutElement::AddChild(control_ptr pLayoutElement)
+	void LayoutElement::AddChild(ControlPtr pLayoutElement)
 	{
 #ifdef _DEBUG
 		auto itFind = std::find(_children.cbegin(), _children.cend(), pLayoutElement);
@@ -206,7 +206,7 @@ namespace fig::gui
 		OnAddedChild(pLayoutElement);
 	}
 
-	bool LayoutElement::RemoveChild(control_ptr pChild)
+	bool LayoutElement::RemoveChild(ControlPtr pChild)
 	{
 		auto it = std::find(_children.begin(), _children.end(), pChild);
 		if (it != _children.end())
@@ -222,7 +222,7 @@ namespace fig::gui
 		return false;
 	}
 
-	bool LayoutElement::DestroyChild(control_ptr pChild)
+	bool LayoutElement::DestroyChild(ControlPtr pChild)
 	{
 		if (RemoveChild(pChild))
 		{
@@ -266,7 +266,7 @@ namespace fig::gui
 		return true;
 	}
 
-	void LayoutElement::SetParent(control_ptr pParent)
+	void LayoutElement::SetParent(ControlPtr pParent)
 	{
 		_pParent = pParent;
 		SetPosition(_localPosition);
@@ -292,7 +292,7 @@ namespace fig::gui
 		}
 	}
 
-	void LayoutElement::MoveChildToTop(control_ptr pChild)
+	void LayoutElement::MoveChildToTop(ControlPtr pChild)
 	{
 		auto it = std::find(_children.begin(), _children.end(), pChild);
 		if (it == _children.end())
@@ -302,7 +302,7 @@ namespace fig::gui
 		_children.push_back(pChild);
 	}
 
-	void LayoutElement::MoveChildToBottom(control_ptr pChild)
+	void LayoutElement::MoveChildToBottom(ControlPtr pChild)
 	{
 		auto it = std::find(_children.begin(), _children.end(), pChild);
 		if (it == _children.end())

@@ -8,7 +8,7 @@
 
 namespace fig::gui
 {
-	UserProfileWidget::UserProfileWidget(control_ptr pParent) noexcept : Panel(pParent)
+	UserProfileWidget::UserProfileWidget(ControlPtr pParent) noexcept : Panel(pParent)
 	{
 		_pImage = CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pImage->SetSize(48, 48);
