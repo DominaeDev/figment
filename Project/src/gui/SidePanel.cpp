@@ -6,6 +6,7 @@
 #include "gui/UserProfileWidget.h"
 #include "gui/LoadModelWidget.h"
 #include "gui/LineBorderRenderer.h"
+#include "gui/ResizeHandle.h"
 #include "gui/Menu.h"
 
 namespace fig::gui
@@ -106,8 +107,9 @@ namespace fig::gui
 		pSmallButtonSizer->Add(pModelsButtonSmall, 0, Sizer::AlignCenterHorizontal);
 //		_pCollapsedRoot->Cull(true);
 
-		SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::East);
-		
+		_pResizeHandle = CreateControl<ResizeHandle>(Direction::East);
+		_pResizeHandle->SetDelegate([this](fig::coord size) { Resize(size); });
+		_pResizeHandle->SetClickDelegate([this]() { _bExpanded ? Collapse() : Expand(); });
 		_bExpanded = false;
 		Expand();
 	}
@@ -206,5 +208,19 @@ namespace fig::gui
 		pTopSizer->Add(_pCollapsedRoot, -1, Sizer::Expand | Sizer::Fill);
 
 		PushEvent(UserEvent::SidePanelCollapsed);
+	}
+
+	void SidePanel::OnSize()
+	{
+		if (_pResizeHandle)
+			_pResizeHandle->FillParent();
+	}
+
+	void SidePanel::Resize(fig::coord size) noexcept
+	{
+		if (_bExpanded and size < 80)
+			Collapse();
+		else if (not _bExpanded and size > 200)
+			Expand();
 	}
 }

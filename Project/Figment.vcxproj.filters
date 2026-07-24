@@ -611,6 +611,9 @@
     <ClCompile Include="src\gui\RenderTargetControl.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ResizeHandle.cpp">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -717,9 +720,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\GUIUtility.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\IUpdateable.h">
-      <Filter>Source Files\Frontend\GUI\Layout</Filter>
     </ClInclude>
     <ClInclude Include="include\pch.h">
       <Filter>Source Files</Filter>
@@ -1433,6 +1433,9 @@
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\RenderTargetControl.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ResizeHandle.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\fast_gaussian_blur\include\fast_gaussian_blur_template.h">

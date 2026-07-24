@@ -5,15 +5,6 @@
 
 namespace fig::gui
 {
-	enum class Direction
-	{
-		North = 1 << 0,
-		East = 1 << 1,
-		South = 1 << 2,
-		West = 1 << 3,
-	};
-	using Directions = EnumFlags<Direction>;
-
 	class LineBorderRenderer : public CustomRenderer
 	{
 	public:

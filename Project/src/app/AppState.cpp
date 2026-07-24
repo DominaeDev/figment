@@ -19,15 +19,21 @@ using namespace fig::llm;
 namespace fig
 {
 	Global::State* Global::__appState = nullptr;
-	SDL_Cursor* Global::_pIBeamCursor = nullptr;
 
 	static void BackendSignalHandler(const LLMStatus& signal);
+
+	static void RegisterCursor(fig::cursor, SDL_SystemCursor);
 
 	void Global::State::Init()
 	{
 		// Load application settings
 		pAppSettings = std::make_unique<AppSettings>(Constants::Paths::AppSettings);
 		pAppSettings->Load();
+
+		// Load cursors
+		RegisterCursor(Cursor::Caret, SDL_SYSTEM_CURSOR_TEXT);
+		RegisterCursor(Cursor::ResizeHorizontal, SDL_SYSTEM_CURSOR_EW_RESIZE);
+		RegisterCursor(Cursor::ResizeVertical, SDL_SYSTEM_CURSOR_NS_RESIZE);
 
 		// Load user profiles
 		pUserManager = std::make_shared<fig::user::UserManager>();
@@ -68,6 +74,15 @@ namespace fig
 		if (pAppSettings)
 			pAppSettings->Save();
 		pAppSettings.reset();
+
+		pSystemCursors.reset();
+	}
+
+	void Global::State::RegisterCursor(fig::cursor cursor, SDL_SystemCursor sdl_cursor)
+	{
+		if (not (bool)pSystemCursors)
+			pSystemCursors = std::make_unique<std::map<fig::cursor, fig::sdl::Cursor>>();
+		(*pSystemCursors)[cursor] = std::move(fig::sdl::Cursor(sdl_cursor));
 	}
 
 	Global::State* Global::CreateState()
@@ -76,8 +91,6 @@ namespace fig
 			return __appState;
 
 		__appState = (Global::State*)SDL_calloc(1, sizeof(Global::State));
-
-		_pIBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
 
 		try
 		{
@@ -100,9 +113,6 @@ namespace fig
 			SDL_free(__appState);
 			__appState = nullptr;
 		}
-
-		SDL_DestroyCursor(_pIBeamCursor);
-		_pIBeamCursor = nullptr;
 	}
 
 	Window& Global::GetMainWindow()
@@ -171,18 +181,14 @@ namespace fig
 		__appState->pLLMInstance = pLLMInstance;
 	}
 
-	void Global::SetCursor(SDL_SystemCursor cursor)
+	void Global::SetCursor(fig::cursor cursor)
 	{
-		SDL_Cursor* pCursor;
-		switch (cursor)
-		{
-		case SDL_SYSTEM_CURSOR_TEXT:
-			pCursor = _pIBeamCursor;
-			break;
-		default:
+		assert(__appState);
+		SDL_Cursor* pCursor = nullptr;
+		if (auto itFind = __appState->pSystemCursors->find(cursor); itFind != std::end(*__appState->pSystemCursors))
+			pCursor = itFind->second.get();
+		if (!(bool)pCursor)
 			pCursor = SDL_GetDefaultCursor();
-			break;
-		}
 
 		SDL_Cursor* pCurrentCursor = SDL_GetCursor();
 		if (pCurrentCursor != pCursor)

@@ -201,6 +201,7 @@
     <ClCompile Include="src\gui\PasswordBox.cpp" />
     <ClCompile Include="src\gui\PlayButton.cpp" />
     <ClCompile Include="src\gui\RenderTargetControl.cpp" />
+    <ClCompile Include="src\gui\ResizeHandle.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
     <ClCompile Include="src\gui\CardList.cpp" />
     <ClCompile Include="src\gui\CharacterCard.cpp" />
@@ -454,6 +455,7 @@
     <ClInclude Include="include\gui\PasswordBox.h" />
     <ClInclude Include="include\gui\PlayButton.h" />
     <ClInclude Include="include\gui\RenderTargetControl.h" />
+    <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
@@ -551,7 +553,6 @@
     <ClInclude Include="include\gui\GUITypes.h" />
     <ClInclude Include="include\gui\HorizontalSizer.h" />
     <ClInclude Include="include\llm\LLMInstance.h" />
-    <ClInclude Include="include\gui\IUpdateable.h" />
     <ClInclude Include="include\gui\LayoutElement.h" />
     <ClInclude Include="include\llm\LLMUtility.h" />
     <ClInclude Include="include\gui\TexturedBorderRenderer.h" />

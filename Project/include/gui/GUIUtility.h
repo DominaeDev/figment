@@ -37,26 +37,26 @@ namespace fig
 
 	inline constexpr bool is_inside(const fig::rect& rect, int x, int y, int expand = 0)
 	{
-		return x - expand >= rect.x and x + expand < rect.x + rect.w
-			and y - expand >= rect.y and y + expand < rect.y + rect.h;
+		return x >= rect.x - expand and x < rect.x + rect.w + expand
+			and y >= rect.y - expand and y < rect.y + rect.h + expand;
 	}
 
 	inline constexpr bool is_inside(const fig::rectf& rect, float x, float y, float expand = 0.0f)
 	{
-		return x - expand >= rect.x and x + expand< rect.x + rect.w
-			and y - expand >= rect.y and y + expand< rect.y + rect.h;
+		return x >= rect.x - expand and x < rect.x + rect.w + expand
+			and y >= rect.y - expand and y < rect.y + rect.h + expand;
 	}
 
 	inline constexpr bool is_inside(const fig::rect& rect, const fig::point& p, int expand = 0)
 	{
-		return p.x - expand >= rect.x and p.x + expand< rect.x + rect.w
-			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
+		return p.x >= rect.x - expand and p.x < rect.x + rect.w + expand
+			and p.y >= rect.y - expand and p.y < rect.y + rect.h + expand;
 	}
 
 	inline constexpr bool is_inside(const fig::rectf& rect, const fig::pointf& p, float expand = 0.0f)
 	{
-		return p.x - expand >= rect.x and p.x + expand< rect.x + rect.w
-			and p.y - expand >= rect.y and p.y + expand< rect.y + rect.h;
+		return p.x >= rect.x - expand and p.x < rect.x + rect.w + expand
+			and p.y >= rect.y - expand and p.y < rect.y + rect.h + expand;
 	}
 
 	inline constexpr fig::colorf to_colorf(fig::color color)

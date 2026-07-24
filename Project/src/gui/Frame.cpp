@@ -131,6 +131,21 @@ namespace fig::gui
 		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && HandleMouseDown(event.button))
 			return EventResult::Handled;
 		
+		if (IsUserEvent(event, UserEvent::PushCursor))
+		{
+			fig::cursor cursor = event.user.code;
+			std::erase(_cursors, cursor);
+			_cursors.push_back(cursor);
+			RefreshCursor();
+		}
+
+		if (IsUserEvent(event, UserEvent::PopCursor))
+		{
+			fig::cursor cursor = event.user.code;
+			std::erase(_cursors, cursor);
+			RefreshCursor();
+		}
+
 		return Control::ProcessEvent(event);
 	}
 
@@ -170,5 +185,22 @@ namespace fig::gui
 	void Frame::OnMenuClose(int32_t menuId)
 	{
 		PushEvent(UserEvent::MenuClosed, menuId);
+	}
+
+	void Frame::ResetCursor()
+	{
+		_cursors.clear();
+		RefreshCursor();
+	}
+
+	void Frame::RefreshCursor()
+	{
+		if (_cursors.empty())
+		{
+			Global::SetCursor(Cursor::Default);
+			return;
+		}
+
+		Global::SetCursor(_cursors.back());
 	}
 }

@@ -17,17 +17,17 @@ using namespace fig::io;
 using namespace fig::data;
 using namespace fig::chat;
 
-inline constexpr fig::string Dialogue(fig::string_view text)
+static constexpr fig::string Dialogue(fig::string_view text)
 {
 	return "\"" + toStr(text) + "\"";
 }
 
-inline constexpr fig::string Direction(fig::string_view text)
+static constexpr fig::string Director(fig::string_view text)
 {
 	return "\\{\\{" + toStr(text) + "\\}\\}";
 }
 
-inline constexpr fig::string Narration(fig::string_view text)
+static constexpr fig::string Narration(fig::string_view text)
 {
 	return "[" + toStr(text) + "]";
 }
@@ -1202,7 +1202,7 @@ namespace fig::llm
 
 	bool LLMInstance::PushDirection(const fig::string& message, int32_t ttl)
 	{
-		return PushMessage(Role::Director, Direction(message), MessageType::Direction, false, ttl);
+		return PushMessage(Role::Director, Director(message), MessageType::Direction, false, ttl);
 	}
 
 	bool LLMInstance::PushNarration(const fig::string& message)
@@ -1558,7 +1558,7 @@ namespace fig::llm
 
 	bool LLMInstance::Instruct(fig::string instructions)
 	{
-		PushMessage(Role::Director, Direction(instructions), MessageType::Direction, false, 4);
+		PushMessage(Role::Director, Director(instructions), MessageType::Direction, false, 4);
 		Instigate(Role::Undefined, MessageType::Undefined, 3);
 		return true;
 	}

@@ -145,7 +145,7 @@ namespace fig::gui
 		InvalidateLayout();
 
 		// Reset cursor
-		Global::SetCursor(SDL_SYSTEM_CURSOR_DEFAULT);
+		ResetCursor();
 	}
 
 	template<IsScreen T>

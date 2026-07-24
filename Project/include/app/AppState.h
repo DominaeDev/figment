@@ -52,8 +52,11 @@ namespace fig
 			std::shared_ptr<fig::user::UserManager> pUserManager;
 			std::unique_ptr<fig::AppSettings> pAppSettings;
 			std::shared_ptr<fig::text::MacroProvider> pMacroProvider;
+			std::unique_ptr<std::map<fig::cursor, fig::sdl::Cursor>> pSystemCursors;
+
 			void Init();
 			void Release();
+			void RegisterCursor(fig::cursor cursor, SDL_SystemCursor sdl_cursor);
 		};
 
 		static State* CreateState();
@@ -73,11 +76,10 @@ namespace fig
 		static bool IsLLMInitialized();
 		static bool IsSignedIn();
 
-		static void SetCursor(SDL_SystemCursor cursor);
+		static void SetCursor(fig::cursor cursor);
 
 	private:
 		static State* __appState;
-		static SDL_Cursor* _pIBeamCursor;
 	};
 
 	using AppState = Global::State;

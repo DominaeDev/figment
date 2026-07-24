@@ -29,7 +29,9 @@ namespace fig::gui
 		bool HandleMouseDown(SDL_MouseButtonEvent& event);
 		void OnMenuOpen(int32_t menuId);
 		void OnMenuClose(int32_t menuId);
-
+		
+		void RefreshCursor();
+		void ResetCursor();
 	protected:
 		struct MenuInstance
 		{
@@ -38,5 +40,7 @@ namespace fig::gui
 		};
 		std::vector<MenuInstance> _menus;
 		int32_t _nextMenuId {};
+
+		std::vector<fig::cursor> _cursors;
 	};
 }

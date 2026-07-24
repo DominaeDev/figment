@@ -35,6 +35,8 @@ namespace fig::gui
 		StartChat,
 		NavigateToChatList,
 		DebugCharacter,
+		PushCursor,
+		PopCursor,
 
 		Count,
 	};

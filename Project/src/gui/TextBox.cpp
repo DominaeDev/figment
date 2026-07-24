@@ -1146,7 +1146,12 @@ namespace fig::gui
 		if (bInRect != _bIBeamCursor)
 		{
 			_bIBeamCursor = bInRect;
-			Global::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
+
+			if (_bIBeamCursor)
+				PushEvent(UserEvent::PushCursor, Cursor::Caret);
+			else
+				PushEvent(UserEvent::PopCursor, Cursor::Caret);
+			//Global::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
 			bHandled = true;
 		}
 

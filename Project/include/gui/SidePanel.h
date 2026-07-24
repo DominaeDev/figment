@@ -12,6 +12,7 @@ namespace fig::gui
 	class ButtonWithIcon;
 	class UserProfileWidget;
 	class LoadModelWidget;
+	class ResizeHandle;
 
 	class SidePanel : public Control
 	{
@@ -23,15 +24,18 @@ namespace fig::gui
 
 	protected:
 		void OnAfterLayout() override;
+		void OnSize() override;
+
 		EventResult OnEvent(fig::event& event) override;
 		void ShowMenu();
-
+		void Resize(fig::coord size) noexcept;
 	private:
 		fig::observer_ptr<LayoutElement> _pGradient;
 		fig::observer_ptr<UserProfileWidget> _pUserWidget;
 		fig::observer_ptr<LoadModelWidget> _pModelWidget;
 		fig::observer_ptr<ButtonWithIcon> _pMenuButton;
 		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;
+		fig::observer_ptr<ResizeHandle> _pResizeHandle;
 		bool _bExpanded { true };
 		
 		fig::observer_ptr<Control> _pExpandedRoot;

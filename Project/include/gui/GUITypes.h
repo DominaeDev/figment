@@ -12,7 +12,7 @@ namespace fig::sdl
 	using Renderer = stdex::c_resource<SDL_Renderer, SDL_CreateRenderer, SDL_DestroyRenderer>;
 	using Texture = stdex::c_resource<SDL_Texture, SDL_CreateTexture, SDL_DestroyTexture>;
 	using Surface = stdex::c_resource<SDL_Surface, SDL_CreateSurface, SDL_DestroySurface>;
-	using Cursor = stdex::c_resource<SDL_Cursor, SDL_CreateCursor, SDL_DestroyCursor>;
+	using Cursor = stdex::c_resource<SDL_Cursor, SDL_CreateSystemCursor, SDL_DestroyCursor>;
 	using TextEngine = stdex::c_resource<TTF_TextEngine, TTF_CreateRendererTextEngine, TTF_DestroyRendererTextEngine>;
 }
 
@@ -69,5 +69,24 @@ namespace fig
 		Undefined = 0x00,
 		RGB24 = 0x03,	// SDL_PIXELFORMAT_RGB24
 		RGBA32 = 0x04,	// SDL_PIXELFORMAT_RGBA8888
+	};
+
+	enum class Direction
+	{
+		North = 1 << 0,
+		East = 1 << 1,
+		South = 1 << 2,
+		West = 1 << 3,
+	};
+	using Directions = EnumFlags<Direction>;
+
+	using cursor = int32_t;
+
+	namespace Cursor
+	{
+		constexpr cursor Default = SDL_SYSTEM_CURSOR_DEFAULT;
+		constexpr cursor Caret = SDL_SYSTEM_CURSOR_TEXT;
+		constexpr cursor ResizeHorizontal = SDL_SYSTEM_CURSOR_EW_RESIZE;
+		constexpr cursor ResizeVertical = SDL_SYSTEM_CURSOR_NS_RESIZE;
 	};
 }
