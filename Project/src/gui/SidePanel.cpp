@@ -28,20 +28,12 @@ namespace fig::gui
 		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(Color::SidePanelGradient.WithAlpha(0.0f), Color::SidePanelGradient.WithAlpha(0.8f));
 		_pGradient = pGradient;
 
-		_pMenuButton = pHeaderPanel->CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
+		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
 		_pMenuButton->SetTheme(Theme::SidePanelButtonStyle);
-		_pMenuButton->SetX(4);
-		_pMenuButton->CenterVertically();
+		_pMenuButton->SetX(3);
+		_pMenuButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pMenuButton->GetHeight()) / 2);
+//		_pMenuButton->CenterVertically();
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
-
-		_pCollapseButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
-		_pCollapseButton->SetTheme(Theme::SidePanelButtonStyle);
-		_pCollapseButton->SetSize(36, 36);
-		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
-		_pCollapseButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pCollapseButton->GetHeight()) / 2);
-		_pCollapseButton->SetDelegate([this]() { 
-			_bExpanded ? Collapse() : Expand();
-		});
 
 		auto pMainArea = _pExpandedRoot->CreateControl<Area>();
 
@@ -181,8 +173,6 @@ namespace fig::gui
 		_bExpanded = true;
 
 		SetWidth(Constants::GUI::SidePanel::Width);
-		_pCollapseButton->SetX(GetWidth() - _pCollapseButton->GetWidth() - 4);
-		_pCollapseButton->SetIcon(Resource::ICON_EXPAND_ARROW_LEFT);
 		_pExpandedRoot->Cull(false);
 		_pCollapsedRoot->Cull(true);
 
@@ -199,8 +189,6 @@ namespace fig::gui
 		_bExpanded = false;
 
 		SetWidth(42);
-		_pCollapseButton->CenterHorizontally();
-		_pCollapseButton->SetIcon(Resource::ICON_EXPAND_ARROW_RIGHT);
 		_pExpandedRoot->Cull(true);
 		_pCollapsedRoot->Cull(false);
 
@@ -218,7 +206,7 @@ namespace fig::gui
 
 	void SidePanel::Resize(fig::coord size) noexcept
 	{
-		if (_bExpanded and size < 80)
+		if (_bExpanded and size < 120)
 			Collapse();
 		else if (not _bExpanded and size > 200)
 			Expand();

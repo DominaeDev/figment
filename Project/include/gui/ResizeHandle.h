@@ -25,13 +25,14 @@ namespace fig::gui
 	private:
 		Direction _direction {};
 		bool _bHovering { false };
+		bool _bMouseDown { false };
+		fig::pointf _mouseDownPosition {};
 		bool _bResizing { false };
 		float _fAlpha { 0.0f };
-
-		ResizeHandleSizeCallback _fnOnResize;
-		ResizeHandleClickCallback _fnOnClick;
-		fig::rect _prevRect;
-		fig::coord _prevSize;
-		fig::coord _currSize;
+		ResizeHandleSizeCallback _fnOnResize {};
+		ResizeHandleClickCallback _fnOnClick {};
+		fig::rect _prevRect {};
+		fig::coord _prevSize {};
+		fig::coord _currSize {};
 	};
 }

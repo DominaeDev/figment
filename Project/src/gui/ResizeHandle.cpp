@@ -33,7 +33,7 @@ namespace fig::gui
 	{
 		if (_bHovering or _bResizing)
 		{
-			auto lineColor = _bResizing ? 0x0060C0_rgb : Color::LineColor.WithAlpha(_fAlpha);
+			auto lineColor = _bResizing ? 0x4080C0_rgb : Color::LineColor.WithAlpha(_fAlpha);
 			auto drawRect = GetHandleRect();
 			SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
 			SDL_SetRenderDrawColor(pRenderer, lineColor.r, lineColor.g, lineColor.b, lineColor.a);
@@ -67,26 +67,18 @@ namespace fig::gui
 		if (event.type == SDL_EVENT_MOUSE_MOTION)
 		{
 			auto motionEvent = event.motion;
-			if (not _bResizing)
+			if (_bMouseDown and !_bResizing)
 			{
-				auto handleRect = GetHandleRect();
-				if (is_inside(handleRect, motionEvent.x, motionEvent.y, 6.0f))
+				constexpr auto threshold = 2.0f;
+				if (std::abs(motionEvent.x - _mouseDownPosition.x) > threshold or std::abs(motionEvent.y - _mouseDownPosition.y) > threshold)
 				{
-					if (not (_bHovering))
-					{
-						_bHovering = true;
-						PushEvent(UserEvent::PushCursor, Cursor::ResizeHorizontal);
-						return EventResult::Continue;
-					}
-				}
-				else if (_bHovering)
-				{
-					_bHovering = false;
-					PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
-					return EventResult::Continue;
+					_bMouseDown = false;
+					_bResizing = true;
+					_currSize = _prevSize;
+					_prevRect = GetParent()->GetRect();
 				}
 			}
-			else // Resizing
+			else if (_bResizing) // Resizing
 			{
 				auto mx = fig::coord(motionEvent.x);
 				auto my = fig::coord(motionEvent.y);
@@ -115,6 +107,25 @@ namespace fig::gui
 					_currSize = size;
 					if (_fnOnResize)
 						_fnOnResize(_currSize);
+				}
+			}
+			else // not resizing
+			{
+				auto handleRect = GetHandleRect();
+				if (is_inside(handleRect, motionEvent.x, motionEvent.y, 6.0f))
+				{
+					if (not (_bHovering))
+					{
+						_bHovering = true;
+						PushEvent(UserEvent::PushCursor, Cursor::ResizeHorizontal);
+						return EventResult::Continue;
+					}
+				}
+				else if (_bHovering)
+				{
+					_bHovering = false;
+					PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
+					return EventResult::Continue;
 				}
 			}
 		}
@@ -149,15 +160,16 @@ namespace fig::gui
 					break;
 				}
 
-				_bResizing = true;
+				_bMouseDown = true;
+				_mouseDownPosition = fig::pointf { event.button.x, event.button.y };
 				_bHovering = false;
-				_currSize = _prevSize;
-				_prevRect = GetParent()->GetRect();
 				return EventResult::Handled;
 			}
 		}
 		else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP && event.button.button == SDL_BUTTON_LEFT)
 		{
+			_bMouseDown = false;
+
 			if (_bResizing)
 			{
 				_bResizing = false;

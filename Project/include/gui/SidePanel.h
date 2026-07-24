@@ -34,7 +34,6 @@ namespace fig::gui
 		fig::observer_ptr<UserProfileWidget> _pUserWidget;
 		fig::observer_ptr<LoadModelWidget> _pModelWidget;
 		fig::observer_ptr<ButtonWithIcon> _pMenuButton;
-		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;
 		fig::observer_ptr<ResizeHandle> _pResizeHandle;
 		bool _bExpanded { true };
 		
