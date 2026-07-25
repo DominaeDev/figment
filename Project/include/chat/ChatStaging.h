@@ -30,6 +30,7 @@ namespace fig::chat
 
 		const PromptScaffold& GetPromptScaffold() const noexcept { return _promptScaffold; }
 		const fig::data::Scenario& GetScenario() const noexcept { return _scenario; }
+		fig::string GetStoryTitle() const noexcept;
 
 		std::vector<PromptBlock> GetStagingBlocks();
 		fig::string GetPersonaOf(Role role);
@@ -47,6 +48,9 @@ namespace fig::chat
 
 		[[nodiscard]] inline Context& GetContext() noexcept { return GetContext(Role::Bot1); }
 		[[nodiscard]] Context& GetContext(Role primaryRole) noexcept;
+		
+		void RefreshContext() noexcept;
+		inline const Context& GetContext() const noexcept { return _context; }
 
 	private:
 		Context& GetContext_Internal() noexcept;

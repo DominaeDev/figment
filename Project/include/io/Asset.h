@@ -185,8 +185,7 @@ namespace fig::io
 			for (auto& kvp : _parameters)
 			{
 				auto key = kvp.first;
-				if ((static_cast<uint8_t>(key) >= static_cast<uint8_t>(MetaTag::ReferenceToCharacter)
-					and static_cast<uint8_t>(key) < static_cast<uint8_t>(MetaTag::ReferenceToCharacter) + fig::chat::MaxBots)
+				if ((static_cast<uint8_t>(key) >= static_cast<uint8_t>(MetaTag::ReferenceToCharacter) and static_cast<uint8_t>(key) < static_cast<uint8_t>(MetaTag::ReferenceToUser))
 					or key == MetaTag::ReferenceToUser
 					or key == MetaTag::ReferenceToScenario
 					or key == MetaTag::ReferenceToWorld)

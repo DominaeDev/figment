@@ -22,7 +22,7 @@ namespace fig::chat
 		else
 			_pollerId = static_cast<uint32_t>(-1);
 
-		_log.SetTitle(std::format("Chat with {}", session.GetNameOf(Role::Bot1))); //! @temp
+		_log.SetTitle(session.GetStaging().GetStoryTitle());
 
 		_log.AddSearchTerm(session.GetNameOf(Role::Bot1));
 		_log.AddSearchTerm(session.GetNameOf(Role::Bot2));

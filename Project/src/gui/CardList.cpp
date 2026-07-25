@@ -92,7 +92,7 @@ namespace fig::gui
 			pCard->ShowTags(_bEnableTags);
 
 			if (initCounter++ < 8)
-				pCard->Initialize();
+				pCard->Initialize(); // Load first 8 cards synchronously
 			else
 				pCard->Cull(true);
 		}

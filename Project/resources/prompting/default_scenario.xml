@@ -1,5 +1,5 @@
 <Scenario format="0">
-	<Title>Default scenario</Title>
+	<Name>Default scenario</Name>
 	<Description>This is a simple scenario of the AI having a conversation with the user.</Description>
 	
 	<Tags>default, casual</Tags>
@@ -21,6 +21,7 @@
 	</Roles>
 	
 	<Story>
+		<Title>Chatting with {ai}</Title>
 		<Intro>
 			<Info>{ai} joined the conversation.</Info>
 			<Info>{user} joined the conversation.</Info>

@@ -20,6 +20,8 @@ namespace fig::chat
 	{
 		_options = options;
 		_staging = staging;
+		_staging.RefreshContext();
+
 		_messagePoller = std::make_unique<MessagePoller>();
 		_logger = std::make_unique<ChatLogger>(*this, chatInstanceID);
 	}

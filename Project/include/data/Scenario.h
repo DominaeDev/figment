@@ -65,6 +65,7 @@ namespace fig::data
 			}
 		};
 
+		fig::string title;
 		std::vector<Chapter> chapters;
 		std::vector<Message> intro;
 		std::vector<Message> outro;

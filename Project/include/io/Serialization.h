@@ -144,7 +144,7 @@ namespace fig::io
 
 	constexpr MetaValueType get_meta_type(MetaTag tag) noexcept
 	{
-		if (static_cast<uint8_t>(tag) >= static_cast<uint8_t>(MetaTag::ReferenceToCharacter) and static_cast<uint8_t>(tag) < static_cast<uint8_t>(MetaTag::ReferenceToCharacter) + fig::chat::MaxBots)
+		if (static_cast<uint8_t>(tag) >= static_cast<uint8_t>(MetaTag::ReferenceToCharacter) and static_cast<uint8_t>(tag) < static_cast<uint8_t>(MetaTag::ReferenceToUser))
 			return MetaValueType::Identifier;
 
 		switch (tag)

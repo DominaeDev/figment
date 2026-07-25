@@ -158,9 +158,9 @@ namespace fig::gui
 
 	void ChatSidePanel::Resize(fig::coord size) noexcept
 	{
-		if (_bExpanded and size < 200)
+		if (_bExpanded and size < 80)
 			Collapse();
-		else if (not _bExpanded and size > 240)
+		else if (not _bExpanded and size > 200)
 			Expand();
 		
 		if (_bExpanded)

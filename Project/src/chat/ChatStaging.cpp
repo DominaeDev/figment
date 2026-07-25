@@ -98,7 +98,7 @@ namespace fig::chat
 
 	Role ChatStaging::GetRoleFromHandle(const fig::handle& handle) const
 	{
-		if (handle == "char" || handle == "char1" || handle == "bot1")
+		if (handle == "char" or handle == "character")
 			return Role::Bot1;
 		else if (handle == "user")
 			return Role::User;
@@ -108,20 +108,14 @@ namespace fig::chat
 			return Role::Director;
 		else if (handle == "system")
 			return Role::System;
-		else if (handle == "char2" || handle == "bot2")
+		else if (handle == "char1" or handle == "bot1" or handle == "character1")
+			return Role::Bot1;
+		else if (handle == "char2" or handle == "bot2" or handle == "character2")
 			return Role::Bot2;
-		else if (handle == "char3" || handle == "bot3")
+		else if (handle == "char3" or handle == "bot3" or handle == "character3")
 			return Role::Bot3;
-		else if (handle == "char4" || handle == "bot4")
+		else if (handle == "char4" or handle == "bot4" or handle == "character4")
 			return Role::Bot4;
-		else if (handle == "char5" || handle == "bot5")
-			return Role::Bot5;
-		else if (handle == "char6" || handle == "bot6")
-			return Role::Bot6;
-		else if (handle == "char7" || handle == "bot7")
-			return Role::Bot7;
-		else if (handle == "char8" || handle == "bot8")
-			return Role::Bot8;
 
 		// Role slots
 		auto& slots = _scenario.GetRoleSlots();
@@ -275,6 +269,11 @@ namespace fig::chat
 		return ctx;
 	}
 
+	void ChatStaging::RefreshContext() noexcept
+	{
+		GetContext_Internal();
+	}
+
 	Context& ChatStaging::GetContext_Internal() noexcept
 	{
 		if (_bDirtyContext)
@@ -321,4 +320,11 @@ namespace fig::chat
 		return _promptScaffold.grammar;
 	}
 
+	fig::string ChatStaging::GetStoryTitle() const noexcept
+	{
+		auto& title = _scenario.GetStory().title;
+		if (not empty_or_whitespace(title))
+			return eval_text(title, _context);
+		return "Untitled";
+	}
 } // namespace

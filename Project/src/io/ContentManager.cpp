@@ -317,7 +317,7 @@ namespace fig::io
 		auto& newAsset = _pAssetMngr->CreateAsset(AssetType::ChatInstance, DataFormat::DataXml, data);
 
 		_pAssetMngr->ModifyAsset(newAsset, [&chatInstance](Asset& asset) {
-			for (size_t idx = 0; idx < chatInstance.characterIds.size() && idx < fig::chat::MaxBots; ++idx)
+			for (size_t idx = 0; idx < chatInstance.characterIds.size() && idx < 8uz; ++idx)
 			{
 				auto& id = chatInstance.characterIds[idx];
 				if (not id.empty())

@@ -131,20 +131,6 @@ namespace fig::gui
 		}
 		else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT)
 		{
-			if (event.button.clicks == 2)
-			{
-				auto handleRect = GetHandleRect();
-				if (is_inside(handleRect, event.button.x, event.button.y, 6.0f))
-				{
-					_bHovering = false;
-					_bResizing = false;
-					PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
-					if (_fnOnClick)
-						_fnOnClick();
-					return EventResult::Handled;
-				}
-			}
-
 			if (_bHovering)
 			{
 				auto parentRect = GetParent()->GetRect();
@@ -179,6 +165,20 @@ namespace fig::gui
 			{
 				_bHovering = false;
 				PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
+			}
+
+			if (event.button.clicks == 2)
+			{
+				auto handleRect = GetHandleRect();
+				if (is_inside(handleRect, event.button.x, event.button.y, 6.0f))
+				{
+					_bHovering = false;
+					_bResizing = false;
+					PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
+					if (_fnOnClick)
+						_fnOnClick();
+					return EventResult::Handled;
+				}
 			}
 			return EventResult::Continue;
 		}

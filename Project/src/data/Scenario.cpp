@@ -121,6 +121,8 @@ namespace fig::data
 
 	FileError Story::LoadFromXml(XmlReaderElement xml) noexcept
 	{
+		title = xml.GetElement<fig::string>("Title", "Untitled");
+
 		// Read chapters
 		chapters.clear();
 		if (auto chaptersNode = xml.GetFirstElement("Chapters"))
@@ -151,6 +153,8 @@ namespace fig::data
 
 	void Story::SaveToXml(XmlWriterElement xml) const noexcept
 	{
+		xml.SetElementValue("Title", title);
+
 		if (not intro.empty())
 		{
 			auto introNode = xml.AddChild("Intro");
