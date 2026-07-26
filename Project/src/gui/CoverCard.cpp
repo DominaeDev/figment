@@ -57,7 +57,6 @@ namespace fig::gui
 		// Label (large)
 		_pLargeLabel = _pLargeFooter->CreateControl<StaticText>("", FontFace::CardHeader, 28.0, false);
 		_pLargeLabel->SetPosition(Large::InnerMargin, Large::FooterHeight - Large::InnerMargin - 68);
-		_pLargeLabel->SetMaxSize(Large::Width - (Large::InnerMargin * 2), -1);
 		_pLargeLabel->SetSize(Large::Width - (Large::InnerMargin * 2), 80);
 		_pLargeLabel->SetForegroundColor(Color::White);
 		_pLargeLabel->SetBackgroundColor(Color::Transparent);
@@ -98,7 +97,6 @@ namespace fig::gui
 		// Label (small)
 		_pSmallLabel = pSmallFooter->CreateControl<StaticText>("", FontFace::CardHeader, 24.0, false);
 		_pSmallLabel->SetPosition(Small::InnerMargin, Small::FooterHeight - Small::InnerMargin - Small::TextY);
-		_pSmallLabel->SetMaxSize(Small::Width - (Small::InnerMargin * 2), -1);
 		_pSmallLabel->SetSize(Small::Width - (Small::InnerMargin * 2), 40);
 		_pSmallLabel->SetForegroundColor(Color::White);
 		_pSmallLabel->SetBackgroundColor(Color::Transparent);
@@ -187,7 +185,7 @@ namespace fig::gui
 			_pLargeLabel->SetText(text);
 
 			// Adjust font size
-			if (_pLargeLabel->MeasureText(false).x <= _pLargeLabel->GetMaxSize().x)
+			if (_pLargeLabel->MeasureText(false).x <= _pLargeLabel->GetMaxWidth())
 			{
 				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 28.0));
 				_pLargeLabel->SetY(Large::FooterHeight - Large::InnerMargin - 64 + (_bEnableTags ? 22 : 32));
@@ -304,7 +302,7 @@ namespace fig::gui
 		pLabel->SetPosition(position.x + Large::Tags::InnerMargin, position.y + 3);
 		pLabel->EnableWordWrap(false);
 		pLabel->EnableEllipsis(true);
-		pLabel->SetMaxSize(Large::Width - (position.x + Large::Tags::InnerMargin * 2 + Large::Tags::Margin), 0);
+		pLabel->SetMaxWidth(Large::Width - (position.x + Large::Tags::InnerMargin * 2 + Large::Tags::Margin));
 		if (color.IsDefined())
 			pLabel->SetForegroundColor(color);
 		else

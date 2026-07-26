@@ -45,7 +45,7 @@ namespace fig::gui
 		{
 			_pLabel->SetX(66);
 			_pLabel->CenterVertically();
-			_pLabel->SetMaxSize(GetWidth() - _pLabel->GetX() - 34, -1);
+			_pLabel->SetWidth(GetWidth() - _pLabel->GetX() - 34);
 		}
 
 		if (_pSettingsButton)

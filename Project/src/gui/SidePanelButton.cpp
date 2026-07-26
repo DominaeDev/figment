@@ -33,7 +33,7 @@ namespace fig::gui
 		}
 
 		if (_pLabel)
-			_pLabel->SetMaxSize(GetWidth() - _pLabel->GetX() - 8, -1);
+			_pLabel->SetWidth(GetWidth() - _pLabel->GetX() - 8);
 	}
 
 	void SidePanelButton::OnButtonState()

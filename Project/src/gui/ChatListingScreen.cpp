@@ -33,7 +33,7 @@ namespace fig::gui
 		auto _pFilterTextBox = pTopBar->CreateControl<SearchBox>(FontFace::Default, 16.0);
 		_pFilterTextBox->SetPosition(0, 0);
 		_pFilterTextBox->SetSize(192, 30);
-		_pFilterTextBox->SetMaxSize(192, -1);
+		_pFilterTextBox->SetMaxWidth(192);
 		_pFilterTextBox->SetBackgroundColor(Color::White);
 		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
 			OnSearchFilter(s);

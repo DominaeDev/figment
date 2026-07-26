@@ -75,7 +75,7 @@ namespace fig::gui
 
 		_pModelWidget = pFooterPanel->CreateControl<LoadModelWidget>();
 		_pModelWidget->SetHeight(60);
-		_pModelWidget->SetMaxSize(-1, 60);
+		_pModelWidget->SetMaxHeight(60);
 
 		_pUserWidget = pFooterPanel->CreateControl<UserProfileWidget>();
 		_pUserWidget->SetHeight(60);

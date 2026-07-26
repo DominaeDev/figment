@@ -115,7 +115,6 @@ namespace fig::gui
 			return;
 		}
 
-		int maxWidth = std::max(toI(GetMaxSize().x), 0);
 		const char* pText = _text.c_str();
 
 		std::string altText;
@@ -127,6 +126,8 @@ namespace fig::gui
 
 		if (_bDropShadow)
 			DrawShadow(pText);
+
+		auto maxWidth = GetMaxLineWidth();
 
 		if (fgColor.IsDefined())
 		{
@@ -218,14 +219,12 @@ namespace fig::gui
 		auto pRenderer = GetSDLRenderer();
 		auto fgColor = GetForegroundColor();
 
-		int maxWidth = std::max(toI(GetMaxSize().x), 0);
-
 		_shadow.clear();
 
 		if (fgColor.IsDefined())
 		{
 			SDL_Surface* pSurface = _bWordWrap ?
-				TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, DropShadowColor, maxWidth)
+				TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, DropShadowColor, GetMaxLineWidth())
 				: TTF_RenderText_Blended(_pFont, pText, 0, DropShadowColor);
 
 			if (pSurface)
@@ -276,9 +275,13 @@ namespace fig::gui
 		InvalidateText();
 	}
 
-	constexpr fig::string ellipsis(const fig::string& text, size_t length) noexcept
+	constexpr fig::string ellipsis(const fig::string& text, size_t utf8_length) noexcept
 	{
-		return text.substr(0, std::min(length, text.size())) + "\u2026";
+		const char* pText = &text[0];
+		for (size_t i = 1; i < utf8_length; ++i)
+			SDL_StepUTF8(&pText, NULL);
+
+		return text.substr(0, ptrdiff_t(pText) - ptrdiff_t(&text[0])) + "\u2026";
 	}
 
 	fig::string StaticText::GetEllipsisText(const fig::string& text) const
@@ -286,7 +289,7 @@ namespace fig::gui
 		if (text.empty())
 			return "";
 
-		int maxWidth = std::max(toI(GetMaxSize().x), 0);
+		fig::coord maxWidth = std::max(_bAutoSize ? GetMaxWidth() : GetWidth(), 0);
 		if (maxWidth == 0)
 			return text;
 
@@ -307,7 +310,7 @@ namespace fig::gui
 		--pos;
 		for (; pos > 0; --pos)
 		{
-			testString = text.substr(0, pos) + "\u2026";
+			testString = ellipsis(text, pos);
 			if (TTF_GetStringSize(_pFont, testString.c_str(), 0, &w, &h) and w <= maxWidth)
 				return testString;
 		}
@@ -323,6 +326,12 @@ namespace fig::gui
 			if (TTF_GetStringSize(_pFont, text.c_str(), 0, &w, &h))
 				return fig::point(w, h);
 		}
+		else if (_bWordWrap)
+		{
+			int w, h;
+			if (TTF_GetStringSizeWrapped(_pFont, _text.c_str(), 0, GetMaxLineWidth(), &w, &h))
+				return fig::point(w, h);
+		}
 		else
 		{
 			int w, h;
@@ -330,5 +339,10 @@ namespace fig::gui
 				return fig::point(w, h);
 		}
 		return fig::point(0, 0);
+	}
+
+	fig::coord StaticText::GetMaxLineWidth() const noexcept
+	{
+		return std::max(_maxLineWidth > 0 ? _maxLineWidth : (_bAutoSize ? GetMaxWidth() : GetWidth()), 0);
 	}
 }

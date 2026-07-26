@@ -168,7 +168,8 @@ namespace fig::gui
 		auto pItemLabel = pItemRoot->CreateControl<StaticText>(menuItem._label, FontFace::Default, 14.5, false);
 		pItemLabel->EnableEllipsis(true);
 		pItemLabel->SetPosition(32, 5);
-		pItemLabel->SetMaxSize(pItemRoot->GetWidth() - 36, -1);
+		pItemLabel->SetMaxWidth(pItemRoot->GetWidth() - 36);
+		pItemLabel->SetWidth(pItemRoot->GetWidth() - 36);
 		pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
 
 		if (menuItem._bCheckable && menuItem._bChecked)

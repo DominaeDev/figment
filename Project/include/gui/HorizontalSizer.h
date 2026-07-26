@@ -6,6 +6,9 @@ namespace fig::gui
 {
 	class HorizontalSizer : public BoxSizer
 	{
+	public:
+		fig::coord GetExtent() const override;
+
 	protected:
 		fig::coord GetAvailableSpace() override;
 		fig::coord GetItemSize(SizerItem& item, bool includeBorder) override;

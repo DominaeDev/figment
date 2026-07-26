@@ -20,18 +20,22 @@ namespace fig::gui
 		inline const fig::rect& GetRect() const noexcept { return _rect; }
 		inline constexpr fig::rectf GetDrawRect() const noexcept { return fig::rectf { toF(_rect.x), toF(_rect.y), toF(_rect.w), toF(_rect.h) }; }
 
-		inline fig::coord GetX() const noexcept { return _localPosition.x; }
-		inline fig::coord GetY() const noexcept { return _localPosition.y; }
-		inline fig::point GetPosition() const noexcept { return fig::point { _localPosition.x, _localPosition.y }; }
-		inline fig::coord GetAbsoluteX() const noexcept { return _rect.x; }
-		inline fig::coord GetAbsoluteY() const noexcept { return _rect.y; }
-		inline fig::point GetAbsolutePosition() const noexcept { return fig::point { _rect.x, _rect.y }; }
+		fig::coord GetX() const noexcept { return _localPosition.x; }
+		fig::coord GetY() const noexcept { return _localPosition.y; }
+		fig::point GetPosition() const noexcept { return fig::point { _localPosition.x, _localPosition.y }; }
+		fig::coord GetAbsoluteX() const noexcept { return _rect.x; }
+		fig::coord GetAbsoluteY() const noexcept { return _rect.y; }
+		fig::point GetAbsolutePosition() const noexcept { return fig::point { _rect.x, _rect.y }; }
 
-		inline fig::point GetSize() const noexcept { return fig::point { _rect.w, _rect.h }; }
-		inline fig::coord GetWidth() const noexcept { return _rect.w; }
-		inline fig::coord GetHeight() const noexcept { return _rect.h; }
-		inline const fig::point& GetMinSize() const noexcept { return _minSize; }
-		inline const fig::point& GetMaxSize() const noexcept { return _maxSize; }
+		fig::point GetSize() const noexcept { return fig::point { _rect.w, _rect.h }; }
+		fig::coord GetWidth() const noexcept { return _rect.w; }
+		fig::coord GetHeight() const noexcept { return _rect.h; }
+		const fig::point& GetMinSize() const noexcept { return _minSize; }
+		fig::coord GetMinWidth() const noexcept { return _minSize.x; }
+		fig::coord GetMinHeight() const noexcept { return _minSize.y; }
+		const fig::point& GetMaxSize() const noexcept { return _maxSize; }
+		fig::coord GetMaxWidth() const noexcept { return _maxSize.x; }
+		fig::coord GetMaxHeight() const noexcept { return _maxSize.y; }
 
 		void SetRect(fig::rect rect);
 		void SetRect(fig::coord x, fig::coord y, fig::coord width, fig::coord height);
@@ -52,8 +56,12 @@ namespace fig::gui
 
 		void SetMinSize(fig::point size) { _minSize = size; }
 		void SetMinSize(fig::coord width, fig::coord height) { _minSize = fig::point { width, height }; }
+		void SetMinWidth(fig::coord width) { _minSize.x = width; }
+		void SetMinHeight(fig::coord height) { _minSize.y = height; }
 		void SetMaxSize(fig::point size) { _maxSize = size; }
 		void SetMaxSize(fig::coord width, fig::coord height) { _maxSize = fig::point { width, height }; }
+		void SetMaxWidth(fig::coord width) { _maxSize.x = width; }
+		void SetMaxHeight(fig::coord height) { _maxSize.y = height; }
 
 		void AddChild(ControlPtr pChild);
 

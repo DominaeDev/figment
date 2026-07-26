@@ -19,7 +19,7 @@ namespace fig::gui
 	std::pair<fig::coord, fig::coord> HorizontalSizer::GetItemMinMaxSize(SizerItem& item)
 	{
 		if (auto pControl = item.GetControl())
-			return std::make_pair(pControl->GetMinSize().x, pControl->GetMaxSize().x);
+			return std::make_pair(pControl->GetMinWidth(), pControl->GetMaxWidth());
 		return {};
 	}
 
@@ -39,6 +39,18 @@ namespace fig::gui
 	void HorizontalSizer::ExpandRect(fig::rect& rect, const fig::rect& allocated)
 	{
 		rect.h = allocated.h;
+	}
+
+	fig::coord HorizontalSizer::GetExtent() const
+	{
+		fig::coord min = std::numeric_limits<fig::coord>::max();
+		fig::coord max = std::numeric_limits<fig::coord>::min();
+		for (auto& item : GetLayoutItems())
+		{
+			min = std::min(min, item.rect.x);
+			max = std::min(max, item.rect.x + item.rect.w);
+		}
+		return max - min;
 	}
 }
 

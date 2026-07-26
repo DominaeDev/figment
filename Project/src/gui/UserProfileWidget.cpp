@@ -50,7 +50,7 @@ namespace fig::gui
 		if (_pLabel)
 		{
 			_pLabel->SetPosition(66, 6);
-			_pLabel->SetMaxSize(GetWidth() - _pLabel->GetX() - 34, -1);
+			_pLabel->SetWidth(GetWidth() - _pLabel->GetX() - 34);
 		}
 
 		if (_pSignOutButton)

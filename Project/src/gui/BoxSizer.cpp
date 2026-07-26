@@ -98,6 +98,7 @@ namespace fig::gui
 				ClampRect(rect, item);
 				AlignRect(rect, allocatedRect, item);
 				
+				OnLayoutItem(rect, item);
 				pControl->SetRect(rect);
 			}
 		}

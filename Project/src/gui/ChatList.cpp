@@ -97,7 +97,7 @@ namespace fig::gui
 	fig::observer_ptr<Control> ChatList::CreateHeader(fig::string_view text)
 	{
 		auto panel = CreateControl<Area>();
-		panel->SetMaxSize(Constants::GUI::ChatList::Width, -1);
+		panel->SetMaxWidth(Constants::GUI::ChatList::Width);
 		panel->SetHeight(40);
 
 		auto label = panel->CreateControl<StaticText>("", FontFace::Italic, 18.0);

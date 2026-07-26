@@ -54,8 +54,12 @@ namespace fig::gui
 		void SetForegroundColor(fig::color color) override;
 		void SetBackgroundColor(fig::color color) override;
 		void EnableDropShadow(bool bEnable) noexcept { _bDropShadow = bEnable; _bInvalidated = true; }
-		void EnableWordWrap(bool bEnable) noexcept { _bWordWrap = bEnable; _bInvalidated = true; }
 		void EnableEllipsis(bool bEnable) noexcept { _bEllipsis = bEnable; _bInvalidated = true; }
+		void EnableWordWrap(bool bEnable) noexcept { _bWordWrap = bEnable; _bInvalidated = true; }
+		void SetMaxLineWidth(fig::coord width) { _maxLineWidth = width; _bWordWrap |= width > 0; }
+
+		bool IsEllipsisEnabled() const noexcept { return _bEllipsis; }
+		bool IsWordWrapEnabled() const noexcept { return _bWordWrap; }
 
 		fig::point MeasureText(bool bAllowEllipsis = true) const;
 		void Reset();
@@ -67,7 +71,7 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnParent() override;
-
+		fig::coord GetMaxLineWidth() const noexcept;
 	private:
 		void DrawText(fig::coord& textWidth, fig::coord& textHeight);
 		void DrawShadow(const char* pText);
@@ -78,8 +82,9 @@ namespace fig::gui
 		bool _bInvalidated = false;
 		bool _bAutoSize = true;
 		bool _bDropShadow = false;
-		bool _bWordWrap = false;
 		bool _bEllipsis = false;
+		bool _bWordWrap = false;
+		fig::coord _maxLineWidth = 0;
 
 		fig::observer_ptr<TTF_Font> _pFont;
 		fig::sdl::Texture _texture {};

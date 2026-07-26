@@ -6,6 +6,8 @@ namespace fig::gui
 {
 	class BoxSizer : public Sizer
 	{
+		virtual fig::coord GetExtent() const = 0;
+
 	protected:
 		void OnLayout(const fig::rect& rect) override;
 

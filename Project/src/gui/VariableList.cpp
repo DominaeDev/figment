@@ -26,7 +26,7 @@ VariableList::VariableList(ControlPtr pParent) : Control(pParent)
 
 	_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
 	_pText->SetPosition(Margin, Margin);
-	_pText->SetMaxSize(250, -1);
+	_pText->SetWidth(250);
 }
 
 void VariableList::OnRender(fig::renderer_ptr pRenderer)

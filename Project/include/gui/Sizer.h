@@ -57,6 +57,15 @@ namespace fig::gui
 			return nullptr;
 		};
 
+		template <typename T>
+			requires std::derived_from<T, Control>
+		T* GetControl() const
+		{
+			if (auto ppCtrl = std::get_if<LayoutElement*>(&target); ppCtrl)
+				return dynamic_cast<T*>(*ppCtrl);
+			return nullptr;
+		};
+
 		constexpr inline fig::coord GetLeftBorder() const { return info.IsSet(SizerFlag::Left) ? info.border : 0; };
 		constexpr inline fig::coord GetRightBorder() const { return info.IsSet(SizerFlag::Right) ? info.border : 0; };
 		constexpr inline fig::coord GetTopBorder() const { return info.IsSet(SizerFlag::Top) ? info.border : 0; };
@@ -104,8 +113,18 @@ namespace fig::gui
 					return true;
 				});
 		}
+		auto GetLayoutItems() const noexcept
+		{
+			return _items
+				| std::views::filter([](auto& it) {
+				if (auto ppCtrl = std::get_if<LayoutElement*>(&it.target); ppCtrl)
+					return (*ppCtrl)->IsLayoutEnabled();
+				return true;
+			});
+		}
 
 		virtual void OnLayout(const fig::rect& rect) = 0;
+		virtual void OnLayoutItem(fig::rect& itemRect, SizerItem& item) {};
 		
 		void ApplyBorder(fig::rect& rect, const SizerItem& item);
 		void ClampRect(fig::rect& rect, const SizerItem& item);

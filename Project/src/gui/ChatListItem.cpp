@@ -40,7 +40,7 @@ namespace fig::gui
 		_pTimestamp = CreateControl<StaticText>("", FontFace::Italic, 11.0, true);
 		_pTimestamp->SetForegroundColor(Color::SidePanelForeground.WithAlpha(0.5f));
 		_pTimestamp->SetY(8);
-		_pTimestamp->SetMaxSize(100, -1);
+		_pTimestamp->SetMaxWidth(100);
 
 		// Portrait
 		_pPortrait = CreateControl<Image>(nullptr);
@@ -88,13 +88,13 @@ namespace fig::gui
 	{
 		if (_pTitle)
 		{
-			_pTitle->SetMaxSize(GetWidth() - _pTitle->GetX() - 112, -1);
+			_pTitle->SetWidth(GetWidth() - _pTitle->GetX() - 112);
 			_pTitle->InvalidateText();
 		}
 
 		if (_pMessage)
 		{
-			_pMessage->SetMaxSize(GetWidth() - _pMessage->GetX() - 112, -1);
+			_pMessage->SetWidth(GetWidth() - _pMessage->GetX() - 112);
 			_pMessage->InvalidateText();
 		}
 

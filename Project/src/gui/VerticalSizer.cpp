@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/VerticalSizer.h"
 #include "gui/Control.h"
+#include <limits>
 
 namespace fig::gui
 {
@@ -19,7 +20,7 @@ namespace fig::gui
 	std::pair<fig::coord, fig::coord> VerticalSizer::GetItemMinMaxSize(SizerItem& item)
 	{
 		if (auto pControl = item.GetControl())
-			return std::make_pair(pControl->GetMinSize().y, pControl->GetMaxSize().y);
+			return std::make_pair(pControl->GetMinHeight(), pControl->GetMaxHeight());
 		return {};
 	}
 
@@ -39,6 +40,42 @@ namespace fig::gui
 	void VerticalSizer::ExpandRect(fig::rect& rect, const fig::rect& allocated)
 	{
 		rect.w = allocated.w;
+	}
+
+	void VerticalSizer::OnLayoutItem(fig::rect& itemRect, SizerItem& item)
+	{
+		if (item.info.IsSet(SizerFlag::Expand))
+		{
+			if (auto pText = item.GetControl<StaticText>())
+			{
+				if (pText->IsWordWrapEnabled())
+				{
+					auto [prev_w, prev_h] = pText->MeasureText(true);
+					pText->SetMaxLineWidth(itemRect.w);
+					auto [new_w, new_h] = pText->MeasureText(true);
+					position += new_h - prev_h;
+					item.rect.h = new_h;
+
+					pText->InvalidateText();
+				}
+				else if (pText->IsEllipsisEnabled())
+				{
+					pText->InvalidateText();
+				}
+			}
+		}
+	}
+
+	fig::coord VerticalSizer::GetExtent() const
+	{
+		fig::coord min = std::numeric_limits<fig::coord>::max();
+		fig::coord max = std::numeric_limits<fig::coord>::min();
+		for (auto& item : GetLayoutItems())
+		{
+			min = std::min(min, item.rect.y);
+			max = std::min(max, item.rect.y + item.rect.h);
+		}
+		return max - min;
 	}
 }
 

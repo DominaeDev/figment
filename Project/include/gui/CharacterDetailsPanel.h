@@ -14,7 +14,6 @@ namespace fig::gui
 	
 	protected:
 		void OnAfterLayout() override;
-		void OnSize() override;
 
 	private:
 		fig::observer_ptr<StaticText> _pHeader;
