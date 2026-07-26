@@ -37,16 +37,16 @@ namespace fig::gui
 		c->SetBackgroundColor(Color::Blue);
 		c->SetSize(50, 50);
 
-		h->Add(a, -1, Sizer::AlignRight | Sizer::AlignTop, 4);
-		h->Add(b, 0, Sizer::AlignCenterHorizontal | Sizer::AlignCenterVertical, 4);
-		h->Add(c, -1, Sizer::AlignLeft | Sizer::AlignBottom, 4);
+		h->Add(a, -1, SizerFlag::AlignRight | SizerFlag::AlignTop, 4);
+		h->Add(b, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::AlignCenterVertical, 4);
+		h->Add(c, -1, SizerFlag::AlignLeft | SizerFlag::AlignBottom, 4);
 
 		auto sizer = area->SetSizer<VerticalSizer>();
-		sizer->Add(left, -1, Sizer::AlignRight | Sizer::AlignCenterVertical);
+		sizer->Add(left, -1, SizerFlag::AlignRight | SizerFlag::AlignCenterVertical);
 		sizer->AddSpacer(4);
-		sizer->Add(center, -1, Sizer::Fill);
+		sizer->Add(center, -1, SizerFlag::Fill);
 		sizer->AddSpacer(4);
-		sizer->Add(right, 0, Sizer::Expand | Sizer::AlignCenterVertical | Sizer::FixedSize, 100);
+		sizer->Add(right, 0, SizerFlag::Expand | SizerFlag::AlignCenterVertical | SizerFlag::FixedSize, 100);
 
 		auto pButton = CreateControl<ButtonWithLabel>("Invalidate");
 		pButton->SetHeight(35);

@@ -22,7 +22,7 @@ namespace fig::gui
 
 		auto _pHeader = pTopBar->CreateControl<StaticText>("Chats", FontFace::Italic, 24, false);
 		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
-		_pHeader->SetAlignment(TextAlignment::Left_Center);
+		_pHeader->SetAlignment(TextAlignment::LeftCenter);
 
 		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
@@ -41,17 +41,17 @@ namespace fig::gui
 
 		auto pTopSizer = pTopBar->SetSizer<HorizontalSizer>();
 		pTopSizer->AddSpacer(12);
-		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
+		pTopSizer->Add(_pHeader, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 6);
 		pTopSizer->AddStretchSpacer();
-		pTopSizer->Add(_pSortingButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(_pFilteringButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
-		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
+		pTopSizer->Add(_pSortingButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+		pTopSizer->Add(_pFilteringButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
+		pTopSizer->Add(_pFilterTextBox, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
 
 		_pChatList = CreateControl<ChatList>();
 
 		auto mainSizer = SetSizer<VerticalSizer>();
-		mainSizer->Add(pTopBar, 0, Sizer::Expand);
-		mainSizer->Add(_pChatList, -1, Sizer::Fill | Sizer::Left, 12);
+		mainSizer->Add(pTopBar, 0, SizerFlag::Expand);
+		mainSizer->Add(_pChatList, -1, SizerFlag::Fill | SizerFlag::Left, 12);
 
 		InvalidateLayout();
 	}

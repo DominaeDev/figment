@@ -253,13 +253,13 @@ namespace fig::gui
 		int h = _textHeight;
 		fig::rect aligned_rect(x, y, w, h);
 
-		if ((_alignment & HorizontalAlignment::Center) != 0)
+		if ((_alignment & HorizontalAlignment::TextAlignCenter) != 0)
 			aligned_rect.x = x + (rect.w - w) / 2;
-		else if ((_alignment & HorizontalAlignment::Right) != 0)
+		else if ((_alignment & HorizontalAlignment::TextAlignRight) != 0)
 			aligned_rect.x = x + rect.w - w;
-		if ((_alignment & VerticalAlignment::Middle) != 0)
+		if ((_alignment & VerticalAlignment::TextAlignMiddle) != 0)
 			aligned_rect.y = y + (rect.h - h) / 2;
-		else if ((_alignment & VerticalAlignment::Bottom) != 0)
+		else if ((_alignment & VerticalAlignment::TextAlignBottom) != 0)
 			aligned_rect.y = y + rect.h - h;
 		return to_rectf(aligned_rect);
 	}

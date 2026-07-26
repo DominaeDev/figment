@@ -124,7 +124,7 @@ namespace fig::gui
 			pMessage->SetY(-1000); // Move off-screen
 			pMessage->SetMessage(message, complete);
 			pMessage->SetColors(session.GetColorsOf(role));
-			GetSizer()->Add(pMessage, 0, Sizer::Expand);
+			GetSizer()->Add(pMessage, 0, SizerFlag::Expand);
 			return pMessage;
 		}
 		else
@@ -133,7 +133,7 @@ namespace fig::gui
 			pMessage->SetY(-1000); // Move off-screen
 			pMessage->SetMessage(message, complete);
 			pMessage->SetColors(ChatSession::GetDefaultColorsOf(role));
-			GetSizer()->Add(pMessage, 0, Sizer::Expand);
+			GetSizer()->Add(pMessage, 0, SizerFlag::Expand);
 			return pMessage;
 		}
 	}

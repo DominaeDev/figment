@@ -39,9 +39,9 @@ namespace fig::gui
 		_pBottomPanel->SetHeight(180);
 
 		auto pMainSizer = _pExpandedRoot->SetSizer<VerticalSizer>();
-		pMainSizer->Add(_pViewport, -1, Sizer::Expand | Sizer::Greedy | Sizer::All, 6);
-		pMainSizer->Add(pDetailsPanel, -1, Sizer::Fill | Sizer::Right | Sizer::Left | Sizer::Bottom, 6);
-		pMainSizer->Add(_pBottomPanel, 0, Sizer::Expand);
+		pMainSizer->Add(_pViewport, -1, SizerFlag::Expand | SizerFlag::Greedy | SizerFlag::All, 6);
+		pMainSizer->Add(pDetailsPanel, -1, SizerFlag::Fill | SizerFlag::Right | SizerFlag::Left | SizerFlag::Bottom, 6);
+		pMainSizer->Add(_pBottomPanel, 0, SizerFlag::Expand);
 
 		_pResizeHandle = CreateControl<ResizeHandle>(Direction::West);
 		_pResizeHandle->SetDelegate([this](fig::coord size) { Resize(size); });
@@ -109,7 +109,7 @@ namespace fig::gui
 		_pCollapsedRoot->Cull(true);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
-		pTopSizer->Add(_pExpandedRoot, -1, Sizer::Expand | Sizer::Fill);
+		pTopSizer->Add(_pExpandedRoot, -1, SizerFlag::Expand | SizerFlag::Fill);
 
 		PushEvent(UserEvent::SidePanelResized);
 	}
@@ -130,7 +130,7 @@ namespace fig::gui
 		_pCollapsedRoot->Cull(false);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
-		pTopSizer->Add(_pCollapsedRoot, -1, Sizer::Expand | Sizer::Fill);
+		pTopSizer->Add(_pCollapsedRoot, -1, SizerFlag::Expand | SizerFlag::Fill);
 
 		PushEvent(UserEvent::SidePanelResized);
 	}

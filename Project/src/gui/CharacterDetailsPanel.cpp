@@ -21,10 +21,10 @@ namespace fig::gui
 			"\n"
 			"Provident dolorem saepe quod qui exercitationem consequatur voluptate non. Optio labore consequatur ipsa. A expedita dicta sunt enim quae. Quia omnis magni eius rem est et sed eligendi.");
 
-		auto pTopSizer = SetSizer<VerticalSizer>();
+		auto pTopSizer = SetSizer<VerticalListSizer>();
 		pTopSizer->AddSpacer(2);
-		pTopSizer->Add(_pHeader, 0, Sizer::Expand | Sizer::Right | Sizer::Left, Margin);
-		pTopSizer->Add(_pDescription, 0, Sizer::Expand | Sizer::Right | Sizer::Left, Margin);
+		pTopSizer->Add(_pHeader, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, Margin);
+		pTopSizer->Add(_pDescription, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, Margin);
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pBorder->SetColor(Color::LineColor);

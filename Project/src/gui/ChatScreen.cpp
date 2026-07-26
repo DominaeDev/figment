@@ -55,12 +55,12 @@ namespace fig::gui
 		auto pRightGradient = _pUnderScroll->CreateControl<Image>(Resource::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT, underColor);
 		pLeftGradient->SetWidth(underGradientWidth);
 		pRightGradient->SetWidth(underGradientWidth);
-		pUnderSizer->Add(pLeftGradient, 0, Sizer::Expand);
-		pUnderSizer->Add(pUnderBG, -1, Sizer::Fill);
-		pUnderSizer->Add(pRightGradient, 0, Sizer::Expand);
+		pUnderSizer->Add(pLeftGradient, 0, SizerFlag::Expand);
+		pUnderSizer->Add(pUnderBG, -1, SizerFlag::Fill);
+		pUnderSizer->Add(pRightGradient, 0, SizerFlag::Expand);
 		
 		auto pStaticText = centerArea->CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize);
-		pStaticText->SetAlignment(TextAlignment::Middle_Center);
+		pStaticText->SetAlignment(TextAlignment::MiddleCenter);
 		pStaticText->SetSize(80, 80);
 		pStaticText->SetMinSize(-1, 80);
 		pStaticText->SetBackgroundColor(fig::color { 255, 255, 0, SDL_ALPHA_OPAQUE });
@@ -75,16 +75,16 @@ namespace fig::gui
 		_pTextBox->SetMaxRows(8);
 
 		auto pCenterSizer = centerArea->SetSizer<VerticalSizer>();
-		pCenterSizer->Add(_pChatScroll, -1, Sizer::Fill | Sizer::Bottom, 8);
-		pCenterSizer->Add(_pTextBox, 0, Sizer::AlignBottom | Sizer::AlignCenterHorizontal);
+		pCenterSizer->Add(_pChatScroll, -1, SizerFlag::Fill | SizerFlag::Bottom, 8);
+		pCenterSizer->Add(_pTextBox, 0, SizerFlag::AlignBottom | SizerFlag::AlignCenterHorizontal);
 
 		auto mainSizer = SetSizer<HorizontalSizer>();
-		mainSizer->Add(_pBackground, -1, Sizer::Fill);
-		mainSizer->Add(_pInfoPanel, 0, Sizer::Expand);
+		mainSizer->Add(_pBackground, -1, SizerFlag::Fill);
+		mainSizer->Add(_pInfoPanel, 0, SizerFlag::Expand);
 
 		auto bgSizer = _pBackground->SetSizer<HorizontalSizer>();
 		bgSizer->AddStretchSpacer();
-		bgSizer->Add(centerArea, 0, Sizer::Fill | Sizer::Bottom, 24);
+		bgSizer->Add(centerArea, 0, SizerFlag::Fill | SizerFlag::Bottom, 24);
 		bgSizer->AddStretchSpacer();
 
 		_pTextBox->SetEnterPressedCallback([this](fig::string text) {

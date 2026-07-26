@@ -178,6 +178,7 @@
     <ClCompile Include="src\data\ModelSettings.cpp" />
     <ClCompile Include="src\data\Scenario.cpp" />
     <ClCompile Include="src\data\TavernCardV2.cpp" />
+    <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\BaseButton.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
@@ -433,6 +434,7 @@
     <ClInclude Include="include\data\Scenario.h" />
     <ClInclude Include="include\data\TavernCardV2.h" />
     <ClInclude Include="include\Figment.h" />
+    <ClInclude Include="include\gui\BoxSizer.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\CharacterDetailsPanel.h" />

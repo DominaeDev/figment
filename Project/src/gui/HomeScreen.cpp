@@ -27,7 +27,7 @@ namespace fig::gui
 		_pHeader = pTopBar->CreateControl<StaticText>("Characters", FontFace::Italic, 24, false);
 		_pHeader->SetX(52);
 		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
-		_pHeader->SetAlignment(TextAlignment::Left_Center);
+		_pHeader->SetAlignment(TextAlignment::LeftCenter);
 		
 		auto pHomeButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_HOME);
 
@@ -53,21 +53,21 @@ namespace fig::gui
 		});
 
 		auto pTopSizer = pTopBar->SetSizer<HorizontalSizer>();
-		pTopSizer->Add(pHomeButton, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
-		pTopSizer->Add(_pHeader, 0, Sizer::AlignCenterVertical | Sizer::Left, 6);
+		pTopSizer->Add(pHomeButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 6);
+		pTopSizer->Add(_pHeader, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 6);
 		pTopSizer->AddStretchSpacer();
-		pTopSizer->Add(_pGridButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(_pToggleTagsButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(_pSortingButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 2);
-		pTopSizer->Add(_pFilteringButton, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
-		pTopSizer->Add(_pFilterTextBox, 0, Sizer::AlignCenterVertical | Sizer::Right, 8);
+		pTopSizer->Add(_pGridButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+		pTopSizer->Add(_pToggleTagsButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+		pTopSizer->Add(_pSortingButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+		pTopSizer->Add(_pFilteringButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
+		pTopSizer->Add(_pFilterTextBox, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
 
 		_pCardList = CreateControl<CardList>();
 		_pCardList->SetScrollBarOffset(0);
 
 		auto mainSizer = SetSizer<VerticalSizer>();
-		mainSizer->Add(pTopBar, 0, Sizer::Expand);
-		mainSizer->Add(_pCardList, -1, Sizer::Fill | Sizer::Left | Sizer::Right, 16);
+		mainSizer->Add(pTopBar, 0, SizerFlag::Expand);
+		mainSizer->Add(_pCardList, -1, SizerFlag::Fill | SizerFlag::Left | SizerFlag::Right, 16);
 	}
 
 	void HomeScreen::OnUpdate(float fElapsed)

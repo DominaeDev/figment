@@ -24,7 +24,7 @@ namespace fig::gui
 				int height = pControl->GetHeight();
 
 				rect.x = parentRect.x;
-				if ((item.info.flags & Flag::Expand) != 0)
+				if (item.info.IsSet(SizerFlag::Expand))
 					rect.w = parentRect.w;
 				rect.y = parentRect.y + parentRect.h - y - rect.h - _marginBottom;
 

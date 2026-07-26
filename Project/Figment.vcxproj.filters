@@ -617,6 +617,9 @@
     <ClCompile Include="src\gui\CharacterDetailsPanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\BoxSizer.cpp">
+      <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1446,6 +1449,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterDetailsPanel.h">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\BoxSizer.h">
+      <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

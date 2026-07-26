@@ -32,7 +32,7 @@ namespace fig::gui
 
 		auto pVerticalSizer = SetSizer<VerticalSizer>();
 		pVerticalSizer->AddStretchSpacer();
-		pVerticalSizer->Add(pCenter, 0, Sizer::AlignCenterHorizontal);
+		pVerticalSizer->Add(pCenter, 0, SizerFlag::AlignCenterHorizontal);
 		pVerticalSizer->AddStretchSpacer();
 
 		_pProfileImage = pCenter->CreateControl<ImageWithMask>(nullptr, nullptr);
@@ -51,7 +51,7 @@ namespace fig::gui
 		_pNoPassButton->SetDelegate([this]() { SignIn(); });
 
 		_pProfileName = pCenter->CreateControl<StaticText>("", FontFace::Default, 24.0, false);
-		_pProfileName->SetAlignment(TextAlignment::Middle_Top);
+		_pProfileName->SetAlignment(TextAlignment::MiddleTop);
 
 		_pPasswordPanel = pCenter->CreateControl<Panel>();
 		_pPasswordPanel->SetHeight(35);
@@ -70,21 +70,21 @@ namespace fig::gui
 
 		auto pPasswordSizer = _pPasswordPanel->SetSizer<HorizontalSizer>();
 		pPasswordSizer->AddStretchSpacer();
-		pPasswordSizer->Add(_pPassword, 0, Sizer::AlignCenterVertical);
-		pPasswordSizer->Add(_pSignInBtn, 0, Sizer::AlignCenterVertical | Sizer::AlignLeft | Sizer::Left, 4);
+		pPasswordSizer->Add(_pPassword, 0, SizerFlag::AlignCenterVertical);
+		pPasswordSizer->Add(_pSignInBtn, 0, SizerFlag::AlignCenterVertical | SizerFlag::AlignLeft | SizerFlag::Left, 4);
 		pPasswordSizer->AddStretchSpacer();
 
 		auto pCenterSizer = pCenter->SetSizer<VerticalSizer>();
-		auto pProfileImageSizer = pCenterSizer->Add<HorizontalSizer>(0, Sizer::FixedSize, 160);
+		auto pProfileImageSizer = pCenterSizer->Add<HorizontalSizer>(0, SizerFlag::FixedSize, 160);
 		pCenterSizer->AddSpacer(4);
-		pCenterSizer->Add(_pProfileName, 0, Sizer::Expand | Sizer::FixedSize, 24);
+		pCenterSizer->Add(_pProfileName, 0, SizerFlag::Expand | SizerFlag::FixedSize, 24);
 		pCenterSizer->AddSpacer(28);
-		pCenterSizer->Add(_pPasswordPanel, 0, Sizer::Expand);
-		pCenterSizer->Add(_pNoPassButton, 0, Sizer::AlignCenterHorizontal);
+		pCenterSizer->Add(_pPasswordPanel, 0, SizerFlag::Expand);
+		pCenterSizer->Add(_pNoPassButton, 0, SizerFlag::AlignCenterHorizontal);
 
-		pProfileImageSizer->Add(_pPrevProfileBtn, -1, Sizer::AlignCenterVertical | Sizer::AlignRight | Sizer::Right, 16);
+		pProfileImageSizer->Add(_pPrevProfileBtn, -1, SizerFlag::AlignCenterVertical | SizerFlag::AlignRight | SizerFlag::Right, 16);
 		pProfileImageSizer->Add(_pProfileImage, 0);
-		pProfileImageSizer->Add(_pNextProfileBtn, -1, Sizer::AlignCenterVertical | Sizer::AlignLeft | Sizer::Left, 16);
+		pProfileImageSizer->Add(_pNextProfileBtn, -1, SizerFlag::AlignCenterVertical | SizerFlag::AlignLeft | SizerFlag::Left, 16);
 
 		auto& profiles = Global::GetUserManager().GetProfiles();
 		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)))

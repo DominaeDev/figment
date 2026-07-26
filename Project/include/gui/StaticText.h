@@ -6,32 +6,32 @@
 
 namespace fig::gui
 {
-	enum HorizontalAlignment : unsigned short
+	enum HorizontalAlignment : uint8_t
 	{
-		Left = (1u << 0),
-		Center = (1u << 1),
-		Right = (1u << 2),
+		TextAlignLeft = (1u << 0),
+		TextAlignCenter = (1u << 1),
+		TextAlignRight = (1u << 2),
 	};
 
-	enum VerticalAlignment : unsigned short
+	enum VerticalAlignment : uint8_t
 	{
-		Top = (1u << 3),
-		Middle = (1u << 4),
-		Bottom = (1u << 5),
+		TextAlignTop = (1u << 3),
+		TextAlignMiddle = (1u << 4),
+		TextAlignBottom = (1u << 5),
 	};
 
 	enum TextAlignment : unsigned short
 	{
-		Left_Top = HorizontalAlignment::Left | VerticalAlignment::Top,
-		Left_Center = HorizontalAlignment::Left | VerticalAlignment::Middle,
-		Left_Bottom = HorizontalAlignment::Left | VerticalAlignment::Bottom,
-		Middle_Top = HorizontalAlignment::Center | VerticalAlignment::Top,
-		Middle_Center = HorizontalAlignment::Center | VerticalAlignment::Middle,
-		Middle_Bottom = HorizontalAlignment::Center | VerticalAlignment::Bottom,
-		Right_Top = HorizontalAlignment::Right | VerticalAlignment::Top,
-		Right_Center = HorizontalAlignment::Right | VerticalAlignment::Middle,
-		Right_Bottom = HorizontalAlignment::Right | VerticalAlignment::Bottom,
-		Default = Left_Top,
+		LeftTop			= HorizontalAlignment::TextAlignLeft | VerticalAlignment::TextAlignTop,
+		LeftCenter		= HorizontalAlignment::TextAlignLeft | VerticalAlignment::TextAlignMiddle,
+		LeftBottom		= HorizontalAlignment::TextAlignLeft | VerticalAlignment::TextAlignBottom,
+		MiddleTop		= HorizontalAlignment::TextAlignCenter | VerticalAlignment::TextAlignTop,
+		MiddleCenter	= HorizontalAlignment::TextAlignCenter | VerticalAlignment::TextAlignMiddle,
+		MiddleBottom	= HorizontalAlignment::TextAlignCenter | VerticalAlignment::TextAlignBottom,
+		RightTop		= HorizontalAlignment::TextAlignRight | VerticalAlignment::TextAlignTop,
+		RightCenter		= HorizontalAlignment::TextAlignRight | VerticalAlignment::TextAlignMiddle,
+		RightBottom		= HorizontalAlignment::TextAlignRight | VerticalAlignment::TextAlignBottom,
+		Default			= LeftTop,
 	};
 
 	class StaticText : public Control

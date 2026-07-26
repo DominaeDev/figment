@@ -220,7 +220,7 @@ namespace fig::gui
 
 			// Header
 			auto pHeader = CreateHeader(TimeBucketLabels[static_cast<size_t>(bucket)]);
-			_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
+			_pVerticalSizer->Add(pHeader, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::Expand | SizerFlag::Right, 18);
 
 			// Chats
 			for (size_t i = 0uz; i < items.size(); i++)
@@ -240,14 +240,14 @@ namespace fig::gui
 				pListItem->SetDelegate([this](auto& card) { Reorder(); });
 				item.pListItem = pListItem;
 
-				_pVerticalSizer->Add(pListItem, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
+				_pVerticalSizer->Add(pListItem, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::Expand | SizerFlag::Right, 18);
 			}
 		}
 
 		if (_children.empty())
 		{
 			auto pHeader = CreateHeader("No chats");
-			_pVerticalSizer->Add(pHeader, 0, Sizer::AlignCenterHorizontal | Sizer::Expand | Sizer::Right, 18);
+			_pVerticalSizer->Add(pHeader, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::Expand | SizerFlag::Right, 18);
 		}
 
 		InvalidateLayout();

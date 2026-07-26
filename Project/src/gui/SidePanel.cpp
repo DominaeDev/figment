@@ -60,15 +60,15 @@ namespace fig::gui
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
 		pButtonSizer->AddSpacer(20);
-		pButtonSizer->Add(pChatButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
+		pButtonSizer->Add(pChatButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 		pButtonSizer->AddSpacer(4);
-		pButtonSizer->Add(pCharactersButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
+		pButtonSizer->Add(pCharactersButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 		pButtonSizer->AddSpacer(4);
-		pButtonSizer->Add(pScenariosButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
+		pButtonSizer->Add(pScenariosButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 		pButtonSizer->AddSpacer(4);
-		pButtonSizer->Add(pWorldsButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
+		pButtonSizer->Add(pWorldsButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 		pButtonSizer->AddSpacer(4);
-		pButtonSizer->Add(pModelsButton, 0, Sizer::Expand | Sizer::Right | Sizer::Left, 12);
+		pButtonSizer->Add(pModelsButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 
 		auto pFooterPanel = _pExpandedRoot->CreateControl<Area>();
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);
@@ -81,22 +81,22 @@ namespace fig::gui
 		_pUserWidget->SetHeight(60);
 		
 		auto pMainSizer =_pExpandedRoot->SetSizer<VerticalSizer>();
-		pMainSizer->Add(pHeaderPanel, 0, Sizer::Expand | Sizer::Fill);
-		pMainSizer->Add(pMainArea, -1, Sizer::Fill);
-		pMainSizer->Add(_pModelWidget, 0, Sizer::Expand);
-		pMainSizer->Add(_pUserWidget, 0, Sizer::Expand);
+		pMainSizer->Add(pHeaderPanel, 0, SizerFlag::Expand | SizerFlag::Fill);
+		pMainSizer->Add(pMainArea, -1, SizerFlag::Fill);
+		pMainSizer->Add(_pModelWidget, 0, SizerFlag::Expand);
+		pMainSizer->Add(_pUserWidget, 0, SizerFlag::Expand);
 
 		auto pSmallButtonSizer = _pCollapsedRoot->SetSizer<VerticalSizer>();
 		pSmallButtonSizer->AddSpacer(56);
-		pSmallButtonSizer->Add(pChatButtonSmall, 0, Sizer::AlignCenterHorizontal);
+		pSmallButtonSizer->Add(pChatButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 		pSmallButtonSizer->AddSpacer(8);
-		pSmallButtonSizer->Add(pCharactersButtonSmall, 0, Sizer::AlignCenterHorizontal);
+		pSmallButtonSizer->Add(pCharactersButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 		pSmallButtonSizer->AddSpacer(8);
-		pSmallButtonSizer->Add(pScenariosButtonSmall, 0, Sizer::AlignCenterHorizontal);
+		pSmallButtonSizer->Add(pScenariosButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 		pSmallButtonSizer->AddSpacer(8);
-		pSmallButtonSizer->Add(pWorldsButtonSmall, 0, Sizer::AlignCenterHorizontal);
+		pSmallButtonSizer->Add(pWorldsButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 		pSmallButtonSizer->AddSpacer(8);
-		pSmallButtonSizer->Add(pModelsButtonSmall, 0, Sizer::AlignCenterHorizontal);
+		pSmallButtonSizer->Add(pModelsButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 //		_pCollapsedRoot->Cull(true);
 
 		_pResizeHandle = CreateControl<ResizeHandle>(Direction::East);
@@ -182,7 +182,7 @@ namespace fig::gui
 			Global::GetUserSettings().SetBool(UserSetting::SidePanel_Collapsed, false);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
-		pTopSizer->Add(_pExpandedRoot, -1, Sizer::Expand | Sizer::Fill);
+		pTopSizer->Add(_pExpandedRoot, -1, SizerFlag::Expand | SizerFlag::Fill);
 
 		PushEvent(UserEvent::SidePanelResized);
 	}
@@ -201,7 +201,7 @@ namespace fig::gui
 			Global::GetUserSettings().SetBool(UserSetting::SidePanel_Collapsed, true);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
-		pTopSizer->Add(_pCollapsedRoot, -1, Sizer::Expand | Sizer::Fill);
+		pTopSizer->Add(_pCollapsedRoot, -1, SizerFlag::Expand | SizerFlag::Fill);
 
 		PushEvent(UserEvent::SidePanelResized);
 	}
