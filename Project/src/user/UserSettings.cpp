@@ -11,8 +11,8 @@ namespace fig
 	static const std::vector<SettingTuple> _AllSettings {
 		std::tuple { UserSetting::Clock,						"Interface",					"Clock",		enum_serialize(Clock::Default, ClockMapping) },
 		std::tuple { UserSetting::SidePanel_Collapsed,			"Interface",					"SidePanel.Collapsed",		0 },
-		std::tuple { UserSetting::ChatSidePanel_Collapsed,		"Interface.Chat",				"InfoPanel.Collapsed",		0 },
-		std::tuple { UserSetting::ChatSidePanel_Width,			"Interface.Chat",				"InfoPanel.Width",			Constants::GUI::ChatSidePanel::DefaultWidth },
+		std::tuple { UserSetting::InfoPanel_Collapsed,		"Interface.Chat",				"InfoPanel.Collapsed",		0 },
+		std::tuple { UserSetting::InfoPanel_Width,			"Interface.Chat",				"InfoPanel.Width",			Constants::GUI::InfoPanel::DefaultWidth },
 		std::tuple { UserSetting::CharacterList_HalfSizeCards,	"Interface.CharacterList",		"SmallCards",	0 },
 		std::tuple { UserSetting::CharacterList_ShowTags,		"Interface.CharacterList",		"ShowTags",		1 },
 		std::tuple { UserSetting::CharacterList_Sorting,		"Interface.CharacterList",		"Sorting",		static_cast<int32_t>(SortBy::LastUsedAt) },

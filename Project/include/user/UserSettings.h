@@ -15,8 +15,8 @@ namespace fig
 		ChatList_Ordering,
 		ChatList_Filtering,
 		SidePanel_Collapsed,
-		ChatSidePanel_Collapsed,
-		ChatSidePanel_Width,
+		InfoPanel_Collapsed,
+		InfoPanel_Width,
 
 		Clock,
 		ModelPreset,

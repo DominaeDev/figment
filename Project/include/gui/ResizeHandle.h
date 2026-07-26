@@ -15,6 +15,7 @@ namespace fig::gui
 		void Render(fig::renderer_ptr pRenderer) override;
 		void SetDelegate(ResizeHandleSizeCallback fnDelegate) { _fnOnResize = fnDelegate; }
 		void SetClickDelegate(ResizeHandleClickCallback fnDelegate) { _fnOnClick = fnDelegate; }
+		void EnableDrawHandle(bool bEnable) { _bDrawHandle = bEnable; }
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -24,6 +25,7 @@ namespace fig::gui
 
 	private:
 		Direction _direction {};
+		bool _bDrawHandle { true };
 		bool _bHovering { false };
 		bool _bMouseDown { false };
 		fig::pointf _mouseDownPosition {};

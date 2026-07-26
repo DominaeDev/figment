@@ -112,6 +112,11 @@ namespace fig::gui
 		}
 	}
 
+	void ScrollPanel::OnSize()
+	{
+		RefreshScrollBar();
+	}
+
 	void ScrollPanel::RefreshScrollBar()
 	{
 		if (_pScrollBar)

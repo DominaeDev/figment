@@ -7,10 +7,10 @@ namespace fig::gui
 	class ImageViewport;
 	class ResizeHandle;
 
-	class ChatSidePanel : public Panel
+	class InfoPanel : public Panel
 	{
 	public:
-		ChatSidePanel(ControlPtr pParent);
+		InfoPanel(ControlPtr pParent);
 
 		void Expand() noexcept;
 		void Collapse() noexcept;

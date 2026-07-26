@@ -31,6 +31,9 @@ namespace fig::gui
 
 	void ResizeHandle::Render(fig::renderer_ptr pRenderer)
 	{
+		if (not _bDrawHandle)
+			return;
+
 		if (_bHovering or _bResizing)
 		{
 			auto lineColor = _bResizing ? 0x4080C0_rgb : Color::LineColor.WithAlpha(_fAlpha);
@@ -57,13 +60,21 @@ namespace fig::gui
 				return rectf { right - 2, top, 3, bottom - top };
 			case Direction::West:
 				return rectf { left - 1, top, 3, bottom - top };
-			default:
-				return {}; //! @todo
+			case Direction::North:
+				return rectf { left, top - 1, right - left, 3 };
+			case Direction::South:
+				return rectf { left, bottom - 2, right - left, 3 };
 		}
+		return {};
 	}
 
 	EventResult ResizeHandle::OnEvent(fig::event& event)
 	{
+#pragma warning (push)
+#pragma warning (suppress: 26813)
+		auto cursor = (_direction == Direction::East or _direction == Direction::West) ? Cursor::ResizeHorizontal : Cursor::ResizeVertical;
+#pragma warning (pop)
+
 		if (event.type == SDL_EVENT_MOUSE_MOTION)
 		{
 			auto motionEvent = event.motion;
@@ -93,10 +104,10 @@ namespace fig::gui
 					size = (_prevRect.x + _prevRect.w) - mx;
 					break;
 				case Direction::North:
-					size = my - _prevRect.y;
+					size = (_prevRect.y + _prevRect.y) - my;
 					break;
 				case Direction::South:
-					size = (_prevRect.y + _prevRect.h) - my;
+					size = my - _prevRect.y;
 					break;
 				default:
 					return EventResult::Pass;
@@ -117,14 +128,14 @@ namespace fig::gui
 					if (not (_bHovering))
 					{
 						_bHovering = true;
-						PushEvent(UserEvent::PushCursor, Cursor::ResizeHorizontal);
+						PushEvent(UserEvent::PushCursor, cursor);
 						return EventResult::Continue;
 					}
 				}
 				else if (_bHovering)
 				{
 					_bHovering = false;
-					PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
+					PushEvent(UserEvent::PopCursor, cursor);
 					return EventResult::Continue;
 				}
 			}
@@ -159,12 +170,12 @@ namespace fig::gui
 			if (_bResizing)
 			{
 				_bResizing = false;
-				PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
+				PushEvent(UserEvent::PopCursor, cursor);
 			}
 			else if (_bHovering)
 			{
 				_bHovering = false;
-				PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
+				PushEvent(UserEvent::PopCursor, cursor);
 			}
 
 			if (event.button.clicks == 2)
@@ -174,7 +185,7 @@ namespace fig::gui
 				{
 					_bHovering = false;
 					_bResizing = false;
-					PushEvent(UserEvent::PopCursor, Cursor::ResizeHorizontal);
+					PushEvent(UserEvent::PopCursor, cursor);
 					if (_fnOnClick)
 						_fnOnClick();
 					return EventResult::Handled;

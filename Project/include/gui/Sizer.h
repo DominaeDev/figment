@@ -21,7 +21,7 @@ namespace fig::gui
 			Expand = 1 << 4,
 			Fill = 1 << 5,
 			FixedSize = 1 << 6, // if prop == 0
-			FlexSize = 1 << 7,	// if prop < 0
+			Greedy = 1 << 7,	// if prop < 0
 
 			AlignLeft = 1 << 10,
 			AlignRight = 1 << 11,

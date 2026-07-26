@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/ImageViewport.h"
 #include "gui/TexturedBorderRenderer.h"
+#include "gui/ResizeHandle.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
@@ -19,6 +20,17 @@ namespace fig::gui
  
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, CornerSize);
 		pBorder->SetColor(Color::LineColor);
+
+		_pResizeHandle = CreateControl<ResizeHandle>(Direction::South);
+		_pResizeHandle->EnableDrawHandle(false);
+		_pResizeHandle->SetDelegate([this](fig::coord size) { 
+			size = std::clamp(((size + 10) / 20) * 20, 240, 640);
+			if (size != GetHeight())
+			{
+				SetHeight(size);
+				InvalidateParentLayout();
+			}
+		});
 	}
 
 	void ImageViewport::OnRender(fig::renderer_ptr pRenderer)
@@ -304,5 +316,9 @@ namespace fig::gui
 	void ImageViewport::OnSize()
 	{
 		SetDirty();
+
+		if (_pResizeHandle)
+			_pResizeHandle->FillParent();
 	}
+
 }

@@ -80,10 +80,10 @@ namespace fig::Constants
 		{
 			constexpr fig::coord HeaderHeight = 48;
 			constexpr fig::coord FooterHeight = 80;
-			constexpr fig::coord Width = 256;
+			constexpr fig::coord Width = 260;
 		}
 
-		namespace ChatSidePanel
+		namespace InfoPanel
 		{
 			constexpr fig::coord DefaultWidth = 340;
 			constexpr std::array<fig::coord, 12> Widths { 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, };

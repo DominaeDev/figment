@@ -9,7 +9,7 @@
 #include "gui/StatusBar.h"
 #include "gui/AppResources.h"
 #include "gui/VariableList.h"
-#include "gui/ChatSidePanel.h"
+#include "gui/InfoPanel.h"
 #include "gui/ChatBackground.h"
 #include "app/AppState.h"
 #include "chat/ChatSession.h"
@@ -66,7 +66,7 @@ namespace fig::gui
 		pStaticText->SetBackgroundColor(fig::color { 255, 255, 0, SDL_ALPHA_OPAQUE });
 		pStaticText->SetVisible(false);
 
-		_pSidePanel = CreateControl<ChatSidePanel>();
+		_pInfoPanel = CreateControl<InfoPanel>();
 		_pChatScroll = centerArea->CreateControl<ChatScroll>();
 
 		_pTextBox = centerArea->CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi, TextBox::Flag::Autosize });
@@ -80,7 +80,7 @@ namespace fig::gui
 
 		auto mainSizer = SetSizer<HorizontalSizer>();
 		mainSizer->Add(_pBackground, -1, Sizer::Fill);
-		mainSizer->Add(_pSidePanel, 0, Sizer::Expand);
+		mainSizer->Add(_pInfoPanel, 0, Sizer::Expand);
 
 		auto bgSizer = _pBackground->SetSizer<HorizontalSizer>();
 		bgSizer->AddStretchSpacer();
@@ -161,12 +161,12 @@ namespace fig::gui
 			// Set portrait
 			if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindImageAsset(_pSession->GetCharacterIdOf(Role::Bot1), fig::io::ImageType::LargePortrait))
 			{
-				_pSidePanel->SetImage((*try_portrait).id);
+				_pInfoPanel->SetImage((*try_portrait).id);
 				_pBackground->SetImage((*try_portrait).id);
 			}
 			else
 			{
-				_pSidePanel->ClearImage();
+				_pInfoPanel->ClearImage();
 			}
 
 			_bStartedChat = true;

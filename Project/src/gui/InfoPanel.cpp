@@ -1,17 +1,19 @@
 #include <pch.h>
-#include "gui/ChatSidePanel.h"
+#include "gui/InfoPanel.h"
 #include "gui/AppResources.h"
 #include "gui/LineBorderRenderer.h"
 #include "gui/KeyboardMods.h"
 #include "gui/ImageWithMask.h"
 #include "gui/ImageViewport.h"
 #include "gui/ResizeHandle.h"
+#include "gui/TexturedBorderRenderer.h"
+#include "gui/CharacterDetailsPanel.h"
 
 namespace fig::gui
 {
-	ChatSidePanel::ChatSidePanel(ControlPtr pParent) : Panel(pParent)
+	InfoPanel::InfoPanel(ControlPtr pParent) : Panel(pParent)
 	{
-		SetWidth(Constants::GUI::ChatSidePanel::DefaultWidth);
+		SetWidth(Constants::GUI::InfoPanel::DefaultWidth);
 		SetBackgroundColor(Color::SidePanelBackground);
 
 		_pExpandedRoot = CreateControl<Area>();
@@ -28,15 +30,18 @@ namespace fig::gui
 		_pCollapseButton->SetDelegate([this]() { _bExpanded ? Collapse() : Expand(); });
 
 		_pViewport = _pExpandedRoot->CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
-		_pViewport->SetMaxSize(-1, 600);
+		_pViewport->SetHeight(600);
 
+		auto pDetailsPanel = _pExpandedRoot->CreateControl<CharacterDetailsPanel>();
+		
 		_pBottomPanel = _pExpandedRoot->CreateControl<Panel>();
 		_pBottomPanel->SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::North);
-		_pBottomPanel->SetSize(-1, 180);
+		_pBottomPanel->SetHeight(180);
 
 		auto pMainSizer = _pExpandedRoot->SetSizer<VerticalSizer>();
-		pMainSizer->Add(_pBottomPanel, 0, Sizer::Fill | Sizer::FixedSize, _pBottomPanel->GetHeight());
-		pMainSizer->Add(_pViewport, -1, Sizer::Fill | Sizer::All, 6);
+		pMainSizer->Add(_pViewport, -1, Sizer::Expand | Sizer::Greedy | Sizer::All, 6);
+		pMainSizer->Add(pDetailsPanel, -1, Sizer::Fill | Sizer::Right | Sizer::Left | Sizer::Bottom, 6);
+		pMainSizer->Add(_pBottomPanel, 0, Sizer::Expand);
 
 		_pResizeHandle = CreateControl<ResizeHandle>(Direction::West);
 		_pResizeHandle->SetDelegate([this](fig::coord size) { Resize(size); });
@@ -46,16 +51,7 @@ namespace fig::gui
 		Expand();
 	}
 
-	void ChatSidePanel::OnAfterLayout()
-	{
-		constexpr fig::coord kGradientSize = 8;
-		_pGradient->SetSize(kGradientSize, GetHeight());
-
-		_pViewport->SetY(6);
-		_pBottomPanel->SetY(GetHeight() - _pBottomPanel->GetHeight());
-	}
-
-	EventResult ChatSidePanel::OnEvent(fig::event& event)
+	EventResult InfoPanel::OnEvent(fig::event& event)
 	{
 		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 		{
@@ -76,12 +72,12 @@ namespace fig::gui
 		{
 			if (Global::IsSignedIn())
 			{
-				Global::GetUserSettings().GetBool(UserSetting::ChatSidePanel_Collapsed) ? Collapse() : Expand();
+				Global::GetUserSettings().GetBool(UserSetting::InfoPanel_Collapsed) ? Collapse() : Expand();
 
 				if (_bExpanded)
 				{
-					auto size = Global::GetUserSettings().GetInt(UserSetting::ChatSidePanel_Width, Constants::GUI::ChatSidePanel::DefaultWidth);
-					fig::coord closestWidth = *std::ranges::min_element(Constants::GUI::ChatSidePanel::Widths, {}, [size](fig::coord width) { return std::abs(width - size); });
+					auto size = Global::GetUserSettings().GetInt(UserSetting::InfoPanel_Width, Constants::GUI::InfoPanel::DefaultWidth);
+					fig::coord closestWidth = *std::ranges::min_element(Constants::GUI::InfoPanel::Widths, {}, [size](fig::coord width) { return std::abs(width - size); });
 					SetWidth(closestWidth);
 					EventResult::Continue;
 				}
@@ -91,7 +87,7 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
-	void ChatSidePanel::Expand() noexcept
+	void InfoPanel::Expand() noexcept
 	{
 		if (_bExpanded)
 			return;
@@ -99,13 +95,13 @@ namespace fig::gui
 
 		if (Global::IsSignedIn())
 		{
-			Global::GetUserSettings().SetBool(UserSetting::ChatSidePanel_Collapsed, false);
-			auto size = Global::GetUserSettings().GetInt(UserSetting::ChatSidePanel_Width, Constants::GUI::ChatSidePanel::DefaultWidth);
-			fig::coord closestWidth = *std::ranges::min_element(Constants::GUI::ChatSidePanel::Widths, {}, [size](fig::coord width) { return std::abs(width - size); });
+			Global::GetUserSettings().SetBool(UserSetting::InfoPanel_Collapsed, false);
+			auto size = Global::GetUserSettings().GetInt(UserSetting::InfoPanel_Width, Constants::GUI::InfoPanel::DefaultWidth);
+			fig::coord closestWidth = *std::ranges::min_element(Constants::GUI::InfoPanel::Widths, {}, [size](fig::coord width) { return std::abs(width - size); });
 			SetWidth(closestWidth);
 		}
 		else
-			SetWidth(Constants::GUI::ChatSidePanel::DefaultWidth);
+			SetWidth(Constants::GUI::InfoPanel::DefaultWidth);
 
 		SetBackgroundColor(Color::SidePanelBackground);
 
@@ -118,14 +114,14 @@ namespace fig::gui
 		PushEvent(UserEvent::SidePanelResized);
 	}
 
-	void ChatSidePanel::Collapse() noexcept
+	void InfoPanel::Collapse() noexcept
 	{
 		if (not _bExpanded)
 			return;
 		_bExpanded = false;
 
 		if (Global::IsSignedIn())
-			Global::GetUserSettings().SetBool(UserSetting::ChatSidePanel_Collapsed, true);
+			Global::GetUserSettings().SetBool(UserSetting::InfoPanel_Collapsed, true);
 
 		SetWidth(42);
 		SetBackgroundColor(Color::AppBackground);
@@ -139,24 +135,24 @@ namespace fig::gui
 		PushEvent(UserEvent::SidePanelResized);
 	}
 
-	void ChatSidePanel::SetImage(const fig::uuid& assetId)
+	void InfoPanel::SetImage(const fig::uuid& assetId)
 	{
 		if (auto try_image = Global::GetUserContent().GetTexture(assetId, GetSDLRenderer()))
 			_pViewport->SetTexture((*try_image).get());
 	}
 
-	void ChatSidePanel::ClearImage() noexcept
+	void InfoPanel::ClearImage() noexcept
 	{
 		_pViewport->SetTexture(nullptr);
 	}
 
-	void ChatSidePanel::OnSize()
+	void InfoPanel::OnSize()
 	{
 		if (_pResizeHandle)
 			_pResizeHandle->FillParent();
 	}
 
-	void ChatSidePanel::Resize(fig::coord size) noexcept
+	void InfoPanel::Resize(fig::coord size) noexcept
 	{
 		if (_bExpanded and size < 80)
 			Collapse();
@@ -165,15 +161,24 @@ namespace fig::gui
 		
 		if (_bExpanded)
 		{
-			fig::coord closestWidth = *std::ranges::min_element(Constants::GUI::ChatSidePanel::Widths, {}, [size](fig::coord width) { return std::abs(width - size); });
+			fig::coord closestWidth = *std::ranges::min_element(Constants::GUI::InfoPanel::Widths, {}, [size](fig::coord width) { return std::abs(width - size); });
 
 			if (GetWidth() != closestWidth)
 			{
 				SetWidth(closestWidth);
-				Global::GetUserSettings().SetInt(UserSetting::ChatSidePanel_Width, closestWidth);
+				Global::GetUserSettings().SetInt(UserSetting::InfoPanel_Width, closestWidth);
 				PushEvent(UserEvent::SidePanelResized);
 			}
 		}
+	}
+
+	void InfoPanel::OnAfterLayout()
+	{
+		constexpr fig::coord kGradientSize = 8;
+		_pGradient->SetSize(kGradientSize, GetHeight());
+
+//		_pViewport->SetY(6);
+//		_pBottomPanel->SetY(GetHeight() - _pBottomPanel->GetHeight());
 	}
 
 }

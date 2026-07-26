@@ -599,7 +599,7 @@
     <ClCompile Include="src\data\ChatLog.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ChatSidePanel.cpp">
+    <ClCompile Include="src\gui\InfoPanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ImageViewport.cpp">
@@ -613,6 +613,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\ResizeHandle.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterDetailsPanel.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1423,7 +1426,7 @@
     <ClInclude Include="include\io\ContentUserSettings.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ChatSidePanel.h">
+    <ClInclude Include="include\gui\InfoPanel.h">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ImageViewport.h">
@@ -1440,6 +1443,9 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\fast_gaussian_blur\include\fast_gaussian_blur_template.h">
       <Filter>Source Files\Third-party\fast_gaussian_blur</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterDetailsPanel.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,8 +3,6 @@
 #include "gui/HomeScreen.h"
 #include "gui/ChatScreen.h"
 #include "gui/DebugScreen.h"
-#include "gui/ChatListingScreen.h"
-#include "gui/ChatSidePanel.h"
 #include "gui/ChatBackground.h"
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
@@ -17,6 +15,9 @@
 #include "data/ModelSettings.h"
 #include "data/ChatInstance.h"
 #include "util/DebugUtils.h"
+
+#include "gui/ChatListingScreen.h" //! @temp
+#include "gui/InfoPanel.h" //! @temp
 
 using namespace fig::io;
 using namespace fig::data;

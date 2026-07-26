@@ -32,9 +32,9 @@ void VerticalSizer::OnLayout(const fig::rect& parentRect)
 		}
 		else if (item.info.prop > 0)
 			totalProportion += item.info.prop;
-		else if ((item.info.flags & Sizer::FlexSize) != 0)
+		else if ((item.info.flags & Sizer::Greedy) != 0 and pControl != nullptr)
 		{
-			auto height = std::min(item.info.border, remainingHeight);
+			auto height = std::min(pControl->GetHeight() + item.info.topBorder() + item.info.bottomBorder(), remainingHeight);
 			flexItems[&item.target] = height;
 			remainingHeight -= height;
 		}
@@ -59,7 +59,7 @@ void VerticalSizer::OnLayout(const fig::rect& parentRect)
 		}
 		else if (info.prop > 0)
 			height = ceil_int(info.prop * remainingHeight / (float)totalProportion);
-		else if ((item.info.flags & Sizer::FlexSize) != 0)
+		else if ((item.info.flags & Sizer::Greedy) != 0)
 			height = flexItems[&item.target];
 		else
 			height = ceil_int(remainingHeight / (float)numStretch);

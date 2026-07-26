@@ -153,6 +153,7 @@ namespace fig::gui
 			child->OnParentMoved();
 			child->InvalidateLayout();
 		}
+
 		_bInvalidLayout = true;
 		OnSize();
 	}
@@ -281,14 +282,17 @@ namespace fig::gui
 
 	void LayoutElement::InvalidateParentLayout(bool bRefreshImmediately)
 	{
+		if (!_pParent)
+			return;
+
 		if (!_pSizer && _pParent != nullptr)
 			_pParent->InvalidateParentLayout();
 		else
 		{
-			if (bRefreshImmediately && _pSizer)
-				_pSizer->Layout(GetSizerRect());
+			if (bRefreshImmediately)
+				_pParent->LayoutNow();
 			else
-				InvalidateLayout();
+				_pParent->InvalidateLayout();
 		}
 	}
 

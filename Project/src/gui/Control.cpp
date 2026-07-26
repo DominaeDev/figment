@@ -155,11 +155,7 @@ namespace fig::gui
 		if (_bCulled)
 			return EventResult::Pass;
 
-		// Pass to self
-		auto result = OnEvent(event);
-		if (result == EventResult::Handled)
-			return EventResult::Handled;
-
+		EventResult result { EventResult::Pass };
 		// Pass to children (in reverse order)
 		for (auto it = _children.rbegin(); it != std::rend(_children); ++it)
 		{
@@ -171,6 +167,10 @@ namespace fig::gui
 					return EventResult::Handled;
 			}
 		}
+
+		// Pass to self
+		if (result != EventResult::Handled)
+			return OnEvent(event);
 		return result;
 	}
 

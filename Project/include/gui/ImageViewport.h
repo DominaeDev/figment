@@ -4,6 +4,8 @@
 
 namespace fig::gui
 {
+	class ResizeHandle;
+
 	class ImageViewport : public Control
 	{
 	public:
@@ -31,7 +33,7 @@ namespace fig::gui
 	protected:
 		bool _bRedraw = true;
 		bool _bRedrawAlpha = true;
-
+		
 		fig::point _offset {};
 		float _fZoom { 1.0f };
 		fig::point _imageSize {};
@@ -45,5 +47,7 @@ namespace fig::gui
 		fig::sdl::Texture _targetTexture;
 		fig::texture_ptr _pTexture = nullptr;
 		fig::texture_ptr _pMask = nullptr;
+
+		fig::observer_ptr<ResizeHandle> _pResizeHandle;
 	};
 }

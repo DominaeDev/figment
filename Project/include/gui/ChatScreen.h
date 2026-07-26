@@ -21,7 +21,7 @@ namespace fig::gui
 	class TextBox;
 	class VariableList;
 	class ChatScroll;
-	class ChatSidePanel;
+	class InfoPanel;
 	class ChatBackground;
 	class Image;
 
@@ -32,7 +32,7 @@ namespace fig::gui
 		ChatScreen(Frame* pParent);
 
 		void StartChat(const fig::chat::ChatStaging& staging, fig::uuid instanceID);
-		fig::observer_ptr<ChatSidePanel> GetSidePanel() { return _pSidePanel; }
+		fig::observer_ptr<InfoPanel> GetSidePanel() { return _pInfoPanel; }
 		fig::observer_ptr<ChatBackground> GetBackground() { return _pBackground; }
 
 	protected:
@@ -54,7 +54,7 @@ namespace fig::gui
 		fig::observer_ptr<Control> _pUnderScroll {};
 		fig::observer_ptr<TextBox> _pTextBox {};
 		fig::observer_ptr<VariableList> _pVariableList {};
-		fig::observer_ptr<ChatSidePanel> _pSidePanel {};
+		fig::observer_ptr<InfoPanel> _pInfoPanel {};
 		fig::observer_ptr<ChatBackground> _pBackground {};
 
 		float _fPollingCounter = 0.0f;
