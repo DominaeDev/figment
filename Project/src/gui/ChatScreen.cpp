@@ -159,6 +159,7 @@ namespace fig::gui
 			_pChatScroll->SetSession(_pSession);
 
 			// Set portrait
+			_pInfoPanel->SetSession(*_pSession);
 			if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindImageAsset(_pSession->GetCharacterIdOf(Role::Bot1), fig::io::ImageType::LargePortrait))
 			{
 				_pInfoPanel->SetImage((*try_portrait).id);

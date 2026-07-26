@@ -45,7 +45,6 @@ namespace fig::gui
 	{
 		ChatMessage* pMessage = AddMessage({}, role, msgType, message, true);
 		pMessage->SetName(name);
-		pMessage->SetActive(false);
 		_messages.push_back(MessageEntry {
 			.chatId = "dummy",
 			.role = role,

@@ -30,6 +30,7 @@ namespace fig::io
 			Character character;
 			character.shortName = card.data.name;
 			character.fullName = card.data.name;
+			character.creatorNotes = card.data.creator_notes;
 			character.AddAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
 			character.AddAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Public);
 			character.AppendTags(card.data.tags);

@@ -21,6 +21,7 @@ namespace fig::data
 				[](auto& value) { return Gender(value); }
 			},
 			Element { "Brief", &Character::brief },
+			Element { "CreatorNotes", &Character::creatorNotes },
 			Element { "Attributes", &Character::_attributes },
 			Element { "Tags", &Character::_tags },
 			Element { "SearchIndex", &Character::_searchIndex,
@@ -209,5 +210,12 @@ namespace fig::data
 			_context.SetFlag((fig::string)gender);
 
 		_bDirtyContext = false;
+	}
+
+	const fig::string& Character::GetDescription() const noexcept
+	{
+		if (not creatorNotes.empty())
+			return creatorNotes;
+		return brief;
 	}
 }

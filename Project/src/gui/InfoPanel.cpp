@@ -8,6 +8,11 @@
 #include "gui/ResizeHandle.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/CharacterDetailsPanel.h"
+#include "chat/ChatSession.h"
+
+using namespace fig::chat;
+using namespace fig::data;
+using namespace fig::io;
 
 namespace fig::gui
 {
@@ -32,7 +37,7 @@ namespace fig::gui
 		_pViewport = _pExpandedRoot->CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
 		_pViewport->SetHeight(600);
 
-		auto pDetailsPanel = _pExpandedRoot->CreateControl<CharacterDetailsPanel>();
+		_pCharacterDetails = _pExpandedRoot->CreateControl<CharacterDetailsPanel>();
 		
 		_pBottomPanel = _pExpandedRoot->CreateControl<Panel>();
 		_pBottomPanel->SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::North);
@@ -40,7 +45,7 @@ namespace fig::gui
 
 		auto pMainSizer = _pExpandedRoot->SetSizer<VerticalSizer>();
 		pMainSizer->Add(_pViewport, -1, SizerFlag::Expand | SizerFlag::Greedy | SizerFlag::All, 6);
-		pMainSizer->Add(pDetailsPanel, -1, SizerFlag::Fill | SizerFlag::Right | SizerFlag::Left | SizerFlag::Bottom, 6);
+		pMainSizer->Add(_pCharacterDetails, -1, SizerFlag::Fill | SizerFlag::Right | SizerFlag::Left | SizerFlag::Bottom, 6);
 		pMainSizer->Add(_pBottomPanel, 0, SizerFlag::Expand);
 
 		_pResizeHandle = CreateControl<ResizeHandle>(Direction::West);
@@ -181,4 +186,17 @@ namespace fig::gui
 //		_pBottomPanel->SetY(GetHeight() - _pBottomPanel->GetHeight());
 	}
 
+	void InfoPanel::SetSession(const ChatSession& session)
+	{
+		auto botId = session.GetCharacterIdOf(Role::Bot1);
+		if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindImageAsset(botId, ImageType::LargePortrait))
+			SetImage((*try_portrait).id);
+		else
+			ClearImage();
+
+		if (auto try_character = Global::GetUserContent().Get<Character>(botId))
+		{
+			_pCharacterDetails->SetCharacter(*try_character);
+		}
+	}
 }
