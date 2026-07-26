@@ -21,7 +21,7 @@ namespace fig::gui
 			"\n"
 			"Provident dolorem saepe quod qui exercitationem consequatur voluptate non. Optio labore consequatur ipsa. A expedita dicta sunt enim quae. Quia omnis magni eius rem est et sed eligendi.");
 
-		auto pTopSizer = SetSizer<VerticalListSizer>();
+		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->AddSpacer(2);
 		pTopSizer->Add(_pHeader, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, Margin);
 		pTopSizer->Add(_pDescription, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, Margin);

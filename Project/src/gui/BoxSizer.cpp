@@ -72,7 +72,7 @@ namespace fig::gui
 				size = std::min(size, max);
 
 			fig::rect allocatedRect = AllocateRect(size);
-			ApplyBorder(allocatedRect, info);
+			ApplyBorder(allocatedRect, item);
 			item.rect = allocatedRect;
 
 			if (pControl)
