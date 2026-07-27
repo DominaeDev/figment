@@ -133,9 +133,9 @@ namespace fig::io
 			{
 				return int_to_string(value);
 			}
-			else if constexpr (std::is_same_v<T, float>)
+			else if constexpr (std::is_same_v<T, fig::fixed>)
 			{
-				return float_to_string(value);
+				return fixed_to_string(value);
 			}
 			else if constexpr (std::is_same_v<T, fig::string>)
 			{
@@ -155,13 +155,13 @@ namespace fig::io
 				}
 				return r + "]";
 			}
-			else if constexpr (std::is_same_v<T, std::vector<float>>)
+			else if constexpr (std::is_same_v<T, std::vector<fig::fixed>>)
 			{
 				fig::string r = "[";
 				for (size_t i = 0; i < value.size(); ++i)
 				{
 					if (i) r += ", ";
-					r += float_to_string(value[i]);
+					r += fixed_to_string(value[i]);
 				}
 				return r + "]";
 			}
@@ -228,41 +228,20 @@ namespace fig::io
 			return result;
 		}
 
-		// Try int32_t list.
+		// Try fixed list.
 		{
-			std::vector<int32_t> result;
+			std::vector<fig::fixed> result;
 			result.reserve(items.size());
 			bool ok = true;
 			for (auto& item : items)
 			{
-				int32_t value {};
-				auto [ptr, err] = std::from_chars(item.data(), item.data() + item.size(), value);
-				if (err != std::errc {} or ptr != item.data() + item.size()) 
+				if (auto try_fixed = string_to_fixed(item))
+					result.push_back(try_fixed.value());
+				else
 				{ 
 					ok = false; 
 					break;
 				}
-				result.push_back(value);
-			}
-			if (ok) 
-				return result;
-		}
-
-		// Try float list.
-		{
-			std::vector<float> result;
-			result.reserve(items.size());
-			bool ok = true;
-			for (auto& item : items)
-			{
-				float value {};
-				auto [ptr, err] = std::from_chars(item.data(), item.data() + item.size(), value);
-				if (err != std::errc {} or ptr != item.data() + item.size())
-				{ 
-					ok = false; 
-					break;
-				}
-				result.push_back(value);
 			}
 			if (ok) 
 				return result;
@@ -294,20 +273,11 @@ namespace fig::io
 		if (str.size() >= 2 and str.front() == '"' and str.back() == '"')
 			return Unescape(str.substr(1, str.size() - 2));
 
-		// Try int32_t
+		// Try fixed
 		{
-			int32_t value {};
-			auto [ptr, err] = std::from_chars(str.data(), str.data() + str.size(), value);
-			if (err == std::errc {} and ptr == str.data() + str.size())
-				return value;
-		}
-
-		// Try float
-		{
-			float value {};
-			auto [ptr, err] = std::from_chars(str.data(), str.data() + str.size(), value);
-			if (err == std::errc {} and ptr == str.data() + str.size())
-				return value;
+			fig::fixed value {};
+			if (auto try_fixed = string_to_fixed(str))
+				return try_fixed.value();
 		}
 
 		// Plain unquoted string
@@ -333,50 +303,39 @@ namespace fig::io
 		}
 	}
 
-	void IniFile::Set(const fig::string& section, const fig::string& key, int32_t value)
+	void IniFile::Set(const fig::string_view section, const fig::string_view key, fig::fixed value)
 	{
 		SetValue(section, key, value);
 	}
 
-	void IniFile::Set(const fig::string& section, const fig::string& key, float value)
-	{
-		SetValue(section, key, value);
-	}
-
-	void IniFile::Set(const fig::string& section, const fig::string& key, fig::string value)
+	void IniFile::Set(const fig::string_view section, const fig::string_view key, fig::string value)
 	{
 		SetValue(section, key, std::move(value));
 	}
 
-	void IniFile::Set(const fig::string& section, const fig::string& key, std::vector<int32_t> value)
+	void IniFile::Set(const fig::string_view section, const fig::string_view key, std::vector<fig::fixed> value)
 	{
 		SetValue(section, key, std::move(value));
 	}
 
-	void IniFile::Set(const fig::string& section, const fig::string& key, std::vector<float> value)
+	void IniFile::Set(const fig::string_view section, const fig::string_view key, std::vector<fig::string> value)
 	{
 		SetValue(section, key, std::move(value));
 	}
 
-	void IniFile::Set(const fig::string& section, const fig::string& key, std::vector<fig::string> value)
+	[[nodiscard]] bool IniFile::HasKey(const fig::string_view section, fig::string_view key) const
 	{
-		SetValue(section, key, std::move(value));
+		if (auto itSection = _sections.find(section); itSection != _sections.end())
+			return itSection->second.values.contains(key);
+		return false;
 	}
 
-	[[nodiscard]] bool IniFile::HasKey(const fig::string& section, const fig::string& key) const
-	{
-		auto itSection = _sections.find(section);
-		if (itSection == _sections.end())
-			return false;
-		return itSection->second.values.contains(key);
-	}
-
-	[[nodiscard]] bool IniFile::HasSection(const fig::string& section) const
+	[[nodiscard]] bool IniFile::HasSection(const fig::string_view section) const
 	{
 		return _sections.contains(section);
 	}
 
-	void IniFile::Remove(const fig::string& section, const fig::string& key)
+	void IniFile::Remove(fig::string_view section, fig::string_view key)
 	{
 		auto itSection = _sections.find(section);
 		if (itSection == _sections.end())
@@ -386,7 +345,7 @@ namespace fig::io
 		std::erase(itSection->second.key_order, key);
 	}
 
-	void IniFile::RemoveSection(const fig::string& section)
+	void IniFile::RemoveSection(fig::string_view section)
 	{
 		_sections.erase(section);
 		std::erase(_section_order, section);
@@ -528,18 +487,21 @@ namespace fig::io
 		return Deserialize(content);
 	}
 
-	void IniFile::SetValue(const fig::string& section, const fig::string& key, Value value)
+	void IniFile::SetValue(fig::string_view section, fig::string_view key, Value value)
 	{
+		fig::string str_section { section };
+		fig::string str_key { key };
+
 		if (!_sections.contains(section))
 		{
-			_section_order.push_back(section);
-			_sections.emplace(section, Section {});
+			_section_order.push_back(str_section);
+			_sections.emplace(str_section, Section {});
 		}
 
-		auto& newSection = _sections[section];
-		if (!newSection.values.contains(key))
-			newSection.key_order.push_back(key);
-		newSection.values[key] = std::move(value);
+		auto& newSection = _sections[str_section];
+		if (!newSection.values.contains(str_key))
+			newSection.key_order.push_back(str_key);
+		newSection.values[str_key] = std::move(value);
 	}
 
 	

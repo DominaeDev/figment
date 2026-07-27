@@ -5,6 +5,8 @@
 #include "app/AppState.h"
 #include "app/AppSettings.h"
 
+using namespace fig::io;
+
 namespace fig::gui
 {
 	ScrollPanel::ScrollPanel(ControlPtr pParent, bool bScrollBar) : Control(pParent)
@@ -30,7 +32,7 @@ namespace fig::gui
 
 	static bool IsSmoothScrollingEnabled()
 	{
-		return Global::GetSettings().GetBool(AppSetting::SmoothScrolling);
+		return Global::GetSettings().GetBool(AppSetting::Interface::SmoothScrolling);
 	}
 
 	void ScrollPanel::Render(fig::renderer_ptr pRenderer)

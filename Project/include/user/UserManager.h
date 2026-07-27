@@ -30,7 +30,7 @@ namespace fig::user
 		bool SignOut();
 		
 		fig::io::UserContentManager& GetContent();
-		UserSettings& GetSettings();
+		fig::io::UserSettings& GetSettings();
 		const fig::auth::AuthKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };
 		
 		bool ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword);
@@ -55,6 +55,6 @@ namespace fig::user
 		fig::auth::AuthKey _signedInAuthKey {};
 
 		std::unique_ptr<fig::io::UserContentManager> _pContentManager;
-		std::unique_ptr<UserSettings> _pUserSettings;
+		std::unique_ptr<fig::io::UserSettings> _pUserSettings;
 	};
 }

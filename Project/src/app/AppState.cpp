@@ -22,7 +22,7 @@ namespace fig
 
 	static void BackendSignalHandler(const LLMStatus& signal);
 
-	static void RegisterCursor(fig::cursor, SDL_SystemCursor);
+	static void CreateCursor(fig::cursor, SDL_SystemCursor);
 
 	void Global::State::Init()
 	{
@@ -31,9 +31,9 @@ namespace fig
 		pAppSettings->Load();
 
 		// Load cursors
-		RegisterCursor(Cursor::Caret, SDL_SYSTEM_CURSOR_TEXT);
-		RegisterCursor(Cursor::ResizeHorizontal, SDL_SYSTEM_CURSOR_EW_RESIZE);
-		RegisterCursor(Cursor::ResizeVertical, SDL_SYSTEM_CURSOR_NS_RESIZE);
+		CreateCursor(SDL_SYSTEM_CURSOR_TEXT);
+		CreateCursor(SDL_SYSTEM_CURSOR_EW_RESIZE);
+		CreateCursor(SDL_SYSTEM_CURSOR_NS_RESIZE);
 
 		// Load user profiles
 		pUserManager = std::make_shared<fig::user::UserManager>();
@@ -44,13 +44,14 @@ namespace fig
 		pMacroProvider = std::make_unique<fig::text::MacroProvider>(fig::path { Constants::Paths::Macros });
 
 		// Create main frame
-		pMainWindow = std::make_shared<Window>(fig::strings::ApplicationTitle,
-			GetSettings().GetIntVector<2>(AppSetting::WindowSize)[0],
-			GetSettings().GetIntVector<2>(AppSetting::WindowSize)[1]);
+		auto windowSize = GetSettings().GetPoint2D(AppSetting::Interface::WindowSize);
+		pMainWindow = std::make_shared<Window>(fig::strings::ApplicationTitle, 
+			std::max(windowSize.x, Constants::GUI::WindowMinWidth), 
+			std::max(windowSize.y, Constants::GUI::WindowMinHeight));
 		pMainWindow->CreateFrame<MainFrame>();
 
 #if !_DEBUG
-		if (GetSettings().GetBool(AppSetting::WindowMaximized))
+		if (GetSettings().GetBool(AppSetting::Interface::WindowMaximized))
 			SDL_MaximizeWindow(pMainWindow->GetSDLWindow().get());
 #endif
 
@@ -78,11 +79,11 @@ namespace fig
 		pSystemCursors.reset();
 	}
 
-	void Global::State::RegisterCursor(fig::cursor cursor, SDL_SystemCursor sdl_cursor)
+	void Global::State::CreateCursor(SDL_SystemCursor cursor)
 	{
 		if (not (bool)pSystemCursors)
 			pSystemCursors = std::make_unique<std::map<fig::cursor, fig::sdl::Cursor>>();
-		(*pSystemCursors)[cursor] = std::move(fig::sdl::Cursor(sdl_cursor));
+		(*pSystemCursors)[(fig::cursor)cursor] = std::move(fig::sdl::Cursor(cursor));
 	}
 
 	Global::State* Global::CreateState()

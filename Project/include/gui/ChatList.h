@@ -27,8 +27,8 @@ namespace fig::gui
 		void ShowChats(const fig::cref_vector<fig::io::Asset>& chats);
 
 	private:
-		void Sort(SortBy sortBy, OrderBy orderBy);
-		void Filter(ChatFilterFlags filterBy, const fig::string& search_string);
+		void Sort(fig::io::SortBy sortBy, fig::io::OrderBy orderBy);
+		void Filter(fig::io::ChatFilterFlags filterBy, const fig::string& search_string);
 		
 		enum class TimeBucket
 		{
@@ -50,7 +50,7 @@ namespace fig::gui
 			TimeBucket timeBucket;
 			bool filtered { false };
 
-			bool MatchesFlags(fig::ChatFilterFlags filter) noexcept;
+			bool MatchesFlags(fig::io::ChatFilterFlags filter) noexcept;
 		};
 
 		static TimeBucket GetTimeBucket(fig::timestamp then, fig::timestamp now) noexcept;

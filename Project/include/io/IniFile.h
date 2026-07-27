@@ -27,29 +27,25 @@ namespace fig::io
 	{
 	public:
 		using Value = std::variant<
-			int32_t,
-			float,
+			fig::fixed,
 			fig::string,
-			std::vector<int32_t>,
-			std::vector<float>,
+			std::vector<fig::fixed>,
 			std::vector<fig::string>
 		>;
 
-		void Set(const fig::string& section, const fig::string& key, int32_t value);
-		void Set(const fig::string& section, const fig::string& key, float value);
-		void Set(const fig::string& section, const fig::string& key, fig::string value);
-		void Set(const fig::string& section, const fig::string& key, std::vector<int32_t> value);
-		void Set(const fig::string& section, const fig::string& key, std::vector<float> value);
-		void Set(const fig::string& section, const fig::string& key, std::vector<fig::string> value);
+		void Set(const fig::string_view section, const fig::string_view key, fig::fixed value);
+		void Set(const fig::string_view section, const fig::string_view key, fig::string value);
+		void Set(const fig::string_view section, const fig::string_view key, std::vector<fig::fixed> value);
+		void Set(const fig::string_view section, const fig::string_view key, std::vector<fig::string> value);
 
 		template<typename T>
-		[[nodiscard]] std::expected<T, IniError> Get(const fig::string& section, const fig::string& key) const
+		[[nodiscard]] std::expected<T, IniError> Get(fig::string_view section, fig::string_view key) const
 		{
-			auto itSection = _sections.find(fig::string(section));
+			auto itSection = _sections.find(fig::string_view(section));
 			if (itSection == _sections.end())
 				return std::unexpected(IniError::SectionNotFound);
 
-			auto itKey = itSection->second.values.find(fig::string(key));
+			auto itKey = itSection->second.values.find(fig::string_view(key));
 			if (itKey == itSection->second.values.end())
 				return std::unexpected(IniError::KeyNotFound);
 
@@ -63,42 +59,42 @@ namespace fig::io
 		template<typename T>
 		static std::optional<T> Coerce(const Value& val)
 		{
-			if (const T* exact = std::get_if<T>(&val))
-				return *exact;
+			if constexpr (std::is_same_v<T, bool>)
+			{
+				if (const auto* str_val = std::get_if<fig::string>(&val))
+					return string_to_bool(*str_val);
+			}
+			else
+			{
+				if (const T* exact = std::get_if<T>(&val))
+					return *exact;
+			}
 
-			else if constexpr (std::is_same_v<T, float>)
+			if constexpr (std::is_same_v<T, std::string>)
 			{
-				if (const auto* int_val = std::get_if<int32_t>(&val))
-					return static_cast<float>(*int_val);
-			}
-			else if constexpr (std::is_same_v<T, int32_t>)
-			{
-				if (const auto* float_val = std::get_if<float>(&val))
-					return static_cast<int32_t>(*float_val);
-			}
-			else if constexpr (std::is_same_v<T, std::string>)
-			{
-				if (const auto* int_val = std::get_if<int32_t>(&val))
-					return int_to_string(*int_val);
-				if (const auto* float_val = std::get_if<float>(&val))
-					return float_to_string(*float_val);
+				if (const auto* fixed_val = std::get_if<fig::fixed>(&val))
+					return fixed_to_string(*fixed_val);
 			}
 
 			return std::nullopt;
 		}
 
-		[[nodiscard]] bool HasKey(const fig::string& section, const fig::string& key) const;
-		[[nodiscard]] bool HasSection(const fig::string& section) const;
+		[[nodiscard]] bool HasKey(const fig::string_view section, fig::string_view key) const;
+		[[nodiscard]] bool HasSection(const fig::string_view section) const;
 
-		void Remove(const fig::string& section, const fig::string& key);
-		void RemoveSection(const fig::string& section);
+		void Remove(fig::string_view section, fig::string_view key);
+		void RemoveSection(fig::string_view section);
 		void Clear();
 
 		[[nodiscard]] std::expected<void, IniError> Load(const fig::path& path);
 		[[nodiscard]] std::expected<void, IniError> Save(const fig::path& path) const;
 
 	private:
-		void SetValue(const fig::string& section, const fig::string& key, Value value);
+		void SetValue(const fig::string& section, const fig::string& key, Value value)
+		{
+			SetValue(fig::string_view { section }, fig::string_view { key }, value);
+		}
+		void SetValue(const fig::string_view section, const fig::string_view key, Value value);
 		[[nodiscard]] fig::string Serialize() const;
 		[[nodiscard]] std::expected<void, IniError> Deserialize(const fig::string& content);
 
@@ -106,10 +102,10 @@ namespace fig::io
 		struct Section
 		{
 			std::vector<fig::string> key_order;
-			std::map<fig::string, Value> values;
+			std::map<fig::string, Value, std::less<>> values;
 		};
 
 		std::vector<fig::string> _section_order;
-		std::map<fig::string, Section> _sections;
+		std::map<fig::string, Section, std::less<>> _sections;
 	};
 }

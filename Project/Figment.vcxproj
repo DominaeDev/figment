@@ -241,6 +241,7 @@
     <ClCompile Include="src\io\FileStream.cpp" />
     <ClCompile Include="src\io\FileUtility.cpp" />
     <ClCompile Include="src\io\IniFile.cpp" />
+    <ClCompile Include="src\io\SettingsCollection.cpp" />
     <ClCompile Include="src\io\XmlReader.cpp" />
     <ClCompile Include="src\io\XmlWriter.cpp" />
     <ClCompile Include="src\llm\LLMContext.cpp" />
@@ -506,7 +507,7 @@
     <ClInclude Include="include\io\IniFile.h" />
     <ClInclude Include="include\io\XmlData.h" />
     <ClInclude Include="include\io\Serialization.h" />
-    <ClInclude Include="include\io\Settings.h" />
+    <ClInclude Include="include\io\SettingsCollection.h" />
     <ClInclude Include="include\io\Xml.h" />
     <ClInclude Include="include\io\XmlReader.h" />
     <ClInclude Include="include\io\XmlSerialize.h" />

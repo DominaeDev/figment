@@ -9,6 +9,8 @@
 #include "gui/ResizeHandle.h"
 #include "gui/Menu.h"
 
+using namespace fig::io;
+
 namespace fig::gui
 {
 	SidePanel::SidePanel(ControlPtr pParent) : Control(pParent)
@@ -141,7 +143,7 @@ namespace fig::gui
 		{
 			_pUserWidget->SetUser(GetUserData<fig::user::UserProfile>(event));
 
-			Global::GetUserSettings().GetBool(UserSetting::SidePanel_Collapsed) ? Collapse() : Expand();
+			Global::GetUserSettings().GetBool(UserSetting::Interface::SidePanelCollapsed) ? Collapse() : Expand();
 			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::UserSignedOut))
@@ -179,7 +181,7 @@ namespace fig::gui
 		_pCollapsedRoot->Cull(true);
 
 		if (Global::IsSignedIn())
-			Global::GetUserSettings().SetBool(UserSetting::SidePanel_Collapsed, false);
+			Global::GetUserSettings().SetBool(UserSetting::Interface::SidePanelCollapsed, false);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->Add(_pExpandedRoot, -1, SizerFlag::Expand | SizerFlag::Fill);
@@ -198,7 +200,7 @@ namespace fig::gui
 		_pCollapsedRoot->Cull(false);
 
 		if (Global::IsSignedIn())
-			Global::GetUserSettings().SetBool(UserSetting::SidePanel_Collapsed, true);
+			Global::GetUserSettings().SetBool(UserSetting::Interface::SidePanelCollapsed, true);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->Add(_pCollapsedRoot, -1, SizerFlag::Expand | SizerFlag::Fill);

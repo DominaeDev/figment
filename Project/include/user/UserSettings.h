@@ -1,31 +1,46 @@
 #pragma once
 
-#include "io/Settings.h"
+#include "io/SettingsCollection.h"
 
-namespace fig
+namespace fig::io
 {
-	enum class UserSetting
+	namespace UserSetting
 	{
-		CharacterList_ShowTags,
-		CharacterList_HalfSizeCards,
-		CharacterList_Sorting,
-		CharacterList_Ordering,
-		CharacterList_Filtering,
-		ChatList_Sorting,
-		ChatList_Ordering,
-		ChatList_Filtering,
-		SidePanel_Collapsed,
-		InfoPanel_Collapsed,
-		InfoPanel_Width,
+		namespace Interface
+		{
+			constexpr fig::io::SettingKey SidePanelCollapsed	{ "Interface", "SidePanel.Collapsed" };
 
-		Clock,
-		ModelPreset,
+			namespace CharacterList
+			{
+				constexpr fig::io::SettingKey SmallCards		{ "Interface", "Characters.SmallCards" };
+				constexpr fig::io::SettingKey ShowTags			{ "Interface", "Characters.ShowTags" };
+				constexpr fig::io::SettingKey Sorting			{ "Interface", "Characters.Sorting" };
+				constexpr fig::io::SettingKey Ordering			{ "Interface", "Characters.Ordering" };
+				constexpr fig::io::SettingKey Filtering			{ "Interface", "Characters.Filter" };
+			}
 
-		Count,
-	};
+			namespace ChatList
+			{
+				constexpr fig::io::SettingKey Sorting			{ "Interface", "Chats.Sorting" };
+				constexpr fig::io::SettingKey Ordering			{ "Interface", "Chats.Ordering" };
+				constexpr fig::io::SettingKey Filtering			{ "Interface", "Chats.Filter" };
+			}
 
-	extern template class fig::io::SettingsCollection<UserSetting>;
-	using UserSettings = fig::io::SettingsCollection<UserSetting>;
+			namespace Chat
+			{
+				constexpr fig::io::SettingKey InfoPanelWidth		{ "Interface", "Chat.InfoPanel.Width" };
+				constexpr fig::io::SettingKey InfoPanelCollapsed	{ "Interface", "Chat.InfoPanel.Collapsed" };
+				constexpr fig::io::SettingKey ImageSize				{ "Interface", "Chat.InfoPanel.ImageSize" };
+			}
+
+		}
+		
+		namespace Settings
+		{
+			constexpr fig::io::SettingKey Clock			{ "Settings", "Clock" };
+			constexpr fig::io::SettingKey ModelPreset	{ "Settings", "ModelPreset" };
+		}
+	}
 
 	enum class SortBy
 	{
@@ -91,5 +106,16 @@ namespace fig
 
 	constexpr ChatFilterFlags DefaultChatFilterFlags {};
 
+	class UserSettings : public SettingsCollection
+	{
+	public:
+		explicit UserSettings(const fig::path& path) noexcept : SettingsCollection(path)
+		{
+			Init();
+		}
 
+		void Init() noexcept override;
+		FileError Load() noexcept override;
+		FileError Save() const noexcept override;
+	};
 }

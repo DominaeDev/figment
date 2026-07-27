@@ -8,11 +8,13 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
+using namespace fig::io;
+
 namespace fig::gui
 {
 	static ChatFilterFlags GetFiltering()
 	{
-		return Global::GetUserSettings().GetFlags<ChatFilterFlags>(UserSetting::ChatList_Filtering, DefaultChatFilterFlags, ChatFilterFlagMapping);
+		return Global::GetUserSettings().GetFlags<ChatFilterFlags>(UserSetting::Interface::ChatList::Filtering, DefaultChatFilterFlags, ChatFilterFlagMapping);
 	};
 
 	ChatListingScreen::ChatListingScreen(Frame* pParent) : Screen(pParent)
@@ -100,17 +102,17 @@ namespace fig::gui
 	void ChatListingScreen::ShowSortingMenu() noexcept
 	{
 		auto ChangeSorting = [this](SortBy sorting) {
-			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::ChatList_Sorting, sorting);
+			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Interface::ChatList::Sorting, sorting);
 			_pChatList->Reorder();
 		};
 
 		auto ChangeOrdering = [this](OrderBy ordering) {
-			Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::ChatList_Ordering, ordering);
+			Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Interface::ChatList::Ordering, ordering);
 			_pChatList->Reorder();
 		};
 
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::ChatList_Sorting, SortBy::Default);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::ChatList_Ordering, OrderBy::Default);
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Interface::ChatList::Sorting, SortBy::Default);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::ChatList::Ordering, OrderBy::Default);
 
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
@@ -125,8 +127,8 @@ namespace fig::gui
 		menu.AddSeparator();
 		menu.AddItem("Reset")
 			.SetDelegate([this] {
-				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::ChatList_Sorting, SortBy::Default);
-				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::ChatList_Ordering, OrderBy::Default);
+				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Interface::ChatList::Sorting, SortBy::Default);
+				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Interface::ChatList::Ordering, OrderBy::Default);
 				_pChatList->Reorder();
 			});
 
@@ -136,7 +138,7 @@ namespace fig::gui
 	void ChatListingScreen::ShowFilteringMenu() noexcept
 	{
 		auto SetFilter = [this](ChatFilterFlags filtering) {
-			Global::GetUserSettings().SetFlags<ChatFilterFlags>(UserSetting::ChatList_Filtering, filtering, ChatFilterFlagMapping);
+			Global::GetUserSettings().SetFlags<ChatFilterFlags>(UserSetting::Interface::ChatList::Filtering, filtering, ChatFilterFlagMapping);
 			_pChatList->Reorder();
 			_pChatList->ScrollTo(0, false);
 			RefreshFilterButton();
@@ -145,7 +147,7 @@ namespace fig::gui
 		auto ToggleFilter = [this](ChatFilterFlag flag) {
 			auto filtering = GetFiltering();
 			filtering.Flip(flag);
-			Global::GetUserSettings().SetFlags<ChatFilterFlag>(UserSetting::ChatList_Filtering, filtering, ChatFilterFlagMapping);
+			Global::GetUserSettings().SetFlags<ChatFilterFlag>(UserSetting::Interface::ChatList::Filtering, filtering, ChatFilterFlagMapping);
 			_pChatList->Reorder();
 			_pChatList->ScrollTo(0, false);
 			RefreshFilterButton();

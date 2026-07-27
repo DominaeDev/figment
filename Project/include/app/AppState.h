@@ -50,13 +50,13 @@ namespace fig
 			std::shared_ptr<fig::llm::LLMBackend> pLLMBackend;
 			std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
 			std::shared_ptr<fig::user::UserManager> pUserManager;
-			std::unique_ptr<fig::AppSettings> pAppSettings;
+			std::unique_ptr<fig::io::AppSettings> pAppSettings;
 			std::shared_ptr<fig::text::MacroProvider> pMacroProvider;
 			std::unique_ptr<std::map<fig::cursor, fig::sdl::Cursor>> pSystemCursors;
 
 			void Init();
 			void Release();
-			void RegisterCursor(fig::cursor cursor, SDL_SystemCursor sdl_cursor);
+			void CreateCursor(SDL_SystemCursor sdl_cursor);
 		};
 
 		static State* CreateState();
@@ -64,10 +64,10 @@ namespace fig
 
 		static fig::gui::Window& GetMainWindow();
 		static fig::llm::LLMBackend& GetLLMBackend();
-		static fig::AppSettings& GetSettings();
+		static fig::io::AppSettings& GetSettings();
 		
 		static fig::user::UserManager& GetUserManager();
-		static UserSettings& GetUserSettings();
+		static fig::io::UserSettings& GetUserSettings();
 		static fig::io::UserContentManager& GetUserContent();
 		static std::weak_ptr<fig::text::MacroProvider> GetMacroProvider();
 

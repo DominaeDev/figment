@@ -763,6 +763,11 @@ namespace fig
 		return output;
 	}
 
+	fig::string bool_to_string(bool value)
+	{
+		return value ? "true" : "false";
+	}
+
 	fig::string int_to_string(int32_t value)
 	{
 		char buf[16];
@@ -786,6 +791,11 @@ namespace fig
 		std::ostringstream os;
 		os << value;
 		return fig::string { os.str() };
+	}
+
+	bool string_to_bool(const fig::string_view& s, bool default_value)
+	{
+		return string_to_bool(s).value_or(default_value);
 	}
 
 	int32_t string_to_int(const fig::string_view& s, int32_t default_value)
@@ -813,7 +823,31 @@ namespace fig
 		is >> value;
 		if (!is.fail())
 			return value;
-		return fig::fixed { 0 };
+		return 0_fp;
+	}
+
+	std::optional<bool> string_to_bool(const fig::string_view& s)
+	{
+		if (s.empty())
+			return std::nullopt;
+
+		if (auto i = string_to_int(s); i.has_value() && i != 0)
+			return true;
+		
+		static const char* true_values[] { "true", "True", "TRUE", "yes", "Yes", "YES", 0 };
+		static const char* false_values[] { "false", "False", "FALSE", "no", "No", "NO", 0 };
+
+		for (int i = 0; true_values[i]; ++i)
+		{
+			if (s == true_values[i])
+				return true;
+		}
+		for (int i = 0; false_values[i]; ++i)
+		{
+			if (s == false_values[i])
+				return false;
+		}
+		return std::nullopt;
 	}
 
 	std::optional<int32_t> string_to_int(const fig::string_view& s)

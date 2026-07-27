@@ -193,12 +193,12 @@ namespace fig::gui
 	void ChatList::Reorder()
 	{
 		// Filter
-		auto filterBy = Global::GetUserSettings().GetFlags<ChatFilterFlags>(UserSetting::ChatList_Filtering, DefaultChatFilterFlags, ChatFilterFlagMapping);
+		auto filterBy = Global::GetUserSettings().GetFlags<ChatFilterFlags>(UserSetting::Interface::ChatList::Filtering, DefaultChatFilterFlags, ChatFilterFlagMapping);
 		Filter(filterBy, _filterString);
 
 		// Sort
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::ChatList_Sorting, SortBy::LastUsedAt);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::ChatList_Ordering, OrderBy::Default);
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Interface::ChatList::Sorting, SortBy::LastUsedAt);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::ChatList::Ordering, OrderBy::Default);
 		Sort(sortBy, orderBy);
 
 		DestroyChildren();
@@ -208,7 +208,7 @@ namespace fig::gui
 			| std::ranges::to<std::vector>()
 			| fig::group_by([](auto& it) { return it.timeBucket; });
 
-		Clock user_clock_setting = Global::GetUserSettings().GetEnum<Clock>(UserSetting::Clock, ClockMapping);
+		Clock user_clock_setting = Global::GetUserSettings().GetEnum<Clock>(UserSetting::Settings::Clock, ClockMapping);
 
 		for (auto& kvp : chatsByTime)
 		{

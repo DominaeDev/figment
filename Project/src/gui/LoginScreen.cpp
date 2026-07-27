@@ -10,6 +10,8 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
+using namespace fig::io;
+
 namespace fig::gui
 {
 	LoginScreen::LoginScreen(Frame* pParent) : Screen(pParent)

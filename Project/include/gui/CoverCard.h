@@ -35,7 +35,7 @@ namespace fig::gui
 		void SetHidden(bool bHidden);
 		inline bool IsHidden() const noexcept { return _bHidden; }
 		
-		bool MatchesFlags(FilterFlags filter) const noexcept;
+		bool MatchesFlags(fig::io::FilterFlags filter) const noexcept;
 		bool MatchesSearch(const SearchQuery& query) const noexcept;
 
 		const fig::uuid& GetAssetID() const { return _assetId; }

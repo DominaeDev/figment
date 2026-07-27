@@ -244,12 +244,12 @@ namespace fig::gui
 	void CardList::Reorder()
 	{
 		// Filter
-		auto filterBy = Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::CharacterList_Filtering, DefaultFilterFlags, FilterFlagMapping);
+		auto filterBy = Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, DefaultFilterFlags, FilterFlagMapping);
 		Filter(_cards, filterBy, _filterString);
 
 		// Sort
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::CharacterList_Sorting, SortBy::Default);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::CharacterList_Ordering, OrderBy::Default);
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Interface::CharacterList::Sorting, SortBy::Default);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::CharacterList::Ordering, OrderBy::Default);
 		Sort(_cards, sortBy, orderBy);
 
 		// Move visible cards to front

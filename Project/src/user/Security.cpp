@@ -82,7 +82,7 @@ namespace fig::auth
 
 	static fig::bytes SimpleHash(fig::string password, fig::auth::AuthSalt salt)
 	{
-		size_t seed;
+		size_t seed {};
 		fig::Hash hash = GetHash(password);
 		hash = HashCombine(hash, GetHash(salt), seed);
 		return hash.to_bytes();
@@ -90,7 +90,7 @@ namespace fig::auth
 
 	static fig::bytes SimpleHash(fig::byte_span data, fig::auth::AuthSalt salt)
 	{
-		size_t seed;
+		size_t seed {};
 		fig::Hash hash = GetHash(data);
 		hash = HashCombine(hash, GetHash(salt), seed);
 		return hash.to_bytes();

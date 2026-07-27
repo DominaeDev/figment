@@ -10,13 +10,14 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
+using namespace fig::io;
 using namespace fig::user;
 
 namespace fig::gui
 {
 	static FilterFlags GetFiltering()
 	{ 
-		return Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::CharacterList_Filtering, DefaultFilterFlags, FilterFlagMapping);
+		return Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, DefaultFilterFlags, FilterFlagMapping);
 	};
 
 	HomeScreen::HomeScreen(Frame* pParent) : Screen(pParent)
@@ -106,12 +107,12 @@ namespace fig::gui
 
 	void HomeScreen::OnUserSignedIn(const fig::user::UserProfile& profile)
 	{
-		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::CharacterList_HalfSizeCards);
+		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards);
 		_pCardList->SetCardSize(bHalfSize ? CardSize::Half : CardSize::Full);
-		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::CharacterList_ShowTags));
+		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pGridButton->SetIcon(bHalfSize ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
 		_pGridButton->Toggle(bHalfSize, false);
-		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::CharacterList_ShowTags));
+		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
 	}
 
@@ -137,9 +138,9 @@ namespace fig::gui
 
 	void HomeScreen::ToggleCardSize() noexcept
 	{
-		bool bSmall = Global::GetUserSettings().GetBool(UserSetting::CharacterList_HalfSizeCards);
+		bool bSmall = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards);
 		bSmall = !bSmall;
-		Global::GetUserSettings().SetBool(UserSetting::CharacterList_HalfSizeCards, bSmall);
+		Global::GetUserSettings().SetBool(UserSetting::Interface::CharacterList::SmallCards, bSmall);
 
 		_pGridButton->SetIcon(bSmall ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
 		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
@@ -148,7 +149,7 @@ namespace fig::gui
 	void HomeScreen::ToggleTags() noexcept
 	{
 		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
-		Global::GetUserSettings().SetBool(UserSetting::CharacterList_ShowTags, _pCardList->IsTagsEnabled());
+		Global::GetUserSettings().SetBool(UserSetting::Interface::CharacterList::ShowTags, _pCardList->IsTagsEnabled());
 		_pToggleTagsButton->EnableBorder(_pCardList->IsTagsEnabled());
 	}
 
@@ -161,17 +162,17 @@ namespace fig::gui
 	void HomeScreen::ShowSortingMenu() noexcept
 	{
 		auto ChangeSorting = [this](SortBy sorting) {
-			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::CharacterList_Sorting, sorting);
+			Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Interface::CharacterList::Sorting, sorting);
 			_pCardList->Reorder();
 		};
 
 		auto ChangeOrdering = [this](OrderBy ordering) {
-			Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::CharacterList_Ordering, ordering);
+			Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Interface::CharacterList::Ordering, ordering);
 			_pCardList->Reorder();
 		};
 
-		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::CharacterList_Sorting, SortBy::Default);
-		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::CharacterList_Ordering, OrderBy::Default);
+		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Interface::CharacterList::Sorting, SortBy::Default);
+		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::CharacterList::Ordering, OrderBy::Default);
 
 		auto& menu = MainFrame::GetInstance().CreateMenu();
 		menu.AddCheckItem("Sort alphabetically", sortBy == SortBy::Name)
@@ -192,8 +193,8 @@ namespace fig::gui
 		menu.AddSeparator();
 		menu.AddItem("Reset")
 			.SetDelegate([this] { 
-				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::CharacterList_Sorting, SortBy::LastUsedAt);
-				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::CharacterList_Ordering, OrderBy::Default);
+				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Interface::CharacterList::Sorting, SortBy::LastUsedAt);
+				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Interface::CharacterList::Ordering, OrderBy::Default);
 				_pCardList->Reorder();
 			});
 
@@ -203,7 +204,7 @@ namespace fig::gui
 	void HomeScreen::ShowFilteringMenu() noexcept
 	{
 		auto SetFilter = [this](FilterFlags filtering) {
-			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::CharacterList_Filtering, filtering, FilterFlagMapping);
+			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, filtering, FilterFlagMapping);
 			_pCardList->Reorder();
 			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
 			_pCardList->ScrollTo(0, false);
@@ -212,7 +213,7 @@ namespace fig::gui
 		auto ToggleFilter = [this](FilterFlag flag) {
 			auto filtering = GetFiltering();
 			filtering.Flip(flag);
-			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::CharacterList_Filtering, filtering, FilterFlagMapping);
+			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, filtering, FilterFlagMapping);
 			_pCardList->Reorder();
 			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
 			_pCardList->ScrollTo(0, false);

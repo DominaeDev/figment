@@ -84,9 +84,9 @@ namespace fig
 
 	namespace Cursor
 	{
-		constexpr cursor Default = SDL_SYSTEM_CURSOR_DEFAULT;
-		constexpr cursor Caret = SDL_SYSTEM_CURSOR_TEXT;
-		constexpr cursor ResizeHorizontal = SDL_SYSTEM_CURSOR_EW_RESIZE;
-		constexpr cursor ResizeVertical = SDL_SYSTEM_CURSOR_NS_RESIZE;
+		constexpr cursor Default			= SDL_SYSTEM_CURSOR_DEFAULT;
+		constexpr cursor Caret				= SDL_SYSTEM_CURSOR_TEXT;
+		constexpr cursor ResizeHorizontal	= SDL_SYSTEM_CURSOR_EW_RESIZE;
+		constexpr cursor ResizeVertical		= SDL_SYSTEM_CURSOR_NS_RESIZE;
 	};
 }

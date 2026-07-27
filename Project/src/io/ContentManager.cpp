@@ -40,7 +40,7 @@ namespace fig::io
 
 	std::optional<ModelSettings> UserContentManager::GetActiveModelSettings() const noexcept
 	{
-		fig::uuid activePresetId = Global::GetUserSettings().GetUUID(UserSetting::ModelPreset);
+		fig::uuid activePresetId = Global::GetUserSettings().GetUUID(UserSetting::Settings::ModelPreset);
 		fig::optional_cref<Asset> settingsAsset;
 
 		if (not activePresetId.empty())

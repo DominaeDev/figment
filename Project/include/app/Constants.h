@@ -87,6 +87,7 @@ namespace fig::Constants
 		{
 			constexpr fig::coord DefaultWidth = 340;
 			constexpr std::array<fig::coord, 12> Widths { 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, };
+			constexpr fig::coord DefaultImageSize = 600;
 		}
 
 		namespace ChatList

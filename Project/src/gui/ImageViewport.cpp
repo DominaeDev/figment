@@ -3,6 +3,9 @@
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/ResizeHandle.h"
 #include "gui/AppResources.h"
+#include "user/UserSettings.h"
+
+using namespace fig::io;
 
 namespace fig::gui
 {
@@ -29,6 +32,8 @@ namespace fig::gui
 			{
 				SetHeight(size);
 				InvalidateParentLayout();
+
+				Global::GetUserSettings().SetInt(UserSetting::Interface::Chat::ImageSize, size);
 			}
 		});
 	}

@@ -620,6 +620,9 @@
     <ClCompile Include="src\gui\BoxSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClCompile>
+    <ClCompile Include="src\io\SettingsCollection.cpp">
+      <Filter>Source Files\Frontend\IO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1273,7 +1276,7 @@
     <ClInclude Include="include\io\FileUtility.h">
       <Filter>Source Files\Frontend\IO</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\Settings.h">
+    <ClInclude Include="include\io\SettingsCollection.h">
       <Filter>Source Files\Frontend\IO</Filter>
     </ClInclude>
     <ClInclude Include="include\user\Security.h">

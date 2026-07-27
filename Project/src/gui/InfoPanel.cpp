@@ -35,7 +35,7 @@ namespace fig::gui
 		_pCollapseButton->SetDelegate([this]() { _bExpanded ? Collapse() : Expand(); });
 
 		_pViewport = _pExpandedRoot->CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
-		_pViewport->SetHeight(600);
+		_pViewport->SetHeight(Constants::GUI::InfoPanel::DefaultImageSize);
 
 		_pCharacterDetails = _pExpandedRoot->CreateControl<CharacterDetailsPanel>();
 		
@@ -77,15 +77,18 @@ namespace fig::gui
 		{
 			if (Global::IsSignedIn())
 			{
-				Global::GetUserSettings().GetBool(UserSetting::InfoPanel_Collapsed) ? Collapse() : Expand();
+				Global::GetUserSettings().GetBool(UserSetting::Interface::Chat::InfoPanelCollapsed) ? Collapse() : Expand();
 
 				if (_bExpanded)
 				{
-					auto size = Global::GetUserSettings().GetInt(UserSetting::InfoPanel_Width, Constants::GUI::InfoPanel::DefaultWidth);
+					auto size = Global::GetUserSettings().GetInt(UserSetting::Interface::Chat::InfoPanelWidth, Constants::GUI::InfoPanel::DefaultWidth);
 					fig::coord closestWidth = *std::ranges::min_element(Constants::GUI::InfoPanel::Widths, {}, [size](fig::coord width) { return std::abs(width - size); });
 					SetWidth(closestWidth);
 					EventResult::Continue;
 				}
+
+				if (_pViewport)
+					_pViewport->SetHeight(Global::GetUserSettings().GetInt(UserSetting::Interface::Chat::ImageSize));
 			}
 		}
 
@@ -100,8 +103,8 @@ namespace fig::gui
 
 		if (Global::IsSignedIn())
 		{
-			Global::GetUserSettings().SetBool(UserSetting::InfoPanel_Collapsed, false);
-			auto size = Global::GetUserSettings().GetInt(UserSetting::InfoPanel_Width, Constants::GUI::InfoPanel::DefaultWidth);
+			Global::GetUserSettings().SetBool(UserSetting::Interface::Chat::InfoPanelCollapsed, false);
+			auto size = Global::GetUserSettings().GetInt(UserSetting::Interface::Chat::InfoPanelWidth, Constants::GUI::InfoPanel::DefaultWidth);
 			fig::coord closestWidth = *std::ranges::min_element(Constants::GUI::InfoPanel::Widths, {}, [size](fig::coord width) { return std::abs(width - size); });
 			SetWidth(closestWidth);
 		}
@@ -126,7 +129,7 @@ namespace fig::gui
 		_bExpanded = false;
 
 		if (Global::IsSignedIn())
-			Global::GetUserSettings().SetBool(UserSetting::InfoPanel_Collapsed, true);
+			Global::GetUserSettings().SetBool(UserSetting::Interface::Chat::InfoPanelCollapsed, true);
 
 		SetWidth(42);
 		SetBackgroundColor(Color::AppBackground);
@@ -171,7 +174,7 @@ namespace fig::gui
 			if (GetWidth() != closestWidth)
 			{
 				SetWidth(closestWidth);
-				Global::GetUserSettings().SetInt(UserSetting::InfoPanel_Width, closestWidth);
+				Global::GetUserSettings().SetInt(UserSetting::Interface::Chat::InfoPanelWidth, closestWidth);
 				PushEvent(UserEvent::SidePanelResized);
 			}
 		}
