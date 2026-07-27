@@ -16,6 +16,7 @@ namespace fig::chat
 		~ChatSession();
 
 		void Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceID);	
+		void Save();
 		void Shutdown();
 
 		inline const ChatStaging& GetStaging() const noexcept { return _staging; }
@@ -35,6 +36,7 @@ namespace fig::chat
 		fig::optional_ref<MessagePoller> GetPoller() noexcept;
 
 	protected:
+		bool _bInitialized { false };
 		ChatStaging _staging {};
 		ChatOptions _options {};
 		Context _context {};

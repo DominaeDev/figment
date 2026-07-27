@@ -18,19 +18,33 @@ namespace fig::chat
 
 	void ChatSession::Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceID)
 	{
+		if (_bInitialized)
+			return;
+
 		_options = options;
 		_staging = staging;
 		_staging.RefreshContext();
 
 		_messagePoller = std::make_unique<MessagePoller>();
 		_logger = std::make_unique<ChatLogger>(*this, chatInstanceID);
+		_bInitialized = true;
 	}
 
 	void ChatSession::Shutdown()
 	{
-		_logger->Save();
-		_logger.reset();
-		_messagePoller.reset();
+		if (_bInitialized)
+		{
+			_logger->Save();
+			_logger.reset();
+			_messagePoller.reset();
+			_bInitialized = false;
+		}
+	}
+
+	void ChatSession::Save()
+	{
+		if (_bInitialized)
+			_logger->Save();
 	}
 
 	fig::uuid ChatSession::GetCharacterIdOf(Role role) const

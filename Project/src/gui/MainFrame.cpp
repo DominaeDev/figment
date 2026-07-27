@@ -356,67 +356,7 @@ namespace fig::gui
 			}
 		}
 
-		if (IsUserEventWithData(event, UserEvent::LLMStatusUpdate))
-		{
-			SetStatusBar(GetUserData<fig::llm::LLMStatus>(event));
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMChatInitializing))
-		{
-			SetStatusBar(fig::strings::Status::InitializingChat);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMChatInitialized))
-		{
-			SetStatusBar(fig::strings::Status::ChatInitialized);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMChatInitializationFailure))
-		{
-			SetStatusBar(fig::strings::Status::FailedToInitializeChat);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMModelLoading))
-		{
-			SetStatusBar(fig::strings::Status::LoadingModel);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMModelLoaded))
-		{
-			SetStatusBar(fig::strings::Status::ModelLoaded);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMModelUnloaded))
-		{
-			SetStatusBar(fig::strings::Status::ModelUnloaded);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMModelLoadFailure))
-		{
-			SetStatusBar(fig::strings::Status::FailedToLoadModel);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMGenerationStarted))
-		{
-			SetStatusBar(fig::strings::Status::GeneratingResponse);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMRebuildingKVCache))
-		{
-			SetStatusBar(fig::strings::Status::RebuildingContext);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMGenerationComplete))
-		{
-			SetStatusBar(fig::strings::Status::Ready);
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::LLMModelUnloadRequest))
-		{
-			UnloadModel();
-			return EventResult::Continue;
-		}
-		else if (IsUserEvent(event, UserEvent::StartChat))
+		if (IsUserEvent(event, UserEvent::StartChat))
 		{
 			auto& characterId = GetUserData<fig::uuid>(event);
 			StartChat(characterId);
@@ -425,7 +365,6 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::Scrolling))
 		{
 			PopAllMenus();
-			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::NavigateToChatList))
 		{
@@ -440,28 +379,32 @@ namespace fig::gui
 				GetScreen<ChatListingScreen>(ScreenType::ChatListing)->ShowAllChats();
 			}
 			PopAllMenus();
-			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::ChangedScreen))
 		{
 			auto& screen = GetUserData1<ScreenType>(event);
 			switch (screen)
 			{
-				case ScreenType::Login:
-					ShowSidePanel(false);
-					break;
-				default:
-					ShowSidePanel(true);
-					break;
+			case ScreenType::Login:
+				ShowSidePanel(false);
+				break;
+			default:
+				ShowSidePanel(true);
+				break;
 			}
 			PopAllMenus();
-			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::SidePanelResized))
 		{
 			PopAllMenus();
 			InvalidateLayout();
-			return EventResult::Continue;
+		}
+		else if (HandleStatusBarEvents(event))
+		{
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelUnloadRequest))
+		{
+			UnloadModel();
 		}
 
 		if constexpr (Debugging)
@@ -474,9 +417,94 @@ namespace fig::gui
 			}
 		}
 
-		if (_pActiveScreen)
-			return _pActiveScreen->ProcessEvent(event);
+		/*if (IsBroadcastEvent(event))
+		{
+			// Pass to all screens
+			BroadcastEvent(event);
+		}
+		else*/
+		{
+			// Pass to active screen only
+			if (_pActiveScreen)
+				return _pActiveScreen->ProcessEvent(event);
+		}
+		
 		return EventResult::Pass;
+	}
+
+	bool MainFrame::HandleStatusBarEvents(fig::event& event)
+	{
+		if (IsUserEventWithData(event, UserEvent::LLMStatusUpdate))
+		{
+			SetStatusBar(GetUserData<fig::llm::LLMStatus>(event));
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMChatInitializing))
+		{
+			SetStatusBar(fig::strings::Status::InitializingChat);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMChatInitialized))
+		{
+			SetStatusBar(fig::strings::Status::ChatInitialized);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMChatInitializationFailure))
+		{
+			SetStatusBar(fig::strings::Status::FailedToInitializeChat);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelLoading))
+		{
+			SetStatusBar(fig::strings::Status::LoadingModel);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelLoaded))
+		{
+			SetStatusBar(fig::strings::Status::ModelLoaded);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelUnloaded))
+		{
+			SetStatusBar(fig::strings::Status::ModelUnloaded);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMModelLoadFailure))
+		{
+			SetStatusBar(fig::strings::Status::FailedToLoadModel);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMGenerationStarted))
+		{
+			SetStatusBar(fig::strings::Status::GeneratingResponse);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMRebuildingKVCache))
+		{
+			SetStatusBar(fig::strings::Status::RebuildingContext);
+			return true;
+		}
+		else if (IsUserEvent(event, UserEvent::LLMGenerationComplete))
+		{
+			SetStatusBar(fig::strings::Status::Ready);
+			return true;
+		}
+		return false;
+	}
+
+	EventResult MainFrame::BroadcastEvent(fig::event& event)
+	{
+		EventResult result { EventResult::Pass };
+		
+		// Pass to all screens
+		for (auto& kvp : _screensByType)
+		{
+			Screen* pScreen = kvp.second;
+			result = std::max(result, pScreen->ProcessEvent(event));
+			if (result == EventResult::Handled)
+				return EventResult::Handled;
+		}
+		return result;
 	}
 
 	bool MainFrame::StartChat(const fig::uuid& characterId)

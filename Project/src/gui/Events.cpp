@@ -12,4 +12,12 @@ namespace fig::gui
 		assert(UserEventBase);
 	}
 
+	bool IsBroadcastEvent(fig::event& event)
+	{
+		if (not IsUserEvent(event))
+			return false;
+		if (event.type >= SDLUserEvent(UserEvent::LLMStatusUpdate))
+			return true;
+		return false;
+	}
 }

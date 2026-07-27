@@ -77,6 +77,8 @@ namespace fig::gui
 		template<IsScreen T>
 		void RegisterScreen(ScreenType screen);
 		void UnregisterScreen(ScreenType screen);
+		EventResult BroadcastEvent(fig::event& event);
+		bool HandleStatusBarEvents(fig::event& event);
 
 		bool AutoSignIn() noexcept;
 		bool StartChat(const fig::uuid& characterId);

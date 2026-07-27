@@ -6,6 +6,22 @@ namespace fig::gui
 {
 	enum class UserEvent : uint32_t
 	{
+		/* UI events*/
+		PushCursor,
+		PopCursor,
+		MenuOpened,
+		MenuClosed,
+		Activated,
+		Deactivated,
+		Scrolling,
+		SidePanelResized,
+		NavigateToChatList,
+		StartChat,
+
+		DebugCharacter,
+
+		/* Broadcast events */
+
 		LLMStatusUpdate,
 		LLMModelLoading,
 		LLMModelLoadingProgress,
@@ -20,22 +36,10 @@ namespace fig::gui
 		LLMGenerationStarted,
 		LLMGenerationComplete,
 		LLMCompletedMessage,
-		LLMRebuildingKVCache, 
-
+		LLMRebuildingKVCache,
 		UserSignedIn,
 		UserSignedOut,
-		MenuOpened,
-		MenuClosed,
-		Activated,
-		Deactivated,
 		ChangedScreen,
-		Scrolling,
-		SidePanelResized,
-		StartChat,
-		NavigateToChatList,
-		DebugCharacter,
-		PushCursor,
-		PopCursor,
 
 		Count,
 	};
@@ -43,10 +47,11 @@ namespace fig::gui
 	void RegisterUserEvents();
 	extern uint32_t UserEventBase;
 
-	inline constexpr uint32_t SDLUserEvent(UserEvent e) { return UserEventBase + static_cast<uint32_t>(e); }
-	inline constexpr bool IsUserEvent(fig::event& event, UserEvent e) { return event.type == SDLUserEvent(e); }
-	inline constexpr bool IsUserEventWithData(fig::event& event, UserEvent e) { return event.type == SDLUserEvent(e) and event.user.data1 != 0; }
-	
+	inline uint32_t SDLUserEvent(UserEvent e) { return UserEventBase + static_cast<uint32_t>(e); }
+	inline bool IsUserEvent(fig::event& event, UserEvent e) { return event.type == SDLUserEvent(e); }
+	inline bool IsUserEventWithData(fig::event& event, UserEvent e) { return event.type == SDLUserEvent(e) and event.user.data1 != 0; }
+	inline bool IsUserEvent(fig::event& event) { return static_cast<uint32_t>(event.type) >= UserEventBase && static_cast<uint32_t>(event.type) < UserEventBase + static_cast<uint32_t>(UserEvent::Count); }
+
 	template <typename T>
 	inline constexpr const T& GetUserData(fig::event& event) { return *reinterpret_cast<T*>(event.user.data1); }
 	template <typename T>
@@ -59,6 +64,8 @@ namespace fig::gui
 	inline constexpr bool HasUserData(fig::event& event) { return (bool)event.user.data1; }
 	inline constexpr bool HasUserData1(fig::event& event) { return (bool)event.user.data1; }
 	inline constexpr bool HasUserData2(fig::event& event) { return (bool)event.user.data2; }
+
+	extern bool IsBroadcastEvent(fig::event& event);
 
 	inline void PushEvent(UserEvent eventType, int32_t code = 0)
 	{
@@ -114,4 +121,5 @@ namespace fig::gui
 		Continue,	// Handled, continue propagation
 		Handled,	// Handled, stop propagation
 	};
+
 }
