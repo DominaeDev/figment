@@ -111,7 +111,7 @@ namespace fig::io
 
 		void SetBool(SettingKey key, bool value) noexcept
 		{
-			SetValue<fig::string>(key, value ? "true" : "false");
+			SetValue<bool>(key, value);
 		}
 
 		void SetInt(SettingKey key, int32_t value) noexcept

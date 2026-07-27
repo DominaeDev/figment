@@ -10,6 +10,8 @@ namespace fig::io
 	{
 	public:
 		virtual ~IAssetCache() = default;
+		virtual bool Erase(const fig::uuid& id) = 0;
+		virtual void Clear() = 0;
 	};
 
 	template <typename T>
@@ -17,13 +19,12 @@ namespace fig::io
 	{
 	public:
 		virtual void Preload() = 0;
+		virtual void Insert(const fig::uuid& assetId, T&& value) = 0;
 		virtual optional_cref<T> Get(const fig::uuid& assetId) = 0;
 		virtual optional_ref<T> TryGet(const fig::uuid& assetId) = 0;
 		virtual optional_cref<T> TryGet(const fig::uuid& assetId) const = 0;
 		virtual std::map<fig::uuid, T>& GetAll() = 0;
 		virtual const std::map<fig::uuid, T>& GetAll() const = 0;
-		virtual bool Erase(const fig::uuid& id) = 0;
-		virtual void Clear() = 0;
 	};
 
 	template <typename T, AssetType A, DataFormat F, fixed_string LOG>
@@ -143,6 +144,11 @@ namespace fig::io
 		void Clear()
 		{
 			_assets.clear();
+		}
+
+		void Insert(const fig::uuid& assetId, T&& value)
+		{
+			_assets.emplace(assetId, std::move(value));
 		}
 
 	private:

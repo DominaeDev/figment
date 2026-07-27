@@ -293,6 +293,31 @@ namespace fig::io
 		return fig::nullref;
 	}
 
+	fig::cref_vector<Asset> AssetManager::FindChildrenOf(const fig::uuid& parentId) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		fig::cref_vector<Asset> children;
+		for (auto& kvp : _assets)
+		{
+			if (kvp.second.parent_id == parentId)
+				children.push_back(std::cref(kvp.second));
+		}
+		return children;
+	}
+
+	bool AssetManager::HasChildren(const fig::uuid& assetId) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		for (auto& kvp : _assets)
+		{
+			if (kvp.second.parent_id == assetId)
+				return true;
+		}
+		return false;
+	}
+
 	bool AssetManager::SaveModifiedAssets()
 	{
 		std::scoped_lock lock { _assetsMutex };
@@ -577,39 +602,46 @@ namespace fig::io
 	bool AssetManager::DeleteAsset(const fig::uuid& assetID) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return DeleteAsset_Internal(assetID);
+		std::set<fig::uuid> uniqueIds = FindRelatedAssets_Internal(assetID);
+		std::vector<fig::uuid> assetIds { uniqueIds.begin(), uniqueIds.end() };
+		return DeleteAssets_Internal(assetIds) != 0;
 	}
 
 	uint32_t AssetManager::DeleteAssets(std::span<fig::uuid> assetIDs) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		std::set<fig::uuid> allAssetIDs;
-		for (auto& assetID : assetIDs)
-			allAssetIDs.insert_range(FindRelatedAssets(assetID));
 
+		std::set<fig::uuid> uniqueIds;
+		for (auto& assetID : assetIDs)
+			uniqueIds.insert_range(FindRelatedAssets_Internal(assetID));
+
+		std::vector<fig::uuid> assetIds { uniqueIds.begin(), uniqueIds.end() };
+		return DeleteAssets_Internal(assetIds);
+	}
+
+	uint32_t AssetManager::DeleteAssets_Internal(std::span<fig::uuid> assetIDs) noexcept
+	{
 		uint32_t count = 0;
-		auto& db = GetDatabase();
-		for (auto& assetID : allAssetIDs)
+		for (auto& assetID : assetIDs)
 		{
-			DeleteAssetFile(assetID);
-			if (Success(db.DeleteAsset(assetID)))
+			if (DeleteAsset_Internal(assetID))
 				count++;
 		}
 		return count;
 	}
 
-	bool AssetManager::DeleteAsset_Internal(const fig::uuid& assetID) noexcept
+	bool AssetManager::DeleteAsset_Internal(fig::uuid assetID) noexcept
 	{
-		if (DeleteAssetFile(assetID))
+		auto& db = GetDatabase();
+		if (DeleteAssetFile_Internal(assetID) and Success(db.DeleteAsset(assetID)))
 		{
-			auto& db = GetDatabase();
-			db.DeleteAsset(assetID);
-			return false;
+			LogLn(std::format("Deleted asset {}", (fig::string)assetID));
+			return true;
 		}
 		return false;
 	}
 
-	bool AssetManager::DeleteAssetFile(const fig::uuid& assetID) noexcept
+	bool AssetManager::DeleteAssetFile_Internal(const fig::uuid& assetID) noexcept
 	{
 		auto itAsset = _assets.find(assetID);
 		if (itAsset == _assets.end())
@@ -643,7 +675,7 @@ namespace fig::io
 		return true;
 	}
 
-	std::set<fig::uuid> AssetManager::FindRelatedAssets(const fig::uuid& assetID) noexcept
+	std::set<fig::uuid> AssetManager::FindRelatedAssets_Internal(const fig::uuid& assetID) noexcept
 	{
 		std::set<fig::uuid> assetIDs;
 		std::set<fig::uuid> openList;
@@ -655,8 +687,7 @@ namespace fig::io
 		{
 			fig::uuid id = *openList.begin();
 			openList.erase(id);
-			auto itAsset = _assets.find(id);
-			if (itAsset == _assets.end())
+			if (auto it = _assets.find(id); it == _assets.end())
 				continue;
 
 			assetIDs.insert(id);
@@ -1166,5 +1197,51 @@ namespace fig::io
 					LogLn("Auto-saved");
 			}
 		}
+	}
+
+	std::set<fig::uuid> AssetManager::GetAssociatedAssets(const fig::uuid& assetId) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		std::set<fig::uuid> result;
+		std::set<fig::uuid> openList;
+
+		openList.insert(assetId);
+
+		if (auto try_asset = FindAsset_Internal(assetId))
+		{
+			auto& asset = *try_asset;
+			// References
+			for (uint8_t idx = static_cast<uint8_t>(MetaTag::ReferenceToCharacter); idx < static_cast<uint8_t>(MetaTag::ReferenceToUser); ++idx)
+			{
+				if (auto ref = asset.GetMeta<fig::uuid>(static_cast<MetaTag>(idx)))
+					openList.insert(*ref);
+			}
+			if (auto ref = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToUser))
+				openList.insert(*ref);
+			if (auto ref = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToScenario))
+				openList.insert(*ref);
+			if (auto ref = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToWorld))
+				openList.insert(*ref);
+		}
+
+		while (not openList.empty())
+		{
+			fig::uuid id = *openList.begin();
+			openList.erase(id);
+			if (id.empty())
+				continue;
+			if (auto it = _assets.find(id); it == _assets.end())
+				continue;
+
+			result.insert(id);
+
+			// Scan children
+			openList.insert_range(_assets
+				| std::views::filter([&id](auto const& kvp) { return kvp.second.parent_id == id; })
+				| std::views::transform([](auto const& kvp) -> fig::uuid { return kvp.second.id; }));
+		}
+
+		return result;
 	}
 }

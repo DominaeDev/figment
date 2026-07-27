@@ -205,8 +205,9 @@ namespace fig::gui
 
 		auto chatsByTime = _items
 			| std::views::filter([](auto& it) { return not it.filtered; })
+			| std::views::transform([](auto& it) { return &it; })
 			| std::ranges::to<std::vector>()
-			| fig::group_by([](auto& it) { return it.timeBucket; });
+			| fig::group_by([](auto it) { return it->timeBucket; });
 
 		Clock user_clock_setting = Global::GetUserSettings().GetEnum<Clock>(UserSetting::Settings::Clock, ClockMapping);
 
@@ -225,7 +226,7 @@ namespace fig::gui
 			// Chats
 			for (size_t i = 0uz; i < items.size(); i++)
 			{
-				auto& item = items[i];
+				auto& item = *items[i];
 
 				if (i > 0)
 					_pVerticalSizer->AddSpacer(Spacing);
@@ -237,7 +238,7 @@ namespace fig::gui
 					timeString = item.updatedAt.get_date_string();
 
 				auto pListItem = CreateControl<ChatListItem>(item.assetId, *item.chatLog, timeString);
-				pListItem->SetDelegate([this](auto& card) { Reorder(); });
+				pListItem->SetDelegate([this](ChatListItem& item, ChatListItemEvent event) { OnItemEvent(item, event); });
 				item.pListItem = pListItem;
 
 				_pVerticalSizer->Add(pListItem, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::Expand | SizerFlag::Right, 18);
@@ -251,5 +252,33 @@ namespace fig::gui
 		}
 
 		InvalidateLayout();
+	}
+
+	void ChatList::OnItemEvent(ChatListItem& item, ChatListItemEvent event)
+	{
+		switch (event)
+		{
+		case ChatListItemEvent::Refresh:
+			Reorder();
+			break;
+		case ChatListItemEvent::Delete:
+			DeleteChat(item);
+			break;
+		}
+	}
+
+	void ChatList::DeleteChat(ChatListItem& item)
+	{
+		if (auto try_item = std::ranges::find_if(_items, [&item](auto& i) { 
+			return i.pListItem.get() == &item;
+		}); try_item != std::ranges::end(_items))
+		{
+			if (Global::GetUserContent().DeleteAsset((*try_item).assetId))
+			{
+				DestroyChild((*try_item).pListItem);
+				_items.erase(try_item);
+				Reorder();
+			}
+		}
 	}
 }

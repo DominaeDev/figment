@@ -187,7 +187,7 @@ namespace fig::gui
 				.SetDelegate([this] {
 				Global::GetUserContent().MarkFavorite(_assetId, true);
 				ShowStar(true);
-				NotifyMetaUpdated();
+				NotifyUpdated();
 			});
 		}
 		else
@@ -196,7 +196,7 @@ namespace fig::gui
 				.SetDelegate([this] {
 				Global::GetUserContent().MarkFavorite(_assetId, false);
 				ShowStar(false);
-				NotifyMetaUpdated();
+				NotifyUpdated();
 			});
 		}
 
@@ -205,7 +205,7 @@ namespace fig::gui
 			menu.AddItem("Archive")
 				.SetDelegate([this] {
 					Global::GetUserContent().MarkHidden(_assetId, true);
-					NotifyMetaUpdated();
+					NotifyUpdated();
 				});
 		}
 		else
@@ -213,25 +213,21 @@ namespace fig::gui
 			menu.AddItem("Unarchive")
 				.SetDelegate([this] {
 					Global::GetUserContent().MarkHidden(_assetId, false);
-					NotifyMetaUpdated();
+					NotifyUpdated();
 				});
 		}
 		menu.AddSeparator();
-		menu.AddItem("Delete\u2026", Resource::ICON_DELETE);
+		menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
+			.SetDelegate([this] { NotifyDelete(); });
 		_menuId = menu.Show();
 	}
 
 
-	void ChatListItem::SetDelegate(OnChatUpdatedDelegate onUpdated)
+	void ChatListItem::SetDelegate(ChatItemEventDelegate fnDelegate)
 	{
-		_fnOnUpdated = onUpdated;
+		_fnDelegate = fnDelegate;
 	}
 
-	void ChatListItem::NotifyMetaUpdated()
-	{
-		if (_fnOnUpdated)
-			_fnOnUpdated(*this);
-	}
 
 	void ChatListItem::ShowStar(bool bShow)
 	{
@@ -248,5 +244,17 @@ namespace fig::gui
 		{
 			_pStar->SetVisible(bShow);
 		}
+	}
+
+	void ChatListItem::NotifyUpdated()
+	{
+		if (_fnDelegate)
+			_fnDelegate(*this, ChatListItemEvent::Refresh);
+	}
+
+	void ChatListItem::NotifyDelete()
+	{
+		if (_fnDelegate)
+			_fnDelegate(*this, ChatListItemEvent::Delete);
 	}
 }

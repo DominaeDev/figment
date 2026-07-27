@@ -22,26 +22,6 @@ namespace fig::gui
 			SetLabel(character.fullName);
 			SetIndex(character.GetSearchIndex());
 
-			// Meta data
-			if (auto try_meta = Global::GetUserContent().GetMetaData(characterId))
-			{
-				auto& meta = *try_meta;
-				SetMetaData(meta);
-			}
-			else
-			{
-				auto now = fig::now();
-				SetMetaData(ContentMetaData {
-					.name = _characterName,
-					.createdAt = now,
-					.updatedAt = now,
-					.lastUsedAt = now,
-				});
-			}
-
-			// User settings
-			SetUserSettings(Global::GetUserContent().GetUserSettings(characterId));
-			
 			// Tags
 			if (character.gender.IsConventional())
 			{
@@ -65,6 +45,8 @@ namespace fig::gui
 					break;
 			}
 		}
+
+		RefreshMeta();
 	}
 
 	EventResult CharacterCard::OnEvent(fig::event& event)
@@ -98,6 +80,11 @@ namespace fig::gui
 				_bSelected = false;
 				return EventResult::Continue;
 			}
+		}
+		else if (IsUserEvent(event, UserEvent::Activated))
+		{
+			RefreshMeta();
+			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::Deactivated))
 		{
@@ -216,5 +203,34 @@ namespace fig::gui
 		menu.AddItem("Delete\u2026", Resource::ICON_DELETE);
 
 		_menuId = menu.Show();
+	}
+
+	void CharacterCard::RefreshMeta()
+	{
+		auto& userContent = Global::GetUserContent();
+		if (auto try_character = userContent.Get<Character>(_characterId); try_character.has_value())
+		{
+			auto& character = try_character.value();
+
+			// Meta data
+			if (auto try_meta = userContent.GetMetaData(_characterId))
+			{
+				auto& meta = *try_meta;
+				SetMetaData(meta);
+			}
+			else
+			{
+				auto now = fig::now();
+				SetMetaData(ContentMetaData {
+					.name = _characterName,
+					.createdAt = now,
+					.updatedAt = now,
+					.lastUsedAt = now,
+				});
+			}
+
+			// User settings
+			SetUserSettings(Global::GetUserContent().GetUserSettings(_characterId));
+		}
 	}
 }

@@ -13,6 +13,7 @@ namespace fig::gui
 	protected:
 		EventResult OnEvent(fig::event& event) override;
 		void ShowMenu();
+		void RefreshMeta();
 
 	private:
 		fig::uuid _characterId;

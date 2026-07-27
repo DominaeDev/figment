@@ -90,6 +90,7 @@ namespace fig::gui
 
 		CardSize _cardSize {};
 		fig::observer_ptr<Control> _pCounterBG;
+		fig::observer_ptr<StaticText> _pChatCount;
 		fig::observer_ptr<Control> _pNewIndicator;
 
 		fig::observer_ptr<Control> _pLargeRoot;

@@ -190,7 +190,7 @@ namespace fig::io
 					or key == MetaTag::ReferenceToScenario
 					or key == MetaTag::ReferenceToWorld)
 				{
-					if (GetMeta<fig::uuid>(key) == assetId)
+					if (auto ref = GetMeta<fig::uuid>(key); ref.has_value() and ref.value() == assetId)
 						return true;
 				}
 			}

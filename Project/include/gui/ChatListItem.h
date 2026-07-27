@@ -16,7 +16,13 @@ namespace fig::io
 
 namespace fig::gui
 {
-	using OnChatUpdatedDelegate = std::function<void(class ChatListItem&)>;
+	enum class ChatListItemEvent
+	{
+		Refresh,
+		Delete,
+	};
+
+	using ChatItemEventDelegate = std::function<void(class ChatListItem&, ChatListItemEvent event)>;
 
 	class ChatListItem : public Panel
 	{
@@ -24,8 +30,8 @@ namespace fig::gui
 	
 	public:
 		ChatListItem(ControlPtr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString);
-		void SetDelegate(OnChatUpdatedDelegate onUpdated);
 		void ShowStar(bool bShow);
+		void SetDelegate(ChatItemEventDelegate fnDelegate);
 
 	protected:
 		void OnUpdate(float fElapsed);
@@ -34,7 +40,8 @@ namespace fig::gui
 		EventResult OnEvent(fig::event& event);
 
 		void ShowMenu() noexcept;
-		void NotifyMetaUpdated();
+		void NotifyUpdated();
+		void NotifyDelete();
 	private:
 		fig::uuid _assetId;
 		fig::uuid _primaryCharacterId;
@@ -47,6 +54,6 @@ namespace fig::gui
 		bool _bSelected {};
 		bool _bHovered {};
 		int32_t _menuId { -1 };
-		OnChatUpdatedDelegate _fnOnUpdated {};
+		ChatItemEventDelegate _fnDelegate {};
 	};
 }

@@ -55,7 +55,7 @@ namespace fig::gui
 
 			for (auto& asset : scenarios)
 			{
-				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}:", asset.id.to_str()));
+				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}", asset.id.to_str()));
 				auto pCard = CreateControl<ScenarioCard>(asset.id, _cardSize);
 				pCard->SetDelegate([this](auto& card) { Reorder(); });
 				_pGridSizer->Add(pCard);
@@ -72,7 +72,7 @@ namespace fig::gui
 
 			for (auto& asset : characters)
 			{
-				DEBUG_MEASURE_BEGIN(std::format("Character card {}:", asset.id.to_str()));
+				DEBUG_MEASURE_BEGIN(std::format("Character card {}", asset.id.to_str()));
 				auto pCard = CreateControl<CharacterCard>(asset.id, _cardSize);
 				pCard->SetDelegate([this](auto& card) { Reorder(); });
 				_pGridSizer->Add(pCard);

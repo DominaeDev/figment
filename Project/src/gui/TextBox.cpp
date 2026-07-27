@@ -1690,14 +1690,6 @@ namespace fig::gui
 			string dots = to_utf8(wdots);
 
 			TTF_SetTextString(_pPassword, toCStr(dots), 0);
-
-	/*		size_t length = SDL_utf8strlen(_pText->text);
-			string dots;
-			dots.resize(length);
-			for (size_t i = 0; i < length; ++i)
-				dots[i] = '*';*/
-
-	//		TTF_SetTextString(_pPassword, phehe, 0);
 		}
 		else
 		{

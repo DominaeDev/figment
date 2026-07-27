@@ -23,7 +23,8 @@ namespace fig::io
 		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename);
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 
-		const Asset& CreateAsset(const fig::data::ChatInstance& chatInstance);
+		const Asset& CreateChat(const fig::data::ChatInstance& chatInstance);
+		bool DeleteAsset(fig::uuid assetId);
 
 		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
 		fig::cref_vector<Asset> GetChatLogsWith(const fig::uuid& characterId, bool bLoad = false);
@@ -43,8 +44,7 @@ namespace fig::io
 
 		AssetManager& GetAssetManager();
 
-		size_t GetChatCount(const fig::uuid& assetId);
-		void RefreshChatCount();
+		uint32_t GetChatCount(const fig::uuid& assetId);
 
 		template <typename T>
 		fig::optional_cref<T> Get(const fig::uuid& assetId) noexcept
@@ -60,6 +60,21 @@ namespace fig::io
 			GetCache<T>().Erase(assetId);
 		}
 
+		void InvalidateAsset(const fig::uuid& assetId) noexcept
+		{
+			InvalidateMeta(assetId);
+			InvalidateCache(assetId);
+		}
+
+		void InvalidateCache(const fig::uuid& assetId) noexcept
+		{
+			for (auto& kvp : _caches)
+			{
+				if (kvp.second->Erase(assetId))
+					return;
+			}
+		}
+
 		void InvalidateMeta(const fig::uuid& assetId) noexcept
 		{
 			_metaData.erase(assetId);
@@ -70,8 +85,23 @@ namespace fig::io
 			_userSettings.erase(assetId);
 		}
 
+		template <typename T>
+		void Cache(const fig::uuid& assetId, const T& value)
+		{
+			T copy { value };
+			GetCache<T>().Insert(assetId, std::move(copy));
+		}
+
+		template <typename T>
+		void Cache(const fig::uuid& assetId, T&& value)
+		{
+			GetCache<T>().Insert(assetId, std::move(value));
+		}
+
 	protected:
 		void LoadAll();
+		void RefreshChatCount();
+		void InvalidateChatCount() { _bInvalidChatCount = true; }
 
 		template <typename T>
 		AssetCacheBase<T>& GetCache()
@@ -86,6 +116,7 @@ namespace fig::io
 			auto& entry = _caches.at(AssetTypeOf<T>);
 			return static_cast<const AssetCacheBase<T>&>(*entry);
 		}
+
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 		std::unordered_map<AssetType, std::unique_ptr<IAssetCache>> _caches;
@@ -100,6 +131,7 @@ namespace fig::io
 		std::map<fig::renderer_ptr, std::map<fig::uuid, std::vector<CachedTexture>>> _cachedTextures;
 
 		std::map<fig::uuid, std::vector<fig::uuid>> _chatsByAsset; // <asset id, chat ids>
+		bool _bInvalidChatCount { true };
 
 		template <ContentUserSettings::Flag E>
 		bool MarkFlag(const fig::uuid& assetId, bool value);

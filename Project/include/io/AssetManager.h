@@ -66,6 +66,9 @@ namespace fig::io
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& id) noexcept;
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;
 		fig::optional_cref<Asset> FindImageAsset(const fig::uuid& parentId, ImageType imageType) noexcept;
+		fig::cref_vector<Asset> FindChildrenOf(const fig::uuid& parentId) noexcept;
+		bool HasChildren(const fig::uuid& assetId) noexcept;
+		std::set<fig::uuid> GetAssociatedAssets(const fig::uuid& id) noexcept;
 
 		FileError LoadAsset(const Asset& asset) noexcept;
 		fig::expected_cref<Asset, FileError> LoadAsset(const fig::uuid& id) noexcept;
@@ -123,14 +126,16 @@ namespace fig::io
 		bool UpdateAssetOnDisk(Asset& asset);
 		bool UpdateAssetInDatabase(Asset& asset);
 
+		/* Internal; Mutex is locked */
 		fig::expected_ref<Asset, FileError> LoadAsset_Internal(Asset& asset) noexcept;
 		fig::expected_ref<Asset, FileError> LoadAssetMeta_Internal(Asset& asset) noexcept;
 		fig::optional_cref<Asset> FindAsset_Internal(const fig::uuid& id) noexcept;
 		fig::optional_cref<Asset> FindAsset_Internal(const fig::uuid& id, AssetType assetType) noexcept;
 
-		bool DeleteAsset_Internal(const fig::uuid& assetID) noexcept;
-		bool DeleteAssetFile(const fig::uuid& assetID) noexcept;
-		std::set<fig::uuid> FindRelatedAssets(const fig::uuid& assetId) noexcept;
+		bool DeleteAsset_Internal(fig::uuid assetID) noexcept;
+		uint32_t DeleteAssets_Internal(std::span<fig::uuid> assetIDs) noexcept;
+		bool DeleteAssetFile_Internal(const fig::uuid& assetID) noexcept;
+		std::set<fig::uuid> FindRelatedAssets_Internal(const fig::uuid& assetId) noexcept;
 
 	private:
 		fig::uuid _profileID;
@@ -148,7 +153,7 @@ namespace fig::io
 		bool ModifyAsset_Bool(const Asset& asset, std::function<bool(Asset&)> fn);
 
 
-		/* Internal; Mutex already held: */
+		/* Internal; Mutex is locked */
 		Asset& CreateEmptyAsset_Internal(AssetType type, const fig::uuid& parent) noexcept;
 		Asset& CreateAsset_Internal(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
 		Asset& CreateAsset_Internal(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept;

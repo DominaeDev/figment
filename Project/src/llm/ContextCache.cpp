@@ -134,7 +134,6 @@ namespace fig::llm
 			{
 				auto seq_span = std::span(&batch.seq_id[idx][0], &batch.seq_id[idx][_n_seq_max - 1]);
 				std::ranges::sort(seq_span, [](Sequence a, Sequence b) { return a > b; });
-				std::vector<Sequence> hehe(seq_span.begin(), seq_span.end());
 			}
 		}
 		return n_empty;

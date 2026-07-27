@@ -510,7 +510,7 @@ namespace fig::gui
 			instance.scenarioId = {}; //! @todo
 			instance.options = Constants::LLM::DefaultChatOptions; //! @todo
 			
-			auto& chatInstanceAsset = Global::GetUserContent().CreateAsset(instance);
+			auto& chatInstanceAsset = Global::GetUserContent().CreateChat(instance);
 
 			pChatScreen->StartChat(staging, chatInstanceAsset.id);
 			return true;

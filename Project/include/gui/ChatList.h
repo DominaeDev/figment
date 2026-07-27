@@ -7,6 +7,8 @@ namespace fig::gui
 	class VerticalSizer;
 	class ChatListItem;
 
+	enum class ChatListItemEvent;
+
 	class ChatList : public ScrollPanel
 	{
 	public:
@@ -19,13 +21,15 @@ namespace fig::gui
 		void Reorder();
 
 	protected:
-		void Reset();
+
 		void OnScroll() override;
 		void OnAfterLayout() override;
 		fig::observer_ptr<Control> CreateHeader(fig::string_view text);
+		void OnItemEvent(ChatListItem& item, ChatListItemEvent event);
 
 		void ShowChats(const fig::cref_vector<fig::io::Asset>& chats);
-
+		void Reset();
+		void DeleteChat(ChatListItem& item);
 	private:
 		void Sort(fig::io::SortBy sortBy, fig::io::OrderBy orderBy);
 		void Filter(fig::io::ChatFilterFlags filterBy, const fig::string& search_string);

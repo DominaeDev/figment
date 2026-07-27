@@ -8,6 +8,9 @@ namespace fig::io
 	struct ContentMetaData
 	{
 		fig::string name;
+		fig::uuid parentId {};
+		AssetType assetType {};
+		uint8_t assetSubtype {};
 		fig::timestamp createdAt {};
 		fig::timestamp updatedAt {};
 		fig::timestamp lastUsedAt {};

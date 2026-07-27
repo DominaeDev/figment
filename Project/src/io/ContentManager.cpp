@@ -33,7 +33,7 @@ namespace fig::io
 		GetCache<fig::data::Scenario>().Preload();
 		GetCache<fig::data::ChatInstance>().Preload();
 
-		RefreshChatCount();
+		_bInvalidChatCount = true;
 
 		DEBUG_MEASURE_END();
 	}
@@ -78,29 +78,32 @@ namespace fig::io
 		{
 			auto& asset = tryAsset.value();
 
-			ContentMetaData metaData;
-			metaData.createdAt = asset.GetCreatedAt();
-			metaData.updatedAt = asset.GetUpdatedAt();
-			metaData.lastUsedAt = asset.GetLastUsedAt();
+			ContentMetaData meta;
+			meta.assetType = asset.asset_type;
+			meta.assetSubtype = asset.asset_subtype;
+			meta.parentId = asset.parent_id;
+			meta.createdAt = asset.GetCreatedAt();
+			meta.updatedAt = asset.GetUpdatedAt();
+			meta.lastUsedAt = asset.GetLastUsedAt();
 
 			if (asset.asset_type == AssetType::Character)
 			{
 				if (auto try_character = Get<Character>(assetId))
 				{
-					metaData.name = (*try_character).shortName;
-					metaData.gender = (*try_character).gender;
-					metaData.tags = (*try_character).GetTags();
+					meta.name = (*try_character).shortName;
+					meta.gender = (*try_character).gender;
+					meta.tags = (*try_character).GetTags();
 				}
 
 				// Count chats
-				metaData.chatCount = static_cast<uint32_t>(GetChatCount(assetId));
+				meta.chatCount = GetChatCount(assetId);
 
 				// Last used => last chat
 				if (auto lastChat = FindLastChatWith(asset.id))
-					metaData.lastUsedAt = std::max(metaData.lastUsedAt, lastChat.value().GetLastUsedAt());
+					meta.lastUsedAt = std::max(meta.lastUsedAt, lastChat.value().GetLastUsedAt());
 			}
 
-			_metaData[assetId] = metaData;
+			_metaData[assetId] = meta;
 			return make_optional_ref(_metaData.at(assetId));
 		}
 
@@ -310,7 +313,7 @@ namespace fig::io
 		return unexpected(FileError::NotFound);
 	}
 
-	const Asset& UserContentManager::CreateAsset(const fig::data::ChatInstance& chatInstance)
+	const Asset& UserContentManager::CreateChat(const fig::data::ChatInstance& chatInstance)
 	{
 		fig::bytes data;
 		chatInstance.SaveToXml(data);
@@ -331,14 +334,28 @@ namespace fig::io
 				asset.SetMeta(fig::io::MetaTag::ReferenceToWorld, chatInstance.worldId);
 		});
 
+		ChatInstance copy { chatInstance };
+		Cache(newAsset.id, std::move(copy));
+
+		auto associatedAssets = _pAssetMngr->GetAssociatedAssets(newAsset.id);
+		for (auto& id : associatedAssets)
+			InvalidateMeta(id);
+		InvalidateChatCount();
+
 		return newAsset;
 	}
 
-	size_t UserContentManager::GetChatCount(const fig::uuid& assetId)
+	uint32_t UserContentManager::GetChatCount(const fig::uuid& assetId)
 	{
+		if (_bInvalidChatCount)
+		{
+			RefreshChatCount();
+			_bInvalidChatCount = false;
+		}
+
 		if (auto itFind = _chatsByAsset.find(assetId); itFind != _chatsByAsset.cend())
-			return itFind->second.size();
-		return 0uz;
+			return static_cast<uint32_t>(itFind->second.size());
+		return 0;
 	}
 
 	void UserContentManager::RefreshChatCount()
@@ -445,5 +462,46 @@ namespace fig::io
 			return chatLogs[0].get();
 		}
 		return nullref;
+	}
+
+	bool UserContentManager::DeleteAsset(fig::uuid assetId)
+	{
+		bool bAlsoDeleteParent = false;
+		fig::uuid parentId {};
+		AssetType assetType {};
+
+		if (auto meta = GetMetaData(assetId))
+		{
+			assetType = (*meta).assetType;
+			if (assetType == AssetType::ChatLog)
+			{
+				parentId = (*meta).parentId;
+				bAlsoDeleteParent = true;
+			}
+		}
+
+		if (assetType == AssetType::ChatInstance)
+		{
+			auto associatedAssets = _pAssetMngr->GetAssociatedAssets(assetId);
+			for (auto& id : associatedAssets)
+				InvalidateMeta(id);
+		}
+
+		if (not _pAssetMngr->DeleteAsset(assetId))
+			return false;
+
+		InvalidateAsset(assetId);
+
+		if (bAlsoDeleteParent and not parentId.empty())
+		{
+			size_t count = _pAssetMngr->FindChildrenOf(parentId).size();
+			if (count == 0uz)
+				DeleteAsset(parentId);
+		}
+
+		if (assetType == AssetType::ChatInstance or assetType == AssetType::ChatLog)
+			InvalidateChatCount();
+
+		return true;
 	}
 }

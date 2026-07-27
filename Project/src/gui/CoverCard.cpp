@@ -204,36 +204,41 @@ namespace fig::gui
 
 	void CoverCard::SetChatCount(uint32_t count)
 	{
-		if (_pCounterBG)
-			return;
+		if (!_pCounterBG)
+		{
+			_pCounterBG = CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
+			if (_cardSize == CardSize::Half)
+				_pCounterBG->SetPosition(6, 6);
+			else
+				_pCounterBG->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 
-		_pCounterBG = CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
-		if (_cardSize == CardSize::Half)
-			_pCounterBG->SetPosition(6, 6);
-		else
-			_pCounterBG->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
+			_pCounterBG->SetForegroundColor(0xA0_rgba);
 
-		_pCounterBG->SetForegroundColor(0xA0_rgba);
+			auto pCounterIcon = _pCounterBG->CreateControl<Image>(AppResources::GetTexture(Resource::CARD_ICON_CHAT_COUNTER));
+			pCounterIcon->SetPosition(6, 6);
+			pCounterIcon->SetForegroundColor(Color::White);
+			pCounterIcon->SetBackgroundColor(Color::Transparent);
 
-		auto pCounterIcon = _pCounterBG->CreateControl<Image>(AppResources::GetTexture(Resource::CARD_ICON_CHAT_COUNTER));
-		pCounterIcon->SetPosition(6, 6);
-		pCounterIcon->SetForegroundColor(Color::White);
-		pCounterIcon->SetBackgroundColor(Color::Transparent);
+			_pChatCount = _pCounterBG->CreateControl<StaticText>("", FontFace::Default, 14.0, true);
+			_pChatCount->SetPosition(27, 3);
+			_pChatCount->SetForegroundColor(Color::White);
+			_pChatCount->SetBackgroundColor(Color::Transparent);
+		}
 
-		auto pLabel = _pCounterBG->CreateControl<StaticText>(std::format("{}", count), FontFace::Default, 14.0, true);
-		pLabel->SetPosition(27, 3);
-		pLabel->SetForegroundColor(Color::White);
-		pLabel->SetBackgroundColor(Color::Transparent);
+		if (_pChatCount)
+		{
+			_pChatCount->SetText(std::format("{}", count));
+			auto [w, h] = _pChatCount->MeasureText();
+			_pCounterBG->SetSize(std::max(w + 35, 32), 26);
+		}
 
-		auto [w, h] = pLabel->MeasureText();
-		_pCounterBG->SetSize(std::max(w + 35, 32), 26);
 	}
 
 	void CoverCard::ShowNew(bool bShow)
 	{
 		if (_pNewIndicator)
 		{
-			_pNewIndicator->SetVisible(bShow);
+			_pNewIndicator->SetVisible(bShow and !_bHidden);
 			return;
 		}
 		else if (!bShow)
@@ -254,6 +259,7 @@ namespace fig::gui
 
 		auto [w, h] = pLabel->MeasureText();
 		_pNewIndicator->SetSize(w + 12, 26);
+		_pNewIndicator->SetVisible(!_bHidden);
 	}
 
 	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, const fig::color& color)
@@ -587,9 +593,9 @@ namespace fig::gui
 	void CoverCard::ShowStar(bool bShow)
 	{
 		if (_pLargeStar)
-			_pLargeStar->SetVisible(bShow);
+			_pLargeStar->SetVisible(bShow and !_bHidden);
 		if (_pSmallStar)
-			_pSmallStar->SetVisible(bShow);
+			_pSmallStar->SetVisible(bShow and !_bHidden);
 	}
 
 	void CoverCard::CreatePendingTags()
@@ -631,21 +637,34 @@ namespace fig::gui
 		if (_pHiddenBG)
 			_pHiddenBG->SetVisible(_bHidden);
 		if (_pLargeRoot)
-			_pLargeRoot->SetVisible(_cardSize == CardSize::Full && !_bHidden);
+			_pLargeRoot->SetVisible(_cardSize == CardSize::Full and !_bHidden);
 		if (_pLargeBorder)
-			_pLargeBorder->SetVisible(_pLargeBorder->HasTexture() && !_bHidden);
+			_pLargeBorder->SetVisible(_pLargeBorder->HasTexture() and !_bHidden);
 		if (_pLargeFooterFade)
 			_pLargeFooterFade->SetVisible(!_largeImageTexture.empty());
+		if (_pLargeStar)
+			_pLargeStar->SetVisible(_userSettings.HasFlag(ContentUserSettings::Flag::Favorite) and !_bHidden);
+
 		if (_pSmallRoot)
-			_pSmallRoot->SetVisible(_cardSize == CardSize::Half && !_bHidden);
+			_pSmallRoot->SetVisible(_cardSize == CardSize::Half and !_bHidden);
 		if (_pSmallBorder)
-			_pSmallBorder->SetVisible(_pSmallBorder->HasTexture() && !_bHidden);
+			_pSmallBorder->SetVisible(_pSmallBorder->HasTexture() and !_bHidden);
 		if (_pSmallFooterFade)
 			_pSmallFooterFade->SetVisible(!_smallImageTexture.empty());
+		if (_pSmallStar)
+			_pSmallStar->SetVisible(_userSettings.HasFlag(ContentUserSettings::Flag::Favorite) and !_bHidden);
+
 		if (_pCounterBG)
 			_pCounterBG->SetVisible(!_bHidden);
 		if (_pNewIndicator)
-			_pNewIndicator->SetVisible(!_bHidden);
+		{
+			_pNewIndicator->SetVisible(_metaData.IsNew() and !_bHidden);
+
+			if (_cardSize == CardSize::Full)
+				_pNewIndicator->SetPosition(Large::Tags::Margin + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), Large::Tags::Margin);
+			else
+				_pNewIndicator->SetPosition(6 + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), 6);
+		}
 
 		// Refresh image
 		if (!_bHidden)
@@ -666,6 +685,7 @@ namespace fig::gui
 	{
 		_metaData = metaData;
 		ShowNew(metaData.IsNew());
+		SetChatCount(metaData.chatCount);
 	}
 
 	void CoverCard::SetUserSettings(const ContentUserSettings& userSettings) noexcept
