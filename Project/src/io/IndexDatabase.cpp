@@ -9,7 +9,7 @@ using namespace fig::auth;
 static constexpr fig::const_string SQL_CreateTables =
 	"CREATE TABLE Assets ("
 	"	id          TEXT     PRIMARY KEY NOT NULL,"
-	"	parent      TEXT"
+	"	parent      TEXT,"
 	"	type        TEXT     NOT NULL,"
 	"   folder      TEXT,"
 	"	settings    TEXT     NOT NULL ON CONFLICT REPLACE DEFAULT [{}],"
@@ -29,9 +29,10 @@ static constexpr fig::const_string SQL_CreateTables =
 	"	FOREIGN KEY (parent) REFERENCES Folders(id) ON DELETE SET NULL ON UPDATE CASCADE"
 	");"
 
-	"CREATE INDEX idx_assets_parent ON Assets (parent);"
-	"CREATE INDEX idx_assets_folder ON Assets (folder);"
-	"CREATE INDEX idx_folders_parent ON Folders (parent);";
+	"CREATE INDEX Assets_parent_idx ON Assets (parent);"
+	"CREATE INDEX Assets_folder_idx ON Assets (folder);"
+	"CREATE INDEX Folders_parent_idx ON Folders (parent);"
+	"\0";
 
 static constexpr fig::const_string SQL_FetchAsset =
 	"SELECT id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt FROM Assets;";
@@ -148,7 +149,8 @@ namespace fig::io
 	void IndexDatabase::PrepareStatements() noexcept
 	{
 		auto Prepare = [this](SQL op, fig::string_view sql) {
-			sqlite3_prepare_v2(_pDB, sql.data(), -1, &_sqlStatements[op], nullptr);
+			int rc = sqlite3_prepare_v2(_pDB, sql.data(), static_cast<int32_t>(sql.length()), &_sqlStatements[op], nullptr);
+			assert(rc == SQLITE_OK);
 		};
 
 		// Prepare statements
@@ -298,7 +300,10 @@ namespace fig::io
 			/*id*/
 			sqlite3_bind_text(stmt, 1, asset.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/*parent*/
-			sqlite3_bind_text(stmt, 2, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			if (not asset.parent_id.empty())
+				sqlite3_bind_text(stmt, 2, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 2, nullptr, -1, SQLITE_STATIC);
 			/*type*/
 			sqlite3_bind_text(stmt, 3, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
 			/*folder*/
@@ -327,7 +332,10 @@ namespace fig::io
 
 		return BindAndExecute(SQL::UpsertAsset, [&asset](sqlite3_stmt* stmt) {
 			/*parent*/
-			sqlite3_bind_text(stmt, 1, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			if (not asset.parent_id.empty())
+				sqlite3_bind_text(stmt, 1, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 1, nullptr, -1, SQLITE_STATIC);
 			/*type*/
 			sqlite3_bind_text(stmt, 2, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
 			/*folder*/
@@ -361,7 +369,10 @@ namespace fig::io
 			/*id*/
 			sqlite3_bind_text(stmt, 1, asset.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/*parent*/
-			sqlite3_bind_text(stmt, 2, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			if (not asset.parent_id.empty())
+				sqlite3_bind_text(stmt, 2, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 2, nullptr, -1, SQLITE_STATIC);
 			/*type*/
 			sqlite3_bind_text(stmt, 3, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
 			/*folder*/

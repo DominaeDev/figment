@@ -57,7 +57,7 @@ namespace fig::io
 
 		const Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateImageAsset(ImageType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateImageAsset(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
+		const Asset& CreateImageAsset(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;
 
 		bool DeleteAsset(const fig::uuid& assetID) noexcept;
 		uint32_t DeleteAssets(std::span<fig::uuid> assetIDs) noexcept;

@@ -89,7 +89,7 @@ namespace fig::io
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
-		asset.parent_id = not parent.empty() ? parent : _profileID;
+		asset.parent_id = parent;
 		asset.asset_type = type;
 		asset.sync_state.file_sync = AssetSyncState::Status::Created;
 		asset.sync_state.db_sync = AssetSyncState::Status::Created;
@@ -135,7 +135,7 @@ namespace fig::io
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
-		asset.parent_id = not parent.empty() ? parent : _profileID;
+		asset.parent_id = parent;
 		asset.asset_type = type;
 		asset.data = std::move(data); // Move data
 		asset.data_format = format;
@@ -155,7 +155,7 @@ namespace fig::io
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
-		asset.parent_id = not parent.empty() ? parent : _profileID;
+		asset.parent_id = parent;
 		asset.asset_type = type;
 		asset.data_format = format;
 		asset.sync_state.file_sync = AssetSyncState::Status::Created;
@@ -731,7 +731,7 @@ namespace fig::io
 			// Create asset
 			fig::bytes characterData;
 			character.SaveToXml(characterData);
-			auto& characterAsset = CreateAsset_Internal(AssetType::Character, DataFormat::DataXml, characterData, _profileID);
+			auto& characterAsset = CreateAsset_Internal(AssetType::Character, DataFormat::DataXml, characterData, {});
 
 			// Load portrait image(s)
 			if (auto file = fig::io::ReadFile(filename))
@@ -784,7 +784,7 @@ namespace fig::io
 		// Create asset
 		fig::bytes scenarioData;
 		scenario.SaveToXml(scenarioData);
-		auto& scenarioAsset = CreateAsset_Internal(AssetType::Scenario, DataFormat::DataXml, scenarioData, _profileID);
+		auto& scenarioAsset = CreateAsset_Internal(AssetType::Scenario, DataFormat::DataXml, scenarioData, {});
 
 		// Load scenario image
 /*		if (not empty_or_whitespace(scenario.imageFilename))

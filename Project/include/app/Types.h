@@ -132,8 +132,8 @@ inline constexpr fig::fixed operator "" _fp( long double arg ) noexcept
     return fig::fixed { arg };
 }
 
-inline constexpr fig::string toStr(fig::string_view sv) { return fig::string(sv); }
-inline constexpr fig::c_string toCStr(fig::string_view sv) { return static_cast<fig::c_string>(sv.data()); }
+inline fig::string toStr(fig::string_view sv) { return fig::string(sv); }
+inline const char* toCStr(fig::string_view sv) { return static_cast<const char*>(sv.data()); }
 
 inline constexpr std::span<const uint8_t> bytes_to_u8(const fig::byte_span& bytes)
 {
