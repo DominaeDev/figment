@@ -64,9 +64,9 @@ namespace fig::gui
 
 			auto name = Global::GetUserContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
 			if (lastMessage.msgType == fig::chat::MessageType::Action)
-				_pMessage->SetText(std::format("{}: *{}*", name, trunc(lastMessage.content, 256uz)));
+				_pMessage->SetText(std::format("{}: *{}*", name, truncate(lastMessage.content, 256uz)));
 			else
-				_pMessage->SetText(std::format("{}: \"{}\"", name, trunc(lastMessage.content, 256uz)));
+				_pMessage->SetText(std::format("{}: \"{}\"", name, truncate(lastMessage.content, 256uz)));
 
 			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(speakerId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
 			{

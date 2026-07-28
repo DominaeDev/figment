@@ -365,6 +365,7 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::Scrolling))
 		{
 			PopAllMenus();
+			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::NavigateToChatList))
 		{
@@ -379,6 +380,7 @@ namespace fig::gui
 				GetScreen<ChatListingScreen>(ScreenType::ChatListing)->ShowAllChats();
 			}
 			PopAllMenus();
+			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::ChangedScreen))
 		{
@@ -393,20 +395,34 @@ namespace fig::gui
 				break;
 			}
 			PopAllMenus();
+			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::SidePanelResized))
 		{
 			PopAllMenus();
 			InvalidateLayout();
-		}
-		else if (HandleStatusBarEvents(event))
-		{
+			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::LLMModelUnloadRequest))
 		{
 			UnloadModel();
+			return EventResult::Continue;
 		}
 
+		HandleStatusBarEvents(event);
+
+		if (IsBroadcastEvent(event))
+		{
+			// Pass to all screens
+			BroadcastEvent(event);
+		}
+		else
+		{
+			// Pass to active screen only
+			if (_pActiveScreen)
+				return _pActiveScreen->ProcessEvent(event);
+		}
+		
 		if constexpr (Debugging)
 		{
 			if (IsUserEvent(event, UserEvent::DebugCharacter))
@@ -416,19 +432,6 @@ namespace fig::gui
 				return EventResult::Handled;
 			}
 		}
-
-		/*if (IsBroadcastEvent(event))
-		{
-			// Pass to all screens
-			BroadcastEvent(event);
-		}
-		else*/
-		{
-			// Pass to active screen only
-			if (_pActiveScreen)
-				return _pActiveScreen->ProcessEvent(event);
-		}
-		
 		return EventResult::Pass;
 	}
 

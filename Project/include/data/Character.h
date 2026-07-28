@@ -62,7 +62,7 @@ namespace fig::data
 
 		[[nodiscard]] const Context& GetContext() noexcept;
 
-		const fig::string& GetDescription() const noexcept;
+		fig::string GetDescription() const noexcept;
 
 	public:
 		fig::string chatId;	//! @remove?

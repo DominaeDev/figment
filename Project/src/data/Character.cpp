@@ -212,10 +212,10 @@ namespace fig::data
 		_bDirtyContext = false;
 	}
 
-	const fig::string& Character::GetDescription() const noexcept
+	fig::string Character::GetDescription() const noexcept
 	{
 		if (not creatorNotes.empty())
-			return creatorNotes;
+			return truncate(strip_emoji(creatorNotes), 1024);
 		return brief;
 	}
 }

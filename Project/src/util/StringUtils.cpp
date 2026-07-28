@@ -112,7 +112,14 @@ namespace fig
 		return s;
 	}
 
-	std::string_view trunc(std::string_view text, size_t length)
+	std::string_view truncate(std::string_view text, size_t length)
+	{
+		if (text.length() <= length)
+			return text;
+		return text.substr(0, length);
+	}
+
+	std::string truncate(const std::string& text, size_t length)
 	{
 		if (text.length() <= length)
 			return text;
@@ -1014,6 +1021,82 @@ namespace fig
 			}
 			if (not replaced)
 				s[--write] = ch;
+		}
+	}
+
+	static constexpr bool is_emoji(char32_t codepoint)
+	{
+		return (codepoint >= 0x1F300 and codepoint <= 0x1FAFF)
+			or (codepoint >= 0x2600 and codepoint <= 0x27BF)
+			or (codepoint >= 0x2B00 and codepoint <= 0x2BFF)
+			or (codepoint >= 0x1F1E6 and codepoint <= 0x1F1FF)
+			or codepoint == 0x200D
+			or codepoint == 0xFE0F;
+	}
+
+	static std::pair<char32_t, size_t> decode_utf8_codepoint(fig::string_view text, size_t position)
+	{
+		unsigned char lead = static_cast<unsigned char>(text[position]);
+
+		std::size_t seqLen = 1uz;
+		char32_t cp = lead;
+		if ((lead & 0xE0) == 0xC0)
+		{
+			seqLen = 2;
+			cp = lead & 0x1F;
+		}
+		else if ((lead & 0xF0) == 0xE0)
+		{
+			seqLen = 3;
+			cp = lead & 0x0F;
+		}
+		else if ((lead & 0xF8) == 0xF0)
+		{
+			seqLen = 4;
+			cp = lead & 0x07;
+		}
+		if (position + seqLen > text.size()) // Not utf-8?
+		{
+			seqLen = 1;
+			cp = lead;
+		}
+
+		for (std::size_t next = 1; next < seqLen; ++next)
+		{
+			unsigned char continuationByte = static_cast<unsigned char>(text[position + next]);
+			cp = (cp << 6) | (continuationByte & 0x3F);
+		}
+		return std::make_pair(cp, seqLen);
+	}
+
+	fig::string strip_emoji(fig::string_view text, fig::string_view replacement)
+	{
+		fig::string result;
+		result.reserve(text.size());
+		size_t index = 0;
+
+		while (index < text.size())
+		{
+			auto [codepoint, len] = decode_utf8_codepoint(text, index);
+			if (is_emoji(codepoint))
+				result.append(replacement);
+			else
+				result.append(text.substr(index, len));
+			index += len;
+		}
+		return result;
+	}
+
+	void strip_emoji(fig::string& text)
+	{
+		std::size_t index = 0;
+		while (index < text.size())
+		{
+			auto [codepoint, len] = decode_utf8_codepoint(text, index);
+			if (is_emoji(codepoint))
+				text.erase(index, len);
+			else
+				index += len;
 		}
 	}
 }

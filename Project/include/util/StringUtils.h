@@ -15,7 +15,8 @@ namespace fig
 	fig::string_view ltrim(fig::string_view s);
 	fig::string_view rtrim(fig::string_view s);
 	fig::string_view trim(fig::string_view s);
-	fig::string_view trunc(fig::string_view s, size_t length);
+	fig::string_view truncate(fig::string_view s, size_t length);
+	std::string truncate(const std::string& text, size_t length);
 
 	[[nodiscard]] fig::wstring ltrim(const fig::wstring& s);
 	[[nodiscard]] fig::wstring rtrim(const fig::wstring& s);
@@ -83,6 +84,9 @@ namespace fig
 	size_t validate_utf8(const fig::string& text) noexcept;
 	fig::wstring from_utf8(const fig::string& str);
 	fig::string to_utf8(const fig::wstring& str);
+
+	void strip_emoji(fig::string& text);
+	fig::string strip_emoji(fig::string_view text, fig::string_view replacement = {});
 
 	template<typename Str, typename Pred>
 	size_t find_index(const Str& str, int32_t pos, Pred pred)
