@@ -106,7 +106,7 @@ namespace fig::user
 				.challenge = authChallenge,
 				.salt = authSalt,
 			},
-			.has_password { hasPassword },
+			.state { password.empty() ? UserProfile::State::Open : UserProfile::State::Locked }
 		};
 
 		// Generate recovery key
@@ -215,7 +215,7 @@ namespace fig::user
 	{
 		if (_profiles.empty())
 			return false;
-		if (auto lastProfile = GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)); lastProfile.has_value() and not (*lastProfile).has_password)
+		if (auto lastProfile = GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)); lastProfile.has_value() and (*lastProfile).state == UserProfile::State::Open)
 			return SignIn(lastProfile.value(), "");
 		return SignIn(_profiles.front(), "");
 	}
@@ -275,7 +275,7 @@ namespace fig::user
 				.salt { newSalt },
 			},
 			.recovery = {},
-			.has_password { !newPassword.empty() },
+			.state { newPassword.empty() ? UserProfile::State::Open : UserProfile::State::Locked },
 		}) == DatabaseError::NoError)
 		{
 			// Update local profile
@@ -284,7 +284,7 @@ namespace fig::user
 				.challenge = newChallenge,
 				.salt = newSalt,
 			};
-			profile.has_password = not newPassword.empty();
+			profile.state = newPassword.empty() ? UserProfile::State::Open : UserProfile::State::Locked;
 			return true;
 		}
 		return false;
@@ -387,7 +387,7 @@ namespace fig::user
 					.salt { CurrentDefaultAuthSalt },
 				},
 				.recovery {},
-				.has_password {},
+				.state {},
 			}) == DatabaseError::NoError)
 			{
 				// Update local profile

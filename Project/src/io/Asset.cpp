@@ -138,7 +138,7 @@ namespace fig::io
 		return DataFormat::Undefined;
 	}
 
-	FolderCategory FolderCategoryFromString(const fig::string& str) noexcept
+	FolderCategory FolderCategoryFromString(fig::string_view str) noexcept
 	{
 		if (str == "character")			return FolderCategory::Character;
 		else if (str == "scenario")		return FolderCategory::Scenario;

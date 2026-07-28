@@ -22,6 +22,7 @@
 using namespace fig::io;
 using namespace fig::data;
 using namespace fig::chat;
+using namespace fig::user;
 
 namespace fig::gui
 {
@@ -253,7 +254,7 @@ namespace fig::gui
 
 		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)))
 		{
-			if (not (*lastProfile).has_password)
+			if ((*lastProfile).state == UserProfile::State::Open)
 				return TrySignIn(*lastProfile, "");
 			return false;
 		}

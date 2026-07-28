@@ -12,10 +12,9 @@ static constexpr fig::const_string SQL_CreateTables =
 	"	parent      TEXT,"
 	"	type        TEXT     NOT NULL,"
 	"   folder      TEXT,"
-	"	settings    TEXT     NOT NULL ON CONFLICT REPLACE DEFAULT [{}],"
+	"	metadata    TEXT     NOT NULL ON CONFLICT REPLACE DEFAULT [{}],"
 	"	createdAt   INTEGER  DEFAULT (CURRENT_TIMESTAMP) NOT NULL,"
 	"	updatedAt   INTEGER  NOT NULL DEFAULT (CURRENT_TIMESTAMP),"
-	"	lastUsedAt  INTEGER  NOT NULL DEFAULT (CURRENT_TIMESTAMP),"
 	"	FOREIGN KEY (parent) REFERENCES Assets (id) ON DELETE CASCADE ON UPDATE CASCADE,"
 	"   FOREIGN KEY (folder) REFERENCES Folders (id) ON DELETE SET NULL ON UPDATE CASCADE"
 	");"
@@ -25,7 +24,7 @@ static constexpr fig::const_string SQL_CreateTables =
 	"	parent   TEXT,"
 	"	category TEXT NOT NULL,"
 	"	name     TEXT NOT NULL,"
-	"	settings TEXT NOT NULL DEFAULT [{}],"
+	"	metadata TEXT NOT NULL DEFAULT [{}],"
 	"	FOREIGN KEY (parent) REFERENCES Folders(id) ON DELETE SET NULL ON UPDATE CASCADE"
 	");"
 
@@ -35,27 +34,26 @@ static constexpr fig::const_string SQL_CreateTables =
 	"\0";
 
 static constexpr fig::const_string SQL_FetchAsset =
-	"SELECT id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt FROM Assets;";
+	"SELECT id, parent, type, folder, metadata, createdAt, updatedAt FROM Assets;";
 
 static constexpr fig::const_string SQL_InsertAsset =
-	"INSERT INTO Assets (id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+	"INSERT INTO Assets (id, parent, type, folder, metadata, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
 static constexpr fig::const_string SQL_UpdateAsset =
-	"UPDATE Assets SET parent = ?, type = ?, folder = ?, settings = ?, updatedAt = ?, lastUsedAt = ? WHERE id = ?;";
+	"UPDATE Assets SET parent = ?, type = ?, folder = ?, metadata = ?, updatedAt = ? WHERE id = ?;";
 
 static constexpr fig::const_string SQL_DeleteAsset =
 	"DELETE FROM Assets WHERE id = ?;";
 
 static constexpr fig::const_string SQL_UpsertAsset =
-	"INSERT INTO Assets (id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt)"
-	"VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+	"INSERT INTO Assets (id, parent, type, folder, metadata, createdAt, updatedAt)"
+	"VALUES (?, ?, ?, ?, ?, ?, ?)"
 	"ON CONFLICT (id) DO UPDATE SET"
 	"	parent = excluded.parent,"
 	"	type = excluded.type,"
 	"	folder = excluded.folder,"
-	"	settings = excluded.settings,"
-	"	updatedAt = excluded.updatedAt,"
-	"	lastUsedAt = excluded.lastUsedAt;";
+	"	metadata = excluded.metadata,"
+	"	updatedAt = excluded.updatedAt;";
 
 namespace fig::io
 {
@@ -121,7 +119,7 @@ namespace fig::io
 		rc = sqlite3_exec(_pDB, toCStr(SQL_CreateTables), nullptr, nullptr, nullptr);
 		if (rc != SQLITE_OK)
 		{
-			Log(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
+			LogLn(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
 			return false;
 		}
 
@@ -160,8 +158,8 @@ namespace fig::io
 		Prepare(SQL::UpsertAsset, SQL_UpsertAsset);
 		Prepare(SQL::DeleteAsset, SQL_DeleteAsset);
 
-		Prepare(SQL::FetchFolders, "SELECT id, parent, category, name, settings FROM Folders;");
-		Prepare(SQL::CreateFolder, "INSERT INTO Folders (id, parent, category, name, settings) VALUES (?, ?, ?, ?, ?);");
+		Prepare(SQL::FetchFolders, "SELECT id, parent, category, name, metadata FROM Folders;");
+		Prepare(SQL::CreateFolder, "INSERT INTO Folders (id, parent, category, name, metadata) VALUES (?, ?, ?, ?, ?);");
 		Prepare(SQL::DeleteFolder, "DELETE FROM Folders WHERE id = ?;");
 	}
 
@@ -180,13 +178,13 @@ namespace fig::io
 
 		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
 		{
-			Log("SQLite Error: No changes");
+			LogLn("SQLite Error: No changes");
 			return DatabaseError::ZeroChanges;
 		}
 
 		if (rc != SQLITE_DONE)
 		{
-			Log(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
+			LogLn(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
 			return DatabaseError::SQLError;
 		}
 
@@ -208,11 +206,10 @@ namespace fig::io
 			const char* pParentID = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
 			const char* pType = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
 			const char* pFolder = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-			const char* pSettings = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+			const char* pMetaData = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
 
 			int64_t createdAt = sqlite3_column_int64(stmt, 5);
 			int64_t updatedAt = sqlite3_column_int64(stmt, 6);
-			int64_t lastUsedAt = sqlite3_column_int64(stmt, 7);
 
 			fig::uuid assetID	= fig::uuid::from_str(pAssetID ? pAssetID : "");
 			fig::uuid parentID	= fig::uuid::from_str(pParentID ? pParentID : "");
@@ -227,9 +224,8 @@ namespace fig::io
 			asset.asset_subtype = subtype;
 			asset.SetMeta(MetaTag::CreatedAt, fig::timestamp(createdAt));
 			asset.SetMeta(MetaTag::UpdatedAt, fig::timestamp(updatedAt));
-			asset.SetMeta(MetaTag::LastUsedAt, fig::timestamp(lastUsedAt));
-			if (pSettings)
-				asset.SetUserSettingsJson(fig::string { pSettings });
+			if (pMetaData)
+				asset.SetUserSettingsJson(fig::string { pMetaData });
 
 			asset.sync_state.file_sync = AssetSyncState::Status::Indeterminate;
 			asset.sync_state.db_sync = AssetSyncState::Status::Synchronized;
@@ -241,7 +237,7 @@ namespace fig::io
 
 		if (rc != SQLITE_DONE)
 		{
-			Log(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
+			LogLn(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
 			return std::unexpected(DatabaseError::SQLError);
 		}
 
@@ -263,7 +259,7 @@ namespace fig::io
 			const char* pParentID = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
 			const char* pCategory = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
 			const char* pName = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
-			const char* pSettings = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+			const char* pMetaData = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
 
 			fig::uuid folderID	= fig::uuid::from_str(pFolderID ? pFolderID : "");
 			fig::uuid parentID	= fig::uuid::from_str(pParentID ? pParentID : "");
@@ -274,8 +270,9 @@ namespace fig::io
 			if (pName)
 				folder.name = fig::string { pName };
 			if (pCategory)
-				folder.category = FolderCategoryFromString(fig::string { pCategory });
-			
+				folder.category = FolderCategoryFromString(pCategory);
+			if (pMetaData)
+				folder.settings = fig::string { pMetaData };
 			if (!folder.id.empty())
 				result[folder.id] = std::move(folder);
 		}
@@ -284,7 +281,7 @@ namespace fig::io
 
 		if (rc != SQLITE_DONE)
 		{
-			Log(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
+			LogLn(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
 			return std::unexpected(DatabaseError::SQLError);
 		}
 
@@ -311,17 +308,15 @@ namespace fig::io
 				sqlite3_bind_text(stmt, 4, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
-			/*settings*/
-			if (auto& settings = asset.GetUserSettingsJson(); not settings.empty())
-				sqlite3_bind_text(stmt, 5, settings.c_str(), -1, SQLITE_TRANSIENT);
+			/*metadata*/
+			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
+				sqlite3_bind_text(stmt, 5, metadata.c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
 			/*createdAt*/
 			sqlite3_bind_int64(stmt, 6, static_cast<int64_t>(asset.GetCreatedAt()));
 			/*updatedAt*/
 			sqlite3_bind_int64(stmt, 7, static_cast<int64_t>(asset.GetUpdatedAt()));
-			/*lastUsedAt*/
-			sqlite3_bind_int64(stmt, 8, static_cast<int64_t>(asset.GetLastUsedAt()));
 		});
 	}
 
@@ -343,17 +338,15 @@ namespace fig::io
 				sqlite3_bind_text(stmt, 3, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 3, nullptr, -1, SQLITE_STATIC);
-			/*settings*/
-			if (auto& settings = asset.GetUserSettingsJson(); not settings.empty())
-				sqlite3_bind_text(stmt, 4, settings.c_str(), -1, SQLITE_TRANSIENT);
+			/*metadata*/
+			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
+				sqlite3_bind_text(stmt, 4, metadata.c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
 			/*updatedAt*/
 			sqlite3_bind_int64(stmt, 5, static_cast<int64_t>(asset.GetUpdatedAt()));
-			/*lastUsedAt*/
-			sqlite3_bind_int64(stmt, 6, static_cast<int64_t>(asset.GetLastUsedAt()));
 			/*id*/
-			sqlite3_bind_text(stmt, 7, asset.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 6, asset.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 		});
 
 		return DatabaseError::NoError;
@@ -380,17 +373,15 @@ namespace fig::io
 				sqlite3_bind_text(stmt, 4, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
-			/*settings*/
-			if (auto& settings = asset.GetUserSettingsJson(); not settings.empty())
-				sqlite3_bind_text(stmt, 5, settings.c_str(), -1, SQLITE_TRANSIENT);
+			/*metadata*/
+			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
+				sqlite3_bind_text(stmt, 5, metadata.c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
 			/*createdAt*/
 			sqlite3_bind_int64(stmt, 6, static_cast<int64_t>(asset.GetCreatedAt()));
 			/*updatedAt*/
 			sqlite3_bind_int64(stmt, 7, static_cast<int64_t>(asset.GetUpdatedAt()));
-			/*lastUsedAt*/
-			sqlite3_bind_int64(stmt, 8, static_cast<int64_t>(asset.GetLastUsedAt()));
 		});
 
 		return DatabaseError::NoError;
@@ -413,15 +404,15 @@ namespace fig::io
 			return DatabaseError::NotConnected;
 
 		return BindAndExecute(SQL::CreateFolder, [&folder](sqlite3_stmt* stmt) {
-			/*id*/
+			/* id */
 			sqlite3_bind_text(stmt, 1, folder.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
-			/*parent*/
+			/* parent */
 			sqlite3_bind_text(stmt, 2, folder.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
-			/*category*/
+			/* category */
 			sqlite3_bind_text(stmt, 3, FolderCategoryToString(folder.category).c_str(), -1, SQLITE_TRANSIENT);
-			/*name*/
+			/* name */
 			sqlite3_bind_text(stmt, 4, folder.name.c_str(), -1, SQLITE_TRANSIENT);
-			/*settings*/
+			/* metadata */
 			sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
 		});
 	}

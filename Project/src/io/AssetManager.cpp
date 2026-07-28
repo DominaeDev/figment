@@ -98,7 +98,6 @@ namespace fig::io
 		auto now = fig::now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
-		asset.SetMeta(MetaTag::LastUsedAt, now);
 		return asset;
 	}
 	
@@ -146,7 +145,6 @@ namespace fig::io
 		auto now = fig::now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
-		asset.SetMeta(MetaTag::LastUsedAt, now);
 		return asset;
 	}
 
@@ -166,7 +164,6 @@ namespace fig::io
 		auto now = fig::now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
-		asset.SetMeta(MetaTag::LastUsedAt, now);
 
 		// Copy data
 		asset.data.resize(data.size());
@@ -846,7 +843,6 @@ namespace fig::io
 			auto now = fig::now();
 			image_file.meta[MetaTag::CreatedAt] = now;
 			image_file.meta[MetaTag::UpdatedAt] = now;
-			image_file.meta[MetaTag::LastUsedAt] = now;
 			image_file.meta[MetaTag::ImageWidth] = static_cast<uint16_t>(pSurface->w);
 			image_file.meta[MetaTag::ImageHeight] = static_cast<uint16_t>(pSurface->h);
 			image_file.meta[MetaTag::ImageFormat] = static_cast<uint8_t>(0x04);

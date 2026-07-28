@@ -11,6 +11,7 @@
 #include "user/UserManager.h"
 
 using namespace fig::io;
+using namespace fig::user;
 
 namespace fig::gui
 {
@@ -120,7 +121,7 @@ namespace fig::gui
 		_pProfileName->SetText(profile.name);
 
 		_pPassword->Clear();
-		if (profile.has_password)
+		if (profile.state == UserProfile::State::Locked)
 		{
 			_pPassword->SetEnabled(true);
 			_pPassword->SetFocus(true);
@@ -170,15 +171,15 @@ namespace fig::gui
 		if (auto tryProfile = Global::GetUserManager().GetProfile(_currentProfileId))
 		{
 			auto& profile = *tryProfile;
-			if (profile.has_password)
+			if (profile.state == UserProfile::State::Open)
+			{
+				MainFrame::GetInstance().TrySignIn(profile, "");
+			}
+			else if (profile.state == UserProfile::State::Locked)
 			{
 				fig::string password = trim(_pPassword->GetText());
 				_pPassword->Clear();
 				MainFrame::GetInstance().TrySignIn(profile, password);
-			}
-			else
-			{
-				MainFrame::GetInstance().TrySignIn(profile, "");
 			}
 		}
 		return false;

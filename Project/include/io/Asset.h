@@ -108,7 +108,7 @@ namespace fig::io
 	};
 
 	fig::string FolderCategoryToString(FolderCategory format) noexcept;
-	FolderCategory FolderCategoryFromString(const fig::string& str) noexcept;
+	FolderCategory FolderCategoryFromString(fig::string_view str) noexcept;
 
 	struct AssetFolder
 	{
@@ -116,6 +116,7 @@ namespace fig::io
 		fig::uuid parent_id {};
 		fig::string name {};
 		FolderCategory category {};
+		fig::string settings {};
 	};
 
 	class Asset
@@ -178,7 +179,6 @@ namespace fig::io
 
 		constexpr fig::timestamp GetCreatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::CreatedAt).value_or({}); }
 		constexpr fig::timestamp GetUpdatedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::UpdatedAt).value_or({}); }
-		constexpr fig::timestamp GetLastUsedAt() const noexcept { return GetMeta<fig::timestamp>(MetaTag::LastUsedAt).value_or({}); }
 
 		bool HasReferenceTo(const fig::uuid& assetId) const
 		{

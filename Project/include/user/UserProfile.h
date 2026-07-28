@@ -14,7 +14,15 @@ namespace fig::user
 		fig::string name;
 		fig::auth::UserAuth auth {};
 		fig::auth::UserAuth recovery {};
-		bool has_password {};
+
+		enum class State : uint8_t
+		{
+			Open		= 0x00,
+			Locked		= 0x01,
+			Recovered	= 0x02,
+		};
+
+		State state {};
 
 		inline constexpr bool IsValid() const noexcept
 		{

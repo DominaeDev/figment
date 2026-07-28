@@ -25,9 +25,8 @@ namespace fig::io
 		bool IsConnected() const noexcept { return _pDB != nullptr; }
 
 	private:
-		bool Connect() noexcept;
+		DatabaseError Connect() noexcept;
 		bool Disconnect() noexcept;
-		bool CreateDatabaseAndConnect() noexcept;
 		void PrepareStatements() noexcept;
 
 	private:

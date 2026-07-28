@@ -41,6 +41,7 @@ namespace fig::io
 		enum class SQL
 		{
 			CreateAssetsTable,
+
 			FetchAssets,
 			CreateAsset,
 			UpdateAsset,

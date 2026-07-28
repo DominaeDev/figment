@@ -84,7 +84,7 @@ namespace fig::io
 			meta.parentId = asset.parent_id;
 			meta.createdAt = asset.GetCreatedAt();
 			meta.updatedAt = asset.GetUpdatedAt();
-			meta.lastUsedAt = asset.GetLastUsedAt();
+			meta.lastUsedAt = asset.GetUpdatedAt();
 
 			if (asset.asset_type == AssetType::Character)
 			{
@@ -100,7 +100,7 @@ namespace fig::io
 
 				// Last used => last chat
 				if (auto lastChat = FindLastChatWith(asset.id))
-					meta.lastUsedAt = std::max(meta.lastUsedAt, lastChat.value().GetLastUsedAt());
+					meta.lastUsedAt = std::max(meta.lastUsedAt, lastChat.value().GetUpdatedAt());
 			}
 
 			_metaData[assetId] = meta;
@@ -398,7 +398,7 @@ namespace fig::io
 			| std::views::transform([](auto& a) { return std::cref(a); })
 			| std::ranges::to<std::vector>();
 
-		std::ranges::sort(chatLogAssets, std::ranges::greater(), [](auto& a) { return a.get().GetLastUsedAt(); });
+		std::ranges::sort(chatLogAssets, std::ranges::greater(), [](auto& a) { return a.get().GetUpdatedAt(); });
 
 		if (bLoad)
 		{
@@ -458,7 +458,7 @@ namespace fig::io
 
 		if (not chatLogs.empty())
 		{
-			std::ranges::sort(chatLogs, std::ranges::greater(), [](auto& a) { return a.get().GetLastUsedAt(); });
+			std::ranges::sort(chatLogs, std::ranges::greater(), [](auto& a) { return a.get().GetUpdatedAt(); });
 			return chatLogs[0].get();
 		}
 		return nullref;

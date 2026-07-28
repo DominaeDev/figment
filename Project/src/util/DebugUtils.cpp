@@ -21,8 +21,8 @@ namespace fig
 		if constexpr (Debugging)
 		{
 //			ImportTestCharacters("./import/characters");
-//			ShuffleCards();
 //			CreateModelSettings();
+//			ShuffleCards();
 //			EraseChats();
 		}
 	}
@@ -105,7 +105,6 @@ namespace fig
 				{
 					auto& asset = assetRef.get();
 					asset.SetMeta(MetaTag::CreatedAt, now);
-					asset.SetMeta(MetaTag::LastUsedAt, now);
 					asset.SetMeta(MetaTag::UpdatedAt, now);
 					now -= std::chrono::milliseconds(100);
 				}
