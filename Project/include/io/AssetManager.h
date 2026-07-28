@@ -123,8 +123,7 @@ namespace fig::io
 		bool LoadMetaData(AssetType assetType) noexcept;
 		bool LoadAssetData() noexcept;
 
-		bool UpdateAssetOnDisk(Asset& asset);
-		bool UpdateAssetInDatabase(Asset& asset);
+		bool WriteAssetToDisk(Asset& asset);
 
 		/* Internal; Mutex is locked */
 		fig::expected_ref<Asset, FileError> LoadAsset_Internal(Asset& asset) noexcept;

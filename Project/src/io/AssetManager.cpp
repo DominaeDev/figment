@@ -323,28 +323,45 @@ namespace fig::io
 		std::scoped_lock lock { _assetsMutex };
 		
 		bool bSaved = false;
+
+		// Write files
 		for (auto& kvp : _assets)
 		{
 			auto& asset = kvp.second;
-			if (asset.sync_state.error == AssetSyncState::Error::NoError)
+			if (asset.sync_state.ShouldWriteToDisk())
 			{
-				if (asset.sync_state.ShouldWriteToDisk())
-				{
-					assert(asset.sync_state.has_data and not asset.data.empty());
-					UpdateAssetOnDisk(asset);
-					bSaved = true;
-				}
-				if (asset.sync_state.ShouldWriteToDatabase())
-				{
-					UpdateAssetInDatabase(asset);
-					bSaved = true;
-				}
+				assert(asset.sync_state.has_data and not asset.data.empty());
+				WriteAssetToDisk(asset);
+				bSaved = true;
 			}
 		}
+
+		// Write to index database
+		auto changedAssets = _assets
+			| std::views::filter([](auto& kvp) { return kvp.second.sync_state.ShouldWriteToDatabase(); })
+			| std::views::transform([](auto& kvp) { return std::ref(kvp.second); })
+			| std::ranges::to<std::vector>();
+		
+		if (not changedAssets.empty())
+		{
+			auto& db = GetDatabase();
+			if (auto result = db.UpsertAssets(changedAssets))
+			{
+				for (auto& assetRef : changedAssets)
+					assetRef.get().sync_state.db_sync = AssetSyncState::Status::Synchronized;
+
+				LogLn(std::format("Wrote {} asset(s) to index database", result.value()));
+			}
+			else
+			{
+				LogLn("Error occurred when updating index database");
+			}
+		}
+
 		return bSaved;
 	}
 
-	bool AssetManager::UpdateAssetOnDisk(Asset& asset)
+	bool AssetManager::WriteAssetToDisk(Asset& asset)
 	{
 		auto file = asset.ToFile();
 		AssetFileWriter writer(_profilePath, _profileAuthKey);
@@ -352,32 +369,6 @@ namespace fig::io
 		{
 			asset.sync_state.file_sync = AssetSyncState::Status::Synchronized;
 			return true;
-		}
-		return false;
-	}
-
-	bool AssetManager::UpdateAssetInDatabase(Asset& asset)
-	{
-		auto& db = GetDatabase();
-		if (asset.sync_state.db_sync == AssetSyncState::Status::Created)
-		{
-			if (db.CreateAsset(asset) == DatabaseError::NoError)
-			{
-				asset.sync_state.db_sync = AssetSyncState::Status::Synchronized;
-				return true;
-			}
-		}
-		else if (asset.sync_state.db_sync == AssetSyncState::Status::Modified)
-		{
-			if (db.UpdateAsset(asset) == DatabaseError::NoError)
-			{
-				asset.sync_state.db_sync = AssetSyncState::Status::Synchronized;
-				return true;
-			}
-		}
-		else
-		{
-			assert(false && "Invalid asset syncronization state");
 		}
 		return false;
 	}

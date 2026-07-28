@@ -44,7 +44,7 @@ namespace fig::user
 
 	static void GenerateLUT()
 	{
-		static constexpr fig::const_string Symbols { "23456789ABCDEFGHJKLMNPQRSTUVXW" };
+		static constexpr fig::const_string Symbols { "23456789ABCDEFGHJKLMNPQRTUVXW" }; // 0:O, 1:I, 2:Z, 5:S
 		static std::mt19937_64 rng { std::default_random_engine{}() };
 		static std::uniform_int_distribution<size_t> dist(0, Symbols.size() - 1);
 
@@ -109,21 +109,18 @@ namespace fig::user
 			.has_password { hasPassword },
 		};
 
-		if (hasPassword)
+		// Generate recovery key
+		AuthKey recoveryKey;
+		AuthChallenge recoveryChallenge;
+		if (CreateRecoveryFile(profile, password, recoveryChallenge, recoveryKey))
 		{
-			// Generate recovery key
-			AuthKey recoveryKey;
-			AuthChallenge recoveryChallenge;
-			if (CreateRecoveryFile(profile, password, recoveryChallenge, recoveryKey))
-			{
-				profile.recovery = UserAuth {
-					.challenge = recoveryChallenge,
-					.salt = authSalt,
-				};
+			profile.recovery = UserAuth {
+				.challenge = recoveryChallenge,
+				.salt = authSalt,
+			};
 
-				auto code = RecoveryKeyToCode(recoveryKey);
-				LogLn(std::format("Recovery code for user {}: {}", profile.id.to_str(), code));
-			}
+			auto code = RecoveryKeyToCode(recoveryKey);
+			LogLn(std::format("Recovery code for user {}: {}", profile.id.to_str(), code));
 		}
 
 		if (db.CreateProfile(profile) == DatabaseError::NoError)
@@ -431,7 +428,15 @@ namespace fig::user
 	{
 		fig::string formatted = code
 			| std::views::filter([](auto& c) { return std::isalnum((int)c); })
-			| std::views::transform([](auto& c) { return (char)std::toupper((int)c); })
+			| std::views::transform([](auto ch) { 
+				ch = (char)std::toupper((int)ch);
+				switch (ch)
+				{
+				case 'S': return '5';
+				case 'Z': return '2';
+				default: return ch;
+				}
+			})
 			| std::ranges::to<fig::string>();
 
 		if (formatted.size() != sizeof(AuthKey) * 2)

@@ -1,21 +1,22 @@
 #include <pch.h>
 #include "io/IndexDatabase.h"
 #include "io/FileUtility.h"
+#include "io/SQLTransaction.h"
 #include <sqlite3.h>
 
 using namespace fig::auth;
 
-constexpr fig::const_string SQL_CreateTables =
+static constexpr fig::const_string SQL_CreateTables =
 	"CREATE TABLE Assets ("
 	"	id          TEXT     PRIMARY KEY NOT NULL,"
-	"	parent      TEXT     NOT NULL,"
+	"	parent      TEXT"
 	"	type        TEXT     NOT NULL,"
 	"   folder      TEXT,"
 	"	settings    TEXT     NOT NULL ON CONFLICT REPLACE DEFAULT [{}],"
 	"	createdAt   INTEGER  DEFAULT (CURRENT_TIMESTAMP) NOT NULL,"
 	"	updatedAt   INTEGER  NOT NULL DEFAULT (CURRENT_TIMESTAMP),"
 	"	lastUsedAt  INTEGER  NOT NULL DEFAULT (CURRENT_TIMESTAMP),"
-	"	FOREIGN KEY (parent) REFERENCES Assets (id) ON DELETE RESTRICT ON UPDATE CASCADE,"
+	"	FOREIGN KEY (parent) REFERENCES Assets (id) ON DELETE CASCADE ON UPDATE CASCADE,"
 	"   FOREIGN KEY (folder) REFERENCES Folders (id) ON DELETE SET NULL ON UPDATE CASCADE"
 	");"
 
@@ -26,7 +27,34 @@ constexpr fig::const_string SQL_CreateTables =
 	"	name     TEXT NOT NULL,"
 	"	settings TEXT NOT NULL DEFAULT [{}],"
 	"	FOREIGN KEY (parent) REFERENCES Folders(id) ON DELETE SET NULL ON UPDATE CASCADE"
-	");";
+	");"
+
+	"CREATE INDEX idx_assets_parent ON Assets (parent);"
+	"CREATE INDEX idx_assets_folder ON Assets (folder);"
+	"CREATE INDEX idx_folders_parent ON Folders (parent);";
+
+static constexpr fig::const_string SQL_FetchAsset =
+	"SELECT id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt FROM Assets;";
+
+static constexpr fig::const_string SQL_InsertAsset =
+	"INSERT INTO Assets (id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+
+static constexpr fig::const_string SQL_UpdateAsset =
+	"UPDATE Assets SET parent = ?, type = ?, folder = ?, settings = ?, updatedAt = ?, lastUsedAt = ? WHERE id = ?;";
+
+static constexpr fig::const_string SQL_DeleteAsset =
+	"DELETE FROM Assets WHERE id = ?;";
+
+static constexpr fig::const_string SQL_UpsertAsset =
+	"INSERT INTO Assets (id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt)"
+	"VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+	"ON CONFLICT (id) DO UPDATE SET"
+	"	parent = excluded.parent,"
+	"	type = excluded.type,"
+	"	folder = excluded.folder,"
+	"	settings = excluded.settings,"
+	"	updatedAt = excluded.updatedAt,"
+	"	lastUsedAt = excluded.lastUsedAt;";
 
 namespace fig::io
 {
@@ -117,19 +145,22 @@ namespace fig::io
 		return false;
 	}
 
-	#define SQL_PREPARE(ENUM, SQL) sqlite3_prepare_v2(_pDB, SQL, -1, &_sqlStatements[ENUM], nullptr)
-
 	void IndexDatabase::PrepareStatements() noexcept
 	{
-		// Prepare statements
-		SQL_PREPARE(SQL::FetchAssets, "SELECT id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt FROM Assets;");
-		SQL_PREPARE(SQL::CreateAsset, "INSERT INTO Assets (id, parent, type, folder, settings, createdAt, updatedAt, lastUsedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
-		SQL_PREPARE(SQL::UpdateAsset, "UPDATE Assets SET parent = ?, type = ?, folder = ?, settings = ?, updatedAt = ?, lastUsedAt = ? WHERE id = ?;");
-		SQL_PREPARE(SQL::DeleteAsset, "DELETE FROM Assets WHERE id = ?;");
+		auto Prepare = [this](SQL op, fig::string_view sql) {
+			sqlite3_prepare_v2(_pDB, sql.data(), -1, &_sqlStatements[op], nullptr);
+		};
 
-		SQL_PREPARE(SQL::FetchFolders, "SELECT id, parent, category, name, settings FROM Folders;");
-		SQL_PREPARE(SQL::CreateFolder, "INSERT INTO Folders (id, parent, category, name, settings) VALUES (?, ?, ?, ?, ?);");
-		SQL_PREPARE(SQL::DeleteFolder, "DELETE FROM Folders WHERE id = ?;");
+		// Prepare statements
+		Prepare(SQL::FetchAssets, SQL_FetchAsset);
+		Prepare(SQL::CreateAsset, SQL_InsertAsset);
+		Prepare(SQL::UpdateAsset, SQL_UpdateAsset);
+		Prepare(SQL::UpsertAsset, SQL_UpsertAsset);
+		Prepare(SQL::DeleteAsset, SQL_DeleteAsset);
+
+		Prepare(SQL::FetchFolders, "SELECT id, parent, category, name, settings FROM Folders;");
+		Prepare(SQL::CreateFolder, "INSERT INTO Folders (id, parent, category, name, settings) VALUES (?, ?, ?, ?, ?);");
+		Prepare(SQL::DeleteFolder, "DELETE FROM Folders WHERE id = ?;");
 	}
 
 	DatabaseError IndexDatabase::BindAndExecute(SQL statement, std::function<void(sqlite3_stmt*)> fnBind)
@@ -294,7 +325,7 @@ namespace fig::io
 		if (!_pDB)
 			return DatabaseError::NotConnected;
 
-		return BindAndExecute(SQL::UpdateAsset, [&asset](sqlite3_stmt* stmt) {
+		return BindAndExecute(SQL::UpsertAsset, [&asset](sqlite3_stmt* stmt) {
 			/*parent*/
 			sqlite3_bind_text(stmt, 1, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/*type*/
@@ -315,6 +346,40 @@ namespace fig::io
 			sqlite3_bind_int64(stmt, 6, static_cast<int64_t>(asset.GetLastUsedAt()));
 			/*id*/
 			sqlite3_bind_text(stmt, 7, asset.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+		});
+
+		return DatabaseError::NoError;
+	}
+
+
+	DatabaseError IndexDatabase::UpsertAsset(const Asset& asset) noexcept
+	{
+		if (!_pDB)
+			return DatabaseError::NotConnected;
+
+		return BindAndExecute(SQL::UpsertAsset, [&asset](sqlite3_stmt* stmt) {
+			/*id*/
+			sqlite3_bind_text(stmt, 1, asset.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			/*parent*/
+			sqlite3_bind_text(stmt, 2, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			/*type*/
+			sqlite3_bind_text(stmt, 3, AssetTypeToString(asset.asset_type, asset.asset_subtype).c_str(), -1, SQLITE_TRANSIENT);
+			/*folder*/
+			if (not asset.folder_id.empty())
+				sqlite3_bind_text(stmt, 4, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
+			/*settings*/
+			if (auto& settings = asset.GetUserSettingsJson(); not settings.empty())
+				sqlite3_bind_text(stmt, 5, settings.c_str(), -1, SQLITE_TRANSIENT);
+			else
+				sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
+			/*createdAt*/
+			sqlite3_bind_int64(stmt, 6, static_cast<int64_t>(asset.GetCreatedAt()));
+			/*updatedAt*/
+			sqlite3_bind_int64(stmt, 7, static_cast<int64_t>(asset.GetUpdatedAt()));
+			/*lastUsedAt*/
+			sqlite3_bind_int64(stmt, 8, static_cast<int64_t>(asset.GetLastUsedAt()));
 		});
 
 		return DatabaseError::NoError;
@@ -361,4 +426,48 @@ namespace fig::io
 		});
 	}
 
+	std::expected<int32_t, DatabaseError> IndexDatabase::UpsertAssets(const fig::ref_vector<Asset>& assets) noexcept
+	{
+		if (!_pDB)
+			return std::unexpected(DatabaseError::NotConnected);
+
+		int32_t total_changes = 0;
+		for (auto const& chunk : assets | std::views::chunk(32))
+		{
+			SqlTransaction transaction(_pDB);
+			for (auto const& asset : chunk)
+			{
+				if (auto upsert_result = UpsertAsset(asset); upsert_result != DatabaseError::NoError)
+					return std::unexpected(upsert_result);
+			}
+			
+			if (auto commit_result = transaction.Commit())
+				total_changes += commit_result.value();
+			else
+				return std::unexpected(commit_result.error());
+		}
+
+		return total_changes;
+	}
+
+	std::expected<int32_t, DatabaseError> IndexDatabase::DeleteAssets(std::span<fig::uuid> assetIDs) noexcept
+	{
+		if (!_pDB)
+			return std::unexpected(DatabaseError::NotConnected);
+
+		int32_t total_changes = 0;
+		for (auto const& chunk : assetIDs | std::views::chunk(32))
+		{
+			SqlTransaction transaction(_pDB);
+			for (auto const& asset : chunk)
+				DeleteAsset(asset);
+
+			if (auto result = transaction.Commit())
+				total_changes += result.value();
+			else
+				return std::unexpected(result.error());
+		}
+
+		return total_changes;
+	}
 }
