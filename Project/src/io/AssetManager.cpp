@@ -71,14 +71,48 @@ namespace fig::io
 		SaveModifiedAssets();
 	}
 
-	const Asset& AssetManager::CreateEmptyAsset(AssetType type, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateAsset(AssetType type, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateEmptyAsset_NoLock(make_asset_type(type), parent);
+		return CreateAsset_NoLock(make_asset_type(type), parent);
+	}
+	
+	const Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_NoLock(make_asset_type(type), std::move(data), parent, bChecksum);
 	}
 
-	Asset& AssetManager::CreateEmptyAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_NoLock(make_asset_type(type), data, parent, bChecksum);
+	}
+
+	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_NoLock(type, std::move(data), parent, bChecksum);
+	}
+
+	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_NoLock(type, data, parent, bChecksum);
+	}
+
+	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return CreateImageAsset_NoLock(subtype, surface, parent);
+	}
+
+	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
@@ -94,50 +128,8 @@ namespace fig::io
 		asset.SetMeta(MetaTag::UpdatedAt, now);
 		return asset;
 	}
-	
-	const Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_NoLock(make_asset_type(type), std::move(data), parent);
-	}
-
-	const Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-
-		return CreateAsset_NoLock(make_asset_type(type), data, parent);
-	}
-
-	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-
-		return CreateAsset_NoLock(make_asset_type(type, format), std::move(data), parent);
-	}
-
-	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-
-		return CreateAsset_NoLock(make_asset_type(type, format), data, parent);
-	}
-
-	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-
-		return CreateAsset_NoLock(type, std::move(data), parent);
-	}
-
-	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-
-		return CreateAsset_NoLock(type, data, parent);
-	}
-
-	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
@@ -152,10 +144,13 @@ namespace fig::io
 		auto now = fig::now();
 		asset.SetMeta(MetaTag::CreatedAt, now);
 		asset.SetMeta(MetaTag::UpdatedAt, now);
+
+		if (bChecksum)
+			asset.CalculateChecksum();
 		return asset;
 	}
 
-	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
@@ -174,40 +169,15 @@ namespace fig::io
 		// Copy data
 		asset.data.resize(data.size());
 		std::memcpy(asset.data.data(), data.data(), data.size());
+
+		if (bChecksum)
+			asset.CalculateChecksum();
 		return asset;
-	}
-
-	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-		return CreateImageAsset_NoLock(subtype, format, std::move(data), parent);
-	}
-
-	Asset& AssetManager::CreateImageAsset_NoLock(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
-	{
-		auto& asset = CreateAsset_NoLock(make_asset_type(AssetType::Image, subtype, format), std::move(data), parent);
-		asset.CalculateChecksum();
-		return asset;
-	}
-
-	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-
-		auto& asset = CreateAsset_NoLock(make_asset_type(AssetType::Image, subtype, format), data, parent);
-		asset.CalculateChecksum();
-		return asset;
-	}
-
-	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
-	{
-		std::scoped_lock lock { _assetsMutex };
-		return CreateImageAsset_NoLock(subtype, surface, parent);
 	}
 
 	Asset& AssetManager::CreateImageAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
 	{
-		auto& asset = CreateEmptyAsset_NoLock(make_asset_type(AssetType::Image, subtype, DataFormat::ImageUncompressed), parent);
+		auto& asset = CreateAsset_NoLock(make_asset_type(AssetType::Image, subtype, DataFormat::ImageUncompressed), parent);
 		if (!surface.get())
 			return asset; // Error
 
@@ -549,7 +519,7 @@ namespace fig::io
 		{
 			if (file.value().data.empty())
 			{
-				auto k = asset.GetFileName();
+//				auto k = asset.GetFileName();
 				asset.sync_state.error = AssetSyncState::Error::Invalid;
 				return std::unexpected(FileError::ReadError);
 			}
@@ -661,16 +631,10 @@ namespace fig::io
 
 	size_t AssetManager::DeleteAssetFiles_NoLock(std::span<fig::uuid> assetIds) noexcept
 	{
-		auto fnAssetFilename = [](const fig::uuid& id) -> fig::path {
-			return fig::path((fig::string)id
-				| std::ranges::views::filter([](char c) { return c != '-'; })
-				| std::ranges::to<fig::string>());
-		};
-
 		size_t count = 0uz;
 		for (auto& assetId : assetIds)
 		{
-			fig::path path = _profilePath / fnAssetFilename(assetId);
+			fig::path path = _profilePath / filename_from_uuid(assetId);
 			if (std::filesystem::exists(path) and std::filesystem::is_regular_file(path))
 			{
 				std::error_code err;
@@ -761,13 +725,13 @@ namespace fig::io
 			// Create asset
 			fig::bytes characterData;
 			character.SaveToXml(characterData);
-			auto& characterAsset = CreateAsset_NoLock(make_asset_type(AssetType::Character, DataFormat::TextXml), characterData, {});
+			auto& characterAsset = CreateAsset_NoLock(make_asset_type(AssetType::Character, DataFormat::TextXml), characterData, {}, false);
 
 			// Load portrait image(s)
 			if (auto file = fig::io::ReadFile(filename))
 			{
 				// Create portrait asset
-				auto& portraitAsset = CreateImageAsset_NoLock(ImageAssetType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
+				auto& portraitAsset = CreateAsset_NoLock(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait, DataFormat::ImagePng), std::move(file.value()), characterAsset.id, true);
 
 				// Create cover card
 				if (auto coverImage = LoadImage(filename) //! @todo: load only once
@@ -814,7 +778,7 @@ namespace fig::io
 		// Create asset
 		fig::bytes scenarioData;
 		scenario.SaveToXml(scenarioData);
-		auto& scenarioAsset = CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, {});
+		auto& scenarioAsset = CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, {}, false);
 
 		// Load scenario image
 /*		if (not empty_or_whitespace(scenario.imageFilename))

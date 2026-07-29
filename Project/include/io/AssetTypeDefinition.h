@@ -50,8 +50,9 @@ namespace fig::io
 
 	enum class ChatAssetType : uint8_t
 	{
-		Instance = 0x00,
-		Log = 0x01,
+		Undefined			= 0x00,
+		Instance			= 0x01,
+		Log					= 0x02,
 	};
 
 	template <typename T>

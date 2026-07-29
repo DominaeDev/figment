@@ -350,4 +350,11 @@ namespace fig
 	{
 		return std::span<const T> { &value, 1 };
 	}
+
+	inline fig::path filename_from_uuid(const fig::uuid& id)
+	{
+		return fig::path((fig::string)id
+			| std::ranges::views::filter([](char c) { return c != '-'; })
+			| std::ranges::to<fig::string>());
+	}
 }

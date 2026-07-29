@@ -202,9 +202,14 @@ namespace fig::io
 			return unexpected(imported.error());
 	}
 
-	AssetManager& UserContentManager::GetAssetManager()
+	AssetManager& UserContentManager::GetAssets()
 	{
 		return *_pAssetMngr;
+	}
+
+	fig::optional_cref<Asset> UserContentManager::GetLargePortraitForCharacter(const fig::uuid& characterId) const
+	{
+		return _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterId);
 	}
 
 	fig::expected_ref<fig::sdl::Texture, FileError> UserContentManager::GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept
@@ -502,5 +507,19 @@ namespace fig::io
 			InvalidateChatCount();
 
 		return true;
+	}
+
+	fig::cref_vector<Asset> UserContentManager::GetCharacters() const noexcept
+	{ 
+		return _pAssetMngr->GetAssetsOfType(AssetType::Character)
+			| std::views::transform([](auto& a) { return std::cref(a); })
+			| std::ranges::to<std::vector>();
+	}
+
+	fig::cref_vector<Asset> UserContentManager::GetScenarios() const noexcept
+	{ 
+		return _pAssetMngr->GetAssetsOfType(AssetType::Scenario)
+			| std::views::transform([](auto& a) { return std::cref(a); })
+			| std::ranges::to<std::vector>();
 	}
 }

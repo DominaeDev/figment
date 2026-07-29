@@ -221,4 +221,9 @@ namespace fig::io
 
 		sync_state.InvalidateData();
 	}
+
+	fig::path Asset::GetFileName() const noexcept
+	{
+		return filename_from_uuid(id);
+	}
 }

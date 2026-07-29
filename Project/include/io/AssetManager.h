@@ -49,16 +49,11 @@ namespace fig::io
 		explicit AssetManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey, int32_t worker_threads = 2);
 		virtual ~AssetManager();
 
-		const Asset& CreateEmptyAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
-
-		const Asset& CreateImageAsset(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateImageAsset(ImageAssetType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
+		const Asset& CreateAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
+		const Asset& CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
+		const Asset& CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
+		const Asset& CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
+		const Asset& CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;
 
 		bool DeleteAsset(fig::uuid assetId) noexcept;
@@ -84,7 +79,7 @@ namespace fig::io
 		void LoadAssetData(const std::vector<fig::uuid>& assetIds) noexcept;
 		void LoadAssetData(const fig::ref_vector<Asset>& assets) noexcept;
 		
-		auto GetAssets() noexcept { return _assets | std::views::values; }
+//		auto GetAssets() noexcept { return _assets | std::views::values; }
 		auto GetAssets() const noexcept { return _assets | std::views::values; }
 		auto GetAssetsOfType(AssetType assetType) const noexcept { 
 			return _assets 
@@ -97,9 +92,6 @@ namespace fig::io
 				| std::views::filter([assetType, subtype](auto&& kvp) { return (kvp.second).type.IsOfType(assetType, subtype); })
 				| std::views::values;
 		}
-
-		auto GetCharacterAssets() const noexcept { return GetAssetsOfType(AssetType::Character); }
-		auto GetScenarioAssets() const noexcept { return GetAssetsOfType(AssetType::Scenario); }
 
 		template <typename Fn>
 		decltype(auto) ModifyAsset(const fig::uuid& assetId, Fn fn)
@@ -172,13 +164,12 @@ namespace fig::io
 		bool ModifyAsset_Bool(const fig::uuid& assetId, std::function<bool(Asset&)> fn);
 		bool ModifyAsset_Bool(const Asset& asset, std::function<bool(Asset&)> fn);
 
-
 		/* Internal; Mutex is locked */
-		Asset& CreateEmptyAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept;
-		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept;
-		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept;
-		Asset& CreateImageAsset_NoLock(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
+		Asset& CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept;
+		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept;
+		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept;
 		Asset& CreateImageAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
+
 		fig::expected_ref<Asset, FileError> ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format);
 		fig::expected_ref<Asset, FileError> ImportScenario_NoLock(const fig::path& filename);
 

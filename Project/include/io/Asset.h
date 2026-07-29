@@ -95,12 +95,7 @@ namespace fig::io
 		void SetUserSettings(const ContentUserSettings& settings) noexcept;
 		void SetUserSettingsJson(const fig::string& json) noexcept { _settings = json; }
 
-		fig::path GetFileName() const noexcept
-		{
-			return fig::path(id.to_str()
-				| std::ranges::views::filter([](char c) { return c != '-'; })
-				| std::ranges::to<fig::string>());
-		}
+		fig::path GetFileName() const noexcept;
 
 		AssetFile ToFile() const noexcept;
 		void FromFile(const AssetFile& file) noexcept;

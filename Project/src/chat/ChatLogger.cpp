@@ -99,7 +99,7 @@ namespace fig::chat
 			return false;
 		}
 
-		auto& assetMngr = Global::GetUserContent().GetAssetManager();
+		auto& assetMngr = Global::GetUserContent().GetAssets();
 
 		if (_assetId.empty())
 		{

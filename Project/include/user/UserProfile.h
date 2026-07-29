@@ -32,10 +32,7 @@ namespace fig::user
 
 		fig::path GetPath() const noexcept
 		{
-			return fig::path(Constants::Paths::ProfilesFolder) / 
-				fig::path(id.to_str()
-					| std::ranges::views::filter([](char c) { return c != '-'; })
-					| std::ranges::to<fig::string>());
+			return fig::path(Constants::Paths::ProfilesFolder) / filename_from_uuid(id);
 		}
 	};
 }

@@ -43,18 +43,19 @@ namespace fig::gui
 	void CardList::CreateCards(CardType cardType)
 	{
 		// Create cards
-		auto& assetMngr = Global::GetUserContent().GetAssetManager();
+		auto& userContent = Global::GetUserContent();
 
 		Reset();
 
 		if (cardType == CardType::Scenario)
 		{
 			// Find scenarios
-			auto scenarios = assetMngr.GetScenarioAssets() | std::ranges::to<std::vector>();
+			auto scenarios = userContent.GetScenarios();
 			std::sort(scenarios.begin(), scenarios.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
 
-			for (auto& asset : scenarios)
+			for (auto& asset_ref : scenarios)
 			{
+				auto& asset = asset_ref.get();
 				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}", asset.id.to_str()));
 				auto pCard = CreateControl<ScenarioCard>(asset.id, _cardSize);
 				_pGridSizer->Add(pCard);
@@ -66,11 +67,12 @@ namespace fig::gui
 		// Find characters
 		if (cardType == CardType::Character)
 		{
-			auto characters = assetMngr.GetCharacterAssets() | std::ranges::to<std::vector>();
-			std::sort(characters.begin(), characters.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
+			auto characters = userContent.GetCharacters();
+			std::sort(characters.begin(), characters.end(), [](const Asset& a, const Asset& b) { return a.GetCreatedAt() < b.GetCreatedAt(); });
 
-			for (auto& asset : characters)
+			for (auto& asset_ref : characters)
 			{
+				auto& asset = asset_ref.get();
 				DEBUG_MEASURE_BEGIN(std::format("Character card {}", asset.id.to_str()));
 				auto pCard = CreateControl<CharacterCard>(asset.id, _cardSize);
 				pCard->SetDelegate([this](CoverCard& card, CardEvent event) { OnCardEvent(card, event); });
@@ -86,7 +88,7 @@ namespace fig::gui
 		int32_t priority = 0;
 		for (auto& pCard : _cards)
 		{
-			auto request = assetMngr.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, priority--);
+			auto request = userContent.GetAssets().LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, priority--);
 			pCard->SetPendingCoverImage(std::move(request.future));
 			pCard->ShowTags(_bEnableTags);
 

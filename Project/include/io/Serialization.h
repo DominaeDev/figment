@@ -223,11 +223,7 @@ namespace fig::io
 
 		fig::string GetFileName() const noexcept
 		{
-			return std::format("{0}.{1}",
-				asset_id.to_str()
-				| std::ranges::views::filter([](char c) { return c != '-'; })
-				| std::ranges::to<fig::string>(),
-				fig::string(Constants::Paths::AssetFileExt));
+			return std::format("{}.{}", filename_from_uuid(asset_id).string(), Constants::Paths::AssetFileExt);
 		}
 
 		static constexpr size_t MaxMetaStringLen { std::numeric_limits<uint8_t>::max() - 1 };

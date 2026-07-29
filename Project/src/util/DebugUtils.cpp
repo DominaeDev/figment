@@ -49,10 +49,10 @@ namespace fig
 				auto& content = userMngr.GetContent();
 
 				// Delete all characters
-				auto remove_characters = content.GetAssetManager().GetAssetsOfType(AssetType::Character)
-					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+				auto remove_characters = content.GetCharacters()
+					| std::views::transform([](auto& a) -> fig::uuid { return a.get().id; })
 					| std::ranges::to<std::vector>();
-				content.GetAssetManager().DeleteAssets(remove_characters);
+				content.GetAssets().DeleteAssets(remove_characters);
 
 				content.ImportCharactersInDirectory(path, max_count);
 				userMngr.SignOut();
@@ -70,10 +70,10 @@ namespace fig
 			{
 				auto& content = userMngr.GetContent();
 
-				auto remove_scenarios = content.GetAssetManager().GetAssetsOfType(AssetType::Scenario)
-					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+				auto remove_scenarios = content.GetScenarios()
+					| std::views::transform([](auto& a) -> fig::uuid { return a.get().id; })
 					| std::ranges::to<std::vector>();
-				content.GetAssetManager().DeleteAssets(remove_scenarios);
+				content.GetAssets().DeleteAssets(remove_scenarios);
 
 				auto _ignored = content.ImportScenario(fig::path("./import/scenario.xml"));
 				userMngr.SignOut();
@@ -91,9 +91,7 @@ namespace fig
 			{
 				auto& content = userMngr.GetContent();
 
-				auto characterAssets = content.GetAssetManager().GetAssetsOfType(AssetType::Character)
-					| std::views::transform([](auto& a) { return std::ref(a); })
-					| std::ranges::to<std::vector>();
+				auto characterAssets = content.GetCharacters();
 
 				auto rng = std::random_device {};
 				std::ranges::shuffle(characterAssets, rng);
@@ -102,7 +100,7 @@ namespace fig
 				auto now = fig::now();
 				for (auto& assetRef : characterAssets)
 				{
-					content.GetAssetManager().ModifyAsset(assetRef.get(), [&now](auto& asset) {
+					content.GetAssets().ModifyAsset(assetRef.get(), [&now](auto& asset) {
 						asset.SetMeta(MetaTag::CreatedAt, now);
 						asset.SetMeta(MetaTag::UpdatedAt, now);
 						now -= std::chrono::milliseconds(100);
@@ -124,7 +122,7 @@ namespace fig
 			{
 				if (auto profile = userMngr.GetActiveProfile())
 				{
-					auto& assetMngr = userMngr.GetContent().GetAssetManager();
+					auto& assetMngr = userMngr.GetContent().GetAssets();
 					assetMngr.CreateProfilePicture(*profile, path);
 					userMngr.SignOut();
 				}
@@ -144,7 +142,7 @@ namespace fig
 
 			if (userMngr.SignInDefaultProfile())
 			{
-				auto& assetMngr = userMngr.GetContent().GetAssetManager();
+				auto& assetMngr = userMngr.GetContent().GetAssets();
 
 				auto remove_settings = assetMngr.GetAssetsOfType(AssetType::ModelSettings)
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
@@ -210,7 +208,7 @@ namespace fig
 
 			if (userMngr.SignInDefaultProfile())
 			{
-				auto& assetMngr = userMngr.GetContent().GetAssetManager();
+				auto& assetMngr = userMngr.GetContent().GetAssets();
 
 				auto remove_chats = assetMngr.GetAssetsOfType(AssetType::Chat, ChatAssetType::Instance)
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })

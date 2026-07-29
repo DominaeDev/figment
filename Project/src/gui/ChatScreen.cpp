@@ -159,15 +159,9 @@ namespace fig::gui
 
 			// Set portrait
 			_pInfoPanel->SetSession(*_pSession);
-			if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), _pSession->GetCharacterIdOf(Role::Bot1)))
-			{
-				_pInfoPanel->SetImage((*try_portrait).id);
+			
+			if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(_pSession->GetCharacterIdOf(Role::Bot1))) //! @temp
 				_pBackground->SetImage((*try_portrait).id);
-			}
-			else
-			{
-				_pInfoPanel->ClearImage();
-			}
 
 			_bStartedChat = true;
 			queue_clear(_commandQueue);

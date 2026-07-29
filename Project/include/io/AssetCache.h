@@ -33,6 +33,7 @@ namespace fig::io
 		using data_type = T;
 		static constexpr AssetTypeDefinition _asset_type_definition = AssetTypeOf<T>;
 		static constexpr AssetType _asset_type { _asset_type_definition.type };
+		static constexpr uint8_t _asset_subtype { _asset_type_definition.subtype };
 		static constexpr DataFormat _data_format { _asset_type_definition.format };
 		static constexpr auto _log_name { LOG.c_str() };
 
@@ -44,7 +45,7 @@ namespace fig::io
 
 		void Preload() override
 		{
-			auto assets = _pAssetMngr->GetAssetsOfType(_asset_type);
+			auto assets = _pAssetMngr->GetAssetsOfType(_asset_type, _asset_subtype);
 			auto assetIds = assets
 				| std::views::transform([](auto& a) { return a.id; })
 				| std::ranges::to<std::vector>();

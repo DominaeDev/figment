@@ -28,12 +28,15 @@ namespace fig::io
 
 		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
 		fig::cref_vector<Asset> GetChatLogsWith(const fig::uuid& characterId, bool bLoad = false);
+		fig::cref_vector<Asset> GetCharacters() const noexcept;
+		fig::cref_vector<Asset> GetScenarios() const noexcept;
 
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
 		std::optional<fig::string> GetCharacterName(const fig::uuid& characterId) const;
 		fig::optional_ref<ContentMetaData> GetMetaData(const fig::uuid& id) noexcept;
 		ContentUserSettings GetUserSettings(const fig::uuid& id) noexcept;
 		
+		fig::optional_cref<Asset> GetLargePortraitForCharacter(const fig::uuid& characterId) const;
 		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept;
 		fig::optional_cref<Asset> FindLastChatWith(const fig::uuid& characterId) const;
 
@@ -42,7 +45,7 @@ namespace fig::io
 		bool MarkHidden(const fig::uuid& assetId, bool value = true);
 		bool SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle);
 
-		AssetManager& GetAssetManager();
+		AssetManager& GetAssets();
 
 		uint32_t GetChatCount(const fig::uuid& assetId);
 
