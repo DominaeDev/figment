@@ -128,6 +128,11 @@ namespace fig::io
 	{
 	}
 
+	size_t FileStream::GetPosition() noexcept
+	{
+		return static_cast<size_t>(_fs.tellg());
+	}
+
 	bool FileStream::Seek(size_t offset) noexcept
 	{
 		if (IsOk())

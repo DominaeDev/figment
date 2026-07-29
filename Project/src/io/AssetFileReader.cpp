@@ -3,7 +3,6 @@
 #include "io/FileStream.h"
 #include "user/UserProfile.h"
 #include <Crc32.h>
-#include <format>
 
 namespace fig::io
 {
@@ -15,10 +14,10 @@ namespace fig::io
 	{
 	}
 
-	static bool ReadMeta(FileStream& fs, uint8_t count, std::map<MetaTag, MetaValue>& outMeta)
+	static bool ReadMeta(FileStream& fs, size_t data_offset, std::map<MetaTag, MetaValue>& outMeta)
 	{
 		std::vector<char> buf(16);
-		for (size_t i = 0; i < toUZ(count); ++i)
+		for (; fs.GetPosition() < data_offset;)
 		{
 			MetaTag tag;
 			if (!fs.ReadStruct(tag))
@@ -80,24 +79,31 @@ namespace fig::io
 		return true;
 	}
 
-	static bool ReadHeader(FileStream& fs, size_t file_size, FileHeader& header)
+	static bool ReadHeader(FileStream& fs, size_t file_size, AssetFileHeader& header)
 	{
 		// Read header
 		if (!fs.ReadStruct(header))
 			return false;
 
 		// Validate header
-		bool valid = header.magic[0] == MagicWord[0] && header.magic[1] == MagicWord[1] && header.magic[2] == MagicWord[2] && header.magic[3] == MagicWord[3];
+		bool valid = 
+			   header.magic[0] == AssetFileHeader::MagicWord[0] 
+			&& header.magic[1] == AssetFileHeader::MagicWord[1]
+			&& header.magic[2] == AssetFileHeader::MagicWord[2] 
+			&& header.magic[3] == AssetFileHeader::MagicWord[3];
 
 		// Version
-		valid &= header.header_version == FileHeaderVersion;
+		valid &= header.header_version == FileHeaderVersion; //! @versioning
 
-		// Data extents
+		// Data offset
+		valid &= header.data_offset >= sizeof(AssetFileHeader);
+
+		// Data length
 		if (valid and header.data_length != 0)
 		{
-			size_t data_offset = header.data_offset + sizeof(FileHeader);
+			size_t data_offset = header.data_offset;
 			valid &= (data_offset + header.data_length <= file_size);
-			valid &= (!(bool)(header.flags & FileHeaderFlag::Encrypted)) or ((file_size - data_offset) % 16 == 0); // Encrypted data length must be divisible by 16
+			valid &= !header.flags.IsSet(AssetFileHeaderFlag::Encrypted) or ((file_size - data_offset) % 16uz == 0); // Encrypted data length must be a multiple of 16
 		}
 		return valid;
 	}
@@ -128,11 +134,11 @@ namespace fig::io
 				return std::unexpected(fs.GetError());
 			
 			size_t file_size = fs.Length();
-			if (file_size < sizeof(FileHeader))
+			if (file_size < sizeof(AssetFileHeader))
 				return std::unexpected(FileError::UnrecognizedFormat);
 
 			AssetFile file {};
-			FileHeader header {};
+			AssetFileHeader header {};
 
 			if (not ReadHeader(fs, file_size, header))
 				return std::unexpected(FileError::UnrecognizedFormat);
@@ -141,24 +147,22 @@ namespace fig::io
 			file.parent_id = fig::uuid(parent_id[1], parent_id[0]);
 			auto asset_id = reinterpret_cast<uint64_t*>(&header.asset_id);
 			file.asset_id = fig::uuid(asset_id[1], asset_id[0]);
-			file.asset_type = header.asset_type;
-			file.asset_subtype = header.asset_subtype;
-			file.data_format = header.data_format;
+			file.type = header.asset_type;
 			file.data_length = header.data_length;
-			file.data_encrypted = (bool)(header.flags & FileHeaderFlag::Encrypted);
+			file.data_encrypted = (bool)(header.flags & AssetFileHeaderFlag::Encrypted);
 
 			// Read meta
-			if (not ReadMeta(fs, header.meta_count, file.meta))
+			if (not ReadMeta(fs, header.data_offset, file.meta))
 				return std::unexpected(FileError::UnrecognizedFormat);
 
 			// Read data
 			if (read_data and header.data_length > 0)
 			{
-				fs.Seek(header.data_offset + sizeof(FileHeader));
+				fs.Seek(header.data_offset);
 				ReadData(fs, file, authKey);
 
 				int32_t checksum;
-				if ((bool)(header.flags & FileHeaderFlag::Checksum) and file.try_get_meta(MetaTag::Checksum, checksum))
+				if ((bool)(header.flags & AssetFileHeaderFlag::Checksum) and file.try_get_meta(MetaTag::Checksum, checksum))
 				{
 					// Compare checksum
 					int32_t crc32 = static_cast<int32_t>(crc32_fast(file.data.data(), file.data.size()));

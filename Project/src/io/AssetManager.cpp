@@ -1,7 +1,4 @@
 #include <pch.h>
-#include <filesystem>
-#include <format>
-#include <ranges>
 #include <execution>
 #include "io/AssetManager.h"
 #include "user/UserManager.h"
@@ -81,16 +78,16 @@ namespace fig::io
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateEmptyAsset_Internal(type, parent);
+		return CreateEmptyAsset_Internal(make_asset_type(type), parent);
 	}
 
-	Asset& AssetManager::CreateEmptyAsset_Internal(AssetType type, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateEmptyAsset_Internal(AssetTypeDefinition type, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
 		asset.parent_id = parent;
-		asset.asset_type = type;
+		asset.type = type;
 		asset.sync_state.file_sync = AssetSyncState::Status::Created;
 		asset.sync_state.db_sync = AssetSyncState::Status::Created;
 		asset.sync_state.has_meta = true;
@@ -105,39 +102,52 @@ namespace fig::io
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(type, DataFormat::Undefined, std::move(data), parent);
+		return CreateAsset_Internal(make_asset_type(type), std::move(data), parent);
 	}
 
 	const Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(type, DataFormat::Undefined, data, parent);
+		return CreateAsset_Internal(make_asset_type(type), data, parent);
 	}
-	
+
 	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(type, format, std::move(data), parent);
+		return CreateAsset_Internal(make_asset_type(type, format), std::move(data), parent);
 	}
 
 	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(type, format, data, parent);
+		return CreateAsset_Internal(make_asset_type(type, format), data, parent);
 	}
 
-	Asset& AssetManager::CreateAsset_Internal(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_Internal(type, std::move(data), parent);
+	}
+
+	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_Internal(type, data, parent);
+	}
+
+	Asset& AssetManager::CreateAsset_Internal(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
 		asset.parent_id = parent;
-		asset.asset_type = type;
+		asset.type = type;
 		asset.data = std::move(data); // Move data
-		asset.data_format = format;
 		asset.sync_state.file_sync = AssetSyncState::Status::Created;
 		asset.sync_state.db_sync = AssetSyncState::Status::Created;
 		asset.sync_state.has_meta = true;
@@ -148,14 +158,13 @@ namespace fig::io
 		return asset;
 	}
 
-	Asset& AssetManager::CreateAsset_Internal(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateAsset_Internal(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
 		asset.parent_id = parent;
-		asset.asset_type = type;
-		asset.data_format = format;
+		asset.type = type;
 		asset.sync_state.file_sync = AssetSyncState::Status::Created;
 		asset.sync_state.db_sync = AssetSyncState::Status::Created;
 		asset.sync_state.has_meta = true;
@@ -171,44 +180,40 @@ namespace fig::io
 		return asset;
 	}
 
-	const Asset& AssetManager::CreateImageAsset(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 		return CreateImageAsset_Internal(subtype, format, std::move(data), parent);
 	}
 
-	Asset& AssetManager::CreateImageAsset_Internal(ImageType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateImageAsset_Internal(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
-		auto& asset = CreateAsset_Internal(AssetType::Image, format, std::move(data), parent);
-		asset.asset_subtype = static_cast<uint8_t>(subtype);
+		auto& asset = CreateAsset_Internal(make_asset_type(AssetType::Image, subtype, format), std::move(data), parent);
 		asset.CalculateChecksum();
 		return asset;
 	}
 
-	const Asset& AssetManager::CreateImageAsset(ImageType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		auto& asset = CreateAsset_Internal(AssetType::Image, format, data, parent);
-		asset.asset_subtype = static_cast<uint8_t>(subtype);
+		auto& asset = CreateAsset_Internal(make_asset_type(AssetType::Image, subtype, format), data, parent);
 		asset.CalculateChecksum();
 		return asset;
 	}
 
-	const Asset& AssetManager::CreateImageAsset(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 		return CreateImageAsset_Internal(subtype, surface, parent);
 	}
 
-	Asset& AssetManager::CreateImageAsset_Internal(ImageType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateImageAsset_Internal(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
 	{
-		auto& asset = CreateEmptyAsset_Internal(AssetType::Image, parent);
+		auto& asset = CreateEmptyAsset_Internal(make_asset_type(AssetType::Image, subtype, DataFormat::ImageUncompressed), parent);
 		if (!surface.get())
 			return asset; // Error
 
-		asset.asset_subtype = static_cast<uint8_t>(subtype);
-		asset.data_format = DataFormat::ImageUncompressed;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = true;
 
@@ -258,15 +263,16 @@ namespace fig::io
 		return FindAsset_Internal(id, assetType);
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindImageAsset(const fig::uuid& parentId, ImageType imageType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAssetOfType(AssetTypeDefinition type, const fig::uuid& parentId) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
+		bool with_parent = !parentId.empty();
+
 		auto itFind = std::find_if(_assets.begin(), _assets.end(),
-			[&parentId, imageType](auto& kvp) {
-				return kvp.second.parent_id == parentId
-					and kvp.second.asset_type == AssetType::Image 
-					and kvp.second.asset_subtype == static_cast<uint8_t>(imageType);
+			[&parentId, type, with_parent](auto& kvp) {
+				return (not with_parent or kvp.second.parent_id == parentId)
+					and kvp.second.type.IsOfType(type.GetType(), type.subtype);
 			});
 
 		if (itFind != _assets.cend())
@@ -285,7 +291,15 @@ namespace fig::io
 	fig::optional_cref<Asset> AssetManager::FindAsset_Internal(const fig::uuid& id, AssetType assetType) noexcept
 	{
 		auto itFind = _assets.find(id);
-		if (itFind != _assets.cend() and itFind->second.asset_type == assetType)
+		if (itFind != _assets.cend() and itFind->second.type.IsOfType(assetType))
+			return make_optional_cref(itFind->second);
+		return fig::nullref;
+	}
+
+	fig::optional_cref<Asset> AssetManager::FindAsset_Internal(const fig::uuid& id, AssetTypeDefinition assetType) noexcept
+	{
+		auto itFind = _assets.find(id);
+		if (itFind != _assets.cend() and (itFind->second).type.IsOfType(assetType, false))
 			return make_optional_cref(itFind->second);
 		return fig::nullref;
 	}
@@ -399,7 +413,7 @@ namespace fig::io
 		// Read meta data of all asset files (in parallel)
 		DEBUG_MEASURE_BEGIN(std::format("Load meta data (0x{:02X})", (int32_t)assetType));
 		std::vector<Asset*> meta_assets = _assets
-			| std::views::filter([assetType](auto& kvp) { return kvp.second.asset_type == assetType; })
+			| std::views::filter([assetType](auto& kvp) { return kvp.second.IsOfType(assetType); })
 			| std::views::values
 			| std::views::transform([](auto&& a) { return &a; })
 			| std::ranges::to<std::vector>();
@@ -437,7 +451,10 @@ namespace fig::io
 
 		DEBUG_MEASURE_BEGIN("LoadAssets (Full)");
 		std::vector<Asset*> assets = _assets
-			| std::views::filter([](auto& kvp) { return kvp.second.asset_type == AssetType::Character || kvp.second.asset_type == AssetType::Scenario || kvp.second.asset_type == AssetType::ChatInstance; })
+			| std::views::filter([](auto& kvp) { 
+				return kvp.second.type.IsOfType(AssetType::Character) 
+					|| kvp.second.type.IsOfType(AssetType::Scenario) 
+					|| kvp.second.type.IsOfType(AssetType::Chat, ChatAssetType::Instance); })
 			| std::views::values
 			| std::views::transform([](auto&& a) { return &a; })
 			| std::ranges::to<std::vector>();
@@ -728,13 +745,13 @@ namespace fig::io
 			// Create asset
 			fig::bytes characterData;
 			character.SaveToXml(characterData);
-			auto& characterAsset = CreateAsset_Internal(AssetType::Character, DataFormat::DataXml, characterData, {});
+			auto& characterAsset = CreateAsset_Internal(make_asset_type(AssetType::Character, DataFormat::TextXml), characterData, {});
 
 			// Load portrait image(s)
 			if (auto file = fig::io::ReadFile(filename))
 			{
 				// Create portrait asset
-				auto& portraitAsset = CreateImageAsset_Internal(ImageType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
+				auto& portraitAsset = CreateImageAsset_Internal(ImageAssetType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
 
 				// Create cover card
 				if (auto coverImage = LoadImage(filename) //! @todo: load only once
@@ -743,7 +760,7 @@ namespace fig::io
 				}))
 				{
 					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage.value(), characterAsset.id);
+					auto& coverAsset = CreateImageAsset_Internal(ImageAssetType::CoverImage, coverImage.value(), characterAsset.id);
 					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 				}
 
@@ -754,7 +771,7 @@ namespace fig::io
 				}))
 				{
 					// Save square portrait asset (bitmap)
-					auto& squarePortraitAsset = CreateImageAsset_Internal(ImageType::SmallPortrait, squarePortraitImage.value(), characterAsset.id);
+					auto& squarePortraitAsset = CreateImageAsset_Internal(ImageAssetType::SmallPortrait, squarePortraitImage.value(), characterAsset.id);
 					squarePortraitAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 				}
 			}
@@ -781,7 +798,7 @@ namespace fig::io
 		// Create asset
 		fig::bytes scenarioData;
 		scenario.SaveToXml(scenarioData);
-		auto& scenarioAsset = CreateAsset_Internal(AssetType::Scenario, DataFormat::DataXml, scenarioData, {});
+		auto& scenarioAsset = CreateAsset_Internal(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, {});
 
 		// Load scenario image
 /*		if (not empty_or_whitespace(scenario.imageFilename))
@@ -789,7 +806,7 @@ namespace fig::io
 			if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
 			{
 				// Create portrait asset
-				auto& scenarioImageAsset = CreateImageAsset_Internal(ImageType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
+				auto& scenarioImageAsset = CreateImageAsset_Internal(ImageAssetType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
 
 				// Create cover card
 				if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
@@ -798,7 +815,7 @@ namespace fig::io
 				}))
 				{
 					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage.value(), scenarioAsset.id);
+					auto& coverAsset = CreateImageAsset_Internal(ImageAssetType::CoverImage, coverImage.value(), scenarioAsset.id);
 					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, scenarioImageAsset.id);
 				}
 			}
@@ -833,9 +850,7 @@ namespace fig::io
 
 			AssetFile image_file {
 				.parent_id {profile.id},
-				.asset_type { static_cast<uint8_t>(AssetType::Image) },
-				.asset_subtype { static_cast<uint8_t>(ImageType::ProfileImage) },
-				.data_format { static_cast<uint8_t>(DataFormat::ImageUncompressed) },
+				.type = make_asset_type(AssetType::Image, ImageAssetType::ProfileImage, DataFormat::ImageUncompressed),
 				.data_length { data.size() },
 				.data_encrypted { false },
 				.data { std::move(data) },
@@ -900,9 +915,9 @@ namespace fig::io
 		return false;
 	}
 
-	AsyncLoadError AssetManager::__LoadImageTask(const fig::uuid& characterAssetID, ImageType imageType, AsyncResultVariant& outResult) noexcept
+	AsyncLoadError AssetManager::__LoadImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResultVariant& outResult) noexcept
 	{
-		if (auto findImage = FindImageAsset(characterAssetID, imageType))
+		if (auto findImage = FindAssetOfType(make_asset_type(AssetType::Image, imageType), characterAssetID))
 		{
 			auto& imageAsset = findImage.value();
 			if (auto result = LoadAsset(imageAsset); result == FileError::NoError)
@@ -927,7 +942,7 @@ namespace fig::io
 		fig::sdl::Surface fullSurface {};
 		fig::sdl::Surface halfSurface {};
 
-		if (auto findCover = FindImageAsset(characterAssetID, ImageType::CoverImage))
+		if (auto findCover = FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), characterAssetID))
 		{
 			auto& cover = findCover.value();
 			auto result = LoadAsset(cover);
@@ -944,7 +959,7 @@ namespace fig::io
 			if (fullSurface.empty())
 			{
 				// Create cover from portrait
-				if (auto findPortrait = FindImageAsset(characterAssetID, ImageType::LargePortrait))
+				if (auto findPortrait = FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterAssetID))
 				{
 					auto& portraitAsset = findPortrait.value();
 					if (LoadAsset(portraitAsset) == FileError::NoError)
@@ -956,7 +971,7 @@ namespace fig::io
 							// Save cover asset (bitmap)
 							{
 								std::scoped_lock lock { _assetsMutex };
-								auto& coverAsset = CreateImageAsset_Internal(ImageType::CoverImage, coverImage, characterAssetID);
+								auto& coverAsset = CreateImageAsset_Internal(ImageAssetType::CoverImage, coverImage, characterAssetID);
 								coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
 								coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 							}
@@ -1029,7 +1044,7 @@ namespace fig::io
 					error = __LoadCoverImageTask(request.assetId, result);
 					break;
 				case AsyncTask::LoadPortrait:
-					error = __LoadImageTask(request.assetId, ImageType::LargePortrait, result);
+					error = __LoadImageTask(request.assetId, ImageAssetType::LargePortrait, result);
 					break;
 				default:
 					error = AsyncLoadError::LoadError;

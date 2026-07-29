@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Figment.h"
-#include <variant>
 #include "util/Hash.h"
 
 namespace fig::io

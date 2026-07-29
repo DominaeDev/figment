@@ -11,112 +11,6 @@
 
 namespace fig::io
 {
-	struct AssetTypeInfo
-	{
-		fig::string_view category;
-		fig::string_view subname;
-		uint8_t type;
-		uint8_t sub;
-	};
-
-	static constexpr std::array<AssetTypeInfo, 11> AssetTypes {
-		AssetTypeInfo { "data",		"character",		static_cast<uint8_t>(AssetType::Character) },
-		AssetTypeInfo { "data",		"scenario",			static_cast<uint8_t>(AssetType::Scenario) },
-		AssetTypeInfo { "data",		"chat",				static_cast<uint8_t>(AssetType::ChatInstance) },
-		AssetTypeInfo { "data",		"log",				static_cast<uint8_t>(AssetType::ChatLog) },
-		AssetTypeInfo { "data",		"model_config",		static_cast<uint8_t>(AssetType::ModelSettings) },
-		AssetTypeInfo { "image",	"profile",			static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::ProfileImage) },
-		AssetTypeInfo { "image",	"cover",			static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::CoverImage) },
-		AssetTypeInfo { "image",	"portrait",			static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::LargePortrait) },
-		AssetTypeInfo { "image",	"small",			static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::SmallPortrait) },
-		AssetTypeInfo { "image",	"background",		static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::Background) },
-		AssetTypeInfo { "image",	"expression",		static_cast<uint8_t>(AssetType::Image),		static_cast<uint8_t>(ImageType::Expression) },
-	};
-
-	using DataFormatInfo = std::pair<fig::string_view, DataFormat>;
-
-	static constexpr std::array<DataFormatInfo, 7> DataFormats {
-		DataFormatInfo { "text/default",	DataFormat::Text },
-		DataFormatInfo { "text/xml",		DataFormat::DataXml },
-		DataFormatInfo { "text/json",		DataFormat::DataJson },
-		DataFormatInfo { "image/bitmap",	DataFormat::ImageUncompressed },
-		DataFormatInfo { "image/jpeg",		DataFormat::ImageJpeg },
-		DataFormatInfo { "image/png",		DataFormat::ImagePng },
-		DataFormatInfo { "image/webp",		DataFormat::ImageWebp },
-	};
-
-	fig::string AssetTypeToString(AssetType assetType, uint8_t subtype) noexcept
-	{
-		uint8_t type = static_cast<uint8_t>(assetType);
-		if (auto itFind = std::find_if(AssetTypes.cbegin(), AssetTypes.cend(),
-			[type, subtype](auto& t) { return t.type == type && t.sub == subtype; }); 
-			itFind != AssetTypes.cend())
-		{
-			auto& assetType = *itFind;
-			if (assetType.subname.empty())
-				return fig::string { assetType.category };
-			else
-				return std::format("{}/{}", assetType.category, assetType.subname);
-		}
-		else
-		{
-			return "unknown";
-		}
-	}
-
-	std::pair<AssetType, uint8_t> AssetTypeFromString(const fig::string& str) noexcept
-	{
-		fig::string strType, strSubtype;
-		size_t pos_slash = str.find('/');
-		if (pos_slash != 0)
-		{
-			strSubtype = str.substr(pos_slash + 1);
-			strType = str.substr(0, pos_slash);
-		}
-		else
-		{
-			strType = str;
-		}
-
-		if (auto itFind = std::find_if(AssetTypes.cbegin(), AssetTypes.cend(),
-			[&strType, &strSubtype](auto& t) { return t.category == strType && t.subname == strSubtype; }); 
-			itFind != AssetTypes.cend())
-		{
-			return std::make_pair(static_cast<AssetType>(itFind->type), itFind->sub);
-		}
-		else
-		{
-			return std::make_pair(AssetType::Undefined, 0);
-		}
-	}
-
-	fig::string DataFormatToString(DataFormat format) noexcept
-	{
-		if (auto itFind = std::find_if(DataFormats.cbegin(), DataFormats.cend(),
-			[format](auto& f) { return f.second == format; });
-			itFind != DataFormats.cend())
-		{
-			return fig::string { itFind->first };
-		}
-		else
-		{
-			return "unknown";
-		}
-	}
-
-	DataFormat DataFormatFromString(const fig::string& str) noexcept
-	{
-		if (auto itFind = std::find_if(DataFormats.cbegin(), DataFormats.cend(),
-			[&str](auto& f) { return f.first == str; });
-			itFind != DataFormats.cend())
-		{
-			return itFind->second;
-		}
-		else
-		{
-			return DataFormat::Undefined;
-		}
-	}
 
 	DataFormat DataFormatFromExt(const fig::string& ext)
 	{
@@ -129,11 +23,11 @@ namespace fig::io
 			if (ext == ".webp")
 				return DataFormat::ImageWebp;
 			if (ext == ".xml")
-				return DataFormat::DataXml;
+				return DataFormat::TextXml;
 			if (ext == ".json")
-				return DataFormat::DataJson;
+				return DataFormat::TextJson;
 			if (ext == ".txt")
-				return DataFormat::Text;
+				return DataFormat::TextDefault;
 		}
 		return DataFormat::Undefined;
 	}
@@ -178,9 +72,7 @@ namespace fig::io
 		auto file = AssetFile {
 			.asset_id = id,
 			.parent_id = parent_id,
-			.asset_type = static_cast<uint8_t>(asset_type),
-			.asset_subtype = asset_subtype,
-			.data_format = static_cast<uint8_t>(data_format),
+			.type = type,
 			.data_length = data.size(),
 			.meta = _parameters,
 		};
@@ -197,11 +89,12 @@ namespace fig::io
 
 	void Asset::FromFile(const AssetFile& file) noexcept
 	{
+		static_assert(asset_subtype_type<AssetType>);
+		static_assert(asset_subtype_type<DataFormat>);
+
 		id = file.asset_id;
 		parent_id = file.parent_id;
-		asset_type = static_cast<AssetType>(file.asset_type);
-		asset_subtype = file.asset_subtype;
-		data_format = static_cast<DataFormat>(file.data_format);
+		type = file.type;
 		data = file.data; // copy (for now)
 		copy_parameters(_parameters, file.meta);
 	}
@@ -210,9 +103,7 @@ namespace fig::io
 	{
 		id = file.asset_id;
 		parent_id = file.parent_id;
-		asset_type = static_cast<AssetType>(file.asset_type);
-		asset_subtype = file.asset_subtype;
-		data_format = static_cast<DataFormat>(file.data_format);
+		type = file.type;
 		data = std::move(file.data);
 		copy_parameters(_parameters, file.meta);
 	}

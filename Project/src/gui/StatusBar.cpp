@@ -2,7 +2,6 @@
 #include "gui/GUICommon.h"
 #include "gui/StatusBar.h"
 #include "llm/LLMStatus.h"
-#include <format>
 
 using namespace fig::gui;
 using namespace fig::llm;

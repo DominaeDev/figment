@@ -1,12 +1,21 @@
 #pragma once
 
+#include <string>
+#include <string_view>
+#include <format>
 #include <algorithm>
-#include <optional>
-#include <expected>
+#include <vector>
+#include <map>
+#include <array>
+#include <set>
 #include <stack>
 #include <queue>
 #include <ranges>
-#include <set>
+#include <span>
+#include <variant>
+#include <optional>
+#include <expected>
+#include <stdint.h>
 
 #include "app/Types.h"
 #include "util/EnumFlags.h"

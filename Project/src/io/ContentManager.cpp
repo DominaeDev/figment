@@ -16,11 +16,11 @@ namespace fig::io
 		_pAssetMngr = std::make_unique<AssetManager>(profile, authKey);
 
 		// Instantiate caches
-		_caches[AssetTypeOf<fig::data::Character>] = std::make_unique<AssetCache<fig::data::Character, AssetType::Character, DataFormat::DataXml, "Character">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::Scenario>] = std::make_unique<AssetCache<fig::data::Scenario, AssetType::Scenario, DataFormat::DataXml, "Scenario">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::ChatInstance>] = std::make_unique<AssetCache<fig::data::ChatInstance, AssetType::ChatInstance, DataFormat::DataXml, "ChatInstance">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::ChatLog>] = std::make_unique<AssetCache<fig::data::ChatLog, AssetType::ChatLog, DataFormat::DataXml, "ChatLog">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::sdl::Surface>] = std::make_unique<AssetCache<fig::sdl::Surface, AssetType::Image, DataFormat::Undefined, "Image">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::Character>]		= std::make_unique<AssetCache<fig::data::Character, "Character">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::Scenario>]		= std::make_unique<AssetCache<fig::data::Scenario, "Scenario">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::ChatInstance>]	= std::make_unique<AssetCache<fig::data::ChatInstance, "ChatInstance">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::ChatLog>]		= std::make_unique<AssetCache<fig::data::ChatLog, "ChatLog">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::sdl::Surface>]			= std::make_unique<AssetCache<fig::sdl::Surface, "Image">>(_pAssetMngr.get());
 
 		LoadAll();
 	}
@@ -79,14 +79,13 @@ namespace fig::io
 			auto& asset = tryAsset.value();
 
 			ContentMetaData meta;
-			meta.assetType = asset.asset_type;
-			meta.assetSubtype = asset.asset_subtype;
+			meta.assetType = asset.type;
 			meta.parentId = asset.parent_id;
 			meta.createdAt = asset.GetCreatedAt();
 			meta.updatedAt = asset.GetUpdatedAt();
 			meta.lastUsedAt = asset.GetUpdatedAt();
 
-			if (asset.asset_type == AssetType::Character)
+			if (asset.type.IsOfType(AssetType::Character))
 			{
 				if (auto try_character = Get<Character>(assetId))
 				{
@@ -222,7 +221,7 @@ namespace fig::io
 			}
 		}
 
-		if (auto find_asset = _pAssetMngr->FindImageAsset(characterId, ImageType::SmallPortrait))
+		if (auto find_asset = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), characterId))
 		{
 			auto& asset = *find_asset;
 			if (auto try_surface = GetCache<fig::sdl::Surface>().Get(asset.id))
@@ -317,7 +316,7 @@ namespace fig::io
 	{
 		fig::bytes data;
 		chatInstance.SaveToXml(data);
-		auto& newAsset = _pAssetMngr->CreateAsset(AssetType::ChatInstance, DataFormat::DataXml, data);
+		auto& newAsset = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Instance, DataFormat::TextXml), data);
 
 		_pAssetMngr->ModifyAsset(newAsset, [&chatInstance](Asset& asset) {
 			for (size_t idx = 0; idx < chatInstance.characterIds.size() && idx < 8uz; ++idx)
@@ -393,7 +392,7 @@ namespace fig::io
 			| std::views::keys
 			| std::ranges::to<std::unordered_set>();
 
-		auto chatLogAssets = _pAssetMngr->GetAssetsOfType(AssetType::ChatLog)
+		auto chatLogAssets = _pAssetMngr->GetAssetsOfType(AssetType::Chat, ChatAssetType::Log)
 			| std::views::filter([&](auto& a) { return chatInstanceIds.contains(a.parent_id); })
 			| std::views::transform([](auto& a) { return std::cref(a); })
 			| std::ranges::to<std::vector>();
@@ -422,7 +421,7 @@ namespace fig::io
 				instanceIds.insert(kvp.first);
 		}
 
-		auto logAssets = _pAssetMngr->GetAssetsOfType(AssetType::ChatLog)
+		auto logAssets = _pAssetMngr->GetAssetsOfType(AssetType::Chat, ChatAssetType::Log)
 			| std::views::filter([&](auto&& a) { return instanceIds.contains(a.parent_id); })
 			| std::views::transform([](auto&& a) { return std::cref(a); })
 			| std::ranges::to<std::vector>();
@@ -446,12 +445,12 @@ namespace fig::io
 
 	fig::optional_cref<Asset> UserContentManager::FindLastChatWith(const fig::uuid& characterId) const
 	{
-		auto chatInstanceIds = _pAssetMngr->GetAssetsOfType(AssetType::ChatInstance)
+		auto chatInstanceIds = _pAssetMngr->GetAssetsOfType(AssetType::Chat, ChatAssetType::Instance)
 			| std::views::filter([&](auto& a) { return a.HasReferenceTo(characterId); })
 			| std::views::transform([](auto& a) { return a.id; })
 			| std::ranges::to<std::unordered_set>();
 
-		auto chatLogs = _pAssetMngr->GetAssetsOfType(AssetType::ChatLog)
+		auto chatLogs = _pAssetMngr->GetAssetsOfType(AssetType::Chat, ChatAssetType::Log)
 			| std::views::filter([&](auto& a) { return chatInstanceIds.contains(a.parent_id); })
 			| std::views::transform([](auto& a) { return std::cref(a); })
 			| std::ranges::to<std::vector>();
@@ -468,19 +467,19 @@ namespace fig::io
 	{
 		bool bAlsoDeleteParent = false;
 		fig::uuid parentId {};
-		AssetType assetType {};
+		AssetTypeDefinition assetType {};
 
 		if (auto meta = GetMetaData(assetId))
 		{
 			assetType = (*meta).assetType;
-			if (assetType == AssetType::ChatLog)
+			if (assetType.IsOfType(AssetType::Chat, ChatAssetType::Log))
 			{
 				parentId = (*meta).parentId;
 				bAlsoDeleteParent = true;
 			}
 		}
 
-		if (assetType == AssetType::ChatInstance)
+		if (assetType.IsOfType(AssetType::Chat, ChatAssetType::Instance))
 		{
 			auto associatedAssets = _pAssetMngr->GetAssociatedAssets(assetId);
 			for (auto& id : associatedAssets)
@@ -499,7 +498,7 @@ namespace fig::io
 				DeleteAsset(parentId);
 		}
 
-		if (assetType == AssetType::ChatInstance or assetType == AssetType::ChatLog)
+		if (assetType.IsOfType(AssetType::Chat))
 			InvalidateChatCount();
 
 		return true;

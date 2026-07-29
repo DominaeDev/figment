@@ -110,14 +110,14 @@ namespace fig::chat
 			fig::string tmp;
 			tmp.assign(reinterpret_cast<const char*>(xmlData.data()), xmlData.size()); //! @temp
 
-			auto& asset = assetMngr.CreateAsset(AssetType::ChatLog, DataFormat::DataXml, xmlData, _parentId);
+			auto& asset = assetMngr.CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Log, DataFormat::TextXml), xmlData, _parentId);
 			_assetId = asset.id;
 			return true;
 		}
 		else
 		{
 			// Update asset
-			if (auto try_asset = assetMngr.FindAsset(_assetId, AssetType::ChatLog))
+			if (auto try_asset = assetMngr.FindAsset(_assetId, AssetType::Chat, ChatAssetType::Log))
 			{
 				assetMngr.ModifyAsset(*try_asset, [&](Asset& asset) {
 					fig::bytes xmlData;

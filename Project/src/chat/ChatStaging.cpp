@@ -11,7 +11,6 @@
 
 #include <exception>
 #include <cassert>
-#include <format>
 
 using namespace fig::io;
 using namespace fig::data;

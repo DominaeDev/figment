@@ -10,7 +10,7 @@ namespace fig::io
 {
 	std::expected<fig::sdl::Surface, FileError> AssetLoader<fig::sdl::Surface>::Load(const Asset& asset)
 	{
-		if (asset.data_format == DataFormat::ImageUncompressed)
+		if (asset.type.IsFormat(DataFormat::ImageUncompressed))
 		{
 			int32_t width = asset.GetMeta<uint16_t>(MetaTag::ImageWidth).value_or(0);
 			int32_t height = asset.GetMeta<uint16_t>(MetaTag::ImageHeight).value_or(0);
@@ -22,9 +22,9 @@ namespace fig::io
 				return surface;
 			return unexpected(FileError::ReadError);
 		}
-		else if (asset.data_format == DataFormat::ImagePng
-			or asset.data_format == DataFormat::ImageJpeg
-			or asset.data_format == DataFormat::ImageWebp)
+		else if (asset.type.IsFormat(DataFormat::ImagePng)
+			or asset.type.IsFormat(DataFormat::ImageJpeg)
+			or asset.type.IsFormat(DataFormat::ImageWebp))
 		{
 			if (auto try_load = LoadImageFromMemory(asset.data))
 				return std::move(try_load.value());

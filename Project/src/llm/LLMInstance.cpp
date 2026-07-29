@@ -8,7 +8,6 @@
 #include "util/Lockable.h"
 #include "text/TextEvaluator.h"
 #include "chat/PromptBuilder.h"
-#include <format>
 #include <cassert>
 #include <chrono>
 

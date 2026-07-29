@@ -4,7 +4,6 @@
 #include "llm/LlamaApi.h"
 #include "io/FileUtility.h"
 #include <llama.h>
-#include <format>
 #include <cassert>
 
 using namespace fig::io;

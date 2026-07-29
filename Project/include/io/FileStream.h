@@ -31,7 +31,6 @@ namespace fig::io
 		inline bool IsOk() const noexcept { return _bOpen and _error == FileError::NoError; }
 		inline FileError GetError() const noexcept { return _error; }
 
-		bool Seek(size_t offset) noexcept;
 		size_t Read(fig::bytes& buffer) noexcept;
 		size_t Read(fig::bytes& buffer, size_t nBytes) noexcept;
 		size_t Read(std::vector<char>& buffer) noexcept;
@@ -41,6 +40,8 @@ namespace fig::io
 		{
 			return Read(reinterpret_cast<char*>(buffer.data()), buffer.size());
 		}
+		bool Seek(size_t offset) noexcept;
+		size_t GetPosition() noexcept;
 
 		template <typename T>
 		bool ReadStruct(T& dst) noexcept {

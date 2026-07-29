@@ -119,7 +119,7 @@ namespace fig::io
 
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
-		std::unordered_map<AssetType, std::unique_ptr<IAssetCache>> _caches;
+		std::unordered_map<AssetTypeDefinition, std::unique_ptr<IAssetCache>> _caches;
 		std::map<fig::uuid, ContentMetaData> _metaData;
 		std::map<fig::uuid, ContentUserSettings> _userSettings;
 		

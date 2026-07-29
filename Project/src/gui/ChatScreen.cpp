@@ -24,12 +24,11 @@
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "text/TextEvaluator.h"
-#include <format>
-#include <ranges>
 
 using namespace fig::llm;
 using namespace fig::data;
 using namespace fig::chat;
+using namespace fig::io;
 
 namespace fig::gui
 {
@@ -160,7 +159,7 @@ namespace fig::gui
 
 			// Set portrait
 			_pInfoPanel->SetSession(*_pSession);
-			if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindImageAsset(_pSession->GetCharacterIdOf(Role::Bot1), fig::io::ImageType::LargePortrait))
+			if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), _pSession->GetCharacterIdOf(Role::Bot1)))
 			{
 				_pInfoPanel->SetImage((*try_portrait).id);
 				_pBackground->SetImage((*try_portrait).id);

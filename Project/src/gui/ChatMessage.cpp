@@ -8,8 +8,6 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
-#include <format>
-
 #define USER_RIGHT_ALIGNED	1
 #define USER_YOU			1
 

@@ -49,7 +49,7 @@ namespace fig
 				auto& content = userMngr.GetContent();
 
 				// Delete all characters
-				auto remove_characters = content.GetAssetManager().GetCharacterAssets()
+				auto remove_characters = content.GetAssetManager().GetAssetsOfType(AssetType::Character)
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
 					| std::ranges::to<std::vector>();
 				content.GetAssetManager().DeleteAssets(remove_characters);
@@ -70,7 +70,7 @@ namespace fig
 			{
 				auto& content = userMngr.GetContent();
 
-				auto remove_scenarios = content.GetAssetManager().GetScenarioAssets()
+				auto remove_scenarios = content.GetAssetManager().GetAssetsOfType(AssetType::Scenario)
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
 					| std::ranges::to<std::vector>();
 				content.GetAssetManager().DeleteAssets(remove_scenarios);
@@ -91,8 +91,7 @@ namespace fig
 			{
 				auto& content = userMngr.GetContent();
 
-				auto characterAssets = content.GetAssetManager().GetAssets()
-					| std::views::filter([](auto& a) { return a.asset_type == AssetType::Character; })
+				auto characterAssets = content.GetAssetManager().GetAssetsOfType(AssetType::Character)
 					| std::views::transform([](auto& a) { return std::ref(a); })
 					| std::ranges::to<std::vector>();
 
@@ -103,10 +102,11 @@ namespace fig
 				auto now = fig::now();
 				for (auto& assetRef : characterAssets)
 				{
-					auto& asset = assetRef.get();
-					asset.SetMeta(MetaTag::CreatedAt, now);
-					asset.SetMeta(MetaTag::UpdatedAt, now);
-					now -= std::chrono::milliseconds(100);
+					content.GetAssetManager().ModifyAsset(assetRef.get(), [&now](auto& asset) {
+						asset.SetMeta(MetaTag::CreatedAt, now);
+						asset.SetMeta(MetaTag::UpdatedAt, now);
+						now -= std::chrono::milliseconds(100);
+					});
 				}
 
 				userMngr.SignOut();
@@ -212,7 +212,7 @@ namespace fig
 			{
 				auto& assetMngr = userMngr.GetContent().GetAssetManager();
 
-				auto remove_chats = assetMngr.GetAssetsOfType(AssetType::ChatInstance)
+				auto remove_chats = assetMngr.GetAssetsOfType(AssetType::Chat, ChatAssetType::Instance)
 					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
 					| std::ranges::to<std::vector>();
 				assetMngr.DeleteAssets(remove_chats);

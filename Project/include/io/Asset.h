@@ -3,52 +3,10 @@
 #include "Figment.h"
 #include "io/Serialization.h"
 #include "io/ContentUserSettings.h"
-#include <map>
-#include <variant>
+#include "io/AssetTypeDefinition.h"
 
 namespace fig::io
 {
-	enum class AssetType : uint8_t
-	{
-		Undefined			= 0x00,
-		Character			= 0x01,
-		Scenario			= 0x02,
-		World				= 0x03,
-		Concept				= 0x04,
-
-		ModelSettings		= 0x08,
-
-		ChatInstance		= 0x14,
-		ChatLog				= 0x15,
-
-		Image				= 0x0A,
-	};
-
-	enum class DataFormat : uint8_t
-	{
-		Undefined			= 0x00,	// generic binary
-		Text				= 0x01,	// utf-8
-	
-		DataXml				= 0x04,	// utf-8
-		DataJson			= 0x05,	// utf-8
-
-		ImageUncompressed	= 0x0A,	// bitmap
-		ImageJpeg			= 0x0B,
-		ImagePng			= 0x0C,
-		ImageWebp			= 0x0D,
-	};
-
-	enum class ImageType : uint8_t
-	{
-		Undefined			= 0x00,
-		ProfileImage		= 0x01,
-		CoverImage			= 0x02,	// card
-		SmallPortrait		= 0x03,
-		LargePortrait		= 0x04,
-		Background			= 0x05,
-		Expression			= 0x0A, // ...
-	};
-
 	struct AssetSyncState
 	{
 		enum class Status
@@ -94,10 +52,6 @@ namespace fig::io
 		}
 	};
 
-	fig::string AssetTypeToString(AssetType type, uint8_t subtype) noexcept;
-	std::pair<AssetType, uint8_t> AssetTypeFromString(const fig::string& str) noexcept;
-	fig::string DataFormatToString(DataFormat format) noexcept;
-	DataFormat DataFormatFromString(const fig::string& str) noexcept;
 	DataFormat DataFormatFromExt(const fig::string& ext);
 
 	enum class FolderCategory
@@ -119,6 +73,7 @@ namespace fig::io
 		fig::string settings {};
 	};
 
+	// In-memory representation of a generic asset
 	class Asset
 	{
 	public:
@@ -152,8 +107,8 @@ namespace fig::io
 		void FromFile(AssetFile&& file) noexcept;
 		void CalculateChecksum();
 
-		constexpr bool IsOfType(AssetType type) const noexcept { return asset_type == type; }
-		constexpr bool IsOfImageType(ImageType subtype) const noexcept { return asset_type == AssetType::Image and asset_subtype == static_cast<uint8_t>(subtype); }
+		constexpr bool IsOfType(AssetType assetType) const noexcept { return type.IsOfType(assetType); }
+		constexpr bool IsOfImageType(ImageAssetType subtype) const noexcept { return type.IsOfType(AssetType::Image, subtype); }
 		constexpr bool HasData() const noexcept { return not data.empty(); }
 		fig::string_view AsStringView() const;
 
@@ -204,9 +159,7 @@ namespace fig::io
 		fig::uuid id {};
 		fig::uuid parent_id {};
 		fig::uuid folder_id {};
-		AssetType asset_type { AssetType::Undefined };
-		uint8_t asset_subtype {};
-		DataFormat data_format { DataFormat::Undefined };
+		AssetTypeDefinition type;
 		fig::bytes data {};
 		AssetSyncState sync_state {};
 

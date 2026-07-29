@@ -10,21 +10,21 @@
 namespace fig::io
 {
 	template <typename TAsset>
-	inline constexpr AssetType AssetTypeOf = []<bool Flag = false>()
+	inline constexpr AssetTypeDefinition AssetTypeOf = []<bool Flag = false>()
 	{
 		static_assert(Flag, "No AssetType mapping for this type");
 	}();
 
 	template <> 
-	constexpr AssetType AssetTypeOf<fig::data::Character> = AssetType::Character;
+	constexpr AssetTypeDefinition AssetTypeOf<fig::data::Character> = make_asset_type(AssetType::Character);
 	template <> 
-	constexpr AssetType AssetTypeOf<fig::data::Scenario> = AssetType::Scenario;
+	constexpr AssetTypeDefinition AssetTypeOf<fig::data::Scenario> = make_asset_type(AssetType::Scenario);
 	template <> 
-	constexpr AssetType AssetTypeOf<fig::sdl::Surface> = AssetType::Image;
+	constexpr AssetTypeDefinition AssetTypeOf<fig::sdl::Surface> = make_asset_type(AssetType::Image);
 	template <> 
-	constexpr AssetType AssetTypeOf<fig::data::ChatInstance> = AssetType::ChatInstance;
+	constexpr AssetTypeDefinition AssetTypeOf<fig::data::ChatInstance> = make_asset_type(AssetType::Chat, ChatAssetType::Instance);
 	template <> 
-	constexpr AssetType AssetTypeOf<fig::data::ChatLog> = AssetType::ChatLog;
+	constexpr AssetTypeDefinition AssetTypeOf<fig::data::ChatLog> = make_asset_type(AssetType::Chat, ChatAssetType::Log);
 
 	template<typename T>
 	concept XmlLoadableAsset = requires (T& value)

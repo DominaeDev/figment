@@ -8,7 +8,6 @@
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "data/Character.h"
-#include <format>
 
 using namespace fig::llm;
 using namespace fig::chat;

@@ -1,7 +1,6 @@
 #include <pch.h>
 #include "llm/Embedding.h"
 #include "io/FileUtility.h"
-#include <format>
 #include <iostream>
 #include <fstream>
 

@@ -27,12 +27,13 @@ namespace fig::io
 		virtual const std::map<fig::uuid, T>& GetAll() const = 0;
 	};
 
-	template <typename T, AssetType A, DataFormat F, fixed_string LOG>
+	template <typename T, fixed_string LOG>
 	class AssetCache : public AssetCacheBase<T>
 	{
 		using data_type = T;
-		static constexpr AssetType _asset_type = A;
-		static constexpr DataFormat _data_format = F;
+		static constexpr AssetTypeDefinition _asset_type_definition = AssetTypeOf<T>;
+		static constexpr AssetType _asset_type { _asset_type_definition.type };
+		static constexpr DataFormat _data_format { _asset_type_definition.format };
 		static constexpr auto _log_name { LOG.c_str() };
 
 	public:
@@ -72,7 +73,7 @@ namespace fig::io
 
 			fail:
 				LogLn(std::format("Failed to preload asset [{}] {}.", _log_name, (fig::string)asset.id));
-//				assert(false && "Failed to preload asset");
+				assert(false && "Failed to preload asset");
 			}
 
 		}
@@ -86,7 +87,7 @@ namespace fig::io
 			{
 				auto& asset = *try_asset;
 
-				if (_data_format != DataFormat::Undefined and asset.data_format != _data_format)
+				if (_data_format != DataFormat::Undefined and !asset.type.IsFormat(_data_format))
 					goto fail;
 
 				if (not asset.HasData())
@@ -108,7 +109,7 @@ namespace fig::io
 
 		fail:
 			LogLn(std::format("Failed to load asset [{}] {}.", _log_name, (fig::string)assetId));
-//			assert(false && "Failed to load asset");
+			assert(false && "Failed to load asset");
 			return fig::nullref;
 		}
 

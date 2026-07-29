@@ -1,6 +1,5 @@
 #include <pch.h>
 #include "llm/LLMStateVariables.h"
-#include <format>
 
 namespace fig::llm
 {

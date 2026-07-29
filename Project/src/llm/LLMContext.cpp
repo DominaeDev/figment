@@ -7,7 +7,6 @@
 #include "text/TextEvaluator.h"
 #include <cassert>
 #include <algorithm>
-#include <format>
 
 using namespace fig::chat;
 

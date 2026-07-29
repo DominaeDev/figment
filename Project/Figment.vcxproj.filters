@@ -623,6 +623,9 @@
     <ClCompile Include="src\io\SettingsCollection.cpp">
       <Filter>Source Files\Frontend\IO</Filter>
     </ClCompile>
+    <ClCompile Include="src\io\SQLTransaction.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1455,6 +1458,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\BoxSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AssetTypeDefinition.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\SQLTransaction.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

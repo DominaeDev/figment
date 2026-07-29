@@ -1,12 +1,9 @@
 #pragma once
 
 #include "Figment.h"
-#include "user/Security.h"
+#include "io/AssetTypeDefinition.h"
 #include "io/Error.h"
-#include <variant>
-#include <map>
-#include <chrono>
-#include <expected>
+#include "user/Security.h"
 
 namespace fig::user
 {
@@ -77,30 +74,6 @@ namespace fig::io
 		{
 			return major != 0 && minor != 0;
 		}
-	};
-
-	constexpr fig::const_string MagicWord = "FIGM";
-
-	enum class FileHeaderFlag : uint8_t
-	{
-		Encrypted = 1 << 0,
-		Checksum = 1 << 1,
-	};
-	using FileHeaderFlags = EnumFlags<FileHeaderFlag>;
-
-	struct alignas(8) FileHeader
-	{
-		char magic[4] = { 'F','I','G','M' };
-		uint8_t header_version { 1 };
-		FileHeaderFlags flags;
-		uint16_t data_offset;
-		uint64_t asset_id[2];
-		uint64_t parent_id[2];
-		uint32_t data_length;
-		uint8_t asset_type;
-		uint8_t asset_subtype;
-		uint8_t data_format;
-		uint8_t meta_count;
 	};
 
 	enum class MetaTag : uint8_t
@@ -174,13 +147,32 @@ namespace fig::io
 		}
 	}
 
+	enum class AssetFileHeaderFlag : uint8_t
+	{
+		Encrypted = 1 << 0,
+		Checksum = 1 << 1,
+	};
+	using AssetFileHeaderFlags = EnumFlags<AssetFileHeaderFlag>;
+
+	struct alignas(8) AssetFileHeader
+	{
+		static constexpr fig::const_string MagicWord = "FIGM";
+
+		char magic[4] = { MagicWord[0], MagicWord[1], MagicWord[2], MagicWord[3] };
+		uint8_t header_version { 1 };
+		AssetFileHeaderFlags flags;
+		uint16_t data_offset;
+		uint64_t asset_id[2];
+		uint64_t parent_id[2];
+		uint32_t data_length;
+		AssetTypeDefinition asset_type;
+	};
+
 	struct AssetFile
 	{
 		fig::uuid asset_id {};
 		fig::uuid parent_id {};
-		uint8_t asset_type { 0 };
-		uint8_t asset_subtype { 0 };
-		uint8_t data_format { 0 };
+		AssetTypeDefinition type {};
 
 		size_t data_length {};
 		bool data_encrypted { true };

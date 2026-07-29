@@ -2,7 +2,6 @@
 
 #include "Figment.h"
 #include "user/Security.h"
-#include <array>
 
 namespace fig::user
 {

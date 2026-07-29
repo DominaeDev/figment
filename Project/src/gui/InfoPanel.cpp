@@ -192,7 +192,7 @@ namespace fig::gui
 	void InfoPanel::SetSession(const ChatSession& session)
 	{
 		auto botId = session.GetCharacterIdOf(Role::Bot1);
-		if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindImageAsset(botId, ImageType::LargePortrait))
+		if (auto try_portrait = Global::GetUserContent().GetAssetManager().FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), botId))
 			SetImage((*try_portrait).id);
 		else
 			ClearImage();

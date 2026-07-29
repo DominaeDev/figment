@@ -18,9 +18,9 @@ namespace fig::io
 	{
 	}
 
-	static uint16_t get_data_offset(const AssetFile& file)
+	static uint16_t calc_data_offset(const AssetFile& file)
 	{
-		uint32_t offset = 0;
+		uint32_t offset = sizeof(AssetFileHeader);
 		for (auto it = file.meta.cbegin(); it != file.meta.cend(); ++it)
 		{
 			offset += 1; // Tag byte
@@ -47,28 +47,25 @@ namespace fig::io
 		}
 
 		assert(offset <= static_cast<uint16_t>(std::numeric_limits<uint16_t>::max()));
-		return offset;
+		return static_cast<uint16_t>(offset);
 	}
 
 	static void WriteHeader(std::ofstream& fs, const AssetFile& file) noexcept
 	{
-		FileHeader header {
+		AssetFileHeader header {
 			.data_length = static_cast<uint32_t>(file.data_length),
-			.asset_type = file.asset_type,
-			.asset_subtype = file.asset_subtype,
-			.data_format = file.data_format,
+			.asset_type = file.type,
 		};
 		file.asset_id.bytes(reinterpret_cast<char*>(&header.asset_id));
 		file.parent_id.bytes(reinterpret_cast<char*>(&header.parent_id));
 
 		assert(file.meta.size() <= toUZ(std::numeric_limits<uint8_t>::max()));
-		header.meta_count = static_cast<uint8_t>(file.meta.size());
-		header.data_offset = get_data_offset(file);
+		header.data_offset = calc_data_offset(file);
 
 		if (file.data_encrypted)
-			header.flags = header.flags | FileHeaderFlag::Encrypted;
+			header.flags = header.flags | AssetFileHeaderFlag::Encrypted;
 		if (file.has_meta(MetaTag::Checksum))
-			header.flags = header.flags | FileHeaderFlag::Checksum;
+			header.flags = header.flags | AssetFileHeaderFlag::Checksum;
 
 		fs.write((const char*)(&header), sizeof(header));
 	}
