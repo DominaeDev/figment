@@ -6,25 +6,30 @@
 
 using namespace fig::auth;
 
+static constexpr fig::const_string SQL_Pragmas = 
+	"PRAGMA journal_mode=WAL;"
+	"PRAGMA synchronous=NORMAL;"
+	"PRAGMA foreign_keys=ON;";
+
 static constexpr fig::const_string SQL_CreateTables =
-	"CREATE TABLE Assets ("
+	"CREATE TABLE IF NOT EXISTS Assets ("
 	"	id          TEXT     PRIMARY KEY NOT NULL,"
 	"	parent      TEXT,"
-	"	type        INTEGER  NOT NULL DEFAULT (0),"
 	"   folder      TEXT,"
-	"	metadata    TEXT     NOT NULL ON CONFLICT REPLACE DEFAULT [{}],"
+	"	type        INTEGER  NOT NULL DEFAULT (0),"
+	"	metadata    TEXT,"
 	"	createdAt   INTEGER  DEFAULT (CURRENT_TIMESTAMP) NOT NULL,"
 	"	updatedAt   INTEGER  NOT NULL DEFAULT (CURRENT_TIMESTAMP),"
 	"	FOREIGN KEY (parent) REFERENCES Assets (id) ON DELETE CASCADE ON UPDATE CASCADE,"
 	"   FOREIGN KEY (folder) REFERENCES Folders (id) ON DELETE SET NULL ON UPDATE CASCADE"
 	");"
 
-	"CREATE TABLE Folders ("
+	"CREATE TABLE IF NOT EXISTS Folders ("
 	"	id       TEXT PRIMARY KEY NOT NULL,"
 	"	parent   TEXT,"
 	"	category INTEGER NOT NULL DEFAULT (0),"
 	"	name     TEXT NOT NULL,"
-	"	metadata TEXT NOT NULL DEFAULT [{}],"
+	"	metadata TEXT,"
 	"	FOREIGN KEY (parent) REFERENCES Folders(id) ON DELETE SET NULL ON UPDATE CASCADE"
 	");"
 
@@ -34,24 +39,24 @@ static constexpr fig::const_string SQL_CreateTables =
 	"\0";
 
 static constexpr fig::const_string SQL_FetchAsset =
-	"SELECT id, parent, type, folder, metadata, createdAt, updatedAt FROM Assets;";
+	"SELECT id, parent, folder, type, metadata, createdAt, updatedAt FROM Assets;";
 
 static constexpr fig::const_string SQL_InsertAsset =
-	"INSERT INTO Assets (id, parent, type, folder, metadata, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?);";
+	"INSERT INTO Assets (id, parent, folder, type, metadata, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?);";
 
 static constexpr fig::const_string SQL_UpdateAsset =
-	"UPDATE Assets SET parent = ?, type = ?, folder = ?, metadata = ?, updatedAt = ? WHERE id = ?;";
+	"UPDATE Assets SET parent = ?, folder = ?, type = ?, metadata = ?, updatedAt = ? WHERE id = ?;";
 
 static constexpr fig::const_string SQL_DeleteAsset =
 	"DELETE FROM Assets WHERE id = ?;";
 
 static constexpr fig::const_string SQL_UpsertAsset =
-	"INSERT INTO Assets (id, parent, type, folder, metadata, createdAt, updatedAt)"
+	"INSERT INTO Assets (id, parent, folder, type, metadata, createdAt, updatedAt)"
 	"VALUES (?, ?, ?, ?, ?, ?, ?)"
 	"ON CONFLICT (id) DO UPDATE SET"
 	"	parent = excluded.parent,"
-	"	type = excluded.type,"
 	"	folder = excluded.folder,"
+	"	type = excluded.type,"
 	"	metadata = excluded.metadata,"
 	"	updatedAt = excluded.updatedAt;";
 
@@ -88,11 +93,10 @@ namespace fig::io
 			return false;
 		}
 
-		rc = sqlite3_exec(_pDB, "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;", nullptr, nullptr, nullptr);
+		rc = sqlite3_exec(_pDB, toCStr(SQL_Pragmas), nullptr, nullptr, nullptr);
 		PrepareStatements();
 		return true;
 	}
-
 
 	bool IndexDatabase::CreateDatabaseAndConnect() noexcept
 	{
@@ -176,18 +180,17 @@ namespace fig::io
 		sqlite3_reset(stmt);
 		sqlite3_clear_bindings(stmt);
 
-		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
-		{
-			LogLn("SQLite Error: No changes");
-			return DatabaseError::ZeroChanges;
-		}
-
 		if (rc != SQLITE_DONE)
 		{
 			LogLn(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
 			return DatabaseError::SQLError;
 		}
 
+		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
+		{
+			LogLn("SQLite Error: No changes");
+			return DatabaseError::ZeroChanges;
+		}
 		return DatabaseError::NoError;
 	}
 
@@ -204,8 +207,8 @@ namespace fig::io
 		{
 			const char* pAssetID = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
 			const char* pParentID = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-			int32_t type = sqlite3_column_int(stmt, 2);
-			const char* pFolder = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+			const char* pFolder = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+			int32_t type = sqlite3_column_int(stmt, 3);
 			const char* pMetaData = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
 
 			int64_t createdAt = sqlite3_column_int64(stmt, 5);
@@ -299,13 +302,13 @@ namespace fig::io
 				sqlite3_bind_text(stmt, 2, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 2, nullptr, -1, SQLITE_STATIC);
-			/* type */
-			sqlite3_bind_int(stmt, 3, static_cast<int32_t>(asset.type));
 			/* folder */
 			if (not asset.folder_id.empty())
-				sqlite3_bind_text(stmt, 4, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 3, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
-				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
+				sqlite3_bind_text(stmt, 3, nullptr, -1, SQLITE_STATIC);
+			/* type */
+			sqlite3_bind_int(stmt, 4, static_cast<int32_t>(asset.type));
 			/* metadata */
 			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
 				sqlite3_bind_text(stmt, 5, metadata.c_str(), -1, SQLITE_TRANSIENT);
@@ -329,13 +332,13 @@ namespace fig::io
 				sqlite3_bind_text(stmt, 1, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 1, nullptr, -1, SQLITE_STATIC);
-			/* type */
-			sqlite3_bind_int(stmt, 2, static_cast<int32_t>(asset.type));
 			/* folder */
 			if (not asset.folder_id.empty())
-				sqlite3_bind_text(stmt, 3, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 2, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
-				sqlite3_bind_text(stmt, 3, nullptr, -1, SQLITE_STATIC);
+				sqlite3_bind_text(stmt, 2, nullptr, -1, SQLITE_STATIC);
+			/* type */
+			sqlite3_bind_int(stmt, 3, static_cast<int32_t>(asset.type));
 			/* metadata */
 			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
 				sqlite3_bind_text(stmt, 4, metadata.c_str(), -1, SQLITE_TRANSIENT);
@@ -364,13 +367,13 @@ namespace fig::io
 				sqlite3_bind_text(stmt, 2, asset.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 2, nullptr, -1, SQLITE_STATIC);
-			/* type */
-			sqlite3_bind_int(stmt, 3, static_cast<int32_t>(asset.type));
 			/* folder */
 			if (not asset.folder_id.empty())
-				sqlite3_bind_text(stmt, 4, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+				sqlite3_bind_text(stmt, 3, asset.folder_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			else
-				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
+				sqlite3_bind_text(stmt, 3, nullptr, -1, SQLITE_STATIC);
+			/* type */
+			sqlite3_bind_int(stmt, 4, static_cast<int32_t>(asset.type));
 			/* metadata */
 			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
 				sqlite3_bind_text(stmt, 5, metadata.c_str(), -1, SQLITE_TRANSIENT);
@@ -437,8 +440,15 @@ namespace fig::io
 			SqlTransaction transaction(_pDB);
 			for (auto const& asset : chunk)
 			{
-				if (auto upsert_result = UpsertAsset(asset); upsert_result != DatabaseError::NoError)
+				if (auto upsert_result = UpsertAsset(asset); Success(upsert_result))
+				{
+					LogLn(std::format("Upserted {}", (fig::string)asset.get().id));
+				}
+				else
+				{
+					LogLn(std::format("SQLError when upserting {} [parent: {}]", (fig::string)asset.get().id, (fig::string)asset.get().parent_id));
 					return std::unexpected(upsert_result);
+				}
 			}
 			
 			if (auto commit_result = transaction.Commit())

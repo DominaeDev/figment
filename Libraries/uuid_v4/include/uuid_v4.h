@@ -311,15 +311,3 @@ class UUIDGenerator {
 };
 
 }
-
-namespace std
-{
-	template<>
-	struct hash<UUIDv4::UUID>
-	{
-		size_t operator()(const UUIDv4::UUID& uuid) const
-		{
-			return uuid.hash();
-		}
-	};
-}

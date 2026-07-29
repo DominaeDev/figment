@@ -167,7 +167,7 @@ namespace fig::gui
 					Global::GetUserContent().MarkFavorite(_characterId, true);
 					_userSettings.flags.Set(ContentUserSettings::Flag::Favorite);
 					ShowStar(true);
-					NotifyMetaUpdated();
+					NotifyUpdated();
 				});
 		}
 		else
@@ -177,7 +177,7 @@ namespace fig::gui
 					Global::GetUserContent().MarkFavorite(_characterId, false);
 					_userSettings.flags.Unset(ContentUserSettings::Flag::Favorite);
 					ShowStar(false);
-					NotifyMetaUpdated();
+					NotifyUpdated();
 				});
 		}
 
@@ -187,7 +187,7 @@ namespace fig::gui
 				.SetDelegate([this] { 
 					Global::GetUserContent().MarkHidden(_characterId, true);
 					_userSettings.flags.Set(ContentUserSettings::Flag::Hidden);
-					NotifyMetaUpdated();
+					NotifyUpdated();
 				});
 		}
 		else
@@ -196,11 +196,12 @@ namespace fig::gui
 				.SetDelegate([this] { 
 					Global::GetUserContent().MarkHidden(_characterId, false);
 					_userSettings.flags.Unset(ContentUserSettings::Flag::Hidden);
-					NotifyMetaUpdated();
+					NotifyUpdated();
 				});
 		}
 		menu.AddSeparator();
-		menu.AddItem("Delete\u2026", Resource::ICON_DELETE);
+		menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
+			.SetDelegate([this] { NotifyDelete(); });
 
 		_menuId = menu.Show();
 	}

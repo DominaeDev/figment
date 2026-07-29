@@ -31,7 +31,7 @@ namespace fig::gui
 	public:
 		ChatListItem(ControlPtr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString);
 		void ShowStar(bool bShow);
-		void SetDelegate(ChatItemEventDelegate fnDelegate);
+		void SetDelegate(ChatItemEventDelegate fnDelegate) { _fnDelegate = fnDelegate; }
 
 	protected:
 		void OnUpdate(float fElapsed);

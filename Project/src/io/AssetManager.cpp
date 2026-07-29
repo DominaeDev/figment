@@ -27,10 +27,7 @@ namespace fig::io
 		_profileID = profile.id;
 		_profilePath = profile.GetPath();
 
-		if (not LoadIndexDatabase())
-		{
-			Log(std::format("No asset index found for profile '{}'.", profile.name));
-		}
+		LoadIndexDatabase();
 
 		_workers.reserve(worker_threads);
 		for (int i = 0; i < worker_threads; ++i)
@@ -78,10 +75,10 @@ namespace fig::io
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateEmptyAsset_Internal(make_asset_type(type), parent);
+		return CreateEmptyAsset_NoLock(make_asset_type(type), parent);
 	}
 
-	Asset& AssetManager::CreateEmptyAsset_Internal(AssetTypeDefinition type, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateEmptyAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
@@ -102,45 +99,45 @@ namespace fig::io
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(make_asset_type(type), std::move(data), parent);
+		return CreateAsset_NoLock(make_asset_type(type), std::move(data), parent);
 	}
 
 	const Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(make_asset_type(type), data, parent);
+		return CreateAsset_NoLock(make_asset_type(type), data, parent);
 	}
 
 	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(make_asset_type(type, format), std::move(data), parent);
+		return CreateAsset_NoLock(make_asset_type(type, format), std::move(data), parent);
 	}
 
 	const Asset& AssetManager::CreateAsset(AssetType type, DataFormat format, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(make_asset_type(type, format), data, parent);
+		return CreateAsset_NoLock(make_asset_type(type, format), data, parent);
 	}
 
 	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(type, std::move(data), parent);
+		return CreateAsset_NoLock(type, std::move(data), parent);
 	}
 
 	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_Internal(type, data, parent);
+		return CreateAsset_NoLock(type, data, parent);
 	}
 
-	Asset& AssetManager::CreateAsset_Internal(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
@@ -158,7 +155,7 @@ namespace fig::io
 		return asset;
 	}
 
-	Asset& AssetManager::CreateAsset_Internal(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
@@ -183,12 +180,12 @@ namespace fig::io
 	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return CreateImageAsset_Internal(subtype, format, std::move(data), parent);
+		return CreateImageAsset_NoLock(subtype, format, std::move(data), parent);
 	}
 
-	Asset& AssetManager::CreateImageAsset_Internal(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateImageAsset_NoLock(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept
 	{
-		auto& asset = CreateAsset_Internal(make_asset_type(AssetType::Image, subtype, format), std::move(data), parent);
+		auto& asset = CreateAsset_NoLock(make_asset_type(AssetType::Image, subtype, format), std::move(data), parent);
 		asset.CalculateChecksum();
 		return asset;
 	}
@@ -197,7 +194,7 @@ namespace fig::io
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		auto& asset = CreateAsset_Internal(make_asset_type(AssetType::Image, subtype, format), data, parent);
+		auto& asset = CreateAsset_NoLock(make_asset_type(AssetType::Image, subtype, format), data, parent);
 		asset.CalculateChecksum();
 		return asset;
 	}
@@ -205,12 +202,12 @@ namespace fig::io
 	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return CreateImageAsset_Internal(subtype, surface, parent);
+		return CreateImageAsset_NoLock(subtype, surface, parent);
 	}
 
-	Asset& AssetManager::CreateImageAsset_Internal(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateImageAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
 	{
-		auto& asset = CreateEmptyAsset_Internal(make_asset_type(AssetType::Image, subtype, DataFormat::ImageUncompressed), parent);
+		auto& asset = CreateEmptyAsset_NoLock(make_asset_type(AssetType::Image, subtype, DataFormat::ImageUncompressed), parent);
 		if (!surface.get())
 			return asset; // Error
 
@@ -254,13 +251,13 @@ namespace fig::io
 	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return FindAsset_Internal(id);
+		return FindAsset_NoLock(id);
 	}
 
 	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return FindAsset_Internal(id, assetType);
+		return FindAsset_NoLock(id, assetType);
 	}
 
 	fig::optional_cref<Asset> AssetManager::FindAssetOfType(AssetTypeDefinition type, const fig::uuid& parentId) noexcept
@@ -280,7 +277,7 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset_Internal(const fig::uuid& id) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id) noexcept
 	{
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend())
@@ -288,7 +285,7 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset_Internal(const fig::uuid& id, AssetType assetType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id, AssetType assetType) noexcept
 	{
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend() and itFind->second.type.IsOfType(assetType))
@@ -296,7 +293,7 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset_Internal(const fig::uuid& id, AssetTypeDefinition assetType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id, AssetTypeDefinition assetType) noexcept
 	{
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend() and (itFind->second).type.IsOfType(assetType, false))
@@ -329,6 +326,23 @@ namespace fig::io
 		return false;
 	}
 
+	constexpr int MaxAssetDepth = 8;
+
+	int32_t AssetManager::GetAssetDepth_NoLock(const fig::uuid& id, std::unordered_map<fig::uuid, int32_t>& depthCache, int32_t depth) const noexcept
+	{
+		if (depth >= MaxAssetDepth)
+		{
+			Log("Asset parent chain exceeded max depth, possible cycle");
+			return 0;
+		}
+		if (auto it = depthCache.find(id); it != depthCache.end())
+			return it->second;
+		auto it = _assets.find(id);
+		if (it == _assets.end() or it->second.parent_id.empty())
+			return depthCache[id] = 0;
+		return depthCache[id] = 1 + GetAssetDepth_NoLock(it->second.parent_id, depthCache, depth + 1);
+	}
+
 	bool AssetManager::SaveModifiedAssets()
 	{
 		std::scoped_lock lock { _assetsMutex };
@@ -352,9 +366,15 @@ namespace fig::io
 			| std::views::filter([](auto& kvp) { return kvp.second.sync_state.ShouldWriteToDatabase(); })
 			| std::views::transform([](auto& kvp) { return std::ref(kvp.second); })
 			| std::ranges::to<std::vector>();
-		
+
 		if (not changedAssets.empty())
 		{
+			// Sort by ancestry
+			std::unordered_map<fig::uuid, int> depthCache;
+			std::ranges::stable_sort(changedAssets, [&](auto& a, auto& b) {
+				return GetAssetDepth_NoLock(a.get().id, depthCache) < GetAssetDepth_NoLock(b.get().id, depthCache);
+			});
+
 			auto& db = GetDatabase();
 			if (auto result = db.UpsertAssets(changedAssets))
 			{
@@ -421,7 +441,7 @@ namespace fig::io
 		std::for_each(std::execution::par_unseq,
 			meta_assets.begin(), meta_assets.end(),
 			[&](Asset* pAsset) {
-				auto discard = LoadAssetMeta_Internal(*pAsset);
+				auto discard = LoadAssetMeta_NoLock(*pAsset);
 			});
 		DEBUG_MEASURE_END();
 
@@ -462,7 +482,7 @@ namespace fig::io
 		std::for_each(std::execution::par_unseq,
 			assets.begin(), assets.end(),
 			[&](Asset* pAsset) {
-			auto discard = LoadAsset_Internal(*pAsset);
+			auto discard = LoadAsset_NoLock(*pAsset);
 		});
 		DEBUG_MEASURE_END();
 		return true;
@@ -479,7 +499,7 @@ namespace fig::io
 		std::for_each(std::execution::par_unseq,
 			assets.begin(), assets.end(),
 			[&](Asset* pAsset) {
-			auto discard = LoadAsset_Internal(*pAsset);
+			auto discard = LoadAsset_NoLock(*pAsset);
 		});
 	}
 
@@ -490,7 +510,7 @@ namespace fig::io
 		std::for_each(std::execution::par_unseq,
 			assets.cbegin(), assets.cend(),
 			[&](auto&& asset) {
-			auto discard = LoadAsset_Internal(asset.get());
+			auto discard = LoadAsset_NoLock(asset.get());
 		});
 	}
 
@@ -513,10 +533,10 @@ namespace fig::io
 		if (asset.sync_state.has_data)
 			return asset;
 
-		return LoadAsset_Internal(asset);
+		return LoadAsset_NoLock(asset);
 	}
 
-	fig::expected_ref<Asset, FileError> AssetManager::LoadAsset_Internal(Asset& asset) noexcept
+	fig::expected_ref<Asset, FileError> AssetManager::LoadAsset_NoLock(Asset& asset) noexcept
 	{
 		if (asset.sync_state.has_data)
 			return asset;
@@ -552,7 +572,7 @@ namespace fig::io
 		}
 	}
 
-	fig::expected_ref<Asset, FileError> AssetManager::LoadAssetMeta_Internal(Asset& asset) noexcept
+	fig::expected_ref<Asset, FileError> AssetManager::LoadAssetMeta_NoLock(Asset& asset) noexcept
 	{
 		if (asset.sync_state.has_meta)
 			return asset;
@@ -604,86 +624,82 @@ namespace fig::io
 		return std::unexpected(FileError::UnrecognizedFormat);
 	}
 
-	bool AssetManager::DeleteAsset(const fig::uuid& assetID) noexcept
+	bool AssetManager::DeleteAsset(fig::uuid assetId) noexcept
 	{
-		std::scoped_lock lock { _assetsMutex };
-		std::set<fig::uuid> uniqueIds = FindRelatedAssets_Internal(assetID);
-		std::vector<fig::uuid> assetIds { uniqueIds.begin(), uniqueIds.end() };
-		return DeleteAssets_Internal(assetIds) != 0;
+		return DeleteAssets(make_span(assetId)) != 0uz;
 	}
 
-	uint32_t AssetManager::DeleteAssets(std::span<fig::uuid> assetIDs) noexcept
+	size_t AssetManager::DeleteAssets(std::span<fig::uuid> assetIds) noexcept
 	{
-		std::scoped_lock lock { _assetsMutex };
-
-		std::set<fig::uuid> uniqueIds;
-		for (auto& assetID : assetIDs)
-			uniqueIds.insert_range(FindRelatedAssets_Internal(assetID));
-
-		std::vector<fig::uuid> assetIds { uniqueIds.begin(), uniqueIds.end() };
-		return DeleteAssets_Internal(assetIds);
-	}
-
-	uint32_t AssetManager::DeleteAssets_Internal(std::span<fig::uuid> assetIDs) noexcept
-	{
-		uint32_t count = 0;
-		for (auto& assetID : assetIDs)
+		if (assetIds.empty())
+			return 0uz;
+		else
 		{
-			if (DeleteAsset_Internal(assetID))
-				count++;
+			std::scoped_lock lock { _assetsMutex };
+			return DeleteAssets_NoLock(assetIds);
+		}
+	}
+
+	size_t AssetManager::DeleteAssets_NoLock(std::span<fig::uuid> assetIds) noexcept
+	{
+		auto& db = GetDatabase();
+		size_t db_deletions = 0;
+		size_t file_deletions = 0;
+		if (auto result = db.DeleteAssets(assetIds))
+		{
+			db_deletions = result.value();
+
+			std::unordered_set<fig::uuid> assetFileIds;
+			for (auto& assetID : assetIds)
+				assetFileIds.insert_range(FindRelatedAssets_NoLock(assetID));
+			file_deletions = DeleteAssetFiles_NoLock(make_span(assetFileIds));
+		}
+		
+		LogLn(std::format("Deleted {} assets (and {} files)", db_deletions, file_deletions));
+		return db_deletions;
+	}
+
+	size_t AssetManager::DeleteAssetFiles_NoLock(std::span<fig::uuid> assetIds) noexcept
+	{
+		auto fnAssetFilename = [](const fig::uuid& id) -> fig::path {
+			return fig::path((fig::string)id
+				| std::ranges::views::filter([](char c) { return c != '-'; })
+				| std::ranges::to<fig::string>());
+		};
+
+		size_t count = 0uz;
+		for (auto& assetId : assetIds)
+		{
+			fig::path path = _profilePath / fnAssetFilename(assetId);
+			if (std::filesystem::exists(path) and std::filesystem::is_regular_file(path))
+			{
+				std::error_code err;
+				if (std::filesystem::remove(path, err))
+					count++;
+			}
 		}
 		return count;
 	}
 
-	bool AssetManager::DeleteAsset_Internal(fig::uuid assetID) noexcept
-	{
-		auto& db = GetDatabase();
-		if (DeleteAssetFile_Internal(assetID) and Success(db.DeleteAsset(assetID)))
-		{
-			LogLn(std::format("Deleted asset {}", (fig::string)assetID));
-			return true;
-		}
-		return false;
-	}
-
-	bool AssetManager::DeleteAssetFile_Internal(const fig::uuid& assetID) noexcept
-	{
-		auto itAsset = _assets.find(assetID);
-		if (itAsset == _assets.end())
-			return false;
-
-		auto& asset = itAsset->second;
-		auto path = _profilePath / asset.GetFileName();
-		if (std::filesystem::exists(path) and std::filesystem::is_regular_file(path))
-		{
-			std::error_code err;
-			if (std::filesystem::remove(path, err))
-			{
-				_assets.erase(itAsset);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool AssetManager::ReleaseAssetData(const fig::uuid& assetID) noexcept
+	bool AssetManager::ReleaseAssetData(const fig::uuid& assetId) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		auto itAsset = _assets.find(assetID);
-		if (itAsset == _assets.end())
-			return false;
+		if (auto it = _assets.find(assetId); it != _assets.end())
+		{
+			auto& asset = it->second;
+			asset.data.clear();
+			asset.sync_state.has_data = false;
+			asset.sync_state.file_sync = AssetSyncState::Status::Indeterminate;
+			return true;
+		}
 
-		auto& asset = itAsset->second;
-		asset.data.clear();
-		asset.sync_state.has_data = false;
-		asset.sync_state.file_sync = AssetSyncState::Status::Indeterminate;
-		return true;
+		return false;
 	}
 
-	std::set<fig::uuid> AssetManager::FindRelatedAssets_Internal(const fig::uuid& assetID) noexcept
+	std::unordered_set<fig::uuid> AssetManager::FindRelatedAssets_NoLock(const fig::uuid& assetID) noexcept
 	{
-		std::set<fig::uuid> assetIDs;
-		std::set<fig::uuid> openList;
+		std::unordered_set<fig::uuid> assetIDs;
+		std::unordered_set<fig::uuid> openList;
 
 		// Find all related assets
 		openList.insert(assetID);
@@ -722,7 +738,7 @@ namespace fig::io
 			std::scoped_lock lock { _assetsMutex };
 			for (auto& filename : files)
 			{
-				if (auto import = ImportCharacter_Internal(filename, format))
+				if (auto import = ImportCharacter_NoLock(filename, format))
 					imported.push_back(std::ref(import.value()));
 			}
 		}
@@ -733,10 +749,10 @@ namespace fig::io
 	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter(const fig::path& filename, CharacterDataFormat format)
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return ImportCharacter_Internal(filename, format);
+		return ImportCharacter_NoLock(filename, format);
 	}
 
-	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format)
+	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format)
 	{
 		if (auto try_character = LoadCharacterData(filename, format))
 		{
@@ -745,13 +761,13 @@ namespace fig::io
 			// Create asset
 			fig::bytes characterData;
 			character.SaveToXml(characterData);
-			auto& characterAsset = CreateAsset_Internal(make_asset_type(AssetType::Character, DataFormat::TextXml), characterData, {});
+			auto& characterAsset = CreateAsset_NoLock(make_asset_type(AssetType::Character, DataFormat::TextXml), characterData, {});
 
 			// Load portrait image(s)
 			if (auto file = fig::io::ReadFile(filename))
 			{
 				// Create portrait asset
-				auto& portraitAsset = CreateImageAsset_Internal(ImageAssetType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
+				auto& portraitAsset = CreateImageAsset_NoLock(ImageAssetType::LargePortrait, DataFormat::ImagePng, std::move(file.value()), characterAsset.id);
 
 				// Create cover card
 				if (auto coverImage = LoadImage(filename) //! @todo: load only once
@@ -760,7 +776,7 @@ namespace fig::io
 				}))
 				{
 					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset_Internal(ImageAssetType::CoverImage, coverImage.value(), characterAsset.id);
+					auto& coverAsset = CreateImageAsset_NoLock(ImageAssetType::CoverImage, coverImage.value(), characterAsset.id);
 					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 				}
 
@@ -771,7 +787,7 @@ namespace fig::io
 				}))
 				{
 					// Save square portrait asset (bitmap)
-					auto& squarePortraitAsset = CreateImageAsset_Internal(ImageAssetType::SmallPortrait, squarePortraitImage.value(), characterAsset.id);
+					auto& squarePortraitAsset = CreateImageAsset_NoLock(ImageAssetType::SmallPortrait, squarePortraitImage.value(), characterAsset.id);
 					squarePortraitAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 				}
 			}
@@ -786,10 +802,10 @@ namespace fig::io
 	fig::expected_ref<Asset, FileError> AssetManager::ImportScenario(const fig::path& filename)
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return ImportScenario_Internal(filename);
+		return ImportScenario_NoLock(filename);
 	}
 
-	fig::expected_ref<Asset, FileError> AssetManager::ImportScenario_Internal(const fig::path& filename)
+	fig::expected_ref<Asset, FileError> AssetManager::ImportScenario_NoLock(const fig::path& filename)
 	{
 		Scenario scenario;
 		if (auto error = scenario.LoadFromXml(filename); error != FileError::NoError)
@@ -798,7 +814,7 @@ namespace fig::io
 		// Create asset
 		fig::bytes scenarioData;
 		scenario.SaveToXml(scenarioData);
-		auto& scenarioAsset = CreateAsset_Internal(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, {});
+		auto& scenarioAsset = CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, {});
 
 		// Load scenario image
 /*		if (not empty_or_whitespace(scenario.imageFilename))
@@ -806,7 +822,7 @@ namespace fig::io
 			if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
 			{
 				// Create portrait asset
-				auto& scenarioImageAsset = CreateImageAsset_Internal(ImageAssetType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
+				auto& scenarioImageAsset = CreateImageAsset_NoLock(ImageAssetType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
 
 				// Create cover card
 				if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
@@ -815,7 +831,7 @@ namespace fig::io
 				}))
 				{
 					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset_Internal(ImageAssetType::CoverImage, coverImage.value(), scenarioAsset.id);
+					auto& coverAsset = CreateImageAsset_NoLock(ImageAssetType::CoverImage, coverImage.value(), scenarioAsset.id);
 					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, scenarioImageAsset.id);
 				}
 			}
@@ -971,7 +987,7 @@ namespace fig::io
 							// Save cover asset (bitmap)
 							{
 								std::scoped_lock lock { _assetsMutex };
-								auto& coverAsset = CreateImageAsset_Internal(ImageAssetType::CoverImage, coverImage, characterAssetID);
+								auto& coverAsset = CreateImageAsset_NoLock(ImageAssetType::CoverImage, coverImage, characterAssetID);
 								coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
 								coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 							}
@@ -1154,9 +1170,9 @@ namespace fig::io
 		return it != _active_promises.end();
 	}
 
-	void AssetManager::ModifyAsset_Void(const fig::uuid& assetID, std::function<void(Asset&)> fn)
+	void AssetManager::ModifyAsset_Void(const fig::uuid& assetId, std::function<void(Asset&)> fn)
 	{
-		if (auto itFind = _assets.find(assetID); itFind != _assets.cend())
+		if (auto itFind = _assets.find(assetId); itFind != _assets.cend())
 		{
 			if (fn)
 				fn(itFind->second);
@@ -1169,9 +1185,9 @@ namespace fig::io
 			fn(const_cast<Asset&>(asset));
 	}
 
-	bool AssetManager::ModifyAsset_Bool(const fig::uuid& assetID, std::function<bool(Asset&)> fn)
+	bool AssetManager::ModifyAsset_Bool(const fig::uuid& assetId, std::function<bool(Asset&)> fn)
 	{
-		if (auto itFind = _assets.find(assetID); itFind != _assets.cend())
+		if (auto itFind = _assets.find(assetId); itFind != _assets.cend())
 		{
 			if (fn)
 				return fn(itFind->second);
@@ -1210,7 +1226,7 @@ namespace fig::io
 
 		openList.insert(assetId);
 
-		if (auto try_asset = FindAsset_Internal(assetId))
+		if (auto try_asset = FindAsset_NoLock(assetId))
 		{
 			auto& asset = *try_asset;
 			// References

@@ -61,26 +61,26 @@ namespace fig::io
 		const Asset& CreateImageAsset(ImageAssetType subtype, DataFormat format, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;
 
-		bool DeleteAsset(const fig::uuid& assetID) noexcept;
-		uint32_t DeleteAssets(std::span<fig::uuid> assetIDs) noexcept;
-		bool ReleaseAssetData(const fig::uuid& assetID) noexcept;
+		bool DeleteAsset(fig::uuid assetId) noexcept;
+		size_t DeleteAssets(std::span<fig::uuid> assetIds) noexcept;
+		bool ReleaseAssetData(const fig::uuid& assetId) noexcept;
 
-		fig::optional_cref<Asset> FindAsset(const fig::uuid& id) noexcept;
-		fig::optional_cref<Asset> FindAsset(const fig::uuid& id, AssetType assetType) noexcept;
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId) noexcept;
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId, AssetType assetType) noexcept;
 		template<asset_subtype_type T>
-		fig::optional_cref<Asset> FindAsset(const fig::uuid& id, AssetType assetType, T subtype) noexcept
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId, AssetType assetType, T subtype) noexcept
 		{
 			std::scoped_lock lock { _assetsMutex };
-			return FindAsset_Internal(id, make_asset_type(assetType, subtype));
+			return FindAsset_NoLock(assetId, make_asset_type(assetType, subtype));
 		}
 		fig::optional_cref<Asset> FindAssetOfType(AssetTypeDefinition type, const fig::uuid& parentId = {}) noexcept;
 
 		fig::cref_vector<Asset> FindChildrenOf(const fig::uuid& parentId) noexcept;
 		bool HasChildren(const fig::uuid& assetId) noexcept;
-		std::set<fig::uuid> GetAssociatedAssets(const fig::uuid& id) noexcept;
+		std::set<fig::uuid> GetAssociatedAssets(const fig::uuid& assetId) noexcept;
 
 		FileError LoadAsset(const Asset& asset) noexcept;
-		fig::expected_cref<Asset, FileError> LoadAsset(const fig::uuid& id) noexcept;
+		fig::expected_cref<Asset, FileError> LoadAsset(const fig::uuid& assetId) noexcept;
 		void LoadAssetData(const std::vector<fig::uuid>& assetIds) noexcept;
 		void LoadAssetData(const fig::ref_vector<Asset>& assets) noexcept;
 		
@@ -102,12 +102,12 @@ namespace fig::io
 		auto GetScenarioAssets() const noexcept { return GetAssetsOfType(AssetType::Scenario); }
 
 		template <typename Fn>
-		decltype(auto) ModifyAsset(const fig::uuid& assetID, Fn fn)
+		decltype(auto) ModifyAsset(const fig::uuid& assetId, Fn fn)
 		{
 			if constexpr (std::is_invocable_r_v<bool, Fn, Asset&>)
-				return ModifyAsset_Bool(assetID, fn);
+				return ModifyAsset_Bool(assetId, fn);
 			else
-				return ModifyAsset_Void(assetID, fn);
+				return ModifyAsset_Void(assetId, fn);
 		}
 
 		template <typename Fn>
@@ -145,17 +145,17 @@ namespace fig::io
 
 		bool WriteAssetToDisk(Asset& asset);
 
-		/* Internal; Mutex is locked */
-		fig::expected_ref<Asset, FileError> LoadAsset_Internal(Asset& asset) noexcept;
-		fig::expected_ref<Asset, FileError> LoadAssetMeta_Internal(Asset& asset) noexcept;
-		fig::optional_cref<Asset> FindAsset_Internal(const fig::uuid& id) noexcept;
-		fig::optional_cref<Asset> FindAsset_Internal(const fig::uuid& id, AssetType assetType) noexcept;
-		fig::optional_cref<Asset> FindAsset_Internal(const fig::uuid& id, AssetTypeDefinition assetType) noexcept;
+		/* Internal */
+		fig::expected_ref<Asset, FileError> LoadAsset_NoLock(Asset& asset) noexcept;
+		fig::expected_ref<Asset, FileError> LoadAssetMeta_NoLock(Asset& asset) noexcept;
+		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId) noexcept;
+		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId, AssetType assetType) noexcept;
+		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId, AssetTypeDefinition assetType) noexcept;
+		int32_t GetAssetDepth_NoLock(const fig::uuid& id, std::unordered_map<fig::uuid, int32_t>& depthCache, int32_t depth = 0) const noexcept;
 
-		bool DeleteAsset_Internal(fig::uuid assetID) noexcept;
-		uint32_t DeleteAssets_Internal(std::span<fig::uuid> assetIDs) noexcept;
-		bool DeleteAssetFile_Internal(const fig::uuid& assetID) noexcept;
-		std::set<fig::uuid> FindRelatedAssets_Internal(const fig::uuid& assetId) noexcept;
+		size_t DeleteAssets_NoLock(std::span<fig::uuid> assetIds) noexcept;
+		size_t DeleteAssetFiles_NoLock(std::span<fig::uuid> assetIds) noexcept;
+		std::unordered_set<fig::uuid> FindRelatedAssets_NoLock(const fig::uuid& assetId) noexcept;
 
 	private:
 		fig::uuid _profileID;
@@ -167,20 +167,20 @@ namespace fig::io
 
 		std::mutex _assetsMutex; // Guards _assets
 
-		void ModifyAsset_Void(const fig::uuid& assetID, std::function<void(Asset&)> fn);
+		void ModifyAsset_Void(const fig::uuid& assetId, std::function<void(Asset&)> fn);
 		void ModifyAsset_Void(const Asset& asset, std::function<void(Asset&)> fn);
-		bool ModifyAsset_Bool(const fig::uuid& assetID, std::function<bool(Asset&)> fn);
+		bool ModifyAsset_Bool(const fig::uuid& assetId, std::function<bool(Asset&)> fn);
 		bool ModifyAsset_Bool(const Asset& asset, std::function<bool(Asset&)> fn);
 
 
 		/* Internal; Mutex is locked */
-		Asset& CreateEmptyAsset_Internal(AssetTypeDefinition type, const fig::uuid& parent) noexcept;
-		Asset& CreateAsset_Internal(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept;
-		Asset& CreateAsset_Internal(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept;
-		Asset& CreateImageAsset_Internal(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
-		Asset& CreateImageAsset_Internal(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
-		fig::expected_ref<Asset, FileError> ImportCharacter_Internal(const fig::path& filename, CharacterDataFormat format);
-		fig::expected_ref<Asset, FileError> ImportScenario_Internal(const fig::path& filename);
+		Asset& CreateEmptyAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept;
+		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent) noexcept;
+		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept;
+		Asset& CreateImageAsset_NoLock(ImageAssetType subtype, DataFormat format, fig::bytes&& data, const fig::uuid& parent) noexcept;
+		Asset& CreateImageAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
+		fig::expected_ref<Asset, FileError> ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format);
+		fig::expected_ref<Asset, FileError> ImportScenario_NoLock(const fig::path& filename);
 
 	private:
 		bool SaveModifiedAssets();

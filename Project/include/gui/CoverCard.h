@@ -19,7 +19,12 @@ namespace fig::gui
 	class NineGridImage;
 	class CoverCard;
 
-	using OnCardUpdatedDelegate = std::function<void(CoverCard&)>;
+	enum class CardEvent
+	{
+		Refresh,
+		Delete,
+	};
+	using CardEventDelegate = std::function<void(class CoverCard&, CardEvent event)>;
 
 	class CoverCard : public CardImage
 	{
@@ -41,7 +46,7 @@ namespace fig::gui
 		const fig::uuid& GetAssetID() const { return _assetId; }
 		inline const fig::io::ContentMetaData& GetMetaData() const noexcept { return _metaData; };
 
-		void SetDelegate(OnCardUpdatedDelegate onUpdated);
+		void SetDelegate(CardEventDelegate fnDelegate) { _fnDelegate = fnDelegate; }
 		void ResetHoverZoom();
 
 	protected:
@@ -64,8 +69,8 @@ namespace fig::gui
 
 		void SetMetaData(const fig::io::ContentMetaData& metaData) noexcept;
 		void SetUserSettings(const fig::io::ContentUserSettings& userSettings) noexcept;
-		void NotifyMetaUpdated();
-
+		void NotifyUpdated();
+		void NotifyDelete();
 	private:
 		void RefreshImage();
 		void PollFuture();
@@ -78,7 +83,7 @@ namespace fig::gui
 		bool _bInitialized = false;
 		bool _bHidden = false;
 		bool _bHasError = false;
-		OnCardUpdatedDelegate _fnOnUpdated {};
+		CardEventDelegate _fnDelegate {};
 		fig::io::ContentMetaData _metaData {};
 		fig::io::ContentUserSettings _userSettings {};
 		bool _bHovered = false;

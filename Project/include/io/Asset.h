@@ -14,7 +14,7 @@ namespace fig::io
 			Created = 0,		// Modified, nonexisting (INSERT, not UPDATE)
 			Modified,			// Modified, existing (UPDATE)
 			Synchronized,		// Saved
-			Indeterminate,		// Partial or missing data in otherwise valid asset
+			Indeterminate,		// Partial or missing data
 		};
 
 		enum class Error

@@ -222,13 +222,6 @@ namespace fig::gui
 		_menuId = menu.Show();
 	}
 
-
-	void ChatListItem::SetDelegate(ChatItemEventDelegate fnDelegate)
-	{
-		_fnDelegate = fnDelegate;
-	}
-
-
 	void ChatListItem::ShowStar(bool bShow)
 	{
 		if (!_pStar)

@@ -210,16 +210,16 @@ namespace fig::io
 		sqlite3_reset(stmt);
 		sqlite3_clear_bindings(stmt);
 
-		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
-		{
-			LogLn("SQLite Error: No changes");
-			return DatabaseError::ZeroChanges;
-		}
-
 		if (rc != SQLITE_DONE)
 		{
 			LogLn(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
 			return DatabaseError::SQLError;
+		}
+
+		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
+		{
+			LogLn("SQLite Error: No changes");
+			return DatabaseError::ZeroChanges;
 		}
 		return DatabaseError::NoError;
 	}
@@ -240,16 +240,16 @@ namespace fig::io
 		sqlite3_reset(stmt);
 		sqlite3_clear_bindings(stmt);
 
-		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
-		{
-			LogLn("SQLite Error: No changes");
-			return DatabaseError::ZeroChanges;
-		}
-
 		if (rc != SQLITE_DONE)
 		{
 			LogLn(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
 			return DatabaseError::SQLError;
+		}
+
+		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
+		{
+			LogLn("SQLite Error: No changes");
+			return DatabaseError::ZeroChanges;
 		}
 		return DatabaseError::NoError;
 	}

@@ -57,7 +57,6 @@ namespace fig::gui
 			{
 				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}", asset.id.to_str()));
 				auto pCard = CreateControl<ScenarioCard>(asset.id, _cardSize);
-				pCard->SetDelegate([this](auto& card) { Reorder(); });
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
 				DEBUG_MEASURE_END();
@@ -74,7 +73,7 @@ namespace fig::gui
 			{
 				DEBUG_MEASURE_BEGIN(std::format("Character card {}", asset.id.to_str()));
 				auto pCard = CreateControl<CharacterCard>(asset.id, _cardSize);
-				pCard->SetDelegate([this](auto& card) { Reorder(); });
+				pCard->SetDelegate([this](CoverCard& card, CardEvent event) { OnCardEvent(card, event); });
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);
 				DEBUG_MEASURE_END();
@@ -266,4 +265,31 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
+	void CardList::DeleteCharacter(CoverCard& card)
+	{
+		if (auto try_card = std::ranges::find_if(_cards, [&card](auto& c) {
+			return c.get() == &card;
+		}); try_card != std::ranges::end(_cards))
+		{
+			if (Global::GetUserContent().DeleteAsset((*try_card)->GetAssetID()))
+			{
+				DestroyChild(*try_card);
+				_cards.erase(try_card);
+				Reorder();
+			}
+		}
+	}
+
+	void CardList::OnCardEvent(CoverCard& card, CardEvent event)
+	{
+		switch (event)
+		{
+		case CardEvent::Refresh:
+			Reorder();
+			break;
+		case CardEvent::Delete:
+			DeleteCharacter(card);
+			break;
+		}
+	}
 }

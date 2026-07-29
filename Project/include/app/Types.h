@@ -159,6 +159,19 @@ inline constexpr fig::byte_span string_to_bytes(const fig::string_view& sv)
     return std::span { reinterpret_cast<const std::byte*>(sv.data()), sv.size() };
 }
 
+namespace std
+{
+    template<>
+    struct hash<fig::uuid>
+    {
+        size_t operator()(const fig::uuid& uuid) const
+        {
+            return uuid.hash();
+        }
+    };
+}
+
+
 constexpr bool Enabled = true;
 constexpr bool Disabled = false;
 

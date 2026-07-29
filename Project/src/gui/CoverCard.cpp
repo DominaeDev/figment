@@ -474,17 +474,6 @@ namespace fig::gui
 		return true;
 	}
 
-	void CoverCard::SetDelegate(OnCardUpdatedDelegate onUpdated)
-	{
-		_fnOnUpdated = onUpdated;
-	}
-
-	void CoverCard::NotifyMetaUpdated()
-	{
-		if (_fnOnUpdated)
-			_fnOnUpdated(*this);
-	}
-
 	bool CoverCard::MatchesSearch(const SearchQuery& query) const noexcept
 	{
 		return query.empty() or _searchIndex->Match(query);
@@ -692,5 +681,18 @@ namespace fig::gui
 	{
 		_userSettings = userSettings;
 		ShowStar(userSettings.HasFlag(ContentUserSettings::Flag::Favorite));
+	}
+
+
+	void CoverCard::NotifyUpdated()
+	{
+		if (_fnDelegate)
+			_fnDelegate(*this, CardEvent::Refresh);
+	}
+
+	void CoverCard::NotifyDelete()
+	{
+		if (_fnDelegate)
+			_fnDelegate(*this, CardEvent::Delete);
 	}
 }

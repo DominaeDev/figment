@@ -320,4 +320,34 @@ namespace fig
 		std::swap(q, empty);
 	}
 
+	template <typename T>
+	struct span_temp_storage
+	{
+		using value_type = std::ranges::range_value_t<T>;
+		T storage;
+
+		operator std::span<value_type>() noexcept { return std::span { storage }; }
+	};
+
+	template <std::ranges::input_range Range>
+	auto make_span(Range&& range)
+	{
+		using T = std::ranges::range_value_t<Range>;
+		std::vector<T> storage { std::ranges::begin(range), std::ranges::end(range) };
+		return span_temp_storage<std::vector<T>> {.storage = std::move(storage) };
+	}
+
+	template <typename T>
+		requires (not std::ranges::range<T>)
+	auto make_span(T& value)
+	{
+		return std::span { &value, 1 };
+	}
+
+	template <typename T>
+		requires (not std::ranges::range<T>)
+	auto make_span(const T& value)
+	{
+		return std::span<const T> { &value, 1 };
+	}
 }

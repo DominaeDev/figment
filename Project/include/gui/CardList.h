@@ -29,6 +29,9 @@ namespace fig::gui
 		void OnScroll() override;
 		void OnAfterLayout() override;
 
+		void OnCardEvent(CoverCard& card, CardEvent event);
+		void DeleteCharacter(CoverCard& card);
+
 	private:
 		std::vector<fig::observer_ptr<CoverCard>> _cards;
 
