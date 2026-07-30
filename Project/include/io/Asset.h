@@ -11,8 +11,7 @@ namespace fig::io
 	{
 		enum class Status
 		{
-			Created = 0,		// Modified, nonexisting (INSERT, not UPDATE)
-			Modified,			// Modified, existing (UPDATE)
+			Modified = 0,		// Modified
 			Synchronized,		// Saved
 			Indeterminate,		// Partial or missing data
 		};
@@ -37,8 +36,7 @@ namespace fig::io
 
 		inline constexpr void InvalidateMetadata() noexcept
 		{
-			if (db_sync != AssetSyncState::Status::Created)
-				db_sync = AssetSyncState::Status::Modified;
+			db_sync = AssetSyncState::Status::Modified;
 		}
 
 		inline constexpr bool ShouldWriteToDisk() const noexcept

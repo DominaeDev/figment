@@ -126,8 +126,8 @@ namespace fig::io
 		asset.id = id;
 		asset.parent_id = parent;
 		asset.type = type;
-		asset.sync_state.file_sync = AssetSyncState::Status::Created;
-		asset.sync_state.db_sync = AssetSyncState::Status::Created;
+		asset.sync_state.file_sync = AssetSyncState::Status::Modified;
+		asset.sync_state.db_sync = AssetSyncState::Status::Modified;
 		asset.sync_state.has_meta = true;
 
 		auto now = fig::now();
@@ -144,8 +144,8 @@ namespace fig::io
 		asset.parent_id = parent;
 		asset.type = type;
 		asset.data = std::move(data); // Move data
-		asset.sync_state.file_sync = AssetSyncState::Status::Created;
-		asset.sync_state.db_sync = AssetSyncState::Status::Created;
+		asset.sync_state.file_sync = AssetSyncState::Status::Modified;
+		asset.sync_state.db_sync = AssetSyncState::Status::Modified;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not asset.data.empty();
 		auto now = fig::now();
@@ -164,8 +164,8 @@ namespace fig::io
 		asset.id = id;
 		asset.parent_id = parent;
 		asset.type = type;
-		asset.sync_state.file_sync = AssetSyncState::Status::Created;
-		asset.sync_state.db_sync = AssetSyncState::Status::Created;
+		asset.sync_state.file_sync = AssetSyncState::Status::Modified;
+		asset.sync_state.db_sync = AssetSyncState::Status::Modified;
 		asset.sync_state.has_meta = true;
 		asset.sync_state.has_data = not data.empty();
 

@@ -19,8 +19,8 @@ namespace fig::io
 		std::expected<std::map<fig::uuid, Asset>, DatabaseError> FetchAssets() noexcept;
 		std::expected<std::map<fig::uuid, AssetFolder>, DatabaseError> FetchFolders() noexcept;
 
-		DatabaseError CreateAsset(const Asset& asset) noexcept;
-		DatabaseError UpdateAsset(const Asset& asset) noexcept;
+		DatabaseError CreateAsset(const Asset& asset) noexcept; //! @todo: remove?
+		DatabaseError UpdateAsset(const Asset& asset) noexcept; //! @todo: remove?
 		DatabaseError UpsertAsset(const Asset& asset) noexcept;
 		DatabaseError DeleteAsset(const fig::uuid& assetID) noexcept;
 
