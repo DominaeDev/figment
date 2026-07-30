@@ -12,9 +12,9 @@ namespace fig::gui
 	};
 
 	std::list<const char*> s_FallbackFontFilenames {
-		{"./fonts/KosugiMaru-Regular.ttf" },
-		{"./fonts/NotoSansKR-Regular.ttf" },
-		{"./fonts/NotoColorEmoji-Regular.ttf" },
+		{"./resources/fonts/KosugiMaru-Regular.ttf" },
+		{"./resources/fonts/NotoSansKR-Regular.ttf" },
+		{"./resources/fonts/NotoColorEmoji-Regular.ttf" },
 	};
 
 	std::map<FontFace, std::list<Fonts::font_face>> Fonts::s_Fonts = {};

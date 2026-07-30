@@ -49,16 +49,36 @@ namespace fig::io
 		}
 	}
 
-	void Asset::SetData(fig::bytes&& data)
+	void Asset::SetData(fig::bytes&& buf)
 	{
-		this->data = std::move(data);
+		if (not buf.empty())
+		{
+			data = std::move(buf);
+			sync_state.has_data = true;
+		}
+		else
+		{
+			data.clear();
+			sync_state.has_data = false;
+		}
+		
 		SetUpdated();
 	}
 
-	void Asset::SetData(fig::byte_span data)
+	void Asset::SetData(fig::byte_span buf)
 	{
-		this->data.resize(data.size());
-		std::memcpy(this->data.data(), data.data(), data.size());
+		if (not buf.empty())
+		{
+			data.resize(buf.size());
+			std::memcpy(data.data(), buf.data(), buf.size());
+			sync_state.has_data = true;
+		}
+		else
+		{
+			data.clear();
+			sync_state.has_data = false;
+		}
+
 		SetUpdated();
 	}
 
@@ -220,6 +240,7 @@ namespace fig::io
 			SetMeta(MetaTag::UpdatedAt, now());
 
 		sync_state.InvalidateData();
+		sync_state.InvalidateMetadata();
 	}
 
 	fig::path Asset::GetFileName() const noexcept

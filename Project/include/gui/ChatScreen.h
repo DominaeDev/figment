@@ -31,7 +31,7 @@ namespace fig::gui
 	public:
 		ChatScreen(Frame* pParent);
 
-		void StartChat(const fig::chat::ChatStaging& staging, fig::uuid instanceID);
+		void StartChat(const fig::chat::ChatStaging& staging, fig::uuid chatInstanceId, fig::uuid chatLogId);
 		fig::observer_ptr<InfoPanel> GetSidePanel() { return _pInfoPanel; }
 		fig::observer_ptr<ChatBackground> GetBackground() { return _pBackground; }
 

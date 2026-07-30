@@ -12,18 +12,18 @@ using namespace fig::data;
 
 namespace fig::chat
 {
-	ChatLogger::ChatLogger(ChatSession& session, fig::uuid parentID, fig::uuid assetId) :
-		_parentId { parentID },
+	ChatLogger::ChatLogger(fig::uuid assetId, fig::uuid parentId, ChatSession& session) :
 		_assetId { assetId },
+		_parentId { parentId },
 		_pSession { &session }
 	{
+		// Hook up to message poller
 		if (auto poller = session.GetPoller())
 			_pollerId = (*poller).RegisterObserver(std::bind_front(&ChatLogger::OnMessage, this));
 		else
 			_pollerId = static_cast<uint32_t>(-1);
 
 		_log.SetTitle(session.GetStaging().GetStoryTitle());
-
 		_log.AddSearchTerm(session.GetNameOf(Role::Bot1));
 		_log.AddSearchTerm(session.GetNameOf(Role::Bot2));
 		_log.AddSearchTerm(session.GetNameOf(Role::Bot3));
@@ -98,39 +98,16 @@ namespace fig::chat
 			assert(false && "Not logged in");
 			return false;
 		}
-
-		auto& assetMngr = Global::GetUserContent().GetAssets();
-
 		if (_assetId.empty())
-		{
-			// Create new asset
+			return false;
+
+		// Update asset
+		Global::GetUserContent().GetAssets().ModifyAsset(_assetId, [&](Asset& asset) {
 			fig::bytes xmlData;
 			_log.SaveToXml(xmlData);
-
-			fig::string tmp;
-			tmp.assign(reinterpret_cast<const char*>(xmlData.data()), xmlData.size()); //! @temp
-
-			auto& asset = assetMngr.CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Log, DataFormat::TextXml), xmlData, _parentId);
-			_assetId = asset.id;
-			return true;
-		}
-		else
-		{
-			// Update asset
-			if (auto try_asset = assetMngr.FindAsset(_assetId, AssetType::Chat, ChatAssetType::Log))
-			{
-				assetMngr.ModifyAsset(*try_asset, [&](Asset& asset) {
-					fig::bytes xmlData;
-					_log.SaveToXml(xmlData);
-					asset.SetData(xmlData);
-				});
-				return true;
-			}
-		}
-
-		// Error
-		assert(false && "Invalid asset id");
-		return false;
+			asset.SetData(xmlData);
+		});
+		return true;
 	}
 
 }

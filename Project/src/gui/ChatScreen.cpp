@@ -142,13 +142,13 @@ namespace fig::gui
 		DrawBackground(pRenderer);
 	}
 
-	void ChatScreen::StartChat(const fig::chat::ChatStaging& staging, fig::uuid chatInstanceID)
+	void ChatScreen::StartChat(const fig::chat::ChatStaging& staging, fig::uuid chatInstanceId, fig::uuid chatLogId)
 	{
 		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
 		{
 			_pSession = std::make_shared<fig::chat::ChatSession>();
-			_pSession->Initialize(staging, Constants::LLM::DefaultChatOptions, chatInstanceID);
+			_pSession->Initialize(staging, Constants::LLM::DefaultChatOptions, chatInstanceId, chatLogId);
 
 			LLMChatArguments llmArgs {
 				.wpSession = _pSession,
@@ -163,6 +163,7 @@ namespace fig::gui
 			if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(_pSession->GetCharacterIdOf(Role::Bot1))) //! @temp
 				_pBackground->SetImage((*try_portrait).id);
 
+			_pSession->Save();
 			_bStartedChat = true;
 			queue_clear(_commandQueue);
 		}

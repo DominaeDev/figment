@@ -20,6 +20,7 @@ namespace fig::io
 	public:
 		virtual void Preload() = 0;
 		virtual void Insert(const fig::uuid& assetId, T&& value) = 0;
+		virtual void Insert(const fig::uuid& assetId, const T& value) = 0;
 		virtual optional_cref<T> Get(const fig::uuid& assetId) = 0;
 		virtual optional_ref<T> TryGet(const fig::uuid& assetId) = 0;
 		virtual optional_cref<T> TryGet(const fig::uuid& assetId) const = 0;
@@ -146,6 +147,18 @@ namespace fig::io
 		void Clear()
 		{
 			_assets.clear();
+		}
+
+		void Insert(const fig::uuid& assetId, const T& value)
+		{
+			if constexpr (std::copyable<T>)
+			{
+				_assets[assetId] = value;
+			}
+			else
+			{
+				assert(false && "Type is non-copyable");
+			}
 		}
 
 		void Insert(const fig::uuid& assetId, T&& value)

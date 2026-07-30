@@ -52,6 +52,7 @@ namespace fig::io
 		const Asset& CreateAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
+		const Asset& CreateAsset(AssetTypeDefinition type, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;

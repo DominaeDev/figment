@@ -287,6 +287,7 @@
     <ClCompile Include="src\text\Context.cpp" />
     <ClCompile Include="src\text\ContextLocator.cpp" />
     <ClCompile Include="src\text\MacroProvider.cpp" />
+    <ClCompile Include="src\text\TextEvaluator.cpp" />
     <ClCompile Include="src\user\ProfileDatabase.cpp" />
     <ClCompile Include="src\user\Security.cpp" />
     <ClCompile Include="src\user\UserManager.cpp" />
@@ -301,7 +302,6 @@
     <ClCompile Include="src\util\CommonUtils.cpp" />
     <ClCompile Include="src\gui\VerticalListSizer.cpp" />
     <ClCompile Include="src\gui\VerticalSizer.cpp" />
-    <ClCompile Include="src\util\TextEvaluator.cpp" />
     <ClCompile Include="src\util\Timestamp.cpp" />
   </ItemGroup>
   <ItemGroup>

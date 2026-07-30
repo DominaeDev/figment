@@ -338,8 +338,16 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_2 and mods.Alt)
 					{
 						ChangeScreen(ScreenType::Chat);
-						GetScreen<ChatScreen>(ScreenType::Chat)->GetSidePanel()->SetImage(fig::uuid::from_str("a43d5566-c337-4054-90e2-eb4a1fe895de")); //! @temp
-						GetScreen<ChatScreen>(ScreenType::Chat)->GetBackground()->SetImage(fig::uuid::from_str("a43d5566-c337-4054-90e2-eb4a1fe895de")); //! @temp
+						if constexpr (Debugging) //! @temp
+						{
+							auto characterId = fig::uuid::from_str("bfa76f6b-4a54-4bc2-a562-cf503ee2abaf");
+							if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(characterId))
+							{
+								auto pChatScreen = GetScreen<ChatScreen>(ScreenType::Chat);
+								pChatScreen->GetSidePanel()->SetImage((*try_portrait).id);
+								pChatScreen->GetBackground()->SetImage((*try_portrait).id);
+							}
+						}
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)
@@ -412,6 +420,16 @@ namespace fig::gui
 
 		HandleStatusBarEvents(event);
 
+		if constexpr (Debugging)
+		{
+			if (IsUserEvent(event, UserEvent::DebugCharacter))
+			{
+				const fig::uuid& characterId = GetUserData<fig::uuid>(event);
+				DebugUtility::DebugCharacter(characterId);
+				return EventResult::Handled;
+			}
+		}
+
 		if (IsBroadcastEvent(event))
 		{
 			// Pass to all screens
@@ -424,15 +442,6 @@ namespace fig::gui
 				return _pActiveScreen->ProcessEvent(event);
 		}
 		
-		if constexpr (Debugging)
-		{
-			if (IsUserEvent(event, UserEvent::DebugCharacter))
-			{
-				const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-				DebugUtility::DebugCharacter(characterId);
-				return EventResult::Handled;
-			}
-		}
 		return EventResult::Pass;
 	}
 
@@ -542,9 +551,9 @@ namespace fig::gui
 			instance.scenarioId = {}; //! @todo
 			instance.options = Constants::LLM::DefaultChatOptions; //! @todo
 			
-			auto& chatInstanceAsset = Global::GetUserContent().CreateChat(instance);
+			auto [chatInstanceId, chatLogId] = Global::GetUserContent().CreateChat(instance);
 
-			pChatScreen->StartChat(staging, chatInstanceAsset.id);
+			pChatScreen->StartChat(staging, chatInstanceId, chatLogId);
 			return true;
 		}
 		return false;

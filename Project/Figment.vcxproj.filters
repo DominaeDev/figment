@@ -512,9 +512,6 @@
     <ClCompile Include="src\text\Context.cpp">
       <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
-    <ClCompile Include="src\util\TextEvaluator.cpp">
-      <Filter>Source Files\Chat\Text</Filter>
-    </ClCompile>
     <ClCompile Include="src\text\ConditionNode.cpp">
       <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
@@ -625,6 +622,9 @@
     </ClCompile>
     <ClCompile Include="src\io\SQLTransaction.cpp">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text\TextEvaluator.cpp">
+      <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

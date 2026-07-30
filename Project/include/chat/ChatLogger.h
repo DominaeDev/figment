@@ -11,7 +11,7 @@ namespace fig::chat
 	class ChatLogger
 	{
 	public:
-		ChatLogger(ChatSession& session, fig::uuid parentID, fig::uuid assetId = {});
+		ChatLogger(fig::uuid assetId, fig::uuid parentId, ChatSession& session);
 		~ChatLogger();
 
 		bool Save();

@@ -317,13 +317,13 @@ namespace fig::io
 		return unexpected(FileError::NotFound);
 	}
 
-	const Asset& UserContentManager::CreateChat(const fig::data::ChatInstance& chatInstance)
+	std::pair<fig::uuid, fig::uuid> UserContentManager::CreateChat(const fig::data::ChatInstance& chatInstance)
 	{
 		fig::bytes data;
 		chatInstance.SaveToXml(data);
-		auto& newAsset = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Instance, DataFormat::TextXml), data);
+		auto& chatInstanceAsset = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Instance, DataFormat::TextXml), data);
 
-		_pAssetMngr->ModifyAsset(newAsset, [&chatInstance](Asset& asset) {
+		_pAssetMngr->ModifyAsset(chatInstanceAsset, [&chatInstance](Asset& asset) {
 			for (size_t idx = 0; idx < chatInstance.characterIds.size() && idx < 8uz; ++idx)
 			{
 				auto& id = chatInstance.characterIds[idx];
@@ -338,15 +338,14 @@ namespace fig::io
 				asset.SetMeta(fig::io::MetaTag::ReferenceToWorld, chatInstance.worldId);
 		});
 
-		ChatInstance copy { chatInstance };
-		Cache(newAsset.id, std::move(copy));
+		auto& chatLogInstance = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Log, DataFormat::TextXml), chatInstanceAsset.id);
 
-		auto associatedAssets = _pAssetMngr->GetAssociatedAssets(newAsset.id);
-		for (auto& id : associatedAssets)
-			InvalidateMeta(id);
-		InvalidateChatCount();
+//		auto associatedAssets = _pAssetMngr->GetAssociatedAssets(chatInstanceAsset.id);
+//		for (auto& id : associatedAssets)
+//			InvalidateMeta(id);
+//		InvalidateChatCount();
 
-		return newAsset;
+		return { chatInstanceAsset.id, chatLogInstance.id };
 	}
 
 	uint32_t UserContentManager::GetChatCount(const fig::uuid& assetId)

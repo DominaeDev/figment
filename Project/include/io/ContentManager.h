@@ -23,7 +23,7 @@ namespace fig::io
 		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename);
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 
-		const Asset& CreateChat(const fig::data::ChatInstance& chatInstance);
+		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::data::ChatInstance& chatInstance);
 		bool DeleteAsset(fig::uuid assetId);
 
 		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
@@ -89,10 +89,10 @@ namespace fig::io
 		}
 
 		template <typename T>
+		requires std::copyable<T>
 		void Cache(const fig::uuid& assetId, const T& value)
 		{
-			T copy { value };
-			GetCache<T>().Insert(assetId, std::move(copy));
+			GetCache<T>().Insert(assetId, value);
 		}
 
 		template <typename T>

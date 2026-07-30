@@ -77,7 +77,14 @@ namespace fig::io
 
 		return CreateAsset_NoLock(make_asset_type(type), parent);
 	}
-	
+
+	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return CreateAsset_NoLock(type, parent);
+	}
+
 	const Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };

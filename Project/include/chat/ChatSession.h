@@ -15,7 +15,7 @@ namespace fig::chat
 		ChatSession(ChatSession&&) = default;
 		~ChatSession();
 
-		void Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceID);	
+		void Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceId, fig::uuid chatLogId);
 		void Save();
 		void Shutdown();
 

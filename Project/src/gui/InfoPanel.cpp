@@ -184,9 +184,6 @@ namespace fig::gui
 	{
 		constexpr fig::coord kGradientSize = 8;
 		_pGradient->SetSize(kGradientSize, GetHeight());
-
-//		_pViewport->SetY(6);
-//		_pBottomPanel->SetY(GetHeight() - _pBottomPanel->GetHeight());
 	}
 
 	void InfoPanel::SetSession(const ChatSession& session)

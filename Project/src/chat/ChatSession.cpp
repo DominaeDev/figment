@@ -16,7 +16,7 @@ namespace fig::chat
 		Shutdown();
 	}
 
-	void ChatSession::Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceID)
+	void ChatSession::Initialize(const ChatStaging& staging, ChatOptions options, fig::uuid chatInstanceId, fig::uuid chatLogId)
 	{
 		if (_bInitialized)
 			return;
@@ -26,7 +26,7 @@ namespace fig::chat
 		_staging.RefreshContext();
 
 		_messagePoller = std::make_unique<MessagePoller>();
-		_logger = std::make_unique<ChatLogger>(*this, chatInstanceID);
+		_logger = std::make_unique<ChatLogger>(chatLogId, chatInstanceId, *this);
 		_bInitialized = true;
 	}
 
