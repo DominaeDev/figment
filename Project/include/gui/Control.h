@@ -7,8 +7,6 @@
 
 namespace fig::gui
 {
-	class Window;
-
 	class Control : public LayoutElement
 	{
 	public:

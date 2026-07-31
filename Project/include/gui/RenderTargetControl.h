@@ -6,12 +6,14 @@ namespace fig::gui
 {
 	class RenderTargetControl : public Control
 	{
+	public:
+		void SetAlpha(float alpha);
+		void SetAlpha(uint8_t alpha);
+
 	protected:
 		RenderTargetControl(ControlPtr parent);
 
 		void Render(fig::renderer_ptr pRenderer) override;
-		void SetAlpha(float alpha);
-		void SetAlpha(uint8_t alpha);
 	
 		virtual void OnRenderMask(fig::renderer_ptr pRenderer, fig::sdl::Texture& texture) {};
 

@@ -90,3 +90,12 @@ namespace fig
 		constexpr cursor ResizeVertical		= SDL_SYSTEM_CURSOR_NS_RESIZE;
 	};
 }
+
+namespace fig::gui
+{
+	class Control;
+	class Sizer;
+	class Window;
+	class Image;
+	class TextBox;
+}

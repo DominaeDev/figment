@@ -15,15 +15,11 @@ namespace fig::chat
 
 namespace fig::gui
 {
-	class Window;
-	class Sizer;
-	class StatusBar;
-	class TextBox;
 	class VariableList;
 	class ChatScroll;
 	class InfoPanel;
 	class ChatBackground;
-	class Image;
+	class BehindChat;
 
 	class ChatScreen : public Screen
 	{
@@ -51,7 +47,7 @@ namespace fig::gui
 
 	private:
 		fig::observer_ptr<ChatScroll> _pChatScroll {};
-		fig::observer_ptr<Control> _pUnderScroll {};
+		fig::observer_ptr<BehindChat> _pBehindChat {};
 		fig::observer_ptr<TextBox> _pTextBox {};
 		fig::observer_ptr<VariableList> _pVariableList {};
 		fig::observer_ptr<InfoPanel> _pInfoPanel {};

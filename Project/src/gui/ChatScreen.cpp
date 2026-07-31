@@ -11,6 +11,8 @@
 #include "gui/VariableList.h"
 #include "gui/InfoPanel.h"
 #include "gui/ChatBackground.h"
+#include "gui/Slider.h"
+#include "gui/BehindChat.h"
 #include "app/AppState.h"
 #include "chat/ChatSession.h"
 #include "chat/ChatCommands.h"
@@ -43,21 +45,10 @@ namespace fig::gui
 		auto centerArea = _pBackground->CreateControl<Area>();
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
-		auto underColor = Color::Black.WithAlpha(0.45f);
-		constexpr fig::coord underGradientWidth = 80;
-		_pUnderScroll = centerArea->CreateControl<Area>();
-		_pUnderScroll->SetBackgroundColor(underColor);
-		_pUnderScroll->SetWidth(Constants::GUI::ChatScrollWidth + (underGradientWidth * 2) + 40);
-		auto pUnderSizer = _pUnderScroll->SetSizer<HorizontalSizer>();
-		auto pLeftGradient = _pUnderScroll->CreateControl<Image>(Resource::MASK_GRADIENT_EASE_IN_CUBIC_LEFT, underColor);
-		auto pUnderBG = _pUnderScroll->CreateControl<Image>(Resource::BLANK, underColor);
-		auto pRightGradient = _pUnderScroll->CreateControl<Image>(Resource::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT, underColor);
-		pLeftGradient->SetWidth(underGradientWidth);
-		pRightGradient->SetWidth(underGradientWidth);
-		pUnderSizer->Add(pLeftGradient, 0, SizerFlag::Expand);
-		pUnderSizer->Add(pUnderBG, -1, SizerFlag::Fill);
-		pUnderSizer->Add(pRightGradient, 0, SizerFlag::Expand);
-		
+		_pBehindChat = centerArea->CreateControl<BehindChat>();
+		_pBehindChat->SetWidth(Constants::GUI::ChatScrollWidth + 200);
+		_pBehindChat->SetColor(Color::Black.WithAlpha(0.45f));
+				
 		auto pStaticText = centerArea->CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize);
 		pStaticText->SetAlignment(TextAlignment::MiddleCenter);
 		pStaticText->SetSize(80, 80);
@@ -112,6 +103,53 @@ namespace fig::gui
 			test["Mood"] = "Terrible weather";
 			_pVariableList->SetVariables(test);
 		}
+
+		auto pAlphaSlider = CreateControl<Slider>();
+		pAlphaSlider->SetValue(1.0f);
+		pAlphaSlider->SetPosition(8, 8 + 20 * 0);
+		pAlphaSlider->SetDelegate([&](float value) {
+			_pBackground->SetAlpha(value);
+		});
+
+		auto pBrightnessSlider = CreateControl<Slider>();
+		pBrightnessSlider->SetValue(0.85f);
+		pBrightnessSlider->SetPosition(8, 8 + 20 * 1);
+		pBrightnessSlider->SetDelegate([&](float value) {
+			_pBackground->SetBrightness(value);
+		});
+
+		auto pSaturationSlider = CreateControl<Slider>();
+		pSaturationSlider->SetValue(1.0f);
+		pSaturationSlider->SetPosition(8, 8 + 20 * 2);
+		pSaturationSlider->SetDelegate([&](float value) {
+			_pBackground->SetSaturation(value);
+		});
+
+		auto pBlurSlider = CreateControl<Slider>();
+		pBlurSlider->SetValue(0.3f);
+		pBlurSlider->SetPosition(8, 8 + 20 * 3);
+		pBlurSlider->SetDelegate([&](float value) {
+			int32_t blur = toI(value * 10);
+			if (blur > 0)
+				_pBackground->SetBlur(toF(blur + 2));
+			else
+				_pBackground->SetBlur(0.0f);
+		});
+
+		auto pUnderSlider = CreateControl<Slider>();
+		pUnderSlider->SetValue(0.45f);
+		pUnderSlider->SetPosition(8, 8 + 20 * 4);
+		pUnderSlider->SetDelegate([this](float value) {
+			auto color = Color::Black.WithAlpha(value);
+			_pBehindChat->SetColor(color);
+		});
+
+		auto pChatSlider = CreateControl<Slider>();
+		pChatSlider->SetValue(1.0f);
+		pChatSlider->SetPosition(8, 8 + 20 * 5);
+		pChatSlider->SetDelegate([this](float value) {
+			_pChatScroll->SetAlpha(std::lerp(0.65f, 1.0f, value));
+		});
 
 		InvalidateLayout();
 	}
@@ -394,10 +432,10 @@ namespace fig::gui
 
 	void ChatScreen::OnAfterLayout()
 	{
-		if (_pUnderScroll)
+		if (_pBehindChat)
 		{
-			_pUnderScroll->SetHeight(GetHeight());
-			_pUnderScroll->CenterHorizontally();
+			_pBehindChat->SetHeight(GetHeight());
+			_pBehindChat->CenterHorizontally();
 		}
 	}
 

@@ -15,13 +15,16 @@ namespace fig::gui
 	void ChatBackground::SetBrightness(float value)
 	{
 		_value = static_cast<uint8_t>(std::clamp(value, 0.0f, 1.0f) * 255.0f);
-		_bDirty = true;
 	}
 
 	void ChatBackground::SetBrightness(uint8_t value)
 	{
 		_value = value;
-		_bDirty = true;
+	}
+
+	void ChatBackground::SetAlpha(float alpha)
+	{
+		_alpha = static_cast<uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
 	}
 
 	void ChatBackground::SetSaturation(float value)
@@ -30,16 +33,9 @@ namespace fig::gui
 		_bDirty = true;
 	}
 
-	void ChatBackground::SetAlpha(float alpha)
-	{
-		_alpha = static_cast<uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
-		_bDirty = true;
-	}
-
 	void ChatBackground::SetAlpha(uint8_t alpha)
 	{
 		_alpha = alpha;
-		_bDirty = true;
 	}
 
 	void ChatBackground::SetBlur(float sigma)

@@ -129,7 +129,7 @@ namespace fig::gui
 		if (bgColor.IsDefined() && bgColor.a != 0)
 		{
 			auto rect = to_rectf(GetRect());
-			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, SDL_ALPHA_OPAQUE);
+			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
 			SDL_RenderFillRect(pRenderer, &rect);
 		}
 	}

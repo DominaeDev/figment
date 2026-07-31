@@ -340,7 +340,7 @@ namespace fig::gui
 						ChangeScreen(ScreenType::Chat);
 						if constexpr (Debugging) //! @temp
 						{
-							auto characterId = fig::uuid::from_str("bfa76f6b-4a54-4bc2-a562-cf503ee2abaf");
+							auto characterId = fig::uuid::from_str("10986bef-3914-4a00-a461-8b7e4af8d2f9");
 							if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(characterId))
 							{
 								auto pChatScreen = GetScreen<ChatScreen>(ScreenType::Chat);
