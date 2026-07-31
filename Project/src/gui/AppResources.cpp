@@ -126,6 +126,11 @@ namespace fig
 		LoadTexture(pRenderer, Resource::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT, "./resources/gui/masks/mask_gradient_ease_in_cubic_r.png");
 		LoadTexture(pRenderer, Resource::MASK_GRADIENT_EASE_IN_OUT_SINE_LEFT, "./resources/gui/masks/mask_gradient_ease_in_out_sine_l.png");
 		LoadTexture(pRenderer, Resource::MASK_GRADIENT_EASE_IN_OUT_SINE_RIGHT, "./resources/gui/masks/mask_gradient_ease_in_out_sine_r.png");
+
+		LoadTexture(pRenderer, Resource::SLIDER_BAR_BG, "./resources/gui/slider_bar_bg.png");
+		LoadTexture(pRenderer, Resource::SLIDER_BAR_BORDER, "./resources/gui/slider_bar_border.png");
+		LoadTexture(pRenderer, Resource::SLIDER_THUMB_BG, "./resources/gui/slider_thumb_bg.png");
+		LoadTexture(pRenderer, Resource::SLIDER_THUMB_BORDER, "./resources/gui/slider_thumb_border.png");
 	}
 
 	void AppResources::Release()

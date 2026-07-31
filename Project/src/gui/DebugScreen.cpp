@@ -3,6 +3,7 @@
 #include "gui/CardImage.h"
 #include "gui/AppResources.h"
 #include "gui/ButtonWithLabel.h"
+#include "gui/Slider.h"
 
 namespace fig::gui
 {
@@ -51,6 +52,10 @@ namespace fig::gui
 		auto pButton = CreateControl<ButtonWithLabel>("Invalidate");
 		pButton->SetHeight(35);
 		pButton->SetDelegate([this]() { InvalidateLayout(); });
+
+
+		auto pSlider = CreateControl<Slider>();
+		pSlider->SetPosition(50, 200);
 	}
 
 	void DebugScreen::OnUpdate(float fElapsed)

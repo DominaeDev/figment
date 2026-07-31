@@ -626,6 +626,12 @@
     <ClCompile Include="src\text\TextEvaluator.cpp">
       <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\Slider.cpp">
+      <Filter>Source Files\Frontend\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\FillParentSizer.cpp">
+      <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1464,6 +1470,12 @@
     </ClInclude>
     <ClInclude Include="include\io\SQLTransaction.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Slider.h">
+      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\FillParentSizer.h">
+      <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

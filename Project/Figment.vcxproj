@@ -188,6 +188,7 @@
     <ClCompile Include="src\gui\ChatList.cpp" />
     <ClCompile Include="src\gui\ChatListingScreen.cpp" />
     <ClCompile Include="src\gui\ChatListItem.cpp" />
+    <ClCompile Include="src\gui\FillParentSizer.cpp" />
     <ClCompile Include="src\gui\InfoPanel.cpp" />
     <ClCompile Include="src\gui\Events.cpp" />
     <ClCompile Include="src\gui\ImageViewport.cpp" />
@@ -216,6 +217,7 @@
     <ClCompile Include="src\gui\NineGridImage.cpp" />
     <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
+    <ClCompile Include="src\gui\Slider.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
@@ -444,6 +446,7 @@
     <ClInclude Include="include\gui\ChatList.h" />
     <ClInclude Include="include\gui\ChatListingScreen.h" />
     <ClInclude Include="include\gui\ChatListItem.h" />
+    <ClInclude Include="include\gui\FillParentSizer.h" />
     <ClInclude Include="include\gui\InfoPanel.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\Events.h" />
@@ -463,6 +466,7 @@
     <ClInclude Include="include\gui\RenderTargetControl.h" />
     <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\Slider.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
     <ClInclude Include="include\gui\SearchBox.h" />
