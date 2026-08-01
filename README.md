@@ -28,3 +28,10 @@ User profiles are transferable between installations and easy to back up. In the
 
 This application was largely written by a human.
 Claude (Free) was used in a limited capacity, to assist with a handful of C++ templates and utility functions, and to discuss code-related topics.
+
+* * *
+
+### Screenshots (WIP)
+[![Early Figment screenshot #1](./Screenshots/figment_screen_01s.jpg "Early Figment screenshot #1")](https://github.com/DominaeDev/figment/blob/main/Screenshots/figment_screen_01.jpg)
+
+[![Early Figment screenshot #2](./Screenshots/figment_screen_02s.jpg "Early Figment screenshot #2")](https://github.com/DominaeDev/figment/blob/main/Screenshots/figment_screen_02.jpg)
