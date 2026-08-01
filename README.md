@@ -1,4 +1,4 @@
-# Figment
+# Figment 🦄
 
 Figment is a local-only, native chatbot client with a primary focus on simplicity, customization, and privacy.
 
@@ -24,6 +24,7 @@ User profiles are transferable between installations and easy to back up. In the
 
 - Windows 10/11
 
-### Made by humans
+### Human made
 
-This application was written by hand and typed on a keyboard by a human. Claude (Free) provided some assistance with a handful of C++ templates and utility functions, as well as answering C++ related questions.
+This application was largely written by a human.
+Claude (Free) was used in a limited capacity, to assist with a handful of C++ templates and utility functions, and to discuss code-related topics.
