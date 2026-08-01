@@ -1,4 +1,4 @@
-# Figment
+# Figment 🦄
 
 Figment is a local-only, native chatbot client with a primary focus on simplicity, customization, and privacy.
 
