@@ -30,7 +30,7 @@ namespace fig::Constants
 
 		namespace Cards
 		{
-			constexpr fig::coord SpacingX = 18;
+			constexpr fig::coord SpacingX = 16;
 			constexpr fig::coord SpacingY = 20;
 			constexpr float ZoomSmoothing = 10.0f;
 			constexpr float ZoomVerticalShift = 0.5f;

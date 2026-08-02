@@ -175,29 +175,29 @@ namespace fig::gui
 		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::CharacterList::Ordering, OrderBy::Default);
 
 		auto& menu = MainFrame::GetInstance().CreateMenu();
-		menu.AddCheckItem("Sort alphabetically", sortBy == SortBy::Name)
+		menu.AddCheckItem("Name", sortBy == SortBy::Name)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::Name); });
-		menu.AddCheckItem("Sort by most recent chat", sortBy == SortBy::LastUsedAt)
+		menu.AddCheckItem("Last message", sortBy == SortBy::LastUsedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::LastUsedAt); });
-		menu.AddCheckItem("Sort by chat count", sortBy == SortBy::ChatCount)
+		menu.AddCheckItem("Chat count", sortBy == SortBy::ChatCount)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::ChatCount); });
-		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
+		menu.AddCheckItem("Date created", sortBy == SortBy::CreatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::CreatedAt); });
-		menu.AddCheckItem("Sort by modified date", sortBy == SortBy::UpdatedAt)
+		menu.AddCheckItem("Date modified", sortBy == SortBy::UpdatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::UpdatedAt); });
 		menu.AddSeparator();
 		menu.AddCheckItem("Ascending", orderBy == OrderBy::Ascending)
 			.SetDelegate([ChangeOrdering, this] { ChangeOrdering(OrderBy::Ascending); });
 		menu.AddCheckItem("Descending", orderBy == OrderBy::Descending)
 			.SetDelegate([ChangeOrdering, this] { ChangeOrdering(OrderBy::Descending); });
-		menu.AddSeparator();
+/*		menu.AddSeparator();
 		menu.AddItem("Reset")
 			.SetDelegate([this] { 
 				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Interface::CharacterList::Sorting, SortBy::LastUsedAt);
 				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Interface::CharacterList::Ordering, OrderBy::Default);
 				_pCardList->Reorder();
 			});
-
+		*/
 		menu.Show(fig::point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
 	}
 

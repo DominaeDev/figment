@@ -9,25 +9,63 @@ namespace fig::data
 {
 	static const fig::string XmlRootName { "Character" };
 
+	fig::string CharacterName::GetSpokenName() const
+	{
+		if (not nickname.empty())
+			return nickname;
+		if (not first.empty())
+			return first;
+		return "Unnamed"; //! @todo
+	}
+
+	fig::string CharacterName::GetFullName() const
+	{
+		if (not (first.empty() or middle.empty() or last.empty()))
+			return std::format("{} {} {}", first, middle, last);
+		if (not (first.empty() or last.empty()))
+			return std::format("{} {}", first, last);
+		if (not first.empty())
+			return first;
+		if (not nickname.empty())
+			return nickname;
+		return "Unnamed"; //! @todo
+	}
+
+	bool CharacterName::empty() const
+	{
+		return first.empty() and nickname.empty();
+	}
+
 	auto Character::XmlFields() noexcept
 	{
 		return Fields(
 			Element { "ID", &Character::chatId  },
-			Element { "Name", &Character::shortName }
+			Element { "Name", &Character::name }
 				.MustExist(),
-			Element { "FullName", &Character::fullName },
 			Element { "Gender", &Character::gender,
 				[](auto& value) { return (fig::string)value; },
 				[](auto& value) { return Gender(value); }
 			},
+			Element { "Description", &Character::description },
 			Element { "Brief", &Character::brief },
-			Element { "CreatorNotes", &Character::creatorNotes },
 			Element { "Attributes", &Character::_attributes },
 			Element { "Tags", &Character::_tags },
 			Element { "SearchIndex", &Character::_searchIndex,
 				[](auto& value) -> fig::string { return value.Serialize(); },
 				[](auto& value) -> SearchIndex { SearchIndex s; s.Deserialize(value); return s; }
 			}
+		);
+
+		static_assert(IsXmlSerializable<Character>);
+	}
+
+	auto CharacterName::XmlFields() noexcept
+	{
+		return Fields(
+			Element { "First", &CharacterName::first },
+			Element { "Middle", &CharacterName::middle },
+			Element { "Last", &CharacterName::last },
+			Element { "Nickname", &CharacterName::nickname }
 		);
 
 		static_assert(IsXmlSerializable<Character>);
@@ -79,17 +117,12 @@ namespace fig::data
 		if (!Deserialize(rootNode, data))
 			return false;
 
-		if (data.fullName.empty())
-			data.fullName = data.shortName;
 		if (data.chatId.empty())
-			data.chatId = data.shortName;
+			data.chatId = data.name.GetSpokenName();
 
 		// Colors
 		data.bgColor = {};
 		data.borderColor = {};
-
-		if (auto description = rootNode.TryGetElement<fig::string>("Description"))
-			data.AddAttribute("persona", "Description", description.value(), CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
 
 		if (auto colorText = rootNode.TryGetElement<fig::string>("Color"))
 		{
@@ -103,7 +136,7 @@ namespace fig::data
 				data.bgColor = fig::color::FromHSV(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 		}
 
-		return !data.chatId.empty() && !data.shortName.empty();
+		return not (data.chatId.empty() or data.name.empty());
 	}
 
 	FileError Character::LoadFromXml(const fig::path& path)
@@ -198,8 +231,8 @@ namespace fig::data
 	{
 		_context.Clear();
 		_context.SetValue("id", chatId);
-		_context.SetValue("name", shortName);
-		_context.SetValue("fullname", fullName);
+		_context.SetValue("name", name.GetSpokenName());
+		_context.SetValue("fullname", name.GetFullName());
 		_context.SetValue("gender", fig::string { gender });
 		_context.SetValue("brief", brief);
 
@@ -214,8 +247,8 @@ namespace fig::data
 
 	fig::string Character::GetDescription() const noexcept
 	{
-		if (not creatorNotes.empty())
-			return truncate(strip_emoji(creatorNotes), 1024);
+		if (not description.empty())
+			return truncate(strip_emoji(description), 1024);
 		return brief;
 	}
 }

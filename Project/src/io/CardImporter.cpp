@@ -28,9 +28,8 @@ namespace fig::io
 			card.Parse(json);
 
 			Character character;
-			character.shortName = card.data.name;
-			character.fullName = card.data.name;
-			character.creatorNotes = card.data.creator_notes;
+			character.name = CharacterName { card.data.name };
+			character.description = card.data.creator_notes;
 			character.AddAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
 			character.AddAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Public);
 			character.AppendTags(card.data.tags);
@@ -58,8 +57,7 @@ namespace fig::io
 			if (character.gender.IsConventional())
 				character.AddSearchTerm(character.gender.GetLabel());
 
-			character.AddSearchTerm(character.shortName);
-			character.AddSearchTerm(character.fullName);
+			character.AddSearchTerm(character.name.GetFullName());
 			character.AddSearchTerm(card.data.persona);
 			character.AddSearchTerm(card.data.personality);
 

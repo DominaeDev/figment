@@ -133,7 +133,7 @@ namespace fig::chat
 		if (name.empty() || _characters.empty())
 			return std::nullopt;
 
-		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& character) { return equals(character.shortName, name, true); }); itFind != _characters.cend())
+		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& character) { return equals(character.name.GetSpokenName(), name, true); }); itFind != _characters.cend())
 			return make_optional_cref(*itFind);
 		return fig::nullref;
 	}
@@ -143,7 +143,7 @@ namespace fig::chat
 		if (characterId.empty() || _characters.empty())
 			return Role::Undefined;
 
-		if (auto itFind = std::ranges::find_if(_charactersByRole, [this, characterId](const auto& kvp) { return equals(_characters[kvp.second].chatId, characterId, true) || equals(_characters[kvp.second].shortName, characterId, true);}); itFind != _charactersByRole.cend())
+		if (auto itFind = std::ranges::find_if(_charactersByRole, [this, characterId](const auto& kvp) { return equals(_characters[kvp.second].chatId, characterId, true) || equals(_characters[kvp.second].name.GetSpokenName(), characterId, true);}); itFind != _charactersByRole.cend())
 			return itFind->first;
 		return Role::Undefined;
 	}
@@ -167,7 +167,7 @@ namespace fig::chat
 			return fig::string { Constants::Chat::Names::Director };
 
 		if (auto try_find = GetCharacterByRole(role))
-			return (*try_find).shortName;
+			return (*try_find).name.GetSpokenName();
 
 		return fig::string { Constants::Chat::Names::Unknown };
 	}

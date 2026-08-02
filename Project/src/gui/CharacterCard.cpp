@@ -18,8 +18,8 @@ namespace fig::gui
 		if (auto try_character = Global::GetUserContent().Get<Character>(characterId); try_character.has_value())
 		{
 			auto& character = try_character.value();
-			_characterName = character.shortName;
-			SetLabel(character.fullName);
+			_characterName = character.name.GetSpokenName();
+			SetLabel(character.name.GetFullName());
 			SetIndex(character.GetSearchIndex());
 
 			// Tags

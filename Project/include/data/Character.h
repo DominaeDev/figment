@@ -28,6 +28,7 @@ namespace fig::data
 			Trivial		= 1 << 0,	// Can be omitted
 			Important	= 1 << 1,	// Mustn't be omitted
 			Memory		= 1 << 2,	// Can be placed in memory
+			Multiline	= 1 << 3,
 		};
 		using HintFlags = EnumFlags<HintFlag>;
 
@@ -39,6 +40,20 @@ namespace fig::data
 
 	public:
 		static auto XmlFields() noexcept;
+	};
+
+	struct CharacterName
+	{
+		fig::string first;
+		fig::string middle;
+		fig::string last;
+		fig::string nickname;
+
+		static auto XmlFields() noexcept;
+
+		fig::string GetSpokenName() const;
+		fig::string GetFullName() const;
+		bool empty() const;
 	};
 
 	class Character
@@ -66,12 +81,12 @@ namespace fig::data
 
 	public:
 		fig::string chatId;	//! @remove?
-		fig::string shortName;
-		fig::string fullName;
-		fig::string brief;
-		fig::string creatorNotes;
-		
+		CharacterName name;
 		Gender gender {};
+		fig::string description; // User-facing only
+		
+		fig::string brief;
+		
 		fig::color bgColor {};
 		fig::color borderColor {};
 	

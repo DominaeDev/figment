@@ -42,7 +42,7 @@ namespace fig::gui
 
 	void CharacterDetailsPanel::SetCharacter(const fig::data::Character& character)
 	{
-		_pHeader->SetText(character.shortName);
+		_pHeader->SetText(character.name.GetSpokenName());
 		_pDescription->SetText(character.GetDescription());
 	}
 

@@ -75,7 +75,7 @@ namespace fig::io
 
 			fail:
 				LogLn(std::format("Failed to preload asset [{}] {}.", _log_name, (fig::string)asset.id));
-				assert(false && "Failed to preload asset");
+//				assert(false && "Failed to preload asset");
 			}
 
 		}

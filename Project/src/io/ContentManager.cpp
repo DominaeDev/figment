@@ -89,7 +89,7 @@ namespace fig::io
 			{
 				if (auto try_character = Get<Character>(assetId))
 				{
-					meta.name = (*try_character).shortName;
+					meta.name = (*try_character).name.GetSpokenName();
 					meta.gender = (*try_character).gender;
 					meta.tags = (*try_character).GetTags();
 				}
@@ -443,7 +443,7 @@ namespace fig::io
 	std::optional<fig::string> UserContentManager::GetCharacterName(const fig::uuid& characterId) const
 	{
 		if (auto try_character = GetCache<Character>().TryGet(characterId))
-			return (*try_character).shortName;
+			return (*try_character).name.GetSpokenName();
 		return std::nullopt;
 	}
 
