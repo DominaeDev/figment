@@ -43,4 +43,7 @@ namespace fig::gui
 		fig::string _search_text;
 		float _fSearchTimer {};
 	};
+
+	template <>
+	constexpr ScreenType ScreenTypeOf<HomeScreen> = ScreenType::Home;
 }

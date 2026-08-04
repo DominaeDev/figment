@@ -15,4 +15,7 @@ namespace fig::gui
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 	};
+
+	template <>
+	constexpr ScreenType ScreenTypeOf<DebugScreen> = ScreenType::Debug;
 }

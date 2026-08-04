@@ -185,10 +185,13 @@
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\CardImage.cpp" />
     <ClCompile Include="src\gui\CharacterDetailsPanel.cpp" />
+    <ClCompile Include="src\gui\CharacterEditor.cpp" />
     <ClCompile Include="src\gui\ChatBackground.cpp" />
     <ClCompile Include="src\gui\ChatList.cpp" />
     <ClCompile Include="src\gui\ChatListingScreen.cpp" />
     <ClCompile Include="src\gui\ChatListItem.cpp" />
+    <ClCompile Include="src\gui\EditorFields.cpp" />
+    <ClCompile Include="src\gui\EditorScreen.cpp" />
     <ClCompile Include="src\gui\FillParentSizer.cpp" />
     <ClCompile Include="src\gui\InfoPanel.cpp" />
     <ClCompile Include="src\gui\Events.cpp" />
@@ -220,6 +223,7 @@
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\Slider.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
+    <ClCompile Include="src\gui\ValueBinding.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
     <ClCompile Include="src\gui\SearchBox.cpp" />
@@ -444,11 +448,15 @@
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\CharacterDetailsPanel.h" />
+    <ClInclude Include="include\gui\CharacterEditor.h" />
     <ClInclude Include="include\gui\ChatBackground.h" />
     <ClInclude Include="include\gui\ChatList.h" />
     <ClInclude Include="include\gui\ChatListingScreen.h" />
     <ClInclude Include="include\gui\ChatListItem.h" />
+    <ClInclude Include="include\gui\EditorFields.h" />
+    <ClInclude Include="include\gui\EditorScreen.h" />
     <ClInclude Include="include\gui\FillParentSizer.h" />
+    <ClInclude Include="include\gui\IEditor.h" />
     <ClInclude Include="include\gui\InfoPanel.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\Events.h" />
@@ -470,6 +478,7 @@
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\Slider.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
+    <ClInclude Include="include\gui\ValueBinding.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
     <ClInclude Include="include\gui\SearchBox.h" />
     <ClInclude Include="include\gui\SidePanelButton.h" />
@@ -553,6 +562,7 @@
     <ClInclude Include="include\util\DebugUtils.h" />
     <ClInclude Include="include\util\ExpectedRef.h" />
     <ClInclude Include="include\util\FixedString.h" />
+    <ClInclude Include="include\util\OpaquePtr.h" />
     <ClInclude Include="include\util\ObserverPtr.h" />
     <ClInclude Include="include\util\OptionalRef.h" />
     <ClInclude Include="include\util\SearchIndex.h" />

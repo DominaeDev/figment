@@ -556,9 +556,13 @@ namespace fig::gui
 		_last_cursor_change = SDL_GetTicks();
 
 		if (_bFocused)
-			SDL_StartTextInput(GetSDLWindow());
+		{
+			PushEvent(UserEvent::StartTextInput, 0, this);
+		}
 		else
-			SDL_StopTextInput(GetSDLWindow());
+		{
+			PushEvent(UserEvent::StopTextInput, 0, this);
+		}
 	}
 
 	static int GetCursorTextIndex(int x, const TTF_SubString* substring)
@@ -1304,15 +1308,18 @@ namespace fig::gui
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			return HandleMouseDown(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-		{
 			HandleMouseUp(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
 			break;
 		}
 
+		if (!_bFocused)
+			return EventResult::Pass;
+
+		switch (event.type)
+		{
 		case SDL_EVENT_KEY_DOWN:
-			if (!_bFocused)
-				break;
-	#if _DEBUG
+		{
+#if _DEBUG
 			if (bModAlt)
 			{
 				switch (event.key.key)
@@ -1331,7 +1338,7 @@ namespace fig::gui
 					return EventResult::Handled;
 				}
 			}
-	#endif
+#endif
 			switch (event.key.key)
 			{
 			case SDLK_A:
@@ -1456,16 +1463,16 @@ namespace fig::gui
 					return EventResult::Handled;
 				}
 				else
-				if (bModCtrl)
-				{
-					BackspaceToPriorWord();
-					return EventResult::Handled;
-				}
-				else if (bModNone || bModShift)
-				{
-					Backspace();
-					return EventResult::Handled;
-				}
+					if (bModCtrl)
+					{
+						BackspaceToPriorWord();
+						return EventResult::Handled;
+					}
+					else if (bModNone || bModShift)
+					{
+						Backspace();
+						return EventResult::Handled;
+					}
 				break;
 
 			case SDLK_DELETE:
@@ -1524,6 +1531,7 @@ namespace fig::gui
 				return EventResult::Pass;
 			}
 			break;
+		}
 		case SDL_EVENT_TEXT_INPUT:
 			Insert(event.text.text);
 			if (event.text.text)
@@ -1549,7 +1557,12 @@ namespace fig::gui
 			break;
 		}
 
-		if (IsUserEvent(event, UserEvent::Deactivated))
+		if (_bFocused and IsUserEvent(event, UserEvent::Deactivated))
+		{
+			SetFocus(false);
+			return EventResult::Continue;
+		}
+		else if (_bFocused and IsUserEvent(event, UserEvent::StartTextInput) and event.user.data1 != this)
 		{
 			SetFocus(false);
 			return EventResult::Continue;

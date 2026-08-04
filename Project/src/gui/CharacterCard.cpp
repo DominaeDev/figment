@@ -126,16 +126,19 @@ namespace fig::gui
 		{
 			menu.AddItem(std::format("Debug {}\u2026", _characterName))
 				.SetDelegate([this] {
-				PushEvent(UserEvent::DebugCharacter, &_characterId);
-			});
+					PushEvent(UserEvent::DebugCharacter, &_characterId);
+				});
 		}
 
 		menu.AddSeparator();
-		menu.AddItem("Edit character\u2026", Resource::ICON_EDIT);
+		menu.AddItem("Edit character\u2026", Resource::ICON_EDIT)
+			.SetDelegate([this] {
+				PushEvent(UserEvent::EditCharacter, &_characterId);
+			});
 		menu.AddItem("Duplicate\u2026");
 		menu.AddItem("Export\u2026");
 		auto& moveMenu = menu.AddItem("Move to folder\u2026");
-			moveMenu.AddItem("New folder\u2026");
+		moveMenu.AddItem("New folder\u2026");
 		menu.AddSeparator();
 		auto& borderMenu = menu.AddItem("Set border");
 			borderMenu.AddCheckItem("No border", _userSettings.borderStyle == CardBorderStyle::None)

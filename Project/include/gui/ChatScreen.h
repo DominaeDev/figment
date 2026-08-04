@@ -68,4 +68,6 @@ namespace fig::gui
 #endif
 	};
 
+	template <>
+	constexpr ScreenType ScreenTypeOf<ChatScreen> = ScreenType::Chat;
 }

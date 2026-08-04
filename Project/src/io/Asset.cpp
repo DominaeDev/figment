@@ -55,6 +55,7 @@ namespace fig::io
 		{
 			data = std::move(buf);
 			sync_state.has_data = true;
+
 		}
 		else
 		{
@@ -62,6 +63,8 @@ namespace fig::io
 			sync_state.has_data = false;
 		}
 		
+		if (_parameters.contains(MetaTag::Checksum))
+			CalculateChecksum();
 		SetUpdated();
 	}
 
@@ -79,6 +82,8 @@ namespace fig::io
 			sync_state.has_data = false;
 		}
 
+		if (_parameters.contains(MetaTag::Checksum))
+			CalculateChecksum();
 		SetUpdated();
 	}
 
@@ -219,9 +224,6 @@ namespace fig::io
 
 	void Asset::CalculateChecksum()
 	{
-		if (_parameters.contains(MetaTag::Checksum))
-			return;
-
 		if (data.size() == 0)
 		{
 			_parameters.erase(MetaTag::Checksum);

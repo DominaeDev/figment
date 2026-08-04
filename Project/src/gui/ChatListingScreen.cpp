@@ -42,8 +42,7 @@ namespace fig::gui
 		});
 
 		auto pTopSizer = pTopBar->SetSizer<HorizontalSizer>();
-		pTopSizer->AddSpacer(12);
-		pTopSizer->Add(_pHeader, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 6);
+		pTopSizer->Add(_pHeader, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 18);
 		pTopSizer->AddStretchSpacer();
 		pTopSizer->Add(_pSortingButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
 		pTopSizer->Add(_pFilteringButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);

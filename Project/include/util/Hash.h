@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Figment.h"
+#include <array>
 
 namespace fig
 {

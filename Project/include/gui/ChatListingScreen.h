@@ -35,4 +35,7 @@ namespace fig::gui
 
 		fig::string _filterByCharacter;
 	};
+
+	template <>
+	constexpr ScreenType ScreenTypeOf<ChatListingScreen> = ScreenType::ChatListing;
 }

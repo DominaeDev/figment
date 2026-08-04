@@ -37,4 +37,8 @@ namespace fig::gui
 
 		fig::uuid _currentProfileId {};
 	};
+
+	template <>
+	constexpr ScreenType ScreenTypeOf<LoginScreen> = ScreenType::Login;
+
 }

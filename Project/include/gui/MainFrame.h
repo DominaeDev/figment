@@ -22,16 +22,6 @@ namespace fig::gui
 {
 	class SidePanel;
 
-	enum class ScreenType : size_t
-	{
-		Undefined,
-		Debug,
-		Login,
-		Home,
-		Chat,
-		ChatListing,
-	};
-
 	class MainFrame : public Frame
 	{
 		friend bool fig::chat::ChatCommandExecutor::Execute(fig::chat::ParsedChatCommand command, fig::chat::ChatCommandExecutor::Context context);
@@ -45,23 +35,37 @@ namespace fig::gui
 		static MainFrame& GetInstance() { return *s_pInstance; }
 
 		template <IsScreen T>
-		T* GetScreen(ScreenType screen)
+		T* GetScreen()
 		{
-			auto it = _screensByType.find(screen);
+			auto it = _screensByType.find(ScreenTypeOf<T>);
 			if (it != _screensByType.end())
 				return dynamic_cast<T*>(it->second);
 			return nullptr;
 		}
 
 		template <IsScreen T>
-		const T* GetScreen(ScreenType screen) const
+		const T* GetScreen() const
 		{
-			auto it = _screensByType.find(screen);
+			auto it = _screensByType.find(ScreenTypeOf<T>);
 			if (it != _screensByType.end())
 				return dynamic_cast<T*>(it->second);
 			return nullptr;
 		}
 		void ChangeScreen(ScreenType screen);
+
+		template <IsScreen T>
+		const T* ChangeScreen() const
+		{
+			ChangeScreen(ScreenTypeOf<T>);
+			return GetScreen<T>();
+		}
+
+		template <IsScreen T>
+		T* ChangeScreen()
+		{
+			ChangeScreen(ScreenTypeOf<T>);
+			return GetScreen<T>();
+		}
 
 		void ShowLoginScreen();
 		void ShowSidePanel(bool bShow) noexcept;
@@ -96,6 +100,7 @@ namespace fig::gui
 		fig::observer_ptr<StatusBar> _pStatusBar;
 		fig::observer_ptr<Control> _pMainArea;
 		fig::observer_ptr<SidePanel> _pSidePanel;
+		fig::opaque_ptr _pFocusedControl {};
 		ScreenType _currentScreen {};
 	};
 }

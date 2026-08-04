@@ -99,6 +99,11 @@ namespace fig::Constants
 		{
 			constexpr float ImageZoomFactor = 1.1f;
 		}
+
+		namespace Editor
+		{
+			constexpr fig::coord Width = 900;
+		}
 	}
 
 	namespace Chat

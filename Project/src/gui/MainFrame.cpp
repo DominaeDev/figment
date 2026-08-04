@@ -6,6 +6,8 @@
 #include "gui/ChatBackground.h"
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
+#include "gui/EditorScreen.h"
+#include "gui/CharacterEditor.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/FileUtility.h"
@@ -54,6 +56,7 @@ namespace fig::gui
 		RegisterScreen<ChatScreen>(ScreenType::Chat);
 		RegisterScreen<DebugScreen>(ScreenType::Debug);
 		RegisterScreen<ChatListingScreen>(ScreenType::ChatListing);
+		RegisterScreen<EditorScreen>(ScreenType::Editor);
 
 		DebugUtility::Initialize();
 
@@ -229,7 +232,7 @@ namespace fig::gui
 		ChangeScreen(ScreenType::Home);
 
 		PushEvent(UserEvent::UserSignedIn, &profile);
-		auto pHomeScreen = GetScreen<HomeScreen>(ScreenType::Home);
+		auto pHomeScreen = GetScreen<HomeScreen>();
 		pHomeScreen->CreateCards();
 	}
 
@@ -320,7 +323,7 @@ namespace fig::gui
 						Close();
 						return EventResult::Handled;
 					}
-					else if (keyEvent.key == SDLK_3 and mods.Alt)
+					else if (keyEvent.key == SDLK_4 and mods.Alt)
 					{
 						ChangeScreen(ScreenType::Debug);
 						return EventResult::Handled;
@@ -337,17 +340,22 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_2 and mods.Alt)
 					{
-						ChangeScreen(ScreenType::Chat);
 						if constexpr (Debugging) //! @temp
 						{
-							auto characterId = fig::uuid::from_str("10986bef-3914-4a00-a461-8b7e4af8d2f9");
+							auto pChatScreen = ChangeScreen<ChatScreen>();
+							auto characterId = fig::uuid::from_str("f00e36d3-42f2-4a86-b844-a5fc389a41da");
 							if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(characterId))
 							{
-								auto pChatScreen = GetScreen<ChatScreen>(ScreenType::Chat);
 								pChatScreen->GetSidePanel()->SetImage((*try_portrait).id);
 								pChatScreen->GetBackground()->SetImage((*try_portrait).id);
 							}
 						}
+						return EventResult::Handled;
+					}
+					else if (keyEvent.key == SDLK_3 and mods.Alt)
+					{
+						auto characterId = fig::uuid::from_str("f00e36d3-42f2-4a86-b844-a5fc389a41da");
+						ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>(characterId);
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)
@@ -382,11 +390,11 @@ namespace fig::gui
 			if (HasUserData1(event))
 			{
 				auto& characterId = GetUserData1<fig::uuid>(event);
-				GetScreen<ChatListingScreen>(ScreenType::ChatListing)->ShowChatsWith(characterId);
+				GetScreen<ChatListingScreen>()->ShowChatsWith(characterId);
 			}
 			else
 			{
-				GetScreen<ChatListingScreen>(ScreenType::ChatListing)->ShowAllChats();
+				GetScreen<ChatListingScreen>()->ShowAllChats();
 			}
 			PopAllMenus();
 			return EventResult::Continue;
@@ -416,6 +424,26 @@ namespace fig::gui
 		{
 			UnloadModel();
 			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::EditCharacter))
+		{
+			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
+			ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>(characterId);
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::StartTextInput)
+			and _pFocusedControl != event.user.data1)
+		{
+			if (!_pFocusedControl)
+				SDL_StartTextInput(GetSDLWindow());
+			_pFocusedControl = event.user.data1;
+		}
+		else if (IsUserEvent(event, UserEvent::StopTextInput)
+			and _pFocusedControl == event.user.data1)
+		{
+			if (_pFocusedControl)
+				SDL_StopTextInput(GetSDLWindow());
+			_pFocusedControl = {};
 		}
 
 		HandleStatusBarEvents(event);
@@ -523,7 +551,7 @@ namespace fig::gui
 	bool MainFrame::StartChat(const fig::uuid& characterId)
 	{
 		ChangeScreen(ScreenType::Chat);
-		auto pChatScreen = GetScreen<ChatScreen>(ScreenType::Chat);
+		auto pChatScreen = GetScreen<ChatScreen>();
 
 		if (auto character = Global::GetUserContent().Get<Character>(characterId))
 		{

@@ -31,4 +31,22 @@ namespace fig::gui
 
 	template <typename T>
 	concept IsScreen = std::derived_from<T, Screen>;
+
+	enum class ScreenType : size_t
+	{
+		Undefined,
+		Debug,
+		Login,
+		Home,
+		Chat,
+		ChatListing,
+		Editor,
+	};
+
+	template <IsScreen T>
+	inline constexpr ScreenType ScreenTypeOf = []<bool Flag = false>()
+	{
+		static_assert(Flag, "No ScreenType mapping for this type");
+	}();
+
 }

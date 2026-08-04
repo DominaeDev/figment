@@ -90,6 +90,7 @@ namespace fig::gui
 				InvalidateLayout();
 			return fig::observer_ptr<T>((T*)_pSizer.get());
 		}
+		fig::observer_ptr<Sizer> const GetSizer() const { return _pSizer.get(); }
 
 		void EnableLayout(bool bEnable) noexcept { _bLayoutEnabled = bEnable; }
 		bool IsLayoutEnabled() const noexcept { return _bLayoutEnabled; }
@@ -105,7 +106,6 @@ namespace fig::gui
 	protected:
 		void SetParent(ControlPtr pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
-		fig::observer_ptr<Sizer> const GetSizer() const { return _pSizer.get(); }
 		void Layout();
 
 		virtual void OnUpdate(float fElapsed) {};

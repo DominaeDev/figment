@@ -162,6 +162,9 @@
     <Filter Include="Source Files\Third-party\fast_gaussian_blur">
       <UniqueIdentifier>{8ff397de-7dd3-44d2-8594-7d6b6a218bf4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\Editor">
+      <UniqueIdentifier>{f995ba2b-e188-4bc6-ad30-c9b4e8435aed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -634,6 +637,18 @@
     </ClCompile>
     <ClCompile Include="src\gui\BehindChat.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\EditorScreen.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\EditorFields.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ValueBinding.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1482,6 +1497,24 @@
     </ClInclude>
     <ClInclude Include="include\gui\BehindChat.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\EditorScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\IEditor.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditor.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\EditorFields.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ValueBinding.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\OpaquePtr.h">
+      <Filter>Source Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

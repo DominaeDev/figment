@@ -18,6 +18,7 @@ namespace fig::gui
 		NavigateToChatList,
 		StartChat,
 
+		EditCharacter,
 		DebugCharacter,
 
 		/* Broadcast events */
@@ -40,6 +41,8 @@ namespace fig::gui
 		UserSignedIn,
 		UserSignedOut,
 		ChangedScreen,
+		StartTextInput,
+		StopTextInput,
 
 		Count,
 	};
