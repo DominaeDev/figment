@@ -650,6 +650,9 @@
     <ClCompile Include="src\gui\ValueBinding.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\EditorUtils.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1515,6 +1518,9 @@
     </ClInclude>
     <ClInclude Include="include\util\OpaquePtr.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\EditorUtils.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

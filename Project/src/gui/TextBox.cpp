@@ -59,6 +59,9 @@ namespace fig::gui
 		highlight_end = -1;
 
 		SetMargins(8, 4, 4, 6);
+
+		if (_pFont)
+			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
 	}
 
 	TextBox::~TextBox()

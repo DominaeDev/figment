@@ -22,11 +22,11 @@ namespace fig::gui
 	{
 		EditorFields fields;
 
-		fields.push_back(std::make_shared<EditorHeader>("Character name"));
-		fields.push_back(std::make_shared<EditorTextField<fig::string>>(&_value.name.first, "First", 250));
-		fields.push_back(std::make_shared<EditorTextField<fig::string>>(&_value.name.middle, "Middle", 250));
-		fields.push_back(std::make_shared<EditorTextField<fig::string>>(&_value.name.last, "Last", 250));
+		fields.push_back(EditorHeader("Character name"));
+		fields.push_back(std::make_shared<EditorTextField<fig::string>>(&_value.name.first, "First name", 250));
+		fields.push_back(std::make_shared<EditorTextField<fig::string>>(&_value.name.last, "Last name", 250));
 		fields.push_back(std::make_shared<EditorTextField<fig::string>>(&_value.name.nickname, "Nickname", 250));
+		fields.push_back(EditorHint("(Supercedes the first name as the character's spoken name)"));
 
 		return fields;
 	}

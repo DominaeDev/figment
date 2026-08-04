@@ -32,7 +32,7 @@ namespace fig::gui
 		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 
-		auto _pFilterTextBox = pTopBar->CreateControl<SearchBox>(FontFace::Default, 16.0);
+		auto _pFilterTextBox = pTopBar->CreateControl<SearchBox>();
 		_pFilterTextBox->SetPosition(0, 0);
 		_pFilterTextBox->SetSize(192, 30);
 		_pFilterTextBox->SetMaxWidth(192);

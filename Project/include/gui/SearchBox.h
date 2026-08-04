@@ -1,13 +1,13 @@
 #pragma once
 
-#include "gui/TextBox.h"
+#include "gui/SimpleTextBox.h"
 
 namespace fig::gui
 {
-	class SearchBox : public TextBox
+	class SearchBox : public SimpleTextBox
 	{
 	public:
-		SearchBox(ControlPtr pParent, FontFace fontFace, double ptSize);
+		SearchBox(ControlPtr pParent);
 
 	protected:
 		void OnSize();

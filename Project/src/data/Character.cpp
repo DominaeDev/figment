@@ -20,8 +20,6 @@ namespace fig::data
 
 	fig::string CharacterName::GetFullName() const
 	{
-		if (not (first.empty() or middle.empty() or last.empty()))
-			return std::format("{} {} {}", first, middle, last);
 		if (not (first.empty() or last.empty()))
 			return std::format("{} {}", first, last);
 		if (not first.empty())
@@ -63,7 +61,6 @@ namespace fig::data
 	{
 		return Fields(
 			Element { "First", &CharacterName::first },
-			Element { "Middle", &CharacterName::middle },
 			Element { "Last", &CharacterName::last },
 			Element { "Nickname", &CharacterName::nickname }
 		);

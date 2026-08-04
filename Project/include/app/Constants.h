@@ -16,6 +16,7 @@ namespace fig::Constants
 		constexpr fig::coord WindowMinHeight = 600;
 
 		constexpr double DefaultFontSize = 18.5;
+		constexpr double TextBoxFontSize = 16.0;
 		constexpr double StatusBarFontSize = 14.5;
 		constexpr double CharacterNameFontSize = 12.0;
 		constexpr double ChatMessageFontSize = 16.0;

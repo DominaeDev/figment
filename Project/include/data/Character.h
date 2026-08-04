@@ -45,7 +45,6 @@ namespace fig::data
 	struct CharacterName
 	{
 		fig::string first;
-		fig::string middle;
 		fig::string last;
 		fig::string nickname;
 

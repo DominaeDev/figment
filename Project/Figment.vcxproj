@@ -192,6 +192,7 @@
     <ClCompile Include="src\gui\ChatListItem.cpp" />
     <ClCompile Include="src\gui\EditorFields.cpp" />
     <ClCompile Include="src\gui\EditorScreen.cpp" />
+    <ClCompile Include="src\gui\EditorUtils.cpp" />
     <ClCompile Include="src\gui\FillParentSizer.cpp" />
     <ClCompile Include="src\gui\InfoPanel.cpp" />
     <ClCompile Include="src\gui\Events.cpp" />
@@ -455,6 +456,7 @@
     <ClInclude Include="include\gui\ChatListItem.h" />
     <ClInclude Include="include\gui\EditorFields.h" />
     <ClInclude Include="include\gui\EditorScreen.h" />
+    <ClInclude Include="include\gui\EditorUtils.h" />
     <ClInclude Include="include\gui\FillParentSizer.h" />
     <ClInclude Include="include\gui\IEditor.h" />
     <ClInclude Include="include\gui\InfoPanel.h" />

@@ -44,7 +44,7 @@ namespace fig::gui
 		_pToggleTagsButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_TAG);
 		_pToggleTagsButton->SetDelegate([this]() { ToggleTags(); });
 
-		_pFilterTextBox = pTopBar->CreateControl<SearchBox>(FontFace::Default, 16.0);
+		_pFilterTextBox = pTopBar->CreateControl<SearchBox>();
 		_pFilterTextBox->SetPosition(0, 0);
 		_pFilterTextBox->SetSize(192, 30);
 		_pFilterTextBox->SetMaxWidth(192);

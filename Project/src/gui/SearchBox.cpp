@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	SearchBox::SearchBox(ControlPtr pParent, FontFace fontFace, double ptSize) : TextBox(pParent, fontFace, ptSize)
+	SearchBox::SearchBox(ControlPtr pParent) : SimpleTextBox(pParent, FontFace::Default, Constants::GUI::TextBoxFontSize, TextBox::Flags { TextBox::Flag::Single })
 	{
 		if (_pFont)
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());

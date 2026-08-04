@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/EditorScreen.h"
 #include "gui/ScrollPanel.h"
+#include "gui/EditorUtils.h"
 
 namespace fig::gui
 {
@@ -48,20 +49,7 @@ namespace fig::gui
 		auto pSizer = _pScrollPanel->GetSizer();
 		for (auto& field_ptr : _fields)
 		{
-			if (auto pHeader = std::get_if<std::shared_ptr<EditorHeader>>(&field_ptr))
-			{
-				auto pLabel = _pScrollPanel->CreateControl<StaticText>(fig::string { (*pHeader)->label}, FontFace::Default, 18.5, false);
-				pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Top, 8);
-			}
-			else if (auto pField = std::get_if<std::shared_ptr<IEditorField>>(&field_ptr))
-			{
-				auto pLabel = _pScrollPanel->CreateControl<StaticText>(fig::string { (*pField)->GetLabel() }, FontFace::Default, 14.0, false);
-				pLabel->SetForegroundColor(Color::SidePanelForeground);
-				auto pControl = (*pField)->CreateControl(_pScrollPanel);
-				pSizer->AddSpacer(8);
-				pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 4);
-				pSizer->Add(pControl, 0, SizerFlag::Expand | SizerFlag::Top, 2);
-			}
+			CreateEditorField(_pScrollPanel, pSizer, field_ptr);
 		}
 		InvalidateLayout();
 	}

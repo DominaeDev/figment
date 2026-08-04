@@ -16,7 +16,7 @@ namespace fig::gui
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(fig::color { 0x61, 0x5a, 0x35, 0xFF });
+		pTextBoxBorder->SetColor(Color::LineColor);
 	}
 
 	void SimpleTextBox::OnEnabled(bool bEnabled)

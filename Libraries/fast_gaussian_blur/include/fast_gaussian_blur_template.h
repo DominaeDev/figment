@@ -7,47 +7,47 @@
 //
 #pragma once
 
-//!
-//! \file fast_gaussian_blur_template.h
-//! \author Basile Fraboni
-//! \date 2017 - 2022
-//!
-//! \brief This contains a C++ implementation of a fast Gaussian blur algorithm in linear time.
-//!
-//! The image buffer is supposed to be of size `w * h * c`, where `h` is height, `w` is width, 
-//! and `c` is the number of channels.
-//! The default implementation only supports up to 4 channels images, but one can easily add support for any number of channels
-//! using either specific template cases or a generic function that takes the number of channels as an explicit parameter.
-//! This implementation is focused on learning and readability more than on performance.
-//! The fast blur algorithm is performed with several box blur passes over an image.
-//! The filter converges towards a true Gaussian blur after several passes thanks to the theorem central limit.
-//! In practice, three passes (biquadratic filter) are sufficient for good quality results.
-//! For further details please refer to:
-//!     - http://blog.ivank.net/fastest-gaussian-blur.html
-//!     - https://www.peterkovesi.com/papers/FastGaussianSmoothing.pdf
-//!     - https://github.com/bfraboni/FastGaussianBlur
-//!
-//! **Note:** The fast gaussian blur algorithm is not accurate on image boundaries. 
-//! It performs a diffusion of the signal with several passes, each pass depending 
-//! on the output of the preceding one. Some of the diffused signal is lost near borders and results in a slight 
-//! loss of accuracy for next pass. This problem can be solved by increasing the image support of 
-//! half the box kernel extent at each pass of the algorithm. The added padding would in this case 
-//! capture the diffusion and make the next pass accurate. 
-//! On contrary true Gaussian blur does not suffer this problem since the whole diffusion process 
-//! is performed in one pass only.
-//! The extra padding is not performed in this implementation, however we provide several border
-//! policies resulting in dfferent approximations and accuracies.
-//! 
+//
+// \file fast_gaussian_blur_template.h
+// \author Basile Fraboni
+// \date 2017 - 2022
+//
+// \brief This contains a C++ implementation of a fast Gaussian blur algorithm in linear time.
+//
+// The image buffer is supposed to be of size `w * h * c`, where `h` is height, `w` is width, 
+// and `c` is the number of channels.
+// The default implementation only supports up to 4 channels images, but one can easily add support for any number of channels
+// using either specific template cases or a generic function that takes the number of channels as an explicit parameter.
+// This implementation is focused on learning and readability more than on performance.
+// The fast blur algorithm is performed with several box blur passes over an image.
+// The filter converges towards a true Gaussian blur after several passes thanks to the theorem central limit.
+// In practice, three passes (biquadratic filter) are sufficient for good quality results.
+// For further details please refer to:
+//     - http://blog.ivank.net/fastest-gaussian-blur.html
+//     - https://www.peterkovesi.com/papers/FastGaussianSmoothing.pdf
+//     - https://github.com/bfraboni/FastGaussianBlur
+//
+// **Note:** The fast gaussian blur algorithm is not accurate on image boundaries. 
+// It performs a diffusion of the signal with several passes, each pass depending 
+// on the output of the preceding one. Some of the diffused signal is lost near borders and results in a slight 
+// loss of accuracy for next pass. This problem can be solved by increasing the image support of 
+// half the box kernel extent at each pass of the algorithm. The added padding would in this case 
+// capture the diffusion and make the next pass accurate. 
+// On contrary true Gaussian blur does not suffer this problem since the whole diffusion process 
+// is performed in one pass only.
+// The extra padding is not performed in this implementation, however we provide several border
+// policies resulting in dfferent approximations and accuracies.
+// 
 
-//!
-//! \brief Enumeration that decribes border policies for filters.
-//! 
-//! For a detailed description of border policies please refer to:
-//! - https://en.wikipedia.org/wiki/Kernel_(image_processing)#Edge_Handling
-//! - https://www.intel.com/content/www/us/en/develop/documentation/ipp-dev-reference/top/volume-2-image-processing/filtering-functions-2/user-defined-border-types.html
-//! - https://docs.opencv.org/3.4/d2/de8/group__core__array.html#ga209f2f4869e304c82d07739337eae7c5
-//! - http://iihm.imag.fr/Docs/java/jai1_0guide/Image-enhance.doc.html
-//!
+//
+// \brief Enumeration that decribes border policies for filters.
+// 
+// For a detailed description of border policies please refer to:
+// - https://en.wikipedia.org/wiki/Kernel_(image_processing)#Edge_Handling
+// - https://www.intel.com/content/www/us/en/develop/documentation/ipp-dev-reference/top/volume-2-image-processing/filtering-functions-2/user-defined-border-types.html
+// - https://docs.opencv.org/3.4/d2/de8/group__core__array.html#ga209f2f4869e304c82d07739337eae7c5
+// - http://iihm.imag.fr/Docs/java/jai1_0guide/Image-enhance.doc.html
+//
 enum Border
 {
     kExtend,
@@ -56,7 +56,7 @@ enum Border
     kWrap,
 };
 
-//! Helper to compute array indices for different border policies.
+// Helper to compute array indices for different border policies.
 template<Border P>
 inline int remap_index(const int begin, const int end, const int index)
 {
@@ -72,7 +72,7 @@ inline int remap_index(const int begin, const int end, const int index)
         }
         else if constexpr (P == kMirror)
         {
-            //! FIXME: is there a better way ?
+            // FIXME: is there a better way ?
             const int length = end-begin, last = end-1, slength = length-1;
             const int pindex = index < begin ? last-index+slength : index-begin;
             const int repeat = pindex / slength;
@@ -87,21 +87,21 @@ inline int remap_index(const int begin, const int end, const int index)
     return index;
 };
 
-//!
-//! Sliding kernel accumulation has 4 cases:
-//! 1. left side out and right side in
-//! 2. left side in and right side in
-//! 3. left side in and right side out
-//! 4. left side out and right side out
-//!
-//! Small (S) kernels corresponds to kernels with radius < width; r < w
-//! Mid   (M) kernels corresponds to kernels with kernel size < width; 2r+1 < w
-//! Large (L) kernels corresponds to kernels with radius > width; r > w
-//!
-//! The fast version for (S) results in 3 loops for cases 1, 2 and 3.
-//! The fast version for (M) results in 3 loops for cases 1, 4 and 3.
-//! The fast version for (L) results in 1 loop for cases 4.
-//!
+//
+// Sliding kernel accumulation has 4 cases:
+// 1. left side out and right side in
+// 2. left side in and right side in
+// 3. left side in and right side out
+// 4. left side out and right side out
+//
+// Small (S) kernels corresponds to kernels with radius < width; r < w
+// Mid   (M) kernels corresponds to kernels with kernel size < width; 2r+1 < w
+// Large (L) kernels corresponds to kernels with radius > width; r > w
+//
+// The fast version for (S) results in 3 loops for cases 1, 2 and 3.
+// The fast version for (M) results in 3 loops for cases 1, 4 and 3.
+// The fast version for (L) results in 1 loop for cases 4.
+//
 enum Kernel
 {
     kSmall,
@@ -109,10 +109,10 @@ enum Kernel
     kLarge,
 };
 
-//!
-//! \brief helper to compute rounding value for the specified type.
-//! This is used to alleviate integer types rounding errors causing image darkening.
-//!
+//
+// \brief helper to compute rounding value for the specified type.
+// This is used to alleviate integer types rounding errors causing image darkening.
+//
 template<typename T>
 constexpr float round_v() { return std::is_integral_v<T> ? 0.5f : 0.0f; }
 
@@ -122,17 +122,17 @@ constexpr T mul_flt(const T& value, float f) { return static_cast<T>(static_cast
 template<typename T>
 constexpr T mul_dbl(const T& value, double f) { return static_cast<T>(static_cast<double>(value) * f + round_v<T>()); }
 
-//!
-//! \brief This function performs a single separable horizontal box blur pass with border extend policy.
-//! Templated by buffer data type T, buffer number of channels C.
-//! Faster version for kernels that are smaller than the image width (r <= w).
-//!
-//! \param[in] in           source buffer
-//! \param[in,out] out      target buffer
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] r            box dimension
-//!
+//
+// \brief This function performs a single separable horizontal box blur pass with border extend policy.
+// Templated by buffer data type T, buffer number of channels C.
+// Faster version for kernels that are smaller than the image width (r <= w).
+//
+// \param[in] in           source buffer
+// \param[in,out] out      target buffer
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] r            box dimension
+//
 template<typename T, int C, Kernel kernel = kSmall>
 inline void horizontal_blur_extend(const T * in, T * out, const int w, const int h, const int r)
 {
@@ -198,7 +198,7 @@ inline void horizontal_blur_extend(const T * in, T * out, const int w, const int
             for(; li<begin; ti++, li++)
             for(int ch=0; ch<C; ++ch)
             {
-                acc[ch] += lv[ch] - fv[ch]; //! mid kernels
+                acc[ch] += lv[ch] - fv[ch]; // mid kernels
                 // assert(acc[ch] >= 0);
                 out[ti*C+ch] = mul_flt(acc[ch], iarr);
             }
@@ -254,17 +254,17 @@ inline void horizontal_blur_extend(const T * in, T * out, const int w, const int
     }
 }
 
-//!
-//! \brief This function performs a single separable horizontal box blur pass with kernel crop border policy.
-//! Templated by buffer data type T, buffer number of channels C.
-//! Faster version for kernels that are smaller than the image width (r <= w).
-//!
-//! \param[in] in           source buffer
-//! \param[in,out] out      target buffer
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] r            box dimension
-//!
+//
+// \brief This function performs a single separable horizontal box blur pass with kernel crop border policy.
+// Templated by buffer data type T, buffer number of channels C.
+// Faster version for kernels that are smaller than the image width (r <= w).
+//
+// \param[in] in           source buffer
+// \param[in,out] out      target buffer
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] r            box dimension
+//
 template<typename T, int C, Kernel kernel = kSmall>
 inline void horizontal_blur_kernel_crop(const T * in, T * out, const int w, const int h, const int r)
 {
@@ -379,18 +379,18 @@ inline void horizontal_blur_kernel_crop(const T * in, T * out, const int w, cons
     }
 }
 
-//!
-//! \brief This function performs a single separable horizontal box blur pass with mirror border policy.
-//! Templated by buffer data type T, buffer number of channels C.
-//! Faster version for kernels that are smaller than the image width (r < w).
-//!
-//! \param[in] in           source buffer
-//! \param[in,out] out      target buffer
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] r            box dimension
-//!
-//! \todo Rework this one at some point.
+//
+// \brief This function performs a single separable horizontal box blur pass with mirror border policy.
+// Templated by buffer data type T, buffer number of channels C.
+// Faster version for kernels that are smaller than the image width (r < w).
+//
+// \param[in] in           source buffer
+// \param[in,out] out      target buffer
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] r            box dimension
+//
+// \todo Rework this one at some point.
 template<typename T, int C, Kernel kernel = kSmall>
 inline void horizontal_blur_mirror(const T* in, T* out, const int w, const int h, const int r)
 {
@@ -521,18 +521,18 @@ inline void horizontal_blur_mirror(const T* in, T* out, const int w, const int h
     }
 }
 
-//!
-//! \brief This function performs a single separable horizontal box blur pass with mirror border policy.
-//! Templated by buffer data type T, buffer number of channels C.
-//! Generic version for kernels that are larger than the image width (r >= w).
-//!
-//! \param[in] in           source buffer
-//! \param[in,out] out      target buffer
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] r            box dimension
-//!
-//! \todo Make a faster version for small kernels.
+//
+// \brief This function performs a single separable horizontal box blur pass with mirror border policy.
+// Templated by buffer data type T, buffer number of channels C.
+// Generic version for kernels that are larger than the image width (r >= w).
+//
+// \param[in] in           source buffer
+// \param[in,out] out      target buffer
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] r            box dimension
+//
+// \todo Make a faster version for small kernels.
 template<typename T, int C>
 inline void horizontal_blur_wrap(const T* in, T* out, const int w, const int h, const int r)
 {
@@ -568,16 +568,16 @@ inline void horizontal_blur_wrap(const T* in, T* out, const int w, const int h, 
     }
 }
 
-//!
-//! \brief Utility template dispatcher function for horizontal_blur.
-//! Templated by buffer data type T, buffer number of channels C, and border policy P.
-//!
-//! \param[in] in           source buffer
-//! \param[in,out] out      target buffer
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] r            box dimension
-//!
+//
+// \brief Utility template dispatcher function for horizontal_blur.
+// Templated by buffer data type T, buffer number of channels C, and border policy P.
+//
+// \param[in] in           source buffer
+// \param[in,out] out      target buffer
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] r            box dimension
+//
 template<typename T, int C, Border P = kMirror>
 inline void horizontal_blur(const T * in, T * out, const int w, const int h, const int r)
 {
@@ -605,16 +605,16 @@ inline void horizontal_blur(const T * in, T * out, const int w, const int h, con
     }
 }
 
-//!
-//! \brief Utility template dispatcher function for horizontal_blur. Templated by buffer data type T and border policy P.
-//!
-//! \param[in] in           source buffer
-//! \param[in,out] out      target buffer
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//! \param[in] r            box dimension
-//!
+//
+// \brief Utility template dispatcher function for horizontal_blur. Templated by buffer data type T and border policy P.
+//
+// \param[in] in           source buffer
+// \param[in,out] out      target buffer
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] c            image channels
+// \param[in] r            box dimension
+//
 template<typename T, Border P = kMirror>
 inline void horizontal_blur(const T * in, T * out, const int w, const int h, const int c, const int r)
 {
@@ -629,18 +629,18 @@ inline void horizontal_blur(const T * in, T * out, const int w, const int h, con
     }
 }
 
-//!
-//! \brief This function performs a 2D tranposition of an image. 
-//!
-//! The transposition is done per 
-//! block to reduce the number of cache misses and improve cache coherency for large image buffers.
-//! Templated by buffer data type T and buffer number of channels C.
-//!
-//! \param[in] in           source buffer
-//! \param[in,out] out      target buffer
-//! \param[in] w            image width
-//! \param[in] h            image height
-//!
+//
+// \brief This function performs a 2D tranposition of an image. 
+//
+// The transposition is done per 
+// block to reduce the number of cache misses and improve cache coherency for large image buffers.
+// Templated by buffer data type T and buffer number of channels C.
+//
+// \param[in] in           source buffer
+// \param[in,out] out      target buffer
+// \param[in] w            image width
+// \param[in] h            image height
+//
 template<typename T, int C>
 inline void flip_block(const T * in, T * out, const int w, const int h)
 {
@@ -668,15 +668,15 @@ inline void flip_block(const T * in, T * out, const int w, const int h)
         }
     }
 }
-//!
-//! \brief Utility template dispatcher function for flip_block. Templated by buffer data type T.
-//!
-//! \param[in] in           source buffer
-//! \param[in,out] out      target buffer
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//!
+//
+// \brief Utility template dispatcher function for flip_block. Templated by buffer data type T.
+//
+// \param[in] in           source buffer
+// \param[in,out] out      target buffer
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] c            image channels
+//
 template<typename T>
 inline void flip_block(const T * in, T * out, const int w, const int h, const int c)
 {
@@ -691,18 +691,18 @@ inline void flip_block(const T * in, T * out, const int w, const int h, const in
     }
 }
 
-//!
-//! \brief This function converts the standard deviation of 
-//! Gaussian blur into a box radius for each box blur pass. 
-//! Returns the approximate sigma value achieved with the N box blur passes.
-//!
-//! For further details please refer to :
-//! - https://www.peterkovesi.com/papers/FastGaussianSmoothing.pdf
-//!
-//! \param[out] boxes   box radiis for kernel sizes of 2*boxes[i]+1
-//! \param[in] sigma    Gaussian standard deviation
-//! \param[in] n        number of box blur pass
-//!
+//
+// \brief This function converts the standard deviation of 
+// Gaussian blur into a box radius for each box blur pass. 
+// Returns the approximate sigma value achieved with the N box blur passes.
+//
+// For further details please refer to :
+// - https://www.peterkovesi.com/papers/FastGaussianSmoothing.pdf
+//
+// \param[out] boxes   box radiis for kernel sizes of 2*boxes[i]+1
+// \param[in] sigma    Gaussian standard deviation
+// \param[in] n        number of box blur pass
+//
 inline float sigma_to_box_radius(int boxes[], const float sigma, const int n)
 {
     // ideal filter width
@@ -720,33 +720,33 @@ inline float sigma_to_box_radius(int boxes[], const float sigma, const int n)
     return std::sqrt((m*wl*wl+(n-m)*wu*wu-n)/12.f);
 }
 
-//!
-//! \brief This function performs a fast Gaussian blur. Templated by buffer data type T and number of passes N.
-//!
-//! Applying several times box blur tends towards a true Gaussian blur (thanks TCL). Three passes are sufficient
-//! for good results. Templated by buffer data type T and number of passes N. The input buffer is also used
-//! as temporary and modified during the process hence it can not be constant. 
-//!
-//! Usually the process should alternate between horizontal and vertical passes
-//! as much times as we want box blur passes. However thanks to box blur properties
-//! the separable passes can be performed in any order without changing the result.
-//! Hence for performance purposes the algorithm is: 
-//! - apply N times horizontal blur (horizontal passes)
-//! - flip the image buffer (transposition)
-//! - apply N times horizontal blur (vertical passes)
-//! - flip the image buffer (transposition)
-//!
-//! We provide two version of the function:
-//! - generic N passes (in which more std::swap are used)
-//! - specialized 3 passes only
-//!
-//! \param[in,out] in       source buffer reference ptr 
-//! \param[in,out] out      target buffer reference ptr 
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//! \param[in] sigma        Gaussian standard deviation
-//!
+//
+// \brief This function performs a fast Gaussian blur. Templated by buffer data type T and number of passes N.
+//
+// Applying several times box blur tends towards a true Gaussian blur (thanks TCL). Three passes are sufficient
+// for good results. Templated by buffer data type T and number of passes N. The input buffer is also used
+// as temporary and modified during the process hence it can not be constant. 
+//
+// Usually the process should alternate between horizontal and vertical passes
+// as much times as we want box blur passes. However thanks to box blur properties
+// the separable passes can be performed in any order without changing the result.
+// Hence for performance purposes the algorithm is: 
+// - apply N times horizontal blur (horizontal passes)
+// - flip the image buffer (transposition)
+// - apply N times horizontal blur (vertical passes)
+// - flip the image buffer (transposition)
+//
+// We provide two version of the function:
+// - generic N passes (in which more std::swap are used)
+// - specialized 3 passes only
+//
+// \param[in,out] in       source buffer reference ptr 
+// \param[in,out] out      target buffer reference ptr 
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] c            image channels
+// \param[in] sigma        Gaussian standard deviation
+//
 template<typename T, unsigned int N, Border P>
 inline void fast_gaussian_blur(T *& in, T *& out, const int w, const int h, const int c, const float sigma) 
 {
@@ -804,19 +804,19 @@ inline void fast_gaussian_blur(T *& in, T *& out, const int w, const int h, cons
     std::swap(in, out);    
 }
 
-//!
-//! \brief Utility template dispatcher function for fast_gaussian_blur. Templated by buffer data type T and border policy P.
-//!
-//! This is the main exposed function and the one that should be used in programs.
-//!
-//! \param[in,out] in       source buffer reference ptr 
-//! \param[in,out] out      target buffer reference ptr 
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//! \param[in] sigma        Gaussian standard deviation
-//! \param[in] n            number of passes, should be > 0
-//!
+//
+// \brief Utility template dispatcher function for fast_gaussian_blur. Templated by buffer data type T and border policy P.
+//
+// This is the main exposed function and the one that should be used in programs.
+//
+// \param[in,out] in       source buffer reference ptr 
+// \param[in,out] out      target buffer reference ptr 
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] c            image channels
+// \param[in] sigma        Gaussian standard deviation
+// \param[in] n            number of passes, should be > 0
+//
 template<typename T, Border P = kMirror>
 void fast_gaussian_blur(T *& in, T *& out, const int w, const int h, const int c, const float sigma, const uint32_t n)
 {
@@ -837,20 +837,20 @@ void fast_gaussian_blur(T *& in, T *& out, const int w, const int h, const int c
     }
 }
 
-//!
-//! \brief Utility template dispatcher function for fast_gaussian_blur. Templated by buffer data type.
-//!
-//! This is the main exposed function and the one that should be used in programs.
-//!
-//! \param[in,out] in       source buffer reference ptr 
-//! \param[in,out] out      target buffer reference ptr 
-//! \param[in] w            image width
-//! \param[in] h            image height
-//! \param[in] c            image channels
-//! \param[in] sigma        Gaussian standard deviation
-//! \param[in] n            number of passes, should be > 0
-//! \param[in] p            border policy {kExtend, kMirror, kKernelCrop, kWrap}
-//!
+//
+// \brief Utility template dispatcher function for fast_gaussian_blur. Templated by buffer data type.
+//
+// This is the main exposed function and the one that should be used in programs.
+//
+// \param[in,out] in       source buffer reference ptr 
+// \param[in,out] out      target buffer reference ptr 
+// \param[in] w            image width
+// \param[in] h            image height
+// \param[in] c            image channels
+// \param[in] sigma        Gaussian standard deviation
+// \param[in] n            number of passes, should be > 0
+// \param[in] p            border policy {kExtend, kMirror, kKernelCrop, kWrap}
+//
 template<typename T>
 void fast_gaussian_blur(
     T *& in,

@@ -7,7 +7,7 @@ namespace fig::gui
 	template<>
 	ControlPtr EditorTextField<fig::string>::CreateControl(ControlPtr pParent)
 	{
-		_pTextBox = pParent->CreateControl<SimpleTextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Single });
+		_pTextBox = pParent->CreateControl<SimpleTextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize, TextBox::Flags { TextBox::Flag::Single });
 		_pTextBox->SetText(_binding.AsString());
 		_pTextBox->SetMaxWidth(_maxWidth);
 		_pTextBox->SetTextChangedCallback([this](const fig::string& text) { OnChange(text); });

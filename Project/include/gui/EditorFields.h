@@ -54,7 +54,15 @@ namespace fig::gui
 		fig::string label;
 	};
 
-	using EditorFieldEntry = std::variant<std::shared_ptr<IEditorField>, std::shared_ptr<EditorHeader>>;
-	using EditorFields = std::vector<EditorFieldEntry>;
+	struct EditorHint
+	{
+		EditorHint(fig::string_view text) : label { text }
+		{}
+
+		fig::string label;
+	};
+
+	using EditorField = std::variant<std::shared_ptr<IEditorField>, EditorHeader, EditorHint>;
+	using EditorFields = std::vector<EditorField>;
 
 }
