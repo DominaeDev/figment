@@ -4,6 +4,7 @@
 #include "gui/GUITypes.h"
 #include "app/AppSettings.h"
 #include "user/UserSettings.h"
+#include "tts/ITTSBackend.h"
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -53,6 +54,7 @@ namespace fig
 			std::unique_ptr<fig::io::AppSettings> pAppSettings;
 			std::shared_ptr<fig::text::MacroProvider> pMacroProvider;
 			std::unique_ptr<std::map<fig::cursor, fig::sdl::Cursor>> pSystemCursors;
+			std::unique_ptr<fig::tts::ITTSBackend> pTTSBackend;
 
 			void Init();
 			void Release();
@@ -64,6 +66,7 @@ namespace fig
 
 		static fig::gui::Window& GetMainWindow();
 		static fig::llm::LLMBackend& GetLLMBackend();
+		static fig::tts::ITTSBackend& GetTTSBackend();
 		static fig::io::AppSettings& GetSettings();
 		
 		static fig::user::UserManager& GetUserManager();
@@ -71,7 +74,7 @@ namespace fig
 		static fig::io::UserContentManager& GetUserContent();
 		static std::weak_ptr<fig::text::MacroProvider> GetMacroProvider();
 
-		[[nodiscard]] static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
+		static std::shared_ptr<fig::llm::LLMInstance> GetLLMInstance();
 		static void SetLLMInstance(std::shared_ptr<fig::llm::LLMInstance> pLLMInstance);
 		static bool IsLLMInitialized();
 		static bool IsSignedIn();

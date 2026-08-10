@@ -56,8 +56,9 @@ namespace fig::io
 	enum class AudioAssetType : uint8_t
 	{
 		Undefined			= 0x00,
-		VoiceSample			= 0x01,
-		VoiceMessage		= 0x02,
+		VoiceSettings		= 0x01,
+		VoiceSample			= 0x02,
+		VoiceMessage		= 0x03,
 	};
 
 	template <typename T>

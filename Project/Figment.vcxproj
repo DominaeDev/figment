@@ -296,6 +296,10 @@
     <ClCompile Include="src\text\ContextLocator.cpp" />
     <ClCompile Include="src\text\MacroProvider.cpp" />
     <ClCompile Include="src\text\TextEvaluator.cpp" />
+    <ClCompile Include="src\tts\HttpClient_Win.cpp" />
+    <ClCompile Include="src\tts\ITTSBackend.cpp" />
+    <ClCompile Include="src\tts\ProcessLogger_Win.cpp" />
+    <ClCompile Include="src\tts\TTSBackend_Win.cpp" />
     <ClCompile Include="src\user\ProfileDatabase.cpp" />
     <ClCompile Include="src\user\Security.cpp" />
     <ClCompile Include="src\user\UserManager.cpp" />
@@ -443,6 +447,7 @@
     <ClInclude Include="include\data\ModelSettings.h" />
     <ClInclude Include="include\data\Scenario.h" />
     <ClInclude Include="include\data\TavernCardV2.h" />
+    <ClInclude Include="include\data\VoiceSettings.h" />
     <ClInclude Include="include\Figment.h" />
     <ClInclude Include="include\gui\BehindChat.h" />
     <ClInclude Include="include\gui\BoxSizer.h" />
@@ -555,6 +560,10 @@
     <ClInclude Include="include\text\ContextLocator.h" />
     <ClInclude Include="include\text\MacroProvider.h" />
     <ClInclude Include="include\text\TextEvaluator.h" />
+    <ClInclude Include="include\tts\HttpClient_Win.h" />
+    <ClInclude Include="include\tts\ProcessLogger_Win.h" />
+    <ClInclude Include="include\tts\ITTSBackend.h" />
+    <ClInclude Include="include\tts\TTSBackend_Win.h" />
     <ClInclude Include="include\user\ProfileDatabase.h" />
     <ClInclude Include="include\user\Security.h" />
     <ClInclude Include="include\user\UserManager.h" />

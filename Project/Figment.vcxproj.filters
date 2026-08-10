@@ -129,9 +129,6 @@
     <Filter Include="Source Files\Application\Common">
       <UniqueIdentifier>{08ed38ef-c891-490c-b20a-88677d1ca92a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Data">
-      <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Chat">
       <UniqueIdentifier>{6fec36fd-514b-4b20-8daa-8d5ad3fd04e6}</UniqueIdentifier>
     </Filter>
@@ -164,6 +161,15 @@
     </Filter>
     <Filter Include="Source Files\Frontend\GUI\Screens\Editor">
       <UniqueIdentifier>{f995ba2b-e188-4bc6-ad30-c9b4e8435aed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\IO\Data">
+      <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Backend\TTS">
+      <UniqueIdentifier>{c612fddb-7ff0-4231-b6b6-4545505e76cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Backend\TTS\Windows">
+      <UniqueIdentifier>{8f1f169b-dea5-465d-9a5e-8ed5c5fe5323}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -495,19 +501,19 @@
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
     <ClCompile Include="src\data\Character.cpp">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
     <ClCompile Include="src\data\CharacterGender.cpp">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
     <ClCompile Include="src\data\ModelSettings.cpp">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
     <ClCompile Include="src\data\Scenario.cpp">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
     <ClCompile Include="src\data\TavernCardV2.cpp">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
     <ClCompile Include="src\util\Handle.cpp">
       <Filter>Source Files\Utility</Filter>
@@ -597,7 +603,7 @@
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\data\ChatLog.cpp">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\InfoPanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
@@ -652,6 +658,18 @@
     </ClCompile>
     <ClCompile Include="src\gui\Editor.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tts\TTSBackend_Win.cpp">
+      <Filter>Source Files\Backend\TTS\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tts\ProcessLogger_Win.cpp">
+      <Filter>Source Files\Backend\TTS\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tts\ITTSBackend.cpp">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tts\HttpClient_Win.cpp">
+      <Filter>Source Files\Backend\TTS\Windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1325,25 +1343,25 @@
       <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
     <ClInclude Include="include\data\ExcludedSearchTerms.h">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\ModelSettings.h">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\Scenario.h">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\TavernCardV2.h">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\Character.h">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\CharacterGender.h">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\ChatLog.h">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\util\Handle.h">
       <Filter>Source Files\Utility</Filter>
@@ -1400,7 +1418,7 @@
       <Filter>Source Files\Chat</Filter>
     </ClInclude>
     <ClInclude Include="include\data\ChatInstance.h">
-      <Filter>Source Files\Data</Filter>
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\util\FixedString.h">
       <Filter>Source Files\Utility</Filter>
@@ -1518,6 +1536,21 @@
     </ClInclude>
     <ClInclude Include="include\util\OpaquePtr.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\VoiceSettings.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\ITTSBackend.h">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\TTSBackend_Win.h">
+      <Filter>Source Files\Backend\TTS\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\ProcessLogger_Win.h">
+      <Filter>Source Files\Backend\TTS\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\HttpClient_Win.h">
+      <Filter>Source Files\Backend\TTS\Windows</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

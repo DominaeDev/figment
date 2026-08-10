@@ -368,6 +368,16 @@ namespace fig::gui
 						UnloadModel();
 						return EventResult::Handled;
 					}
+					else if (keyEvent.key == SDLK_F4 and mods.None)
+					{
+						Global::GetTTSBackend().Initialize();
+						return EventResult::Handled;
+					}
+					else if (keyEvent.key == SDLK_F4 and mods.Shift)
+					{
+						Global::GetTTSBackend().EnqueueTask(fig::tts::TTSTask::Speak, "These are nice, tasty biscuits.");
+						return EventResult::Handled;
+					}
 				}
 
 			}

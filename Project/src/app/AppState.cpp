@@ -12,9 +12,14 @@
 #include <SDL3/SDL.h>
 #include <cassert>
 
+#if PLATFORM_WINDOWS
+#include "tts/TTSBackend_Win.h"
+#endif
+
 using namespace fig::gui;
 using namespace fig::io;
 using namespace fig::llm;
+using namespace fig::tts;
 
 namespace fig
 {
@@ -58,6 +63,9 @@ namespace fig
 		// Init LLM
 		pLLMBackend = std::make_shared<LLMBackend>();
 		pLLMBackend->RegisterObserver(BackendSignalHandler);
+
+		// Init TTS
+		pTTSBackend = std::make_unique<TTSBackend>();
 	}
 
 	void Global::State::Release()
@@ -65,10 +73,11 @@ namespace fig
 		if (pLLMBackend)
 			pLLMBackend->Shutdown();
 		pLLMBackend.reset();
-
-		pMainWindow.reset();
 		pLLMInstance.reset();
 
+		pTTSBackend.reset();
+
+		pMainWindow.reset();
 		pUserManager.reset();
 		pMacroProvider.reset();
 
@@ -126,6 +135,12 @@ namespace fig
 	{
 		assert(__appState);
 		return *(__appState->pLLMBackend.get());
+	}
+
+	ITTSBackend& Global::GetTTSBackend()
+	{
+		assert(__appState);
+		return *(__appState->pTTSBackend.get());
 	}
 
 	std::shared_ptr<LLMInstance> Global::GetLLMInstance()

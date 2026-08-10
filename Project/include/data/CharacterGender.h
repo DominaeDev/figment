@@ -9,8 +9,8 @@ namespace fig::data
 		Undefined,
 		Male,
 		Female,
-		Nonbinary,
-		Newhalf,
+		Nonbinary,	// Neither
+		Newhalf,	// Both
 	};
 
 	enum class Pronouns

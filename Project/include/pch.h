@@ -14,7 +14,7 @@
 
 #define USE_WIN32_API 0 // Use Win32 calls for file i/o
 
-#if defined(_WIN32) && USE_WIN32_API
+#if defined(_WIN32)
 	#define WIN32_LEAN_AND_MEAN
 	#define NOMINMAX
 	#include <windows.h>
@@ -22,4 +22,11 @@
 	// Undefine troublesome macros
 	#undef LoadImage
 	#undef DrawText
+	
+	#define PLATFORM_WINDOWS 1
+
+	constexpr bool WindowsBuild = true;
+#else
+	#undef PLATFORM_WINDOWS
+	constexpr bool WindowsBuild = false;
 #endif

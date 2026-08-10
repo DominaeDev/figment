@@ -23,3 +23,4 @@ Project/ggml-cpu.dll
 Project/cublas64_12.dll
 Project/cudart64_12.dll
 Project/cublasLt64_12.dll
+Project/bin/

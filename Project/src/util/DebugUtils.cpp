@@ -24,6 +24,7 @@ namespace fig
 //			CreateModelSettings();
 //			ShuffleCards();
 //			EraseChats();
+			GenerateUUIDs(10uz);
 		}
 	}
 
@@ -218,5 +219,11 @@ namespace fig
 				userMngr.SignOut();
 			}
 		}
+	}
+
+	void DebugUtility::GenerateUUIDs(size_t count)
+	{
+		for (size_t i = 0uz; i < count; ++i)
+			LogLn((fig::string)_CreateUUID());
 	}
 }
