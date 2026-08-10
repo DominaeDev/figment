@@ -650,7 +650,7 @@
     <ClCompile Include="src\gui\ValueBinding.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\EditorUtils.cpp">
+    <ClCompile Include="src\gui\Editor.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1504,7 +1504,7 @@
     <ClInclude Include="include\gui\EditorScreen.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\IEditor.h">
+    <ClInclude Include="include\gui\Editor.h">
       <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditor.h">
@@ -1518,9 +1518,6 @@
     </ClInclude>
     <ClInclude Include="include\util\OpaquePtr.h">
       <Filter>Source Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\EditorUtils.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

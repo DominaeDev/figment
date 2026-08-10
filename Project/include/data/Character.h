@@ -82,9 +82,8 @@ namespace fig::data
 		fig::string chatId;	//! @remove?
 		CharacterName name;
 		Gender gender {};
-		fig::string description; // User-facing only
-		
 		fig::string brief;
+		fig::string description; // User-facing only
 		
 		fig::color bgColor {};
 		fig::color borderColor {};

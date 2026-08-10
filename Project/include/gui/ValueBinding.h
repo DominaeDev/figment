@@ -11,8 +11,8 @@ namespace fig::gui
 		ValueBinding(const ValueBinding& other) : _ptr { other._ptr } {}
 		explicit ValueBinding(T* ptr) : _ptr { ptr } {}
 
-		void Set(fig::string value) noexcept;
-		fig::string AsString() const noexcept;
+		void Set(fig::string value) noexcept = delete;
+		fig::string AsString() const noexcept = delete;
 
 		T* _ptr;
 	};

@@ -14,8 +14,8 @@ namespace fig::io
 		Chat			= 0x09,
 
 		Image			= 0x0A,
-
-		Voice			= 0x20, //! @todo: voice sample?
+		Animation		= 0x0B, //! @reserved
+		Audio			= 0x0C,
 	};
 
 	enum class DataFormat : uint8_t
@@ -33,8 +33,6 @@ namespace fig::io
 		ImageWebp			= 0x0D,
 
 		AudioWav			= 0x10, //! @todo: voice sample?
-		AudioMp3			= 0x11, //! @todo: voice sample?
-		AudioOgg			= 0x12, //! @todo: voice sample?
 	};
 
 	enum class ImageAssetType : uint8_t
@@ -53,6 +51,13 @@ namespace fig::io
 		Undefined			= 0x00,
 		Instance			= 0x01,
 		Log					= 0x02,
+	};
+
+	enum class AudioAssetType : uint8_t
+	{
+		Undefined			= 0x00,
+		VoiceSample			= 0x01,
+		VoiceMessage		= 0x02,
 	};
 
 	template <typename T>

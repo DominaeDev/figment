@@ -6,6 +6,7 @@
 namespace fig::gui
 {
 	using ControlPtr = fig::observer_ptr<class LayoutElement>;
+	using SizerPtr = fig::observer_ptr<class Sizer>;
 
 	class LayoutElement
 	{
@@ -107,6 +108,7 @@ namespace fig::gui
 		void SetParent(ControlPtr pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
 		void Layout();
+		void ResizeToFit(bool bHorizontal, bool bVertical) noexcept;
 
 		virtual void OnUpdate(float fElapsed) {};
 		virtual void OnParent() {};

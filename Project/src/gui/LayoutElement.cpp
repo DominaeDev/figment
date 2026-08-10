@@ -315,4 +315,20 @@ namespace fig::gui
 		_children.erase(it);
 		_children.insert(_children.begin(), pChild);
 	}
+
+	void LayoutElement::ResizeToFit(bool bHorizontal, bool bVertical) noexcept
+	{
+		LayoutNow();
+
+		fig::point size {};
+		for (auto& child : _children)
+		{
+			size.x = std::max(size.x, child->GetX() + child->GetWidth());
+			size.y = std::max(size.y, child->GetY() + child->GetHeight());
+		}
+		if (bHorizontal)
+			SetWidth(size.x);
+		if (bVertical)
+			SetHeight(size.y);
+	}
 }

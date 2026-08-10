@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IEditor.h"
+#include "gui/Editor.h"
 
 namespace fig::data
 {
@@ -9,11 +9,13 @@ namespace fig::data
 
 namespace fig::gui
 {
-	class CharacterEditor : public IEditor
+	class CharacterEditor : public Editor
 	{
 	public:
 		CharacterEditor(const fig::uuid& characterId);
 		
+		void Initialize() noexcept;
+
 		fig::string GetTitle() const noexcept override;
 		EditorFields GetFields() noexcept override;
 		bool SaveChanges() noexcept override;

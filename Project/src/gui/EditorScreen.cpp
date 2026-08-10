@@ -1,7 +1,6 @@
 #include <pch.h>
 #include "gui/EditorScreen.h"
 #include "gui/ScrollPanel.h"
-#include "gui/EditorUtils.h"
 
 namespace fig::gui
 {
@@ -43,14 +42,12 @@ namespace fig::gui
 		SetTitle(_pEditor->GetTitle());
 
 		// Create fields
-		_fields = _pEditor->GetFields();
 		_pScrollPanel->DestroyChildren();
+		_pScrollPanel->AddChild(_pEditor.get());
+		_pEditor->Initialize();
 
 		auto pSizer = _pScrollPanel->GetSizer();
-		for (auto& field_ptr : _fields)
-		{
-			CreateEditorField(_pScrollPanel, pSizer, field_ptr);
-		}
+		pSizer->Add(_pEditor.get(), 0, SizerFlag::Expand);
 		InvalidateLayout();
 	}
 
