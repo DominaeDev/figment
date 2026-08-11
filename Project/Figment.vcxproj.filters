@@ -662,13 +662,16 @@
     <ClCompile Include="src\tts\TTSBackend_Win.cpp">
       <Filter>Source Files\Backend\TTS\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="src\tts\ProcessLogger_Win.cpp">
-      <Filter>Source Files\Backend\TTS\Windows</Filter>
-    </ClCompile>
     <ClCompile Include="src\tts\ITTSBackend.cpp">
       <Filter>Source Files\Backend\TTS</Filter>
     </ClCompile>
     <ClCompile Include="src\tts\HttpClient_Win.cpp">
+      <Filter>Source Files\Backend\TTS\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tts\AudioServerProcess.cpp">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tts\AudioServerProcess_Win.cpp">
       <Filter>Source Files\Backend\TTS\Windows</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1546,10 +1549,13 @@
     <ClInclude Include="include\tts\TTSBackend_Win.h">
       <Filter>Source Files\Backend\TTS\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="include\tts\ProcessLogger_Win.h">
+    <ClInclude Include="include\tts\HttpClient_Win.h">
       <Filter>Source Files\Backend\TTS\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="include\tts\HttpClient_Win.h">
+    <ClInclude Include="include\tts\AudioServerProcess.h">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\AudioServerProcess_Win.h">
       <Filter>Source Files\Backend\TTS\Windows</Filter>
     </ClInclude>
   </ItemGroup>

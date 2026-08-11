@@ -3,9 +3,8 @@
 #if defined(_WIN32)
 
 #include "Figment.h"
-#include <windows.h>
 #include "tts/ITTSBackend.h"
-#include "tts/ProcessLogger_Win.h"
+#include "tts/AudioServerProcess_Win.h"
 #include "tts/HttpClient_Win.h"
 
 namespace fig::tts
@@ -24,19 +23,7 @@ namespace fig::tts
 		bool CheckHealth();
 		std::expected<TTSData, TTSError> SendRequest(TTSTask task, fig::string_view text) override;
 
-		static void CALLBACK ProcessEndedCallback(PTP_CALLBACK_INSTANCE Instance, PVOID Context, PTP_WAIT Wait, TP_WAIT_RESULT Result);
-
-		HANDLE _hJob { 0 };
-		PROCESS_INFORMATION _processInfo {};
-		PTP_WAIT _cbWait {};
-		ProcessLogger_Win _logger {};
-
-		struct CallbackContext
-		{
-			TTSBackend_Win* pInstance;
-			HANDLE hProcess;
-		} _cbCtx {};
-
+		AudioServerProcess_Win _server {};
 		HttpClient_Win _http {};
 		bool _bConnected { false };
 

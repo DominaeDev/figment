@@ -3,16 +3,6 @@
 
 namespace fig::tts
 {
-	void CALLBACK TTSBackend_Win::ProcessEndedCallback(PTP_CALLBACK_INSTANCE Instance, PVOID Context, PTP_WAIT Wait, TP_WAIT_RESULT Result)
-	{
-		CallbackContext* pCtx = static_cast<CallbackContext*>(Context);
-		DWORD exitCode;
-		GetExitCodeProcess(pCtx->hProcess, &exitCode);
-		LogLn(std::format("audiocpp_server exited with code {}", exitCode));
-
-		pCtx->pInstance->Shutdown();
-	}
-
 	TTSBackend_Win::TTSBackend_Win() : ITTSBackend()
 	{
 	}
@@ -31,91 +21,24 @@ namespace fig::tts
 			Shutdown(); // Restart
 		}
 
-		// Start server
-		_hJob = CreateJobObjectW(nullptr, nullptr);
-		JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits = {};
-		limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+//		const char* arguments[] = { "bin/audiocpp/audiocpp_server.exe", "--config", "bin/audiocpp/server.json", nullptr };
 
-		SetInformationJobObject(
-			_hJob,
-			JobObjectExtendedLimitInformation,
-			&limits,
-			sizeof(limits));
-
-		_logger.Stop();
-
-		STARTUPINFOW startupInfo = { sizeof(startupInfo) };
-		startupInfo.dwFlags |= STARTF_USESTDHANDLES;
-			
-		if (auto writeHandle = _logger.CreateWriteHandle())
+		if (auto started = _server.Start())
 		{
-			startupInfo.hStdOutput = *writeHandle;
-			startupInfo.hStdError = *writeHandle;
-		}
-
-		_processInfo = PROCESS_INFORMATION {};
-
-		std::wstring exePath = L"./bin/audiocpp/audiocpp_server.exe";
-		std::wstring commandLine = L"audiocpp_server.exe --config \"bin/audiocpp/server.json\"";
-
-		if (CreateProcessW(
-			exePath.c_str(),
-			commandLine.data(),
-			nullptr,
-			nullptr,
-			TRUE,
-			CREATE_SUSPENDED,
-			nullptr,
-			nullptr,
-			&startupInfo,
-			&_processInfo))
-		{
-			_logger.Start();
-
-			// Process exit callback
-			_cbCtx = { this, _processInfo.hProcess };
-			_cbWait = CreateThreadpoolWait(ProcessEndedCallback, &_cbCtx, NULL);
-			SetThreadpoolWait(_cbWait, _processInfo.hProcess, NULL);
-
-			// Assign job and resume
-			AssignProcessToJobObject(_hJob, _processInfo.hProcess);
-			ResumeThread(_processInfo.hThread);
-
 			_status = TTSStatus::ServerStarted;
-			LogLn("audiocpp_server process started.");
 			return true;
 		}
-
-		// Failed
-		LogLn("Failed to launch audiocpp_server process.");
-		CloseHandle(_hJob);
-		_hJob = 0;
-		return false;
+		else
+			return false;
 	}
 
 	void TTSBackend_Win::Shutdown()
 	{
 		// Shut down server
-		if (_hJob)
-		{
-			if (_processInfo.hProcess and _processInfo.hProcess != INVALID_HANDLE_VALUE)
-				CloseHandle(_processInfo.hProcess);
-			if (_processInfo.hThread and _processInfo.hThread != INVALID_HANDLE_VALUE)
-				CloseHandle(_processInfo.hThread);
-			CloseHandle(_hJob);
-
-			_hJob = NULL;
-			_processInfo = {};
-
-			LogLn("audiocpp_server process stopped.");
-		}
-
-		if (_cbWait)
-		{
-			CloseThreadpoolWait(_cbWait);
-			_cbWait = NULL;
-		}
-		
+		int32_t exitCode;
+		if (_server.IsRunning(exitCode))
+			_server.Stop();
+	
 		_status = TTSStatus::Uninitialized;
 	}
 
@@ -133,14 +56,12 @@ namespace fig::tts
 		if (_status == TTSStatus::Uninitialized)
 			return false;
 
-		if (_processInfo.hProcess)
-		{
-			DWORD exitCode;
-			GetExitCodeProcess(_processInfo.hProcess, &exitCode);
-			if (exitCode == STILL_ACTIVE)
-				return true; // Still running
+		int32_t exitCode = -255;
+		if (_server.IsRunning(exitCode))
+			return true; // Still running
+
+		if (exitCode != -255)
 			LogLn(std::format("audiocpp_server exited with code {}", exitCode));
-		}
 		return false;
 	}
 
@@ -148,7 +69,7 @@ namespace fig::tts
 	{
 		if (not _http.IsConnected())
 		{
-			if (not _http.Connect(L"127.0.0.1", 8080))
+			if (not _http.Connect(L"localhost", 8080))
 				return std::unexpected(TTSError::Unavailable);
 		}
 

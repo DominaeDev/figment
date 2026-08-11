@@ -128,7 +128,8 @@ namespace fig::tts
 
 		if constexpr (Debugging)
 		{
-			fig::io::WriteFile("tts.wav", body);
+			fig::io::WriteFile("temp/tts.wav", body);
+			LogLn("Received voice clip.");
 		}
 		return body;
 	}
