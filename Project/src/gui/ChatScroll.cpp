@@ -318,7 +318,14 @@ namespace fig::gui
 		}
 
 		if (piece.complete)
+		{
 			RefreshActive();
+
+			if (piece.msgType == MessageType::Dialogue and piece.role == Role::Bot1)
+			{
+				Global::GetTTSBackend().Speak(piece.content);
+			}
+		}
 	}
 
 	void ChatScroll::OnRenderMask(fig::renderer_ptr pRenderer, fig::sdl::Texture& texture)
@@ -338,4 +345,5 @@ namespace fig::gui
 		_pBottomGradient->OnRender(pRenderer);
 		SDL_SetRenderDrawBlendMode(pRenderer, blendMode); //! @todo: Do this rigorously before every render instead
 	}
+
 }

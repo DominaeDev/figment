@@ -69,11 +69,11 @@ namespace fig::tts
 	{
 		if (not _http.IsConnected())
 		{
-			if (not _http.Connect(L"localhost", 8080))
+			if (not _http.Connect(L"localhost", Constants::TTS::ServerPort))
 				return std::unexpected(TTSError::Unavailable);
 		}
 
-		fig::string request = std::format("{{ \"model\": \"{}\", \"input\": \"{}\" }}", "pocket-tts", text);
+		fig::string request = std::format("{{ \"model\": \"{}\", \"input\": \"{}\" }}", "chatterbox", text);
 		if (auto response = _http.Post(L"/v1/audio/speech", request))
 		{
 			auto& data = response.value();

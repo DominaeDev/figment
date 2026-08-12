@@ -38,6 +38,11 @@ namespace fig::text
 	class MacroProvider;
 }
 
+namespace fig::audio
+{
+	class AudioManager;
+}
+
 namespace fig
 {
 	class Global
@@ -55,6 +60,7 @@ namespace fig
 			std::shared_ptr<fig::text::MacroProvider> pMacroProvider;
 			std::unique_ptr<std::map<fig::cursor, fig::sdl::Cursor>> pSystemCursors;
 			std::unique_ptr<fig::tts::ITTSBackend> pTTSBackend;
+			std::unique_ptr<fig::audio::AudioManager> pAudioManager;
 
 			void Init();
 			void Release();
@@ -66,8 +72,9 @@ namespace fig
 
 		static fig::gui::Window& GetMainWindow();
 		static fig::llm::LLMBackend& GetLLMBackend();
-		static fig::tts::ITTSBackend& GetTTSBackend();
 		static fig::io::AppSettings& GetSettings();
+		static fig::tts::ITTSBackend& GetTTSBackend();
+		static fig::audio::AudioManager& GetAudioManager();
 		
 		static fig::user::UserManager& GetUserManager();
 		static fig::io::UserSettings& GetUserSettings();

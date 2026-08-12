@@ -16,21 +16,6 @@ using namespace fig::io;
 using namespace fig::data;
 using namespace fig::chat;
 
-static constexpr fig::string Dialogue(fig::string_view text)
-{
-	return "\"" + toStr(text) + "\"";
-}
-
-static constexpr fig::string Director(fig::string_view text)
-{
-	return "\\{\\{" + toStr(text) + "\\}\\}";
-}
-
-static constexpr fig::string Narration(fig::string_view text)
-{
-	return "[" + toStr(text) + "]";
-}
-
 namespace fig::llm
 {
 	LLMInstance::LLMInstance()

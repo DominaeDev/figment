@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "tts/HttpClient_Win.h"
 #include "io/FileUtility.h"
+#include "audio/AudioManager.h"
 
 #pragma comment(lib, "winhttp.lib")
 
@@ -125,12 +126,9 @@ namespace fig::tts
 
 		if (statusCode != 200)
 			return std::unexpected(std::make_error_code(std::errc::protocol_error));
+		LogLn("Received voice clip.");
 
-		if constexpr (Debugging)
-		{
-			fig::io::WriteFile("temp/tts.wav", body);
-			LogLn("Received voice clip.");
-		}
+		Global::GetAudioManager().EnqueueSound(body); //! @temp
 		return body;
 	}
 }

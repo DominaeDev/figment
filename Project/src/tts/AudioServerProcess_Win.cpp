@@ -24,11 +24,16 @@ namespace fig::tts
 		STARTUPINFOW startupInfo = { sizeof(startupInfo) };
 		startupInfo.dwFlags |= STARTF_USESTDHANDLES;
 
+#ifdef _DEBUG
+		BOOL bInheritHandles = TRUE;
 		if (auto writeHandle = CreateWriteHandle())
 		{
 			startupInfo.hStdOutput = *writeHandle;
 			startupInfo.hStdError = *writeHandle;
 		}
+#else
+		BOOL bInheritHandles = FALSE;
+#endif
 
 		_processInfo = PROCESS_INFORMATION {};
 
@@ -40,18 +45,20 @@ namespace fig::tts
 			commandLine.data(),
 			nullptr,
 			nullptr,
-			TRUE,
-			CREATE_SUSPENDED,
+			bInheritHandles,
+			CREATE_SUSPENDED | CREATE_NO_WINDOW,
 			nullptr,
 			nullptr,
 			&startupInfo,
 			&_processInfo))
 		{
+
+#ifdef _DEBUG
 			// Init io pipe
 			CloseHandle(_writeHandle);
 			_writeHandle = nullptr;
 			_readThread = std::jthread(std::bind_front(&AudioServerProcess_Win::ReadLoop, this));
-
+#endif
 			// Process exit callback
 			_cbCtx = { this, _processInfo.hProcess };
 			_cbWait = CreateThreadpoolWait(ProcessEndedCallback, &_cbCtx, NULL);
@@ -74,6 +81,7 @@ namespace fig::tts
 
 	void AudioServerProcess_Win::Stop()
 	{
+#ifdef _DEBUG
 		// Release io pipe
 		if (_readHandle)
 		{
@@ -89,6 +97,7 @@ namespace fig::tts
 			CloseHandle(_writeHandle);
 			_writeHandle = nullptr;
 		}
+#endif
 
 		// Shut down server
 		if (_hJob)

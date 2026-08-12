@@ -215,4 +215,11 @@ namespace fig::Constants
 	{
 		constexpr int32_t SmallPortraitWidth = 128;
 	}
+
+	namespace TTS
+	{
+		constexpr int32_t ServerPort = 8080;
+
+		constexpr float DefaultDelay = 0.35f;
+	}
 }

@@ -47,7 +47,7 @@ namespace fig
 
 	std::string_view rtrim(std::string_view text)
 	{
-		constexpr std::string_view whitespace = " \t\n\r\f\v";
+		constexpr std::string_view whitespace = " \t\n\r\f\v\b";
 		auto end = text.find_last_not_of(whitespace);
 		if (end == std::string_view::npos)
 			return {};
@@ -56,7 +56,7 @@ namespace fig
 
 	std::string_view ltrim(std::string_view text)
 	{
-		constexpr std::string_view whitespace = " \t\n\r\f\v";
+		constexpr std::string_view whitespace = " \t\n\r\f\v\b";
 		auto start = text.find_first_not_of(whitespace);
 		if (start == std::string_view::npos)
 			return {};
@@ -65,7 +65,7 @@ namespace fig
 
 	std::string_view trim(std::string_view text)
 	{
-		constexpr std::string_view whitespace = " \t\n\r\f\v";
+		constexpr std::string_view whitespace = " \t\n\r\f\v\b";
 		auto start = text.find_first_not_of(whitespace);
 		if (start == std::string_view::npos)
 			return {};
@@ -360,6 +360,119 @@ namespace fig
 			result.push_back(token);
 
 		return result;
+	}
+
+	std::vector<fig::string_view> split_sentences(fig::string_view text, bool removeEmpty)
+	{
+		std::vector<fig::string_view> sentences;
+		size_t pos_start = 0;
+
+		auto is_decimal = [](fig::string_view text, size_t position) -> bool {
+			bool before = position > 0 and std::isdigit(static_cast<unsigned char>(text[position - 1]));
+			bool after = position + 1 < text.size() and std::isdigit(static_cast<unsigned char>(text[position + 1]));
+			return before and after;
+		};
+
+		auto is_abbriviation = [](fig::string_view word) -> bool {
+			static const std::unordered_set<fig::string> abbreviations =
+			{
+				"mr", "mrs", "ms", "dr", "prof", "sr", "jr", "st",
+				"vs", "etc", "e.g", "i.e", "a.m", "p.m", "u.s", "u.k",
+				"approx", "no", "vol", "fig", "cf", "al", "gen", "rev",
+				"capt", "col", "cmdr", "corp", "inc", "ltd", "co",
+			};
+
+			return abbreviations.contains(lcase(fig::string { word }));
+		};
+
+		auto is_ellipsis = [](fig::string_view text, size_t position, size_t& out_length) -> bool {
+			if (position + 3 <= text.size()
+				and static_cast<unsigned char>(text[position]) == 0xE2
+				and static_cast<unsigned char>(text[position + 1]) == 0x80
+				and static_cast<unsigned char>(text[position + 2]) == 0xA6)
+			{
+				out_length = 3;
+				return true;
+			}
+
+			size_t dotEnd = position;
+
+			while (dotEnd < text.size() and text[dotEnd] == '.')
+				++dotEnd;
+
+			if (dotEnd - position >= 3)
+			{
+				out_length = dotEnd - position;
+				return true;
+			}
+			return false;
+		};
+
+		auto preceding_word = [](fig::string_view text, size_t position) -> fig::string_view {
+			size_t pos_word = position;
+
+			while (pos_word > 0 and (std::isalnum(static_cast<unsigned char>(text[pos_word - 1])) or text[pos_word - 1] == '.'))
+				--pos_word;
+
+			return text.substr(pos_word, position - pos_word);
+		};
+
+		for (size_t position = 0; position < text.size(); ++position)
+		{
+			char character = text[position];
+
+			// Check for non-breaking periods
+			if (character == '.' and (is_decimal(text, position) or is_abbriviation(preceding_word(text, position))))
+				continue;
+			
+			// Check for ellipsis
+			size_t ellipsis_len;
+			if (character == '.' and is_ellipsis(text, position, ellipsis_len))
+			{
+				position += ellipsis_len - 1;
+				continue;
+			}
+
+			if (character == '.' or character == '!' or character == '?')
+			{
+				size_t pos_end = position + 1;
+
+				while (pos_end < text.size() and (text[pos_end] == '.' or text[pos_end] == '!' or text[pos_end] == '?'))
+					++pos_end;
+
+				while (pos_end < text.size() and (text[pos_end] == '"' or text[pos_end] == '\'' or text[pos_end] == ')'))
+					++pos_end;
+
+				bool reachedEnd = pos_end >= text.size();
+				bool followedByWhitespace = not reachedEnd and std::isspace(static_cast<unsigned char>(text[pos_end]));
+
+				if (reachedEnd or followedByWhitespace)
+				{
+					fig::string_view sentence = text.substr(pos_start, pos_end - pos_start);
+					size_t contentStart = sentence.find_first_not_of(" \t\r\n");
+
+					if (contentStart != fig::string_view::npos)
+						sentences.push_back(trim(sentence.substr(contentStart)));
+
+					pos_start = pos_end;
+					position = pos_end - 1;
+				}
+			}
+		}
+
+		if (pos_start < text.size())
+		{
+			fig::string_view remainder = text.substr(pos_start);
+			size_t contentStart = remainder.find_first_not_of(" \t\r\n");
+
+			if (contentStart != fig::string_view::npos)
+				sentences.push_back(remainder.substr(contentStart));
+		}
+
+		if (removeEmpty)
+			std::erase_if(sentences, [](auto&& s) { return s.empty(); });
+
+		return sentences;
 	}
 
 	string& normalize_newlines(string& text)
@@ -1024,6 +1137,63 @@ namespace fig
 		}
 	}
 
+	void escape_json_inplace(fig::string& s) noexcept
+	{
+		static const std::array<std::pair<char, char>, 8> escape_sequences {
+			std::pair { '\n', 'n' },
+			std::pair { '\r', 'r' },
+			std::pair { '\t', 't' },
+			std::pair { '\b', 'b' },
+			std::pair { '\f', 'f' },
+			std::pair { '\\', '\\' },
+			std::pair { '/', '/' },
+			std::pair { '\"', '\"' },
+		};
+
+		size_t length = s.size();
+
+		// Count additional characters
+		size_t added = 0;
+		for (size_t i = 0; i < length; ++i)
+		{
+			for (auto& seq : escape_sequences)
+			{
+				if (s[i] == seq.first)
+				{
+					++added;
+					break;
+				}
+			}
+		}
+
+		if (added == 0)
+			return; // No escapes
+
+		size_t newLength = s.size() + added;
+		size_t read = length;
+		size_t write = newLength;
+		s.resize(newLength);
+
+		while (read > 0)
+		{
+			--read;
+			char ch = s[read];
+			bool replaced = false;
+			for (auto& seq : escape_sequences)
+			{
+				if (ch == seq.first)
+				{
+					s[--write] = seq.second;
+					s[--write] = '\\';
+					replaced = true;
+					break;
+				}
+			}
+			if (not replaced)
+				s[--write] = ch;
+		}
+	}
+
 	static constexpr bool is_emoji(char32_t codepoint)
 	{
 		return (codepoint >= 0x1F300 and codepoint <= 0x1FAFF)
@@ -1098,5 +1268,53 @@ namespace fig
 			else
 				index += len;
 		}
+	}
+
+	fig::string Dialogue(fig::string_view text)
+	{
+		return "\"" + fig::string(text) + "\"";
+	}
+
+	fig::string Action(fig::string_view text)
+	{
+		return "*" + fig::string(text) + "*";
+	}
+
+	fig::string Director(fig::string_view text)
+	{
+		return "\\{\\{" + fig::string(text) + "\\}\\}";
+	}
+
+	fig::string Narration(fig::string_view text)
+	{
+		return "[" + fig::string(text) + "]";
+	}
+
+	fig::string_view Undialogue(fig::string_view text)
+	{
+		if (text.length() > 2 and text.front() == '\"' and text.back() == '\"')
+			return text.substr(1, text.length() - 2);
+		return text;
+	}
+
+	fig::string_view Unaction(fig::string_view text)
+	{
+		if (text.length() > 2 and text.front() == '*' and text.back() == '*')
+			return text.substr(1, text.length() - 2);
+		return text;
+	}
+
+	fig::string_view Undirector(fig::string_view text)
+	{
+		if (text.length() > 4 and text[0] == '{' and text[1] == '{' and text[text.length() - 1] == '}' and text[text.length() - 2] == '}')
+			return text.substr(2, text.length() - 4);
+		return text;
+	}
+
+	fig::string_view Unnarration(fig::string_view text)
+	{
+		if (text.length() > 2 and text.front() == '[' and text.back() == ']')
+			return text.substr(1, text.length() - 2);
+		return text;
 	}
 }

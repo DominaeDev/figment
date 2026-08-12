@@ -11,9 +11,10 @@
 #include "gui/Fonts.h"
 #include "gui/MainFrame.h"
 #include "gui/Window.h"
+#include "gui/Events.h"
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
-#include "gui/Events.h"
+#include "audio/AudioManager.h"
 
 #if defined(_DEBUG)
 #define DETECT_MEMORY_LEAKS
@@ -72,7 +73,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 //	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON, "0");
 //	SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON_SMALL, "0");
 
-	if (!SDL_Init(SDL_INIT_VIDEO))
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
 	{
 		SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
@@ -122,6 +123,7 @@ SDL_AppResult SDL_AppIterate(void* state)
 	float fElapsed = static_cast<float>(delta) / 1000.0f;
 
 	fig::Global::GetLLMBackend().Update(fElapsed);
+	fig::Global::GetAudioManager().Update(fElapsed);
 
 	auto& mainWnd = fig::Global::GetMainWindow();
 	mainWnd.Update(fElapsed);

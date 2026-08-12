@@ -162,6 +162,7 @@
     <ClCompile Include="src\app\AppSettings.cpp" />
     <ClCompile Include="src\app\AppState.cpp" />
     <ClCompile Include="src\app\main.cpp" />
+    <ClCompile Include="src\audio\AudioManager.cpp" />
     <ClCompile Include="src\chat\ChatCommandExecutor.cpp" />
     <ClCompile Include="src\chat\ChatCommands.cpp" />
     <ClCompile Include="src\chat\ChatLogger.cpp" />
@@ -428,6 +429,7 @@
     <ClInclude Include="include\app\Constants.h" />
     <ClInclude Include="include\app\GlobalStrings.h" />
     <ClInclude Include="include\app\Types.h" />
+    <ClInclude Include="include\audio\AudioManager.h" />
     <ClInclude Include="include\chat\ChatCommandExecutor.h" />
     <ClInclude Include="include\chat\ChatCommands.h" />
     <ClInclude Include="include\chat\ChatLogger.h" />

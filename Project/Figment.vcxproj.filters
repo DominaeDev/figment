@@ -171,6 +171,9 @@
     <Filter Include="Source Files\Backend\TTS\Windows">
       <UniqueIdentifier>{8f1f169b-dea5-465d-9a5e-8ed5c5fe5323}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\Audio">
+      <UniqueIdentifier>{32579375-ab0b-4c2a-b9a8-0022afda6e77}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -673,6 +676,9 @@
     </ClCompile>
     <ClCompile Include="src\tts\AudioServerProcess_Win.cpp">
       <Filter>Source Files\Backend\TTS\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\audio\AudioManager.cpp">
+      <Filter>Source Files\Frontend\Audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1557,6 +1563,9 @@
     </ClInclude>
     <ClInclude Include="include\tts\AudioServerProcess_Win.h">
       <Filter>Source Files\Backend\TTS\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\audio\AudioManager.h">
+      <Filter>Source Files\Frontend\Audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

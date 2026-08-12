@@ -73,6 +73,12 @@ namespace fig::tts
 
 	TTSResult ITTSBackend::EnqueueTask(TTSTask task, const fig::string& text)
 	{
+		if (_status == TTSStatus::Uninitialized)
+		{
+			if (not Initialize())
+				return {}; // Give up
+		}
+
 		const uint64_t id = _next_id.fetch_add(1, std::memory_order_relaxed);
 
 		// Create the promise
@@ -101,5 +107,60 @@ namespace fig::tts
 			.task = task,
 			.future = std::move(future),
 		};
+	}
+
+	bool ITTSBackend::Speak(fig::string_view text, bool split)
+	{
+		text = Undialogue(text);
+		text = Unaction(text);
+		text = Unnarration(text);
+
+		fig::string content { text };
+		escape_json_inplace(content);
+
+		if (split)
+		{
+			auto sentences = split_sentences(content, true);
+			
+			// Chunk shorter sentences together
+			constexpr size_t MinSentenceLength = 60;
+
+			std::vector<fig::string> phrases;
+			std::string scratch;
+			for (auto& sentence : sentences)
+			{
+				if (not scratch.empty())
+				{
+					scratch.append(" ");
+					scratch.append(sentence);
+				}
+				else
+					scratch = sentence;
+
+				if (scratch.length() >= MinSentenceLength)
+				{
+					phrases.push_back(scratch);
+					scratch.clear();
+				}
+			}
+
+			if (not scratch.empty())
+				phrases.push_back(scratch);
+
+			bool bOk = false;
+			for (auto& phrase : phrases)
+			{
+				EnqueueTask(fig::tts::TTSTask::Speak, phrase); //! @todo: return future
+				bOk = true;
+			}
+			return bOk;
+		}
+		else if (not empty_or_whitespace(content)) // Don't split
+		{
+			EnqueueTask(fig::tts::TTSTask::Speak, content); //! @todo: return future
+			return true;
+		}
+
+		return false;
 	}
 }

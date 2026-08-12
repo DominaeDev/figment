@@ -50,6 +50,8 @@ namespace fig::tts
 		virtual bool Restart() = 0;
 	
 		TTSStatus GetStatus() const noexcept { return _status; };
+
+		bool Speak(fig::string_view text, bool split = true);
 		TTSResult EnqueueTask(TTSTask task, const fig::string& text);
 
 	protected:

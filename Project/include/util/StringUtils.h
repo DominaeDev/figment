@@ -40,6 +40,7 @@ namespace fig
 
 	fig::string escape(const fig::string& s) noexcept;
 	void escape_inplace(fig::string& s) noexcept;
+	void escape_json_inplace(fig::string& s) noexcept;
 	fig::string unescape(const fig::string& s) noexcept;
 	void unescape_inplace(fig::string& s) noexcept;
 
@@ -61,6 +62,8 @@ namespace fig
 	bool ends_with(const fig::string& str, const fig::string& suffix, bool ignore_case = false);
 	std::vector<fig::string> split(fig::string s, char delimiter, bool removeEmpty = true);
 	std::vector<fig::string> split(const fig::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty);
+	
+	std::vector<fig::string_view> split_sentences(fig::string_view text, bool removeEmpty);
 
 	fig::string& normalize_newlines(fig::string& text);
 	[[nodiscard]] fig::string normalize_newlines(fig::string&& s);
@@ -124,4 +127,13 @@ namespace fig
 
 	[[nodiscard]] fig::wstring strip_diacritics(fig::wstring&& input);
 	[[nodiscard]] fig::string strip_diacritics(fig::string&& input);
+
+	fig::string Dialogue(fig::string_view text);
+	fig::string Action(fig::string_view text);
+	fig::string Director(fig::string_view text);
+	fig::string Narration(fig::string_view text);
+	fig::string_view Undialogue(fig::string_view text);
+	fig::string_view Unaction(fig::string_view text);
+	fig::string_view Undirector(fig::string_view text);
+	fig::string_view Unnarration(fig::string_view text);
 }

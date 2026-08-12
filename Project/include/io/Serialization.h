@@ -151,6 +151,7 @@ namespace fig::io
 	{
 		Encrypted = 1 << 0,
 		Checksum = 1 << 1,
+		Compressed = 1 << 2,
 	};
 	using AssetFileHeaderFlags = EnumFlags<AssetFileHeaderFlag>;
 

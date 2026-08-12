@@ -15,11 +15,13 @@
 #if PLATFORM_WINDOWS
 #include "tts/TTSBackend_Win.h"
 #endif
+#include "audio/AudioManager.h"
 
 using namespace fig::gui;
 using namespace fig::io;
 using namespace fig::llm;
 using namespace fig::tts;
+using namespace fig::audio;
 
 namespace fig
 {
@@ -64,6 +66,10 @@ namespace fig
 		pLLMBackend = std::make_shared<LLMBackend>();
 		pLLMBackend->RegisterObserver(BackendSignalHandler);
 
+		// Init Audio
+		pAudioManager = std::make_unique<AudioManager>();
+		pAudioManager->SetVolume(0.8f);
+
 		// Init TTS
 		pTTSBackend = std::make_unique<TTSBackend>();
 	}
@@ -75,6 +81,7 @@ namespace fig
 		pLLMBackend.reset();
 		pLLMInstance.reset();
 
+		pAudioManager.reset();
 		pTTSBackend.reset();
 
 		pMainWindow.reset();
@@ -141,6 +148,12 @@ namespace fig
 	{
 		assert(__appState);
 		return *(__appState->pTTSBackend.get());
+	}
+
+	AudioManager& Global::GetAudioManager()
+	{
+		assert(__appState);
+		return *(__appState->pAudioManager.get());
 	}
 
 	std::shared_ptr<LLMInstance> Global::GetLLMInstance()
