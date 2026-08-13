@@ -239,7 +239,7 @@ namespace fig::gui
 				else
 					ToggleFilter(FilterFlag::Starred); 
 			});
-		menu.AddCheckItem("In chats", filter.IsSet(FilterFlag::Chats))
+		menu.AddCheckItem("With chats", filter.IsSet(FilterFlag::Chats))
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([=, this] { 
 				if (IsShiftDown())

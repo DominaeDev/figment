@@ -21,8 +21,6 @@ namespace fig::tts
 			Shutdown(); // Restart
 		}
 
-//		const char* arguments[] = { "bin/audiocpp/audiocpp_server.exe", "--config", "bin/audiocpp/server.json", nullptr };
-
 		if (auto started = _server.Start())
 		{
 			_status = TTSStatus::ServerStarted;
@@ -73,13 +71,43 @@ namespace fig::tts
 				return std::unexpected(TTSError::Unavailable);
 		}
 
-		fig::string request = std::format("{{ \"model\": \"{}\", \"input\": \"{}\" }}", "chatterbox", text);
-		if (auto response = _http.Post(L"/v1/audio/speech", request))
+		if (task == TTSTask::Speak)
 		{
-			auto& data = response.value();
-			return std::move(data);
+			fig::string request = std::format(R"({{
+				"model": "{0}",
+				"input": "{1}"
+			}})", "chatterbox", text);
+			if (auto response = _http.Post(L"/v1/audio/speech", request))
+			{
+				auto& data = response.value();
+				return std::move(data);
+			}
+			else
+				return std::unexpected(TTSError::Failed); //! @todo
 		}
-		else
-			return std::unexpected(TTSError::Failed); //! @todo
+		else if (task == TTSTask::Design)
+		{
+			fig::string instruct { text };
+			escape_json_inplace(instruct);
+
+			fig::string greeting = "Good day";
+			fig::string input = std::format("{}! This is what my voice sounds like. What do you think? If you don't like it, let me know. I'm sure I can find a way to change your mind.", greeting);
+
+			fig::string request = std::format(R"({{
+				"model": "{0}",
+				"input": "{1}",
+				"instructions": "{2}"
+			}})", "qwen3-design", input, instruct);
+
+			if (auto response = _http.Post(L"/v1/audio/speech", request))
+			{
+				auto& data = response.value();
+				return std::move(data);
+			}
+			else
+				return std::unexpected(TTSError::Failed); //! @todo
+		}
+
+		return std::unexpected(TTSError::Failed); //! @todo
 	}
 }

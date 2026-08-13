@@ -40,6 +40,8 @@ namespace fig::data
 		template<>
 		std::optional<double> TryGet<double>() const noexcept;
 		template<>
+		std::optional<fig::fixed> TryGet<fig::fixed>() const noexcept;
+		template<>
 		std::optional<fig::string> TryGet<fig::string>() const noexcept;
 		template<>
 		std::optional<fig::path> TryGet<fig::path>() const noexcept;
@@ -101,6 +103,8 @@ namespace fig::data
 		[[nodiscard]] std::optional<float> TryGetValue<float>() const noexcept;
 		template<>
 		[[nodiscard]] std::optional<double> TryGetValue<double>() const noexcept;
+		template<>
+		[[nodiscard]] std::optional<fig::fixed> TryGetValue<fig::fixed>() const noexcept;
 		template<>
 		[[nodiscard]] std::optional<fig::string> TryGetValue<fig::string>() const noexcept;
 		template<>

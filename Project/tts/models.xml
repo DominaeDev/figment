@@ -1,0 +1,189 @@
+<Models format="0">
+	<Model id="1847255d-6081-46c2-8444-5cc736bc49ce">
+		<Name>Pocket TTS</Name>
+		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
+		<Version>1.0</Version>
+		<Task id="tts">tts</Task>
+
+		<Variants>
+			<Variant id="1951b8ba-52ee-40ed-a553-6391678d58c2">
+				<Name>Pocket TTS (English)</Name>
+				<Precision>Q8</Precision>
+				<Size>128000000</Size>
+				<Recommended>true</Recommended>
+				<Filename>pocket-tts-english-q8_0.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/PocketTTS-GGUF/english/pocket-tts-english-q8_0.gguf?download=true</Url>
+				<Hash algorithm="SHA256">0315406421d515d9ffbde49ed998832ff2962562ef8abde440c85fa0a27d8b2a</Hash>
+			</Variant>
+			<Variant id="d2e16fce-755c-435f-93f8-9c4b3f8bf689">
+				<Name>Pocket TTS (English)</Name>
+				<Precision>BF16</Precision>
+				<Size>219000000</Size>
+				<Recommended>false</Recommended>
+				<Filename>pocket-tts-english-bf16.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/PocketTTS-GGUF/english/pocket-tts-english-bf16.gguf?download=true</Url>
+				<Hash algorithm="SHA256">267e774a671138c4ebbc1d6d9d73af92f4a8e83a64b45b84f3457ac700ad0cc9</Hash>
+			</Variant>
+		</Variants>
+
+		<Languages>
+			<Language id="en">English</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.8</Temperature>
+			<ChunkSize>128</ChunkSize>
+		</Parameters>
+	</Model>
+
+	<Model id="471bf0f0-aad5-4c4b-9f14-5d31523bcde4">
+		<Name>Chatterbox</Name>
+		<Description>Expressive text-to-speech model with broad language support.</Description>
+		<Version>1.0</Version>
+		<Task id="clon">tts</Task>
+		
+		<Variants>
+			<Variant id="f45eddf7-dd44-4c19-8eec-931220e05f30">
+				<Name>Chatterbox 0.5B</Name>
+				<Precision>Q8</Precision>
+				<Size>2088393668</Size>
+				<Recommended>true</Recommended>
+				<Filename>chatterbox-q8_0.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Chatterbox-GGUF/chatterbox-q8_0.gguf?download=true</Url>
+				<Hash algorithm="SHA256">d586dd1aa59613cab8046176fb7ca5ba191c02a9b10ffa5b0d892ed22b470656</Hash>
+			</Variant>
+			<Variant id="d53296d3-952b-4048-a3ca-1a23e332fffd">
+				<Name>Chatterbox 0.5B</Name>
+				<Precision>F16</Precision>
+				<Size>3740000000</Size>
+				<Recommended>false</Recommended>
+				<Filename>chatterbox-f16.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Chatterbox-GGUF/chatterbox-f16.gguf?download=true</Url>
+				<Hash algorithm="SHA256">b872f908605f5ccbdd8eaa9e9c92a521c602b70cbec635d46e86eb70a3f8e713</Hash>
+			</Variant>
+		</Variants>
+
+		<Languages>
+			<Language id="en">English</Language>
+			<Language id="ar">Arabic</Language>
+			<Language id="da">Danish</Language>
+			<Language id="nl">Dutch</Language>
+			<Language id="de">German</Language>
+			<Language id="fi">Finnish</Language>
+			<Language id="fr">French</Language>
+			<Language id="el">Greek</Language>
+			<Language id="hi">Hindi</Language>
+			<Language id="it">Italian</Language>
+			<Language id="ko">Korean</Language>
+			<Language id="ms">Malay</Language>
+			<Language id="no">Norwegian</Language>
+			<Language id="pl">Polish</Language>
+			<Language id="pt">Portuguese</Language>
+			<Language id="es">Spanish</Language>
+			<Language id="sw">Swahili</Language>
+			<Language id="sv">Swedish</Language>
+			<Language id="tr">Turkish</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.6</Temperature>
+			<ChunkSize>80</ChunkSize>
+		</Parameters>
+	</Model>
+
+	<Model id="2863ada4-8882-4841-9b27-34dc44684f6c">
+		<Name>Qwen 3 TTS</Name>
+		<Description>High quality text-to-speech model.</Description>
+		<Version>1.0</Version>
+		<Task id="tts">tts</Task>
+
+		<Variants>
+			<Variant id="b1aa5cc8-bcfe-4eda-aecd-e2e3d2521f9d">
+				<Name>Qwen 3 TTS 0.6B</Name>
+				<Precision>Q8</Precision>
+				<Size>1991211136</Size>
+				<Recommended>true</Recommended>
+				<Filename>qwen3-tts-12hz-0.6b-base-q8_0.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-q8_0.gguf?download=true</Url>
+				<Hash algorithm="SHA256">771420bd20ff5f35407b4fa9cf9c5461e153800d3d772ef51c9febc0a520855d</Hash>
+			</Variant>
+			<Variant id="812a18b1-8c8c-4646-92b8-7d7645b3b123">
+				<Name>Qwen 3 TTS 0.6B</Name>
+				<Precision>BF16</Precision>
+				<Size>1991211136</Size>
+				<Recommended>true</Recommended>
+				<Filename>qwen3-tts-12hz-0.6b-base-bf16.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-bf16.gguf?download=true</Url>
+				<Hash algorithm="SHA256">97d418048b07b5b267628da955b27db4c57b353ded8089de01a469b474255b8d</Hash>
+			</Variant>
+			<Variant id="b7523ebd-c633-4785-b982-a7692570f370">
+				<Name>Qwen 3 TTS 1.7B</Name>
+				<Precision>Q8</Precision>
+				<Size>2695000000</Size>
+				<Recommended>true</Recommended>
+				<Filename>qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf?download=true</Url>
+				<Hash algorithm="SHA256">f5cf4c37b969335e0ffb657119e52025e26192553119590d59fa17b8d36e8b29</Hash>
+			</Variant>
+			<Variant id="c5cf401a-d1e1-4fd3-ac05-e1dc725fccf8">
+				<Name>Qwen 3 TTS 1.7B</Name>
+				<Precision>BF16</Precision>
+				<Size>4200000000</Size>
+				<Recommended>false</Recommended>
+				<Filename>qwen3-tts-12hz-1.7b-base-bf16.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-bf16.gguf?download=true</Url>
+				<Hash algorithm="SHA256">f5cf4c37b969335e0ffb657119e52025e26192553119590d59fa17b8d36e8b29</Hash>
+			</Variant>
+		</Variants>
+
+		<Languages>
+			<Language id="English">English</Language>
+			<Language id="Chinese">Chinese</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.8</Temperature>
+			<ChunkSize>80</ChunkSize>
+		</Parameters>
+	</Model>
+
+	<Model id="eda06e5c-8d30-4dfe-9f7b-1f5916ca378a">
+		<Name>Qwen 3 VoiceDesign</Name>
+		<Description>High quality voice creation model.</Description>
+		<Version>1.0</Version>
+		<Task id="vdes">design</Task>
+
+		<Variants>
+			<Variant id="f1068090-b776-4536-8618-3b2857a6c9ac">
+				<Name>Qwen 3 VoiceDesign 1.7B</Name>
+				<Precision>Q8</Precision>
+				<Size>2820000000</Size>
+				<Recommended>true</Recommended>
+				<Filename>qwen3-tts-12hz-1.7b-voicedesign-q8_0.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-VoiceDesign-GGUF/qwen3-tts-12hz-1.7b-voicedesign-q8_0.gguf?download=true</Url>
+				<Hash algorithm="SHA256">1bcef9a8c021072fca40e00498e00af9091fbe6d3ae4f87567cfee885d6c7554</Hash>
+			</Variant>
+			<Variant id="3059d897-030a-4e83-a3d5-6445c86fe5ac">
+				<Name>Qwen 3 VoiceDesign 1.7B</Name>
+				<Precision>BF16</Precision>
+				<Size>4180000000</Size>
+				<Recommended>false</Recommended>
+				<Filename>qwen3-tts-12hz-1.7b-voicedesign-bf16.gguf</Filename>
+				<Url>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-VoiceDesign-GGUF/qwen3-tts-12hz-1.7b-voicedesign-bf16.gguf?download=true</Url>
+				<Hash algorithm="SHA256">f4cebcd68023a2db7c3fc8d52d1d28eafb22d4e3b7a64e12c4f946a300536f86</Hash>
+			</Variant>
+		</Variants>
+
+		<Languages>
+			<Language id="English">English</Language>
+			<Language id="Chinese">Chinese</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.6</Temperature>
+			<TopK>65</TopK>
+		</Parameters>
+	</Model>
+
+
+</Models>

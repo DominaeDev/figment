@@ -70,12 +70,12 @@ namespace fig::io
 		if (s.empty())
 			return true;
 
-		if (s.front() == ' ' or s.front() == '\t' or s.back() == ' ' or s.back() == '\t')
+		if (s.front() == ' ' or s.front() == '\t' or s.back() == ' ' or s.back() == '\t' or std::isdigit(s.front()))
 			return true;
 
 		for (char ch : s)
 		{
-			if (ch == '"' or ch == '\\' or ch == '[' or ch == ']' or ch == ';' or ch == '#' or ch == '=' or ch == '\r')
+			if (ch == '"' or ch == '\\' or ch == '[' or ch == ']' or ch == ';' or ch == '-' or ch == '#' or ch == '=' or ch == '\r')
 				return true;
 		}
 		return false;

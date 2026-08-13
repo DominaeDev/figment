@@ -450,6 +450,7 @@
     <ClInclude Include="include\data\ModelSettings.h" />
     <ClInclude Include="include\data\Scenario.h" />
     <ClInclude Include="include\data\TavernCardV2.h" />
+    <ClInclude Include="include\data\VersionNumber.h" />
     <ClInclude Include="include\data\VoiceSettings.h" />
     <ClInclude Include="include\Figment.h" />
     <ClInclude Include="include\gui\BehindChat.h" />
@@ -568,6 +569,8 @@
     <ClInclude Include="include\tts\HttpClient_Win.h" />
     <ClInclude Include="include\tts\ITTSBackend.h" />
     <ClInclude Include="include\tts\TTSBackend_Win.h" />
+    <ClInclude Include="include\tts\TTSTypes.h" />
+    <ClInclude Include="include\tts\VoiceModelSettings.h" />
     <ClInclude Include="include\user\ProfileDatabase.h" />
     <ClInclude Include="include\user\Security.h" />
     <ClInclude Include="include\user\UserManager.h" />

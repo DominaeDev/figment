@@ -5,6 +5,9 @@ namespace fig::tts
 {
 	ITTSBackend::ITTSBackend()
 	{
+		// Load model settings
+		_models.LoadFromXml(fig::path { "tts/models.xml" });
+
 		// Start worker thread
 		_worker = std::jthread(std::bind_front(&ITTSBackend::__Worker, this));
 	}
@@ -162,5 +165,15 @@ namespace fig::tts
 		}
 
 		return false;
+	}
+
+	bool ITTSBackend::Design(fig::string_view instruct)
+	{
+		instruct = trim(instruct);
+		if (instruct.empty())
+			return false;
+
+		EnqueueTask(fig::tts::TTSTask::Design, fig::string { instruct }); //! @todo: return future
+		return true;
 	}
 }

@@ -37,11 +37,11 @@ namespace fig::tts
 
 		_processInfo = PROCESS_INFORMATION {};
 
-		std::wstring exePath = L"bin/audiocpp/audiocpp_server.exe";
-		std::wstring commandLine = L"audiocpp_server.exe --config \"bin/audiocpp/server.json\"";
+		auto exePath = fig::path { Constants::Paths::AudioCPPServer };
+		auto commandLine = from_utf8(std::format("{} --config \"tts/server.json\"", exePath.filename().u8string()));
 
 		if (CreateProcessW(
-			exePath.c_str(),
+			exePath.wstring().c_str(),
 			commandLine.data(),
 			nullptr,
 			nullptr,

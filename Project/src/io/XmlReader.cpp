@@ -87,6 +87,21 @@ namespace fig::data
 	}
 
 	template<>
+	std::optional<fig::fixed> XmlReaderAttribute::TryGet<fig::fixed>() const noexcept
+	{
+		if (_pAttrib)
+		{
+			const char* pValue = _pAttrib->Value();
+			if (pValue)
+			{
+				auto value = trim(fig::string(pValue));
+				return string_to_fixed(value);
+			}
+		}
+		return std::nullopt;
+	}
+
+	template<>
 	std::optional<fig::string> XmlReaderAttribute::TryGet<fig::string>() const noexcept
 	{
 		if (_pAttrib)
@@ -320,6 +335,14 @@ namespace fig::data
 		double value;
 		if (_pElement->QueryDoubleText(&value) == XML_SUCCESS)
 			return std::make_optional(value);
+		return std::nullopt;
+	}
+
+	template<>
+	std::optional<fig::fixed> XmlReaderElement::TryGetValue<fig::fixed>() const noexcept
+	{
+		if (auto text = ReadText())
+			return string_to_fixed(text.value());
 		return std::nullopt;
 	}
 

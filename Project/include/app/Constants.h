@@ -167,6 +167,7 @@ namespace fig::Constants
 		constexpr fig::const_string Macros = "./resources/prompting/macros.xml";
 		constexpr fig::const_string PromptScaffold = "./resources/prompting/chat.scaffold";
 		constexpr fig::const_string DefaultScenario = "./resources/prompting/default_scenario.xml";
+		constexpr fig::const_string AudioCPPServer = "tts/bin/audiocpp_server.exe";
 	}
 	
 	namespace LLM

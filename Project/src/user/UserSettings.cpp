@@ -24,6 +24,10 @@ namespace fig::io
 		{ UserSetting::Interface::ChatList::Sorting,				static_cast<int32_t>(SortBy::Default) },
 		{ UserSetting::Interface::ChatList::Ordering,				static_cast<int32_t>(OrderBy::Default) },
 		{ UserSetting::Interface::ChatList::Filtering,				ChatFilterFlags::Serialize(DefaultChatFilterFlags, ChatFilterFlagMapping) },
+
+		{ UserSetting::Interface::TTS::Enabled,						false },
+		{ UserSetting::Interface::TTS::TTSModel,					"" },
+		{ UserSetting::Interface::TTS::DesignModel,					"" },
 	};
 
 	void UserSettings::Init() noexcept

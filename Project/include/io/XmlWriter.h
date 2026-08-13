@@ -29,6 +29,7 @@ namespace fig::data
 		template<> void Set<bool>(const bool& value) noexcept;
 		template<> void Set<float>(const float& value) noexcept;
 		template<> void Set<double>(const double& value) noexcept;
+		template<> void Set<fig::fixed>(const fig::fixed& value) noexcept;
 		template<> void Set<fig::string>(const fig::string& value) noexcept;
 		template<> void Set<fig::path>(const fig::path& value) noexcept;
 		template<> void Set<fig::byte_span>(const fig::byte_span& value) noexcept;
@@ -86,6 +87,7 @@ namespace fig::data
 		template<> void SetValue<bool>(const bool& value) noexcept;
 		template<> void SetValue<float>(const float& value) noexcept;
 		template<> void SetValue<double>(const double& value) noexcept;
+		template<> void SetValue<fig::fixed>(const fig::fixed& value) noexcept;
 		template<> void SetValue<fig::string>(const fig::string& value) noexcept;
 		template<> void SetValue<fig::path>(const fig::path& value) noexcept;
 		template<> void SetValue<fig::byte_span>(const fig::byte_span& value) noexcept;

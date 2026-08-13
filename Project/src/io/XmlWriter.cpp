@@ -26,6 +26,12 @@ namespace fig::data
 	}
 
 	template<>
+	void XmlWriterAttribute::Set<fig::fixed>(const fig::fixed& value) noexcept
+	{
+		_pParent->SetAttribute(_name.c_str(), fixed_to_string(value).c_str());
+	}
+
+	template<>
 	void XmlWriterAttribute::Set<fig::string>(const fig::string& value) noexcept
 	{
 		_pParent->SetAttribute(_name.c_str(), value.c_str());
@@ -129,6 +135,13 @@ namespace fig::data
 	{
 		DeleteValue();
 		_pElement->InsertNewText(std::format("{:g}", value).c_str());
+	}
+
+	template<>
+	void XmlWriterElement::SetValue<fig::fixed>(const fig::fixed& value) noexcept
+	{
+		DeleteValue();
+		_pElement->InsertNewText(fixed_to_string(value).c_str());
 	}
 
 	template<>

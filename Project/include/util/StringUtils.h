@@ -11,12 +11,12 @@ namespace fig
 	void ltrim_inplace(fig::string& s);
 	void rtrim_inplace(fig::string& s);
 	inline void trim_inplace(fig::string& s) { ltrim_inplace(s); rtrim_inplace(s); }
-	fig::string trim(fig::string&& s);
-	fig::string_view ltrim(fig::string_view s);
-	fig::string_view rtrim(fig::string_view s);
-	fig::string_view trim(fig::string_view s);
-	fig::string_view truncate(fig::string_view s, size_t length);
-	std::string truncate(const std::string& text, size_t length);
+	[[nodiscard]] fig::string trim(fig::string&& s);
+	[[nodiscard]] fig::string_view ltrim(fig::string_view s);
+	[[nodiscard]] fig::string_view rtrim(fig::string_view s);
+	[[nodiscard]] fig::string_view trim(fig::string_view s);
+	[[nodiscard]] fig::string_view truncate(fig::string_view s, size_t length);
+	[[nodiscard]] std::string truncate(const std::string& text, size_t length);
 
 	[[nodiscard]] fig::wstring ltrim(const fig::wstring& s);
 	[[nodiscard]] fig::wstring rtrim(const fig::wstring& s);
@@ -24,7 +24,7 @@ namespace fig
 	void ltrim_inplace(fig::wstring& s);
 	void rtrim_inplace(fig::wstring& s);
 	inline void trim_inplace(fig::wstring& s) { ltrim_inplace(s); rtrim_inplace(s); }
-	fig::wstring trim(fig::wstring&& s);
+	[[nodiscard]] fig::wstring trim(fig::wstring&& s);
 
 	[[nodiscard]] fig::string lcase(const fig::string& s);
 	[[nodiscard]] fig::string ucase(const fig::string& s);

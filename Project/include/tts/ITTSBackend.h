@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Figment.h"
+#include "tts/TTSTypes.h"
+#include "tts/VoiceModelSettings.h"
 #include <future>
 
 namespace fig::tts
@@ -18,12 +20,6 @@ namespace fig::tts
 	using TTSPayload = std::expected<TTSData, TTSError>;
 	using TTSPromise = std::promise<TTSPayload>;
 	using TTSFuture = std::future<TTSPayload>;
-
-	enum class TTSTask
-	{
-		Speak = 0,
-		Design,
-	};
 
 	struct TTSResult
 	{
@@ -54,12 +50,15 @@ namespace fig::tts
 		bool Speak(fig::string_view text, bool split = true);
 		TTSResult EnqueueTask(TTSTask task, const fig::string& text);
 
+		bool Design(fig::string_view instruct);
+
 	protected:
 		ITTSBackend();
 		virtual TTSPayload SendRequest(TTSTask task, fig::string_view text) = 0;
 
 	protected:
 		TTSStatus _status { TTSStatus::Uninitialized };
+		fig::data::VoiceModelSettings _models;
 
 		struct PendingRequest {
 			uint64_t id {};

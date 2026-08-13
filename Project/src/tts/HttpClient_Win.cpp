@@ -125,7 +125,10 @@ namespace fig::tts
 		WinHttpCloseHandle(request);
 
 		if (statusCode != 200)
+		{
+			LogLn(std::format("Audio server returned status code: {}", statusCode));
 			return std::unexpected(std::make_error_code(std::errc::protocol_error));
+		}
 		LogLn("Received voice clip.");
 
 		Global::GetAudioManager().EnqueueSound(body); //! @temp
