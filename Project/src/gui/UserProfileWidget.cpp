@@ -16,7 +16,7 @@ namespace fig::gui
 		_pLabel = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
 		_pLabel->EnableEllipsis(true);
 
-		_pSignOutButton = CreateControl<ButtonWithIcon>(Resource::ICON_LOGOUT);
+		_pSignOutButton = CreateControl<ButtonWithIcon>(Resource::ICON_LOGOUT, false);
 		_pSignOutButton->SetTheme(Theme::SidePanelButtonStyle);
 		_pSignOutButton->SetSize(36, 36);
 		_pSignOutButton->CenterVertically();

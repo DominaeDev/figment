@@ -12,14 +12,15 @@ namespace fig::gui
 	{
 		ButtonWithLabel() = delete;
 	public:
-		ButtonWithLabel(ControlPtr pParent, const fig::string& text);
+		ButtonWithLabel(ControlPtr pParent, fig::string_view label, double fontSize = 16.0);
+
+		void SetLabel(fig::string_view label) noexcept;
 
 	protected:
-		void OnAfterLayout() override;
 		void OnButtonState() override;
+		void OnSize() override;
 
-	private:
+	protected:
 		fig::observer_ptr<StaticText> _pLabel;
-		fig::observer_ptr<TexturedBorder> _pBorder;
 	};
 }

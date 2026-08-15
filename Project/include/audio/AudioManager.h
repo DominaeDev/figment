@@ -11,6 +11,7 @@ namespace fig::audio
 
 		bool PlaySound(fig::bytes&& data);
 		bool EnqueueSound(const fig::bytes& data, float fDelay = Constants::TTS::DefaultDelay);
+		bool IsPlaying() const noexcept;
 
 		void StopAllSounds();
 		void SetVolume(float fVolume);

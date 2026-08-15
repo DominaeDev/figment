@@ -13,7 +13,7 @@ namespace fig::gui
 		{};
 
 		virtual fig::string GetTitle() const noexcept = 0;
-		virtual EditorFields GetFields() noexcept = 0;
+		virtual EditorFields GetFields() noexcept { return {}; };
 
 		virtual void Initialize() noexcept = 0;
 		virtual bool SaveChanges() noexcept = 0;

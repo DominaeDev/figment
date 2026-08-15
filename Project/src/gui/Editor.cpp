@@ -28,9 +28,9 @@ namespace fig::gui
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 14.0, false);
 		pLabel->SetForegroundColor(Color::SidePanelForeground);
-		pSizer->AddSpacer(8);
+		pSizer->AddSpacer(12);
 		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 4);
-		pSizer->AddSpacer(2);
+		pSizer->AddSpacer(3);
 		return pLabel;
 	}
 

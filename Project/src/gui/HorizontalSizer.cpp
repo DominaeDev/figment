@@ -13,6 +13,8 @@ namespace fig::gui
 	{
 		if (auto pControl = item.GetControl())
 			return pControl->GetWidth() + (includeBorder ? item.GetLeftBorder() + item.GetRightBorder() : 0);
+		else if (auto pControl = item.GetControl())
+			return item.rect.w + (includeBorder ? item.GetLeftBorder() + item.GetRightBorder() : 0);
 		return 0;
 	}
 
@@ -41,16 +43,5 @@ namespace fig::gui
 		rect.h = allocated.h;
 	}
 
-	fig::coord HorizontalSizer::GetExtent() const
-	{
-		fig::coord min = std::numeric_limits<fig::coord>::max();
-		fig::coord max = std::numeric_limits<fig::coord>::min();
-		for (auto& item : GetLayoutItems())
-		{
-			min = std::min(min, item.rect.x);
-			max = std::min(max, item.rect.x + item.rect.w);
-		}
-		return max - min;
-	}
 }
 

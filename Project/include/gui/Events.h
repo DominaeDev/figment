@@ -19,6 +19,7 @@ namespace fig::gui
 		StartChat,
 
 		EditCharacter,
+		EditCharacterVoice,
 		DebugCharacter,
 
 		/* Broadcast events */
@@ -43,6 +44,12 @@ namespace fig::gui
 		ChangedScreen,
 		StartTextInput,
 		StopTextInput,
+		
+		TTSServerStarted,
+		TTSServerLoadingModel,
+		TTSServerGenerating,
+		TTSServerError,
+		TTSServerShutdown,
 
 		Count,
 	};

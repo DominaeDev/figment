@@ -37,10 +37,10 @@ namespace fig
 		{
 			return std::format("({})",
 				_children
-				| std::views::transform([](auto&& c) { return (fig::string)(*c); })
-				| std::views::join_with(std::string_view { " and " })
-				| std::ranges::to<std::string>()
-			);
+					| std::views::transform([](auto&& c) { return (fig::string)(*c); })
+					| std::views::join_with(std::string_view { " and " })
+					| std::ranges::to<std::string>()
+				);
 		}
 		return "#error";
 	}

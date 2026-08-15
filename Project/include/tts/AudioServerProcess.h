@@ -17,9 +17,7 @@ namespace fig::tts
     private:
         SDL_Process* _process = nullptr;
 
-#ifdef _DEBUG
         void ReadLoop(SDL_IOStream* output, std::stop_token stopToken);
         std::jthread _logThread;
-#endif
     };
 }

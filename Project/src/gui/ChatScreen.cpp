@@ -52,7 +52,7 @@ namespace fig::gui
 		_pInfoPanel = CreateControl<InfoPanel>();
 		_pChatScroll = centerArea->CreateControl<ChatScroll>();
 
-		_pTextBox = centerArea->CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi, TextBox::Flag::Autosize });
+		_pTextBox = centerArea->CreateControl<TextBox>(FontFace::Default, Constants::GUI::ChatBoxFontSize, TextBox::Flags { TextBox::Flag::Multi, TextBox::Flag::Autosize });
 		_pTextBox->SetSize(Constants::GUI::ChatTextBoxWidth, 88);
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);

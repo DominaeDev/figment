@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "tts/AudioServerProcess_Win.h"
 
+using namespace fig::gui;
+
 namespace fig::tts
 {
 	AudioServerProcess_Win::~AudioServerProcess_Win()
@@ -24,20 +26,16 @@ namespace fig::tts
 		STARTUPINFOW startupInfo = { sizeof(startupInfo) };
 		startupInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-#ifdef _DEBUG
 		BOOL bInheritHandles = TRUE;
 		if (auto writeHandle = CreateWriteHandle())
 		{
 			startupInfo.hStdOutput = *writeHandle;
 			startupInfo.hStdError = *writeHandle;
 		}
-#else
-		BOOL bInheritHandles = FALSE;
-#endif
 
 		_processInfo = PROCESS_INFORMATION {};
 
-		auto exePath = fig::path { Constants::Paths::AudioCPPServer };
+		auto exePath = fig::path { Constants::Paths::TTSServer };
 		auto commandLine = from_utf8(std::format("{} --config \"tts/server.json\"", exePath.filename().u8string()));
 
 		if (CreateProcessW(
@@ -53,12 +51,11 @@ namespace fig::tts
 			&_processInfo))
 		{
 
-#ifdef _DEBUG
 			// Init io pipe
 			CloseHandle(_writeHandle);
 			_writeHandle = nullptr;
 			_readThread = std::jthread(std::bind_front(&AudioServerProcess_Win::ReadLoop, this));
-#endif
+
 			// Process exit callback
 			_cbCtx = { this, _processInfo.hProcess };
 			_cbWait = CreateThreadpoolWait(ProcessEndedCallback, &_cbCtx, NULL);
@@ -81,7 +78,6 @@ namespace fig::tts
 
 	void AudioServerProcess_Win::Stop()
 	{
-#ifdef _DEBUG
 		// Release io pipe
 		if (_readHandle)
 		{
@@ -97,7 +93,6 @@ namespace fig::tts
 			CloseHandle(_writeHandle);
 			_writeHandle = nullptr;
 		}
-#endif
 
 		// Shut down server
 		if (_hJob)
@@ -131,11 +126,11 @@ namespace fig::tts
 				return true; // Still running
 
 			LogLn(std::format("audiocpp_server exited with code {}", exitCode));
+			PushEvent(UserEvent::TTSServerShutdown);
 		}
 		return false;
 	}
 
-#ifdef _DEBUG
 	std::optional<HANDLE> AudioServerProcess_Win::CreateWriteHandle()
 	{
 		SECURITY_ATTRIBUTES pipeAttributes = {};
@@ -157,12 +152,21 @@ namespace fig::tts
 		DWORD bytesRead;
 
 		while (ReadFile(_readHandle, buffer, sizeof(buffer), &bytesRead, nullptr) and bytesRead > 0)
-			Log(fig::string(buffer, bytesRead));
+		{
+			fig::string log { buffer, bytesRead };
+			Log(log);
+
+			if (log.contains("ggml_cuda_init"))
+				PushEvent(UserEvent::TTSServerLoadingModel);
+			else if (log.contains("ggml_backend_cuda_graph_compute"))
+				PushEvent(UserEvent::TTSServerGenerating);
+			else if (log.contains("audiocpp_server failed"))
+				PushEvent(UserEvent::TTSServerError);
+		}
 
 		CloseHandle(_readHandle);
 		_readHandle = nullptr;
 	}
-#endif
 
 	void CALLBACK AudioServerProcess_Win::ProcessEndedCallback(PTP_CALLBACK_INSTANCE Instance, PVOID Context, PTP_WAIT Wait, TP_WAIT_RESULT Result)
 	{
@@ -171,6 +175,8 @@ namespace fig::tts
 		GetExitCodeProcess(pCtx->hProcess, &exitCode);
 		LogLn(std::format("audiocpp_server exited with code {}", exitCode));
 		pCtx->pInstance->Stop();
+
+		PushEvent(UserEvent::TTSServerShutdown);
 	}
 
 }

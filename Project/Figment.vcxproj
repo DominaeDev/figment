@@ -225,6 +225,7 @@
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\Slider.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
+    <ClCompile Include="src\gui\ToggleWithLabel.cpp" />
     <ClCompile Include="src\gui\ValueBinding.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
@@ -237,6 +238,7 @@
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
+    <ClCompile Include="src\gui\VoiceEditor.cpp" />
     <ClCompile Include="src\gui\Window.cpp" />
     <ClCompile Include="src\io\Asset.cpp" />
     <ClCompile Include="src\io\IndexDatabase.cpp" />
@@ -488,6 +490,7 @@
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\Slider.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
+    <ClInclude Include="include\gui\ToggleWithLabel.h" />
     <ClInclude Include="include\gui\ValueBinding.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
     <ClInclude Include="include\gui\SearchBox.h" />
@@ -516,6 +519,7 @@
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
+    <ClInclude Include="include\gui\VoiceEditor.h" />
     <ClInclude Include="include\gui\Window.h" />
     <ClInclude Include="include\io\Asset.h" />
     <ClInclude Include="include\io\AssetCache.h" />
@@ -571,6 +575,7 @@
     <ClInclude Include="include\tts\TTSBackend_Win.h" />
     <ClInclude Include="include\tts\TTSTypes.h" />
     <ClInclude Include="include\tts\VoiceModelSettings.h" />
+    <ClInclude Include="include\tts\VoicePrint.h" />
     <ClInclude Include="include\user\ProfileDatabase.h" />
     <ClInclude Include="include\user\Security.h" />
     <ClInclude Include="include\user\UserManager.h" />

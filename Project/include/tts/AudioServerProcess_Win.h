@@ -28,14 +28,12 @@ namespace fig::tts
 			HANDLE hProcess;
 		} _cbCtx {};
 
-#ifdef _DEBUG
 		std::optional<HANDLE> CreateWriteHandle();
 		void ReadLoop(std::stop_token stopToken);
 
 		HANDLE _readHandle = nullptr;
 		HANDLE _writeHandle = nullptr;
 		std::jthread _readThread {};
-#endif
 	};
 }
 #endif

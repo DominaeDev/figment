@@ -126,4 +126,12 @@ namespace fig::audio
 			return false;
 		return true;
 	}
+
+	bool AudioManager::IsPlaying() const noexcept
+	{
+		if (_stream.empty())
+			return false;
+
+		return SDL_GetAudioStreamAvailable(_stream.get()) > 0;
+	}
 }

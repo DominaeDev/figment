@@ -13,13 +13,20 @@ namespace fig::gui
 		_fn = pDelegate;
 	}
 
-	void BaseButton::SetEnabled(bool bEnabled) noexcept
+	void BaseButton::Enable(bool bEnabled) noexcept
 	{
-		if (bEnabled == (_state == ButtonState::Disabled))
+		if (bEnabled and _state == ButtonState::Disabled)
 		{
-			SetButtonState(bEnabled ? ButtonState::Default : ButtonState::Disabled);
-			_bMouseDown = false;
-		}		
+			_state = ButtonState::Default;
+			OnButtonState();
+		}
+		else if (not bEnabled and _state != ButtonState::Disabled)
+		{
+			_state = ButtonState::Disabled;
+			OnButtonState();
+		}
+
+		_bMouseDown = false; // Drop input
 	}
 
 	bool BaseButton::IsEnabled() const noexcept 
@@ -90,8 +97,11 @@ namespace fig::gui
 
 	void BaseButton::SetButtonState(ButtonState state)
 	{
-		_state = state;
-		OnButtonState();
+		if (IsEnabled())
+		{
+			_state = state;
+			OnButtonState();
+		}
 	}
 
 	void BaseButton::DropState() noexcept

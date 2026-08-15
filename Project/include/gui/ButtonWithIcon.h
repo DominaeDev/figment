@@ -11,7 +11,7 @@ namespace fig::gui
 	{
 		ButtonWithIcon() = delete;
 	public:
-		ButtonWithIcon(ControlPtr pParent, Resource icon);
+		ButtonWithIcon(ControlPtr pParent, Resource icon, bool bBorder = false);
 		void SetIcon(Resource icon);
 		void EnableBorder(bool bEnable) noexcept;
 

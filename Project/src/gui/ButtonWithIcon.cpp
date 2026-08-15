@@ -5,10 +5,16 @@
 
 namespace fig::gui
 {
-	ButtonWithIcon::ButtonWithIcon(ControlPtr pParent, Resource icon) : ThemedButton(pParent)
+	ButtonWithIcon::ButtonWithIcon(ControlPtr pParent, Resource icon, bool bBorder) : ThemedButton(pParent)
 	{
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());
+
+		if (bBorder)
+		{
+			auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
+			pBorderRenderer->SetColor(Color::LineColor);
+		}
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
 		_pIcon->SetForegroundColor(GetThemeForeground());
@@ -31,18 +37,14 @@ namespace fig::gui
 	{
 		GetBackgroundRenderer()->SetColor(GetThemeBackground());
 		_pIcon->SetForegroundColor(GetThemeForeground());
+		
+		if (auto pBorder = GetBorderRenderer())
+			pBorder->SetColor(IsEnabled() ? Color::LineColor : Color::DisabledLineColor);
 	}
 
 	void ButtonWithIcon::EnableBorder(bool bEnable) noexcept
 	{
-		if (bEnable)
-		{
-			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-			pBorder->SetColor(Color::LineColor);
-		}
-		else
-		{
-			ClearBorderRenderer();
-		}
+		if (auto pBorder = GetBorderRenderer())
+			pBorder->SetColor(bEnable ? Color::LineColor : Color::Transparent);
 	}
 }

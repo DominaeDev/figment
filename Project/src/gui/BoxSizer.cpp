@@ -4,6 +4,22 @@
 
 namespace fig::gui
 {
+	void BoxSizer::OnPreLayout(const fig::rect& parentRect)
+	{
+		auto sizerItems = GetSizerItems();
+		for (auto& item : sizerItems)
+		{
+			auto pSizer = std::get<Sizer*>(item.target);
+			if (auto pBoxSizer = dynamic_cast<BoxSizer*>(pSizer))
+			{
+				pBoxSizer->Layout(parentRect);
+				auto extents = pBoxSizer->GetExtents();
+				item.rect.w = extents.x;
+				item.rect.h = extents.y;
+			}
+		}
+	}
+
 	void BoxSizer::OnLayout(const fig::rect& parentRect)
 	{
 		this->parentRect = parentRect;
@@ -23,12 +39,15 @@ namespace fig::gui
 		for (auto& item : items)
 		{
 			auto pControl = item.GetControl();
+			auto pSizer = item.GetSizer();
 
 			if (item.info.prop == 0)
 			{
 				if (item.info.IsSet(SizerFlag::FixedSize))
 					remainingSpace = std::max(remainingSpace - item.info.border, 0);
 				else if (pControl != nullptr)
+					remainingSpace = std::max(remainingSpace - GetItemSize(item, true), 0);
+				else if (pSizer != nullptr)
 					remainingSpace = std::max(remainingSpace - GetItemSize(item, true), 0);
 			}
 			else if (item.info.prop > 0)
@@ -49,13 +68,17 @@ namespace fig::gui
 		for (auto& item : items)
 		{
 			auto pControl = item.GetControl();
+			auto pSizer = item.GetSizer();
 			auto& info = item.info;
 			int size = 0;
+
 			if (info.prop == 0)
 			{
 				if (info.IsSet(SizerFlag::FixedSize))
 					size = info.border;
 				else if (pControl)
+					size = GetItemSize(item, true);
+				else if (pSizer)
 					size = GetItemSize(item, true);
 			}
 			else if (info.prop > 0)
@@ -103,4 +126,30 @@ namespace fig::gui
 			}
 		}
 	}
+
+	fig::point BoxSizer::GetExtents() const
+	{
+		auto layoutItems = GetLayoutItems();
+		if (layoutItems.empty())
+			return {};
+
+		fig::coord minX = std::numeric_limits<fig::coord>::max();
+		fig::coord maxX = std::numeric_limits<fig::coord>::min();
+		fig::coord minY = std::numeric_limits<fig::coord>::max();
+		fig::coord maxY = std::numeric_limits<fig::coord>::min();
+		
+		for (auto& item : layoutItems)
+		{
+			if (auto ppControl = std::get_if<LayoutElement*>(&item.target))
+			{
+				auto& rect = (*ppControl)->GetRect();
+				minX = std::min(minX, rect.x);
+				maxX = std::max(maxX, rect.x + rect.w);
+				minY = std::min(minY, rect.y);
+				maxY = std::max(maxY, rect.y + rect.h);
+			}
+		}
+		return fig::point { maxX - minX, maxY - minY };
+	}
+
 }

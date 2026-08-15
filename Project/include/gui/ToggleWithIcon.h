@@ -7,19 +7,16 @@ namespace fig::gui
 {
 	class TexturedBorderRenderer;
 
-	using ToggleDelegate = std::function<void(bool)>;
-
 	class ToggleWithIcon : public ThemedButton
 	{
 		ToggleWithIcon() = delete;
 	public:
-		enum class ToggleBehavior { Default, Radio };
 		ToggleWithIcon(ControlPtr pParent, Resource icon, ToggleBehavior behavior = ToggleBehavior::Default, bool bOn = false);
 
 		void SetIcon(Resource icon);
-		void Toggle(bool bOn, bool bTrigger = true) noexcept;
-
 		void SetDelegate(ToggleDelegate pDelegate) noexcept;
+		void Toggle(bool bOn, bool bSilent = false) noexcept;
+		bool IsOn() const noexcept { return _bOn; }
 
 	protected:
 		void OnSize() override;

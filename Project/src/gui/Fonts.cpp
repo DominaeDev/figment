@@ -25,6 +25,7 @@ namespace fig::gui
 		GetFont(FontFace::Regular, Constants::GUI::DefaultFontSize);
 		GetFont(FontFace::Italic, Constants::GUI::DefaultFontSize);
 		GetFont(FontFace::Bold, Constants::GUI::DefaultFontSize);
+		GetFont(FontFace::Regular, Constants::GUI::ChatBoxFontSize);
 	}
 
 	void Fonts::ReleaseFonts()

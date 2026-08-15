@@ -106,9 +106,10 @@ namespace fig::gui
 		_items.clear();
 	}
 
-
 	void Sizer::Layout(const fig::rect& parentRect)
 	{
+		OnPreLayout(parentRect);
+
 		OnLayout(parentRect);
 
 		for (auto& li : _items)

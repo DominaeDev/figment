@@ -15,7 +15,8 @@ namespace fig::Constants
 		constexpr fig::coord WindowMinWidth = 800;
 		constexpr fig::coord WindowMinHeight = 600;
 
-		constexpr double DefaultFontSize = 18.5;
+		constexpr double DefaultFontSize = 16.0;
+		constexpr double ChatBoxFontSize = 18.5;
 		constexpr double TextBoxFontSize = 16.0;
 		constexpr double StatusBarFontSize = 14.5;
 		constexpr double CharacterNameFontSize = 12.0;
@@ -152,9 +153,9 @@ namespace fig::Constants
 
 	namespace Paths
 	{
-		constexpr fig::const_string AppSettings = "./settings.ini";
+		constexpr fig::const_string AppSettings = "settings.ini";
 		constexpr fig::const_string UserSettings = "user-settings.ini";
-		constexpr fig::const_string ProfilesFolder = "./profiles";
+		constexpr fig::const_string ProfilesFolder = "profiles";
 		constexpr fig::const_string ProfilesFileName = "profiles";
 		constexpr fig::const_string ProfilesFileExt = "";
 		constexpr fig::const_string AssetIndexFileName = "index";
@@ -164,10 +165,13 @@ namespace fig::Constants
 		constexpr fig::const_string ProfileImageFileName = "image";
 		constexpr fig::const_string ProfileImageFileExt = "";
 		constexpr fig::const_string AssetFileExt = "";
-		constexpr fig::const_string Macros = "./resources/prompting/macros.xml";
-		constexpr fig::const_string PromptScaffold = "./resources/prompting/chat.scaffold";
-		constexpr fig::const_string DefaultScenario = "./resources/prompting/default_scenario.xml";
-		constexpr fig::const_string AudioCPPServer = "tts/bin/audiocpp_server.exe";
+
+		constexpr fig::const_string Macros = "resources/prompting/macros.xml";
+		constexpr fig::const_string PromptScaffold = "resources/prompting/chat.scaffold";
+		constexpr fig::const_string DefaultScenario = "resources/prompting/default_scenario.xml";
+		
+		constexpr fig::const_string TTSServer = "tts/bin/audiocpp_server.exe";
+		constexpr fig::const_string TTSModels = "tts/models";
 	}
 	
 	namespace LLM

@@ -323,7 +323,7 @@ namespace fig::gui
 
 			if (piece.msgType == MessageType::Dialogue and piece.role == Role::Bot1)
 			{
-				Global::GetTTSBackend().Speak(piece.content);
+				auto discard = Global::GetTTSBackend().Speak(piece.content); //! @todo: resolve promise
 			}
 		}
 	}

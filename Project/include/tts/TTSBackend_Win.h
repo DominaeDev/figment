@@ -21,7 +21,7 @@ namespace fig::tts
 
 	private:
 		bool CheckHealth();
-		std::expected<TTSData, TTSError> SendRequest(TTSTask task, fig::string_view text) override;
+		std::expected<TTSData, TTSError> SendRequest(TTSTask task, fig::string_view text, fig::string_view instructions) override;
 
 		AudioServerProcess_Win _server {};
 		HttpClient_Win _http {};

@@ -33,6 +33,7 @@ namespace fig::data
 
 		std::tuple<fig::string, ConventionalGender, Pronouns> Get() const noexcept;
 		inline bool IsConventional() const noexcept { return _conventional != ConventionalGender::Undefined; };
+		inline bool IsConventional(ConventionalGender gender) const noexcept { return _conventional == gender; };
 
 		fig::string GetLabel() const noexcept { return _label; }
 		Pronouns GetPronouns() const noexcept { return _pronouns; }

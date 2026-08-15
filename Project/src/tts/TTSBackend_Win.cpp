@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "tts/TTSBackend_Win.h"
 
+using namespace fig::gui;
+
 namespace fig::tts
 {
 	TTSBackend_Win::TTSBackend_Win() : ITTSBackend()
@@ -24,10 +26,14 @@ namespace fig::tts
 		if (auto started = _server.Start())
 		{
 			_status = TTSStatus::ServerStarted;
+			PushEvent(UserEvent::TTSServerStarted);
 			return true;
 		}
 		else
+		{
+			PushEvent(UserEvent::TTSServerShutdown);
 			return false;
+		}
 	}
 
 	void TTSBackend_Win::Shutdown()
@@ -63,7 +69,7 @@ namespace fig::tts
 		return false;
 	}
 
-	std::expected<TTSData, TTSError> TTSBackend_Win::SendRequest(TTSTask task, fig::string_view text)
+	std::expected<TTSData, TTSError> TTSBackend_Win::SendRequest(TTSTask task, fig::string_view text, fig::string_view instructions)
 	{
 		if (not _http.IsConnected())
 		{
@@ -77,27 +83,25 @@ namespace fig::tts
 				"model": "{0}",
 				"input": "{1}"
 			}})", "chatterbox", text);
+
 			if (auto response = _http.Post(L"/v1/audio/speech", request))
 			{
 				auto& data = response.value();
 				return std::move(data);
 			}
 			else
-				return std::unexpected(TTSError::Failed); //! @todo
+				return std::unexpected(TTSError::Failed);
 		}
 		else if (task == TTSTask::Design)
 		{
-			fig::string instruct { text };
-			escape_json_inplace(instruct);
-
-			fig::string greeting = "Good day";
-			fig::string input = std::format("{}! This is what my voice sounds like. What do you think? If you don't like it, let me know. I'm sure I can find a way to change your mind.", greeting);
+			fig::string strInstructions { instructions };
+			escape_json_inplace(strInstructions);
 
 			fig::string request = std::format(R"({{
 				"model": "{0}",
 				"input": "{1}",
 				"instructions": "{2}"
-			}})", "qwen3-design", input, instruct);
+			}})", "qwen3-design", text, strInstructions);
 
 			if (auto response = _http.Post(L"/v1/audio/speech", request))
 			{
@@ -105,9 +109,9 @@ namespace fig::tts
 				return std::move(data);
 			}
 			else
-				return std::unexpected(TTSError::Failed); //! @todo
+				return std::unexpected(TTSError::Failed);
 		}
 
-		return std::unexpected(TTSError::Failed); //! @todo
+		return std::unexpected(TTSError::Failed);
 	}
 }

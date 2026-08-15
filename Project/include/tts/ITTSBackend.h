@@ -3,39 +3,9 @@
 #include "Figment.h"
 #include "tts/TTSTypes.h"
 #include "tts/VoiceModelSettings.h"
-#include <future>
 
 namespace fig::tts
 {
-	enum class TTSError
-	{
-		NoError = 0,
-		Failed,
-		Canceled,
-		Busy,			// Server responded with 503 busy
-		Unavailable,	// Server didn't respond
-	};
-
-	using TTSData = fig::bytes;
-	using TTSPayload = std::expected<TTSData, TTSError>;
-	using TTSPromise = std::promise<TTSPayload>;
-	using TTSFuture = std::future<TTSPayload>;
-
-	struct TTSResult
-	{
-		uint64_t id;
-		TTSTask task;
-		TTSFuture future;
-	};
-
-	enum TTSStatus
-	{
-		Uninitialized,
-		ServerStarted,
-		ServerRunning,
-		ServerBusy,
-	};
-
 	class ITTSBackend
 	{
 	public:
@@ -47,14 +17,12 @@ namespace fig::tts
 	
 		TTSStatus GetStatus() const noexcept { return _status; };
 
-		bool Speak(fig::string_view text, bool split = true);
-		TTSResult EnqueueTask(TTSTask task, const fig::string& text);
-
-		bool Design(fig::string_view instruct);
+		std::expected<std::vector<TTSResult>, TTSError> Speak(fig::string_view text, bool split = true);
+		std::expected<TTSResult, TTSError> Design(fig::string_view text, fig::string_view instruct);
 
 	protected:
 		ITTSBackend();
-		virtual TTSPayload SendRequest(TTSTask task, fig::string_view text) = 0;
+		virtual TTSPayload SendRequest(TTSTask task, fig::string_view text, fig::string_view instructions) = 0;
 
 	protected:
 		TTSStatus _status { TTSStatus::Uninitialized };
@@ -64,9 +32,11 @@ namespace fig::tts
 			uint64_t id {};
 			TTSTask task {};
 			fig::string text {};
+			fig::string instructions {};
 			std::unique_ptr<TTSPromise> promise;
 		};
 		bool IsAsyncRequestAlive(const PendingRequest& request) const;
+		std::optional<TTSResult> EnqueueTask(TTSTask task, fig::string_view text, fig::string_view instructions = {});
 
 	private:
 		mutable std::mutex _pending_mutex;
@@ -87,7 +57,7 @@ namespace fig::tts
 		bool Restart() override { return false; }
 		void Shutdown() override {}
 	protected:
-		TTSPayload SendRequest(TTSTask task, fig::string_view text) override { return std::unexpected(TTSError::Failed); }
+		TTSPayload SendRequest(TTSTask task, fig::string_view text, fig::string_view instructions) override { return std::unexpected(TTSError::Unavailable); }
 	};
 }
 

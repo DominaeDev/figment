@@ -75,8 +75,8 @@ namespace fig::gui
 		if (_bInvalidated)
 		{
 			_bInvalidated = false;
-			fig::coord tmp;
-			DrawText(tmp, tmp);
+			fig::coord tmpX, tmpY;
+			DrawText(tmpX, tmpY);
 		}
 	}
 

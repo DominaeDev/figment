@@ -30,19 +30,21 @@ namespace fig::gui
 		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 		_pHeader->SetAlignment(TextAlignment::LeftCenter);
 		
-		auto pHomeButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_HOME);
+		auto pHomeButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_HOME, false);
 
-		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING);
+		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING, false);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
-		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING);
+		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING, true);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
+		_pFilteringButton->EnableBorder(false);
 
 		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_GRID_LARGE);
 		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
-		_pToggleTagsButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_TAG);
+		_pToggleTagsButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_TAG, true);
 		_pToggleTagsButton->SetDelegate([this]() { ToggleTags(); });
+		_pToggleTagsButton->EnableBorder(false);
 
 		_pFilterTextBox = pTopBar->CreateControl<SearchBox>();
 		_pFilterTextBox->SetPosition(0, 0);
@@ -111,7 +113,7 @@ namespace fig::gui
 		_pCardList->SetCardSize(bHalfSize ? CardSize::Half : CardSize::Full);
 		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pGridButton->SetIcon(bHalfSize ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
-		_pGridButton->Toggle(bHalfSize, false);
+		_pGridButton->Toggle(bHalfSize, true);
 		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
 	}

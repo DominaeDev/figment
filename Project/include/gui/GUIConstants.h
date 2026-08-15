@@ -8,17 +8,17 @@ namespace fig::gui
 	{
 		constexpr ButtonTheme DefaultButtonStyle
 		{
-			.defaultColor	{ 0x4e4431_rgb, 0xFFFFFF00_rgba },
-			.hoverColor		{ 0x4e4431_rgb, 0xefece3FF_rgba },
-			.pressedColor	{ 0x4e4431_rgb, 0xFFFFFFC0_rgba },
-			.disabledColor	{ 0x4e4431_rgb, 0xCCCCCC80_rgba },
+			.defaultColor	{ 0x4E4431_rgb, 0xFFFFFF00_rgba },
+			.hoverColor		{ 0x4E4431_rgb, 0xEFECE3FF_rgba },
+			.pressedColor	{ 0x4E4431_rgb, 0xFFFFFFC0_rgba },
+			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
 		};
 
 		constexpr ButtonTheme SidePanelButtonStyle
 		{
-			.defaultColor	{ 0x4e4431_rgb, 0xFFFFFF00_rgba },
-			.hoverColor		{ 0x4e4431_rgb, 0xFFFFFF80_rgba },
-			.pressedColor	{ 0x4e4431_rgb, 0xFFFFFFC0_rgba },
+			.defaultColor	{ 0x4E4431_rgb, 0xFFFFFF00_rgba },
+			.hoverColor		{ 0x4E4431_rgb, 0xFFFFFF80_rgba },
+			.pressedColor	{ 0x4E4431_rgb, 0xFFFFFFC0_rgba },
 			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
 		};
 	}
@@ -47,6 +47,7 @@ namespace fig::gui
 		inline constexpr fig::color SidePanelBackground			{ 0xEEECE4_rgb };
 		inline constexpr fig::color SidePanelGradient			{ 0xe0dccb_rgb };
 		inline constexpr fig::color LineColor					{ 0xc7bcaa_rgb };
+		inline constexpr fig::color DisabledLineColor			{ 0xc0c0c0_rgb };
 		
 		inline constexpr fig::color GenderTagMale				{ 0x45ccff_rgb };
 		inline constexpr fig::color GenderTagFemale				{ 0xff5abb_rgb };

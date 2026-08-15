@@ -57,6 +57,13 @@ namespace fig::gui
 			return nullptr;
 		};
 
+		Sizer* GetSizer() const
+		{
+			if (auto ppSizer = std::get_if<Sizer*>(&target); ppSizer)
+				return *ppSizer;
+			return nullptr;
+		};
+
 		template <typename T>
 			requires std::derived_from<T, Control>
 		T* GetControl() const
@@ -113,16 +120,30 @@ namespace fig::gui
 					return true;
 				});
 		}
+
 		auto GetLayoutItems() const noexcept
 		{
 			return _items
 				| std::views::filter([](auto& it) {
-				if (auto ppCtrl = std::get_if<LayoutElement*>(&it.target); ppCtrl)
-					return (*ppCtrl)->IsLayoutEnabled();
-				return true;
-			});
+					if (auto ppCtrl = std::get_if<LayoutElement*>(&it.target); ppCtrl)
+						return (*ppCtrl)->IsLayoutEnabled();
+					return true;
+				});
 		}
 
+		auto GetSizerItems() noexcept
+		{
+			return _items
+				| std::views::filter([](auto& it) { return std::holds_alternative<Sizer*>(it.target); });
+		}
+
+		auto GetSizerItems() const noexcept
+		{
+			return _items
+				| std::views::filter([](auto& it) { return std::holds_alternative<Sizer*>(it.target); });
+		}
+
+		virtual void OnPreLayout(const fig::rect& rect) {};
 		virtual void OnLayout(const fig::rect& rect) = 0;
 		virtual void OnLayoutItem(fig::rect& itemRect, SizerItem& item) {};
 		

@@ -44,7 +44,7 @@ namespace fig::tts
 			}
 
 			// Do work
-			auto result = SendRequest(request.task, request.text);
+			auto result = SendRequest(request.task, request.text, request.instructions);
 			
 			if (IsAsyncRequestAlive(request))
 			{
@@ -74,12 +74,12 @@ namespace fig::tts
 		return it != _active_promises.end();
 	}
 
-	TTSResult ITTSBackend::EnqueueTask(TTSTask task, const fig::string& text)
+	std::optional<TTSResult> ITTSBackend::EnqueueTask(TTSTask task, fig::string_view text, fig::string_view instructions)
 	{
 		if (_status == TTSStatus::Uninitialized)
 		{
 			if (not Initialize())
-				return {}; // Give up
+				return std::nullopt; // Give up
 		}
 
 		const uint64_t id = _next_id.fetch_add(1, std::memory_order_relaxed);
@@ -99,7 +99,8 @@ namespace fig::tts
 			_pending.push(PendingRequest {
 				.id = id,
 				.task = task,
-				.text = text,
+				.text = fig::string { text },
+				.instructions = fig::string { instructions },
 				.promise = std::move(promise),
 			});
 		}
@@ -112,7 +113,7 @@ namespace fig::tts
 		};
 	}
 
-	bool ITTSBackend::Speak(fig::string_view text, bool split)
+	std::expected<std::vector<TTSResult>, TTSError> ITTSBackend::Speak(fig::string_view text, bool split)
 	{
 		text = Undialogue(text);
 		text = Unaction(text);
@@ -121,6 +122,7 @@ namespace fig::tts
 		fig::string content { text };
 		escape_json_inplace(content);
 
+		std::vector<TTSResult> results;
 		if (split)
 		{
 			auto sentences = split_sentences(content, true);
@@ -150,30 +152,37 @@ namespace fig::tts
 			if (not scratch.empty())
 				phrases.push_back(scratch);
 
-			bool bOk = false;
 			for (auto& phrase : phrases)
 			{
-				EnqueueTask(fig::tts::TTSTask::Speak, phrase); //! @todo: return future
-				bOk = true;
+				if (auto task = EnqueueTask(fig::tts::TTSTask::Speak, phrase))
+					results.emplace_back(std::move(task).value());
+				else
+					return std::unexpected(TTSError::Unavailable);
 			}
-			return bOk;
+
 		}
 		else if (not empty_or_whitespace(content)) // Don't split
 		{
-			EnqueueTask(fig::tts::TTSTask::Speak, content); //! @todo: return future
-			return true;
+			if (auto task = EnqueueTask(fig::tts::TTSTask::Speak, content))
+				results.emplace_back(std::move(task).value());
+			else
+				return std::unexpected(TTSError::Unavailable);
 		}
 
-		return false;
+		if (not results.empty())
+			return results;
+		return std::unexpected(TTSError::Failed);
 	}
 
-	bool ITTSBackend::Design(fig::string_view instruct)
+	std::expected<TTSResult, TTSError> ITTSBackend::Design(fig::string_view text, fig::string_view instruct)
 	{
 		instruct = trim(instruct);
 		if (instruct.empty())
-			return false;
+			return std::unexpected(TTSError::Failed);
 
-		EnqueueTask(fig::tts::TTSTask::Design, fig::string { instruct }); //! @todo: return future
-		return true;
+		if (auto task = EnqueueTask(fig::tts::TTSTask::Design, fig::string { text }, fig::string { instruct }))
+			return std::move(task).value();
+		else
+			return std::unexpected(TTSError::Unavailable);
 	}
 }

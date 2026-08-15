@@ -47,17 +47,17 @@ namespace fig::gui
 		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
 		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_MODELS, "Models");
 
-		auto pChatButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHATS_SMALL);
+		auto pChatButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHATS_SMALL, false);
 		pChatButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
 		pChatButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
-		auto pCharactersButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHARACTERS_SMALL);
+		auto pCharactersButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHARACTERS_SMALL, false);
 		pCharactersButtonSmall->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
 		pCharactersButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
-		auto pScenariosButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_SCENARIOS_SMALL);
+		auto pScenariosButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_SCENARIOS_SMALL, false);
 		pScenariosButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
-		auto pWorldsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_WORLDS_SMALL);
+		auto pWorldsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_WORLDS_SMALL, false);
 		pWorldsButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
-		auto pModelsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_MODELS_SMALL);
+		auto pModelsButtonSmall = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_MENU_MODELS_SMALL, false);
 		pModelsButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();

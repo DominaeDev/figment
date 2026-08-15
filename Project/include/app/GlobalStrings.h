@@ -64,6 +64,22 @@ namespace fig::strings
 			"New";
 	}
 
+	namespace TTS
+	{
+		inline constexpr fig::const_string Generating =
+			"Generating voice sample...";
+		inline constexpr fig::const_string ServerInitializing =
+			"Text-to-speech server is initializing...";
+		inline constexpr fig::const_string ServerUnavailable =
+			"Text-to-speech server is unavailable";
+		inline constexpr fig::const_string LoadingModel =
+			"Loading model...";
+		inline constexpr fig::const_string ErrorOccurred =
+			"An error occurred";
+		inline constexpr fig::const_string PlayingSound =
+			"Playing...";
+	}
+
 	namespace Errors
 	{
 		// ...

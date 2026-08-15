@@ -680,6 +680,12 @@
     <ClCompile Include="src\audio\AudioManager.cpp">
       <Filter>Source Files\Frontend\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\VoiceEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ToggleWithLabel.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1574,6 +1580,15 @@
       <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\tts\TTSTypes.h">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\VoiceEditor.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ToggleWithLabel.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\VoicePrint.h">
       <Filter>Source Files\Backend\TTS</Filter>
     </ClInclude>
   </ItemGroup>

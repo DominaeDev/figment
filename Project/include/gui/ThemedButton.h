@@ -10,6 +10,7 @@ namespace fig::gui
 		ThemedButton() = delete;
 	public:
 		void SetTheme(const ButtonTheme& theme) noexcept;
+		const ButtonTheme& GetTheme() const noexcept { return _theme; }
 
 	protected:
 		ThemedButton(ControlPtr pParent);
@@ -20,7 +21,7 @@ namespace fig::gui
 		EventResult OnEvent(fig::event& event) override;
 		void OnAfterLayout() override;
 
-	private:
+	protected:
 		ButtonTheme _theme {};
 	};
 }

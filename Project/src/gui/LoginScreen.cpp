@@ -22,7 +22,7 @@ namespace fig::gui
 		pLogo->SetPosition(44, 0);
 
 		// Menu button
-		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
+		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU, false);
 		_pMenuButton->SetTheme(Theme::SidePanelButtonStyle);
 		_pMenuButton->SetSize(36, 36);
 		_pMenuButton->SetPosition(4, 6);
@@ -41,11 +41,11 @@ namespace fig::gui
 		_pProfileImage = pCenter->CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pProfileImage->SetSize(160, 160);
 
-		_pPrevProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Resource::ICON_CHEVRON_LEFT);
+		_pPrevProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Resource::ICON_CHEVRON_LEFT, false);
 		_pPrevProfileBtn->SetSize(35, 56);
 		_pPrevProfileBtn->SetDelegate([this]() { CycleProfile(-1); });
 
-		_pNextProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Resource::ICON_CHEVRON_RIGHT);
+		_pNextProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Resource::ICON_CHEVRON_RIGHT, false);
 		_pNextProfileBtn->SetSize(35, 56);
 		_pNextProfileBtn->SetDelegate([this]() { CycleProfile(+1); });
 
@@ -64,12 +64,9 @@ namespace fig::gui
 		_pPassword->SetEnterPressedCallback([this](fig::string password) { SignIn(); });
 		_pPassword->SetFocus(true);
 
-		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(Resource::ICON_ARROW_RIGHT);
+		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(Resource::ICON_ARROW_RIGHT, true);
 		_pSignInBtn->SetSize(35, 35);
 		_pSignInBtn->SetDelegate([this]() { SignIn(); });
-		auto pSimpleBorder = _pSignInBtn->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
-		pSimpleBorder->FillParent();
-		pSimpleBorder->SetForegroundColor(Color::SidePanelForeground);
 
 		auto pPasswordSizer = _pPasswordPanel->SetSizer<HorizontalSizer>();
 		pPasswordSizer->AddStretchSpacer();

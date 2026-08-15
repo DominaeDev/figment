@@ -14,6 +14,8 @@ namespace fig::gui
 	{
 		if (auto pControl = item.GetControl())
 			return pControl->GetHeight() + (includeBorder ? item.GetTopBorder() + item.GetBottomBorder() : 0);
+		else if (auto pSizer = item.GetSizer())
+			return item.rect.h + (includeBorder ? item.GetTopBorder() + item.GetBottomBorder() : 0);
 		return 0;
 	}
 
@@ -64,18 +66,6 @@ namespace fig::gui
 				}
 			}
 		}
-	}
-
-	fig::coord VerticalSizer::GetExtent() const
-	{
-		fig::coord min = std::numeric_limits<fig::coord>::max();
-		fig::coord max = std::numeric_limits<fig::coord>::min();
-		for (auto& item : GetLayoutItems())
-		{
-			min = std::min(min, item.rect.y);
-			max = std::min(max, item.rect.y + item.rect.h);
-		}
-		return max - min;
 	}
 }
 

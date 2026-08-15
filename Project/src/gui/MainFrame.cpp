@@ -8,6 +8,7 @@
 #include "gui/LoginScreen.h"
 #include "gui/EditorScreen.h"
 #include "gui/CharacterEditor.h"
+#include "gui/VoiceEditor.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/FileUtility.h"
@@ -355,7 +356,7 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{
 						auto characterId = fig::uuid::from_str("f00e36d3-42f2-4a86-b844-a5fc389a41da");
-						ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>(characterId);
+						ChangeScreen<EditorScreen>()->SetEditor<VoiceEditor>(characterId);
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)
@@ -371,16 +372,12 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_F4 and mods.None)
 					{
 						Global::GetTTSBackend().Initialize();
+//						auto discard = Global::GetTTSBackend().Speak("These are nice, tasty biscuits.", false);
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F4 and mods.Control)
 					{
 						Global::GetTTSBackend().Shutdown();
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_F4 and mods.Shift)
-					{
-						Global::GetTTSBackend().Speak("These are nice, tasty biscuits.");
 						return EventResult::Handled;
 					}
 				}
@@ -444,6 +441,12 @@ namespace fig::gui
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>(characterId);
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::EditCharacterVoice))
+		{
+			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
+			ChangeScreen<EditorScreen>()->SetEditor<VoiceEditor>(characterId);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::StartTextInput)

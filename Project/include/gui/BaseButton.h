@@ -12,7 +12,7 @@ namespace fig::gui
 		BaseButton() = delete;
 	public:
 		void SetDelegate(ButtonDelegate pDelegate) noexcept;
-		void SetEnabled(bool bEnabled) noexcept;
+		void Enable(bool bEnabled) noexcept;
 		void SetExpandedArea(fig::coord size) noexcept;
 		inline bool IsEnabled() const noexcept;
 

@@ -15,7 +15,7 @@ namespace fig::gui
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
 		_pIcon->SetForegroundColor(GetThemeForeground());
 
-		Toggle(bOn, false);
+		Toggle(bOn, true);
 
 		SetSize(36, 36);
 
@@ -53,7 +53,7 @@ namespace fig::gui
 		_pIcon->SetForegroundColor(GetThemeForeground());
 	}
 
-	void ToggleWithIcon::Toggle(bool bOn, bool bTrigger) noexcept
+	void ToggleWithIcon::Toggle(bool bOn, bool bSilent) noexcept
 	{
 		_bOn = bOn;
 		if (bOn)
@@ -64,7 +64,7 @@ namespace fig::gui
 		else
 			ClearBorderRenderer();
 
-		if (bTrigger and _fnToggle)
+		if (_fnToggle and not bSilent)
 			_fnToggle(_bOn);
 	}
 }

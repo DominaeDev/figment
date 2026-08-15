@@ -6,9 +6,11 @@ namespace fig::gui
 {
 	class BoxSizer : public Sizer
 	{
-		virtual fig::coord GetExtent() const = 0;
+	public:
+		fig::point GetExtents() const;
 
 	protected:
+		void OnPreLayout(const fig::rect& rect) override;
 		void OnLayout(const fig::rect& rect) override;
 
 		virtual fig::coord GetAvailableSpace() = 0;

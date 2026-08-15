@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "tts/AudioServerProcess.h"
 
+using namespace fig::gui;
+
 namespace fig::tts
 {
 	AudioServerProcess::~AudioServerProcess()
@@ -17,10 +19,8 @@ namespace fig::tts
 			SDL_PROP_PROCESS_CREATE_ARGS_POINTER,
 			const_cast<void*>(static_cast<const void*>(arguments.data())));
 
-#ifdef _DEBUG
 		SDL_SetNumberProperty(properties, SDL_PROP_PROCESS_CREATE_STDOUT_NUMBER, SDL_PROCESS_STDIO_APP);
 		SDL_SetBooleanProperty(properties, SDL_PROP_PROCESS_CREATE_STDERR_TO_STDOUT_BOOLEAN, true);
-#endif
 
 		_process = SDL_CreateProcessWithProperties(properties);
 
@@ -29,10 +29,8 @@ namespace fig::tts
 		if (not _process)
 			return std::unexpected(SDL_GetError());
 
-#ifdef _DEBUG
 		SDL_IOStream* output = SDL_GetProcessOutput(_process);
 		_logThread = std::jthread(std::bind_front(&AudioServerProcess::ReadLoop, this, output));
-#endif
 		return {};
 	}
 
@@ -43,10 +41,8 @@ namespace fig::tts
 
 		SDL_KillProcess(_process, true);
 
-#ifdef _DEBUG
 		if (_logThread.joinable())
 			_logThread.join();
-#endif
 
 		SDL_DestroyProcess(_process);
 		_process = nullptr;
@@ -60,7 +56,6 @@ namespace fig::tts
 		return not SDL_WaitProcess(_process, false, &exitCode);
 	}
 
-#ifdef _DEBUG
 	void AudioServerProcess::ReadLoop(SDL_IOStream* output, std::stop_token stopToken)
 	{
 		char buffer[4096];
@@ -71,7 +66,15 @@ namespace fig::tts
 
 			if (bytesRead > 0)
 			{
-				Log(fig::string { buffer, bytesRead });
+				fig::string log { buffer, bytesRead };
+				Log(log);
+
+				if (log.contains("ggml_cuda_init"))
+					PushEvent(UserEvent::TTSServerLoadingModel);
+				else if (log.contains("ggml_backend_cuda_graph_compute"))
+					PushEvent(UserEvent::TTSServerGenerating);
+				else if (log.contains("audiocpp_server failed"))
+					PushEvent(UserEvent::TTSServerError);
 				continue;
 			}
 
@@ -86,5 +89,4 @@ namespace fig::tts
 			break;
 		}
 	}
-#endif
 }

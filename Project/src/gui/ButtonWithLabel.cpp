@@ -6,34 +6,38 @@
 
 namespace fig::gui
 {
-	ButtonWithLabel::ButtonWithLabel(ControlPtr pParent, const fig::string& text) : ThemedButton(pParent)
+	ButtonWithLabel::ButtonWithLabel(ControlPtr pParent, fig::string_view text, double fontSize) : ThemedButton(pParent)
 	{
-		SetSize(200, 36);
-
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());
 		SetBackgroundColor(GetThemeBackground());
 
-		_pLabel = CreateControl<StaticText>("", FontFace::Default, 16.0, true);
+		auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
+		pBorderRenderer->SetColor(Color::LineColor);
+
+		_pLabel = CreateControl<StaticText>("", FontFace::Default, fontSize, true);
 		_pLabel->SetForegroundColor(GetThemeForeground());
 		_pLabel->SetTextAndResize(text);
-		_pLabel->Center();
 
-		_pBorder = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
-		_pBorder->SetForegroundColor(Color::SidePanelForeground);
-		_pBorder->FillParent();
-
+		SetSize(200, 36);
 	}
 
-	void ButtonWithLabel::OnAfterLayout()
+	void ButtonWithLabel::SetLabel(fig::string_view label) noexcept
 	{
-		if (_pBorder)
-			_pBorder->FillParent();
+		_pLabel->SetTextAndResize(label);
+		_pLabel->Center();
+	}
+
+	void ButtonWithLabel::OnSize()
+	{
+		_pLabel->Center();
 	}
 
 	void ButtonWithLabel::OnButtonState()
 	{
 		GetBackgroundRenderer()->SetColor(GetThemeBackground());
+		GetBorderRenderer()->SetColor(_state != ButtonState::Disabled ? Color::LineColor : Color::DisabledLineColor);
+
 		_pLabel->SetForegroundColor(GetThemeForeground());
 	}
 }

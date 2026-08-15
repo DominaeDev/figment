@@ -1,0 +1,51 @@
+#pragma once
+
+#include "gui/Editor.h"
+#include "data/Character.h"
+#include "tts/VoicePrint.h"
+
+namespace fig::gui
+{
+	class VoiceEditor : public Editor
+	{
+	public:
+		VoiceEditor(const fig::uuid& characterId);
+
+		void Initialize() noexcept;
+		fig::string GetTitle() const noexcept override;
+		bool SaveChanges() noexcept override { return false; }
+
+	protected:
+		void OnUpdate(float fElapsed);
+		EventResult OnEvent(fig::event& event) override;
+		void OnToggle(fig::handle group, fig::handle key, bool bOn);
+
+	private:
+		fig::observer_ptr<class ToggleWithLabel> CreateToggle(SizerPtr pSizer, fig::handle toggleGroup, fig::handle toggleKey, fig::string_view label, bool bRadio = false);
+		fig::string GetPrompt() const noexcept;
+		
+		void Generate() noexcept;
+		void PlayStop() noexcept;
+		void SetStatusMessage(fig::string_view message);
+
+	private:
+		fig::uuid _characterId {};
+		fig::data::Character _character {};
+
+		fig::observer_ptr<class ButtonWithLabel> _pGenerateButton;
+		fig::observer_ptr<class ButtonWithIcon> _pPlayButton;
+		fig::observer_ptr<class TextBox> _pCustomPrompt;
+		fig::observer_ptr<class StaticText> _pStatusText;
+
+		using ToggleGroup = std::map<fig::handle, fig::observer_ptr<class ToggleWithLabel>>;
+		std::map<fig::handle, ToggleGroup> _toggleGroups;
+
+		std::unordered_set<fig::handle> _selectedKeys;
+
+		std::vector<fig::tts::TTSResult> _pendingResults;
+		fig::tts::VoicePrint _voicePrint;
+		bool _bIsPlaying = false;
+
+
+	};
+}

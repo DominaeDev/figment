@@ -1,7 +1,6 @@
 #include <pch.h>
 #include "tts/HttpClient_Win.h"
 #include "io/FileUtility.h"
-#include "audio/AudioManager.h"
 
 #pragma comment(lib, "winhttp.lib")
 
@@ -131,7 +130,6 @@ namespace fig::tts
 		}
 		LogLn("Received voice clip.");
 
-		Global::GetAudioManager().EnqueueSound(body); //! @temp
 		return body;
 	}
 }
