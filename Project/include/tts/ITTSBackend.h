@@ -6,6 +6,12 @@
 
 namespace fig::tts
 {
+	struct TTSVoiceRef 
+	{
+		fig::observer_ptr<const AudioData> pData;
+		fig::string referenceText;
+	};
+
 	class ITTSBackend
 	{
 	public:
@@ -17,26 +23,33 @@ namespace fig::tts
 	
 		TTSStatus GetStatus() const noexcept { return _status; };
 
-		std::expected<std::vector<TTSResult>, TTSError> Speak(fig::string_view text, bool split = true);
+		void UnloadAllModels();
+		void UnloadSpeechModels();
+		void UnloadDesignModels();
+
+		std::expected<std::vector<TTSResult>, TTSError> Speak(fig::uuid characterId, fig::string_view text, bool split = true);
 		std::expected<TTSResult, TTSError> Design(fig::string_view text, fig::string_view instruct);
 
 	protected:
 		ITTSBackend();
-		virtual TTSPayload SendRequest(TTSTask task, fig::string_view text, fig::string_view instructions) = 0;
+		virtual TTSPayload SendRequest(TTSTask task, fig::uuid modelId, fig::string_view text, fig::string_view instructions, TTSVoiceRef voiceRef) = 0;
+		void LoadModelConfigurations();
 
 	protected:
 		TTSStatus _status { TTSStatus::Uninitialized };
-		fig::data::VoiceModelSettings _models;
+		fig::tts::VoiceModelSettings _models;
 
 		struct PendingRequest {
 			uint64_t id {};
 			TTSTask task {};
+			fig::uuid modelId {};
 			fig::string text {};
 			fig::string instructions {};
+			TTSVoiceRef voiceReference {};
 			std::unique_ptr<TTSPromise> promise;
 		};
 		bool IsAsyncRequestAlive(const PendingRequest& request) const;
-		std::optional<TTSResult> EnqueueTask(TTSTask task, fig::string_view text, fig::string_view instructions = {});
+		std::optional<TTSResult> EnqueueTask(TTSTask task, fig::uuid modelId, fig::uuid characterId, fig::string_view text, fig::string_view instructions = {});
 
 	private:
 		mutable std::mutex _pending_mutex;
@@ -56,8 +69,9 @@ namespace fig::tts
 		bool Initialize() override { return false; }
 		bool Restart() override { return false; }
 		void Shutdown() override {}
+	
 	protected:
-		TTSPayload SendRequest(TTSTask task, fig::string_view text, fig::string_view instructions) override { return std::unexpected(TTSError::Unavailable); }
+		TTSPayload SendRequest(TTSTask task, fig::uuid modelId, fig::string_view text, fig::string_view instructions, TTSVoiceRef voiceRef) override { return std::unexpected(TTSError::Unavailable); }
 	};
 }
 

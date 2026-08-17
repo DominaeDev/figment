@@ -75,7 +75,6 @@ namespace fig::io
 
 			fail:
 				LogLn(std::format("Failed to preload asset [{}] {}.", _log_name, (fig::string)asset.id));
-//				assert(false && "Failed to preload asset");
 			}
 
 		}
@@ -103,7 +102,8 @@ namespace fig::io
 				{
 					auto [it, _] = _assets.emplace(assetId, std::move(try_load.value()));
 
-					_pAssetMngr->ReleaseAssetData(assetId); // Data no longer needed
+					if (asset.sync_state.file_sync == AssetSyncState::Status::Synchronized)
+						_pAssetMngr->ReleaseAssetData(assetId); // Data no longer needed
 					LogLn(std::format("Loaded asset [{}] {} into cache.", _log_name, (fig::string)assetId));
 					return fig::optional_cref<data_type>((*it).second);
 				}
@@ -111,7 +111,6 @@ namespace fig::io
 
 		fail:
 			LogLn(std::format("Failed to load asset [{}] {}.", _log_name, (fig::string)assetId));
-			assert(false && "Failed to load asset");
 			return fig::nullref;
 		}
 

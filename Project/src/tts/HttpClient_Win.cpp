@@ -123,12 +123,13 @@ namespace fig::tts
 
 		WinHttpCloseHandle(request);
 
+		LogLn(std::format("Audio server returned status code: {}", statusCode));
+
 		if (statusCode != 200)
 		{
-			LogLn(std::format("Audio server returned status code: {}", statusCode));
+			LogLn(fig::string { fig::string_view { reinterpret_cast<char*>(body.data()), body.size() } });
 			return std::unexpected(std::make_error_code(std::errc::protocol_error));
 		}
-		LogLn("Received voice clip.");
 
 		return body;
 	}

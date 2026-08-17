@@ -32,7 +32,7 @@ namespace fig::io
 		ImagePng			= 0x0C,
 		ImageWebp			= 0x0D,
 
-		AudioWav			= 0x10, //! @todo: voice sample?
+		AudioWav			= 0x10,
 	};
 
 	enum class ImageAssetType : uint8_t
@@ -57,7 +57,7 @@ namespace fig::io
 	{
 		Undefined			= 0x00,
 		VoiceSettings		= 0x01,
-		VoiceSample			= 0x02,
+		VoiceReference		= 0x02,
 		VoiceMessage		= 0x03,
 	};
 

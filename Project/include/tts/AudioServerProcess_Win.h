@@ -3,6 +3,7 @@
 #if defined(_WIN32)
 
 #include "Figment.h"
+#include "tts/AudioServerConfiguration.h"
 #include <windows.h>
 
 namespace fig::tts
@@ -12,7 +13,7 @@ namespace fig::tts
 	public:
 		~AudioServerProcess_Win();
 
-		std::expected<void, std::string> Start();
+		std::expected<void, std::string> Start(const AudioServerConfiguration& config);
 		void Stop();
 		bool IsRunning(int32_t& exitCode);
 

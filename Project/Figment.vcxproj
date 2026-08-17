@@ -299,6 +299,8 @@
     <ClCompile Include="src\text\ContextLocator.cpp" />
     <ClCompile Include="src\text\MacroProvider.cpp" />
     <ClCompile Include="src\text\TextEvaluator.cpp" />
+    <ClCompile Include="src\tts\AudioResultQueue.cpp" />
+    <ClCompile Include="src\tts\AudioServerConfiguration.cpp" />
     <ClCompile Include="src\tts\AudioServerProcess.cpp" />
     <ClCompile Include="src\tts\AudioServerProcess_Win.cpp" />
     <ClCompile Include="src\tts\HttpClient_Win.cpp" />
@@ -568,6 +570,9 @@
     <ClInclude Include="include\text\ContextLocator.h" />
     <ClInclude Include="include\text\MacroProvider.h" />
     <ClInclude Include="include\text\TextEvaluator.h" />
+    <ClInclude Include="include\tts\AudioData.h" />
+    <ClInclude Include="include\tts\AudioResultQueue.h" />
+    <ClInclude Include="include\tts\AudioServerConfiguration.h" />
     <ClInclude Include="include\tts\AudioServerProcess.h" />
     <ClInclude Include="include\tts\AudioServerProcess_Win.h" />
     <ClInclude Include="include\tts\HttpClient_Win.h" />

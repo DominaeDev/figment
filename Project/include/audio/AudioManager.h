@@ -10,7 +10,7 @@ namespace fig::audio
 		AudioManager();
 
 		bool PlaySound(fig::bytes&& data);
-		bool EnqueueSound(const fig::bytes& data, float fDelay = Constants::TTS::DefaultDelay);
+		bool EnqueueSound(fig::byte_span data, float fVolume = -1.0f, float fDelay = Constants::TTS::DefaultDelay);
 		bool IsPlaying() const noexcept;
 
 		void StopAllSounds();
@@ -31,6 +31,7 @@ namespace fig::audio
 				spec = other.spec;
 				audioData = other.audioData;
 				audioLength = other.audioLength;
+				volume = other.volume;
 				delay = other.delay;
 				other.audioData = NULL;
 			}
@@ -43,6 +44,7 @@ namespace fig::audio
 			SDL_AudioSpec spec {};
 			Uint8* audioData {};
 			Uint32 audioLength {};
+			float volume { 1.0f };
 			float delay {};
 		};
 

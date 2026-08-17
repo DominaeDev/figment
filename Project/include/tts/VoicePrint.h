@@ -7,9 +7,28 @@ namespace fig::tts
 {
 	struct VoicePrint
 	{
-		TTSData audioData;
-		fig::string prompt;
 		fig::uuid modelId;
-		std::unordered_set<fig::handle> keys;
+		fig::string generationPrompt;
+		fig::string referenceText;
+		std::vector<fig::string> keys;
+
+		AudioData audioData;
+
+		static auto XmlFields() noexcept
+		{
+			using namespace fig::data;
+			return Fields(
+				Element { "Model",			&VoicePrint::modelId },
+				Element { "Prompt",			&VoicePrint::generationPrompt },
+				Element { "Transcript",		&VoicePrint::referenceText },
+				Element { "Keys",			&VoicePrint::keys },
+				Element { "Data",			&VoicePrint::audioData,
+					[](auto&& data) { return data.AsBase64(); },
+					[](auto&& data) { return AudioData::FromBase64(data); }
+				}
+					
+			);
+			static_assert(IsXmlSerializable<VoicePrint>);
+		}
 	};
 }

@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "tts/TTSBackend_Win.h"
+#include "io/FileUtility.h"
 
 using namespace fig::gui;
 
@@ -23,7 +24,11 @@ namespace fig::tts
 			Shutdown(); // Restart
 		}
 
-		if (auto started = _server.Start())
+		AudioServerConfiguration serverConfig;
+		serverConfig.backend = AudioServerConfiguration::Backend::CUDA;
+		serverConfig.models = _models;
+
+		if (auto started = _server.Start(serverConfig))
 		{
 			_status = TTSStatus::ServerStarted;
 			PushEvent(UserEvent::TTSServerStarted);
@@ -69,7 +74,7 @@ namespace fig::tts
 		return false;
 	}
 
-	std::expected<TTSData, TTSError> TTSBackend_Win::SendRequest(TTSTask task, fig::string_view text, fig::string_view instructions)
+	std::expected<AudioData, TTSError> TTSBackend_Win::SendRequest(TTSTask task, fig::uuid modelId, fig::string_view text, fig::string_view instructions, TTSVoiceRef voiceRef)
 	{
 		if (not _http.IsConnected())
 		{
@@ -77,18 +82,30 @@ namespace fig::tts
 				return std::unexpected(TTSError::Unavailable);
 		}
 
-		if (task == TTSTask::Speak)
+		if (task == TTSTask::Speech)
 		{
-			fig::string request = std::format(R"({{
-				"model": "{0}",
-				"input": "{1}"
-			}})", "chatterbox", text);
+			string ref_text = voiceRef.referenceText;
+
+			fig::string request;
+			if (voiceRef.pData)
+			{
+				request = std::format(R"({{
+					"model": "{0}",
+					"input": "{1}",
+					"voice_ref": {{ "type": "base64", "data": "{2}" }},
+					"reference_text": "{3}"
+				}})", (fig::string)modelId, text, voiceRef.pData->AsBase64(), ref_text);
+			}
+			else
+			{
+				request = std::format(R"({{
+					"model": "{0}",
+					"input": "{1}"
+				}})", (fig::string)modelId, text);
+			}
 
 			if (auto response = _http.Post(L"/v1/audio/speech", request))
-			{
-				auto& data = response.value();
-				return std::move(data);
-			}
+				return std::move(AudioData::FromBytes(std::move(response.value())));
 			else
 				return std::unexpected(TTSError::Failed);
 		}
@@ -101,15 +118,37 @@ namespace fig::tts
 				"model": "{0}",
 				"input": "{1}",
 				"instructions": "{2}"
-			}})", "qwen3-design", text, strInstructions);
+			}})", (fig::string)modelId, text, strInstructions);
 
 			if (auto response = _http.Post(L"/v1/audio/speech", request))
-			{
-				auto& data = response.value();
-				return std::move(data);
-			}
+				return std::move(AudioData::FromBytes(std::move(response.value())));
 			else
 				return std::unexpected(TTSError::Failed);
+		}
+		else if (task == TTSTask::Unload)
+		{
+			if (not modelId.empty())
+			{
+				fig::string request = std::format(R"({{ "model_ids": ["{}"] }})", (fig::string)modelId);
+
+				if (auto response = _http.Post(L"/v1/tasks/unload_models", request))
+				{
+					LogLn(std::format("Unloaded TTS model {}", (fig::string)modelId));
+					return {};
+				}
+				else
+					return std::unexpected(TTSError::Failed);
+			}
+			else
+			{
+				if (auto response = _http.Post(L"/v1/tasks/unload_all_models", ""))
+				{
+					LogLn("Unloaded all TTS models");
+					return {};
+				}
+				else
+					return std::unexpected(TTSError::Failed);
+			}
 		}
 
 		return std::unexpected(TTSError::Failed);

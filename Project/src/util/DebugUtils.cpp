@@ -24,7 +24,7 @@ namespace fig
 //			CreateModelSettings();
 //			ShuffleCards();
 //			EraseChats();
-			GenerateUUIDs(10uz);
+//			GenerateUUIDs(10uz);
 		}
 	}
 

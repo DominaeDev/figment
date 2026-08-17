@@ -4,6 +4,7 @@
 #include "io/AssetManager.h"
 #include "gui/AppResources.h"
 #include "data/ChatInstance.h"
+#include "data/VoiceSettings.h"
 
 using namespace fig::user;
 using namespace fig::data;
@@ -21,6 +22,7 @@ namespace fig::io
 		_caches[AssetTypeOf<fig::data::ChatInstance>]	= std::make_unique<AssetCache<fig::data::ChatInstance, "ChatInstance">>(_pAssetMngr.get());
 		_caches[AssetTypeOf<fig::data::ChatLog>]		= std::make_unique<AssetCache<fig::data::ChatLog, "ChatLog">>(_pAssetMngr.get());
 		_caches[AssetTypeOf<fig::sdl::Surface>]			= std::make_unique<AssetCache<fig::sdl::Surface, "Image">>(_pAssetMngr.get());
+		_caches[AssetTypeOf<fig::data::VoiceSettings>]	= std::make_unique<AssetCache<fig::data::VoiceSettings, "VoiceSettings">>(_pAssetMngr.get());
 
 		LoadAll();
 	}
@@ -100,6 +102,8 @@ namespace fig::io
 				// Last used => last chat
 				if (auto lastChat = FindLastChatWith(asset.id))
 					meta.lastUsedAt = std::max(meta.lastUsedAt, lastChat.value().GetUpdatedAt());
+
+				meta.hasVoice = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Audio, AudioAssetType::VoiceReference), assetId).has_value();
 			}
 
 			_metaData[assetId] = meta;
@@ -521,4 +525,33 @@ namespace fig::io
 			| std::views::transform([](auto& a) { return std::cref(a); })
 			| std::ranges::to<std::vector>();
 	}
+
+	fig::uuid UserContentManager::CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings)
+	{
+		if (auto character = _pAssetMngr->FindAsset(characterId, AssetType::Character); not character.has_value())
+			return {}; // Not found
+
+		if (voiceSettings.voicePrint.audioData.empty())
+			return {}; // No data
+
+		// Delete existing voice
+		if (auto existingVoice = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Audio, AudioAssetType::VoiceSettings), characterId))
+			DeleteAsset(existingVoice.value().id);
+
+		fig::bytes voiceSettingsData;
+		voiceSettings.SaveToXml(voiceSettingsData);
+		auto& voiceSettingsAsset = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Audio, AudioAssetType::VoiceSettings, DataFormat::TextXml), voiceSettingsData, characterId);
+
+		return voiceSettingsAsset.id;
+	}
+
+	fig::optional_cref<VoiceSettings> UserContentManager::GetVoiceForCharacter(const fig::uuid& characterId) noexcept
+	{
+		if (auto try_asset = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Audio, AudioAssetType::VoiceSettings), characterId))
+		{
+			return Get<fig::data::VoiceSettings>((*try_asset).id);
+		}
+		return std::nullopt;
+	}
+
 }

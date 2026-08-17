@@ -3,15 +3,17 @@
 #include "gui/ToggleWithLabel.h"
 #include "gui/SimpleTextBox.h"
 #include "gui/AppResources.h"
+#include "gui/ImageViewport.h"
 #include "data/Character.h"
 #include "audio/AudioManager.h"
 
 using namespace fig::data;
 using namespace fig::tts;
+using namespace fig::io;
 
 namespace fig::gui
 {
-	constexpr fig::string_view examplePhrase = "Greetings! My name is {} and this is my voice. Do you like it? If not, I'm sure I can change your mind.";
+	constexpr fig::string_view examplePhrase = "Greetings! I'm {}, and this is my voice. Do you like it? If not, well, that sounds like a YOU problem.";
 
 	static const fig::handle groupGender = "gender";
 	static const fig::handle groupMaturity = "maturity";
@@ -71,30 +73,34 @@ namespace fig::gui
 	VoiceEditor::VoiceEditor(const fig::uuid& characterId) : Editor(nullptr),
 		_characterId { characterId }
 	{
-//		SetBackgroundColor(Color::Debug);
-
 		if (auto try_character = Global::GetUserContent().Get<Character>(characterId))
 			_character = fig::data::Character { *try_character };
+
+		_audioResultQueue.SetDelegate([this](auto&& r) { OnAudioResult(std::move(r)); });
 	}
 
 	fig::string VoiceEditor::GetTitle() const noexcept
 	{
-		return std::format("Configure {}'s voice", _character.GetName());
+		return std::format("Configuring {}'s voice", _character.GetName());
 	}
 
 	void VoiceEditor::Initialize() noexcept
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
 
+		auto pHorizontalSizer = new HorizontalSizer();
+
+		auto pDesignerSizer = new VerticalSizer();
+
 		// Gender
-		CreateLabel(this, pSizer, "Pitch");
+		CreateLabel(this, pDesignerSizer, "Pitch");
 		auto pGenderSizer = new HorizontalSizer();
 		auto pMale = CreateToggle(pGenderSizer, groupGender, "gender_male", "Masculine", true);
 		auto pFemale = CreateToggle(pGenderSizer, groupGender, "gender_female", "Feminine", true);
-		pSizer->Add(pGenderSizer);
+		pDesignerSizer->Add(pGenderSizer);
 
 		// Maturity
-		CreateLabel(this, pSizer, "Maturity");
+		CreateLabel(this, pDesignerSizer, "Maturity");
 		auto pMaturitySizer1 = new HorizontalSizer();
 		auto pMaturitySizer2 = new HorizontalSizer();
 		CreateToggle(pMaturitySizer1, groupMaturity, "maturity_spry", "Spry");
@@ -103,12 +109,12 @@ namespace fig::gui
 		CreateToggle(pMaturitySizer1, groupMaturity, "maturity_dependable", "Dependable");
 		CreateToggle(pMaturitySizer1, groupMaturity, "maturity_seasoned", "Seasoned");
 		CreateToggle(pMaturitySizer2, groupMaturity, "maturity_venerable", "Venerable");
-		pSizer->Add(pMaturitySizer1);
-		pSizer->AddSpacer(6);
-		pSizer->Add(pMaturitySizer2);
+		pDesignerSizer->Add(pMaturitySizer1);
+		pDesignerSizer->AddSpacer(6);
+		pDesignerSizer->Add(pMaturitySizer2);
 
 		// Tone
-		CreateLabel(this, pSizer, "Tone");
+		CreateLabel(this, pDesignerSizer, "Tone");
 		auto pToneSizer1 = new HorizontalSizer();
 		auto pToneSizer2 = new HorizontalSizer();
 		CreateToggle(pToneSizer1, groupTone, "tone_deep", "Deep");
@@ -118,12 +124,12 @@ namespace fig::gui
 		CreateToggle(pToneSizer1, groupTone, "tone_cute", "Sweet");
 		CreateToggle(pToneSizer2, groupTone, "tone_textured", "Textured");
 		CreateToggle(pToneSizer2, groupTone, "tone_crisp", "Crisp");
-		pSizer->Add(pToneSizer1);
-		pSizer->AddSpacer(6);
-		pSizer->Add(pToneSizer2);
+		pDesignerSizer->Add(pToneSizer1);
+		pDesignerSizer->AddSpacer(6);
+		pDesignerSizer->Add(pToneSizer2);
 		
 		// Presence
-		CreateLabel(this, pSizer, "Presence");
+		CreateLabel(this, pDesignerSizer, "Presence");
 		auto pPresenceSizer1 = new HorizontalSizer();
 //		auto pPresenceSizer2 = new HorizontalSizer();
 		CreateToggle(pPresenceSizer1, groupPresence, "presence_nervous", "Nervous");
@@ -131,22 +137,22 @@ namespace fig::gui
 		CreateToggle(pPresenceSizer1, groupPresence, "presence_grounded", "Grounded");
 		CreateToggle(pPresenceSizer1, groupPresence, "presence_strong", "Strong");
 		CreateToggle(pPresenceSizer1, groupPresence, "presence_commanding", "Commanding");
-		pSizer->Add(pPresenceSizer1);
-//		pSizer->AddSpacer(6);
-//		pSizer->Add(pPresenceSizer2);
+		pDesignerSizer->Add(pPresenceSizer1);
+//		pDesignerSizer->AddSpacer(6);
+//		pDesignerSizer->Add(pPresenceSizer2);
 
 		// Flow
-		CreateLabel(this, pSizer, "Flow");
+		CreateLabel(this, pDesignerSizer, "Flow");
 		auto pFlowSizer = new HorizontalSizer();
 		CreateToggle(pFlowSizer, groupFlow, "flow_relaxed", "Relaxed");
 		CreateToggle(pFlowSizer, groupFlow, "flow_balanced", "Balanced");
 		CreateToggle(pFlowSizer, groupFlow, "flow_controlled", "Controlled");
 		CreateToggle(pFlowSizer, groupFlow, "flow_monotone", "Flat");
 		CreateToggle(pFlowSizer, groupFlow, "flow_quick", "Quick");
-		pSizer->Add(pFlowSizer);
+		pDesignerSizer->Add(pFlowSizer);
 
 		// Temperature
-		CreateLabel(this, pSizer, "Mood");
+		CreateLabel(this, pDesignerSizer, "Mood");
 		auto pTemperatureSizer1 = new HorizontalSizer();
 		auto pTemperatureSizer2 = new HorizontalSizer();
 		CreateToggle(pTemperatureSizer1, groupTemperature, "temperature_friendly", "Friendly");
@@ -157,17 +163,18 @@ namespace fig::gui
 		CreateToggle(pTemperatureSizer2, groupTemperature, "temperature_gloomy", "Gloomy");
 		CreateToggle(pTemperatureSizer2, groupTemperature, "temperature_arrogant", "Arrogant");
 		CreateToggle(pTemperatureSizer2, groupTemperature, "temperature_malevolent", "Malevolent");
-		pSizer->Add(pTemperatureSizer1);
-		pSizer->AddSpacer(6);
-		pSizer->Add(pTemperatureSizer2);
+		pDesignerSizer->Add(pTemperatureSizer1);
+		pDesignerSizer->AddSpacer(6);
+		pDesignerSizer->Add(pTemperatureSizer2);
 
 		// Custom
-		CreateLabel(this, pSizer, "Custom prompt");
+		CreateLabel(this, pDesignerSizer, "Custom prompt");
 		_pCustomPrompt = CreateControl<SimpleTextBox>();
 		_pCustomPrompt->SetMaxWidth(532);
-		pSizer->Add(_pCustomPrompt, 0, SizerFlag::Expand);
+		pDesignerSizer->Add(_pCustomPrompt, 0, SizerFlag::Expand);
 
-		pSizer->AddSpacer(24);
+		pHorizontalSizer->Add(pDesignerSizer, -1, SizerFlag::Expand);
+		pSizer->Add(pHorizontalSizer, 0, SizerFlag::Expand);
 
 		_pGenerateButton = CreateControl<ButtonWithLabel>("Generate voice");
 		_pGenerateButton->SetHeight(35);
@@ -178,6 +185,14 @@ namespace fig::gui
 		_pPlayButton->SetDelegate([this] { PlayStop(); });
 		_pPlayButton->Enable(false);
 
+		_pSaveButton = CreateControl<ButtonWithLabel>("Save");
+		_pSaveButton->SetHeight(35);
+		_pSaveButton->SetDelegate([this] { 
+			if (Save())
+				PushEvent(UserEvent::NavigateToHome);
+		});
+		_pSaveButton->Enable(false);
+
 		_pStatusText = CreateControl<StaticText>("");
 
 		auto pButtonSizer = new HorizontalSizer();
@@ -185,14 +200,43 @@ namespace fig::gui
 		pButtonSizer->Add(_pPlayButton, 0, SizerFlag::Left, 12);
 		pButtonSizer->Add(_pStatusText, -1, SizerFlag::Left | SizerFlag::AlignCenterVertical, 12);
 
-		pSizer->Add(pButtonSizer, 0, SizerFlag::FixedSize, 35);
+		pDesignerSizer->AddSpacer(24);
+		pDesignerSizer->Add(pButtonSizer, 0, SizerFlag::FixedSize, 35);
+		pDesignerSizer->AddSpacer(24);
+		pDesignerSizer->Add(_pSaveButton, 0);
 
 		ResizeToFit(false, true);
 
 		pMale->Toggle(_character.gender.IsConventional(ConventionalGender::Male));
 		pFemale->Toggle(not _character.gender.IsConventional(ConventionalGender::Male));
 
-		
+		_pViewport = CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
+		_pViewport->SetSize(320, 480);
+		_pViewport->SetVisible(false);
+		pHorizontalSizer->Add(_pViewport, 0, SizerFlag::AlignRight | SizerFlag::Right, 12);
+
+		// Load portrait
+		if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(_characterId))
+		{
+			if (auto try_image = Global::GetUserContent().GetTexture((*try_portrait).id, GetSDLRenderer()))
+			{
+				_pViewport->SetTexture((*try_image).get());
+				_pViewport->SetVisible(true);
+			}
+		}
+
+		// Load (existing) voice
+		if (auto try_voice = Global::GetUserContent().GetVoiceForCharacter(_characterId))
+		{
+			_voicePrint.audioData = (*try_voice).voicePrint.audioData;
+			_pPlayButton->Enable(true);
+		}
+	}
+
+	void VoiceEditor::ShutDown() noexcept
+	{
+		Global::GetAudioManager().StopAllSounds();
+		Global::GetTTSBackend().UnloadDesignModels();
 	}
 
 	fig::observer_ptr<ToggleWithLabel> VoiceEditor::CreateToggle(SizerPtr pSizer, fig::handle toggleGroup, fig::handle toggleKey, fig::string_view label, bool bRadio)
@@ -289,13 +333,17 @@ namespace fig::gui
 		if (auto result = Global::GetTTSBackend().Design(phrase, prompt))
 		{
 			_voicePrint = {
-				.prompt = prompt,
-				.keys = _selectedKeys,
+				.generationPrompt = prompt,
+				.referenceText = phrase,
+				.keys = _selectedKeys 
+					| std::views::transform([](auto&& key) { return (fig::string)key; })
+					| std::ranges::to<std::vector>(),
 			};
 
-			_pendingResults.emplace_back(std::move(result).value());
+			_audioResultQueue.Add(std::move(result).value());
 			_pGenerateButton->Enable(false);
 			_pPlayButton->Enable(false);
+			_pSaveButton->Enable(false);
 
 			SetStatusMessage(isServerRunning ? fig::strings::TTS::Generating : fig::strings::TTS::ServerInitializing);
 			Global::GetAudioManager().StopAllSounds();
@@ -308,35 +356,7 @@ namespace fig::gui
 
 	void VoiceEditor::OnUpdate(float fElapsed)
 	{
-		// Resolve pending results
-		if (not _pendingResults.empty())
-		{
-			for (auto& result : _pendingResults)
-			{
-				auto& future = result.future;
-				if (not future.valid())
-					continue;
-
-				if (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
-				{
-					if (auto payload = future.get())
-					{
-						_voicePrint.audioData = payload.value();
-						Global::GetAudioManager().StopAllSounds();
-						Global::GetAudioManager().EnqueueSound(_voicePrint.audioData);
-
-						SetStatusMessage("");
-						_pPlayButton->Enable(true);
-					}
-					else
-					{
-						SetStatusMessage(fig::strings::TTS::ErrorOccurred);
-					}
-				}
-			}
-
-			std::erase_if(_pendingResults, [](auto&& r) { return not r.future.valid(); });
-		}
+		_audioResultQueue.Update();
 
 		if (bool isPlaying = Global::GetAudioManager().IsPlaying(); isPlaying != _bIsPlaying)
 		{
@@ -349,7 +369,7 @@ namespace fig::gui
 				SetStatusMessage("");
 		}
 
-		if (not _pGenerateButton->IsEnabled() and _pendingResults.empty())
+		if (not _pGenerateButton->IsEnabled() and _audioResultQueue.IsEmpty())
 		{
 			_pGenerateButton->Enable(true);
 			_pPlayButton->Enable(true);
@@ -366,7 +386,7 @@ namespace fig::gui
 		{
 			// Play
 			Global::GetAudioManager().StopAllSounds();
-			Global::GetAudioManager().EnqueueSound(_voicePrint.audioData);
+			Global::GetAudioManager().EnqueueSound(_voicePrint.audioData.AsBytes());
 		}
 	}
 
@@ -385,13 +405,13 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::TTSServerError))
 		{
 			SetStatusMessage(fig::strings::TTS::ErrorOccurred);
-			_pendingResults.clear();
+			_audioResultQueue.Clear();
 			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::TTSServerShutdown))
 		{
 			SetStatusMessage(fig::strings::TTS::ServerUnavailable);
-			_pendingResults.clear();
+			_audioResultQueue.Clear();
 			return EventResult::Continue;
 		}
 		return EventResult::Pass;
@@ -400,5 +420,38 @@ namespace fig::gui
 	void VoiceEditor::SetStatusMessage(fig::string_view message)
 	{
 		_pStatusText->SetText(message);
+	}
+
+	bool VoiceEditor::Save() noexcept
+	{
+		if (_voicePrint.audioData.empty())
+			return false;
+
+		VoiceSettings voiceSettings;
+		voiceSettings.name = std::format("{}'s voice", _character.GetName());
+		voiceSettings.voicePrint = _voicePrint;
+		
+		auto voiceSettingsId = Global::GetUserContent().CreateVoiceReference(_characterId, voiceSettings);
+		if (voiceSettingsId.empty())
+			return false;
+		return true;
+	}
+
+	void VoiceEditor::OnAudioResult(fig::tts::TTSPayload&& payload)
+	{
+		if (payload.has_value())
+		{
+			_voicePrint.audioData = std::move(payload).value();
+			Global::GetAudioManager().StopAllSounds();
+			Global::GetAudioManager().EnqueueSound(_voicePrint.audioData.AsBytes());
+
+			SetStatusMessage("");
+			_pPlayButton->Enable(true);
+			_pSaveButton->Enable(true);
+		}
+		else 
+		{
+			SetStatusMessage(fig::strings::TTS::ErrorOccurred);
+		}
 	}
 }

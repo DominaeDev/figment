@@ -15,6 +15,7 @@ namespace fig::gui
 		CharacterEditor(const fig::uuid& characterId);
 		
 		void Initialize() noexcept;
+		void ShutDown() noexcept {};
 
 		fig::string GetTitle() const noexcept override;
 		EditorFields GetFields() noexcept override;

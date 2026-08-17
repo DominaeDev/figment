@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "audio/AudioManager.h"
+#include "user/UserSettings.h"
 
 namespace fig::audio
 {
@@ -49,7 +50,9 @@ namespace fig::audio
 		if (_stream.empty())
 			return;
 		
-		SDL_SetAudioStreamGain(_stream.get(), std::clamp(fVolume, 0.0f, 1.0f));
+		float gain = fVolume <= 0.0f ? 0.0f : std::pow(10.0f, (fVolume - 1.0f) * 40.0f / 20.0f);
+
+		SDL_SetAudioStreamGain(_stream.get(), std::clamp(gain, 0.0f, 1.0f));
 	}
 
 	float AudioManager::GetVolume() const noexcept
@@ -60,14 +63,23 @@ namespace fig::audio
 		return SDL_GetAudioStreamGain(_stream.get());
 	}
 
-	bool AudioManager::EnqueueSound(const fig::bytes& data, float fDelay)
+	bool AudioManager::EnqueueSound(fig::byte_span data, float fVolume, float fDelay)
 	{
 		if (_stream.empty())
 			return false;
 
+		if (fVolume < 0.0f)
+		{
+			if (Global::GetUserManager().IsSignedIn())
+				fVolume = Global::GetUserSettings().GetFloat(fig::io::UserSetting::TTS::Volume);
+			else
+				fVolume = 1.0f;
+		}
+
 		SDL_IOStream* io = SDL_IOFromConstMem(data.data(), data.size());
 
 		AudioClip clip;
+		clip.volume = fVolume;
 		clip.delay = fDelay;
 
 		if (not SDL_LoadWAV_IO(io, true, &clip.spec, &clip.audioData, &clip.audioLength))
@@ -120,6 +132,7 @@ namespace fig::audio
 		if (_stream.empty())
 			return false;
 
+		SetVolume(clip.volume);
 		if (not SDL_SetAudioStreamFormat(_stream.get(), &clip.spec, nullptr))
 			return false;
 		if (not SDL_PutAudioStreamData(_stream.get(), clip.audioData, static_cast<int>(clip.audioLength)))

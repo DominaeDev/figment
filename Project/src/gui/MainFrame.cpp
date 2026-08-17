@@ -26,6 +26,7 @@ using namespace fig::io;
 using namespace fig::data;
 using namespace fig::chat;
 using namespace fig::user;
+using namespace fig::tts;
 
 namespace fig::gui
 {
@@ -355,7 +356,7 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{
-						auto characterId = fig::uuid::from_str("f00e36d3-42f2-4a86-b844-a5fc389a41da");
+						auto characterId = fig::uuid::from_str("e66008f6-f3b8-4099-a50d-1cc284ecd008");
 						ChangeScreen<EditorScreen>()->SetEditor<VoiceEditor>(characterId);
 						return EventResult::Handled;
 					}
@@ -372,7 +373,7 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_F4 and mods.None)
 					{
 						Global::GetTTSBackend().Initialize();
-//						auto discard = Global::GetTTSBackend().Speak("These are nice, tasty biscuits.", false);
+						auto discard = Global::GetTTSBackend().Speak(fig::uuid { "e66008f6-f3b8-4099-a50d-1cc284ecd008" }, "These are nice, tasty biscuits.", false);
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F4 and mods.Control)
@@ -396,6 +397,12 @@ namespace fig::gui
 			PopAllMenus();
 			return EventResult::Continue;
 		}
+		else if (IsUserEvent(event, UserEvent::NavigateToHome))
+		{
+			if (Global::GetUserManager().IsSignedIn())
+				ChangeScreen(ScreenType::Home);
+			return EventResult::Handled;
+		}
 		else if (IsUserEvent(event, UserEvent::NavigateToChatList))
 		{
 			ChangeScreen(ScreenType::ChatListing);
@@ -408,8 +415,7 @@ namespace fig::gui
 			{
 				GetScreen<ChatListingScreen>()->ShowAllChats();
 			}
-			PopAllMenus();
-			return EventResult::Continue;
+			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::ChangedScreen))
 		{
@@ -435,6 +441,11 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::LLMModelUnloadRequest))
 		{
 			UnloadModel();
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::TTSServerShutdown))
+		{
+			Global::GetTTSBackend().Shutdown();
 			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::EditCharacter))
@@ -573,6 +584,10 @@ namespace fig::gui
 
 		if (auto character = Global::GetUserContent().Get<Character>(characterId))
 		{
+			// Preload speech model
+			Global::GetTTSBackend().UnloadDesignModels(); // jic
+			auto discard = Global::GetTTSBackend().Speak(characterId, "Hi.");
+
 			PromptScaffold scaffold;
 			if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
 				return false;

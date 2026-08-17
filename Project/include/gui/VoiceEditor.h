@@ -3,6 +3,7 @@
 #include "gui/Editor.h"
 #include "data/Character.h"
 #include "tts/VoicePrint.h"
+#include "tts/AudioResultQueue.h"
 
 namespace fig::gui
 {
@@ -12,6 +13,8 @@ namespace fig::gui
 		VoiceEditor(const fig::uuid& characterId);
 
 		void Initialize() noexcept;
+		void ShutDown() noexcept;
+
 		fig::string GetTitle() const noexcept override;
 		bool SaveChanges() noexcept override { return false; }
 
@@ -26,7 +29,9 @@ namespace fig::gui
 		
 		void Generate() noexcept;
 		void PlayStop() noexcept;
+		bool Save() noexcept;
 		void SetStatusMessage(fig::string_view message);
+		void OnAudioResult(fig::tts::TTSPayload&& payload);
 
 	private:
 		fig::uuid _characterId {};
@@ -34,18 +39,20 @@ namespace fig::gui
 
 		fig::observer_ptr<class ButtonWithLabel> _pGenerateButton;
 		fig::observer_ptr<class ButtonWithIcon> _pPlayButton;
+		fig::observer_ptr<class ButtonWithLabel> _pSaveButton;
+
 		fig::observer_ptr<class TextBox> _pCustomPrompt;
 		fig::observer_ptr<class StaticText> _pStatusText;
+		fig::observer_ptr<class ImageViewport> _pViewport;
 
 		using ToggleGroup = std::map<fig::handle, fig::observer_ptr<class ToggleWithLabel>>;
 		std::map<fig::handle, ToggleGroup> _toggleGroups;
 
 		std::unordered_set<fig::handle> _selectedKeys;
 
-		std::vector<fig::tts::TTSResult> _pendingResults;
+		fig::tts::AudioResultQueue _audioResultQueue {};
 		fig::tts::VoicePrint _voicePrint;
 		bool _bIsPlaying = false;
-
 
 	};
 }

@@ -15,6 +15,7 @@ namespace fig::gui
 		Deactivated,
 		Scrolling,
 		SidePanelResized,
+		NavigateToHome,
 		NavigateToChatList,
 		StartChat,
 

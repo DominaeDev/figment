@@ -16,6 +16,7 @@ namespace fig::gui
 		virtual EditorFields GetFields() noexcept { return {}; };
 
 		virtual void Initialize() noexcept = 0;
+		virtual void ShutDown() noexcept = 0;
 		virtual bool SaveChanges() noexcept = 0;
 
 	protected:

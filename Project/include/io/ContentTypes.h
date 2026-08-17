@@ -4,6 +4,7 @@
 #include "data/Scenario.h"
 #include "data/ChatInstance.h"
 #include "data/ChatLog.h"
+#include "data/VoiceSettings.h"
 #include "gui/GUITypes.h"
 #include "io/Asset.h"
 
@@ -23,8 +24,10 @@ namespace fig::io
 	constexpr AssetTypeDefinition AssetTypeOf<fig::sdl::Surface> = make_asset_type(AssetType::Image);
 	template <> 
 	constexpr AssetTypeDefinition AssetTypeOf<fig::data::ChatInstance> = make_asset_type(AssetType::Chat, ChatAssetType::Instance);
-	template <> 
+	template <>
 	constexpr AssetTypeDefinition AssetTypeOf<fig::data::ChatLog> = make_asset_type(AssetType::Chat, ChatAssetType::Log);
+	template <>
+	constexpr AssetTypeDefinition AssetTypeOf<fig::data::VoiceSettings> = make_asset_type(AssetType::Audio, AudioAssetType::VoiceSettings);
 
 	template<typename T>
 	concept XmlLoadableAsset = requires (T& value)

@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "tts/AudioServerProcess_Win.h"
+#include "io/FileUtility.h"
 
 using namespace fig::gui;
 
@@ -10,8 +11,13 @@ namespace fig::tts
 		Stop();
 	}
 
-	std::expected<void, std::string> AudioServerProcess_Win::Start()
+	std::expected<void, std::string> AudioServerProcess_Win::Start(const AudioServerConfiguration& config)
 	{
+		fig::string serverJson = config.ToJson();
+
+		if (auto error = fig::io::WriteTextFile(fig::path { "tts/server.json" }, serverJson); error != fig::io::FileError::NoError)
+			return {}; // Write error
+
 		// Start server
 		_hJob = CreateJobObjectW(nullptr, nullptr);
 		JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits = {};
@@ -36,7 +42,7 @@ namespace fig::tts
 		_processInfo = PROCESS_INFORMATION {};
 
 		auto exePath = fig::path { Constants::Paths::TTSServer };
-		auto commandLine = from_utf8(std::format("{} --config \"tts/server.json\"", exePath.filename().u8string()));
+		auto commandLine = from_utf8(std::format("{} --config \"tts/server.json\"", exePath.filename().u8string())); //! @todo -> tts/server.json
 
 		if (CreateProcessW(
 			exePath.wstring().c_str(),
@@ -50,7 +56,6 @@ namespace fig::tts
 			&startupInfo,
 			&_processInfo))
 		{
-
 			// Init io pipe
 			CloseHandle(_writeHandle);
 			_writeHandle = nullptr;

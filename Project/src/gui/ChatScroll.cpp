@@ -8,6 +8,8 @@
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
 #include "data/Character.h"
+#include "audio/AudioManager.h"
+#include "user/UserSettings.h"
 
 using namespace fig::llm;
 using namespace fig::chat;
@@ -29,6 +31,8 @@ namespace fig::gui
 		EnableCulling(true);
 
 		SetAlpha(0.90f);
+
+		_audioResultQueue.SetDelegate([this](auto&& r) { OnAudioResult(std::move(r)); });
 	}
 
 	void ChatScroll::SetSession(std::weak_ptr<fig::chat::ChatSession> wpSession)
@@ -187,6 +191,8 @@ namespace fig::gui
 
 	void ChatScroll::OnUpdate(float fElapsed)
 	{
+		_audioResultQueue.Update();
+
 		if (_fAnimatedScroll > 0.0f)
 		{
 			_fAnimatedScroll -= _fAnimatedScroll * fElapsed * kAnimatedScrollSpeed;
@@ -315,15 +321,19 @@ namespace fig::gui
 				}
 			}
 
-		}
-
-		if (piece.complete)
-		{
-			RefreshActive();
-
-			if (piece.msgType == MessageType::Dialogue and piece.role == Role::Bot1)
+			if (piece.complete)
 			{
-				auto discard = Global::GetTTSBackend().Speak(piece.content); //! @todo: resolve promise
+				RefreshActive();
+
+				if (piece.msgType == MessageType::Dialogue and piece.role == Role::Bot1)
+				{
+					auto characterId = pSession->GetCharacterIdOf(piece.role);
+					if (auto results = Global::GetTTSBackend().Speak(characterId, piece.content))
+					{
+						for (auto& result : results.value())
+							_audioResultQueue.Add(std::move(result));
+					}
+				}
 			}
 		}
 	}
@@ -346,4 +356,9 @@ namespace fig::gui
 		SDL_SetRenderDrawBlendMode(pRenderer, blendMode); //! @todo: Do this rigorously before every render instead
 	}
 
+	void ChatScroll::OnAudioResult(fig::tts::TTSPayload&& payload)
+	{
+		if (payload.has_value())
+			Global::GetAudioManager().EnqueueSound((*payload).AsBytes());
+	}
 }

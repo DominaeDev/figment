@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Figment.h"
+#include "tts/AudioData.h"
 #include <future>
 
 namespace fig::tts
@@ -8,12 +9,13 @@ namespace fig::tts
 	enum class TTSTask
 	{
 		Undefined = 0,
-		Speak,
+		Speech,
 		Design,
+		Unload,
 	};
 
 	constexpr auto TTSTaskMapping = std::array<std::pair<TTSTask, std::string_view>, 2> {
-		std::pair { TTSTask::Speak,		"tts" },
+		std::pair { TTSTask::Speech,		"tts" },
 		std::pair { TTSTask::Design,	"design" },
 	};
 
@@ -26,8 +28,8 @@ namespace fig::tts
 		Unavailable,	// Server didn't respond
 	};
 
-	using TTSData = fig::bytes;
-	using TTSPayload = std::expected<TTSData, TTSError>;
+	
+	using TTSPayload = std::expected<AudioData, TTSError>;
 	using TTSPromise = std::promise<TTSPayload>;
 	using TTSFuture = std::future<TTSPayload>;
 

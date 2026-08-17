@@ -29,6 +29,7 @@ namespace fig::gui
 
 	void EditorScreen::ReleaseEditor()
 	{
+		_pEditor->ShutDown();
 		_pEditor.reset();
 	}
 
@@ -56,4 +57,14 @@ namespace fig::gui
 		return false;
 	}
 
+	EventResult EditorScreen::OnEvent(fig::event& event)
+	{
+		if (IsUserEvent(event, UserEvent::Deactivated))
+		{
+			ReleaseEditor();
+			return EventResult::Handled;
+		}
+
+		return EventResult::Pass;
+	}
 }

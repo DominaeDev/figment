@@ -415,7 +415,7 @@ namespace fig::data
 						{
 							if (auto value = element[field.name].TryGet<FieldType::SerializedType>())
 							{
-								member = field.custom_deserializer(*value);
+								member = std::move(field.custom_deserializer(*value));
 							}
 							else
 							{
@@ -441,7 +441,7 @@ namespace fig::data
 						{
 							if (auto value = element.TryGetValue<FieldType::SerializedType>())
 							{
-								member = field.custom_deserializer(*value);
+								member = std::move(field.custom_deserializer(*value));
 							}
 							else
 							{
@@ -512,7 +512,7 @@ namespace fig::data
 										{
 											if (auto try_value = (*item).TryGetValue<std::remove_cvref_t<SerializedMappedType>>())
 											{
-												auto deserialized_kvp = field.custom_deserializer(typename FieldType::SerializedType { *try_key, *try_value });
+												auto deserialized_kvp = std::move(field.custom_deserializer(typename FieldType::SerializedType { *try_key, *try_value }));
 												member[deserialized_kvp.first] = deserialized_kvp.second;
 											}
 										}
@@ -546,7 +546,7 @@ namespace fig::data
 							else
 							{
 								if (auto value = element.TryGetElement<FieldType::SerializedType>(field.name))
-									member = field.custom_deserializer(*value);
+									member = std::move(field.custom_deserializer(*value));
 								else
 								{
 									member = field.default_value;

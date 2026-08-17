@@ -5,13 +5,14 @@
 #include "tts/TTSTypes.h"
 #include "data/VersionNumber.h"
 
-namespace fig::data
+namespace fig::tts
 {
 	struct VoiceModel
 	{
 		fig::uuid id;
 		fig::string name;
 		fig::string description;
+		fig::string family;
 		fig::string version;
 
 		struct Task
@@ -21,6 +22,7 @@ namespace fig::data
 			
 			static auto XmlFields() noexcept
 			{
+				using namespace fig::data;
 				return Fields (
 					Attribute("id", &Task::id)
 						.MustExist(),
@@ -39,6 +41,7 @@ namespace fig::data
 
 			static auto XmlFields() noexcept
 			{
+				using namespace fig::data;
 				return Fields(
 					Attribute("id", &Language::id)
 						.MustExist(),
@@ -74,6 +77,7 @@ namespace fig::data
 
 				static auto XmlFields() noexcept
 				{
+					using namespace fig::data;
 					return Fields(
 						Attribute("algorithm", &Hash::algorithm,
 							[](auto&& value) { return enum_serialize(value, AlgorithmMapping); },
@@ -85,6 +89,7 @@ namespace fig::data
 
 			static auto XmlFields() noexcept
 			{
+				using namespace fig::data;
 				return Fields(
 					Attribute("id", &Variant::id)
 						.MustExist(),
@@ -113,19 +118,25 @@ namespace fig::data
 
 			static auto XmlFields() noexcept
 			{
+				using namespace fig::data;
 				return Fields(
-					Element("Temperature", &Parameters::temperature),
+					Element("Temperature", &Parameters::temperature)
+						.Default(0_fp),
 					Element("TopK", &Parameters::topK),
-					Element("TopP", &Parameters::topP),
-					Element("RepetitionPenalty", &Parameters::repetitionPenalty),
-					Element("Guidance", &Parameters::guidance),
+					Element("TopP", &Parameters::topP)
+						.Default(0_fp),
+					Element("RepetitionPenalty", &Parameters::repetitionPenalty)
+						.Default(0_fp),
+					Element("Guidance", &Parameters::guidance)
+						.Default(0_fp),
 					Element("ChunkSize", &Parameters::chunkSize)
 				);
 			}
-		} parameters;
+		} parameters {};
 
 		static auto XmlFields() noexcept
 		{
+			using namespace fig::data;
 			return Fields(
 				Attribute("id", &VoiceModel::id)
 					.MustExist(),
@@ -133,6 +144,7 @@ namespace fig::data
 					.MustExist(),
 				Element("Description", &VoiceModel::description),
 				Element("Version", &VoiceModel::version),
+				Element("Family", &VoiceModel::family),
 				Element("Task", &VoiceModel::task)
 					.MustExist(),
 				Element("Variant", &VoiceModel::variants)
@@ -146,12 +158,13 @@ namespace fig::data
 		}
 	};
 
-	struct VoiceModelSettings : XmlData<"Models", 0>
+	struct VoiceModelSettings : fig::data::XmlData<"Models", 0>
 	{
 		std::vector<VoiceModel> models;
 
 		static auto XmlFields() noexcept
 		{
+			using namespace fig::data;
 			return Fields(
 				Element("Model", &VoiceModelSettings::models)
 					.Collection("Models")

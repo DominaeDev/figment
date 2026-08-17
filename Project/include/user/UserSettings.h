@@ -32,13 +32,14 @@ namespace fig::io
 				constexpr fig::io::SettingKey InfoPanelCollapsed	{ "Interface", "Chat.InfoPanel.Collapsed" };
 				constexpr fig::io::SettingKey ImageSize				{ "Interface", "Chat.InfoPanel.ImageSize" };
 			}
+		}
 
-			namespace TTS
-			{
-				constexpr fig::io::SettingKey Enabled			{ "TTS", "Enabled" };
-				constexpr fig::io::SettingKey TTSModel			{ "TTS", "Model.Speech" };
-				constexpr fig::io::SettingKey DesignModel		{ "TTS", "Model.Design" };
-			}
+		namespace TTS
+		{
+			constexpr fig::io::SettingKey Enabled			{ "TTS", "Enabled" };
+			constexpr fig::io::SettingKey Volume			{ "TTS", "Volume" };
+			constexpr fig::io::SettingKey TTSModel			{ "TTS", "Model.Speech" };
+			constexpr fig::io::SettingKey DesignModel		{ "TTS", "Model.Design" };
 		}
 		
 		namespace Settings

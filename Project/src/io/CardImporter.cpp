@@ -4,8 +4,6 @@
 #include "io/FileUtility.h"
 #include "data/TavernCardV2.h"
 
-using json = nlohmann::json;
-
 using namespace fig::data;
 
 namespace fig::io

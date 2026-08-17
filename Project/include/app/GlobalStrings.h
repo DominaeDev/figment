@@ -69,11 +69,11 @@ namespace fig::strings
 		inline constexpr fig::const_string Generating =
 			"Generating voice sample...";
 		inline constexpr fig::const_string ServerInitializing =
-			"Text-to-speech server is initializing...";
+			"Text-to-speech server is starting up...";
 		inline constexpr fig::const_string ServerUnavailable =
 			"Text-to-speech server is unavailable";
 		inline constexpr fig::const_string LoadingModel =
-			"Loading model...";
+			"Loading voice model...";
 		inline constexpr fig::const_string ErrorOccurred =
 			"An error occurred";
 		inline constexpr fig::const_string PlayingSound =

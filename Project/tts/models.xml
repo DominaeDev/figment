@@ -4,6 +4,7 @@
 		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
 		<Version>1.0</Version>
 		<Task id="tts">tts</Task>
+		<Family>pocket_tts</Family>
 
 		<Variants>
 			<Variant id="1951b8ba-52ee-40ed-a553-6391678d58c2">
@@ -41,6 +42,7 @@
 		<Description>Expressive text-to-speech model with broad language support.</Description>
 		<Version>1.0</Version>
 		<Task id="clon">tts</Task>
+		<Family>chatterbox</Family>
 		
 		<Variants>
 			<Variant id="f45eddf7-dd44-4c19-8eec-931220e05f30">
@@ -86,7 +88,7 @@
 		</Languages>
 
 		<Parameters>
-			<Temperature>0.6</Temperature>
+			<Temperature>1.2</Temperature>
 			<ChunkSize>80</ChunkSize>
 		</Parameters>
 	</Model>
@@ -96,6 +98,7 @@
 		<Description>High quality text-to-speech model.</Description>
 		<Version>1.0</Version>
 		<Task id="tts">tts</Task>
+		<Family>qwen3_tts</Family>
 
 		<Variants>
 			<Variant id="b1aa5cc8-bcfe-4eda-aecd-e2e3d2521f9d">
@@ -152,6 +155,7 @@
 		<Description>High quality voice creation model.</Description>
 		<Version>1.0</Version>
 		<Task id="vdes">design</Task>
+		<Family>qwen3_tts</Family>
 
 		<Variants>
 			<Variant id="f1068090-b776-4536-8618-3b2857a6c9ac">

@@ -25,9 +25,10 @@ namespace fig::io
 		{ UserSetting::Interface::ChatList::Ordering,				static_cast<int32_t>(OrderBy::Default) },
 		{ UserSetting::Interface::ChatList::Filtering,				ChatFilterFlags::Serialize(DefaultChatFilterFlags, ChatFilterFlagMapping) },
 
-		{ UserSetting::Interface::TTS::Enabled,						false },
-		{ UserSetting::Interface::TTS::TTSModel,					"" },
-		{ UserSetting::Interface::TTS::DesignModel,					"" },
+		{ UserSetting::TTS::Enabled,								false },
+		{ UserSetting::TTS::Volume,									0.8_fp },
+		{ UserSetting::TTS::TTSModel,								"" },
+		{ UserSetting::TTS::DesignModel,							"" },
 	};
 
 	void UserSettings::Init() noexcept

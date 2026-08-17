@@ -27,6 +27,7 @@ namespace fig::gui
 		void SetTitle(fig::string_view text);
 		bool OnKeyboardEvent(KeyboardEvent& event);
 		void OnSetEditor();
+		EventResult OnEvent(fig::event& event) override;
 
 	private:
 		fig::observer_ptr<StaticText> _pTitle {};

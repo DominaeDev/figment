@@ -686,6 +686,12 @@
     <ClCompile Include="src\gui\ToggleWithLabel.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\tts\AudioServerConfiguration.cpp">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tts\AudioResultQueue.cpp">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1573,9 +1579,6 @@
     <ClInclude Include="include\audio\AudioManager.h">
       <Filter>Source Files\Frontend\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="include\tts\VoiceModelSettings.h">
-      <Filter>Source Files\Frontend\IO\Data</Filter>
-    </ClInclude>
     <ClInclude Include="include\data\VersionNumber.h">
       <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
@@ -1589,6 +1592,18 @@
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\tts\VoicePrint.h">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\AudioServerConfiguration.h">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\VoiceModelSettings.h">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\AudioData.h">
+      <Filter>Source Files\Backend\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\AudioResultQueue.h">
       <Filter>Source Files\Backend\TTS</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include "chat/ChatTypes.h"
 #include "chat/ChatSession.h"
 #include "chat/MessagePoller.h"
+#include "tts/AudioResultQueue.h"
 
 #include <map>
 
@@ -40,6 +41,7 @@ namespace fig::gui
 		void RefreshActive();
 
 		void OnMessage(const fig::chat::MessagePoller::Message& msg);
+		void OnAudioResult(fig::tts::TTSPayload&& payload);
 	private:
 		std::unique_ptr<VerticalGradient> _pBottomGradient;
 
@@ -63,5 +65,7 @@ namespace fig::gui
 		float _fAnimatedScroll = 0.0f;
 
 		std::weak_ptr<fig::chat::ChatSession> _pSession {};
+		fig::tts::AudioResultQueue _audioResultQueue;
+
 	};
 }

@@ -8,6 +8,7 @@
 namespace fig::data
 {
 	struct ChatInstance;
+	struct VoiceSettings;
 }
 
 namespace fig::io
@@ -24,6 +25,7 @@ namespace fig::io
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 
 		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::data::ChatInstance& chatInstance);
+		fig::uuid CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings);
 		bool DeleteAsset(fig::uuid assetId);
 
 		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
@@ -39,6 +41,7 @@ namespace fig::io
 		fig::optional_cref<Asset> GetLargePortraitForCharacter(const fig::uuid& characterId) const;
 		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept;
 		fig::optional_cref<Asset> FindLastChatWith(const fig::uuid& characterId) const;
+		fig::optional_cref<fig::data::VoiceSettings> GetVoiceForCharacter(const fig::uuid& characterId) noexcept;
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);

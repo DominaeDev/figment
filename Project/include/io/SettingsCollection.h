@@ -61,6 +61,11 @@ namespace fig::io
 			return GetValue<fig::fixed>(key, defaultValue);
 		}
 
+		float GetFloat(SettingKey key, float defaultValue = 0.0f) const noexcept
+		{
+			return (float)GetValue<fig::fixed>(key, fig::fixed { defaultValue });
+		}
+
 		template <size_t N>
 		std::vector<fig::fixed> GetFixedVector(SettingKey key, const std::vector<fig::fixed>& defaultValue = {}) const noexcept
 		{
