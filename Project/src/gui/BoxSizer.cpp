@@ -1,25 +1,8 @@
 #include <pch.h>
-#include "gui/BoxSizer.h"
 #include "gui/Control.h"
 
 namespace fig::gui
 {
-	void BoxSizer::OnPreLayout(const fig::rect& parentRect)
-	{
-		auto sizerItems = GetSizerItems();
-		for (auto& item : sizerItems)
-		{
-			auto pSizer = std::get<Sizer*>(item.target);
-			if (auto pBoxSizer = dynamic_cast<BoxSizer*>(pSizer))
-			{
-				pBoxSizer->Layout(parentRect);
-				auto extents = pBoxSizer->GetExtents();
-				item.rect.w = extents.x;
-				item.rect.h = extents.y;
-			}
-		}
-	}
-
 	void BoxSizer::OnLayout(const fig::rect& parentRect)
 	{
 		this->parentRect = parentRect;

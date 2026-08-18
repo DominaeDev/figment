@@ -108,8 +108,7 @@ namespace fig::gui
 
 	void Sizer::Layout(const fig::rect& parentRect)
 	{
-		OnPreLayout(parentRect);
-
+		PreLayout(parentRect);
 		OnLayout(parentRect);
 
 		for (auto& li : _items)
@@ -118,6 +117,23 @@ namespace fig::gui
 				(*pp)->Layout();
 			else if (auto pp = std::get_if<Sizer*>(&li.target))
 				(*pp)->Layout(li.rect);
+		}
+	}
+
+	void Sizer::PreLayout(const fig::rect& parentRect)
+	{
+		// Pre-layout to get sizer's extents
+		auto sizerItems = GetSizerItems();
+		for (auto& item : sizerItems)
+		{
+			auto pSizer = std::get<Sizer*>(item.target);
+			if (auto pSizerWithExtents = dynamic_cast<SizerWithExtents*>(pSizer))
+			{
+				pSizerWithExtents->Layout(parentRect);
+				auto extents = pSizerWithExtents->GetExtents();
+				item.rect.w = extents.x; // Temporarily stored in rect
+				item.rect.h = extents.y; // Temporarily stored in rect
+			}
 		}
 	}
 

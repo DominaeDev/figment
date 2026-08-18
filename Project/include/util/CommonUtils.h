@@ -49,6 +49,23 @@ namespace fig
 	fig::string Base64Encode(fig::byte_span data) noexcept;
 	fig::bytes Base64Decode(fig::string_view) noexcept;
 
+	template <typename T>
+	concept UniformRandomIntegral =
+		std::same_as<T, std::int16_t>
+		or std::same_as<T, std::uint16_t>
+		or std::same_as<T, std::int32_t>
+		or std::same_as<T, std::uint32_t>
+		or std::same_as<T, std::int64_t>
+		or std::same_as<T, std::uint64_t>;
+
+	template <UniformRandomIntegral T>
+	T GetRandomNumber()
+	{
+		static std::mt19937_64 rng { std::random_device{}() };
+		static std::uniform_int_distribution<T> dist;
+		return dist(rng);
+	}
+
 	inline fig::timestamp now() noexcept
 	{
 		return fig::timestamp(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());

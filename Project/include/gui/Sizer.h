@@ -82,7 +82,6 @@ namespace fig::gui
 	class Sizer
 	{
 	public:
-		void Layout(const fig::rect& parentRect);
 		virtual ~Sizer();
 
 		SizerItem& Add(LayoutElement* pControl, int32_t proportion = 0, int32_t flags = 0, int border = 0);
@@ -107,8 +106,10 @@ namespace fig::gui
 			return fig::observer_ptr<T>(pSizer);
 		}
 
+		void Layout(const fig::rect& parentRect);
+
 	protected:
-		LayoutElement* _pOwner;
+		void PreLayout(const fig::rect& rect);
 
 		unsigned int GetCount() const { return static_cast<unsigned int>(_items.size()); }
 		auto GetLayoutItems() noexcept
@@ -143,16 +144,23 @@ namespace fig::gui
 				| std::views::filter([](auto& it) { return std::holds_alternative<Sizer*>(it.target); });
 		}
 
-		virtual void OnPreLayout(const fig::rect& rect) {};
 		virtual void OnLayout(const fig::rect& rect) = 0;
 		virtual void OnLayoutItem(fig::rect& itemRect, SizerItem& item) {};
 		
 		void ApplyBorder(fig::rect& rect, const SizerItem& item);
 		void ClampRect(fig::rect& rect, const SizerItem& item);
 		void AlignRect(fig::rect& rect, const fig::rect& allocatedRect, const SizerItem& item);
+
+		LayoutElement* _pOwner;
 	private:
 		std::vector<SizerItem> _items;
 		std::vector<std::unique_ptr<LayoutElement>> _dummies;
+	};
+
+	class SizerWithExtents : public Sizer
+	{
+	public:
+		virtual fig::point GetExtents() const = 0;
 	};
 
 }

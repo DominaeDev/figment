@@ -8,20 +8,20 @@ namespace fig::tts
 	{
 		try
 		{
-			nlohmann::json json;
-			json["host"] = "127.0.0.1";
-			json["port"] = Constants::TTS::ServerPort;
+			nlohmann::json jConfig;
+			jConfig["host"] = "127.0.0.1";
+			jConfig["port"] = Constants::TTS::ServerPort;
 			switch (backend)
 			{
 			default:
-			case Backend::CPU: json["backend"] = "cpu"; break;
-			case Backend::CUDA: json["backend"] = "cuda"; break;
+			case Backend::CPU: jConfig["backend"] = "cpu"; break;
+			case Backend::CUDA: jConfig["backend"] = "cuda"; break;
 			}
-			json["device"] = 0;
-			json["threads"] = 1;
-			json["lazy_load"] = true;
-			json["log_request_body"] = false;
-			json["max_request_body_bytes"] = std::numeric_limits<int32_t>::max();
+			jConfig["device"] = 0;
+			jConfig["threads"] = 2;
+			jConfig["lazy_load"] = true;
+			jConfig["log_request_body"] = false;
+			jConfig["max_request_body_bytes"] = std::numeric_limits<int32_t>::max();
 
 			nlohmann::json jModels = nlohmann::json::array();
 			for (auto& model : models.models)
@@ -34,7 +34,7 @@ namespace fig::tts
 					jModel["path"] = std::format("models/{0}", variant.filename);
 					jModel["task"] = model.task.id;
 					jModel["mode"] = "offline";
-					jModel["busy_timeout_ms"] = 120000;
+					jModel["busy_timeout_ms"] = 60000;
 
 					nlohmann::json load_options = nlohmann::json::object();
 					load_options["language"] = model.supportedLanguages[0].id;
@@ -61,9 +61,9 @@ namespace fig::tts
 					jModels.push_back(jModel);
 				}
 			}
-			json["models"] = jModels;
+			jConfig["models"] = jModels;
 
-			return json.dump(1, '\t');
+			return jConfig.dump();
 		}
 		catch (const nlohmann::json::exception&)
 		{

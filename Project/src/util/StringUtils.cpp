@@ -933,7 +933,7 @@ namespace fig
 	fig::string fixed_to_string(fig::fixed value)
 	{
 		std::ostringstream os;
-		os << value;
+		os << std::setprecision(3) << value;
 		return fig::string { os.str() };
 	}
 
@@ -964,7 +964,7 @@ namespace fig
 	{
 		std::istringstream is { fig::string { s } };
 		fig::fixed value;
-		is >> value;
+		is >> std::setprecision(3) >> value;
 		if (!is.fail())
 			return value;
 		return 0_fp;
@@ -1016,7 +1016,7 @@ namespace fig
 	{
 		std::istringstream is { fig::string { s } };
 		fig::fixed value;
-		is >> value;
+		is >> std::setprecision(3) >> value;
 		if (!is.fail())
 			return value;
 		return std::nullopt;

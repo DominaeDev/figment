@@ -4,6 +4,7 @@
 #include "gui/SimpleTextBox.h"
 #include "gui/AppResources.h"
 #include "gui/ImageViewport.h"
+#include "gui/GridSizer.h"
 #include "data/Character.h"
 #include "audio/AudioManager.h"
 #include "tts/TTSBackend.h"
@@ -14,8 +15,6 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	constexpr fig::string_view examplePhrase = "Greetings! I'm {}, and this is my voice. Do you like it? If not, well, that sounds like a YOU problem.";
-
 	static const fig::handle groupGender = "gender";
 	static const fig::handle groupMaturity = "maturity";
 	static const fig::handle groupTone = "tone";
@@ -88,63 +87,52 @@ namespace fig::gui
 	void VoiceEditor::Initialize() noexcept
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
-
 		auto pHorizontalSizer = new HorizontalSizer();
-
 		auto pDesignerSizer = new VerticalSizer();
 
 		// Gender
 		CreateLabel(this, pDesignerSizer, "Pitch");
-		auto pGenderSizer = new HorizontalSizer();
+		auto pGenderSizer = new GridSizer(100, 29, 8, 6);
 		auto pMale = CreateToggle(pGenderSizer, groupGender, "gender_male", "Masculine", true);
 		auto pFemale = CreateToggle(pGenderSizer, groupGender, "gender_female", "Feminine", true);
 		pDesignerSizer->Add(pGenderSizer);
 
 		// Maturity
 		CreateLabel(this, pDesignerSizer, "Maturity");
-		auto pMaturitySizer1 = new HorizontalSizer();
-		auto pMaturitySizer2 = new HorizontalSizer();
-		CreateToggle(pMaturitySizer1, groupMaturity, "maturity_spry", "Spry");
-		CreateToggle(pMaturitySizer1, groupMaturity, "maturity_daring", "Daring");
-		CreateToggle(pMaturitySizer1, groupMaturity, "maturity_ambitious", "Ambitious");
-		CreateToggle(pMaturitySizer1, groupMaturity, "maturity_dependable", "Dependable");
-		CreateToggle(pMaturitySizer1, groupMaturity, "maturity_seasoned", "Seasoned");
-		CreateToggle(pMaturitySizer2, groupMaturity, "maturity_venerable", "Venerable");
-		pDesignerSizer->Add(pMaturitySizer1);
-		pDesignerSizer->AddSpacer(6);
-		pDesignerSizer->Add(pMaturitySizer2);
+		auto pMaturitySizer = new GridSizer(100, 29, 8, 6);
+		CreateToggle(pMaturitySizer, groupMaturity, "maturity_spry", "Spry");
+		CreateToggle(pMaturitySizer, groupMaturity, "maturity_daring", "Daring");
+		CreateToggle(pMaturitySizer, groupMaturity, "maturity_ambitious", "Ambitious");
+		CreateToggle(pMaturitySizer, groupMaturity, "maturity_dependable", "Dependable");
+		CreateToggle(pMaturitySizer, groupMaturity, "maturity_seasoned", "Seasoned");
+		CreateToggle(pMaturitySizer, groupMaturity, "maturity_venerable", "Venerable");
+		pDesignerSizer->Add(pMaturitySizer);
 
 		// Tone
 		CreateLabel(this, pDesignerSizer, "Tone");
-		auto pToneSizer1 = new HorizontalSizer();
-		auto pToneSizer2 = new HorizontalSizer();
-		CreateToggle(pToneSizer1, groupTone, "tone_deep", "Deep");
-		CreateToggle(pToneSizer1, groupTone, "tone_mellow", "Mellow");
-		CreateToggle(pToneSizer1, groupTone, "tone_light", "Light");
-		CreateToggle(pToneSizer1, groupTone, "tone_soft", "Soft");
-		CreateToggle(pToneSizer1, groupTone, "tone_cute", "Sweet");
-		CreateToggle(pToneSizer2, groupTone, "tone_textured", "Textured");
-		CreateToggle(pToneSizer2, groupTone, "tone_crisp", "Crisp");
-		pDesignerSizer->Add(pToneSizer1);
-		pDesignerSizer->AddSpacer(6);
-		pDesignerSizer->Add(pToneSizer2);
+		auto pToneSizer = new GridSizer(100, 29, 8, 6);
+		CreateToggle(pToneSizer, groupTone, "tone_deep", "Deep");
+		CreateToggle(pToneSizer, groupTone, "tone_mellow", "Mellow");
+		CreateToggle(pToneSizer, groupTone, "tone_light", "Light");
+		CreateToggle(pToneSizer, groupTone, "tone_soft", "Soft");
+		CreateToggle(pToneSizer, groupTone, "tone_cute", "Sweet");
+		CreateToggle(pToneSizer, groupTone, "tone_textured", "Textured");
+		CreateToggle(pToneSizer, groupTone, "tone_crisp", "Crisp");
+		pDesignerSizer->Add(pToneSizer);
 		
 		// Presence
 		CreateLabel(this, pDesignerSizer, "Presence");
-		auto pPresenceSizer1 = new HorizontalSizer();
-//		auto pPresenceSizer2 = new HorizontalSizer();
-		CreateToggle(pPresenceSizer1, groupPresence, "presence_nervous", "Nervous");
-		CreateToggle(pPresenceSizer1, groupPresence, "presence_shy", "Weak");
-		CreateToggle(pPresenceSizer1, groupPresence, "presence_grounded", "Grounded");
-		CreateToggle(pPresenceSizer1, groupPresence, "presence_strong", "Strong");
-		CreateToggle(pPresenceSizer1, groupPresence, "presence_commanding", "Commanding");
-		pDesignerSizer->Add(pPresenceSizer1);
-//		pDesignerSizer->AddSpacer(6);
-//		pDesignerSizer->Add(pPresenceSizer2);
+		auto pPresenceSizer = new GridSizer(100, 29, 8, 6);
+		CreateToggle(pPresenceSizer, groupPresence, "presence_nervous", "Nervous");
+		CreateToggle(pPresenceSizer, groupPresence, "presence_shy", "Weak");
+		CreateToggle(pPresenceSizer, groupPresence, "presence_grounded", "Grounded");
+		CreateToggle(pPresenceSizer, groupPresence, "presence_strong", "Strong");
+		CreateToggle(pPresenceSizer, groupPresence, "presence_commanding", "Commanding");
+		pDesignerSizer->Add(pPresenceSizer);
 
 		// Flow
 		CreateLabel(this, pDesignerSizer, "Flow");
-		auto pFlowSizer = new HorizontalSizer();
+		auto pFlowSizer = new GridSizer(100, 29, 8, 6);
 		CreateToggle(pFlowSizer, groupFlow, "flow_relaxed", "Relaxed");
 		CreateToggle(pFlowSizer, groupFlow, "flow_balanced", "Balanced");
 		CreateToggle(pFlowSizer, groupFlow, "flow_controlled", "Controlled");
@@ -154,19 +142,16 @@ namespace fig::gui
 
 		// Temperature
 		CreateLabel(this, pDesignerSizer, "Mood");
-		auto pTemperatureSizer1 = new HorizontalSizer();
-		auto pTemperatureSizer2 = new HorizontalSizer();
-		CreateToggle(pTemperatureSizer1, groupTemperature, "temperature_friendly", "Friendly");
-		CreateToggle(pTemperatureSizer1, groupTemperature, "temperature_playful", "Playful");
-		CreateToggle(pTemperatureSizer1, groupTemperature, "temperature_protective", "Protective");
-		CreateToggle(pTemperatureSizer1, groupTemperature, "temperature_sensual", "Sensual");
-		CreateToggle(pTemperatureSizer1, groupTemperature, "temperature_intimate", "Intimate");
-		CreateToggle(pTemperatureSizer2, groupTemperature, "temperature_gloomy", "Gloomy");
-		CreateToggle(pTemperatureSizer2, groupTemperature, "temperature_arrogant", "Arrogant");
-		CreateToggle(pTemperatureSizer2, groupTemperature, "temperature_malevolent", "Malevolent");
-		pDesignerSizer->Add(pTemperatureSizer1);
-		pDesignerSizer->AddSpacer(6);
-		pDesignerSizer->Add(pTemperatureSizer2);
+		auto pTemperatureSizer = new GridSizer(100, 29, 8, 6);
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_friendly", "Friendly");
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_playful", "Playful");
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_protective", "Protective");
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_sensual", "Sensual");
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_intimate", "Intimate");
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_gloomy", "Gloomy");
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_arrogant", "Arrogant");
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_malevolent", "Malevolent");
+		pDesignerSizer->Add(pTemperatureSizer);
 
 		// Custom
 		CreateLabel(this, pDesignerSizer, "Custom prompt");
@@ -177,6 +162,7 @@ namespace fig::gui
 		pHorizontalSizer->Add(pDesignerSizer, -1, SizerFlag::Expand);
 		pSizer->Add(pHorizontalSizer, 0, SizerFlag::Expand);
 
+		// Buttons
 		_pGenerateButton = CreateControl<ButtonWithLabel>("Generate voice");
 		_pGenerateButton->SetHeight(35);
 		_pGenerateButton->SetDelegate([this] { Generate(); });
@@ -214,7 +200,7 @@ namespace fig::gui
 		_pViewport = CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
 		_pViewport->SetSize(320, 480);
 		_pViewport->SetVisible(false);
-		pHorizontalSizer->Add(_pViewport, 0, SizerFlag::AlignRight | SizerFlag::Right, 12);
+		pHorizontalSizer->Add(_pViewport, 0, SizerFlag::AlignRight);
 
 		// Load portrait
 		if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(_characterId))
@@ -326,12 +312,14 @@ namespace fig::gui
 		fig::string name = _character.GetName();
 		if (empty_or_whitespace(name))
 			name = "Character";
-		fig::string phrase = std::format(examplePhrase, name);
-		
+
+		fig::string phrase = std::format(Constants::TTS::ExamplePhrase, name);
 		bool isServerRunning = Global::GetTTSBackend().GetStatus() >= TTSStatus::ServerStarted;
 
+		uint32_t seed = GetRandomNumber<uint32_t>();
+
 		auto prompt = GetPrompt();
-		if (auto result = Global::GetTTSBackend().Design(phrase, prompt))
+		if (auto result = Global::GetTTSBackend().Design(phrase, prompt, seed))
 		{
 			_voicePrint = {
 				.generationPrompt = prompt,
@@ -339,6 +327,7 @@ namespace fig::gui
 				.keys = _selectedKeys 
 					| std::views::transform([](auto&& key) { return (fig::string)key; })
 					| std::ranges::to<std::vector>(),
+				.seed = seed,
 			};
 
 			_audioResultQueue.Add(std::move(result).value());

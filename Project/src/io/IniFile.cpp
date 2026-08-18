@@ -303,26 +303,6 @@ namespace fig::io
 		}
 	}
 
-	void IniFile::Set(const fig::string_view section, const fig::string_view key, fig::fixed value)
-	{
-		SetValue(section, key, value);
-	}
-
-	void IniFile::Set(const fig::string_view section, const fig::string_view key, fig::string value)
-	{
-		SetValue(section, key, std::move(value));
-	}
-
-	void IniFile::Set(const fig::string_view section, const fig::string_view key, std::vector<fig::fixed> value)
-	{
-		SetValue(section, key, std::move(value));
-	}
-
-	void IniFile::Set(const fig::string_view section, const fig::string_view key, std::vector<fig::string> value)
-	{
-		SetValue(section, key, std::move(value));
-	}
-
 	[[nodiscard]] bool IniFile::HasKey(const fig::string_view section, fig::string_view key) const
 	{
 		if (auto itSection = _sections.find(section); itSection != _sections.end())

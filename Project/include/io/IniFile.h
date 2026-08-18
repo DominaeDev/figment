@@ -33,11 +33,12 @@ namespace fig::io
 			std::vector<fig::string>
 		>;
 
-		void Set(const fig::string_view section, const fig::string_view key, fig::fixed value);
-		void Set(const fig::string_view section, const fig::string_view key, fig::string value);
-		void Set(const fig::string_view section, const fig::string_view key, std::vector<fig::fixed> value);
-		void Set(const fig::string_view section, const fig::string_view key, std::vector<fig::string> value);
-
+		template<typename T>
+		void Set(const fig::string_view section, const fig::string_view key, T value)
+		{
+			SetValue(section, key, std::move(value));
+		}
+		
 		template<typename T>
 		[[nodiscard]] std::expected<T, IniError> Get(fig::string_view section, fig::string_view key) const
 		{

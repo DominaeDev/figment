@@ -4,13 +4,12 @@
 
 namespace fig::gui
 {
-	class BoxSizer : public Sizer
+	class BoxSizer : public SizerWithExtents
 	{
 	public:
-		fig::point GetExtents() const;
+		fig::point GetExtents() const override;
 
 	protected:
-		void OnPreLayout(const fig::rect& rect) override;
 		void OnLayout(const fig::rect& rect) override;
 
 		virtual fig::coord GetAvailableSpace() = 0;

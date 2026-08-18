@@ -11,6 +11,7 @@ namespace fig::tts
 		fig::string generationPrompt;
 		fig::string referenceText;
 		std::vector<fig::string> keys;
+		uint32_t seed;
 
 		AudioData audioData;
 
@@ -20,6 +21,7 @@ namespace fig::tts
 			return Fields(
 				Element { "Model",			&VoicePrint::modelId },
 				Element { "Prompt",			&VoicePrint::generationPrompt },
+				Element { "Seed",			&VoicePrint::seed },
 				Element { "Transcript",		&VoicePrint::referenceText },
 				Element { "Keys",			&VoicePrint::keys },
 				Element { "Data",			&VoicePrint::audioData,

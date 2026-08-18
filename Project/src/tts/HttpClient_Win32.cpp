@@ -84,6 +84,14 @@ namespace fig::tts
 			return HttpResponse { .responseCode = 400 };
 		}
 
+		// Timeout(s)
+		WinHttpSetTimeouts(
+			request,
+			0,          // resolve
+			10000,      // connect
+			10000,      // send
+			600000);    // receive
+
 		if (not WinHttpSendRequest(
 			request,
 			WINHTTP_NO_ADDITIONAL_HEADERS,

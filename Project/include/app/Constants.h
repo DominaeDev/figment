@@ -209,11 +209,11 @@ namespace fig::Constants
 
 	namespace CharacterAttributes
 	{
-		const fig::const_string Age = "age";
-		const fig::const_string Appearance = "appearance";
-		const fig::const_string Background = "background";
-		const fig::const_string Persona = "persona";
-		const fig::const_string Personality = "personality";
+		constexpr fig::const_string Age = "age";
+		constexpr fig::const_string Appearance = "appearance";
+		constexpr fig::const_string Background = "background";
+		constexpr fig::const_string Persona = "persona";
+		constexpr fig::const_string Personality = "personality";
 	}
 
 	namespace Data
@@ -225,5 +225,8 @@ namespace fig::Constants
 	{
 		constexpr int32_t ServerPort = 8080;
 		constexpr float DefaultDialogueDelay = 0.250f;
+
+		constexpr fig::const_string ExamplePhrase = "Greetings! I'm {}, and this is my voice. Do you like it? If not, well, that sounds like a YOU-problem.";
+
 	}
 }

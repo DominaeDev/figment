@@ -39,7 +39,7 @@ namespace fig
     using path = std::filesystem::path;
     using string_list = std::vector<string>;
     using string_span = std::span<const string>;
-    using fixed = fpm::fixed<std::int32_t, std::int64_t, 10>;
+    using fixed = fpm::fixed<std::int32_t, std::int64_t, 12>;
 
     template<typename T>
     using ref_vector = std::vector<std::reference_wrapper<T>>;
