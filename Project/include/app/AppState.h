@@ -4,7 +4,6 @@
 #include "gui/GUITypes.h"
 #include "app/AppSettings.h"
 #include "user/UserSettings.h"
-#include "tts/ITTSBackend.h"
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -33,6 +32,11 @@ namespace fig::llm
 	class LLMInstance;
 }
 
+namespace fig::tts
+{
+	class TTSBackend;
+}
+
 namespace fig::text
 {
 	class MacroProvider;
@@ -59,7 +63,7 @@ namespace fig
 			std::unique_ptr<fig::io::AppSettings> pAppSettings;
 			std::shared_ptr<fig::text::MacroProvider> pMacroProvider;
 			std::unique_ptr<std::map<fig::cursor, fig::sdl::Cursor>> pSystemCursors;
-			std::unique_ptr<fig::tts::ITTSBackend> pTTSBackend;
+			std::unique_ptr<fig::tts::TTSBackend> pTTSBackend;
 			std::unique_ptr<fig::audio::AudioManager> pAudioManager;
 
 			void Init();
@@ -73,7 +77,7 @@ namespace fig
 		static fig::gui::Window& GetMainWindow();
 		static fig::llm::LLMBackend& GetLLMBackend();
 		static fig::io::AppSettings& GetSettings();
-		static fig::tts::ITTSBackend& GetTTSBackend();
+		static fig::tts::TTSBackend& GetTTSBackend();
 		static fig::audio::AudioManager& GetAudioManager();
 		
 		static fig::user::UserManager& GetUserManager();

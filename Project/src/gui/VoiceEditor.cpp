@@ -6,6 +6,7 @@
 #include "gui/ImageViewport.h"
 #include "data/Character.h"
 #include "audio/AudioManager.h"
+#include "tts/TTSBackend.h"
 
 using namespace fig::data;
 using namespace fig::tts;

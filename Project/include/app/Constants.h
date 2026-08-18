@@ -224,7 +224,6 @@ namespace fig::Constants
 	namespace TTS
 	{
 		constexpr int32_t ServerPort = 8080;
-
-		constexpr float DefaultDelay = 0.35f;
+		constexpr float DefaultDialogueDelay = 0.250f;
 	}
 }

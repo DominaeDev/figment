@@ -17,8 +17,9 @@
 #include "llm/LLMUtility.h"
 #include "data/ModelSettings.h"
 #include "data/ChatInstance.h"
-#include "util/DebugUtils.h"
+#include "tts/TTSBackend.h"
 
+#include "util/DebugUtils.h"
 #include "gui/ChatListingScreen.h" //! @temp
 #include "gui/InfoPanel.h" //! @temp
 

@@ -1,23 +1,29 @@
 #include <pch.h>
-#include "tts/AudioServerProcess.h"
+#include "tts/AudioServerProcess_SDL.h"
+#include "io/FileUtility.h"
 
 using namespace fig::gui;
 
 namespace fig::tts
 {
-	AudioServerProcess::~AudioServerProcess()
+	AudioServerProcess_SDL::~AudioServerProcess_SDL()
 	{
 		Stop();
 	}
 
-	std::expected<void, std::string> AudioServerProcess::Start(std::span<const char* const> arguments)
+	bool AudioServerProcess_SDL::Start(const AudioServerConfiguration& config)
 	{
-		SDL_PropertiesID properties = SDL_CreateProperties();
+		fig::string serverJson = config.ToJson();
+		if (auto error = fig::io::WriteTextFile(fig::path { "tts/server.json" }, serverJson); error != fig::io::FileError::NoError)
+			return false; // Write error
 
+		const char* arguments[] = { "tts/bin/audiocpp_server.exe", "--config", "tts/server.json", nullptr };
+
+		SDL_PropertiesID properties = SDL_CreateProperties();
 		SDL_SetPointerProperty(
 			properties,
 			SDL_PROP_PROCESS_CREATE_ARGS_POINTER,
-			const_cast<void*>(static_cast<const void*>(arguments.data())));
+			const_cast<void*>(static_cast<const void*>(arguments)));
 
 		SDL_SetNumberProperty(properties, SDL_PROP_PROCESS_CREATE_STDOUT_NUMBER, SDL_PROCESS_STDIO_APP);
 		SDL_SetBooleanProperty(properties, SDL_PROP_PROCESS_CREATE_STDERR_TO_STDOUT_BOOLEAN, true);
@@ -27,14 +33,14 @@ namespace fig::tts
 		SDL_DestroyProperties(properties);
 
 		if (not _process)
-			return std::unexpected(SDL_GetError());
+			return false;
 
 		SDL_IOStream* output = SDL_GetProcessOutput(_process);
-		_logThread = std::jthread(std::bind_front(&AudioServerProcess::ReadLoop, this, output));
-		return {};
+		_logThread = std::jthread(std::bind_front(&AudioServerProcess_SDL::ReadLoop, this, output));
+		return true;
 	}
 
-	void AudioServerProcess::Stop()
+	void AudioServerProcess_SDL::Stop()
 	{
 		if (not _process)
 			return;
@@ -48,7 +54,7 @@ namespace fig::tts
 		_process = nullptr;
 	}
 
-	bool AudioServerProcess::IsRunning(int32_t& exitCode)
+	bool AudioServerProcess_SDL::IsRunning(int32_t& exitCode)
 	{
 		if (not _process)
 			return false;
@@ -56,7 +62,7 @@ namespace fig::tts
 		return not SDL_WaitProcess(_process, false, &exitCode);
 	}
 
-	void AudioServerProcess::ReadLoop(SDL_IOStream* output, std::stop_token stopToken)
+	void AudioServerProcess_SDL::ReadLoop(SDL_IOStream* output, std::stop_token stopToken)
 	{
 		char buffer[4096];
 
@@ -84,7 +90,7 @@ namespace fig::tts
 				continue;
 
 			if (status != SDL_IO_STATUS_EOF)
-				LogLn("AudioServerProcess: read failed unexpectedly");
+				LogLn("AudioServerProcess_SDL: read failed unexpectedly");
 
 			break;
 		}

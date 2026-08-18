@@ -10,7 +10,6 @@ namespace fig::tts
 	class AudioResultQueue
 	{
 	public:
-
 		void SetDelegate(AudioResultCallback fnDelegate) { _fnDelegate = fnDelegate; }
 		void Update();
 		void Add(fig::tts::TTSResult&& result);

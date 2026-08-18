@@ -1,22 +1,21 @@
 #include <pch.h>
-#include "tts/AudioServerProcess_Win.h"
+#include "tts/AudioServerProcess_Win32.h"
 #include "io/FileUtility.h"
 
 using namespace fig::gui;
 
 namespace fig::tts
 {
-	AudioServerProcess_Win::~AudioServerProcess_Win()
+	AudioServerProcess_Win32::~AudioServerProcess_Win32()
 	{
 		Stop();
 	}
 
-	std::expected<void, std::string> AudioServerProcess_Win::Start(const AudioServerConfiguration& config)
+	bool AudioServerProcess_Win32::Start(const AudioServerConfiguration& config)
 	{
 		fig::string serverJson = config.ToJson();
-
 		if (auto error = fig::io::WriteTextFile(fig::path { "tts/server.json" }, serverJson); error != fig::io::FileError::NoError)
-			return {}; // Write error
+			return false; // Write error
 
 		// Start server
 		_hJob = CreateJobObjectW(nullptr, nullptr);
@@ -59,7 +58,7 @@ namespace fig::tts
 			// Init io pipe
 			CloseHandle(_writeHandle);
 			_writeHandle = nullptr;
-			_readThread = std::jthread(std::bind_front(&AudioServerProcess_Win::ReadLoop, this));
+			_readThread = std::jthread(std::bind_front(&AudioServerProcess_Win32::ReadLoop, this));
 
 			// Process exit callback
 			_cbCtx = { this, _processInfo.hProcess };
@@ -71,17 +70,17 @@ namespace fig::tts
 			ResumeThread(_processInfo.hThread);
 
 			LogLn("audiocpp_server process started.");
-			return {};
+			return true;
 		}
 
 		// Failed
 		LogLn("Failed to launch audiocpp_server process.");
 		CloseHandle(_hJob);
 		_hJob = 0;
-		return {};
+		return false;
 	}
 
-	void AudioServerProcess_Win::Stop()
+	void AudioServerProcess_Win32::Stop()
 	{
 		// Release io pipe
 		if (_readHandle)
@@ -121,7 +120,7 @@ namespace fig::tts
 		}
 	}
 
-	bool AudioServerProcess_Win::IsRunning(int32_t& exitCode)
+	bool AudioServerProcess_Win32::IsRunning(int32_t& exitCode)
 	{
 		if (_processInfo.hProcess)
 		{
@@ -136,7 +135,7 @@ namespace fig::tts
 		return false;
 	}
 
-	std::optional<HANDLE> AudioServerProcess_Win::CreateWriteHandle()
+	std::optional<HANDLE> AudioServerProcess_Win32::CreateWriteHandle()
 	{
 		SECURITY_ATTRIBUTES pipeAttributes = {};
 		pipeAttributes.nLength = sizeof(pipeAttributes);
@@ -151,7 +150,7 @@ namespace fig::tts
 		return _writeHandle;
 	}
 
-	void AudioServerProcess_Win::ReadLoop(std::stop_token stopToken)
+	void AudioServerProcess_Win32::ReadLoop(std::stop_token stopToken)
 	{
 		char buffer[4096];
 		DWORD bytesRead;
@@ -173,7 +172,7 @@ namespace fig::tts
 		_readHandle = nullptr;
 	}
 
-	void CALLBACK AudioServerProcess_Win::ProcessEndedCallback(PTP_CALLBACK_INSTANCE Instance, PVOID Context, PTP_WAIT Wait, TP_WAIT_RESULT Result)
+	void CALLBACK AudioServerProcess_Win32::ProcessEndedCallback(PTP_CALLBACK_INSTANCE Instance, PVOID Context, PTP_WAIT Wait, TP_WAIT_RESULT Result)
 	{
 		CallbackContext* pCtx = static_cast<CallbackContext*>(Context);
 		DWORD exitCode;

@@ -87,6 +87,10 @@ namespace fig
 	size_t validate_utf8(const fig::string& text) noexcept;
 	fig::wstring from_utf8(const fig::string& str);
 	fig::string to_utf8(const fig::wstring& str);
+	fig::wstring from_utf8(fig::string_view str);
+	fig::string to_utf8(fig::wstring_view str);
+	fig::wstring from_utf8(const char* str);
+	fig::string to_utf8(const wchar_t* str);
 
 	void strip_emoji(fig::string& text);
 	fig::string strip_emoji(fig::string_view text, fig::string_view replacement = {});

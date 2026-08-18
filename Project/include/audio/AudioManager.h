@@ -10,7 +10,7 @@ namespace fig::audio
 		AudioManager();
 
 		bool PlaySound(fig::bytes&& data);
-		bool EnqueueSound(fig::byte_span data, float fVolume = -1.0f, float fDelay = Constants::TTS::DefaultDelay);
+		bool EnqueueSound(fig::byte_span data, float fVolume = -1.0f, float fDelay = Constants::TTS::DefaultDialogueDelay);
 		bool IsPlaying() const noexcept;
 
 		void StopAllSounds();

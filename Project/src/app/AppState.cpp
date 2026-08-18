@@ -12,9 +12,7 @@
 #include <SDL3/SDL.h>
 #include <cassert>
 
-#if PLATFORM_WINDOWS
-#include "tts/TTSBackend_Win.h"
-#endif
+#include "tts/TTSBackend.h"
 #include "audio/AudioManager.h"
 
 using namespace fig::gui;
@@ -144,7 +142,7 @@ namespace fig
 		return *(__appState->pLLMBackend.get());
 	}
 
-	ITTSBackend& Global::GetTTSBackend()
+	TTSBackend& Global::GetTTSBackend()
 	{
 		assert(__appState);
 		return *(__appState->pTTSBackend.get());

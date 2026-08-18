@@ -12,14 +12,15 @@ namespace fig::tts
 		fig::string referenceText;
 	};
 
-	class ITTSBackend
+	class TTSBackend
 	{
 	public:
-		virtual ~ITTSBackend();
+		TTSBackend();
+		virtual ~TTSBackend();
 
-		virtual bool Initialize() = 0;
-		virtual void Shutdown() = 0;
-		virtual bool Restart() = 0;
+		bool Initialize();
+		void Shutdown();
+		bool Restart();
 	
 		TTSStatus GetStatus() const noexcept { return _status; };
 
@@ -31,13 +32,16 @@ namespace fig::tts
 		std::expected<TTSResult, TTSError> Design(fig::string_view text, fig::string_view instruct);
 
 	protected:
-		ITTSBackend();
-		virtual TTSPayload SendRequest(TTSTask task, fig::uuid modelId, fig::string_view text, fig::string_view instructions, TTSVoiceRef voiceRef) = 0;
+		TTSPayload SendRequest(TTSTask task, fig::uuid modelId, fig::string_view text, fig::string_view instructions, TTSVoiceRef voiceRef);
 		void LoadModelConfigurations();
+		bool CheckHealth();
 
 	protected:
 		TTSStatus _status { TTSStatus::Uninitialized };
 		fig::tts::VoiceModelSettings _models;
+		std::unique_ptr<class IAudioServerProcess> _pServer {};
+		std::unique_ptr<class IHttpClient> _pHttp {};
+		bool _bConnected { false };
 
 		struct PendingRequest {
 			uint64_t id {};
@@ -61,17 +65,6 @@ namespace fig::tts
 
 		void __Worker(std::stop_token stop);
 		std::jthread _worker;
-	};
-
-	class TTSBackend_Dummy : public ITTSBackend
-	{
-	public:
-		bool Initialize() override { return false; }
-		bool Restart() override { return false; }
-		void Shutdown() override {}
-	
-	protected:
-		TTSPayload SendRequest(TTSTask task, fig::uuid modelId, fig::string_view text, fig::string_view instructions, TTSVoiceRef voiceRef) override { return std::unexpected(TTSError::Unavailable); }
 	};
 }
 

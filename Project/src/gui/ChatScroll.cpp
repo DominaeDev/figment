@@ -10,6 +10,7 @@
 #include "data/Character.h"
 #include "audio/AudioManager.h"
 #include "user/UserSettings.h"
+#include "tts/TTSBackend.h"
 
 using namespace fig::llm;
 using namespace fig::chat;

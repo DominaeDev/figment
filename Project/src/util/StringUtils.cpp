@@ -539,6 +539,30 @@ namespace fig
 		return converter.to_bytes(str);
 	}
 
+	wstring from_utf8(string_view str)
+	{
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		return converter.from_bytes(str.data(), str.data() + str.size());
+	}
+
+	string to_utf8(wstring_view str)
+	{
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		return converter.to_bytes(str.data(), str.data() + str.size());
+	}
+
+	wstring from_utf8(const char* str)
+	{
+		size_t len = std::strlen(str);
+		return from_utf8(fig::string_view { str, len });
+	}
+
+	string to_utf8(const wchar_t* str)
+	{
+		size_t len = std::wcslen(str);
+		return to_utf8(fig::wstring_view { str, len });
+	}
+
 	size_t validate_utf8(const string& text) noexcept
 	{
 		size_t len = text.size();
