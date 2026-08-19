@@ -48,7 +48,7 @@ namespace fig::gui
 	private:
 		fig::observer_ptr<ChatScroll> _pChatScroll {};
 		fig::observer_ptr<BehindChat> _pBehindChat {};
-		fig::observer_ptr<TextBox> _pTextBox {};
+		fig::observer_ptr<TextInput> _pTextBox {};
 		fig::observer_ptr<VariableList> _pVariableList {};
 		fig::observer_ptr<InfoPanel> _pInfoPanel {};
 		fig::observer_ptr<ChatBackground> _pBackground {};

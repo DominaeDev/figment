@@ -49,6 +49,9 @@ namespace fig::gui
 		inline constexpr fig::color LineColor					{ 0xc7bcaa_rgb };
 		inline constexpr fig::color DisabledLineColor			{ 0xc0c0c0_rgb };
 		
+		inline constexpr fig::color TextBoxForeground			{ 0x000000_rgb };
+		inline constexpr fig::color TextBoxBackground			{ 0xFFFFFF_rgb };
+		
 		inline constexpr fig::color GenderTagMale				{ 0x45ccff_rgb };
 		inline constexpr fig::color GenderTagFemale				{ 0xff5abb_rgb };
 		inline constexpr fig::color GenderTagOther				{ 0x4cff8b_rgb };

@@ -25,7 +25,7 @@ namespace fig::gui
 		fig::string _label;
 	};
 
-	class TextBox;
+	class TextInput;
 
 	template <typename T>
 	class EditorTextField : public IEditorField
@@ -42,7 +42,7 @@ namespace fig::gui
 		void OnChange(const fig::string& text);
 
 		ValueBinding<T> _binding;
-		fig::observer_ptr<TextBox> _pTextBox;
+		fig::observer_ptr<TextInput> _pTextBox;
 		fig::coord _maxWidth {};
 	};
 

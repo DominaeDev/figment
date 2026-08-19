@@ -79,6 +79,7 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_EXPAND_ARROW_RIGHT, "./resources/gui/icons/icon_expand_arrow.png");
 		LoadTexture(pRenderer, Resource::ICON_EXPAND_ARROW_LEFT, "./resources/gui/icons/icon_collapse_arrow.png");
 		LoadTexture(pRenderer, Resource::ICON_SAVE, "./resources/gui/icons/icon_save.png");
+		LoadTexture(pRenderer, Resource::ICON_CROSS, "./resources/gui/icons/icon_cross.png");
 		
 		LoadTexture(pRenderer, Resource::ICON_BORDER_01, "./resources/gui/card/borders/icon_border_01.png");
 		LoadTexture(pRenderer, Resource::ICON_BORDER_02, "./resources/gui/card/borders/icon_border_02.png");

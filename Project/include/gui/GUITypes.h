@@ -101,5 +101,5 @@ namespace fig::gui
 	class Sizer;
 	class Window;
 	class Image;
-	class TextBox;
+	class TextInput;
 }

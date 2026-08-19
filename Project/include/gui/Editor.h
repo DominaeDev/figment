@@ -28,8 +28,8 @@ namespace fig::gui
 		fig::observer_ptr<StaticText> CreateLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 
 		template <typename T>
-		fig::observer_ptr<class SimpleTextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding) = delete;
+		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding) = delete;
 		template <>
-		fig::observer_ptr<class SimpleTextBox> CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding);
+		fig::observer_ptr<class TextBox> CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding);
 	};
 }

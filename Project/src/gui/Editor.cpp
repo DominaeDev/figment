@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "gui/Editor.h"
-#include "gui/SimpleTextBox.h"
+#include "gui/TextBox.h"
 
 namespace fig::gui
 {
@@ -35,9 +35,9 @@ namespace fig::gui
 	}
 
 	template <>
-	fig::observer_ptr<SimpleTextBox> Editor::CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding)
+	fig::observer_ptr<TextBox> Editor::CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding)
 	{
-		auto pTextBox = pParent->CreateControl<SimpleTextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize, TextBox::Flags { TextBox::Flag::Single });
+		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize, TextInput::Flags { TextInput::Flag::Single });
 		pTextBox->SetText(binding.AsString());
 		pTextBox->SetTextChangedCallback([binding](const fig::string& text) mutable { binding.Set(text); });
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);

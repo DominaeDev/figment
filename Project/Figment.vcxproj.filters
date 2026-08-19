@@ -159,9 +159,6 @@
     <Filter Include="Source Files\Third-party\fast_gaussian_blur">
       <UniqueIdentifier>{8ff397de-7dd3-44d2-8594-7d6b6a218bf4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Screens\Editor">
-      <UniqueIdentifier>{f995ba2b-e188-4bc6-ad30-c9b4e8435aed}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\IO\Data">
       <UniqueIdentifier>{ff0f8576-90c4-4582-9cfe-68cda04a61b0}</UniqueIdentifier>
     </Filter>
@@ -173,6 +170,9 @@
     </Filter>
     <Filter Include="Source Files\Backend\TTS\AudioServer">
       <UniqueIdentifier>{bce3df02-909e-4dc1-84d8-d271728445aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\Editors">
+      <UniqueIdentifier>{f995ba2b-e188-4bc6-ad30-c9b4e8435aed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -272,7 +272,7 @@
     <ClCompile Include="src\gui\StaticText.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\TextBox.cpp">
+    <ClCompile Include="src\gui\TextInput.cpp">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalGradient.cpp">
@@ -326,7 +326,7 @@
     <ClCompile Include="..\Libraries\miniz\src\miniz.c">
       <Filter>Source Files\Third-party\miniz</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\SimpleTextBox.cpp">
+    <ClCompile Include="src\gui\TextBox.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SearchBox.cpp">
@@ -651,16 +651,16 @@
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CharacterEditor.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\EditorFields.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ValueBinding.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Editor.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClCompile>
     <ClCompile Include="src\tts\TTSBackend.cpp">
       <Filter>Source Files\Backend\TTS</Filter>
@@ -669,7 +669,7 @@
       <Filter>Source Files\Frontend\Audio</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VoiceEditor.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ToggleWithLabel.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -823,7 +823,7 @@
     <ClInclude Include="include\gui\StaticText.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\TextBox.h">
+    <ClInclude Include="include\gui\TextInput.h">
       <Filter>Source Files\Frontend\GUI\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalGradient.h">
@@ -1147,7 +1147,7 @@
     <ClInclude Include="include\gui\GUIConstants.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\SimpleTextBox.h">
+    <ClInclude Include="include\gui\TextBox.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SearchBox.h">
@@ -1547,16 +1547,16 @@
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Editor.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditor.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\EditorFields.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ValueBinding.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClInclude>
     <ClInclude Include="include\util\OpaquePtr.h">
       <Filter>Source Files\Utility</Filter>
@@ -1577,7 +1577,7 @@
       <Filter>Source Files\Backend\TTS</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VoiceEditor.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editor</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ToggleWithLabel.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>

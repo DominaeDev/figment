@@ -8,7 +8,7 @@
 #include "gui/MainFrame.h"
 #include "gui/ChatScreen.h"
 #include "gui/ChatScroll.h"
-#include "gui/TextBox.h"
+#include "gui/TextInput.h"
 #include <map>
 #include <cwctype>
 #include <ranges>
@@ -29,7 +29,7 @@ namespace fig::chat
 	struct ChatCommandFunctionContext
 	{
 		ChatScroll* pChatScroll;
-		TextBox* pTextBox;
+		TextInput* pTextBox;
 		fig::llm::LLMInstancePtr pLLM;
 		ParsedChatCommandQueue& commandQueue;
 	};

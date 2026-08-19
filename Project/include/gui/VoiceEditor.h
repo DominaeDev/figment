@@ -45,7 +45,7 @@ namespace fig::gui
 		fig::observer_ptr<class ButtonWithLabelAndIcon> _pSaveButton;
 		fig::observer_ptr<class ButtonWithLabelAndIcon> _pDiscardButton;
 
-		fig::observer_ptr<class TextBox> _pCustomPrompt;
+		fig::observer_ptr<class TextInput> _pCustomPrompt;
 		fig::observer_ptr<class StaticText> _pStatusText;
 		fig::observer_ptr<class ImageViewport> _pViewport;
 

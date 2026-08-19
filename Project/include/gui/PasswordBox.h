@@ -1,10 +1,10 @@
 #pragma once
 
-#include "gui/SimpleTextBox.h"
+#include "gui/TextBox.h"
 
 namespace fig::gui
 {
-	class PasswordBox : public SimpleTextBox
+	class PasswordBox : public TextBox
 	{
 	public:
 		PasswordBox(ControlPtr pParent);

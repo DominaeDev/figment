@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	PasswordBox::PasswordBox(ControlPtr pParent) : SimpleTextBox(pParent, FontFace::Default, 18, { TextBox::Flag::Password, TextBox::Flag::Single })
+	PasswordBox::PasswordBox(ControlPtr pParent) : TextBox(pParent, FontFace::Default, 18, { TextInput::Flag::Password, TextInput::Flag::Single })
 	{
 		SetMarginLeft(34);
 
@@ -23,7 +23,7 @@ namespace fig::gui
 
 	void PasswordBox::OnEnabled(bool bEnabled)
 	{
-		SimpleTextBox::OnEnabled(bEnabled);
+		TextBox::OnEnabled(bEnabled);
 
 		_pIcon->SetForegroundColor(bEnabled ? Color::SidePanelForeground : Color::DisabledForeground);
 	}

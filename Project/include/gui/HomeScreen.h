@@ -32,7 +32,7 @@ namespace fig::gui
 
 	private:
 		fig::observer_ptr<CardList> _pCardList;
-		fig::observer_ptr<TextBox> _pFilterTextBox;
+		fig::observer_ptr<TextInput> _pFilterTextBox;
 		fig::observer_ptr<StaticText> _pHeader;
 		fig::observer_ptr<ButtonWithIcon> _pSortingButton;
 		fig::observer_ptr<ButtonWithIcon> _pFilteringButton;

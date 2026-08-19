@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/VoiceEditor.h"
 #include "gui/ToggleWithLabel.h"
-#include "gui/SimpleTextBox.h"
+#include "gui/TextBox.h"
 #include "gui/AppResources.h"
 #include "gui/ImageViewport.h"
 #include "gui/GridSizer.h"
@@ -175,7 +175,7 @@ namespace fig::gui
 
 		// Custom
 		CreateLabel(this, pDesignerSizer, "Custom prompt");
-		_pCustomPrompt = CreateControl<SimpleTextBox>();
+		_pCustomPrompt = CreateControl<TextBox>();
 		_pCustomPrompt->SetMaxWidth(532);
 		pDesignerSizer->Add(_pCustomPrompt, 0, SizerFlag::Expand);
 

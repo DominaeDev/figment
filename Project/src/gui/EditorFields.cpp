@@ -1,13 +1,13 @@
 #include <pch.h>
 #include "gui/EditorFields.h"
-#include "gui/SimpleTextBox.h"
+#include "gui/TextBox.h"
 
 namespace fig::gui
 {
 	template<>
 	ControlPtr EditorTextField<fig::string>::CreateControl(ControlPtr pParent)
 	{
-		_pTextBox = pParent->CreateControl<SimpleTextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize, TextBox::Flags { TextBox::Flag::Single });
+		_pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize, TextInput::Flags { TextInput::Flag::Single });
 		_pTextBox->SetText(_binding.AsString());
 		_pTextBox->SetMaxWidth(_maxWidth);
 		_pTextBox->SetTextChangedCallback([this](const fig::string& text) { OnChange(text); });

@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "gui/CharacterEditor.h"
 #include "gui/EditorFields.h"
-#include "gui/SimpleTextBox.h"
+#include "gui/TextBox.h"
 #include "data/Character.h"
 
 using namespace fig::data;
