@@ -19,7 +19,6 @@ namespace fig::gui
 
 		fig::string GetTitle() const noexcept override;
 		EditorFields GetFields() noexcept override;
-		bool SaveChanges() noexcept override;
 
 	private:
 		fig::data::Character _value {};

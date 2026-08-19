@@ -46,17 +46,13 @@ namespace fig::gui
 		_pDescription->SetText(character.GetDescription());
 	}
 
-	void CharacterDetailsPanel::OnAfterLayout()
+	fig::coord CharacterDetailsPanel::GetExtent() const
 	{
 		if (_children.empty())
-			_maxExtent = 0;
-		else
-		{
-			auto& bottomItem = _children.back();
-			_maxExtent = bottomItem->GetY() + bottomItem->GetHeight();
-		}
+			return 0;
 
-		ScrollPanel::OnAfterLayout();
+		auto& bottomItem = _children.back();
+		return bottomItem->GetY() + bottomItem->GetHeight();
 	}
 
 }

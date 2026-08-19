@@ -14,6 +14,7 @@ void VerticalGradient::SetColors(fig::color colorTop, fig::color colorBottom)
 {
 	_colorTop = to_colorf(colorTop);
 	_colorBottom = to_colorf(colorBottom);
+	_bInvalid = true;
 }
 
 void VerticalGradient::SetTexture(fig::texture_ptr pTexture)
@@ -24,7 +25,7 @@ void VerticalGradient::SetTexture(fig::texture_ptr pTexture)
 void VerticalGradient::OnRender(fig::renderer_ptr pRenderer)
 {
 	fig::rectf rect = GetDrawRect();
-	if (!SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
+	if (_bInvalid or !SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
 		RefreshGeometry(rect);
 
 	static constexpr int indices[6] = { 0, 1, 2, 2, 3, 0 };
@@ -47,4 +48,6 @@ void VerticalGradient::RefreshGeometry(fig::rectf rect)
 	_vertices.push_back(fig::vertex { fig::pointf { right, bottom }, _colorBottom });
 	_vertices.push_back(fig::vertex { fig::pointf { right, top }, _colorTop });
 	_vertices.push_back(fig::vertex { fig::pointf { left, top }, _colorTop });
+
+	_bInvalid = false;
 }

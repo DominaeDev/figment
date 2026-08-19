@@ -318,17 +318,16 @@ namespace fig::gui
 
 	void LayoutElement::ResizeToFit(bool bHorizontal, bool bVertical) noexcept
 	{
-		LayoutNow();
-
 		fig::point size {};
 		for (auto& child : _children)
 		{
 			size.x = std::max(size.x, child->GetX() + child->GetWidth());
 			size.y = std::max(size.y, child->GetY() + child->GetHeight());
 		}
+
 		if (bHorizontal)
-			SetWidth(size.x);
+			_rect.w = size.x; // No layout
 		if (bVertical)
-			SetHeight(size.y);
+			_rect.h = size.y; // No layout
 	}
 }

@@ -17,7 +17,7 @@ namespace fig::gui
 
 		virtual void Initialize() noexcept = 0;
 		virtual void ShutDown() noexcept = 0;
-		virtual bool SaveChanges() noexcept = 0;
+		virtual void PopulateTopBar(ControlPtr pTopBar) {};
 
 	protected:
 		void CreateEditorField(ControlPtr pParent, const EditorField& field);

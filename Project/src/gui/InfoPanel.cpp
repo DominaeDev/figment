@@ -73,7 +73,7 @@ namespace fig::gui
 			}
 		}
 		
-		if (IsUserEvent(event, UserEvent::Activated))
+		if (IsUserEvent(event, UserEvent::ScreenActivated))
 		{
 			if (Global::IsSignedIn())
 			{

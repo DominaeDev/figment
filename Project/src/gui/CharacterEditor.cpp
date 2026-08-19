@@ -67,8 +67,4 @@ namespace fig::gui
 		return fields;
 	}
 
-	bool CharacterEditor::SaveChanges() noexcept
-	{
-		return false;
-	}
 }

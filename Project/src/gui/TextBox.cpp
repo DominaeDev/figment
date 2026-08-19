@@ -1560,7 +1560,7 @@ namespace fig::gui
 			break;
 		}
 
-		if (_bFocused and IsUserEvent(event, UserEvent::Deactivated))
+		if (_bFocused and IsUserEvent(event, UserEvent::ScreenDeactivated))
 		{
 			SetFocus(false);
 			return EventResult::Continue;

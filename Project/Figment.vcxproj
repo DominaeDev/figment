@@ -184,6 +184,7 @@
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\BaseButton.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
+    <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp" />
     <ClCompile Include="src\gui\CardImage.cpp" />
     <ClCompile Include="src\gui\CharacterDetailsPanel.cpp" />
     <ClCompile Include="src\gui\CharacterEditor.cpp" />
@@ -226,6 +227,7 @@
     <ClCompile Include="src\gui\Slider.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
     <ClCompile Include="src\gui\ToggleWithLabel.cpp" />
+    <ClCompile Include="src\gui\TopBar.cpp" />
     <ClCompile Include="src\gui\ValueBinding.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
@@ -459,6 +461,7 @@
     <ClInclude Include="include\gui\BehindChat.h" />
     <ClInclude Include="include\gui\BoxSizer.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
+    <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\CharacterDetailsPanel.h" />
     <ClInclude Include="include\gui\CharacterEditor.h" />
@@ -492,6 +495,7 @@
     <ClInclude Include="include\gui\Slider.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
     <ClInclude Include="include\gui\ToggleWithLabel.h" />
+    <ClInclude Include="include\gui\TopBar.h" />
     <ClInclude Include="include\gui\ValueBinding.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
     <ClInclude Include="include\gui\SearchBox.h" />

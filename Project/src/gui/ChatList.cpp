@@ -27,8 +27,8 @@ namespace fig::gui
 	ChatList::ChatList(ControlPtr pParent) : ScrollPanel(pParent)
 	{
 		_pVerticalSizer = SetSizer<VerticalSizer>();
-		SetTopMargin(TopMargin);
-		SetBottomMargin(BottomMargin);
+		SetTopPadding(TopMargin);
+		SetBottomPadding(BottomMargin);
 
 		EnableClipping(true);
 		EnableCulling(true);
@@ -118,17 +118,12 @@ namespace fig::gui
 		PushEvent(UserEvent::Scrolling);
 	}
 
-	void ChatList::OnAfterLayout()
+	fig::coord ChatList::GetExtent() const
 	{
 		if (_children.empty())
-			_maxExtent = 0;
-		else
-		{
-			auto& bottomItem = _children.back();
-			_maxExtent = bottomItem->GetY() + bottomItem->GetHeight();
-		}
-
-		ScrollPanel::OnAfterLayout();
+			return 0;
+		auto& bottomItem = _children.back();
+		return bottomItem->GetY() + bottomItem->GetHeight();
 	}
 
 	void ChatList::SetFilter(const fig::string& search_string) noexcept

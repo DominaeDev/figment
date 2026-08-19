@@ -33,8 +33,8 @@ namespace fig::gui
 		_pGridSizer = SetSizer<GridSizer>(cardWidth(cardSize), cardHeight(cardSize));
 		_pGridSizer->SetSpacing(Constants::GUI::Cards::SpacingX, Constants::GUI::Cards::SpacingY);
 		_pGridSizer->EnableCentering(true);
-		SetTopMargin(TopMargin);
-		SetBottomMargin(BottomMargin);
+		SetTopPadding(TopMargin);
+		SetBottomPadding(BottomMargin);
 
 		EnableClipping(true);
 		EnableCulling(true);
@@ -114,13 +114,13 @@ namespace fig::gui
 			auto last_extent = (_last_rows * kCardHeight + std::max(_last_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
 			auto curr_extent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
 
-			_maxExtent = curr_extent;
+//			_maxExtent = curr_extent;
 			_last_rows = curr_rows;
 
 			if (last_extent > 0)
 			{
 				float ratio = _fScrollY / last_extent;
-				_fScrollY = ratio * toF(_maxExtent);
+				_fScrollY = ratio * toF(curr_extent);
 				_fTargetScrollY = _fScrollY;
 				LayoutNow();
 			}
@@ -175,13 +175,11 @@ namespace fig::gui
 		PushEvent(UserEvent::Scrolling);
 	}
 
-	void CardList::OnAfterLayout()
+	fig::coord CardList::GetExtent() const
 	{
 		int32_t curr_rows = toI(_pGridSizer->GetRows());
 		fig::coord kCardHeight = cardHeight(_cardSize);
-		_maxExtent = (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
-
-		ScrollPanel::OnAfterLayout();
+		return (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
 	}
 
 	static void Sort(std::vector<CoverCardPtr>& cards, SortBy sortBy, OrderBy orderBy)

@@ -14,6 +14,7 @@ namespace fig::gui
 
 	void LineBorderRenderer::Render(fig::renderer_ptr pRenderer, const fig::rectf& rect)
 	{
+		SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
 		SDL_SetRenderDrawColor(pRenderer, _color.r, _color.g, _color.b, _color.a);
 		
 		if (_directions.IsSet(Direction::North))

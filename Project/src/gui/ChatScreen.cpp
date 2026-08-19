@@ -418,7 +418,7 @@ namespace fig::gui
 				_pVariableList->SetVariables(pLLMInstance->GetStateVariables());
 			NextQueuedCommand();
 		}
-		else if (IsUserEvent(event, UserEvent::Activated))
+		else if (IsUserEvent(event, UserEvent::ScreenActivated))
 		{
 			_pTextBox->SetFocus(true);
 		}

@@ -27,7 +27,7 @@ namespace fig::gui
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnScroll() override;
-		void OnAfterLayout() override;
+		fig::coord GetExtent() const override;
 
 		void OnCardEvent(CoverCard& card, CardEvent event);
 		void DeleteCharacter(CoverCard& card);

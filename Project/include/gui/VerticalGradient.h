@@ -12,15 +12,16 @@ namespace fig::gui
 		void SetTexture(fig::texture_ptr pTexture);
 
 		void OnRender(fig::renderer_ptr pRenderer) override;
+	
 	protected:
 		void OnUpdate(float fElapsed) override {};
-
 		void RefreshGeometry(fig::rectf rect);
 	private:
 		fig::colorf _colorTop {};
 		fig::colorf _colorBottom {};
 		fig::rectf _lastRect {};
 		fig::texture_ptr _pTexture;
+		bool _bInvalid { true };
 
 		std::vector<fig::vertex> _vertices {};
 	};

@@ -25,14 +25,16 @@ namespace fig::gui
 
 	protected:
 		void SetTitle(fig::string_view text);
-		bool OnKeyboardEvent(KeyboardEvent& event);
 		void OnSetEditor();
+
+		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		EventResult OnEvent(fig::event& event) override;
 
 	private:
 		fig::observer_ptr<StaticText> _pTitle {};
 		fig::observer_ptr<ScrollPanel> _pScrollPanel {};
 		fig::observer_ptr<Editor> _pEditor;
+		fig::observer_ptr<class TopBar> _pTopBar;
 		EditorFields _fields {};
 	};
 

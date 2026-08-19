@@ -126,7 +126,7 @@ namespace fig::gui
 		if (_pActiveScreen)
 		{
 			_pActiveScreen->SetVisible(false);
-			_pActiveScreen->PushEvent(UserEvent::Deactivated);
+			_pActiveScreen->PushEvent(UserEvent::ScreenDeactivated);
 
 			// Detach
 			auto pParent = _pActiveScreen->GetParent();
@@ -147,7 +147,7 @@ namespace fig::gui
 		sizer->Add(_pActiveScreen, -1, SizerFlag::Fill);
 
 		_pActiveScreen->SetVisible(true);
-		_pActiveScreen->PushEvent(UserEvent::Activated);
+		_pActiveScreen->PushEvent(UserEvent::ScreenActivated);
 		PushEvent(UserEvent::ChangedScreen, &_currentScreen);
 
 		InvalidateLayout();

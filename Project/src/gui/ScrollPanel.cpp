@@ -98,18 +98,38 @@ namespace fig::gui
 		return true;
 	}
 
+	fig::coord ScrollPanel::GetExtent() const
+	{
+		if (_children.empty())
+			return 0;
+
+		fig::coord minY = std::numeric_limits<fig::coord>::max();
+		fig::coord maxY = std::numeric_limits<fig::coord>::min();
+
+		for (auto& child : _children)
+		{
+			auto& rect = child->GetRect();
+			minY = std::min(minY, rect.y);
+			maxY = std::max(maxY, rect.y + rect.h);
+		}
+		return fig::coord { maxY - minY };
+	}
+
 	void ScrollPanel::OnAfterLayout()
 	{
 		if (_pSizer and not _children.empty())
 		{
-			fig::coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
-			_fScrollY = std::clamp(_fScrollY, 0.0f, toF(maxExtent));
-			_fTargetScrollY = std::clamp(_fTargetScrollY, 0.0f, toF(maxExtent));
+			_maxExtent = GetExtent();
+
+			fig::coord extent = std::max(_maxExtent - GetHeight() + _topPadding + _bottomPadding, 0);
+			_fScrollY = std::clamp(_fScrollY, 0.0f, toF(extent));
+			_fTargetScrollY = std::clamp(_fTargetScrollY, 0.0f, toF(extent));
 
 			// Move vertically
 			for (auto& child : _children)
-				child->SetY(child->GetY() - toI(_fScrollY) + _topMargin);
+				child->SetY(child->GetY() - toI(_fScrollY) + _topPadding);
 			
+			_currentScrollY = toI(_fScrollY);
 			RefreshScrollBar();
 		}
 	}
@@ -123,7 +143,7 @@ namespace fig::gui
 	{
 		if (_pScrollBar)
 		{
-			fig::coord maxExtent = std::max(_maxExtent - GetHeight() + _topMargin + _bottomMargin, 0);
+			fig::coord maxExtent = std::max(_maxExtent - GetHeight() + _topPadding + _bottomPadding, 0);
 			_pScrollBar->SetHeight(GetHeight());
 			_pScrollBar->SetAbsolutePosition(GetAbsoluteX() + GetWidth() + _scrollBarOffset, GetAbsoluteY()); // 16px offset??
 			_pScrollBar->SetScroll(*this, _fScrollY, maxExtent);

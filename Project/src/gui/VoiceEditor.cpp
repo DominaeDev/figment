@@ -5,6 +5,7 @@
 #include "gui/AppResources.h"
 #include "gui/ImageViewport.h"
 #include "gui/GridSizer.h"
+#include "gui/ButtonWithLabelAndIcon.h"
 #include "data/Character.h"
 #include "audio/AudioManager.h"
 #include "tts/TTSBackend.h"
@@ -84,6 +85,37 @@ namespace fig::gui
 		return std::format("Configuring {}'s voice", _character.GetName());
 	}
 
+	fig::observer_ptr<Sizer> VoiceEditor::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
+	{
+		CreateLabel(pParent, pSizer, text);
+		auto pGridSizer = new GridSizer(100, 29, 8, 6);
+		pSizer->Add(pGridSizer);
+		return pGridSizer;
+	}
+
+	void VoiceEditor::PopulateTopBar(ControlPtr pParent)
+	{
+		auto pSizer = pParent->GetSizer();
+
+		_pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
+		_pSaveButton->SetSize(110, 32);
+		_pSaveButton->SetDelegate([this] {
+			if (Save())
+				PushEvent(UserEvent::NavigateToHome);
+		});
+		_pSaveButton->Enable(false);
+		
+		_pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Discard", Resource::ICON_DELETE);
+		_pDiscardButton->SetSize(110, 32);
+		_pDiscardButton->SetDelegate([this] {
+			PushEvent(UserEvent::NavigateToHome);
+		});
+
+		pSizer->Add(_pSaveButton, 0, SizerFlag::AlignCenterVertical);
+		pSizer->Add(_pDiscardButton, 0, SizerFlag::Left | SizerFlag::AlignCenterVertical, 8);
+		pSizer->AddSpacer(8);
+	}
+
 	void VoiceEditor::Initialize() noexcept
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
@@ -91,26 +123,21 @@ namespace fig::gui
 		auto pDesignerSizer = new VerticalSizer();
 
 		// Gender
-		CreateLabel(this, pDesignerSizer, "Pitch");
-		auto pGenderSizer = new GridSizer(100, 29, 8, 6);
+		auto pGenderSizer = CreateGroup(this, pDesignerSizer, "Pitch");
 		auto pMale = CreateToggle(pGenderSizer, groupGender, "gender_male", "Masculine", true);
 		auto pFemale = CreateToggle(pGenderSizer, groupGender, "gender_female", "Feminine", true);
-		pDesignerSizer->Add(pGenderSizer);
 
 		// Maturity
-		CreateLabel(this, pDesignerSizer, "Maturity");
-		auto pMaturitySizer = new GridSizer(100, 29, 8, 6);
+		auto pMaturitySizer = CreateGroup(this, pDesignerSizer, "Maturity");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_spry", "Spry");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_daring", "Daring");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_ambitious", "Ambitious");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_dependable", "Dependable");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_seasoned", "Seasoned");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_venerable", "Venerable");
-		pDesignerSizer->Add(pMaturitySizer);
 
 		// Tone
-		CreateLabel(this, pDesignerSizer, "Tone");
-		auto pToneSizer = new GridSizer(100, 29, 8, 6);
+		auto pToneSizer = CreateGroup(this, pDesignerSizer, "Tone");
 		CreateToggle(pToneSizer, groupTone, "tone_deep", "Deep");
 		CreateToggle(pToneSizer, groupTone, "tone_mellow", "Mellow");
 		CreateToggle(pToneSizer, groupTone, "tone_light", "Light");
@@ -118,31 +145,25 @@ namespace fig::gui
 		CreateToggle(pToneSizer, groupTone, "tone_cute", "Sweet");
 		CreateToggle(pToneSizer, groupTone, "tone_textured", "Textured");
 		CreateToggle(pToneSizer, groupTone, "tone_crisp", "Crisp");
-		pDesignerSizer->Add(pToneSizer);
 		
 		// Presence
-		CreateLabel(this, pDesignerSizer, "Presence");
-		auto pPresenceSizer = new GridSizer(100, 29, 8, 6);
+		auto pPresenceSizer = CreateGroup(this, pDesignerSizer, "Presence");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_nervous", "Nervous");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_shy", "Weak");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_grounded", "Grounded");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_strong", "Strong");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_commanding", "Commanding");
-		pDesignerSizer->Add(pPresenceSizer);
 
 		// Flow
-		CreateLabel(this, pDesignerSizer, "Flow");
-		auto pFlowSizer = new GridSizer(100, 29, 8, 6);
+		auto pFlowSizer = CreateGroup(this, pDesignerSizer, "Flow");
 		CreateToggle(pFlowSizer, groupFlow, "flow_relaxed", "Relaxed");
 		CreateToggle(pFlowSizer, groupFlow, "flow_balanced", "Balanced");
 		CreateToggle(pFlowSizer, groupFlow, "flow_controlled", "Controlled");
 		CreateToggle(pFlowSizer, groupFlow, "flow_monotone", "Flat");
 		CreateToggle(pFlowSizer, groupFlow, "flow_quick", "Quick");
-		pDesignerSizer->Add(pFlowSizer);
 
 		// Temperature
-		CreateLabel(this, pDesignerSizer, "Mood");
-		auto pTemperatureSizer = new GridSizer(100, 29, 8, 6);
+		auto pTemperatureSizer = CreateGroup(this, pDesignerSizer, "Mood");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_friendly", "Friendly");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_playful", "Playful");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_protective", "Protective");
@@ -151,7 +172,6 @@ namespace fig::gui
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_gloomy", "Gloomy");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_arrogant", "Arrogant");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_malevolent", "Malevolent");
-		pDesignerSizer->Add(pTemperatureSizer);
 
 		// Custom
 		CreateLabel(this, pDesignerSizer, "Custom prompt");
@@ -172,14 +192,6 @@ namespace fig::gui
 		_pPlayButton->SetDelegate([this] { PlayStop(); });
 		_pPlayButton->Enable(false);
 
-		_pSaveButton = CreateControl<ButtonWithLabel>("Save");
-		_pSaveButton->SetHeight(35);
-		_pSaveButton->SetDelegate([this] { 
-			if (Save())
-				PushEvent(UserEvent::NavigateToHome);
-		});
-		_pSaveButton->Enable(false);
-
 		_pStatusText = CreateControl<StaticText>("");
 
 		auto pButtonSizer = new HorizontalSizer();
@@ -189,10 +201,6 @@ namespace fig::gui
 
 		pDesignerSizer->AddSpacer(24);
 		pDesignerSizer->Add(pButtonSizer, 0, SizerFlag::FixedSize, 35);
-		pDesignerSizer->AddSpacer(24);
-		pDesignerSizer->Add(_pSaveButton, 0);
-
-		ResizeToFit(false, true);
 
 		pMale->Toggle(_character.gender.IsConventional(ConventionalGender::Male));
 		pFemale->Toggle(not _character.gender.IsConventional(ConventionalGender::Male));
@@ -366,6 +374,11 @@ namespace fig::gui
 		}
 	}
 
+	void VoiceEditor::OnAfterLayout()
+	{
+		ResizeToFit(false, true);
+	}
+
 	void VoiceEditor::PlayStop() noexcept
 	{
 		if (_bIsPlaying)
@@ -444,4 +457,5 @@ namespace fig::gui
 			SetStatusMessage(fig::strings::TTS::ErrorOccurred);
 		}
 	}
+
 }

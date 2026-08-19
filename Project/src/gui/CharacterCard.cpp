@@ -81,12 +81,12 @@ namespace fig::gui
 				return EventResult::Continue;
 			}
 		}
-		else if (IsUserEvent(event, UserEvent::Activated))
+		else if (IsUserEvent(event, UserEvent::ScreenActivated))
 		{
 			RefreshMeta();
 			return EventResult::Continue;
 		}
-		else if (IsUserEvent(event, UserEvent::Deactivated))
+		else if (IsUserEvent(event, UserEvent::ScreenDeactivated))
 		{
 			_bSelected = false;
 			ResetHoverZoom();

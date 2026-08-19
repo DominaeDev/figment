@@ -1,29 +1,22 @@
 #include <pch.h>
 #include "gui/EditorScreen.h"
 #include "gui/ScrollPanel.h"
+#include "gui/TopBar.h"
 
 namespace fig::gui
 {
 	EditorScreen::EditorScreen(Frame* pParent) : Screen(pParent)
 	{
-		auto pTopBar = CreateControl<Panel>();
-		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
-
-		_pTitle = pTopBar->CreateControl<StaticText>("", FontFace::Italic, 24, false);
-		_pTitle->SetX(52);
-		_pTitle->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
-		_pTitle->SetAlignment(TextAlignment::LeftCenter);
-
-		auto pTopSizer = pTopBar->SetSizer<HorizontalSizer>();
-		pTopSizer->Add(_pTitle, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 18);
-
 		_pScrollPanel = CreateControl<ScrollPanel>();
 		_pScrollPanel->SetScrollBarOffset(0);
+		_pScrollPanel->SetBottomPadding(40);
 		_pScrollPanel->SetMaxWidth(Constants::GUI::Editor::Width);
 		_pScrollPanel->SetSizer<VerticalSizer>();
 
+		_pTopBar = CreateControl<TopBar>("", _pScrollPanel);
+
 		auto mainSizer = SetSizer<VerticalSizer>();
-		mainSizer->Add(pTopBar, 0, SizerFlag::Expand);
+		mainSizer->Add(_pTopBar, 0, SizerFlag::Expand);
 		mainSizer->Add(_pScrollPanel, -1, SizerFlag::Fill | SizerFlag::AlignLeft | SizerFlag::Left | SizerFlag::Right, 16);
 	}
 
@@ -35,17 +28,19 @@ namespace fig::gui
 
 	void EditorScreen::SetTitle(fig::string_view text)
 	{
-		_pTitle->SetText(text);
+		_pTopBar->SetTitle(text);
 	}
 
 	void EditorScreen::OnSetEditor()
 	{
-		SetTitle(_pEditor->GetTitle());
+		// Init top bar
+		_pTopBar->Initialize(_pEditor->GetTitle());
 
-		// Create fields
+		// Init editor
 		_pScrollPanel->DestroyChildren();
 		_pScrollPanel->AddChild(_pEditor.get());
 		_pEditor->Initialize();
+		_pEditor->PopulateTopBar(_pTopBar);
 
 		auto pSizer = _pScrollPanel->GetSizer();
 		pSizer->Add(_pEditor.get(), 0, SizerFlag::Expand);
@@ -59,7 +54,7 @@ namespace fig::gui
 
 	EventResult EditorScreen::OnEvent(fig::event& event)
 	{
-		if (IsUserEvent(event, UserEvent::Deactivated))
+		if (IsUserEvent(event, UserEvent::ScreenDeactivated))
 		{
 			ReleaseEditor();
 			return EventResult::Handled;

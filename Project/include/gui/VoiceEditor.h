@@ -16,12 +16,15 @@ namespace fig::gui
 		void ShutDown() noexcept;
 
 		fig::string GetTitle() const noexcept override;
-		bool SaveChanges() noexcept override { return false; }
+		void PopulateTopBar(ControlPtr pParent) override;
 
 	protected:
 		void OnUpdate(float fElapsed);
 		EventResult OnEvent(fig::event& event) override;
 		void OnToggle(fig::handle group, fig::handle key, bool bOn);
+		void OnAfterLayout();
+
+		fig::observer_ptr<Sizer> CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 
 	private:
 		fig::observer_ptr<class ToggleWithLabel> CreateToggle(SizerPtr pSizer, fig::handle toggleGroup, fig::handle toggleKey, fig::string_view label, bool bRadio = false);
@@ -39,7 +42,8 @@ namespace fig::gui
 
 		fig::observer_ptr<class ButtonWithLabel> _pGenerateButton;
 		fig::observer_ptr<class ButtonWithIcon> _pPlayButton;
-		fig::observer_ptr<class ButtonWithLabel> _pSaveButton;
+		fig::observer_ptr<class ButtonWithLabelAndIcon> _pSaveButton;
+		fig::observer_ptr<class ButtonWithLabelAndIcon> _pDiscardButton;
 
 		fig::observer_ptr<class TextBox> _pCustomPrompt;
 		fig::observer_ptr<class StaticText> _pStatusText;

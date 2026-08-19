@@ -4,6 +4,7 @@
 #include "gui/AppResources.h"
 #include "gui/ButtonWithLabel.h"
 #include "gui/Slider.h"
+#include "gui/ButtonWithLabelAndIcon.h"
 
 namespace fig::gui
 {
@@ -53,9 +54,12 @@ namespace fig::gui
 		pButton->SetHeight(35);
 		pButton->SetDelegate([this]() { InvalidateLayout(); });
 
-
 		auto pSlider = CreateControl<Slider>();
 		pSlider->SetPosition(50, 200);
+
+		auto pButton2 = CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
+
+		pButton2->SetPosition(400, 50);
 	}
 
 	void DebugScreen::OnUpdate(float fElapsed)

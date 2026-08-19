@@ -21,9 +21,9 @@ namespace fig::gui
 		void Reorder();
 
 	protected:
-
 		void OnScroll() override;
-		void OnAfterLayout() override;
+		fig::coord GetExtent() const override;
+
 		fig::observer_ptr<Control> CreateHeader(fig::string_view text);
 		void OnItemEvent(ChatListItem& item, ChatListItemEvent event);
 

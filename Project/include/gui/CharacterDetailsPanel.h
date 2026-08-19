@@ -13,7 +13,7 @@ namespace fig::gui
 		void SetCharacter(const fig::data::Character& character);
 	
 	protected:
-		void OnAfterLayout() override;
+		fig::coord GetExtent() const override;
 
 	private:
 		fig::observer_ptr<StaticText> _pHeader;

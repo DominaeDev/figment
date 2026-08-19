@@ -7,6 +7,7 @@
 #include "gui/Menu.h"
 #include "gui/ToggleWithIcon.h"
 #include "gui/TexturedBorder.h"
+#include "gui/TopBar.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
@@ -22,15 +23,10 @@ namespace fig::gui
 
 	HomeScreen::HomeScreen(Frame* pParent) : Screen(pParent)
 	{
-		auto pTopBar = CreateControl<Panel>();
-		pTopBar->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
+		_pCardList = CreateControl<CardList>();
+		_pCardList->SetScrollBarOffset(0);
 
-		_pHeader = pTopBar->CreateControl<StaticText>("Characters", FontFace::Italic, 24, false);
-		_pHeader->SetX(52);
-		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
-		_pHeader->SetAlignment(TextAlignment::LeftCenter);
-		
-		auto pHomeButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_HOME, false);
+		auto pTopBar = CreateControl<TopBar>("Characters", _pCardList);
 
 		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING, false);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
@@ -52,21 +48,16 @@ namespace fig::gui
 		_pFilterTextBox->SetMaxWidth(192);
 		_pFilterTextBox->SetBackgroundColor(Color::White);
 		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
-			OnSearchFilter(s); 
+			OnSearchFilter(s);
 		});
 
-		auto pTopSizer = pTopBar->SetSizer<HorizontalSizer>();
-		pTopSizer->Add(pHomeButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 6);
-		pTopSizer->Add(_pHeader, 0, SizerFlag::AlignCenterVertical | SizerFlag::Left, 6);
-		pTopSizer->AddStretchSpacer();
-		pTopSizer->Add(_pGridButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
-		pTopSizer->Add(_pToggleTagsButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
-		pTopSizer->Add(_pSortingButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
-		pTopSizer->Add(_pFilteringButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
-		pTopSizer->Add(_pFilterTextBox, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
-
-		_pCardList = CreateControl<CardList>();
-		_pCardList->SetScrollBarOffset(0);
+		auto pTopBarSizer = pTopBar->GetSizer();
+		pTopBarSizer->AddStretchSpacer();
+		pTopBarSizer->Add(_pGridButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+		pTopBarSizer->Add(_pToggleTagsButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+		pTopBarSizer->Add(_pSortingButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+		pTopBarSizer->Add(_pFilteringButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
+		pTopBarSizer->Add(_pFilterTextBox, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
 
 		auto mainSizer = SetSizer<VerticalSizer>();
 		mainSizer->Add(pTopBar, 0, SizerFlag::Expand);

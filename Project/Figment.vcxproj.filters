@@ -689,6 +689,12 @@
     <ClCompile Include="src\tts\HttpClient_Win32.cpp">
       <Filter>Source Files\Backend\TTS\AudioServer</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\TopBar.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1605,6 +1611,12 @@
     </ClInclude>
     <ClInclude Include="include\tts\HttpClient_Win32.h">
       <Filter>Source Files\Backend\TTS\AudioServer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TopBar.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
