@@ -292,7 +292,7 @@ namespace fig::user
 
 	fig::optional_cref<UserProfile> UserManager::GetActiveProfile() const noexcept
 	{
-		if (_signedInProfile == nullptr)
+		if (_signedInProfile != nullptr)
 			return make_optional_cref(*_signedInProfile);
 		return fig::nullref;
 	}

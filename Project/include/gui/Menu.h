@@ -1,7 +1,6 @@
 #pragma once
 
 #include "gui/Overlay.h"
-#include "gui/BaseButton.h"
 
 namespace fig::gui
 {

@@ -51,7 +51,7 @@ namespace fig::user
 		std::unique_ptr<fig::io::ProfileDatabase> _pProfileDB;
 
 		std::vector<UserProfile> _profiles {};
-		UserProfile* _signedInProfile = nullptr;
+		fig::observer_ptr<UserProfile> _signedInProfile = nullptr;
 		fig::auth::AuthKey _signedInAuthKey {};
 
 		std::unique_ptr<fig::io::UserContentManager> _pContentManager;

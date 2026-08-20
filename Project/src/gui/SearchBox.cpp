@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	SearchBox::SearchBox(ControlPtr pParent) : TextBox(pParent, FontFace::Default, Constants::GUI::TextBoxFontSize, TextInput::Flags { TextInput::Flag::Single })
+	SearchBox::SearchBox(ControlPtr pParent) : TextBox(pParent, FontFace::Default, Constants::GUI::TextBoxFontSize, TextInput::Flags { TextInput::Flag::Single }), MouseEventHandler(this)
 	{
 		SetMarginLeft(30); // Icon
 		SetMarginRight(30); // Cross
@@ -34,69 +34,31 @@ namespace fig::gui
 
 		_pCross->SetX(GetWidth() - 4 - _pCross->GetWidth());
 		_pCross->CenterVertically();
+		MouseEventHandler::SetClickableRegion(_pCross->GetLocalRect());
 	}
 
 	EventResult SearchBox::OnEvent(fig::event& event)
 	{
-		if (HandleMouseEvents(event))
-			return EventResult::Handled;
+		if (auto result = MouseEventHandler::HandleMouseEvents(event); result == EventResult::Handled)
+			return result;
 		
 		return TextBox::OnEvent(event);
 	}
 
-	bool SearchBox::HandleMouseEvents(const fig::event& event) noexcept
-	{
-		if (not (_bEnabled or _pCross->GetVisible()))
-			return false;
-
-		auto& rect = _pCross->GetRect();
-		fig::coord expand = 0;
-
-		if (event.type == SDL_EVENT_MOUSE_MOTION)
-		{
-			auto motionEvent = event.motion;
-			if (is_inside(rect, toI(motionEvent.x), toI(motionEvent.y), expand))
-			{
-				if (not _bMouseInside and not _bMouseDown)
-					_bMouseInside = true;
-			}
-			else
-			{
-				if (_bMouseInside or _bMouseDown)
-				{
-					_bMouseInside = false;
-					_bMouseDown = false;
-				}
-			}
-			return false; // Don't consume event
-		}
-
-		if ((event.type == SDL_EVENT_MOUSE_BUTTON_DOWN or event.type == SDL_EVENT_MOUSE_BUTTON_UP) and event.button.button == SDL_BUTTON_LEFT)
-		{
-			auto mouseEvent = event.button;
-
-			if (not is_inside(rect, toI(mouseEvent.x), toI(mouseEvent.y), expand))
-				return false; // Ignore
-
-			if (mouseEvent.down != _bMouseDown)
-			{
-				if (_bMouseDown and !mouseEvent.down)
-				{
-					// Clicked cross
-					Clear();
-				}
-
-				_bMouseDown = mouseEvent.down;
-				_bMouseInside = false;
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	void SearchBox::OnText(fig::string_view text) noexcept
 	{
-		_pCross->SetVisible(text.length() > 0);
+		_bHasText = text.length() > 0;
+		_pCross->SetVisible(_bHasText);
+	}
+
+	void SearchBox::OnEnabled(bool bEnabled)
+	{
+		MouseEventHandler::Enable(bEnabled);
+	}
+
+	void SearchBox::OnClicked()
+	{
+		if (_bHasText)
+			Clear();
 	}
 }

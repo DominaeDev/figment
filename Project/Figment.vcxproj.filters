@@ -81,9 +81,6 @@
     <Filter Include="Source Files\Frontend\GUI\Utility">
       <UniqueIdentifier>{062e3db7-9b40-48c1-aa77-79b7eb40528d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Primitives">
-      <UniqueIdentifier>{2c70c89d-43b8-455e-8e3e-7dc34517dae3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Backend\LLM\Utility">
       <UniqueIdentifier>{a0782deb-9c61-45f0-ab51-c5a61d5c0d41}</UniqueIdentifier>
     </Filter>
@@ -174,6 +171,9 @@
     <Filter Include="Source Files\Frontend\GUI\Screens\Editors">
       <UniqueIdentifier>{f995ba2b-e188-4bc6-ad30-c9b4e8435aed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Controls\Primitives">
+      <UniqueIdentifier>{2c70c89d-43b8-455e-8e3e-7dc34517dae3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -258,28 +258,28 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Area.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Control.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Image.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Panel.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StaticText.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\TextInput.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalGradient.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HorizontalGradient.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LlamaApi.cpp">
       <Filter>Source Files\Backend\LLM</Filter>
@@ -294,7 +294,7 @@
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
     </ClCompile>
     <ClCompile Include="include\gui\TexturedBorder.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\llm\LLMUtility.cpp">
       <Filter>Source Files\Backend\LLM\Utility</Filter>
@@ -306,16 +306,16 @@
       <Filter>Source Files\Backend\LLM\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\NineGridImage.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ScrollPanel.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SidePanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\RoundedBorder.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\fast-crc32\src\crc32.cpp">
       <Filter>Source Files\Third-party\fast-crc32</Filter>
@@ -326,16 +326,7 @@
     <ClCompile Include="..\Libraries\miniz\src\miniz.c">
       <Filter>Source Files\Third-party\miniz</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\TextBox.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\SearchBox.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\BaseButton.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ThemedButton.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\DebugScreen.cpp">
@@ -350,9 +341,6 @@
     <ClCompile Include="src\gui\SidePanelButton.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ButtonWithIcon.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\LoginScreen.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
@@ -360,7 +348,7 @@
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ImageWithMask.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\UserProfileWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Widgets</Filter>
@@ -383,9 +371,6 @@
     <ClCompile Include="src\gui\VerticalSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ButtonWithLabel.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\TexturedBorderRenderer.cpp">
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClCompile>
@@ -402,19 +387,16 @@
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Menu.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Overlay.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MenuSeparator.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\VerticalScrollBar.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ToggleWithIcon.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\Events.cpp">
       <Filter>Source Files\Frontend\GUI</Filter>
@@ -618,10 +600,10 @@
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\RenderTargetControl.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ResizeHandle.cpp">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CharacterDetailsPanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
@@ -671,9 +653,6 @@
     <ClCompile Include="src\gui\VoiceEditor.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ToggleWithLabel.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\tts\AudioResultQueue.cpp">
       <Filter>Source Files\Backend\TTS\AudioServer</Filter>
     </ClCompile>
@@ -689,11 +668,32 @@
     <ClCompile Include="src\tts\HttpClient_Win32.cpp">
       <Filter>Source Files\Backend\TTS\AudioServer</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\TopBar.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\TextBox.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ButtonWithIcon.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ButtonWithLabel.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ThemedButton.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ToggleWithIcon.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ToggleWithLabel.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\MouseEventHandler.cpp">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -806,31 +806,31 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Area.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Control.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Primitives.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Image.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Panel.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\StaticText.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\TextInput.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalGradient.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\HorizontalGradient.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\util\UndoStack.h">
       <Filter>Source Files\Utility</Filter>
@@ -1109,7 +1109,7 @@
       <Filter>Source Files\Frontend\GUI\Frames</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\TexturedBorder.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\llm\LLMUtility.h">
       <Filter>Source Files\Backend\LLM\Utility</Filter>
@@ -1124,16 +1124,16 @@
       <Filter>Source Files\Backend\LLM</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\NineGridImage.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ScrollPanel.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SidePanel.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\RoundedBorder.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\fast-crc32\include\crc32.h">
       <Filter>Source Files\Third-party\fast-crc32</Filter>
@@ -1147,16 +1147,7 @@
     <ClInclude Include="include\gui\GUIConstants.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\TextBox.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\SearchBox.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\BaseButton.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ThemedButton.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\DebugScreen.h">
@@ -1164,9 +1155,6 @@
     </ClInclude>
     <ClInclude Include="include\util\SearchIndex.h">
       <Filter>Source Files\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ButtonWithIcon.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SidePanelButton.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -1178,7 +1166,7 @@
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ImageWithMask.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\UserProfileWidget.h">
       <Filter>Source Files\Frontend\GUI\Widgets</Filter>
@@ -1200,9 +1188,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\VerticalSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ButtonWithLabel.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CustomRenderer.h">
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
@@ -1226,19 +1211,16 @@
       <Filter>Source Files\Frontend\GUI\Renderers</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Menu.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Overlay.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\MenuSeparator.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\VerticalScrollBar.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ToggleWithIcon.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Events.h">
       <Filter>Source Files\Frontend\GUI</Filter>
@@ -1514,10 +1496,10 @@
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\RenderTargetControl.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ResizeHandle.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\fast_gaussian_blur\include\fast_gaussian_blur_template.h">
       <Filter>Source Files\Third-party\fast_gaussian_blur</Filter>
@@ -1535,7 +1517,7 @@
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\Slider.h">
-      <Filter>Source Files\Frontend\GUI\Primitives</Filter>
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\FillParentSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
@@ -1579,9 +1561,6 @@
     <ClInclude Include="include\gui\VoiceEditor.h">
       <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ToggleWithLabel.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\tts\VoicePrint.h">
       <Filter>Source Files\Backend\TTS</Filter>
     </ClInclude>
@@ -1612,11 +1591,32 @@
     <ClInclude Include="include\tts\HttpClient_Win32.h">
       <Filter>Source Files\Backend\TTS\AudioServer</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\TopBar.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TextBox.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ButtonWithIcon.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ButtonWithLabel.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ThemedButton.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ToggleWithIcon.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ToggleWithLabel.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\MouseEventHandler.h">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

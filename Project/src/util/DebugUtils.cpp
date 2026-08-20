@@ -226,4 +226,18 @@ namespace fig
 		for (size_t i = 0uz; i < count; ++i)
 			LogLn((fig::string)_CreateUUID());
 	}
+
+	void DebugUtility::ChangePassword(fig::string_view oldPassword, fig::string_view newPassword)
+	{
+		if constexpr (Debugging)
+		{
+			auto& userMngr = Global::GetUserManager();
+
+			if (userMngr.SignInDefaultProfile())
+			{
+				userMngr.ChangePassword(userMngr.GetActiveProfile().value().id, fig::string { oldPassword }, fig::string { newPassword });
+				userMngr.SignOut();
+			}
+		}
+	}
 }

@@ -26,9 +26,10 @@ namespace fig::gui
 		inline void EnableCulling(bool bEnable) noexcept { _bCulling = bEnable; }
 
 		bool GetVisible() const noexcept { return _bVisible; }
-		void SetVisible(bool bVisible);
-		bool GetEnabled() const { return _bEnabled; }
-		void SetEnabled(bool bEnabled);
+		void SetVisible(bool bVisible) noexcept;
+		bool GetEnabled() const noexcept { return _bEnabled; }
+		void SetEnabled(bool bEnabled) noexcept;
+
 		virtual EventResult ProcessEvent(fig::event& event);
 
 		void SetBackgroundRenderer(CustomRenderer* pCustom);

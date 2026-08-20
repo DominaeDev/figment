@@ -13,7 +13,7 @@ namespace fig::gui
 	public:
 		ButtonWithIcon(ControlPtr pParent, Resource icon, bool bBorder = false);
 		void SetIcon(Resource icon);
-		void EnableBorder(bool bEnable) noexcept;
+		void ShowBorder(bool bEnable) noexcept;
 
 	protected:
 		void OnSize() override;
@@ -21,5 +21,6 @@ namespace fig::gui
 
 	private:
 		fig::observer_ptr<Image> _pIcon;
+		bool _bShowBorder { true };
 	};
 }

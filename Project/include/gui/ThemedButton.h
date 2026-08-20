@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Control.h"
-#include "gui/BaseButton.h"
+#include "gui/Control.h"
+#include "gui/MouseEventHandler.h"
 
 namespace fig::gui
 {
-	class ThemedButton : public Control, public BaseButton
+	class ThemedButton : public Control, public MouseEventHandler
 	{
 		ThemedButton() = delete;
 	public:
@@ -18,8 +18,9 @@ namespace fig::gui
 		const fig::color& GetThemeForeground() const noexcept;
 		const fig::color& GetThemeBackground() const noexcept;
 
-		EventResult OnEvent(fig::event& event) override;
 		void OnAfterLayout() override;
+		EventResult OnEvent(fig::event& event) override;
+		void OnEnabled(bool bEnabled) override;
 
 	protected:
 		ButtonTheme _theme {};

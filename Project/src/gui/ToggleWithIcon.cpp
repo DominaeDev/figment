@@ -23,10 +23,10 @@ namespace fig::gui
 		{
 		default:
 		case ToggleBehavior::Default:
-			BaseButton::SetDelegate([this]() { Toggle(!this->_bOn); });
+			MouseEventHandler::SetDelegate([this]() { Toggle(!this->_bOn); });
 			break;
 		case ToggleBehavior::Radio:
-			BaseButton::SetDelegate([this]() { if (!this->_bOn) Toggle(true); });
+			MouseEventHandler::SetDelegate([this]() { if (!this->_bOn) Toggle(true); });
 			break;
 		}
 	}

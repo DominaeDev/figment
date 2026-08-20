@@ -4,14 +4,14 @@
 
 namespace fig::gui
 {
-	ThemedButton::ThemedButton(ControlPtr pParent) : Control(pParent), BaseButton(this)
+	ThemedButton::ThemedButton(ControlPtr pParent) : Control(pParent), MouseEventHandler(this)
 	{
 		SetTheme(Theme::DefaultButtonStyle);
 	}
 
 	EventResult ThemedButton::OnEvent(fig::event& event)
 	{
-		return HandleMouseEvents(event) ? EventResult::Handled : EventResult::Pass;
+		return MouseEventHandler::HandleMouseEvents(event);
 	}
 
 	void ThemedButton::SetTheme(const ButtonTheme& theme) noexcept
@@ -52,5 +52,10 @@ namespace fig::gui
 	void ThemedButton::OnAfterLayout()
 	{
 		DropState();
+	}
+
+	void ThemedButton::OnEnabled(bool bEnabled)
+	{
+		MouseEventHandler::Enable(bEnabled);
 	}
 }

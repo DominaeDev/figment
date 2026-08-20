@@ -33,14 +33,14 @@ namespace fig::gui
 
 		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING, true);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
-		_pFilteringButton->EnableBorder(false);
+		_pFilteringButton->ShowBorder(false);
 
 		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_GRID_LARGE);
 		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
 		_pToggleTagsButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_TAG, true);
 		_pToggleTagsButton->SetDelegate([this]() { ToggleTags(); });
-		_pToggleTagsButton->EnableBorder(false);
+		_pToggleTagsButton->ShowBorder(false);
 
 		_pFilterTextBox = pTopBar->CreateControl<SearchBox>();
 		_pFilterTextBox->SetPosition(0, 0);
@@ -105,8 +105,8 @@ namespace fig::gui
 		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pGridButton->SetIcon(bHalfSize ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
 		_pGridButton->Toggle(bHalfSize, true);
-		_pToggleTagsButton->EnableBorder(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
-		_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
+		_pToggleTagsButton->ShowBorder(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
+		_pFilteringButton->ShowBorder(GetFiltering() != DefaultFilterFlags);
 	}
 
 	CardList& HomeScreen::GetCardList()
@@ -143,7 +143,7 @@ namespace fig::gui
 	{
 		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
 		Global::GetUserSettings().SetBool(UserSetting::Interface::CharacterList::ShowTags, _pCardList->IsTagsEnabled());
-		_pToggleTagsButton->EnableBorder(_pCardList->IsTagsEnabled());
+		_pToggleTagsButton->ShowBorder(_pCardList->IsTagsEnabled());
 	}
 
 	static bool IsShiftDown()
@@ -199,7 +199,7 @@ namespace fig::gui
 		auto SetFilter = [this](FilterFlags filtering) {
 			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, filtering, FilterFlagMapping);
 			_pCardList->Reorder();
-			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
+			_pFilteringButton->ShowBorder(GetFiltering() != DefaultFilterFlags);
 			_pCardList->ScrollTo(0, false);
 		};
 
@@ -208,7 +208,7 @@ namespace fig::gui
 			filtering.Flip(flag);
 			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, filtering, FilterFlagMapping);
 			_pCardList->Reorder();
-			_pFilteringButton->EnableBorder(GetFiltering() != DefaultFilterFlags);
+			_pFilteringButton->ShowBorder(GetFiltering() != DefaultFilterFlags);
 			_pCardList->ScrollTo(0, false);
 		};
 

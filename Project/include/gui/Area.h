@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Control.h"
+#include "gui/Control.h"
 
 /// <summary>
 /// Render-less panel

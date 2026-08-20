@@ -38,13 +38,13 @@ namespace fig::gui
 		GetBackgroundRenderer()->SetColor(GetThemeBackground());
 		_pIcon->SetForegroundColor(GetThemeForeground());
 		
-		if (auto pBorder = GetBorderRenderer())
-			pBorder->SetColor(IsEnabled() ? Color::LineColor : Color::DisabledLineColor);
+		ShowBorder(_bShowBorder);
 	}
 
-	void ButtonWithIcon::EnableBorder(bool bEnable) noexcept
+	void ButtonWithIcon::ShowBorder(bool bShow) noexcept
 	{
 		if (auto pBorder = GetBorderRenderer())
-			pBorder->SetColor(bEnable ? Color::LineColor : Color::Transparent);
+			pBorder->SetColor(bShow ? (GetEnabled() ? Color::LineColor : Color::DisabledLineColor) : Color::Transparent);
+		_bShowBorder = bShow;
 	}
 }

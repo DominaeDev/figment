@@ -182,7 +182,7 @@
     <ClCompile Include="src\gui\BehindChat.cpp" />
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
-    <ClCompile Include="src\gui\BaseButton.cpp" />
+    <ClCompile Include="src\gui\MouseEventHandler.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp" />
     <ClCompile Include="src\gui\CardImage.cpp" />
@@ -478,7 +478,7 @@
     <ClInclude Include="include\gui\Events.h" />
     <ClInclude Include="include\gui\GUIConstants.h" />
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
-    <ClInclude Include="include\gui\BaseButton.h" />
+    <ClInclude Include="include\gui\MouseEventHandler.h" />
     <ClInclude Include="include\gui\ImageViewport.h" />
     <ClInclude Include="include\gui\ImageWithMask.h" />
     <ClInclude Include="include\gui\KeyboardMods.h" />

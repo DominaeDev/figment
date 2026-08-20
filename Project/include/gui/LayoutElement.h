@@ -18,8 +18,9 @@ namespace fig::gui
 
 		void Update(float fElapsed);
 
-		inline const fig::rect& GetRect() const noexcept { return _rect; }
-		inline constexpr fig::rectf GetDrawRect() const noexcept { return fig::rectf { toF(_rect.x), toF(_rect.y), toF(_rect.w), toF(_rect.h) }; }
+		const fig::rect& GetRect() const noexcept { return _rect; }
+		fig::rectf GetDrawRect() const noexcept { return fig::rectf { toF(_rect.x), toF(_rect.y), toF(_rect.w), toF(_rect.h) }; }
+		fig::rect GetLocalRect() const noexcept { return fig::rect { _localPosition.x, _localPosition.y, _rect.w, _rect.h }; }
 
 		fig::coord GetX() const noexcept { return _localPosition.x; }
 		fig::coord GetY() const noexcept { return _localPosition.y; }

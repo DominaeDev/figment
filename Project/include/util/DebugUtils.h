@@ -10,6 +10,7 @@ namespace fig
 		static void Initialize();
 
 		static void CreateNewProfile(const fig::string& name = "New profile", const fig::string& password = "");
+		static void ChangePassword(fig::string_view oldPassword, fig::string_view newPassword);
 		static void ImportTestCharacters(const fig::path& path, size_t max_count = 0uz);
 		static void ImportTestScenario();
 		static void ShuffleCards();

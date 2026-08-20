@@ -194,7 +194,7 @@ namespace fig::gui
 		_pBorderRenderer.reset();
 	}
 
-	void Control::SetVisible(bool bVisible)
+	void Control::SetVisible(bool bVisible) noexcept
 	{ 
 		if (_bVisible != bVisible)
 		{
@@ -203,7 +203,7 @@ namespace fig::gui
 		}
 	}
 
-	void Control::SetEnabled(bool bEnabled)
+	void Control::SetEnabled(bool bEnabled) noexcept
 	{ 
 		if (_bEnabled != bEnabled)
 		{

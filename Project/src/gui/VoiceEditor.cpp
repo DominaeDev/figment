@@ -103,7 +103,7 @@ namespace fig::gui
 			if (Save())
 				PushEvent(UserEvent::NavigateToHome);
 		});
-		_pSaveButton->Enable(false);
+		_pSaveButton->SetEnabled(false);
 		
 		_pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Discard", Resource::ICON_DELETE);
 		_pDiscardButton->SetSize(110, 32);
@@ -190,7 +190,7 @@ namespace fig::gui
 		_pPlayButton = CreateControl<ButtonWithIcon>(Resource::ICON_PLAY, true);
 		_pPlayButton->SetSize(35, 35);
 		_pPlayButton->SetDelegate([this] { PlayStop(); });
-		_pPlayButton->Enable(false);
+		_pPlayButton->SetEnabled(false);
 
 		_pStatusText = CreateControl<StaticText>("");
 
@@ -224,7 +224,7 @@ namespace fig::gui
 		if (auto try_voice = Global::GetUserContent().GetVoiceForCharacter(_characterId))
 		{
 			_voicePrint.audioData = (*try_voice).voicePrint.audioData;
-			_pPlayButton->Enable(true);
+			_pPlayButton->SetEnabled(true);
 		}
 	}
 
@@ -339,9 +339,9 @@ namespace fig::gui
 			};
 
 			_audioResultQueue.Add(std::move(result).value());
-			_pGenerateButton->Enable(false);
-			_pPlayButton->Enable(false);
-			_pSaveButton->Enable(false);
+			_pGenerateButton->SetEnabled(false);
+			_pPlayButton->SetEnabled(false);
+			_pSaveButton->SetEnabled(false);
 
 			SetStatusMessage(isServerRunning ? fig::strings::TTS::Generating : fig::strings::TTS::ServerInitializing);
 			Global::GetAudioManager().StopAllSounds();
@@ -367,10 +367,10 @@ namespace fig::gui
 				SetStatusMessage("");
 		}
 
-		if (not _pGenerateButton->IsEnabled() and _audioResultQueue.IsEmpty())
+		if (not _pGenerateButton->GetEnabled() and _audioResultQueue.IsEmpty())
 		{
-			_pGenerateButton->Enable(true);
-			_pPlayButton->Enable(true);
+			_pGenerateButton->SetEnabled(true);
+			_pPlayButton->SetEnabled(true);
 		}
 	}
 
@@ -449,8 +449,8 @@ namespace fig::gui
 			Global::GetAudioManager().EnqueueSound(_voicePrint.audioData.AsBytes());
 
 			SetStatusMessage("");
-			_pPlayButton->Enable(true);
-			_pSaveButton->Enable(true);
+			_pPlayButton->SetEnabled(true);
+			_pSaveButton->SetEnabled(true);
 		}
 		else 
 		{

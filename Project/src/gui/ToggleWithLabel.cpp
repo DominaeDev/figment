@@ -13,10 +13,10 @@ namespace fig::gui
 		{
 		default:
 		case ToggleBehavior::Default:
-			BaseButton::SetDelegate([this]() { Toggle(!this->_bOn); });
+			MouseEventHandler::SetDelegate([this]() { Toggle(!this->_bOn); });
 			break;
 		case ToggleBehavior::Radio:
-			BaseButton::SetDelegate([this]() { if (!this->_bOn) Toggle(true); });
+			MouseEventHandler::SetDelegate([this]() { if (!this->_bOn) Toggle(true); });
 			break;
 		}
 	}
@@ -31,7 +31,7 @@ namespace fig::gui
 		_bOn = bOn;
 		GetBorderRenderer()->SetColor(bOn ? Color::Black : Color::LineColor); //! @todo: Theme
 		
-		if (IsEnabled())
+		if (GetEnabled())
 			SetButtonState(ButtonState::Default);
 
 		if (_fnToggle and not bSilent)

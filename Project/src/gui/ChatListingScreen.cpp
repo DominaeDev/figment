@@ -202,6 +202,6 @@ namespace fig::gui
 
 	void ChatListingScreen::RefreshFilterButton()
 	{
-		_pFilteringButton->EnableBorder((GetFiltering() != DefaultChatFilterFlags) or !_filterByCharacter.empty());
+		_pFilteringButton->ShowBorder((GetFiltering() != DefaultChatFilterFlags) or !_filterByCharacter.empty());
 	}
 }

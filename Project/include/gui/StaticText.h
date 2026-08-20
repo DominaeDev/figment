@@ -2,7 +2,7 @@
 
 #include "Figment.h"
 #include "Fonts.h"
-#include "Control.h"
+#include "gui/Control.h"
 
 namespace fig::gui
 {
