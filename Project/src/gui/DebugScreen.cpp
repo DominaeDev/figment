@@ -5,6 +5,7 @@
 #include "gui/ButtonWithLabel.h"
 #include "gui/Slider.h"
 #include "gui/ButtonWithLabelAndIcon.h"
+#include "gui/DropList.h"
 
 namespace fig::gui
 {
@@ -51,15 +52,20 @@ namespace fig::gui
 		sizer->Add(right, 0, SizerFlag::Expand | SizerFlag::AlignCenterVertical | SizerFlag::FixedSize, 100);
 
 		auto pButton = CreateControl<ButtonWithLabel>("Invalidate");
+		pButton->SetPosition(400, 150);
 		pButton->SetHeight(35);
 		pButton->SetDelegate([this]() { InvalidateLayout(); });
 
 		auto pSlider = CreateControl<Slider>();
-		pSlider->SetPosition(50, 200);
+		pSlider->SetPosition(400, 100);
 
-		auto pButton2 = CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
-
-		pButton2->SetPosition(400, 50);
+		auto pDropList = CreateControl<DropList>();
+		pDropList->SetPosition(400, 50);
+		pDropList->AddItem("Item #1");
+		pDropList->AddItem("Item #2");
+		pDropList->AddItem("Item #3");
+		pDropList->AddItem("Item #4");
+		pDropList->Select(0);
 	}
 
 	void DebugScreen::OnUpdate(float fElapsed)

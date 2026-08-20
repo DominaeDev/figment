@@ -695,6 +695,9 @@
     <ClCompile Include="src\gui\MouseEventHandler.cpp">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\DropList.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1617,6 +1620,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\MouseEventHandler.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\DropList.h">
+      <Filter>Source Files\Frontend\GUI\Controls\Primitives</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

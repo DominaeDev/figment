@@ -182,6 +182,7 @@
     <ClCompile Include="src\gui\BehindChat.cpp" />
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
+    <ClCompile Include="src\gui\DropList.cpp" />
     <ClCompile Include="src\gui\MouseEventHandler.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp" />
@@ -469,6 +470,7 @@
     <ClInclude Include="include\gui\ChatList.h" />
     <ClInclude Include="include\gui\ChatListingScreen.h" />
     <ClInclude Include="include\gui\ChatListItem.h" />
+    <ClInclude Include="include\gui\DropList.h" />
     <ClInclude Include="include\gui\EditorFields.h" />
     <ClInclude Include="include\gui\EditorScreen.h" />
     <ClInclude Include="include\gui\FillParentSizer.h" />

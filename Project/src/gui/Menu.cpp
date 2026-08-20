@@ -51,7 +51,6 @@ namespace fig::gui
 		_subItems.back().SetEnabled(false);
 	}
 
-
 	Menu::Menu(Frame* pHostFrame) : Overlay(pHostFrame)
 	{
 		auto pBackground = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
@@ -62,6 +61,8 @@ namespace fig::gui
 
 		SetBackgroundColor(Color::White);
 		SetForegroundColor(Color::Black);
+
+		SetSize(MenuWidth, MenuItemHeight);
 
 		SetVisible(false);
 	}
@@ -127,18 +128,8 @@ namespace fig::gui
 		return;
 	}
 
-	uint32_t Menu::Show(fig::point position, bool bPopAll)
+	void Menu::CreateItems()
 	{
-		if (_pOwner and bPopAll)
-			_pOwner->PopAllMenus();
-
-		if (position.x == -1 and position.y == -1)
-		{
-			float mx, my;
-			SDL_GetMouseState(&mx, &my);
-			position = fig::point { toI(mx), toI(my) };
-		}
-
 		Reset();
 
 		for (auto& item : _items)
@@ -150,6 +141,46 @@ namespace fig::gui
 		}
 
 		_bInitialized = true;
+	}
+
+	uint32_t Menu::Show(fig::rect parentRect, bool bPopAll)
+	{
+		if (_pOwner and bPopAll)
+			_pOwner->PopAllMenus();
+
+		SetWidth(parentRect.w);
+
+		CreateItems();
+
+		auto menuY = parentRect.y + parentRect.h;
+		auto menuHeight = GetHeight();
+		auto maxY = _pOwner->GetHeight();
+		if (menuHeight >= maxY)
+			menuY = 0;
+		else if (menuY + menuHeight > maxY)
+			menuY = parentRect.y - menuHeight;
+		menuY = std::max(menuY, 0);
+
+		SetAbsolutePosition(fig::point { parentRect.x, menuY });
+		SetVisible(true);
+
+		int32_t menuId = _pOwner->PushMenu(this);
+		return menuId;
+	}
+
+	uint32_t Menu::Show(fig::point position, bool bPopAll)
+	{
+		if (_pOwner and bPopAll)
+			_pOwner->PopAllMenus();
+
+		CreateItems();
+
+		if (position.x == -1 and position.y == -1)
+		{
+			float mx, my;
+			SDL_GetMouseState(&mx, &my);
+			position = fig::point { toI(mx), toI(my) };
+		}
 
 		SetAbsolutePosition(position);
 		SetVisible(true);
@@ -162,27 +193,39 @@ namespace fig::gui
 	{
 		auto pItemRoot = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::ROUNDED_BACKGROUND_6PX), 8);
 		pItemRoot->SetPosition(MenuMargin, MenuMargin + _itemY);
-		pItemRoot->SetSize(MenuWidth - MenuMargin * 2, MenuItemHeight);
+		pItemRoot->SetSize(GetWidth() - MenuMargin * 2, MenuItemHeight);
 		pItemRoot->SetForegroundColor(MenuBackgroundColor);
 
-		auto pItemLabel = pItemRoot->CreateControl<StaticText>(menuItem._label, FontFace::Default, 14.5, false);
-		pItemLabel->EnableEllipsis(true);
-		pItemLabel->SetPosition(32, 5);
-		pItemLabel->SetMaxWidth(pItemRoot->GetWidth() - 36);
-		pItemLabel->SetWidth(pItemRoot->GetWidth() - 36);
-		pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+		if (_style == MenuStyle::Default)
+		{
+			auto pItemLabel = pItemRoot->CreateControl<StaticText>(menuItem._label, FontFace::Default, 14.5, false);
+			pItemLabel->EnableEllipsis(true);
+			pItemLabel->SetPosition(32, 5);
+			pItemLabel->SetMaxWidth(pItemRoot->GetWidth() - 36);
+			pItemLabel->SetWidth(pItemRoot->GetWidth() - 36);
+			pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+		}
+		else if (_style == MenuStyle::DropList)
+		{
+			auto pItemLabel = pItemRoot->CreateControl<StaticText>(menuItem._label, FontFace::Default, Constants::GUI::DefaultFontSize, false);
+			pItemLabel->EnableEllipsis(true);
+			pItemLabel->SetPosition(6, 3);
+			pItemLabel->SetMaxWidth(pItemRoot->GetWidth() - 12);
+			pItemLabel->SetWidth(pItemRoot->GetWidth() - 12);
+			pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+		}
 
 		if (menuItem._bCheckable && menuItem._bChecked)
 		{
 			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CHECKMARK));
-			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::DisabledForeground);
 			pIcon->SetPosition(4, 4);
 		}
 		else if (menuItem._icon != Resource::NONE)
 		{
 			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(menuItem._icon));
 			if (menuItem._bMonochromeIcon)
-				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::DisabledForeground);
 			else
 				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::White : Color::White.WithAlpha(0x80));
 			pIcon->SetPosition(4, 4);
@@ -191,13 +234,13 @@ namespace fig::gui
 		if (menuItem.HasSubMenu())
 		{
 			auto pArrow = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::SUBMENU_ARROW));
-			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::DisabledForeground);
 			pArrow->SetX(pItemRoot->GetWidth() - pArrow->GetWidth());
 			pArrow->CenterVertically();
 		}
 
 		_itemY += MenuItemHeight;
-		SetSize(MenuWidth, _itemY + MenuMargin * 2);
+		SetHeight(_itemY + MenuMargin * 2);
 
 		menuItem.rect = pItemRoot->GetRect();
 		menuItem.pControl = pItemRoot;

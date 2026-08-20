@@ -7,6 +7,12 @@ namespace fig::gui
 	class Frame;
 	using MenuDelegate = std::function<void()>;
 
+	enum class MenuStyle
+	{
+		Default,
+		DropList,
+	};
+
 	class MenuItem
 	{
 		friend class Menu;
@@ -57,8 +63,10 @@ namespace fig::gui
 		void AddSeparator();
 
 		uint32_t Show(fig::point position = {-1, -1}, bool bPopAll = true);
+		uint32_t Show(fig::rect parentRect, bool bPopAll = true);
 		void Reset();
 
+		void SetStyle(MenuStyle style) noexcept { _style = style; }
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
@@ -73,10 +81,14 @@ namespace fig::gui
 		void SetMenuItemState(int32_t index, MenuItem::State state);
 		void ShowSubmenu(size_t menuItemIndex);
 
+	private:
+		void CreateItems();
+
 	protected:
 		fig::sdl::Texture _texture;
 		std::vector<MenuItem> _items;
 		bool _bInitialized = false;
+		MenuStyle _style {};
 
 		int32_t _mouseHoverIndex = -1;
 		bool _bMouseDown = false;

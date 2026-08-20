@@ -48,6 +48,7 @@ namespace fig::gui
 		inline constexpr fig::color SidePanelGradient			{ 0xe0dccb_rgb };
 		inline constexpr fig::color LineColor					{ 0xc7bcaa_rgb };
 		inline constexpr fig::color DisabledLineColor			{ 0xc0c0c0_rgb };
+		inline constexpr fig::color Icon						{ 0x4e4431_rgb };
 		
 		inline constexpr fig::color TextBoxForeground			{ 0x000000_rgb };
 		inline constexpr fig::color TextBoxBackground			{ 0xFFFFFF_rgb };

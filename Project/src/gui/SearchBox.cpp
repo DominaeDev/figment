@@ -12,10 +12,10 @@ namespace fig::gui
 		SetMarginRight(30); // Cross
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_SEARCH));
-		_pIcon->SetForegroundColor(Color::SidePanelForeground);
+		_pIcon->SetForegroundColor(Color::Icon);
 
 		_pCross = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CROSS));
-		_pCross->SetForegroundColor(Color::SidePanelForeground);
+		_pCross->SetForegroundColor(Color::Icon);
 		_pCross->SetVisible(false);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);

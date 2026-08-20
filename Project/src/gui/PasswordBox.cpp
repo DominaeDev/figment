@@ -9,7 +9,7 @@ namespace fig::gui
 		SetMarginLeft(34);
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_LOCK));
-		_pIcon->SetForegroundColor(Color::SidePanelForeground);
+		_pIcon->SetForegroundColor(Color::Icon);
 	}
 
 	void PasswordBox::OnSize()
@@ -25,6 +25,6 @@ namespace fig::gui
 	{
 		TextBox::OnEnabled(bEnabled);
 
-		_pIcon->SetForegroundColor(bEnabled ? Color::SidePanelForeground : Color::DisabledForeground);
+		_pIcon->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
 	}
 }

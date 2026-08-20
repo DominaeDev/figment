@@ -41,15 +41,15 @@ namespace fig::gui
 		{
 		case ButtonState::Default:
 			_pBackground->SetForegroundColor(fig::color { offColor, 0x40 });
-			_pIcon->SetForegroundColor(Color::SidePanelForeground);
+			_pIcon->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Hover:
 			_pBackground->SetForegroundColor(fig::color { offColor, 0x80 });
-			_pIcon->SetForegroundColor(Color::SidePanelForeground);
+			_pIcon->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Pressed:
 			_pBackground->SetForegroundColor(fig::color { offColor, 0xC0 });
-			_pIcon->SetForegroundColor(Color::SidePanelForeground);
+			_pIcon->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Disabled:
 			_pBackground->SetForegroundColor(fig::color { 0xCCCCCC, 0x80 });
