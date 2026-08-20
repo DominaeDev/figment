@@ -150,11 +150,8 @@ namespace fig::gui
 		if (not _bEnabled)
 			return;
 
-		if (_state != state)
-		{
-			_state = state;
-			OnButtonState();
-		}
+		_state = state;
+		OnButtonState();
 	}
 
 	void MouseEventHandler::DropState() noexcept
