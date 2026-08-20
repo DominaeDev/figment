@@ -4,7 +4,6 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "gui/Events.h"
-#include "gui/MainFrame.h"
 #include "gui/Menu.h"
 
 using namespace fig::data;
@@ -106,7 +105,7 @@ namespace fig::gui
 
 		bool bLLM = Global::IsLLMInitialized();
 
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 
 		menu.AddItem("Resume last chat")
 			.SetEnabled(bLLM && _metaData.chatCount > 0);

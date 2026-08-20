@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "gui/Control.h"
 #include "gui/Window.h"
+#include "gui/Frame.h"
+#include "gui/Menu.h"
 #include "gui/GUIUtility.h"
 #include "gui/Sizer.h"
 #include "gui/CustomRenderer.h"
@@ -12,12 +14,13 @@ namespace fig::gui
 		_pParent = pParent;
 	}
 
-	Control::Control(ControlPtr pParent, Window* pHostWindow) : Control(pParent)
+	Control::Control(ControlPtr pParent, Window* pHostWindow, Frame* pHostFrame) : Control(pParent)
 	{
 		_renderContext = std::make_shared<ControlRenderContext>(ControlRenderContext {
 			.pWindow = pHostWindow->GetSDLWindow().get(),
 			.pRenderer = pHostWindow->GetSDLRenderer().get(),
 			.pTextEngine = pHostWindow->GetSDLTextEngine().get(),
+			.pFrame = pHostFrame,
 		});
 	}
 
@@ -283,5 +286,28 @@ namespace fig::gui
 		if (_renderContext)
 			return _renderContext->pTextEngine;
 		return nullptr;
+	}
+
+	fig::observer_ptr<Frame> Control::GetOwnerFrame()
+	{ 
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+
+		if (_renderContext)
+			return _renderContext->pFrame;
+		return nullptr;
+	}
+
+	Menu& Control::CreateMenu() noexcept
+	{
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+		
+		if (_renderContext and _renderContext->pFrame)
+			return _renderContext->pFrame->CreateMenu();
+
+		assert(false && "No render context");
+		static Menu err { nullptr };
+		return err; // Error
 	}
 }

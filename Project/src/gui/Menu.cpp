@@ -63,7 +63,6 @@ namespace fig::gui
 		SetForegroundColor(Color::Black);
 
 		SetSize(MenuWidth, MenuItemHeight);
-
 		SetVisible(false);
 	}
 

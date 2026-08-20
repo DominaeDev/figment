@@ -184,7 +184,7 @@ namespace fig::gui
 
 	void LoginScreen::ShowMenu()
 	{
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 		menu.AddItem("New profile\u2026");
 		menu.AddItem("Recover profile\u2026");
 		menu.AddSeparator();

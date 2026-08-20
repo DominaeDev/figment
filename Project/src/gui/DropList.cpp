@@ -2,7 +2,6 @@
 #include "gui/DropList.h"
 #include "gui/AppResources.h"
 #include "gui/TexturedBorderRenderer.h"
-#include "gui/MainFrame.h"
 #include "gui/Menu.h"
 
 namespace fig::gui
@@ -97,7 +96,7 @@ namespace fig::gui
 		if (_items.empty())
 			return;
 
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 		menu.SetStyle(MenuStyle::DropList);
 
 		for (size_t i = 0; i < _items.size(); ++i)

@@ -7,11 +7,14 @@
 
 namespace fig::gui
 {
+	class Menu;
+	class Frame;
+
 	class Control : public LayoutElement
 	{
 	public:
 		Control(ControlPtr pParent);
-		Control(ControlPtr pParent, Window* pHostWindow);
+		Control(ControlPtr pParent, Window* pHostWindow, Frame* pHostFrame);
 		virtual ~Control() = default;
 
 		virtual void Render(fig::renderer_ptr pRenderer);
@@ -84,8 +87,10 @@ namespace fig::gui
 		fig::window_ptr GetSDLWindow();
 		fig::renderer_ptr GetSDLRenderer();
 		fig::text_engine_ptr GetSDLTextEngine();
+		fig::observer_ptr<Frame> GetOwnerFrame();
 		fig::point GetMousePos() const noexcept;
-
+		Menu& CreateMenu() noexcept;
+		
 	protected:
 		fig::color _foregroundColor {};
 		fig::color _backgroundColor {};
@@ -108,9 +113,10 @@ namespace fig::gui
 	private:
 		struct ControlRenderContext
 		{
-			fig::window_ptr pWindow {};	// weak
-			fig::renderer_ptr pRenderer {};	// weak
-			fig::text_engine_ptr pTextEngine {};	// weak
+			fig::window_ptr pWindow {};
+			fig::renderer_ptr pRenderer {};
+			fig::text_engine_ptr pTextEngine {};
+			fig::observer_ptr<class Frame> pFrame {};
 		};
 		std::shared_ptr<ControlRenderContext> _renderContext {};
 		std::shared_ptr<ControlRenderContext> GetRenderContext();

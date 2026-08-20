@@ -117,7 +117,7 @@ namespace fig::gui
 
 	void SidePanel::ShowMenu()
 	{
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 		auto& createMenu = menu.AddItem("Create");
 		createMenu.AddItem("New character\u2026");
 		createMenu.AddItem("New story\u2026");

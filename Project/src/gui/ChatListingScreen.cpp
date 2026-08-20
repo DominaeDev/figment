@@ -3,7 +3,6 @@
 #include "gui/ChatListingScreen.h"
 #include "gui/ChatList.h"
 #include "gui/SearchBox.h"
-#include "gui/MainFrame.h"
 #include "gui/Menu.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
@@ -113,7 +112,7 @@ namespace fig::gui
 		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Interface::ChatList::Sorting, SortBy::Default);
 		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::ChatList::Ordering, OrderBy::Default);
 
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 		menu.AddCheckItem("Sort by creation date", sortBy == SortBy::CreatedAt)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::CreatedAt); });
 		menu.AddCheckItem("Sort by modified date", sortBy == SortBy::UpdatedAt)
@@ -155,7 +154,7 @@ namespace fig::gui
 		auto filter = GetFiltering();
 		bool bShowHidden = filter.IsSet(ChatFilterFlag::Hidden);
 
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 
 		if (not _filterByCharacter.empty())
 		{

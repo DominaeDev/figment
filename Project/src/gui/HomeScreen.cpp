@@ -1,7 +1,6 @@
 #include <pch.h>
 #include "gui/HomeScreen.h"
 #include "gui/CardList.h"
-#include "gui/MainFrame.h"
 #include "gui/SearchBox.h"
 #include "gui/AppResources.h"
 #include "gui/Menu.h"
@@ -167,7 +166,7 @@ namespace fig::gui
 		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Interface::CharacterList::Sorting, SortBy::Default);
 		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::CharacterList::Ordering, OrderBy::Default);
 
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 		menu.AddCheckItem("Name", sortBy == SortBy::Name)
 			.SetDelegate([ChangeSorting, this] { ChangeSorting(SortBy::Name); });
 		menu.AddCheckItem("Last message", sortBy == SortBy::LastUsedAt)
@@ -215,7 +214,7 @@ namespace fig::gui
 		auto filter = GetFiltering();
 		bool bShowHidden = filter.IsSet(FilterFlag::Hidden);
 
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 		menu.AddCheckItem("New", filter.IsSet(FilterFlag::New))
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([=, this] { 

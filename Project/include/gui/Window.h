@@ -34,7 +34,7 @@ namespace fig::gui
 		fig::sdl::Renderer& GetSDLRenderer() noexcept { return _renderer; }
 		fig::sdl::TextEngine& GetSDLTextEngine() noexcept { return _textEngine; }
 
-		std::weak_ptr<Frame> GetFrame() { return _pFrame; }
+		fig::observer_ptr<Frame> GetFrame() { return _pFrame ? _pFrame.get() : nullptr; }
 		
 		bool HandleEvent(fig::event& event);
 

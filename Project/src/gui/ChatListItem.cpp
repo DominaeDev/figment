@@ -2,7 +2,7 @@
 #include "gui/ChatListItem.h"
 #include "gui/CustomRenderers.h"
 #include "gui/AppResources.h"
-#include "gui/MainFrame.h"
+#include "gui/Frame.h"
 #include "gui/Menu.h"
 #include "data/ChatLog.h"
 #include "io/ContentUserSettings.h"
@@ -142,7 +142,7 @@ namespace fig::gui
 	void ChatListItem::OnUpdate(float fElapsed)
 	{
 		bool bHovered = (_bSelected or is_inside(GetRect(), GetMousePos())
-			and !MainFrame::GetInstance().IsMenuShowing());
+			and not GetOwnerFrame()->IsMenuShowing());
 
 		if (_bHovered != bHovered)
 		{
@@ -153,7 +153,7 @@ namespace fig::gui
 
 	void ChatListItem::ShowMenu() noexcept
 	{
-		auto& menu = MainFrame::GetInstance().CreateMenu();
+		auto& menu = CreateMenu();
 
 		bool bLLM = Global::IsLLMInitialized();
 

@@ -7,7 +7,7 @@
 
 namespace fig::gui
 {
-	Frame::Frame(Window* pHostWindow) : Control(nullptr, pHostWindow)
+	Frame::Frame(Window* pHostWindow) : Control(nullptr, pHostWindow, this)
 	{
 		int w, h;
 		SDL_GetWindowSizeInPixels(pHostWindow->GetSDLWindow().get(), &w, &h);
