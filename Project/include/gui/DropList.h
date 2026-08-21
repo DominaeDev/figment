@@ -6,8 +6,6 @@
 
 namespace fig::gui
 {
-	using ItemSelectedDelegate = std::function<void(int32_t)>;
-
 	class DropListBase : public Control, public MouseEventHandler
 	{
 	public:
@@ -15,7 +13,7 @@ namespace fig::gui
 		int32_t SelectValue(fig::string_view label, bool bSilent = false) noexcept;
 		int32_t GetSelectedIndex() const noexcept;
 
-		void SetDelegate(ItemSelectedDelegate fnDelegate);
+		void SetDelegate(ListItemSelectedDelegate fnDelegate);
 
 	protected:
 		DropListBase(ControlPtr pParent);
@@ -52,7 +50,7 @@ namespace fig::gui
 		fig::observer_ptr<StaticText> _pText;
 		fig::observer_ptr<Image> _pArrow;
 		int32_t _menuId {};
-		ItemSelectedDelegate _fnDelegate;
+		ListItemSelectedDelegate _fnDelegate;
 	};
 
 	template <typename T>

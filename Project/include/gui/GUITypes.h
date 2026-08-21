@@ -93,6 +93,8 @@ namespace fig
 
 	using ToggleDelegate = std::function<void(bool)>;
 	enum class ToggleBehavior { Default, Radio };
+
+	using ListItemSelectedDelegate = std::function<void(int32_t)>;
 }
 
 namespace fig::gui

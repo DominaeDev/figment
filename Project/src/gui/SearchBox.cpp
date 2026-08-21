@@ -34,6 +34,7 @@ namespace fig::gui
 
 		_pCross->SetX(GetWidth() - 4 - _pCross->GetWidth());
 		_pCross->CenterVertically();
+
 		MouseEventHandler::SetClickableRegion(_pCross->GetLocalRect());
 	}
 

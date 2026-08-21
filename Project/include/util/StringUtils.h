@@ -28,6 +28,8 @@ namespace fig
 
 	[[nodiscard]] fig::string lcase(const fig::string& s);
 	[[nodiscard]] fig::string ucase(const fig::string& s);
+	[[nodiscard]] fig::string lcase(fig::string_view s);
+	[[nodiscard]] fig::string ucase(fig::string_view s);
 	fig::string& lcase_inplace(fig::string& s);
 	fig::string& ucase_inplace(fig::string& s);
 	[[nodiscard]] fig::wstring lcase(const fig::wstring& s);

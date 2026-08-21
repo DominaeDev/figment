@@ -162,6 +162,20 @@ namespace fig
 		return to_utf8(s);
 	}
 
+	string lcase(string_view str)
+	{
+		wstring s = from_utf8(str);
+		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towlower(c); });
+		return to_utf8(s);
+	}
+
+	string ucase(string_view str)
+	{
+		wstring s = from_utf8(str);
+		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towupper(c); });
+		return to_utf8(s);
+	}
+
 	string& lcase_inplace(string& str)
 	{
 		wstring s = from_utf8(str);

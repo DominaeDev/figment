@@ -86,7 +86,7 @@ namespace fig::gui
 		return _selectedIndex;
 	}
 
-	void DropListBase::SetDelegate(ItemSelectedDelegate fnDelegate) 
+	void DropListBase::SetDelegate(ListItemSelectedDelegate fnDelegate)
 	{ 
 		_fnDelegate = fnDelegate; 
 	}

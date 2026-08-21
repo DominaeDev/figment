@@ -55,7 +55,8 @@ namespace fig::gui
 		void OnSize() override;
 		void OnPostRender() override;
 		void OnEnabled(bool bEnabled) override;
-		virtual void OnText(fig::string_view text) noexcept {};
+		
+		virtual void OnText(fig::string_view text) {};
 
 	private:
 		void Insert(const char* text);
