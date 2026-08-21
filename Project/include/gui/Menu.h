@@ -50,7 +50,8 @@ namespace fig::gui
 
 		std::vector<MenuItem> _subItems;
 		fig::rect rect {};
-		Control* pControl {};
+		fig::observer_ptr<Control> pControl {};
+		fig::observer_ptr<StaticText> pLabel {};
 	};
 
 	class Menu : public Overlay

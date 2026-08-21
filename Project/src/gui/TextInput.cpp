@@ -1087,8 +1087,8 @@ namespace fig::gui
 			SetFocus(true);
 
 		TTF_SubString substring;
-		int textX = x - rect.x - GetMarginLeft() + _scroll.x;
-		int textY = y - rect.y - GetMarginTop() + _scroll.y;
+		int textX = x - rect.x + _scroll.x;
+		int textY = y - rect.y + _scroll.y;
 		if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
 		{
 			int32_t pos = GetCursorTextIndex(textX, &substring);
@@ -1125,8 +1125,8 @@ namespace fig::gui
 		{
 			/* Set the highlight position */
 			TTF_SubString substring;
-			int textX = x - rect.x - GetMarginLeft() + _scroll.x;
-			int textY = y - rect.y - GetMarginTop() + _scroll.y;
+			int textX = x - rect.x + _scroll.x;
+			int textY = y - rect.y + _scroll.y;
 			if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
 			{
 				int32_t pos = GetCursorTextIndex(textX, &substring);

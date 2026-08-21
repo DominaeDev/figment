@@ -17,8 +17,8 @@ namespace fig::gui
 	constexpr int32_t MenuSeparatorMargin = 8;
 	constexpr fig::color MenuBackgroundColor = Color::White;
 	constexpr fig::color MenuBorderColor = Color::LineColor;
-	constexpr fig::color MenuItemHoverColor = fig::color { 0xefece3, 0x80 };
-	constexpr fig::color MenuItemPressedColor = fig::color { 0xefece3, 0xFF };
+	constexpr fig::color MenuItemHoverColor = 0xf7f5f1_rgb;
+	constexpr fig::color MenuItemPressedColor = 0xefece3_rgb;
 	constexpr float AutoExpandDelay = 0.3f;
 	constexpr float AutoCollapseDelay = 0.3f;
 	constexpr const char* Separator = "----";
@@ -203,6 +203,7 @@ namespace fig::gui
 			pItemLabel->SetMaxWidth(pItemRoot->GetWidth() - 36);
 			pItemLabel->SetWidth(pItemRoot->GetWidth() - 36);
 			pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+			menuItem.pLabel = pItemLabel;
 		}
 		else if (_style == MenuStyle::DropList)
 		{
@@ -212,6 +213,7 @@ namespace fig::gui
 			pItemLabel->SetMaxWidth(pItemRoot->GetWidth() - 12);
 			pItemLabel->SetWidth(pItemRoot->GetWidth() - 12);
 			pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+			menuItem.pLabel = pItemLabel;
 		}
 
 		if (menuItem._bCheckable && menuItem._bChecked)
@@ -401,15 +403,19 @@ namespace fig::gui
 		{
 		case MenuItem::State::Default:
 			menuItem.pControl->SetForegroundColor(MenuBackgroundColor);
+			menuItem.pLabel->SetBackgroundColor(MenuBackgroundColor);
 			break;
 		case MenuItem::State::Hover:
 			menuItem.pControl->SetForegroundColor(MenuItemHoverColor);
+			menuItem.pLabel->SetBackgroundColor(MenuItemHoverColor);
 			break;
 		case MenuItem::State::Pressed:
 			menuItem.pControl->SetForegroundColor(MenuItemPressedColor);
+			menuItem.pLabel->SetBackgroundColor(MenuItemPressedColor);
 			break;
 		case MenuItem::State::Disabled:
 			menuItem.pControl->SetForegroundColor(MenuBackgroundColor);
+			menuItem.pLabel->SetBackgroundColor(MenuBackgroundColor);
 			break;
 		}
 	}

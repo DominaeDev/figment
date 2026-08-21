@@ -15,11 +15,9 @@ namespace fig::gui
 		SetSize(300, 32);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
-		pTextBoxBG->SetExtend(0.0f);
 		pTextBoxBG->SetColor(Color::TextBoxBackground);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pTextBoxBorder->SetExtend(0.0f);
 		pTextBoxBorder->SetColor(Color::LineColor);
 	}
 
@@ -48,7 +46,7 @@ namespace fig::gui
 		_pArrow->SetX(GetWidth() - 8 - _pArrow->GetWidth());
 		_pArrow->CenterVertically();
 
-		MouseEventHandler::SetClickableRegion(_pArrow->GetLocalRect(), 2);
+		MouseEventHandler::SetClickableRegion(_pArrow->GetLocalRect(), 4);
 	}
 
 	void ComboBox::OnText(fig::string_view text)
@@ -71,6 +69,10 @@ namespace fig::gui
 	{
 		TextInput::OnEnabled(bEnabled);
 		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
+		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
+
+		MouseEventHandler::Enable(bEnabled);
 	}
 
 	EventResult ComboBox::OnEvent(fig::event& event)

@@ -17,14 +17,14 @@ namespace fig::gui
 		_pFill = _pBar->CreateControl<TexturedBorder>(Resource::SLIDER_BAR_BG, 4);
 		_pFill->SetForegroundColor(0x57caff_rgb);
 
-		auto pBarBorder = _pBar->CreateControl<TexturedBorder>(Resource::SLIDER_BAR_BORDER, 4);
-		pBarBorder->SetForegroundColor(Color::LineColor);
-		_pBar->SetSizer<FillParentSizer>()->Add(pBarBorder);
+		_pBarBorder = _pBar->CreateControl<TexturedBorder>(Resource::SLIDER_BAR_BORDER, 4);
+		_pBarBorder->SetForegroundColor(Color::LineColor);
+		_pBar->SetSizer<FillParentSizer>()->Add(_pBarBorder);
 
 		_pThumb = CreateControl<Image>(Resource::SLIDER_THUMB_BG, Color::AppBackground);
 		_pThumb->CenterVertically();
-		auto pThumbBorder = _pThumb->CreateControl<Image>(Resource::SLIDER_THUMB_BORDER, Color::LineColor);
-		pThumbBorder->FillParent();
+		_pThumbBorder = _pThumb->CreateControl<Image>(Resource::SLIDER_THUMB_BORDER, Color::LineColor);
+		_pThumbBorder->FillParent();
 		_thumbHalfSize = _pThumb->GetTextureSize().x / 2;
 
 		SetValue(0.5f);
@@ -53,6 +53,9 @@ namespace fig::gui
 
 	EventResult Slider::OnEvent(fig::event& event)
 	{
+		if (not _bEnabled)
+			return EventResult::Pass;
+
 		auto fnDrag = [&](fig::coord mx) {
 			auto& rect = GetRect();
 			fig::coord x = mx - (rect.x + Margin) - 1;
@@ -114,6 +117,12 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
+	void Slider::OnEnabled(bool bEnabled)
+	{
+		_pFill->SetForegroundColor(bEnabled ? 0x57caff_rgb : Color::DisabledBackground);
+		_pBarBorder->SetForegroundColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+		_pThumbBorder->SetForegroundColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+	}
 
 	void Slider::OnSize()
 	{

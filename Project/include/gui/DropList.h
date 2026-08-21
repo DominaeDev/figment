@@ -39,6 +39,7 @@ namespace fig::gui
 		EventResult OnEvent(fig::event& event) override;
 		void OnSize() override;
 		void OnClicked() override;
+		void OnEnabled(bool bEnabled) override;
 
 		void RefreshText();
 

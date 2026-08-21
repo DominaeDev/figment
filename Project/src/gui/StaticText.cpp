@@ -9,14 +9,14 @@ namespace fig::gui
 	constexpr fig::color DropShadowColor { 0x00, 0x00, 0x00, 0xC0 };
 	constexpr float DropShadowDistance { 1.25f };
 
-	StaticText::StaticText(ControlPtr pParent, const fig::string& text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent),
+	StaticText::StaticText(ControlPtr pParent, fig::string_view text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent),
 		_bAutoSize(bAutoSize)
 	{
 		_pFont = Fonts::GetFont(fontFace, ptSize);
 		SetHeight(TTF_GetFontHeight(_pFont.get()));
 
-		SetForegroundColor(Color::Black);
-		SetBackgroundColor(Color::Transparent);
+//		SetForegroundColor(Color::Black);
+//		SetBackgroundColor(Color::Transparent);
 
 		// Set text and measure
 		_text = text;

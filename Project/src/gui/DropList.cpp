@@ -9,8 +9,10 @@ namespace fig::gui
 	DropListBase::DropListBase(ControlPtr pParent) : Control(pParent), MouseEventHandler(this)
 	{
 		SetForegroundColor(Color::TextBoxForeground);
+		SetBackgroundColor(Color::TextBoxBackground);
 		
 		_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
+		_pText->SetForegroundColor(Color::TextBoxForeground);
 		_pText->EnableEllipsis(true);
 
 		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
@@ -43,6 +45,20 @@ namespace fig::gui
 
 		_pArrow->SetX(GetWidth() - 8 - _pArrow->GetWidth());
 		_pArrow->CenterVertically();
+	}
+
+	void DropListBase::OnEnabled(bool bEnabled)
+	{
+		SetForegroundColor(bEnabled ? Color::TextBoxForeground : Color::DisabledForeground);
+		SetBackgroundColor(bEnabled ? Color::TextBoxBackground : Color::DisabledBackground);
+		_pText->SetForegroundColor(GetForegroundColor());
+		_pText->SetBackgroundColor(GetBackgroundColor());
+
+		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
+		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
+
+		MouseEventHandler::Enable(bEnabled);
 	}
 
 	void DropListBase::RefreshText()

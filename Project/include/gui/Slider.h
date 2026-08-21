@@ -19,17 +19,21 @@ namespace fig::gui
 		float GetValue() const { return _value; }
 
 		void SetDelegate(SliderValueChangedDelegate fnDelegate) { _fnDelegate = fnDelegate; }
+
 	protected:
 		void OnUpdate(float fElapsed) override;
 		EventResult OnEvent(fig::event& event) override;
 		void OnSize() override;
+		void OnEnabled(bool bEnabled) override;
 
 		void RefreshBar();
 		fig::rect GetThumbRect() const noexcept;
 
 	private:
 		fig::observer_ptr<TexturedBorder> _pBar;
+		fig::observer_ptr<TexturedBorder> _pBarBorder;
 		fig::observer_ptr<TexturedBorder> _pFill;
+		fig::observer_ptr<Image> _pThumbBorder;
 		fig::observer_ptr<Image> _pThumb;
 
 		bool _bInvalidBar { true };

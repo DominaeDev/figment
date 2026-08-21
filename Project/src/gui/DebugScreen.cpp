@@ -7,6 +7,7 @@
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/DropList.h"
 #include "gui/ComboBox.h"
+#include "gui/CheckBox.h"
 
 namespace fig::gui
 {
@@ -55,29 +56,65 @@ namespace fig::gui
 			sizer->Add(right, 0, SizerFlag::Expand | SizerFlag::AlignCenterVertical | SizerFlag::FixedSize, 100);
 		}
 
+		auto pSlider = CreateControl<Slider>();
+		pSlider->SetPosition(100, 50);
+
+		auto pSlider2 = CreateControl<Slider>();
+		pSlider2->SetPosition(500, 50);
+		pSlider2->SetEnabled(false);
+
 		auto pButton = CreateControl<ButtonWithLabel>("Invalidate");
-		pButton->SetPosition(400, 150);
+		pButton->SetPosition(100, 100);
 		pButton->SetHeight(35);
 		pButton->SetDelegate([this]() { InvalidateLayout(); });
 
-		auto pSlider = CreateControl<Slider>();
-		pSlider->SetPosition(400, 100);
+		auto pButton2 = CreateControl<ButtonWithLabel>("Invalidate");
+		pButton2->SetPosition(500, 100);
+		pButton2->SetHeight(35);
+		pButton2->SetDelegate([this]() { InvalidateLayout(); });
+		pButton2->SetEnabled(false);
 
 		auto pDropList = CreateControl<DropList>();
-		pDropList->SetPosition(400, 50);
+		pDropList->SetPosition(100, 150);
 		pDropList->AddItem("Item #1");
 		pDropList->AddItem("Item #2");
 		pDropList->AddItem("Item #3");
 		pDropList->AddItem("Item #4");
 		pDropList->Select(0);
 
+		auto pDropList2 = CreateControl<DropList>();
+		pDropList2->SetPosition(500, 150);
+		pDropList2->AddItem("Item #1");
+		pDropList2->AddItem("Item #2");
+		pDropList2->AddItem("Item #3");
+		pDropList2->AddItem("Item #4");
+		pDropList2->Select(0);
+		pDropList2->SetEnabled(false);
+
 		auto pComboBox = CreateControl<ComboBox>();
-		pComboBox->SetPosition(400, 200);
+		pComboBox->SetPosition(100, 200);
 		pComboBox->AddItem("Item #1");
 		pComboBox->AddItem("Item #2");
 		pComboBox->AddItem("Item #3");
 		pComboBox->AddItem("Item #4");
 		pComboBox->Select(0);
+
+		auto pComboBox2 = CreateControl<ComboBox>();
+		pComboBox2->SetPosition(500, 200);
+		pComboBox2->AddItem("Item #1");
+		pComboBox2->AddItem("Item #2");
+		pComboBox2->AddItem("Item #3");
+		pComboBox2->AddItem("Item #4");
+		pComboBox2->Select(0);
+		pComboBox2->SetEnabled(false);
+
+		auto pCheckBox = CreateControl<CheckBox>("Checkbox", false);
+		pCheckBox->SetPosition(100, 250);
+
+		auto pCheckBox2 = CreateControl<CheckBox>("Checkbox", true);
+		pCheckBox2->SetPosition(500, 250);
+		pCheckBox2->SetEnabled(false);
+
 	}
 
 	void DebugScreen::OnUpdate(float fElapsed)
