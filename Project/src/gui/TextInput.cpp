@@ -125,28 +125,31 @@ namespace fig::gui
 		SDL_SetRenderClipRect(pRenderer, &clippingRect);
 
 		// Scroll to cursor
-		if (IsMultiline()) // Multiline (Vertical scrolling)
+		if (_bFocused)
 		{
-			float cursorY = _cursor_rect.y - clientRect.y;
-			while (toI(std::round((cursorY - _scroll.y) / lineSkip)) >= maxRows)
-				_scroll.y += lineSkip;
-			while (toI(std::round((cursorY - _scroll.y) / lineSkip)) < 0)
-				_scroll.y -= lineSkip;
-			_scroll.x = 0;
-		}
-		else // Single line (Horizontal scrolling)
-		{
-			constexpr int32_t kScrollStep = 80;
+			if (IsMultiline()) // Multiline (Vertical scrolling)
+			{
+				float cursorY = _cursor_rect.y - clientRect.y;
+				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) >= maxRows)
+					_scroll.y += lineSkip;
+				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) < 0)
+					_scroll.y -= lineSkip;
+				_scroll.x = 0;
+			}
+			else // Single line (Horizontal scrolling)
+			{
+				constexpr int32_t kScrollStep = 80;
 
-			int maxCursorX = clientRect.w;
-			int textWidth, _;
-			TTF_GetTextSize(GetRenderedText(), &textWidth, &_);
-			int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
-			while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
-				_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
-			while (cursorX > 0 and cursorX - _scroll.x < 0)
-				_scroll.x = std::max(_scroll.x - kScrollStep, 0);
-			_scroll.y = 0;
+				int maxCursorX = clientRect.w;
+				int textWidth, _;
+				TTF_GetTextSize(GetRenderedText(), &textWidth, &_);
+				int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
+				while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
+					_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
+				while (cursorX > 0 and cursorX - _scroll.x < 0)
+					_scroll.x = std::max(_scroll.x - kScrollStep, 0);
+				_scroll.y = 0;
+			}
 		}
 
 		// Draw highlight(s) 
@@ -205,6 +208,7 @@ namespace fig::gui
 		int xx = rect.x + GetMarginLeft();
 		int yy = rect.y + GetMarginTop();
 		ApplyScroll(xx, yy);
+
 		TTF_DrawRendererText(pText, toF(xx), toF(yy));
 	}
 
@@ -1496,7 +1500,7 @@ namespace fig::gui
 
 			case SDLK_RETURN:
 			case SDLK_KP_ENTER:
-				if ((bModCtrl || bModShift) && IsMultiline())
+				if (IsMultiline() and (not _flags.IsSet(Flag::CtrlEnterNewLine) or (bModCtrl || bModShift)))
 				{
 					Insert("\n");
 					PushUndo(UndoAction::Write, false);
@@ -1614,6 +1618,7 @@ namespace fig::gui
 		Insert(text.c_str());
 		InitUndo();
 		DidChange();
+		_scroll = {};
 	}
 
 	fig::string TextInput::GetText() const
@@ -1782,7 +1787,6 @@ namespace fig::gui
 
 	void TextInput::OnPostRender()
 	{
-		// Autosize
 		Autosize();
 	}
 

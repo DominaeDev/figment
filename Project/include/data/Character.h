@@ -66,11 +66,11 @@ namespace fig::data
 		std::optional<CharacterAttribute> FindAttribute(const fig::string_view& attributeId) const noexcept;
 		std::optional<fig::string> GetAttribute(const fig::string_view& attributeId) const noexcept;
 		inline const std::map<fig::string, CharacterAttribute>& GetAttributes() const noexcept { return _attributes; }
+		void SetAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format = CharacterAttribute::Format::Text, CharacterAttribute::Visibility visibility = CharacterAttribute::Visibility::Public);
 
 		inline const fig::string_list& GetTags() const noexcept { return _tags; }
 		inline const SearchIndex& GetSearchIndex() const noexcept { return _searchIndex; }
 
-		void AddAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format = CharacterAttribute::Format::Text, CharacterAttribute::Visibility visibility = CharacterAttribute::Visibility::Public);
 		void AppendTags(const fig::string_list& tags);
 		void AddSearchTerm(const fig::string& term);
 
@@ -83,6 +83,7 @@ namespace fig::data
 		fig::string chatId;	//! @remove?
 		CharacterName name;
 		Gender gender {};
+		Pronouns pronouns { Pronouns::Undefined };
 		fig::string brief;
 		fig::string description; // User-facing only
 		

@@ -15,10 +15,11 @@ namespace fig::gui
 	public:
 		enum class Flag
 		{ 
-			Single		= 1 << 0,
-			Multi		= 1 << 1,
-			Autosize	= 1 << 2,
-			Password	= 1 << 3,
+			Single				= 1 << 0,
+			Multi				= 1 << 1,
+			Autosize			= 1 << 2,
+			Password			= 1 << 3,
+			CtrlEnterNewLine	= 1 << 4,
 		};
 		using Flags = EnumFlags<Flag>;
 

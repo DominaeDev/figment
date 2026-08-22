@@ -14,6 +14,7 @@ namespace fig::gui
 		_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
 		_pText->SetForegroundColor(Color::TextBoxForeground);
 		_pText->EnableEllipsis(true);
+		_pText->SetX(8);
 
 		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
 		_pArrow->SetForegroundColor(Color::Icon);
@@ -39,11 +40,10 @@ namespace fig::gui
 
 	void DropListBase::OnSize()
 	{
-		_pText->SetX(12);
 		_pText->SetWidth(GetWidth() - 24 - _pArrow->GetWidth());
 		_pText->CenterVertically();
 
-		_pArrow->SetX(GetWidth() - 8 - _pArrow->GetWidth());
+		_pArrow->SetX(GetWidth() - 4 - _pArrow->GetWidth());
 		_pArrow->CenterVertically();
 	}
 

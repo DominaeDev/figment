@@ -8,6 +8,7 @@
 #include "gui/DropList.h"
 #include "gui/ComboBox.h"
 #include "gui/CheckBox.h"
+#include "gui/TextBox.h"
 
 namespace fig::gui
 {
@@ -114,6 +115,26 @@ namespace fig::gui
 		auto pCheckBox2 = CreateControl<CheckBox>("Checkbox", true);
 		pCheckBox2->SetPosition(500, 250);
 		pCheckBox2->SetEnabled(false);
+
+		auto pTextBox = CreateControl<TextBox>();
+		pTextBox->SetText("Text box");
+		pTextBox->SetPosition(100, 300);
+
+		auto pTextBox2 = CreateControl<TextBox>();
+		pTextBox2->SetText("Text box");
+		pTextBox2->SetPosition(500, 300);
+		pTextBox2->SetEnabled(false);
+
+		auto pTextBox3 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi });
+		pTextBox3->SetText("Text box (multi)");
+		pTextBox3->SetFixedRows(3);
+		pTextBox3->SetPosition(100, 350);
+
+		auto pTextBox4 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi });
+		pTextBox4->SetText("Text box (multi)");
+		pTextBox4->SetFixedRows(3);
+		pTextBox4->SetPosition(500, 350);
+		pTextBox4->SetEnabled(false);
 
 	}
 

@@ -11,7 +11,7 @@ namespace fig::gui
 		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
 		_pArrow->SetForegroundColor(Color::Icon);
 
-		SetMargins(8, 4, 34, 6);
+		SetMargins(8, 4, 38, 6);
 		SetSize(300, 32);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
@@ -43,10 +43,10 @@ namespace fig::gui
 
 	void ComboBox::OnSize()
 	{
-		_pArrow->SetX(GetWidth() - 8 - _pArrow->GetWidth());
+		_pArrow->SetX(GetWidth() - 4 - _pArrow->GetWidth());
 		_pArrow->CenterVertically();
 
-		MouseEventHandler::SetClickableRegion(_pArrow->GetLocalRect(), 4);
+		MouseEventHandler::SetClickableRegion(fig::rect { GetWidth() - 38, 0, 38, GetHeight() });
 	}
 
 	void ComboBox::OnText(fig::string_view text)

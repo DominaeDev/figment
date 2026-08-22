@@ -185,6 +185,7 @@
     <ClCompile Include="src\gui\CheckBox.cpp" />
     <ClCompile Include="src\gui\ComboBox.cpp" />
     <ClCompile Include="src\gui\DropList.cpp" />
+    <ClCompile Include="src\gui\HorizontalLine.cpp" />
     <ClCompile Include="src\gui\MouseEventHandler.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp" />
@@ -479,6 +480,7 @@
     <ClInclude Include="include\gui\EditorScreen.h" />
     <ClInclude Include="include\gui\FillParentSizer.h" />
     <ClInclude Include="include\gui\Editor.h" />
+    <ClInclude Include="include\gui\HorizontalLine.h" />
     <ClInclude Include="include\gui\InfoPanel.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\Events.h" />

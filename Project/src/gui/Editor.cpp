@@ -13,14 +13,7 @@ namespace fig::gui
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 18.5, false);
 		pParent->GetSizer()->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Top, 8);
-		return pLabel;
-	}
-
-	fig::observer_ptr<StaticText> Editor::CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
-	{
-		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 12.5, false);
-		pLabel->SetForegroundColor(Color::SidePanelForeground.WithAlpha(0.8f));
-		pParent->GetSizer()->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 2);
+		pSizer->AddSpacer(9);
 		return pLabel;
 	}
 
@@ -28,17 +21,28 @@ namespace fig::gui
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 14.0, false);
 		pLabel->SetForegroundColor(Color::SidePanelForeground);
-		pSizer->AddSpacer(12);
+		pSizer->AddSpacer(8);
 		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 4);
 		pSizer->AddSpacer(3);
 		return pLabel;
 	}
 
-	template <>
-	fig::observer_ptr<TextBox> Editor::CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding)
+	fig::observer_ptr<StaticText> Editor::CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
-		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize, TextInput::Flags { TextInput::Flag::Single });
+		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Italic, 14.0, false);
+		pLabel->SetForegroundColor(0x8a8375_rgb);
+		pSizer->AddSpacer(2);
+		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 2);
+		pSizer->AddSpacer(3);
+		return pLabel;
+	}
+
+	template <>
+	fig::observer_ptr<TextBox> Editor::CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows)
+	{
+		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, rows == 1 ? Constants::GUI::TextBoxFontSize : 14.5, TextInput::Flags { rows > 1 ? TextInput::Flag::Multi : TextInput::Flag::Single });
 		pTextBox->SetText(binding.AsString());
+		pTextBox->SetFixedRows(rows);
 		pTextBox->SetTextChangedCallback([binding](const fig::string& text) mutable { binding.Set(text); });
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;

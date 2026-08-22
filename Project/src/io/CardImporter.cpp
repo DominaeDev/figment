@@ -28,8 +28,8 @@ namespace fig::io
 			Character character;
 			character.name = CharacterName { card.data.name };
 			character.description = card.data.creator_notes;
-			character.AddAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
-			character.AddAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Public);
+			character.SetAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
+			character.SetAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Public);
 			character.AppendTags(card.data.tags);
 
 			// Check for gender tags

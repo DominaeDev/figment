@@ -701,6 +701,9 @@
     <ClCompile Include="src\gui\CheckBox.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\HorizontalLine.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1631,6 +1634,9 @@
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CheckBox.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\HorizontalLine.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>

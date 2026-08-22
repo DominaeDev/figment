@@ -201,7 +201,7 @@ namespace fig::data
 		_bDirtyContext = true;
 	}
 
-	void Character::AddAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format, CharacterAttribute::Visibility visibility)
+	void Character::SetAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format, CharacterAttribute::Visibility visibility)
 	{
 		_attributes[lcase(attributeId)] = CharacterAttribute {
 			.label = label,

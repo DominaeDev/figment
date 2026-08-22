@@ -25,6 +25,16 @@ namespace fig::gui
 	{
 		TextInput::OnEnabled(bEnabled);
 		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
+		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+	}
+
+	void TextBox::SetFixedRows(int32_t rows)
+	{
+		if (_pFont)
+			SetHeight(TTF_GetFontLineSkip(_pFont) * rows + GetMarginVertical());
+		_minRows = rows;
+		_maxRows = rows;
+		_flags.Unset(Flag::Autosize);
 	}
 
 }
