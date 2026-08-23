@@ -127,6 +127,7 @@ namespace fig::gui
 
 		auto pTextBox3 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi });
 		pTextBox3->SetText("Text box (multi)");
+		pTextBox3->SetPlaceholder("Enter some text, please...");
 		pTextBox3->SetFixedRows(3);
 		pTextBox3->SetPosition(100, 350);
 

@@ -46,11 +46,13 @@ namespace fig::gui
 		SetBackgroundColor(Color::TextBoxBackground);
 
 		_pFont = Fonts::GetFont(fontFace, ptSize);
-		_pText = TTF_CreateText(GetSDLTextEngine(), _pFont, "", 0);
+		_pText = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
+		_pPlaceholder = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
 		TTF_SetTextWrapWhitespaceVisible(_pText, true);
+		TTF_SetTextWrapWhitespaceVisible(_pPlaceholder, true);
 	
 		if (flags.IsSet(Flag::Password))
-			_pPassword = TTF_CreateText(GetSDLTextEngine(), _pFont, "", 0);
+			_pPassword = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
 
 		_bFocused = false;
 		EnableClipping(false);
@@ -67,6 +69,7 @@ namespace fig::gui
 		ClearCandidates();
 		TTF_DestroyText(_pPassword);
 		TTF_DestroyText(_pText);
+		TTF_DestroyText(_pPlaceholder);
 	}
 
 	TTF_Text* TextInput::GetRenderedText()
@@ -182,7 +185,10 @@ namespace fig::gui
 			}
 		}
 
-		DrawText(pRenderer, GetRenderedText(), rect.x, rect.y + 8);
+		if (auto pText = GetRenderedText(); pText->text)
+			DrawText(pRenderer, pText, rect.x, rect.y + 8);
+		else
+			DrawPlaceholder(pRenderer, rect.x, rect.y + 8);
 
 		if (_bFocused)
 		{
@@ -210,6 +216,22 @@ namespace fig::gui
 		ApplyScroll(xx, yy);
 
 		TTF_DrawRendererText(pText, toF(xx), toF(yy));
+	}
+
+	void TextInput::DrawPlaceholder(fig::renderer_ptr pRenderer, int x, int y)
+	{
+		if (!_pPlaceholder->text)
+			return;
+
+		auto fgColor = Color::DisabledForeground;
+		TTF_SetTextColor(_pPlaceholder, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
+
+		auto& rect = GetRect();
+		int xx = rect.x + GetMarginLeft();
+		int yy = rect.y + GetMarginTop();
+		ApplyScroll(xx, yy);
+
+		TTF_DrawRendererText(_pPlaceholder, toF(xx), toF(yy));
 	}
 
 	void TextInput::DrawCursor(fig::renderer_ptr pRenderer)
@@ -1271,9 +1293,9 @@ namespace fig::gui
 		DidChange();
 	}
 
-	void TextInput::Insert(const char* text)
+	void TextInput::Insert(fig::string_view text)
 	{
-		if (!text)
+		if (text.empty())
 			return;
 
 		DeleteHighlight();
@@ -1284,9 +1306,8 @@ namespace fig::gui
 			composition_length = 0;
 		}
 
-		size_t length = SDL_strlen(text);
-		TTF_InsertTextString(_pText, _cursor, text, length);
-		SetCursorPosition((int)(_cursor + length));
+		TTF_InsertTextString(_pText, _cursor, text.data(), text.length());
+		SetCursorPosition(static_cast<int>(_cursor + text.length()));
 	}
 
 	#pragma region Events
@@ -1604,7 +1625,7 @@ namespace fig::gui
 
 	void TextInput::Clear()
 	{
-		TTF_SetTextString(_pText, "", 0);
+		TTF_SetTextString(_pText, nullptr, 0);
 		Deselect();
 		SetCursorPosition(0);
 		InitUndo();
@@ -1612,13 +1633,18 @@ namespace fig::gui
 		_scroll = {};
 	}
 
-	void TextInput::SetText(fig::string text)
+	void TextInput::SetText(fig::string_view text)
 	{
 		Clear();
-		Insert(text.c_str());
+		Insert(fig::string { text }.c_str());
 		InitUndo();
 		DidChange();
 		_scroll = {};
+	}
+
+	void TextInput::SetPlaceholder(fig::string_view text)
+	{
+		TTF_SetTextString(_pPlaceholder, text.data(), text.length());
 	}
 
 	fig::string TextInput::GetText() const
@@ -1792,10 +1818,10 @@ namespace fig::gui
 
 	void TextInput::DidChange()
 	{
-		if (_pOnChanged and _pText)
+		if (_pOnChanged)
 			_pOnChanged(_pText->text ? _pText->text : "");
 		
-		OnText(_pText and _pText->text ? _pText->text : "");
+		OnText(_pText->text ? _pText->text : "");
 	}
 
 	void TextInput::OnEnabled(bool bEnabled)

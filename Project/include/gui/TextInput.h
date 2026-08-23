@@ -26,7 +26,8 @@ namespace fig::gui
 		TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Flags flags = {});
 		~TextInput();
 
-		void SetText(fig::string text);
+		void SetText(fig::string_view text);
+		void SetPlaceholder(fig::string_view text);
 		void SetTextChangedCallback(TextChangedCallback cb);
 		void SetEnterPressedCallback(EnterPressedCallback cb);
 		void SetMinRows(int32_t rows);
@@ -60,8 +61,9 @@ namespace fig::gui
 		virtual void OnText(fig::string_view text) {};
 
 	private:
-		void Insert(const char* text);
+		void Insert(fig::string_view text);
 		void DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y);
+		void DrawPlaceholder(fig::renderer_ptr pRenderer, int x, int y);
 		void DrawCursor(fig::renderer_ptr pRenderer);
 		void DrawCandidates(fig::renderer_ptr pRenderer);
 		void DrawComposition(fig::renderer_ptr pRenderer);
@@ -116,6 +118,7 @@ namespace fig::gui
 		fig::observer_ptr<TTF_Font> _pFont;
 		fig::observer_ptr<TTF_Text> _pText;
 		fig::observer_ptr<TTF_Text> _pPassword;
+		fig::observer_ptr<TTF_Text> _pPlaceholder;
 		size_t _lastLength = 0uz;
 		
 		bool _bFocused = false;
