@@ -229,9 +229,12 @@
     <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\Slider.cpp" />
+    <ClCompile Include="src\gui\TextBox2.cpp" />
+    <ClCompile Include="src\gui\TextInput2.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
     <ClCompile Include="src\gui\ToggleWithLabel.cpp" />
     <ClCompile Include="src\gui\TopBar.cpp" />
+    <ClCompile Include="src\gui\TTFTextBody.cpp" />
     <ClCompile Include="src\gui\ValueBinding.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
@@ -501,9 +504,12 @@
     <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\Slider.h" />
+    <ClInclude Include="include\gui\TextBox2.h" />
+    <ClInclude Include="include\gui\TextInput2.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
     <ClInclude Include="include\gui\ToggleWithLabel.h" />
     <ClInclude Include="include\gui\TopBar.h" />
+    <ClInclude Include="include\gui\TTFTextBody.h" />
     <ClInclude Include="include\gui\ValueBinding.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
     <ClInclude Include="include\gui\SearchBox.h" />

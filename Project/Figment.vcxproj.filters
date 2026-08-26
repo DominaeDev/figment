@@ -704,6 +704,15 @@
     <ClCompile Include="src\gui\HorizontalLine.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\TextInput2.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\TextBox2.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\TTFTextBody.cpp">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1637,6 +1646,15 @@
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\HorizontalLine.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TTFTextBody.h">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TextInput2.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TextBox2.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>

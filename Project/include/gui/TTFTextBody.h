@@ -1,0 +1,102 @@
+#pragma once
+
+#include "gui/GUITypes.h"
+
+// Helper class for dealing with TTF_Text's severe performance issues with long texts.
+namespace fig::gui
+{
+	struct TTFTextLine
+	{
+		fig::sdl::Text ttf_text;
+		int32_t position; // in bytes
+		int32_t length;
+		bool eol { false };
+		bool dirty { false };
+	};
+
+	struct TTFCursor
+	{
+		TTF_Text* pText { nullptr };
+		int32_t position { -1 }; // absolute
+		int32_t offset { -1 }; // relative to pText
+		int32_t line { 0 };
+
+		constexpr bool valid() const noexcept { return (bool)pText and position >= 0 and offset >= 0; }
+	};
+
+	class TTFTextBody
+	{
+	public:
+		TTFTextBody() = default;
+		TTFTextBody(fig::text_engine_ptr pTextEngine, fig::observer_ptr<TTF_Font> pFont);
+
+		void SetText(fig::string_view text);
+		void SetTextWrapWidth(int32_t width);
+		int32_t GetTextWrapWidth() const noexcept;
+		const fig::string& GetText() const noexcept { return _text; }
+
+		const std::vector<TTFTextLine>& GetLines() const noexcept;
+		size_t GetLineCount() const noexcept;
+
+		bool IsWordWrapping() const noexcept { return _wrapWidth > 0; }
+		void Invalidate();
+
+		void Render(fig::renderer_ptr pRenderer);
+
+		int32_t SetCursor(int32_t index) noexcept;
+		bool SetCursor(fig::point position) noexcept;
+
+		TTFCursor GetCursor() const noexcept;
+		int32_t GetCursorPosition() const noexcept { return _cursor; }
+		TTFCursor GetCursorAt(int32_t index) const noexcept;
+		TTFCursor GetLineCursor(size_t line_index) const noexcept;
+
+		int32_t MoveCursor(int direction) noexcept;
+		int32_t MoveCursorLeft() noexcept;
+		int32_t MoveCursorRight() noexcept;
+		int32_t MoveCursorUp() noexcept;
+		int32_t MoveCursorDown() noexcept;
+		int32_t MoveCursorBeginningOfLine() noexcept;
+		int32_t MoveCursorEndOfLine() noexcept;
+		int32_t MoveCursorToPriorWord() noexcept;
+		int32_t MoveCursorToNextWord() noexcept;
+
+		void SelectAll();
+		void Deselect();
+		bool Delete();
+		bool Delete(int32_t from, int32_t length);
+		bool DeleteSelection();
+		bool DeleteToNextWord();
+		bool DeleteToEndOfLine();
+		bool DeleteToEnd();
+		bool Backspace();
+		bool BackspaceToPriorWord();
+		bool BackspaceToBeginning();
+		bool BackspaceToBeginningOfLine();
+		void Insert(fig::string_view text);
+
+		void Copy();
+		bool Cut();
+		void Clear();
+
+	private:
+		void LayoutAll();
+		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text);
+		bool GetSelection(int32_t& marker, int32_t& length) const noexcept;
+		void Relayout();
+	
+		fig::text_engine_ptr _pTextEngine;
+		fig::observer_ptr<TTF_Font> _pFont;
+		fig::string _text;
+		int32_t _lineHeight {};
+		int32_t _wrapWidth {};
+		std::vector<TTFTextLine> _lines;
+		bool _bInvalidated { false };
+
+		int32_t _cursor = 0;
+		int32_t highlight_start = -1;
+		int32_t highlight_end = -1;
+	};
+
+
+};

@@ -3,29 +3,29 @@
 #include <functional>
 
 #include "gui/Control.h"
+#include "gui/TTFTextBody.h"
 #include "util/UndoStack.h"
 
 namespace fig::gui
 {
-
-	class TextInput : public Control
+	class TextInput2 : public Control
 	{
 	public:
-		using TextChangedCallback = std::function<void(fig::string)>;
-		using EnterPressedCallback = std::function<void(fig::string)>;
+		using TextChangedCallback = std::function<void(fig::string_view)>;
+		using EnterPressedCallback = std::function<void(fig::string_view)>;
 
 		enum class Flag
-		{ 
-			Single				= 1 << 0,
-			Multi				= 1 << 1,
-			Autosize			= 1 << 2,
-			Password			= 1 << 3,
-			CtrlEnterNewLine	= 1 << 4,
+		{
+			Single = 1 << 0,
+			Multi = 1 << 1,
+			Autosize = 1 << 2,
+			Password = 1 << 3,
+			CtrlEnterNewLine = 1 << 4,
 		};
 		using Flags = EnumFlags<Flag>;
 
-		TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Flags flags = {});
-		~TextInput();
+		TextInput2(ControlPtr pParent, FontFace fontFace, double ptSize, Flags flags = {});
+		~TextInput2();
 
 		void SetText(fig::string_view text);
 		void SetPlaceholder(fig::string_view text);
@@ -55,7 +55,7 @@ namespace fig::gui
 		void OnSize() override;
 		void OnPostRender() override;
 		void OnEnabled(bool bEnabled) override;
-		
+
 		virtual void OnText(fig::string_view text) {};
 
 	private:
@@ -72,10 +72,11 @@ namespace fig::gui
 		void HandleComposition(const SDL_TextEditingEvent* event);
 		void CancelComposition();
 		void ResetComposition();
-		void OnMoveCursor(int last_cursor);
 		void UpdateTextInputArea();
-		void SetCursorPosition(int position);
-		void MoveCursorIndex(int direction);
+		void OnMoveCursor(int32_t last_position);
+
+		void SetCursorPosition(int32_t position);
+		void MoveCursorIndex(int32_t direction);
 		void MoveCursorLeft();
 		void MoveCursorRight();
 		void MoveCursorUp();
@@ -119,11 +120,12 @@ namespace fig::gui
 
 	protected:
 		fig::observer_ptr<TTF_Font> _pFont;
-		fig::observer_ptr<TTF_Text> _pText;
 		fig::observer_ptr<TTF_Text> _pPassword;
 		fig::observer_ptr<TTF_Text> _pPlaceholder;
 		size_t _lastLength = 0uz;
-		
+
+		TTFTextBody _body;
+
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;
 		Flags _flags {};
@@ -132,13 +134,11 @@ namespace fig::gui
 		int _minRows = 1;
 		int _maxRows = 1;
 
-		fig::texture_ptr _pTexture;
-		fig::surface_ptr _pSurface;
 		TextChangedCallback _pOnChanged = nullptr;
 		EnterPressedCallback _pOnEnter = nullptr;
 
 		// Cursor
-		int _cursor = 0;
+//		int _cursor = 0;
 		bool _cursor_visible = false;
 		uint64_t _last_cursor_change = 0ULL;
 		fig::rectf _cursor_rect {};

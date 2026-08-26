@@ -14,6 +14,7 @@ namespace fig::sdl
 	using Surface = stdex::c_resource<SDL_Surface, SDL_CreateSurface, SDL_DestroySurface>;
 	using Cursor = stdex::c_resource<SDL_Cursor, SDL_CreateSystemCursor, SDL_DestroyCursor>;
 	using TextEngine = stdex::c_resource<TTF_TextEngine, TTF_CreateRendererTextEngine, TTF_DestroyRendererTextEngine>;
+	using Text = stdex::c_resource<TTF_Text, TTF_CreateText, TTF_DestroyText>;
 	using AudioStream = stdex::c_resource<SDL_AudioStream, SDL_OpenAudioDeviceStream, SDL_DestroyAudioStream>;
 }
 

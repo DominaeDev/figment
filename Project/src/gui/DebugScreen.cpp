@@ -9,6 +9,7 @@
 #include "gui/ComboBox.h"
 #include "gui/CheckBox.h"
 #include "gui/TextBox.h"
+#include "gui/TextBox2.h"
 
 namespace fig::gui
 {
@@ -136,6 +137,11 @@ namespace fig::gui
 		pTextBox4->SetFixedRows(3);
 		pTextBox4->SetPosition(500, 350);
 		pTextBox4->SetEnabled(false);
+
+		auto pTextBox5 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Multi });
+		pTextBox5->SetText("Text box (multi)\nHello, world.");
+		pTextBox5->SetFixedRows(3);
+		pTextBox5->SetPosition(100, 450);
 
 	}
 
