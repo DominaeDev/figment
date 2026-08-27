@@ -35,8 +35,11 @@ namespace fig::gui
 		int32_t GetTextWrapWidth() const noexcept;
 		const fig::string& GetText() const noexcept { return _text; }
 
+		fig::observer_ptr<TTF_Text> GetRenderedText() noexcept; //! @temp
+
 		const std::vector<TTFTextLine>& GetLines() const noexcept;
 		size_t GetLineCount() const noexcept;
+		int32_t GetLineHeight() const noexcept { return _lineHeight; }
 
 		bool IsWordWrapping() const noexcept { return _wrapWidth > 0; }
 		void Invalidate();
@@ -61,8 +64,12 @@ namespace fig::gui
 		int32_t MoveCursorToPriorWord() noexcept;
 		int32_t MoveCursorToNextWord() noexcept;
 
-		void SelectAll();
-		void Deselect();
+		void Select(int32_t start, int32_t end) noexcept;
+		void SelectAll() noexcept;
+		void Deselect() noexcept;
+		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
+		std::pair<int32_t, int32_t> GetSelection() const noexcept { return std::make_pair(highlight_start, highlight_end); }
+
 		bool Delete();
 		bool Delete(int32_t from, int32_t length);
 		bool DeleteSelection();

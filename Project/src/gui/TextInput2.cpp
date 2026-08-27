@@ -56,9 +56,6 @@ namespace fig::gui
 		_bFocused = false;
 		EnableClipping(false);
 
-		highlight_start = -1;
-		highlight_end = -1;
-
 		if (_pFont)
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
 	}
@@ -70,9 +67,12 @@ namespace fig::gui
 		TTF_DestroyText(_pPlaceholder);
 	}
 
-	TTF_Text* TextInput2::GetRenderedText()
+	fig::observer_ptr<TTF_Text> TextInput2::GetRenderedText()
 	{
-		return _flags.IsSet(Flag::Password) && _pPassword ? _pPassword : _pText;
+		if (IsPassword())
+			return _pPassword;
+
+		return _body.GetRenderedText(); //! @temp
 	}
 
 	void TextInput2::OnUpdate(float fElapsed)
@@ -183,8 +183,20 @@ namespace fig::gui
 			}
 		}
 
-		if (auto pText = GetRenderedText(); pText->text)
-			DrawText(pRenderer, pText, rect.x, rect.y + 8);
+		if (IsPassword() and _pPassword->text)
+			DrawText(pRenderer, _pPassword, rect.x, rect.y + 8);
+		else if (not (IsPassword() or _body.GetText().empty()))
+		{
+			_body.Render(pRenderer); //! @temp
+			auto& lines = _body.GetLines();
+			auto lineHeight = _body.GetLineHeight();
+			for (size_t i = 0uz; i < lines.size(); ++i)
+			{
+				auto& line = lines[i];
+				if (line.ttf_text->text)
+					DrawText(pRenderer, line.ttf_text.get(), 0, lineHeight * static_cast<int32_t>(i));
+			}
+		}
 		else
 			DrawPlaceholder(pRenderer, rect.x, rect.y + 8);
 
@@ -201,9 +213,6 @@ namespace fig::gui
 		}
 
 		SDL_SetRenderClipRect(pRenderer, restoreClipping ? &prevClippingRect : nullptr);
-
-
-		_body.Render(pRenderer); //! @temp
 	}
 
 	void TextInput2::DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y)
@@ -212,8 +221,8 @@ namespace fig::gui
 		TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
 
 		auto& rect = GetRect();
-		int xx = rect.x + GetMarginLeft();
-		int yy = rect.y + GetMarginTop();
+		int xx = rect.x + GetMarginLeft() + x;
+		int yy = rect.y + GetMarginTop() + y;
 		ApplyScroll(xx, yy);
 
 		TTF_DrawRendererText(pText, toF(xx), toF(yy));
@@ -251,6 +260,8 @@ namespace fig::gui
 
 	bool TextInput2::GetHighlightExtents(int* marker, int* length)
 	{
+		return false;
+		/*
 		if (highlight_start >= 0 and highlight_end >= 0)
 		{
 			int marker1 = SDL_min(highlight_start, highlight_end);
@@ -262,7 +273,7 @@ namespace fig::gui
 				return true;
 			}
 		}
-		return false;
+		return false;*/
 	}
 
 	static bool IsShiftDown()
@@ -758,32 +769,28 @@ namespace fig::gui
 	void TextInput2::OnMoveCursor(int32_t last_position)
 	{
 		bool isShiftDown = IsShiftDown();
-		bool is_highlighting = highlight_start != -1 and highlight_end != -1;
+		bool is_highlighting = _body.HasSelection();
 		if (!is_highlighting and isShiftDown)
 		{
-			highlight_start = last_position;
-			highlight_end = last_position;
+			_body.Select(last_position, last_position);
 			is_highlighting = true;
 		}
 		else if (is_highlighting and !isShiftDown)
 		{
-			highlight_start = -1;
-			highlight_end = -1;
+			_body.Deselect();
 			is_highlighting = false;
 		}
 
 		if (is_highlighting)
 		{
-			int start = highlight_start;
-			int end = highlight_end;
+			auto [start, end] = _body.GetSelection();
 			int curr = _body.GetCursorPosition();
 			if (start == last_position)
 				start = curr;
 			else
 				end = curr;
 
-			highlight_start = SDL_min(start, end);
-			highlight_end = SDL_max(start, end);
+			_body.Select(SDL_min(start, end), SDL_max(start, end));
 		}
 
 		ResetCursorBlink();
@@ -843,7 +850,7 @@ namespace fig::gui
 	void TextInput2::MoveCursorEnd()
 	{
 		auto last_cursor = _body.GetCursor();
-		_body.SetCursor(_body.GetText().length());
+		_body.SetCursor(static_cast<int32_t>(_body.GetText().length()));
 		OnMoveCursor(last_cursor.position);
 	}
 
@@ -1013,8 +1020,7 @@ namespace fig::gui
 			{
 				SetCursorPosition(pos);
 				_bIsHighlighting = true;
-				highlight_start = _body.GetCursorPosition();
-				highlight_end = -1;
+				_body.Select(_body.GetCursorPosition(), -1);
 			}
 		}
 
@@ -1043,7 +1049,7 @@ namespace fig::gui
 //				}
 
 				SetCursorPosition(pos);
-				highlight_end = _body.GetCursorPosition();
+				_body.Select(_body.GetSelection().first, _body.GetCursorPosition());
 
 				bHandled = true;
 			}
@@ -1370,7 +1376,7 @@ namespace fig::gui
 			case SDLK_ESCAPE:
 				if (bModNone)
 				{
-					if (HasSelection())
+					if (_body.HasSelection())
 					{
 						Deselect();
 						return EventResult::Handled;
@@ -1433,15 +1439,11 @@ namespace fig::gui
 		if (IsMultiline())
 		{
 			int width = std::max(GetWidth() - GetMarginHorizontal(), 0);
-			int currWrapWidth;
-			if (TTF_GetTextWrapWidth(GetRenderedText(), &currWrapWidth) && currWrapWidth != width)
-				TTF_SetTextWrapWidth(GetRenderedText(), width);
-
 			_body.SetTextWrapWidth(width);
 		}
 		else
 		{
-			TTF_SetTextWrapWidth(GetRenderedText(), 0);
+			_body.SetTextWrapWidth(0);
 		}
 	}
 
@@ -1524,8 +1526,8 @@ namespace fig::gui
 			return;
 
 		auto clientRect = GetClientRect();
-		int lineSkip = TTF_GetFontLineSkip(_pFont);
-		int numRows = _body.GetLineCount();
+		int32_t lineSkip = TTF_GetFontLineSkip(_pFont);
+		int32_t numRows = static_cast<int32_t>(_body.GetLineCount());
 
 		numRows = std::clamp(numRows, _minRows, _maxRows);
 		if (numRows * lineSkip != clientRect.h)
@@ -1585,8 +1587,8 @@ namespace fig::gui
 		{
 			.text = GetText(),
 			.cursor_pos = _body.GetCursorPosition(),
-			.highlight_start = highlight_start,
-			.highlight_end = highlight_end,
+//			.highlight_start = highlight_start, //! @todo
+//			.highlight_end = highlight_end, //! @todo
 			.actionType = action,
 		};
 	}
@@ -1608,8 +1610,8 @@ namespace fig::gui
 		{
 //			TTF_SetTextString(_pText, toCStr(undo.value().text), 0); //! @todo
 			SetCursorPosition(undo.value().cursor_pos);
-			highlight_start = undo.value().highlight_start;
-			highlight_end = undo.value().highlight_end;
+//			highlight_start = undo.value().highlight_start;  //! @todo
+//			highlight_end = undo.value().highlight_end; //! @todo
 		}
 	}
 
@@ -1619,8 +1621,8 @@ namespace fig::gui
 		{
 //			TTF_SetTextString(_pText, toCStr(undo.value().text), 0); //! @todo
 			SetCursorPosition(undo.value().cursor_pos);
-			highlight_start = undo.value().highlight_start;
-			highlight_end = undo.value().highlight_end;
+//			highlight_start = undo.value().highlight_start; //! @todo
+//			highlight_end = undo.value().highlight_end; //! @todo
 		}
 	}
 

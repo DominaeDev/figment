@@ -261,77 +261,87 @@ namespace fig::gui
 	std::vector<TTFTextLine> TTFTextBody::LayoutParagraph(fig::string_view text)
 	{
 		std::vector<TTFTextLine> result;
-		const char* pText = text.data();
-		size_t remainingLength = text.size();
-		size_t offsetInParagraph = 0;
 
-		while (remainingLength > 0)
+		auto lines = text
+			| std::ranges::views::split('\n')
+			| std::views::transform([](auto range) -> fig::string_view { return fig::string_view(range.data(), range.size()); });
+
+		for (auto line : lines)
 		{
-			int32_t measuredWidth;
-			size_t measuredLength;
+			const char* pText = line.data();
+			size_t remainingLength = line.size();
+			size_t offsetInParagraph = 0;
 
-			if (not TTF_MeasureString(_pFont, pText, remainingLength, _wrapWidth, &measuredWidth, &measuredLength))
-				break;
-
-			if (measuredLength < remainingLength)
+			while (remainingLength > 0)
 			{
-				size_t lastSpace = measuredLength;
+				int32_t measuredWidth;
+				size_t measuredLength;
 
-				// Walk back to last non-whitespace
-				while (lastSpace > 0 and not SDL_isspace(static_cast<unsigned char>(pText[lastSpace - 1])))
-					--lastSpace;
+				if (not TTF_MeasureString(_pFont, pText, remainingLength, _wrapWidth, &measuredWidth, &measuredLength))
+					break;
 
-				if (lastSpace > 0)
-					measuredLength = lastSpace;
+				if (measuredLength < remainingLength)
+				{
+					size_t lastSpace = measuredLength;
+
+					// Walk back to last non-whitespace
+					while (lastSpace > 0 and not SDL_isspace(static_cast<unsigned char>(pText[lastSpace - 1])))
+						--lastSpace;
+
+					if (lastSpace > 0)
+						measuredLength = lastSpace;
+				}
+
+				result.emplace_back(TTFTextLine {
+					.position = static_cast<int32_t>(uintptr_t(pText) - uintptr_t(_text.data())),
+					.length = static_cast<int32_t>(measuredLength),
+				});
+
+				size_t advance = measuredLength;
+
+				// Skip trailing whitespace
+				while (advance < remainingLength and SDL_isspace(static_cast<unsigned char>(pText[advance])))
+					++advance;
+
+				pText += advance;
+				offsetInParagraph += advance;
+				remainingLength -= advance;
 			}
 
-			result.emplace_back(TTFTextLine {
-				.ttf_text = fig::sdl::Text(_pTextEngine.get(), _pFont, pText, measuredLength),
-				.position = static_cast<int32_t>(uintptr_t(pText) - uintptr_t(_text.data())),
-				.length = static_cast<int32_t>(measuredLength),
-			});
-
-			size_t advance = measuredLength;
-
-			// Skip trailing whitespace
-			while (advance < remainingLength and SDL_isspace(static_cast<unsigned char>(pText[advance])))
-				++advance;
-
-			pText += advance;
-			offsetInParagraph += advance;
-			remainingLength -= advance;
+			if (not result.empty())
+				result.back().eol = true;
 		}
 
-		if (not result.empty())
-			result.back().eol = true;
 		return result;
 	}
 
 	void TTFTextBody::Render(fig::renderer_ptr pRenderer)
 	{
 		if (_bInvalidated)
+		{
 			Relayout();
+			_bInvalidated = false;
+		}
 
 		// ...
 	}
 
 	TTFCursor TTFTextBody::GetCursorAt(int32_t position) const noexcept
 	{
-		if (position < 0 or position >= _text.length())
-			return TTFCursor { nullptr, -1, -1 };
-
 		for (size_t i = 0uz; i < _lines.size(); ++i)
 		{
 			auto& line = _lines[i];
 			if (position >= line.position and position < line.position + line.length)
-				return TTFCursor { 
-					.pText = line.ttf_text.get(), 
-					.position = line.position, 
-					.offset = position - line.position, 
+			{
+				return TTFCursor {
+					.pText = line.ttf_text.get(),
+					.position = position,
+					.offset = position - line.position,
 					.line = static_cast<int32_t>(i)
 				};
+			}
 		}
-		return TTFCursor { nullptr, -1, -1 };
+		return TTFCursor { nullptr, 0, 0 };
 	}
 
 	TTFCursor TTFTextBody::GetLineCursor(size_t line_index) const noexcept
@@ -454,13 +464,19 @@ namespace fig::gui
 		return SetCursor(FindNextWord(_text, _cursor));
 	}
 
-	void TTFTextBody::SelectAll()
+	void TTFTextBody::SelectAll() noexcept
 	{
 		highlight_start = 0;
 		highlight_end = static_cast<int32_t>(_text.size());
 	}
 
-	void TTFTextBody::Deselect()
+	void TTFTextBody::Select(int32_t start, int32_t end) noexcept
+	{
+		highlight_start = start;
+		highlight_end = end;
+	}
+
+	void TTFTextBody::Deselect() noexcept
 	{
 		highlight_start = -1;
 		highlight_end = -1;
@@ -482,6 +498,7 @@ namespace fig::gui
 		return false;
 	}
 
+
 	bool TTFTextBody::Delete(int32_t from, int32_t length)
 	{
 		if (_text.empty() or length == 0uz)
@@ -490,8 +507,7 @@ namespace fig::gui
 		auto cursorFrom = GetCursorAt(from);
 		auto cursorTo = GetCursorAt(from + length);
 
-		int32_t position = cursorFrom.position;
-
+		int32_t startPosition = _lines[cursorFrom.line].position;
 		int32_t endLine = cursorFrom.line; // end of paragraph
 		int32_t endPosition = _lines[endLine].position + _lines[endLine].length;
 		for (size_t i = cursorFrom.line; i < _lines.size(); ++i)
@@ -505,18 +521,18 @@ namespace fig::gui
 		}
 
 		// Shift up
-		for (size_t i = cursorFrom.line; i < _lines.size(); ++i)
+		for (size_t i = cursorFrom.line + 1uz; i < _lines.size(); ++i)
 		{
 			auto& line = _lines[i];
 			line.position = std::max(line.position - static_cast<int32_t>(length), 0);
 		}
 
 		// Erase affected lines
-		_lines.erase(_lines.cbegin() + cursorFrom.line, _lines.cbegin() + cursorTo.line);
+		_lines.erase(_lines.cbegin() + cursorFrom.line, _lines.cbegin() + endLine + 1uz);
 		_text.erase(cursorFrom.position, cursorTo.position - cursorFrom.position);
 
 		// Re-layout
-		auto newText = fig::string_view { _text.data() + position, static_cast<size_t>(endPosition - length) };
+		auto newText = fig::string_view { _text.data() + startPosition, static_cast<size_t>(endPosition - length) };
 		auto newLines = LayoutParagraph(newText);
 
 		if (not newLines.empty())
@@ -525,6 +541,7 @@ namespace fig::gui
 				_lines.insert(_lines.cbegin() + cursorFrom.line + i, std::move(newLines[i]));
 		}
 
+		_bInvalidated = true;
 		SetCursor(cursorFrom.position);
 		Deselect();
 		return true;
@@ -697,10 +714,10 @@ namespace fig::gui
 				.eol = true,
 				.dirty = true,
 			});
+			_text = text;
 		}
 		else
 		{
-
 			auto cursor = GetCursor();
 			auto length = text.length();
 			_text.insert_range(_text.cbegin() + cursor.position, text);
@@ -730,7 +747,7 @@ namespace fig::gui
 				}
 
 				auto text = fig::string_view { _text.data() + (*itFirst).position, static_cast<size_t>((*itLast).position + (*itLast).length - (*itFirst).position) };
-				auto itInsert = _lines.erase(itFirst, itLast);
+				auto itInsert = _lines.erase(itFirst, ++itLast);
 
 				auto newLines = LayoutParagraph(text);
 				for (size_t i = 0uz; i < newLines.size(); ++i)
@@ -742,5 +759,22 @@ namespace fig::gui
 			}
 			break;
 		}
+
+		for (auto& line : _lines)
+		{
+			if (line.ttf_text.empty())
+			{
+				assert(line.position >= 0 and line.length >= 0 and line.position + line.length <= _text.size());
+				line.ttf_text = fig::sdl::Text(_pTextEngine.get(), _pFont, _text.data() + line.position, line.length);
+			}
+		}
+	}
+
+	fig::observer_ptr<TTF_Text> TTFTextBody::GetRenderedText() noexcept
+	{
+		if (_lines.empty())
+			return nullptr;
+
+		return _lines[0].ttf_text.get(); //! @temp
 	}
 }

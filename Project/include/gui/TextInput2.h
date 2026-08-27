@@ -108,12 +108,12 @@ namespace fig::gui
 		void Autosize();
 		void DidChange();
 
-		inline bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
+//		inline bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
 		inline bool IsMultiline() const noexcept { return _flags.IsSet(Flag::Multi) && not IsPassword(); }
 		inline bool IsPassword() const noexcept { return _flags.IsSet(Flag::Password); }
 		inline bool IsAutosized() const noexcept { return _flags.IsSet(Flag::Autosize); }
 
-		TTF_Text* GetRenderedText();
+		fig::observer_ptr<TTF_Text> GetRenderedText();
 		void UpdatePassword();
 		int32_t ConvertToPasswordPosition(int32_t position);
 		int32_t ConvertFromPasswordPosition(int32_t position);
@@ -145,8 +145,8 @@ namespace fig::gui
 
 		// Selection
 		bool _bIsHighlighting = false;
-		int highlight_start = -1;
-		int highlight_end = -1;
+//		int highlight_start = -1;
+//		int highlight_end = -1;
 
 		// IME composition
 		int composition_start = -1;
