@@ -8,10 +8,11 @@ namespace fig::gui
 	struct TTFTextLine
 	{
 		fig::sdl::Text ttf_text;
+
 		int32_t position; // in bytes
 		int32_t length;
-		bool eol { false };
-		bool dirty { false };
+		bool eol {}; // End of paragraph
+		bool dirty {};
 	};
 
 	struct TTFCursor
@@ -20,8 +21,6 @@ namespace fig::gui
 		int32_t position { -1 }; // absolute
 		int32_t offset { -1 }; // relative to pText
 		int32_t line { 0 };
-
-		constexpr bool valid() const noexcept { return (bool)pText and position >= 0 and offset >= 0; }
 	};
 
 	class TTFTextBody
@@ -42,7 +41,6 @@ namespace fig::gui
 		int32_t GetLineHeight() const noexcept { return _lineHeight; }
 
 		bool IsWordWrapping() const noexcept { return _wrapWidth > 0; }
-		void Invalidate();
 
 		void Render(fig::renderer_ptr pRenderer);
 
@@ -52,6 +50,7 @@ namespace fig::gui
 		TTFCursor GetCursor() const noexcept;
 		int32_t GetCursorPosition() const noexcept { return _cursor; }
 		TTFCursor GetCursorAt(int32_t index) const noexcept;
+		TTFCursor GetCursorAt(int32_t x, int32_t y) const noexcept;
 		TTFCursor GetLineCursor(size_t line_index) const noexcept;
 
 		int32_t MoveCursor(int direction) noexcept;
@@ -69,9 +68,10 @@ namespace fig::gui
 		void Deselect() noexcept;
 		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
 		std::pair<int32_t, int32_t> GetSelection() const noexcept { return std::make_pair(highlight_start, highlight_end); }
+		std::vector<fig::rectf> GetHighlights() const noexcept;
+		fig::rectf GetCursorRect() const noexcept;
 
 		bool Delete();
-		bool Delete(int32_t from, int32_t length);
 		bool DeleteSelection();
 		bool DeleteToNextWord();
 		bool DeleteToEndOfLine();
@@ -87,10 +87,14 @@ namespace fig::gui
 		void Clear();
 
 	private:
-		void LayoutAll();
+		void Insert(int32_t position, fig::string_view text);
+		bool Delete(int32_t from, int32_t length);
 		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text);
 		bool GetSelection(int32_t& marker, int32_t& length) const noexcept;
 		void Relayout();
+		bool IsEOL(const TTFTextLine& line) const noexcept;
+
+		void InvalidateAt(int32_t position, int32_t length) noexcept;
 	
 		fig::text_engine_ptr _pTextEngine;
 		fig::observer_ptr<TTF_Font> _pFont;

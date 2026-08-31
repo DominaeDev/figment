@@ -88,22 +88,13 @@ namespace fig::gui
 
 		if (_bFocused)
 		{
-			int32_t cursor_pos = ConvertToPasswordPosition(_body.GetCursorPosition());
+			int32_t cursor_pos = ConvertToPasswordPosition(_body.GetCursorPosition()); //! @todo
 
-			/* Calculate the cursor rect, used for positioning candidates */
-			TTF_SubString cursor;
-			if (TTF_GetTextSubString(GetRenderedText(), cursor_pos, &cursor))
-			{
-				auto& rect = GetRect();
-				fig::rectf cursor_rect = to_rectf(cursor.rect);
-				cursor_rect.x += rect.x + GetMarginLeft();
-				cursor_rect.y += rect.y + GetMarginTop();
-				cursor_rect.w = 1.0f;
-				cursor_rect.h = std::max(cursor_rect.h, (float)TTF_GetFontLineSkip(_pFont));
-				SDL_copyp(&_cursor_rect, &cursor_rect);
-
-				UpdateTextInputArea();
-			}
+			auto& rect = GetRect();
+			_cursor_rect = _body.GetCursorRect();
+			_cursor_rect.x += rect.x + GetMarginLeft();
+			_cursor_rect.y += rect.y + GetMarginTop();
+			UpdateTextInputArea();
 		}
 	}
 
@@ -154,24 +145,23 @@ namespace fig::gui
 		}
 
 		// Draw highlight(s) 
-		int marker, length;
-		if (GetHighlightExtents(&marker, &length))
+		if (_body.HasSelection())
 		{
 			if (IsPassword())
 			{
-				int utf8_text_start = BytesUTF8Length(_body.GetText().c_str(), marker);
-				int utf8_text_end = BytesUTF8Length(_body.GetText().c_str(), marker + length);
-				marker = UTF8ByteLength(_pPassword->text, utf8_text_start);
-				length = UTF8ByteLength(_pPassword->text, utf8_text_end) - marker;
+				//! @todo
+//				auto [start, end] = _body.GetSelection();
+//				int utf8_text_start = BytesUTF8Length(_body.GetText().c_str(), start);
+//				int utf8_text_end = BytesUTF8Length(_body.GetText().c_str(), end);
+//				marker = UTF8ByteLength(_pPassword->text, utf8_text_start);
+//				length = UTF8ByteLength(_pPassword->text, utf8_text_end) - start;
 			}
 
-			TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(GetRenderedText(), marker, length, NULL);
-			if (pHighlights)
+			if (auto highlights = _body.GetHighlights(); not highlights.empty())
 			{
 				SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
-				for (int i = 0; pHighlights[i]; ++i)
+				for (auto& highlight_rect : highlights)
 				{
-					fig::rectf highlight_rect = to_rectf(pHighlights[i]->rect);
 					highlight_rect.w = std::max(highlight_rect.w, 3.0f);
 					highlight_rect.x += rect.x + GetMarginLeft();
 					highlight_rect.y += rect.y + GetMarginTop();
@@ -179,7 +169,6 @@ namespace fig::gui
 					ApplyScroll(highlight_rect);
 					SDL_RenderFillRect(pRenderer, &highlight_rect);
 				}
-				SDL_free(pHighlights);
 			}
 		}
 
@@ -761,9 +750,9 @@ namespace fig::gui
 
 	void TextInput2::MoveCursorIndex(int32_t direction)
 	{
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.MoveCursor(direction);
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::OnMoveCursor(int32_t last_position)
@@ -790,7 +779,7 @@ namespace fig::gui
 			else
 				end = curr;
 
-			_body.Select(SDL_min(start, end), SDL_max(start, end));
+			_body.Select(start, end);
 		}
 
 		ResetCursorBlink();
@@ -811,9 +800,9 @@ namespace fig::gui
 		if (not IsMultiline())
 			return;
 
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.MoveCursorUp();
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::MoveCursorDown()
@@ -821,51 +810,51 @@ namespace fig::gui
 		if (not IsMultiline())
 			return;
 
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.MoveCursorDown();
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::MoveCursorBeginningOfLine()
 	{
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.MoveCursorBeginningOfLine();
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::MoveCursorEndOfLine()
 	{
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.MoveCursorEndOfLine();
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::MoveCursorBeginning()
 	{
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.SetCursor(0);
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::MoveCursorEnd()
 	{
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.SetCursor(static_cast<int32_t>(_body.GetText().length()));
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::MoveCursorToPriorWord()
 	{
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.MoveCursorToPriorWord();
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::MoveCursorToNextWord()
 	{
-		auto last_cursor = _body.GetCursor();
+		auto last_cursor = _body.GetCursorPosition();
 		_body.MoveCursorToNextWord();
-		OnMoveCursor(last_cursor.position);
+		OnMoveCursor(last_cursor);
 	}
 
 	void TextInput2::Backspace()
@@ -998,30 +987,26 @@ namespace fig::gui
 		if (!_bFocused)
 			SetFocus(true);
 
-		TTF_SubString substring;
 		int textX = x - rect.x + _scroll.x;
 		int textY = y - rect.y + _scroll.y;
-		if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
+		auto pos = _body.GetCursorAt(textX, textY).position;
+		if (IsPassword()) //! @ todo
 		{
-			int32_t pos = GetCursorTextIndex(textX, &substring);
-//			if (IsPassword()) //! @ todo
-//			{
-//				pos = ConvertFromPasswordPosition(pos);
-//				if (TTF_GetTextSubString(_pText, pos, &substring))
-//					pos = GetCursorTextIndex(textX, &substring);
-//			}
-			if (IsShiftDown())
-			{
-				auto last_cursor = _body.GetCursor();
-				SetCursorPosition(pos);
-				OnMoveCursor(last_cursor.position);
-			}
-			else
-			{
-				SetCursorPosition(pos);
-				_bIsHighlighting = true;
-				_body.Select(_body.GetCursorPosition(), -1);
-			}
+			pos = ConvertFromPasswordPosition(pos);
+//			if (TTF_GetTextSubString(_pText, pos, &substring))
+//				pos = GetCursorTextIndex(textX, &substring);
+		}
+		if (IsShiftDown())
+		{
+			auto last_cursor = _body.GetCursorPosition();
+			SetCursorPosition(pos);
+			OnMoveCursor(last_cursor);
+		}
+		else
+		{
+			SetCursorPosition(pos);
+			_bIsHighlighting = true;
+			_body.Select(pos, -1);
 		}
 
 		return true;
@@ -1035,24 +1020,20 @@ namespace fig::gui
 		if (_bIsHighlighting)
 		{
 			/* Set the highlight position */
-			TTF_SubString substring;
 			int textX = x - rect.x + _scroll.x;
 			int textY = y - rect.y + _scroll.y;
-			if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
+			auto pos = _body.GetCursorAt(textX, textY).position;
+			if (IsPassword()) //! @todo
 			{
-				int32_t pos = GetCursorTextIndex(textX, &substring);
-//				if (IsPassword()) //! @todo
-//				{
-//					pos = ConvertFromPasswordPosition(pos);
-//					if (TTF_GetTextSubString(_pText, pos, &substring))
-//						pos = GetCursorTextIndex(textX, &substring);
-//				}
-
-				SetCursorPosition(pos);
-				_body.Select(_body.GetSelection().first, _body.GetCursorPosition());
-
-				bHandled = true;
+				pos = ConvertFromPasswordPosition(pos);
+//				if (TTF_GetTextSubString(_pText, pos, &substring))
+//					pos = GetCursorTextIndex(textX, &substring);
 			}
+
+			SetCursorPosition(pos);
+			_body.Select(_body.GetSelection().first, _body.GetCursorPosition());
+
+			bHandled = true;
 		}
 
 
@@ -1067,7 +1048,6 @@ namespace fig::gui
 				PushEvent(UserEvent::PushCursor, Cursor::Caret);
 			else
 				PushEvent(UserEvent::PopCursor, Cursor::Caret);
-			//Global::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
 			bHandled = true;
 		}
 
