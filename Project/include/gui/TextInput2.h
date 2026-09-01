@@ -3,13 +3,27 @@
 #include <functional>
 
 #include "gui/Control.h"
-#include "gui/TTFTextBody.h"
 #include "util/UndoStack.h"
 
 namespace fig::gui
 {
 	class TextInput2 : public Control
 	{
+		struct TTFTextLine
+		{
+			fig::sdl::Text ttf_text;
+
+			int32_t position; // in bytes
+			int32_t length;
+			bool eol {}; // End of paragraph
+		};
+
+		struct TTFCursor
+		{
+			int32_t position {}; // absolute
+			int32_t offset {}; // relative to pText
+			int32_t line {};
+		};
 	public:
 		using TextChangedCallback = std::function<void(fig::string_view)>;
 		using EnterPressedCallback = std::function<void(fig::string_view)>;
@@ -33,18 +47,27 @@ namespace fig::gui
 		void SetEnterPressedCallback(EnterPressedCallback cb);
 		void SetMinRows(int32_t rows);
 		void SetMaxRows(int32_t rows);
-
-		fig::string GetText() const;
-
+		void SetTextWrapWidth(int32_t width);
 		void SetFocus(bool focus);
+		void SetFont(FontFace fontFace, double ptSize) noexcept;
+
+		const fig::string& GetText() const noexcept { return _text; }
+		int32_t GetTextWrapWidth() const noexcept;
+		size_t GetLineCount() const noexcept;
+		int32_t GetLineHeight() const noexcept { return _lineHeight; }
+
+
+		void Select(int32_t start, int32_t end) noexcept;
+		void SelectAll() noexcept;
+		void Deselect() noexcept;
+		std::pair<int32_t, int32_t> GetSelection() const noexcept { return std::make_pair(highlight_start, highlight_end); }
+		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
+
+		bool Copy();
+		bool Cut();
+		bool Paste();
 		void Clear();
 
-		void SelectAll();
-		void Deselect();
-		bool DeleteHighlight();
-		void Copy();
-		void Cut();
-		void Paste();
 		void Undo();
 		void Redo();
 
@@ -59,7 +82,6 @@ namespace fig::gui
 		virtual void OnText(fig::string_view text) {};
 
 	private:
-		void Insert(fig::string_view text);
 		void DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y);
 		void DrawPlaceholder(fig::renderer_ptr pRenderer, int x, int y);
 		void DrawCursor(fig::renderer_ptr pRenderer);
@@ -73,29 +95,41 @@ namespace fig::gui
 		void CancelComposition();
 		void ResetComposition();
 		void UpdateTextInputArea();
+
+		int32_t SetCursor(int32_t index) noexcept;
+		int32_t SetCursor(fig::point position) noexcept;
+
+		void Insert(fig::string_view text);
+		bool Delete();
+		bool DeleteSelection();
+		bool DeleteToNextWord();
+		bool DeleteToEndOfLine();
+		bool DeleteToEnd();
+		bool Backspace();
+		bool BackspaceToPriorWord();
+		bool BackspaceToBeginning();
+		bool BackspaceToBeginningOfLine();
+
+		TTFCursor GetCursor() const noexcept;
+		int32_t GetCursorPosition() const noexcept { return _cursor; }
+		TTFCursor GetCursorAt(int32_t index) const noexcept;
+		TTFCursor GetCursorAt(int32_t x, int32_t y) const noexcept;
+		TTFCursor GetLineCursor(size_t line_index) const noexcept;
+
+		int32_t MoveCursor(int32_t direction) noexcept;
+		int32_t MoveCursorLeft() noexcept;
+		int32_t MoveCursorRight() noexcept;
+		int32_t MoveCursorUp() noexcept;
+		int32_t MoveCursorDown() noexcept;
+		int32_t MoveCursorBeginningOfLine() noexcept;
+		int32_t MoveCursorEndOfLine() noexcept;
+		int32_t MoveCursorToPriorWord() noexcept;
+		int32_t MoveCursorToNextWord() noexcept;
+		int32_t MoveCursorBeginning() noexcept;
+		int32_t MoveCursorEnd() noexcept;
 		void OnMoveCursor(int32_t last_position);
 
-		void SetCursorPosition(int32_t position);
-		void MoveCursorIndex(int32_t direction);
-		void MoveCursorLeft();
-		void MoveCursorRight();
-		void MoveCursorUp();
-		void MoveCursorDown();
-		void MoveCursorToPriorWord();
-		void MoveCursorToNextWord();
-		void MoveCursorBeginningOfLine();
-		void MoveCursorEndOfLine();
-		void MoveCursorBeginning();
-		void MoveCursorEnd();
-
-		void Backspace();
-		void BackspaceToBeginning();
-		void BackspaceToBeginningOfLine();
-		void BackspaceToPriorWord();
-		void DeleteToEnd();
-		void DeleteToEndOfLine();
-		void DeleteToNextWord();
-		void Delete();
+		fig::rectf GetCursorRect() const noexcept;
 		void ResetCursorBlink();
 
 		bool HandleMouseDown(int x, int y);
@@ -108,23 +142,38 @@ namespace fig::gui
 		void Autosize();
 		void DidChange();
 
-//		inline bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
-		inline bool IsMultiline() const noexcept { return _flags.IsSet(Flag::Multi) && not IsPassword(); }
-		inline bool IsPassword() const noexcept { return _flags.IsSet(Flag::Password); }
-		inline bool IsAutosized() const noexcept { return _flags.IsSet(Flag::Autosize); }
+		bool IsMultiline() const noexcept { return _flags.IsSet(Flag::Multi) && not IsPassword(); }
+		bool IsPassword() const noexcept { return _flags.IsSet(Flag::Password); }
+		bool IsAutosized() const noexcept { return _flags.IsSet(Flag::Autosize); }
+		bool IsWordWrapping() const noexcept { return IsMultiline() and _wrapWidth > 0; }
+
+		// Layout
+		void Insert(int32_t position, fig::string_view text);
+		bool Delete(int32_t from, int32_t length);
+		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text);
+		bool GetSelection(int32_t& marker, int32_t& length) const noexcept;
+		void RelayoutAll();
+		bool IsEOL(const TTFTextLine& line) const noexcept;
 
 		fig::observer_ptr<TTF_Text> GetRenderedText();
+		std::vector<fig::rectf> GetHighlights() const noexcept;
+
+		// Password
 		void UpdatePassword();
-		int32_t ConvertToPasswordPosition(int32_t position);
-		int32_t ConvertFromPasswordPosition(int32_t position);
+		int32_t ConvertToPasswordPosition(int32_t position) const;
+		int32_t ConvertFromPasswordPosition(int32_t position) const;
 
 	protected:
+		fig::string _text;
+		int32_t _lineHeight {};
+		int32_t _wrapWidth {};
+		std::vector<TTFTextLine> _lines;
+		bool _bInvalidated { false };
+
 		fig::observer_ptr<TTF_Font> _pFont;
 		fig::observer_ptr<TTF_Text> _pPassword;
 		fig::observer_ptr<TTF_Text> _pPlaceholder;
 		size_t _lastLength = 0uz;
-
-		TTFTextBody _body;
 
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;
@@ -138,15 +187,15 @@ namespace fig::gui
 		EnterPressedCallback _pOnEnter = nullptr;
 
 		// Cursor
-//		int _cursor = 0;
+		int32_t _cursor = 0;
 		bool _cursor_visible = false;
 		uint64_t _last_cursor_change = 0ULL;
 		fig::rectf _cursor_rect {};
 
 		// Selection
+		int32_t highlight_start = -1;
+		int32_t highlight_end = -1;
 		bool _bIsHighlighting = false;
-//		int highlight_start = -1;
-//		int highlight_end = -1;
 
 		// IME composition
 		int composition_start = -1;

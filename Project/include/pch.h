@@ -22,6 +22,7 @@
 	// Undefine troublesome macros
 	#undef LoadImage
 	#undef DrawText
+	#undef SetCursor
 	
 	#define PLATFORM_WINDOWS 1
 
