@@ -337,11 +337,11 @@ namespace fig::gui
 		{
 			if (IsPassword())
 			{
-				auto [start, end] = GetSelection();
-				int utf8_text_start = BytesUTF8Length(_text.c_str(), start);
-				int utf8_text_end = BytesUTF8Length(_text.c_str(), end);
-				marker = UTF8ByteLength(_pPassword->text, utf8_text_start);
-				length = UTF8ByteLength(_pPassword->text, utf8_text_end) - start;
+	//			auto [start, end] = GetSelection();
+	//			int utf8_text_start = BytesUTF8Length(_text.c_str(), start);
+	//			int utf8_text_end = BytesUTF8Length(_text.c_str(), end);
+//				marker = UTF8ByteLength(_pPassword->text, utf8_text_start);
+//				length = UTF8ByteLength(_pPassword->text, utf8_text_end) - start;
 			}
 			else if (auto highlights = GetHighlights(); not highlights.empty())
 			{
