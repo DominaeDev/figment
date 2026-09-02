@@ -10,6 +10,7 @@ static int UTF8ByteLength(const char* text, int num_codepoints)
 {
 	if (!text)
 		return 0;
+
 	const char* start = text;
 	while (num_codepoints > 0)
 	{
@@ -288,22 +289,6 @@ namespace fig::gui
 		clippingRect.h = std::min(clippingRect.h, lineSkip * maxRows);
 		SDL_SetRenderClipRect(pRenderer, &clippingRect);
 
-		if (_bInvalidated)
-		{
-			_bInvalidated = false;
-
-			// Create text objects
-			for (auto& line : _lines)
-			{
-				if (line.ttf_text.empty())
-				{
-					assert(line.position >= 0 and line.length >= 0 and line.position + line.length <= _text.size());
-					line.ttf_text = fig::sdl::Text(GetSDLTextEngine(), _pFont, _text.data() + line.position, line.length);
-					TTF_SetTextWrapWhitespaceVisible(line.ttf_text.get(), true);
-				}
-			}
-		}
-
 		// Scroll to cursor
 		if (_bFocused)
 		{
@@ -365,7 +350,10 @@ namespace fig::gui
 			for (size_t i = 0uz; i < _lines.size(); ++i)
 			{
 				auto& line = _lines[i];
-				if (line.ttf_text->text)
+
+				if (_composition_cursor_length > 0 and _composition_line == i and not _composition_text.empty())
+					DrawText(pRenderer, _composition_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
+				else if (line.ttf_text->text)
 					DrawText(pRenderer, line.ttf_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
 			}
 		}
@@ -374,10 +362,10 @@ namespace fig::gui
 
 		if (_bFocused)
 		{
-			if (composition_length > 0)
+			if (_composition_length > 0)
 				DrawComposition(pRenderer);
 
-			if (candidates)
+			if (_candidates)
 				DrawCandidates(pRenderer);
 
 			if (_cursor_visible)
@@ -418,7 +406,7 @@ namespace fig::gui
 
 	void TextInput2::DrawCursor(fig::renderer_ptr pRenderer)
 	{
-		if (composition_length > 0)
+		if (_composition_length > 0)
 		{
 			DrawCompositionCursor(pRenderer);
 			return;
@@ -428,24 +416,6 @@ namespace fig::gui
 		ApplyScroll(rect);
 		SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
 		SDL_RenderFillRect(pRenderer, &rect);
-	}
-
-	bool TextInput2::GetHighlightExtents(int* marker, int* length)
-	{
-		return false;
-		/*
-		if (highlight_start >= 0 and highlight_end >= 0)
-		{
-			int marker1 = SDL_min(highlight_start, highlight_end);
-			int marker2 = SDL_max(highlight_start, highlight_end);
-			if (marker2 > marker1)
-			{
-				*marker = marker1;
-				*length = marker2 - marker1;
-				return true;
-			}
-		}
-		return false;*/
 	}
 
 	static bool IsShiftDown()
@@ -463,270 +433,283 @@ namespace fig::gui
 
 	void TextInput2::ResetComposition()
 	{
-		composition_start = 0;
-		composition_length = 0;
-		composition_cursor = 0;
-		composition_cursor_length = 0;
+		_composition_start = 0;
+		_composition_length = 0;
+		_composition_cursor = 0;
+		_composition_cursor_length = 0;
+		_composition_text.release();
+		_composition_line = -1;
 	}
 
 	void TextInput2::HandleComposition(const SDL_TextEditingEvent* event)
 	{
-//		DeleteHighlight(); //! @todo
-//
-//		if (composition_length > 0)
-//		{
-//			TTF_DeleteTextString(_pText, composition_start, composition_length);
-//			ResetComposition();
-//		}
-//
-//		int length = (int)SDL_strlen(event->text);
-//		if (length > 0)
-//		{
-//			composition_start = _cursor;
-//			composition_length = length;
-//			TTF_InsertTextString(_pText, composition_start, event->text, composition_length);
-//			if (event->start > 0 or event->length > 0)
-//			{
-//				composition_cursor = UTF8ByteLength(&_pText->text[composition_start], event->start);
-//				composition_cursor_length = UTF8ByteLength(&_pText->text[composition_start + composition_cursor], event->length);
-//			}
-//			else
-//			{
-//				composition_cursor = length;
-//				composition_cursor_length = 0;
-//			}
-//			PushUndo(UndoAction::Write);
-//			DidChange();
-//		}
+		DeleteSelection();
+
+		auto cursor = GetCursor();
+		_composition_line = cursor.line;
+		auto& line = _lines[_composition_line];
+		if (line.ttf_text.empty())
+			return;
+
+		int length = (int)SDL_strlen(event->text);
+		LogLn(std::format("Composition: {}", length));
+		if (length > 0)
+		{
+			if (_composition_text.empty())
+				_composition_text = fig::sdl::Text(GetSDLTextEngine(), _pFont, _text.data(), line.length);
+			if (_composition_length > 0)
+				TTF_DeleteTextString(_composition_text.get(), _composition_start, _composition_length);
+
+			_composition_start = cursor.offset;
+			_composition_length = length;
+			TTF_InsertTextString(_composition_text.get(), _composition_start, event->text, _composition_length);
+			if (event->start > 0 or event->length > 0)
+			{
+				_composition_cursor = UTF8ByteLength(&_composition_text->text[_composition_start], event->start);
+				_composition_cursor_length = UTF8ByteLength(&_composition_text->text[_composition_start + _composition_cursor], event->length);
+			}
+			else
+			{
+				_composition_cursor = length;
+				_composition_cursor_length = 0;
+			}
+		}
+		else
+		{
+			ResetComposition();
+		}
 	}
 
 	void TextInput2::CancelComposition()
 	{
 		ResetComposition();
-
 		SDL_ClearComposition(GetSDLWindow());
 	}
 
 	void TextInput2::DrawComposition(fig::renderer_ptr pRenderer)
 	{
-		//! @todo
-//		/* Draw an underline under the composed text */
-//		int font_height = TTF_GetFontHeight(_pFont);
-//		TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_pText, composition_start, composition_length, NULL);
-//		if (substrings)
-//		{
-//			for (int i = 0; substrings[i]; ++i)
-//			{
-//				fig::rectf rect;
-//				SDL_RectToFRect(&substrings[i]->rect, &rect);
-//				rect.x += rect.x;
-//				rect.y += (rect.y + font_height);
-//				rect.h = 1.0f;
-//				SDL_RenderFillRect(pRenderer, &rect);
-//			}
-//			SDL_free(substrings);
-//		}
-//
-//		/* Thicken the underline under the active clause in the composed text */
-//		if (composition_cursor_length > 0)
-//		{
-//			substrings = TTF_GetTextSubStringsForRange(_pText, composition_start + composition_cursor, composition_cursor_length, NULL);
-//			if (substrings)
-//			{
-//				for (int i = 0; substrings[i]; ++i)
-//				{
-//					fig::rectf rect;
-//					SDL_RectToFRect(&substrings[i]->rect, &rect);
-//					rect.x += rect.x;
-//					rect.y += (rect.y + font_height) - 1;
-//					rect.h = 8.0f;
-//					SDL_RenderFillRect(pRenderer, &rect);
-//				}
-//				SDL_free(substrings);
-//			}
-//		}
+		auto clientRect = GetClientRect();
+		auto fgColor = GetForegroundColor();
+
+		/* Draw an underline under the composed text */
+		int font_height = TTF_GetFontHeight(_pFont);
+		TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_composition_text.get(), _composition_start, _composition_length, NULL);
+		if (substrings)
+		{
+			for (int i = 0; substrings[i]; ++i)
+			{
+				fig::rectf line_rect;
+				SDL_RectToFRect(&substrings[i]->rect, &line_rect);
+				line_rect.x += clientRect.x;
+				line_rect.y += clientRect.y + _composition_line * _lineHeight + font_height;
+				line_rect.h = 1.0f;
+				ApplyScroll(line_rect);
+				SDL_SetRenderDrawColor(pRenderer, fgColor.r, fgColor.g, fgColor.b, 0xFF);
+				SDL_RenderFillRect(pRenderer, &line_rect);
+			}
+			SDL_free(substrings);
+		}
+
+		/* Thicken the underline under the active clause in the composed text */
+		if (_composition_cursor_length > 0)
+		{
+			substrings = TTF_GetTextSubStringsForRange(_composition_text.get(), _composition_start + _composition_cursor, _composition_cursor_length, NULL);
+			if (substrings)
+			{
+				for (int i = 0; substrings[i]; ++i)
+				{
+					fig::rectf line_rect;
+					SDL_RectToFRect(&substrings[i]->rect, &line_rect);
+					line_rect.x += clientRect.x;
+					line_rect.y += clientRect.y + _composition_line * _lineHeight + font_height;
+					line_rect.h = 2.0f;
+					ApplyScroll(line_rect);
+
+					SDL_SetRenderDrawColor(pRenderer, fgColor.r, fgColor.g, fgColor.b, 0xFF);
+					SDL_RenderFillRect(pRenderer, &line_rect);
+				}
+				SDL_free(substrings);
+			}
+		}
 	}
 
 	void TextInput2::DrawCompositionCursor(fig::renderer_ptr pRenderer)
 	{
-		//! @todo
-//		if (composition_cursor_length == 0)
-//		{
-//			TTF_SubString cursor;
-//			if (TTF_GetTextSubString(_pText, composition_start + composition_cursor, &cursor))
-//			{
-//				fig::rectf rect = to_rectf(cursor.rect);
-//				rect.x += rect.x;
-//				rect.y += rect.y;
-//				rect.w = 1.0f;
-//
-//				ApplyScroll(rect);
-//				SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
-//				SDL_RenderFillRect(pRenderer, &rect);
-//			}
-//		}
+		auto clientRect = GetClientRect();
+
+		if (_composition_cursor_length == 0)
+		{
+			TTF_SubString cursor;
+			if (TTF_GetTextSubString(_composition_text.get(), _composition_start + _composition_cursor, &cursor))
+			{
+				fig::rectf cursor_rect = to_rectf(cursor.rect);
+				cursor_rect.x += clientRect.x;
+				cursor_rect.y += clientRect.y + _composition_line * _lineHeight;
+				cursor_rect.w = 1.0f;
+
+				ApplyScroll(cursor_rect);
+
+				SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
+				SDL_RenderFillRect(pRenderer, &cursor_rect);
+			}
+		}
 	}
 
 	void TextInput2::ClearCandidates()
 	{
-		if (candidates)
-		{
-			TTF_DestroyText(candidates);
-			candidates = NULL;
-		}
-		selected_candidate_start = 0;
-		selected_candidate_length = 0;
+		if (_candidates)
+			_candidates.release();
+		_selected_candidate_start = 0;
+		_selected_candidate_length = 0;
 	}
 
 	void TextInput2::SaveCandidates(const SDL_Event* event)
 	{
-//		int i;
-//
-//		ClearCandidates();
-//
-//		bool horizontal = event->edit_candidates.horizontal;
-//		int num_candidates = event->edit_candidates.num_candidates;
-//		int selected_candidate = event->edit_candidates.selected_candidate;
-//
-//		/* Calculate the length of the candidates text */
-//		size_t length = 0;
-//		for (i = 0; i < num_candidates; ++i)
-//		{
-//			if (horizontal)
-//			{
-//				if (i > 0)
-//				{
-//					++length;
-//				}
-//			}
-//
-//			length += SDL_strlen(event->edit_candidates.candidates[i]);
-//
-//			if (!horizontal)
-//			{
-//				length += 1;
-//			}
-//		}
-//		if (length == 0)
-//		{
-//			return;
-//		}
-//		++length; /* For null terminator */
-//
-//		char* candidate_text = (char*)SDL_malloc(length);
-//		if (!candidate_text)
-//		{
-//			return;
-//		}
-//
-//		char* dst = candidate_text;
-//		for (i = 0; i < num_candidates; ++i)
-//		{
-//			if (horizontal)
-//			{
-//				if (i > 0)
-//				{
-//					*dst++ = ' ';
-//				}
-//			}
-//
-//			int length = (int)SDL_strlen(event->edit_candidates.candidates[i]);
-//			if (i == selected_candidate)
-//			{
-//				selected_candidate_start = (int)(uintptr_t)(dst - candidate_text);
-//				selected_candidate_length = length;
-//			}
-//			SDL_memcpy(dst, event->edit_candidates.candidates[i], length);
-//			dst += length;
-//
-//			if (!horizontal)
-//			{
-//				*dst++ = '\n';
-//			}
-//		}
-//		*dst = '\0';
-//
-//		candidates = TTF_CreateText(GetSDLTextEngine(), _pFont, candidate_text, 0);
-//		SDL_free(candidate_text);
-//		if (candidates)
-//		{
-//			float r, g, b, a;
-//			TTF_GetTextColorFloat(_pText, &r, &g, &b, &a);
-//			TTF_SetTextColorFloat(candidates, r, g, b, a);
-//		}
-//		else
-//		{
-//			ClearCandidates();
-//		}
+		ClearCandidates();
+
+		bool horizontal = event->edit_candidates.horizontal;
+		int num_candidates = event->edit_candidates.num_candidates;
+		int selected_candidate = event->edit_candidates.selected_candidate;
+
+		/* Calculate the length of the candidates text */
+		size_t length = 0;
+		for (int i = 0; i < num_candidates; ++i)
+		{
+			if (horizontal)
+			{
+				if (i > 0)
+				{
+					++length;
+				}
+			}
+
+			length += SDL_strlen(event->edit_candidates.candidates[i]);
+
+			if (!horizontal)
+			{
+				length += 1;
+			}
+		}
+		if (length == 0)
+		{
+			return;
+		}
+		++length; /* For null terminator */
+
+		char* candidate_text = (char*)SDL_malloc(length);
+		if (!candidate_text)
+		{
+			return;
+		}
+
+		char* dst = candidate_text;
+		for (int i = 0; i < num_candidates; ++i)
+		{
+			if (horizontal)
+			{
+				if (i > 0)
+				{
+					*dst++ = ' ';
+				}
+			}
+
+			int length = (int)SDL_strlen(event->edit_candidates.candidates[i]);
+			if (i == selected_candidate)
+			{
+				_selected_candidate_start = (int)(uintptr_t)(dst - candidate_text);
+				_selected_candidate_length = length;
+			}
+			SDL_memcpy(dst, event->edit_candidates.candidates[i], length);
+			dst += length;
+
+			if (!horizontal)
+			{
+				*dst++ = '\n';
+			}
+		}
+		*dst = '\0';
+
+		_candidates = fig::sdl::Text(GetSDLTextEngine(), _pFont, candidate_text, 0);
+		SDL_free(candidate_text);
+		if (_candidates)
+		{
+			float r, g, b, a;
+			TTF_GetTextColorFloat(_composition_text.get(), &r, &g, &b, &a);
+			TTF_SetTextColorFloat(_candidates.get(), r, g, b, a);
+		}
+		else
+		{
+			ClearCandidates();
+		}
 	}
 
 	void TextInput2::DrawCandidates(fig::renderer_ptr pRenderer)
 	{
-//		SDL_Rect safe_rect;
-//		fig::rectf candidates_rect;
-//		int candidates_w;
-//		int candidates_h;
-//
-//		auto& rect = GetRect();
-//
-//		/* Position the candidate window */
-//		TTF_SubString cursor;
-//		int offset = composition_start;
-//		if (composition_cursor_length > 0)
-//		{
-//			// Place the candidates at the active clause
-//			offset += composition_cursor;
-//		}
-//		if (!TTF_GetTextSubString(_pText, offset, &cursor))
-//			return;
-//
-//		SDL_GetRenderSafeArea(pRenderer, &safe_rect);
-//		TTF_GetTextSize(candidates, &candidates_w, &candidates_h);
-//		candidates_rect.x = toF(rect.x + GetMarginLeft() + cursor.rect.x);
-//		candidates_rect.y = toF(rect.y + GetMarginTop() + cursor.rect.y + cursor.rect.h + 2);
-//		candidates_rect.w = 1.0f + 2.0f + candidates_w + 2.0f + 1.0f;
-//		candidates_rect.h = 1.0f + 2.0f + candidates_h + 2.0f + 1.0f;
-//		if ((candidates_rect.x + candidates_rect.w) > safe_rect.w)
-//		{
-//			candidates_rect.x = (safe_rect.w - candidates_rect.w);
-//			if (candidates_rect.x < 0.0f)
-//			{
-//				candidates_rect.x = 0.0f;
-//			}
-//		}
-//
+		SDL_Rect safe_rect;
+		fig::rectf candidates_rect;
+		int candidates_w;
+		int candidates_h;
+
+		auto rect = GetClientRect();
+
+		/* Position the candidate window */
+		TTF_SubString cursor;
+		int offset = _composition_start;
+		if (_composition_cursor_length > 0)
+		{
+			// Place the candidates at the active clause
+			offset += _composition_cursor;
+		}
+		if (!TTF_GetTextSubString(_composition_text.get(), offset, &cursor))
+			return;
+
+		SDL_GetRenderSafeArea(pRenderer, &safe_rect);
+		TTF_GetTextSize(_candidates.get(), &candidates_w, &candidates_h);
+		candidates_rect.x = toF(rect.x + cursor.rect.x);
+		candidates_rect.y = toF(rect.y + cursor.rect.y + cursor.rect.h + 2);
+		candidates_rect.w = 1.0f + 2.0f + candidates_w + 2.0f + 1.0f;
+		candidates_rect.h = 1.0f + 2.0f + candidates_h + 2.0f + 1.0f;
+		if ((candidates_rect.x + candidates_rect.w) > safe_rect.w)
+		{
+			candidates_rect.x = (safe_rect.w - candidates_rect.w);
+			if (candidates_rect.x < 0.0f)
+			{
+				candidates_rect.x = 0.0f;
+			}
+		}
+
 //		ApplyScroll(candidates_rect);
-//
-//		/* Draw the candidate background */
-//		SDL_SetRenderDrawColor(pRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
-//		SDL_RenderFillRect(pRenderer, &candidates_rect);
-//		SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0xFF);
-//		SDL_RenderRect(pRenderer, &candidates_rect);
-//
-//		/* Draw the candidates */
-//		int x = toI(candidates_rect.x + 3);
-//		int y = toI(candidates_rect.y + 3);
-//		DrawText(pRenderer, candidates, x, y);
-//
-//		/* Underline the selected candidate */
-//		if (selected_candidate_length > 0)
-//		{
-//			int font_height = TTF_GetFontHeight(_pFont);
-//			TTF_SubString** substrings = TTF_GetTextSubStringsForRange(candidates, selected_candidate_start, selected_candidate_length, NULL);
-//			if (substrings)
-//			{
-//				for (int i = 0; substrings[i]; ++i)
-//				{
-//					fig::rectf rect;
-//					SDL_RectToFRect(&substrings[i]->rect, &rect);
-//					rect.x += x;
-//					rect.y += (y + font_height);
-//					rect.h = 1.0f;
-//					SDL_RenderFillRect(pRenderer, &rect);
-//				}
-//				SDL_free(substrings);
-//			}
-//		}
+
+		/* Draw the candidate background */
+		SDL_SetRenderDrawColor(pRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
+		SDL_RenderFillRect(pRenderer, &candidates_rect);
+		SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_RenderRect(pRenderer, &candidates_rect);
+
+		/* Draw the candidates */
+		int x = toI(candidates_rect.x + 3);
+		int y = toI(candidates_rect.y + 3);
+		DrawText(pRenderer, _candidates.get(), x, y);
+
+		/* Underline the selected candidate */
+		if (_selected_candidate_length > 0)
+		{
+			int font_height = TTF_GetFontHeight(_pFont);
+			TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_candidates.get(), _selected_candidate_start, _selected_candidate_length, NULL);
+			if (substrings)
+			{
+				for (int i = 0; substrings[i]; ++i)
+				{
+					fig::rectf rect;
+					SDL_RectToFRect(&substrings[i]->rect, &rect);
+					rect.x += x;
+					rect.y += (y + font_height);
+					rect.h = 1.0f;
+					SDL_RenderFillRect(pRenderer, &rect);
+				}
+				SDL_free(substrings);
+			}
+		}
 	}
 
 #pragma endregion Composition
@@ -1509,12 +1492,12 @@ namespace fig::gui
 
 		case SDL_EVENT_TEXT_EDITING:
 			HandleComposition(&event.edit);
-			break;
+			return EventResult::Handled;
 
 		case SDL_EVENT_TEXT_EDITING_CANDIDATES:
 			ClearCandidates();
-			SaveCandidates(&event);
-			break;
+			SaveCandidates(&event); 
+			return EventResult::Handled;
 
 		default:
 			break;
@@ -1565,7 +1548,7 @@ namespace fig::gui
 		_cursor = 0;
 		highlight_start = -1;
 		highlight_end = -1;
-		_bInvalidated = false;
+		CancelComposition();
 
 		InitUndo();
 		DidChange();
@@ -1712,7 +1695,7 @@ namespace fig::gui
 			auto& undo = *try_undo;
 			_text = undo.text;
 			_lines = LayoutParagraph(_text);
-			_bInvalidated = true;
+			RefreshTexts();
 			SetCursor(undo.cursor_pos);
 			highlight_start = undo.highlight_start;
 			highlight_end = undo.highlight_end;
@@ -1726,7 +1709,7 @@ namespace fig::gui
 			auto& undo = *try_undo;
 			_text = undo.text;
 			_lines = LayoutParagraph(_text);
-			_bInvalidated = true;
+			RefreshTexts();
 			SetCursor(undo.cursor_pos);
 			highlight_start = undo.highlight_start;
 			highlight_end = undo.highlight_end;
@@ -1904,15 +1887,16 @@ namespace fig::gui
 
 	int32_t TextInput2::SetCursor(int32_t index) noexcept
 	{
-		if (composition_length > 0)
+		if (_composition_length > 0)
 		{
 			/* Don't let the cursor be moved into the composition */
-			if (index >= composition_start and index <= (composition_start + composition_length))
+			if (index >= _composition_start and index <= (_composition_start + _composition_length))
 				return _cursor;
 
 			CancelComposition();
 		}
 
+		ResetCursorBlink();
 		_cursor = std::clamp(index, 0, static_cast<int32_t>(_text.length()));
 		return _cursor;
 	}
@@ -1967,7 +1951,7 @@ namespace fig::gui
 		{
 			_text = text;
 			_lines = LayoutParagraph(_text);
-			_bInvalidated = true;
+			RefreshTexts();
 			SetCursor(static_cast<int32_t>(text.size()));
 			return;
 		}
@@ -1999,7 +1983,7 @@ namespace fig::gui
 		_lines.erase(_lines.begin() + paragraphStartLine, _lines.begin() + paragraphEndLine + 1);
 		_lines.insert(_lines.begin() + paragraphStartLine, std::make_move_iterator(newLines.begin()), std::make_move_iterator(newLines.end()));
 
-		_bInvalidated = true;
+		RefreshTexts();
 		SetCursor(position + delta);
 	}
 
@@ -2052,7 +2036,7 @@ namespace fig::gui
 			std::make_move_iterator(newLines.begin()),
 			std::make_move_iterator(newLines.end()));
 
-		_bInvalidated = true;
+		RefreshTexts();
 		SetCursor(from);
 		Deselect();
 		return true;
@@ -2110,6 +2094,14 @@ namespace fig::gui
 			.h = static_cast<float>(_lineHeight),
 		};
 
+		if (not _text.empty() and cursor.line == static_cast<int32_t>(_lines.size()) - 1 and _text.back() == '\n')
+		{
+			rect.x = 0;
+			rect.y += _lineHeight;
+			rect.h = std::max(rect.h, static_cast<float>(_lineHeight));
+			return rect;
+		}
+
 		if (cursor.line <_lines.size())
 		{
 			auto& line = _lines[cursor.line];
@@ -2156,6 +2148,20 @@ namespace fig::gui
 		}
 
 		_lines = std::move(newLines);
-		_bInvalidated = true;
+		RefreshTexts();
+	}
+
+	void TextInput2::RefreshTexts() noexcept
+	{
+		// Create text objects
+		for (auto& line : _lines)
+		{
+			if (line.ttf_text.empty())
+			{
+				assert(line.position >= 0 and line.length >= 0 and line.position + line.length <= _text.size());
+				line.ttf_text = fig::sdl::Text(GetSDLTextEngine(), _pFont, _text.data() + line.position, line.length);
+				TTF_SetTextWrapWhitespaceVisible(line.ttf_text.get(), true);
+			}
+		}
 	}
 }

@@ -56,7 +56,6 @@ namespace fig::gui
 		size_t GetLineCount() const noexcept;
 		int32_t GetLineHeight() const noexcept { return _lineHeight; }
 
-
 		void Select(int32_t start, int32_t end) noexcept;
 		void SelectAll() noexcept;
 		void Deselect() noexcept;
@@ -90,11 +89,11 @@ namespace fig::gui
 		void DrawCompositionCursor(fig::renderer_ptr pRenderer);
 		void ClearCandidates();
 		void SaveCandidates(const SDL_Event* event);
-		bool GetHighlightExtents(int* marker, int* length);
 		void HandleComposition(const SDL_TextEditingEvent* event);
 		void CancelComposition();
 		void ResetComposition();
 		void UpdateTextInputArea();
+		void RefreshTexts() noexcept;
 
 		int32_t SetCursor(int32_t index) noexcept;
 		int32_t SetCursor(fig::point position) noexcept;
@@ -168,7 +167,6 @@ namespace fig::gui
 		int32_t _lineHeight {};
 		int32_t _wrapWidth {};
 		std::vector<TTFTextLine> _lines;
-		bool _bInvalidated { false };
 
 		fig::observer_ptr<TTF_Font> _pFont;
 		fig::observer_ptr<TTF_Text> _pPassword;
@@ -180,8 +178,8 @@ namespace fig::gui
 		Flags _flags {};
 		bool _bAutoSize = false;
 		fig::point _scroll {};
-		int _minRows = 1;
-		int _maxRows = 1;
+		int32_t _minRows = 1;
+		int32_t _maxRows = 1;
 
 		TextChangedCallback _pOnChanged = nullptr;
 		EnterPressedCallback _pOnEnter = nullptr;
@@ -198,14 +196,15 @@ namespace fig::gui
 		bool _bIsHighlighting = false;
 
 		// IME composition
-		int composition_start = -1;
-		int composition_length = -1;
-		int composition_cursor = -1;
-		int composition_cursor_length = -1;
-
-		TTF_Text* candidates {};
-		int selected_candidate_start = -1;
-		int selected_candidate_length = -1;
+		fig::sdl::Text _composition_text {};
+		int32_t _composition_line {};
+		int32_t _composition_start = -1;
+		int32_t _composition_length = -1;
+		int32_t _composition_cursor = -1;
+		int32_t _composition_cursor_length = -1;
+		fig::sdl::Text _candidates {};
+		int32_t _selected_candidate_start = -1;
+		int32_t _selected_candidate_length = -1;
 
 		// Undo
 		enum class UndoAction

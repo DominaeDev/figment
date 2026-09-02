@@ -312,8 +312,8 @@ namespace fig::gui
 				composition_cursor = length;
 				composition_cursor_length = 0;
 			}
-			PushUndo(UndoAction::Write);
-			DidChange();
+//			PushUndo(UndoAction::Write);
+//			DidChange();
 		}
 	}
 
