@@ -1731,7 +1731,7 @@ namespace fig::gui
 			wstring wdots;
 			wdots.resize(length);
 			for (size_t i = 0; i < length; ++i)
-				wdots[i] = L'\u2022'; // Heavy asterisk
+				wdots[i] = L'\u2022'; // Bullet
 			string dots = to_utf8(wdots);
 
 			TTF_SetTextString(_pPassword, toCStr(dots), 0);

@@ -65,12 +65,12 @@ namespace fig::gui
 		pSlider2->SetPosition(500, 50);
 		pSlider2->SetEnabled(false);
 
-		auto pButton = CreateControl<ButtonWithLabel>("Invalidate");
+		auto pButton = CreateControl<ButtonWithLabel>("Button");
 		pButton->SetPosition(100, 100);
 		pButton->SetHeight(35);
 		pButton->SetDelegate([this]() { InvalidateLayout(); });
 
-		auto pButton2 = CreateControl<ButtonWithLabel>("Invalidate");
+		auto pButton2 = CreateControl<ButtonWithLabel>("Button");
 		pButton2->SetPosition(500, 100);
 		pButton2->SetHeight(35);
 		pButton2->SetDelegate([this]() { InvalidateLayout(); });
@@ -139,7 +139,7 @@ namespace fig::gui
 		pTextBox4->SetEnabled(false);
 
 		auto pTextBox5 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Multi });
-		pTextBox5->SetText("Text box (multi)\nHello, world.");
+		pTextBox5->SetText("\u2022 Text box (multi)\u2026\n\u2022 Hello, world.");
 		pTextBox5->SetFixedRows(3);
 		pTextBox5->SetPosition(100, 450);
 

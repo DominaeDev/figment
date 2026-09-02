@@ -37,124 +37,124 @@ static int BytesUTF8Length(const char* text, int num_bytes)
 	return num_codepoints;
 }
 
-static int32_t FindPriorWord(const fig::string& text, int32_t cursor)
+static bool StepLeft(fig::string_view text, int32_t& position)
 {
-	const char* start = &text[cursor];
-	const char* zero = &text[0];
-	const char* curr = start;
-	if (start == zero)
+	if (position <= 0)
+		return false;
+
+	assert(position <= static_cast<int32_t>(text.size()));
+
+	const char* pos = text.data() + position;
+	if (SDL_StepBackUTF8(text.data(), &pos) != SDL_INVALID_UNICODE_CODEPOINT)
+	{
+		position = (int32_t)(std::distance(text.data(), pos));
+		return true;
+	}
+	return false; // Error
+}
+
+static bool StepRight(fig::string_view text, int32_t& position)
+{
+	if (position >= static_cast<int32_t>(text.size()))
+		return false;
+
+	const char* pos = text.data() + position;
+	while (SDL_StepUTF8(&pos, NULL) == SDL_INVALID_UNICODE_CODEPOINT);
+	position = (int32_t)(std::distance(text.data(), pos));
+	return true;
+}
+
+enum CharType 
+{
+	Whitespace,
+	Punctuation,
+	Letter,
+};
+
+static CharType GetCharType(char ch) 
+{
+	if (fig::is_whitespace(ch)) return CharType::Whitespace;
+	if (fig::is_punctuation(ch)) return CharType::Punctuation;
+	return CharType::Letter;
+};
+
+static int32_t FindPriorWord(fig::string_view text, int32_t position)
+{
+	if (position <= 0)
 		return 0;
 
-	enum CharType {
-		Whitespace,
-		Punctuation,
-		Character,
-		Invalid,
-	};
-
-	auto fnCharType = [](char ch) -> CharType {
-		if (fig::is_whitespace(ch)) return CharType::Whitespace;
-		if (fig::is_punctuation(ch)) return CharType::Punctuation;
-		return CharType::Character;
-	};
-
-	auto fnMoveLeft = [text, &fnCharType](const char*& ch) -> CharType {
-		if (SDL_StepBackUTF8(text.data(), &ch) == SDL_INVALID_UNICODE_CODEPOINT)
-			return CharType::Invalid;
-		return fnCharType(ch[0]);
-	};
-
-	auto fnMoveRight = [&fnCharType](const char*& ch) -> CharType {
-		size_t length = SDL_strlen(ch);
-		if (SDL_StepUTF8(&ch, &length) == SDL_INVALID_UNICODE_CODEPOINT)
-			return CharType::Invalid;
-		return fnCharType(ch[0]);
-	};
-
 	// Skip any whitespace first
-	while (curr > zero)
+	int32_t curr = position;
+	while (curr > 0)
 	{
-		CharType charType = fnMoveLeft(curr);
-		if (not fig::is_whitespace(curr[0]))
+		if (not StepLeft(text, curr))
+			break;
+
+		CharType charType = GetCharType(text[curr]);
+		if (charType != CharType::Whitespace)
 		{
-			fnMoveRight(curr);
+			StepRight(text, curr);
 			break;
 		}
 	}
 
 	// Find first position of word
-	if (curr > zero)
+	if (StepLeft(text, curr))
 	{
-		CharType skipType = fnMoveLeft(curr);
-		while (curr > zero)
+		CharType skipType = GetCharType(text[curr]);
+		while (curr > 0)
 		{
-			CharType priorType = fnMoveLeft(curr);
+			if (not StepLeft(text, curr))
+				break;
+			CharType priorType = GetCharType(text[curr]);
 			if (priorType == skipType)
 				continue;
 
-			fnMoveRight(curr);
+			StepRight(text, curr);
 			break;
 		}
 	}
 
-	int length = (int)(uintptr_t)(start - curr);
-	return cursor - length;
+	return curr;
 }
 
-static int32_t FindNextWord(const fig::string& text, int32_t cursor)
+static int32_t FindNextWord(fig::string_view text, int32_t position)
 {
-	size_t length = text.length();
-	const char* start = &text[cursor];
-	const char* end = &text[length];
-	const char* curr = start;
-	if (start == end)
-		return cursor;
+	int32_t curr = position;
+	int32_t length = static_cast<int32_t>(text.size());
+	if (position >= length)
+		return length;
 
-	enum CharType {
-		Whitespace,
-		Punctuation,
-		Character,
-	};
-
-	auto fnCharType = [](char ch) -> CharType {
-		if (fig::is_whitespace(ch)) return CharType::Whitespace;
-		if (fig::is_punctuation(ch)) return CharType::Punctuation;
-		return CharType::Character;
-	};
-
-	auto fnMoveLeft = [text, &fnCharType](const char*& ch) -> CharType {
-		SDL_StepBackUTF8(text.data(), &ch);
-		return fnCharType(ch[0]);
-	};
-
-	auto fnMoveRight = [&fnCharType](const char*& ch) -> CharType {
-		size_t length = SDL_strlen(ch);
-		SDL_StepUTF8(&ch, &length);
-		return fnCharType(ch[0]);
-	};
-
-	CharType startType = fnCharType(start[0]);
+	CharType startType = GetCharType(text[position]);
 	if (startType == CharType::Whitespace)
 	{
-		// On whitespace: only erase whitespace
-		while (curr < end and fig::is_whitespace(curr[0]))
-			fnMoveRight(curr);
-		int length = (int)(uintptr_t)(curr - start);
-		return cursor + length;
+		// Skip to first non-whitespace
+		while (fig::is_whitespace(text[curr]))
+		{
+			if (not StepRight(text, curr))
+				break;
+		}
+		return curr;
 	}
 	else
 	{
-		// Otherwise: skip of same type
+		// Skip similar
 		CharType nextType = startType;
-		while (curr < end and nextType == startType)
-			nextType = fnMoveRight(curr);
+		while (nextType == startType)
+		{
+			if (not StepRight(text, curr) or curr == length)
+				break;
+			nextType = GetCharType(text[curr]);
+		}
 
-		// ..then skip any whitespace
-		while (curr < end and nextType == CharType::Whitespace)
-			nextType = fnMoveRight(curr);
-
-		int length = (int)(uintptr_t)(curr - start);
-		return cursor + length;
+		// Skip whitespace
+		while (curr < length - 1 and nextType == CharType::Whitespace)
+		{
+			if (not StepRight(text, curr) or curr == length)
+				break;
+			nextType = GetCharType(text[curr]);
+		}
+		return curr;
 	}
 }
 
@@ -337,9 +337,9 @@ namespace fig::gui
 		{
 			if (IsPassword())
 			{
-	//			auto [start, end] = GetSelection();
-	//			int utf8_text_start = BytesUTF8Length(_text.c_str(), start);
-	//			int utf8_text_end = BytesUTF8Length(_text.c_str(), end);
+				auto [start, end] = GetSelection();
+				int utf8_text_start = BytesUTF8Length(_text.c_str(), start);
+				int utf8_text_end = BytesUTF8Length(_text.c_str(), end);
 //				marker = UTF8ByteLength(_pPassword->text, utf8_text_start);
 //				length = UTF8ByteLength(_pPassword->text, utf8_text_end) - start;
 			}
@@ -777,11 +777,13 @@ namespace fig::gui
 	{
 		auto last_cursor = _cursor;
 
-		auto cursor = GetCursor();
-		if (direction < 0)
-			SetCursor(cursor.position - 1);
-		else
-			SetCursor(cursor.position + 1);
+		auto position = _cursor;
+		if (direction < 0 and not StepLeft(_text, position))
+			return _cursor;
+		if (direction > 0 and not StepRight(_text, position))
+			return _cursor;
+		
+		SetCursor(position);
 		OnMoveCursor(last_cursor);
 		return _cursor;
 	}
@@ -1078,7 +1080,7 @@ namespace fig::gui
 		int32_t position, length;
 		if (GetSelection(position, length) and Delete(position, length))
 		{
-			PushUndo(UndoAction::Erase);
+			PushUndo(UndoAction::Erase, false);
 			DidChange();
 			return true;
 		}
