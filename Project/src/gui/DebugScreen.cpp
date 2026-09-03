@@ -117,31 +117,35 @@ namespace fig::gui
 		pCheckBox2->SetPosition(500, 250);
 		pCheckBox2->SetEnabled(false);
 
-		auto pTextBox = CreateControl<TextBox>();
-		pTextBox->SetText("Text box");
-		pTextBox->SetPosition(100, 300);
+		auto pTextBox1 = CreateControl<TextBox2>();
+		pTextBox1->SetText("Text box");
+		pTextBox1->SetPosition(100, 300);
 
-		auto pTextBox2 = CreateControl<TextBox>();
+		auto pTextBox2 = CreateControl<TextBox2>();
 		pTextBox2->SetText("Text box");
 		pTextBox2->SetPosition(500, 300);
 		pTextBox2->SetEnabled(false);
 
-		auto pTextBox3 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi });
-		pTextBox3->SetText("Text box (multi)");
-		pTextBox3->SetPlaceholder("Enter some text, please...");
-		pTextBox3->SetFixedRows(3);
+		auto pTextBox3 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Password });
+		pTextBox3->SetText("Password");
 		pTextBox3->SetPosition(100, 350);
 
-		auto pTextBox4 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox::Flags { TextBox::Flag::Multi });
-		pTextBox4->SetText("Text box (multi)");
-		pTextBox4->SetFixedRows(3);
+		auto pTextBox4 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Password });
+		pTextBox4->SetText("Password");
 		pTextBox4->SetPosition(500, 350);
 		pTextBox4->SetEnabled(false);
 
-		auto pTextBox5 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Multi });
-		pTextBox5->SetText("\u2022 Text box (multi)\u2026\n\u2022 Hello, world.");
+		auto pTextBox5 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Multi, TextBox2::Flag::WordWrap });
+		pTextBox5->SetText("Text box (multi)\nHello, World.");
+		pTextBox5->SetPlaceholder("Enter some text, please...");
 		pTextBox5->SetFixedRows(3);
-		pTextBox5->SetPosition(100, 450);
+		pTextBox5->SetPosition(100, 400);
+
+		auto pTextBox6 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Multi });
+		pTextBox6->SetText("Text box (multi)\nHello, World.");
+		pTextBox6->SetFixedRows(3);
+		pTextBox6->SetPosition(500, 400);
+		pTextBox6->SetEnabled(false);
 
 	}
 

@@ -30,8 +30,8 @@ namespace fig::gui
 
 		enum class Flag
 		{
-			Single = 1 << 0,
-			Multi = 1 << 1,
+			Multi = 1 << 0,
+			WordWrap = 1 << 1,
 			Autosize = 1 << 2,
 			Password = 1 << 3,
 			CtrlEnterNewLine = 1 << 4,
@@ -144,7 +144,7 @@ namespace fig::gui
 		bool IsMultiline() const noexcept { return _flags.IsSet(Flag::Multi) && not IsPassword(); }
 		bool IsPassword() const noexcept { return _flags.IsSet(Flag::Password); }
 		bool IsAutosized() const noexcept { return _flags.IsSet(Flag::Autosize); }
-		bool IsWordWrapping() const noexcept { return IsMultiline() and _wrapWidth > 0; }
+		bool IsWordWrapping() const noexcept { return _flags.IsSet({ Flag::WordWrap, Flag::Multi }) and _wrapWidth > 0; }
 
 		// Layout
 		void Insert(int32_t position, fig::string_view text);
@@ -153,8 +153,8 @@ namespace fig::gui
 		bool GetSelection(int32_t& marker, int32_t& length) const noexcept;
 		void RelayoutAll();
 		bool IsEOL(const TTFTextLine& line) const noexcept;
+		bool IsOnLastNewLine() const noexcept;
 
-		fig::observer_ptr<TTF_Text> GetRenderedText();
 		std::vector<fig::rectf> GetHighlights() const noexcept;
 
 		// Password
@@ -171,7 +171,6 @@ namespace fig::gui
 		fig::observer_ptr<TTF_Font> _pFont;
 		fig::observer_ptr<TTF_Text> _pPassword;
 		fig::observer_ptr<TTF_Text> _pPlaceholder;
-		size_t _lastLength = 0uz;
 
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;

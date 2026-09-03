@@ -6,7 +6,7 @@
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ULL };
 
-static int UTF8ByteLength(const char* text, int num_codepoints)
+static int Utf8CodepointsToBytes(const char* text, int num_codepoints)
 {
 	if (!text)
 		return 0;
@@ -21,12 +21,13 @@ static int UTF8ByteLength(const char* text, int num_codepoints)
 	return (int)(uintptr_t)(text - start);
 }
 
-static int BytesUTF8Length(const char* text, int num_bytes)
+static int GetUtf8Codepoints(const char* text, int position)
 {
 	if (!text)
 		return 0;
+
 	const char* start = text;
-	const char* end = text + num_bytes;
+	const char* end = text + position;
 	int num_codepoints = 0;
 	while (text < end)
 	{
@@ -212,14 +213,6 @@ namespace fig::gui
 		TTF_DestroyText(_pPlaceholder);
 	}
 
-	fig::observer_ptr<TTF_Text> TextInput2::GetRenderedText()
-	{
-		if (IsPassword())
-			return _pPassword;
-
-		return _lines.empty() ? nullptr : _lines[0].ttf_text.get(); //! @temp
-	}
-
 	void TextInput2::SetTextWrapWidth(int32_t width)
 	{
 		if (_wrapWidth == width)
@@ -259,8 +252,6 @@ namespace fig::gui
 			_last_cursor_change = now;
 		}
 
-		UpdatePassword();
-
 		if (_bFocused)
 		{
 			auto& rect = GetRect();
@@ -292,43 +283,45 @@ namespace fig::gui
 		// Scroll to cursor
 		if (_bFocused)
 		{
-			if (IsMultiline()) // Multiline (Vertical scrolling)
+			if (IsMultiline()) // Vertical scroll
 			{
 				float cursorY = _cursor_rect.y - clientRect.y;
 				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) >= maxRows)
 					_scroll.y += lineSkip;
 				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) < 0)
 					_scroll.y -= lineSkip;
-				_scroll.x = 0;
 			}
-			else // Single line (Horizontal scrolling)
+			else
+			{
+				_scroll.y = 0;
+			}
+
+			if (not IsWordWrapping()) // Horizontal scroll
 			{
 				constexpr int32_t kScrollStep = 80;
 
-				int maxCursorX = clientRect.w;
-				int textWidth, _;
-				TTF_GetTextSize(GetRenderedText(), &textWidth, &_);
-				int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
-				while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
-					_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
-				while (cursorX > 0 and cursorX - _scroll.x < 0)
-					_scroll.x = std::max(_scroll.x - kScrollStep, 0);
-				_scroll.y = 0;
+				if (auto pText = IsPassword() ? _pPassword.get() : (_lines.empty() ? nullptr : _lines[0].ttf_text.get()))
+				{
+					int maxCursorX = clientRect.w;
+					int textWidth, _;
+					TTF_GetTextSize(pText, &textWidth, &_);
+					int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
+					while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
+						_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
+					while (cursorX > 0 and cursorX - _scroll.x < 0)
+						_scroll.x = std::max(_scroll.x - kScrollStep, 0);
+				}
+			}
+			else
+			{
+				_scroll.x = 0;
 			}
 		}
 
 		// Draw highlight(s) 
 		if (HasSelection())
 		{
-			if (IsPassword())
-			{
-				auto [start, end] = GetSelection();
-				int utf8_text_start = BytesUTF8Length(_text.c_str(), start);
-				int utf8_text_end = BytesUTF8Length(_text.c_str(), end);
-//				marker = UTF8ByteLength(_pPassword->text, utf8_text_start);
-//				length = UTF8ByteLength(_pPassword->text, utf8_text_end) - start;
-			}
-			else if (auto highlights = GetHighlights(); not highlights.empty())
+			if (auto highlights = GetHighlights(); not highlights.empty())
 			{
 				SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
 				for (auto& highlight_rect : highlights)
@@ -343,18 +336,21 @@ namespace fig::gui
 			}
 		}
 
-		if (IsPassword() and _pPassword->text)
-			DrawText(pRenderer, _pPassword, rect.x, rect.y + 8);
-		else if (not (IsPassword() or _text.empty()))
+		if (not _text.empty())
 		{
-			for (size_t i = 0uz; i < _lines.size(); ++i)
+			if (IsPassword())
+				DrawText(pRenderer, _pPassword, 0, 0);
+			else
 			{
-				auto& line = _lines[i];
+				for (size_t i = 0uz; i < _lines.size(); ++i)
+				{
+					auto& line = _lines[i];
 
-				if (_composition_cursor_length > 0 and _composition_line == i and not _composition_text.empty())
-					DrawText(pRenderer, _composition_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
-				else if (line.ttf_text->text)
-					DrawText(pRenderer, line.ttf_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
+					if (_composition_cursor_length > 0 and _composition_line == i and not _composition_text.empty())
+						DrawText(pRenderer, _composition_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
+					else if (line.ttf_text->text)
+						DrawText(pRenderer, line.ttf_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
+				}
 			}
 		}
 		else
@@ -465,8 +461,8 @@ namespace fig::gui
 			TTF_InsertTextString(_composition_text.get(), _composition_start, event->text, _composition_length);
 			if (event->start > 0 or event->length > 0)
 			{
-				_composition_cursor = UTF8ByteLength(&_composition_text->text[_composition_start], event->start);
-				_composition_cursor_length = UTF8ByteLength(&_composition_text->text[_composition_start + _composition_cursor], event->length);
+				_composition_cursor = Utf8CodepointsToBytes(&_composition_text->text[_composition_start], event->start);
+				_composition_cursor_length = Utf8CodepointsToBytes(&_composition_text->text[_composition_start + _composition_cursor], event->length);
 			}
 			else
 			{
@@ -814,9 +810,21 @@ namespace fig::gui
 		if (not IsMultiline())
 			return _cursor;
 
-		auto cursor = GetCursor();
-		if (cursor.line == 0uz)
+		if (_lines.empty())
+			return 0;
+
+		if (IsOnLastNewLine())
+		{
+			auto last_cursor = _cursor;
+			SetCursor(_lines.back().position);
+			OnMoveCursor(last_cursor);
 			return _cursor;
+		}
+
+		auto cursor = GetCursor();
+		if (cursor.line == 0)
+			return _cursor;
+
 
 		auto& curr_line = _lines[cursor.line];
 		TTF_SubString substring;
@@ -839,23 +847,27 @@ namespace fig::gui
 		if (not IsMultiline())
 			return _cursor;
 
+		if (_lines.empty())
+			return 0;
+
 		auto cursor = GetCursor();
 		if (cursor.line + 1uz >= _lines.size())
-			return _cursor;
+			return SetCursor(static_cast<int32_t>(_text.size()));
 
 		auto& curr_line = _lines[cursor.line];
+		auto& next_line = _lines[cursor.line + 1];
 		TTF_SubString substring;
+		int32_t pos = next_line.position;
 		if (TTF_GetTextSubString(curr_line.ttf_text.get(), cursor.offset, &substring))
 		{
 			int32_t x = substring.rect.x;
-			auto& next_line = _lines[cursor.line + 1];
 			if (TTF_GetTextSubStringForPoint(next_line.ttf_text.get(), x, _lineHeight / 2, &substring))
-			{
-				auto last_cursor = _cursor;
-				SetCursor(next_line.position + GetCursorTextIndex(x, &substring));
-				OnMoveCursor(last_cursor);
-			}
+				pos += GetCursorTextIndex(x, &substring);
 		}
+
+		auto last_cursor = _cursor;
+		SetCursor(pos);
+		OnMoveCursor(last_cursor);
 		return _cursor;
 	}
 
@@ -863,6 +875,9 @@ namespace fig::gui
 	{
 		if (_lines.empty())
 			return 0;
+
+		if (IsOnLastNewLine())
+			return _cursor;
 
 		auto last_cursor = _cursor;
 		auto& line = _lines[GetCursor().line];
@@ -874,7 +889,10 @@ namespace fig::gui
 	int32_t TextInput2::MoveCursorEndOfLine() noexcept
 	{
 		if (_lines.empty())
-			return 0;
+			return _cursor;
+
+		if (_cursor == _text.size())
+			return _cursor;
 
 		auto last_cursor = _cursor;
 		auto& line = _lines[GetCursor().line];
@@ -893,6 +911,9 @@ namespace fig::gui
 
 	int32_t TextInput2::MoveCursorToNextWord() noexcept
 	{
+		if (IsPassword())
+			return _cursor;
+
 		auto last_cursor = _cursor;
 		SetCursor(FindNextWord(_text, _cursor));
 		OnMoveCursor(last_cursor);
@@ -922,17 +943,16 @@ namespace fig::gui
 
 		if (_cursor > 0)
 		{
-			const char* start = &_text[_cursor];
-			const char* next = start;
-			SDL_StepBackUTF8(_text.c_str(), &next);
-			int length = (int)((uintptr_t)start - (uintptr_t)next);
-
-			if (Delete(_cursor - length, length))
+			int32_t pos = _cursor;
+			if (StepLeft(_text, pos))
 			{
-				ResetCursorBlink();
-				PushUndo(UndoAction::Erase);
-				DidChange();
-				return true;
+				if (Delete(pos, _cursor - pos))
+				{
+					ResetCursorBlink();
+					PushUndo(UndoAction::Erase);
+					DidChange();
+					return true;
+				}
 			}
 		}
 		return false;
@@ -1088,13 +1108,7 @@ namespace fig::gui
 		int textX = x - rect.x + _scroll.x;
 		int textY = y - rect.y + _scroll.y;
 		auto pos = GetCursorAt(textX, textY).position;
-		if (IsPassword()) //! @ todo
-		{
-			pos = ConvertFromPasswordPosition(pos);
-//			if (TTF_GetTextSubString(_pText, pos, &substring))
-//				pos = GetCursorTextIndex(textX, &substring);
-		}
-
+		
 		if (IsShiftDown())
 		{
 			auto last_cursor = _cursor;
@@ -1122,19 +1136,12 @@ namespace fig::gui
 			int textX = x - rect.x + _scroll.x;
 			int textY = y - rect.y + _scroll.y;
 			auto pos = GetCursorAt(textX, textY).position;
-			if (IsPassword()) //! @todo
-			{
-				pos = ConvertFromPasswordPosition(pos);
-//				if (TTF_GetTextSubString(_pText, pos, &substring))
-//					pos = GetCursorTextIndex(textX, &substring);
-			}
 
 			SetCursor(pos);
 			Select(highlight_start, _cursor);
 
 			bHandled = true;
 		}
-
 
 		// Change cursor
 		fig::point pt = { x, y };
@@ -1520,7 +1527,7 @@ namespace fig::gui
 #pragma endregion Events
 	void TextInput2::OnSize()
 	{
-		if (IsMultiline())
+		if (_flags.IsSet({ Flag::WordWrap, Flag::Multi }))
 		{
 			int width = std::max(GetWidth() - GetMarginHorizontal(), 0);
 			SetTextWrapWidth(width);
@@ -1629,26 +1636,18 @@ namespace fig::gui
 			return;
 
 		size_t length = SDL_utf8strlen(_text.c_str());
-		if (_pPassword->text && _lastLength == length)
-			return;
-
-		_lastLength = length;
 
 		wstring wdots;
-		wdots.resize(length);
-		for (size_t i = 0; i < length; ++i)
-			wdots[i] = L'\u2022'; // Bullet point
-		string dots = to_utf8(wdots);
-
-		TTF_SetTextString(_pPassword, toCStr(dots), 0);
+		wdots.resize(length, L'\u2022');
+		TTF_SetTextString(_pPassword, to_utf8(wdots).data(), 0);
 	}
 
 	int32_t TextInput2::ConvertToPasswordPosition(int32_t position) const
 	{
 		if (IsPassword())
 		{
-			int utf8_position = BytesUTF8Length(_text.c_str(), position);
-			return UTF8ByteLength(_pPassword->text, utf8_position);
+			int utf8_position = GetUtf8Codepoints(_text.c_str(), position);
+			return Utf8CodepointsToBytes(_pPassword->text, utf8_position);
 		}
 		return position;
 	}
@@ -1657,8 +1656,8 @@ namespace fig::gui
 	{
 		if (IsPassword())
 		{
-			int utf8_position = BytesUTF8Length(_pPassword->text, position);
-			return UTF8ByteLength(_text.c_str(), utf8_position);
+			int utf8_position = GetUtf8Codepoints(_pPassword->text, position);
+			return Utf8CodepointsToBytes(_text.c_str(), utf8_position);
 		}
 		return position;
 	}
@@ -1749,7 +1748,7 @@ namespace fig::gui
 	{
 		std::vector<TTFTextLine> result;
 
-		if (not IsWordWrapping())
+		if (not IsMultiline())
 		{
 			size_t newlinePos = text.find('\n', 0);
 			result.emplace_back(TTFTextLine {
@@ -1757,6 +1756,31 @@ namespace fig::gui
 				.length = static_cast<int32_t>(std::min(text.length(), newlinePos)),
 				.eol = true,
 			});
+			return result;
+		}
+
+		if (not IsWordWrapping())
+		{
+			size_t paragraphStart = 0;
+			while (paragraphStart < text.size())
+			{
+				size_t newlinePos = text.find('\n', paragraphStart);
+				size_t paragraphEnd = (newlinePos == fig::string_view::npos) ? text.size() : newlinePos + 1uz;
+				const char* pText = text.data() + paragraphStart;
+
+				result.emplace_back(TTFTextLine {
+					.position = static_cast<int32_t>(pText - text.data()),
+					.length = static_cast<int32_t>(paragraphEnd - paragraphStart),
+					.eol = true,
+				});
+
+				assert(result.back().length > 0);
+
+				if (paragraphEnd >= text.size())
+					break;
+
+				paragraphStart = paragraphEnd;
+			}
 			return result;
 		}
 
@@ -1851,6 +1875,23 @@ namespace fig::gui
 
 	TextInput2::TTFCursor TextInput2::GetCursorAt(int32_t x, int32_t y) const noexcept
 	{
+		if (IsPassword())
+		{
+			TTF_SubString substring;
+			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineHeight / 2, &substring))
+			{
+				int32_t pos = GetCursorTextIndex(x, &substring);
+				pos = ConvertFromPasswordPosition(pos);
+
+				return TTFCursor {
+					.position = pos,
+					.offset = pos,
+					.line = 0,
+				};
+			}
+			return {};
+		}
+
 		if (not _lines.empty())
 		{
 			size_t line_index = static_cast<size_t>(std::clamp(y / _lineHeight, 0, static_cast<int32_t>(_lines.size() - 1)));
@@ -2016,8 +2057,9 @@ namespace fig::gui
 		fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
 		std::vector<TTFTextLine> newLines = LayoutParagraph(paragraphText);
 
-		if (newLines.empty())
+		if (newLines.empty() and false)
 		{
+			assert(false);
 			newLines.emplace_back(TTFTextLine {
 				.position = 0,
 				.length = 0,
@@ -2056,27 +2098,54 @@ namespace fig::gui
 		auto end = std::max(highlight_start, highlight_end);
 
 		std::vector<fig::rectf> highlights;
-		highlights.reserve(_lines.size());
-		for (size_t iLine = 0uz; iLine < _lines.size(); ++iLine)
-		{
-			auto& line = _lines[iLine];
-			if (line.ttf_text.empty())
-				continue;
-			if (end <= line.position or start >= line.position + line.length)
-				continue;
 
-			int32_t pos_start = std::max(line.position, start) - line.position;
-			int32_t pos_end = std::min(line.position + line.length, end) - line.position;
-			if (TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(line.ttf_text.get(), pos_start, pos_end - pos_start, NULL))
+		if (IsPassword())
+		{
+			start = ConvertToPasswordPosition(start);
+			end = ConvertToPasswordPosition(end);
+			if (TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(_pPassword.get(), start, end - start, NULL))
 			{
 				for (int i = 0; pHighlights[i]; ++i)
 				{
 					auto highlight_rect = to_rectf(pHighlights[i]->rect);
 					highlight_rect.w = std::max(highlight_rect.w, 3.0f);
-					highlight_rect.y += iLine * _lineHeight;
+					highlight_rect.y += 0;
 					if (highlight_rect.x <= 1.0f)
+					{
+						highlight_rect.w += highlight_rect.x;
 						highlight_rect.x = 0;
+					}
 					highlights.push_back(highlight_rect);
+				}
+			}
+		}
+		else
+		{
+			highlights.reserve(_lines.size());
+			for (size_t iLine = 0uz; iLine < _lines.size(); ++iLine)
+			{
+				auto& line = _lines[iLine];
+				if (line.ttf_text.empty())
+					continue;
+				if (end <= line.position or start >= line.position + line.length)
+					continue;
+
+				auto pos_start = std::max(line.position, start) - line.position;
+				auto pos_end = std::min(line.position + line.length, end) - line.position;
+				if (TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(line.ttf_text.get(), pos_start, pos_end - pos_start, NULL))
+				{
+					for (int i = 0; pHighlights[i]; ++i)
+					{
+						auto highlight_rect = to_rectf(pHighlights[i]->rect);
+						highlight_rect.w = std::max(highlight_rect.w, 3.0f);
+						highlight_rect.y += iLine * _lineHeight;
+						if (highlight_rect.x <= 1.0f)
+						{
+							highlight_rect.w += highlight_rect.x;
+							highlight_rect.x = 0;
+						}
+						highlights.push_back(highlight_rect);
+					}
 				}
 			}
 		}
@@ -2085,6 +2154,29 @@ namespace fig::gui
 
 	fig::rectf TextInput2::GetCursorRect() const noexcept
 	{
+		if (IsPassword())
+		{
+			auto pos = ConvertToPasswordPosition(_cursor);
+			TTF_SubString substring;
+			TTF_GetTextSubString(_pPassword.get(), pos, &substring);
+			return rectf {
+				.x = static_cast<float>(substring.rect.x),
+				.y = 0,
+				.w = 1.0f,
+				.h = static_cast<float>(_lineHeight),
+			};
+		}
+
+		if (IsOnLastNewLine())
+		{
+			return rectf {
+				.x = 0,
+				.y = static_cast<float>(_lineHeight * _lines.size()),
+				.w = 1.0f,
+				.h = static_cast<float>(_lineHeight),
+			};
+		}
+
 		auto cursor = GetCursor();
 
 		fig::rectf rect {
@@ -2094,23 +2186,12 @@ namespace fig::gui
 			.h = static_cast<float>(_lineHeight),
 		};
 
-		if (not _text.empty() and cursor.line == static_cast<int32_t>(_lines.size()) - 1 and _text.back() == '\n')
-		{
-			rect.x = 0;
-			rect.y += _lineHeight;
-			rect.h = std::max(rect.h, static_cast<float>(_lineHeight));
-			return rect;
-		}
-
 		if (cursor.line <_lines.size())
 		{
 			auto& line = _lines[cursor.line];
 			if (not line.ttf_text.empty())
 			{
 				int32_t cursor_pos = cursor.offset; 
-				if (IsPassword())
-					cursor_pos = ConvertToPasswordPosition(cursor_pos); //! @todo
-
 				TTF_SubString substring;
 				if (TTF_GetTextSubString(line.ttf_text.get(), cursor_pos, &substring))
 				{
@@ -2163,5 +2244,17 @@ namespace fig::gui
 				TTF_SetTextWrapWhitespaceVisible(line.ttf_text.get(), true);
 			}
 		}
+
+		if (IsPassword())
+			UpdatePassword();
+	}
+
+	bool TextInput2::IsOnLastNewLine() const noexcept
+	{
+		// If the cursor is at the end of the string, and the last character is a line break,
+		// treat it as a new line.
+		return _cursor > 0
+			and _cursor == _text.size()
+			and _text.back() == '\n';
 	}
 }
