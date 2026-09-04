@@ -7,44 +7,66 @@
 
 namespace fig::gui
 {
-
 	class TextInput : public Control
 	{
-	public:
-		using TextChangedCallback = std::function<void(fig::string)>;
-		using EnterPressedCallback = std::function<void(fig::string)>;
+		struct TTFTextLine
+		{
+			fig::sdl::Text ttf_text;
 
-		enum class Flag
-		{ 
-			Single				= 1 << 0,
-			Multi				= 1 << 1,
-			Autosize			= 1 << 2,
-			Password			= 1 << 3,
-			CtrlEnterNewLine	= 1 << 4,
+			int32_t position; // in bytes
+			int32_t length;
+			bool eol {}; // End of paragraph
 		};
-		using Flags = EnumFlags<Flag>;
 
-		TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Flags flags = {});
+		struct TTFCursor
+		{
+			int32_t position {}; // absolute
+			int32_t offset {}; // relative to pText
+			int32_t line {};
+		};
+	public:
+		using TextChangedCallback = std::function<void(fig::string_view)>;
+		using EnterPressedCallback = std::function<void(fig::string_view)>;
+
+		enum class Mode
+		{
+			Single = 0,
+			Multiline,
+			MultilineNoWrap,
+			Password,
+			Chat,
+		};
+
+		TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode = TextInput::Mode::Single);
 		~TextInput();
 
 		void SetText(fig::string_view text);
 		void SetPlaceholder(fig::string_view text);
 		void SetTextChangedCallback(TextChangedCallback cb);
 		void SetEnterPressedCallback(EnterPressedCallback cb);
+		void SetTextWrapWidth(int32_t width);
+		void SetFocus(bool focus);
+		void SetFont(FontFace fontFace, double ptSize) noexcept;
+		void EnableAutoSize(bool bEnable) noexcept { _bAutoSize = bEnable; }
 		void SetMinRows(int32_t rows);
 		void SetMaxRows(int32_t rows);
 
-		fig::string GetText() const;
+		const fig::string& GetText() const noexcept { return _text; }
+		int32_t GetTextWrapWidth() const noexcept;
+		size_t GetLineCount() const noexcept;
+		int32_t GetLineHeight() const noexcept { return _lineHeight; }
 
-		void SetFocus(bool focus);
+		void Select(int32_t start, int32_t end) noexcept;
+		void SelectAll() noexcept;
+		void Deselect() noexcept;
+		std::pair<int32_t, int32_t> GetSelection() const noexcept { return std::make_pair(highlight_start, highlight_end); }
+		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
+
+		bool Copy();
+		bool Cut();
+		bool Paste();
 		void Clear();
 
-		void SelectAll();
-		void Deselect();
-		bool DeleteHighlight();
-		void Copy();
-		void Cut();
-		void Paste();
 		void Undo();
 		void Redo();
 
@@ -55,11 +77,10 @@ namespace fig::gui
 		void OnSize() override;
 		void OnPostRender() override;
 		void OnEnabled(bool bEnabled) override;
-		
+
 		virtual void OnText(fig::string_view text) {};
 
 	private:
-		void Insert(fig::string_view text);
 		void DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y);
 		void DrawPlaceholder(fig::renderer_ptr pRenderer, int x, int y);
 		void DrawCursor(fig::renderer_ptr pRenderer);
@@ -68,33 +89,46 @@ namespace fig::gui
 		void DrawCompositionCursor(fig::renderer_ptr pRenderer);
 		void ClearCandidates();
 		void SaveCandidates(const SDL_Event* event);
-		bool GetHighlightExtents(int* marker, int* length);
 		void HandleComposition(const SDL_TextEditingEvent* event);
 		void CancelComposition();
 		void ResetComposition();
-		void OnMoveCursor(int last_cursor);
 		void UpdateTextInputArea();
-		void SetCursorPosition(int position);
-		void MoveCursorIndex(int direction);
-		void MoveCursorLeft();
-		void MoveCursorRight();
-		void MoveCursorUp();
-		void MoveCursorDown();
-		void MoveCursorToPriorWord();
-		void MoveCursorToNextWord();
-		void MoveCursorBeginningOfLine();
-		void MoveCursorEndOfLine();
-		void MoveCursorBeginning();
-		void MoveCursorEnd();
+		void RefreshTexts() noexcept;
 
-		void Backspace();
-		void BackspaceToBeginning();
-		void BackspaceToBeginningOfLine();
-		void BackspaceToPriorWord();
-		void DeleteToEnd();
-		void DeleteToEndOfLine();
-		void DeleteToNextWord();
-		void Delete();
+		int32_t SetCursor(int32_t index) noexcept;
+		int32_t SetCursor(fig::point position) noexcept;
+
+		void Insert(fig::string_view text);
+		bool Delete();
+		bool DeleteSelection();
+		bool DeleteToNextWord();
+		bool DeleteToEndOfLine();
+		bool DeleteToEnd();
+		bool Backspace();
+		bool BackspaceToPriorWord();
+		bool BackspaceToBeginning();
+		bool BackspaceToBeginningOfLine();
+
+		TTFCursor GetCursor() const noexcept;
+		int32_t GetCursorPosition() const noexcept { return _cursor; }
+		TTFCursor GetCursorAt(int32_t index) const noexcept;
+		TTFCursor GetCursorAt(int32_t x, int32_t y) const noexcept;
+		TTFCursor GetLineCursor(size_t line_index) const noexcept;
+
+		int32_t MoveCursor(int32_t direction) noexcept;
+		int32_t MoveCursorLeft() noexcept;
+		int32_t MoveCursorRight() noexcept;
+		int32_t MoveCursorUp() noexcept;
+		int32_t MoveCursorDown() noexcept;
+		int32_t MoveCursorBeginningOfLine() noexcept;
+		int32_t MoveCursorEndOfLine() noexcept;
+		int32_t MoveCursorToPriorWord() noexcept;
+		int32_t MoveCursorToNextWord() noexcept;
+		int32_t MoveCursorBeginning() noexcept;
+		int32_t MoveCursorEnd() noexcept;
+		void OnMoveCursor(int32_t last_position);
+
+		fig::rectf GetCursorRect() const noexcept;
 		void ResetCursorBlink();
 
 		bool HandleMouseDown(int x, int y);
@@ -107,56 +141,70 @@ namespace fig::gui
 		void Autosize();
 		void DidChange();
 
-		inline bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
-		inline bool IsMultiline() const noexcept { return _flags.IsSet(Flag::Multi) && not IsPassword(); }
-		inline bool IsPassword() const noexcept { return _flags.IsSet(Flag::Password); }
-		inline bool IsAutosized() const noexcept { return _flags.IsSet(Flag::Autosize); }
+		bool IsMultiline() const noexcept { return _mode == Mode::Multiline or _mode == Mode::MultilineNoWrap or _mode == Mode::Chat; }
+		bool IsPassword() const noexcept { return _mode == Mode::Password; }
+		bool IsAutosized() const noexcept { return _bAutoSize; }
+		bool IsWordWrapping() const noexcept { return (_mode == Mode::Multiline or _mode == Mode::Chat) and _wrapWidth > 0; }
 
-		TTF_Text* GetRenderedText();
+		// Layout
+		void Insert(int32_t position, fig::string_view text);
+		bool Delete(int32_t from, int32_t length);
+		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text);
+		bool GetSelection(int32_t& marker, int32_t& length) const noexcept;
+		void RelayoutAll();
+		bool IsEOL(const TTFTextLine& line) const noexcept;
+		bool IsOnLastNewLine() const noexcept;
+
+		std::vector<fig::rectf> GetHighlights() const noexcept;
+
+		// Password
 		void UpdatePassword();
-		int32_t ConvertToPasswordPosition(int32_t position);
-		int32_t ConvertFromPasswordPosition(int32_t position);
+		int32_t ConvertToPasswordPosition(int32_t position) const;
+		int32_t ConvertFromPasswordPosition(int32_t position) const;
 
 	protected:
+		fig::string _text;
+		int32_t _lineHeight {};
+		int32_t _wrapWidth {};
+		std::vector<TTFTextLine> _lines;
+		Mode _mode {};
+		bool _bAutoSize = false;
+
 		fig::observer_ptr<TTF_Font> _pFont;
-		fig::observer_ptr<TTF_Text> _pText;
 		fig::observer_ptr<TTF_Text> _pPassword;
 		fig::observer_ptr<TTF_Text> _pPlaceholder;
-		size_t _lastLength = 0uz;
-		
+
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;
-		Flags _flags {};
-		bool _bAutoSize = false;
-		fig::point _scroll {};
-		int _minRows = 1;
-		int _maxRows = 1;
 
-		fig::texture_ptr _pTexture;
-		fig::surface_ptr _pSurface;
+		fig::point _scroll {};
+		int32_t _minRows = 1;
+		int32_t _maxRows = 1;
+
 		TextChangedCallback _pOnChanged = nullptr;
 		EnterPressedCallback _pOnEnter = nullptr;
 
 		// Cursor
-		int _cursor = 0;
+		int32_t _cursor = 0;
 		bool _cursor_visible = false;
 		uint64_t _last_cursor_change = 0ULL;
 		fig::rectf _cursor_rect {};
 
 		// Selection
+		int32_t highlight_start = -1;
+		int32_t highlight_end = -1;
 		bool _bIsHighlighting = false;
-		int highlight_start = -1;
-		int highlight_end = -1;
 
 		// IME composition
-		int composition_start = -1;
-		int composition_length = -1;
-		int composition_cursor = -1;
-		int composition_cursor_length = -1;
-
-		TTF_Text* candidates {};
-		int selected_candidate_start = -1;
-		int selected_candidate_length = -1;
+		fig::sdl::Text _composition_text {};
+		int32_t _composition_line {};
+		int32_t _composition_start = -1;
+		int32_t _composition_length = -1;
+		int32_t _composition_cursor = -1;
+		int32_t _composition_cursor_length = -1;
+		fig::sdl::Text _candidates {};
+		int32_t _selected_candidate_start = -1;
+		int32_t _selected_candidate_length = -1;
 
 		// Undo
 		enum class UndoAction

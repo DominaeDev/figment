@@ -40,10 +40,11 @@ namespace fig::gui
 	template <>
 	fig::observer_ptr<TextBox> Editor::CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows)
 	{
-		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, rows == 1 ? Constants::GUI::TextBoxFontSize : 14.5, TextInput::Flags { rows > 1 ? TextInput::Flag::Multi : TextInput::Flag::Single });
+		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, rows == 1 ? Constants::GUI::TextBoxFontSize : 14.5, rows > 1 ? TextInput::Mode::Multiline : TextInput::Mode::Single );
+
 		pTextBox->SetText(binding.AsString());
 		pTextBox->SetFixedRows(rows);
-		pTextBox->SetTextChangedCallback([binding](const fig::string& text) mutable { binding.Set(text); });
+		pTextBox->SetTextChangedCallback([binding](fig::string_view text) mutable { binding.Set(fig::string { text }); });
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;
 	}

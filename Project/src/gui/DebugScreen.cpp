@@ -9,7 +9,6 @@
 #include "gui/ComboBox.h"
 #include "gui/CheckBox.h"
 #include "gui/TextBox.h"
-#include "gui/TextBox2.h"
 
 namespace fig::gui
 {
@@ -117,31 +116,34 @@ namespace fig::gui
 		pCheckBox2->SetPosition(500, 250);
 		pCheckBox2->SetEnabled(false);
 
-		auto pTextBox1 = CreateControl<TextBox2>();
+		auto pTextBox1 = CreateControl<TextBox>();
 		pTextBox1->SetText("Text box");
 		pTextBox1->SetPosition(100, 300);
 
-		auto pTextBox2 = CreateControl<TextBox2>();
+		auto pTextBox2 = CreateControl<TextBox>();
 		pTextBox2->SetText("Text box");
 		pTextBox2->SetPosition(500, 300);
 		pTextBox2->SetEnabled(false);
 
-		auto pTextBox3 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Password });
+		auto pTextBox3 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextInput::Mode::Password);
 		pTextBox3->SetText("Password");
 		pTextBox3->SetPosition(100, 350);
 
-		auto pTextBox4 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Password });
+		auto pTextBox4 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextInput::Mode::Password);
 		pTextBox4->SetText("Password");
 		pTextBox4->SetPosition(500, 350);
 		pTextBox4->SetEnabled(false);
 
-		auto pTextBox5 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Multi, TextBox2::Flag::WordWrap });
+		auto pTextBox5 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextInput::Mode::Multiline);
 		pTextBox5->SetText("Text box (multi)\nHello, World.");
 		pTextBox5->SetPlaceholder("Enter some text, please...");
-		pTextBox5->SetFixedRows(3);
+//		pTextBox5->SetFixedRows(3);
+		pTextBox5->EnableAutoSize(true);
+		pTextBox5->SetMinRows(3);
+		pTextBox5->SetMaxRows(6);
 		pTextBox5->SetPosition(100, 400);
 
-		auto pTextBox6 = CreateControl<TextBox2>(FontFace::Default, Constants::GUI::DefaultFontSize, TextBox2::Flags { TextBox2::Flag::Multi });
+		auto pTextBox6 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextInput::Mode::Multiline);
 		pTextBox6->SetText("Text box (multi)\nHello, World.");
 		pTextBox6->SetFixedRows(3);
 		pTextBox6->SetPosition(500, 400);

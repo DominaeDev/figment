@@ -51,7 +51,7 @@ namespace fig::gui
 
 		_pNoPassButton = pCenter->CreateControl<ButtonWithLabel>("Sign in");
 		_pNoPassButton->SetHeight(35);
-		_pNoPassButton->SetDelegate([this]() { SignIn(); });
+		_pNoPassButton->SetDelegate([this]() { SignIn(""); });
 
 		_pProfileName = pCenter->CreateControl<StaticText>("", FontFace::Default, 24.0, false);
 		_pProfileName->SetAlignment(TextAlignment::MiddleTop);
@@ -61,12 +61,12 @@ namespace fig::gui
 
 		_pPassword = _pPasswordPanel->CreateControl<PasswordBox>();
 		_pPassword->SetWidth(240);
-		_pPassword->SetEnterPressedCallback([this](fig::string password) { SignIn(); });
+		_pPassword->SetEnterPressedCallback([this](fig::string_view password) { SignIn(password); });
 		_pPassword->SetFocus(true);
 
 		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(Resource::ICON_ARROW_RIGHT, true);
 		_pSignInBtn->SetSize(35, 35);
-		_pSignInBtn->SetDelegate([this]() { SignIn(); });
+		_pSignInBtn->SetDelegate([this]() { SignIn(_pPassword->GetText()); });
 
 		auto pPasswordSizer = _pPasswordPanel->SetSizer<HorizontalSizer>();
 		pPasswordSizer->AddStretchSpacer();
@@ -163,7 +163,7 @@ namespace fig::gui
 		SelectProfile(profiles[toUZ((toI(curr) + step)) % profiles.size()]);
 	}
 
-	bool LoginScreen::SignIn()
+	bool LoginScreen::SignIn(fig::string_view password)
 	{
 		if (auto tryProfile = Global::GetUserManager().GetProfile(_currentProfileId))
 		{
@@ -174,7 +174,6 @@ namespace fig::gui
 			}
 			else if (profile.state == UserProfile::State::Locked)
 			{
-				fig::string password = trim(_pPassword->GetText());
 				_pPassword->Clear();
 				MainFrame::GetInstance().TrySignIn(profile, password);
 			}

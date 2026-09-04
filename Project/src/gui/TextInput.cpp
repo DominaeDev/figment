@@ -6,10 +6,11 @@
 
 constexpr uint64_t CursorBlinkIntervalMS { 500ULL };
 
-static int UTF8ByteLength(const char* text, int num_codepoints)
+static int Utf8CodepointsToBytes(const char* text, int num_codepoints)
 {
 	if (!text)
 		return 0;
+
 	const char* start = text;
 	while (num_codepoints > 0)
 	{
@@ -20,12 +21,13 @@ static int UTF8ByteLength(const char* text, int num_codepoints)
 	return (int)(uintptr_t)(text - start);
 }
 
-static int BytesUTF8Length(const char* text, int num_bytes)
+static int GetUtf8Codepoints(const char* text, int position)
 {
 	if (!text)
 		return 0;
+
 	const char* start = text;
-	const char* end = text + num_bytes;
+	const char* end = text + position;
 	int num_codepoints = 0;
 	while (text < end)
 	{
@@ -37,44 +39,208 @@ static int BytesUTF8Length(const char* text, int num_bytes)
 	return num_codepoints;
 }
 
+static bool StepLeft(fig::string_view text, int32_t& position)
+{
+	if (position <= 0)
+		return false;
+
+	assert(position <= static_cast<int32_t>(text.size()));
+
+	const char* pos = text.data() + position;
+	if (SDL_StepBackUTF8(text.data(), &pos) != SDL_INVALID_UNICODE_CODEPOINT)
+	{
+		position = (int32_t)(std::distance(text.data(), pos));
+		return true;
+	}
+	return false; // Error
+}
+
+static bool StepRight(fig::string_view text, int32_t& position)
+{
+	if (position >= static_cast<int32_t>(text.size()))
+		return false;
+
+	const char* pos = text.data() + position;
+	while (SDL_StepUTF8(&pos, NULL) == SDL_INVALID_UNICODE_CODEPOINT);
+	position = (int32_t)(std::distance(text.data(), pos));
+	return true;
+}
+
+enum CharType 
+{
+	Whitespace,
+	Punctuation,
+	Letter,
+};
+
+static CharType GetCharType(char ch) 
+{
+	if (fig::is_whitespace(ch)) return CharType::Whitespace;
+	if (fig::is_punctuation(ch)) return CharType::Punctuation;
+	return CharType::Letter;
+};
+
+static int32_t FindPriorWord(fig::string_view text, int32_t position)
+{
+	if (position <= 0)
+		return 0;
+
+	// Skip any whitespace first
+	int32_t curr = position;
+	while (curr > 0)
+	{
+		if (not StepLeft(text, curr))
+			break;
+
+		CharType charType = GetCharType(text[curr]);
+		if (charType != CharType::Whitespace)
+		{
+			StepRight(text, curr);
+			break;
+		}
+	}
+
+	// Find first position of word
+	if (StepLeft(text, curr))
+	{
+		CharType skipType = GetCharType(text[curr]);
+		while (curr > 0)
+		{
+			if (not StepLeft(text, curr))
+				break;
+			CharType priorType = GetCharType(text[curr]);
+			if (priorType == skipType)
+				continue;
+
+			StepRight(text, curr);
+			break;
+		}
+	}
+
+	return curr;
+}
+
+static int32_t FindNextWord(fig::string_view text, int32_t position)
+{
+	int32_t curr = position;
+	int32_t length = static_cast<int32_t>(text.size());
+	if (position >= length)
+		return length;
+
+	CharType startType = GetCharType(text[position]);
+	if (startType == CharType::Whitespace)
+	{
+		// Skip to first non-whitespace
+		while (fig::is_whitespace(text[curr]))
+		{
+			if (not StepRight(text, curr))
+				break;
+		}
+		return curr;
+	}
+	else
+	{
+		// Skip similar
+		CharType nextType = startType;
+		while (nextType == startType)
+		{
+			if (not StepRight(text, curr) or curr == length)
+				break;
+			nextType = GetCharType(text[curr]);
+		}
+
+		// Skip whitespace
+		while (curr < length - 1 and nextType == CharType::Whitespace)
+		{
+			if (not StepRight(text, curr) or curr == length)
+				break;
+			nextType = GetCharType(text[curr]);
+		}
+		return curr;
+	}
+}
+
+static int GetCursorTextIndex(int32_t x, const TTF_SubString* substring)
+{
+	if (substring->flags & (TTF_SUBSTRING_LINE_END | TTF_SUBSTRING_TEXT_END))
+	{
+		return substring->offset;
+	}
+
+	bool round_down = (x < (substring->rect.x + substring->rect.w / 2));
+
+	if (round_down)
+	{
+		/* Start the cursor before the selected text */
+		return substring->offset;
+	}
+	else
+	{
+		/* Place the cursor after the selected text */
+		return substring->offset + substring->length;
+	}
+}
+
 namespace fig::gui
 {
-	TextInput::TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, TextInput::Flags flags) : Control(pParent),
-		_flags { flags }
+	TextInput::TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode) : Control(pParent),
+		_mode { mode }
 	{
 		SetForegroundColor(Color::TextBoxForeground);
 		SetBackgroundColor(Color::TextBoxBackground);
 
 		_pFont = Fonts::GetFont(fontFace, ptSize);
-		_pText = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
 		_pPlaceholder = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
-		TTF_SetTextWrapWhitespaceVisible(_pText, true);
 		TTF_SetTextWrapWhitespaceVisible(_pPlaceholder, true);
-	
-		if (flags.IsSet(Flag::Password))
+
+		if (IsPassword())
 			_pPassword = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
 
 		_bFocused = false;
 		EnableClipping(false);
 
-		highlight_start = -1;
-		highlight_end = -1;
-
 		if (_pFont)
+		{
+			_lineHeight = TTF_GetFontLineSkip(_pFont);
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
+		}
 	}
 
 	TextInput::~TextInput()
 	{
 		ClearCandidates();
 		TTF_DestroyText(_pPassword);
-		TTF_DestroyText(_pText);
 		TTF_DestroyText(_pPlaceholder);
 	}
 
-	TTF_Text* TextInput::GetRenderedText()
+	void TextInput::SetTextWrapWidth(int32_t width)
 	{
-		return _flags.IsSet(Flag::Password) && _pPassword ? _pPassword : _pText;
+		if (_wrapWidth == width)
+			return;
+
+		_wrapWidth = std::max(width, 0);
+		RelayoutAll();
+	}
+
+	void TextInput::SetFont(FontFace fontFace, double ptSize) noexcept
+	{
+		if (auto font = Fonts::GetFont(fontFace, ptSize))
+		{
+			_pFont = font;
+			_lineHeight = TTF_GetFontLineSkip(_pFont);
+
+			RelayoutAll();
+		}
+	}
+
+	int32_t TextInput::GetTextWrapWidth() const noexcept
+	{
+		return _wrapWidth;
+	}
+
+	size_t TextInput::GetLineCount() const noexcept
+	{
+		return _lines.size();
 	}
 
 	void TextInput::OnUpdate(float fElapsed)
@@ -86,26 +252,13 @@ namespace fig::gui
 			_last_cursor_change = now;
 		}
 
-		UpdatePassword();
-
 		if (_bFocused)
 		{
-			int32_t cursor_pos = ConvertToPasswordPosition(_cursor);
-		
-			/* Calculate the cursor rect, used for positioning candidates */
-			TTF_SubString cursor;
-			if (TTF_GetTextSubString(GetRenderedText(), cursor_pos, &cursor))
-			{
-				auto& rect = GetRect();
-				fig::rectf cursor_rect = to_rectf(cursor.rect);
-				cursor_rect.x += rect.x + GetMarginLeft();
-				cursor_rect.y += rect.y + GetMarginTop();
-				cursor_rect.w = 1.0f;
-				cursor_rect.h = std::max(cursor_rect.h, (float)TTF_GetFontLineSkip(_pFont));
-				SDL_copyp(&_cursor_rect, &cursor_rect);
-
-				UpdateTextInputArea();
-			}
+			auto& rect = GetRect();
+			_cursor_rect = GetCursorRect();
+			_cursor_rect.x += rect.x + GetMarginLeft();
+			_cursor_rect.y += rect.y + GetMarginTop();
+			UpdateTextInputArea();
 		}
 	}
 
@@ -113,7 +266,7 @@ namespace fig::gui
 	{
 		DrawBackground(pRenderer);
 		DrawBorder(pRenderer);
-	
+
 		int lineSkip = TTF_GetFontLineSkip(_pFont);
 		int maxRows = IsMultiline() ? std::max(_maxRows, 1) : 1;
 
@@ -130,50 +283,49 @@ namespace fig::gui
 		// Scroll to cursor
 		if (_bFocused)
 		{
-			if (IsMultiline()) // Multiline (Vertical scrolling)
+			if (IsMultiline()) // Vertical scroll
 			{
 				float cursorY = _cursor_rect.y - clientRect.y;
 				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) >= maxRows)
 					_scroll.y += lineSkip;
 				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) < 0)
 					_scroll.y -= lineSkip;
-				_scroll.x = 0;
 			}
-			else // Single line (Horizontal scrolling)
+			else
+			{
+				_scroll.y = 0;
+			}
+
+			if (not IsWordWrapping()) // Horizontal scroll
 			{
 				constexpr int32_t kScrollStep = 80;
 
-				int maxCursorX = clientRect.w;
-				int textWidth, _;
-				TTF_GetTextSize(GetRenderedText(), &textWidth, &_);
-				int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
-				while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
-					_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
-				while (cursorX > 0 and cursorX - _scroll.x < 0)
-					_scroll.x = std::max(_scroll.x - kScrollStep, 0);
-				_scroll.y = 0;
+				if (auto pText = IsPassword() ? _pPassword.get() : (_lines.empty() ? nullptr : _lines[0].ttf_text.get()))
+				{
+					int maxCursorX = clientRect.w;
+					int textWidth, _;
+					TTF_GetTextSize(pText, &textWidth, &_);
+					int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
+					while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
+						_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
+					while (cursorX > 0 and cursorX - _scroll.x < 0)
+						_scroll.x = std::max(_scroll.x - kScrollStep, 0);
+				}
+			}
+			else
+			{
+				_scroll.x = 0;
 			}
 		}
 
 		// Draw highlight(s) 
-		int marker, length;
-		if (GetHighlightExtents(&marker, &length))
+		if (HasSelection())
 		{
-			if (IsPassword())
-			{
-				int utf8_text_start = BytesUTF8Length(_pText->text, marker);
-				int utf8_text_end = BytesUTF8Length(_pText->text, marker + length);
-				marker = UTF8ByteLength(_pPassword->text, utf8_text_start);
-				length = UTF8ByteLength(_pPassword->text, utf8_text_end) - marker;
-			}
-
-			TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(GetRenderedText(), marker, length, NULL);
-			if (pHighlights)
+			if (auto highlights = GetHighlights(); not highlights.empty())
 			{
 				SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
-				for (int i = 0; pHighlights[i]; ++i)
+				for (auto& highlight_rect : highlights)
 				{
-					fig::rectf highlight_rect = to_rectf(pHighlights[i]->rect);
 					highlight_rect.w = std::max(highlight_rect.w, 3.0f);
 					highlight_rect.x += rect.x + GetMarginLeft();
 					highlight_rect.y += rect.y + GetMarginTop();
@@ -181,21 +333,35 @@ namespace fig::gui
 					ApplyScroll(highlight_rect);
 					SDL_RenderFillRect(pRenderer, &highlight_rect);
 				}
-				SDL_free(pHighlights);
 			}
 		}
 
-		if (auto pText = GetRenderedText(); pText->text)
-			DrawText(pRenderer, pText, rect.x, rect.y + 8);
+		if (not _text.empty())
+		{
+			if (IsPassword())
+				DrawText(pRenderer, _pPassword, 0, 0);
+			else
+			{
+				for (size_t i = 0uz; i < _lines.size(); ++i)
+				{
+					auto& line = _lines[i];
+
+					if (_composition_cursor_length > 0 and _composition_line == i and not _composition_text.empty())
+						DrawText(pRenderer, _composition_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
+					else if (line.ttf_text->text)
+						DrawText(pRenderer, line.ttf_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
+				}
+			}
+		}
 		else
 			DrawPlaceholder(pRenderer, rect.x, rect.y + 8);
 
 		if (_bFocused)
 		{
-			if (composition_length > 0)
+			if (_composition_length > 0)
 				DrawComposition(pRenderer);
 
-			if (candidates)
+			if (_candidates)
 				DrawCandidates(pRenderer);
 
 			if (_cursor_visible)
@@ -211,8 +377,8 @@ namespace fig::gui
 		TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
 
 		auto& rect = GetRect();
-		int xx = rect.x + GetMarginLeft();
-		int yy = rect.y + GetMarginTop();
+		int xx = rect.x + GetMarginLeft() + x;
+		int yy = rect.y + GetMarginTop() + y;
 		ApplyScroll(xx, yy);
 
 		TTF_DrawRendererText(pText, toF(xx), toF(yy));
@@ -236,7 +402,7 @@ namespace fig::gui
 
 	void TextInput::DrawCursor(fig::renderer_ptr pRenderer)
 	{
-		if (composition_length > 0)
+		if (_composition_length > 0)
 		{
 			DrawCompositionCursor(pRenderer);
 			return;
@@ -246,23 +412,6 @@ namespace fig::gui
 		ApplyScroll(rect);
 		SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
 		SDL_RenderFillRect(pRenderer, &rect);
-	}
-
-
-	bool TextInput::GetHighlightExtents(int* marker, int* length)
-	{
-		if (highlight_start >= 0 and highlight_end >= 0)
-		{
-			int marker1 = SDL_min(highlight_start, highlight_end);
-			int marker2 = SDL_max(highlight_start, highlight_end);
-			if (marker2 > marker1)
-			{
-				*marker = marker1;
-				*length = marker2 - marker1;
-				return true;
-			}
-		}
-		return false;
 	}
 
 	static bool IsShiftDown()
@@ -276,87 +425,104 @@ namespace fig::gui
 		_last_cursor_change = SDL_GetTicks();
 	}
 
-	#pragma region Composition
+#pragma region Composition
 
 	void TextInput::ResetComposition()
 	{
-		composition_start = 0;
-		composition_length = 0;
-		composition_cursor = 0;
-		composition_cursor_length = 0;
+		_composition_start = 0;
+		_composition_length = 0;
+		_composition_cursor = 0;
+		_composition_cursor_length = 0;
+		_composition_text.release();
+		_composition_line = -1;
 	}
 
 	void TextInput::HandleComposition(const SDL_TextEditingEvent* event)
 	{
-		DeleteHighlight();
+		DeleteSelection();
 
-		if (composition_length > 0)
-		{
-			TTF_DeleteTextString(_pText, composition_start, composition_length);
-			ResetComposition();
-		}
+		auto cursor = GetCursor();
+		_composition_line = cursor.line;
+		auto& line = _lines[_composition_line];
+		if (line.ttf_text.empty())
+			return;
 
 		int length = (int)SDL_strlen(event->text);
+		LogLn(std::format("Composition: {}", length));
 		if (length > 0)
 		{
-			composition_start = _cursor;
-			composition_length = length;
-			TTF_InsertTextString(_pText, composition_start, event->text, composition_length);
+			if (_composition_text.empty())
+				_composition_text = fig::sdl::Text(GetSDLTextEngine(), _pFont, _text.data(), line.length);
+			if (_composition_length > 0)
+				TTF_DeleteTextString(_composition_text.get(), _composition_start, _composition_length);
+
+			_composition_start = cursor.offset;
+			_composition_length = length;
+			TTF_InsertTextString(_composition_text.get(), _composition_start, event->text, _composition_length);
 			if (event->start > 0 or event->length > 0)
 			{
-				composition_cursor = UTF8ByteLength(&_pText->text[composition_start], event->start);
-				composition_cursor_length = UTF8ByteLength(&_pText->text[composition_start + composition_cursor], event->length);
+				_composition_cursor = Utf8CodepointsToBytes(&_composition_text->text[_composition_start], event->start);
+				_composition_cursor_length = Utf8CodepointsToBytes(&_composition_text->text[_composition_start + _composition_cursor], event->length);
 			}
 			else
 			{
-				composition_cursor = length;
-				composition_cursor_length = 0;
+				_composition_cursor = length;
+				_composition_cursor_length = 0;
 			}
-//			PushUndo(UndoAction::Write);
-//			DidChange();
+		}
+		else
+		{
+			ResetComposition();
 		}
 	}
 
 	void TextInput::CancelComposition()
 	{
 		ResetComposition();
-
 		SDL_ClearComposition(GetSDLWindow());
 	}
 
 	void TextInput::DrawComposition(fig::renderer_ptr pRenderer)
 	{
+		auto clientRect = GetClientRect();
+		auto fgColor = GetForegroundColor();
+
 		/* Draw an underline under the composed text */
 		int font_height = TTF_GetFontHeight(_pFont);
-		TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_pText, composition_start, composition_length, NULL);
+		TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_composition_text.get(), _composition_start, _composition_length, NULL);
 		if (substrings)
 		{
 			for (int i = 0; substrings[i]; ++i)
 			{
-				fig::rectf rect;
-				SDL_RectToFRect(&substrings[i]->rect, &rect);
-				rect.x += rect.x;
-				rect.y += (rect.y + font_height);
-				rect.h = 1.0f;
-				SDL_RenderFillRect(pRenderer, &rect);
+				fig::rectf line_rect;
+				SDL_RectToFRect(&substrings[i]->rect, &line_rect);
+				line_rect.x += clientRect.x;
+				line_rect.y += clientRect.y + _composition_line * _lineHeight + font_height;
+				line_rect.h = 1.0f;
+				ApplyScroll(line_rect);
+				SDL_SetRenderDrawColor(pRenderer, fgColor.r, fgColor.g, fgColor.b, 0xFF);
+				SDL_RenderFillRect(pRenderer, &line_rect);
 			}
 			SDL_free(substrings);
 		}
 
 		/* Thicken the underline under the active clause in the composed text */
-		if (composition_cursor_length > 0)
+		if (_composition_cursor_length > 0)
 		{
-			substrings = TTF_GetTextSubStringsForRange(_pText, composition_start + composition_cursor, composition_cursor_length, NULL);
+			substrings = TTF_GetTextSubStringsForRange(_composition_text.get(), _composition_start + _composition_cursor, _composition_cursor_length, NULL);
 			if (substrings)
 			{
 				for (int i = 0; substrings[i]; ++i)
 				{
-					fig::rectf rect;
-					SDL_RectToFRect(&substrings[i]->rect, &rect);
-					rect.x += rect.x;
-					rect.y += (rect.y + font_height) - 1;
-					rect.h = 8.0f;
-					SDL_RenderFillRect(pRenderer, &rect);
+					fig::rectf line_rect;
+					SDL_RectToFRect(&substrings[i]->rect, &line_rect);
+					line_rect.x += clientRect.x;
+					line_rect.y += clientRect.y + _composition_line * _lineHeight + font_height;
+					line_rect.h = 2.0f;
+					ApplyScroll(line_rect);
+
+					SDL_SetRenderDrawColor(pRenderer, fgColor.r, fgColor.g, fgColor.b, 0xFF);
+					SDL_RenderFillRect(pRenderer, &line_rect);
 				}
 				SDL_free(substrings);
 			}
@@ -365,38 +531,36 @@ namespace fig::gui
 
 	void TextInput::DrawCompositionCursor(fig::renderer_ptr pRenderer)
 	{
-		if (composition_cursor_length == 0)
+		auto clientRect = GetClientRect();
+
+		if (_composition_cursor_length == 0)
 		{
 			TTF_SubString cursor;
-			if (TTF_GetTextSubString(_pText, composition_start + composition_cursor, &cursor))
+			if (TTF_GetTextSubString(_composition_text.get(), _composition_start + _composition_cursor, &cursor))
 			{
-				fig::rectf rect = to_rectf(cursor.rect);
-				rect.x += rect.x;
-				rect.y += rect.y;
-				rect.w = 1.0f;
+				fig::rectf cursor_rect = to_rectf(cursor.rect);
+				cursor_rect.x += clientRect.x;
+				cursor_rect.y += clientRect.y + _composition_line * _lineHeight;
+				cursor_rect.w = 1.0f;
 
-				ApplyScroll(rect);
+				ApplyScroll(cursor_rect);
+
 				SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
-				SDL_RenderFillRect(pRenderer, &rect);
+				SDL_RenderFillRect(pRenderer, &cursor_rect);
 			}
 		}
 	}
 
 	void TextInput::ClearCandidates()
 	{
-		if (candidates)
-		{
-			TTF_DestroyText(candidates);
-			candidates = NULL;
-		}
-		selected_candidate_start = 0;
-		selected_candidate_length = 0;
+		if (_candidates)
+			_candidates.release();
+		_selected_candidate_start = 0;
+		_selected_candidate_length = 0;
 	}
 
 	void TextInput::SaveCandidates(const SDL_Event* event)
 	{
-		int i;
-
 		ClearCandidates();
 
 		bool horizontal = event->edit_candidates.horizontal;
@@ -405,7 +569,7 @@ namespace fig::gui
 
 		/* Calculate the length of the candidates text */
 		size_t length = 0;
-		for (i = 0; i < num_candidates; ++i)
+		for (int i = 0; i < num_candidates; ++i)
 		{
 			if (horizontal)
 			{
@@ -435,7 +599,7 @@ namespace fig::gui
 		}
 
 		char* dst = candidate_text;
-		for (i = 0; i < num_candidates; ++i)
+		for (int i = 0; i < num_candidates; ++i)
 		{
 			if (horizontal)
 			{
@@ -448,8 +612,8 @@ namespace fig::gui
 			int length = (int)SDL_strlen(event->edit_candidates.candidates[i]);
 			if (i == selected_candidate)
 			{
-				selected_candidate_start = (int)(uintptr_t)(dst - candidate_text);
-				selected_candidate_length = length;
+				_selected_candidate_start = (int)(uintptr_t)(dst - candidate_text);
+				_selected_candidate_length = length;
 			}
 			SDL_memcpy(dst, event->edit_candidates.candidates[i], length);
 			dst += length;
@@ -461,13 +625,13 @@ namespace fig::gui
 		}
 		*dst = '\0';
 
-		candidates = TTF_CreateText(TTF_GetTextEngine(_pText), _pFont, candidate_text, 0);
+		_candidates = fig::sdl::Text(GetSDLTextEngine(), _pFont, candidate_text, 0);
 		SDL_free(candidate_text);
-		if (candidates)
+		if (_candidates)
 		{
 			float r, g, b, a;
-			TTF_GetTextColorFloat(_pText, &r, &g, &b, &a);
-			TTF_SetTextColorFloat(candidates, r, g, b, a);
+			TTF_GetTextColorFloat(_composition_text.get(), &r, &g, &b, &a);
+			TTF_SetTextColorFloat(_candidates.get(), r, g, b, a);
 		}
 		else
 		{
@@ -481,24 +645,24 @@ namespace fig::gui
 		fig::rectf candidates_rect;
 		int candidates_w;
 		int candidates_h;
-	
-		auto& rect = GetRect();
+
+		auto rect = GetClientRect();
 
 		/* Position the candidate window */
 		TTF_SubString cursor;
-		int offset = composition_start;
-		if (composition_cursor_length > 0)
+		int offset = _composition_start;
+		if (_composition_cursor_length > 0)
 		{
 			// Place the candidates at the active clause
-			offset += composition_cursor;
+			offset += _composition_cursor;
 		}
-		if (!TTF_GetTextSubString(_pText, offset, &cursor))
+		if (!TTF_GetTextSubString(_composition_text.get(), offset, &cursor))
 			return;
 
 		SDL_GetRenderSafeArea(pRenderer, &safe_rect);
-		TTF_GetTextSize(candidates, &candidates_w, &candidates_h);
-		candidates_rect.x = toF(rect.x + GetMarginLeft() + cursor.rect.x);
-		candidates_rect.y = toF(rect.y + GetMarginTop() + cursor.rect.y + cursor.rect.h + 2);
+		TTF_GetTextSize(_candidates.get(), &candidates_w, &candidates_h);
+		candidates_rect.x = toF(rect.x + cursor.rect.x);
+		candidates_rect.y = toF(rect.y + cursor.rect.y + cursor.rect.h + 2);
 		candidates_rect.w = 1.0f + 2.0f + candidates_w + 2.0f + 1.0f;
 		candidates_rect.h = 1.0f + 2.0f + candidates_h + 2.0f + 1.0f;
 		if ((candidates_rect.x + candidates_rect.w) > safe_rect.w)
@@ -510,7 +674,7 @@ namespace fig::gui
 			}
 		}
 
-		ApplyScroll(candidates_rect);
+//		ApplyScroll(candidates_rect);
 
 		/* Draw the candidate background */
 		SDL_SetRenderDrawColor(pRenderer, 0xAA, 0xAA, 0xAA, 0xFF);
@@ -521,13 +685,13 @@ namespace fig::gui
 		/* Draw the candidates */
 		int x = toI(candidates_rect.x + 3);
 		int y = toI(candidates_rect.y + 3);
-		DrawText(pRenderer, candidates, x, y);
+		DrawText(pRenderer, _candidates.get(), x, y);
 
 		/* Underline the selected candidate */
-		if (selected_candidate_length > 0)
+		if (_selected_candidate_length > 0)
 		{
 			int font_height = TTF_GetFontHeight(_pFont);
-			TTF_SubString** substrings = TTF_GetTextSubStringsForRange(candidates, selected_candidate_start, selected_candidate_length, NULL);
+			TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_candidates.get(), _selected_candidate_start, _selected_candidate_length, NULL);
 			if (substrings)
 			{
 				for (int i = 0; substrings[i]; ++i)
@@ -544,7 +708,7 @@ namespace fig::gui
 		}
 	}
 
-	#pragma endregion Composition
+#pragma endregion Composition
 
 	void TextInput::UpdateTextInputArea()
 	{
@@ -583,513 +747,279 @@ namespace fig::gui
 		_last_cursor_change = SDL_GetTicks();
 
 		if (_bFocused)
-		{
 			PushEvent(UserEvent::StartTextInput, 0, this);
-		}
 		else
-		{
 			PushEvent(UserEvent::StopTextInput, 0, this);
-		}
 	}
 
-	static int GetCursorTextIndex(int x, const TTF_SubString* substring)
+	int32_t TextInput::MoveCursor(int32_t direction) noexcept
 	{
-		if (substring->flags & (TTF_SUBSTRING_LINE_END | TTF_SUBSTRING_TEXT_END))
-		{
-			return substring->offset;
-		}
+		auto last_cursor = _cursor;
 
-		bool round_down = (x < (substring->rect.x + substring->rect.w / 2));
-
-		if (round_down)
-		{
-			/* Start the cursor before the selected text */
-			return substring->offset;
-		}
-		else
-		{
-			/* Place the cursor after the selected text */
-			return substring->offset + substring->length;
-		}
-	}
-
-	static int FindPriorWord(TTF_Text* pText, int cursor)
-	{
-		const char* start = &pText->text[cursor];
-		const char* zero = &pText->text[0];
-		const char* curr = start;
-		if (start == zero)
-			return 0;
-
-		enum CharType {
-			Whitespace,
-			Punctuation,
-			Character,
-		};
-
-		auto fnCharType = [](char ch) -> CharType
-		{
-			if (is_whitespace(ch)) return CharType::Whitespace;
-			if (is_punctuation(ch)) return CharType::Punctuation;
-			return CharType::Character;
-		};
-
-		auto fnMoveLeft = [pText, &fnCharType](const char*& ch) -> CharType {
-			SDL_StepBackUTF8(pText->text, &ch);
-			return fnCharType(ch[0]);
-		};
-
-		auto fnMoveRight = [pText, &fnCharType](const char*& ch) -> CharType {
-			size_t length = SDL_strlen(ch);
-			SDL_StepUTF8(&ch, &length);
-			return fnCharType(ch[0]);
-		};
-
-		// Skip any whitespace first
-		while (curr > zero)
-		{
-			CharType charType = fnMoveLeft(curr);
-			if (not is_whitespace(curr[0]))
-			{
-				fnMoveRight(curr);
-				break;
-			}
-		}
-
-		// Find first position of word
-		if (curr > zero)
-		{
-			CharType skipType = fnMoveLeft(curr);
-			while (curr > zero)
-			{
-				CharType priorType = fnMoveLeft(curr);
-				if (priorType == skipType)
-					continue;
-
-				fnMoveRight(curr);
-				break;
-			}
-		}
-
-		int length = (int)(uintptr_t)(start - curr);
-		return cursor - length;
-	}
-
-	static int FindNextWord(TTF_Text* pText, int cursor)
-	{
-		size_t length = SDL_strlen(pText->text);
-		const char* start = &pText->text[cursor];
-		const char* end = &pText->text[length];
-		const char* curr = start;
-		if (start == end)
-			return cursor;
-
-		enum CharType {
-			Whitespace,
-			Punctuation,
-			Character,
-		};
-
-		auto fnCharType = [](char ch) -> CharType
-		{
-			if (is_whitespace(ch)) return CharType::Whitespace;
-			if (is_punctuation(ch)) return CharType::Punctuation;
-			return CharType::Character;
-		};
-
-		auto fnMoveLeft = [pText, &fnCharType](const char*& ch) -> CharType {
-			SDL_StepBackUTF8(pText->text, &ch);
-			return fnCharType(ch[0]);
-		};
-
-		auto fnMoveRight = [pText, &fnCharType](const char*& ch) -> CharType {
-			size_t length = SDL_strlen(ch);
-			SDL_StepUTF8(&ch, &length);
-			return fnCharType(ch[0]);
-		};
-
-		CharType startType = fnCharType(start[0]);
-		if (startType == CharType::Whitespace)
-		{
-			// On whitespace: only erase whitespace
-			while (curr < end and is_whitespace(curr[0]))
-				fnMoveRight(curr);
-			int length = (int)(uintptr_t)(curr - start);
-			return cursor + length;
-		}
-		else
-		{
-			// Otherwise: skip of same type
-			CharType nextType = startType;
-			while (curr < end and nextType == startType)
-				nextType = fnMoveRight(curr);
-
-			// ..then skip any whitespace
-			while (curr < end and nextType == CharType::Whitespace)
-				nextType = fnMoveRight(curr);
-
-			int length = (int)(uintptr_t)(curr - start);
-			return cursor + length;
-		}
-	}
-
-	void TextInput::SetCursorPosition(int position)
-	{
-		if (composition_length > 0)
-		{
-			/* Don't let the cursor be moved into the composition */
-			if (position >= composition_start and position <= (composition_start + composition_length))
-				return;
-
-			CancelComposition();
-		}
-
-		_cursor = position;
-		ResetCursorBlink();
-	}
-
-	void TextInput::MoveCursorIndex(int direction)
-	{
-		TTF_SubString substring;
-
-		int last_cursor = _cursor;
-
-		if (direction < 0) // <-
-		{
-			if (TTF_GetTextSubString(_pText, _cursor - 1, &substring))
-			{
-				SetCursorPosition(substring.offset);
-			}
-		}
-		else // ->
-		{
-			if (TTF_GetTextSubString(_pText, _cursor, &substring) and
-				TTF_GetTextSubString(_pText, substring.offset + SDL_max(substring.length, 1), &substring))
-			{
-				SetCursorPosition(substring.offset);
-			}
-		}
-
+		auto position = _cursor;
+		if (direction < 0 and not StepLeft(_text, position))
+			return _cursor;
+		if (direction > 0 and not StepRight(_text, position))
+			return _cursor;
+		
+		SetCursor(position);
 		OnMoveCursor(last_cursor);
+		return _cursor;
 	}
 
-	void TextInput::OnMoveCursor(int last_cursor)
+	void TextInput::OnMoveCursor(int32_t last_position)
 	{
 		bool isShiftDown = IsShiftDown();
-		bool is_highlighting = highlight_start != -1 and highlight_end != -1;
+		bool is_highlighting = HasSelection();
 		if (!is_highlighting and isShiftDown)
 		{
-			highlight_start = last_cursor;
-			highlight_end = last_cursor;
+			Select(last_position, last_position);
 			is_highlighting = true;
 		}
 		else if (is_highlighting and !isShiftDown)
 		{
-			highlight_start = -1;
-			highlight_end = -1;
+			Deselect();
 			is_highlighting = false;
 		}
 
 		if (is_highlighting)
 		{
-			int start = highlight_start;
-			int end = highlight_end;
-			int curr = _cursor;
-			if (start == last_cursor)
-				start = curr;
+			auto [start, end] = GetSelection();
+			if (start == last_position)
+				start = _cursor;
 			else
-				end = curr;
-		
-			highlight_start = SDL_min(start, end);
-			highlight_end = SDL_max(start, end);
+				end = _cursor;
+			Select(start, end);
 		}
 
 		ResetCursorBlink();
 	}
 
-	void TextInput::MoveCursorLeft()
+	int32_t TextInput::MoveCursorLeft() noexcept
 	{
-		MoveCursorIndex(-1);
+		return MoveCursor(-1);
 	}
 
-	void TextInput::MoveCursorRight()
+	int32_t TextInput::MoveCursorRight() noexcept
 	{
-		MoveCursorIndex(1);
+		return MoveCursor(1);
 	}
 
-	void TextInput::MoveCursorUp()
+	int32_t TextInput::MoveCursorUp() noexcept
 	{
 		if (not IsMultiline())
-			return;
+			return _cursor;
 
-		TTF_SubString substring;
-		if (TTF_GetTextSubString(_pText, _cursor, &substring))
+		if (_lines.empty())
+			return 0;
+
+		if (IsOnLastNewLine())
 		{
-			int fontHeight = TTF_GetFontHeight(_pFont);
-			int x, y;
-			x = substring.rect.x;
-			y = substring.rect.y - fontHeight / 2;
-			if (TTF_GetTextSubStringForPoint(_pText, x, y, &substring))
+			auto last_cursor = _cursor;
+			SetCursor(_lines.back().position);
+			OnMoveCursor(last_cursor);
+			return _cursor;
+		}
+
+		auto cursor = GetCursor();
+		if (cursor.line == 0)
+			return _cursor;
+
+
+		auto& curr_line = _lines[cursor.line];
+		TTF_SubString substring;
+		if (TTF_GetTextSubString(curr_line.ttf_text.get(), cursor.offset, &substring))
+		{
+			int32_t x = substring.rect.x;
+			auto& prev_line = _lines[cursor.line - 1];
+			if (TTF_GetTextSubStringForPoint(prev_line.ttf_text.get(), x, _lineHeight / 2, &substring))
 			{
-				int last_cursor = _cursor;
-				SetCursorPosition(GetCursorTextIndex(x, &substring));
+				auto last_cursor = _cursor;
+				SetCursor(prev_line.position + GetCursorTextIndex(x, &substring));
 				OnMoveCursor(last_cursor);
 			}
 		}
+		return _cursor;
 	}
 
-	void TextInput::MoveCursorDown()
+	int32_t TextInput::MoveCursorDown() noexcept
 	{
 		if (not IsMultiline())
-			return;
+			return _cursor;
 
+		if (_lines.empty())
+			return 0;
+
+		auto cursor = GetCursor();
+		if (cursor.line + 1uz >= _lines.size())
+			return SetCursor(static_cast<int32_t>(_text.size()));
+
+		auto& curr_line = _lines[cursor.line];
+		auto& next_line = _lines[cursor.line + 1];
 		TTF_SubString substring;
-		if (TTF_GetTextSubString(_pText, _cursor, &substring))
+		int32_t pos = next_line.position;
+		if (TTF_GetTextSubString(curr_line.ttf_text.get(), cursor.offset, &substring))
 		{
-			int fontHeight = TTF_GetFontHeight(_pFont);
-			int x, y;
-			x = substring.rect.x;
-			y = substring.rect.y + substring.rect.h + fontHeight / 2;
-			if (TTF_GetTextSubStringForPoint(_pText, x, y, &substring))
-			{
-				int last_cursor = _cursor;
-				SetCursorPosition(GetCursorTextIndex(x, &substring));
-				OnMoveCursor(last_cursor);
-			}
+			int32_t x = substring.rect.x;
+			if (TTF_GetTextSubStringForPoint(next_line.ttf_text.get(), x, _lineHeight / 2, &substring))
+				pos += GetCursorTextIndex(x, &substring);
 		}
-	}
 
-	void TextInput::MoveCursorBeginningOfLine()
-	{
-		TTF_SubString substring;
-		if (TTF_GetTextSubString(_pText, _cursor, &substring) and
-			TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
-		{
-			int last_cursor = _cursor;
-			SetCursorPosition(substring.offset);
-			OnMoveCursor(last_cursor);
-		}
-	}
-
-	void TextInput::MoveCursorEndOfLine()
-	{
-		TTF_SubString substring;
-		if (TTF_GetTextSubString(_pText, _cursor, &substring) and
-			TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
-		{
-			int last_cursor = _cursor;
-			int pos = substring.offset + substring.length;
-			if (pos > 0 and pos <= strlen(_pText->text) and _pText->text[pos - 1] == '\n')
-				pos--;
-
-			SetCursorPosition(pos);
-			OnMoveCursor(last_cursor);
-		}
-	}
-
-	void TextInput::MoveCursorBeginning()
-	{
-		int last_cursor = _cursor;
-		SetCursorPosition(0);
+		auto last_cursor = _cursor;
+		SetCursor(pos);
 		OnMoveCursor(last_cursor);
+		return _cursor;
 	}
 
-	void TextInput::MoveCursorEnd()
+	int32_t TextInput::MoveCursorBeginningOfLine() noexcept
 	{
-		/* Move to the end of the text */
-		if (_pText->text)
-		{
-			int last_cursor = _cursor;
-			SetCursorPosition((int)SDL_strlen(_pText->text));
-			OnMoveCursor(last_cursor);
-		}
+		if (_lines.empty())
+			return 0;
+
+		if (IsOnLastNewLine())
+			return _cursor;
+
+		auto last_cursor = _cursor;
+		auto& line = _lines[GetCursor().line];
+		SetCursor(line.position);
+		OnMoveCursor(last_cursor);
+		return _cursor;
 	}
 
-	void TextInput::MoveCursorToPriorWord()
+	int32_t TextInput::MoveCursorEndOfLine() noexcept
 	{
-		if (_pText->text)
-		{
-			int prior = FindPriorWord(_pText, _cursor);
-			int last_cursor = _cursor;
-			SetCursorPosition(prior);
-			OnMoveCursor(last_cursor);
-		}
+		if (_lines.empty())
+			return _cursor;
+
+		if (_cursor == _text.size())
+			return _cursor;
+
+		auto last_cursor = _cursor;
+		auto& line = _lines[GetCursor().line];
+		SetCursor(line.position + line.length - (IsEOL(line) ? 1 : 0));
+		OnMoveCursor(last_cursor);
+		return _cursor;
 	}
 
-	void TextInput::MoveCursorToNextWord()
+	int32_t TextInput::MoveCursorToPriorWord() noexcept
 	{
-		if (_pText->text)
-		{
-			int next = FindNextWord(_pText, _cursor);
-			int last_cursor = _cursor;
-			SetCursorPosition(next);
-			OnMoveCursor(last_cursor);
-		}
+		auto last_cursor = _cursor;
+		SetCursor(FindPriorWord(_text, _cursor));
+		OnMoveCursor(last_cursor);
+		return _cursor;
 	}
 
-	void TextInput::Backspace()
+	int32_t TextInput::MoveCursorToNextWord() noexcept
 	{
-		if (DeleteHighlight())
-			return;
+		if (IsPassword())
+			return _cursor;
 
-		if (_pText->text and _cursor > 0)
-		{
-			const char* start = &_pText->text[_cursor];
-			const char* next = start;
-			SDL_StepBackUTF8(_pText->text, &next);
-			int length = (int)(uintptr_t)(start - next);
-			TTF_DeleteTextString(_pText, _cursor - length, length);
-			_cursor -= length;
-
-			ResetCursorBlink();
-			PushUndo(UndoAction::Erase);
-			DidChange();
-		}
+		auto last_cursor = _cursor;
+		SetCursor(FindNextWord(_text, _cursor));
+		OnMoveCursor(last_cursor);
+		return _cursor;
 	}
 
-	void TextInput::BackspaceToPriorWord()
+	int32_t TextInput::MoveCursorBeginning() noexcept
 	{
-		if (DeleteHighlight())
-			return;
-
-		if (_pText->text)
-		{
-			int prior = FindPriorWord(_pText, _cursor);
-			int length = (_cursor - prior);
-			TTF_DeleteTextString(_pText, prior, length);
-			_cursor -= length;
-
-			ResetCursorBlink();
-			PushUndo(UndoAction::Erase, false);
-			DidChange();
-		}
+		auto last_cursor = _cursor;
+		SetCursor(0);
+		OnMoveCursor(last_cursor);
+		return _cursor;
 	}
 
-	void TextInput::BackspaceToBeginning()
+	int32_t TextInput::MoveCursorEnd() noexcept
 	{
-		if (DeleteHighlight())
-			return;
-	
-		if (_pText->text)
-		{
-			TTF_DeleteTextString(_pText, 0, _cursor);
-			SetCursorPosition(0);
-
-			PushUndo(UndoAction::Erase, false);
-			DidChange();
-		}
+		auto last_cursor = _cursor;
+		SetCursor(static_cast<int32_t>(_text.size()));
+		OnMoveCursor(last_cursor);
+		return _cursor;
 	}
 
-	void TextInput::BackspaceToBeginningOfLine()
+	bool TextInput::Backspace()
 	{
-		if (DeleteHighlight())
-			return;
-	
-		if (_pText->text)
+		if (DeleteSelection())
+			return true;
+
+		if (_cursor > 0)
 		{
-			TTF_SubString substring;
-			if (TTF_GetTextSubString(_pText, _cursor, &substring) and
-				TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
+			int32_t pos = _cursor;
+			if (StepLeft(_text, pos))
 			{
-				int last_cursor = _cursor;
-				TTF_DeleteTextString(_pText, substring.offset, _cursor);
-				SetCursorPosition(substring.offset);
-				OnMoveCursor(last_cursor);
-
-				PushUndo(UndoAction::Erase, false);
-				DidChange();
+				if (Delete(pos, _cursor - pos))
+				{
+					ResetCursorBlink();
+					PushUndo(UndoAction::Erase);
+					DidChange();
+					return true;
+				}
 			}
 		}
+		return false;
 	}
 
-	void TextInput::Delete()
+	bool TextInput::BackspaceToPriorWord()
 	{
-		if (DeleteHighlight())
-			return;
+		if (DeleteSelection())
+			return true;
 
-		if (_pText->text)
+		int32_t prior = FindPriorWord(_text, _cursor);
+		int32_t length = (_cursor - prior);
+		if (Delete(prior, length))
 		{
-			const char* start = &_pText->text[_cursor];
-			const char* next = start;
-			size_t length = SDL_strlen(next);
-			SDL_StepUTF8(&next, &length);
-			length = (next - start);
-			TTF_DeleteTextString(_pText, _cursor, (int)length);
-
-			ResetCursorBlink();
-			PushUndo(UndoAction::Erase);
-			DidChange();
-		}
-	}
-
-	void TextInput::DeleteToNextWord()
-	{
-		if (DeleteHighlight())
-			return;
-
-		if (_pText->text)
-		{
-			int next = FindNextWord(_pText, _cursor);
-			int length = (next - _cursor);
-			TTF_DeleteTextString(_pText, _cursor, length);
-
 			ResetCursorBlink();
 			PushUndo(UndoAction::Erase, false);
 			DidChange();
+			return true;
 		}
+		return false;
 	}
 
-	void TextInput::DeleteToEnd()
+	bool TextInput::BackspaceToBeginning()
 	{
-		if (DeleteHighlight())
-			return;
-	
-		if (_pText->text)
-		{
-			TTF_DeleteTextString(_pText, _cursor, -1);
+		if (DeleteSelection())
+			return true;
 
+		if (Delete(0, _cursor))
+		{
 			ResetCursorBlink();
 			PushUndo(UndoAction::Erase, false);
 			DidChange();
+			return true;
 		}
+		return false;
 	}
 
-	void TextInput::DeleteToEndOfLine()
+	bool TextInput::BackspaceToBeginningOfLine()
 	{
-		if (DeleteHighlight())
-			return;
-	
-		if (_pText->text)
-		{
-			TTF_SubString substring;
-			if (TTF_GetTextSubString(_pText, _cursor, &substring) and
-				TTF_GetTextSubStringForLine(_pText, substring.line_index, &substring))
-			{
-				int pos = substring.offset + substring.length;
-				if (pos > 0 and pos <= strlen(_pText->text) and _pText->text[pos - 1] == '\n')
-					pos--;
-				int length = (pos - _cursor);
-				TTF_DeleteTextString(_pText, _cursor, length);
+		if (DeleteSelection())
+			return true;
 
-				ResetCursorBlink();
-				PushUndo(UndoAction::Erase, false);
-				DidChange();
-			}
+		auto cursor = GetCursor();
+		if (Delete(cursor.position, _cursor))
+		{
+			ResetCursorBlink();
+			PushUndo(UndoAction::Erase, false);
+			DidChange();
+			return true;
 		}
+		return false;
 	}
 
-	bool TextInput::DeleteHighlight()
+	bool TextInput::Delete()
 	{
-		if (!_pText->text)
-			return false;
+		if (DeleteSelection())
+			return true;
 
-		int marker, length;
-		if (GetHighlightExtents(&marker, &length))
+		const char* start = &_text[_cursor];
+		const char* next = start;
+		size_t length = SDL_strlen(next);
+		SDL_StepUTF8(&next, &length);
+		length = static_cast<size_t>((uintptr_t)next - (uintptr_t)start);
+
+		if (Delete(_cursor, static_cast<int32_t>(length)))
 		{
-			TTF_DeleteTextString(_pText, marker, length);
-			SetCursorPosition(marker);
-			Deselect();
-
+			ResetCursorBlink();
 			PushUndo(UndoAction::Erase);
 			DidChange();
 			return true;
@@ -1097,7 +1027,70 @@ namespace fig::gui
 		return false;
 	}
 
-	#pragma region Selection
+	bool TextInput::DeleteToNextWord()
+	{
+		if (DeleteSelection())
+			return true;
+
+		int32_t next = FindNextWord(_text, _cursor);
+		int32_t length = next - _cursor;
+		if (Delete(_cursor, length))
+		{
+			ResetCursorBlink();
+			PushUndo(UndoAction::Erase, false);
+			DidChange();
+			return true;
+		}
+		return false;
+	}
+
+	bool TextInput::DeleteToEndOfLine()
+	{
+		if (DeleteSelection())
+			return true;
+
+		auto cursor = GetCursor();
+		if (cursor.line < _lines.size() and Delete(_cursor, _lines[cursor.line].position + _lines[cursor.line].length - cursor.position))
+		{
+			ResetCursorBlink();
+			PushUndo(UndoAction::Erase, false);
+			DidChange();
+			return true;
+		}
+		return false;
+	}
+
+	bool TextInput::DeleteToEnd()
+	{
+		if (DeleteSelection())
+			return true;
+
+		if (Delete(_cursor, static_cast<int32_t>(_text.length()) - _cursor))
+		{
+			ResetCursorBlink();
+			PushUndo(UndoAction::Erase, false);
+			DidChange();
+			return true;
+		}
+		return false;
+	}
+
+	bool TextInput::DeleteSelection()
+	{
+		if (not HasSelection())
+			return false;
+
+		int32_t position, length;
+		if (GetSelection(position, length) and Delete(position, length))
+		{
+			PushUndo(UndoAction::Erase, false);
+			DidChange();
+			return true;
+		}
+		return false;
+	}
+
+#pragma region Selection
 	bool TextInput::HandleMouseDown(int x, int y)
 	{
 		fig::point pt = { x, y };
@@ -1112,31 +1105,21 @@ namespace fig::gui
 		if (!_bFocused)
 			SetFocus(true);
 
-		TTF_SubString substring;
 		int textX = x - rect.x + _scroll.x;
 		int textY = y - rect.y + _scroll.y;
-		if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
+		auto pos = GetCursorAt(textX, textY).position;
+		
+		if (IsShiftDown())
 		{
-			int32_t pos = GetCursorTextIndex(textX, &substring);
-			if (IsPassword())
-			{
-				pos = ConvertFromPasswordPosition(pos);
-				if (TTF_GetTextSubString(_pText, pos, &substring))
-					pos = GetCursorTextIndex(textX, &substring);
-			}
-			if (IsShiftDown())
-			{
-				int last_cursor = _cursor;
-				SetCursorPosition(pos);
-				OnMoveCursor(last_cursor);
-			}
-			else
-			{
-				SetCursorPosition(pos);
-				_bIsHighlighting = true;
-				highlight_start = _cursor;
-				highlight_end = -1;
-			}
+			auto last_cursor = _cursor;
+			SetCursor(pos);
+			OnMoveCursor(last_cursor);
+		}
+		else
+		{
+			SetCursor(pos);
+			Select(pos, -1);
+			_bIsHighlighting = true;
 		}
 
 		return true;
@@ -1150,26 +1133,15 @@ namespace fig::gui
 		if (_bIsHighlighting)
 		{
 			/* Set the highlight position */
-			TTF_SubString substring;
 			int textX = x - rect.x + _scroll.x;
 			int textY = y - rect.y + _scroll.y;
-			if (TTF_GetTextSubStringForPoint(GetRenderedText(), textX, textY, &substring))
-			{
-				int32_t pos = GetCursorTextIndex(textX, &substring);
-				if (IsPassword())
-				{
-					pos = ConvertFromPasswordPosition(pos);
-					if (TTF_GetTextSubString(_pText, pos, &substring))
-						pos = GetCursorTextIndex(textX, &substring);
-				}
+			auto pos = GetCursorAt(textX, textY).position;
 
-				SetCursorPosition(pos);
-				highlight_end = _cursor;
+			SetCursor(pos);
+			Select(highlight_start, _cursor);
 
-				bHandled = true;
-			}
+			bHandled = true;
 		}
-
 
 		// Change cursor
 		fig::point pt = { x, y };
@@ -1182,7 +1154,6 @@ namespace fig::gui
 				PushEvent(UserEvent::PushCursor, Cursor::Caret);
 			else
 				PushEvent(UserEvent::PopCursor, Cursor::Caret);
-			//Global::SetCursor(_bIBeamCursor ? SDL_SYSTEM_CURSOR_TEXT : SDL_SYSTEM_CURSOR_DEFAULT);
 			bHandled = true;
 		}
 
@@ -1198,119 +1169,77 @@ namespace fig::gui
 		return true;
 	}
 
-	void TextInput::SelectAll()
+#pragma endregion Selection
+
+	bool TextInput::Copy()
 	{
-		if (!_pText->text)
-			return;
+		if (_text.empty())
+			return false;
 
-		highlight_start = 0;
-		highlight_end = (int)SDL_strlen(_pText->text);
-	}
-
-	void TextInput::Deselect()
-	{
-		_bIsHighlighting = false;
-		highlight_start = -1;
-		highlight_end = -1;
-	}
-
-	#pragma endregion Selection
-
-	void TextInput::Copy()
-	{
-		if (!_pText->text)
-			return;
-
-		int marker, length;
-		if (GetHighlightExtents(&marker, &length))
+		int32_t position, length;
+		if (GetSelection(position, length))
 		{
 			char* temp = (char*)SDL_malloc(toUZ(length + 1));
 			if (temp)
 			{
-				SDL_memcpy(temp, &_pText->text[marker], length);
+				SDL_memcpy(temp, &_text[position], length);
 				temp[length] = '\0';
 				SDL_SetClipboardText(temp);
 				SDL_free(temp);
 			}
+			return true;
 		}
-		else
-		{
-			SDL_SetClipboardText(_pText->text);
-		}
+		return false;
 	}
 
-	void TextInput::Cut()
+	bool TextInput::Cut()
 	{
-		if (!_pText->text)
-			return;
+		if (_text.empty())
+			return false;
 
-		/* Copy to clipboard and delete text */
-		int marker, length;
-		if (GetHighlightExtents(&marker, &length))
+		int position, length;
+		if (GetSelection(position, length))
 		{
 			char* temp = (char*)SDL_malloc(toUZ(length + 1));
 			if (temp)
 			{
-				SDL_memcpy(temp, &_pText->text[marker], length);
+				SDL_memcpy(temp, &_text[position], length);
 				temp[length] = '\0';
 				SDL_SetClipboardText(temp);
 				SDL_free(temp);
 			}
-			TTF_DeleteTextString(_pText, marker, length);
-			SetCursorPosition(marker);
-			Deselect();
-		}
-		else
-		{
-			SDL_SetClipboardText(_pText->text);
-			TTF_DeleteTextString(_pText, 0, -1);
-		}
 
-		PushUndo(UndoAction::Erase, false);
-		DidChange();
+			if (Delete(position, length))
+			{
+				PushUndo(UndoAction::Erase, false);
+				DidChange();
+				return true;
+			}
+		}
+		return false;
 	}
 
-	void TextInput::Paste()
+	bool TextInput::Paste()
 	{
+		fig::string content = SDL_GetClipboardText();
+		if (content.empty())
+			return false;
+		normalize_newlines(content);
+
 		if (!IsMultiline())
 		{
-			// Only accept the first line of pasted content
-			wstring content = from_utf8(SDL_GetClipboardText());
-			normalize_newlines(content);
-			size_t pos_endl = index_of(content, 0, L'\n');
+			size_t pos_endl = index_of(content, 0, '\n');
 			if (pos_endl != fig::npos)
 				content.resize(pos_endl);
-		
-			string contentUtf8 = to_utf8(content);
-			Insert(contentUtf8.c_str());
-		}
-		else
-		{
-			Insert(SDL_GetClipboardText());
 		}
 
+		Insert(content);
 		PushUndo(UndoAction::Write, false);
 		DidChange();
+		return true;
 	}
 
-	void TextInput::Insert(fig::string_view text)
-	{
-		if (text.empty())
-			return;
-
-		DeleteHighlight();
-
-		if (composition_length > 0)
-		{
-			TTF_DeleteTextString(_pText, composition_start, composition_length);
-			composition_length = 0;
-		}
-
-		TTF_InsertTextString(_pText, _cursor, text.data(), text.length());
-		SetCursorPosition(static_cast<int>(_cursor + text.length()));
-	}
-
-	#pragma region Events
+#pragma region Events
 
 	EventResult TextInput::OnEvent(fig::event& event)
 	{
@@ -1318,11 +1247,11 @@ namespace fig::gui
 		bool bShift = event.key.mod & SDL_KMOD_SHIFT;
 		bool bAlt = event.key.mod & SDL_KMOD_ALT;
 
-		bool bModCtrl		= bCtrl and not (bShift or bAlt);
-		bool bModShift		= bShift and not (bCtrl or bAlt);
-		bool bModAlt		= bAlt and not (bCtrl or bShift);
-		bool bModCtrlShift	= bCtrl and bShift and not bAlt;
-		bool bModNone		= not (bCtrl or bShift or bAlt);
+		bool bModCtrl = bCtrl and not (bShift or bAlt);
+		bool bModShift = bShift and not (bCtrl or bAlt);
+		bool bModAlt = bAlt and not (bCtrl or bShift);
+		bool bModCtrlShift = bCtrl and bShift and not bAlt;
+		bool bModNone = not (bCtrl or bShift or bAlt);
 
 		if (not GetEnabled())
 			return EventResult::Pass; // Disabled
@@ -1521,7 +1450,14 @@ namespace fig::gui
 
 			case SDLK_RETURN:
 			case SDLK_KP_ENTER:
-				if (IsMultiline() and (not _flags.IsSet(Flag::CtrlEnterNewLine) or (bModCtrl || bModShift)))
+				if (_mode == Mode::Multiline or _mode == Mode::MultilineNoWrap)
+				{
+					Insert("\n");
+					PushUndo(UndoAction::Write, false);
+					DidChange();
+					return EventResult::Handled;
+				}
+				if (_mode == Mode::Chat and (bModCtrl || bModShift))
 				{
 					Insert("\n");
 					PushUndo(UndoAction::Write, false);
@@ -1530,9 +1466,7 @@ namespace fig::gui
 				}
 				else if (bModNone and _pOnEnter)
 				{
-					// Invoke
-					fig::string text = _pText->text ? trim(fig::string(_pText->text)) : "";
-					_pOnEnter(text);
+					_pOnEnter(_text); // Invoke
 					return EventResult::Handled;
 				}
 				break;
@@ -1572,12 +1506,12 @@ namespace fig::gui
 
 		case SDL_EVENT_TEXT_EDITING:
 			HandleComposition(&event.edit);
-			break;
+			return EventResult::Handled;
 
 		case SDL_EVENT_TEXT_EDITING_CANDIDATES:
 			ClearCandidates();
-			SaveCandidates(&event);
-			break;
+			SaveCandidates(&event); 
+			return EventResult::Handled;
 
 		default:
 			break;
@@ -1597,19 +1531,17 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
-	#pragma endregion Events
+#pragma endregion Events
 	void TextInput::OnSize()
 	{
 		if (IsMultiline())
 		{
 			int width = std::max(GetWidth() - GetMarginHorizontal(), 0);
-			int currWrapWidth;
-			if (TTF_GetTextWrapWidth(GetRenderedText(), &currWrapWidth) && currWrapWidth != width)
-				TTF_SetTextWrapWidth(GetRenderedText(), width);
+			SetTextWrapWidth(width);
 		}
 		else
 		{
-			TTF_SetTextWrapWidth(GetRenderedText(), 0);
+			SetTextWrapWidth(0);
 		}
 	}
 
@@ -1625,9 +1557,13 @@ namespace fig::gui
 
 	void TextInput::Clear()
 	{
-		TTF_SetTextString(_pText, nullptr, 0);
-		Deselect();
-		SetCursorPosition(0);
+		_text.clear();
+		_lines.clear();
+		_cursor = 0;
+		highlight_start = -1;
+		highlight_end = -1;
+		CancelComposition();
+
 		InitUndo();
 		DidChange();
 		_scroll = {};
@@ -1645,13 +1581,6 @@ namespace fig::gui
 	void TextInput::SetPlaceholder(fig::string_view text)
 	{
 		TTF_SetTextString(_pPlaceholder, text.data(), text.length());
-	}
-
-	fig::string TextInput::GetText() const
-	{
-		if (_pText->text)
-			return fig::string(_pText->text);
-		return {};
 	}
 
 	void TextInput::ApplyScroll(int& x, int& y) const
@@ -1696,16 +1625,10 @@ namespace fig::gui
 			return;
 
 		auto clientRect = GetClientRect();
-		int lineSkip = TTF_GetFontLineSkip(_pFont);
-		size_t textLen = _pText->text ? SDL_strlen(_pText->text) : 0;
-		int numRows;
-		TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_pText, 0, toI(textLen), &numRows);
-
-		if (_pText->text && numRows > 0 && substrings[numRows - 1]->length != 0)
-		{
-			if (textLen > 0 && _pText->text[textLen - 1] == '\n')
-				numRows += 1; // Count empty row
-		}
+		int32_t lineSkip = TTF_GetFontLineSkip(_pFont);
+		int32_t numRows = static_cast<int32_t>(GetLineCount());
+		if (not _text.empty() and _text.back() == '\n')
+			numRows++;
 
 		numRows = std::clamp(numRows, _minRows, _maxRows);
 		if (numRows * lineSkip != clientRect.h)
@@ -1721,48 +1644,34 @@ namespace fig::gui
 		if (!_pPassword)
 			return;
 
-		if (_pText->text)
-		{
-			size_t length = SDL_utf8strlen(_pText->text);
-			if (_pPassword->text && _lastLength == length)
-				return;
-			_lastLength = length;
+		size_t length = SDL_utf8strlen(_text.c_str());
 
-			wstring wdots;
-			wdots.resize(length);
-			for (size_t i = 0; i < length; ++i)
-				wdots[i] = L'\u2022'; // Bullet
-			string dots = to_utf8(wdots);
-
-			TTF_SetTextString(_pPassword, toCStr(dots), 0);
-		}
-		else
-		{
-			TTF_SetTextString(_pPassword, "", 0);
-		}
+		wstring wdots;
+		wdots.resize(length, L'\u2022');
+		TTF_SetTextString(_pPassword, to_utf8(wdots).data(), 0);
 	}
 
-	int32_t TextInput::ConvertToPasswordPosition(int32_t position)
+	int32_t TextInput::ConvertToPasswordPosition(int32_t position) const
 	{
 		if (IsPassword())
 		{
-			int utf8_position = BytesUTF8Length(_pText->text, position);
-			return UTF8ByteLength(_pPassword->text, utf8_position);
+			int utf8_position = GetUtf8Codepoints(_text.c_str(), position);
+			return Utf8CodepointsToBytes(_pPassword->text, utf8_position);
 		}
 		return position;
 	}
 
-	int32_t TextInput::ConvertFromPasswordPosition(int32_t position)
+	int32_t TextInput::ConvertFromPasswordPosition(int32_t position) const
 	{
 		if (IsPassword())
 		{
-			int utf8_position = BytesUTF8Length(_pPassword->text, position);
-			return UTF8ByteLength(_pText->text, utf8_position);
+			int utf8_position = GetUtf8Codepoints(_pPassword->text, position);
+			return Utf8CodepointsToBytes(_text.c_str(), utf8_position);
 		}
 		return position;
 	}
 
-	#pragma region Undo/Redo
+#pragma region Undo/Redo
 
 	TextInput::UndoState TextInput::GetUndoState(UndoAction action) const noexcept
 	{
@@ -1789,27 +1698,33 @@ namespace fig::gui
 
 	void TextInput::Undo()
 	{
-		if (auto undo = _undo.Undo())
+		if (auto try_undo = _undo.Undo())
 		{
-			TTF_SetTextString(_pText, toCStr(undo.value().text), 0);
-			SetCursorPosition(undo.value().cursor_pos);
-			highlight_start = undo.value().highlight_start;
-			highlight_end = undo.value().highlight_end;
+			auto& undo = *try_undo;
+			_text = undo.text;
+			_lines = LayoutParagraph(_text);
+			RefreshTexts();
+			SetCursor(undo.cursor_pos);
+			highlight_start = undo.highlight_start;
+			highlight_end = undo.highlight_end;
 		}
 	}
 
 	void TextInput::Redo()
 	{
-		if (auto undo = _undo.Redo())
+		if (auto try_undo = _undo.Redo())
 		{
-			TTF_SetTextString(_pText, toCStr(undo.value().text), 0);
-			SetCursorPosition(undo.value().cursor_pos);
-			highlight_start = undo.value().highlight_start;
-			highlight_end = undo.value().highlight_end;
+			auto& undo = *try_undo;
+			_text = undo.text;
+			_lines = LayoutParagraph(_text);
+			RefreshTexts();
+			SetCursor(undo.cursor_pos);
+			highlight_start = undo.highlight_start;
+			highlight_end = undo.highlight_end;
 		}
 	}
 
-	#pragma endregion Undo/Redo
+#pragma endregion Undo/Redo
 
 	void TextInput::OnPostRender()
 	{
@@ -1819,9 +1734,9 @@ namespace fig::gui
 	void TextInput::DidChange()
 	{
 		if (_pOnChanged)
-			_pOnChanged(_pText->text ? _pText->text : "");
-		
-		OnText(_pText->text ? _pText->text : "");
+			_pOnChanged(_text);
+
+		OnText(_text);
 	}
 
 	void TextInput::OnEnabled(bool bEnabled)
@@ -1836,5 +1751,519 @@ namespace fig::gui
 		{
 			SetForegroundColor(Color::Black);
 		}
+	}
+
+	std::vector<TextInput::TTFTextLine> TextInput::LayoutParagraph(fig::string_view text)
+	{
+		std::vector<TTFTextLine> result;
+
+		if (not IsMultiline())
+		{
+			size_t newlinePos = text.find('\n', 0);
+			result.emplace_back(TTFTextLine {
+				.position = 0,
+				.length = static_cast<int32_t>(std::min(text.length(), newlinePos)),
+				.eol = true,
+			});
+			return result;
+		}
+
+		if (not IsWordWrapping())
+		{
+			size_t paragraphStart = 0;
+			while (paragraphStart < text.size())
+			{
+				size_t newlinePos = text.find('\n', paragraphStart);
+				size_t paragraphEnd = (newlinePos == fig::string_view::npos) ? text.size() : newlinePos + 1uz;
+				const char* pText = text.data() + paragraphStart;
+
+				result.emplace_back(TTFTextLine {
+					.position = static_cast<int32_t>(pText - text.data()),
+					.length = static_cast<int32_t>(paragraphEnd - paragraphStart),
+					.eol = true,
+				});
+
+				assert(result.back().length > 0);
+
+				if (paragraphEnd >= text.size())
+					break;
+
+				paragraphStart = paragraphEnd;
+			}
+			return result;
+		}
+
+		size_t paragraphStart = 0;
+		while (paragraphStart <= text.size())
+		{
+			size_t newlinePos = text.find('\n', paragraphStart);
+			size_t paragraphEnd = (newlinePos == fig::string_view::npos) ? text.size() : newlinePos + 1uz;
+
+			const char* pText = text.data() + paragraphStart;
+			size_t remainingLength = paragraphEnd - paragraphStart;
+
+			while (remainingLength > 0)
+			{
+				int32_t measuredWidth;
+				size_t measuredLength;
+
+				if (not TTF_MeasureString(_pFont, pText, remainingLength, _wrapWidth, &measuredWidth, &measuredLength))
+					break;
+
+				size_t breakWidth = measuredLength;
+				if (measuredLength < remainingLength)
+				{
+					size_t lastSpace = measuredLength;
+
+					while (lastSpace > 0 and not SDL_isspace(static_cast<unsigned char>(pText[lastSpace - 1])))
+						--lastSpace;
+
+					if (lastSpace > 0)
+						measuredLength = lastSpace;
+				}
+
+				size_t advance = measuredLength;
+
+				while (advance < remainingLength and SDL_isspace(static_cast<unsigned char>(pText[advance])) and pText[advance] != '\n')
+					++advance;
+
+				if (advance < remainingLength and pText[advance] == '\n')
+					++advance;
+
+				result.emplace_back(TTFTextLine {
+					.position = static_cast<int32_t>(pText - text.data()),
+					.length = static_cast<int32_t>(advance),
+				});
+
+				result.back().eol = IsEOL(result.back());
+
+				pText += advance;
+				remainingLength -= advance;
+			}
+
+			if (newlinePos == fig::string_view::npos)
+				break;
+
+			paragraphStart = paragraphEnd;
+		}
+
+		if (not result.empty())
+			result.back().eol = true;
+
+		return result;
+	}
+
+	TextInput::TTFCursor TextInput::GetCursorAt(int32_t position) const noexcept
+	{
+		if (_lines.empty())
+			return {};
+
+		if (position >= _text.size())
+		{
+			return TTFCursor {
+				.position = position,
+				.offset = position - _lines.back().position,
+				.line = static_cast<int32_t>(_lines.size() - 1),
+			};
+		}
+
+		for (size_t i = 0uz; i < _lines.size(); ++i)
+		{
+			auto& line = _lines[i];
+			if (position >= line.position and position < line.position + line.length)
+			{
+				return TTFCursor {
+					.position = position,
+					.offset = position - line.position,
+					.line = static_cast<int32_t>(i)
+				};
+			}
+		}
+		return {};
+	}
+
+	TextInput::TTFCursor TextInput::GetCursorAt(int32_t x, int32_t y) const noexcept
+	{
+		if (IsPassword())
+		{
+			TTF_SubString substring;
+			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineHeight / 2, &substring))
+			{
+				int32_t pos = GetCursorTextIndex(x, &substring);
+				pos = ConvertFromPasswordPosition(pos);
+
+				return TTFCursor {
+					.position = pos,
+					.offset = pos,
+					.line = 0,
+				};
+			}
+			return {};
+		}
+
+		if (not _lines.empty())
+		{
+			size_t line_index = static_cast<size_t>(std::clamp(y / _lineHeight, 0, static_cast<int32_t>(_lines.size() - 1)));
+			auto& line = _lines[line_index];
+			TTF_SubString substring;
+			if (TTF_GetTextSubStringForPoint(line.ttf_text.get(), x, _lineHeight / 2, &substring))
+			{
+				int32_t pos = GetCursorTextIndex(x, &substring);
+				return TTFCursor {
+					.position = line.position + pos,
+					.offset = pos,
+					.line = static_cast<int32_t>(line_index),
+				};
+			}
+		}
+
+		return {};
+	}
+
+	TextInput::TTFCursor TextInput::GetLineCursor(size_t line_index) const noexcept
+	{
+		if (line_index < _lines.size())
+		{
+			auto& line = _lines[line_index];
+			return TTFCursor {
+				.position = line.position,
+				.offset = 0,
+				.line = static_cast<int32_t>(line_index)
+			};
+		}
+
+		return {};
+	}
+
+	int32_t TextInput::SetCursor(int32_t index) noexcept
+	{
+		if (_composition_length > 0)
+		{
+			/* Don't let the cursor be moved into the composition */
+			if (index >= _composition_start and index <= (_composition_start + _composition_length))
+				return _cursor;
+
+			CancelComposition();
+		}
+
+		ResetCursorBlink();
+		_cursor = std::clamp(index, 0, static_cast<int32_t>(_text.length()));
+		return _cursor;
+	}
+
+	int32_t TextInput::SetCursor(fig::point position) noexcept
+	{
+		SetCursor(GetCursorAt(position.x, position.y).position);
+		return _cursor;
+	}
+
+	TextInput::TTFCursor TextInput::GetCursor() const noexcept
+	{
+		return GetCursorAt(_cursor);
+	}
+
+	void TextInput::SelectAll() noexcept
+	{
+		highlight_start = 0;
+		highlight_end = static_cast<int32_t>(_text.size());
+	}
+
+	void TextInput::Select(int32_t start, int32_t end) noexcept
+	{
+		highlight_start = start;
+		highlight_end = end;
+	}
+
+	void TextInput::Deselect() noexcept
+	{
+		highlight_start = -1;
+		highlight_end = -1;
+	}
+
+	bool TextInput::GetSelection(int32_t& marker, int32_t& length) const noexcept
+	{
+		if (HasSelection())
+		{
+			auto start = std::min(highlight_start, highlight_end);
+			auto end = std::max(highlight_start, highlight_end);
+			marker = start;
+			length = end - start;
+			return true;
+		}
+		return false;
+	}
+
+	void TextInput::Insert(int32_t position, fig::string_view text)
+	{
+		DeleteSelection();
+
+		if (_text.empty())
+		{
+			_text = text;
+			_lines = LayoutParagraph(_text);
+			RefreshTexts();
+			SetCursor(static_cast<int32_t>(text.size()));
+			return;
+		}
+
+		auto cursor = GetCursorAt(position);
+		int32_t paragraphStartLine = cursor.line;
+		int32_t paragraphEndLine = cursor.line;
+
+		while (not _lines[paragraphEndLine].eol and paragraphEndLine < static_cast<int32_t>(_lines.size()) - 1)
+			++paragraphEndLine;
+
+		int32_t paragraphStart = _lines[paragraphStartLine].position;
+		int32_t paragraphEnd = _lines[paragraphEndLine].position + _lines[paragraphEndLine].length;
+
+		_text.insert_range(_text.cbegin() + position, text);
+
+		int32_t delta = static_cast<int32_t>(text.size());
+		paragraphEnd += delta;
+
+		fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
+		std::vector<TTFTextLine> newLines = LayoutParagraph(paragraphText);
+
+		for (auto& line : newLines)
+			line.position += paragraphStart;
+
+		for (size_t i = paragraphEndLine + 1; i < _lines.size(); ++i)
+			_lines[i].position += delta;
+
+		_lines.erase(_lines.begin() + paragraphStartLine, _lines.begin() + paragraphEndLine + 1);
+		_lines.insert(_lines.begin() + paragraphStartLine, std::make_move_iterator(newLines.begin()), std::make_move_iterator(newLines.end()));
+
+		RefreshTexts();
+		SetCursor(position + delta);
+	}
+
+	void TextInput::Insert(fig::string_view text)
+	{
+		Insert(std::clamp(_cursor, 0, static_cast<int32_t>(_text.size())), text);
+	}
+
+	bool TextInput::Delete(int32_t from, int32_t length)
+	{
+		if (_text.empty() or length <= 0)
+			return false;
+
+		auto startCursor = GetCursorAt(from);
+		auto endCursor = GetCursorAt(from + length);
+
+		int32_t paragraphStartLine = startCursor.line;
+		int32_t paragraphEndLine = endCursor.line;
+
+		while (not _lines[paragraphEndLine].eol and paragraphEndLine < static_cast<int32_t>(_lines.size()) - 1)
+			++paragraphEndLine;
+
+		int32_t paragraphStart = _lines[paragraphStartLine].position;
+		int32_t paragraphEnd = _lines[paragraphEndLine].position + _lines[paragraphEndLine].length;
+
+		_text.erase(_text.cbegin() + from, _text.cbegin() + from + length);
+
+		paragraphEnd -= length;
+
+		fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
+		std::vector<TTFTextLine> newLines = LayoutParagraph(paragraphText);
+
+		if (newLines.empty() and false)
+		{
+			assert(false);
+			newLines.emplace_back(TTFTextLine {
+				.position = 0,
+				.length = 0,
+				.eol = true,
+			});
+		}
+
+		for (auto& line : newLines)
+			line.position += paragraphStart;
+
+		for (size_t i = paragraphEndLine + 1; i < _lines.size(); ++i)
+			_lines[i].position -= length;
+
+		_lines.erase(_lines.begin() + paragraphStartLine, _lines.begin() + paragraphEndLine + 1);
+		_lines.insert(_lines.begin() + paragraphStartLine,
+			std::make_move_iterator(newLines.begin()),
+			std::make_move_iterator(newLines.end()));
+
+		RefreshTexts();
+		SetCursor(from);
+		Deselect();
+		return true;
+	}
+
+	bool TextInput::IsEOL(const TTFTextLine& line) const noexcept
+	{
+		return line.position >= 0 and line.position + line.length <= _text.length() and _text[line.position + line.length - 1uz] == '\n';
+	}
+
+	std::vector<fig::rectf> TextInput::GetHighlights() const noexcept
+	{
+		if (not HasSelection())
+			return {};
+
+		auto start = std::min(highlight_start, highlight_end);
+		auto end = std::max(highlight_start, highlight_end);
+
+		std::vector<fig::rectf> highlights;
+
+		if (IsPassword())
+		{
+			start = ConvertToPasswordPosition(start);
+			end = ConvertToPasswordPosition(end);
+			if (TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(_pPassword.get(), start, end - start, NULL))
+			{
+				for (int i = 0; pHighlights[i]; ++i)
+				{
+					auto highlight_rect = to_rectf(pHighlights[i]->rect);
+					highlight_rect.w = std::max(highlight_rect.w, 3.0f);
+					highlight_rect.y += 0;
+					if (highlight_rect.x <= 1.0f)
+					{
+						highlight_rect.w += highlight_rect.x;
+						highlight_rect.x = 0;
+					}
+					highlights.push_back(highlight_rect);
+				}
+			}
+		}
+		else
+		{
+			highlights.reserve(_lines.size());
+			for (size_t iLine = 0uz; iLine < _lines.size(); ++iLine)
+			{
+				auto& line = _lines[iLine];
+				if (line.ttf_text.empty())
+					continue;
+				if (end <= line.position or start >= line.position + line.length)
+					continue;
+
+				auto pos_start = std::max(line.position, start) - line.position;
+				auto pos_end = std::min(line.position + line.length, end) - line.position;
+				if (TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(line.ttf_text.get(), pos_start, pos_end - pos_start, NULL))
+				{
+					for (int i = 0; pHighlights[i]; ++i)
+					{
+						auto highlight_rect = to_rectf(pHighlights[i]->rect);
+						highlight_rect.w = std::max(highlight_rect.w, 3.0f);
+						highlight_rect.y += iLine * _lineHeight;
+						if (highlight_rect.x <= 1.0f)
+						{
+							highlight_rect.w += highlight_rect.x;
+							highlight_rect.x = 0;
+						}
+						highlights.push_back(highlight_rect);
+					}
+				}
+			}
+		}
+		return highlights;
+	}
+
+	fig::rectf TextInput::GetCursorRect() const noexcept
+	{
+		if (IsPassword())
+		{
+			auto pos = ConvertToPasswordPosition(_cursor);
+			TTF_SubString substring;
+			TTF_GetTextSubString(_pPassword.get(), pos, &substring);
+			return rectf {
+				.x = static_cast<float>(substring.rect.x),
+				.y = 0,
+				.w = 1.0f,
+				.h = static_cast<float>(_lineHeight),
+			};
+		}
+
+		if (IsOnLastNewLine())
+		{
+			return rectf {
+				.x = 0,
+				.y = static_cast<float>(_lineHeight * _lines.size()),
+				.w = 1.0f,
+				.h = static_cast<float>(_lineHeight),
+			};
+		}
+
+		auto cursor = GetCursor();
+
+		fig::rectf rect {
+			.x = 0.0f,
+			.y = cursor.line * static_cast<float>(_lineHeight),
+			.w = 1.0f,
+			.h = static_cast<float>(_lineHeight),
+		};
+
+		if (cursor.line <_lines.size())
+		{
+			auto& line = _lines[cursor.line];
+			if (not line.ttf_text.empty())
+			{
+				int32_t cursor_pos = cursor.offset; 
+				TTF_SubString substring;
+				if (TTF_GetTextSubString(line.ttf_text.get(), cursor_pos, &substring))
+				{
+					rect.x = static_cast<float>(substring.rect.x);
+					rect.h = std::max(rect.h, static_cast<float>(_lineHeight));
+				}
+			}
+		}
+		return rect;
+	}
+
+	void TextInput::RelayoutAll()
+	{
+		std::vector<TTFTextLine> newLines;
+		int32_t paragraphStart = 0;
+
+		for (size_t i = 0; i < _lines.size(); ++i)
+		{
+			if (not _lines[i].eol)
+				continue;
+
+			int32_t paragraphEnd = _lines[i].position + _lines[i].length;
+			fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
+
+			std::vector<TTFTextLine> paragraphLines = LayoutParagraph(paragraphText);
+
+			for (auto& line : paragraphLines)
+				line.position += paragraphStart;
+
+			newLines.insert(newLines.end(),
+				std::make_move_iterator(paragraphLines.begin()),
+				std::make_move_iterator(paragraphLines.end()));
+
+			paragraphStart = paragraphEnd;
+		}
+
+		_lines = std::move(newLines);
+		RefreshTexts();
+	}
+
+	void TextInput::RefreshTexts() noexcept
+	{
+		// Create text objects
+		for (auto& line : _lines)
+		{
+			if (line.ttf_text.empty())
+			{
+				assert(line.position >= 0 and line.length >= 0 and line.position + line.length <= _text.size());
+				line.ttf_text = fig::sdl::Text(GetSDLTextEngine(), _pFont, _text.data() + line.position, line.length);
+				TTF_SetTextWrapWhitespaceVisible(line.ttf_text.get(), true);
+			}
+		}
+
+		if (IsPassword())
+			UpdatePassword();
+	}
+
+	bool TextInput::IsOnLastNewLine() const noexcept
+	{
+		// If the cursor is at the end of the string, and the last character is a line break,
+		// treat it as a new line.
+		return _cursor > 0
+			and _cursor == _text.size()
+			and _text.back() == '\n';
 	}
 }

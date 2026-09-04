@@ -201,11 +201,11 @@ namespace fig::data
 		_bDirtyContext = true;
 	}
 
-	void Character::SetAttribute(const fig::string& attributeId, const fig::string& label, const fig::string& content, CharacterAttribute::Format format, CharacterAttribute::Visibility visibility)
+	void Character::SetAttribute(const fig::string& attributeId, const fig::string& label, fig::string_view content, CharacterAttribute::Format format, CharacterAttribute::Visibility visibility)
 	{
 		_attributes[lcase(attributeId)] = CharacterAttribute {
 			.label = label,
-			.value = content,
+			.value = fig::string { content },
 			.format = format,
 			.visibility = visibility,
 		};

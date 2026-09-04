@@ -198,12 +198,12 @@ namespace fig::gui
 		ShowSidePanel(false);
 	}
 
-	bool MainFrame::TrySignIn(const fig::user::UserProfile& profile, const fig::string& password) noexcept
+	bool MainFrame::TrySignIn(const fig::user::UserProfile& profile, fig::string_view password) noexcept
 	{
 		auto& userMngr = Global::GetUserManager();
 		auto startTime = std::chrono::steady_clock::now();
 
-		if (userMngr.SignIn(profile.id, password))
+		if (userMngr.SignIn(profile.id, fig::string { password }))
 		{
 			OnSignedIn(profile);
 

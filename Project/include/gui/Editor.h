@@ -46,7 +46,7 @@ namespace fig::gui
 			auto pControl = pParent->CreateControl<ComboBox>();
 			pControl->AddItems(items);
 			pControl->SetText(binding.AsString());
-			pControl->SetTextChangedCallback([binding](const fig::string& text) mutable { binding.Set(text); });
+			pControl->SetTextChangedCallback([binding](fig::string_view text) mutable { binding.Set(fig::string { text }); });
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
 			return pControl;
 		}

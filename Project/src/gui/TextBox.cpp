@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	TextBox::TextBox(ControlPtr pParent, FontFace fontFace, double ptSize, Flags flags) : TextInput(pParent, fontFace, ptSize, flags)
+	TextBox::TextBox(ControlPtr pParent, FontFace fontFace, double ptSize, TextInput::Mode mode) : TextInput(pParent, fontFace, ptSize, mode)
 	{
 		SetMargins(8, 4, 4, 6);
 
@@ -34,7 +34,7 @@ namespace fig::gui
 			SetHeight(TTF_GetFontLineSkip(_pFont) * rows + GetMarginVertical());
 		_minRows = rows;
 		_maxRows = rows;
-		_flags.Unset(Flag::Autosize);
+		_bAutoSize = false;
 	}
 
 }

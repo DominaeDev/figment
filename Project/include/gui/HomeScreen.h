@@ -21,7 +21,7 @@ namespace fig::gui
 		void OnRender(fig::renderer_ptr pRenderer) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
-		void OnSearchFilter(fig::string search_text);
+		void OnSearchFilter(fig::string_view search_text);
 		void OnUserSignedIn(const fig::user::UserProfile& profile) override;
 
 	private:

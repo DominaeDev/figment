@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	PasswordBox::PasswordBox(ControlPtr pParent) : TextBox(pParent, FontFace::Default, 18, { TextInput::Flag::Password, TextInput::Flag::Single })
+	PasswordBox::PasswordBox(ControlPtr pParent) : TextBox(pParent, FontFace::Default, 18, Mode::Password)
 	{
 		SetMarginLeft(34);
 

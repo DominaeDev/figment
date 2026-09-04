@@ -229,8 +229,7 @@
     <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
     <ClCompile Include="src\gui\Slider.cpp" />
-    <ClCompile Include="src\gui\TextBox2.cpp" />
-    <ClCompile Include="src\gui\TextInput2.cpp" />
+    <ClCompile Include="src\gui\TextInput.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
     <ClCompile Include="src\gui\ToggleWithLabel.cpp" />
     <ClCompile Include="src\gui\TopBar.cpp" />
@@ -322,7 +321,6 @@
     <ClCompile Include="src\util\SearchIndex.cpp" />
     <ClCompile Include="src\util\Hash.cpp" />
     <ClCompile Include="src\util\StringUtils.cpp" />
-    <ClCompile Include="src\gui\TextInput.cpp" />
     <ClCompile Include="src\gui\AppResources.cpp" />
     <ClCompile Include="src\util\CommonUtils.cpp" />
     <ClCompile Include="src\gui\VerticalListSizer.cpp" />
@@ -503,8 +501,7 @@
     <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\Slider.h" />
-    <ClInclude Include="include\gui\TextBox2.h" />
-    <ClInclude Include="include\gui\TextInput2.h" />
+    <ClInclude Include="include\gui\TextInput.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
     <ClInclude Include="include\gui\ToggleWithLabel.h" />
     <ClInclude Include="include\gui\TopBar.h" />
@@ -636,7 +633,6 @@
     <ClInclude Include="include\util\Lockable.h" />
     <ClInclude Include="include\util\Handle.h" />
     <ClInclude Include="include\util\StringUtils.h" />
-    <ClInclude Include="include\gui\TextInput.h" />
     <ClInclude Include="include\gui\AppResources.h" />
     <ClInclude Include="include\util\CommonUtils.h" />
     <ClInclude Include="include\gui\VerticalListSizer.h" />

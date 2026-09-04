@@ -22,7 +22,7 @@ namespace fig::gui
 		EventResult OnEvent(fig::event& event) override;
 		void ShowSortingMenu() noexcept;
 		void ShowFilteringMenu() noexcept;
-		void OnSearchFilter(fig::string search_text);
+		void OnSearchFilter(fig::string_view search_text);
 		void RefreshFilterButton();
 
 	private:

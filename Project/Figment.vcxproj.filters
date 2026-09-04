@@ -677,9 +677,6 @@
     <ClCompile Include="src\gui\TextBox.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\TextInput.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="include\gui\TexturedBorder.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
@@ -704,10 +701,7 @@
     <ClCompile Include="src\gui\HorizontalLine.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\TextInput2.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\TextBox2.cpp">
+    <ClCompile Include="src\gui\TextInput.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1618,9 +1612,6 @@
     <ClInclude Include="include\gui\TextBox.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\TextInput.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\TexturedBorder.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
@@ -1645,10 +1636,7 @@
     <ClInclude Include="include\gui\HorizontalLine.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\TextInput2.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\TextBox2.h">
+    <ClInclude Include="include\gui\TextInput.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>

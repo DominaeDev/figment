@@ -21,7 +21,7 @@ namespace fig::gui
 	private:
 		void SelectProfile(const fig::user::UserProfile& profile);
 		void CycleProfile(int32_t step);
-		bool SignIn();
+		bool SignIn(fig::string_view password);
 		void ShowMenu();
 
 	private:

@@ -46,7 +46,7 @@ namespace fig::gui
 		_pFilterTextBox->SetSize(192, 30);
 		_pFilterTextBox->SetMaxWidth(192);
 		_pFilterTextBox->SetBackgroundColor(Color::White);
-		_pFilterTextBox->SetTextChangedCallback([this](fig::string s) {
+		_pFilterTextBox->SetTextChangedCallback([this](fig::string_view s) {
 			OnSearchFilter(s);
 		});
 
@@ -113,7 +113,7 @@ namespace fig::gui
 		return *_pCardList;
 	}
 
-	void HomeScreen::OnSearchFilter(fig::string search_text)
+	void HomeScreen::OnSearchFilter(fig::string_view search_text)
 	{
 		if (search_text.size() < 2)
 		{
@@ -123,7 +123,7 @@ namespace fig::gui
 		}
 		else
 		{
-			_search_text = std::move(search_text);
+			_search_text = fig::string { search_text };
 			_fSearchTimer = 0.005f;
 		}
 	}

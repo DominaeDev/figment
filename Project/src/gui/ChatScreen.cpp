@@ -52,9 +52,10 @@ namespace fig::gui
 		_pInfoPanel = CreateControl<InfoPanel>();
 		_pChatScroll = centerArea->CreateControl<ChatScroll>();
 
-		_pTextBox = centerArea->CreateControl<TextInput>(FontFace::Default, Constants::GUI::ChatBoxFontSize, TextInput::Flags { TextInput::Flag::Multi, TextInput::Flag::Autosize, TextInput::Flag::CtrlEnterNewLine });
+		_pTextBox = centerArea->CreateControl<TextInput>(FontFace::Default, Constants::GUI::ChatBoxFontSize, TextInput::Mode::Chat);
 		_pTextBox->SetSize(Constants::GUI::ChatTextBoxWidth, 88);
 		_pTextBox->SetMargins(8, 4, 4, 6);
+		_pTextBox->EnableAutoSize(true);
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);
 
@@ -71,8 +72,8 @@ namespace fig::gui
 		bgSizer->Add(centerArea, 0, SizerFlag::Fill | SizerFlag::Bottom, 24);
 		bgSizer->AddStretchSpacer();
 
-		_pTextBox->SetEnterPressedCallback([this](fig::string text) {
-			EnqueueCommand(ChatCommands::Parse(text));
+		_pTextBox->SetEnterPressedCallback([this](fig::string_view text) {
+			EnqueueCommand(ChatCommands::Parse(fig::string { text }));
 			_pTextBox->Clear();
 		});
 

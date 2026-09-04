@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	SearchBox::SearchBox(ControlPtr pParent) : TextBox(pParent, FontFace::Default, Constants::GUI::TextBoxFontSize, TextInput::Flags { TextInput::Flag::Single }), MouseEventHandler(this)
+	SearchBox::SearchBox(ControlPtr pParent) : TextBox(pParent, FontFace::Default, Constants::GUI::TextBoxFontSize), MouseEventHandler(this)
 	{
 		SetMarginLeft(30); // Icon
 		SetMarginRight(30); // Cross
