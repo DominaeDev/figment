@@ -159,6 +159,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="include\gui\TexturedBorder.cpp" />
+    <ClCompile Include="include\util\StripHtml.cpp" />
     <ClCompile Include="src\app\AppSettings.cpp" />
     <ClCompile Include="src\app\AppState.cpp" />
     <ClCompile Include="src\app\main.cpp" />
@@ -637,6 +638,7 @@
     <ClInclude Include="include\util\CommonUtils.h" />
     <ClInclude Include="include\gui\VerticalListSizer.h" />
     <ClInclude Include="include\gui\VerticalSizer.h" />
+    <ClInclude Include="include\util\StripHtml.h" />
     <ClInclude Include="include\util\Timestamp.h" />
     <ClInclude Include="include\util\UndoStack.h" />
   </ItemGroup>

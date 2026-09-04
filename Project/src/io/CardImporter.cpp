@@ -3,6 +3,7 @@
 #include "io/CardImporter.h"
 #include "io/FileUtility.h"
 #include "data/TavernCardV2.h"
+#include "util/StripHtml.h"
 
 using namespace fig::data;
 
@@ -28,6 +29,8 @@ namespace fig::io
 			Character character;
 			character.name = CharacterName { card.data.name };
 			character.description = card.data.creator_notes;
+			if (contains_html(character.description))
+				character.description = strip_html(character.description);
 			character.SetAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
 			character.SetAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Public);
 			character.AppendTags(card.data.tags);
