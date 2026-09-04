@@ -1457,7 +1457,7 @@ namespace fig::gui
 					DidChange();
 					return EventResult::Handled;
 				}
-				if (_mode == Mode::Chat and (bModCtrl || bModShift))
+				else if (_mode == Mode::Chat and (bModCtrl || bModShift))
 				{
 					Insert("\n");
 					PushUndo(UndoAction::Write, false);
