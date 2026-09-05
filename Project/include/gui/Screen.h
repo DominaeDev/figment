@@ -40,7 +40,7 @@ namespace fig::gui
 		Home,
 		Chat,
 		ChatListing,
-		Editor,
+		EditorPage,
 	};
 
 	template <IsScreen T>

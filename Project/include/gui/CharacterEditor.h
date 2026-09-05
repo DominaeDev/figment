@@ -2,32 +2,23 @@
 
 #include "gui/Editor.h"
 
-namespace fig::data
-{
-	class Character;
-}
-
 namespace fig::gui
 {
 	class CharacterEditor : public Editor
 	{
 	public:
-		CharacterEditor(const fig::uuid& characterId);
+		CharacterEditor(ControlPtr pParent, const fig::uuid& assetId);
+		void Shutdown() override {};
 		
-		void Initialize() noexcept;
-		void ShutDown() noexcept {};
-
 		fig::string GetTitle() const noexcept override;
-		EditorFields GetFields() noexcept override;
-	
-		void PopulateTopBar(ControlPtr pParent);
+		void PopulateTopBar(ControlPtr pTopBar) override;
+
 		bool Save() noexcept;
 
 	protected:
-		void OnAfterLayout();
+		void OnAfterLayout() override;
 
 	private:
-		fig::data::Character _value {};
 		fig::observer_ptr<Control> _pSaveButton;
 	};
 }

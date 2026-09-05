@@ -10,7 +10,7 @@ namespace fig::gui
 		_pScrollPanel = CreateControl<ScrollPanel>();
 		_pScrollPanel->SetScrollBarOffset(0);
 		_pScrollPanel->SetBottomPadding(40);
-		_pScrollPanel->SetMaxWidth(Constants::GUI::Editor::Width);
+		_pScrollPanel->SetMaxWidth(Constants::GUI::EditorPage::Width);
 		_pScrollPanel->SetSizer<VerticalSizer>();
 
 		_pTopBar = CreateControl<TopBar>("", _pScrollPanel);
@@ -20,10 +20,19 @@ namespace fig::gui
 		mainSizer->Add(_pScrollPanel, -1, SizerFlag::Fill | SizerFlag::AlignLeft | SizerFlag::Left | SizerFlag::Right, 16);
 	}
 
+	EditorScreen::~EditorScreen()
+	{
+		ReleaseEditor();
+	}
+
 	void EditorScreen::ReleaseEditor()
 	{
-		_pEditor->ShutDown();
-		_pEditor.reset();
+		if (_pEditor)
+		{
+			_pScrollPanel->RemoveChildren();
+			_pEditor->Shutdown();
+			_pEditor.reset();
+		}
 	}
 
 	void EditorScreen::SetTitle(fig::string_view text)
@@ -39,11 +48,12 @@ namespace fig::gui
 		// Init editor
 		_pScrollPanel->DestroyChildren();
 		_pScrollPanel->AddChild(_pEditor.get());
-		_pEditor->Initialize();
-		_pEditor->PopulateTopBar(_pTopBar);
-
 		auto pSizer = _pScrollPanel->GetSizer();
 		pSizer->Add(_pEditor.get(), 0, SizerFlag::Expand);
+
+		_pEditor->PopulateTopBar(_pTopBar);
+		_pEditor->SelectPage(0);
+
 		InvalidateLayout();
 	}
 

@@ -7,8 +7,6 @@
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
 #include "gui/EditorScreen.h"
-#include "gui/CharacterEditor.h"
-#include "gui/VoiceEditor.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/FileUtility.h"
@@ -22,6 +20,7 @@
 #include "util/DebugUtils.h"
 #include "gui/ChatListingScreen.h" //! @temp
 #include "gui/InfoPanel.h" //! @temp
+#include "gui/CharacterEditor.h"
 
 using namespace fig::io;
 using namespace fig::data;
@@ -59,7 +58,7 @@ namespace fig::gui
 		RegisterScreen<ChatScreen>(ScreenType::Chat);
 		RegisterScreen<DebugScreen>(ScreenType::Debug);
 		RegisterScreen<ChatListingScreen>(ScreenType::ChatListing);
-		RegisterScreen<EditorScreen>(ScreenType::Editor);
+		RegisterScreen<EditorScreen>(ScreenType::EditorPage);
 
 		DebugUtility::Initialize();
 
@@ -358,7 +357,9 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{
 						auto characterId = fig::uuid::from_str("e66008f6-f3b8-4099-a50d-1cc284ecd008");
-						ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>(characterId);
+						ChangeScreen<EditorScreen>()
+							->SetEditor<CharacterEditor>(characterId)
+							->SelectPage(0);
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)
@@ -452,13 +453,17 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::EditCharacter))
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-			ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>(characterId);
+			ChangeScreen<EditorScreen>()
+				->SetEditor<CharacterEditor>(characterId)
+				->SelectPage(0);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditCharacterVoice))
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-			ChangeScreen<EditorScreen>()->SetEditor<VoiceEditor>(characterId);
+			ChangeScreen<EditorScreen>()
+				->SetEditor<CharacterEditor>(characterId)
+				->SelectPage(1);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::StartTextInput)

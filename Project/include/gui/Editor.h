@@ -1,67 +1,41 @@
 #pragma once
 
-#include "EditorFields.h"
-#include "ComboBox.h"
-#include "DropList.h"
+#include "EditorPage.h"
 
 namespace fig::gui
 {
+	using EditorPagePtr = fig::observer_ptr<EditorPage>;
+
 	class Editor : public Control
 	{
+		Editor() = delete;
 	public:
-		Editor(ControlPtr pParent) : Control(pParent)
-		{}
-		virtual ~Editor()
-		{};
-
-		virtual fig::string GetTitle() const noexcept = 0;
-		virtual EditorFields GetFields() noexcept { return {}; };
-
-		virtual void Initialize() noexcept = 0;
-		virtual void ShutDown() noexcept = 0;
+		Editor(ControlPtr pParent);
+		
+		virtual void Shutdown() = 0;
 		virtual void PopulateTopBar(ControlPtr pTopBar) {};
+		virtual fig::string GetTitle() const noexcept = 0;
 
+		std::vector<EditorPagePtr> GetPages() const noexcept { return _pages; }
+
+		void SelectPage(size_t index);
+	
 	protected:
-		void CreateEditorField(ControlPtr pParent, const EditorField& field);
-		void CreateEditorField(ControlPtr pParent, fig::observer_ptr<Sizer> pSizer, const EditorField& field);
-
-		fig::observer_ptr<StaticText> CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
-		fig::observer_ptr<StaticText> CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
-		fig::observer_ptr<StaticText> CreateLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
-
-		template <typename T>
-		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding)
+		template <typename T, typename... Args>
+			requires std::derived_from<T, EditorPage>
+		fig::observer_ptr<T> CreatePage(Args&&... args)
 		{
-			return CreateTextBox(pParent, pSizer, binding, 1);
-		};
-
-		template <typename T>
-		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding, int32_t rows) = delete;
-		template <>
-		fig::observer_ptr<class TextBox> CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows);
-
-		template <is_string_value_bindable T, is_string_range U>
-		fig::observer_ptr<class ComboBox> CreateComboBox(ControlPtr pParent, SizerPtr pSizer, const U& items, ValueBinding<T> binding)
-		{
-			auto pControl = pParent->CreateControl<ComboBox>();
-			pControl->AddItems(items);
-			pControl->SetText(binding.AsString());
-			pControl->SetTextChangedCallback([binding](fig::string_view text) mutable { binding.Set(fig::string { text }); });
-			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
-			return pControl;
+			auto pPage = CreateControl<T>(std::forward<Args>(args)...);
+			_pages.push_back(pPage);
+			EnablePage(pPage, false);
+			_pPageSizer->Add(pPage, 0, SizerFlag::Expand);
+			return pPage;
 		}
+		
+		void EnablePage(EditorPage* pPage, bool bEnabled);
 
-		template <is_int_value_bindable T, is_string_range U>
-		fig::observer_ptr<DropList> CreateDropList(ControlPtr pParent, SizerPtr pSizer, const U& items, ValueBinding<T> binding)
-		{
-			auto pControl = pParent->CreateControl<DropList>();
-			pControl->AddItems(items);
-			pControl->Select(binding.AsInt());
-			pControl->SetDelegate([binding](int32_t index) mutable { 
-				binding.Set(index >= 0 ? index : 0); 
-			});
-			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
-			return pControl;
-		}
+	private:
+		std::vector<EditorPagePtr> _pages;
+		SizerPtr _pPageSizer;
 	};
 }

@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "gui/VoiceEditor.h"
+#include "gui/CharacterEditorVoicePage.h"
 #include "gui/ToggleWithLabel.h"
 #include "gui/TextBox.h"
 #include "gui/AppResources.h"
@@ -71,21 +71,23 @@ namespace fig::gui
 		{ "presence_commanding",	std::pair { "His voice reflects his commanding confidence and domineering character", "Her voice reflects her commanding confidence and domineering character" } },
 	};
 
-	VoiceEditor::VoiceEditor(const fig::uuid& characterId) : Editor(nullptr),
+	CharacterEditorVoicePage::CharacterEditorVoicePage(ControlPtr pParent, const fig::uuid& characterId) : EditorPage(pParent),
 		_characterId { characterId }
 	{
 		if (auto try_character = Global::GetUserContent().Get<Character>(characterId))
 			_character = fig::data::Character { *try_character };
 
 		_audioResultQueue.SetDelegate([this](auto&& r) { OnAudioResult(std::move(r)); });
+
+		Initialize();
 	}
 
-	fig::string VoiceEditor::GetTitle() const noexcept
+	fig::string CharacterEditorVoicePage::GetName() const noexcept
 	{
-		return std::format("Configuring {}'s voice", _character.GetName());
+		return "Voice";
 	}
 
-	fig::observer_ptr<Sizer> VoiceEditor::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
+	fig::observer_ptr<Sizer> CharacterEditorVoicePage::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		CreateLabel(pParent, pSizer, text);
 		auto pGridSizer = new GridSizer(100, 29, 8, 6);
@@ -93,30 +95,7 @@ namespace fig::gui
 		return pGridSizer;
 	}
 
-	void VoiceEditor::PopulateTopBar(ControlPtr pParent)
-	{
-		auto pSizer = pParent->GetSizer();
-
-		_pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
-		_pSaveButton->SetSize(110, 32);
-		_pSaveButton->SetDelegate([this] {
-			if (Save())
-				PushEvent(UserEvent::NavigateToHome);
-		});
-		_pSaveButton->SetEnabled(false);
-		
-		_pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Discard", Resource::ICON_DELETE);
-		_pDiscardButton->SetSize(110, 32);
-		_pDiscardButton->SetDelegate([this] {
-			PushEvent(UserEvent::NavigateToHome);
-		});
-
-		pSizer->Add(_pSaveButton, 0, SizerFlag::AlignCenterVertical);
-		pSizer->Add(_pDiscardButton, 0, SizerFlag::Left | SizerFlag::AlignCenterVertical, 8);
-		pSizer->AddSpacer(8);
-	}
-
-	void VoiceEditor::Initialize() noexcept
+	void CharacterEditorVoicePage::Initialize() noexcept
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
 		auto pHorizontalSizer = new HorizontalSizer();
@@ -228,13 +207,13 @@ namespace fig::gui
 		}
 	}
 
-	void VoiceEditor::ShutDown() noexcept
+	void CharacterEditorVoicePage::ShutDown() noexcept
 	{
 		Global::GetAudioManager().StopAllSounds();
 		Global::GetTTSBackend().UnloadDesignModels();
 	}
 
-	fig::observer_ptr<ToggleWithLabel> VoiceEditor::CreateToggle(SizerPtr pSizer, fig::handle toggleGroup, fig::handle toggleKey, fig::string_view label, bool bRadio)
+	fig::observer_ptr<ToggleWithLabel> CharacterEditorVoicePage::CreateToggle(SizerPtr pSizer, fig::handle toggleGroup, fig::handle toggleKey, fig::string_view label, bool bRadio)
 	{
 		auto pToggle = CreateControl<ToggleWithLabel>(label, 14.5, bRadio ? ToggleBehavior::Radio : ToggleBehavior::Default);
 		pToggle->SetDelegate([this, toggleGroup, toggleKey](bool bOn) { 
@@ -246,7 +225,7 @@ namespace fig::gui
 		return pToggle;
 	}
 
-	void VoiceEditor::OnToggle(fig::handle group, fig::handle key, bool bOn)
+	void CharacterEditorVoicePage::OnToggle(fig::handle group, fig::handle key, bool bOn)
 	{
 		auto& toggleGroup = _toggleGroups[group];
 		if (bOn) // Untoggle others in group
@@ -267,7 +246,7 @@ namespace fig::gui
 		}
 	}
 
-	fig::string VoiceEditor::GetPrompt() const noexcept
+	fig::string CharacterEditorVoicePage::GetPrompt() const noexcept
 	{
 		std::vector<fig::string> prompts;
 
@@ -315,7 +294,7 @@ namespace fig::gui
 			| std::ranges::to<std::string>();
 	}
 
-	void VoiceEditor::Generate() noexcept
+	void CharacterEditorVoicePage::Generate() noexcept
 	{
 		fig::string name = _character.GetName();
 		if (empty_or_whitespace(name))
@@ -352,7 +331,7 @@ namespace fig::gui
 		}
 	}
 
-	void VoiceEditor::OnUpdate(float fElapsed)
+	void CharacterEditorVoicePage::OnUpdate(float fElapsed)
 	{
 		_audioResultQueue.Update();
 
@@ -374,12 +353,12 @@ namespace fig::gui
 		}
 	}
 
-	void VoiceEditor::OnAfterLayout()
+	void CharacterEditorVoicePage::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
 	}
 
-	void VoiceEditor::PlayStop() noexcept
+	void CharacterEditorVoicePage::PlayStop() noexcept
 	{
 		if (_bIsPlaying)
 		{
@@ -393,7 +372,7 @@ namespace fig::gui
 		}
 	}
 
-	EventResult VoiceEditor::OnEvent(fig::event& event)
+	EventResult CharacterEditorVoicePage::OnEvent(fig::event& event)
 	{
 		if (IsUserEvent(event, UserEvent::TTSServerLoadingModel))
 		{
@@ -420,12 +399,12 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
-	void VoiceEditor::SetStatusMessage(fig::string_view message)
+	void CharacterEditorVoicePage::SetStatusMessage(fig::string_view message)
 	{
 		_pStatusText->SetText(message);
 	}
 
-	bool VoiceEditor::Save() noexcept
+	bool CharacterEditorVoicePage::Save() noexcept
 	{
 		if (_voicePrint.audioData.empty())
 			return false;
@@ -440,7 +419,7 @@ namespace fig::gui
 		return true;
 	}
 
-	void VoiceEditor::OnAudioResult(fig::tts::TTSPayload&& payload)
+	void CharacterEditorVoicePage::OnAudioResult(fig::tts::TTSPayload&& payload)
 	{
 		if (payload.has_value())
 		{

@@ -155,7 +155,7 @@ namespace fig::gui
 
 	EventResult Control::ProcessEvent(fig::event& event)
 	{
-		if (_bCulled)
+		if (_bCulled or not _bEnabled)
 			return EventResult::Pass;
 
 		EventResult result { EventResult::Pass };

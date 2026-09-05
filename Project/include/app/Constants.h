@@ -102,7 +102,7 @@ namespace fig::Constants
 			constexpr float ImageZoomFactor = 1.1f;
 		}
 
-		namespace Editor
+		namespace EditorPage
 		{
 			constexpr fig::coord Width = 900;
 		}

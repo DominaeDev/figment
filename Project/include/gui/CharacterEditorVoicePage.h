@@ -1,22 +1,21 @@
 #pragma once
 
-#include "gui/Editor.h"
+#include "gui/EditorPage.h"
 #include "data/Character.h"
 #include "tts/VoicePrint.h"
 #include "tts/AudioResultQueue.h"
 
 namespace fig::gui
 {
-	class VoiceEditor : public Editor
+	class CharacterEditorVoicePage : public EditorPage
 	{
 	public:
-		VoiceEditor(const fig::uuid& characterId);
+		CharacterEditorVoicePage(ControlPtr pParent, const fig::uuid& characterId);
 
 		void Initialize() noexcept;
 		void ShutDown() noexcept;
 
-		fig::string GetTitle() const noexcept override;
-		void PopulateTopBar(ControlPtr pParent) override;
+		fig::string GetName() const noexcept;
 
 	protected:
 		void OnUpdate(float fElapsed);
