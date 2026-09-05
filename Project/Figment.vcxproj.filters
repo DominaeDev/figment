@@ -710,6 +710,12 @@
     <ClCompile Include="src\gui\CharacterEditor.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\SidePanelMain.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\SidePanelEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1648,6 +1654,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditor.h">
       <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\SidePanelMain.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\SidePanelEditor.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,8 @@
 #include "gui/EditorScreen.h"
 #include "gui/ScrollPanel.h"
 #include "gui/TopBar.h"
+#include "gui/MainFrame.h"
+#include "gui/SidePanel.h"
 
 namespace fig::gui
 {
@@ -54,6 +56,8 @@ namespace fig::gui
 		_pEditor->PopulateTopBar(_pTopBar);
 		_pEditor->SelectPage(0);
 
+		MainFrame::GetInstance().GetSidePanel()->SetEditor(_pEditor.get());
+
 		InvalidateLayout();
 	}
 
@@ -67,6 +71,8 @@ namespace fig::gui
 		if (IsUserEvent(event, UserEvent::ScreenDeactivated))
 		{
 			ReleaseEditor();
+			MainFrame::GetInstance().GetSidePanel()->SetEditor(nullptr);
+
 			return EventResult::Handled;
 		}
 

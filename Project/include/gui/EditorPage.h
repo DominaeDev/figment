@@ -16,6 +16,7 @@ namespace fig::gui
 
 		virtual fig::string GetName() const noexcept = 0;
 
+		virtual bool OnSave() { return true; };
 	protected:
 		fig::observer_ptr<StaticText> CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 		fig::observer_ptr<StaticText> CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);

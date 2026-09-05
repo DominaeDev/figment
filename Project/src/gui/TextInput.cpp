@@ -1995,7 +1995,11 @@ namespace fig::gui
 
 	void TextInput::Insert(int32_t position, fig::string_view text)
 	{
+		assert(position >= 0 and position <= static_cast<int32_t>(_text.size()));
+
 		DeleteSelection();
+
+		assert(position >= 0 and position <= static_cast<int32_t>(_text.size()));
 
 		if (_text.empty())
 		{

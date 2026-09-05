@@ -43,6 +43,8 @@ namespace fig::gui
 
 	bool CharacterEditor::Save() noexcept
 	{
+		for (auto& page : _pages)
+			page->OnSave();
 		return true;
 	}
 

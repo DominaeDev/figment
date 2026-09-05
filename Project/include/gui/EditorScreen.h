@@ -53,5 +53,5 @@ namespace fig::gui
 	};
 
 	template <>
-	constexpr ScreenType ScreenTypeOf<EditorScreen> = ScreenType::EditorPage;
+	constexpr ScreenType ScreenTypeOf<EditorScreen> = ScreenType::Editor;
 }

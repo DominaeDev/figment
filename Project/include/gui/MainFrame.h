@@ -69,6 +69,7 @@ namespace fig::gui
 
 		void ShowLoginScreen();
 		void ShowSidePanel(bool bShow) noexcept;
+		fig::observer_ptr<SidePanel> GetSidePanel() noexcept { return _pSidePanel; }
 
 		bool TrySignIn(const fig::user::UserProfile& profile, fig::string_view password) noexcept;
 		bool SignOut() noexcept;

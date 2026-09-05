@@ -230,6 +230,8 @@
     <ClCompile Include="src\gui\NineGridImage.cpp" />
     <ClCompile Include="src\gui\ScenarioCard.cpp" />
     <ClCompile Include="src\gui\Screen.cpp" />
+    <ClCompile Include="src\gui\SidePanelEditor.cpp" />
+    <ClCompile Include="src\gui\SidePanelMain.cpp" />
     <ClCompile Include="src\gui\Slider.cpp" />
     <ClCompile Include="src\gui\TextInput.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
@@ -503,6 +505,8 @@
     <ClInclude Include="include\gui\RenderTargetControl.h" />
     <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\SidePanelEditor.h" />
+    <ClInclude Include="include\gui\SidePanelMain.h" />
     <ClInclude Include="include\gui\Slider.h" />
     <ClInclude Include="include\gui\TextInput.h" />
     <ClInclude Include="include\gui\ToggleWithIcon.h" />

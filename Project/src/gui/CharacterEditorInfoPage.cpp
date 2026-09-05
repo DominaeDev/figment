@@ -18,8 +18,6 @@ namespace fig::gui
 			_value = fig::data::Character { *try_character };
 
 		Initialize();
-
-		SetBackgroundColor(Color::Debug2);
 	}
 
 	void CharacterEditorInfoPage::Initialize() noexcept

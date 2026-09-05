@@ -19,8 +19,10 @@ namespace fig::gui
 		std::vector<EditorPagePtr> GetPages() const noexcept { return _pages; }
 
 		void SelectPage(size_t index);
-	
+		
 	protected:
+		std::vector<EditorPagePtr> _pages;
+
 		template <typename T, typename... Args>
 			requires std::derived_from<T, EditorPage>
 		fig::observer_ptr<T> CreatePage(Args&&... args)
@@ -35,7 +37,6 @@ namespace fig::gui
 		void EnablePage(EditorPage* pPage, bool bEnabled);
 
 	private:
-		std::vector<EditorPagePtr> _pages;
 		SizerPtr _pPageSizer;
 	};
 }

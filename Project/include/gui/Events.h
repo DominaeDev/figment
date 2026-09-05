@@ -43,6 +43,7 @@ namespace fig::gui
 		UserSignedIn,
 		UserSignedOut,
 		ChangedScreen,
+		LeaveScreen,
 		StartTextInput,
 		StopTextInput,
 		

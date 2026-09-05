@@ -58,7 +58,7 @@ namespace fig::gui
 		RegisterScreen<ChatScreen>(ScreenType::Chat);
 		RegisterScreen<DebugScreen>(ScreenType::Debug);
 		RegisterScreen<ChatListingScreen>(ScreenType::ChatListing);
-		RegisterScreen<EditorScreen>(ScreenType::EditorPage);
+		RegisterScreen<EditorScreen>(ScreenType::Editor);
 
 		DebugUtility::Initialize();
 
@@ -122,11 +122,13 @@ namespace fig::gui
 		if (auto itFind = _screensByType.find(screen); itFind != _screensByType.end())
 			pScreen = itFind->second;
 
+		PushEvent(UserEvent::LeaveScreen, &_currentScreen);
+
 		if (_pActiveScreen)
 		{
 			_pActiveScreen->SetVisible(false);
 			_pActiveScreen->PushEvent(UserEvent::ScreenDeactivated);
-
+			
 			// Detach
 			auto pParent = _pActiveScreen->GetParent();
 			if (pParent)

@@ -31,9 +31,9 @@ namespace fig::gui
 		
 		void Generate() noexcept;
 		void PlayStop() noexcept;
-		bool Save() noexcept;
 		void SetStatusMessage(fig::string_view message);
 		void OnAudioResult(fig::tts::TTSPayload&& payload);
+		bool OnSave() override;
 
 	private:
 		fig::uuid _characterId {};

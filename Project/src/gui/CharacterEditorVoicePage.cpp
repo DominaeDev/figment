@@ -320,7 +320,7 @@ namespace fig::gui
 			_audioResultQueue.Add(std::move(result).value());
 			_pGenerateButton->SetEnabled(false);
 			_pPlayButton->SetEnabled(false);
-			_pSaveButton->SetEnabled(false);
+//			_pSaveButton->SetEnabled(false);
 
 			SetStatusMessage(isServerRunning ? fig::strings::TTS::Generating : fig::strings::TTS::ServerInitializing);
 			Global::GetAudioManager().StopAllSounds();
@@ -404,7 +404,7 @@ namespace fig::gui
 		_pStatusText->SetText(message);
 	}
 
-	bool CharacterEditorVoicePage::Save() noexcept
+	bool CharacterEditorVoicePage::OnSave()
 	{
 		if (_voicePrint.audioData.empty())
 			return false;
@@ -429,7 +429,7 @@ namespace fig::gui
 
 			SetStatusMessage("");
 			_pPlayButton->SetEnabled(true);
-			_pSaveButton->SetEnabled(true);
+//			_pSaveButton->SetEnabled(true);
 		}
 		else 
 		{
