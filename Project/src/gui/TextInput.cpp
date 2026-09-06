@@ -2067,16 +2067,6 @@ namespace fig::gui
 		fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
 		std::vector<TTFTextLine> newLines = LayoutParagraph(paragraphText);
 
-		if (newLines.empty() and false)
-		{
-			assert(false);
-			newLines.emplace_back(TTFTextLine {
-				.position = 0,
-				.length = 0,
-				.eol = true,
-			});
-		}
-
 		for (auto& line : newLines)
 			line.position += paragraphStart;
 
