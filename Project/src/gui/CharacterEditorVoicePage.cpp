@@ -39,10 +39,10 @@ namespace fig::gui
 		// Tone
 		{ "tone_textured",			std::pair { "A rough, raspy, hoarse, and gravelly voice", "" } },
 		{ "tone_deep",				std::pair { "Deep voice, with low, husky, throaty notes.", "" } },
-		{ "tone_mellow",			std::pair { "A mellow, neither masculine nor feminine, mid-range voice", "" } },
-		{ "tone_light",				std::pair { "A bright and clear, high pitched voice with distinctly feminine notes", "" } },
-		{ "tone_crisp",				std::pair { "Loud, crisp, and optimistic", "" } },
-		{ "tone_cute",				std::pair { "An affectionate, kind-hearted voice with light notes and a tender, melodic timbre", "" } },
+		{ "tone_mellow",			std::pair { "A tempered, neither masculine nor feminine, mid-range voice", "" } },
+//		{ "tone_light",				std::pair { "A bright and clear, high pitched voice with distinctly feminine notes", "" } },
+//		{ "tone_crisp",				std::pair { "Loud, crisp, and optimistic", "" } },
+		{ "tone_light",				std::pair { "An affectionate, kind-hearted voice with light notes and a tender, melodic timbre", "" } },
 		{ "tone_soft",				std::pair { "Soft like velvet, a tiny whisper, with a weak presence", "" } },
 
 		// Flow
@@ -54,10 +54,10 @@ namespace fig::gui
 		
 		// Temperature
 		{ "temperature_friendly",		std::pair { "Friendly, kind, and easy-going", "" } },
-		{ "temperature_playful",		std::pair { "Playful, joyous, and enthusiastic", "" } },
+		{ "temperature_playful",		std::pair { "He's endearing, full of optimism and enthusiasm", "She's endearing, full of optimism and enthusiasm" } },
 		{ "temperature_sensual",		std::pair { "Sensual, gentle, angelic, and serene voice", "" } },
 		{ "temperature_arrogant",		std::pair { "Arrogant, concieted, brash, and overconfident", "" } },
-		{ "temperature_protective",		std::pair { "A loving parental figure, with notes of platonic love, guidance, and unyielding protection", "" } },
+		{ "temperature_protective",		std::pair { "A loving father, his voice is kind and patient, full of love and support", "A loving mother, her voice is kind and patient, full of love and support" } },
 		{ "temperature_gloomy",			std::pair { "Depressed, gloomy and sad, his voice reflects her fragility and loneliness", "Depressed, gloomy and sad, her voice reflects her fragility and loneliness" } },
 		{ "temperature_intimate",		std::pair { "Seductive, alluring, and intimately close, with notes of desire, lust, and growing arousal", "" } },
 		{ "temperature_malevolent",		std::pair { "A cruel, spiteful, haughty, villainous timbre, with undertones of pure hatred, disgust, and resentment", "" } },
@@ -119,16 +119,16 @@ namespace fig::gui
 		auto pToneSizer = CreateGroup(this, pDesignerSizer, "Tone");
 		CreateToggle(pToneSizer, groupTone, "tone_deep", "Deep");
 		CreateToggle(pToneSizer, groupTone, "tone_mellow", "Mellow");
-		CreateToggle(pToneSizer, groupTone, "tone_light", "Light");
+		CreateToggle(pToneSizer, groupTone, "tone_light", "Bright");
 		CreateToggle(pToneSizer, groupTone, "tone_soft", "Soft");
-		CreateToggle(pToneSizer, groupTone, "tone_cute", "Sweet");
+//		CreateToggle(pToneSizer, groupTone, "tone_cute", "Sweet");
 		CreateToggle(pToneSizer, groupTone, "tone_textured", "Textured");
-		CreateToggle(pToneSizer, groupTone, "tone_crisp", "Crisp");
+//		CreateToggle(pToneSizer, groupTone, "tone_crisp", "Crisp");
 		
 		// Presence
 		auto pPresenceSizer = CreateGroup(this, pDesignerSizer, "Presence");
+		CreateToggle(pPresenceSizer, groupPresence, "presence_shy", "Shy");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_nervous", "Nervous");
-		CreateToggle(pPresenceSizer, groupPresence, "presence_shy", "Weak");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_grounded", "Grounded");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_strong", "Strong");
 		CreateToggle(pPresenceSizer, groupPresence, "presence_commanding", "Commanding");
@@ -142,12 +142,12 @@ namespace fig::gui
 		CreateToggle(pFlowSizer, groupFlow, "flow_quick", "Quick");
 
 		// Temperature
-		auto pTemperatureSizer = CreateGroup(this, pDesignerSizer, "Mood");
+		auto pTemperatureSizer = CreateGroup(this, pDesignerSizer, "Temperature");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_friendly", "Friendly");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_playful", "Playful");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_protective", "Protective");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_sensual", "Sensual");
-		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_intimate", "Intimate");
+		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_intimate", "Passionate");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_gloomy", "Gloomy");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_arrogant", "Arrogant");
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_malevolent", "Malevolent");

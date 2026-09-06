@@ -21,9 +21,9 @@ namespace fig
 		if constexpr (Debugging)
 		{
 //			ImportTestCharacters("./import/characters");
+//			EraseChats();
 //			CreateModelSettings();
 //			ShuffleCards();
-//			EraseChats();
 //			GenerateUUIDs(10uz);
 		}
 	}

@@ -85,10 +85,14 @@ namespace fig::data
 		Gender gender {};
 		Pronouns pronouns { Pronouns::Undefined };
 		fig::string brief;
-		fig::string description; // User-facing only
 		
 		fig::color bgColor {};
 		fig::color borderColor {};
+
+		// Meta data
+		fig::string creator;
+		fig::string about; // User-facing only
+		fig::string version;
 	
 	private:
 		void UpdateContext();

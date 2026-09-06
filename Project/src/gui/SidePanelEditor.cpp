@@ -24,14 +24,14 @@ namespace fig::gui
 
 		// Character info
 		auto pInfoButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_INFO, "General");
-		pInfoButton->SetDelegate([]() { PushEvent(UserEvent::SelectEditorPage, 0); });
+		pInfoButton->SetDelegate([]{ PushEvent(UserEvent::SelectEditorPage, 0); });
 
 		// Images
 		auto pImagesButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_IMAGES, "Images");
 
 		// Voice
 		auto pVoiceButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_VOICE, "Voice");
-		pVoiceButton->SetDelegate([]() { PushEvent(UserEvent::SelectEditorPage, 1); });
+		pVoiceButton->SetDelegate([]{ PushEvent(UserEvent::SelectEditorPage, 1); });
 
 		// Story
 		auto pStoryButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_STORY, "Story");
@@ -44,6 +44,7 @@ namespace fig::gui
 
 		// About
 		auto pAboutButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_ABOUT, "About");
+		pAboutButton->SetDelegate([]{ PushEvent(UserEvent::SelectEditorPage, 2); });
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->AddSpacer(56);
@@ -102,6 +103,7 @@ namespace fig::gui
 		// About
 		auto pAboutButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL, false);
 		pAboutButton->SetTheme(Theme::SidePanelButtonStyle);
+		pAboutButton->SetDelegate([]() { PushEvent(UserEvent::SelectEditorPage, 2); });
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->AddSpacer(62);

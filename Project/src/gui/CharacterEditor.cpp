@@ -2,6 +2,7 @@
 #include "gui/CharacterEditor.h"
 #include "gui/CharacterEditorInfoPage.h"
 #include "gui/CharacterEditorVoicePage.h"
+#include "gui/CharacterEditorAboutPage.h"
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/AppResources.h"
 
@@ -11,6 +12,7 @@ namespace fig::gui
 	{
 		CreatePage<CharacterEditorInfoPage>(assetId);
 		CreatePage<CharacterEditorVoicePage>(assetId);
+		CreatePage<CharacterEditorAboutPage>(assetId);
 	}
 
 	fig::string CharacterEditor::GetTitle() const noexcept

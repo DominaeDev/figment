@@ -70,18 +70,8 @@ namespace fig::gui
 		auto pAge = CreateControl<TextBox>();
 		pAge->SetText(_value.GetAttribute("age").value_or(""));
 		pAge->SetTextChangedCallback([&](fig::string_view text) mutable { _value.SetAttribute("age", "Age", text); });
-		pAge->SetMaxWidth(100);
+		pAge->SetMaxWidth(120);
 		pSizer->Add(pAge, 0, SizerFlag::Expand, 0);
-
-		// Description
-		CreateLabel(this, pSizer, "Creator's notes");
-		auto pDescription = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_value.description), 4);
-		pDescription->SetMaxWidth(620);
-		pDescription->EnableAutoSize(true);
-		pDescription->SetMinRows(2);
-		pDescription->SetMaxRows(8);
-
-		CreateHint(this, pSizer, "The notes do not affect the character's behavior.");
 
 		// ----
 		auto pLine = CreateControl<HorizontalLine>();
@@ -89,26 +79,12 @@ namespace fig::gui
 		pSizer->AddSpacer(6);
 		pSizer->Add(pLine, 0, SizerFlag::Expand);
 
-		CreateHeader(this, pSizer, "Attributes");
-
 		// Buttons
 		auto pAddAttributeButton = CreateControl<ButtonWithLabel>("Add attribute");
 		pAddAttributeButton->SetHeight(35);
 //		pAddAttributeButton->SetDelegate([] { });
 		
 		pSizer->Add(pAddAttributeButton, 0);
-
-
-/*		auto genderBinding = ValueBinding<Gender>(&_value.gender);
-		auto pGender = CreateControl<ComboBox>();
-		pGender->AddItems(std::vector<fig::string> { "Male", "Female", });
-		pGender->SetMaxWidth(300);
-		pGender->SetTextChangedCallback([genderBinding](const fig::string& text) mutable { genderBinding.Set(text); });
-		pSizer->Add(pGender, 0, SizerFlag::Expand, 0); */
-
-//		CreateLabel(this, pSizer, "Next item");
-//		CreateTextBox<fig::string>(this, pSizer, ValueBinding<fig::string>(&_value.name.last))
-//			->SetMaxWidth(250);
 	}
 
 	void CharacterEditorInfoPage::OnAfterLayout()

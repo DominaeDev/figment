@@ -226,7 +226,7 @@ namespace fig::Constants
 		constexpr int32_t ServerPort = 8080;
 		constexpr float DefaultDialogueDelay = 0.250f;
 
-		constexpr fig::const_string ExamplePhrase = "Greetings! I'm {}, and this is my voice. Do you like it? If not, well, that sounds like a YOU-problem.";
+		constexpr fig::const_string ExamplePhrase = "Greetings! I'm {}, and this is my voice. Do you like it? If not, well, that's YOUR problem.";
 
 	}
 }

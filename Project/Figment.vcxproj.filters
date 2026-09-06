@@ -716,6 +716,9 @@
     <ClCompile Include="src\gui\SidePanelEditor.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorAboutPage.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1660,6 +1663,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\SidePanelEditor.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorAboutPage.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

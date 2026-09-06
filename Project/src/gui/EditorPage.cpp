@@ -43,5 +43,12 @@ namespace fig::gui
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;
 	}
+
+	fig::observer_ptr<TextBox> EditorPage::CreateTextBox(ControlPtr pParent, SizerPtr pSizer)
+	{
+		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize);
+		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
+		return pTextBox;
+	}
 	
 }

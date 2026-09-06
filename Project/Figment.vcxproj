@@ -184,6 +184,7 @@
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\CharacterEditor.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorAboutPage.cpp" />
     <ClCompile Include="src\gui\CheckBox.cpp" />
     <ClCompile Include="src\gui\ComboBox.cpp" />
     <ClCompile Include="src\gui\DropList.cpp" />
@@ -473,6 +474,7 @@
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\CharacterDetailsPanel.h" />
     <ClInclude Include="include\gui\CharacterEditor.h" />
+    <ClInclude Include="include\gui\CharacterEditorAboutPage.h" />
     <ClInclude Include="include\gui\CharacterEditorInfoPage.h" />
     <ClInclude Include="include\gui\ChatBackground.h" />
     <ClInclude Include="include\gui\ChatList.h" />

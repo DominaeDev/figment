@@ -28,9 +28,13 @@ namespace fig::io
 
 			Character character;
 			character.name = CharacterName { card.data.name };
-			character.description = card.data.creator_notes;
-			if (contains_html(character.description))
-				character.description = strip_html(character.description);
+			character.creator = card.data.creator;
+			character.about = card.data.creator_notes;
+			character.version = card.data.character_version;
+			if (character.version == "main")
+				character.version = "1.0";
+			if (contains_html(character.about))
+				character.about = strip_html(character.about);
 			character.SetAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
 			character.SetAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Public);
 			character.AppendTags(card.data.tags);

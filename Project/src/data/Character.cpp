@@ -44,14 +44,16 @@ namespace fig::data
 				[](auto& value) { return (fig::string)value; },
 				[](auto& value) { return Gender(value); }
 			},
-			Element { "Description", &Character::description },
 			Element { "Brief", &Character::brief },
 			Element { "Attributes", &Character::_attributes },
 			Element { "Tags", &Character::_tags },
 			Element { "SearchIndex", &Character::_searchIndex,
 				[](auto& value) -> fig::string { return value.Serialize(); },
 				[](auto& value) -> SearchIndex { SearchIndex s; s.Deserialize(value); return s; }
-			}
+			},
+			Element { "About", &Character::about },
+			Element { "Creator", &Character::creator },
+			Element { "Version", &Character::version }
 		);
 
 		static_assert(IsXmlSerializable<Character>);
@@ -244,8 +246,8 @@ namespace fig::data
 
 	fig::string Character::GetDescription() const noexcept
 	{
-		if (not description.empty())
-			return truncate(strip_emoji(description), 1024);
+		if (not about.empty())
+			return truncate(strip_emoji(about), 1024);
 		return brief;
 	}
 }
