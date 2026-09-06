@@ -1997,10 +1997,6 @@ namespace fig::gui
 	{
 		assert(position >= 0 and position <= static_cast<int32_t>(_text.size()));
 
-		DeleteSelection();
-
-		assert(position >= 0 and position <= static_cast<int32_t>(_text.size()));
-
 		if (_text.empty())
 		{
 			_text = text;
@@ -2043,7 +2039,8 @@ namespace fig::gui
 
 	void TextInput::Insert(fig::string_view text)
 	{
-		Insert(std::clamp(_cursor, 0, static_cast<int32_t>(_text.size())), text);
+		DeleteSelection();
+		Insert(_cursor, text);
 	}
 
 	bool TextInput::Delete(int32_t from, int32_t length)
