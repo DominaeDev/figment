@@ -75,6 +75,12 @@ namespace fig::gui
 
 			return EventResult::Handled;
 		}
+		else if (IsUserEvent(event, UserEvent::SelectEditorPage))
+		{
+			if (_pEditor)
+				_pEditor->SelectPage(static_cast<size_t>(event.user.code));
+			return EventResult::Handled;
+		}
 
 		return EventResult::Pass;
 	}

@@ -12,6 +12,7 @@ namespace fig::gui
 	{
 		for (size_t i = 0uz; i < _pages.size(); ++i)
 			EnablePage(_pages[i], i == index);
+		InvalidateLayout();
 	}
 
 	void Editor::EnablePage(EditorPage* pPage, bool bEnabled)

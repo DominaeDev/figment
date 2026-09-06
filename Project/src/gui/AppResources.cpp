@@ -81,6 +81,21 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_SAVE, "./resources/gui/icons/icon_save.png");
 		LoadTexture(pRenderer, Resource::ICON_CROSS, "./resources/gui/icons/icon_cross.png");
 		LoadTexture(pRenderer, Resource::ICON_DROPLIST_ARROW, "./resources/gui/icons/icon_droplist_arrow.png");
+
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_INFO, "./resources/gui/icons/icon_character_edit_info.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_VOICE, "./resources/gui/icons/icon_character_edit_voice.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_IMAGES, "./resources/gui/icons/icon_character_edit_images.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_STORY, "./resources/gui/icons/icon_character_edit_story.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_CONCEPTS, "./resources/gui/icons/icon_character_edit_concepts.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_MEMORIES, "./resources/gui/icons/icon_character_edit_memories.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ABOUT, "./resources/gui/icons/icon_character_edit_about.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_INFO_SMALL, "./resources/gui/icons/icon_character_edit_info_small.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_VOICE_SMALL, "./resources/gui/icons/icon_character_edit_voice_small.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_IMAGES_SMALL, "./resources/gui/icons/icon_character_edit_images_small.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_STORY_SMALL, "./resources/gui/icons/icon_character_edit_story_small.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL, "./resources/gui/icons/icon_character_edit_concepts_small.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_MEMORIES_SMALL, "./resources/gui/icons/icon_character_edit_memories_small.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL, "./resources/gui/icons/icon_character_edit_about_small.png");
 		
 		LoadTexture(pRenderer, Resource::ICON_BORDER_01, "./resources/gui/card/borders/icon_border_01.png");
 		LoadTexture(pRenderer, Resource::ICON_BORDER_02, "./resources/gui/card/borders/icon_border_02.png");

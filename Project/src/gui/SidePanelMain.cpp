@@ -45,7 +45,6 @@ namespace fig::gui
 		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_MODELS, "Models");
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
-		pButtonSizer->AddSpacer(20);
 		pButtonSizer->Add(pChatButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pCharactersButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
@@ -70,6 +69,7 @@ namespace fig::gui
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->Add(pHeaderPanel, 0, SizerFlag::Expand | SizerFlag::Fill);
+		pTopSizer->AddSpacer(8);
 		pTopSizer->Add(pMainArea, -1, SizerFlag::Fill);
 		pTopSizer->Add(_pModelWidget, 0, SizerFlag::Expand);
 		pTopSizer->Add(_pUserWidget, 0, SizerFlag::Expand);
@@ -100,7 +100,7 @@ namespace fig::gui
 		pModelsButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
-		pTopSizer->AddSpacer(56);
+		pTopSizer->AddSpacer(62);
 		pTopSizer->Add(pChatButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 		pTopSizer->AddSpacer(8);
 		pTopSizer->Add(pCharactersButtonSmall, 0, SizerFlag::AlignCenterHorizontal);

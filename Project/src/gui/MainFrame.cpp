@@ -456,16 +456,7 @@ namespace fig::gui
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			ChangeScreen<EditorScreen>()
-				->SetEditor<CharacterEditor>(characterId)
-				->SelectPage(0);
-			return EventResult::Handled;
-		}
-		else if (IsUserEvent(event, UserEvent::EditCharacterVoice))
-		{
-			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-			ChangeScreen<EditorScreen>()
-				->SetEditor<CharacterEditor>(characterId)
-				->SelectPage(1);
+				->SetEditor<CharacterEditor>(characterId);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::StartTextInput)

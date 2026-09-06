@@ -163,12 +163,12 @@ namespace fig::gui
 
 		auto userSettings = Global::GetUserContent().GetUserSettings(_assetId);
 
-		menu.AddItem("Resume chat", Resource::ICON_NEW_CHAT)
+		menu.AddItem("Resume this chat", Resource::ICON_NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] {
 //			PushEvent(UserEvent::StartChat, &_characterId);
 		});
-		menu.AddItem("Start another chat\u2026")
+		menu.AddItem("Start a new chat\u2026")
 			.SetEnabled(bLLM)
 			.SetDelegate([this] {
 //			PushEvent(UserEvent::StartChat, &_characterId);
@@ -219,10 +219,10 @@ namespace fig::gui
 					Global::GetUserContent().MarkHidden(_assetId, false);
 					NotifyUpdated();
 				});
+			menu.AddSeparator();
+			menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
+				.SetDelegate([this] { NotifyDelete(); });
 		}
-		menu.AddSeparator();
-		menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
-			.SetDelegate([this] { NotifyDelete(); });
 		_menuId = menu.Show();
 	}
 

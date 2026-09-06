@@ -31,11 +31,10 @@ namespace fig::gui
 
 		// Maturity
 		{ "maturity_spry",			std::pair { "child, small boy", "female, infant, girl" } },
-		{ "maturity_daring",		std::pair { "male, teenager", "female, teenager" } },
-		{ "maturity_ambitious",		std::pair { "male, age 20", "woman, age 20" } },
-		{ "maturity_dependable",	std::pair { "adult man", "adult woman" } },
-		{ "maturity_seasoned",		std::pair { "middle-aged man, age 48", "mature, middle-aged woman, age 48" } },
-		{ "maturity_venerable",		std::pair { "very old man, crusty, grandfather, raspy, geriatric, age 70", "very old woman, crusty, grandmother, raspy, geriatric, age 70" } },
+		{ "maturity_ambitious",		std::pair { "male, teenager", "female, teenager" } },
+		{ "maturity_dependable",	std::pair { "male, age 28", "woman, age 28" } },
+		{ "maturity_seasoned",		std::pair { "middle-aged man, age 50", "mature, middle-aged woman, age 50" } },
+		{ "maturity_venerable",		std::pair { "very old man, a grandfather, gravely raspy and hoarse, geriatric, age 70", "very old woman, a grandmother, gravely raspy and hoarse, geriatric, age 70" } },
 
 		// Tone
 		{ "tone_textured",			std::pair { "A rough, raspy, hoarse, and gravelly voice", "" } },
@@ -101,6 +100,8 @@ namespace fig::gui
 		auto pHorizontalSizer = new HorizontalSizer();
 		auto pDesignerSizer = new VerticalSizer();
 
+		CreateHeader(this, pSizer, "Voice parameters");
+
 		// Gender
 		auto pGenderSizer = CreateGroup(this, pDesignerSizer, "Pitch");
 		auto pMale = CreateToggle(pGenderSizer, groupGender, "gender_male", "Masculine", true);
@@ -109,7 +110,6 @@ namespace fig::gui
 		// Maturity
 		auto pMaturitySizer = CreateGroup(this, pDesignerSizer, "Maturity");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_spry", "Spry");
-		CreateToggle(pMaturitySizer, groupMaturity, "maturity_daring", "Daring");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_ambitious", "Ambitious");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_dependable", "Dependable");
 		CreateToggle(pMaturitySizer, groupMaturity, "maturity_seasoned", "Seasoned");

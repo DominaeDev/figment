@@ -134,10 +134,6 @@ namespace fig::gui
 			.SetDelegate([this] {
 				PushEvent(UserEvent::EditCharacter, &_characterId);
 			});
-		menu.AddItem("Edit voice\u2026")
-			.SetDelegate([this] {
-				PushEvent(UserEvent::EditCharacterVoice, &_characterId);
-			});
 		menu.AddItem("Duplicate\u2026");
 		menu.AddItem("Export\u2026");
 		auto& moveMenu = menu.AddItem("Move to folder\u2026");

@@ -17,10 +17,10 @@ namespace fig::gui
 		SidePanelResized,
 		NavigateToHome,
 		NavigateToChatList,
+		SelectEditorPage,
 		StartChat,
 
 		EditCharacter,
-		EditCharacterVoice,
 		DebugCharacter,
 
 		/* Broadcast events */

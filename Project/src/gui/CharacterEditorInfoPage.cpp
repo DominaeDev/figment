@@ -74,7 +74,7 @@ namespace fig::gui
 		pSizer->Add(pAge, 0, SizerFlag::Expand, 0);
 
 		// Description
-		CreateLabel(this, pSizer, "Notes");
+		CreateLabel(this, pSizer, "Creator's notes");
 		auto pDescription = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_value.description), 4);
 		pDescription->SetMaxWidth(620);
 		pDescription->EnableAutoSize(true);

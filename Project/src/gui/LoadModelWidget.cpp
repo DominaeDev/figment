@@ -31,6 +31,18 @@ namespace fig::gui
 		_pSettingsButton->CenterVertically();
 
 		SetBorderRenderer<LineBorderRenderer>(Color::LineColor,  Direction::North);
+
+		if (Global::IsLLMInitialized())
+		{
+			_pLabel->SetText(toStr(fig::strings::LoadModelWidget::ModelLoaded));
+			_pLoadButton->SetIconState(PlayButton::IconState::Stop);
+		} 
+		else if (Global::IsLLMInitializing())
+		{
+			_pLabel->SetText(toStr(fig::strings::LoadModelWidget::ModelLoading));
+			_pLoadButton->SetIconState(PlayButton::IconState::Spinner);
+		}
+
 	}
 
 	void LoadModelWidget::OnSize()

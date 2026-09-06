@@ -163,7 +163,13 @@ namespace fig
 	bool Global::IsLLMInitialized() 
 	{ 
 		assert(__appState);
-		return __appState->pLLMBackend.get()->IsInitialized();
+		return __appState->pLLMBackend and __appState->pLLMBackend.get()->IsInitialized();
+	}
+
+	bool Global::IsLLMInitializing() 
+	{ 
+		assert(__appState);
+		return __appState->pLLMBackend and __appState->pLLMBackend.get()->IsInitializing();
 	}
 
 	bool Global::IsSignedIn() 
