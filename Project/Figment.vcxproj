@@ -475,6 +475,7 @@
     <ClInclude Include="include\gui\CharacterDetailsPanel.h" />
     <ClInclude Include="include\gui\CharacterEditor.h" />
     <ClInclude Include="include\gui\CharacterEditorAboutPage.h" />
+    <ClInclude Include="include\gui\CharacterEditorArgs.h" />
     <ClInclude Include="include\gui\CharacterEditorInfoPage.h" />
     <ClInclude Include="include\gui\ChatBackground.h" />
     <ClInclude Include="include\gui\ChatList.h" />

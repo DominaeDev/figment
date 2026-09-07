@@ -7,7 +7,9 @@ namespace fig::gui
 	class CharacterEditor : public Editor
 	{
 	public:
-		CharacterEditor(ControlPtr pParent, const fig::uuid& assetId);
+		CharacterEditor(ControlPtr pParent);
+
+		bool Initialize(const fig::uuid& assetId) noexcept;
 		void Shutdown() override {};
 		
 		fig::string GetTitle() const noexcept override;
@@ -20,5 +22,8 @@ namespace fig::gui
 
 	private:
 		fig::observer_ptr<Control> _pSaveButton;
+		fig::uuid _assetId {};
+		fig::data::Character _character {};
+
 	};
 }

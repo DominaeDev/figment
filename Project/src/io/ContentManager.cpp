@@ -554,4 +554,14 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	bool UserContentManager::UpdateAsset(const fig::uuid& assetId, fig::bytes&& data)
+	{
+		if (_pAssetMngr->UpdateAsset(assetId, data))
+		{
+			InvalidateAsset(assetId);
+			return true;
+		}
+		return false;
+	}
+
 }

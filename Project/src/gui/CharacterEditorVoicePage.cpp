@@ -70,20 +70,9 @@ namespace fig::gui
 		{ "presence_commanding",	std::pair { "His voice reflects his commanding confidence and domineering character", "Her voice reflects her commanding confidence and domineering character" } },
 	};
 
-	CharacterEditorVoicePage::CharacterEditorVoicePage(ControlPtr pParent, const fig::uuid& characterId) : EditorPage(pParent),
-		_characterId { characterId }
+	CharacterEditorVoicePage::CharacterEditorVoicePage(ControlPtr pParent) : EditorPage(pParent)
 	{
-		if (auto try_character = Global::GetUserContent().Get<Character>(characterId))
-			_character = fig::data::Character { *try_character };
-
 		_audioResultQueue.SetDelegate([this](auto&& r) { OnAudioResult(std::move(r)); });
-
-		Initialize();
-	}
-
-	fig::string CharacterEditorVoicePage::GetName() const noexcept
-	{
-		return "Voice";
 	}
 
 	fig::observer_ptr<Sizer> CharacterEditorVoicePage::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
@@ -94,8 +83,14 @@ namespace fig::gui
 		return pGridSizer;
 	}
 
-	void CharacterEditorVoicePage::Initialize() noexcept
+	bool CharacterEditorVoicePage::Initialize(CharacterEditorArgs args)
 	{
+		if (not (bool)args.pCharacter or args.assetId.empty())
+			return false;
+
+		_pCharacter = args.pCharacter;
+		_characterId = args.assetId;
+
 		auto pSizer = SetSizer<VerticalSizer>();
 		auto pHorizontalSizer = new HorizontalSizer();
 		auto pDesignerSizer = new VerticalSizer();
@@ -181,8 +176,8 @@ namespace fig::gui
 		pDesignerSizer->AddSpacer(24);
 		pDesignerSizer->Add(pButtonSizer, 0, SizerFlag::FixedSize, 35);
 
-		pMale->Toggle(_character.gender.IsConventional(ConventionalGender::Male));
-		pFemale->Toggle(not _character.gender.IsConventional(ConventionalGender::Male));
+		pMale->Toggle(_pCharacter->gender.IsConventional(ConventionalGender::Male));
+		pFemale->Toggle(not _pCharacter->gender.IsConventional(ConventionalGender::Male));
 
 		_pViewport = CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
 		_pViewport->SetSize(320, 480);
@@ -205,6 +200,8 @@ namespace fig::gui
 			_voicePrint.audioData = (*try_voice).voicePrint.audioData;
 			_pPlayButton->SetEnabled(true);
 		}
+
+		return true;
 	}
 
 	void CharacterEditorVoicePage::ShutDown() noexcept
@@ -296,7 +293,7 @@ namespace fig::gui
 
 	void CharacterEditorVoicePage::Generate() noexcept
 	{
-		fig::string name = _character.GetName();
+		fig::string name = _pCharacter->GetName();
 		if (empty_or_whitespace(name))
 			name = "Character";
 
@@ -404,13 +401,13 @@ namespace fig::gui
 		_pStatusText->SetText(message);
 	}
 
-	bool CharacterEditorVoicePage::OnSave()
+	bool CharacterEditorVoicePage::Save()
 	{
 		if (_voicePrint.audioData.empty())
-			return false;
+			return true; // No change
 
 		VoiceSettings voiceSettings;
-		voiceSettings.name = std::format("{}'s voice", _character.GetName());
+		voiceSettings.name = std::format("{}'s voice", _pCharacter->GetName());
 		voiceSettings.voicePrint = _voicePrint;
 		
 		auto voiceSettingsId = Global::GetUserContent().CreateVoiceReference(_characterId, voiceSettings);

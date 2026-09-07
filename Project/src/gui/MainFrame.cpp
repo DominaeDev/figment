@@ -359,9 +359,12 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{
 						auto characterId = fig::uuid::from_str("e66008f6-f3b8-4099-a50d-1cc284ecd008");
-						ChangeScreen<EditorScreen>()
-							->SetEditor<CharacterEditor>(characterId)
-							->SelectPage(0);
+						auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
+						if (not pEditor->Initialize(characterId))
+						{
+							// Error
+							ChangeScreen<HomeScreen>();
+						}
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)
@@ -455,8 +458,12 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::EditCharacter))
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-			ChangeScreen<EditorScreen>()
-				->SetEditor<CharacterEditor>(characterId);
+			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
+			if (not pEditor->Initialize(characterId))
+			{
+				// Error
+				ChangeScreen<HomeScreen>();
+			}
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::StartTextInput)

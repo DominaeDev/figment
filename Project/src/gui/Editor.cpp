@@ -15,7 +15,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void Editor::EnablePage(EditorPage* pPage, bool bEnabled)
+	void Editor::EnablePage(EditorPageBase* pPage, bool bEnabled)
 	{
 		if (pPage)
 		{

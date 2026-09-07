@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui/EditorPage.h"
+#include "gui/CharacterEditorArgs.h"
 
 namespace fig::data
 {
@@ -9,20 +10,17 @@ namespace fig::data
 
 namespace fig::gui
 {
-	class CharacterEditorInfoPage : public EditorPage
+	class CharacterEditorInfoPage : public EditorPage<CharacterEditorArgs>
 	{
 	public:
-		CharacterEditorInfoPage(ControlPtr pParent, const fig::uuid& characterId);
+		CharacterEditorInfoPage(ControlPtr pParent);
 		
-		void Initialize() noexcept;
+		bool Initialize(CharacterEditorArgs args) override;
 		void ShutDown() noexcept {};
-
-		fig::string GetName() const noexcept;
 	
 	protected:
 		void OnAfterLayout();
 
-	private:
-		fig::data::Character _value {};
+		fig::observer_ptr<fig::data::Character> _pCharacter {};
 	};
 }

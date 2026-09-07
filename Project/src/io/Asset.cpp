@@ -207,6 +207,11 @@ namespace fig::io
 		}
 	}
 
+	void Asset::EraseMeta(MetaTag tag) noexcept
+	{
+		_parameters.erase(tag);
+	}
+
 	ContentUserSettings Asset::GetUserSettings() const noexcept
 	{
 		return ContentUserSettings::FromJson(_settings).value_or({});

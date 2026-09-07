@@ -1,21 +1,21 @@
 #pragma once
 
 #include "gui/EditorPage.h"
-#include "data/Character.h"
 #include "tts/VoicePrint.h"
 #include "tts/AudioResultQueue.h"
+#include "gui/CharacterEditorArgs.h"
 
 namespace fig::gui
 {
-	class CharacterEditorVoicePage : public EditorPage
+	class CharacterEditorVoicePage : public EditorPage<CharacterEditorArgs>
 	{
 	public:
-		CharacterEditorVoicePage(ControlPtr pParent, const fig::uuid& characterId);
+		CharacterEditorVoicePage(ControlPtr pParent);
 
-		void Initialize() noexcept;
+		bool Initialize(CharacterEditorArgs args) override;
 		void ShutDown() noexcept;
 
-		fig::string GetName() const noexcept;
+		bool Save() override;
 
 	protected:
 		void OnUpdate(float fElapsed);
@@ -33,11 +33,10 @@ namespace fig::gui
 		void PlayStop() noexcept;
 		void SetStatusMessage(fig::string_view message);
 		void OnAudioResult(fig::tts::TTSPayload&& payload);
-		bool OnSave() override;
 
 	private:
 		fig::uuid _characterId {};
-		fig::data::Character _character {};
+		fig::observer_ptr<fig::data::Character> _pCharacter {};
 
 		fig::observer_ptr<class ButtonWithLabel> _pGenerateButton;
 		fig::observer_ptr<class ButtonWithIcon> _pPlayButton;

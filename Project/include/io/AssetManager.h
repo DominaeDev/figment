@@ -57,6 +57,9 @@ namespace fig::io
 		const Asset& CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;
 
+		bool UpdateAsset(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum = false) noexcept;
+		bool UpdateAsset(const fig::uuid& assetId, fig::byte_span data, bool bChecksum = false) noexcept;
+
 		bool DeleteAsset(fig::uuid assetId) noexcept;
 		size_t DeleteAssets(std::span<fig::uuid> assetIds) noexcept;
 		bool ReleaseAssetData(const fig::uuid& assetId) noexcept;
@@ -170,6 +173,8 @@ namespace fig::io
 		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept;
 		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept;
 		Asset& CreateImageAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
+		bool UpdateAsset_NoLock(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum) noexcept;
+		bool UpdateAsset_NoLock(const fig::uuid& assetId, fig::byte_span data, bool bChecksum) noexcept;
 
 		fig::expected_ref<Asset, FileError> ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format);
 		fig::expected_ref<Asset, FileError> ImportScenario_NoLock(const fig::path& filename);

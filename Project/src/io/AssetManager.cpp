@@ -119,6 +119,20 @@ namespace fig::io
 		return CreateImageAsset_NoLock(subtype, surface, parent);
 	}
 
+	bool AssetManager::UpdateAsset(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return UpdateAsset_NoLock(assetId, std::move(data), bChecksum);
+	}
+
+	bool AssetManager::UpdateAsset(const fig::uuid& assetId, fig::byte_span data, bool bChecksum) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return UpdateAsset_NoLock(assetId, data, bChecksum);
+	}
+
 	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept
 	{
 		fig::uuid id = GenerateUUID();
@@ -223,6 +237,52 @@ namespace fig::io
 		}
 		asset.CalculateChecksum();
 		return asset;
+	}
+
+	bool AssetManager::UpdateAsset_NoLock(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum) noexcept
+	{
+		if (auto itFind = _assets.find(assetId); itFind != _assets.end())
+		{
+			auto& asset = itFind->second;
+			asset.data = std::move(data); // Move data
+
+			asset.sync_state.file_sync = AssetSyncState::Status::Modified;
+			asset.sync_state.db_sync = AssetSyncState::Status::Modified;
+			asset.sync_state.has_data = not data.empty();
+
+			asset.SetMeta(MetaTag::UpdatedAt, fig::now());
+
+			if (bChecksum)
+				asset.CalculateChecksum();
+			else
+				asset.EraseMeta(MetaTag::Checksum);
+			return true;
+		}
+		return false;
+	}
+
+	bool AssetManager::UpdateAsset_NoLock(const fig::uuid& assetId, fig::byte_span data, bool bChecksum) noexcept
+	{
+		if (auto itFind = _assets.find(assetId); itFind != _assets.end())
+		{
+			auto& asset = itFind->second;
+			// Copy data
+			asset.data.resize(data.size());
+			std::memcpy(asset.data.data(), data.data(), data.size());
+
+			asset.sync_state.file_sync = AssetSyncState::Status::Modified;
+			asset.sync_state.db_sync = AssetSyncState::Status::Modified;
+			asset.sync_state.has_data = not data.empty();
+
+			asset.SetMeta(MetaTag::UpdatedAt, fig::now());
+
+			if (bChecksum)
+				asset.CalculateChecksum();
+			else
+				asset.EraseMeta(MetaTag::Checksum);
+			return true;
+		}
+		return false;
 	}
 
 	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id) noexcept

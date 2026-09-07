@@ -4,6 +4,7 @@
 #include "io/ContentUserSettings.h"
 #include "data/ModelSettings.h"
 #include "io/AssetCache.h"
+#include "io/XmlData.h"
 
 namespace fig::data
 {
@@ -14,6 +15,12 @@ namespace fig::data
 namespace fig::io
 {
 	class AssetManager;
+
+	template <typename T>
+	concept IsXmlContent = requires (const T& v, fig::bytes& data)
+	{
+		{ v.SaveToXml(data) } -> std::same_as<void>;
+	};
 
 	class UserContentManager
 	{
@@ -26,8 +33,18 @@ namespace fig::io
 
 		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::data::ChatInstance& chatInstance);
 		fig::uuid CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings);
-		bool DeleteAsset(fig::uuid assetId);
 
+		bool UpdateAsset(const fig::uuid& assetId, IsXmlContent auto const& assetData)
+		{
+			fig::bytes data;
+			assetData.SaveToXml(data);
+			if (data.empty())
+				return false;
+			return UpdateAsset(assetId, std::move(data));
+		}
+		bool UpdateAsset(const fig::uuid& assetId, fig::bytes&& data);
+
+		bool DeleteAsset(fig::uuid assetId);
 		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
 		fig::cref_vector<Asset> GetChatLogsWith(const fig::uuid& characterId, bool bLoad = false);
 		fig::cref_vector<Asset> GetCharacters() const noexcept;

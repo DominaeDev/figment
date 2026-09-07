@@ -12,16 +12,17 @@ using namespace fig::data;
 
 namespace fig::gui
 {
-	CharacterEditorInfoPage::CharacterEditorInfoPage(ControlPtr pParent, const fig::uuid& characterId) : EditorPage(pParent)
+	CharacterEditorInfoPage::CharacterEditorInfoPage(ControlPtr pParent) : EditorPage(pParent)
 	{
-		if (auto try_character = Global::GetUserContent().Get<Character>(characterId))
-			_value = fig::data::Character { *try_character };
-
-		Initialize();
 	}
 
-	void CharacterEditorInfoPage::Initialize() noexcept
+	bool CharacterEditorInfoPage::Initialize(CharacterEditorArgs args)
 	{
+		if (not (bool)args.pCharacter)
+			return false;
+
+		_pCharacter = args.pCharacter;
+
 		auto pSizer = SetSizer<VerticalSizer>();
 
 		CreateHeader(this, pSizer, "Character details");
@@ -33,15 +34,15 @@ namespace fig::gui
 		pNameSizer->Add(pNameColumn1, 0, SizerFlag::FixedSize, 320);
 		pNameSizer->Add(pNameColumn2, -1);
 		CreateLabel(this, pNameColumn1, "First name");
-		CreateTextBox(this, pNameColumn1, ValueBinding<fig::string>(&_value.name.first))
+		CreateTextBox(this, pNameColumn1, ValueBinding<fig::string>(&_pCharacter->name.first))
 			->SetMaxWidth(300);
 
 		CreateLabel(this, pNameColumn2, "Last name");
-		CreateTextBox(this, pNameColumn2, ValueBinding<fig::string>(&_value.name.last))
+		CreateTextBox(this, pNameColumn2, ValueBinding<fig::string>(&_pCharacter->name.last))
 			->SetMaxWidth(300);
 
 		CreateLabel(this, pNameColumn1, "Nickname");
-		CreateTextBox(this, pNameColumn1, ValueBinding<fig::string>(&_value.name.nickname))
+		CreateTextBox(this, pNameColumn1, ValueBinding<fig::string>(&_pCharacter->name.nickname))
 			->SetMaxWidth(300);
 
 		pSizer->Add(pNameSizer, 0, SizerFlag::FixedSize, 126);
@@ -56,11 +57,11 @@ namespace fig::gui
 		std::vector<fig::string> genders { "Male", "Female", "Non-binary" };
 		std::vector<fig::string> pronouns { "Auto", "He/Him", "She/Her", "They/Them", "It/It" };
 		CreateLabel(this, pGenderColumn1, "Gender");
-		CreateComboBox(this, pGenderColumn1, genders, ValueBinding<Gender>(&_value.gender))
+		CreateComboBox(this, pGenderColumn1, genders, ValueBinding<Gender>(&_pCharacter->gender))
 			->SetMaxWidth(300);
 
 		CreateLabel(this, pGenderColumn2, "Pronouns");
-		CreateDropList(this, pGenderColumn2, pronouns, ValueBinding<Pronouns>(&_value.pronouns))
+		CreateDropList(this, pGenderColumn2, pronouns, ValueBinding<Pronouns>(&_pCharacter->pronouns))
 			->SetMaxWidth(180);
 
 		pSizer->Add(pGenderSizer, 0, SizerFlag::FixedSize, 63);
@@ -68,8 +69,8 @@ namespace fig::gui
 		// Age
 		CreateLabel(this, pSizer, "Age");
 		auto pAge = CreateControl<TextBox>();
-		pAge->SetText(_value.GetAttribute("age").value_or(""));
-		pAge->SetTextChangedCallback([&](fig::string_view text) mutable { _value.SetAttribute("age", "Age", text); });
+		pAge->SetText(_pCharacter->GetAttribute("age").value_or(""));
+		pAge->SetTextChangedCallback([&](fig::string_view text) mutable { _pCharacter->SetAttribute("age", "Age", text); });
 		pAge->SetMaxWidth(120);
 		pSizer->Add(pAge, 0, SizerFlag::Expand, 0);
 
@@ -85,16 +86,12 @@ namespace fig::gui
 //		pAddAttributeButton->SetDelegate([] { });
 		
 		pSizer->Add(pAddAttributeButton, 0);
+		return true;
 	}
 
 	void CharacterEditorInfoPage::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
-	}
-
-	fig::string CharacterEditorInfoPage::GetName() const noexcept
-	{
-		return "Attributes";
 	}
 		
 }

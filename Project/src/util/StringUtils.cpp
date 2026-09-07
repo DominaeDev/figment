@@ -947,7 +947,7 @@ namespace fig
 	fig::string fixed_to_string(fig::fixed value)
 	{
 		std::ostringstream os;
-		os << std::setprecision(3) << value;
+		os << std::format("{:g}", value);
 		return fig::string { os.str() };
 	}
 

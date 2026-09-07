@@ -87,6 +87,7 @@ namespace fig::io
 		void SetMeta(MetaTag tag, const char* value) noexcept;
 		void SetMeta(MetaTag tag, const fig::string& value) noexcept;
 		void SetMeta(MetaTag tag, const fig::uuid& value) noexcept;
+		void EraseMeta(MetaTag tag) noexcept;
 
 		ContentUserSettings GetUserSettings() const noexcept;
 		inline constexpr const fig::string& GetUserSettingsJson() const { return _settings; }

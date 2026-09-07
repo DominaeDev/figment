@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	using EditorPagePtr = fig::observer_ptr<EditorPage>;
+	using EditorPagePtr = fig::observer_ptr<EditorPageBase>;
 
 	class Editor : public Control
 	{
@@ -24,7 +24,7 @@ namespace fig::gui
 		std::vector<EditorPagePtr> _pages;
 
 		template <typename T, typename... Args>
-			requires std::derived_from<T, EditorPage>
+			requires std::derived_from<T, EditorPageBase>
 		fig::observer_ptr<T> CreatePage(Args&&... args)
 		{
 			auto pPage = CreateControl<T>(std::forward<Args>(args)...);
@@ -34,7 +34,8 @@ namespace fig::gui
 			return pPage;
 		}
 		
-		void EnablePage(EditorPage* pPage, bool bEnabled);
+	private:
+		void EnablePage(EditorPageBase* pPage, bool bEnabled);
 
 	private:
 		SizerPtr _pPageSizer;

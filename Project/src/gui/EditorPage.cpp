@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	fig::observer_ptr<StaticText> EditorPage::CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
+	fig::observer_ptr<StaticText> EditorPageBase::CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 18.5, false);
 		pParent->GetSizer()->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Top, 8);
@@ -12,7 +12,7 @@ namespace fig::gui
 		return pLabel;
 	}
 
-	fig::observer_ptr<StaticText> EditorPage::CreateLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
+	fig::observer_ptr<StaticText> EditorPageBase::CreateLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 14.0, false);
 		pLabel->SetForegroundColor(Color::SidePanelForeground);
@@ -22,7 +22,7 @@ namespace fig::gui
 		return pLabel;
 	}
 
-	fig::observer_ptr<StaticText> EditorPage::CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
+	fig::observer_ptr<StaticText> EditorPageBase::CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Italic, 14.0, false);
 		pLabel->SetForegroundColor(0x8a8375_rgb);
@@ -33,7 +33,7 @@ namespace fig::gui
 	}
 
 	template <>
-	fig::observer_ptr<TextBox> EditorPage::CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows)
+	fig::observer_ptr<TextBox> EditorPageBase::CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows)
 	{
 		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, rows == 1 ? Constants::GUI::TextBoxFontSize : 14.5, rows > 1 ? TextInput::Mode::Multiline : TextInput::Mode::Single );
 
@@ -44,7 +44,7 @@ namespace fig::gui
 		return pTextBox;
 	}
 
-	fig::observer_ptr<TextBox> EditorPage::CreateTextBox(ControlPtr pParent, SizerPtr pSizer)
+	fig::observer_ptr<TextBox> EditorPageBase::CreateTextBox(ControlPtr pParent, SizerPtr pSizer)
 	{
 		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize);
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);

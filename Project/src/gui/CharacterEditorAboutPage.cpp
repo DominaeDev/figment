@@ -12,16 +12,17 @@ using namespace fig::data;
 
 namespace fig::gui
 {
-	CharacterEditorAboutPage::CharacterEditorAboutPage(ControlPtr pParent, const fig::uuid& characterId) : EditorPage(pParent)
+	CharacterEditorAboutPage::CharacterEditorAboutPage(ControlPtr pParent) : EditorPage(pParent)
 	{
-		if (auto try_character = Global::GetUserContent().Get<Character>(characterId))
-			_value = fig::data::Character { *try_character };
-
-		Initialize();
 	}
 
-	void CharacterEditorAboutPage::Initialize() noexcept
+	bool CharacterEditorAboutPage::Initialize(CharacterEditorArgs args)
 	{
+		if (not (bool)args.pCharacter)
+			return false;
+
+		_pCharacter = args.pCharacter;
+
 		auto pSizer = SetSizer<VerticalSizer>();
 
 		CreateHeader(this, pSizer, "About character");
@@ -29,12 +30,12 @@ namespace fig::gui
 		// Author
 		static fig::string temp_author;
 		CreateLabel(this, pSizer, "Creator");
-		CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_value.creator))
+		CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pCharacter->creator))
 			->SetMaxWidth(300);
 
 		// Notes
 		CreateLabel(this, pSizer, "Creator's notes");
-		auto pDescription = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_value.about), 4);
+		auto pDescription = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pCharacter->about), 4);
 		pDescription->SetMaxWidth(620);
 		pDescription->EnableAutoSize(true);
 		pDescription->SetMinRows(2);
@@ -48,18 +49,15 @@ namespace fig::gui
 		// Version
 		static fig::string temp_version;
 		CreateLabel(this, pSizer, "Version");
-		CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_value.version))
+		CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pCharacter->version))
 			->SetMaxWidth(120);
+
+		return true;
 	}
 
 	void CharacterEditorAboutPage::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
-	}
-
-	fig::string CharacterEditorAboutPage::GetName() const noexcept
-	{
-		return "About";
 	}
 		
 }

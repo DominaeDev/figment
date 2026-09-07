@@ -6,17 +6,15 @@
 
 namespace fig::gui
 {
-	class EditorPage : public Control
+	class EditorPageBase : public Control
 	{
 	public:
-		EditorPage(ControlPtr pParent) : Control(pParent)
-		{}
-		virtual ~EditorPage()
-		{};
+		EditorPageBase(ControlPtr pParent) : Control(pParent)
+		{
+		}
 
-		virtual fig::string GetName() const noexcept = 0;
+		virtual bool Save() { return true; }
 
-		virtual bool OnSave() { return true; };
 	protected:
 		fig::observer_ptr<StaticText> CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 		fig::observer_ptr<StaticText> CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
@@ -34,7 +32,7 @@ namespace fig::gui
 		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding, int32_t rows) = delete;
 		template <>
 		fig::observer_ptr<class TextBox> CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows);
-		
+
 
 		template <is_string_value_bindable T, is_string_range U>
 		fig::observer_ptr<class ComboBox> CreateComboBox(ControlPtr pParent, SizerPtr pSizer, const U& items, ValueBinding<T> binding)
@@ -53,11 +51,21 @@ namespace fig::gui
 			auto pControl = pParent->CreateControl<DropList>();
 			pControl->AddItems(items);
 			pControl->Select(binding.AsInt());
-			pControl->SetDelegate([binding](int32_t index) mutable { 
-				binding.Set(index >= 0 ? index : 0); 
+			pControl->SetDelegate([binding](int32_t index) mutable {
+				binding.Set(index >= 0 ? index : 0);
 			});
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
 			return pControl;
 		}
+	};
+
+	template <typename TArgs>
+	class EditorPage : public EditorPageBase
+	{
+	public:
+		EditorPage(ControlPtr pParent) : EditorPageBase(pParent)
+		{}
+
+		virtual bool Initialize(TArgs args) = 0;
 	};
 }
