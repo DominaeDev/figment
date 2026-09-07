@@ -55,7 +55,7 @@ namespace fig::gui
 
 			if (keyEvent.down and not keyEvent.repeat)
 			{
-				if (keyEvent.key == SDLK_TAB and mods.None)
+				if (keyEvent.key == SDLK_LEFT and mods.Alt)
 				{
 					_bExpanded ? Collapse() : Expand();
 					return EventResult::Handled;

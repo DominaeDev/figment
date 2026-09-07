@@ -250,4 +250,9 @@ namespace fig::data
 			return truncate(strip_emoji(about), 1024);
 		return brief;
 	}
+
+	void Character::SetTags(const fig::string_list& tags) noexcept
+	{
+		_tags = tags;
+	}
 }

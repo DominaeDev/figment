@@ -68,11 +68,10 @@ namespace fig::gui
 
 		// Age
 		CreateLabel(this, pSizer, "Age");
-		auto pAge = CreateControl<TextBox>();
+		auto pAge = CreateTextBox(this, pSizer);
 		pAge->SetText(_pCharacter->GetAttribute("age").value_or(""));
 		pAge->SetTextChangedCallback([&](fig::string_view text) mutable { _pCharacter->SetAttribute("age", "Age", text); });
 		pAge->SetMaxWidth(120);
-		pSizer->Add(pAge, 0, SizerFlag::Expand, 0);
 
 		// ----
 		auto pLine = CreateControl<HorizontalLine>();

@@ -12,11 +12,13 @@ namespace fig::gui
 
 		bool Initialize(CharacterEditorArgs args) override;
 		void ShutDown() noexcept {};
+		bool Save() override;
 
 	protected:
 		void OnAfterLayout();
 
 	private:
 		fig::observer_ptr<fig::data::Character> _pCharacter {};
+		fig::observer_ptr<TextBox> _pTags {};
 	};
 }

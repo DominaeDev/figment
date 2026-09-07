@@ -68,11 +68,12 @@ namespace fig::data
 		inline const std::map<fig::string, CharacterAttribute>& GetAttributes() const noexcept { return _attributes; }
 		void SetAttribute(const fig::string& attributeId, const fig::string& label, fig::string_view content, CharacterAttribute::Format format = CharacterAttribute::Format::Text, CharacterAttribute::Visibility visibility = CharacterAttribute::Visibility::Public);
 
-		inline const fig::string_list& GetTags() const noexcept { return _tags; }
-		inline const SearchIndex& GetSearchIndex() const noexcept { return _searchIndex; }
-
+		void SetTags(const fig::string_list& tags) noexcept;
 		void AppendTags(const fig::string_list& tags);
+		const fig::string_list& GetTags() const noexcept { return _tags; }
+
 		void AddSearchTerm(const fig::string& term);
+		const SearchIndex& GetSearchIndex() const noexcept { return _searchIndex; }
 
 		[[nodiscard]] const Context& GetContext() noexcept;
 
@@ -98,7 +99,7 @@ namespace fig::data
 		void UpdateContext();
 
 		std::map<fig::string, CharacterAttribute> _attributes;
-		string_list _tags {};
+		fig::string_list _tags {};
 		SearchIndex _searchIndex;
 		Context _context;
 		bool _bDirtyContext {};

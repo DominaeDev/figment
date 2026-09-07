@@ -37,17 +37,16 @@ namespace fig::gui
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
 		_pBackground = CreateControl<ChatBackground>();
-		_pBackground->SetBrightness(0.85f);
-//		_pBackground->SetAlpha(0.85f);
-//		_pBackground->SetSaturation(0.5f);
-		_pBackground->SetBlur(3.0f);
+		_pBackground->SetBrightness(1.0f);
+		_pBackground->SetAlpha(0.3f);
+		_pBackground->SetBlur(5.0f);
 
 		auto centerArea = _pBackground->CreateControl<Area>();
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
 
 		_pBehindChat = centerArea->CreateControl<BehindChat>();
 		_pBehindChat->SetWidth(Constants::GUI::ChatScrollWidth + 200);
-		_pBehindChat->SetColor(Color::Black.WithAlpha(0.45f));
+		_pBehindChat->SetColor(Color::Black.WithAlpha(0.0f));
 
 		_pInfoPanel = CreateControl<InfoPanel>();
 		_pChatScroll = centerArea->CreateControl<ChatScroll>();
@@ -102,14 +101,14 @@ namespace fig::gui
 		if constexpr (Enabled)
 		{
 			auto pAlphaSlider = CreateControl<Slider>();
-			pAlphaSlider->SetValue(1.0f);
+			pAlphaSlider->SetValue(0.3f);
 			pAlphaSlider->SetPosition(8, 8 + 20 * 0);
 			pAlphaSlider->SetDelegate([&](float value) {
 				_pBackground->SetAlpha(value);
 			});
 
 			auto pBrightnessSlider = CreateControl<Slider>();
-			pBrightnessSlider->SetValue(0.85f);
+			pBrightnessSlider->SetValue(1.0f);
 			pBrightnessSlider->SetPosition(8, 8 + 20 * 1);
 			pBrightnessSlider->SetDelegate([&](float value) {
 				_pBackground->SetBrightness(value);
@@ -134,7 +133,7 @@ namespace fig::gui
 			});
 
 			auto pUnderSlider = CreateControl<Slider>();
-			pUnderSlider->SetValue(0.45f);
+			pUnderSlider->SetValue(0.0f);
 			pUnderSlider->SetPosition(8, 8 + 20 * 4);
 			pUnderSlider->SetDelegate([this](float value) {
 				auto color = Color::Black.WithAlpha(value);

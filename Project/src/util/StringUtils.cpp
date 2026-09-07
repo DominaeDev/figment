@@ -687,7 +687,7 @@ namespace fig
 		for (const auto& field : values)
 		{
 			if (!result.empty())
-				result += ',';
+				result += ", ";
 			result += trim(encode_value(field));
 		}
 		return result;
@@ -722,7 +722,8 @@ namespace fig
 					in_quotes = true;
 				else if (ch == ',')
 				{
-					fields.emplace_back(trim(std::move(current)));
+					if (not current.empty())
+						fields.emplace_back(trim(std::move(current)));
 					current.clear();
 				}
 				else 
