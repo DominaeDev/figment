@@ -30,6 +30,7 @@ namespace fig::io
 
 	enum class AsyncTask {
 		None,
+		LoadImage,
 		LoadPortrait,
 		LoadCoverImage,
 	};
@@ -184,7 +185,8 @@ namespace fig::io
 
 		/* Asynchronous loading */
 		void __Worker(std::stop_token stop);
-		AsyncLoadError __LoadImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResultVariant& outResult) noexcept;
+		AsyncLoadError __LoadImageTask(const fig::uuid& assetId, AsyncResultVariant& outResult) noexcept;
+		AsyncLoadError __LoadCharacterImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResultVariant& outResult) noexcept;
 		AsyncLoadError __LoadCoverImageTask(const fig::uuid& characterAssetID, AsyncResultVariant& outResult) noexcept;
 
 		struct PendingRequest {

@@ -111,6 +111,8 @@ namespace fig
 	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, fig::surface_ptr pSurface);
 	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, const fig::sdl::Surface& surface);
 	fig::sdl::Surface CreateSurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data);
+	
+	fig::rect ScaleToFit(const fig::rect& srcRect, const fig::rect& dstRect, ImageFit fit);
 
 	bool MaskCorners(fig::sdl::Surface& surface, MaskType style);
 	void AlphaToMask(fig::path filename);

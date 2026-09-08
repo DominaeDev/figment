@@ -185,6 +185,7 @@
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\CharacterEditor.cpp" />
     <ClCompile Include="src\gui\CharacterEditorAboutPage.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorImagesPage.cpp" />
     <ClCompile Include="src\gui\CheckBox.cpp" />
     <ClCompile Include="src\gui\ComboBox.cpp" />
     <ClCompile Include="src\gui\DropList.cpp" />
@@ -217,6 +218,7 @@
     <ClCompile Include="src\gui\Overlay.cpp" />
     <ClCompile Include="src\gui\PasswordBox.cpp" />
     <ClCompile Include="src\gui\PlayButton.cpp" />
+    <ClCompile Include="src\gui\PreviewCardImage.cpp" />
     <ClCompile Include="src\gui\RenderTargetControl.cpp" />
     <ClCompile Include="src\gui\ResizeHandle.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
@@ -476,6 +478,7 @@
     <ClInclude Include="include\gui\CharacterEditor.h" />
     <ClInclude Include="include\gui\CharacterEditorAboutPage.h" />
     <ClInclude Include="include\gui\CharacterEditorArgs.h" />
+    <ClInclude Include="include\gui\CharacterEditorImagesPage.h" />
     <ClInclude Include="include\gui\CharacterEditorInfoPage.h" />
     <ClInclude Include="include\gui\ChatBackground.h" />
     <ClInclude Include="include\gui\ChatList.h" />
@@ -505,6 +508,7 @@
     <ClInclude Include="include\gui\Overlay.h" />
     <ClInclude Include="include\gui\PasswordBox.h" />
     <ClInclude Include="include\gui\PlayButton.h" />
+    <ClInclude Include="include\gui\PreviewCardImage.h" />
     <ClInclude Include="include\gui\RenderTargetControl.h" />
     <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />

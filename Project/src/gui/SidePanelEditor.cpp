@@ -11,6 +11,11 @@ namespace fig::gui
 	{
 	}
 
+	void SidePanelEditor::SetEditor(fig::observer_ptr<Editor> pEditor) noexcept
+	{
+		_pEditor = pEditor;
+	}
+
 	void SidePanelEditor::ShowExpanded()
 	{
 		DestroyChildren();
@@ -22,45 +27,21 @@ namespace fig::gui
 		pBackButton->SetY((Constants::GUI::SidePanel::HeaderHeight - pBackButton->GetHeight()) / 2);
 		pBackButton->SetDelegate([this]() { PushEvent(UserEvent::NavigateToHome); });
 
-		// Character info
-		auto pInfoButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_INFO, "General");
-		pInfoButton->SetDelegate([]{ PushEvent(UserEvent::SelectEditorPage, 0); });
+		if (_pEditor)
+		{
+			auto pNavigationSizer = SetSizer<VerticalSizer>();
+			pNavigationSizer->AddSpacer(56);
 
-		// Images
-		auto pImagesButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_IMAGES, "Images");
-
-		// Voice
-		auto pVoiceButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_VOICE, "Voice");
-		pVoiceButton->SetDelegate([]{ PushEvent(UserEvent::SelectEditorPage, 1); });
-
-		// Story
-		auto pStoryButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_STORY, "Story");
-
-		// Concepts
-		auto pConceptsButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_CONCEPTS, "Concepts");
-
-		// Memories
-		auto pMemoriesButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_MEMORIES, "Memories");
-
-		// About
-		auto pAboutButton = CreateControl<SidePanelButton>(Resource::ICON_CHARACTER_EDIT_ABOUT, "About");
-		pAboutButton->SetDelegate([]{ PushEvent(UserEvent::SelectEditorPage, 2); });
-
-		auto pTopSizer = SetSizer<VerticalSizer>();
-		pTopSizer->AddSpacer(56);
-		pTopSizer->Add(pInfoButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
-		pTopSizer->AddSpacer(4);
-		pTopSizer->Add(pImagesButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
-		pTopSizer->AddSpacer(4);
-		pTopSizer->Add(pVoiceButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
-		pTopSizer->AddSpacer(4);
-		pTopSizer->Add(pStoryButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
-		pTopSizer->AddSpacer(4);
-		pTopSizer->Add(pConceptsButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
-		pTopSizer->AddSpacer(4);
-		pTopSizer->Add(pMemoriesButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
-		pTopSizer->AddSpacer(4);
-		pTopSizer->Add(pAboutButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
+			auto pages = _pEditor->GetPageDescriptors();
+			for (auto& page : pages)
+			{
+				auto pNavButton = CreateControl<SidePanelButton>(page.iconLarge, page.label);
+				pNavButton->SetDelegate([page] { PushEvent(UserEvent::SelectEditorPage, static_cast<int32_t>(page.pageIndex)); });
+				
+				pNavigationSizer->Add(pNavButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
+				pNavigationSizer->AddSpacer(4);
+			}
+		}
 	}
 
 	void SidePanelEditor::ShowCollapsed()
@@ -74,53 +55,22 @@ namespace fig::gui
 		pBackButton->SetY((Constants::GUI::SidePanel::HeaderHeight - pBackButton->GetHeight()) / 2);
 		pBackButton->SetDelegate([this]() { PushEvent(UserEvent::NavigateToHome); });
 
-		// Character info
-		auto pInfoButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_INFO_SMALL, false);
-		pInfoButton->SetTheme(Theme::SidePanelButtonStyle);
-		pInfoButton->SetDelegate([]() { PushEvent(UserEvent::SelectEditorPage, 0); });
+		if (_pEditor)
+		{
+			auto pNavigationSizer = SetSizer<VerticalSizer>();
+			pNavigationSizer->AddSpacer(62);
 
-		// Images
-		auto pImagesButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_IMAGES_SMALL, false);
-		pImagesButton->SetTheme(Theme::SidePanelButtonStyle);
+			auto pages = _pEditor->GetPageDescriptors();
+			for (auto& page : pages)
+			{
+				auto pNavButton = CreateControl<ButtonWithIcon>(page.iconSmall, false);
+				pNavButton->SetTheme(Theme::SidePanelButtonStyle);
+				pNavButton->SetDelegate([page] { PushEvent(UserEvent::SelectEditorPage, static_cast<int32_t>(page.pageIndex)); });
 
-		// Voice
-		auto pVoiceButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_VOICE_SMALL, false);
-		pVoiceButton->SetTheme(Theme::SidePanelButtonStyle);
-		pVoiceButton->SetDelegate([]() { PushEvent(UserEvent::SelectEditorPage, 1); });
-
-		// Story
-		auto pStoryButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_STORY_SMALL, false);
-		pStoryButton->SetTheme(Theme::SidePanelButtonStyle);
-
-		// Concepts
-		auto pConceptsButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL, false);
-		pConceptsButton->SetTheme(Theme::SidePanelButtonStyle);
-
-		// Memories
-		auto pMemoriesButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_MEMORIES_SMALL, false);
-		pMemoriesButton->SetTheme(Theme::SidePanelButtonStyle);
-
-		// About
-		auto pAboutButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL, false);
-		pAboutButton->SetTheme(Theme::SidePanelButtonStyle);
-		pAboutButton->SetDelegate([]() { PushEvent(UserEvent::SelectEditorPage, 2); });
-
-		auto pTopSizer = SetSizer<VerticalSizer>();
-		pTopSizer->AddSpacer(62);
-		pTopSizer->Add(pInfoButton, 0, SizerFlag::AlignCenterHorizontal);
-		pTopSizer->AddSpacer(8);
-		pTopSizer->Add(pImagesButton, 0, SizerFlag::AlignCenterHorizontal);
-		pTopSizer->AddSpacer(8);
-		pTopSizer->Add(pVoiceButton, 0, SizerFlag::AlignCenterHorizontal);
-		pTopSizer->AddSpacer(8);
-		pTopSizer->Add(pStoryButton, 0, SizerFlag::AlignCenterHorizontal);
-		pTopSizer->AddSpacer(8);
-		pTopSizer->Add(pConceptsButton, 0, SizerFlag::AlignCenterHorizontal);
-		pTopSizer->AddSpacer(8);
-		pTopSizer->Add(pMemoriesButton, 0, SizerFlag::AlignCenterHorizontal);
-		pTopSizer->AddSpacer(8);
-		pTopSizer->Add(pAboutButton, 0, SizerFlag::AlignCenterHorizontal);
-
+				pNavigationSizer->Add(pNavButton, 0, SizerFlag::AlignCenterHorizontal);
+				pNavigationSizer->AddSpacer(8);
+			}
+		}
 	}
 
 }

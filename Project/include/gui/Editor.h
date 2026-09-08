@@ -14,7 +14,8 @@ namespace fig::gui
 		
 		virtual void Shutdown() = 0;
 		virtual void PopulateTopBar(ControlPtr pTopBar) {};
-		virtual fig::string GetTitle() const noexcept = 0;
+		virtual fig::string GetTitle() const = 0;
+		virtual std::vector<EditorPageDescriptor> GetPageDescriptors() const = 0;
 
 		std::vector<EditorPagePtr> GetPages() const noexcept { return _pages; }
 

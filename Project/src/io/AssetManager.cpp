@@ -962,7 +962,29 @@ namespace fig::io
 		return false;
 	}
 
-	AsyncLoadError AssetManager::__LoadImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResultVariant& outResult) noexcept
+	AsyncLoadError AssetManager::__LoadImageTask(const fig::uuid& assetId, AsyncResultVariant& outResult) noexcept
+	{
+		if (auto findImage = FindAsset(assetId); findImage.has_value() and (*findImage).IsOfType(AssetType::Image))
+		{
+			auto& imageAsset = findImage.value();
+			if (auto result = LoadAsset(imageAsset); result == FileError::NoError)
+			{
+				if (auto image = LoadImageFromMemory(imageAsset.data))
+				{
+					outResult.emplace<AsyncResult_Image>(std::move(image.value()));
+					return AsyncLoadError::NoError;
+				}
+			}
+			else if (result == FileError::NotFound)
+				return AsyncLoadError::FileNotFound;
+			else
+				return AsyncLoadError::LoadError;
+		}
+
+		return AsyncLoadError::FileNotFound;
+	}
+
+	AsyncLoadError AssetManager::__LoadCharacterImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResultVariant& outResult) noexcept
 	{
 		if (auto findImage = FindAssetOfType(make_asset_type(AssetType::Image, imageType), characterAssetID))
 		{
@@ -1087,11 +1109,14 @@ namespace fig::io
 			AsyncResultVariant result;
 			switch (request.task)
 			{
+				case AsyncTask::LoadImage:
+					error = __LoadImageTask(request.assetId, result);
+					break;
 				case AsyncTask::LoadCoverImage:
 					error = __LoadCoverImageTask(request.assetId, result);
 					break;
 				case AsyncTask::LoadPortrait:
-					error = __LoadImageTask(request.assetId, ImageAssetType::LargePortrait, result);
+					error = __LoadCharacterImageTask(request.assetId, ImageAssetType::LargePortrait, result);
 					break;
 				default:
 					error = AsyncLoadError::LoadError;

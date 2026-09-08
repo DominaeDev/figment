@@ -9,7 +9,12 @@ namespace fig::gui
 	public:
 		SidePanelEditor(ControlPtr pParent);
 
+		void SetEditor(fig::observer_ptr<Editor> pEditor) noexcept;
+
 		void ShowExpanded() override;
 		void ShowCollapsed() override;
+
+	private:
+		fig::observer_ptr<Editor> _pEditor;
 	};
 }

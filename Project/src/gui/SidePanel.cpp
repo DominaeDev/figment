@@ -137,7 +137,15 @@ namespace fig::gui
 	void SidePanel::SetEditor(fig::observer_ptr<fig::gui::Editor> pEditor)
 	{
 		if (pEditor)
+		{
 			SetMode(Mode::Editor);
+			if (auto pSidePanel = dynamic_cast<SidePanelEditor*>(_pContent.get()))
+			{
+				pSidePanel->SetEditor(pEditor);
+				_bExpanded ? pSidePanel->ShowExpanded() : pSidePanel->ShowCollapsed();
+			}
+
+		}
 		else
 			SetMode(Mode::Main);
 	}

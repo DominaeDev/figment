@@ -103,21 +103,12 @@ namespace fig
 		}
 		else if (fit == ImageFit::SquarePortrait)
 		{
-			if (pImage->w < 128 or pImage->h < 128)
-			{
-				fig::rect srcRect { 0, 0, pImage->w, pImage->h };
-				fig::rect dstRect { 0, 0, width, height };
-				SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
-			}
-			else
-			{
-				constexpr float fContract = 0.05f;
-				float size = std::max(toF(pImage->w) * (1.0f - 2.0f * fContract), 128.0f);
-				float offset = std::min(toF(pImage->w) * fContract, std::max(toF(pImage->h) - toF(pImage->w) * fContract, 0.0f));
-				fig::rect srcRect { toI(offset), toI(offset), toI(size), toI(size) };
-				fig::rect dstRect { 0, 0, width, height };
-				SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
-			}
+			constexpr float fContract = 0.05f;
+			float size = std::max(toF(pImage->w) * (1.0f - 2.0f * fContract), 128.0f);
+			float offset = std::min(toF(pImage->w) * fContract, std::max(toF(pImage->h) - toF(pImage->w) * fContract, 0.0f));
+			fig::rect srcRect { toI(offset), toI(offset), toI(size), toI(size) };
+			fig::rect dstRect { 0, 0, width, height };
+			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
 		}
 		else
 		{
@@ -356,5 +347,72 @@ namespace fig
 	int MeasureFontHeight(fig::font& font)
 	{
 		return TTF_GetFontHeight(&font);
+	}
+
+	fig::rect ScaleToFit(const fig::rect& srcRect, const fig::rect& dstRect, ImageFit fit)
+	{
+		switch (fit)
+		{
+		default:
+		case ImageFit::None:
+			return fig::rect {
+				0,
+				0,
+				srcRect.w,
+				srcRect.h,
+			};
+
+		case ImageFit::Stretch:
+			return dstRect;
+
+		case ImageFit::Inside:
+		{
+			float fScale = std::min(static_cast<float>(dstRect.w) / srcRect.w, static_cast<float>(dstRect.h) / srcRect.h);
+			int32_t width = static_cast<int32_t>(srcRect.w * fScale);
+			int32_t height = static_cast<int32_t>(srcRect.h * fScale);
+			return fig::rect {
+				(dstRect.w - width) / 2,
+				(dstRect.h - height) / 2,
+				width,
+				height,
+			};
+		}
+		case ImageFit::Outside:
+		{
+			float fScale = std::max(static_cast<float>(dstRect.w) / srcRect.w, static_cast<float>(dstRect.h) / srcRect.h);
+			int32_t width = static_cast<int32_t>(srcRect.w * fScale);
+			int32_t height = static_cast<int32_t>(srcRect.h * fScale);
+			return fig::rect {
+				(dstRect.w - width) / 2,
+				(dstRect.h - height) / 2,
+				width,
+				height,
+			};
+		}
+		case ImageFit::Portrait:
+		{
+			float fScale = std::max(static_cast<float>(dstRect.w) / srcRect.w, static_cast<float>(dstRect.h) / srcRect.h);
+			int32_t width = static_cast<int32_t>(srcRect.w * fScale);
+			int32_t height = static_cast<int32_t>(srcRect.h * fScale);
+			return fig::rect {
+				(dstRect.w - width) / 2,
+				0,
+				width,
+				height,
+			};
+		}
+		case ImageFit::SquarePortrait:
+		{
+			float fScale = std::min(std::max(static_cast<float>(dstRect.w) / static_cast<float>(srcRect.w), static_cast<float>(dstRect.h) / static_cast<float>(srcRect.h)), 1.0f) * 1.10f;
+			int32_t width = static_cast<int32_t>(static_cast<float>(srcRect.w) * fScale);
+			int32_t height = static_cast<int32_t>(static_cast<float>(srcRect.h) * fScale);
+			return fig::rect {
+				(dstRect.w - width) / 2, // Centered
+				(dstRect.h * 2 - height) / 4, // Upper half
+				width,
+				height,
+			};
+		}
+		}
 	}
 }

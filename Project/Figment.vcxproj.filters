@@ -725,6 +725,12 @@
     <ClCompile Include="src\gui\CharacterEditorVoicePage.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorImagesPage.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\PreviewCardImage.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1675,6 +1681,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditorArgs.h">
       <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorImagesPage.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\PreviewCardImage.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -371,12 +371,12 @@ namespace fig::gui
 			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, full.get()))
 			{
 				_largeImageTexture.reset(pTexture);
-				_imageSurface = std::move(full);
+				_largeImageSurface = std::move(full);
 			}
 			else
 			{
 				_largeImageTexture.clear();
-				_imageSurface.clear();
+				_largeImageSurface.clear();
 			}
 		}
 

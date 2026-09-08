@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/CharacterEditor.h"
 #include "gui/CharacterEditorInfoPage.h"
+#include "gui/CharacterEditorImagesPage.h"
 #include "gui/CharacterEditorVoicePage.h"
 #include "gui/CharacterEditorAboutPage.h"
 #include "gui/ButtonWithLabelAndIcon.h"
@@ -11,6 +12,7 @@ namespace fig::gui
 	CharacterEditor::CharacterEditor(ControlPtr pParent) : Editor(pParent)
 	{
 		CreatePage<CharacterEditorInfoPage>();
+		CreatePage<CharacterEditorImagesPage>();
 		CreatePage<CharacterEditorVoicePage>();
 		CreatePage<CharacterEditorAboutPage>();
 	}
@@ -87,5 +89,54 @@ namespace fig::gui
 	void CharacterEditor::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
+	}
+
+	std::vector<EditorPageDescriptor> CharacterEditor::GetPageDescriptors() const
+	{
+		static size_t NotImpl = (size_t)(-1);
+		return std::vector<EditorPageDescriptor> {
+			{
+				0,
+				"General",
+				Resource::ICON_CHARACTER_EDIT_INFO,
+				Resource::ICON_CHARACTER_EDIT_INFO_SMALL,
+			},
+			{
+				NotImpl,
+				"Story",
+				Resource::ICON_CHARACTER_EDIT_STORY,
+				Resource::ICON_CHARACTER_EDIT_STORY_SMALL,
+			},
+			{
+				1,
+				"Images",
+				Resource::ICON_CHARACTER_EDIT_IMAGES,
+				Resource::ICON_CHARACTER_EDIT_IMAGES_SMALL,
+			},
+			{
+				2,
+				"Voice",
+				Resource::ICON_CHARACTER_EDIT_VOICE,
+				Resource::ICON_CHARACTER_EDIT_VOICE_SMALL,
+			},
+			{
+				NotImpl,
+				"Memories",
+				Resource::ICON_CHARACTER_EDIT_MEMORIES,
+				Resource::ICON_CHARACTER_EDIT_MEMORIES_SMALL,
+			},
+			{
+				NotImpl,
+				"Concepts",
+				Resource::ICON_CHARACTER_EDIT_CONCEPTS,
+				Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL,
+			},
+			{
+				3,
+				"About",
+				Resource::ICON_CHARACTER_EDIT_ABOUT,
+				Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL,
+			},
+		};
 	}
 }

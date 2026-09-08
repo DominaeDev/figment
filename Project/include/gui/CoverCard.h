@@ -2,9 +2,6 @@
 
 #include "CardImage.h"
 #include "io/AssetManager.h"
-#include "data/ContentMetaData.h"
-#include "io/ContentUserSettings.h"
-#include "user/UserSettings.h"
 #include "util/SearchIndex.h"
 
 namespace fig::gui
@@ -115,7 +112,7 @@ namespace fig::gui
 		fig::point _tagPosition {};
 		int32_t _tagRows { 1 };
 
-		fig::sdl::Surface _imageSurface {};
+		fig::sdl::Surface _largeImageSurface {};
 		fig::sdl::Texture _largeImageTexture {};
 		fig::sdl::Surface _smallImageSurface {};
 		fig::sdl::Texture _smallImageTexture {};

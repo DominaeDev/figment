@@ -6,6 +6,14 @@
 
 namespace fig::gui
 {
+	struct EditorPageDescriptor
+	{
+		size_t pageIndex;
+		fig::string label;
+		Resource iconLarge;
+		Resource iconSmall;
+	};
+
 	class EditorPageBase : public Control
 	{
 	public:
