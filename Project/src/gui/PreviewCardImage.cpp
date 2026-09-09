@@ -23,20 +23,38 @@ namespace fig::gui
 		pBorder->SetColor(Color::LineColor);
 	}
 
-	bool PreviewCardImage::SetImage(const fig::uuid& assetId)
+	void PreviewCardImage::SetImage(const fig::uuid& assetId)
 	{
-		if (auto request = Global::GetUserContent().GetAssets().LoadAssetAsync(assetId, AsyncTask::LoadImage, 0); request.future.valid())
-		{
-			SetPendingCoverImage(std::move(request.future));
-			return true;
-		}
-		return false;
+		_loader.LoadAsync(assetId,
+			[&](AsyncImageLoadResult result) {
+				auto pRenderer = GetSDLRenderer();
+				if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, (*result).get()))
+				{
+					_imageTexture.reset(pTexture);
+					OnTexture();
+				}
+			}, 
+			[&](AsyncLoadError error) {
+				_bHasError = true;
+			});
 	}
 
 	void PreviewCardImage::OnUpdate(float fElapsed)
 	{
 		if (_imageTexture.empty())
-			PollFuture();
+			_loader.Poll();
+
+		if (_bHasError && !_pErrorIcon)
+		{
+			// Create error icon
+			constexpr float fScale = 0.75f;
+			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
+			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * fScale), toI(_pErrorIcon->GetTextureSize().y * fScale));
+			_pErrorIcon->SetForegroundColor(fig::color { 0xC0, 0xC0, 0xC0, });
+			_pErrorIcon->Center();
+			_pErrorBG = AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY);
+			SetDirty();
+		}
 	}
 
 	void PreviewCardImage::OnRender(fig::renderer_ptr pRenderer)
@@ -68,35 +86,6 @@ namespace fig::gui
 				SDL_SetTextureAlphaMod(pTexture, 0xFF);
 
 			SDL_RenderTexture(pRenderer, pTexture, NULL, &rect);
-		}
-	}
-
-	void PreviewCardImage::SetPendingCoverImage(AsyncFuture&& future)
-	{
-		if (not future.valid())
-			return;
-
-		_pendingRequest = std::move(future);
-		PollFuture();
-	}
-
-	void PreviewCardImage::PollFuture()
-	{
-		if (not _pendingRequest.valid())
-			return;
-
-		if (auto try_surface = GetAsyncResult<fig::sdl::Surface>(_pendingRequest))
-		{
-			auto pRenderer = GetSDLRenderer();
-			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, (**try_surface).get()))
-			{
-				_imageTexture.reset(pTexture);
-				OnTexture();
-			}
-		}
-		else if (try_surface.error() != AsyncLoadError::NoError)
-		{
-			// Error
 		}
 	}
 
@@ -173,10 +162,26 @@ namespace fig::gui
 				SDL_SetTextureAlphaMod(pTexture, 0xFF);
 				SDL_RenderTexture(pRenderer, pTexture, NULL, &drawRect);
 			}
+			else if (_pErrorBG)
+			{
+				auto pTexture = _pErrorBG.get();
+				SDL_SetTextureBlendMode(pTexture, blendMode);
+				SDL_SetTextureColorMod(pTexture, 0xFF, 0xFF, 0xFF);
+				SDL_SetTextureAlphaMod(pTexture, 0xFF);
+				SDL_RenderTexture(pRenderer, pTexture, NULL, &drawRect);
+			}
 		}
 		else if (not _imageTexture.empty())
 		{
 			auto pTexture = _imageTexture.get();
+			SDL_SetTextureBlendMode(pTexture, SDL_BLENDMODE_BLEND);
+			SDL_SetTextureColorMod(pTexture, 0xFF, 0xFF, 0xFF);
+			SDL_SetTextureAlphaMod(pTexture, 0xFF);
+			SDL_RenderTexture(pRenderer, pTexture, NULL, &drawRect);
+		}
+		else if (_pErrorBG)
+		{
+			auto pTexture = _pErrorBG.get();
 			SDL_SetTextureBlendMode(pTexture, SDL_BLENDMODE_BLEND);
 			SDL_SetTextureColorMod(pTexture, 0xFF, 0xFF, 0xFF);
 			SDL_SetTextureAlphaMod(pTexture, 0xFF);

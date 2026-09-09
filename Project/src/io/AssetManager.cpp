@@ -1178,23 +1178,7 @@ namespace fig::io
 
 	[[nodiscard]] AsyncLoad AssetManager::LoadAssetAsync(const fig::uuid& assetId, AsyncTask task, int32_t priority)
 	{
-		if (task == AsyncTask::None)
-		{
-			return AsyncLoad {
-				.assetId = assetId,
-				.task = task,
-				.future = {},
-			};
-		}
-
 		const uint64_t id = _next_id.fetch_add(1, std::memory_order_relaxed);
-
-		// Cancel the previous request for this card, if any
-//		{
-//			std::scoped_lock lock(_active_mutex);
-//			if (auto it = _active_promises.find(assetId); it != _active_promises.end())
-//				_active_promises.erase(it);
-//		}
 
 		// Create the promise
 		AsyncPromise promise {};
@@ -1224,16 +1208,17 @@ namespace fig::io
 		};
 	}
 
-	void AssetManager::Cancel(const fig::uuid& assetId)
+	void AssetManager::CancelAsync(const fig::uuid& assetId)
 	{
 		__YieldAsyncResult(assetId, std::unexpected(AsyncLoadError::Canceled));
 	}
 
-	void AssetManager::CancelAll()
+	void AssetManager::CancelAllAsync()
 	{
-		std::scoped_lock lock(_pending_mutex);
+		std::scoped_lock lock(_pending_mutex, _active_mutex);
 		while (!_pending.empty())
 			_pending.pop();
+		_active_promises.clear();
 		_pending_cv.notify_all();
 	}
 
@@ -1241,9 +1226,7 @@ namespace fig::io
 	{
 		std::scoped_lock lock(_active_mutex);
 		auto it = _active_promises.find(request.assetId);
-		if (it == _active_promises.cend())
-			return false;
-		return it != _active_promises.end();
+		return it != _active_promises.cend();
 	}
 
 	void AssetManager::ModifyAsset_Void(const fig::uuid& assetId, std::function<void(Asset&)> fn)

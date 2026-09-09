@@ -731,6 +731,9 @@
     <ClCompile Include="src\gui\PreviewCardImage.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\io\AsyncImageLoad.cpp">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1687,6 +1690,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\PreviewCardImage.h">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AsyncImageLoad.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

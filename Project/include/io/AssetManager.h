@@ -129,8 +129,8 @@ namespace fig::io
 		static FileError CreateProfilePicture(const fig::user::UserProfile& profile, fig::path imageFilename);
 
 		[[nodiscard]] AsyncLoad LoadAssetAsync(const fig::uuid& assetId, AsyncTask task, int32_t priority);
-		void Cancel(const fig::uuid& assetId);
-		void CancelAll();
+		void CancelAsync(const fig::uuid& assetId);
+		void CancelAllAsync();
 
 	private:
 		IndexDatabase& GetDatabase() noexcept;

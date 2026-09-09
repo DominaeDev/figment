@@ -351,6 +351,9 @@ namespace fig
 
 	fig::rect ScaleToFit(const fig::rect& srcRect, const fig::rect& dstRect, ImageFit fit)
 	{
+		if (srcRect.w == 0 or srcRect.h == 0)
+			return dstRect;
+
 		switch (fit)
 		{
 		default:

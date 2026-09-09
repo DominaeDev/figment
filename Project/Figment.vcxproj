@@ -255,6 +255,7 @@
     <ClCompile Include="src\gui\CharacterEditorVoicePage.cpp" />
     <ClCompile Include="src\gui\Window.cpp" />
     <ClCompile Include="src\io\Asset.cpp" />
+    <ClCompile Include="src\io\AsyncImageLoad.cpp" />
     <ClCompile Include="src\io\IndexDatabase.cpp" />
     <ClCompile Include="src\io\AssetFileReader.cpp" />
     <ClCompile Include="src\io\AssetFileWriter.cpp" />
@@ -552,6 +553,7 @@
     <ClInclude Include="include\io\Asset.h" />
     <ClInclude Include="include\io\AssetCache.h" />
     <ClInclude Include="include\io\AssetTypeDefinition.h" />
+    <ClInclude Include="include\io\AsyncImageLoad.h" />
     <ClInclude Include="include\io\IndexDatabase.h" />
     <ClInclude Include="include\io\AssetFileReader.h" />
     <ClInclude Include="include\io\AssetFileWriter.h" />

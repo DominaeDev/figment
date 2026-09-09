@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gui/Control.h"
-#include "io/AssetManager.h"
+#include "io/AsyncImageLoad.h"
 
 namespace fig::gui
 {
@@ -10,13 +10,10 @@ namespace fig::gui
 	public:
 		PreviewCardImage(ControlPtr pParent, ImageFit fit = ImageFit::Outside);
 
-		bool SetImage(const fig::uuid& assetId);
+		void SetImage(const fig::uuid& assetId);
 		void SetMask(fig::texture_ptr pMask) noexcept;
 
 	protected:
-		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
-		void PollFuture();
-
 		void OnUpdate(float fElapsed);
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnSize() override;
@@ -26,15 +23,19 @@ namespace fig::gui
 		void SetDirty();
 
 	private:
-		fig::io::AsyncFuture _pendingRequest {};
+		fig::io::AsyncImageLoad _loader {};
 
 		bool _bRedraw = true;
 		bool _bRedrawAlpha = true;
+		bool _bHasError = false;
 		fig::point _imageSize {};
 		ImageFit _fit {};
 
 		fig::sdl::Texture _targetTexture {};
 		fig::sdl::Texture _imageTexture {};
 		fig::texture_ptr _pMask {};
+
+		fig::observer_ptr<Image> _pErrorIcon;
+		fig::texture_ptr _pErrorBG;
 	};
 }
