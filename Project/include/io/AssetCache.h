@@ -46,9 +46,9 @@ namespace fig::io
 
 		void Preload() override
 		{
-			auto assets = _pAssetMngr->GetAssetsOfType(_asset_type, _asset_subtype);
+			auto assets = _pAssetMngr->FindAssetsOfType(make_asset_type(_asset_type, _asset_subtype));
 			auto assetIds = assets
-				| std::views::transform([](auto& a) { return a.id; })
+				| std::views::transform([](auto&& a) { return a.get().id; })
 				| std::ranges::to<std::vector>();
 
 			if (assetIds.empty())
@@ -56,8 +56,10 @@ namespace fig::io
 
 			_pAssetMngr->LoadAssetData(assetIds);
 
-			for (auto& asset : assets)
+			for (auto& asset_ref : assets)
 			{
+				auto& asset = asset_ref.get();
+
 				if (not asset.HasData())
 				{
 					if (_pAssetMngr->LoadAsset(asset) != FileError::NoError)

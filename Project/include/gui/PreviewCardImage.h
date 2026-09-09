@@ -8,7 +8,7 @@ namespace fig::gui
 	class PreviewCardImage : public Control
 	{
 	public:
-		PreviewCardImage(ControlPtr pParent);
+		PreviewCardImage(ControlPtr pParent, ImageFit fit = ImageFit::Outside);
 
 		bool SetImage(const fig::uuid& assetId);
 		void SetMask(fig::texture_ptr pMask) noexcept;
@@ -26,12 +26,12 @@ namespace fig::gui
 		void SetDirty();
 
 	private:
-		fig::io::AsyncFuture _pendingCover {};
+		fig::io::AsyncFuture _pendingRequest {};
 
 		bool _bRedraw = true;
 		bool _bRedrawAlpha = true;
-
 		fig::point _imageSize {};
+		ImageFit _fit {};
 
 		fig::sdl::Texture _targetTexture {};
 		fig::sdl::Texture _imageTexture {};

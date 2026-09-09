@@ -9,7 +9,8 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	PreviewCardImage::PreviewCardImage(ControlPtr pParent) : Control(pParent)
+	PreviewCardImage::PreviewCardImage(ControlPtr pParent, ImageFit fit) : Control(pParent),
+		_fit { fit }
 	{
 		SetSize(Constants::GUI::Cards::Half::Width, Constants::GUI::Cards::Half::Height);
 
@@ -75,30 +76,27 @@ namespace fig::gui
 		if (not future.valid())
 			return;
 
-		_pendingCover = std::move(future);
+		_pendingRequest = std::move(future);
 		PollFuture();
 	}
 
 	void PreviewCardImage::PollFuture()
 	{
-		if (not _pendingCover.valid())
+		if (not _pendingRequest.valid())
 			return;
 
-		if (_pendingCover.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+		if (auto try_surface = GetAsyncResult<fig::sdl::Surface>(_pendingRequest))
 		{
-			if (auto result = _pendingCover.get(); result.has_value())
+			auto pRenderer = GetSDLRenderer();
+			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, (**try_surface).get()))
 			{
-				auto pRenderer = GetSDLRenderer();
-
-				if (auto surface = std::get_if<AsyncResult_Image>(&result.value()))
-				{
-					if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, (*surface).get()))
-					{
-						_imageTexture.reset(pTexture);
-						OnTexture();
-					}
-				}
+				_imageTexture.reset(pTexture);
+				OnTexture();
 			}
+		}
+		else if (try_surface.error() != AsyncLoadError::NoError)
+		{
+			// Error
 		}
 	}
 
@@ -138,7 +136,7 @@ namespace fig::gui
 		auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
 		SDL_SetRenderTarget(pRenderer, pTarget);
 
-		fig::rectf drawRect = to_rectf(ScaleToFit(rect { 0, 0, _imageSize.x, _imageSize.y }, rect { 0, 0, width, height }, ImageFit::Portrait));
+		fig::rectf drawRect = to_rectf(ScaleToFit(rect { 0, 0, _imageSize.x, _imageSize.y }, rect { 0, 0, width, height }, _fit));
 
 		// Render with alpha
 		if (_pMask)

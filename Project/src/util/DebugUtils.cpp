@@ -145,8 +145,8 @@ namespace fig
 			{
 				auto& assetMngr = userMngr.GetContent().GetAssets();
 
-				auto remove_settings = assetMngr.GetAssetsOfType(AssetType::ModelSettings)
-					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+				auto remove_settings = assetMngr.FindAssetsOfType(make_asset_type(AssetType::ModelSettings))
+					| std::views::transform([](auto& a) -> fig::uuid { return a.get().id; })
 					| std::ranges::to<std::vector>();
 				assetMngr.DeleteAssets(remove_settings);
 
@@ -211,8 +211,8 @@ namespace fig
 			{
 				auto& assetMngr = userMngr.GetContent().GetAssets();
 
-				auto remove_chats = assetMngr.GetAssetsOfType(AssetType::Chat, ChatAssetType::Instance)
-					| std::views::transform([](auto& a) -> fig::uuid { return a.id; })
+				auto remove_chats = assetMngr.FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
+					| std::views::transform([](auto& a) -> fig::uuid { return a.get().id; })
 					| std::ranges::to<std::vector>();
 				assetMngr.DeleteAssets(remove_chats);
 

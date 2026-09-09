@@ -49,7 +49,7 @@ namespace fig::io
 			{
 				PendingRequest request = std::move(const_cast<PendingRequest&>(_pending.top()));
 				_pending.pop();
-				request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
+//				request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
 			}
 		}
 
@@ -244,11 +244,11 @@ namespace fig::io
 		if (auto itFind = _assets.find(assetId); itFind != _assets.end())
 		{
 			auto& asset = itFind->second;
-			asset.data = std::move(data); // Move data
 
 			asset.sync_state.file_sync = AssetSyncState::Status::Modified;
 			asset.sync_state.db_sync = AssetSyncState::Status::Modified;
 			asset.sync_state.has_data = not data.empty();
+			asset.data = std::move(data); // Move data
 
 			asset.SetMeta(MetaTag::UpdatedAt, fig::now());
 
@@ -285,19 +285,19 @@ namespace fig::io
 		return false;
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id) const noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 		return FindAsset_NoLock(id);
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id, AssetType assetType) const noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 		return FindAsset_NoLock(id, assetType);
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAssetOfType(AssetTypeDefinition type, const fig::uuid& parentId) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAssetOfType(AssetTypeDefinition type, const fig::uuid& parentId) const noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -314,7 +314,19 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id) noexcept
+	fig::cref_vector<Asset> AssetManager::FindAssetsOfType(AssetTypeDefinition type, const fig::uuid& parentId) const noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		bool with_parent = !parentId.empty();
+
+		return _assets
+			| std::views::filter([type, with_parent, &parentId](auto&& kvp) { return (kvp.second).type.IsOfType(type) and (not with_parent or kvp.second.parent_id == parentId); })
+			| std::views::transform([](auto&& kvp) { return std::cref(kvp.second); })
+			| std::ranges::to<std::vector>();
+	}
+
+	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id) const noexcept
 	{
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend())
@@ -322,7 +334,7 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id, AssetType assetType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id, AssetType assetType) const noexcept
 	{
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend() and itFind->second.type.IsOfType(assetType))
@@ -330,7 +342,7 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id, AssetTypeDefinition assetType) noexcept
+	fig::optional_cref<Asset> AssetManager::FindAsset_NoLock(const fig::uuid& id, AssetTypeDefinition assetType) const noexcept
 	{
 		auto itFind = _assets.find(id);
 		if (itFind != _assets.cend() and (itFind->second).type.IsOfType(assetType, false))
@@ -338,7 +350,7 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::cref_vector<Asset> AssetManager::FindChildrenOf(const fig::uuid& parentId) noexcept
+	fig::cref_vector<Asset> AssetManager::FindChildrenOf(const fig::uuid& parentId) const noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -351,7 +363,7 @@ namespace fig::io
 		return children;
 	}
 
-	bool AssetManager::HasChildren(const fig::uuid& assetId) noexcept
+	bool AssetManager::HasChildren(const fig::uuid& assetId) const noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
@@ -727,7 +739,7 @@ namespace fig::io
 		return false;
 	}
 
-	std::unordered_set<fig::uuid> AssetManager::FindRelatedAssets_NoLock(const fig::uuid& assetID) noexcept
+	std::unordered_set<fig::uuid> AssetManager::FindRelatedAssets_NoLock(const fig::uuid& assetID) const noexcept
 	{
 		std::unordered_set<fig::uuid> assetIDs;
 		std::unordered_set<fig::uuid> openList;
@@ -962,7 +974,7 @@ namespace fig::io
 		return false;
 	}
 
-	AsyncLoadError AssetManager::__LoadImageTask(const fig::uuid& assetId, AsyncResultVariant& outResult) noexcept
+	AsyncLoadError AssetManager::__LoadImageTask(const fig::uuid& assetId, AsyncResult& outResult) noexcept
 	{
 		if (auto findImage = FindAsset(assetId); findImage.has_value() and (*findImage).IsOfType(AssetType::Image))
 		{
@@ -971,7 +983,9 @@ namespace fig::io
 			{
 				if (auto image = LoadImageFromMemory(imageAsset.data))
 				{
-					outResult.emplace<AsyncResult_Image>(std::move(image.value()));
+					outResult = std::make_shared<AsyncResultVariant>(
+						std::in_place_type<AsyncResult_Image>,
+						std::move(image.value()));
 					return AsyncLoadError::NoError;
 				}
 			}
@@ -984,7 +998,7 @@ namespace fig::io
 		return AsyncLoadError::FileNotFound;
 	}
 
-	AsyncLoadError AssetManager::__LoadCharacterImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResultVariant& outResult) noexcept
+	AsyncLoadError AssetManager::__LoadCharacterImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResult& outResult) noexcept
 	{
 		if (auto findImage = FindAssetOfType(make_asset_type(AssetType::Image, imageType), characterAssetID))
 		{
@@ -993,7 +1007,9 @@ namespace fig::io
 			{
 				if (auto image = LoadImageFromMemory(imageAsset.data))
 				{
-					outResult.emplace<AsyncResult_Image>(std::move(image.value()));
+					outResult = std::make_shared<AsyncResultVariant>(
+						std::in_place_type<AsyncResult_Image>,
+						std::move(image.value()));
 					return AsyncLoadError::NoError;
 				}
 			}
@@ -1006,7 +1022,7 @@ namespace fig::io
 		return AsyncLoadError::FileNotFound;
 	}
 
-	AsyncLoadError AssetManager::__LoadCoverImageTask(const fig::uuid& characterAssetID, AsyncResultVariant& outResult) noexcept
+	AsyncLoadError AssetManager::__LoadCoverImageTask(const fig::uuid& characterAssetID, AsyncResult& outResult) noexcept
 	{
 		fig::sdl::Surface fullSurface {};
 		fig::sdl::Surface halfSurface {};
@@ -1067,10 +1083,13 @@ namespace fig::io
 			MaskCorners(fullSurface, MaskType::CARD_CORNER_MASK);
 		}
 
-		outResult.emplace<AsyncResult_CoverPair>(AsyncResult_CoverPair {
-			std::move(fullSurface),
-			std::move(halfSurface),
+		outResult = std::make_shared<AsyncResultVariant>(
+			std::in_place_type<AsyncResult_CoverPair>,
+			AsyncResult_CoverPair {
+				std::move(fullSurface),
+				std::move(halfSurface),
 			});
+
 		return AsyncLoadError::NoError;
 	}
 
@@ -1092,21 +1111,20 @@ namespace fig::io
 				_pending.pop();
 			}
 
+			AsyncResult result;
 			if (not IsAsyncRequestAlive(request))
 			{
-				request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
+				__YieldAsyncResult(request.assetId, std::unexpected(AsyncLoadError::Canceled));
 				continue;
 			}
 
-			if constexpr (Disabled)
+			if constexpr (Disabled) // Simulate slow loading
 			{
-				// Simulated slowness
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 
 			// Do work
 			AsyncLoadError error;
-			AsyncResultVariant result;
 			switch (request.task)
 			{
 				case AsyncTask::LoadImage:
@@ -1123,22 +1141,38 @@ namespace fig::io
 					break;
 			}
 
-			if (IsAsyncRequestAlive(request))
-			{
-				std::scoped_lock<std::mutex> lock(_active_mutex);
-				_active_promises.erase(request.assetId);
-			}
-			else
+			if (not IsAsyncRequestAlive(request))
 			{
 				// Canceled
-				request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
+				__YieldAsyncResult(request.assetId, std::unexpected(AsyncLoadError::Canceled));
 				continue;
 			}
 
 			if (error == AsyncLoadError::NoError)
-				request.promise->set_value(std::move(result));
+				__YieldAsyncResult(request.assetId, result);
 			else
-				request.promise->set_value(std::unexpected(error));
+				__YieldAsyncResult(request.assetId, std::unexpected(error));
+		}
+	}
+
+	void AssetManager::__YieldAsyncResult(const fig::uuid& assetId, std::expected<AsyncResult, AsyncLoadError> result)
+	{
+		std::vector<AsyncPromise> waiters;
+		{
+			std::scoped_lock lock(_active_mutex);
+			if (auto it = _active_promises.find(assetId); it != _active_promises.end())
+			{
+				waiters = std::move(it->second);
+				_active_promises.erase(it);
+			}
+		}
+
+		for (size_t i = 0; i < waiters.size(); ++i)
+		{
+			if (result.has_value())
+				waiters[i].set_value(result.value());
+			else
+				waiters[i].set_value(std::unexpected(result.error()));
 		}
 	}
 
@@ -1156,23 +1190,19 @@ namespace fig::io
 		const uint64_t id = _next_id.fetch_add(1, std::memory_order_relaxed);
 
 		// Cancel the previous request for this card, if any
-		{
-			std::scoped_lock lock(_active_mutex);
-			if (auto it = _active_promises.find(assetId); it != _active_promises.end())
-			{
-				it->second->set_value(std::unexpected(AsyncLoadError::Canceled));
-				_active_promises.erase(it);
-			}
-		}
+//		{
+//			std::scoped_lock lock(_active_mutex);
+//			if (auto it = _active_promises.find(assetId); it != _active_promises.end())
+//				_active_promises.erase(it);
+//		}
 
 		// Create the promise
-		auto promise = std::make_unique<AsyncPromise>();
-		auto future = promise->get_future();
-		auto promise_ptr = promise.get();
+		AsyncPromise promise {};
+		auto future = promise.get_future();
 
 		{	// Store promise
 			std::scoped_lock lock(_active_mutex);
-			_active_promises[assetId] = promise_ptr;
+			_active_promises[assetId].emplace_back(std::move(promise));
 		}
 
 		{	// Enqueue request
@@ -1182,7 +1212,6 @@ namespace fig::io
 				.assetId = assetId,
 				.priority = priority,
 				.task = task,
-				.promise = std::move(promise),
 			});
 		}
 		_pending_cv.notify_one();
@@ -1197,23 +1226,14 @@ namespace fig::io
 
 	void AssetManager::Cancel(const fig::uuid& assetId)
 	{
-		std::scoped_lock lock(_active_mutex);
-		if (auto it = _active_promises.find(assetId); it != _active_promises.end())
-		{
-			it->second->set_value(std::unexpected(AsyncLoadError::Canceled));
-			_active_promises.erase(it);
-		}
+		__YieldAsyncResult(assetId, std::unexpected(AsyncLoadError::Canceled));
 	}
 
 	void AssetManager::CancelAll()
 	{
 		std::scoped_lock lock(_pending_mutex);
 		while (!_pending.empty())
-		{
-			PendingRequest request = std::move(const_cast<PendingRequest&>(_pending.top()));
 			_pending.pop();
-			request.promise->set_value(std::unexpected(AsyncLoadError::Canceled));
-		}
 		_pending_cv.notify_all();
 	}
 
@@ -1273,7 +1293,7 @@ namespace fig::io
 		}
 	}
 
-	std::set<fig::uuid> AssetManager::GetAssociatedAssets(const fig::uuid& assetId) noexcept
+	std::set<fig::uuid> AssetManager::FindAssociatedAssets(const fig::uuid& assetId) const noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 

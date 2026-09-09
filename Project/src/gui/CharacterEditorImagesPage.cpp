@@ -3,9 +3,11 @@
 #include "gui/AppResources.h"
 #include "gui/HorizontalLine.h"
 #include "gui/PreviewCardImage.h"
+#include "gui/GridSizer.h"
 #include "data/Character.h"
 #include "io/ContentManager.h"
 
+using namespace fig::io;
 using namespace fig::data;
 
 namespace fig::gui
@@ -24,13 +26,16 @@ namespace fig::gui
 		
 		CreateHeader(this, pSizer, "Portraits");
 
-		if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(_characterId))
-		{
-			auto pImage = CreateControl<PreviewCardImage>();
-			pImage->SetImage((*try_portrait).id);
-			pSizer->Add(pImage);
-		}
+		auto pGridSizer = new GridSizer(Constants::GUI::Cards::Half::Width, Constants::GUI::Cards::Half::Height, 12, 12);
+		pSizer->Add(pGridSizer);
 
+		auto images = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), _characterId);
+		for (auto image : images)
+		{
+			auto pImage = CreateControl<PreviewCardImage>(ImageFit::Portrait);
+			pImage->SetImage(image.get().id);
+			pGridSizer->Add(pImage);
+		}
 
 		return true;
 	}

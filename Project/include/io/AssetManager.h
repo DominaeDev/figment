@@ -3,8 +3,6 @@
 #include "io/Asset.h"
 #include "user/Security.h"
 #include "io/IndexDatabase.h"
-#include <expected>
-#include <ranges>
 #include <mutex>
 #include <future>
 
@@ -24,9 +22,26 @@ namespace fig::io
 	using AsyncResult_Image		= fig::sdl::Surface;
 	using AsyncResult_CoverPair	= std::pair<fig::sdl::Surface, fig::sdl::Surface>;
 	using AsyncResultVariant = std::variant<AsyncResult_Image, AsyncResult_CoverPair>;
+	using AsyncResult = std::shared_ptr<AsyncResultVariant>;
 
-	using AsyncPromise = std::promise<std::expected<AsyncResultVariant, AsyncLoadError>>;
-	using AsyncFuture = std::future<std::expected<AsyncResultVariant, AsyncLoadError>>;
+	using AsyncPromise = std::promise<std::expected<AsyncResult, AsyncLoadError>>;
+	using AsyncFuture = std::future<std::expected<AsyncResult, AsyncLoadError>>;
+
+	template <typename T>
+	std::expected<std::shared_ptr<T>, AsyncLoadError> GetAsyncResult(AsyncFuture& future)
+	{
+		if (future.valid() and future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+		{
+			if (auto result = future.get(); result.has_value())
+			{
+				if (auto pValue = std::get_if<T>((*result).get()))
+					return std::shared_ptr<T>(*result, pValue);
+			}
+			else
+				return std::unexpected(result.error());
+		}
+		return std::unexpected(AsyncLoadError::NoError); // No result yet
+	}
 
 	enum class AsyncTask {
 		None,
@@ -65,39 +80,26 @@ namespace fig::io
 		size_t DeleteAssets(std::span<fig::uuid> assetIds) noexcept;
 		bool ReleaseAssetData(const fig::uuid& assetId) noexcept;
 
-		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId) noexcept;
-		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId, AssetType assetType) noexcept;
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId) const noexcept;
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId, AssetType assetType) const noexcept;
 		template<asset_subtype_type T>
-		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId, AssetType assetType, T subtype) noexcept
+		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId, AssetType assetType, T subtype) const noexcept
 		{
 			std::scoped_lock lock { _assetsMutex };
 			return FindAsset_NoLock(assetId, make_asset_type(assetType, subtype));
 		}
-		fig::optional_cref<Asset> FindAssetOfType(AssetTypeDefinition type, const fig::uuid& parentId = {}) noexcept;
+		fig::optional_cref<Asset> FindAssetOfType(AssetTypeDefinition type, const fig::uuid& parentId = {}) const noexcept;
+		fig::cref_vector<Asset> FindAssetsOfType(AssetTypeDefinition type, const fig::uuid& parentId = {}) const noexcept;
 
-		fig::cref_vector<Asset> FindChildrenOf(const fig::uuid& parentId) noexcept;
-		bool HasChildren(const fig::uuid& assetId) noexcept;
-		std::set<fig::uuid> GetAssociatedAssets(const fig::uuid& assetId) noexcept;
+		fig::cref_vector<Asset> FindChildrenOf(const fig::uuid& parentId) const noexcept;
+		bool HasChildren(const fig::uuid& assetId) const noexcept;
+		std::set<fig::uuid> FindAssociatedAssets(const fig::uuid& assetId) const noexcept;
 
 		FileError LoadAsset(const Asset& asset) noexcept;
 		fig::expected_cref<Asset, FileError> LoadAsset(const fig::uuid& assetId) noexcept;
 		void LoadAssetData(const std::vector<fig::uuid>& assetIds) noexcept;
 		void LoadAssetData(const fig::ref_vector<Asset>& assets) noexcept;
 		
-//		auto GetAssets() noexcept { return _assets | std::views::values; }
-		auto GetAssets() const noexcept { return _assets | std::views::values; }
-		auto GetAssetsOfType(AssetType assetType) const noexcept { 
-			return _assets 
-				| std::views::filter([assetType](auto&& kvp) { return (kvp.second).type.IsOfType(assetType); }) 
-				| std::views::values;
-		}
-		template <asset_subtype_type T>
-		auto GetAssetsOfType(AssetType assetType, T subtype) const noexcept { 
-			return _assets 
-				| std::views::filter([assetType, subtype](auto&& kvp) { return (kvp.second).type.IsOfType(assetType, subtype); })
-				| std::views::values;
-		}
-
 		template <typename Fn>
 		decltype(auto) ModifyAsset(const fig::uuid& assetId, Fn fn)
 		{
@@ -145,31 +147,21 @@ namespace fig::io
 		/* Internal */
 		fig::expected_ref<Asset, FileError> LoadAsset_NoLock(Asset& asset) noexcept;
 		fig::expected_ref<Asset, FileError> LoadAssetMeta_NoLock(Asset& asset) noexcept;
-		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId) noexcept;
-		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId, AssetType assetType) noexcept;
-		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId, AssetTypeDefinition assetType) noexcept;
+		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId) const noexcept;
+		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId, AssetType assetType) const noexcept;
+		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId, AssetTypeDefinition assetType) const noexcept;
 		int32_t GetAssetDepth_NoLock(const fig::uuid& id, std::unordered_map<fig::uuid, int32_t>& depthCache, int32_t depth = 0) const noexcept;
+		std::unordered_set<fig::uuid> FindRelatedAssets_NoLock(const fig::uuid& assetId) const noexcept;
 
 		size_t DeleteAssets_NoLock(std::span<fig::uuid> assetIds) noexcept;
 		size_t DeleteAssetFiles_NoLock(std::span<fig::uuid> assetIds) noexcept;
-		std::unordered_set<fig::uuid> FindRelatedAssets_NoLock(const fig::uuid& assetId) noexcept;
-
-	private:
-		fig::uuid _profileID;
-		fig::path _profilePath;
-		fig::auth::AuthKey _profileAuthKey {};
-		std::map<fig::uuid, AssetFolder> _folders {};
-		std::map<fig::uuid, Asset> _assets {};
-		std::unique_ptr<IndexDatabase> _pAssetDB;
-
-		std::mutex _assetsMutex; // Guards _assets
 
 		void ModifyAsset_Void(const fig::uuid& assetId, std::function<void(Asset&)> fn);
 		void ModifyAsset_Void(const Asset& asset, std::function<void(Asset&)> fn);
 		bool ModifyAsset_Bool(const fig::uuid& assetId, std::function<bool(Asset&)> fn);
 		bool ModifyAsset_Bool(const Asset& asset, std::function<bool(Asset&)> fn);
 
-		/* Internal; Mutex is locked */
+		/* Internal; Only called when mutex is locked */
 		Asset& CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept;
 		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept;
 		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept;
@@ -185,17 +177,16 @@ namespace fig::io
 
 		/* Asynchronous loading */
 		void __Worker(std::stop_token stop);
-		AsyncLoadError __LoadImageTask(const fig::uuid& assetId, AsyncResultVariant& outResult) noexcept;
-		AsyncLoadError __LoadCharacterImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResultVariant& outResult) noexcept;
-		AsyncLoadError __LoadCoverImageTask(const fig::uuid& characterAssetID, AsyncResultVariant& outResult) noexcept;
+		AsyncLoadError __LoadImageTask(const fig::uuid& assetId, AsyncResult& outResult) noexcept;
+		AsyncLoadError __LoadCharacterImageTask(const fig::uuid& characterAssetID, ImageAssetType imageType, AsyncResult& outResult) noexcept;
+		AsyncLoadError __LoadCoverImageTask(const fig::uuid& characterAssetID, AsyncResult& outResult) noexcept;
+		void __YieldAsyncResult(const fig::uuid& assetId, std::expected<AsyncResult, AsyncLoadError> result);
 
 		struct PendingRequest {
 			uint64_t id {};
 			fig::uuid assetId {};
 			int32_t priority {};
 			AsyncTask task {};
-
-			std::unique_ptr<AsyncPromise> promise;
 
 			bool operator<(const PendingRequest& rhs) const noexcept
 			{
@@ -209,13 +200,26 @@ namespace fig::io
 		void __Autosave(std::stop_token stopToken, std::chrono::seconds interval);
 
 	private:
+		fig::uuid _profileID;
+		fig::path _profilePath;
+		fig::auth::AuthKey _profileAuthKey {};
+		std::map<fig::uuid, AssetFolder> _folders {};
+		std::map<fig::uuid, Asset> _assets {};
+		std::unique_ptr<IndexDatabase> _pAssetDB;
+
+		mutable std::mutex _assetsMutex; // Guards _assets
+
+		// Task queue
 		std::priority_queue<PendingRequest> _pending;
 		mutable std::mutex _pending_mutex;
 		std::condition_variable _pending_cv;
-		std::map<fig::uuid, AsyncPromise*> _active_promises;
-		mutable std::mutex _active_mutex;
 		std::atomic<uint64_t> _next_id { 0 };
 		std::vector<std::jthread> _workers;
+
+		std::unordered_map<fig::uuid, std::vector<AsyncPromise>> _active_promises;
+		mutable std::mutex _active_mutex;
+
+		// Auto save
 		std::jthread _autosave_worker {};
 		std::condition_variable_any _autosave_cv {};
 	};

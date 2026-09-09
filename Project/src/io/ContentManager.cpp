@@ -51,10 +51,10 @@ namespace fig::io
 		if (not settingsAsset.has_value())
 		{
 			// Find first
-			auto model_settings = _pAssetMngr->GetAssetsOfType(AssetType::ModelSettings)
+			auto model_settings = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::ModelSettings))
 				| std::ranges::to<std::vector>();
 			if (model_settings.size() > 0)
-				settingsAsset = _pAssetMngr->FindAsset(model_settings.front().id);
+				settingsAsset = _pAssetMngr->FindAsset(model_settings.front().get().id);
 		}
 
 		if (settingsAsset.has_value())
@@ -400,9 +400,8 @@ namespace fig::io
 			| std::views::keys
 			| std::ranges::to<std::unordered_set>();
 
-		auto chatLogAssets = _pAssetMngr->GetAssetsOfType(AssetType::Chat, ChatAssetType::Log)
-			| std::views::filter([&](auto& a) { return chatInstanceIds.contains(a.parent_id); })
-			| std::views::transform([](auto& a) { return std::cref(a); })
+		auto chatLogAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Log))
+			| std::views::filter([&](auto&& a) { return chatInstanceIds.contains(a.get().parent_id); })
 			| std::ranges::to<std::vector>();
 
 		std::ranges::sort(chatLogAssets, std::ranges::greater(), [](auto& a) { return a.get().GetUpdatedAt(); });
@@ -429,9 +428,8 @@ namespace fig::io
 				instanceIds.insert(kvp.first);
 		}
 
-		auto logAssets = _pAssetMngr->GetAssetsOfType(AssetType::Chat, ChatAssetType::Log)
-			| std::views::filter([&](auto&& a) { return instanceIds.contains(a.parent_id); })
-			| std::views::transform([](auto&& a) { return std::cref(a); })
+		auto logAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Log))
+			| std::views::filter([&](auto&& a) { return instanceIds.contains(a.get().parent_id); })
 			| std::ranges::to<std::vector>();
 
 		if (bLoad)
@@ -453,13 +451,13 @@ namespace fig::io
 
 	fig::optional_cref<Asset> UserContentManager::FindLastChatWith(const fig::uuid& characterId) const
 	{
-		auto chatInstanceIds = _pAssetMngr->GetAssetsOfType(AssetType::Chat, ChatAssetType::Instance)
-			| std::views::filter([&](auto& a) { return a.HasReferenceTo(characterId); })
-			| std::views::transform([](auto& a) { return a.id; })
+		auto chatInstanceIds = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
+			| std::views::filter([&](auto& a) { return a.get().HasReferenceTo(characterId); })
+			| std::views::transform([](auto& a) { return a.get().id; })
 			| std::ranges::to<std::unordered_set>();
 
-		auto chatLogs = _pAssetMngr->GetAssetsOfType(AssetType::Chat, ChatAssetType::Log)
-			| std::views::filter([&](auto& a) { return chatInstanceIds.contains(a.parent_id); })
+		auto chatLogs = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Log))
+			| std::views::filter([&](auto& a) { return chatInstanceIds.contains(a.get().parent_id); })
 			| std::views::transform([](auto& a) { return std::cref(a); })
 			| std::ranges::to<std::vector>();
 
@@ -489,7 +487,7 @@ namespace fig::io
 
 		if (assetType.IsOfType(AssetType::Chat, ChatAssetType::Instance))
 		{
-			auto associatedAssets = _pAssetMngr->GetAssociatedAssets(assetId);
+			auto associatedAssets = _pAssetMngr->FindAssociatedAssets(assetId);
 			for (auto& id : associatedAssets)
 				InvalidateMeta(id);
 		}
@@ -514,16 +512,12 @@ namespace fig::io
 
 	fig::cref_vector<Asset> UserContentManager::GetCharacters() const noexcept
 	{ 
-		return _pAssetMngr->GetAssetsOfType(AssetType::Character)
-			| std::views::transform([](auto& a) { return std::cref(a); })
-			| std::ranges::to<std::vector>();
+		return _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Character));
 	}
 
 	fig::cref_vector<Asset> UserContentManager::GetScenarios() const noexcept
 	{ 
-		return _pAssetMngr->GetAssetsOfType(AssetType::Scenario)
-			| std::views::transform([](auto& a) { return std::cref(a); })
-			| std::ranges::to<std::vector>();
+		return _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Scenario));
 	}
 
 	fig::uuid UserContentManager::CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings)

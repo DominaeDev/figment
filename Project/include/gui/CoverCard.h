@@ -48,6 +48,7 @@ namespace fig::gui
 
 	protected:
 		void SetCoverImages(fig::sdl::Surface&& fullCover, fig::sdl::Surface&& halfCover);
+		void SetCoverImages(const fig::sdl::Surface& full, const fig::sdl::Surface& half);
 		void RefreshState();
 
 		void SetLabel(const fig::string& text) noexcept;

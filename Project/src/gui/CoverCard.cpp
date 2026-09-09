@@ -409,21 +409,18 @@ namespace fig::gui
 		if (not _pendingCover.valid())
 			return;
 
-		if (_pendingCover.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+		// Pair
+		if (auto try_cover = GetAsyncResult<AsyncResult_CoverPair>(_pendingCover))
 		{
-			if (auto result = _pendingCover.get(); result.has_value())
-			{
-				if (auto surface = std::get_if<AsyncResult_Image>(&result.value()))
-					SetCoverImages(std::move(*surface), {});
-				else if (auto pair = std::get_if<AsyncResult_CoverPair>(&result.value()))
-					SetCoverImages(std::move(pair->first), std::move(pair->second));
-			}
-			else
-			{
-				_bHasError = true;
-			}
+			SetCoverImages(std::move((*try_cover).get()->first), std::move((*try_cover).get()->second));
 			RefreshState();
 		}
+		else if (try_cover.error() != AsyncLoadError::NoError)
+		{
+			_bHasError = true;
+			RefreshState();
+		}
+
 	}
 
 	void CoverCard::AddSearchTerms(const fig::string& text) noexcept
