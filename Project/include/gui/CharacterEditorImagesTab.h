@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/EditorPage.h"
+#include "gui/EditorTab.h"
 #include "gui/CharacterEditorArgs.h"
 
 namespace fig::gui
@@ -9,10 +9,10 @@ namespace fig::gui
 	class CharacterPortraitWidget;
 	class CharacterBackgroundWidget;
 
-	class CharacterEditorImagesPage : public EditorPage<CharacterEditorArgs>
+	class CharacterEditorImagesTab : public EditorTab<CharacterEditorArgs>
 	{
 	public:
-		CharacterEditorImagesPage(ControlPtr pParent);
+		CharacterEditorImagesTab(ControlPtr pParent);
 
 		bool Initialize(CharacterEditorArgs args) override;
 		void ShutDown() noexcept {};
@@ -43,7 +43,7 @@ namespace fig::gui
 
 		struct FileDialogUserData
 		{
-			CharacterEditorImagesPage* pThis;
+			CharacterEditorImagesTab* pThis;
 			CharacterImageType type;
 		} _fileDlgUserData {};
 		static void SDLCALL OnFileDialogResult(void* userdata, const char* const* fileList, int filter);

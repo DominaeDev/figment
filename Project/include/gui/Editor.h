@@ -1,10 +1,10 @@
 #pragma once
 
-#include "EditorPage.h"
+#include "EditorTab.h"
 
 namespace fig::gui
 {
-	using EditorPagePtr = fig::observer_ptr<EditorPageBase>;
+	using EditorTabPtr = fig::observer_ptr<EditorTabBase>;
 
 	class Editor : public Control
 	{
@@ -15,30 +15,30 @@ namespace fig::gui
 		virtual void Shutdown() = 0;
 		virtual void PopulateTopBar(ControlPtr pTopBar) {};
 		virtual fig::string GetTitle() const = 0;
-		virtual std::vector<EditorPageDescriptor> GetPageDescriptors() const = 0;
 
-		std::vector<EditorPagePtr> GetPages() const noexcept { return _pages; }
+		virtual std::vector<EditorTabDescriptor> GetTabDescriptors() const = 0;
+		std::vector<EditorTabPtr> GetTabs() const noexcept { return _tabs; }
 
-		void SelectPage(size_t index);
+		void SelectTab(size_t index);
 		
 	protected:
-		std::vector<EditorPagePtr> _pages;
+		std::vector<EditorTabPtr> _tabs;
 
 		template <typename T, typename... Args>
-			requires std::derived_from<T, EditorPageBase>
-		fig::observer_ptr<T> CreatePage(Args&&... args)
+			requires std::derived_from<T, EditorTabBase>
+		fig::observer_ptr<T> CreateTab(Args&&... args)
 		{
-			auto pPage = CreateControl<T>(std::forward<Args>(args)...);
-			_pages.push_back(pPage);
-			EnablePage(pPage, false);
-			_pPageSizer->Add(pPage, 0, SizerFlag::Expand);
-			return pPage;
+			auto pTab = CreateControl<T>(std::forward<Args>(args)...);
+			_tabs.push_back(pTab);
+			EnableTab(pTab, false);
+			_pTabSizer->Add(pTab, 0, SizerFlag::Expand);
+			return pTab;
 		}
 		
 	private:
-		void EnablePage(EditorPageBase* pPage, bool bEnabled);
+		void EnableTab(EditorTabBase* pTab, bool bEnabled);
 
 	private:
-		SizerPtr _pPageSizer;
+		SizerPtr _pTabSizer;
 	};
 }

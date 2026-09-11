@@ -102,7 +102,7 @@ namespace fig::Constants
 			constexpr float ImageZoomFactor = 1.1f;
 		}
 
-		namespace EditorPage
+		namespace EditorTab
 		{
 			constexpr fig::coord MaxWidth = 0;
 		}

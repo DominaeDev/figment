@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "gui/CharacterEditorInfoPage.h"
+#include "gui/CharacterEditorInfoTab.h"
 #include "gui/TextBox.h"
 #include "gui/ComboBox.h"
 #include "gui/ButtonWithLabel.h"
@@ -12,11 +12,12 @@ using namespace fig::data;
 
 namespace fig::gui
 {
-	CharacterEditorInfoPage::CharacterEditorInfoPage(ControlPtr pParent) : EditorPage(pParent)
+	CharacterEditorInfoTab::CharacterEditorInfoTab(ControlPtr pParent) : EditorTab(pParent)
 	{
+		SetMaxWidth(1280);
 	}
 
-	bool CharacterEditorInfoPage::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorInfoTab::Initialize(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter)
 			return false;
@@ -88,7 +89,7 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorInfoPage::OnAfterLayout()
+	void CharacterEditorInfoTab::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
 	}

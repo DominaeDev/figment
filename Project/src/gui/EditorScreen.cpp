@@ -12,7 +12,7 @@ namespace fig::gui
 		_pScrollPanel = CreateControl<ScrollPanel>();
 		_pScrollPanel->SetScrollBarOffset(0);
 		_pScrollPanel->SetBottomPadding(40);
-		_pScrollPanel->SetMaxWidth(Constants::GUI::EditorPage::MaxWidth);
+		_pScrollPanel->SetMaxWidth(Constants::GUI::EditorTab::MaxWidth);
 		_pScrollPanel->SetSizer<VerticalSizer>();
 
 		_pTopBar = CreateControl<TopBar>("", _pScrollPanel);
@@ -54,7 +54,7 @@ namespace fig::gui
 		pSizer->Add(_pEditor.get(), 0, SizerFlag::Expand);
 
 		_pEditor->PopulateTopBar(_pTopBar);
-		_pEditor->SelectPage(0);
+		_pEditor->SelectTab(0);
 
 		MainFrame::GetInstance().GetSidePanel()->SetEditor(_pEditor.get());
 
@@ -75,10 +75,10 @@ namespace fig::gui
 
 			return EventResult::Handled;
 		}
-		else if (IsUserEvent(event, UserEvent::SelectEditorPage))
+		else if (IsUserEvent(event, UserEvent::SelectEditorTab))
 		{
 			if (_pEditor)
-				_pEditor->SelectPage(static_cast<size_t>(event.user.code));
+				_pEditor->SelectTab(static_cast<size_t>(event.user.code));
 			return EventResult::Handled;
 		}
 

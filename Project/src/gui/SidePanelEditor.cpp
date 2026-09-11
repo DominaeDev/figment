@@ -32,11 +32,11 @@ namespace fig::gui
 			auto pNavigationSizer = SetSizer<VerticalSizer>();
 			pNavigationSizer->AddSpacer(56);
 
-			auto pages = _pEditor->GetPageDescriptors();
-			for (auto& page : pages)
+			auto tabs = _pEditor->GetTabDescriptors();
+			for (auto& tab : tabs)
 			{
-				auto pNavButton = CreateControl<SidePanelButton>(page.iconLarge, page.label);
-				pNavButton->SetDelegate([page] { PushEvent(UserEvent::SelectEditorPage, static_cast<int32_t>(page.pageIndex)); });
+				auto pNavButton = CreateControl<SidePanelButton>(tab.iconLarge, tab.label);
+				pNavButton->SetDelegate([tab] { PushEvent(UserEvent::SelectEditorTab, static_cast<int32_t>(tab.tabIndex)); });
 				
 				pNavigationSizer->Add(pNavButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 				pNavigationSizer->AddSpacer(4);
@@ -60,12 +60,12 @@ namespace fig::gui
 			auto pNavigationSizer = SetSizer<VerticalSizer>();
 			pNavigationSizer->AddSpacer(62);
 
-			auto pages = _pEditor->GetPageDescriptors();
-			for (auto& page : pages)
+			auto tabs = _pEditor->GetTabDescriptors();
+			for (auto& tab : tabs)
 			{
-				auto pNavButton = CreateControl<ButtonWithIcon>(page.iconSmall, false);
+				auto pNavButton = CreateControl<ButtonWithIcon>(tab.iconSmall, false);
 				pNavButton->SetTheme(Theme::SidePanelButtonStyle);
-				pNavButton->SetDelegate([page] { PushEvent(UserEvent::SelectEditorPage, static_cast<int32_t>(page.pageIndex)); });
+				pNavButton->SetDelegate([tab] { PushEvent(UserEvent::SelectEditorTab, static_cast<int32_t>(tab.tabIndex)); });
 
 				pNavigationSizer->Add(pNavButton, 0, SizerFlag::AlignCenterHorizontal);
 				pNavigationSizer->AddSpacer(8);

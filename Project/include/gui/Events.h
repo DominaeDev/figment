@@ -17,7 +17,7 @@ namespace fig::gui
 		SidePanelResized,
 		NavigateToHome,
 		NavigateToChatList,
-		SelectEditorPage,
+		SelectEditorTab,
 		StartChat,
 
 		EditCharacter,

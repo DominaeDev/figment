@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "gui/CharacterEditorVoicePage.h"
+#include "gui/CharacterEditorVoiceTab.h"
 #include "gui/ToggleWithLabel.h"
 #include "gui/TextBox.h"
 #include "gui/AppResources.h"
@@ -70,12 +70,13 @@ namespace fig::gui
 		{ "presence_commanding",	std::pair { "His voice reflects his commanding confidence and domineering character", "Her voice reflects her commanding confidence and domineering character" } },
 	};
 
-	CharacterEditorVoicePage::CharacterEditorVoicePage(ControlPtr pParent) : EditorPage(pParent)
+	CharacterEditorVoiceTab::CharacterEditorVoiceTab(ControlPtr pParent) : EditorTab(pParent)
 	{
+		SetMaxWidth(1280);
 		_audioResultQueue.SetDelegate([this](auto&& r) { OnAudioResult(std::move(r)); });
 	}
 
-	fig::observer_ptr<Sizer> CharacterEditorVoicePage::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
+	fig::observer_ptr<Sizer> CharacterEditorVoiceTab::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		CreateLabel(pParent, pSizer, text);
 		auto pGridSizer = new GridSizer(100, 29, 8, 6);
@@ -83,7 +84,7 @@ namespace fig::gui
 		return pGridSizer;
 	}
 
-	bool CharacterEditorVoicePage::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorVoiceTab::Initialize(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter or args.assetId.empty())
 			return false;
@@ -204,13 +205,13 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorVoicePage::ShutDown() noexcept
+	void CharacterEditorVoiceTab::ShutDown() noexcept
 	{
 		Global::GetAudioManager().StopAllSounds();
 		Global::GetTTSBackend().UnloadDesignModels();
 	}
 
-	fig::observer_ptr<ToggleWithLabel> CharacterEditorVoicePage::CreateToggle(SizerPtr pSizer, fig::handle toggleGroup, fig::handle toggleKey, fig::string_view label, bool bRadio)
+	fig::observer_ptr<ToggleWithLabel> CharacterEditorVoiceTab::CreateToggle(SizerPtr pSizer, fig::handle toggleGroup, fig::handle toggleKey, fig::string_view label, bool bRadio)
 	{
 		auto pToggle = CreateControl<ToggleWithLabel>(label, 14.5, bRadio ? ToggleBehavior::Radio : ToggleBehavior::Default);
 		pToggle->SetDelegate([this, toggleGroup, toggleKey](bool bOn) { 
@@ -222,7 +223,7 @@ namespace fig::gui
 		return pToggle;
 	}
 
-	void CharacterEditorVoicePage::OnToggle(fig::handle group, fig::handle key, bool bOn)
+	void CharacterEditorVoiceTab::OnToggle(fig::handle group, fig::handle key, bool bOn)
 	{
 		auto& toggleGroup = _toggleGroups[group];
 		if (bOn) // Untoggle others in group
@@ -243,7 +244,7 @@ namespace fig::gui
 		}
 	}
 
-	fig::string CharacterEditorVoicePage::GetPrompt() const noexcept
+	fig::string CharacterEditorVoiceTab::GetPrompt() const noexcept
 	{
 		std::vector<fig::string> prompts;
 
@@ -291,7 +292,7 @@ namespace fig::gui
 			| std::ranges::to<std::string>();
 	}
 
-	void CharacterEditorVoicePage::Generate() noexcept
+	void CharacterEditorVoiceTab::Generate() noexcept
 	{
 		fig::string name = _pCharacter->GetFullName();
 		fig::string phrase = std::format(Constants::TTS::ExamplePhrase, name);
@@ -325,7 +326,7 @@ namespace fig::gui
 		}
 	}
 
-	void CharacterEditorVoicePage::OnUpdate(float fElapsed)
+	void CharacterEditorVoiceTab::OnUpdate(float fElapsed)
 	{
 		_audioResultQueue.Update();
 
@@ -347,12 +348,12 @@ namespace fig::gui
 		}
 	}
 
-	void CharacterEditorVoicePage::OnAfterLayout()
+	void CharacterEditorVoiceTab::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
 	}
 
-	void CharacterEditorVoicePage::PlayStop() noexcept
+	void CharacterEditorVoiceTab::PlayStop() noexcept
 	{
 		if (_bIsPlaying)
 		{
@@ -366,7 +367,7 @@ namespace fig::gui
 		}
 	}
 
-	EventResult CharacterEditorVoicePage::OnEvent(fig::event& event)
+	EventResult CharacterEditorVoiceTab::OnEvent(fig::event& event)
 	{
 		if (IsUserEvent(event, UserEvent::TTSServerLoadingModel))
 		{
@@ -393,12 +394,12 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
-	void CharacterEditorVoicePage::SetStatusMessage(fig::string_view message)
+	void CharacterEditorVoiceTab::SetStatusMessage(fig::string_view message)
 	{
 		_pStatusText->SetText(message);
 	}
 
-	bool CharacterEditorVoicePage::Save()
+	bool CharacterEditorVoiceTab::Save()
 	{
 		if (_voicePrint.audioData.empty())
 			return true; // No change
@@ -413,7 +414,7 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorVoicePage::OnAudioResult(fig::tts::TTSPayload&& payload)
+	void CharacterEditorVoiceTab::OnAudioResult(fig::tts::TTSPayload&& payload)
 	{
 		if (payload.has_value())
 		{

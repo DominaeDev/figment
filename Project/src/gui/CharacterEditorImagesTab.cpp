@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "gui/CharacterEditorImagesPage.h"
+#include "gui/CharacterEditorImagesTab.h"
 #include "gui/AppResources.h"
 #include "gui/HorizontalLine.h"
 #include "gui/CharacterPortraitWidget.h"
@@ -17,11 +17,12 @@ using namespace fig::data;
 
 namespace fig::gui
 {
-	CharacterEditorImagesPage::CharacterEditorImagesPage(ControlPtr pParent) : EditorPage(pParent)
+	CharacterEditorImagesTab::CharacterEditorImagesTab(ControlPtr pParent) : EditorTab(pParent)
 	{
+		SetMaxWidth(1280);
 	}
 
-	bool CharacterEditorImagesPage::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorImagesTab::Initialize(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter)
 			return false;
@@ -45,18 +46,18 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorImagesPage::OnUpdate(float fElapsed)
+	void CharacterEditorImagesTab::OnUpdate(float fElapsed)
 	{
 		// Load images in load queue
 		ProcessLoadQueue();
 	}
 
-	void CharacterEditorImagesPage::OnAfterLayout()
+	void CharacterEditorImagesTab::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
 	}
 
-	void SDLCALL CharacterEditorImagesPage::OnFileDialogResult(void* userdata, const char* const* fileList, int filter)
+	void SDLCALL CharacterEditorImagesTab::OnFileDialogResult(void* userdata, const char* const* fileList, int filter)
 	{
 		if (not fileList)
 			return;
@@ -66,7 +67,7 @@ namespace fig::gui
 			pArgs->pThis->OnOpenFile(std::filesystem::u8path(*path), pArgs->type);
 	}
 
-	void CharacterEditorImagesPage::OpenFile(CharacterImageType type)
+	void CharacterEditorImagesTab::OpenFile(CharacterImageType type)
 	{
 		static constexpr SDL_DialogFileFilter filters[] =
 		{
@@ -83,7 +84,7 @@ namespace fig::gui
 		SDL_ShowOpenFileDialog(OnFileDialogResult, (void*)&_fileDlgUserData, GetSDLWindow(), filters, SDL_arraysize(filters), nullptr, true);
 	}
 
-	void CharacterEditorImagesPage::OnOpenFile(const fig::path& filename, CharacterImageType type)
+	void CharacterEditorImagesTab::OnOpenFile(const fig::path& filename, CharacterImageType type)
 	{
 		switch (type)
 		{
@@ -96,7 +97,7 @@ namespace fig::gui
 		}
 	}
 
-	void CharacterEditorImagesPage::InitPortraits(SizerPtr pSizer)
+	void CharacterEditorImagesTab::InitPortraits(SizerPtr pSizer)
 	{
 		_pPortraitGridSizer = new GridSizer(Constants::GUI::CharacterEditor::PortraitWidth + 12, Constants::GUI::CharacterEditor::PortraitHeight + 35, 4, 4);
 		pSizer->Add(_pPortraitGridSizer.get());
@@ -138,7 +139,7 @@ namespace fig::gui
 		_pPortraitGridSizer->Add(_pAddPortraitButton, 0, SizerFlag::All, 6);
 	}
 
-	void CharacterEditorImagesPage::InitBackgrounds(SizerPtr pSizer)
+	void CharacterEditorImagesTab::InitBackgrounds(SizerPtr pSizer)
 	{
 		_pBackgroundGridSizer = new GridSizer(Constants::GUI::CharacterEditor::BackgroundWidth + 12, Constants::GUI::CharacterEditor::BackgroundHeight + 12, 4, 4);
 		pSizer->Add(_pBackgroundGridSizer.get());
@@ -169,7 +170,7 @@ namespace fig::gui
 		_pBackgroundGridSizer->Add(_pAddBackgroundButton, 0, SizerFlag::All, 6);
 	}
 
-	void CharacterEditorImagesPage::OnClickedPortrait(ControlPtr pControl, int32_t button)
+	void CharacterEditorImagesTab::OnClickedPortrait(ControlPtr pControl, int32_t button)
 	{
 		size_t index;
 		if (auto itFind = std::ranges::find(_portraitWidgets, pControl, [](auto&& p) { return p.pControl; }); itFind != std::ranges::cend(_portraitWidgets))
@@ -203,7 +204,7 @@ namespace fig::gui
 		}
 	}
 
-	void CharacterEditorImagesPage::OnClickedBackground(ControlPtr pControl)
+	void CharacterEditorImagesTab::OnClickedBackground(ControlPtr pControl)
 	{
 		size_t index;
 		if (auto itFind = std::ranges::find(_backgroundWidgets, pControl, [](auto&& p) { return p.pControl; }); itFind != std::ranges::cend(_backgroundWidgets))
@@ -224,7 +225,7 @@ namespace fig::gui
 		menu.Show();
 	}
 
-	void CharacterEditorImagesPage::SelectCover(size_t index)
+	void CharacterEditorImagesTab::SelectCover(size_t index)
 	{
 		for (size_t i = 0; i < _portraitWidgets.size(); ++i)
 		{
@@ -233,7 +234,7 @@ namespace fig::gui
 		}
 	}
 
-	void CharacterEditorImagesPage::RemovePortrait(size_t index)
+	void CharacterEditorImagesTab::RemovePortrait(size_t index)
 	{
 		if (index >= _portraitWidgets.size())
 			return;
@@ -253,7 +254,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CharacterEditorImagesPage::MovePortraitUp(size_t index)
+	void CharacterEditorImagesTab::MovePortraitUp(size_t index)
 	{
 		if (index <= 0)
 			return;
@@ -267,7 +268,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CharacterEditorImagesPage::MovePortraitDown(size_t index)
+	void CharacterEditorImagesTab::MovePortraitDown(size_t index)
 	{
 		if (index + 1 >= _portraitWidgets.size())
 			return;
@@ -281,7 +282,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CharacterEditorImagesPage::RemoveBackground(size_t index)
+	void CharacterEditorImagesTab::RemoveBackground(size_t index)
 	{
 		if (index >= _backgroundWidgets.size())
 			return;
@@ -298,7 +299,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CharacterEditorImagesPage::MoveBackgroundUp(size_t index)
+	void CharacterEditorImagesTab::MoveBackgroundUp(size_t index)
 	{
 		if (index <= 0)
 			return;
@@ -312,7 +313,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CharacterEditorImagesPage::MoveBackgroundDown(size_t index)
+	void CharacterEditorImagesTab::MoveBackgroundDown(size_t index)
 	{
 		if (index + 1 >= _backgroundWidgets.size())
 			return;
@@ -326,7 +327,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CharacterEditorImagesPage::ProcessLoadQueue()
+	void CharacterEditorImagesTab::ProcessLoadQueue()
 	{
 		if (_portraitLoadQueue.empty() and _backgroundLoadQueue.empty())
 			return;
@@ -398,7 +399,7 @@ namespace fig::gui
 			LayoutNow();
 	}
 
-	bool CharacterEditorImagesPage::Save()
+	bool CharacterEditorImagesTab::Save()
 	{
 		auto& content = Global::GetUserContent();
 		auto& assets = content.GetAssets();

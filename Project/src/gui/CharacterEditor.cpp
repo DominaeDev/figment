@@ -1,9 +1,9 @@
 #include <pch.h>
 #include "gui/CharacterEditor.h"
-#include "gui/CharacterEditorInfoPage.h"
-#include "gui/CharacterEditorImagesPage.h"
-#include "gui/CharacterEditorVoicePage.h"
-#include "gui/CharacterEditorAboutPage.h"
+#include "gui/CharacterEditorInfoTab.h"
+#include "gui/CharacterEditorImagesTab.h"
+#include "gui/CharacterEditorVoiceTab.h"
+#include "gui/CharacterEditorAboutTab.h"
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/AppResources.h"
 
@@ -11,10 +11,10 @@ namespace fig::gui
 {
 	CharacterEditor::CharacterEditor(ControlPtr pParent) : Editor(pParent)
 	{
-		CreatePage<CharacterEditorInfoPage>();
-		CreatePage<CharacterEditorImagesPage>();
-		CreatePage<CharacterEditorVoicePage>();
-		CreatePage<CharacterEditorAboutPage>();
+		CreateTab<CharacterEditorInfoTab>();
+		CreateTab<CharacterEditorImagesTab>();
+		CreateTab<CharacterEditorVoiceTab>();
+		CreateTab<CharacterEditorAboutTab>();
 	}
 
 	fig::string CharacterEditor::GetTitle() const noexcept
@@ -34,9 +34,9 @@ namespace fig::gui
 				.pCharacter = &_character,
 			};
 
-			for (auto page : _pages | std::views::transform([](auto&& p) { return dynamic_cast<EditorPage<CharacterEditorArgs>*>(p.get()); }))
+			for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<CharacterEditorArgs>*>(t.get()); }))
 			{
-				if (not (page and page->Initialize(args)))
+				if (not (tab and tab->Initialize(args)))
 					return false;
 			}
 
@@ -76,8 +76,8 @@ namespace fig::gui
 			return false;
 
 		bool bOk = true;
-		for (auto& page : _pages)
-			bOk &= page->Save();
+		for (auto& tab : _tabs)
+			bOk &= tab->Save();
 		
 		bOk &= Global::GetUserContent().UpdateAsset(_assetId, _character);
 
@@ -93,10 +93,10 @@ namespace fig::gui
 		ResizeToFit(false, true);
 	}
 
-	std::vector<EditorPageDescriptor> CharacterEditor::GetPageDescriptors() const
+	std::vector<EditorTabDescriptor> CharacterEditor::GetTabDescriptors() const
 	{
 		static size_t NotImpl = (size_t)(-1);
-		return std::vector<EditorPageDescriptor> {
+		return std::vector<EditorTabDescriptor> {
 			{
 				0,
 				"General",

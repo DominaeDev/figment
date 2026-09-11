@@ -1,16 +1,16 @@
 #pragma once
 
-#include "gui/EditorPage.h"
+#include "gui/EditorTab.h"
 #include "tts/VoicePrint.h"
 #include "tts/AudioResultQueue.h"
 #include "gui/CharacterEditorArgs.h"
 
 namespace fig::gui
 {
-	class CharacterEditorVoicePage : public EditorPage<CharacterEditorArgs>
+	class CharacterEditorVoiceTab : public EditorTab<CharacterEditorArgs>
 	{
 	public:
-		CharacterEditorVoicePage(ControlPtr pParent);
+		CharacterEditorVoiceTab(ControlPtr pParent);
 
 		bool Initialize(CharacterEditorArgs args) override;
 		void ShutDown() noexcept;

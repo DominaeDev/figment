@@ -5,23 +5,23 @@ namespace fig::gui
 {
 	Editor::Editor(ControlPtr pParent) : Control(pParent)
 	{
-		_pPageSizer = SetSizer<VerticalSizer>();
+		_pTabSizer = SetSizer<VerticalSizer>();
 	}
 
-	void Editor::SelectPage(size_t index)
+	void Editor::SelectTab(size_t index)
 	{
-		for (size_t i = 0uz; i < _pages.size(); ++i)
-			EnablePage(_pages[i], i == index);
+		for (size_t i = 0uz; i < _tabs.size(); ++i)
+			EnableTab(_tabs[i], i == index);
 		InvalidateLayout();
 	}
 
-	void Editor::EnablePage(EditorPageBase* pPage, bool bEnabled)
+	void Editor::EnableTab(EditorTabBase* pTab, bool bEnabled)
 	{
-		if (pPage)
+		if (pTab)
 		{
-			pPage->EnableLayout(bEnabled);
-			pPage->SetVisible(bEnabled);
-			pPage->SetEnabled(bEnabled);
+			pTab->EnableLayout(bEnabled);
+			pTab->SetVisible(bEnabled);
+			pTab->SetEnabled(bEnabled);
 		}
 	}
 

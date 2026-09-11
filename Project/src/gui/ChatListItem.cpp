@@ -54,7 +54,10 @@ namespace fig::gui
 		if (not empty_or_whitespace(chatLog.GetTitle()))
 			_pTitle->SetText(chatLog.GetTitle());
 		else
+		{
 			_pTitle->SetText("Untitled chat");
+			_bHasError = true;
+		}
 
 		if (not chatLog.GetMessages().empty())
 		{
@@ -73,9 +76,11 @@ namespace fig::gui
 				_pPortrait->SetTexture((*portrait).get());
 				_pPortrait->SetVisible(true);
 			}
-
-//			_createdAt = Global::GetUserContent().GetMetaData(
+			else
+				_bHasError = true;
 		}
+		else
+			_bHasError = true;
 
 		if (Global::GetUserContent().GetUserSettings(assetId).flags.IsSet(AssetUserSettings::Flag::Favorite))
 			ShowStar(true);
@@ -211,6 +216,13 @@ namespace fig::gui
 					Global::GetUserContent().MarkHidden(_assetId, true);
 					NotifyUpdated();
 				});
+			
+			if (_bHasError)
+			{
+				menu.AddSeparator();
+				menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
+					.SetDelegate([this] { NotifyDelete(); });
+			}
 		}
 		else
 		{

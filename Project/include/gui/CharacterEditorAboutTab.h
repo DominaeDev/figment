@@ -1,26 +1,24 @@
 #pragma once
 
-#include "gui/EditorPage.h"
+#include "gui/EditorTab.h"
 #include "gui/CharacterEditorArgs.h"
-
-namespace fig::data
-{
-	class Character;
-}
 
 namespace fig::gui
 {
-	class CharacterEditorInfoPage : public EditorPage<CharacterEditorArgs>
+	class CharacterEditorAboutTab : public EditorTab<CharacterEditorArgs>
 	{
 	public:
-		CharacterEditorInfoPage(ControlPtr pParent);
-		
+		CharacterEditorAboutTab(ControlPtr pParent);
+
 		bool Initialize(CharacterEditorArgs args) override;
 		void ShutDown() noexcept {};
-	
+		bool Save() override;
+
 	protected:
 		void OnAfterLayout();
 
+	private:
 		fig::observer_ptr<fig::data::Character> _pCharacter {};
+		fig::observer_ptr<TextBox> _pTags {};
 	};
 }

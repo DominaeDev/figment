@@ -6,9 +6,9 @@
 
 namespace fig::gui
 {
-	struct EditorPageDescriptor
+	struct EditorTabDescriptor
 	{
-		size_t pageIndex;
+		size_t tabIndex;
 		fig::string label;
 		Resource iconLarge;
 		Resource iconSmall;
@@ -16,10 +16,10 @@ namespace fig::gui
 
 	class HorizontalLine;
 
-	class EditorPageBase : public Control
+	class EditorTabBase : public Control
 	{
 	public:
-		EditorPageBase(ControlPtr pParent) : Control(pParent)
+		EditorTabBase(ControlPtr pParent) : Control(pParent)
 		{
 		}
 
@@ -71,10 +71,10 @@ namespace fig::gui
 	};
 
 	template <typename TArgs>
-	class EditorPage : public EditorPageBase
+	class EditorTab : public EditorTabBase
 	{
 	public:
-		EditorPage(ControlPtr pParent) : EditorPageBase(pParent)
+		EditorTab(ControlPtr pParent) : EditorTabBase(pParent)
 		{}
 
 		virtual bool Initialize(TArgs args) = 0;

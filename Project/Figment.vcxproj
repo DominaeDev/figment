@@ -186,8 +186,8 @@
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\CharacterBackgroundWidget.cpp" />
     <ClCompile Include="src\gui\CharacterEditor.cpp" />
-    <ClCompile Include="src\gui\CharacterEditorAboutPage.cpp" />
-    <ClCompile Include="src\gui\CharacterEditorImagesPage.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorAboutTab.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorImagesTab.cpp" />
     <ClCompile Include="src\gui\CharacterPortraitWidget.cpp" />
     <ClCompile Include="src\gui\CheckBox.cpp" />
     <ClCompile Include="src\gui\ComboBox.cpp" />
@@ -199,12 +199,12 @@
     <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp" />
     <ClCompile Include="src\gui\CardImage.cpp" />
     <ClCompile Include="src\gui\CharacterDetailsPanel.cpp" />
-    <ClCompile Include="src\gui\CharacterEditorInfoPage.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorInfoTab.cpp" />
     <ClCompile Include="src\gui\ChatBackground.cpp" />
     <ClCompile Include="src\gui\ChatList.cpp" />
     <ClCompile Include="src\gui\ChatListingScreen.cpp" />
     <ClCompile Include="src\gui\ChatListItem.cpp" />
-    <ClCompile Include="src\gui\EditorPage.cpp" />
+    <ClCompile Include="src\gui\EditorTab.cpp" />
     <ClCompile Include="src\gui\EditorScreen.cpp" />
     <ClCompile Include="src\gui\FillParentSizer.cpp" />
     <ClCompile Include="src\gui\InfoPanel.cpp" />
@@ -255,7 +255,7 @@
     <ClCompile Include="src\gui\VariableList.cpp" />
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
-    <ClCompile Include="src\gui\CharacterEditorVoicePage.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp" />
     <ClCompile Include="src\gui\Window.cpp" />
     <ClCompile Include="src\io\Asset.cpp" />
     <ClCompile Include="src\io\AsyncImageLoad.cpp" />
@@ -482,10 +482,10 @@
     <ClInclude Include="include\gui\CharacterBackgroundWidget.h" />
     <ClInclude Include="include\gui\CharacterDetailsPanel.h" />
     <ClInclude Include="include\gui\CharacterEditor.h" />
-    <ClInclude Include="include\gui\CharacterEditorAboutPage.h" />
+    <ClInclude Include="include\gui\CharacterEditorAboutTab.h" />
     <ClInclude Include="include\gui\CharacterEditorArgs.h" />
-    <ClInclude Include="include\gui\CharacterEditorImagesPage.h" />
-    <ClInclude Include="include\gui\CharacterEditorInfoPage.h" />
+    <ClInclude Include="include\gui\CharacterEditorImagesTab.h" />
+    <ClInclude Include="include\gui\CharacterEditorInfoTab.h" />
     <ClInclude Include="include\gui\CharacterPortraitWidget.h" />
     <ClInclude Include="include\gui\ChatBackground.h" />
     <ClInclude Include="include\gui\ChatList.h" />
@@ -497,7 +497,7 @@
     <ClInclude Include="include\gui\Editor.h" />
     <ClInclude Include="include\gui\EditorScreen.h" />
     <ClInclude Include="include\gui\FillParentSizer.h" />
-    <ClInclude Include="include\gui\EditorPage.h" />
+    <ClInclude Include="include\gui\EditorTab.h" />
     <ClInclude Include="include\gui\HorizontalLine.h" />
     <ClInclude Include="include\gui\InfoPanel.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
@@ -554,7 +554,7 @@
     <ClInclude Include="include\gui\VariableList.h" />
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
-    <ClInclude Include="include\gui\CharacterEditorVoicePage.h" />
+    <ClInclude Include="include\gui\CharacterEditorVoiceTab.h" />
     <ClInclude Include="include\gui\Window.h" />
     <ClInclude Include="include\io\Asset.h" />
     <ClInclude Include="include\io\AssetCache.h" />

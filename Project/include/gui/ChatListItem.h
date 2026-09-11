@@ -42,6 +42,7 @@ namespace fig::gui
 		void ShowMenu() noexcept;
 		void NotifyUpdated();
 		void NotifyDelete();
+	
 	private:
 		fig::uuid _assetId;
 		fig::uuid _primaryCharacterId;
@@ -55,5 +56,6 @@ namespace fig::gui
 		bool _bHovered {};
 		int32_t _menuId { -1 };
 		ChatItemEventDelegate _fnDelegate {};
+		bool _bHasError {};
 	};
 }

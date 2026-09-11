@@ -14,7 +14,7 @@ namespace fig::gui
 		void Shutdown() override {};
 		
 		fig::string GetTitle() const noexcept override;
-		std::vector<EditorPageDescriptor> GetPageDescriptors() const override;
+		std::vector<EditorTabDescriptor> GetTabDescriptors() const override;
 		void PopulateTopBar(ControlPtr pTopBar) override;
 
 		bool Save() noexcept;

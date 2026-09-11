@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "gui/CharacterEditorAboutPage.h"
+#include "gui/CharacterEditorAboutTab.h"
 #include "gui/TextBox.h"
 #include "gui/ComboBox.h"
 #include "gui/ButtonWithLabel.h"
@@ -13,11 +13,12 @@ using namespace fig::data;
 
 namespace fig::gui
 {
-	CharacterEditorAboutPage::CharacterEditorAboutPage(ControlPtr pParent) : EditorPage(pParent)
+	CharacterEditorAboutTab::CharacterEditorAboutTab(ControlPtr pParent) : EditorTab(pParent)
 	{
+		SetMaxWidth(1280);
 	}
 
-	bool CharacterEditorAboutPage::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorAboutTab::Initialize(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter)
 			return false;
@@ -59,12 +60,12 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorAboutPage::OnAfterLayout()
+	void CharacterEditorAboutTab::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
 	}
 	
-	bool CharacterEditorAboutPage::Save()
+	bool CharacterEditorAboutTab::Save()
 	{
 		auto tags = decode_csv(_pTags->GetText())
 			| std::ranges::to<std::unordered_set>()
