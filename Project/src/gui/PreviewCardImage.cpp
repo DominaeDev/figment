@@ -12,7 +12,7 @@ namespace fig::gui
 	PreviewCardImage::PreviewCardImage(ControlPtr pParent, ImageFit fit) : Control(pParent),
 		_fit { fit }
 	{
-		SetSize(Constants::GUI::Cards::Half::Width, Constants::GUI::Cards::Half::Height);
+		SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);
 
 		SetForegroundColor(Color::White);
 		SetBackgroundColor(Color::White);

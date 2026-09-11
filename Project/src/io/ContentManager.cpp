@@ -203,9 +203,15 @@ namespace fig::io
 		return *_pAssetMngr;
 	}
 
-	fig::optional_cref<Asset> UserContentManager::GetLargePortraitForCharacter(const fig::uuid& characterId) const
+	fig::optional_cref<Asset> UserContentManager::GetLargePortraitForCharacter(const fig::uuid& characterId, size_t index) const
 	{
-		return _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterId);
+		auto backgrounds = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterId);
+		if (not backgrounds.empty())
+		{
+			std::ranges::sort(backgrounds, std::ranges::less(), [](auto&& b) { return b.get().GetOrder(); });
+			return backgrounds[std::min(index, backgrounds.size() - 1uz)].get();
+		}
+		return fig::nullref;
 	}
 
 	fig::expected_ref<fig::sdl::Texture, FileError> UserContentManager::GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept
@@ -273,6 +279,17 @@ namespace fig::io
 		}
 
 		return unexpected(FileError::NotFound);
+	}
+
+	fig::optional_cref<Asset> UserContentManager::GetBackgroundForCharacter(const fig::uuid& characterId, size_t index) const
+	{
+		auto backgrounds = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::Background), characterId);
+		if (not backgrounds.empty())
+		{
+			std::ranges::sort(backgrounds, std::ranges::less(), [](auto&& b) { return b.get().GetOrder(); });
+			return backgrounds[std::min(index, backgrounds.size() - 1uz)].get();
+		}
+		return fig::nullref;
 	}
 
 	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, SDL_Renderer* pRenderer) noexcept

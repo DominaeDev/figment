@@ -106,6 +106,17 @@ namespace fig::Constants
 		{
 			constexpr fig::coord MaxWidth = 0;
 		}
+
+		namespace CharacterEditor
+		{
+			constexpr fig::coord PortraitWidth = 240;
+			constexpr fig::coord PortraitHeight = 309;
+			constexpr fig::coord BackgroundWidth = 240;
+			constexpr fig::coord BackgroundHeight = 150;
+			
+			constexpr size_t MaxPortraits = 25;
+			constexpr size_t MaxBackgrounds = 25;
+		}
 	}
 
 	namespace Chat

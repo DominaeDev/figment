@@ -6,17 +6,16 @@ namespace fig::gui
 {
 	class PreviewCardImage;
 
-	class CharacterPortraitImage : public Control, public MouseEventHandler
+	class CharacterPortraitWidget : public Control, public MouseEventHandler
 	{
 	public:
-		CharacterPortraitImage(ControlPtr pParent);
+		CharacterPortraitWidget(ControlPtr pParent);
 	
 		void SetImage(const fig::uuid& assetId);
 		void SetImage(const fig::sdl::Surface& surface);
 		void SetSelected(bool bSelected);
 		
 	protected:
-		void OnUpdate(float fElapsed) override;
 		void OnSize() override;
 		EventResult OnEvent(fig::event& event) override;
 

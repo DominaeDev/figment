@@ -17,7 +17,7 @@ namespace fig::gui
 		_pLabel = CreateControl<StaticText>(label, FontFace::Italic, Constants::GUI::DefaultFontSize, true);
 		_pLabel->SetForegroundColor(0x9d9584_rgb);
 
-		SetSize(Constants::GUI::Cards::Half::Width, Constants::GUI::Cards::Half::Height);
+		SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);
 	}
 
 	EventResult AddImageButton::OnEvent(fig::event& event)

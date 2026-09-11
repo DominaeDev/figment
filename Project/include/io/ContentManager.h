@@ -52,10 +52,11 @@ namespace fig::io
 		fig::optional_ref<ContentMetaData> GetMetaData(const fig::uuid& id) noexcept;
 		AssetUserSettings GetUserSettings(const fig::uuid& id) const noexcept;
 		
-		fig::optional_cref<Asset> GetLargePortraitForCharacter(const fig::uuid& characterId) const;
+		fig::optional_cref<Asset> GetLargePortraitForCharacter(const fig::uuid& characterId, size_t index = 0uz) const;
 		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept;
 		fig::optional_cref<Asset> FindLastChatWith(const fig::uuid& characterId) const;
 		fig::optional_cref<fig::data::VoiceSettings> GetVoiceForCharacter(const fig::uuid& characterId) noexcept;
+		fig::optional_cref<Asset> GetBackgroundForCharacter(const fig::uuid& characterId, size_t index = 0uz) const;
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);

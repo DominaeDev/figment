@@ -144,7 +144,7 @@ namespace fig::gui
 			pChatSlider->SetValue(1.0f);
 			pChatSlider->SetPosition(8, 8 + 20 * 5);
 			pChatSlider->SetDelegate([this](float value) {
-				_pChatScroll->SetAlpha(std::lerp(0.65f, 1.0f, value));
+				_pChatScroll->SetAlpha(std::lerp(0.25f, 1.0f, value));
 			});
 		}
 
@@ -195,8 +195,8 @@ namespace fig::gui
 			// Set portrait
 			_pInfoPanel->SetSession(*_pSession);
 			
-			if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(_pSession->GetCharacterIdOf(Role::Bot1))) //! @temp
-				_pBackground->SetImage((*try_portrait).id);
+			if (auto try_background = Global::GetUserContent().GetBackgroundForCharacter(_pSession->GetCharacterIdOf(Role::Bot1))) //! @temp
+				_pBackground->SetImage((*try_background).id);
 
 			_pSession->Save();
 			_bStartedChat = true;

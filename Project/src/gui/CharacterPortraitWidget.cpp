@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "gui/CharacterPortraitImage.h"
+#include "gui/CharacterPortraitWidget.h"
 #include "gui/PreviewCardImage.h"
 #include "gui/TexturedBorder.h"
 #include "gui/AppResources.h"
@@ -9,9 +9,9 @@ namespace fig::gui
 	static constexpr fig::coord Margin = 6;
 	static constexpr fig::coord Footer = 23;
 
-	CharacterPortraitImage::CharacterPortraitImage(ControlPtr pParent) : Control(pParent), MouseEventHandler(this)
+	CharacterPortraitWidget::CharacterPortraitWidget(ControlPtr pParent) : Control(pParent), MouseEventHandler(this)
 	{
-		SetSize(Constants::GUI::Cards::Half::Width + Margin * 2, Constants::GUI::Cards::Half::Height + Margin * 2 + Footer);
+		SetSize(Constants::GUI::CharacterEditor::PortraitWidth + Margin * 2, Constants::GUI::CharacterEditor::PortraitHeight + Margin * 2 + Footer);
 
 		_pSelection = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::ROUNDED_BACKGROUND_10PX), 16);
 		_pSelection->FillParent();
@@ -29,33 +29,29 @@ namespace fig::gui
 		_pLabel->SetVisible(false);
 	}
 
-	void CharacterPortraitImage::SetImage(const fig::uuid& assetId)
+	void CharacterPortraitWidget::SetImage(const fig::uuid& assetId)
 	{
 		_pPortrait->SetImage(assetId);
 	}
 
-	void CharacterPortraitImage::SetImage(const fig::sdl::Surface& surface)
+	void CharacterPortraitWidget::SetImage(const fig::sdl::Surface& surface)
 	{
 		_pPortrait->SetImage(surface);
 	}
 
-	void CharacterPortraitImage::SetSelected(bool bSelected)
+	void CharacterPortraitWidget::SetSelected(bool bSelected)
 	{
 		_pSelection->SetVisible(bSelected);
 		_pLabel->SetBackgroundColor(bSelected ? Color::StatusBarBackground : GetBackgroundColor());
 		_pLabel->SetVisible(bSelected);
 	}
 
-	void CharacterPortraitImage::OnUpdate(float fElapsed)
-	{
-	}
-
-	EventResult CharacterPortraitImage::OnEvent(fig::event& event)
+	EventResult CharacterPortraitWidget::OnEvent(fig::event& event)
 	{
 		return MouseEventHandler::HandleMouseEvents(event);
 	}
 
-	void CharacterPortraitImage::OnSize()
+	void CharacterPortraitWidget::OnSize()
 	{
 		if (_pLabel)
 			_pLabel->CenterHorizontally();
