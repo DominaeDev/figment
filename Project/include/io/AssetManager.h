@@ -58,6 +58,8 @@ namespace fig::io
 		AsyncFuture future;
 	};
 
+	using ModifyAssetsDelegate = std::function<void(const fig::ref_vector<Asset>&)>;
+
 	class AssetManager
 	{
 		AssetManager() = delete;
@@ -117,6 +119,8 @@ namespace fig::io
 			else
 				return ModifyAsset_Void(asset, fn);
 		}
+
+		void ModifyAssets(const std::vector<fig::uuid> assetIds, ModifyAssetsDelegate fnDelegate);
 
 		void SaveNow();
 		void Shutdown();

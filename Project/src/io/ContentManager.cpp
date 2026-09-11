@@ -113,30 +113,23 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	ContentUserSettings UserContentManager::GetUserSettings(const fig::uuid& id) noexcept
+	AssetUserSettings UserContentManager::GetUserSettings(const fig::uuid& id) const noexcept
 	{
-		if (auto itFind = _userSettings.find(id); itFind != _userSettings.cend())
-			return itFind->second;
-
 		if (auto tryAsset = _pAssetMngr->FindAsset(id))
-		{
-			auto& asset = tryAsset.value();
-			return _userSettings[id] = asset.GetUserSettings();
-		}
+			return (*tryAsset).GetUserSettings().value_or({});
 		return {};
 	}
 
-	template <ContentUserSettings::Flag E>
+	template <AssetUserSettings::Flag E>
 	bool UserContentManager::MarkFlag(const fig::uuid& assetId, bool value)
 	{
 		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
 		{
 			_pAssetMngr->ModifyAsset(*tryAsset, [&](Asset& asset) {
-				auto settings = GetUserSettings(assetId);
+				auto& settings = asset.GetUserSettings();
 				value ? settings.flags.Set(E) : settings.flags.Unset(E);
-				asset.SetUserSettings(settings);
+				asset.InvalidateUserSettings();
 			});
-			InvalidateUserSettings((*tryAsset).id);
 			return true;
 		}
 		return false;
@@ -144,17 +137,17 @@ namespace fig::io
 
 	bool UserContentManager::MarkImported(const fig::uuid& assetId, bool value)
 	{
-		return MarkFlag<ContentUserSettings::Flag::Imported>(assetId, value);
+		return MarkFlag<AssetUserSettings::Flag::Imported>(assetId, value);
 	}
 
 	bool UserContentManager::MarkFavorite(const fig::uuid& assetId, bool value)
 	{
-		return MarkFlag<ContentUserSettings::Flag::Favorite>(assetId, value);
+		return MarkFlag<AssetUserSettings::Flag::Favorite>(assetId, value);
 	}
 
 	bool UserContentManager::MarkHidden(const fig::uuid& assetId, bool value)
 	{
-		return MarkFlag<ContentUserSettings::Flag::Hidden>(assetId, value);
+		return MarkFlag<AssetUserSettings::Flag::Hidden>(assetId, value);
 	}
 
 	bool UserContentManager::SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle)
@@ -162,11 +155,10 @@ namespace fig::io
 		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
 		{
 			_pAssetMngr->ModifyAsset(*tryAsset, [&](auto& asset) {
-				auto settings = asset.GetUserSettings();
+				auto& settings = asset.GetUserSettings();
 				settings.borderStyle = borderStyle;
-				asset.SetUserSettings(settings);
+				asset.InvalidateUserSettings();
 			});
-			InvalidateUserSettings((*tryAsset).id);
 		}
 		return false;
 	}
@@ -589,5 +581,17 @@ namespace fig::io
 
 		// Not found
 		return std::nullopt;
+	}
+
+	void UserContentManager::AssignOrder(const std::vector<fig::uuid>& assetIds)
+	{
+		_pAssetMngr->ModifyAssets(assetIds, [](const fig::ref_vector<Asset>& assets) {
+			int32_t i = 0;
+			for (auto& asset : assets)
+			{
+				asset.get().GetUserSettings().order = i++;
+				asset.get().InvalidateUserSettings();
+			}
+		});
 	}
 }

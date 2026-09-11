@@ -13,7 +13,7 @@ namespace fig::io
 		Style06,
 	};
 
-	struct ContentUserSettings
+	struct AssetUserSettings
 	{
 		enum class Flag
 		{
@@ -25,9 +25,10 @@ namespace fig::io
 
 		CardBorderStyle borderStyle {};
 		Flags flags {};
+		int32_t order { -1 };
 
-		static std::optional<ContentUserSettings> FromJson(const fig::string& json);
-		static fig::string ToJson(const ContentUserSettings& metaData);
+		static std::optional<AssetUserSettings> FromJson(fig::string_view json);
+		static fig::string ToJson(const AssetUserSettings& metaData);
 
 		constexpr inline bool HasFlag(Flag flag) const
 		{

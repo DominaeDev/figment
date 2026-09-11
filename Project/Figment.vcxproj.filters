@@ -539,7 +539,7 @@
     <ClCompile Include="src\data\ContentMetaData.cpp">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\io\ContentUserSettings.cpp">
+    <ClCompile Include="src\io\AssetUserSettings.cpp">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\data\ChatLog.cpp">
@@ -1477,7 +1477,7 @@
     <ClInclude Include="include\data\ContentMetaData.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="include\io\ContentUserSettings.h">
+    <ClInclude Include="include\io\AssetUserSettings.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\InfoPanel.h">

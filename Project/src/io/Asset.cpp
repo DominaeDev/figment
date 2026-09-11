@@ -217,19 +217,35 @@ namespace fig::io
 		_parameters.erase(tag);
 	}
 
-	ContentUserSettings Asset::GetUserSettings() const noexcept
+	fig::optional_cref<AssetUserSettings> Asset::GetUserSettings() const noexcept
 	{
-		return ContentUserSettings::FromJson(_settings).value_or({});
+		if (_settings.has_value())
+			return _settings.value();
+		return fig::nullref;
 	}
 
-	void Asset::SetUserSettings(const ContentUserSettings& value) noexcept
+	AssetUserSettings& Asset::GetUserSettings() noexcept
 	{
-		auto json = ContentUserSettings::ToJson(value);
-		if (_settings != json)
-		{
-			_settings = json;
-			sync_state.InvalidateMetadata();
-		}
+		if (not _settings.has_value())
+			_settings = std::make_optional<AssetUserSettings>();
+		return _settings.value();
+	}
+
+	fig::string Asset::GetUserSettingsJson() const noexcept
+	{
+		if (not _settings.has_value())
+			return "";
+		return AssetUserSettings::ToJson(_settings.value());
+	}
+
+	void Asset::LoadUserSettingsFromJson(fig::string_view json) noexcept
+	{
+		_settings = AssetUserSettings::FromJson(json);
+	}
+
+	void Asset::InvalidateUserSettings() noexcept
+	{
+		sync_state.InvalidateMetadata();
 	}
 
 	void Asset::CalculateChecksum()

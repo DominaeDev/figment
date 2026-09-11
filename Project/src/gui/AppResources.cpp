@@ -70,6 +70,7 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_HIDE, "./resources/gui/icons/icon_hide.png");
 		LoadTexture(pRenderer, Resource::ICON_UNHIDE, "./resources/gui/icons/icon_unhide.png");
 		LoadTexture(pRenderer, Resource::ICON_DELETE, "./resources/gui/icons/icon_delete.png");
+		LoadTexture(pRenderer, Resource::ICON_DISMISS, "./resources/gui/icons/icon_dismiss.png");
 		LoadTexture(pRenderer, Resource::ICON_EDIT, "./resources/gui/icons/icon_edit.png");
 		LoadTexture(pRenderer, Resource::ICON_PLAY, "./resources/gui/icons/icon_play.png");
 		LoadTexture(pRenderer, Resource::ICON_PAUSE, "./resources/gui/icons/icon_pause.png");

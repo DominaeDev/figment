@@ -226,7 +226,7 @@ namespace fig::io
 			asset.SetMeta(MetaTag::CreatedAt, fig::timestamp(createdAt));
 			asset.SetMeta(MetaTag::UpdatedAt, fig::timestamp(updatedAt));
 			if (pMetaData)
-				asset.SetUserSettingsJson(fig::string { pMetaData });
+				asset.LoadUserSettingsFromJson(pMetaData);
 
 			asset.sync_state.file_sync = AssetSyncState::Status::Indeterminate;
 			asset.sync_state.db_sync = AssetSyncState::Status::Synchronized;
@@ -310,7 +310,7 @@ namespace fig::io
 			/* type */
 			sqlite3_bind_int(stmt, 4, static_cast<int32_t>(asset.type));
 			/* metadata */
-			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
+			if (auto metadata = asset.GetUserSettingsJson(); not (metadata.empty() or metadata == "{}"))
 				sqlite3_bind_text(stmt, 5, metadata.c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);
@@ -340,7 +340,7 @@ namespace fig::io
 			/* type */
 			sqlite3_bind_int(stmt, 3, static_cast<int32_t>(asset.type));
 			/* metadata */
-			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
+			if (auto metadata = asset.GetUserSettingsJson(); not (metadata.empty() or metadata == "{}"))
 				sqlite3_bind_text(stmt, 4, metadata.c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 4, nullptr, -1, SQLITE_STATIC);
@@ -375,7 +375,7 @@ namespace fig::io
 			/* type */
 			sqlite3_bind_int(stmt, 4, static_cast<int32_t>(asset.type));
 			/* metadata */
-			if (auto& metadata = asset.GetUserSettingsJson(); not metadata.empty())
+			if (auto metadata = asset.GetUserSettingsJson(); not (metadata.empty() or metadata == "{}"))
 				sqlite3_bind_text(stmt, 5, metadata.c_str(), -1, SQLITE_TRANSIENT);
 			else
 				sqlite3_bind_text(stmt, 5, nullptr, -1, SQLITE_STATIC);

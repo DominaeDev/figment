@@ -59,7 +59,7 @@ namespace fig::gui
 		});
 		_pSaveButton = pSaveButton;
 
-		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Discard", Resource::ICON_DELETE);
+		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Discard", Resource::ICON_DISMISS);
 		pDiscardButton->SetSize(110, 32);
 		pDiscardButton->SetDelegate([this] {
 			PushEvent(UserEvent::NavigateToHome);

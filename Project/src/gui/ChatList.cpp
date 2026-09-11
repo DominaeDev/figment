@@ -164,11 +164,11 @@ namespace fig::gui
 	{
 		auto userSettings = Global::GetUserContent().GetUserSettings(assetId);
 
-		if (filter.IsSet(ChatFilterFlag::Hidden) != userSettings.HasFlag(ContentUserSettings::Flag::Hidden))
+		if (filter.IsSet(ChatFilterFlag::Hidden) != userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 			return false;
 
 		if (filter.IsSet(ChatFilterFlag::Starred))
-			return userSettings.HasFlag(ContentUserSettings::Flag::Favorite);
+			return userSettings.HasFlag(AssetUserSettings::Flag::Favorite);
 
 		return true;
 	}

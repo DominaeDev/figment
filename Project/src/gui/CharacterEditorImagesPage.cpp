@@ -29,8 +29,8 @@ namespace fig::gui
 		_characterId = args.assetId;
 		
 		CreateHeader(this, pSizer, "Avatar");
-
-		CreateHeader(this, pSizer, "Portrait(s)");
+		CreateHorizontalLine(this, pSizer);
+		CreateHeader(this, pSizer, "Portraits");
 
 		_pImageGridSizer = new GridSizer(Constants::GUI::Cards::Half::Width + 12, Constants::GUI::Cards::Half::Height + 35, 4, 4);
 		pSizer->Add(_pImageGridSizer.get());
@@ -41,28 +41,23 @@ namespace fig::gui
 		else
 			_coverAssetId = {};
 
-		auto images = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), _characterId);
-		std::ranges::sort(images, [this](auto&& a, auto&& b) -> int {
-			if (a.get().id == _coverAssetId)
-				return -1;
-			else if (b.get().id == _coverAssetId)
-				return 1;
-			return a.get().GetCreatedAt() < b.get().GetCreatedAt();
-		});
+		auto imageAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), _characterId);
+		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
 
-		for (size_t index = 0; index < images.size(); ++index)
+		for (size_t index = 0; index < imageAssets.size(); ++index)
 		{
-			auto& image = images[index];
+			auto& imageAssetId = imageAssets[index].get().id;
 
 			auto pImage = CreateControl<CharacterPortraitImage>();
-			pImage->SetImage(image.get().id);
-			pImage->SetMouseDownDelegate([this, pImage](int32_t button, fig::point) { OnClickedPortrait(pImage, button); });
+			pImage->SetImage(imageAssetId);
+			pImage->SetDelegate([this, pImage] { OnClickedPortrait(pImage, SDL_BUTTON_LEFT); });
+			pImage->SetRightClickDelegate([this, pImage] { OnClickedPortrait(pImage, SDL_BUTTON_RIGHT); });
 			_pImageGridSizer->Add(pImage);
 
-			bool isCover = image.get().id == _coverAssetId;
+			bool isCover = imageAssetId == _coverAssetId;
 
 			_portraits.emplace_back(Portrait {
-				.assetId = image.get().id,
+				.assetId = imageAssetId,
 				.pControl = pImage,
 				.order = toI(index),
 				.isCover = isCover,
@@ -76,8 +71,8 @@ namespace fig::gui
 		_pAddButton = pAddButton;
 		_pImageGridSizer->Add(pAddButton);
 
-		CreateHeader(this, pSizer, "Background(s)");
-
+		CreateHorizontalLine(this, pSizer);
+		CreateHeader(this, pSizer, "Backgrounds");
 
 		_removedImages.clear();
 		return true;
@@ -108,7 +103,12 @@ namespace fig::gui
 	{
 		static constexpr SDL_DialogFileFilter filters[] =
 		{
-			{ "Image files", "png;jpg;jpeg" }
+			{ "Image files", "bmp;gif;jpg;jpeg;jfif;png;webp" },
+			{ "BMP files", "bmp" },
+			{ "GIF files", "gif" },
+			{ "JPEG files", "jpg;jpeg;jfif" },
+			{ "PNG files", "png" },
+			{ "WEBP files", "webp" },
 		};
 
 		SDL_ShowOpenFileDialog(OnFileDialogResult, (void*)this, GetSDLWindow(), filters, SDL_arraysize(filters), nullptr, true);
@@ -139,8 +139,16 @@ namespace fig::gui
 				.SetEnabled(not _portraits[index].isCover);
 			menu.AddCheckItem("Use as avatar", false); //! @todo
 			menu.AddSeparator();
+			menu.AddItem("Move up")
+				.SetDelegate([this, index] { MovePortraitUp(index); })
+				.SetEnabled(index > 0);
+			menu.AddItem("Move down")
+				.SetDelegate([this, index] { MovePortraitDown(index); })
+				.SetEnabled(index + 1 < _portraits.size());
+			menu.AddSeparator();
 			menu.AddItem("Remove")
-				.SetDelegate([this, index] { RemovePortrait(index); });
+				.SetDelegate([this, index] { RemovePortrait(index); })
+				.SetEnabled(_portraits.size() > 1);
 			menu.Show();
 		}
 	}
@@ -174,6 +182,70 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
+	void CharacterEditorImagesPage::MovePortraitUp(size_t index)
+	{
+		if (index <= 0)
+			return;
+
+		std::swap(_portraits[index - 1], _portraits[index]);
+
+		_pImageGridSizer->RemoveAll();
+		for (auto& portrait : _portraits)
+			_pImageGridSizer->Add(portrait.pControl);
+		_pImageGridSizer->Add(_pAddButton);
+		InvalidateLayout();
+	}
+
+	void CharacterEditorImagesPage::MovePortraitDown(size_t index)
+	{
+		if (index + 1 >= _portraits.size())
+			return;
+
+		std::swap(_portraits[index], _portraits[index + 1]);
+
+		_pImageGridSizer->RemoveAll();
+		for (auto& portrait : _portraits)
+			_pImageGridSizer->Add(portrait.pControl);
+		_pImageGridSizer->Add(_pAddButton);
+		InvalidateLayout();
+	}
+
+	void CharacterEditorImagesPage::LoadImages()
+	{
+		if (_loadQueue.empty())
+			return;
+
+		while (not _loadQueue.empty())
+		{
+			auto& path = _loadQueue.front();
+
+			auto data = fig::io::ReadFile(path).value_or({});
+			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
+			{
+				fig::sdl::Surface surface = std::move(try_surface).value();
+				auto pImage = CreateControl<CharacterPortraitImage>();
+				pImage->SetImage(surface);
+
+				size_t index = _portraits.size();
+				pImage->SetDelegate([this, pImage] { OnClickedPortrait(pImage, SDL_BUTTON_LEFT); });
+				pImage->SetRightClickDelegate([this, pImage] { OnClickedPortrait(pImage, SDL_BUTTON_RIGHT); });
+				_portraits.emplace_back(Portrait {
+					.pControl = pImage,
+					.image = std::move(surface),
+					.order = toI(index),
+					.isCover = false,
+					.format = DataFormatFromExt(path),
+					.data = std::move(data),
+				});
+
+				_pImageGridSizer->Insert(_pImageGridSizer->size() - 1, pImage);
+			}
+			_loadQueue.pop();
+
+		}
+		LayoutNow();
+	}
+
 	bool CharacterEditorImagesPage::Save()
 	{
 		auto& content = Global::GetUserContent();
@@ -204,41 +276,12 @@ namespace fig::gui
 			}
 		}
 
+		// Assign order to portraits
+		content.AssignOrder(_portraits
+			| std::views::transform([](auto&& p) { return p.assetId; })
+			| std::ranges::to<std::vector>()
+		);
+
 		return true;
-	}
-
-	void CharacterEditorImagesPage::LoadImages()
-	{
-		if (_loadQueue.empty())
-			return;
-
-		while (not _loadQueue.empty())
-		{
-			auto& path = _loadQueue.front();
-
-			auto data = fig::io::ReadFile(path).value_or({});
-			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
-			{
-				fig::sdl::Surface surface = std::move(try_surface).value();
-				auto pImage = CreateControl<CharacterPortraitImage>();
-				pImage->SetImage(surface);
-
-				size_t index = _portraits.size();
-				pImage->SetMouseDownDelegate([this, pImage](int32_t button, fig::point) { OnClickedPortrait(pImage, button); });
-				_portraits.emplace_back(Portrait {
-					.pControl = pImage,
-					.image = std::move(surface),
-					.order = toI(index),
-					.isCover = false,
-					.format = DataFormatFromExt(path),
-					.data = std::move(data),
-				});
-
-				_pImageGridSizer->Insert(_pImageGridSizer->size() - 1, pImage);
-			}
-			_loadQueue.pop();
-
-		}
-		LayoutNow();
 	}
 }

@@ -2,7 +2,7 @@
 
 #include "Figment.h"
 #include "io/Serialization.h"
-#include "io/ContentUserSettings.h"
+#include "io/AssetUserSettings.h"
 #include "io/AssetTypeDefinition.h"
 
 namespace fig::io
@@ -90,10 +90,11 @@ namespace fig::io
 		void SetMeta(MetaTag tag, const fig::uuid& value) noexcept;
 		void EraseMeta(MetaTag tag) noexcept;
 
-		ContentUserSettings GetUserSettings() const noexcept;
-		inline constexpr const fig::string& GetUserSettingsJson() const { return _settings; }
-		void SetUserSettings(const ContentUserSettings& settings) noexcept;
-		void SetUserSettingsJson(const fig::string& json) noexcept { _settings = json; }
+		fig::optional_cref<AssetUserSettings> GetUserSettings() const noexcept;
+		AssetUserSettings& GetUserSettings() noexcept;
+		fig::string GetUserSettingsJson() const noexcept;
+		void LoadUserSettingsFromJson(fig::string_view json) noexcept;
+		void InvalidateUserSettings() noexcept;
 
 		fig::path GetFileName() const noexcept;
 
@@ -147,6 +148,8 @@ namespace fig::io
 			return false;
 		}
 
+		int32_t GetOrder() const { return GetUserSettings().value_or({}).order; }
+
 	private:
 		void SetUpdated(bool bWriteTimestamp = true);
 
@@ -159,7 +162,7 @@ namespace fig::io
 		AssetSyncState sync_state {};
 
 	private:
-		fig::string _settings;
+		std::optional<AssetUserSettings> _settings {};
 		std::map<MetaTag, MetaValue> _parameters {};
 
 	};

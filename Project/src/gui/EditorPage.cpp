@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/EditorPage.h"
 #include "gui/TextBox.h"
+#include "gui/HorizontalLine.h"
 
 namespace fig::gui
 {
@@ -50,5 +51,14 @@ namespace fig::gui
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;
 	}
-	
+
+	fig::observer_ptr<HorizontalLine> EditorPageBase::CreateHorizontalLine(ControlPtr pParent, SizerPtr pSizer)
+	{
+		auto pLine = CreateControl<HorizontalLine>();
+		pLine->SetHeight(1);
+		pSizer->AddSpacer(12);
+		pSizer->Add(pLine, 0, SizerFlag::Expand);
+		pSizer->AddSpacer(8);
+		return pLine;
+	}
 }

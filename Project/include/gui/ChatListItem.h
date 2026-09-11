@@ -11,7 +11,7 @@ namespace fig::data
 
 namespace fig::io
 {
-	struct ContentUserSettings;
+	struct AssetUserSettings;
 }
 
 namespace fig::gui

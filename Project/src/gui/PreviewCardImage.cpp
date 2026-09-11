@@ -15,7 +15,7 @@ namespace fig::gui
 		SetSize(Constants::GUI::Cards::Half::Width, Constants::GUI::Cards::Half::Height);
 
 		SetForegroundColor(Color::White);
-		SetBackgroundColor(Color::Transparent);
+		SetBackgroundColor(Color::White);
 
 		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 
@@ -160,7 +160,7 @@ namespace fig::gui
 				SDL_BLENDOPERATION_ADD);
 
 			// Background color
-			constexpr auto bgColor = Color::LineColor;
+			auto bgColor = GetBackgroundColor();
 			SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
 			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
 			SDL_RenderFillRect(pRenderer, NULL);

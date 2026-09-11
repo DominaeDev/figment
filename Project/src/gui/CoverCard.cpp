@@ -123,7 +123,7 @@ namespace fig::gui
 		SetCardSize(_cardSize);
 
 		SetBorder(_userSettings.borderStyle);
-		ShowStar(_userSettings.HasFlag(ContentUserSettings::Flag::Favorite));
+		ShowStar(_userSettings.HasFlag(AssetUserSettings::Flag::Favorite));
 
 		CreatePendingTags();
 		CreatePendingLabel();
@@ -436,8 +436,8 @@ namespace fig::gui
 	bool CoverCard::MatchesFlags(FilterFlags filter) const noexcept
 	{
 		if (filter.IsSet(FilterFlag::Hidden))
-			return _userSettings.HasFlag(ContentUserSettings::Flag::Hidden);
-		if (_userSettings.HasFlag(ContentUserSettings::Flag::Hidden))
+			return _userSettings.HasFlag(AssetUserSettings::Flag::Hidden);
+		if (_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 			return false;
 
 		auto [name, gender, _] = _metaData.gender.Get();
@@ -461,11 +461,11 @@ namespace fig::gui
 			return false;
 		if (filter.IsSet(FilterFlag::Chats) and _metaData.chatCount == 0)
 			return false;
-		if (filter.IsSet(FilterFlag::Starred) and not _userSettings.HasFlag(ContentUserSettings::Flag::Favorite))
+		if (filter.IsSet(FilterFlag::Starred) and not _userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 			return false;
-		if (not filter.IsSet(FilterFlag::SourceCreated) and not _userSettings.HasFlag(ContentUserSettings::Flag::Imported))
+		if (not filter.IsSet(FilterFlag::SourceCreated) and not _userSettings.HasFlag(AssetUserSettings::Flag::Imported))
 			return false;
-		if (not filter.IsSet(FilterFlag::SourceImported) and _userSettings.HasFlag(ContentUserSettings::Flag::Imported))
+		if (not filter.IsSet(FilterFlag::SourceImported) and _userSettings.HasFlag(AssetUserSettings::Flag::Imported))
 			return false;
 
 		return true;
@@ -629,7 +629,7 @@ namespace fig::gui
 		if (_pLargeFooterFade)
 			_pLargeFooterFade->SetVisible(!_largeImageTexture.empty());
 		if (_pLargeStar)
-			_pLargeStar->SetVisible(_userSettings.HasFlag(ContentUserSettings::Flag::Favorite) and !_bHidden);
+			_pLargeStar->SetVisible(_userSettings.HasFlag(AssetUserSettings::Flag::Favorite) and !_bHidden);
 
 		if (_pSmallRoot)
 			_pSmallRoot->SetVisible(_cardSize == CardSize::Half and !_bHidden);
@@ -638,7 +638,7 @@ namespace fig::gui
 		if (_pSmallFooterFade)
 			_pSmallFooterFade->SetVisible(!_smallImageTexture.empty());
 		if (_pSmallStar)
-			_pSmallStar->SetVisible(_userSettings.HasFlag(ContentUserSettings::Flag::Favorite) and !_bHidden);
+			_pSmallStar->SetVisible(_userSettings.HasFlag(AssetUserSettings::Flag::Favorite) and !_bHidden);
 
 		if (_pCounterBG)
 			_pCounterBG->SetVisible(!_bHidden);
@@ -674,10 +674,10 @@ namespace fig::gui
 		SetChatCount(metaData.chatCount);
 	}
 
-	void CoverCard::SetUserSettings(const ContentUserSettings& userSettings) noexcept
+	void CoverCard::SetUserSettings(const AssetUserSettings& userSettings) noexcept
 	{
 		_userSettings = userSettings;
-		ShowStar(userSettings.HasFlag(ContentUserSettings::Flag::Favorite));
+		ShowStar(userSettings.HasFlag(AssetUserSettings::Flag::Favorite));
 	}
 
 

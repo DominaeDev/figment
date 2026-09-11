@@ -14,6 +14,8 @@ namespace fig::gui
 		Resource iconSmall;
 	};
 
+	class HorizontalLine;
+
 	class EditorPageBase : public Control
 	{
 	public:
@@ -27,6 +29,7 @@ namespace fig::gui
 		fig::observer_ptr<StaticText> CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 		fig::observer_ptr<StaticText> CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 		fig::observer_ptr<StaticText> CreateLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
+		fig::observer_ptr<HorizontalLine> CreateHorizontalLine(ControlPtr pParent, SizerPtr pSizer);
 
 		template <typename T>
 		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding)

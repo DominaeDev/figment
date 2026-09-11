@@ -21,6 +21,8 @@ namespace fig::gui
 		void LoadImages();
 		void SelectCover(size_t index);
 		void RemovePortrait(size_t index);
+		void MovePortraitUp(size_t index);
+		void MovePortraitDown(size_t index);
 
 		void OnUpdate(float fElapsed) override;
 		void OnAfterLayout();

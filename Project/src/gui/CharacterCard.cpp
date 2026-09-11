@@ -162,12 +162,12 @@ namespace fig::gui
 				.SetIcon(Resource::ICON_BORDER_06, false)
 				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
 
-		if (!_userSettings.HasFlag(ContentUserSettings::Flag::Favorite))
+		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 		{
 			menu.AddItem("Star", Resource::ICON_STAR)
 				.SetDelegate([this] {
 					Global::GetUserContent().MarkFavorite(_characterId, true);
-					_userSettings.flags.Set(ContentUserSettings::Flag::Favorite);
+					_userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
 					ShowStar(true);
 					NotifyUpdated();
 				});
@@ -177,18 +177,18 @@ namespace fig::gui
 			menu.AddItem("Unstar", Resource::ICON_UNSTAR)
 				.SetDelegate([this] {
 					Global::GetUserContent().MarkFavorite(_characterId, false);
-					_userSettings.flags.Unset(ContentUserSettings::Flag::Favorite);
+					_userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
 					ShowStar(false);
 					NotifyUpdated();
 				});
 		}
 
-		if (!_userSettings.HasFlag(ContentUserSettings::Flag::Hidden))
+		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Hide")
 				.SetDelegate([this] { 
 					Global::GetUserContent().MarkHidden(_characterId, true);
-					_userSettings.flags.Set(ContentUserSettings::Flag::Hidden);
+					_userSettings.flags.Set(AssetUserSettings::Flag::Hidden);
 					NotifyUpdated();
 				});
 		}
@@ -197,7 +197,7 @@ namespace fig::gui
 			menu.AddItem("Unhide")
 				.SetDelegate([this] { 
 					Global::GetUserContent().MarkHidden(_characterId, false);
-					_userSettings.flags.Unset(ContentUserSettings::Flag::Hidden);
+					_userSettings.flags.Unset(AssetUserSettings::Flag::Hidden);
 					NotifyUpdated();
 				});
 		}

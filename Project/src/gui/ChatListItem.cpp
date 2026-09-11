@@ -5,7 +5,7 @@
 #include "gui/Frame.h"
 #include "gui/Menu.h"
 #include "data/ChatLog.h"
-#include "io/ContentUserSettings.h"
+#include "io/AssetUserSettings.h"
 
 using namespace fig::io;
 using namespace fig::data;
@@ -77,7 +77,7 @@ namespace fig::gui
 //			_createdAt = Global::GetUserContent().GetMetaData(
 		}
 
-		if (Global::GetUserContent().GetUserSettings(assetId).flags.IsSet(ContentUserSettings::Flag::Favorite))
+		if (Global::GetUserContent().GetUserSettings(assetId).flags.IsSet(AssetUserSettings::Flag::Favorite))
 			ShowStar(true);
 
 		_assetId = assetId;
@@ -185,7 +185,7 @@ namespace fig::gui
 		menu.AddItem("Export\u2026");
 		menu.AddSeparator();
 
-		if (!userSettings.HasFlag(ContentUserSettings::Flag::Favorite))
+		if (!userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 		{
 			menu.AddItem("Star", Resource::ICON_STAR)
 				.SetDelegate([this] {
@@ -204,7 +204,7 @@ namespace fig::gui
 			});
 		}
 
-		if (!userSettings.HasFlag(ContentUserSettings::Flag::Hidden))
+		if (!userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Archive")
 				.SetDelegate([this] {

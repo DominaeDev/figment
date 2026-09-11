@@ -1,13 +1,13 @@
 #include <pch.h>
-#include "io/ContentUserSettings.h"
+#include "io/AssetUserSettings.h"
 #include <json.hpp>
 
 namespace fig::io
 {
-	static constexpr auto FlagMapping = std::array<std::pair<ContentUserSettings::Flag, std::string_view>, 3> {
-		std::pair { ContentUserSettings::Flag::Imported,	"imported" },
-		std::pair { ContentUserSettings::Flag::Hidden,		"hidden" },
-		std::pair { ContentUserSettings::Flag::Favorite,	"favorite" },
+	static constexpr auto FlagMapping = std::array<std::pair<AssetUserSettings::Flag, std::string_view>, 3> {
+		std::pair { AssetUserSettings::Flag::Imported,	"imported" },
+		std::pair { AssetUserSettings::Flag::Hidden,	"hidden" },
+		std::pair { AssetUserSettings::Flag::Favorite,	"favorite" },
 	};
 
 	static fig::string SerializeBorder(CardBorderStyle border)
@@ -35,7 +35,7 @@ namespace fig::io
 		return CardBorderStyle::None;
 	}
 
-	std::optional<ContentUserSettings> ContentUserSettings::FromJson(const fig::string& strJson)
+	std::optional<AssetUserSettings> AssetUserSettings::FromJson(fig::string_view strJson)
 	{
 		if (strJson.empty())
 			return std::nullopt;
@@ -44,13 +44,18 @@ namespace fig::io
 		{
 			auto json = nlohmann::json::parse(strJson);
 
-			ContentUserSettings data;
+			AssetUserSettings data;
 
+			// Border
 			data.borderStyle = DeserializeBorder(json.value("border", ""));
 
-			std::vector<fig::string> f;
-			json.at("flags").get_to(f);
-			data.flags = Flags::Deserialize(f, FlagMapping);
+			// Flags
+			std::vector<fig::string> flags;
+			json.value("flags", nlohmann::json::array()).get_to(flags);
+			data.flags = Flags::Deserialize(flags, FlagMapping);
+
+			// Order
+			data.order = json.value("order", -1);
 			return data;
 		}
 		catch (const nlohmann::json::exception&)
@@ -59,7 +64,7 @@ namespace fig::io
 		}
 	}
 
-	fig::string ContentUserSettings::ToJson(const ContentUserSettings& data)
+	fig::string AssetUserSettings::ToJson(const AssetUserSettings& data)
 	{
 		try
 		{
@@ -68,7 +73,8 @@ namespace fig::io
 				json["border"] = SerializeBorder(data.borderStyle);
 			if (!data.flags.IsEmpty())
 				json["flags"] = Flags::Serialize(data.flags, FlagMapping);
-
+			if (data.order >= 0)
+				json["order"] = data.order;
 			return json.dump();
 		}
 		catch (const nlohmann::json::exception&)

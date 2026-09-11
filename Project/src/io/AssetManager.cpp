@@ -1237,34 +1237,42 @@ namespace fig::io
 
 	void AssetManager::ModifyAsset_Void(const fig::uuid& assetId, std::function<void(Asset&)> fn)
 	{
+		std::scoped_lock lock { _assetsMutex };
 		if (auto itFind = _assets.find(assetId); itFind != _assets.cend())
-		{
-			if (fn)
-				fn(itFind->second);
-		}
+			fn(itFind->second);
 	}
 
 	void AssetManager::ModifyAsset_Void(const Asset& asset, std::function<void(Asset&)> fn)
 	{
-		if (fn)
-			fn(const_cast<Asset&>(asset));
+		std::scoped_lock lock { _assetsMutex };
+		fn(const_cast<Asset&>(asset));
 	}
 
 	bool AssetManager::ModifyAsset_Bool(const fig::uuid& assetId, std::function<bool(Asset&)> fn)
 	{
+		std::scoped_lock lock { _assetsMutex };
 		if (auto itFind = _assets.find(assetId); itFind != _assets.cend())
-		{
-			if (fn)
-				return fn(itFind->second);
-		}
+			return fn(itFind->second);
 		return false;
 	}
 
 	bool AssetManager::ModifyAsset_Bool(const Asset& asset, std::function<bool(Asset&)> fn)
 	{
-		if (fn)
-			return fn(const_cast<Asset&>(asset));
-		return false;
+		std::scoped_lock lock { _assetsMutex };
+		return fn(const_cast<Asset&>(asset));
+	}
+
+	void AssetManager::ModifyAssets(const std::vector<fig::uuid> assetIds, ModifyAssetsDelegate fn)
+	{
+		std::scoped_lock lock { _assetsMutex };
+		fig::ref_vector<Asset> assets;
+		assets.reserve(assetIds.size());
+		for (auto& assetId : assetIds)
+		{
+			if (auto itFind = _assets.find(assetId); itFind != _assets.cend())
+				assets.push_back(std::ref(itFind->second));
+		}
+		fn(assets);
 	}
 
 	void AssetManager::__Autosave(std::stop_token stopToken, std::chrono::seconds interval)

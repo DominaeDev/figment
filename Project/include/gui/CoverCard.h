@@ -66,7 +66,7 @@ namespace fig::gui
 		void AddSearchTerms(std::span<const fig::string> texts) noexcept;
 
 		void SetMetaData(const fig::io::ContentMetaData& metaData) noexcept;
-		void SetUserSettings(const fig::io::ContentUserSettings& userSettings) noexcept;
+		void SetUserSettings(const fig::io::AssetUserSettings& userSettings) noexcept;
 		void NotifyUpdated();
 		void NotifyDelete();
 	private:
@@ -83,7 +83,7 @@ namespace fig::gui
 		bool _bHasError = false;
 		CardEventDelegate _fnDelegate {};
 		fig::io::ContentMetaData _metaData {};
-		fig::io::ContentUserSettings _userSettings {};
+		fig::io::AssetUserSettings _userSettings {};
 		bool _bHovered = false;
 		float _fHoverZoom = 0.0f;
 		float _fTargetZoom = 0.0f;

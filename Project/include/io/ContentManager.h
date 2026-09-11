@@ -1,7 +1,7 @@
 #pragma once
 
 #include "data/ContentMetaData.h"
-#include "io/ContentUserSettings.h"
+#include "io/AssetUserSettings.h"
 #include "data/ModelSettings.h"
 #include "io/AssetCache.h"
 #include "io/XmlData.h"
@@ -50,7 +50,7 @@ namespace fig::io
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
 		std::optional<fig::string> GetCharacterName(const fig::uuid& characterId) const;
 		fig::optional_ref<ContentMetaData> GetMetaData(const fig::uuid& id) noexcept;
-		ContentUserSettings GetUserSettings(const fig::uuid& id) noexcept;
+		AssetUserSettings GetUserSettings(const fig::uuid& id) const noexcept;
 		
 		fig::optional_cref<Asset> GetLargePortraitForCharacter(const fig::uuid& characterId) const;
 		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept;
@@ -100,11 +100,6 @@ namespace fig::io
 			_metaData.erase(assetId);
 		}
 
-		void InvalidateUserSettings(const fig::uuid& assetId) noexcept
-		{
-			_userSettings.erase(assetId);
-		}
-
 		template <typename T>
 		requires std::copyable<T>
 		void Cache(const fig::uuid& assetId, const T& value)
@@ -121,7 +116,8 @@ namespace fig::io
 		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::data::ChatInstance& chatInstance);
 		fig::uuid CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings);
 		fig::optional_cref<Asset> ReplaceCoverImage(const fig::uuid& characterId, const fig::uuid& originalAssetId);
-
+		
+		void AssignOrder(const std::vector<fig::uuid>& assetIds);
 
 	protected:
 		void LoadAll();
@@ -146,7 +142,6 @@ namespace fig::io
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 		std::unordered_map<AssetTypeDefinition, std::unique_ptr<IAssetCache>> _caches;
 		std::map<fig::uuid, ContentMetaData> _metaData;
-		std::map<fig::uuid, ContentUserSettings> _userSettings;
 		
 		struct CachedTexture
 		{
@@ -158,7 +153,7 @@ namespace fig::io
 		std::map<fig::uuid, std::vector<fig::uuid>> _chatsByAsset; // <asset id, chat ids>
 		bool _bInvalidChatCount { true };
 
-		template <ContentUserSettings::Flag E>
+		template <AssetUserSettings::Flag E>
 		bool MarkFlag(const fig::uuid& assetId, bool value);
 	};
 }
