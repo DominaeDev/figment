@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui/Editor.h"
+#include "data/Character.h"
 
 namespace fig::gui
 {

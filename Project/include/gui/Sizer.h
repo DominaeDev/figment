@@ -86,6 +86,8 @@ namespace fig::gui
 
 		SizerItem& Add(LayoutElement* pControl, int32_t proportion = 0, int32_t flags = 0, int border = 0);
 		SizerItem& Add(Sizer* pControl, int32_t proportion = 0, int32_t flags = 0, int border = 0);
+		SizerItem& Insert(size_t position, LayoutElement* pControl, int32_t proportion = 0, int32_t flags = 0, int border = 0);
+		SizerItem& Insert(size_t position, Sizer* pControl, int32_t proportion = 0, int32_t flags = 0, int border = 0);
 		SizerItem& AddSpacer(fig::coord size);
 		SizerItem& AddStretchSpacer();
 		void Remove(LayoutElement* pControl);
@@ -107,6 +109,8 @@ namespace fig::gui
 		}
 
 		void Layout(const fig::rect& parentRect);
+
+		constexpr size_t size() const noexcept { return _items.size(); }
 
 	protected:
 		void PreLayout(const fig::rect& rect);

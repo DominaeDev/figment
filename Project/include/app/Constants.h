@@ -104,7 +104,7 @@ namespace fig::Constants
 
 		namespace EditorPage
 		{
-			constexpr fig::coord Width = 900;
+			constexpr fig::coord MaxWidth = 0;
 		}
 	}
 
@@ -226,7 +226,7 @@ namespace fig::Constants
 		constexpr int32_t ServerPort = 8080;
 		constexpr float DefaultDialogueDelay = 0.250f;
 
-		constexpr fig::const_string ExamplePhrase = "Greetings! I'm {}, and this is my voice. Do you like it? If not, well, that's YOUR problem.";
+		constexpr fig::const_string ExamplePhrase = "Greetings! I'm {}, and this is my voice. Do you like it? Or would you prefer something else?";
 
 	}
 }

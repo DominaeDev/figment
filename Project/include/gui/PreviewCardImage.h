@@ -11,8 +11,10 @@ namespace fig::gui
 		PreviewCardImage(ControlPtr pParent, ImageFit fit = ImageFit::Outside);
 
 		void SetImage(const fig::uuid& assetId);
+		void SetImage(const fig::sdl::Surface& pSurface);
 		void SetMask(fig::texture_ptr pMask) noexcept;
-
+		
+		fig::point GetImageSize() const noexcept;
 	protected:
 		void OnUpdate(float fElapsed);
 		void OnRender(fig::renderer_ptr pRenderer) override;

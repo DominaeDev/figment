@@ -39,6 +39,7 @@ namespace fig
 		CreateCursor(SDL_SYSTEM_CURSOR_TEXT);
 		CreateCursor(SDL_SYSTEM_CURSOR_EW_RESIZE);
 		CreateCursor(SDL_SYSTEM_CURSOR_NS_RESIZE);
+		CreateCursor(SDL_SYSTEM_CURSOR_POINTER);
 
 		// Load user profiles
 		pUserManager = std::make_shared<fig::user::UserManager>();

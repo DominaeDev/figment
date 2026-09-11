@@ -8,8 +8,8 @@ namespace fig::gui
 	using MouseClickedDelegate = std::function<void()>;
 	using MouseEnterDelegate = std::function<void()>;
 	using MouseExitDelegate = std::function<void()>;
-	using MouseDownDelegate = std::function<void(fig::point)>;
-	using MouseUpDelegate = std::function<void(fig::point)>;
+	using MouseDownDelegate = std::function<void(int32_t button, fig::point)>;
+	using MouseUpDelegate = std::function<void(int32_t button, fig::point)>;
 
 	class MouseEventHandler
 	{
@@ -19,6 +19,7 @@ namespace fig::gui
 		void SetExpandSize(fig::coord size) noexcept;
 
 		void SetDelegate(MouseClickedDelegate pDelegate) noexcept;
+		void SetRightClickDelegate(MouseClickedDelegate pDelegate) noexcept;
 		void SetMouseEnterDelegate(MouseEnterDelegate pDelegate) noexcept;
 		void SetMouseExitDelegate(MouseExitDelegate pDelegate) noexcept;
 		void SetMouseDownDelegate(MouseDownDelegate pDelegate) noexcept;
@@ -34,9 +35,10 @@ namespace fig::gui
 		virtual void OnButtonState() {}
 		virtual void OnMouseEnter() {}
 		virtual void OnMouseExit() {}
-		virtual void OnButtonDown() {}
-		virtual void OnButtonUp() {}
+		virtual void OnButtonDown(int32_t button) {}
+		virtual void OnButtonUp(int32_t button) {}
 		virtual void OnClicked() {}
+		virtual void OnRightClicked() {}
 
 	protected:
 		enum class ButtonState
@@ -51,12 +53,14 @@ namespace fig::gui
 	private:
 		ControlPtr _pOwner {};
 		bool _bMouseInside = false;
-		bool _bMouseDown = false;
+		bool _bMouseLeftDown = false;
+		bool _bMouseRightDown = false;
 		bool _bEnabled = true;
 		fig::rect _region {};
 		fig::coord _expand = 0;
 
-		MouseClickedDelegate _fnClicked {};
+		MouseClickedDelegate _fnLeftClicked {};
+		MouseClickedDelegate _fnRightClicked {};
 		MouseEnterDelegate _fnEnter {};
 		MouseExitDelegate _fnExit {};
 		MouseDownDelegate _fnDown {};

@@ -403,19 +403,23 @@ namespace fig::gui
 		{
 		case MenuItem::State::Default:
 			menuItem.pControl->SetForegroundColor(MenuBackgroundColor);
-			menuItem.pLabel->SetBackgroundColor(MenuBackgroundColor);
+			if (menuItem.pLabel)
+				menuItem.pLabel->SetBackgroundColor(MenuBackgroundColor);
 			break;
 		case MenuItem::State::Hover:
 			menuItem.pControl->SetForegroundColor(MenuItemHoverColor);
-			menuItem.pLabel->SetBackgroundColor(MenuItemHoverColor);
+			if (menuItem.pLabel)
+				menuItem.pLabel->SetBackgroundColor(MenuItemHoverColor);
 			break;
 		case MenuItem::State::Pressed:
 			menuItem.pControl->SetForegroundColor(MenuItemPressedColor);
-			menuItem.pLabel->SetBackgroundColor(MenuItemPressedColor);
+			if (menuItem.pLabel)
+				menuItem.pLabel->SetBackgroundColor(MenuItemPressedColor);
 			break;
 		case MenuItem::State::Disabled:
 			menuItem.pControl->SetForegroundColor(MenuBackgroundColor);
-			menuItem.pLabel->SetBackgroundColor(MenuBackgroundColor);
+			if (menuItem.pLabel)
+				menuItem.pLabel->SetBackgroundColor(MenuBackgroundColor);
 			break;
 		}
 	}

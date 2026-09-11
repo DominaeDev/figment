@@ -11,7 +11,12 @@ namespace fig::gui
 
 	void MouseEventHandler::SetDelegate(MouseClickedDelegate pDelegate) noexcept
 	{
-		_fnClicked = pDelegate;
+		_fnLeftClicked = pDelegate;
+	}
+
+	void MouseEventHandler::SetRightClickDelegate(MouseClickedDelegate pDelegate) noexcept
+	{
+		_fnRightClicked = pDelegate;
 	}
 
 	void MouseEventHandler::SetMouseEnterDelegate(MouseEnterDelegate pDelegate) noexcept
@@ -54,7 +59,8 @@ namespace fig::gui
 		}
 
 		_bEnabled = bEnable;
-		_bMouseDown = false;
+		_bMouseLeftDown = false;
+		_bMouseRightDown = false;
 		_bMouseInside = false;
 	}
 
@@ -91,13 +97,14 @@ namespace fig::gui
 					OnMouseEnter();
 				}
 			}
-			else
+			else // Outside
 			{
 				if (_bMouseInside or _state == ButtonState::Pressed)
 				{
 					SetButtonState(ButtonState::Default);
 					_bMouseInside = false;
-					_bMouseDown = false;
+					_bMouseLeftDown = false;
+					_bMouseRightDown = false;
 					if (_fnExit)
 						_fnExit();
 					OnMouseExit();
@@ -106,39 +113,71 @@ namespace fig::gui
 			return EventResult::Continue;
 		}
 
-		if ((event.type == SDL_EVENT_MOUSE_BUTTON_DOWN or event.type == SDL_EVENT_MOUSE_BUTTON_UP) and event.button.button == SDL_BUTTON_LEFT)
+		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN or event.type == SDL_EVENT_MOUSE_BUTTON_UP)
 		{
 			auto mouseEvent = event.button;
 
 			if (not is_inside(rect, toI(mouseEvent.x), toI(mouseEvent.y), _expand))
 				return EventResult::Pass;
 
-			if (mouseEvent.down != _bMouseDown)
+			if (event.button.button == SDL_BUTTON_LEFT)
 			{
-				if (_bMouseDown and !mouseEvent.down) // Click!
+				if (mouseEvent.down != _bMouseLeftDown)
 				{
-					if (_fnClicked)
-						_fnClicked();
-					OnClicked();
-				}
+					if (_bMouseLeftDown and !mouseEvent.down) // Click!
+					{
+						if (_fnLeftClicked)
+							_fnLeftClicked();
+						OnClicked();
+					}
 
-				SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Default);
-				_bMouseDown = mouseEvent.down;
-				_bMouseInside = false;
+					SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Default);
+					_bMouseLeftDown = mouseEvent.down;
+					_bMouseInside = false;
 
-				if (_bMouseDown)
-				{
-					if (_fnDown)
-						_fnDown(fig::point { toI(mouseEvent.x), toI(mouseEvent.y) });
-					OnButtonDown();
+					if (_bMouseLeftDown)
+					{
+						if (_fnDown)
+							_fnDown(mouseEvent.button, fig::point { toI(mouseEvent.x), toI(mouseEvent.y) });
+						OnButtonDown(mouseEvent.button);
+					}
+					else
+					{
+						if (_fnUp)
+							_fnUp(mouseEvent.button, fig::point { toI(mouseEvent.x), toI(mouseEvent.y) });
+						OnButtonUp(mouseEvent.button);
+					}
+					return EventResult::Handled;
 				}
-				else
+			}
+			else if (event.button.button == SDL_BUTTON_RIGHT)
+			{
+				if (mouseEvent.down != _bMouseRightDown)
 				{
-					if (_fnUp)
-						_fnUp(fig::point { toI(mouseEvent.x), toI(mouseEvent.y) });
-					OnButtonUp();
+					if (_bMouseRightDown and !mouseEvent.down) // Click!
+					{
+						if (_fnRightClicked)
+							_fnRightClicked();
+						OnRightClicked();
+					}
+
+					_bMouseRightDown = mouseEvent.down;
+					_bMouseInside = false;
+
+					if (_bMouseRightDown)
+					{
+						if (_fnDown)
+							_fnDown(mouseEvent.button, fig::point { toI(mouseEvent.x), toI(mouseEvent.y) });
+						OnButtonDown(mouseEvent.button);
+					}
+					else
+					{
+						if (_fnUp)
+							_fnUp(mouseEvent.button, fig::point { toI(mouseEvent.x), toI(mouseEvent.y) });
+						OnButtonUp(mouseEvent.button);
+					}
+					return EventResult::Handled;
 				}
-				return EventResult::Handled;
 			}
 		}
 
@@ -157,7 +196,8 @@ namespace fig::gui
 	void MouseEventHandler::DropState() noexcept
 	{
 		_bMouseInside = false;
-		_bMouseDown = false;
+		_bMouseLeftDown = false;
+		_bMouseRightDown = false;
 		_state = _bEnabled ? ButtonState::Default : ButtonState::Disabled;
 		OnButtonState();
 	}

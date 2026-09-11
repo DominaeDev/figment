@@ -50,6 +50,7 @@ namespace fig::io
 		}
 	};
 
+	DataFormat DataFormatFromExt(const fig::path& path);
 	DataFormat DataFormatFromExt(const fig::string& ext);
 
 	enum class FolderCategory

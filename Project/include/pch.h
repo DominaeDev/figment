@@ -23,6 +23,7 @@
 	#undef LoadImage
 	#undef DrawText
 	#undef SetCursor
+	#undef ReadFile
 	
 	#define PLATFORM_WINDOWS 1
 

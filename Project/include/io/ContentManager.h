@@ -31,9 +31,6 @@ namespace fig::io
 		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename);
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 
-		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::data::ChatInstance& chatInstance);
-		fig::uuid CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings);
-
 		bool UpdateAsset(const fig::uuid& assetId, IsXmlContent auto const& assetData)
 		{
 			fig::bytes data;
@@ -120,6 +117,11 @@ namespace fig::io
 		{
 			GetCache<T>().Insert(assetId, std::move(value));
 		}
+
+		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::data::ChatInstance& chatInstance);
+		fig::uuid CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings);
+		fig::optional_cref<Asset> ReplaceCoverImage(const fig::uuid& characterId, const fig::uuid& originalAssetId);
+
 
 	protected:
 		void LoadAll();

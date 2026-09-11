@@ -20,7 +20,7 @@ namespace fig::gui
 		// Background
 		SetForegroundColor(Color::SidePanelForeground);
 		SetBackgroundColor(0xf4f2ec_rgb);
-		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 8);
+		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
 		pBGRenderer->SetColor(GetBackgroundColor());
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);

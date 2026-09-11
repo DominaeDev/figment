@@ -90,7 +90,7 @@ namespace fig::chat
 		if (identifier.empty() || _characters.empty())
 			return fig::nullref;
 
-		if (auto itFind = std::ranges::find_if(_characters, [&identifier](auto& character) { return equals(character.chatId, identifier, true); }); itFind != _characters.cend())
+		if (auto itFind = std::ranges::find_if(_characters, [&identifier](auto& character) { return equals(character.chatId, identifier, true); }); itFind != std::ranges::cend(_characters))
 			return make_optional_cref(*itFind);
 		return fig::nullref;
 	}
@@ -133,7 +133,7 @@ namespace fig::chat
 		if (name.empty() || _characters.empty())
 			return std::nullopt;
 
-		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& character) { return equals(character.name.GetSpokenName(), name, true); }); itFind != _characters.cend())
+		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& character) { return equals(character.name.GetSpokenName(), name, true); }); itFind != std::ranges::cend(_characters))
 			return make_optional_cref(*itFind);
 		return fig::nullref;
 	}
@@ -143,7 +143,7 @@ namespace fig::chat
 		if (characterId.empty() || _characters.empty())
 			return Role::Undefined;
 
-		if (auto itFind = std::ranges::find_if(_charactersByRole, [this, characterId](const auto& kvp) { return equals(_characters[kvp.second].chatId, characterId, true) || equals(_characters[kvp.second].name.GetSpokenName(), characterId, true);}); itFind != _charactersByRole.cend())
+		if (auto itFind = std::ranges::find_if(_charactersByRole, [this, characterId](const auto& kvp) { return equals(_characters[kvp.second].chatId, characterId, true) || equals(_characters[kvp.second].name.GetSpokenName(), characterId, true);}); itFind != std::ranges::cend(_charactersByRole))
 			return itFind->first;
 		return Role::Undefined;
 	}

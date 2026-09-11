@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "io/Asset.h"
+#include "io/FileUtility.h"
 #include "user/UserProfile.h"
 #include "user/Security.h"
 
@@ -11,6 +12,10 @@
 
 namespace fig::io
 {
+	DataFormat DataFormatFromExt(const fig::path& path)
+	{
+		return DataFormatFromExt(GetFileExt(path));
+	}
 
 	DataFormat DataFormatFromExt(const fig::string& ext)
 	{

@@ -177,6 +177,9 @@
     <Filter Include="Source Files\Frontend\GUI\Screens\Editors\Settings">
       <UniqueIdentifier>{e97d13a0-dbd3-4cde-8e8e-eec5aa0924ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls">
+      <UniqueIdentifier>{b69db8b4-38fa-4c37-af19-338befee923b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -733,6 +736,12 @@
     </ClCompile>
     <ClCompile Include="src\io\AsyncImageLoad.cpp">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\AddImageButton.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterPortraitImage.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1693,6 +1702,12 @@
     </ClInclude>
     <ClInclude Include="include\io\AsyncImageLoad.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\AddImageButton.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterPortraitImage.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

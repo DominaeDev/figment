@@ -481,7 +481,7 @@ namespace fig::io
 			if (assetType.IsOfType(AssetType::Chat, ChatAssetType::Log))
 			{
 				parentId = (*meta).parentId;
-				bAlsoDeleteParent = true;
+				bAlsoDeleteParent = true; //! @todo?
 			}
 		}
 
@@ -558,4 +558,36 @@ namespace fig::io
 		return false;
 	}
 
+	fig::optional_cref<Asset> UserContentManager::ReplaceCoverImage(const fig::uuid& characterId, const fig::uuid& originalAssetId)
+	{
+		if (auto originalAsset = _pAssetMngr->FindAsset(originalAssetId, AssetType::Image))
+		{
+			// Find prior cover asset
+			fig::uuid previousCoverId;
+			if (auto try_cover = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), characterId))
+				previousCoverId = (*try_cover).id;
+
+			if (auto try_surface = Get<fig::sdl::Surface>(originalAssetId))
+			{
+				if (auto cover = fig::CreateCoverImage(*try_surface, false); not cover.empty())
+				{
+					// Create new cover asset
+					auto& coverAsset = _pAssetMngr->CreateImageAsset(ImageAssetType::CoverImage, cover, characterId);
+
+					_pAssetMngr->ModifyAsset(coverAsset, [&originalAssetId](auto&& asset) {
+						asset.SetMeta(MetaTag::ReferenceToOriginal, originalAssetId);
+					});
+
+					// Delete previous cover asset
+					if (not previousCoverId.empty())
+						DeleteAsset(previousCoverId);
+					
+					return coverAsset;
+				}
+			}
+		}
+
+		// Not found
+		return std::nullopt;
+	}
 }

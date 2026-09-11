@@ -242,6 +242,9 @@ namespace fig
 		int32_t expandX = Constants::GUI::Cards::Full::ZoomPixels * 2;
 		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::Cards::Full::ZoomPixels * 2) * toF(Constants::GUI::CardHeight) / toF(Constants::GUI::CardWidth)));
 
+		if (surface.empty())
+			return {};
+
 		auto pSurface = SDL_CreateSurface(Constants::GUI::CardWidth + expandX, Constants::GUI::CardHeight + expandY, SDL_PIXELFORMAT_RGB24);
 		if (not (bool)pSurface)
 			return {};

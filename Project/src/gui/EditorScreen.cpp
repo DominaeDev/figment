@@ -12,7 +12,7 @@ namespace fig::gui
 		_pScrollPanel = CreateControl<ScrollPanel>();
 		_pScrollPanel->SetScrollBarOffset(0);
 		_pScrollPanel->SetBottomPadding(40);
-		_pScrollPanel->SetMaxWidth(Constants::GUI::EditorPage::Width);
+		_pScrollPanel->SetMaxWidth(Constants::GUI::EditorPage::MaxWidth);
 		_pScrollPanel->SetSizer<VerticalSizer>();
 
 		_pTopBar = CreateControl<TopBar>("", _pScrollPanel);

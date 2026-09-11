@@ -180,12 +180,14 @@
     <ClCompile Include="src\data\ModelSettings.cpp" />
     <ClCompile Include="src\data\Scenario.cpp" />
     <ClCompile Include="src\data\TavernCardV2.cpp" />
+    <ClCompile Include="src\gui\AddImageButton.cpp" />
     <ClCompile Include="src\gui\BehindChat.cpp" />
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\CharacterEditor.cpp" />
     <ClCompile Include="src\gui\CharacterEditorAboutPage.cpp" />
     <ClCompile Include="src\gui\CharacterEditorImagesPage.cpp" />
+    <ClCompile Include="src\gui\CharacterPortraitImage.cpp" />
     <ClCompile Include="src\gui\CheckBox.cpp" />
     <ClCompile Include="src\gui\ComboBox.cpp" />
     <ClCompile Include="src\gui\DropList.cpp" />
@@ -470,6 +472,7 @@
     <ClInclude Include="include\data\VersionNumber.h" />
     <ClInclude Include="include\data\VoiceSettings.h" />
     <ClInclude Include="include\Figment.h" />
+    <ClInclude Include="include\gui\AddImageButton.h" />
     <ClInclude Include="include\gui\BehindChat.h" />
     <ClInclude Include="include\gui\BoxSizer.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
@@ -481,6 +484,7 @@
     <ClInclude Include="include\gui\CharacterEditorArgs.h" />
     <ClInclude Include="include\gui\CharacterEditorImagesPage.h" />
     <ClInclude Include="include\gui\CharacterEditorInfoPage.h" />
+    <ClInclude Include="include\gui\CharacterPortraitImage.h" />
     <ClInclude Include="include\gui\ChatBackground.h" />
     <ClInclude Include="include\gui\ChatList.h" />
     <ClInclude Include="include\gui\ChatListingScreen.h" />

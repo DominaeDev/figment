@@ -17,6 +17,7 @@ namespace fig::gui
 	void ThemedButton::SetTheme(const ButtonTheme& theme) noexcept
 	{
 		_theme = theme;
+		OnButtonState();
 	}
 
 	const fig::color& ThemedButton::GetThemeForeground() const noexcept

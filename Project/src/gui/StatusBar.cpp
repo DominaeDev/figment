@@ -11,7 +11,7 @@ StatusBar::StatusBar(ControlPtr pParent) : Control(pParent)
 	SetSize(pParent->GetWidth(), 24);
 
 	SetForegroundColor(fig::color { 0x51, 0x4a, 0x2f, SDL_ALPHA_OPAQUE });
-	SetBackgroundColor(fig::color { 0xde, 0xd9, 0xc5, SDL_ALPHA_OPAQUE });
+	SetBackgroundColor(Color::StatusBarBackground);
 
 	_pMessage = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
 	_pMessage->SetPosition(8, 2);

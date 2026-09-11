@@ -38,7 +38,9 @@ namespace fig::gui
 
 	void SidePanelButton::OnButtonState()
 	{
-		_pBorder->SetColor(GetThemeBackground());
-		_pIcon->SetForegroundColor(GetThemeForeground());
+		if (_pBorder)
+			_pBorder->SetColor(GetThemeBackground());
+		if (_pIcon)
+			_pIcon->SetForegroundColor(GetThemeForeground());
 	}
 }

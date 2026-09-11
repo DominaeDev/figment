@@ -448,6 +448,7 @@ namespace fig::io
 		if (auto error = writer.WriteFile(file); error == FileError::NoError)
 		{
 			asset.sync_state.file_sync = AssetSyncState::Status::Synchronized;
+			LogLn(std::format("Wrote {} to disk ({} bytes)", (fig::string)asset.id, file.data_length));
 			return true;
 		}
 		return false;
@@ -698,10 +699,15 @@ namespace fig::io
 		{
 			db_deletions = result.value();
 
+			// Delete files
 			std::unordered_set<fig::uuid> assetFileIds;
-			for (auto& assetID : assetIds)
-				assetFileIds.insert_range(FindRelatedAssets_NoLock(assetID));
+			for (auto& assetId : assetIds)
+				assetFileIds.insert_range(FindRelatedAssets_NoLock(assetId));
 			file_deletions = DeleteAssetFiles_NoLock(make_span(assetFileIds));
+
+			// Free from memory as well
+			for (auto& assetId : assetIds)
+				_assets.erase(assetId);
 		}
 		
 		LogLn(std::format("Deleted {} assets (and {} files)", db_deletions, file_deletions));

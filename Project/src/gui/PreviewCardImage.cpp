@@ -39,6 +39,21 @@ namespace fig::gui
 			});
 	}
 
+	void PreviewCardImage::SetImage(const fig::sdl::Surface& surface)
+	{
+		if (auto pTexture = SDL_CreateTextureFromSurface(GetSDLRenderer(), surface.get()))
+			_imageTexture = fig::sdl::Texture::from_ptr(pTexture);
+
+		OnTexture();
+	}
+
+	fig::point PreviewCardImage::GetImageSize() const noexcept
+	{
+		if (not _imageTexture.empty())
+			return fig::point { _imageTexture->w, _imageTexture->h };
+		return {};
+	}
+
 	void PreviewCardImage::OnUpdate(float fElapsed)
 	{
 		if (_imageTexture.empty())
@@ -61,8 +76,6 @@ namespace fig::gui
 	{
 		auto bgColor = GetBackgroundColor();
 		auto fgColor = GetForegroundColor();
-		if (bgColor.IsDefined() && bgColor.a != 0)
-			DrawBackground(pRenderer);
 
 		if (_bRedraw)
 		{
@@ -160,6 +173,7 @@ namespace fig::gui
 				SDL_SetTextureBlendMode(pTexture, blendMode);
 				SDL_SetTextureColorMod(pTexture, 0xFF, 0xFF, 0xFF);
 				SDL_SetTextureAlphaMod(pTexture, 0xFF);
+				SDL_SetTextureScaleMode(pTexture, SDL_SCALEMODE_LINEAR);
 				SDL_RenderTexture(pRenderer, pTexture, NULL, &drawRect);
 			}
 			else if (_pErrorBG)
@@ -177,6 +191,7 @@ namespace fig::gui
 			SDL_SetTextureBlendMode(pTexture, SDL_BLENDMODE_BLEND);
 			SDL_SetTextureColorMod(pTexture, 0xFF, 0xFF, 0xFF);
 			SDL_SetTextureAlphaMod(pTexture, 0xFF);
+			SDL_SetTextureScaleMode(pTexture, SDL_SCALEMODE_LINEAR);
 			SDL_RenderTexture(pRenderer, pTexture, NULL, &drawRect);
 		}
 		else if (_pErrorBG)

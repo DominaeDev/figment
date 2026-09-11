@@ -42,6 +42,36 @@ namespace fig::gui
 		return _items.back();
 	}
 
+	SizerItem& Sizer::Insert(size_t position, LayoutElement* pControl, int32_t proportion, int32_t flags, int border)
+	{
+		auto it = _items.begin();
+		std::advance(it, position);
+		_items.emplace(it, SizerItem {
+			.info = LayoutProperties { 
+				.prop = proportion, 
+				.flags = flags, 
+				.border = border
+			},
+			.target = pControl,
+		});
+		return _items.back();
+	}
+
+	SizerItem& Sizer::Insert(size_t position, Sizer* pSizer, int32_t proportion, int32_t flags, int border)
+	{
+		auto it = _items.begin();
+		std::advance(it, position);
+		_items.emplace(it, SizerItem {
+			.info = LayoutProperties { 
+				.prop = proportion, 
+				.flags = flags | SizerFlag::Fill,
+				.border = border 
+			},
+			.target = pSizer,
+		});
+		return _items.back();
+	}
+
 	SizerItem& Sizer::AddSpacer(fig::coord size)
 	{
 		_items.emplace_back(SizerItem {

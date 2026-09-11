@@ -293,10 +293,7 @@ namespace fig::gui
 
 	void CharacterEditorVoicePage::Generate() noexcept
 	{
-		fig::string name = _pCharacter->GetName();
-		if (empty_or_whitespace(name))
-			name = "Character";
-
+		fig::string name = _pCharacter->GetFullName();
 		fig::string phrase = std::format(Constants::TTS::ExamplePhrase, name);
 		bool isServerRunning = Global::GetTTSBackend().GetStatus() >= TTSStatus::ServerStarted;
 

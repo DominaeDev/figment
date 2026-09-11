@@ -79,11 +79,13 @@ namespace fig::gui
 		for (auto& page : _pages)
 			bOk &= page->Save();
 		
-		if (bOk and Global::GetUserContent().UpdateAsset(_assetId, _character))
-			return true;
+		bOk &= Global::GetUserContent().UpdateAsset(_assetId, _character);
 
-		LogLn("Error occurred while saving character."); //! @todo: User facing error
-		return false;
+		if (bOk)
+			Global::GetUserContent().GetAssets().SaveNow();
+		else
+			LogLn("Error occurred while saving character."); //! @todo: User facing error
+		return bOk;
 	}
 
 	void CharacterEditor::OnAfterLayout()
