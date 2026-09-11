@@ -117,6 +117,7 @@ namespace fig::io
 		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::data::ChatInstance& chatInstance);
 		fig::uuid CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings);
 		fig::optional_cref<Asset> ReplaceCoverImage(const fig::uuid& characterId, const fig::uuid& originalAssetId);
+		fig::optional_cref<Asset> ReplaceSmallPortrait(const fig::uuid& characterId, const fig::sdl::Surface& image, const fig::uuid& originalAssetId);
 		
 		void AssignOrder(const std::vector<fig::uuid>& assetIds);
 

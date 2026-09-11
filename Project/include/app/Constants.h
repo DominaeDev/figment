@@ -230,6 +230,7 @@ namespace fig::Constants
 	namespace Data
 	{
 		constexpr int32_t SmallPortraitWidth = 128;
+		constexpr int32_t SmallPortraitHeight = 128;
 	}
 
 	namespace TTS

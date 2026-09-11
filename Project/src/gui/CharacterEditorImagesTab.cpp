@@ -4,6 +4,7 @@
 #include "gui/HorizontalLine.h"
 #include "gui/CharacterPortraitWidget.h"
 #include "gui/CharacterBackgroundWidget.h"
+#include "gui/CharacterSmallPortraitWidget.h"
 #include "gui/GridSizer.h"
 #include "gui/ButtonWithLabel.h"
 #include "gui/AddImageButton.h"
@@ -31,6 +32,7 @@ namespace fig::gui
 		_characterId = args.assetId;
 		
 		CreateHeader(this, pSizer, "Avatar");
+		InitSmallPortrait(pSizer);
 		CreateHorizontalLine(this, pSizer);
 
 		CreateHeader(this, pSizer, "Portraits");
@@ -93,6 +95,22 @@ namespace fig::gui
 			break;
 		case CharacterImageType::Background:
 			_backgroundLoadQueue.push(filename);
+			break;
+		}
+	}
+
+	void CharacterEditorImagesTab::InitSmallPortrait(SizerPtr pSizer)
+	{
+		auto imageAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), _characterId);
+		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
+
+		_pSmallPortrait = CreateControl<CharacterSmallPortraitWidget>();
+		pSizer->Add(_pSmallPortrait);
+
+		for (size_t index = 0; index < imageAssets.size(); ++index)
+		{
+			auto& imageAssetId = imageAssets[index].get().id;
+			_pSmallPortrait->SetImage(imageAssetId);
 			break;
 		}
 	}
@@ -188,7 +206,8 @@ namespace fig::gui
 			menu.AddCheckItem("Use as cover", _portraitWidgets[index].isCover)
 				.SetDelegate([this, index] { SelectCover(index); })
 				.SetEnabled(not _portraitWidgets[index].isCover);
-			menu.AddCheckItem("Use as avatar", false); //! @todo
+			menu.AddCheckItem("Use as avatar", false)
+				.SetDelegate([this, index] { SetSmallPortrait(index); });
 			menu.AddSeparator();
 			menu.AddItem("Move up")
 				.SetDelegate([this, index] { MovePortraitUp(index); })
@@ -327,6 +346,26 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
+	void CharacterEditorImagesTab::SetSmallPortrait(size_t index)
+	{
+		if (index >= _portraitWidgets.size())
+			return;
+
+		auto& portrait = _portraitWidgets[index];
+		if (not portrait.image.empty())
+		{
+			_pSmallPortrait->SetImage(portrait.image);
+			_bReplacedSmallPortrait = true;
+		}
+		else if (not portrait.assetId.empty())
+		{
+			_pSmallPortrait->SetImage(portrait.assetId);
+			_bReplacedSmallPortrait = true;
+		}
+		_pSmallPortrait->ResetTransform();
+
+	}
+
 	void CharacterEditorImagesTab::ProcessLoadQueue()
 	{
 		if (_portraitLoadQueue.empty() and _backgroundLoadQueue.empty())
@@ -436,6 +475,18 @@ namespace fig::gui
 				size_t idxCover = std::distance(_portraitWidgets.begin(), itCover);
 				if (_portraitWidgets[idxCover].assetId != _coverAssetId)
 					content.ReplaceCoverImage(_characterId, _portraitWidgets[idxCover].assetId);
+			}
+		}
+
+		// Update small portrait
+		if (_bReplacedSmallPortrait)
+		{
+			auto smallPortrait = _pSmallPortrait->GetImage();
+			if (not smallPortrait.empty()
+				and smallPortrait.get()->w == Constants::Data::SmallPortraitWidth
+				and smallPortrait.get()->h == Constants::Data::SmallPortraitHeight)
+			{
+				content.ReplaceSmallPortrait(_characterId, smallPortrait, {}); //! @todo: original asset
 			}
 		}
 

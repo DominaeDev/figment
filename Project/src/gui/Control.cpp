@@ -278,6 +278,13 @@ namespace fig::gui
 		return nullptr;
 	}
 
+	fig::renderer_ptr Control::GetSDLRenderer() const
+	{
+		if (_renderContext)
+			return _renderContext->pRenderer;
+		return nullptr;
+	}
+
 	fig::text_engine_ptr Control::GetSDLTextEngine() 
 	{ 
 		if (!_renderContext)

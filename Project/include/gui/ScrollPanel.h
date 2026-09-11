@@ -15,11 +15,12 @@ namespace fig::gui
 		inline void SetScrollBarOffset(fig::coord offset) noexcept { _scrollBarOffset = offset; }
 		
 		void ScrollTo(float position, bool bSmooth = true) noexcept;
+		void ResetScroll() noexcept;
+		fig::coord GetScrollY() const noexcept { return _currentScrollY; }
 
 		void SetTopPadding(fig::coord padding) { _topPadding = padding; };
 		void SetBottomPadding(fig::coord padding) { _bottomPadding = padding; };
 
-		fig::coord GetScrollY() const noexcept { return _currentScrollY; }
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -30,7 +31,6 @@ namespace fig::gui
 		virtual fig::coord GetExtent() const;
 		
 		virtual void OnScroll() {};
-		void ResetScroll() noexcept;
 
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
 		void RefreshScrollBar();

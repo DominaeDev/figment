@@ -600,6 +600,33 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	fig::optional_cref<Asset> UserContentManager::ReplaceSmallPortrait(const fig::uuid& characterId, const fig::sdl::Surface& image, const fig::uuid& originalAssetId)
+	{
+		// Find prior small portrait
+		fig::uuid previousSmallPortrait;
+		if (auto try_cover = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), characterId))
+			previousSmallPortrait = (*try_cover).id;
+
+		if (not image.empty())
+		{
+			// Create new small portrait asset
+			auto& smallPortraitAsset = _pAssetMngr->CreateImageAsset(ImageAssetType::SmallPortrait, image, characterId);
+
+			if (not originalAssetId.empty())
+			{
+				_pAssetMngr->ModifyAsset(smallPortraitAsset, [&originalAssetId](auto&& asset) {
+					asset.SetMeta(MetaTag::ReferenceToOriginal, originalAssetId);
+				});
+			}
+
+			// Delete previous cover asset
+			if (not previousSmallPortrait.empty())
+				DeleteAsset(previousSmallPortrait);
+			return smallPortraitAsset;
+		}
+		return std::nullopt;
+	}
+
 	void UserContentManager::AssignOrder(const std::vector<fig::uuid>& assetIds)
 	{
 		_pAssetMngr->ModifyAssets(assetIds, [](const fig::ref_vector<Asset>& assets) {

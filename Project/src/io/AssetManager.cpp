@@ -987,13 +987,26 @@ namespace fig::io
 			auto& imageAsset = findImage.value();
 			if (auto result = LoadAsset(imageAsset); result == FileError::NoError)
 			{
-				if (auto image = LoadImageFromMemory(imageAsset.data))
+				if (imageAsset.type.IsFormat(DataFormat::ImageUncompressed))
+				{
+					fig::sdl::Surface surface {};
+					if (CreateSurface(imageAsset, surface))
+					{
+						outResult = std::make_shared<AsyncResultVariant>(
+							std::in_place_type<AsyncResult_Image>,
+							std::move(surface));
+						return AsyncLoadError::NoError;
+					}
+				}
+				else if (auto image = LoadImageFromMemory(imageAsset.data))
 				{
 					outResult = std::make_shared<AsyncResultVariant>(
 						std::in_place_type<AsyncResult_Image>,
 						std::move(image.value()));
 					return AsyncLoadError::NoError;
 				}
+				else
+					return AsyncLoadError::LoadError;
 			}
 			else if (result == FileError::NotFound)
 				return AsyncLoadError::FileNotFound;

@@ -79,6 +79,7 @@ namespace fig::gui
 		{
 			if (_pEditor)
 				_pEditor->SelectTab(static_cast<size_t>(event.user.code));
+			_pScrollPanel->ResetScroll();
 			return EventResult::Handled;
 		}
 

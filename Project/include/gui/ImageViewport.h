@@ -4,12 +4,10 @@
 
 namespace fig::gui
 {
-	class ResizeHandle;
-
 	class ImageViewport : public Control
 	{
 	public:
-		ImageViewport(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask = nullptr) noexcept;
+		ImageViewport(ControlPtr pParent);
 		void SetTexture(fig::texture_ptr pTexture) noexcept;
 		void SetMask(fig::texture_ptr pTexture) noexcept;
 
@@ -47,7 +45,5 @@ namespace fig::gui
 		fig::sdl::Texture _targetTexture;
 		fig::texture_ptr _pTexture = nullptr;
 		fig::texture_ptr _pMask = nullptr;
-
-		fig::observer_ptr<ResizeHandle> _pResizeHandle;
 	};
 }

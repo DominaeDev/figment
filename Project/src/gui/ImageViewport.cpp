@@ -1,7 +1,6 @@
 #include <pch.h>
 #include "gui/ImageViewport.h"
 #include "gui/TexturedBorderRenderer.h"
-#include "gui/ResizeHandle.h"
 #include "gui/AppResources.h"
 #include "user/UserSettings.h"
 
@@ -11,31 +10,14 @@ namespace fig::gui
 {
 	static constexpr fig::coord CornerSize = 8;
 
-	ImageViewport::ImageViewport(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) noexcept : Control(pParent),
-		_pTexture(pTexture),
-		_pMask(pMask)
+	ImageViewport::ImageViewport(ControlPtr pParent) : Control(pParent)
 	{
-		if (pTexture)
-			SetSize(pTexture->w, pTexture->h);
-
 		SetForegroundColor(Color::White);
 		SetBackgroundColor(Color::Transparent);
  
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, CornerSize);
 		pBorder->SetColor(Color::LineColor);
-
-		_pResizeHandle = CreateControl<ResizeHandle>(Direction::South);
-		_pResizeHandle->EnableDrawHandle(false);
-		_pResizeHandle->SetDelegate([this](fig::coord size) { 
-			size = std::clamp(((size + 10) / 20) * 20, 240, 640);
-			if (size != GetHeight())
-			{
-				SetHeight(size);
-				InvalidateParentLayout();
-
-				Global::GetUserSettings().SetInt(UserSetting::Interface::Chat::ImageSize, size);
-			}
-		});
+		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 	}
 
 	void ImageViewport::OnRender(fig::renderer_ptr pRenderer)
@@ -280,7 +262,7 @@ namespace fig::gui
 				SDL_BLENDOPERATION_ADD);
 
 			// Background color
-			constexpr auto bgColor = Color::LineColor;
+			auto bgColor = GetBackgroundColor();
 			SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
 			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
 			SDL_RenderFillRect(pRenderer, NULL);
@@ -321,9 +303,6 @@ namespace fig::gui
 	void ImageViewport::OnSize()
 	{
 		SetDirty();
-
-		if (_pResizeHandle)
-			_pResizeHandle->FillParent();
 	}
 
 }

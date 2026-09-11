@@ -9,7 +9,7 @@ namespace fig::gui
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 18.5, false);
 		pParent->GetSizer()->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Top, 8);
-		pSizer->AddSpacer(9);
+		pSizer->AddSpacer(6);
 		return pLabel;
 	}
 

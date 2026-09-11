@@ -278,7 +278,7 @@ namespace fig
 
 	fig::sdl::Surface CreateSquarePortrait(const fig::sdl::Surface& surface)
 	{
-		auto pSurface = SDL_CreateSurface(Constants::Data::SmallPortraitWidth, Constants::Data::SmallPortraitWidth, SDL_PIXELFORMAT_RGB24);
+		auto pSurface = SDL_CreateSurface(Constants::Data::SmallPortraitWidth, Constants::Data::SmallPortraitHeight, SDL_PIXELFORMAT_RGB24);
 		if (not (bool)pSurface)
 			return {};
 

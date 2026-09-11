@@ -31,6 +31,8 @@ namespace fig::io
 		ImageJpeg			= 0x0B,
 		ImagePng			= 0x0C,
 		ImageWebp			= 0x0D,
+		ImageGif			= 0x0E,
+		ImageBmp			= 0x0F,
 
 		AudioWav			= 0x10,
 	};

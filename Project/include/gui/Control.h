@@ -86,6 +86,7 @@ namespace fig::gui
 
 		fig::window_ptr GetSDLWindow();
 		fig::renderer_ptr GetSDLRenderer();
+		fig::renderer_ptr GetSDLRenderer() const;
 		fig::text_engine_ptr GetSDLTextEngine();
 		fig::observer_ptr<Frame> GetOwnerFrame();
 		fig::point GetMousePos() const noexcept;

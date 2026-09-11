@@ -180,7 +180,7 @@ namespace fig::gui
 		pMale->Toggle(_pCharacter->gender.IsConventional(ConventionalGender::Male));
 		pFemale->Toggle(not _pCharacter->gender.IsConventional(ConventionalGender::Male));
 
-		_pViewport = CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
+		_pViewport = CreateControl<ImageViewport>();
 		_pViewport->SetSize(320, 480);
 		_pViewport->SetVisible(false);
 		pHorizontalSizer->Add(_pViewport, 0, SizerFlag::AlignRight);

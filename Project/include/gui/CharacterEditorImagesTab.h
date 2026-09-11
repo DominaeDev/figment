@@ -7,6 +7,7 @@ namespace fig::gui
 {
 	class GridSizer;
 	class CharacterPortraitWidget;
+	class CharacterSmallPortraitWidget;
 	class CharacterBackgroundWidget;
 
 	class CharacterEditorImagesTab : public EditorTab<CharacterEditorArgs>
@@ -19,9 +20,11 @@ namespace fig::gui
 		bool Save() override;
 
 	protected:
+		void InitSmallPortrait(SizerPtr pSizer);
 		void InitPortraits(SizerPtr pSizer);
 		void InitBackgrounds(SizerPtr pSizer);
 		void SelectCover(size_t index);
+		void SetSmallPortrait(size_t index);
 		void ProcessLoadQueue();
 		
 		void OnUpdate(float fElapsed) override;
@@ -60,6 +63,10 @@ namespace fig::gui
 			fig::io::DataFormat format = fig::io::DataFormat::Undefined;
 			fig::bytes data {};
 		};
+
+		// Small portrait
+		fig::observer_ptr<CharacterSmallPortraitWidget> _pSmallPortrait;
+		bool _bReplacedSmallPortrait {};
 
 		// Portraits
 		fig::observer_ptr<GridSizer> _pPortraitGridSizer;

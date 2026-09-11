@@ -27,6 +27,10 @@ namespace fig::io
 				return DataFormat::ImageJpeg;
 			if (ext == ".webp")
 				return DataFormat::ImageWebp;
+			if (ext == ".gif")
+				return DataFormat::ImageGif;
+			if (ext == ".bmp")
+				return DataFormat::ImageBmp;
 			if (ext == ".xml")
 				return DataFormat::TextXml;
 			if (ext == ".json")

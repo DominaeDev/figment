@@ -4,7 +4,7 @@
 #include "gui/LineBorderRenderer.h"
 #include "gui/KeyboardMods.h"
 #include "gui/ImageWithMask.h"
-#include "gui/ImageViewport.h"
+#include "gui/ResizeableImageViewport.h"
 #include "gui/ResizeHandle.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/CharacterDetailsPanel.h"
@@ -34,7 +34,8 @@ namespace fig::gui
 		_pCollapseButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pCollapseButton->GetHeight()) / 2);
 		_pCollapseButton->SetDelegate([this]() { _bExpanded ? Collapse() : Expand(); });
 
-		_pViewport = _pExpandedRoot->CreateControl<ImageViewport>(nullptr, AppResources::GetTexture(Resource::MASK_CARD));
+		_pViewport = _pExpandedRoot->CreateControl<ResizeableImageViewport>();
+		_pViewport->SetResizedDelegate([](fig::coord size) { Global::GetUserSettings().SetInt(UserSetting::Interface::Chat::ImageSize, size); });
 		_pViewport->SetHeight(Constants::GUI::InfoPanel::DefaultImageSize);
 
 		_pCharacterDetails = _pExpandedRoot->CreateControl<CharacterDetailsPanel>();

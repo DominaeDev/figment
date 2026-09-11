@@ -9,8 +9,8 @@ namespace fig::chat
 
 namespace fig::gui
 {
-	class ImageViewport;
 	class ResizeHandle;
+	class ResizeableImageViewport;
 	class CharacterDetailsPanel;
 
 	class InfoPanel : public Panel
@@ -35,7 +35,7 @@ namespace fig::gui
 	private:
 		bool _bExpanded { true };
 
-		fig::observer_ptr<ImageViewport> _pViewport;
+		fig::observer_ptr<ResizeableImageViewport> _pViewport;
 		fig::observer_ptr<Control> _pBottomPanel;
 		fig::observer_ptr<LayoutElement> _pGradient;
 		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;
