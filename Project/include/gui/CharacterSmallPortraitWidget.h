@@ -7,7 +7,7 @@ namespace fig::gui
 {
 	class PreviewCardImage;
 
-	class CharacterSmallPortraitWidget : public ImageViewport
+	class CharacterSmallPortraitWidget : public ImageViewport, public MouseEventHandler
 	{
 	public:
 		CharacterSmallPortraitWidget(ControlPtr pParent);
@@ -19,6 +19,7 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fElapsed) override;
+		EventResult OnEvent(fig::event& event) override;
 
 		fig::io::AsyncImageLoad _loader {};
 		fig::sdl::Texture _imageTexture {};

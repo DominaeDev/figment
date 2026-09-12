@@ -8,7 +8,7 @@ namespace fig::tts
 {
 	struct TTSVoiceRef 
 	{
-		fig::observer_ptr<const AudioData> pData;
+		fig::observer_ptr<const AudioData> pData {};
 		fig::string referenceText;
 	};
 

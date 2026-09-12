@@ -8,9 +8,8 @@ namespace fig::data
 {
 	struct VoiceSettings : public XmlData<"VoiceSettings", 0>
 	{
-		fig::string name; //??
+		fig::string name;
 		fig::string description; //??
-		fig::string language; //! @maybe
 		fig::uuid modelId; //! @maybe
 		fig::tts::VoicePrint voicePrint;
 
@@ -20,7 +19,6 @@ namespace fig::data
 				Element { "Name",			&VoiceSettings::name },
 				Element { "Description",	&VoiceSettings::description },
 				Element { "Model",			&VoiceSettings::modelId },
-				Element { "Language",		&VoiceSettings::language },
 				Element { "Voice",			&VoiceSettings::voicePrint}
 			);
 

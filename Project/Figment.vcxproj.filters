@@ -168,17 +168,17 @@
     <Filter Include="Source Files\Backend\TTS\AudioServer">
       <UniqueIdentifier>{bce3df02-909e-4dc1-84d8-d271728445aa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Screens\Editors">
+    <Filter Include="Source Files\Frontend\GUI\Editors">
       <UniqueIdentifier>{f995ba2b-e188-4bc6-ad30-c9b4e8435aed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Screens\Editors\CharacterEditor">
+    <Filter Include="Source Files\Frontend\GUI\Editors\CharacterEditor">
       <UniqueIdentifier>{b3cd0474-c143-430c-a890-3351e38e852f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Screens\Editors\Settings">
-      <UniqueIdentifier>{e97d13a0-dbd3-4cde-8e8e-eec5aa0924ea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls">
+    <Filter Include="Source Files\Frontend\GUI\Editors\CharacterEditor\Controls">
       <UniqueIdentifier>{b69db8b4-38fa-4c37-af19-338befee923b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\SettingsEditor">
+      <UniqueIdentifier>{e97d13a0-dbd3-4cde-8e8e-eec5aa0924ea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -582,10 +582,7 @@
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ValueBinding.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\EditorPage.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
     </ClCompile>
     <ClCompile Include="src\tts\TTSBackend.cpp">
       <Filter>Source Files\Backend\TTS</Filter>
@@ -704,11 +701,8 @@
     <ClCompile Include="src\gui\TextInput.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="include\util\StripHtml.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\Editor.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SidePanelMain.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
@@ -717,19 +711,7 @@
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CharacterEditor.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorAboutPage.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorInfoPage.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorVoicePage.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorImagesPage.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\PreviewCardImage.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
@@ -738,10 +720,37 @@
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\AddImageButton.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\CharacterPortraitImage.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls</Filter>
+    <ClCompile Include="src\gui\CharacterSmallPortraitWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterBackgroundWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterPortraitWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="include\util\StripHtml.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ResizeableImageViewport.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\EditorTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorAboutTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorImagesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorInfoTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1513,11 +1522,8 @@
     <ClInclude Include="include\gui\EditorScreen.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\EditorPage.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\ValueBinding.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
     </ClInclude>
     <ClInclude Include="include\util\OpaquePtr.h">
       <Filter>Source Files\Utility</Filter>
@@ -1669,9 +1675,8 @@
     <ClInclude Include="include\gui\TextInput.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\util\StripHtml.h" />
     <ClInclude Include="include\gui\Editor.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SidePanelMain.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
@@ -1680,22 +1685,10 @@
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditor.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorAboutPage.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorInfoPage.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorVoicePage.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditorArgs.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorImagesPage.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\PreviewCardImage.h">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
@@ -1704,10 +1697,37 @@
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\AddImageButton.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls</Filter>
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\CharacterPortraitImage.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Editors\CharacterEditor\Controls</Filter>
+    <ClInclude Include="include\gui\CharacterBackgroundWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterPortraitWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterSmallPortraitWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\util\StripHtml.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ResizeableImageViewport.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\EditorTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorAboutTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorImagesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorInfoTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorVoiceTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -73,7 +73,7 @@ namespace fig::io
 			return GetCache<T>().Get(assetId);
 		}
 
-		fig::expected_cref<fig::sdl::Texture, FileError> GetTexture(const fig::uuid& assetId, struct SDL_Renderer* pRenderer) noexcept;
+		fig::expected_cref<fig::sdl::Texture, FileError> GetTexture(const fig::uuid& assetId, fig::renderer_ptr pRenderer) noexcept;
 
 		template <typename T>
 		void InvalidateCache(const fig::uuid& assetId) noexcept
@@ -87,14 +87,7 @@ namespace fig::io
 			InvalidateCache(assetId);
 		}
 
-		void InvalidateCache(const fig::uuid& assetId) noexcept
-		{
-			for (auto& kvp : _caches)
-			{
-				if (kvp.second->Erase(assetId))
-					return;
-			}
-		}
+		void InvalidateCache(const fig::uuid& assetId) noexcept;
 
 		void InvalidateMeta(const fig::uuid& assetId) noexcept
 		{
@@ -140,17 +133,14 @@ namespace fig::io
 			return static_cast<const AssetCacheBase<T>&>(*entry);
 		}
 
+		fig::observer_ptr<fig::sdl::Texture> GetCachedTexture(fig::renderer_ptr pRenderer, const fig::uuid& assetId, fig::texture_ptr pMask = nullptr);
+
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 		std::unordered_map<AssetTypeDefinition, std::unique_ptr<IAssetCache>> _caches;
 		std::map<fig::uuid, ContentMetaData> _metaData;
 		
-		struct CachedTexture
-		{
-			fig::sdl::Texture pTexture;
-			fig::texture_ptr pMask {};
-		};
-		std::map<fig::renderer_ptr, std::map<fig::uuid, std::vector<CachedTexture>>> _cachedTextures;
+		std::map<fig::renderer_ptr, std::map<fig::uuid, std::map<fig::texture_ptr, fig::sdl::Texture>>> _cachedTextures;
 
 		std::map<fig::uuid, std::vector<fig::uuid>> _chatsByAsset; // <asset id, chat ids>
 		bool _bInvalidChatCount { true };

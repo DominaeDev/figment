@@ -6,7 +6,7 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	CharacterSmallPortraitWidget::CharacterSmallPortraitWidget(ControlPtr pParent) : ImageViewport(pParent)
+	CharacterSmallPortraitWidget::CharacterSmallPortraitWidget(ControlPtr pParent) : ImageViewport(pParent), MouseEventHandler(this)
 	{
 		SetSize(Constants::Data::SmallPortraitWidth, Constants::Data::SmallPortraitHeight);
 	}
@@ -41,6 +41,13 @@ namespace fig::gui
 		_loader.Poll();
 	}
 
+	EventResult CharacterSmallPortraitWidget::OnEvent(fig::event& event)
+	{
+		if (auto result = ImageViewport::OnEvent(event); result != EventResult::Pass)
+			return result;
+		return MouseEventHandler::HandleMouseEvents(event);
+	}
+
 	fig::sdl::Surface CharacterSmallPortraitWidget::GetImage() const
 	{
 		if (_targetTexture.empty())
@@ -59,6 +66,8 @@ namespace fig::gui
 			(float)Constants::Data::SmallPortraitWidth,
 			(float)Constants::Data::SmallPortraitHeight,
 		};
+
+		// Draw background
 
 		SDL_SetRenderDrawColor(pRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(pRenderer);

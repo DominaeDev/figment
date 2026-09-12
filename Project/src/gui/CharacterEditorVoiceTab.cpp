@@ -198,7 +198,7 @@ namespace fig::gui
 		// Load (existing) voice
 		if (auto try_voice = Global::GetUserContent().GetVoiceForCharacter(_characterId))
 		{
-			_voicePrint.audioData = (*try_voice).voicePrint.audioData;
+			_voicePrint = (*try_voice).voicePrint;
 			_pPlayButton->SetEnabled(true);
 		}
 
@@ -306,6 +306,7 @@ namespace fig::gui
 			_voicePrint = {
 				.generationPrompt = prompt,
 				.referenceText = phrase,
+				.language = "en",
 				.keys = _selectedKeys 
 					| std::views::transform([](auto&& key) { return (fig::string)key; })
 					| std::ranges::to<std::vector>(),

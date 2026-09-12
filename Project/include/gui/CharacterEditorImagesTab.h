@@ -30,17 +30,20 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		void OnAfterLayout();
 
+		void OnClickedSmallPortrait();
+		void RevertSmallPortrait();
+
+		void OnClickedPortrait(ControlPtr pControl, int32_t button);
 		void RemovePortrait(size_t index);
 		void MovePortraitUp(size_t index);
 		void MovePortraitDown(size_t index);
-		void OnClickedPortrait(ControlPtr pControl, int32_t button);
 
+		void OnClickedBackground(ControlPtr pControl);
 		void RemoveBackground(size_t index);
 		void MoveBackgroundUp(size_t index);
 		void MoveBackgroundDown(size_t index);
-		void OnClickedBackground(ControlPtr pControl);
 
-		enum CharacterImageType { Portrait, Background };
+		enum CharacterImageType { SmallPortrait, Portrait, Background };
 		void OpenFile(CharacterImageType type);
 		void OnOpenFile(const fig::path& filename, CharacterImageType type);
 
@@ -66,7 +69,8 @@ namespace fig::gui
 
 		// Small portrait
 		fig::observer_ptr<CharacterSmallPortraitWidget> _pSmallPortrait;
-		bool _bReplacedSmallPortrait {};
+		std::queue<fig::path> _smallPortraitLoadQueue;
+		bool _bEditingSmallPortrait {};
 
 		// Portraits
 		fig::observer_ptr<GridSizer> _pPortraitGridSizer;

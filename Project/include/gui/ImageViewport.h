@@ -8,7 +8,9 @@ namespace fig::gui
 	{
 	public:
 		ImageViewport(ControlPtr pParent);
+		
 		void SetTexture(fig::texture_ptr pTexture) noexcept;
+		void SetBackgroundTexture(fig::texture_ptr pBGTexture) noexcept;
 		void SetMask(fig::texture_ptr pTexture) noexcept;
 
 		void ResetTransform();
@@ -44,6 +46,7 @@ namespace fig::gui
 
 		fig::sdl::Texture _targetTexture;
 		fig::texture_ptr _pTexture = nullptr;
+		fig::texture_ptr _pBGTexture = nullptr;
 		fig::texture_ptr _pMask = nullptr;
 	};
 }

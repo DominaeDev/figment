@@ -10,6 +10,7 @@ namespace fig::tts
 		fig::uuid modelId;
 		fig::string generationPrompt;
 		fig::string referenceText;
+		fig::string language;
 		std::vector<fig::string> keys;
 		uint32_t seed;
 
@@ -23,6 +24,7 @@ namespace fig::tts
 				Element { "Prompt",			&VoicePrint::generationPrompt },
 				Element { "Seed",			&VoicePrint::seed },
 				Element { "Transcript",		&VoicePrint::referenceText },
+				Element { "Language",		&VoicePrint::language },
 				Element { "Keys",			&VoicePrint::keys },
 				Element { "Data",			&VoicePrint::audioData,
 					[](auto&& data) { return data.AsBase64(); },

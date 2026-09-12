@@ -203,82 +203,85 @@ namespace fig::io
 		return *_pAssetMngr;
 	}
 
+	fig::observer_ptr<fig::sdl::Texture> UserContentManager::GetCachedTexture(fig::renderer_ptr pRenderer, const fig::uuid& assetId, fig::texture_ptr pMask)
+	{
+		if (auto itRenderer = _cachedTextures.find(pRenderer); itRenderer != _cachedTextures.cend())
+		{
+			if (auto itAsset = (*itRenderer).second.find(assetId); itAsset != (*itRenderer).second.cend())
+			{
+				if (auto itMask = (*itAsset).second.find(pMask); itMask != (*itAsset).second.cend())
+					return &itMask->second;
+			}
+		}
+		return nullptr;
+	}
+
 	fig::optional_cref<Asset> UserContentManager::GetLargePortraitForCharacter(const fig::uuid& characterId, size_t index) const
 	{
-		auto backgrounds = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterId);
-		if (not backgrounds.empty())
+		auto portraits = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterId);
+		if (not portraits.empty())
 		{
-			std::ranges::sort(backgrounds, std::ranges::less(), [](auto&& b) { return b.get().GetOrder(); });
-			return backgrounds[std::min(index, backgrounds.size() - 1uz)].get();
+			std::ranges::sort(portraits, std::ranges::less(), [](auto&& b) { return b.get().GetOrder(); });
+			return portraits[std::min(index, portraits.size() - 1uz)].get();
 		}
 		return fig::nullref;
 	}
 
 	fig::expected_ref<fig::sdl::Texture, FileError> UserContentManager::GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept
 	{
-		if (auto itRenderer = _cachedTextures.find(pRenderer); itRenderer != _cachedTextures.cend())
+		auto portraits = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), characterId);
+		if (portraits.empty())
+			return std::unexpected(FileError::NotFound);
+
+		std::ranges::sort(portraits, std::ranges::less(), [](auto&& b) { return b.get().GetOrder(); });
+		auto& portraitAsset = portraits[0].get();
+
+		if (auto cached = GetCachedTexture(pRenderer, portraitAsset.id, pMask))
+			return *cached;
+
+		if (auto try_surface = Get<fig::sdl::Surface>(portraitAsset.id))
 		{
-			if (auto itTextures = (*itRenderer).second.find(characterId); itTextures != (*itRenderer).second.cend())
+			auto& surface = try_surface.value();
+
+			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, surface.get()))
 			{
-				for (auto& t : (*itTextures).second)
+				fig::sdl::Texture texture = fig::sdl::Texture::from_ptr(pTexture);
+
+				if (pMask)
 				{
-					if (t.pMask == pMask)
-						return t.pTexture;
+					auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
+
+					// Bake mask into texture
+					fig::texture_ptr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
+					SDL_SetRenderTarget(pRenderer, pTarget);
+					SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
+					SDL_RenderClear(pRenderer);
+					SDL_SetTextureBlendMode(pMask, SDL_BLENDMODE_NONE);
+					SDL_RenderTexture(pRenderer, pMask, NULL, NULL);
+
+					SDL_BlendMode multiplyAlpha = SDL_ComposeCustomBlendMode(
+						SDL_BLENDFACTOR_DST_ALPHA,
+						SDL_BLENDFACTOR_ZERO,
+						SDL_BLENDOPERATION_ADD,
+						SDL_BLENDFACTOR_ZERO,
+						SDL_BLENDFACTOR_ONE,
+						SDL_BLENDOPERATION_ADD
+					);
+
+					SDL_SetTextureBlendMode(pTexture, multiplyAlpha);
+					SDL_RenderTexture(pRenderer, pTexture, NULL, NULL);
+					SDL_SetRenderTarget(pRenderer, priorRenderTarget);
+					SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
+					texture.reset(pTarget);
 				}
+
+				auto& cache = _cachedTextures[pRenderer][portraitAsset.id];
+				cache[pMask] = std::move(texture);
+				return cache[pMask];
 			}
 		}
-
-		if (auto find_asset = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), characterId))
-		{
-			auto& asset = *find_asset;
-			if (auto try_surface = GetCache<fig::sdl::Surface>().Get(asset.id))
-			{
-				auto& surface = try_surface.value();
-
-				if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, surface.get()))
-				{
-					fig::sdl::Texture texture = fig::sdl::Texture::from_ptr(pTexture);
-
-					if (pMask)
-					{
-						auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
-
-						// Bake mask into texture
-						fig::texture_ptr pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, pTexture->w, pTexture->h);
-						SDL_SetRenderTarget(pRenderer, pTarget);
-						SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
-						SDL_RenderClear(pRenderer);
-						SDL_SetTextureBlendMode(pMask, SDL_BLENDMODE_NONE);
-						SDL_RenderTexture(pRenderer, pMask, NULL, NULL);
-
-						SDL_BlendMode multiplyAlpha = SDL_ComposeCustomBlendMode(
-							SDL_BLENDFACTOR_DST_ALPHA,
-							SDL_BLENDFACTOR_ZERO,
-							SDL_BLENDOPERATION_ADD,
-							SDL_BLENDFACTOR_ZERO,
-							SDL_BLENDFACTOR_ONE,
-							SDL_BLENDOPERATION_ADD
-						);
-
-						SDL_SetTextureBlendMode(pTexture, multiplyAlpha);
-						SDL_RenderTexture(pRenderer, pTexture, NULL, NULL);
-						SDL_SetRenderTarget(pRenderer, priorRenderTarget);
-						SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
-						texture.reset(pTarget);
-					}
-
-					auto& textures = _cachedTextures[pRenderer][characterId];
-					textures.emplace_back(CachedTexture {
-						.pTexture = std::move(texture),
-						.pMask = pMask,
-					});
-
-					return textures.back().pTexture;
-				}
-			}
-		}
-
-		return unexpected(FileError::NotFound);
+		
+		return std::unexpected(FileError::ReadError);
 	}
 
 	fig::optional_cref<Asset> UserContentManager::GetBackgroundForCharacter(const fig::uuid& characterId, size_t index) const
@@ -292,20 +295,11 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, SDL_Renderer* pRenderer) noexcept
+	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, fig::renderer_ptr pRenderer) noexcept
 	{
-		if (auto itRenderer = _cachedTextures.find(pRenderer); itRenderer != _cachedTextures.cend())
-		{
-			if (auto itTextures = (*itRenderer).second.find(assetId); itTextures != (*itRenderer).second.cend())
-			{
-				for (auto& t : (*itTextures).second)
-				{
-					if (t.pMask == nullptr)
-						return t.pTexture;
-				}
-			}
-		}
-
+		if (auto cached = GetCachedTexture(pRenderer, assetId))
+			return *cached;
+		
 		if (auto find_asset = _pAssetMngr->FindAsset(assetId, AssetType::Image))
 		{
 			auto& asset = *find_asset;
@@ -317,12 +311,9 @@ namespace fig::io
 				{
 					fig::sdl::Texture texture = fig::sdl::Texture::from_ptr(pTexture);
 
-					auto& textures = _cachedTextures[pRenderer][assetId];
-					auto& value = textures.emplace_back(CachedTexture {
-						.pTexture = std::move(texture),
-					});
-
-					return value.pTexture;
+					auto& cache = _cachedTextures[pRenderer][assetId];
+					cache[nullptr] = std::move(texture);
+					return cache[nullptr];
 				}
 			}
 		}
@@ -359,6 +350,22 @@ namespace fig::io
 //		InvalidateChatCount();
 
 		return { chatInstanceAsset.id, chatLogInstance.id };
+	}
+
+	void UserContentManager::InvalidateCache(const fig::uuid& assetId) noexcept
+	{
+		for (auto& kvp : _caches)
+		{
+			if (kvp.second->Erase(assetId))
+				return;
+		}
+
+		for (auto& cache : _cachedTextures)
+		{
+			auto& map = cache.second;
+			for (auto& kvp : map)
+				map.erase(assetId);
+		}
 	}
 
 	uint32_t UserContentManager::GetChatCount(const fig::uuid& assetId)

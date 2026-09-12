@@ -205,6 +205,12 @@ namespace fig::gui
 		SetDirty();
 	}
 
+	void ImageViewport::SetBackgroundTexture(fig::texture_ptr pBGTexture) noexcept
+	{
+		_pBGTexture = pBGTexture;
+		SetDirty();
+	}
+
 	void ImageViewport::SetMask(fig::texture_ptr pTexture) noexcept
 	{
 		_pMask = pTexture;
@@ -261,12 +267,23 @@ namespace fig::gui
 				SDL_BLENDFACTOR_ONE, 
 				SDL_BLENDOPERATION_ADD);
 
-			// Background color
-			auto bgColor = GetBackgroundColor();
-			SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
-			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
-			SDL_RenderFillRect(pRenderer, NULL);
-			SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
+
+			// Render background
+			if (_pBGTexture)
+			{
+				SDL_SetTextureBlendMode(_pBGTexture, blendMode);
+				SDL_SetTextureColorMod(_pBGTexture, 0xFF, 0xFF, 0xFF);
+				SDL_SetTextureAlphaMod(_pBGTexture, 0xFF);
+				SDL_RenderTexture(pRenderer, _pBGTexture, NULL, NULL);
+			}
+			else
+			{
+				auto bgColor = GetBackgroundColor();
+				SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
+				SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
+				SDL_RenderFillRect(pRenderer, NULL);
+				SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
+			}
 
 			// Render texture
 			if (_pTexture)
@@ -277,12 +294,31 @@ namespace fig::gui
 				SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
 			}
 		}
-		else if (_pTexture)
+		else
 		{
-			SDL_SetTextureBlendMode(_pTexture, SDL_BLENDMODE_BLEND);
-			SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
-			SDL_SetTextureAlphaMod(_pTexture, 0xFF);
-			SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
+			// Render background
+			if (_pBGTexture)
+			{
+				SDL_SetTextureBlendMode(_pBGTexture, SDL_BLENDMODE_BLEND);
+				SDL_SetTextureColorMod(_pBGTexture, 0xFF, 0xFF, 0xFF);
+				SDL_SetTextureAlphaMod(_pBGTexture, 0xFF);
+				SDL_RenderTexture(pRenderer, _pBGTexture, NULL, NULL);
+			}
+			else
+			{
+				auto bgColor = GetBackgroundColor();
+				SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
+				SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
+				SDL_RenderFillRect(pRenderer, NULL);
+			}
+
+			if (_pTexture)
+			{
+				SDL_SetTextureBlendMode(_pTexture, SDL_BLENDMODE_BLEND);
+				SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
+				SDL_SetTextureAlphaMod(_pTexture, 0xFF);
+				SDL_RenderTexture(pRenderer, _pTexture, NULL, &drawRect);
+			}
 		}
 
 		SDL_SetRenderTarget(pRenderer, priorRenderTarget);

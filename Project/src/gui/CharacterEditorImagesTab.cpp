@@ -31,11 +31,11 @@ namespace fig::gui
 		auto pSizer = SetSizer<VerticalSizer>();
 		_characterId = args.assetId;
 		
-		CreateHeader(this, pSizer, "Avatar");
+		CreateHeader(this, pSizer, "Chat icon");
 		InitSmallPortrait(pSizer);
 		CreateHorizontalLine(this, pSizer);
 
-		CreateHeader(this, pSizer, "Portraits");
+		CreateHeader(this, pSizer, "Character portraits");
 		InitPortraits(pSizer);
 		CreateHint(this, pSizer, std::format("You may add up to {} portrait images", Constants::GUI::CharacterEditor::MaxPortraits));
 		CreateHorizontalLine(this, pSizer);
@@ -83,13 +83,16 @@ namespace fig::gui
 
 		_fileDlgUserData.pThis = this;
 		_fileDlgUserData.type = type;
-		SDL_ShowOpenFileDialog(OnFileDialogResult, (void*)&_fileDlgUserData, GetSDLWindow(), filters, SDL_arraysize(filters), nullptr, true);
+		SDL_ShowOpenFileDialog(OnFileDialogResult, (void*)&_fileDlgUserData, GetSDLWindow(), filters, SDL_arraysize(filters), nullptr, type != CharacterImageType::SmallPortrait);
 	}
 
 	void CharacterEditorImagesTab::OnOpenFile(const fig::path& filename, CharacterImageType type)
 	{
 		switch (type)
 		{
+		case CharacterImageType::SmallPortrait:
+			_smallPortraitLoadQueue.push(filename);
+			break;
 		case CharacterImageType::Portrait:
 			_portraitLoadQueue.push(filename);
 			break;
@@ -105,14 +108,13 @@ namespace fig::gui
 		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
 
 		_pSmallPortrait = CreateControl<CharacterSmallPortraitWidget>();
+		_pSmallPortrait->SetBackgroundTexture(AppResources::GetTexture(Resource::SQUARE_BACKGROUND_DEFAULT));
+
+		_pSmallPortrait->SetRightClickDelegate([this]() { OnClickedSmallPortrait(); });
 		pSizer->Add(_pSmallPortrait);
 
-		for (size_t index = 0; index < imageAssets.size(); ++index)
-		{
-			auto& imageAssetId = imageAssets[index].get().id;
-			_pSmallPortrait->SetImage(imageAssetId);
-			break;
-		}
+		if (not imageAssets.empty())
+			_pSmallPortrait->SetImage(imageAssets[0].get().id);
 	}
 
 	void CharacterEditorImagesTab::InitPortraits(SizerPtr pSizer)
@@ -206,7 +208,7 @@ namespace fig::gui
 			menu.AddCheckItem("Use as cover", _portraitWidgets[index].isCover)
 				.SetDelegate([this, index] { SelectCover(index); })
 				.SetEnabled(not _portraitWidgets[index].isCover);
-			menu.AddCheckItem("Use as avatar", false)
+			menu.AddCheckItem("Use as chat icon", false)
 				.SetDelegate([this, index] { SetSmallPortrait(index); });
 			menu.AddSeparator();
 			menu.AddItem("Move up")
@@ -355,23 +357,64 @@ namespace fig::gui
 		if (not portrait.image.empty())
 		{
 			_pSmallPortrait->SetImage(portrait.image);
-			_bReplacedSmallPortrait = true;
+			_bEditingSmallPortrait = true;
 		}
 		else if (not portrait.assetId.empty())
 		{
 			_pSmallPortrait->SetImage(portrait.assetId);
-			_bReplacedSmallPortrait = true;
+			_bEditingSmallPortrait = true;
 		}
 		_pSmallPortrait->ResetTransform();
+	}
+
+	void CharacterEditorImagesTab::OnClickedSmallPortrait()
+	{
+		auto& menu = CreateMenu();
+		menu.AddItem("Load chat icon")
+			.SetDelegate([this] { OpenFile(CharacterImageType::SmallPortrait); });
+		menu.AddSeparator();
+		menu.AddItem("Revert")
+			.SetDelegate([this] { RevertSmallPortrait(); })
+			.SetEnabled(_bEditingSmallPortrait);
+		
+		menu.Show();
+	}
+
+	void CharacterEditorImagesTab::RevertSmallPortrait()
+	{
+		auto imageAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), _characterId);
+		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
+
+		if (not imageAssets.empty())
+		{
+			_pSmallPortrait->SetImage(imageAssets[0].get().id);
+			_bEditingSmallPortrait = false;
+		}
 
 	}
 
 	void CharacterEditorImagesTab::ProcessLoadQueue()
 	{
-		if (_portraitLoadQueue.empty() and _backgroundLoadQueue.empty())
+		if (_smallPortraitLoadQueue.empty() 
+			and _portraitLoadQueue.empty() 
+			and _backgroundLoadQueue.empty())
 			return;
 
 		bool bChanged = false;
+
+		// Load small portrait
+		if (not _smallPortraitLoadQueue.empty())
+		{
+			auto& path = _smallPortraitLoadQueue.front();
+			auto data = fig::io::ReadFile(path).value_or({});
+			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
+			{
+				_pSmallPortrait->SetImage(*try_surface);
+				_bEditingSmallPortrait = true;
+				bChanged = true;
+			}
+			queue_clear(_smallPortraitLoadQueue);
+		}
 
 		// Load portraits
 		while (not _portraitLoadQueue.empty())
@@ -479,7 +522,7 @@ namespace fig::gui
 		}
 
 		// Update small portrait
-		if (_bReplacedSmallPortrait)
+		if (_bEditingSmallPortrait)
 		{
 			auto smallPortrait = _pSmallPortrait->GetImage();
 			if (not smallPortrait.empty()

@@ -81,18 +81,15 @@ namespace fig::gui
 		auto pRenderer = GetSDLRenderer();
 		SDL_assert(pRenderer);
 
-		fig::texture_ptr pTarget = _targetTexture.get();
-		if (!pTarget)
+		if (_targetTexture.empty())
 		{
-			pTarget = SDL_CreateTexture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
-			SDL_SetTextureBlendMode(pTarget, SDL_BLENDMODE_BLEND_PREMULTIPLIED);
-
-			_targetTexture.reset(pTarget);
+			_targetTexture = fig::sdl::Texture(pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
+			SDL_SetTextureBlendMode(_targetTexture.get(), SDL_BLENDMODE_BLEND_PREMULTIPLIED);
 			_bRedrawAlpha = true;
 		}
 
 		auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
-		SDL_SetRenderTarget(pRenderer, pTarget);
+		SDL_SetRenderTarget(pRenderer, _targetTexture.get());
 		
 		constexpr float fCorner = 8.0f;
 
