@@ -20,10 +20,13 @@ namespace fig::gui
 	protected:
 		void OnUpdate(float fElapsed) override;
 		EventResult OnEvent(fig::event& event) override;
+		void OnMouseEnter() override;
+		void OnMouseExit() override;
 
 		fig::io::AsyncImageLoad _loader {};
 		fig::sdl::Texture _imageTexture {};
 
+		bool _bEditable {};
 		bool _bHasError {};
 	};
 }

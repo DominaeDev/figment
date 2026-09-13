@@ -91,6 +91,7 @@ namespace fig
 		constexpr cursor ResizeHorizontal	= SDL_SYSTEM_CURSOR_EW_RESIZE;
 		constexpr cursor ResizeVertical		= SDL_SYSTEM_CURSOR_NS_RESIZE;
 		constexpr cursor Pointer			= SDL_SYSTEM_CURSOR_POINTER;
+		constexpr cursor Move				= SDL_SYSTEM_CURSOR_MOVE;
 	};
 
 	using ToggleDelegate = std::function<void(bool)>;

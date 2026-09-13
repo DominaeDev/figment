@@ -30,9 +30,15 @@ namespace fig::gui
 			SetTexture(pTexture);
 
 			if (_imageTexture.get()->w <= Constants::Data::SmallPortraitWidth and _imageTexture.get()->h <= Constants::Data::SmallPortraitHeight)
+			{
 				GetBorderRenderer()->SetColor(Color::LineColor);
+				_bEditable = false;
+			}
 			else
+			{
 				GetBorderRenderer()->SetColor(0x40C0FF_rgb);
+				_bEditable = true;
+			}
 		}
 	}
 
@@ -43,8 +49,11 @@ namespace fig::gui
 
 	EventResult CharacterSmallPortraitWidget::OnEvent(fig::event& event)
 	{
-		if (auto result = ImageViewport::OnEvent(event); result != EventResult::Pass)
-			return result;
+		if (_bEditable)
+		{
+			if (auto result = ImageViewport::OnEvent(event); result == EventResult::Handled)
+				return result;
+		}
 		return MouseEventHandler::HandleMouseEvents(event);
 	}
 
@@ -78,6 +87,17 @@ namespace fig::gui
 
 		surface.reset(SDL_ConvertSurface(surface.get(), SDL_PIXELFORMAT_RGB24));
 		return surface;
+	}
+
+	void CharacterSmallPortraitWidget::OnMouseEnter()
+	{
+		if (_bEditable)
+			PushEvent(UserEvent::PushCursor, Cursor::Move);
+	}
+
+	void CharacterSmallPortraitWidget::OnMouseExit()
+	{
+		PushEvent(UserEvent::PopCursor, Cursor::Move);
 	}
 }
 
