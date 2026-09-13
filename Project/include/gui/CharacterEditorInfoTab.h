@@ -19,6 +19,8 @@ namespace fig::gui
 		void ShutDown() noexcept {};
 	
 	protected:
+		void ShowAttributesMenu();
+
 		void OnAfterLayout();
 
 		fig::observer_ptr<fig::data::Character> _pCharacter {};

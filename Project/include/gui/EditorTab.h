@@ -44,6 +44,14 @@ namespace fig::gui
 		template <>
 		fig::observer_ptr<class TextBox> CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows);
 
+		template <is_string_range U>
+		fig::observer_ptr<class ComboBox> CreateComboBox(ControlPtr pParent, SizerPtr pSizer, const U& items)
+		{
+			auto pControl = pParent->CreateControl<ComboBox>();
+			pControl->AddItems(items);
+			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
+			return pControl;
+		}
 
 		template <is_string_value_bindable T, is_string_range U>
 		fig::observer_ptr<class ComboBox> CreateComboBox(ControlPtr pParent, SizerPtr pSizer, const U& items, ValueBinding<T> binding)

@@ -69,8 +69,8 @@ namespace fig::io
 			if (character.version == "main")
 				character.version = "1.0";
 			
-			character.SetAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Private);
-			character.SetAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::Format::Text, CharacterAttribute::Visibility::Public);
+			character.SetAttribute(toStr(Constants::CharacterAttributes::Persona), "Persona", card.data.persona, CharacterAttribute::ValueType::LongText, CharacterAttribute::Visibility::Private, CharacterAttribute::HintFlags { CharacterAttribute::HintFlag::Important } );
+			character.SetAttribute(toStr(Constants::CharacterAttributes::Personality), "Personality", card.data.personality, CharacterAttribute::ValueType::ShortText, CharacterAttribute::Visibility::Public);
 			character.AppendTags(card.data.tags);
 
 			// Check for gender tags

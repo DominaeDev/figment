@@ -213,6 +213,11 @@ namespace fig::gui
 		TTF_DestroyText(_pPlaceholder);
 	}
 
+	void TextInput::SetMode(Mode mode)
+	{
+		_mode = mode;
+	}
+
 	void TextInput::SetTextWrapWidth(int32_t width)
 	{
 		if (_wrapWidth == width)
@@ -268,7 +273,7 @@ namespace fig::gui
 		DrawBorder(pRenderer);
 
 		int lineSkip = TTF_GetFontLineSkip(_pFont);
-		int maxRows = IsMultiline() ? std::max(_maxRows, 1) : 1;
+		int maxRows = (IsMultiline() or IsWordWrapping()) ? std::max(_maxRows, 1) : 1;
 
 		auto& rect = GetRect();
 		auto clientRect = GetClientRect();
@@ -283,7 +288,7 @@ namespace fig::gui
 		// Scroll to cursor
 		if (_bFocused)
 		{
-			if (IsMultiline()) // Vertical scroll
+			if (IsMultiline() or IsWordWrapping()) // Vertical scroll
 			{
 				float cursorY = _cursor_rect.y - clientRect.y;
 				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) >= maxRows)
@@ -807,7 +812,7 @@ namespace fig::gui
 
 	int32_t TextInput::MoveCursorUp() noexcept
 	{
-		if (not IsMultiline())
+		if (not (IsMultiline() or IsWordWrapping()) )
 			return _cursor;
 
 		if (_lines.empty())
@@ -844,7 +849,7 @@ namespace fig::gui
 
 	int32_t TextInput::MoveCursorDown() noexcept
 	{
-		if (not IsMultiline())
+		if (not (IsMultiline() or IsWordWrapping()))
 			return _cursor;
 
 		if (_lines.empty())
@@ -1534,10 +1539,9 @@ namespace fig::gui
 #pragma endregion Events
 	void TextInput::OnSize()
 	{
-		if (IsMultiline())
+		if (IsMultiline() or IsWordWrapping() or _mode == Mode::SingleWordWrap)
 		{
-			int width = std::max(GetWidth() - GetMarginHorizontal(), 0);
-			SetTextWrapWidth(width);
+			SetTextWrapWidth(std::max(GetClientRect().w, 0));
 		}
 		else
 		{
@@ -1635,7 +1639,30 @@ namespace fig::gui
 		{
 			auto& rect = GetRect();
 			SetHeight(numRows * lineSkip + GetMarginVertical());
-			InvalidateParentLayout(false);
+			InvalidateParentLayout();
+		}
+	}
+
+	void TextInput::ResetSize()
+	{
+		if (IsAutosized())
+		{
+			Autosize();
+			return;
+		}
+
+		auto clientRect = GetClientRect();
+		int32_t lineSkip = TTF_GetFontLineSkip(_pFont);
+		int32_t numRows = static_cast<int32_t>(GetLineCount());
+		if (not _text.empty() and _text.back() == '\n')
+			numRows++;
+
+		numRows = std::clamp(numRows, _minRows, _maxRows);
+		if (numRows * lineSkip != clientRect.h)
+		{
+			auto& rect = GetRect();
+			SetHeight(numRows * lineSkip + GetMarginVertical());
+			InvalidateParentLayout();
 		}
 	}
 
@@ -1760,12 +1787,7 @@ namespace fig::gui
 		if (not IsMultiline())
 		{
 			size_t newlinePos = text.find('\n', 0);
-			result.emplace_back(TTFTextLine {
-				.position = 0,
-				.length = static_cast<int32_t>(std::min(text.length(), newlinePos)),
-				.eol = true,
-			});
-			return result;
+			text = fig::string_view { text.data(), std::min(text.length(), newlinePos) };
 		}
 
 		if (not IsWordWrapping())

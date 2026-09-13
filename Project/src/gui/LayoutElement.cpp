@@ -126,8 +126,14 @@ namespace fig::gui
 
 	void LayoutElement::SetSize(fig::point size)
 	{
-		_rect.w = size.x;
-		_rect.h = size.y;
+		if (_maxSize.x > 0)
+			_rect.w = std::min(size.x, _maxSize.x);
+		else
+			_rect.w = size.x;
+		if (_maxSize.y > 0)
+			_rect.h = std::min(size.y, _maxSize.y);
+		else
+			_rect.h = size.y;
 		_bInvalidLayout = true;
 
 		for (auto& child : _children)

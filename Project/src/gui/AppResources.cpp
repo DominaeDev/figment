@@ -97,6 +97,7 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL, "./resources/gui/icons/icon_character_edit_concepts_small.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_MEMORIES_SMALL, "./resources/gui/icons/icon_character_edit_memories_small.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL, "./resources/gui/icons/icon_character_edit_about_small.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS, "./resources/gui/icons/icon_cog.png");
 		
 		LoadTexture(pRenderer, Resource::ICON_BORDER_01, "./resources/gui/card/borders/icon_border_01.png");
 		LoadTexture(pRenderer, Resource::ICON_BORDER_02, "./resources/gui/card/borders/icon_border_02.png");

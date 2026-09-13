@@ -752,6 +752,9 @@
     <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CharacterAttributeWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1728,6 +1731,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditorVoiceTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterAttributeWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

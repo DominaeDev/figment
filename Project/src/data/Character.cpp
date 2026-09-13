@@ -70,10 +70,11 @@ namespace fig::data
 		static_assert(IsXmlSerializable<Character>);
 	}
 
-	static const std::map<CharacterAttribute::Format, fig::string> FormatMapping {
-		{ CharacterAttribute::Format::Text,		"text" },
-		{ CharacterAttribute::Format::Number,	"number" },
-		{ CharacterAttribute::Format::List,		"list" },
+	static const std::map<CharacterAttribute::ValueType, fig::string> FormatMapping {
+		{ CharacterAttribute::ValueType::ShortText,		"text" },
+		{ CharacterAttribute::ValueType::LongText,		"multiline" },
+		{ CharacterAttribute::ValueType::Number,		"number" },
+		{ CharacterAttribute::ValueType::List,			"list" },
 	};
 
 	static const std::map<CharacterAttribute::Visibility, fig::string> VisibilityMapping {
@@ -102,7 +103,7 @@ namespace fig::data
 				[](auto& value) -> fig::string { return encode_csv(CharacterAttribute::HintFlags::Serialize(value, FlagMapping)); },
 				[](const fig::string& value) { return CharacterAttribute::HintFlags::Deserialize(decode_csv(value), FlagMapping); }
 			},
-			Element { "Label", &CharacterAttribute::label }.MustExist(),
+			Element { "Label", &CharacterAttribute::name }.MustExist(),
 			Element { "Value", &CharacterAttribute::value }.MustExist()
 		);
 
@@ -203,10 +204,10 @@ namespace fig::data
 		_bDirtyContext = true;
 	}
 
-	void Character::SetAttribute(const fig::string& attributeId, const fig::string& label, fig::string_view content, CharacterAttribute::Format format, CharacterAttribute::Visibility visibility)
+	void Character::SetAttribute(const fig::string& attributeId, const fig::string& label, fig::string_view content, CharacterAttribute::ValueType format, CharacterAttribute::Visibility visibility, CharacterAttribute::HintFlags flags)
 	{
 		_attributes[lcase(attributeId)] = CharacterAttribute {
-			.label = label,
+			.name = label,
 			.value = fig::string { content },
 			.format = format,
 			.visibility = visibility,

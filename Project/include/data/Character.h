@@ -10,9 +10,10 @@ namespace fig::data
 {
 	struct CharacterAttribute
 	{
-		enum class Format
+		enum class ValueType
 		{
-			Text,
+			ShortText,
+			LongText,
 			Number,
 			List,
 		};
@@ -28,13 +29,12 @@ namespace fig::data
 			Trivial		= 1 << 0,	// Can be omitted
 			Important	= 1 << 1,	// Mustn't be omitted
 			Memory		= 1 << 2,	// Can be placed in memory
-			Multiline	= 1 << 3,
 		};
 		using HintFlags = EnumFlags<HintFlag>;
 
-		fig::string label;
+		fig::string name;
 		fig::string value;
-		Format format {};
+		ValueType format {};
 		Visibility visibility {};
 		HintFlags flags {};
 
@@ -65,8 +65,9 @@ namespace fig::data
 
 		std::optional<CharacterAttribute> FindAttribute(const fig::string_view& attributeId) const noexcept;
 		std::optional<fig::string> GetAttribute(const fig::string_view& attributeId) const noexcept;
-		inline const std::map<fig::string, CharacterAttribute>& GetAttributes() const noexcept { return _attributes; }
-		void SetAttribute(const fig::string& attributeId, const fig::string& label, fig::string_view content, CharacterAttribute::Format format = CharacterAttribute::Format::Text, CharacterAttribute::Visibility visibility = CharacterAttribute::Visibility::Public);
+		std::map<fig::string, CharacterAttribute>& GetAttributes() noexcept { return _attributes; }
+		const std::map<fig::string, CharacterAttribute>& GetAttributes() const noexcept { return _attributes; }
+		void SetAttribute(const fig::string& attributeId, const fig::string& label, fig::string_view content, CharacterAttribute::ValueType format = CharacterAttribute::ValueType::ShortText, CharacterAttribute::Visibility visibility = CharacterAttribute::Visibility::Public, CharacterAttribute::HintFlags flags = {});
 
 		void SetTags(const fig::string_list& tags) noexcept;
 		void AppendTags(const fig::string_list& tags);

@@ -184,6 +184,7 @@
     <ClCompile Include="src\gui\BehindChat.cpp" />
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
+    <ClCompile Include="src\gui\CharacterAttributeWidget.cpp" />
     <ClCompile Include="src\gui\CharacterBackgroundWidget.cpp" />
     <ClCompile Include="src\gui\CharacterEditor.cpp" />
     <ClCompile Include="src\gui\CharacterEditorAboutTab.cpp" />
@@ -481,6 +482,7 @@
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h" />
     <ClInclude Include="include\gui\CardImage.h" />
+    <ClInclude Include="include\gui\CharacterAttributeWidget.h" />
     <ClInclude Include="include\gui\CharacterBackgroundWidget.h" />
     <ClInclude Include="include\gui\CharacterDetailsPanel.h" />
     <ClInclude Include="include\gui\CharacterEditor.h" />

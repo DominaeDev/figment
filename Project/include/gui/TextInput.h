@@ -31,6 +31,7 @@ namespace fig::gui
 		enum class Mode
 		{
 			Single = 0,
+			SingleWordWrap,
 			Multiline,
 			MultilineNoWrap,
 			Password,
@@ -50,6 +51,7 @@ namespace fig::gui
 		void EnableAutoSize(bool bEnable) noexcept { _bAutoSize = bEnable; }
 		void SetMinRows(int32_t rows);
 		void SetMaxRows(int32_t rows);
+		void SetMode(Mode mode);
 
 		const fig::string& GetText() const noexcept { return _text; }
 		int32_t GetTextWrapWidth() const noexcept;
@@ -62,6 +64,8 @@ namespace fig::gui
 		std::pair<int32_t, int32_t> GetSelection() const noexcept { return std::make_pair(highlight_start, highlight_end); }
 		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
 
+		int32_t SetCursor(int32_t index) noexcept;
+
 		bool Copy();
 		bool Cut();
 		bool Paste();
@@ -69,6 +73,8 @@ namespace fig::gui
 
 		void Undo();
 		void Redo();
+
+		void ResetSize();
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -95,7 +101,6 @@ namespace fig::gui
 		void UpdateTextInputArea();
 		void RefreshTexts() noexcept;
 
-		int32_t SetCursor(int32_t index) noexcept;
 		int32_t SetCursor(fig::point position) noexcept;
 
 		void Insert(fig::string_view text);
@@ -144,7 +149,7 @@ namespace fig::gui
 		bool IsMultiline() const noexcept { return _mode == Mode::Multiline or _mode == Mode::MultilineNoWrap or _mode == Mode::Chat; }
 		bool IsPassword() const noexcept { return _mode == Mode::Password; }
 		bool IsAutosized() const noexcept { return _bAutoSize; }
-		bool IsWordWrapping() const noexcept { return (_mode == Mode::Multiline or _mode == Mode::Chat) and _wrapWidth > 0; }
+		bool IsWordWrapping() const noexcept { return (_mode == Mode::Multiline or _mode == Mode::Chat or _mode == Mode::SingleWordWrap) and _wrapWidth > 0; }
 
 		// Layout
 		void Insert(int32_t position, fig::string_view text);
