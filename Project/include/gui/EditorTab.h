@@ -23,7 +23,8 @@ namespace fig::gui
 		{
 		}
 
-		virtual bool Save() { return true; }
+		using SaveResult = std::expected<void, std::runtime_error>;
+		virtual SaveResult OnSave() noexcept { return {}; };
 
 	protected:
 		fig::observer_ptr<StaticText> CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);

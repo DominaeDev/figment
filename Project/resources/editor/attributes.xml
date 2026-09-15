@@ -1,0 +1,97 @@
+<Attributes>
+	<Group name="General">
+		<Attribute id="alias" type="list">
+			<Name>Aliases</Name>
+		</Attribute>
+		<Attribute id="occupation" type="text" flags="trivial">
+			<Name>Occupation</Name>
+		</Attribute>
+		<Attribute id="background" type="multiline" visibility="private" flags="trivial">
+			<Name>Background</Name>
+		</Attribute>
+		<Attribute id="reputation" type="list">
+			<Name>Repuation</Name>
+		</Attribute>
+		<Attribute id="speech" type="text" visibility="private">
+			<Name>Speech</Name>
+		</Attribute>
+	</Group>
+	<Group name="Appearance">
+		<Attribute id="appearance" type="text" break="true">
+			<Name>Appearance</Name>
+		</Attribute>
+		<Attribute id="clothes" type="text" flags="trivial">
+			<Name>Clothes</Name>
+		</Attribute>
+		<Attribute id="hair" type="text" flags="trivial">
+			<Name>Hair</Name>
+		</Attribute>
+		<Attribute id="eyes" type="text" flags="trivial">
+			<Name>Eyes</Name>
+		</Attribute>
+		<Attribute id="body" type="text" flags="trivial">
+			<Name>Body</Name>
+		</Attribute>
+		<Attribute id="skin" type="text" flags="trivial">
+			<Name>Skin</Name>
+		</Attribute>
+		<Attribute id="height" type="text" flags="trivial">
+			<Name>Height</Name>
+		</Attribute>
+		<Attribute id="weight" type="text" flags="trivial">
+			<Name>Weight</Name>
+		</Attribute>
+	</Group>
+	<Group name="Psychology">
+		<Attribute id="personality" type="text" break="true">
+			<Name>Personality</Name>
+		</Attribute>
+		<Attribute id="interests" type="list" visibility="private">
+			<Name>Interests</Name>
+		</Attribute>
+		<Attribute id="hobbies" type="list" visibility="private">
+			<Name>Hobbies</Name>
+		</Attribute>
+		<Attribute id="likes" type="list" visibility="private">
+			<Name>Likes</Name>
+			<Placeholder>Enter a list of likes, separated by comma.</Placeholder>
+		</Attribute>
+		<Attribute id="dislikes" type="list" visibility="private">
+			<Name>Dislikes</Name>
+			<Placeholder>Enter a list of dislikes, separated by comma.</Placeholder>
+		</Attribute>
+		<Attribute id="sexuality" type="text" visibility="private">
+			<Name>Sexuality</Name>
+			<Options>Heterosexual, Bisexual, Homosexual</Options>
+			<Value>Heterosexual</Value>
+		</Attribute>
+		<Attribute id="likes" type="list" visibility="private">
+			<Name>Turn-ons</Name>
+			<Placeholder>Enter a list of turn-ons, separated by comma.</Placeholder>
+		</Attribute>
+		<Attribute id="dislikes" type="list" visibility="private">
+			<Name>Turn-offs</Name>
+			<Placeholder>Enter a list of turn-ons, separated by comma.</Placeholder>
+		</Attribute>
+		<Attribute id="motivation" type="text" visibility="private">
+			<Name>Motivation</Name>
+		</Attribute>
+		<Attribute id="opinions" type="list" visibility="private">
+			<Name>Opinions/Beliefs</Name>
+		</Attribute>
+	</Group>
+	<Group name="Miscellaneous">
+		<Attribute id="blood-type" type="text" visibility="private" flags="trivial">
+			<Name>Blood type</Name>
+			<Options>A, B, O, AB</Options>
+			<Value>A</Value>
+		</Attribute>
+		<Attribute id="zodiac" type="text" visibility="private" flags="trivial">
+			<Name>Astrological sign</Name>
+			<Options>Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces</Options>
+			<Value>Aries</Value>
+		</Attribute>
+	</Group>
+
+
+</Attributes>

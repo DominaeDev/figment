@@ -267,7 +267,7 @@ namespace fig::gui
 		}
 
 		if (auto customPrompt = _pCustomPrompt->GetText(); not empty_or_whitespace(customPrompt))
-			prompts.push_back(customPrompt);
+			prompts.push_back(fig::string { customPrompt });
 
 		static const std::array<fig::handle, 5> groupOrder {
 			groupMaturity, groupTone, groupTemperature, groupFlow, groupPresence,
@@ -400,10 +400,10 @@ namespace fig::gui
 		_pStatusText->SetText(message);
 	}
 
-	bool CharacterEditorVoiceTab::Save()
+	EditorTabBase::SaveResult CharacterEditorVoiceTab::OnSave() noexcept
 	{
 		if (_voicePrint.audioData.empty())
-			return true; // No change
+			return {}; // No change
 
 		VoiceSettings voiceSettings;
 		voiceSettings.name = std::format("{}'s voice", _pCharacter->GetName());
@@ -411,8 +411,8 @@ namespace fig::gui
 		
 		auto voiceSettingsId = Global::GetUserContent().CreateVoiceReference(_characterId, voiceSettings);
 		if (voiceSettingsId.empty())
-			return false;
-		return true;
+			return std::unexpected(std::runtime_error("Failed to write voice data."));
+		return {};
 	}
 
 	void CharacterEditorVoiceTab::OnAudioResult(fig::tts::TTSPayload&& payload)

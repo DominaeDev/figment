@@ -65,12 +65,12 @@ namespace fig::gui
 		ResizeToFit(false, true);
 	}
 	
-	bool CharacterEditorAboutTab::Save()
+	EditorTabBase::SaveResult CharacterEditorAboutTab::OnSave() noexcept
 	{
 		auto tags = decode_csv(_pTags->GetText())
 			| std::ranges::to<std::unordered_set>()
 			| std::ranges::to<std::vector>();
 		_pCharacter->SetTags(tags);
-		return true;
+		return {};
 	}
 }

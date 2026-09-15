@@ -6,68 +6,68 @@
 
 namespace fig
 {
-	void ltrim_inplace(string& s)
+	void ltrim_inplace(fig::string& s)
 	{
 		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
 			return !std::isspace(ch);
 		}));
 	}
 
-	string ltrim(const string& in)
+	fig::string ltrim(const fig::string& in)
 	{
-		string s(in);
+		fig::string s(in);
 		s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
 			return !std::isspace(ch);
 		}));
 		return s;
 	}
 
-	void rtrim_inplace(string& s)
+	void rtrim_inplace(fig::string& s)
 	{
 		s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
 			return !std::isspace(ch);
 		}).base(), s.end());
 	}
 
-	string rtrim(const string& in)
+	fig::string rtrim(const fig::string& in)
 	{
-		string s(in);
+		fig::string s(in);
 		s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
 			return !std::isspace(ch);
 		}).base(), s.end());
 		return s;
 	}
 
-	string trim(string&& in)
+	fig::string trim(fig::string&& in)
 	{
-		string s(std::move(in));
+		fig::string s(std::move(in));
 		trim_inplace(s);
 		return s;
 	}
 
-	std::string_view rtrim(std::string_view text)
+	fig::string_view rtrim(fig::string_view text)
 	{
-		constexpr std::string_view whitespace = " \t\n\r\f\v\b";
+		constexpr fig::string_view whitespace = " \t\n\r\f\v\b";
 		auto end = text.find_last_not_of(whitespace);
-		if (end == std::string_view::npos)
+		if (end == fig::string_view::npos)
 			return {};
 		return text.substr(0, end + 1);
 	}
 
-	std::string_view ltrim(std::string_view text)
+	fig::string_view ltrim(fig::string_view text)
 	{
-		constexpr std::string_view whitespace = " \t\n\r\f\v\b";
+		constexpr fig::string_view whitespace = " \t\n\r\f\v\b";
 		auto start = text.find_first_not_of(whitespace);
-		if (start == std::string_view::npos)
+		if (start == fig::string_view::npos)
 			return {};
 		return text.substr(start);
 	}
 
-	std::string_view trim(std::string_view text)
+	fig::string_view trim(fig::string_view text)
 	{
-		constexpr std::string_view whitespace = " \t\n\r\f\v\b";
+		constexpr fig::string_view whitespace = " \t\n\r\f\v\b";
 		auto start = text.find_first_not_of(whitespace);
-		if (start == std::string_view::npos)
+		if (start == fig::string_view::npos)
 			return {};
 		auto end = text.find_last_not_of(whitespace);
 		return text.substr(start, end - start + 1);
@@ -112,21 +112,21 @@ namespace fig
 		return s;
 	}
 
-	std::string_view truncate(std::string_view text, size_t length)
+	fig::string_view truncate(fig::string_view text, size_t length)
 	{
 		if (text.length() <= length)
 			return text;
 		return text.substr(0, length);
 	}
 
-	std::string truncate(const std::string& text, size_t length)
+	fig::string truncate(const fig::string& text, size_t length)
 	{
 		if (text.length() <= length)
 			return text;
 		return text.substr(0, length);
 	}
 
-	bool empty_or_whitespace(const string& s) noexcept
+	bool empty_or_whitespace(fig::string_view s) noexcept
 	{
 		static constexpr const_string ws { " \t\r\n\v\f" };
 		return s.size() == 0 || s.find_first_not_of(ws.data(), 0, ws.length()) == fig::npos;
@@ -148,35 +148,35 @@ namespace fig
 		return std::ispunct(static_cast<unsigned char>(ch));
 	}
 
-	string lcase(const string& str)
+	fig::string lcase(const fig::string& str)
 	{
 		wstring s = from_utf8(str);
 		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towlower(c); });
 		return to_utf8(s);
 	}
 
-	string ucase(const string& str)
+	fig::string ucase(const fig::string& str)
 	{
 		wstring s = from_utf8(str);
 		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towupper(c); });
 		return to_utf8(s);
 	}
 
-	string lcase(string_view str)
+	fig::string lcase(string_view str)
 	{
 		wstring s = from_utf8(str);
 		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towlower(c); });
 		return to_utf8(s);
 	}
 
-	string ucase(string_view str)
+	fig::string ucase(string_view str)
 	{
 		wstring s = from_utf8(str);
 		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towupper(c); });
 		return to_utf8(s);
 	}
 
-	string& lcase_inplace(string& str)
+	fig::string& lcase_inplace(fig::string& str)
 	{
 		wstring s = from_utf8(str);
 		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towlower(c); });
@@ -184,7 +184,7 @@ namespace fig
 		return str;
 	}
 
-	string& ucase_inplace(string& str)
+	fig::string& ucase_inplace(fig::string& str)
 	{
 		wstring s = from_utf8(str);
 		std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c) { return std::towupper(c); });
@@ -220,7 +220,7 @@ namespace fig
 		return str;
 	}
 
-	int compare(const string& a, const string& b, bool ignore_case)
+	int compare(const fig::string& a, const fig::string& b, bool ignore_case)
 	{
 		wstring wa = from_utf8(a);
 		wstring wb = from_utf8(b);
@@ -237,7 +237,7 @@ namespace fig
 		return 0;
 	}
 
-	bool equals(const string& a, const string& b, bool ignore_case)
+	bool equals(const fig::string& a, const fig::string& b, bool ignore_case)
 	{
 		if (!ignore_case)
 			return a == b;
@@ -252,7 +252,7 @@ namespace fig
 		return std::ranges::equal(a, b, [](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
 	}
 
-	bool begins_with(const string& str, const string& prefix, bool ignore_case)
+	bool begins_with(const fig::string& str, const fig::string& prefix, bool ignore_case)
 	{
 		wstring wstr = from_utf8(str);
 		wstring wprefix = from_utf8(prefix);
@@ -267,7 +267,7 @@ namespace fig
 			return begin_piece == wprefix;
 	}
 
-	bool ends_with(const string& str, const string& suffix, bool ignore_case)
+	bool ends_with(const fig::string& str, const fig::string& suffix, bool ignore_case)
 	{
 		wstring wstr = from_utf8(str);
 		wstring wsuffix = from_utf8(suffix);
@@ -283,24 +283,24 @@ namespace fig
 			return end_piece == wsuffix;
 	}
 
-	string replace(const string& str, const string& find, const string& replace)
+	fig::string replace(const fig::string& str, const fig::string& find, const fig::string& replace)
 	{
 		auto&& pos = str.find(find);
 		if (pos != fig::npos)
 		{
-			string copy = str;
+			fig::string copy = str;
 			copy.replace(pos, find.length(), replace);
 			return copy;
 		}
 		return str;
 	}
 
-	string replace_all(const string& str, const string& find, const string& replace)
+	fig::string replace_all(const fig::string& str, const fig::string& find, const fig::string& replace)
 	{
 		auto&& pos = str.find(find);
 		if (pos != fig::npos)
 		{
-			string copy = str;
+			fig::string copy = str;
 			while (pos != fig::npos)
 			{
 				copy.replace(pos, find.length(), replace);
@@ -311,7 +311,7 @@ namespace fig
 		return str;
 	}
 
-	string& replace_inplace(string& str, const string& find, const string& replace)
+	fig::string& replace_inplace(fig::string& str, const fig::string& find, const fig::string& replace)
 	{
 		auto&& pos = str.find(find);
 		if (pos != fig::npos)
@@ -319,7 +319,7 @@ namespace fig
 		return str;
 	}
 
-	string& replace_all_inplace(string& str, const string& find, const string& replace)
+	fig::string& replace_all_inplace(fig::string& str, const fig::string& find, const fig::string& replace)
 	{
 		auto&& pos = str.find(find);
 		while (pos != fig::npos)
@@ -330,13 +330,13 @@ namespace fig
 		return str;
 	}
 
-	std::vector<string> split(string s, char delimiter, bool removeEmpty)
+	std::vector<fig::string> split(fig::string s, char delimiter, bool removeEmpty)
 	{
-		std::vector<string> sections;
+		std::vector<fig::string> sections;
 		size_t pos = 0;
 		while ((pos = s.find(delimiter)) != fig::npos)
 		{
-			string token = s.substr(0, pos);
+			fig::string token = s.substr(0, pos);
 			if (!removeEmpty || !empty_or_whitespace(token))
 				sections.push_back(token);
 			s.erase(0, pos + 1);
@@ -344,17 +344,17 @@ namespace fig
 		if (!removeEmpty || !empty_or_whitespace(s))
 			sections.push_back(s); // Remainder
 
-		std::transform(sections.begin(), sections.end(), sections.begin(), [](string str) {
+		std::transform(sections.begin(), sections.end(), sections.begin(), [](fig::string str) {
 			return trim(str);
 		});
 
 		return sections;
 	}
 
-	std::vector<string> split(const string& input, const std::unordered_set<char>& delimiters, bool removeEmpty)
+	std::vector<fig::string> split(const fig::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty)
 	{
-		std::vector<string> result;
-		string token;
+		std::vector<fig::string> result;
+		fig::string token;
 
 		for (char ch : input)
 		{
@@ -489,7 +489,7 @@ namespace fig
 		return sentences;
 	}
 
-	string& normalize_newlines(string& text)
+	fig::string& normalize_newlines(fig::string& text)
 	{
 		size_t cursor_write = 0;
 
@@ -510,7 +510,7 @@ namespace fig
 		return text;
 	}
 
-	string normalize_newlines(string&& text)
+	fig::string normalize_newlines(fig::string&& text)
 	{
 		return normalize_newlines(text); // rvo
 	}
@@ -541,13 +541,13 @@ namespace fig
 		return normalize_newlines(text); // rvo
 	}
 
-	wstring from_utf8(const string& str)
+	wstring from_utf8(const fig::string& str)
 	{
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 		return converter.from_bytes(str);
 	}
 
-	string to_utf8(const wstring& str)
+	fig::string to_utf8(const wstring& str)
 	{
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 		return converter.to_bytes(str);
@@ -559,7 +559,7 @@ namespace fig
 		return converter.from_bytes(str.data(), str.data() + str.size());
 	}
 
-	string to_utf8(wstring_view str)
+	fig::string to_utf8(wstring_view str)
 	{
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 		return converter.to_bytes(str.data(), str.data() + str.size());
@@ -571,13 +571,13 @@ namespace fig
 		return from_utf8(fig::string_view { str, len });
 	}
 
-	string to_utf8(const wchar_t* str)
+	fig::string to_utf8(const wchar_t* str)
 	{
 		size_t len = std::wcslen(str);
 		return to_utf8(fig::wstring_view { str, len });
 	}
 
-	size_t validate_utf8(const string& text) noexcept
+	size_t validate_utf8(const fig::string& text) noexcept
 	{
 		size_t len = text.size();
 		if (len == 0) return 0;
@@ -611,7 +611,7 @@ namespace fig
 		return len;
 	}
 	
-	bool find_in(const std::string_view substr, const std::string_view text, bool case_insensitive, bool whole_words)
+	bool find_in(const fig::string_view substr, const fig::string_view text, bool case_insensitive, bool whole_words)
 	{
 		std::wstring substrUtf8 = from_utf8(fig::string(substr));
 		std::wstring textUtf8 = from_utf8(fig::string(text));
@@ -693,7 +693,7 @@ namespace fig
 		return result;
 	}
 
-	fig::string_list decode_csv(const fig::string& csv)
+	fig::string_list decode_csv(fig::string_view csv)
 	{
 		fig::string_list fields;
 		fig::string current;
@@ -876,7 +876,7 @@ namespace fig
 			{ 0x017A, 'z' }, { 0x017C, 'z' }, { 0x017E, 'z' },
 		};
 
-		std::string output;
+		fig::string output;
 		output.reserve(input.size());
 
 		for (size_t i = 0; i < input.size(); )

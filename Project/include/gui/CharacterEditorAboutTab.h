@@ -12,7 +12,7 @@ namespace fig::gui
 
 		bool Initialize(CharacterEditorArgs args) override;
 		void ShutDown() noexcept {};
-		bool Save() override;
+		SaveResult OnSave() noexcept override;
 
 	protected:
 		void OnAfterLayout();

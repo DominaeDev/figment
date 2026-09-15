@@ -1,6 +1,5 @@
 #include <pch.h>
 #include "data/Character.h"
-#include "io/Xml.h"
 
 using namespace fig::gui;
 using namespace fig::io;
@@ -9,35 +8,10 @@ namespace fig::data
 {
 	static const fig::string XmlRootName { "Character" };
 
-	fig::string CharacterName::GetSpokenName() const
-	{
-		if (not nickname.empty())
-			return nickname;
-		if (not first.empty())
-			return first;
-		return "Unnamed"; //! @todo
-	}
-
-	fig::string CharacterName::GetFullName() const
-	{
-		if (not (first.empty() or last.empty()))
-			return std::format("{} {}", first, last);
-		if (not first.empty())
-			return first;
-		if (not nickname.empty())
-			return nickname;
-		return "Unnamed"; //! @todo
-	}
-
-	bool CharacterName::empty() const
-	{
-		return first.empty() and nickname.empty();
-	}
-
 	auto Character::XmlFields() noexcept
 	{
 		return Fields(
-			Element { "ID", &Character::chatId  },
+			Element { "ID", &Character::chatId },
 			Element { "Name", &Character::name }
 				.MustExist(),
 			Element { "Gender", &Character::gender,
@@ -57,57 +31,6 @@ namespace fig::data
 		);
 
 		static_assert(IsXmlSerializable<Character>);
-	}
-
-	auto CharacterName::XmlFields() noexcept
-	{
-		return Fields(
-			Element { "First", &CharacterName::first },
-			Element { "Last", &CharacterName::last },
-			Element { "Nickname", &CharacterName::nickname }
-		);
-
-		static_assert(IsXmlSerializable<Character>);
-	}
-
-	static const std::map<CharacterAttribute::ValueType, fig::string> FormatMapping {
-		{ CharacterAttribute::ValueType::ShortText,		"text" },
-		{ CharacterAttribute::ValueType::LongText,		"multiline" },
-		{ CharacterAttribute::ValueType::Number,		"number" },
-		{ CharacterAttribute::ValueType::List,			"list" },
-	};
-
-	static const std::map<CharacterAttribute::Visibility, fig::string> VisibilityMapping {
-		{ CharacterAttribute::Visibility::Public,	"public" },
-		{ CharacterAttribute::Visibility::Private,	"private" }
-	};
-
-	static const std::map<CharacterAttribute::HintFlag, fig::string> FlagMapping {
-		{ CharacterAttribute::HintFlag::Trivial,	"trivial" },
-		{ CharacterAttribute::HintFlag::Important,	"important" },
-		{ CharacterAttribute::HintFlag::Memory,		"memory" }
-	};
-
-	auto CharacterAttribute::XmlFields() noexcept
-	{
-		return Fields(
-			Attribute { "format", &CharacterAttribute::format, 
-				[](auto& value) { return enum_serialize(value, FormatMapping); }, 
-				[](auto& value) { return enum_deserialize(value, FormatMapping); } 
-			},
-			Attribute { "visibility", &CharacterAttribute::visibility, 
-				[](auto& value) { return enum_serialize(value, VisibilityMapping); },
-				[](auto& value) { return enum_deserialize(value, VisibilityMapping); }
-			},
-			Attribute { "flags", &CharacterAttribute::flags,
-				[](auto& value) -> fig::string { return encode_csv(CharacterAttribute::HintFlags::Serialize(value, FlagMapping)); },
-				[](const fig::string& value) { return CharacterAttribute::HintFlags::Deserialize(decode_csv(value), FlagMapping); }
-			},
-			Element { "Label", &CharacterAttribute::name }.MustExist(),
-			Element { "Value", &CharacterAttribute::value }.MustExist()
-		);
-
-		static_assert(IsXmlSerializable<CharacterAttribute>);
 	}
 
 	static bool ReadXml(XmlReader& xml, Character& data)
@@ -183,14 +106,14 @@ namespace fig::data
 		xml.WriteToMemory(buffer);
 	}
 
-	std::optional<CharacterAttribute> Character::FindAttribute(const fig::string_view& attributeId) const noexcept
+	std::optional<CharacterAttribute> Character::FindAttribute(const fig::handle& attributeId) const noexcept
 	{
-		if (auto itFind = _attributes.find(lcase(toStr(attributeId))); itFind != _attributes.cend())
-			return itFind->second;
+		if (auto itFind = std::ranges::find_if(_attributes, [&attributeId](auto&& a) { return a.id == attributeId; }); itFind != std::ranges::cend(_attributes))
+			return *itFind;
 		return std::nullopt;
 	}
 
-	std::optional<fig::string> Character::GetAttribute(const fig::string_view& attributeId) const noexcept
+	std::optional<fig::string> Character::GetAttribute(const fig::handle& attributeId) const noexcept
 	{
 		if (auto try_attrib = FindAttribute(attributeId))
 			return try_attrib.value().value;
@@ -204,15 +127,46 @@ namespace fig::data
 		_bDirtyContext = true;
 	}
 
-	void Character::SetAttribute(const fig::string& attributeId, const fig::string& label, fig::string_view content, CharacterAttribute::ValueType format, CharacterAttribute::Visibility visibility, CharacterAttribute::HintFlags flags)
+	CharacterAttribute& Character::SetAttribute(const fig::handle& attributeId, fig::string_view label, fig::string_view content, CharacterAttribute::ValueType format, CharacterAttribute::Visibility visibility, CharacterAttribute::HintFlags flags)
 	{
-		_attributes[lcase(attributeId)] = CharacterAttribute {
-			.name = label,
+		// Update existing
+		if (auto try_attribute = FindAttribute(attributeId))
+		{
+			auto& attribute = try_attribute.value();
+			attribute.name = fig::string { label };
+			attribute.value = fig::string { content };
+			attribute.type = format;
+			attribute.visibility = visibility;
+			attribute.flags = flags;
+			return attribute;
+		}
+
+		// Add new
+		_attributes.emplace_back(CharacterAttribute {
+			.id = fig::handle { attributeId },
+			.name = fig::string { label },
 			.value = fig::string { content },
-			.format = format,
+			.type = format,
 			.visibility = visibility,
-		};
+			.flags = flags,
+		});
 		_bDirtyContext = true;
+		return _attributes.back();
+	}
+
+	bool Character::RemoveAttribute(const fig::handle& attributeId)
+	{
+		if (auto e = std::ranges::remove(_attributes, attributeId, [](auto&& a) { return a.id; }); e.begin() != e.end())
+		{
+			_attributes.erase(e.begin(), e.end());
+			return true;
+		}
+		return false;
+	}
+
+	void Character::ClearAttributes()
+	{
+		_attributes.clear();
 	}
 
 	void Character::AddSearchTerm(const fig::string& term)
@@ -237,7 +191,7 @@ namespace fig::data
 		_context.SetValue("brief", brief);
 
 		for (auto& attrib : _attributes)
-			_context.SetValue(attrib.first, attrib.second.value);
+			_context.SetValue(attrib.id, attrib.value);
 
 		if (gender.IsConventional())
 			_context.SetFlag((fig::string)gender);

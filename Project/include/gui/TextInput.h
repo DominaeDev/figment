@@ -53,7 +53,7 @@ namespace fig::gui
 		void SetMaxRows(int32_t rows);
 		void SetMode(Mode mode);
 
-		const fig::string& GetText() const noexcept { return _text; }
+		fig::string_view GetText() const noexcept { return _text; }
 		int32_t GetTextWrapWidth() const noexcept;
 		size_t GetLineCount() const noexcept;
 		int32_t GetLineHeight() const noexcept { return _lineHeight; }

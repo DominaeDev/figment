@@ -1704,7 +1704,7 @@ namespace fig::gui
 	{
 		return UndoState
 		{
-			.text = GetText(),
+			.text = fig::string { GetText() },
 			.cursor_pos = _cursor,
 			.highlight_start = highlight_start,
 			.highlight_end = highlight_end,

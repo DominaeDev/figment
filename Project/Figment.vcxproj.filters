@@ -746,7 +746,7 @@
     <ClCompile Include="src\gui\CharacterEditorImagesTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorInfoTab.cpp">
+    <ClCompile Include="src\gui\CharacterEditorGeneralTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp">
@@ -754,6 +754,12 @@
     </ClCompile>
     <ClCompile Include="src\gui\CharacterAttributeWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\CharacterName.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\CharacterAttribute.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1726,7 +1732,7 @@
     <ClInclude Include="include\gui\CharacterEditorImagesTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorInfoTab.h">
+    <ClInclude Include="include\gui\CharacterEditorGeneralTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditorVoiceTab.h">
@@ -1734,6 +1740,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterAttributeWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\CharacterAttribute.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\CharacterName.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

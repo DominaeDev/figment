@@ -223,6 +223,7 @@ namespace fig::gui
 			OnRemovedChild(*it);
 			(*it)->SetParent(nullptr);
 			_children.erase(it);
+			InvalidateLayout();
 			return true;
 		}
 
@@ -253,6 +254,7 @@ namespace fig::gui
 
 		if (_pSizer)
 			_pSizer->Clear();
+		InvalidateLayout();
 		return true;
 	}
 
@@ -270,6 +272,7 @@ namespace fig::gui
 
 		if (_pSizer)
 			_pSizer->Clear();
+		InvalidateLayout();
 		return true;
 	}
 

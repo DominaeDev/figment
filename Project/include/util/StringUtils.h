@@ -58,7 +58,7 @@ namespace fig
 
 	bool is_whitespace(char ch) noexcept;
 	bool is_punctuation(char ch) noexcept;
-	bool empty_or_whitespace(const fig::string& s) noexcept;
+	bool empty_or_whitespace(fig::string_view s) noexcept;
 	bool empty_or_whitespace(const fig::wstring& s) noexcept;
 	bool begins_with(const fig::string& str, const fig::string& prefix, bool ignore_case = false);
 	bool ends_with(const fig::string& str, const fig::string& suffix, bool ignore_case = false);
@@ -129,7 +129,7 @@ namespace fig
 	[[nodiscard]] bool find_in(const std::wstring_view substr, const std::wstring_view text, bool case_insensitive = false, bool whole_words = false);
 
 	[[nodiscard]] fig::string encode_csv(fig::string_span values);
-	[[nodiscard]] fig::string_list decode_csv(const fig::string& csv);
+	[[nodiscard]] fig::string_list decode_csv(fig::string_view csv);
 
 	[[nodiscard]] fig::wstring strip_diacritics(fig::wstring&& input);
 	[[nodiscard]] fig::string strip_diacritics(fig::string&& input);

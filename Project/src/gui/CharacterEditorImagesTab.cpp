@@ -481,7 +481,7 @@ namespace fig::gui
 			LayoutNow();
 	}
 
-	bool CharacterEditorImagesTab::Save()
+	EditorTabBase::SaveResult CharacterEditorImagesTab::OnSave() noexcept
 	{
 		auto& content = Global::GetUserContent();
 		auto& assets = content.GetAssets();
@@ -545,6 +545,6 @@ namespace fig::gui
 			| std::ranges::to<std::vector>()
 		);
 
-		return true;
+		return {};
 	}
 }

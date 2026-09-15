@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "gui/CharacterEditor.h"
-#include "gui/CharacterEditorInfoTab.h"
+#include "gui/CharacterEditorGeneralTab.h"
 #include "gui/CharacterEditorImagesTab.h"
 #include "gui/CharacterEditorVoiceTab.h"
 #include "gui/CharacterEditorAboutTab.h"
@@ -11,7 +11,7 @@ namespace fig::gui
 {
 	CharacterEditor::CharacterEditor(ControlPtr pParent) : Editor(pParent)
 	{
-		CreateTab<CharacterEditorInfoTab>();
+		CreateTab<CharacterEditorGeneralTab>();
 		CreateTab<CharacterEditorImagesTab>();
 		CreateTab<CharacterEditorVoiceTab>();
 		CreateTab<CharacterEditorAboutTab>();
@@ -77,15 +77,23 @@ namespace fig::gui
 
 		bool bOk = true;
 		for (auto& tab : _tabs)
-			bOk &= tab->Save();
-		
-		bOk &= Global::GetUserContent().UpdateAsset(_assetId, _character);
+		{
+			if (auto result = tab->OnSave(); not result.has_value())
+			{
+				bOk = false;
+				break;
+			}
+		}
 
-		if (bOk)
-			Global::GetUserContent().GetAssets().SaveNow();
-		else
+		if (not bOk)
+		{
 			LogLn("Error occurred while saving character."); //! @todo: User facing error
-		return bOk;
+			return false; // Error
+		}
+		
+		Global::GetUserContent().UpdateAsset(_assetId, _character);
+		Global::GetUserContent().GetAssets().SaveNow();
+		return true;
 	}
 
 	void CharacterEditor::OnAfterLayout()
