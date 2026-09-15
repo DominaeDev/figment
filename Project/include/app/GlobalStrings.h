@@ -9,11 +9,11 @@ namespace fig::strings
 	namespace Status
 	{
 		inline constexpr fig::const_string LoadingModel = 
-			"Loading model...";
+			"Loading model\u2026";
 		inline constexpr fig::const_string LoadingModelPercentFmt = 
-			"Loading model... {0}%";
+			"Loading model\u2026 {0}%";
 		inline constexpr fig::const_string InitializingChat = 
-			"Initializing chat...";
+			"Initializing chat\u2026";
 		inline constexpr fig::const_string ChatInitialized = 
 			"Chat initialized";
 		inline constexpr fig::const_string FailedToInitializeChat = 
@@ -25,9 +25,9 @@ namespace fig::strings
 		inline constexpr fig::const_string FailedToLoadModel = 
 			"Failed to load model";
 		inline constexpr fig::const_string GeneratingResponse = 
-			"Generating response...";
+			"Generating response\u2026";
 		inline constexpr fig::const_string RebuildingContext = 
-			"Rebuilding context...";
+			"Rebuilding context\u2026";
 		inline constexpr fig::const_string Ready = 
 			"Ready";
 	}
@@ -41,7 +41,7 @@ namespace fig::strings
 	namespace LoadModelWidget
 	{
 		inline constexpr fig::const_string ModelLoading =
-			"Loading...";
+			"Loading\u2026";
 		inline constexpr fig::const_string ModelLoaded =
 			"Ready";
 		inline constexpr fig::const_string ModelUnloaded =
@@ -67,17 +67,17 @@ namespace fig::strings
 	namespace TTS
 	{
 		inline constexpr fig::const_string Generating =
-			"Generating voice sample...";
+			"Generating voice sample\u2026";
 		inline constexpr fig::const_string ServerInitializing =
-			"Text-to-speech server is starting up...";
+			"Text-to-speech server is starting up\u2026";
 		inline constexpr fig::const_string ServerUnavailable =
 			"Text-to-speech server is unavailable";
 		inline constexpr fig::const_string LoadingModel =
-			"Loading voice model...";
+			"Loading voice model\u2026";
 		inline constexpr fig::const_string ErrorOccurred =
 			"An error occurred";
 		inline constexpr fig::const_string PlayingSound =
-			"Playing...";
+			"Playing\u2026";
 	}
 
 	namespace Errors

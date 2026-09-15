@@ -37,7 +37,7 @@ namespace fig::gui
 
 		auto pSizer = SetSizer<VerticalSizer>();
 
-		CreateHeader(this, pSizer, "Basic information");
+		CreateHeader(this, pSizer, "General information");
 
 		// Name(s)
 		auto pNameSizer = new HorizontalSizer();
@@ -310,7 +310,7 @@ namespace fig::gui
 			});
 
 		menu.AddSeparator();
-		menu.AddItem("Rename ...", Resource::ICON_EDIT)
+		menu.AddItem("Rename\u2026", Resource::ICON_EDIT)
 			.SetDelegate([this, attributeIndex] { RenameAttribute(attributeIndex); });
 		auto& moveMenu = menu.AddItem("Move");
 		if (_items.size() > 1uz)

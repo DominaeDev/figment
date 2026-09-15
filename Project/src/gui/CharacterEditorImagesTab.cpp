@@ -370,7 +370,7 @@ namespace fig::gui
 	void CharacterEditorImagesTab::OnClickedSmallPortrait()
 	{
 		auto& menu = CreateMenu();
-		menu.AddItem("Load chat icon")
+		menu.AddItem("Load image\u2026")
 			.SetDelegate([this] { OpenFile(CharacterImageType::SmallPortrait); });
 		menu.AddSeparator();
 		menu.AddItem("Revert")

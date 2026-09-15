@@ -79,7 +79,7 @@ namespace fig::gui
 	fig::observer_ptr<Sizer> CharacterEditorVoiceTab::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		CreateBoldLabel(pParent, pSizer, text);
-		auto pGridSizer = new GridSizer(100, 29, 8, 6);
+		auto pGridSizer = new GridSizer(120, 36, 8, 6);
 		pGridSizer->SetMaxColumns(5);
 		pSizer->Add(pGridSizer);
 		return pGridSizer;
@@ -218,7 +218,7 @@ namespace fig::gui
 		pToggle->SetDelegate([this, toggleGroup, toggleKey](bool bOn) { 
 			OnToggle(toggleGroup, toggleKey, bOn);
 		});
-		pToggle->SetSize(100, 29);
+		pToggle->SetSize(120, 36);
 		pSizer->Add(pToggle, 0, SizerFlag::Right, 8);
 		_toggleGroups[toggleGroup][toggleKey] = pToggle;
 		return pToggle;
