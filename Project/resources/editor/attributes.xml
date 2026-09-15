@@ -60,7 +60,7 @@
 			<Name>Dislikes</Name>
 			<Placeholder>Enter a list of dislikes, separated by comma.</Placeholder>
 		</Attribute>
-		<Attribute id="sexuality" type="text" visibility="private">
+		<Attribute id="sexuality" type="options" visibility="private">
 			<Name>Sexuality</Name>
 			<Options>Heterosexual, Bisexual, Homosexual</Options>
 			<Value>Heterosexual</Value>
@@ -81,12 +81,12 @@
 		</Attribute>
 	</Group>
 	<Group name="Miscellaneous">
-		<Attribute id="blood-type" type="text" visibility="private" flags="trivial">
+		<Attribute id="blood-type" type="options" visibility="private" flags="trivial">
 			<Name>Blood type</Name>
 			<Options>A, B, O, AB</Options>
 			<Value>A</Value>
 		</Attribute>
-		<Attribute id="zodiac" type="text" visibility="private" flags="trivial">
+		<Attribute id="zodiac" type="options" visibility="private" flags="trivial">
 			<Name>Astrological sign</Name>
 			<Options>Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces</Options>
 			<Value>Aries</Value>

@@ -112,12 +112,6 @@ namespace fig::gui
 				Resource::ICON_CHARACTER_EDIT_INFO_SMALL,
 			},
 			{
-				NotImpl,
-				"Story",
-				Resource::ICON_CHARACTER_EDIT_STORY,
-				Resource::ICON_CHARACTER_EDIT_STORY_SMALL,
-			},
-			{
 				1,
 				"Images",
 				Resource::ICON_CHARACTER_EDIT_IMAGES,
@@ -131,6 +125,12 @@ namespace fig::gui
 			},
 			{
 				NotImpl,
+				"Story",
+				Resource::ICON_CHARACTER_EDIT_STORY,
+				Resource::ICON_CHARACTER_EDIT_STORY_SMALL,
+			},
+			{
+				NotImpl,
 				"Memories",
 				Resource::ICON_CHARACTER_EDIT_MEMORIES,
 				Resource::ICON_CHARACTER_EDIT_MEMORIES_SMALL,
@@ -140,6 +140,12 @@ namespace fig::gui
 				"Concepts",
 				Resource::ICON_CHARACTER_EDIT_CONCEPTS,
 				Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL,
+			},
+			{
+				NotImpl,
+				"Rules",
+				Resource::ICON_CHARACTER_EDIT_RULES,
+				Resource::ICON_CHARACTER_EDIT_RULES_SMALL,
 			},
 			{
 				3,

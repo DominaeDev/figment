@@ -12,6 +12,7 @@ namespace fig::data
 			LongText,
 			Number,
 			List,
+			Options,
 		};
 
 		enum class Visibility
@@ -35,7 +36,7 @@ namespace fig::data
 		Visibility visibility {};
 		HintFlags flags {};
 
-		static const std::map<CharacterAttribute::ValueType, fig::string> FormatMapping;
+		static const std::map<CharacterAttribute::ValueType, fig::string> ValueTypeMapping;
 		static const std::map<CharacterAttribute::Visibility, fig::string> VisibilityMapping;
 		static const std::map<CharacterAttribute::HintFlag, fig::string> FlagMapping;
 
@@ -45,8 +46,8 @@ namespace fig::data
 			return Fields(
 				Attribute { "id", &CharacterAttribute::id },
 				Attribute { "format", &CharacterAttribute::type,
-					[](auto& value) { return enum_serialize(value, FormatMapping); },
-					[](auto& value) { return enum_deserialize(value, FormatMapping); }
+					[](auto& value) { return enum_serialize(value, ValueTypeMapping); },
+					[](auto& value) { return enum_deserialize(value, ValueTypeMapping); }
 				},
 				Attribute { "visibility", &CharacterAttribute::visibility,
 					[](auto& value) { return enum_serialize(value, VisibilityMapping); },

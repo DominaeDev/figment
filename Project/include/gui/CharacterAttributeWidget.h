@@ -15,6 +15,8 @@ namespace fig::gui
 	public:
 		CharacterAttributeWidget(ControlPtr pParent, fig::string_view label, fig::string_view content, fig::data::CharacterAttribute::ValueType type, const fig::string_list& options = {}, fig::string_view placeholder = {});
 
+		using MoveDelegate = std::function<void(int32_t)>;
+		void SetMoveDelegate(MoveDelegate fnDelegate);
 		void SetButtonDelegate(MouseClickedDelegate fnDelegate);
 
 		fig::string_view GetValue() const noexcept;
@@ -36,6 +38,7 @@ namespace fig::gui
 		void EndEditName();
 		void CancelEditName();
 		void OnDoubleClickedAt(fig::point pos) override;
+		void OnMove(int32_t dir) noexcept;
 
 	private:
 		fig::observer_ptr<StaticText> _pLabel;
@@ -43,11 +46,15 @@ namespace fig::gui
 		fig::observer_ptr<TextBox> _pTextBox;
 		fig::observer_ptr<ComboBox> _pComboBox;
 		fig::observer_ptr<ButtonWithIcon> _pSettingsButton;
+		fig::observer_ptr<ButtonWithIcon> _pMoveUpButton;
+		fig::observer_ptr<ButtonWithIcon> _pMoveDownButton;
 
 		fig::coord _lastTextBoxHeight = 0uz;
 		fig::string_list _options {};
 
 		bool _bRenaming {};
 		EditNameDelegate _fnRenameDelegate;
+
+		MoveDelegate _fnMoveDelegate;
 	};
 }

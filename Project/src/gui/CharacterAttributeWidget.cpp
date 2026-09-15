@@ -28,6 +28,12 @@ namespace fig::gui
 
 		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS);
 		_pSettingsButton->SetSize(20, 20);
+		_pMoveUpButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP);
+		_pMoveUpButton->SetSize(20, 20);
+		_pMoveUpButton->SetDelegate([this] { OnMove(-1); });
+		_pMoveDownButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN);
+		_pMoveDownButton->SetSize(20, 20);
+		_pMoveDownButton->SetDelegate([this] { OnMove(1); });
 
 		InitValue(value, type);
 
@@ -40,20 +46,28 @@ namespace fig::gui
 		_pSettingsButton->SetDelegate(fnDelegate);
 	}
 
-	void CharacterAttributeWidget::ChangeType(fig::data::CharacterAttribute::ValueType type)
+	void CharacterAttributeWidget::SetMoveDelegate(MoveDelegate fnDelegate)
 	{
-		InitValue("", type);
-		_options.clear();
+		_fnMoveDelegate = fnDelegate;
 	}
 
-	void CharacterAttributeWidget::InitValue(fig::string_view value, fig::data::CharacterAttribute::ValueType type)
+	void CharacterAttributeWidget::ChangeType(CharacterAttribute::ValueType type)
 	{
+		_options.clear();
+		InitValue("", type);
+	}
+
+	void CharacterAttributeWidget::InitValue(fig::string_view text, CharacterAttribute::ValueType type)
+	{
+		fig::string value;
 		if (_pTextBox)
 			value = _pTextBox->GetText();
 		else if (_pComboBox)
 			value = _pComboBox->GetText();
+		else
+			value = text;
 
-		if (not _options.empty())
+		if (type == CharacterAttribute::ValueType::Options and not _options.empty())
 		{
 			_pComboBox = CreateControl<ComboBox>();
 			_pComboBox->SetPosition(0, 23);
@@ -145,7 +159,11 @@ namespace fig::gui
 			_pTextBox->SetWidth(GetWidth());
 		
 		if (_pSettingsButton)
-			_pSettingsButton->SetX(std::min(GetWidth(), MaxWidth) - _pSettingsButton->GetWidth());
+			_pSettingsButton->SetX(std::min(GetWidth(), MaxWidth) - 20);
+		if (_pMoveDownButton)
+			_pMoveDownButton->SetX(std::min(GetWidth(), MaxWidth) - 42);
+		if (_pMoveUpButton)
+			_pMoveUpButton->SetX(std::min(GetWidth(), MaxWidth) - 64);
 	}
 
 	fig::string_view CharacterAttributeWidget::GetValue() const noexcept
@@ -242,5 +260,11 @@ namespace fig::gui
 	{
 		if (is_inside(_pLabel->GetRect(), pos))
 			BeginEditName();
+	}
+
+	void CharacterAttributeWidget::OnMove(int32_t dir) noexcept
+	{
+		if (_fnMoveDelegate)
+			_fnMoveDelegate(dir);
 	}
 }

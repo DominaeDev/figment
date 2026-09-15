@@ -4,11 +4,12 @@
 
 namespace fig::data
 {
-	const std::map<CharacterAttribute::ValueType, fig::string> CharacterAttribute::FormatMapping {
+	const std::map<CharacterAttribute::ValueType, fig::string> CharacterAttribute::ValueTypeMapping {
 		{ CharacterAttribute::ValueType::ShortText,		"text" },
 		{ CharacterAttribute::ValueType::LongText,		"multiline" },
 		{ CharacterAttribute::ValueType::Number,		"number" },
 		{ CharacterAttribute::ValueType::List,			"list" },
+		{ CharacterAttribute::ValueType::Options,		"options" },
 	};
 
 	const std::map<CharacterAttribute::Visibility, fig::string> CharacterAttribute::VisibilityMapping {

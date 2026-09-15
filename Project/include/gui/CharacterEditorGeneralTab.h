@@ -45,8 +45,8 @@ namespace fig::gui
 					Attribute { "id", &AttributeInfo::id }
 						.MustExist(),
 					Attribute { "type", &AttributeInfo::type,
-						[](auto&& value) { return enum_serialize(value, CharacterAttribute::FormatMapping); },
-						[](auto&& value) { return enum_deserialize(value, CharacterAttribute::FormatMapping); }
+						[](auto&& value) { return enum_serialize(value, CharacterAttribute::ValueTypeMapping); },
+						[](auto&& value) { return enum_deserialize(value, CharacterAttribute::ValueTypeMapping); }
 					},
 					Attribute { "visibility", &AttributeInfo::visibility,
 						[](auto&& value) { return enum_serialize(value, CharacterAttribute::VisibilityMapping); },
@@ -114,7 +114,7 @@ namespace fig::gui
 		void RenameAttribute(size_t index);
 		void OnRenamedAttribute(size_t index, fig::string_view name);
 		void RemoveAttribute(size_t index);
-
+		void OnMoveAttribute(size_t index, int32_t dir, bool bMaxDistance);
 
 	private:
 		void ShowAttributesMenu();

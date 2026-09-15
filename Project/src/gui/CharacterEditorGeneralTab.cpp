@@ -153,11 +153,18 @@ namespace fig::gui
 		menu.Show();
 	}
 
+	static bool IsShiftDown()
+	{
+		auto mod = SDL_GetModState();
+		return (mod & SDL_KMOD_SHIFT) != 0 and (mod & SDL_KMOD_CTRL) == 0 and (mod & SDL_KMOD_ALT) == 0;
+	}
+
 	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorGeneralTab::AppendAttributeControl(fig::data::CharacterAttribute& attribute, size_t index, const fig::string_list& options, fig::string_view placeholder)
 	{
 		auto pAttribute = CreateControl<CharacterAttributeWidget>(attribute.name, attribute.value, attribute.type, options, placeholder);
 		pAttribute->SetButtonDelegate([this, index] { OnAttributeSettingsMenu(index); });
 		pAttribute->SetEditNameDelegate([this, index](auto&& name) { OnRenamedAttribute(index, name); });
+		pAttribute->SetMoveDelegate([this, index](auto&& dir) { OnMoveAttribute(index, dir, IsShiftDown()); });
 		_pAttributeSizer->Add(pAttribute, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 		return pAttribute;
 	}
@@ -197,7 +204,7 @@ namespace fig::gui
 		{
 			for (auto& info : group.attributes)
 			{
-				if (info.id == item.attribute.id and info.type == item.attribute.type)
+				if (info.id == item.attribute.id and item.attribute.type == CharacterAttribute::ValueType::Options)
 				{
 					options = info.options;
 					placeholder = info.placeholder;
@@ -229,8 +236,12 @@ namespace fig::gui
 	void CharacterEditorGeneralTab::OnAttributeSettingsMenu(size_t attributeIndex)
 	{
 		AttributeItem* pItem = nullptr;
+		size_t index {};
 		if (auto itFind = std::ranges::find(_items, attributeIndex, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
 			pItem = &(*itFind);
+			index = std::distance(_items.begin(), itFind);
+		}
 		else
 			return;
 
@@ -285,15 +296,30 @@ namespace fig::gui
 		menu.AddSeparator();
 		menu.AddItem("Rename ...", Resource::ICON_EDIT)
 			.SetDelegate([this, attributeIndex] { RenameAttribute(attributeIndex); });
+		auto& moveMenu = menu.AddItem("Move");
+		if (_items.size() > 1uz)
+		{
+			moveMenu.AddItem("Move to top")
+				.SetEnabled(index > 0uz)
+				.SetDelegate([this, attributeIndex] { OnMoveAttribute(attributeIndex, -1, true); });
+			moveMenu.AddItem("Move up")
+				.SetEnabled(index > 0uz)
+				.SetDelegate([this, attributeIndex] { OnMoveAttribute(attributeIndex, -1, false); });
+			moveMenu.AddItem("Move down")
+				.SetEnabled(index + 1uz < _items.size())
+				.SetDelegate([this, attributeIndex] { OnMoveAttribute(attributeIndex, 1, false); });
+			moveMenu.AddItem("Move to bottom")
+				.SetEnabled(index + 1uz < _items.size())
+				.SetDelegate([this, attributeIndex] { OnMoveAttribute(attributeIndex, 1, true); });
+		}
+		else
+		{
+			moveMenu.SetEnabled(false);
+		}
+
 		menu.AddSeparator();
 		menu.AddItem("Copy");
 		menu.AddItem("Paste");
-		menu.AddSeparator();
-		menu.AddItem("Move to top");
-		menu.AddItem("Move up");
-		menu.AddItem("Move down");
-		menu.AddItem("Move to bottom");
-
 		menu.AddSeparator();
 		menu.AddItem("Remove", Resource::ICON_DELETE)
 			.SetDelegate([this, attributeIndex] { RemoveAttribute(attributeIndex); });
@@ -329,6 +355,48 @@ namespace fig::gui
 			_pAttributeSizer->Remove(item.pControl);
 			DestroyChild(item.pControl);
 			_items.erase(itFind);
+		}
+	}
+
+	void CharacterEditorGeneralTab::OnMoveAttribute(size_t attributeIndex, int32_t dir, bool bMaxDistance)
+	{
+		if (auto itFind = std::ranges::find(_items, attributeIndex, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			size_t index = std::distance(std::ranges::begin(_items), itFind);
+			if (dir < 0 and bMaxDistance) // Move to top
+			{
+				if (index == 0uz)
+					return;
+				AttributeItem item = *itFind;
+				_items.erase(itFind);
+				_items.insert(_items.cbegin(), item);
+			}
+			else if (dir < 0) // Move up
+			{
+				if (index == 0uz)
+					return;
+				std::swap(_items[index - 1], _items[index]);
+			}
+			if (dir > 0 and bMaxDistance) // Move to bottom
+			{
+				if (index + 1 >= _items.size())
+					return;
+				
+				AttributeItem item = *itFind;
+				_items.erase(itFind);
+				_items.insert(_items.cbegin() + _items.size(), item);
+			}
+			else if (dir > 0) // Move down
+			{
+				if (index + 1 >= _items.size())
+					return;
+				std::swap(_items[index], _items[index + 1]);
+			}
+			
+			_pAttributeSizer->RemoveAll();
+			for (auto& item : _items)
+				_pAttributeSizer->Add(item.pControl, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+			InvalidateLayout();
 		}
 	}
 
