@@ -15,7 +15,7 @@ namespace fig::gui
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
 		_pIcon->SetForegroundColor(GetThemeForeground());
 
-		Toggle(bOn, true);
+		SetOn(bOn, true);
 
 		SetSize(36, 36);
 
@@ -23,10 +23,10 @@ namespace fig::gui
 		{
 		default:
 		case ToggleBehavior::Default:
-			MouseEventHandler::SetDelegate([this]() { Toggle(!this->_bOn); });
+			MouseEventHandler::SetDelegate([this]() { SetOn(!this->_bOn); });
 			break;
 		case ToggleBehavior::Radio:
-			MouseEventHandler::SetDelegate([this]() { if (!this->_bOn) Toggle(true); });
+			MouseEventHandler::SetDelegate([this]() { if (!this->_bOn) SetOn(true); });
 			break;
 		}
 	}
@@ -53,7 +53,7 @@ namespace fig::gui
 		_pIcon->SetForegroundColor(GetThemeForeground());
 	}
 
-	void ToggleWithIcon::Toggle(bool bOn, bool bSilent) noexcept
+	void ToggleWithIcon::SetOn(bool bOn, bool bSilent) noexcept
 	{
 		_bOn = bOn;
 		if (bOn)

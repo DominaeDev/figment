@@ -13,7 +13,7 @@ namespace fig::gui
 
 	void LayoutElement::Update(float fElapsed)
 	{
-		if (_bCulled)
+		if (_bCulled) //! @maybe
 			return;
 
 		Layout();
@@ -28,7 +28,7 @@ namespace fig::gui
 
 	void LayoutElement::Layout()
 	{
-		if (!_bInvalidLayout or !_bLayoutEnabled or _bCulled)
+		if (!_bInvalidLayout or !_bLayoutEnabled)
 			return;
 		
 		if (_pSizer)
@@ -330,6 +330,9 @@ namespace fig::gui
 		fig::point size {};
 		for (auto& child : _children)
 		{
+			if (not child->IsLayoutEnabled())
+				continue;
+
 			size.x = std::max(size.x, child->GetX() + child->GetWidth());
 			size.y = std::max(size.y, child->GetY() + child->GetHeight());
 		}

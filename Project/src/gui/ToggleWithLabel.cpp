@@ -7,16 +7,16 @@ namespace fig::gui
 {
 	ToggleWithLabel::ToggleWithLabel(ControlPtr pParent, fig::string_view text, double fontSize, ToggleBehavior behavior, bool bOn) : ButtonWithLabel(pParent, text, fontSize)
 	{
-		Toggle(bOn, true);
+		SetOn(bOn, true);
 
 		switch (behavior)
 		{
 		default:
 		case ToggleBehavior::Default:
-			MouseEventHandler::SetDelegate([this]() { Toggle(!this->_bOn); });
+			MouseEventHandler::SetDelegate([this]() { SetOn(!this->_bOn); });
 			break;
 		case ToggleBehavior::Radio:
-			MouseEventHandler::SetDelegate([this]() { if (!this->_bOn) Toggle(true); });
+			MouseEventHandler::SetDelegate([this]() { if (!this->_bOn) SetOn(true); });
 			break;
 		}
 	}
@@ -26,7 +26,7 @@ namespace fig::gui
 		_fnToggle = pDelegate;
 	}
 
-	void ToggleWithLabel::Toggle(bool bOn, bool bSilent) noexcept
+	void ToggleWithLabel::SetOn(bool bOn, bool bSilent) noexcept
 	{
 		_bOn = bOn;
 		GetBorderRenderer()->SetColor(bOn ? Color::Black : Color::LineColor); //! @todo: Theme

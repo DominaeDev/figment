@@ -1,6 +1,5 @@
 #include <pch.h>
 #include "data/CharacterAttribute.h"
-#include "io/Xml.h"
 
 namespace fig::data
 {

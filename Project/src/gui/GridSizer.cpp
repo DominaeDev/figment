@@ -24,6 +24,11 @@ namespace fig::gui
 		_spacingY = std::max(y, 0);
 	}
 
+	void GridSizer::SetMaxColumns(int32_t cols)
+	{
+		_max_columns = cols;
+	}
+
 	void GridSizer::OnLayout(const fig::rect& parentRect)
 	{
 		auto count = GetCount();
@@ -41,24 +46,14 @@ namespace fig::gui
 		else
 			columns = 1;
 
+		if (_max_columns > 0)
+			columns = std::min(columns, _max_columns);
+
 		fig::coord offsetX = (_bCenterX ? (totalWidth - (columns * _cellWidth + std::max(columns - 1, 0) * _spacingX)) / 2 : 0);
 
 		auto items = GetLayoutItems();
 		int32_t index = 0;
-		/*for (auto& item : items)
-		{
-			int col = index % columns;
-			int row = index / columns;
-
-			auto pControl = item.GetControl();
-			if (pControl)
-			{
-				pControl->SetPosition(offsetX + col * (_cellWidth + _spacingX), row * (_cellHeight + _spacingY));
-				item.rect = pControl->GetRect();
-				index++;
-			}
-		}*/
-
+		
 		for (auto& item : items)
 		{
 			auto pControl = item.GetControl();

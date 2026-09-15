@@ -761,6 +761,9 @@
     <ClCompile Include="src\data\CharacterAttribute.cpp">
       <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
+    <ClCompile Include="src\data\CharacterTrait.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1745,6 +1748,15 @@
       <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
     <ClInclude Include="include\data\CharacterName.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\CharacterTrait.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\CharacterAttributeInfo.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\CharacterTraitInfo.h">
       <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClInclude>
   </ItemGroup>

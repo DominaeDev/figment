@@ -11,7 +11,7 @@ namespace fig::gui
 	{
 		_pScrollPanel = CreateControl<ScrollPanel>();
 		_pScrollPanel->SetScrollBarOffset(0);
-		_pScrollPanel->SetBottomPadding(40);
+		_pScrollPanel->SetBottomPadding(120);
 		_pScrollPanel->SetMaxWidth(Constants::GUI::EditorTab::MaxWidth);
 		_pScrollPanel->SetSizer<VerticalSizer>();
 
@@ -78,8 +78,12 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::SelectEditorTab))
 		{
 			if (_pEditor)
+			{
 				_pEditor->SelectTab(static_cast<size_t>(event.user.code));
+				_pEditor->InvalidateLayout();
+			}
 			_pScrollPanel->ResetScroll();
+			InvalidateLayout();
 			return EventResult::Handled;
 		}
 

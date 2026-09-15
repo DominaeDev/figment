@@ -108,6 +108,9 @@ namespace fig::gui
 
 		for (auto& child : _children)
 		{
+			if (not child->IsLayoutEnabled())
+				return false;
+
 			auto& rect = child->GetRect();
 			minY = std::min(minY, rect.y);
 			maxY = std::max(maxY, rect.y + rect.h);

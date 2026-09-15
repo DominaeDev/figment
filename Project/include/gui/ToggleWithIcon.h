@@ -15,7 +15,7 @@ namespace fig::gui
 
 		void SetIcon(Resource icon);
 		void SetDelegate(ToggleDelegate pDelegate) noexcept;
-		void Toggle(bool bOn, bool bSilent = false) noexcept;
+		void SetOn(bool bOn, bool bSilent = false) noexcept;
 		bool IsOn() const noexcept { return _bOn; }
 
 	protected:

@@ -4,13 +4,13 @@
 			<Name>Background</Name>
 		</Attribute>
 		<Attribute id="alias" type="list">
-			<Name>Aliases</Name>
+			<Name>Alias</Name>
 		</Attribute>
 		<Attribute id="occupation" type="text" flags="trivial">
 			<Name>Occupation</Name>
 		</Attribute>
 		<Attribute id="reputation" type="list">
-			<Name>Repuation</Name>
+			<Name>Reputation</Name>
 		</Attribute>
 		<Attribute id="speech" type="text" visibility="private">
 			<Name>Speech</Name>

@@ -23,6 +23,16 @@ namespace fig::gui
 		return pLabel;
 	}
 
+	fig::observer_ptr<StaticText> EditorTabBase::CreateBoldLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
+	{
+		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Bold, 14.0, false);
+		pLabel->SetForegroundColor(Color::SidePanelForeground);
+		pSizer->AddSpacer(8);
+		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 4);
+		pSizer->AddSpacer(3);
+		return pLabel;
+	}
+
 	fig::observer_ptr<StaticText> EditorTabBase::CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Italic, 14.0, false);

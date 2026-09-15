@@ -21,7 +21,6 @@ namespace fig::gui
 		void SetTopPadding(fig::coord padding) { _topPadding = padding; };
 		void SetBottomPadding(fig::coord padding) { _bottomPadding = padding; };
 
-
 	protected:
 		void OnUpdate(float fElapsed) override;
 		EventResult OnEvent(fig::event& event) override;

@@ -13,6 +13,7 @@ namespace fig::gui
 		for (size_t i = 0uz; i < _tabs.size(); ++i)
 			EnableTab(_tabs[i], i == index);
 		InvalidateLayout();
+		LayoutNow();
 	}
 
 	void Editor::EnableTab(EditorTabBase* pTab, bool bEnabled)
@@ -24,5 +25,7 @@ namespace fig::gui
 			pTab->SetEnabled(bEnabled);
 		}
 	}
+
+
 
 }

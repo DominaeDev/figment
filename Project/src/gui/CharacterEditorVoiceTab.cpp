@@ -78,8 +78,9 @@ namespace fig::gui
 
 	fig::observer_ptr<Sizer> CharacterEditorVoiceTab::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
-		CreateLabel(pParent, pSizer, text);
+		CreateBoldLabel(pParent, pSizer, text);
 		auto pGridSizer = new GridSizer(100, 29, 8, 6);
+		pGridSizer->SetMaxColumns(5);
 		pSizer->Add(pGridSizer);
 		return pGridSizer;
 	}
@@ -149,7 +150,7 @@ namespace fig::gui
 		CreateToggle(pTemperatureSizer, groupTemperature, "temperature_malevolent", "Malevolent");
 
 		// Custom
-		CreateLabel(this, pDesignerSizer, "Custom prompt");
+		CreateBoldLabel(this, pDesignerSizer, "Custom prompt");
 		_pCustomPrompt = CreateControl<TextBox>();
 		_pCustomPrompt->SetMaxWidth(532);
 		pDesignerSizer->Add(_pCustomPrompt, 0, SizerFlag::Expand);
@@ -177,8 +178,8 @@ namespace fig::gui
 		pDesignerSizer->AddSpacer(24);
 		pDesignerSizer->Add(pButtonSizer, 0, SizerFlag::FixedSize, 35);
 
-		pMale->Toggle(_pCharacter->gender.IsConventional(ConventionalGender::Male));
-		pFemale->Toggle(not _pCharacter->gender.IsConventional(ConventionalGender::Male));
+		pMale->SetOn(_pCharacter->gender.IsConventional(ConventionalGender::Male));
+		pFemale->SetOn(not _pCharacter->gender.IsConventional(ConventionalGender::Male));
 
 		_pViewport = CreateControl<ImageViewport>();
 		_pViewport->SetSize(320, 480);
@@ -233,7 +234,7 @@ namespace fig::gui
 			{
 				if (kvp.first != key)
 				{
-					kvp.second->Toggle(false, true);
+					kvp.second->SetOn(false, true);
 					_selectedKeys.erase(kvp.first);
 				}
 			}
@@ -316,7 +317,6 @@ namespace fig::gui
 			_audioResultQueue.Add(std::move(result).value());
 			_pGenerateButton->SetEnabled(false);
 			_pPlayButton->SetEnabled(false);
-//			_pSaveButton->SetEnabled(false);
 
 			SetStatusMessage(isServerRunning ? fig::strings::TTS::Generating : fig::strings::TTS::ServerInitializing);
 			Global::GetAudioManager().StopAllSounds();
@@ -425,7 +425,6 @@ namespace fig::gui
 
 			SetStatusMessage("");
 			_pPlayButton->SetEnabled(true);
-//			_pSaveButton->SetEnabled(true);
 		}
 		else 
 		{

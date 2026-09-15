@@ -175,6 +175,7 @@
     <ClCompile Include="src\chat\UserDefinedOptions.cpp" />
     <ClCompile Include="src\data\CharacterAttribute.cpp" />
     <ClCompile Include="src\data\CharacterName.cpp" />
+    <ClCompile Include="src\data\CharacterTrait.cpp" />
     <ClCompile Include="src\data\ChatLog.cpp" />
     <ClCompile Include="src\data\ContentMetaData.cpp" />
     <ClCompile Include="src\data\Character.cpp" />
@@ -466,8 +467,11 @@
     <ClInclude Include="include\chat\ChatTypes.h" />
     <ClInclude Include="include\chat\PromptBuilder.h" />
     <ClInclude Include="include\chat\PromptScaffold.h" />
+    <ClInclude Include="include\data\CharacterAttributeInfo.h" />
     <ClInclude Include="include\data\CharacterAttribute.h" />
     <ClInclude Include="include\data\CharacterName.h" />
+    <ClInclude Include="include\data\CharacterTrait.h" />
+    <ClInclude Include="include\data\CharacterTraitInfo.h" />
     <ClInclude Include="include\data\ContentMetaData.h" />
     <ClInclude Include="include\data\Character.h" />
     <ClInclude Include="include\data\CharacterGender.h" />

@@ -4,6 +4,7 @@
 #include "data/CharacterName.h"
 #include "data/CharacterGender.h"
 #include "data/CharacterAttribute.h"
+#include "data/CharacterTrait.h"
 #include "util/SearchIndex.h"
 #include "text/Context.h"
 
@@ -19,11 +20,17 @@ namespace fig::data
 
 		std::optional<CharacterAttribute> FindAttribute(const fig::handle& attributeId) const noexcept;
 		std::optional<fig::string> GetAttribute(const fig::handle& attributeId) const noexcept;
-		std::vector<CharacterAttribute>& GetAttributes() noexcept { return _attributes; }
 		const std::vector<CharacterAttribute>& GetAttributes() const noexcept { return _attributes; }
-		CharacterAttribute& SetAttribute(const fig::handle& attributeId, fig::string_view, fig::string_view content, CharacterAttribute::ValueType format = CharacterAttribute::ValueType::ShortText, CharacterAttribute::Visibility visibility = CharacterAttribute::Visibility::Public, CharacterAttribute::HintFlags flags = {});
+		const CharacterAttribute& SetAttribute(const fig::handle& attributeId, fig::string_view name, fig::string_view content, CharacterAttribute::ValueType format = CharacterAttribute::ValueType::ShortText, CharacterAttribute::Visibility visibility = CharacterAttribute::Visibility::Public, CharacterAttribute::HintFlags flags = {});
 		bool RemoveAttribute(const fig::handle& attributeId);
 		void ClearAttributes();
+
+		bool HasTrait(const fig::handle& traitId) const noexcept;
+		std::optional<CharacterTrait> FindTrait(const fig::handle& traitId) const noexcept;
+		const std::vector<CharacterTrait>& GetTraits() const noexcept { return _traits; }
+		const CharacterTrait& SetTrait(const fig::handle& traitId, fig::string_view name, fig::string_view content, CharacterTrait::Visibility visibility = CharacterTrait::Visibility::Public);
+		bool RemoveTrait(const fig::handle& traitId);
+		void ClearTraits();
 
 		void SetTags(const fig::string_list& tags) noexcept;
 		void AppendTags(const fig::string_list& tags);
@@ -57,6 +64,7 @@ namespace fig::data
 		void UpdateContext();
 
 		std::vector<CharacterAttribute> _attributes;
+		std::vector<CharacterTrait> _traits;
 		fig::string_list _tags;
 		SearchIndex _searchIndex;
 		Context _context;

@@ -20,6 +20,7 @@ namespace fig::data
 			},
 			Element { "Brief", &Character::brief },
 			Element { "Attributes", &Character::_attributes },
+			Element { "Traits", &Character::_traits },
 			Element { "Tags", &Character::_tags },
 			Element { "SearchIndex", &Character::_searchIndex,
 				[](auto& value) -> fig::string { return value.Serialize(); },
@@ -117,20 +118,17 @@ namespace fig::data
 	{
 		if (auto try_attrib = FindAttribute(attributeId))
 			return try_attrib.value().value;
-		return "";
+		return std::nullopt;
 	}
 
-	void Character::AppendTags(const fig::string_list& tags)
+	const CharacterAttribute& Character::SetAttribute(const fig::handle& attributeId, fig::string_view label, fig::string_view content, CharacterAttribute::ValueType format, CharacterAttribute::Visibility visibility, CharacterAttribute::HintFlags flags)
 	{
-		_tags.append_range(tags);
-		_searchIndex.AddTerms(tags);
-		_bDirtyContext = true;
-	}
+		fig::handle id = attributeId;
+		if (id.empty())
+			id = fig::handle { label };
 
-	CharacterAttribute& Character::SetAttribute(const fig::handle& attributeId, fig::string_view label, fig::string_view content, CharacterAttribute::ValueType format, CharacterAttribute::Visibility visibility, CharacterAttribute::HintFlags flags)
-	{
 		// Update existing
-		if (auto try_attribute = FindAttribute(attributeId))
+		if (auto try_attribute = FindAttribute(id))
 		{
 			auto& attribute = try_attribute.value();
 			attribute.name = fig::string { label };
@@ -143,7 +141,7 @@ namespace fig::data
 
 		// Add new
 		_attributes.emplace_back(CharacterAttribute {
-			.id = fig::handle { attributeId },
+			.id = id,
 			.name = fig::string { label },
 			.value = fig::string { content },
 			.type = format,
@@ -167,6 +165,67 @@ namespace fig::data
 	void Character::ClearAttributes()
 	{
 		_attributes.clear();
+	}
+
+	bool Character::HasTrait(const fig::handle& traitId) const noexcept
+	{
+		return std::ranges::contains(_traits, traitId, [](auto&& t) { return t.id; });
+	}
+
+	std::optional<CharacterTrait> Character::FindTrait(const fig::handle& traitId) const noexcept
+	{
+		if (auto itFind = std::ranges::find_if(_traits, [&traitId](auto&& t) { return t.id == traitId; }); itFind != std::ranges::cend(_traits))
+			return *itFind;
+		return std::nullopt;
+	}
+
+	const CharacterTrait& Character::SetTrait(const fig::handle& traitId, fig::string_view name, fig::string_view text, CharacterTrait::Visibility visibility)
+	{
+		fig::handle id = traitId;
+		if (id.empty())
+			id = fig::handle { name };
+
+		// Update existing
+		if (auto try_trait = FindTrait(id))
+		{
+			auto& trait = try_trait.value();
+			trait.name = fig::string { name };
+			trait.text = fig::string { text };
+			trait.visibility = visibility;
+			return trait;
+		}
+
+		// Add new
+		_traits.emplace_back(CharacterTrait {
+			.id = id,
+			.name = fig::string { name },
+			.text = fig::string { text },
+			.visibility = visibility,
+		});
+		_bDirtyContext = true;
+		return _traits.back();
+	}
+
+	bool Character::RemoveTrait(const fig::handle& traitId)
+	{
+		if (auto e = std::ranges::remove(_traits, traitId, [](auto&& a) { return a.id; }); e.begin() != e.end())
+		{
+			_traits.erase(e.begin(), e.end());
+			return true;
+		}
+		return false;
+	}
+
+	void Character::ClearTraits()
+	{
+		_traits.clear();
+	}
+
+	void Character::AppendTags(const fig::string_list& tags)
+	{
+		_tags.append_range(tags);
+		_searchIndex.AddTerms(tags);
+		_bDirtyContext = true;
 	}
 
 	void Character::AddSearchTerm(const fig::string& term)

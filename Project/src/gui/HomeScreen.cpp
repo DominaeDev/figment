@@ -103,7 +103,7 @@ namespace fig::gui
 		_pCardList->SetCardSize(bHalfSize ? CardSize::Half : CardSize::Full);
 		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pGridButton->SetIcon(bHalfSize ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
-		_pGridButton->Toggle(bHalfSize, true);
+		_pGridButton->SetOn(bHalfSize, true);
 		_pToggleTagsButton->ShowBorder(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pFilteringButton->ShowBorder(GetFiltering() != DefaultFilterFlags);
 	}

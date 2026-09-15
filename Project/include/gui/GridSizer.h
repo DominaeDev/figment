@@ -10,6 +10,7 @@ namespace fig::gui
 		GridSizer(int32_t cellWidth, int32_t cellHeight, int32_t spacingX = 0, int32_t spacingY = 0);
 		void SetCellSize(int32_t x, int32_t y);
 		void SetSpacing(int32_t x, int32_t y);
+		void SetMaxColumns(int32_t cols);
 		void EnableCentering(bool bEnable);
 
 		int32_t GetSpacingX() const noexcept { return _spacingX; };
@@ -30,6 +31,7 @@ namespace fig::gui
 		bool _bCenterX = false;
 		int32_t _last_columns = 0;
 		int32_t _last_rows = 0;
+		int32_t _max_columns = 0;
 		
 	};
 }

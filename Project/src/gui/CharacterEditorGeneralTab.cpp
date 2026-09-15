@@ -4,10 +4,12 @@
 #include "gui/ComboBox.h"
 #include "gui/ButtonWithLabel.h"
 #include "gui/ButtonWithLabelAndIcon.h"
+#include "gui/ToggleWithLabel.h"
 #include "gui/CharacterAttributeWidget.h"
 #include "gui/AppResources.h"
 #include "gui/HorizontalLine.h"
 #include "gui/Menu.h"
+#include "gui/GridSizer.h"
 #include "data/Character.h"
 #include "io/FileUtility.h"
 
@@ -23,6 +25,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 
 		_attributesInfo.LoadFromXml(fig::path { "resources/editor/attributes.xml"});
+		_traitsInfo.LoadFromXml(fig::path { "resources/editor/traits.xml"});
 	}
 
 	bool CharacterEditorGeneralTab::Initialize(CharacterEditorArgs args)
@@ -108,9 +111,22 @@ namespace fig::gui
 
 		// Traits
 		CreateHeader(this, pSizer, "Traits");
-		CreateLabel(this, pSizer, "Positive (0)")->SetFont(FontFace::Bold, 14.0);
-		CreateLabel(this, pSizer, "Negative (0)")->SetFont(FontFace::Bold, 14.0);
-		CreateLabel(this, pSizer, "Neutral (0)")->SetFont(FontFace::Bold, 14.0);
+		for (auto& group : _traitsInfo.groups)
+		{
+			auto pLabel = CreateBoldLabel(this, pSizer, group.name);
+			_traitGroupLabels[group.name] = pLabel;
+
+			auto pTraitGridSizer = new GridSizer(120, 36, 8, 6);
+			pTraitGridSizer->SetMaxColumns(6);
+			pSizer->Add(pTraitGridSizer, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+
+			for (auto& trait : group.traits)
+			{
+				auto pTrait = CreateTrait(pTraitGridSizer, trait.id, trait.name);
+				pTrait->SetOn(_pCharacter->HasTrait(trait.id), true);
+			}
+		}
+		RefreshToggleGroupLabels();
 
 		return true;
 	}
@@ -169,7 +185,7 @@ namespace fig::gui
 		return pAttribute;
 	}
 
-	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorGeneralTab::AddAttribute(const AttributeInfo& info)
+	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorGeneralTab::AddAttribute(const fig::data::CharacterAttributeInfo& info)
 	{
 		auto item = AttributeItem {
 			.index = _nextAttributeIndex++,
@@ -397,6 +413,61 @@ namespace fig::gui
 			for (auto& item : _items)
 				_pAttributeSizer->Add(item.pControl, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 			InvalidateLayout();
+		}
+	}
+
+	fig::observer_ptr<ToggleWithLabel> CharacterEditorGeneralTab::CreateTrait(SizerPtr pSizer, fig::handle traitId, fig::string_view label)
+	{
+		auto pToggle = CreateControl<ToggleWithLabel>(label, 14.5, ToggleBehavior::Default);
+		pToggle->SetDelegate([this, traitId](bool bOn) { OnToggledTrait(traitId, bOn); });
+		pToggle->SetSize(120, 36);
+		pSizer->Add(pToggle, 0, SizerFlag::Right, 8);
+		return pToggle;
+	}
+
+	void CharacterEditorGeneralTab::OnToggledTrait(const fig::handle& traitId, bool bOn)
+	{
+		if (bOn)
+		{
+			for (auto& group : _traitsInfo.groups)
+			{
+				for (auto& trait : group.traits)
+				{
+					if (trait.id == traitId)
+					{
+						_pCharacter->SetTrait(traitId, trait.name, trait.text, trait.visibility);
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			_pCharacter->RemoveTrait(traitId);
+		}
+
+		RefreshToggleGroupLabels();
+	}
+
+	void CharacterEditorGeneralTab::RefreshToggleGroupLabels()
+	{
+		auto traitIds = _pCharacter->GetTraits()
+			| std::views::transform([](auto&& t) { return t.id; })
+			| std::ranges::to<std::unordered_set>();
+
+		for (auto& group : _traitsInfo.groups)
+		{
+			if (auto pLabel = _traitGroupLabels[group.name])
+			{
+				size_t count = 0uz;
+				for (auto& trait : group.traits)
+				{
+					if (traitIds.contains(trait.id))
+						++count;
+				}
+
+				pLabel->SetText(std::format("{} ({})", group.name, count));
+			}
 		}
 	}
 
