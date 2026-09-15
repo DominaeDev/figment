@@ -36,7 +36,7 @@ namespace fig::gui
 		_pFilterTextBox->SetSize(192, 30);
 		_pFilterTextBox->SetMaxWidth(192);
 		_pFilterTextBox->SetBackgroundColor(Color::White);
-		_pFilterTextBox->SetTextChangedCallback([this](fig::string_view s) {
+		_pFilterTextBox->SetTextChangedDelegate([this](fig::string_view s) {
 			OnSearchFilter(s);
 		});
 

@@ -61,7 +61,7 @@ namespace fig::gui
 
 		_pPassword = _pPasswordPanel->CreateControl<PasswordBox>();
 		_pPassword->SetWidth(240);
-		_pPassword->SetEnterPressedCallback([this](fig::string_view password) { SignIn(password); });
+		_pPassword->SetEnterPressedDelegate([this](fig::string_view password) { SignIn(password); });
 		_pPassword->SetFocus(true);
 
 		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(Resource::ICON_ARROW_RIGHT, true);

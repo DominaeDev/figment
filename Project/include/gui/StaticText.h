@@ -49,7 +49,8 @@ namespace fig::gui
 		const fig::string& GetText() const { return _text; }
 
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
-		void SetFont(fig::font_ptr pFont) { _pFont.reset(pFont); }
+		void SetFont(FontFace fontFace, double ptSize = Constants::GUI::DefaultFontSize);
+		void SetFont(fig::font_ptr pFont);
 
 		void SetForegroundColor(fig::color color) override;
 		void SetBackgroundColor(fig::color color) override;

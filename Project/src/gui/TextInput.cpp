@@ -754,7 +754,11 @@ namespace fig::gui
 		if (_bFocused)
 			PushEvent(UserEvent::StartTextInput, 0, this);
 		else
+		{
 			PushEvent(UserEvent::StopTextInput, 0, this);
+			if (_fnOnLostFocus)
+				_fnOnLostFocus();
+		}
 	}
 
 	int32_t TextInput::MoveCursor(int32_t direction) noexcept
@@ -1469,9 +1473,9 @@ namespace fig::gui
 					DidChange();
 					return EventResult::Handled;
 				}
-				else if (bModNone and _pOnEnter)
+				else if (bModNone and _fnOnEnter)
 				{
-					_pOnEnter(_text); // Invoke
+					_fnOnEnter(_text); // Invoke
 					return EventResult::Handled;
 				}
 				break;
@@ -1486,6 +1490,8 @@ namespace fig::gui
 					}
 					else
 					{
+						if (_fnOnEscape)
+							_fnOnEscape();
 						SetFocus(false);
 						return EventResult::Handled;
 					}
@@ -1549,14 +1555,24 @@ namespace fig::gui
 		}
 	}
 
-	void TextInput::SetTextChangedCallback(TextChangedCallback cb)
+	void TextInput::SetTextChangedDelegate(TextChangedDelegate fnDelegate)
 	{
-		_pOnChanged = cb;
+		_fnOnChanged = fnDelegate;
 	}
 
-	void TextInput::SetEnterPressedCallback(EnterPressedCallback cb)
+	void TextInput::SetEnterPressedDelegate(EnterPressedDelegate fnDelegate)
 	{
-		_pOnEnter = cb;
+		_fnOnEnter = fnDelegate;
+	}
+
+	void TextInput::SetEscapePressedDelegate(EscapePressedDelegate fnDelegate)
+	{
+		_fnOnEscape = fnDelegate;
+	}
+
+	void TextInput::SetLostFocusDelegate(LostFocusDelegate fnDelegate)
+	{
+		_fnOnLostFocus = fnDelegate;
 	}
 
 	void TextInput::Clear()
@@ -1760,8 +1776,8 @@ namespace fig::gui
 
 	void TextInput::DidChange()
 	{
-		if (_pOnChanged)
-			_pOnChanged(_text);
+		if (_fnOnChanged)
+			_fnOnChanged(_text);
 
 		OnText(_text);
 	}

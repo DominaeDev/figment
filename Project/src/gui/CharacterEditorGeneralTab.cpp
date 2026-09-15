@@ -65,7 +65,7 @@ namespace fig::gui
 
 		std::vector<fig::string> genders { "Male", "Female", "Non-binary" };
 		std::vector<fig::string> pronouns { "Auto", "He/Him", "She/Her", "They/Them", "It/It" };
-		CreateLabel(this, pGenderColumn1, "Gender");
+		CreateLabel(this, pGenderColumn1, "Gender/Sex");
 		CreateComboBox(this, pGenderColumn1, genders, ValueBinding<Gender>(&_pCharacter->gender))
 			->SetMaxWidth(300);
 
@@ -108,9 +108,9 @@ namespace fig::gui
 
 		// Traits
 		CreateHeader(this, pSizer, "Traits");
-		CreateLabel(this, pSizer, "Positive (0)");
-		CreateLabel(this, pSizer, "Negative (0)");
-		CreateLabel(this, pSizer, "Neutral (0)");
+		CreateLabel(this, pSizer, "Positive (0)")->SetFont(FontFace::Bold, 14.0);
+		CreateLabel(this, pSizer, "Negative (0)")->SetFont(FontFace::Bold, 14.0);
+		CreateLabel(this, pSizer, "Neutral (0)")->SetFont(FontFace::Bold, 14.0);
 
 		return true;
 	}
@@ -157,6 +157,7 @@ namespace fig::gui
 	{
 		auto pAttribute = CreateControl<CharacterAttributeWidget>(attribute.name, attribute.value, attribute.type, options, placeholder);
 		pAttribute->SetButtonDelegate([this, index] { OnAttributeSettingsMenu(index); });
+		pAttribute->SetEditNameDelegate([this, index](auto&& name) { OnRenamedAttribute(index, name); });
 		_pAttributeSizer->Add(pAttribute, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 		return pAttribute;
 	}
@@ -220,7 +221,7 @@ namespace fig::gui
 		};
 
 		item.pControl = AppendAttributeControl(item.attribute, item.index, {}, {});
-		item.pControl->Focus();
+		item.pControl->BeginEditName();
 		_items.push_back(std::move(item));
 		return item.pControl;
 	}
@@ -238,12 +239,12 @@ namespace fig::gui
 
 		auto& menu = CreateMenu();
 		auto& typeMenu = menu.AddItem("Value type");
-		typeMenu.AddCheckItem("Text (short)", pAttribute->type == CharacterAttribute::ValueType::ShortText)
+		typeMenu.AddCheckItem("Text (single line)", pAttribute->type == CharacterAttribute::ValueType::ShortText)
 			.SetDelegate([pAttribute, pControl] {
 				pAttribute->type = CharacterAttribute::ValueType::ShortText;
 				pControl->ChangeType(pAttribute->type);
 			});
-		typeMenu.AddCheckItem("Text (long)", pAttribute->type == CharacterAttribute::ValueType::LongText)
+		typeMenu.AddCheckItem("Text (multiple lines)", pAttribute->type == CharacterAttribute::ValueType::LongText)
 			.SetDelegate([pAttribute, pControl] {
 				pAttribute->type = CharacterAttribute::ValueType::LongText;
 				pControl->ChangeType(pAttribute->type);
@@ -282,7 +283,8 @@ namespace fig::gui
 			});
 
 		menu.AddSeparator();
-		menu.AddItem("Rename ...", Resource::ICON_EDIT);
+		menu.AddItem("Rename ...", Resource::ICON_EDIT)
+			.SetDelegate([this, attributeIndex] { RenameAttribute(attributeIndex); });
 		menu.AddSeparator();
 		menu.AddItem("Copy");
 		menu.AddItem("Paste");
@@ -297,6 +299,26 @@ namespace fig::gui
 			.SetDelegate([this, attributeIndex] { RemoveAttribute(attributeIndex); });
 
 		menu.Show();
+	}
+
+	void CharacterEditorGeneralTab::RenameAttribute(size_t index)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			item.pControl->BeginEditName();
+		}
+	}
+
+	void CharacterEditorGeneralTab::OnRenamedAttribute(size_t index, fig::string_view name)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			item.attribute.name = name;
+			item.attribute.id = fig::handle { name };
+			item.pControl->Focus();
+		}
 	}
 
 	void CharacterEditorGeneralTab::RemoveAttribute(size_t index)
@@ -348,7 +370,6 @@ namespace fig::gui
 
 			_pCharacter->SetAttribute(attribute.id, attribute.name, value, attribute.type, attribute.visibility, attribute.flags);
 		}
-
 
 		return {};
 	}

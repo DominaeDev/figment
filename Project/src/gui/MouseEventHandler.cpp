@@ -14,6 +14,11 @@ namespace fig::gui
 		_fnLeftClicked = pDelegate;
 	}
 
+	void MouseEventHandler::SetDoubleClickDelegate(MouseClickedDelegate pDelegate) noexcept
+	{
+		_fnLeftDoubleClicked = pDelegate;
+	}
+
 	void MouseEventHandler::SetRightClickDelegate(MouseClickedDelegate pDelegate) noexcept
 	{
 		_fnRightClicked = pDelegate;
@@ -116,9 +121,12 @@ namespace fig::gui
 		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN or event.type == SDL_EVENT_MOUSE_BUTTON_UP)
 		{
 			auto mouseEvent = event.button;
-
-			if (not is_inside(rect, toI(mouseEvent.x), toI(mouseEvent.y), _expand))
+			int32_t mx = toI(mouseEvent.x);
+			int32_t my = toI(mouseEvent.y);
+			if (not is_inside(rect, mx, my, _expand))
 				return EventResult::Pass;
+
+			fig::point mpos { mx, my };
 
 			if (event.button.button == SDL_BUTTON_LEFT)
 			{
@@ -126,9 +134,18 @@ namespace fig::gui
 				{
 					if (_bMouseLeftDown and !mouseEvent.down) // Click!
 					{
+						if (mouseEvent.clicks == 2)
+						{
+							if (_fnLeftDoubleClicked)
+								_fnLeftDoubleClicked();
+							OnDoubleClicked();
+							OnDoubleClickedAt(mpos);
+						}
+
 						if (_fnLeftClicked)
 							_fnLeftClicked();
 						OnClicked();
+						OnClickedAt(mpos);
 					}
 
 					SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Default);
@@ -159,6 +176,7 @@ namespace fig::gui
 						if (_fnRightClicked)
 							_fnRightClicked();
 						OnRightClicked();
+						OnRightClickedAt(mpos);
 					}
 
 					_bMouseRightDown = mouseEvent.down;

@@ -71,7 +71,7 @@ namespace fig::gui
 		bgSizer->Add(centerArea, 0, SizerFlag::Fill | SizerFlag::Bottom, 24);
 		bgSizer->AddStretchSpacer();
 
-		_pTextBox->SetEnterPressedCallback([this](fig::string_view text) {
+		_pTextBox->SetEnterPressedDelegate([this](fig::string_view text) {
 			EnqueueCommand(ChatCommands::Parse(fig::string { text }));
 			_pTextBox->Clear();
 		});

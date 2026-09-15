@@ -40,7 +40,7 @@ namespace fig::gui
 
 		pTextBox->SetText(binding.AsString());
 		pTextBox->SetFixedRows(rows);
-		pTextBox->SetTextChangedCallback([binding](fig::string_view text) mutable { binding.Set(fig::string { text }); });
+		pTextBox->SetTextChangedDelegate([binding](fig::string_view text) mutable { binding.Set(fig::string { text }); });
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;
 	}

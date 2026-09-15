@@ -1,13 +1,13 @@
 <Attributes>
 	<Group name="General">
+		<Attribute id="background" type="multiline" visibility="private" flags="trivial" break="true">
+			<Name>Background</Name>
+		</Attribute>
 		<Attribute id="alias" type="list">
 			<Name>Aliases</Name>
 		</Attribute>
 		<Attribute id="occupation" type="text" flags="trivial">
 			<Name>Occupation</Name>
-		</Attribute>
-		<Attribute id="background" type="multiline" visibility="private" flags="trivial">
-			<Name>Background</Name>
 		</Attribute>
 		<Attribute id="reputation" type="list">
 			<Name>Repuation</Name>
@@ -35,10 +35,10 @@
 		<Attribute id="skin" type="text" flags="trivial">
 			<Name>Skin</Name>
 		</Attribute>
-		<Attribute id="height" type="text" flags="trivial">
+		<Attribute id="height" type="number" flags="trivial">
 			<Name>Height</Name>
 		</Attribute>
-		<Attribute id="weight" type="text" flags="trivial">
+		<Attribute id="weight" type="number" flags="trivial">
 			<Name>Weight</Name>
 		</Attribute>
 	</Group>

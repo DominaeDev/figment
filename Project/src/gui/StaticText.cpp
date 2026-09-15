@@ -40,6 +40,20 @@ namespace fig::gui
 		ReleaseTexture();
 	};
 
+	void StaticText::SetFont(FontFace fontFace, double ptSize)
+	{
+		SetFont(Fonts::GetFont(fontFace, ptSize));
+	}
+
+	void StaticText::SetFont(fig::font_ptr pFont)
+	{
+		if (_pFont = pFont)
+		{
+			SetHeight(TTF_GetFontHeight(_pFont.get()));
+			InvalidateText();
+		}
+	}
+
 	void StaticText::SetText(fig::string_view text)
 	{
 		_text = text;

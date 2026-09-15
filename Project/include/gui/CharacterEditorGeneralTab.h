@@ -111,6 +111,8 @@ namespace fig::gui
 		fig::observer_ptr<CharacterAttributeWidget> AddAttribute(const AttributeInfo& info);
 		fig::observer_ptr<CharacterAttributeWidget> AddAttribute(const fig::data::CharacterAttribute& attribute);
 		fig::observer_ptr<CharacterAttributeWidget> AppendAttributeControl(fig::data::CharacterAttribute& attribute, size_t index, const fig::string_list& options, fig::string_view placeholder);
+		void RenameAttribute(size_t index);
+		void OnRenamedAttribute(size_t index, fig::string_view name);
 		void RemoveAttribute(size_t index);
 
 

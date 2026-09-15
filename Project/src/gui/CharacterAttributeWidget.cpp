@@ -12,12 +12,19 @@ namespace fig::gui
 {
 	constexpr fig::coord MaxWidth = 780;
 
-	CharacterAttributeWidget::CharacterAttributeWidget(ControlPtr pParent, fig::string_view label, fig::string_view value, CharacterAttribute::ValueType type, const fig::string_list& options, fig::string_view placeholder) : Control(pParent),
+	CharacterAttributeWidget::CharacterAttributeWidget(ControlPtr pParent, fig::string_view label, fig::string_view value, CharacterAttribute::ValueType type, const fig::string_list& options, fig::string_view placeholder) : Control(pParent), MouseEventHandler(this),
 		_options { options }
 	{
-		_pLabel = CreateControl<StaticText>(label, FontFace::Default, 14.0, false);
+		_pLabel = CreateControl<StaticText>(label, FontFace::Default, 14.0, true);
 		_pLabel->SetX(4);
 		_pLabel->SetForegroundColor(Color::SidePanelForeground);
+
+		_pEditLabel = CreateControl<TextInput>(FontFace::Default, 14.0, TextInput::Mode::Single);
+		_pEditLabel->SetEnterPressedDelegate([this](auto&& text) { EndEditName(); });
+		_pEditLabel->SetEscapePressedDelegate([this] { CancelEditName(); });
+		_pEditLabel->SetLostFocusDelegate([this] { EndEditName(); });
+		_pEditLabel->SetEnabled(false);
+		_pEditLabel->SetVisible(false);
 
 		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS);
 		_pSettingsButton->SetSize(20, 20);
@@ -69,7 +76,7 @@ namespace fig::gui
 			_pTextBox->EnableAutoSize(true);
 		}
 
-		fig::string_view value_sv = value;
+		auto value_sv = fig::string { value };
 
 		auto fnTrimLine = [](fig::string_view text) {
 			size_t newlinePos = text.find('\n', 0);
@@ -157,9 +164,83 @@ namespace fig::gui
 	void CharacterAttributeWidget::Focus()
 	{
 		if (_pTextBox)
+		{
 			return _pTextBox->SetFocus(true);
+		}
 		else if (_pComboBox)
+		{
 			return _pComboBox->SetFocus(true);
+		}
 	}
 
+	void CharacterAttributeWidget::SetEditNameDelegate(EditNameDelegate fnDelegate)
+	{
+		_fnRenameDelegate = fnDelegate;
+	}
+
+	void CharacterAttributeWidget::BeginEditName()
+	{
+		if (_bRenaming)
+			return;
+		_bRenaming = true;
+
+		_pLabel->SetVisible(false);
+	
+		_pEditLabel->SetPosition(_pLabel->GetPosition());
+		_pEditLabel->SetWidth(260);
+		_pEditLabel->SetBackgroundColor(GetBackgroundColor());
+		_pEditLabel->SetText(_pLabel->GetText());
+		_pEditLabel->SetVisible(true);
+		_pEditLabel->SetEnabled(true);
+		_pEditLabel->SelectAll();
+		_pEditLabel->SetFocus(true);
+	}
+
+	void CharacterAttributeWidget::EndEditName()
+	{
+		if (not _bRenaming)
+			return;
+		_bRenaming = false;
+
+		auto name = trim(_pEditLabel->GetText());
+		if (name.empty())
+			name = "Unnamed attribute";
+
+		_pLabel->SetText(name);
+		_pLabel->SetVisible(true);
+		if (_fnRenameDelegate)
+			_fnRenameDelegate(fig::string { name });
+
+		_pEditLabel->SetVisible(false);
+		_pEditLabel->SetEnabled(false);
+	}
+
+	void CharacterAttributeWidget::CancelEditName()
+	{
+		_bRenaming = false;
+		_pLabel->SetVisible(true);
+		_pEditLabel->SetVisible(false);
+		_pEditLabel->SetEnabled(false);
+		_pEditLabel->SetFocus(false);
+	}
+
+	EventResult CharacterAttributeWidget::OnEvent(fig::event& event)
+	{
+		if (event.type == SDL_EVENT_KEY_DOWN)
+		{
+			if (event.key.key == SDLK_ESCAPE and _bRenaming)
+			{
+				CancelEditName();
+				return EventResult::Handled;
+			}
+		}
+
+		return MouseEventHandler::HandleMouseEvents(event);
+	}
+
+	void CharacterAttributeWidget::OnDoubleClickedAt(fig::point pos)
+	{
+		if (is_inside(_pLabel->GetRect(), pos))
+			BeginEditName();
+	}
 }

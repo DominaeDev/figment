@@ -19,6 +19,7 @@ namespace fig::gui
 		void SetExpandSize(fig::coord size) noexcept;
 
 		void SetDelegate(MouseClickedDelegate pDelegate) noexcept;
+		void SetDoubleClickDelegate(MouseClickedDelegate pDelegate) noexcept;
 		void SetRightClickDelegate(MouseClickedDelegate pDelegate) noexcept;
 		void SetMouseEnterDelegate(MouseEnterDelegate pDelegate) noexcept;
 		void SetMouseExitDelegate(MouseExitDelegate pDelegate) noexcept;
@@ -38,7 +39,11 @@ namespace fig::gui
 		virtual void OnButtonDown(int32_t button) {}
 		virtual void OnButtonUp(int32_t button) {}
 		virtual void OnClicked() {}
+		virtual void OnDoubleClicked() {}
 		virtual void OnRightClicked() {}
+		virtual void OnClickedAt(fig::point pos) {}
+		virtual void OnDoubleClickedAt(fig::point pos) {}
+		virtual void OnRightClickedAt(fig::point pos) {}
 
 	protected:
 		enum class ButtonState
@@ -60,6 +65,7 @@ namespace fig::gui
 		fig::coord _expand = 0;
 
 		MouseClickedDelegate _fnLeftClicked {};
+		MouseClickedDelegate _fnLeftDoubleClicked {};
 		MouseClickedDelegate _fnRightClicked {};
 		MouseEnterDelegate _fnEnter {};
 		MouseExitDelegate _fnExit {};

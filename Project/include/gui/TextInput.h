@@ -25,8 +25,10 @@ namespace fig::gui
 			int32_t line {};
 		};
 	public:
-		using TextChangedCallback = std::function<void(fig::string_view)>;
-		using EnterPressedCallback = std::function<void(fig::string_view)>;
+		using TextChangedDelegate = std::function<void(fig::string_view)>;
+		using EnterPressedDelegate = std::function<void(fig::string_view)>;
+		using EscapePressedDelegate = std::function<void()>;
+		using LostFocusDelegate = std::function<void()>;
 
 		enum class Mode
 		{
@@ -43,8 +45,6 @@ namespace fig::gui
 
 		void SetText(fig::string_view text);
 		void SetPlaceholder(fig::string_view text);
-		void SetTextChangedCallback(TextChangedCallback cb);
-		void SetEnterPressedCallback(EnterPressedCallback cb);
 		void SetTextWrapWidth(int32_t width);
 		void SetFocus(bool focus);
 		void SetFont(FontFace fontFace, double ptSize) noexcept;
@@ -52,6 +52,11 @@ namespace fig::gui
 		void SetMinRows(int32_t rows);
 		void SetMaxRows(int32_t rows);
 		void SetMode(Mode mode);
+
+		void SetTextChangedDelegate(TextChangedDelegate fnDelegate);
+		void SetEnterPressedDelegate(EnterPressedDelegate fnDelegate);
+		void SetEscapePressedDelegate(EscapePressedDelegate fnDelegate);
+		void SetLostFocusDelegate(LostFocusDelegate fnDelegate);
 
 		fig::string_view GetText() const noexcept { return _text; }
 		int32_t GetTextWrapWidth() const noexcept;
@@ -186,8 +191,10 @@ namespace fig::gui
 		int32_t _minRows = 1;
 		int32_t _maxRows = 1;
 
-		TextChangedCallback _pOnChanged = nullptr;
-		EnterPressedCallback _pOnEnter = nullptr;
+		TextChangedDelegate _fnOnChanged {};
+		EnterPressedDelegate _fnOnEnter {};
+		EscapePressedDelegate _fnOnEscape {};
+		LostFocusDelegate _fnOnLostFocus {};
 
 		// Cursor
 		int32_t _cursor = 0;
