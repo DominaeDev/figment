@@ -70,6 +70,7 @@ namespace fig::gui
 		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
 
 		int32_t SetCursor(int32_t index) noexcept;
+		void ScrollToCursor();
 
 		bool Copy();
 		bool Cut();
@@ -144,6 +145,7 @@ namespace fig::gui
 		bool HandleMouseDown(int x, int y);
 		bool HandleMouseMotion(int x, int y);
 		bool HandleMouseUp(int x, int y);
+		EventResult HandleMouseWheel(SDL_MouseWheelEvent event);
 		void ApplyScroll(int& x, int& y) const;
 		void ApplyScroll(float& x, float& y) const;
 		void ApplyScroll(fig::rect& rect) const;

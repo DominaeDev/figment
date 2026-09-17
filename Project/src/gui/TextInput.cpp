@@ -285,50 +285,15 @@ namespace fig::gui
 		clippingRect.h = std::min(clippingRect.h, lineSkip * maxRows);
 		SDL_SetRenderClipRect(pRenderer, &clippingRect);
 
-		// Scroll to cursor
-		if (_bFocused)
-		{
-			if (IsMultiline() or IsWordWrapping()) // Vertical scroll
-			{
-				float cursorY = _cursor_rect.y - clientRect.y;
-				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) >= maxRows)
-					_scroll.y += lineSkip;
-				while (toI(std::round((cursorY - _scroll.y) / lineSkip)) < 0)
-					_scroll.y -= lineSkip;
-			}
-			else
-			{
-				_scroll.y = 0;
-			}
-
-			if (not IsWordWrapping()) // Horizontal scroll
-			{
-				constexpr int32_t kScrollStep = 80;
-
-				if (auto pText = IsPassword() ? _pPassword.get() : (_lines.empty() ? nullptr : _lines[0].ttf_text.get()))
-				{
-					int maxCursorX = clientRect.w;
-					int textWidth, _;
-					TTF_GetTextSize(pText, &textWidth, &_);
-					int cursorX = toI(_cursor_rect.x + _cursor_rect.w - clientRect.x);
-					while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
-						_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
-					while (cursorX > 0 and cursorX - _scroll.x < 0)
-						_scroll.x = std::max(_scroll.x - kScrollStep, 0);
-				}
-			}
-			else
-			{
-				_scroll.x = 0;
-			}
-		}
-
 		// Draw highlight(s) 
 		if (HasSelection())
 		{
 			if (auto highlights = GetHighlights(); not highlights.empty())
 			{
-				SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
+				if (_bFocused)
+					SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
+				else
+					SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackgroundInactive.r, Color::TextSelectionBackgroundInactive.g, Color::TextSelectionBackgroundInactive.b, Color::TextSelectionBackgroundInactive.a);
 				for (auto& highlight_rect : highlights)
 				{
 					highlight_rect.w = std::max(highlight_rect.w, 3.0f);
@@ -802,6 +767,7 @@ namespace fig::gui
 		}
 
 		ResetCursorBlink();
+		ScrollToCursor();
 	}
 
 	int32_t TextInput::MoveCursorLeft() noexcept
@@ -1177,7 +1143,6 @@ namespace fig::gui
 		_bIsHighlighting = false;
 		return true;
 	}
-
 #pragma endregion Selection
 
 	bool TextInput::Copy()
@@ -1274,6 +1239,8 @@ namespace fig::gui
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			HandleMouseUp(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
 			break;
+		case SDL_EVENT_MOUSE_WHEEL:
+			return HandleMouseWheel(event.wheel);
 		}
 
 		if (!_bFocused)
@@ -1289,16 +1256,16 @@ namespace fig::gui
 				switch (event.key.key)
 				{
 				case SDLK_UP:
-					_scroll.y -= 10;
+					_scroll.y -= _lineHeight;
 					return EventResult::Handled;
 				case SDLK_DOWN:
-					_scroll.y += 10;
+					_scroll.y += _lineHeight;
 					return EventResult::Handled;
 				case SDLK_LEFT:
-					_scroll.x -= 10;
+					_scroll.x -= _lineHeight;
 					return EventResult::Handled;
 				case SDLK_RIGHT:
-					_scroll.x += 10;
+					_scroll.x += _lineHeight;
 					return EventResult::Handled;
 				}
 			}
@@ -1553,6 +1520,21 @@ namespace fig::gui
 		{
 			SetTextWrapWidth(0);
 		}
+	}
+
+	EventResult TextInput::HandleMouseWheel(SDL_MouseWheelEvent event)
+	{
+		if (not (IsMultiline() or IsWordWrapping()))
+			return EventResult::Pass;
+
+		auto& rect = GetRect();
+		fig::point pt = { toI(event.mouse_x), toI(event.mouse_y) };
+		if (!SDL_PointInRect(&pt, &rect))
+			return EventResult::Pass;
+
+		_scroll.y = std::clamp(_scroll.y - toI(toF(event.integer_y) * _lineHeight * 6), 0, std::max(_lineHeight * toI(GetLineCount() + 1) - GetHeight(), 0));
+		_scroll.y = (_scroll.y / _lineHeight) * _lineHeight; // Quantize
+		return EventResult::Handled;
 	}
 
 	void TextInput::SetTextChangedDelegate(TextChangedDelegate fnDelegate)
@@ -2073,6 +2055,7 @@ namespace fig::gui
 
 		RefreshTexts();
 		SetCursor(position + delta);
+		ScrollToCursor();
 	}
 
 	void TextInput::Insert(fig::string_view text)
@@ -2119,6 +2102,7 @@ namespace fig::gui
 		RefreshTexts();
 		SetCursor(from);
 		Deselect();
+		ScrollToCursor();
 		return true;
 	}
 
@@ -2294,5 +2278,54 @@ namespace fig::gui
 		return _cursor > 0
 			and _cursor == _text.size()
 			and _text.back() == '\n';
+	}
+
+	void TextInput::ScrollToCursor()
+	{
+		auto cursor_rect = GetCursorRect();
+		auto& rect = GetRect();
+		cursor_rect.x += rect.x + GetMarginLeft();
+		cursor_rect.y += rect.y + GetMarginTop();
+
+		auto clientRect = GetClientRect();
+		int maxRows = (IsMultiline() or IsWordWrapping()) ? std::max(_maxRows, 1) : 1;
+
+		if (_bFocused)
+		{
+			if (IsMultiline() or IsWordWrapping()) // Vertical scroll
+			{
+				float cursorY = cursor_rect.y - clientRect.y;
+				while (toI(std::round((cursorY - _scroll.y) / _lineHeight)) >= maxRows)
+					_scroll.y += _lineHeight;
+				while (toI(std::round((cursorY - _scroll.y) / _lineHeight)) < 0)
+					_scroll.y -= _lineHeight;
+				_scroll.y = (_scroll.y / _lineHeight) * _lineHeight; // Quantize
+			}
+			else
+			{
+				_scroll.y = 0;
+			}
+
+			if (not IsWordWrapping()) // Horizontal scroll
+			{
+				constexpr int32_t kScrollStep = 80;
+
+				if (auto pText = IsPassword() ? _pPassword.get() : (_lines.empty() ? nullptr : _lines[0].ttf_text.get()))
+				{
+					int maxCursorX = clientRect.w;
+					int textWidth, _;
+					TTF_GetTextSize(pText, &textWidth, &_);
+					int cursorX = toI(cursor_rect.x + cursor_rect.w - clientRect.x);
+					while (cursorX > 0 and cursorX - _scroll.x > maxCursorX)
+						_scroll.x = std::min(_scroll.x + kScrollStep, cursorX - maxCursorX);
+					while (cursorX > 0 and cursorX - _scroll.x < 0)
+						_scroll.x = std::max(_scroll.x - kScrollStep, 0);
+				}
+			}
+			else
+			{
+				_scroll.x = 0;
+			}
+		}
 	}
 }
