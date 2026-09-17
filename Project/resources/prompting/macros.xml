@@ -32,14 +32,15 @@
 	<Condition id="f_pronouns">__feminine_pronouns or (not (__masculine_pronouns or __non_binary_pronouns) and presumed_feminine)</Condition>
 	<Condition id="nb_pronouns">__non_binary_pronouns or (not (__masculine_pronouns or __feminine_pronouns) and presumed_non_binary)</Condition>
 	<Condition id="nt_pronouns">__neuter_pronouns</Condition>
-	<Condition id="c_pronouns">custom_they or custom_them or custom_their or custom_theirs or custom_themselves</Condition>
+	<Condition id="c_pronouns">custom_they or custom_them or custom_their or custom_theirs or custom_themself</Condition>
 	<Condition id="pl_pronouns">nb_pronouns</Condition>
 
 	<Macro id="they">{custom_they?{custom_they}|{f_pronouns?she|{m_pronouns?he|{nt_pronouns?it|they}}}}</Macro>
 	<Macro id="them">{custom_them?{custom_them}|{f_pronouns?her|{m_pronouns?him|{nt_pronouns?it|them}}}}</Macro>
 	<Macro id="their">{custom_their?{custom_their}|{f_pronouns?her|{m_pronouns?his|{nt_pronouns?its|their}}}}</Macro>
 	<Macro id="theirs">{custom_theirs?{custom_theirs}|{f_pronouns?hers|{m_pronouns?his|{nt_pronouns?its|theirs}}}}</Macro>
-	<Macro id="themselves">{custom_themselves?{custom_themselves}|{f_pronouns?herself|{m_pronouns?himself|{nt_pronouns?itself|themselves}}}}</Macro>
+	<Macro id="themself">{custom_themself?{custom_themself}|{f_pronouns?herself|{m_pronouns?himself|{nt_pronouns?itself|themself}}}}</Macro>
+	<Macro id="themselves">{custom_themself?{custom_themself}|{f_pronouns?herself|{m_pronouns?himself|{nt_pronouns?itself|themselves}}}}</Macro>
 
 	<!-- Grammar macros -->
 	<Macro id="is">{pl_pronouns?are|is}</Macro>						<!-- {they} {is} -->

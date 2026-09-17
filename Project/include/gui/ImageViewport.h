@@ -15,6 +15,8 @@ namespace fig::gui
 
 		void ResetTransform();
 
+		fig::texture_ptr GetTargetTexture() noexcept { return _targetTexture.get(); }
+
 	protected:
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		EventResult OnEvent(fig::event& event);

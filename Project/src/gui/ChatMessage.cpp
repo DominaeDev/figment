@@ -85,7 +85,7 @@ namespace fig::gui
 				pTexture = AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE);
 
 			Image* pPortrait = CreateControl<Image>(pTexture);
-			pPortrait->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitWidth);
+			pPortrait->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitHeight);
 
 			constexpr int32_t spacing = 24;
 			if (bRight)

@@ -27,8 +27,10 @@ namespace fig
 		LoadTexture(pRenderer, Resource::LOGO_SMALL, "./resources/gui/logo_small.png");
 		LoadTexture(pRenderer, Resource::ROUNDED_BACKGROUND_6PX, "./resources/gui/rounded_bg_6px.png");
 		LoadTexture(pRenderer, Resource::ROUNDED_BORDER_6PX, "./resources/gui/rounded_border_6px.png");
+		LoadTexture(pRenderer, Resource::THICK_ROUNDED_BORDER_6PX, "./resources/gui/thick_rounded_border_6px.png");
 		LoadTexture(pRenderer, Resource::ROUNDED_BACKGROUND_10PX, "./resources/gui/rounded_bg_10px.png");
 		LoadTexture(pRenderer, Resource::ROUNDED_BORDER_10PX, "./resources/gui/rounded_border_10px.png");
+		LoadTexture(pRenderer, Resource::THICK_ROUNDED_BORDER_10PX, "./resources/gui/thick_rounded_border_10px.png");
 		LoadTexture(pRenderer, Resource::SUBMENU_ARROW , "./resources/gui/submenu_arrow.png");
 		LoadTexture(pRenderer, Resource::BACKGROUND_CIRCLE_48PX , "./resources/gui/circle_48.png");
 

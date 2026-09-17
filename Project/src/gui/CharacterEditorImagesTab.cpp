@@ -5,6 +5,7 @@
 #include "gui/CharacterPortraitWidget.h"
 #include "gui/CharacterBackgroundWidget.h"
 #include "gui/CharacterSmallPortraitWidget.h"
+#include "gui/NonOwningImageWithMask.h"
 #include "gui/GridSizer.h"
 #include "gui/ButtonWithLabel.h"
 #include "gui/AddImageButton.h"
@@ -52,6 +53,11 @@ namespace fig::gui
 	{
 		// Load images in load queue
 		ProcessLoadQueue();
+
+		if (not _pSmallPortraitPreview->HasTexture())
+			RefreshSmallPortraitPreview();
+		if (_bEditingSmallPortrait)
+			_pSmallPortraitPreview->SetDirty();
 	}
 
 	void CharacterEditorImagesTab::OnAfterLayout()
@@ -109,9 +115,15 @@ namespace fig::gui
 
 		_pSmallPortrait = CreateControl<CharacterSmallPortraitWidget>();
 		_pSmallPortrait->SetBackgroundTexture(AppResources::GetTexture(Resource::SQUARE_BACKGROUND_DEFAULT));
-
 		_pSmallPortrait->SetRightClickDelegate([this]() { OnClickedSmallPortrait(); });
-		pSizer->Add(_pSmallPortrait);
+
+		_pSmallPortraitPreview = CreateControl<NonOwningImageWithMask>(nullptr, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
+		_pSmallPortraitPreview->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitHeight);
+
+		auto pHSizer = new HorizontalSizer();
+		pHSizer->Add(_pSmallPortrait, 0);
+		pHSizer->Add(_pSmallPortraitPreview, -1, SizerFlag::AlignBottom | SizerFlag::Left, 12);
+		_pSizer->Add(pHSizer, 0, SizerFlag::FixedSize, Constants::Data::SmallPortraitHeight);
 
 		if (not imageAssets.empty())
 			_pSmallPortrait->SetImage(imageAssets[0].get().id);
@@ -357,11 +369,13 @@ namespace fig::gui
 		if (not portrait.image.empty())
 		{
 			_pSmallPortrait->SetImage(portrait.image);
+			
 			_bEditingSmallPortrait = true;
 		}
 		else if (not portrait.assetId.empty())
 		{
 			_pSmallPortrait->SetImage(portrait.assetId);
+			RefreshSmallPortraitPreview();
 			_bEditingSmallPortrait = true;
 		}
 		_pSmallPortrait->ResetTransform();
@@ -388,9 +402,9 @@ namespace fig::gui
 		if (not imageAssets.empty())
 		{
 			_pSmallPortrait->SetImage(imageAssets[0].get().id);
+			RefreshSmallPortraitPreview();
 			_bEditingSmallPortrait = false;
 		}
-
 	}
 
 	void CharacterEditorImagesTab::ProcessLoadQueue()
@@ -410,6 +424,7 @@ namespace fig::gui
 			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
 			{
 				_pSmallPortrait->SetImage(*try_surface);
+				RefreshSmallPortraitPreview();
 				_bEditingSmallPortrait = true;
 				bChanged = true;
 			}
@@ -546,5 +561,10 @@ namespace fig::gui
 		);
 
 		return {};
+	}
+
+	void CharacterEditorImagesTab::RefreshSmallPortraitPreview()
+	{
+		_pSmallPortraitPreview->SetTexture(_pSmallPortrait->GetTargetTexture(), AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
 	}
 }

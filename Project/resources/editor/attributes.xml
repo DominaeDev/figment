@@ -20,8 +20,8 @@
 		<Attribute id="appearance" type="text" break="true">
 			<Name>Appearance</Name>
 		</Attribute>
-		<Attribute id="clothes" type="text" flags="trivial">
-			<Name>Clothes</Name>
+		<Attribute id="clothing" type="text" flags="trivial">
+			<Name>Clothing</Name>
 		</Attribute>
 		<Attribute id="hair" type="text" flags="trivial">
 			<Name>Hair</Name>

@@ -764,6 +764,15 @@
     <ClCompile Include="src\data\CharacterTrait.cpp">
       <Filter>Source Files\Frontend\IO\Data</Filter>
     </ClCompile>
+    <ClCompile Include="src\io\CsvFile.cpp">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\CharacterTraitInfo.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\NonOwningImageWithMask.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1758,6 +1767,12 @@
     </ClInclude>
     <ClInclude Include="include\data\CharacterTraitInfo.h">
       <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\CsvFile.h">
+      <Filter>Source Files\Frontend\IO\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\NonOwningImageWithMask.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

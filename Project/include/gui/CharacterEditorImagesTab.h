@@ -9,6 +9,7 @@ namespace fig::gui
 	class CharacterPortraitWidget;
 	class CharacterSmallPortraitWidget;
 	class CharacterBackgroundWidget;
+	class NonOwningImageWithMask;
 
 	class CharacterEditorImagesTab : public EditorTab<CharacterEditorArgs>
 	{
@@ -32,6 +33,7 @@ namespace fig::gui
 
 		void OnClickedSmallPortrait();
 		void RevertSmallPortrait();
+		void RefreshSmallPortraitPreview();
 
 		void OnClickedPortrait(ControlPtr pControl, int32_t button);
 		void RemovePortrait(size_t index);
@@ -69,6 +71,7 @@ namespace fig::gui
 
 		// Small portrait
 		fig::observer_ptr<CharacterSmallPortraitWidget> _pSmallPortrait;
+		fig::observer_ptr<NonOwningImageWithMask> _pSmallPortraitPreview;
 		std::queue<fig::path> _smallPortraitLoadQueue;
 		bool _bEditingSmallPortrait {};
 

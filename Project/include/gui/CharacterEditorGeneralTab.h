@@ -42,6 +42,7 @@ namespace fig::gui
 
 		fig::data::CharacterAttributeInfoDatabase _attributesInfo;
 		fig::data::CharacterTraitInfoDatabase _traitsInfo;
+
 	private:
 		void ShowAttributesMenu();
 		void OnAttributeSettingsMenu(size_t attributeIndex);
@@ -61,6 +62,9 @@ namespace fig::gui
 
 		fig::observer_ptr<TextBox> _pAge;
 		SizerPtr _pAttributeSizer {};
+
+		std::map<fig::handle, fig::observer_ptr<ToggleWithLabel>> _traitToggles;
+		fig::observer_ptr<StaticText> _traitsLabel;
 		std::map<fig::string, fig::observer_ptr<StaticText>> _traitGroupLabels;
 	};
 }

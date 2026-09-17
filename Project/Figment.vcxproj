@@ -176,6 +176,7 @@
     <ClCompile Include="src\data\CharacterAttribute.cpp" />
     <ClCompile Include="src\data\CharacterName.cpp" />
     <ClCompile Include="src\data\CharacterTrait.cpp" />
+    <ClCompile Include="src\data\CharacterTraitInfo.cpp" />
     <ClCompile Include="src\data\ChatLog.cpp" />
     <ClCompile Include="src\data\ContentMetaData.cpp" />
     <ClCompile Include="src\data\Character.cpp" />
@@ -223,6 +224,7 @@
     <ClCompile Include="src\gui\GUIColor.cpp" />
     <ClCompile Include="src\gui\Menu.cpp" />
     <ClCompile Include="src\gui\MenuSeparator.cpp" />
+    <ClCompile Include="src\gui\NonOwningImageWithMask.cpp" />
     <ClCompile Include="src\gui\Overlay.cpp" />
     <ClCompile Include="src\gui\PasswordBox.cpp" />
     <ClCompile Include="src\gui\PlayButton.cpp" />
@@ -265,6 +267,7 @@
     <ClCompile Include="src\gui\Window.cpp" />
     <ClCompile Include="src\io\Asset.cpp" />
     <ClCompile Include="src\io\AsyncImageLoad.cpp" />
+    <ClCompile Include="src\io\CsvFile.cpp" />
     <ClCompile Include="src\io\IndexDatabase.cpp" />
     <ClCompile Include="src\io\AssetFileReader.cpp" />
     <ClCompile Include="src\io\AssetFileWriter.cpp" />
@@ -525,6 +528,7 @@
     <ClInclude Include="include\gui\LoadModelWidget.h" />
     <ClInclude Include="include\gui\Menu.h" />
     <ClInclude Include="include\gui\MenuSeparator.h" />
+    <ClInclude Include="include\gui\NonOwningImageWithMask.h" />
     <ClInclude Include="include\gui\Overlay.h" />
     <ClInclude Include="include\gui\PasswordBox.h" />
     <ClInclude Include="include\gui\PlayButton.h" />
@@ -574,6 +578,7 @@
     <ClInclude Include="include\io\AssetCache.h" />
     <ClInclude Include="include\io\AssetTypeDefinition.h" />
     <ClInclude Include="include\io\AsyncImageLoad.h" />
+    <ClInclude Include="include\io\CsvFile.h" />
     <ClInclude Include="include\io\IndexDatabase.h" />
     <ClInclude Include="include\io\AssetFileReader.h" />
     <ClInclude Include="include\io\AssetFileWriter.h" />

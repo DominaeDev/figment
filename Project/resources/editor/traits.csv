@@ -1,0 +1,189 @@
+Category,Trait,Description,Visibility
+Sociability,Approachable,"Easy to talk to, even for strangers.",public
+Sociability,Extroverted,Draws energy from being around others.,public
+Sociability,Friendly,Puts others at ease with a friendly demeanor.,public
+Sociability,Gregarious,Seeks out company and thrives in a crowd.,public
+Sociability,Introverted,Recharges alone rather than around others.,public
+Sociability,Outgoing,Reaches out and starts conversations easily.,public
+Sociability,Shy,Hesitant in unfamiliar social situations.,public
+Sociability,Sociable,Enjoys spending time around other people.,public
+Sociability,Timid,Holds back rather than risk confrontation or attention.,public
+Temperament,Aggressive,Quick to threaten or attack.,public
+Temperament,Brooding,Often withdrawn into {their} own mind; immersed in dark thoughts.,public
+Temperament,Crazed,"Unhinged, prone to frightening outbursts.",public
+Temperament,Easygoing,Rolls with things rather than making a fuss.,public
+Temperament,Gentle,"Handles others, and their feelings, with a soft touch.",public
+Temperament,Grumpy,Perpetually sour and hard to please.,public
+Temperament,Irritable,Quick to snap at small annoyances.,public
+Temperament,Mood swings,Swings sharply between emotional highs and lows.,public
+Temperament,Overwhelmed,Struggles to cope when too much piles up at once.,public
+Temperament,Patient,Stays calm and steady while others find {their} way.,public
+Temperament,Poised,Stays composed and graceful under pressure.,public
+Temperament,Relaxed,Rarely rattled; takes things in stride.,public
+Temperament,Short-tempered,Anger flares fast and hard.,public
+Temperament,Violent,"Looks for a fight, even over small things.",public
+Candor,Authentic,Stays true to who {they} actually {are}.,private
+Candor,Candid,"Speaks openly, without holding back {their} real thoughts.",private
+Candor,Cryptic,"Speaks in riddles, rarely saying exactly what {they} mean{s}.",private
+Candor,Earnest,Approaches things with heartfelt seriousness.,private
+Candor,Enigmatic,Hard to read; keeps others guessing.,private
+Candor,Fair,"Judges situations on {their} merits, not personal bias.",private
+Candor,Frank,"Gets straight to the point, diplomacy be damned.",private
+Candor,Genuine,Doesn't put on airs; what you see is real.,private
+Candor,Honest,"Tells the truth, even when it's uncomfortable.",private
+Candor,Impartial,Doesn't take sides or play favorites.,private
+Candor,Manipulative,Manipulates and swindles others for personal gain.,private
+Candor,Sincere,Means what {they} say{s}.,private
+Candor,Sly,Gets what {they} want{s} through clever misdirection.,private
+Candor,Sneaky,Moves and acts without being noticed.,private
+Candor,Straightforward,"Says what {they} mean{s}, plainly and directly.",private
+Candor,Truthful,Doesn't lie or mislead.,private
+Candor,Untruthful,Lies as a matter of habit.,private
+Candor,Upstanding,Holds {themself} to a high moral standard.,private
+Initiative,Ambitious,Sets {their} sights high and works to get there.,public
+Initiative,Anticipatory,Sees what's coming and prepares for it.,public
+Initiative,Assertive,States {their} needs and opinions plainly.,public
+Initiative,Decisive,Makes up {their} mind quickly and sticks with it.,public
+Initiative,Determined,"Keeps pushing toward a goal, no matter the obstacle.",public
+Initiative,Forward-thinking,Plans with an eye toward the future.,public
+Initiative,Impulsive,Acts on instinct before thinking it through.,public
+Initiative,Proactive,Takes action before being asked.,public
+Initiative,Progressive,Favors new approaches over sticking with tradition.,public
+Initiative,Purposeful,"Acts with clear intent, rarely aimless.",public
+Charisma,Alluring,Has a pull that's hard to look away from.,public
+Charisma,Charismatic,Draws people in with sheer force of personality.,public
+Charisma,Charming,Effortlessly likable; people warm to them fast.,public
+Charisma,Convincing,Makes a case that's hard to argue with.,public
+Charisma,Coquettish,"Plays coy, dropping hints rather than saying things outright.",public
+Charisma,Flirty,"Enjoys playful, lighthearted romantic banter.",public
+Charisma,Influential,"Shapes how others think and act, often without trying.",public
+Charisma,Magnetic,Draws people in without even trying.,public
+Charisma,Persuasive,Skilled at winning others over to {their} point of view.,public
+Charisma,Provocative,"Deliberately stirs up desire, and doesn't shy from attention.",public
+Charisma,Seductive,Knows exactly how to draw someone in and keep them there.,public
+Charisma,Sultry,"Carries a smoldering, sensual presence.",public
+Charisma,Teasing,"Loves to tempt, just enough to leave you wanting more.",public
+Creativity,Artistic,Drawn to expressing {themself} through art.,public
+Creativity,Creative,Comes up with original ideas naturally.,public
+Creativity,Expressive,Openly shows what {they} think{s} and feel{s}.,public
+Creativity,Imaginative,Pictures possibilities that aren't there yet.,public
+Creativity,Innovative,Finds new ways to do old things.,public
+Creativity,Visionary,Imagines possibilities others haven't thought of yet.,public
+Confidence,Audacious,Bold to the point of being shocking.,public
+Confidence,Bold,"Acts decisively, without waiting for permission.",public
+Confidence,Brave,Pushes through fear to do what needs doing.,public
+Confidence,Confident,Believes in {their} own ability to handle what comes.,public
+Confidence,Courageous,Faces danger or difficulty head-on.,public
+Confidence,Daring,Takes risks that others would shy away from.,public
+Confidence,Down-to-earth,"Grounded and practical, without airs.",public
+Confidence,Fearless,"Feels little to no fear, even in danger.",public
+Confidence,Humble,Doesn't overstate {their} own importance or achievements.,public
+Confidence,Modest,Downplays {their} own accomplishments.,public
+Confidence,Secure,Feels grounded and safe in who {they} {are}.,public
+Confidence,Self-assured,Trusts {their} own judgment without needing validation.,public
+Confidence,Self-effacing,"Quick to deflect praise, sometimes to a fault.",public
+Confidence,Unassuming,Doesn't seek attention or credit.,public
+Confidence,Unpretentious,Doesn't try to seem more than {she} {are}.,public
+Vigor,Energetic,Full of physical energy and drive.,public
+Vigor,Exuberant,"Overflowing with enthusiasm, impossible to miss.",public
+Vigor,Lazy,Avoids effort whenever {they} can get away with it.,public
+Vigor,Lethargic,"Low on energy, slow to get moving.",public
+Vigor,Lively,Brings energy and life to any room {they're} in.,public
+Vigor,Manic,Swept into frantic highs with little self-control.,public
+Vigor,Spirited,Full of spark and determination.,public
+Vigor,Spontaneous,"Embraces the moment, plans be damned.",public
+Vigor,Vivacious,"Bursting with lively, infectious energy.",public
+Vigor,Zealous,Pursues {their} interests with relentless fervor.,public
+Mindset,Analytical,Breaks problems down into {their} parts to understand them.,private
+Mindset,Cheerful,"Keeps a bright, upbeat outlook day to day.",private
+Mindset,Comical,Acts in ways that are outright funny to watch.,private
+Mindset,Contemplative,Comfortable sitting with a question for a long while.,private
+Mindset,Dark-humored,Finds humor in bleak or morbid subjects.,private
+Mindset,Depressed,Weighed down by a heaviness that won't lift.,private
+Mindset,Fatalistic,Believes the outcome was always going to happen.,private
+Mindset,Fun-loving,Always looking for the next good time.,private
+Mindset,Funny,Reliably good for a laugh.,private
+Mindset,Hopeful,"Expects good things, even in hard times.",private
+Mindset,Humorous,Has a natural gift for making others laugh.,private
+Mindset,Idealistic,Holds onto a vision of how things should be.,private
+Mindset,Introspective,Regularly examines {their} own thoughts and motives.,private
+Mindset,Joyful,Radiates genuine happiness.,private
+Mindset,Judicious,Weighs decisions carefully before acting.,private
+Mindset,Lighthearted,Doesn't take things too seriously.,private
+Mindset,Logical,"Reasons things through step by step, minimizing bias.",private
+Mindset,Melancholic,Carries a wistful sadness beneath the surface.,private
+Mindset,Methodical,"Works through things step by step, in order.",private
+Mindset,Nihilistic,Doubts that anything really matters in the end.,private
+Mindset,Optimistic,Sees the best possible outcome in most situations.,private
+Mindset,Playful,Turns everyday moments into games or jokes.,private
+Mindset,Positive,Keeps an upbeat outlook on life.,private
+Mindset,Prudent,"Cautious about risk, careful with resources.",private
+Mindset,Reflective,Takes time to look back before moving forward.,private
+Mindset,Sad,Carries a quiet sorrow most days.,private
+Mindset,Simple,"Prefers a straightforward, uncomplicated life.",private
+Mindset,Systematic,Relies on process and structure to get things done.,private
+Mindset,Witty,Quick with a clever remark.,private
+Romance,Adorable,"Charms people effortlessly, in the sweetest way.",public
+Romance,Affectionate,Freely shows warmth through touch and words.,public
+Romance,Caring,Attentive to others' needs and wellbeing.,public
+Romance,Emotional,Feels things deeply and shows it.,public
+Romance,Endearing,Has small quirks that make them easy to love.,public
+Romance,Insatiable ,"{Their} libido is weather: constant, ambient, occasionally a storm.",public
+Romance,Loving,Gives love openly and without holding back.,public
+Romance,Passionate,"Expresses {their} love with intense, uninhibited fervor.",public
+Romance,Romantic,Delights in gestures of love; sees the world through a heart-shaped lens.,public
+Romance,Sentimental,Holds onto memories and small tokens of meaning.,public
+Loyalty,Dedicated,"Puts in consistent, sustained effort toward what matters to them.",public
+Loyalty,Devoted,Gives {themself} fully to the one {they} serve{s} or love{s}.,public
+Loyalty,Eager to please,Finds real satisfaction in making others happy.,public
+Loyalty,Faithful,"Stays true, especially to a partner or promise.",public
+Loyalty,Loyal,Stands by the people and causes {they} commit{s} {themself} to.,public
+Loyalty,Obsessive,"Fixates on one person to an unhealthy, all-consuming degree.",public
+Intellect,Bright,"Picks things up quickly, almost instinctively.",public
+Intellect,Clever,Finds inventive solutions to tricky problems.,public
+Intellect,Intelligent,Learns and reasons with above-average ease.,public
+Intellect,Knowledgeable,Has a deep well of facts and expertise to draw on.,public
+Intellect,Quick-witted,Thinks on {their} feet and responds in an instant.,public
+Intellect,Perceptive,Quick to notice details others miss.,public
+Intellect,Smart,"Makes sound decisions, practically and quickly.",public
+Empathy,Accepting,"Takes people as they are, without trying to change them.",public
+Empathy,Altruistic,"Does good simply because it's right, expecting nothing back.",public
+Empathy,Broad-minded,Open to ideas and lifestyles outside {their} own experience.,public
+Empathy,Compassionate,Moved to ease others' suffering.,public
+Empathy,Considerate,Weighs how {their} actions affect others before acting.,public
+Empathy,Empathetic,"Feels what others feel, as if it were {their} own.",public
+Empathy,Encouraging,Lifts others up and cheers them on.,public
+Empathy,Generous,"Gives freely, of time, resources, or attention.",public
+Empathy,Helpful,Steps in to lend a hand whenever needed.,public
+Empathy,Indifferent,Rarely moved by what happens around them.,public
+Empathy,Insensitive,Blind to how {their} words land on others.,public
+Empathy,Kind,Treats others with warmth and consideration.,public
+Empathy,Magnanimous,Generous even toward those who've wronged them.,public
+Empathy,Non-judgmental,"Treats others without judgment, even when {they'd} be entitled to it.",public
+Empathy,Respectful,"Treats others' feelings, opinions, and boundaries with regard.",public
+Empathy,Selfish,"Puts {their} own needs first, always.",public
+Empathy,Selfless,Willingly sacrifices {their} own comfort for others.,public
+Empathy,Sensitive,Picks up easily on others' feelings and moods.,public
+Empathy,Supportive,Stands behind others through {their} struggles.,public
+Empathy,Thoughtful,Notices the small things that matter to others.,public
+Empathy,Tolerant,Puts up with differences and disagreements without complaint.,public
+Empathy,Understanding,Gives others the benefit of the doubt.,public
+Empathy,Unselfish,Rarely acts out of personal gain.,public
+Control,Authoritative,Carries natural authority; others defer without being asked.,public
+Control,Commanding,Speaks and acts in a way that leaves no room for argument.,public
+Control,Controlling,"Wants a firm hand over how things, and people, go.",public
+Control,Docile,"Easygoing and compliant, rarely resists.",public
+Control,Jealous,Consumed by envy over what others have.,public
+Control,Obedient,Follows instructions without pushing back.,public
+Control,Possessive,"Holds tightly to what's {theirs}, and doesn't like to share.",public
+Control,Protective,Fiercely shields the people {they} care{s} about.,public
+Control,Submissive,Comfortable letting someone else take the lead.,public
+Control,Territorial,Marks what's {theirs} and guards it jealously.,public
+Control,Yielding,Gives way easily rather than holding {their} ground.,public
+Cardinal sins,Lustful,"Driven by desire, chasing pleasure wherever it may be found, without restraint nor discretion.",private
+Cardinal sins,Gluttonous,"Overindulges without restraint, especially in food and pleasure.",private
+Cardinal sins,Greedy,Never has enough; always wants more.,private
+Cardinal sins,Slothful,"Idle by nature, allergic to responsibility.",private
+Cardinal sins,Wrathful,Simmers with unbridled wrath just under the surface.,private
+Cardinal sins,Envious,Unable to restrain {their} envy towards others. Resents what others have that {they} {don't}.,private
+Cardinal sins,Prideful,Views {themself} as superior to most.,private

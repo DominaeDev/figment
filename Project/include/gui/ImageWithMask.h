@@ -8,8 +8,10 @@ namespace fig::gui
 	{
 	public:
 		ImageWithMask(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask, fig::color tint = { 0xFF, 0xFF, 0xFF, 0xFF });
+		
 		void SetTexture(fig::texture_ptr pTexture, fig::texture_ptr pMask, bool bResize = false);
 		fig::point GetTextureSize() const noexcept;
+		bool HasTexture() const noexcept { return not _texture.empty(); }
 		void Reset();
 
 	protected:

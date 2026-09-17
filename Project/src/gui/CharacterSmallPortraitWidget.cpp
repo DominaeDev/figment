@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/CharacterSmallPortraitWidget.h"
 #include "gui/AppResources.h"
+#include "gui/TexturedBorderRenderer.h"
 
 using namespace fig::io;
 
@@ -31,12 +32,14 @@ namespace fig::gui
 
 			if (_imageTexture.get()->w <= Constants::Data::SmallPortraitWidth and _imageTexture.get()->h <= Constants::Data::SmallPortraitHeight)
 			{
-				GetBorderRenderer()->SetColor(Color::LineColor);
+				auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
+				pBorder->SetColor(Color::LineColor);
 				_bEditable = false;
 			}
 			else
 			{
-				GetBorderRenderer()->SetColor(0x40C0FF_rgb);
+				auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::THICK_ROUNDED_BORDER_6PX, 8);
+				pBorder->SetColor(0x40C0FF_rgb);
 				_bEditable = true;
 			}
 		}

@@ -146,6 +146,7 @@ namespace fig::Constants
 		}
 
 		constexpr fig::coord SmallPortraitWidth = 56;
+		constexpr fig::coord SmallPortraitHeight = 56;
 		constexpr std::array<fig::const_string, 23> ReservedCharacterIDs { "user", "char", "current", "director", "narrator", "system", "char1", "char2", "char3", "char4", "char5", "char6", "char7", "char8", "char", "bot1", "bot2", "bot3", "bot4", "bot5", "bot6", "bot7", "bot8"};
 	}
 

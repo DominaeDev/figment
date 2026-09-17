@@ -3,7 +3,6 @@
 #include "gui/ToggleWithLabel.h"
 #include "gui/TextBox.h"
 #include "gui/AppResources.h"
-#include "gui/ImageViewport.h"
 #include "gui/GridSizer.h"
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "data/Character.h"
@@ -70,6 +69,8 @@ namespace fig::gui
 		{ "presence_commanding",	std::pair { "His voice reflects his commanding confidence and domineering character", "Her voice reflects her commanding confidence and domineering character" } },
 	};
 
+	static constexpr fig::point kToggleSize { 129, 35 };
+
 	CharacterEditorVoiceTab::CharacterEditorVoiceTab(ControlPtr pParent) : EditorTab(pParent)
 	{
 		SetMaxWidth(1280);
@@ -79,7 +80,7 @@ namespace fig::gui
 	fig::observer_ptr<Sizer> CharacterEditorVoiceTab::CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		CreateBoldLabel(pParent, pSizer, text);
-		auto pGridSizer = new GridSizer(120, 36, 8, 6);
+		auto pGridSizer = new GridSizer(kToggleSize.x, kToggleSize.y, 8, 6);
 		pGridSizer->SetMaxColumns(5);
 		pSizer->Add(pGridSizer);
 		return pGridSizer;
@@ -94,7 +95,6 @@ namespace fig::gui
 		_characterId = args.assetId;
 
 		auto pSizer = SetSizer<VerticalSizer>();
-		auto pHorizontalSizer = new HorizontalSizer();
 		auto pDesignerSizer = new VerticalSizer();
 
 		CreateHeader(this, pSizer, "Voice parameters");
@@ -155,8 +155,7 @@ namespace fig::gui
 		_pCustomPrompt->SetMaxWidth(532);
 		pDesignerSizer->Add(_pCustomPrompt, 0, SizerFlag::Expand);
 
-		pHorizontalSizer->Add(pDesignerSizer, -1, SizerFlag::Expand);
-		pSizer->Add(pHorizontalSizer, 0, SizerFlag::Expand);
+		pSizer->Add(pDesignerSizer, 0, SizerFlag::Expand);
 
 		// Buttons
 		_pGenerateButton = CreateControl<ButtonWithLabel>("Generate voice");
@@ -181,21 +180,6 @@ namespace fig::gui
 		pMale->SetOn(_pCharacter->gender.IsConventional(ConventionalGender::Male));
 		pFemale->SetOn(not _pCharacter->gender.IsConventional(ConventionalGender::Male));
 
-		_pViewport = CreateControl<ImageViewport>();
-		_pViewport->SetSize(320, 480);
-		_pViewport->SetVisible(false);
-		pHorizontalSizer->Add(_pViewport, 0, SizerFlag::AlignRight);
-
-		// Load portrait
-		if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(_characterId))
-		{
-			if (auto try_image = Global::GetUserContent().GetTexture((*try_portrait).id, GetSDLRenderer()))
-			{
-				_pViewport->SetTexture((*try_image).get());
-				_pViewport->SetVisible(true);
-			}
-		}
-
 		// Load (existing) voice
 		if (auto try_voice = Global::GetUserContent().GetVoiceForCharacter(_characterId))
 		{
@@ -218,7 +202,7 @@ namespace fig::gui
 		pToggle->SetDelegate([this, toggleGroup, toggleKey](bool bOn) { 
 			OnToggle(toggleGroup, toggleKey, bOn);
 		});
-		pToggle->SetSize(120, 36);
+		pToggle->SetSize(kToggleSize.x, kToggleSize.y);
 		pSizer->Add(pToggle, 0, SizerFlag::Right, 8);
 		_toggleGroups[toggleGroup][toggleKey] = pToggle;
 		return pToggle;

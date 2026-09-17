@@ -45,7 +45,6 @@ namespace fig::gui
 
 		fig::observer_ptr<class TextInput> _pCustomPrompt;
 		fig::observer_ptr<class StaticText> _pStatusText;
-		fig::observer_ptr<class ImageViewport> _pViewport;
 
 		using ToggleGroup = std::map<fig::handle, fig::observer_ptr<class ToggleWithLabel>>;
 		std::map<fig::handle, ToggleGroup> _toggleGroups;
