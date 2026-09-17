@@ -1,19 +1,34 @@
 #include <pch.h>
 #include "gui/CharacterEditor.h"
 #include "gui/CharacterEditorGeneralTab.h"
+#include "gui/CharacterEditorTraitsTab.h"
 #include "gui/CharacterEditorImagesTab.h"
 #include "gui/CharacterEditorVoiceTab.h"
+#include "gui/CharacterEditorRulesTab.h"
 #include "gui/CharacterEditorAboutTab.h"
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
 {
+	constexpr enum Tab : int32_t
+	{
+		General = 0,
+		Traits,
+		Images,
+		Voice,
+		Rules,
+		About,
+	};
+
+
 	CharacterEditor::CharacterEditor(ControlPtr pParent) : Editor(pParent)
 	{
 		CreateTab<CharacterEditorGeneralTab>();
+		CreateTab<CharacterEditorTraitsTab>();
 		CreateTab<CharacterEditorImagesTab>();
 		CreateTab<CharacterEditorVoiceTab>();
+		CreateTab<CharacterEditorRulesTab>();
 		CreateTab<CharacterEditorAboutTab>();
 	}
 
@@ -106,19 +121,25 @@ namespace fig::gui
 		static size_t NotImpl = (size_t)(-1);
 		return std::vector<EditorTabDescriptor> {
 			{
-				0,
+				Tab::General,
 				"General",
 				Resource::ICON_CHARACTER_EDIT_INFO,
 				Resource::ICON_CHARACTER_EDIT_INFO_SMALL,
 			},
 			{
-				1,
+				Tab::Traits,
+				"Traits",
+				Resource::ICON_CHARACTER_EDIT_TRAITS,
+				Resource::ICON_CHARACTER_EDIT_TRAITS_SMALL,
+			},
+			{
+				Tab::Images,
 				"Images",
 				Resource::ICON_CHARACTER_EDIT_IMAGES,
 				Resource::ICON_CHARACTER_EDIT_IMAGES_SMALL,
 			},
 			{
-				2,
+				Tab::Voice,
 				"Voice",
 				Resource::ICON_CHARACTER_EDIT_VOICE,
 				Resource::ICON_CHARACTER_EDIT_VOICE_SMALL,
@@ -136,19 +157,19 @@ namespace fig::gui
 				Resource::ICON_CHARACTER_EDIT_MEMORIES_SMALL,
 			},
 			{
+				Tab::Rules,
+				"Rules",
+				Resource::ICON_CHARACTER_EDIT_RULES,
+				Resource::ICON_CHARACTER_EDIT_RULES_SMALL,
+			},
+			{
 				NotImpl,
 				"Concepts",
 				Resource::ICON_CHARACTER_EDIT_CONCEPTS,
 				Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL,
 			},
 			{
-				NotImpl,
-				"Rules",
-				Resource::ICON_CHARACTER_EDIT_RULES,
-				Resource::ICON_CHARACTER_EDIT_RULES_SMALL,
-			},
-			{
-				3,
+				Tab::About,
 				"About",
 				Resource::ICON_CHARACTER_EDIT_ABOUT,
 				Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL,

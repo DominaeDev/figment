@@ -773,6 +773,12 @@
     <ClCompile Include="src\gui\NonOwningImageWithMask.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorTraitsTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorRulesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1773,6 +1779,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\NonOwningImageWithMask.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorTraitsTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorRulesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

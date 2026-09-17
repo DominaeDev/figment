@@ -10,6 +10,8 @@
 
 namespace fig::data
 {
+	using CharacterRule = fig::string; // for now
+
 	class Character
 	{
 	public:
@@ -35,6 +37,11 @@ namespace fig::data
 		void SetTags(const fig::string_list& tags) noexcept;
 		void AppendTags(const fig::string_list& tags);
 		const fig::string_list& GetTags() const noexcept { return _tags; }
+
+		void SetRules(const std::vector<CharacterRule>& rules) noexcept;
+		void AppendRules(const std::vector<CharacterRule>& rules) noexcept;
+		void ClearRules() noexcept;
+		const std::vector<CharacterRule>& GetRules() const noexcept { return _rules; }
 
 		void AddSearchTerm(const fig::string& term);
 		const SearchIndex& GetSearchIndex() const noexcept { return _searchIndex; }
@@ -65,6 +72,7 @@ namespace fig::data
 
 		std::vector<CharacterAttribute> _attributes;
 		std::vector<CharacterTrait> _traits;
+		std::vector<CharacterRule> _rules;
 		fig::string_list _tags;
 		SearchIndex _searchIndex;
 		Context _context;

@@ -10,6 +10,7 @@
 #include "gui/ButtonWithLabel.h"
 #include "gui/AddImageButton.h"
 #include "gui/Menu.h"
+#include "gui/TexturedBorderRenderer.h"
 #include "data/Character.h"
 #include "io/ContentManager.h"
 #include "io/FileUtility.h"
@@ -119,6 +120,8 @@ namespace fig::gui
 
 		_pSmallPortraitPreview = CreateControl<NonOwningImageWithMask>(nullptr, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
 		_pSmallPortraitPreview->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitHeight);
+		_pSmallPortraitPreview->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8)
+			->SetColor(Color::LineColor);
 
 		auto pHSizer = new HorizontalSizer();
 		pHSizer->Add(_pSmallPortrait, 0);

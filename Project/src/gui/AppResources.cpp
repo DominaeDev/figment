@@ -93,6 +93,7 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_MEMORIES, "./resources/gui/icons/icon_character_edit_memories.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ABOUT, "./resources/gui/icons/icon_character_edit_about.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_RULES, "./resources/gui/icons/icon_character_edit_rules.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_TRAITS, "./resources/gui/icons/icon_character_edit_traits.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_INFO_SMALL, "./resources/gui/icons/icon_character_edit_info_small.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_VOICE_SMALL, "./resources/gui/icons/icon_character_edit_voice_small.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_IMAGES_SMALL, "./resources/gui/icons/icon_character_edit_images_small.png");
@@ -101,6 +102,7 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_MEMORIES_SMALL, "./resources/gui/icons/icon_character_edit_memories_small.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL, "./resources/gui/icons/icon_character_edit_about_small.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_RULES_SMALL, "./resources/gui/icons/icon_character_edit_rules_small.png");
+		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_TRAITS_SMALL, "./resources/gui/icons/icon_character_edit_traits_small.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS, "./resources/gui/icons/icon_cog.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP, "./resources/gui/icons/icon_move_up.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN, "./resources/gui/icons/icon_move_down.png");

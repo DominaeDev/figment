@@ -391,7 +391,7 @@ namespace fig::gui
 
 	void TextInput::DrawPlaceholder(fig::renderer_ptr pRenderer, int x, int y)
 	{
-		if (!_pPlaceholder->text)
+		if (not _pPlaceholder->text or _bFocused)
 			return;
 
 		auto fgColor = Color::DisabledForeground;

@@ -19,16 +19,14 @@ using namespace fig::io;
 namespace fig::gui
 {
 	size_t CharacterEditorGeneralTab::_nextAttributeIndex {};
-	static constexpr size_t MaxTraitCount = 10uz;
+	static constexpr size_t kMaxTraitCount = 10uz;
 	static constexpr fig::point kTraitToggleSize { 129, 35 };
-
 
 	CharacterEditorGeneralTab::CharacterEditorGeneralTab(ControlPtr pParent) : EditorTab(pParent)
 	{
 		SetMaxWidth(1280);
 
 		_attributesInfo.LoadFromXml(fig::path { "resources/editor/attributes.xml"});
-		_traitsInfo.LoadFromCsv(fig::path { "resources/editor/traits.csv"});
 	}
 
 	bool CharacterEditorGeneralTab::Initialize(CharacterEditorArgs args)
@@ -109,29 +107,6 @@ namespace fig::gui
 		pAddAttributeButton->SetHeight(35);
 		pAddAttributeButton->SetDelegate([this] { ShowAttributesMenu(); });
 		pSizer->Add(pAddAttributeButton, 0);
-		
-		CreateHorizontalLine(this, pSizer);
-
-		// Traits
-		_traitsLabel = CreateHeader(this, pSizer, "Traits");
-		for (auto& group : _traitsInfo.groups)
-		{
-			auto pLabel = CreateBoldLabel(this, pSizer, group.name);
-			_traitGroupLabels[group.name] = pLabel;
-
-			auto pTraitGridSizer = new GridSizer(kTraitToggleSize.x, kTraitToggleSize.y, 8, 6);
-			pTraitGridSizer->SetMaxColumns(5);
-			pSizer->AddSpacer(2);
-			pSizer->Add(pTraitGridSizer, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
-
-			for (auto& trait : group.traits)
-			{
-				auto pTrait = CreateTrait(pTraitGridSizer, trait.id, trait.name);
-				pTrait->SetOn(_pCharacter->HasTrait(trait.id), true);
-			}
-		}
-		RefreshToggleGroupLabels();
-
 		return true;
 	}
 
@@ -183,6 +158,7 @@ namespace fig::gui
 	{
 		auto pAttribute = CreateControl<CharacterAttributeWidget>(attribute.name, attribute.value, attribute.type, options, placeholder);
 		pAttribute->SetButtonDelegate([this, index] { OnAttributeSettingsMenu(index); });
+		pAttribute->EnableRename(true);
 		pAttribute->SetEditNameDelegate([this, index](auto&& name) { OnRenamedAttribute(index, name); });
 		pAttribute->SetMoveDelegate([this, index](auto&& dir) { OnMoveAttribute(index, dir, IsShiftDown()); });
 		_pAttributeSizer->Add(pAttribute, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
@@ -417,84 +393,6 @@ namespace fig::gui
 			for (auto& item : _items)
 				_pAttributeSizer->Add(item.pControl, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 			InvalidateLayout();
-		}
-	}
-
-	fig::observer_ptr<ToggleWithLabel> CharacterEditorGeneralTab::CreateTrait(SizerPtr pSizer, fig::handle traitId, fig::string_view label)
-	{
-		auto pToggle = CreateControl<ToggleWithLabel>(label, 14.5, ToggleBehavior::Default);
-		pToggle->SetDelegate([this, traitId](bool bOn) { OnToggledTrait(traitId, bOn); });
-		pToggle->SetSize(kTraitToggleSize.x, kTraitToggleSize.y);
-		pSizer->Add(pToggle, 0, SizerFlag::Right, 8);
-		_traitToggles[traitId] = pToggle;
-		return pToggle;
-	}
-
-	void CharacterEditorGeneralTab::OnToggledTrait(const fig::handle& traitId, bool bOn)
-	{
-		if (bOn)
-		{
-			for (auto& group : _traitsInfo.groups)
-			{
-				for (auto& trait : group.traits)
-				{
-					if (trait.id == traitId)
-					{
-						_pCharacter->SetTrait(traitId, trait.name, trait.text, trait.visibility);
-						break;
-					}
-				}
-			}
-		}
-		else
-		{
-			_pCharacter->RemoveTrait(traitId);
-		}
-
-		RefreshToggleGroupLabels();
-	}
-
-	void CharacterEditorGeneralTab::RefreshToggleGroupLabels()
-	{
-		if constexpr (Disabled)
-		{
-			auto traitIds = _pCharacter->GetTraits()
-				| std::views::transform([](auto&& t) { return t.id; })
-				| std::ranges::to<std::unordered_set>();
-
-			for (auto& group : _traitsInfo.groups)
-			{
-				if (auto pLabel = _traitGroupLabels[group.name])
-				{
-					size_t count = 0uz;
-					for (auto& trait : group.traits)
-					{
-						if (traitIds.contains(trait.id))
-							++count;
-					}
-
-					pLabel->SetText(std::format("{} ({})", group.name, count));
-				}
-			}
-		}
-		else
-		{
-			_traitsLabel->SetText(std::format("Traits ({} of {})", _pCharacter->GetTraits().size(), MaxTraitCount));
-
-			if (_pCharacter->GetTraits().size() >= MaxTraitCount)
-			{
-				for (auto& kvp : _traitToggles)
-					kvp.second->SetEnabled(kvp.second->IsOn());
-			}
-			else
-			{
-				for (auto& kvp : _traitToggles)
-				{
-					if (not kvp.second->GetEnabled())
-						kvp.second->SetEnabled(true);
-				}
-			}
-
 		}
 	}
 

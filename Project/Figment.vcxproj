@@ -193,6 +193,8 @@
     <ClCompile Include="src\gui\CharacterEditor.cpp" />
     <ClCompile Include="src\gui\CharacterEditorAboutTab.cpp" />
     <ClCompile Include="src\gui\CharacterEditorImagesTab.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorRulesTab.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorTraitsTab.cpp" />
     <ClCompile Include="src\gui\CharacterPortraitWidget.cpp" />
     <ClCompile Include="src\gui\CharacterSmallPortraitWidget.cpp" />
     <ClCompile Include="src\gui\CheckBox.cpp" />
@@ -501,6 +503,8 @@
     <ClInclude Include="include\gui\CharacterEditorArgs.h" />
     <ClInclude Include="include\gui\CharacterEditorImagesTab.h" />
     <ClInclude Include="include\gui\CharacterEditorGeneralTab.h" />
+    <ClInclude Include="include\gui\CharacterEditorRulesTab.h" />
+    <ClInclude Include="include\gui\CharacterEditorTraitsTab.h" />
     <ClInclude Include="include\gui\CharacterPortraitWidget.h" />
     <ClInclude Include="include\gui\CharacterSmallPortraitWidget.h" />
     <ClInclude Include="include\gui\ChatBackground.h" />

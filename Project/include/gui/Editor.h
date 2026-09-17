@@ -12,7 +12,6 @@ namespace fig::gui
 	public:
 		Editor(ControlPtr pParent);
 		
-		virtual void Shutdown() = 0;
 		virtual void PopulateTopBar(ControlPtr pTopBar) {};
 		virtual fig::string GetTitle() const = 0;
 
@@ -20,6 +19,7 @@ namespace fig::gui
 		std::vector<EditorTabPtr> GetTabs() const noexcept { return _tabs; }
 
 		void SelectTab(size_t index);
+		void Shutdown();
 		
 	protected:
 		std::vector<EditorTabPtr> _tabs;
@@ -35,6 +35,7 @@ namespace fig::gui
 			return pTab;
 		}
 		
+		virtual void OnShutdown() noexcept = 0;
 	private:
 		void EnableTab(EditorTabBase* pTab, bool bEnabled);
 

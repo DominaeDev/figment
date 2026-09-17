@@ -190,7 +190,7 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorVoiceTab::ShutDown() noexcept
+	void CharacterEditorVoiceTab::OnShutdown() noexcept
 	{
 		Global::GetAudioManager().StopAllSounds();
 		Global::GetTTSBackend().UnloadDesignModels();

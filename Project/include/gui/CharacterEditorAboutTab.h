@@ -11,7 +11,6 @@ namespace fig::gui
 		CharacterEditorAboutTab(ControlPtr pParent);
 
 		bool Initialize(CharacterEditorArgs args) override;
-		void ShutDown() noexcept {};
 		SaveResult OnSave() noexcept override;
 
 	protected:

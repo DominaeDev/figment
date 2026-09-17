@@ -24,7 +24,6 @@ namespace fig::gui
 		
 		bool Initialize(CharacterEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
-		void ShutDown() noexcept {};
 
 	private:
 		fig::observer_ptr<CharacterAttributeWidget> AddAttribute();
@@ -36,12 +35,7 @@ namespace fig::gui
 		void RemoveAttribute(size_t index);
 		void OnMoveAttribute(size_t index, int32_t dir, bool bMaxDistance);
 
-		fig::observer_ptr<ToggleWithLabel> CreateTrait(SizerPtr pSizer, fig::handle traitId, fig::string_view label);
-		void OnToggledTrait(const fig::handle& traitId, bool bOn);
-		void RefreshToggleGroupLabels();
-
 		fig::data::CharacterAttributeInfoDatabase _attributesInfo;
-		fig::data::CharacterTraitInfoDatabase _traitsInfo;
 
 	private:
 		void ShowAttributesMenu();
@@ -62,9 +56,5 @@ namespace fig::gui
 
 		fig::observer_ptr<TextBox> _pAge;
 		SizerPtr _pAttributeSizer {};
-
-		std::map<fig::handle, fig::observer_ptr<ToggleWithLabel>> _traitToggles;
-		fig::observer_ptr<StaticText> _traitsLabel;
-		std::map<fig::string, fig::observer_ptr<StaticText>> _traitGroupLabels;
 	};
 }

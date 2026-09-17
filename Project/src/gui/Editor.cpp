@@ -26,6 +26,12 @@ namespace fig::gui
 		}
 	}
 
+	void Editor::Shutdown()
+	{
+		for (size_t i = 0uz; i < _tabs.size(); ++i)
+			_tabs[i]->OnShutdown();
+		OnShutdown();
+	}
 
 
 }

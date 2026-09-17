@@ -21,6 +21,8 @@ namespace fig::data
 			Element { "Brief", &Character::brief },
 			Element { "Attributes", &Character::_attributes },
 			Element { "Traits", &Character::_traits },
+			Element { "Rule", &Character::_rules }
+				.Collection("Rules"),
 			Element { "Tags", &Character::_tags },
 			Element { "SearchIndex", &Character::_searchIndex,
 				[](auto& value) -> fig::string { return value.Serialize(); },
@@ -268,5 +270,20 @@ namespace fig::data
 	void Character::SetTags(const fig::string_list& tags) noexcept
 	{
 		_tags = tags;
+	}
+
+	void Character::SetRules(const std::vector<CharacterRule>& rules) noexcept
+	{
+		_rules = rules;
+	}
+
+	void Character::AppendRules(const std::vector<CharacterRule>& rules) noexcept
+	{
+		_rules.append_range(rules);
+	}
+
+	void Character::ClearRules() noexcept
+	{
+		_rules.clear();
 	}
 }

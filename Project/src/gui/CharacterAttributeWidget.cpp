@@ -51,6 +51,12 @@ namespace fig::gui
 		_fnMoveDelegate = fnDelegate;
 	}
 
+	void CharacterAttributeWidget::EnableRename(bool bEnabled) noexcept
+	{
+		_bCanRename = bEnabled;
+		EndEditName();
+	}
+
 	void CharacterAttributeWidget::ChangeType(CharacterAttribute::ValueType type)
 	{
 		_options.clear();
@@ -198,7 +204,7 @@ namespace fig::gui
 
 	void CharacterAttributeWidget::BeginEditName()
 	{
-		if (_bRenaming)
+		if (_bRenaming or not _bCanRename)
 			return;
 		_bRenaming = true;
 
@@ -218,6 +224,7 @@ namespace fig::gui
 	{
 		if (not _bRenaming)
 			return;
+
 		_bRenaming = false;
 
 		auto name = trim(_pEditLabel->GetText());
@@ -266,5 +273,10 @@ namespace fig::gui
 	{
 		if (_fnMoveDelegate)
 			_fnMoveDelegate(dir);
+	}
+
+	void CharacterAttributeWidget::SetLabel(fig::string_view label)
+	{
+		_pLabel->SetText(label);
 	}
 }

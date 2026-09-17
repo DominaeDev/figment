@@ -21,6 +21,9 @@ namespace fig::gui
 
 		fig::string_view GetValue() const noexcept;
 		void Focus();
+		void EnableRename(bool bEnable) noexcept;
+
+		void SetLabel(fig::string_view label);
 
 		void ChangeType(fig::data::CharacterAttribute::ValueType type);
 
@@ -52,6 +55,7 @@ namespace fig::gui
 		fig::coord _lastTextBoxHeight = 0uz;
 		fig::string_list _options {};
 
+		bool _bCanRename { false };
 		bool _bRenaming {};
 		EditNameDelegate _fnRenameDelegate;
 
