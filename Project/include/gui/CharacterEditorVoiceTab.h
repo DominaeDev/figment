@@ -36,7 +36,7 @@ namespace fig::gui
 
 	private:
 		fig::uuid _characterId {};
-		fig::observer_ptr<fig::data::Character> _pCharacter {};
+		fig::string _characterName {};
 
 		fig::observer_ptr<class ButtonWithLabel> _pGenerateButton;
 		fig::observer_ptr<class ButtonWithIcon> _pPlayButton;
@@ -54,6 +54,7 @@ namespace fig::gui
 		fig::tts::AudioResultQueue _audioResultQueue {};
 		fig::tts::VoicePrint _voicePrint;
 		bool _bIsPlaying = false;
+		bool _bChanged = false;
 
 	};
 }

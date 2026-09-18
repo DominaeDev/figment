@@ -21,6 +21,22 @@ namespace fig::gui
 			.pressedColor	{ 0x4E4431_rgb, 0xFFFFFFC0_rgba },
 			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
 		};
+
+		constexpr ButtonTheme EditorSmallButtonStyle
+		{
+			.defaultColor	{ 0x8b806b_rgb, 0xFFFFFF00_rgba },
+			.hoverColor		{ 0x8b806b_rgb, 0xEFECE3FF_rgba },
+			.pressedColor	{ 0x8b806b_rgb, 0xFFFFFFC0_rgba },
+			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
+		};
+
+		constexpr ButtonTheme GreenSaveButtonStyle
+		{
+			.defaultColor	{ 0x13330e_rgb, 0xc7e8c1_rgb },
+			.hoverColor		{ 0x13330e_rgb, 0x77ce70C0_rgba },
+			.pressedColor	{ 0x13330e_rgb, 0xb7e3b1_rgb },
+			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
+		};
 	}
 
 	namespace Color

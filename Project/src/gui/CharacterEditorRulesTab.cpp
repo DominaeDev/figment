@@ -54,7 +54,7 @@ namespace fig::gui
 		pSizer->AddSpacer(6);
 
 		_pAddButton->SetHeight(35);
-		_pAddButton->SetDelegate([this] { auto pRule = AddRule(); pRule->Focus(); });
+		_pAddButton->SetDelegate([this] { auto pRule = AddRule(); pRule->Focus(); SetDirty(); });
 		pSizer->Add(_pAddButton, 0);
 
 		CreateHint(this, pSizer, std::format("You can add up to {} rules.", kMaxRuleCount));
@@ -77,6 +77,7 @@ namespace fig::gui
 	{
 		auto pRule = CreateControl<CharacterAttributeWidget>("", value, CharacterAttribute::ValueType::ShortText);
 		pRule->SetButtonDelegate([this, index] { OnRuleMenu(index); });
+		pRule->SetValueChangedDelegate([this] (auto&& _) { SetDirty(); });
 		pRule->SetMoveDelegate([this, index](auto&& dir) { OnMoveRule(index, dir, IsShiftDown()); });
 		_pRuleSizer->Add(pRule, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 		return pRule;
@@ -127,8 +128,11 @@ namespace fig::gui
 			.SetEnabled(index + 1uz < _items.size())
 			.SetDelegate([this, ruleIndex] { OnMoveRule(ruleIndex, 1, true); });
 		menu.AddSeparator();
-		menu.AddItem("Copy");
-		menu.AddItem("Paste");
+		menu.AddItem("Copy")
+			.SetDelegate([this, ruleIndex] { OnCopyRule(ruleIndex); });
+		menu.AddItem("Paste")
+			.SetEnabled(SDL_HasClipboardText())
+			.SetDelegate([this, ruleIndex] { OnPasteRule(ruleIndex); });
 		menu.AddSeparator();
 		menu.AddItem("Remove", Resource::ICON_DELETE)
 			.SetDelegate([this, ruleIndex] { RemoveRule(ruleIndex); });
@@ -145,6 +149,7 @@ namespace fig::gui
 			DestroyChild(item.pControl);
 			_items.erase(itFind);
 			RefreshRuleLabels();
+			SetDirty();
 		}
 	}
 
@@ -187,8 +192,8 @@ namespace fig::gui
 			for (auto& item : _items)
 				_pRuleSizer->Add(item.pControl, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 			InvalidateLayout();
-
 			RefreshRuleLabels();
+			SetDirty();
 		}
 	}
 
@@ -198,6 +203,29 @@ namespace fig::gui
 			_items[i].pControl->SetLabel(std::format("Rule #{}", i + 1uz));
 
 		_pAddButton->SetEnabled(_items.size() < kMaxRuleCount);
+	}
+
+	void CharacterEditorRulesTab::OnCopyRule(size_t index)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			SDL_SetClipboardText(item.pControl->GetValue().data());
+		}
+	}
+
+	void CharacterEditorRulesTab::OnPasteRule(size_t index)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			fig::string content = SDL_GetClipboardText();
+			if (not content.empty())
+			{
+				item.pControl->SetValue(content);
+				SetDirty();
+			}
+		}
 	}
 
 	EditorTabBase::SaveResult CharacterEditorRulesTab::OnSave() noexcept

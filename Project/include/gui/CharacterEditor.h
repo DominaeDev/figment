@@ -21,9 +21,10 @@ namespace fig::gui
 
 	protected:
 		void OnAfterLayout() override;
+		void OnPropertyChanged() override;
 
 	private:
-		fig::observer_ptr<Control> _pSaveButton;
+		fig::observer_ptr<ThemedButton> _pSaveButton;
 		fig::uuid _assetId {};
 		fig::data::Character _character {};
 

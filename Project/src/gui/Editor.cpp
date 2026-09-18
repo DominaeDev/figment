@@ -33,5 +33,10 @@ namespace fig::gui
 		OnShutdown();
 	}
 
+	void Editor::SetDirty() noexcept
+	{
+		_bIsDirty = true;
+		OnPropertyChanged();
+	}
 
 }

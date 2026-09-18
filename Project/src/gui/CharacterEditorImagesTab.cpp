@@ -263,11 +263,15 @@ namespace fig::gui
 
 	void CharacterEditorImagesTab::SelectCover(size_t index)
 	{
+		bool bChanged = false;
 		for (size_t i = 0; i < _portraitWidgets.size(); ++i)
 		{
+			bChanged |= _portraitWidgets[i].isCover != (i == index);
 			_portraitWidgets[i].isCover = (i == index);
 			dynamic_cast<CharacterPortraitWidget*>(_portraitWidgets[i].pControl.get())->SetSelected(i == index);
 		}
+		if (bChanged)
+			SetDirty();
 	}
 
 	void CharacterEditorImagesTab::RemovePortrait(size_t index)
@@ -288,6 +292,7 @@ namespace fig::gui
 		if (wasCover && _portraitWidgets.size() > 0uz)
 			SelectCover(0uz);
 		InvalidateLayout();
+		SetDirty();
 	}
 
 	void CharacterEditorImagesTab::MovePortraitUp(size_t index)
@@ -302,6 +307,7 @@ namespace fig::gui
 			_pPortraitGridSizer->Add(portrait.pControl);
 		_pPortraitGridSizer->Add(_pAddPortraitButton, 0, SizerFlag::All, 6);
 		InvalidateLayout();
+		SetDirty();
 	}
 
 	void CharacterEditorImagesTab::MovePortraitDown(size_t index)
@@ -316,6 +322,7 @@ namespace fig::gui
 			_pPortraitGridSizer->Add(portrait.pControl);
 		_pPortraitGridSizer->Add(_pAddPortraitButton, 0, SizerFlag::All, 6);
 		InvalidateLayout();
+		SetDirty();
 	}
 
 	void CharacterEditorImagesTab::RemoveBackground(size_t index)
@@ -333,6 +340,7 @@ namespace fig::gui
 		_backgroundWidgets.erase(_backgroundWidgets.cbegin() + index);
 
 		InvalidateLayout();
+		SetDirty();
 	}
 
 	void CharacterEditorImagesTab::MoveBackgroundUp(size_t index)
@@ -347,6 +355,7 @@ namespace fig::gui
 			_pBackgroundGridSizer->Add(background.pControl);
 		_pBackgroundGridSizer->Add(_pAddBackgroundButton, 0, SizerFlag::All, 6);
 		InvalidateLayout();
+		SetDirty();
 	}
 
 	void CharacterEditorImagesTab::MoveBackgroundDown(size_t index)
@@ -361,6 +370,7 @@ namespace fig::gui
 			_pBackgroundGridSizer->Add(widget.pControl);
 		_pBackgroundGridSizer->Add(_pAddBackgroundButton, 0, SizerFlag::All, 6);
 		InvalidateLayout();
+		SetDirty();
 	}
 
 	void CharacterEditorImagesTab::SetSmallPortrait(size_t index)
@@ -372,7 +382,6 @@ namespace fig::gui
 		if (not portrait.image.empty())
 		{
 			_pSmallPortrait->SetImage(portrait.image);
-			
 			_bEditingSmallPortrait = true;
 		}
 		else if (not portrait.assetId.empty())
@@ -382,6 +391,7 @@ namespace fig::gui
 			_bEditingSmallPortrait = true;
 		}
 		_pSmallPortrait->ResetTransform();
+		SetDirty();
 	}
 
 	void CharacterEditorImagesTab::OnClickedSmallPortrait()
@@ -407,6 +417,7 @@ namespace fig::gui
 			_pSmallPortrait->SetImage(imageAssets[0].get().id);
 			RefreshSmallPortraitPreview();
 			_bEditingSmallPortrait = false;
+			SetDirty();
 		}
 	}
 
@@ -496,7 +507,10 @@ namespace fig::gui
 		}
 
 		if (bChanged)
+		{
 			LayoutNow();
+			SetDirty();
+		}
 	}
 
 	EditorTabBase::SaveResult CharacterEditorImagesTab::OnSave() noexcept
@@ -511,7 +525,7 @@ namespace fig::gui
 		// Write new portraits
 		for (auto& portrait : _portraitWidgets)
 		{
-			if (not portrait.data.empty() and portrait.assetId.empty())
+			if (portrait.assetId.empty() and not portrait.data.empty())
 			{
 				auto& asset = assets.CreateAsset(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait, portrait.format), portrait.data, _characterId);
 				portrait.assetId = asset.id;
@@ -521,7 +535,7 @@ namespace fig::gui
 		// Write new backgrounds
 		for (auto& background : _backgroundWidgets)
 		{
-			if (not background.data.empty() and background.assetId.empty())
+			if (background.assetId.empty() and not background.data.empty())
 			{
 				auto& asset = assets.CreateAsset(make_asset_type(AssetType::Image, ImageAssetType::Background, background.format), background.data, _characterId);
 				background.assetId = asset.id;
@@ -535,7 +549,10 @@ namespace fig::gui
 			{
 				size_t idxCover = std::distance(_portraitWidgets.begin(), itCover);
 				if (_portraitWidgets[idxCover].assetId != _coverAssetId)
+				{
 					content.ReplaceCoverImage(_characterId, _portraitWidgets[idxCover].assetId);
+					_coverAssetId = _portraitWidgets[idxCover].assetId;
+				}
 			}
 		}
 
@@ -549,6 +566,8 @@ namespace fig::gui
 			{
 				content.ReplaceSmallPortrait(_characterId, smallPortrait, {}); //! @todo: original asset
 			}
+			_pSmallPortrait->SetImage(smallPortrait);
+			_bEditingSmallPortrait = false;
 		}
 
 		// Assign order to portraits

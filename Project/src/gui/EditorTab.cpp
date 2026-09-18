@@ -50,7 +50,7 @@ namespace fig::gui
 
 		pTextBox->SetText(binding.AsString());
 		pTextBox->SetFixedRows(rows);
-		pTextBox->SetTextChangedDelegate([binding](fig::string_view text) mutable { binding.Set(fig::string { text }); });
+		pTextBox->SetTextChangedDelegate([this, binding](fig::string_view text) mutable { binding.Set(fig::string { text }); SetDirty(); });
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;
 	}
@@ -58,6 +58,7 @@ namespace fig::gui
 	fig::observer_ptr<TextBox> EditorTabBase::CreateTextBox(ControlPtr pParent, SizerPtr pSizer)
 	{
 		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize);
+		pTextBox->SetTextChangedDelegate([this](fig::string_view text) { SetDirty(); });
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;
 	}
@@ -70,5 +71,11 @@ namespace fig::gui
 		pSizer->Add(pLine, 0, SizerFlag::Expand);
 		pSizer->AddSpacer(8);
 		return pLine;
+	}
+
+	void EditorTabBase::SetDirty() noexcept
+	{
+		if (_fnChanged)
+			_fnChanged();
 	}
 }

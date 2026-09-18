@@ -27,11 +27,14 @@ namespace fig::gui
 		_pEditLabel->SetVisible(false);
 
 		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS);
+		_pSettingsButton->SetTheme(Theme::EditorSmallButtonStyle);
 		_pSettingsButton->SetSize(20, 20);
 		_pMoveUpButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP);
+		_pMoveUpButton->SetTheme(Theme::EditorSmallButtonStyle);
 		_pMoveUpButton->SetSize(20, 20);
 		_pMoveUpButton->SetDelegate([this] { OnMove(-1); });
 		_pMoveDownButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN);
+		_pMoveDownButton->SetTheme(Theme::EditorSmallButtonStyle);
 		_pMoveDownButton->SetSize(20, 20);
 		_pMoveDownButton->SetDelegate([this] { OnMove(1); });
 
@@ -51,13 +54,18 @@ namespace fig::gui
 		_fnMoveDelegate = fnDelegate;
 	}
 
+	void CharacterAttributeWidget::SetValueChangedDelegate(TextInput::TextChangedDelegate fnDelegate)
+	{
+		_fnChangedDelegate = fnDelegate;
+	}
+
 	void CharacterAttributeWidget::EnableRename(bool bEnabled) noexcept
 	{
 		_bCanRename = bEnabled;
 		EndEditName();
 	}
 
-	void CharacterAttributeWidget::ChangeType(CharacterAttribute::ValueType type)
+	void CharacterAttributeWidget::ChangeValueType(CharacterAttribute::ValueType type)
 	{
 		_options.clear();
 		InitValue("", type);
@@ -76,6 +84,8 @@ namespace fig::gui
 		if (type == CharacterAttribute::ValueType::Options and not _options.empty())
 		{
 			_pComboBox = CreateControl<ComboBox>();
+			_pComboBox->SetDelegate([this] (auto&& _) { OnValueChanged(); });
+			_pComboBox->SetTextChangedDelegate([this] (auto&& _) { OnValueChanged(); });
 			_pComboBox->SetPosition(0, 23);
 			_pComboBox->AddItems(_options);
 			_pComboBox->SetText(value);
@@ -92,6 +102,7 @@ namespace fig::gui
 		if (not _pTextBox)
 		{
 			_pTextBox = CreateControl<TextBox>(FontFace::Default, 14.0);
+			_pTextBox->SetTextChangedDelegate([this](auto&& _) { OnValueChanged(); });
 			_pTextBox->SetPosition(0, 23);
 			_pTextBox->EnableAutoSize(true);
 		}
@@ -170,6 +181,14 @@ namespace fig::gui
 			_pMoveDownButton->SetX(std::min(GetWidth(), MaxWidth) - 42);
 		if (_pMoveUpButton)
 			_pMoveUpButton->SetX(std::min(GetWidth(), MaxWidth) - 64);
+	}
+
+	void CharacterAttributeWidget::SetValue(fig::string_view value)
+	{
+		if (_pTextBox)
+			_pTextBox->SetText(value);
+		else if (_pComboBox)
+			_pComboBox->SetText(value);
 	}
 
 	fig::string_view CharacterAttributeWidget::GetValue() const noexcept
@@ -278,5 +297,11 @@ namespace fig::gui
 	void CharacterAttributeWidget::SetLabel(fig::string_view label)
 	{
 		_pLabel->SetText(label);
+	}
+
+	void CharacterAttributeWidget::OnValueChanged() noexcept
+	{
+		if (_fnChangedDelegate)
+			_fnChangedDelegate(GetValue());
 	}
 }

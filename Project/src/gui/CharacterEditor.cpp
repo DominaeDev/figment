@@ -7,6 +7,7 @@
 #include "gui/CharacterEditorRulesTab.h"
 #include "gui/CharacterEditorAboutTab.h"
 #include "gui/ButtonWithLabelAndIcon.h"
+#include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
@@ -69,8 +70,7 @@ namespace fig::gui
 		auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
 		pSaveButton->SetSize(110, 32);
 		pSaveButton->SetDelegate([this] {
-			if (Save())
-				PushEvent(UserEvent::NavigateToHome);
+			Save();
 		});
 		_pSaveButton = pSaveButton;
 
@@ -108,6 +108,10 @@ namespace fig::gui
 		
 		Global::GetUserContent().UpdateAsset(_assetId, _character);
 		Global::GetUserContent().GetAssets().SaveNow();
+
+		_pSaveButton->SetTheme(Theme::DefaultButtonStyle);
+		auto pBorder = _pSaveButton->GetBorderRenderer();
+		pBorder->SetColor(Color::LineColor);
 		return true;
 	}
 
@@ -175,5 +179,12 @@ namespace fig::gui
 				Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL,
 			},
 		};
+	}
+
+	void CharacterEditor::OnPropertyChanged()
+	{
+		_pSaveButton->SetTheme(Theme::GreenSaveButtonStyle);
+		auto pBorder = _pSaveButton->GetBorderRenderer();
+		pBorder->SetColor(0x097f00_rgb);
 	}
 }

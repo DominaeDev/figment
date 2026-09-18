@@ -20,7 +20,7 @@ namespace fig::gui
 
 		void SelectTab(size_t index);
 		void Shutdown();
-		
+			
 	protected:
 		std::vector<EditorTabPtr> _tabs;
 
@@ -29,6 +29,7 @@ namespace fig::gui
 		fig::observer_ptr<T> CreateTab(Args&&... args)
 		{
 			auto pTab = CreateControl<T>(std::forward<Args>(args)...);
+			pTab->SetChangedDelegate([this] { SetDirty(); });
 			_tabs.push_back(pTab);
 			EnableTab(pTab, false);
 			_pTabSizer->Add(pTab, 0, SizerFlag::Expand);
@@ -36,10 +37,13 @@ namespace fig::gui
 		}
 		
 		virtual void OnShutdown() noexcept = 0;
+		virtual void OnPropertyChanged() {};
 	private:
 		void EnableTab(EditorTabBase* pTab, bool bEnabled);
+		void SetDirty() noexcept;
 
 	private:
 		SizerPtr _pTabSizer;
+		bool _bIsDirty { false };
 	};
 }

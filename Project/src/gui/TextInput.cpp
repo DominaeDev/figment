@@ -1567,16 +1567,21 @@ namespace fig::gui
 		CancelComposition();
 
 		InitUndo();
-		DidChange();
+//		DidChange();
 		_scroll = {};
 	}
 
 	void TextInput::SetText(fig::string_view text)
 	{
-		Clear();
+		_text.clear();
+		_lines.clear();
+		_cursor = 0;
+		highlight_start = -1;
+		highlight_end = -1;
+		CancelComposition();
 		Insert(text);
 		InitUndo();
-		DidChange();
+//		DidChange();
 		_scroll = {};
 	}
 
@@ -1758,7 +1763,7 @@ namespace fig::gui
 
 	void TextInput::DidChange()
 	{
-		if (_fnOnChanged)
+		if (_fnOnChanged and not _bMuted)
 			_fnOnChanged(_text);
 
 		OnText(_text);

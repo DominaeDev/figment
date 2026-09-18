@@ -91,8 +91,8 @@ namespace fig::gui
 		if (not (bool)args.pCharacter or args.assetId.empty())
 			return false;
 
-		_pCharacter = args.pCharacter;
 		_characterId = args.assetId;
+		_characterName = args.pCharacter->GetFullName();
 
 		auto pSizer = SetSizer<VerticalSizer>();
 		auto pDesignerSizer = new VerticalSizer();
@@ -177,8 +177,8 @@ namespace fig::gui
 		pDesignerSizer->AddSpacer(24);
 		pDesignerSizer->Add(pButtonSizer, 0, SizerFlag::FixedSize, 35);
 
-		pMale->SetOn(_pCharacter->gender.IsConventional(ConventionalGender::Male));
-		pFemale->SetOn(not _pCharacter->gender.IsConventional(ConventionalGender::Male));
+		pMale->SetOn(args.pCharacter->gender.IsConventional(ConventionalGender::Male));
+		pFemale->SetOn(not args.pCharacter->gender.IsConventional(ConventionalGender::Male));
 
 		// Load (existing) voice
 		if (auto try_voice = Global::GetUserContent().GetVoiceForCharacter(_characterId))
@@ -279,8 +279,7 @@ namespace fig::gui
 
 	void CharacterEditorVoiceTab::Generate() noexcept
 	{
-		fig::string name = _pCharacter->GetFullName();
-		fig::string phrase = std::format(Constants::TTS::ExamplePhrase, name);
+		fig::string phrase = std::format(Constants::TTS::ExamplePhrase, _characterName);
 		bool isServerRunning = Global::GetTTSBackend().GetStatus() >= TTSStatus::ServerStarted;
 
 		uint32_t seed = GetRandomNumber<uint32_t>();
@@ -384,21 +383,6 @@ namespace fig::gui
 		_pStatusText->SetText(message);
 	}
 
-	EditorTabBase::SaveResult CharacterEditorVoiceTab::OnSave() noexcept
-	{
-		if (_voicePrint.audioData.empty())
-			return {}; // No change
-
-		VoiceSettings voiceSettings;
-		voiceSettings.name = std::format("{}'s voice", _pCharacter->GetName());
-		voiceSettings.voicePrint = _voicePrint;
-		
-		auto voiceSettingsId = Global::GetUserContent().CreateVoiceReference(_characterId, voiceSettings);
-		if (voiceSettingsId.empty())
-			return std::unexpected(std::runtime_error("Failed to write voice data."));
-		return {};
-	}
-
 	void CharacterEditorVoiceTab::OnAudioResult(fig::tts::TTSPayload&& payload)
 	{
 		if (payload.has_value())
@@ -409,11 +393,29 @@ namespace fig::gui
 
 			SetStatusMessage("");
 			_pPlayButton->SetEnabled(true);
+			_bChanged = true;
 		}
 		else 
 		{
 			SetStatusMessage(fig::strings::TTS::ErrorOccurred);
 		}
+	}
+
+	EditorTabBase::SaveResult CharacterEditorVoiceTab::OnSave() noexcept
+	{
+		if (not _bChanged or _voicePrint.audioData.empty())
+			return {};
+
+		VoiceSettings voiceSettings;
+		voiceSettings.name = std::format("{}'s voice", _characterName);
+		voiceSettings.voicePrint = _voicePrint;
+
+		auto voiceSettingsId = Global::GetUserContent().CreateVoiceReference(_characterId, voiceSettings);
+		if (voiceSettingsId.empty())
+			return std::unexpected(std::runtime_error("Failed to write voice data."));
+
+		_bChanged = false;
+		return {};
 	}
 
 }

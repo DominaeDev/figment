@@ -30,11 +30,9 @@ namespace fig::gui
 	void EditorScreen::ReleaseEditor()
 	{
 		if (_pEditor)
-		{
-			_pScrollPanel->RemoveChildren();
 			_pEditor->Shutdown();
-			_pEditor.reset();
-		}
+		_pScrollPanel->RemoveChildren();
+		_pEditor.reset();
 	}
 
 	void EditorScreen::SetTitle(fig::string_view text)
@@ -89,4 +87,5 @@ namespace fig::gui
 
 		return EventResult::Pass;
 	}
+
 }

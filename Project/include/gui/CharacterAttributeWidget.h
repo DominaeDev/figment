@@ -16,21 +16,21 @@ namespace fig::gui
 		CharacterAttributeWidget(ControlPtr pParent, fig::string_view label, fig::string_view content, fig::data::CharacterAttribute::ValueType type, const fig::string_list& options = {}, fig::string_view placeholder = {});
 
 		using MoveDelegate = std::function<void(int32_t)>;
+		void SetValueChangedDelegate(TextInput::TextChangedDelegate fnDelegate);
 		void SetMoveDelegate(MoveDelegate fnDelegate);
 		void SetButtonDelegate(MouseClickedDelegate fnDelegate);
 
+		void SetValue(fig::string_view value);
+		void ChangeValueType(fig::data::CharacterAttribute::ValueType type);
 		fig::string_view GetValue() const noexcept;
-		void Focus();
-		void EnableRename(bool bEnable) noexcept;
 
 		void SetLabel(fig::string_view label);
-
-		void ChangeType(fig::data::CharacterAttribute::ValueType type);
+		void Focus();
 
 		using EditNameDelegate = std::function<void(fig::string)>;
 		void SetEditNameDelegate(EditNameDelegate fnDelegate);
-		
 		void BeginEditName();
+		void EnableRename(bool bEnable) noexcept;
 
 	protected:
 		void InitValue(fig::string_view value, fig::data::CharacterAttribute::ValueType type);
@@ -42,6 +42,8 @@ namespace fig::gui
 		void CancelEditName();
 		void OnDoubleClickedAt(fig::point pos) override;
 		void OnMove(int32_t dir) noexcept;
+
+		void OnValueChanged() noexcept;
 
 	private:
 		fig::observer_ptr<StaticText> _pLabel;
@@ -60,5 +62,6 @@ namespace fig::gui
 		EditNameDelegate _fnRenameDelegate;
 
 		MoveDelegate _fnMoveDelegate;
+		TextInput::TextChangedDelegate _fnChangedDelegate;
 	};
 }

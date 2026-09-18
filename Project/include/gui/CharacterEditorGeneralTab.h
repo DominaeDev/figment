@@ -32,8 +32,13 @@ namespace fig::gui
 		fig::observer_ptr<CharacterAttributeWidget> AppendAttributeControl(fig::data::CharacterAttribute& attribute, size_t index, const fig::string_list& options, fig::string_view placeholder);
 		void RenameAttribute(size_t index);
 		void OnRenamedAttribute(size_t index, fig::string_view name);
-		void RemoveAttribute(size_t index);
+		void OnRemoveAttribute(size_t index);
 		void OnMoveAttribute(size_t index, int32_t dir, bool bMaxDistance);
+		void OnCopyAttribute(size_t index);
+		void OnPasteAttribute(size_t index);
+		void OnChangedAttributeValueType(size_t index, fig::data::CharacterAttribute::ValueType valueType);
+		void OnChangedAttributeVisibility(size_t index, fig::data::CharacterAttribute::Visibility visibility);
+		void OnChangedAttributeFlags(size_t index, fig::data::CharacterAttribute::HintFlags flags);
 
 		fig::data::CharacterAttributeInfoDatabase _attributesInfo;
 

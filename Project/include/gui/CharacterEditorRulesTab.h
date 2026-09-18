@@ -34,6 +34,8 @@ namespace fig::gui
 	private:
 		void OnRuleMenu(size_t index);
 		void OnAfterLayout();
+		void OnCopyRule(size_t index);
+		void OnPasteRule(size_t index);
 
 		fig::observer_ptr<fig::data::Character> _pCharacter {};
 

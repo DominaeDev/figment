@@ -14,6 +14,8 @@ namespace fig::gui
 		Resource iconSmall;
 	};
 
+	using EditorPropertyChangedDelegate = std::function<void()>;
+
 	class HorizontalLine;
 
 	class EditorTabBase : public Control
@@ -26,6 +28,8 @@ namespace fig::gui
 		using SaveResult = std::expected<void, std::runtime_error>;
 		virtual SaveResult OnSave() noexcept { return {}; };
 		virtual void OnShutdown() noexcept {};
+
+		void SetChangedDelegate(EditorPropertyChangedDelegate fnDelegate) noexcept { _fnChanged = fnDelegate; }
 
 	protected:
 		fig::observer_ptr<StaticText> CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
@@ -51,6 +55,8 @@ namespace fig::gui
 		fig::observer_ptr<class ComboBox> CreateComboBox(ControlPtr pParent, SizerPtr pSizer, const U& items)
 		{
 			auto pControl = pParent->CreateControl<ComboBox>();
+			pControl->SetDelegate([this](auto&& _) { SetDirty(); });
+			pControl->SetTextChangedDelegate([this](auto&& _) { SetDirty(); });
 			pControl->AddItems(items);
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
 			return pControl;
@@ -62,7 +68,11 @@ namespace fig::gui
 			auto pControl = pParent->CreateControl<ComboBox>();
 			pControl->AddItems(items);
 			pControl->SetText(binding.AsString());
-			pControl->SetTextChangedDelegate([binding](fig::string_view text) mutable { binding.Set(fig::string { text }); });
+			pControl->SetDelegate([this](auto&& _) { SetDirty(); });
+			pControl->SetTextChangedDelegate([this, binding](fig::string_view text) mutable { 
+				binding.Set(fig::string { text });
+				SetDirty(); 
+			});
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
 			return pControl;
 		}
@@ -73,12 +83,17 @@ namespace fig::gui
 			auto pControl = pParent->CreateControl<DropList>();
 			pControl->AddItems(items);
 			pControl->Select(binding.AsInt());
-			pControl->SetDelegate([binding](int32_t index) mutable {
+			pControl->SetDelegate([this, binding](int32_t index) mutable {
 				binding.Set(index >= 0 ? index : 0);
+				SetDirty();
 			});
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
 			return pControl;
 		}
+
+		void SetDirty() noexcept;
+	private:
+		EditorPropertyChangedDelegate _fnChanged {};
 	};
 
 	template <typename TArgs>

@@ -188,6 +188,7 @@ namespace fig::gui
 
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;
+		bool _bMuted = false;
 
 		fig::point _scroll {};
 		int32_t _minRows = 1;

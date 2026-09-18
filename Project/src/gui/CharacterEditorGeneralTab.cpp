@@ -123,7 +123,7 @@ namespace fig::gui
 
 		auto& menu = CreateMenu();
 		menu.AddItem("New attribute")
-			.SetDelegate([this]() { AddAttribute(); });
+			.SetDelegate([this]() { AddAttribute(); SetDirty(); });
 
 		if (not _attributesInfo.groups.empty())
 		{
@@ -136,7 +136,7 @@ namespace fig::gui
 				for (auto& attribute : group.attributes)
 				{
 					auto& attributeItem = groupItem.AddItem(attribute.name);
-					attributeItem.SetDelegate([this, attribute]() { AddAttribute(attribute); });
+					attributeItem.SetDelegate([this, attribute]() { AddAttribute(attribute); SetDirty(); });
 					attributeItem.SetEnabled(not usedAttributeIds.contains(attribute.id));
 
 					if (attribute.bBreak)
@@ -154,18 +154,19 @@ namespace fig::gui
 		return (mod & SDL_KMOD_SHIFT) != 0 and (mod & SDL_KMOD_CTRL) == 0 and (mod & SDL_KMOD_ALT) == 0;
 	}
 
-	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorGeneralTab::AppendAttributeControl(fig::data::CharacterAttribute& attribute, size_t index, const fig::string_list& options, fig::string_view placeholder)
+	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorGeneralTab::AppendAttributeControl(CharacterAttribute& attribute, size_t index, const fig::string_list& options, fig::string_view placeholder)
 	{
 		auto pAttribute = CreateControl<CharacterAttributeWidget>(attribute.name, attribute.value, attribute.type, options, placeholder);
 		pAttribute->SetButtonDelegate([this, index] { OnAttributeSettingsMenu(index); });
-		pAttribute->EnableRename(true);
 		pAttribute->SetEditNameDelegate([this, index](auto&& name) { OnRenamedAttribute(index, name); });
 		pAttribute->SetMoveDelegate([this, index](auto&& dir) { OnMoveAttribute(index, dir, IsShiftDown()); });
+		pAttribute->SetValueChangedDelegate([this] (auto&& _) { SetDirty(); });
+		pAttribute->EnableRename(true);
 		_pAttributeSizer->Add(pAttribute, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 		return pAttribute;
 	}
 
-	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorGeneralTab::AddAttribute(const fig::data::CharacterAttributeInfo& info)
+	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorGeneralTab::AddAttribute(const CharacterAttributeInfo& info)
 	{
 		auto item = AttributeItem {
 			.index = _nextAttributeIndex++,
@@ -242,54 +243,46 @@ namespace fig::gui
 			return;
 
 		auto pAttribute = &pItem->attribute;
-		auto pControl = pItem->pControl;
 
 		auto& menu = CreateMenu();
 		auto& typeMenu = menu.AddItem("Value type");
 		typeMenu.AddCheckItem("Text (single line)", pAttribute->type == CharacterAttribute::ValueType::ShortText)
-			.SetDelegate([pAttribute, pControl] {
-				pAttribute->type = CharacterAttribute::ValueType::ShortText;
-				pControl->ChangeType(pAttribute->type);
-			});
+			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::ShortText); });
 		typeMenu.AddCheckItem("Text (multiple lines)", pAttribute->type == CharacterAttribute::ValueType::LongText)
-			.SetDelegate([pAttribute, pControl] {
-				pAttribute->type = CharacterAttribute::ValueType::LongText;
-				pControl->ChangeType(pAttribute->type);
-			});
+			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::LongText); });
 		typeMenu.AddCheckItem("Number", pAttribute->type == CharacterAttribute::ValueType::Number)
-			.SetDelegate([pAttribute, pControl] {
-				pAttribute->type = CharacterAttribute::ValueType::Number;
-				pControl->ChangeType(pAttribute->type);
-			});
+			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::Number); });
 		typeMenu.AddCheckItem("Comma-separated list", pAttribute->type == CharacterAttribute::ValueType::List)
-			.SetDelegate([pAttribute, pControl] {
-				pAttribute->type = CharacterAttribute::ValueType::List;
-				pControl->ChangeType(pAttribute->type);
-			});
+			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::List); });
 
 		auto& visibilityMenu = menu.AddItem("Visibility");
 		visibilityMenu.AddCheckItem("Public", pAttribute->visibility == CharacterAttribute::Visibility::Public)
-			.SetDelegate([pAttribute, pControl] {
-				pAttribute->visibility = CharacterAttribute::Visibility::Public;
-			});
+			.SetDelegate([this, attributeIndex] { OnChangedAttributeVisibility(attributeIndex, CharacterAttribute::Visibility::Public); });
 		visibilityMenu.AddCheckItem("Private", pAttribute->visibility == CharacterAttribute::Visibility::Private)
-			.SetDelegate([pAttribute, pControl] {
-				pAttribute->visibility = CharacterAttribute::Visibility::Private;
-			});
+			.SetDelegate([this, attributeIndex] { OnChangedAttributeVisibility(attributeIndex, CharacterAttribute::Visibility::Private); });
 
 		auto& priorityMenu = menu.AddItem("Priority");
 		priorityMenu.AddCheckItem("Trivial", pAttribute->flags.IsSet(CharacterAttribute::HintFlag::Trivial))
-			.SetDelegate([pAttribute, pControl] {
-				pAttribute->flags.Flip(CharacterAttribute::HintFlag::Trivial); 
-				pAttribute->flags.Unset(CharacterAttribute::HintFlag::Important);
+			.SetDelegate([this, attributeIndex, pAttribute] {
+				auto flags = pAttribute->flags;
+				flags.Flip(CharacterAttribute::HintFlag::Trivial); 
+				flags.Unset(CharacterAttribute::HintFlag::Important);
+				OnChangedAttributeFlags(attributeIndex, flags);
 			});
 		priorityMenu.AddCheckItem("Important", pAttribute->flags.IsSet(CharacterAttribute::HintFlag::Important))
-			.SetDelegate([pAttribute, pControl] {
-				pAttribute->flags.Flip(CharacterAttribute::HintFlag::Important); 
-				pAttribute->flags.Unset(CharacterAttribute::HintFlag::Trivial);
+			.SetDelegate([this, attributeIndex, pAttribute] {
+				auto flags = pAttribute->flags;
+				flags.Flip(CharacterAttribute::HintFlag::Important); 
+				flags.Unset(CharacterAttribute::HintFlag::Trivial);
+				OnChangedAttributeFlags(attributeIndex, flags);
 			});
 
 		menu.AddSeparator();
+		menu.AddItem("Copy")
+			.SetDelegate([this, attributeIndex] { OnCopyAttribute(attributeIndex); });
+		menu.AddItem("Paste")
+			.SetEnabled(SDL_HasClipboardText())
+			.SetDelegate([this, attributeIndex] { OnPasteAttribute(attributeIndex); });
 		menu.AddItem("Rename\u2026", Resource::ICON_EDIT)
 			.SetDelegate([this, attributeIndex] { RenameAttribute(attributeIndex); });
 		auto& moveMenu = menu.AddItem("Move");
@@ -314,11 +307,8 @@ namespace fig::gui
 		}
 
 		menu.AddSeparator();
-		menu.AddItem("Copy");
-		menu.AddItem("Paste");
-		menu.AddSeparator();
 		menu.AddItem("Remove", Resource::ICON_DELETE)
-			.SetDelegate([this, attributeIndex] { RemoveAttribute(attributeIndex); });
+			.SetDelegate([this, attributeIndex] { OnRemoveAttribute(attributeIndex); });
 
 		menu.Show();
 	}
@@ -340,10 +330,11 @@ namespace fig::gui
 			item.attribute.name = name;
 			item.attribute.id = fig::handle { name };
 			item.pControl->Focus();
+			SetDirty();
 		}
 	}
 
-	void CharacterEditorGeneralTab::RemoveAttribute(size_t index)
+	void CharacterEditorGeneralTab::OnRemoveAttribute(size_t index)
 	{
 		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
 		{
@@ -351,6 +342,29 @@ namespace fig::gui
 			_pAttributeSizer->Remove(item.pControl);
 			DestroyChild(item.pControl);
 			_items.erase(itFind);
+		}
+	}
+
+	void CharacterEditorGeneralTab::OnCopyAttribute(size_t index)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			SDL_SetClipboardText(item.pControl->GetValue().data());
+		}
+	}
+
+	void CharacterEditorGeneralTab::OnPasteAttribute(size_t index)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			fig::string content = SDL_GetClipboardText();
+			if (not content.empty())
+			{
+				item.pControl->SetValue(content);
+				SetDirty();
+			}
 		}
 	}
 
@@ -393,6 +407,38 @@ namespace fig::gui
 			for (auto& item : _items)
 				_pAttributeSizer->Add(item.pControl, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 			InvalidateLayout();
+			SetDirty();
+		}
+	}
+
+	void CharacterEditorGeneralTab::OnChangedAttributeValueType(size_t index, CharacterAttribute::ValueType valueType)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			item.attribute.type = CharacterAttribute::ValueType::ShortText;
+			item.pControl->ChangeValueType(item.attribute.type);
+			SetDirty();
+		}
+	}
+
+	void CharacterEditorGeneralTab::OnChangedAttributeVisibility(size_t index, CharacterAttribute::Visibility visibility)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			item.attribute.visibility = CharacterAttribute::Visibility::Public;
+			SetDirty();
+		}
+	}
+
+	void CharacterEditorGeneralTab::OnChangedAttributeFlags(size_t index, CharacterAttribute::HintFlags flags)
+	{
+		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
+		{
+			auto& item = *itFind;
+			item.attribute.flags = flags;
+			SetDirty();
 		}
 	}
 

@@ -68,7 +68,7 @@ namespace fig::gui
 	fig::observer_ptr<ToggleWithLabel> CharacterEditorTraitsTab::CreateTrait(SizerPtr pSizer, fig::handle traitId, fig::string_view label)
 	{
 		auto pToggle = CreateControl<ToggleWithLabel>(label, 14.5, ToggleBehavior::Default);
-		pToggle->SetDelegate([this, traitId](bool bOn) { OnToggledTrait(traitId, bOn); });
+		pToggle->SetDelegate([this, traitId](bool bOn) { OnToggledTrait(traitId, bOn); SetDirty(); });
 		pToggle->SetSize(kTraitToggleSize.x, kTraitToggleSize.y);
 		pSizer->Add(pToggle, 0, SizerFlag::Right, 8);
 		_traitToggles[traitId] = pToggle;
