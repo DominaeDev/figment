@@ -27,9 +27,9 @@ namespace fig::gui
 		fig::observer_ptr<Control> CreateHeader(fig::string_view text);
 		void OnItemEvent(ChatListItem& item, ChatListItemEvent event);
 
-		void ShowChats(const fig::cref_vector<fig::io::Asset>& chats);
-		void Reset();
+		void ShowChats(const fig::io::ChatCollection& chatInstances);
 		void DeleteChat(ChatListItem& item);
+		void Clear();
 	private:
 		void Sort(fig::io::SortBy sortBy, fig::io::OrderBy orderBy);
 		void Filter(fig::io::ChatFilterFlags filterBy, const fig::string& search_string);
@@ -46,7 +46,7 @@ namespace fig::gui
 
 		struct Item
 		{
-			fig::uuid assetId;
+			fig::uuid instanceId;
 			fig::optional_cref<class fig::data::ChatLog> chatLog;
 			fig::timestamp createdAt;
 			fig::timestamp updatedAt;

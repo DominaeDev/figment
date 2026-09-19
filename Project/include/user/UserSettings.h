@@ -124,5 +124,8 @@ namespace fig::io
 		void Init() noexcept override;
 		FileError Load() noexcept override;
 		FileError Save() const noexcept override;
+
+		void SetChatListFilter(ChatFilterFlags filter);
+		ChatFilterFlags GetChatListFilter() const;
 	};
 }

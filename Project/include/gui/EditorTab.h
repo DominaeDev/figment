@@ -55,7 +55,9 @@ namespace fig::gui
 		fig::observer_ptr<class ComboBox> CreateComboBox(ControlPtr pParent, SizerPtr pSizer, const U& items)
 		{
 			auto pControl = pParent->CreateControl<ComboBox>();
-			pControl->SetDelegate([this](auto&& _) { SetDirty(); });
+			pControl->SetDelegate([this](auto&& _) {
+				SetDirty();
+			});
 			pControl->SetTextChangedDelegate([this](auto&& _) { SetDirty(); });
 			pControl->AddItems(items);
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
@@ -68,7 +70,10 @@ namespace fig::gui
 			auto pControl = pParent->CreateControl<ComboBox>();
 			pControl->AddItems(items);
 			pControl->SetText(binding.AsString());
-			pControl->SetDelegate([this](auto&& _) { SetDirty(); });
+			pControl->SetDelegate([this, binding, pControl](auto&& _) mutable {
+				binding.Set(fig::string { pControl->GetText() });
+				SetDirty();
+			});
 			pControl->SetTextChangedDelegate([this, binding](fig::string_view text) mutable { 
 				binding.Set(fig::string { text });
 				SetDirty(); 

@@ -49,7 +49,7 @@ namespace fig::gui
 		_pPortrait->SetVisible(false);
 	}
 
-	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& assetId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
 	{
 		if (not empty_or_whitespace(chatLog.GetTitle()))
 			_pTitle->SetText(chatLog.GetTitle());
@@ -82,10 +82,10 @@ namespace fig::gui
 		else
 			_bHasError = true;
 
-		if (Global::GetUserContent().GetUserSettings(assetId).flags.IsSet(AssetUserSettings::Flag::Favorite))
+		if (Global::GetUserContent().GetUserSettings(chatInstanceId).flags.IsSet(AssetUserSettings::Flag::Favorite))
 			ShowStar(true);
 
-		_assetId = assetId;
+		_chatInstanceId = chatInstanceId;
 		_pTimestamp->SetTextAndResize(timeString);
 	}
 
@@ -166,54 +166,55 @@ namespace fig::gui
 
 		bool bLLM = Global::IsLLMInitialized();
 
-		auto userSettings = Global::GetUserContent().GetUserSettings(_assetId);
+		auto userSettings = Global::GetUserContent().GetUserSettings(_chatInstanceId);
 
-		menu.AddItem("Resume this chat", Resource::ICON_NEW_CHAT)
-			.SetEnabled(bLLM)
-			.SetDelegate([this] {
-//			PushEvent(UserEvent::StartChat, &_characterId);
-		});
-		menu.AddItem("Start a new chat\u2026")
-			.SetEnabled(bLLM)
-			.SetDelegate([this] {
-//			PushEvent(UserEvent::StartChat, &_characterId);
-		});
-		menu.AddItem("Filter by character")
-			.SetEnabled(not _primaryCharacterId.empty())
-			.SetDelegate([this]() {
-				PushEvent(UserEvent::NavigateToChatList, &_primaryCharacterId);
+
+		if (not userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
+		{
+			menu.AddItem("Resume chat", Resource::ICON_NEW_CHAT)
+				.SetEnabled(bLLM)
+				.SetDelegate([this] {
+//				PushEvent(UserEvent::StartChat, &_characterId);
+			});
+			menu.AddItem("Filter by character")
+				.SetEnabled(not _primaryCharacterId.empty())
+				.SetDelegate([this]() {
+				auto flags = Global::GetUserSettings().GetChatListFilter();
+				PushEvent(UserEvent::NavigateToChatList, flags.IsSet(ChatFilterFlag::Hidden) ? 1 : 0, &_primaryCharacterId);
 			});
 
-		menu.AddSeparator();
-		menu.AddItem("Edit chat settings\u2026", Resource::ICON_EDIT);
-		menu.AddItem("Duplicate\u2026");
-		menu.AddItem("Export\u2026");
-		menu.AddSeparator();
+			menu.AddSeparator();
 
-		if (!userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
-		{
-			menu.AddItem("Star", Resource::ICON_STAR)
-				.SetDelegate([this] {
-				Global::GetUserContent().MarkFavorite(_assetId, true);
-				ShowStar(true);
-				NotifyUpdated();
-			});
-		}
-		else
-		{
-			menu.AddItem("Unstar", Resource::ICON_UNSTAR)
-				.SetDelegate([this] {
-				Global::GetUserContent().MarkFavorite(_assetId, false);
-				ShowStar(false);
-				NotifyUpdated();
-			});
-		}
+			menu.AddItem("Edit chat settings\u2026", Resource::ICON_EDIT);
 
-		if (!userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
-		{
-			menu.AddItem("Archive")
+			if (!userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
+			{
+				menu.AddItem("Star", Resource::ICON_STAR)
+					.SetDelegate([this] {
+					Global::GetUserContent().MarkFavorite(_chatInstanceId, true);
+					ShowStar(true);
+					NotifyUpdated();
+				});
+			}
+			else
+			{
+				menu.AddItem("Unstar", Resource::ICON_UNSTAR)
+					.SetDelegate([this] {
+					Global::GetUserContent().MarkFavorite(_chatInstanceId, false);
+					ShowStar(false);
+					NotifyUpdated();
+				});
+			}
+			menu.AddSeparator();
+
+			menu.AddItem("Duplicate\u2026");
+			menu.AddItem("Export\u2026");
+			menu.AddSeparator();
+
+			menu.AddItem("Archive", Resource::ICON_ARCHIVE)
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkHidden(_assetId, true);
+					Global::GetUserContent().MarkHidden(_chatInstanceId, true);
+					Global::GetUserContent().InvalidateChatCount(_chatInstanceId);
 					NotifyUpdated();
 				});
 			
@@ -224,13 +225,22 @@ namespace fig::gui
 					.SetDelegate([this] { NotifyDelete(); });
 			}
 		}
-		else
+		else // Archived
 		{
-			menu.AddItem("Unarchive")
+			menu.AddItem("Filter by character")
+				.SetEnabled(not _primaryCharacterId.empty())
+				.SetDelegate([this]() {
+				auto flags = Global::GetUserSettings().GetChatListFilter();
+				PushEvent(UserEvent::NavigateToChatList, flags.IsSet(ChatFilterFlag::Hidden) ? 1 : 0, &_primaryCharacterId);
+			});
+
+			menu.AddItem("Unarchive", Resource::ICON_UNARCHIVE)
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkHidden(_assetId, false);
+					Global::GetUserContent().MarkHidden(_chatInstanceId, false);
+					Global::GetUserContent().InvalidateChatCount(_chatInstanceId);
 					NotifyUpdated();
 				});
+
 			menu.AddSeparator();
 			menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
 				.SetDelegate([this] { NotifyDelete(); });

@@ -8,12 +8,15 @@ namespace fig::gui
 	{
 	public:
 		CharacterCard(ControlPtr pParent, const fig::uuid& characterId, CardSize cardSize);
-		inline const fig::uuid& GetUUID() const noexcept { return _characterId; }
+		
+		const fig::uuid& GetCharacterId() const noexcept { return _characterId; }
+
+		void RefreshFull();
+		void RefreshMeta();
 
 	protected:
 		EventResult OnEvent(fig::event& event) override;
 		void ShowMenu();
-		void RefreshMeta();
 
 	private:
 		fig::uuid _characterId;

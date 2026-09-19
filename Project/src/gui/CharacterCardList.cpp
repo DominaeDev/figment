@@ -2,7 +2,7 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/AssetManager.h"
-#include "gui/CardList.h"
+#include "gui/CharacterCardList.h"
 #include "gui/GridSizer.h"
 #include "gui/ScenarioCard.h"
 #include "gui/CharacterCard.h"
@@ -15,7 +15,7 @@ namespace fig::gui
 	constexpr fig::coord TopMargin = 8;
 	constexpr fig::coord BottomMargin = 120;
 
-	using CoverCardPtr = fig::observer_ptr<CoverCard>;
+	using CharacterCardPtr = fig::observer_ptr<CharacterCard>;
 
 	static constexpr fig::coord cardWidth(CardSize cardSize) noexcept
 	{
@@ -27,7 +27,7 @@ namespace fig::gui
 		return cardSize == CardSize::Full ? Constants::GUI::CardHeight: Constants::GUI::HalfCardHeight;
 	}
 
-	CardList::CardList(ControlPtr pParent, CardSize cardSize) : ScrollPanel(pParent),
+	CharacterCardList::CharacterCardList(ControlPtr pParent, CardSize cardSize) : ScrollPanel(pParent),
 		_cardSize { cardSize }
 	{
 		_pGridSizer = SetSizer<GridSizer>(cardWidth(cardSize), cardHeight(cardSize));
@@ -40,46 +40,30 @@ namespace fig::gui
 		EnableCulling(true);
 	}
 
-	void CardList::CreateCards(CardType cardType)
+	void CharacterCardList::CreateCards()
 	{
+		if (_bInitialized)
+			return;
+
 		// Create cards
 		auto& userContent = Global::GetUserContent();
 
-		Reset();
-
-		if (cardType == CardType::Scenario)
-		{
-			// Find scenarios
-			auto scenarios = userContent.GetScenarios();
-			std::sort(scenarios.begin(), scenarios.end(), [](const Asset& a, const Asset& b) {return a.GetCreatedAt() < b.GetCreatedAt(); });
-
-			for (auto& asset_ref : scenarios)
-			{
-				auto& asset = asset_ref.get();
-				DEBUG_MEASURE_BEGIN(std::format("Scenario card {}", asset.id.to_str()));
-				auto pCard = CreateControl<ScenarioCard>(asset.id, _cardSize);
-				_pGridSizer->Add(pCard);
-				_cards.push_back(pCard);
-				DEBUG_MEASURE_END();
-			}
-		}
-
+		Clear();
+		
 		// Find characters
-		if (cardType == CardType::Character)
-		{
-			auto characters = userContent.GetCharacters();
-			std::sort(characters.begin(), characters.end(), [](const Asset& a, const Asset& b) { return a.GetCreatedAt() < b.GetCreatedAt(); });
 
-			for (auto& asset_ref : characters)
-			{
-				auto& asset = asset_ref.get();
-				DEBUG_MEASURE_BEGIN(std::format("Character card {}", asset.id.to_str()));
-				auto pCard = CreateControl<CharacterCard>(asset.id, _cardSize);
-				pCard->SetDelegate([this](CoverCard& card, CardEvent event) { OnCardEvent(card, event); });
-				_pGridSizer->Add(pCard);
-				_cards.push_back(pCard);
-				DEBUG_MEASURE_END();
-			}
+		auto characters = userContent.GetCharacters();
+		std::sort(characters.begin(), characters.end(), [](const Asset& a, const Asset& b) { return a.GetCreatedAt() < b.GetCreatedAt(); });
+
+		for (auto& asset_ref : characters)
+		{
+			auto& asset = asset_ref.get();
+			DEBUG_MEASURE_BEGIN(std::format("Character card {}", asset.id.to_str()));
+			auto pCard = CreateControl<CharacterCard>(asset.id, _cardSize);
+			pCard->SetDelegate([this](CoverCard& card, CardEvent event) { OnCardEvent(card, event); });
+			_pGridSizer->Add(pCard);
+			_cards.push_back(pCard);
+			DEBUG_MEASURE_END();
 		}
 
 		Reorder();
@@ -98,10 +82,11 @@ namespace fig::gui
 				pCard->Cull(true);
 		}
 
+		_bInitialized = true;
 		InvalidateLayout();
 	}
 
-	void CardList::OnUpdate(float fElapsed)
+	void CharacterCardList::OnUpdate(float fElapsed)
 	{
 		ScrollPanel::OnUpdate(fElapsed);
 
@@ -127,7 +112,7 @@ namespace fig::gui
 		}
 	}
 
-	void CardList::SetFilter(const fig::string& search_string) noexcept
+	void CharacterCardList::SetFilter(const fig::string& search_string) noexcept
 	{
 		_filterString = search_string;
 		
@@ -135,7 +120,7 @@ namespace fig::gui
 		ResetScroll();
 	}
 
-	void CardList::SetCardSize(CardSize cardSize)
+	void CharacterCardList::SetCardSize(CardSize cardSize)
 	{
 		if (cardSize == _cardSize)
 			return;
@@ -152,7 +137,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CardList::EnableTags(bool bEnable) noexcept
+	void CharacterCardList::EnableTags(bool bEnable) noexcept
 	{
 		if (_bEnableTags == bEnable)
 			return;
@@ -162,37 +147,38 @@ namespace fig::gui
 			card->ShowTags(bEnable);
 	}
 
-	void CardList::Reset()
+	void CharacterCardList::Clear()
 	{
 		DestroyChildren();
 		_cards.clear();
 		_fScrollY = 0;
 		_fTargetScrollY = 0;
+		_bInitialized = false;
 	}
 
-	void CardList::OnScroll()
+	void CharacterCardList::OnScroll()
 	{
 		PushEvent(UserEvent::Scrolling);
 	}
 
-	fig::coord CardList::GetExtent() const
+	fig::coord CharacterCardList::GetExtent() const
 	{
 		int32_t curr_rows = toI(_pGridSizer->GetRows());
 		fig::coord kCardHeight = cardHeight(_cardSize);
 		return (curr_rows * kCardHeight + std::max(curr_rows - 1, 0) * Constants::GUI::Cards::SpacingY);
 	}
 
-	static void Sort(std::vector<CoverCardPtr>& cards, SortBy sortBy, OrderBy orderBy)
+	static void Sort(std::vector<CharacterCardPtr>& cards, SortBy sortBy, OrderBy orderBy)
 	{
 		auto fnCompare = [](const fig::timestamp& a, const fig::timestamp& b) -> int {
 			return a < b ? -1 : (a > b ? 1 : 0);
 		};
-		auto fnCompareCount = [](uint32_t a, uint32_t b) -> int {
+		auto fnCompareCount = [](size_t a, size_t b) -> int {
 			return a < b ? -1 : (a > b ? 1 : 0);
 		};
 
 		// Initial sort (creation date)
-		std::ranges::stable_sort(cards, [&](CoverCardPtr a, CoverCardPtr b) -> bool {
+		std::ranges::stable_sort(cards, [&](CharacterCardPtr a, CharacterCardPtr b) -> bool {
 			auto& meta_a = a->GetMetaData();
 			auto& meta_b = b->GetMetaData();
 			int cmp = fnCompare(meta_b.lastUsedAt, meta_a.lastUsedAt);
@@ -200,9 +186,11 @@ namespace fig::gui
 		});
 
 		// Then sort by...
-		std::ranges::stable_sort(cards, [&](CoverCardPtr a, CoverCardPtr b) -> bool {
+		std::ranges::stable_sort(cards, [&](CharacterCardPtr a, CharacterCardPtr b) -> bool {
 			auto& meta_a = a->GetMetaData();
 			auto& meta_b = b->GetMetaData();
+			size_t chats_a = a->GetChatCount();
+			size_t chats_b = b->GetChatCount();
 			int cmp = 0;
 			switch (sortBy)
 			{
@@ -219,7 +207,7 @@ namespace fig::gui
 				cmp = fnCompare(meta_a.lastUsedAt, meta_b.lastUsedAt);
 				break;
 			case SortBy::ChatCount:
-				cmp = fnCompareCount(meta_a.chatCount, meta_b.chatCount);
+				cmp = fnCompareCount(chats_a, chats_b);
 				break;
 			}
 			if (orderBy == OrderBy::Descending)
@@ -228,7 +216,7 @@ namespace fig::gui
 		});
 	}
 
-	static void Filter(std::vector<CoverCardPtr>& cards, FilterFlags filterBy, const fig::string& search_string)
+	static void Filter(std::vector<CharacterCardPtr>& cards, FilterFlags filterBy, const fig::string& search_string)
 	{
 		SearchQuery query { search_string };
 
@@ -240,7 +228,7 @@ namespace fig::gui
 			card->SetHidden(not fnFilter(card));
 	}
 
-	void CardList::Reorder()
+	void CharacterCardList::Reorder()
 	{
 		// Filter
 		auto filterBy = Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, DefaultFilterFlags, FilterFlagMapping);
@@ -265,7 +253,7 @@ namespace fig::gui
 		InvalidateLayout();
 	}
 
-	void CardList::DeleteCharacter(CoverCard& card)
+	void CharacterCardList::DeleteCharacter(CoverCard& card)
 	{
 		if (auto try_card = std::ranges::find_if(_cards, [&card](auto& c) {
 			return c.get() == &card;
@@ -280,7 +268,7 @@ namespace fig::gui
 		}
 	}
 
-	void CardList::OnCardEvent(CoverCard& card, CardEvent event)
+	void CharacterCardList::OnCardEvent(CoverCard& card, CardEvent event)
 	{
 		switch (event)
 		{
@@ -291,5 +279,38 @@ namespace fig::gui
 			DeleteCharacter(card);
 			break;
 		}
+	}
+
+	void CharacterCardList::RefreshCards()
+	{
+		if (not _bInitialized)
+			return;
+
+		auto characters = Global::GetUserContent().GetCharacters();
+		std::map<fig::uuid, fig::timestamp> updateTimes;
+		for (auto& character : characters)
+			updateTimes[character.get().id] = character.get().GetUpdatedAt();
+
+		for (auto& pCard : _cards)
+		{
+			if (auto it = updateTimes.find(pCard->GetCharacterId()); it != updateTimes.cend())
+			{
+				auto& updatedAt = it->second;
+				if (pCard->GetUpdatedAt() < updatedAt) // New
+				{
+					auto request = Global::GetUserContent().GetAssets().LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, 0);
+					pCard->SetPendingCoverImage(std::move(request.future));
+					pCard->RefreshFull();
+				}
+				else
+					pCard->RefreshMeta();
+			}
+			else // Removed?
+			{
+				// @todo
+			}
+		}
+
+		Reorder();
 	}
 }

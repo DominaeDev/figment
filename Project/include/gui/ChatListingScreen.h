@@ -13,7 +13,7 @@ namespace fig::gui
 		ChatListingScreen(Frame* pParent);
 
 		void ShowAllChats();
-		void ShowChatsWith(const fig::uuid& characterId);
+		void ShowChatsWith(const fig::uuid& characterId, bool bHidden);
 	
 	protected:
 		void OnUpdate(float fElapsed) override;

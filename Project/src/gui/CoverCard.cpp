@@ -119,7 +119,7 @@ namespace fig::gui
 		_pSmallStar->SetPosition(Small::Width - _pSmallStar->GetWidth() - 6, 6);
 		_pSmallStar->SetVisible(false);
 
-		SetChatCount(_metaData.chatCount);
+		SetChatCount(_chatCount);
 		SetCardSize(_cardSize);
 
 		SetBorder(_userSettings.borderStyle);
@@ -202,8 +202,10 @@ namespace fig::gui
 			_pSmallLabel->SetText(text);
 	}
 
-	void CoverCard::SetChatCount(uint32_t count)
+	void CoverCard::SetChatCount(size_t count)
 	{
+		_chatCount = count;
+
 		if (!_pCounterBG)
 		{
 			_pCounterBG = CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
@@ -322,6 +324,16 @@ namespace fig::gui
 		return AddTagResult::Ok;
 	}
 
+	void CoverCard::ClearTags()
+	{
+		_tags.clear();
+		_tagPosition.x = Large::Tags::Margin;
+		_tagPosition.y = Large::Tags::Top;
+		_tagRows = 1;
+		if (_pTagsRoot)
+			_pTagsRoot->DestroyChildren();
+	}
+
 	void CoverCard::SetBorder(CardBorderStyle style)
 	{
 		if (style == None)
@@ -401,7 +413,16 @@ namespace fig::gui
 			return;
 
 		_pendingCover = std::move(future);
+		_largeImageSurface.clear();
+		_largeImageTexture.clear();
+		_smallImageSurface.clear();
+		_smallImageTexture.clear();
 		PollFuture();
+	}
+
+	bool CoverCard::IsPending() const
+	{
+		return _pendingCover.valid();
 	}
 
 	void CoverCard::PollFuture()
@@ -459,7 +480,7 @@ namespace fig::gui
 
 		if (filter.IsSet(FilterFlag::New) and not _metaData.IsNew())
 			return false;
-		if (filter.IsSet(FilterFlag::Chats) and _metaData.chatCount == 0)
+		if (filter.IsSet(FilterFlag::Chats) and _chatCount == 0)
 			return false;
 		if (filter.IsSet(FilterFlag::Starred) and not _userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 			return false;
@@ -671,7 +692,6 @@ namespace fig::gui
 	{
 		_metaData = metaData;
 		ShowNew(metaData.IsNew());
-		SetChatCount(metaData.chatCount);
 	}
 
 	void CoverCard::SetUserSettings(const AssetUserSettings& userSettings) noexcept
@@ -679,7 +699,6 @@ namespace fig::gui
 		_userSettings = userSettings;
 		ShowStar(userSettings.HasFlag(AssetUserSettings::Flag::Favorite));
 	}
-
 
 	void CoverCard::NotifyUpdated()
 	{

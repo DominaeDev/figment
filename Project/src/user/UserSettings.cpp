@@ -45,4 +45,14 @@ namespace fig::io
 	{
 		return OnSave(_UserSettings);
 	}
+
+	void UserSettings::SetChatListFilter(ChatFilterFlags filter)
+	{
+		SetFlags<ChatFilterFlag>(UserSetting::Interface::ChatList::Filtering, filter, ChatFilterFlagMapping);
+	}
+
+	ChatFilterFlags UserSettings::GetChatListFilter() const
+	{
+		return GetFlags<ChatFilterFlag>(UserSetting::Interface::ChatList::Filtering, DefaultChatFilterFlags, ChatFilterFlagMapping);
+	}
 }

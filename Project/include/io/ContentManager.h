@@ -22,6 +22,17 @@ namespace fig::io
 		{ v.SaveToXml(data) } -> std::same_as<void>;
 	};
 
+
+	template <typename T>
+	struct UserContent
+	{
+		std::reference_wrapper<const T> instance;
+		fig::uuid assetId;
+		fig::timestamp createdAt;
+		fig::timestamp updatedAt;
+	};
+	using ChatCollection = std::vector<std::pair<UserContent<fig::data::ChatInstance>, std::vector<UserContent<fig::data::ChatLog>>>>;
+
 	class UserContentManager
 	{
 	public:
@@ -42,10 +53,11 @@ namespace fig::io
 		bool UpdateAsset(const fig::uuid& assetId, fig::bytes&& data);
 
 		bool DeleteAsset(fig::uuid assetId);
-		fig::cref_vector<Asset> GetChatLogs(bool bLoad = false);
-		fig::cref_vector<Asset> GetChatLogsWith(const fig::uuid& characterId, bool bLoad = false);
 		fig::cref_vector<Asset> GetCharacters() const noexcept;
 		fig::cref_vector<Asset> GetScenarios() const noexcept;
+		ChatCollection GetAllChats() noexcept;
+		ChatCollection GetChatsWith(const fig::uuid& characterId) noexcept;
+		size_t GetChatCount(const fig::uuid& assetId);
 
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
 		std::optional<fig::string> GetCharacterName(const fig::uuid& characterId) const;
@@ -64,8 +76,8 @@ namespace fig::io
 		bool SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle);
 
 		AssetManager& GetAssets();
-
-		uint32_t GetChatCount(const fig::uuid& assetId);
+		std::expected<fig::timestamp, FileError> GetCreatedAt(const fig::uuid& assetId) const noexcept;
+		std::expected<fig::timestamp, FileError> GetUpdatedAt(const fig::uuid& assetId) const noexcept;
 
 		template <typename T>
 		fig::optional_cref<T> Get(const fig::uuid& assetId) noexcept
@@ -92,7 +104,10 @@ namespace fig::io
 		void InvalidateMeta(const fig::uuid& assetId) noexcept
 		{
 			_metaData.erase(assetId);
+			_chatCounts.erase(assetId);
 		}
+
+		void InvalidateChatCount(const fig::uuid& assetId);
 
 		template <typename T>
 		requires std::copyable<T>
@@ -116,8 +131,6 @@ namespace fig::io
 
 	protected:
 		void LoadAll();
-		void RefreshChatCount();
-		void InvalidateChatCount() { _bInvalidChatCount = true; }
 
 		template <typename T>
 		AssetCacheBase<T>& GetCache()
@@ -133,17 +146,19 @@ namespace fig::io
 			return static_cast<const AssetCacheBase<T>&>(*entry);
 		}
 
+		fig::cref_vector<Asset> GetChatInstances(bool bLoad) const noexcept;
+		ChatCollection CompileChatCollection(const fig::cref_vector<Asset>& assets) noexcept;
+
 		fig::observer_ptr<fig::sdl::Texture> GetCachedTexture(fig::renderer_ptr pRenderer, const fig::uuid& assetId, fig::texture_ptr pMask = nullptr);
+		void RefreshChatCounts();
 
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 		std::unordered_map<AssetTypeDefinition, std::unique_ptr<IAssetCache>> _caches;
 		std::map<fig::uuid, ContentMetaData> _metaData;
+		std::map<fig::uuid, size_t> _chatCounts;
 		
 		std::map<fig::renderer_ptr, std::map<fig::uuid, std::map<fig::texture_ptr, fig::sdl::Texture>>> _cachedTextures;
-
-		std::map<fig::uuid, std::vector<fig::uuid>> _chatsByAsset; // <asset id, chat ids>
-		bool _bInvalidChatCount { true };
 
 		template <AssetUserSettings::Flag E>
 		bool MarkFlag(const fig::uuid& assetId, bool value);

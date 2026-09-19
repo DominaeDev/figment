@@ -17,7 +17,6 @@ namespace fig::io
 		// Character
 		fig::data::Gender gender {};
 		fig::string_list tags {};
-		uint32_t chatCount {};
 		bool hasVoice {};
 
 		bool IsNew() const noexcept;

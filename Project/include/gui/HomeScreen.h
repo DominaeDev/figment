@@ -5,7 +5,7 @@
 
 namespace fig::gui
 {
-	class CardList;
+	class CharacterCardList;
 	class ToggleWithIcon;
 
 	class HomeScreen : public Screen
@@ -13,8 +13,7 @@ namespace fig::gui
 	public:
 		HomeScreen(Frame* pParent);
 
-		void CreateCards();
-		CardList& GetCardList();
+		CharacterCardList& GetCardList();
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -23,6 +22,7 @@ namespace fig::gui
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void OnSearchFilter(fig::string_view search_text);
 		void OnUserSignedIn(const fig::user::UserProfile& profile) override;
+		void OnActivated() override;
 
 	private:
 		void ToggleCardSize() noexcept;
@@ -31,7 +31,7 @@ namespace fig::gui
 		void ShowFilteringMenu() noexcept;
 
 	private:
-		fig::observer_ptr<CardList> _pCardList;
+		fig::observer_ptr<CharacterCardList> _pCardList;
 		fig::observer_ptr<TextInput> _pFilterTextBox;
 		fig::observer_ptr<StaticText> _pHeader;
 		fig::observer_ptr<ButtonWithIcon> _pSortingButton;

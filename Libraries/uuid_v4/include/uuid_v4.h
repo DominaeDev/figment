@@ -247,12 +247,9 @@ private:
 public:
 	bool empty() const noexcept
 	{
-		for (size_t i = 0; i < sizeof(data); ++i)
-		{
-			if (data[i] != 0)
-				return false;
-		}
-		return true;
+		struct Words { uint64_t low, high; };
+		auto words = std::bit_cast<Words>(data);
+		return words.low == 0ULL and words.high == 0ULL;
 	}
 
 	friend std::ostream& operator<< (std::ostream& stream, const UUID& uuid)

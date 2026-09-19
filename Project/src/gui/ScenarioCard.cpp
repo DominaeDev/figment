@@ -17,7 +17,7 @@ namespace fig::gui
 		{
 			auto [title, desc] = scenario.value().GetInfo();
 			SetLabel(title);
-			SetChatCount(_metaData.chatCount);
+			SetChatCount(_chatCount);
 		}
 	}
 }

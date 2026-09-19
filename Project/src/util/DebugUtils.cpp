@@ -20,6 +20,7 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
+//			FlushBrokenAssets();
 //			ImportTestCharacters("./import/characters");
 //			EraseChats();
 //			CreateModelSettings();
@@ -235,9 +236,68 @@ namespace fig
 
 			if (userMngr.SignInDefaultProfile())
 			{
-				userMngr.ChangePassword(userMngr.GetActiveProfile().value().id, fig::string { oldPassword }, fig::string { newPassword });
+				if (auto try_profile = userMngr.GetActiveProfile())
+				{
+					userMngr.ChangePassword((*try_profile).id, fig::string { oldPassword }, fig::string { newPassword });
+				}
 				userMngr.SignOut();
 			}
+		}
+	}
+
+	void DebugUtility::FlushBrokenAssets()
+	{
+		if constexpr (Debugging)
+		{
+			auto& userMngr = Global::GetUserManager();
+			if (userMngr.SignInDefaultProfile())
+			{
+				auto& assetMngr = userMngr.GetContent().GetAssets();
+
+				std::unordered_set<fig::uuid> removeAssetIds;
+				auto assets = assetMngr.GetAllAssets();
+
+				// Remove orphans (there should be none)
+				auto assetIds = assets
+					| std::views::transform([](auto&& ref) { return ref.get().id; })
+					| std::ranges::to<std::unordered_set>();
+
+				for (auto& assetRef : assets)
+				{
+					auto& asset = assetRef.get();
+					if (asset.parent_id.empty())
+						continue;
+
+					if (not assetIds.contains(asset.parent_id))
+						removeAssetIds.insert(asset.id);
+				}
+
+				// Removed empty chat instances
+				auto validChatIds = assets
+					| std::views::filter([](auto&& ref) { return ref.get().type.IsOfType(AssetType::Chat, ChatAssetType::Log); })
+					| std::views::transform([](auto&& ref) { return ref.get().parent_id; })
+					| std::ranges::to<std::unordered_set>();
+
+				auto brokenChatInstanceIds = assets
+					| std::views::filter([validChatIds](auto&& ref) { 
+						auto& a = ref.get(); 
+						return a.type.IsOfType(AssetType::Chat, ChatAssetType::Instance)
+							and not validChatIds.contains(a.id);
+					})
+					| std::views::transform([](auto&& ref) { return ref.get().id; })
+					| std::ranges::to<std::vector>();
+
+				removeAssetIds.insert_range(brokenChatInstanceIds);
+
+				auto removeList = removeAssetIds | std::ranges::to<std::vector>();
+				if (auto removed = assetMngr.DeleteAssets(removeList))
+				{
+					LogLn(std::format("Removed {} broken assets.", removed));
+				}
+
+				userMngr.SignOut();
+			}
+
 		}
 	}
 }

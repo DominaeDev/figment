@@ -19,5 +19,6 @@ namespace fig
 		static void DebugCharacter(const fig::uuid& characterId);
 		static void EraseChats();
 		static void GenerateUUIDs(size_t count);
+		static void FlushBrokenAssets();
 	};
 }

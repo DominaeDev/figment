@@ -27,6 +27,9 @@ namespace fig::gui
 
 		virtual void OnUserSignedIn(const fig::user::UserProfile& profile) {};
 		virtual void OnUserSignedOut() {};
+
+		virtual void OnActivated() {};
+		virtual void OnDeactivated() {};
 	};
 
 	template <typename T>

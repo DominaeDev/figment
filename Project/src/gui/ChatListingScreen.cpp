@@ -70,17 +70,30 @@ namespace fig::gui
 		if (not Global::IsSignedIn())
 			return;
 
-		_pChatList->ShowAllChats();
 		_filterByCharacter.clear();
+
+		auto flags = Global::GetUserSettings().GetChatListFilter();
+		flags.Unset(ChatFilterFlag::Hidden);
+		Global::GetUserSettings().SetChatListFilter(flags);
+
+		_pChatList->ShowAllChats();
 		RefreshFilterButton();
 	}
 
-	void ChatListingScreen::ShowChatsWith(const fig::uuid& characterId)
+	void ChatListingScreen::ShowChatsWith(const fig::uuid& characterId, bool bHidden)
 	{
 		if (not Global::IsSignedIn())
 			return;
 
 		_filterByCharacter = Global::GetUserContent().GetCharacterName(characterId).value_or("Unknown");
+
+		auto flags = Global::GetUserSettings().GetChatListFilter();
+		if (bHidden)
+			flags.Set(ChatFilterFlag::Hidden);
+		else
+			flags.Unset(ChatFilterFlag::Hidden);
+		Global::GetUserSettings().SetChatListFilter(flags);
+
 		_pChatList->ShowChatsWith(characterId);
 		RefreshFilterButton();
 	}
@@ -177,8 +190,6 @@ namespace fig::gui
 
 		menu.AddItem("Clear filter")
 			.SetDelegate([=, this] {
-				SetFilter(DefaultChatFilterFlags);
-				_filterByCharacter.clear();
 				ShowAllChats();
 			});
 		menu.Show(fig::point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });

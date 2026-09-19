@@ -58,35 +58,33 @@ namespace fig::gui
 
 	void ChatList::ShowAllChats()
 	{
-		auto chats = Global::GetUserContent().GetChatLogs(true)
+		auto chats = Global::GetUserContent().GetAllChats()
 			| std::ranges::to<std::vector>();
 		ShowChats(chats);
 	}
 
 	void ChatList::ShowChatsWith(const fig::uuid& characterId)
 	{
-		auto chats = Global::GetUserContent().GetChatLogsWith(characterId, true)
+		auto chats = Global::GetUserContent().GetChatsWith(characterId)
 			| std::ranges::to<std::vector>();
 		ShowChats(chats);
 	}
 
-	void ChatList::ShowChats(const fig::cref_vector<Asset>& chats)
+	void ChatList::ShowChats(const fig::io::ChatCollection& chats)
 	{
-		Reset();
-
-		auto& content = Global::GetUserContent();
+		Clear();
 
 		auto now = fig::now();
 		_items = chats
-			| std::views::transform([&content, now](auto& a) {
-				auto& asset = a.get();
-				auto chat = content.Get<fig::data::ChatLog>(asset.id);
+			| std::views::transform([now](auto&& pair) {
+				auto& chatInstance = pair.first;
+				auto& chatLog = pair.second[0];
 				return Item {
-					.assetId = asset.id,
-					.chatLog = chat,
-					.createdAt = asset.GetCreatedAt(),
-					.updatedAt = asset.GetUpdatedAt(),
-					.timeBucket = GetTimeBucket(asset.GetUpdatedAt(), now),
+					.instanceId = chatInstance.assetId,
+					.chatLog = chatLog.instance.get(),
+					.createdAt = chatLog.createdAt,
+					.updatedAt = chatLog.updatedAt,
+					.timeBucket = GetTimeBucket(chatLog.updatedAt, now),
 				};
 			})
 			| std::ranges::to<std::vector>();
@@ -106,7 +104,7 @@ namespace fig::gui
 		return panel;
 	}
 
-	void ChatList::Reset()
+	void ChatList::Clear()
 	{
 		DestroyChildren();
 		ResetScroll();
@@ -162,7 +160,7 @@ namespace fig::gui
 
 	bool ChatList::Item::MatchesFlags(ChatFilterFlags filter) noexcept
 	{
-		auto userSettings = Global::GetUserContent().GetUserSettings(assetId);
+		auto userSettings = Global::GetUserContent().GetUserSettings(instanceId);
 
 		if (filter.IsSet(ChatFilterFlag::Hidden) != userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 			return false;
@@ -232,7 +230,7 @@ namespace fig::gui
 				else
 					timeString = item.updatedAt.get_date_string();
 
-				auto pListItem = CreateControl<ChatListItem>(item.assetId, *item.chatLog, timeString);
+				auto pListItem = CreateControl<ChatListItem>(item.instanceId, *item.chatLog, timeString);
 				pListItem->SetDelegate([this](ChatListItem& item, ChatListItemEvent event) { OnItemEvent(item, event); });
 				item.pListItem = pListItem;
 
@@ -268,7 +266,7 @@ namespace fig::gui
 			return i.pListItem.get() == &item;
 		}); try_item != std::ranges::end(_items))
 		{
-			if (Global::GetUserContent().DeleteAsset((*try_item).assetId))
+			if (Global::GetUserContent().DeleteAsset((*try_item).instanceId))
 			{
 				DestroyChild((*try_item).pListItem);
 				_items.erase(try_item);

@@ -235,7 +235,7 @@
     <ClCompile Include="src\gui\ResizeableImageViewport.cpp" />
     <ClCompile Include="src\gui\ResizeHandle.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
-    <ClCompile Include="src\gui\CardList.cpp" />
+    <ClCompile Include="src\gui\CharacterCardList.cpp" />
     <ClCompile Include="src\gui\CharacterCard.cpp" />
     <ClCompile Include="src\gui\ChatScreen.cpp" />
     <ClCompile Include="src\gui\CoverCard.cpp" />
@@ -555,7 +555,7 @@
     <ClInclude Include="include\gui\LoginScreen.h" />
     <ClInclude Include="include\gui\TextBox.h" />
     <ClInclude Include="include\gui\TexturedBorder.h" />
-    <ClInclude Include="include\gui\CardList.h" />
+    <ClInclude Include="include\gui\CharacterCardList.h" />
     <ClInclude Include="include\gui\CharacterCard.h" />
     <ClInclude Include="include\gui\ChatScreen.h" />
     <ClInclude Include="include\gui\CoverCard.h" />

@@ -34,9 +34,7 @@ namespace fig::io
 		GetCache<fig::data::Character>().Preload();
 		GetCache<fig::data::Scenario>().Preload();
 		GetCache<fig::data::ChatInstance>().Preload();
-
-		_bInvalidChatCount = true;
-
+		RefreshChatCounts();
 		DEBUG_MEASURE_END();
 	}
 
@@ -95,9 +93,6 @@ namespace fig::io
 					meta.gender = (*try_character).gender;
 					meta.tags = (*try_character).GetTags();
 				}
-
-				// Count chats
-				meta.chatCount = GetChatCount(assetId);
 
 				// Last used => last chat
 				if (auto lastChat = FindLastChatWith(asset.id))
@@ -342,14 +337,12 @@ namespace fig::io
 				asset.SetMeta(fig::io::MetaTag::ReferenceToWorld, chatInstance.worldId);
 		});
 
-		auto& chatLogInstance = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Log, DataFormat::TextXml), chatInstanceAsset.id);
+		auto& chatLogAsset = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Log, DataFormat::TextXml), chatInstanceAsset.id);
+		
+		InvalidateChatCount(chatInstanceAsset.id);
+		GetCache<ChatInstance>().Insert(chatInstanceAsset.id, chatInstance);
 
-//		auto associatedAssets = _pAssetMngr->GetAssociatedAssets(chatInstanceAsset.id);
-//		for (auto& id : associatedAssets)
-//			InvalidateMeta(id);
-//		InvalidateChatCount();
-
-		return { chatInstanceAsset.id, chatLogInstance.id };
+		return { chatInstanceAsset.id, chatLogAsset.id };
 	}
 
 	void UserContentManager::InvalidateCache(const fig::uuid& assetId) noexcept
@@ -368,62 +361,90 @@ namespace fig::io
 		}
 	}
 
-	uint32_t UserContentManager::GetChatCount(const fig::uuid& assetId)
+	void UserContentManager::RefreshChatCounts()
 	{
-		if (_bInvalidChatCount)
+		_chatCounts.clear();
+
+		auto fnInc = [&](const fig::uuid& assetId) {
+			if (auto it = _chatCounts.find(assetId); it != _chatCounts.end())
+				++(it->second);
+			else
+				_chatCounts[assetId] = 1uz;
+		};
+
+		// Zero counts
+		auto characterAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Character));
+		for (auto& assetRef : characterAssets)
+			_chatCounts[assetRef.get().id] = 0uz;
+
+		auto chatAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance));
+		for (auto assetRef : chatAssets)
 		{
-			RefreshChatCount();
-			_bInvalidChatCount = false;
-		}
+			auto& asset = assetRef.get();
+			if (auto userSettings = asset.GetUserSettings(); userSettings.has_value() and (*userSettings).HasFlag(AssetUserSettings::Flag::Hidden))
+				continue; // Don't count archived chats
 
-		if (auto itFind = _chatsByAsset.find(assetId); itFind != _chatsByAsset.cend())
-			return static_cast<uint32_t>(itFind->second.size());
-		return 0;
-	}
-
-	void UserContentManager::RefreshChatCount()
-	{
-		_chatsByAsset.clear();
-		auto& chats = GetCache<ChatInstance>().GetAll();
-
-		for (auto& kvp : chats)
-		{
-			auto& assetId = kvp.first;
-			auto& chat = kvp.second;
-
-			for (auto& id : chat.characterIds)
+			for (uint8_t idx = static_cast<uint8_t>(MetaTag::ReferenceToCharacter); idx < static_cast<uint8_t>(MetaTag::ReferenceToUser); ++idx)
 			{
-				if (not id.empty())
-					_chatsByAsset[id].push_back(assetId);
+				if (auto refId = asset.GetMeta<fig::uuid>(static_cast<MetaTag>(idx)))
+					fnInc(*refId);
 			}
-
-			if (not chat.userId.empty())
-				_chatsByAsset[chat.userId].push_back(assetId);
-
-			if (not chat.scenarioId.empty())
-				_chatsByAsset[chat.scenarioId].push_back(assetId);
-
-			if (not chat.worldId.empty())
-				_chatsByAsset[chat.worldId].push_back(assetId);
+			if (auto refId = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToUser))
+				fnInc(*refId);
+			if (auto refId = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToScenario))
+				fnInc(*refId);
+			if (auto refId = asset.GetMeta<fig::uuid>(MetaTag::ReferenceToWorld))
+				fnInc(*refId);
 		}
+
+		_chatCounts.erase(fig::uuid {});
 	}
 
-	fig::cref_vector<Asset> UserContentManager::GetChatLogs(bool bLoad)
+	size_t UserContentManager::GetChatCount(const fig::uuid& assetId)
 	{
-		auto& chats = GetCache<ChatInstance>().GetAll();
+		if (auto itFind = _chatCounts.find(assetId); itFind != _chatCounts.cend())
+			return itFind->second;
 
-		auto chatInstanceIds = chats
-			| std::views::keys
+		auto chatAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance));
+		size_t count = 0uz;
+
+		for (auto assetRef : chatAssets)
+		{
+			auto& chat = assetRef.get();
+			if (auto userSettings = chat.GetUserSettings(); userSettings.has_value() and (*userSettings).HasFlag(AssetUserSettings::Flag::Hidden))
+				continue; // Don't count archived chats
+
+			if (chat.HasReferenceTo(assetId))
+				++count;
+		}
+		
+		_chatCounts[assetId] = count;
+		return count;
+	}
+
+	fig::cref_vector<Asset> UserContentManager::GetChatInstances(bool bLoad) const noexcept
+	{
+		auto chatInstanceAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
+			| std::ranges::to<std::vector>();
+
+		auto chatInstanceIds = chatInstanceAssets
+			| std::views::transform([](auto&& a) { return a.get().id; })
 			| std::ranges::to<std::unordered_set>();
 
 		auto chatLogAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Log))
 			| std::views::filter([&](auto&& a) { return chatInstanceIds.contains(a.get().parent_id); })
 			| std::ranges::to<std::vector>();
 
-		std::ranges::sort(chatLogAssets, std::ranges::greater(), [](auto& a) { return a.get().GetUpdatedAt(); });
-
 		if (bLoad)
 		{
+			// Load instances
+			std::vector<fig::uuid> instanceIds = chatInstanceAssets
+				| std::views::filter([](auto& a) { return !a.get().HasData(); })
+				| std::views::transform([](auto& a) { return a.get().id; })
+				| std::ranges::to<std::vector>();
+			_pAssetMngr->LoadAssetData(instanceIds);
+
+			// Load logs
 			std::vector<fig::uuid> logIds = chatLogAssets
 				| std::views::filter([](auto& a) { return !a.get().HasData(); })
 				| std::views::transform([](auto& a) { return a.get().id; })
@@ -431,33 +452,80 @@ namespace fig::io
 			_pAssetMngr->LoadAssetData(logIds);
 		}
 
-		return chatLogAssets;
+		return chatInstanceAssets;
 	}
 
-	fig::cref_vector<Asset> UserContentManager::GetChatLogsWith(const fig::uuid& characterId, bool bLoad)
+	ChatCollection UserContentManager::GetAllChats() noexcept
 	{
-		std::unordered_set<fig::uuid> instanceIds;
-		auto& chats = GetCache<ChatInstance>().GetAll();
-		for (auto& kvp : chats)
-		{
-			if (kvp.second.contains(characterId))
-				instanceIds.insert(kvp.first);
-		}
-
-		auto logAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Log))
-			| std::views::filter([&](auto&& a) { return instanceIds.contains(a.get().parent_id); })
+		auto chatInstanceAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
 			| std::ranges::to<std::vector>();
 
-		if (bLoad)
-		{
-			std::vector<fig::uuid> logIds = logAssets
-				| std::views::transform([](auto&& a) { return a.get().id; })
-				| std::ranges::to<std::vector>();
-			_pAssetMngr->LoadAssetData(logIds);
-		}
-
-		return logAssets;
+		return CompileChatCollection(chatInstanceAssets);
 	}
+
+	ChatCollection UserContentManager::GetChatsWith(const fig::uuid& characterId) noexcept
+	{
+		auto chatInstanceAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
+			| std::views::filter([&characterId](auto&& a) { return a.get().HasReferenceTo(characterId); })
+			| std::ranges::to<std::vector>();
+
+		return CompileChatCollection(chatInstanceAssets);
+	}
+
+	ChatCollection UserContentManager::CompileChatCollection(const fig::cref_vector<Asset>& assets) noexcept
+	{
+		auto chatInstanceIds = assets
+			| std::views::transform([](auto&& a) { return a.get().id; })
+			| std::ranges::to<std::unordered_set>();
+
+		auto chatLogAssets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Log))
+			| std::views::filter([&](auto&& a) { return chatInstanceIds.contains(a.get().parent_id); })
+			| std::ranges::to<std::vector>();
+
+		ChatCollection chats;
+		for (auto chatInstanceAssetRef : assets)
+		{
+			auto& chatInstanceAsset = chatInstanceAssetRef.get();
+			if (auto try_instance = Get<ChatInstance>(chatInstanceAsset.id))
+			{
+				std::vector<UserContent<ChatLog>> logs;
+
+				for (auto& chatLogAssetRef : chatLogAssets)
+				{
+					auto& chatLogAsset = chatLogAssetRef.get();
+					if (chatLogAsset.parent_id != chatInstanceAsset.id)
+						continue;
+
+					if (auto try_log = Get<ChatLog>(chatLogAsset.id))
+					{
+						logs.push_back(UserContent<ChatLog> {
+							.instance = std::cref(try_log.value()),
+							.assetId = chatLogAsset.id,
+							.createdAt = chatLogAsset.GetCreatedAt(),
+							.updatedAt = chatLogAsset.GetUpdatedAt(),
+						});
+					}
+				}
+
+				if (not logs.empty())
+				{
+					std::ranges::sort(logs, std::ranges::greater(), [](auto& log) { return log.updatedAt; });
+
+					chats.push_back({ 
+						UserContent<ChatInstance> {
+							.instance = std::cref(try_instance.value()),
+							.assetId = chatInstanceAsset.id,
+							.createdAt = chatInstanceAsset.GetCreatedAt(),
+							.updatedAt = chatInstanceAsset.GetUpdatedAt(),
+						}, 
+						std::move(logs)
+					});
+				}
+			}
+		}
+		return chats;
+	}
+
 	std::optional<fig::string> UserContentManager::GetCharacterName(const fig::uuid& characterId) const
 	{
 		if (auto try_character = GetCache<Character>().TryGet(characterId))
@@ -487,42 +555,13 @@ namespace fig::io
 
 	bool UserContentManager::DeleteAsset(fig::uuid assetId)
 	{
-		bool bAlsoDeleteParent = false;
-		fig::uuid parentId {};
-		AssetTypeDefinition assetType {};
-
-		if (auto meta = GetMetaData(assetId))
-		{
-			assetType = (*meta).assetType;
-			if (assetType.IsOfType(AssetType::Chat, ChatAssetType::Log))
-			{
-				parentId = (*meta).parentId;
-				bAlsoDeleteParent = true; //! @todo?
-			}
-		}
-
-		if (assetType.IsOfType(AssetType::Chat, ChatAssetType::Instance))
-		{
-			auto associatedAssets = _pAssetMngr->FindAssociatedAssets(assetId);
-			for (auto& id : associatedAssets)
-				InvalidateMeta(id);
-		}
+		auto associatedAssets = _pAssetMngr->FindAssociatedAssets(assetId);
+		for (auto& id : associatedAssets)
+			InvalidateMeta(id);
+		InvalidateAsset(assetId);
 
 		if (not _pAssetMngr->DeleteAsset(assetId))
 			return false;
-
-		InvalidateAsset(assetId);
-
-		if (bAlsoDeleteParent and not parentId.empty())
-		{
-			size_t count = _pAssetMngr->FindChildrenOf(parentId).size();
-			if (count == 0uz)
-				DeleteAsset(parentId);
-		}
-
-		if (assetType.IsOfType(AssetType::Chat))
-			InvalidateChatCount();
-
 		return true;
 	}
 
@@ -644,5 +683,26 @@ namespace fig::io
 				asset.get().InvalidateUserSettings();
 			}
 		});
+	}
+
+	std::expected<fig::timestamp, FileError> UserContentManager::GetCreatedAt(const fig::uuid& assetId) const noexcept
+	{
+		if (auto try_asset = _pAssetMngr->FindAsset(assetId))
+			return (*try_asset).GetCreatedAt();
+		return std::unexpected(FileError::NotFound);
+	}
+
+	std::expected<fig::timestamp, FileError> UserContentManager::GetUpdatedAt(const fig::uuid& assetId) const noexcept
+	{
+		if (auto try_asset = _pAssetMngr->FindAsset(assetId))
+			return (*try_asset).GetUpdatedAt();
+		return std::unexpected(FileError::NotFound);
+	}
+
+	void UserContentManager::InvalidateChatCount(const fig::uuid& assetId)
+	{
+		auto associatedAssets = _pAssetMngr->FindAssociatedAssets(assetId);
+		for (auto& id : associatedAssets)
+			_chatCounts.erase(id);
 	}
 }

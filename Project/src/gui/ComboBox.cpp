@@ -90,10 +90,10 @@ namespace fig::gui
 		else
 			_selectedIndex = -1;
 
+		RefreshText();
+
 		if (_fnDelegate and not bSilent)
 			_fnDelegate(_selectedIndex);
-
-		RefreshText();
 		return _selectedIndex;
 	}
 
@@ -105,10 +105,10 @@ namespace fig::gui
 		else
 			_selectedIndex = -1;
 
+		RefreshText();
+
 		if (_fnDelegate and not bSilent)
 			_fnDelegate(_selectedIndex);
-
-		RefreshText();
 		return _selectedIndex;
 	}
 

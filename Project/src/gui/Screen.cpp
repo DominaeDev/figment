@@ -43,6 +43,18 @@ namespace fig::gui
 			return EventResult::Continue;
 		}
 
+		if (IsUserEvent(event, UserEvent::ScreenActivated))
+		{
+			OnActivated();
+			return EventResult::Continue;
+		}
+
+		if (IsUserEvent(event, UserEvent::ScreenDeactivated))
+		{
+			OnDeactivated();
+			return EventResult::Continue;
+		}
+
 		return EventResult::Pass;
 	}
 

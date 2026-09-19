@@ -1,6 +1,6 @@
 #include <pch.h>
 #include "gui/HomeScreen.h"
-#include "gui/CardList.h"
+#include "gui/CharacterCardList.h"
 #include "gui/SearchBox.h"
 #include "gui/AppResources.h"
 #include "gui/Menu.h"
@@ -22,7 +22,7 @@ namespace fig::gui
 
 	HomeScreen::HomeScreen(Frame* pParent) : Screen(pParent)
 	{
-		_pCardList = CreateControl<CardList>();
+		_pCardList = CreateControl<CharacterCardList>();
 		_pCardList->SetScrollBarOffset(0);
 
 		auto pTopBar = CreateControl<TopBar>("Characters", _pCardList);
@@ -88,15 +88,6 @@ namespace fig::gui
 		return false;
 	}
 
-	void HomeScreen::CreateCards()
-	{
-		DEBUG_MEASURE_BEGIN("CreateCards");
-		_pCardList->CreateCards(CardList::CardType::Character);
-		DEBUG_MEASURE_END();
-
-		InvalidateLayout();
-	}
-
 	void HomeScreen::OnUserSignedIn(const fig::user::UserProfile& profile)
 	{
 		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards);
@@ -106,9 +97,18 @@ namespace fig::gui
 		_pGridButton->SetOn(bHalfSize, true);
 		_pToggleTagsButton->ShowBorder(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pFilteringButton->ShowBorder(GetFiltering() != DefaultFilterFlags);
+
+		// Create cards
+		DEBUG_MEASURE_BEGIN("CreateCards");
+		_pCardList->Clear();
+		_pCardList->CreateCards();
+		DEBUG_MEASURE_END();
+
+		InvalidateLayout();
+
 	}
 
-	CardList& HomeScreen::GetCardList()
+	CharacterCardList& HomeScreen::GetCardList()
 	{
 		return *_pCardList;
 	}
@@ -182,14 +182,6 @@ namespace fig::gui
 			.SetDelegate([ChangeOrdering, this] { ChangeOrdering(OrderBy::Ascending); });
 		menu.AddCheckItem("Descending", orderBy == OrderBy::Descending)
 			.SetDelegate([ChangeOrdering, this] { ChangeOrdering(OrderBy::Descending); });
-/*		menu.AddSeparator();
-		menu.AddItem("Reset")
-			.SetDelegate([this] { 
-				Global::GetUserSettings().SetEnum<SortBy>(UserSetting::Interface::CharacterList::Sorting, SortBy::LastUsedAt);
-				Global::GetUserSettings().SetEnum<OrderBy>(UserSetting::Interface::CharacterList::Ordering, OrderBy::Default);
-				_pCardList->Reorder();
-			});
-		*/
 		menu.Show(fig::point { _pSortingButton->GetAbsoluteX(), _pSortingButton->GetAbsoluteY() + _pSortingButton->GetHeight() });
 	}
 
@@ -297,5 +289,9 @@ namespace fig::gui
 			});
 		menu.Show(fig::point { _pFilteringButton->GetAbsoluteX(), _pFilteringButton->GetAbsoluteY() + _pFilteringButton->GetHeight() });
 	}
-	
+
+	void HomeScreen::OnActivated()
+	{
+		_pCardList->RefreshCards();
+	}
 }

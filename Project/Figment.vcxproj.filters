@@ -521,7 +521,7 @@
     <ClCompile Include="src\gui\ScenarioCard.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\CardList.cpp">
+    <ClCompile Include="src\gui\CharacterCardList.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ChatList.cpp">
@@ -1492,7 +1492,7 @@
     <ClInclude Include="include\gui\ScenarioCard.h">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\CardList.h">
+    <ClInclude Include="include\gui\CharacterCardList.h">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ChatListItem.h">

@@ -234,10 +234,7 @@ namespace fig::gui
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
 		ChangeScreen(ScreenType::Home);
-
 		PushEvent(UserEvent::UserSignedIn, &profile);
-		auto pHomeScreen = GetScreen<HomeScreen>();
-		pHomeScreen->CreateCards();
 	}
 
 	void MainFrame::OnSignedOut() noexcept
@@ -416,7 +413,8 @@ namespace fig::gui
 			if (HasUserData1(event))
 			{
 				auto& characterId = GetUserData1<fig::uuid>(event);
-				GetScreen<ChatListingScreen>()->ShowChatsWith(characterId);
+				bool bShowHidden = (bool)event.user.code;
+				GetScreen<ChatListingScreen>()->ShowChatsWith(characterId, bShowHidden);
 			}
 			else
 			{

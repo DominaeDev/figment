@@ -31,31 +31,34 @@ namespace fig::gui
 
 		void SetBorder(fig::io::CardBorderStyle style);
 		void SetCardSize(CardSize cardSize);
-		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
 		void ShowTags(bool bEnable);
 		void ShowStar(bool bShow);
 		void SetHidden(bool bHidden);
-		inline bool IsHidden() const noexcept { return _bHidden; }
+		bool IsHidden() const noexcept { return _bHidden; }
+		void SetPendingCoverImage(fig::io::AsyncFuture&& future);
+		bool IsPending() const;
 		
 		bool MatchesFlags(fig::io::FilterFlags filter) const noexcept;
 		bool MatchesSearch(const SearchQuery& query) const noexcept;
 
 		const fig::uuid& GetAssetID() const { return _assetId; }
 		inline const fig::io::ContentMetaData& GetMetaData() const noexcept { return _metaData; };
-
+		fig::timestamp GetUpdatedAt() const noexcept { return _updatedAt; }
+		size_t GetChatCount() const noexcept { return _chatCount; }
+		
 		void SetDelegate(CardEventDelegate fnDelegate) { _fnDelegate = fnDelegate; }
 		void ResetHoverZoom();
 
 	protected:
 		void SetCoverImages(fig::sdl::Surface&& fullCover, fig::sdl::Surface&& halfCover);
-		void SetCoverImages(const fig::sdl::Surface& full, const fig::sdl::Surface& half);
 		void RefreshState();
 
 		void SetLabel(const fig::string& text) noexcept;
-		void SetChatCount(uint32_t count);
+		void SetChatCount(size_t count);
 		void ShowNew(bool bShow);
 
 		enum class AddTagResult { Ok, Reject, Stop };
+		void ClearTags();
 		AddTagResult AddTag(const fig::string& tag, const fig::color& color = {});
 
 		void OnUpdate(float fElapsed) override;
@@ -84,6 +87,8 @@ namespace fig::gui
 		CardEventDelegate _fnDelegate {};
 		fig::io::ContentMetaData _metaData {};
 		fig::io::AssetUserSettings _userSettings {};
+		fig::timestamp _updatedAt {};
+		size_t _chatCount {};
 		bool _bHovered = false;
 		float _fHoverZoom = 0.0f;
 		float _fTargetZoom = 0.0f;

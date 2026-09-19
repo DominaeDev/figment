@@ -82,6 +82,7 @@ namespace fig::io
 		size_t DeleteAssets(std::span<fig::uuid> assetIds) noexcept;
 		bool ReleaseAssetData(const fig::uuid& assetId) noexcept;
 
+		fig::cref_vector<Asset> GetAllAssets() const noexcept;
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId) const noexcept;
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId, AssetType assetType) const noexcept;
 		template<asset_subtype_type T>

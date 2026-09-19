@@ -285,6 +285,16 @@ namespace fig::io
 		return false;
 	}
 
+	fig::cref_vector<Asset> AssetManager::GetAllAssets() const noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		return _assets
+			| std::views::values
+			| std::views::transform([](auto&& a) { return std::cref(a); })
+			| std::ranges::to<std::vector>();
+	}
+
 	fig::optional_cref<Asset> AssetManager::FindAsset(const fig::uuid& id) const noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
@@ -1315,6 +1325,27 @@ namespace fig::io
 		if (auto try_asset = FindAsset_NoLock(assetId))
 		{
 			auto& asset = *try_asset;
+
+			if (asset.type.IsOfType(AssetType::Chat, ChatAssetType::Log))
+			{
+				if (auto try_parent = FindAsset_NoLock(asset.parent_id))
+				{
+					auto& parent = *try_parent;
+					// References (in parent)
+					for (uint8_t idx = static_cast<uint8_t>(MetaTag::ReferenceToCharacter); idx < static_cast<uint8_t>(MetaTag::ReferenceToUser); ++idx)
+					{
+						if (auto ref = parent.GetMeta<fig::uuid>(static_cast<MetaTag>(idx)))
+							openList.insert(*ref);
+					}
+					if (auto ref = parent.GetMeta<fig::uuid>(MetaTag::ReferenceToUser))
+						openList.insert(*ref);
+					if (auto ref = parent.GetMeta<fig::uuid>(MetaTag::ReferenceToScenario))
+						openList.insert(*ref);
+					if (auto ref = parent.GetMeta<fig::uuid>(MetaTag::ReferenceToWorld))
+						openList.insert(*ref);
+				}
+			}
+
 			// References
 			for (uint8_t idx = static_cast<uint8_t>(MetaTag::ReferenceToCharacter); idx < static_cast<uint8_t>(MetaTag::ReferenceToUser); ++idx)
 			{

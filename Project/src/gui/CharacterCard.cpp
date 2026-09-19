@@ -14,38 +14,7 @@ namespace fig::gui
 	CharacterCard::CharacterCard(ControlPtr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
 		_characterId { characterId }
 	{
-		if (auto try_character = Global::GetUserContent().Get<Character>(characterId); try_character.has_value())
-		{
-			auto& character = try_character.value();
-			_characterName = character.name.GetSpokenName();
-			SetLabel(character.name.GetFullName());
-			SetIndex(character.GetSearchIndex());
-
-			// Tags
-			if (character.gender.IsConventional())
-			{
-				fig::color color;
-				if (character.gender == ConventionalGender::Male)
-					color = Color::GenderTagMale;
-				else if (character.gender == ConventionalGender::Female)
-					color = Color::GenderTagFemale;
-				else if (character.gender.IsConventional())
-					color = Color::GenderTagOther;
-				else
-					color = Color::White;
-
-				AddTag(character.gender.GetLabel(), color);
-			}
-
-			auto& tags = character.GetTags();
-			for (size_t i = 0; i < tags.size(); ++i)
-			{
-				if (AddTag(tags[i]) == CoverCard::AddTagResult::Stop)
-					break;
-			}
-		}
-
-		RefreshMeta();
+		RefreshFull();
 	}
 
 	EventResult CharacterCard::OnEvent(fig::event& event)
@@ -80,11 +49,6 @@ namespace fig::gui
 				return EventResult::Continue;
 			}
 		}
-		else if (IsUserEvent(event, UserEvent::ScreenActivated))
-		{
-			RefreshMeta();
-			return EventResult::Continue;
-		}
 		else if (IsUserEvent(event, UserEvent::ScreenDeactivated))
 		{
 			_bSelected = false;
@@ -108,7 +72,7 @@ namespace fig::gui
 		auto& menu = CreateMenu();
 
 		menu.AddItem("Resume last chat")
-			.SetEnabled(bLLM && _metaData.chatCount > 0);
+			.SetEnabled(bLLM && _chatCount > 0);
 		menu.AddItem(std::format("New chat with {}\u2026", _characterName), Resource::ICON_NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] { 
@@ -116,7 +80,7 @@ namespace fig::gui
 			});
 
 		menu.AddItem("View chats")
-			.SetEnabled(_metaData.chatCount > 0)
+			.SetEnabled(_chatCount > 0)
 			.SetDelegate([this] { 
 				PushEvent(UserEvent::NavigateToChatList, &_characterId); 
 			});
@@ -134,55 +98,60 @@ namespace fig::gui
 			.SetDelegate([this] {
 				PushEvent(UserEvent::EditCharacter, &_characterId);
 			});
-		menu.AddItem("Duplicate\u2026");
-		menu.AddItem("Export\u2026");
-		auto& moveMenu = menu.AddItem("Move to folder\u2026");
-		moveMenu.AddItem("New folder\u2026");
-		menu.AddSeparator();
-		auto& borderMenu = menu.AddItem("Set border");
-			borderMenu.AddCheckItem("No border", _userSettings.borderStyle == CardBorderStyle::None)
-				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::None); });
-			borderMenu.AddSeparator();
-			borderMenu.AddCheckItem("Border #1", _userSettings.borderStyle == CardBorderStyle::Style01)
-				.SetIcon(Resource::ICON_BORDER_01, false)
-				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style01); });
-			borderMenu.AddCheckItem("Border #2", _userSettings.borderStyle == CardBorderStyle::Style02)
-				.SetIcon(Resource::ICON_BORDER_02, false)
-				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style02); });
-			borderMenu.AddCheckItem("Border #3", _userSettings.borderStyle == CardBorderStyle::Style03)
-				.SetIcon(Resource::ICON_BORDER_03, false)
-				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style03); });
-			borderMenu.AddCheckItem("Border #4", _userSettings.borderStyle == CardBorderStyle::Style04)
-				.SetIcon(Resource::ICON_BORDER_04, false)
-				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style04); });
-			borderMenu.AddCheckItem("Border #5", _userSettings.borderStyle == CardBorderStyle::Style05)
-				.SetIcon(Resource::ICON_BORDER_05, false)
-				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style05); });
-			borderMenu.AddCheckItem("Border #6", _userSettings.borderStyle == CardBorderStyle::Style06)
-				.SetIcon(Resource::ICON_BORDER_06, false)
-				.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
 
 		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 		{
 			menu.AddItem("Star", Resource::ICON_STAR)
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkFavorite(_characterId, true);
-					_userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
-					ShowStar(true);
-					NotifyUpdated();
-				});
+				Global::GetUserContent().MarkFavorite(_characterId, true);
+				_userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
+				ShowStar(true);
+				NotifyUpdated();
+			});
 		}
 		else
 		{
 			menu.AddItem("Unstar", Resource::ICON_UNSTAR)
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkFavorite(_characterId, false);
-					_userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
-					ShowStar(false);
-					NotifyUpdated();
-				});
+				Global::GetUserContent().MarkFavorite(_characterId, false);
+				_userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
+				ShowStar(false);
+				NotifyUpdated();
+			});
 		}
 
+		auto& borderMenu = menu.AddItem("Set border");
+		borderMenu.AddCheckItem("No border", _userSettings.borderStyle == CardBorderStyle::None)
+			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::None); });
+		borderMenu.AddSeparator();
+		borderMenu.AddCheckItem("Border #1", _userSettings.borderStyle == CardBorderStyle::Style01)
+			.SetIcon(Resource::ICON_BORDER_01, false)
+			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style01); });
+		borderMenu.AddCheckItem("Border #2", _userSettings.borderStyle == CardBorderStyle::Style02)
+			.SetIcon(Resource::ICON_BORDER_02, false)
+			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style02); });
+		borderMenu.AddCheckItem("Border #3", _userSettings.borderStyle == CardBorderStyle::Style03)
+			.SetIcon(Resource::ICON_BORDER_03, false)
+			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style03); });
+		borderMenu.AddCheckItem("Border #4", _userSettings.borderStyle == CardBorderStyle::Style04)
+			.SetIcon(Resource::ICON_BORDER_04, false)
+			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style04); });
+		borderMenu.AddCheckItem("Border #5", _userSettings.borderStyle == CardBorderStyle::Style05)
+			.SetIcon(Resource::ICON_BORDER_05, false)
+			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style05); });
+		borderMenu.AddCheckItem("Border #6", _userSettings.borderStyle == CardBorderStyle::Style06)
+			.SetIcon(Resource::ICON_BORDER_06, false)
+			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
+
+		menu.AddSeparator();
+
+		menu.AddItem("Duplicate\u2026");
+		menu.AddItem("Export\u2026");
+		auto& moveMenu = menu.AddItem("Move to folder\u2026");
+		moveMenu.AddItem("New folder\u2026");
+	
+		menu.AddSeparator();
+	
 		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Hide")
@@ -201,7 +170,6 @@ namespace fig::gui
 					NotifyUpdated();
 				});
 		}
-		menu.AddSeparator();
 		menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
 			.SetDelegate([this] { NotifyDelete(); });
 
@@ -221,7 +189,7 @@ namespace fig::gui
 				auto& meta = *try_meta;
 				SetMetaData(meta);
 			}
-			else
+			else // Error
 			{
 				auto now = fig::now();
 				SetMetaData(ContentMetaData {
@@ -232,8 +200,49 @@ namespace fig::gui
 				});
 			}
 
+			// Chat count
+			SetChatCount(userContent.GetChatCount(_characterId));
+
 			// User settings
 			SetUserSettings(Global::GetUserContent().GetUserSettings(_characterId));
 		}
+	}
+
+	void CharacterCard::RefreshFull()
+	{
+		if (auto try_character = Global::GetUserContent().Get<Character>(_characterId); try_character.has_value())
+		{
+			auto& character = try_character.value();
+			_characterName = character.name.GetSpokenName();
+			_updatedAt = Global::GetUserContent().GetUpdatedAt(_characterId).value_or({});
+			SetLabel(character.name.GetFullName());
+			SetIndex(character.GetSearchIndex());
+
+			// Tags
+			ClearTags();
+			if (character.gender.IsConventional())
+			{
+				fig::color color;
+				if (character.gender == ConventionalGender::Male)
+					color = Color::GenderTagMale;
+				else if (character.gender == ConventionalGender::Female)
+					color = Color::GenderTagFemale;
+				else if (character.gender.IsConventional())
+					color = Color::GenderTagOther;
+				else
+					color = Color::White;
+
+				AddTag(character.gender.GetLabel(), color);
+			}
+
+			auto& tags = character.GetTags();
+			for (size_t i = 0; i < tags.size(); ++i)
+			{
+				if (AddTag(tags[i]) == CoverCard::AddTagResult::Stop)
+					break;
+			}
+		}
+
+		RefreshMeta();
 	}
 }
