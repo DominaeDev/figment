@@ -418,7 +418,8 @@ namespace fig::gui
 			}
 			else
 			{
-				GetScreen<ChatListingScreen>()->ShowAllChats();
+				bool bShowHidden = (bool)event.user.code;
+				GetScreen<ChatListingScreen>()->ShowAllChats(bShowHidden);
 			}
 			return EventResult::Handled;
 		}
@@ -602,21 +603,21 @@ namespace fig::gui
 
 			ChatStaging staging(std::move(scenario), std::move(scaffold), Constants::LLM::DefaultChatOptions);
 
-			if (!staging.AddCharacter(characterId, Role::Bot1, character.value()))
+			if (!staging.AddCharacter(Role::Bot1, characterId, character.value()))
 				return false;
 
 			Character user;
-			if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) and staging.AddCharacter({}, Role::User, user))) //! @temp
+			if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) and staging.AddCharacter(Role::User, _CreateUUID(), user))) //! @temp
 				return false;
 
 			// Create instance
-			ChatInstance instance;
+			ChatInstance instance; //! @todo: Why is this here?
 			instance.characterIds = staging.GetCharacterIds();
 			instance.userId = {}; //! @todo
 			instance.scenarioId = {}; //! @todo
 			instance.options = Constants::LLM::DefaultChatOptions; //! @todo
 			
-			auto [chatInstanceId, chatLogId] = Global::GetUserContent().CreateChat(instance);
+			auto [chatInstanceId, chatLogId] = Global::GetUserContent().CreateChat(instance);  
 
 			pChatScreen->StartChat(staging, chatInstanceId, chatLogId);
 			return true;

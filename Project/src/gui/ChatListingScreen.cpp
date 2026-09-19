@@ -65,15 +65,15 @@ namespace fig::gui
 		}
 	}
 
-	void ChatListingScreen::ShowAllChats()
+	void ChatListingScreen::ShowAllChats(bool bHidden)
 	{
 		if (not Global::IsSignedIn())
 			return;
 
-		_filterByCharacter.clear();
+		_filteredCharacterName.clear();
 
 		auto flags = Global::GetUserSettings().GetChatListFilter();
-		flags.Unset(ChatFilterFlag::Hidden);
+		bHidden ? flags.Set(ChatFilterFlag::Hidden) : flags.Unset(ChatFilterFlag::Hidden);
 		Global::GetUserSettings().SetChatListFilter(flags);
 
 		_pChatList->ShowAllChats();
@@ -85,13 +85,10 @@ namespace fig::gui
 		if (not Global::IsSignedIn())
 			return;
 
-		_filterByCharacter = Global::GetUserContent().GetCharacterName(characterId).value_or("Unknown");
+		_filteredCharacterName = Global::GetUserContent().GetCharacterName(characterId).value_or("Unknown");
 
 		auto flags = Global::GetUserSettings().GetChatListFilter();
-		if (bHidden)
-			flags.Set(ChatFilterFlag::Hidden);
-		else
-			flags.Unset(ChatFilterFlag::Hidden);
+		bHidden ? flags.Set(ChatFilterFlag::Hidden) : flags.Unset(ChatFilterFlag::Hidden);
 		Global::GetUserSettings().SetChatListFilter(flags);
 
 		_pChatList->ShowChatsWith(characterId);
@@ -169,10 +166,12 @@ namespace fig::gui
 
 		auto& menu = CreateMenu();
 
-		if (not _filterByCharacter.empty())
+		if (not _filteredCharacterName.empty())
 		{
-			menu.AddCheckItem(std::format("Character: {}", _filterByCharacter), true)
-				.SetDelegate([this] { ShowAllChats(); });
+			menu.AddCheckItem(std::format("Character: {}", _filteredCharacterName), true)
+				.SetDelegate([=, this] { 
+					ShowAllChats(filter.IsSet(ChatFilterFlag::Hidden));
+				});
 			menu.AddSeparator();
 		}
 
@@ -212,6 +211,6 @@ namespace fig::gui
 
 	void ChatListingScreen::RefreshFilterButton()
 	{
-		_pFilteringButton->ShowBorder((GetFiltering() != DefaultChatFilterFlags) or !_filterByCharacter.empty());
+		_pFilteringButton->ShowBorder((GetFiltering() != DefaultChatFilterFlags) or !_filteredCharacterName.empty());
 	}
 }

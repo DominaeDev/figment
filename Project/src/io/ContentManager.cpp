@@ -24,17 +24,16 @@ namespace fig::io
 		_caches[AssetTypeOf<fig::sdl::Surface>]			= std::make_unique<AssetCache<fig::sdl::Surface, "Image">>(_pAssetMngr.get());
 		_caches[AssetTypeOf<fig::data::VoiceSettings>]	= std::make_unique<AssetCache<fig::data::VoiceSettings, "VoiceSettings">>(_pAssetMngr.get());
 
-		LoadAll();
+		Preload();
+		RefreshChatCounts();
 	}
 
-	void UserContentManager::LoadAll()
+	void UserContentManager::Preload()
 	{
-		DEBUG_MEASURE_BEGIN("UserContentManager::LoadAll");
-
+		DEBUG_MEASURE_BEGIN("UserContentManager::Preload");
 		GetCache<fig::data::Character>().Preload();
 		GetCache<fig::data::Scenario>().Preload();
 		GetCache<fig::data::ChatInstance>().Preload();
-		RefreshChatCounts();
 		DEBUG_MEASURE_END();
 	}
 

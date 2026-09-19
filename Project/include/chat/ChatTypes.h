@@ -6,7 +6,7 @@ namespace fig::chat
 {
 	enum class Role : uint8_t
 	{
-		User = 0,
+		User		= 0x00,
 
 		Bot1		= 0x01,
 		Bot2		= 0x02,

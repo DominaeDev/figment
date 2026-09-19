@@ -130,7 +130,7 @@ namespace fig::io
 		void AssignOrder(const std::vector<fig::uuid>& assetIds);
 
 	protected:
-		void LoadAll();
+		void Preload();
 
 		template <typename T>
 		AssetCacheBase<T>& GetCache()

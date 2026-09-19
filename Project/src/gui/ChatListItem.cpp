@@ -49,7 +49,7 @@ namespace fig::gui
 		_pPortrait->SetVisible(false);
 	}
 
-	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatInstance& chatInstance, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
 	{
 		if (not empty_or_whitespace(chatLog.GetTitle()))
 			_pTitle->SetText(chatLog.GetTitle());
@@ -76,11 +76,16 @@ namespace fig::gui
 				_pPortrait->SetTexture((*portrait).get());
 				_pPortrait->SetVisible(true);
 			}
-			else
-				_bHasError = true;
 		}
 		else
-			_bHasError = true;
+		{
+			auto& characterId = chatInstance.characterIds[static_cast<size_t>(fig::chat::Role::Bot1)];
+			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(characterId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
+			{
+				_pPortrait->SetTexture((*portrait).get());
+				_pPortrait->SetVisible(true);
+			}
+		}
 
 		if (Global::GetUserContent().GetUserSettings(chatInstanceId).flags.IsSet(AssetUserSettings::Flag::Favorite))
 			ShowStar(true);

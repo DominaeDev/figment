@@ -182,12 +182,12 @@ namespace fig
 						return;
 
 					ChatStaging staging(std::move(scenario), std::move(scaffold), Constants::LLM::DefaultChatOptions);
-					if (!staging.AddCharacter(characterId, Role::Bot1, character))
+					if (!staging.AddCharacter(Role::Bot1, characterId, character))
 						return;
 
 					Character user;
 					if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) 
-						and staging.AddCharacter({}, Role::User, user))) //! @temp
+						and staging.AddCharacter(Role::User, _CreateUUID(), user))) //! @temp
 						return;
 
 					auto blocks = staging.GetStagingBlocks();

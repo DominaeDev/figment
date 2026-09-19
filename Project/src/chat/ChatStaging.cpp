@@ -32,12 +32,10 @@ namespace fig::chat
 	{
 	}
 
-	bool ChatStaging::AddCharacter(const fig::uuid& in_characterId, Role role, const Character& data)
+	bool ChatStaging::AddCharacter(Role role, const fig::uuid& characterId, const fig::data::Character& character)
 	{
-		fig::uuid characterId = in_characterId;
 		if (characterId.empty())
-			characterId = GenerateUUID();
-
+			return false;
 		if (_charactersByRole.contains(role))
 			return false; // Role already assigned
 		if (_charactersByID.contains(characterId))
@@ -45,12 +43,17 @@ namespace fig::chat
 
 		size_t index = _characters.size();
 
-		_characters.push_back(data);
-		auto& character = _characters.back();
+		_characters.push_back(Character {
+			.assetId = characterId,
+			.role = role,
+			.instance = character,
+		});
+
+		auto& added = _characters.back().instance;
 		if (role == Role::User)
-			character.chatId = "USR";
+			added.chatId = "USR";
 		else if (role == Role::Bot1)
-			character.chatId = "AI"; //! @id
+			added.chatId = "AI"; //! @id
 
 		_charactersByID[characterId] = index;
 		_charactersByRole[role] = index;
@@ -64,10 +67,10 @@ namespace fig::chat
 		return static_cast<int32_t>(std::ranges::count_if(_charactersByRole, [](auto& kvp) { return is_bot(kvp.first); }));
 	}
 
-	fig::optional_cref<Character> ChatStaging::GetCharacterByRole(Role role) const noexcept
+	fig::optional_cref<fig::data::Character> ChatStaging::GetCharacterByRole(Role role) const noexcept
 	{
 		if (auto itFind = _charactersByRole.find(role); itFind != _charactersByRole.cend())
-			return make_optional_cref(_characters[itFind->second]);
+			return make_optional_cref(_characters[itFind->second].instance);
 		return fig::nullref;
 	}
 
@@ -78,20 +81,20 @@ namespace fig::chat
 		return std::nullopt;
 	}
 
-	fig::optional_cref<Character> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
+	fig::optional_cref<fig::data::Character> ChatStaging::GetCharacterById(const fig::uuid& id) const noexcept
 	{
 		if (auto itFind = _charactersByID.find(id); itFind != _charactersByID.cend())
-			return make_optional_cref(_characters[itFind->second]);
+			return make_optional_cref(_characters[itFind->second].instance);
 		return fig::nullref;
 	}
 
-	fig::optional_cref<Character> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
+	fig::optional_cref<fig::data::Character> ChatStaging::GetCharacterByChatId(const fig::string& identifier) const noexcept
 	{
 		if (identifier.empty() || _characters.empty())
 			return fig::nullref;
 
-		if (auto itFind = std::ranges::find_if(_characters, [&identifier](auto& character) { return equals(character.chatId, identifier, true); }); itFind != std::ranges::cend(_characters))
-			return make_optional_cref(*itFind);
+		if (auto itFind = std::ranges::find_if(_characters, [&identifier](auto& c) { return equals(c.instance.chatId, identifier, true); }); itFind != std::ranges::cend(_characters))
+			return make_optional_cref((*itFind).instance);
 		return fig::nullref;
 	}
 
@@ -123,19 +126,26 @@ namespace fig::chat
 		return Role::Undefined;
 	}
 
-	fig::optional_cref<Character> ChatStaging::GetCharacterByRole(fig::handle handle) const noexcept
+	fig::optional_cref<fig::data::Character> ChatStaging::GetCharacterByRole(fig::handle handle) const noexcept
 	{
 		return GetCharacterByRole(GetRoleFromHandle(handle));
 	}
 
-	fig::optional_cref<Character> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
+	fig::optional_cref<fig::data::Character> ChatStaging::GetCharacterByName(const fig::string& name) const noexcept
 	{
 		if (name.empty() || _characters.empty())
 			return std::nullopt;
 
-		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& character) { return equals(character.name.GetSpokenName(), name, true); }); itFind != std::ranges::cend(_characters))
-			return make_optional_cref(*itFind);
+		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& c) { return equals(c.instance.name.GetSpokenName(), name, true); }); itFind != std::ranges::cend(_characters))
+			return make_optional_cref((*itFind).instance);
 		return fig::nullref;
+	}
+
+	std::vector<fig::data::Character> ChatStaging::GetCharacters() const noexcept
+	{ 
+		return _characters
+			| std::views::transform([](auto&& c) { return c.instance; })
+			| std::ranges::to<std::vector>();
 	}
 
 	Role ChatStaging::GetRoleOf(const fig::string& characterId) const
@@ -143,8 +153,13 @@ namespace fig::chat
 		if (characterId.empty() || _characters.empty())
 			return Role::Undefined;
 
-		if (auto itFind = std::ranges::find_if(_charactersByRole, [this, characterId](const auto& kvp) { return equals(_characters[kvp.second].chatId, characterId, true) || equals(_characters[kvp.second].name.GetSpokenName(), characterId, true);}); itFind != std::ranges::cend(_charactersByRole))
+		if (auto itFind = std::ranges::find_if(_charactersByRole, [this, characterId](const auto& kvp) { 
+			return equals(_characters[kvp.second].instance.chatId, characterId, true) 
+				or equals(_characters[kvp.second].instance.name.GetSpokenName(), characterId, true);
+			}); itFind != std::ranges::cend(_charactersByRole))
+		{
 			return itFind->first;
+		}
 		return Role::Undefined;
 	}
 
@@ -291,7 +306,7 @@ namespace fig::chat
 		for (auto& kvp : _charactersByRole)
 		{
 			auto role = kvp.first;
-			auto& character = _characters[kvp.second];
+			auto& character = _characters[kvp.second].instance;
 			_context.AddContext(ContextSelector::FromRole(role)[0], character);
 		}
 		_context.SetValue("__num_bots", GetBotCount());
@@ -325,5 +340,14 @@ namespace fig::chat
 		if (not empty_or_whitespace(title))
 			return eval_text(title, _context);
 		return "Untitled";
+	}
+
+	std::vector<fig::uuid> ChatStaging::GetCharacterIds() const noexcept
+	{
+		std::vector<Character> characters = _characters;
+		std::ranges::sort(characters, std::ranges::less(), [](auto&& c) { return c.role; });
+		return characters
+			| std::views::transform([](auto&& c) { return c.assetId; })
+			| std::ranges::to<std::vector>();
 	}
 } // namespace

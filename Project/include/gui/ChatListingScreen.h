@@ -12,7 +12,7 @@ namespace fig::gui
 	public:
 		ChatListingScreen(Frame* pParent);
 
-		void ShowAllChats();
+		void ShowAllChats(bool bHidden = false);
 		void ShowChatsWith(const fig::uuid& characterId, bool bHidden);
 	
 	protected:
@@ -33,7 +33,7 @@ namespace fig::gui
 		fig::string _search_text;
 		float _fSearchTimer {};
 
-		fig::string _filterByCharacter;
+		fig::string _filteredCharacterName;
 	};
 
 	template <>

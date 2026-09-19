@@ -80,7 +80,8 @@ namespace fig::gui
 				auto& chatInstance = pair.first;
 				auto& chatLog = pair.second[0];
 				return Item {
-					.instanceId = chatInstance.assetId,
+					.assetId = chatInstance.assetId,
+					.chatInstance = chatInstance.instance.get(),
 					.chatLog = chatLog.instance.get(),
 					.createdAt = chatLog.createdAt,
 					.updatedAt = chatLog.updatedAt,
@@ -160,7 +161,7 @@ namespace fig::gui
 
 	bool ChatList::Item::MatchesFlags(ChatFilterFlags filter) noexcept
 	{
-		auto userSettings = Global::GetUserContent().GetUserSettings(instanceId);
+		auto userSettings = Global::GetUserContent().GetUserSettings(assetId);
 
 		if (filter.IsSet(ChatFilterFlag::Hidden) != userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 			return false;
@@ -230,7 +231,7 @@ namespace fig::gui
 				else
 					timeString = item.updatedAt.get_date_string();
 
-				auto pListItem = CreateControl<ChatListItem>(item.instanceId, *item.chatLog, timeString);
+				auto pListItem = CreateControl<ChatListItem>(item.assetId, *item.chatInstance, *item.chatLog, timeString);
 				pListItem->SetDelegate([this](ChatListItem& item, ChatListItemEvent event) { OnItemEvent(item, event); });
 				item.pListItem = pListItem;
 
@@ -266,7 +267,7 @@ namespace fig::gui
 			return i.pListItem.get() == &item;
 		}); try_item != std::ranges::end(_items))
 		{
-			if (Global::GetUserContent().DeleteAsset((*try_item).instanceId))
+			if (Global::GetUserContent().DeleteAsset((*try_item).assetId))
 			{
 				DestroyChild((*try_item).pListItem);
 				_items.erase(try_item);

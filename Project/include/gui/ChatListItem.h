@@ -29,7 +29,7 @@ namespace fig::gui
 		ChatListItem(ControlPtr pParent);
 	
 	public:
-		ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatLog& chatLog, const fig::string& timeString);
+		ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatInstance& chatInstance, const fig::data::ChatLog& chatLog, const fig::string& timeString);
 		void ShowStar(bool bShow);
 		void SetDelegate(ChatItemEventDelegate fnDelegate) { _fnDelegate = fnDelegate; }
 

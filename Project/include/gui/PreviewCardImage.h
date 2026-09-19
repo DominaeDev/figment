@@ -13,8 +13,10 @@ namespace fig::gui
 		void SetImage(const fig::uuid& assetId);
 		void SetImage(const fig::sdl::Surface& pSurface);
 		void SetMask(fig::texture_ptr pMask) noexcept;
-		
+		void SetBackgroundTexture(fig::texture_ptr pBGTexture) noexcept;
+
 		fig::point GetImageSize() const noexcept;
+
 	protected:
 		void OnUpdate(float fElapsed);
 		void OnRender(fig::renderer_ptr pRenderer) override;
@@ -36,6 +38,7 @@ namespace fig::gui
 		fig::sdl::Texture _targetTexture {};
 		fig::sdl::Texture _imageTexture {};
 		fig::texture_ptr _pMask {};
+		fig::texture_ptr _pBGTexture;
 
 		fig::observer_ptr<Image> _pErrorIcon;
 		fig::texture_ptr _pErrorBG;

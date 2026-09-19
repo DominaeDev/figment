@@ -15,7 +15,7 @@ namespace fig::chat
 		ChatStaging(const fig::data::Scenario& scenario, const PromptScaffold& scaffold, ChatOptions options);
 		ChatStaging(fig::data::Scenario&& scenario, PromptScaffold&& scaffold, ChatOptions options);
 
-		bool AddCharacter(const fig::uuid& characterId, Role role, const fig::data::Character& data);
+		bool AddCharacter(Role role, const fig::uuid& characterId, const fig::data::Character& character);
 		bool HasCharacter(Role role) const noexcept { return _charactersByRole.contains(role); }
 		bool HasCharacter(fig::uuid id) const noexcept { return _charactersByID.contains(id); }
 
@@ -25,8 +25,8 @@ namespace fig::chat
 		fig::optional_cref<fig::data::Character> GetCharacterById(const fig::uuid& id) const noexcept;
 		fig::optional_cref<fig::data::Character> GetCharacterByChatId(const fig::string& characterId) const noexcept;
 		fig::optional_cref<fig::data::Character> GetCharacterByName(const fig::string& name) const noexcept;
-		const std::vector<fig::data::Character>& GetCharacters() const noexcept { return _characters; }
-		auto GetCharacterIds() const noexcept { return _charactersByID | std::views::keys | std::ranges::to<std::vector>(); }
+		std::vector<fig::data::Character> GetCharacters() const noexcept;
+		std::vector<fig::uuid> GetCharacterIds() const noexcept;
 
 		const PromptScaffold& GetPromptScaffold() const noexcept { return _promptScaffold; }
 		const fig::data::Scenario& GetScenario() const noexcept { return _scenario; }
@@ -58,9 +58,17 @@ namespace fig::chat
 		fig::uuid GenerateUUID() const noexcept;
 		void UpdateContext();
 
-		std::vector<fig::data::Character> _characters {};
+		struct Character
+		{
+			fig::uuid assetId;
+			Role role;
+			fig::data::Character instance;
+		};
+
+		std::vector<Character> _characters {};
 		std::map<fig::uuid, size_t> _charactersByID {};
 		std::map<Role, size_t> _charactersByRole {};
+
 		fig::data::Scenario _scenario {};
 		PromptScaffold _promptScaffold {};
 

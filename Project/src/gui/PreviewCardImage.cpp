@@ -16,7 +16,7 @@ namespace fig::gui
 
 		SetForegroundColor(Color::White);
 		SetBackgroundColor(Color::White);
-
+		SetBackgroundTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_DEFAULT));
 		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
@@ -159,12 +159,22 @@ namespace fig::gui
 				SDL_BLENDFACTOR_ONE,
 				SDL_BLENDOPERATION_ADD);
 
-			// Background color
-			auto bgColor = GetBackgroundColor();
-			SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
-			SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
-			SDL_RenderFillRect(pRenderer, NULL);
-			SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
+			// Render background
+			if (_pBGTexture)
+			{
+				SDL_SetTextureBlendMode(_pBGTexture, blendMode);
+				SDL_SetTextureColorMod(_pBGTexture, 0xFF, 0xFF, 0xFF);
+				SDL_SetTextureAlphaMod(_pBGTexture, 0xFF);
+				SDL_RenderTexture(pRenderer, _pBGTexture, NULL, NULL);
+			}
+			else
+			{
+				auto bgColor = GetBackgroundColor();
+				SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
+				SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
+				SDL_RenderFillRect(pRenderer, NULL);
+				SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
+			}
 
 			// Render texture
 			if (not _imageTexture.empty())
@@ -213,6 +223,12 @@ namespace fig::gui
 
 	void PreviewCardImage::OnSize()
 	{
+		SetDirty();
+	}
+
+	void PreviewCardImage::SetBackgroundTexture(fig::texture_ptr pBGTexture) noexcept
+	{
+		_pBGTexture = pBGTexture;
 		SetDirty();
 	}
 }

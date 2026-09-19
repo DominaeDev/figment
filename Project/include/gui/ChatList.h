@@ -46,7 +46,8 @@ namespace fig::gui
 
 		struct Item
 		{
-			fig::uuid instanceId;
+			fig::uuid assetId;
+			fig::optional_cref<struct fig::data::ChatInstance> chatInstance;
 			fig::optional_cref<class fig::data::ChatLog> chatLog;
 			fig::timestamp createdAt;
 			fig::timestamp updatedAt;

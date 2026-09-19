@@ -101,12 +101,8 @@ namespace fig::chat
 		if (_assetId.empty())
 			return false;
 
-		// Update asset
-		Global::GetUserContent().GetAssets().ModifyAsset(_assetId, [&](Asset& asset) {
-			fig::bytes xmlData;
-			_log.SaveToXml(xmlData);
-			asset.SetData(xmlData);
-		});
+		// Write
+		Global::GetUserContent().UpdateAsset(_assetId, _log);
 		return true;
 	}
 

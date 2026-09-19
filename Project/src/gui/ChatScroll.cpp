@@ -31,8 +31,6 @@ namespace fig::gui
 		EnableClipping(true);
 		EnableCulling(true);
 
-		SetAlpha(0.90f);
-
 		_audioResultQueue.SetDelegate([this](auto&& r) { OnAudioResult(std::move(r)); });
 	}
 

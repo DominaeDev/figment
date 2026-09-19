@@ -48,7 +48,7 @@ namespace fig::gui
 			AddRule(rule);
 			++ruleCount;
 		}
-		for (; ruleCount < 5; ++ruleCount)
+		for (; ruleCount < 3uz; ++ruleCount)
 			AddRule();
 
 		pSizer->AddSpacer(6);
