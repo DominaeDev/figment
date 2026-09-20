@@ -60,7 +60,7 @@ namespace fig::gui
 
 		fig::string_view GetText() const noexcept { return _text; }
 		int32_t GetTextWrapWidth() const noexcept;
-		size_t GetLineCount() const noexcept;
+		int32_t GetLineCount() const noexcept;
 		int32_t GetLineHeight() const noexcept { return _lineHeight; }
 
 		void Select(int32_t start, int32_t end) noexcept;
@@ -80,8 +80,6 @@ namespace fig::gui
 		void Undo();
 		void Redo();
 
-		void ResetSize();
-
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
@@ -91,6 +89,7 @@ namespace fig::gui
 		void OnEnabled(bool bEnabled) override;
 
 		virtual void OnText(fig::string_view text) {};
+		int32_t GetScrollExtentY() const noexcept;
 
 	private:
 		void DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y);

@@ -13,5 +13,9 @@ namespace fig::gui
 
 	protected:
 		void OnEnabled(bool bEnabled) override;
+		void OnUpdate(float) override;
+
+		void RefreshScrollBar();
+		fig::observer_ptr<class VerticalBar> _pScrollBar;
 	};
 }

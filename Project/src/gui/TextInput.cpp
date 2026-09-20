@@ -243,9 +243,12 @@ namespace fig::gui
 		return _wrapWidth;
 	}
 
-	size_t TextInput::GetLineCount() const noexcept
+	int32_t TextInput::GetLineCount() const noexcept
 	{
-		return _lines.size();
+		int32_t count = toI(_lines.size());
+		if (not _text.empty() and _text.back() == '\n')
+			count++;
+		return count;
 	}
 
 	void TextInput::OnUpdate(float fElapsed)
@@ -827,7 +830,12 @@ namespace fig::gui
 
 		auto cursor = GetCursor();
 		if (cursor.line + 1uz >= _lines.size())
-			return SetCursor(static_cast<int32_t>(_text.size()));
+		{
+			auto last_cursor = _cursor;
+			SetCursor(static_cast<int32_t>(_text.size()));
+			OnMoveCursor(last_cursor);
+			return _cursor;
+		}
 
 		auto& curr_line = _lines[cursor.line];
 		auto& next_line = _lines[cursor.line + 1];
@@ -1532,7 +1540,8 @@ namespace fig::gui
 		if (!SDL_PointInRect(&pt, &rect))
 			return EventResult::Pass;
 
-		_scroll.y = std::clamp(_scroll.y - toI(toF(event.integer_y) * _lineHeight * 6), 0, std::max(_lineHeight * toI(GetLineCount() + 1) - GetHeight(), 0));
+		int32_t extent = GetScrollExtentY();
+		_scroll.y = std::clamp(_scroll.y - toI(toF(event.integer_y) * _lineHeight * 6), 0, extent);
 		_scroll.y = (_scroll.y / _lineHeight) * _lineHeight; // Quantize
 		return EventResult::Handled;
 	}
@@ -1567,6 +1576,7 @@ namespace fig::gui
 		CancelComposition();
 
 		InitUndo();
+		Autosize();
 //		DidChange();
 		_scroll = {};
 	}
@@ -1582,6 +1592,7 @@ namespace fig::gui
 		Insert(text);
 		InitUndo();
 //		DidChange();
+		Autosize();
 		_scroll = {};
 	}
 
@@ -1618,12 +1629,14 @@ namespace fig::gui
 	{
 		_minRows = std::max(rows, 1);
 		_maxRows = std::max(_minRows, _maxRows);
+		Autosize();
 	}
 
 	void TextInput::SetMaxRows(int32_t rows)
 	{
 		_maxRows = std::max(rows, 1);
 		_minRows = std::min(_minRows, _maxRows);
+		Autosize();
 	}
 
 	void TextInput::Autosize()
@@ -1633,33 +1646,8 @@ namespace fig::gui
 
 		auto clientRect = GetClientRect();
 		int32_t lineSkip = TTF_GetFontLineSkip(_pFont);
-		int32_t numRows = static_cast<int32_t>(GetLineCount());
-		if (not _text.empty() and _text.back() == '\n')
-			numRows++;
-
-		numRows = std::clamp(numRows, _minRows, _maxRows);
-		if (numRows * lineSkip != clientRect.h)
-		{
-			auto& rect = GetRect();
-			SetHeight(numRows * lineSkip + GetMarginVertical());
-			InvalidateParentLayout();
-		}
-	}
-
-	void TextInput::ResetSize()
-	{
-		if (IsAutosized())
-		{
-			Autosize();
-			return;
-		}
-
-		auto clientRect = GetClientRect();
-		int32_t lineSkip = TTF_GetFontLineSkip(_pFont);
-		int32_t numRows = static_cast<int32_t>(GetLineCount());
-		if (not _text.empty() and _text.back() == '\n')
-			numRows++;
-
+		int32_t numRows = GetLineCount();
+		
 		numRows = std::clamp(numRows, _minRows, _maxRows);
 		if (numRows * lineSkip != clientRect.h)
 		{
@@ -1758,7 +1746,7 @@ namespace fig::gui
 
 	void TextInput::OnPostRender()
 	{
-		Autosize();
+//		Autosize();
 	}
 
 	void TextInput::DidChange()
@@ -1767,6 +1755,7 @@ namespace fig::gui
 			_fnOnChanged(_text);
 
 		OnText(_text);
+		Autosize();
 	}
 
 	void TextInput::OnEnabled(bool bEnabled)
@@ -2285,6 +2274,11 @@ namespace fig::gui
 			and _text.back() == '\n';
 	}
 
+	int32_t TextInput::GetScrollExtentY() const noexcept
+	{
+		return std::max(_lineHeight * GetLineCount() - GetClientRect().h, 0);
+	}
+
 	void TextInput::ScrollToCursor()
 	{
 		auto cursor_rect = GetCursorRect();
@@ -2305,6 +2299,7 @@ namespace fig::gui
 				while (toI(std::round((cursorY - _scroll.y) / _lineHeight)) < 0)
 					_scroll.y -= _lineHeight;
 				_scroll.y = (_scroll.y / _lineHeight) * _lineHeight; // Quantize
+				_scroll.y = std::clamp(_scroll.y, 0, GetScrollExtentY());
 			}
 			else
 			{
