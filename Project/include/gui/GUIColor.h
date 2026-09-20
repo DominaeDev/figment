@@ -105,9 +105,16 @@ namespace fig
 		return color { static_cast<int32_t>(arg & 0xFFFFFF) };
 	}
 
+	struct color_set
+	{
+		color background;
+		color foreground;
+		color border;
+	};
+
 	struct color_pair
 	{
-		color foreground;
 		color background;
+		color foreground;
 	};
 }

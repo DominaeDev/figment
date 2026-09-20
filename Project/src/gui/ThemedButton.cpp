@@ -50,6 +50,21 @@ namespace fig::gui
 		}
 	}
 
+	const fig::color& ThemedButton::GetThemeBorderColor() const noexcept
+	{
+		switch (_state)
+		{
+		default:
+			return _theme.defaultColor.border;
+		case ButtonState::Hover:
+			return _theme.hoverColor.border;
+		case ButtonState::Pressed:
+			return _theme.pressedColor.border;
+		case ButtonState::Disabled:
+			return _theme.disabledColor.border;
+		}
+	}
+
 	void ThemedButton::OnAfterLayout()
 	{
 		DropState();

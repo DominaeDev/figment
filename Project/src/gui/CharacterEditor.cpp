@@ -184,7 +184,5 @@ namespace fig::gui
 	void CharacterEditor::OnPropertyChanged()
 	{
 		_pSaveButton->SetTheme(Theme::GreenSaveButtonStyle);
-		auto pBorder = _pSaveButton->GetBorderRenderer();
-		pBorder->SetColor(0x097f00_rgb);
 	}
 }

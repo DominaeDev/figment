@@ -44,7 +44,7 @@ namespace fig::gui
 	void ButtonWithIcon::ShowBorder(bool bShow) noexcept
 	{
 		if (auto pBorder = GetBorderRenderer())
-			pBorder->SetColor(bShow ? (GetEnabled() ? Color::LineColor : Color::DisabledLineColor) : Color::Transparent);
+			pBorder->SetColor(bShow ? GetThemeBorderColor() : Color::Transparent);
 		_bShowBorder = bShow;
 	}
 }

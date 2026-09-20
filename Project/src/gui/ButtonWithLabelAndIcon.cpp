@@ -50,7 +50,7 @@ namespace fig::gui
 	void ButtonWithLabelAndIcon::OnButtonState()
 	{
 		GetBackgroundRenderer()->SetColor(GetThemeBackground());
-		GetBorderRenderer()->SetColor(_state != ButtonState::Disabled ? Color::LineColor : Color::DisabledLineColor);
+		GetBorderRenderer()->SetColor(GetThemeBorderColor());
 
 		_pLabel->SetForegroundColor(GetThemeForeground());
 		_pIcon->SetForegroundColor(GetThemeForeground());

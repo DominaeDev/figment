@@ -87,8 +87,8 @@ namespace fig::chat
 			if (character.bgColor.IsDefined() && character.borderColor.IsDefined())
 			{
 				return fig::color_pair {
-					.foreground = character.borderColor,
 					.background = character.bgColor,
+					.foreground = character.borderColor,
 				};
 			}
 		}
@@ -101,29 +101,29 @@ namespace fig::chat
 		if (is_bot(role))
 		{
 			return fig::color_pair {
-				.foreground = Color::DefaultBotMessageBorders[get_bot_index(role) % 8],
 				.background = Color::DefaultBotMessageBackgrounds[get_bot_index(role) % 8],
+				.foreground = Color::DefaultBotMessageBorders[get_bot_index(role) % 8],
 			};
 		}
 		else if (role == Role::User)
 		{
 			return fig::color_pair {
-				.foreground = Color::DefaultUserMessageBorder,
 				.background = Color::DefaultUserMessageBackground,
+				.foreground = Color::DefaultUserMessageBorder,
 			};
 		}
 		else if (role == Role::System)
 		{
 			return fig::color_pair {
-				.foreground = Color::MessageBorderNavy,
 				.background = Color::MessageBackgroundNavy,
+				.foreground = Color::MessageBorderNavy,
 			};
 		}
 		else
 		{
 			return fig::color_pair {
-				.foreground = Color::MessageBorderDefault,
 				.background = Color::MessageBackgroundDefault,
+				.foreground = Color::MessageBorderDefault,
 			};
 		}
 	}

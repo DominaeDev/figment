@@ -57,10 +57,10 @@ namespace fig
 
 	struct ButtonTheme
 	{
-		fig::color_pair defaultColor;
-		fig::color_pair hoverColor;
-		fig::color_pair pressedColor;
-		fig::color_pair disabledColor;
+		fig::color_set defaultColor;
+		fig::color_set hoverColor;
+		fig::color_set pressedColor;
+		fig::color_set disabledColor;
 	};
 
 	enum class Resource;

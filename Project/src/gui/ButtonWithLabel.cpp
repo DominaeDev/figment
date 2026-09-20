@@ -36,7 +36,7 @@ namespace fig::gui
 	void ButtonWithLabel::OnButtonState()
 	{
 		GetBackgroundRenderer()->SetColor(GetThemeBackground());
-		GetBorderRenderer()->SetColor(_state != ButtonState::Disabled ? Color::LineColor : Color::DisabledLineColor);
+		GetBorderRenderer()->SetColor(GetThemeBorderColor());
 
 		_pLabel->SetForegroundColor(GetThemeForeground());
 	}

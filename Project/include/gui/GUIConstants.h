@@ -4,41 +4,6 @@
 
 namespace fig::gui
 {
-	namespace Theme
-	{
-		constexpr ButtonTheme DefaultButtonStyle
-		{
-			.defaultColor	{ 0x4E4431_rgb, 0xFFFFFF00_rgba },
-			.hoverColor		{ 0x4E4431_rgb, 0xEFECE3FF_rgba },
-			.pressedColor	{ 0x4E4431_rgb, 0xFFFFFFC0_rgba },
-			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
-		};
-
-		constexpr ButtonTheme SidePanelButtonStyle
-		{
-			.defaultColor	{ 0x4E4431_rgb, 0xFFFFFF00_rgba },
-			.hoverColor		{ 0x4E4431_rgb, 0xFFFFFF80_rgba },
-			.pressedColor	{ 0x4E4431_rgb, 0xFFFFFFC0_rgba },
-			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
-		};
-
-		constexpr ButtonTheme EditorSmallButtonStyle
-		{
-			.defaultColor	{ 0x8b806b_rgb, 0xFFFFFF00_rgba },
-			.hoverColor		{ 0x8b806b_rgb, 0xEFECE3FF_rgba },
-			.pressedColor	{ 0x8b806b_rgb, 0xFFFFFFC0_rgba },
-			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
-		};
-
-		constexpr ButtonTheme GreenSaveButtonStyle
-		{
-			.defaultColor	{ 0x13330e_rgb, 0xc7e8c1_rgb },
-			.hoverColor		{ 0x13330e_rgb, 0x77ce70C0_rgba },
-			.pressedColor	{ 0x13330e_rgb, 0xb7e3b1_rgb },
-			.disabledColor	{ 0x808080_rgb, 0xCCCCCC80_rgba },
-		};
-	}
-
 	namespace Color
 	{
 		inline constexpr fig::color Debug						{ 0xC000C0_rgb };
@@ -121,6 +86,41 @@ namespace fig::gui
 			MessageBackgroundPurple,
 			MessageBackgroundBrown,
 			MessageBackgroundNavy,
+		};
+	}
+
+	namespace Theme
+	{
+		constexpr ButtonTheme DefaultButtonStyle
+		{
+			.defaultColor	{ 0xFFFFFF00_rgba, 0x4E4431_rgb, Color::LineColor },
+			.hoverColor		{ 0xEFECE3FF_rgba, 0x4E4431_rgb, Color::LineColor },
+			.pressedColor	{ 0xFFFFFFC0_rgba, 0x4E4431_rgb, Color::LineColor },
+			.disabledColor	{ 0xCCCCCC80_rgba, 0x808080_rgb, Color::DisabledLineColor },
+		};
+
+		constexpr ButtonTheme SidePanelButtonStyle
+		{
+			.defaultColor	{ 0xFFFFFF00_rgba, 0x4E4431_rgb, Color::LineColor },
+			.hoverColor		{ 0xFFFFFF80_rgba, 0x4E4431_rgb, Color::LineColor },
+			.pressedColor	{ 0xFFFFFFC0_rgba, 0x4E4431_rgb, Color::LineColor },
+			.disabledColor	{ 0xCCCCCC80_rgba, 0x808080_rgb, Color::DisabledLineColor },
+		};
+
+		constexpr ButtonTheme EditorSmallButtonStyle
+		{
+			.defaultColor	{ 0xFFFFFF00_rgba, 0x8b806b_rgb, Color::LineColor },
+			.hoverColor		{ 0xEFECE3FF_rgba, 0x8b806b_rgb, Color::LineColor },
+			.pressedColor	{ 0xFFFFFFC0_rgba, 0x8b806b_rgb, Color::LineColor },
+			.disabledColor	{ 0xCCCCCC80_rgba, 0x808080_rgb, Color::DisabledLineColor },
+		};
+
+		constexpr ButtonTheme GreenSaveButtonStyle
+		{
+			.defaultColor	{ 0xc7e8c1_rgb,		0x13330e_rgb, 0x097f00_rgb },
+			.hoverColor		{ 0x77ce70C0_rgba,	0x13330e_rgb, 0x097f00_rgb },
+			.pressedColor	{ 0xb7e3b1_rgb,		0x13330e_rgb, 0x097f00_rgb },
+			.disabledColor	{ 0xCCCCCC80_rgba,	0x808080_rgb, Color::DisabledLineColor },
 		};
 	}
 }
