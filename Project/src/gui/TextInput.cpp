@@ -1122,6 +1122,7 @@ namespace fig::gui
 
 			SetCursor(pos);
 			Select(highlight_start, _cursor);
+			ScrollToCursor();
 
 			bHandled = true;
 		}
@@ -1249,6 +1250,20 @@ namespace fig::gui
 			break;
 		case SDL_EVENT_MOUSE_WHEEL:
 			return HandleMouseWheel(event.wheel);
+		}
+
+		if (_bFocused and IsUserEvent(event, UserEvent::ScreenDeactivated))
+		{
+			SetFocus(false);
+			return EventResult::Continue;
+		}
+		else if (IsUserEvent(event, UserEvent::StartTextInput) and event.user.data1 != this)
+		{
+			if (_bFocused)
+				SetFocus(false);
+			if (HasSelection())
+				Deselect();
+ 			return EventResult::Continue;
 		}
 
 		if (!_bFocused)
@@ -1501,17 +1516,6 @@ namespace fig::gui
 
 		default:
 			break;
-		}
-
-		if (_bFocused and IsUserEvent(event, UserEvent::ScreenDeactivated))
-		{
-			SetFocus(false);
-			return EventResult::Continue;
-		}
-		else if (_bFocused and IsUserEvent(event, UserEvent::StartTextInput) and event.user.data1 != this)
-		{
-			SetFocus(false);
-			return EventResult::Continue;
 		}
 
 		return EventResult::Pass;
@@ -1917,7 +1921,17 @@ namespace fig::gui
 
 		if (not _lines.empty())
 		{
-			size_t line_index = static_cast<size_t>(std::clamp(y / _lineHeight, 0, static_cast<int32_t>(_lines.size() - 1)));
+			size_t line_index = static_cast<size_t>(std::max(y / _lineHeight, 0));
+			if (line_index >= _lines.size() and not _text.empty() and _text.back() == '\n')
+			{
+				return TTFCursor {
+					.position = toI(_text.size()),
+					.offset = 0,
+					.line = static_cast<int32_t>(_lines.size()),
+				};
+			}
+			line_index = std::min(line_index, _lines.size() - 1uz);
+
 			auto& line = _lines[line_index];
 			TTF_SubString substring;
 			if (TTF_GetTextSubStringForPoint(line.ttf_text.get(), x, _lineHeight / 2, &substring))
