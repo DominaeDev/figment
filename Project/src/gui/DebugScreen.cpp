@@ -9,6 +9,8 @@
 #include "gui/ComboBox.h"
 #include "gui/CheckBox.h"
 #include "gui/TextBox.h"
+#include "gui/HorizontalBar.h"
+#include "gui/VerticalBar.h"
 
 namespace fig::gui
 {
@@ -148,6 +150,16 @@ namespace fig::gui
 		pTextBox6->SetFixedRows(3);
 		pTextBox6->SetPosition(500, 400);
 		pTextBox6->SetEnabled(false);
+
+		auto HBar = CreateControl<HorizontalBar>(Resource::HORIZONTAL_BAR_SMALL);
+		HBar->SetPosition(20, 10);
+		HBar->SetSize(300, 4);
+		HBar->SetForegroundColor(Color::Blue);
+
+		auto VBar = CreateControl<VerticalBar>(Resource::VERTICAL_BAR_SMALL);
+		VBar->SetPosition(10, 20);
+		VBar->SetSize(4, 300);
+		VBar->SetForegroundColor(Color::Green);
 
 	}
 

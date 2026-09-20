@@ -100,13 +100,6 @@ namespace fig::gui
 		return false;
 	}
 
-	EventResult ChatListingScreen::OnEvent(fig::event& event)
-	{
-		// ...
-
-		return Screen::OnEvent(event);
-	}
-
 	void ChatListingScreen::ShowSortingMenu() noexcept
 	{
 		auto ChangeSorting = [this](SortBy sorting) {

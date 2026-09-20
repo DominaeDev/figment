@@ -161,6 +161,9 @@ namespace fig
 		LoadTexture(pRenderer, Resource::SLIDER_BAR_BORDER, "./resources/gui/slider_bar_border.png");
 		LoadTexture(pRenderer, Resource::SLIDER_THUMB_BG, "./resources/gui/slider_thumb_bg.png");
 		LoadTexture(pRenderer, Resource::SLIDER_THUMB_BORDER, "./resources/gui/slider_thumb_border.png");
+		
+		LoadTexture(pRenderer, Resource::HORIZONTAL_BAR_SMALL, "./resources/gui/horizontal_bar_small.png");
+		LoadTexture(pRenderer, Resource::VERTICAL_BAR_SMALL, "./resources/gui/vertical_bar_small.png");
 	}
 
 	void AppResources::Release()

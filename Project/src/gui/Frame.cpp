@@ -146,7 +146,9 @@ namespace fig::gui
 			RefreshCursor();
 		}
 
-		return Control::ProcessEvent(event);
+		// Pass to self
+		return OnEvent(event);
+		// return Control::ProcessEvent(event);
 	}
 
 	bool Frame::HandleMouseDown(SDL_MouseButtonEvent& event)

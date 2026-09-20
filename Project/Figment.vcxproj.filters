@@ -779,6 +779,15 @@
     <ClCompile Include="src\gui\CharacterEditorRulesTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\IMeshControl.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\HorizontalBar.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\VerticalBar.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1785,6 +1794,15 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditorRulesTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\IMeshControl.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\HorizontalBar.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\VerticalBar.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

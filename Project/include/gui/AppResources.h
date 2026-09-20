@@ -154,6 +154,9 @@ namespace fig
 		SLIDER_BAR_BORDER,
 		SLIDER_THUMB_BG,
 		SLIDER_THUMB_BORDER,
+
+		HORIZONTAL_BAR_SMALL,
+		VERTICAL_BAR_SMALL,
 	};
 
 	enum class MaskType

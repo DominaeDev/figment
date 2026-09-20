@@ -81,12 +81,11 @@ namespace fig
 		pLLMBackend.reset();
 		pLLMInstance.reset();
 
-		pAudioManager.reset();
-		pTTSBackend.reset();
-
 		pMainWindow.reset();
-		pUserManager.reset();
+		pTTSBackend.reset();
 		pMacroProvider.reset();
+		pAudioManager.reset();
+		pUserManager.reset();
 
 		if (pAppSettings)
 			pAppSettings->Save();

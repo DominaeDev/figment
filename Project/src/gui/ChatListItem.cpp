@@ -190,8 +190,6 @@ namespace fig::gui
 
 			menu.AddSeparator();
 
-			menu.AddItem("Edit chat settings\u2026", Resource::ICON_EDIT);
-
 			if (!userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 			{
 				menu.AddItem("Star", Resource::ICON_STAR)
@@ -247,8 +245,10 @@ namespace fig::gui
 				});
 
 			menu.AddSeparator();
-			menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
+			menu.AddItem("Delete forever\u2026", Resource::ICON_DELETE)
 				.SetDelegate([this] { NotifyDelete(); });
+			menu.AddItem("Purge archive\u2026", Resource::ICON_DELETE);
+
 		}
 		_menuId = menu.Show();
 	}

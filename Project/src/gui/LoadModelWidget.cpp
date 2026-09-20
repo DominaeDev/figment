@@ -16,7 +16,7 @@ namespace fig::gui
 	LoadModelWidget::LoadModelWidget(ControlPtr pParent) noexcept : Panel(pParent)
 	{
 		_pProgressBar = CreateControl<Panel>();
-		_pProgressBar->SetBackgroundRenderer<SolidFillRenderer>(fig::color { 0x57caff, 0xff });
+		_pProgressBar->SetBackgroundRenderer<SolidFillRenderer>(0x57caff_rgb);
 
 		_pLoadButton = CreateControl<PlayButton>();
 		_pLoadButton->SetDelegate(std::bind(&LoadModelWidget::OnButtonPressed, this));

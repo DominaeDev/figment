@@ -492,10 +492,17 @@ namespace fig::gui
 			}
 		}
 
+		if (_pSidePanel)
+		{
+			if (auto result = _pSidePanel->ProcessEvent(event); result == EventResult::Handled)
+				return EventResult::Handled;
+		}
+
 		if (IsBroadcastEvent(event))
 		{
 			// Pass to all screens
 			BroadcastEvent(event);
+			return EventResult::Continue;
 		}
 		else
 		{

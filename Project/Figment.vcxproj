@@ -188,6 +188,8 @@
     <ClCompile Include="src\gui\BehindChat.cpp" />
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
+    <ClCompile Include="src\gui\HorizontalBar.cpp" />
+    <ClCompile Include="src\gui\IMeshControl.cpp" />
     <ClCompile Include="src\gui\CharacterAttributeWidget.cpp" />
     <ClCompile Include="src\gui\CharacterBackgroundWidget.cpp" />
     <ClCompile Include="src\gui\CharacterEditor.cpp" />
@@ -254,6 +256,7 @@
     <ClCompile Include="src\gui\ToggleWithLabel.cpp" />
     <ClCompile Include="src\gui\TopBar.cpp" />
     <ClCompile Include="src\gui\ValueBinding.cpp" />
+    <ClCompile Include="src\gui\VerticalBar.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
     <ClCompile Include="src\gui\ScrollPanel.cpp" />
     <ClCompile Include="src\gui\SearchBox.cpp" />
@@ -494,6 +497,8 @@
     <ClInclude Include="include\gui\BoxSizer.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h" />
+    <ClInclude Include="include\gui\HorizontalBar.h" />
+    <ClInclude Include="include\gui\IMeshControl.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\CharacterAttributeWidget.h" />
     <ClInclude Include="include\gui\CharacterBackgroundWidget.h" />
@@ -549,6 +554,7 @@
     <ClInclude Include="include\gui\ToggleWithLabel.h" />
     <ClInclude Include="include\gui\TopBar.h" />
     <ClInclude Include="include\gui\ValueBinding.h" />
+    <ClInclude Include="include\gui\VerticalBar.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
     <ClInclude Include="include\gui\SearchBox.h" />
     <ClInclude Include="include\gui\SidePanelButton.h" />
