@@ -1,13 +1,14 @@
 #include <pch.h>
 #include "gui/Panel.h"
 
-using namespace fig::gui;
-
-Panel::Panel(ControlPtr pParent) : Control(pParent)
+namespace fig::gui
 {
-}
+	Panel::Panel(ControlPtr pParent) : Control(pParent)
+	{
+	}
 
-void Panel::OnRender(fig::renderer_ptr pRenderer)
-{
-	DrawBackground(pRenderer);
+	void Panel::OnRender(fig::renderer_ptr pRenderer)
+	{
+		DrawBackground(pRenderer);
+	}
 }

@@ -59,26 +59,6 @@ namespace fig
 			and p.y >= rect.y - expand and p.y < rect.y + rect.h + expand;
 	}
 
-	inline constexpr fig::colorf to_colorf(fig::color color)
-	{
-		return fig::colorf {
-			color.r / 255.0f,
-			color.g / 255.0f,
-			color.b / 255.0f,
-			color.a / 255.0f,
-		};
-	}
-
-	inline constexpr fig::color to_color(fig::colorf color)
-	{
-		return fig::color {
-			std::clamp(static_cast<uint8_t>(color.r * 255.0f), 0_u8, 255_u8),
-			std::clamp(static_cast<uint8_t>(color.g * 255.0f), 0_u8, 255_u8),
-			std::clamp(static_cast<uint8_t>(color.b * 255.0f), 0_u8, 255_u8),
-			std::clamp(static_cast<uint8_t>(color.a * 255.0f), 0_u8, 255_u8),
-		};
-	}
-
 	inline constexpr SDL_PixelFormat to_sdl_format(ImageFormat format)
 	{
 		switch (format)

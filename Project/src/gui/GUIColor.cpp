@@ -170,9 +170,4 @@ namespace fig
 		HSVtoRGB(h, s, v, r, g, b);
 		return fig::color { r, g, b, 0xff };
 	}
-
-	fig::color::operator fig::colorf() const noexcept
-	{
-		return to_colorf(*this); 
-	}
 }

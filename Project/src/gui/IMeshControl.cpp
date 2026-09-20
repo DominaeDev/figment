@@ -46,12 +46,12 @@ namespace fig::gui
 
 	void IMeshControl::AddPoint(float x, float y, float u, float v, fig::color color)
 	{
-		_vertices.push_back(fig::vertex { fig::pointf { x, y }, to_colorf(color), fig::pointf { u, v } });
+		_vertices.push_back(fig::vertex { fig::pointf { x, y }, color, fig::pointf { u, v } });
 	}
 
 	void IMeshControl::AddPoint(fig::pointf pos, fig::pointf uv, fig::color color)
 	{
-		_vertices.push_back(fig::vertex { pos, to_colorf(color),  uv });
+		_vertices.push_back(fig::vertex { pos, color,  uv });
 	}
 
 	void IMeshControl::AddQuad() noexcept

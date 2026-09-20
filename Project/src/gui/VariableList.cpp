@@ -5,52 +5,54 @@
 #include "gui/AppResources.h"
 #include <format>
 
-using namespace fig::gui;
-
 constexpr fig::coord Margin = 8;
 
-VariableList::VariableList(ControlPtr pParent) : Control(pParent)
+namespace fig::gui
 {
-	auto pBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BG, fig::corners { 30, 72, 64, 30 });
-	pBG->SetColor(Color::MessageBackgroundDefault);
-	pBG->SetCornerScale(0.3f);
-	pBG->SetExtend(5);
 
-	auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BORDER, fig::corners { 30, 72, 64, 30 });
-	pBorder->SetColor(Color::MessageBorderDefault);
-	pBorder->SetCornerScale(0.3f);
-	pBorder->SetExtend(5);
+	VariableList::VariableList(ControlPtr pParent) : Control(pParent)
+	{
+		auto pBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BG, fig::corners { 30, 72, 64, 30 });
+		pBG->SetColor(Color::MessageBackgroundDefault);
+		pBG->SetCornerScale(0.3f);
+		pBG->SetExtend(5);
 
-	SetForegroundColor(Color::TextForeground);
-	SetBackgroundColor(Color::MessageBackgroundDefault);
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BORDER, fig::corners { 30, 72, 64, 30 });
+		pBorder->SetColor(Color::MessageBorderDefault);
+		pBorder->SetCornerScale(0.3f);
+		pBorder->SetExtend(5);
 
-	_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
-	_pText->SetPosition(Margin, Margin);
-	_pText->SetWidth(250);
-}
+		SetForegroundColor(Color::TextForeground);
+		SetBackgroundColor(Color::MessageBackgroundDefault);
 
-void VariableList::OnRender(fig::renderer_ptr pRenderer)
-{
-	if (_pText->GetText().empty())
-		return;
-	Control::OnRender(pRenderer);
-}
+		_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
+		_pText->SetPosition(Margin, Margin);
+		_pText->SetWidth(250);
+	}
 
-void VariableList::SetVariables(const std::map<fig::string, fig::string>& variables)
-{
-	fig::string text;
-	text.reserve(512);
-	for (auto& kvp : variables)
-		text = text + std::format("{} = {}\n", kvp.first, kvp.second);
-	text = rtrim(text);
+	void VariableList::OnRender(fig::renderer_ptr pRenderer)
+	{
+		if (_pText->GetText().empty())
+			return;
+		Control::OnRender(pRenderer);
+	}
 
-	fig::coord w, h;
-	_pText->SetTextAndResize(text, w, h);
+	void VariableList::SetVariables(const std::map<fig::string, fig::string>& variables)
+	{
+		fig::string text;
+		text.reserve(512);
+		for (auto& kvp : variables)
+			text = text + std::format("{} = {}\n", kvp.first, kvp.second);
+		text = rtrim(text);
+
+		fig::coord w, h;
+		_pText->SetTextAndResize(text, w, h);
 	
-	SetSize(w + Margin * 2, h + Margin * 2);
-}
+		SetSize(w + Margin * 2, h + Margin * 2);
+	}
 
-bool VariableList::IsEmpty() const
-{
-	return _pText->GetText().empty();
+	bool VariableList::IsEmpty() const
+	{
+		return _pText->GetText().empty();
+	}
 }

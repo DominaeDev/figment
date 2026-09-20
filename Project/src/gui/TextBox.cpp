@@ -7,6 +7,7 @@
 namespace fig::gui
 {
 	static constexpr fig::coord kScrollBarMarginY = 4;
+	static constexpr fig::coord kScrollBarRight = 7;
 
 	TextBox::TextBox(ControlPtr pParent, FontFace fontFace, double ptSize, TextInput::Mode mode) : TextInput(pParent, fontFace, ptSize, mode)
 	{
@@ -25,7 +26,7 @@ namespace fig::gui
 
 		_pScrollBar = CreateControl<VerticalBar>(Resource::VERTICAL_BAR_SMALL);
 		_pScrollBar->SetForegroundColor(0x00000060_rgba);
-		_pScrollBar->SetPosition(GetWidth() - 7, 4);
+		_pScrollBar->SetX(GetWidth() - kScrollBarRight);
 		_pScrollBar->SetSize(3, 16);
 	}
 
@@ -48,7 +49,12 @@ namespace fig::gui
 	void TextBox::OnUpdate(float fElapsed)
 	{
 		TextInput::OnUpdate(fElapsed);
+		RefreshScrollBar();
+	}
 
+	void TextBox::OnSize()
+	{
+		TextInput::OnSize();
 		RefreshScrollBar();
 	}
 
@@ -82,6 +88,7 @@ namespace fig::gui
 
 		int32_t handleSize = std::clamp(toI(std::min(toF(pageHeight) / fExtent, 1.0f) * pageHeight), 20, std::max(pageHeight, 16));
 		_pScrollBar->SetY(kScrollBarMarginY + toI((_scroll.y / fScrollRange) * (GetHeight() - handleSize - kScrollBarMarginY * 2)));
+		_pScrollBar->SetX(GetWidth() - kScrollBarRight);
 		_pScrollBar->SetHeight(handleSize);
 	}
 }

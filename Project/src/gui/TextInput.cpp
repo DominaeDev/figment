@@ -799,25 +799,7 @@ namespace fig::gui
 			return _cursor;
 		}
 
-		auto cursor = GetCursor();
-		if (cursor.line == 0)
-			return _cursor;
-
-
-		auto& curr_line = _lines[cursor.line];
-		TTF_SubString substring;
-		if (TTF_GetTextSubString(curr_line.ttf_text.get(), cursor.offset, &substring))
-		{
-			int32_t x = substring.rect.x;
-			auto& prev_line = _lines[cursor.line - 1];
-			if (TTF_GetTextSubStringForPoint(prev_line.ttf_text.get(), x, _lineHeight / 2, &substring))
-			{
-				auto last_cursor = _cursor;
-				SetCursor(prev_line.position + GetCursorTextIndex(x, &substring));
-				OnMoveCursor(last_cursor);
-			}
-		}
-		return _cursor;
+		return MoveCursorUpDown(-1);
 	}
 
 	int32_t TextInput::MoveCursorDown() noexcept
@@ -837,8 +819,34 @@ namespace fig::gui
 			return _cursor;
 		}
 
+		return MoveCursorUpDown(1);
+	}
+
+	int32_t TextInput::MoveCursorUpDown(int32_t lines) noexcept
+	{
+		if (not (IsMultiline() or IsWordWrapping()) or lines == 0)
+			return _cursor;
+
+		if (_lines.empty())
+			return _cursor;
+
+		auto cursor = GetCursor();
+		auto last_cursor = _cursor;
+		if (cursor.line == 0 and lines < 0)
+			return _cursor; // No move
+
+		int32_t target_line = std::clamp(cursor.line + lines, 0, toI(_lines.size()));
+
+		if (target_line >= _lines.size())
+		{
+			SetCursor(static_cast<int32_t>(_text.size()));
+			OnMoveCursor(last_cursor);
+			return _cursor;
+		}
+
 		auto& curr_line = _lines[cursor.line];
-		auto& next_line = _lines[cursor.line + 1];
+		auto& next_line = _lines[target_line];
+
 		TTF_SubString substring;
 		int32_t pos = next_line.position;
 		if (TTF_GetTextSubString(curr_line.ttf_text.get(), cursor.offset, &substring))
@@ -848,7 +856,6 @@ namespace fig::gui
 				pos += GetCursorTextIndex(x, &substring);
 		}
 
-		auto last_cursor = _cursor;
 		SetCursor(pos);
 		OnMoveCursor(last_cursor);
 		return _cursor;
@@ -1279,16 +1286,10 @@ namespace fig::gui
 				switch (event.key.key)
 				{
 				case SDLK_UP:
-					_scroll.y -= _lineHeight;
+					ScrollUp();
 					return EventResult::Handled;
 				case SDLK_DOWN:
-					_scroll.y += _lineHeight;
-					return EventResult::Handled;
-				case SDLK_LEFT:
-					_scroll.x -= _lineHeight;
-					return EventResult::Handled;
-				case SDLK_RIGHT:
-					_scroll.x += _lineHeight;
+					ScrollDown();
 					return EventResult::Handled;
 				}
 			}
@@ -1380,6 +1381,22 @@ namespace fig::gui
 				if (bModNone or bModShift)
 				{
 					MoveCursorDown();
+					return EventResult::Handled;
+				}
+				break;
+
+			case SDLK_PAGEUP:
+				if (bModNone or bModShift)
+				{
+					PageUp();
+					return EventResult::Handled;
+				}
+				break;
+
+			case SDLK_PAGEDOWN:
+				if (bModNone or bModShift)
+				{
+					PageDown();
 					return EventResult::Handled;
 				}
 				break;
@@ -2342,4 +2359,26 @@ namespace fig::gui
 			}
 		}
 	}
+
+	void TextInput::ScrollUp() noexcept
+	{
+		_scroll.y = std::max(_scroll.y - _lineHeight, 0);
+	}
+
+	void TextInput::ScrollDown() noexcept
+	{
+		_scroll.y = std::min(_scroll.y + _lineHeight, GetScrollExtentY());
+	}
+
+	void TextInput::PageUp() noexcept
+	{
+		MoveCursorUpDown(15);
+	}
+
+	void TextInput::PageDown() noexcept
+	{
+		MoveCursorUpDown(15);
+	}
+
+
 }

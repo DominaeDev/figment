@@ -130,6 +130,7 @@ namespace fig::gui
 		int32_t MoveCursorRight() noexcept;
 		int32_t MoveCursorUp() noexcept;
 		int32_t MoveCursorDown() noexcept;
+		int32_t MoveCursorUpDown(int32_t lines) noexcept;
 		int32_t MoveCursorBeginningOfLine() noexcept;
 		int32_t MoveCursorEndOfLine() noexcept;
 		int32_t MoveCursorToPriorWord() noexcept;
@@ -137,6 +138,10 @@ namespace fig::gui
 		int32_t MoveCursorBeginning() noexcept;
 		int32_t MoveCursorEnd() noexcept;
 		void OnMoveCursor(int32_t last_position);
+		void ScrollUp() noexcept;
+		void ScrollDown() noexcept;
+		void PageUp() noexcept;
+		void PageDown() noexcept;
 
 		fig::rectf GetCursorRect() const noexcept;
 		void ResetCursorBlink();

@@ -37,6 +37,14 @@ namespace fig
 			this->a = a;
 		}
 
+		constexpr color(const fig::colorf color) noexcept
+		{
+			this->r = std::clamp(static_cast<uint8_t>(color.r * 255.0f), 0_u8, 255_u8);
+			this->g = std::clamp(static_cast<uint8_t>(color.g * 255.0f), 0_u8, 255_u8);
+			this->b = std::clamp(static_cast<uint8_t>(color.b * 255.0f), 0_u8, 255_u8);
+			this->a = std::clamp(static_cast<uint8_t>(color.a * 255.0f), 0_u8, 255_u8);
+		}
+
 		template<std::floating_point T>
 		constexpr explicit color(T r, T g, T b, T a = T(1.0)) noexcept
 		{
@@ -81,7 +89,10 @@ namespace fig
 			return WithAlpha(static_cast<uint8_t>(std::clamp(alpha, T(0), T(1)) * T(255)));
 		}
 
-		operator colorf() const noexcept;
+		inline operator colorf() const noexcept
+		{
+			return fig::colorf { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
+		}
 
 		fig::string ToString() const noexcept;
 		static color FromString(const fig::string& hex) noexcept;
