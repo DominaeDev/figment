@@ -16,7 +16,7 @@ namespace fig::gui
 		SetWidth(Constants::GUI::SidePanel::Width);
 		SetBackgroundColor(Colour::SidePanelBackground);
 		
-		_pGradient = CreateControl<HorizontalGradient>(custom_color((*_Color(Colour::SidePanelGradient)).WithAlpha(0.0f)), custom_color((*_Color(Colour::SidePanelGradient)).WithAlpha(0.8f)));
+		_pGradient = CreateControl<HorizontalGradient>(fig::color_ref(Colour::SidePanelGradient).WithAlpha(0.0f), fig::color_ref(Colour::SidePanelGradient).WithAlpha(0.8f));
 
 		_pResizeHandle = CreateControl<ResizeHandle>(Direction::East);
 		_pResizeHandle->SetDelegate([this](fig::coord size) { Resize(size); });

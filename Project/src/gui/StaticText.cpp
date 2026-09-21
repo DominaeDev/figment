@@ -97,7 +97,7 @@ namespace fig::gui
 	void StaticText::OnRender(fig::renderer_ptr pRenderer)
 	{
 		auto bgColor = GetBackgroundColor();
-		if (bgColor && bgColor->a != 0)
+		if (bgColor && bgColor.a() != 0)
 			DrawBackground(pRenderer);
 
 		if (not _shadow.empty() and _bDropShadow)
@@ -146,7 +146,7 @@ namespace fig::gui
 		if (fgColor)
 		{
 			// Opaque background: Use ClearType
-			if (bgColor->a == 0xFF)
+			if (bgColor.a() == 0xFF)
 			{
 				SDL_Surface* pSurface = _bWordWrap ?
 					TTF_RenderText_LCD_Wrapped(_pFont, pText, 0, fgColor, bgColor, maxWidth)
@@ -166,7 +166,7 @@ namespace fig::gui
 					return;
 				}
 			}
-			else if (bgColor->a == 0x00) // Transparent background
+			else if (bgColor.a() == 0x00) // Transparent background
 			{
 				SDL_Surface* pSurface = _bWordWrap ?
 					TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, fgColor, maxWidth)
@@ -189,8 +189,8 @@ namespace fig::gui
 			{
 				// Recreate text
 				SDL_Surface* pSurface = _bWordWrap ?
-					TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, _Color(Colour::White), maxWidth)
-					: TTF_RenderText_Blended(_pFont, pText, 0, _Color(Colour::White));
+					TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, fig::color_ref(Colour::White), maxWidth)
+					: TTF_RenderText_Blended(_pFont, pText, 0, fig::color_ref(Colour::White));
 				if (pSurface)
 				{
 					_textWidth = pSurface->w;
@@ -200,7 +200,7 @@ namespace fig::gui
 					SDL_BlendMode mode;
 					SDL_GetSurfaceBlendMode(pSurface, &mode);
 					SDL_Surface* pColorSurface = SDL_CreateSurface(_textWidth, _textHeight, pSurface->format);
-					SDL_FillSurfaceRect(pColorSurface, NULL, SDL_MapSurfaceRGBA(pColorSurface, fgColor->r, fgColor->g, fgColor->b, fgColor->a));
+					SDL_FillSurfaceRect(pColorSurface, NULL, SDL_MapSurfaceRGBA(pColorSurface, fgColor.r(), fgColor.g(), fgColor.b(), fgColor.a()));
 					SDL_SetSurfaceBlendMode(pColorSurface, SDL_BLENDMODE_MOD);
 					SDL_SetSurfaceBlendMode(pSurface, SDL_BLENDMODE_NONE);
 					SDL_BlitSurface(pColorSurface, NULL, pSurface, NULL);
@@ -277,13 +277,13 @@ namespace fig::gui
 		return to_rectf(aligned_rect);
 	}
 
-	void StaticText::SetForegroundColor(fig::color_ref color)
+	void StaticText::SetForegroundColor(fig::color_ref_with_alpha color)
 	{
 		Control::SetForegroundColor(color);
 		InvalidateText();
 	}
 
-	void StaticText::SetBackgroundColor(fig::color_ref color)
+	void StaticText::SetBackgroundColor(fig::color_ref_with_alpha color)
 	{
 		Control::SetBackgroundColor(color);
 		InvalidateText();

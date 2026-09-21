@@ -4,13 +4,13 @@
 
 namespace fig::gui
 {
-	VerticalGradient::VerticalGradient(ControlPtr pParent, fig::color_ref colorTop, fig::color_ref colorBottom) : Control(pParent)
+	VerticalGradient::VerticalGradient(ControlPtr pParent, fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom) : Control(pParent)
 	{
 		SetColors(colorTop, colorBottom);
 		_pTexture = AppResources::GetTexture(Resource::BLANK);
 	}
 
-	void VerticalGradient::SetColors(fig::color_ref colorTop, fig::color_ref colorBottom)
+	void VerticalGradient::SetColors(fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom)
 	{
 		_colorTop = colorTop;
 		_colorBottom = colorBottom;
@@ -26,7 +26,11 @@ namespace fig::gui
 	{
 		fig::rectf rect = GetDrawRect();
 		if (_bInvalid or !SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
+		{
 			RefreshGeometry(rect);
+			_lastRect = rect;
+			_bInvalid = false;
+		}
 
 		static constexpr int indices[6] = { 0, 1, 2, 2, 3, 0 };
 		SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), indices, 6);
@@ -34,8 +38,6 @@ namespace fig::gui
 
 	void VerticalGradient::RefreshGeometry(fig::rectf rect)
 	{
-		_lastRect = rect;
-
 		_vertices.clear();
 		_vertices.reserve(4);
 
@@ -49,6 +51,5 @@ namespace fig::gui
 		_vertices.push_back(fig::vertex { fig::pointf { right, top }, _colorTop });
 		_vertices.push_back(fig::vertex { fig::pointf { left, top }, _colorTop });
 
-		_bInvalid = false;
 	}
 }

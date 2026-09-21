@@ -13,6 +13,12 @@ namespace fig::gui
 
 	void ParseTable(ColorTable& table, fig::string_view text)
 	{
+		if constexpr (Debugging)
+		{
+			for (auto& color : table)
+				color = 0xff00ff_rgb;
+		}
+
 		for (auto row : std::views::split(text, '\n'))
 		{
 			auto line = trim(fig::string_view { row });

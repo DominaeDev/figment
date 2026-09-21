@@ -9,8 +9,7 @@ namespace fig::gui
 	public:
 		BehindChat(ControlPtr pParent);
 
-		void SetColor(fig::color_ref color);
-		void SetColor(fig::color_ref color, float fAlpha);
+		void SetColor(fig::color_ref_with_alpha color);
 		void SetAlpha(float fAlpha);
 
 	protected:

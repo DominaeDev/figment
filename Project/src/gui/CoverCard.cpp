@@ -50,7 +50,7 @@ namespace fig::gui
 		_pLargeFooter->SetSize(Large::Width, Large::FooterHeight);
 
 		_pLargeFooterFade = _pLargeFooter->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_BOTTOM_FADE), fig::corners { 16, 16, 64, 16 });
-		_pLargeFooterFade->SetForegroundColor(custom_color(fig::color(0, 0, 0, FadeAlpha)));
+		_pLargeFooterFade->SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(FadeAlpha));
 		_pLargeFooterFade->FillParent();
 		_pLargeFooterFade->SetVisible(false);
 
@@ -66,7 +66,7 @@ namespace fig::gui
 		// Border (large)
 		auto pSimpleBorder = _pLargeRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
-		pSimpleBorder->SetForegroundColor(custom_color(fig::color(0, 0, 0, FadeAlpha)));
+		pSimpleBorder->SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(FadeAlpha));
 
 		// Styled border (large)
 		_pLargeBorder = _pLargeRoot->CreateControl<Image>(nullptr);
@@ -90,7 +90,7 @@ namespace fig::gui
 		pSmallFooter->SetSize(Small::Width, Small::FooterHeight);
 
 		_pSmallFooterFade = pSmallFooter->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_BOTTOM_FADE_SMALL), fig::corners { 16, 16, 40, 16 });
-		_pSmallFooterFade->SetForegroundColor(custom_color(fig::color(0, 0, 0, 0x80)));
+		_pSmallFooterFade->SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(FadeAlpha));
 		_pSmallFooterFade->FillParent();
 		_pSmallFooterFade->SetVisible(false);
 
@@ -106,7 +106,7 @@ namespace fig::gui
 		// Border (small)
 		auto pSmallSimpleBorder = _pSmallRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSmallSimpleBorder->FillParent();
-		pSmallSimpleBorder->SetForegroundColor(custom_color(fig::color(0, 0, 0, 0x80)));
+		pSmallSimpleBorder->SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(FadeAlpha));
 
 		// Styled border (small)
 		_pSmallBorder = _pSmallRoot->CreateControl<Image>(nullptr);
@@ -304,7 +304,7 @@ namespace fig::gui
 
 		auto pTagBG = _pTagsRoot->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
 		pTagBG->SetPosition(position);
-		pTagBG->SetForegroundColor(custom_color((*_Color(Colour::Black)).WithAlpha(0.7f)));
+		pTagBG->SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(0.7f));
 
 		auto pLabel = _pTagsRoot->CreateControl<StaticText>(tag, FontFace::Default, 14.0, true);
 		pLabel->SetPosition(position.x + Large::Tags::InnerMargin, position.y + 3);

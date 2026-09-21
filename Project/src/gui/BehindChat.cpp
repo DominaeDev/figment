@@ -22,7 +22,7 @@ namespace fig::gui
 		SetColor(Colour::Black);
 	}
 
-	void BehindChat::SetColor(fig::color_ref color)
+	void BehindChat::SetColor(fig::color_ref_with_alpha color)
 	{
 		SetBackgroundColor(color);
 
@@ -30,16 +30,11 @@ namespace fig::gui
 		_pLeftGradient->SetForegroundColor(color);
 		_pRightGradient->SetForegroundColor(color);
 
-		SetVisible(color->a);
-	}
-
-	void BehindChat::SetColor(fig::color_ref color, float fAlpha)
-	{
-		SetBackgroundColor(custom_color(color->WithAlpha(fAlpha)));
+		SetVisible(color.a() != 0);
 	}
 
 	void BehindChat::SetAlpha(float fAlpha)
 	{
-		SetColor(custom_color(GetBackgroundColor()->WithAlpha(fAlpha)));
+		SetColor(GetBackgroundColor().WithAlpha(fAlpha));
 	}
 }

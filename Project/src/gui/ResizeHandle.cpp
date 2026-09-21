@@ -36,10 +36,15 @@ namespace fig::gui
 
 		if (_bHovering or _bResizing)
 		{
-			auto lineColor = _bResizing ? custom_color(0x4080C0_rgb) : custom_color(_Color(Colour::LineColor)->WithAlpha(_fAlpha));
+			fig::color_ref_with_alpha lineColor;
+			if (_bResizing)
+				lineColor = custom_color_with_alpha(0x4080C0_rgb);
+			else
+				lineColor = fig::color_ref(Colour::LineColor).WithAlpha(_fAlpha);
+
 			auto drawRect = GetHandleRect();
 			SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
-			SDL_SetRenderDrawColor(pRenderer, lineColor->r, lineColor->g, lineColor->b, lineColor->a);
+			SDL_SetRenderDrawColor(pRenderer, lineColor.r(), lineColor.g(), lineColor.b(), lineColor.a());
 			SDL_RenderFillRect(pRenderer, &drawRect);
 		}
 		else

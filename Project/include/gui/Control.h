@@ -19,11 +19,11 @@ namespace fig::gui
 
 		virtual void Render(fig::renderer_ptr pRenderer);
 
-		fig::color_ref GetForegroundColor() const;
-		fig::color_ref GetBackgroundColor() const;
+		fig::color_ref_with_alpha GetForegroundColor() const;
+		fig::color_ref_with_alpha GetBackgroundColor() const;
 		inline bool GetClipping() const { return _bClipping; }
-		virtual void SetForegroundColor(fig::color_ref color) { _foregroundColor = color; }
-		virtual void SetBackgroundColor(fig::color_ref color) { _backgroundColor = color; }
+		virtual void SetForegroundColor(fig::color_ref_with_alpha color) { _foregroundColor = color; }
+		virtual void SetBackgroundColor(fig::color_ref_with_alpha color) { _backgroundColor = color; }
 		inline void EnableClipping(bool bEnable) noexcept { _bClipping = bEnable; }
 		inline void EnableCulling(bool bEnable) noexcept { _bCulling = bEnable; }
 
@@ -92,8 +92,8 @@ namespace fig::gui
 		Menu& CreateMenu() noexcept;
 		
 	protected:
-		fig::color_ref _foregroundColor {};
-		fig::color_ref _backgroundColor {};
+		fig::color_ref_with_alpha _foregroundColor {};
+		fig::color_ref_with_alpha _backgroundColor {};
 		bool _bClipping = false;
 		bool _bCulling = false;
 		bool _bVisible = true;

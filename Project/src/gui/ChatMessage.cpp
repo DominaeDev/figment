@@ -276,13 +276,13 @@ namespace fig::gui
 
 		uint8_t alpha = (uint8_t)(_bActive ? 255 : fadedAlpha);
 
-		SetForegroundColor(custom_color(fig::color(0, 0, 0, alpha)));
+		SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(alpha));
 
-		_pSpeechBubbleBG->SetColor(custom_color((*_bgColor).WithAlpha(alpha)));
-		_pSpeechBubbleBorder->SetColor(custom_color((*_borderColor).WithAlpha(alpha)));
+		_pSpeechBubbleBG->SetColor(fig::color_ref(_bgColor).WithAlpha(alpha));
+		_pSpeechBubbleBorder->SetColor(fig::color_ref(_borderColor).WithAlpha(alpha));
 
-		_pMessagePanel->SetBackgroundColor(custom_color((*chatBG).WithAlpha(alpha)));
-		_pMessageText->SetForegroundColor(custom_color((*_textColor).WithAlpha(alpha)));
+		_pMessagePanel->SetBackgroundColor(fig::color_ref(chatBG).WithAlpha(alpha));
+		_pMessageText->SetForegroundColor(fig::color_ref(_textColor).WithAlpha(alpha));
 		
 		if (_bActive)
 		{
@@ -298,6 +298,6 @@ namespace fig::gui
 		}
 
 		if (_pNameText)
-			_pNameText->SetForegroundColor(custom_color((*_nameColor).WithAlpha(alpha)));
+			_pNameText->SetForegroundColor(fig::color_ref(_nameColor).WithAlpha(alpha));
 	}
 }

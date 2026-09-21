@@ -18,6 +18,7 @@ namespace fig::gui
 		Debug,
 		Debug2,
 		Debug3,
+		Opaque,
 		Transparent,
 		White,
 		Black,
@@ -40,6 +41,7 @@ namespace fig::gui
 		Icon,
 		TextBoxForeground,
 		TextBoxBackground,
+		TextBoxScrollBar,
 		StatusBarForeground,
 		StatusBarBackground,
 		GenderTagMale,
@@ -78,6 +80,7 @@ namespace fig::gui
 		std::pair { Colour::Debug,								"Debug" },
 		std::pair { Colour::Debug2,								"Debug2" },
 		std::pair { Colour::Debug3,								"Debug3" },
+		std::pair { Colour::Opaque,								"Opaque" },
 		std::pair { Colour::Transparent,						"Transparent" },
 		std::pair { Colour::White,								"White" },
 		std::pair { Colour::Black,								"Black" },
@@ -100,6 +103,7 @@ namespace fig::gui
 		std::pair { Colour::Icon,								"Icon" },
 		std::pair { Colour::TextBoxForeground,					"TextBoxForeground" },
 		std::pair { Colour::TextBoxBackground,					"TextBoxBackground" },
+		std::pair { Colour::TextBoxScrollBar,					"TextBoxScrollBar" },
 		std::pair { Colour::StatusBarForeground,				"StatusBarForeground" },
 		std::pair { Colour::StatusBarBackground,				"StatusBarBackground" },
 		std::pair { Colour::GenderTagMale,						"GenderTagMale" },
@@ -147,6 +151,12 @@ namespace fig::gui
 	{
 		auto& c = _CustomColors[static_cast<uint32_t>(color)] = color;
 		return fig::color_ref(&c);
+	}
+
+	inline fig::color_ref_with_alpha custom_color_with_alpha(const fig::color& color, uint8_t alpha = 0xFF)
+	{
+		auto& c = _CustomColors[static_cast<uint32_t>(color)] = color;
+		return fig::color_ref_with_alpha { &c, alpha };
 	}
 
 	inline static fig::color_ref DefaultUserMessageBorder { Colour::MessageBorderBlue };

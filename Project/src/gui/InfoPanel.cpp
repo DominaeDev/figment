@@ -24,7 +24,7 @@ namespace fig::gui
 		_pExpandedRoot = CreateControl<Area>();
 		_pCollapsedRoot = CreateControl<Area>();
 
-		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(custom_color((*_Color(Colour::SidePanelGradient)).WithAlpha(0.8f)), custom_color((*_Color(Colour::SidePanelGradient)).WithAlpha(0.0f)));
+		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(fig::color_ref(Colour::SidePanelGradient).WithAlpha(0.8f), fig::color_ref(Colour::SidePanelGradient).WithAlpha(0.0f));
 		_pGradient = pGradient;
 
 		_pCollapseButton = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT, false);

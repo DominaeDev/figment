@@ -23,6 +23,7 @@ DisabledLineColor					#c0c0c0
 Icon								#4e4431
 TextBoxForeground					#000000
 TextBoxBackground					#FFFFFF
+TextBoxScrollBar					#00000060
 StatusBarForeground					#514a2f
 StatusBarBackground					#ded9c5
 GenderTagMale						#45ccff

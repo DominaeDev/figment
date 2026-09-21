@@ -112,7 +112,7 @@ namespace fig::gui
 		if (radius <= 0.0f)
 			return;
 
-		fig::colorf color = (*_color).WithAlpha(1.0f);
+		fig::colorf color = _color.WithAlpha(1.0f);
 
 		_lastRect = rect;
 

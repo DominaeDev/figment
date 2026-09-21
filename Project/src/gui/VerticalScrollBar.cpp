@@ -16,7 +16,7 @@ namespace fig::gui
 		auto pHandle = CreateControl<TexturedBorder>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pHandle->SetWidth(8);
 		pHandle->SetCornerScale(0.5f);
-		pHandle->SetForegroundColor(custom_color((*_Color(Colour::Black)).WithAlpha(HandleAlpha[0])));
+		pHandle->SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(HandleAlpha[0]));
 		_pHandle = pHandle;
 	}
 
@@ -83,7 +83,7 @@ namespace fig::gui
 
 		if (is_inside(rect, x, y))
 		{
-			_pHandle->SetForegroundColor(custom_color(_pHandle->GetForegroundColor()->WithAlpha(HandleAlpha[1])));
+			_pHandle->SetForegroundColor(_pHandle->GetForegroundColor().WithAlpha(HandleAlpha[1]));
 			_bScrolling = true;
 			return true;
 		}
@@ -94,7 +94,7 @@ namespace fig::gui
 	{
 		if (_bScrolling)
 		{
-			_pHandle->SetForegroundColor(custom_color(_pHandle->GetForegroundColor()->WithAlpha(HandleAlpha[0])));
+			_pHandle->SetForegroundColor(_pHandle->GetForegroundColor().WithAlpha(HandleAlpha[0]));
 			_bScrolling = false;
 			_bDirty = true;
 		}

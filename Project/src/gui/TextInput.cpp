@@ -294,7 +294,7 @@ namespace fig::gui
 			if (auto highlights = GetHighlights(); not highlights.empty())
 			{
 				fig::color_ref selectionColor = _bFocused ? Colour::TextSelectionBackground : Colour::TextSelectionBackgroundInactive;
-				SDL_SetRenderDrawColor(pRenderer, selectionColor->r, selectionColor->g, selectionColor->b, selectionColor->a);
+				SDL_SetRenderDrawColor(pRenderer, selectionColor.r(), selectionColor.g(), selectionColor.b(), selectionColor.a());
 
 				for (auto& highlight_rect : highlights)
 				{
@@ -346,7 +346,7 @@ namespace fig::gui
 	void TextInput::DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y)
 	{
 		auto fgColor = GetForegroundColor();
-		TTF_SetTextColor(pText, fgColor->r, fgColor->g, fgColor->b, fgColor->a);
+		TTF_SetTextColor(pText, fgColor.r(), fgColor.g(), fgColor.b(), fgColor.a());
 
 		auto& rect = GetRect();
 		int xx = rect.x + GetMarginLeft() + x;
@@ -361,8 +361,8 @@ namespace fig::gui
 		if (not _pPlaceholder->text or _bFocused)
 			return;
 
-		auto fgColor = _Color(Colour::DisabledForeground);
-		TTF_SetTextColor(_pPlaceholder, fgColor->r, fgColor->g, fgColor->b, fgColor->a);
+		fig::color_ref fgColor = Colour::DisabledForeground;
+		TTF_SetTextColor(_pPlaceholder, fgColor.r(), fgColor.g(), fgColor.b(), fgColor.a());
 
 		auto& rect = GetRect();
 		int xx = rect.x + GetMarginLeft();
@@ -472,7 +472,7 @@ namespace fig::gui
 				line_rect.y += clientRect.y + _composition_line * _lineHeight + font_height;
 				line_rect.h = 1.0f;
 				ApplyScroll(line_rect);
-				SDL_SetRenderDrawColor(pRenderer, fgColor->r, fgColor->g, fgColor->b, 0xFF);
+				SDL_SetRenderDrawColor(pRenderer, fgColor.r(), fgColor.g(), fgColor.b(), 0xFF);
 				SDL_RenderFillRect(pRenderer, &line_rect);
 			}
 			SDL_free(substrings);
@@ -493,7 +493,7 @@ namespace fig::gui
 					line_rect.h = 2.0f;
 					ApplyScroll(line_rect);
 
-					SDL_SetRenderDrawColor(pRenderer, fgColor->r, fgColor->g, fgColor->b, 0xFF);
+					SDL_SetRenderDrawColor(pRenderer, fgColor.r(), fgColor.g(), fgColor.b(), 0xFF);
 					SDL_RenderFillRect(pRenderer, &line_rect);
 				}
 				SDL_free(substrings);

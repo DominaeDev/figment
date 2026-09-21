@@ -224,7 +224,7 @@ namespace fig::gui
 			if (menuItem._bMonochromeIcon)
 				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colour::Icon : Colour::DisabledForeground);
 			else
-				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colour::White : custom_color((*_Color(Colour::White)).WithAlpha(0x80)));
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colour::White : fig::color_ref(Colour::White).WithAlpha(0x80));
 			pIcon->SetPosition(4, 4);
 		}
 

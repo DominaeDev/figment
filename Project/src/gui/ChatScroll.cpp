@@ -26,7 +26,7 @@ namespace fig::gui
 		_pScrollSizer->SetBottomMargin(50);
 		_pScrollSizer->SetSpacing(12);
 
-		_pBottomGradient = std::make_unique<VerticalGradient>(nullptr, Colour::White, custom_color((*_Color(Colour::White)).WithAlpha(0.0f)));
+		_pBottomGradient = std::make_unique<VerticalGradient>(nullptr, Colour::White, fig::color_ref(Colour::White).WithAlpha(0.0f));
 		_pBottomGradient->SetTexture(nullptr);
 		EnableClipping(true);
 		EnableCulling(true);

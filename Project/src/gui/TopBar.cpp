@@ -70,10 +70,10 @@ namespace fig::gui
 			else if (fAlpha == 0.0f and GetBorderRenderer() != nullptr)
 				SetBorderRenderer(nullptr);
 
-			_pShadow->SetColors(custom_color((*_Color(Colour::LineColor)).WithAlpha(0.5f * fAlpha)), custom_color((*_Color(Colour::LineColor)).WithAlpha(0.0f)));
+			_pShadow->SetColors(fig::color_ref(Colour::LineColor).WithAlpha(0.5f * fAlpha), fig::color_ref(Colour::LineColor).WithAlpha(0.0f));
 			_pShadow->SetVisible(fAlpha > 0.0f);
 			if (fAlpha > 0.0f)
-				GetBorderRenderer()->SetColor(custom_color((*_Color(Colour::LineColor)).WithAlpha(fAlpha)));
+				GetBorderRenderer()->SetColor(fig::color_ref(Colour::LineColor).WithAlpha(fAlpha));
 		}
 	}
 }

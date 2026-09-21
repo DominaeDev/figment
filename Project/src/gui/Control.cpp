@@ -88,7 +88,7 @@ namespace fig::gui
 			_pBorderRenderer->Render(pRenderer, GetDrawRect());
 	}
 
-	fig::color_ref Control::GetForegroundColor() const
+	fig::color_ref_with_alpha Control::GetForegroundColor() const
 	{
 		if (!_foregroundColor)
 		{
@@ -98,7 +98,7 @@ namespace fig::gui
 		return _foregroundColor;
 	}
 
-	fig::color_ref Control::GetBackgroundColor() const
+	fig::color_ref_with_alpha Control::GetBackgroundColor() const
 	{
 		if (!_backgroundColor.IsDefined())
 		{
@@ -118,10 +118,10 @@ namespace fig::gui
 		}
 
 		auto bgColor = GetBackgroundColor();
-		if (bgColor && bgColor->a != 0)
+		if (bgColor && bgColor.a() != 0)
 		{
 			auto rect = to_rectf(GetRect());
-			SDL_SetRenderDrawColor(pRenderer, bgColor->r, bgColor->g, bgColor->b, bgColor->a);
+			SDL_SetRenderDrawColor(pRenderer, bgColor.r(), bgColor.g(), bgColor.b(), bgColor.a());
 			SDL_RenderFillRect(pRenderer, &rect);
 		}
 	}

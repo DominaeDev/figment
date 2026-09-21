@@ -89,12 +89,12 @@ namespace fig::gui
 			auto rect = GetDrawRect();
 
 			if (fgColor.IsDefined())
-				SDL_SetTextureColorMod(pTexture, fgColor->r, fgColor->g, fgColor->b);
+				SDL_SetTextureColorMod(pTexture, fgColor.r(), fgColor.g(), fgColor.b());
 			else
 				SDL_SetTextureColorMod(pTexture, 0xFF, 0xFF, 0xFF);
 
-			if (fgColor.IsDefined() && fgColor->a != 0)
-				SDL_SetTextureAlphaMod(pTexture, fgColor->a);
+			if (fgColor.IsDefined() && fgColor.a() != 0)
+				SDL_SetTextureAlphaMod(pTexture, fgColor.a());
 			else
 				SDL_SetTextureAlphaMod(pTexture, 0xFF);
 
@@ -171,7 +171,7 @@ namespace fig::gui
 			{
 				auto bgColor = GetBackgroundColor();
 				SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
-				SDL_SetRenderDrawColor(pRenderer, bgColor->r, bgColor->g, bgColor->b, 255);
+				SDL_SetRenderDrawColor(pRenderer, bgColor.r(), bgColor.g(), bgColor.b(), 255);
 				SDL_RenderFillRect(pRenderer, NULL);
 				SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
 			}

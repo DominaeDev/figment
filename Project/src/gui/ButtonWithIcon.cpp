@@ -44,7 +44,7 @@ namespace fig::gui
 	void ButtonWithIcon::ShowBorder(bool bShow) noexcept
 	{
 		if (auto pBorder = GetBorderRenderer())
-			pBorder->SetColor(bShow ? custom_color(GetThemeBorderColor()) : Colour::Transparent);
+			pBorder->SetColor(bShow ? GetThemeBorderColor() : Colour::Transparent);
 		_bShowBorder = bShow;
 	}
 }

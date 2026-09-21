@@ -6,12 +6,13 @@ namespace fig
 {
 	const color_ref color_ref::nullref(&color_ref::null_value);
 
-	color_ref::color_ref(fig::gui::Colour color) : _ptr { &fig::gui::_ColorTable.at(static_cast<size_t>(color)) }
+	color_ref::color_ref(fig::gui::Colour color) : 
+		_ptr { &fig::gui::_ColorTable.at(static_cast<size_t>(color)) }
 	{
 	}
 
-/*	fig::color_ref color_ref::WithAlpha(uint8_t alpha) const noexcept
+	color_ref_with_alpha color_ref::WithAlpha(uint8_t alpha) const noexcept
 	{
-		return fig::gui::custom_color(fig::color { _ptr->r, _ptr->g, _ptr->b, alpha });
-	}*/
+		return color_ref_with_alpha(*this, alpha);
+	}
 }

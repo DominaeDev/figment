@@ -21,7 +21,7 @@ namespace fig::gui
 		SetForegroundColor(Colour::SidePanelForeground);
 		SetBackgroundColor(custom_color(0xf4f2ec_rgb));
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
-		pBGRenderer->SetColor(custom_color(GetBackgroundColor()));
+		pBGRenderer->SetColor(GetBackgroundColor());
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
 		pBorder->SetColor(Colour::LineColor);
@@ -38,7 +38,7 @@ namespace fig::gui
 
 		// Timestamp
 		_pTimestamp = CreateControl<StaticText>("", FontFace::Italic, 11.0, true);
-		_pTimestamp->SetForegroundColor(custom_color((*fig::color_ref(Colour::SidePanelForeground)).WithAlpha(0.5f)));
+		_pTimestamp->SetForegroundColor(fig::color_ref(Colour::SidePanelForeground).WithAlpha(0.5f));
 		_pTimestamp->SetY(8);
 		_pTimestamp->SetMaxWidth(100);
 

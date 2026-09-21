@@ -4,13 +4,13 @@
 
 namespace fig::gui
 {
-	HorizontalGradient::HorizontalGradient(ControlPtr pParent, fig::color_ref colorLeft, fig::color_ref colorRight) : Control(pParent)
+	HorizontalGradient::HorizontalGradient(ControlPtr pParent, fig::color_ref_with_alpha colorLeft, fig::color_ref_with_alpha colorRight) : Control(pParent)
 	{
 		SetColors(colorLeft, colorRight);
 		_pTexture = AppResources::GetTexture(Resource::BLANK);
 	}
-
-	void HorizontalGradient::SetColors(fig::color_ref colorLeft, fig::color_ref colorRight)
+	
+	void HorizontalGradient::SetColors(fig::color_ref_with_alpha colorLeft, fig::color_ref_with_alpha colorRight)
 	{
 		_colorLeft = colorLeft;
 		_colorRight = colorRight;

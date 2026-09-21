@@ -25,7 +25,7 @@ namespace fig::gui
 		pTextBoxBorder->SetColor(Colour::LineColor);
 
 		_pScrollBar = CreateControl<VerticalBar>(Resource::VERTICAL_BAR_SMALL);
-		_pScrollBar->SetForegroundColor(custom_color(0x00000060_rgba));
+		_pScrollBar->SetForegroundColor(Colour::TextBoxScrollBar);
 		_pScrollBar->SetX(GetWidth() - kScrollBarRight);
 		_pScrollBar->SetSize(3, 16);
 	}
