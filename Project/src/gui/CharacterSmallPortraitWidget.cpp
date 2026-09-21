@@ -33,7 +33,7 @@ namespace fig::gui
 			if (_imageTexture.get()->w <= Constants::Data::SmallPortraitWidth and _imageTexture.get()->h <= Constants::Data::SmallPortraitHeight)
 			{
 				auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-				pBorder->SetColor(Colour::LineColor);
+				pBorder->SetColor(Color::LineColor);
 				_bEditable = false;
 			}
 			else

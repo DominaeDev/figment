@@ -30,7 +30,7 @@ namespace fig::gui
 			size_t pos_value_begin = line.find_first_not_of(" \t", pos_name_end);
 			fig::string_view value = trim(line.substr(pos_value_begin));
 
-			if (auto enumColor = enum_deserialize(name, _ColorNameMapping, Colour::Invalid); enumColor != Colour::Invalid)
+			if (auto enumColor = enum_deserialize(name, _ColorNameMapping, Color::Invalid); enumColor != Color::Invalid)
 				table[static_cast<size_t>(enumColor)] = fig::color::FromString(value);
 		}
 	}
@@ -49,12 +49,6 @@ namespace fig::gui
 	{
 		auto& table = _ColorThemes[theme];
 		std::copy(table.cbegin(), table.cend(), _ColorTable.begin());
-	}
-
-	fig::color_ref _Color(Colour color)
-	{
-		assert(color >= (Colour)0 and color < Colour::Count);
-		return fig::color_ref { &_ColorTable[static_cast<size_t>(color)] };
 	}
 
 	void CycleColors()

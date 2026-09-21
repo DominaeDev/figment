@@ -12,7 +12,7 @@ namespace fig::gui
 		Dark,
 	};
 
-	enum class Colour
+	enum class Color
 	{
 		Invalid,
 		Debug,
@@ -76,73 +76,72 @@ namespace fig::gui
 		Count,
 	};
 	
-	constexpr auto _ColorNameMapping = std::array<std::pair<Colour, std::string_view>, static_cast<size_t>(Colour::Count)> {
-		std::pair { Colour::Debug,								"Debug" },
-		std::pair { Colour::Debug2,								"Debug2" },
-		std::pair { Colour::Debug3,								"Debug3" },
-		std::pair { Colour::Opaque,								"Opaque" },
-		std::pair { Colour::Transparent,						"Transparent" },
-		std::pair { Colour::White,								"White" },
-		std::pair { Colour::Black,								"Black" },
-		std::pair { Colour::Red,								"Red" },
-		std::pair { Colour::Green,								"Green" },
-		std::pair { Colour::Blue,								"Blue" },
-		std::pair { Colour::DarkGray,							"DarkGray" },
-		std::pair { Colour::TextForeground,						"TextForeground" },
-		std::pair { Colour::TextSelectionForeground,			"TextSelectionForeground" },
-		std::pair { Colour::TextSelectionBackground,			"TextSelectionBackground" },
-		std::pair { Colour::TextSelectionBackgroundInactive,	"TextSelectionBackgroundInactive" },
-		std::pair { Colour::AppBackground,						"AppBackground" },
-		std::pair { Colour::DisabledForeground,					"DisabledForeground" },
-		std::pair { Colour::DisabledBackground,					"DisabledBackground" },
-		std::pair { Colour::SidePanelForeground,				"SidePanelForeground" },
-		std::pair { Colour::SidePanelBackground,				"SidePanelBackground" },
-		std::pair { Colour::SidePanelGradient,					"SidePanelGradient" },
-		std::pair { Colour::LineColor,							"LineColor" },
-		std::pair { Colour::DisabledLineColor,					"DisabledLineColor" },
-		std::pair { Colour::Icon,								"Icon" },
-		std::pair { Colour::TextBoxForeground,					"TextBoxForeground" },
-		std::pair { Colour::TextBoxBackground,					"TextBoxBackground" },
-		std::pair { Colour::TextBoxScrollBar,					"TextBoxScrollBar" },
-		std::pair { Colour::StatusBarForeground,				"StatusBarForeground" },
-		std::pair { Colour::StatusBarBackground,				"StatusBarBackground" },
-		std::pair { Colour::GenderTagMale,						"GenderTagMale" },
-		std::pair { Colour::GenderTagFemale,					"GenderTagFemale" },
-		std::pair { Colour::GenderTagOther,						"GenderTagOther" },
-		std::pair { Colour::ChatBackground,						"ChatBackground" },
-		std::pair { Colour::MenuBackgroundColor,				"MenuBackgroundColor" },
-		std::pair { Colour::MenuBorderColor,					"MenuBorderColor" },
-		std::pair { Colour::MenuItemHoverColor,					"MenuItemHoverColor" },
-		std::pair { Colour::MenuItemPressedColor,				"MenuItemPressedColor" },
-		std::pair { Colour::MessageBorderDefault,				"MessageBorderDefault" },
-		std::pair { Colour::MessageBackgroundDefault,			"MessageBackgroundDefault" },
-		std::pair { Colour::MessageBorderBlue,					"MessageBorderBlue" },
-		std::pair { Colour::MessageBackgroundBlue,				"MessageBackgroundBlue" },
-		std::pair { Colour::MessageBorderPink,					"MessageBorderPink" },
-		std::pair { Colour::MessageBackgroundPink,				"MessageBackgroundPink" },
-		std::pair { Colour::MessageBorderGreen,					"MessageBorderGreen" },
-		std::pair { Colour::MessageBackgroundGreen,				"MessageBackgroundGreen" },
-		std::pair { Colour::MessageBorderYellow,				"MessageBorderYellow" },
-		std::pair { Colour::MessageBackgroundYellow,			"MessageBackgroundYellow" },
-		std::pair { Colour::MessageBorderRed,					"MessageBorderRed" },
-		std::pair { Colour::MessageBackgroundRed,				"MessageBackgroundRed" },
-		std::pair { Colour::MessageBorderTeal,					"MessageBorderTeal" },
-		std::pair { Colour::MessageBackgroundTeal,				"MessageBackgroundTeal" },
-		std::pair { Colour::MessageBorderPurple,				"MessageBorderPurple" },
-		std::pair { Colour::MessageBackgroundPurple,			"MessageBackgroundPurple" },
-		std::pair { Colour::MessageBorderBrown,					"MessageBorderBrown" },
-		std::pair { Colour::MessageBackgroundBrown,				"MessageBackgroundBrown" },
-		std::pair { Colour::MessageBorderNavy,					"MessageBorderNavy" },
-		std::pair { Colour::MessageBackgroundNavy,				"MessageBackgroundNavy" },
+	constexpr auto _ColorNameMapping = std::array<std::pair<Color, std::string_view>, static_cast<size_t>(Color::Count)> {
+		std::pair { Color::Debug,								"Debug" },
+		std::pair { Color::Debug2,								"Debug2" },
+		std::pair { Color::Debug3,								"Debug3" },
+		std::pair { Color::Opaque,								"Opaque" },
+		std::pair { Color::Transparent,						"Transparent" },
+		std::pair { Color::White,								"White" },
+		std::pair { Color::Black,								"Black" },
+		std::pair { Color::Red,								"Red" },
+		std::pair { Color::Green,								"Green" },
+		std::pair { Color::Blue,								"Blue" },
+		std::pair { Color::DarkGray,							"DarkGray" },
+		std::pair { Color::TextForeground,						"TextForeground" },
+		std::pair { Color::TextSelectionForeground,				"TextSelectionForeground" },
+		std::pair { Color::TextSelectionBackground,				"TextSelectionBackground" },
+		std::pair { Color::TextSelectionBackgroundInactive,		"TextSelectionBackgroundInactive" },
+		std::pair { Color::AppBackground,						"AppBackground" },
+		std::pair { Color::DisabledForeground,					"DisabledForeground" },
+		std::pair { Color::DisabledBackground,					"DisabledBackground" },
+		std::pair { Color::SidePanelForeground,					"SidePanelForeground" },
+		std::pair { Color::SidePanelBackground,					"SidePanelBackground" },
+		std::pair { Color::SidePanelGradient,					"SidePanelGradient" },
+		std::pair { Color::LineColor,							"LineColor" },
+		std::pair { Color::DisabledLineColor,					"DisabledLineColor" },
+		std::pair { Color::Icon,								"Icon" },
+		std::pair { Color::TextBoxForeground,					"TextBoxForeground" },
+		std::pair { Color::TextBoxBackground,					"TextBoxBackground" },
+		std::pair { Color::TextBoxScrollBar,					"TextBoxScrollBar" },
+		std::pair { Color::StatusBarForeground,					"StatusBarForeground" },
+		std::pair { Color::StatusBarBackground,					"StatusBarBackground" },
+		std::pair { Color::GenderTagMale,						"GenderTagMale" },
+		std::pair { Color::GenderTagFemale,						"GenderTagFemale" },
+		std::pair { Color::GenderTagOther,						"GenderTagOther" },
+		std::pair { Color::ChatBackground,						"ChatBackground" },
+		std::pair { Color::MenuBackgroundColor,					"MenuBackgroundColor" },
+		std::pair { Color::MenuBorderColor,						"MenuBorderColor" },
+		std::pair { Color::MenuItemHoverColor,					"MenuItemHoverColor" },
+		std::pair { Color::MenuItemPressedColor,				"MenuItemPressedColor" },
+		std::pair { Color::MessageBorderDefault,				"MessageBorderDefault" },
+		std::pair { Color::MessageBackgroundDefault,			"MessageBackgroundDefault" },
+		std::pair { Color::MessageBorderBlue,					"MessageBorderBlue" },
+		std::pair { Color::MessageBackgroundBlue,				"MessageBackgroundBlue" },
+		std::pair { Color::MessageBorderPink,					"MessageBorderPink" },
+		std::pair { Color::MessageBackgroundPink,				"MessageBackgroundPink" },
+		std::pair { Color::MessageBorderGreen,					"MessageBorderGreen" },
+		std::pair { Color::MessageBackgroundGreen,				"MessageBackgroundGreen" },
+		std::pair { Color::MessageBorderYellow,					"MessageBorderYellow" },
+		std::pair { Color::MessageBackgroundYellow,				"MessageBackgroundYellow" },
+		std::pair { Color::MessageBorderRed,					"MessageBorderRed" },
+		std::pair { Color::MessageBackgroundRed,				"MessageBackgroundRed" },
+		std::pair { Color::MessageBorderTeal,					"MessageBorderTeal" },
+		std::pair { Color::MessageBackgroundTeal,				"MessageBackgroundTeal" },
+		std::pair { Color::MessageBorderPurple,					"MessageBorderPurple" },
+		std::pair { Color::MessageBackgroundPurple,				"MessageBackgroundPurple" },
+		std::pair { Color::MessageBorderBrown,					"MessageBorderBrown" },
+		std::pair { Color::MessageBackgroundBrown,				"MessageBackgroundBrown" },
+		std::pair { Color::MessageBorderNavy,					"MessageBorderNavy" },
+		std::pair { Color::MessageBackgroundNavy,				"MessageBackgroundNavy" },
 	};
 
-	using ColorTable = std::array<fig::color, static_cast<size_t>(Colour::Count)>;
+	using ColorTable = std::array<fig::color, static_cast<size_t>(Color::Count)>;
 	
 	extern ColorTable _ColorTable;
 	extern std::map<ColorTheme, ColorTable> _ColorThemes;
 	extern std::map<uint32_t, fig::color> _CustomColors;
 
-	extern fig::color_ref _Color(Colour color);
 	extern fig::io::FileError LoadColorTheme(ColorTheme theme, const fig::path& path);
 	extern void ApplyColorTheme(ColorTheme theme);
 	extern void CycleColors();
@@ -153,35 +152,29 @@ namespace fig::gui
 		return fig::color_ref(&c);
 	}
 
-	inline fig::color_ref_with_alpha custom_color_with_alpha(const fig::color& color, uint8_t alpha = 0xFF)
-	{
-		auto& c = _CustomColors[static_cast<uint32_t>(color)] = color;
-		return fig::color_ref_with_alpha { &c, alpha };
-	}
-
-	inline static fig::color_ref DefaultUserMessageBorder { Colour::MessageBorderBlue };
-	inline static fig::color_ref DefaultUserMessageBackground { Colour::MessageBackgroundBlue };
+	inline static fig::color_ref DefaultUserMessageBorder { Color::MessageBorderBlue };
+	inline static fig::color_ref DefaultUserMessageBackground { Color::MessageBackgroundBlue };
 
 	inline static std::array<fig::color_ref, 8> DefaultBotMessageBorders {
-		Colour::MessageBorderPink,
-		Colour::MessageBorderGreen,
-		Colour::MessageBorderYellow,
-		Colour::MessageBorderRed,
-		Colour::MessageBorderTeal,
-		Colour::MessageBorderPurple,
-		Colour::MessageBorderBrown,
-		Colour::MessageBorderNavy,
+		Color::MessageBorderPink,
+		Color::MessageBorderGreen,
+		Color::MessageBorderYellow,
+		Color::MessageBorderRed,
+		Color::MessageBorderTeal,
+		Color::MessageBorderPurple,
+		Color::MessageBorderBrown,
+		Color::MessageBorderNavy,
 	};
 
 	inline static std::array<fig::color_ref, 8> DefaultBotMessageBackgrounds {
-		Colour::MessageBackgroundPink,
-		Colour::MessageBackgroundGreen,
-		Colour::MessageBackgroundYellow,
-		Colour::MessageBackgroundRed,
-		Colour::MessageBackgroundTeal,
-		Colour::MessageBackgroundPurple,
-		Colour::MessageBackgroundBrown,
-		Colour::MessageBackgroundNavy,
+		Color::MessageBackgroundPink,
+		Color::MessageBackgroundGreen,
+		Color::MessageBackgroundYellow,
+		Color::MessageBackgroundRed,
+		Color::MessageBackgroundTeal,
+		Color::MessageBackgroundPurple,
+		Color::MessageBackgroundBrown,
+		Color::MessageBackgroundNavy,
 	};
 
 }

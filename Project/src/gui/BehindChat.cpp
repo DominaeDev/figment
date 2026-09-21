@@ -19,7 +19,7 @@ namespace fig::gui
 		pSizer->Add(_pBG, -1, SizerFlag::Fill);
 		pSizer->Add(_pRightGradient, 0, SizerFlag::Expand);
 
-		SetColor(Colour::Black);
+		SetColor(Color::Black);
 	}
 
 	void BehindChat::SetColor(fig::color_ref_with_alpha color)

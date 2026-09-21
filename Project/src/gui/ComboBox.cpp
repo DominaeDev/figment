@@ -9,16 +9,16 @@ namespace fig::gui
 	ComboBox::ComboBox(ControlPtr pParent) : TextInput(pParent, FontFace::Default, Constants::GUI::DefaultFontSize), MouseEventHandler(this)
 	{
 		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
-		_pArrow->SetForegroundColor(Colour::Icon);
+		_pArrow->SetForegroundColor(Color::Icon);
 
 		SetMargins(8, 4, 38, 6);
 		SetSize(300, 32);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
-		pTextBoxBG->SetColor(Colour::TextBoxBackground);
+		pTextBoxBG->SetColor(Color::TextBoxBackground);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pTextBoxBorder->SetColor(Colour::LineColor);
+		pTextBoxBorder->SetColor(Color::LineColor);
 	}
 
 	void ComboBox::SetDelegate(ListItemSelectedDelegate fnDelegate)
@@ -68,9 +68,9 @@ namespace fig::gui
 	void ComboBox::OnEnabled(bool bEnabled)
 	{
 		TextInput::OnEnabled(bEnabled);
-		GetBackgroundRenderer()->SetColor(bEnabled ? Colour::White : Colour::DisabledBackground);
-		GetBorderRenderer()->SetColor(bEnabled ? Colour::LineColor : Colour::DisabledLineColor);
-		_pArrow->SetForegroundColor(bEnabled ? Colour::Icon : Colour::DisabledForeground);
+		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
+		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
 
 		MouseEventHandler::Enable(bEnabled);
 	}

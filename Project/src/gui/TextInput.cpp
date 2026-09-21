@@ -186,8 +186,8 @@ namespace fig::gui
 	TextInput::TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode) : Control(pParent),
 		_mode { mode }
 	{
-		SetForegroundColor(Colour::TextBoxForeground);
-		SetBackgroundColor(Colour::TextBoxBackground);
+		SetForegroundColor(Color::TextBoxForeground);
+		SetBackgroundColor(Color::TextBoxBackground);
 
 		_pFont = Fonts::GetFont(fontFace, ptSize);
 		_pPlaceholder = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
@@ -293,7 +293,7 @@ namespace fig::gui
 		{
 			if (auto highlights = GetHighlights(); not highlights.empty())
 			{
-				fig::color_ref selectionColor = _bFocused ? Colour::TextSelectionBackground : Colour::TextSelectionBackgroundInactive;
+				fig::color_ref selectionColor = _bFocused ? Color::TextSelectionBackground : Color::TextSelectionBackgroundInactive;
 				SDL_SetRenderDrawColor(pRenderer, selectionColor.r(), selectionColor.g(), selectionColor.b(), selectionColor.a());
 
 				for (auto& highlight_rect : highlights)
@@ -361,7 +361,7 @@ namespace fig::gui
 		if (not _pPlaceholder->text or _bFocused)
 			return;
 
-		fig::color_ref fgColor = Colour::DisabledForeground;
+		fig::color_ref fgColor = Color::DisabledForeground;
 		TTF_SetTextColor(_pPlaceholder, fgColor.r(), fgColor.g(), fgColor.b(), fgColor.a());
 
 		auto& rect = GetRect();
@@ -1784,11 +1784,11 @@ namespace fig::gui
 		{
 			SetFocus(false);
 			Deselect();
-			SetForegroundColor(Colour::DisabledForeground);
+			SetForegroundColor(Color::DisabledForeground);
 		}
 		else
 		{
-			SetForegroundColor(Colour::Black);
+			SetForegroundColor(Color::Black);
 		}
 	}
 

@@ -19,7 +19,7 @@ namespace fig::gui
 		if constexpr (false)
 		{
 			auto area = CreateControl<Panel>();
-			area->SetBackgroundColor(Colour::Black);
+			area->SetBackgroundColor(Color::Black);
 			area->SetPosition(200, 200);
 			area->SetSize(500, 500);
 
@@ -38,13 +38,13 @@ namespace fig::gui
 			auto h = right->SetSizer<HorizontalSizer>();
 
 			auto a = right->CreateControl<Panel>();
-			a->SetBackgroundColor(Colour::Red);
+			a->SetBackgroundColor(Color::Red);
 			a->SetSize(50, 50);
 			auto b = right->CreateControl<Panel>();
-			b->SetBackgroundColor(Colour::Green);
+			b->SetBackgroundColor(Color::Green);
 			b->SetSize(50, 50);
 			auto c = right->CreateControl<Panel>();
-			c->SetBackgroundColor(Colour::Blue);
+			c->SetBackgroundColor(Color::Blue);
 			c->SetSize(50, 50);
 
 			h->Add(a, -1, SizerFlag::AlignRight | SizerFlag::AlignTop, 4);
@@ -154,12 +154,12 @@ namespace fig::gui
 		auto HBar = CreateControl<HorizontalBar>(Resource::HORIZONTAL_BAR_SMALL);
 		HBar->SetPosition(20, 10);
 		HBar->SetSize(300, 4);
-		HBar->SetForegroundColor(Colour::Blue);
+		HBar->SetForegroundColor(Color::Blue);
 
 		auto VBar = CreateControl<VerticalBar>(Resource::VERTICAL_BAR_SMALL);
 		VBar->SetPosition(10, 20);
 		VBar->SetSize(4, 300);
-		VBar->SetForegroundColor(Colour::Green);
+		VBar->SetForegroundColor(Color::Green);
 
 	}
 

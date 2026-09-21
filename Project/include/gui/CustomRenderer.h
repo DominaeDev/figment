@@ -23,6 +23,6 @@ namespace fig::gui
 		}
 
 	protected:
-		fig::color_ref_with_alpha _color { Colour::White };
+		fig::color_ref_with_alpha _color { Color::White };
 	};
 }

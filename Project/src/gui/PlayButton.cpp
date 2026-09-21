@@ -15,7 +15,7 @@ namespace fig::gui
 
 		SetSize(36, 36);
 		OnButtonState();
-		SetBackgroundColor(Colour::Transparent);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	void PlayButton::OnUpdate(float fElapsed)
@@ -39,15 +39,15 @@ namespace fig::gui
 		{
 		case ButtonState::Default:
 			_pBackground->SetForegroundColor(custom_color(0xa6998240_rgba));
-			_pIcon->SetForegroundColor(Colour::Icon);
+			_pIcon->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Hover:
 			_pBackground->SetForegroundColor(custom_color(0xa6998280_rgba));
-			_pIcon->SetForegroundColor(Colour::Icon);
+			_pIcon->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Pressed:
 			_pBackground->SetForegroundColor(custom_color(0xa69982C0_rgba));
-			_pIcon->SetForegroundColor(Colour::Icon);
+			_pIcon->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Disabled:
 			_pBackground->SetForegroundColor(custom_color(0xCCCCCC80_rgba));

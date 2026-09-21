@@ -132,14 +132,14 @@ namespace fig::gui
 		_pMessageText->SetMaxWidth(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2);
 //		_pMessageText->SetMaxLineWidth(Constants::GUI::ChatScrollWidth - HMARGIN - TEXT_HMARGIN - 2);
 		_pMessageText->SetPosition(TEXT_LEFT_MARGIN + (bDialogue && !bRight ? DIALOGUE_OFFSET : 0), 8);
-		_pMessageText->SetBackgroundColor(Colour::Transparent);
+		_pMessageText->SetBackgroundColor(Color::Transparent);
 
 		// Name label
 		if ((_style & Style::Name) == Style::Name)
 		{
 			_pNameText = CreateControl<StaticText>(name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
 			_pNameText->SetAlignment(bRight ? TextAlignment::RightTop : TextAlignment::Default);
-			_pNameText->SetBackgroundColor(Colour::Transparent);
+			_pNameText->SetBackgroundColor(Color::Transparent);
 			_pNameText->SetPosition(LEFT_MARGIN, -1);
 			_pNameText->SetSize(Constants::GUI::ChatScrollWidth - HMARGIN, -1);
 		}
@@ -261,7 +261,7 @@ namespace fig::gui
 		_bgColor = bgColor;
 		_borderColor = borderColor;
 		if ((_style & Style::Dialogue) == Style::Dialogue)
-			_textColor = Colour::Black;
+			_textColor = Color::Black;
 		else
 			_textColor = custom_color((*borderColor).Multiply(0.5f));
 		_nameColor = custom_color((*borderColor).Add(-0.1f));
@@ -276,7 +276,7 @@ namespace fig::gui
 
 		uint8_t alpha = (uint8_t)(_bActive ? 255 : fadedAlpha);
 
-		SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(alpha));
+		SetForegroundColor(fig::color_ref(Color::Black).WithAlpha(alpha));
 
 		_pSpeechBubbleBG->SetColor(fig::color_ref(_bgColor).WithAlpha(alpha));
 		_pSpeechBubbleBorder->SetColor(fig::color_ref(_borderColor).WithAlpha(alpha));
@@ -292,9 +292,9 @@ namespace fig::gui
 		}
 		else
 		{
-			_pMessageText->SetBackgroundColor(Colour::Transparent);
+			_pMessageText->SetBackgroundColor(Color::Transparent);
 			if (_pNameText)
-				_pNameText->SetBackgroundColor(Colour::Transparent);
+				_pNameText->SetBackgroundColor(Color::Transparent);
 		}
 
 		if (_pNameText)

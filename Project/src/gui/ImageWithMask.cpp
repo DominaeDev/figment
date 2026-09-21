@@ -8,7 +8,7 @@ namespace fig::gui
 	{
 		SetTexture(pTexture, pMask, true);
 		SetForegroundColor(tint);
-		SetBackgroundColor(Colour::Transparent);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	void ImageWithMask::OnRender(fig::renderer_ptr pRenderer)

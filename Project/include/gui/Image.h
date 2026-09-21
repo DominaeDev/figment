@@ -7,8 +7,8 @@ namespace fig::gui
 	class Image : public Control
 	{
 	public:
-		Image(ControlPtr pParent, fig::texture_ptr pTexture, fig::color_ref tint = Colour::White);
-		Image(ControlPtr pParent, Resource texture, fig::color_ref tint = Colour::White);
+		Image(ControlPtr pParent, fig::texture_ptr pTexture, fig::color_ref tint = Color::White);
+		Image(ControlPtr pParent, Resource texture, fig::color_ref tint = Color::White);
 		void SetTexture(fig::texture_ptr pTexture, bool bResize = false);
 		void SetTexture(Resource texture, bool bResize = false);
 		inline bool HasTexture() const noexcept { return (bool)_pTexture; }

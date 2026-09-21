@@ -7,8 +7,8 @@ namespace fig::gui
 	NonOwningImageWithMask::NonOwningImageWithMask(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask) : Control(pParent)
 	{
 		SetTexture(pTexture, pMask);
-		SetForegroundColor(Colour::White);
-		SetBackgroundColor(Colour::Transparent);
+		SetForegroundColor(Color::White);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	void NonOwningImageWithMask::OnRender(fig::renderer_ptr pRenderer)

@@ -10,8 +10,8 @@ namespace fig::gui
 		if (pTexture)
 			SetSize(pTexture->w, pTexture->h);
 
-		SetForegroundColor(Colour::White);
-		SetBackgroundColor(Colour::Transparent);
+		SetForegroundColor(Color::White);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	void CardImage::OnRender(fig::renderer_ptr pRenderer)

@@ -115,15 +115,15 @@ namespace fig::chat
 		else if (role == Role::System)
 		{
 			return fig::color_pair {
-				.background = Colour::MessageBackgroundNavy,
-				.foreground = Colour::MessageBorderNavy,
+				.background = Color::MessageBackgroundNavy,
+				.foreground = Color::MessageBorderNavy,
 			};
 		}
 		else
 		{
 			return fig::color_pair {
-				.background = Colour::MessageBackgroundDefault,
-				.foreground = Colour::MessageBorderDefault,
+				.background = Color::MessageBackgroundDefault,
+				.foreground = Color::MessageBorderDefault,
 			};
 		}
 	}

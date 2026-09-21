@@ -13,17 +13,17 @@ namespace fig::gui
 	VariableList::VariableList(ControlPtr pParent) : Control(pParent)
 	{
 		auto pBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BG, fig::corners { 30, 72, 64, 30 });
-		pBG->SetColor(Colour::MessageBackgroundDefault);
+		pBG->SetColor(Color::MessageBackgroundDefault);
 		pBG->SetCornerScale(0.3f);
 		pBG->SetExtend(5);
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BORDER, fig::corners { 30, 72, 64, 30 });
-		pBorder->SetColor(Colour::MessageBorderDefault);
+		pBorder->SetColor(Color::MessageBorderDefault);
 		pBorder->SetCornerScale(0.3f);
 		pBorder->SetExtend(5);
 
-		SetForegroundColor(Colour::TextForeground);
-		SetBackgroundColor(Colour::MessageBackgroundDefault);
+		SetForegroundColor(Color::TextForeground);
+		SetBackgroundColor(Color::MessageBackgroundDefault);
 
 		_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
 		_pText->SetPosition(Margin, Margin);

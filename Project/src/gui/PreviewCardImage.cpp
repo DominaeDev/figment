@@ -14,13 +14,13 @@ namespace fig::gui
 	{
 		SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);
 
-		SetForegroundColor(Colour::White);
-		SetBackgroundColor(Colour::White);
+		SetForegroundColor(Color::White);
+		SetBackgroundColor(Color::White);
 		SetBackgroundTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_DEFAULT));
 		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBorder->SetColor(Colour::LineColor);
+		pBorder->SetColor(Color::LineColor);
 	}
 
 	void PreviewCardImage::SetImage(const fig::uuid& assetId)

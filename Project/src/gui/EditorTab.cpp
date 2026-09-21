@@ -16,7 +16,7 @@ namespace fig::gui
 	fig::observer_ptr<StaticText> EditorTabBase::CreateLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 14.0, false);
-		pLabel->SetForegroundColor(Colour::SidePanelForeground);
+		pLabel->SetForegroundColor(Color::SidePanelForeground);
 		pSizer->AddSpacer(8);
 		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 4);
 		pSizer->AddSpacer(3);
@@ -26,7 +26,7 @@ namespace fig::gui
 	fig::observer_ptr<StaticText> EditorTabBase::CreateBoldLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Bold, 14.0, false);
-		pLabel->SetForegroundColor(Colour::SidePanelForeground);
+		pLabel->SetForegroundColor(Color::SidePanelForeground);
 		pSizer->AddSpacer(8);
 		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 4);
 		pSizer->AddSpacer(3);

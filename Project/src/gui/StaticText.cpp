@@ -15,8 +15,8 @@ namespace fig::gui
 		_pFont = Fonts::GetFont(fontFace, ptSize);
 		SetHeight(TTF_GetFontHeight(_pFont.get()));
 
-//		SetForegroundColor(Colour::Black);
-//		SetBackgroundColor(Colour::Transparent);
+//		SetForegroundColor(Color::Black);
+//		SetBackgroundColor(Color::Transparent);
 
 		// Set text and measure
 		_text = text;
@@ -189,8 +189,8 @@ namespace fig::gui
 			{
 				// Recreate text
 				SDL_Surface* pSurface = _bWordWrap ?
-					TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, fig::color_ref(Colour::White), maxWidth)
-					: TTF_RenderText_Blended(_pFont, pText, 0, fig::color_ref(Colour::White));
+					TTF_RenderText_Blended_Wrapped(_pFont, pText, 0, fig::color_ref(Color::White), maxWidth)
+					: TTF_RenderText_Blended(_pFont, pText, 0, fig::color_ref(Color::White));
 				if (pSurface)
 				{
 					_textWidth = pSurface->w;

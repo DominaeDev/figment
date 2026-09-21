@@ -111,7 +111,7 @@ namespace fig::gui
 
 		_pSaveButton->SetTheme(Theme::DefaultButtonStyle);
 		auto pBorder = _pSaveButton->GetBorderRenderer();
-		pBorder->SetColor(Colour::LineColor);
+		pBorder->SetColor(Color::LineColor);
 		return true;
 	}
 

@@ -12,7 +12,7 @@ namespace fig::gui
 			SetSize(_pTexture->w, _pTexture->h);
 
 		SetForegroundColor(tint);
-		SetBackgroundColor(Colour::Transparent);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	Image::Image(ControlPtr pParent, Resource texture, fig::color_ref tint) : Control(pParent)
@@ -22,7 +22,7 @@ namespace fig::gui
 			SetSize(_pTexture->w, _pTexture->h);
 
 		SetForegroundColor(tint);
-		SetBackgroundColor(Colour::Transparent);
+		SetBackgroundColor(Color::Transparent);
 	}
 
 	void Image::OnRender(fig::renderer_ptr pRenderer)

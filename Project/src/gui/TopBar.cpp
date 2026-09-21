@@ -37,7 +37,7 @@ namespace fig::gui
 		// Create shadow
 		if (_pScrollPanel)
 		{
-			_pShadow = CreateControl<VerticalGradient>(Colour::LineColor, Colour::LineColor);
+			_pShadow = CreateControl<VerticalGradient>(Color::LineColor, Color::LineColor);
 			_pShadow->SetY(GetHeight());
 			_pShadow->SetHeight(28);
 		}
@@ -66,14 +66,14 @@ namespace fig::gui
 			float fAlpha = std::clamp((fScrollY - fMinScrollY) / fScrollFadeDistance, 0.0f, 1.0f);
 
 			if (fAlpha > 0.0f and GetBorderRenderer() == nullptr)
-				SetBorderRenderer<LineBorderRenderer>(Colour::LineColor, Direction::South);
+				SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::South);
 			else if (fAlpha == 0.0f and GetBorderRenderer() != nullptr)
 				SetBorderRenderer(nullptr);
 
-			_pShadow->SetColors(fig::color_ref(Colour::LineColor).WithAlpha(0.5f * fAlpha), fig::color_ref(Colour::LineColor).WithAlpha(0.0f));
+			_pShadow->SetColors(fig::color_ref(Color::LineColor).WithAlpha(0.5f * fAlpha), fig::color_ref(Color::LineColor).WithAlpha(0.0f));
 			_pShadow->SetVisible(fAlpha > 0.0f);
 			if (fAlpha > 0.0f)
-				GetBorderRenderer()->SetColor(fig::color_ref(Colour::LineColor).WithAlpha(fAlpha));
+				GetBorderRenderer()->SetColor(fig::color_ref(Color::LineColor).WithAlpha(fAlpha));
 		}
 	}
 }

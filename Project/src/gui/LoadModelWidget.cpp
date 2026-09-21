@@ -30,7 +30,7 @@ namespace fig::gui
 		_pSettingsButton->SetSize(36, 36);
 		_pSettingsButton->CenterVertically();
 
-		SetBorderRenderer<LineBorderRenderer>(Colour::LineColor,  Direction::North);
+		SetBorderRenderer<LineBorderRenderer>(Color::LineColor,  Direction::North);
 
 		if (Global::IsLLMInitialized())
 		{

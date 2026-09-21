@@ -5,7 +5,7 @@ namespace fig::gui
 {
 	RenderTargetControl::RenderTargetControl(ControlPtr parent) : Control(parent)
 	{
-		SetBackgroundColor(Colour::Transparent);
+		SetBackgroundColor(Color::Transparent);
 		_bLocalFromOrigin = true;
 	}
 

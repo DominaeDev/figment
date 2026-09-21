@@ -12,11 +12,11 @@ namespace fig::gui
 
 	ImageViewport::ImageViewport(ControlPtr pParent) : Control(pParent)
 	{
-		SetForegroundColor(Colour::White);
-		SetBackgroundColor(Colour::Transparent);
+		SetForegroundColor(Color::White);
+		SetBackgroundColor(Color::Transparent);
  
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, CornerSize);
-		pBorder->SetColor(Colour::LineColor);
+		pBorder->SetColor(Color::LineColor);
 		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 	}
 

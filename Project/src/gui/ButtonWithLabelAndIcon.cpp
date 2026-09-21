@@ -13,7 +13,7 @@ namespace fig::gui
 		SetBackgroundColor(GetThemeBackground());
 
 		auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBorderRenderer->SetColor(Colour::LineColor);
+		pBorderRenderer->SetColor(Color::LineColor);
 
 		_pLabel = CreateControl<StaticText>("", FontFace::Default, fontSize, true);
 		_pLabel->SetForegroundColor(GetThemeForeground());

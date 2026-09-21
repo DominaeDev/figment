@@ -11,12 +11,12 @@ namespace fig::gui
 
 	VerticalScrollBar::VerticalScrollBar(ControlPtr pParent) : Control(pParent)
 	{
-		SetBackgroundColor(Colour::Transparent);
+		SetBackgroundColor(Color::Transparent);
 
 		auto pHandle = CreateControl<TexturedBorder>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pHandle->SetWidth(8);
 		pHandle->SetCornerScale(0.5f);
-		pHandle->SetForegroundColor(fig::color_ref(Colour::Black).WithAlpha(HandleAlpha[0]));
+		pHandle->SetForegroundColor(fig::color_ref(Color::Black).WithAlpha(HandleAlpha[0]));
 		_pHandle = pHandle;
 	}
 

@@ -14,12 +14,12 @@ namespace fig::gui
 		_pBox->SetSize(28, 28);
 
 		auto pBoxBG = _pBox->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
-		pBoxBG->SetColor(Colour::TextBoxBackground);
+		pBoxBG->SetColor(Color::TextBoxBackground);
 		auto pBoxBorder = _pBox->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBoxBorder->SetColor(Colour::LineColor);
+		pBoxBorder->SetColor(Color::LineColor);
 
 		_pTick = _pBox->CreateControl<Image>(Resource::ICON_CHECKMARK);
-		_pTick->SetForegroundColor(Colour::Icon);
+		_pTick->SetForegroundColor(Color::Icon);
 		_pTick->Center();
 		_pTick->SetVisible(_bOn);
 
@@ -81,22 +81,22 @@ namespace fig::gui
 		{
 		case ButtonState::Default:
 		case ButtonState::Hover:
-			_pBox->GetBackgroundRenderer()->SetColor(Colour::TextBoxBackground);
-			_pBox->GetBorderRenderer()->SetColor(Colour::LineColor);
+			_pBox->GetBackgroundRenderer()->SetColor(Color::TextBoxBackground);
+			_pBox->GetBorderRenderer()->SetColor(Color::LineColor);
 			_pLabel->SetForegroundColor(custom_color(0x4E4431_rgb));
-			_pTick->SetForegroundColor(Colour::Icon);
+			_pTick->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Pressed:
 			_pBox->GetBackgroundRenderer()->SetColor(custom_color(0xF0F0F0_rgb));
-			_pBox->GetBorderRenderer()->SetColor(Colour::LineColor);
+			_pBox->GetBorderRenderer()->SetColor(Color::LineColor);
 			_pLabel->SetForegroundColor(custom_color(0x4E4431_rgb));
-			_pTick->SetForegroundColor(Colour::Icon);
+			_pTick->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Disabled:
-			_pBox->GetBackgroundRenderer()->SetColor(Colour::DisabledBackground);
-			_pBox->GetBorderRenderer()->SetColor(Colour::DisabledLineColor);
+			_pBox->GetBackgroundRenderer()->SetColor(Color::DisabledBackground);
+			_pBox->GetBorderRenderer()->SetColor(Color::DisabledLineColor);
 			_pLabel->SetForegroundColor(custom_color(0x808080C0_rgba));
-			_pTick->SetForegroundColor(Colour::DisabledForeground);
+			_pTick->SetForegroundColor(Color::DisabledForeground);
 			break;
 		}
 	}

@@ -29,7 +29,7 @@ namespace fig::gui
 	void ToggleWithLabel::SetOn(bool bOn, bool bSilent) noexcept
 	{
 		_bOn = bOn;
-		GetBorderRenderer()->SetColor(bOn ? Colour::Black : Colour::LineColor); //! @todo: Theme
+		GetBorderRenderer()->SetColor(bOn ? Color::Black : Color::LineColor); //! @todo: Theme
 		
 		if (GetEnabled())
 			SetButtonState(ButtonState::Default);

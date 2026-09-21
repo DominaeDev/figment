@@ -15,14 +15,14 @@ namespace fig::gui
 
 		_pSelection = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::ROUNDED_BACKGROUND_10PX), 16);
 		_pSelection->FillParent();
-		_pSelection->SetForegroundColor(Colour::StatusBarBackground);
+		_pSelection->SetForegroundColor(Color::StatusBarBackground);
 		_pSelection->SetVisible(false);
 
 		_pPortrait = CreateControl<PreviewCardImage>(ImageFit::Portrait);
 		_pPortrait->SetPosition(Margin, Margin);
 
 		_pLabel = CreateControl<StaticText>("Cover", FontFace::Default, Constants::GUI::DefaultFontSize, false);
-		_pLabel->SetForegroundColor(Colour::SidePanelForeground);
+		_pLabel->SetForegroundColor(Color::SidePanelForeground);
 		_pLabel->SetAlignment(TextAlignment::MiddleTop);
 		_pLabel->SetWidth(GetWidth() - Margin * 2);
 		_pLabel->SetY(GetHeight() - (Footer + Margin) + 2);
@@ -42,7 +42,7 @@ namespace fig::gui
 	void CharacterPortraitWidget::SetSelected(bool bSelected)
 	{
 		_pSelection->SetVisible(bSelected);
-		_pLabel->SetBackgroundColor(bSelected ? Colour::StatusBarBackground : GetBackgroundColor());
+		_pLabel->SetBackgroundColor(bSelected ? Color::StatusBarBackground : GetBackgroundColor());
 		_pLabel->SetVisible(bSelected);
 	}
 

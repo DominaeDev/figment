@@ -8,24 +8,24 @@ namespace fig::gui
 {
 	DropListBase::DropListBase(ControlPtr pParent) : Control(pParent), MouseEventHandler(this)
 	{
-		SetForegroundColor(Colour::TextBoxForeground);
-		SetBackgroundColor(Colour::TextBoxBackground);
+		SetForegroundColor(Color::TextBoxForeground);
+		SetBackgroundColor(Color::TextBoxBackground);
 		
 		_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
-		_pText->SetForegroundColor(Colour::TextBoxForeground);
+		_pText->SetForegroundColor(Color::TextBoxForeground);
 		_pText->EnableEllipsis(true);
 		_pText->SetX(8);
 
 		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
-		_pArrow->SetForegroundColor(Colour::Icon);
+		_pArrow->SetForegroundColor(Color::Icon);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Colour::TextBoxBackground);
+		pTextBoxBG->SetColor(Color::TextBoxBackground);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Colour::LineColor);
+		pTextBoxBorder->SetColor(Color::LineColor);
 
 		SetSize(300, 32);
 	}
@@ -49,14 +49,14 @@ namespace fig::gui
 
 	void DropListBase::OnEnabled(bool bEnabled)
 	{
-		SetForegroundColor(bEnabled ? Colour::TextBoxForeground : Colour::DisabledForeground);
-		SetBackgroundColor(bEnabled ? Colour::TextBoxBackground : Colour::DisabledBackground);
+		SetForegroundColor(bEnabled ? Color::TextBoxForeground : Color::DisabledForeground);
+		SetBackgroundColor(bEnabled ? Color::TextBoxBackground : Color::DisabledBackground);
 		_pText->SetForegroundColor(GetForegroundColor());
 		_pText->SetBackgroundColor(GetBackgroundColor());
 
-		GetBackgroundRenderer()->SetColor(bEnabled ? Colour::White : Colour::DisabledBackground);
-		GetBorderRenderer()->SetColor(bEnabled ? Colour::LineColor : Colour::DisabledLineColor);
-		_pArrow->SetForegroundColor(bEnabled ? Colour::Icon : Colour::DisabledForeground);
+		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
+		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
 
 		MouseEventHandler::Enable(bEnabled);
 	}

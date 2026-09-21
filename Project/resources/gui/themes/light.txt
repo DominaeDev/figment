@@ -1,13 +1,14 @@
 Debug								#C000C0
 Debug2								#00C0C0
 Debug3								#C0C000
+Opaque								#FFFFFFFF
+Transparent							#FFFFFF00
 White								#FFFFFF
 Black								#000000
 Red									#800000
 Green								#008000
 Blue								#000080
 DarkGray							#646464
-Transparent							#FFFFFF00
 TextForeground						#000000
 TextSelectionForeground				#FFFFFF
 TextSelectionBackground				#99C9EF

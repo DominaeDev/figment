@@ -7,7 +7,7 @@ namespace fig::gui
 	class RoundedFillRenderer : public CustomRenderer
 	{
 	public:
-		explicit RoundedFillRenderer(float radius, fig::color_ref color = Colour::White);
+		explicit RoundedFillRenderer(float radius, fig::color_ref color = Color::White);
 
 		void Render(fig::renderer_ptr pRenderer, fig::rectf rect);
 

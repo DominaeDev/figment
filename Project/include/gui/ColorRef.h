@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	enum class Colour;
+	enum class Color;
 }
 
 namespace fig
@@ -32,7 +32,7 @@ namespace fig
 		{
 		}
 
-		color_ref(fig::gui::Colour color);
+		color_ref(fig::gui::Color color);
 
 		constexpr color_ref(const color_ref&) = default;
 		color_ref& operator= (const color_ref& other) = default;
@@ -112,7 +112,7 @@ namespace fig
 			_ptr = other._ptr;
 		}
 
-		color_ref_with_alpha(fig::gui::Colour color) : color_ref(color)
+		color_ref_with_alpha(fig::gui::Color color) : color_ref(color)
 		{
 			_a = _ptr->a;
 		}

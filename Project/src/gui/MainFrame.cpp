@@ -36,8 +36,8 @@ namespace fig::gui
 	{
 		s_pInstance = this;
 
-		SetForegroundColor(Colour::Black);
-		SetBackgroundColor(Colour::AppBackground);
+		SetForegroundColor(Color::Black);
+		SetBackgroundColor(Color::AppBackground);
 
 		_pMainArea = CreateControl<Area>();
 		_pSidePanel = CreateControl<SidePanel>();

@@ -224,13 +224,13 @@ namespace fig::gui
 			{
 				fig::color_ref color;
 				if (character.gender == ConventionalGender::Male)
-					color = Colour::GenderTagMale;
+					color = Color::GenderTagMale;
 				else if (character.gender == ConventionalGender::Female)
-					color = Colour::GenderTagFemale;
+					color = Color::GenderTagFemale;
 				else if (character.gender.IsConventional())
-					color = Colour::GenderTagOther;
+					color = Color::GenderTagOther;
 				else
-					color = Colour::White;
+					color = Color::White;
 
 				AddTag(character.gender.GetLabel(), color);
 			}

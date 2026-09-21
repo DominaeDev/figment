@@ -12,19 +12,19 @@ namespace fig::gui
 		SetMarginRight(30); // Cross
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_SEARCH));
-		_pIcon->SetForegroundColor(Colour::Icon);
+		_pIcon->SetForegroundColor(Color::Icon);
 
 		_pCross = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CROSS));
-		_pCross->SetForegroundColor(Colour::Icon);
+		_pCross->SetForegroundColor(Color::Icon);
 		_pCross->SetVisible(false);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Colour::White);
+		pTextBoxBG->SetColor(Color::White);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Colour::LineColor);
+		pTextBoxBorder->SetColor(Color::LineColor);
 	}
 
 	void SearchBox::OnSize()

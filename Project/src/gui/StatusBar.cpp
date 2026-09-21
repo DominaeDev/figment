@@ -11,8 +11,8 @@ namespace fig::gui
 	{
 		SetSize(pParent->GetWidth(), 24);
 
-		SetForegroundColor(Colour::StatusBarForeground);
-		SetBackgroundColor(Colour::StatusBarBackground);
+		SetForegroundColor(Color::StatusBarForeground);
+		SetBackgroundColor(Color::StatusBarBackground);
 
 		_pMessage = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
 		_pMessage->SetPosition(8, 2);

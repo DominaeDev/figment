@@ -18,14 +18,14 @@ namespace fig::gui
 				
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Colour::TextBoxBackground);
+		pTextBoxBG->SetColor(Color::TextBoxBackground);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Colour::LineColor);
+		pTextBoxBorder->SetColor(Color::LineColor);
 
 		_pScrollBar = CreateControl<VerticalBar>(Resource::VERTICAL_BAR_SMALL);
-		_pScrollBar->SetForegroundColor(Colour::TextBoxScrollBar);
+		_pScrollBar->SetForegroundColor(Color::TextBoxScrollBar);
 		_pScrollBar->SetX(GetWidth() - kScrollBarRight);
 		_pScrollBar->SetSize(3, 16);
 	}
@@ -33,8 +33,8 @@ namespace fig::gui
 	void TextBox::OnEnabled(bool bEnabled)
 	{
 		TextInput::OnEnabled(bEnabled);
-		GetBackgroundRenderer()->SetColor(bEnabled ? Colour::White : Colour::DisabledBackground);
-		GetBorderRenderer()->SetColor(bEnabled ? Colour::LineColor : Colour::DisabledLineColor);
+		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
+		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
 	}
 
 	void TextBox::SetFixedRows(int32_t rows)
