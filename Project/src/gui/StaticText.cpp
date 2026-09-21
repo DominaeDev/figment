@@ -359,4 +359,15 @@ namespace fig::gui
 	{
 		return std::max(_maxLineWidth > 0 ? _maxLineWidth : (_bAutoSize ? GetMaxWidth() : GetWidth()), 0);
 	}
+
+	EventResult StaticText::OnEvent(fig::event& event)
+	{
+		if (IsUserEvent(event, UserEvent::ColorThemeChanged))
+		{
+			InvalidateText();
+			return EventResult::Continue;
+		}
+
+		return EventResult::Pass;
+	}
 }

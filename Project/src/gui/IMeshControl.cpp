@@ -44,9 +44,19 @@ namespace fig::gui
 		}
 	}
 
+	void IMeshControl::AddPoint(float x, float y, fig::colorf color)
+	{
+		_vertices.push_back(fig::vertex { fig::pointf { x, y }, color });
+	}
+
 	void IMeshControl::AddPoint(float x, float y, float u, float v, fig::colorf color)
 	{
 		_vertices.push_back(fig::vertex { fig::pointf { x, y }, color, fig::pointf { u, v } });
+	}
+
+	void IMeshControl::AddPoint(fig::pointf pos, fig::colorf color)
+	{
+		_vertices.push_back(fig::vertex { pos, color });
 	}
 
 	void IMeshControl::AddPoint(fig::pointf pos, fig::pointf uv, fig::colorf color)
@@ -128,5 +138,16 @@ namespace fig::gui
 	void IMeshControl::InvalidateMesh() noexcept
 	{
 		_lastRect = {};
+	}
+
+	EventResult IMeshControl::OnEvent(fig::event& event)
+	{
+		if (IsUserEvent(event, UserEvent::ColorThemeChanged))
+		{
+			InvalidateMesh();
+			return EventResult::Continue;
+		}
+
+		return EventResult::Pass;
 	}
 }

@@ -4,52 +4,31 @@
 
 namespace fig::gui
 {
-	VerticalGradient::VerticalGradient(ControlPtr pParent, fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom) : Control(pParent)
+	VerticalGradient::VerticalGradient(ControlPtr pParent, fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom) : IMeshControl(pParent)
 	{
 		SetColors(colorTop, colorBottom);
-		_pTexture = AppResources::GetTexture(Resource::BLANK);
 	}
 
 	void VerticalGradient::SetColors(fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom)
 	{
 		_colorTop = colorTop;
 		_colorBottom = colorBottom;
-		_bInvalid = true;
+		InvalidateMesh();
 	}
 
-	void VerticalGradient::SetTexture(fig::texture_ptr pTexture)
+	void VerticalGradient::RefreshGeometry(const fig::rectf& rect)
 	{
-		_pTexture = pTexture;
-	}
-
-	void VerticalGradient::OnRender(fig::renderer_ptr pRenderer)
-	{
-		fig::rectf rect = GetDrawRect();
-		if (_bInvalid or !SDL_RectsEqualFloat(&_lastRect, &rect) || _vertices.empty())
-		{
-			RefreshGeometry(rect);
-			_lastRect = rect;
-			_bInvalid = false;
-		}
-
-		static constexpr int indices[6] = { 0, 1, 2, 2, 3, 0 };
-		SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), indices, 6);
-	}
-
-	void VerticalGradient::RefreshGeometry(fig::rectf rect)
-	{
-		_vertices.clear();
-		_vertices.reserve(4);
+		ClearMesh(4, 6);
 
 		float left = rect.x;
 		float right = rect.x + rect.w;
 		float top = rect.y;
 		float bottom = rect.y + rect.h;
 
-		_vertices.push_back(fig::vertex { fig::pointf { left, bottom }, _colorBottom });
-		_vertices.push_back(fig::vertex { fig::pointf { right, bottom }, _colorBottom });
-		_vertices.push_back(fig::vertex { fig::pointf { right, top }, _colorTop });
-		_vertices.push_back(fig::vertex { fig::pointf { left, top }, _colorTop });
-
+		AddPoint(left, bottom, _colorBottom);
+		AddPoint(right, bottom, _colorBottom);
+		AddPoint(right, top, _colorTop);
+		AddPoint(left, top, _colorTop);
+		AddQuad();
 	}
 }

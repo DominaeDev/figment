@@ -91,8 +91,6 @@ namespace fig::gui
 			if (auto pSession = pLLM->GetSession().lock())
 				pSession->Update(fElapsed);
 		}
-
-		CycleColors(); //! @temp
 	}
 
 	void MainFrame::OnRender(fig::renderer_ptr pRenderer)
@@ -588,6 +586,7 @@ namespace fig::gui
 			if (result == EventResult::Handled)
 				return EventResult::Handled;
 		}
+
 		return result;
 	}
 

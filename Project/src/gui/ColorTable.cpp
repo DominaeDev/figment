@@ -59,7 +59,7 @@ namespace fig::gui
 
 	void CycleColors()
 	{
-		if constexpr (Debugging and Disabled)
+		if constexpr (Disabled and Debugging) //! @temp
 		{
 			for (auto& color : _ColorTable)
 			{

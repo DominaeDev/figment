@@ -72,7 +72,9 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnParent() override;
+		EventResult OnEvent(fig::event& event) override;
 		fig::coord GetMaxLineWidth() const noexcept;
+
 	private:
 		void DrawText(fig::coord& textWidth, fig::coord& textHeight);
 		void DrawShadow(const char* pText);

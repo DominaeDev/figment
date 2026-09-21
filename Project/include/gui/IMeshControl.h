@@ -15,9 +15,12 @@ namespace fig::gui
 	protected:
 		IMeshControl(ControlPtr pParent);
 		virtual void RefreshGeometry(const fig::rectf& rect) = 0;
+		EventResult OnEvent(fig::event& event) override;
 
 		void ClearMesh(size_t nVertices = 0uz, size_t nIndices = 0uz);
+		void AddPoint(float x, float y, fig::colorf color = 0xFFFFFF_rgb);
 		void AddPoint(float x, float y, float u, float v, fig::colorf color = 0xFFFFFF_rgb);
+		void AddPoint(fig::pointf pos, fig::colorf color = 0xFFFFFF_rgb);
 		void AddPoint(fig::pointf pos, fig::pointf uv, fig::colorf color = 0xFFFFFF_rgb);
 		void AddQuad() noexcept;
 		void AddQuad(int32_t p0, int32_t p1, int32_t p2, int32_t p3) noexcept;

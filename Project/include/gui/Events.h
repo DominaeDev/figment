@@ -46,6 +46,7 @@ namespace fig::gui
 		LeaveScreen,
 		StartTextInput,
 		StopTextInput,
+		ColorThemeChanged,
 		
 		TTSServerStarted,
 		TTSServerLoadingModel,
