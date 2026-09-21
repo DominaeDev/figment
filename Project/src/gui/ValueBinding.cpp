@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	void ValueBinding<int32_t>::Set(fig::string value) noexcept
+	void ValueBinding<int32_t>::Set(fig::string_view value) noexcept
 	{
 		(*_ptr) = string_to_int(value, 0);
 	}
@@ -13,7 +13,7 @@ namespace fig::gui
 		return int_to_string(*_ptr);
 	}
 
-	void ValueBinding<float>::Set(fig::string value) noexcept
+	void ValueBinding<float>::Set(fig::string_view value) noexcept
 	{
 		(*_ptr) = string_to_float(value, 0.0f);
 	}
@@ -23,7 +23,7 @@ namespace fig::gui
 		return float_to_string(*_ptr);
 	}
 
-	void ValueBinding<fig::fixed>::Set(fig::string value) noexcept
+	void ValueBinding<fig::fixed>::Set(fig::string_view value) noexcept
 	{
 		(*_ptr) = string_to_fixed(value, 0_fp);
 	}

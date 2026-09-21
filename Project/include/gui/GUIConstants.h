@@ -66,6 +66,7 @@ namespace fig::gui
 		inline constexpr fig::color DefaultUserMessageBorder = Color::MessageBorderBlue;
 		inline constexpr fig::color DefaultUserMessageBackground = Color::MessageBackgroundBlue;
 
+		/*
 		inline constexpr std::array<fig::color, 8> DefaultBotMessageBorders {
 			MessageBorderPink,
 			MessageBorderGreen,
@@ -86,41 +87,41 @@ namespace fig::gui
 			MessageBackgroundPurple,
 			MessageBackgroundBrown,
 			MessageBackgroundNavy,
-		};
+		};*/
 	}
 
 	namespace Theme
 	{
-		constexpr ButtonTheme DefaultButtonStyle
+		inline static ButtonTheme DefaultButtonStyle = 
 		{
-			.defaultColor	{ 0xFFFFFF00_rgba, 0x4E4431_rgb, Color::LineColor },
-			.hoverColor		{ 0xEFECE3FF_rgba, 0x4E4431_rgb, Color::LineColor },
-			.pressedColor	{ 0xFFFFFFC0_rgba, 0x4E4431_rgb, Color::LineColor },
-			.disabledColor	{ 0xCCCCCC80_rgba, 0x808080_rgb, Color::DisabledLineColor },
+			.defaultColor	{ custom_color(0xFFFFFF00_rgba), custom_color(0x4E4431_rgb), Colour::LineColor },
+			.hoverColor		{ custom_color(0xEFECE3FF_rgba), custom_color(0x4E4431_rgb), Colour::LineColor },
+			.pressedColor	{ custom_color(0xFFFFFFC0_rgba), custom_color(0x4E4431_rgb), Colour::LineColor },
+			.disabledColor	{ custom_color(0xCCCCCC80_rgba), custom_color(0x808080_rgb), Colour::DisabledLineColor },
 		};
 
-		constexpr ButtonTheme SidePanelButtonStyle
+		inline static ButtonTheme SidePanelButtonStyle =
 		{
-			.defaultColor	{ 0xFFFFFF00_rgba, 0x4E4431_rgb, Color::LineColor },
-			.hoverColor		{ 0xFFFFFF80_rgba, 0x4E4431_rgb, Color::LineColor },
-			.pressedColor	{ 0xFFFFFFC0_rgba, 0x4E4431_rgb, Color::LineColor },
-			.disabledColor	{ 0xCCCCCC80_rgba, 0x808080_rgb, Color::DisabledLineColor },
+			.defaultColor	{ custom_color(0xFFFFFF00_rgba), custom_color(0x4E4431_rgb), Colour::LineColor },
+			.hoverColor		{ custom_color(0xFFFFFF80_rgba), custom_color(0x4E4431_rgb), Colour::LineColor },
+			.pressedColor	{ custom_color(0xFFFFFFC0_rgba), custom_color(0x4E4431_rgb), Colour::LineColor },
+			.disabledColor	{ custom_color(0xCCCCCC80_rgba), custom_color(0x808080_rgb), Colour::DisabledLineColor },
 		};
 
-		constexpr ButtonTheme EditorSmallButtonStyle
+		inline static ButtonTheme EditorSmallButtonStyle =
 		{
-			.defaultColor	{ 0xFFFFFF00_rgba, 0x8b806b_rgb, Color::LineColor },
-			.hoverColor		{ 0xEFECE3FF_rgba, 0x8b806b_rgb, Color::LineColor },
-			.pressedColor	{ 0xFFFFFFC0_rgba, 0x8b806b_rgb, Color::LineColor },
-			.disabledColor	{ 0xCCCCCC80_rgba, 0x808080_rgb, Color::DisabledLineColor },
+			.defaultColor	{ custom_color(0xFFFFFF00_rgba), custom_color(0x8b806b_rgb), Colour::LineColor },
+			.hoverColor		{ custom_color(0xEFECE3FF_rgba), custom_color(0x8b806b_rgb), Colour::LineColor },
+			.pressedColor	{ custom_color(0xFFFFFFC0_rgba), custom_color(0x8b806b_rgb), Colour::LineColor },
+			.disabledColor	{ custom_color(0xCCCCCC80_rgba), custom_color(0x808080_rgb), Colour::DisabledLineColor },
 		};
 
-		constexpr ButtonTheme GreenSaveButtonStyle
+		inline static ButtonTheme GreenSaveButtonStyle =
 		{
-			.defaultColor	{ 0xc7e8c1_rgb,		0x13330e_rgb, 0x097f00_rgb },
-			.hoverColor		{ 0x77ce70C0_rgba,	0x13330e_rgb, 0x097f00_rgb },
-			.pressedColor	{ 0xb7e3b1_rgb,		0x13330e_rgb, 0x097f00_rgb },
-			.disabledColor	{ 0xCCCCCC80_rgba,	0x808080_rgb, Color::DisabledLineColor },
+			.defaultColor	{ custom_color(0xc7e8c1_rgb),		custom_color(0x13330e_rgb), custom_color(0x097f00_rgb) },
+			.hoverColor		{ custom_color(0x77ce70C0_rgba),	custom_color(0x13330e_rgb), custom_color(0x097f00_rgb) },
+			.pressedColor	{ custom_color(0xb7e3b1_rgb),		custom_color(0x13330e_rgb), custom_color(0x097f00_rgb) },
+			.disabledColor	{ custom_color(0xCCCCCC80_rgba),	custom_color(0x808080_rgb), Colour::DisabledLineColor },
 		};
 	}
 }

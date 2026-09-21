@@ -13,12 +13,12 @@ namespace fig::gui
 	VariableList::VariableList(ControlPtr pParent) : Control(pParent)
 	{
 		auto pBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BG, fig::corners { 30, 72, 64, 30 });
-		pBG->SetColor(Color::MessageBackgroundDefault);
+		pBG->SetColor(Colour::MessageBackgroundDefault);
 		pBG->SetCornerScale(0.3f);
 		pBG->SetExtend(5);
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::SPEECH_BUBBLE_CENTER_BORDER, fig::corners { 30, 72, 64, 30 });
-		pBorder->SetColor(Color::MessageBorderDefault);
+		pBorder->SetColor(Colour::MessageBorderDefault);
 		pBorder->SetCornerScale(0.3f);
 		pBorder->SetExtend(5);
 

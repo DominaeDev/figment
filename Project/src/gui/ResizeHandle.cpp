@@ -10,7 +10,7 @@ namespace fig::gui
 	{
 		FillParent();
 
-		SetBorderRenderer<LineBorderRenderer>(Color::LineColor, direction);
+		SetBorderRenderer<LineBorderRenderer>(Colour::LineColor, direction);
 	}
 
 	void ResizeHandle::OnUpdate(float fElapsed)

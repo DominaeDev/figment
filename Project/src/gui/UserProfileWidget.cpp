@@ -22,7 +22,7 @@ namespace fig::gui
 		_pSignOutButton->CenterVertically();
 		_pSignOutButton->SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
 
-		SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::North);
+		SetBorderRenderer<LineBorderRenderer>(Colour::LineColor, Direction::North);
 	}
 
 	void UserProfileWidget::SetUser(const fig::user::UserProfile& profile) noexcept

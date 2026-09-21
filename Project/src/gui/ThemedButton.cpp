@@ -20,7 +20,7 @@ namespace fig::gui
 		OnButtonState();
 	}
 
-	const fig::color& ThemedButton::GetThemeForeground() const noexcept
+	fig::color_ref ThemedButton::GetThemeForeground() const noexcept
 	{
 		switch (_state)
 		{
@@ -35,7 +35,7 @@ namespace fig::gui
 		}
 	}
 
-	const fig::color& ThemedButton::GetThemeBackground() const noexcept
+	fig::color_ref ThemedButton::GetThemeBackground() const noexcept
 	{
 		switch (_state)
 		{
@@ -50,7 +50,7 @@ namespace fig::gui
 		}
 	}
 
-	const fig::color& ThemedButton::GetThemeBorderColor() const noexcept
+	fig::color_ref ThemedButton::GetThemeBorderColor() const noexcept
 	{
 		switch (_state)
 		{

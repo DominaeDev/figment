@@ -1,5 +1,6 @@
 #include <pch.h>
-#include "gui/GUIColor.h"
+#include "gui/Color.h"
+#include "util/StringUtils.h"
 
 namespace fig
 {
@@ -122,31 +123,31 @@ namespace fig
 			return std::format("#{:02X}{:02X}{:02X}{:02X}", r, g, b, a);
 	}
 
-	fig::color fig::color::FromString(const fig::string& value) noexcept
+	fig::color fig::color::FromString(fig::string_view value) noexcept
 	{
-		fig::string hex = trim(value);
-		if (hex.empty())
+		value = trim(value);
+		if (value.empty())
 			return (fig::color)0;
-		if (hex[0] == '#')
-			hex = hex.erase(0, 1);
-		if (hex.length() != 6 && hex.length() != 8)
+		if (value[0] == '#')
+			value = value.substr(1);
+		if (value.length() != 6 && value.length() != 8)
 			return (fig::color)0;
 
 		try
 		{
-			if (hex.length() == 6)
+			if (value.length() == 6)
 			{
-				uint8_t r = static_cast<uint8_t>(std::stoi(hex.substr(0, 2), nullptr, 16));
-				uint8_t g = static_cast<uint8_t>(std::stoi(hex.substr(2, 2), nullptr, 16));
-				uint8_t b = static_cast<uint8_t>(std::stoi(hex.substr(4, 2), nullptr, 16));
+				uint8_t r = static_cast<uint8_t>(string_to_int_base(value.substr(0, 2), 0, 16));
+				uint8_t g = static_cast<uint8_t>(string_to_int_base(value.substr(2, 2), 0, 16));
+				uint8_t b = static_cast<uint8_t>(string_to_int_base(value.substr(4, 2), 0, 16));
 				return fig::color { r, g, b, 0xff };
 			}
-			else if (hex.length() == 8)
+			else if (value.length() == 8)
 			{
-				uint8_t r = static_cast<uint8_t>(std::stoi(hex.substr(0, 2), nullptr, 16));
-				uint8_t g = static_cast<uint8_t>(std::stoi(hex.substr(2, 2), nullptr, 16));
-				uint8_t b = static_cast<uint8_t>(std::stoi(hex.substr(4, 2), nullptr, 16));
-				uint8_t a = static_cast<uint8_t>(std::stoi(hex.substr(6, 2), nullptr, 16));
+				uint8_t r = static_cast<uint8_t>(string_to_int_base(value.substr(0, 2), 0, 16));
+				uint8_t g = static_cast<uint8_t>(string_to_int_base(value.substr(2, 2), 0, 16));
+				uint8_t b = static_cast<uint8_t>(string_to_int_base(value.substr(4, 2), 0, 16));
+				uint8_t a = static_cast<uint8_t>(string_to_int_base(value.substr(6, 2), 0, 16));
 				return fig::color { r, g, b, a };
 			}
 		}

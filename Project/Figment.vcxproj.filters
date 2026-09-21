@@ -180,6 +180,9 @@
     <Filter Include="Source Files\Frontend\GUI\Editors\SettingsEditor">
       <UniqueIdentifier>{e97d13a0-dbd3-4cde-8e8e-eec5aa0924ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Themes">
+      <UniqueIdentifier>{f9c765df-ed5f-409e-94dd-422884be2ef9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -302,7 +305,7 @@
     <ClCompile Include="src\gui\DebugScreen.cpp">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\GUIColor.cpp">
+    <ClCompile Include="src\gui\Color.cpp">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\util\SearchIndex.cpp">
@@ -788,6 +791,12 @@
     <ClCompile Include="src\gui\VerticalBar.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ColorRef.cpp">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ColorTable.cpp">
+      <Filter>Source Files\Frontend\GUI\Themes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -886,7 +895,7 @@
     <ClInclude Include="include\gui\GUICommon.h">
       <Filter>Source Files\Frontend\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\GUIColor.h">
+    <ClInclude Include="include\gui\Color.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\GUITypes.h">
@@ -1803,6 +1812,13 @@
     </ClInclude>
     <ClInclude Include="include\gui\VerticalBar.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ColorRef.h">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\ColorRef.h" />
+    <ClInclude Include="include\gui\ColorTable.h">
+      <Filter>Source Files\Frontend\GUI\Themes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

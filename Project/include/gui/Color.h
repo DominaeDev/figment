@@ -94,8 +94,13 @@ namespace fig
 			return fig::colorf { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
 		}
 
+		inline explicit operator uint32_t() const noexcept
+		{
+			return std::bit_cast<uint32_t>(*this);
+		}
+
 		fig::string ToString() const noexcept;
-		static color FromString(const fig::string& hex) noexcept;
+		static color FromString(fig::string_view value) noexcept;
 		static color FromHSV(float h, float s, float v) noexcept;
 	};
 
@@ -115,17 +120,4 @@ namespace fig
 	{
 		return color { static_cast<int32_t>(arg & 0xFFFFFF) };
 	}
-
-	struct color_set
-	{
-		color background;
-		color foreground;
-		color border;
-	};
-
-	struct color_pair
-	{
-		color background;
-		color foreground;
-	};
 }

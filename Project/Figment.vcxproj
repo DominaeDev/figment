@@ -188,6 +188,8 @@
     <ClCompile Include="src\gui\BehindChat.cpp" />
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
+    <ClCompile Include="src\gui\ColorRef.cpp" />
+    <ClCompile Include="src\gui\ColorTable.cpp" />
     <ClCompile Include="src\gui\HorizontalBar.cpp" />
     <ClCompile Include="src\gui\IMeshControl.cpp" />
     <ClCompile Include="src\gui\CharacterAttributeWidget.cpp" />
@@ -225,7 +227,7 @@
     <ClCompile Include="src\gui\LoadModelWidget.cpp" />
     <ClCompile Include="src\gui\LoginScreen.cpp" />
     <ClCompile Include="src\gui\DebugScreen.cpp" />
-    <ClCompile Include="src\gui\GUIColor.cpp" />
+    <ClCompile Include="src\gui\Color.cpp" />
     <ClCompile Include="src\gui\Menu.cpp" />
     <ClCompile Include="src\gui\MenuSeparator.cpp" />
     <ClCompile Include="src\gui\NonOwningImageWithMask.cpp" />
@@ -497,6 +499,8 @@
     <ClInclude Include="include\gui\BoxSizer.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h" />
+    <ClInclude Include="include\gui\ColorRef.h" />
+    <ClInclude Include="include\gui\ColorTable.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
     <ClInclude Include="include\gui\IMeshControl.h" />
     <ClInclude Include="include\gui\CardImage.h" />
@@ -661,7 +665,7 @@
     <ClInclude Include="include\gui\CustomRenderer.h" />
     <ClInclude Include="include\gui\ChatMessage.h" />
     <ClInclude Include="include\gui\ChatScroll.h" />
-    <ClInclude Include="include\gui\GUIColor.h" />
+    <ClInclude Include="include\gui\Color.h" />
     <ClInclude Include="include\gui\Control.h" />
     <ClInclude Include="include\gui\Fonts.h" />
     <ClInclude Include="include\gui\Frame.h" />
@@ -691,6 +695,7 @@
     <ClInclude Include="include\util\StripHtml.h" />
     <ClInclude Include="include\util\Timestamp.h" />
     <ClInclude Include="include\util\UndoStack.h" />
+    <ClInclude Include="src\gui\ColorRef.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

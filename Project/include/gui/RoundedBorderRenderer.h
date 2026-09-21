@@ -8,7 +8,7 @@ namespace fig::gui
 	class RoundedBorderRenderer : public CustomRenderer
 	{
 	public:
-		explicit RoundedBorderRenderer(float radius, float thickness, fig::color color = Color::White);
+		explicit RoundedBorderRenderer(float radius, float thickness, fig::color_ref color = Colour::White);
 
 		void Render(fig::renderer_ptr pRenderer, const fig::rectf& rect);
 

@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	RoundedFillRenderer::RoundedFillRenderer(float radius, fig::color color) : CustomRenderer(color),
+	RoundedFillRenderer::RoundedFillRenderer(float radius, fig::color_ref color) : CustomRenderer(color),
 		_radius(radius)
 	{
 	}
@@ -77,12 +77,7 @@ namespace fig::gui
 		if (radius <= 0.0f)
 			return;
 
-		fig::colorf color = {
-			_color.r / 255.0f,
-			_color.g / 255.0f,
-			_color.b / 255.0f,
-			1.0f,
-		};
+		fig::colorf color = (*_color).WithAlpha(1.0f);
 
 		_lastRect = rect;
 

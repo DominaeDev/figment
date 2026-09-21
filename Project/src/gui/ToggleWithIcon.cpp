@@ -59,7 +59,7 @@ namespace fig::gui
 		if (bOn)
 		{
 			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-			pBorder->SetColor(Color::LineColor);
+			pBorder->SetColor(Colour::LineColor);
 		}
 		else
 			ClearBorderRenderer();

@@ -16,7 +16,7 @@ namespace fig::gui
 	LoadModelWidget::LoadModelWidget(ControlPtr pParent) noexcept : Panel(pParent)
 	{
 		_pProgressBar = CreateControl<Panel>();
-		_pProgressBar->SetBackgroundRenderer<SolidFillRenderer>(0x57caff_rgb);
+		_pProgressBar->SetBackgroundRenderer<SolidFillRenderer>(custom_color(0x57caff_rgb));
 
 		_pLoadButton = CreateControl<PlayButton>();
 		_pLoadButton->SetDelegate(std::bind(&LoadModelWidget::OnButtonPressed, this));
@@ -30,7 +30,7 @@ namespace fig::gui
 		_pSettingsButton->SetSize(36, 36);
 		_pSettingsButton->CenterVertically();
 
-		SetBorderRenderer<LineBorderRenderer>(Color::LineColor,  Direction::North);
+		SetBorderRenderer<LineBorderRenderer>(Colour::LineColor,  Direction::North);
 
 		if (Global::IsLLMInitialized())
 		{

@@ -22,7 +22,7 @@ namespace fig::gui
 		pTopSizer->Add(_pDescription, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, Margin);
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBorder->SetColor(Color::LineColor);
+		pBorder->SetColor(Colour::LineColor);
 
 		EnableClipping(true);
 		EnableCulling(true);

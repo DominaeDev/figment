@@ -1,0 +1,53 @@
+#include <pch.h>
+#include "gui/ColorTable.h"
+#include "util/CommonUtils.h"
+#include "io/FileUtility.h"
+
+using namespace fig::io;
+
+namespace fig::gui
+{
+	ColorTable _ColorTable {};
+	std::map<ColorTheme, ColorTable> _ColorThemes {};
+	std::map<uint32_t, fig::color> _CustomColors {};
+
+	void ParseTable(ColorTable& table, fig::string_view text)
+	{
+		for (auto row : std::views::split(text, '\n'))
+		{
+			auto line = trim(fig::string_view { row });
+			if (line.empty())
+				continue;
+
+			size_t pos_name_end = line.find_first_of(" \t");
+			fig::string_view name = trim(line.substr(0, pos_name_end));
+			size_t pos_value_begin = line.find_first_not_of(" \t", pos_name_end);
+			fig::string_view value = trim(line.substr(pos_value_begin));
+
+			if (auto enumColor = enum_deserialize(name, _ColorNameMapping, Colour::Invalid); enumColor != Colour::Invalid)
+				table[static_cast<size_t>(enumColor)] = fig::color::FromString(value);
+		}
+	}
+
+	FileError LoadColorTheme(ColorTheme theme, const fig::path& path)
+	{
+		if (auto file = ReadTextFile(path, false))
+		{
+			ParseTable(_ColorThemes[theme], *file);
+			return FileError::NoError;
+		}
+		return FileError::NotFound;
+	}
+
+	void ApplyColorTheme(ColorTheme theme)
+	{
+		auto& table = _ColorThemes[theme];
+		std::copy(table.cbegin(), table.cend(), _ColorTable.begin());
+	}
+
+	fig::color_ref _Color(Colour color)
+	{
+		assert(color >= (Colour)0 and color < Colour::Count);
+		return fig::color_ref { &_ColorTable[static_cast<size_t>(color)] };
+	}
+}

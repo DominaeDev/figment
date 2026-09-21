@@ -20,11 +20,11 @@ namespace fig::gui
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Color::White);
+		pTextBoxBG->SetColor(Colour::White);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Color::LineColor);
+		pTextBoxBorder->SetColor(Colour::LineColor);
 	}
 
 	void SearchBox::OnSize()

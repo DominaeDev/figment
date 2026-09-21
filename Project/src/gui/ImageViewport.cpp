@@ -16,7 +16,7 @@ namespace fig::gui
 		SetBackgroundColor(Color::Transparent);
  
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, CornerSize);
-		pBorder->SetColor(Color::LineColor);
+		pBorder->SetColor(Colour::LineColor);
 		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 	}
 

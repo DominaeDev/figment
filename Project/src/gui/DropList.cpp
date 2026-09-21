@@ -21,11 +21,11 @@ namespace fig::gui
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Color::TextBoxBackground);
+		pTextBoxBG->SetColor(Colour::TextBoxBackground);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Color::LineColor);
+		pTextBoxBorder->SetColor(Colour::LineColor);
 
 		SetSize(300, 32);
 	}
@@ -54,8 +54,8 @@ namespace fig::gui
 		_pText->SetForegroundColor(GetForegroundColor());
 		_pText->SetBackgroundColor(GetBackgroundColor());
 
-		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
-		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+		GetBackgroundRenderer()->SetColor(bEnabled ? Colour::White : Colour::DisabledBackground);
+		GetBorderRenderer()->SetColor(bEnabled ? Colour::LineColor : Colour::DisabledLineColor);
 		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
 
 		MouseEventHandler::Enable(bEnabled);

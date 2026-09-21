@@ -278,8 +278,8 @@ namespace fig::gui
 
 		SetForegroundColor(fig::color { 0, 0, 0, alpha });
 
-		_pSpeechBubbleBG->SetColor(_bgColor.WithAlpha(alpha));
-		_pSpeechBubbleBorder->SetColor(_borderColor.WithAlpha(alpha));
+		_pSpeechBubbleBG->SetColor(custom_color(_bgColor.WithAlpha(alpha)));
+		_pSpeechBubbleBorder->SetColor(custom_color(_borderColor.WithAlpha(alpha)));
 
 		_pMessagePanel->SetBackgroundColor(chatBG.WithAlpha(alpha));
 		_pMessageText->SetForegroundColor(_textColor.WithAlpha(alpha));

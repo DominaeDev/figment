@@ -966,6 +966,15 @@ namespace fig
 		return value;
 	}
 
+	int32_t string_to_int_base(const fig::string_view& s, int32_t default_value, int32_t base)
+	{
+		int32_t value {};
+		auto [ptr, err] = std::from_chars(s.data(), s.data() + s.size(), value, base);
+		if (err != std::errc {} or ptr != s.data() + s.size())
+			return default_value;
+		return value;
+	}
+
 	float string_to_float(const fig::string_view& s, float default_value)
 	{
 		float value {};
@@ -1013,6 +1022,15 @@ namespace fig
 	{
 		int32_t value {};
 		auto [ptr, err] = std::from_chars(s.data(), s.data() + s.size(), value);
+		if (err != std::errc {} or ptr != s.data() + s.size())
+			return std::nullopt;
+		return value;
+	}
+
+	std::optional<int32_t> string_to_int_base(const fig::string_view& s, int32_t base)
+	{
+		int32_t value {};
+		auto [ptr, err] = std::from_chars(s.data(), s.data() + s.size(), value, base);
 		if (err != std::errc {} or ptr != s.data() + s.size())
 			return std::nullopt;
 		return value;

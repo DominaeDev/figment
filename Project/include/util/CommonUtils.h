@@ -267,7 +267,7 @@ namespace fig
 
 	template <typename K, typename T, std::size_t N>
 		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
-	inline constexpr K enum_deserialize(const fig::string& name, const std::array<std::pair<K, T>, N>& map, const K& defaultValue = {})
+	inline constexpr K enum_deserialize(fig::string_view name, const std::array<std::pair<K, T>, N>& map, const K& defaultValue = {})
 	{
 		for (const auto& [key, value] : map)
 		{
@@ -279,7 +279,7 @@ namespace fig
 
 	template <typename K, typename T>
 		requires std::is_enum_v<K>
-	inline EnumFlags<K> enum_deserialize_flags(const fig::string& value, const std::map<K, T>& mapping)
+	inline EnumFlags<K> enum_deserialize_flags(fig::string_view value, const std::map<K, T>& mapping)
 	{
 		return EnumFlags<K>::Deserialize(decode_csv(value), mapping);
 	}

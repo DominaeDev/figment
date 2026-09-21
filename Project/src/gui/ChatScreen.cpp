@@ -46,7 +46,7 @@ namespace fig::gui
 
 		_pBehindChat = centerArea->CreateControl<BehindChat>();
 		_pBehindChat->SetWidth(Constants::GUI::ChatScrollWidth + 200);
-		_pBehindChat->SetColor(Color::Black.WithAlpha(0.0f));
+		_pBehindChat->SetColor(_Color(Colour::Black).WithAlpha(0.0f));
 
 		_pInfoPanel = CreateControl<InfoPanel>();
 		_pChatScroll = centerArea->CreateControl<ChatScroll>();
@@ -79,12 +79,12 @@ namespace fig::gui
 		auto pTextBoxBG = _pTextBox->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::TEXTBOX_BG);
 		pTextBoxBG->SetCornerScale(0.5f);
 		pTextBoxBG->SetExtend(7.0f);
-		pTextBoxBG->SetColor(Color::White);
+		pTextBoxBG->SetColor(Colour::White);
 
 		auto pTextBoxBorder = _pTextBox->SetBorderRenderer<TexturedBorderRenderer>(Resource::TEXTBOX_BORDER);
 		pTextBoxBorder->SetCornerScale(0.5f);
 		pTextBoxBorder->SetExtend(7.0f);
-		pTextBoxBorder->SetColor(fig::color { 0xb9, 0xb2, 0x8f, 0xFF });
+		pTextBoxBorder->SetColor(custom_color(0xb9b28f_rgb));
 
 		if constexpr (Disabled)
 		{

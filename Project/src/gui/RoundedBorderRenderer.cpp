@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, fig::color color) : CustomRenderer(color),
+	RoundedBorderRenderer::RoundedBorderRenderer(float radius, float thickness, fig::color_ref color) : CustomRenderer(color),
 		_thickness(thickness),
 		_radius(radius)
 	{
@@ -104,12 +104,7 @@ namespace fig::gui
 		if (radius <= 0.0f)
 			return;
 
-		fig::colorf color = {
-			_color.r / 255.0f,
-			_color.g / 255.0f,
-			_color.b / 255.0f,
-			1.0f,
-		};
+		fig::colorf color = (*_color).WithAlpha(1.0f);
 
 		_lastRect = rect;
 

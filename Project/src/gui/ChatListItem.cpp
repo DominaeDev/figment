@@ -21,10 +21,10 @@ namespace fig::gui
 		SetForegroundColor(Color::SidePanelForeground);
 		SetBackgroundColor(0xf4f2ec_rgb);
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
-		pBGRenderer->SetColor(GetBackgroundColor());
+		pBGRenderer->SetColor(custom_color(GetBackgroundColor()));
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
-		pBorder->SetColor(Color::LineColor);
+		pBorder->SetColor(Colour::LineColor);
 
 		// Title
 		_pTitle = CreateControl<StaticText>("", FontFace::Bold, 14.0, false);
@@ -158,7 +158,7 @@ namespace fig::gui
 		{
 			_bHovered = bHovered;
 			SetBackgroundColor(_bHovered ? 0xfdfcfa_rgb : 0xf4f2ec_rgb);
-			GetBackgroundRenderer()->SetColor(_bHovered ? 0xfdfcfa_rgb : 0xf4f2ec_rgb);
+			GetBackgroundRenderer()->SetColor(_bHovered ? custom_color(0xfdfcfa_rgb) : custom_color(0xf4f2ec_rgb));
 		}
 		_pTitle->SetBackgroundColor(GetBackgroundColor());
 		_pMessage->SetBackgroundColor(GetBackgroundColor());

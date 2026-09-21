@@ -7,15 +7,11 @@ namespace fig::gui
 {
 	AddImageButton::AddImageButton(ControlPtr pParent, fig::string_view label) : Control(pParent), MouseEventHandler(this)
 	{
-//		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
-//		pBGRenderer->SetColor(0xEFECE3_rgb);
-//		SetBackgroundColor(0xEFECE3_rgb);
-
 		auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBorderRenderer->SetColor(0xe0dccb_rgb);
+		pBorderRenderer->SetColor(custom_color(0xe0dccb_rgb));
 
 		_pLabel = CreateControl<StaticText>(label, FontFace::Italic, Constants::GUI::DefaultFontSize, true);
-		_pLabel->SetForegroundColor(0x9d9584_rgb);
+		_pLabel->SetForegroundColor(custom_color(0x9d9584_rgb));
 
 		SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);
 	}

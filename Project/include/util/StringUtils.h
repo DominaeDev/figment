@@ -79,10 +79,12 @@ namespace fig
 	fig::string fixed_to_string(fig::fixed value);
 	bool string_to_bool(const fig::string_view& s, bool default_value);
 	int32_t string_to_int(const fig::string_view& s, int32_t default_value);
+	int32_t string_to_int_base(const fig::string_view& s, int32_t default_value, int32_t base);
 	float string_to_float(const fig::string_view& s, float default_value);
 	fig::fixed string_to_fixed(const fig::string_view& s, fig::fixed default_value);
 	std::optional<bool> string_to_bool(const fig::string_view& s);
 	std::optional<int32_t> string_to_int(const fig::string_view& s);
+	std::optional<int32_t> string_to_int_base(const fig::string_view& s, int32_t base);
 	std::optional<float> string_to_float(const fig::string_view& s);
 	std::optional<fig::fixed> string_to_fixed(const fig::string_view& s);
 

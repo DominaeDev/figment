@@ -13,7 +13,7 @@ namespace fig::gui
 		if (bBorder)
 		{
 			auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-			pBorderRenderer->SetColor(Color::LineColor);
+			pBorderRenderer->SetColor(Colour::LineColor);
 		}
 
 		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
@@ -44,7 +44,7 @@ namespace fig::gui
 	void ButtonWithIcon::ShowBorder(bool bShow) noexcept
 	{
 		if (auto pBorder = GetBorderRenderer())
-			pBorder->SetColor(bShow ? GetThemeBorderColor() : Color::Transparent);
+			pBorder->SetColor(bShow ? custom_color(GetThemeBorderColor()) : Colour::Transparent);
 		_bShowBorder = bShow;
 	}
 }

@@ -15,9 +15,9 @@ namespace fig::gui
 	protected:
 		ThemedButton(ControlPtr pParent);
 
-		const fig::color& GetThemeForeground() const noexcept;
-		const fig::color& GetThemeBackground() const noexcept;
-		const fig::color& GetThemeBorderColor() const noexcept;
+		fig::color_ref GetThemeForeground() const noexcept;
+		fig::color_ref GetThemeBackground() const noexcept;
+		fig::color_ref GetThemeBorderColor() const noexcept;
 
 		void OnAfterLayout() override;
 		EventResult OnEvent(fig::event& event) override;

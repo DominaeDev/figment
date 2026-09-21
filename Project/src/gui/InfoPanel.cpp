@@ -41,7 +41,7 @@ namespace fig::gui
 		_pCharacterDetails = _pExpandedRoot->CreateControl<CharacterDetailsPanel>();
 		
 		_pBottomPanel = _pExpandedRoot->CreateControl<Panel>();
-		_pBottomPanel->SetBorderRenderer<LineBorderRenderer>(Color::LineColor, Direction::North);
+		_pBottomPanel->SetBorderRenderer<LineBorderRenderer>(Colour::LineColor, Direction::North);
 		_pBottomPanel->SetHeight(180);
 
 		auto pMainSizer = _pExpandedRoot->SetSizer<VerticalSizer>();

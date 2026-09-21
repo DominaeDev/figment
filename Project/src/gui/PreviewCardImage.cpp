@@ -20,7 +20,7 @@ namespace fig::gui
 		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBorder->SetColor(Color::LineColor);
+		pBorder->SetColor(Colour::LineColor);
 	}
 
 	void PreviewCardImage::SetImage(const fig::uuid& assetId)
