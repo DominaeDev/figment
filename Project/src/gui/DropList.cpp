@@ -8,16 +8,16 @@ namespace fig::gui
 {
 	DropListBase::DropListBase(ControlPtr pParent) : Control(pParent), MouseEventHandler(this)
 	{
-		SetForegroundColor(Color::TextBoxForeground);
-		SetBackgroundColor(Color::TextBoxBackground);
+		SetForegroundColor(Colour::TextBoxForeground);
+		SetBackgroundColor(Colour::TextBoxBackground);
 		
 		_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
-		_pText->SetForegroundColor(Color::TextBoxForeground);
+		_pText->SetForegroundColor(Colour::TextBoxForeground);
 		_pText->EnableEllipsis(true);
 		_pText->SetX(8);
 
 		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
-		_pArrow->SetForegroundColor(Color::Icon);
+		_pArrow->SetForegroundColor(Colour::Icon);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetExtend(0.0f);
@@ -49,14 +49,14 @@ namespace fig::gui
 
 	void DropListBase::OnEnabled(bool bEnabled)
 	{
-		SetForegroundColor(bEnabled ? Color::TextBoxForeground : Color::DisabledForeground);
-		SetBackgroundColor(bEnabled ? Color::TextBoxBackground : Color::DisabledBackground);
+		SetForegroundColor(bEnabled ? Colour::TextBoxForeground : Colour::DisabledForeground);
+		SetBackgroundColor(bEnabled ? Colour::TextBoxBackground : Colour::DisabledBackground);
 		_pText->SetForegroundColor(GetForegroundColor());
 		_pText->SetBackgroundColor(GetBackgroundColor());
 
 		GetBackgroundRenderer()->SetColor(bEnabled ? Colour::White : Colour::DisabledBackground);
 		GetBorderRenderer()->SetColor(bEnabled ? Colour::LineColor : Colour::DisabledLineColor);
-		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
+		_pArrow->SetForegroundColor(bEnabled ? Colour::Icon : Colour::DisabledForeground);
 
 		MouseEventHandler::Enable(bEnabled);
 	}

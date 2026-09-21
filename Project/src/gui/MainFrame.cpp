@@ -36,8 +36,8 @@ namespace fig::gui
 	{
 		s_pInstance = this;
 
-		SetForegroundColor(Color::Black);
-		SetBackgroundColor(Color::AppBackground);
+		SetForegroundColor(Colour::Black);
+		SetBackgroundColor(Colour::AppBackground);
 
 		_pMainArea = CreateControl<Area>();
 		_pSidePanel = CreateControl<SidePanel>();
@@ -91,6 +91,8 @@ namespace fig::gui
 			if (auto pSession = pLLM->GetSession().lock())
 				pSession->Update(fElapsed);
 		}
+
+		CycleColors(); //! @temp
 	}
 
 	void MainFrame::OnRender(fig::renderer_ptr pRenderer)

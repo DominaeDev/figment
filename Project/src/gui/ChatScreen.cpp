@@ -46,7 +46,7 @@ namespace fig::gui
 
 		_pBehindChat = centerArea->CreateControl<BehindChat>();
 		_pBehindChat->SetWidth(Constants::GUI::ChatScrollWidth + 200);
-		_pBehindChat->SetColor(_Color(Colour::Black).WithAlpha(0.0f));
+		_pBehindChat->SetColor(custom_color(fig::color(0, 0, 0, 0)));
 
 		_pInfoPanel = CreateControl<InfoPanel>();
 		_pChatScroll = centerArea->CreateControl<ChatScroll>();
@@ -136,8 +136,7 @@ namespace fig::gui
 			pUnderSlider->SetValue(0.0f);
 			pUnderSlider->SetPosition(8, 8 + 20 * 4);
 			pUnderSlider->SetDelegate([this](float value) {
-				auto color = Color::Black.WithAlpha(value);
-				_pBehindChat->SetColor(color);
+				_pBehindChat->SetColor(Colour::Black, value);
 			});
 
 			auto pChatSlider = CreateControl<Slider>();

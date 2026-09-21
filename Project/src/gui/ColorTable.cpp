@@ -50,4 +50,24 @@ namespace fig::gui
 		assert(color >= (Colour)0 and color < Colour::Count);
 		return fig::color_ref { &_ColorTable[static_cast<size_t>(color)] };
 	}
+
+	void CycleColors()
+	{
+		if constexpr (Debugging and Disabled)
+		{
+			for (auto& color : _ColorTable)
+			{
+				color.r = color.r + 1;
+				color.g = color.g - 1;
+				color.b = color.b + 2;
+			}
+
+			for (auto& kvp : _CustomColors)
+			{
+				kvp.second.r = kvp.second.r + 1;
+				kvp.second.g = kvp.second.g - 1;
+				kvp.second.b = kvp.second.b + 2;
+			}
+		}
+	}
 }

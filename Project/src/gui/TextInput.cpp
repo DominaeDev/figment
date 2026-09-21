@@ -186,8 +186,8 @@ namespace fig::gui
 	TextInput::TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode) : Control(pParent),
 		_mode { mode }
 	{
-		SetForegroundColor(Color::TextBoxForeground);
-		SetBackgroundColor(Color::TextBoxBackground);
+		SetForegroundColor(Colour::TextBoxForeground);
+		SetBackgroundColor(Colour::TextBoxBackground);
 
 		_pFont = Fonts::GetFont(fontFace, ptSize);
 		_pPlaceholder = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
@@ -293,10 +293,9 @@ namespace fig::gui
 		{
 			if (auto highlights = GetHighlights(); not highlights.empty())
 			{
-				if (_bFocused)
-					SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackground.r, Color::TextSelectionBackground.g, Color::TextSelectionBackground.b, Color::TextSelectionBackground.a);
-				else
-					SDL_SetRenderDrawColor(pRenderer, Color::TextSelectionBackgroundInactive.r, Color::TextSelectionBackgroundInactive.g, Color::TextSelectionBackgroundInactive.b, Color::TextSelectionBackgroundInactive.a);
+				fig::color_ref selectionColor = _bFocused ? Colour::TextSelectionBackground : Colour::TextSelectionBackgroundInactive;
+				SDL_SetRenderDrawColor(pRenderer, selectionColor->r, selectionColor->g, selectionColor->b, selectionColor->a);
+
 				for (auto& highlight_rect : highlights)
 				{
 					highlight_rect.w = std::max(highlight_rect.w, 3.0f);
@@ -347,7 +346,7 @@ namespace fig::gui
 	void TextInput::DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y)
 	{
 		auto fgColor = GetForegroundColor();
-		TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
+		TTF_SetTextColor(pText, fgColor->r, fgColor->g, fgColor->b, fgColor->a);
 
 		auto& rect = GetRect();
 		int xx = rect.x + GetMarginLeft() + x;
@@ -362,8 +361,8 @@ namespace fig::gui
 		if (not _pPlaceholder->text or _bFocused)
 			return;
 
-		auto fgColor = Color::DisabledForeground;
-		TTF_SetTextColor(_pPlaceholder, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
+		auto fgColor = _Color(Colour::DisabledForeground);
+		TTF_SetTextColor(_pPlaceholder, fgColor->r, fgColor->g, fgColor->b, fgColor->a);
 
 		auto& rect = GetRect();
 		int xx = rect.x + GetMarginLeft();
@@ -473,7 +472,7 @@ namespace fig::gui
 				line_rect.y += clientRect.y + _composition_line * _lineHeight + font_height;
 				line_rect.h = 1.0f;
 				ApplyScroll(line_rect);
-				SDL_SetRenderDrawColor(pRenderer, fgColor.r, fgColor.g, fgColor.b, 0xFF);
+				SDL_SetRenderDrawColor(pRenderer, fgColor->r, fgColor->g, fgColor->b, 0xFF);
 				SDL_RenderFillRect(pRenderer, &line_rect);
 			}
 			SDL_free(substrings);
@@ -494,7 +493,7 @@ namespace fig::gui
 					line_rect.h = 2.0f;
 					ApplyScroll(line_rect);
 
-					SDL_SetRenderDrawColor(pRenderer, fgColor.r, fgColor.g, fgColor.b, 0xFF);
+					SDL_SetRenderDrawColor(pRenderer, fgColor->r, fgColor->g, fgColor->b, 0xFF);
 					SDL_RenderFillRect(pRenderer, &line_rect);
 				}
 				SDL_free(substrings);
@@ -1785,11 +1784,11 @@ namespace fig::gui
 		{
 			SetFocus(false);
 			Deselect();
-			SetForegroundColor(Color::DisabledForeground);
+			SetForegroundColor(Colour::DisabledForeground);
 		}
 		else
 		{
-			SetForegroundColor(Color::Black);
+			SetForegroundColor(Colour::Black);
 		}
 	}
 

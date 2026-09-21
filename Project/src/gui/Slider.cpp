@@ -13,17 +13,17 @@ namespace fig::gui
 		SetSize(200, 9);
 
 		_pBar = CreateControl<TexturedBorder>(Resource::SLIDER_BAR_BG, 4);
-		_pBar->SetForegroundColor(0xf4f2ec80_rgba);
+		_pBar->SetForegroundColor(custom_color(0xf4f2ec80_rgba));
 		_pFill = _pBar->CreateControl<TexturedBorder>(Resource::SLIDER_BAR_BG, 4);
-		_pFill->SetForegroundColor(0x57caff_rgb);
+		_pFill->SetForegroundColor(custom_color(0x57caff_rgb));
 
 		_pBarBorder = _pBar->CreateControl<TexturedBorder>(Resource::SLIDER_BAR_BORDER, 4);
-		_pBarBorder->SetForegroundColor(Color::LineColor);
+		_pBarBorder->SetForegroundColor(Colour::LineColor);
 		_pBar->SetSizer<FillParentSizer>()->Add(_pBarBorder);
 
-		_pThumb = CreateControl<Image>(Resource::SLIDER_THUMB_BG, Color::AppBackground);
+		_pThumb = CreateControl<Image>(Resource::SLIDER_THUMB_BG, Colour::AppBackground);
 		_pThumb->CenterVertically();
-		_pThumbBorder = _pThumb->CreateControl<Image>(Resource::SLIDER_THUMB_BORDER, Color::LineColor);
+		_pThumbBorder = _pThumb->CreateControl<Image>(Resource::SLIDER_THUMB_BORDER, Colour::LineColor);
 		_pThumbBorder->FillParent();
 		_thumbHalfSize = _pThumb->GetTextureSize().x / 2;
 
@@ -119,9 +119,9 @@ namespace fig::gui
 
 	void Slider::OnEnabled(bool bEnabled)
 	{
-		_pFill->SetForegroundColor(bEnabled ? 0x57caff_rgb : Color::DisabledBackground);
-		_pBarBorder->SetForegroundColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
-		_pThumbBorder->SetForegroundColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
+		_pFill->SetForegroundColor(bEnabled ? custom_color(0x57caff_rgb) : Colour::DisabledBackground);
+		_pBarBorder->SetForegroundColor(bEnabled ? Colour::LineColor : Colour::DisabledLineColor);
+		_pThumbBorder->SetForegroundColor(bEnabled ? Colour::LineColor : Colour::DisabledLineColor);
 	}
 
 	void Slider::OnSize()

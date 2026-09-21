@@ -9,7 +9,7 @@ namespace fig::gui
 	ChatBackground::ChatBackground(ControlPtr parent) : Control(parent)
 	{
 		EnableClipping(true);
-		SetBackgroundColor(Color::Transparent);
+		SetBackgroundColor(Colour::Transparent);
 	}
 
 	void ChatBackground::SetBrightness(float value)

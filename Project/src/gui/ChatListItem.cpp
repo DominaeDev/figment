@@ -18,8 +18,8 @@ namespace fig::gui
 		SetHeight(60);
 
 		// Background
-		SetForegroundColor(Color::SidePanelForeground);
-		SetBackgroundColor(0xf4f2ec_rgb);
+		SetForegroundColor(Colour::SidePanelForeground);
+		SetBackgroundColor(custom_color(0xf4f2ec_rgb));
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
 		pBGRenderer->SetColor(custom_color(GetBackgroundColor()));
 
@@ -38,7 +38,7 @@ namespace fig::gui
 
 		// Timestamp
 		_pTimestamp = CreateControl<StaticText>("", FontFace::Italic, 11.0, true);
-		_pTimestamp->SetForegroundColor(Color::SidePanelForeground.WithAlpha(0.5f));
+		_pTimestamp->SetForegroundColor(custom_color((*fig::color_ref(Colour::SidePanelForeground)).WithAlpha(0.5f)));
 		_pTimestamp->SetY(8);
 		_pTimestamp->SetMaxWidth(100);
 
@@ -157,7 +157,7 @@ namespace fig::gui
 		if (_bHovered != bHovered)
 		{
 			_bHovered = bHovered;
-			SetBackgroundColor(_bHovered ? 0xfdfcfa_rgb : 0xf4f2ec_rgb);
+			SetBackgroundColor(_bHovered ? custom_color(0xfdfcfa_rgb) : custom_color(0xf4f2ec_rgb));
 			GetBackgroundRenderer()->SetColor(_bHovered ? custom_color(0xfdfcfa_rgb) : custom_color(0xf4f2ec_rgb));
 		}
 		_pTitle->SetBackgroundColor(GetBackgroundColor());

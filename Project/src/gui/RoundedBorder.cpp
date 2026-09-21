@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	RoundedBorder::RoundedBorder(ControlPtr pParent, float radius, float thickness, fig::color color) : Control(pParent),
+	RoundedBorder::RoundedBorder(ControlPtr pParent, float radius, float thickness, fig::color_ref color) : Control(pParent),
 		_thickness(thickness),
 		_radius(radius),
 		_color(color)
@@ -21,9 +21,10 @@ namespace fig::gui
 		SDL_RenderGeometry(pRenderer, _pTexture, _vertices.data(), toI(_vertices.size()), _indices.data(), toI(_indices.size()));
 	}
 
-	void RoundedBorder::SetColor(fig::color color)
+	void RoundedBorder::SetColor(fig::color_ref color)
 	{
 		_color = color;
+		_lastRect = {};
 	}
 
 	constexpr int32_t corner_triangles = 8;
@@ -111,12 +112,7 @@ namespace fig::gui
 		if (radius <= 0.0f)
 			return;
 
-		fig::colorf color = {
-			_color.r / 255.0f,
-			_color.g / 255.0f,
-			_color.b / 255.0f,
-			1.0f,
-		};
+		fig::colorf color = (*_color).WithAlpha(1.0f);
 
 		_lastRect = rect;
 

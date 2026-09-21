@@ -11,10 +11,10 @@ namespace fig
 {
 	class color_ref
 	{
-		static constexpr const fig::color null { 0xCDCDCD00_rgba };
+		static constexpr const fig::color null_value { 0xCDCDCD00_rgba };
 	public:
 		constexpr color_ref() noexcept :
-			_ptr { &null }
+			_ptr { &null_value }
 		{
 		}
 		constexpr color_ref(fig::color* color) noexcept :
@@ -34,22 +34,25 @@ namespace fig
 
 		constexpr color_ref(const color_ref&) = default;
 		color_ref& operator= (const color_ref& other) = default;
-		color_ref& operator= (color_ref&& other)
+		color_ref& operator= (color_ref&& other) noexcept
 		{
 			_ptr = other._ptr;
+			return *this;
 		};
 
 		const fig::color& operator*() const noexcept { return *_ptr; }
 		const fig::color* const operator->() const noexcept { return _ptr; }
 
-		fig::color_ref WithAlpha(uint8_t alpha) const noexcept;
-		
+		constexpr bool IsDefined() const noexcept { return _ptr != &null_value; }
+		explicit operator bool() const noexcept { return IsDefined(); }
+
+/*		fig::color_ref WithAlpha(uint8_t alpha) const noexcept;
 		template<std::floating_point T>
 		constexpr fig::color_ref WithAlpha(T alpha) const noexcept
 		{
 			auto alpha_u8 = static_cast<uint8_t>(std::clamp(alpha, T(0), T(1)) * T(255));
 			return WithAlpha(alpha_u8);
-		}
+		}*/
 
 		inline constexpr operator fig::color() const noexcept
 		{
@@ -70,6 +73,6 @@ namespace fig
 		const fig::color* _ptr;
 
 	public:
-		static color_ref nullref;
+		static const color_ref nullref;
 	};
 }

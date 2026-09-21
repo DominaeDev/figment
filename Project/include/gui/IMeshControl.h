@@ -17,8 +17,8 @@ namespace fig::gui
 		virtual void RefreshGeometry(const fig::rectf& rect) = 0;
 
 		void ClearMesh(size_t nVertices = 0uz, size_t nIndices = 0uz);
-		void AddPoint(float x, float y, float u, float v, fig::color color = Color::White);
-		void AddPoint(fig::pointf pos, fig::pointf uv, fig::color color = Color::White);
+		void AddPoint(float x, float y, float u, float v, fig::colorf color = 0xFFFFFF_rgb);
+		void AddPoint(fig::pointf pos, fig::pointf uv, fig::colorf color = 0xFFFFFF_rgb);
 		void AddQuad() noexcept;
 		void AddQuad(int32_t p0, int32_t p1, int32_t p2, int32_t p3) noexcept;
 		void AddTriangle() noexcept;

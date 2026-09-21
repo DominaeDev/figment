@@ -15,10 +15,6 @@ namespace fig::gui
 	constexpr int32_t MenuItemHeight = 30;
 	constexpr int32_t MenuSeparatorHeight = 5;
 	constexpr int32_t MenuSeparatorMargin = 8;
-	constexpr fig::color MenuBackgroundColor = Color::White;
-	constexpr fig::color MenuBorderColor = Color::LineColor;
-	constexpr fig::color MenuItemHoverColor = 0xf7f5f1_rgb;
-	constexpr fig::color MenuItemPressedColor = 0xefece3_rgb;
 	constexpr float AutoExpandDelay = 0.3f;
 	constexpr float AutoCollapseDelay = 0.3f;
 	constexpr const char* Separator = "----";
@@ -54,13 +50,13 @@ namespace fig::gui
 	Menu::Menu(Frame* pHostFrame) : Overlay(pHostFrame)
 	{
 		auto pBackground = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
-		pBackground->SetColor(custom_color(MenuBackgroundColor));
+		pBackground->SetColor(Colour::MenuBackgroundColor);
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
 		pBorder->SetColor(Colour::LineColor);
 
-		SetBackgroundColor(Color::White);
-		SetForegroundColor(Color::Black);
+		SetBackgroundColor(Colour::White);
+		SetForegroundColor(Colour::Black);
 
 		SetSize(MenuWidth, MenuItemHeight);
 		SetVisible(false);
@@ -193,7 +189,7 @@ namespace fig::gui
 		auto pItemRoot = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::ROUNDED_BACKGROUND_6PX), 8);
 		pItemRoot->SetPosition(MenuMargin, MenuMargin + _itemY);
 		pItemRoot->SetSize(GetWidth() - MenuMargin * 2, MenuItemHeight);
-		pItemRoot->SetForegroundColor(MenuBackgroundColor);
+		pItemRoot->SetForegroundColor(Colour::MenuBackgroundColor);
 
 		if (_style == MenuStyle::Default)
 		{
@@ -202,7 +198,7 @@ namespace fig::gui
 			pItemLabel->SetPosition(32, 5);
 			pItemLabel->SetMaxWidth(pItemRoot->GetWidth() - 36);
 			pItemLabel->SetWidth(pItemRoot->GetWidth() - 36);
-			pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+			pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Colour::SidePanelForeground : Colour::DisabledForeground);
 			menuItem.pLabel = pItemLabel;
 		}
 		else if (_style == MenuStyle::DropList)
@@ -212,30 +208,30 @@ namespace fig::gui
 			pItemLabel->SetPosition(6, 3);
 			pItemLabel->SetMaxWidth(pItemRoot->GetWidth() - 12);
 			pItemLabel->SetWidth(pItemRoot->GetWidth() - 12);
-			pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Color::SidePanelForeground : Color::DisabledForeground);
+			pItemLabel->SetForegroundColor(menuItem.IsEnabled() ? Colour::SidePanelForeground : Colour::DisabledForeground);
 			menuItem.pLabel = pItemLabel;
 		}
 
 		if (menuItem._bCheckable && menuItem._bChecked)
 		{
 			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CHECKMARK));
-			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::DisabledForeground);
+			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colour::Icon : Colour::DisabledForeground);
 			pIcon->SetPosition(4, 4);
 		}
 		else if (menuItem._icon != Resource::NONE)
 		{
 			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(menuItem._icon));
 			if (menuItem._bMonochromeIcon)
-				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::DisabledForeground);
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colour::Icon : Colour::DisabledForeground);
 			else
-				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::White : Color::White.WithAlpha(0x80));
+				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Colour::White : custom_color((*_Color(Colour::White)).WithAlpha(0x80)));
 			pIcon->SetPosition(4, 4);
 		}
 
 		if (menuItem.HasSubMenu())
 		{
 			auto pArrow = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::SUBMENU_ARROW));
-			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::DisabledForeground);
+			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Colour::Icon : Colour::DisabledForeground);
 			pArrow->SetX(pItemRoot->GetWidth() - pArrow->GetWidth());
 			pArrow->CenterVertically();
 		}
@@ -252,7 +248,7 @@ namespace fig::gui
 		auto pItemRoot = CreateControl<MenuSeparator>();
 		pItemRoot->SetPosition(MenuSeparatorMargin, MenuMargin + _itemY);
 		pItemRoot->SetSize(MenuWidth - MenuSeparatorMargin * 2, MenuSeparatorHeight);
-		pItemRoot->SetForegroundColor(Color::LineColor);
+		pItemRoot->SetForegroundColor(Colour::LineColor);
 
 		_itemY += MenuSeparatorHeight;
 		SetSize(MenuWidth, _itemY + MenuMargin * 2);
@@ -402,24 +398,24 @@ namespace fig::gui
 		switch (state)
 		{
 		case MenuItem::State::Default:
-			menuItem.pControl->SetForegroundColor(MenuBackgroundColor);
+			menuItem.pControl->SetForegroundColor(Colour::MenuBackgroundColor);
 			if (menuItem.pLabel)
-				menuItem.pLabel->SetBackgroundColor(MenuBackgroundColor);
+				menuItem.pLabel->SetBackgroundColor(Colour::MenuBackgroundColor);
 			break;
 		case MenuItem::State::Hover:
-			menuItem.pControl->SetForegroundColor(MenuItemHoverColor);
+			menuItem.pControl->SetForegroundColor(Colour::MenuItemHoverColor);
 			if (menuItem.pLabel)
-				menuItem.pLabel->SetBackgroundColor(MenuItemHoverColor);
+				menuItem.pLabel->SetBackgroundColor(Colour::MenuItemHoverColor);
 			break;
 		case MenuItem::State::Pressed:
-			menuItem.pControl->SetForegroundColor(MenuItemPressedColor);
+			menuItem.pControl->SetForegroundColor(Colour::MenuItemPressedColor);
 			if (menuItem.pLabel)
-				menuItem.pLabel->SetBackgroundColor(MenuItemPressedColor);
+				menuItem.pLabel->SetBackgroundColor(Colour::MenuItemPressedColor);
 			break;
 		case MenuItem::State::Disabled:
-			menuItem.pControl->SetForegroundColor(MenuBackgroundColor);
+			menuItem.pControl->SetForegroundColor(Colour::MenuBackgroundColor);
 			if (menuItem.pLabel)
-				menuItem.pLabel->SetBackgroundColor(MenuBackgroundColor);
+				menuItem.pLabel->SetBackgroundColor(Colour::MenuBackgroundColor);
 			break;
 		}
 	}

@@ -28,12 +28,12 @@ namespace fig::gui
 				auto fgColor = GetForegroundColor();
 
 				if (fgColor.IsDefined())
-					SDL_SetTextureColorMod(_pTexture, fgColor.r, fgColor.g, fgColor.b);
+					SDL_SetTextureColorMod(_pTexture, fgColor->r, fgColor->g, fgColor->b);
 				else
 					SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
 
-				if (fgColor.IsDefined() && fgColor.a != 0)
-					SDL_SetTextureAlphaMod(_pTexture, fgColor.a);
+				if (fgColor.IsDefined() && fgColor->a != 0)
+					SDL_SetTextureAlphaMod(_pTexture, fgColor->a);
 				else
 					SDL_SetTextureAlphaMod(_pTexture, 0xFF);
 				
@@ -44,12 +44,12 @@ namespace fig::gui
 		}
 	}
 
-	void IMeshControl::AddPoint(float x, float y, float u, float v, fig::color color)
+	void IMeshControl::AddPoint(float x, float y, float u, float v, fig::colorf color)
 	{
 		_vertices.push_back(fig::vertex { fig::pointf { x, y }, color, fig::pointf { u, v } });
 	}
 
-	void IMeshControl::AddPoint(fig::pointf pos, fig::pointf uv, fig::color color)
+	void IMeshControl::AddPoint(fig::pointf pos, fig::pointf uv, fig::colorf color)
 	{
 		_vertices.push_back(fig::vertex { pos, color,  uv });
 	}

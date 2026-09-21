@@ -8,7 +8,7 @@ namespace fig::gui
 	CheckBox::CheckBox(ControlPtr pParent, fig::string_view label, bool bOn) : Control(pParent), MouseEventHandler(this),
 		_bOn { bOn }
 	{
-		SetForegroundColor(0x4E4431_rgb);
+		SetForegroundColor(custom_color(0x4E4431_rgb));
 
 		_pBox = CreateControl<Panel>();
 		_pBox->SetSize(28, 28);
@@ -19,7 +19,7 @@ namespace fig::gui
 		pBoxBorder->SetColor(Colour::LineColor);
 
 		_pTick = _pBox->CreateControl<Image>(Resource::ICON_CHECKMARK);
-		_pTick->SetForegroundColor(Color::Icon);
+		_pTick->SetForegroundColor(Colour::Icon);
 		_pTick->Center();
 		_pTick->SetVisible(_bOn);
 
@@ -83,20 +83,20 @@ namespace fig::gui
 		case ButtonState::Hover:
 			_pBox->GetBackgroundRenderer()->SetColor(Colour::TextBoxBackground);
 			_pBox->GetBorderRenderer()->SetColor(Colour::LineColor);
-			_pLabel->SetForegroundColor(0x4E4431_rgb);
-			_pTick->SetForegroundColor(Color::Icon);
+			_pLabel->SetForegroundColor(custom_color(0x4E4431_rgb));
+			_pTick->SetForegroundColor(Colour::Icon);
 			break;
 		case ButtonState::Pressed:
 			_pBox->GetBackgroundRenderer()->SetColor(custom_color(0xF0F0F0_rgb));
 			_pBox->GetBorderRenderer()->SetColor(Colour::LineColor);
-			_pLabel->SetForegroundColor(0x4E4431_rgb);
-			_pTick->SetForegroundColor(Color::Icon);
+			_pLabel->SetForegroundColor(custom_color(0x4E4431_rgb));
+			_pTick->SetForegroundColor(Colour::Icon);
 			break;
 		case ButtonState::Disabled:
 			_pBox->GetBackgroundRenderer()->SetColor(Colour::DisabledBackground);
 			_pBox->GetBorderRenderer()->SetColor(Colour::DisabledLineColor);
-			_pLabel->SetForegroundColor(0x808080C0_rgba);
-			_pTick->SetForegroundColor(Color::DisabledForeground);
+			_pLabel->SetForegroundColor(custom_color(0x808080C0_rgba));
+			_pTick->SetForegroundColor(Colour::DisabledForeground);
 			break;
 		}
 	}

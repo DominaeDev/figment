@@ -4,13 +4,13 @@
 
 namespace fig::gui
 {
-	VerticalGradient::VerticalGradient(ControlPtr pParent, fig::color colorTop, fig::color colorBottom) : Control(pParent)
+	VerticalGradient::VerticalGradient(ControlPtr pParent, fig::color_ref colorTop, fig::color_ref colorBottom) : Control(pParent)
 	{
 		SetColors(colorTop, colorBottom);
 		_pTexture = AppResources::GetTexture(Resource::BLANK);
 	}
 
-	void VerticalGradient::SetColors(fig::color colorTop, fig::color colorBottom)
+	void VerticalGradient::SetColors(fig::color_ref colorTop, fig::color_ref colorBottom)
 	{
 		_colorTop = colorTop;
 		_colorBottom = colorBottom;

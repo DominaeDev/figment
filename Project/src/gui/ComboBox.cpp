@@ -9,7 +9,7 @@ namespace fig::gui
 	ComboBox::ComboBox(ControlPtr pParent) : TextInput(pParent, FontFace::Default, Constants::GUI::DefaultFontSize), MouseEventHandler(this)
 	{
 		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
-		_pArrow->SetForegroundColor(Color::Icon);
+		_pArrow->SetForegroundColor(Colour::Icon);
 
 		SetMargins(8, 4, 38, 6);
 		SetSize(300, 32);
@@ -70,7 +70,7 @@ namespace fig::gui
 		TextInput::OnEnabled(bEnabled);
 		GetBackgroundRenderer()->SetColor(bEnabled ? Colour::White : Colour::DisabledBackground);
 		GetBorderRenderer()->SetColor(bEnabled ? Colour::LineColor : Colour::DisabledLineColor);
-		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
+		_pArrow->SetForegroundColor(bEnabled ? Colour::Icon : Colour::DisabledForeground);
 
 		MouseEventHandler::Enable(bEnabled);
 	}

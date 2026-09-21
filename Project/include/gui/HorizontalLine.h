@@ -7,14 +7,14 @@ namespace fig::gui
 	class HorizontalLine : public Control
 	{
 	public:
-		HorizontalLine(ControlPtr pParent, fig::color color = Color::LineColor);
+		HorizontalLine(ControlPtr pParent, fig::color_ref color = Colour::LineColor);
 
-		void SetColor(const fig::color& color) { _color = color; };
+		void SetColor(fig::color_ref color) { _color = color; };
 
 	protected:
 		void OnRender(fig::renderer_ptr pRenderer) override;
 
 	private:
-		fig::color _color;
+		fig::color_ref _color;
 	};
 }

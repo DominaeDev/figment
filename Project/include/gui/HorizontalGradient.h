@@ -7,8 +7,8 @@ namespace fig::gui
 	class HorizontalGradient : public Control
 	{
 	public:
-		HorizontalGradient(ControlPtr pParent, fig::color colorLeft, fig::color colorRight);
-		void SetColors(fig::color colorLeft, fig::color colorRight);
+		HorizontalGradient(ControlPtr pParent, fig::color_ref colorLeft, fig::color_ref colorRight);
+		void SetColors(fig::color_ref colorLeft, fig::color_ref colorRight);
 
 	protected:
 		void OnUpdate(float fElapsed) override {};
@@ -16,8 +16,8 @@ namespace fig::gui
 
 		void RefreshGeometry(const fig::rect& rect);
 	private:
-		fig::color _colorLeft {};
-		fig::color _colorRight {};
+		fig::color_ref _colorLeft {};
+		fig::color_ref _colorRight {};
 		fig::rect _lastRect {};
 		fig::texture_ptr _pTexture;
 

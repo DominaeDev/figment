@@ -14,8 +14,8 @@ namespace fig::gui
 	{
 		SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);
 
-		SetForegroundColor(Color::White);
-		SetBackgroundColor(Color::White);
+		SetForegroundColor(Colour::White);
+		SetBackgroundColor(Colour::White);
 		SetBackgroundTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_DEFAULT));
 		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 
@@ -65,7 +65,7 @@ namespace fig::gui
 			constexpr float fScale = 0.75f;
 			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * fScale), toI(_pErrorIcon->GetTextureSize().y * fScale));
-			_pErrorIcon->SetForegroundColor(fig::color { 0xC0, 0xC0, 0xC0, });
+			_pErrorIcon->SetForegroundColor(custom_color(0xC0C0C0_rgb));
 			_pErrorIcon->Center();
 			_pErrorBG = AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY);
 			SetDirty();
@@ -89,12 +89,12 @@ namespace fig::gui
 			auto rect = GetDrawRect();
 
 			if (fgColor.IsDefined())
-				SDL_SetTextureColorMod(pTexture, fgColor.r, fgColor.g, fgColor.b);
+				SDL_SetTextureColorMod(pTexture, fgColor->r, fgColor->g, fgColor->b);
 			else
 				SDL_SetTextureColorMod(pTexture, 0xFF, 0xFF, 0xFF);
 
-			if (fgColor.IsDefined() && fgColor.a != 0)
-				SDL_SetTextureAlphaMod(pTexture, fgColor.a);
+			if (fgColor.IsDefined() && fgColor->a != 0)
+				SDL_SetTextureAlphaMod(pTexture, fgColor->a);
 			else
 				SDL_SetTextureAlphaMod(pTexture, 0xFF);
 
@@ -171,7 +171,7 @@ namespace fig::gui
 			{
 				auto bgColor = GetBackgroundColor();
 				SDL_SetRenderDrawBlendMode(pRenderer, blendMode);
-				SDL_SetRenderDrawColor(pRenderer, bgColor.r, bgColor.g, bgColor.b, 255);
+				SDL_SetRenderDrawColor(pRenderer, bgColor->r, bgColor->g, bgColor->b, 255);
 				SDL_RenderFillRect(pRenderer, NULL);
 				SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);
 			}

@@ -59,7 +59,7 @@ namespace fig::gui
 
 		enum class AddTagResult { Ok, Reject, Stop };
 		void ClearTags();
-		AddTagResult AddTag(const fig::string& tag, const fig::color& color = {});
+		AddTagResult AddTag(const fig::string& tag, fig::color_ref color = {});
 
 		void OnUpdate(float fElapsed) override;
 		void OnSize() override;
@@ -133,7 +133,7 @@ namespace fig::gui
 		struct PendingTag
 		{
 			fig::string tag;
-			fig::color color;
+			fig::color_ref color;
 		};
 		fig::string _pendingLabel {};
 		std::vector<PendingTag> _pendingTags {};

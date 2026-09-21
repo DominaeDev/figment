@@ -19,7 +19,7 @@ namespace fig::gui
 
 		_pLabel = CreateControl<StaticText>(label, FontFace::Default, 20, false);
 		_pLabel->SetForegroundColor(GetThemeForeground());
-		_pLabel->SetBackgroundColor(Color::Transparent);
+		_pLabel->SetBackgroundColor(Colour::Transparent);
 		_pLabel->EnableEllipsis(true);
 		_pLabel->SetPosition(60, 16);
 	}

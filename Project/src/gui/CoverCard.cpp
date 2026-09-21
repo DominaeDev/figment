@@ -26,7 +26,7 @@ namespace fig::gui
 		_searchIndex = std::make_unique<SearchIndex>();
 
 		_pHiddenBG = CreateControl<TexturedBorder>(Resource::CARD_FILL, 8);
-		_pHiddenBG->SetForegroundColor(fig::color { 0x9b896a, 0x30 });
+		_pHiddenBG->SetForegroundColor(custom_color(0x9b896a30_rgba));
 
 		SetCardSize(cardSize);
 		SetHidden(false);
@@ -50,7 +50,7 @@ namespace fig::gui
 		_pLargeFooter->SetSize(Large::Width, Large::FooterHeight);
 
 		_pLargeFooterFade = _pLargeFooter->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_BOTTOM_FADE), fig::corners { 16, 16, 64, 16 });
-		_pLargeFooterFade->SetForegroundColor(fig::color { 0, 0, 0, FadeAlpha });
+		_pLargeFooterFade->SetForegroundColor(custom_color(fig::color(0, 0, 0, FadeAlpha)));
 		_pLargeFooterFade->FillParent();
 		_pLargeFooterFade->SetVisible(false);
 
@@ -58,15 +58,15 @@ namespace fig::gui
 		_pLargeLabel = _pLargeFooter->CreateControl<StaticText>("", FontFace::CardHeader, 28.0, false);
 		_pLargeLabel->SetPosition(Large::InnerMargin, Large::FooterHeight - Large::InnerMargin - 68);
 		_pLargeLabel->SetSize(Large::Width - (Large::InnerMargin * 2), 80);
-		_pLargeLabel->SetForegroundColor(Color::White);
-		_pLargeLabel->SetBackgroundColor(Color::Transparent);
+		_pLargeLabel->SetForegroundColor(Colour::White);
+		_pLargeLabel->SetBackgroundColor(Colour::Transparent);
 		_pLargeLabel->EnableDropShadow(true);
 		_pLargeLabel->EnableEllipsis(true);
 
 		// Border (large)
 		auto pSimpleBorder = _pLargeRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
-		pSimpleBorder->SetForegroundColor(fig::color { 0, 0, 0, FadeAlpha });
+		pSimpleBorder->SetForegroundColor(custom_color(fig::color(0, 0, 0, FadeAlpha)));
 
 		// Styled border (large)
 		_pLargeBorder = _pLargeRoot->CreateControl<Image>(nullptr);
@@ -90,7 +90,7 @@ namespace fig::gui
 		pSmallFooter->SetSize(Small::Width, Small::FooterHeight);
 
 		_pSmallFooterFade = pSmallFooter->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_BOTTOM_FADE_SMALL), fig::corners { 16, 16, 40, 16 });
-		_pSmallFooterFade->SetForegroundColor(fig::color { 0, 0, 0, 0x80 });
+		_pSmallFooterFade->SetForegroundColor(custom_color(fig::color(0, 0, 0, 0x80)));
 		_pSmallFooterFade->FillParent();
 		_pSmallFooterFade->SetVisible(false);
 
@@ -98,15 +98,15 @@ namespace fig::gui
 		_pSmallLabel = pSmallFooter->CreateControl<StaticText>("", FontFace::CardHeader, 24.0, false);
 		_pSmallLabel->SetPosition(Small::InnerMargin, Small::FooterHeight - Small::InnerMargin - Small::TextY);
 		_pSmallLabel->SetSize(Small::Width - (Small::InnerMargin * 2), 40);
-		_pSmallLabel->SetForegroundColor(Color::White);
-		_pSmallLabel->SetBackgroundColor(Color::Transparent);
+		_pSmallLabel->SetForegroundColor(Colour::White);
+		_pSmallLabel->SetBackgroundColor(Colour::Transparent);
 		_pSmallLabel->EnableDropShadow(true);
 		_pSmallLabel->EnableEllipsis(true);
 
 		// Border (small)
 		auto pSmallSimpleBorder = _pSmallRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSmallSimpleBorder->FillParent();
-		pSmallSimpleBorder->SetForegroundColor(fig::color { 0, 0, 0, 0x80 });
+		pSmallSimpleBorder->SetForegroundColor(custom_color(fig::color(0, 0, 0, 0x80)));
 
 		// Styled border (small)
 		_pSmallBorder = _pSmallRoot->CreateControl<Image>(nullptr);
@@ -146,7 +146,7 @@ namespace fig::gui
 			float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
 			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
-			_pErrorIcon->SetForegroundColor(fig::color { 0xC0, 0xC0, 0xC0, });
+			_pErrorIcon->SetForegroundColor(custom_color(0xC0C0C0_rgb));
 			_pErrorIcon->Center();
 
 			CardImage::SetTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY));
@@ -214,17 +214,17 @@ namespace fig::gui
 			else
 				_pCounterBG->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 
-			_pCounterBG->SetForegroundColor(0xA0_rgba);
+			_pCounterBG->SetForegroundColor(custom_color(0x000000A0_rgba));
 
 			auto pCounterIcon = _pCounterBG->CreateControl<Image>(AppResources::GetTexture(Resource::CARD_ICON_CHAT_COUNTER));
 			pCounterIcon->SetPosition(6, 6);
-			pCounterIcon->SetForegroundColor(Color::White);
-			pCounterIcon->SetBackgroundColor(Color::Transparent);
+			pCounterIcon->SetForegroundColor(Colour::White);
+			pCounterIcon->SetBackgroundColor(Colour::Transparent);
 
 			_pChatCount = _pCounterBG->CreateControl<StaticText>("", FontFace::Default, 14.0, true);
 			_pChatCount->SetPosition(27, 3);
-			_pChatCount->SetForegroundColor(Color::White);
-			_pChatCount->SetBackgroundColor(Color::Transparent);
+			_pChatCount->SetForegroundColor(Colour::White);
+			_pChatCount->SetBackgroundColor(Colour::Transparent);
 		}
 
 		if (_pChatCount)
@@ -252,19 +252,19 @@ namespace fig::gui
 		else
 			_pNewIndicator->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 
-		_pNewIndicator->SetForegroundColor(0x1065b4E0_rgba);
+		_pNewIndicator->SetForegroundColor(custom_color(0x1065b4E0_rgba));
 
 		auto pLabel = _pNewIndicator->CreateControl<StaticText>(fig::string { fig::strings::UI::New }, FontFace::Default, 14.0, true);
 		pLabel->SetPosition(6, 3);
-		pLabel->SetForegroundColor(Color::White);
-		pLabel->SetBackgroundColor(Color::Transparent);
+		pLabel->SetForegroundColor(Colour::White);
+		pLabel->SetBackgroundColor(Colour::Transparent);
 
 		auto [w, h] = pLabel->MeasureText();
 		_pNewIndicator->SetSize(w + 12, 26);
 		_pNewIndicator->SetVisible(!_bHidden);
 	}
 
-	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, const fig::color& color)
+	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, fig::color_ref color)
 	{
 		if (!_bInitialized or !_bEnableTags)
 		{
@@ -304,17 +304,17 @@ namespace fig::gui
 
 		auto pTagBG = _pTagsRoot->CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
 		pTagBG->SetPosition(position);
-		pTagBG->SetForegroundColor(Color::Black.WithAlpha(0.7f));
+		pTagBG->SetForegroundColor(custom_color((*_Color(Colour::Black)).WithAlpha(0.7f)));
 
 		auto pLabel = _pTagsRoot->CreateControl<StaticText>(tag, FontFace::Default, 14.0, true);
 		pLabel->SetPosition(position.x + Large::Tags::InnerMargin, position.y + 3);
 		pLabel->EnableWordWrap(false);
 		pLabel->EnableEllipsis(true);
 		pLabel->SetMaxWidth(Large::Width - (position.x + Large::Tags::InnerMargin * 2 + Large::Tags::Margin));
-		if (color.IsDefined())
+		if (color)
 			pLabel->SetForegroundColor(color);
 		else
-			pLabel->SetForegroundColor(Color::White);
+			pLabel->SetForegroundColor(Colour::White);
 
 		auto [w, h] = pLabel->MeasureText();
 		pTagBG->SetSize(w + Large::Tags::InnerMargin * 2, 26);

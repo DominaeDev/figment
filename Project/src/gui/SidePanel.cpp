@@ -14,9 +14,9 @@ namespace fig::gui
 	SidePanel::SidePanel(ControlPtr pParent) : Control(pParent)
 	{
 		SetWidth(Constants::GUI::SidePanel::Width);
-		SetBackgroundColor(Color::SidePanelBackground);
+		SetBackgroundColor(Colour::SidePanelBackground);
 		
-		_pGradient = CreateControl<HorizontalGradient>(Color::SidePanelGradient.WithAlpha(0.0f), Color::SidePanelGradient.WithAlpha(0.8f));
+		_pGradient = CreateControl<HorizontalGradient>(custom_color((*_Color(Colour::SidePanelGradient)).WithAlpha(0.0f)), custom_color((*_Color(Colour::SidePanelGradient)).WithAlpha(0.8f)));
 
 		_pResizeHandle = CreateControl<ResizeHandle>(Direction::East);
 		_pResizeHandle->SetDelegate([this](fig::coord size) { Resize(size); });

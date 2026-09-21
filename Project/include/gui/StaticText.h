@@ -52,8 +52,8 @@ namespace fig::gui
 		void SetFont(FontFace fontFace, double ptSize = Constants::GUI::DefaultFontSize);
 		void SetFont(fig::font_ptr pFont);
 
-		void SetForegroundColor(fig::color color) override;
-		void SetBackgroundColor(fig::color color) override;
+		void SetForegroundColor(fig::color_ref color) override;
+		void SetBackgroundColor(fig::color_ref color) override;
 		void EnableDropShadow(bool bEnable) noexcept { _bDropShadow = bEnable; _bInvalidated = true; }
 		void EnableEllipsis(bool bEnable) noexcept { _bEllipsis = bEnable; _bInvalidated = true; }
 		void EnableWordWrap(bool bEnable) noexcept { _bWordWrap = bEnable; _bInvalidated = true; }

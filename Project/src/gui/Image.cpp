@@ -5,31 +5,31 @@
 
 namespace fig::gui
 {
-	Image::Image(ControlPtr pParent, fig::texture_ptr pTexture, fig::color tint) : Control(pParent),
+	Image::Image(ControlPtr pParent, fig::texture_ptr pTexture, fig::color_ref tint) : Control(pParent),
 		_pTexture(pTexture)
 	{
 		if (_pTexture)
 			SetSize(_pTexture->w, _pTexture->h);
 
 		SetForegroundColor(tint);
-		SetBackgroundColor(Color::Transparent);
+		SetBackgroundColor(Colour::Transparent);
 	}
 
-	Image::Image(ControlPtr pParent, Resource texture, fig::color tint) : Control(pParent)
+	Image::Image(ControlPtr pParent, Resource texture, fig::color_ref tint) : Control(pParent)
 	{
 		_pTexture = AppResources::GetTexture(texture);
 		if (_pTexture)
 			SetSize(_pTexture->w, _pTexture->h);
 
 		SetForegroundColor(tint);
-		SetBackgroundColor(Color::Transparent);
+		SetBackgroundColor(Colour::Transparent);
 	}
 
 	void Image::OnRender(fig::renderer_ptr pRenderer)
 	{
 		auto bgColor = GetBackgroundColor();
 		auto fgColor = GetForegroundColor();
-		if (bgColor.IsDefined() && bgColor.a != 0)
+		if (bgColor && bgColor->a != 0)
 			DrawBackground(pRenderer);
 
 		if (_pTexture)
@@ -37,12 +37,12 @@ namespace fig::gui
 			auto rect = GetDrawRect();
 
 			if (fgColor.IsDefined())
-				SDL_SetTextureColorMod(_pTexture, fgColor.r, fgColor.g, fgColor.b);
+				SDL_SetTextureColorMod(_pTexture, fgColor->r, fgColor->g, fgColor->b);
 			else
 				SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
 
-			if (fgColor.IsDefined() && fgColor.a != 0)
-				SDL_SetTextureAlphaMod(_pTexture, fgColor.a);
+			if (fgColor.IsDefined() && fgColor->a != 0)
+				SDL_SetTextureAlphaMod(_pTexture, fgColor->a);
 			else
 				SDL_SetTextureAlphaMod(_pTexture, 0xFF);
 

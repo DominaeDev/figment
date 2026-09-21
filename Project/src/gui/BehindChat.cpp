@@ -19,10 +19,10 @@ namespace fig::gui
 		pSizer->Add(_pBG, -1, SizerFlag::Fill);
 		pSizer->Add(_pRightGradient, 0, SizerFlag::Expand);
 
-		SetColor(Color::Black);
+		SetColor(Colour::Black);
 	}
 
-	void BehindChat::SetColor(fig::color color)
+	void BehindChat::SetColor(fig::color_ref color)
 	{
 		SetBackgroundColor(color);
 
@@ -30,16 +30,16 @@ namespace fig::gui
 		_pLeftGradient->SetForegroundColor(color);
 		_pRightGradient->SetForegroundColor(color);
 
-		SetVisible(color.a);
+		SetVisible(color->a);
 	}
 
-	void BehindChat::SetColor(fig::color color, float fAlpha)
+	void BehindChat::SetColor(fig::color_ref color, float fAlpha)
 	{
-		SetBackgroundColor(color.WithAlpha(fAlpha));
+		SetBackgroundColor(custom_color(color->WithAlpha(fAlpha)));
 	}
 
 	void BehindChat::SetAlpha(float fAlpha)
 	{
-		SetColor(GetBackgroundColor().WithAlpha(fAlpha));
+		SetColor(custom_color(GetBackgroundColor()->WithAlpha(fAlpha)));
 	}
 }

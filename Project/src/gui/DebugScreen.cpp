@@ -19,32 +19,32 @@ namespace fig::gui
 		if constexpr (false)
 		{
 			auto area = CreateControl<Panel>();
-			area->SetBackgroundColor(Color::Black);
+			area->SetBackgroundColor(Colour::Black);
 			area->SetPosition(200, 200);
 			area->SetSize(500, 500);
 
 			auto left = area->CreateControl<Panel>();
-			left->SetBackgroundColor(fig::color { 0xC0, 0, 0, 0xFF });
+			left->SetBackgroundColor(custom_color(0xC00000_rgb));
 			left->SetSize(50, 50);
 
 			auto center = area->CreateControl<Panel>();
-			center->SetBackgroundColor(fig::color { 0, 0xC0, 0, 0xFF });
+			center->SetBackgroundColor(custom_color(0x00C000_rgb));
 			center->SetSize(100, 100);
 
 			auto right = area->CreateControl<Panel>();
-			right->SetBackgroundColor(fig::color { 0, 0, 0xC0, 0xFF });
+			right->SetBackgroundColor(custom_color(0x0000C0_rgb));
 			right->SetSize(100, 100);
 
 			auto h = right->SetSizer<HorizontalSizer>();
 
 			auto a = right->CreateControl<Panel>();
-			a->SetBackgroundColor(Color::Red);
+			a->SetBackgroundColor(Colour::Red);
 			a->SetSize(50, 50);
 			auto b = right->CreateControl<Panel>();
-			b->SetBackgroundColor(Color::Green);
+			b->SetBackgroundColor(Colour::Green);
 			b->SetSize(50, 50);
 			auto c = right->CreateControl<Panel>();
-			c->SetBackgroundColor(Color::Blue);
+			c->SetBackgroundColor(Colour::Blue);
 			c->SetSize(50, 50);
 
 			h->Add(a, -1, SizerFlag::AlignRight | SizerFlag::AlignTop, 4);
@@ -154,12 +154,12 @@ namespace fig::gui
 		auto HBar = CreateControl<HorizontalBar>(Resource::HORIZONTAL_BAR_SMALL);
 		HBar->SetPosition(20, 10);
 		HBar->SetSize(300, 4);
-		HBar->SetForegroundColor(Color::Blue);
+		HBar->SetForegroundColor(Colour::Blue);
 
 		auto VBar = CreateControl<VerticalBar>(Resource::VERTICAL_BAR_SMALL);
 		VBar->SetPosition(10, 20);
 		VBar->SetSize(4, 300);
-		VBar->SetForegroundColor(Color::Green);
+		VBar->SetForegroundColor(Colour::Green);
 
 	}
 

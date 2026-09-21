@@ -17,7 +17,7 @@ namespace fig::gui
 	{
 		_pLabel = CreateControl<StaticText>(label, FontFace::Default, 14.0, true);
 		_pLabel->SetX(4);
-		_pLabel->SetForegroundColor(Color::SidePanelForeground);
+		_pLabel->SetForegroundColor(Colour::SidePanelForeground);
 
 		_pEditLabel = CreateControl<TextInput>(FontFace::Default, 14.0, TextInput::Mode::Single);
 		_pEditLabel->SetEnterPressedDelegate([this](auto&& text) { EndEditName(); });

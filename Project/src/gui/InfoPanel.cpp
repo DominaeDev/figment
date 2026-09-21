@@ -19,12 +19,12 @@ namespace fig::gui
 	InfoPanel::InfoPanel(ControlPtr pParent) : Panel(pParent)
 	{
 		SetWidth(Constants::GUI::InfoPanel::DefaultWidth);
-		SetBackgroundColor(Color::SidePanelBackground);
+		SetBackgroundColor(Colour::SidePanelBackground);
 
 		_pExpandedRoot = CreateControl<Area>();
 		_pCollapsedRoot = CreateControl<Area>();
 
-		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(Color::SidePanelGradient.WithAlpha(0.8f), Color::SidePanelGradient.WithAlpha(0.0f));
+		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(custom_color((*_Color(Colour::SidePanelGradient)).WithAlpha(0.8f)), custom_color((*_Color(Colour::SidePanelGradient)).WithAlpha(0.0f)));
 		_pGradient = pGradient;
 
 		_pCollapseButton = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT, false);
@@ -112,7 +112,7 @@ namespace fig::gui
 		else
 			SetWidth(Constants::GUI::InfoPanel::DefaultWidth);
 
-		SetBackgroundColor(Color::SidePanelBackground);
+		SetBackgroundColor(Colour::SidePanelBackground);
 
 		_pExpandedRoot->Cull(false);
 		_pCollapsedRoot->Cull(true);
@@ -133,7 +133,7 @@ namespace fig::gui
 			Global::GetUserSettings().SetBool(UserSetting::Interface::Chat::InfoPanelCollapsed, true);
 
 		SetWidth(42);
-		SetBackgroundColor(Color::AppBackground);
+		SetBackgroundColor(Colour::AppBackground);
 
 		_pExpandedRoot->Cull(true);
 		_pCollapsedRoot->Cull(false);

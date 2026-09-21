@@ -40,11 +40,16 @@ namespace fig::gui
 		Icon,
 		TextBoxForeground,
 		TextBoxBackground,
+		StatusBarForeground,
 		StatusBarBackground,
 		GenderTagMale,
 		GenderTagFemale,
 		GenderTagOther,
 		ChatBackground,
+		MenuBackgroundColor,
+		MenuBorderColor,
+		MenuItemHoverColor,
+		MenuItemPressedColor,
 		MessageBorderDefault,
 		MessageBackgroundDefault,
 		MessageBorderBlue,
@@ -95,11 +100,16 @@ namespace fig::gui
 		std::pair { Colour::Icon,								"Icon" },
 		std::pair { Colour::TextBoxForeground,					"TextBoxForeground" },
 		std::pair { Colour::TextBoxBackground,					"TextBoxBackground" },
+		std::pair { Colour::StatusBarForeground,				"StatusBarForeground" },
 		std::pair { Colour::StatusBarBackground,				"StatusBarBackground" },
 		std::pair { Colour::GenderTagMale,						"GenderTagMale" },
 		std::pair { Colour::GenderTagFemale,					"GenderTagFemale" },
 		std::pair { Colour::GenderTagOther,						"GenderTagOther" },
 		std::pair { Colour::ChatBackground,						"ChatBackground" },
+		std::pair { Colour::MenuBackgroundColor,				"MenuBackgroundColor" },
+		std::pair { Colour::MenuBorderColor,					"MenuBorderColor" },
+		std::pair { Colour::MenuItemHoverColor,					"MenuItemHoverColor" },
+		std::pair { Colour::MenuItemPressedColor,				"MenuItemPressedColor" },
 		std::pair { Colour::MessageBorderDefault,				"MessageBorderDefault" },
 		std::pair { Colour::MessageBackgroundDefault,			"MessageBackgroundDefault" },
 		std::pair { Colour::MessageBorderBlue,					"MessageBorderBlue" },
@@ -131,6 +141,7 @@ namespace fig::gui
 	extern fig::color_ref _Color(Colour color);
 	extern fig::io::FileError LoadColorTheme(ColorTheme theme, const fig::path& path);
 	extern void ApplyColorTheme(ColorTheme theme);
+	extern void CycleColors();
 
 	inline fig::color_ref custom_color(const fig::color& color)
 	{

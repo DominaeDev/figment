@@ -40,8 +40,8 @@ namespace fig::gui
 		{
 			auto fgColor = GetForegroundColor();
 
-			SDL_SetTextureColorMod(_pTexture, fgColor.r, fgColor.g, fgColor.b);
-			SDL_SetTextureAlphaMod(_pTexture, fgColor.a);
+			SDL_SetTextureColorMod(_pTexture, fgColor->r, fgColor->g, fgColor->b);
+			SDL_SetTextureAlphaMod(_pTexture, fgColor->a);
 			SDL_RenderTexture9Grid(pRenderer, _pTexture, nullptr, _cornerPixels[0], _cornerPixels[1], _cornerPixels[2], _cornerPixels[3], 1.0f, &rect);
 		}
 	}

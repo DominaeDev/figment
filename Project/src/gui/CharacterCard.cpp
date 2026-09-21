@@ -222,15 +222,15 @@ namespace fig::gui
 			ClearTags();
 			if (character.gender.IsConventional())
 			{
-				fig::color color;
+				fig::color_ref color;
 				if (character.gender == ConventionalGender::Male)
-					color = Color::GenderTagMale;
+					color = Colour::GenderTagMale;
 				else if (character.gender == ConventionalGender::Female)
-					color = Color::GenderTagFemale;
+					color = Colour::GenderTagFemale;
 				else if (character.gender.IsConventional())
-					color = Color::GenderTagOther;
+					color = Colour::GenderTagOther;
 				else
-					color = Color::White;
+					color = Colour::White;
 
 				AddTag(character.gender.GetLabel(), color);
 			}
