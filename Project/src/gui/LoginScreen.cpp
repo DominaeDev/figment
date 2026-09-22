@@ -18,7 +18,8 @@ namespace fig::gui
 	LoginScreen::LoginScreen(Frame* pParent) : Screen(pParent)
 	{
 		// Logo
-		auto pLogo = CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL), Color::Black);
+		auto pLogo = CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL));
+		pLogo->SetForegroundColor(Color::AppForeground);
 		pLogo->SetPosition(44, 0);
 
 		// Menu button
@@ -30,7 +31,6 @@ namespace fig::gui
 
 		// Center (login)
 		auto pCenter = CreateControl<Panel>();
-//		pCenter->SetBackgroundColor(Color::Green);
 		pCenter->SetSize(500, 260);
 
 		auto pVerticalSizer = SetSizer<VerticalSizer>();
