@@ -55,27 +55,6 @@ namespace fig
 	using coord = int32_t;
 	using corners = std::array<coord, 4>;
 
-	struct color_set
-	{
-		color_ref background {};
-		color_ref foreground {};
-		color_ref border {};
-	};
-
-	struct color_pair
-	{
-		color_ref background {};
-		color_ref foreground {};
-	};
-
-	struct ButtonTheme
-	{
-		color_set defaultColor;
-		color_set hoverColor;
-		color_set pressedColor;
-		color_set disabledColor;
-	};
-
 	enum class Resource;
 	enum class MaskType;
 

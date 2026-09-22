@@ -499,6 +499,7 @@
     <ClInclude Include="include\gui\BoxSizer.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h" />
+    <ClInclude Include="include\gui\ColorNames.h" />
     <ClInclude Include="include\gui\ColorRef.h" />
     <ClInclude Include="include\gui\ColorTable.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
@@ -531,7 +532,6 @@
     <ClInclude Include="include\gui\InfoPanel.h" />
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\Events.h" />
-    <ClInclude Include="include\gui\GUIConstants.h" />
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
     <ClInclude Include="include\gui\MouseEventHandler.h" />
     <ClInclude Include="include\gui\ImageViewport.h" />
@@ -699,6 +699,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\gui\themes\dark.txt" />
+    <Text Include="resources\gui\themes\light.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

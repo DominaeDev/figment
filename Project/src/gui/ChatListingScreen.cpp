@@ -4,6 +4,7 @@
 #include "gui/ChatList.h"
 #include "gui/SearchBox.h"
 #include "gui/Menu.h"
+#include "gui/TexturedBorderRenderer.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
@@ -35,7 +36,6 @@ namespace fig::gui
 		_pFilterTextBox->SetPosition(0, 0);
 		_pFilterTextBox->SetSize(192, 30);
 		_pFilterTextBox->SetMaxWidth(192);
-		_pFilterTextBox->SetBackgroundColor(Color::White);
 		_pFilterTextBox->SetTextChangedDelegate([this](fig::string_view s) {
 			OnSearchFilter(s);
 		});
@@ -204,6 +204,9 @@ namespace fig::gui
 
 	void ChatListingScreen::RefreshFilterButton()
 	{
-		_pFilteringButton->ShowBorder((GetFiltering() != DefaultChatFilterFlags) or !_filteredCharacterName.empty());
+		if ((GetFiltering() != DefaultChatFilterFlags) or !_filteredCharacterName.empty())
+			_pFilteringButton->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8)->SetColor(Color::BorderSelected);
+		else
+			_pFilteringButton->ClearBorderRenderer();
 	}
 }

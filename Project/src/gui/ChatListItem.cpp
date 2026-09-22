@@ -18,13 +18,13 @@ namespace fig::gui
 		SetHeight(60);
 
 		// Background
-		SetForegroundColor(Color::SidePanelForeground);
-		SetBackgroundColor(custom_color(0xf4f2ec_rgb));
+		SetForegroundColor(Color::PanelForeground);
+		SetBackgroundColor(Color::PanelBackground);
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
 		pBGRenderer->SetColor(GetBackgroundColor());
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
-		pBorder->SetColor(Color::LineColor);
+		pBorder->SetColor(Color::Border);
 
 		// Title
 		_pTitle = CreateControl<StaticText>("", FontFace::Bold, 14.0, false);
@@ -38,7 +38,7 @@ namespace fig::gui
 
 		// Timestamp
 		_pTimestamp = CreateControl<StaticText>("", FontFace::Italic, 11.0, true);
-		_pTimestamp->SetForegroundColor(fig::color_ref(Color::SidePanelForeground).WithAlpha(0.5f));
+		_pTimestamp->SetForegroundColor(Color::HintText);
 		_pTimestamp->SetY(8);
 		_pTimestamp->SetMaxWidth(100);
 
@@ -157,12 +157,12 @@ namespace fig::gui
 		if (_bHovered != bHovered)
 		{
 			_bHovered = bHovered;
-			SetBackgroundColor(_bHovered ? custom_color(0xfdfcfa_rgb) : custom_color(0xf4f2ec_rgb));
-			GetBackgroundRenderer()->SetColor(_bHovered ? custom_color(0xfdfcfa_rgb) : custom_color(0xf4f2ec_rgb));
+			SetBackgroundColor(_bHovered ? Color::PanelBackgroundHover : Color::PanelBackground);
+			GetBackgroundRenderer()->SetColor(GetBackgroundColor());
+			_pTitle->SetBackgroundColor(GetBackgroundColor());
+			_pMessage->SetBackgroundColor(GetBackgroundColor());
+			_pTimestamp->SetBackgroundColor(GetBackgroundColor());
 		}
-		_pTitle->SetBackgroundColor(GetBackgroundColor());
-		_pMessage->SetBackgroundColor(GetBackgroundColor());
-		_pTimestamp->SetBackgroundColor(GetBackgroundColor());
 	}
 
 	void ChatListItem::ShowMenu() noexcept

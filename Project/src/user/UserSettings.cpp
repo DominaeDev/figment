@@ -1,6 +1,9 @@
 #include <pch.h>
 #include "user/UserSettings.h"
 #include "io/IniFile.h"
+#include "gui/ColorTable.h"
+
+using namespace fig::gui;
 
 namespace fig::io
 {
@@ -9,6 +12,7 @@ namespace fig::io
 		{ UserSetting::Settings::Clock,								enum_serialize(Clock::Default, ClockMapping) },
 		{ UserSetting::Settings::ModelPreset,						"" },
 
+		{ UserSetting::Interface::Theme,							enum_serialize(ColorTheme::Default, ColorThemeMapping) },
 		{ UserSetting::Interface::SidePanelCollapsed,				false },
 
 		{ UserSetting::Interface::Chat::InfoPanelWidth,				Constants::GUI::InfoPanel::DefaultWidth },
@@ -54,5 +58,15 @@ namespace fig::io
 	ChatFilterFlags UserSettings::GetChatListFilter() const
 	{
 		return GetFlags<ChatFilterFlag>(UserSetting::Interface::ChatList::Filtering, DefaultChatFilterFlags, ChatFilterFlagMapping);
+	}
+
+	void UserSettings::SetColorTheme(fig::gui::ColorTheme theme)
+	{
+		SetEnum<ColorTheme>(UserSetting::Interface::Theme, theme, ColorThemeMapping);
+	}
+
+	fig::gui::ColorTheme UserSettings::GetColorTheme() const
+	{
+		return GetEnum<ColorTheme>(UserSetting::Interface::Theme, ColorThemeMapping, ColorTheme::Default);
 	}
 }

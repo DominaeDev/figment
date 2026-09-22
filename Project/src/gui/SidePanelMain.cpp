@@ -24,7 +24,8 @@ namespace fig::gui
 		auto pHeaderPanel = CreateControl<Panel>();
 		pHeaderPanel->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		auto pLogo = pHeaderPanel->CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL), Color::Black);
+		auto pLogo = pHeaderPanel->CreateControl<Image>(AppResources::GetTexture(Resource::LOGO_SMALL));
+		pLogo->SetForegroundColor(Color::AppForeground);
 		pLogo->SetX(44);
 
 		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);

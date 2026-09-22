@@ -78,14 +78,14 @@ namespace fig::gui
 		});
 
 		auto pTextBoxBG = _pTextBox->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::TEXTBOX_BG);
+		pTextBoxBG->SetColor(Color::TextBoxBackground);
 		pTextBoxBG->SetCornerScale(0.5f);
 		pTextBoxBG->SetExtend(7.0f);
-		pTextBoxBG->SetColor(Color::White);
 
 		auto pTextBoxBorder = _pTextBox->SetBorderRenderer<TexturedBorderRenderer>(Resource::TEXTBOX_BORDER);
 		pTextBoxBorder->SetCornerScale(0.5f);
 		pTextBoxBorder->SetExtend(7.0f);
-		pTextBoxBorder->SetColor(custom_color(0xb9b28f_rgb));
+		pTextBoxBorder->SetColor(Color::Border);
 
 		if constexpr (Disabled)
 		{

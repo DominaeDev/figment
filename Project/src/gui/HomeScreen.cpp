@@ -6,6 +6,7 @@
 #include "gui/Menu.h"
 #include "gui/ToggleWithIcon.h"
 #include "gui/TexturedBorder.h"
+#include "gui/TexturedBorderRenderer.h"
 #include "gui/TopBar.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
@@ -17,7 +18,10 @@ namespace fig::gui
 {
 	static FilterFlags GetFiltering()
 	{ 
-		return Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, DefaultFilterFlags, FilterFlagMapping);
+		if (Global::IsSignedIn())
+			return Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, DefaultFilterFlags, FilterFlagMapping);
+		else
+			return DefaultFilterFlags;
 	};
 
 	HomeScreen::HomeScreen(Frame* pParent) : Screen(pParent)
@@ -30,22 +34,19 @@ namespace fig::gui
 		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING, false);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
-		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING, true);
-		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
-		_pFilteringButton->ShowBorder(false);
-
 		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_GRID_LARGE);
 		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
-		_pToggleTagsButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_TAG, true);
-		_pToggleTagsButton->SetDelegate([this]() { ToggleTags(); });
-		_pToggleTagsButton->ShowBorder(false);
+		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING, true);
+		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
+
+		_pToggleTagsButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_TAG);
+		_pToggleTagsButton->SetDelegate([this](bool _) { ToggleTags(); });
 
 		_pFilterTextBox = pTopBar->CreateControl<SearchBox>();
 		_pFilterTextBox->SetPosition(0, 0);
 		_pFilterTextBox->SetSize(192, 30);
 		_pFilterTextBox->SetMaxWidth(192);
-		_pFilterTextBox->SetBackgroundColor(Color::White);
 		_pFilterTextBox->SetTextChangedDelegate([this](fig::string_view s) {
 			OnSearchFilter(s);
 		});
@@ -95,8 +96,7 @@ namespace fig::gui
 		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pGridButton->SetIcon(bHalfSize ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
 		_pGridButton->SetOn(bHalfSize, true);
-		_pToggleTagsButton->ShowBorder(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
-		_pFilteringButton->ShowBorder(GetFiltering() != DefaultFilterFlags);
+		RefreshTopButtons();
 
 		// Create cards
 		DEBUG_MEASURE_BEGIN("CreateCards");
@@ -142,7 +142,7 @@ namespace fig::gui
 	{
 		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
 		Global::GetUserSettings().SetBool(UserSetting::Interface::CharacterList::ShowTags, _pCardList->IsTagsEnabled());
-		_pToggleTagsButton->ShowBorder(_pCardList->IsTagsEnabled());
+		RefreshTopButtons();
 	}
 
 	static bool IsShiftDown()
@@ -190,7 +190,7 @@ namespace fig::gui
 		auto SetFilter = [this](FilterFlags filtering) {
 			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, filtering, FilterFlagMapping);
 			_pCardList->Reorder();
-			_pFilteringButton->ShowBorder(GetFiltering() != DefaultFilterFlags);
+			RefreshTopButtons();
 			_pCardList->ScrollTo(0, false);
 		};
 
@@ -199,7 +199,7 @@ namespace fig::gui
 			filtering.Flip(flag);
 			Global::GetUserSettings().SetFlags<FilterFlags>(UserSetting::Interface::CharacterList::Filtering, filtering, FilterFlagMapping);
 			_pCardList->Reorder();
-			_pFilteringButton->ShowBorder(GetFiltering() != DefaultFilterFlags);
+			RefreshTopButtons();
 			_pCardList->ScrollTo(0, false);
 		};
 
@@ -293,5 +293,19 @@ namespace fig::gui
 	void HomeScreen::OnActivated()
 	{
 		_pCardList->RefreshCards();
+	}
+
+	void HomeScreen::RefreshTopButtons()
+	{
+		if (not Global::IsSignedIn())
+			return;
+
+		if (GetFiltering() != DefaultFilterFlags)
+			_pFilteringButton->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8)->SetColor(Color::BorderSelected);
+		else
+			_pFilteringButton->ClearBorderRenderer();
+
+		bool bShowTags = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags);
+		_pToggleTagsButton->SetOn(bShowTags, true);
 	}
 }

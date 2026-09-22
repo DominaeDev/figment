@@ -27,14 +27,14 @@ namespace fig::gui
 		_pEditLabel->SetVisible(false);
 
 		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS);
-		_pSettingsButton->SetTheme(Theme::EditorSmallButtonStyle);
+		_pSettingsButton->SetTheme(Theme::DefaultButtonStyle);
 		_pSettingsButton->SetSize(20, 20);
 		_pMoveUpButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP);
-		_pMoveUpButton->SetTheme(Theme::EditorSmallButtonStyle);
+		_pMoveUpButton->SetTheme(Theme::DefaultButtonStyle);
 		_pMoveUpButton->SetSize(20, 20);
 		_pMoveUpButton->SetDelegate([this] { OnMove(-1); });
 		_pMoveDownButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN);
-		_pMoveDownButton->SetTheme(Theme::EditorSmallButtonStyle);
+		_pMoveDownButton->SetTheme(Theme::DefaultButtonStyle);
 		_pMoveDownButton->SetSize(20, 20);
 		_pMoveDownButton->SetDelegate([this] { OnMove(1); });
 

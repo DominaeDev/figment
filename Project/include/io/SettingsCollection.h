@@ -158,7 +158,7 @@ namespace fig::io
 
 		template <typename K, typename T, std::size_t N>
 			requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
-		void SetEnum(SettingKey key, const fig::string& value, const std::array<std::pair<K, T>, N>& map) noexcept
+		void SetEnum(SettingKey key, K value, const std::array<std::pair<K, T>, N>& map) noexcept
 		{
 			return SetValue<fig::string>(key, enum_serialize(value, map));
 		}

@@ -10,7 +10,7 @@ namespace fig::gui
 	{
 		FillParent();
 
-		SetBorderRenderer<LineBorderRenderer>(Color::LineColor, direction);
+		SetBorderRenderer<LineBorderRenderer>(Color::Border, direction);
 	}
 
 	void ResizeHandle::OnUpdate(float fElapsed)
@@ -38,9 +38,9 @@ namespace fig::gui
 		{
 			fig::color_ref_with_alpha lineColor;
 			if (_bResizing)
-				lineColor = custom_color(0x4080C0_rgb);
+				lineColor = fig::color_ref(Color::SelectedControlBorder);
 			else
-				lineColor = fig::color_ref(Color::LineColor).WithAlpha(_fAlpha);
+				lineColor = fig::color_ref(Color::Border).WithAlpha(_fAlpha);
 
 			auto drawRect = GetHandleRect();
 			SDL_SetRenderDrawBlendMode(pRenderer, SDL_BLENDMODE_BLEND);

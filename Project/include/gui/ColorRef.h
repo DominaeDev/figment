@@ -1,11 +1,7 @@
 #pragma once
 
 #include "gui/Color.h"
-
-namespace fig::gui
-{
-	enum class Color;
-}
+#include "gui/ColorNames.h"
 
 namespace fig
 {

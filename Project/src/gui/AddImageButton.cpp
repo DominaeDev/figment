@@ -8,10 +8,10 @@ namespace fig::gui
 	AddImageButton::AddImageButton(ControlPtr pParent, fig::string_view label) : Control(pParent), MouseEventHandler(this)
 	{
 		auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBorderRenderer->SetColor(custom_color(0xe0dccb_rgb));
+		pBorderRenderer->SetColor(fig::color_ref(Color::Border).WithAlpha(0xC0));
 
 		_pLabel = CreateControl<StaticText>(label, FontFace::Italic, Constants::GUI::DefaultFontSize, true);
-		_pLabel->SetForegroundColor(custom_color(0x9d9584_rgb));
+		_pLabel->SetForegroundColor(Color::HintText);
 
 		SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);
 	}

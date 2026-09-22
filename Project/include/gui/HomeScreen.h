@@ -29,6 +29,7 @@ namespace fig::gui
 		void ToggleTags() noexcept;
 		void ShowSortingMenu() noexcept;
 		void ShowFilteringMenu() noexcept;
+		void RefreshTopButtons();
 
 	private:
 		fig::observer_ptr<CharacterCardList> _pCardList;
@@ -37,7 +38,7 @@ namespace fig::gui
 		fig::observer_ptr<ButtonWithIcon> _pSortingButton;
 		fig::observer_ptr<ButtonWithIcon> _pFilteringButton;
 		fig::observer_ptr<Control> _pFilterBorder;
-		fig::observer_ptr<ButtonWithIcon> _pToggleTagsButton;
+		fig::observer_ptr<ToggleWithIcon> _pToggleTagsButton;
 		fig::observer_ptr<ToggleWithIcon> _pGridButton;
 
 		fig::string _search_text;

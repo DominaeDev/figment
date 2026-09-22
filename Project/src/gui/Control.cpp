@@ -144,7 +144,7 @@ namespace fig::gui
 
 	EventResult Control::ProcessEvent(fig::event& event)
 	{
-		if (not _bEnabled)
+		if (not _bEnabled and not IsBroadcastEvent(event))
 			return EventResult::Pass;
 
 		EventResult result { EventResult::Pass };

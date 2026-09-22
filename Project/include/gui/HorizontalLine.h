@@ -7,7 +7,7 @@ namespace fig::gui
 	class HorizontalLine : public Control
 	{
 	public:
-		HorizontalLine(ControlPtr pParent, fig::color_ref_with_alpha color = Color::LineColor);
+		HorizontalLine(ControlPtr pParent, fig::color_ref_with_alpha color = Color::Border);
 
 	protected:
 		void OnRender(fig::renderer_ptr pRenderer) override;

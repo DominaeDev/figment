@@ -26,7 +26,7 @@ namespace fig::gui
 		_searchIndex = std::make_unique<SearchIndex>();
 
 		_pHiddenBG = CreateControl<TexturedBorder>(Resource::CARD_FILL, 8);
-		_pHiddenBG->SetForegroundColor(custom_color(0x9b896a30_rgba));
+		_pHiddenBG->SetForegroundColor(Color::CardShadow);
 
 		SetCardSize(cardSize);
 		SetHidden(false);
@@ -146,7 +146,7 @@ namespace fig::gui
 			float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
 			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
-			_pErrorIcon->SetForegroundColor(custom_color(0xC0C0C0_rgb));
+			_pErrorIcon->SetForegroundColor(Color::Gray);
 			_pErrorIcon->Center();
 
 			CardImage::SetTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY));
@@ -214,7 +214,7 @@ namespace fig::gui
 			else
 				_pCounterBG->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 
-			_pCounterBG->SetForegroundColor(custom_color(0x000000A0_rgba));
+			_pCounterBG->SetForegroundColor(fig::color_ref(Color::Black).WithAlpha(0xA0));
 
 			auto pCounterIcon = _pCounterBG->CreateControl<Image>(AppResources::GetTexture(Resource::CARD_ICON_CHAT_COUNTER));
 			pCounterIcon->SetPosition(6, 6);
@@ -252,7 +252,7 @@ namespace fig::gui
 		else
 			_pNewIndicator->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 
-		_pNewIndicator->SetForegroundColor(custom_color(0x1065b4E0_rgba));
+		_pNewIndicator->SetForegroundColor(Color::TagNew);
 
 		auto pLabel = _pNewIndicator->CreateControl<StaticText>(fig::string { fig::strings::UI::New }, FontFace::Default, 14.0, true);
 		pLabel->SetPosition(6, 3);
@@ -438,10 +438,14 @@ namespace fig::gui
 		}
 		else if (try_cover.error() != AsyncLoadError::NoError)
 		{
+			if (try_cover.error() == AsyncLoadError::FileNotFound)
+				LogLn(std::format("Failed to load cover for {}: File not found", (fig::string)_assetId));
+			else
+				LogLn(std::format("Failed to load cover for {}", (fig::string)_assetId));
+
 			_bHasError = true;
 			RefreshState();
 		}
-
 	}
 
 	void CoverCard::AddSearchTerms(const fig::string& text) noexcept

@@ -17,14 +17,6 @@ namespace fig::gui
 		_pCross = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CROSS));
 		_pCross->SetForegroundColor(Color::Icon);
 		_pCross->SetVisible(false);
-
-		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
-		pTextBoxBG->SetExtend(0.0f);
-		pTextBoxBG->SetColor(Color::White);
-
-		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Color::LineColor);
 	}
 
 	void SearchBox::OnSize()

@@ -183,6 +183,9 @@
     <Filter Include="Source Files\Frontend\GUI\Themes">
       <UniqueIdentifier>{f9c765df-ed5f-409e-94dd-422884be2ef9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Themes">
+      <UniqueIdentifier>{ecbc5874-cc0a-4d3e-9a38-1926487475a8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -1207,9 +1210,6 @@
     <ClInclude Include="..\Libraries\miniz\include\miniz.h">
       <Filter>Source Files\Third-party\miniz</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\GUIConstants.h">
-      <Filter>Source Files\Frontend\GUI\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\SearchBox.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
@@ -1820,8 +1820,19 @@
     <ClInclude Include="include\gui\ColorTable.h">
       <Filter>Source Files\Frontend\GUI\Themes</Filter>
     </ClInclude>
+    <ClInclude Include="include\gui\ColorNames.h">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\gui\themes\light.txt">
+      <Filter>Resource Files\Themes</Filter>
+    </Text>
+    <Text Include="resources\gui\themes\dark.txt">
+      <Filter>Resource Files\Themes</Filter>
+    </Text>
   </ItemGroup>
 </Project>

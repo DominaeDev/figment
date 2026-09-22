@@ -2,12 +2,18 @@
 
 #include "io/SettingsCollection.h"
 
+namespace fig::gui
+{
+	enum class ColorTheme;
+}
+
 namespace fig::io
 {
 	namespace UserSetting
 	{
 		namespace Interface
 		{
+			constexpr fig::io::SettingKey Theme					{ "Interface", "Theme" };
 			constexpr fig::io::SettingKey SidePanelCollapsed	{ "Interface", "SidePanel.Collapsed" };
 
 			namespace CharacterList
@@ -127,5 +133,8 @@ namespace fig::io
 
 		void SetChatListFilter(ChatFilterFlags filter);
 		ChatFilterFlags GetChatListFilter() const;
+
+		void SetColorTheme(fig::gui::ColorTheme theme);
+		fig::gui::ColorTheme GetColorTheme() const;
 	};
 }

@@ -18,7 +18,7 @@ namespace fig::gui
 		pTextBoxBG->SetColor(Color::TextBoxBackground);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pTextBoxBorder->SetColor(Color::LineColor);
+		pTextBoxBorder->SetColor(Color::Border);
 	}
 
 	void ComboBox::SetDelegate(ListItemSelectedDelegate fnDelegate)
@@ -68,9 +68,9 @@ namespace fig::gui
 	void ComboBox::OnEnabled(bool bEnabled)
 	{
 		TextInput::OnEnabled(bEnabled);
-		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
-		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
-		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
+		GetBackgroundRenderer()->SetColor(bEnabled ? Color::CheckBoxBackground : Color::DisabledBackground);
+		GetBorderRenderer()->SetColor(bEnabled ? Color::Border : Color::BorderDisabled);
+		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::IconDisabled);
 
 		MouseEventHandler::Enable(bEnabled);
 	}

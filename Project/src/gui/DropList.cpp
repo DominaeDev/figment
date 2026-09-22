@@ -20,12 +20,12 @@ namespace fig::gui
 		_pArrow->SetForegroundColor(Color::Icon);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
-		pTextBoxBG->SetExtend(0.0f);
 		pTextBoxBG->SetColor(Color::TextBoxBackground);
+		pTextBoxBG->SetExtend(0.0f);
 
 		auto pTextBoxBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pTextBoxBorder->SetExtend(0.0f);
-		pTextBoxBorder->SetColor(Color::LineColor);
+		pTextBoxBorder->SetColor(Color::Border);
 
 		SetSize(300, 32);
 	}
@@ -34,6 +34,12 @@ namespace fig::gui
 	{
 		if (auto result = MouseEventHandler::HandleMouseEvents(event); result == EventResult::Handled)
 			return result;
+
+		if (IsUserEvent(event, UserEvent::ColorThemeChanged))
+		{
+			_pText->InvalidateText();
+			return EventResult::Continue;
+		}
 
 		return Control::OnEvent(event);
 	}
@@ -49,14 +55,14 @@ namespace fig::gui
 
 	void DropListBase::OnEnabled(bool bEnabled)
 	{
-		SetForegroundColor(bEnabled ? Color::TextBoxForeground : Color::DisabledForeground);
-		SetBackgroundColor(bEnabled ? Color::TextBoxBackground : Color::DisabledBackground);
+		SetForegroundColor(bEnabled ? Color::TextBoxForeground : Color::TextBoxForegroundDisabled);
+		SetBackgroundColor(bEnabled ? Color::TextBoxBackground : Color::TextBoxBackgroundDisabled);
 		_pText->SetForegroundColor(GetForegroundColor());
 		_pText->SetBackgroundColor(GetBackgroundColor());
 
-		GetBackgroundRenderer()->SetColor(bEnabled ? Color::White : Color::DisabledBackground);
-		GetBorderRenderer()->SetColor(bEnabled ? Color::LineColor : Color::DisabledLineColor);
-		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
+		GetBackgroundRenderer()->SetColor(GetBackgroundColor());
+		GetBorderRenderer()->SetColor(bEnabled ? Color::Border : Color::BorderDisabled);
+		_pArrow->SetForegroundColor(bEnabled ? Color::Icon : Color::IconDisabled);
 
 		MouseEventHandler::Enable(bEnabled);
 	}

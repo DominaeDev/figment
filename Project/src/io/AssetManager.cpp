@@ -623,7 +623,7 @@ namespace fig::io
 		else if (file.error() == FileError::NotFound)
 		{
 			asset.sync_state.error = AssetSyncState::Error::Missing;
-			return std::unexpected(FileError::ReadError);
+			return std::unexpected(FileError::NotFound);
 		}
 		else
 		{
@@ -1016,7 +1016,9 @@ namespace fig::io
 					return AsyncLoadError::NoError;
 				}
 				else
+				{
 					return AsyncLoadError::LoadError;
+				}
 			}
 			else if (result == FileError::NotFound)
 				return AsyncLoadError::FileNotFound;

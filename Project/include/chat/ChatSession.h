@@ -26,8 +26,8 @@ namespace fig::chat
 		fig::string GetIdentifierOf(Role role) const;
 		fig::string GetNameOf(Role role) const;
 		fig::string GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const;
-		fig::color_pair GetColorsOf(Role role) const;
-		static fig::color_pair GetDefaultColorsOf(Role role);
+		fig::gui::color_pair GetColorsOf(Role role) const;
+		static fig::gui::color_pair GetDefaultColorsOf(Role role);
 
 		inline const Context& GetContext() const noexcept { return _context; }
 

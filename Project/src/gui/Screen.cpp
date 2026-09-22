@@ -7,7 +7,7 @@ namespace fig::gui
 	Screen::Screen(Frame* pParent) : Control(pParent)
 	{
 		SetSize(pParent->GetSize());
-		SetForegroundColor(Color::Black);
+		SetForegroundColor(Color::AppForeground);
 		SetBackgroundColor(Color::AppBackground);
 	}
 

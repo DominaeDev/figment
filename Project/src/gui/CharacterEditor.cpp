@@ -111,7 +111,7 @@ namespace fig::gui
 
 		_pSaveButton->SetTheme(Theme::DefaultButtonStyle);
 		auto pBorder = _pSaveButton->GetBorderRenderer();
-		pBorder->SetColor(Color::LineColor);
+		pBorder->SetColor(Color::Border);
 		return true;
 	}
 
@@ -183,6 +183,6 @@ namespace fig::gui
 
 	void CharacterEditor::OnPropertyChanged()
 	{
-		_pSaveButton->SetTheme(Theme::GreenSaveButtonStyle);
+		_pSaveButton->SetTheme(Theme::SaveButtonStyle);
 	}
 }

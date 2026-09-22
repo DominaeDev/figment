@@ -20,7 +20,7 @@ namespace fig::gui
 		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
 
 		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBorder->SetColor(Color::LineColor);
+		pBorder->SetColor(Color::Border);
 	}
 
 	void PreviewCardImage::SetImage(const fig::uuid& assetId)
@@ -65,7 +65,7 @@ namespace fig::gui
 			constexpr float fScale = 0.75f;
 			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * fScale), toI(_pErrorIcon->GetTextureSize().y * fScale));
-			_pErrorIcon->SetForegroundColor(custom_color(0xC0C0C0_rgb));
+			_pErrorIcon->SetForegroundColor(Color::Gray);
 			_pErrorIcon->Center();
 			_pErrorBG = AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY);
 			SetDirty();

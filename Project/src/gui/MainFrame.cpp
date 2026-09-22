@@ -36,7 +36,7 @@ namespace fig::gui
 	{
 		s_pInstance = this;
 
-		SetForegroundColor(Color::Black);
+		SetForegroundColor(Color::AppBackground);
 		SetBackgroundColor(Color::AppBackground);
 
 		_pMainArea = CreateControl<Area>();
@@ -233,6 +233,8 @@ namespace fig::gui
 		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
+		ChangeColorTheme(Global::GetUserSettings().GetColorTheme());
+
 		ChangeScreen(ScreenType::Home);
 		PushEvent(UserEvent::UserSignedIn, &profile);
 	}
@@ -384,6 +386,33 @@ namespace fig::gui
 					{
 						Global::GetTTSBackend().Shutdown();
 						return EventResult::Handled;
+					}
+					else if (keyEvent.key == SDLK_F1 and mods.None)
+					{
+						if (Global::IsSignedIn())
+						{
+							ColorTheme theme;
+							switch (Global::GetUserSettings().GetColorTheme())
+							{
+							case ColorTheme::Light:
+								theme = ColorTheme::Dark;
+								break;
+							default:
+								theme = ColorTheme::Light;
+								break;
+							}
+							ChangeColorTheme(theme);
+							return EventResult::Handled;
+						}
+					}
+					else if (keyEvent.key == SDLK_F1 and mods.Control)
+					{
+						if (Global::IsSignedIn())
+						{
+							InitColorThemes();
+							ChangeColorTheme(Global::GetUserSettings().GetColorTheme());
+							return EventResult::Handled;
+						}
 					}
 				}
 
@@ -633,4 +662,11 @@ namespace fig::gui
 		return false;
 	}
 
+	void MainFrame::ChangeColorTheme(ColorTheme theme)
+	{
+		if (Global::IsSignedIn())
+			Global::GetUserSettings().SetColorTheme(theme);
+		ApplyColorTheme(theme);
+		PushEvent(UserEvent::ColorThemeChanged);
+	}
 }

@@ -15,8 +15,7 @@ namespace fig::gui
 		_pFont = Fonts::GetFont(fontFace, ptSize);
 		SetHeight(TTF_GetFontHeight(_pFont.get()));
 
-//		SetForegroundColor(Color::Black);
-//		SetBackgroundColor(Color::Transparent);
+		SetBackgroundColor(Color::Transparent);
 
 		// Set text and measure
 		_text = text;

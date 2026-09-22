@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include "gui/GUITypes.h"
 #include "app/AppSettings.h"
 #include "user/UserSettings.h"
 

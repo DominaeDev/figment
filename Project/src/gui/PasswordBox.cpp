@@ -25,6 +25,6 @@ namespace fig::gui
 	{
 		TextBox::OnEnabled(bEnabled);
 
-		_pIcon->SetForegroundColor(bEnabled ? Color::Icon : Color::DisabledForeground);
+		_pIcon->SetForegroundColor(bEnabled ? Color::Icon : Color::IconDisabled);
 	}
 }

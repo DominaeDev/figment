@@ -293,7 +293,7 @@ namespace fig::gui
 		{
 			if (auto highlights = GetHighlights(); not highlights.empty())
 			{
-				fig::color_ref selectionColor = _bFocused ? Color::TextSelectionBackground : Color::TextSelectionBackgroundInactive;
+				fig::color_ref selectionColor = _bFocused ? Color::TextBoxSelectionBackground : Color::TextBoxSelectionBackgroundInactive;
 				SDL_SetRenderDrawColor(pRenderer, selectionColor.r(), selectionColor.g(), selectionColor.b(), selectionColor.a());
 
 				for (auto& highlight_rect : highlights)
@@ -361,7 +361,7 @@ namespace fig::gui
 		if (not _pPlaceholder->text or _bFocused)
 			return;
 
-		fig::color_ref fgColor = Color::DisabledForeground;
+		fig::color_ref fgColor = Color::TextBoxForegroundDisabled;
 		TTF_SetTextColor(_pPlaceholder, fgColor.r(), fgColor.g(), fgColor.b(), fgColor.a());
 
 		auto& rect = GetRect();
@@ -1232,6 +1232,9 @@ namespace fig::gui
 
 	EventResult TextInput::OnEvent(fig::event& event)
 	{
+		if (not GetEnabled())
+			return EventResult::Pass; // Disabled
+
 		bool bCtrl = event.key.mod & SDL_KMOD_CTRL;
 		bool bShift = event.key.mod & SDL_KMOD_SHIFT;
 		bool bAlt = event.key.mod & SDL_KMOD_ALT;
@@ -1241,9 +1244,6 @@ namespace fig::gui
 		bool bModAlt = bAlt and not (bCtrl or bShift);
 		bool bModCtrlShift = bCtrl and bShift and not bAlt;
 		bool bModNone = not (bCtrl or bShift or bAlt);
-
-		if (not GetEnabled())
-			return EventResult::Pass; // Disabled
 
 		switch (event.type)
 		{
@@ -1784,11 +1784,11 @@ namespace fig::gui
 		{
 			SetFocus(false);
 			Deselect();
-			SetForegroundColor(Color::DisabledForeground);
+			SetForegroundColor(Color::TextBoxForegroundDisabled);
 		}
 		else
 		{
-			SetForegroundColor(Color::Black);
+			SetForegroundColor(Color::TextBoxForeground);
 		}
 	}
 

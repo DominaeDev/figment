@@ -251,7 +251,7 @@ namespace fig::gui
 		RefreshColors();
 	}
 
-	void ChatMessage::SetColors(const fig::color_pair& colors)
+	void ChatMessage::SetColors(const fig::gui::color_pair& colors)
 	{
 		SetColors(colors.background, colors.foreground);
 	}
@@ -261,7 +261,7 @@ namespace fig::gui
 		_bgColor = bgColor;
 		_borderColor = borderColor;
 		if ((_style & Style::Dialogue) == Style::Dialogue)
-			_textColor = Color::Black;
+			_textColor = Color::AppForeground;
 		else
 			_textColor = custom_color((*borderColor).Multiply(0.5f));
 		_nameColor = custom_color((*borderColor).Add(-0.1f));

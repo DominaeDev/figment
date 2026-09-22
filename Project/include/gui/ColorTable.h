@@ -10,130 +10,13 @@ namespace fig::gui
 	{
 		Light = 0,
 		Dark,
+
+		Default = Light,
 	};
 
-	enum class Color
-	{
-		Invalid,
-		Debug,
-		Debug2,
-		Debug3,
-		Opaque,
-		Transparent,
-		White,
-		Black,
-		Red,
-		Green,
-		Blue,
-		DarkGray,
-		TextForeground,
-		TextSelectionForeground,
-		TextSelectionBackground,
-		TextSelectionBackgroundInactive,
-		AppBackground,
-		DisabledForeground,
-		DisabledBackground,
-		SidePanelForeground,
-		SidePanelBackground,
-		SidePanelGradient,
-		LineColor,
-		DisabledLineColor,
-		Icon,
-		TextBoxForeground,
-		TextBoxBackground,
-		TextBoxScrollBar,
-		StatusBarForeground,
-		StatusBarBackground,
-		GenderTagMale,
-		GenderTagFemale,
-		GenderTagOther,
-		ChatBackground,
-		MenuBackgroundColor,
-		MenuBorderColor,
-		MenuItemHoverColor,
-		MenuItemPressedColor,
-		MessageBorderDefault,
-		MessageBackgroundDefault,
-		MessageBorderBlue,
-		MessageBackgroundBlue,
-		MessageBorderPink,
-		MessageBackgroundPink,
-		MessageBorderGreen,
-		MessageBackgroundGreen,
-		MessageBorderYellow,
-		MessageBackgroundYellow,
-		MessageBorderRed,
-		MessageBackgroundRed,
-		MessageBorderTeal,
-		MessageBackgroundTeal,
-		MessageBorderPurple,
-		MessageBackgroundPurple,
-		MessageBorderBrown,
-		MessageBackgroundBrown,
-		MessageBorderNavy,
-		MessageBackgroundNavy,
-
-		Count,
-	};
-	
-	constexpr auto _ColorNameMapping = std::array<std::pair<Color, std::string_view>, static_cast<size_t>(Color::Count)> {
-		std::pair { Color::Debug,								"Debug" },
-		std::pair { Color::Debug2,								"Debug2" },
-		std::pair { Color::Debug3,								"Debug3" },
-		std::pair { Color::Opaque,								"Opaque" },
-		std::pair { Color::Transparent,						"Transparent" },
-		std::pair { Color::White,								"White" },
-		std::pair { Color::Black,								"Black" },
-		std::pair { Color::Red,								"Red" },
-		std::pair { Color::Green,								"Green" },
-		std::pair { Color::Blue,								"Blue" },
-		std::pair { Color::DarkGray,							"DarkGray" },
-		std::pair { Color::TextForeground,						"TextForeground" },
-		std::pair { Color::TextSelectionForeground,				"TextSelectionForeground" },
-		std::pair { Color::TextSelectionBackground,				"TextSelectionBackground" },
-		std::pair { Color::TextSelectionBackgroundInactive,		"TextSelectionBackgroundInactive" },
-		std::pair { Color::AppBackground,						"AppBackground" },
-		std::pair { Color::DisabledForeground,					"DisabledForeground" },
-		std::pair { Color::DisabledBackground,					"DisabledBackground" },
-		std::pair { Color::SidePanelForeground,					"SidePanelForeground" },
-		std::pair { Color::SidePanelBackground,					"SidePanelBackground" },
-		std::pair { Color::SidePanelGradient,					"SidePanelGradient" },
-		std::pair { Color::LineColor,							"LineColor" },
-		std::pair { Color::DisabledLineColor,					"DisabledLineColor" },
-		std::pair { Color::Icon,								"Icon" },
-		std::pair { Color::TextBoxForeground,					"TextBoxForeground" },
-		std::pair { Color::TextBoxBackground,					"TextBoxBackground" },
-		std::pair { Color::TextBoxScrollBar,					"TextBoxScrollBar" },
-		std::pair { Color::StatusBarForeground,					"StatusBarForeground" },
-		std::pair { Color::StatusBarBackground,					"StatusBarBackground" },
-		std::pair { Color::GenderTagMale,						"GenderTagMale" },
-		std::pair { Color::GenderTagFemale,						"GenderTagFemale" },
-		std::pair { Color::GenderTagOther,						"GenderTagOther" },
-		std::pair { Color::ChatBackground,						"ChatBackground" },
-		std::pair { Color::MenuBackgroundColor,					"MenuBackgroundColor" },
-		std::pair { Color::MenuBorderColor,						"MenuBorderColor" },
-		std::pair { Color::MenuItemHoverColor,					"MenuItemHoverColor" },
-		std::pair { Color::MenuItemPressedColor,				"MenuItemPressedColor" },
-		std::pair { Color::MessageBorderDefault,				"MessageBorderDefault" },
-		std::pair { Color::MessageBackgroundDefault,			"MessageBackgroundDefault" },
-		std::pair { Color::MessageBorderBlue,					"MessageBorderBlue" },
-		std::pair { Color::MessageBackgroundBlue,				"MessageBackgroundBlue" },
-		std::pair { Color::MessageBorderPink,					"MessageBorderPink" },
-		std::pair { Color::MessageBackgroundPink,				"MessageBackgroundPink" },
-		std::pair { Color::MessageBorderGreen,					"MessageBorderGreen" },
-		std::pair { Color::MessageBackgroundGreen,				"MessageBackgroundGreen" },
-		std::pair { Color::MessageBorderYellow,					"MessageBorderYellow" },
-		std::pair { Color::MessageBackgroundYellow,				"MessageBackgroundYellow" },
-		std::pair { Color::MessageBorderRed,					"MessageBorderRed" },
-		std::pair { Color::MessageBackgroundRed,				"MessageBackgroundRed" },
-		std::pair { Color::MessageBorderTeal,					"MessageBorderTeal" },
-		std::pair { Color::MessageBackgroundTeal,				"MessageBackgroundTeal" },
-		std::pair { Color::MessageBorderPurple,					"MessageBorderPurple" },
-		std::pair { Color::MessageBackgroundPurple,				"MessageBackgroundPurple" },
-		std::pair { Color::MessageBorderBrown,					"MessageBorderBrown" },
-		std::pair { Color::MessageBackgroundBrown,				"MessageBackgroundBrown" },
-		std::pair { Color::MessageBorderNavy,					"MessageBorderNavy" },
-		std::pair { Color::MessageBackgroundNavy,				"MessageBackgroundNavy" },
+	constexpr auto ColorThemeMapping = std::array<std::pair<ColorTheme, std::string_view>, 2uz> {
+		std::pair { ColorTheme::Light,	"Light" },
+		std::pair { ColorTheme::Dark,	"Dark" },
 	};
 
 	using ColorTable = std::array<fig::color, static_cast<size_t>(Color::Count)>;
@@ -142,6 +25,7 @@ namespace fig::gui
 	extern std::map<ColorTheme, ColorTable> _ColorThemes;
 	extern std::map<uint32_t, fig::color> _CustomColors;
 
+	extern void InitColorThemes();
 	extern fig::io::FileError LoadColorTheme(ColorTheme theme, const fig::path& path);
 	extern void ApplyColorTheme(ColorTheme theme);
 	extern void CycleColors();
@@ -149,6 +33,11 @@ namespace fig::gui
 	inline fig::color_ref custom_color(const fig::color& color)
 	{
 		auto& c = _CustomColors[static_cast<uint32_t>(color)] = color;
+
+		if constexpr (Debugging and Disabled)
+		{
+			c = 0xc000c0_rgb; // Debug color
+		}
 		return fig::color_ref(&c);
 	}
 
@@ -177,4 +66,59 @@ namespace fig::gui
 		Color::MessageBackgroundNavy,
 	};
 
+	struct color_set
+	{
+		color_ref background {};
+		color_ref foreground {};
+		color_ref border {};
+	};
+
+	struct color_pair
+	{
+		color_ref background {};
+		color_ref foreground {};
+	};
+
+	struct ButtonTheme
+	{
+		color_set defaultColor;
+		color_set hoverColor;
+		color_set pressedColor;
+		color_set disabledColor;
+	};
+
+	namespace Theme
+	{
+		inline static ButtonTheme DefaultButtonStyle =
+		{
+			.defaultColor	{ Color::ButtonDefaultBackground, Color::ButtonDefaultForeground, Color::ButtonDefaultBorder },
+			.hoverColor		{ Color::ButtonHoverBackground, Color::ButtonHoverForeground, Color::ButtonHoverBorder },
+			.pressedColor	{ Color::ButtonPressedBackground, Color::ButtonPressedForeground, Color::ButtonPressedBorder },
+			.disabledColor	{ Color::DisabledButtonBackground, Color::DisabledButtonForeground, Color::DisabledButtonBorder },
+		};
+
+		inline static ButtonTheme SidePanelButtonStyle =
+		{
+			.defaultColor	{ Color::SidePanelButtonDefaultBackground, Color::SidePanelButtonDefaultForeground, Color::Undefined },
+			.hoverColor		{ Color::SidePanelButtonHoverBackground, Color::SidePanelButtonHoverForeground, Color::Undefined },
+			.pressedColor	{ Color::SidePanelButtonPressedBackground, Color::SidePanelButtonPressedForeground, Color::Undefined },
+			.disabledColor	{ Color::DisabledButtonBackground, Color::DisabledButtonForeground, Color::Undefined },
+		};
+
+		inline static ButtonTheme SaveButtonStyle =
+		{
+			.defaultColor	{ Color::SaveButtonDefaultBackground, Color::SaveButtonDefaultForeground, Color::SaveButtonDefaultBorder },
+			.hoverColor		{ Color::SaveButtonHoverBackground, Color::SaveButtonHoverForeground, Color::SaveButtonHoverBorder },
+			.pressedColor	{ Color::SaveButtonPressedBackground, Color::SaveButtonPressedForeground, Color::SaveButtonPressedBorder },
+			.disabledColor	{ Color::DisabledButtonBackground, Color::DisabledButtonForeground, Color::DisabledButtonBorder },
+		};
+
+		inline static ButtonTheme PlayButtonStyle =
+		{
+			.defaultColor	{ Color::PlayButtonDefaultBackground, Color::PlayButtonDefaultForeground, Color::Undefined },
+			.hoverColor		{ Color::PlayButtonHoverBackground, Color::PlayButtonHoverForeground, Color::Undefined },
+			.pressedColor	{ Color::PlayButtonPressedBackground, Color::PlayButtonPressedForeground, Color::Undefined },
+			.disabledColor	{ Color::DisabledButtonBackground, Color::DisabledButtonForeground, Color::Undefined },
+		};
+	}
 }

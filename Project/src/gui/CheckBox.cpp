@@ -8,7 +8,7 @@ namespace fig::gui
 	CheckBox::CheckBox(ControlPtr pParent, fig::string_view label, bool bOn) : Control(pParent), MouseEventHandler(this),
 		_bOn { bOn }
 	{
-		SetForegroundColor(custom_color(0x4E4431_rgb));
+		SetForegroundColor(Color::Label);
 
 		_pBox = CreateControl<Panel>();
 		_pBox->SetSize(28, 28);
@@ -16,7 +16,7 @@ namespace fig::gui
 		auto pBoxBG = _pBox->SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBoxBG->SetColor(Color::TextBoxBackground);
 		auto pBoxBorder = _pBox->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
-		pBoxBorder->SetColor(Color::LineColor);
+		pBoxBorder->SetColor(Color::Border);
 
 		_pTick = _pBox->CreateControl<Image>(Resource::ICON_CHECKMARK);
 		_pTick->SetForegroundColor(Color::Icon);
@@ -81,22 +81,22 @@ namespace fig::gui
 		{
 		case ButtonState::Default:
 		case ButtonState::Hover:
-			_pBox->GetBackgroundRenderer()->SetColor(Color::TextBoxBackground);
-			_pBox->GetBorderRenderer()->SetColor(Color::LineColor);
-			_pLabel->SetForegroundColor(custom_color(0x4E4431_rgb));
+			_pBox->GetBackgroundRenderer()->SetColor(Color::CheckBoxBackground);
+			_pBox->GetBorderRenderer()->SetColor(Color::Border);
+			_pLabel->SetForegroundColor(Color::Label);
 			_pTick->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Pressed:
-			_pBox->GetBackgroundRenderer()->SetColor(custom_color(0xF0F0F0_rgb));
-			_pBox->GetBorderRenderer()->SetColor(Color::LineColor);
-			_pLabel->SetForegroundColor(custom_color(0x4E4431_rgb));
+			_pBox->GetBackgroundRenderer()->SetColor(Color::CheckBoxBackgroundPressed);
+			_pBox->GetBorderRenderer()->SetColor(Color::Border);
+			_pLabel->SetForegroundColor(Color::Label);
 			_pTick->SetForegroundColor(Color::Icon);
 			break;
 		case ButtonState::Disabled:
 			_pBox->GetBackgroundRenderer()->SetColor(Color::DisabledBackground);
-			_pBox->GetBorderRenderer()->SetColor(Color::DisabledLineColor);
-			_pLabel->SetForegroundColor(custom_color(0x808080C0_rgba));
-			_pTick->SetForegroundColor(Color::DisabledForeground);
+			_pBox->GetBorderRenderer()->SetColor(Color::BorderDisabled);
+			_pLabel->SetForegroundColor(Color::DisabledLabel);
+			_pTick->SetForegroundColor(Color::IconDisabled);
 			break;
 		}
 	}
