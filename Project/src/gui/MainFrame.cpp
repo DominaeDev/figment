@@ -401,14 +401,12 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_F1 and mods.Control)
 					{
-						if (Global::IsSignedIn())
-						{
-							// Reload colors
-							auto currentTheme = ColorTheme::GetTheme();
-							ColorTheme::Init();
-							ColorTheme::SetTheme(currentTheme, false);
-							return EventResult::Handled;
-						}
+						// Reload colors
+						auto currentTheme = ColorTheme::GetTheme();
+						ColorTheme::Init();
+						ColorTheme::SetTheme(currentTheme, false);
+						PushEvent(UserEvent::ColorThemeChanged);
+						return EventResult::Handled;
 					}
 				}
 

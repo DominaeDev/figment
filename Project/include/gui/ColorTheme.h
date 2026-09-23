@@ -11,6 +11,7 @@ namespace fig::gui
 	{
 		SystemDefault = 0,
 		LightDefault,
+		LightGray,
 		LightPink,
 		LightBlue,
 		LightGreen,
@@ -26,6 +27,7 @@ namespace fig::gui
 	constexpr auto ColorThemeMapping = std::array<std::pair<Theme, std::string_view>, static_cast<size_t>(Theme::Count)> {
 		std::pair { Theme::SystemDefault,	"Default" },
 		std::pair { Theme::LightDefault,	"Light" },
+		std::pair { Theme::LightGray,		"LightGray" },
 		std::pair { Theme::LightPink,		"LightPink" },
 		std::pair { Theme::LightBlue,		"LightBlue" },
 		std::pair { Theme::LightGreen,		"LightGreen" },

@@ -60,6 +60,7 @@ namespace fig::gui
 		LoadColorTheme(Theme::LightPink, 		fig::path { "resources/gui/themes/light_pink.txt" });
 		LoadColorTheme(Theme::LightBlue,		fig::path { "resources/gui/themes/light_blue.txt" });
 		LoadColorTheme(Theme::LightGreen,		fig::path { "resources/gui/themes/light_green.txt" });
+		LoadColorTheme(Theme::LightGray,		fig::path { "resources/gui/themes/light_gray.txt" });
 		LoadColorTheme(Theme::DarkDefault,		fig::path { "resources/gui/themes/dark_default.txt" });
 		LoadColorTheme(Theme::DarkPink,			fig::path { "resources/gui/themes/dark_pink.txt" });
 		LoadColorTheme(Theme::DarkBlue,			fig::path { "resources/gui/themes/dark_blue.txt" });
