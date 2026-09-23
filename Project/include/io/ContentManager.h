@@ -53,6 +53,7 @@ namespace fig::io
 		bool UpdateAsset(const fig::uuid& assetId, fig::bytes&& data);
 
 		bool DeleteAsset(fig::uuid assetId);
+		size_t DeleteAssets(std::span<fig::uuid> assetIds);
 		fig::cref_vector<Asset> GetCharacters() const noexcept;
 		fig::cref_vector<Asset> GetScenarios() const noexcept;
 		ChatCollection GetAllChats() noexcept;

@@ -554,6 +554,7 @@ namespace fig::io
 
 	bool UserContentManager::DeleteAsset(fig::uuid assetId)
 	{
+		// Invalidate associated meta data
 		auto associatedAssets = _pAssetMngr->FindAssociatedAssets(assetId);
 		for (auto& id : associatedAssets)
 			InvalidateMeta(id);
@@ -562,6 +563,20 @@ namespace fig::io
 		if (not _pAssetMngr->DeleteAsset(assetId))
 			return false;
 		return true;
+	}
+
+	size_t UserContentManager::DeleteAssets(std::span<fig::uuid> assetIds)
+	{
+		// Invalidate associated meta data
+		for (auto& assetId : assetIds)
+		{
+			auto associatedAssets = _pAssetMngr->FindAssociatedAssets(assetId);
+			for (auto& id : associatedAssets)
+				InvalidateMeta(id);
+			InvalidateAsset(assetId);
+		}
+
+		return _pAssetMngr->DeleteAssets(assetIds);
 	}
 
 	fig::cref_vector<Asset> UserContentManager::GetCharacters() const noexcept

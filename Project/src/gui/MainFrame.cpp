@@ -233,7 +233,7 @@ namespace fig::gui
 		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
-		ChangeColorTheme(Global::GetUserSettings().GetColorTheme());
+		ChangeColorTheme(Global::GetUserSettings().GetColorTheme(), false);
 
 		ChangeScreen(ScreenType::Home);
 		PushEvent(UserEvent::UserSignedIn, &profile);
@@ -391,17 +391,17 @@ namespace fig::gui
 					{
 						if (Global::IsSignedIn())
 						{
-							ColorTheme theme;
+							Theme theme;
 							switch (Global::GetUserSettings().GetColorTheme())
 							{
-							case ColorTheme::Light:
-								theme = ColorTheme::Dark;
+							case Theme::Light:
+								theme = Theme::Dark;
 								break;
 							default:
-								theme = ColorTheme::Light;
+								theme = Theme::Light;
 								break;
 							}
-							ChangeColorTheme(theme);
+							ChangeColorTheme(theme, true);
 							return EventResult::Handled;
 						}
 					}
@@ -409,8 +409,9 @@ namespace fig::gui
 					{
 						if (Global::IsSignedIn())
 						{
-							InitColorThemes();
-							ChangeColorTheme(Global::GetUserSettings().GetColorTheme());
+							// Reload colors
+							ColorTheme::Init();
+							ColorTheme::SetTheme(ColorTheme::GetTheme(), true);
 							return EventResult::Handled;
 						}
 					}
@@ -524,6 +525,12 @@ namespace fig::gui
 		if (_pSidePanel)
 		{
 			if (auto result = _pSidePanel->ProcessEvent(event); result == EventResult::Handled)
+				return EventResult::Handled;
+		}
+
+		if (_pStatusBar)
+		{
+			if (auto result = _pStatusBar->ProcessEvent(event); result == EventResult::Handled)
 				return EventResult::Handled;
 		}
 
@@ -662,11 +669,11 @@ namespace fig::gui
 		return false;
 	}
 
-	void MainFrame::ChangeColorTheme(ColorTheme theme)
+	void MainFrame::ChangeColorTheme(Theme theme, bool bTransition)
 	{
 		if (Global::IsSignedIn())
 			Global::GetUserSettings().SetColorTheme(theme);
-		ApplyColorTheme(theme);
+		ColorTheme::SetTheme(theme, bTransition);
 		PushEvent(UserEvent::ColorThemeChanged);
 	}
 }

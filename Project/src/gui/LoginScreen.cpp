@@ -24,7 +24,7 @@ namespace fig::gui
 
 		// Menu button
 		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU, false);
-		_pMenuButton->SetTheme(Theme::SidePanelButtonStyle);
+		_pMenuButton->SetTheme(SidePanelButtonStyle);
 		_pMenuButton->SetSize(36, 36);
 		_pMenuButton->SetPosition(4, 6);
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });

@@ -145,12 +145,6 @@ namespace fig::gui
 		RefreshTopButtons();
 	}
 
-	static bool IsShiftDown()
-	{
-		auto mod = SDL_GetModState();
-		return (mod & SDL_KMOD_SHIFT) != 0 and (mod & SDL_KMOD_CTRL) == 0 and (mod & SDL_KMOD_ALT) == 0;
-	}
-
 	void HomeScreen::ShowSortingMenu() noexcept
 	{
 		auto ChangeSorting = [this](SortBy sorting) {

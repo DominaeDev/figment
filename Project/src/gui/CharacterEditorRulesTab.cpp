@@ -67,12 +67,6 @@ namespace fig::gui
 		ResizeToFit(false, true);
 	}
 
-	static bool IsShiftDown()
-	{
-		auto mod = SDL_GetModState();
-		return (mod & SDL_KMOD_SHIFT) != 0 and (mod & SDL_KMOD_CTRL) == 0 and (mod & SDL_KMOD_ALT) == 0;
-	}
-
 	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorRulesTab::AppendControl(fig::string_view value, size_t index)
 	{
 		auto pRule = CreateControl<CharacterAttributeWidget>("", value, CharacterAttribute::ValueType::ShortText);

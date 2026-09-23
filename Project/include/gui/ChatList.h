@@ -29,7 +29,9 @@ namespace fig::gui
 
 		void ShowChats(const fig::io::ChatCollection& chatInstances);
 		void DeleteChat(ChatListItem& item);
+		void DeleteArchivedChats();
 		void Clear();
+
 	private:
 		void Sort(fig::io::SortBy sortBy, fig::io::OrderBy orderBy);
 		void Filter(fig::io::ChatFilterFlags filterBy, const fig::string& search_string);

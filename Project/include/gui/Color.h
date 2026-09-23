@@ -65,6 +65,16 @@ namespace fig
 		color Add(int32_t value) const noexcept;
 		color Multiply(color other) const noexcept;
 		color WithAlpha(uint8_t alpha) const noexcept;
+		color Blend(color other, float t) const noexcept
+		{
+			t = std::clamp(t, 0.0f, 1.0f);
+			return {
+				static_cast<Uint8>(std::lerp(static_cast<float>(r), static_cast<float>(other.r), t)),
+				static_cast<Uint8>(std::lerp(static_cast<float>(g), static_cast<float>(other.g), t)),
+				static_cast<Uint8>(std::lerp(static_cast<float>(b), static_cast<float>(other.b), t)),
+				static_cast<Uint8>(std::lerp(static_cast<float>(a), static_cast<float>(other.a), t))
+			};
+		}
 		
 		template<std::floating_point T>
 		color Add(T value) const noexcept

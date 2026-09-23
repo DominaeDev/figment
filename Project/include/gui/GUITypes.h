@@ -3,7 +3,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Figment.h"
-#include "gui/ColorTable.h"
+#include "gui/ColorTheme.h"
 #include "c_resource.h"
 
 namespace fig::sdl

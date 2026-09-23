@@ -20,6 +20,8 @@ namespace fig::gui
 		void SetMessage(const fig::string& message);
 		void SetModelInfo(const fig::llm::LLMStatus& status);
 
+	protected:
+		EventResult OnEvent(fig::event& event) override;
 	private:
 		fig::observer_ptr<StaticText> _pMessage;
 		fig::observer_ptr<StaticText> _pModelInfo;

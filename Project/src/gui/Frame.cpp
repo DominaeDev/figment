@@ -4,6 +4,7 @@
 #include "gui/GUITypes.h"
 #include "gui/Window.h"
 #include "gui/Events.h"
+#include "gui/ColorTheme.h"
 
 namespace fig::gui
 {
@@ -29,6 +30,9 @@ namespace fig::gui
 			auto& menu = _menus.at(toUZ(i));
 			menu.ptr->Update(fElapsed);
 		}
+
+		if (ColorTheme::IsTransitioning())
+			PushEvent(UserEvent::ColorThemeChanged);
 	}
 
 	void Frame::Render(fig::renderer_ptr pRenderer)

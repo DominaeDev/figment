@@ -46,13 +46,13 @@ namespace fig
 		explicit operator bool() const noexcept { return IsDefined(); }
 
 		inline constexpr operator fig::color() const noexcept { return *_ptr; }
-		inline constexpr operator fig::colorf() const noexcept 
+		inline constexpr operator fig::colorf() const noexcept
 		{
-			return fig::colorf { 
-				static_cast<float>(_ptr->r) / 255.0f, 
-				static_cast<float>(_ptr->g) / 255.0f, 
-				static_cast<float>(_ptr->b) / 255.0f, 
-				static_cast<float>(_ptr->a) / 255.0f 
+			return fig::colorf {
+				static_cast<float>(_ptr->r) / 255.0f,
+				static_cast<float>(_ptr->g) / 255.0f,
+				static_cast<float>(_ptr->b) / 255.0f,
+				static_cast<float>(_ptr->a) / 255.0f
 			};
 		}
 
@@ -121,7 +121,7 @@ namespace fig
 			return *this;
 		};
 
-		color_ref_with_alpha& operator= (const color_ref& other) noexcept 
+		color_ref_with_alpha& operator= (const color_ref& other) noexcept
 		{
 			_ptr = other.get();
 			_a = _ptr->a;
@@ -193,5 +193,46 @@ namespace fig
 
 	public:
 		static const color_ref nullref;
+	};
+}
+
+namespace fig::gui
+{
+	inline static fig::color_ref DefaultUserMessageBorder { Color::MessageBorderBlue };
+	inline static fig::color_ref DefaultUserMessageBackground { Color::MessageBackgroundBlue };
+
+	inline static std::array<fig::color_ref, 8> DefaultBotMessageBorders {
+		Color::MessageBorderPink,
+		Color::MessageBorderGreen,
+		Color::MessageBorderYellow,
+		Color::MessageBorderRed,
+		Color::MessageBorderTeal,
+		Color::MessageBorderPurple,
+		Color::MessageBorderBrown,
+		Color::MessageBorderNavy,
+	};
+
+	inline static std::array<fig::color_ref, 8> DefaultBotMessageBackgrounds {
+		Color::MessageBackgroundPink,
+		Color::MessageBackgroundGreen,
+		Color::MessageBackgroundYellow,
+		Color::MessageBackgroundRed,
+		Color::MessageBackgroundTeal,
+		Color::MessageBackgroundPurple,
+		Color::MessageBackgroundBrown,
+		Color::MessageBackgroundNavy,
+	};
+
+	struct color_set
+	{
+		color_ref background {};
+		color_ref foreground {};
+		color_ref border {};
+	};
+
+	struct color_pair
+	{
+		color_ref background {};
+		color_ref foreground {};
 	};
 }

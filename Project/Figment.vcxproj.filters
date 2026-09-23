@@ -797,7 +797,7 @@
     <ClCompile Include="src\gui\ColorRef.cpp">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ColorTable.cpp">
+    <ClCompile Include="src\gui\ColorTheme.cpp">
       <Filter>Source Files\Frontend\GUI\Themes</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1817,11 +1817,14 @@
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ColorRef.h" />
-    <ClInclude Include="include\gui\ColorTable.h">
-      <Filter>Source Files\Frontend\GUI\Themes</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\ColorNames.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ColorTheme.h">
+      <Filter>Source Files\Frontend\GUI\Themes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ButtonThemes.h">
+      <Filter>Source Files\Frontend\GUI\Themes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

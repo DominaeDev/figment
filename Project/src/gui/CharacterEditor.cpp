@@ -109,7 +109,7 @@ namespace fig::gui
 		Global::GetUserContent().UpdateAsset(_assetId, _character);
 		Global::GetUserContent().GetAssets().SaveNow();
 
-		_pSaveButton->SetTheme(Theme::DefaultButtonStyle);
+		_pSaveButton->SetTheme(DefaultButtonStyle);
 		auto pBorder = _pSaveButton->GetBorderRenderer();
 		pBorder->SetColor(Color::Border);
 		return true;
@@ -183,6 +183,6 @@ namespace fig::gui
 
 	void CharacterEditor::OnPropertyChanged()
 	{
-		_pSaveButton->SetTheme(Theme::SaveButtonStyle);
+		_pSaveButton->SetTheme(SaveButtonStyle);
 	}
 }

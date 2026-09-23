@@ -148,12 +148,6 @@ namespace fig::gui
 		menu.Show();
 	}
 
-	static bool IsShiftDown()
-	{
-		auto mod = SDL_GetModState();
-		return (mod & SDL_KMOD_SHIFT) != 0 and (mod & SDL_KMOD_CTRL) == 0 and (mod & SDL_KMOD_ALT) == 0;
-	}
-
 	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorGeneralTab::AppendAttributeControl(CharacterAttribute& attribute, size_t index, const fig::string_list& options, fig::string_view placeholder)
 	{
 		auto pAttribute = CreateControl<CharacterAttributeWidget>(attribute.name, attribute.value, attribute.type, options, placeholder);

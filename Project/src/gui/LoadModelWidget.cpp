@@ -28,7 +28,7 @@ namespace fig::gui
 		_pLabel->EnableEllipsis(true);
 
 		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_SETTINGS, false);
-		_pSettingsButton->SetTheme(Theme::SidePanelButtonStyle);
+		_pSettingsButton->SetTheme(SidePanelButtonStyle);
 		_pSettingsButton->SetSize(36, 36);
 		_pSettingsButton->CenterVertically();
 

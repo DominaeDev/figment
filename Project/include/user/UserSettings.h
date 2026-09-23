@@ -4,7 +4,7 @@
 
 namespace fig::gui
 {
-	enum class ColorTheme;
+	enum class Theme;
 }
 
 namespace fig::io
@@ -134,7 +134,7 @@ namespace fig::io
 		void SetChatListFilter(ChatFilterFlags filter);
 		ChatFilterFlags GetChatListFilter() const;
 
-		void SetColorTheme(fig::gui::ColorTheme theme);
-		fig::gui::ColorTheme GetColorTheme() const;
+		void SetColorTheme(fig::gui::Theme theme);
+		fig::gui::Theme GetColorTheme() const;
 	};
 }

@@ -28,7 +28,7 @@ namespace fig::gui
 		_pGradient = pGradient;
 
 		_pCollapseButton = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT, false);
-		_pCollapseButton->SetTheme(Theme::DefaultButtonStyle);
+		_pCollapseButton->SetTheme(DefaultButtonStyle);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(3);
 		_pCollapseButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pCollapseButton->GetHeight()) / 2);

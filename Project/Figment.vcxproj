@@ -189,7 +189,7 @@
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
     <ClCompile Include="src\gui\ColorRef.cpp" />
-    <ClCompile Include="src\gui\ColorTable.cpp" />
+    <ClCompile Include="src\gui\ColorTheme.cpp" />
     <ClCompile Include="src\gui\HorizontalBar.cpp" />
     <ClCompile Include="src\gui\IMeshControl.cpp" />
     <ClCompile Include="src\gui\CharacterAttributeWidget.cpp" />
@@ -497,11 +497,12 @@
     <ClInclude Include="include\gui\AddImageButton.h" />
     <ClInclude Include="include\gui\BehindChat.h" />
     <ClInclude Include="include\gui\BoxSizer.h" />
+    <ClInclude Include="include\gui\ButtonThemes.h" />
     <ClInclude Include="include\gui\ButtonWithLabel.h" />
     <ClInclude Include="include\gui\ButtonWithLabelAndIcon.h" />
     <ClInclude Include="include\gui\ColorNames.h" />
     <ClInclude Include="include\gui\ColorRef.h" />
-    <ClInclude Include="include\gui\ColorTable.h" />
+    <ClInclude Include="include\gui\ColorTheme.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
     <ClInclude Include="include\gui\IMeshControl.h" />
     <ClInclude Include="include\gui\CardImage.h" />

@@ -20,6 +20,7 @@ namespace fig::gui
 	{
 		Refresh,
 		Delete,
+		DeleteArchive,
 	};
 
 	using ChatItemEventDelegate = std::function<void(class ChatListItem&, ChatListItemEvent event)>;
@@ -42,6 +43,7 @@ namespace fig::gui
 		void ShowMenu() noexcept;
 		void NotifyUpdated();
 		void NotifyDelete();
+		void NotifyDeleteArchive();
 	
 	private:
 		fig::uuid _chatInstanceId;

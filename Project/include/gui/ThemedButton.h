@@ -2,6 +2,7 @@
 
 #include "gui/Control.h"
 #include "gui/MouseEventHandler.h"
+#include "gui/ButtonThemes.h"
 
 namespace fig::gui
 {

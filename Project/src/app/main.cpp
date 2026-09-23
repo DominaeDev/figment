@@ -12,6 +12,7 @@
 #include "gui/MainFrame.h"
 #include "gui/Window.h"
 #include "gui/Events.h"
+#include "gui/ColorTheme.h"
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 #include "audio/AudioManager.h"
@@ -124,6 +125,7 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 	fig::Global::GetLLMBackend().Update(fElapsed);
 	fig::Global::GetAudioManager().Update(fElapsed);
+	fig::gui::ColorTheme::Update(fElapsed);
 
 	auto& mainWnd = fig::Global::GetMainWindow();
 	mainWnd.Update(fElapsed);

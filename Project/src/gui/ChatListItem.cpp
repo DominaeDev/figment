@@ -214,18 +214,19 @@ namespace fig::gui
 			menu.AddItem("Export\u2026");
 			menu.AddSeparator();
 
-			menu.AddItem("Archive", Resource::ICON_ARCHIVE)
-				.SetDelegate([this] {
+			if (_bHasError or IsShiftDown())
+			{
+				menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
+					.SetDelegate([this] { NotifyDelete(); });
+			}
+			else
+			{
+				menu.AddItem("Archive", Resource::ICON_ARCHIVE)
+					.SetDelegate([this] {
 					Global::GetUserContent().MarkHidden(_chatInstanceId, true);
 					Global::GetUserContent().InvalidateChatCount(_chatInstanceId);
 					NotifyUpdated();
 				});
-			
-			if (_bHasError)
-			{
-				menu.AddSeparator();
-				menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
-					.SetDelegate([this] { NotifyDelete(); });
 			}
 		}
 		else // Archived
@@ -247,7 +248,11 @@ namespace fig::gui
 			menu.AddSeparator();
 			menu.AddItem("Delete forever\u2026", Resource::ICON_DELETE)
 				.SetDelegate([this] { NotifyDelete(); });
-			menu.AddItem("Purge archive\u2026", Resource::ICON_DELETE);
+			if (IsShiftDown())
+			{
+				menu.AddItem("Delete all archived chats\u2026", Resource::ICON_CROSS)
+					.SetDelegate([this] { NotifyDeleteArchive(); });
+			}
 
 		}
 		_menuId = menu.Show();
@@ -280,5 +285,11 @@ namespace fig::gui
 	{
 		if (_fnDelegate)
 			_fnDelegate(*this, ChatListItemEvent::Delete);
+	}
+
+	void ChatListItem::NotifyDeleteArchive()
+	{
+		if (_fnDelegate)
+			_fnDelegate(*this, ChatListItemEvent::DeleteArchive);
 	}
 }

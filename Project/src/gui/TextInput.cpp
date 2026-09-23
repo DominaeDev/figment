@@ -381,14 +381,10 @@ namespace fig::gui
 		}
 
 		auto rect = _cursor_rect;
+		fig::color_ref cursorColor = Color::TextBoxCursor;
 		ApplyScroll(rect);
-		SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0xFF);
+		SDL_SetRenderDrawColor(pRenderer, cursorColor.r(), cursorColor.g(), cursorColor.b(), cursorColor.a());
 		SDL_RenderFillRect(pRenderer, &rect);
-	}
-
-	static bool IsShiftDown()
-	{
-		return (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
 	}
 
 	void TextInput::ResetCursorBlink()
@@ -745,7 +741,7 @@ namespace fig::gui
 
 	void TextInput::OnMoveCursor(int32_t last_position)
 	{
-		bool isShiftDown = IsShiftDown();
+		bool isShiftDown = (SDL_GetModState() & SDL_KMOD_SHIFT) != 0;
 		bool is_highlighting = HasSelection();
 		if (!is_highlighting and isShiftDown)
 		{
@@ -1098,7 +1094,7 @@ namespace fig::gui
 		int textY = y - rect.y + _scroll.y;
 		auto pos = GetCursorAt(textX, textY).position;
 		
-		if (IsShiftDown())
+		if ((SDL_GetModState() & SDL_KMOD_SHIFT) != 0)
 		{
 			auto last_cursor = _cursor;
 			SetCursor(pos);

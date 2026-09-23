@@ -13,7 +13,7 @@ namespace fig::gui
 		_pIcon = _pBackground->CreateControl<Image>(Resource::ICON_PLAY);
 		_pIcon->Center();
 
-		SetTheme(Theme::PlayButtonStyle);
+		SetTheme(PlayButtonStyle);
 
 		SetSize(36, 36);
 		OnButtonState();

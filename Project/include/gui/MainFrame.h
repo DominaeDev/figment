@@ -21,7 +21,7 @@ namespace fig::user
 namespace fig::gui
 {
 	class SidePanel;
-	enum class ColorTheme;
+	enum class Theme;
 
 	class MainFrame : public Frame
 	{
@@ -79,7 +79,8 @@ namespace fig::gui
 		void InitializeModel();
 		void UnloadModel();
 
-		void ChangeColorTheme(ColorTheme theme);
+		void ChangeColorTheme(Theme theme, bool bTransition = false);
+
 	protected:
 		template<IsScreen T>
 		void RegisterScreen(ScreenType screen);

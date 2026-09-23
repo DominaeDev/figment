@@ -16,6 +16,7 @@ TextBox.Background.Disabled				#E0E0E0
 TextBox.Selection.Foreground			#FFFFFF
 TextBox.Selection.Background			#99C9EF
 TextBox.Selection.Background.Inactive	#D0D0D0
+TextBox.Cursor							#000000
 TextBox.ScrollBar						#00000060
 Border									#C7BCAA
 Border.Disabled							#C0C0C0
@@ -38,7 +39,7 @@ StatusBar.Background					#DED9C5
 Control.Selected.Border					#40C0FF
 Control.Foreground.Disabled				#A0A0A0
 Control.Background.Disabled				#E0E0E0
-	
+
 Panel.Foreground						#4E4431 // near AppBackground
 Panel.Background						#F4F2EC // near AppBackground
 Panel.Background.Hover					#FDFCFA // subtle highlight

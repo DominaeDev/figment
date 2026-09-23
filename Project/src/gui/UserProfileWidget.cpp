@@ -19,7 +19,7 @@ namespace fig::gui
 		_pLabel->EnableEllipsis(true);
 
 		_pSignOutButton = CreateControl<ButtonWithIcon>(Resource::ICON_LOGOUT, false);
-		_pSignOutButton->SetTheme(Theme::SidePanelButtonStyle);
+		_pSignOutButton->SetTheme(SidePanelButtonStyle);
 		_pSignOutButton->SetSize(36, 36);
 		_pSignOutButton->CenterVertically();
 		_pSignOutButton->SetDelegate([]() { MainFrame::GetInstance().SignOut(); });

@@ -29,7 +29,7 @@ namespace fig::gui
 		pLogo->SetX(44);
 
 		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
-		_pMenuButton->SetTheme(Theme::SidePanelButtonStyle);
+		_pMenuButton->SetTheme(SidePanelButtonStyle);
 		_pMenuButton->SetX(3);
 		_pMenuButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pMenuButton->GetHeight()) / 2);
 //		_pMenuButton->CenterVertically();
@@ -81,7 +81,7 @@ namespace fig::gui
 		DestroyChildren();
 
 		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
-		_pMenuButton->SetTheme(Theme::SidePanelButtonStyle);
+		_pMenuButton->SetTheme(SidePanelButtonStyle);
 		_pMenuButton->SetX(3);
 		_pMenuButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pMenuButton->GetHeight()) / 2);
 //		_pMenuButton->CenterVertically();
@@ -89,16 +89,16 @@ namespace fig::gui
 
 		auto pChatButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHATS_SMALL, false);
 		pChatButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
-		pChatButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
+		pChatButtonSmall->SetTheme(SidePanelButtonStyle);
 		auto pCharactersButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHARACTERS_SMALL, false);
 		pCharactersButtonSmall->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
-		pCharactersButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
+		pCharactersButtonSmall->SetTheme(SidePanelButtonStyle);
 		auto pScenariosButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_SCENARIOS_SMALL, false);
-		pScenariosButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
+		pScenariosButtonSmall->SetTheme(SidePanelButtonStyle);
 		auto pWorldsButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_WORLDS_SMALL, false);
-		pWorldsButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
+		pWorldsButtonSmall->SetTheme(SidePanelButtonStyle);
 		auto pModelsButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_MODELS_SMALL, false);
-		pModelsButtonSmall->SetTheme(Theme::SidePanelButtonStyle);
+		pModelsButtonSmall->SetTheme(SidePanelButtonStyle);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->AddSpacer(62);

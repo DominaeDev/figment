@@ -22,7 +22,7 @@ namespace fig::gui
 
 		// Back button
 		auto pBackButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
-		pBackButton->SetTheme(Theme::SidePanelButtonStyle);
+		pBackButton->SetTheme(SidePanelButtonStyle);
 		pBackButton->SetX(3);
 		pBackButton->SetY((Constants::GUI::SidePanel::HeaderHeight - pBackButton->GetHeight()) / 2);
 		pBackButton->SetDelegate([this]() { PushEvent(UserEvent::NavigateToHome); });
@@ -50,7 +50,7 @@ namespace fig::gui
 
 		// Back button
 		auto pBackButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
-		pBackButton->SetTheme(Theme::SidePanelButtonStyle);
+		pBackButton->SetTheme(SidePanelButtonStyle);
 		pBackButton->SetX(3);
 		pBackButton->SetY((Constants::GUI::SidePanel::HeaderHeight - pBackButton->GetHeight()) / 2);
 		pBackButton->SetDelegate([this]() { PushEvent(UserEvent::NavigateToHome); });
@@ -64,7 +64,7 @@ namespace fig::gui
 			for (auto& tab : tabs)
 			{
 				auto pNavButton = CreateControl<ButtonWithIcon>(tab.iconSmall, false);
-				pNavButton->SetTheme(Theme::SidePanelButtonStyle);
+				pNavButton->SetTheme(SidePanelButtonStyle);
 				pNavButton->SetDelegate([tab] { PushEvent(UserEvent::SelectEditorTab, static_cast<int32_t>(tab.tabIndex)); });
 
 				pNavigationSizer->Add(pNavButton, 0, SizerFlag::AlignCenterHorizontal);

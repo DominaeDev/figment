@@ -258,6 +258,9 @@ namespace fig::gui
 		case ChatListItemEvent::Delete:
 			DeleteChat(item);
 			break;
+		case ChatListItemEvent::DeleteArchive:
+			DeleteArchivedChats();
+			break;
 		}
 	}
 
@@ -273,6 +276,29 @@ namespace fig::gui
 				_items.erase(try_item);
 				Reorder();
 			}
+		}
+	}
+
+	void ChatList::DeleteArchivedChats()
+	{
+		auto archivedChats = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
+			| std::views::filter([](auto&& a) { return Global::GetUserContent().GetUserSettings(a.get().id).HasFlag(AssetUserSettings::Flag::Hidden); })
+			| std::views::transform([](auto&& a) { return a.get().id; })
+			| std::ranges::to<std::vector>();
+
+		if (Global::GetUserContent().DeleteAssets(archivedChats) != 0uz)
+		{
+			for (int32_t i = toI(_items.size()) - 1; i >= 0; --i)
+			{
+				auto& item = _items[i];
+				if (std::ranges::contains(archivedChats, item.assetId))
+				{
+					DestroyChild(item.pListItem);
+					_items.erase(_items.cbegin() + toUZ(i));
+				}
+			}
+
+			Reorder();
 		}
 	}
 }

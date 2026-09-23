@@ -44,4 +44,13 @@ namespace fig::gui
 			));
 		}
 	}
+
+	EventResult StatusBar::OnEvent(fig::event& event)
+	{
+		if (IsUserEvent(event, UserEvent::ColorThemeChanged))
+		{
+			int k = 0;
+		}
+		return EventResult::Pass;
+	}
 }

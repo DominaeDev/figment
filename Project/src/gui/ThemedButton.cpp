@@ -5,7 +5,7 @@ namespace fig::gui
 {
 	ThemedButton::ThemedButton(ControlPtr pParent) : Control(pParent), MouseEventHandler(this)
 	{
-		SetTheme(Theme::DefaultButtonStyle);
+		SetTheme(DefaultButtonStyle);
 	}
 
 	EventResult ThemedButton::OnEvent(fig::event& event)

@@ -16,6 +16,7 @@ TextBox.Background.Disabled				#1C1D20
 TextBox.Selection.Foreground			#FFFFFF
 TextBox.Selection.Background			#3C45A5
 TextBox.Selection.Background.Inactive	#55575E
+TextBox.Cursor							#F2F3F5
 TextBox.ScrollBar						#FFFFFF60
 Border									#3F4147
 Border.Disabled							#4E5058

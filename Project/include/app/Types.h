@@ -47,7 +47,6 @@ namespace fig
     using cref_vector = std::vector<std::reference_wrapper<const T>>;
 
     // Concepts
-
     template <typename T>
     concept is_string_like = std::constructible_from<fig::string, T>;
 
