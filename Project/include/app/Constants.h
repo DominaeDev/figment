@@ -39,8 +39,8 @@ namespace fig::Constants
 
 			namespace Full
 			{
-				constexpr fig::coord Width = 320;
-				constexpr fig::coord Height = 412;
+				constexpr fig::coord Width = 320;		// 356
+				constexpr fig::coord Height = 412;		// 448
 				constexpr fig::coord ZoomPixels = 18;
 				constexpr fig::coord BorderOffset = 16;
 				constexpr fig::coord TextY = 32;
@@ -195,7 +195,7 @@ namespace fig::Constants
 			.flags {
 				fig::chat::ChatOptions::Flag::GreetUser,
 				fig::chat::ChatOptions::Flag::Uncensored,
-		//		fig::chat::ChatOptions::Flag::LimitMessages,
+				fig::chat::ChatOptions::Flag::LimitMessages,
 		//		fig::chat::ChatOptions::Flag::RandomizeMessageCount,
 		//		fig::chat::ChatOptions::Flag::StateVariables,
 		//		fig::chat::ChatOptions::Flag::ReportStateChanges,

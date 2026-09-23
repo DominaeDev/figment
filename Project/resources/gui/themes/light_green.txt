@@ -1,11 +1,11 @@
 // Primary theme colors
 App.Foreground							#2E3A22
-App.Background							#F8FBF3
+App.Background							#F5F9EE
 App.Accent								#82CE59
 
 // Side panel (low-contrast off-shade)
 SidePanel.Foreground					#4C5E38
-SidePanel.Background					#F0F6E7
+SidePanel.Background					#E9F2DC
 SidePanel.Gradient						#E1EDCB // Darker, fade
 
 // Controls
@@ -18,7 +18,7 @@ TextBox.Selection.Background			#C3E29A
 TextBox.Selection.Background.Inactive	#DAE7C7
 TextBox.Cursor							#2E3A22
 TextBox.ScrollBar						#00000060
-Border									#C9E0A3
+Border									#B1D27A
 Border.Disabled							#D3E1BF
 Border.Highlighted						#82CE59
 Icon									#4C5E38
@@ -54,14 +54,14 @@ Card.Shadow								#DFEBCA
 	
 // Button (Default)	
 Button.Default.Foreground				#4C5E38
-Button.Default.Background				#F8FBF3
-Button.Default.Border					#C9E0A3
+Button.Default.Background				#F5F9EE
+Button.Default.Border					#B1D27A
 Button.Hover.Foreground					#4C5E38
 Button.Hover.Background				#E9F1DA
-Button.Hover.Border						#C9E0A3
+Button.Hover.Border						#B1D27A
 Button.Pressed.Foreground				#4C5E38
 Button.Pressed.Background				#FEFEFA
-Button.Pressed.Border					#C9E0A3
+Button.Pressed.Border					#B1D27A
 
 // Button (Side panel)
 SidePanelButton.Default.Foreground		#4C5E38

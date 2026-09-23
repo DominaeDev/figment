@@ -825,7 +825,7 @@ namespace fig::llm
 								else if (tag == Constants::Chat::StateReportTag)
 									msgType = MessageType::StateReport;
 
-								if (msgType != MessageType::StateReport && args.maxMessages > 0 && ++numMessages >= args.maxMessages)
+								if (msgType != MessageType::StateReport && args.maxMessages > 0 && ++numMessages > args.maxMessages)
 								{
 									stop_reason = StopReason::MessageCountLimit;
 									break; // That's enough, thank you
@@ -946,7 +946,6 @@ namespace fig::llm
 		cursor_pos = _contextState.GetCache().length();
 		token_pos = response_pos;
 		_contextState.last_sequence_index = current_sequence_index;
-
 
 		sanitize_response(response);
 
@@ -1523,7 +1522,7 @@ namespace fig::llm
 						if (not content.empty())
 							PushMessage(role, content, MessageType::Undefined); //! @todo: split message by type
 						else
-							Instigate(role, MessageType::Dialogue);
+							Instigate(role, MessageType::Dialogue, 1);
 					}
 					else if (is_user(role))
 					{

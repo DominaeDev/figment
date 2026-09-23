@@ -5,7 +5,7 @@ App.Accent								#FF7FAF
 
 // Side panel (low-contrast off-shade)
 SidePanel.Foreground					#7A3F55
-SidePanel.Background					#FDEFF4
+SidePanel.Background					#FCE3EC
 SidePanel.Gradient						#F9DCE6 // Darker, fade
 
 // Controls
@@ -18,7 +18,7 @@ TextBox.Selection.Background			#FFB6D0
 TextBox.Selection.Background.Inactive	#EAD3DA
 TextBox.Cursor							#4A2A33
 TextBox.ScrollBar						#00000060
-Border									#F0BFD1
+Border									#E590AF
 Border.Disabled							#E0C7CF
 Border.Highlighted						#D98CAA
 Icon									#7A3F55
@@ -55,13 +55,13 @@ Card.Shadow								#F7DDE6
 // Button (Default)	
 Button.Default.Foreground				#7A3F55
 Button.Default.Background				#FFF8FA
-Button.Default.Border					#F0BFD1
+Button.Default.Border					#E590AF
 Button.Hover.Foreground					#7A3F55
 Button.Hover.Background				#FBE5ED
-Button.Hover.Border						#F0BFD1
+Button.Hover.Border						#E590AF
 Button.Pressed.Foreground				#7A3F55
 Button.Pressed.Background				#FFFDFE
-Button.Pressed.Border					#F0BFD1
+Button.Pressed.Border					#E590AF
 
 // Button (Side panel)
 SidePanelButton.Default.Foreground		#7A3F55

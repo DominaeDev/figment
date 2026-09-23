@@ -49,7 +49,7 @@ Menu.Background 						#1E1F22
 Menu.Border 							#1E1F22
 Menu.Item.Hover 						#292B2F
 Menu.Item.Pressed 						#5B5E68
-Card.Shadow								#1A1B1E
+Card.Shadow								#26272B
 	
 // Button (Default)	
 Button.Default.Foreground				#B5BAC1

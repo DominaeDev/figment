@@ -19,6 +19,7 @@ namespace fig::gui
 
 		_pModelInfo = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);
 		_pModelInfo->SetPosition(400, 2);
+		_pModelInfo->SetVisible(false); //! @temp
 	}
 
 	void StatusBar::SetMessage(const fig::string& message)

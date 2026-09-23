@@ -239,13 +239,15 @@ namespace fig
 
 	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha)
 	{
-		int32_t expandX = Constants::GUI::Cards::Full::ZoomPixels * 2;
-		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::Cards::Full::ZoomPixels * 2) * toF(Constants::GUI::CardHeight) / toF(Constants::GUI::CardWidth)));
-
 		if (surface.empty())
 			return {};
 
-		auto pSurface = SDL_CreateSurface(Constants::GUI::CardWidth + expandX, Constants::GUI::CardHeight + expandY, SDL_PIXELFORMAT_RGB24);
+		int32_t expandX = Constants::GUI::Cards::Full::ZoomPixels * 2;
+		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::Cards::Full::ZoomPixels * 2) * toF(Constants::GUI::CardHeight) / toF(Constants::GUI::CardWidth)));
+		int32_t coverWidth = Constants::GUI::CardWidth + expandX;
+		int32_t coverHeight = Constants::GUI::CardHeight + expandY;
+
+		auto pSurface = SDL_CreateSurface(coverWidth, coverHeight, SDL_PIXELFORMAT_RGB24);
 		if (not (bool)pSurface)
 			return {};
 		
@@ -256,7 +258,7 @@ namespace fig
 		auto pBGImage = AppResources::GetImage(Resource::CARD_BACKGROUND_DEFAULT);
 		SDL_BlitSurfaceScaled(pBGImage, NULL, pSurface, NULL, SDL_SCALEMODE_LINEAR);
 
-		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->h, ImageFit::Portrait);
+		auto pScaledImage = ScaleSurface(surface, coverWidth, coverHeight, ImageFit::Portrait);
 		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
 
 		if (bAlpha)
@@ -265,11 +267,6 @@ namespace fig
 			{
 				SDL_DestroySurface(pSurface);
 				cover.reset(newSurface);
-
-				if constexpr (Disabled) 
-				{
-					MaskCorners(cover, MaskType::CARD_CORNER_MASK);
-				}
 			}
 		}
 

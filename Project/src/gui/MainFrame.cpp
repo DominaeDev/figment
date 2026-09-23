@@ -221,6 +221,7 @@ namespace fig::gui
 		auto& userMngr = Global::GetUserManager();
 		if (userMngr.SignOut())
 		{
+			ColorTheme::SetTheme(Theme::SystemDefault, false);
 			OnSignedOut();
 			return true;
 		}
