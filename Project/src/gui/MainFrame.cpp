@@ -391,17 +391,10 @@ namespace fig::gui
 					{
 						if (Global::IsSignedIn())
 						{
-							Theme theme;
-							switch (Global::GetUserSettings().GetColorTheme())
-							{
-							case Theme::Light:
-								theme = Theme::Dark;
-								break;
-							default:
-								theme = Theme::Light;
-								break;
-							}
-							ChangeColorTheme(theme, true);
+							int32_t theme = static_cast<int32_t>(Global::GetUserSettings().GetColorTheme());
+							if (++theme == static_cast<int32_t>(Theme::Count))
+								theme = static_cast<int32_t>(Theme::LightDefault);
+							ChangeColorTheme(static_cast<Theme>(theme), true);
 							return EventResult::Handled;
 						}
 					}
@@ -410,8 +403,9 @@ namespace fig::gui
 						if (Global::IsSignedIn())
 						{
 							// Reload colors
+							auto currentTheme = ColorTheme::GetTheme();
 							ColorTheme::Init();
-							ColorTheme::SetTheme(ColorTheme::GetTheme(), true);
+							ColorTheme::SetTheme(currentTheme, false);
 							return EventResult::Handled;
 						}
 					}

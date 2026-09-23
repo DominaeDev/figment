@@ -10,14 +10,30 @@ namespace fig::gui
 	enum class Theme
 	{
 		SystemDefault = 0,
-		Light,
-		Dark,
+		LightDefault,
+		LightPink,
+		LightBlue,
+		LightGreen,
+		DarkDefault,
+		DarkPink,
+		DarkBlue,
+		DarkGreen,
+		DarkBrown,
+
+		Count,
 	};
 
-	constexpr auto ColorThemeMapping = std::array<std::pair<Theme, std::string_view>, 3uz> {
+	constexpr auto ColorThemeMapping = std::array<std::pair<Theme, std::string_view>, static_cast<size_t>(Theme::Count)> {
 		std::pair { Theme::SystemDefault,	"Default" },
-		std::pair { Theme::Light,			"Light" },
-		std::pair { Theme::Dark,			"Dark" },
+		std::pair { Theme::LightDefault,	"Light" },
+		std::pair { Theme::LightPink,		"LightPink" },
+		std::pair { Theme::LightBlue,		"LightBlue" },
+		std::pair { Theme::LightGreen,		"LightGreen" },
+		std::pair { Theme::DarkDefault,		"Dark" },
+		std::pair { Theme::DarkPink,		"DarkPink" },
+		std::pair { Theme::DarkBlue,		"DarkBlue" },
+		std::pair { Theme::DarkGreen,		"DarkGreen" },
+		std::pair { Theme::DarkBrown,		"DarkBrown" },
 	};
 
 	class ColorTheme

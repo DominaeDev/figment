@@ -48,17 +48,24 @@ namespace fig::gui
 		if constexpr (Debugging)
 		{
 			// Fill tables with "error color" (red)
-			auto themes = { Theme::Light, Theme::Dark };
-			for (auto theme : themes)
+			for (int32_t theme = 0; theme < static_cast<int32_t>(Theme::Count); ++theme)
 			{
-				auto& table = _state.colorThemes[theme];
+				auto& table = _state.colorThemes[static_cast<Theme>(theme)];
 				for (auto& color : table)
 					color = MissingColor;
 			}
 		}
 
-		LoadColorTheme(Theme::Light, fig::path { "resources/gui/themes/light.txt" });
-		LoadColorTheme(Theme::Dark, fig::path { "resources/gui/themes/dark.txt" });
+		LoadColorTheme(Theme::LightDefault,		fig::path { "resources/gui/themes/light_default.txt" });
+		LoadColorTheme(Theme::LightPink, 		fig::path { "resources/gui/themes/light_pink.txt" });
+		LoadColorTheme(Theme::LightBlue,		fig::path { "resources/gui/themes/light_blue.txt" });
+		LoadColorTheme(Theme::LightGreen,		fig::path { "resources/gui/themes/light_green.txt" });
+		LoadColorTheme(Theme::DarkDefault,		fig::path { "resources/gui/themes/dark_default.txt" });
+		LoadColorTheme(Theme::DarkPink,			fig::path { "resources/gui/themes/dark_pink.txt" });
+		LoadColorTheme(Theme::DarkBlue,			fig::path { "resources/gui/themes/dark_blue.txt" });
+		LoadColorTheme(Theme::DarkGreen,		fig::path { "resources/gui/themes/dark_green.txt" });
+		LoadColorTheme(Theme::DarkBrown,		fig::path { "resources/gui/themes/dark_brown.txt" });
+
 		return SetTheme(Theme::SystemDefault);
 	}
 
@@ -80,10 +87,10 @@ namespace fig::gui
 			{
 			default:
 			case SDL_SYSTEM_THEME_LIGHT: 
-				theme = Theme::Light;
+				theme = Theme::LightDefault;
 				break;
 			case SDL_SYSTEM_THEME_DARK: 
-				theme = Theme::Dark;
+				theme = Theme::DarkDefault;
 				break;
 			}
 		}

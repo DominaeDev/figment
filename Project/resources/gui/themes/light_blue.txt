@@ -1,0 +1,136 @@
+// Primary theme colors
+App.Foreground							#1F3A4A
+App.Background							#f7fcff
+App.Accent								#5FB8FF
+
+// Side panel (low-contrast off-shade)
+SidePanel.Foreground					#2E5E78
+SidePanel.Background					#E9F5FE
+SidePanel.Gradient						#D3E9FB // Darker, fade
+
+// Controls
+TextBox.Foreground						#1F3A4A
+TextBox.Foreground.Disabled				#9AB2C2
+TextBox.Background						#FFFFFF
+TextBox.Background.Disabled				#DCEBF7
+TextBox.Selection.Foreground			#FFFFFF
+TextBox.Selection.Background			#A9D6FF
+TextBox.Selection.Background.Inactive	#CFE3F2
+TextBox.Cursor							#1F3A4A
+TextBox.ScrollBar						#00000060
+Border									#75ade0
+Border.Disabled							#C4DAEA
+Border.Highlighted						#5FA8E0
+Icon									#2E5E78
+Icon.Disabled							#9FB6C7
+Label									#2E5E78
+Label.Disabled							#9FB6C7C0 // blend with background
+HintText								#8DAAC0 // (less contrast)
+CheckBox.Background						#FFFFFF
+CheckBox.Background.Pressed				#E4F1FC
+ScrollBar								#000000
+Slider.Background						#EAF4FE
+Slider.Thumb							#FCFEFF
+Slider.Fill								#6FC0FF
+ProgressBar.Fill						#6FC0FF
+ScrollBar								#000000	
+StatusBar.Foreground					#265170
+StatusBar.Background					#CFE6FA
+Control.Selected.Border					#5FB8FF
+Control.Foreground.Disabled				#9AB2C2
+Control.Background.Disabled				#DCEBF7
+
+Panel.Foreground						#2E5E78 // near AppBackground
+Panel.Background						#EAF4FE // near AppBackground
+Panel.Background.Hover					#FCFEFF // subtle highlight
+	
+Menu.Foreground 						#2E5E78
+Menu.Foreground.Disabled				#9AB2C2
+Menu.Background 						#FFFFFF
+Menu.Border 							#FFFFFF
+Menu.Item.Hover 						#EDF7FF
+Menu.Item.Pressed 						#DCEEFC
+Card.Shadow								#D6E9F9
+	
+// Button (Default)	
+Button.Default.Foreground				#2E5E78
+Button.Default.Background				#f7fcff
+Button.Default.Border					#75ade0
+Button.Hover.Foreground					#2E5E78
+Button.Hover.Background					#DCEEFC
+Button.Hover.Border						#75ade0
+Button.Pressed.Foreground				#2E5E78
+Button.Pressed.Background				#FCFEFF
+Button.Pressed.Border					#75ade0
+
+// Button (Side panel)
+SidePanelButton.Default.Foreground		#2E5E78
+SidePanelButton.Default.Background		#FFFFFF00 // over SidePanelBackground
+SidePanelButton.Hover.Foreground		#2E5E78
+SidePanelButton.Hover.Background		#FFFFFF80 // over SidePanelBackground
+SidePanelButton.Pressed.Foreground		#2E5E78
+SidePanelButton.Pressed.Background		#FFFFFFC0 // over SidePanelBackground
+
+// Save button (Green)
+SaveButton.Default.Foreground			#13330E
+SaveButton.Default.Background			#C7E8C1
+SaveButton.Default.Border				#097F00
+SaveButton.Hover.Foreground				#13330E
+SaveButton.Hover.Background				#97D991
+SaveButton.Hover.Border					#097F00
+SaveButton.Pressed.Foreground			#13330E
+SaveButton.Pressed.Background			#B7E3B1
+SaveButton.Pressed.Border				#097F00
+	
+PlayButton.Default.Foreground			#2E5E78
+PlayButton.Default.Background			#8FC5F540
+PlayButton.Hover.Foreground				#2E5E78
+PlayButton.Hover.Background				#8FC5F580
+PlayButton.Pressed.Foreground			#2E5E78
+PlayButton.Pressed.Background			#8FC5F5C0
+	
+// Button (Disabled)	
+DisabledButton.Foreground				#8FA6B8
+DisabledButton.Background				#CBE0F080 // 50% blend with background
+DisabledButton.Border					#C4DAEA
+
+// Chat speech bubbles (colorful; text + background + border)
+Message.Foreground						#000000
+Message.Default.Background				#F4F4F4
+Message.Default.Border					#9F9F9F
+Message.Blue.Background					#F2FBFF
+Message.Blue.Border						#4DA1C1
+Message.Pink.Background					#FFF3F9
+Message.Pink.Border						#EF76BD
+Message.Green.Background				#EAFFE9
+Message.Green.Border					#50E433
+Message.Yellow.Background				#FFFCEA
+Message.Yellow.BorderY					#E4C533
+Message.Red.Background					#FFEEEE
+Message.Red.Border						#D52B2B
+Message.Teal.Background					#EEFFFC
+Message.Teal.Border						#4DC1BA
+Message.PurpleBackground				#FCF3FF
+Message.PurpleBorder					#B25CE1
+Message.Brown.Background				#FFF9EA
+Message.Brown.Border					#C07C4C
+Message.Navy.Background					#F2FAFF
+Message.Navy.Border						#4D55C1
+
+// Fixed colors (invariant)
+Debug									#C000C0
+Debug2									#00C0C0
+Debug3									#C0C000
+Opaque									#FFFFFFFF
+Transparent								#FFFFFF00
+White									#FFFFFF
+Black									#000000
+Red										#800000
+Green									#008000
+Blue									#000080
+Gray									#C0C0C0
+DarkGray								#646464
+Tag.Gender.Male							#45ccff	// Blue
+Tag.Gender.Female						#ff5abb	// Pink
+Tag.Gender.Other						#4cff8b	// Green
+Tag.New									#1065B4E0 // Blue

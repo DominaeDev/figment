@@ -66,7 +66,7 @@ namespace fig::gui
 		// Border (large)
 		auto pSimpleBorder = _pLargeRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSimpleBorder->FillParent();
-		pSimpleBorder->SetForegroundColor(fig::color_ref(Color::Black).WithAlpha(FadeAlpha));
+		pSimpleBorder->SetForegroundColor(Color::Border);
 
 		// Styled border (large)
 		_pLargeBorder = _pLargeRoot->CreateControl<Image>(nullptr);
@@ -106,7 +106,7 @@ namespace fig::gui
 		// Border (small)
 		auto pSmallSimpleBorder = _pSmallRoot->CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::CARD_BORDER), 16);
 		pSmallSimpleBorder->FillParent();
-		pSmallSimpleBorder->SetForegroundColor(fig::color_ref(Color::Black).WithAlpha(FadeAlpha));
+		pSmallSimpleBorder->SetForegroundColor(Color::Border);
 
 		// Styled border (small)
 		_pSmallBorder = _pSmallRoot->CreateControl<Image>(nullptr);

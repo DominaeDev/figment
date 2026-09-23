@@ -18,7 +18,7 @@ TextBox.Selection.Background			#3C45A5
 TextBox.Selection.Background.Inactive	#55575E
 TextBox.Cursor							#F2F3F5
 TextBox.ScrollBar						#FFFFFF60
-Border									#3F4147
+Border									#5B5E68
 Border.Disabled							#4E5058
 Border.Highlighted						#909090
 Icon									#B5BAC1
@@ -48,27 +48,27 @@ Menu.Foreground.Disabled				#595D63
 Menu.Background 						#1E1F22
 Menu.Border 							#1E1F22
 Menu.Item.Hover 						#292B2F
-Menu.Item.Pressed 						#3F4147
+Menu.Item.Pressed 						#5B5E68
 Card.Shadow								#1A1B1E
 	
 // Button (Default)	
 Button.Default.Foreground				#B5BAC1
 Button.Default.Background				#313338
-Button.Default.Border					#3F4147
+Button.Default.Border					#5B5E68
 Button.Hover.Foreground					#B5BAC1
-Button.Hover.Background					#3F4147
-Button.Hover.Border						#3F4147
+Button.Hover.Background					#45474E
+Button.Hover.Border						#5B5E68
 Button.Pressed.Foreground				#B5BAC1
-Button.Pressed.Background				#45474E
-Button.Pressed.Border					#3F4147
+Button.Pressed.Background				#5B5E68
+Button.Pressed.Border					#5B5E68
 
 // Button (Side panel)
 SidePanelButton.Default.Foreground		#B5BAC1
-SidePanelButton.Default.Background		#FFFFFF00 // over SidePanelBackground
+SidePanelButton.Default.Background		#FFFFFF00
 SidePanelButton.Hover.Foreground		#B5BAC1
-SidePanelButton.Hover.Background		#FFFFFF1A // over SidePanelBackground
+SidePanelButton.Hover.Background		#FFFFFF1A
 SidePanelButton.Pressed.Foreground		#B5BAC1
-SidePanelButton.Pressed.Background		#FFFFFF33 // over SidePanelBackground
+SidePanelButton.Pressed.Background		#FFFFFF33
 
 // Save button (Green)
 SaveButton.Default.Foreground			#FFFFFF
