@@ -381,6 +381,7 @@ namespace fig
 		std::vector<fig::string_view> sentences;
 		size_t pos_start = 0;
 
+		// Exception detection
 		auto is_decimal = [](fig::string_view text, size_t position) -> bool {
 			bool before = position > 0 and std::isdigit(static_cast<unsigned char>(text[position - 1]));
 			bool after = position + 1 < text.size() and std::isdigit(static_cast<unsigned char>(text[position + 1]));
@@ -422,6 +423,29 @@ namespace fig
 			return false;
 		};
 
+		auto is_acronym_fragment = [](fig::string_view word) -> bool {
+			size_t runLength = 0;
+
+			for (char character : word)
+			{
+				if (character == '.')
+				{
+					runLength = 0;
+					continue;
+				}
+
+				if (not std::isalpha(static_cast<unsigned char>(character)))
+					return false;
+
+				++runLength;
+
+				if (runLength > 1)
+					return false;
+			}
+
+			return not word.empty();
+		};
+
 		auto preceding_word = [](fig::string_view text, size_t position) -> fig::string_view {
 			size_t pos_word = position;
 
@@ -436,7 +460,8 @@ namespace fig
 			char character = text[position];
 
 			// Check for non-breaking periods
-			if (character == '.' and (is_decimal(text, position) or is_abbriviation(preceding_word(text, position))))
+			fig::string_view word = preceding_word(text, position);
+			if (character == '.' and (is_decimal(text, position) or is_abbriviation(word) or is_acronym_fragment(word)))
 				continue;
 			
 			// Check for ellipsis

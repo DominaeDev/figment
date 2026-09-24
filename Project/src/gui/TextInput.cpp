@@ -991,6 +991,18 @@ namespace fig::gui
 		return false;
 	}
 
+	int32_t TextInput::SelectWordAt(fig::point pos) noexcept
+	{
+		if (auto cursor = TryGetCursorAt(pos.x, pos.y))
+		{
+			auto start = FindPriorWord(_text, (*cursor).position);
+			auto end = FindNextWord(_text, (*cursor).position);
+			SetCursor(end);
+			Select(start, end);
+		}
+		return _cursor;
+	}
+
 	bool TextInput::Delete()
 	{
 		if (DeleteSelection())
@@ -1076,22 +1088,27 @@ namespace fig::gui
 	}
 
 #pragma region Selection
-	bool TextInput::HandleMouseDown(int x, int y)
+	bool TextInput::HandleMouseDown(SDL_MouseButtonEvent& event)
 	{
-		fig::point pt = { x, y };
-		auto rect = GetClientRect();
-		if (!SDL_PointInRect(&pt, &rect))
+		if (event.button != SDL_BUTTON_LEFT)
+			return false;
+
+		auto mpos = fig::point { toI(event.x), toI(event.y) };
+		auto& rect = GetRect();
+
+		if (!SDL_PointInRect(&mpos, &rect))
 		{
 			if (_bFocused)
 				SetFocus(false);
 			return false;
 		}
 
+		auto clientRect = GetClientRect();
 		if (!_bFocused)
 			SetFocus(true);
 
-		int textX = x - rect.x + _scroll.x;
-		int textY = y - rect.y + _scroll.y;
+		int textX = mpos.x - clientRect.x + _scroll.x;
+		int textY = mpos.y - clientRect.y + _scroll.y;
 		auto pos = GetCursorAt(textX, textY).position;
 		
 		if ((SDL_GetModState() & SDL_KMOD_SHIFT) != 0)
@@ -1102,24 +1119,45 @@ namespace fig::gui
 		}
 		else
 		{
+			if (event.clicks >= 2 and is_near(mpos, _lastClick))
+			{
+				SelectWordAt(fig::point { textX, textY });
+				_lastClick = mpos;
+				return true;
+			}
+
 			SetCursor(pos);
 			Select(pos, -1);
 			_bIsHighlighting = true;
 		}
 
+		_lastClick = mpos;
 		return true;
 	}
 
-	bool TextInput::HandleMouseMotion(int x, int y)
+	bool TextInput::HandleMouseUp(SDL_MouseButtonEvent& event)
+	{
+		if (event.button != SDL_BUTTON_LEFT)
+			return false;
+
+		if (!_bIsHighlighting)
+			return false;
+
+		_bIsHighlighting = false;
+		return true;
+	}
+
+	bool TextInput::HandleMouseMotion(SDL_MouseButtonEvent& event)
 	{
 		bool bHandled = false;
-		auto rect = GetClientRect();
+		auto mpos = fig::point { toI(event.x), toI(event.y) };
 
 		if (_bIsHighlighting)
 		{
+			auto clientRect = GetClientRect();
 			/* Set the highlight position */
-			int textX = x - rect.x + _scroll.x;
-			int textY = y - rect.y + _scroll.y;
+			int textX = mpos.x - clientRect.x + _scroll.x;
+			int textY = mpos.y - clientRect.y + _scroll.y;
 			auto pos = GetCursorAt(textX, textY).position;
 
 			SetCursor(pos);
@@ -1130,8 +1168,8 @@ namespace fig::gui
 		}
 
 		// Change cursor
-		fig::point pt = { x, y };
-		bool bInRect = SDL_PointInRect(&pt, &rect);
+		auto& rect = GetRect();
+		bool bInRect = SDL_PointInRect(&mpos, &rect);
 		if (bInRect != _bIBeamCursor)
 		{
 			_bIBeamCursor = bInRect;
@@ -1146,14 +1184,6 @@ namespace fig::gui
 		return bHandled;
 	}
 
-	bool TextInput::HandleMouseUp(int x, int y)
-	{
-		if (!_bIsHighlighting)
-			return false;
-
-		_bIsHighlighting = false;
-		return true;
-	}
 #pragma endregion Selection
 
 	bool TextInput::Copy()
@@ -1244,12 +1274,11 @@ namespace fig::gui
 		switch (event.type)
 		{
 		case SDL_EVENT_MOUSE_MOTION:
-			return HandleMouseMotion(toI(event.motion.x), toI(event.motion.y)) ? EventResult::Handled : EventResult::Pass;
+			return HandleMouseMotion(event.button) ? EventResult::Handled : EventResult::Pass;
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			return HandleMouseDown(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
+			return HandleMouseDown(event.button) ? EventResult::Handled : EventResult::Pass;
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			HandleMouseUp(toI(event.button.x), toI(event.button.y)) ? EventResult::Handled : EventResult::Pass;
-			break;
+			return HandleMouseUp(event.button) ? EventResult::Handled : EventResult::Pass;
 		case SDL_EVENT_MOUSE_WHEEL:
 			return HandleMouseWheel(event.wheel);
 		}
@@ -1958,6 +1987,50 @@ namespace fig::gui
 		}
 
 		return {};
+	}
+
+	std::optional<TextInput::TTFCursor> TextInput::TryGetCursorAt(int32_t x, int32_t y) const noexcept
+	{
+		if (IsPassword())
+		{
+			TTF_SubString substring;
+			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineHeight / 2, &substring) and substring.rect.w > 0)
+			{
+				int32_t pos = GetCursorTextIndex(x, &substring);
+				pos = ConvertFromPasswordPosition(pos);
+
+				return TTFCursor {
+					.position = pos,
+					.offset = pos,
+					.line = 0,
+				};
+			}
+			return std::nullopt;
+		}
+
+		if (not _lines.empty())
+		{
+			size_t line_index = static_cast<size_t>(std::max(y / _lineHeight, 0));
+			if (line_index >= _lines.size() and not _text.empty() and _text.back() == '\n')
+				return std::nullopt;
+
+			if (line_index >= _lines.size())
+				return std::nullopt;
+
+			auto& line = _lines[line_index];
+			TTF_SubString substring;
+			if (TTF_GetTextSubStringForPoint(line.ttf_text.get(), x, _lineHeight / 2, &substring) and substring.rect.w > 0)
+			{
+				int32_t pos = GetCursorTextIndex(x, &substring);
+				return TTFCursor {
+					.position = line.position + pos,
+					.offset = pos,
+					.line = static_cast<int32_t>(line_index),
+				};
+			}
+		}
+
+		return std::nullopt;
 	}
 
 	TextInput::TTFCursor TextInput::GetLineCursor(size_t line_index) const noexcept

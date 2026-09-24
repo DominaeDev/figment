@@ -63,6 +63,7 @@ namespace fig::gui
 		bool _bEnabled = true;
 		fig::rect _region {};
 		fig::coord _expand = 0;
+		fig::point _lastClick {};
 
 		MouseClickedDelegate _fnLeftClicked {};
 		MouseClickedDelegate _fnLeftDoubleClicked {};

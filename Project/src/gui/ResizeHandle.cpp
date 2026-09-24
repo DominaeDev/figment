@@ -183,7 +183,7 @@ namespace fig::gui
 				PushEvent(UserEvent::PopCursor, cursor);
 			}
 
-			if (event.button.clicks == 2)
+			if (event.button.clicks >= 2 and is_near(fig::pointf { event.button.x, event.button.y }, _lastClick))
 			{
 				auto handleRect = GetHandleRect();
 				if (is_inside(handleRect, event.button.x, event.button.y, 6.0f))
@@ -196,6 +196,7 @@ namespace fig::gui
 					return EventResult::Handled;
 				}
 			}
+			_lastClick = _mouseDownPosition;
 			return EventResult::Continue;
 		}
 

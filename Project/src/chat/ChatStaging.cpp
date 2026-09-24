@@ -249,8 +249,39 @@ namespace fig::chat
 		if (auto try_character = GetCharacterByRole(role))
 		{
 			auto& character = *try_character;
-			fig::string persona = character.GetAttribute(Constants::CharacterAttributes::Persona).value_or("");
-			return eval_text(persona, GetContext(role));
+			
+			// Compile persona
+			fig::string persona; //! @temp: For now. Attributes should not be one contiguous block
+			for (auto& attribute : character.GetAttributes())
+			{
+				if (attribute.id == Constants::CharacterAttributes::Persona)
+				{
+					// (Imported) persona as is
+					persona += std::format("{}\n\n", attribute.name, trim(attribute.value));
+					continue;
+				}
+
+				switch (attribute.type)
+				{
+				case CharacterAttribute::ValueType::LongText:
+					persona += std::format("{0}:\n{1}\n\n", attribute.name, trim(attribute.value));
+					break;
+				default:
+					persona += std::format("{0}: {1}\n", attribute.name, trim(attribute.value));
+					break;
+				}
+			}
+
+			// Traits
+			if (character.GetTraits().size() > 0uz)
+			{
+				persona += std::format("{}'s character traits:\n", character.name.GetSpokenName());
+
+				for (auto& trait : character.GetTraits())
+					persona += std::format("- [{0}] {1}\n", trait.name, trim(trait.text));
+			}
+
+			return eval_text(rtrim(persona), GetContext(role));
 		}
 		return "";
 	}

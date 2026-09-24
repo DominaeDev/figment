@@ -59,6 +59,16 @@ namespace fig
 			and p.y >= rect.y - expand and p.y < rect.y + rect.h + expand;
 	}
 
+	inline bool is_near(const fig::point& p0, const fig::point& p1, int32_t expand = 8)
+	{
+		return std::abs(p0.x - p1.x) <= expand and std::abs(p0.y - p1.y) <= expand;
+	}
+
+	inline bool is_near(const fig::pointf& p0, const fig::pointf& p1, float expand = 8.0f)
+	{
+		return std::abs(p0.x - p1.x) <= expand and std::abs(p0.y - p1.y) <= expand;
+	}
+
 	inline constexpr SDL_PixelFormat to_sdl_format(ImageFormat format)
 	{
 		switch (format)

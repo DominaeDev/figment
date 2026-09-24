@@ -4,8 +4,8 @@
 
 namespace fig::gui
 {
-	using ResizeHandleSizeCallback = std::function<void(fig::coord)>;
-	using ResizeHandleClickCallback = std::function<void()>;
+	using ResizeHandleSizeDelegate = std::function<void(fig::coord)>;
+	using ResizeHandleClickDelegate = std::function<void()>;
 
 	class ResizeHandle : public Control
 	{
@@ -13,8 +13,8 @@ namespace fig::gui
 		ResizeHandle(ControlPtr pParent, Direction direction);
 	
 		void Render(fig::renderer_ptr pRenderer) override;
-		void SetDelegate(ResizeHandleSizeCallback fnDelegate) { _fnOnResize = fnDelegate; }
-		void SetClickDelegate(ResizeHandleClickCallback fnDelegate) { _fnOnClick = fnDelegate; }
+		void SetDelegate(ResizeHandleSizeDelegate fnDelegate) { _fnOnResize = fnDelegate; }
+		void SetClickDelegate(ResizeHandleClickDelegate fnDelegate) { _fnOnClick = fnDelegate; }
 		void EnableDrawHandle(bool bEnable) { _bDrawHandle = bEnable; }
 
 	protected:
@@ -31,8 +31,9 @@ namespace fig::gui
 		fig::pointf _mouseDownPosition {};
 		bool _bResizing { false };
 		float _fAlpha { 0.0f };
-		ResizeHandleSizeCallback _fnOnResize {};
-		ResizeHandleClickCallback _fnOnClick {};
+		fig::pointf _lastClick {};
+		ResizeHandleSizeDelegate _fnOnResize {};
+		ResizeHandleClickDelegate _fnOnClick {};
 		fig::rect _prevRect {};
 		fig::coord _prevSize {};
 		fig::coord _currSize {};

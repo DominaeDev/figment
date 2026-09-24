@@ -134,7 +134,7 @@ namespace fig::gui
 				{
 					if (_bMouseLeftDown and !mouseEvent.down) // Click!
 					{
-						if (mouseEvent.clicks == 2)
+						if (mouseEvent.clicks >= 2 and is_near(mpos, _lastClick))
 						{
 							if (_fnLeftDoubleClicked)
 								_fnLeftDoubleClicked();
@@ -146,6 +146,8 @@ namespace fig::gui
 							_fnLeftClicked();
 						OnClicked();
 						OnClickedAt(mpos);
+
+						_lastClick = mpos;
 					}
 
 					SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Default);

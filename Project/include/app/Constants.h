@@ -221,11 +221,11 @@ namespace fig::Constants
 
 	namespace CharacterAttributes
 	{
-		constexpr fig::const_string Age = "age";
-		constexpr fig::const_string Appearance = "appearance";
-		constexpr fig::const_string Background = "background";
-		constexpr fig::const_string Persona = "persona";
-		constexpr fig::const_string Personality = "personality";
+		inline const fig::handle Age = "age";
+		inline const fig::handle Appearance = "appearance";
+		inline const fig::handle Background = "background";
+		inline const fig::handle Persona = "persona";
+		inline const fig::handle Personality = "personality";
 	}
 
 	namespace Data

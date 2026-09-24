@@ -63,9 +63,9 @@ namespace fig
 	bool begins_with(const fig::string& str, const fig::string& prefix, bool ignore_case = false);
 	bool ends_with(const fig::string& str, const fig::string& suffix, bool ignore_case = false);
 	std::vector<fig::string> split(fig::string s, char delimiter, bool removeEmpty = true);
-	std::vector<fig::string> split(const fig::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty);
+	std::vector<fig::string> split(const fig::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty = true);
 	
-	std::vector<fig::string_view> split_sentences(fig::string_view text, bool removeEmpty);
+	std::vector<fig::string_view> split_sentences(fig::string_view text, bool removeEmpty = true);
 
 	fig::string& normalize_newlines(fig::string& text);
 	[[nodiscard]] fig::string normalize_newlines(fig::string&& s);

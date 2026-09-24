@@ -123,6 +123,7 @@ namespace fig::gui
 		int32_t GetCursorPosition() const noexcept { return _cursor; }
 		TTFCursor GetCursorAt(int32_t index) const noexcept;
 		TTFCursor GetCursorAt(int32_t x, int32_t y) const noexcept;
+		std::optional<TextInput::TTFCursor> TryGetCursorAt(int32_t x, int32_t y) const noexcept;
 		TTFCursor GetLineCursor(size_t line_index) const noexcept;
 
 		int32_t MoveCursor(int32_t direction) noexcept;
@@ -137,6 +138,7 @@ namespace fig::gui
 		int32_t MoveCursorToNextWord() noexcept;
 		int32_t MoveCursorBeginning() noexcept;
 		int32_t MoveCursorEnd() noexcept;
+		int32_t SelectWordAt(fig::point pos) noexcept;
 		void OnMoveCursor(int32_t last_position);
 		void ScrollUp() noexcept;
 		void ScrollDown() noexcept;
@@ -146,9 +148,9 @@ namespace fig::gui
 		fig::rectf GetCursorRect() const noexcept;
 		void ResetCursorBlink();
 
-		bool HandleMouseDown(int x, int y);
-		bool HandleMouseMotion(int x, int y);
-		bool HandleMouseUp(int x, int y);
+		bool HandleMouseDown(SDL_MouseButtonEvent& event);
+		bool HandleMouseMotion(SDL_MouseButtonEvent& event);
+		bool HandleMouseUp(SDL_MouseButtonEvent& event);
 		EventResult HandleMouseWheel(SDL_MouseWheelEvent event);
 		void ApplyScroll(int& x, int& y) const;
 		void ApplyScroll(float& x, float& y) const;
@@ -193,6 +195,7 @@ namespace fig::gui
 		bool _bFocused = false;
 		bool _bIBeamCursor = false;
 		bool _bMuted = false;
+		fig::point _lastClick {};
 
 		fig::point _scroll {};
 		int32_t _minRows = 1;
