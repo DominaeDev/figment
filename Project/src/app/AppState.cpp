@@ -14,6 +14,7 @@
 
 #include "tts/TTSBackend.h"
 #include "audio/AudioManager.h"
+#include "io/PackageManager.h"
 
 using namespace fig::gui;
 using namespace fig::io;
@@ -65,6 +66,11 @@ namespace fig
 			SDL_MaximizeWindow(pMainWindow->GetSDLWindow().get());
 #endif
 
+		// Init Package manager
+		pPackageManager = std::make_unique<PackageManager>();
+		if (pPackageManager->Init() == FileError::NoError)
+			pPackageManager->VerifyInstalledPackages();
+
 		// Init LLM
 		pLLMBackend = std::make_shared<LLMBackend>();
 		pLLMBackend->RegisterObserver(BackendSignalHandler);
@@ -89,6 +95,7 @@ namespace fig
 		pMacroProvider.reset();
 		pAudioManager.reset();
 		pUserManager.reset();
+		pPackageManager.reset();
 
 		if (pAppSettings)
 			pAppSettings->Save();
@@ -158,6 +165,11 @@ namespace fig
 		return *(__appState->pAudioManager.get());
 	}
 
+	PackageManager& Global::GetPackageManager()
+	{
+		assert(__appState);
+		return *(__appState->pPackageManager.get());
+	}
 	std::shared_ptr<LLMInstance> Global::GetLLMInstance()
 	{
 		assert(__appState);

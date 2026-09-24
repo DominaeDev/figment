@@ -186,6 +186,9 @@
     <Filter Include="Source Files\Frontend\GUI\Screens\Home\SidePanel">
       <UniqueIdentifier>{767d5128-4bc1-4c80-9f7e-07570141d0bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\IO\Packages">
+      <UniqueIdentifier>{c1ba031f-6f67-474a-8301-5403981c87e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -802,6 +805,18 @@
     </ClCompile>
     <ClCompile Include="src\gui\SidePanelMain.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Home\SidePanel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\Downloader.cpp">
+      <Filter>Source Files\Frontend\IO\Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\AsyncDownloader.cpp">
+      <Filter>Source Files\Frontend\IO\Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\PackageManager.cpp">
+      <Filter>Source Files\Frontend\IO\Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\UserSettingsEditorVoiceTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1836,6 +1851,18 @@
     </ClInclude>
     <ClInclude Include="src\gui\ColorRef.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\Downloader.h">
+      <Filter>Source Files\Frontend\IO\Packages</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AsyncDownloader.h">
+      <Filter>Source Files\Frontend\IO\Packages</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\PackageManager.h">
+      <Filter>Source Files\Frontend\IO\Packages</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserSettingsEditorVoiceTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

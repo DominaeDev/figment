@@ -257,7 +257,7 @@ namespace fig::chat
 				if (attribute.id == Constants::CharacterAttributes::Persona)
 				{
 					// (Imported) persona as is
-					persona += std::format("{}\n\n", attribute.name, trim(attribute.value));
+					persona += std::format("{}\n\n", trim(attribute.value));
 					continue;
 				}
 

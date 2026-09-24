@@ -23,6 +23,7 @@ namespace fig::user
 namespace fig::io
 {
 	class UserContentManager;
+	class PackageManager;
 }
 
 namespace fig::llm
@@ -60,6 +61,7 @@ namespace fig
 			std::shared_ptr<fig::llm::LLMInstance> pLLMInstance;
 			std::shared_ptr<fig::user::UserManager> pUserManager;
 			std::unique_ptr<fig::io::AppSettings> pAppSettings;
+			std::unique_ptr<fig::io::PackageManager> pPackageManager;
 			std::shared_ptr<fig::text::MacroProvider> pMacroProvider;
 			std::unique_ptr<std::map<fig::cursor, fig::sdl::Cursor>> pSystemCursors;
 			std::unique_ptr<fig::tts::TTSBackend> pTTSBackend;
@@ -78,6 +80,7 @@ namespace fig
 		static fig::io::AppSettings& GetSettings();
 		static fig::tts::TTSBackend& GetTTSBackend();
 		static fig::audio::AudioManager& GetAudioManager();
+		static fig::io::PackageManager& GetPackageManager();
 		
 		static fig::user::UserManager& GetUserManager();
 		static fig::io::UserSettings& GetUserSettings();

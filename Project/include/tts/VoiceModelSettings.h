@@ -56,36 +56,9 @@ namespace fig::tts
 			fig::uuid id;
 			fig::string name;
 			fig::string precision;
-			int64_t size {};
+			fig::uuid packageId;
 			bool recommended { false };
 			fig::string filename;
-			fig::string downloadUrl;
-
-			struct Hash
-			{
-				enum class Algorithm
-				{
-					Unknown = 0,
-					Sha256,
-				} algorithm;
-
-				static constexpr auto AlgorithmMapping = std::array<std::pair<Algorithm, std::string_view>, 1> {
-					std::pair { Algorithm::Sha256,	"SHA256" },
-				};
-
-				fig::string hash;
-
-				static auto XmlFields() noexcept
-				{
-					using namespace fig::data;
-					return Fields(
-						Attribute("algorithm", &Hash::algorithm,
-							[](auto&& value) { return enum_serialize(value, AlgorithmMapping); },
-							[](auto&& value) { return enum_deserialize(value, AlgorithmMapping); }),
-						Text(&Hash::hash)
-					);
-				}
-			} hash;
 
 			static auto XmlFields() noexcept
 			{
@@ -96,14 +69,14 @@ namespace fig::tts
 					Element("Name", &Variant::name)
 						.MustExist(),
 					Element("Precision", &Variant::precision),
-					Element("Size", &Variant::size),
-					Element("Hash", &Variant::hash),
-					Element("Recommended", &Variant::recommended),
-					Element("Filename", &Variant::filename)
+					Element("Filename", &Variant::filename),
+					Element("Package", &Variant::packageId)
 						.MustExist(),
-					Element("Url", &Variant::downloadUrl)
+					Element("Recommended", &Variant::recommended)
 				);
 			}
+
+			fig::string GetFilename() const noexcept;
 		};
 		std::vector<Variant> variants;
 

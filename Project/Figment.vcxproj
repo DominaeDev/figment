@@ -258,6 +258,7 @@
     <ClCompile Include="src\gui\ToggleWithLabel.cpp" />
     <ClCompile Include="src\gui\TopBar.cpp" />
     <ClCompile Include="src\gui\UserSettingsEditor.cpp" />
+    <ClCompile Include="src\gui\UserSettingsEditorVoiceTab.cpp" />
     <ClCompile Include="src\gui\ValueBinding.cpp" />
     <ClCompile Include="src\gui\VerticalBar.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
@@ -274,8 +275,10 @@
     <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp" />
     <ClCompile Include="src\gui\Window.cpp" />
     <ClCompile Include="src\io\Asset.cpp" />
+    <ClCompile Include="src\io\AsyncDownloader.cpp" />
     <ClCompile Include="src\io\AsyncImageLoad.cpp" />
     <ClCompile Include="src\io\CsvFile.cpp" />
+    <ClCompile Include="src\io\Downloader.cpp" />
     <ClCompile Include="src\io\IndexDatabase.cpp" />
     <ClCompile Include="src\io\AssetFileReader.cpp" />
     <ClCompile Include="src\io\AssetFileWriter.cpp" />
@@ -287,6 +290,7 @@
     <ClCompile Include="src\io\FileStream.cpp" />
     <ClCompile Include="src\io\FileUtility.cpp" />
     <ClCompile Include="src\io\IniFile.cpp" />
+    <ClCompile Include="src\io\PackageManager.cpp" />
     <ClCompile Include="src\io\SettingsCollection.cpp" />
     <ClCompile Include="src\io\SQLTransaction.cpp" />
     <ClCompile Include="src\io\XmlReader.cpp" />
@@ -561,6 +565,7 @@
     <ClInclude Include="include\gui\ToggleWithLabel.h" />
     <ClInclude Include="include\gui\TopBar.h" />
     <ClInclude Include="include\gui\UserSettingsEditorArgs.h" />
+    <ClInclude Include="include\gui\UserSettingsEditorVoiceTab.h" />
     <ClInclude Include="include\gui\ValueBinding.h" />
     <ClInclude Include="include\gui\VerticalBar.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />
@@ -595,8 +600,10 @@
     <ClInclude Include="include\io\Asset.h" />
     <ClInclude Include="include\io\AssetCache.h" />
     <ClInclude Include="include\io\AssetTypeDefinition.h" />
+    <ClInclude Include="include\io\AsyncDownloader.h" />
     <ClInclude Include="include\io\AsyncImageLoad.h" />
     <ClInclude Include="include\io\CsvFile.h" />
+    <ClInclude Include="include\io\Downloader.h" />
     <ClInclude Include="include\io\IndexDatabase.h" />
     <ClInclude Include="include\io\AssetFileReader.h" />
     <ClInclude Include="include\io\AssetFileWriter.h" />
@@ -609,6 +616,7 @@
     <ClInclude Include="include\io\FileStream.h" />
     <ClInclude Include="include\io\FileUtility.h" />
     <ClInclude Include="include\io\IniFile.h" />
+    <ClInclude Include="include\io\PackageManager.h" />
     <ClInclude Include="include\io\SQLTransaction.h" />
     <ClInclude Include="include\io\XmlData.h" />
     <ClInclude Include="include\io\Serialization.h" />
