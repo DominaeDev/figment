@@ -17,9 +17,9 @@ namespace fig::io
 
 	class SettingsCollection
 	{
-		SettingsCollection() = delete;
-		SettingsCollection(const SettingsCollection& other) = delete;
 	public:
+		SettingsCollection() = default;
+		SettingsCollection(const SettingsCollection& other) = default;
 		explicit SettingsCollection(const fig::path& path) noexcept :
 			_filename { path }
 		{};

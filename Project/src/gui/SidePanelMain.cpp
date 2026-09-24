@@ -125,7 +125,8 @@ namespace fig::gui
 			.SetEnabled(false);
 		menu.AddSeparator();
 		menu.AddItem("User profile\u2026", Resource::ICON_USER_SETTINGS);
-		menu.AddItem("Settings\u2026", Resource::ICON_SETTINGS);
+		menu.AddItem("Settings\u2026", Resource::ICON_SETTINGS)
+			.SetDelegate([] { PushEvent(UserEvent::EditUserSettings); });
 		menu.AddSeparator();
 		menu.AddItem("Sign out", Resource::ICON_LOGOUT)
 			.SetDelegate([]() { MainFrame::GetInstance().SignOut(); });

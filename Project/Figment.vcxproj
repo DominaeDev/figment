@@ -257,6 +257,7 @@
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
     <ClCompile Include="src\gui\ToggleWithLabel.cpp" />
     <ClCompile Include="src\gui\TopBar.cpp" />
+    <ClCompile Include="src\gui\UserSettingsEditor.cpp" />
     <ClCompile Include="src\gui\ValueBinding.cpp" />
     <ClCompile Include="src\gui\VerticalBar.cpp" />
     <ClCompile Include="src\gui\VerticalScrollBar.cpp" />
@@ -551,6 +552,7 @@
     <ClInclude Include="include\gui\ResizeableImageViewport.h" />
     <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\UserSettingsEditor.h" />
     <ClInclude Include="include\gui\SidePanelEditor.h" />
     <ClInclude Include="include\gui\SidePanelMain.h" />
     <ClInclude Include="include\gui\Slider.h" />
@@ -558,6 +560,7 @@
     <ClInclude Include="include\gui\ToggleWithIcon.h" />
     <ClInclude Include="include\gui\ToggleWithLabel.h" />
     <ClInclude Include="include\gui\TopBar.h" />
+    <ClInclude Include="include\gui\UserSettingsEditorArgs.h" />
     <ClInclude Include="include\gui\ValueBinding.h" />
     <ClInclude Include="include\gui\VerticalBar.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />

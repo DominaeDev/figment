@@ -122,6 +122,9 @@ namespace fig::io
 	class UserSettings : public SettingsCollection
 	{
 	public:
+		UserSettings() : SettingsCollection()
+		{
+		}
 		explicit UserSettings(const fig::path& path) noexcept : SettingsCollection(path)
 		{
 			Init();

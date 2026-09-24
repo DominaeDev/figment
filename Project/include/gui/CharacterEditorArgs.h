@@ -7,8 +7,11 @@ namespace fig::data
 	class Character;
 }
 
-struct CharacterEditorArgs
+namespace fig::gui
 {
-	fig::uuid assetId;
-	fig::observer_ptr<fig::data::Character> pCharacter;
-};
+	struct CharacterEditorArgs
+	{
+		fig::uuid assetId;
+		fig::observer_ptr<fig::data::Character> pCharacter;
+	};
+}

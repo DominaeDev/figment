@@ -275,7 +275,7 @@ namespace fig::chat
 			// Traits
 			if (character.GetTraits().size() > 0uz)
 			{
-				persona += std::format("{}'s character traits:\n", character.name.GetSpokenName());
+				persona += std::format("{}'s traits:\n", character.name.GetSpokenName());
 
 				for (auto& trait : character.GetTraits())
 					persona += std::format("- [{0}] {1}\n", trait.name, trim(trait.text));

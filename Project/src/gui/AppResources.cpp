@@ -108,7 +108,13 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS, "./resources/gui/icons/icon_cog.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP, "./resources/gui/icons/icon_move_up.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN, "./resources/gui/icons/icon_move_down.png");
-		
+		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_APPLICATION, "./resources/gui/icons/icon_settings_edit_application.png");
+		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_APPLICATION_SMALL, "./resources/gui/icons/icon_settings_edit_application_small.png");
+		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_PROFILE, "./resources/gui/icons/icon_settings_edit_profile.png");
+		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_PROFILE_SMALL, "./resources/gui/icons/icon_settings_edit_profile_small.png");
+		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_ADVANCED, "./resources/gui/icons/icon_settings_edit_advanced.png");
+		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_ADVANCED_SMALL, "./resources/gui/icons/icon_settings_edit_advanced_small.png");
+
 		LoadTexture(pRenderer, Resource::ICON_BORDER_01, "./resources/gui/card/borders/icon_border_01.png");
 		LoadTexture(pRenderer, Resource::ICON_BORDER_02, "./resources/gui/card/borders/icon_border_02.png");
 		LoadTexture(pRenderer, Resource::ICON_BORDER_03, "./resources/gui/card/borders/icon_border_03.png");

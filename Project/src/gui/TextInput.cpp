@@ -2440,7 +2440,7 @@ namespace fig::gui
 
 	void TextInput::PageUp() noexcept
 	{
-		MoveCursorUpDown(15);
+		MoveCursorUpDown(-15);
 	}
 
 	void TextInput::PageDown() noexcept

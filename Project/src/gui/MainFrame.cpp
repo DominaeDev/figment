@@ -7,6 +7,8 @@
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
 #include "gui/EditorScreen.h"
+#include "gui/CharacterEditor.h"
+#include "gui/UserSettingsEditor.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/FileUtility.h"
@@ -20,7 +22,6 @@
 #include "util/DebugUtils.h"
 #include "gui/ChatListingScreen.h" //! @temp
 #include "gui/InfoPanel.h" //! @temp
-#include "gui/CharacterEditor.h"
 
 using namespace fig::io;
 using namespace fig::data;
@@ -482,6 +483,16 @@ namespace fig::gui
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
 			if (not pEditor->Initialize(characterId))
+			{
+				// Error
+				ChangeScreen<HomeScreen>();
+			}
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::EditUserSettings))
+		{
+			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<UserSettingsEditor>();
+			if (not pEditor->Initialize({}))
 			{
 				// Error
 				ChangeScreen<HomeScreen>();
