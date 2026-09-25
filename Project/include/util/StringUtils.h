@@ -144,4 +144,20 @@ namespace fig
 	fig::string_view Unaction(fig::string_view text);
 	fig::string_view Undirector(fig::string_view text);
 	fig::string_view Unnarration(fig::string_view text);
+
+	inline fig::string format_file_size(uint64_t bytes) noexcept
+	{
+		constexpr uint64_t kb = 1024;
+		constexpr uint64_t mb = kb * 1024;
+		constexpr uint64_t gb = mb * 1024;
+
+		if (bytes >= gb)
+			return std::format("{:.1f} GB", static_cast<double>(bytes) / gb);
+		else if (bytes >= mb)
+			return std::format("{:.1f} MB", static_cast<double>(bytes) / mb);
+		else if (bytes >= kb)
+			return std::format("{:.1f} KB", static_cast<double>(bytes) / kb);
+		else
+			return std::format("{} B", bytes);
+	}
 }

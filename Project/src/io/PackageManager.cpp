@@ -50,10 +50,15 @@ namespace fig::io
 		return true;
 	}
 
-	fig::optional_cref<fig::data::PackageInfo> PackageManager::GetPackageInfo(const fig::uuid& packageId) const noexcept
+	fig::optional_cref<fig::data::PackageInfo> PackageManager::GetPackage(const fig::uuid& packageId) const noexcept
 	{
 		if (auto itFind = std::ranges::find(_packages, packageId, [](auto&& p) { return p.id; }); itFind != std::ranges::cend(_packages))
 			return *itFind;
 		return fig::nullref; // Unknown package
+	}
+
+	const std::vector<fig::data::PackageInfo>& PackageManager::GetPackages() const noexcept
+	{
+		return _packages;
 	}
 }

@@ -1,15 +1,6 @@
 #pragma once
 
-#include "Downloader.h"
-
-#include <cstdint>
-#include <filesystem>
-#include <functional>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <thread>
+#include "io/Downloader.h"
 
 namespace fig::io
 {
@@ -19,21 +10,21 @@ namespace fig::io
     class AsyncDownloader
     {
     public:
-        ~AsyncDownloader();
-
         AsyncDownloadId Start(const std::string& url, const std::filesystem::path& destination, AsyncDownloadResultDelegate delegate);
         void Cancel(AsyncDownloadId id);
         bool GetProgress(AsyncDownloadId id, std::uint64_t& received, std::uint64_t& total) const;
 
     private:
+        void FlushFinishedDownloads();
+
         struct Download
         {
             Downloader downloader;
-            std::thread thread;
+            std::jthread thread;
+            std::atomic<bool> bComplete = false;
         };
-
-        mutable std::mutex _mutex;
         std::map<AsyncDownloadId, std::unique_ptr<Download>> _downloads;
-        AsyncDownloadId _nextId = {};
+        AsyncDownloadId _nextId { 1 };
+        mutable std::mutex _mutex;
     };
 }

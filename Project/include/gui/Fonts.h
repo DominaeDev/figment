@@ -9,7 +9,7 @@ namespace fig::gui
 		Regular,
 		Italic,
 		Bold,
-		NunitoBold,
+		NunitoItalic,
 		CardHeader,
 		CardSubheader = Regular,
 		Default = Regular,

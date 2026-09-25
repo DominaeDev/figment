@@ -2,6 +2,7 @@
 #include "gui/UserSettingsEditor.h"
 #include "gui/UserSettingsEditorArgs.h"
 #include "gui/UserSettingsEditorVoiceTab.h"
+#include "gui/UserSettingsEditorExtensionsTab.h"
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
@@ -10,16 +11,17 @@ namespace fig::gui
 {
 	constexpr enum Tab : int32_t
 	{
-		Voice,
-		// Application = 0,
+		// Application,
 		// Profile,
-		// Extensions,
+		Voice,
+		Extensions,
 		// Advanced,
 	};
 
 	UserSettingsEditor::UserSettingsEditor(ControlPtr pParent) : Editor(pParent)
 	{
 		CreateTab<UserSettingsEditorVoiceTab>();
+		CreateTab<UserSettingsEditorExtensionsTab>();
 	}
 
 	fig::string UserSettingsEditor::GetTitle() const noexcept
@@ -95,7 +97,7 @@ namespace fig::gui
 				Resource::ICON_CHARACTER_EDIT_VOICE_SMALL,
 			},
 			{
-				NotImpl,
+				Extensions,
 				"Extensions",
 				Resource::ICON_CHARACTER_EDIT_CONCEPTS,
 				Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL,

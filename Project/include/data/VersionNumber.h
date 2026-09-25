@@ -24,12 +24,14 @@ namespace fig::data
 			build = static_cast<uint8_t>(packed & 0xFF);
 		}
 
-		operator std::string() const
+		operator fig::string() const
 		{
-			return std::format("{}.{}.{}", major, minor, build);
+			if (build > 0)
+				return std::format("{}.{}.{}", major, minor, build);
+			return std::format("{}.{}", major, minor);
 		}
 
-		explicit VersionNumber(std::string_view str)
+		explicit VersionNumber(fig::string_view str)
 		{
 			std::array<uint8_t, 3> fields {};
 

@@ -330,7 +330,9 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_4 and mods.Alt)
 					{
-						ChangeScreen(ScreenType::Debug);
+//						ChangeScreen(ScreenType::Debug);
+						PushEvent(UserEvent::EditUserSettings);
+						PushEvent(UserEvent::SelectEditorTab, 1);
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F12 and mods.Control)

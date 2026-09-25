@@ -15,8 +15,8 @@ namespace fig::data
 	};
 
 	constexpr auto TargetPlatformMapping = std::array<std::pair<TargetPlatform, std::string_view>, 2uz> {
-		std::pair { TargetPlatform::Undefined,	"undefined" },
-		std::pair { TargetPlatform::Windows,	"windows" },
+		std::pair { TargetPlatform::Undefined,	"Undefined" },
+		std::pair { TargetPlatform::Windows,	"Windows" },
 	};
 
 	enum class PackageType
@@ -28,10 +28,10 @@ namespace fig::data
 	};
 
 	constexpr auto PackageTypeMapping = std::array<std::pair<PackageType, std::string_view>, 4uz> {
-		std::pair { PackageType::Undefined,		"undefined" },
-		std::pair { PackageType::LLM_Model,		"llm_model" },
-		std::pair { PackageType::TTS_Model,		"tts_model" },
-		std::pair { PackageType::TTS_Server,	"tts_server" },
+		std::pair { PackageType::Undefined,		"Undefined" },
+		std::pair { PackageType::LLM_Model,		"LLM_Model" },
+		std::pair { PackageType::TTS_Model,		"TTS_Merver" },
+		std::pair { PackageType::TTS_Server,	"TTS_Server" },
 	};
 
 	struct PackageInfo
@@ -39,17 +39,19 @@ namespace fig::data
 		fig::uuid id;
 		PackageType type {};
 		TargetPlatform targetPlatform {};
+		VersionNumber version;
+		uint64_t fileSize;
 		fig::string name;
 		fig::string description;
 		fig::string downloadUrl;
-		uint64_t dataLength;
+		fig::string infoUrl;
 		fig::string sha256;
-		VersionNumber version;
-		fig::path outputDirectory;
+		fig::path targetPath;
 
 		struct FileEntry
 		{
 			fig::string name;
+			fig::path targetPath;
 			fig::string sha256;
 
 			static auto XmlFields() noexcept
@@ -57,14 +59,15 @@ namespace fig::data
 				return Fields(
 					Element("Name", &FileEntry::name)
 						.MustExist(),
+					Element("Target", &FileEntry::targetPath)
+						.MustExist(),
 					Element("Sha256", &FileEntry::sha256)
 				);
 
 				static_assert(IsXmlSerializable<FileEntry>);
 			}
 		};
-		std::vector<FileEntry> archiveFiles; // Archive
-		fig::string filename; // Single file
+		std::vector<FileEntry> entries; // Archive
 
 		static auto XmlFields() noexcept
 		{
@@ -77,26 +80,22 @@ namespace fig::data
 					.MustExist(),
 				Element("Platform", &PackageInfo::targetPlatform,
 					[](auto&& value) { return enum_serialize(value, TargetPlatformMapping); },
-					[](auto&& value) { return enum_deserialize(value, TargetPlatformMapping); })
-					.MustExist(),
+					[](auto&& value) { return enum_deserialize(value, TargetPlatformMapping); }),
 				Element("Name", &PackageInfo::name)
 					.MustExist(),
 				Element("Description", &PackageInfo::description),
-				Element("Url", &PackageInfo::downloadUrl)
+				Element("DownloadUrl", &PackageInfo::downloadUrl)
 					.MustExist(),
-				Element("Size", &PackageInfo::dataLength)
+				Element("InfoUrl", &PackageInfo::infoUrl)
 					.MustExist(),
-				Element("Size", &PackageInfo::dataLength)
+				Element("Size", &PackageInfo::fileSize)
 					.MustExist(),
 				Element("Sha256", &PackageInfo::sha256)
 					.MustExist(),
 				Element("Version", &PackageInfo::version)
 					.MustExist(),
-				Element("OutputDirectory", &PackageInfo::outputDirectory)
-					.MustExist(),
-				Element("File", &PackageInfo::archiveFiles)
-					.Collection("Archive"),
-				Element("Filename", &PackageInfo::filename)
+				Element("File", &PackageInfo::entries)
+					.Collection("Archive")
 			);
 			static_assert(IsXmlSerializable<PackageInfo>);
 		}
@@ -115,7 +114,8 @@ namespace fig::io
 		FileError Init() noexcept;
 		void VerifyInstalledPackages();
 
-		fig::optional_cref<fig::data::PackageInfo> GetPackageInfo(const fig::uuid&) const noexcept;
+		fig::optional_cref<fig::data::PackageInfo> GetPackage(const fig::uuid&) const noexcept;
+		const std::vector<fig::data::PackageInfo>& GetPackages() const noexcept;
 
 		bool IsPackageInstalled(const fig::uuid& packageId) const;
 		bool InstallPackage(const fig::uuid& packageId);

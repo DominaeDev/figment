@@ -7,7 +7,7 @@ namespace fig::gui
 		{ FontFace::Regular,	"./resources/fonts/Nunito-Regular.ttf" },
 		{ FontFace::Italic,		"./resources/fonts/Nunito-Italic.ttf" },
 		{ FontFace::Bold,		"./resources/fonts/Nunito-Bold.ttf" },
-		{ FontFace::NunitoBold,	"./resources/fonts/Nunito-MediumItalic.ttf" },
+		{ FontFace::NunitoItalic,	"./resources/fonts/Nunito-MediumItalic.ttf" },
 		{ FontFace::CardHeader,	"./resources/fonts/Nunito-BoldItalic.ttf" },
 	};
 

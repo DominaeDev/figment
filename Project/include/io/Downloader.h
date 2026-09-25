@@ -1,10 +1,7 @@
 #pragma once
 
-#include <atomic>
-#include <cstdint>
-#include <expected>
-#include <filesystem>
-#include <string>
+#include "Figment.h"
+#include <stop_token>
 
 namespace fig::io
 {
@@ -16,21 +13,19 @@ namespace fig::io
 		RequestFailed,
 		HttpStatus,
 		FileError,
-		Cancelled,
+		Cancelled
 	};
 
 	class Downloader
 	{
 	public:
-		DownloadError Download(const std::string& url, const std::filesystem::path& destination);
+		[[nodiscard]] DownloadError Download(const std::string& url, const std::filesystem::path& destination, std::stop_token stopToken);
 
-		void Cancel();
-		std::uint64_t GetBytesReceived() const;
-		std::uint64_t GetBytesTotal() const;
+		uint64_t GetBytesReceived() const;
+		uint64_t GetBytesTotal() const;
 
 	private:
-		std::atomic<bool> _cancelRequested = false;
-		std::atomic<std::uint64_t> _bytesReceived = 0;
-		std::atomic<std::uint64_t> _bytesTotal = 0;
+		std::atomic<uint64_t> _bytesReceived = 0;
+		std::atomic<uint64_t> _bytesTotal = 0;
 	};
 }

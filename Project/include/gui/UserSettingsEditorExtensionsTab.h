@@ -5,15 +5,16 @@
 
 namespace fig::gui
 {
-	class UserSettingsEditorVoiceTab : public EditorTab<UserSettingsEditorArgs>
+	class UserSettingsEditorExtensionsTab : public EditorTab<UserSettingsEditorArgs>
 	{
 	public:
-		UserSettingsEditorVoiceTab(ControlPtr pParent);
+		UserSettingsEditorExtensionsTab(ControlPtr pParent);
 
 		bool Initialize(UserSettingsEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
 
 	protected:
 		void OnAfterLayout();
+		void InstallTTSServer();
 	};
 }

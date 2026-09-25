@@ -86,6 +86,10 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_SAVE, "./resources/gui/icons/icon_save.png");
 		LoadTexture(pRenderer, Resource::ICON_CROSS, "./resources/gui/icons/icon_cross.png");
 		LoadTexture(pRenderer, Resource::ICON_DROPLIST_ARROW, "./resources/gui/icons/icon_droplist_arrow.png");
+		LoadTexture(pRenderer, Resource::ICON_DOWNLOAD, "./resources/gui/icons/icon_download.png");
+		LoadTexture(pRenderer, Resource::ICON_DOWNLOAD_PAUSE, "./resources/gui/icons/icon_download_pause.png");
+		LoadTexture(pRenderer, Resource::ICON_UNINSTALL, "./resources/gui/icons/icon_uninstall.png");
+		LoadTexture(pRenderer, Resource::ICON_INFO_SMALL, "./resources/gui/icons/icon_info_small.png");
 
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_INFO, "./resources/gui/icons/icon_character_edit_info.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_VOICE, "./resources/gui/icons/icon_character_edit_voice.png");
@@ -168,6 +172,7 @@ namespace fig
 		LoadTexture(pRenderer, Resource::SLIDER_THUMB_BG, "./resources/gui/slider_thumb_bg.png");
 		LoadTexture(pRenderer, Resource::SLIDER_THUMB_BORDER, "./resources/gui/slider_thumb_border.png");
 		
+		LoadTexture(pRenderer, Resource::HORIZONTAL_BAR, "./resources/gui/horizontal_bar.png");
 		LoadTexture(pRenderer, Resource::HORIZONTAL_BAR_SMALL, "./resources/gui/horizontal_bar_small.png");
 		LoadTexture(pRenderer, Resource::VERTICAL_BAR_SMALL, "./resources/gui/vertical_bar_small.png");
 	}

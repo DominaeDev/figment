@@ -189,6 +189,9 @@
     <Filter Include="Source Files\Frontend\IO\Packages">
       <UniqueIdentifier>{c1ba031f-6f67-474a-8301-5403981c87e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls">
+      <UniqueIdentifier>{9802f9e1-7377-4d0a-8f39-d9c824a0da30}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -817,6 +820,12 @@
     </ClCompile>
     <ClCompile Include="src\gui\UserSettingsEditorVoiceTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\UserSettingsEditorExtensionsTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\PackageWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1863,6 +1872,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\UserSettingsEditorVoiceTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserSettingsEditorExtensionsTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\PackageWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

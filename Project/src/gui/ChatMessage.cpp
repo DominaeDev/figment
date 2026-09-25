@@ -137,7 +137,7 @@ namespace fig::gui
 		// Name label
 		if ((_style & Style::Name) == Style::Name)
 		{
-			_pNameText = CreateControl<StaticText>(name, FontFace::NunitoBold, Constants::GUI::CharacterNameFontSize, false);
+			_pNameText = CreateControl<StaticText>(name, FontFace::NunitoItalic, Constants::GUI::CharacterNameFontSize, false);
 			_pNameText->SetAlignment(bRight ? TextAlignment::RightTop : TextAlignment::Default);
 			_pNameText->SetBackgroundColor(Color::Transparent);
 			_pNameText->SetPosition(LEFT_MARGIN, -1);
