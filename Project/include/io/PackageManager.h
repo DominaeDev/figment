@@ -50,6 +50,7 @@ namespace fig::data
 
 		struct FileEntry
 		{
+			fig::uuid id;
 			fig::string name;
 			fig::path targetPath;
 			fig::string sha256;
@@ -57,6 +58,8 @@ namespace fig::data
 			static auto XmlFields() noexcept
 			{
 				return Fields(
+					Attribute("id", &FileEntry::id)
+						.MustExist(),
 					Element("Name", &FileEntry::name)
 						.MustExist(),
 					Element("Target", &FileEntry::targetPath)
@@ -86,14 +89,11 @@ namespace fig::data
 				Element("Description", &PackageInfo::description),
 				Element("DownloadUrl", &PackageInfo::downloadUrl)
 					.MustExist(),
-				Element("InfoUrl", &PackageInfo::infoUrl)
-					.MustExist(),
+				Element("InfoUrl", &PackageInfo::infoUrl),
 				Element("Size", &PackageInfo::fileSize)
 					.MustExist(),
-				Element("Sha256", &PackageInfo::sha256)
-					.MustExist(),
-				Element("Version", &PackageInfo::version)
-					.MustExist(),
+				Element("Sha256", &PackageInfo::sha256),
+				Element("Version", &PackageInfo::version),
 				Element("File", &PackageInfo::entries)
 					.Collection("Archive")
 			);
@@ -110,8 +110,10 @@ namespace fig::io
 	{
 	public:
 		PackageManager();
+		~PackageManager();
 
 		FileError Init() noexcept;
+		FileError SaveState();
 		void VerifyInstalledPackages();
 
 		fig::optional_cref<fig::data::PackageInfo> GetPackage(const fig::uuid&) const noexcept;
@@ -123,20 +125,23 @@ namespace fig::io
 	protected:
 		std::vector<fig::data::PackageInfo> _packages;
 
-		enum class PackageInstallState
+		enum class PackageState
 		{
-			NotInstalled,
+			NotDownloaded,
 			PartiallyDownloaded,
-			Downloading,
-			Downloaded,
-			Decompressing,
+			Unverified,
 			Installed,
 			Invalid,
 			Outdated,
 		};
-		std::map<fig::uuid, PackageInstallState> _installedPackages;
 		std::unique_ptr<AsyncDownloader> _pDownloader;
 		std::map<fig::uuid, AsyncDownloadId> _activeInstalls;
+
+		std::unique_ptr<std::jthread> _verificationWorker {};
+		std::map<fig::uuid, PackageState> _packageStates;
+		std::map<fig::uuid, fig::string> _packageHashes;
+		void __Verify();
+
 	private:
 		mutable std::mutex _mutex;
 

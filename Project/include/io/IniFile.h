@@ -87,8 +87,8 @@ namespace fig::io
 		void RemoveSection(fig::string_view section);
 		void Clear();
 
-		[[nodiscard]] std::expected<void, IniError> Load(const fig::path& path);
-		[[nodiscard]] std::expected<void, IniError> Save(const fig::path& path) const;
+		[[nodiscard]] IniError Load(const fig::path& path);
+		[[nodiscard]] IniError Save(const fig::path& path) const;
 
 	private:
 		void SetValue(const fig::string& section, const fig::string& key, Value value)
@@ -97,7 +97,7 @@ namespace fig::io
 		}
 		void SetValue(const fig::string_view section, const fig::string_view key, Value value);
 		[[nodiscard]] fig::string Serialize() const;
-		[[nodiscard]] std::expected<void, IniError> Deserialize(const fig::string& content);
+		[[nodiscard]] IniError Deserialize(const fig::string& content);
 
 	private:
 		struct Section

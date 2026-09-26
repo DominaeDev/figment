@@ -6,6 +6,9 @@
 #include <print>
 #include <uuid_v4.h>
 #include <base64.h>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 namespace fig
 {
@@ -15,6 +18,10 @@ namespace fig
 		{
 			std::print("{}", message);
 		}
+
+#ifdef _WIN32
+		OutputDebugStringA(std::format("{}\r\n", message).c_str());
+#endif
 	}
 
 	void LogLn(fig::string message)
@@ -23,6 +30,9 @@ namespace fig
 		{
 			std::println("{}", message);
 		}
+#ifdef _WIN32
+		OutputDebugStringA(std::format("{}\r\n", message).c_str());
+#endif
 	}
 
 	void MeasureTime(const fig::string& label, MeasureTimeFn fn)

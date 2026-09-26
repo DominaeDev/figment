@@ -1,5 +1,5 @@
 <Packages format="0">
-	<!-- Audio.cpp TTS server -->
+	<!-- Audio.cpp CUDA V0.6 -->
 	<Package id="eda3584f-a78f-4b7c-83dd-8f28fab23ea1">
 		<Name>Text-to-speech backend &#x2013; audio.cpp (CUDA)</Name>
 		<Description>Enables voice generation.\nNvidia driver 580 or newer is required.</Description>
@@ -11,34 +11,35 @@
 		<Size>261536807</Size>
 		<Sha256>d813bed75fb31fd1877120a9c6159a70174054175f6d52f30602b83924699f7c</Sha256>
 		<Archive>
-			<File>
+			<File id="17d36533-4fb2-4d5a-82d6-b6a68494a774">
 				<Name>audiocpp_server.exe</Name>
-				<Target>audio_cpp/0.6/cuda/audiocpp_server.exe</Target>
+				<Target>tts/bin/0.6/cuda/audiocpp_server.exe</Target>
 				<Sha256></Sha256>
 			</File>
-			<File>
+			<File id="cd90e544-0d56-4a94-99a2-ba5e7ed6aa89">
 				<Name>MSVCP140.dll</Name>
-				<Target>audio_cpp/0.6/cuda/MSVCP140.dll</Target>
+				<Target>tts/bin/0.6/cuda/MSVCP140.dll</Target>
 				<Sha256></Sha256>
 			</File>
-			<File>
+			<File id="d52c123d-16ac-4689-9465-db1a2326c434">
 				<Name>VCOMP140.DLL</Name>
-				<Target>audio_cpp/0.6/cuda/VCOMP140.DLL</Target>
+				<Target>tts/bin/0.6/cuda/VCOMP140.DLL</Target>
 				<Sha256></Sha256>
 			</File>
-			<File>
+			<File id="9ad6ace3-3403-4ff0-af9a-be049b1aacff">
 				<Name>VCRUNTIME140.dll</Name>
-				<Target>audio_cpp/0.6/cuda/VCRUNTIME140.dll</Target>
+				<Target>tts/bin/0.6/cuda/VCRUNTIME140.dll</Target>
 				<Sha256></Sha256>
 			</File>
-			<File>
+			<File id="91982d5d-0d56-4cf2-9d98-5f11606980ba">
 				<Name>VCRUNTIME140_1.dll</Name>
-				<Target>audio_cpp/0.6/cuda/VCRUNTIME140_1.dll</Target>
+				<Target>tts/bin/0.6/cuda/VCRUNTIME140_1.dll</Target>
 				<Sha256></Sha256>
 			</File>
 		</Archive>
 	</Package>
 
+	<!-- Audio.cpp CPU V0.6 -->
 	<Package id="d374bf34-fbd1-4526-99ec-54aeb0698f0f">
 		<Name>Text-to-speech backend &#x2013; audio.cpp (CPU)</Name>
 		<Description>Enables voice generation.\nRuns natively on the CPU (slower).</Description>
@@ -49,31 +50,30 @@
 		<InfoUrl>https://github.com/0xShug0/audio.cpp/</InfoUrl>
 		<Size>24142863</Size>
 		<Sha256>844e90c97ff74e5a9ec880091a32718034a29d919d79994f1607c77da008791b</Sha256>
-		<OutputDirectory>audio_cpp/0.6/cpu/</OutputDirectory>
 		<Archive>
-			<File>
+			<File id="24ad9c45-e633-4f29-8905-43d34ad47422">
 				<Name>audiocpp_server.exe</Name>
-				<Target>audio_cpp/0.6/cpu/audiocpp_server.exe</Target>
+				<Target>tts/bin/0.6/cpu/audiocpp_server.exe</Target>
 				<Sha256></Sha256>
 			</File>
-			<File>
+			<File id="5796b158-eda2-41f8-af13-14cfbd448b96">
 				<Name>MSVCP140.dll</Name>
-				<Target>audio_cpp/0.6/cpu/MSVCP140.dll</Target>
+				<Target>tts/bin/0.6/cpu/MSVCP140.dll</Target>
 				<Sha256></Sha256>
 			</File>
-			<File>
+			<File id="7007b9aa-e301-46a5-9aa9-5b9f77366f8b">
 				<Name>VCOMP140.DLL</Name>
-				<Target>audio_cpp/0.6/cpu/VCOMP140.DLL</Target>
+				<Target>tts/bin/0.6/cpu/VCOMP140.DLL</Target>
 				<Sha256></Sha256>
 			</File>
-			<File>
+			<File id="869f2714-ed38-431f-a610-353e76e4048b">
 				<Name>VCRUNTIME140.dll</Name>
-				<Target>audio_cpp/0.6/cpu/VCRUNTIME140.dll</Target>
+				<Target>tts/bin/0.6/cpu/VCRUNTIME140.dll</Target>
 				<Sha256></Sha256>
 			</File>
-			<File>
+			<File id="6fde3761-fc07-4473-b8c1-06a9d9c6a970">
 				<Name>VCRUNTIME140_1.dll</Name>
-				<Target>audio_cpp/0.6/cpu/VCRUNTIME140_1.dll</Target>
+				<Target>tts/bin/0.6/cpu/VCRUNTIME140_1.dll</Target>
 				<Sha256></Sha256>
 			</File>
 		</Archive>

@@ -13,7 +13,7 @@ namespace fig::io
 	FileError SettingsCollection::OnLoad(const std::vector<SettingTuple>& settings) noexcept
 	{
 		IniFile ini;
-		if (auto try_load = ini.Load(_filename))
+		if (auto error = ini.Load(_filename); error == IniError::NoError)
 		{
 			for (auto& [key, defaultValue] : settings)
 			{
@@ -46,7 +46,7 @@ namespace fig::io
 		}
 		else
 		{
-			switch (try_load.error())
+			switch (error)
 			{
 			case IniError::FileNotFound:
 				return FileError::NotFound;
@@ -84,11 +84,11 @@ namespace fig::io
 				ini.Set(section, key, *x);
 		}
 
-		if (auto try_save = ini.Save(_filename))
+		if (auto error = ini.Save(_filename); error == IniError::NoError)
 			return FileError::NoError;
 		else
 		{
-			switch (try_save.error())
+			switch (error)
 			{
 			case IniError::FileAccessDenied:
 				return FileError::AccessDenied;

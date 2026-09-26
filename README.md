@@ -26,8 +26,7 @@ User profiles are transferable between installations and easy to back up. In the
 
 ### Human made
 
-This application was largely written by a human.
-Claude (Free) was used in a limited capacity, to assist with a handful of C++ templates and utility functions, and to discuss code-related topics.
+Figment's source code has, for the most part, been written by human hands. Claude (Free) has been used in a limited capacity to create a handful of C++ templates and utility functions, as well as for double-checking my own code and asking C++ related questions. All AI-generated code has gone through a human interpreter (i.e., myself).
 
 * * *
 

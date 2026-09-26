@@ -57,6 +57,7 @@ namespace fig::io
 			result += line;
 			result += '\n';
 		}
+
 		return std::unexpected(IniError::UnclosedMultilineString);
 	}
 
@@ -365,7 +366,7 @@ namespace fig::io
 		return out;
 	}
 
-	[[nodiscard]] std::expected<void, IniError> IniFile::Deserialize(const fig::string& content)
+	[[nodiscard]] IniError IniFile::Deserialize(const fig::string& content)
 	{
 		Clear();
 
@@ -385,7 +386,7 @@ namespace fig::io
 			{
 				auto close = trimmed.find(']', 1);
 				if (close == fig::string::npos)
-					return std::unexpected(IniError::MalformedSection);
+					return IniError::MalformedSection;
 
 				current_group = Trim(trimmed.substr(1, close - 1));
 				in_group = true;
@@ -404,11 +405,11 @@ namespace fig::io
 				continue;
 
 			if (!in_group)
-				return std::unexpected(IniError::KeyBeforeSection);
+				return IniError::KeyBeforeSection;
 
 			auto key_sv = Trim(trimmed.substr(0, eq));
 			if (key_sv.empty())
-				return std::unexpected(IniError::EmptyKeyName);
+				return IniError::EmptyKeyName;
 
 			fig::string key(key_sv);
 			auto val_sv = Trim(trimmed.substr(eq + 1));
@@ -418,7 +419,7 @@ namespace fig::io
 			{
 				auto result = ReadMultiline(content, pos, val_sv.substr(3));
 				if (!result)
-					return std::unexpected(result.error());
+					return result.error();
 				parsed = std::move(*result);
 			}
 			else
@@ -431,30 +432,30 @@ namespace fig::io
 				grp.key_order.push_back(key);
 			grp.values[key] = std::move(parsed);
 		}
-		return {};
+		return IniError::NoError;
 	}
 
-	[[nodiscard]] std::expected<void, IniError> IniFile::Save(const fig::path& path) const
+	[[nodiscard]] IniError IniFile::Save(const fig::path& path) const
 	{
 		std::ofstream f(path, std::ios::binary);
 		if (!f)
-			return std::unexpected(ErrnoToWriteError());
+			return ErrnoToWriteError();
 
 		auto s = Serialize();
 		f.write(s.data(), static_cast<std::streamsize>(s.size()));
 		f.flush();
 
 		if (!f.good())
-			return std::unexpected(IniError::FileWriteError);
+			return IniError::FileWriteError;
 
-		return {};
+		return IniError::NoError;
 	}
 
-	[[nodiscard]] std::expected<void, IniError> IniFile::Load(const fig::path& path)
+	[[nodiscard]] IniError IniFile::Load(const fig::path& path)
 	{
 		std::ifstream f(path, std::ios::binary | std::ios::ate);
 		if (!f)
-			return std::unexpected(ErrnoToReadError());
+			return ErrnoToReadError();
 
 		auto size = static_cast<std::streamsize>(f.tellg());
 		f.seekg(0);
@@ -462,7 +463,7 @@ namespace fig::io
 		f.read(content.data(), size);
 
 		if (!f.good())
-			return std::unexpected(IniError::FileReadError);
+			return IniError::FileReadError;
 
 		return Deserialize(content);
 	}

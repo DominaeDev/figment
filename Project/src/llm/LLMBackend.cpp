@@ -70,7 +70,7 @@ namespace fig::llm
 
 		_pStatus->EmitSignal(LLMStatusEvent::ModelLoading);
 
-		_workerThread = std::make_unique<std::jthread>(std::jthread(std::bind_front(&LLMBackend::__LoadModel, this),
+		_workerThread = std::make_unique<std::jthread>(std::bind_front(&LLMBackend::__LoadModel, this),
 			settings,
 			[this, onComplete](std::shared_ptr<ModelState> result)
 		{
@@ -101,7 +101,7 @@ namespace fig::llm
 				_pStatus->EmitSignal(LLMStatusEvent::ModelLoadFailure);
 				LogLn("Failed to load model");
 			}
-		}));
+		});
 
 		return true;
 	}

@@ -23,25 +23,65 @@ extern "C" {
 
 namespace fig
 {
-	fig::Hash GetHash(const fig::string& text)
+	fig::hash GetHash(const fig::string& text)
 	{
-		fig::Hash hash {};
-		static_assert(sizeof(hash.parts) == SHA256_BYTES_SIZE);
-		sha256_bytes(text.data(), text.size(), &hash.parts);
+		fig::hash hash {};
+		static_assert(sizeof(hash.parts) == 32uz);
+
+		SHA256_CTX ctx;
+		sha256_init(&ctx);
+		sha256_update(&ctx, (SHA256_BYTE*)text.data(), text.size());
+		sha256_final(&ctx, (SHA256_BYTE*)&hash.parts);
+
+		for (auto& part : hash.parts)
+			part = std::byteswap(part);
+
 		return hash;
 	}
 
-	fig::Hash GetHash(fig::byte_span data)
+	fig::hash GetHash(fig::byte_span data)
 	{
-		Hash hash {};
-		static_assert(sizeof(hash.parts) == SHA256_BYTES_SIZE);
-		sha256_bytes(data.data(), data.size(), &hash.parts);
+		fig::hash hash {};
+		static_assert(sizeof(hash.parts) == 32uz);
+
+		SHA256_CTX ctx;
+		sha256_init(&ctx);
+		sha256_update(&ctx, (SHA256_BYTE*)data.data(), data.size());
+		sha256_final(&ctx, (SHA256_BYTE*)&hash.parts);
+
+		for (auto& part : hash.parts)
+			part = std::byteswap(part);
 		return hash;
 	}
 
-	fig::Hash HashCombine(fig::Hash a, fig::Hash b, size_t& seed)
+	fig::hash GetHash(const fig::path& filename)
 	{
-		fig::Hash c { a };
+		std::ifstream file(filename, std::ios::binary | std::ios::in);
+		if (!file)
+			return {};
+
+		SHA256_CTX ctx;
+		sha256_init(&ctx);
+		std::vector<uint8_t> buffer(1024 * 1024); // 1MB
+
+		while (file.read(reinterpret_cast<char*>(buffer.data()), buffer.size()) || file.gcount() > 0)
+			sha256_update(&ctx, buffer.data(), static_cast<size_t>(file.gcount()));
+
+		if (file.bad())
+			return {};
+
+		fig::hash hash {};
+		sha256_final(&ctx, (SHA256_BYTE*)&hash.parts);
+		static_assert(sizeof(hash.parts) == 32uz);
+
+		for (auto& part : hash.parts)
+			part = std::byteswap(part);
+		return hash;
+	}
+
+	fig::hash HashCombine(fig::hash a, fig::hash b, size_t& seed)
+	{
+		fig::hash c { a };
 		for (size_t i = 0; i < 8; ++i)
 			seed = c.parts[i] ^= b.parts[i] + 0x9e3779b9U + (seed << 6) + (seed >> 2);
 		return c;

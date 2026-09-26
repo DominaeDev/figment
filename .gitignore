@@ -25,7 +25,8 @@ Project/cudart64_12.dll
 Project/cublasLt64_12.dll
 Project/bin/
 Project/temp/
-Project/tts/bin/
-Project/tts/models/
-Project/tts/samples/
-Project/tts/server.json
+Project/packages/installed.ini
+Project/packages/tts/bin/
+Project/packages/tts/models/
+Project/packages/tts/samples/
+Project/packages/tts/server.json
