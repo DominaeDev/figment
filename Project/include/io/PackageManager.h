@@ -51,9 +51,10 @@ namespace fig::data
 		struct FileEntry
 		{
 			fig::uuid id;
+			uint64_t fileSize;
 			fig::string name;
-			fig::path targetPath;
 			fig::string sha256;
+			fig::path targetPath;
 
 			static auto XmlFields() noexcept
 			{
@@ -64,7 +65,8 @@ namespace fig::data
 						.MustExist(),
 					Element("Target", &FileEntry::targetPath)
 						.MustExist(),
-					Element("Sha256", &FileEntry::sha256)
+					Element("Sha256", &FileEntry::sha256),
+					Element("Size", &FileEntry::fileSize)
 				);
 
 				static_assert(IsXmlSerializable<FileEntry>);
@@ -106,6 +108,42 @@ namespace fig::io
 {
 	class AsyncDownloader;
 
+	enum class PackageState
+	{
+		Unknown = -1,
+		NotDownloaded = 0,
+		PartiallyDownloaded,
+		Unverified,
+		Installed,
+		VerificationFailed,
+	};
+
+	enum class InstallationPhase
+	{
+		None = 0,
+		Downloading,
+		Decompressing,
+		Verifying,
+		Installing,
+		Completed,
+		Failed,
+	};
+
+	struct InstallationState
+	{
+		InstallationPhase phase {};
+		uint64_t bytesReceived {};
+		uint64_t bytesTotal {};
+
+		float GetProgress() const noexcept
+		{
+			if (bytesTotal == 0)
+				return 0.0f;
+
+			return static_cast<float>(static_cast<double>(bytesReceived) / static_cast<double>(bytesTotal));
+		}
+	};
+
 	class PackageManager : public fig::data::XmlData<"Packages", 0>
 	{
 	public:
@@ -113,37 +151,52 @@ namespace fig::io
 		~PackageManager();
 
 		FileError Init() noexcept;
-		FileError SaveState();
-		void VerifyInstalledPackages();
+		void CheckInstalledPackages();
 
 		fig::optional_cref<fig::data::PackageInfo> GetPackage(const fig::uuid&) const noexcept;
 		const std::vector<fig::data::PackageInfo>& GetPackages() const noexcept;
 
-		bool IsPackageInstalled(const fig::uuid& packageId) const;
 		bool InstallPackage(const fig::uuid& packageId);
+		bool CancelInstall(fig::uuid packageId);
+		void CancelAll();
 
-	protected:
+		PackageState GetPackageState(const fig::uuid& packageId) const;
+		InstallationState GetInstallationState(const fig::uuid& packageId) const;
+
+	private:
+		FileError LoadState();
+		FileError SaveState();
+
 		std::vector<fig::data::PackageInfo> _packages;
-
-		enum class PackageState
-		{
-			NotDownloaded,
-			PartiallyDownloaded,
-			Unverified,
-			Installed,
-			Invalid,
-			Outdated,
-		};
-		std::unique_ptr<AsyncDownloader> _pDownloader;
-		std::map<fig::uuid, AsyncDownloadId> _activeInstalls;
-
 		std::unique_ptr<std::jthread> _verificationWorker {};
 		std::map<fig::uuid, PackageState> _packageStates;
 		std::map<fig::uuid, fig::string> _packageHashes;
-		void __Verify();
+		
+		void __CheckInstalledPackages();
+		struct Installation
+		{
+			fig::data::PackageInfo packageInfo;
+			std::unique_ptr<Downloader> downloader;
+			std::unique_ptr<std::jthread> thread;
 
-	private:
-		mutable std::mutex _mutex;
+			enum class Error
+			{
+				NoError = 0,
+				Cancelled,
+				DownloadError,
+				FileError,
+				VerificationFailed,
+			} error;
+
+			DownloadError downloadError {};
+			FileError fileError {};
+			InstallationPhase phase;
+		};
+		std::map<fig::uuid, Installation> _activeInstalls;
+		std::unordered_set<fig::uuid> _finishedInstalls;
+		void __InstallPackage(fig::uuid packageId, std::stop_token stopToken);
+
+		mutable std::mutex _mutex; // Guards all state
 
 	public:
 		static auto XmlFields() noexcept
@@ -151,7 +204,7 @@ namespace fig::io
 			using namespace fig::data;
 			return Fields(
 				Element("Package", &PackageManager::_packages)
-				.MustExist()
+					.MustExist()
 			);
 
 			static_assert(IsXmlSerializable<PackageManager>);

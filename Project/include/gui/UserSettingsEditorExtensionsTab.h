@@ -14,7 +14,10 @@ namespace fig::gui
 		SaveResult OnSave() noexcept override;
 
 	protected:
-		void OnAfterLayout();
-		void InstallTTSServer();
+		void OnUpdate(float fElapsed) override;
+		void OnAfterLayout() override;
+
+	private:
+		std::vector<fig::observer_ptr<class PackageWidget>> _widgets;
 	};
 }

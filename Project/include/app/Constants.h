@@ -184,6 +184,12 @@ namespace fig::Constants
 		
 		constexpr fig::const_string TTSServer = "tts/bin/audiocpp_server.exe";
 		constexpr fig::const_string TTSModels = "tts/models";
+
+		constexpr fig::const_string PackagesFolder = "packages";
+		constexpr fig::const_string PackagesFileName = "packages.xml";
+		constexpr fig::const_string PackagesStateFileName = "installed.ini";
+		
+		constexpr fig::const_string TemporaryFolder = "temp";
 	}
 	
 	namespace LLM

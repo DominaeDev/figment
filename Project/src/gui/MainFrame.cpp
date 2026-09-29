@@ -528,7 +528,7 @@ namespace fig::gui
 			}
 		}
 
-		if (_pSidePanel)
+		if (_pSidePanel and _pSidePanel->GetVisible())
 		{
 			if (auto result = _pSidePanel->ProcessEvent(event); result == EventResult::Handled)
 				return EventResult::Handled;

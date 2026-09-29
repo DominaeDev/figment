@@ -34,8 +34,10 @@ namespace fig::gui
 		{
 			auto pWidget = CreateControl<PackageWidget>(package);
 			pSizer->Add(pWidget, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
-		}
+			_widgets.push_back(pWidget);
 
+			pWidget->RefreshState();
+		}
 
 		return true;
 	}
@@ -50,8 +52,15 @@ namespace fig::gui
 		return {};
 	}
 
-	void UserSettingsEditorExtensionsTab::InstallTTSServer()
+	void UserSettingsEditorExtensionsTab::OnUpdate(float fElapsed)
 	{
-		Global::GetPackageManager().InstallPackage(fig::uuid { "eda3584f-a78f-4b7c-83dd-8f28fab23ea1" });
+		static float fCounter = 0.0f;
+		fCounter += fElapsed;
+		if (fCounter > 0.3f)
+		{
+			fCounter = 0.0f;
+			for (auto& pWidget : _widgets)
+				pWidget->RefreshState();
+		}
 	}
 }

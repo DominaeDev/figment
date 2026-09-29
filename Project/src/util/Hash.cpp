@@ -79,6 +79,31 @@ namespace fig
 		return hash;
 	}
 
+	fig::hash GetHash(const fig::path& filename, std::stop_token stopToken)
+	{
+		std::ifstream file(filename, std::ios::binary | std::ios::in);
+		if (!file)
+			return {};
+
+		SHA256_CTX ctx;
+		sha256_init(&ctx);
+		std::vector<uint8_t> buffer(1024 * 1024); // 1MB
+
+		while ((file.read(reinterpret_cast<char*>(buffer.data()), buffer.size()) or file.gcount() > 0) and not stopToken.stop_requested())
+			sha256_update(&ctx, buffer.data(), static_cast<size_t>(file.gcount()));
+
+		if (file.bad() or stopToken.stop_requested())
+			return {};
+
+		fig::hash hash {};
+		sha256_final(&ctx, (SHA256_BYTE*)&hash.parts);
+		static_assert(sizeof(hash.parts) == 32uz);
+
+		for (auto& part : hash.parts)
+			part = std::byteswap(part);
+		return hash;
+	}
+
 	fig::hash HashCombine(fig::hash a, fig::hash b, size_t& seed)
 	{
 		fig::hash c { a };

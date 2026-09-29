@@ -16,6 +16,7 @@ namespace fig::sdl
 	using TextEngine = stdex::c_resource<TTF_TextEngine, TTF_CreateRendererTextEngine, TTF_DestroyRendererTextEngine>;
 	using Text = stdex::c_resource<TTF_Text, TTF_CreateText, TTF_DestroyText>;
 	using AudioStream = stdex::c_resource<SDL_AudioStream, SDL_OpenAudioDeviceStream, SDL_DestroyAudioStream>;
+	using FileStream = stdex::c_resource<SDL_IOStream, SDL_IOFromFile, SDL_CloseIO>;
 }
 
 namespace fig

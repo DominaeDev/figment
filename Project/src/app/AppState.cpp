@@ -69,7 +69,9 @@ namespace fig
 		// Init Package manager
 		pPackageManager = std::make_unique<PackageManager>();
 		if (pPackageManager->Init() == FileError::NoError)
-			pPackageManager->VerifyInstalledPackages();
+			pPackageManager->CheckInstalledPackages();
+		else
+			LogLn("Error reading packages.xml");
 
 		// Init LLM
 		pLLMBackend = std::make_shared<LLMBackend>();

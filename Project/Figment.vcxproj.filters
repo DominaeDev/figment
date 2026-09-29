@@ -192,6 +192,9 @@
     <Filter Include="Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls">
       <UniqueIdentifier>{9802f9e1-7377-4d0a-8f39-d9c824a0da30}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\IO\Zip">
+      <UniqueIdentifier>{3fc3d61a-0095-4268-a90f-b9ad2839165f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -826,6 +829,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\PackageWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\ZipArchive.cpp">
+      <Filter>Source Files\Frontend\IO\Zip</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1878,6 +1884,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\PackageWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\ZipArchive.h">
+      <Filter>Source Files\Frontend\IO\Zip</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

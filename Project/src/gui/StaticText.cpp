@@ -55,6 +55,9 @@ namespace fig::gui
 
 	void StaticText::SetText(fig::string_view text)
 	{
+		if (text == _text)
+			return; // No change
+
 		_text = text;
 
 		InvalidateText();
@@ -63,6 +66,8 @@ namespace fig::gui
 
 	void StaticText::SetTextAndResize(fig::string_view text)
 	{
+		if (text == _text)
+			return; // No change
 		_text = text;
 		_bInvalidated = false;
 		fig::coord newWidth, newHeight;

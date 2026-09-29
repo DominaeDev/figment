@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <stop_token>
 
 namespace fig
 {
@@ -25,7 +26,7 @@ namespace fig
 
 		fig::string to_string() const noexcept
 		{
-			return std::format("{:x}{:x}{:x}{:x}{:x}{:x}{:x}{:x}", parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
+			return std::format("{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}{:08x}", parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
 		}
 
 		explicit operator fig::string() const { return to_string(); }
@@ -57,6 +58,7 @@ namespace fig
 	[[nodiscard]] fig::hash GetHash(const fig::string& text);
 	[[nodiscard]] fig::hash GetHash(fig::byte_span data);
 	[[nodiscard]] fig::hash GetHash(const fig::path& filename);
+	[[nodiscard]] fig::hash GetHash(const fig::path& filename, std::stop_token stopToken);
 	[[nodiscard]] fig::hash HashCombine(fig::hash a, fig::hash b, size_t& seed);
 
 	template <typename T, typename... Rest>

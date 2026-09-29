@@ -14,26 +14,31 @@
 			<File id="17d36533-4fb2-4d5a-82d6-b6a68494a774">
 				<Name>audiocpp_server.exe</Name>
 				<Target>tts/bin/0.6/cuda/audiocpp_server.exe</Target>
+				<Size>152058368</Size>
 				<Sha256></Sha256>
 			</File>
 			<File id="cd90e544-0d56-4a94-99a2-ba5e7ed6aa89">
 				<Name>MSVCP140.dll</Name>
 				<Target>tts/bin/0.6/cuda/MSVCP140.dll</Target>
+				<Size>557728</Size>
 				<Sha256></Sha256>
 			</File>
 			<File id="d52c123d-16ac-4689-9465-db1a2326c434">
 				<Name>VCOMP140.DLL</Name>
 				<Target>tts/bin/0.6/cuda/VCOMP140.DLL</Target>
+				<Size>193152</Size>
 				<Sha256></Sha256>
 			</File>
 			<File id="9ad6ace3-3403-4ff0-af9a-be049b1aacff">
 				<Name>VCRUNTIME140.dll</Name>
 				<Target>tts/bin/0.6/cuda/VCRUNTIME140.dll</Target>
+				<Size>124544</Size>
 				<Sha256></Sha256>
 			</File>
 			<File id="91982d5d-0d56-4cf2-9d98-5f11606980ba">
 				<Name>VCRUNTIME140_1.dll</Name>
 				<Target>tts/bin/0.6/cuda/VCRUNTIME140_1.dll</Target>
+				<Size>49792</Size>
 				<Sha256></Sha256>
 			</File>
 		</Archive>
@@ -54,26 +59,31 @@
 			<File id="24ad9c45-e633-4f29-8905-43d34ad47422">
 				<Name>audiocpp_server.exe</Name>
 				<Target>tts/bin/0.6/cpu/audiocpp_server.exe</Target>
+				<Size>20528128</Size>
 				<Sha256></Sha256>
 			</File>
 			<File id="5796b158-eda2-41f8-af13-14cfbd448b96">
 				<Name>MSVCP140.dll</Name>
 				<Target>tts/bin/0.6/cpu/MSVCP140.dll</Target>
+				<Size>557728</Size>
 				<Sha256></Sha256>
 			</File>
 			<File id="7007b9aa-e301-46a5-9aa9-5b9f77366f8b">
 				<Name>VCOMP140.DLL</Name>
 				<Target>tts/bin/0.6/cpu/VCOMP140.DLL</Target>
+				<Size>193152</Size>
 				<Sha256></Sha256>
 			</File>
 			<File id="869f2714-ed38-431f-a610-353e76e4048b">
 				<Name>VCRUNTIME140.dll</Name>
 				<Target>tts/bin/0.6/cpu/VCRUNTIME140.dll</Target>
+				<Size>124544</Size>
 				<Sha256></Sha256>
 			</File>
 			<File id="6fde3761-fc07-4473-b8c1-06a9d9c6a970">
 				<Name>VCRUNTIME140_1.dll</Name>
 				<Target>tts/bin/0.6/cpu/VCRUNTIME140_1.dll</Target>
+				<Size>49792</Size>
 				<Sha256></Sha256>
 			</File>
 		</Archive>
