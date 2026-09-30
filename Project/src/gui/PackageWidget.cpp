@@ -14,6 +14,8 @@ namespace fig::gui
 	PackageWidget::PackageWidget(ControlPtr pParent, const fig::data::PackageInfo& package) : Control(pParent)
 	{
 		_packageId = package.id;
+		_packageDependencies = Condition(package.dependencies, true);
+		_sizeString = format_file_size(package.fileSize);
 
 		SetSize(720, 106);
 		SetMaxWidth(720);
@@ -39,7 +41,7 @@ namespace fig::gui
 
 		_pName = CreateControl<StaticText>("", FontFace::Default, 18.0, false);
 		_pName->SetTextAndResize(package.name);
-		_pName->SetMaxWidth(480);
+		_pName->SetMaxWidth(540);
 		_pName->EnableEllipsis(true);
 		pLeftSizer->Add(_pName, 0);
 
@@ -52,8 +54,8 @@ namespace fig::gui
 
 		_pDescription = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
 		_pDescription->EnableWordWrap(true);
-		_pDescription->SetMaxWidth(480);
-		_pDescription->SetWidth(480);
+		_pDescription->SetMaxWidth(560);
+		_pDescription->SetWidth(560);
 		_pDescription->SetTextAndResize(package.description);
 		pLeftSizer->Add(_pDescription, 0, SizerFlag::Top, 8);
 
@@ -77,12 +79,7 @@ namespace fig::gui
 		_pInfoButton->SetDelegate([infoUrl] { SDL_OpenURL(infoUrl.c_str()); });
 
 		_pStatusText = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
-		_pStatusText->SetVisible(false);
 		_pStatusText->SetPosition(GetWidth() - _pStatusText->GetWidth() - 10, GetHeight() - _pStatusText->GetHeight() - 7);
-
-		_pFileSizeText = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
-		_pFileSizeText->SetTextAndResize(format_file_size(package.fileSize));
-		_pFileSizeText->SetPosition(GetWidth() - _pFileSizeText->GetWidth() - 10, GetHeight() - _pFileSizeText->GetHeight() - 7);
 
 		_pProgressBar = CreateControl<HorizontalBar>(Resource::HORIZONTAL_BAR);
 		_pProgressBar->SetForegroundColor(Color::CardShadow);
@@ -117,8 +114,6 @@ namespace fig::gui
 	{
 		if (_pStatusText)
 			_pStatusText->SetX(GetWidth() - _pStatusText->GetWidth() - 10);
-		if (_pFileSizeText)
-			_pFileSizeText->SetX(GetWidth() - _pFileSizeText->GetWidth() - 10);
 		if (_pInfoButton)
 			_pInfoButton->SetX(_pName->GetX() + _pName->GetWidth() + 2);
 	}
@@ -131,20 +126,16 @@ namespace fig::gui
 		if (_packageState == PackageState::Installed)
 		{
 			_pInstallButton->SetLabel("Uninstall", Resource::ICON_DELETE);
-			_pFileSizeText->SetVisible(false);
-			_pStatusText->SetVisible(true);
+			_pInstallButton->SetEnabled(true);
 			_pProgressBar->SetVisible(false);
 			_pProgressText->SetVisible(false);
 			_pDescription->SetVisible(true);
 
-			_pStatusText->SetTextAndResize("Installed");
+			_pStatusText->SetTextAndResize(std::format("Installed ({})", _sizeString));
 			_pStatusText->SetForegroundColor(Color::SuccessText);
 			_pStatusText->SetX(GetWidth() - _pStatusText->GetWidth() - 10);
+			_pStatusText->SetVisible(true);
 			return;
-		}
-		else
-		{
-			_pStatusText->SetVisible(false);
 		}
 
 		_installationState = Global::GetPackageManager().GetInstallationState(_packageId);
@@ -156,8 +147,9 @@ namespace fig::gui
 
 		if (bShowProgressBar)
 		{
-			_pInstallButton->SetLabel("Cancel", Resource::ICON_PAUSE);
-			_pFileSizeText->SetVisible(false);
+			_pInstallButton->SetLabel("Stop", Resource::ICON_STOP);
+			_pInstallButton->SetEnabled(true);
+			_pStatusText->SetVisible(false);
 			_pProgressBar->SetVisible(true);
 			_pProgressText->SetVisible(true);
 			_pDescription->SetVisible(false);
@@ -172,7 +164,11 @@ namespace fig::gui
 		else
 		{
 			_pInstallButton->SetLabel("Download", Resource::ICON_DOWNLOAD);
-			_pFileSizeText->SetVisible(true);
+			_pInstallButton->SetEnabled(_packageDependencies.Evaluate(Global::GetPackageManager().GetContext()));
+			_pStatusText->SetTextAndResize(_sizeString);
+			_pStatusText->SetForegroundColor(Color::PanelForeground);
+			_pStatusText->SetX(GetWidth() - _pStatusText->GetWidth() - 10);
+			_pStatusText->SetVisible(true);
 			_pProgressBar->SetVisible(false);
 			_pProgressText->SetVisible(false);
 			_pDescription->SetVisible(true);
@@ -207,7 +203,6 @@ namespace fig::gui
 			_pStatusText->SetForegroundColor(Color::ErrorText);
 			_pStatusText->SetX(GetWidth() - _pStatusText->GetWidth() - 10);
 			_pStatusText->SetVisible(true);
-			_pFileSizeText->SetVisible(false);
 		}
 	}
 

@@ -46,20 +46,21 @@ namespace fig::gui
 	{
 		auto pSizer = pParent->GetSizer();
 
-		auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Apply", Resource::ICON_SAVE);
+		/*auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Apply", Resource::ICON_SAVE);
 		pSaveButton->SetSize(110, 32);
 		pSaveButton->SetDelegate([this] {
 			Save();
 		});
 		_pSaveButton = pSaveButton;
+		pSizer->Add(_pSaveButton, 0, SizerFlag::AlignCenterVertical);
+		*/
 
-		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Discard", Resource::ICON_DISMISS);
+		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Close", Resource::ICON_DISMISS);
 		pDiscardButton->SetSize(110, 32);
 		pDiscardButton->SetDelegate([this] {
 			PushEvent(UserEvent::NavigateToHome);
 		});
 
-		pSizer->Add(_pSaveButton, 0, SizerFlag::AlignCenterVertical);
 		pSizer->Add(pDiscardButton, 0, SizerFlag::Left | SizerFlag::AlignCenterVertical, 8);
 		pSizer->AddSpacer(8);
 	}

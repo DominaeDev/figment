@@ -4,6 +4,7 @@
 #include "io/Downloader.h"
 #include "io/ZipArchive.h"
 #include "io/Xml.h"
+#include "io/FileUtility.h"
 #include "util/Hash.h"
 
 using namespace fig::data;
@@ -38,7 +39,7 @@ namespace fig::io
 
 	FileError PackageManager::LoadState()
 	{
-		auto path = fig::path(Constants::Paths::PackagesFolder) / fig::path("installed");
+		auto path = GetPackagesFilename(std::format("{}.{}", Constants::Paths::PackagesStateFileName, Constants::Paths::PackagesStateFileExt));
 		XmlReader xml(path);
 		if (xml.IsOk())
 		{
@@ -54,6 +55,7 @@ namespace fig::io
 					packageNode = packageNode->GetNextSibling();
 				}
 			}
+			_bChanged = false;
 			return FileError::NoError;
 		}
 		return FileError::NotFound;
@@ -64,7 +66,7 @@ namespace fig::io
 		if (not _bChanged)
 			return FileError::NoError;
 
-		auto path = fig::path(Constants::Paths::PackagesFolder) / fig::path("installed");
+		auto path = GetPackagesFilename(std::format("{}.{}", Constants::Paths::PackagesStateFileName, Constants::Paths::PackagesStateFileExt));
 
 		XmlWriter xml("InstalledPackages");
 		for (auto& kvp : _packageHashes)
@@ -75,7 +77,10 @@ namespace fig::io
 		}
 
 		if (xml.WriteToFile(path))
+		{
+			_bChanged = false;
 			return FileError::NoError;
+		}
 		return FileError::WriteError;
 	}
 
@@ -104,7 +109,7 @@ namespace fig::io
 		if (_activeInstalls.contains(packageId))
 			return false; // Already installing
 
-		auto tempFilename = fig::path { Constants::Paths::TemporaryFolder } / fig::path { (fig::string)package.id };
+		auto tempFilename = GetTemporaryFilename((fig::string)package.id);
 
 		if (packageState == PackageState::PartiallyDownloaded)
 		{
@@ -149,7 +154,7 @@ namespace fig::io
 			auto& package = *itPackage;
 
 			// Delete files
-			auto packagesDirectory = fig::path { Constants::Paths::PackagesFolder };
+			auto packagesDirectory = GetPackagesFolder();
 			
 			std::vector<fig::path> paths;
 			paths.push_back(packagesDirectory / package.targetPath );
@@ -284,7 +289,7 @@ namespace fig::io
 				bOk = true;
 				for (auto& entry : package.entries)
 				{
-					auto targetPath = fig::path(Constants::Paths::PackagesFolder) / entry.targetPath;
+					auto targetPath = GetPackagesFolder() / entry.targetPath;
 					if (not std::filesystem::exists(targetPath))
 					{
 						bOk = false;
@@ -294,7 +299,7 @@ namespace fig::io
 			}
 			else
 			{
-				auto targetPath = fig::path(Constants::Paths::PackagesFolder) / package.targetPath;
+				auto targetPath = GetPackagesFolder() / package.targetPath;
 				bOk = std::filesystem::exists(targetPath);
 			}
 
@@ -308,8 +313,8 @@ namespace fig::io
 			if (states[package.id] != PackageState::NotDownloaded)
 				continue;
 
-			fig::path fullFile = fig::path { Constants::Paths::TemporaryFolder } / fig::path { (fig::string)package.id };
-			fig::path partialFile = fig::path { Constants::Paths::TemporaryFolder } / fig::path { std::format("{}.part", (fig::string)package.id) };
+			fig::path fullFile = GetTemporaryFolder() / fig::path { (fig::string)package.id };
+			fig::path partialFile = GetTemporaryFolder() / fig::path { std::format("{}.part", (fig::string)package.id) };
 			if (std::filesystem::exists(partialFile) or std::filesystem::exists(fullFile))
 				states[package.id] = PackageState::PartiallyDownloaded;
 		}
@@ -320,32 +325,17 @@ namespace fig::io
 			if (states[package.id] != PackageState::Unverified)
 				continue;
 
-			std::vector<std::pair<fig::uuid, fig::string>> expectedHashes;
-			expectedHashes.push_back(std::make_pair(package.id, package.sha256));
-			for (auto& entry : package.entries)
-			{
-				if constexpr (Debugging)
-				{
-					if (entry.sha256.empty())
-						continue; // Allow skipping hash check in debug
-				}
-				expectedHashes.push_back(std::make_pair(entry.id, entry.sha256));
-			}
-
 			bool bKnown = true;
 			bool bValid = true;
-			for (auto& [id, hash] : expectedHashes)
+			if (not knownHashes.contains(package.id))
 			{
-				if (not knownHashes.contains(id))
-				{
-					bKnown = false;
-					break;
-				}
-				if (hash != knownHashes[id])
-				{
-					bValid = false;
-					break;
-				}
+				bKnown = false;
+				break;
+			}
+			if (package.sha256 != knownHashes[package.id])
+			{
+				bValid = false;
+				break;
 			}
 			if (bKnown)
 				states[package.id] = bValid ? PackageState::Installed : PackageState::VerificationFailed;
@@ -398,19 +388,26 @@ namespace fig::io
 		};
 
 		bool bShouldDownload = true;
-		auto tempDirectory = fig::path { Constants::Paths::TemporaryFolder };
-		fig::path tempFilename = tempDirectory / fig::path { (fig::string)package.id };
-		fig::path partialFilename = tempDirectory / fig::path { std::format("{}.part", (fig::string)package.id) };
+		fig::path tempFilename = GetTemporaryFilename((fig::string)package.id);
+		fig::path partialFilename = GetTemporaryFilename(std::format("{}.part", (fig::string)package.id));
 
 		// Check if download is already complete
 		if (std::filesystem::exists(tempFilename) and std::filesystem::file_size(tempFilename) == package.fileSize)
 			bShouldDownload = false;
+		else if (std::filesystem::exists(partialFilename) and std::filesystem::file_size(partialFilename) == package.fileSize)
+		{
+			// Finished, yet somehow still a .part file
+			std::error_code errorCode;
+			std::filesystem::rename(partialFilename, tempFilename, errorCode);
+			bShouldDownload = false;
+		}
 
 		// Download
 		if (bShouldDownload)
 		{
 			fnSetState(InstallationPhase::Downloading);
 
+			EnsureFolderExists(tempFilename.parent_path());
 			auto downloadError = pInstall->downloader->Download(package.downloadUrl, tempFilename, stopToken);
 			switch (downloadError)
 			{
@@ -534,7 +531,7 @@ namespace fig::io
 						}
 					}
 
-					auto entryTempFilename = tempDirectory / fig::path { (fig::string)packageEntry.id };
+					auto entryTempFilename = GetTemporaryFilename((fig::string)packageEntry.id);
 					if (auto error = zip.Extract(packageEntry.name, entryTempFilename); error != ZipError::NoError)
 					{
 						bValidContents = false;
@@ -560,7 +557,7 @@ namespace fig::io
 
 		if (package.entries.empty())
 		{
-			auto targetPath = fig::path(Constants::Paths::PackagesFolder) / package.targetPath;
+			auto targetPath = GetPackagesFolder() / package.targetPath;
 			if (not fnInstall(tempFilename, targetPath))
 			{
 				fnFinish(FileError::WriteError);
@@ -571,8 +568,8 @@ namespace fig::io
 		{
 			for (auto& entry : package.entries)
 			{
-				auto targetPath = fig::path(Constants::Paths::PackagesFolder) / entry.targetPath;
-				auto entryTempFilename = tempDirectory / fig::path { (fig::string)entry.id };
+				auto targetPath = GetPackagesFolder() / entry.targetPath;
+				auto entryTempFilename = GetTemporaryFilename((fig::string)entry.id);
 				if (not fnInstall(entryTempFilename, targetPath))
 				{
 					fnFinish(FileError::WriteError);
@@ -595,12 +592,11 @@ namespace fig::io
 			return; // Unknown package
 		auto& package = *itPackage;
 
-		auto tempDirectory = fig::path { Constants::Paths::TemporaryFolder };
 		std::vector<fig::path> paths;
-		paths.push_back(tempDirectory / fig::path { (fig::string)package.id });
-		paths.push_back(tempDirectory / fig::path { std::format("{}.part", (fig::string)package.id) });
+		paths.push_back(GetTemporaryFilename((fig::string)package.id));
+		paths.push_back(GetTemporaryFilename(std::format("{}.part", (fig::string)package.id)));
 		for (auto& entry : package.entries)
-			paths.push_back(tempDirectory / fig::path { (fig::string)entry.id });
+			paths.push_back(GetTemporaryFilename((fig::string)entry.id));
 
 		// Clean up
 		for (auto& path : paths)
@@ -626,5 +622,18 @@ namespace fig::io
 			return true;
 		}
 		return false;
+	}
+
+	fig::Context PackageManager::GetContext() const
+	{
+		std::scoped_lock lock(_mutex);
+
+		Context ctx;
+		for (auto& [id, state] : _packageStates)
+		{
+			if (state == PackageState::Installed)
+				ctx.SetFlag((fig::string)id);
+		}
+		return ctx;
 	}
 }

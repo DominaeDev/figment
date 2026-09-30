@@ -121,7 +121,7 @@ namespace fig::gui
 		createMenu.AddItem("New story\u2026");
 		createMenu.AddItem("New world\u2026");
 		createMenu.AddSeparator();
-		createMenu.AddItem("From file\u2026")
+		createMenu.AddItem("Import from file\u2026")
 			.SetEnabled(false);
 		menu.AddSeparator();
 		menu.AddItem("User profile\u2026", Resource::ICON_USER_SETTINGS);

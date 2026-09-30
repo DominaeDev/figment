@@ -66,6 +66,7 @@ namespace fig
 			std::unique_ptr<std::map<fig::cursor, fig::sdl::Cursor>> pSystemCursors;
 			std::unique_ptr<fig::tts::TTSBackend> pTTSBackend;
 			std::unique_ptr<fig::audio::AudioManager> pAudioManager;
+			fig::path userAppPath;
 
 			void Init();
 			void Release();
@@ -94,6 +95,7 @@ namespace fig
 		static bool IsSignedIn();
 
 		static void SetCursor(fig::cursor cursor);
+		static const fig::path& GetUserAppPath();
 
 	private:
 		static State* __appState;

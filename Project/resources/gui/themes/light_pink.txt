@@ -118,7 +118,7 @@ Message.Navy.Background					#F2FAFF
 Message.Navy.Border						#4D55C1
 
 // Error messages
-SuccessText								#23992C
+SuccessText								#3EB147
 ErrorText								#990D2B
 
 // Fixed colors (invariant)

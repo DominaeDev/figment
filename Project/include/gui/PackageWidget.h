@@ -2,6 +2,7 @@
 
 #include "gui/Control.h"
 #include "io/PackageManager.h"
+#include "text/Condition.h"
 
 namespace fig::gui
 {
@@ -31,12 +32,13 @@ namespace fig::gui
 		fig::observer_ptr<StaticText> _pName;
 		fig::observer_ptr<StaticText> _pDescription;
 		fig::observer_ptr<StaticText> _pStatusText;
-		fig::observer_ptr<StaticText> _pFileSizeText;
 
 		fig::observer_ptr<HorizontalBar> _pProgressBar;
 		fig::observer_ptr<HorizontalBar> _pProgressFill;
 		fig::observer_ptr<StaticText> _pProgressText;
 
 		float _fRefreshCounter {};
+		Condition _packageDependencies;
+		fig::string _sizeString;
 	};
 }

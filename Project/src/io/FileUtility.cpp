@@ -1,6 +1,8 @@
 #include <pch.h>
 #include "io/FileUtility.h"
 #include "io/Asset.h"
+#include "user/UserManager.h"
+#include "user/UserProfile.h"
 #include <spng.h>
 #include <fstream>
 
@@ -216,5 +218,60 @@ namespace fig::io
 		}
 
 		return content;
+	}
+
+	fig::path GetUserDataFolder()
+	{
+		return Global::GetUserAppPath();
+	}
+
+	fig::path GetPackagesFolder()
+	{
+		return Global::GetUserAppPath() / fig::path { Constants::Paths::PackagesFolder };
+	}
+
+	fig::path GetProfilesFolder()
+	{
+		return Global::GetUserAppPath() / fig::path { Constants::Paths::ProfilesFolder };
+	}
+
+	fig::path GetTemporaryFolder()
+	{
+		return Global::GetUserAppPath() / fig::path { Constants::Paths::TemporaryFolder };
+	}
+
+	fig::path GetUserDataFilename(const fig::path& filename)
+	{
+		return GetUserDataFolder() / filename;
+	}
+
+	fig::path GetTemporaryFilename(const fig::path& filename)
+	{
+		return GetTemporaryFolder() / filename;
+	}
+
+	fig::path GetPackagesFilename(const fig::path& filename)
+	{
+		return GetPackagesFolder() / filename;
+	}
+
+	fig::path GetProfilesFilename(const fig::path& filename)
+	{
+		return GetProfilesFolder() / filename;
+	}
+
+	bool EnsureFolderExists(fig::path path)
+	{
+		if (path.has_extension())
+			path = path.parent_path();
+
+		if (not std::filesystem::exists(path))
+		{
+			std::error_code errorCode {};
+			std::filesystem::create_directories(path, errorCode);
+			if (errorCode)
+				return false;
+		}
+		return true;
 	}
 }

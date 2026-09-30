@@ -833,6 +833,9 @@
     <ClCompile Include="src\io\ZipArchive.cpp">
       <Filter>Source Files\Frontend\IO\Zip</Filter>
     </ClCompile>
+    <ClCompile Include="src\user\UserProfile.cpp">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">

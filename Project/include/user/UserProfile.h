@@ -9,7 +9,7 @@ namespace fig::user
 	{
 		fig::auth::AuthVersion version { uint16_t(-1) };
 
-		fig::uuid id { 0, 0 };
+		fig::uuid id {};
 		fig::string name;
 		fig::auth::UserAuth auth {};
 		fig::auth::UserAuth recovery {};
@@ -30,9 +30,6 @@ namespace fig::user
 				and not name.empty();
 		}
 
-		fig::path GetPath() const noexcept
-		{
-			return fig::path(Constants::Paths::ProfilesFolder) / filename_from_uuid(id);
-		}
+		fig::path GetPath() const;
 	};
 }

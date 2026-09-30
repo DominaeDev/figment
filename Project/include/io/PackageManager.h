@@ -5,6 +5,7 @@
 #include "io/XmlData.h"
 #include "io/AsyncDownloader.h"
 #include "data/VersionNumber.h"
+#include "text/Context.h"
 
 namespace fig::data
 {
@@ -49,6 +50,7 @@ namespace fig::data
 		fig::string infoUrl;
 		fig::string sha256;
 		fig::string versionString;
+		fig::string dependencies;
 		fig::path targetPath;
 
 		struct FileEntry
@@ -100,6 +102,7 @@ namespace fig::data
 				Element("Sha256", &PackageInfo::sha256),
 				Element("Version", &PackageInfo::version),
 				Element("VersionString", &PackageInfo::versionString),
+				Element("Dependencies", &PackageInfo::dependencies),
 				Element("Target", &PackageInfo::targetPath),
 				Element("File", &PackageInfo::entries)
 					.Collection("Archive")
@@ -169,6 +172,8 @@ namespace fig::io
 
 		PackageState GetPackageState(const fig::uuid& packageId) const;
 		InstallationState GetInstallationState(const fig::uuid& packageId) const;
+
+		fig::Context GetContext() const;
 
 	private:
 		FileError LoadState();

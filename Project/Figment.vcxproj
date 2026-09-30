@@ -350,6 +350,7 @@
     <ClCompile Include="src\user\ProfileDatabase.cpp" />
     <ClCompile Include="src\user\Security.cpp" />
     <ClCompile Include="src\user\UserManager.cpp" />
+    <ClCompile Include="src\user\UserProfile.cpp" />
     <ClCompile Include="src\user\UserSettings.cpp" />
     <ClCompile Include="src\util\DebugUtils.cpp" />
     <ClCompile Include="src\util\Handle.cpp" />

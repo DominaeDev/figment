@@ -13,6 +13,16 @@ namespace fig::io
 	std::expected<fig::string, FileError> ReadTextFile(const fig::path& filename, bool normalizeNewlines = true);
 	FileError ReadTextFile(const fig::path& filename, fig::string& out_content, bool normalizeNewlines = true);
 	FileError WriteTextFile(const fig::path& filename, const fig::string& content, bool append = false);
+	
+	fig::path GetUserDataFolder();
+	fig::path GetUserDataFilename(const fig::path& filename);
+	fig::path GetTemporaryFolder();
+	fig::path GetTemporaryFilename(const fig::path& filename);
+	fig::path GetPackagesFolder();
+	fig::path GetPackagesFilename(const fig::path& filename);
+	fig::path GetProfilesFolder();
+	fig::path GetProfilesFilename(const fig::path& path);
+	bool EnsureFolderExists(fig::path path);
 
 	std::expected<std::vector<fig::path>, FileError> FindFilesInPath(const fig::path& directory, const fig::string& extension);
 
@@ -22,4 +32,5 @@ namespace fig::io
 
 	std::expected<fig::string, FileError> ReadPNGMeta(fig::path filename, const fig::string& keyword = "chara", bool bDecodeBase64 = true) noexcept;
 	std::expected<fig::string, FileError> ReadPNGMeta(const fig::bytes& buffer, const fig::string& keyword = "chara", bool bDecodeBase64 = true) noexcept;
+
 }

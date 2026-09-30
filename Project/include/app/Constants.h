@@ -8,6 +8,12 @@
 
 namespace fig::Constants
 {
+	namespace Application
+	{
+		constexpr fig::const_string CompanyName = "DominaeDev";
+		constexpr fig::const_string ApplicationName = "Figment";
+	}
+
 	namespace GUI
 	{
 		constexpr fig::coord WindowDefaultWidth = 1320;
@@ -181,13 +187,14 @@ namespace fig::Constants
 		constexpr fig::const_string Macros = "resources/prompting/macros.xml";
 		constexpr fig::const_string PromptScaffold = "resources/prompting/chat.scaffold";
 		constexpr fig::const_string DefaultScenario = "resources/prompting/default_scenario.xml";
+		constexpr fig::const_string PackagesFileName = "resources/packages/packages.xml";
 		
 		constexpr fig::const_string TTSServer = "tts/bin/audiocpp_server.exe";
 		constexpr fig::const_string TTSModels = "tts/models";
 
-		constexpr fig::const_string PackagesFileName = "resources/packages/packages.xml";
 		constexpr fig::const_string PackagesFolder = "packages";
-		constexpr fig::const_string PackagesStateFileName = "installed.ini";
+		constexpr fig::const_string PackagesStateFileName = "installed";
+		constexpr fig::const_string PackagesStateFileExt = "";
 		
 		constexpr fig::const_string TemporaryFolder = "temp";
 	}

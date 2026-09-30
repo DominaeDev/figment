@@ -4,8 +4,6 @@
 
 namespace fig::strings
 {
-	inline constexpr fig::const_string ApplicationTitle = "Figment";
-
 	namespace Status
 	{
 		inline constexpr fig::const_string LoadingModel = 

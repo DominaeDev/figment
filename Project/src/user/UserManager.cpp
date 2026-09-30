@@ -13,6 +13,7 @@
 #include "io/AssetFileWriter.h"
 #include "io/AssetFileReader.h"
 #include "io/AssetManager.h"
+#include "io/FileUtility.h"
 #include "app/AppState.h"
 
 using namespace fig::io;
@@ -327,10 +328,10 @@ namespace fig::user
 		return static_cast<UserSettings&>(*_pUserSettings);
 	}
 
-	fig::io::ProfileDatabase& UserManager::GetDatabase() noexcept
+	ProfileDatabase& UserManager::GetDatabase() noexcept
 	{
 		if (!_pProfileDB)
-			_pProfileDB = std::make_unique<fig::io::ProfileDatabase>(fig::path(std::format("{}/{}.{}", Constants::Paths::ProfilesFolder, Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt)));
+			_pProfileDB = std::make_unique<ProfileDatabase>(GetProfilesFilename(std::format("{}.{}", Constants::Paths::ProfilesFileName, Constants::Paths::ProfilesFileExt)));
 		return *_pProfileDB.get();
 	}
 

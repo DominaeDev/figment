@@ -20,7 +20,7 @@ namespace fig::io
 		DatabaseError CreateProfile(const fig::user::UserProfile& profile) noexcept;
 		DatabaseError UpdateProfile(const fig::user::UserProfile& profile) noexcept;
 		DatabaseError UpdateRecovery(const fig::user::UserProfile& profile) noexcept;
-		DatabaseError DeleteProfile(const fig::uuid& id) noexcept;
+		DatabaseError DeleteProfile(const fig::uuid& id) noexcept; //! @todo
 		
 		bool IsConnected() const noexcept { return _pDB != nullptr; }
 

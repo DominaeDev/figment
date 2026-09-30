@@ -6,6 +6,7 @@
 #include "gui/Window.h"
 #include "gui/Events.h"
 #include "gui/GUITypes.h"
+#include "gui/GUITypes.h"
 #include "llm/LLMBackend.h"
 #include "llm/LLMStatus.h"
 #include "app/Constants.h"
@@ -32,8 +33,15 @@ namespace fig
 
 	void Global::State::Init()
 	{
+		// Get user app path
+		char* pPrefPath = SDL_GetPrefPath(Constants::Application::CompanyName.data(), Constants::Application::ApplicationName.data());
+		if (pPrefPath == NULL)
+			throw std::runtime_error("User path not found.");
+		userAppPath = std::filesystem::u8path(fig::string_view { pPrefPath });
+		SDL_free(pPrefPath);
+
 		// Load application settings
-		pAppSettings = std::make_unique<AppSettings>(Constants::Paths::AppSettings);
+		pAppSettings = std::make_unique<AppSettings>(userAppPath / fig::path { Constants::Paths::AppSettings });
 		pAppSettings->Load();
 
 		// Load cursors
@@ -56,7 +64,7 @@ namespace fig
 
 		// Create main frame
 		auto windowSize = GetSettings().GetPoint2D(AppSetting::Interface::WindowSize);
-		pMainWindow = std::make_shared<Window>(fig::strings::ApplicationTitle, 
+		pMainWindow = std::make_shared<Window>(Constants::Application::ApplicationName, 
 			std::max(windowSize.x, Constants::GUI::WindowMinWidth), 
 			std::max(windowSize.y, Constants::GUI::WindowMinHeight));
 		pMainWindow->CreateFrame<MainFrame>();
@@ -104,6 +112,7 @@ namespace fig
 		pAppSettings.reset();
 
 		pSystemCursors.reset();
+		userAppPath.~path();
 	}
 
 	void Global::State::CreateCursor(SDL_SystemCursor cursor)
@@ -172,6 +181,7 @@ namespace fig
 		assert(__appState);
 		return *(__appState->pPackageManager.get());
 	}
+
 	std::shared_ptr<LLMInstance> Global::GetLLMInstance()
 	{
 		assert(__appState);
@@ -244,6 +254,12 @@ namespace fig
 		SDL_Cursor* pCurrentCursor = SDL_GetCursor();
 		if (pCurrentCursor != pCursor)
 			SDL_SetCursor(pCursor);
+	}
+
+	const fig::path& Global::GetUserAppPath()
+	{
+		assert(__appState);
+		return __appState->userAppPath;
 	}
 
 	static void BackendSignalHandler(const LLMStatus& status)

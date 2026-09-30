@@ -53,6 +53,9 @@ BOOL WINAPI OnConsoleCtrl(DWORD controlType)
 
 #define APP_STATE(P) static_cast<AppState*>(P);
 
+using namespace fig;
+using namespace fig::gui;
+
 SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 {
 #ifdef DETECT_MEMORY_LEAKS
@@ -66,7 +69,7 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 	SetConsoleCtrlHandler(OnConsoleCtrl, TRUE);
 #endif
 
-	SDL_SetHint(SDL_HINT_APP_NAME, "Figment");
+	SDL_SetHint(SDL_HINT_APP_NAME, Constants::Application::ApplicationName.data());
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1"); // Generate mouse events for clicks that activate the window
 	SDL_SetHint(SDL_HINT_MAC_OPTION_AS_ALT, "both");
 	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "composition,candidates");
@@ -86,11 +89,11 @@ SDL_AppResult SDL_AppInit(void** ppAppState, int argc, char* argv[])
 		return SDL_APP_FAILURE;
 	}
 
-	fig::gui::RegisterUserEvents();
+	RegisterUserEvents();
 
 	setlocale(LC_CTYPE, "");
 
-	auto pAppState = fig::Global::CreateState();
+	auto pAppState = Global::CreateState();
 	if (!pAppState)
 		return SDL_APP_FAILURE;
 	*ppAppState = pAppState;
@@ -105,7 +108,7 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 		return SDL_APP_SUCCESS;
 	}
 
-	if (fig::Global::GetMainWindow().HandleEvent(*event))
+	if (Global::GetMainWindow().HandleEvent(*event))
 	{
 		return SDL_APP_CONTINUE;
 	}
@@ -115,7 +118,7 @@ SDL_AppResult SDL_AppEvent(void* state, SDL_Event* event)
 
 SDL_AppResult SDL_AppIterate(void* state)
 {
-	fig::AppState* pAppState = static_cast<fig::AppState*>(state);
+	AppState* pAppState = static_cast<AppState*>(state);
     static Uint64 lastTick = 0;
     Uint64 now = SDL_GetTicks();
     Uint64 delta = now - lastTick;
@@ -123,11 +126,11 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 	float fElapsed = static_cast<float>(delta) / 1000.0f;
 
-	fig::Global::GetLLMBackend().Update(fElapsed);
-	fig::Global::GetAudioManager().Update(fElapsed);
-	fig::gui::ColorTheme::Update(fElapsed);
+	Global::GetLLMBackend().Update(fElapsed);
+	Global::GetAudioManager().Update(fElapsed);
+	ColorTheme::Update(fElapsed);
 
-	auto& mainWnd = fig::Global::GetMainWindow();
+	auto& mainWnd = Global::GetMainWindow();
 	mainWnd.Update(fElapsed);
 	mainWnd.Render();
 
@@ -143,7 +146,7 @@ SDL_AppResult SDL_AppIterate(void* state)
 		if (now_ns - last > 999999999)
 		{
 			last = now_ns;
-			fig::Global::GetMainWindow().SetTitle(std::format("{} {} fps", fig::strings::ApplicationTitle, accu));
+			Global::GetMainWindow().SetTitle(std::format("{} {} fps", Constants::Application::ApplicationName, accu));
 			accu = 0;
 		}
 		past = now_ns;
@@ -155,8 +158,8 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 void SDL_AppQuit(void* state, SDL_AppResult result)
 {
-	fig::gui::Fonts::ReleaseFonts();
-	fig::Global::ReleaseState();
+	Fonts::ReleaseFonts();
+	Global::ReleaseState();
 
 	TTF_Quit();
 	SDL_Quit();
