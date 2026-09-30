@@ -200,6 +200,7 @@ namespace fig::io
 		};
 		std::map<fig::uuid, Installation> _activeInstalls;
 		std::unordered_set<fig::uuid> _finishedInstalls;
+		bool _bChanged {};
 		void __InstallPackage(fig::uuid packageId, std::stop_token stopToken);
 		void __CleanUpTemporaryFiles(fig::uuid packageId);
 

@@ -38,7 +38,7 @@ namespace fig::io
 
 	FileError PackageManager::LoadState()
 	{
-		auto path = fig::path(Constants::Paths::PackagesFolder) / fig::path("installed.xml");
+		auto path = fig::path(Constants::Paths::PackagesFolder) / fig::path("installed");
 		XmlReader xml(path);
 		if (xml.IsOk())
 		{
@@ -61,7 +61,10 @@ namespace fig::io
 
 	FileError PackageManager::SaveState()
 	{
-		auto path = fig::path(Constants::Paths::PackagesFolder) / fig::path("installed.xml");
+		if (not _bChanged)
+			return FileError::NoError;
+
+		auto path = fig::path(Constants::Paths::PackagesFolder) / fig::path("installed");
 
 		XmlWriter xml("InstalledPackages");
 		for (auto& kvp : _packageHashes)
@@ -161,8 +164,10 @@ namespace fig::io
 			}
 
 			_packageStates[packageId] = PackageState::NotDownloaded;
+			_packageHashes.erase(packageId);
 			_activeInstalls.erase(packageId);
 			_finishedInstalls.erase(packageId);
+			_bChanged = true;
 		}
 
 		__CleanUpTemporaryFiles(packageId);
@@ -478,6 +483,7 @@ namespace fig::io
 			// Store hash
 			std::scoped_lock lock(_mutex);
 			_packageHashes[packageId] = (fig::string)hash;
+			_bChanged = true;
 		}
 
 		if constexpr (Disabled) // Somewhat redundant after a successful SHA256, and getting a precise byte count for every download is a pain
