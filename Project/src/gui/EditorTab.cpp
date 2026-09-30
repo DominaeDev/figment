@@ -16,6 +16,7 @@ namespace fig::gui
 	fig::observer_ptr<StaticText> EditorTabBase::CreateLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Default, 14.0, false);
+		pLabel->EnableWordWrap(true);
 		pLabel->SetForegroundColor(Color::SidePanelForeground);
 		pSizer->AddSpacer(8);
 		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 4);
@@ -36,6 +37,7 @@ namespace fig::gui
 	fig::observer_ptr<StaticText> EditorTabBase::CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Italic, 14.0, false);
+		pLabel->EnableWordWrap(true);
 		pLabel->SetForegroundColor(Color::HintText);
 		pSizer->AddSpacer(2);
 		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 2);

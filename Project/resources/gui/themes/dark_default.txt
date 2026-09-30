@@ -116,6 +116,10 @@ Message.Brown.Border					#C08A5A
 Message.Navy.Background					#181C2E
 Message.Navy.Border						#5B63D6
 
+// Error messages
+SuccessText								#73FF7E
+ErrorText								#FF567A
+
 // Fixed colors (invariant)
 Debug									#C000C0
 Debug2									#00C0C0

@@ -80,8 +80,17 @@ namespace fig::strings
 			"Playing\u2026";
 	}
 
-	namespace Errors
+	namespace Error
 	{
-		// ...
+		inline constexpr const_string FileErrorMessage = 
+			"File error (0x{:02X})";
+		inline constexpr const_string FileAccessErrorMessage = 
+			"File access denied";
+		inline constexpr const_string DiskFullErrorMessage = 
+			"Disk is full";
+		inline constexpr const_string VerificationErrorMessage = 
+			"Verification failed";
+		inline constexpr const_string DownloadErrorMessage = 
+			"Download failed";
 	}
 }

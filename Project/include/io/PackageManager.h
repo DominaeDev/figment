@@ -22,16 +22,18 @@ namespace fig::data
 	enum class PackageType
 	{
 		Undefined = 0,
-		LLM_Model,
-		TTS_Model,
-		TTS_Server,
+		LLMModel,
+		TTSServer,
+		TTSVoiceModel,
+		TTSDesignModel,
 	};
 
-	constexpr auto PackageTypeMapping = std::array<std::pair<PackageType, std::string_view>, 4uz> {
-		std::pair { PackageType::Undefined,		"Undefined" },
-		std::pair { PackageType::LLM_Model,		"LLM_Model" },
-		std::pair { PackageType::TTS_Model,		"TTS_Merver" },
-		std::pair { PackageType::TTS_Server,	"TTS_Server" },
+	constexpr auto PackageTypeMapping = std::array<std::pair<PackageType, std::string_view>, 5uz> {
+		std::pair { PackageType::Undefined,			"undefined" },
+		std::pair { PackageType::LLMModel,			"llm_model" },
+		std::pair { PackageType::TTSServer,			"tts_server" },
+		std::pair { PackageType::TTSVoiceModel,		"tts_model" },
+		std::pair { PackageType::TTSDesignModel,	"tts_design_model" },
 	};
 
 	struct PackageInfo
@@ -46,6 +48,7 @@ namespace fig::data
 		fig::string downloadUrl;
 		fig::string infoUrl;
 		fig::string sha256;
+		fig::string versionString;
 		fig::path targetPath;
 
 		struct FileEntry
@@ -79,7 +82,7 @@ namespace fig::data
 			return Fields(
 				Attribute("id", &PackageInfo::id)
 					.MustExist(),
-				Element("Type", &PackageInfo::type,
+				Attribute("type", &PackageInfo::type,
 					[](auto&& value) { return enum_serialize(value, PackageTypeMapping); },
 					[](auto&& value) { return enum_deserialize(value, PackageTypeMapping); })
 					.MustExist(),
@@ -96,6 +99,8 @@ namespace fig::data
 					.MustExist(),
 				Element("Sha256", &PackageInfo::sha256),
 				Element("Version", &PackageInfo::version),
+				Element("VersionString", &PackageInfo::versionString),
+				Element("Target", &PackageInfo::targetPath),
 				Element("File", &PackageInfo::entries)
 					.Collection("Archive")
 			);
@@ -134,6 +139,7 @@ namespace fig::io
 		InstallationPhase phase {};
 		uint64_t bytesReceived {};
 		uint64_t bytesTotal {};
+		fig::string errorMessage {};
 
 		float GetProgress() const noexcept
 		{
@@ -157,6 +163,7 @@ namespace fig::io
 		const std::vector<fig::data::PackageInfo>& GetPackages() const noexcept;
 
 		bool InstallPackage(const fig::uuid& packageId);
+		bool UninstallPackage(const fig::uuid& packageId);
 		bool CancelInstall(fig::uuid packageId);
 		void CancelAll();
 
@@ -178,23 +185,23 @@ namespace fig::io
 			fig::data::PackageInfo packageInfo;
 			std::unique_ptr<Downloader> downloader;
 			std::unique_ptr<std::jthread> thread;
+			InstallationPhase phase;
 
 			enum class Error
 			{
 				NoError = 0,
 				Cancelled,
-				DownloadError,
-				FileError,
+				DownloadFailed,
 				VerificationFailed,
-			} error;
+			};
 
-			DownloadError downloadError {};
-			FileError fileError {};
-			InstallationPhase phase;
+			using Result = std::variant<Error, FileError>;
+			Result result {};
 		};
 		std::map<fig::uuid, Installation> _activeInstalls;
 		std::unordered_set<fig::uuid> _finishedInstalls;
 		void __InstallPackage(fig::uuid packageId, std::stop_token stopToken);
+		void __CleanUpTemporaryFiles(fig::uuid packageId);
 
 		mutable std::mutex _mutex; // Guards all state
 

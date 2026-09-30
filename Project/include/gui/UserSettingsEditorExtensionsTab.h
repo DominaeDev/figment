@@ -14,7 +14,6 @@ namespace fig::gui
 		SaveResult OnSave() noexcept override;
 
 	protected:
-		void OnUpdate(float fElapsed) override;
 		void OnAfterLayout() override;
 
 	private:

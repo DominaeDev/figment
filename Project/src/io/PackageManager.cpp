@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "io/PackageManager.h"
 #include "io/XmlReader.h"
-#include "io/AsyncDownloader.h"
+#include "io/Downloader.h"
 #include "io/ZipArchive.h"
 #include "io/Xml.h"
 #include "util/Hash.h"
@@ -27,7 +27,7 @@ namespace fig::io
 		LoadState();
 
 		// Load package data
-		if (auto error = LoadFromXml(fig::path { Constants::Paths::PackagesFolder } / fig::path { Constants::Paths::PackagesFileName }); error != FileError::NoError)
+		if (auto error = LoadFromXml(fig::path { Constants::Paths::PackagesFileName }); error != FileError::NoError)
 		{
 			_packages.clear();
 			return error;
@@ -92,6 +92,12 @@ namespace fig::io
 		if (packageState == PackageState::Installed)
 			return false; // Already installed
 	
+		if (_finishedInstalls.contains(packageId))
+		{
+			_activeInstalls.erase(packageId);
+			_finishedInstalls.erase(packageId);
+		}
+
 		if (_activeInstalls.contains(packageId))
 			return false; // Already installing
 
@@ -122,6 +128,47 @@ namespace fig::io
 		return true;
 	}
 
+	bool PackageManager::UninstallPackage(const fig::uuid& packageId)
+	{
+		{
+			std::scoped_lock _ { _mutex };
+
+			PackageState packageState {};
+			if (auto itState = _packageStates.find(packageId); itState != _packageStates.cend())
+				packageState = itState->second;
+
+			if (packageState != PackageState::Installed)
+				return false; // Already installed
+
+			auto itPackage = std::ranges::find(_packages, packageId, [](auto&& p) { return p.id; });
+			if (itPackage == std::ranges::cend(_packages))
+				return false; // Unknown package
+			auto& package = *itPackage;
+
+			// Delete files
+			auto packagesDirectory = fig::path { Constants::Paths::PackagesFolder };
+			
+			std::vector<fig::path> paths;
+			paths.push_back(packagesDirectory / package.targetPath );
+			for (auto& entry : package.entries)
+				paths.push_back(packagesDirectory / entry.targetPath );
+
+			for (auto& path : paths)
+			{
+				std::error_code err;
+				if (std::filesystem::is_regular_file(path))
+					std::filesystem::remove(path, err);
+			}
+
+			_packageStates[packageId] = PackageState::NotDownloaded;
+			_activeInstalls.erase(packageId);
+			_finishedInstalls.erase(packageId);
+		}
+
+		__CleanUpTemporaryFiles(packageId);
+		return true;
+	}
+
 	fig::optional_cref<fig::data::PackageInfo> PackageManager::GetPackage(const fig::uuid& packageId) const noexcept
 	{
 		if (auto itFind = std::ranges::find(_packages, packageId, [](auto&& p) { return p.id; }); itFind != std::ranges::cend(_packages))
@@ -146,26 +193,56 @@ namespace fig::io
 	{
 		std::scoped_lock _ { _mutex };
 
-		// Is downloading?
 		if (auto itFind = _activeInstalls.find(packageId); itFind != _activeInstalls.cend())
 		{
 			auto& install = itFind->second;
-			switch (install.error)
+			if (auto err = std::get_if<Installation::Error>(&install.result))
 			{
-			case Installation::Error::NoError:
-				return InstallationState {
-					.phase = install.phase,
-					.bytesReceived = install.downloader->GetBytesReceived(),
-					.bytesTotal = install.downloader->GetBytesTotal(),
-				};
-			case Installation::Error::Cancelled:
-				return InstallationState {
-					.phase = InstallationPhase::None,
-				};
-			default:
-				return InstallationState {
-					.phase = InstallationPhase::Failed,
-				};
+				switch (*err)
+				{
+				case Installation::Error::NoError:
+					return InstallationState {
+						.phase = install.phase,
+						.bytesReceived = install.downloader->GetBytesReceived(),
+						.bytesTotal = install.downloader->GetBytesTotal(),
+					};
+				case Installation::Error::DownloadFailed:
+					return InstallationState {
+						.phase = InstallationPhase::Failed,
+						.errorMessage = fig::string { fig::strings::Error::DownloadErrorMessage },
+					};
+				case Installation::Error::VerificationFailed:
+					return InstallationState {
+						.phase = InstallationPhase::Failed,
+						.errorMessage = fig::string { fig::strings::Error::VerificationErrorMessage },
+					};
+				default:
+				case Installation::Error::Cancelled:
+					return InstallationState {
+						.phase = InstallationPhase::None,
+					};
+				}
+			}
+			else if (auto err = std::get_if<FileError>(&install.result))
+			{
+				switch (*err)
+				{
+				case FileError::AccessDenied:
+					return InstallationState {
+						.phase = InstallationPhase::Failed,
+						.errorMessage = fig::string { fig::strings::Error::FileAccessErrorMessage },
+					};
+				case FileError::DiskFull:
+					return InstallationState {
+						.phase = InstallationPhase::Failed,
+						.errorMessage = fig::string { fig::strings::Error::DiskFullErrorMessage },
+					};
+				default:
+					return InstallationState {
+						.phase = InstallationPhase::Failed,
+						.errorMessage = std::format(fig::strings::Error::FileErrorMessage, (uint32_t)(*err)),
+					};
+				}
 			}
 		}
 
@@ -285,17 +362,19 @@ namespace fig::io
 			pInstall = &_activeInstalls[packageId];
 		}
 		auto& package = pInstall->packageInfo;
-		auto& downloader = *pInstall->downloader.get();
 
-		auto fnFinish = [&](Installation::Error error) {
+		auto fnFinish = [&](Installation::Result result) {
 			std::scoped_lock lock(_mutex);
-			pInstall->error = error;
+			pInstall->result = result;
 			_finishedInstalls.insert(packageId);
 
-			if (error == Installation::Error::NoError)
-				_packageStates[packageId] = PackageState::Installed;
-			else if (error == Installation::Error::VerificationFailed)
-				_packageStates[packageId] = PackageState::VerificationFailed;
+			if (auto err = std::get_if<Installation::Error>(&result))
+			{
+				if (*err == Installation::Error::NoError)
+					_packageStates[packageId] = PackageState::Installed;
+				else if (*err == Installation::Error::VerificationFailed)
+					_packageStates[packageId] = PackageState::VerificationFailed;
+			}
 		};
 
 		auto fnSetState = [&](InstallationPhase phase) {
@@ -314,8 +393,9 @@ namespace fig::io
 		};
 
 		bool bShouldDownload = true;
-		fig::path tempFilename = fig::path { Constants::Paths::TemporaryFolder } / fig::path { (fig::string)package.id };
-		fig::path partialFilename = fig::path { Constants::Paths::TemporaryFolder } / fig::path { std::format("{}.part", (fig::string)package.id) };
+		auto tempDirectory = fig::path { Constants::Paths::TemporaryFolder };
+		fig::path tempFilename = tempDirectory / fig::path { (fig::string)package.id };
+		fig::path partialFilename = tempDirectory / fig::path { std::format("{}.part", (fig::string)package.id) };
 
 		// Check if download is already complete
 		if (std::filesystem::exists(tempFilename) and std::filesystem::file_size(tempFilename) == package.fileSize)
@@ -326,10 +406,31 @@ namespace fig::io
 		{
 			fnSetState(InstallationPhase::Downloading);
 
-			pInstall->downloadError = downloader.Download(package.downloadUrl, tempFilename, stopToken);
-			if (pInstall->downloadError != DownloadError::NoError)
+			auto downloadError = pInstall->downloader->Download(package.downloadUrl, tempFilename, stopToken);
+			switch (downloadError)
 			{
-				fnFinish(Installation::Error::DownloadError);
+			case DownloadError::WriteAccessError:
+				fnFinish(FileError::AccessDenied);
+				return;
+			case DownloadError::DiskFullError:
+				fnFinish(FileError::DiskFull);
+				return;
+			case DownloadError::FileError:
+				fnFinish(FileError::WriteError);
+				return;
+			case DownloadError::NoError:
+			case DownloadError::Cancelled:
+				break;
+			}
+
+			if (downloadError == DownloadError::FileError)
+			{
+				fnFinish(FileError::WriteError);
+				return;
+			}
+			else if (downloadError != DownloadError::NoError and downloadError != DownloadError::Cancelled)
+			{
+				fnFinish(Installation::Error::DownloadFailed);
 				return;
 			}
 		}
@@ -342,15 +443,58 @@ namespace fig::io
 
 		if (not std::filesystem::exists(tempFilename))
 		{
-			pInstall->fileError = FileError::NotFound;
-			fnFinish(Installation::Error::FileError);
+			fnFinish(FileError::NotFound);
 			return;
+		}
+
+		fnSetState(InstallationPhase::Verifying);
+
+		// Verify hash
+		fig::hash hash;
+		if (not package.sha256.empty())
+			hash = GetHash(tempFilename, stopToken);
+
+		if (stopToken.stop_requested())
+		{
+			fnFinish(Installation::Error::Cancelled);
+			return;
+		}
+
+		bool bVerified = (fig::string)hash == package.sha256;
+		if constexpr (Debugging)
+		{
+			bVerified |= package.sha256.empty();
+		}
+
+		if (not bVerified)
+		{
+			__CleanUpTemporaryFiles(packageId);
+			fnFinish(Installation::Error::VerificationFailed);
+			return;
+		}
+
+		if (not hash.empty())
+		{
+			// Store hash
+			std::scoped_lock lock(_mutex);
+			_packageHashes[packageId] = (fig::string)hash;
+		}
+
+		if constexpr (Disabled) // Somewhat redundant after a successful SHA256, and getting a precise byte count for every download is a pain
+		{
+			// Verify file size
+			if (std::filesystem::file_size(tempFilename) != package.fileSize)
+			{
+				fnFinish(Installation::Error::VerificationFailed);
+				return;
+			}
 		}
 
 		// Decompress archive
 		if (not package.entries.empty())
 		{
 			fnSetState(InstallationPhase::Decompressing);
+			bool bValidContents = true;
 
 			ZipArchive zip;
 			if (zip.Open(tempFilename) == ZipError::NoError)
@@ -363,90 +507,43 @@ namespace fig::io
 						return;
 					}
 
-					// Verify file size
-					if (packageEntry.fileSize != 0ULL)
+					if constexpr (Disabled) // Somewhat redundant after a successful SHA256, and getting a precise byte count for every download is a pain
 					{
-						if (auto try_entry = zip.GetEntry(packageEntry.name))
+						// Verify file size
+						if (packageEntry.fileSize != 0ULL)
 						{
-							if ((*try_entry).uncompressedSize != packageEntry.fileSize)
+							if (auto try_entry = zip.GetEntry(packageEntry.name))
 							{
-								//! @todo: Delete file
-								fnFinish(Installation::Error::VerificationFailed);
-								return;
+								if ((*try_entry).uncompressedSize != packageEntry.fileSize)
+								{
+									bValidContents = false;
+									break;
+								}
 							}
-						}
-						else
-						{
-							fnFinish(Installation::Error::VerificationFailed);
-							return;
+							else
+							{
+								bValidContents = false;
+								break;
+							}
 						}
 					}
 
-					auto entryTempFilename = fig::path { Constants::Paths::TemporaryFolder } / fig::path { (fig::string)packageEntry.id };
+					auto entryTempFilename = tempDirectory / fig::path { (fig::string)packageEntry.id };
 					if (auto error = zip.Extract(packageEntry.name, entryTempFilename); error != ZipError::NoError)
 					{
-						//! @todo: Delete file
-						fnFinish(Installation::Error::VerificationFailed);
-						return;
+						bValidContents = false;
+						break;
 					}
 				}
 			}
 			else
 			{
-				//! @todo: Delete file
-				fnFinish(Installation::Error::VerificationFailed);
-				return;
-			}
-		}
-
-		fnSetState(InstallationPhase::Verifying);
-		bool bVerified = false;
-
-		// Verify file size
-		if (std::filesystem::file_size(tempFilename) != package.fileSize)
-		{
-			fnFinish(Installation::Error::VerificationFailed);
-			return;
-		}
-
-		// Verify hash(es)
-		std::vector<std::pair<fig::path, fig::string>> expectedHashes;
-		expectedHashes.push_back(std::make_pair(tempFilename, package.sha256));
-		for (auto& entry : package.entries)
-		{
-			auto entryTempFilename = fig::path { Constants::Paths::TemporaryFolder } / fig::path { (fig::string)entry.id };
-			expectedHashes.push_back(std::make_pair(entryTempFilename, entry.sha256));
-		}
-
-		for (auto& [filename, expected] : expectedHashes)
-		{
-			fig::hash hash;
-			if (not expected.empty())
-				hash = GetHash(filename, stopToken);
-
-			if (stopToken.stop_requested())
-			{
-				fnFinish(Installation::Error::Cancelled);
-				return;
+				bValidContents = false;
 			}
 
-			bVerified = (fig::string)hash == expected;
-			if constexpr (Debugging)
+			if (not bValidContents)
 			{
-				// Allow skipping hash check in debug
-				bVerified |= expected.empty();
-			}
-
-			if (bVerified and not hash.empty())
-			{
-				// Store hash
-				std::scoped_lock lock(_mutex);
-				_packageHashes[packageId] = (fig::string)hash;
-			}
-
-			if (not bVerified)
-			{
-				//! @todo: Delete file
+				__CleanUpTemporaryFiles(packageId);
 				fnFinish(Installation::Error::VerificationFailed);
 				return;
 			}
@@ -460,7 +557,7 @@ namespace fig::io
 			auto targetPath = fig::path(Constants::Paths::PackagesFolder) / package.targetPath;
 			if (not fnInstall(tempFilename, targetPath))
 			{
-				fnFinish(Installation::Error::FileError);
+				fnFinish(FileError::WriteError);
 				return;
 			}
 		}
@@ -469,17 +566,42 @@ namespace fig::io
 			for (auto& entry : package.entries)
 			{
 				auto targetPath = fig::path(Constants::Paths::PackagesFolder) / entry.targetPath;
-				auto entryTempFilename = fig::path { Constants::Paths::TemporaryFolder } / fig::path { (fig::string)entry.id };
+				auto entryTempFilename = tempDirectory / fig::path { (fig::string)entry.id };
 				if (not fnInstall(entryTempFilename, targetPath))
 				{
-					fnFinish(Installation::Error::FileError);
+					fnFinish(FileError::WriteError);
 					return;
 				}
 			}
 		}
 
 		fnSetState(InstallationPhase::Completed);
+		__CleanUpTemporaryFiles(packageId);
 		fnFinish(Installation::Error::NoError);
+	}
+
+	void PackageManager::__CleanUpTemporaryFiles(fig::uuid packageId)
+	{
+		std::scoped_lock lock(_mutex);
+
+		auto itPackage = std::ranges::find(_packages, packageId, [](auto&& p) { return p.id; });
+		if (itPackage == std::ranges::cend(_packages))
+			return; // Unknown package
+		auto& package = *itPackage;
+
+		auto tempDirectory = fig::path { Constants::Paths::TemporaryFolder };
+		std::vector<fig::path> paths;
+		paths.push_back(tempDirectory / fig::path { (fig::string)package.id });
+		paths.push_back(tempDirectory / fig::path { std::format("{}.part", (fig::string)package.id) });
+		for (auto& entry : package.entries)
+			paths.push_back(tempDirectory / fig::path { (fig::string)entry.id });
+
+		// Clean up
+		for (auto& path : paths)
+		{
+			std::error_code err;
+			std::filesystem::remove(path, err);
+		}
 	}
 
 	void PackageManager::CancelAll()

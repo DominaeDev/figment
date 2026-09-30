@@ -1840,9 +1840,6 @@
     <ClInclude Include="include\gui\ColorRef.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ColorNames.h">
-      <Filter>Source Files\Frontend\GUI\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\ColorTheme.h">
       <Filter>Source Files\Frontend\GUI\Themes</Filter>
     </ClInclude>
@@ -1887,6 +1884,9 @@
     </ClInclude>
     <ClInclude Include="include\io\ZipArchive.h">
       <Filter>Source Files\Frontend\IO\Zip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ColorNames.h">
+      <Filter>Source Files\Frontend\GUI\Themes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,7 @@
 namespace fig::gui
 {
 	class HorizontalBar;
+	class ButtonWithLabelAndIcon;
 
 	class PackageWidget : public Control
 	{
@@ -25,14 +26,17 @@ namespace fig::gui
 
 		uint32_t _downloadId {};
 
-		fig::observer_ptr<ButtonWithIcon> _pInstallButton;
+		fig::observer_ptr<ButtonWithLabelAndIcon> _pInstallButton;
 		fig::observer_ptr<ButtonWithIcon> _pInfoButton;
+		fig::observer_ptr<StaticText> _pName;
 		fig::observer_ptr<StaticText> _pDescription;
-		fig::observer_ptr<StaticText> _pInstalledText;
+		fig::observer_ptr<StaticText> _pStatusText;
 		fig::observer_ptr<StaticText> _pFileSizeText;
 
 		fig::observer_ptr<HorizontalBar> _pProgressBar;
 		fig::observer_ptr<HorizontalBar> _pProgressFill;
 		fig::observer_ptr<StaticText> _pProgressText;
+
+		float _fRefreshCounter {};
 	};
 }

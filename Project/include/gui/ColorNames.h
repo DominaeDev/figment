@@ -90,6 +90,9 @@ namespace fig::gui
 		MessageBorderNavy,
 		MessageBackgroundNavy,
 
+		SuccessText,
+		ErrorText,
+
 		ButtonDefaultForeground,
 		ButtonDefaultBackground,
 		ButtonDefaultBorder,
@@ -202,6 +205,8 @@ namespace fig::gui
 		std::pair { Color::MessageBackgroundBrown,				"Message.Brown.Background" },
 		std::pair { Color::MessageBorderNavy,					"Message.Navy.Border" },
 		std::pair { Color::MessageBackgroundNavy,				"Message.Navy.Background" },
+		std::pair { Color::SuccessText,							"SuccessText" },
+		std::pair { Color::ErrorText,							"ErrorText" },
 		std::pair { Color::ButtonDefaultForeground,				"Button.Default.Foreground" },
 		std::pair { Color::ButtonDefaultBackground,				"Button.Default.Background" },
 		std::pair { Color::ButtonDefaultBorder,					"Button.Default.Border" },

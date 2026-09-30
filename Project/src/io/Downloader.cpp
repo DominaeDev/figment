@@ -109,7 +109,19 @@ namespace fig::io
 		std::ios::openmode mode = std::ios::binary | (resuming ? std::ios::app : std::ios::trunc);
 		std::ofstream file(partPath, mode);
 		if (not file)
+		{
+			switch (errno)
+			{
+			case EACCES:
+			case EROFS:
+				return DownloadError::WriteAccessError;
+			case ENOSPC:
+				return DownloadError::DiskFullError;
+			default:
+				return DownloadError::FileError;
+			}
 			return DownloadError::FileError;
+		}
 
 		_bytesReceived = existingSize;
 
@@ -126,7 +138,19 @@ namespace fig::io
 
 			file.write(buffer.data(), bytesRead);
 			if (not file)
+			{
+				switch (errno)
+				{
+				case EACCES:
+				case EROFS:
+					return DownloadError::WriteAccessError;
+				case ENOSPC:
+					return DownloadError::DiskFullError;
+				default:
+					return DownloadError::FileError;
+				}
 				return DownloadError::FileError;
+			}
 
 			_bytesReceived += bytesRead;
 		}

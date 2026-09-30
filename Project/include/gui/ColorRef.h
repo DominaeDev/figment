@@ -39,7 +39,6 @@ namespace fig
 		};
 
 		const fig::color& operator*() const noexcept { return *_ptr; }
-//		const fig::color* const operator->() const noexcept { return _ptr; }
 		const fig::color* const get() const noexcept { return _ptr; }
 
 		constexpr bool IsDefined() const noexcept { return _ptr != &null_value; }
@@ -162,16 +161,15 @@ namespace fig
 			_a = static_cast<uint8_t>(std::clamp(alpha, T(0), T(1)) * T(255));
 		}
 
-		inline constexpr operator fig::color() const noexcept
-		{
-			return fig::color(_ptr->r, _ptr->g, _ptr->b, _a);
-		}
-
 		void ResetAlpha(uint8_t alpha) noexcept
 		{
 			_a = _ptr->a;
 		}
 
+		inline constexpr operator fig::color() const noexcept
+		{
+			return fig::color(_ptr->r, _ptr->g, _ptr->b, _a);
+		}
 
 		inline constexpr operator fig::colorf() const noexcept
 		{
@@ -190,9 +188,6 @@ namespace fig
 
 	private:
 		uint8_t _a;
-
-	public:
-		static const color_ref nullref;
 	};
 }
 

@@ -25,9 +25,11 @@ namespace fig::gui
 		SetSize(200, 36);
 	}
 
-	void ButtonWithLabelAndIcon::SetLabel(fig::string_view label) noexcept
+	void ButtonWithLabelAndIcon::SetLabel(fig::string_view label, Resource icon) noexcept
 	{
 		_pLabel->SetTextAndResize(label);
+		if (icon != Resource::NONE)
+			SetIcon(icon);
 		OnSize();
 	}
 

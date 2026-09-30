@@ -10,6 +10,7 @@ namespace fig::io
 		UnknownError,
 		NotFound,
 		AccessDenied,
+		DiskFull,
 		DirectoryDoesNotExist,
 		UnrecognizedFormat,
 		ReadError,

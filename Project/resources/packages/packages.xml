@@ -1,10 +1,10 @@
 <Packages format="0">
 	<!-- Audio.cpp CUDA V0.6 -->
-	<Package id="eda3584f-a78f-4b7c-83dd-8f28fab23ea1">
-		<Name>Text-to-speech backend &#x2013; audio.cpp (CUDA)</Name>
-		<Description>Enables voice generation.\nNvidia driver 580 or newer is required.</Description>
-		<Type>TTS_Server</Type>
+	<Package id="eda3584f-a78f-4b7c-83dd-8f28fab23ea1" type="tts_server">
+		<Name>Text-to-speech &#x2013; audio.cpp</Name>
+		<Description>Nvidia driver 580 or newer is required.</Description>
 		<Version>0.6</Version>
+		<VersionString>Version 0.6 (Nvidia CUDA)</VersionString>
 		<Platform>Windows</Platform>
 		<DownloadUrl>https://github.com/0xShug0/audio.cpp/releases/download/release-0.6/audiocpp-windows-cuda-balance-bb15edd7.zip</DownloadUrl>
 		<InfoUrl>https://github.com/0xShug0/audio.cpp/</InfoUrl>
@@ -14,42 +14,32 @@
 			<File id="17d36533-4fb2-4d5a-82d6-b6a68494a774">
 				<Name>audiocpp_server.exe</Name>
 				<Target>tts/bin/0.6/cuda/audiocpp_server.exe</Target>
-				<Size>152058368</Size>
-				<Sha256></Sha256>
 			</File>
 			<File id="cd90e544-0d56-4a94-99a2-ba5e7ed6aa89">
 				<Name>MSVCP140.dll</Name>
 				<Target>tts/bin/0.6/cuda/MSVCP140.dll</Target>
-				<Size>557728</Size>
-				<Sha256></Sha256>
 			</File>
 			<File id="d52c123d-16ac-4689-9465-db1a2326c434">
 				<Name>VCOMP140.DLL</Name>
 				<Target>tts/bin/0.6/cuda/VCOMP140.DLL</Target>
-				<Size>193152</Size>
-				<Sha256></Sha256>
 			</File>
 			<File id="9ad6ace3-3403-4ff0-af9a-be049b1aacff">
 				<Name>VCRUNTIME140.dll</Name>
 				<Target>tts/bin/0.6/cuda/VCRUNTIME140.dll</Target>
-				<Size>124544</Size>
-				<Sha256></Sha256>
 			</File>
 			<File id="91982d5d-0d56-4cf2-9d98-5f11606980ba">
 				<Name>VCRUNTIME140_1.dll</Name>
 				<Target>tts/bin/0.6/cuda/VCRUNTIME140_1.dll</Target>
-				<Size>49792</Size>
-				<Sha256></Sha256>
 			</File>
 		</Archive>
 	</Package>
 
 	<!-- Audio.cpp CPU V0.6 -->
-	<Package id="d374bf34-fbd1-4526-99ec-54aeb0698f0f">
-		<Name>Text-to-speech backend &#x2013; audio.cpp (CPU)</Name>
-		<Description>Enables voice generation.\nRuns natively on the CPU (slower).</Description>
-		<Type>TTS_Server</Type>
+	<Package id="d374bf34-fbd1-4526-99ec-54aeb0698f0f" type="tts_server">
+		<Name>Text-to-speech &#x2013; audio.cpp</Name>
+		<Description>Same as above, but runs on the CPU (slower).</Description>
 		<Version>0.6</Version>
+		<VersionString>Version 0.6 (CPU)</VersionString>
 		<Platform>Windows</Platform>
 		<DownloadUrl>https://github.com/0xShug0/audio.cpp/releases/download/release-0.6/audiocpp-windows-cpu-portable-bb15edd7.zip</DownloadUrl>
 		<InfoUrl>https://github.com/0xShug0/audio.cpp/</InfoUrl>
@@ -59,144 +49,135 @@
 			<File id="24ad9c45-e633-4f29-8905-43d34ad47422">
 				<Name>audiocpp_server.exe</Name>
 				<Target>tts/bin/0.6/cpu/audiocpp_server.exe</Target>
-				<Size>20528128</Size>
-				<Sha256></Sha256>
 			</File>
 			<File id="5796b158-eda2-41f8-af13-14cfbd448b96">
 				<Name>MSVCP140.dll</Name>
 				<Target>tts/bin/0.6/cpu/MSVCP140.dll</Target>
-				<Size>557728</Size>
-				<Sha256></Sha256>
 			</File>
 			<File id="7007b9aa-e301-46a5-9aa9-5b9f77366f8b">
 				<Name>VCOMP140.DLL</Name>
 				<Target>tts/bin/0.6/cpu/VCOMP140.DLL</Target>
-				<Size>193152</Size>
-				<Sha256></Sha256>
 			</File>
 			<File id="869f2714-ed38-431f-a610-353e76e4048b">
 				<Name>VCRUNTIME140.dll</Name>
 				<Target>tts/bin/0.6/cpu/VCRUNTIME140.dll</Target>
-				<Size>124544</Size>
-				<Sha256></Sha256>
 			</File>
 			<File id="6fde3761-fc07-4473-b8c1-06a9d9c6a970">
 				<Name>VCRUNTIME140_1.dll</Name>
 				<Target>tts/bin/0.6/cpu/VCRUNTIME140_1.dll</Target>
-				<Size>49792</Size>
-				<Sha256></Sha256>
 			</File>
 		</Archive>
 	</Package>
 
 	<!-- TTS Models -->
-	<Package id="16f4b177-bd78-425f-bd39-628dfbac5fb4">
+	<Package id="16f4b177-bd78-425f-bd39-628dfbac5fb4" type="tts_model">
 		<Name>Pocket TTS (English)</Name>
-		<Type>TTS_Model</Type>
+		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
+		<VersionString>Q8</VersionString>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/PocketTTS-GGUF/english/pocket-tts-english-q8_0.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/kyutai-labs/pocket-tts</InfoUrl>
-		<Size>128000000</Size>
+		<Size>127856704</Size>
 		<Sha256>0315406421d515d9ffbde49ed998832ff2962562ef8abde440c85fa0a27d8b2a</Sha256>
 		<Target>tts/models/pocket-tts-english-q8_0.gguf</Target>
 	</Package>
 
-	<Package id="17670fa5-a0e3-41ba-a9f1-6ed7b915a309">
+	<Package id="17670fa5-a0e3-41ba-a9f1-6ed7b915a309" type="tts_model">
 		<Name>Pocket TTS (English)</Name>
-		<Type>TTS_Model</Type>
+		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
+		<VersionString>BF16</VersionString>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/PocketTTS-GGUF/english/pocket-tts-english-bf16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/kyutai-labs/pocket-tts</InfoUrl>
 		<Size>219000000</Size>
 		<Sha256>267e774a671138c4ebbc1d6d9d73af92f4a8e83a64b45b84f3457ac700ad0cc9</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>pocket-tts-english-bf16.gguf</Target>
-		<Target>tts/models/pocket-tts-english-q8_0.gguf</Target>
+		<Target>tts/models/pocket-tts-english-bf16.gguf</Target>
 	</Package>
 
-	<Package id="4aaf6874-a16a-4331-9581-7559e9ba3823">
+	<Package id="4aaf6874-a16a-4331-9581-7559e9ba3823" type="tts_model">
 		<Name>Chatterbox 0.5B</Name>
-		<Type>TTS_Model</Type>
+		<Description>Expressive text-to-speech model with broad language support.</Description>
+		<VersionString>Q8</VersionString>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Chatterbox-GGUF/chatterbox-q8_0.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/resemble-ai/chatterbox</InfoUrl>
 		<Size>2088393668</Size>
 		<Sha256>d586dd1aa59613cab8046176fb7ca5ba191c02a9b10ffa5b0d892ed22b470656</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>chatterbox-q8_0.gguf</Target>
+		<Target>tts/models/chatterbox-q8_0.gguf</Target>
 	</Package>
 
-	<Package id="11389a9c-aa39-467a-9c56-6f835be937a9">
+	<Package id="11389a9c-aa39-467a-9c56-6f835be937a9" type="tts_model">
 		<Name>Chatterbox 0.5B</Name>
-		<Type>TTS_Model</Type>
+		<Description>Expressive text-to-speech model with broad language support.</Description>
+		<VersionString>F16</VersionString>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Chatterbox-GGUF/chatterbox-f16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/resemble-ai/chatterbox</InfoUrl>
 		<Size>3740000000</Size>
 		<Sha256>b872f908605f5ccbdd8eaa9e9c92a521c602b70cbec635d46e86eb70a3f8e713</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>chatterbox-f16.gguf</Target>
+		<Target>tts/models/chatterbox-f16.gguf</Target>
 	</Package>
 
-	<Package id="ca15babf-eddd-4d1f-9984-64e4067562af">
-		<Name>>Qwen 3 TTS 0.6B</Name>
-		<Type>TTS_Model</Type>
+	<Package id="ca15babf-eddd-4d1f-9984-64e4067562af" type="tts_model">
+		<Name>Qwen 3 TTS 0.6B</Name>
+		<Description>High quality text-to-speech model.</Description>
+		<VersionString>Q8</VersionString>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-q8_0.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
 		<Size>1991211136</Size>
 		<Sha256>771420bd20ff5f35407b4fa9cf9c5461e153800d3d772ef51c9febc0a520855d</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>qwen3-tts-12hz-0.6b-base-q8_0.gguf</Target>
+		<Target>tts/models/qwen3-tts-12hz-0.6b-base-q8_0.gguf</Target>
 	</Package>
 
-	<Package id="f7af9d41-d0ed-4fda-8a29-c04acfc68a92">
+	<Package id="f7af9d41-d0ed-4fda-8a29-c04acfc68a92" type="tts_model">
 		<Name>Qwen 3 TTS 0.6B</Name>
-		<Type>TTS_Model</Type>
+		<Description>High quality text-to-speech model.</Description>
+		<VersionString>BF16</VersionString>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-bf16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
 		<Size>2516154496</Size>
 		<Sha256>97d418048b07b5b267628da955b27db4c57b353ded8089de01a469b474255b8d</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>qwen3-tts-12hz-0.6b-base-bf16.gguf</Target>
+		<Target>tts/models/qwen3-tts-12hz-0.6b-base-bf16.gguf</Target>
 	</Package>
 
-	<Package id="78f38cf4-eff3-42db-b751-a216ebc29c3e">
+	<Package id="78f38cf4-eff3-42db-b751-a216ebc29c3e" type="tts_model">
 		<Name>Qwen 3 TTS 1.7B</Name>
-		<Type>TTS_Model</Type>
+		<VersionString>Q8</VersionString>
+		<Description>High quality text-to-speech model.</Description>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf?download=true</DownloadUrl>
-		<Size>2695000000</Size>
+		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
+		<Size>2695175104</Size>
 		<Sha256>f5cf4c37b969335e0ffb657119e52025e26192553119590d59fa17b8d36e8b29</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf</Target>
+		<Target>tts/models/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf</Target>
 	</Package>
 
-	<Package id="348b5ae3-a11b-4989-8da6-76c7113f00d1">
+	<Package id="348b5ae3-a11b-4989-8da6-76c7113f00d1" type="tts_model">
 		<Name>Qwen 3 TTS 1.7B</Name>
-		<Type>TTS_Model</Type>
+		<VersionString>BF16</VersionString>
+		<Description>High quality text-to-speech model.</Description>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-bf16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
 		<Size>4200000000</Size>
 		<Sha256>f5cf4c37b969335e0ffb657119e52025e26192553119590d59fa17b8d36e8b29</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>qwen3-tts-12hz-1.7b-base-bf16.gguf</Target>
+		<Target>tts/models/qwen3-tts-12hz-1.7b-base-bf16.gguf</Target>
 	</Package>
 	
-	<Package id="83cca264-f834-4383-a7cd-cad8e37f7699">
+	<Package id="83cca264-f834-4383-a7cd-cad8e37f7699" type="tts_design_model">
 		<Name>Qwen 3 VoiceDesign 1.7B</Name>
-		<Type>TTS_Model</Type>
+		<VersionString>Q8</VersionString>
+		<Description>High quality voice model capable of generating voices from scratch.</Description>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-VoiceDesign-GGUF/qwen3-tts-12hz-1.7b-voicedesign-q8_0.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
-		<Size>2820000000</Size>
+		<Size>2816988960</Size>
 		<Sha256>1bcef9a8c021072fca40e00498e00af9091fbe6d3ae4f87567cfee885d6c7554</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>qwen3-tts-12hz-1.7b-voicedesign-q8_0.gguf</Target>
+		<Target>tts/models/qwen3-tts-12hz-1.7b-voicedesign-q8_0.gguf</Target>
 	</Package>
 	
-	<Package id="661490f6-fd08-437b-bb6a-d56a154757db">
+	<Package id="661490f6-fd08-437b-bb6a-d56a154757db" type="tts_design_model">
 		<Name>Qwen 3 VoiceDesign 1.7B</Name>
-		<Type>TTS_Model</Type>
+		<Description>High quality voice model capable of generating voices from scratch.</Description>
+		<VersionString>BF16</VersionString>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-VoiceDesign-GGUF/qwen3-tts-12hz-1.7b-voicedesign-bf16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
-		<Size>4180000000</Size>
+		<Size>4179089248</Size>
 		<Sha256>f4cebcd68023a2db7c3fc8d52d1d28eafb22d4e3b7a64e12c4f946a300536f86</Sha256>
-		<OutputDirectory>models/tts</OutputDirectory>
-		<Target>qwen3-tts-12hz-1.7b-voicedesign-bf16.gguf</Target>
+		<Target>tts/models/qwen3-tts-12hz-1.7b-voicedesign-bf16.gguf</Target>
 	</Package>
 
 </Packages>

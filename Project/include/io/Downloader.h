@@ -12,6 +12,8 @@ namespace fig::io
 		ConnectionFailed,
 		RequestFailed,
 		HttpStatus,
+		DiskFullError,
+		WriteAccessError,
 		FileError,
 		Cancelled
 	};

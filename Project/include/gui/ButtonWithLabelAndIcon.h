@@ -14,7 +14,7 @@ namespace fig::gui
 	public:
 		ButtonWithLabelAndIcon(ControlPtr pParent, fig::string_view label, Resource icon, double fontSize = 16.0);
 
-		void SetLabel(fig::string_view label) noexcept;
+		void SetLabel(fig::string_view label, Resource icon = {}) noexcept;
 		void SetIcon(Resource icon);
 
 	protected:
