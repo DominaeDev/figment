@@ -15,7 +15,7 @@ namespace fig::gui
 		Slider(ControlPtr pParent);
 		Slider(ControlPtr pParent, float fMin, float fMax);
 
-		void SetValue(float value);
+		void SetValue(float value, bool bSilent = false);
 		float GetValue() const { return _value; }
 
 		void SetDelegate(SliderValueChangedDelegate fnDelegate) { _fnDelegate = fnDelegate; }

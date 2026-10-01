@@ -30,6 +30,8 @@ namespace fig::io
 		{ UserSetting::Interface::ChatList::Filtering,				ChatFilterFlags::Serialize(DefaultChatFilterFlags, ChatFilterFlagMapping) },
 
 		{ UserSetting::TTS::Enabled,								false },
+		{ UserSetting::TTS::Warmup,									false },
+		{ UserSetting::TTS::Split,									true },
 		{ UserSetting::TTS::Volume,									0.8_fp },
 		{ UserSetting::TTS::Backend,								"" },
 		{ UserSetting::TTS::SpeechModel,							"" },

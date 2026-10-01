@@ -195,6 +195,18 @@ namespace fig::io
 		return _packages;
 	}
 
+	std::vector<fig::data::PackageInfo> PackageManager::GetInstalledPackages() const noexcept
+	{
+		std::scoped_lock _ { _mutex };
+		return _packages
+			| std::views::filter([this](auto&& p) { 
+				if (auto itFind = _packageStates.find(p.id); itFind != _packageStates.cend())
+					return itFind->second == PackageState::Installed;
+				return false;
+			})
+			| std::ranges::to<std::vector>();
+	}
+
 	PackageState PackageManager::GetPackageState(const fig::uuid& packageId) const
 	{
 		std::scoped_lock _ { _mutex };

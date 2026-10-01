@@ -10,10 +10,13 @@ namespace fig::tts
 	struct VoiceModel
 	{
 		fig::uuid id;
+		fig::uuid packageId;
 		fig::string name;
 		fig::string description;
 		fig::string family;
 		fig::string version;
+		fig::string precision;
+		bool recommended { false };
 
 		struct Task
 		{
@@ -51,33 +54,6 @@ namespace fig::tts
 		};
 		std::vector<Language> supportedLanguages;
 
-		struct Variant
-		{
-			fig::uuid id;
-			fig::string name;
-			fig::string precision;
-			fig::uuid packageId;
-			bool recommended { false };
-			fig::string filename;
-
-			static auto XmlFields() noexcept
-			{
-				using namespace fig::data;
-				return Fields(
-					Attribute("id", &Variant::id)
-						.MustExist(),
-					Element("Name", &Variant::name)
-						.MustExist(),
-					Element("Precision", &Variant::precision),
-					Element("Filename", &Variant::filename),
-					Element("Package", &Variant::packageId)
-						.MustExist(),
-					Element("Recommended", &Variant::recommended)
-				);
-			}
-		};
-		std::vector<Variant> variants;
-
 		struct Parameters
 		{
 			fig::fixed temperature { 0_fp };
@@ -111,6 +87,8 @@ namespace fig::tts
 			return Fields(
 				Attribute("id", &VoiceModel::id)
 					.MustExist(),
+				Element("Package", &VoiceModel::packageId)
+					.MustExist(),
 				Element("Name", &VoiceModel::name)
 					.MustExist(),
 				Element("Description", &VoiceModel::description),
@@ -118,9 +96,8 @@ namespace fig::tts
 				Element("Family", &VoiceModel::family),
 				Element("Task", &VoiceModel::task)
 					.MustExist(),
-				Element("Variant", &VoiceModel::variants)
-					.Collection("Variants")
-					.MustExist(),
+				Element("Precision", &VoiceModel::precision),
+				Element("Recommended", &VoiceModel::recommended),
 				Element("Language", &VoiceModel::supportedLanguages)
 					.Collection("Languages")
 					.MustExist(),

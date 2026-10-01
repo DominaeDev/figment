@@ -41,6 +41,9 @@ namespace fig::tts
 		std::expected<std::vector<TTSResult>, TTSError> Speak(fig::uuid characterId, fig::string_view text, bool split = true);
 		std::expected<TTSResult, TTSError> Design(fig::string_view text, fig::string_view instruct, uint32_t seed = 0);
 
+		std::vector<fig::tts::VoiceModel> GetVoiceModels() const;
+		std::vector<fig::tts::TTSBackendInfo> GetBackendSettings() const;
+
 	protected:
 		TTSPayload SendRequest(TTSTask task, TTSTaskArguments args);
 		void LoadTTSSettings();

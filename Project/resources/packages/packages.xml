@@ -67,7 +67,6 @@
 		</Archive>
 	</Package>
 
-	<!-- TTS Models -->
 	<Package id="16f4b177-bd78-425f-bd39-628dfbac5fb4" type="tts_model">
 		<Name>Pocket TTS (English)</Name>
 		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
@@ -111,7 +110,7 @@
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Chatterbox-GGUF/chatterbox-f16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/resemble-ai/chatterbox</InfoUrl>
-		<Size>3740000000</Size>
+		<Size>3744360386</Size>
 		<Sha256>b872f908605f5ccbdd8eaa9e9c92a521c602b70cbec635d46e86eb70a3f8e713</Sha256>
 		<Target>tts/models/chatterbox-f16.gguf</Target>
 	</Package>

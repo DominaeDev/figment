@@ -343,8 +343,7 @@ namespace fig::tts
 			if (model.task.task != TTSTask::Speech)
 				continue;
 
-			for (auto& variant : model.variants)
-				auto discard = EnqueueTask(TTSTask::Unload, TTSTaskArguments { .modelId = variant.id });
+			auto discard = EnqueueTask(TTSTask::Unload, TTSTaskArguments { .modelId = model.id });
 		}
 	}
 
@@ -358,8 +357,7 @@ namespace fig::tts
 			if (model.task.task != TTSTask::Design)
 				continue;
 
-			for (auto& variant : model.variants)
-				auto discard = EnqueueTask(TTSTask::Unload, TTSTaskArguments { .modelId = variant.id });
+			auto discard = EnqueueTask(TTSTask::Unload, TTSTaskArguments { .modelId = model.id });
 		}
 	}
 
@@ -469,5 +467,29 @@ namespace fig::tts
 			return fig::nullref;
 
 		return fig::make_optional_cref(*itBackend);
+	}
+
+	std::vector<fig::tts::VoiceModel> TTSBackend::GetVoiceModels() const
+	{
+		auto installedTTSModels = Global::GetPackageManager().GetInstalledPackages()
+			| std::views::filter([](auto&& p) { return p.type == PackageType::TTSVoiceModel or p.type == PackageType::TTSDesignModel; })
+			| std::views::transform([](auto&& p) { return p.id; })
+			| std::ranges::to<std::unordered_set>();
+
+		return _ttsModels.models
+			| std::views::filter([&](auto&& m) { return installedTTSModels.contains(m.packageId); })
+			| std::ranges::to<std::vector>();
+	}
+
+	std::vector<fig::tts::TTSBackendInfo> TTSBackend::GetBackendSettings() const
+	{
+		auto installedTTSBackends = Global::GetPackageManager().GetInstalledPackages()
+			| std::views::filter([](auto&& p) { return p.type == PackageType::TTSServer; })
+			| std::views::transform([](auto&& p) { return p.id; })
+			| std::ranges::to<std::unordered_set>();
+
+		return _ttsBackends.backends
+			| std::views::filter([&](auto&& b) { return installedTTSBackends.contains(b.packageId); })
+			| std::ranges::to<std::vector>();
 	}
 }

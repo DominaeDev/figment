@@ -43,6 +43,8 @@ namespace fig::io
 		namespace TTS
 		{
 			constexpr fig::io::SettingKey Enabled			{ "TTS", "Enabled" };
+			constexpr fig::io::SettingKey Warmup			{ "TTS", "Warmup" };
+			constexpr fig::io::SettingKey Split				{ "TTS", "Split" };
 			constexpr fig::io::SettingKey Volume			{ "TTS", "Volume" };
 			constexpr fig::io::SettingKey Backend			{ "TTS", "Backend" };
 			constexpr fig::io::SettingKey SpeechModel		{ "TTS", "Model.Speech" };

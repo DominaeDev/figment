@@ -164,6 +164,7 @@ namespace fig::io
 
 		std::pair<fig::optional_cref<fig::data::PackageInfo>, PackageState> GetPackage(const fig::uuid&) const noexcept;
 		const std::vector<fig::data::PackageInfo>& GetPackages() const noexcept;
+		std::vector<fig::data::PackageInfo> GetInstalledPackages() const noexcept;
 
 		bool InstallPackage(const fig::uuid& packageId);
 		bool UninstallPackage(const fig::uuid& packageId);

@@ -17,6 +17,7 @@ namespace fig::gui
 	using EditorPropertyChangedDelegate = std::function<void()>;
 
 	class HorizontalLine;
+	class CheckBox;
 
 	class EditorTabBase : public Control
 	{
@@ -74,9 +75,9 @@ namespace fig::gui
 				binding.Set(fig::string { pControl->GetText() });
 				SetDirty();
 			});
-			pControl->SetTextChangedDelegate([this, binding](fig::string_view text) mutable { 
+			pControl->SetTextChangedDelegate([this, binding](fig::string_view text) mutable {
 				binding.Set(fig::string { text });
-				SetDirty(); 
+				SetDirty();
 			});
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
 			return pControl;
@@ -95,6 +96,19 @@ namespace fig::gui
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
 			return pControl;
 		}
+
+		template <is_string_range U>
+		fig::observer_ptr<DropList> CreateDropList(ControlPtr pParent, SizerPtr pSizer, const U& items, std::function<void(int32_t)> fnDelegate)
+		{
+			auto pControl = pParent->CreateControl<DropList>();
+			pControl->AddItems(items);
+			pControl->SetDelegate(fnDelegate);
+			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
+			return pControl;
+		}
+
+		fig::observer_ptr<CheckBox> CreateToggle(ControlPtr pParent, SizerPtr pSizer, fig::string_view label, ValueBinding<bool> binding);
+		fig::observer_ptr<CheckBox> CreateToggle(ControlPtr pParent, SizerPtr pSizer, fig::string_view label, std::function<void(bool)> fnDelegate);
 
 		void SetDirty() noexcept;
 	private:

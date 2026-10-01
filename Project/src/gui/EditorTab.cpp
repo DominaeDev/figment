@@ -2,6 +2,7 @@
 #include "gui/EditorTab.h"
 #include "gui/TextBox.h"
 #include "gui/HorizontalLine.h"
+#include "gui/CheckBox.h"
 
 namespace fig::gui
 {
@@ -74,6 +75,27 @@ namespace fig::gui
 		pSizer->AddSpacer(8);
 		return pLine;
 	}
+
+	fig::observer_ptr<CheckBox> EditorTabBase::CreateToggle(ControlPtr pParent, SizerPtr pSizer, fig::string_view label, ValueBinding<bool> binding)
+	{
+		auto pControl = pParent->CreateControl<CheckBox>(label);
+		pControl->SetValue(binding.Get(), true);
+		pControl->SetDelegate([this, binding](bool bOn) mutable {
+			binding.Set(bOn);
+			SetDirty();
+		});
+		pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
+		return pControl;
+	}
+
+	fig::observer_ptr<CheckBox> EditorTabBase::CreateToggle(ControlPtr pParent, SizerPtr pSizer, fig::string_view label, std::function<void(bool)> fnDelegate)
+	{
+		auto pControl = pParent->CreateControl<CheckBox>(label);
+		pControl->SetDelegate(fnDelegate);
+		pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
+		return pControl;
+	}
+
 
 	void EditorTabBase::SetDirty() noexcept
 	{

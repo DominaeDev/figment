@@ -130,6 +130,11 @@ namespace fig::io
 				| std::ranges::to<std::vector>());
 		}
 
+		void SetFloat(SettingKey key, float value) noexcept
+		{
+			return SetValue<fig::fixed>(key, fig::fixed { value });
+		}
+
 		void SetFixed(SettingKey key, fig::fixed value) noexcept
 		{
 			return SetValue<fig::fixed>(key, value);

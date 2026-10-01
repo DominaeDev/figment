@@ -27,8 +27,6 @@ namespace fig::gui
 		_pThumbBorder = _pThumb->CreateControl<Image>(Resource::SLIDER_THUMB_BORDER, Color::Border);
 		_pThumbBorder->FillParent();
 		_thumbHalfSize = _pThumb->GetTextureSize().x / 2;
-
-		SetValue(0.5f);
 	}
 
 	Slider::Slider(ControlPtr pParent, float fMin, float fMax) : Slider(pParent)
@@ -37,9 +35,11 @@ namespace fig::gui
 		_fMax = fMax;
 	}
 
-	void Slider::SetValue(float value)
+	void Slider::SetValue(float value, bool bSilent)
 	{
 		_value = value;
+		if (_fnDelegate and not bSilent)
+			_fnDelegate(_value);
 		_bInvalidBar = true;
 	}
 
@@ -65,11 +65,7 @@ namespace fig::gui
 			float value = width > 0 ? std::clamp(x / toF(width), 0.0f, 1.0f) : 1.0f;
 
 			if (not flt_eq(value, _value))
-			{
-				SetValue(value);
-				if (_fnDelegate)
-					_fnDelegate(_fMin + _value * (_fMax - _fMin));
-			}
+				SetValue(_fMin + value * (_fMax - _fMin));
 		};
 
 		if (event.type == SDL_EVENT_MOUSE_MOTION)

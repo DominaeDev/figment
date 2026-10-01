@@ -1,27 +1,33 @@
 <Models format="0">
-	<Model id="1847255d-6081-46c2-8444-5cc736bc49ce">
-		<Name>Pocket TTS</Name>
+	<Model id="1951b8ba-52ee-40ed-a553-6391678d58c2">
+		<Name>Pocket TTS (Q8)</Name>
 		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
 		<Version>1.0</Version>
 		<Task id="tts">tts</Task>
 		<Family>pocket_tts</Family>
+		<Precision>Q8</Precision>
+		<Recommended>true</Recommended>
+		<Package>16f4b177-bd78-425f-bd39-628dfbac5fb4</Package>
 
-		<Variants>
-			<Variant id="1951b8ba-52ee-40ed-a553-6391678d58c2">
-				<Name>Pocket TTS (English)</Name>
-				<Precision>Q8</Precision>
-				<Recommended>true</Recommended>
-				<Filename>pocket-tts-english-q8_0.gguf</Filename>
-				<Package>16f4b177-bd78-425f-bd39-628dfbac5fb4</Package>
-			</Variant>
-			<Variant id="d2e16fce-755c-435f-93f8-9c4b3f8bf689">
-				<Name>Pocket TTS (English)</Name>
-				<Precision>BF16</Precision>
-				<Recommended>false</Recommended>
-				<Filename>pocket-tts-english-bf16.gguf</Filename>
-				<Package>17670fa5-a0e3-41ba-a9f1-6ed7b915a309</Package>
-			</Variant>
-		</Variants>
+		<Languages>
+			<Language id="en">English</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.8</Temperature>
+			<ChunkSize>128</ChunkSize>
+		</Parameters>
+	</Model>
+	
+	<Model id="d2e16fce-755c-435f-93f8-9c4b3f8bf689">
+		<Name>Pocket TTS (BF16)</Name>
+		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
+		<Version>1.0</Version>
+		<Task id="tts">tts</Task>
+		<Family>pocket_tts</Family>
+		<Precision>BF16</Precision>
+		<Recommended>false</Recommended>
+		<Package>17670fa5-a0e3-41ba-a9f1-6ed7b915a309</Package>
 
 		<Languages>
 			<Language id="en">English</Language>
@@ -33,29 +39,53 @@
 		</Parameters>
 	</Model>
 
-	<Model id="471bf0f0-aad5-4c4b-9f14-5d31523bcde4">
-		<Name>Chatterbox</Name>
+	<Model id="f45eddf7-dd44-4c19-8eec-931220e05f30">
+		<Name>Chatterbox 0.5B (Q8)</Name>
 		<Description>Expressive text-to-speech model with broad language support.</Description>
 		<Version>1.0</Version>
 		<Task id="clon">tts</Task>
 		<Family>chatterbox</Family>
-		
-		<Variants>
-			<Variant id="f45eddf7-dd44-4c19-8eec-931220e05f30">
-				<Name>Chatterbox 0.5B</Name>
-				<Precision>Q8</Precision>
-				<Recommended>true</Recommended>
-				<Filename>chatterbox-q8_0.gguf</Filename>
-				<Package>4aaf6874-a16a-4331-9581-7559e9ba3823</Package>
-			</Variant>
-			<Variant id="d53296d3-952b-4048-a3ca-1a23e332fffd">
-				<Name>Chatterbox 0.5B</Name>
-				<Precision>F16</Precision>
-				<Recommended>false</Recommended>
-				<Filename>chatterbox-f16.gguf</Filename>
-				<Package>11389a9c-aa39-467a-9c56-6f835be937a9</Package>
-			</Variant>
-		</Variants>
+		<Precision>Q8</Precision>
+		<Recommended>true</Recommended>
+		<Package>4aaf6874-a16a-4331-9581-7559e9ba3823</Package>
+
+		<Languages>
+			<Language id="en">English</Language>
+			<Language id="ar">Arabic</Language>
+			<Language id="da">Danish</Language>
+			<Language id="nl">Dutch</Language>
+			<Language id="de">German</Language>
+			<Language id="fi">Finnish</Language>
+			<Language id="fr">French</Language>
+			<Language id="el">Greek</Language>
+			<Language id="hi">Hindi</Language>
+			<Language id="it">Italian</Language>
+			<Language id="ko">Korean</Language>
+			<Language id="ms">Malay</Language>
+			<Language id="no">Norwegian</Language>
+			<Language id="pl">Polish</Language>
+			<Language id="pt">Portuguese</Language>
+			<Language id="es">Spanish</Language>
+			<Language id="sw">Swahili</Language>
+			<Language id="sv">Swedish</Language>
+			<Language id="tr">Turkish</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>1.2</Temperature>
+			<ChunkSize>80</ChunkSize>
+		</Parameters>
+	</Model>
+	
+	<Model id="d53296d3-952b-4048-a3ca-1a23e332fffd">
+		<Name>Chatterbox 0.5B (F16)</Name>
+		<Description>Expressive text-to-speech model with broad language support.</Description>
+		<Version>1.0</Version>
+		<Task id="clon">tts</Task>
+		<Family>chatterbox</Family>
+		<Precision>F16</Precision>
+		<Recommended>false</Recommended>
+		<Package>11389a9c-aa39-467a-9c56-6f835be937a9</Package>
 
 		<Languages>
 			<Language id="en">English</Language>
@@ -85,43 +115,78 @@
 		</Parameters>
 	</Model>
 
-	<Model id="2863ada4-8882-4841-9b27-34dc44684f6c">
-		<Name>Qwen 3 TTS</Name>
+	<Model id="b1aa5cc8-bcfe-4eda-aecd-e2e3d2521f9d">
+		<Name>Qwen 3 TTS 0.6B (Q8)</Name>
 		<Description>High quality text-to-speech model.</Description>
 		<Version>1.0</Version>
 		<Task id="tts">tts</Task>
 		<Family>qwen3_tts</Family>
+		<Precision>Q8</Precision>
+		<Recommended>true</Recommended>
+		<Package>ca15babf-eddd-4d1f-9984-64e4067562af</Package>
 
-		<Variants>
-			<Variant id="b1aa5cc8-bcfe-4eda-aecd-e2e3d2521f9d">
-				<Name>Qwen 3 TTS 0.6B</Name>
-				<Precision>Q8</Precision>
-				<Recommended>true</Recommended>
-				<Filename>qwen3-tts-12hz-0.6b-base-q8_0.gguf</Filename>
-				<Package>ca15babf-eddd-4d1f-9984-64e4067562af</Package>
-			</Variant>
-			<Variant id="812a18b1-8c8c-4646-92b8-7d7645b3b123">
-				<Name>Qwen 3 TTS 0.6B</Name>
-				<Precision>BF16</Precision>
-				<Recommended>true</Recommended>
-				<Filename>qwen3-tts-12hz-0.6b-base-bf16.gguf</Filename>
-				<Package>f7af9d41-d0ed-4fda-8a29-c04acfc68a92</Package>
-			</Variant>
-			<Variant id="b7523ebd-c633-4785-b982-a7692570f370">
-				<Name>Qwen 3 TTS 1.7B</Name>
-				<Precision>Q8</Precision>
-				<Recommended>true</Recommended>
-				<Filename>qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf</Filename>
-				<Package>78f38cf4-eff3-42db-b751-a216ebc29c3e</Package>
-			</Variant>
-			<Variant id="c5cf401a-d1e1-4fd3-ac05-e1dc725fccf8">
-				<Name>Qwen 3 TTS 1.7B</Name>
-				<Precision>BF16</Precision>
-				<Recommended>false</Recommended>
-				<Filename>qwen3-tts-12hz-1.7b-base-bf16.gguf</Filename>
-				<Package>348b5ae3-a11b-4989-8da6-76c7113f00d1</Package>
-			</Variant>
-		</Variants>
+		<Languages>
+			<Language id="English">English</Language>
+			<Language id="Chinese">Chinese</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.8</Temperature>
+			<ChunkSize>80</ChunkSize>
+		</Parameters>
+	</Model>
+	
+	<Model id="812a18b1-8c8c-4646-92b8-7d7645b3b123">
+		<Name>Qwen 3 TTS 0.6B (BF16)</Name>
+		<Description>High quality text-to-speech model.</Description>
+		<Version>1.0</Version>
+		<Task id="tts">tts</Task>
+		<Family>qwen3_tts</Family>
+		<Precision>BF16</Precision>
+		<Recommended>true</Recommended>
+		<Package>f7af9d41-d0ed-4fda-8a29-c04acfc68a92</Package>
+
+		<Languages>
+			<Language id="English">English</Language>
+			<Language id="Chinese">Chinese</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.8</Temperature>
+			<ChunkSize>80</ChunkSize>
+		</Parameters>
+	</Model>
+	
+	<Model id="b7523ebd-c633-4785-b982-a7692570f370">
+		<Name>Qwen 3 TTS 1.7B (Q8)</Name>
+		<Description>High quality text-to-speech model.</Description>
+		<Version>1.0</Version>
+		<Task id="tts">tts</Task>
+		<Family>qwen3_tts</Family>
+		<Precision>Q8</Precision>
+		<Recommended>true</Recommended>
+		<Package>78f38cf4-eff3-42db-b751-a216ebc29c3e</Package>
+
+		<Languages>
+			<Language id="English">English</Language>
+			<Language id="Chinese">Chinese</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.8</Temperature>
+			<ChunkSize>80</ChunkSize>
+		</Parameters>
+	</Model>
+	
+	<Model id="c5cf401a-d1e1-4fd3-ac05-e1dc725fccf8">
+		<Name>Qwen 3 TTS 1.7B (BF16)</Name>
+		<Description>High quality text-to-speech model.</Description>
+		<Version>1.0</Version>
+		<Task id="tts">tts</Task>
+		<Family>qwen3_tts</Family>
+		<Precision>BF16</Precision>
+		<Recommended>false</Recommended>
+		<Package>348b5ae3-a11b-4989-8da6-76c7113f00d1</Package>
 
 		<Languages>
 			<Language id="English">English</Language>
@@ -134,29 +199,15 @@
 		</Parameters>
 	</Model>
 
-	<Model id="eda06e5c-8d30-4dfe-9f7b-1f5916ca378a">
-		<Name>Qwen 3 VoiceDesign</Name>
+	<Model id="f1068090-b776-4536-8618-3b2857a6c9ac">
+		<Name>Qwen 3 VoiceDesign 1.7B (Q8)</Name>
 		<Description>High quality voice creation model.</Description>
 		<Version>1.0</Version>
 		<Task id="vdes">design</Task>
 		<Family>qwen3_tts</Family>
-
-		<Variants>
-			<Variant id="f1068090-b776-4536-8618-3b2857a6c9ac">
-				<Name>Qwen 3 VoiceDesign 1.7B</Name>
-				<Precision>Q8</Precision>
-				<Recommended>true</Recommended>
-				<Filename>qwen3-tts-12hz-1.7b-voicedesign-q8_0.gguf</Filename>
-				<Package>83cca264-f834-4383-a7cd-cad8e37f7699</Package>
-			</Variant>
-			<Variant id="3059d897-030a-4e83-a3d5-6445c86fe5ac">
-				<Name>Qwen 3 VoiceDesign 1.7B</Name>
-				<Precision>BF16</Precision>
-				<Recommended>false</Recommended>
-				<Filename>qwen3-tts-12hz-1.7b-voicedesign-bf16.gguf</Filename>
-				<Package>661490f6-fd08-437b-bb6a-d56a154757db</Package>
-			</Variant>
-		</Variants>
+		<Precision>Q8</Precision>
+		<Recommended>true</Recommended>
+		<Package>83cca264-f834-4383-a7cd-cad8e37f7699</Package>
 
 		<Languages>
 			<Language id="English">English</Language>
@@ -168,6 +219,26 @@
 			<TopK>65</TopK>
 		</Parameters>
 	</Model>
+	
+	<Model id="3059d897-030a-4e83-a3d5-6445c86fe5ac">
+		<Name>Qwen 3 VoiceDesign 1.7B (BF16)</Name>
+		<Description>High quality voice creation model.</Description>
+		<Version>1.0</Version>
+		<Task id="vdes">design</Task>
+		<Family>qwen3_tts</Family>
+		<Precision>BF16</Precision>
+		<Recommended>false</Recommended>
+		<Package>661490f6-fd08-437b-bb6a-d56a154757db</Package>
 
+		<Languages>
+			<Language id="English">English</Language>
+			<Language id="Chinese">Chinese</Language>
+		</Languages>
+
+		<Parameters>
+			<Temperature>0.6</Temperature>
+			<TopK>65</TopK>
+		</Parameters>
+	</Model>
 
 </Models>

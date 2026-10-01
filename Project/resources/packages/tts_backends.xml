@@ -1,7 +1,7 @@
 <TTSBackends format="0">
 	<TTSBackend id="66359339-6285-469d-ac65-d50c5a44e27d">
 		<Package>eda3584f-a78f-4b7c-83dd-8f28fab23ea1</Package>
-		<Name>audio.cpp (CUDA)</Name>
+		<Name>audio.cpp v0.6.1 (CUDA)</Name>
 		<Version>0.6.1</Version>
 		<Parameters>
 			<Backend>cuda</Backend>
@@ -10,7 +10,7 @@
 
 	<TTSBackend id="dbfab655-8b2b-485b-8f3d-b77e10ac8b2d">
 		<Package>d374bf34-fbd1-4526-99ec-54aeb0698f0f</Package>
-		<Name>audio.cpp (CPU)</Name>
+		<Name>audio.cpp v0.6.1 (CPU)</Name>
 		<Version>0.6.1</Version>
 		<Parameters>
 			<Backend>cpu</Backend>
