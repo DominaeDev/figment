@@ -70,11 +70,12 @@ namespace fig::gui
 		auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
 		pSaveButton->SetSize(110, 32);
 		pSaveButton->SetDelegate([this] {
-			Save();
+			if (Save())
+				PushEvent(UserEvent::NavigateToHome);
 		});
 		_pSaveButton = pSaveButton;
 
-		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Discard", Resource::ICON_DISMISS);
+		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Cancel", Resource::ICON_DISMISS);
 		pDiscardButton->SetSize(110, 32);
 		pDiscardButton->SetDelegate([this] {
 			PushEvent(UserEvent::NavigateToHome);

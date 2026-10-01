@@ -31,7 +31,8 @@ namespace fig::io
 
 		{ UserSetting::TTS::Enabled,								false },
 		{ UserSetting::TTS::Volume,									0.8_fp },
-		{ UserSetting::TTS::TTSModel,								"" },
+		{ UserSetting::TTS::Backend,								"" },
+		{ UserSetting::TTS::SpeechModel,							"" },
 		{ UserSetting::TTS::DesignModel,							"" },
 	};
 
@@ -69,4 +70,5 @@ namespace fig::io
 	{
 		return GetEnum<Theme>(UserSetting::Interface::Theme, ColorThemeMapping, Theme::SystemDefault);
 	}
+
 }

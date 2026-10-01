@@ -1,7 +1,8 @@
 #pragma once
 
-#include "tts/VoiceModelSettings.h"
+#include "tts/TTSModelSettings.h"
 #include "data/VoiceSettings.h"
+#include "data/VersionNumber.h"
 
 namespace fig::tts
 {
@@ -12,10 +13,14 @@ namespace fig::tts
 		{
 			CPU,
 			CUDA,
+			Vulkan,
+			Metal,
 		};
 
+		fig::path serverPath;
+		fig::data::VersionNumber serverVersion;
 		Backend backend { Backend::CUDA };
-		VoiceModelSettings models {};
+		TTSModelSettings models {};
 		std::vector<fig::data::VoiceSettings> voices {};
 
 		fig::string ToJson() const noexcept;

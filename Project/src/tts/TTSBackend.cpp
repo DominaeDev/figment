@@ -1,5 +1,7 @@
 #include <pch.h>
 #include "tts/TTSBackend.h"
+#include "io/PackageManager.h"
+#include "io/FileUtility.h"
 
 #if defined(_WIN32)
 #include "tts/AudioServerProcess_Win32.h"
@@ -8,6 +10,10 @@
 #include "tts/AudioServerProcess_SDL.h"
 #include "tts/IHttpClient.h"
 #endif
+
+using namespace fig::io;
+using namespace fig::data;
+using namespace fig::gui;
 
 namespace fig::tts
 {
@@ -21,7 +27,7 @@ namespace fig::tts
 		_pHttp = std::make_unique<HttpClient_Dummy>(); //! @todo
 #endif
 
-		LoadModelConfigurations();
+		LoadTTSSettings();
 
 		// Start worker thread
 		_worker = std::jthread(std::bind_front(&TTSBackend::__Worker, this));
@@ -34,6 +40,94 @@ namespace fig::tts
 		// Shut down worker thread
 		_worker.request_stop();
 		_pending_cv.notify_all();
+	}
+
+	bool TTSBackend::Initialize()
+	{
+		if (_status != TTSStatus::Uninitialized)
+		{
+			if (CheckHealth())
+				return true; // Already initialized
+			Shutdown(); // Restart
+		}
+
+		auto backend = GetActiveBackend();
+		if (not backend)
+			return false;
+
+		AudioServerConfiguration serverConfig;
+
+		// Locate server exe from installed packages
+		if (auto [package, _] = Global::GetPackageManager().GetPackage((*backend).packageId); package.has_value())
+		{
+			serverConfig.serverVersion = (*package).version;
+			if (not (*package).targetPath.empty())
+				serverConfig.serverPath = GetPackagesFilename((*package).targetPath);
+			else if (auto itExe = std::ranges::find_if((*package).entries,
+					[](auto&& e) { return ends_with(e.name, ".exe", true); });
+				itExe != std::ranges::cend((*package).entries))
+			{
+				serverConfig.serverPath = GetPackagesFilename((*itExe).targetPath);
+			}
+		}
+
+		if ((*backend).parameters.backend == "cuda")
+			serverConfig.backend = AudioServerConfiguration::Backend::CUDA;
+		else if ((*backend).parameters.backend == "vulkan")
+			serverConfig.backend = AudioServerConfiguration::Backend::Vulkan;
+		else if ((*backend).parameters.backend == "metal")
+			serverConfig.backend = AudioServerConfiguration::Backend::Metal;
+		else
+			serverConfig.backend = AudioServerConfiguration::Backend::CPU;
+
+		serverConfig.models = _ttsModels;
+
+		LogLn(std::format("Starting TTS backend {}", (fig::string)(*backend).id));
+
+		if (auto started = _pServer->Start(serverConfig))
+		{
+			_status = TTSStatus::ServerStarted;
+			PushEvent(UserEvent::TTSServerStarted);
+			return true;
+		}
+		else
+		{
+			PushEvent(UserEvent::TTSServerShutdown);
+			return false;
+		}
+	}
+
+	void TTSBackend::Shutdown()
+	{
+		// Shut down server
+		int32_t exitCode;
+		if (_pServer->IsRunning(exitCode))
+			_pServer->Stop();
+
+		_status = TTSStatus::Uninitialized;
+	}
+
+	bool TTSBackend::Restart()
+	{
+		if (_status == TTSStatus::Uninitialized)
+			return false;
+
+		Shutdown();
+		return Initialize();
+	}
+
+	bool TTSBackend::CheckHealth()
+	{
+		if (_status == TTSStatus::Uninitialized)
+			return false;
+
+		int32_t exitCode = -255;
+		if (_pServer->IsRunning(exitCode))
+			return true; // Still running
+
+		if (exitCode != -255)
+			LogLn(std::format("audiocpp_server exited with code {}", exitCode));
+		return false;
 	}
 
 	void TTSBackend::__Worker(std::stop_token stop)
@@ -138,7 +232,7 @@ namespace fig::tts
 		fig::string content { text };
 		escape_json_inplace(content);
 
-		fig::uuid modelId = Global::GetUserSettings().GetUUID(fig::io::UserSetting::TTS::TTSModel);
+		fig::uuid modelId = Global::GetUserSettings().GetUUID(fig::io::UserSetting::TTS::SpeechModel);
 
 		TTSVoiceRef voiceReference {};
 		if (auto try_voice = Global::GetUserContent().GetVoiceForCharacter(characterId))
@@ -244,7 +338,7 @@ namespace fig::tts
 		if (_status == TTSStatus::Uninitialized)
 			return;
 
-		for (auto& model : _models.models)
+		for (auto& model : _ttsModels.models)
 		{
 			if (model.task.task != TTSTask::Speech)
 				continue;
@@ -259,7 +353,7 @@ namespace fig::tts
 		if (_status == TTSStatus::Uninitialized)
 			return;
 
-		for (auto& model : _models.models)
+		for (auto& model : _ttsModels.models)
 		{
 			if (model.task.task != TTSTask::Design)
 				continue;
@@ -269,75 +363,10 @@ namespace fig::tts
 		}
 	}
 
-	void TTSBackend::LoadModelConfigurations()
+	void TTSBackend::LoadTTSSettings()
 	{
-		_models.LoadFromXml(fig::path { "tts/models.xml" });
-
-		// Remove all but installed models
-		for (auto& model : _models.models)
-			std::erase_if(model.variants, [](auto&& m) { return not std::filesystem::exists(fig::path { Constants::Paths::TTSModels } / fig::path { m.filename }); });
-		std::erase_if(_models.models, [](auto&& m) { return m.variants.empty(); });
-	}
-
-	bool TTSBackend::Initialize()
-	{
-		using namespace fig::gui;
-
-		if (_status != TTSStatus::Uninitialized)
-		{
-			if (CheckHealth())
-				return true; // Already initialized
-			Shutdown(); // Restart
-		}
-
-		AudioServerConfiguration serverConfig;
-		serverConfig.backend = AudioServerConfiguration::Backend::CUDA;
-		serverConfig.models = _models;
-
-		if (auto started = _pServer->Start(serverConfig))
-		{
-			_status = TTSStatus::ServerStarted;
-			PushEvent(UserEvent::TTSServerStarted);
-			return true;
-		}
-		else
-		{
-			PushEvent(UserEvent::TTSServerShutdown);
-			return false;
-		}
-	}
-
-	void TTSBackend::Shutdown()
-	{
-		// Shut down server
-		int32_t exitCode;
-		if (_pServer->IsRunning(exitCode))
-			_pServer->Stop();
-
-		_status = TTSStatus::Uninitialized;
-	}
-
-	bool TTSBackend::Restart()
-	{
-		if (_status == TTSStatus::Uninitialized)
-			return false;
-
-		Shutdown();
-		return Initialize();
-	}
-
-	bool TTSBackend::CheckHealth()
-	{
-		if (_status == TTSStatus::Uninitialized)
-			return false;
-
-		int32_t exitCode = -255;
-		if (_pServer->IsRunning(exitCode))
-			return true; // Still running
-
-		if (exitCode != -255)
-			LogLn(std::format("audiocpp_server exited with code {}", exitCode));
-		return false;
+		_ttsModels.LoadFromXml(fig::path { "resources/packages/tts_models.xml" });
+		_ttsBackends.LoadFromXml(fig::path { "resources/packages/tts_backends.xml" });
 	}
 
 	std::expected<AudioData, TTSError> TTSBackend::SendRequest(TTSTask task, TTSTaskArguments args)
@@ -424,5 +453,21 @@ namespace fig::tts
 		}
 
 		return std::unexpected(TTSError::Failed);
+	}
+
+	fig::optional_cref<TTSBackendInfo> TTSBackend::GetActiveBackend() const
+	{
+		fig::uuid backendId = Global::GetUserSettings().GetUUID(fig::io::UserSetting::TTS::Backend);
+		if (backendId.empty())
+			return fig::nullref;
+
+		auto itBackend = std::ranges::find_if(_ttsBackends.backends, [backendId](auto&& backend) { return backend.id == backendId; });
+		if (itBackend == std::ranges::cend(_ttsBackends.backends))
+			return fig::nullref;
+
+		if (Global::GetPackageManager().GetPackageState((*itBackend).packageId) != PackageState::Installed)
+			return fig::nullref;
+
+		return fig::make_optional_cref(*itBackend);
 	}
 }

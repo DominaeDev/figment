@@ -2,7 +2,8 @@
 
 #include "Figment.h"
 #include "tts/TTSTypes.h"
-#include "tts/VoiceModelSettings.h"
+#include "tts/TTSModelSettings.h"
+#include "tts/TTSBackendSettings.h"
 
 namespace fig::tts
 {
@@ -20,7 +21,6 @@ namespace fig::tts
 		TTSVoiceRef voiceReference;
 		uint32_t seed {};
 	};
-
 
 	class TTSBackend
 	{
@@ -43,12 +43,14 @@ namespace fig::tts
 
 	protected:
 		TTSPayload SendRequest(TTSTask task, TTSTaskArguments args);
-		void LoadModelConfigurations();
+		void LoadTTSSettings();
 		bool CheckHealth();
+		fig::optional_cref<TTSBackendInfo> GetActiveBackend() const;
 
 	protected:
 		TTSStatus _status { TTSStatus::Uninitialized };
-		fig::tts::VoiceModelSettings _models;
+		fig::tts::TTSModelSettings _ttsModels;
+		fig::tts::TTSBackendSettings _ttsBackends;
 		std::unique_ptr<class IAudioServerProcess> _pServer {};
 		std::unique_ptr<class IHttpClient> _pHttp {};
 		bool _bConnected { false };

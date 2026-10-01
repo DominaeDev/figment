@@ -137,7 +137,7 @@ namespace fig::io
 		Failed,
 	};
 
-	struct InstallationState
+	struct InstallationProgress
 	{
 		InstallationPhase phase {};
 		uint64_t bytesReceived {};
@@ -162,7 +162,7 @@ namespace fig::io
 		FileError Init() noexcept;
 		void CheckInstalledPackages();
 
-		fig::optional_cref<fig::data::PackageInfo> GetPackage(const fig::uuid&) const noexcept;
+		std::pair<fig::optional_cref<fig::data::PackageInfo>, PackageState> GetPackage(const fig::uuid&) const noexcept;
 		const std::vector<fig::data::PackageInfo>& GetPackages() const noexcept;
 
 		bool InstallPackage(const fig::uuid& packageId);
@@ -171,7 +171,7 @@ namespace fig::io
 		void CancelAll();
 
 		PackageState GetPackageState(const fig::uuid& packageId) const;
-		InstallationState GetInstallationState(const fig::uuid& packageId) const;
+		InstallationProgress GetInstallationProgress(const fig::uuid& packageId) const;
 
 		fig::Context GetContext() const;
 

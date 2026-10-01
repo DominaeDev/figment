@@ -665,8 +665,9 @@
     <ClInclude Include="include\tts\IAudioServerProcess.h" />
     <ClInclude Include="include\tts\IHttpClient.h" />
     <ClInclude Include="include\tts\TTSBackend.h" />
+    <ClInclude Include="include\tts\TTSBackendSettings.h" />
     <ClInclude Include="include\tts\TTSTypes.h" />
-    <ClInclude Include="include\tts\VoiceModelSettings.h" />
+    <ClInclude Include="include\tts\TTSModelSettings.h" />
     <ClInclude Include="include\tts\VoicePrint.h" />
     <ClInclude Include="include\user\ProfileDatabase.h" />
     <ClInclude Include="include\user\Security.h" />

@@ -23,7 +23,7 @@ namespace fig::gui
 	private:
 		fig::uuid _packageId {};
 		fig::io::PackageState _packageState {};
-		fig::io::InstallationState _installationState {};
+		fig::io::InstallationProgress _installationState {};
 
 		uint32_t _downloadId {};
 

@@ -135,10 +135,16 @@ namespace fig::gui
 			_pStatusText->SetForegroundColor(Color::SuccessText);
 			_pStatusText->SetX(GetWidth() - _pStatusText->GetWidth() - 10);
 			_pStatusText->SetVisible(true);
+
+			SetBackgroundColor(Color::PanelBackgroundHover);
+			GetBackgroundRenderer()->SetColor(Color::PanelBackgroundHover);
 			return;
 		}
 
-		_installationState = Global::GetPackageManager().GetInstallationState(_packageId);
+		SetBackgroundColor(Color::PanelBackground);
+		GetBackgroundRenderer()->SetColor(Color::PanelBackground);
+
+		_installationState = Global::GetPackageManager().GetInstallationProgress(_packageId);
 
 		bool bShowProgressBar = _installationState.phase == InstallationPhase::Downloading
 			or _installationState.phase == InstallationPhase::Decompressing
@@ -208,7 +214,7 @@ namespace fig::gui
 
 	void PackageWidget::OnButtonClicked()
 	{
-		auto installationPhase = Global::GetPackageManager().GetInstallationState(_packageId).phase;
+		auto installationPhase = Global::GetPackageManager().GetInstallationProgress(_packageId).phase;
 		
 		// Cancel
 		if (installationPhase != InstallationPhase::None and (int32_t)installationPhase < (int32_t)InstallationPhase::Completed)

@@ -189,9 +189,6 @@ namespace fig::Constants
 		constexpr fig::const_string DefaultScenario = "resources/prompting/default_scenario.xml";
 		constexpr fig::const_string PackagesFileName = "resources/packages/packages.xml";
 		
-		constexpr fig::const_string TTSServer = "tts/bin/audiocpp_server.exe";
-		constexpr fig::const_string TTSModels = "tts/models";
-
 		constexpr fig::const_string PackagesFolder = "packages";
 		constexpr fig::const_string PackagesStateFileName = "installed";
 		constexpr fig::const_string PackagesStateFileExt = "";

@@ -13,8 +13,14 @@ namespace fig::tts
 
 	bool AudioServerProcess_Win32::Start(const AudioServerConfiguration& config)
 	{
+		if (not std::filesystem::is_regular_file(config.serverPath))
+			return false;
+
+		fig::path parentFolder = config.serverPath.parent_path();
+		fig::path jsonFilename = parentFolder / fig::path { "server.json" };
+
 		fig::string serverJson = config.ToJson();
-		if (auto error = fig::io::WriteTextFile(fig::path { "tts/server.json" }, serverJson); error != fig::io::FileError::NoError)
+		if (auto error = fig::io::WriteTextFile(jsonFilename, serverJson); error != fig::io::FileError::NoError)
 			return false; // Write error
 
 		// Start server
@@ -40,11 +46,10 @@ namespace fig::tts
 
 		_processInfo = PROCESS_INFORMATION {};
 
-		auto exePath = fig::path { Constants::Paths::TTSServer };
-		auto commandLine = from_utf8(std::format("{} --config \"tts/server.json\"", exePath.filename().u8string())); //! @todo -> tts/server.json
+		auto commandLine = std::format(L"{} --config \"{}\"", config.serverPath.filename().wstring(), jsonFilename.wstring());
 
 		if (CreateProcessW(
-			exePath.wstring().c_str(),
+			config.serverPath.wstring().c_str(),
 			commandLine.data(),
 			nullptr,
 			nullptr,

@@ -179,11 +179,15 @@ namespace fig::io
 		return true;
 	}
 
-	fig::optional_cref<fig::data::PackageInfo> PackageManager::GetPackage(const fig::uuid& packageId) const noexcept
+	std::pair<fig::optional_cref<fig::data::PackageInfo>, PackageState> PackageManager::GetPackage(const fig::uuid& packageId) const noexcept
 	{
-		if (auto itFind = std::ranges::find(_packages, packageId, [](auto&& p) { return p.id; }); itFind != std::ranges::cend(_packages))
-			return *itFind;
-		return fig::nullref; // Unknown package
+		std::scoped_lock _ { _mutex };
+		if (auto itPackage = std::ranges::find(_packages, packageId, [](auto&& p) { return p.id; }); itPackage != std::ranges::cend(_packages))
+		{
+			if (auto itState = _packageStates.find(packageId); itState != _packageStates.cend())
+				return std::make_pair(fig::make_optional_cref(*itPackage), itState->second);
+		}
+		return std::make_pair(fig::nullref, PackageState::Unknown);
 	}
 
 	const std::vector<fig::data::PackageInfo>& PackageManager::GetPackages() const noexcept
@@ -199,7 +203,7 @@ namespace fig::io
 		return PackageState::Unknown;
 	}
 
-	InstallationState PackageManager::GetInstallationState(const fig::uuid& packageId) const
+	InstallationProgress PackageManager::GetInstallationProgress(const fig::uuid& packageId) const
 	{
 		std::scoped_lock _ { _mutex };
 
@@ -211,24 +215,24 @@ namespace fig::io
 				switch (*err)
 				{
 				case Installation::Error::NoError:
-					return InstallationState {
+					return InstallationProgress {
 						.phase = install.phase,
 						.bytesReceived = install.downloader->GetBytesReceived(),
 						.bytesTotal = install.downloader->GetBytesTotal(),
 					};
 				case Installation::Error::DownloadFailed:
-					return InstallationState {
+					return InstallationProgress {
 						.phase = InstallationPhase::Failed,
 						.errorMessage = fig::string { fig::strings::Error::DownloadErrorMessage },
 					};
 				case Installation::Error::VerificationFailed:
-					return InstallationState {
+					return InstallationProgress {
 						.phase = InstallationPhase::Failed,
 						.errorMessage = fig::string { fig::strings::Error::VerificationErrorMessage },
 					};
 				default:
 				case Installation::Error::Cancelled:
-					return InstallationState {
+					return InstallationProgress {
 						.phase = InstallationPhase::None,
 					};
 				}
@@ -238,17 +242,17 @@ namespace fig::io
 				switch (*err)
 				{
 				case FileError::AccessDenied:
-					return InstallationState {
+					return InstallationProgress {
 						.phase = InstallationPhase::Failed,
 						.errorMessage = fig::string { fig::strings::Error::FileAccessErrorMessage },
 					};
 				case FileError::DiskFull:
-					return InstallationState {
+					return InstallationProgress {
 						.phase = InstallationPhase::Failed,
 						.errorMessage = fig::string { fig::strings::Error::DiskFullErrorMessage },
 					};
 				default:
-					return InstallationState {
+					return InstallationProgress {
 						.phase = InstallationPhase::Failed,
 						.errorMessage = std::format(fig::strings::Error::FileErrorMessage, (uint32_t)(*err)),
 					};
@@ -330,12 +334,12 @@ namespace fig::io
 			if (not knownHashes.contains(package.id))
 			{
 				bKnown = false;
-				break;
+				continue;
 			}
 			if (package.sha256 != knownHashes[package.id])
 			{
 				bValid = false;
-				break;
+				continue;
 			}
 			if (bKnown)
 				states[package.id] = bValid ? PackageState::Installed : PackageState::VerificationFailed;

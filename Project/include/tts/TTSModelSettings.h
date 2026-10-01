@@ -75,8 +75,6 @@ namespace fig::tts
 					Element("Recommended", &Variant::recommended)
 				);
 			}
-
-			fig::string GetFilename() const noexcept;
 		};
 		std::vector<Variant> variants;
 
@@ -131,7 +129,7 @@ namespace fig::tts
 		}
 	};
 
-	struct VoiceModelSettings : fig::data::XmlData<"Models", 0>
+	struct TTSModelSettings : fig::data::XmlData<"Models", 0>
 	{
 		std::vector<VoiceModel> models;
 
@@ -139,11 +137,11 @@ namespace fig::tts
 		{
 			using namespace fig::data;
 			return Fields(
-				Element("Model", &VoiceModelSettings::models)
+				Element("Model", &TTSModelSettings::models)
 					.Collection("Models")
 					.MustExist()
 			);
-			static_assert(IsXmlSerializable<VoiceModelSettings>);
+			static_assert(IsXmlSerializable<TTSModelSettings>);
 		}
 	};
 };

@@ -15,7 +15,7 @@ namespace fig::tts
 	};
 
 	constexpr auto TTSTaskMapping = std::array<std::pair<TTSTask, std::string_view>, 2> {
-		std::pair { TTSTask::Speech,		"tts" },
+		std::pair { TTSTask::Speech,	"tts" },
 		std::pair { TTSTask::Design,	"design" },
 	};
 

@@ -1,6 +1,10 @@
 #include <pch.h>
 #include "tts/AudioServerConfiguration.h"
+#include "io/PackageManager.h"
+#include "io/FileUtility.h"
 #include <json.hpp>
+
+using namespace fig::io;
 
 namespace fig::tts
 {
@@ -16,6 +20,8 @@ namespace fig::tts
 			default:
 			case Backend::CPU: jConfig["backend"] = "cpu"; break;
 			case Backend::CUDA: jConfig["backend"] = "cuda"; break;
+			case Backend::Vulkan: jConfig["backend"] = "vulkan"; break;
+			case Backend::Metal: jConfig["backend"] = "metal"; break;
 			}
 			jConfig["device"] = 0;
 			jConfig["threads"] = 2;
@@ -28,10 +34,14 @@ namespace fig::tts
 			{
 				for (auto& variant : model.variants)
 				{
+					auto [package, state] = Global::GetPackageManager().GetPackage(variant.packageId);
+					if (state != PackageState::Installed)
+						continue;
+
 					nlohmann::json jModel = nlohmann::json::object();
 					jModel["id"] = (fig::string)variant.id;
 					jModel["family"] = model.family;
-					jModel["path"] = std::format("models/{0}", variant.filename);
+					jModel["path"] = GetPackagesFilename((*package).targetPath).u8string();
 					jModel["task"] = model.task.id;
 					jModel["mode"] = "offline";
 					jModel["busy_timeout_ms"] = 60000;

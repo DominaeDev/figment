@@ -13,11 +13,19 @@ namespace fig::tts
 
 	bool AudioServerProcess_SDL::Start(const AudioServerConfiguration& config)
 	{
+		if (not std::filesystem::is_regular_file(config.serverPath))
+			return false;
+
+		fig::path parentFolder = config.serverPath.parent_path();
+		fig::path jsonFilename = parentFolder / fig::path { "server.json" };
+
 		fig::string serverJson = config.ToJson();
-		if (auto error = fig::io::WriteTextFile(fig::path { "tts/server.json" }, serverJson); error != fig::io::FileError::NoError)
+		if (auto error = fig::io::WriteTextFile(jsonFilename, serverJson); error != fig::io::FileError::NoError)
 			return false; // Write error
 
-		const char* arguments[] = { "tts/bin/audiocpp_server.exe", "--config", "tts/server.json", nullptr };
+		fig::string exe = config.serverPath.u8string();
+		fig::string configArg = std::format("\"{}\"", jsonFilename.u8string());
+		const char* arguments[] = { exe.c_str(), "--config", configArg.c_str(), nullptr };
 
 		SDL_PropertiesID properties = SDL_CreateProperties();
 		SDL_SetPointerProperty(

@@ -1624,7 +1624,7 @@
     <ClInclude Include="include\tts\VoicePrint.h">
       <Filter>Source Files\Backend\TTS</Filter>
     </ClInclude>
-    <ClInclude Include="include\tts\VoiceModelSettings.h">
+    <ClInclude Include="include\tts\TTSModelSettings.h">
       <Filter>Source Files\Backend\TTS</Filter>
     </ClInclude>
     <ClInclude Include="include\tts\AudioData.h">
@@ -1890,6 +1890,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\ColorNames.h">
       <Filter>Source Files\Frontend\GUI\Themes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tts\TTSBackendSettings.h">
+      <Filter>Source Files\Backend\TTS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -44,7 +44,8 @@ namespace fig::io
 		{
 			constexpr fig::io::SettingKey Enabled			{ "TTS", "Enabled" };
 			constexpr fig::io::SettingKey Volume			{ "TTS", "Volume" };
-			constexpr fig::io::SettingKey TTSModel			{ "TTS", "Model.Speech" };
+			constexpr fig::io::SettingKey Backend			{ "TTS", "Backend" };
+			constexpr fig::io::SettingKey SpeechModel		{ "TTS", "Model.Speech" };
 			constexpr fig::io::SettingKey DesignModel		{ "TTS", "Model.Design" };
 		}
 		
