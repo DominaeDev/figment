@@ -13,7 +13,6 @@ namespace fig::gui
 		bool Initialize(UserSettingsEditorArgs args) override;
 
 	protected:
-		void OnAfterLayout();
 		void ChangeColorTheme(ColorTheme index);
 	};
 }

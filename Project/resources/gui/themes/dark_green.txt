@@ -28,9 +28,10 @@ Label.Disabled							#587E62C0 // blend with background
 HintText								#6C9D78 // (less contrast)
 CheckBox.Background						#0F1F13
 CheckBox.Background.Pressed				#142418
-Slider.Background						#1C3121
+Slider.Background						#111F15
 Slider.Thumb							#3D9252
 Slider.Fill								#92FFAD
+ProgressBar.Background					#111F15
 ProgressBar.Fill						#92FFAD
 ScrollBar								#C0C0C0
 StatusBar.Foreground					#A9EAB9
@@ -39,9 +40,9 @@ Control.Selected.Border					#37E663
 Control.Foreground.Disabled				#78A182
 Control.Background.Disabled				#122116
 	
-Panel.Foreground						#A9EAB9 // near AppBackground
-Panel.Background						#1C3121 // near AppBackground
-Panel.Background.Hover					#3A5F43 // subtle highlight
+Panel.Foreground						#A9EAB9
+Panel.Background						#15281A
+Panel.Background.Hover					#3A5F43
 	
 Menu.Foreground 						#A9EAB9
 Menu.Foreground.Disabled				#4F7258
@@ -53,7 +54,7 @@ Card.Shadow								#16261A
 	
 // Button (Default)	
 Button.Default.Foreground				#A9EAB9
-Button.Default.Background				#1F3424
+Button.Default.Background				#1C2E20
 Button.Default.Border					#2B7B3F
 Button.Hover.Foreground					#A9EAB9
 Button.Hover.Background					#235B31

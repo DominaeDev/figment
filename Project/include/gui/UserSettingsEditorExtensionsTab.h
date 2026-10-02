@@ -12,9 +12,6 @@ namespace fig::gui
 
 		bool Initialize(UserSettingsEditorArgs args) override;
 
-	protected:
-		void OnAfterLayout() override;
-
 	private:
 		std::vector<fig::observer_ptr<class PackageWidget>> _widgets;
 	};

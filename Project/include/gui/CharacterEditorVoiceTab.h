@@ -15,13 +15,12 @@ namespace fig::gui
 		bool Initialize(CharacterEditorArgs args) override;
 
 		SaveResult OnSave() noexcept override;
-		void OnShutdown() noexcept override;
+		void OnClose() noexcept override;
 
 	protected:
 		void OnUpdate(float fElapsed);
 		EventResult OnEvent(fig::event& event) override;
 		void OnToggle(fig::handle group, fig::handle key, bool bOn);
-		void OnAfterLayout();
 
 		fig::observer_ptr<Sizer> CreateGroup(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 

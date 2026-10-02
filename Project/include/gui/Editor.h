@@ -19,7 +19,7 @@ namespace fig::gui
 		std::vector<EditorTabPtr> GetTabs() const noexcept { return _tabs; }
 
 		void SelectTab(size_t index);
-		void Shutdown();
+		void Close();
 			
 	protected:
 		std::vector<EditorTabPtr> _tabs;
@@ -36,8 +36,11 @@ namespace fig::gui
 			return pTab;
 		}
 		
-		virtual void OnShutdown() noexcept = 0;
+		virtual void OnClose() {};
 		virtual void OnPropertyChanged() {};
+		void OnAfterLayout() override;
+		bool SaveTabs();
+
 	private:
 		void EnableTab(EditorTabBase* pTab, bool bEnabled);
 		void SetDirty() noexcept;

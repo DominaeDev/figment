@@ -4,6 +4,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include "Figment.h"
 #include "gui/ColorTheme.h"
+#include "gui/ControlDefs.h"
 #include "c_resource.h"
 
 namespace fig::sdl
@@ -91,13 +92,4 @@ namespace fig
 	enum class ToggleBehavior { Default, Radio };
 
 	using ListItemSelectedDelegate = std::function<void(int32_t)>;
-}
-
-namespace fig::gui
-{
-	class Control;
-	class Sizer;
-	class Window;
-	class Image;
-	class TextInput;
 }

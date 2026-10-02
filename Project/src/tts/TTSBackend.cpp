@@ -187,6 +187,9 @@ namespace fig::tts
 
 	std::optional<TTSResult> TTSBackend::EnqueueTask(TTSTask task, TTSTaskArguments args)
 	{
+		if (not Global::GetUserSettings().GetBool(UserSetting::TTS::Enabled))
+			return std::nullopt; // TTS disabled
+
 		if (_status == TTSStatus::Uninitialized)
 		{
 			if (not Initialize())

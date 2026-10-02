@@ -48,15 +48,6 @@ namespace fig::gui
 	{
 		auto pSizer = pParent->GetSizer();
 
-		/*auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Apply", Resource::ICON_SAVE);
-		pSaveButton->SetSize(110, 32);
-		pSaveButton->SetDelegate([this] {
-			Save();
-		});
-		_pSaveButton = pSaveButton;
-		pSizer->Add(_pSaveButton, 0, SizerFlag::AlignCenterVertical);
-		*/
-
 		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Close", Resource::ICON_DISMISS);
 		pDiscardButton->SetSize(110, 32);
 		pDiscardButton->SetDelegate([this] {
@@ -67,14 +58,9 @@ namespace fig::gui
 		pSizer->AddSpacer(8);
 	}
 
-	bool UserSettingsEditor::Save() noexcept
+	void UserSettingsEditor::OnClose()
 	{
-		return true;
-	}
-
-	void UserSettingsEditor::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
+		PushEvent(UserEvent::UserSettingsChanged);
 	}
 
 	std::vector<EditorTabDescriptor> UserSettingsEditor::GetTabDescriptors() const

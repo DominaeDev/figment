@@ -324,7 +324,7 @@ namespace fig::gui
 			{
 				RefreshActive();
 
-				if (piece.msgType == MessageType::Dialogue and piece.role == Role::Bot1)
+				if (piece.msgType == MessageType::Dialogue and is_bot(piece.role))
 				{
 					auto characterId = pSession->GetCharacterIdOf(piece.role);
 					if (auto results = Global::GetTTSBackend().Speak(characterId, piece.content))

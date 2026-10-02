@@ -1,7 +1,10 @@
 <Packages format="0">
 	<Package id="eda3584f-a78f-4b7c-83dd-8f28fab23ea1" type="tts_server">
-		<Name>Text-to-speech &#x2013; audio.cpp</Name>
-		<Description>Nvidia driver 580 or newer is required.</Description>
+		<Name>Text-to-speech module</Name>
+		<Description>
+			Adds voice features via audio.cpp, a locally running TTS server.
+			Nvidia driver 580 or newer is required.
+		</Description>
 		<Version>0.6.1</Version>
 		<VersionString>Version 0.6.1 (Nvidia CUDA)</VersionString>
 		<Platform>Windows</Platform>
@@ -34,8 +37,10 @@
 	</Package>
 
 	<Package id="d374bf34-fbd1-4526-99ec-54aeb0698f0f" type="tts_server">
-		<Name>Text-to-speech &#x2013; audio.cpp</Name>
-		<Description>Same as above, but runs on the CPU (slower).</Description>
+		<Name>Text-to-speech module</Name>
+		<Description>
+			Same as above, but runs on the CPU (slower).
+		</Description>
 		<Version>0.6.1</Version>
 		<VersionString>Version 0.6.1 (CPU)</VersionString>
 		<Platform>Windows</Platform>
@@ -68,9 +73,9 @@
 	</Package>
 
 	<Package id="16f4b177-bd78-425f-bd39-628dfbac5fb4" type="tts_model">
-		<Name>Pocket TTS (English)</Name>
+		<Name>Pocket TTS</Name>
 		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
-		<VersionString>Q8</VersionString>
+		<VersionString>Q8 (Normal precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/PocketTTS-GGUF/english/pocket-tts-english-q8_0.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/kyutai-labs/pocket-tts</InfoUrl>
@@ -80,9 +85,9 @@
 	</Package>
 
 	<Package id="17670fa5-a0e3-41ba-a9f1-6ed7b915a309" type="tts_model">
-		<Name>Pocket TTS (English)</Name>
+		<Name>Pocket TTS</Name>
 		<Description>A small and nimble text-to-speech model that performs remarkably well for its size.</Description>
-		<VersionString>BF16</VersionString>
+		<VersionString>BF16 (High precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/PocketTTS-GGUF/english/pocket-tts-english-bf16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/kyutai-labs/pocket-tts</InfoUrl>
@@ -94,7 +99,7 @@
 	<Package id="4aaf6874-a16a-4331-9581-7559e9ba3823" type="tts_model">
 		<Name>Chatterbox 0.5B</Name>
 		<Description>Expressive text-to-speech model with broad language support.</Description>
-		<VersionString>Q8</VersionString>
+		<VersionString>Q8 (Normal precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Chatterbox-GGUF/chatterbox-q8_0.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/resemble-ai/chatterbox</InfoUrl>
@@ -106,7 +111,7 @@
 	<Package id="11389a9c-aa39-467a-9c56-6f835be937a9" type="tts_model">
 		<Name>Chatterbox 0.5B</Name>
 		<Description>Expressive text-to-speech model with broad language support.</Description>
-		<VersionString>F16</VersionString>
+		<VersionString>F16 (High precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Chatterbox-GGUF/chatterbox-f16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/resemble-ai/chatterbox</InfoUrl>
@@ -118,7 +123,7 @@
 	<Package id="ca15babf-eddd-4d1f-9984-64e4067562af" type="tts_model">
 		<Name>Qwen 3 TTS 0.6B</Name>
 		<Description>High quality text-to-speech model.</Description>
-		<VersionString>Q8</VersionString>
+		<VersionString>Q8 (Normal precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-q8_0.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
@@ -130,7 +135,7 @@
 	<Package id="f7af9d41-d0ed-4fda-8a29-c04acfc68a92" type="tts_model">
 		<Name>Qwen 3 TTS 0.6B</Name>
 		<Description>High quality text-to-speech model.</Description>
-		<VersionString>BF16</VersionString>
+		<VersionString>BF16 (High precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-bf16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
@@ -140,9 +145,9 @@
 	</Package>
 
 	<Package id="78f38cf4-eff3-42db-b751-a216ebc29c3e" type="tts_model">
-		<Name>Qwen 3 TTS 1.7B</Name>
+		<Name>Qwen 3 TTS 1.7B (Q8)</Name>
 		<Description>High quality text-to-speech model.</Description>
-		<VersionString>Q8</VersionString>
+		<VersionString>Q8 (Normal precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
@@ -152,9 +157,9 @@
 	</Package>
 
 	<Package id="348b5ae3-a11b-4989-8da6-76c7113f00d1" type="tts_model">
-		<Name>Qwen 3 TTS 1.7B</Name>
+		<Name>Qwen 3 TTS 1.7B (BF16)</Name>
 		<Description>High quality text-to-speech model.</Description>
-		<VersionString>BF16</VersionString>
+		<VersionString>BF16 (High precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-bf16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
@@ -164,9 +169,9 @@
 	</Package>
 	
 	<Package id="83cca264-f834-4383-a7cd-cad8e37f7699" type="tts_design_model">
-		<Name>Qwen 3 VoiceDesign 1.7B</Name>
+		<Name>Qwen 3 VoiceDesign 1.7B (Q8)</Name>
 		<Description>High quality voice model capable of generating voices from scratch.</Description>
-		<VersionString>Q8</VersionString>
+		<VersionString>Q8 (Normal precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-VoiceDesign-GGUF/qwen3-tts-12hz-1.7b-voicedesign-q8_0.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>
@@ -176,9 +181,9 @@
 	</Package>
 	
 	<Package id="661490f6-fd08-437b-bb6a-d56a154757db" type="tts_design_model">
-		<Name>Qwen 3 VoiceDesign 1.7B</Name>
+		<Name>Qwen 3 VoiceDesign 1.7B (BF16)</Name>
 		<Description>High quality voice model capable of generating voices from scratch.</Description>
-		<VersionString>BF16</VersionString>
+		<VersionString>BF16 (High precision)</VersionString>
 		<Dependencies>eda3584f-a78f-4b7c-83dd-8f28fab23ea1 or d374bf34-fbd1-4526-99ec-54aeb0698f0f</Dependencies>
 		<DownloadUrl>https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/main/Qwen3-TTS-12Hz-1.7B-VoiceDesign-GGUF/qwen3-tts-12hz-1.7b-voicedesign-bf16.gguf?download=true</DownloadUrl>
 		<InfoUrl>https://github.com/QwenLM/Qwen3-TTS</InfoUrl>

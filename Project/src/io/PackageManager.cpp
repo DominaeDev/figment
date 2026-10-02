@@ -5,6 +5,8 @@
 #include "io/ZipArchive.h"
 #include "io/Xml.h"
 #include "io/FileUtility.h"
+#include "tts/TTSBackend.h"
+#include "llm/LLMBackend.h"
 #include "util/Hash.h"
 
 using namespace fig::data;
@@ -99,6 +101,8 @@ namespace fig::io
 
 		if (packageState == PackageState::Installed)
 			return false; // Already installed
+
+		OnBeforeInstall(package);
 	
 		if (_finishedInstalls.contains(packageId))
 		{
@@ -152,6 +156,8 @@ namespace fig::io
 			if (itPackage == std::ranges::cend(_packages))
 				return false; // Unknown package
 			auto& package = *itPackage;
+
+			OnBeforeUninstall(package);
 
 			// Delete files
 			auto packagesDirectory = GetPackagesFolder();
@@ -329,9 +335,9 @@ namespace fig::io
 			if (states[package.id] != PackageState::NotDownloaded)
 				continue;
 
-			fig::path fullFile = GetTemporaryFolder() / fig::path { (fig::string)package.id };
-			fig::path partialFile = GetTemporaryFolder() / fig::path { std::format("{}.part", (fig::string)package.id) };
-			if (std::filesystem::exists(partialFile) or std::filesystem::exists(fullFile))
+			fig::path fullFilename = GetTemporaryFolder() / fig::path { (fig::string)package.id };
+			fig::path partialFilename = GetTemporaryFolder() / fig::path { std::format("{}.part", (fig::string)package.id) };
+			if (std::filesystem::exists(partialFilename) or std::filesystem::exists(fullFilename))
 				states[package.id] = PackageState::PartiallyDownloaded;
 		}
 
@@ -344,18 +350,45 @@ namespace fig::io
 			bool bKnown = true;
 			bool bValid = true;
 			if (not knownHashes.contains(package.id))
-			{
 				bKnown = false;
-				continue;
-			}
 			if (package.sha256 != knownHashes[package.id])
-			{
 				bValid = false;
-				continue;
-			}
-			if (bKnown)
-				states[package.id] = bValid ? PackageState::Installed : PackageState::VerificationFailed;
+			
+			bool bInstalled = bKnown and bValid;
+			bool bFailed = bKnown and !bValid;
+			if (bInstalled)
+				states[package.id] = PackageState::Installed;
+			else if (bFailed)
+				states[package.id] = PackageState::VerificationFailed;
 		}
+
+		// Remove leftover install files
+		std::unordered_set<fig::path> removeTempFiles;
+		for (auto& package : packages)
+		{
+			auto& state = states[package.id];
+			if (state == PackageState::NotDownloaded or state == PackageState::Installed or state == PackageState::Unknown)
+			{
+				fig::path partialFilename = GetTemporaryFilename(std::format("{}.part", (fig::string)package.id));
+				fig::path fullFilename = GetTemporaryFilename((fig::string)package.id);
+				if (std::filesystem::exists(partialFilename))
+					removeTempFiles.insert(partialFilename);
+				else if (std::filesystem::exists(fullFilename))
+					removeTempFiles.insert(fullFilename);
+				
+				for (auto& entry : package.entries)
+				{
+					fig::path partialEntryFilename = GetTemporaryFilename(std::format("{}.part", (fig::string)entry.id));
+					fig::path fullEntryFilename = GetTemporaryFilename((fig::string)entry.id);
+					if (std::filesystem::exists(partialEntryFilename))
+						removeTempFiles.insert(partialEntryFilename);
+					else if (std::filesystem::exists(fullEntryFilename))
+						removeTempFiles.insert(fullEntryFilename);
+				}
+			}
+		}
+		if (size_t removed = DeleteFiles(removeTempFiles))
+			LogLn(std::format("Deleted {} temporary package files", removed));
 
 		{	// Store result
 			std::scoped_lock lock(_mutex);
@@ -651,5 +684,35 @@ namespace fig::io
 				ctx.SetFlag((fig::string)id);
 		}
 		return ctx;
+	}
+
+	void PackageManager::OnBeforeInstall(const PackageInfo& package)
+	{
+		if (package.type == PackageType::TTSServer
+			or package.type == PackageType::TTSVoiceModel
+			or package.type == PackageType::TTSDesignModel)
+		{
+			Global::GetTTSBackend().Shutdown();
+		}
+
+		if (package.type == PackageType::LLMModel)
+		{
+			Global::GetLLMBackend().Shutdown();
+		}
+	}
+
+	void PackageManager::OnBeforeUninstall(const PackageInfo& package)
+	{
+		if (package.type == PackageType::TTSServer
+			or package.type == PackageType::TTSVoiceModel
+			or package.type == PackageType::TTSDesignModel)
+		{
+			Global::GetTTSBackend().Shutdown();
+		}
+
+		if (package.type == PackageType::LLMModel)
+		{
+			Global::GetLLMBackend().Shutdown();
+		}
 	}
 }

@@ -1900,6 +1900,9 @@
     <ClInclude Include="include\gui\UserSettingsEditorMainTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClInclude>
+    <ClInclude Include="include\gui\ControlDefs.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

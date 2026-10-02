@@ -30,7 +30,7 @@ namespace fig::gui
 	void EditorScreen::ReleaseEditor()
 	{
 		if (_pEditor)
-			_pEditor->Shutdown();
+			_pEditor->Close();
 		_pScrollPanel->RemoveChildren();
 		_pEditor.reset();
 	}

@@ -55,7 +55,7 @@ namespace fig::io
 		partPath += ".part";
 
 		std::error_code errorCode;
-		uint64_t existingSize = 0;
+		uint64_t existingSize {};
 		if (std::filesystem::exists(partPath, errorCode))
 			existingSize = std::filesystem::file_size(partPath, errorCode);
 
@@ -159,6 +159,7 @@ namespace fig::io
 			return DownloadError::Cancelled;
 
 		file.close();
+		
 		std::filesystem::rename(partPath, destination, errorCode);
 		if (errorCode)
 			return DownloadError::FileError;

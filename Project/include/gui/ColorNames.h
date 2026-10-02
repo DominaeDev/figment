@@ -57,6 +57,7 @@ namespace fig::gui
 		SliderBackground,
 		SliderThumb,
 		SliderFill,
+		ProgressBarBackground,
 		ProgressBarFill,
 		ScrollBar,
 
@@ -173,6 +174,7 @@ namespace fig::gui
 		std::pair { Color::SliderBackground,					"Slider.Background" },
 		std::pair { Color::SliderThumb,							"Slider.Thumb" },
 		std::pair { Color::SliderFill,							"Slider.Fill" },
+		std::pair { Color::ProgressBarBackground,				"ProgressBar.Background" },
 		std::pair { Color::ProgressBarFill,						"ProgressBar.Fill" },
 		std::pair { Color::Label,								"Label" },
 		std::pair { Color::DisabledLabel,						"Label.Disabled" },

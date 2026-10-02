@@ -13,6 +13,21 @@ namespace fig::io
 	std::expected<fig::string, FileError> ReadTextFile(const fig::path& filename, bool normalizeNewlines = true);
 	FileError ReadTextFile(const fig::path& filename, fig::string& out_content, bool normalizeNewlines = true);
 	FileError WriteTextFile(const fig::path& filename, const fig::string& content, bool append = false);
+
+	FileError DeleteFile(const fig::path& path) noexcept;
+		
+	template <std::ranges::range T>
+	requires std::is_same_v<fig::path, std::ranges::range_value_t<T>>
+	size_t DeleteFiles(const T& paths) noexcept
+	{
+		size_t count = 0uz;
+		for (auto& path : paths)
+		{
+			if (DeleteFile(path) == FileError::NoError)
+				count++;
+		}
+		return count;
+	}
 	
 	fig::path GetUserDataFolder();
 	fig::path GetUserDataFilename(const fig::path& filename);

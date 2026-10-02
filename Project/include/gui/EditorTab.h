@@ -27,12 +27,15 @@ namespace fig::gui
 		}
 
 		using SaveResult = std::expected<void, std::runtime_error>;
-		virtual SaveResult OnSave() noexcept { return {}; };
-		virtual void OnShutdown() noexcept {};
 
 		void SetChangedDelegate(EditorPropertyChangedDelegate fnDelegate) noexcept { _fnChanged = fnDelegate; }
 
 	protected:
+		friend class Editor;
+		virtual SaveResult OnSave() noexcept { return {}; };
+		virtual void OnClose() noexcept {};
+		virtual void OnTabSelected() {};
+
 		fig::observer_ptr<StaticText> CreateHeader(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 		fig::observer_ptr<StaticText> CreateHint(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
 		fig::observer_ptr<StaticText> CreateLabel(ControlPtr pParent, SizerPtr pSizer, fig::string_view text);
@@ -107,9 +110,18 @@ namespace fig::gui
 			return pControl;
 		}
 
+		fig::observer_ptr<DropList> CreateDropList(ControlPtr pParent, SizerPtr pSizer, std::function<void(int32_t)> fnDelegate)
+		{
+			auto pControl = pParent->CreateControl<DropList>();
+			pControl->SetDelegate(fnDelegate);
+			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
+			return pControl;
+		}
+
 		fig::observer_ptr<CheckBox> CreateToggle(ControlPtr pParent, SizerPtr pSizer, fig::string_view label, ValueBinding<bool> binding);
 		fig::observer_ptr<CheckBox> CreateToggle(ControlPtr pParent, SizerPtr pSizer, fig::string_view label, std::function<void(bool)> fnDelegate);
 
+		void OnAfterLayout() override;
 		void SetDirty() noexcept;
 	private:
 		EditorPropertyChangedDelegate _fnChanged {};

@@ -56,14 +56,16 @@ namespace fig::gui
 			}
 		}
 
-		LoadColorTheme(ColorTheme::LightDefault,		fig::path { "resources/gui/themes/light_default.txt" });
+		LoadColorTheme(ColorTheme::LightDefault,	fig::path { "resources/gui/themes/light_default.txt" });
+		LoadColorTheme(ColorTheme::LightGray,		fig::path { "resources/gui/themes/light_gray.txt" });
 		LoadColorTheme(ColorTheme::LightPink, 		fig::path { "resources/gui/themes/light_pink.txt" });
 		LoadColorTheme(ColorTheme::LightBlue,		fig::path { "resources/gui/themes/light_blue.txt" });
 		LoadColorTheme(ColorTheme::LightGreen,		fig::path { "resources/gui/themes/light_green.txt" });
-		LoadColorTheme(ColorTheme::LightGray,		fig::path { "resources/gui/themes/light_gray.txt" });
+		LoadColorTheme(ColorTheme::LightYellow,		fig::path { "resources/gui/themes/light_yellow.txt" });
 		LoadColorTheme(ColorTheme::DarkDefault,		fig::path { "resources/gui/themes/dark_default.txt" });
-		LoadColorTheme(ColorTheme::DarkPink,			fig::path { "resources/gui/themes/dark_pink.txt" });
-		LoadColorTheme(ColorTheme::DarkBlue,			fig::path { "resources/gui/themes/dark_blue.txt" });
+		LoadColorTheme(ColorTheme::DarkBlack,		fig::path { "resources/gui/themes/dark_black.txt" });
+		LoadColorTheme(ColorTheme::DarkPink,		fig::path { "resources/gui/themes/dark_pink.txt" });
+		LoadColorTheme(ColorTheme::DarkBlue,		fig::path { "resources/gui/themes/dark_blue.txt" });
 		LoadColorTheme(ColorTheme::DarkGreen,		fig::path { "resources/gui/themes/dark_green.txt" });
 		LoadColorTheme(ColorTheme::DarkBrown,		fig::path { "resources/gui/themes/dark_brown.txt" });
 

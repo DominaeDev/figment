@@ -190,7 +190,7 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorVoiceTab::OnShutdown() noexcept
+	void CharacterEditorVoiceTab::OnClose() noexcept
 	{
 		Global::GetAudioManager().StopAllSounds();
 		Global::GetTTSBackend().UnloadDesignModels();
@@ -330,11 +330,6 @@ namespace fig::gui
 			_pGenerateButton->SetEnabled(true);
 			_pPlayButton->SetEnabled(true);
 		}
-	}
-
-	void CharacterEditorVoiceTab::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
 	}
 
 	void CharacterEditorVoiceTab::PlayStop() noexcept

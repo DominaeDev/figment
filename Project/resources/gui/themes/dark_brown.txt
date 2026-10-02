@@ -28,9 +28,10 @@ Label.Disabled							#7B6A5BC0 // blend with background
 HintText								#937358 // (less contrast)
 CheckBox.Background						#1D140C
 CheckBox.Background.Pressed				#231910
-Slider.Background						#34281D
+Slider.Background						#261D17
 Slider.Thumb							#634B36
 Slider.Fill								#E7AA74
+ProgressBar.Background					#261D17
 ProgressBar.Fill						#E7AA74
 ScrollBar								#C0C0C0
 StatusBar.Foreground					#DFC8B4
@@ -53,7 +54,7 @@ Card.Shadow								#2A211A
 	
 // Button (Default)	
 Button.Default.Foreground				#DFC8B4
-Button.Default.Background				#423328
+Button.Default.Background				#33271F
 Button.Default.Border					#8A6342
 Button.Hover.Foreground					#DFC8B4
 Button.Hover.Background					#4F3722

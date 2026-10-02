@@ -268,10 +268,20 @@ namespace fig::io
 		if (not std::filesystem::exists(path))
 		{
 			std::error_code errorCode {};
-			std::filesystem::create_directories(path, errorCode);
-			if (errorCode)
-				return false;
+			return std::filesystem::create_directories(path, errorCode);
 		}
 		return true;
+	}
+
+	FileError DeleteFile(const fig::path& filename) noexcept
+	{
+		if (std::filesystem::exists(filename) and std::filesystem::is_regular_file(filename))
+		{
+			std::error_code errorCode;
+			if (std::filesystem::remove(filename, errorCode))
+				return FileError::NoError;
+			return FileError::UnknownError;
+		}
+		return FileError::NotFound;
 	}
 }

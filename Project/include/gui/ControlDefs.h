@@ -1,0 +1,41 @@
+#pragma once
+
+namespace fig::gui
+{
+	class Area;
+	class Panel;
+	class ButtonWithIcon;
+	class ButtonWithLabel;
+	class ButtonWithLabelAndIcon;
+	class CheckBox;
+	class ComboBox;
+	class Control;
+	class Frame;
+	class HorizontalBar;
+	class HorisontalGradient;
+	class HorisontalLine;
+	class Image;
+	class ImageWithMask;
+	class NineGridImage;
+	class NonOwningImageWithMask;
+	class Menu;
+	class Overlay;
+	class PasswordBox;
+	class RenderTargetControl;
+	class ResizeableImageViewport;
+	class ResizeHandle;
+	class RoundedBorder;
+	class ScrollPanel;
+	class SearchBox;
+	class Slider;
+	class StaticText;
+	class TextBox;
+	class TextInput;
+	class TexturedBorder;
+	class ToggleWithIcon;
+	class ToggleWithLabel;
+	class VerticalBar;
+	class VerticalGradient;
+	class VerticalScrollBar;
+	class Window;
+}

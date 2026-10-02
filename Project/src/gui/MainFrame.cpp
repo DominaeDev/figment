@@ -381,7 +381,6 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_F4 and mods.None)
 					{
 						Global::GetTTSBackend().Initialize();
-						auto discard = Global::GetTTSBackend().Speak(fig::uuid { "e66008f6-f3b8-4099-a50d-1cc284ecd008" }, "These are nice, tasty biscuits.", false);
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F4 and mods.Control)
@@ -639,7 +638,10 @@ namespace fig::gui
 		{
 			// Preload speech model
 			Global::GetTTSBackend().UnloadDesignModels(); // jic
-			auto discard = Global::GetTTSBackend().Speak(characterId, "Hi.");
+			if (Global::GetUserSettings().GetBool(UserSetting::TTS::Warmup))
+			{
+				auto _discarded = Global::GetTTSBackend().Speak(characterId, ".");
+			}
 
 			PromptScaffold scaffold;
 			if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))

@@ -96,6 +96,10 @@ namespace fig::gui
 		return pControl;
 	}
 
+	void EditorTabBase::OnAfterLayout()
+	{
+		ResizeToFit(false, true);
+	}
 
 	void EditorTabBase::SetDirty() noexcept
 	{

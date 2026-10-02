@@ -22,7 +22,6 @@ namespace fig::gui
 		About,
 	};
 
-
 	CharacterEditor::CharacterEditor(ControlPtr pParent) : Editor(pParent)
 	{
 		CreateTab<CharacterEditorGeneralTab>();
@@ -91,15 +90,7 @@ namespace fig::gui
 		if (_assetId.empty())
 			return false;
 
-		bool bOk = true;
-		for (auto& tab : _tabs)
-		{
-			if (auto result = tab->OnSave(); not result.has_value())
-			{
-				bOk = false;
-				break;
-			}
-		}
+		bool bOk = SaveTabs();
 
 		if (not bOk)
 		{
@@ -114,11 +105,6 @@ namespace fig::gui
 		auto pBorder = _pSaveButton->GetBorderRenderer();
 		pBorder->SetColor(Color::Border);
 		return true;
-	}
-
-	void CharacterEditor::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
 	}
 
 	std::vector<EditorTabDescriptor> CharacterEditor::GetTabDescriptors() const

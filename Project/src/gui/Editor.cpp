@@ -12,6 +12,10 @@ namespace fig::gui
 	{
 		for (size_t i = 0uz; i < _tabs.size(); ++i)
 			EnableTab(_tabs[i], i == index);
+
+		if (index < _tabs.size())
+			_tabs[index]->OnTabSelected();
+
 		InvalidateLayout();
 		LayoutNow();
 	}
@@ -26,11 +30,11 @@ namespace fig::gui
 		}
 	}
 
-	void Editor::Shutdown()
+	void Editor::Close()
 	{
 		for (size_t i = 0uz; i < _tabs.size(); ++i)
-			_tabs[i]->OnShutdown();
-		OnShutdown();
+			_tabs[i]->OnClose();
+		OnClose();
 	}
 
 	void Editor::SetDirty() noexcept
@@ -39,4 +43,16 @@ namespace fig::gui
 		OnPropertyChanged();
 	}
 
+	void Editor::OnAfterLayout()
+	{
+		ResizeToFit(false, true);
+	}
+
+	bool Editor::SaveTabs()
+	{
+		bool bOk = true;
+		for (auto& tab : _tabs)
+			bOk &= (bool)(tab->OnSave());
+		return bOk;
+	}
 }

@@ -45,7 +45,6 @@ namespace fig::gui
 	private:
 		void ShowAttributesMenu();
 		void OnAttributeSettingsMenu(size_t attributeIndex);
-		void OnAfterLayout();
 
 		fig::observer_ptr<fig::data::Character> _pCharacter {};
 

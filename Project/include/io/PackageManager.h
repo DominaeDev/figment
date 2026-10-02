@@ -212,6 +212,9 @@ namespace fig::io
 
 		mutable std::mutex _mutex; // Guards all state
 
+		void OnBeforeInstall(const fig::data::PackageInfo& package);
+		void OnBeforeUninstall(const fig::data::PackageInfo& package);
+
 	public:
 		static auto XmlFields() noexcept
 		{

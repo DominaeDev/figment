@@ -11,7 +11,6 @@ namespace fig::gui
 		CharacterEditor(ControlPtr pParent);
 
 		bool Initialize(const fig::uuid& assetId) noexcept;
-		void OnShutdown() noexcept override {}
 		
 		fig::string GetTitle() const noexcept override;
 		std::vector<EditorTabDescriptor> GetTabDescriptors() const override;
@@ -20,7 +19,6 @@ namespace fig::gui
 		bool Save() noexcept;
 
 	protected:
-		void OnAfterLayout() override;
 		void OnPropertyChanged() override;
 
 	private:

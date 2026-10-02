@@ -67,9 +67,4 @@ namespace fig::gui
 		}
 		return true;
 	}
-
-	void UserSettingsEditorExtensionsTab::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
-	}
 }

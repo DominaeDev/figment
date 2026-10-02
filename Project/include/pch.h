@@ -19,11 +19,12 @@
 	#define NOMINMAX
 	#include <windows.h>
 
-	// Undefine troublesome macros
+	// Undefine troublesome windows macros
 	#undef LoadImage
 	#undef DrawText
 	#undef SetCursor
 	#undef ReadFile
+	#undef DeleteFile
 	
 	#define PLATFORM_WINDOWS 1
 

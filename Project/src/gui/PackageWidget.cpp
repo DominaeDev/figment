@@ -11,6 +11,8 @@ using namespace fig::io;
 
 namespace fig::gui
 {
+	constexpr float RefreshCadence = 0.1f;
+
 	PackageWidget::PackageWidget(ControlPtr pParent, const fig::data::PackageInfo& package) : Control(pParent)
 	{
 		_packageId = package.id;
@@ -40,6 +42,7 @@ namespace fig::gui
 		pHorizontalSizer->Add(pRightSizer, 0, SizerFlag::FixedSize, 100);
 
 		_pName = CreateControl<StaticText>("", FontFace::Default, 18.0, false);
+		_pName->SetForegroundColor(Color::AppForeground);
 		_pName->SetTextAndResize(package.name);
 		_pName->SetMaxWidth(540);
 		_pName->EnableEllipsis(true);
@@ -75,14 +78,14 @@ namespace fig::gui
 
 		fig::string infoUrl = package.infoUrl;
 		_pInfoButton->SetVisible(not infoUrl.empty());
-		_pInfoButton->SetPosition(_pName->GetX() + _pName->GetWidth() + 2, 8);
+		_pInfoButton->SetPosition(_pName->GetX() + _pName->GetWidth() + 2, 6);
 		_pInfoButton->SetDelegate([infoUrl] { SDL_OpenURL(infoUrl.c_str()); });
 
 		_pStatusText = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
 		_pStatusText->SetPosition(GetWidth() - _pStatusText->GetWidth() - 10, GetHeight() - _pStatusText->GetHeight() - 7);
 
 		_pProgressBar = CreateControl<HorizontalBar>(Resource::HORIZONTAL_BAR);
-		_pProgressBar->SetForegroundColor(Color::CardShadow);
+		_pProgressBar->SetForegroundColor(Color::ProgressBarBackground);
 		_pProgressBar->SetHeight(8);
 		_pProgressBar->SetVisible(false);
 		pSizer->Add(_pProgressBar, 0, SizerFlag::Expand | SizerFlag::FixedSize, 40);
@@ -100,8 +103,6 @@ namespace fig::gui
 
 	void PackageWidget::OnUpdate(float fElapsed)
 	{
-		constexpr float RefreshCadence = 0.2f;
-
 		_fRefreshCounter += fElapsed;
 		if (_fRefreshCounter > RefreshCadence)
 		{
@@ -193,10 +194,10 @@ namespace fig::gui
 
 		if (_installationState.phase == InstallationPhase::Downloading)
 		{
-			_pProgressText->SetTextAndResize(std::format("Downloading\u2026 {}/{} ({}%)",
+			_pProgressText->SetTextAndResize(std::format("Downloading\u2026 {}/{} ({:.1f}%)",
 				format_file_size(_installationState.bytesReceived),
 				format_file_size(_installationState.bytesTotal),
-				toI(_installationState.GetProgress() * 100.0f)
+				_installationState.GetProgress() * 100.0f
 			));
 		}
 		else if (_installationState.phase == InstallationPhase::Decompressing)

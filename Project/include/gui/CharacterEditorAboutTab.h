@@ -13,9 +13,6 @@ namespace fig::gui
 		bool Initialize(CharacterEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
 
-	protected:
-		void OnAfterLayout();
-
 	private:
 		fig::observer_ptr<fig::data::Character> _pCharacter {};
 		fig::observer_ptr<TextBox> _pTags {};

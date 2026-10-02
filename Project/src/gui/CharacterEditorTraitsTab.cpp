@@ -60,11 +60,6 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorTraitsTab::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
-	}
-
 	fig::observer_ptr<ToggleWithLabel> CharacterEditorTraitsTab::CreateTrait(SizerPtr pSizer, fig::handle traitId, fig::string_view label)
 	{
 		auto pToggle = CreateControl<ToggleWithLabel>(label, 14.5, ToggleBehavior::Default);

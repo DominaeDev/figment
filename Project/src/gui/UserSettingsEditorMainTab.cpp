@@ -21,7 +21,7 @@ namespace fig::gui
 		auto pSizer = SetSizer<VerticalSizer>();
 
 		// Color theme
-		static constexpr std::array<std::pair<fig::string_view, ColorTheme>, 11uz> Themes
+		static constexpr std::array<std::pair<fig::string_view, ColorTheme>, 13uz> Themes
 		{
 			std::pair { "System default",	ColorTheme::SystemDefault },
 			std::pair { "Vanilla",			ColorTheme::LightDefault },
@@ -29,7 +29,9 @@ namespace fig::gui
 			std::pair { "Cherry blossom",	ColorTheme::LightPink },
 			std::pair { "Cool blue",		ColorTheme::LightBlue },
 			std::pair { "Morning dew",		ColorTheme::LightGreen },
+			std::pair { "Lemon zest",		ColorTheme::LightYellow },
 			std::pair { "Graphite",			ColorTheme::DarkDefault },
+			std::pair { "Obsidian",			ColorTheme::DarkBlack },
 			std::pair { "Cheeky rose",		ColorTheme::DarkPink  },
 			std::pair { "Midnight blue",	ColorTheme::DarkBlue  },
 			std::pair { "Forest green",		ColorTheme::DarkGreen },
@@ -51,11 +53,6 @@ namespace fig::gui
 			pTheme->Select(toI(index), true);
 		
 		return true;
-	}
-
-	void UserSettingsEditorMainTab::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
 	}
 
 	void UserSettingsEditorMainTab::ChangeColorTheme(ColorTheme theme)

@@ -7,9 +7,6 @@
 
 namespace fig::gui
 {
-	class Menu;
-	class Frame;
-
 	class Control : public LayoutElement
 	{
 	public:

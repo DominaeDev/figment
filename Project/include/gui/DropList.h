@@ -89,6 +89,12 @@ namespace fig::gui
 			return std::nullopt;
 		}
 
+		void Clear()
+		{
+			DropListBase::Clear();
+			_selectedIndex = -1;
+		}
+
 	private:
 		std::vector<T> _values;
 	};

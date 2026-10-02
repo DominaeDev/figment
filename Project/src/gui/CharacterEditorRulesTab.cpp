@@ -62,11 +62,6 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorRulesTab::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
-	}
-
 	fig::observer_ptr<CharacterAttributeWidget> CharacterEditorRulesTab::AppendControl(fig::string_view value, size_t index)
 	{
 		auto pRule = CreateControl<CharacterAttributeWidget>("", value, CharacterAttribute::ValueType::ShortText);

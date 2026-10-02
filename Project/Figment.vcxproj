@@ -513,6 +513,7 @@
     <ClInclude Include="include\gui\ColorNames.h" />
     <ClInclude Include="include\gui\ColorRef.h" />
     <ClInclude Include="include\gui\ColorTheme.h" />
+    <ClInclude Include="include\gui\ControlDefs.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
     <ClInclude Include="include\gui\IMeshControl.h" />
     <ClInclude Include="include\gui\CardImage.h" />

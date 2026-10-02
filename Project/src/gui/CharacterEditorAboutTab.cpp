@@ -59,11 +59,6 @@ namespace fig::gui
 
 		return true;
 	}
-
-	void CharacterEditorAboutTab::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
-	}
 	
 	EditorTabBase::SaveResult CharacterEditorAboutTab::OnSave() noexcept
 	{

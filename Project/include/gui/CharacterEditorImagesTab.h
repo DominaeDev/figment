@@ -28,7 +28,6 @@ namespace fig::gui
 		void ProcessLoadQueue();
 		
 		void OnUpdate(float fElapsed) override;
-		void OnAfterLayout();
 
 		void OnClickedSmallPortrait();
 		void RevertSmallPortrait();

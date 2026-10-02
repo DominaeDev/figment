@@ -61,11 +61,6 @@ namespace fig::gui
 			_pSmallPortraitPreview->SetDirty();
 	}
 
-	void CharacterEditorImagesTab::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
-	}
-
 	void SDLCALL CharacterEditorImagesTab::OnFileDialogResult(void* userdata, const char* const* fileList, int filter)
 	{
 		if (not fileList)

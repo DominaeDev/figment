@@ -132,6 +132,25 @@ namespace fig::gui
 			}
 		}
 
+		if (event.type == SDL_EVENT_SYSTEM_THEME_CHANGED)
+		{
+			if (Global::IsSignedIn())
+			{
+				auto theme = Global::GetUserSettings().GetColorTheme();
+				if (theme == ColorTheme::SystemDefault)
+				{
+					AppColors::SetTheme(ColorTheme::SystemDefault);
+					PushEvent(UserEvent::ColorThemeChanged);
+				}
+			}
+			else
+			{
+				AppColors::SetTheme(ColorTheme::SystemDefault);
+				PushEvent(UserEvent::ColorThemeChanged);
+			}
+			return EventResult::Handled;
+		}
+
 		if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && HandleMouseDown(event.button))
 			return EventResult::Handled;
 		

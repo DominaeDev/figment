@@ -29,8 +29,6 @@ namespace fig::gui
 		fig::data::CharacterTraitInfoDatabase _traitsInfo;
 
 	private:
-		void OnAfterLayout();
-
 		fig::observer_ptr<fig::data::Character> _pCharacter {};
 
 		std::map<fig::handle, fig::observer_ptr<ToggleWithLabel>> _traitToggles;

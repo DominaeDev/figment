@@ -110,11 +110,6 @@ namespace fig::gui
 		return true;
 	}
 
-	void CharacterEditorGeneralTab::OnAfterLayout()
-	{
-		ResizeToFit(false, true);
-	}
-		
 	void CharacterEditorGeneralTab::ShowAttributesMenu()
 	{
 		auto usedAttributeIds = _items

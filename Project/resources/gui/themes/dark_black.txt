@@ -1,74 +1,74 @@
 // Primary theme colors
-App.Foreground							#F2F3F5
-App.Background							#313338
-App.Accent								#5865F2
+App.Foreground							#E6E8EC
+App.Background							#151618
+App.Accent								#395BA7
 
 // Side panel (low-contrast off-shade)
-SidePanel.Foreground					#B5BAC1
-SidePanel.Background					#2B2D31
-SidePanel.Gradient						#1E1F22 // Darker, fade
+SidePanel.Foreground					#AAB0B8
+SidePanel.Background					#121315
+SidePanel.Gradient						#0B0B0C // Darker, fade
 
 // Controls
-TextBox.Foreground						#F2F3F5
-TextBox.Foreground.Disabled				#595D63
-TextBox.Background						#1E1F22
-TextBox.Background.Disabled				#1C1D20
+TextBox.Foreground						#E6E8EC
+TextBox.Foreground.Disabled				#4F5358
+TextBox.Background						#0B0B0C
+TextBox.Background.Disabled				#0A0A0B
 TextBox.Selection.Foreground			#FFFFFF
-TextBox.Selection.Background			#3C45A5
-TextBox.Selection.Background.Inactive	#55575E
-TextBox.Cursor							#F2F3F5
+TextBox.Selection.Background			#3D4381
+TextBox.Selection.Background.Inactive	#292A2D
+TextBox.Cursor							#E6E8EC
 TextBox.ScrollBar						#FFFFFF60
-Border									#5B5E68
-Border.Disabled							#4E5058
-Border.Highlighted						#909090
-Icon									#B5BAC1
-Icon.Disabled							#6A6D74
-Label									#B5BAC1
-Label.Disabled							#6A6D74C0 // blend with background
-HintText								#80848E // (less contrast)
-CheckBox.Background						#1E1F22
-CheckBox.Background.Pressed				#24262A
-Slider.Background						#1B1C1F
-Slider.Thumb							#4A4C53
+Border									#36373D
+Border.Disabled							#25262A
+Border.Highlighted						#494949
+Icon									#AAB0B8
+Icon.Disabled							#606369
+Label									#AAB0B8
+Label.Disabled							#606369 // blend with background
+HintText								#767A84 // (less contrast)
+CheckBox.Background						#0B0B0C
+CheckBox.Background.Pressed				#0E0F11
+Slider.Background						#090A0B
+Slider.Thumb							#232427
 Slider.Fill								#7983F5
-ProgressBar.Background					#1B1C1F
+ProgressBar.Background					#090A0B
 ProgressBar.Fill						#7983F5
 ScrollBar								#C0C0C0
-StatusBar.Foreground					#B5BAC1
-StatusBar.Background					#232428
-Control.Selected.Border					#5865F2
-Control.Foreground.Disabled				#949BA4
-Control.Background.Disabled				#1C1D20
+StatusBar.Foreground					#AAB0B8
+StatusBar.Background					#0E0E10
+Control.Selected.Border					#395BA7
+Control.Foreground.Disabled				#89919B
+Control.Background.Disabled				#0A0A0B
 	
-Panel.Foreground						#B5BAC1
-Panel.Background						#2B2D31
-Panel.Background.Hover					#4A4C53
+Panel.Foreground						#AAB0B8
+Panel.Background						#121315
+Panel.Background.Hover					#232427
 	
-Menu.Foreground 						#A6ABB5
-Menu.Foreground.Disabled				#595D63
-Menu.Background 						#1E1F22
-Menu.Border 							#1E1F22
-Menu.Item.Hover 						#292B2F
-Menu.Item.Pressed 						#5B5E68
-Card.Shadow								#26272B
+Menu.Foreground 						#AAB0B8
+Menu.Foreground.Disabled				#4F5358
+Menu.Background 						#0B0B0C
+Menu.Border 							#0B0B0C
+Menu.Item.Hover 						#1B1C1F
+Menu.Item.Pressed 						#36373D
+Card.Shadow								#0F1011
 	
 // Button (Default)	
-Button.Default.Foreground				#B5BAC1
-Button.Default.Background				#282A2E
-Button.Default.Border					#5B5E68
-Button.Hover.Foreground					#B5BAC1
-Button.Hover.Background					#45474E
-Button.Hover.Border						#5B5E68
-Button.Pressed.Foreground				#B5BAC1
-Button.Pressed.Background				#5B5E68
-Button.Pressed.Border					#5B5E68
+Button.Default.Foreground				#AAB0B8
+Button.Default.Background				#101113
+Button.Default.Border					#36373D
+Button.Hover.Foreground					#AAB0B8
+Button.Hover.Background					#202125
+Button.Hover.Border						#36373D
+Button.Pressed.Foreground				#AAB0B8
+Button.Pressed.Background				#36373D
+Button.Pressed.Border					#36373D
 
 // Button (Side panel)
-SidePanelButton.Default.Foreground		#B5BAC1
+SidePanelButton.Default.Foreground		#AAB0B8
 SidePanelButton.Default.Background		#FFFFFF00
-SidePanelButton.Hover.Foreground		#B5BAC1
+SidePanelButton.Hover.Foreground		#AAB0B8
 SidePanelButton.Hover.Background		#FFFFFF1A
-SidePanelButton.Pressed.Foreground		#B5BAC1
+SidePanelButton.Pressed.Foreground		#AAB0B8
 SidePanelButton.Pressed.Background		#FFFFFF33
 
 // Save button (Green)
