@@ -128,7 +128,7 @@ SDL_AppResult SDL_AppIterate(void* state)
 
 	Global::GetLLMBackend().Update(fElapsed);
 	Global::GetAudioManager().Update(fElapsed);
-	ColorTheme::Update(fElapsed);
+	AppColors::Update(fElapsed);
 
 	auto& mainWnd = Global::GetMainWindow();
 	mainWnd.Update(fElapsed);

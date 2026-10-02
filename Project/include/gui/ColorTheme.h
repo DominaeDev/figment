@@ -7,7 +7,7 @@ namespace fig::gui
 {
 	using ColorTable = std::array<fig::color, static_cast<size_t>(Color::Count)>;
 
-	enum class Theme
+	enum class ColorTheme
 	{
 		SystemDefault = 0,
 		LightDefault,
@@ -24,37 +24,37 @@ namespace fig::gui
 		Count,
 	};
 
-	constexpr auto ColorThemeMapping = std::array<std::pair<Theme, std::string_view>, static_cast<size_t>(Theme::Count)> {
-		std::pair { Theme::SystemDefault,	"Default" },
-		std::pair { Theme::LightDefault,	"Light" },
-		std::pair { Theme::LightGray,		"LightGray" },
-		std::pair { Theme::LightPink,		"LightPink" },
-		std::pair { Theme::LightBlue,		"LightBlue" },
-		std::pair { Theme::LightGreen,		"LightGreen" },
-		std::pair { Theme::DarkDefault,		"Dark" },
-		std::pair { Theme::DarkPink,		"DarkPink" },
-		std::pair { Theme::DarkBlue,		"DarkBlue" },
-		std::pair { Theme::DarkGreen,		"DarkGreen" },
-		std::pair { Theme::DarkBrown,		"DarkBrown" },
+	constexpr auto ColorThemeMapping = std::array<std::pair<ColorTheme, std::string_view>, static_cast<size_t>(ColorTheme::Count)> {
+		std::pair { ColorTheme::SystemDefault,	"Default" },
+		std::pair { ColorTheme::LightDefault,	"Light" },
+		std::pair { ColorTheme::LightGray,		"LightGray" },
+		std::pair { ColorTheme::LightPink,		"LightPink" },
+		std::pair { ColorTheme::LightBlue,		"LightBlue" },
+		std::pair { ColorTheme::LightGreen,		"LightGreen" },
+		std::pair { ColorTheme::DarkDefault,	"Dark" },
+		std::pair { ColorTheme::DarkPink,		"DarkPink" },
+		std::pair { ColorTheme::DarkBlue,		"DarkBlue" },
+		std::pair { ColorTheme::DarkGreen,		"DarkGreen" },
+		std::pair { ColorTheme::DarkBrown,		"DarkBrown" },
 	};
 
-	class ColorTheme
+	class AppColors
 	{
 	public:
 		static bool Init();
-		static bool SetTheme(Theme theme, bool bTransition = false);
-		static Theme GetTheme() noexcept { return _state.currentTheme; }
+		static bool SetTheme(ColorTheme theme, bool bTransition = false);
+		static ColorTheme GetTheme() noexcept { return _state.currentTheme; }
 		static void Update(float fElapsed) noexcept;
 		static bool IsTransitioning() noexcept { return _state.isTransitioning; }
 
 	private:
-		static fig::io::FileError LoadColorTheme(Theme theme, const fig::path& path);
+		static fig::io::FileError LoadColorTheme(ColorTheme theme, const fig::path& path);
 
 		static struct State
 		{
 			ColorTable colorTable {};
-			std::map<Theme, ColorTable> colorThemes {};
-			Theme currentTheme { Theme::SystemDefault };
+			std::map<ColorTheme, ColorTable> colorThemes {};
+			ColorTheme currentTheme { ColorTheme::SystemDefault };
 
 			bool isTransitioning { false };
 			ColorTable fromTable {};

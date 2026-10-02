@@ -25,7 +25,7 @@ namespace fig::gui
 		auto pSizer = SetSizer<VerticalSizer>();
 
 		// Enabled?
-		auto pEnabledToggle = CreateToggle(this, pSizer, "Enable voice features", [](auto&& bOn) {
+		auto pEnabledToggle = CreateToggle(this, pSizer, "Enable text-to-speech features", [](auto&& bOn) {
 			Global::GetUserSettings().SetBool(UserSetting::TTS::Enabled, bOn);
 		});
 		pEnabledToggle->SetValue(userSettings.GetBool(UserSetting::TTS::Enabled), false);
@@ -51,9 +51,9 @@ namespace fig::gui
 		
 		auto currentBackendId = Global::GetUserSettings().GetUUID(UserSetting::TTS::Backend);
 		if (auto itBackend = std::ranges::find(ttsBackends, currentBackendId, [](auto&& b) { return b.id; }); itBackend != std::ranges::cend(ttsBackends))
-			pTTSBackend->Select(static_cast<int32_t>(std::distance(ttsBackends.begin(), itBackend)), false);
+			pTTSBackend->Select(static_cast<int32_t>(std::distance(ttsBackends.begin(), itBackend)), true);
 		else
-			pTTSBackend->Select(-1, false);
+			pTTSBackend->Select(-1, true);
 
 		// Voice model
 		CreateLabel(this, pSizer, "Select speech model");
@@ -76,12 +76,12 @@ namespace fig::gui
 
 		auto currentVoiceModelId = Global::GetUserSettings().GetUUID(UserSetting::TTS::SpeechModel);
 		if (auto itModel = std::ranges::find(voiceModels, currentVoiceModelId, [](auto&& b) { return b.id; }); itModel != std::ranges::cend(voiceModels))
-			pTTSVoiceModel->Select(static_cast<int32_t>(std::distance(voiceModels.begin(), itModel)), false);
+			pTTSVoiceModel->Select(static_cast<int32_t>(std::distance(voiceModels.begin(), itModel)), true);
 		else
-			pTTSVoiceModel->Select(-1, false);
+			pTTSVoiceModel->Select(-1, true);
 
 		// Design model
-		CreateLabel(this, pSizer, "Select voice design model");
+		CreateLabel(this, pSizer, "Select voice design model*");
 		auto designModels = ttsModels
 			| std::views::filter([](auto&& m) { return m.task.task == TTSTask::Design; })
 			| std::ranges::to<std::vector>();
@@ -98,14 +98,16 @@ namespace fig::gui
 		pTTSDesignModel->SetMaxWidth(340);
 		pTTSDesignModel->SetEnabled(not designModels.empty());
 		
+		CreateHint(this, pSizer, "* A voice design model is only necessary when using the character voice editor, not for chatting.");
+
 		auto currentDesignModelId = Global::GetUserSettings().GetUUID(UserSetting::TTS::DesignModel);
 		if (auto itModel = std::ranges::find(designModels, currentDesignModelId, [](auto&& b) { return b.id; }); itModel != std::ranges::cend(designModels))
-			pTTSDesignModel->Select(static_cast<int32_t>(std::distance(designModels.begin(), itModel)), false);
+			pTTSDesignModel->Select(static_cast<int32_t>(std::distance(designModels.begin(), itModel)), true);
 		else
-			pTTSDesignModel->Select(-1, false);
+			pTTSDesignModel->Select(-1, true);
 
 		CreateHorizontalLine(this, pSizer);
-		CreateHeader(this, pSizer, "Other settings");
+		CreateHeader(this, pSizer, "Voice settings");
 
 		// Volume
 		CreateLabel(this, pSizer, "Volume");
@@ -116,7 +118,8 @@ namespace fig::gui
 			Global::GetUserSettings().SetFloat(UserSetting::TTS::Volume, value);
 		});
 		pSizer->AddSpacer(4);
-		pSizer->Add(pVolume, 0, SizerFlag::Expand | SizerFlag::Bottom, 12);
+		pSizer->Add(pVolume, 0, SizerFlag::Expand | SizerFlag::Bottom | SizerFlag::Left, 6);
+		pSizer->AddSpacer(6);
 
 		// Warm-up
 		auto pWarmUpToggle = CreateToggle(this, pSizer, "Warm-up TTS backend (faster first response)", [](auto&& bOn) {
@@ -136,10 +139,5 @@ namespace fig::gui
 	void UserSettingsEditorVoiceTab::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
-	}
-
-	EditorTabBase::SaveResult UserSettingsEditorVoiceTab::OnSave() noexcept
-	{
-		return {};
 	}
 }

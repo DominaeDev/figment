@@ -7,7 +7,7 @@ namespace fig
 	const color_ref color_ref::nullref(&color_ref::null_value);
 
 	color_ref::color_ref(fig::gui::Color color) : 
-		_ptr { &fig::gui::ColorTheme::Get(color) }
+		_ptr { &fig::gui::AppColors::Get(color) }
 	{
 		int k = 0;
 	}

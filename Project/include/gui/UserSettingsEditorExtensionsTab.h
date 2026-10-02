@@ -11,7 +11,6 @@ namespace fig::gui
 		UserSettingsEditorExtensionsTab(ControlPtr pParent);
 
 		bool Initialize(UserSettingsEditorArgs args) override;
-		SaveResult OnSave() noexcept override;
 
 	protected:
 		void OnAfterLayout() override;

@@ -336,6 +336,7 @@ namespace fig::gui
 			_pAttributeSizer->Remove(item.pControl);
 			DestroyChild(item.pControl);
 			_items.erase(itFind);
+			SetDirty();
 		}
 	}
 

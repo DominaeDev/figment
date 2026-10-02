@@ -260,6 +260,7 @@
     <ClCompile Include="src\gui\TopBar.cpp" />
     <ClCompile Include="src\gui\UserSettingsEditor.cpp" />
     <ClCompile Include="src\gui\UserSettingsEditorExtensionsTab.cpp" />
+    <ClCompile Include="src\gui\UserSettingsEditorMainTab.cpp" />
     <ClCompile Include="src\gui\UserSettingsEditorVoiceTab.cpp" />
     <ClCompile Include="src\gui\ValueBinding.cpp" />
     <ClCompile Include="src\gui\VerticalBar.cpp" />
@@ -572,6 +573,7 @@
     <ClInclude Include="include\gui\UserSettingsEditorArgs.h" />
     <ClInclude Include="include\gui\UserSettingsEditorExtensionsTab.h" />
     <ClInclude Include="include\gui\UserSettingsEditorVoiceTab.h" />
+    <ClInclude Include="include\gui\UserSettingsEditorMainTab.h" />
     <ClInclude Include="include\gui\ValueBinding.h" />
     <ClInclude Include="include\gui\VerticalBar.h" />
     <ClInclude Include="include\gui\VerticalScrollBar.h" />

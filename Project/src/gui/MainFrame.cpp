@@ -222,7 +222,7 @@ namespace fig::gui
 		auto& userMngr = Global::GetUserManager();
 		if (userMngr.SignOut())
 		{
-			ColorTheme::SetTheme(Theme::SystemDefault, false);
+			AppColors::SetTheme(ColorTheme::SystemDefault, false);
 			OnSignedOut();
 			return true;
 		}
@@ -394,18 +394,18 @@ namespace fig::gui
 						if (Global::IsSignedIn())
 						{
 							int32_t theme = static_cast<int32_t>(Global::GetUserSettings().GetColorTheme());
-							if (++theme == static_cast<int32_t>(Theme::Count))
-								theme = static_cast<int32_t>(Theme::LightDefault);
-							ChangeColorTheme(static_cast<Theme>(theme), true);
+							if (++theme == static_cast<int32_t>(ColorTheme::Count))
+								theme = static_cast<int32_t>(ColorTheme::LightDefault);
+							ChangeColorTheme(static_cast<ColorTheme>(theme), true);
 							return EventResult::Handled;
 						}
 					}
 					else if (keyEvent.key == SDLK_F1 and mods.Control)
 					{
 						// Reload colors
-						auto currentTheme = ColorTheme::GetTheme();
-						ColorTheme::Init();
-						ColorTheme::SetTheme(currentTheme, false);
+						auto currentTheme = AppColors::GetTheme();
+						AppColors::Init();
+						AppColors::SetTheme(currentTheme, false);
 						PushEvent(UserEvent::ColorThemeChanged);
 						return EventResult::Handled;
 					}
@@ -673,11 +673,11 @@ namespace fig::gui
 		return false;
 	}
 
-	void MainFrame::ChangeColorTheme(Theme theme, bool bTransition)
+	void MainFrame::ChangeColorTheme(ColorTheme theme, bool bTransition)
 	{
 		if (Global::IsSignedIn())
 			Global::GetUserSettings().SetColorTheme(theme);
-		ColorTheme::SetTheme(theme, bTransition);
+		AppColors::SetTheme(theme, bTransition);
 		PushEvent(UserEvent::ColorThemeChanged);
 	}
 }

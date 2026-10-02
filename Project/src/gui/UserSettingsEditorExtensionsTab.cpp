@@ -24,8 +24,8 @@ namespace fig::gui
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
 
-		CreateHeader(this, pSizer, "Voice generation");
-		CreateLabel(this, pSizer, "One of the packages below is required to enable voice features.");
+		CreateHeader(this, pSizer, "Text-to-speech");
+		CreateLabel(this, pSizer, "You must install one of the packages below to enable text-to-speech features.");
 
 		auto ttsServerPackages = Global::GetPackageManager().GetPackages()
 			| std::views::filter([](auto&& p) { return p.type == PackageType::TTSServer; })
@@ -71,10 +71,5 @@ namespace fig::gui
 	void UserSettingsEditorExtensionsTab::OnAfterLayout()
 	{
 		ResizeToFit(false, true);
-	}
-
-	EditorTabBase::SaveResult UserSettingsEditorExtensionsTab::OnSave() noexcept
-	{
-		return {};
 	}
 }

@@ -138,12 +138,23 @@ namespace fig::gui
 
 			SetBackgroundColor(Color::PanelBackgroundHover);
 			GetBackgroundRenderer()->SetColor(Color::PanelBackgroundHover);
+			_pInfoButton->SetTheme(ButtonTheme {
+				.defaultColor	{ Color::PanelBackgroundHover, Color::ButtonDefaultForeground },
+				.hoverColor		{ Color::SidePanelButtonHoverBackground, Color::ButtonHoverForeground },
+				.pressedColor	{ Color::SidePanelButtonPressedBackground, Color::ButtonPressedForeground },
+				.disabledColor	{ Color::DisabledButtonBackground, Color::DisabledButtonForeground },
+			});
 			return;
 		}
 
 		SetBackgroundColor(Color::PanelBackground);
 		GetBackgroundRenderer()->SetColor(Color::PanelBackground);
-
+		_pInfoButton->SetTheme(ButtonTheme {
+			.defaultColor	{ Color::PanelBackground, Color::ButtonDefaultForeground },
+			.hoverColor		{ Color::SidePanelButtonHoverBackground, Color::ButtonHoverForeground },
+			.pressedColor	{ Color::SidePanelButtonPressedBackground, Color::ButtonPressedForeground },
+			.disabledColor	{ Color::DisabledButtonBackground, Color::DisabledButtonForeground },
+		});
 		_installationState = Global::GetPackageManager().GetInstallationProgress(_packageId);
 
 		bool bShowProgressBar = _installationState.phase == InstallationPhase::Downloading

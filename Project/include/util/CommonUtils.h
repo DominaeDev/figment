@@ -165,6 +165,25 @@ namespace fig
 		return fig::npos;
 	};
 
+	template <std::ranges::forward_range Range, typename Proj = std::identity, std::indirect_unary_predicate<std::projected<std::ranges::iterator_t<Range>, Proj>> Pred>
+	constexpr size_t find_index_if(Range&& range, Pred pred, Proj proj = {})
+	{
+		auto iterator = std::ranges::find_if(range, std::move(pred), std::move(proj));
+		if (iterator != std::ranges::end(range))
+			return static_cast<size_t>(std::ranges::distance(std::ranges::begin(range), iterator));
+		return fig::npos;
+	}
+
+	template <std::ranges::forward_range Range, typename Value, typename Proj = std::identity>
+		requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<std::ranges::iterator_t<Range>, Proj>, const Value*>
+	constexpr size_t find_index(Range&& range, const Value& value, Proj proj = {})
+	{
+		auto iterator = std::ranges::find(range, value, std::move(proj));
+		if (iterator != std::ranges::end(range))
+			return static_cast<size_t>(std::ranges::distance(std::ranges::begin(range), iterator));
+		return fig::npos;
+	}
+
 	template<template <typename, typename> class Cont, typename V, typename Pred, typename A = std::allocator<V>>
 	inline constexpr size_t index_of(const Cont<V, A>& cont, V value)
 	{

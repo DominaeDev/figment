@@ -836,6 +836,9 @@
     <ClCompile Include="src\user\UserProfile.cpp">
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\UserSettingsEditorMainTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1893,6 +1896,9 @@
     </ClInclude>
     <ClInclude Include="include\tts\TTSBackendSettings.h">
       <Filter>Source Files\Backend\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserSettingsEditorMainTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

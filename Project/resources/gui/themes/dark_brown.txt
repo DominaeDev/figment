@@ -1,7 +1,7 @@
 // Primary theme colors
 App.Foreground							#F5F1EC
-App.Background							#3E3229
-App.Accent								#C2732E
+App.Background							#423328
+App.Accent								#A17D5D
 
 // Side panel (low-contrast off-shade)
 SidePanel.Foreground					#E9D5C4
@@ -35,7 +35,7 @@ ProgressBar.Fill						#E7AA74
 ScrollBar								#C0C0C0
 StatusBar.Foreground					#DFC8B4
 StatusBar.Background					#20160E
-Control.Selected.Border					#C2732E
+Control.Selected.Border					#A17D5D
 Control.Foreground.Disabled				#A2856D
 Control.Background.Disabled				#20160E
 	
@@ -53,7 +53,7 @@ Card.Shadow								#2A211A
 	
 // Button (Default)	
 Button.Default.Foreground				#DFC8B4
-Button.Default.Background				#3E3229
+Button.Default.Background				#423328
 Button.Default.Border					#8A6342
 Button.Hover.Foreground					#DFC8B4
 Button.Hover.Background					#4F3722

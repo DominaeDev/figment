@@ -31,7 +31,7 @@ namespace fig::gui
 			menu.ptr->Update(fElapsed);
 		}
 
-		if (ColorTheme::IsTransitioning())
+		if (AppColors::IsTransitioning())
 			PushEvent(UserEvent::ColorThemeChanged);
 	}
 

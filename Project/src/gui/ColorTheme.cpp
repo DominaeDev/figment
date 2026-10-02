@@ -11,7 +11,7 @@ namespace fig::gui
 	static constexpr fig::color DebugColor { 0xC000C0_rgb };
 	static constexpr float TransitionDuration = 0.35f;
 
-	ColorTheme::State ColorTheme::_state {};
+	AppColors::State AppColors::_state {};
 
 	static void ParseTable(ColorTable& table, fig::string_view text)
 	{
@@ -43,34 +43,34 @@ namespace fig::gui
 		}
 	}
 
-	bool ColorTheme::Init()
+	bool AppColors::Init()
 	{
 		if constexpr (Debugging)
 		{
 			// Fill tables with "error color" (red)
-			for (int32_t theme = 0; theme < static_cast<int32_t>(Theme::Count); ++theme)
+			for (int32_t theme = 0; theme < static_cast<int32_t>(ColorTheme::Count); ++theme)
 			{
-				auto& table = _state.colorThemes[static_cast<Theme>(theme)];
+				auto& table = _state.colorThemes[static_cast<ColorTheme>(theme)];
 				for (auto& color : table)
 					color = MissingColor;
 			}
 		}
 
-		LoadColorTheme(Theme::LightDefault,		fig::path { "resources/gui/themes/light_default.txt" });
-		LoadColorTheme(Theme::LightPink, 		fig::path { "resources/gui/themes/light_pink.txt" });
-		LoadColorTheme(Theme::LightBlue,		fig::path { "resources/gui/themes/light_blue.txt" });
-		LoadColorTheme(Theme::LightGreen,		fig::path { "resources/gui/themes/light_green.txt" });
-		LoadColorTheme(Theme::LightGray,		fig::path { "resources/gui/themes/light_gray.txt" });
-		LoadColorTheme(Theme::DarkDefault,		fig::path { "resources/gui/themes/dark_default.txt" });
-		LoadColorTheme(Theme::DarkPink,			fig::path { "resources/gui/themes/dark_pink.txt" });
-		LoadColorTheme(Theme::DarkBlue,			fig::path { "resources/gui/themes/dark_blue.txt" });
-		LoadColorTheme(Theme::DarkGreen,		fig::path { "resources/gui/themes/dark_green.txt" });
-		LoadColorTheme(Theme::DarkBrown,		fig::path { "resources/gui/themes/dark_brown.txt" });
+		LoadColorTheme(ColorTheme::LightDefault,		fig::path { "resources/gui/themes/light_default.txt" });
+		LoadColorTheme(ColorTheme::LightPink, 		fig::path { "resources/gui/themes/light_pink.txt" });
+		LoadColorTheme(ColorTheme::LightBlue,		fig::path { "resources/gui/themes/light_blue.txt" });
+		LoadColorTheme(ColorTheme::LightGreen,		fig::path { "resources/gui/themes/light_green.txt" });
+		LoadColorTheme(ColorTheme::LightGray,		fig::path { "resources/gui/themes/light_gray.txt" });
+		LoadColorTheme(ColorTheme::DarkDefault,		fig::path { "resources/gui/themes/dark_default.txt" });
+		LoadColorTheme(ColorTheme::DarkPink,			fig::path { "resources/gui/themes/dark_pink.txt" });
+		LoadColorTheme(ColorTheme::DarkBlue,			fig::path { "resources/gui/themes/dark_blue.txt" });
+		LoadColorTheme(ColorTheme::DarkGreen,		fig::path { "resources/gui/themes/dark_green.txt" });
+		LoadColorTheme(ColorTheme::DarkBrown,		fig::path { "resources/gui/themes/dark_brown.txt" });
 
-		return SetTheme(Theme::SystemDefault);
+		return SetTheme(ColorTheme::SystemDefault);
 	}
 
-	FileError ColorTheme::LoadColorTheme(Theme theme, const fig::path& path)
+	FileError AppColors::LoadColorTheme(ColorTheme theme, const fig::path& path)
 	{
 		if (auto file = ReadTextFile(path, false))
 		{
@@ -80,18 +80,18 @@ namespace fig::gui
 		return FileError::NotFound;
 	}
 
-	bool ColorTheme::SetTheme(Theme theme, bool bTransition)
+	bool AppColors::SetTheme(ColorTheme theme, bool bTransition)
 	{
-		if (theme == Theme::SystemDefault)
+		if (theme == ColorTheme::SystemDefault)
 		{
 			switch (SDL_GetSystemTheme())
 			{
 			default:
 			case SDL_SYSTEM_THEME_LIGHT: 
-				theme = Theme::LightDefault;
+				theme = ColorTheme::LightDefault;
 				break;
 			case SDL_SYSTEM_THEME_DARK: 
-				theme = Theme::DarkDefault;
+				theme = ColorTheme::DarkDefault;
 				break;
 			}
 		}
@@ -129,7 +129,7 @@ namespace fig::gui
 		return fig::color_ref(&c);
 	}
 
-	void ColorTheme::Update(float fElapsed) noexcept
+	void AppColors::Update(float fElapsed) noexcept
 	{
 		if (not _state.isTransitioning)
 			return;

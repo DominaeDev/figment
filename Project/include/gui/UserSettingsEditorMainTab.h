@@ -5,14 +5,15 @@
 
 namespace fig::gui
 {
-	class UserSettingsEditorVoiceTab : public EditorTab<UserSettingsEditorArgs>
+	class UserSettingsEditorMainTab : public EditorTab<UserSettingsEditorArgs>
 	{
 	public:
-		UserSettingsEditorVoiceTab(ControlPtr pParent);
+		UserSettingsEditorMainTab(ControlPtr pParent);
 
 		bool Initialize(UserSettingsEditorArgs args) override;
 
 	protected:
 		void OnAfterLayout();
+		void ChangeColorTheme(ColorTheme index);
 	};
 }

@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/UserSettingsEditor.h"
 #include "gui/UserSettingsEditorArgs.h"
+#include "gui/UserSettingsEditorMainTab.h"
 #include "gui/UserSettingsEditorVoiceTab.h"
 #include "gui/UserSettingsEditorExtensionsTab.h"
 #include "gui/ButtonWithLabelAndIcon.h"
@@ -11,7 +12,7 @@ namespace fig::gui
 {
 	constexpr enum Tab : int32_t
 	{
-		// Application,
+		Application,
 		// Profile,
 		Voice,
 		Extensions,
@@ -20,6 +21,7 @@ namespace fig::gui
 
 	UserSettingsEditor::UserSettingsEditor(ControlPtr pParent) : Editor(pParent)
 	{
+		CreateTab<UserSettingsEditorMainTab>();
 		CreateTab<UserSettingsEditorVoiceTab>();
 		CreateTab<UserSettingsEditorExtensionsTab>();
 	}
@@ -80,10 +82,10 @@ namespace fig::gui
 		static size_t NotImpl = (size_t)(-1);
 		return std::vector<EditorTabDescriptor> {
 			{
-				NotImpl,
-					"Application",
-					Resource::ICON_USER_SETTINGS_EDIT_APPLICATION,
-					Resource::ICON_USER_SETTINGS_EDIT_APPLICATION_SMALL,
+				Application,
+				"Application",
+				Resource::ICON_USER_SETTINGS_EDIT_APPLICATION,
+				Resource::ICON_USER_SETTINGS_EDIT_APPLICATION_SMALL,
 			},
 			{
 				NotImpl,

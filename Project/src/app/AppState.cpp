@@ -60,7 +60,7 @@ namespace fig
 		pMacroProvider = std::make_unique<fig::text::MacroProvider>(fig::path { Constants::Paths::Macros });
 
 		// Load color themes
-		ColorTheme::Init();
+		AppColors::Init();
 
 		// Create main frame
 		auto windowSize = GetSettings().GetPoint2D(AppSetting::Interface::WindowSize);
