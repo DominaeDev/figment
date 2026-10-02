@@ -29,9 +29,10 @@ HintText								#B98DA0 // (less contrast)
 CheckBox.Background						#FFFFFF
 CheckBox.Background.Pressed				#FBECF1
 ScrollBar								#000000
-Slider.Background						#FDF0F4
+Slider.Background						#F7DDE6
 Slider.Thumb							#FFFDFE
 Slider.Fill								#FF8FBB
+ProgressBar.Background					#F7DDE6
 ProgressBar.Fill						#FF8FBB
 ScrollBar								#000000	
 StatusBar.Foreground					#6E3548
@@ -57,7 +58,7 @@ Button.Default.Foreground				#7A3F55
 Button.Default.Background				#FFF8FA
 Button.Default.Border					#E590AF
 Button.Hover.Foreground					#7A3F55
-Button.Hover.Background				#FBE5ED
+Button.Hover.Background					#FBE5ED
 Button.Hover.Border						#E590AF
 Button.Pressed.Foreground				#7A3F55
 Button.Pressed.Background				#FFFDFE
@@ -95,26 +96,38 @@ DisabledButton.Background				#E8CCD680 // 50% blend with background
 DisabledButton.Border					#E0C7CF
 
 // Chat speech bubbles (colorful; text + background + border)
-Message.Foreground						#000000
+Message.Default.Foreground				#000000
 Message.Default.Background				#F4F4F4
 Message.Default.Border					#9F9F9F
+Message.Gray.Foreground					#565656
+Message.Gray.Background					#F4F4F4
+Message.Gray.Border						#9F9F9F
 Message.Blue.Background					#F2FBFF
+Message.Blue.Foreground					#2A5666
 Message.Blue.Border						#4DA1C1
 Message.Pink.Background					#FFF3F9
+Message.Pink.Foreground					#663250
 Message.Pink.Border						#EF76BD
 Message.Green.Background				#EAFFE9
+Message.Green.Foreground				#246616
 Message.Green.Border					#50E433
 Message.Yellow.Background				#FFFCEA
-Message.Yellow.BorderY					#E4C533
+Message.Yellow.Foreground				#4E420D
+Message.Yellow.Border					#E4C533
 Message.Red.Background					#FFEEEE
+Message.Red.Foreground					#591111
 Message.Red.Border						#D52B2B
 Message.Teal.Background					#EEFFFC
+Message.Teal.Foreground					#1B504C
 Message.Teal.Border						#4DC1BA
-Message.PurpleBackground				#FCF3FF
-Message.PurpleBorder					#B25CE1
+Message.Purple.Background				#FCF3FF
+Message.Purple.Foreground				#3E1B50
+Message.Purple.Border					#B25CE1
 Message.Brown.Background				#FFF9EA
+Message.Brown.Foreground				#492D18
 Message.Brown.Border					#C07C4C
 Message.Navy.Background					#F2FAFF
+Message.Navy.Foreground					#212566
 Message.Navy.Border						#4D55C1
 
 // Error messages

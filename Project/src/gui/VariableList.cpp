@@ -22,7 +22,7 @@ namespace fig::gui
 		pBorder->SetCornerScale(0.3f);
 		pBorder->SetExtend(5);
 
-		SetForegroundColor(Color::AppForeground);
+		SetForegroundColor(Color::MessageForegroundDefault);
 		SetBackgroundColor(Color::MessageBackgroundDefault);
 
 		_pText = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::StatusBarFontSize, false);

@@ -102,6 +102,6 @@ namespace fig::gui
 
 	void UserSettingsEditor::OnPropertyChanged()
 	{
-		_pSaveButton->SetTheme(SaveButtonStyle);
+		_pSaveButton->SetTheme(ButtonThemes::SaveButton);
 	}
 }

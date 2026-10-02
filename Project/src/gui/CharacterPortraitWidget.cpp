@@ -15,7 +15,7 @@ namespace fig::gui
 
 		_pSelection = CreateControl<TexturedBorder>(AppResources::GetTexture(Resource::ROUNDED_BACKGROUND_10PX), 16);
 		_pSelection->FillParent();
-		_pSelection->SetForegroundColor(Color::StatusBarBackground);
+		_pSelection->SetForegroundColor(Color::SelectedControlBorder);
 		_pSelection->SetVisible(false);
 
 		_pPortrait = CreateControl<PreviewCardImage>(ImageFit::Portrait);
@@ -42,7 +42,8 @@ namespace fig::gui
 	void CharacterPortraitWidget::SetSelected(bool bSelected)
 	{
 		_pSelection->SetVisible(bSelected);
-		_pLabel->SetBackgroundColor(bSelected ? Color::StatusBarBackground : GetBackgroundColor());
+		_pLabel->SetBackgroundColor(bSelected ? Color::SelectedControlBorder : GetBackgroundColor());
+		_pLabel->SetForegroundColor(bSelected ? Color::White : Color::SidePanelForeground);
 		_pLabel->SetVisible(bSelected);
 	}
 

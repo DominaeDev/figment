@@ -381,6 +381,7 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_F4 and mods.None)
 					{
 						Global::GetTTSBackend().Initialize();
+						auto _discarded = Global::GetTTSBackend().Speak(fig::uuid { "feb7e840-4198-4a63-898b-62ed2708cdee" }, ".");
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F4 and mods.Control)

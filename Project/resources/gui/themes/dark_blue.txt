@@ -95,27 +95,39 @@ DisabledButton.Background				#323D5380 // 50% blend with background
 DisabledButton.Border					#323D53
 
 // Chat speech bubbles (colorful; text + background + border)
-Message.Foreground						#F5F0F4
-Message.Default.Background				#311C2D
-Message.Default.Border					#684561
+Message.Default.Foreground				#F2F3F5
+Message.Default.Background				#2B2D31
+Message.Default.Border					#55585F
+Message.Gray.Foreground					#DADDE3
+Message.Gray.Background					#2B2D31
+Message.Gray.Border						#55585F
+Message.Blue.Foreground					#F2F3F5
 Message.Blue.Background					#17232D
 Message.Blue.Border						#3B82C4
+Message.Pink.Foreground					#F2F3F5
 Message.Pink.Background					#2D1B27
 Message.Pink.Border						#E85AAE
+Message.Green.Foreground				#F2F3F5
 Message.Green.Background				#17291A
 Message.Green.Border					#3ECF3E
+Message.Yellow.Foreground				#F2F3F5
 Message.Yellow.Background				#2B2712
-Message.Yellow.BorderY					#D4B233
+Message.Yellow.Border					#D4B233
+Message.Red.Foreground					#F2F3F5
 Message.Red.Background					#2C1618
 Message.Red.Border						#E0464C
+Message.Teal.Foreground					#F2F3F5
 Message.Teal.Background					#12292A
 Message.Teal.Border						#3BC7BE
-Message.PurpleBackground				#241C2C
-Message.PurpleBorder					#A867D8
+Message.Purple.Foreground				#F2F3F5
+Message.Purple.Background				#241C2C
+Message.Purple.Border					#A867D8
+Message.Brown.Foreground				#F2F3F5
 Message.Brown.Background				#2A2218
 Message.Brown.Border					#C08A5A
 Message.Navy.Background					#181C2E
 Message.Navy.Border						#5B63D6
+Message.Navy.Foreground					#ADB1E8
 
 // Error messages
 SuccessText								#73FF7E

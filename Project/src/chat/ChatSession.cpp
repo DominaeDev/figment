@@ -79,55 +79,10 @@ namespace fig::chat
 		return fig::string { Constants::Chat::Names::Unknown };
 	}
 
-	fig::gui::color_pair ChatSession::GetColorsOf(Role role) const
+	fig::gui::color_triple ChatSession::GetColorsOf(Role role) const
 	{
-		if (auto try_character = _staging.GetCharacterByRole(role))
-		{
-			auto& character = *try_character;
-			if (character.bgColor.IsDefined() && character.borderColor.IsDefined())
-			{
-				return fig::gui::color_pair {
-					.background = custom_color(character.bgColor),
-					.foreground = custom_color(character.borderColor),
-				};
-			}
-		}
-
-		return GetDefaultColorsOf(role);
+		return _staging.GetColorsOf(role);
 	}
-
-	fig::gui::color_pair ChatSession::GetDefaultColorsOf(Role role)
-	{
-		if (is_bot(role))
-		{
-			return fig::gui::color_pair {
-				.background = DefaultBotMessageBackgrounds[get_bot_index(role) % 8],
-				.foreground = DefaultBotMessageBorders[get_bot_index(role) % 8],
-			};
-		}
-		else if (role == Role::User)
-		{
-			return fig::gui::color_pair {
-				.background = DefaultUserMessageBackground,
-				.foreground = DefaultUserMessageBorder,
-			};
-		}
-		else if (role == Role::System)
-		{
-			return fig::gui::color_pair {
-				.background = Color::MessageBackgroundNavy,
-				.foreground = Color::MessageBorderNavy,
-			};
-		}
-		else
-		{
-			return fig::gui::color_pair {
-				.background = Color::MessageBackgroundDefault,
-				.foreground = Color::MessageBorderDefault,
-			};
-		}
-	}
-
 
 	fig::string ChatSession::GetNameGrammar(bool useCharacterIds, bool bIncludeUser) const
 	{

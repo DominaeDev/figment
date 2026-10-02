@@ -4,7 +4,7 @@ App.Background							#FBF9EC
 App.Accent								#DDD74A
 
 // Side panel (low-contrast off-shade)
-SidePanel.Foreground					#533716
+SidePanel.Foreground					#564417
 SidePanel.Background					#F5F4D9
 SidePanel.Gradient						#F2F0C6 // Darker, fade
 
@@ -21,17 +21,18 @@ TextBox.ScrollBar						#00000060
 Border									#DDD96F
 Border.Disabled							#E6E4BA
 Border.Highlighted						#DDD74A
-Icon									#533716
+Icon									#564417
 Icon.Disabled							#C1C098
-Label									#533716
+Label									#564417
 Label.Disabled							#C1C098C0 // blend with background
 HintText								#BCBB88 // (less contrast)
 CheckBox.Background						#FFFFFF
 CheckBox.Background.Pressed				#F6F6E0
 ScrollBar								#000000
-Slider.Background						#F8F8E4
+Slider.Background						#EFEEC6
 Slider.Thumb							#FEFEFA
 Slider.Fill								#DDD866
+ProgressBar.Background					#EFEEC6
 ProgressBar.Fill						#DDD866
 ScrollBar								#000000	
 StatusBar.Foreground					#4C4A10
@@ -40,11 +41,11 @@ Control.Selected.Border					#DDD74A
 Control.Foreground.Disabled				#B8B795
 Control.Background.Disabled				#F2F1D5
 
-Panel.Foreground						#533716 // near AppBackground
+Panel.Foreground						#564417 // near AppBackground
 Panel.Background						#F8F8E4 // near AppBackground
 Panel.Background.Hover					#FEFEFA // subtle highlight
 	
-Menu.Foreground 						#533716
+Menu.Foreground 						#564417
 Menu.Foreground.Disabled				#B8B795
 Menu.Background 						#FFFFFF
 Menu.Border 							#FFFFFF
@@ -53,22 +54,22 @@ Menu.Item.Pressed 						#F4F3D7
 Card.Shadow								#EFEEC6
 	
 // Button (Default)	
-Button.Default.Foreground				#533716
+Button.Default.Foreground				#564417
 Button.Default.Background				#FBF9EC
 Button.Default.Border					#DDD96F
-Button.Hover.Foreground					#533716
-Button.Hover.Background				#F4F3D7
+Button.Hover.Foreground					#564417
+Button.Hover.Background					#F4F3D7
 Button.Hover.Border						#DDD96F
-Button.Pressed.Foreground				#533716
+Button.Pressed.Foreground				#564417
 Button.Pressed.Background				#FEFEFA
 Button.Pressed.Border					#DDD96F
 
 // Button (Side panel)
-SidePanelButton.Default.Foreground		#533716
+SidePanelButton.Default.Foreground		#564417
 SidePanelButton.Default.Background		#FFFFFF00 // over SidePanelBackground
-SidePanelButton.Hover.Foreground		#533716
+SidePanelButton.Hover.Foreground		#564417
 SidePanelButton.Hover.Background		#FFFFFF80 // over SidePanelBackground
-SidePanelButton.Pressed.Foreground		#533716
+SidePanelButton.Pressed.Foreground		#564417
 SidePanelButton.Pressed.Background		#FFFFFFC0 // over SidePanelBackground
 
 // Save button (Green)
@@ -95,26 +96,38 @@ DisabledButton.Background				#E6E4C680 // 50% blend with background
 DisabledButton.Border					#E1DFBF
 
 // Chat speech bubbles (colorful; text + background + border)
-Message.Foreground						#000000
+Message.Default.Foreground				#000000
 Message.Default.Background				#F4F4F4
 Message.Default.Border					#9F9F9F
+Message.Gray.Foreground					#565656
+Message.Gray.Background					#F4F4F4
+Message.Gray.Border						#9F9F9F
 Message.Blue.Background					#F2FBFF
+Message.Blue.Foreground					#2A5666
 Message.Blue.Border						#4DA1C1
 Message.Pink.Background					#FFF3F9
+Message.Pink.Foreground					#663250
 Message.Pink.Border						#EF76BD
 Message.Green.Background				#EAFFE9
+Message.Green.Foreground				#246616
 Message.Green.Border					#50E433
 Message.Yellow.Background				#FFFCEA
-Message.Yellow.BorderY					#E4C533
+Message.Yellow.Foreground				#4E420D
+Message.Yellow.Border					#E4C533
 Message.Red.Background					#FFEEEE
+Message.Red.Foreground					#591111
 Message.Red.Border						#D52B2B
 Message.Teal.Background					#EEFFFC
+Message.Teal.Foreground					#1B504C
 Message.Teal.Border						#4DC1BA
-Message.PurpleBackground				#FCF3FF
-Message.PurpleBorder					#B25CE1
+Message.Purple.Background				#FCF3FF
+Message.Purple.Foreground				#3E1B50
+Message.Purple.Border					#B25CE1
 Message.Brown.Background				#FFF9EA
+Message.Brown.Foreground				#492D18
 Message.Brown.Border					#C07C4C
 Message.Navy.Background					#F2FAFF
+Message.Navy.Foreground					#212566
 Message.Navy.Border						#4D55C1
 
 // Error messages

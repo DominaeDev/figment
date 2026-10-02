@@ -32,15 +32,19 @@ namespace fig::gui
 		auto pTopBar = CreateControl<TopBar>("Characters", _pCardList);
 
 		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING, false);
+		_pSortingButton->SetTheme(ButtonThemes::TopBar);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
 		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_GRID_LARGE);
+		_pGridButton->SetTheme(ButtonThemes::TopBar);
 		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
 		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING, true);
+		_pFilteringButton->SetTheme(ButtonThemes::TopBar);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 
 		_pToggleTagsButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_TAG);
+		_pToggleTagsButton->SetTheme(ButtonThemes::TopBar);
 		_pToggleTagsButton->SetDelegate([this](bool _) { ToggleTags(); });
 
 		_pFilterTextBox = pTopBar->CreateControl<SearchBox>();

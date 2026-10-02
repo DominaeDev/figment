@@ -193,21 +193,11 @@ namespace fig
 
 namespace fig::gui
 {
-	inline static fig::color_ref DefaultUserMessageBorder { Color::MessageBorderBlue };
-	inline static fig::color_ref DefaultUserMessageBackground { Color::MessageBackgroundBlue };
+	inline static fig::color_ref DefaultUserMessageBackground	{ Color::MessageBackgroundBlue };
+	inline static fig::color_ref DefaultUserMessageForeground	{ Color::MessageForegroundBlue };
+	inline static fig::color_ref DefaultUserMessageBorder		{ Color::MessageBorderBlue };
 
-	inline static std::array<fig::color_ref, 8> DefaultBotMessageBorders {
-		Color::MessageBorderPink,
-		Color::MessageBorderGreen,
-		Color::MessageBorderYellow,
-		Color::MessageBorderRed,
-		Color::MessageBorderTeal,
-		Color::MessageBorderPurple,
-		Color::MessageBorderBrown,
-		Color::MessageBorderNavy,
-	};
-
-	inline static std::array<fig::color_ref, 8> DefaultBotMessageBackgrounds {
+	inline static std::array<fig::color_ref, 8> BotMessageBackgrounds {
 		Color::MessageBackgroundPink,
 		Color::MessageBackgroundGreen,
 		Color::MessageBackgroundYellow,
@@ -218,16 +208,38 @@ namespace fig::gui
 		Color::MessageBackgroundNavy,
 	};
 
-	struct color_set
-	{
-		color_ref background {};
-		color_ref foreground {};
-		color_ref border {};
+	inline static std::array<fig::color_ref, 8> BotMessageForegrounds {
+		Color::MessageForegroundPink,
+		Color::MessageForegroundGreen,
+		Color::MessageForegroundYellow,
+		Color::MessageForegroundRed,
+		Color::MessageForegroundTeal,
+		Color::MessageForegroundPurple,
+		Color::MessageForegroundBrown,
+		Color::MessageForegroundNavy,
+	};
+
+	inline static std::array<fig::color_ref, 8> BotMessageBorders {
+		Color::MessageBorderPink,
+		Color::MessageBorderGreen,
+		Color::MessageBorderYellow,
+		Color::MessageBorderRed,
+		Color::MessageBorderTeal,
+		Color::MessageBorderPurple,
+		Color::MessageBorderBrown,
+		Color::MessageBorderNavy,
 	};
 
 	struct color_pair
 	{
 		color_ref background {};
 		color_ref foreground {};
+	};
+
+	struct color_triple
+	{
+		color_ref background {};
+		color_ref foreground {};
+		color_ref border {};
 	};
 }

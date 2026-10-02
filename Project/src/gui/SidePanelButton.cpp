@@ -7,7 +7,7 @@ namespace fig::gui
 {
 	SidePanelButton::SidePanelButton(ControlPtr pParent, Resource icon, const fig::string& label) : ThemedButton(pParent)
 	{
-		SetTheme(SidePanelButtonStyle);
+		SetTheme(ButtonThemes::SidePanel);
 		SetHeight(58);
 
 		auto pBorder = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);

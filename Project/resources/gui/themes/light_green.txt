@@ -29,9 +29,10 @@ HintText								#A2B78D // (less contrast)
 CheckBox.Background						#FFFFFF
 CheckBox.Background.Pressed				#EEF4E2
 ScrollBar								#000000
-Slider.Background						#F1F6E6
+Slider.Background						#DFEBCA
 Slider.Thumb							#FEFEFA
 Slider.Fill								#A2D172
+ProgressBar.Background					#DFEBCA
 ProgressBar.Fill						#A2D172
 ScrollBar								#000000	
 StatusBar.Foreground					#3E4E2C
@@ -95,26 +96,38 @@ DisabledButton.Background				#DAE6C680 // 50% blend with background
 DisabledButton.Border					#D3E1BF
 
 // Chat speech bubbles (colorful; text + background + border)
-Message.Foreground						#000000
+Message.Default.Foreground				#000000
 Message.Default.Background				#F4F4F4
 Message.Default.Border					#9F9F9F
+Message.Gray.Foreground					#565656
+Message.Gray.Background					#F4F4F4
+Message.Gray.Border						#9F9F9F
 Message.Blue.Background					#F2FBFF
+Message.Blue.Foreground					#2A5666
 Message.Blue.Border						#4DA1C1
 Message.Pink.Background					#FFF3F9
+Message.Pink.Foreground					#663250
 Message.Pink.Border						#EF76BD
 Message.Green.Background				#EAFFE9
+Message.Green.Foreground				#246616
 Message.Green.Border					#50E433
 Message.Yellow.Background				#FFFCEA
-Message.Yellow.BorderY					#E4C533
+Message.Yellow.Foreground				#4E420D
+Message.Yellow.Border					#E4C533
 Message.Red.Background					#FFEEEE
+Message.Red.Foreground					#591111
 Message.Red.Border						#D52B2B
 Message.Teal.Background					#EEFFFC
+Message.Teal.Foreground					#1B504C
 Message.Teal.Border						#4DC1BA
-Message.PurpleBackground				#FCF3FF
-Message.PurpleBorder					#B25CE1
+Message.Purple.Background				#FCF3FF
+Message.Purple.Foreground				#3E1B50
+Message.Purple.Border					#B25CE1
 Message.Brown.Background				#FFF9EA
+Message.Brown.Foreground				#492D18
 Message.Brown.Border					#C07C4C
 Message.Navy.Background					#F2FAFF
+Message.Navy.Foreground					#212566
 Message.Navy.Border						#4D55C1
 
 // Error messages

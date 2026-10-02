@@ -187,46 +187,59 @@ namespace fig::chat
 		return fig::string { Constants::Chat::Names::Unknown };
 	}
 
-	fig::gui::color_pair ChatStaging::GetColorsOf(Role role) const
+	fig::gui::color_triple ChatStaging::GetColorsOf(Role role) const
 	{
 		if (auto try_character = GetCharacterByRole(role))
 		{
 			auto& character = *try_character;
 			if (character.bgColor.IsDefined() && character.borderColor.IsDefined())
 			{
-				return fig::gui::color_pair {
+				return fig::gui::color_triple {
 					.background = custom_color(character.bgColor),
-					.foreground = custom_color(character.borderColor),
+					.foreground = Color::MessageForegroundDefault,
+					.border = custom_color(character.borderColor),
 				};
 			}
 		}
 
 		if (is_bot(role))
 		{
-			return fig::gui::color_pair {
-				.background = DefaultBotMessageBackgrounds[get_bot_index(role) % 8],
-				.foreground = DefaultBotMessageBorders[get_bot_index(role) % 8],
+			return fig::gui::color_triple {
+				.background = BotMessageBackgrounds[get_bot_index(role) % 8],
+				.foreground = BotMessageForegrounds[get_bot_index(role) % 8],
+				.border = BotMessageBorders[get_bot_index(role) % 8],
 			};
 		}
 		else if (role == Role::User)
 		{
-			return fig::gui::color_pair {
+			return fig::gui::color_triple {
 				.background = DefaultUserMessageBackground,
-				.foreground = DefaultUserMessageBorder,
+				.foreground = DefaultUserMessageForeground,
+				.border = DefaultUserMessageBorder,
 			};
 		}
 		else if (role == Role::System)
 		{
-			return fig::gui::color_pair {
+			return fig::gui::color_triple {
 				.background = Color::MessageBackgroundNavy,
-				.foreground = Color::MessageBorderNavy,
+				.foreground = Color::MessageForegroundNavy,
+				.border = Color::MessageBorderNavy,
+			};
+		}
+		else if (role == Role::Narrator)
+		{
+			return fig::gui::color_triple {
+				.background = Color::MessageBackgroundGray,
+				.foreground = Color::MessageForegroundGray,
+				.border = Color::MessageBorderGray,
 			};
 		}
 		else
 		{
-			return fig::gui::color_pair {
+			return fig::gui::color_triple {
 				.background = Color::MessageBackgroundDefault,
-				.foreground = Color::MessageBorderDefault,
+				.foreground = Color::MessageForegroundDefault,
+				.border = Color::MessageBorderDefault,
 			};
 		}
 	}

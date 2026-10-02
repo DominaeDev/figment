@@ -39,7 +39,7 @@ namespace fig::gui
 		_pBackground = CreateControl<ChatBackground>();
 		_pBackground->SetBrightness(1.0f);
 		_pBackground->SetAlpha(0.3f);
-		_pBackground->SetBlur(5.0f);
+		_pBackground->SetBlur(0.0f);
 
 		auto centerArea = _pBackground->CreateControl<Area>();
 		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);

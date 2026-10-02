@@ -29,7 +29,7 @@ namespace fig::gui
 		pLogo->SetX(44);
 
 		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
-		_pMenuButton->SetTheme(SidePanelButtonStyle);
+		_pMenuButton->SetTheme(ButtonThemes::SidePanel);
 		_pMenuButton->SetX(3);
 		_pMenuButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pMenuButton->GetHeight()) / 2);
 //		_pMenuButton->CenterVertically();
@@ -81,7 +81,7 @@ namespace fig::gui
 		DestroyChildren();
 
 		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
-		_pMenuButton->SetTheme(SidePanelButtonStyle);
+		_pMenuButton->SetTheme(ButtonThemes::SidePanel);
 		_pMenuButton->SetX(3);
 		_pMenuButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pMenuButton->GetHeight()) / 2);
 //		_pMenuButton->CenterVertically();
@@ -89,16 +89,16 @@ namespace fig::gui
 
 		auto pChatButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHATS_SMALL, false);
 		pChatButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
-		pChatButtonSmall->SetTheme(SidePanelButtonStyle);
+		pChatButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pCharactersButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHARACTERS_SMALL, false);
 		pCharactersButtonSmall->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
-		pCharactersButtonSmall->SetTheme(SidePanelButtonStyle);
+		pCharactersButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pScenariosButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_SCENARIOS_SMALL, false);
-		pScenariosButtonSmall->SetTheme(SidePanelButtonStyle);
+		pScenariosButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pWorldsButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_WORLDS_SMALL, false);
-		pWorldsButtonSmall->SetTheme(SidePanelButtonStyle);
+		pWorldsButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pModelsButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_MODELS_SMALL, false);
-		pModelsButtonSmall->SetTheme(SidePanelButtonStyle);
+		pModelsButtonSmall->SetTheme(ButtonThemes::SidePanel);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
 		pTopSizer->AddSpacer(62);
@@ -124,7 +124,11 @@ namespace fig::gui
 		createMenu.AddItem("Import from file\u2026")
 			.SetEnabled(false);
 		menu.AddSeparator();
-		menu.AddItem("User profile\u2026", Resource::ICON_USER_SETTINGS);
+		menu.AddItem("User profile\u2026", Resource::ICON_USER_SETTINGS)
+			.SetDelegate([] {
+				PushEvent(UserEvent::EditUserSettings);
+				PushEvent(UserEvent::SelectEditorTab, 1);
+			});
 		menu.AddItem("Settings\u2026", Resource::ICON_SETTINGS)
 			.SetDelegate([] { PushEvent(UserEvent::EditUserSettings); });
 		menu.AddSeparator();

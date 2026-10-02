@@ -30,7 +30,7 @@ namespace fig::Constants
 		constexpr fig::coord ChatScrollWidth = 720;
 		constexpr fig::coord ChatTextBoxWidth = 680;
 		
-		constexpr float MouseScrollSpeed = 200.0f;
+		constexpr float MouseScrollSpeed = 140.0f;
 		constexpr float MouseScrollSmoothing = 14.0f;
 		
 		constexpr int32_t ProfileImageWidth = 256;

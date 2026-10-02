@@ -61,7 +61,7 @@ namespace fig::gui
 	{
 		ChatMessage* pMessage = AddMessage({}, Role::System, MessageType::SystemMessage, message, true);
 		pMessage->SetActive(false);
-		pMessage->SetColors(Color::MessageBackgroundNavy, Color::MessageBorderNavy);
+		pMessage->SetColors(Color::MessageBackgroundNavy, Color::MessageForegroundNavy, Color::MessageBorderNavy);
 		_messages.push_back(MessageEntry {
 			.chatId = "dummy",
 			.role = Role::System,
@@ -133,7 +133,7 @@ namespace fig::gui
 			auto pMessage = CreateControl<ChatMessage>(role, characterId, "", msgType, bShowAvatar);
 			pMessage->SetY(-1000); // Move off-screen
 			pMessage->SetMessage(message, complete);
-			pMessage->SetColors(ChatSession::GetDefaultColorsOf(role));
+			pMessage->SetColors(color_triple { Color::MessageBackgroundDefault, Color::MessageForegroundDefault, Color::MessageBorderDefault });
 			GetSizer()->Add(pMessage, 0, SizerFlag::Expand);
 			return pMessage;
 		}

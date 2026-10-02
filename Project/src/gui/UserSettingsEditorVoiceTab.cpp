@@ -124,11 +124,13 @@ namespace fig::gui
 		// Enabled
 		bool bEnabled = userSettings.GetBool(UserSetting::TTS::Enabled);
 		_pEnabledToggle->SetValue(bEnabled, true);
-
+		
 		// Backend
 		auto ttsBackends = Global::GetTTSBackend().GetBackendSettings();
 		auto currentBackendId = Global::GetUserSettings().GetUUID(UserSetting::TTS::Backend);
-		
+		bEnabled &= not ttsBackends.empty();
+		_pEnabledToggle->SetEnabled(not ttsBackends.empty());
+
 		_pTTSBackend->Clear();
 		_pTTSBackend->AddItems(ttsBackends
 			| std::views::transform([](auto&& b) { return b.name; })
@@ -139,7 +141,7 @@ namespace fig::gui
 		else
 			_pTTSBackend->Select(-1, true);
 		
-		_pTTSBackend->SetEnabled(not ttsBackends.empty() and bEnabled);
+		_pTTSBackend->SetEnabled(bEnabled);
 
 		// Voice model
 		auto ttsModels = Global::GetTTSBackend().GetVoiceModels();
@@ -163,6 +165,7 @@ namespace fig::gui
 		auto designModels = ttsModels
 			| std::views::filter([](auto&& m) { return m.task.task == TTSTask::Design; })
 			| std::ranges::to<std::vector>();
+		_pTTSDesignModel->Clear();
 		_pTTSDesignModel->AddItems(designModels
 			| std::views::transform([](auto&& b) { return b.name; })
 			| std::ranges::to<std::vector>());

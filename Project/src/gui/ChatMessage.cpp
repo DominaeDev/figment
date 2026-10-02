@@ -251,19 +251,19 @@ namespace fig::gui
 		RefreshColors();
 	}
 
-	void ChatMessage::SetColors(const fig::gui::color_pair& colors)
+	void ChatMessage::SetColors(const fig::gui::color_triple& colors)
 	{
-		SetColors(colors.background, colors.foreground);
+		SetColors(colors.background, colors.foreground, colors.border);
 	}
 
-	void ChatMessage::SetColors(fig::color_ref bgColor, fig::color_ref borderColor)
+	void ChatMessage::SetColors(fig::color_ref bgColor, fig::color_ref fgColor, fig::color_ref borderColor)
 	{
 		_bgColor = bgColor;
 		_borderColor = borderColor;
 		if ((_style & Style::Dialogue) == Style::Dialogue)
 			_textColor = Color::AppForeground;
 		else
-			_textColor = custom_color((*borderColor).Multiply(0.5f));
+			_textColor = fgColor;
 		_nameColor = custom_color((*borderColor).Add(-0.1f));
 		RefreshColors();
 	}
@@ -281,7 +281,7 @@ namespace fig::gui
 		_pSpeechBubbleBG->SetColor(fig::color_ref(_bgColor).WithAlpha(alpha));
 		_pSpeechBubbleBorder->SetColor(fig::color_ref(_borderColor).WithAlpha(alpha));
 
-		_pMessagePanel->SetBackgroundColor(fig::color_ref(chatBG).WithAlpha(alpha));
+		_pMessagePanel->SetBackgroundColor(chatBG.WithAlpha(alpha));
 		_pMessageText->SetForegroundColor(fig::color_ref(_textColor).WithAlpha(alpha));
 		
 		if (_bActive)

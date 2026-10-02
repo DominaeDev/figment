@@ -17,8 +17,8 @@ namespace fig::gui
 
 		void SetName(string_cref name);
 		void SetMessage(fig::string text, bool complete = false);
-		void SetColors(const fig::gui::color_pair& colors);
-		void SetColors(fig::color_ref bgColor, fig::color_ref borderColor);
+		void SetColors(const fig::gui::color_triple& colors);
+		void SetColors(fig::color_ref bgColor, fig::color_ref fgColor, fig::color_ref borderColor);
 		void AppendMessage(const fig::string& text, bool complete = false);
 
 		void SetActive(bool bActive);
