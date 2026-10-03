@@ -47,7 +47,7 @@ namespace fig::gui
 		_subItems.back().SetEnabled(false);
 	}
 
-	Menu::Menu(Frame* pHostFrame) : Overlay(pHostFrame)
+	Menu::Menu(FramePtr pFrame) : Overlay(pFrame)
 	{
 		auto pBackground = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
 		pBackground->SetColor(Color::MenuBackground);
@@ -115,12 +115,6 @@ namespace fig::gui
 				_submenuIndex = -1;
 			}
 		}
-	}
-
-	void Menu::OnRender(fig::renderer_ptr pRenderer)
-	{
-		Control::OnRender(pRenderer);
-		return;
 	}
 
 	void Menu::CreateItems()
@@ -383,7 +377,7 @@ namespace fig::gui
 		if (menuItem._fnDelegate)
 			menuItem._fnDelegate();
 
-		_bDestroyMe = true;
+		Destroy();
 		return true;
 	}
 

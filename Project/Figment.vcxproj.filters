@@ -839,6 +839,9 @@
     <ClCompile Include="src\gui\UserSettingsEditorMainTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ModalOverlay.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1901,6 +1904,9 @@
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ControlDefs.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ModalOverlay.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,9 +4,14 @@
 
 namespace fig::gui
 {
-	Overlay::Overlay(Frame* pHostFrame) : Control(nullptr),
+	Overlay::Overlay(FramePtr pHostFrame) : Control(nullptr),
 		_pOwner { pHostFrame }
 	{
 		SetParent(pHostFrame);
+	}
+
+	void Overlay::Destroy()
+	{
+		_bDestroyMe = true;
 	}
 } 

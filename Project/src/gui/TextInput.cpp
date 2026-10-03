@@ -401,7 +401,7 @@ namespace fig::gui
 		_composition_length = 0;
 		_composition_cursor = 0;
 		_composition_cursor_length = 0;
-		_composition_text.release();
+		_composition_text.reset();
 		_composition_line = -1;
 	}
 
@@ -522,7 +522,7 @@ namespace fig::gui
 	void TextInput::ClearCandidates()
 	{
 		if (_candidates)
-			_candidates.release();
+			_candidates.reset();
 		_selected_candidate_start = 0;
 		_selected_candidate_length = 0;
 	}

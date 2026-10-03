@@ -4,7 +4,6 @@
 
 namespace fig::gui
 {
-	class Frame;
 	using MenuDelegate = std::function<void()>;
 
 	enum class MenuStyle
@@ -57,7 +56,7 @@ namespace fig::gui
 	class Menu : public Overlay
 	{
 	public:
-		Menu(Frame* pHostFrame);
+		Menu(FramePtr pFrame);
 
 		MenuItem& AddItem(const fig::string& label, Resource icon = {}, MenuDelegate fn = {});
 		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
@@ -68,9 +67,9 @@ namespace fig::gui
 		void Reset();
 
 		void SetStyle(MenuStyle style) noexcept { _style = style; }
+
 	protected:
 		void OnUpdate(float fElapsed) override;
-		void OnRender(fig::renderer_ptr pRenderer) override;
 		EventResult OnEvent(fig::event& event) override;
 
 		bool HandleMouseMotion(SDL_MouseMotionEvent& event);

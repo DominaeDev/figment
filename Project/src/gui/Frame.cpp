@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "gui/Frame.h"
 #include "gui/Menu.h"
+#include "gui/ModalOverlay.h"
 #include "gui/GUITypes.h"
 #include "gui/Window.h"
 #include "gui/Events.h"
@@ -8,7 +9,7 @@
 
 namespace fig::gui
 {
-	Frame::Frame(Window* pHostWindow) : Control(nullptr, pHostWindow, this)
+	Frame::Frame(WindowPtr pHostWindow) : Control(nullptr, pHostWindow, this)
 	{
 		int w, h;
 		SDL_GetWindowSizeInPixels(pHostWindow->GetSDLWindow().get(), &w, &h);
@@ -18,13 +19,20 @@ namespace fig::gui
 	Frame::~Frame()
 	{
 		PopAllMenus();
+		PopAllModals();
 	}
 
 	void Frame::Update(float fElapsed)
 	{
-		Control::Update(fElapsed);
+		if (_modals.empty())
+			Control::Update(fElapsed);
 
-		// Draw overlays
+		for (int32_t i = toI(_modals.size()) - 1; i >= 0; --i)
+		{
+			auto& modal = _modals.at(toUZ(i));
+			modal.ptr->Update(fElapsed);
+		}
+
 		for (int32_t i = toI(_menus.size()) - 1; i >= 0; --i)
 		{
 			auto& menu = _menus.at(toUZ(i));
@@ -37,14 +45,33 @@ namespace fig::gui
 
 	void Frame::Render(fig::renderer_ptr pRenderer)
 	{
-		SDL_SetRenderDrawColor(pRenderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
+		if constexpr (Debugging)
+			SDL_SetRenderDrawColor(pRenderer, 0xFF, 0x00, 0xFF, 0xFF);
+		else
+			SDL_SetRenderDrawColor(pRenderer, 0x00, 0x00, 0x00, 0xFF);
+
 		SDL_RenderClear(pRenderer);
 
 		Control::Render(pRenderer);
 
-		// Draw menu
-		for (auto it = _menus.cbegin(); it != _menus.cend(); ++it)
-			(*it).ptr->Render(pRenderer);
+		// Draw modal(s)
+		for (auto& modal : _modals)
+			modal.ptr->Render(pRenderer);
+
+		// Draw menu(s)
+		for (auto& menu : _menus)
+			menu.ptr->Render(pRenderer);
+
+		// Grab screen buffer
+		if (not _snapshotPromises.empty())
+		{
+			for (auto& promise : _snapshotPromises)
+			{
+				auto surface = fig::sdl::Surface::from_ptr(SDL_RenderReadPixels(pRenderer, nullptr));
+				promise.set_value(std::move(surface));
+			}
+			_snapshotPromises.clear();
+		}
 
 		SDL_RenderPresent(pRenderer);
 	}
@@ -56,10 +83,10 @@ namespace fig::gui
 
 	int32_t Frame::PushMenu(MenuPtr pMenu)
 	{
-		int32_t menuId = ++_nextMenuId;
-		
+		int32_t overlayId = ++_nextOverlayId;
+
 		_menus.push_back(MenuInstance {
-			.id = menuId,
+			.id = overlayId,
 			.ptr = pMenu,
 		});
 
@@ -85,8 +112,8 @@ namespace fig::gui
 		if (pos.x != menuRect.x or pos.y != menuRect.y)
 			pMenu->SetAbsolutePosition(pos);
 
-		OnMenuOpen(menuId);
-		return menuId;
+		OnMenuOpen(overlayId);
+		return overlayId;
 	}
 
 	void Frame::PopMenu(MenuPtr pMenu)
@@ -119,16 +146,89 @@ namespace fig::gui
 			OnMenuClose(*it);
 	}
 
+	int32_t Frame::PushModal(ModalPtr pMenu)
+	{
+		int32_t overlayId = ++_nextOverlayId;
+
+		_modals.push_back(ModalInstance {
+			.id = overlayId,
+			.ptr = pMenu,
+		});
+
+		PopAllMenus();
+		OnMenuOpen(overlayId);
+		return overlayId;
+	}
+
+	void Frame::PopModal(ModalPtr pModal)
+	{
+		std::vector<int32_t> removedIds;
+
+		auto itFind = std::ranges::find_if(_modals.begin(), _modals.end(), [pModal](auto&& m) { return m.ptr == pModal; });
+		while (itFind != _modals.end())
+		{
+			removedIds.push_back((*itFind).id);
+			delete (*itFind).ptr;
+			itFind = _modals.erase(itFind);
+		}
+
+		for (auto it = removedIds.crbegin(); it != removedIds.crend(); it++)
+			OnMenuClose(*it);
+	}
+
+	void Frame::PopAllModals()
+	{
+		std::vector<int32_t> removedIds;
+		for (auto modal : _modals)
+		{
+			removedIds.push_back(modal.id);
+			delete modal.ptr;
+		}
+		_modals.clear();
+
+		for (auto it = removedIds.crbegin(); it != removedIds.crend(); it++)
+			OnMenuClose(*it);
+	}
+
 	EventResult Frame::ProcessEvent(fig::event& event)
 	{
 		for (int32_t i = toI(_menus.size()) - 1; i >= 0; --i)
 		{
-			Menu* pMenu = _menus[toUZ(i)].ptr;
+			auto pMenu = _menus[toUZ(i)].ptr;
 			if (pMenu->ProcessEvent(event) == EventResult::Handled)
 			{
 				if (pMenu->_bDestroyMe)
-					PopAllMenus();
+					PopMenu(pMenu);
 				return EventResult::Handled;
+			}
+		}
+
+		if (not _modals.empty())
+		{
+			for (int32_t i = toI(_modals.size()) - 1; i >= 0; --i)
+			{
+				auto pModal = _modals[toUZ(i)].ptr;
+				if (pModal->ProcessEvent(event) == EventResult::Handled)
+				{
+					if (pModal->_bDestroyMe)
+						PopAllMenus();
+					return EventResult::Handled;
+				}
+			}
+			
+			// Block all user input
+			switch (event.type)
+			{
+			case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			case SDL_EVENT_MOUSE_BUTTON_UP:
+			case SDL_EVENT_MOUSE_MOTION:
+			case SDL_EVENT_MOUSE_WHEEL:
+			case SDL_EVENT_KEY_DOWN:
+			case SDL_EVENT_KEY_UP:
+			case SDL_EVENT_TEXT_EDITING:
+			case SDL_EVENT_TEXT_INPUT:
+			case SDL_EVENT_TEXT_EDITING_CANDIDATES:
+				return EventResult::Handled; 
 			}
 		}
 
@@ -227,5 +327,20 @@ namespace fig::gui
 		}
 
 		Global::SetCursor(_cursors.back());
+	}
+
+	void Frame::OnSize()
+	{
+		PopAllMenus();
+
+		for (auto modal : _modals)
+			modal.ptr->SetSize(GetSize());
+	}
+
+	std::future<fig::sdl::Surface> Frame::GetSnapshot()
+	{
+		_snapshotPromises.emplace_back(std::promise<fig::sdl::Surface> {});
+		auto future = _snapshotPromises.back().get_future();
+		return future;
 	}
 }

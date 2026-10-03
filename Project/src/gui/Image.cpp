@@ -37,14 +37,16 @@ namespace fig::gui
 			auto rect = GetDrawRect();
 
 			if (fgColor.IsDefined())
+			{
 				SDL_SetTextureColorMod(_pTexture, fgColor.r(), fgColor.g(), fgColor.b());
-			else
-				SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
-
-			if (fgColor.IsDefined() && fgColor.a() != 0)
 				SDL_SetTextureAlphaMod(_pTexture, fgColor.a());
+			}
 			else
+			{
+				SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
 				SDL_SetTextureAlphaMod(_pTexture, 0xFF);
+			}
+
 
 			if (dbl_eq(_angle, 0.0))
 				SDL_RenderTexture(pRenderer, _pTexture, NULL, &rect);

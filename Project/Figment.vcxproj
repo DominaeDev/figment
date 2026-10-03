@@ -206,6 +206,7 @@
     <ClCompile Include="src\gui\DropList.cpp" />
     <ClCompile Include="src\gui\Editor.cpp" />
     <ClCompile Include="src\gui\HorizontalLine.cpp" />
+    <ClCompile Include="src\gui\ModalOverlay.cpp" />
     <ClCompile Include="src\gui\MouseEventHandler.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabelAndIcon.cpp" />
@@ -545,6 +546,7 @@
     <ClInclude Include="include\gui\DebugScreen.h" />
     <ClInclude Include="include\gui\Events.h" />
     <ClInclude Include="include\gui\ButtonWithIcon.h" />
+    <ClInclude Include="include\gui\ModalOverlay.h" />
     <ClInclude Include="include\gui\MouseEventHandler.h" />
     <ClInclude Include="include\gui\ImageViewport.h" />
     <ClInclude Include="include\gui\ImageWithMask.h" />
