@@ -6,6 +6,7 @@
 #include "gui/Menu.h"
 #include "data/ChatLog.h"
 #include "io/AssetUserSettings.h"
+#include "io/ContentManager.h"
 
 using namespace fig::io;
 using namespace fig::data;

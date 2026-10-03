@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Figment.h"
-#include "io/Asset.h"
+#include "io/AssetManager.h"
 #include "io/ContentTypes.h"
 
 namespace fig::io

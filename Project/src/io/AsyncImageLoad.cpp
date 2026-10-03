@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "io/AsyncImageLoad.h"
+#include "io/ContentManager.h"
 
 namespace fig::io
 {

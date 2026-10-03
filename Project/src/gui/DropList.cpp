@@ -89,7 +89,7 @@ namespace fig::gui
 		return _selectedIndex;
 	}
 
-	int32_t DropListBase::SelectValue(fig::string_view label, bool bSilent) noexcept
+	int32_t DropListBase::Select(fig::string_view label, bool bSilent) noexcept
 	{
 		if (auto itFind = std::find_if(_items.cbegin(), _items.cend(), [label](auto&& i) { return i == label; }); itFind != _items.cend())
 			_selectedIndex = static_cast<int32_t>(std::distance(_items.cbegin(), itFind));

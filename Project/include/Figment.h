@@ -15,6 +15,7 @@
 #include <variant>
 #include <optional>
 #include <expected>
+#include <mutex>
 #include <stdint.h>
 
 #include "app/Types.h"
@@ -25,6 +26,8 @@
 #include "gui/GUICommon.h"
 #include "gui/Events.h"
 #include "io/Error.h"
+#include "app/AppSettings.h"
+#include "app/AppState.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>

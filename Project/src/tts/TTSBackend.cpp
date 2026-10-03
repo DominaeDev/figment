@@ -2,6 +2,7 @@
 #include "tts/TTSBackend.h"
 #include "io/PackageManager.h"
 #include "io/FileUtility.h"
+#include "io/ContentManager.h"
 
 #if defined(_WIN32)
 #include "tts/AudioServerProcess_Win32.h"

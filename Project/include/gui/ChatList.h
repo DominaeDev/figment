@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui/ScrollPanel.h"
+#include "io/ContentManager.h"
 
 namespace fig::gui
 {

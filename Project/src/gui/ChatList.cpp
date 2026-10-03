@@ -203,8 +203,6 @@ namespace fig::gui
 			| std::ranges::to<std::vector>()
 			| fig::group_by([](auto it) { return it->timeBucket; });
 
-		Clock user_clock_setting = Global::GetUserSettings().GetEnum<Clock>(UserSetting::Settings::Clock, ClockMapping);
-
 		for (auto& kvp : chatsByTime)
 		{
 			auto bucket = kvp.first;
@@ -226,8 +224,10 @@ namespace fig::gui
 					_pVerticalSizer->AddSpacer(Spacing);
 
 				fig::string timeString;
-				if (item.timeBucket < TimeBucket::LessThan1Week)
-					timeString = item.updatedAt.get_time_string(user_clock_setting);
+				if (item.timeBucket < TimeBucket::LessThan1Day)
+					timeString = item.updatedAt.get_time_string();
+				else if (item.timeBucket < TimeBucket::LessThan1Week)
+					timeString = std::format("{}, {}", item.updatedAt.weekday(), item.updatedAt.get_time_string());
 				else
 					timeString = item.updatedAt.get_date_string();
 

@@ -9,6 +9,7 @@
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/CharacterDetailsPanel.h"
 #include "chat/ChatSession.h"
+#include "io/ContentManager.h"
 
 using namespace fig::chat;
 using namespace fig::data;

@@ -8,6 +8,7 @@
 namespace fig::data
 {
 	class Character;
+	using CharacterRule = fig::string;
 }
 
 namespace fig::gui

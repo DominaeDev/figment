@@ -20,17 +20,28 @@ namespace fig
 		local,
 	};
 
-	enum class Clock
+	enum class TimeFormat
 	{
-		Default,
-		H12,
-		H24,
+		HR24 = 0,
+		HR12,
 	};
 
-	static auto ClockMapping = std::array<std::pair<Clock, std::string_view>, 3> {
-		std::pair { Clock::Default,	"default" },
-		std::pair { Clock::H12,	"12h" },
-		std::pair { Clock::H24,	"24h" }
+	enum class DateFormat
+	{
+		YYYYMMDD = 0,
+		DDMMYYYY,
+		MMDDYYYY,
+	};
+
+	static auto TimeFormatMapping = std::array<std::pair<TimeFormat, std::string_view>, 2> {
+		std::pair { TimeFormat::HR24,			"24hr" },
+		std::pair { TimeFormat::HR12,			"12hr" }
+	};
+
+	static auto DateFormatMapping = std::array<std::pair<DateFormat, std::string_view>, 3> {
+		std::pair { DateFormat::YYYYMMDD,		"ymd" },
+		std::pair { DateFormat::DDMMYYYY,		"dmy" },
+		std::pair { DateFormat::MMDDYYYY,		"mdy" },
 	};
 
 	struct duration
@@ -92,8 +103,11 @@ namespace fig
 		timestamp to_global() const;
 		int64_t utc_epoch() const { return static_cast<int64_t>(to_global()); }
 
-		std::string get_time_string(Clock clock);
+		std::string get_time_string();
 		std::string get_date_string();
+		std::string get_time_string(TimeFormat clock);
+		std::string get_date_string(DateFormat clock);
+		std::string weekday() const;
 
 		template <chrono_duration Dur>
 		timestamp operator+(const Dur& duration) const noexcept { return timestamp(_epoch + std::chrono::duration_cast<std::chrono::milliseconds>(duration).count()); }

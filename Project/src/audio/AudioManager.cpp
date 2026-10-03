@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "audio/AudioManager.h"
 #include "user/UserSettings.h"
+#include "user/UserManager.h"
 
 namespace fig::audio
 {

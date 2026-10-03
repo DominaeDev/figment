@@ -53,7 +53,8 @@ namespace fig::io
 		
 		namespace Settings
 		{
-			constexpr fig::io::SettingKey Clock			{ "Settings", "Clock" };
+			constexpr fig::io::SettingKey TimeFormat	{ "Settings", "TimeFormat" };
+			constexpr fig::io::SettingKey DateFormat	{ "Settings", "DateFormat" };
 			constexpr fig::io::SettingKey ModelPreset	{ "Settings", "ModelPreset" };
 		}
 	}
@@ -142,5 +143,11 @@ namespace fig::io
 
 		void SetColorTheme(fig::gui::ColorTheme theme);
 		fig::gui::ColorTheme GetColorTheme() const;
+
+		DateFormat GetDateFormat() const;
+		TimeFormat GetTimeFormat() const;
+	
+	protected:
+		void OnSetDefaults() override;
 	};
 }

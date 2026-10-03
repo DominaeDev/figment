@@ -7,6 +7,7 @@
 namespace fig::data
 {
 	class ChatLog;
+	struct ChatInstance;
 }
 
 namespace fig::io

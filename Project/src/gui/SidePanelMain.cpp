@@ -8,6 +8,8 @@
 #include "gui/LineBorderRenderer.h"
 #include "gui/ResizeHandle.h"
 #include "gui/Menu.h"
+#include "io/ContentManager.h"
+#include "user/UserManager.h"
 
 using namespace fig::io;
 

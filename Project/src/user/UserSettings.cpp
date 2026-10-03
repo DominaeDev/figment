@@ -9,7 +9,8 @@ namespace fig::io
 {
 	static const std::vector<SettingTuple> _UserSettings
 	{
-		{ UserSetting::Settings::Clock,								enum_serialize(Clock::Default, ClockMapping) },
+		{ UserSetting::Settings::TimeFormat,						"" },
+		{ UserSetting::Settings::DateFormat,						"" },
 		{ UserSetting::Settings::ModelPreset,						"" },
 
 		{ UserSetting::Interface::Theme,							enum_serialize(ColorTheme::SystemDefault, ColorThemeMapping) },
@@ -53,6 +54,49 @@ namespace fig::io
 		return OnSave(_UserSettings);
 	}
 
+	void UserSettings::OnSetDefaults()
+	{
+		// Auto-detect time and date formats
+		if (auto format = TryGetEnum<DateFormat>(UserSetting::Settings::DateFormat, DateFormatMapping); not format.has_value())
+		{
+			SDL_DateFormat dateFormat {};
+			if (SDL_GetDateTimeLocalePreferences(&dateFormat, NULL))
+			{
+				switch (dateFormat)
+				{
+				default:
+				case SDL_DATE_FORMAT_YYYYMMDD:
+					SetEnum(UserSetting::Settings::DateFormat, DateFormat::YYYYMMDD, DateFormatMapping);
+					break;
+				case SDL_DATE_FORMAT_DDMMYYYY:
+					SetEnum(UserSetting::Settings::DateFormat, DateFormat::DDMMYYYY, DateFormatMapping);
+					break;
+				case SDL_DATE_FORMAT_MMDDYYYY:
+					SetEnum(UserSetting::Settings::DateFormat, DateFormat::MMDDYYYY, DateFormatMapping);
+					break;
+				}
+			}
+		}
+
+		if (auto format = TryGetEnum<TimeFormat>(UserSetting::Settings::TimeFormat, TimeFormatMapping); not format.has_value())
+		{
+			SDL_TimeFormat timeFormat {};
+			if (SDL_GetDateTimeLocalePreferences(NULL, &timeFormat))
+			{
+				switch (timeFormat)
+				{
+				default:
+				case SDL_TIME_FORMAT_24HR:
+					SetEnum(UserSetting::Settings::TimeFormat, TimeFormat::HR24, TimeFormatMapping);
+					break;
+				case SDL_TIME_FORMAT_12HR:
+					SetEnum(UserSetting::Settings::TimeFormat, TimeFormat::HR12, TimeFormatMapping);
+					break;
+				}
+			}
+		}
+	}
+
 	void UserSettings::SetChatListFilter(ChatFilterFlags filter)
 	{
 		SetFlags<ChatFilterFlag>(UserSetting::Interface::ChatList::Filtering, filter, ChatFilterFlagMapping);
@@ -72,5 +116,16 @@ namespace fig::io
 	{
 		return GetEnum<ColorTheme>(UserSetting::Interface::Theme, ColorThemeMapping, ColorTheme::SystemDefault);
 	}
+
+	DateFormat UserSettings::GetDateFormat() const
+	{
+		return GetEnum<DateFormat>(UserSetting::Settings::DateFormat, DateFormatMapping);
+	}
+
+	TimeFormat UserSettings::GetTimeFormat() const
+	{
+		return GetEnum<TimeFormat>(UserSetting::Settings::TimeFormat, TimeFormatMapping);
+	}
+
 
 }

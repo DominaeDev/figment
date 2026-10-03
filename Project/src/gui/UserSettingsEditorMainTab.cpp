@@ -52,6 +52,47 @@ namespace fig::gui
 		if (auto index = find_index(Themes, Global::GetUserSettings().GetColorTheme(), [](auto&& p) { return p.second; }); index != fig::npos)
 			pTheme->Select(toI(index), true);
 		
+		auto currentTime = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
+		auto currentDate = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(currentTime));
+		auto day = static_cast<unsigned>(currentDate.day());
+		auto month = static_cast<unsigned>(currentDate.month());
+		auto year = static_cast<int32_t>(currentDate.year());
+
+		auto dateFormats = std::vector { 
+			std::pair { DateFormat::YYYYMMDD, std::format("YYYY-MM-DD ({:02}-{:02}-{:02})", year, month, day) },
+			std::pair { DateFormat::DDMMYYYY, std::format("DD/MM/YYYY ({:02}/{:02}/{:02})", day, month, year) },
+			std::pair { DateFormat::MMDDYYYY, std::format("MM/DD/YYYY ({}/{}/{})", month, day, year) },
+		};
+
+		CreateLabel(this, pSizer, "Time and date");
+		auto pDateFormat = CreateControl<DropListOfType<DateFormat>>();
+		for (auto& format : dateFormats)
+			pDateFormat->AddItem(format.second, format.first);
+		pDateFormat->SetDelegate([this, dateFormats](int32_t index) {
+			if (index >= 0 and index < dateFormats.size())
+				Global::GetUserSettings().SetEnum<DateFormat>(UserSetting::Settings::DateFormat, dateFormats[index].first, DateFormatMapping);
+		});
+		pDateFormat->SelectValue(Global::GetUserSettings().GetDateFormat());
+		pDateFormat->SetMaxWidth(260);
+		pSizer->Add(pDateFormat, 0, SizerFlag::Expand);
+
+		auto timeFormats = std::vector {
+			std::pair { TimeFormat::HR12, std::format("12 hour ({:%I:%M %p})", currentTime) },
+			std::pair { TimeFormat::HR24, std::format("24 hour ({:%H:%M})", currentTime) },
+		};
+
+		auto pTimeFormat = CreateControl<DropListOfType<TimeFormat>>();
+		for (auto& format : timeFormats)
+			pTimeFormat->AddItem(format.second, format.first);
+		pTimeFormat->SetDelegate([this, timeFormats](int32_t index) {
+			if (index >= 0 and index < timeFormats.size())
+				Global::GetUserSettings().SetEnum<TimeFormat>(UserSetting::Settings::TimeFormat, timeFormats[index].first, TimeFormatMapping);
+		});
+		pTimeFormat->SelectValue(Global::GetUserSettings().GetTimeFormat());
+		pTimeFormat->SetMaxWidth(200);
+		pSizer->AddSpacer(6);
+		pSizer->Add(pTimeFormat, 0, SizerFlag::Expand);
+
 		return true;
 	}
 

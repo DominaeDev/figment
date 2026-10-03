@@ -1,8 +1,9 @@
 #include <pch.h>
 #include <execution>
 #include "gui/ChatBackground.h"
+#include "io/ContentManager.h"
 
-#include "fast_gaussian_blur_template.h"
+#include <fast_gaussian_blur_template.h>
 
 namespace fig::gui
 {

@@ -8,6 +8,7 @@
 #include "data/Character.h"
 #include "audio/AudioManager.h"
 #include "tts/TTSBackend.h"
+#include "io/ContentManager.h"
 
 using namespace fig::data;
 using namespace fig::tts;

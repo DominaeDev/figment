@@ -10,7 +10,7 @@ namespace fig::gui
 	{
 	public:
 		int32_t Select(int32_t index, bool bSilent = false) noexcept;
-		int32_t SelectValue(fig::string_view label, bool bSilent = false) noexcept;
+		int32_t Select(fig::string_view label, bool bSilent = false) noexcept;
 		int32_t GetSelectedIndex() const noexcept;
 
 		void SetDelegate(ListItemSelectedDelegate fnDelegate);
@@ -68,9 +68,9 @@ namespace fig::gui
 			AddItem(static_cast<fig::string>(item), item);
 		}
 
-		template <typename R = std::ranges::range<T>>
+		template <std::ranges::range R>
+			requires fig::is_string_like<T> and std::same_as<std::ranges::range_value_t<R>, T>
 		void AddItems(const R& items) noexcept
-			requires fig::is_string_like<T>
 		{
 			for (auto& item : items)
 				AddItem(static_cast<fig::string>(item), item);
@@ -87,6 +87,14 @@ namespace fig::gui
 			if (_selectedIndex >= 0 && _selectedIndex < _items.size())
 				return _items[_selectedIndex].second;
 			return std::nullopt;
+		}
+
+		int32_t SelectValue(const T& value, bool bSilent = false) noexcept
+		{
+			if (auto index = index_of(_values, value); index != fig::npos)
+				return Select(static_cast<int32_t>(index), bSilent);
+			else
+				return Select(-1, bSilent);
 		}
 
 		void Clear()

@@ -3,6 +3,7 @@
 #include "CardImage.h"
 #include "io/AssetManager.h"
 #include "util/SearchIndex.h"
+#include "data/ContentMetaData.h"
 
 namespace fig::gui
 {

@@ -184,8 +184,9 @@ namespace fig
 		return fig::npos;
 	}
 
-	template<template <typename, typename> class Cont, typename V, typename Pred, typename A = std::allocator<V>>
-	inline constexpr size_t index_of(const Cont<V, A>& cont, V value)
+	template<std::ranges::range R, typename T>
+		requires std::same_as<std::ranges::range_value_t<R>, T>
+	inline constexpr size_t index_of(const R& cont, const T& value)
 	{
 		auto it = std::find(cont.cbegin(), cont.cend(), value);
 		if (it != cont.cend())
@@ -267,7 +268,6 @@ namespace fig
 		return encode_csv(flags.Serialized(mapping));
 	}
 
-
 	template <typename K, typename T, std::size_t N>
 		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
 	inline fig::string enum_serialize_flags(const EnumFlags<K>& flags, const std::array<std::pair<K, T>, N>& mapping)
@@ -294,6 +294,25 @@ namespace fig
 				return key;
 		}
 		return defaultValue;
+	}
+
+	template <typename K, typename T>
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline std::optional<K> try_enum_deserialize(const T& enum_value, const std::map<K, T>& mapping)
+	{
+		return find_key(mapping, enum_value);
+	}
+
+	template <typename K, typename T, std::size_t N>
+		requires std::is_enum_v<K> and std::constructible_from<fig::string, T>
+	inline constexpr std::optional<K> try_enum_deserialize(fig::string_view name, const std::array<std::pair<K, T>, N>& map)
+	{
+		for (const auto& [key, value] : map)
+		{
+			if (value == name)
+				return key;
+		}
+		return std::nullopt;
 	}
 
 	template <typename K, typename T>

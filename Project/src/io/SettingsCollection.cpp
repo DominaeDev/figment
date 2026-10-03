@@ -42,6 +42,7 @@ namespace fig::io
 						SetValue(key, ini.Get<fig::string>(key.section, key.key).value_or(""));
 				}
 			}
+			OnSetDefaults();
 			return FileError::NoError;
 		}
 		else

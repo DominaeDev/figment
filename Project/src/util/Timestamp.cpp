@@ -1,58 +1,71 @@
 #include <pch.h>
 #include "util/Timestamp.h"
-
-#if _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <Windows.h>
-#endif
+#include "user/UserSettings.h"
 
 namespace fig
 {
-	std::string timestamp::get_time_string(Clock clock)
+	std::string timestamp::get_time_string()
 	{
-		if (clock == Clock::Default)
-		{
-#if _WIN32
-			// Call OS to get the system locale format
-			ULARGE_INTEGER largeInteger;
-			largeInteger.QuadPart = (_epoch + 11644473600000ULL) * 10000ULL;
-
-			FILETIME fileTime;
-			fileTime.dwLowDateTime = largeInteger.LowPart;
-			fileTime.dwHighDateTime = largeInteger.HighPart;
-
-			SYSTEMTIME utcTime;
-			FileTimeToSystemTime(&fileTime, &utcTime);
-
-			SYSTEMTIME localTime;
-			SystemTimeToTzSpecificLocalTime(nullptr, &utcTime, &localTime);
-
-			wchar_t buffer[64];
-			GetTimeFormatEx(LOCALE_NAME_USER_DEFAULT, TIME_NOSECONDS, &localTime, nullptr, buffer, 64);
-
-			char narrowBuffer[64];
-			int32_t length = WideCharToMultiByte(CP_UTF8, 0, buffer, -1, narrowBuffer, 64, nullptr, nullptr);
-
-			if (length > 0)
-				return std::string(narrowBuffer, static_cast<size_t>(length - 1));
-#endif
-		}
-
-		auto localTime = std::chrono::local_time<std::chrono::milliseconds>(*this);
-		if (clock == Clock::H12)
-			return trim(std::format("{:%I:%M %p}", localTime));
-		else
-			return trim(std::format("{:%H:%M}", localTime));
+		if (Global::IsSignedIn())
+			return get_time_string(Global::GetUserSettings().GetTimeFormat());
+		return get_time_string(TimeFormat::HR24);
 	}
 
 	std::string timestamp::get_date_string()
 	{
-		auto localTime = std::chrono::local_time<std::chrono::milliseconds>(*this);
-		auto day = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(localTime)).day();
+		if (Global::IsSignedIn())
+			return get_date_string(Global::GetUserSettings().GetDateFormat());
+		return get_date_string(DateFormat::YYYYMMDD);
+	}
 
-		return std::format("{0:%a}, {0:%b} {1}", localTime, static_cast<unsigned>(day));
+	std::string timestamp::get_time_string(TimeFormat format)
+	{
+		auto localTime = std::chrono::local_time<std::chrono::milliseconds>(*this);
+		
+		switch (format)
+		{
+		case TimeFormat::HR12:
+			return trim(std::format("{:%I:%M %p}", localTime));
+		default:
+		case TimeFormat::HR24:
+			return trim(std::format("{:%H:%M}", localTime));
+		}
+	}
+
+	std::string timestamp::get_date_string(DateFormat format)
+	{
+		auto localTime = std::chrono::local_time<std::chrono::milliseconds>(*this);
+		auto date = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(localTime));
+		auto day = static_cast<unsigned>(date.day());
+		auto month = static_cast<unsigned>(date.month());
+		auto year = static_cast<int32_t>(date.year());
+
+		auto currentTime = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
+		auto currentDate = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(currentTime));
+		bool includeYear = date.year() != currentDate.year();
+
+		switch (format)
+		{
+		case DateFormat::DDMMYYYY:
+			if (includeYear)
+				return std::format("{}/{}/{}", day, month, year);
+			return std::format("{0:%a}, {1} {0:%b}", localTime, day);
+		case DateFormat::MMDDYYYY:
+			if (includeYear)
+				return std::format("{}/{}/{}", month, day, year);
+			return std::format("{0:%a}, {0:%b} {1}", localTime, day);
+		default:
+		case DateFormat::YYYYMMDD:
+			if (includeYear)
+				return std::format("{}-{}-{}", year, month, day);
+			return std::format("{0:%a}, {1} {0:%b}", localTime, day);
+		}
+	}
+
+	std::string timestamp::weekday() const
+	{
+		auto localTime = std::chrono::local_time<std::chrono::milliseconds>(*this);
+		return std::format("{0:%a}", localTime);
 	}
 
 	timestamp timestamp::to_local() const

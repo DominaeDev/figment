@@ -9,6 +9,7 @@
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
+#include "io/ContentManager.h"
 
 namespace fig::gui
 {
