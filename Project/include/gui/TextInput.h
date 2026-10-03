@@ -70,6 +70,7 @@ namespace fig::gui
 		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
 
 		int32_t SetCursor(int32_t index) noexcept;
+
 		void ScrollToCursor();
 
 		bool Copy();
@@ -126,7 +127,8 @@ namespace fig::gui
 		std::optional<TextInput::TTFCursor> TryGetCursorAt(int32_t x, int32_t y) const noexcept;
 		TTFCursor GetLineCursor(size_t line_index) const noexcept;
 
-		int32_t MoveCursor(int32_t direction) noexcept;
+		int32_t StepCursor(int32_t direction) noexcept;
+		int32_t MoveCursor(int32_t position) noexcept;
 		int32_t MoveCursorLeft() noexcept;
 		int32_t MoveCursorRight() noexcept;
 		int32_t MoveCursorUp() noexcept;
@@ -231,7 +233,11 @@ namespace fig::gui
 		// Undo
 		enum class UndoAction
 		{
-			Default, Write, WhitespacePunctuation, Erase,
+			Default, 
+			Select, 
+			Insert, 
+			Delete,
+			WhitespaceAndPunctuation, 
 		};
 
 		struct UndoState

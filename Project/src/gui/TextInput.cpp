@@ -724,19 +724,15 @@ namespace fig::gui
 		}
 	}
 
-	int32_t TextInput::MoveCursor(int32_t direction) noexcept
+	int32_t TextInput::StepCursor(int32_t direction) noexcept
 	{
-		auto last_cursor = _cursor;
-
 		auto position = _cursor;
 		if (direction < 0 and not StepLeft(_text, position))
 			return _cursor;
 		if (direction > 0 and not StepRight(_text, position))
 			return _cursor;
 		
-		SetCursor(position);
-		OnMoveCursor(last_cursor);
-		return _cursor;
+		return MoveCursor(position);
 	}
 
 	void TextInput::OnMoveCursor(int32_t last_position)
@@ -764,18 +760,20 @@ namespace fig::gui
 			Select(start, end);
 		}
 
+		_undo.PushState(GetUndoState(UndoAction::Select));
+
 		ResetCursorBlink();
 		ScrollToCursor();
 	}
 
 	int32_t TextInput::MoveCursorLeft() noexcept
 	{
-		return MoveCursor(-1);
+		return StepCursor(-1);
 	}
 
 	int32_t TextInput::MoveCursorRight() noexcept
 	{
-		return MoveCursor(1);
+		return StepCursor(1);
 	}
 
 	int32_t TextInput::MoveCursorUp() noexcept
@@ -787,12 +785,7 @@ namespace fig::gui
 			return 0;
 
 		if (IsOnLastNewLine())
-		{
-			auto last_cursor = _cursor;
-			SetCursor(_lines.back().position);
-			OnMoveCursor(last_cursor);
-			return _cursor;
-		}
+			return MoveCursor(_lines.back().position);
 
 		return MoveCursorUpDown(-1);
 	}
@@ -807,12 +800,7 @@ namespace fig::gui
 
 		auto cursor = GetCursor();
 		if (cursor.line + 1uz >= _lines.size())
-		{
-			auto last_cursor = _cursor;
-			SetCursor(static_cast<int32_t>(_text.size()));
-			OnMoveCursor(last_cursor);
-			return _cursor;
-		}
+			return MoveCursor(static_cast<int32_t>(_text.size()));
 
 		return MoveCursorUpDown(1);
 	}
@@ -826,18 +814,13 @@ namespace fig::gui
 			return _cursor;
 
 		auto cursor = GetCursor();
-		auto last_cursor = _cursor;
 		if (cursor.line == 0 and lines < 0)
 			return _cursor; // No move
 
 		int32_t target_line = std::clamp(cursor.line + lines, 0, toI(_lines.size()));
 
 		if (target_line >= _lines.size())
-		{
-			SetCursor(static_cast<int32_t>(_text.size()));
-			OnMoveCursor(last_cursor);
-			return _cursor;
-		}
+			return MoveCursor(static_cast<int32_t>(_text.size()));
 
 		auto& curr_line = _lines[cursor.line];
 		auto& next_line = _lines[target_line];
@@ -851,9 +834,7 @@ namespace fig::gui
 				pos += GetCursorTextIndex(x, &substring);
 		}
 
-		SetCursor(pos);
-		OnMoveCursor(last_cursor);
-		return _cursor;
+		return MoveCursor(pos);
 	}
 
 	int32_t TextInput::MoveCursorBeginningOfLine() noexcept
@@ -864,11 +845,8 @@ namespace fig::gui
 		if (IsOnLastNewLine())
 			return _cursor;
 
-		auto last_cursor = _cursor;
 		auto& line = _lines[GetCursor().line];
-		SetCursor(line.position);
-		OnMoveCursor(last_cursor);
-		return _cursor;
+		return MoveCursor(line.position);
 	}
 
 	int32_t TextInput::MoveCursorEndOfLine() noexcept
@@ -879,19 +857,13 @@ namespace fig::gui
 		if (_cursor == _text.size())
 			return _cursor;
 
-		auto last_cursor = _cursor;
 		auto& line = _lines[GetCursor().line];
-		SetCursor(line.position + line.length - (IsEOL(line) ? 1 : 0));
-		OnMoveCursor(last_cursor);
-		return _cursor;
+		return MoveCursor(line.position + line.length - (IsEOL(line) ? 1 : 0));
 	}
 
 	int32_t TextInput::MoveCursorToPriorWord() noexcept
 	{
-		auto last_cursor = _cursor;
-		SetCursor(FindPriorWord(_text, _cursor));
-		OnMoveCursor(last_cursor);
-		return _cursor;
+		return MoveCursor(FindPriorWord(_text, _cursor));
 	}
 
 	int32_t TextInput::MoveCursorToNextWord() noexcept
@@ -899,26 +871,17 @@ namespace fig::gui
 		if (IsPassword())
 			return _cursor;
 
-		auto last_cursor = _cursor;
-		SetCursor(FindNextWord(_text, _cursor));
-		OnMoveCursor(last_cursor);
-		return _cursor;
+		return MoveCursor(FindNextWord(_text, _cursor));
 	}
 
 	int32_t TextInput::MoveCursorBeginning() noexcept
 	{
-		auto last_cursor = _cursor;
-		SetCursor(0);
-		OnMoveCursor(last_cursor);
-		return _cursor;
+		return MoveCursor(0);
 	}
 
 	int32_t TextInput::MoveCursorEnd() noexcept
 	{
-		auto last_cursor = _cursor;
-		SetCursor(static_cast<int32_t>(_text.size()));
-		OnMoveCursor(last_cursor);
-		return _cursor;
+		return MoveCursor(static_cast<int32_t>(_text.size()));
 	}
 
 	bool TextInput::Backspace()
@@ -934,7 +897,7 @@ namespace fig::gui
 				if (Delete(pos, _cursor - pos))
 				{
 					ResetCursorBlink();
-					PushUndo(UndoAction::Erase);
+					PushUndo(UndoAction::Delete);
 					DidChange();
 					return true;
 				}
@@ -953,7 +916,7 @@ namespace fig::gui
 		if (Delete(prior, length))
 		{
 			ResetCursorBlink();
-			PushUndo(UndoAction::Erase, false);
+			PushUndo(UndoAction::Delete, false);
 			DidChange();
 			return true;
 		}
@@ -968,7 +931,7 @@ namespace fig::gui
 		if (Delete(0, _cursor))
 		{
 			ResetCursorBlink();
-			PushUndo(UndoAction::Erase, false);
+			PushUndo(UndoAction::Delete, false);
 			DidChange();
 			return true;
 		}
@@ -984,7 +947,7 @@ namespace fig::gui
 		if (Delete(cursor.position, _cursor))
 		{
 			ResetCursorBlink();
-			PushUndo(UndoAction::Erase, false);
+			PushUndo(UndoAction::Delete, false);
 			DidChange();
 			return true;
 		}
@@ -999,6 +962,10 @@ namespace fig::gui
 			auto end = FindNextWord(_text, (*cursor).position);
 			SetCursor(end);
 			Select(start, end);
+
+			_undo.PushState(GetUndoState(UndoAction::Select));
+			ResetCursorBlink();
+			ScrollToCursor();
 		}
 		return _cursor;
 	}
@@ -1017,7 +984,7 @@ namespace fig::gui
 		if (Delete(_cursor, static_cast<int32_t>(length)))
 		{
 			ResetCursorBlink();
-			PushUndo(UndoAction::Erase);
+			PushUndo(UndoAction::Delete);
 			DidChange();
 			return true;
 		}
@@ -1034,7 +1001,7 @@ namespace fig::gui
 		if (Delete(_cursor, length))
 		{
 			ResetCursorBlink();
-			PushUndo(UndoAction::Erase, false);
+			PushUndo(UndoAction::Delete, false);
 			DidChange();
 			return true;
 		}
@@ -1050,7 +1017,7 @@ namespace fig::gui
 		if (cursor.line < _lines.size() and Delete(_cursor, _lines[cursor.line].position + _lines[cursor.line].length - cursor.position))
 		{
 			ResetCursorBlink();
-			PushUndo(UndoAction::Erase, false);
+			PushUndo(UndoAction::Delete, false);
 			DidChange();
 			return true;
 		}
@@ -1065,7 +1032,7 @@ namespace fig::gui
 		if (Delete(_cursor, static_cast<int32_t>(_text.length()) - _cursor))
 		{
 			ResetCursorBlink();
-			PushUndo(UndoAction::Erase, false);
+			PushUndo(UndoAction::Delete, false);
 			DidChange();
 			return true;
 		}
@@ -1080,7 +1047,7 @@ namespace fig::gui
 		int32_t position, length;
 		if (GetSelection(position, length) and Delete(position, length))
 		{
-			PushUndo(UndoAction::Erase, false);
+			PushUndo(UndoAction::Delete, false);
 			DidChange();
 			return true;
 		}
@@ -1113,9 +1080,7 @@ namespace fig::gui
 		
 		if ((SDL_GetModState() & SDL_KMOD_SHIFT) != 0)
 		{
-			auto last_cursor = _cursor;
-			SetCursor(pos);
-			OnMoveCursor(last_cursor);
+			MoveCursor(pos);
 		}
 		else
 		{
@@ -1128,6 +1093,8 @@ namespace fig::gui
 
 			SetCursor(pos);
 			Select(pos, -1);
+
+			_undo.PushState(GetUndoState(UndoAction::Select));
 			_bIsHighlighting = true;
 		}
 
@@ -1226,7 +1193,7 @@ namespace fig::gui
 
 			if (Delete(position, length))
 			{
-				PushUndo(UndoAction::Erase, false);
+				PushUndo(UndoAction::Delete, false);
 				DidChange();
 				return true;
 			}
@@ -1249,7 +1216,7 @@ namespace fig::gui
 		}
 
 		Insert(content);
-		PushUndo(UndoAction::Write, false);
+		PushUndo(UndoAction::Insert, false);
 		DidChange();
 		return true;
 	}
@@ -1493,14 +1460,14 @@ namespace fig::gui
 				if (_mode == Mode::Multiline or _mode == Mode::MultilineNoWrap)
 				{
 					Insert("\n");
-					PushUndo(UndoAction::Write, false);
+					PushUndo(UndoAction::Insert, false);
 					DidChange();
 					return EventResult::Handled;
 				}
 				else if (_mode == Mode::Chat and (bModCtrl || bModShift))
 				{
 					Insert("\n");
-					PushUndo(UndoAction::Write, false);
+					PushUndo(UndoAction::Insert, false);
 					DidChange();
 					return EventResult::Handled;
 				}
@@ -1539,9 +1506,9 @@ namespace fig::gui
 			if (event.text.text)
 			{
 				if (is_whitespace(event.text.text[0]) || is_punctuation(event.text.text[0]))
-					PushUndo(UndoAction::WhitespacePunctuation);
+					PushUndo(UndoAction::WhitespaceAndPunctuation);
 				else
-					PushUndo(UndoAction::Write);
+					PushUndo(UndoAction::Insert);
 				DidChange();
 			}
 			return EventResult::Handled;
@@ -1767,9 +1734,9 @@ namespace fig::gui
 			_text = undo.text;
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
+			Select(undo.highlight_start, undo.highlight_end);
 			SetCursor(undo.cursor_pos);
-			highlight_start = undo.highlight_start;
-			highlight_end = undo.highlight_end;
+			ScrollToCursor();
 		}
 	}
 
@@ -1781,9 +1748,9 @@ namespace fig::gui
 			_text = undo.text;
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
+			Select(undo.highlight_start, undo.highlight_end);
 			SetCursor(undo.cursor_pos);
-			highlight_start = undo.highlight_start;
-			highlight_end = undo.highlight_end;
+			ScrollToCursor();
 		}
 	}
 
@@ -2048,19 +2015,27 @@ namespace fig::gui
 		return {};
 	}
 
-	int32_t TextInput::SetCursor(int32_t index) noexcept
+	int32_t TextInput::SetCursor(int32_t position) noexcept
 	{
 		if (_composition_length > 0)
 		{
 			/* Don't let the cursor be moved into the composition */
-			if (index >= _composition_start and index <= (_composition_start + _composition_length))
+			if (position >= _composition_start and position <= (_composition_start + _composition_length))
 				return _cursor;
 
 			CancelComposition();
 		}
 
 		ResetCursorBlink();
-		_cursor = std::clamp(index, 0, static_cast<int32_t>(_text.length()));
+		_cursor = std::clamp(position, 0, static_cast<int32_t>(_text.length()));
+		return _cursor;
+	}
+
+	int32_t TextInput::MoveCursor(int32_t position) noexcept
+	{
+		auto last_cursor = _cursor;
+		SetCursor(position);
+		OnMoveCursor(last_cursor);
 		return _cursor;
 	}
 
