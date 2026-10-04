@@ -484,9 +484,11 @@ namespace fig::gui
 
 		if (filter.IsSet(FilterFlag::New) and not _metaData.IsNew())
 			return false;
+		if (filter.IsSet(FilterFlag::Starred) and not _userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
+			return false;
 		if (filter.IsSet(FilterFlag::Chats) and _chatCount == 0)
 			return false;
-		if (filter.IsSet(FilterFlag::Starred) and not _userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
+		if (filter.IsSet(FilterFlag::Voiced) and not _metaData.hasVoice)
 			return false;
 		if (not filter.IsSet(FilterFlag::SourceCreated) and not _userSettings.HasFlag(AssetUserSettings::Flag::Imported))
 			return false;

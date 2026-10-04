@@ -1918,6 +1918,9 @@
     <ClInclude Include="include\gui\DialogBox.h">
       <Filter>Source Files\Frontend\GUI\Modals</Filter>
     </ClInclude>
+    <ClInclude Include="include\util\Interpolate.h">
+      <Filter>Source Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

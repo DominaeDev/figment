@@ -7,12 +7,14 @@
 #include "gui/MenuSeparator.h"
 #include "app/AppState.h"
 #include "gui/Events.h"
+#include "util/Interpolate.h"
 #include <fast_gaussian_blur_template.h>
 
 namespace fig::gui
 {
 	constexpr float fBlurSigma = 2.5f;
 	constexpr float fBlurOpacity = 0.5f;
+	constexpr float fFadeDuration = 0.4f;
 
 	ModalOverlay::ModalOverlay(FramePtr pFrame) : Overlay(pFrame)
 	{
@@ -82,14 +84,12 @@ namespace fig::gui
 		{
 			if (_pBGImage && _pBGImage->HasTexture() and _fBlurFade < 1.0f)
 			{
-				_fBlurFade += fElapsed / 0.3f;
+				_fBlurFade += fElapsed / fFadeDuration;
 				if (_fBlurFade > 1.0f)
 					_fBlurFade = 1.0f;
 				
-				float fInverse = 1.0f - _fBlurFade;
-				float fEaseOut = 1.0f - fInverse * fInverse;
-				_pBGImage->SetForegroundColor(fig::color_ref(Color::White).WithAlpha(fEaseOut));
-				_pBGTint->SetBackgroundColor(fig::color_ref(Color::CardShadow).WithAlpha(fBlurOpacity * fEaseOut));
+				_pBGImage->SetForegroundColor(fig::color_ref(Color::White).WithAlpha(std::lerp(0.0f, 1.0f, ease_out_cubic(_fBlurFade))));
+				_pBGTint->SetBackgroundColor(fig::color_ref(Color::CardShadow).WithAlpha(std::lerp(0.0f, fBlurOpacity, ease_out_cubic(_fBlurFade))));
 			}
 		}
 	}
@@ -97,7 +97,7 @@ namespace fig::gui
 	void ModalOverlay::OnSize()
 	{
 		if (_pBGImage)
-			_pBGImage->SetSize(GetSize());
+			_pBGImage->SetRect(ScaleToFit(_pBGImage->GetRect(), GetRect(), ImageFit::Outside));
 		if (_pBGTint)
 			_pBGTint->SetSize(GetSize());
 	}

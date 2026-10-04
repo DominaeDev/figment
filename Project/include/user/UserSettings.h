@@ -89,19 +89,21 @@ namespace fig::io
 		New				= 1 << 4,
 		Starred			= 1 << 5,
 		Chats			= 1 << 6,
-		Hidden			= 1 << 7,
-		SourceCreated	= 1 << 8,
-		SourceImported	= 1 << 9,
+		Voiced			= 1 << 7,
+		Hidden			= 1 << 8,
+		SourceCreated	= 1 << 9,
+		SourceImported	= 1 << 10,
 	};
 	using FilterFlags = EnumFlags<FilterFlag>;
 
-	static auto FilterFlagMapping = std::array<std::pair<FilterFlag, std::string_view>, 9> {
+	static auto FilterFlagMapping = std::array<std::pair<FilterFlag, std::string_view>, 10uz> {
 		std::pair { FilterFlag::GenderMale,		"male" },
 		std::pair { FilterFlag::GenderFemale,	"female" },
 		std::pair { FilterFlag::GenderOther,	"nonbinary" },
 		std::pair { FilterFlag::New,			"new" },
 		std::pair { FilterFlag::Starred,		"starred" },
 		std::pair { FilterFlag::Chats,			"chats" },
+		std::pair { FilterFlag::Voiced,			"voice" },
 		std::pair { FilterFlag::Hidden,			"hidden" },
 		std::pair { FilterFlag::SourceCreated,	"created" },
 		std::pair { FilterFlag::SourceImported,	"imported" },

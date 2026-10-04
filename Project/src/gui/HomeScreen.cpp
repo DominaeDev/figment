@@ -209,7 +209,7 @@ namespace fig::gui
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([=, this] { 
 				if (IsShiftDown())
-					SetFilter((filter & ~FilterFlags { FilterFlag::Starred, FilterFlag::Chats }) | FilterFlag::New);
+					SetFilter((filter & ~FilterFlags { FilterFlag::Starred, FilterFlag::Chats, FilterFlag::Voiced }) | FilterFlag::New);
 				else
 					ToggleFilter(FilterFlag::New); 
 			});
@@ -217,7 +217,7 @@ namespace fig::gui
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([=, this] { 
 				if (IsShiftDown())
-					SetFilter((filter & ~FilterFlags { FilterFlag::New, FilterFlag::Chats }) | FilterFlag::Starred);
+					SetFilter((filter & ~FilterFlags { FilterFlag::New, FilterFlag::Chats, FilterFlag::Voiced }) | FilterFlag::Starred);
 				else
 					ToggleFilter(FilterFlag::Starred); 
 			});
@@ -225,9 +225,17 @@ namespace fig::gui
 			.SetEnabled(!bShowHidden)
 			.SetDelegate([=, this] { 
 				if (IsShiftDown())
-					SetFilter((filter & ~FilterFlags { FilterFlag::New, FilterFlag::Starred}) | FilterFlag::Chats);
+					SetFilter((filter & ~FilterFlags { FilterFlag::New, FilterFlag::Starred, FilterFlag::Voiced }) | FilterFlag::Chats);
 				else
 					ToggleFilter(FilterFlag::Chats); 
+			});
+		menu.AddCheckItem("With voice", filter.IsSet(FilterFlag::Voiced))
+			.SetEnabled(!bShowHidden)
+			.SetDelegate([=, this] { 
+				if (IsShiftDown())
+					SetFilter((filter & ~FilterFlags { FilterFlag::New, FilterFlag::Starred , FilterFlag::Chats }) | FilterFlag::Voiced);
+				else
+					ToggleFilter(FilterFlag::Voiced); 
 			});
 		menu.AddCheckItem("Hidden", bShowHidden)
 			.SetDelegate([=, this] {

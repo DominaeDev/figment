@@ -684,6 +684,7 @@
     <ClInclude Include="include\util\DebugUtils.h" />
     <ClInclude Include="include\util\ExpectedRef.h" />
     <ClInclude Include="include\util\FixedString.h" />
+    <ClInclude Include="include\util\Interpolate.h" />
     <ClInclude Include="include\util\OpaquePtr.h" />
     <ClInclude Include="include\util\ObserverPtr.h" />
     <ClInclude Include="include\util\OptionalRef.h" />

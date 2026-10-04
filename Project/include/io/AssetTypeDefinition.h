@@ -59,8 +59,8 @@ namespace fig::io
 	{
 		Undefined			= 0x00,
 		VoiceSettings		= 0x01,
-		VoiceReference		= 0x02,
-		VoiceMessage		= 0x03,
+		VoiceReference		= 0x02, //! @unused
+		VoiceMessage		= 0x03, //! @unused
 	};
 
 	template <typename T>

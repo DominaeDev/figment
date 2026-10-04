@@ -96,8 +96,10 @@ namespace fig::io
 				// Last used => last chat
 				if (auto lastChat = FindLastChatWith(asset.id))
 					meta.lastUsedAt = std::max(meta.lastUsedAt, lastChat.value().GetUpdatedAt());
+				else
+					meta.lastUsedAt = meta.createdAt;
 
-				meta.hasVoice = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Audio, AudioAssetType::VoiceReference), assetId).has_value();
+				meta.hasVoice = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Audio, AudioAssetType::VoiceSettings), assetId).has_value();
 			}
 
 			_metaData[assetId] = meta;
