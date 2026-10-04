@@ -709,10 +709,4 @@ namespace fig::gui
 		if (_fnDelegate)
 			_fnDelegate(*this, CardEvent::Refresh);
 	}
-
-	void CoverCard::NotifyDelete()
-	{
-		if (_fnDelegate)
-			_fnDelegate(*this, CardEvent::Delete);
-	}
 }

@@ -52,12 +52,12 @@ namespace fig
 			return std::format("{0:%a}, {1} {0:%b}", localTime, day);
 		case DateFormat::MMDDYYYY:
 			if (includeYear)
-				return std::format("{}/{}/{}", month, day, year);
+				return std::format("%F", localTime);
 			return std::format("{0:%a}, {0:%b} {1}", localTime, day);
 		default:
 		case DateFormat::YYYYMMDD:
 			if (includeYear)
-				return std::format("{}-{}-{}", year, month, day);
+				return std::format("%D", localTime);
 			return std::format("{0:%a}, {1} {0:%b}", localTime, day);
 		}
 	}

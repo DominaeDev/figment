@@ -6,6 +6,7 @@
 #include "gui/GUIUtility.h"
 #include "gui/Sizer.h"
 #include "gui/CustomRenderer.h"
+#include "gui/DialogBox.h"
 
 namespace fig::gui
 {
@@ -305,5 +306,59 @@ namespace fig::gui
 		assert(false && "No render context");
 		static Menu err { nullptr };
 		return err; // Error
+	}
+
+	void Control::ShowDialogBox(fig::string_view message, DialogBoxType type, std::function<void(bool)> fnDelegate)
+	{
+		auto& dlg = CreateDialogBox(message, type, fnDelegate);
+		dlg.Show();
+	}
+
+	DialogBox& Control::CreateDialogBox(fig::string_view message, DialogBoxType type, std::function<void(bool)> fnDelegate)
+	{
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+
+		if (_renderContext and _renderContext->pFrame)
+		{
+			DialogButtons buttons;
+			switch (type)
+			{
+			default:
+			case DialogBoxType::Ok:
+				buttons = { DialogButton::Ok };
+				break;
+			case DialogBoxType::OkCancel:
+				buttons = { DialogButton::Ok, DialogButton::Cancel };
+				break;
+			case DialogBoxType::YesNo:
+				buttons = { DialogButton::Yes, DialogButton::No };
+				break;
+			case DialogBoxType::ConfirmCancel:
+				buttons = { DialogButton::Confirm, DialogButton::Cancel };
+				break;
+			}
+
+			return _renderContext->pFrame->CreateModal<DialogBox>(message, buttons, [fnDelegate](auto&& button) {
+				if (fnDelegate)
+				{
+					switch (button)
+					{
+					case DialogButton::Ok:
+					case DialogButton::Yes:
+					case DialogButton::Confirm:
+						fnDelegate(true);
+						break;
+					default:
+						fnDelegate(false);
+						break;
+					}
+				}
+			});
+		}
+
+		assert(false && "No render context");
+		static DialogBox err { nullptr, {}, {}, {} };
+		return err;
 	}
 }

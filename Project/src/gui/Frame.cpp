@@ -20,6 +20,7 @@ namespace fig::gui
 	{
 		PopAllMenus();
 		PopAllModals();
+		Flush();
 	}
 
 	void Frame::Update(float fElapsed)
@@ -41,6 +42,8 @@ namespace fig::gui
 
 		if (AppColors::IsTransitioning())
 			PushEvent(UserEvent::ColorThemeChanged);
+
+		Flush();
 	}
 
 	void Frame::Render(fig::renderer_ptr pRenderer)
@@ -124,7 +127,7 @@ namespace fig::gui
 		while (itFind != _menus.end())
 		{
 			removedIds.push_back((*itFind).id);
-			delete (*itFind).ptr;
+			_removalQueue.push_back((*itFind).ptr);
 			itFind = _menus.erase(itFind);
 		}
 
@@ -138,7 +141,7 @@ namespace fig::gui
 		for (auto menu : _menus)
 		{
 			removedIds.push_back(menu.id);
-			delete menu.ptr;
+			_removalQueue.push_back(menu.ptr);
 		}
 		_menus.clear();
 
@@ -168,7 +171,7 @@ namespace fig::gui
 		while (itFind != _modals.end())
 		{
 			removedIds.push_back((*itFind).id);
-			delete (*itFind).ptr;
+			_removalQueue.push_back((*itFind).ptr);
 			itFind = _modals.erase(itFind);
 		}
 
@@ -182,7 +185,7 @@ namespace fig::gui
 		for (auto modal : _modals)
 		{
 			removedIds.push_back(modal.id);
-			delete modal.ptr;
+			_removalQueue.push_back(modal.ptr);
 		}
 		_modals.clear();
 
@@ -342,5 +345,12 @@ namespace fig::gui
 		_snapshotPromises.emplace_back(std::promise<fig::sdl::Surface> {});
 		auto future = _snapshotPromises.back().get_future();
 		return future;
+	}
+
+	void Frame::Flush()
+	{
+		for (auto& pOverlay : _removalQueue)
+			delete pOverlay;
+		_removalQueue.clear();
 	}
 }

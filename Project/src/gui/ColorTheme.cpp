@@ -119,6 +119,7 @@ namespace fig::gui
 	}
 
 	static std::map<uint32_t, fig::color> _CustomColors {};
+	
 	fig::color_ref custom_color(const fig::color& color)
 	{
 		auto& c = _CustomColors[static_cast<uint32_t>(color)] = color;

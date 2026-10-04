@@ -6,6 +6,7 @@
 namespace fig::gui
 {
 	using WindowPtr = fig::observer_ptr<class Window>;
+	using OverlayPtr = fig::observer_ptr<class Overlay>;
 	using MenuPtr = fig::observer_ptr<class Menu>;
 	using ModalPtr = fig::observer_ptr<class ModalOverlay>;
 
@@ -47,6 +48,7 @@ namespace fig::gui
 		
 		void RefreshCursor();
 		void ResetCursor();
+		void Flush();
 
 	protected:
 		int32_t _nextOverlayId {};
@@ -63,6 +65,8 @@ namespace fig::gui
 			ModalPtr ptr;
 		};
 		std::vector<ModalInstance> _modals;
+		
+		std::vector<OverlayPtr> _removalQueue;
 		
 		std::vector<fig::cursor> _cursors;
 		std::vector<std::promise<fig::sdl::Surface>> _snapshotPromises;

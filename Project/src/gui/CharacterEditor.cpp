@@ -8,6 +8,8 @@
 #include "gui/CharacterEditorAboutTab.h"
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/TexturedBorderRenderer.h"
+#include "gui/DialogBox.h"
+#include "gui/Frame.h"
 #include "gui/AppResources.h"
 #include "io/ContentManager.h"
 
@@ -69,17 +71,12 @@ namespace fig::gui
 
 		auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
 		pSaveButton->SetSize(110, 32);
-		pSaveButton->SetDelegate([this] {
-			if (Save())
-				PushEvent(UserEvent::NavigateToHome);
-		});
+		pSaveButton->SetDelegate([this] { SaveChanges(); });
 		_pSaveButton = pSaveButton;
 
 		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Cancel", Resource::ICON_DISMISS);
 		pDiscardButton->SetSize(110, 32);
-		pDiscardButton->SetDelegate([this] {
-			PushEvent(UserEvent::NavigateToHome);
-		});
+		pDiscardButton->SetDelegate([this] { DismissChanges(); });
 
 		pSizer->Add(_pSaveButton, 0, SizerFlag::AlignCenterVertical);
 		pSizer->Add(pDiscardButton, 0, SizerFlag::Left | SizerFlag::AlignCenterVertical, 8);
@@ -172,5 +169,29 @@ namespace fig::gui
 	void CharacterEditor::OnPropertyChanged()
 	{
 		_pSaveButton->SetTheme(ButtonThemes::SaveButton);
+	}
+
+	void CharacterEditor::SaveChanges()
+	{
+		if (Save())
+			PushEvent(UserEvent::NavigateToHome);
+		else
+		{
+			auto& dlg = CreateDialogBox("An error occurred while saving.", DialogBoxType::Ok);
+			dlg.Show();
+		}
+	}
+
+	void CharacterEditor::DismissChanges()
+	{
+		if (IsDirty())
+		{
+			auto& dlg = CreateDialogBox("Discard unsaved changes?", DialogBoxType::YesNo,
+				[this](bool bConfirm) {
+					if (bConfirm)
+						PushEvent(UserEvent::NavigateToHome);
+				});
+			dlg.Show();
+		}
 	}
 }

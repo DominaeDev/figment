@@ -10,6 +10,7 @@ namespace fig::gui
 	class CheckBox;
 	class ComboBox;
 	class Control;
+	class DialogBox;
 	class Frame;
 	class HorizontalBar;
 	class HorisontalGradient;

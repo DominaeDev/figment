@@ -17,6 +17,7 @@ namespace fig::gui
 	protected:
 		EventResult OnEvent(fig::event& event) override;
 		void ShowMenu();
+		void NotifyDelete();
 
 	private:
 		fig::uuid _characterId;

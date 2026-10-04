@@ -11,7 +11,7 @@
 
 namespace fig::gui
 {
-	constexpr float fBlurSigma = 4.0f;
+	constexpr float fBlurSigma = 2.5f;
 	constexpr float fBlurOpacity = 0.5f;
 
 	ModalOverlay::ModalOverlay(FramePtr pFrame) : Overlay(pFrame)
@@ -22,7 +22,6 @@ namespace fig::gui
 
 	int32_t ModalOverlay::Show()
 	{
-		SetVisible(true);
 		_overlayId = _pOwner->PushModal(this);
 		return _overlayId;
 	}
@@ -75,6 +74,8 @@ namespace fig::gui
 				_pBGImage->SetVisible(true);
 				_pBGImage->SetForegroundColor(Color::Transparent);
 				SDL_DestroySurface(pResult);
+
+				SetVisible(true);
 			}
 		}
 		else
@@ -88,13 +89,9 @@ namespace fig::gui
 				float fInverse = 1.0f - _fBlurFade;
 				float fEaseOut = 1.0f - fInverse * fInverse;
 				_pBGImage->SetForegroundColor(fig::color_ref(Color::White).WithAlpha(fEaseOut));
-				_pBGTint->SetBackgroundColor(fig::color_ref(Color::AppBackground).WithAlpha(fBlurOpacity * fEaseOut));
+				_pBGTint->SetBackgroundColor(fig::color_ref(Color::CardShadow).WithAlpha(fBlurOpacity * fEaseOut));
 			}
 		}
-	}
-
-	void ModalOverlay::OnRender(fig::renderer_ptr pRenderer)
-	{
 	}
 
 	void ModalOverlay::OnSize()

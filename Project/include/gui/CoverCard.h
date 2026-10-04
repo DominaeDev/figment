@@ -72,7 +72,7 @@ namespace fig::gui
 		void SetMetaData(const fig::io::ContentMetaData& metaData) noexcept;
 		void SetUserSettings(const fig::io::AssetUserSettings& userSettings) noexcept;
 		void NotifyUpdated();
-		void NotifyDelete();
+
 	private:
 		void RefreshImage();
 		void PollFuture();

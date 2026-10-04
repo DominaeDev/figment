@@ -274,6 +274,13 @@ namespace fig::gui
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			return HandleMouseUp(event.button) ? EventResult::Handled : EventResult::Pass;
 		}
+		
+		if (IsUserEvent(event, UserEvent::Scrolling))
+		{
+			if (_pOwner)
+				_pOwner->PopMenu(this);
+			return EventResult::Continue;
+		}
 		return EventResult::Pass;
 	}
 

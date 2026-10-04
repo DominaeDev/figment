@@ -17,6 +17,7 @@ namespace fig::gui
 	
 	protected:
 		void OnUpdate(float fElapsed) override;
+		EventResult OnEvent(fig::event& event) override;
 
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void ShowSortingMenu() noexcept;

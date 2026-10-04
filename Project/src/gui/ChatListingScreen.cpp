@@ -209,4 +209,15 @@ namespace fig::gui
 		else
 			_pFilteringButton->ClearBorderRenderer();
 	}
+
+	EventResult ChatListingScreen::OnEvent(fig::event& event)
+	{
+		if (IsUserEvent(event, UserEvent::UserSettingsChanged))
+		{
+			_pChatList->Reorder();
+			return EventResult::Continue;
+		}
+
+		return EventResult::Pass;
+	}
 }

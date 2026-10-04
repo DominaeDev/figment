@@ -63,6 +63,7 @@ namespace fig::gui
 		bool IsWordWrapEnabled() const noexcept { return _bWordWrap; }
 
 		fig::point MeasureText(bool bAllowEllipsis = true) const;
+		fig::point MeasureText(fig::string_view text) const;
 		void Reset();
 		void InvalidateText();
 

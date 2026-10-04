@@ -338,22 +338,22 @@ namespace fig::gui
 	fig::point StaticText::MeasureText(bool bAllowEllipsis) const
 	{
 		if (_bEllipsis and bAllowEllipsis)
+			return MeasureText(GetEllipsisText(_text));
+		return MeasureText(_text);
+	}
+
+	fig::point StaticText::MeasureText(fig::string_view text) const
+	{
+		if (_bWordWrap)
 		{
-			auto text = GetEllipsisText(_text);
 			int w, h;
-			if (TTF_GetStringSize(_pFont, text.c_str(), 0, &w, &h))
-				return fig::point(w, h);
-		}
-		else if (_bWordWrap)
-		{
-			int w, h;
-			if (TTF_GetStringSizeWrapped(_pFont, _text.c_str(), 0, GetMaxLineWidth(), &w, &h))
+			if (TTF_GetStringSizeWrapped(_pFont, text.data(), 0, GetMaxLineWidth(), &w, &h))
 				return fig::point(w, h);
 		}
 		else
 		{
 			int w, h;
-			if (TTF_GetStringSize(_pFont, _text.c_str(), 0, &w, &h))
+			if (TTF_GetStringSize(_pFont, text.data(), 0, &w, &h))
 				return fig::point(w, h);
 		}
 		return fig::point(0, 0);

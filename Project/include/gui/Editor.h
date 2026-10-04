@@ -40,6 +40,7 @@ namespace fig::gui
 		virtual void OnPropertyChanged() {};
 		void OnAfterLayout() override;
 		bool SaveTabs();
+		bool IsDirty() const noexcept { return _bIsDirty; }
 
 	private:
 		void EnableTab(EditorTabBase* pTab, bool bEnabled);

@@ -284,13 +284,19 @@ namespace fig::gui
 
 	void ChatListItem::NotifyDelete()
 	{
-		if (_fnDelegate)
-			_fnDelegate(*this, ChatListItemEvent::Delete);
+		ShowDialogBox("Are you sure you want to delete this chat?\nThis action cannot be undone.", DialogBoxType::ConfirmCancel,
+			[this](bool bOk) {
+				if (_fnDelegate and bOk)
+					_fnDelegate(*this, ChatListItemEvent::Delete);
+			});
 	}
 
 	void ChatListItem::NotifyDeleteArchive()
 	{
-		if (_fnDelegate)
-			_fnDelegate(*this, ChatListItemEvent::DeleteArchive);
+		ShowDialogBox("This will permanently delete all archived chats.\nAre you sure?", DialogBoxType::ConfirmCancel,
+			[this](bool bOk) {
+				if (_fnDelegate and bOk)
+					_fnDelegate(*this, ChatListItemEvent::DeleteArchive);
+			});
 	}
 }

@@ -29,7 +29,7 @@ namespace fig::gui
 			std::pair { "Cherry blossom",	ColorTheme::LightPink },
 			std::pair { "Cool blue",		ColorTheme::LightBlue },
 			std::pair { "Morning dew",		ColorTheme::LightGreen },
-			std::pair { "Lemon zest",		ColorTheme::LightYellow },
+			std::pair { "Lemon sorbet",		ColorTheme::LightYellow },
 			std::pair { "Graphite",			ColorTheme::DarkDefault },
 			std::pair { "Obsidian",			ColorTheme::DarkBlack },
 			std::pair { "Cheeky rose",		ColorTheme::DarkPink  },
@@ -51,20 +51,15 @@ namespace fig::gui
 		pTheme->SetMaxWidth(260);
 		if (auto index = find_index(Themes, Global::GetUserSettings().GetColorTheme(), [](auto&& p) { return p.second; }); index != fig::npos)
 			pTheme->Select(toI(index), true);
-		
-		auto currentTime = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
-		auto currentDate = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(currentTime));
-		auto day = static_cast<unsigned>(currentDate.day());
-		auto month = static_cast<unsigned>(currentDate.month());
-		auto year = static_cast<int32_t>(currentDate.year());
+
 
 		auto dateFormats = std::vector { 
-			std::pair { DateFormat::YYYYMMDD, std::format("YYYY-MM-DD ({:02}-{:02}-{:02})", year, month, day) },
-			std::pair { DateFormat::DDMMYYYY, std::format("DD/MM/YYYY ({:02}/{:02}/{:02})", day, month, year) },
-			std::pair { DateFormat::MMDDYYYY, std::format("MM/DD/YYYY ({}/{}/{})", month, day, year) },
+			std::pair { DateFormat::YYYYMMDD, "YYYY-MM-DD"},
+			std::pair { DateFormat::DDMMYYYY, "DD/MM/YYYY"},
+			std::pair { DateFormat::MMDDYYYY, "MM/DD/YYYY"},
 		};
 
-		CreateLabel(this, pSizer, "Time and date");
+		CreateLabel(this, pSizer, "Time and date format");
 		auto pDateFormat = CreateControl<DropListOfType<DateFormat>>();
 		for (auto& format : dateFormats)
 			pDateFormat->AddItem(format.second, format.first);
@@ -77,8 +72,8 @@ namespace fig::gui
 		pSizer->Add(pDateFormat, 0, SizerFlag::Expand);
 
 		auto timeFormats = std::vector {
-			std::pair { TimeFormat::HR12, std::format("12 hour ({:%I:%M %p})", currentTime) },
-			std::pair { TimeFormat::HR24, std::format("24 hour ({:%H:%M})", currentTime) },
+			std::pair { TimeFormat::HR12, std::format("12 hour") },
+			std::pair { TimeFormat::HR24, std::format("24 hour") },
 		};
 
 		auto pTimeFormat = CreateControl<DropListOfType<TimeFormat>>();

@@ -4,7 +4,7 @@ App.Background							#341F2F
 App.Accent								#E637C3
 
 // Side panel (low-contrast off-shade)
-SidePanel.Foreground					#f2bde7
+SidePanel.Foreground					#e692d5
 SidePanel.Background					#281524
 SidePanel.Gradient						#1F0F1C // Darker, fade
 
@@ -64,11 +64,11 @@ Button.Pressed.Background				#3F273A
 Button.Pressed.Border					#7B2B6B
 
 // Button (Side panel)
-SidePanelButton.Default.Foreground		#EAA9DD
+SidePanelButton.Default.Foreground		#e692d5
 SidePanelButton.Default.Background		#E637C300 // over SidePanelBackground
-SidePanelButton.Hover.Foreground		#EAA9DD
+SidePanelButton.Hover.Foreground		#e692d5
 SidePanelButton.Hover.Background		#E637C31A // over SidePanelBackground
-SidePanelButton.Pressed.Foreground		#EAA9DD
+SidePanelButton.Pressed.Foreground		#e692d5
 SidePanelButton.Pressed.Background		#E637C333 // over SidePanelBackground
 
 // Save button (Green)

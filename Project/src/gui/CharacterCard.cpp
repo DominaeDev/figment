@@ -244,4 +244,14 @@ namespace fig::gui
 
 		RefreshMeta();
 	}
+
+	void CharacterCard::NotifyDelete()
+	{
+		ShowDialogBox(std::format("Are you sure you want to delete {}?\nThis action cannot be undone.", _characterName), DialogBoxType::ConfirmCancel,
+			[this](bool bOk) {
+			if (_fnDelegate and bOk)
+				_fnDelegate(*this, CardEvent::Delete);
+		});
+	}
+
 }

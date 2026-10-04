@@ -51,7 +51,7 @@ namespace fig::gui
 		_pTexture = pTexture;
 		if (bResize and pTexture)
 			SetSize(pTexture->w, pTexture->h);
-		SetDirty();
+		SetDirty(true);
 	}
 
 	void CardImage::SetMask(fig::texture_ptr pTexture) noexcept
@@ -164,9 +164,10 @@ namespace fig::gui
 		}
 	}
 
-	void CardImage::SetDirty()
+	void CardImage::SetDirty(bool bAlpha)
 	{
 		_bRedraw = true;
+		_bRedrawAlpha |= bAlpha;
 	}
 
 	void CardImage::OnSize()

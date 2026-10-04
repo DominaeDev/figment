@@ -29,8 +29,8 @@ HintText								#B98DA0 // (less contrast)
 CheckBox.Background						#FFFFFF
 CheckBox.Background.Pressed				#FBECF1
 ScrollBar								#000000
-Slider.Background						#F7DDE6
-Slider.Thumb							#FFFDFE
+Slider.Background						#FFFDFE
+Slider.Thumb							#FFFFFF
 Slider.Fill								#FF8FBB
 ProgressBar.Background					#F7DDE6
 ProgressBar.Fill						#FF8FBB

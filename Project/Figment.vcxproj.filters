@@ -195,6 +195,9 @@
     <Filter Include="Source Files\Frontend\IO\Zip">
       <UniqueIdentifier>{3fc3d61a-0095-4268-a90f-b9ad2839165f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Modals">
+      <UniqueIdentifier>{1567338d-810e-495f-8c59-1f32e44cb07a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -841,6 +844,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\ModalOverlay.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\DialogBox.cpp">
+      <Filter>Source Files\Frontend\GUI\Modals</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1908,6 +1914,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\ModalOverlay.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\DialogBox.h">
+      <Filter>Source Files\Frontend\GUI\Modals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

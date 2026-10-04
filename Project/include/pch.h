@@ -15,6 +15,8 @@
 #undef DeleteFile
 #undef GetDateFormat
 #undef GetTimeFormat
+#undef DialogBox
+#undef CreateDialog
 #define PLATFORM_WINDOWS 1
 #define USE_WIN32_API 0 // Use Win32 calls for file i/o
 

@@ -61,10 +61,12 @@ namespace fig::gui
 
 		auto pSlider = CreateControl<Slider>();
 		pSlider->SetPosition(100, 50);
+		pSlider->SetValue(0.5f);
 
 		auto pSlider2 = CreateControl<Slider>();
 		pSlider2->SetPosition(500, 50);
 		pSlider2->SetEnabled(false);
+		pSlider2->SetValue(0.5f);
 
 		auto pButton = CreateControl<ButtonWithLabel>("Button");
 		pButton->SetPosition(100, 100);

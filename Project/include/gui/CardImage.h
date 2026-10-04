@@ -16,7 +16,7 @@ namespace fig::gui
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnSize() override;
 		void Redraw();
-		void SetDirty();
+		void SetDirty(bool bAlpha = false);
 
 	protected:
 		bool _bRedraw = true;

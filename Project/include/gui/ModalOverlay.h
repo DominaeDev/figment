@@ -15,11 +15,11 @@ namespace fig::gui
 
 		int32_t Show();
 		void Close();
+
 	protected:
 		void BlurBackground();
 
 		void OnUpdate(float fElapsed) override;
-		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnSize() override;
 
 	private:

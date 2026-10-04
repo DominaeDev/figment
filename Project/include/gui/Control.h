@@ -3,7 +3,7 @@
 #include "gui/Events.h"
 #include "gui/GUITypes.h"
 #include "gui/CustomRenderer.h"
-#include "LayoutElement.h"
+#include "gui/LayoutElement.h"
 
 namespace fig::gui
 {
@@ -87,6 +87,10 @@ namespace fig::gui
 		fig::observer_ptr<Frame> GetOwnerFrame();
 		fig::point GetMousePos() const noexcept;
 		Menu& CreateMenu() noexcept;
+
+		enum class DialogBoxType { Ok, OkCancel, YesNo, ConfirmCancel, };
+		void ShowDialogBox(fig::string_view message, DialogBoxType type, std::function<void(bool)> fnDelegate = nullptr);
+		DialogBox& CreateDialogBox(fig::string_view message, DialogBoxType type, std::function<void(bool)> fnDelegate = nullptr);
 		
 	protected:
 		fig::color_ref_with_alpha _foregroundColor {};

@@ -224,7 +224,7 @@ namespace fig::gui
 					_pVerticalSizer->AddSpacer(Spacing);
 
 				fig::string timeString;
-				if (item.timeBucket < TimeBucket::LessThan1Day)
+				if (item.timeBucket <= TimeBucket::LessThan1Day)
 					timeString = item.updatedAt.get_time_string();
 				else if (item.timeBucket < TimeBucket::LessThan1Week)
 					timeString = std::format("{}, {}", item.updatedAt.weekday(), item.updatedAt.get_time_string());
