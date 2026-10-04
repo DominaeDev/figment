@@ -141,7 +141,6 @@ namespace fig::gui
 		auto pTextBox5 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextInput::Mode::Multiline);
 		pTextBox5->SetText("Text box (multi)\nHello, World.");
 		pTextBox5->SetPlaceholder("Enter some text, please...");
-//		pTextBox5->SetFixedRows(3);
 		pTextBox5->EnableAutoSize(true);
 		pTextBox5->SetMinRows(3);
 		pTextBox5->SetMaxRows(6);
@@ -162,6 +161,36 @@ namespace fig::gui
 		VBar->SetPosition(10, 20);
 		VBar->SetSize(4, 300);
 		VBar->SetForegroundColor(Color::Green);
+
+		auto pStaticText1 = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
+		pStaticText1->SetBackgroundColor(Color::Green);
+		pStaticText1->SetForegroundColor(Color::White);
+		pStaticText1->SetPosition(100, 500);
+		pStaticText1->SetSize(320, 60);
+		pStaticText1->SetMaxLineWidth(320);
+		pStaticText1->EnableWordWrap(true);
+		pStaticText1->SetAlignment(TextAlignment::LeftTop);
+		pStaticText1->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
+
+		auto pStaticText2 = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
+		pStaticText2->SetBackgroundColor(Color::Green);
+		pStaticText2->SetForegroundColor(Color::White);
+		pStaticText2->SetPosition(100, 570);
+		pStaticText2->SetSize(320, 60);
+		pStaticText2->EnableWordWrap(true);
+		pStaticText2->SetMaxLineWidth(320);
+		pStaticText2->SetAlignment(TextAlignment::MiddleCenter);
+		pStaticText2->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
+
+		auto pStaticText3 = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
+		pStaticText3->SetPosition(100, 640);
+		pStaticText3->SetSize(320, 60);
+		pStaticText3->SetBackgroundColor(Color::Green);
+		pStaticText3->SetForegroundColor(Color::White);
+		pStaticText3->EnableWordWrap(true);
+		pStaticText3->SetMaxLineWidth(320);
+		pStaticText3->SetAlignment(TextAlignment::RightBottom);
+		pStaticText3->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
 
 	}
 
