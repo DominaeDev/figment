@@ -256,6 +256,7 @@
     <ClCompile Include="src\gui\SidePanelEditor.cpp" />
     <ClCompile Include="src\gui\SidePanelMain.cpp" />
     <ClCompile Include="src\gui\Slider.cpp" />
+    <ClCompile Include="src\gui\TextBase.cpp" />
     <ClCompile Include="src\gui\TextInput.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
     <ClCompile Include="src\gui\ToggleWithLabel.cpp" />
@@ -567,6 +568,7 @@
     <ClInclude Include="include\gui\ResizeableImageViewport.h" />
     <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\TextBase.h" />
     <ClInclude Include="include\gui\UserSettingsEditor.h" />
     <ClInclude Include="include\gui\SidePanelEditor.h" />
     <ClInclude Include="include\gui\SidePanelMain.h" />

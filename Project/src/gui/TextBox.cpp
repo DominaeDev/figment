@@ -28,6 +28,8 @@ namespace fig::gui
 		_pScrollBar->SetForegroundColor(Color::TextBoxScrollBar);
 		_pScrollBar->SetX(GetWidth() - kScrollBarRight);
 		_pScrollBar->SetSize(3, 16);
+
+		SetMode(mode);
 	}
 
 	void TextBox::OnEnabled(bool bEnabled)

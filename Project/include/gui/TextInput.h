@@ -3,21 +3,13 @@
 #include <functional>
 
 #include "gui/Control.h"
+#include "gui/TextBase.h"
 #include "util/UndoStack.h"
 
 namespace fig::gui
 {
-	class TextInput : public Control
+	class TextInput : public Control, public TextBase
 	{
-		struct TTFTextLine
-		{
-			fig::sdl::Text ttf_text;
-
-			int32_t position; // in bytes
-			int32_t length;
-			bool eol {}; // End of paragraph
-		};
-
 		struct TTFCursor
 		{
 			int32_t position {}; // absolute
@@ -43,11 +35,9 @@ namespace fig::gui
 		TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode = TextInput::Mode::Single);
 		~TextInput();
 
-		void SetText(fig::string_view text);
+		void SetText(fig::string_view text) override;
 		void SetPlaceholder(fig::string_view text);
-		void SetTextWrapWidth(int32_t width);
 		void SetFocus(bool focus);
-		void SetFont(FontFace fontFace, double ptSize) noexcept;
 		void EnableAutoSize(bool bEnable) noexcept { _bAutoSize = bEnable; }
 		void SetMinRows(int32_t rows);
 		void SetMaxRows(int32_t rows);
@@ -57,11 +47,6 @@ namespace fig::gui
 		void SetEnterPressedDelegate(EnterPressedDelegate fnDelegate);
 		void SetEscapePressedDelegate(EscapePressedDelegate fnDelegate);
 		void SetLostFocusDelegate(LostFocusDelegate fnDelegate);
-
-		fig::string_view GetText() const noexcept { return _text; }
-		int32_t GetTextWrapWidth() const noexcept;
-		int32_t GetLineCount() const noexcept;
-		int32_t GetLineHeight() const noexcept { return _lineHeight; }
 
 		void Select(int32_t start, int32_t end) noexcept;
 		void SelectAll() noexcept;
@@ -105,7 +90,6 @@ namespace fig::gui
 		void CancelComposition();
 		void ResetComposition();
 		void UpdateTextInputArea();
-		void RefreshTexts() noexcept;
 
 		int32_t SetCursor(fig::point position) noexcept;
 
@@ -161,36 +145,26 @@ namespace fig::gui
 		void Autosize();
 		void DidChange();
 
-		bool IsMultiline() const noexcept { return _mode == Mode::Multiline or _mode == Mode::MultilineNoWrap or _mode == Mode::Chat; }
 		bool IsPassword() const noexcept { return _mode == Mode::Password; }
 		bool IsAutosized() const noexcept { return _bAutoSize; }
-		bool IsWordWrapping() const noexcept { return (_mode == Mode::Multiline or _mode == Mode::Chat or _mode == Mode::SingleWordWrap) and _wrapWidth > 0; }
 
 		// Layout
 		void Insert(int32_t position, fig::string_view text);
 		bool Delete(int32_t from, int32_t length);
-		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text);
 		bool GetSelection(int32_t& marker, int32_t& length) const noexcept;
-		void RelayoutAll();
-		bool IsEOL(const TTFTextLine& line) const noexcept;
 		bool IsOnLastNewLine() const noexcept;
 
 		std::vector<fig::rectf> GetHighlights() const noexcept;
 
 		// Password
-		void UpdatePassword();
+		void RefreshPassword();
 		int32_t ConvertToPasswordPosition(int32_t position) const;
 		int32_t ConvertFromPasswordPosition(int32_t position) const;
 
 	protected:
-		fig::string _text;
-		int32_t _lineHeight {};
-		int32_t _wrapWidth {};
-		std::vector<TTFTextLine> _lines;
 		Mode _mode {};
 		bool _bAutoSize = false;
 
-		fig::observer_ptr<TTF_Font> _pFont;
 		fig::observer_ptr<TTF_Text> _pPassword;
 		fig::observer_ptr<TTF_Text> _pPlaceholder;
 

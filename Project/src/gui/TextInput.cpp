@@ -183,13 +183,12 @@ static int GetCursorTextIndex(int32_t x, const TTF_SubString* substring)
 
 namespace fig::gui
 {
-	TextInput::TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode) : Control(pParent),
+	TextInput::TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode) : Control(pParent), TextBase(GetSDLTextEngine(), fontFace, ptSize),
 		_mode { mode }
 	{
 		SetForegroundColor(Color::TextBoxForeground);
 		SetBackgroundColor(Color::TextBoxBackground);
 
-		_pFont = Fonts::GetFont(fontFace, ptSize);
 		_pPlaceholder = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
 		TTF_SetTextWrapWhitespaceVisible(_pPlaceholder, true);
 
@@ -200,10 +199,7 @@ namespace fig::gui
 		EnableClipping(false);
 
 		if (_pFont)
-		{
-			_lineHeight = TTF_GetFontLineSkip(_pFont);
 			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
-		}
 	}
 
 	TextInput::~TextInput()
@@ -216,39 +212,8 @@ namespace fig::gui
 	void TextInput::SetMode(Mode mode)
 	{
 		_mode = mode;
-	}
-
-	void TextInput::SetTextWrapWidth(int32_t width)
-	{
-		if (_wrapWidth == width)
-			return;
-
-		_wrapWidth = std::max(width, 0);
-		RelayoutAll();
-	}
-
-	void TextInput::SetFont(FontFace fontFace, double ptSize) noexcept
-	{
-		if (auto font = Fonts::GetFont(fontFace, ptSize))
-		{
-			_pFont = font;
-			_lineHeight = TTF_GetFontLineSkip(_pFont);
-
-			RelayoutAll();
-		}
-	}
-
-	int32_t TextInput::GetTextWrapWidth() const noexcept
-	{
-		return _wrapWidth;
-	}
-
-	int32_t TextInput::GetLineCount() const noexcept
-	{
-		int32_t count = toI(_lines.size());
-		if (not _text.empty() and _text.back() == '\n')
-			count++;
-		return count;
+		_bMultiline = _mode == Mode::Multiline or _mode == Mode::MultilineNoWrap or _mode == Mode::Chat;
+		_bWordWrap = _mode == Mode::Multiline or _mode == Mode::Chat or _mode == Mode::SingleWordWrap;
 	}
 
 	void TextInput::OnUpdate(float fElapsed)
@@ -276,7 +241,7 @@ namespace fig::gui
 		DrawBorder(pRenderer);
 
 		int lineSkip = TTF_GetFontLineSkip(_pFont);
-		int maxRows = (IsMultiline() or IsWordWrapping()) ? std::max(_maxRows, 1) : 1;
+		int maxRows = (_bMultiline or _bWordWrap) ? std::max(_maxRows, 1) : 1;
 
 		auto& rect = GetRect();
 		auto clientRect = GetClientRect();
@@ -778,7 +743,7 @@ namespace fig::gui
 
 	int32_t TextInput::MoveCursorUp() noexcept
 	{
-		if (not (IsMultiline() or IsWordWrapping()) )
+		if (not (_bMultiline or _bWordWrap) )
 			return _cursor;
 
 		if (_lines.empty())
@@ -792,7 +757,7 @@ namespace fig::gui
 
 	int32_t TextInput::MoveCursorDown() noexcept
 	{
-		if (not (IsMultiline() or IsWordWrapping()))
+		if (not (_bMultiline or _bWordWrap))
 			return _cursor;
 
 		if (_lines.empty())
@@ -807,7 +772,7 @@ namespace fig::gui
 
 	int32_t TextInput::MoveCursorUpDown(int32_t lines) noexcept
 	{
-		if (not (IsMultiline() or IsWordWrapping()) or lines == 0)
+		if (not (_bMultiline or _bWordWrap) or lines == 0)
 			return _cursor;
 
 		if (_lines.empty())
@@ -1208,7 +1173,7 @@ namespace fig::gui
 			return false;
 		normalize_newlines(content);
 
-		if (!IsMultiline())
+		if (!_bMultiline)
 		{
 			size_t pos_endl = index_of(content, 0, '\n');
 			if (pos_endl != fig::npos)
@@ -1457,7 +1422,7 @@ namespace fig::gui
 
 			case SDLK_RETURN:
 			case SDLK_KP_ENTER:
-				if (_mode == Mode::Multiline or _mode == Mode::MultilineNoWrap)
+				if (_bMultiline)
 				{
 					Insert("\n");
 					PushUndo(UndoAction::Insert, false);
@@ -1532,7 +1497,7 @@ namespace fig::gui
 #pragma endregion Events
 	void TextInput::OnSize()
 	{
-		if (IsMultiline() or IsWordWrapping() or _mode == Mode::SingleWordWrap)
+		if (_bMultiline or _bWordWrap or _mode == Mode::SingleWordWrap)
 		{
 			SetTextWrapWidth(std::max(GetClientRect().w, 0));
 		}
@@ -1544,7 +1509,7 @@ namespace fig::gui
 
 	EventResult TextInput::HandleMouseWheel(SDL_MouseWheelEvent event)
 	{
-		if (not (IsMultiline() or IsWordWrapping()))
+		if (not (_bMultiline or _bWordWrap))
 			return EventResult::Pass;
 
 		auto& rect = GetRect();
@@ -1580,8 +1545,8 @@ namespace fig::gui
 
 	void TextInput::Clear()
 	{
-		_text.clear();
-		_lines.clear();
+		TextBase::ClearText();
+
 		_cursor = 0;
 		highlight_start = -1;
 		highlight_end = -1;
@@ -1589,21 +1554,21 @@ namespace fig::gui
 
 		InitUndo();
 		Autosize();
-//		DidChange();
 		_scroll = {};
 	}
 
 	void TextInput::SetText(fig::string_view text)
 	{
-		_text.clear();
-		_lines.clear();
+		TextBase::ClearText();
+
 		_cursor = 0;
 		highlight_start = -1;
 		highlight_end = -1;
 		CancelComposition();
 		Insert(text);
+		RefreshPassword();
+
 		InitUndo();
-//		DidChange();
 		Autosize();
 		_scroll = {};
 	}
@@ -1669,7 +1634,7 @@ namespace fig::gui
 		}
 	}
 
-	void TextInput::UpdatePassword()
+	void TextInput::RefreshPassword()
 	{
 		if (!_pPassword)
 			return;
@@ -1734,6 +1699,7 @@ namespace fig::gui
 			_text = undo.text;
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
+			RefreshPassword();
 			Select(undo.highlight_start, undo.highlight_end);
 			SetCursor(undo.cursor_pos);
 			ScrollToCursor();
@@ -1748,6 +1714,7 @@ namespace fig::gui
 			_text = undo.text;
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
+			RefreshPassword();
 			Select(undo.highlight_start, undo.highlight_end);
 			SetCursor(undo.cursor_pos);
 			ScrollToCursor();
@@ -1782,101 +1749,6 @@ namespace fig::gui
 		{
 			SetForegroundColor(Color::TextBoxForeground);
 		}
-	}
-
-	std::vector<TextInput::TTFTextLine> TextInput::LayoutParagraph(fig::string_view text)
-	{
-		std::vector<TTFTextLine> result;
-
-		if (not IsMultiline())
-		{
-			size_t newlinePos = text.find('\n', 0);
-			text = fig::string_view { text.data(), std::min(text.length(), newlinePos) };
-		}
-
-		if (not IsWordWrapping())
-		{
-			size_t paragraphStart = 0;
-			while (paragraphStart < text.size())
-			{
-				size_t newlinePos = text.find('\n', paragraphStart);
-				size_t paragraphEnd = (newlinePos == fig::string_view::npos) ? text.size() : newlinePos + 1uz;
-				const char* pText = text.data() + paragraphStart;
-
-				result.emplace_back(TTFTextLine {
-					.position = static_cast<int32_t>(pText - text.data()),
-					.length = static_cast<int32_t>(paragraphEnd - paragraphStart),
-					.eol = true,
-				});
-
-				assert(result.back().length > 0);
-
-				if (paragraphEnd >= text.size())
-					break;
-
-				paragraphStart = paragraphEnd;
-			}
-			return result;
-		}
-
-		size_t paragraphStart = 0;
-		while (paragraphStart <= text.size())
-		{
-			size_t newlinePos = text.find('\n', paragraphStart);
-			size_t paragraphEnd = (newlinePos == fig::string_view::npos) ? text.size() : newlinePos + 1uz;
-
-			const char* pText = text.data() + paragraphStart;
-			size_t remainingLength = paragraphEnd - paragraphStart;
-
-			while (remainingLength > 0)
-			{
-				int32_t measuredWidth;
-				size_t measuredLength;
-
-				if (not TTF_MeasureString(_pFont, pText, remainingLength, _wrapWidth, &measuredWidth, &measuredLength))
-					break;
-
-				size_t breakWidth = measuredLength;
-				if (measuredLength < remainingLength)
-				{
-					size_t lastSpace = measuredLength;
-
-					while (lastSpace > 0 and not SDL_isspace(static_cast<unsigned char>(pText[lastSpace - 1])))
-						--lastSpace;
-
-					if (lastSpace > 0)
-						measuredLength = lastSpace;
-				}
-
-				size_t advance = measuredLength;
-
-				while (advance < remainingLength and SDL_isspace(static_cast<unsigned char>(pText[advance])) and pText[advance] != '\n')
-					++advance;
-
-				if (advance < remainingLength and pText[advance] == '\n')
-					++advance;
-
-				result.emplace_back(TTFTextLine {
-					.position = static_cast<int32_t>(pText - text.data()),
-					.length = static_cast<int32_t>(advance),
-				});
-
-				result.back().eol = IsEOL(result.back());
-
-				pText += advance;
-				remainingLength -= advance;
-			}
-
-			if (newlinePos == fig::string_view::npos)
-				break;
-
-			paragraphStart = paragraphEnd;
-		}
-
-		if (not result.empty())
-			result.back().eol = true;
-
-		return result;
 	}
 
 	TextInput::TTFCursor TextInput::GetCursorAt(int32_t position) const noexcept
@@ -2090,6 +1962,7 @@ namespace fig::gui
 			_text = text;
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
+			RefreshPassword();
 			SetCursor(static_cast<int32_t>(text.size()));
 			return;
 		}
@@ -2122,6 +1995,7 @@ namespace fig::gui
 		_lines.insert(_lines.begin() + paragraphStartLine, std::make_move_iterator(newLines.begin()), std::make_move_iterator(newLines.end()));
 
 		RefreshTexts();
+		RefreshPassword();
 		SetCursor(position + delta);
 		ScrollToCursor();
 	}
@@ -2168,15 +2042,11 @@ namespace fig::gui
 			std::make_move_iterator(newLines.end()));
 
 		RefreshTexts();
+		RefreshPassword();
 		SetCursor(from);
 		Deselect();
 		ScrollToCursor();
 		return true;
-	}
-
-	bool TextInput::IsEOL(const TTFTextLine& line) const noexcept
-	{
-		return line.position >= 0 and line.position + line.length <= _text.length() and _text[line.position + line.length - 1uz] == '\n';
 	}
 
 	std::vector<fig::rectf> TextInput::GetHighlights() const noexcept
@@ -2293,52 +2163,6 @@ namespace fig::gui
 		return rect;
 	}
 
-	void TextInput::RelayoutAll()
-	{
-		std::vector<TTFTextLine> newLines;
-		int32_t paragraphStart = 0;
-
-		for (size_t i = 0; i < _lines.size(); ++i)
-		{
-			if (not _lines[i].eol)
-				continue;
-
-			int32_t paragraphEnd = _lines[i].position + _lines[i].length;
-			fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
-
-			std::vector<TTFTextLine> paragraphLines = LayoutParagraph(paragraphText);
-
-			for (auto& line : paragraphLines)
-				line.position += paragraphStart;
-
-			newLines.insert(newLines.end(),
-				std::make_move_iterator(paragraphLines.begin()),
-				std::make_move_iterator(paragraphLines.end()));
-
-			paragraphStart = paragraphEnd;
-		}
-
-		_lines = std::move(newLines);
-		RefreshTexts();
-	}
-
-	void TextInput::RefreshTexts() noexcept
-	{
-		// Create text objects
-		for (auto& line : _lines)
-		{
-			if (line.ttf_text.empty())
-			{
-				assert(line.position >= 0 and line.length >= 0 and line.position + line.length <= _text.size());
-				line.ttf_text = fig::sdl::Text(GetSDLTextEngine(), _pFont, _text.data() + line.position, line.length);
-				TTF_SetTextWrapWhitespaceVisible(line.ttf_text.get(), true);
-			}
-		}
-
-		if (IsPassword())
-			UpdatePassword();
-	}
-
 	bool TextInput::IsOnLastNewLine() const noexcept
 	{
 		// If the cursor is at the end of the string, and the last character is a line break,
@@ -2361,11 +2185,11 @@ namespace fig::gui
 		cursor_rect.y += rect.y + GetMarginTop();
 
 		auto clientRect = GetClientRect();
-		int maxRows = (IsMultiline() or IsWordWrapping()) ? std::max(_maxRows, 1) : 1;
+		int maxRows = (_bMultiline or _bWordWrap) ? std::max(_maxRows, 1) : 1;
 
 		if (_bFocused)
 		{
-			if (IsMultiline() or IsWordWrapping()) // Vertical scroll
+			if (_bMultiline or _bWordWrap) // Vertical scroll
 			{
 				float cursorY = cursor_rect.y - clientRect.y;
 				while (toI(std::round((cursorY - _scroll.y) / _lineHeight)) >= maxRows)
@@ -2380,7 +2204,7 @@ namespace fig::gui
 				_scroll.y = 0;
 			}
 
-			if (not IsWordWrapping()) // Horizontal scroll
+			if (not _bWordWrap) // Horizontal scroll
 			{
 				constexpr int32_t kScrollStep = 80;
 

@@ -848,6 +848,9 @@
     <ClCompile Include="src\gui\DialogBox.cpp">
       <Filter>Source Files\Frontend\GUI\Modals</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\TextBase.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1920,6 +1923,9 @@
     </ClInclude>
     <ClInclude Include="include\util\Interpolate.h">
       <Filter>Source Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TextBase.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
