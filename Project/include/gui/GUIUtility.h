@@ -108,7 +108,6 @@ namespace fig
 	void AlphaToMask(fig::path filename);
 
 	fig::point MeasureText(fig::font& font, const fig::string& text);
-	int MeasureFontHeight(fig::font& font);
 
 	inline bool IsShiftDown()
 	{

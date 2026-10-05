@@ -9,7 +9,6 @@ namespace fig
 	color_ref::color_ref(fig::gui::Color color) : 
 		_ptr { &fig::gui::AppColors::Get(color) }
 	{
-		int k = 0;
 	}
 
 	color_ref_with_alpha color_ref::WithAlpha(uint8_t alpha) const noexcept

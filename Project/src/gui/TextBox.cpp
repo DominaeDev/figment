@@ -13,8 +13,7 @@ namespace fig::gui
 	{
 		SetMargins(8, 4, 6, 6);
 
-		if (_pFont)
-			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
+		SetSize(300, _fontHeight + GetMarginVertical());
 				
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pTextBoxBG->SetColor(Color::TextBoxBackground);
@@ -41,8 +40,7 @@ namespace fig::gui
 
 	void TextBox::SetFixedRows(int32_t rows)
 	{
-		if (_pFont)
-			SetHeight(TTF_GetFontLineSkip(_pFont) * rows + GetMarginVertical());
+		SetHeight(_lineSkip * rows + GetMarginVertical());
 		_minRows = rows;
 		_maxRows = rows;
 		_bAutoSize = false;
@@ -74,7 +72,7 @@ namespace fig::gui
 
 		auto text = GetText();
 
-		float fExtent = toF(GetLineCount() * _lineHeight);
+		float fExtent = toF(GetLineCount() * _lineSkip);
 
 		int32_t pageHeight = GetClientRect().h;
 		float fScrollRange = fExtent - pageHeight;

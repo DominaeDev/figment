@@ -9,14 +9,11 @@ namespace fig::gui
 	constexpr fig::color DropShadowColor { 0x00, 0x00, 0x00, 0xC0 };
 	constexpr float DropShadowDistance { 1.25f };
 
-	StaticText::StaticText(ControlPtr pParent, fig::string_view text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent), TextBase(GetSDLTextEngine()),
+	StaticText::StaticText(ControlPtr pParent, fig::string_view text, FontFace fontFace, double ptSize, bool bAutoSize) : Control(pParent), TextBase(GetSDLTextEngine(), fontFace, ptSize),
 		_bAutoSize(bAutoSize)
 	{
 		SetBackgroundColor(Color::Transparent);
-
-		_pFont = Fonts::GetFont(fontFace, ptSize);
-		SetHeight(TTF_GetFontHeight(_pFont.get()));
-
+		SetHeight(_lineSkip);
 		SetText(text);
 	}
 
@@ -85,37 +82,47 @@ namespace fig::gui
 
 		if (not _shadows.empty() and _bDropShadow)
 		{
-			fig::rectf alignRect = GetAlignedRect();
-			alignRect.x += DropShadowDistance;
-			alignRect.y += DropShadowDistance;
+			auto alignRect = GetAlignedRect();
 			for (size_t i = 0uz; i < _shadows.size(); ++i)
 			{
 				if (_shadows[i].empty())
 					continue;
 
 				auto lineRect = alignRect;
-				lineRect.y += _lineHeight * toF(i);
-				lineRect.w = toF(_textures[i]->w);
-				lineRect.h = toF(_textures[i]->h);
-				if (not _shadows[i].empty())
-					SDL_RenderTexture(pRenderer, _shadows[i].get(), NULL, &lineRect);
+				lineRect.y += _lineSkip * toI(i);
+				lineRect.w = _shadows[i]->w;
+				lineRect.h = _shadows[i]->h;
+				if ((_alignment & HorizontalAlignment::TextAlignRight) != 0)
+					lineRect.x = alignRect.x + alignRect.w - lineRect.w;
+				else if ((_alignment & HorizontalAlignment::TextAlignCenter) != 0)
+					lineRect.x = alignRect.x + (alignRect.w - lineRect.w) / 2;
+
+				auto lineRectf = to_rectf(lineRect);
+				lineRectf.x += DropShadowDistance;
+				lineRectf.y += DropShadowDistance;
+				SDL_RenderTexture(pRenderer, _shadows[i].get(), NULL, &lineRectf);
 			}
 		}
 
 		if (not _textures.empty())
 		{
-			fig::rectf alignRect = GetAlignedRect();
+			auto alignRect = GetAlignedRect();
 			for (size_t i = 0uz; i < _textures.size(); ++i)
 			{
 				if (_textures[i].empty())
 					continue;
 
 				auto lineRect = alignRect;
-				lineRect.y += _lineHeight * toF(i);
-				lineRect.w = toF(_textures[i]->w);
-				lineRect.h = toF(_textures[i]->h);
-				if (not _textures[i].empty())
-					SDL_RenderTexture(pRenderer, _textures[i].get(), NULL, &lineRect);
+				lineRect.y += _lineSkip * toI(i);
+				lineRect.w = _textures[i]->w;
+				lineRect.h = _textures[i]->h;
+				if ((_alignment & HorizontalAlignment::TextAlignRight) != 0)
+					lineRect.x = alignRect.x + alignRect.w - lineRect.w;
+				else if ((_alignment & HorizontalAlignment::TextAlignCenter) != 0)
+					lineRect.x = alignRect.x + (alignRect.w - lineRect.w) / 2;
+
+				auto lineRectf = to_rectf(lineRect);
+				SDL_RenderTexture(pRenderer, _textures[i].get(), NULL, &lineRectf);
 			}
 		}
 	}
@@ -141,7 +148,7 @@ namespace fig::gui
 		if (_bDropShadow)
 			_shadows.resize(_lines.size());
 
-		newHeight = _lineHeight * toI(_lines.size());
+		newHeight = _lineSkip * toI(_lines.size());
 		for (size_t index = 0uz; index != _lines.size(); ++index)
 		{
 			fig::coord w, h;
@@ -157,7 +164,7 @@ namespace fig::gui
 		newWidth += GetMarginHorizontal();
 		newHeight += GetMarginVertical();
 		if (_bAutoSize)
-			SetSize(_textWidth, _textHeight);
+			SetSize(newWidth, newHeight);
 	}
 
 	void StaticText::DrawText(size_t line_index, fig::renderer_ptr pRenderer, const fig::color_ref_with_alpha& fgColor, const fig::color_ref_with_alpha& bgColor, fig::coord& newWidth, fig::coord& newHeight)
@@ -261,7 +268,13 @@ namespace fig::gui
 			textLength = altText.length();
 		}
 
-		if (SDL_Surface* pSurface = TTF_RenderText_Blended(_pFont, pText, 0, DropShadowColor))
+		if (line.length > 0 and pText[line.length - 1] == '\n')
+			textLength -= 1;
+
+		if (textLength == 0uz)
+			return;
+
+		if (SDL_Surface* pSurface = TTF_RenderText_Blended(_pFont, pText, textLength, DropShadowColor))
 		{
 			_shadows[line_index].reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
 			SDL_DestroySurface(pSurface);
@@ -275,7 +288,7 @@ namespace fig::gui
 		InvalidateText();
 	}
 
-	fig::rectf StaticText::GetAlignedRect() const
+	fig::rect StaticText::GetAlignedRect() const
 	{
 		auto& rect = GetRect();
 		int x = toI(rect.x + GetMarginLeft());
@@ -292,7 +305,7 @@ namespace fig::gui
 			aligned_rect.y = y + (rect.h - h) / 2;
 		else if ((_alignment & VerticalAlignment::TextAlignBottom) != 0)
 			aligned_rect.y = y + rect.h - h;
-		return to_rectf(aligned_rect);
+		return aligned_rect;
 	}
 
 	void StaticText::SetForegroundColor(fig::color_ref_with_alpha color)
@@ -358,19 +371,26 @@ namespace fig::gui
 
 	fig::point StaticText::MeasureText(fig::string_view text) const
 	{
-		if (_bWordWrap)
+		auto lines = LayoutParagraph(text);
+		if (lines.empty())
+			return fig::point(0, 0);
+		
+		fig::coord width = 0;
+		fig::coord height = _fontHeight + _lineSkip * toI(_lines.size() - 1uz);
+		for (size_t index = 0uz; index != _lines.size(); ++index)
 		{
+			auto& line = _lines[index];
+			const char* pText = _text.data();
+			std::advance(pText, line.position);
+			size_t textLength = line.length;
+			if (line.length > 0 and pText[line.length - 1] == '\n')
+				textLength -= 1;
+
 			int w, h;
-			if (TTF_GetStringSizeWrapped(_pFont, text.data(), 0, GetMaxLineWidth(), &w, &h))
-				return fig::point(w, h);
+			if (TTF_GetStringSize(_pFont, text.data(), textLength, &w, &h))
+				width = std::max(width, w);
 		}
-		else
-		{
-			int w, h;
-			if (TTF_GetStringSize(_pFont, text.data(), 0, &w, &h))
-				return fig::point(w, h);
-		}
-		return fig::point(0, 0);
+		return fig::point { width, height };
 	}
 
 	fig::coord StaticText::GetMaxLineWidth() const noexcept

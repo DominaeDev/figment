@@ -189,17 +189,17 @@ namespace fig::gui
 		SetForegroundColor(Color::TextBoxForeground);
 		SetBackgroundColor(Color::TextBoxBackground);
 
-		_pPlaceholder = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
+		if (_pFont)
+			_pPlaceholder = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
 		TTF_SetTextWrapWhitespaceVisible(_pPlaceholder, true);
 
-		if (IsPassword())
+		if (IsPassword() and _pFont)
 			_pPassword = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
 
 		_bFocused = false;
 		EnableClipping(false);
 
-		if (_pFont)
-			SetSize(300, MeasureFontHeight(*_pFont) + GetMarginVertical());
+		SetSize(300, _fontHeight + GetMarginVertical());
 	}
 
 	TextInput::~TextInput()
@@ -240,7 +240,6 @@ namespace fig::gui
 		DrawBackground(pRenderer);
 		DrawBorder(pRenderer);
 
-		int lineSkip = TTF_GetFontLineSkip(_pFont);
 		int maxRows = (_bMultiline or _bWordWrap) ? std::max(_maxRows, 1) : 1;
 
 		auto& rect = GetRect();
@@ -250,7 +249,7 @@ namespace fig::gui
 		fig::rect prevClippingRect;
 		bool restoreClipping = SDL_GetRenderClipRect(pRenderer, &prevClippingRect) && prevClippingRect.w > 0;
 		fig::rect clippingRect = clientRect;
-		clippingRect.h = std::min(clippingRect.h, lineSkip * maxRows);
+		clippingRect.h = std::min(clippingRect.h, _lineSkip * maxRows);
 		SDL_SetRenderClipRect(pRenderer, &clippingRect);
 
 		// Draw highlight(s) 
@@ -284,9 +283,9 @@ namespace fig::gui
 					auto& line = _lines[i];
 
 					if (_composition_cursor_length > 0 and _composition_line == i and not _composition_text.empty())
-						DrawText(pRenderer, _composition_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
+						DrawText(pRenderer, _composition_text.get(), 0, _lineSkip * static_cast<int32_t>(i));
 					else if (line.ttf_text->text)
-						DrawText(pRenderer, line.ttf_text.get(), 0, _lineHeight * static_cast<int32_t>(i));
+						DrawText(pRenderer, line.ttf_text.get(), 0, _lineSkip * static_cast<int32_t>(i));
 				}
 			}
 		}
@@ -421,7 +420,7 @@ namespace fig::gui
 		auto fgColor = GetForegroundColor();
 
 		/* Draw an underline under the composed text */
-		int font_height = TTF_GetFontHeight(_pFont);
+
 		TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_composition_text.get(), _composition_start, _composition_length, NULL);
 		if (substrings)
 		{
@@ -430,7 +429,7 @@ namespace fig::gui
 				fig::rectf line_rect;
 				SDL_RectToFRect(&substrings[i]->rect, &line_rect);
 				line_rect.x += clientRect.x;
-				line_rect.y += clientRect.y + _composition_line * _lineHeight + font_height;
+				line_rect.y += clientRect.y + _composition_line * _lineSkip + _fontHeight;
 				line_rect.h = 1.0f;
 				ApplyScroll(line_rect);
 				SDL_SetRenderDrawColor(pRenderer, fgColor.r(), fgColor.g(), fgColor.b(), 0xFF);
@@ -450,7 +449,7 @@ namespace fig::gui
 					fig::rectf line_rect;
 					SDL_RectToFRect(&substrings[i]->rect, &line_rect);
 					line_rect.x += clientRect.x;
-					line_rect.y += clientRect.y + _composition_line * _lineHeight + font_height;
+					line_rect.y += clientRect.y + _composition_line * _lineSkip + _fontHeight;
 					line_rect.h = 2.0f;
 					ApplyScroll(line_rect);
 
@@ -473,7 +472,7 @@ namespace fig::gui
 			{
 				fig::rectf cursor_rect = to_rectf(cursor.rect);
 				cursor_rect.x += clientRect.x;
-				cursor_rect.y += clientRect.y + _composition_line * _lineHeight;
+				cursor_rect.y += clientRect.y + _composition_line * _lineSkip;
 				cursor_rect.w = 1.0f;
 
 				ApplyScroll(cursor_rect);
@@ -623,7 +622,6 @@ namespace fig::gui
 		/* Underline the selected candidate */
 		if (_selected_candidate_length > 0)
 		{
-			int font_height = TTF_GetFontHeight(_pFont);
 			TTF_SubString** substrings = TTF_GetTextSubStringsForRange(_candidates.get(), _selected_candidate_start, _selected_candidate_length, NULL);
 			if (substrings)
 			{
@@ -632,7 +630,7 @@ namespace fig::gui
 					fig::rectf rect;
 					SDL_RectToFRect(&substrings[i]->rect, &rect);
 					rect.x += x;
-					rect.y += (y + font_height);
+					rect.y += (y + _fontHeight);
 					rect.h = 1.0f;
 					SDL_RenderFillRect(pRenderer, &rect);
 				}
@@ -795,7 +793,7 @@ namespace fig::gui
 		if (TTF_GetTextSubString(curr_line.ttf_text.get(), cursor.offset, &substring))
 		{
 			int32_t x = substring.rect.x;
-			if (TTF_GetTextSubStringForPoint(next_line.ttf_text.get(), x, _lineHeight / 2, &substring))
+			if (TTF_GetTextSubStringForPoint(next_line.ttf_text.get(), x, _lineSkip / 2, &substring))
 				pos += GetCursorTextIndex(x, &substring);
 		}
 
@@ -1518,8 +1516,8 @@ namespace fig::gui
 			return EventResult::Pass;
 
 		int32_t extent = GetScrollExtentY();
-		_scroll.y = std::clamp(_scroll.y - toI(toF(event.integer_y) * _lineHeight * 6), 0, extent);
-		_scroll.y = (_scroll.y / _lineHeight) * _lineHeight; // Quantize
+		_scroll.y = std::clamp(_scroll.y - toI(toF(event.integer_y) * _lineSkip * 6), 0, extent);
+		_scroll.y = (_scroll.y / _lineSkip) * _lineSkip; // Quantize
 		return EventResult::Handled;
 	}
 
@@ -1616,20 +1614,27 @@ namespace fig::gui
 		Autosize();
 	}
 
+	int32_t TextInput::GetLineCount() const noexcept
+	{
+		int32_t count = toI(_lines.size());
+		if (not _text.empty() and _text.back() == '\n')
+			count++;
+		return count;
+	}
+
 	void TextInput::Autosize()
 	{
 		if (!IsAutosized())
 			return;
 
 		auto clientRect = GetClientRect();
-		int32_t lineSkip = TTF_GetFontLineSkip(_pFont);
 		int32_t numRows = GetLineCount();
 		
 		numRows = std::clamp(numRows, _minRows, _maxRows);
-		if (numRows * lineSkip != clientRect.h)
+		if (numRows * _lineSkip != clientRect.h)
 		{
 			auto& rect = GetRect();
-			SetHeight(numRows * lineSkip + GetMarginVertical());
+			SetHeight(numRows * _lineSkip + GetMarginVertical());
 			InvalidateParentLayout();
 		}
 	}
@@ -1785,7 +1790,7 @@ namespace fig::gui
 		if (IsPassword())
 		{
 			TTF_SubString substring;
-			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineHeight / 2, &substring))
+			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineSkip / 2, &substring))
 			{
 				int32_t pos = GetCursorTextIndex(x, &substring);
 				pos = ConvertFromPasswordPosition(pos);
@@ -1801,7 +1806,7 @@ namespace fig::gui
 
 		if (not _lines.empty())
 		{
-			size_t line_index = static_cast<size_t>(std::max(y / _lineHeight, 0));
+			size_t line_index = static_cast<size_t>(std::max(y / _lineSkip, 0));
 			if (line_index >= _lines.size() and not _text.empty() and _text.back() == '\n')
 			{
 				return TTFCursor {
@@ -1814,7 +1819,7 @@ namespace fig::gui
 
 			auto& line = _lines[line_index];
 			TTF_SubString substring;
-			if (TTF_GetTextSubStringForPoint(line.ttf_text.get(), x, _lineHeight / 2, &substring))
+			if (TTF_GetTextSubStringForPoint(line.ttf_text.get(), x, _lineSkip / 2, &substring))
 			{
 				int32_t pos = GetCursorTextIndex(x, &substring);
 				return TTFCursor {
@@ -1833,7 +1838,7 @@ namespace fig::gui
 		if (IsPassword())
 		{
 			TTF_SubString substring;
-			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineHeight / 2, &substring) and substring.rect.w > 0)
+			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineSkip / 2, &substring) and substring.rect.w > 0)
 			{
 				int32_t pos = GetCursorTextIndex(x, &substring);
 				pos = ConvertFromPasswordPosition(pos);
@@ -1849,7 +1854,7 @@ namespace fig::gui
 
 		if (not _lines.empty())
 		{
-			size_t line_index = static_cast<size_t>(std::max(y / _lineHeight, 0));
+			size_t line_index = static_cast<size_t>(std::max(y / _lineSkip, 0));
 			if (line_index >= _lines.size() and not _text.empty() and _text.back() == '\n')
 				return std::nullopt;
 
@@ -1858,7 +1863,7 @@ namespace fig::gui
 
 			auto& line = _lines[line_index];
 			TTF_SubString substring;
-			if (TTF_GetTextSubStringForPoint(line.ttf_text.get(), x, _lineHeight / 2, &substring) and substring.rect.w > 0)
+			if (TTF_GetTextSubStringForPoint(line.ttf_text.get(), x, _lineSkip / 2, &substring) and substring.rect.w > 0)
 			{
 				int32_t pos = GetCursorTextIndex(x, &substring);
 				return TTFCursor {
@@ -2098,7 +2103,7 @@ namespace fig::gui
 					{
 						auto highlight_rect = to_rectf(pHighlights[i]->rect);
 						highlight_rect.w = std::max(highlight_rect.w, 3.0f);
-						highlight_rect.y += iLine * _lineHeight;
+						highlight_rect.y += iLine * _lineSkip;
 						if (highlight_rect.x <= 1.0f)
 						{
 							highlight_rect.w += highlight_rect.x;
@@ -2123,7 +2128,7 @@ namespace fig::gui
 				.x = static_cast<float>(substring.rect.x),
 				.y = 0,
 				.w = 1.0f,
-				.h = static_cast<float>(_lineHeight),
+				.h = static_cast<float>(_lineSkip),
 			};
 		}
 
@@ -2131,9 +2136,9 @@ namespace fig::gui
 		{
 			return rectf {
 				.x = 0,
-				.y = static_cast<float>(_lineHeight * _lines.size()),
+				.y = static_cast<float>(_lineSkip * _lines.size()),
 				.w = 1.0f,
-				.h = static_cast<float>(_lineHeight),
+				.h = static_cast<float>(_lineSkip),
 			};
 		}
 
@@ -2141,9 +2146,9 @@ namespace fig::gui
 
 		fig::rectf rect {
 			.x = 0.0f,
-			.y = cursor.line * static_cast<float>(_lineHeight),
+			.y = cursor.line * static_cast<float>(_lineSkip),
 			.w = 1.0f,
-			.h = static_cast<float>(_lineHeight),
+			.h = static_cast<float>(_lineSkip),
 		};
 
 		if (cursor.line <_lines.size())
@@ -2156,7 +2161,7 @@ namespace fig::gui
 				if (TTF_GetTextSubString(line.ttf_text.get(), cursor_pos, &substring))
 				{
 					rect.x = static_cast<float>(substring.rect.x);
-					rect.h = std::max(rect.h, static_cast<float>(_lineHeight));
+					rect.h = std::max(rect.h, static_cast<float>(_lineSkip));
 				}
 			}
 		}
@@ -2174,7 +2179,7 @@ namespace fig::gui
 
 	int32_t TextInput::GetScrollExtentY() const noexcept
 	{
-		return std::max(_lineHeight * GetLineCount() - GetClientRect().h, 0);
+		return std::max(_lineSkip * GetLineCount() - GetClientRect().h, 0);
 	}
 
 	void TextInput::ScrollToCursor()
@@ -2192,11 +2197,11 @@ namespace fig::gui
 			if (_bMultiline or _bWordWrap) // Vertical scroll
 			{
 				float cursorY = cursor_rect.y - clientRect.y;
-				while (toI(std::round((cursorY - _scroll.y) / _lineHeight)) >= maxRows)
-					_scroll.y += _lineHeight;
-				while (toI(std::round((cursorY - _scroll.y) / _lineHeight)) < 0)
-					_scroll.y -= _lineHeight;
-				_scroll.y = (_scroll.y / _lineHeight) * _lineHeight; // Quantize
+				while (toI(std::round((cursorY - _scroll.y) / _lineSkip)) >= maxRows)
+					_scroll.y += _lineSkip;
+				while (toI(std::round((cursorY - _scroll.y) / _lineSkip)) < 0)
+					_scroll.y -= _lineSkip;
+				_scroll.y = (_scroll.y / _lineSkip) * _lineSkip; // Quantize
 				_scroll.y = std::clamp(_scroll.y, 0, GetScrollExtentY());
 			}
 			else
@@ -2229,12 +2234,12 @@ namespace fig::gui
 
 	void TextInput::ScrollUp() noexcept
 	{
-		_scroll.y = std::max(_scroll.y - _lineHeight, 0);
+		_scroll.y = std::max(_scroll.y - _lineSkip, 0);
 	}
 
 	void TextInput::ScrollDown() noexcept
 	{
-		_scroll.y = std::min(_scroll.y + _lineHeight, GetScrollExtentY());
+		_scroll.y = std::min(_scroll.y + _lineSkip, GetScrollExtentY());
 	}
 
 	void TextInput::PageUp() noexcept

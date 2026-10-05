@@ -76,6 +76,7 @@ namespace fig::gui
 
 		virtual void OnText(fig::string_view text) {};
 		int32_t GetScrollExtentY() const noexcept;
+		int32_t GetLineCount() const noexcept;
 
 	private:
 		void DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y);

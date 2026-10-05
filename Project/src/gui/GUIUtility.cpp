@@ -344,11 +344,6 @@ namespace fig
 		return {};
 	}
 
-	int MeasureFontHeight(fig::font& font)
-	{
-		return TTF_GetFontHeight(&font);
-	}
-
 	fig::rect ScaleToFit(const fig::rect& srcRect, const fig::rect& dstRect, ImageFit fit)
 	{
 		if (srcRect.w == 0 or srcRect.h == 0)

@@ -505,7 +505,6 @@ namespace fig::llm
 			cursor_pos = GetUncachedOffset();
 			chat_begin_pos = GetChatBeginOffset();
 			token_pos = chat_begin_pos;
-			int k = 0;
 		}
 	}
 

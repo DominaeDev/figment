@@ -163,32 +163,35 @@ namespace fig::gui
 		VBar->SetForegroundColor(Color::Green);
 
 		auto pStaticText1 = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
-		pStaticText1->SetBackgroundColor(Color::Green);
+//		pStaticText1->SetBackgroundColor(Color::Green);
 		pStaticText1->SetForegroundColor(Color::White);
 		pStaticText1->SetPosition(100, 500);
 		pStaticText1->SetSize(320, 60);
 		pStaticText1->SetTextWrapWidth(320);
 		pStaticText1->EnableWordWrap(true);
+		pStaticText1->EnableDropShadow(true);
 		pStaticText1->SetAlignment(TextAlignment::LeftTop);
 		pStaticText1->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
 
 		auto pStaticText2 = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
-		pStaticText2->SetBackgroundColor(Color::Green);
+//		pStaticText2->SetBackgroundColor(Color::Green);
 		pStaticText2->SetForegroundColor(Color::White);
 		pStaticText2->SetPosition(100, 570);
 		pStaticText2->SetSize(320, 60);
 		pStaticText2->SetTextWrapWidth(320);
 		pStaticText2->EnableWordWrap(true);
+		pStaticText2->EnableDropShadow(true);
 		pStaticText2->SetAlignment(TextAlignment::MiddleCenter);
 		pStaticText2->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
 
 		auto pStaticText3 = CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
+//		pStaticText3->SetBackgroundColor(Color::Green);
+		pStaticText3->SetForegroundColor(Color::White);
 		pStaticText3->SetPosition(100, 640);
 		pStaticText3->SetSize(320, 60);
-		pStaticText3->SetBackgroundColor(Color::Green);
-		pStaticText3->SetForegroundColor(Color::White);
 		pStaticText3->SetTextWrapWidth(320);
 		pStaticText3->EnableWordWrap(true);
+		pStaticText3->EnableDropShadow(true);
 		pStaticText3->SetAlignment(TextAlignment::RightBottom);
 		pStaticText3->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
 

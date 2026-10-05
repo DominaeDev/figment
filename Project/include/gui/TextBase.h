@@ -17,9 +17,6 @@ namespace fig::gui
 		fig::font_ptr GetFont() const { return _pFont.get(); }
 		int32_t GetTextWrapWidth() const noexcept;
 
-		int32_t GetLineCount() const noexcept;
-		int32_t GetLineHeight() const noexcept { return _lineHeight; }
-
 		bool IsWordWrapping() const noexcept { return _bWordWrap and _wrapWidth > 0; }
 		void InvalidateText();
 
@@ -38,16 +35,18 @@ namespace fig::gui
 
 		void ClearText();
 		void RefreshTexts() noexcept;
+
 		virtual void OnRefreshedTexts() {};
 
-		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text);
+		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text) const;
 		void LayoutAll();
 		bool IsEOL(const TTFTextLine& line) const noexcept;
 
 		fig::text_engine_ptr _pTextEngine;
 		fig::observer_ptr<TTF_Font> _pFont;
 		fig::string _text;
-		int32_t _lineHeight {};
+		int32_t _fontHeight {};
+		int32_t _lineSkip {};
 		int32_t _wrapWidth {};
 		bool _bInvalidated = true;
 

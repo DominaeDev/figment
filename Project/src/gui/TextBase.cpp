@@ -6,9 +6,7 @@ namespace fig::gui
 	TextBase::TextBase(fig::text_engine_ptr pTextEngine, FontFace fontFace, double ptSize) :
 		_pTextEngine { pTextEngine }
 	{
-		_pFont = Fonts::GetFont(fontFace, ptSize);
-		if (_pFont)
-			_lineHeight = TTF_GetFontLineSkip(_pFont);
+		SetFont(fontFace, ptSize);
 		InvalidateText();
 	}
 	
@@ -24,12 +22,17 @@ namespace fig::gui
 
 	void TextBase::SetFont(FontFace fontFace, double ptSize) noexcept
 	{
-		if (auto font = Fonts::GetFont(fontFace, ptSize))
+		if (_pFont = Fonts::GetFont(fontFace, ptSize))
 		{
-			_pFont = font;
-			_lineHeight = TTF_GetFontLineSkip(_pFont);
+			_fontHeight = TTF_GetFontHeight(_pFont);
+			_lineSkip = TTF_GetFontLineSkip(_pFont);
 
 			LayoutAll();
+		}
+		else
+		{
+			_fontHeight = 0;
+			_lineSkip = 0;
 		}
 		InvalidateText();
 	}
@@ -37,14 +40,6 @@ namespace fig::gui
 	int32_t TextBase::GetTextWrapWidth() const noexcept
 	{
 		return _wrapWidth;
-	}
-
-	int32_t TextBase::GetLineCount() const noexcept
-	{
-		int32_t count = toI(_lines.size());
-		if (not _text.empty() and _text.back() == '\n')
-			count++;
-		return count;
 	}
 
 	void TextBase::ClearText()
@@ -63,7 +58,7 @@ namespace fig::gui
 		RefreshTexts();
 	}
 	
-	std::vector<TextBase::TTFTextLine> TextBase::LayoutParagraph(fig::string_view text)
+	std::vector<TextBase::TTFTextLine> TextBase::LayoutParagraph(fig::string_view text) const
 	{
 		std::vector<TTFTextLine> result;
 

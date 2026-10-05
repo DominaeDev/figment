@@ -67,7 +67,7 @@ namespace fig::gui
 		void OnSize() override;
 		EventResult OnEvent(fig::event& event) override;
 
-		fig::rectf GetAlignedRect() const;
+		fig::rect GetAlignedRect() const;
 	private:
 		void DrawText(fig::coord& textWidth, fig::coord& textHeight);
 		void DrawText(size_t line_index, fig::renderer_ptr pRenderer, const fig::color_ref_with_alpha& fgColor, const fig::color_ref_with_alpha& bgColor, fig::coord& textWidth, fig::coord& textHeight);

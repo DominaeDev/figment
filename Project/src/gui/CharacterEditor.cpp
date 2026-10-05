@@ -174,24 +174,28 @@ namespace fig::gui
 	void CharacterEditor::SaveChanges()
 	{
 		if (Save())
-			PushEvent(UserEvent::NavigateToHome);
-		else
 		{
-			auto& dlg = CreateDialogBox("An error occurred while saving.", DialogBoxType::Ok);
-			dlg.Show();
+			PushEvent(UserEvent::NavigateToHome);
+			return;
 		}
+		
+		auto& dlg = CreateDialogBox("An error occurred while saving.", DialogBoxType::Ok);
+		dlg.Show();
 	}
 
 	void CharacterEditor::DismissChanges()
 	{
-		if (IsDirty())
+		if (not IsDirty())
 		{
-			auto& dlg = CreateDialogBox("Discard unsaved changes?", DialogBoxType::YesNo,
-				[this](bool bConfirm) {
-					if (bConfirm)
-						PushEvent(UserEvent::NavigateToHome);
-				});
-			dlg.Show();
+			PushEvent(UserEvent::NavigateToHome);
+			return;
 		}
+
+		auto& dlg = CreateDialogBox("Discard unsaved changes?", DialogBoxType::YesNo,
+			[this](bool bConfirm) {
+				if (bConfirm)
+					PushEvent(UserEvent::NavigateToHome);
+			});
+		dlg.Show();
 	}
 }
