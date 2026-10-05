@@ -163,6 +163,7 @@ namespace fig::gui
 
 	protected:
 		Mode _mode {};
+		bool _bMultiline = false;
 		bool _bAutoSize = false;
 
 		fig::observer_ptr<TTF_Text> _pPassword;

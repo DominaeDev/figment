@@ -10,16 +10,18 @@ namespace fig::gui
 	{
 	public:
 		virtual void SetText(fig::string_view text);
-		void SetTextWrapWidth(int32_t width);
 		void SetFont(FontFace fontFace, double ptSize) noexcept;
+		void SetTextWrapWidth(int32_t width);
 
 		fig::string_view GetText() const noexcept { return _text; }
+		fig::font_ptr GetFont() const { return _pFont.get(); }
 		int32_t GetTextWrapWidth() const noexcept;
+
 		int32_t GetLineCount() const noexcept;
 		int32_t GetLineHeight() const noexcept { return _lineHeight; }
 
-		bool IsMultiline() const noexcept { return _bMultiline; }
 		bool IsWordWrapping() const noexcept { return _bWordWrap and _wrapWidth > 0; }
+		void InvalidateText();
 
 	protected:
 		struct TTFTextLine
@@ -36,6 +38,7 @@ namespace fig::gui
 
 		void ClearText();
 		void RefreshTexts() noexcept;
+		virtual void OnRefreshedTexts() {};
 
 		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text);
 		void LayoutAll();
@@ -46,8 +49,8 @@ namespace fig::gui
 		fig::string _text;
 		int32_t _lineHeight {};
 		int32_t _wrapWidth {};
+		bool _bInvalidated = true;
 
-		bool _bMultiline = false;
 		bool _bWordWrap = false;
 		std::vector<TTFTextLine> _lines;
 	};

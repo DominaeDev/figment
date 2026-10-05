@@ -50,10 +50,10 @@ namespace fig::gui
 		{
 			if (auto pText = item.GetControl<StaticText>())
 			{
-				if (pText->IsWordWrapEnabled())
+				if (pText->IsWordWrapping())
 				{
 					auto [prev_w, prev_h] = pText->MeasureText(true);
-					pText->SetMaxLineWidth(itemRect.w);
+					pText->SetTextWrapWidth(itemRect.w);
 					auto [new_w, new_h] = pText->MeasureText(true);
 					position += new_h - prev_h;
 					item.rect.h = new_h;

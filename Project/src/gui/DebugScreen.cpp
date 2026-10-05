@@ -167,7 +167,7 @@ namespace fig::gui
 		pStaticText1->SetForegroundColor(Color::White);
 		pStaticText1->SetPosition(100, 500);
 		pStaticText1->SetSize(320, 60);
-		pStaticText1->SetMaxLineWidth(320);
+		pStaticText1->SetTextWrapWidth(320);
 		pStaticText1->EnableWordWrap(true);
 		pStaticText1->SetAlignment(TextAlignment::LeftTop);
 		pStaticText1->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
@@ -177,8 +177,8 @@ namespace fig::gui
 		pStaticText2->SetForegroundColor(Color::White);
 		pStaticText2->SetPosition(100, 570);
 		pStaticText2->SetSize(320, 60);
+		pStaticText2->SetTextWrapWidth(320);
 		pStaticText2->EnableWordWrap(true);
-		pStaticText2->SetMaxLineWidth(320);
 		pStaticText2->SetAlignment(TextAlignment::MiddleCenter);
 		pStaticText2->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
 
@@ -187,8 +187,8 @@ namespace fig::gui
 		pStaticText3->SetSize(320, 60);
 		pStaticText3->SetBackgroundColor(Color::Green);
 		pStaticText3->SetForegroundColor(Color::White);
+		pStaticText3->SetTextWrapWidth(320);
 		pStaticText3->EnableWordWrap(true);
-		pStaticText3->SetMaxLineWidth(320);
 		pStaticText3->SetAlignment(TextAlignment::RightBottom);
 		pStaticText3->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
 

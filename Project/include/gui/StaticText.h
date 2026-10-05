@@ -3,6 +3,7 @@
 #include "Figment.h"
 #include "Fonts.h"
 #include "gui/Control.h"
+#include "gui/Textbase.h"
 
 namespace fig::gui
 {
@@ -34,65 +35,54 @@ namespace fig::gui
 		Default			= LeftTop,
 	};
 
-	class StaticText : public Control
+	class StaticText : public Control, public TextBase
 	{
 	public:
 		StaticText(ControlPtr pParent, fig::string_view text, FontFace fontFace = FontFace::Default, double ptSize = Constants::GUI::DefaultFontSize, bool bAutoSize = true);
 		virtual ~StaticText();
 
-		fig::font_ptr GetFont() const { return _pFont.get(); }
-
-		void SetText(fig::string_view text);
+		void SetText(fig::string_view text) override;
 		void SetTextAndResize(fig::string_view text);
 		void SetTextAndResize(fig::string_view text, fig::coord& newWidth, fig::coord& newHeight);
 
-		const fig::string& GetText() const { return _text; }
-
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
-		void SetFont(FontFace fontFace, double ptSize = Constants::GUI::DefaultFontSize);
-		void SetFont(fig::font_ptr pFont);
 
 		void SetForegroundColor(fig::color_ref_with_alpha color) override;
 		void SetBackgroundColor(fig::color_ref_with_alpha color) override;
-		void EnableDropShadow(bool bEnable) noexcept { _bDropShadow = bEnable; _bInvalidated = true; }
-		void EnableEllipsis(bool bEnable) noexcept { _bEllipsis = bEnable; _bInvalidated = true; }
-		void EnableWordWrap(bool bEnable) noexcept { _bWordWrap = bEnable; _bInvalidated = true; }
-		void SetMaxLineWidth(fig::coord width) { _maxLineWidth = width; _bWordWrap |= width > 0; }
+		void EnableDropShadow(bool bEnable) noexcept;
 
+		void EnableEllipsis(bool bEnable) noexcept;
 		bool IsEllipsisEnabled() const noexcept { return _bEllipsis; }
-		bool IsWordWrapEnabled() const noexcept { return _bWordWrap; }
+		void EnableMultiline(bool bEnable) noexcept;
+		void EnableWordWrap(bool bEnable) noexcept;
 
 		fig::point MeasureText(bool bAllowEllipsis = true) const;
 		fig::point MeasureText(fig::string_view text) const;
 		void Reset();
-		void InvalidateText();
 
 	protected:
-		fig::rectf GetAlignedRect() const;
-
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnParent() override;
+		void OnSize() override;
 		EventResult OnEvent(fig::event& event) override;
-		fig::coord GetMaxLineWidth() const noexcept;
 
+		fig::rectf GetAlignedRect() const;
 	private:
 		void DrawText(fig::coord& textWidth, fig::coord& textHeight);
-		void DrawShadow(const char* pText);
-		fig::string GetEllipsisText(const fig::string& text) const;
-		void ReleaseTexture();
+		void DrawText(size_t line_index, fig::renderer_ptr pRenderer, const fig::color_ref_with_alpha& fgColor, const fig::color_ref_with_alpha& bgColor, fig::coord& textWidth, fig::coord& textHeight);
+		void DrawShadow(size_t line_index, fig::renderer_ptr pRenderer);
+		fig::string GetEllipsisText(fig::string_view text) const;
+		void ReleaseTextures();
+		fig::coord GetMaxLineWidth() const noexcept;
 
-		fig::string _text;
-		bool _bInvalidated = false;
+		bool _bMultiline = true;
 		bool _bAutoSize = true;
 		bool _bDropShadow = false;
 		bool _bEllipsis = false;
-		bool _bWordWrap = false;
-		fig::coord _maxLineWidth = 0;
-
-		fig::observer_ptr<TTF_Font> _pFont;
-		fig::sdl::Texture _texture {};
-		fig::sdl::Texture _shadow {};
+		
+		std::vector<fig::sdl::Texture> _textures {};
+		std::vector<fig::sdl::Texture> _shadows {};
 		int _textWidth;
 		int _textHeight;
 

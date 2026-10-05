@@ -9,6 +9,7 @@ namespace fig::gui
 		_pFont = Fonts::GetFont(fontFace, ptSize);
 		if (_pFont)
 			_lineHeight = TTF_GetFontLineSkip(_pFont);
+		InvalidateText();
 	}
 	
 	void TextBase::SetTextWrapWidth(int32_t width)
@@ -17,6 +18,7 @@ namespace fig::gui
 			return;
 
 		_wrapWidth = std::max(width, 0);
+		_bWordWrap |= _wrapWidth > 0;
 		LayoutAll();
 	}
 
@@ -29,6 +31,7 @@ namespace fig::gui
 
 			LayoutAll();
 		}
+		InvalidateText();
 	}
 
 	int32_t TextBase::GetTextWrapWidth() const noexcept
@@ -52,6 +55,9 @@ namespace fig::gui
 
 	void TextBase::SetText(fig::string_view text)
 	{
+		if (text == _text)
+			return; // No change
+
 		_text = text;
 		_lines = LayoutParagraph(_text);
 		RefreshTexts();
@@ -60,12 +66,6 @@ namespace fig::gui
 	std::vector<TextBase::TTFTextLine> TextBase::LayoutParagraph(fig::string_view text)
 	{
 		std::vector<TTFTextLine> result;
-
-		if (not _bMultiline)
-		{
-			size_t newlinePos = text.find('\n', 0);
-			text = fig::string_view { text.data(), std::min(text.length(), newlinePos) };
-		}
 
 		if (not (_bWordWrap and _wrapWidth > 0))
 		{
@@ -80,7 +80,7 @@ namespace fig::gui
 					.position = static_cast<int32_t>(pText - text.data()),
 					.length = static_cast<int32_t>(paragraphEnd - paragraphStart),
 					.eol = true,
-					});
+				});
 
 				assert(result.back().length > 0);
 
@@ -132,7 +132,7 @@ namespace fig::gui
 				result.emplace_back(TTFTextLine {
 					.position = static_cast<int32_t>(pText - text.data()),
 					.length = static_cast<int32_t>(advance),
-					});
+				});
 
 				result.back().eol = IsEOL(result.back());
 
@@ -198,5 +198,14 @@ namespace fig::gui
 				TTF_SetTextWrapWhitespaceVisible(line.ttf_text.get(), true);
 			}
 		}
+
+		InvalidateText();
+		OnRefreshedTexts();
 	}
+
+	void TextBase::InvalidateText()
+	{
+		_bInvalidated = true;
+	}
+
 }

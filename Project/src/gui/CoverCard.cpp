@@ -187,12 +187,12 @@ namespace fig::gui
 			// Adjust font size
 			if (_pLargeLabel->MeasureText(false).x <= _pLargeLabel->GetMaxWidth())
 			{
-				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 28.0));
+				_pLargeLabel->SetFont(FontFace::CardHeader, 28.0);
 				_pLargeLabel->SetY(Large::FooterHeight - Large::InnerMargin - 64 + (_bEnableTags ? 22 : 32));
 			}
 			else
 			{
-				_pLargeLabel->SetFont(Fonts::GetFont(FontFace::CardHeader, 24.0));
+				_pLargeLabel->SetFont(FontFace::CardHeader, 24.0);
 				_pLargeLabel->SetY(Large::FooterHeight - Large::InnerMargin - 60 + (_bEnableTags ? 22 : 32));
 			}
 		}

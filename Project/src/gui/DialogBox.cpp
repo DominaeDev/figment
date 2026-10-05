@@ -69,7 +69,7 @@ namespace fig::gui
 		constexpr fig::coord VPadding = 44;
 		
 		auto size = _pMessage->MeasureText(text);
-		_pMessage->SetMaxLineWidth(std::clamp(size.x, MinDialogWidth - HPadding, MaxDialogWidth - HPadding));
+		_pMessage->SetTextWrapWidth(std::clamp(size.x, MinDialogWidth - HPadding, MaxDialogWidth - HPadding));
 		_pMessage->SetTextAndResize(text);
 		
 		_pBox->SetSize(std::max(MinDialogWidth, _pMessage->GetWidth() + HPadding), std::max(MinDialogHeight, _pMessage->GetHeight() + VPadding));
