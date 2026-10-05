@@ -71,7 +71,6 @@ namespace fig::gui
 	private:
 		void DrawText(fig::coord& textWidth, fig::coord& textHeight);
 		void DrawText(size_t line_index, fig::renderer_ptr pRenderer, const fig::color_ref_with_alpha& fgColor, const fig::color_ref_with_alpha& bgColor, fig::coord& textWidth, fig::coord& textHeight);
-		void DrawShadow(size_t line_index, fig::renderer_ptr pRenderer);
 		fig::string GetEllipsisText(fig::string_view text) const;
 		void ReleaseTextures();
 		fig::coord GetMaxLineWidth() const noexcept;
@@ -82,7 +81,6 @@ namespace fig::gui
 		bool _bEllipsis = false;
 		
 		std::vector<fig::sdl::Texture> _textures {};
-		std::vector<fig::sdl::Texture> _shadows {};
 		int _textWidth;
 		int _textHeight;
 
