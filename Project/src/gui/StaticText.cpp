@@ -179,27 +179,30 @@ namespace fig::gui
 			return;
 		}
 
-		if (bgColor.a() == 0xFF) // Opaque background: Use ClearType
+		if (fgColor)
 		{
-			if (SDL_Surface* pSurface = TTF_RenderText_LCD(_pFont, pText, textLength, fgColor, bgColor))
+			if (bgColor.a() == 0xFF) // Opaque background: Use ClearType
 			{
-				newWidth = pSurface->w;
-				newHeight = pSurface->h;
+				if (SDL_Surface* pSurface = TTF_RenderText_LCD(_pFont, pText, textLength, fgColor, bgColor))
+				{
+					newWidth = pSurface->w;
+					newHeight = pSurface->h;
 
-				texture.reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
-				SDL_DestroySurface(pSurface);
-				return;
+					texture.reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
+					SDL_DestroySurface(pSurface);
+					return;
+				}
 			}
-		}
-		else
-		{
-			if (SDL_Surface* pSurface = TTF_RenderText_Blended(_pFont, pText, textLength, fgColor))
+			else
 			{
-				newWidth = pSurface->w;
-				newHeight = pSurface->h;
-				texture.reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
-				SDL_DestroySurface(pSurface);
-				return;
+				if (SDL_Surface* pSurface = TTF_RenderText_Blended(_pFont, pText, textLength, fgColor))
+				{
+					newWidth = pSurface->w;
+					newHeight = pSurface->h;
+					texture.reset(SDL_CreateTextureFromSurface(pRenderer, pSurface));
+					SDL_DestroySurface(pSurface);
+					return;
+				}
 			}
 		}
 
@@ -297,26 +300,45 @@ namespace fig::gui
 
 	fig::point StaticText::MeasureText(fig::string_view text) const
 	{
-		auto lines = LayoutParagraph(text);
-		if (lines.empty())
-			return fig::point(0, 0);
-		
-		fig::coord width = 0;
-		fig::coord height = _fontHeight + _lineSkip * toI(_lines.size() - 1uz);
-		for (size_t index = 0uz; index != _lines.size(); ++index)
+		if constexpr (Disabled)
 		{
-			auto& line = _lines[index];
-			const char* pText = _text.data();
-			std::advance(pText, line.position);
-			size_t textLength = line.length;
-			if (line.length > 0 and pText[line.length - 1] == '\n')
-				textLength -= 1;
+			auto lines = LayoutParagraph(text);
+			if (lines.empty())
+				return fig::point(0, 0);
 
-			int w, h;
-			if (TTF_GetStringSize(_pFont, text.data(), textLength, &w, &h))
-				width = std::max(width, w);
+			fig::coord width = 0;
+			fig::coord height = _fontHeight + _lineSkip * toI(lines.size() - 1uz);
+			for (size_t index = 0uz; index < lines.size(); ++index)
+			{
+				auto& line = lines[index];
+				const char* pText = _text.data();
+				std::advance(pText, line.position);
+				size_t textLength = line.length;
+				if (line.length > 0 and pText[line.length - 1] == '\n')
+					textLength -= 1;
+
+				int w, h;
+				if (TTF_GetStringSize(_pFont, text.data(), textLength, &w, &h))
+					width = std::max(width, w);
+			}
+			return fig::point { width, height };
 		}
-		return fig::point { width, height };
+		else
+		{
+			if (_bWordWrap)
+			{
+				int w, h;
+				if (TTF_GetStringSizeWrapped(_pFont, text.data(), text.length(), GetMaxLineWidth(), &w, &h))
+					return fig::point(w, h);
+			}
+			else
+			{
+				int w, h;
+				if (TTF_GetStringSize(_pFont, text.data(), text.length(), &w, &h))
+					return fig::point(w, h);
+			}
+			return fig::point(0, 0);
+		}
 	}
 
 	fig::coord StaticText::GetMaxLineWidth() const noexcept
@@ -356,18 +378,14 @@ namespace fig::gui
 	void StaticText::EnableWordWrap(bool bEnable) noexcept 
 	{ 
 		_bWordWrap = bEnable;
+		if (not bEnable)
+			_wrapWidth = 0;
 		InvalidateText(); 
 	}
 
 	void StaticText::OnSize()
 	{
-		if (_bWordWrap)
-		{
+		if (_bWordWrap and not _bAutoSize)
 			SetTextWrapWidth(std::max(GetClientRect().w, 0));
-		}
-		else
-		{
-			SetTextWrapWidth(0);
-		}
 	}
 }
