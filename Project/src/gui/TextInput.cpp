@@ -160,14 +160,14 @@ static int32_t FindNextWord(fig::string_view text, int32_t position)
 	}
 }
 
-static int GetCursorTextIndex(int32_t x, const TTF_SubString* substring)
+static int32_t GetCursorTextIndex(int32_t pixel_x, const TTF_SubString* substring)
 {
 	if (substring->flags & (TTF_SUBSTRING_LINE_END | TTF_SUBSTRING_TEXT_END))
 	{
 		return substring->offset;
 	}
 
-	bool round_down = (x < (substring->rect.x + substring->rect.w / 2));
+	bool round_down = (pixel_x < (substring->rect.x + substring->rect.w / 2));
 
 	if (round_down)
 	{
@@ -336,7 +336,7 @@ namespace fig::gui
 				{
 					auto& style = GetTextStyle(run.styleId);
 					auto& fgColor = style.fgColor;
-					TTF_SetTextColor(pText, fgColor.r, fgColor.g, fgColor.b, fgColor.a);
+					TTF_SetTextColor(pText, fgColor.r(), fgColor.g(), fgColor.b(), fgColor.a());
 					TTF_DrawRendererText(pText, toF(xx + run.offsetX), toF(yy));
 				}
 			}
@@ -504,7 +504,7 @@ namespace fig::gui
 		if (_composition_cursor_length == 0)
 		{
 			TTF_SubString cursor;
-			if (::TTF_GetTextSubString(_composition_text.get(), _composition_start + _composition_cursor, &cursor))
+			if (TTF_GetTextSubString(_composition_text.get(), _composition_start + _composition_cursor, &cursor))
 			{
 				fig::rectf cursor_rect = to_rectf(cursor.rect);
 				cursor_rect.x += clientRect.x;
@@ -624,7 +624,7 @@ namespace fig::gui
 			// Place the candidates at the active clause
 			offset += _composition_cursor;
 		}
-		if (!::TTF_GetTextSubString(_composition_text.get(), offset, &cursor))
+		if (!TTF_GetTextSubString(_composition_text.get(), offset, &cursor))
 			return;
 
 		SDL_GetRenderSafeArea(pRenderer, &safe_rect);
@@ -824,14 +824,9 @@ namespace fig::gui
 		auto& curr_line = _lines[cursor.line];
 		auto& next_line = _lines[target_line];
 
-		TTF_SubString substring;
 		int32_t pos = next_line.position;
-		if (TTF_GetTextSubString(curr_line, cursor.offset, &substring))
-		{
-			int32_t x = substring.rect.x;
-			if (TTF_GetTextSubStringForPoint(next_line, x, _lineSkip / 2, &substring))
-				pos += GetCursorTextIndex(x, &substring);
-		}
+		int32_t x = GetPixelsToLineOffset(curr_line, cursor.offset);
+		pos += GetLineOffsetAt(next_line, x);
 
 		return MoveCursor(pos);
 	}
@@ -1714,6 +1709,7 @@ namespace fig::gui
 		return UndoState
 		{
 			.text = fig::string { GetText() },
+			.styles = _styleSpans,
 			.cursor_pos = _cursor,
 			.highlight_start = highlight_start,
 			.highlight_end = highlight_end,
@@ -1738,6 +1734,7 @@ namespace fig::gui
 		{
 			auto& undo = *try_undo;
 			_text = undo.text;
+			_styleSpans = undo.styles;
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
 			RefreshPassword();
@@ -1753,6 +1750,7 @@ namespace fig::gui
 		{
 			auto& undo = *try_undo;
 			_text = undo.text;
+			_styleSpans = undo.styles;
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
 			RefreshPassword();
@@ -1826,7 +1824,7 @@ namespace fig::gui
 		if (IsPassword())
 		{
 			TTF_SubString substring;
-			if (::TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineSkip / 2, &substring))
+			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineSkip / 2, &substring))
 			{
 				int32_t pos = GetCursorTextIndex(x, &substring);
 				pos = ConvertFromPasswordPosition(pos);
@@ -1854,16 +1852,12 @@ namespace fig::gui
 			line_index = std::min(line_index, _lines.size() - 1uz);
 
 			auto& line = _lines[line_index];
-			TTF_SubString substring;
-			if (TTF_GetTextSubStringForPoint(line, x, _lineSkip / 2, &substring))
-			{
-				int32_t pos = GetCursorTextIndex(x, &substring);
-				return TTFCursor {
-					.position = line.position + pos,
-					.offset = pos,
-					.line = static_cast<int32_t>(line_index),
-				};
-			}
+			int32_t pos = GetLineOffsetAt(line, x);
+			return TTFCursor {
+				.position = line.position + pos,
+				.offset = pos,
+				.line = static_cast<int32_t>(line_index),
+			};
 		}
 
 		return {};
@@ -1874,7 +1868,7 @@ namespace fig::gui
 		if (IsPassword())
 		{
 			TTF_SubString substring;
-			if (::TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineSkip / 2, &substring) and substring.rect.w > 0)
+			if (TTF_GetTextSubStringForPoint(_pPassword.get(), x, _lineSkip / 2, &substring) and substring.rect.w > 0)
 			{
 				int32_t pos = GetCursorTextIndex(x, &substring);
 				pos = ConvertFromPasswordPosition(pos);
@@ -1898,16 +1892,12 @@ namespace fig::gui
 				return std::nullopt;
 
 			auto& line = _lines[line_index];
-			TTF_SubString substring;
-			if (TTF_GetTextSubStringForPoint(line, x, _lineSkip / 2, &substring) and substring.rect.w > 0)
-			{
-				int32_t pos = GetCursorTextIndex(x, &substring);
-				return TTFCursor {
-					.position = line.position + pos,
-					.offset = pos,
-					.line = static_cast<int32_t>(line_index),
-				};
-			}
+			int32_t pos = GetLineOffsetAt(line, x);
+			return TTFCursor {
+				.position = line.position + pos,
+				.offset = pos,
+				.line = static_cast<int32_t>(line_index),
+			};
 		}
 
 		return std::nullopt;
@@ -1998,10 +1988,23 @@ namespace fig::gui
 	{
 		assert(position >= 0 and position <= static_cast<int32_t>(_text.size()));
 
-		if (_text.empty())
+		if (_text.empty()) // Set
 		{
 			_text = text;
 			_lines = LayoutParagraph(_text);
+
+			if (IsStyled())
+			{
+				for (const auto& range : ParseVariableSpans(_text))
+				{
+					_styleSpans.emplace_back(StyleSpan {
+						.position = range.first,
+						.length = range.second,
+						.styleId = 1,
+						});
+				}
+			}
+
 			RefreshTexts();
 			RefreshPassword();
 			SetCursor(static_cast<int32_t>(text.size()));
@@ -2035,6 +2038,31 @@ namespace fig::gui
 		_lines.erase(_lines.begin() + paragraphStartLine, _lines.begin() + paragraphEndLine + 1);
 		_lines.insert(_lines.begin() + paragraphStartLine, std::make_move_iterator(newLines.begin()), std::make_move_iterator(newLines.end()));
 
+		// Refresh styles
+		if (IsStyled())
+		{
+			auto spanIt = std::ranges::remove_if(_styleSpans, [paragraphStart, oldParagraphEnd = paragraphEnd - delta](const StyleSpan& span) {
+				return span.position >= paragraphStart and span.position < oldParagraphEnd;
+			}).begin();
+			_styleSpans.erase(spanIt, _styleSpans.end());
+
+			for (auto& span : _styleSpans)
+			{
+				if (span.position >= paragraphStart)
+					span.position += delta;
+			}
+
+			for (const auto& range : ParseVariableSpans(paragraphText))
+			{
+				_styleSpans.emplace_back(StyleSpan {
+					.position = paragraphStart + range.first,
+					.length = range.second,
+					.styleId = 1,
+					});
+			}
+			std::ranges::sort(_styleSpans, {}, &StyleSpan::position);
+		}
+
 		RefreshTexts();
 		RefreshPassword();
 		SetCursor(position + delta);
@@ -2063,6 +2091,7 @@ namespace fig::gui
 
 		int32_t paragraphStart = _lines[paragraphStartLine].position;
 		int32_t paragraphEnd = _lines[paragraphEndLine].position + _lines[paragraphEndLine].length;
+		int32_t oldParagraphEnd = paragraphEnd;
 
 		_text.erase(_text.cbegin() + from, _text.cbegin() + from + length);
 
@@ -2081,6 +2110,32 @@ namespace fig::gui
 		_lines.insert(_lines.begin() + paragraphStartLine,
 			std::make_move_iterator(newLines.begin()),
 			std::make_move_iterator(newLines.end()));
+
+		// Refresh styles
+		if (IsStyled())
+		{
+			auto spanIt = std::ranges::remove_if(_styleSpans, [paragraphStart, oldParagraphEnd](const StyleSpan& span) {
+				return span.position >= paragraphStart and span.position < oldParagraphEnd;
+			}).begin();
+			_styleSpans.erase(spanIt, _styleSpans.end());
+
+			for (auto& span : _styleSpans)
+			{
+				if (span.position >= paragraphStart)
+					span.position -= length;
+			}
+
+			for (const auto& range : ParseVariableSpans(paragraphText))
+			{
+				_styleSpans.emplace_back(StyleSpan {
+					.position = paragraphStart + range.first,
+					.length = range.second,
+					.styleId = 1,
+				});
+			}
+
+			std::ranges::sort(_styleSpans, {}, &StyleSpan::position);
+		}
 
 		RefreshTexts();
 		RefreshPassword();
@@ -2126,32 +2181,50 @@ namespace fig::gui
 			for (size_t iLine = 0uz; iLine < _lines.size(); ++iLine)
 			{
 				auto& line = _lines[iLine];
-				if (line.runs.empty())
-					continue;
 				if (end <= line.position or start >= line.position + line.length)
 					continue;
 
 				auto pos_start = std::max(line.position, start) - line.position;
 				auto pos_end = std::min(line.position + line.length, end) - line.position;
+				int32_t minX = std::numeric_limits<int32_t>::max();
+				int32_t maxX = std::numeric_limits<int32_t>::min();
+				int32_t remainingLength = pos_end - pos_start;
+
 				for (auto& run : line.runs)
 				{
-					int32_t offset = 0;
-					if (TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(run.ttf_text.get(), pos_start + offset, pos_end - pos_start, NULL))
+					if (run.ttf_text.empty())
+						continue;
+
+					if (run.byteOffset > pos_end or run.byteOffset + run.length < pos_start)
+						continue;
+
+					int32_t start = std::max(pos_start - run.byteOffset, 0);
+					int32_t length = std::min(remainingLength, run.length - start);
+					remainingLength -= length;
+					if (TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(run.ttf_text.get(), start, length, NULL))
 					{
 						for (int i = 0; pHighlights[i]; ++i)
 						{
-							auto highlight_rect = to_rectf(pHighlights[i]->rect);
-							highlight_rect.w = std::max(highlight_rect.w, 3.0f);
-							highlight_rect.y += iLine * _lineSkip;
-							if (highlight_rect.x <= 1.0f)
-							{
-								highlight_rect.w += highlight_rect.x;
-								highlight_rect.x = 0;
-							}
-							highlights.push_back(highlight_rect);
+							auto& rect = pHighlights[i]->rect;
+							minX = std::min(minX, rect.x + run.offsetX);
+							maxX = std::max(maxX, rect.x + run.offsetX + rect.w);
 						}
 					}
-					offset += run.length;
+				}
+
+				if (minX < std::numeric_limits<int32_t>::max() and maxX > std::numeric_limits<int32_t>::min())
+				{
+					fig::rect highlight_rect {};
+					highlight_rect.x = minX;
+					highlight_rect.w = std::max(maxX - minX, 3);
+					highlight_rect.y = toI(iLine * _lineSkip);
+					highlight_rect.h = _lineSkip;
+					if (highlight_rect.x <= 1)
+					{
+						highlight_rect.w += highlight_rect.x;
+						highlight_rect.x = 0;
+					}
+					highlights.push_back(to_rectf(highlight_rect));
 				}
 			}
 		}
@@ -2164,7 +2237,7 @@ namespace fig::gui
 		{
 			auto pos = ConvertToPasswordPosition(_cursor);
 			TTF_SubString substring;
-			::TTF_GetTextSubString(_pPassword.get(), pos, &substring);
+			TTF_GetTextSubString(_pPassword.get(), pos, &substring);
 			return rectf {
 				.x = static_cast<float>(substring.rect.x),
 				.y = 0,
@@ -2197,13 +2270,8 @@ namespace fig::gui
 			auto& line = _lines[cursor.line];
 			if (not line.runs.empty())
 			{
-				int32_t cursor_pos = cursor.offset; 
-				TTF_SubString substring;
-				if (TTF_GetTextSubString(line, cursor_pos, &substring))
-				{
-					rect.x = static_cast<float>(substring.rect.x);
-					rect.h = std::max(rect.h, static_cast<float>(_lineSkip));
-				}
+				rect.x = static_cast<float>(GetPixelsToLineOffset(line, cursor.offset));
+				rect.h = std::max(rect.h, static_cast<float>(_lineSkip));
 			}
 		}
 		return rect;
@@ -2287,5 +2355,4 @@ namespace fig::gui
 	{
 		MoveCursorUpDown(15);
 	}
-
 }

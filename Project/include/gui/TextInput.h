@@ -220,6 +220,7 @@ namespace fig::gui
 		struct UndoState
 		{
 			fig::string text;
+			std::vector<StyleSpan> styles;
 			int cursor_pos;
 			int highlight_start;
 			int highlight_end;

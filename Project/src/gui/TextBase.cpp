@@ -210,6 +210,7 @@ namespace fig::gui
 	{
 		line.runs.clear();
 
+		int32_t byteOffset = 0;
 		int32_t offsetX = 0;
 
 		for (const auto& range : StyleLine(line))
@@ -219,15 +220,12 @@ namespace fig::gui
 				.position = range.position,
 				.length = range.length,
 				.styleId = range.styleId,
+				.byteOffset = byteOffset,
 				.offsetX = offsetX,
 			};
+			byteOffset += range.length;
 
-			if (IsStyled())
-			{
-				auto& style = GetTextStyle(range.styleId);
-				TTF_SetTextColor(run.ttf_text.get(), style.fgColor.r, style.fgColor.g, style.fgColor.b, style.fgColor.a);
-				TTF_SetTextWrapWhitespaceVisible(run.ttf_text.get(), true);
-			}
+			TTF_SetTextWrapWhitespaceVisible(run.ttf_text.get(), true);
 
 			int32_t w;
 			TTF_GetTextSize(run.ttf_text.get(), &w, NULL);
@@ -336,33 +334,60 @@ namespace fig::gui
 		return _styles[styleId];
 	}
 
-	bool TextBase::TTF_GetTextSubString(const TTFTextLine& line, int32_t cursor, TTF_SubString* pSubstring) const
+	static int32_t GetCursorTextIndex(int32_t pixel_x, const TTF_SubString* substring)
 	{
-		int32_t offset = 0;
-		for (auto& run : line.runs)
+		if (substring->flags & (TTF_SUBSTRING_LINE_END | TTF_SUBSTRING_TEXT_END))
 		{
-			if (run.ttf_text.empty())
-				continue;
-
-			if (::TTF_GetTextSubString(run.ttf_text.get(), cursor + offset, pSubstring))
-				return true;
-			offset += run.offsetX;
+			return substring->offset;
 		}
-		return false;
+
+		bool round_down = (pixel_x < (substring->rect.x + substring->rect.w / 2));
+
+		if (round_down)
+		{
+			/* Start the cursor before the selected text */
+			return substring->offset;
+		}
+		else
+		{
+			/* Place the cursor after the selected text */
+			return substring->offset + substring->length;
+		}
 	}
 
-	bool TextBase::TTF_GetTextSubStringForPoint(const TTFTextLine& line, int x, int y, TTF_SubString* pSubstring) const
+	int32_t TextBase::GetLineOffsetAt(const TTFTextLine& line, fig::coord px) const
 	{
-		int32_t offset = 0;
-		for (auto& run : line.runs)
+		for (int32_t i = toI(line.runs.size()) - 1; i >= 0; --i)
 		{
+			auto& run = line.runs[toUZ(i)];
 			if (run.ttf_text.empty())
 				continue;
 
-			if (::TTF_GetTextSubStringForPoint(run.ttf_text.get(), x + offset, y, pSubstring))
-				return true;
-			offset += run.offsetX;
+			if (run.offsetX > px)
+				continue;
+
+			TTF_SubString substring;
+			if (TTF_GetTextSubStringForPoint(run.ttf_text.get(), px - run.offsetX, _lineSkip / 2, &substring))
+				return run.byteOffset + GetCursorTextIndex(px - run.offsetX, &substring);
 		}
-		return false;
+		return line.position;
+	}
+
+	int32_t TextBase::GetPixelsToLineOffset(const TTFTextLine& line, int32_t offset) const
+	{
+		for (int32_t i = toI(line.runs.size()) - 1; i >= 0; --i)
+		{
+			auto& run = line.runs[toUZ(i)];
+			if (run.ttf_text.empty())
+				continue;
+
+			if (run.byteOffset > offset)
+				continue;
+
+			TTF_SubString substring;
+			if (TTF_GetTextSubString(run.ttf_text.get(), offset - run.byteOffset, &substring))
+				return substring.rect.x + run.offsetX;
+		}
+		return 0;
 	}
 }

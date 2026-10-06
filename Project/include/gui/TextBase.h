@@ -8,7 +8,7 @@ namespace fig::gui
 {
 	struct TextStyle
 	{
-		fig::color fgColor;
+		fig::color_ref fgColor;
 		// ...
 	};
 
@@ -47,6 +47,7 @@ namespace fig::gui
 			int32_t position;
 			int32_t length;
 			TextStyleId styleId;
+			int32_t byteOffset; // bytes, from line begin
 			int32_t offsetX; // pixels
 		};
 
@@ -75,8 +76,8 @@ namespace fig::gui
 		bool IsStyled() const noexcept { return not _styles.empty(); }
 		const TextStyle& GetTextStyle(TextStyleId styleId) const;
 
-		bool TTF_GetTextSubString(const TTFTextLine& line, int32_t cursor, TTF_SubString* pSubstring) const;
-		bool TTF_GetTextSubStringForPoint(const TTFTextLine& line, int x, int y, TTF_SubString* pSubstring) const;
+		int32_t GetLineOffsetAt(const TTFTextLine& line, fig::coord px) const;
+		int32_t GetPixelsToLineOffset(const TTFTextLine& line, int32_t offset) const;
 
 		fig::text_engine_ptr _pTextEngine;
 		fig::observer_ptr<TTF_Font> _pFont;
