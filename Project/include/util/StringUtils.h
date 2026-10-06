@@ -160,4 +160,7 @@ namespace fig
 		else
 			return std::format("{} B", bytes);
 	}
+
+	using ParsedSpan = std::pair<int32_t, int32_t>;
+	std::vector<ParsedSpan> ParseVariableSpans(fig::string_view text);
 }

@@ -80,6 +80,7 @@ namespace fig::gui
 
 	private:
 		void DrawText(fig::renderer_ptr pRenderer, TTF_Text* pText, int x, int y);
+		void DrawText(fig::renderer_ptr pRenderer, TTFTextLine& line, int x, int y);
 		void DrawPlaceholder(fig::renderer_ptr pRenderer, int x, int y);
 		void DrawCursor(fig::renderer_ptr pRenderer);
 		void DrawCandidates(fig::renderer_ptr pRenderer);

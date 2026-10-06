@@ -6,10 +6,26 @@
 
 namespace fig::gui
 {
+	struct TextStyle
+	{
+		fig::color fgColor;
+		// ...
+	};
+
+	using TextStyleId = size_t;
+
+	struct StyleSpan
+	{
+		int32_t position;
+		int32_t length;
+		TextStyleId styleId;
+	};
+
 	class TextBase
 	{
 	public:
 		virtual void SetText(fig::string_view text);
+		virtual void SetStyledText(fig::string_view text, std::span<const StyleSpan> styleSpans);
 		void SetFont(FontFace fontFace, double ptSize) noexcept;
 		void SetTextWrapWidth(int32_t width);
 
@@ -20,16 +36,28 @@ namespace fig::gui
 		bool IsWordWrapping() const noexcept { return _bWordWrap and _wrapWidth > 0; }
 		void InvalidateText();
 
+		void SetDefaultStyle(fig::color_ref fgColor) noexcept;
+		TextStyleId AddStyle(fig::color_ref fgColor) noexcept;
+		bool ApplyStyle(TextStyleId styleId, int32_t position, int32_t length) noexcept;
+
 	protected:
-		struct TTFTextLine
+		struct StyledTextRun
 		{
 			fig::sdl::Text ttf_text;
+			int32_t position;
+			int32_t length;
+			TextStyleId styleId;
+			int32_t offsetX; // pixels
+		};
 
+		struct TTFTextLine
+		{
+			std::vector<StyledTextRun> runs;
 			int32_t position; // in bytes
 			int32_t length;
 			bool eol {}; // End of paragraph
 		};
-	
+
 		TextBase(fig::text_engine_ptr pTextEngine, FontFace fontFace = FontFace::Default, double ptSize = Constants::GUI::DefaultFontSize);
 		virtual ~TextBase() {};
 
@@ -42,6 +70,14 @@ namespace fig::gui
 		void LayoutAll();
 		bool IsEOL(const TTFTextLine& line) const noexcept;
 
+		void FinalizeLine(TTFTextLine& line) const;
+		std::vector<StyledTextRun> StyleLine(const TTFTextLine& line) const;
+		bool IsStyled() const noexcept { return not _styles.empty(); }
+		const TextStyle& GetTextStyle(TextStyleId styleId) const;
+
+		bool TTF_GetTextSubString(const TTFTextLine& line, int32_t cursor, TTF_SubString* pSubstring) const;
+		bool TTF_GetTextSubStringForPoint(const TTFTextLine& line, int x, int y, TTF_SubString* pSubstring) const;
+
 		fig::text_engine_ptr _pTextEngine;
 		fig::observer_ptr<TTF_Font> _pFont;
 		fig::string _text;
@@ -52,5 +88,9 @@ namespace fig::gui
 
 		bool _bWordWrap = false;
 		std::vector<TTFTextLine> _lines;
+		
+		// Styling
+		std::vector<StyleSpan> _styleSpans;
+		std::vector<TextStyle> _styles;
 	};
 }

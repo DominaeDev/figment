@@ -54,6 +54,15 @@ namespace fig::gui
 			return; // No change
 
 		_text = text;
+		_styleSpans.clear();
+		_lines = LayoutParagraph(_text);
+		RefreshTexts();
+	}
+
+	void TextBase::SetStyledText(fig::string_view text, std::span<const StyleSpan> styleSpans)
+	{
+		_text = text;
+		_styleSpans.assign(styleSpans.begin(), styleSpans.end());
 		_lines = LayoutParagraph(_text);
 		RefreshTexts();
 	}
@@ -186,11 +195,10 @@ namespace fig::gui
 		// Create text objects
 		for (auto& line : _lines)
 		{
-			if (line.ttf_text.empty())
+			if (line.runs.empty())
 			{
 				assert(line.position >= 0 and line.length >= 0 and line.position + line.length <= _text.size());
-				line.ttf_text = fig::sdl::Text(_pTextEngine, _pFont, _text.data() + line.position, line.length);
-				TTF_SetTextWrapWhitespaceVisible(line.ttf_text.get(), true);
+				FinalizeLine(line);
 			}
 		}
 
@@ -198,9 +206,163 @@ namespace fig::gui
 		OnRefreshedTexts();
 	}
 
+	void TextBase::FinalizeLine(TTFTextLine& line) const
+	{
+		line.runs.clear();
+
+		int32_t offsetX = 0;
+
+		for (const auto& range : StyleLine(line))
+		{
+			StyledTextRun run {
+				.ttf_text = fig::sdl::Text(_pTextEngine, _pFont, _text.data() + range.position, range.length),
+				.position = range.position,
+				.length = range.length,
+				.styleId = range.styleId,
+				.offsetX = offsetX,
+			};
+
+			if (IsStyled())
+			{
+				auto& style = GetTextStyle(range.styleId);
+				TTF_SetTextColor(run.ttf_text.get(), style.fgColor.r, style.fgColor.g, style.fgColor.b, style.fgColor.a);
+				TTF_SetTextWrapWhitespaceVisible(run.ttf_text.get(), true);
+			}
+
+			int32_t w;
+			TTF_GetTextSize(run.ttf_text.get(), &w, NULL);
+			offsetX += w;
+
+			line.runs.push_back(std::move(run));
+		}
+	}
+
 	void TextBase::InvalidateText()
 	{
 		_bInvalidated = true;
 	}
 
+	void TextBase::SetDefaultStyle(fig::color_ref fgColor) noexcept
+	{
+		if (_styles.empty())
+			_styles.resize(1uz);
+
+		_styles[0] = std::move(TextStyle {
+			.fgColor = fgColor,
+		});
+	}
+
+	TextStyleId TextBase::AddStyle(fig::color_ref fgColor) noexcept
+	{
+		if (_styles.empty())
+			_styles.resize(2uz);
+
+		_styles.emplace_back(TextStyle {
+			.fgColor = fgColor,
+		});
+		return _styles.size() - 1uz;
+	}
+
+	bool TextBase::ApplyStyle(TextStyleId styleId, int32_t position, int32_t length) noexcept
+	{
+		if (toUZ(styleId) >= _styles.size())
+			return false;
+
+		auto it = _styleSpans.begin();
+		for (; it != _styleSpans.end(); ++it)
+		{
+			if (it->position > position)
+				break;
+		}
+		_styleSpans.emplace(it, StyleSpan {
+			.position = position,
+			.length = length,
+			.styleId = styleId,
+		});
+		return true;
+	}
+
+	std::vector<TextBase::StyledTextRun> TextBase::StyleLine(const TextBase::TTFTextLine& line) const
+	{
+		std::vector<StyledTextRun> result;
+		int32_t pos_line_end = line.position + line.length;
+		int32_t pos_cursor = line.position;
+
+		for (const auto& span : _styleSpans)
+		{
+			int32_t pos_span_end = span.position + span.length;
+
+			if (pos_span_end <= pos_cursor)
+				continue;
+			if (span.position >= pos_line_end)
+				break;
+
+			int32_t pos_run_start = std::max(span.position, pos_cursor);
+			int32_t pos_run_end = std::min(pos_span_end, pos_line_end);
+
+			if (pos_run_start > pos_cursor)
+			{
+				result.emplace_back(StyledTextRun {
+					.position = pos_cursor,
+					.length = pos_run_start - pos_cursor,
+					.styleId = 0,
+				});
+			}
+
+			result.emplace_back(StyledTextRun {
+				.position = pos_run_start,
+				.length = pos_run_end - pos_run_start,
+				.styleId = span.styleId,
+			});
+
+			pos_cursor = pos_run_end;
+		}
+
+		if (pos_cursor < pos_line_end)
+		{
+			result.emplace_back(StyledTextRun {
+				.position = pos_cursor,
+				.length = pos_line_end - pos_cursor,
+				.styleId = 0,
+			});
+		}
+
+		return result;
+	}
+
+	const TextStyle& TextBase::GetTextStyle(TextStyleId styleId) const
+	{
+		assert(styleId < _styles.size());
+		return _styles[styleId];
+	}
+
+	bool TextBase::TTF_GetTextSubString(const TTFTextLine& line, int32_t cursor, TTF_SubString* pSubstring) const
+	{
+		int32_t offset = 0;
+		for (auto& run : line.runs)
+		{
+			if (run.ttf_text.empty())
+				continue;
+
+			if (::TTF_GetTextSubString(run.ttf_text.get(), cursor + offset, pSubstring))
+				return true;
+			offset += run.offsetX;
+		}
+		return false;
+	}
+
+	bool TextBase::TTF_GetTextSubStringForPoint(const TTFTextLine& line, int x, int y, TTF_SubString* pSubstring) const
+	{
+		int32_t offset = 0;
+		for (auto& run : line.runs)
+		{
+			if (run.ttf_text.empty())
+				continue;
+
+			if (::TTF_GetTextSubStringForPoint(run.ttf_text.get(), x + offset, y, pSubstring))
+				return true;
+			offset += run.offsetX;
+		}
+		return false;
+	}
 }
