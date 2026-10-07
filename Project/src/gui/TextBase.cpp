@@ -242,6 +242,9 @@ namespace fig::gui
 				.position = line.position,
 				.length = line.length,
 			};
+
+			TTF_SetTextWrapWhitespaceVisible(run.ttf_text.get(), true);
+			line.runs.push_back(std::move(run));
 		}
 	}
 

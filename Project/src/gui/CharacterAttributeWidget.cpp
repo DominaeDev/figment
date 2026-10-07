@@ -146,7 +146,7 @@ namespace fig::gui
 			_pTextBox->SetMode(TextInput::Mode::Multiline);
 			_pTextBox->SetTextWrapWidth(_pTextBox->GetClientRect().w);
 			_pTextBox->SetMinRows(2);
-			_pTextBox->SetMaxRows(12);
+			_pTextBox->SetMaxRows(18);
 			_pTextBox->SetMaxWidth(MaxWidth);
 			_pTextBox->SetWidth(MaxWidth);
 			break;

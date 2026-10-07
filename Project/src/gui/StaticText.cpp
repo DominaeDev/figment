@@ -48,7 +48,8 @@ namespace fig::gui
 	void StaticText::SetTextAndResize(fig::string_view text)
 	{
 		TextBase::SetText(text);
-		fig::coord newWidth, newHeight;
+		fig::coord newWidth {};
+		fig::coord newHeight {};
 		DrawText(newWidth, newHeight);
 		SetSize(newWidth, newHeight);
 		_bInvalidated = false;
@@ -120,13 +121,13 @@ namespace fig::gui
 
 	void StaticText::DrawText(fig::coord& newWidth, fig::coord& newHeight)
 	{
+		newWidth = 0;
+		newHeight = 0;
 		_textures.clear();
 		if (_text.empty())
 		{
 			_textWidth = 0;
 			_textHeight = 0;
-			newWidth = 0;
-			newHeight = 0;
 			return;
 		}
 
@@ -172,12 +173,10 @@ namespace fig::gui
 		if (line.length > 0 and pText[line.length - 1] == '\n')
 			textLength -= 1;
 
+		newWidth = 0;
+		newHeight = 0;
 		if (textLength == 0uz)
-		{
-			newWidth = 0;
-			newHeight = 0;
 			return;
-		}
 
 		if (fgColor)
 		{
@@ -267,7 +266,7 @@ namespace fig::gui
 		if (maxWidth == 0)
 			return fig::string { text };
 
-		int w, h;
+		int32_t w, h;
 		if (TTF_GetStringSize(_pFont, text.data(), 0, &w, &h) and w <= maxWidth)
 			return fig::string { text };
 
@@ -317,7 +316,7 @@ namespace fig::gui
 				if (line.length > 0 and pText[line.length - 1] == '\n')
 					textLength -= 1;
 
-				int w, h;
+				int32_t w, h;
 				if (TTF_GetStringSize(_pFont, text.data(), textLength, &w, &h))
 					width = std::max(width, w);
 			}
@@ -327,13 +326,13 @@ namespace fig::gui
 		{
 			if (_bWordWrap)
 			{
-				int w, h;
+				int32_t w, h;
 				if (TTF_GetStringSizeWrapped(_pFont, text.data(), text.length(), GetMaxLineWidth(), &w, &h))
 					return fig::point(w, h);
 			}
 			else
 			{
-				int w, h;
+				int32_t w, h;
 				if (TTF_GetStringSize(_pFont, text.data(), text.length(), &w, &h))
 					return fig::point(w, h);
 			}
