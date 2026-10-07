@@ -134,6 +134,13 @@ Message.Navy.Border						#4D55C1
 SuccessText								#3EB147
 ErrorText								#BA2545
 
+// Command syntax highlighting
+Command.Brace							#ff6000
+Command.Value							#ca3400
+Command.Operator						#4a77ff
+Command.Literal							#C400B4
+Command.Keyword							#C400B4
+
 // Fixed colors (invariant)
 Debug									#C000C0
 Debug2									#00C0C0

@@ -1547,7 +1547,7 @@ namespace fig::gui
 			return EventResult::Pass;
 
 		int32_t extent = GetScrollExtentY();
-		_scroll.y = std::clamp(_scroll.y - toI(toF(event.integer_y) * _lineSkip * 6), 0, extent);
+		_scroll.y = std::clamp(_scroll.y - toI(toF(event.integer_y) * _lineSkip * 3), 0, extent);
 		_scroll.y = (_scroll.y / _lineSkip) * _lineSkip; // Quantize
 		return EventResult::Handled;
 	}

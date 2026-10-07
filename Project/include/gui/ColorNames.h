@@ -148,12 +148,12 @@ namespace fig::gui
 		GenderTagOther,
 		TagNew,
 
-		SyntaxSymbol,
-		SyntaxValue,
-		SyntaxLiteral,
-		SyntaxKeyword,
-		SyntaxOperator,
-		SyntaxError,
+		CommandBrace,
+		CommandValue,
+		CommandLiteral,
+		CommandKeyword,
+		CommandOperator,
+		CommandError,
 
 		Count,
 	};
@@ -274,12 +274,11 @@ namespace fig::gui
 		std::pair { Color::DisabledButtonBackground,			"DisabledButton.Background" },
 		std::pair { Color::DisabledButtonBorder,				"DisabledButton.Border" },
 		
-		std::pair { Color::SyntaxSymbol,						"Command.Symbol" },
-		std::pair { Color::SyntaxValue,							"Command.Value" },
-		std::pair { Color::SyntaxLiteral,						"Command.Literal" },
-		std::pair { Color::SyntaxKeyword,						"Command.Keyword" },
-		std::pair { Color::SyntaxOperator,						"Command.Operator" },
-		std::pair { Color::SyntaxError,							"Command.Error" },
+		std::pair { Color::CommandBrace,						"Command.Brace" },
+		std::pair { Color::CommandValue,						"Command.Value" },
+		std::pair { Color::CommandLiteral,						"Command.Literal" },
+		std::pair { Color::CommandKeyword,						"Command.Keyword" },
+		std::pair { Color::CommandOperator,						"Command.Operator" },
 
 		std::pair { Color::Debug,								"Debug" },
 		std::pair { Color::Debug2,								"Debug2" },

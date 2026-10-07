@@ -133,6 +133,13 @@ Message.Navy.Foreground					#ADB1E8
 SuccessText								#73FF7E
 ErrorText								#FF567A
 
+// Command syntax highlighting
+Command.Brace							#FFC746
+Command.Value							#FCFF00
+Command.Operator						#3FEFFF
+Command.Literal							#E323E5
+Command.Keyword							#E323E5
+
 // Fixed colors (invariant)
 Debug									#C000C0
 Debug2									#00C0C0

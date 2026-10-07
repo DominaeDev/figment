@@ -6,12 +6,11 @@ namespace fig::gui
 {
 	using Token = ConditionParser::TokenType;
 	constexpr TextStyleId kStyleDefault = 0;
-	constexpr TextStyleId kStyleSymbol = 1;
+	constexpr TextStyleId kStyleBraces = 1;
 	constexpr TextStyleId kStyleVariable = 2;
 	constexpr TextStyleId kStyleLiteral = 3;
 	constexpr TextStyleId kStyleKeyword = 4;
 	constexpr TextStyleId kStyleOperator = 5;
-	constexpr TextStyleId kStyleError = 6;
 
 	static bool IsIdentifierStart(char c)
 	{
@@ -140,7 +139,7 @@ namespace fig::gui
 		{
 		case ConditionParser::TokenType::LeftParen:
 		case ConditionParser::TokenType::RightParen:
-			return kStyleSymbol;
+			return kStyleBraces;
 		case ConditionParser::TokenType::And:
 		case ConditionParser::TokenType::Or:
 		case ConditionParser::TokenType::Not:
@@ -220,7 +219,7 @@ namespace fig::gui
 			result.emplace_back(StyleSpan {
 				.position = static_cast<int32_t>(openPos),
 				.length = 1,
-				.styleId = kStyleSymbol,
+				.styleId = kStyleBraces,
 			});
 
 			if (separatorPos == contentEnd)
@@ -238,7 +237,7 @@ namespace fig::gui
 				result.emplace_back(StyleSpan {
 					.position = static_cast<int32_t>(separatorPos),
 					.length = 1,
-					.styleId = kStyleSymbol,
+					.styleId = kStyleOperator,
 				});
 
 				size_t branchStart = separatorPos + 1;
@@ -251,13 +250,17 @@ namespace fig::gui
 					result.emplace_back(StyleSpan {
 						.position = static_cast<int32_t>(pipePos),
 						.length = 1,
-						.styleId = kStyleSymbol,
+						.styleId = kStyleOperator,
 					});
 					Parse(text, pipePos + 1, contentEnd, result);
 				}
 			}
 
-			result.emplace_back(StyleSpan { .position = static_cast<int32_t>(contentEnd), .length = 1, .styleId = kStyleSymbol });
+			result.emplace_back(StyleSpan { 
+				.position = static_cast<int32_t>(contentEnd), 
+				.length = 1, 
+				.styleId = kStyleBraces 
+			});
 
 			pos = contentEnd + 1;
 		}
@@ -266,12 +269,11 @@ namespace fig::gui
 	DefaultTextStyleProvider::DefaultTextStyleProvider(TextBase* pOwner)
 	{
 		AddStyle(Color::TextBoxForeground);		// kStyleDefault
-		AddStyle(Color::SyntaxSymbol);			// kStyleSymbol
-		AddStyle(Color::SyntaxValue);			// kStyleVariable
-		AddStyle(Color::SyntaxLiteral);			// kStyleLiteral
-		AddStyle(Color::SyntaxKeyword);			// kStyleKeyword
-		AddStyle(Color::SyntaxOperator);		// kStyleOperator
-		AddStyle(Color::SyntaxError);			// kStyleError
+		AddStyle(Color::CommandBrace);			// kStyleBraces
+		AddStyle(Color::CommandValue);			// kStyleVariable
+		AddStyle(Color::CommandLiteral);		// kStyleLiteral
+		AddStyle(Color::CommandKeyword);		// kStyleKeyword
+		AddStyle(Color::CommandOperator);		// kStyleOperator
 	}
 
 	std::vector<StyleSpan> DefaultTextStyleProvider::GetStyles(fig::string_view text, size_t offset)

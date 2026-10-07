@@ -5,6 +5,7 @@
 #include "gui/ComboBox.h"
 #include "gui/Menu.h"
 #include "gui/AppResources.h"
+#include "gui/DefaultTextStyleProvider.h"
 
 using namespace fig::data;
 
@@ -99,6 +100,7 @@ namespace fig::gui
 		if (not _pTextBox)
 		{
 			_pTextBox = CreateControl<TextBox>(FontFace::Default, 14.0);
+			_pTextBox->SetStyleProvider<DefaultTextStyleProvider>();
 			_pTextBox->SetTextChangedDelegate([this](auto&& _) { OnValueChanged(); });
 			_pTextBox->SetPosition(0, 23);
 			_pTextBox->EnableAutoSize(true);
