@@ -210,28 +210,38 @@ namespace fig::gui
 	{
 		line.runs.clear();
 
-		int32_t byteOffset = 0;
-		int32_t offsetX = 0;
+		if (HasStyleProvider())
+		{
+			int32_t byteOffset = 0;
+			int32_t offsetX = 0;
+			for (const auto& style : StyleLine(line))
+			{
+				StyledTextRun run {
+					.ttf_text = fig::sdl::Text(_pTextEngine, _pFont, _text.data() + style.position, style.length),
+					.position = style.position,
+					.length = style.length,
+					.styleId = style.styleId,
+					.byteOffset = byteOffset,
+					.offsetX = offsetX,
+				};
+				byteOffset += style.length;
 
-		for (const auto& range : StyleLine(line))
+				TTF_SetTextWrapWhitespaceVisible(run.ttf_text.get(), true);
+
+				int32_t w;
+				TTF_GetTextSize(run.ttf_text.get(), &w, NULL);
+				offsetX += w;
+
+				line.runs.push_back(std::move(run));
+			}
+		}
+		else
 		{
 			StyledTextRun run {
-				.ttf_text = fig::sdl::Text(_pTextEngine, _pFont, _text.data() + range.position, range.length),
-				.position = range.position,
-				.length = range.length,
-				.styleId = range.styleId,
-				.byteOffset = byteOffset,
-				.offsetX = offsetX,
+				.ttf_text = fig::sdl::Text(_pTextEngine, _pFont, _text.data() + line.position, line.length),
+				.position = line.position,
+				.length = line.length,
 			};
-			byteOffset += range.length;
-
-			TTF_SetTextWrapWhitespaceVisible(run.ttf_text.get(), true);
-
-			int32_t w;
-			TTF_GetTextSize(run.ttf_text.get(), &w, NULL);
-			offsetX += w;
-
-			line.runs.push_back(std::move(run));
 		}
 	}
 
@@ -240,49 +250,9 @@ namespace fig::gui
 		_bInvalidated = true;
 	}
 
-	void TextBase::SetDefaultStyle(fig::color_ref fgColor) noexcept
-	{
-		if (_styles.empty())
-			_styles.resize(1uz);
-
-		_styles[0] = std::move(TextStyle {
-			.fgColor = fgColor,
-		});
-	}
-
-	TextStyleId TextBase::AddStyle(fig::color_ref fgColor) noexcept
-	{
-		if (_styles.empty())
-			_styles.resize(2uz);
-
-		_styles.emplace_back(TextStyle {
-			.fgColor = fgColor,
-		});
-		return _styles.size() - 1uz;
-	}
-
-	bool TextBase::ApplyStyle(TextStyleId styleId, int32_t position, int32_t length) noexcept
-	{
-		if (toUZ(styleId) >= _styles.size())
-			return false;
-
-		auto it = _styleSpans.begin();
-		for (; it != _styleSpans.end(); ++it)
-		{
-			if (it->position > position)
-				break;
-		}
-		_styleSpans.emplace(it, StyleSpan {
-			.position = position,
-			.length = length,
-			.styleId = styleId,
-		});
-		return true;
-	}
-
 	std::vector<TextBase::StyledTextRun> TextBase::StyleLine(const TextBase::TTFTextLine& line) const
 	{
-		std::vector<StyledTextRun> result;
+		std::vector<StyledTextRun> styledRuns;
 		int32_t pos_line_end = line.position + line.length;
 		int32_t pos_cursor = line.position;
 
@@ -300,38 +270,47 @@ namespace fig::gui
 
 			if (pos_run_start > pos_cursor)
 			{
-				result.emplace_back(StyledTextRun {
+				styledRuns.emplace_back(StyledTextRun {
 					.position = pos_cursor,
 					.length = pos_run_start - pos_cursor,
 					.styleId = 0,
 				});
 			}
 
-			result.emplace_back(StyledTextRun {
-				.position = pos_run_start,
-				.length = pos_run_end - pos_run_start,
-				.styleId = span.styleId,
-			});
+			if (pos_run_end > pos_run_start)
+			{
+				styledRuns.emplace_back(StyledTextRun {
+					.position = pos_run_start,
+					.length = pos_run_end - pos_run_start,
+					.styleId = span.styleId,
+				});
+			}
 
 			pos_cursor = pos_run_end;
 		}
 
 		if (pos_cursor < pos_line_end)
 		{
-			result.emplace_back(StyledTextRun {
+			styledRuns.emplace_back(StyledTextRun {
 				.position = pos_cursor,
 				.length = pos_line_end - pos_cursor,
 				.styleId = 0,
 			});
 		}
 
-		return result;
+		return styledRuns;
 	}
 
-	const TextStyle& TextBase::GetTextStyle(TextStyleId styleId) const
+	void TextBase::ApplyStyle(fig::string_view text, size_t position)
 	{
-		assert(styleId < _styles.size());
-		return _styles[styleId];
+		if (_pStyleProvider)
+		{
+			if (const auto& styles = _pStyleProvider->GetStyles(text, position); not styles.empty())
+			{
+				_styleSpans.insert_range(_styleSpans.cend(), styles);
+				std::ranges::sort(_styleSpans, {}, &StyleSpan::position);
+			}
+		}
 	}
 
 	static int32_t GetCursorTextIndex(int32_t pixel_x, const TTF_SubString* substring)

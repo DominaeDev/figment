@@ -1400,34 +1400,4 @@ namespace fig
 			return text.substr(1, text.length() - 2);
 		return text;
 	}
-
-	std::vector<ParsedSpan> ParseVariableSpans(fig::string_view text)
-	{
-		std::vector<ParsedSpan> result;
-		size_t pos = 0uz;
-
-		while (pos < text.size())
-		{
-			size_t pos_open = text.find('{', pos);
-			if (pos_open == fig::string_view::npos)
-				break;
-
-			size_t pos_curr = pos_open + 1;
-			while (pos_curr < text.size() and text[pos_curr] != '}' and not is_whitespace(static_cast<unsigned char>(text[pos_curr])))
-				++pos_curr;
-
-			if (pos_curr < text.size() and text[pos_curr] == '}')
-			{
-				result.emplace_back(ParsedSpan {
-					static_cast<int32_t>(pos_open),
-					static_cast<int32_t>(pos_curr - pos_open + 1),
-				});
-				pos = pos_curr + 1;
-			}
-			else
-				pos = pos_open + 1;
-		}
-
-		return result;
-	}
 }

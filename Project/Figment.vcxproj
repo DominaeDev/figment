@@ -207,6 +207,7 @@
     <ClCompile Include="src\gui\DropList.cpp" />
     <ClCompile Include="src\gui\Editor.cpp" />
     <ClCompile Include="src\gui\HorizontalLine.cpp" />
+    <ClCompile Include="src\gui\ITextStyleProvider.cpp" />
     <ClCompile Include="src\gui\ModalOverlay.cpp" />
     <ClCompile Include="src\gui\MouseEventHandler.cpp" />
     <ClCompile Include="src\gui\ButtonWithLabel.cpp" />
@@ -256,6 +257,7 @@
     <ClCompile Include="src\gui\SidePanelEditor.cpp" />
     <ClCompile Include="src\gui\SidePanelMain.cpp" />
     <ClCompile Include="src\gui\Slider.cpp" />
+    <ClCompile Include="src\gui\DefaultTextStyleProvider.cpp" />
     <ClCompile Include="src\gui\TextBase.cpp" />
     <ClCompile Include="src\gui\TextInput.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
@@ -568,6 +570,8 @@
     <ClInclude Include="include\gui\ResizeableImageViewport.h" />
     <ClInclude Include="include\gui\ResizeHandle.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
+    <ClInclude Include="include\gui\ITextStyleProvider.h" />
+    <ClInclude Include="include\gui\DefaultTextStyleProvider.h" />
     <ClInclude Include="include\gui\TextBase.h" />
     <ClInclude Include="include\gui\UserSettingsEditor.h" />
     <ClInclude Include="include\gui\SidePanelEditor.h" />

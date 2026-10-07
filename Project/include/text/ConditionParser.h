@@ -17,9 +17,6 @@ namespace fig
 	class ConditionParser
 	{
 	public:
-		static std::expected<ConditionPtr, ConditionParseError> Parse(const fig::string& expression);
-
-	private:
 		enum class TokenType
 		{
 			End,
@@ -46,15 +43,26 @@ namespace fig
 			GreaterThan,
 			GreaterOrEqual,
 		};
+				
+		static std::expected<ConditionPtr, ConditionParseError> Parse(fig::string_view expression);
 
+		struct TokenSpan
+		{
+			TokenType token;
+			size_t position;
+			size_t length;
+		};
+		static std::vector<TokenSpan> GetTokenSpans(fig::string_view expression);
+	private:
 		struct Token
 		{
 			TokenType type = TokenType::End;
+			size_t position {};
 			fig::string text;
 			fig::fixed number {};
 		};
 
-		explicit ConditionParser(const fig::string& source);
+		explicit ConditionParser(fig::string_view expression);
 
 		void Advance();
 		Token NextToken();
@@ -66,6 +74,7 @@ namespace fig
 		std::expected<ConditionPtr, ConditionParseError> ParseAtom();
 
 		const char* _cursor;
+		const char* _start;
 		const char* _end;
 		Token _current {};
 	};

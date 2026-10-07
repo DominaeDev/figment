@@ -11,6 +11,7 @@
 #include "gui/TextBox.h"
 #include "gui/HorizontalBar.h"
 #include "gui/VerticalBar.h"
+#include "gui/DefaultTextStyleProvider.h"
 
 namespace fig::gui
 {
@@ -139,8 +140,7 @@ namespace fig::gui
 		pTextBox4->SetEnabled(false);
 
 		auto pTextBox5 = CreateControl<TextBox>(FontFace::Default, Constants::GUI::DefaultFontSize, TextInput::Mode::Multiline);
-		pTextBox5->SetDefaultStyle(Color::AppForeground);
-		pTextBox5->AddStyle(custom_color(0xFFFF00_rgb));
+		pTextBox5->SetStyleProvider<DefaultTextStyleProvider>();
 		pTextBox5->SetText("Text box (multi)\nHello, World.");
 		pTextBox5->SetPlaceholder("Enter some text, please...");
 		pTextBox5->EnableAutoSize(true);

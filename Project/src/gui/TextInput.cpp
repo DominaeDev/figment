@@ -327,14 +327,14 @@ namespace fig::gui
 		int yy = rect.y + GetMarginTop() + y;
 		ApplyScroll(xx, yy);
 
-		if (IsStyled())
+		if (HasStyleProvider())
 		{
 			for (auto& run : line.runs)
 			{
 				auto pText = run.ttf_text.get();
 				if (pText->text)
 				{
-					auto& style = GetTextStyle(run.styleId);
+					auto& style = _pStyleProvider->GetTextStyle(run.styleId);
 					auto& fgColor = style.fgColor;
 					TTF_SetTextColor(pText, fgColor.r(), fgColor.g(), fgColor.b(), fgColor.a());
 					TTF_DrawRendererText(pText, toF(xx + run.offsetX), toF(yy));
@@ -1993,17 +1993,7 @@ namespace fig::gui
 			_text = text;
 			_lines = LayoutParagraph(_text);
 
-			if (IsStyled())
-			{
-				for (const auto& range : ParseVariableSpans(_text))
-				{
-					_styleSpans.emplace_back(StyleSpan {
-						.position = range.first,
-						.length = range.second,
-						.styleId = 1,
-						});
-				}
-			}
+			ApplyStyle(_text);
 
 			RefreshTexts();
 			RefreshPassword();
@@ -2014,6 +2004,9 @@ namespace fig::gui
 		auto cursor = GetCursorAt(position);
 		int32_t paragraphStartLine = cursor.line;
 		int32_t paragraphEndLine = cursor.line;
+
+		while (paragraphStartLine > 0 and not _lines[paragraphStartLine - 1].eol)
+			--paragraphStartLine;
 
 		while (not _lines[paragraphEndLine].eol and paragraphEndLine < static_cast<int32_t>(_lines.size()) - 1)
 			++paragraphEndLine;
@@ -2039,7 +2032,7 @@ namespace fig::gui
 		_lines.insert(_lines.begin() + paragraphStartLine, std::make_move_iterator(newLines.begin()), std::make_move_iterator(newLines.end()));
 
 		// Refresh styles
-		if (IsStyled())
+		if (HasStyleProvider())
 		{
 			auto spanIt = std::ranges::remove_if(_styleSpans, [paragraphStart, oldParagraphEnd = paragraphEnd - delta](const StyleSpan& span) {
 				return span.position >= paragraphStart and span.position < oldParagraphEnd;
@@ -2052,15 +2045,7 @@ namespace fig::gui
 					span.position += delta;
 			}
 
-			for (const auto& range : ParseVariableSpans(paragraphText))
-			{
-				_styleSpans.emplace_back(StyleSpan {
-					.position = paragraphStart + range.first,
-					.length = range.second,
-					.styleId = 1,
-					});
-			}
-			std::ranges::sort(_styleSpans, {}, &StyleSpan::position);
+			ApplyStyle(paragraphText, paragraphStart);
 		}
 
 		RefreshTexts();
@@ -2085,6 +2070,9 @@ namespace fig::gui
 
 		int32_t paragraphStartLine = startCursor.line;
 		int32_t paragraphEndLine = endCursor.line;
+
+		while (paragraphStartLine > 0 and not _lines[paragraphStartLine - 1].eol)
+			--paragraphStartLine;
 
 		while (not _lines[paragraphEndLine].eol and paragraphEndLine < static_cast<int32_t>(_lines.size()) - 1)
 			++paragraphEndLine;
@@ -2112,7 +2100,7 @@ namespace fig::gui
 			std::make_move_iterator(newLines.end()));
 
 		// Refresh styles
-		if (IsStyled())
+		if (HasStyleProvider())
 		{
 			auto spanIt = std::ranges::remove_if(_styleSpans, [paragraphStart, oldParagraphEnd](const StyleSpan& span) {
 				return span.position >= paragraphStart and span.position < oldParagraphEnd;
@@ -2125,16 +2113,7 @@ namespace fig::gui
 					span.position -= length;
 			}
 
-			for (const auto& range : ParseVariableSpans(paragraphText))
-			{
-				_styleSpans.emplace_back(StyleSpan {
-					.position = paragraphStart + range.first,
-					.length = range.second,
-					.styleId = 1,
-				});
-			}
-
-			std::ranges::sort(_styleSpans, {}, &StyleSpan::position);
+			ApplyStyle(paragraphText, paragraphStart);
 		}
 
 		RefreshTexts();

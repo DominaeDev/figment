@@ -10,7 +10,7 @@ namespace fig
 	constexpr const char* OpAlways = "always";
 	constexpr const char* OpNever = "never";
 
-	std::expected<ConditionPtr, ConditionParseError> ConditionParser::Parse(const fig::string& expression)
+	std::expected<ConditionPtr, ConditionParseError> ConditionParser::Parse(fig::string_view expression)
 	{
 		ConditionParser parser(expression);
 		auto result = parser.ParseOr();
@@ -19,9 +19,10 @@ namespace fig
 		return result;
 	}
 
-	ConditionParser::ConditionParser(const fig::string& source) :
-		_cursor(source.data()),
-		_end(source.data() + source.size()),
+	ConditionParser::ConditionParser(fig::string_view expression) :
+		_cursor(expression.data()),
+		_start(expression.data()),
+		_end(expression.data() + expression.size()),
 		_current {}
 	{
 		Advance();
@@ -49,8 +50,10 @@ namespace fig
 		while (_cursor < _end and std::isspace(static_cast<unsigned char>(*_cursor)))
 			++_cursor;
 
+		size_t pos_token = static_cast<size_t>(_cursor - _start);
+
 		if (_cursor >= _end)
-			return { TokenType::End };
+			return { TokenType::End, pos_token };
 
 		const char character = *_cursor;
 
@@ -58,10 +61,10 @@ namespace fig
 		{
 			case '(':
 				++_cursor;
-				return { TokenType::LeftParen };
+				return { TokenType::LeftParen, pos_token };
 			case ')':
 				++_cursor;
-				return { TokenType::RightParen };
+				return { TokenType::RightParen, pos_token };
 			case '"':
 			{
 				++_cursor;
@@ -73,121 +76,127 @@ namespace fig
 
 				fig::string text(start, static_cast<size_t>(_cursor - start));
 				++_cursor;
-				return { TokenType::String, std::move(text) };
+				return { TokenType::String, pos_token, std::move(text) };
 			}
 			case '>':
 				if (stricmp(_cursor, ">="))	// a >= b
 				{
 					_cursor += 2;
-					return { TokenType::GreaterOrEqual };
+					return { TokenType::GreaterOrEqual, pos_token };
 				}
 				else
 				{
 					++_cursor;
-					return { TokenType::GreaterThan };
+					return { TokenType::GreaterThan, pos_token };
 				}
 			case '<':
 				if (stricmp(_cursor, "<="))	// a <= b
 				{
 					_cursor += 2;
-					return { TokenType::LessOrEqual };
+					return { TokenType::LessOrEqual, pos_token };
 				}
 				else if (stricmp(_cursor, "<>"))	// a <> b
 				{
 					_cursor += 2;
-					return { TokenType::NotEqual };
+					return { TokenType::NotEqual, pos_token };
 				}
 				else
 				{
 					++_cursor;
-					return { TokenType::LessThan };
+					return { TokenType::LessThan, pos_token };
 				}
 			case '=':
 				if (stricmp(_cursor, "=="))	// a == b
 				{
 					_cursor += 2;
-					return { TokenType::EqualStrict };
+					return { TokenType::EqualStrict, pos_token };
 				}
 				else  // a = b
 				{
 					++_cursor;
-					return { TokenType::Equal };
+					return { TokenType::Equal, pos_token };
 				}
 			case '!':
 				if (stricmp(_cursor, "!=="))	// a !== b
 				{
 					_cursor += 3;
-					return { TokenType::NotEqualStrict };
+					return { TokenType::NotEqualStrict, pos_token };
 				}
 				else if (stricmp(_cursor, "!="))	// a != b
 				{
 					_cursor += 2;
-					return { TokenType::NotEqual };
+					return { TokenType::NotEqual, pos_token };
 				}
 				else if (stricmp(_cursor, "!~="))	// a !~= b
 				{
 					_cursor += 3;
-					return { TokenType::NotEqualApprox };
+					return { TokenType::NotEqualApprox, pos_token };
 				}
 				else
-					return { TokenType::Error };
+				{
+					++_cursor;
+					return { TokenType::Error, pos_token };
+				}
 			case '~':
 				if (stricmp(_cursor, "~="))	// a ~= b
 				{
 					_cursor += 2;
-					return { TokenType::EqualApprox };
+					return { TokenType::EqualApprox, pos_token };
 				}
 				else
-					return { TokenType::Error };
+				{
+					++_cursor;
+					return { TokenType::Error, pos_token };
+				}
 			case 'g':
 			case 'G':
 				if (stricmp(_cursor, "gt ")) // a gt b
 				{
 					_cursor += 3;
-					return { TokenType::GreaterThan };
+					return { TokenType::GreaterThan, pos_token };
 				}
 				else if (stricmp(_cursor, "ge ")) // a ge b
 				{
 					_cursor += 3;
-					return { TokenType::GreaterOrEqual };
+					return { TokenType::GreaterOrEqual, pos_token };
 				}
 			case 'l':
 			case 'L':
 				if (stricmp(_cursor, "lt "))	// a lt b
 				{
 					_cursor += 3;
-					return { TokenType::LessThan };
+					return { TokenType::LessThan, pos_token };
 				}
 				else if (stricmp(_cursor, "le "))	// a le b
 				{
 					_cursor += 3;
-					return { TokenType::LessOrEqual };
+					return { TokenType::LessOrEqual, pos_token };
 				}
 			case 'e':
 			case 'E':
 				if (stricmp(_cursor, "eq "))	// a eq b
 				{
 					_cursor += 3;
-					return { TokenType::Equal };
+					return { TokenType::Equal, pos_token };
 				}
 			case 'i':
 			case 'I':
 				if (stricmp(_cursor, "is "))	// a is b
 				{
 					_cursor += 3;
-					return { TokenType::Equal };
+					return { TokenType::Equal, pos_token };
 				}
 				else if (stricmp(_cursor, "is not ")) // a is not b
 				{
 					_cursor += 7;
-					return { TokenType::NotEqual };
+					return { TokenType::NotEqual, pos_token };
 				}
 			case 'n':
 			case 'N':
 				if (stricmp(_cursor, "neq "))	// a neq b
 				{
 					_cursor += 4;
-					return { TokenType::NotEqual };
+					return { TokenType::NotEqual, pos_token };
 				}
 			default:
 				break;
@@ -208,11 +217,11 @@ namespace fig
 				if (denom >= 0_fp and trunc(denom) == denom) // b is integer
 				{
 					_cursor = denomEnd;
-					return { TokenType::Probability, fig::string(start, static_cast<size_t>(_cursor - start)) };
+					return { TokenType::Probability, pos_token, fig::string(start, static_cast<size_t>(_cursor - start)) };
 				}
 			}
 
-			return { TokenType::Number, fig::string(start, static_cast<size_t>(_cursor - start)), value };
+			return { TokenType::Number, pos_token, fig::string(start, static_cast<size_t>(_cursor - start)), value };
 		}
 
 		if (std::isalpha(static_cast<unsigned char>(character)) || character == '_')
@@ -234,10 +243,11 @@ namespace fig
 			if (text == OpNever)
 				return { TokenType::Never };
 
-			return { TokenType::Identifier, std::move(text) };
+			return { TokenType::Identifier, pos_token, std::move(text) };
 		}
 
-		return { TokenType::Error };
+		_cursor = std::min(_cursor + 1, _end);
+		return { TokenType::Error, pos_token };
 	}
 
 	std::expected<ConditionPtr, ConditionParseError> ConditionParser::ParseOr()
@@ -436,5 +446,29 @@ namespace fig
 		Advance();
 
 		return std::make_unique<ComparisonCondition>(std::move(lhsValue), std::move(rhsValue), *compareOperator);
+	}
+
+	std::vector<ConditionParser::TokenSpan> ConditionParser::GetTokenSpans(fig::string_view expression)
+	{
+		std::vector<TokenSpan> spans;
+		ConditionParser parser(expression);
+
+		while (parser._current.type != TokenType::End)
+		{
+			size_t start = std::distance(expression.data(), parser._start);
+			TokenType tokenType = parser._current.type;
+			size_t tokenStart = parser._current.position;
+			size_t tokenEnd = std::distance(expression.data(), parser._cursor);
+
+			parser.Advance();
+
+			spans.emplace_back(TokenSpan {
+				.token = tokenType,
+				.position = start + tokenStart,
+				.length = static_cast<size_t>(tokenEnd - tokenStart),
+			});
+		}
+
+		return spans;
 	}
 }

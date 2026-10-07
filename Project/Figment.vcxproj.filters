@@ -851,6 +851,12 @@
     <ClCompile Include="src\gui\TextBase.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\DefaultTextStyleProvider.cpp">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ITextStyleProvider.cpp">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1926,6 +1932,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\TextBase.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ITextStyleProvider.h">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\DefaultTextStyleProvider.h">
+      <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,24 +3,10 @@
 #include <functional>
 
 #include "util/UndoStack.h"
+#include "ITextStyleProvider.h"
 
 namespace fig::gui
 {
-	struct TextStyle
-	{
-		fig::color_ref fgColor;
-		// ...
-	};
-
-	using TextStyleId = size_t;
-
-	struct StyleSpan
-	{
-		int32_t position;
-		int32_t length;
-		TextStyleId styleId;
-	};
-
 	class TextBase
 	{
 	public:
@@ -36,9 +22,12 @@ namespace fig::gui
 		bool IsWordWrapping() const noexcept { return _bWordWrap and _wrapWidth > 0; }
 		void InvalidateText();
 
-		void SetDefaultStyle(fig::color_ref fgColor) noexcept;
-		TextStyleId AddStyle(fig::color_ref fgColor) noexcept;
-		bool ApplyStyle(TextStyleId styleId, int32_t position, int32_t length) noexcept;
+		template <typename T>
+		requires std::derived_from<T, ITextStyleProvider>
+		void SetStyleProvider()
+		{
+			_pStyleProvider = std::make_unique<T>(this);
+		}
 
 	protected:
 		struct StyledTextRun
@@ -71,10 +60,10 @@ namespace fig::gui
 		void LayoutAll();
 		bool IsEOL(const TTFTextLine& line) const noexcept;
 
-		void FinalizeLine(TTFTextLine& line) const;
+		bool HasStyleProvider() const noexcept { return (bool)_pStyleProvider; }
+		void ApplyStyle(fig::string_view text, size_t position = 0uz);
 		std::vector<StyledTextRun> StyleLine(const TTFTextLine& line) const;
-		bool IsStyled() const noexcept { return not _styles.empty(); }
-		const TextStyle& GetTextStyle(TextStyleId styleId) const;
+		void FinalizeLine(TTFTextLine& line) const;
 
 		int32_t GetLineOffsetAt(const TTFTextLine& line, fig::coord px) const;
 		int32_t GetPixelsToLineOffset(const TTFTextLine& line, int32_t offset) const;
@@ -92,6 +81,6 @@ namespace fig::gui
 		
 		// Styling
 		std::vector<StyleSpan> _styleSpans;
-		std::vector<TextStyle> _styles;
+		std::unique_ptr<ITextStyleProvider> _pStyleProvider;
 	};
 }
