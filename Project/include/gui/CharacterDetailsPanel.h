@@ -14,6 +14,7 @@ namespace fig::gui
 	
 	protected:
 		fig::coord GetExtent() const override;
+		void OnSize() override;
 
 	private:
 		fig::observer_ptr<StaticText> _pHeader;

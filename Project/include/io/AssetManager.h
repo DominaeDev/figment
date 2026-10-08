@@ -73,7 +73,7 @@ namespace fig::io
 		const Asset& CreateAsset(AssetTypeDefinition type, const fig::uuid& parent = {}) noexcept;
 		const Asset& CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
-		const Asset& CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;
+		const Asset& CreateBitmapAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;
 
 		bool UpdateAsset(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum = false) noexcept;
 		bool UpdateAsset(const fig::uuid& assetId, fig::byte_span data, bool bChecksum = false) noexcept;
@@ -170,7 +170,7 @@ namespace fig::io
 		Asset& CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept;
 		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept;
 		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept;
-		Asset& CreateImageAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
+		Asset& CreateBitmapAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
 		bool UpdateAsset_NoLock(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum) noexcept;
 		bool UpdateAsset_NoLock(const fig::uuid& assetId, fig::byte_span data, bool bChecksum) noexcept;
 

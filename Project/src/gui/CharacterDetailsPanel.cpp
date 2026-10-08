@@ -55,4 +55,10 @@ namespace fig::gui
 		return bottomItem->GetY() + bottomItem->GetHeight();
 	}
 
+	void CharacterDetailsPanel::OnSize()
+	{
+		_pDescription->SetTextWrapWidth(_pDescription->GetWidth());
+	}
+
+
 }

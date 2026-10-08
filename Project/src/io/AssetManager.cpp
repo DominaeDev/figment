@@ -113,10 +113,10 @@ namespace fig::io
 		return CreateAsset_NoLock(type, data, parent, bChecksum);
 	}
 
-	const Asset& AssetManager::CreateImageAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateBitmapAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return CreateImageAsset_NoLock(subtype, surface, parent);
+		return CreateBitmapAsset_NoLock(subtype, surface, parent);
 	}
 
 	bool AssetManager::UpdateAsset(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum) noexcept
@@ -196,7 +196,7 @@ namespace fig::io
 		return asset;
 	}
 
-	Asset& AssetManager::CreateImageAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateBitmapAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
 	{
 		auto& asset = CreateAsset_NoLock(make_asset_type(AssetType::Image, subtype, DataFormat::ImageUncompressed), parent);
 		if (!surface.get())
@@ -447,6 +447,22 @@ namespace fig::io
 				LogLn("Error occurred when updating index database");
 			}
 		}
+
+		// Flush data in RAM
+		size_t freed = 0uz;
+		for (auto& kvp : _assets)
+		{
+			auto& asset = kvp.second;
+			if (asset.sync_state.has_data and asset.sync_state.file_sync == AssetSyncState::Status::Synchronized)
+			{
+				freed += asset.data.size();
+				asset.data.clear();
+				asset.sync_state.has_data = false;
+				asset.sync_state.file_sync = AssetSyncState::Status::Indeterminate;
+			}
+		}
+		if (freed > 0uz)
+			LogLn(std::format("Freed {} bytes of memory.", freed));
 
 		return bSaved;
 	}
@@ -793,13 +809,11 @@ namespace fig::io
 		fig::ref_vector<Asset> imported;
 		imported.reserve(files.size());
 
-		{	// Mutex scope
-			std::scoped_lock lock { _assetsMutex };
-			for (auto& filename : files)
-			{
-				if (auto import = ImportCharacter_NoLock(filename, format))
-					imported.push_back(std::ref(import.value()));
-			}
+		for (auto& filename : files)
+		{
+			if (auto import = ImportCharacter(filename, format))
+				imported.push_back(std::ref(import.value()));
+			SaveModifiedAssets(); // Save after each one
 		}
 
 		return imported;
@@ -825,29 +839,31 @@ namespace fig::io
 			// Load portrait image(s)
 			if (auto file = fig::io::ReadFile(filename))
 			{
-				// Create portrait asset
+				// Create asset
 				auto& portraitAsset = CreateAsset_NoLock(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait, DataFormat::ImagePng), std::move(file.value()), characterAsset.id, true);
 
-				// Create cover card
-				if (auto coverImage = LoadImage(filename) //! @todo: load only once
-					.transform([](auto img) {
-					return CreateCoverImage(img, false);
-				}))
+				if (auto try_image = LoadImage(filename))
 				{
-					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset_NoLock(ImageAssetType::CoverImage, coverImage.value(), characterAsset.id);
-					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
-				}
+					// Create cover
+					if (auto coverImage = CreateCoverImage(*try_image, false))
+					{
+						auto& coverAsset = CreateBitmapAsset_NoLock(ImageAssetType::CoverImage, coverImage, characterAsset.id);
+						coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+					}
 
-				// Create square portrait
-				if (auto squarePortraitImage = LoadImage(filename) //! @todo: load only once
-					.transform([](auto img) {
-					return CreateSquarePortrait(img);
-				}))
-				{
-					// Save square portrait asset (bitmap)
-					auto& squarePortraitAsset = CreateImageAsset_NoLock(ImageAssetType::SmallPortrait, squarePortraitImage.value(), characterAsset.id);
-					squarePortraitAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+					// Create square portrait
+					if (auto squarePortraitImage = CreateSquarePortrait(*try_image))
+					{
+						auto& squarePortraitAsset = CreateBitmapAsset_NoLock(ImageAssetType::SmallPortrait, squarePortraitImage, characterAsset.id);
+						squarePortraitAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+					}
+
+					// Create thumbnail
+					if (auto thumbnailImage = CreateThumbnail(*try_image, Constants::Data::PortraitThumbnailWidth, Constants::Data::PortraitThumbnailHeight))
+					{
+						auto& thumbnailAsset = CreateBitmapAsset_NoLock(ImageAssetType::Thumbnail, thumbnailImage, characterAsset.id);
+						thumbnailAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
+					}
 				}
 			}
 
@@ -881,7 +897,7 @@ namespace fig::io
 			if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
 			{
 				// Create portrait asset
-				auto& scenarioImageAsset = CreateImageAsset_NoLock(ImageAssetType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
+				auto& scenarioImageAsset = CreateBitmapAsset_NoLock(ImageAssetType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
 
 				// Create cover card
 				if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
@@ -890,7 +906,7 @@ namespace fig::io
 				}))
 				{
 					// Save cover asset (bitmap)
-					auto& coverAsset = CreateImageAsset_NoLock(ImageAssetType::CoverImage, coverImage.value(), scenarioAsset.id);
+					auto& coverAsset = CreateBitmapAsset_NoLock(ImageAssetType::CoverImage, coverImage.value(), scenarioAsset.id);
 					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, scenarioImageAsset.id);
 				}
 			}
@@ -1087,7 +1103,7 @@ namespace fig::io
 							// Save cover asset (bitmap)
 							{
 								std::scoped_lock lock { _assetsMutex };
-								auto& coverAsset = CreateImageAsset_NoLock(ImageAssetType::CoverImage, coverImage, characterAssetID);
+								auto& coverAsset = CreateBitmapAsset_NoLock(ImageAssetType::CoverImage, coverImage, characterAssetID);
 								coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
 								coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 							}

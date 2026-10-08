@@ -17,6 +17,7 @@ namespace fig
 	public:
 		void AddTerm(const fig::string& text) noexcept;
 		void AddTerms(std::span<const fig::string> texts) noexcept;
+		void Clear() noexcept;
 
 		bool Match(const SearchQuery& query) const noexcept;
 		inline bool IsEmpty() const noexcept { return _index.empty(); }

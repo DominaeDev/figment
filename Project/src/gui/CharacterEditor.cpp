@@ -90,6 +90,8 @@ namespace fig::gui
 
 		bool bOk = SaveTabs();
 
+		_character.RebuildSearchIndex();
+
 		if (not bOk)
 		{
 			LogLn("Error occurred while saving character."); //! @todo: User facing error

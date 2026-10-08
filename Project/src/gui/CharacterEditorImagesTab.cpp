@@ -531,10 +531,7 @@ namespace fig::gui
 		for (auto& background : _backgroundWidgets)
 		{
 			if (background.assetId.empty() and not background.data.empty())
-			{
-				auto& asset = assets.CreateAsset(make_asset_type(AssetType::Image, ImageAssetType::Background, background.format), background.data, _characterId);
-				background.assetId = asset.id;
-			}
+				background.assetId = content.CreateBackground(_characterId, background.format, background.data);
 		}
 
 		// Update cover

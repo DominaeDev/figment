@@ -45,7 +45,8 @@ namespace fig::io
 		SmallPortrait		= 0x03,
 		LargePortrait		= 0x04,
 		Background			= 0x05,
-		Expression			= 0x10, //! @todo: expressions?
+		Thumbnail			= 0x06,
+		Expression			= 0x10, //! @todo?
 	};
 
 	enum class ChatAssetType : uint8_t

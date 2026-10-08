@@ -348,7 +348,7 @@ namespace fig::gui
 						if constexpr (Debugging) //! @temp
 						{
 							auto pChatScreen = ChangeScreen<ChatScreen>();
-							auto characterId = fig::uuid::from_str("f00e36d3-42f2-4a86-b844-a5fc389a41da");
+							auto characterId = fig::uuid::from_str("22cebd74-1db5-40ff-95a7-23228d5f0c68");
 							if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(characterId))
 							{
 								pChatScreen->GetSidePanel()->SetImage((*try_portrait).id);
@@ -359,7 +359,7 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{
-						auto characterId = fig::uuid::from_str("e66008f6-f3b8-4099-a50d-1cc284ecd008");
+						auto characterId = fig::uuid::from_str("22cebd74-1db5-40ff-95a7-23228d5f0c68");
 						auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
 						if (not pEditor->Initialize(characterId))
 						{

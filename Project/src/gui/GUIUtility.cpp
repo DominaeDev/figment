@@ -288,6 +288,20 @@ namespace fig
 		return fig::sdl::Surface::from_ptr(pSurface);
 	}
 
+	fig::sdl::Surface CreateThumbnail(const fig::sdl::Surface& surface, int32_t width, int32_t height)
+	{
+		auto pSurface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGB24);
+		if (not (bool)pSurface)
+			return {};
+
+		// Fill black
+		SDL_FillSurfaceRect(pSurface, NULL, SDL_MapRGB(SDL_GetPixelFormatDetails(pSurface->format), NULL, 0xFF, 0xFF, 0xFF));
+
+		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->h, ImageFit::Outside, true);
+		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
+		return fig::sdl::Surface::from_ptr(pSurface);
+	}
+
 	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface)
 	{
 		auto pSurface = SDL_CreateSurface(Constants::GUI::ProfileImageWidth, Constants::GUI::ProfileImageWidth, SDL_PIXELFORMAT_RGBA8888);

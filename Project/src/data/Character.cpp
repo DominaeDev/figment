@@ -226,7 +226,6 @@ namespace fig::data
 	void Character::AppendTags(const fig::string_list& tags)
 	{
 		_tags.append_range(tags);
-		_searchIndex.AddTerms(tags);
 		_bDirtyContext = true;
 	}
 
@@ -285,5 +284,19 @@ namespace fig::data
 	void Character::ClearRules() noexcept
 	{
 		_rules.clear();
+	}
+
+	void Character::RebuildSearchIndex()
+	{
+		_searchIndex.Clear();
+		if (gender.IsConventional())
+			_searchIndex.AddTerm(gender.GetLabel());
+
+		_searchIndex.AddTerm(name.GetSpokenName());
+		_searchIndex.AddTerm(name.GetFullName());
+		for (auto& attribute : _attributes)
+			_searchIndex.AddTerm(attribute.value);
+		_searchIndex.AddTerm(creator);
+		_searchIndex.AddTerms(_tags);
 	}
 }

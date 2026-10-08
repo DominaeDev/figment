@@ -20,8 +20,8 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
-//			FlushBrokenAssets();
 //			ImportTestCharacters("./import/characters");
+//			FlushBrokenAssets();
 //			EraseChats();
 //			CreateModelSettings();
 //			ShuffleCards();

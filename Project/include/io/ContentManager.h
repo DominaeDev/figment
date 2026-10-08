@@ -128,6 +128,9 @@ namespace fig::io
 		fig::optional_cref<Asset> ReplaceCoverImage(const fig::uuid& characterId, const fig::uuid& originalAssetId);
 		fig::optional_cref<Asset> ReplaceSmallPortrait(const fig::uuid& characterId, const fig::sdl::Surface& image, const fig::uuid& originalAssetId);
 		
+		fig::uuid CreateLargePortrait(const fig::uuid& characterId, DataFormat format, fig::byte_span imageData);
+		fig::uuid CreateBackground(const fig::uuid& characterId, DataFormat format, fig::byte_span imageData);
+		
 		void AssignOrder(const std::vector<fig::uuid>& assetIds);
 
 	protected:

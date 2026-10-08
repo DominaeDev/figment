@@ -98,6 +98,7 @@ namespace fig
 	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha);
 	fig::sdl::Surface CreateSquarePortrait(const fig::sdl::Surface& surface);
 	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface);
+	fig::sdl::Surface CreateThumbnail(const fig::sdl::Surface& surface, int32_t width, int32_t height);
 	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, fig::surface_ptr pSurface);
 	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, const fig::sdl::Surface& surface);
 	fig::sdl::Surface CreateSurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data);

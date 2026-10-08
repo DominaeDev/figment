@@ -52,6 +52,8 @@ namespace fig::data
 		fig::string GetFullName() const noexcept { return name.GetFullName(); }
 		fig::string GetDescription() const noexcept;
 
+		void RebuildSearchIndex();
+
 	public:
 		fig::string chatId;	//! @remove?
 		CharacterName name;

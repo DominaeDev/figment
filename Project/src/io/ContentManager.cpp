@@ -643,7 +643,7 @@ namespace fig::io
 				if (auto cover = fig::CreateCoverImage(*try_surface, false); not cover.empty())
 				{
 					// Create new cover asset
-					auto& coverAsset = _pAssetMngr->CreateImageAsset(ImageAssetType::CoverImage, cover, characterId);
+					auto& coverAsset = _pAssetMngr->CreateBitmapAsset(ImageAssetType::CoverImage, cover, characterId);
 
 					_pAssetMngr->ModifyAsset(coverAsset, [&originalAssetId](auto&& asset) {
 						asset.SetMeta(MetaTag::ReferenceToOriginal, originalAssetId);
@@ -672,7 +672,7 @@ namespace fig::io
 		if (not image.empty())
 		{
 			// Create new small portrait asset
-			auto& smallPortraitAsset = _pAssetMngr->CreateImageAsset(ImageAssetType::SmallPortrait, image, characterId);
+			auto& smallPortraitAsset = _pAssetMngr->CreateBitmapAsset(ImageAssetType::SmallPortrait, image, characterId);
 
 			if (not originalAssetId.empty())
 			{
@@ -687,6 +687,32 @@ namespace fig::io
 			return smallPortraitAsset;
 		}
 		return std::nullopt;
+	}
+
+	fig::uuid UserContentManager::CreateLargePortrait(const fig::uuid& characterId, DataFormat format, fig::byte_span imageData)
+	{
+		auto& asset = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait, format), imageData, characterId);
+		
+		// Create thumbnail
+		if (auto image = LoadImageFromMemory(imageData))
+		{
+			if (auto thumbnailImage = CreateThumbnail(image.value(), Constants::Data::PortraitThumbnailWidth, Constants::Data::PortraitThumbnailHeight))
+				_pAssetMngr->CreateBitmapAsset(ImageAssetType::Thumbnail, thumbnailImage, asset.id);
+		}
+		return asset.id;
+	}
+
+	fig::uuid UserContentManager::CreateBackground(const fig::uuid& characterId, DataFormat format, fig::byte_span imageData)
+	{
+		auto& asset = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Image, ImageAssetType::Background, format), imageData, characterId);
+		
+		// Create thumbnail
+		if (auto image = LoadImageFromMemory(imageData))
+		{
+			if (auto thumbnailImage = CreateThumbnail(image.value(), Constants::Data::BackgroundThumbnailWidth, Constants::Data::BackgroundThumbnailHeight))
+				_pAssetMngr->CreateBitmapAsset(ImageAssetType::Thumbnail, thumbnailImage, asset.id);
+		}
+		return asset.id;
 	}
 
 	void UserContentManager::AssignOrder(const std::vector<fig::uuid>& assetIds)

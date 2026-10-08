@@ -95,12 +95,7 @@ namespace fig::io
 				}
 			}
 
-			if (character.gender.IsConventional())
-				character.AddSearchTerm(character.gender.GetLabel());
-
-			character.AddSearchTerm(character.name.GetFullName());
-			character.AddSearchTerm(card.data.persona);
-			character.AddSearchTerm(card.data.personality);
+			character.RebuildSearchIndex();
 
 			return character;
 		}

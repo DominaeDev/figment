@@ -52,6 +52,13 @@ namespace fig::gui
 	void SearchBox::OnClicked()
 	{
 		if (_bHasText)
+		{
 			Clear();
+			_bHasText = false;
+			_pCross->SetVisible(false);
+
+			if (_fnOnChanged)
+				_fnOnChanged(_text);
+		}
 	}
 }

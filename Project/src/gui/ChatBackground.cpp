@@ -151,8 +151,6 @@ namespace fig::gui
 
 		auto pSurface = _processedSurface.get();
 
-		DEBUG_MEASURE_BEGIN("Blur");
-
 		// Rescale image
 		constexpr int32_t MaxSize = 768;
 		fig::point size { _surface->w, _surface->h };
@@ -179,7 +177,6 @@ namespace fig::gui
 			std::memcpy(pixels, new_pixels.data(), length);
 			SDL_UnlockSurface(pSurface);
 		}
-		DEBUG_MEASURE_END();
 	}
 
 	void ChatBackground::Saturate()

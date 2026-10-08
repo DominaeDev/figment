@@ -103,6 +103,11 @@ namespace fig
 		return true;
 	}
 
+	void SearchIndex::Clear() noexcept
+	{
+		_index.clear();
+	}
+
 	fig::string SearchIndex::Serialize() const noexcept
 	{
 		fig::string result;
