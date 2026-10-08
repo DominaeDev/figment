@@ -2,8 +2,7 @@
 	<Package id="eda3584f-a78f-4b7c-83dd-8f28fab23ea1" type="tts_server">
 		<Name>Text-to-speech module</Name>
 		<Description>
-			Adds voice features via audio.cpp, a locally running TTS server.
-			Nvidia driver 580 or newer is required.
+			Adds voice features via audio.cpp, a locally running TTS server.\nNvidia driver 580 or newer is required.
 		</Description>
 		<Version>0.6.1</Version>
 		<VersionString>Version 0.6.1 (Nvidia CUDA)</VersionString>

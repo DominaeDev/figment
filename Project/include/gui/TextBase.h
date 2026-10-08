@@ -15,7 +15,7 @@ namespace fig::gui
 		void SetFont(FontFace fontFace, double ptSize) noexcept;
 		void SetTextWrapWidth(int32_t width);
 
-		fig::string_view GetText() const noexcept { return _text; }
+		[[nodiscard]] fig::string_view GetText() const noexcept { return _text; }
 		fig::font_ptr GetFont() const { return _pFont.get(); }
 		int32_t GetTextWrapWidth() const noexcept;
 

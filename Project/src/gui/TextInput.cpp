@@ -2165,33 +2165,12 @@ namespace fig::gui
 
 				auto pos_start = std::max(line.position, start) - line.position;
 				auto pos_end = std::min(line.position + line.length, end) - line.position;
-				int32_t minX = std::numeric_limits<int32_t>::max();
-				int32_t maxX = std::numeric_limits<int32_t>::min();
 				int32_t remainingLength = pos_end - pos_start;
 
-				for (auto& run : line.runs)
-				{
-					if (run.ttf_text.empty())
-						continue;
+				int32_t minX = GetPixelsToLineOffset(line, pos_start);
+				int32_t maxX = GetPixelsToLineOffset(line, pos_end);
 
-					if (run.byteOffset > pos_end or run.byteOffset + run.length < pos_start)
-						continue;
-
-					int32_t start = std::max(pos_start - run.byteOffset, 0);
-					int32_t length = std::min(remainingLength, run.length - start);
-					remainingLength -= length;
-					if (TTF_SubString** pHighlights = TTF_GetTextSubStringsForRange(run.ttf_text.get(), start, length, NULL))
-					{
-						for (int i = 0; pHighlights[i]; ++i)
-						{
-							auto& rect = pHighlights[i]->rect;
-							minX = std::min(minX, rect.x + run.offsetX);
-							maxX = std::max(maxX, rect.x + run.offsetX + rect.w);
-						}
-					}
-				}
-
-				if (minX < std::numeric_limits<int32_t>::max() and maxX > std::numeric_limits<int32_t>::min())
+				if (minX < maxX)
 				{
 					fig::rect highlight_rect {};
 					highlight_rect.x = minX;

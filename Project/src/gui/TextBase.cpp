@@ -214,8 +214,10 @@ namespace fig::gui
 		{
 			int32_t byteOffset = 0;
 			int32_t offsetX = 0;
-			for (const auto& style : StyleLine(line))
+			auto styles = StyleLine(line);
+			for (size_t i = 0uz; i < styles.size(); ++i)
 			{
+				auto& style = styles[i];
 				StyledTextRun run {
 					.ttf_text = fig::sdl::Text(_pTextEngine, _pFont, _text.data() + style.position, style.length),
 					.position = style.position,
@@ -228,9 +230,12 @@ namespace fig::gui
 
 				TTF_SetTextWrapWhitespaceVisible(run.ttf_text.get(), true);
 
-				int32_t w;
-				TTF_GetTextSize(run.ttf_text.get(), &w, NULL);
-				offsetX += w;
+				if (i < styles.size() - 1uz)
+				{
+					int32_t w;
+					TTF_GetTextSize(run.ttf_text.get(), &w, NULL);
+					offsetX += w;
+				}
 
 				line.runs.push_back(std::move(run));
 			}
