@@ -8,6 +8,7 @@
 #include "gui/ResizeHandle.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/CharacterDetailsPanel.h"
+#include "gui/ImageCarousel.h"
 #include "chat/ChatSession.h"
 #include "io/ContentManager.h"
 
@@ -37,6 +38,10 @@ namespace fig::gui
 		_pViewport = _pExpandedRoot->CreateControl<ResizeableImageViewport>();
 		_pViewport->SetResizedDelegate([](fig::coord size) { Global::GetUserSettings().SetInt(UserSetting::Interface::Chat::ImageSize, size); });
 		_pViewport->SetHeight(Constants::GUI::InfoPanel::DefaultImageSize);
+
+		_pImageCarousel = _pViewport->CreateControl<ImageCarousel>(50, 64);
+		_pImageCarousel->SetSize(_pViewport->GetWidth(), 100);
+		_pImageCarousel->SetDelegate([this](fig::uuid assetId) { SetImage(assetId); });
 
 		_pCharacterDetails = _pExpandedRoot->CreateControl<CharacterDetailsPanel>();
 		
@@ -184,20 +189,45 @@ namespace fig::gui
 	void InfoPanel::OnAfterLayout()
 	{
 		constexpr fig::coord kGradientSize = 8;
-		_pGradient->SetSize(kGradientSize, GetHeight());
+		if (_pGradient)
+			_pGradient->SetSize(kGradientSize, GetHeight());
+
+		if (_pImageCarousel)
+		{
+			_pImageCarousel->SetWidth(_pViewport->GetWidth());
+			_pImageCarousel->SetHeight(std::max(_pViewport->GetHeight() / 2, 100));
+			_pImageCarousel->SetY(_pViewport->GetHeight() - _pImageCarousel->GetHeight());
+			_pImageCarousel->ShutUp();
+		}
+
 	}
 
 	void InfoPanel::SetSession(const ChatSession& session)
 	{
 		auto botId = session.GetCharacterIdOf(Role::Bot1);
-		if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(botId))
+		SetCharacter(botId);
+	}
+
+	void InfoPanel::SetCharacter(const fig::uuid& characterId)
+	{
+		if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(characterId))
 			SetImage((*try_portrait).id);
 		else
 			ClearImage();
 
-		if (auto try_character = Global::GetUserContent().Get<Character>(botId))
+		if (auto try_character = Global::GetUserContent().Get<Character>(characterId))
 		{
 			_pCharacterDetails->SetCharacter(*try_character);
+			_pImageCarousel->LoadCharacterPortraits(characterId);
+		}
+	}
+
+	void InfoPanel::OnUpdate(float fElapsed)
+	{
+		if (_pViewport and _pViewport->IsTransforming())
+		{
+			if (_pImageCarousel)
+				_pImageCarousel->ShutUp();
 		}
 	}
 }

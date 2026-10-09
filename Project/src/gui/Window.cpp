@@ -23,6 +23,10 @@ namespace fig::gui
 			SDL_Log("Couldn't create renderer: %s", SDL_GetError());
 			throw std::runtime_error("Couldn't create renderer");
 		}
+		else
+		{
+			LogLn(std::format("Created '{}' renderer", SDL_GetRendererName(_renderer.get())));
+		}
 
 		_textEngine = fig::sdl::TextEngine(_renderer.get());
 		if (!_textEngine)

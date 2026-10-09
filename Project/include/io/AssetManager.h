@@ -1,8 +1,9 @@
 #pragma once
 
 #include "io/Asset.h"
-#include "user/Security.h"
+#include "io/AsyncIO.h"
 #include "io/IndexDatabase.h"
+#include "user/Security.h"
 #include <mutex>
 #include <future>
 
@@ -19,30 +20,6 @@ namespace fig::data
 
 namespace fig::io
 {
-	using AsyncResult_Image		= fig::sdl::Surface;
-	using AsyncResult_CoverPair	= std::pair<fig::sdl::Surface, fig::sdl::Surface>;
-	using AsyncResultVariant = std::variant<AsyncResult_Image, AsyncResult_CoverPair>;
-	using AsyncResult = std::shared_ptr<AsyncResultVariant>;
-
-	using AsyncPromise = std::promise<std::expected<AsyncResult, AsyncLoadError>>;
-	using AsyncFuture = std::future<std::expected<AsyncResult, AsyncLoadError>>;
-
-	template <typename T>
-	std::expected<std::shared_ptr<T>, AsyncLoadError> GetAsyncResult(AsyncFuture& future)
-	{
-		if (future.valid() and future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
-		{
-			if (auto result = future.get(); result.has_value())
-			{
-				if (auto pValue = std::get_if<T>((*result).get()))
-					return std::shared_ptr<T>(*result, pValue);
-			}
-			else
-				return std::unexpected(result.error());
-		}
-		return std::unexpected(AsyncLoadError::NoError); // No result yet
-	}
-
 	enum class AsyncTask {
 		None,
 		LoadImage,

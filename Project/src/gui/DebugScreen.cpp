@@ -12,6 +12,7 @@
 #include "gui/HorizontalBar.h"
 #include "gui/VerticalBar.h"
 #include "gui/DefaultTextStyleProvider.h"
+#include "gui/ImageCarousel.h"
 
 namespace fig::gui
 {
@@ -196,6 +197,15 @@ namespace fig::gui
 		pStaticText3->EnableDropShadow(true);
 		pStaticText3->SetAlignment(TextAlignment::RightBottom);
 		pStaticText3->SetText("This is the story all about how\nmy life got twisted, turned upside down.");
+
+		_pCarousel = CreateControl<ImageCarousel>(50, 64);
+		_pCarousel->SetPosition(500, 500);
+		_pCarousel->SetSize(320, 120);
+	}
+
+	void DebugScreen::OnActivated()
+	{
+		_pCarousel->LoadCharacterPortraits(fig::uuid::from_str("c44fe884-073e-4e6e-991c-0f8f875891de"));
 
 	}
 

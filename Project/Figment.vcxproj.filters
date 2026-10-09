@@ -857,6 +857,9 @@
     <ClCompile Include="src\gui\ITextStyleProvider.cpp">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ImageCarousel.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1938,6 +1941,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\DefaultTextStyleProvider.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ImageCarousel.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AsyncIO.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

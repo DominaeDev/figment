@@ -74,5 +74,6 @@ namespace fig::gui
 	};
 
 	extern fig::color_ref custom_color(const fig::color& color);
+	extern fig::color_ref_with_alpha opacity(float fAlpha);
 
 }

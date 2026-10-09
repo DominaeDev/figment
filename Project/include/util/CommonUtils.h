@@ -412,4 +412,23 @@ namespace fig
 			| std::ranges::views::filter([](char c) { return c != '-'; })
 			| std::ranges::to<fig::string>());
 	}
+
+	inline float& step_alpha(float& fAlpha, float fTargetAlpha, float fDelta)
+	{
+		constexpr float kThreshold = 0.02f;
+		if (not flt_eq(fAlpha, fTargetAlpha))
+		{
+			if (fTargetAlpha > fAlpha)
+			{
+				if (fAlpha = fAlpha + (fTargetAlpha - fAlpha) * fDelta; fAlpha > fTargetAlpha - kThreshold)
+					fAlpha = fTargetAlpha;
+			}
+			else if (fTargetAlpha < fAlpha)
+			{
+				if (fAlpha = fAlpha + (fTargetAlpha - fAlpha) * fDelta; fAlpha < fTargetAlpha + kThreshold)
+					fAlpha = fTargetAlpha;
+			}
+		}
+		return fAlpha;
+	}
 }

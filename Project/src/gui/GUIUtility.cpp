@@ -297,7 +297,7 @@ namespace fig
 		// Fill black
 		SDL_FillSurfaceRect(pSurface, NULL, SDL_MapRGB(SDL_GetPixelFormatDetails(pSurface->format), NULL, 0xFF, 0xFF, 0xFF));
 
-		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->h, ImageFit::Outside, true);
+		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->h, width > height ? ImageFit::Outside : ImageFit::Portrait, true);
 		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
 		return fig::sdl::Surface::from_ptr(pSurface);
 	}

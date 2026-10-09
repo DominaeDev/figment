@@ -521,10 +521,7 @@ namespace fig::gui
 		for (auto& portrait : _portraitWidgets)
 		{
 			if (portrait.assetId.empty() and not portrait.data.empty())
-			{
-				auto& asset = assets.CreateAsset(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait, portrait.format), portrait.data, _characterId);
-				portrait.assetId = asset.id;
-			}
+				portrait.assetId = content.CreateLargePortrait(_characterId, portrait.format, portrait.data);
 		}
 
 		// Write new backgrounds

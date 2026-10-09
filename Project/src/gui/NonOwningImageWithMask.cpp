@@ -24,7 +24,7 @@ namespace fig::gui
 		if (bgColor && bgColor.a() != 0)
 			DrawBackground(pRenderer);
 
-		if (auto pTexture = _targetTexture.get())
+		if (auto pTexture = _targetTexture.get(); pTexture and fgColor.a() > 0)
 		{
 			auto rect = GetDrawRect();
 
@@ -33,20 +33,24 @@ namespace fig::gui
 			else
 				SDL_SetTextureColorMod(pTexture, 0xFF, 0xFF, 0xFF);
 
-			if (fgColor.IsDefined() && fgColor.a() != 0)
-				SDL_SetTextureAlphaMod(pTexture, fgColor.a());
-			else
-				SDL_SetTextureAlphaMod(pTexture, 0xFF);
-
+			SDL_SetTextureAlphaMod(pTexture, fgColor.a());
 			SDL_RenderTexture(pRenderer, pTexture, NULL, &rect);
 		}
+	}
+
+	void NonOwningImageWithMask::SetTexture(fig::texture_ptr pTexture, bool bResize)
+	{
+		_pTexture = pTexture;
+		if (bResize and pTexture)
+			SetSize(pTexture->w, pTexture->h);
+		SetDirty();
 	}
 
 	void NonOwningImageWithMask::SetTexture(fig::texture_ptr pTexture, fig::texture_ptr pMask, bool bResize)
 	{
 		_pTexture = pTexture;
 		_pMask = pMask;
-		if (bResize)
+		if (bResize and pTexture)
 			SetSize(pTexture->w, pTexture->h);
 		SetDirty();
 	}

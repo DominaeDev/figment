@@ -327,7 +327,8 @@ namespace fig::gui
 	void ImageViewport::ResetTransform()
 	{
 		_fZoom = 1.0f;
-		_offset = {};
+		_offset = {0, -_imageSize.y };
+		ClampOffset();
 		SetDirty();
 	}
 

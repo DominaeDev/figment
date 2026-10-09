@@ -91,7 +91,11 @@ namespace fig::gui
 		if (event.type == SDL_EVENT_MOUSE_MOTION)
 		{
 			auto motionEvent = event.motion;
-			if (is_inside(rect, toI(motionEvent.x), toI(motionEvent.y), _expand))
+			int32_t mx = toI(motionEvent.x);
+			int32_t my = toI(motionEvent.y);
+			fig::point mpos { mx, my };
+
+			if (is_inside(rect, mx, my, _expand))
 			{
 				if (not _bMouseInside and _state != ButtonState::Pressed)
 				{
@@ -115,6 +119,8 @@ namespace fig::gui
 					OnMouseExit();
 				}
 			}
+
+			OnMouseMotion(mpos);
 			return EventResult::Continue;
 		}
 
@@ -152,6 +158,7 @@ namespace fig::gui
 
 					SetButtonState(mouseEvent.down ? ButtonState::Pressed : ButtonState::Default);
 					_bMouseLeftDown = mouseEvent.down;
+					_lastLeftDownPos = mpos;
 					_bMouseInside = false;
 
 					if (_bMouseLeftDown)
@@ -182,6 +189,7 @@ namespace fig::gui
 					}
 
 					_bMouseRightDown = mouseEvent.down;
+					_lastRightDownPos = mpos;
 					_bMouseInside = false;
 
 					if (_bMouseRightDown)

@@ -17,6 +17,7 @@ namespace fig::gui
 	class HorisontalLine;
 	class Image;
 	class ImageWithMask;
+	class ImageCarousel;
 	class NineGridImage;
 	class NonOwningImageWithMask;
 	class Menu;

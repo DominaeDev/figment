@@ -118,20 +118,6 @@ namespace fig::gui
 		}
 	}
 
-	static std::map<uint32_t, fig::color> _CustomColors {};
-	
-	fig::color_ref custom_color(const fig::color& color)
-	{
-		auto& c = _CustomColors[static_cast<uint32_t>(color)] = color;
-
-		if constexpr (Debugging and Disabled)
-		{
-			c = DebugColor;
-		}
-
-		return fig::color_ref(&c);
-	}
-
 	void AppColors::Update(float fElapsed) noexcept
 	{
 		if (not _state.isTransitioning)
@@ -147,5 +133,24 @@ namespace fig::gui
 
 		for (size_t i = 0uz; i < _state.colorTable.size(); ++i)
 			_state.colorTable[i] = _state.fromTable[i].Blend(_state.toTable[i], _state.transitionTimer * _state.transitionTimer);
+	}
+
+	static std::map<uint32_t, fig::color> _CustomColors {};
+	
+	fig::color_ref custom_color(const fig::color& color)
+	{
+		auto& c = _CustomColors[static_cast<uint32_t>(color)] = color;
+
+		if constexpr (Debugging and Disabled)
+		{
+			c = DebugColor;
+		}
+
+		return fig::color_ref(&c);
+	}
+
+	fig::color_ref_with_alpha opacity(float fAlpha)
+	{
+		return custom_color(0xFFFFFF_rgb).WithAlpha(fAlpha);
 	}
 }

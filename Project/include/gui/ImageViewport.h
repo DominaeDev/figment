@@ -14,6 +14,7 @@ namespace fig::gui
 		void SetMask(fig::texture_ptr pTexture) noexcept;
 
 		void ResetTransform();
+		bool IsTransforming() const noexcept { return _bMouseDown; }
 
 		fig::texture_ptr GetTargetTexture() noexcept { return _targetTexture.get(); }
 

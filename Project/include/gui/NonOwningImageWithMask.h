@@ -9,6 +9,7 @@ namespace fig::gui
 	public:
 		NonOwningImageWithMask(ControlPtr pParent, fig::texture_ptr pTexture = nullptr, fig::texture_ptr pMask = nullptr);
 
+		void SetTexture(fig::texture_ptr pTexture, bool bResize = false);
 		void SetTexture(fig::texture_ptr pTexture, fig::texture_ptr pMask, bool bResize = false);
 		bool HasTexture() const noexcept { return _pTexture != nullptr; }
 		void SetDirty();

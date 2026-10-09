@@ -243,11 +243,11 @@ namespace fig::Constants
 		constexpr int32_t SmallPortraitWidth = 128;
 		constexpr int32_t SmallPortraitHeight = 128;
 		
-		constexpr int32_t PortraitThumbnailWidth = 60;
-		constexpr int32_t PortraitThumbnailHeight = 80;
+		constexpr int32_t PortraitThumbnailWidth = 100;
+		constexpr int32_t PortraitThumbnailHeight = 128;
 
-		constexpr int32_t BackgroundThumbnailWidth = 80;
-		constexpr int32_t BackgroundThumbnailHeight = 50;
+		constexpr int32_t LandscapeThumbnailWidth = 128;
+		constexpr int32_t LandscapeThumbnailHeight = 100;
 	}
 
 	namespace TTS

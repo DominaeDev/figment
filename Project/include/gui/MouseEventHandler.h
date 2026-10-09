@@ -36,13 +36,14 @@ namespace fig::gui
 		virtual void OnButtonState() {}
 		virtual void OnMouseEnter() {}
 		virtual void OnMouseExit() {}
+		virtual void OnMouseMotion(fig::point pos) {}
 		virtual void OnButtonDown(int32_t button) {}
 		virtual void OnButtonUp(int32_t button) {}
 		virtual void OnClicked() {}
-		virtual void OnDoubleClicked() {}
-		virtual void OnRightClicked() {}
 		virtual void OnClickedAt(fig::point pos) {}
+		virtual void OnDoubleClicked() {}
 		virtual void OnDoubleClickedAt(fig::point pos) {}
+		virtual void OnRightClicked() {}
 		virtual void OnRightClickedAt(fig::point pos) {}
 
 	protected:
@@ -55,15 +56,18 @@ namespace fig::gui
 		} _state {};
 		void SetButtonState(ButtonState state);
 
+		fig::point _lastLeftDownPos {};
+		fig::point _lastRightDownPos {};
+		fig::point _lastClick {};
+		bool _bMouseLeftDown = false;
+		bool _bMouseRightDown = false;
+
 	private:
 		ControlPtr _pOwner {};
 		bool _bMouseInside = false;
-		bool _bMouseLeftDown = false;
-		bool _bMouseRightDown = false;
 		bool _bEnabled = true;
 		fig::rect _region {};
 		fig::coord _expand = 0;
-		fig::point _lastClick {};
 
 		MouseClickedDelegate _fnLeftClicked {};
 		MouseClickedDelegate _fnLeftDoubleClicked {};

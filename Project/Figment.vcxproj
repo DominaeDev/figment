@@ -192,6 +192,7 @@
     <ClCompile Include="src\gui\ColorTheme.cpp" />
     <ClCompile Include="src\gui\DialogBox.cpp" />
     <ClCompile Include="src\gui\HorizontalBar.cpp" />
+    <ClCompile Include="src\gui\ImageCarousel.cpp" />
     <ClCompile Include="src\gui\IMeshControl.cpp" />
     <ClCompile Include="src\gui\CharacterAttributeWidget.cpp" />
     <ClCompile Include="src\gui\CharacterBackgroundWidget.cpp" />
@@ -521,6 +522,7 @@
     <ClInclude Include="include\gui\DialogBox.h" />
     <ClInclude Include="include\gui\ControlDefs.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
+    <ClInclude Include="include\gui\ImageCarousel.h" />
     <ClInclude Include="include\gui\IMeshControl.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\CharacterAttributeWidget.h" />
@@ -621,6 +623,7 @@
     <ClInclude Include="include\io\AssetTypeDefinition.h" />
     <ClInclude Include="include\io\AsyncDownloader.h" />
     <ClInclude Include="include\io\AsyncImageLoad.h" />
+    <ClInclude Include="include\io\AsyncIO.h" />
     <ClInclude Include="include\io\CsvFile.h" />
     <ClInclude Include="include\io\Downloader.h" />
     <ClInclude Include="include\io\IndexDatabase.h" />

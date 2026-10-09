@@ -11,9 +11,13 @@ namespace fig::gui
 		DebugScreen(Frame* pParent);
 
 	protected:
+		void OnActivated() override;
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
+
+	private:
+		fig::observer_ptr<class ImageCarousel> _pCarousel;
 	};
 
 	template <>

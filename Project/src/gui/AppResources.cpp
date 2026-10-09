@@ -161,6 +161,8 @@ namespace fig
 		LoadTexture(pRenderer, Resource::MASK_CIRCLE, "./resources/gui/masks/mask_circle256.png");
 		LoadTexture(pRenderer, Resource::MASK_SMALL_PORTRAIT_48PX, "./resources/gui/masks/mask_small_portrait_48px.png");
 		LoadTexture(pRenderer, Resource::MASK_SMALL_PORTRAIT_56PX, "./resources/gui/masks/mask_small_portrait_56px.png");
+		LoadTexture(pRenderer, Resource::MASK_THUMBNAIL_PORTRAIT, "./resources/gui/masks/mask_thumbnail_portrait.png");
+		LoadTexture(pRenderer, Resource::MASK_THUMBNAIL_LANDSCAPE, "./resources/gui/masks/mask_thumbnail_landscape.png");
 		
 		LoadTexture(pRenderer, Resource::MASK_GRADIENT_EASE_IN_CUBIC_LEFT, "./resources/gui/masks/mask_gradient_ease_in_cubic_l.png");
 		LoadTexture(pRenderer, Resource::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT, "./resources/gui/masks/mask_gradient_ease_in_cubic_r.png");

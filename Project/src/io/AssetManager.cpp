@@ -861,7 +861,7 @@ namespace fig::io
 					// Create thumbnail
 					if (auto thumbnailImage = CreateThumbnail(*try_image, Constants::Data::PortraitThumbnailWidth, Constants::Data::PortraitThumbnailHeight))
 					{
-						auto& thumbnailAsset = CreateBitmapAsset_NoLock(ImageAssetType::Thumbnail, thumbnailImage, characterAsset.id);
+						auto& thumbnailAsset = CreateBitmapAsset_NoLock(ImageAssetType::Thumbnail, thumbnailImage, portraitAsset.id);
 						thumbnailAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
 					}
 				}

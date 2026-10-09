@@ -709,7 +709,7 @@ namespace fig::io
 		// Create thumbnail
 		if (auto image = LoadImageFromMemory(imageData))
 		{
-			if (auto thumbnailImage = CreateThumbnail(image.value(), Constants::Data::BackgroundThumbnailWidth, Constants::Data::BackgroundThumbnailHeight))
+			if (auto thumbnailImage = CreateThumbnail(image.value(), Constants::Data::LandscapeThumbnailWidth, Constants::Data::LandscapeThumbnailHeight))
 				_pAssetMngr->CreateBitmapAsset(ImageAssetType::Thumbnail, thumbnailImage, asset.id);
 		}
 		return asset.id;
