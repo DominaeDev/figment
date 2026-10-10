@@ -6,6 +6,7 @@
 #include "gui/Menu.h"
 #include "gui/ToggleWithIcon.h"
 #include "gui/TexturedBorder.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/TopBar.h"
 #include "app/AppState.h"

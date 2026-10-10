@@ -231,21 +231,19 @@ namespace fig::Constants
 
 	namespace CharacterAttributes
 	{
-		inline const fig::handle Age = "age";
-		inline const fig::handle Appearance = "appearance";
-		inline const fig::handle Background = "background";
 		inline const fig::handle Persona = "persona";
 		inline const fig::handle Personality = "personality";
+		inline const fig::handle Background = "background";
+		inline const fig::handle Appearance = "appearance";
+		inline const fig::handle Age = "age";
 	}
 
 	namespace Data
 	{
 		constexpr int32_t SmallPortraitWidth = 128;
 		constexpr int32_t SmallPortraitHeight = 128;
-		
 		constexpr int32_t PortraitThumbnailWidth = 100;
 		constexpr int32_t PortraitThumbnailHeight = 128;
-
 		constexpr int32_t LandscapeThumbnailWidth = 128;
 		constexpr int32_t LandscapeThumbnailHeight = 100;
 	}

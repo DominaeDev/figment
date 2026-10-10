@@ -7,6 +7,7 @@
 #include "gui/ResizeableImageViewport.h"
 #include "gui/ResizeHandle.h"
 #include "gui/TexturedBorderRenderer.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/CharacterDetailsPanel.h"
 #include "gui/ImageCarousel.h"
 #include "chat/ChatSession.h"

@@ -4,12 +4,13 @@
 
 namespace fig::gui
 {
-	HorizontalGradient::HorizontalGradient(ControlPtr pParent, fig::color_ref_with_alpha colorLeft, fig::color_ref_with_alpha colorRight) : IMeshControl(pParent)
+	HorizontalGradient::HorizontalGradient(ControlPtr pParent, fig::color_ref colorLeft, fig::color_ref colorRight) : IMeshControl(pParent)
 	{
 		SetColors(colorLeft, colorRight);
+		int k = 0;
 	}
 
-	void HorizontalGradient::SetColors(fig::color_ref_with_alpha colorLeft, fig::color_ref_with_alpha colorRight)
+	void HorizontalGradient::SetColors(fig::color_ref colorLeft, fig::color_ref colorRight)
 	{
 		_colorLeft = colorLeft;
 		_colorRight = colorRight;

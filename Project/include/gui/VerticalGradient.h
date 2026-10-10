@@ -7,14 +7,14 @@ namespace fig::gui
 	class VerticalGradient : public IMeshControl
 	{
 	public:
-		VerticalGradient(ControlPtr pParent, fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom);
-		void SetColors(fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom);
+		VerticalGradient(ControlPtr pParent, fig::color_ref colorTop, fig::color_ref colorBottom);
+		void SetColors(fig::color_ref colorTop, fig::color_ref colorBottom);
 
 	protected:
 		void RefreshGeometry(const fig::rectf& rect) override;
 
 	private:
-		fig::color_ref_with_alpha _colorTop {};
-		fig::color_ref_with_alpha _colorBottom {};
+		fig::color_ref _colorTop {};
+		fig::color_ref _colorBottom {};
 	};
 }

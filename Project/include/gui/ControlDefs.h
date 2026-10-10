@@ -35,6 +35,7 @@ namespace fig::gui
 	class TextInput;
 	class TexturedBorder;
 	class ToggleWithIcon;
+	class ThemedButton;
 	class ToggleWithLabel;
 	class VerticalBar;
 	class VerticalGradient;

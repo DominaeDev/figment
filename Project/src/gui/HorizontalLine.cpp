@@ -3,7 +3,7 @@
 
 namespace fig::gui
 {
-	HorizontalLine::HorizontalLine(ControlPtr pParent, fig::color_ref_with_alpha color) : Control(pParent)
+	HorizontalLine::HorizontalLine(ControlPtr pParent, fig::color_ref color) : Control(pParent)
 	{
 		SetForegroundColor(color);
 		SetHeight(16);

@@ -47,8 +47,8 @@ namespace fig::gui
 
 		void SetAlignment(TextAlignment alignment) { _alignment = alignment; }
 
-		void SetForegroundColor(fig::color_ref_with_alpha color) override;
-		void SetBackgroundColor(fig::color_ref_with_alpha color) override;
+		void SetForegroundColor(fig::color_ref color) override;
+		void SetBackgroundColor(fig::color_ref color) override;
 		void EnableDropShadow(bool bEnable) noexcept;
 
 		void EnableEllipsis(bool bEnable) noexcept;
@@ -70,7 +70,7 @@ namespace fig::gui
 		fig::rect GetAlignedRect() const;
 	private:
 		void DrawText(fig::coord& textWidth, fig::coord& textHeight);
-		void DrawText(size_t line_index, fig::renderer_ptr pRenderer, const fig::color_ref_with_alpha& fgColor, const fig::color_ref_with_alpha& bgColor, fig::coord& textWidth, fig::coord& textHeight);
+		void DrawText(size_t line_index, fig::renderer_ptr pRenderer, const fig::color_ref& fgColor, const fig::color_ref& bgColor, fig::coord& textWidth, fig::coord& textHeight);
 		fig::string GetEllipsisText(fig::string_view text) const;
 		void ReleaseTextures();
 		fig::coord GetMaxLineWidth() const noexcept;

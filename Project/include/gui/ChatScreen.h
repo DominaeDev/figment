@@ -52,6 +52,7 @@ namespace fig::gui
 		fig::observer_ptr<VariableList> _pVariableList {};
 		fig::observer_ptr<InfoPanel> _pInfoPanel {};
 		fig::observer_ptr<ChatBackground> _pBackground {};
+		fig::observer_ptr<ButtonWithIcon> _pBackgroundButton {};
 
 		float _fPollingCounter = 0.0f;
 		bool _bStartedChat = false; // Used to trigger greeting

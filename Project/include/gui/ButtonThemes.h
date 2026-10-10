@@ -53,5 +53,13 @@ namespace fig::gui
 			.pressedColor	{ Color::PlayButtonPressedBackground, Color::PlayButtonPressedForeground, Color::Undefined },
 			.disabledColor	{ Color::DisabledButtonBackground, Color::DisabledButtonForeground, Color::Undefined },
 		};
+
+		inline static ButtonTheme OverlayButton =
+		{
+			.defaultColor	{ Color::Transparent, Color::OverlayButtonDefaultForeground, Color::Undefined },
+			.hoverColor		{ Color::Transparent, Color::OverlayButtonHoverForeground, Color::Undefined },
+			.pressedColor	{ Color::Transparent, Color::OverlayButtonPressedForeground, Color::Undefined },
+			.disabledColor	{ Color::Transparent, Color::OverlayButtonDisabledForeground, Color::Undefined },
+		};
 	}
 }

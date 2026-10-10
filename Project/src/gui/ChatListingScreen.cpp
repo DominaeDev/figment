@@ -5,6 +5,7 @@
 #include "gui/SearchBox.h"
 #include "gui/Menu.h"
 #include "gui/TexturedBorderRenderer.h"
+#include "gui/ButtonWithIcon.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 

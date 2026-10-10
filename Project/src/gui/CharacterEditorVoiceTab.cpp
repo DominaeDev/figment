@@ -4,6 +4,7 @@
 #include "gui/TextBox.h"
 #include "gui/AppResources.h"
 #include "gui/GridSizer.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "data/Character.h"
 #include "audio/AudioManager.h"

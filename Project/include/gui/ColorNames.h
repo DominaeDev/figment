@@ -140,6 +140,11 @@ namespace fig::gui
 		PlayButtonPressedForeground,
 		PlayButtonPressedBackground,
 
+		OverlayButtonDefaultForeground,
+		OverlayButtonHoverForeground,
+		OverlayButtonPressedForeground,
+		OverlayButtonDisabledForeground,
+
 		DisabledButtonForeground,
 		DisabledButtonBackground,
 		DisabledButtonBorder,
@@ -270,6 +275,10 @@ namespace fig::gui
 		std::pair { Color::PlayButtonHoverBackground,			"PlayButton.Hover.Background" },
 		std::pair { Color::PlayButtonPressedForeground,			"PlayButton.Pressed.Foreground" },
 		std::pair { Color::PlayButtonPressedBackground,			"PlayButton.Pressed.Background" },
+		std::pair { Color::OverlayButtonDefaultForeground,		"OverlayButton.Default.Foreground" },
+		std::pair { Color::OverlayButtonHoverForeground,		"OverlayButton.Hover.Foreground" },
+		std::pair { Color::OverlayButtonPressedForeground,		"OverlayButton.Pressed.Foreground" },
+		std::pair { Color::OverlayButtonDisabledForeground,		"OverlayButton.Disabled.Foreground" },
 		std::pair { Color::DisabledButtonForeground,			"DisabledButton.Foreground" },
 		std::pair { Color::DisabledButtonBackground,			"DisabledButton.Background" },
 		std::pair { Color::DisabledButtonBorder,				"DisabledButton.Border" },

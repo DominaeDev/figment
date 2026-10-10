@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui/ImageViewport.h"
+#include "gui/MouseEventHandler.h"
 #include "io/AsyncImageLoad.h"
 
 namespace fig::gui

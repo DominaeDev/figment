@@ -11,8 +11,8 @@ namespace fig
 	{
 	}
 
-	color_ref_with_alpha color_ref::WithAlpha(uint8_t alpha) const noexcept
+	color_ref color_ref::WithAlpha(uint8_t alpha) const noexcept
 	{
-		return color_ref_with_alpha(*this, alpha);
+		return color_ref(*this, alpha);
 	}
 }

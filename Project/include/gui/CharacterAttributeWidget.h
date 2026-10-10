@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui/Control.h"
+#include "gui/MouseEventHandler.h"
 #include "data/Character.h"
 
 namespace fig::gui

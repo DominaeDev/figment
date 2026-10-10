@@ -76,14 +76,16 @@ namespace fig::io
 			character.AppendTags(card.data.tags);
 
 			// Check for gender tags
+			auto male_tags = { "male", "man", "boy" };
+			auto female_tags = { "female", "woman", "girl" };
 			for (auto& tag : card.data.tags)
 			{
-				if (equals(tag, "male", true) || equals(tag, "man", true) || equals(tag, "boy", true))
+				if (std::ranges::contains(male_tags, lcase(tag)))
 				{
 					character.gender = Gender::Male;
 					break;
 				}
-				else if (equals(tag, "female", true) || equals(tag, "woman", true) || equals(tag, "girl", true))
+				else if (std::ranges::contains(female_tags, lcase(tag)))
 				{
 					character.gender = Gender::Female;
 					break;

@@ -2,6 +2,7 @@
 #include "gui/SidePanelEditor.h"
 #include "gui/AppResources.h"
 #include "gui/SidePanelButton.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/MainFrame.h"
 #include "gui/EditorScreen.h"
 

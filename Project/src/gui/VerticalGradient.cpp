@@ -4,12 +4,12 @@
 
 namespace fig::gui
 {
-	VerticalGradient::VerticalGradient(ControlPtr pParent, fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom) : IMeshControl(pParent)
+	VerticalGradient::VerticalGradient(ControlPtr pParent, fig::color_ref colorTop, fig::color_ref colorBottom) : IMeshControl(pParent)
 	{
 		SetColors(colorTop, colorBottom);
 	}
 
-	void VerticalGradient::SetColors(fig::color_ref_with_alpha colorTop, fig::color_ref_with_alpha colorBottom)
+	void VerticalGradient::SetColors(fig::color_ref colorTop, fig::color_ref colorBottom)
 	{
 		_colorTop = colorTop;
 		_colorBottom = colorBottom;

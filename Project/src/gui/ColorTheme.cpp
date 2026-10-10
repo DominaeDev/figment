@@ -7,7 +7,7 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	static constexpr fig::color MissingColor { 0xFE0000FE_rgba };
+	static constexpr fig::color MissingColor { 0xFE00FEFE_rgba };
 	static constexpr fig::color DebugColor { 0xC000C0_rgb };
 	static constexpr float TransitionDuration = 0.35f;
 
@@ -149,7 +149,7 @@ namespace fig::gui
 		return fig::color_ref(&c);
 	}
 
-	fig::color_ref_with_alpha opacity(float fAlpha)
+	fig::color_ref opacity(float fAlpha)
 	{
 		return custom_color(0xFFFFFF_rgb).WithAlpha(fAlpha);
 	}

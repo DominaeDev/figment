@@ -22,7 +22,7 @@ namespace fig::gui
 		SetColor(Color::Black);
 	}
 
-	void BehindChat::SetColor(fig::color_ref_with_alpha color)
+	void BehindChat::SetColor(fig::color_ref color)
 	{
 		SetBackgroundColor(color);
 

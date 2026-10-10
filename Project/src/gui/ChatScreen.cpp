@@ -11,6 +11,7 @@
 #include "gui/VariableList.h"
 #include "gui/InfoPanel.h"
 #include "gui/ChatBackground.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/Slider.h"
 #include "gui/BehindChat.h"
 #include "app/AppState.h"
@@ -58,6 +59,10 @@ namespace fig::gui
 		_pTextBox->EnableAutoSize(true);
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);
+
+		_pBackgroundButton = _pBackground->CreateControl<ButtonWithIcon>(Resource::ICON_BACKGROUND);
+		_pBackgroundButton->SetTheme(ButtonThemes::OverlayButton);
+//		_pBackgroundButton->SetY(0);
 
 		auto pCenterSizer = centerArea->SetSizer<VerticalSizer>();
 		pCenterSizer->Add(_pChatScroll, -1, SizerFlag::Fill | SizerFlag::Bottom, 8);
@@ -433,6 +438,11 @@ namespace fig::gui
 		{
 			_pBehindChat->SetHeight(GetHeight());
 			_pBehindChat->CenterHorizontally();
+		}
+
+		if (_pBackgroundButton and _pBackground)
+		{
+			_pBackgroundButton->SetX(_pBackground->GetWidth() - _pBackgroundButton->GetWidth() - 4);
 		}
 	}
 

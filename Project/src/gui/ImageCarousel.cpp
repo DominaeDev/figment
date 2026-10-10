@@ -11,7 +11,7 @@ using namespace fig::io;
 namespace fig::gui
 {
 	constexpr fig::coord kImageMargin = 8;
-	constexpr fig::coord kImageSpacing = 3;
+	constexpr fig::coord kImageSpacing = 4;
 
 	ImageCarousel::ImageCarousel(ControlPtr pParent, fig::coord thumbnailWidth, fig::coord thumbnailHeight) : Control(pParent), MouseEventHandler(this),
 		_thumbnailWidth { thumbnailWidth },
@@ -82,10 +82,20 @@ namespace fig::gui
 
 	bool ImageCarousel::IsOverImage() const noexcept
 	{
-		if (not _bHover)
+		if (not _bHover or _images.empty())
 			return false;
 
-		return std::ranges::find_if(_images, [](auto&& i) { return i.bInside; }) != std::ranges::cend(_images);
+		auto firstRect = _images.front().pControl->GetRect();
+		auto lastRect = _images.back().pControl->GetRect();
+		fig::rect rect {
+			firstRect.x,
+			firstRect.y,
+			lastRect.x + lastRect.w - firstRect.x,
+			lastRect.h,
+		};
+		auto thisRect = GetRect();
+		SDL_GetRectIntersection(&rect, &thisRect, &rect);
+		return is_inside(rect, GetMousePos());
 	}
 
 	void ImageCarousel::OnUpdate(float fElapsed)
@@ -120,7 +130,7 @@ namespace fig::gui
 		if (_bHover)
 			_fHoverCounter = 1.0f;
 
-		float kFadeSpeed = 10.0f;
+		float kFadeSpeed = 15.0f;
 		float fTargetAlpha = _bHover ? 1.0f : 0.0f;
 		step_alpha(_fAlpha, fTargetAlpha, fElapsed * kFadeSpeed);
 
@@ -135,9 +145,9 @@ namespace fig::gui
 				auto& widget = *image.pControl.get();
 				auto& imageRect = widget.GetRect();
 				bool bInside = is_inside(imageRect, mpos);
-				image.fTargetAlpha = bInside or _bSliding ? 1.0f : 0.25f;
+				image.fTargetAlpha = bInside or _bSliding ? 1.0f : 0.35f;
 				image.bInside = bInside;
-				step_alpha(image.fAlpha, image.fTargetAlpha, fElapsed * kFadeSpeed * 1.5f);
+				step_alpha(image.fAlpha, image.fTargetAlpha, fElapsed * kFadeSpeed);
 			}
 		}
 
@@ -290,7 +300,7 @@ namespace fig::gui
 
 	void ImageCarousel::ShutUp()
 	{
-		_fShutUpTimer = 1.5f;
+		_fShutUpTimer = 1.0f;
 		_bHover = false;
 		_bSliding = false;
 		DropState();

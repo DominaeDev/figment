@@ -4,6 +4,7 @@
 #include "gui/AppResources.h"
 #include "gui/FillParentSizer.h"
 #include "gui/HorizontalBar.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "io/PackageManager.h"
 

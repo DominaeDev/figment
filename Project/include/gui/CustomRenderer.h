@@ -10,7 +10,7 @@ namespace fig::gui
 	public:
 		CustomRenderer() = default;
 		
-		explicit CustomRenderer(fig::color_ref_with_alpha color) :
+		explicit CustomRenderer(fig::color_ref color) :
 			_color { color }
 		{
 		}
@@ -18,9 +18,9 @@ namespace fig::gui
 		virtual void Render(fig::renderer_ptr pRenderer, const fig::rectf& rect) = 0;
 		virtual ~CustomRenderer() = default;
 
-		void SetColor(fig::color_ref_with_alpha color) noexcept { _color = color; }
+		void SetColor(fig::color_ref color) noexcept { _color = color; }
 
 	protected:
-		fig::color_ref_with_alpha _color { Color::White };
+		fig::color_ref _color { Color::White };
 	};
 }

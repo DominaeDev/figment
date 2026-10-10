@@ -153,7 +153,7 @@ namespace fig::gui
 			SetSize(newWidth, newHeight);
 	}
 
-	void StaticText::DrawText(size_t line_index, fig::renderer_ptr pRenderer, const fig::color_ref_with_alpha& fgColor, const fig::color_ref_with_alpha& bgColor, fig::coord& newWidth, fig::coord& newHeight)
+	void StaticText::DrawText(size_t line_index, fig::renderer_ptr pRenderer, const fig::color_ref& fgColor, const fig::color_ref& bgColor, fig::coord& newWidth, fig::coord& newHeight)
 	{
 		auto& line = _lines[line_index];
 		auto& texture = _textures[line_index];
@@ -236,13 +236,13 @@ namespace fig::gui
 		return aligned_rect;
 	}
 
-	void StaticText::SetForegroundColor(fig::color_ref_with_alpha color)
+	void StaticText::SetForegroundColor(fig::color_ref color)
 	{
 		Control::SetForegroundColor(color);
 		InvalidateText();
 	}
 
-	void StaticText::SetBackgroundColor(fig::color_ref_with_alpha color)
+	void StaticText::SetBackgroundColor(fig::color_ref color)
 	{
 		Control::SetBackgroundColor(color);
 		InvalidateText();

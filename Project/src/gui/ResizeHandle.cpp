@@ -36,7 +36,7 @@ namespace fig::gui
 
 		if (_bHovering or _bResizing)
 		{
-			fig::color_ref_with_alpha lineColor;
+			fig::color_ref lineColor;
 			if (_bResizing)
 				lineColor = fig::color_ref(Color::SelectedControlBorder);
 			else

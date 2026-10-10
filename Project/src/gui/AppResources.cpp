@@ -90,6 +90,7 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_DOWNLOAD_PAUSE, "./resources/gui/icons/icon_download_pause.png");
 		LoadTexture(pRenderer, Resource::ICON_UNINSTALL, "./resources/gui/icons/icon_uninstall.png");
 		LoadTexture(pRenderer, Resource::ICON_INFO_SMALL, "./resources/gui/icons/icon_info_small.png");
+		LoadTexture(pRenderer, Resource::ICON_BACKGROUND, "./resources/gui/icons/icon_background.png");
 
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_INFO, "./resources/gui/icons/icon_character_edit_info.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_VOICE, "./resources/gui/icons/icon_character_edit_voice.png");

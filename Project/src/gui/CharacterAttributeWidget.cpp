@@ -3,6 +3,7 @@
 #include "gui/TextBox.h"
 #include "gui/TextInput.h"
 #include "gui/ComboBox.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/Menu.h"
 #include "gui/AppResources.h"
 #include "gui/DefaultTextStyleProvider.h"

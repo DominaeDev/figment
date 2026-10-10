@@ -354,8 +354,8 @@ namespace fig::gui
 							{
 								pChatScreen->GetBackground()->SetImage((*try_portrait).id);
 							}
+							return EventResult::Handled;
 						}
-						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{

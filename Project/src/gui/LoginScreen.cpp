@@ -5,6 +5,7 @@
 #include "gui/PasswordBox.h"
 #include "gui/MainFrame.h"
 #include "gui/TexturedBorder.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/ButtonWithLabel.h"
 #include "gui/Menu.h"
 #include "app/AppState.h"

@@ -89,7 +89,7 @@ namespace fig::gui
 			_pBorderRenderer->Render(pRenderer, GetDrawRect());
 	}
 
-	fig::color_ref_with_alpha Control::GetForegroundColor() const
+	fig::color_ref Control::GetForegroundColor() const
 	{
 		if (!_foregroundColor)
 		{
@@ -99,7 +99,7 @@ namespace fig::gui
 		return _foregroundColor;
 	}
 
-	fig::color_ref_with_alpha Control::GetBackgroundColor() const
+	fig::color_ref Control::GetBackgroundColor() const
 	{
 		if (!_backgroundColor.IsDefined())
 		{
