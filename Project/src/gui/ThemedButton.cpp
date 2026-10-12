@@ -72,5 +72,7 @@ namespace fig::gui
 	void ThemedButton::OnEnabled(bool bEnabled)
 	{
 		MouseEventHandler::Enable(bEnabled);
+		Control::OnEnabled(bEnabled);
+		OnButtonState();
 	}
 }

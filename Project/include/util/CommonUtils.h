@@ -431,4 +431,13 @@ namespace fig
 		}
 		return fAlpha;
 	}
+
+	template <typename T>
+	constexpr T inverse_lerp(T min, T max, T value)
+	{
+		if (min == max)
+			return T { 0 };
+
+		return (value - min) / (max - min);
+	}
 }

@@ -9,7 +9,9 @@ namespace fig::gui
 	public:
 		ChatBackground(ControlPtr pParent);
 		void SetImage(const fig::uuid& assetId);
-		
+		fig::uuid GetAssetId() const noexcept { return _currentAssetId; }
+
+
 		void SetAlpha(float alpha);
 		float GetAlpha() const noexcept { return toF(_alpha) / 255.0f; }
 		void SetBrightness(float alpha);
@@ -21,6 +23,10 @@ namespace fig::gui
 
 		void SetFit(ImageFit fit) { _fit = fit; }
 		ImageFit GetFit() const noexcept { return _fit; }
+		void SetAlignment(ImageAlignment alignment) { _alignment = alignment; }
+		ImageAlignment GetAlignment() const noexcept { return _alignment; }
+		void SetZoom(float fZoom) { _fZoom = fZoom; }
+		float GetZoom() const noexcept { return _fZoom; }
 
 		void SetBounded(bool bBounded) { _bBounded = bBounded; }
 		void SetBoundingRect(const fig::rect& rect) { _boundingRect = rect; }
@@ -36,6 +42,7 @@ namespace fig::gui
 		void Blur();
 
 	protected:
+		fig::uuid _currentAssetId {};
 		fig::rect _boundingRect {};
 		bool _bBounded {};
 		fig::sdl::Surface _surface {};
@@ -45,7 +52,9 @@ namespace fig::gui
 		uint8_t _saturation { 0xFF };
 		uint8_t _alpha { 0xFF };
 		float _fBlurSigma {};
+		float _fZoom { 0.0f };
 		bool _bDirty {};
 		ImageFit _fit { ImageFit::Outside };
+		ImageAlignment _alignment {};
 	};
 }

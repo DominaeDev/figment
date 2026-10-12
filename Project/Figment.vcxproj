@@ -194,6 +194,7 @@
     <ClCompile Include="src\gui\ColorTheme.cpp" />
     <ClCompile Include="src\gui\DialogBox.cpp" />
     <ClCompile Include="src\gui\HorizontalBar.cpp" />
+    <ClCompile Include="src\gui\ImageAlignmentWidget.cpp" />
     <ClCompile Include="src\gui\PortraitImageCarousel.cpp" />
     <ClCompile Include="src\gui\IMeshControl.cpp" />
     <ClCompile Include="src\gui\CharacterAttributeWidget.cpp" />
@@ -526,6 +527,7 @@
     <ClInclude Include="include\gui\DialogBox.h" />
     <ClInclude Include="include\gui\ControlDefs.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
+    <ClInclude Include="include\gui\ImageAlignmentWidget.h" />
     <ClInclude Include="include\gui\PortraitImageCarousel.h" />
     <ClInclude Include="include\gui\IMeshControl.h" />
     <ClInclude Include="include\gui\CardImage.h" />

@@ -19,6 +19,7 @@ namespace fig::gui
 		float GetValue() const { return _value; }
 
 		void SetDelegate(SliderValueChangedDelegate fnDelegate) { _fnDelegate = fnDelegate; }
+		void SetRange(float fMin, float fMax);
 
 	protected:
 		void OnUpdate(float fElapsed) override;

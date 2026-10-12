@@ -27,14 +27,21 @@ namespace fig::gui
 		_pThumbBorder = _pThumb->CreateControl<Image>(Resource::SLIDER_THUMB_BORDER, Color::Border);
 		_pThumbBorder->FillParent();
 		_thumbHalfSize = _pThumb->GetTextureSize().x / 2;
+
+		SetRange(0.0f, 1.0f);
 	}
 
 	Slider::Slider(ControlPtr pParent, float fMin, float fMax) : Slider(pParent)
 	{
+		SetRange(fMin, fMax);
+	}
+
+	void Slider::SetRange(float fMin, float fMax)
+	{
 		_fMin = fMin;
 		_fMax = fMax;
 	}
-
+	
 	void Slider::SetValue(float value, bool bSilent)
 	{
 		_value = std::clamp(value, _fMin, _fMax);
@@ -132,7 +139,7 @@ namespace fig::gui
 		_pBar->SetRect(rect);
 
 		auto fillRect = rect;
-		fillRect.w = Margin * 2 + static_cast<fig::coord>(toF(fillRect.w - Margin * 2) * std::clamp(_value, 0.0f, 1.0f));
+		fillRect.w = Margin * 2 + static_cast<fig::coord>(toF(fillRect.w - Margin * 2) * inverse_lerp(_fMin, _fMax, _value));
 		_pFill->SetRect(fillRect);
 
 		_pThumb->SetX(fillRect.w - _thumbHalfSize - Margin);

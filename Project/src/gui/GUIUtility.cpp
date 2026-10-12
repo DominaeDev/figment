@@ -425,6 +425,96 @@ namespace fig
 				height,
 			};
 		}
+		} // switch
+	}
+
+	fig::rect AlignRect(const fig::rect& srcRect, const fig::rect& dstRect, ImageAlignment alignment)
+	{
+		fig::rect alignedRect = srcRect;
+		switch (alignment)
+		{
+		case ImageAlignment::Center:
+			alignedRect.x = dstRect.x + (dstRect.w - srcRect.w) / 2;
+			alignedRect.y = dstRect.y + (dstRect.h - srcRect.h) / 2;
+			break;
+		case ImageAlignment::NorthWest:
+			alignedRect.x = dstRect.x;
+			alignedRect.y = dstRect.y;
+			break;
+		case ImageAlignment::North:
+			alignedRect.x = dstRect.x + (dstRect.w - srcRect.w) / 2;
+			alignedRect.y = dstRect.y;
+			break;
+		case ImageAlignment::NorthEast:
+			alignedRect.x = dstRect.x + dstRect.w - srcRect.w;
+			alignedRect.y = dstRect.y;
+			break;
+		case ImageAlignment::West:
+			alignedRect.x = dstRect.x;
+			alignedRect.y = dstRect.y + (dstRect.h - srcRect.h) / 2;
+			break;
+		case ImageAlignment::East:
+			alignedRect.x = dstRect.x + dstRect.w - srcRect.w;
+			alignedRect.y = dstRect.y + (dstRect.h - srcRect.h) / 2;
+			break;
+		case ImageAlignment::SouthWest:
+			alignedRect.x = dstRect.x;
+			alignedRect.y = dstRect.y + dstRect.h - srcRect.h;
+			break;
+		case ImageAlignment::South:
+			alignedRect.x = dstRect.x + (dstRect.w - srcRect.w) / 2;
+			alignedRect.y = dstRect.y + dstRect.h - srcRect.h;
+			break;
+		case ImageAlignment::SouthEast:
+			alignedRect.x = dstRect.x + dstRect.w - srcRect.w;
+			alignedRect.y = dstRect.y + dstRect.h - srcRect.h;
+			break;
 		}
+		return alignedRect;
+	}
+
+	fig::rectf AlignRect(const fig::rectf& srcRect, const fig::rectf& dstRect, ImageAlignment alignment)
+	{
+		fig::rectf alignedRect = srcRect;
+		switch (alignment)
+		{
+		case ImageAlignment::Center:
+			alignedRect.x = dstRect.x + (dstRect.w - srcRect.w) * 0.5f;
+			alignedRect.y = dstRect.y + (dstRect.h - srcRect.h) * 0.5f;
+			break;
+		case ImageAlignment::NorthWest:
+			alignedRect.x = dstRect.x;
+			alignedRect.y = dstRect.y;
+			break;
+		case ImageAlignment::North:
+			alignedRect.x = dstRect.x + (dstRect.w - srcRect.w) * 0.5f;
+			alignedRect.y = dstRect.y;
+			break;
+		case ImageAlignment::NorthEast:
+			alignedRect.x = dstRect.x + dstRect.w - srcRect.w;
+			alignedRect.y = dstRect.y;
+			break;
+		case ImageAlignment::West:
+			alignedRect.x = dstRect.x;
+			alignedRect.y = dstRect.y + (dstRect.h - srcRect.h) * 0.5f;
+			break;
+		case ImageAlignment::East:
+			alignedRect.x = dstRect.x + dstRect.w - srcRect.w;
+			alignedRect.y = dstRect.y + (dstRect.h - srcRect.h) * 0.5f;
+			break;
+		case ImageAlignment::SouthWest:
+			alignedRect.x = dstRect.x;
+			alignedRect.y = dstRect.y + dstRect.h - srcRect.h;
+			break;
+		case ImageAlignment::South:
+			alignedRect.x = dstRect.x + (dstRect.w - srcRect.w) * 0.5f;
+			alignedRect.y = dstRect.y + dstRect.h - srcRect.h;
+			break;
+		case ImageAlignment::SouthEast:
+			alignedRect.x = dstRect.x + dstRect.w - srcRect.w;
+			alignedRect.y = dstRect.y + dstRect.h - srcRect.h;
+			break;
+		}
+		return alignedRect;
 	}
 }

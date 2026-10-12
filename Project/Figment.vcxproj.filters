@@ -866,6 +866,9 @@
     <ClCompile Include="src\gui\BackgroundImageCarousel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ImageAlignmentWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1958,6 +1961,9 @@
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\BackgroundImageCarousel.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ImageAlignmentWidget.h">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
   </ItemGroup>

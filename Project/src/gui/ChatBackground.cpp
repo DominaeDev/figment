@@ -73,8 +73,16 @@ namespace fig::gui
 			SDL_SetTextureAlphaMod(_texture.get(), _alpha);
 
 			auto& boundingRect = _bBounded ? _boundingRect : GetRect();
-			auto drawRect = to_rectf(ScaleToFit(fig::rect { 0, 0, _texture->w, _texture->h }, boundingRect, _fit));
-			drawRect.x = (_boundingRect.x + _boundingRect.w / 2) - (drawRect.w / 2); // Center on chat
+			auto fitRect = ScaleToFit(fig::rect { 0, 0, _texture->w, _texture->h }, boundingRect, _fit);
+			auto drawRect = to_rectf(fitRect);
+			float fZoom = _fZoom >= 0.0f ? (1.0f + _fZoom) : (1.0f + _fZoom * 0.5f);
+			drawRect.w *= fZoom;
+			drawRect.h *= fZoom;
+			
+			drawRect = AlignRect(drawRect, to_rectf(boundingRect), _alignment);
+			if (not _bBounded and (_alignment == ImageAlignment::Center or _alignment == ImageAlignment::North or _alignment == ImageAlignment::South))
+				drawRect.x = (_boundingRect.x + _boundingRect.w / 2) - (drawRect.w / 2); // Center on chat
+
 			SDL_RenderTexture(pRenderer, _texture.get(), NULL, &drawRect);
 		}
 	}

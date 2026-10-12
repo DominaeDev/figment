@@ -3,6 +3,7 @@
 #include "gui/BackgroundImageCarousel.h"
 #include "gui/Frame.h"
 #include "gui/TexturedBorderRenderer.h"
+#include "gui/ImageAlignmentWidget.h"
 #include "gui/ChatBackground.h"
 #include "gui/BehindChat.h"
 #include "gui/HorizontalLine.h"
@@ -47,7 +48,7 @@ namespace fig::gui
 		_pCarousel = CreateControl<BackgroundImageCarousel>();
 		_pCarousel->SetHeight(64);
 		_pCarousel->LoadCharacterPortraits(fig::uuid { "c44fe884-073e-4e6e-991c-0f8f875891de" }); //! @temp
-		_pCarousel->SetDelegate([this](auto&& id) { _pBackground->SetImage(id); });
+		_pCarousel->SetDelegate([this](auto&& id) { SetImage(id); });
 		pSizer->Add(_pCarousel, 0, SizerFlag::Expand | SizerFlag::Left | SizerFlag::Right, kMargin);
 		pSizer->AddSpacer(kSpacing);
 
@@ -81,7 +82,7 @@ namespace fig::gui
 			auto pButtonArea = CreateControl<Area>();
 			auto pButtonSizer = pButtonArea->SetSizer<HorizontalSizer>();
 
-			_pFitArea = pButtonArea->CreateControl<ToggleWithLabel>("Area");
+			_pFitArea = pButtonArea->CreateControl<ToggleWithLabel>("Chat");
 			_pFitArea->SetOn(_pBackground->IsBounded(), true);
 			_pFitArea->SetSize(80, 25);
 			_pFitArea->SetDelegate([this](bool bOn) { SetBounded(bOn); });
@@ -101,12 +102,12 @@ namespace fig::gui
 
 		// Alignment
 		CreateLabel("Alignment");
-		auto pAlign = CreateControl<Panel>();
-		pAlign->SetSize(60, 60);
-		pAlign->SetBackgroundColor(Color::Debug);
-		pSizer->Add(pAlign, 0, SizerFlag::AlignCenterHorizontal);
+		_pAlignment = CreateControl<ImageAlignmentWidget>();
+		_pAlignment->SetAlignment(_pBackground->GetAlignment(), true);
+		_pAlignment->SetSize(80, 68);
+		_pAlignment->SetDelegate([this](auto&& align) { _pBackground->SetAlignment(align); });
+		pSizer->Add(_pAlignment, 0, SizerFlag::AlignCenterHorizontal);
 		pSizer->AddSpacer(kSpacing);
-
 
 		// ----
 		pSizer->Add(CreateControl<HorizontalLine>(), 0, SizerFlag::Expand | SizerFlag::Left | SizerFlag::Right, kMargin);
@@ -145,6 +146,15 @@ namespace fig::gui
 		_pVeilSlider->SetValue(_pBehindChat->GetAlpha(), true);
 		_pVeilSlider->SetDelegate([&](float value) {
 			_pBehindChat->SetAlpha(value);
+		});
+
+		// Zoom
+		CreateLabel("Zoom");
+		_pZoomSlider = CreateSlider();
+		_pZoomSlider->SetRange(0.0f, 2.0f);
+		_pZoomSlider->SetValue(_pBackground->GetZoom(), true);
+		_pZoomSlider->SetDelegate([&](float value) {
+			_pBackground->SetZoom(std::roundf(value * 20.0f) / 20.0f);
 		});
 
 		LayoutNow();
@@ -226,11 +236,15 @@ namespace fig::gui
 	{
 		_pOpacitySlider->SetEnabled(bEnabled);
 		_pSaturationSlider->SetEnabled(bEnabled);
+		_pZoomSlider->SetEnabled(bEnabled);
 		_pBlurSlider->SetEnabled(bEnabled);
 		_pVeilSlider->SetEnabled(bEnabled);
 		_pCarousel->SetEnabled(bEnabled);
 		_pFitInside->SetEnabled(bEnabled);
 		_pFitOutside->SetEnabled(bEnabled);
+		_pFitArea->SetEnabled(bEnabled);
+		_pFitWindow->SetEnabled(bEnabled);
+		_pAlignment->SetEnabled(bEnabled);
 	}
 
 	void ChatBackgroundPopOver::SetFit(ImageFit fit)
@@ -254,5 +268,12 @@ namespace fig::gui
 		_pBackground->SetBounded(bBounded);
 		_pFitArea->SetOn(bBounded, true);
 		_pFitWindow->SetOn(!bBounded, true);
+	}
+
+	void ChatBackgroundPopOver::SetImage(const fig::uuid& assetId)
+	{
+		_pBackground->SetImage(assetId);
+//		_pBackground->SetZoom(0.0f);
+//		_pZoomSlider->SetValue(0.0f, true);
 	}
 }

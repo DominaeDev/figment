@@ -91,6 +91,19 @@ namespace fig
 		SquarePortrait,
 	};
 
+	enum class ImageAlignment : uint8_t
+	{
+		Center = 0,
+		NorthWest,
+		North,
+		NorthEast,
+		West,
+		East,
+		SouthWest,
+		South,
+		SouthEast,
+	};
+
 	std::optional<fig::sdl::Surface> LoadImage(fig::path filename);
 	std::optional<fig::sdl::Surface> LoadImageFromMemory(fig::byte_span data);
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
@@ -104,6 +117,8 @@ namespace fig
 	fig::sdl::Surface CreateSurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data);
 	
 	fig::rect ScaleToFit(const fig::rect& srcRect, const fig::rect& dstRect, ImageFit fit);
+	fig::rect AlignRect(const fig::rect& srcRect, const fig::rect& dstRect, ImageAlignment alignment);
+	fig::rectf AlignRect(const fig::rectf& srcRect, const fig::rectf& dstRect, ImageAlignment alignment);
 
 	bool MaskCorners(fig::sdl::Surface& surface, MaskType style);
 	void AlphaToMask(fig::path filename);

@@ -7,6 +7,7 @@ namespace fig::gui
 	class ChatBackground;
 	class BehindChat;
 	class BackgroundImageCarousel;
+	class ImageAlignmentWidget;
 
 	class ChatBackgroundPopOver : public Overlay
 	{
@@ -19,6 +20,8 @@ namespace fig::gui
 	protected:
 		EventResult OnEvent(fig::event& event) override;
 		void EnableControls(bool bEnabled);
+		
+		void SetImage(const fig::uuid& assetId);
 		void SetFit(ImageFit fit);
 		void SetBounded(bool bBounded);
 
@@ -30,12 +33,14 @@ namespace fig::gui
 		fig::observer_ptr<CheckBox> _pEnabled;
 		fig::observer_ptr<Slider> _pOpacitySlider;
 		fig::observer_ptr<Slider> _pSaturationSlider;
+		fig::observer_ptr<Slider> _pZoomSlider;
 		fig::observer_ptr<Slider> _pBlurSlider;
 		fig::observer_ptr<Slider> _pVeilSlider;
 		fig::observer_ptr<ToggleWithLabel> _pFitInside;
 		fig::observer_ptr<ToggleWithLabel> _pFitOutside;
 		fig::observer_ptr<ToggleWithLabel> _pFitArea;
 		fig::observer_ptr<ToggleWithLabel> _pFitWindow;
+		fig::observer_ptr<ImageAlignmentWidget> _pAlignment;
 		fig::observer_ptr<BackgroundImageCarousel> _pCarousel;
 		fig::observer_ptr<BehindChat> _pBehindChat;
 	};

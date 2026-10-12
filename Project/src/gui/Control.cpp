@@ -201,6 +201,15 @@ namespace fig::gui
 		if (_bEnabled != bEnabled)
 		{
 			_bEnabled = bEnabled;
+			
+			// Pass to children
+			for (auto& child : _children)
+			{
+				auto pControl = dynamic_cast<Control*>(child); //! @todo: remove this cast
+				if (pControl)
+					pControl->SetEnabled(bEnabled);
+			}
+
 			OnEnabled(_bEnabled);
 		}
 	}
