@@ -1,6 +1,7 @@
 #include <pch.h>
-#include "gui/ImageCarousel.h"
+#include "gui/PortraitImageCarousel.h"
 #include "gui/NonOwningImageWithMask.h"
+#include "gui/NineGridImage.h"
 #include "gui/AppResources.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "io/ContentManager.h"
@@ -13,15 +14,19 @@ namespace fig::gui
 	constexpr fig::coord kImageMargin = 8;
 	constexpr fig::coord kImageSpacing = 4;
 
-	ImageCarousel::ImageCarousel(ControlPtr pParent, fig::coord thumbnailWidth, fig::coord thumbnailHeight) : Control(pParent), MouseEventHandler(this),
+	PortraitImageCarousel::PortraitImageCarousel(ControlPtr pParent, fig::coord thumbnailWidth, fig::coord thumbnailHeight) : Control(pParent), MouseEventHandler(this),
 		_thumbnailWidth { thumbnailWidth },
 		_thumbnailHeight { thumbnailHeight }
 	{
+		_pFooterFade = CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_BOTTOM_FADE_SMALL), fig::corners { 16, 16, 40, 16 });
+		_pFooterFade->SetForegroundColor(fig::color_ref(Color::Black).WithAlpha(0.6f));
+		_pFooterFade->SetHeight(70);
+
 		SetHeight(70);
 		EnableClipping(true);
 	}
 
-	void ImageCarousel::LoadCharacterPortraits(fig::uuid characterId)
+	void PortraitImageCarousel::LoadCharacterPortraits(fig::uuid characterId)
 	{
 		Clear();
 		auto portraitAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterId);
@@ -30,7 +35,7 @@ namespace fig::gui
 			AddImage(asset.get().id);
 	}
 
-	bool ImageCarousel::AddImage(const fig::uuid& assetId)
+	bool PortraitImageCarousel::AddImage(const fig::uuid& assetId)
 	{
 		auto& content = Global::GetUserContent();
 		auto& assets = content.GetAssets();
@@ -60,7 +65,7 @@ namespace fig::gui
 		return false;
 	}
 
-	void ImageCarousel::Clear()
+	void PortraitImageCarousel::Clear()
 	{
 		for (int32_t i = toI(_images.size()) - 1; i >= 0; --i)
 		{
@@ -73,14 +78,14 @@ namespace fig::gui
 		_bSliding = false;
 	}
 
-	fig::coord ImageCarousel::GetTotalWidth() const noexcept
+	fig::coord PortraitImageCarousel::GetTotalWidth() const noexcept
 	{
 		if (_images.empty())
 			return 0;
 		return _thumbnailWidth * toI(_images.size()) + kImageSpacing * (toI(_images.size()) - 1);
 	}
 
-	bool ImageCarousel::IsOverImage() const noexcept
+	bool PortraitImageCarousel::IsOverImage() const noexcept
 	{
 		if (not _bHover or _images.empty())
 			return false;
@@ -98,7 +103,7 @@ namespace fig::gui
 		return is_inside(rect, GetMousePos());
 	}
 
-	void ImageCarousel::OnUpdate(float fElapsed)
+	void PortraitImageCarousel::OnUpdate(float fElapsed)
 	{
 		if (not GetEnabled())
 			return;
@@ -183,9 +188,12 @@ namespace fig::gui
 				_bSliding = false;
 			}
 		}
+
+		if (_pFooterFade)
+			_pFooterFade->SetForegroundColor(_pFooterFade->GetForegroundColor().WithAlpha(_fAlpha * 0.40f));
 	}
 
-	EventResult ImageCarousel::OnEvent(fig::event& event)
+	EventResult PortraitImageCarousel::OnEvent(fig::event& event)
 	{
 		if (_fShutUpTimer > 0.0f)
 			return EventResult::Pass;
@@ -206,28 +214,34 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
-	void ImageCarousel::OnSize()
+	void PortraitImageCarousel::OnSize()
 	{
+		if (_pFooterFade)
+		{
+			_pFooterFade->SetY(GetHeight() - _pFooterFade->GetHeight());
+			_pFooterFade->SetWidth(GetWidth());
+		}
+
 		_bHover = false;
 		_bSliding = false;
 		SetVisible(false);
 		CenterImages();
 	}
 
-	void ImageCarousel::OnMouseEnter()
+	void PortraitImageCarousel::OnMouseEnter()
 	{
 		if (!_bHover)
 			_bHover = true;
 	}
 
-	void ImageCarousel::OnMouseExit()
+	void PortraitImageCarousel::OnMouseExit()
 	{
 		if (_bHover)
 			_bHover = false;
 		_fSlidingCounter = 0.0f;
 	}
 
-	void ImageCarousel::OnClickedAt(fig::point pos)
+	void PortraitImageCarousel::OnClickedAt(fig::point pos)
 	{
 		if (_bSliding or not is_near(pos, _lastLeftDownPos))
 			return;
@@ -245,7 +259,7 @@ namespace fig::gui
 		}
 	}
 
-	void ImageCarousel::OnButtonUp(int32_t button)
+	void PortraitImageCarousel::OnButtonUp(int32_t button)
 	{
 		if (button == SDL_BUTTON_LEFT)
 		{
@@ -258,7 +272,7 @@ namespace fig::gui
 		}
 	}
 
-	void ImageCarousel::OnMouseMotion(fig::point pos)
+	void PortraitImageCarousel::OnMouseMotion(fig::point pos)
 	{
 		fig::coord maxSlide = std::max((GetTotalWidth() + kImageMargin * 2) - GetWidth(), 0);
 
@@ -280,14 +294,14 @@ namespace fig::gui
 		}
 	}
 
-	void ImageCarousel::CenterImages() noexcept
+	void PortraitImageCarousel::CenterImages() noexcept
 	{
 		_slideOffset = ((GetWidth() - kImageMargin * 2) - GetTotalWidth()) / 2;
 		_slideOffset = std::max(_slideOffset, 0);
 		RefreshImagePositions();
 	}
 
-	void ImageCarousel::RefreshImagePositions()
+	void PortraitImageCarousel::RefreshImagePositions()
 	{
 		for (int32_t i = 0; i < toI(_images.size()); ++i)
 		{
@@ -298,7 +312,7 @@ namespace fig::gui
 		}
 	}
 
-	void ImageCarousel::ShutUp()
+	void PortraitImageCarousel::ShutUp()
 	{
 		_fShutUpTimer = 1.0f;
 		_bHover = false;

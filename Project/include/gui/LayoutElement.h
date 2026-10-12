@@ -28,6 +28,8 @@ namespace fig::gui
 		fig::coord GetAbsoluteX() const noexcept { return _rect.x; }
 		fig::coord GetAbsoluteY() const noexcept { return _rect.y; }
 		fig::point GetAbsolutePosition() const noexcept { return fig::point { _rect.x, _rect.y }; }
+		fig::coord GetRight() const noexcept { return _localPosition.x + _rect.w; }
+		fig::coord GetBottom() const noexcept { return _localPosition.y + _rect.h; }
 
 		fig::point GetSize() const noexcept { return fig::point { _rect.w, _rect.h }; }
 		fig::coord GetWidth() const noexcept { return _rect.w; }
@@ -105,11 +107,11 @@ namespace fig::gui
 		inline void Cull(bool bCulled) { _bCulled = bCulled; }
 		inline bool IsCulled() const { return _bCulled; }
 
+		void ResizeToFit(bool bHorizontal, bool bVertical) noexcept;
 	protected:
 		void SetParent(ControlPtr pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);
 		void Layout();
-		void ResizeToFit(bool bHorizontal, bool bVertical) noexcept;
 
 		virtual void OnUpdate(float fElapsed) {};
 		virtual void OnParent() {};

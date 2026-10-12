@@ -9,10 +9,10 @@ namespace fig::gui
 {
 	using ImageCarouselDelegate = std::function<void(fig::uuid)>;
 
-	class ImageCarousel : public Control, public MouseEventHandler
+	class PortraitImageCarousel : public Control, public MouseEventHandler
 	{
 	public:
-		ImageCarousel(ControlPtr pParent, fig::coord thumbnailWidth, fig::coord thumbnailHeight);
+		PortraitImageCarousel(ControlPtr pParent, fig::coord thumbnailWidth, fig::coord thumbnailHeight);
 
 		void LoadCharacterPortraits(fig::uuid characterId);
 
@@ -54,6 +54,7 @@ namespace fig::gui
 		fig::coord _thumbnailWidth {};
 		fig::coord _thumbnailHeight {};
 		ImageCarouselDelegate _fnDelegate;
+		fig::observer_ptr<NineGridImage> _pFooterFade;
 
 		bool _bHover = false;
 		bool _bSliding = false;

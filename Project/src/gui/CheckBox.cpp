@@ -24,10 +24,11 @@ namespace fig::gui
 		_pTick->SetVisible(_bOn);
 
 		_pLabel = CreateControl<StaticText>(label);
+		_pLabel->SetBackgroundColor(Color::Transparent);
 		_pLabel->EnableEllipsis(true);
 		_pLabel->SetX(36);
 
-		SetSize(300, 32);
+		SetSize(36 + _pLabel->GetWidth(), 32);
 	}
 
 	void CheckBox::SetLabel(fig::string_view text) noexcept

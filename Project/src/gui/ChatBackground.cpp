@@ -17,12 +17,6 @@ namespace fig::gui
 	{
 		_value = static_cast<uint8_t>(std::clamp(value, 0.0f, 1.0f) * 255.0f);
 	}
-
-	void ChatBackground::SetBrightness(uint8_t value)
-	{
-		_value = value;
-	}
-
 	void ChatBackground::SetAlpha(float alpha)
 	{
 		_alpha = static_cast<uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
@@ -32,11 +26,6 @@ namespace fig::gui
 	{
 		_saturation = static_cast<uint8_t>(std::clamp(value, 0.0f, 1.0f) * 255.0f);
 		_bDirty = true;
-	}
-
-	void ChatBackground::SetAlpha(uint8_t alpha)
-	{
-		_alpha = alpha;
 	}
 
 	void ChatBackground::SetBlur(float sigma)
@@ -53,9 +42,6 @@ namespace fig::gui
 			SDL_BlitSurface((*try_surface).get(), NULL, pNewSurface, NULL);
 			_surface.reset(pNewSurface);
 			_processedSurface.clear();
-
-			_imageSize = fig::point { pNewSurface->w, pNewSurface->h };
-			_fImageRatio = toF(_imageSize.x) / toF(_imageSize.y);
 		}
 
 		_texture.clear();
@@ -80,50 +66,17 @@ namespace fig::gui
 			_texture.reset(pTexture);
 		}
 
-		SDL_SetTextureBlendMode(_texture.get(), SDL_BLENDMODE_BLEND);
-		SDL_SetTextureColorMod(_texture.get(), _value, _value, _value);
-		SDL_SetTextureAlphaMod(_texture.get(), _alpha);
-
-		auto drawRect = GetImageRect();
-		SDL_RenderTexture(pRenderer, _texture.get(), NULL, &drawRect);
-	}
-
-	fig::rectf ChatBackground::GetImageRect() const
-	{
-		float dstWidth = toF(GetWidth());
-		float dstHeight = toF(GetHeight());
-		float srcWidth = toF(_imageSize.x);
-		float srcHeight = toF(_imageSize.y);
-		float scale;
-
-		if (_fit == ImageFit::Inside)
-			scale = std::min(toF(dstWidth) / srcWidth, toF(dstHeight) / srcHeight);
-		else if (_fit == ImageFit::Outside || _fit == ImageFit::Portrait)
-			scale = std::max(toF(dstWidth) / srcWidth, toF(dstHeight) / srcHeight);
-		else
-			scale = 1.0f;
-
-		fig::rectf drawRect;
-		drawRect.w = srcWidth * scale;
-		drawRect.h = srcHeight * scale;
-		drawRect.x = (dstWidth - drawRect.w) / 2.0f;
-		if (_fit == ImageFit::Portrait)
-			drawRect.y = 0.0f;
-		else
-			drawRect.y = (dstHeight - drawRect.h) / 2.0f;
-		drawRect.x += GetRect().x;
-		drawRect.y += GetRect().y;
-
-		if (flt_eq(scale, 1.0f))
+		if (_texture)
 		{
-			// Round to nearest pixel
-			drawRect.x = std::roundf(drawRect.x);
-			drawRect.y = std::roundf(drawRect.y);
-			drawRect.w = std::roundf(drawRect.w);
-			drawRect.h = std::roundf(drawRect.h);
-		}
+			SDL_SetTextureBlendMode(_texture.get(), SDL_BLENDMODE_BLEND);
+			SDL_SetTextureColorMod(_texture.get(), _value, _value, _value);
+			SDL_SetTextureAlphaMod(_texture.get(), _alpha);
 
-		return drawRect;
+			auto& boundingRect = _bBounded ? _boundingRect : GetRect();
+			auto drawRect = to_rectf(ScaleToFit(fig::rect { 0, 0, _texture->w, _texture->h }, boundingRect, _fit));
+			drawRect.x = (_boundingRect.x + _boundingRect.w / 2) - (drawRect.w / 2); // Center on chat
+			SDL_RenderTexture(pRenderer, _texture.get(), NULL, &drawRect);
+		}
 	}
 
 	void ChatBackground::ProcessImage()

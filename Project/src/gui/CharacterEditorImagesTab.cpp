@@ -42,7 +42,7 @@ namespace fig::gui
 		CreateHint(this, pSizer, std::format("You may add up to {} portrait images", Constants::GUI::CharacterEditor::MaxPortraits));
 		CreateHorizontalLine(this, pSizer);
 
-		CreateHeader(this, pSizer, "Backgrounds");
+		CreateHeader(this, pSizer, "Chat backgrounds");
 		InitBackgrounds(pSizer);
 		CreateHint(this, pSizer, std::format("You may add up to {} background images", Constants::GUI::CharacterEditor::MaxBackgrounds));
 

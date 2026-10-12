@@ -368,8 +368,8 @@ namespace fig
 		default:
 		case ImageFit::None:
 			return fig::rect {
-				0,
-				0,
+				dstRect.x,
+				dstRect.y,
 				srcRect.w,
 				srcRect.h,
 			};
@@ -383,8 +383,8 @@ namespace fig
 			int32_t width = static_cast<int32_t>(srcRect.w * fScale);
 			int32_t height = static_cast<int32_t>(srcRect.h * fScale);
 			return fig::rect {
-				(dstRect.w - width) / 2,
-				(dstRect.h - height) / 2,
+				dstRect.x + (dstRect.w - width) / 2,
+				dstRect.y + (dstRect.h - height) / 2,
 				width,
 				height,
 			};
@@ -395,8 +395,8 @@ namespace fig
 			int32_t width = static_cast<int32_t>(srcRect.w * fScale);
 			int32_t height = static_cast<int32_t>(srcRect.h * fScale);
 			return fig::rect {
-				(dstRect.w - width) / 2,
-				(dstRect.h - height) / 2,
+				dstRect.x + (dstRect.w - width) / 2,
+				dstRect.y + (dstRect.h - height) / 2,
 				width,
 				height,
 			};
@@ -407,8 +407,8 @@ namespace fig
 			int32_t width = static_cast<int32_t>(srcRect.w * fScale);
 			int32_t height = static_cast<int32_t>(srcRect.h * fScale);
 			return fig::rect {
-				(dstRect.w - width) / 2,
-				0,
+				dstRect.x + (dstRect.w - width) / 2,
+				dstRect.y,
 				width,
 				height,
 			};
@@ -419,8 +419,8 @@ namespace fig
 			int32_t width = static_cast<int32_t>(static_cast<float>(srcRect.w) * fScale);
 			int32_t height = static_cast<int32_t>(static_cast<float>(srcRect.h) * fScale);
 			return fig::rect {
-				(dstRect.w - width) / 2, // Centered
-				(dstRect.h * 2 - height) / 4, // Upper half
+				dstRect.x + (dstRect.w - width) / 2, // Centered
+				dstRect.y + (dstRect.h * 2 - height) / 4, // Upper half
 				width,
 				height,
 			};

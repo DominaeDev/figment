@@ -68,6 +68,7 @@ namespace fig::gui
 		MenuItemHover,
 		MenuItemPressed,
 		CardShadow,
+		ChatVeil,
 
 		MessageBorderDefault,
 		MessageBackgroundDefault,
@@ -210,6 +211,7 @@ namespace fig::gui
 		std::pair { Color::MenuItemHover,						"Menu.Item.Hover" },
 		std::pair { Color::MenuItemPressed,						"Menu.Item.Pressed" },
 		std::pair { Color::CardShadow,							"Card.Shadow" },
+		std::pair { Color::ChatVeil,							"Chat.Veil" },
 		std::pair { Color::MessageBorderDefault,				"Message.Default.Border" },
 		std::pair { Color::MessageForegroundDefault,			"Message.Default.Foreground" },
 		std::pair { Color::MessageBackgroundDefault,			"Message.Default.Background" },

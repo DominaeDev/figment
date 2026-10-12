@@ -9,12 +9,22 @@ namespace fig::gui
 	public:
 		ChatBackground(ControlPtr pParent);
 		void SetImage(const fig::uuid& assetId);
-		void SetBrightness(float alpha);
-		void SetBrightness(uint8_t alpha);
-		void SetSaturation(float saturation);
+		
 		void SetAlpha(float alpha);
-		void SetAlpha(uint8_t alpha);
+		float GetAlpha() const noexcept { return toF(_alpha) / 255.0f; }
+		void SetBrightness(float alpha);
+		float GetBrightness() const noexcept { return toF(_value) / 255.0f; }
+		void SetSaturation(float saturation);
+		float GetSaturation() const noexcept { return toF(_saturation) / 255.0f; }
 		void SetBlur(float sigma);
+		float GetBlur() const noexcept { return _fBlurSigma; }
+
+		void SetFit(ImageFit fit) { _fit = fit; }
+		ImageFit GetFit() const noexcept { return _fit; }
+
+		void SetBounded(bool bBounded) { _bBounded = bBounded; }
+		void SetBoundingRect(const fig::rect& rect) { _boundingRect = rect; }
+		bool IsBounded() const noexcept { return _bBounded; }
 
 	protected:
 		void OnUpdate(float fElapsed);
@@ -24,19 +34,18 @@ namespace fig::gui
 		void ProcessImage();
 		void Saturate();
 		void Blur();
-		fig::rectf GetImageRect() const;
 
 	protected:
+		fig::rect _boundingRect {};
+		bool _bBounded {};
 		fig::sdl::Surface _surface {};
 		fig::sdl::Texture _texture {};
 		fig::sdl::Surface _processedSurface {};
-		fig::point _imageSize {};
-		float _fImageRatio {};
 		uint8_t _value { 0xFF };
 		uint8_t _saturation { 0xFF };
 		uint8_t _alpha { 0xFF };
 		float _fBlurSigma {};
 		bool _bDirty {};
-		ImageFit _fit { ImageFit::Portrait };
+		ImageFit _fit { ImageFit::Outside };
 	};
 }

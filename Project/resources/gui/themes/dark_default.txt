@@ -51,6 +51,7 @@ Menu.Border 							#1E1F22
 Menu.Item.Hover 						#292B2F
 Menu.Item.Pressed 						#5B5E68
 Card.Shadow								#26272B
+Chat.Veil								#313338
 	
 // Button (Default)	
 Button.Default.Foreground				#B5BAC1

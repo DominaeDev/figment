@@ -110,7 +110,7 @@ namespace fig::gui
 
 			if (_fCollapseTimer >= AutoCollapseDelay)
 			{
-				_pOwner->PopMenu(_pSubmenu);
+				_pOwner->PopOverlay(_pSubmenu);
 				_pSubmenu = nullptr;
 				_submenuIndex = -1;
 			}
@@ -135,7 +135,7 @@ namespace fig::gui
 	uint32_t Menu::Show(fig::rect parentRect, bool bPopAll)
 	{
 		if (_pOwner and bPopAll)
-			_pOwner->PopAllMenus();
+			_pOwner->PopAllOverlays();
 
 		SetWidth(parentRect.w);
 
@@ -153,14 +153,13 @@ namespace fig::gui
 		SetAbsolutePosition(fig::point { parentRect.x, menuY });
 		SetVisible(true);
 
-		int32_t menuId = _pOwner->PushMenu(this);
-		return menuId;
+		return _pOwner->PushOverlay(this);
 	}
 
 	uint32_t Menu::Show(fig::point position, bool bPopAll)
 	{
 		if (_pOwner and bPopAll)
-			_pOwner->PopAllMenus();
+			_pOwner->PopAllOverlays();
 
 		CreateItems();
 
@@ -174,8 +173,7 @@ namespace fig::gui
 		SetAbsolutePosition(position);
 		SetVisible(true);
 
-		int32_t menuId = _pOwner->PushMenu(this);
-		return menuId;
+		return _pOwner->PushOverlay(this);
 	}
 
 	void Menu::CreateItem(MenuItem& menuItem)
@@ -278,7 +276,7 @@ namespace fig::gui
 		if (IsUserEvent(event, UserEvent::Scrolling))
 		{
 			if (_pOwner)
-				_pOwner->PopMenu(this);
+				_pOwner->PopOverlay(this);
 			return EventResult::Continue;
 		}
 		return EventResult::Pass;
@@ -425,7 +423,7 @@ namespace fig::gui
 	{
 		if (_pSubmenu)
 		{
-			_pOwner->PopMenu(_pSubmenu);
+			_pOwner->PopOverlay(_pSubmenu);
 			_pSubmenu = nullptr;
 			_submenuIndex = -1;
 		}

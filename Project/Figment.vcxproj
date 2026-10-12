@@ -185,6 +185,8 @@
     <ClCompile Include="src\data\Scenario.cpp" />
     <ClCompile Include="src\data\TavernCardV2.cpp" />
     <ClCompile Include="src\gui\AddImageButton.cpp" />
+    <ClCompile Include="src\gui\BackgroundImageCarousel.cpp" />
+    <ClCompile Include="src\gui\ChatBackgroundPopOver.cpp" />
     <ClCompile Include="src\gui\BehindChat.cpp" />
     <ClCompile Include="src\gui\BoxSizer.cpp" />
     <ClCompile Include="src\gui\ButtonWithIcon.cpp" />
@@ -192,7 +194,7 @@
     <ClCompile Include="src\gui\ColorTheme.cpp" />
     <ClCompile Include="src\gui\DialogBox.cpp" />
     <ClCompile Include="src\gui\HorizontalBar.cpp" />
-    <ClCompile Include="src\gui\ImageCarousel.cpp" />
+    <ClCompile Include="src\gui\PortraitImageCarousel.cpp" />
     <ClCompile Include="src\gui\IMeshControl.cpp" />
     <ClCompile Include="src\gui\CharacterAttributeWidget.cpp" />
     <ClCompile Include="src\gui\CharacterBackgroundWidget.cpp" />
@@ -511,6 +513,8 @@
     <ClInclude Include="include\data\VoiceSettings.h" />
     <ClInclude Include="include\Figment.h" />
     <ClInclude Include="include\gui\AddImageButton.h" />
+    <ClInclude Include="include\gui\BackgroundImageCarousel.h" />
+    <ClInclude Include="include\gui\ChatBackgroundPopOver.h" />
     <ClInclude Include="include\gui\BehindChat.h" />
     <ClInclude Include="include\gui\BoxSizer.h" />
     <ClInclude Include="include\gui\ButtonThemes.h" />
@@ -522,7 +526,7 @@
     <ClInclude Include="include\gui\DialogBox.h" />
     <ClInclude Include="include\gui\ControlDefs.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
-    <ClInclude Include="include\gui\ImageCarousel.h" />
+    <ClInclude Include="include\gui\PortraitImageCarousel.h" />
     <ClInclude Include="include\gui\IMeshControl.h" />
     <ClInclude Include="include\gui\CardImage.h" />
     <ClInclude Include="include\gui\CharacterAttributeWidget.h" />

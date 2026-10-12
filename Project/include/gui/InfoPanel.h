@@ -36,7 +36,7 @@ namespace fig::gui
 		bool _bExpanded { true };
 
 		fig::observer_ptr<ResizeableImageViewport> _pViewport;
-		fig::observer_ptr<ImageCarousel> _pImageCarousel;
+		fig::observer_ptr<PortraitImageCarousel> _pImageCarousel;
 		fig::observer_ptr<Control> _pBottomPanel;
 		fig::observer_ptr<LayoutElement> _pGradient;
 		fig::observer_ptr<ButtonWithIcon> _pCollapseButton;

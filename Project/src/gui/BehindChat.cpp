@@ -19,7 +19,7 @@ namespace fig::gui
 		pSizer->Add(_pBG, -1, SizerFlag::Fill);
 		pSizer->Add(_pRightGradient, 0, SizerFlag::Expand);
 
-		SetColor(Color::Black);
+		SetColor(Color::ChatVeil);
 	}
 
 	void BehindChat::SetColor(fig::color_ref color)
@@ -36,5 +36,10 @@ namespace fig::gui
 	void BehindChat::SetAlpha(float fAlpha)
 	{
 		SetColor(GetBackgroundColor().WithAlpha(fAlpha));
+	}
+
+	float BehindChat::GetAlpha() const noexcept
+	{
+		return toF(GetBackgroundColor().a()) / 255.0f;
 	}
 }

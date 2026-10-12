@@ -1,6 +1,6 @@
 // Primary theme colors
 App.Foreground							#1F3A4A
-App.Background							#f7fcff
+App.Background							#F7FCFF
 App.Accent								#5FB8FF
 
 // Side panel (low-contrast off-shade)
@@ -52,10 +52,11 @@ Menu.Border 							#FFFFFF
 Menu.Item.Hover 						#EDF7FF
 Menu.Item.Pressed 						#DCEEFC
 Card.Shadow								#D6E9F9
+Chat.Veil								#F7FCFF
 	
 // Button (Default)	
 Button.Default.Foreground				#2E5E78
-Button.Default.Background				#f7fcff
+Button.Default.Background				#F7FCFF
 Button.Default.Border					#75ade0
 Button.Hover.Foreground					#2E5E78
 Button.Hover.Background					#DCEEFC
@@ -82,14 +83,19 @@ SaveButton.Hover.Border					#097F00
 SaveButton.Pressed.Foreground			#13330E
 SaveButton.Pressed.Background			#B7E3B1
 SaveButton.Pressed.Border				#097F00
-	
+
 PlayButton.Default.Foreground			#2E5E78
 PlayButton.Default.Background			#8FC5F540
 PlayButton.Hover.Foreground				#2E5E78
 PlayButton.Hover.Background				#8FC5F580
 PlayButton.Pressed.Foreground			#2E5E78
 PlayButton.Pressed.Background			#8FC5F5C0
-	
+
+OverlayButton.Default.Foreground		#2E5E7840
+OverlayButton.Hover.Foreground		    #2E5E78FF
+OverlayButton.Pressed.Foreground		#FFFFFFFF
+OverlayButton.Disabled.Foreground		#80808020
+
 // Button (Disabled)	
 DisabledButton.Foreground				#8FA6B8
 DisabledButton.Background				#CBE0F080 // 50% blend with background

@@ -14,6 +14,7 @@
 #include "gui/ButtonWithIcon.h"
 #include "gui/Slider.h"
 #include "gui/BehindChat.h"
+#include "gui/ChatBackgroundPopOver.h"
 #include "app/AppState.h"
 #include "chat/ChatSession.h"
 #include "chat/ChatCommands.h"
@@ -38,43 +39,43 @@ namespace fig::gui
 	ChatScreen::ChatScreen(Frame* pParent) : Screen(pParent)
 	{
 		_pBackground = CreateControl<ChatBackground>();
-		_pBackground->SetBrightness(1.0f);
-		_pBackground->SetAlpha(0.3f);
-		_pBackground->SetBlur(0.0f);
+		_pMainArea = CreateControl<Area>();
 
-		auto centerArea = _pBackground->CreateControl<Area>();
-		centerArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
+		auto pCenterArea = _pMainArea->CreateControl<Area>();
+		pCenterArea->SetSize(Constants::GUI::ChatScrollWidth, -1);
+		auto pCenterSizer = pCenterArea->SetSizer<VerticalSizer>();
 
-		_pBehindChat = centerArea->CreateControl<BehindChat>();
+		_pBehindChat = pCenterArea->CreateControl<BehindChat>();
 		_pBehindChat->SetWidth(Constants::GUI::ChatScrollWidth + 200);
-		_pBehindChat->SetColor(Color::Black);
 		_pBehindChat->SetAlpha(0.0f);
 
 		_pInfoPanel = CreateControl<InfoPanel>();
-		_pChatScroll = centerArea->CreateControl<ChatScroll>();
+		_pChatScroll = pCenterArea->CreateControl<ChatScroll>();
 
-		_pTextBox = centerArea->CreateControl<TextInput>(FontFace::Default, Constants::GUI::ChatBoxFontSize, TextInput::Mode::Chat);
+		_pTextBox = pCenterArea->CreateControl<TextInput>(FontFace::Default, Constants::GUI::ChatBoxFontSize, TextInput::Mode::Chat);
 		_pTextBox->SetSize(Constants::GUI::ChatTextBoxWidth, 88);
 		_pTextBox->SetMargins(8, 4, 4, 6);
 		_pTextBox->EnableAutoSize(true);
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);
 
-		_pBackgroundButton = _pBackground->CreateControl<ButtonWithIcon>(Resource::ICON_BACKGROUND);
+		_pBackgroundButton = _pMainArea->CreateControl<ButtonWithIcon>(Resource::ICON_CHAT_BACKGROUND);
 		_pBackgroundButton->SetTheme(ButtonThemes::OverlayButton);
-//		_pBackgroundButton->SetY(0);
+		_pBackgroundButton->SetDelegate([this] { ShowBackgroundSettings(); });
 
-		auto pCenterSizer = centerArea->SetSizer<VerticalSizer>();
+		_pVoiceButton = _pMainArea->CreateControl<ButtonWithIcon>(Resource::ICON_CHAT_VOICE);
+		_pVoiceButton->SetTheme(ButtonThemes::OverlayButton);
+		_pVoiceButton->SetDelegate([this] { });
 		pCenterSizer->Add(_pChatScroll, -1, SizerFlag::Fill | SizerFlag::Bottom, 8);
 		pCenterSizer->Add(_pTextBox, 0, SizerFlag::AlignBottom | SizerFlag::AlignCenterHorizontal);
 
 		auto mainSizer = SetSizer<HorizontalSizer>();
-		mainSizer->Add(_pBackground, -1, SizerFlag::Fill);
+		mainSizer->Add(_pMainArea, -1, SizerFlag::Fill);
 		mainSizer->Add(_pInfoPanel, 0, SizerFlag::Expand);
 
-		auto bgSizer = _pBackground->SetSizer<HorizontalSizer>();
+		auto bgSizer = _pMainArea->SetSizer<HorizontalSizer>();
 		bgSizer->AddStretchSpacer();
-		bgSizer->Add(centerArea, 0, SizerFlag::Fill | SizerFlag::Bottom, 24);
+		bgSizer->Add(pCenterArea, 0, SizerFlag::Fill | SizerFlag::Bottom, 24);
 		bgSizer->AddStretchSpacer();
 
 		_pTextBox->SetEnterPressedDelegate([this](fig::string_view text) {
@@ -104,55 +105,6 @@ namespace fig::gui
 			_pVariableList->SetVariables(test);
 		}
 		
-		if constexpr (Enabled)
-		{
-			auto pAlphaSlider = CreateControl<Slider>();
-			pAlphaSlider->SetValue(0.3f);
-			pAlphaSlider->SetPosition(8, 8 + 20 * 0);
-			pAlphaSlider->SetDelegate([&](float value) {
-				_pBackground->SetAlpha(value);
-			});
-
-			auto pBrightnessSlider = CreateControl<Slider>();
-			pBrightnessSlider->SetValue(1.0f);
-			pBrightnessSlider->SetPosition(8, 8 + 20 * 1);
-			pBrightnessSlider->SetDelegate([&](float value) {
-				_pBackground->SetBrightness(value);
-			});
-
-			auto pSaturationSlider = CreateControl<Slider>();
-			pSaturationSlider->SetValue(1.0f);
-			pSaturationSlider->SetPosition(8, 8 + 20 * 2);
-			pSaturationSlider->SetDelegate([&](float value) {
-				_pBackground->SetSaturation(value);
-			});
-
-			auto pBlurSlider = CreateControl<Slider>();
-			pBlurSlider->SetValue(0.3f);
-			pBlurSlider->SetPosition(8, 8 + 20 * 3);
-			pBlurSlider->SetDelegate([&](float value) {
-				int32_t blur = toI(value * 10);
-				if (blur > 0)
-					_pBackground->SetBlur(toF(blur + 2));
-				else
-					_pBackground->SetBlur(0.0f);
-			});
-
-			auto pUnderSlider = CreateControl<Slider>();
-			pUnderSlider->SetValue(0.0f);
-			pUnderSlider->SetPosition(8, 8 + 20 * 4);
-			pUnderSlider->SetDelegate([this](float value) {
-				_pBehindChat->SetAlpha(value);
-			});
-
-			auto pChatSlider = CreateControl<Slider>();
-			pChatSlider->SetValue(1.0f);
-			pChatSlider->SetPosition(8, 8 + 20 * 5);
-			pChatSlider->SetDelegate([this](float value) {
-				_pChatScroll->SetAlpha(std::lerp(0.25f, 1.0f, value));
-			});
-		}
-
 		InvalidateLayout();
 	}
 
@@ -428,6 +380,13 @@ namespace fig::gui
 		{
 			_pTextBox->SetFocus(true);
 		}
+		else if (IsUserEvent(event, UserEvent::MenuClosed))
+		{
+			if (_popOverId == event.user.code)
+			{
+				ShowOverlayButtons(true);
+			}
+		}
 
 		return Screen::OnEvent(event);
 	}
@@ -440,10 +399,33 @@ namespace fig::gui
 			_pBehindChat->CenterHorizontally();
 		}
 
-		if (_pBackgroundButton and _pBackground)
-		{
-			_pBackgroundButton->SetX(_pBackground->GetWidth() - _pBackgroundButton->GetWidth() - 4);
-		}
+		if (_pBackgroundButton)
+			_pBackgroundButton->SetX(_pBackgroundButton->GetParent()->GetWidth() - _pBackgroundButton->GetWidth() - 4);
+		if (_pVoiceButton)
+			_pVoiceButton->SetX(_pVoiceButton->GetParent()->GetWidth() - _pVoiceButton->GetWidth() - 46);
 	}
 
+	void ChatScreen::ShowBackgroundSettings()
+	{
+		ShowOverlayButtons(false);
+
+		auto pPopOver = new ChatBackgroundPopOver(GetOwnerFrame(), _pBackground, _pBehindChat);
+		_popOverId = pPopOver->Show(fig::point { _pInfoPanel->GetAbsoluteX() - pPopOver->GetWidth() - 4, _pBackgroundButton->GetY() + 4 });
+	}
+
+	void ChatScreen::ShowOverlayButtons(bool bShow)
+	{
+		_pBackgroundButton->SetVisible(bShow);
+		_pVoiceButton->SetVisible(bShow);
+	}
+
+	void ChatScreen::OnSize()
+	{
+		if (_pBackground)
+		{
+			_pBackground->SetAbsolutePosition(0, 0);
+			_pBackground->SetSize(GetOwnerFrame()->GetSize());
+			_pBackground->SetBoundingRect(_pMainArea->GetRect());
+		}
+	}
 }

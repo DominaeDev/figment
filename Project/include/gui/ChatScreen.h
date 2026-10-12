@@ -35,6 +35,7 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnAfterLayout() override;
+		void OnSize() override;
 
 		EventResult OnEvent(fig::event& event) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
@@ -44,6 +45,8 @@ namespace fig::gui
 		void NextQueuedCommand();
 
 		void SetStatusBar(fig::string_view message);
+		void ShowBackgroundSettings();
+		void ShowOverlayButtons(bool bShow);
 
 	private:
 		fig::observer_ptr<ChatScroll> _pChatScroll {};
@@ -53,12 +56,16 @@ namespace fig::gui
 		fig::observer_ptr<InfoPanel> _pInfoPanel {};
 		fig::observer_ptr<ChatBackground> _pBackground {};
 		fig::observer_ptr<ButtonWithIcon> _pBackgroundButton {};
+		fig::observer_ptr<ButtonWithIcon> _pVoiceButton {};
+		fig::observer_ptr<Control> _pMainArea {};
 
 		float _fPollingCounter = 0.0f;
 		bool _bStartedChat = false; // Used to trigger greeting
 
 		fig::chat::ParsedChatCommandQueue _commandQueue;
 		std::shared_ptr<fig::chat::ChatSession> _pSession;
+
+		int32_t _popOverId {};
 
 #if ENABLE_AUTO_CHAT
 	private:

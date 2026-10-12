@@ -7,7 +7,6 @@ namespace fig::gui
 {
 	using WindowPtr = fig::observer_ptr<class Window>;
 	using OverlayPtr = fig::observer_ptr<class Overlay>;
-	using MenuPtr = fig::observer_ptr<class Menu>;
 	using ModalPtr = fig::observer_ptr<class ModalOverlay>;
 
 	class Frame : public Control
@@ -28,10 +27,10 @@ namespace fig::gui
 			return *new T(this, std::forward<Args>(args)...);
 		}
 
-		inline bool IsMenuShowing() const noexcept { return !_menus.empty(); };
-		int32_t PushMenu(MenuPtr pMenu);
-		void PopMenu(MenuPtr pMenu);
-		void PopAllMenus();
+		inline bool IsMenuShowing() const noexcept { return !_overlays.empty(); };
+		int32_t PushOverlay(OverlayPtr pOverlay);
+		void PopOverlay(OverlayPtr pOverlay);
+		void PopAllOverlays();
 
 		inline bool IsModalShowing() const noexcept { return !_modals.empty(); };
 		int32_t PushModal(ModalPtr pModal);
@@ -42,8 +41,8 @@ namespace fig::gui
 
 	protected:
 		bool HandleMouseDown(SDL_MouseButtonEvent& event);
-		void OnMenuOpen(int32_t overlayId);
-		void OnMenuClose(int32_t overlayId);
+		void OnOverlayOpen(int32_t overlayId);
+		void OnOverlayClose(int32_t overlayId);
 		void OnSize() override;
 		
 		void RefreshCursor();
@@ -52,12 +51,12 @@ namespace fig::gui
 
 	protected:
 		int32_t _nextOverlayId {};
-		struct MenuInstance
+		struct OverlayInstance
 		{
 			int32_t id;
-			MenuPtr ptr;
+			OverlayPtr ptr;
 		};
-		std::vector<MenuInstance> _menus;
+		std::vector<OverlayInstance> _overlays;
 
 		struct ModalInstance
 		{

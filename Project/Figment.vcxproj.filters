@@ -857,8 +857,14 @@
     <ClCompile Include="src\gui\ITextStyleProvider.cpp">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ImageCarousel.cpp">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    <ClCompile Include="src\gui\ChatBackgroundPopOver.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\PortraitImageCarousel.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\BackgroundImageCarousel.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1942,11 +1948,17 @@
     <ClInclude Include="include\gui\DefaultTextStyleProvider.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ImageCarousel.h">
-      <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\io\AsyncIO.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ChatBackgroundPopOver.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\PortraitImageCarousel.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\BackgroundImageCarousel.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

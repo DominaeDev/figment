@@ -9,7 +9,7 @@
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/ButtonWithIcon.h"
 #include "gui/CharacterDetailsPanel.h"
-#include "gui/ImageCarousel.h"
+#include "gui/PortraitImageCarousel.h"
 #include "chat/ChatSession.h"
 #include "io/ContentManager.h"
 
@@ -40,7 +40,7 @@ namespace fig::gui
 		_pViewport->SetResizedDelegate([](fig::coord size) { Global::GetUserSettings().SetInt(UserSetting::Interface::Chat::ImageSize, size); });
 		_pViewport->SetHeight(Constants::GUI::InfoPanel::DefaultImageSize);
 
-		_pImageCarousel = _pViewport->CreateControl<ImageCarousel>(50, 64);
+		_pImageCarousel = _pViewport->CreateControl<PortraitImageCarousel>(50, 64);
 		_pImageCarousel->SetSize(_pViewport->GetWidth(), 100);
 		_pImageCarousel->SetDelegate([this](fig::uuid assetId) { SetImage(assetId); });
 

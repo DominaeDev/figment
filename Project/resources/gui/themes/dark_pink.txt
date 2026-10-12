@@ -51,6 +51,7 @@ Menu.Border 							#1E101B
 Menu.Item.Hover 						#3B1834
 Menu.Item.Pressed 						#7B2B6B
 Card.Shadow								#261622
+Chat.Veil								#341F2F
 	
 // Button (Default)	
 Button.Default.Foreground				#EAA9DD
@@ -81,14 +82,19 @@ SaveButton.Hover.Border					#1A6334
 SaveButton.Pressed.Foreground			#FFFFFF
 SaveButton.Pressed.Background			#23A55A
 SaveButton.Pressed.Border				#1A6334
-	
+
 PlayButton.Default.Foreground			#EAA9DD
 PlayButton.Default.Background			#9D6C9340
 PlayButton.Hover.Foreground				#EAA9DD
 PlayButton.Hover.Background				#9D6C9380
 PlayButton.Pressed.Foreground			#EAA9DD
 PlayButton.Pressed.Background			#9D6C93C0
-	
+
+OverlayButton.Default.Foreground		#EAA9DD40
+OverlayButton.Hover.Foreground		    #EAA9DDFF
+OverlayButton.Pressed.Foreground		#FFFFFFFF
+OverlayButton.Disabled.Foreground		#80808020
+
 // Button (Disabled)	
 DisabledButton.Foreground				#7E5877
 DisabledButton.Background				#53324C80 // 50% blend with background

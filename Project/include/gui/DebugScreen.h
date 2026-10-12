@@ -17,7 +17,7 @@ namespace fig::gui
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 
 	private:
-		fig::observer_ptr<class ImageCarousel> _pCarousel;
+		fig::observer_ptr<class PortraitImageCarousel> _pCarousel;
 	};
 
 	template <>

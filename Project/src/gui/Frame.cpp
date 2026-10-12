@@ -18,7 +18,7 @@ namespace fig::gui
 
 	Frame::~Frame()
 	{
-		PopAllMenus();
+		PopAllOverlays();
 		PopAllModals();
 		Flush();
 	}
@@ -34,10 +34,10 @@ namespace fig::gui
 			modal.ptr->Update(fElapsed);
 		}
 
-		for (int32_t i = toI(_menus.size()) - 1; i >= 0; --i)
+		for (int32_t i = toI(_overlays.size()) - 1; i >= 0; --i)
 		{
-			auto& menu = _menus.at(toUZ(i));
-			menu.ptr->Update(fElapsed);
+			auto& overlay = _overlays.at(toUZ(i));
+			overlay.ptr->Update(fElapsed);
 		}
 
 		if (AppColors::IsTransitioning())
@@ -57,13 +57,13 @@ namespace fig::gui
 
 		Control::Render(pRenderer);
 
-		// Draw modal(s)
+		// Draw modals
 		for (auto& modal : _modals)
 			modal.ptr->Render(pRenderer);
 
-		// Draw menu(s)
-		for (auto& menu : _menus)
-			menu.ptr->Render(pRenderer);
+		// Draw overlays
+		for (auto& overlay : _overlays)
+			overlay.ptr->Render(pRenderer);
 
 		// Grab screen buffer
 		if (not _snapshotPromises.empty())
@@ -84,82 +84,82 @@ namespace fig::gui
 		return *new Menu(this);
 	}
 
-	int32_t Frame::PushMenu(MenuPtr pMenu)
+	int32_t Frame::PushOverlay(OverlayPtr pOverlay)
 	{
 		int32_t overlayId = ++_nextOverlayId;
 
-		_menus.push_back(MenuInstance {
+		_overlays.push_back(OverlayInstance {
 			.id = overlayId,
-			.ptr = pMenu,
+			.ptr = pOverlay,
 		});
 
 		// Clamp to edge
 		auto& frameRect = GetRect();
-		auto& menuRect = pMenu->GetRect();
-		fig::point pos { menuRect.x, menuRect.y };
+		auto& overlayRect = pOverlay->GetRect();
+		fig::point pos { overlayRect.x, overlayRect.y };
 
-		if (menuRect.x + menuRect.w > frameRect.w)
+		if (overlayRect.x + overlayRect.w > frameRect.w)
 		{
-			if (_menus.size() == 1)
-				pos.x = frameRect.w - menuRect.w;
+			if (_overlays.size() == 1)
+				pos.x = frameRect.w - overlayRect.w;
 			else
-				pos.x = _menus.at(_menus.size() - 2).ptr->GetRect().x - menuRect.w;
+				pos.x = _overlays.at(_overlays.size() - 2).ptr->GetRect().x - overlayRect.w;
 		}
-		if (menuRect.y < 0)
+		if (overlayRect.y < 0)
 			pos.y = 0;
-		if (menuRect.y + menuRect.h > frameRect.h)
-			pos.y = frameRect.h - menuRect.h;
-		if (menuRect.y < 0)
+		if (overlayRect.y + overlayRect.h > frameRect.h)
+			pos.y = frameRect.h - overlayRect.h;
+		if (overlayRect.y < 0)
 			pos.y = 0;
 
-		if (pos.x != menuRect.x or pos.y != menuRect.y)
-			pMenu->SetAbsolutePosition(pos);
+		if (pos.x != overlayRect.x or pos.y != overlayRect.y)
+			pOverlay->SetAbsolutePosition(pos);
 
-		OnMenuOpen(overlayId);
+		OnOverlayOpen(overlayId);
 		return overlayId;
 	}
 
-	void Frame::PopMenu(MenuPtr pMenu)
+	void Frame::PopOverlay(OverlayPtr pOverlay)
 	{
 		std::vector<int32_t> removedIds;
 
-		auto itFind = std::find_if(_menus.begin(), _menus.end(), [pMenu](auto&& m) { return m.ptr == pMenu; });
-		while (itFind != _menus.end())
+		auto itFind = std::find_if(_overlays.begin(), _overlays.end(), [pOverlay](auto&& m) { return m.ptr == pOverlay; });
+		while (itFind != _overlays.end())
 		{
 			removedIds.push_back((*itFind).id);
 			_removalQueue.push_back((*itFind).ptr);
-			itFind = _menus.erase(itFind);
+			itFind = _overlays.erase(itFind);
 		}
 
 		for (auto it = removedIds.crbegin(); it != removedIds.crend(); it++)
-			OnMenuClose(*it);
+			OnOverlayClose(*it);
 	}
 
-	void Frame::PopAllMenus()
+	void Frame::PopAllOverlays()
 	{
 		std::vector<int32_t> removedIds;
-		for (auto menu : _menus)
+		for (auto overlay : _overlays)
 		{
-			removedIds.push_back(menu.id);
-			_removalQueue.push_back(menu.ptr);
+			removedIds.push_back(overlay.id);
+			_removalQueue.push_back(overlay.ptr);
 		}
-		_menus.clear();
+		_overlays.clear();
 
 		for (auto it = removedIds.crbegin(); it != removedIds.crend(); it++)
-			OnMenuClose(*it);
+			OnOverlayClose(*it);
 	}
 
-	int32_t Frame::PushModal(ModalPtr pMenu)
+	int32_t Frame::PushModal(ModalPtr pOverlay)
 	{
 		int32_t overlayId = ++_nextOverlayId;
 
 		_modals.push_back(ModalInstance {
 			.id = overlayId,
-			.ptr = pMenu,
+			.ptr = pOverlay,
 		});
 
-		PopAllMenus();
-		OnMenuOpen(overlayId);
+		PopAllOverlays();
+		OnOverlayOpen(overlayId);
 		return overlayId;
 	}
 
@@ -176,7 +176,7 @@ namespace fig::gui
 		}
 
 		for (auto it = removedIds.crbegin(); it != removedIds.crend(); it++)
-			OnMenuClose(*it);
+			OnOverlayClose(*it);
 	}
 
 	void Frame::PopAllModals()
@@ -190,18 +190,18 @@ namespace fig::gui
 		_modals.clear();
 
 		for (auto it = removedIds.crbegin(); it != removedIds.crend(); it++)
-			OnMenuClose(*it);
+			OnOverlayClose(*it);
 	}
 
 	EventResult Frame::ProcessEvent(fig::event& event)
 	{
-		for (int32_t i = toI(_menus.size()) - 1; i >= 0; --i)
+		for (int32_t i = toI(_overlays.size()) - 1; i >= 0; --i)
 		{
-			auto pMenu = _menus[toUZ(i)].ptr;
-			if (pMenu->ProcessEvent(event) == EventResult::Handled)
+			auto pOverlay = _overlays[toUZ(i)].ptr;
+			if (pOverlay->ProcessEvent(event) == EventResult::Handled)
 			{
-				if (pMenu->_bDestroyMe)
-					PopMenu(pMenu);
+				if (pOverlay->_bDestroyMe)
+					PopOverlay(pOverlay);
 				return EventResult::Handled;
 			}
 		}
@@ -214,7 +214,7 @@ namespace fig::gui
 				if (pModal->ProcessEvent(event) == EventResult::Handled)
 				{
 					if (pModal->_bDestroyMe)
-						PopAllMenus();
+						PopAllOverlays();
 					return EventResult::Handled;
 				}
 			}
@@ -279,40 +279,40 @@ namespace fig::gui
 
 	bool Frame::HandleMouseDown(SDL_MouseButtonEvent& event)
 	{
-		auto fnIsInsideAnyMenu = [this](const SDL_MouseButtonEvent& event) -> bool {
+		auto fnIsInsideAnyOverlay = [this](const SDL_MouseButtonEvent& event) -> bool {
 			int32_t mx = toI(event.x);
 			int32_t my = toI(event.y);
-			for (auto& menu : _menus)
+			for (auto& overlay : _overlays)
 			{
-				auto rect = menu.ptr->GetRect();
+				auto rect = overlay.ptr->GetRect();
 				if (is_inside(rect, mx, my))
 					return true;
 			}
 			return false;
 		};
 
-		if (event.button == SDL_BUTTON_LEFT && !_menus.empty())
+		if (event.button == SDL_BUTTON_LEFT && !_overlays.empty())
 		{
-			if (!fnIsInsideAnyMenu(event))
-				PopAllMenus();
+			if (!fnIsInsideAnyOverlay(event))
+				PopAllOverlays();
 		}
-		else if (event.button == SDL_BUTTON_RIGHT && !_menus.empty())
+		else if (event.button == SDL_BUTTON_RIGHT && !_overlays.empty())
 		{
-			if (!fnIsInsideAnyMenu(event))
-				PopAllMenus();
+			if (!fnIsInsideAnyOverlay(event))
+				PopAllOverlays();
 		}
 
 		return false;
 	}
 
-	void Frame::OnMenuOpen(int32_t menuId)
+	void Frame::OnOverlayOpen(int32_t overlayId)
 	{
-		PushEvent(UserEvent::MenuOpened, menuId);
+		PushEvent(UserEvent::MenuOpened, overlayId);
 	}
 
-	void Frame::OnMenuClose(int32_t menuId)
+	void Frame::OnOverlayClose(int32_t overlayId)
 	{
-		PushEvent(UserEvent::MenuClosed, menuId);
+		PushEvent(UserEvent::MenuClosed, overlayId);
 	}
 
 	void Frame::ResetCursor()
@@ -334,7 +334,7 @@ namespace fig::gui
 
 	void Frame::OnSize()
 	{
-		PopAllMenus();
+		PopAllOverlays();
 
 		for (auto modal : _modals)
 			modal.ptr->SetSize(GetSize());

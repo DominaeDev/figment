@@ -37,7 +37,7 @@ namespace fig::gui
 
 	void Slider::SetValue(float value, bool bSilent)
 	{
-		_value = value;
+		_value = std::clamp(value, _fMin, _fMax);
 		if (_fnDelegate and not bSilent)
 			_fnDelegate(_value);
 		_bInvalidBar = true;

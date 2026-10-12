@@ -13,7 +13,7 @@ namespace fig::gui
 	{
 		SetBackgroundColor(Color::Transparent);
 		SetHeight(_lineSkip);
-		SetText(text);
+		bAutoSize ? SetTextAndResize(text) : SetText(text);
 	}
 
 	StaticText::~StaticText()

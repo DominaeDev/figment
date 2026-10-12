@@ -422,7 +422,7 @@ namespace fig::gui
 		}
 		else if (IsUserEvent(event, UserEvent::Scrolling))
 		{
-			PopAllMenus();
+			PopAllOverlays();
 			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::NavigateToHome))
@@ -459,12 +459,12 @@ namespace fig::gui
 				ShowSidePanel(true);
 				break;
 			}
-			PopAllMenus();
+			PopAllOverlays();
 			return EventResult::Continue;
 		}
 		else if (IsUserEvent(event, UserEvent::SidePanelResized))
 		{
-			PopAllMenus();
+			PopAllOverlays();
 			InvalidateLayout();
 			return EventResult::Continue;
 		}
