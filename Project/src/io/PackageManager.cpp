@@ -418,6 +418,8 @@ namespace fig::io
 					_packageStates[packageId] = PackageState::Installed;
 				else if (*err == Installation::Error::VerificationFailed)
 					_packageStates[packageId] = PackageState::VerificationFailed;
+				else if (*err == Installation::Error::Cancelled)
+					_packageStates[packageId] = PackageState::PartiallyDownloaded;
 			}
 		};
 

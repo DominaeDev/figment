@@ -76,7 +76,7 @@ namespace fig::gui
 
 		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Cancel", Resource::ICON_DISMISS);
 		pDiscardButton->SetSize(110, 32);
-		pDiscardButton->SetDelegate([this] { DismissChanges(); });
+		pDiscardButton->SetDelegate([this] { Close(); });
 
 		pSizer->Add(_pSaveButton, 0, SizerFlag::AlignCenterVertical);
 		pSizer->Add(pDiscardButton, 0, SizerFlag::Left | SizerFlag::AlignCenterVertical, 8);
@@ -182,22 +182,6 @@ namespace fig::gui
 		}
 		
 		auto& dlg = CreateDialogBox("An error occurred while saving.", DialogBoxType::Ok);
-		dlg.Show();
-	}
-
-	void CharacterEditor::DismissChanges()
-	{
-		if (not IsDirty())
-		{
-			PushEvent(UserEvent::NavigateToHome);
-			return;
-		}
-
-		auto& dlg = CreateDialogBox("Discard unsaved changes?", DialogBoxType::YesNo,
-			[this](bool bConfirm) {
-				if (bConfirm)
-					PushEvent(UserEvent::NavigateToHome);
-			});
 		dlg.Show();
 	}
 }

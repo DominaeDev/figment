@@ -2,15 +2,23 @@
 
 #include "gui/Control.h"
 
+namespace fig::chat
+{
+	class ChatSession;
+}
+
 namespace fig::gui
 {
 	class ChatBackground : public Control
 	{
 	public:
 		ChatBackground(ControlPtr pParent);
+
+		void SetSession(fig::chat::ChatSession& session);
+		void Reset();
+
 		void SetImage(const fig::uuid& assetId);
 		fig::uuid GetAssetId() const noexcept { return _currentAssetId; }
-
 
 		void SetAlpha(float alpha);
 		float GetAlpha() const noexcept { return toF(_alpha) / 255.0f; }
@@ -42,9 +50,10 @@ namespace fig::gui
 		void Blur();
 
 	protected:
+		fig::observer_ptr<fig::chat::ChatSession> _pSession {};
 		fig::uuid _currentAssetId {};
 		fig::rect _boundingRect {};
-		bool _bBounded {};
+		bool _bBounded { true };
 		fig::sdl::Surface _surface {};
 		fig::sdl::Texture _texture {};
 		fig::sdl::Surface _processedSurface {};
@@ -55,6 +64,6 @@ namespace fig::gui
 		float _fZoom { 0.0f };
 		bool _bDirty {};
 		ImageFit _fit { ImageFit::Outside };
-		ImageAlignment _alignment {};
+		ImageAlignment _alignment { ImageAlignment::North };
 	};
 }

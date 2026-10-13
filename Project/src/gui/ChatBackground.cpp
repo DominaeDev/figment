@@ -1,9 +1,12 @@
 #include <pch.h>
 #include <execution>
 #include "gui/ChatBackground.h"
+#include "chat/ChatSession.h"
 #include "io/ContentManager.h"
 
 #include <fast_gaussian_blur_template.h>
+
+using namespace fig::chat;
 
 namespace fig::gui
 {
@@ -11,6 +14,38 @@ namespace fig::gui
 	{
 		EnableClipping(true);
 		SetBackgroundColor(Color::Transparent);
+	}
+
+	void ChatBackground::SetSession(ChatSession& session)
+	{
+		_pSession = &session;
+		if (auto try_background = Global::GetUserContent().GetBackgroundForCharacter(session.GetCharacterIdOf(Role::Bot1)))
+		{
+			SetImage((*try_background).id);
+			SetVisible(true);
+		}
+		else
+			SetVisible(false);
+
+	}
+
+	void ChatBackground::Reset()
+	{
+		_pSession.reset();
+	}
+
+	void ChatBackground::SetImage(const fig::uuid& assetId)
+	{
+		if (auto try_surface = Global::GetUserContent().Get<fig::sdl::Surface>(assetId))
+		{
+			auto pNewSurface = SDL_CreateSurface((*try_surface)->w, (*try_surface)->h, SDL_PIXELFORMAT_RGB24);
+			SDL_BlitSurface((*try_surface).get(), NULL, pNewSurface, NULL);
+			_surface.reset(pNewSurface);
+			_processedSurface.clear();
+		}
+
+		_texture.clear();
+		_bDirty = true;
 	}
 
 	void ChatBackground::SetBrightness(float value)
@@ -31,20 +66,6 @@ namespace fig::gui
 	void ChatBackground::SetBlur(float sigma)
 	{
 		_fBlurSigma = std::max(sigma, 0.0f);
-		_bDirty = true;
-	}
-
-	void ChatBackground::SetImage(const fig::uuid& assetId)
-	{
-		if (auto try_surface = Global::GetUserContent().Get<fig::sdl::Surface>(assetId))
-		{
-			auto pNewSurface = SDL_CreateSurface((*try_surface)->w, (*try_surface)->h, SDL_PIXELFORMAT_RGB24);
-			SDL_BlitSurface((*try_surface).get(), NULL, pNewSurface, NULL);
-			_surface.reset(pNewSurface);
-			_processedSurface.clear();
-		}
-
-		_texture.clear();
 		_bDirty = true;
 	}
 

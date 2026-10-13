@@ -19,7 +19,7 @@ namespace fig::gui
 		std::vector<EditorTabPtr> GetTabs() const noexcept { return _tabs; }
 
 		void SelectTab(size_t index);
-		void Close();
+		virtual void Close();
 			
 	protected:
 		std::vector<EditorTabPtr> _tabs;

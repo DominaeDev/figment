@@ -99,9 +99,6 @@
     <Filter Include="Source Files\Frontend\GUI\Screens">
       <UniqueIdentifier>{0b0e7823-493d-4e1c-9c9f-946893298eae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Widgets">
-      <UniqueIdentifier>{df64db93-71b3-42f9-a95f-1347111b58b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\GUI\Layout\Sizers">
       <UniqueIdentifier>{5337a1e9-0b3d-42e9-bfb3-81797c6ee036}</UniqueIdentifier>
     </Filter>
@@ -183,9 +180,6 @@
     <Filter Include="Source Files\Frontend\GUI\Editors\UserSettingsEditor">
       <UniqueIdentifier>{e97d13a0-dbd3-4cde-8e8e-eec5aa0924ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Frontend\GUI\Screens\Home\SidePanel">
-      <UniqueIdentifier>{767d5128-4bc1-4c80-9f7e-07570141d0bf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Frontend\IO\Packages">
       <UniqueIdentifier>{c1ba031f-6f67-474a-8301-5403981c87e3}</UniqueIdentifier>
     </Filter>
@@ -197,6 +191,12 @@
     </Filter>
     <Filter Include="Source Files\Frontend\GUI\Modals">
       <UniqueIdentifier>{1567338d-810e-495f-8c59-1f32e44cb07a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\SidePanel">
+      <UniqueIdentifier>{767d5128-4bc1-4c80-9f7e-07570141d0bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\SidePanel\Controls">
+      <UniqueIdentifier>{b7b032e9-fdd3-42db-8fa1-5f5cc956e8a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -332,9 +332,6 @@
     <ClCompile Include="src\gui\PasswordBox.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\UserProfileWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\GridSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClCompile>
@@ -370,9 +367,6 @@
     </ClCompile>
     <ClCompile Include="src\gui\Events.cpp">
       <Filter>Source Files\Frontend\GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\LoadModelWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\PlayButton.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -807,13 +801,13 @@
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SidePanel.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Home\SidePanel</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SidePanelEditor.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Home\SidePanel</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SidePanelMain.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Home\SidePanel</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClCompile>
     <ClCompile Include="src\io\Downloader.cpp">
       <Filter>Source Files\Frontend\IO\Packages</Filter>
@@ -868,6 +862,12 @@
     </ClCompile>
     <ClCompile Include="src\gui\ImageAlignmentWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\LoadModelWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\UserProfileWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1294,9 +1294,6 @@
     <ClInclude Include="include\gui\PasswordBox.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\UserProfileWidget.h">
-      <Filter>Source Files\Frontend\GUI\Widgets</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\GridSizer.h">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClInclude>
@@ -1341,9 +1338,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\KeyboardMods.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\LoadModelWidget.h">
-      <Filter>Source Files\Frontend\GUI\Widgets</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\PlayButton.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -1889,13 +1883,13 @@
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SidePanel.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Home\SidePanel</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SidePanelEditor.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Home\SidePanel</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\SidePanelMain.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Home\SidePanel</Filter>
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ColorRef.h">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
@@ -1965,6 +1959,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\ImageAlignmentWidget.h">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\LoadModelWidget.h">
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserProfileWidget.h">
+      <Filter>Source Files\Frontend\GUI\Screens\SidePanel\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -21,7 +21,6 @@ namespace fig::gui
 	protected:
 		void OnPropertyChanged() override;
 		void SaveChanges();
-		void DismissChanges();
 
 	private:
 		fig::observer_ptr<ThemedButton> _pSaveButton;

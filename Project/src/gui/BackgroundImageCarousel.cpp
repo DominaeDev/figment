@@ -20,17 +20,22 @@ namespace fig::gui
 		EnableClipping(true);
 	}
 
-	void BackgroundImageCarousel::LoadCharacterPortraits(fig::uuid characterId)
+	bool BackgroundImageCarousel::AddCharacterBackgrounds(fig::uuid characterId)
 	{
 		auto backgroundAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::Background), characterId);
 		std::ranges::sort(backgroundAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
 		for (auto& asset : backgroundAssets)
 			AddImage(asset.get().id, false);
+		return not backgroundAssets.empty();
+	}
 
+	bool BackgroundImageCarousel::AddCharacterPortraits(fig::uuid characterId)
+	{
 		auto portraitAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterId);
 		std::ranges::sort(portraitAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
 		for (auto& asset : portraitAssets)
 			AddImage(asset.get().id, true);
+		return not portraitAssets.empty();
 	}
 
 	bool BackgroundImageCarousel::AddImage(const fig::uuid& assetId, bool bPortrait)
@@ -74,7 +79,6 @@ namespace fig::gui
 			DestroyChild(image.pControl);
 		}
 		_images.clear();
-		SetVisible(false);
 		_bSliding = false;
 		_slideOffset = 0;
 	}
@@ -106,9 +110,6 @@ namespace fig::gui
 
 	void BackgroundImageCarousel::OnUpdate(float fElapsed)
 	{
-		if (not GetEnabled())
-			return;
-
 		for (int32_t i = toI(_images.size()) - 1; i >= 0; --i)
 		{
 			auto& image = _images[toUZ(i)];
@@ -132,16 +133,16 @@ namespace fig::gui
 			}
 		}
 
-		if (not GetVisible())
-			SetVisible(true);
-
-		auto mpos = GetMousePos();
-		for (auto& image : _images)
+		if (GetEnabled())
 		{
-			auto& widget = *image.pControl.get();
-			auto& imageRect = widget.GetRect();
-			bool bInside = is_inside(imageRect, mpos);
-			image.bInside = bInside;
+			auto mpos = GetMousePos();
+			for (auto& image : _images)
+			{
+				auto& widget = *image.pControl.get();
+				auto& imageRect = widget.GetRect();
+				bool bInside = is_inside(imageRect, mpos);
+				image.bInside = bInside;
+			}
 		}
 	}
 
@@ -165,7 +166,6 @@ namespace fig::gui
 	void BackgroundImageCarousel::OnSize()
 	{
 		_bSliding = false;
-		SetVisible(false);
 	}
 
 	void BackgroundImageCarousel::OnClickedAt(fig::point pos)
@@ -233,5 +233,12 @@ namespace fig::gui
 			auto& widget = *image.pControl.get();
 			widget.SetForegroundColor(bEnabled ? Color::White : Color::DarkGray);
 		}
+	}
+
+	std::vector<fig::uuid> BackgroundImageCarousel::GetAssetIds() const noexcept
+	{
+		return _images
+			| std::views::transform([](auto&& i) { return i.assetId; })
+			| std::ranges::to<std::vector>();
 	}
 }

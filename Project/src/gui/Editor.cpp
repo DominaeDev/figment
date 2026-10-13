@@ -1,5 +1,6 @@
 #include <pch.h>
 #include "gui/Editor.h"
+#include "gui/DialogBox.h"
 
 namespace fig::gui
 {
@@ -32,9 +33,25 @@ namespace fig::gui
 
 	void Editor::Close()
 	{
-		for (size_t i = 0uz; i < _tabs.size(); ++i)
-			_tabs[i]->OnClose();
-		OnClose();
+		auto fnClose = [this] {
+			for (size_t i = 0uz; i < _tabs.size(); ++i)
+				_tabs[i]->OnClose();
+			OnClose();
+			PushEvent(UserEvent::NavigateToHome);
+		};
+
+		if (not IsDirty())
+		{
+			fnClose();
+			return;
+		}
+
+		auto& dlg = CreateDialogBox("Discard unsaved changes?", DialogBoxType::YesNo,
+			[this, fnClose](bool bConfirm) {
+				if (bConfirm)
+					fnClose();
+			});
+		dlg.Show();
 	}
 
 	void Editor::SetDirty() noexcept

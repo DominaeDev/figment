@@ -11,13 +11,14 @@
 #include "gui/CheckBox.h"
 #include "gui/ToggleWithLabel.h"
 #include "gui/AppResources.h"
+#include "chat/ChatSession.h"
 
 namespace fig::gui
 {
 	constexpr fig::coord kSpacing = 6;
 	constexpr fig::coord kMargin = 12;
 
-	ChatBackgroundPopOver::ChatBackgroundPopOver(FramePtr pFrame, fig::observer_ptr<ChatBackground> pBackground, fig::observer_ptr<BehindChat> pBehindChat) : Overlay(pFrame),
+	ChatBackgroundPopOver::ChatBackgroundPopOver(FramePtr pFrame, fig::observer_ptr<fig::chat::ChatSession> pSession, fig::observer_ptr<ChatBackground> pBackground, fig::observer_ptr<BehindChat> pBehindChat) : Overlay(pFrame),
 		_pBackground(pBackground),
 		_pBehindChat(pBehindChat)
 	{
@@ -38,7 +39,7 @@ namespace fig::gui
 		// Enabled
 		_pEnabled = CreateControl<CheckBox>("Enable chat background");
 		_pEnabled->SetValue(_pBackground->GetVisible(), true);
-		_pEnabled->SetDelegate([this](bool bOn) { _pBackground->SetVisible(bOn); EnableControls(bOn); });
+		_pEnabled->SetDelegate([this](bool bOn) { EnableBackground(bOn); });
 		pSizer->Add(_pEnabled, 0, SizerFlag::Left | SizerFlag::Right, kMargin);
 
 		// ----
@@ -47,7 +48,20 @@ namespace fig::gui
 		CreateLabel("Choose image");
 		_pCarousel = CreateControl<BackgroundImageCarousel>();
 		_pCarousel->SetHeight(64);
-		_pCarousel->LoadCharacterPortraits(fig::uuid { "c44fe884-073e-4e6e-991c-0f8f875891de" }); //! @temp
+		if (pSession)
+		{
+			for (auto& characterId : pSession->GetStaging().GetCharacterIds())
+				_pCarousel->AddCharacterBackgrounds(characterId);
+			for (auto& characterId : pSession->GetStaging().GetCharacterIds())
+				_pCarousel->AddCharacterPortraits(characterId);
+			_pEnabled->SetEnabled(true);
+		}
+		else
+		{
+			_pEnabled->SetValue(false, true);
+			_pEnabled->SetEnabled(false);
+		}
+
 		_pCarousel->SetDelegate([this](auto&& id) { SetImage(id); });
 		pSizer->Add(_pCarousel, 0, SizerFlag::Expand | SizerFlag::Left | SizerFlag::Right, kMargin);
 		pSizer->AddSpacer(kSpacing);
@@ -148,15 +162,6 @@ namespace fig::gui
 			_pBehindChat->SetAlpha(value);
 		});
 
-		// Zoom
-		CreateLabel("Zoom");
-		_pZoomSlider = CreateSlider();
-		_pZoomSlider->SetRange(0.0f, 2.0f);
-		_pZoomSlider->SetValue(_pBackground->GetZoom(), true);
-		_pZoomSlider->SetDelegate([&](float value) {
-			_pBackground->SetZoom(std::roundf(value * 20.0f) / 20.0f);
-		});
-
 		LayoutNow();
 		ResizeToFit(false, true);
 
@@ -236,7 +241,6 @@ namespace fig::gui
 	{
 		_pOpacitySlider->SetEnabled(bEnabled);
 		_pSaturationSlider->SetEnabled(bEnabled);
-		_pZoomSlider->SetEnabled(bEnabled);
 		_pBlurSlider->SetEnabled(bEnabled);
 		_pVeilSlider->SetEnabled(bEnabled);
 		_pCarousel->SetEnabled(bEnabled);
@@ -273,7 +277,17 @@ namespace fig::gui
 	void ChatBackgroundPopOver::SetImage(const fig::uuid& assetId)
 	{
 		_pBackground->SetImage(assetId);
-//		_pBackground->SetZoom(0.0f);
-//		_pZoomSlider->SetValue(0.0f, true);
+	}
+
+	void ChatBackgroundPopOver::EnableBackground(bool bEnable)
+	{
+		_pBackground->SetVisible(bEnable);
+		EnableControls(bEnable);
+		
+		if (bEnable and _pBackground->GetAssetId().empty())
+		{
+			if (auto images = _pCarousel->GetAssetIds(); not images.empty())
+				SetImage(images.front());
+		}
 	}
 }

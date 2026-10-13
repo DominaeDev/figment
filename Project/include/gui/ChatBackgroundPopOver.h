@@ -2,6 +2,11 @@
 
 #include "gui/Overlay.h"
 
+namespace fig::chat
+{
+	class ChatSession;
+}
+
 namespace fig::gui
 {
 	class ChatBackground;
@@ -12,18 +17,19 @@ namespace fig::gui
 	class ChatBackgroundPopOver : public Overlay
 	{
 	public:
-		ChatBackgroundPopOver(FramePtr pFrame, fig::observer_ptr<ChatBackground> pBackground, fig::observer_ptr<BehindChat> pBehindChat);
+		ChatBackgroundPopOver(FramePtr pFrame, fig::observer_ptr<fig::chat::ChatSession> pSession, fig::observer_ptr<ChatBackground> pBackground, fig::observer_ptr<BehindChat> pBehindChat);
 
 		uint32_t Show(fig::point position = { -1, -1 });
 		uint32_t Show(fig::rect parentRect);
 
 	protected:
 		EventResult OnEvent(fig::event& event) override;
-		void EnableControls(bool bEnabled);
 		
+		void EnableBackground(bool bEnable);
 		void SetImage(const fig::uuid& assetId);
 		void SetFit(ImageFit fit);
 		void SetBounded(bool bBounded);
+		void EnableControls(bool bEnabled);
 
 		fig::observer_ptr<StaticText> CreateLabel(fig::string_view text);
 		fig::observer_ptr<Slider> CreateSlider();
@@ -33,7 +39,6 @@ namespace fig::gui
 		fig::observer_ptr<CheckBox> _pEnabled;
 		fig::observer_ptr<Slider> _pOpacitySlider;
 		fig::observer_ptr<Slider> _pSaturationSlider;
-		fig::observer_ptr<Slider> _pZoomSlider;
 		fig::observer_ptr<Slider> _pBlurSlider;
 		fig::observer_ptr<Slider> _pVeilSlider;
 		fig::observer_ptr<ToggleWithLabel> _pFitInside;

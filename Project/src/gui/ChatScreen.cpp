@@ -121,8 +121,6 @@ namespace fig::gui
 			}
 		}
 
-
-
 #if ENABLE_AUTO_CHAT
 		if (_bAutoChat) 
 			AutoChat();
@@ -149,11 +147,8 @@ namespace fig::gui
 			pLLM->Initialize(llmArgs);
 			_pChatScroll->SetSession(_pSession);
 
-			// Set portrait
 			_pInfoPanel->SetSession(*_pSession);
-			
-			if (auto try_background = Global::GetUserContent().GetBackgroundForCharacter(_pSession->GetCharacterIdOf(Role::Bot1))) //! @temp
-				_pBackground->SetImage((*try_background).id);
+			_pBackground->SetSession(*_pSession);
 
 			_pSession->Save();
 			_bStartedChat = true;
@@ -342,6 +337,7 @@ namespace fig::gui
 		}
 		if (IsUserEvent(event, UserEvent::LLMChatInitialized))
 		{
+			_pChatScroll->ClearMessages();
 			auto pLLMInstance = Global::GetLLMInstance();
 			if (pLLMInstance and _pVariableList)
 			{
@@ -353,6 +349,7 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::LLMChatUnloaded))
 		{
 			_pSession.reset();
+			_pBackground->Reset();
 		}
 		else if (IsUserEvent(event, UserEvent::LLMModelLoaded))
 		{
@@ -361,6 +358,7 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::LLMModelUnloaded))
 		{
 			_pSession.reset();
+			_pBackground->Reset();
 			if (_pVariableList)
 				_pVariableList->SetVisible(false);
 			Global::SetLLMInstance(nullptr);
@@ -409,7 +407,7 @@ namespace fig::gui
 	{
 		ShowOverlayButtons(false);
 
-		auto pPopOver = new ChatBackgroundPopOver(GetOwnerFrame(), _pBackground, _pBehindChat);
+		auto pPopOver = new ChatBackgroundPopOver(GetOwnerFrame(), _pSession.get(), _pBackground, _pBehindChat);
 		_popOverId = pPopOver->Show(fig::point { _pInfoPanel->GetAbsoluteX() - pPopOver->GetWidth() - 4, _pBackgroundButton->GetY() + 4 });
 	}
 

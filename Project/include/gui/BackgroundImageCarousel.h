@@ -14,11 +14,14 @@ namespace fig::gui
 	public:
 		BackgroundImageCarousel(ControlPtr pParent);
 
-		void LoadCharacterPortraits(fig::uuid characterId);
+		bool AddCharacterBackgrounds(fig::uuid characterId);
+		bool AddCharacterPortraits(fig::uuid characterId);
 
 		void Clear();
 		size_t GetImageCount() const noexcept { return _images.size(); }
 		void SetDelegate(ImageCarouselDelegate fnDelegate) noexcept { _fnDelegate = fnDelegate; }
+
+		std::vector<fig::uuid> GetAssetIds() const noexcept;
 
 	protected:
 		bool AddImage(const fig::uuid& assetId, bool bPortrait);

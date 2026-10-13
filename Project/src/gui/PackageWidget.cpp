@@ -182,7 +182,7 @@ namespace fig::gui
 		}
 		else
 		{
-			_pInstallButton->SetLabel("Download", Resource::ICON_DOWNLOAD);
+			_pInstallButton->SetLabel(_packageState == PackageState::PartiallyDownloaded ? "Resume" : "Download", Resource::ICON_DOWNLOAD);
 			_pInstallButton->SetEnabled(_packageDependencies.Evaluate(Global::GetPackageManager().GetContext()));
 			_pStatusText->SetTextAndResize(_sizeString);
 			_pStatusText->SetForegroundColor(Color::PanelForeground);
