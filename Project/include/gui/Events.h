@@ -19,6 +19,8 @@ namespace fig::gui
 		NavigateToChatList,
 		SelectEditorTab,
 		StartChat,
+		TabNavigationForward,
+		TabNavigationBackward,
 
 		EditCharacter,
 		DebugCharacter,

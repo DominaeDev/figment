@@ -11,7 +11,7 @@ namespace fig::gui
 	class ButtonWithIcon;
 	class ComboBox;
 
-	class CharacterAttributeWidget : public Control, public MouseEventHandler
+	class CharacterAttributeWidget : public Control, public MouseEventHandler, public ITabControl
 	{
 	public:
 		CharacterAttributeWidget(ControlPtr pParent, fig::string_view label, fig::string_view content, fig::data::CharacterAttribute::ValueType type, const fig::string_list& options = {}, fig::string_view placeholder = {});
@@ -26,7 +26,8 @@ namespace fig::gui
 		fig::string_view GetValue() const noexcept;
 
 		void SetLabel(fig::string_view label);
-		void Focus();
+		void SetFocus(bool bFocused);
+		bool IsFocused() const;
 
 		using EditNameDelegate = std::function<void(fig::string)>;
 		void SetEditNameDelegate(EditNameDelegate fnDelegate);

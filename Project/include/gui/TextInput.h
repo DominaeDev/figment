@@ -4,11 +4,12 @@
 
 #include "gui/Control.h"
 #include "gui/TextBase.h"
+#include "gui/ITabControl.h"
 #include "util/UndoStack.h"
 
 namespace fig::gui
 {
-	class TextInput : public Control, public TextBase
+	class TextInput : public Control, public TextBase, public ITabControl
 	{
 		struct TTFCursor
 		{
@@ -37,7 +38,8 @@ namespace fig::gui
 
 		void SetText(fig::string_view text) override;
 		void SetPlaceholder(fig::string_view text);
-		void SetFocus(bool focus);
+		void SetFocus(bool focus) override;
+		bool IsFocused() const override;
 		void EnableAutoSize(bool bEnable) noexcept { _bAutoSize = bEnable; }
 		void SetMinRows(int32_t rows);
 		void SetMaxRows(int32_t rows);

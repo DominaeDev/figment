@@ -4,6 +4,7 @@
 #include "gui/GUITypes.h"
 #include "gui/CustomRenderer.h"
 #include "gui/LayoutElement.h"
+#include "gui/TabControlGroup.h"
 
 namespace fig::gui
 {
@@ -67,6 +68,8 @@ namespace fig::gui
 		inline fig::coord GetMarginRight() const noexcept { return _marginRight; }
 		inline fig::coord GetMarginBottom() const noexcept { return _marginBottom; }
 
+		fig::observer_ptr<TabControlGroup> CreateTabGroup();
+
 	protected:
 		virtual void OnRender(fig::renderer_ptr pRenderer);
 		virtual void OnPostRender() {};
@@ -109,6 +112,8 @@ namespace fig::gui
 		fig::coord _marginTop = 0;
 		fig::coord _marginRight = 0;
 		fig::coord _marginBottom = 0;
+
+		std::unique_ptr<TabControlGroup> _pTabGroup;
 
 	private:
 		struct ControlRenderContext

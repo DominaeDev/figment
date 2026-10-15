@@ -101,6 +101,7 @@ namespace fig::gui
 		void InvalidateLayout();
 		void LayoutNow();
 
+		auto GetChildren() const noexcept { return _children; }
 		fig::observer_ptr<LayoutElement> GetParent() { return _pParent; }
 		fig::observer_ptr<const LayoutElement> GetParent() const { return fig::observer_ptr<const LayoutElement>(_pParent); }
 
@@ -108,6 +109,7 @@ namespace fig::gui
 		inline bool IsCulled() const { return _bCulled; }
 
 		void ResizeToFit(bool bHorizontal, bool bVertical) noexcept;
+
 	protected:
 		void SetParent(ControlPtr pParent);
 		void InvalidateParentLayout(bool bRefreshImmediately = false);

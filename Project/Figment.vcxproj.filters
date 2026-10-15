@@ -578,9 +578,6 @@
     <ClCompile Include="src\text\TextEvaluator.cpp">
       <Filter>Source Files\Chat\Text</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Slider.cpp">
-      <Filter>Source Files\Frontend\GUI</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\FillParentSizer.cpp">
       <Filter>Source Files\Frontend\GUI\Layout\Sizers</Filter>
     </ClCompile>
@@ -868,6 +865,12 @@
     </ClCompile>
     <ClCompile Include="src\gui\UserProfileWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\SidePanel\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Slider.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\TabControlGroup.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1965,6 +1968,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\UserProfileWidget.h">
       <Filter>Source Files\Frontend\GUI\Screens\SidePanel\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ITabControl.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TabControlGroup.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

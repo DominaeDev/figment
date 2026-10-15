@@ -262,6 +262,7 @@
     <ClCompile Include="src\gui\SidePanelMain.cpp" />
     <ClCompile Include="src\gui\Slider.cpp" />
     <ClCompile Include="src\gui\DefaultTextStyleProvider.cpp" />
+    <ClCompile Include="src\gui\TabControlGroup.cpp" />
     <ClCompile Include="src\gui\TextBase.cpp" />
     <ClCompile Include="src\gui\TextInput.cpp" />
     <ClCompile Include="src\gui\ToggleWithIcon.cpp" />
@@ -528,6 +529,7 @@
     <ClInclude Include="include\gui\ControlDefs.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
     <ClInclude Include="include\gui\ImageAlignmentWidget.h" />
+    <ClInclude Include="include\gui\ITabControl.h" />
     <ClInclude Include="include\gui\PortraitImageCarousel.h" />
     <ClInclude Include="include\gui\IMeshControl.h" />
     <ClInclude Include="include\gui\CardImage.h" />
@@ -580,6 +582,7 @@
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\ITextStyleProvider.h" />
     <ClInclude Include="include\gui\DefaultTextStyleProvider.h" />
+    <ClInclude Include="include\gui\TabControlGroup.h" />
     <ClInclude Include="include\gui\TextBase.h" />
     <ClInclude Include="include\gui\UserSettingsEditor.h" />
     <ClInclude Include="include\gui\SidePanelEditor.h" />

@@ -60,5 +60,7 @@ namespace fig::gui
 
 		fig::observer_ptr<TextBox> _pAge;
 		SizerPtr _pAttributeSizer {};
+		
+		fig::observer_ptr<TabControlGroup> _pTabGroup;
 	};
 }

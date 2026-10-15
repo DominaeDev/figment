@@ -10,6 +10,7 @@
 #include "gui/HorizontalLine.h"
 #include "gui/Menu.h"
 #include "gui/GridSizer.h"
+#include "gui/TabControlGroup.h"
 #include "data/Character.h"
 #include "io/FileUtility.h"
 
@@ -107,6 +108,8 @@ namespace fig::gui
 		pAddAttributeButton->SetHeight(35);
 		pAddAttributeButton->SetDelegate([this] { ShowAttributesMenu(); });
 		pSizer->Add(pAddAttributeButton, 0);
+
+		_pTabGroup = CreateTabGroup();
 		return true;
 	}
 
@@ -152,6 +155,10 @@ namespace fig::gui
 		pAttribute->SetValueChangedDelegate([this] (auto&& _) { SetDirty(); });
 		pAttribute->EnableRename(true);
 		_pAttributeSizer->Add(pAttribute, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+		
+		if (_pTabGroup)
+			_pTabGroup->AddControl(pAttribute);
+
 		return pAttribute;
 	}
 
@@ -170,7 +177,7 @@ namespace fig::gui
 		};
 	
 		item.pControl = AppendAttributeControl(item.attribute, item.index, info.options, info.placeholder);
-		item.pControl->Focus();
+		item.pControl->SetFocus(true);
 		_items.push_back(std::move(item));
 		return item.pControl;
 	}
@@ -318,7 +325,7 @@ namespace fig::gui
 			auto& item = *itFind;
 			item.attribute.name = name;
 			item.attribute.id = fig::handle { name };
-			item.pControl->Focus();
+			item.pControl->SetFocus(true);
 			SetDirty();
 		}
 	}
@@ -395,7 +402,15 @@ namespace fig::gui
 			
 			_pAttributeSizer->RemoveAll();
 			for (auto& item : _items)
+			{
 				_pAttributeSizer->Add(item.pControl, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+
+				if (_pTabGroup)
+				{
+					_pTabGroup->RemoveControl(item.pControl);
+					_pTabGroup->AddControl(item.pControl);
+				}
+			}
 			InvalidateLayout();
 			SetDirty();
 		}

@@ -161,6 +161,10 @@ namespace fig::gui
 			}
 		}
 
+		// Pass to tab group
+		if (result != EventResult::Handled and _pTabGroup and _pTabGroup->ProcessEvent(event))
+			return EventResult::Handled;
+
 		// Pass to self
 		if (result != EventResult::Handled)
 			return OnEvent(event);
@@ -369,5 +373,11 @@ namespace fig::gui
 		assert(false && "No render context");
 		static DialogBox err { nullptr, {}, {}, {} };
 		return err;
+	}
+
+	fig::observer_ptr<TabControlGroup> Control::CreateTabGroup()
+	{
+		_pTabGroup = std::make_unique<TabControlGroup>(this);
+		return _pTabGroup.get();
 	}
 }

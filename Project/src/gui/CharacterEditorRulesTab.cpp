@@ -54,7 +54,7 @@ namespace fig::gui
 		pSizer->AddSpacer(6);
 
 		_pAddButton->SetHeight(35);
-		_pAddButton->SetDelegate([this] { auto pRule = AddRule(); pRule->Focus(); SetDirty(); });
+		_pAddButton->SetDelegate([this] { auto pRule = AddRule(); pRule->SetFocus(true); SetDirty(); });
 		pSizer->Add(_pAddButton, 0);
 
 		CreateHint(this, pSizer, std::format("You can add up to {} rules.", kMaxRuleCount));

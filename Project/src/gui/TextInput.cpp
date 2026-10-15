@@ -1281,6 +1281,18 @@ namespace fig::gui
 #endif
 			switch (event.key.key)
 			{
+			case SDLK_TAB:
+				if (bModNone)
+				{
+					PushEvent(UserEvent::TabNavigationForward);
+					return EventResult::Handled;
+				}
+				else if (bModShift)
+				{
+					PushEvent(UserEvent::TabNavigationBackward);
+					return EventResult::Handled;
+				}
+				break;
 			case SDLK_A:
 				if (bModCtrl)
 				{
@@ -1726,6 +1738,11 @@ namespace fig::gui
 	{
 		_undo.PushState(GetUndoState(action));
 		_undo.CreateUndo(allowCoalesce);
+	}
+
+	bool TextInput::IsFocused() const
+	{
+		return _bFocused;
 	}
 
 	void TextInput::Undo()

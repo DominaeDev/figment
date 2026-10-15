@@ -204,16 +204,21 @@ namespace fig::gui
 		}
 	}
 
-	void CharacterAttributeWidget::Focus()
+	void CharacterAttributeWidget::SetFocus(bool bFocused)
 	{
 		if (_pTextBox)
-		{
-			return _pTextBox->SetFocus(true);
-		}
+			return _pTextBox->SetFocus(bFocused);
 		else if (_pComboBox)
-		{
-			return _pComboBox->SetFocus(true);
-		}
+			return _pComboBox->SetFocus(bFocused);
+	}
+
+	bool CharacterAttributeWidget::IsFocused() const
+	{
+		if (_pTextBox)
+			return _pTextBox->IsFocused();
+		else if (_pComboBox)
+			return _pComboBox->IsFocused();
+		return false;
 	}
 
 	void CharacterAttributeWidget::SetEditNameDelegate(EditNameDelegate fnDelegate)
