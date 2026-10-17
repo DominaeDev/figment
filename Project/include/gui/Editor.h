@@ -41,6 +41,7 @@ namespace fig::gui
 		void OnAfterLayout() override;
 		bool SaveTabs();
 		bool IsDirty() const noexcept { return _bIsDirty; }
+		void ClearDirtyFlag() noexcept { _bIsDirty = false; }
 
 	private:
 		void EnableTab(EditorTabBase* pTab, bool bEnabled);

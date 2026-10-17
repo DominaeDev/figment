@@ -40,6 +40,17 @@ namespace fig
 		}
 	}
 
+	void DebugUtility::ResetProfile(const fig::uuid& profileId)
+	{
+		if constexpr (Debugging)
+		{
+			auto& userMngr = Global::GetUserManager();
+
+			// Create new profile
+			userMngr.ResetProfile(profileId);
+		}
+	}
+
 	void DebugUtility::ImportTestCharacters(const fig::path& path, size_t max_count)
 	{
 		if constexpr (Debugging)

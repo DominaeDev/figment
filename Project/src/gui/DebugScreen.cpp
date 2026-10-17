@@ -18,7 +18,7 @@ namespace fig::gui
 {
 	DebugScreen::DebugScreen(Frame* pParent) : Screen(pParent)
 	{
-		if constexpr (false)
+		if constexpr (Disabled)
 		{
 			auto area = CreateControl<Panel>();
 			area->SetBackgroundColor(Color::Black);

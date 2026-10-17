@@ -111,19 +111,6 @@ namespace fig::user
 		};
 
 		// Generate recovery key
-		AuthKey recoveryKey;
-		AuthChallenge recoveryChallenge;
-		if (CreateRecoveryFile(profile, password, recoveryChallenge, recoveryKey))
-		{
-			profile.recovery = UserAuth {
-				.challenge = recoveryChallenge,
-				.salt = authSalt,
-			};
-
-			auto code = RecoveryKeyToCode(recoveryKey);
-			LogLn(std::format("Recovery code for user {}: {}", profile.id.to_str(), code));
-		}
-
 		if (db.CreateProfile(profile) == DatabaseError::NoError)
 		{
 			_profiles.emplace_back(std::move(profile));
@@ -183,10 +170,10 @@ namespace fig::user
 		return SignIn(*itProfile, password);
 	}
 
-	bool UserManager::SignIn(const fig::uuid& profileID, const fig::string& password)
+	bool UserManager::SignIn(const fig::uuid& profileId, const fig::string& password)
 	{
-		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileID](const UserProfile& profile) {
-			return profile.id == profileID;
+		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileId](const UserProfile& profile) {
+			return profile.id == profileId;
 		});
 
 		if (itProfile == _profiles.cend())
@@ -247,10 +234,10 @@ namespace fig::user
 			return false;
 	}
 
-	bool UserManager::ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword)
+	bool UserManager::ChangePassword(const fig::uuid& profileId, const fig::string& oldPassword, const fig::string& newPassword)
 	{
-		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileID](const UserProfile& profile) {
-			return profile.id == profileID;
+		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileId](const UserProfile& profile) {
+			return profile.id == profileId;
 		});
 
 		if (itProfile == _profiles.cend())
@@ -262,33 +249,51 @@ namespace fig::user
 		if (not Authenticate(profile, oldPassword, authKey))
 			return false;
 
-		AuthSalt newSalt = not newPassword.empty() ? RandomSalt() : CurrentDefaultAuthSalt;
-		AuthKey newPasswordKey = not newPassword.empty() ? DeriveKeyFromPassword(newPassword, newSalt) : CurrentDefaultAuthKey;
-		AuthChallenge newChallenge = CreateAuthChallenge(authKey, newSalt, newPasswordKey);
-
-		auto& db = GetDatabase();
-		if (db.UpdateProfile(UserProfile {
-			.version { CurrentAuthVersion },
-			.id { profile.id },
-			.name { profile.name },
-			.auth {
+		if (not newPassword.empty())
+		{
+			AuthSalt newSalt = RandomSalt();
+			AuthKey newPasswordKey = DeriveKeyFromPassword(newPassword, newSalt);
+			AuthChallenge newChallenge = CreateAuthChallenge(authKey, newSalt, newPasswordKey);
+			profile.auth = {
 				.challenge { newChallenge },
 				.salt { newSalt },
-			},
-			.recovery = {},
-			.state { newPassword.empty() ? UserProfile::State::Open : UserProfile::State::Locked },
-		}) == DatabaseError::NoError)
-		{
-			// Update local profile
-			profile.version = CurrentAuthVersion;
-			profile.auth = UserAuth {
-				.challenge = newChallenge,
-				.salt = newSalt,
 			};
-			profile.state = newPassword.empty() ? UserProfile::State::Open : UserProfile::State::Locked;
-			return true;
+			profile.state = UserProfile::State::Locked;
 		}
-		return false;
+		else
+		{
+			profile.auth = {
+				.challenge { CreateAuthChallenge(authKey, CurrentDefaultAuthSalt, CurrentDefaultAuthKey) },
+				.salt { CurrentDefaultAuthSalt },
+			};
+			profile.state = UserProfile::State::Open;
+		}
+		profile.version = CurrentAuthVersion;
+		profile.recovery = {};
+
+		return GetDatabase().UpdateProfile(profile) == DatabaseError::NoError;
+	}
+
+	bool UserManager::ResetProfile(const fig::uuid& profileId)
+	{
+		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileId](const UserProfile& profile) {
+			return profile.id == profileId;
+		});
+
+		if (itProfile == _profiles.cend())
+			return false; // Not found
+		
+		auto authKey = RandomKey();
+		auto& profile = *itProfile;
+		profile.auth = {
+			.challenge { CreateAuthChallenge(authKey, CurrentDefaultAuthSalt, CurrentDefaultAuthKey) },
+			.salt { CurrentDefaultAuthSalt },
+		};
+		profile.state = UserProfile::State::Open;
+		profile.version = CurrentAuthVersion;
+		profile.recovery = {};
+
+		return GetDatabase().UpdateProfile(profile) == DatabaseError::NoError;
 	}
 
 	fig::optional_cref<UserProfile> UserManager::GetActiveProfile() const noexcept
@@ -335,6 +340,32 @@ namespace fig::user
 		return *_pProfileDB.get();
 	}
 
+	std::optional<fig::string> UserManager::GenerateNewRecoveryKey()
+	{
+		if (not IsSignedIn())
+			return std::nullopt;
+
+		auto& profile = *_signedInProfile;
+
+		AuthKey recoveryKey;
+		AuthChallenge recoveryChallenge;
+		if (CreateRecoveryFile(profile, GetActiveAuthKey(), recoveryChallenge, recoveryKey))
+		{
+			profile.recovery = UserAuth {
+				.challenge = recoveryChallenge,
+				.salt = profile.auth.salt,
+			};
+
+			if (_pProfileDB->UpdateProfile(profile) == DatabaseError::NoError)
+			{
+				auto code = RecoveryKeyToCode(recoveryKey);
+				LogLn(std::format("Recovery code for user {}: {}", profile.id.to_str(), code));
+				return code;
+			}
+		}
+		return std::nullopt;
+	}
+
 	bool UserManager::CreateRecoveryFile(const UserProfile& profile, const fig::string& password, AuthChallenge& recoveryChallenge, AuthKey& recoveryKey)
 	{
 		AuthKey authKey;
@@ -350,18 +381,29 @@ namespace fig::user
 		return AssetFileWriter::WriteRecoveryFile(profile, recoveryChallenge) == FileError::NoError;
 	}
 
-	bool UserManager::RecoverProfile(const fig::uuid& profileID, const fig::string& recoveryCode)
+	bool UserManager::CreateRecoveryFile(const UserProfile& profile, const AuthKey& authKey, AuthChallenge& recoveryChallenge, AuthKey& recoveryKey)
+	{
+		auto& salt = profile.auth.salt;
+		recoveryKey = RandomKey();
+	
+		AuthKey encKey = DeriveKeyFromBytes(recoveryKey, salt);
+		recoveryChallenge = CreateAuthChallenge(authKey, salt, encKey);
+		
+		return AssetFileWriter::WriteRecoveryFile(profile, recoveryChallenge) == FileError::NoError;
+	}
+
+	bool UserManager::RecoverProfile(const fig::uuid& profileId, const fig::string& recoveryCode)
 	{
 		AuthKey recoveryKey;
 		if (RecoveryCodeToKey(recoveryCode, recoveryKey))
-			return RecoverProfile(profileID, recoveryKey);
+			return RecoverProfile(profileId, recoveryKey);
 		return false;
 	}
 
-	bool UserManager::RecoverProfile(const fig::uuid& profileID, const AuthKey& recoveryKey)
+	bool UserManager::RecoverProfile(const fig::uuid& profileId, const AuthKey& recoveryKey)
 	{
-		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileID](const UserProfile& profile) {
-			return profile.id == profileID;
+		auto itProfile = std::find_if(_profiles.begin(), _profiles.end(), [&profileId](const UserProfile& profile) {
+			return profile.id == profileId;
 		});
 
 		if (itProfile == _profiles.cend())
@@ -468,5 +510,20 @@ namespace fig::user
 		while (std::ranges::contains(_profiles, uuid, [](auto& profile) { return profile.id; }))
 			uuid = _CreateUUID();
 		return uuid;
+	}
+
+	bool UserManager::ChangeProfileName(const fig::uuid& profileId, const fig::string& newName)
+	{
+		if (empty_or_whitespace(newName))
+			return false;
+
+		if (auto profile = GetProfile(profileId))
+		{
+			profile->name = newName;
+			if (_pProfileDB->UpdateProfile(*profile) == DatabaseError::NoError)
+				return true;
+		}
+
+		return false;
 	}
 }

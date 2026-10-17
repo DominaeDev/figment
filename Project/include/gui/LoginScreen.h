@@ -23,6 +23,7 @@ namespace fig::gui
 		void CycleProfile(int32_t step);
 		bool SignIn(fig::string_view password);
 		void ShowMenu();
+		void OnActivated() override;
 
 	private:
 		fig::observer_ptr<PasswordBox> _pPassword;

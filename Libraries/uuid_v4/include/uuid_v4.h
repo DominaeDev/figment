@@ -210,6 +210,8 @@ public:
 	{
 		if (str.length() == 36)
 			return _fromStrFactory(str.c_str());
+		else if (str.length() == 32)
+			return _fromStrFactory(std::format("{}-{}-{}-{}-{}", str.substr(0, 8), str.substr(8, 4), str.substr(12, 4), str.substr(16, 4), str.substr(20)));
 		return {};
 	}
 

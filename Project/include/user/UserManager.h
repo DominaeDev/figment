@@ -24,7 +24,7 @@ namespace fig::user
 		fig::optional_cref<UserProfile> CreateProfile(const fig::string& profileName, const fig::string& password);
 
 		bool IsSignedIn() const noexcept { return _signedInProfile != nullptr; };
-		bool SignIn(const fig::uuid& profileID, const fig::string& password);
+		bool SignIn(const fig::uuid& profileId, const fig::string& password);
 		bool SignIn(const fig::string& profileName, const fig::string& password);
 		bool SignInDefaultProfile();
 		bool SignOut();
@@ -33,13 +33,17 @@ namespace fig::user
 		fig::io::UserSettings& GetSettings();
 		const fig::auth::AuthKey& GetActiveAuthKey() const noexcept { return _signedInAuthKey; };
 		
-		bool ChangePassword(const fig::uuid& profileID, const fig::string& oldPassword, const fig::string& newPassword);
+		std::optional<fig::string> GenerateNewRecoveryKey();
+		bool ChangeProfileName(const fig::uuid& profileId, const fig::string& newName);
+		bool ChangePassword(const fig::uuid& profileId, const fig::string& oldPassword, const fig::string& newPassword);
 		bool CreateRecoveryFile(const UserProfile& profile, const fig::string& password, fig::auth::AuthChallenge& recoveryChallenge, fig::auth::AuthKey& recoveryKey);
-		bool RecoverProfile(const fig::uuid& profileID, const fig::string& recoveryCode);
-		bool RecoverProfile(const fig::uuid& profileID, const fig::auth::AuthKey& recoveryKey);
+		bool CreateRecoveryFile(const UserProfile& profile, const fig::auth::AuthKey& authKey, fig::auth::AuthChallenge& recoveryChallenge, fig::auth::AuthKey& recoveryKey);
+		bool RecoverProfile(const fig::uuid& profileId, const fig::string& recoveryCode);
+		bool RecoverProfile(const fig::uuid& profileId, const fig::auth::AuthKey& recoveryKey);
+		bool ResetProfile(const fig::uuid& profileId);
 
-	private:
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::auth::AuthKey& outKey);
+	private:
 		static bool Authenticate(const fig::auth::AuthChallenge& challenge, const fig::auth::AuthSalt& salt, const fig::auth::AuthKey& key, fig::auth::AuthKey& outKey, fig::auth::AuthVersion version = fig::auth::CurrentAuthVersion);
 		bool SignIn(UserProfile& profile, const fig::string& password);
 		fig::io::ProfileDatabase& GetDatabase() noexcept;

@@ -872,6 +872,9 @@
     <ClCompile Include="src\gui\TabControlGroup.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\UserSettingsEditorProfileTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1974,6 +1977,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\TabControlGroup.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserSettingsEditorProfileTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

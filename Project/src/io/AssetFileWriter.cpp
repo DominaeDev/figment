@@ -178,7 +178,7 @@ namespace fig::io
 			if (not std::filesystem::exists(parentPath))
 				std::filesystem::create_directory(parentPath);
 
-			std::ofstream fs(path.wstring(), std::ios::binary | std::ios::out | std::ios::trunc);
+			std::ofstream fs(path, std::ios::binary | std::ios::out | std::ios::trunc);
 			if (not fs.is_open())
 				return FileError::WriteError;
 

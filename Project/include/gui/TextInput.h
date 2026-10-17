@@ -149,7 +149,7 @@ namespace fig::gui
 		void Autosize();
 		void DidChange();
 
-		bool IsPassword() const noexcept { return _mode == Mode::Password; }
+		bool IsPassword() const noexcept { return _mode == Mode::Password and _pPassword; }
 		bool IsAutosized() const noexcept { return _bAutoSize; }
 
 		// Layout

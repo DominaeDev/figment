@@ -2,6 +2,7 @@
 #include "gui/UserSettingsEditor.h"
 #include "gui/UserSettingsEditorArgs.h"
 #include "gui/UserSettingsEditorMainTab.h"
+#include "gui/UserSettingsEditorProfileTab.h"
 #include "gui/UserSettingsEditorVoiceTab.h"
 #include "gui/UserSettingsEditorExtensionsTab.h"
 #include "gui/ButtonWithLabelAndIcon.h"
@@ -13,7 +14,7 @@ namespace fig::gui
 	constexpr enum Tab : int32_t
 	{
 		Application,
-		// Profile,
+		Profile,
 		Voice,
 		Extensions,
 		// Advanced,
@@ -22,6 +23,7 @@ namespace fig::gui
 	UserSettingsEditor::UserSettingsEditor(ControlPtr pParent) : Editor(pParent)
 	{
 		CreateTab<UserSettingsEditorMainTab>();
+		CreateTab<UserSettingsEditorProfileTab>();
 		CreateTab<UserSettingsEditorVoiceTab>();
 		CreateTab<UserSettingsEditorExtensionsTab>();
 	}
@@ -50,16 +52,16 @@ namespace fig::gui
 
 		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Close", Resource::ICON_DISMISS);
 		pDiscardButton->SetSize(110, 32);
-		pDiscardButton->SetDelegate([this] {
-			PushEvent(UserEvent::NavigateToHome);
-		});
+		pDiscardButton->SetDelegate([this] { Close(); });
 
 		pSizer->Add(pDiscardButton, 0, SizerFlag::Left | SizerFlag::AlignCenterVertical, 8);
 		pSizer->AddSpacer(8);
 	}
 
-	void UserSettingsEditor::OnClose()
+	void UserSettingsEditor::Close()
 	{
+		ClearDirtyFlag();
+		Editor::Close();
 		PushEvent(UserEvent::UserSettingsChanged);
 	}
 
@@ -74,7 +76,7 @@ namespace fig::gui
 				Resource::ICON_USER_SETTINGS_EDIT_APPLICATION_SMALL,
 			},
 			{
-				NotImpl,
+				Profile,
 				"Profile",
 				Resource::ICON_USER_SETTINGS_EDIT_PROFILE,
 				Resource::ICON_USER_SETTINGS_EDIT_PROFILE_SMALL,
@@ -102,6 +104,5 @@ namespace fig::gui
 
 	void UserSettingsEditor::OnPropertyChanged()
 	{
-		_pSaveButton->SetTheme(ButtonThemes::SaveButton);
 	}
 }

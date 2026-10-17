@@ -149,6 +149,7 @@ namespace fig::gui
 			return EventResult::Pass;
 
 		EventResult result { EventResult::Pass };
+
 		// Pass to children (in reverse order)
 		for (auto it = _children.rbegin(); it != std::rend(_children); ++it)
 		{

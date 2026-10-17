@@ -17,11 +17,10 @@ namespace fig::gui
 		void PopulateTopBar(ControlPtr pTopBar) override;
 
 	protected:
-		void OnClose() override;
+		void Close() override;
 		void OnPropertyChanged() override;
 
 	private:
-		fig::observer_ptr<ThemedButton> _pSaveButton;
 		fig::io::UserSettings _settings {};
 
 	};

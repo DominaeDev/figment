@@ -12,7 +12,7 @@ SidePanel.Gradient						#1E1F22 // Darker, fade
 TextBox.Foreground						#F2F3F5
 TextBox.Foreground.Disabled				#595D63
 TextBox.Background						#1E1F22
-TextBox.Background.Disabled				#1C1D20
+TextBox.Background.Disabled				#404248
 TextBox.Selection.Foreground			#FFFFFF
 TextBox.Selection.Background			#3C45A5
 TextBox.Selection.Background.Inactive	#55575E
@@ -38,7 +38,7 @@ StatusBar.Foreground					#B5BAC1
 StatusBar.Background					#232428
 Control.Selected.Border					#5865F2
 Control.Foreground.Disabled				#949BA4
-Control.Background.Disabled				#1C1D20
+Control.Background.Disabled				#404248
 	
 Panel.Foreground						#B5BAC1
 Panel.Background						#2B2D31
@@ -97,7 +97,7 @@ OverlayButton.Disabled.Foreground		#80808020
 
 // Button (Disabled)	
 DisabledButton.Foreground				#6A6D74
-DisabledButton.Background				#4E505880 // 50% blend with background
+DisabledButton.Background				#404248
 DisabledButton.Border					#4E5058
 
 // Chat speech bubbles (colorful; text + background + border)

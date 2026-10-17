@@ -168,7 +168,9 @@ namespace fig::io
 
 	struct alignas(8) RecoveryFile
 	{
-		char magic[4] = { 'F', 'I', 'G', 'R' };
+		static constexpr fig::const_string MagicWord = "FIGM";
+
+		char magic[4] = { MagicWord[0], MagicWord[1], MagicWord[2], MagicWord[3] };
 		uint8_t recovery_version { 0 };
 		uint8_t reserved { 0 };
 		uint16_t profile_version { 0 };

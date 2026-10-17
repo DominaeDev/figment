@@ -86,18 +86,6 @@ namespace fig::gui
 		pProfileImageSizer->Add(_pPrevProfileBtn, -1, SizerFlag::AlignCenterVertical | SizerFlag::AlignRight | SizerFlag::Right, 16);
 		pProfileImageSizer->Add(_pProfileImage, 0);
 		pProfileImageSizer->Add(_pNextProfileBtn, -1, SizerFlag::AlignCenterVertical | SizerFlag::AlignLeft | SizerFlag::Left, 16);
-
-		auto& profiles = Global::GetUserManager().GetProfiles();
-		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)))
-			SelectProfile(lastProfile.value());
-		else
-		{
-			if (not profiles.empty())
-				SelectProfile(profiles.front());
-		}
-
-		_pPrevProfileBtn->SetVisible(profiles.size() > 1);
-		_pNextProfileBtn->SetVisible(profiles.size() > 1);
 	}
 
 	void LoginScreen::OnUpdate(float fElapsed)
@@ -175,8 +163,8 @@ namespace fig::gui
 			}
 			else if (profile.state == UserProfile::State::Locked)
 			{
-				_pPassword->Clear();
 				MainFrame::GetInstance().TrySignIn(profile, password);
+				_pPassword->Clear();
 			}
 		}
 		return false;
@@ -194,5 +182,20 @@ namespace fig::gui
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });
 
 		menu.Show(fig::point { _pMenuButton->GetX() + 4, _pMenuButton->GetY() + _pMenuButton->GetHeight() - 2 });
+	}
+
+	void LoginScreen::OnActivated()
+	{
+		auto& profiles = Global::GetUserManager().GetProfiles();
+		if (auto lastProfile = Global::GetUserManager().GetProfile(Global::GetSettings().GetUUID(AppSetting::LastUser)))
+			SelectProfile(lastProfile.value());
+		else
+		{
+			if (not profiles.empty())
+				SelectProfile(profiles.front());
+		}
+
+		_pPrevProfileBtn->SetVisible(profiles.size() > 1);
+		_pNextProfileBtn->SetVisible(profiles.size() > 1);
 	}
 }

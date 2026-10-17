@@ -214,6 +214,9 @@ namespace fig::gui
 		_mode = mode;
 		_bMultiline = _mode == Mode::Multiline or _mode == Mode::MultilineNoWrap or _mode == Mode::Chat;
 		_bWordWrap = _mode == Mode::Multiline or _mode == Mode::Chat or _mode == Mode::SingleWordWrap;
+
+		if (mode == Mode::Password and not (bool)_pPassword)
+			_pPassword = TTF_CreateText(GetSDLTextEngine(), _pFont, nullptr, 0);
 	}
 
 	void TextInput::OnUpdate(float fElapsed)
