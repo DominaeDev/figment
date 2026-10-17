@@ -456,9 +456,6 @@ namespace fig::user
 		const uint8_t* pKey = reinterpret_cast<const uint8_t*>(key.data());
 		for (size_t i = 0; i < key.size(); ++i)
 		{
-			if (i > 0 and i % 4 == 0)
-				code.append(" ");
-
 			auto& lut = recoveryLUT[i % recoveryLUT.size()];
 			assert(lut.size() == 512);
 			std::memcpy(tmp, lut.data() + ptrdiff_t((uint16_t)key[i] * 2), 2uz);

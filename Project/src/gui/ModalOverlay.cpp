@@ -94,6 +94,11 @@ namespace fig::gui
 		}
 	}
 
+	void ModalOverlay::OnRender(fig::renderer_ptr pRenderer)
+	{
+		// Don't call Control::OnRender
+	}
+
 	void ModalOverlay::OnSize()
 	{
 		if (_pBGImage)

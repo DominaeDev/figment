@@ -1,9 +1,11 @@
 #include <pch.h>
+#include "user/UserManager.h"
+#include "user/UserProfile.h"
 #include "gui/UserSettingsEditorProfileTab.h"
 #include "gui/TextBox.h"
 #include "gui/ButtonWithLabel.h"
-#include "user/UserManager.h"
-#include "user/UserProfile.h"
+#include "gui/RecoveryCodeModal.h"
+#include "gui/Frame.h"
 
 using namespace fig::auth;
 using namespace fig::user;
@@ -92,7 +94,8 @@ namespace fig::gui
 	{
 		if (auto code = Global::GetUserManager().GenerateNewRecoveryKey())
 		{
-			ShowDialogBox(std::format("Recovery code:\n{}", *code), DialogBoxType::Ok);
+			auto& dlg = GetOwnerFrame()->CreateModal<RecoveryCodeModal>(*code);
+			dlg.Show();
 		}
 	}
 

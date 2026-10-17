@@ -875,6 +875,9 @@
     <ClCompile Include="src\gui\UserSettingsEditorProfileTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\RecoveryCodeModal.cpp">
+      <Filter>Source Files\Frontend\GUI\Modals</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1980,6 +1983,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\UserSettingsEditorProfileTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\RecoveryCodeModal.h">
+      <Filter>Source Files\Frontend\GUI\Modals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

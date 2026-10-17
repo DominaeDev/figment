@@ -58,11 +58,6 @@ namespace fig::gui
 		ModalOverlay::OnUpdate(fElapsed);
 	}
 
-	void DialogBox::OnRender(fig::renderer_ptr pRenderer)
-	{
-		// Don't call Control::OnRender
-	}
-
 	void DialogBox::SetText(fig::string_view text)
 	{
 		constexpr fig::coord HPadding = 80;

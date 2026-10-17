@@ -20,6 +20,7 @@ namespace fig::gui
 		void BlurBackground();
 
 		void OnUpdate(float fElapsed) override;
+		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnSize() override;
 
 	private:

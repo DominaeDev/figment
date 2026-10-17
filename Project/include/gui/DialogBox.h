@@ -26,7 +26,6 @@ namespace fig::gui
 
 	protected:
 		void OnUpdate(float fElapsed) override;
-		void OnRender(fig::renderer_ptr pRenderer) override;
 		void OnSize() override;
 		EventResult OnEvent(fig::event& event) override;
 		void OnButton(DialogButton button);

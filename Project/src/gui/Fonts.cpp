@@ -4,11 +4,11 @@
 namespace fig::gui
 {
 	std::map<FontFace, const char*> s_FontFilenames {
-		{ FontFace::Regular,	"./resources/fonts/Nunito-Regular.ttf" },
-		{ FontFace::Italic,		"./resources/fonts/Nunito-Italic.ttf" },
-		{ FontFace::Bold,		"./resources/fonts/Nunito-Bold.ttf" },
+		{ FontFace::Regular,		"./resources/fonts/Nunito-Regular.ttf" },
+		{ FontFace::Italic,			"./resources/fonts/Nunito-Italic.ttf" },
+		{ FontFace::Bold,			"./resources/fonts/Nunito-Bold.ttf" },
 		{ FontFace::NunitoItalic,	"./resources/fonts/Nunito-MediumItalic.ttf" },
-		{ FontFace::CardHeader,	"./resources/fonts/Nunito-BoldItalic.ttf" },
+		{ FontFace::CardHeader,		"./resources/fonts/Nunito-BoldItalic.ttf" },
 	};
 
 	std::list<const char*> s_FallbackFontFilenames {
