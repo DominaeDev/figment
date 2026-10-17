@@ -90,7 +90,10 @@ namespace fig::gui
 
 	void UserSettingsEditorProfileTab::GenerateRecoveryCode()
 	{
-		Global::GetUserManager().GenerateNewRecoveryKey();
+		if (auto code = Global::GetUserManager().GenerateNewRecoveryKey())
+		{
+			ShowDialogBox(std::format("Recovery code:\n{}", *code), DialogBoxType::Ok);
+		}
 	}
 
 	void UserSettingsEditorProfileTab::ChangePassword()
