@@ -13,8 +13,6 @@ namespace fig
 	std::map<Resource, fig::sdl::Surface> AppResources::_surfaces;
 	std::map<Resource, fig::sdl::Texture> AppResources::_textures;
 	std::map<MaskType, Mask> AppResources::_masks;
-	std::map<fig::uuid, fig::sdl::Surface> AppResources::_profileSurfaces;
-	std::map<fig::uuid, fig::sdl::Texture> AppResources::_profileTextures;
 
 	void AppResources::Init(fig::renderer_ptr pRenderer)
 	{
@@ -290,44 +288,4 @@ namespace fig
 		return nullptr;
 	}
 
-	fig::texture_ptr AppResources::GetUserProfileImage(fig::renderer_ptr pRenderer, const fig::user::UserProfile& profile)
-	{
-		auto itFind = _profileTextures.find(profile.id);
-		if (itFind != _profileTextures.end())
-			return itFind->second.get();
-
-		fig::surface_ptr pSurface = nullptr;
-		if (auto itSurf = _profileSurfaces.find(profile.id); itSurf != _profileSurfaces.end())
-		{
-			pSurface = itSurf->second.get();
-		}
-		else
-		{
-			// Load from disk
-			if (auto result = AssetFileReader::ReadProfileFile(profile, std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt)); result.has_value())
-			{
-				const auto& asset = result.value();
-				auto width = asset.get_meta<uint16_t>(fig::io::MetaTag::ImageWidth).value_or(0);
-				auto height = asset.get_meta<uint16_t>(fig::io::MetaTag::ImageHeight).value_or(0);
-				auto format = static_cast<ImageFormat>(asset.get_meta<uint8_t>(fig::io::MetaTag::ImageFormat).value_or(0));
-
-				if (auto image = CreateSurfaceFromBytes(width, height, format, asset.data); not image.empty())
-				{
-					pSurface = image.get();
-					_profileSurfaces[profile.id] = std::move(image);
-				}
-			}
-		}
-
-		if (pSurface)
-		{
-			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, pSurface))
-			{
-				auto& texture = _profileTextures[profile.id] = fig::sdl::Texture::from_ptr(pTexture);
-				return texture.get();
-			}
-		}
-
-		return nullptr;
-	}
 }

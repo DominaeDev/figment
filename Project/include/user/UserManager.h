@@ -44,6 +44,8 @@ namespace fig::user
 		fig::io::FileError ChangeProfilePicture(const UserProfile& profile, const fig::sdl::Surface& image);
 
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::auth::AuthKey& outKey);
+		static fig::sdl::Surface GetProfileImage(const fig::user::UserProfile& profile);
+
 	private:
 		static bool Authenticate(const fig::auth::AuthChallenge& challenge, const fig::auth::AuthSalt& salt, const fig::auth::AuthKey& key, fig::auth::AuthKey& outKey, fig::auth::AuthVersion version = fig::auth::CurrentAuthVersion);
 		bool SignIn(UserProfile& profile, const fig::string& password);

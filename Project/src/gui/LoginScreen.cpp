@@ -125,10 +125,19 @@ namespace fig::gui
 			_pPasswordPanel->EnableLayout(false);
 		}
 
-		if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
-			_pProfileImage->SetTexture(pTexture, AppResources::GetTexture(Resource::MASK_CIRCLE));
+		if (auto profileImage = UserManager::GetProfileImage(profile))
+		{
+			if (auto pTexture = SDL_CreateTextureFromSurface(GetSDLRenderer(), profileImage.get()))
+			{
+				_pProfileImage->SetTexture(pTexture, AppResources::GetTexture(Resource::MASK_CIRCLE));
+				_profileImageTexture.reset(pTexture);
+			}
+		}
 		else
+		{
 			_pProfileImage->SetTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(Resource::MASK_CIRCLE));
+			_profileImageTexture.reset();
+		}
 
 		InvalidateLayout();
 	}

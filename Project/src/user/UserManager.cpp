@@ -127,6 +127,18 @@ namespace fig::user
 				_pContentManager->GetAssets().SaveNow();
 				SignOut();
 			}
+			
+			// Create recovery file
+			AuthKey recoveryKey;
+			AuthChallenge recoveryChallenge;
+			if (CreateRecoveryFile(profile, authKey, recoveryChallenge, recoveryKey))
+			{
+				profile.recovery = {
+					.challenge = recoveryChallenge,
+					.salt = authSalt,
+				};
+				db.UpdateProfile(profile);
+			}
 
 			_profiles.emplace_back(std::move(profile));
 			return make_optional_cref(_profiles.back());
@@ -408,7 +420,6 @@ namespace fig::user
 	
 		AuthKey encKey = DeriveKeyFromBytes(recoveryKey, salt);
 		recoveryChallenge = CreateAuthChallenge(authKey, salt, encKey);
-		
 		return AssetFileWriter::WriteRecoveryFile(profile, recoveryChallenge) == FileError::NoError;
 	}
 
@@ -546,6 +557,13 @@ namespace fig::user
 
 	FileError UserManager::ChangeProfilePicture(const UserProfile& profile, const fig::sdl::Surface& image)
 	{
+		auto filename = fig::path(std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt));
+
+		if (image.empty())
+		{
+			return DeleteFile(profile.GetPath() / filename);
+		}
+
 		if (auto profileImage = CreateProfileImage(image); not profileImage.empty() and profileImage->w > 0 and profileImage->h > 0)
 		{
 			auto pSurface = profileImage.get();
@@ -580,7 +598,6 @@ namespace fig::user
 			image_file.meta[MetaTag::ImageHeight] = static_cast<uint16_t>(pSurface->h);
 			image_file.meta[MetaTag::ImageFormat] = static_cast<uint8_t>(ImageFormat::RGB24);
 
-			auto filename = fig::path(std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt));
 			if (auto error = AssetFileWriter::WriteProfileFile(profile, filename, image_file); error != FileError::NoError)
 				return error;
 			return FileError::NoError;
@@ -589,5 +606,21 @@ namespace fig::user
 		{
 			return FileError::UnknownError;
 		}
+	}
+
+
+	fig::sdl::Surface UserManager::GetProfileImage(const fig::user::UserProfile& profile)
+	{
+		if (auto result = AssetFileReader::ReadProfileFile(profile, std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt)))
+		{
+			const auto& asset = result.value();
+			auto width = asset.get_meta<uint16_t>(fig::io::MetaTag::ImageWidth).value_or(0);
+			auto height = asset.get_meta<uint16_t>(fig::io::MetaTag::ImageHeight).value_or(0);
+			auto format = static_cast<ImageFormat>(asset.get_meta<uint8_t>(fig::io::MetaTag::ImageFormat).value_or(0));
+			if (auto image = CreateSurfaceFromBytes(width, height, format, asset.data))
+				return image;
+		}
+
+		return {};
 	}
 }

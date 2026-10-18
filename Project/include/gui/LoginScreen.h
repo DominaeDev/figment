@@ -39,6 +39,7 @@ namespace fig::gui
 		fig::observer_ptr<Panel> _pPasswordPanel;
 
 		fig::uuid _currentProfileId {};
+		fig::sdl::Texture _profileImageTexture {};
 	};
 
 	template <>

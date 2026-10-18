@@ -201,8 +201,6 @@ namespace fig
 		static fig::surface_ptr GetImage(Resource id) noexcept;
 		static MaskPtr GetMask(MaskType maskId);
 
-		static fig::texture_ptr GetUserProfileImage(fig::renderer_ptr pRenderer, const fig::user::UserProfile& profile);
-
 	private:
 		static bool LoadTexture(fig::renderer_ptr pRenderer, Resource textureId, fig::path filename);
 		static bool LoadTextureAndMaskCorners(fig::renderer_ptr pRenderer, Resource textureId, MaskType maskId, fig::path filename);
@@ -211,8 +209,5 @@ namespace fig
 		static std::map<Resource, fig::sdl::Surface> _surfaces;
 		static std::map<Resource, fig::sdl::Texture> _textures;
 		static std::map<MaskType, Mask> _masks;
-
-		static std::map<fig::uuid, fig::sdl::Surface> _profileSurfaces;
-		static std::map<fig::uuid, fig::sdl::Texture> _profileTextures;
 	};
 }

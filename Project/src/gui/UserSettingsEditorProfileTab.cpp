@@ -136,13 +136,23 @@ namespace fig::gui
 
 			if (_bChangedProfileImage)
 			{
-				if (auto profileImage = _pProfileImage->GetImage(Constants::Data::ProfileImageWidth, Constants::Data::ProfileImageHeight))
+				if (_bHasProfileImage)
 				{
-					if (Global::GetUserManager().ChangeProfilePicture(*profile, profileImage) == FileError::NoError)
-						LogLn("Changed profile image");
+					if (auto profileImage = _pProfileImage->GetImage(Constants::Data::ProfileImageWidth, Constants::Data::ProfileImageHeight))
+					{
+						if (Global::GetUserManager().ChangeProfilePicture(*profile, profileImage) == FileError::NoError)
+							LogLn("Changed profile image");
+						else
+							LogLn("Failed to change profile image");
+
+					}
+				}
+				else
+				{
+					if (Global::GetUserManager().ChangeProfilePicture(*profile, {}) == FileError::NoError)
+						LogLn("Removed profile image");
 					else
 						LogLn("Failed to change profile image");
-
 				}
 			}
 		}
@@ -290,6 +300,7 @@ namespace fig::gui
 			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
 			{
 				_pProfileImage->SetImage(*try_surface);
+				_bHasProfileImage = true;
 				_bChangedProfileImage = true;
 				bChanged = true;
 			}
@@ -301,9 +312,9 @@ namespace fig::gui
 	{
 		auto& profile = Global::GetUserManager().GetActiveProfile().value();
 
-		if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
+		if (auto profileImage = UserManager::GetProfileImage(profile))
 		{
-			_pProfileImage->SetTexture(pTexture);
+			_pProfileImage->SetImage(profileImage);
 			_bHasProfileImage = true;
 		}
 		else

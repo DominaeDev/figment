@@ -125,30 +125,6 @@ namespace fig
 		}
 	}
 
-	void DebugUtility::CreateProfilePic(const fig::path& path)
-	{
-		/*if constexpr (Debugging)
-		{
-			auto& userMngr = Global::GetUserManager();
-
-			if (userMngr.SignInDefaultProfile())
-			{
-				if (auto profile = userMngr.GetActiveProfile())
-				{
-					auto& assetMngr = userMngr.GetContent().GetAssets();
-					assetMngr.CreateProfilePicture(*profile, path);
-					userMngr.SignOut();
-				}
-
-// Create profile image
-		if (auto profileImage = LoadImage(filename)
-			.transform([](auto img) { return CreateProfileImage(img); });
-			profileImage.has_value() && profileImage.value()->w > 0)
-		
-			}
-		}*/
-	}
-
 	void DebugUtility::CreateModelSettings()
 	{
 		if constexpr (Debugging)

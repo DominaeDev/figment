@@ -5,6 +5,9 @@
 #include "gui/ButtonWithIcon.h"
 #include "gui/MainFrame.h"
 #include "gui/CustomRenderers.h"
+#include "user/UserManager.h"
+
+using namespace fig::user;
 
 namespace fig::gui
 {
@@ -31,8 +34,8 @@ namespace fig::gui
 	{
 		if (_pImage)
 		{
-			if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
-				_pImage->SetTexture(pTexture, AppResources::GetTexture(Resource::MASK_CIRCLE));
+			if (auto profileImage = UserManager::GetProfileImage(profile))
+				_pImage->SetImage(profileImage, AppResources::GetTexture(Resource::MASK_CIRCLE));
 			else
 				_pImage->SetTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(Resource::MASK_CIRCLE));
 		}

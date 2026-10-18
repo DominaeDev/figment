@@ -36,6 +36,14 @@ namespace fig::gui
 		}
 	}
 
+	void ImageWithMask::SetImage(const fig::sdl::Surface& surface, fig::texture_ptr pMask, bool bResize)
+	{
+		if (auto pTexture = SDL_CreateTextureFromSurface(GetSDLRenderer(), surface.get()))
+			SetTexture(pTexture, pMask, bResize);
+		else
+			SetTexture(nullptr, nullptr);
+	}
+
 	void ImageWithMask::SetTexture(fig::texture_ptr pTexture, fig::texture_ptr pMask, bool bResize)
 	{
 		if (!pTexture)
