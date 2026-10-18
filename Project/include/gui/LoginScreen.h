@@ -25,6 +25,8 @@ namespace fig::gui
 		void ShowMenu();
 		void OnActivated() override;
 
+		void CreateNewProfile();
+
 	private:
 		fig::observer_ptr<PasswordBox> _pPassword;
 		fig::observer_ptr<ImageWithMask> _pProfileImage;

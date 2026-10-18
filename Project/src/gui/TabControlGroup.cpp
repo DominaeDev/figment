@@ -46,16 +46,29 @@ namespace fig::gui
 			auto prev_index = index;
 			if (direction < 0)
 			{
-				if (index == 0uz)
-					index = _controls.size() - 1uz;
-				else
-					index--;
+				for (size_t tries = 0uz; tries < _controls.size(); ++tries)
+				{
+					if (index == 0uz)
+						index = _controls.size() - 1uz;
+					else
+						index--;
+
+					if (_controls[index]->CanFocus())
+						break;
+				}
 			}
 			else if (direction > 0)
 			{
-				if (++index == _controls.size())
-					index = 0uz;
+				for (size_t tries = 0uz; tries < _controls.size(); ++tries)
+				{
+					if (++index == _controls.size())
+						index = 0uz;
+
+					if (_controls[index]->CanFocus())
+						break;
+				}
 			}
+
 			_controls[prev_index]->SetFocus(false);
 			_controls[index]->SetFocus(true);
 			return true;

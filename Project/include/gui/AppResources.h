@@ -211,6 +211,7 @@ namespace fig
 		static std::map<Resource, fig::sdl::Surface> _surfaces;
 		static std::map<Resource, fig::sdl::Texture> _textures;
 		static std::map<MaskType, Mask> _masks;
+
 		static std::map<fig::uuid, fig::sdl::Surface> _profileSurfaces;
 		static std::map<fig::uuid, fig::sdl::Texture> _profileTextures;
 	};

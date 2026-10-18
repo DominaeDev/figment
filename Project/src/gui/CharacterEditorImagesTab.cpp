@@ -553,7 +553,7 @@ namespace fig::gui
 				and smallPortrait.get()->w == Constants::Data::SmallPortraitWidth
 				and smallPortrait.get()->h == Constants::Data::SmallPortraitHeight)
 			{
-				content.ReplaceSmallPortrait(_characterId, smallPortrait, {}); //! @todo: original asset
+				content.ReplaceSmallPortrait(_characterId, smallPortrait);
 			}
 			_pSmallPortrait->SetImage(smallPortrait);
 			_bEditingSmallPortrait = false;

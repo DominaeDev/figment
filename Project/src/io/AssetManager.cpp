@@ -916,50 +916,6 @@ namespace fig::io
 		return scenarioAsset;
 	}
 
-	FileError AssetManager::CreateProfilePicture(const fig::user::UserProfile& profile, fig::path filename)
-	{
-		// Create profile image
-		if (auto profileImage = LoadImage(filename)
-			.transform([](auto img) { return CreateProfileImage(img); });
-			profileImage.has_value() && profileImage.value()->w > 0)
-		{
-			auto pSurface = (*profileImage).get();
-			fig::bytes data;
-			if (SDL_LockSurface(pSurface))
-			{
-				size_t data_length = toUZ(pSurface->h * pSurface->pitch);
-
-				// Copy pixel data
-				data.resize(data_length);
-				std::memcpy(data.data(), (fig::byte*)pSurface->pixels, data_length);
-				SDL_UnlockSurface(pSurface);
-			}
-			else
-			{
-				return FileError::WriteError;
-			}
-
-			AssetFile image_file {
-				.parent_id {profile.id},
-				.type = make_asset_type(AssetType::Image, ImageAssetType::ProfileImage, DataFormat::ImageUncompressed),
-				.data_length { data.size() },
-				.data_encrypted { false },
-				.data { std::move(data) },
-			};
-			auto now = fig::now();
-			image_file.meta[MetaTag::CreatedAt] = now;
-			image_file.meta[MetaTag::UpdatedAt] = now;
-			image_file.meta[MetaTag::ImageWidth] = static_cast<uint16_t>(pSurface->w);
-			image_file.meta[MetaTag::ImageHeight] = static_cast<uint16_t>(pSurface->h);
-			image_file.meta[MetaTag::ImageFormat] = static_cast<uint8_t>(0x04);
-
-			auto filename = fig::path(std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt));
-			return AssetFileWriter::WriteProfileFile(profile, filename, image_file);
-		}
-
-		return FileError::UnknownError;
-	}
-
 	fig::uuid AssetManager::GenerateUUID() const noexcept
 	{
 		auto uuid = _CreateUUID();

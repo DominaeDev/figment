@@ -13,6 +13,7 @@ namespace fig::gui
 		bool Initialize(UserSettingsEditorArgs args) override;
 
 	protected:
+		void OnUpdate(float fElapsed) override;
 		void OnClose() noexcept override;
 		void OnTabSelected() override;
 
@@ -20,6 +21,15 @@ namespace fig::gui
 		void ChangePassword();
 		void ClearPassword();
 		void RefreshRecoveryCodeButton();
+		void RefreshDeleteButton();
+		
+		void OnClickedProfileImage();
+		void OpenFile();
+		void OnOpenFile(const fig::path& filename);
+		void ProcessLoadQueue();
+		void RevertProfileImage();
+		void RemoveProfileImage();
+		static void SDLCALL OnFileDialogResult(void* userdata, const char* const* fileList, int filter);
 
 	private:
 		fig::observer_ptr<TextBox> _pName;
@@ -27,5 +37,12 @@ namespace fig::gui
 		fig::observer_ptr<TextBox> _pNewPassword;
 		fig::observer_ptr<TextBox> _pConfirmPassword;
 		fig::observer_ptr<ButtonWithLabel> _pRecoveryCodeButton;
+		fig::observer_ptr<ButtonWithLabel> _pDeleteProfileButton;
+		fig::observer_ptr<class ProfileImageWidget> _pProfileImage;
+		std::array<fig::observer_ptr<CheckBox>, 3uz> _pConfirmCheckBoxes {};
+
+		std::queue<fig::path> _profileImageLoadQueue;
+		bool _bChangedProfileImage {};
+		bool _bHasProfileImage {};
 	};
 }

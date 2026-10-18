@@ -41,6 +41,7 @@ namespace fig::user
 		bool RecoverProfile(const fig::uuid& profileId, const fig::string& recoveryCode);
 		bool RecoverProfile(const fig::uuid& profileId, const fig::auth::AuthKey& recoveryKey);
 		bool ResetProfile(const fig::uuid& profileId);
+		fig::io::FileError ChangeProfilePicture(const UserProfile& profile, const fig::sdl::Surface& image);
 
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::auth::AuthKey& outKey);
 	private:

@@ -8,20 +8,21 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	static constexpr fig::coord CornerSize = 8;
-
-	ImageViewport::ImageViewport(ControlPtr pParent) : Control(pParent)
+	ImageViewport::ImageViewport(ControlPtr pParent, bool bClampZoom) : Control(pParent),
+		_bClampZoom { bClampZoom }
 	{
 		SetForegroundColor(Color::White);
 		SetBackgroundColor(Color::Transparent);
  
-		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, CornerSize);
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pBorder->SetColor(Color::Border);
-		SetMask(AppResources::GetTexture(Resource::MASK_CARD));
+		SetMask(AppResources::GetTexture(Resource::MASK_CARD), 8);
 	}
 
 	void ImageViewport::OnRender(fig::renderer_ptr pRenderer)
 	{
+		DrawBackground(pRenderer);
+
 		auto bgColor = GetBackgroundColor();
 		auto fgColor = GetForegroundColor();
 		if (bgColor && bgColor.a() != 0)
@@ -70,36 +71,37 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
-	float ImageViewport::GetFitScale() const
+	float ImageViewport::GetFitScale(fig::coord width, fig::coord height) const
 	{
-		float dstWidth = toF(GetWidth());
-		float dstHeight = toF(GetHeight());
+		float dstWidth = toF(width);
+		float dstHeight = toF(height);
 		float srcWidth = toF(_imageSize.x);
 		float srcHeight = toF(_imageSize.y);
 
-		if (srcWidth > dstWidth and srcHeight > dstHeight)
+		if ((srcWidth > dstWidth and srcHeight > dstHeight) or not _bClampZoom)
 			return std::max(dstWidth / srcWidth, dstHeight / srcHeight);
 		return 1.0f;
 	}
 
-	void ImageViewport::ClampOffset()
+	void ImageViewport::ClampOffset(fig::point& offset, fig::coord width, fig::coord height)
 	{
-		fig::rectf drawRect = CalcDrawRect(_fZoom, _offset);
-		float maxOffsetX = std::max(0.0f, (drawRect.w - toF(GetWidth())) / 2.0f);
-		float maxOffsetY = std::max(0.0f, (drawRect.h - toF(GetHeight())) / 2.0f);
-		_offset.x = std::clamp(_offset.x, toI(-maxOffsetX), toI(maxOffsetX));
-		_offset.y = std::clamp(_offset.y, toI(-maxOffsetY), toI(maxOffsetY));
+		fig::rectf drawRect = CalcDrawRect(width, height, _fZoom, offset);
+		float maxOffsetX = std::max(0.0f, (drawRect.w - toF(width)) / 2.0f);
+		float maxOffsetY = std::max(0.0f, (drawRect.h - toF(height)) / 2.0f);
+		offset.x = std::clamp(offset.x, toI(-maxOffsetX), toI(maxOffsetX));
+		offset.y = std::clamp(offset.y, toI(-maxOffsetY), toI(maxOffsetY));
 	}
 
-	fig::rectf ImageViewport::CalcDrawRect(float zoom, fig::point offset) const
+	fig::rectf ImageViewport::CalcDrawRect(fig::coord width, fig::coord height, float zoom, fig::point offset) const
 	{
-		float dstWidth = toF(GetWidth());
-		float dstHeight = toF(GetHeight());
+		float dstWidth = toF(width);
+		float dstHeight = toF(height);
 		float srcWidth = toF(_imageSize.x);
 		float srcHeight = toF(_imageSize.y);
-		float scale = GetFitScale() * zoom;
+		float scale = GetFitScale(width, height) * zoom;
 
-		scale = std::min(scale, 1.0f);
+		if (_bClampZoom)
+			scale = std::min(scale, 1.0f);
 
 		fig::rectf drawRect;
 		drawRect.w = srcWidth * scale;
@@ -129,23 +131,26 @@ namespace fig::gui
 		if (_fZoom == 1.0f && event.integer_y < 0)
 			return true; // Ignore, clamped
 
-		fig::rectf oldDrawRect = CalcDrawRect(_fZoom, _offset);
+		auto width = GetWidth();
+		auto height = GetHeight();
+
+		fig::rectf oldDrawRect = CalcDrawRect(width, height, _fZoom, _offset);
 		fig::point mouseLocal = { pt.x - rect.x, pt.y - rect.y };
 		float fractionX = (toF(mouseLocal.x) - oldDrawRect.x) / oldDrawRect.w;
 		float fractionY = (toF(mouseLocal.y) - oldDrawRect.y) / oldDrawRect.h;
 
 		float newZoom = _fZoom * std::pow(Constants::GUI::Chat::ImageZoomFactor, toF(event.integer_y));
 		_fZoom = std::max(newZoom, 1.0f);
-		_fZoom = std::min(_fZoom, 1.0f / GetFitScale());
+		_fZoom = std::min(_fZoom, 1.0f / GetFitScale(width, height));
 		
-		fig::rectf newDrawRect = CalcDrawRect(newZoom, { 0, 0 });
+		fig::rectf newDrawRect = CalcDrawRect(width, height, newZoom, { 0, 0 });
 		float newDrawRectX = toF(mouseLocal.x) - fractionX * newDrawRect.w;
 		float newDrawRectY = toF(mouseLocal.y) - fractionY * newDrawRect.h;
 
 		_offset.x = toI(newDrawRect.x - newDrawRectX);
 		_offset.y = toI(newDrawRect.y - newDrawRectY);
+		ClampOffset(_offset, width, height);
 
-		ClampOffset();
 		SetDirty();
 		return true;
 	}
@@ -179,8 +184,8 @@ namespace fig::gui
 
 		_offset.x = _mouseDownOffset.x - (toI(motionEvent.x) - _mouseDownPos.x);
 		_offset.y = _mouseDownOffset.y - (toI(motionEvent.y) - _mouseDownPos.y);
+		ClampOffset(_offset, GetWidth(), GetHeight());
 
-		ClampOffset();
 		SetDirty();
 
 		return true;
@@ -211,9 +216,10 @@ namespace fig::gui
 		SetDirty();
 	}
 
-	void ImageViewport::SetMask(fig::texture_ptr pTexture) noexcept
+	void ImageViewport::SetMask(fig::texture_ptr pTexture, fig::coord cornerSize) noexcept
 	{
 		_pMask = pTexture;
+		_cornerSize = cornerSize;
 		_bRedraw = true;
 		_bRedrawAlpha = true;
 	}
@@ -227,7 +233,7 @@ namespace fig::gui
 		{
 			_lastSize = fig::point { width, height };
 			_targetTexture.clear();
-			ClampOffset();
+			ClampOffset(_offset, GetWidth(), GetHeight());
 		}
 
 		auto pRenderer = GetSDLRenderer();
@@ -244,9 +250,7 @@ namespace fig::gui
 		auto priorRenderTarget = SDL_GetRenderTarget(pRenderer);
 		SDL_SetRenderTarget(pRenderer, pTarget);
 
-		constexpr float fCorner = toF(CornerSize);
-
-		fig::rectf drawRect = CalcDrawRect(_fZoom, _offset);
+		fig::rectf drawRect = CalcDrawRect(GetWidth(), GetHeight(), _fZoom, _offset);
 
 		// Render with alpha
 		if (_pMask)
@@ -256,7 +260,10 @@ namespace fig::gui
 				SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
 				SDL_RenderClear(pRenderer);
 				SDL_SetTextureBlendMode(_pMask, SDL_BLENDMODE_NONE);
-				SDL_RenderTexture9Grid(pRenderer, _pMask, nullptr, fCorner, fCorner, fCorner, fCorner, 1.0f, NULL);
+				if (_cornerSize)
+					SDL_RenderTexture9Grid(pRenderer, _pMask, NULL, toF(_cornerSize), toF(_cornerSize), toF(_cornerSize), toF(_cornerSize), 1.0f, NULL);
+				else
+					SDL_RenderTexture(pRenderer, _pMask, NULL, NULL);
 			}
 
 			SDL_BlendMode blendMode = SDL_ComposeCustomBlendMode(
@@ -328,7 +335,7 @@ namespace fig::gui
 	{
 		_fZoom = 1.0f;
 		_offset = {0, -_imageSize.y };
-		ClampOffset();
+		ClampOffset(_offset, GetWidth(), GetHeight());
 		SetDirty();
 	}
 

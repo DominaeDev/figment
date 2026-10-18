@@ -173,7 +173,8 @@ namespace fig::gui
 	void LoginScreen::ShowMenu()
 	{
 		auto& menu = CreateMenu();
-		menu.AddItem("New profile\u2026");
+		menu.AddItem("Create new profile")
+			.SetDelegate([this] { CreateNewProfile(); });
 		menu.AddItem("Recover profile\u2026");
 		menu.AddSeparator();
 		menu.AddItem("Settings\u2026", Resource::ICON_SETTINGS);
@@ -197,5 +198,11 @@ namespace fig::gui
 
 		_pPrevProfileBtn->SetVisible(profiles.size() > 1);
 		_pNextProfileBtn->SetVisible(profiles.size() > 1);
+	}
+
+	void LoginScreen::CreateNewProfile()
+	{
+		if (auto profile = Global::GetUserManager().CreateProfile("New profile", ""))
+			MainFrame::GetInstance().TrySignIn(*profile, "");
 	}
 }

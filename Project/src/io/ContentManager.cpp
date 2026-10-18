@@ -662,7 +662,7 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	fig::optional_cref<Asset> UserContentManager::ReplaceSmallPortrait(const fig::uuid& characterId, const fig::sdl::Surface& image, const fig::uuid& originalAssetId)
+	fig::optional_cref<Asset> UserContentManager::ReplaceSmallPortrait(const fig::uuid& characterId, const fig::sdl::Surface& image)
 	{
 		// Find prior small portrait
 		fig::uuid previousSmallPortrait;
@@ -673,13 +673,6 @@ namespace fig::io
 		{
 			// Create new small portrait asset
 			auto& smallPortraitAsset = _pAssetMngr->CreateBitmapAsset(ImageAssetType::SmallPortrait, image, characterId);
-
-			if (not originalAssetId.empty())
-			{
-				_pAssetMngr->ModifyAsset(smallPortraitAsset, [&originalAssetId](auto&& asset) {
-					asset.SetMeta(MetaTag::ReferenceToOriginal, originalAssetId);
-				});
-			}
 
 			// Delete previous cover asset
 			if (not previousSmallPortrait.empty())

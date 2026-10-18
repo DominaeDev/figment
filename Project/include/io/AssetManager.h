@@ -108,8 +108,6 @@ namespace fig::io
 		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 		
-		static FileError CreateProfilePicture(const fig::user::UserProfile& profile, fig::path imageFilename);
-
 		[[nodiscard]] AsyncLoad LoadAssetAsync(const fig::uuid& assetId, AsyncTask task, int32_t priority);
 		void CancelAsync(const fig::uuid& assetId);
 		void CancelAllAsync();

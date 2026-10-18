@@ -88,12 +88,14 @@ namespace fig
 		fig::sdl::Surface pScaledSurface;
 		pScaledSurface.reset(pSurface);
 
+		if (surface->w == width and surface->h == height)
+			fit = ImageFit::None;
+
 		if (fit == ImageFit::None)
 		{
 			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
 			fig::rect dstRect { 0, 0, width, height };
 			SDL_BlitSurface(pImage, &srcRect, pSurface, &dstRect);
-
 		}
 		else if (fit == ImageFit::Stretch)
 		{
@@ -304,11 +306,29 @@ namespace fig
 
 	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface)
 	{
-		auto pSurface = SDL_CreateSurface(Constants::GUI::ProfileImageWidth, Constants::GUI::ProfileImageWidth, SDL_PIXELFORMAT_RGBA8888);
-		if (not (bool)pSurface)
-			return {};
+		if (not surface.empty())
+		{
+			auto width = Constants::Data::ProfileImageWidth;
+			auto height = Constants::Data::ProfileImageHeight;
 
-		return ScaleSurface(surface, Constants::GUI::ProfileImageWidth, Constants::GUI::ProfileImageWidth, ImageFit::Portrait);
+			if (auto pSurface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGB24))
+			{
+				if (surface->w == width and surface->h == height)
+				{
+					fig::rect srcRect { 0, 0, surface->w, surface->h };
+					fig::rect dstRect { 0, 0, width, height };
+					SDL_BlitSurface(surface.get(), &srcRect, pSurface, &dstRect);
+				}
+				else
+				{
+					fig::rect srcRect { 0, 0, surface->w, surface->h };
+					fig::rect dstRect { 0, 0, width, height };
+					SDL_StretchSurface(surface.get(), &srcRect, pSurface, &dstRect, SDL_SCALEMODE_LINEAR);
+				}
+				return fig::sdl::Surface::from_ptr(pSurface);
+			}
+		}
+		return {};
 	}
 
 	fig::sdl::Surface CreateSurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data)

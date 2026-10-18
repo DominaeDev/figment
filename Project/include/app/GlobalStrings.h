@@ -6,89 +6,101 @@ namespace fig::strings
 {
 	namespace Status
 	{
-		inline constexpr fig::const_string LoadingModel = 
+		constexpr fig::const_string LoadingModel = 
 			"Loading model\u2026";
-		inline constexpr fig::const_string LoadingModelPercentFmt = 
+		constexpr fig::const_string LoadingModelPercentFmt = 
 			"Loading model\u2026 {0}%";
-		inline constexpr fig::const_string InitializingChat = 
+		constexpr fig::const_string InitializingChat = 
 			"Initializing chat\u2026";
-		inline constexpr fig::const_string ChatInitialized = 
+		constexpr fig::const_string ChatInitialized = 
 			"Chat initialized";
-		inline constexpr fig::const_string FailedToInitializeChat = 
+		constexpr fig::const_string FailedToInitializeChat = 
 			"Failed to initialize chat";
-		inline constexpr fig::const_string ModelLoaded = 
+		constexpr fig::const_string ModelLoaded = 
 			"Model loaded successfully";
-		inline constexpr fig::const_string ModelUnloaded = 
+		constexpr fig::const_string ModelUnloaded = 
 			"Model unloaded";
-		inline constexpr fig::const_string FailedToLoadModel = 
+		constexpr fig::const_string FailedToLoadModel = 
 			"Failed to load model";
-		inline constexpr fig::const_string GeneratingResponse = 
+		constexpr fig::const_string GeneratingResponse = 
 			"Generating response\u2026";
-		inline constexpr fig::const_string RebuildingContext = 
+		constexpr fig::const_string RebuildingContext = 
 			"Rebuilding context\u2026";
-		inline constexpr fig::const_string Ready = 
+		constexpr fig::const_string Ready = 
 			"Ready";
 	}
 
-	namespace UserProfile
+	namespace User
 	{
-		inline constexpr fig::const_string DefaultUser =
+		constexpr fig::const_string DefaultUser =
 			"Default User";
 	}
 
 	namespace LoadModelWidget
 	{
-		inline constexpr fig::const_string ModelLoading =
+		constexpr fig::const_string ModelLoading =
 			"Loading\u2026";
-		inline constexpr fig::const_string ModelLoaded =
+		constexpr fig::const_string ModelLoaded =
 			"Ready";
-		inline constexpr fig::const_string ModelUnloaded =
+		constexpr fig::const_string ModelUnloaded =
 			"Not ready";
-		inline constexpr fig::const_string ModelError =
+		constexpr fig::const_string ModelError =
 			"Load error";
 	}
 
 	namespace UI
 	{
-		inline constexpr fig::const_string MenuRecentChats =
+		constexpr fig::const_string MenuRecentChats =
 			"Chats";
-		inline constexpr fig::const_string MenuCharacters =
+		constexpr fig::const_string MenuCharacters =
 			"Characters";
-		inline constexpr fig::const_string MenuScenarios =
+		constexpr fig::const_string MenuScenarios =
 			"Stories";
-		inline constexpr fig::const_string MenuWorlds =
+		constexpr fig::const_string MenuWorlds =
 			"Worlds";
-		inline constexpr fig::const_string New =
+		constexpr fig::const_string New =
 			"New";
 	}
 
 	namespace TTS
 	{
-		inline constexpr fig::const_string Generating =
+		constexpr fig::const_string Generating =
 			"Generating voice sample\u2026";
-		inline constexpr fig::const_string ServerInitializing =
+		constexpr fig::const_string ServerInitializing =
 			"Text-to-speech server is starting up\u2026";
-		inline constexpr fig::const_string ServerUnavailable =
+		constexpr fig::const_string ServerUnavailable =
 			"Text-to-speech server is unavailable";
-		inline constexpr fig::const_string LoadingModel =
+		constexpr fig::const_string LoadingModel =
 			"Loading voice model\u2026";
-		inline constexpr fig::const_string ErrorOccurred =
+		constexpr fig::const_string ErrorOccurred =
 			"An error occurred";
-		inline constexpr fig::const_string PlayingSound =
+		constexpr fig::const_string PlayingSound =
 			"Playing\u2026";
 	}
 
 	namespace Error
 	{
-		inline constexpr const_string FileErrorMessage = 
+		constexpr const_string FileErrorMessage = 
 			"File error (0x{:02X})";
-		inline constexpr const_string FileAccessErrorMessage = 
+		constexpr const_string FileAccessErrorMessage = 
 			"File access denied";
-		inline constexpr const_string DiskFullErrorMessage = 
+		constexpr const_string DiskFullErrorMessage = 
 			"Disk is full";
-		inline constexpr const_string VerificationErrorMessage = 
+		constexpr const_string VerificationErrorMessage = 
 			"Verification failed";
-		inline constexpr const_string DownloadErrorMessage = 
+		constexpr const_string DownloadErrorMessage = 
 			"Download failed";
+	}
+
+	namespace ProfileSettings
+	{
+		constexpr const_string RecoveryCodeHint =
+			"In the event that you forget your password, you can use a recovery code to reset it. Make sure you write it down and store it securely. When a new recovery code is generated, any prior code will be rendered invalid.";
+		constexpr const_string ConfirmationFailedError =
+			"Password confirmation does not match.\nPlease try again.";
+		constexpr const_string IncorrectPasswordError =
+			"Incorrect password.\nPlease try again.";
+		constexpr const_string PasswordChanged =
+			"Password has been successfully changed.";
 	}
 }

@@ -83,7 +83,7 @@ namespace fig::user
 
 	fig::optional_cref<UserProfile> UserManager::CreateDefaultProfile()
 	{
-		return CreateProfile(fig::string(fig::strings::UserProfile::DefaultUser), "");
+		return CreateProfile(fig::string(fig::strings::User::DefaultUser), "");
 	}
 
 	fig::optional_cref<UserProfile> UserManager::CreateProfile(const fig::string& name, const fig::string& password)
@@ -110,9 +110,24 @@ namespace fig::user
 			.state { password.empty() ? UserProfile::State::Open : UserProfile::State::Locked }
 		};
 
-		// Generate recovery key
+		SignOut();
+
+		// Write to db
 		if (db.CreateProfile(profile) == DatabaseError::NoError)
 		{
+			// Create path
+			auto path = profile.GetPath();
+			if (not std::filesystem::exists(path))
+				std::filesystem::create_directory(path);
+
+			// Write profile files
+			if (SignIn(profile, password))
+			{
+				_pUserSettings->Save();
+				_pContentManager->GetAssets().SaveNow();
+				SignOut();
+			}
+
 			_profiles.emplace_back(std::move(profile));
 			return make_optional_cref(_profiles.back());
 		}
@@ -271,7 +286,12 @@ namespace fig::user
 		profile.version = CurrentAuthVersion;
 		profile.recovery = {};
 
-		return GetDatabase().UpdateProfile(profile) == DatabaseError::NoError;
+		if (GetDatabase().UpdateProfile(profile) == DatabaseError::NoError)
+		{
+			GenerateNewRecoveryKey();
+			return true;
+		}
+		return false;
 	}
 
 	bool UserManager::ResetProfile(const fig::uuid& profileId)
@@ -522,5 +542,52 @@ namespace fig::user
 		}
 
 		return false;
+	}
+
+	FileError UserManager::ChangeProfilePicture(const UserProfile& profile, const fig::sdl::Surface& image)
+	{
+		if (auto profileImage = CreateProfileImage(image); not profileImage.empty() and profileImage->w > 0 and profileImage->h > 0)
+		{
+			auto pSurface = profileImage.get();
+
+			fig::bytes data;
+			if (SDL_LockSurface(pSurface))
+			{
+				size_t data_length = toUZ(pSurface->h * pSurface->pitch);
+
+				// Copy pixel data
+				data.resize(data_length);
+				std::memcpy(data.data(), (fig::byte*)pSurface->pixels, data_length);
+				SDL_UnlockSurface(pSurface);
+			}
+			else
+			{
+				return FileError::WriteError;
+			}
+
+			AssetFile image_file {
+				.parent_id { profile.id },
+				.type = make_asset_type(AssetType::Image, ImageAssetType::ProfileImage, DataFormat::ImageUncompressed),
+				.data_length { data.size() },
+				.data_encrypted { false },
+				.data { std::move(data) },
+			};
+
+			auto now = fig::now();
+			image_file.meta[MetaTag::CreatedAt] = now;
+			image_file.meta[MetaTag::UpdatedAt] = now;
+			image_file.meta[MetaTag::ImageWidth] = static_cast<uint16_t>(pSurface->w);
+			image_file.meta[MetaTag::ImageHeight] = static_cast<uint16_t>(pSurface->h);
+			image_file.meta[MetaTag::ImageFormat] = static_cast<uint8_t>(ImageFormat::RGB24);
+
+			auto filename = fig::path(std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt));
+			if (auto error = AssetFileWriter::WriteProfileFile(profile, filename, image_file); error != FileError::NoError)
+				return error;
+			return FileError::NoError;
+		}
+		else
+		{
+			return FileError::UnknownError;
+		}
 	}
 }

@@ -878,6 +878,9 @@
     <ClCompile Include="src\gui\RecoveryCodeModal.cpp">
       <Filter>Source Files\Frontend\GUI\Modals</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ProfileImageWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1986,6 +1989,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\RecoveryCodeModal.h">
       <Filter>Source Files\Frontend\GUI\Modals</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ProfileImageWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

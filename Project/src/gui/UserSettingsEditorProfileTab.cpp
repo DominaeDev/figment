@@ -5,10 +5,17 @@
 #include "gui/TextBox.h"
 #include "gui/ButtonWithLabel.h"
 #include "gui/RecoveryCodeModal.h"
+#include "gui/CheckBox.h"
 #include "gui/Frame.h"
+#include "gui/Menu.h"
+#include "gui/AppResources.h"
+#include "gui/ProfileImageWidget.h"
+#include "io/FileUtility.h"
 
 using namespace fig::auth;
 using namespace fig::user;
+using namespace fig::strings;
+using namespace fig::io;
 
 namespace fig::gui
 {
@@ -21,12 +28,29 @@ namespace fig::gui
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
 
-		CreateLabel(this, pSizer, "Profile name");
-		_pName = CreateTextBox(this, pSizer);
-		_pName->SetMaxWidth(300);
-		_pName->SetText(Global::GetUserManager().GetActiveProfile()->name);
+		auto& profile = Global::GetUserManager().GetActiveProfile().value();
 
-		pSizer->AddSpacer(12);
+		CreateHeader(this, pSizer, "User profile");
+
+		auto pHSizer = new HorizontalSizer();
+		auto pColumn1 = new VerticalSizer();
+		auto pColumn2 = new VerticalSizer();
+		pHSizer->Add(pColumn1, 0, SizerFlag::FixedSize, 140);
+		pHSizer->Add(pColumn2, -1);
+
+		CreateLabel(this, pColumn1, "Profile picture");
+		_pProfileImage = CreateControl<ProfileImageWidget>();
+		_pProfileImage->SetRightClickDelegate([this]() { OnClickedProfileImage(); });
+		pColumn1->Add(_pProfileImage, 0);
+		
+		RevertProfileImage();
+
+		CreateLabel(this, pColumn2, "Profile name");
+		_pName = CreateTextBox(this, pColumn2);
+		_pName->SetMaxWidth(300);
+		_pName->SetText(profile.name);
+
+		pSizer->Add(pHSizer, 0, SizerFlag::FixedSize, 156);
 
 		CreateHorizontalLine(this, pSizer);
 		CreateHeader(this, pSizer, "Change password");
@@ -57,30 +81,70 @@ namespace fig::gui
 		CreateHorizontalLine(this, pSizer);
 		CreateHeader(this, pSizer, "Profile recovery");
 
-		auto pHint = CreateHint(this, pSizer, "In the event that you forget your password, you can use a recovery code to reset it. Make sure you write it down and store it securely. When a new recovery code is generated, any prior code will be rendered invalid.");
-		pHint->SetMaxWidth(480);
-
-		pSizer->AddSpacer(52); //! @todo: hint height?
-
 		_pRecoveryCodeButton = CreateControl<ButtonWithLabel>("Generate recovery code");
 		_pRecoveryCodeButton->SetHeight(35);
 		_pRecoveryCodeButton->SetDelegate([this] { GenerateRecoveryCode(); });
-
 		pSizer->Add(_pRecoveryCodeButton, 0);
+		pSizer->AddSpacer(4);
+
+		auto pHint = CreateHint(this, pSizer, ProfileSettings::RecoveryCodeHint);
+		pHint->SetMaxWidth(480);
+
+		pSizer->AddSpacer(46); //! @todo: hint height?
+
+		// Delete account
+
+		CreateHorizontalLine(this, pSizer);
+		CreateHeader(this, pSizer, "Danger zone");
+
+		_pDeleteProfileButton = CreateControl<ButtonWithLabel>("Delete profile");
+		_pDeleteProfileButton->SetHeight(35);
+		_pDeleteProfileButton->SetDelegate([this] { /* ... */ });
+		pSizer->Add(_pDeleteProfileButton, 0, SizerFlag::Bottom, 4);
+
+		_pConfirmCheckBoxes[0] = CreateControl<CheckBox>("Yes, I want to delete this profile");
+		_pConfirmCheckBoxes[1] = CreateControl<CheckBox>("I am positively sure");
+		_pConfirmCheckBoxes[2] = CreateControl<CheckBox>("And I will not regret it");
+		for (auto& pCB : _pConfirmCheckBoxes)
+		{
+			pCB->SetDelegate([this](bool b) { RefreshDeleteButton(); });
+			pSizer->Add(pCB, 0);
+		}
+		pSizer->AddSpacer(8);
 
 		CreateTabGroup();
-
 		return true;
+	}
+
+	void UserSettingsEditorProfileTab::OnUpdate(float fElapsed)
+	{
+		// Load images in load queue
+		ProcessLoadQueue();
 	}
 
 	void UserSettingsEditorProfileTab::OnClose() noexcept
 	{
-		if (auto newName = trim(_pName->GetText()); not empty_or_whitespace(newName) and Global::GetUserManager().GetActiveProfile()->name != newName)
+		if (auto profile = Global::GetUserManager().GetActiveProfile())
 		{
-			if (Global::GetUserManager().ChangeProfileName(Global::GetUserManager().GetActiveProfile()->id, fig::string { newName }))
-				LogLn(std::format("Changed profile name to '{}'", newName));
-			else
-				LogLn("Failed to change name");
+			if (auto newName = trim(_pName->GetText()); not empty_or_whitespace(newName) and Global::GetUserManager().GetActiveProfile()->name != newName)
+			{
+				if (Global::GetUserManager().ChangeProfileName((*profile).id, fig::string { newName }))
+					LogLn(std::format("Changed profile name to '{}'", newName));
+				else
+					LogLn("Failed to change name");
+			}
+
+			if (_bChangedProfileImage)
+			{
+				if (auto profileImage = _pProfileImage->GetImage(Constants::Data::ProfileImageWidth, Constants::Data::ProfileImageHeight))
+				{
+					if (Global::GetUserManager().ChangeProfilePicture(*profile, profileImage) == FileError::NoError)
+						LogLn("Changed profile image");
+					else
+						LogLn("Failed to change profile image");
+
+				}
+			}
 		}
 	}
 
@@ -88,6 +152,10 @@ namespace fig::gui
 	{
 		ClearPassword();
 		RefreshRecoveryCodeButton();
+
+		for (auto& pCB : _pConfirmCheckBoxes)
+			pCB->SetValue(false, true);
+		RefreshDeleteButton();
 	}
 
 	void UserSettingsEditorProfileTab::GenerateRecoveryCode()
@@ -107,7 +175,7 @@ namespace fig::gui
 
 		if (newPassword != confirmPassword)
 		{
-			ShowDialogBox("Password conformation does not match.\nPlease try again.", DialogBoxType::Ok);
+			ShowDialogBox(ProfileSettings::ConfirmationFailedError, DialogBoxType::Ok);
 			ClearPassword();
 			return;
 		}
@@ -117,14 +185,14 @@ namespace fig::gui
 			AuthKey tmp;
 			if (not UserManager::Authenticate(*profile, oldPassword, tmp))
 			{
-				ShowDialogBox("Incorrect password.\nPlease try again.", DialogBoxType::Ok);
+				ShowDialogBox(ProfileSettings::IncorrectPasswordError, DialogBoxType::Ok);
 				ClearPassword();
 				return;
 			}
 
 			if (auto code = Global::GetUserManager().ChangePassword((*profile).id, oldPassword, newPassword))
 			{
-				ShowDialogBox("Password has been successfully changed.", DialogBoxType::Ok);
+				ShowDialogBox(ProfileSettings::PasswordChanged, DialogBoxType::Ok);
 				ClearPassword();
 				RefreshRecoveryCodeButton();
 				return;
@@ -149,6 +217,112 @@ namespace fig::gui
 	{
 		if (_pRecoveryCodeButton)
 			_pRecoveryCodeButton->SetEnabled(Global::IsSignedIn() and Global::GetUserManager().GetActiveProfile()->state == UserProfile::State::Locked);
+	}
+
+	void UserSettingsEditorProfileTab::RefreshDeleteButton()
+	{
+		if (not _pConfirmCheckBoxes[0]->GetValue())
+			_pConfirmCheckBoxes[1]->SetValue(false, true);
+		if (not _pConfirmCheckBoxes[1]->GetValue())
+			_pConfirmCheckBoxes[2]->SetValue(false, true);
+		_pConfirmCheckBoxes[1]->SetEnabled(_pConfirmCheckBoxes[0]->GetValue());
+		_pConfirmCheckBoxes[2]->SetEnabled(_pConfirmCheckBoxes[1]->GetValue());
+		_pDeleteProfileButton->SetEnabled(_pConfirmCheckBoxes[0]->GetValue() and _pConfirmCheckBoxes[1]->GetValue() and _pConfirmCheckBoxes[2]->GetValue());
+	}
+
+	void SDLCALL UserSettingsEditorProfileTab::OnFileDialogResult(void* userdata, const char* const* fileList, int filter)
+	{
+		if (not fileList)
+			return;
+
+		auto pThis = static_cast<UserSettingsEditorProfileTab*>(userdata);
+		for (const char* const* path = fileList; *path; ++path)
+			pThis->OnOpenFile(std::filesystem::u8path(*path));
+	}
+
+	void UserSettingsEditorProfileTab::OpenFile()
+	{
+		static constexpr SDL_DialogFileFilter filters[] =
+		{
+			{ "Image files", "bmp;gif;jpg;jpeg;jfif;png;webp" },
+			{ "BMP files", "bmp" },
+			{ "GIF files", "gif" },
+			{ "JPEG files", "jpg;jpeg;jfif" },
+			{ "PNG files", "png" },
+			{ "WEBP files", "webp" },
+		};
+
+		SDL_ShowOpenFileDialog(OnFileDialogResult, (void*)this, GetSDLWindow(), filters, SDL_arraysize(filters), nullptr, false);
+	}
+
+	void UserSettingsEditorProfileTab::OnOpenFile(const fig::path& filename)
+	{
+		_profileImageLoadQueue.push(filename);
+	}
+
+	void UserSettingsEditorProfileTab::OnClickedProfileImage()
+	{
+		auto& menu = CreateMenu();
+		menu.AddItem("Load image\u2026")
+			.SetDelegate([this] { OpenFile(); });
+		menu.AddSeparator();
+		menu.AddItem("Revert")
+			.SetDelegate([this] { RevertProfileImage(); })
+			.SetEnabled(_bChangedProfileImage);
+		menu.AddItem("Remove")
+			.SetDelegate([this] { RemoveProfileImage(); })
+			.SetEnabled(_bHasProfileImage);
+		menu.Show();
+	}
+
+	void UserSettingsEditorProfileTab::ProcessLoadQueue()
+	{
+		if (_profileImageLoadQueue.empty())
+			return;
+
+		bool bChanged = false;
+
+		// Load small portrait
+		if (not _profileImageLoadQueue.empty())
+		{
+			auto& path = _profileImageLoadQueue.front();
+			auto data = fig::io::ReadFile(path).value_or({});
+			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
+			{
+				_pProfileImage->SetImage(*try_surface);
+				_bChangedProfileImage = true;
+				bChanged = true;
+			}
+			queue_clear(_profileImageLoadQueue);
+		}
+	}
+
+	void UserSettingsEditorProfileTab::RevertProfileImage()
+	{
+		auto& profile = Global::GetUserManager().GetActiveProfile().value();
+
+		if (auto pTexture = AppResources::GetUserProfileImage(GetSDLRenderer(), profile); pTexture)
+		{
+			_pProfileImage->SetTexture(pTexture);
+			_bHasProfileImage = true;
+		}
+		else
+		{
+			_pProfileImage->SetTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE));
+			_bHasProfileImage = false;
+		}
+		_pProfileImage->SetEditable(false);
+		_bChangedProfileImage = false;
+	}
+
+	void UserSettingsEditorProfileTab::RemoveProfileImage()
+	{
+		auto& profile = Global::GetUserManager().GetActiveProfile().value();
+
+		_pProfileImage->SetTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE));
+		_pProfileImage->SetEditable(false);
+		_bHasProfileImage = false;
+		_bChangedProfileImage = true;
 	}
 
 }

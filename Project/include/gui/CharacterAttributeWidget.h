@@ -27,6 +27,7 @@ namespace fig::gui
 
 		void SetLabel(fig::string_view label);
 		void SetFocus(bool bFocused);
+		bool CanFocus() const { return true; }
 		bool IsFocused() const;
 
 		using EditNameDelegate = std::function<void(fig::string)>;

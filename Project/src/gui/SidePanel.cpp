@@ -43,11 +43,7 @@ namespace fig::gui
 			Global::GetUserSettings().GetBool(UserSetting::Interface::SidePanelCollapsed) ? Collapse() : Expand();
 			return EventResult::Continue;
 		}
-		else if (IsUserEvent(event, UserEvent::UserSignedOut))
-		{
-			return EventResult::Continue;
-		}
-
+		
 		if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 		{
 			SDL_KeyboardEvent& keyEvent = event.key;

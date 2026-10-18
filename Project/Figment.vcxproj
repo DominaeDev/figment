@@ -243,6 +243,7 @@
     <ClCompile Include="src\gui\PasswordBox.cpp" />
     <ClCompile Include="src\gui\PlayButton.cpp" />
     <ClCompile Include="src\gui\PreviewCardImage.cpp" />
+    <ClCompile Include="src\gui\ProfileImageWidget.cpp" />
     <ClCompile Include="src\gui\RecoveryCodeModal.cpp" />
     <ClCompile Include="src\gui\RenderTargetControl.cpp" />
     <ClCompile Include="src\gui\ResizeableImageViewport.cpp" />
@@ -578,6 +579,7 @@
     <ClInclude Include="include\gui\PasswordBox.h" />
     <ClInclude Include="include\gui\PlayButton.h" />
     <ClInclude Include="include\gui\PreviewCardImage.h" />
+    <ClInclude Include="include\gui\ProfileImageWidget.h" />
     <ClInclude Include="include\gui\RecoveryCodeModal.h" />
     <ClInclude Include="include\gui\RenderTargetControl.h" />
     <ClInclude Include="include\gui\ResizeableImageViewport.h" />

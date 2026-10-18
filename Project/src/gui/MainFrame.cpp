@@ -231,14 +231,15 @@ namespace fig::gui
 
 	void MainFrame::OnSignedIn(const fig::user::UserProfile& profile) noexcept
 	{
-		// Remember
 		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
-		ChangeColorTheme(Global::GetUserSettings().GetColorTheme(), false);
-
 		ChangeScreen(ScreenType::Home);
 		PushEvent(UserEvent::UserSignedIn, &profile);
+
+		auto theme = Global::GetUserSettings().GetColorTheme();
+		AppColors::SetTheme(theme, false);
+		PushEvent(UserEvent::ColorThemeChanged);
 	}
 
 	void MainFrame::OnSignedOut() noexcept
@@ -284,6 +285,7 @@ namespace fig::gui
 				modelSettings = try_model_settings.value();
 			else
 			{
+				LogLn("No model settings.");
 				PushEvent(UserEvent::LLMModelLoadFailure);
 				return;
 			}

@@ -33,9 +33,6 @@ namespace fig::Constants
 		constexpr float MouseScrollSpeed = 140.0f;
 		constexpr float MouseScrollSmoothing = 14.0f;
 		
-		constexpr int32_t ProfileImageWidth = 256;
-		constexpr int32_t ProfileImageHeight = 256;
-
 		namespace Cards
 		{
 			constexpr fig::coord SpacingX = 16;
@@ -246,6 +243,8 @@ namespace fig::Constants
 		constexpr int32_t PortraitThumbnailHeight = 128;
 		constexpr int32_t LandscapeThumbnailWidth = 128;
 		constexpr int32_t LandscapeThumbnailHeight = 100;
+		constexpr int32_t ProfileImageWidth = 256;
+		constexpr int32_t ProfileImageHeight = 256;
 	}
 
 	namespace TTS

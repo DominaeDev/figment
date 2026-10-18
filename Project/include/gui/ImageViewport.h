@@ -7,11 +7,11 @@ namespace fig::gui
 	class ImageViewport : public Control
 	{
 	public:
-		ImageViewport(ControlPtr pParent);
+		ImageViewport(ControlPtr pParent, bool bClampZoom = true);
 		
 		void SetTexture(fig::texture_ptr pTexture) noexcept;
 		void SetBackgroundTexture(fig::texture_ptr pBGTexture) noexcept;
-		void SetMask(fig::texture_ptr pTexture) noexcept;
+		void SetMask(fig::texture_ptr pTexture, fig::coord cornerSize) noexcept;
 
 		void ResetTransform();
 		bool IsTransforming() const noexcept { return _bMouseDown; }
@@ -27,9 +27,9 @@ namespace fig::gui
 		bool HandleMouseDown(SDL_MouseButtonEvent& event);
 		bool HandleMouseUp(SDL_MouseButtonEvent& event);
 
-		float GetFitScale() const;
-		fig::rectf CalcDrawRect(float zoom, fig::point offset) const;
-		void ClampOffset();
+		float GetFitScale(fig::coord width, fig::coord height) const;
+		void ClampOffset(fig::point& offset, fig::coord width, fig::coord height);
+		fig::rectf CalcDrawRect(fig::coord width, fig::coord height, float zoom, fig::point offset) const;
 		void Redraw();
 		void SetDirty();
 
@@ -41,6 +41,7 @@ namespace fig::gui
 		float _fZoom { 1.0f };
 		fig::point _imageSize {};
 		float _fImageRatio {};
+		bool _bClampZoom { true };
 
 		fig::point _mouseDownPos {};
 		fig::point _mouseDownOffset {};
@@ -51,5 +52,6 @@ namespace fig::gui
 		fig::texture_ptr _pTexture = nullptr;
 		fig::texture_ptr _pBGTexture = nullptr;
 		fig::texture_ptr _pMask = nullptr;
+		fig::coord _cornerSize {};
 	};
 }

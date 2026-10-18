@@ -21,10 +21,8 @@ namespace fig
 				throw std::bad_optional_access {};
 			return *_pointer;
 		}
-		T& value() const && = delete;
 
 		T& operator*() const & noexcept { return *_pointer; }
-		T& operator*() const && = delete;
 		T* operator->() const noexcept { return _pointer; }
 
 		T& value_or(T& fallback) const noexcept { return _pointer ? *_pointer : fallback; }

@@ -38,8 +38,6 @@ namespace fig::gui
 
 		void SetText(fig::string_view text) override;
 		void SetPlaceholder(fig::string_view text);
-		void SetFocus(bool focus) override;
-		bool IsFocused() const override;
 		void EnableAutoSize(bool bEnable) noexcept { _bAutoSize = bEnable; }
 		void SetMinRows(int32_t rows);
 		void SetMaxRows(int32_t rows);
@@ -57,6 +55,9 @@ namespace fig::gui
 		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
 
 		int32_t SetCursor(int32_t index) noexcept;
+		void SetFocus(bool focus) override;
+		bool IsFocused() const override;
+		bool CanFocus() const { return GetEnabled(); }
 
 		void ScrollToCursor();
 
