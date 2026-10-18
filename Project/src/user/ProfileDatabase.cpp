@@ -91,6 +91,7 @@ namespace fig::io
 		Prepare(SQL::FetchProfiles, "SELECT id, version, name, state, auth, recovery FROM Profiles;");
 		Prepare(SQL::CreateProfile, "INSERT INTO Profiles (id, version, name, state, auth, recovery) VALUES (?, ?, ?, ?, ?, ?);");
 		Prepare(SQL::UpdateProfile, "UPDATE Profiles SET version = ?, name = ?, state = ?, auth = ?, recovery = ? WHERE id = ?;");
+		Prepare(SQL::DeleteProfile, "DELETE FROM Profiles WHERE id = ?;");
 		Prepare(SQL::UpdateRecovery, "UPDATE Profiles SET recovery = ? WHERE id = ?;");
 	}
 
@@ -235,6 +236,34 @@ namespace fig::io
 		sqlite3_bind_blob(stmt, 1, &profile.recovery, sizeof(fig::auth::UserAuth), SQLITE_STATIC);
 		/* id */
 		sqlite3_bind_text(stmt, 2, profile.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+
+		int rc = sqlite3_step(stmt);
+		sqlite3_reset(stmt);
+		sqlite3_clear_bindings(stmt);
+
+		if (rc != SQLITE_DONE)
+		{
+			LogLn(std::format("SQLite Error: {}", sqlite3_errmsg(_pDB)));
+			return DatabaseError::SQLError;
+		}
+
+		if (int nUpdates = sqlite3_changes(_pDB); !nUpdates)
+		{
+			LogLn("SQLite Error: No changes");
+			return DatabaseError::ZeroChanges;
+		}
+		return DatabaseError::NoError;
+	}
+
+	DatabaseError ProfileDatabase::DeleteProfile(const fig::uuid& id) noexcept
+	{
+		if (!_pDB)
+			return DatabaseError::NotConnected;
+
+		auto stmt = _sqlStatements[SQL::DeleteProfile];
+
+		/* id */
+		sqlite3_bind_text(stmt, 1, id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 
 		int rc = sqlite3_step(stmt);
 		sqlite3_reset(stmt);

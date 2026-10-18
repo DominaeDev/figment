@@ -38,6 +38,7 @@ namespace fig::io
 			CreateProfileTable,
 			FetchProfiles,
 			CreateProfile,
+			DeleteProfile,
 			UpdateProfile,
 			UpdateRecovery,
 		};

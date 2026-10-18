@@ -219,7 +219,7 @@ namespace fig::user
 		if (not success)
 			return false; // Incorrect password
 
-		_signedInProfile = &profile;
+		_pSignedInProfile = &profile;
 		_pUserSettings = std::make_unique<UserSettings>(profile.GetPath() / Constants::Paths::UserSettings);
 		_pUserSettings->Load();
 		_pContentManager = std::make_unique<UserContentManager>(profile, _signedInAuthKey);
@@ -244,7 +244,7 @@ namespace fig::user
 
 		_pUserSettings->Save();
 
-		_signedInProfile = nullptr;
+		_pSignedInProfile = nullptr;
 		_signedInAuthKey = AuthKey {};
 		return true;
 	}
@@ -328,10 +328,60 @@ namespace fig::user
 		return GetDatabase().UpdateProfile(profile) == DatabaseError::NoError;
 	}
 
+	bool UserManager::DeleteProfile(const fig::uuid& profileId)
+	{
+		if (auto profile = GetProfile(profileId))
+		{
+			// Sign out from current profile
+			SignOut();
+
+			if (GetDatabase().DeleteProfile(profileId) == DatabaseError::NoError)
+			{
+				remove(_profiles, profileId, [](auto&& p) { return p.id; });
+
+				// Collect asset filenames
+				std::unordered_set<fig::path> filenames;
+
+				auto profilePath = (*profile).GetPath();
+
+				{	// Scan index database
+					IndexDatabase db(profilePath / std::format("{}.{}", Constants::Paths::AssetIndexFileName, Constants::Paths::AssetIndexFileExt));
+					if (auto assets = db.FetchAssets())
+					{
+						filenames.insert_range(assets.value()
+							| std::views::keys
+							| std::views::transform([&profilePath](auto&& id) { 
+								return profilePath / std::format("{}.{}", filename_from_uuid(id).u8string(), Constants::Paths::AssetFileExt);
+							})
+						);
+					}
+				}
+
+				filenames.insert(profilePath / std::format("{}.{}", Constants::Paths::RecoveryFileName, Constants::Paths::RecoveryFileExt));
+				filenames.insert(profilePath / std::format("{}.{}", Constants::Paths::ProfileImageFileName, Constants::Paths::ProfileImageFileExt));
+				filenames.insert(profilePath / std::format("{}.{}", Constants::Paths::AssetIndexFileName, Constants::Paths::AssetIndexFileExt));
+				filenames.insert(profilePath / Constants::Paths::UserSettings);
+
+				// Delete content files
+				size_t count = DeleteFiles(filenames);
+				if (count > 0)
+					LogLn(std::format("Deleted {} files", count));
+
+				// Delete profile folder
+				DeleteDirectory(profilePath);
+
+				if (_profiles.empty())
+					CreateDefaultProfile(); // Need at least one profile
+				return true;
+			}
+		}
+		return false;
+	}
+
 	fig::optional_cref<UserProfile> UserManager::GetActiveProfile() const noexcept
 	{
-		if (_signedInProfile != nullptr)
-			return make_optional_cref(*_signedInProfile);
+		if (_pSignedInProfile != nullptr)
+			return make_optional_cref(*_pSignedInProfile);
 		return fig::nullref;
 	}
 
@@ -351,7 +401,7 @@ namespace fig::user
 
 	UserContentManager& UserManager::GetContent()
 	{
-		if (_signedInProfile == nullptr or !_pContentManager)
+		if (_pSignedInProfile == nullptr or !_pContentManager)
 			throw std::runtime_error("Not signed in");
 
 		return static_cast<UserContentManager&>(*_pContentManager);
@@ -359,7 +409,7 @@ namespace fig::user
 
 	UserSettings& UserManager::GetSettings()
 	{
-		if (_signedInProfile == nullptr or !_pUserSettings)
+		if (_pSignedInProfile == nullptr or !_pUserSettings)
 			throw std::runtime_error("Not signed in");
 
 		return static_cast<UserSettings&>(*_pUserSettings);
@@ -377,7 +427,7 @@ namespace fig::user
 		if (not IsSignedIn())
 			return std::nullopt;
 
-		auto& profile = *_signedInProfile;
+		auto& profile = *_pSignedInProfile;
 
 		AuthKey recoveryKey;
 		AuthChallenge recoveryChallenge;
@@ -623,4 +673,5 @@ namespace fig::user
 
 		return {};
 	}
+
 }

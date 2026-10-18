@@ -25,6 +25,7 @@ namespace fig::gui
 		EditCharacter,
 		DebugCharacter,
 		EditUserSettings,
+		ProfileDeleted,
 
 		/* Broadcast events */
 

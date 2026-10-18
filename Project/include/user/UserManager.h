@@ -23,7 +23,7 @@ namespace fig::user
 		fig::optional_cref<UserProfile> CreateDefaultProfile();
 		fig::optional_cref<UserProfile> CreateProfile(const fig::string& profileName, const fig::string& password);
 
-		bool IsSignedIn() const noexcept { return _signedInProfile != nullptr; };
+		bool IsSignedIn() const noexcept { return _pSignedInProfile != nullptr; };
 		bool SignIn(const fig::uuid& profileId, const fig::string& password);
 		bool SignIn(const fig::string& profileName, const fig::string& password);
 		bool SignInDefaultProfile();
@@ -42,6 +42,7 @@ namespace fig::user
 		bool RecoverProfile(const fig::uuid& profileId, const fig::auth::AuthKey& recoveryKey);
 		bool ResetProfile(const fig::uuid& profileId);
 		fig::io::FileError ChangeProfilePicture(const UserProfile& profile, const fig::sdl::Surface& image);
+		bool DeleteProfile(const fig::uuid& profileId);
 
 		static bool Authenticate(const UserProfile& profile, const fig::string& password, fig::auth::AuthKey& outKey);
 		static fig::sdl::Surface GetProfileImage(const fig::user::UserProfile& profile);
@@ -58,7 +59,7 @@ namespace fig::user
 		std::unique_ptr<fig::io::ProfileDatabase> _pProfileDB;
 
 		std::vector<UserProfile> _profiles {};
-		fig::observer_ptr<UserProfile> _signedInProfile = nullptr;
+		fig::observer_ptr<UserProfile> _pSignedInProfile = nullptr;
 		fig::auth::AuthKey _signedInAuthKey {};
 
 		std::unique_ptr<fig::io::UserContentManager> _pContentManager;

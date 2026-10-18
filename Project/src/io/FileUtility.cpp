@@ -284,4 +284,16 @@ namespace fig::io
 		}
 		return FileError::NotFound;
 	}
+
+	FileError DeleteDirectory(const fig::path& path) noexcept
+	{
+		if (std::filesystem::exists(path) and std::filesystem::is_directory(path))
+		{
+			std::error_code errorCode;
+			if (std::filesystem::remove(path, errorCode))
+				return FileError::NoError;
+			return FileError::UnknownError;
+		}
+		return FileError::NotFound;
+	}
 }

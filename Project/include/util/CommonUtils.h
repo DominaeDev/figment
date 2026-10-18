@@ -194,6 +194,39 @@ namespace fig
 		return fig::npos;
 	};
 
+	template <std::ranges::forward_range Range, typename Value, typename Proj = std::identity>
+		requires std::indirect_binary_predicate<std::ranges::equal_to, std::projected<std::ranges::iterator_t<Range>, Proj>, const Value*>
+	constexpr bool remove(Range&& range, const Value& value, Proj proj = {})
+	{
+		if (auto it = std::ranges::remove(range, value, std::move(proj)).begin(); it != std::ranges::cend(range))
+		{
+			range.erase(it, std::ranges::cend(range));
+			return true;
+		}
+		return false;
+	}
+
+	template <std::ranges::forward_range Range, typename Proj = std::identity, std::indirect_unary_predicate<std::projected<std::ranges::iterator_t<Range>, Proj>> Pred>
+	constexpr size_t remove_if(Range&& range, Pred pred, Proj proj = {})
+	{
+		auto it = std::ranges::remove_if(range, std::move(pred), std::move(proj)).begin();
+		if (it != std::ranges::end(range))
+			range.erase(it, std::ranges::cend(range));
+		return fig::npos;
+	}
+
+	template<std::ranges::range R, typename T>
+		requires std::same_as<std::ranges::range_value_t<R>, T>
+	inline constexpr bool remove(const R& cont, const T& value)
+	{
+		if (auto e = std::ranges::remove(cont, value); e.begin() != e.end())
+		{
+			cont.erase(e.begin(), e.end());
+			return true;
+		}
+		return false;
+	}
+
 	inline int32_t round_to_int(float value)
 	{
 		return static_cast<int32_t>(std::roundf(value));

@@ -515,6 +515,11 @@ namespace fig::gui
 				SDL_StopTextInput(GetSDLWindow());
 			_pFocusedControl = {};
 		}
+		else if (IsUserEvent(event, UserEvent::ProfileDeleted))
+		{
+			OnSignedOut();
+			return EventResult::Handled;
+		}
 
 		HandleStatusBarEvents(event);
 

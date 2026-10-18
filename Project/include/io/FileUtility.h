@@ -15,6 +15,7 @@ namespace fig::io
 	FileError WriteTextFile(const fig::path& filename, const fig::string& content, bool append = false);
 
 	FileError DeleteFile(const fig::path& path) noexcept;
+	FileError DeleteDirectory(const fig::path& path) noexcept;
 		
 	template <std::ranges::range T>
 	requires std::is_same_v<fig::path, std::ranges::range_value_t<T>>

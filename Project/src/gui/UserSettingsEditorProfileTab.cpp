@@ -10,6 +10,7 @@
 #include "gui/Menu.h"
 #include "gui/AppResources.h"
 #include "gui/ProfileImageWidget.h"
+#include "gui/MainFrame.h"
 #include "io/FileUtility.h"
 
 using namespace fig::auth;
@@ -99,7 +100,7 @@ namespace fig::gui
 
 		_pDeleteProfileButton = CreateControl<ButtonWithLabel>("Delete profile");
 		_pDeleteProfileButton->SetHeight(35);
-		_pDeleteProfileButton->SetDelegate([this] { /* ... */ });
+		_pDeleteProfileButton->SetDelegate([this] { DeleteProfile(); });
 		pSizer->Add(_pDeleteProfileButton, 0, SizerFlag::Bottom, 4);
 
 		_pConfirmCheckBoxes[0] = CreateControl<CheckBox>("Yes, I want to delete this profile");
@@ -124,6 +125,10 @@ namespace fig::gui
 
 	void UserSettingsEditorProfileTab::OnClose() noexcept
 	{
+		// If we're signed out here, the user has probably deleted the profile and all changes are moot.
+		if (not Global::GetUserManager().IsSignedIn())
+			return; 
+
 		if (auto profile = Global::GetUserManager().GetActiveProfile())
 		{
 			if (auto newName = trim(_pName->GetText()); not empty_or_whitespace(newName) and Global::GetUserManager().GetActiveProfile()->name != newName)
@@ -334,6 +339,27 @@ namespace fig::gui
 		_pProfileImage->SetEditable(false);
 		_bHasProfileImage = false;
 		_bChangedProfileImage = true;
+	}
+
+	void UserSettingsEditorProfileTab::DeleteProfile()
+	{
+		ShowDialogBox("Are you really sure you want to permanently delete the profile?\nThis action cannot be undone.", DialogBoxType::YesNo,
+			[this](bool bOk) {
+				if (bOk)
+				{
+					fig::uuid profileId = (*Global::GetUserManager().GetActiveProfile()).id;
+					if (Global::GetUserManager().DeleteProfile(profileId))
+						LogLn(std::format("Deleted profile {}", (fig::string)profileId));
+					PushEvent(UserEvent::ProfileDeleted);
+				}
+				else
+				{
+					// Uncheck boxes
+					for (auto& pCB : _pConfirmCheckBoxes)
+						pCB->SetValue(false, true);
+					RefreshDeleteButton();
+				}
+			});
 	}
 
 }

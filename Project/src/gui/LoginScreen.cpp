@@ -211,7 +211,7 @@ namespace fig::gui
 
 	void LoginScreen::CreateNewProfile()
 	{
-		if (auto profile = Global::GetUserManager().CreateProfile("New profile", ""))
+		if (auto profile = Global::GetUserManager().CreateDefaultProfile())
 			MainFrame::GetInstance().TrySignIn(*profile, "");
 	}
 }

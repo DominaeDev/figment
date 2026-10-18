@@ -8,6 +8,7 @@
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
+#include "user/UserManager.h"
 
 namespace fig::gui
 {
@@ -60,9 +61,12 @@ namespace fig::gui
 
 	void UserSettingsEditor::Close()
 	{
-		ClearDirtyFlag();
-		Editor::Close();
-		PushEvent(UserEvent::UserSettingsChanged);
+		if (Global::GetUserManager().IsSignedIn())
+		{
+			ClearDirtyFlag();
+			Editor::Close();
+			PushEvent(UserEvent::UserSettingsChanged);
+		}
 	}
 
 	std::vector<EditorTabDescriptor> UserSettingsEditor::GetTabDescriptors() const

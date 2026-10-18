@@ -29,6 +29,7 @@ namespace fig::gui
 		void ProcessLoadQueue();
 		void RevertProfileImage();
 		void RemoveProfileImage();
+		void DeleteProfile();
 		static void SDLCALL OnFileDialogResult(void* userdata, const char* const* fileList, int filter);
 
 	private:
