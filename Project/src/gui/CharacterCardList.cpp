@@ -260,12 +260,7 @@ namespace fig::gui
 		}); try_card != std::ranges::end(_cards))
 		{
 			if (Global::GetUserContent().DeleteAsset((*try_card)->GetAssetID()))
-			{
 				RefreshCards();
-//				DestroyChild(*try_card);
-//				_cards.erase(try_card);
-//				Reorder();
-			}
 		}
 	}
 
