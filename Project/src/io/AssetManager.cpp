@@ -119,6 +119,16 @@ namespace fig::io
 		return CreateBitmapAsset_NoLock(subtype, surface, parent);
 	}
 
+	const Asset& AssetManager::CreateTemporaryAsset(AssetTypeDefinition type, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		auto& asset = CreateAsset_NoLock(type, parent);
+		asset.sync_state.file_sync = AssetSyncState::Status::Temporary;
+		asset.sync_state.db_sync = AssetSyncState::Status::Temporary;
+		return asset;
+	}
+
 	bool AssetManager::UpdateAsset(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
@@ -754,6 +764,12 @@ namespace fig::io
 			}
 		}
 		return count;
+	}
+
+	size_t AssetManager::DiscardTemporaryAssets() noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return remove_if(_assets, [](auto&& kvp) { return kvp.second.sync_state.file_sync == AssetSyncState::Status::Temporary; });
 	}
 
 	bool AssetManager::ReleaseAssetData(const fig::uuid& assetId) noexcept

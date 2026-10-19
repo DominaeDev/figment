@@ -103,9 +103,11 @@ namespace fig::gui
 		_pDeleteProfileButton->SetDelegate([this] { DeleteProfile(); });
 		pSizer->Add(_pDeleteProfileButton, 0, SizerFlag::Bottom, 4);
 
+		CreateLabel(this, pSizer, "Confirm by checking all boxes:");
+
 		_pConfirmCheckBoxes[0] = CreateControl<CheckBox>("Yes, I want to delete this profile");
-		_pConfirmCheckBoxes[1] = CreateControl<CheckBox>("I am positively sure");
-		_pConfirmCheckBoxes[2] = CreateControl<CheckBox>("And I will not regret it");
+		_pConfirmCheckBoxes[1] = CreateControl<CheckBox>("Yes, I am positively sure");
+		_pConfirmCheckBoxes[2] = CreateControl<CheckBox>("I swear I will not regret this");
 		for (auto& pCB : _pConfirmCheckBoxes)
 		{
 			pCB->SetDelegate([this](bool b) { RefreshDeleteButton(); });
@@ -343,7 +345,7 @@ namespace fig::gui
 
 	void UserSettingsEditorProfileTab::DeleteProfile()
 	{
-		ShowDialogBox("Are you really sure you want to permanently delete the profile?\nThis action cannot be undone.", DialogBoxType::YesNo,
+		ShowDialogBox(fig::strings::ProfileSettings::ConfirmationMessage, DialogBoxType::YesNo,
 			[this](bool bOk) {
 				if (bOk)
 				{

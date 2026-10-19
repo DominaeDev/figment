@@ -22,6 +22,7 @@ namespace fig::gui
 		TabNavigationForward,
 		TabNavigationBackward,
 
+		CreateCharacter,
 		EditCharacter,
 		DebugCharacter,
 		EditUserSettings,

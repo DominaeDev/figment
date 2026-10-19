@@ -39,12 +39,12 @@ namespace fig::gui
 
 		CreateHeader(this, pSizer, "Character portraits");
 		InitPortraits(pSizer);
-		CreateHint(this, pSizer, std::format("You may add up to {} portrait images", Constants::GUI::CharacterEditor::MaxPortraits));
+		CreateHint(this, pSizer, std::format("You can add up to {} portrait images", Constants::GUI::CharacterEditor::MaxPortraits));
 		CreateHorizontalLine(this, pSizer);
 
 		CreateHeader(this, pSizer, "Chat backgrounds");
 		InitBackgrounds(pSizer);
-		CreateHint(this, pSizer, std::format("You may add up to {} background images", Constants::GUI::CharacterEditor::MaxBackgrounds));
+		CreateHint(this, pSizer, std::format("You can add up to {} background images", Constants::GUI::CharacterEditor::MaxBackgrounds));
 
 		_removedAssets.clear();
 		return true;
@@ -449,9 +449,12 @@ namespace fig::gui
 				auto data = fig::io::ReadFile(path).value_or({});
 				if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
 				{
+					bool isCover = _portraitWidgets.empty();
+
 					fig::sdl::Surface surface = std::move(try_surface).value();
 					auto pWidget = CreateControl<CharacterPortraitWidget>();
 					pWidget->SetImage(surface);
+					pWidget->SetSelected(isCover);
 
 					size_t index = _portraitWidgets.size();
 					pWidget->SetDelegate([this, pWidget] { OnClickedPortrait(pWidget, SDL_BUTTON_LEFT); });
@@ -459,7 +462,7 @@ namespace fig::gui
 					_portraitWidgets.emplace_back(ImageWidget {
 						.pControl = pWidget,
 						.image = std::move(surface),
-						.isCover = false,
+						.isCover = isCover,
 						.format = DataFormatFromExt(path),
 						.data = std::move(data),
 					});
@@ -534,7 +537,11 @@ namespace fig::gui
 		// Update cover
 		if (not _portraitWidgets.empty())
 		{
-			if (auto itCover = std::ranges::find_if(_portraitWidgets, [](auto&& p) { return p.isCover; }); itCover != std::ranges::end(_portraitWidgets))
+			auto itCover = std::ranges::find_if(_portraitWidgets, [](auto&& p) { return p.isCover; });
+			if (itCover == std::ranges::end(_portraitWidgets))
+				itCover = _portraitWidgets.begin();
+
+			if (itCover != std::ranges::end(_portraitWidgets))
 			{
 				size_t idxCover = std::distance(_portraitWidgets.begin(), itCover);
 				if (_portraitWidgets[idxCover].assetId != _coverAssetId)

@@ -61,6 +61,7 @@ namespace fig::gui
 			DEBUG_MEASURE_BEGIN(std::format("Character card {}", asset.id.to_str()));
 			auto pCard = CreateControl<CharacterCard>(asset.id, _cardSize);
 			pCard->SetDelegate([this](CoverCard& card, CardEvent event) { OnCardEvent(card, event); });
+			pCard->ShowTags(_bEnableTags);
 			_pGridSizer->Add(pCard);
 			_cards.push_back(pCard);
 			DEBUG_MEASURE_END();
@@ -74,7 +75,6 @@ namespace fig::gui
 		{
 			auto request = userContent.GetAssets().LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, priority--);
 			pCard->SetPendingCoverImage(std::move(request.future));
-			pCard->ShowTags(_bEnableTags);
 
 			if (initCounter++ < 8)
 				pCard->Initialize(); // Load first 8 cards synchronously
@@ -261,9 +261,10 @@ namespace fig::gui
 		{
 			if (Global::GetUserContent().DeleteAsset((*try_card)->GetAssetID()))
 			{
-				DestroyChild(*try_card);
-				_cards.erase(try_card);
-				Reorder();
+				RefreshCards();
+//				DestroyChild(*try_card);
+//				_cards.erase(try_card);
+//				Reorder();
 			}
 		}
 	}
@@ -286,28 +287,57 @@ namespace fig::gui
 		if (not _bInitialized)
 			return;
 
+		auto& assets = Global::GetUserContent().GetAssets();
+
 		auto characters = Global::GetUserContent().GetCharacters();
 		std::map<fig::uuid, fig::timestamp> updateTimes;
 		for (auto& character : characters)
 			updateTimes[character.get().id] = character.get().GetUpdatedAt();
 
-		for (auto& pCard : _cards)
+		std::unordered_set<fig::uuid> existingCharacterIds;
+
+		for (size_t i = 0uz; i < _cards.size();)
 		{
+			auto& pCard = _cards[i];
+			existingCharacterIds.insert(pCard->GetAssetID());
+
 			if (auto it = updateTimes.find(pCard->GetCharacterId()); it != updateTimes.cend())
 			{
 				auto& updatedAt = it->second;
-				if (pCard->GetUpdatedAt() < updatedAt) // New
+				if (pCard->GetUpdatedAt() < updatedAt) // Updated
 				{
-					auto request = Global::GetUserContent().GetAssets().LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, 0);
+					auto request = assets.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, 0);
 					pCard->SetPendingCoverImage(std::move(request.future));
 					pCard->RefreshFull();
 				}
 				else
 					pCard->RefreshMeta();
 			}
-			else // Removed?
+			else
 			{
-				// @todo
+				// Character removed
+				DestroyChild(pCard);
+				_cards[i] = nullptr;
+			}
+			++i;
+		}
+		std::erase_if(_cards, [](auto&& p) { return !p; });
+
+		// Create new cards
+		for (auto& character : characters)
+		{
+			auto& assetId = character.get().id;
+
+			if (not existingCharacterIds.contains(assetId))
+			{
+				auto pCard = CreateControl<CharacterCard>(assetId, _cardSize);
+				pCard->SetDelegate([this](CoverCard& card, CardEvent event) { OnCardEvent(card, event); });
+				pCard->ShowTags(_bEnableTags);
+				_pGridSizer->Add(pCard);
+				_cards.push_back(pCard);
+
+				auto request = assets.LoadAssetAsync(pCard->GetAssetID(), AsyncTask::LoadCoverImage, 0);
+				pCard->SetPendingCoverImage(std::move(request.future));
 			}
 		}
 

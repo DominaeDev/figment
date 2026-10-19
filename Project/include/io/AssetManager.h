@@ -51,6 +51,7 @@ namespace fig::io
 		const Asset& CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateBitmapAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;
+		const Asset& CreateTemporaryAsset(AssetTypeDefinition type, const fig::uuid& parent = {}) noexcept;
 
 		bool UpdateAsset(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum = false) noexcept;
 		bool UpdateAsset(const fig::uuid& assetId, fig::byte_span data, bool bChecksum = false) noexcept;
@@ -58,6 +59,7 @@ namespace fig::io
 		bool DeleteAsset(fig::uuid assetId) noexcept;
 		size_t DeleteAssets(std::span<fig::uuid> assetIds) noexcept;
 		bool ReleaseAssetData(const fig::uuid& assetId) noexcept;
+		size_t DiscardTemporaryAssets() noexcept;
 
 		fig::cref_vector<Asset> GetAllAssets() const noexcept;
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId) const noexcept;

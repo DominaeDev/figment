@@ -361,13 +361,6 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_3 and mods.Alt)
 					{
-						auto characterId = fig::uuid::from_str("c44fe884-073e-4e6e-991c-0f8f875891de");
-						auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
-						if (not pEditor->Initialize(characterId))
-						{
-							// Error
-							ChangeScreen<HomeScreen>();
-						}
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F2 and mods.None)
@@ -480,11 +473,22 @@ namespace fig::gui
 			Global::GetTTSBackend().Shutdown();
 			return EventResult::Continue;
 		}
+		else if (IsUserEvent(event, UserEvent::CreateCharacter))
+		{
+			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
+			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
+			if (not pEditor->NewCharacter())
+			{
+				// Error
+				ChangeScreen<HomeScreen>();
+			}
+			return EventResult::Handled;
+		}
 		else if (IsUserEvent(event, UserEvent::EditCharacter))
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
-			if (not pEditor->Initialize(characterId))
+			if (not pEditor->EditCharacter(characterId))
 			{
 				// Error
 				ChangeScreen<HomeScreen>();

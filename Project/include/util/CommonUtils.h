@@ -206,13 +206,12 @@ namespace fig
 		return false;
 	}
 
-	template <std::ranges::forward_range Range, typename Proj = std::identity, std::indirect_unary_predicate<std::projected<std::ranges::iterator_t<Range>, Proj>> Pred>
-	constexpr size_t remove_if(Range&& range, Pred pred, Proj proj = {})
+	template <typename Container, typename Pred, typename Proj = std::identity>
+	constexpr std::size_t remove_if(Container& container, Pred pred, Proj proj = {})
 	{
-		auto it = std::ranges::remove_if(range, std::move(pred), std::move(proj)).begin();
-		if (it != std::ranges::end(range))
-			range.erase(it, std::ranges::cend(range));
-		return fig::npos;
+		return std::erase_if(container, [&](const auto& element) {
+			return std::invoke(pred, std::invoke(proj, element));
+		});
 	}
 
 	template<std::ranges::range R, typename T>

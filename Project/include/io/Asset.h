@@ -14,6 +14,7 @@ namespace fig::io
 			Modified = 0,		// Modified
 			Synchronized,		// Saved
 			Indeterminate,		// Partial or missing data
+			Temporary,			// Don't save
 		};
 
 		enum class Error

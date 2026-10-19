@@ -120,7 +120,8 @@ namespace fig::gui
 	{
 		auto& menu = CreateMenu();
 		auto& createMenu = menu.AddItem("Create");
-		createMenu.AddItem("New character\u2026");
+		createMenu.AddItem("New character\u2026")
+			.SetDelegate([this] { PushEvent(UserEvent::CreateCharacter); });
 		createMenu.AddItem("New story\u2026");
 		createMenu.AddItem("New world\u2026");
 		createMenu.AddSeparator();

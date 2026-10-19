@@ -198,6 +198,9 @@
     <Filter Include="Source Files\Frontend\GUI\Screens\SidePanel\Controls">
       <UniqueIdentifier>{b7b032e9-fdd3-42db-8fa1-5f5cc956e8a8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs">
+      <UniqueIdentifier>{15580488-f82a-468f-ada5-1aca90a76792}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -740,18 +743,6 @@
     <ClCompile Include="src\gui\EditorTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorAboutTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorImagesTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorGeneralTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\CharacterAttributeWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClCompile>
@@ -772,12 +763,6 @@
     </ClCompile>
     <ClCompile Include="src\gui\NonOwningImageWithMask.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorTraitsTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorRulesTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\IMeshControl.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -880,6 +865,24 @@
     </ClCompile>
     <ClCompile Include="src\gui\ProfileImageWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorAboutTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorGeneralTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorImagesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorRulesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorTraitsTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1828,18 +1831,6 @@
     <ClInclude Include="include\gui\EditorTab.h">
       <Filter>Source Files\Frontend\GUI\Editors</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorAboutTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorImagesTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorGeneralTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorVoiceTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\CharacterAttributeWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
@@ -1863,12 +1854,6 @@
     </ClInclude>
     <ClInclude Include="include\gui\NonOwningImageWithMask.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorTraitsTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorRulesTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\IMeshControl.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -1992,6 +1977,24 @@
     </ClInclude>
     <ClInclude Include="include\gui\ProfileImageWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorAboutTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorGeneralTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorImagesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorRulesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorTraitsTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorVoiceTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

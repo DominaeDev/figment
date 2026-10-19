@@ -13,6 +13,8 @@
 #include "gui/AppResources.h"
 #include "io/ContentManager.h"
 
+using namespace fig::io;
+
 namespace fig::gui
 {
 	constexpr enum Tab : int32_t
@@ -39,8 +41,31 @@ namespace fig::gui
 	{
 		return "Editing character";
 	}
+	
+	bool CharacterEditor::NewCharacter() noexcept
+	{
+		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::Character, DataFormat::TextXml));
 
-	bool CharacterEditor::Initialize(const fig::uuid& assetId) noexcept
+		_assetId = asset.id;
+		_character = {};
+		_character.name.first = "Unnamed";
+
+		CharacterEditorArgs args
+		{
+			.assetId = _assetId,
+			.pCharacter = &_character,
+		};
+
+		for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<CharacterEditorArgs>*>(t.get()); }))
+		{
+			if (not (tab and tab->Initialize(args)))
+				return false;
+		}
+
+		return true;
+	}
+
+	bool CharacterEditor::EditCharacter(const fig::uuid& assetId) noexcept
 	{
 		if (auto try_character = Global::GetUserContent().Get<fig::data::Character>(assetId))
 		{
@@ -48,7 +73,7 @@ namespace fig::gui
 			_character = fig::data::Character { *try_character };
 			CharacterEditorArgs args
 			{
-				.assetId = assetId,
+				.assetId = _assetId,
 				.pCharacter = &_character,
 			};
 
@@ -105,6 +130,11 @@ namespace fig::gui
 		auto pBorder = _pSaveButton->GetBorderRenderer();
 		pBorder->SetColor(Color::Border);
 		return true;
+	}
+
+	void CharacterEditor::OnClose()
+	{
+		Global::GetUserContent().GetAssets().DiscardTemporaryAssets();
 	}
 
 	std::vector<EditorTabDescriptor> CharacterEditor::GetTabDescriptors() const

@@ -140,16 +140,24 @@ namespace fig::gui
 			Initialize();
 		}
 
-		if (_bHasError && !_pErrorIcon)
+		if (_bHasError != (bool)_pErrorIcon)
 		{
-			// Create error icon
-			float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
-			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
-			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
-			_pErrorIcon->SetForegroundColor(Color::Gray);
-			_pErrorIcon->Center();
+			if (_bHasError)
+			{
+				// Create error icon
+				float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
+				_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
+				_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
+				_pErrorIcon->SetForegroundColor(Color::Gray);
+				_pErrorIcon->Center();
 
-			CardImage::SetTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY));
+				CardImage::SetTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY));
+			}
+			else
+			{
+				DestroyChild(_pErrorIcon);
+				_pErrorIcon = nullptr;
+			}
 		}
 
 		bool bHovered = (_bSelected or is_inside(GetRect(), GetMousePos())
@@ -384,6 +392,7 @@ namespace fig::gui
 			{
 				_largeImageTexture.reset(pTexture);
 				_largeImageSurface = std::move(full);
+				_bHasError = false;
 			}
 			else
 			{
@@ -398,6 +407,7 @@ namespace fig::gui
 			{
 				_smallImageTexture.reset(pTexture);
 				_smallImageSurface = std::move(half);
+				_bHasError = false;
 			}
 			else
 			{
