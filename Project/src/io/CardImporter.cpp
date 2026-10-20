@@ -2,9 +2,13 @@
 #include <json.hpp>
 #include "io/CardImporter.h"
 #include "io/FileUtility.h"
+#include "io/ContentManager.h"
+#include "gui/Events.h"
+#include "user/UserManager.h"
 #include "data/TavernCardV2.h"
 #include "util/StripHtml.h"
 
+using namespace fig::gui;
 using namespace fig::data;
 
 namespace fig::io
@@ -105,5 +109,27 @@ namespace fig::io
 		{
 			return std::unexpected(try_import.error());
 		}
+	}
+
+	void SDLCALL OnFileDialogResult(void* userdata, const char* const* fileList, int filter)
+	{
+		if (not fileList)
+			return;
+
+		if (not Global::IsSignedIn())
+			return;
+
+		for (const char* const* path = fileList; *path; ++path)
+			PushEvent(UserEvent::ImportCharacter, std::filesystem::u8path(*path).u8string());
+	}
+
+	void CardImporter::ShowImportDialog(fig::window_ptr pWindow) noexcept
+	{
+		static constexpr SDL_DialogFileFilter filters[] =
+		{
+			{ "Character card v2 (.png)", "png" },
+		};
+
+		SDL_ShowOpenFileDialog(OnFileDialogResult, NULL, pWindow, filters, SDL_arraysize(filters), nullptr, true);
 	}
 }

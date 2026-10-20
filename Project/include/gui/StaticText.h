@@ -57,7 +57,7 @@ namespace fig::gui
 		void EnableWordWrap(bool bEnable) noexcept;
 
 		fig::point MeasureText(bool bAllowEllipsis = true) const;
-		fig::point MeasureText(fig::string_view text) const;
+		fig::point MeasureText(fig::string_view text, bool bRaw = false) const;
 		void Reset();
 
 	protected:

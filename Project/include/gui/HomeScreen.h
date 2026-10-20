@@ -13,12 +13,14 @@ namespace fig::gui
 	public:
 		HomeScreen(Frame* pParent);
 
+		void RefreshCards();
 		CharacterCardList& GetCardList();
 
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
 
+		EventResult OnEvent(fig::event& event) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void OnSearchFilter(fig::string_view search_text);
 		void OnUserSignedIn(const fig::user::UserProfile& profile) override;
@@ -43,6 +45,7 @@ namespace fig::gui
 
 		fig::string _search_text;
 		float _fSearchTimer {};
+		bool _bRefreshCardList {};
 	};
 
 	template <>

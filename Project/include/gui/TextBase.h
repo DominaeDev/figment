@@ -56,7 +56,8 @@ namespace fig::gui
 
 		virtual void OnRefreshedTexts() {};
 
-		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text) const;
+		std::vector<TextBase::TTFTextLine> LayoutParagraph(fig::string_view text) const;
+		std::vector<TTFTextLine> LayoutParagraph(fig::string_view text, int32_t wrapWidth) const;
 		void LayoutAll();
 		bool IsEOL(const TTFTextLine& line) const noexcept;
 

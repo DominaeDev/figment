@@ -5,6 +5,7 @@
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/ButtonWithLabel.h"
 #include "gui/AppResources.h"
+#include "gui/FillParentSizer.h"
 
 namespace fig::gui
 {
@@ -23,18 +24,22 @@ namespace fig::gui
 		auto pBorder = _pBox->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
 		pBorder->SetColor(Color::Border);
 		
-		auto pSizer = new VerticalSizer();
-		
+		auto pSizer = _pBox->SetSizer<FillParentSizer>();
+		auto pInnerArea = _pBox->CreateControl<Area>();
+		auto pInnerSizer = pInnerArea->SetSizer<VerticalSizer>();
+
+		pSizer->Add(pInnerArea, -1, SizerFlag::All, 12);
+
 		_pMessage = _pBox->CreateControl<StaticText>("", FontFace::Default, Constants::GUI::DefaultFontSize, false);
 		_pMessage->SetForegroundColor(Color::AppForeground);
 		_pMessage->SetAlignment(TextAlignment::MiddleCenter);
 		_pMessage->EnableWordWrap(true);
-		pSizer->Add(_pMessage, -1, SizerFlag::Expand | SizerFlag::AlignCenterHorizontal | SizerFlag::AlignCenterVertical);
-		
-		auto pBorderSizer = _pBox->SetSizer<VerticalSizer>();
-		pBorderSizer->Add(pSizer, -1, SizerFlag::Fill | SizerFlag::All, 12);
+		pInnerSizer->Add(_pMessage, -1, SizerFlag::Fill | SizerFlag::AlignCenterHorizontal | SizerFlag::AlignCenterVertical);
 
-		auto pButtonSizer = new HorizontalSizer();
+		auto pButtonArea = _pBox->CreateControl<Area>();
+		pButtonArea->SetHeight(36);
+		auto pButtonSizer = pButtonArea->SetSizer<HorizontalSizer>();
+
 		if (buttons.IsSet(DialogButton::Ok))
 			CreateButton(pButtonSizer, DialogButton::Ok, "OK");
 		if (buttons.IsSet(DialogButton::Yes))
@@ -47,8 +52,7 @@ namespace fig::gui
 			CreateButton(pButtonSizer, DialogButton::Dismiss, "Dismiss");
 		if (buttons.IsSet(DialogButton::Cancel))
 			CreateButton(pButtonSizer, DialogButton::Cancel, "Cancel");
-		pSizer->Add(pButtonSizer, 0, SizerFlag::FixedSize, 36);
-		pSizer->AddSpacer(8);
+		pInnerSizer->Add(pButtonArea, 0, SizerFlag::Expand);
 
 		SetText(message);
 	}
@@ -61,21 +65,22 @@ namespace fig::gui
 	void DialogBox::SetText(fig::string_view text)
 	{
 		constexpr fig::coord HPadding = 80;
-		constexpr fig::coord VPadding = 44;
+		constexpr fig::coord VPadding = 36 + 12 * 2;
 		
-		auto size = _pMessage->MeasureText(text);
-		_pMessage->SetTextWrapWidth(std::clamp(size.x, MinDialogWidth - HPadding, MaxDialogWidth - HPadding));
+		auto size = _pMessage->MeasureText(text, true).x;
+		_pMessage->SetTextWrapWidth(std::clamp(size, MinDialogWidth - HPadding, MaxDialogWidth - HPadding));
 		_pMessage->SetTextAndResize(text);
 		
-		_pBox->SetSize(std::max(MinDialogWidth, _pMessage->GetWidth() + HPadding), std::max(MinDialogHeight, _pMessage->GetHeight() + VPadding));
+		_pBox->SetSize(
+			std::max(MinDialogWidth, _pMessage->GetWidth() + HPadding), 
+			std::max(MinDialogHeight, _pMessage->GetHeight() + VPadding));
 		_pBox->Center();
 	}
 
 	void DialogBox::OnSize()
 	{
-		ModalOverlay::OnSize();
-
 		_pBox->Center();
+		ModalOverlay::OnSize();
 	}
 
 	EventResult DialogBox::OnEvent(fig::event& event)

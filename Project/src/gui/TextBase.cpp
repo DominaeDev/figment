@@ -69,9 +69,14 @@ namespace fig::gui
 	
 	std::vector<TextBase::TTFTextLine> TextBase::LayoutParagraph(fig::string_view text) const
 	{
+		return LayoutParagraph(text, _bWordWrap ? _wrapWidth : 0);
+	}
+
+	std::vector<TextBase::TTFTextLine> TextBase::LayoutParagraph(fig::string_view text, int32_t wrapWidth) const
+	{
 		std::vector<TTFTextLine> result;
 
-		if (not (_bWordWrap and _wrapWidth > 0))
+		if (wrapWidth <= 0) // No word wrap
 		{
 			size_t paragraphStart = 0;
 			while (paragraphStart < text.size())
@@ -110,7 +115,7 @@ namespace fig::gui
 				int32_t measuredWidth;
 				size_t measuredLength;
 
-				if (not TTF_MeasureString(_pFont, pText, remainingLength, _wrapWidth, &measuredWidth, &measuredLength))
+				if (not TTF_MeasureString(_pFont, pText, remainingLength, wrapWidth, &measuredWidth, &measuredLength))
 					break;
 
 				size_t breakWidth = measuredLength;
@@ -174,7 +179,7 @@ namespace fig::gui
 			int32_t paragraphEnd = _lines[i].position + _lines[i].length;
 			fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
 
-			std::vector<TTFTextLine> paragraphLines = LayoutParagraph(paragraphText);
+			std::vector<TTFTextLine> paragraphLines = LayoutParagraph(paragraphText, _bWordWrap ? _wrapWidth : 0);
 
 			for (auto& line : paragraphLines)
 				line.position += paragraphStart;

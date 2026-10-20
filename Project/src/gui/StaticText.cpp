@@ -48,6 +48,7 @@ namespace fig::gui
 	void StaticText::SetTextAndResize(fig::string_view text)
 	{
 		TextBase::SetText(text);
+
 		fig::coord newWidth {};
 		fig::coord newHeight {};
 		DrawText(newWidth, newHeight);
@@ -297,47 +298,28 @@ namespace fig::gui
 		return MeasureText(_text);
 	}
 
-	fig::point StaticText::MeasureText(fig::string_view text) const
+	fig::point StaticText::MeasureText(fig::string_view text, bool bRaw) const
 	{
-		if constexpr (Disabled)
-		{
-			auto lines = LayoutParagraph(text);
-			if (lines.empty())
-				return fig::point(0, 0);
-
-			fig::coord width = 0;
-			fig::coord height = _fontHeight + _lineSkip * toI(lines.size() - 1uz);
-			for (size_t index = 0uz; index < lines.size(); ++index)
-			{
-				auto& line = lines[index];
-				const char* pText = _text.data();
-				std::advance(pText, line.position);
-				size_t textLength = line.length;
-				if (line.length > 0 and pText[line.length - 1] == '\n')
-					textLength -= 1;
-
-				int32_t w, h;
-				if (TTF_GetStringSize(_pFont, text.data(), textLength, &w, &h))
-					width = std::max(width, w);
-			}
-			return fig::point { width, height };
-		}
-		else
-		{
-			if (_bWordWrap)
-			{
-				int32_t w, h;
-				if (TTF_GetStringSizeWrapped(_pFont, text.data(), text.length(), GetMaxLineWidth(), &w, &h))
-					return fig::point(w, h);
-			}
-			else
-			{
-				int32_t w, h;
-				if (TTF_GetStringSize(_pFont, text.data(), text.length(), &w, &h))
-					return fig::point(w, h);
-			}
+		std::vector<TextBase::TTFTextLine> lines = LayoutParagraph(text, bRaw ? 0 : (_bWordWrap ? _wrapWidth : 0));
+		if (lines.empty())
 			return fig::point(0, 0);
+
+		fig::coord width = 0;
+		fig::coord height = _fontHeight + _lineSkip * toI(lines.size() - 1uz);
+		for (size_t index = 0uz; index < lines.size(); ++index)
+		{
+			auto& line = lines[index];
+			const char* pText = _text.data();
+			std::advance(pText, line.position);
+			size_t textLength = line.length;
+			if (line.length > 0 and pText[line.length - 1] == '\n')
+				textLength -= 1;
+
+			int32_t w, h;
+			if (TTF_GetStringSize(_pFont, text.data(), textLength, &w, &h))
+				width = std::max(width, w);
 		}
+		return fig::point { width, height };
 	}
 
 	fig::coord StaticText::GetMaxLineWidth() const noexcept

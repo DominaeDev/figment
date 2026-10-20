@@ -23,6 +23,8 @@ namespace fig::gui
 		TabNavigationBackward,
 
 		CreateCharacter,
+		ImportCharacter,
+		AddedCharacter,
 		EditCharacter,
 		DebugCharacter,
 		EditUserSettings,
@@ -83,6 +85,12 @@ namespace fig::gui
 	inline constexpr bool HasUserData(fig::event& event) { return (bool)event.user.data1; }
 	inline constexpr bool HasUserData1(fig::event& event) { return (bool)event.user.data1; }
 	inline constexpr bool HasUserData2(fig::event& event) { return (bool)event.user.data2; }
+	
+	inline std::unique_ptr<fig::string> GetEventText(fig::event& event) noexcept { 
+		auto text = std::unique_ptr<fig::string>(static_cast<fig::string*>(event.user.data1));
+		event.user.data1 = nullptr;
+		return std::move(text);
+	}
 
 	extern bool IsBroadcastEvent(fig::event& event);
 
@@ -131,6 +139,23 @@ namespace fig::gui
 		event.user.code = code;
 		event.user.data1 = (void*)pData1;
 		event.user.data2 = (void*)pData2;
+		SDL_PushEvent(&event);
+	}
+
+	inline void PushEvent(UserEvent eventType, fig::string_view text)
+	{
+		fig::event event {};
+		event.type = SDLUserEvent(eventType);
+		event.user.data1 = new fig::string(text);
+		SDL_PushEvent(&event);
+	}
+
+	inline void PushEvent(UserEvent eventType, int32_t code, fig::string_view text)
+	{
+		fig::event event {};
+		event.type = SDLUserEvent(eventType);
+		event.user.code = code;
+		event.user.data1 = new fig::string(text);
 		SDL_PushEvent(&event);
 	}
 

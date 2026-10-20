@@ -2040,7 +2040,7 @@ namespace fig::gui
 		paragraphEnd += delta;
 
 		fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
-		std::vector<TTFTextLine> newLines = LayoutParagraph(paragraphText);
+		std::vector<TTFTextLine> newLines = LayoutParagraph(paragraphText, _bWordWrap ? _wrapWidth : 0);
 
 		for (auto& line : newLines)
 			line.position += paragraphStart;
@@ -2106,7 +2106,7 @@ namespace fig::gui
 		paragraphEnd -= length;
 
 		fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
-		std::vector<TTFTextLine> newLines = LayoutParagraph(paragraphText);
+		std::vector<TTFTextLine> newLines = LayoutParagraph(paragraphText, _bWordWrap ? _wrapWidth : 0);
 
 		for (auto& line : newLines)
 			line.position += paragraphStart;

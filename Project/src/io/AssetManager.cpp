@@ -728,26 +728,25 @@ namespace fig::io
 
 	size_t AssetManager::DeleteAssets_NoLock(std::span<fig::uuid> assetIds) noexcept
 	{
+		// Remove from database
 		auto& db = GetDatabase();
 		size_t db_deletions = 0;
-		size_t file_deletions = 0;
 		if (auto result = db.DeleteAssets(assetIds))
-		{
 			db_deletions = result.value();
 
-			// Delete files
-			std::unordered_set<fig::uuid> assetFileIds;
-			for (auto& assetId : assetIds)
-				assetFileIds.insert_range(FindRelatedAssets_NoLock(assetId));
-			file_deletions = DeleteAssetFiles_NoLock(make_span(assetFileIds));
+		// Delete files
+		std::unordered_set<fig::uuid> assetFileIds;
+		for (auto& assetId : assetIds)
+			assetFileIds.insert_range(FindRelatedAssets_NoLock(assetId));
+		size_t file_deletions = DeleteAssetFiles_NoLock(make_span(assetFileIds));
 
-			// Free from memory as well
-			for (auto& assetId : assetIds)
-				_assets.erase(assetId);
-		}
-		
-		LogLn(std::format("Deleted {} assets (and {} files)", db_deletions, file_deletions));
-		return db_deletions;
+		size_t num_deletions = 0uz;
+		// Remove from memory
+		for (auto& assetId : assetIds)
+			num_deletions += _assets.erase(assetId);
+
+		LogLn(std::format("Deleted {} assets ({} database entries and {} files)", num_deletions, db_deletions, file_deletions));
+		return num_deletions;
 	}
 
 	size_t AssetManager::DeleteAssetFiles_NoLock(std::span<fig::uuid> assetIds) noexcept

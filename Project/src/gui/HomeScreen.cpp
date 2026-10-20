@@ -76,11 +76,25 @@ namespace fig::gui
 			if ((_fSearchTimer -= fElapsed) <= 0.0f)
 				_pCardList->SetFilter(_search_text);
 		}
+
+		if (_bRefreshCardList)
+			RefreshCards();
 	}
 
 	void HomeScreen::OnRender(fig::renderer_ptr pRenderer)
 	{
 		DrawBackground(pRenderer);
+	}
+
+	EventResult HomeScreen::OnEvent(fig::event& event)
+	{
+		if (IsUserEvent(event, UserEvent::AddedCharacter))
+		{
+			_bRefreshCardList = true;
+			return EventResult::Continue;
+		}
+
+		return Screen::OnEvent(event);
 	}
 
 	bool HomeScreen::OnKeyboardEvent(KeyboardEvent& event)
@@ -299,7 +313,13 @@ namespace fig::gui
 
 	void HomeScreen::OnActivated()
 	{
+		RefreshCards();
+	}
+
+	void HomeScreen::RefreshCards()
+	{
 		_pCardList->RefreshCards();
+		_bRefreshCardList = false;
 	}
 
 	void HomeScreen::RefreshTopButtons()
@@ -315,4 +335,5 @@ namespace fig::gui
 		bool bShowTags = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags);
 		_pToggleTagsButton->SetOn(bShowTags, true);
 	}
+
 }

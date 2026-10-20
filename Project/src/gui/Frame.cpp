@@ -201,7 +201,7 @@ namespace fig::gui
 			if (pOverlay->ProcessEvent(event) == EventResult::Handled)
 			{
 				if (pOverlay->_bDestroyMe)
-					PopOverlay(pOverlay);
+					PopAllOverlays();
 				return EventResult::Handled;
 			}
 		}

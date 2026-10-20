@@ -12,6 +12,7 @@
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/FileUtility.h"
+#include "io/CardImporter.h"
 #include "llm/LLMBackend.h"
 #include "llm/LLMInstance.h"
 #include "llm/LLMUtility.h"
@@ -475,12 +476,22 @@ namespace fig::gui
 		}
 		else if (IsUserEvent(event, UserEvent::CreateCharacter))
 		{
-			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
 			if (not pEditor->NewCharacter())
+				ChangeScreen<HomeScreen>(); // Error
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::ImportCharacter))
+		{
+			if (auto fn = GetEventText(event))
 			{
-				// Error
-				ChangeScreen<HomeScreen>();
+				auto path = std::filesystem::u8path(fn->c_str());
+				if (Global::GetUserContent().ImportCharacter(path))
+					PushEvent(UserEvent::AddedCharacter);
+			}
+			else
+			{
+				CardImporter::ShowImportDialog(GetSDLWindow());
 			}
 			return EventResult::Handled;
 		}
@@ -489,10 +500,7 @@ namespace fig::gui
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
 			if (not pEditor->EditCharacter(characterId))
-			{
-				// Error
-				ChangeScreen<HomeScreen>();
-			}
+				ChangeScreen<HomeScreen>(); // Error
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditUserSettings))
