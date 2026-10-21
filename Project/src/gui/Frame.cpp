@@ -195,15 +195,27 @@ namespace fig::gui
 
 	EventResult Frame::ProcessEvent(fig::event& event)
 	{
-		for (int32_t i = toI(_overlays.size()) - 1; i >= 0; --i)
+		if (not _overlays.empty())
 		{
-			auto pOverlay = _overlays[toUZ(i)].ptr;
-			if (pOverlay->ProcessEvent(event) == EventResult::Handled)
+			for (int32_t i = toI(_overlays.size()) - 1; i >= 0; --i)
 			{
-				if (pOverlay->_bDestroyMe)
-					PopAllOverlays();
-				return EventResult::Handled;
+				auto pOverlay = _overlays[toUZ(i)].ptr;
+				if (pOverlay->ProcessEvent(event) == EventResult::Handled)
+				{
+					if (pOverlay->_bDestroyMe)
+						PopAllOverlays();
+					return EventResult::Handled;
+				}
 			}
+
+			// Eat mouse events while menus are open
+			if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+			{
+				HandleMouseDown(event.button);
+				return EventResult::Pass;
+			}
+			else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP or event.type == SDL_EVENT_MOUSE_MOTION)
+				return EventResult::Pass;
 		}
 
 		if (not _modals.empty())
@@ -231,7 +243,7 @@ namespace fig::gui
 			case SDL_EVENT_TEXT_EDITING:
 			case SDL_EVENT_TEXT_INPUT:
 			case SDL_EVENT_TEXT_EDITING_CANDIDATES:
-				return EventResult::Handled; 
+				return EventResult::Pass;
 			}
 		}
 
@@ -274,7 +286,6 @@ namespace fig::gui
 
 		// Pass to self
 		return OnEvent(event);
-		// return Control::ProcessEvent(event);
 	}
 
 	bool Frame::HandleMouseDown(SDL_MouseButtonEvent& event)

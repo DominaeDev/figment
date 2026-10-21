@@ -126,7 +126,7 @@ namespace fig::gui
 		createMenu.AddItem("New world\u2026");
 		createMenu.AddSeparator();
 		createMenu.AddItem("Import from file\u2026")
-			.SetDelegate([this] { PushEvent(UserEvent::ImportCharacter, 0); });
+			.SetDelegate([this] { PushEvent(UserEvent::ImportCharacter); });
 		menu.AddSeparator();
 		menu.AddItem("User profile\u2026", Resource::ICON_USER_SETTINGS)
 			.SetDelegate([] {

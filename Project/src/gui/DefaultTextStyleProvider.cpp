@@ -11,6 +11,7 @@ namespace fig::gui
 	constexpr TextStyleId kStyleLiteral = 3;
 	constexpr TextStyleId kStyleKeyword = 4;
 	constexpr TextStyleId kStyleOperator = 5;
+	constexpr TextStyleId kStyleComment = 6;
 
 	static bool IsIdentifierStart(char c)
 	{
@@ -191,12 +192,31 @@ namespace fig::gui
 		{
 			char c = text[pos];
 
+			// Escape braces
 			if (c == '\\' and pos + 1 < end and (text[pos + 1] == '{' or text[pos + 1] == '}'))
 			{
 				pos += 2;
 				continue;
 			}
 
+			// Comments
+			if (c == '/' and pos + 1 < end and text[pos + 1] == '*')
+			{
+				size_t commentEnd = text.find("*/", pos + 2);
+
+				if (commentEnd != fig::string_view::npos and commentEnd + 2 <= end)
+				{
+					result.emplace_back(StyleSpan {
+						.position = static_cast<int32_t>(pos),
+						.length = static_cast<int32_t>(commentEnd + 2 - pos),
+						.styleId = kStyleComment,
+					});
+					pos = commentEnd + 2;
+					continue;
+				}
+			}
+
+			// Brace syntax
 			if (c != '{')
 			{
 				++pos;
@@ -274,6 +294,7 @@ namespace fig::gui
 		AddStyle(Color::CommandLiteral);		// kStyleLiteral
 		AddStyle(Color::CommandKeyword);		// kStyleKeyword
 		AddStyle(Color::CommandOperator);		// kStyleOperator
+		AddStyle(Color::CommandComment);		// kStyleComment
 	}
 
 	std::vector<StyleSpan> DefaultTextStyleProvider::GetStyles(fig::string_view text, size_t offset)

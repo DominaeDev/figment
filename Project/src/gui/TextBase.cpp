@@ -362,7 +362,7 @@ namespace fig::gui
 			if (TTF_GetTextSubStringForPoint(run.ttf_text.get(), px - run.offsetX, _lineSkip / 2, &substring))
 				return run.byteOffset + GetCursorTextIndex(px - run.offsetX, &substring);
 		}
-		return line.position;
+		return 0;
 	}
 
 	int32_t TextBase::GetPixelsToLineOffset(const TTFTextLine& line, int32_t offset) const
@@ -376,8 +376,12 @@ namespace fig::gui
 			if (run.byteOffset > offset)
 				continue;
 
+			int32_t line_offset = offset - run.byteOffset;
+			if (line.position + offset > 0 and _text[line.position + offset - 1] == '\n')
+				line_offset -= 1; // Exclude newline
+
 			TTF_SubString substring;
-			if (TTF_GetTextSubString(run.ttf_text.get(), offset - run.byteOffset, &substring))
+			if (TTF_GetTextSubString(run.ttf_text.get(), line_offset, &substring))
 				return substring.rect.x + run.offsetX;
 		}
 		return 0;

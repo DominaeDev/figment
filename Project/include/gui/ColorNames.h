@@ -159,6 +159,7 @@ namespace fig::gui
 		CommandLiteral,
 		CommandKeyword,
 		CommandOperator,
+		CommandComment,
 		CommandError,
 
 		Count,
@@ -290,6 +291,7 @@ namespace fig::gui
 		std::pair { Color::CommandLiteral,						"Command.Literal" },
 		std::pair { Color::CommandKeyword,						"Command.Keyword" },
 		std::pair { Color::CommandOperator,						"Command.Operator" },
+		std::pair { Color::CommandComment,						"Command.Comment" },
 
 		std::pair { Color::Debug,								"Debug" },
 		std::pair { Color::Debug2,								"Debug2" },

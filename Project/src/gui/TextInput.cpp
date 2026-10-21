@@ -131,7 +131,7 @@ static int32_t FindNextWord(fig::string_view text, int32_t position)
 	if (startType == CharType::Whitespace)
 	{
 		// Skip to first non-whitespace
-		while (fig::is_whitespace(text[curr]))
+		while (curr < text.length() and fig::is_whitespace(text[curr]))
 		{
 			if (not StepRight(text, curr))
 				break;
@@ -967,6 +967,23 @@ namespace fig::gui
 		return _cursor;
 	}
 
+	int32_t TextInput::SelectLineAt(fig::point pos) noexcept
+	{
+		if (auto cursor = TryGetCursorAt(pos.x, pos.y))
+		{
+			auto& line = _lines[(*cursor).line];
+			auto start = line.position;
+			auto end = start + line.length;
+			Select(start, end);
+			SetCursor(line.eol ? end - 1 : end);
+
+			_undo.PushState(GetUndoState(UndoAction::Select));
+			ResetCursorBlink();
+			ScrollToCursor();
+		}
+		return _cursor;
+	}
+
 	bool TextInput::Delete()
 	{
 		if (DeleteSelection())
@@ -1081,9 +1098,15 @@ namespace fig::gui
 		}
 		else
 		{
-			if (event.clicks >= 2 and is_near(mpos, _lastClick))
+			if (event.clicks == 2 and is_near(mpos, _lastClick))
 			{
 				SelectWordAt(fig::point { textX, textY });
+				_lastClick = mpos;
+				return true;
+			}
+			else if (event.clicks == 3 and is_near(mpos, _lastClick))
+			{
+				SelectLineAt(fig::point { textX, textY });
 				_lastClick = mpos;
 				return true;
 			}
@@ -1300,6 +1323,9 @@ namespace fig::gui
 				if (bModCtrl)
 				{
 					SelectAll();
+					SetCursor(toI(_text.size()));
+					ScrollToCursor();
+					_undo.PushState(GetUndoState(UndoAction::Select));
 					return EventResult::Handled;
 				}
 				break;
@@ -2183,14 +2209,12 @@ namespace fig::gui
 				if (end <= line.position or start >= line.position + line.length)
 					continue;
 
-				auto pos_start = std::max(line.position, start) - line.position;
-				auto pos_end = std::min(line.position + line.length, end) - line.position;
-				int32_t remainingLength = pos_end - pos_start;
-
+				int32_t pos_start = std::max(line.position, start) - line.position;
+				int32_t pos_end = std::min(line.position + line.length, end) - line.position;
 				int32_t minX = GetPixelsToLineOffset(line, pos_start);
 				int32_t maxX = GetPixelsToLineOffset(line, pos_end);
 
-				if (minX < maxX)
+				if (minX <= maxX)
 				{
 					fig::rect highlight_rect {};
 					highlight_rect.x = minX;

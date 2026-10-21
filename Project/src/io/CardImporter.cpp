@@ -119,8 +119,11 @@ namespace fig::io
 		if (not Global::IsSignedIn())
 			return;
 
+		std::vector<fig::string> paths;
 		for (const char* const* path = fileList; *path; ++path)
-			PushEvent(UserEvent::ImportCharacter, std::filesystem::u8path(*path).u8string());
+			paths.push_back(std::filesystem::u8path(*path).u8string());
+
+		PushEvent(UserEvent::ImportCharacter, encode_csv(paths));
 	}
 
 	void CardImporter::ShowImportDialog(fig::window_ptr pWindow) noexcept

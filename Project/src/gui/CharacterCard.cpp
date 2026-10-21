@@ -70,17 +70,17 @@ namespace fig::gui
 
 		auto& menu = CreateMenu();
 
-		menu.AddItem("View chats")
-			.SetEnabled(_chatCount > 0)
-			.SetDelegate([this] { 
-				PushEvent(UserEvent::NavigateToChatList, &_characterId); 
-			});
-		menu.AddItem("Resume last chat")
+		menu.AddItem("Resume chat")
 			.SetEnabled(bLLM && _chatCount > 0);
 		menu.AddItem("Start a new chat", Resource::ICON_NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] { 
 				PushEvent(UserEvent::StartChat, &_characterId); 
+			});
+		menu.AddItem("View chats")
+			.SetEnabled(_chatCount > 0)
+			.SetDelegate([this] { 
+				PushEvent(UserEvent::NavigateToChatList, &_characterId); 
 			});
 
 		if constexpr (Debugging)
@@ -96,6 +96,13 @@ namespace fig::gui
 			.SetDelegate([this] {
 				PushEvent(UserEvent::EditCharacter, &_characterId);
 			});
+
+		auto& moveMenu = menu.AddItem("Move to folder");
+		moveMenu.AddItem("New folder\u2026");
+		menu.AddItem("Duplicate");
+		menu.AddItem("Export\u2026");
+
+		menu.AddSeparator();
 
 		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 		{
@@ -141,15 +148,6 @@ namespace fig::gui
 			.SetIcon(Resource::ICON_BORDER_06, false)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
 
-		menu.AddSeparator();
-
-		menu.AddItem("Duplicate\u2026");
-		menu.AddItem("Export\u2026");
-		auto& moveMenu = menu.AddItem("Move to folder\u2026");
-		moveMenu.AddItem("New folder\u2026");
-	
-		menu.AddSeparator();
-	
 		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Hide")
@@ -168,6 +166,9 @@ namespace fig::gui
 					NotifyUpdated();
 				});
 		}
+	
+		menu.AddSeparator();
+	
 		menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
 			.SetDelegate([this] { NotifyDelete(); });
 

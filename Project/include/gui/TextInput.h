@@ -130,6 +130,7 @@ namespace fig::gui
 		int32_t MoveCursorBeginning() noexcept;
 		int32_t MoveCursorEnd() noexcept;
 		int32_t SelectWordAt(fig::point pos) noexcept;
+		int32_t SelectLineAt(fig::point pos) noexcept;
 		void OnMoveCursor(int32_t last_position);
 		void ScrollUp() noexcept;
 		void ScrollDown() noexcept;

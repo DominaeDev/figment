@@ -421,7 +421,7 @@ namespace fig::gui
 		if (auto itFind = std::ranges::find(_items, index, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_items))
 		{
 			auto& item = *itFind;
-			item.attribute.type = CharacterAttribute::ValueType::ShortText;
+			item.attribute.type = valueType;
 			item.pControl->ChangeValueType(item.attribute.type);
 			SetDirty();
 		}

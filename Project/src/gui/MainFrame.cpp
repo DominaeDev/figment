@@ -485,14 +485,32 @@ namespace fig::gui
 		{
 			if (auto fn = GetEventText(event))
 			{
-				auto path = std::filesystem::u8path(fn->c_str());
-				if (Global::GetUserContent().ImportCharacter(path))
+				auto paths = decode_csv(*fn)
+					| std::views::transform([](auto&& s) { return std::filesystem::u8path(s); })
+					| std::ranges::to<std::vector>();
+				
+				size_t num_imported = 0uz;
+				for (auto& path : paths)
+				{
+					if (Global::GetUserContent().ImportCharacter(path))
+						num_imported++;
+				}
+				size_t num_failed = paths.size() - num_imported;
+				if (num_imported)
+				{
+					fig::string message = std::format("Successfully imported {} character{}.", num_imported, num_imported > 1 ? "s" : "");
+					if (num_imported < paths.size())
+						message += std::format("\n{} files{} could not be imported.", num_failed, num_failed > 1 ? "s" : "");
+
+					ShowDialogBox(message, DialogBoxType::Ok);
 					PushEvent(UserEvent::AddedCharacter);
+				}
+				else
+					ShowDialogBox("Failed to import character.", DialogBoxType::Ok);
 			}
 			else
-			{
 				CardImporter::ShowImportDialog(GetSDLWindow());
-			}
+
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditCharacter))
