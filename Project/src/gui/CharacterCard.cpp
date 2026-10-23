@@ -90,11 +90,15 @@ namespace fig::gui
 					PushEvent(UserEvent::DebugCharacter, &_characterId);
 				});
 		}
-
+		
 		menu.AddSeparator();
 		menu.AddItem("Edit character\u2026", Resource::ICON_EDIT)
 			.SetDelegate([this] {
 				PushEvent(UserEvent::EditCharacter, &_characterId);
+			});
+		menu.AddItem("Edit story\u2026")
+			.SetDelegate([this] {
+				PushEvent(UserEvent::EditCharacterStory, &_characterId);
 			});
 
 		auto& moveMenu = menu.AddItem("Move to folder");

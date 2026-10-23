@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "chat/ChatOptions.h"
@@ -10,71 +10,7 @@
 
 namespace fig::data
 {
-	struct Story
-	{
-		struct Message
-		{
-			enum class Type 
-			{
-				Undefined,
-				Message,
-				UserMessage,
-			};
-
-			Type type {};
-			fig::handle role_handle {};
-			fig::string content {};
-			Condition condition {};
-			int32_t ttl { -1 };
-		};
-
-		struct Step
-		{
-			fig::handle id;
-			Condition condition;
-			int32_t ttl = -1;
-			fig::string content;
-
-			static auto XmlFields() noexcept
-			{
-				return Fields(
-					Attribute { "id",				&Step::id },
-					Element	{ "Condition",		&Step::condition },
-					Element	{ "Duration",		&Step::ttl },
-					Element	{ "Content",		&Step::content }
-				);
-
-				static_assert(IsXmlSerializable<Step>);
-			}
-		};
-
-		struct Chapter
-		{
-			fig::string title;
-			std::vector<Step> steps;
-
-			static auto XmlFields() noexcept
-			{
-				return Fields(
-					Element { "Title",		&Chapter::title },
-					Element { "Step",			&Chapter::steps }
-						.Collection("Steps")
-				);
-
-				static_assert(IsXmlSerializable<Chapter>);
-			}
-		};
-
-		fig::string title;
-		std::vector<Chapter> chapters;
-		std::vector<Message> intro;
-		std::vector<Message> outro;
-
-		fig::io::FileError LoadFromXml(XmlReaderElement xml) noexcept;
-		void SaveToXml(XmlWriterElement xml) const noexcept;
-
-		fig::optional_cref<Step> GetStep(size_t chapter, size_t step) const noexcept;
-	};
+	using ScenarioRule = fig::string; // for now
 
 	class Scenario : public XmlData<"Scenario", 0>
 	{
@@ -121,21 +57,99 @@ namespace fig::data
 				static_assert(IsXmlSerializable<RoleSlot>);
 			}
 		};
+		
+		struct Event
+		{
+			enum class Type
+			{
+				Invalid,
+				Instruct,
+				Instigate,
+				ChatMessage,
+				ShowMessage,
+			};
 
-		bool OnValidate() const noexcept override;
+			static constexpr auto EventTypeMapping = std::array<std::pair<Type, fig::string_view>, 5> {
+				std::pair { Type::Invalid,			"invalid" },
+				std::pair { Type::Instruct,			"instruct" },
+				std::pair { Type::Instigate,		"instigate" },
+				std::pair { Type::ChatMessage,		"chat" },
+				std::pair { Type::ShowMessage,		"info" },
+			};
 
+			Type type {};
+			Condition condition {};
+			fig::chat::Role role { fig::chat::Role::Undefined };
+			fig::string content {};
+			int32_t ttl { -1 };
+
+			static auto XmlFields() noexcept
+			{
+				return Fields(
+					Attribute { "type",			&Event::type,
+						[](auto& value) { return enum_serialize(value, EventTypeMapping); },
+						[](auto& value) { return enum_deserialize(value, EventTypeMapping); }
+					}	.MustExist(),
+					Attribute { "condition",	&Event::condition },
+					Attribute { "role", &Event::role,
+						[](auto& value) { return enum_serialize(value, fig::chat::RoleMapping); },
+						[](auto& value) { return enum_deserialize(value, fig::chat::RoleMapping); }
+					}	.SkipEmpty(),
+					Attribute { "ttl",			&Event::ttl }
+						.Default(-1),
+					Text { &Event::content }
+				);
+
+				static_assert(IsXmlSerializable<Event>);
+			}
+		};
+
+		struct Scene
+		{
+			fig::uuid id;
+			fig::string name;
+			fig::string content;
+			std::vector<Event> events;
+
+			static auto XmlFields() noexcept
+			{
+				return Fields(
+					Attribute { "id",		&Scene::id },
+					Element { "Name",		&Scene::name },
+					Element { "Content",	&Scene::content },
+					Element { "Event",		&Scene::events }
+						.Collection("Events")
+				);
+
+				static_assert(IsXmlSerializable<Scene>);
+			}
+		};
+		
 		const std::vector<RoleSlot>& GetRoleSlots() const noexcept { return roles; }
-		std::pair<fig::string, fig::string> GetInfo() const noexcept { return std::make_pair(title, description); }
-		const Story& GetStory() const noexcept { return story; }
 
 		bool OnLoadFromXml(XmlReaderElement xml) override;
+		bool OnValidate() const noexcept override;
 
-	private:
+		void SetRules(const std::vector<ScenarioRule>& rules) noexcept;
+		void AppendRules(const std::vector<ScenarioRule>& rules) noexcept;
+		void ClearRules() noexcept;
+		const std::vector<ScenarioRule>& GetRules() const noexcept { return _rules; }
+
+		fig::string GetTitle(const Context& context) const noexcept;
+		Scene& CreateScene() noexcept;
+
+		fig::string name;
 		fig::string title;
-		fig::string description;
+		fig::string about;
+		fig::string creator;
+		fig::string version;
 		fig::chat::UserDefinedOptions userOptions;
 		std::vector<RoleSlot> roles {};
-		Story story {};
+		std::vector<ScenarioRule> _rules;
+		fig::string_list _tags;
+
+		std::vector<Scene> scenes;
+		fig::optional_cref<Scene> GetFirstScene() const noexcept;
 
 	public:
 		static auto XmlFields() noexcept
@@ -143,12 +157,19 @@ namespace fig::data
 			using namespace fig::io;
 
 			return Fields(
-				Element { "Title",		&Scenario::title },
-				Element { "Description",	&Scenario::description },
+				Element { "Name",			&Scenario::name },
+				Element { "Title",			&Scenario::title },
+				Element { "Description",	&Scenario::about },
+				Element { "Creator",		&Scenario::creator },
+				Element { "Version",		&Scenario::version },
+				Element { "Tags",			&Scenario::_tags },
 				Element { "Options",		&Scenario::userOptions },
 				Element { "Role",			&Scenario::roles }
 					.Collection("Roles"),
-				Element { "Story",		&Scenario::story }
+				Element { "Scene",			&Scenario::scenes }
+					.Collection("Scenes"),
+				Element { "Rule",			&Scenario::_rules }
+					.Collection("Rules")
 			);
 
 			static_assert(IsXmlSerializable<Scenario>);

@@ -1,6 +1,7 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "data/Scenario.h"
 #include "text/ConditionParser.h"
+#include "text/TextEvaluator.h"
 #include "io/Xml.h"
 #include <cassert>
 
@@ -23,170 +24,74 @@ namespace fig::data
 		return true;
 	}
 
+	void Scenario::SetRules(const std::vector<ScenarioRule>& rules) noexcept
+	{
+		_rules = rules;
+	}
+
+	void Scenario::AppendRules(const std::vector<ScenarioRule>& rules) noexcept
+	{
+		_rules.append_range(rules);
+	}
+
+	void Scenario::ClearRules() noexcept
+	{
+		_rules.clear();
+	}
+
 	bool Scenario::OnValidate() const noexcept
 	{
-		if (roles.empty())
-			return false;
-		
-		// Ensure the scenario can assign roles to at least one bot and one user
-		int32_t idx_bot { -1 };
-		int32_t idx_user { -1 };
-		for (size_t idx = 0; idx < roles.size(); ++idx)
+		if constexpr (Enabled)
 		{
-			if (idx_user < 0 and roles[idx].flags.IsSet(RoleSlot::Flag::User))
+			if (roles.empty())
+				return false;
+
+			// Ensure the scenario can assign roles to at least one bot and one user
+			int32_t idx_bot { -1 };
+			int32_t idx_user { -1 };
+			for (size_t idx = 0; idx < roles.size(); ++idx)
 			{
-				idx_user = static_cast<int32_t>(idx);
-				continue;
-			}
-			if (idx_bot < 0 and idx != idx_user)
-			{
-				idx_bot = static_cast<int32_t>(idx);
-				continue;
-			}
-		}
-
-		if (idx_bot == -1 or idx_user == -1)
-			return false; // No exclusive roles
-		return true;
-	}
-
-	static void ReadMessages(XmlReaderElement xml, std::vector<Story::Message>& messages)
-	{
-		auto try_node = xml.GetFirstElementAny();
-		while (try_node)
-		{
-			auto& node = try_node.value();
-			auto nodeName = node.GetName();
-			Story::Message message;
-
-			if (nodeName == "Info")
-			{
-				message.type = Story::Message::Type::UserMessage;
-			}
-			else if (nodeName == "InvokeBot")
-			{
-				message.type = Story::Message::Type::Message;
-				message.role_handle = node["role"].Get<fig::string>();
-				message.ttl = node["duration"].Get<int32_t>(-1);
-			}
-			else if (nodeName == "InvokeNarrator")
-			{
-				message.type = Story::Message::Type::Message;
-				message.role_handle = "narrator";
-				message.ttl = node["duration"].Get<int32_t>(-1);
-			}
-			else if (nodeName == "Instruct")
-			{
-				message.type = Story::Message::Type::Message;
-				message.role_handle = "director";
-				message.ttl = node["duration"].Get<int32_t>(2);
-			}
-			else
-				goto next;
-
-			message.condition = Condition(node["condition"].Get<fig::string>(), true);
-			message.content = node.GetValue<fig::string>();
-
-			messages.emplace_back(std::move(message));
-
-		next:
-			try_node = node.GetNextSiblingAny();
-		}
-	}
-
-	static void WriteMessages(XmlWriterElement xml, const std::vector<Story::Message>& messages)
-	{
-		for (auto& message : messages)
-		{
-			fig::string elementName;
-			switch (message.type)
-			{
-				case Story::Message::Type::Message:
-					elementName = "Message";
-					break;
-				case Story::Message::Type::UserMessage:
-					elementName = "UserMessage";
-					break;
-				default:
-					continue;
-			}
-			auto node = xml.AddChild(elementName);
-
-			if (not message.role_handle.empty())
-				node["role"].Set(message.role_handle);
-			node["duration"].Set(message.ttl);
-			node["condition"].Set((fig::string)message.condition);
-		}
-	}
-
-	FileError Story::LoadFromXml(XmlReaderElement xml) noexcept
-	{
-		title = xml.GetElement<fig::string>("Title", "Untitled");
-
-		// Read chapters
-		chapters.clear();
-		if (auto chaptersNode = xml.GetFirstElement("Chapters"))
-		{
-			if (auto chapterNode = (*chaptersNode).GetFirstElement("Chapter"))
-			{
-				while (chapterNode)
+				if (idx_user < 0 and roles[idx].flags.IsSet(RoleSlot::Flag::User))
 				{
-					Chapter chapter;
-					if (Deserialize(chapterNode.value(), chapter))
-						chapters.emplace_back(std::move(chapter));
-
-					chapterNode = chapterNode.value().GetNextSibling();
+					idx_user = static_cast<int32_t>(idx);
+					continue;
+				}
+				if (idx_bot < 0 and idx != idx_user)
+				{
+					idx_bot = static_cast<int32_t>(idx);
+					continue;
 				}
 			}
+
+			if (idx_bot == -1 or idx_user == -1)
+				return false; // No exclusive roles
+			return true;
 		}
-
-		// Read intro
-		if (auto introNode = xml.GetFirstElement("Intro"))
-			ReadMessages(introNode.value(), intro);
-
-		// Read outro
-		if (auto outroNode = xml.GetFirstElement("Outro"))
-			ReadMessages(outroNode.value(), outro);
-
-		return FileError::NoError;
-	}
-
-	void Story::SaveToXml(XmlWriterElement xml) const noexcept
-	{
-		xml.SetElementValue("Title", title);
-
-		if (not intro.empty())
+		else
 		{
-			auto introNode = xml.AddChild("Intro");
-			WriteMessages(introNode, intro);
-		}
-
-		if (not outro.empty())
-		{
-			auto outroNode = xml.AddChild("Outro");
-			WriteMessages(outroNode, outro);
-		}
-
-		if (not chapters.empty())
-		{
-			auto chaptersNode = xml.AddChild("Chapters");
-			for (auto& chapter : chapters)
-			{
-				auto chapterNode = chaptersNode.AddChild("Chapter");
-				Serialize(chapterNode, chapter);
-			}
+			return true;
 		}
 	}
 
-	fig::optional_cref<Story::Step> Story::GetStep(size_t idx_chapter, size_t idx_step) const noexcept
+	fig::optional_cref<Scenario::Scene> Scenario::GetFirstScene() const noexcept
 	{
-		if (idx_chapter >= chapters.size())
-			return std::nullopt;
+		if (not scenes.empty())
+			return scenes.front();
+		return std::nullopt;
+	}
 
-		auto& chapter = chapters[idx_chapter];
-		if (idx_step >= chapter.steps.size())
-			return std::nullopt;
+	fig::string Scenario::GetTitle(const Context& context) const noexcept
+	{
+		if (not empty_or_whitespace(title))
+			return eval_text(title, context);
+		return "Untitled";
+	}
 
-		return chapter.steps[idx_step];
+	Scenario::Scene& Scenario::CreateScene() noexcept
+	{
+		scenes.emplace_back(Scene {
+			.id = _CreateUUID(),
+		});
+		return scenes.back();
 	}
 }

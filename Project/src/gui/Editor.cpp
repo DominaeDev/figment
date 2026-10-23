@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Editor.h"
 #include "gui/DialogBox.h"
 
@@ -46,7 +46,7 @@ namespace fig::gui
 			return;
 		}
 
-		auto& dlg = CreateDialogBox("Discard unsaved changes?", DialogBoxType::YesNo,
+		auto& dlg = CreateDialogBox("Discard unsaved changes?", DialogBoxType::ConfirmCancel,
 			[this, fnClose](bool bConfirm) {
 				if (bConfirm)
 					fnClose();

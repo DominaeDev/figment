@@ -1495,44 +1495,44 @@ namespace fig::llm
 	{
 		// Story introduction
 		auto& staging = _staging;
-		auto& story = staging.GetScenario().GetStory();
-		if (not story.intro.empty())
+		
+		if (auto scene = staging.GetScenario().GetFirstScene(); scene.has_value())
 		{
 			auto& ctx = staging.GetContext();
-			for (auto& msg : story.intro)
+			for (auto& msg : (*scene).events)
 			{
 				if (not msg.condition.Evaluate(ctx))
 					continue; // Skip
 
-				if (msg.type == Story::Message::Type::Message)
+				auto content = eval_text(msg.content, ctx);
+				auto role = msg.role;
+
+				switch (msg.type)
 				{
-					fig::string content = eval_text(msg.content, ctx);
-					auto role = staging.GetRoleFromHandle(msg.role_handle);
-					if (role == Role::Director)
-						PushDirection(content, msg.ttl);
-					else if (role == Role::Narrator)
+				case Scenario::Event::Type::ChatMessage:
+					if (not content.empty())
 					{
-						if (not content.empty())
+						if (role == Role::Narrator)
 							PushNarration(content);
-						else
-							Instigate(Role::Narrator, MessageType::Narration, 1);
-					}
-					else if (is_bot(role))
-					{
-						if (not content.empty())
+						else if (is_bot(role))
 							PushMessage(role, content, MessageType::Undefined); //! @todo: split message by type
-						else
-							Instigate(role, MessageType::Dialogue, 1);
+						else if (is_user(role))
+							PushUserDialogue(content); //! @todo: split message by type
 					}
-					else if (is_user(role))
-					{
-						PushUserDialogue(content); //! @todo: split message by type
-					}
-				}
-				else if (msg.type == Story::Message::Type::UserMessage)
-				{
-					fig::string content = eval_text(msg.content, ctx);
+					break;
+				case Scenario::Event::Type::Instigate:
+					if (role == Role::Narrator)
+						Instigate(Role::Narrator, MessageType::Narration, 1);
+					else if (is_bot(role))
+						Instigate(role, MessageType::Dialogue, 1);
+					break;
+				case Scenario::Event::Type::Instruct:
+					if (not content.empty())
+						PushDirection(content, msg.ttl);
+					break;
+				case Scenario::Event::Type::ShowMessage:
 					PushUserMessage(content);
+					break;
 				}
 			}
 		}

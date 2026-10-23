@@ -27,6 +27,9 @@ namespace fig::gui
 		AddedCharacter,
 		EditCharacter,
 		DebugCharacter,
+		CreateStory,
+		EditStory,
+		EditCharacterStory,
 		EditUserSettings,
 		ProfileDeleted,
 

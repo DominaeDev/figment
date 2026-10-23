@@ -1,53 +1,43 @@
 <Scenario format="0">
-	<Name>Default scenario</Name>
-	<Description>This is a simple scenario of the AI having a conversation with the user.</Description>
-	
+	<Name>Default story</Name>
+	<Title>Chat with {ai}</Title>
+	<Description>A casual conversation between the AI and the user.</Description>
 	<Tags>default, casual</Tags>
 	
 	<Roles>
 		<Role id="ai">
-			<Label>AI character</Label>
+			<Label>Character (AI)</Label>
 			<Flags>required</Flags>
 			<Brief>{user}'s friend and companion.</Brief>
-			<Condition error="Requires a female character">female</Condition>
 		</Role>
 		
 		<Role id="user">
-			<Label>User</Label>
+			<Label>User (You)</Label>
 			<Flags>required, user</Flags>
 			<Brief>{ai}'s best friend.</Brief>
-			<Condition error="Requires a male character">male</Condition>
 		</Role>
 	</Roles>
 	
-	<Story>
-		<Title>Chatting with {ai}</Title>
-		<Intro>
-			<Info>{ai} joined the conversation.</Info>
-			<Info>{user} joined the conversation.</Info>
-			<Instruct>First, introduce yourself, then greet {user} with a compliment, then suggests a topic for your conversation.</Instruct>
-			<InvokeNarrator/>
-			<InvokeBot role="ai"/>
-		</Intro>
-		
-		<Outro>
-			<Info>The end</Info>
-		</Outro>
-		
-		<Chapters>
-			<Chapter id="beginning">		
-				<Title>Chapter I</Title>
-				<Step>
-					<Content>{user} and {ai} are having a casual conversation.</Content>
-					
-					<Trigger>
-						<Condition>story:turn &gt;= 10</Condition>
-						<Actions>
-							<NextStep/>
-						</Actions>
-					</Trigger>
-				</Step>
-			</Chapter>
-		</Chapters>
-	</Story>
+	<Scenes>
+		<Scene id="38ee20eb-71d9-4d85-a616-7154a9191faa">
+			<Name>Introduction</Name>
+			<Content>{user} and {ai} are having a casual conversation.</Content>
+			<Events>
+				<Event type="info">{ai} joined the conversation.</Event>
+				<Event type="info">{user} joined the conversation.</Event>
+				<Event type="instruct">First, introduce yourself, then greet {user} with a compliment, then suggests a topic for your conversation.</Event>
+				<Event type="instigate" role="narrator"/>
+				<Event type="instigate" role="ai"/>
+			</Events>
+			
+			<Triggers>
+				<Trigger>
+					<Condition>story:turn &gt;= 10</Condition>
+					<Actions>
+						<Action type="goto-next"/>
+					</Actions>
+				</Trigger>
+			</Triggers>
+		</Scene>
+	</Scenes>
 </Scenario>

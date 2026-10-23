@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include "gui/MouseEventHandler.h"
@@ -84,8 +84,8 @@ namespace fig::gui
 
 		std::optional<T> GetValue() const noexcept
 		{
-			if (_selectedIndex >= 0 && _selectedIndex < _items.size())
-				return _items[_selectedIndex].second;
+			if (_selectedIndex >= 0 and _selectedIndex < _values.size())
+				return _values[_selectedIndex];
 			return std::nullopt;
 		}
 

@@ -125,10 +125,6 @@ namespace fig::gui
 		
 		Global::GetUserContent().UpdateAsset(_assetId, _character);
 		Global::GetUserContent().GetAssets().SaveNow();
-
-		_pSaveButton->SetTheme(ButtonThemes::Default);
-		auto pBorder = _pSaveButton->GetBorderRenderer();
-		pBorder->SetColor(Color::Border);
 		return true;
 	}
 

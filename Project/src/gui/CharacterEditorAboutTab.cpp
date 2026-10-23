@@ -46,13 +46,11 @@ namespace fig::gui
 		_pTags->SetText(encode_csv(_pCharacter->GetTags()));
 
 		// Author
-		static fig::string temp_author;
 		CreateLabel(this, pSizer, "Creator");
 		CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pCharacter->creator))
 			->SetMaxWidth(300);
 
 		// Version
-		static fig::string temp_version;
 		CreateLabel(this, pSizer, "Version");
 		CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pCharacter->version))
 			->SetMaxWidth(120);

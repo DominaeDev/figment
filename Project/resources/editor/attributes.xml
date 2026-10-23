@@ -12,6 +12,9 @@
 		<Attribute id="reputation" type="list">
 			<Name>Reputation</Name>
 		</Attribute>
+		<Attribute id="nationality" type="text" flags="trivial">
+			<Name>Nationality</Name>
+		</Attribute>
 		<Attribute id="speech" type="text" visibility="private">
 			<Name>Speech</Name>
 		</Attribute>

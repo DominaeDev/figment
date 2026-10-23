@@ -8,6 +8,7 @@
 #include "gui/LoginScreen.h"
 #include "gui/EditorScreen.h"
 #include "gui/CharacterEditor.h"
+#include "gui/StoryEditor.h"
 #include "gui/UserSettingsEditor.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
@@ -518,6 +519,21 @@ namespace fig::gui
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
 			if (not pEditor->EditCharacter(characterId))
+				ChangeScreen<HomeScreen>(); // Error
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::CreateStory))
+		{
+			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
+			if (not pEditor->NewStory())
+				ChangeScreen<HomeScreen>(); // Error
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::EditCharacterStory))
+		{
+			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
+			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
+			if (not pEditor->EditCharacterStory(characterId))
 				ChangeScreen<HomeScreen>(); // Error
 			return EventResult::Handled;
 		}

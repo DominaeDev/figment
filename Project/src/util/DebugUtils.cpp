@@ -2,6 +2,7 @@
 #include "util/DebugUtils.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
+#include "io/ContentManager.h"
 #include "io/Asset.h"
 #include "data/ModelSettings.h"
 #include "data/Character.h"
@@ -281,6 +282,14 @@ namespace fig
 					| std::ranges::to<std::vector>();
 
 				removeAssetIds.insert_range(brokenChatInstanceIds);
+
+				// Remove invalid scenarios
+				auto invalidScenarioIds = assets
+					| std::views::filter([](auto&& ref) { return ref.get().type.IsOfType(AssetType::Scenario) and not Global::GetUserContent().Get<fig::data::Scenario>(ref.get().id).has_value(); })
+					| std::views::transform([](auto&& ref) { return ref.get().id; })
+					| std::ranges::to<std::unordered_set>();
+
+				removeAssetIds.insert_range(invalidScenarioIds);
 
 				auto removeList = removeAssetIds | std::ranges::to<std::vector>();
 				if (auto removed = assetMngr.DeleteAssets(removeList))

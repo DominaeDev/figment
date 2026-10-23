@@ -68,7 +68,7 @@ namespace fig::data
 		{
 			return Fields(
 				Element { "Title",		&ChatLog::_title },
-				Element { "Message",	&ChatLog::_messages }
+				Element { "Event",	&ChatLog::_messages }
 					.Collection("Messages"),
 				Element { "SearchIndex", &ChatLog::_searchIndex,
 					[](auto& value) -> fig::string { return value.Serialize(); },

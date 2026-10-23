@@ -708,6 +708,35 @@ namespace fig::io
 		return asset.id;
 	}
 
+	fig::uuid UserContentManager::CreateCharacterStory(const fig::uuid& characterId)
+	{
+		// Create new scenario
+		auto scenario = fig::data::Scenario {};
+		scenario.roles.push_back(fig::data::Scenario::RoleSlot {
+			.id = "character",
+			.label = "Character",
+			.flags = { fig::data::Scenario::RoleSlot::Flag::Required },
+		});
+		scenario.roles.push_back(fig::data::Scenario::RoleSlot {
+			.id = "user",
+			.label = "User",
+			.flags = { fig::data::Scenario::RoleSlot::Flag::Required, fig::data::Scenario::RoleSlot::Flag::User },
+		});
+		if (auto character = Global::GetUserContent().Get<fig::data::Character>(characterId))
+		{
+			scenario.title = std::format("{}'s story", (*character).name.GetSpokenName());
+			scenario.creator = (*character).creator;
+		}
+		else
+			scenario.title = "Untitled story";
+
+		fig::bytes data;
+		scenario.SaveToXml(data);
+
+		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::Scenario), data, characterId);
+		return asset.id;
+	}
+
 	void UserContentManager::AssignOrder(const std::vector<fig::uuid>& assetIds)
 	{
 		_pAssetMngr->ModifyAssets(assetIds, [](const fig::ref_vector<Asset>& assets) {

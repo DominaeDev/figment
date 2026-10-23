@@ -129,6 +129,16 @@ namespace fig::io
 		return asset;
 	}
 
+	const Asset& AssetManager::CreateTemporaryAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		auto& asset = CreateAsset_NoLock(type, data, parent, false);
+		asset.sync_state.file_sync = AssetSyncState::Status::Temporary;
+		asset.sync_state.db_sync = AssetSyncState::Status::Temporary;
+		return asset;
+	}
+
 	bool AssetManager::UpdateAsset(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };

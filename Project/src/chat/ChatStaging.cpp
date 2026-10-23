@@ -361,14 +361,14 @@ namespace fig::chat
 			if (std::ranges::find(Constants::Chat::ReservedCharacterIDs, slot.id) == std::cend(Constants::Chat::ReservedCharacterIDs))
 			{
 				_context.SetAlias(slot.id, ContextSelector::FromRole(slot.role));
-				_context.SetMacro(slot.id, std::format("{{{}:name}}", (fig::string)slot.id));
+				_context.SetMacro(slot.id, std::format("{{{0}:name}}", (fig::string)slot.id));
 			}
 		}
 
 		// Scenario
-		if (auto firstStep = _scenario.GetStory().GetStep(0uz, 0uz)) //! @todo: current step
+		if (auto intro = _scenario.GetFirstScene()) //! @todo: current step
 		{
-			fig::string scenario = eval_text((*firstStep).content, _context);
+			fig::string scenario = eval_text((*intro).content, _context);
 			_context.SetValue("scenario", scenario);
 		}
 	}
@@ -380,10 +380,7 @@ namespace fig::chat
 
 	fig::string ChatStaging::GetStoryTitle() const noexcept
 	{
-		auto& title = _scenario.GetStory().title;
-		if (not empty_or_whitespace(title))
-			return eval_text(title, _context);
-		return "Untitled";
+		return _scenario.GetTitle(_context);
 	}
 
 	std::vector<fig::uuid> ChatStaging::GetCharacterIds() const noexcept

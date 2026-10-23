@@ -435,6 +435,6 @@ namespace fig::gui
 		_submenuIndex = toI(menuItemIndex);
 		_pSubmenu = new Menu(_pOwner);
 		_pSubmenu->_items = menuItem._subItems;
-		_pSubmenu->Show(fig::point { GetX() + GetWidth(), GetY() + menuItem.rect.y }, false);
+		_pSubmenu->Show(fig::point { GetX() + GetWidth(), GetY() + menuItem.rect.y - MenuMargin }, false);
 	}
 }

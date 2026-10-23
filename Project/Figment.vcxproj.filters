@@ -201,6 +201,15 @@
     <Filter Include="Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs">
       <UniqueIdentifier>{15580488-f82a-468f-ada5-1aca90a76792}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\StoryEditor">
+      <UniqueIdentifier>{a8d582db-5e1c-4a87-ae8e-df84aa47f422}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\StoryEditor\Tabs">
+      <UniqueIdentifier>{1c006ae5-0db8-448b-87b1-bb801c803d4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\StoryEditor\Controls">
+      <UniqueIdentifier>{11297da5-8876-4fa0-98f7-1eef604f9601}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -883,6 +892,24 @@
     </ClCompile>
     <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryEditorAboutTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryEditorRulesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryEditorImagesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryEditorScenesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryEventWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1995,6 +2022,27 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterEditorVoiceTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEditor.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEditorAboutTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEditorArgs.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEditorRulesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEditorImagesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEditorScenesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEventWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

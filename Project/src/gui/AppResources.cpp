@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/AppResources.h"
 #include "io/FileUtility.h"
 #include "io/AssetFileReader.h"
@@ -114,6 +114,12 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS, "./resources/gui/icons/icon_cog.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP, "./resources/gui/icons/icon_move_up.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN, "./resources/gui/icons/icon_move_down.png");
+		
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_ROLES, "./resources/gui/icons/icon_story_edit_roles.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_ROLES_SMALL, "./resources/gui/icons/icon_story_edit_roles_small.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_SCENES, "./resources/gui/icons/icon_story_edit_scenes.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_SCENES_SMALL, "./resources/gui/icons/icon_story_edit_scenes_small.png");
+
 		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_APPLICATION, "./resources/gui/icons/icon_settings_edit_application.png");
 		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_APPLICATION_SMALL, "./resources/gui/icons/icon_settings_edit_application_small.png");
 		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_PROFILE, "./resources/gui/icons/icon_settings_edit_profile.png");

@@ -130,6 +130,7 @@ namespace fig::io
 		
 		fig::uuid CreateLargePortrait(const fig::uuid& characterId, DataFormat format, fig::byte_span imageData);
 		fig::uuid CreateBackground(const fig::uuid& characterId, DataFormat format, fig::byte_span imageData);
+		fig::uuid CreateCharacterStory(const fig::uuid& characterId);
 		
 		void AssignOrder(const std::vector<fig::uuid>& assetIds);
 

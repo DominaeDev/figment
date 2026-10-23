@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterEditorGeneralTab.h"
 #include "gui/TextBox.h"
 #include "gui/ComboBox.h"

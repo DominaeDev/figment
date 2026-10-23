@@ -142,10 +142,7 @@ namespace fig::data
 		[[nodiscard]] std::optional<T> TryGetElement(const fig::string& name) const noexcept
 		{
 			if (auto elem = GetFirstElement(name))
-			{
-				auto value = elem.value().TryGetValue<T>();
-				return value;
-			}
+				return (*elem).TryGetValue<T>();
 			return std::nullopt;
 		}
 
