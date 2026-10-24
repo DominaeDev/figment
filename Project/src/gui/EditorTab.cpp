@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/EditorTab.h"
 #include "gui/TextBox.h"
 #include "gui/HorizontalLine.h"
@@ -54,6 +54,18 @@ namespace fig::gui
 		pTextBox->SetText(binding.AsString());
 		pTextBox->SetFixedRows(rows);
 		pTextBox->SetTextChangedDelegate([this, binding](fig::string_view text) mutable { binding.Set(fig::string { text }); SetDirty(); });
+		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
+		return pTextBox;
+	}
+
+	template <>
+	fig::observer_ptr<TextBox> EditorTabBase::CreateTextBox<int32_t>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<int32_t> binding, int32_t rows)
+	{
+		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, rows == 1 ? Constants::GUI::TextBoxFontSize : 14.5, rows > 1 ? TextInput::Mode::Multiline : TextInput::Mode::Single );
+
+		pTextBox->SetText(binding.AsString());
+		pTextBox->SetFixedRows(rows);
+		pTextBox->SetTextChangedDelegate([this, binding](fig::string_view text) mutable { binding.Set(text); SetDirty(); });
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;
 	}

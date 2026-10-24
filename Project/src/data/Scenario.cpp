@@ -75,6 +75,8 @@ namespace fig::data
 
 	fig::optional_cref<Scenario::Scene> Scenario::GetFirstScene() const noexcept
 	{
+		if (auto it = std::ranges::find_if(scenes, [](auto&& s) { return s.bEntryPoint; }); it != std::ranges::cend(scenes))
+			return *it;
 		if (not scenes.empty())
 			return scenes.front();
 		return std::nullopt;
@@ -91,6 +93,7 @@ namespace fig::data
 	{
 		scenes.emplace_back(Scene {
 			.id = _CreateUUID(),
+			.bEntryPoint = scenes.empty(),
 		});
 		return scenes.back();
 	}

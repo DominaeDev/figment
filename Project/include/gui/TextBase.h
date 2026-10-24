@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <functional>
 
@@ -27,6 +27,7 @@ namespace fig::gui
 		void SetStyleProvider()
 		{
 			_pStyleProvider = std::make_unique<T>(this);
+			ApplyStyle(_text);
 		}
 
 	protected:

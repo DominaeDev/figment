@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 
@@ -32,7 +32,7 @@ namespace fig::gui
 	template <typename T>
 	concept is_string_value_bindable = is_string_convertible<T>;
 	template <typename T>
-	concept is_int_value_bindable = std::is_enum_v<T> and (not is_string_convertible<T>);
+	concept is_int_value_bindable = (std::is_enum_v<T> or (std::integral<T> and (not std::same_as<T, bool>) and (not std::same_as<T, char>))) and (not is_string_convertible<T>);
 
 	template <is_string_value_bindable T>
 	struct ValueBinding<T>
@@ -60,6 +60,9 @@ namespace fig::gui
 		ValueBinding() = delete;
 		ValueBinding(const ValueBinding& other) : _ptr { other._ptr } {}
 		explicit ValueBinding(T* ptr) : _ptr { ptr } {}
+
+		void Set(fig::string_view value) noexcept;
+		fig::string AsString() const noexcept;
 
 		void Set(int32_t value) noexcept
 		{

@@ -2,8 +2,8 @@
 	<!-- Character aliases -->
 	<Alias id="char">current:name</Alias>
 	<Alias id="character">current:name</Alias>
-	<Alias id="character:">current:name</Alias>
 	<Alias id="char:">current</Alias>
+	<Alias id="character:">current</Alias>
 	<Alias id="char1:">bot1</Alias>
 	<Alias id="char2:">bot2</Alias>
 	<Alias id="char3:">bot3</Alias>
@@ -12,9 +12,7 @@
 	<Alias id="char6:">bot6</Alias>
 	<Alias id="char7:">bot7</Alias>
 	<Alias id="char8:">bot8</Alias>
-	<Alias id="c:">current</Alias>
 	<Alias id="user">user:name</Alias>
-	<Alias id="u:">user</Alias>
 	
 	<!-- Standard conditions -->
 	<Condition id="single_chat">__num_bots eq 1</Condition>

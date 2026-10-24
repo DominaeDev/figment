@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/MainFrame.h"
 #include "gui/HomeScreen.h"
 #include "gui/ChatScreen.h"
@@ -702,8 +702,13 @@ namespace fig::gui
 				return false;
 
 			Scenario scenario;
-			if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
-				return false;
+			if (auto try_scenario = Global::GetUserContent().GetCharacterScenario(characterId))
+				scenario = *try_scenario;
+			else
+			{
+				if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
+					return false;
+			}
 
 			ChatStaging staging(std::move(scenario), std::move(scaffold), Constants::LLM::DefaultChatOptions);
 

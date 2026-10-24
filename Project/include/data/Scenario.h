@@ -110,11 +110,15 @@ namespace fig::data
 			fig::string name;
 			fig::string content;
 			std::vector<Event> events;
+			int32_t ttl {};
+			bool bEntryPoint {};
 
 			static auto XmlFields() noexcept
 			{
 				return Fields(
 					Attribute { "id",		&Scene::id },
+					Attribute { "entry",	&Scene::bEntryPoint },
+					Attribute { "ttl",		&Scene::ttl },
 					Element { "Name",		&Scene::name },
 					Element { "Content",	&Scene::content },
 					Element { "Event",		&Scene::events }

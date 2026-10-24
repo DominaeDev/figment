@@ -16,6 +16,10 @@ namespace fig::gui
 
 	protected:
 		SaveResult OnSave() noexcept override;
+		void OnEventSettingsMenu(size_t eventIndex);
+		void OnMoveEvent(size_t EventIndex, int32_t dir, bool bMaxDistance);
+		void OnRemoveEvent(size_t index);
+
 		void ShowEventsMenu();
 		void ShowTriggersMenu();
 		void AddEvent(fig::data::Scenario::Event::Type type);

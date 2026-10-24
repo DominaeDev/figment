@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "util/DebugUtils.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
@@ -172,8 +172,13 @@ namespace fig
 						return;
 
 					Scenario scenario;
-					if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
-						return;
+					if (auto try_scenario = Global::GetUserContent().GetCharacterScenario(characterId))
+						scenario = *try_scenario;
+					else
+					{
+						if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
+							return;
+					}
 
 					ChatStaging staging(std::move(scenario), std::move(scaffold), Constants::LLM::DefaultChatOptions);
 					if (!staging.AddCharacter(Role::Bot1, characterId, character))

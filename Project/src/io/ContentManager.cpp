@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "app/AppState.h"
 #include "io/ContentManager.h"
 #include "io/AssetManager.h"
@@ -288,6 +288,13 @@ namespace fig::io
 			std::ranges::sort(backgrounds, std::ranges::less(), [](auto&& b) { return b.get().GetOrder(); });
 			return backgrounds[std::min(index, backgrounds.size() - 1uz)].get();
 		}
+		return fig::nullref;
+	}
+
+	fig::optional_cref<fig::data::Scenario> UserContentManager::GetCharacterScenario(const fig::uuid& characterId)
+	{
+		if (auto scenario = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Scenario), characterId))
+			return Get<fig::data::Scenario>((*scenario).id);
 		return fig::nullref;
 	}
 
@@ -726,6 +733,7 @@ namespace fig::io
 		{
 			scenario.title = std::format("{}'s story", (*character).name.GetSpokenName());
 			scenario.creator = (*character).creator;
+			scenario.roles[0].label = (*character).name.GetSpokenName();
 		}
 		else
 			scenario.title = "Untitled story";

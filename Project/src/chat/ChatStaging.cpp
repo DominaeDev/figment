@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "chat/ChatStaging.h"
 #include "chat/PromptBuilder.h"
 #include "app/AppState.h"
@@ -360,14 +360,22 @@ namespace fig::chat
 		{
 			if (std::ranges::find(Constants::Chat::ReservedCharacterIDs, slot.id) == std::cend(Constants::Chat::ReservedCharacterIDs))
 			{
-				_context.SetAlias(slot.id, ContextSelector::FromRole(slot.role));
-				_context.SetMacro(slot.id, std::format("{{{0}:name}}", (fig::string)slot.id));
+				static const auto reserved_ids = std::unordered_set<fig::handle> { "char", "character", "char1", "char2", "char3", "char4", "char5", "char6", "char7", "char8", "user", "current" };
+				if (not reserved_ids.contains(slot.id))
+				{
+					_context.SetAlias(slot.id, ContextSelector::FromRole(slot.role));
+					_context.SetMacro(slot.id, std::format("{{{0}:name}}", (fig::string)slot.id));
+				}
 			}
 		}
 
 		// Scenario
-		if (auto intro = _scenario.GetFirstScene()) //! @todo: current step
+		if (auto intro = _scenario.GetFirstScene())
 		{
+			auto primarySelector = ContextSelector::FromRole(Role::Bot1);
+			_context.SetAlias("current", primarySelector);
+			_context.SetPrimarySelector(primarySelector);
+
 			fig::string scenario = eval_text((*intro).content, _context);
 			_context.SetValue("scenario", scenario);
 		}

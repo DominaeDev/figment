@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/ComboBox.h"
 #include "gui/DropList.h"
@@ -52,8 +52,12 @@ namespace fig::gui
 
 		template <typename T>
 		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding, int32_t rows) = delete;
+
 		template <>
 		fig::observer_ptr<class TextBox> CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows);
+
+		template <>
+		fig::observer_ptr<class TextBox> CreateTextBox<int32_t>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<int32_t> binding, int32_t rows);
 
 		template <is_string_range U>
 		fig::observer_ptr<class ComboBox> CreateComboBox(ControlPtr pParent, SizerPtr pSizer, const U& items)
