@@ -911,6 +911,12 @@
     <ClCompile Include="src\gui\StoryEventWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\CharacterEditorDialogueTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\CharacterDialogueWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -2043,6 +2049,12 @@
     </ClInclude>
     <ClInclude Include="include\gui\StoryEventWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterEditorDialogueTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CharacterDialogueWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

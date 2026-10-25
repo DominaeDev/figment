@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/VerticalSizer.h"
 #include "gui/Control.h"
 #include <limits>
@@ -13,7 +13,7 @@ namespace fig::gui
 	fig::coord VerticalSizer::GetItemSize(SizerItem& item, bool includeBorder)
 	{
 		if (auto pControl = item.GetControl())
-			return pControl->GetHeight() + (includeBorder ? item.GetTopBorder() + item.GetBottomBorder() : 0);
+			return pControl->GetPreferredSize().y + (includeBorder ? item.GetTopBorder() + item.GetBottomBorder() : 0);
 		else if (auto pSizer = item.GetSizer())
 			return item.rect.h + (includeBorder ? item.GetTopBorder() + item.GetBottomBorder() : 0);
 		return 0;

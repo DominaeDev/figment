@@ -1,15 +1,9 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterEditorRulesTab.h"
-#include "gui/TextBox.h"
-#include "gui/ComboBox.h"
-#include "gui/ButtonWithLabel.h"
-#include "gui/ButtonWithLabelAndIcon.h"
-#include "gui/ToggleWithLabel.h"
 #include "gui/CharacterAttributeWidget.h"
-#include "gui/AppResources.h"
-#include "gui/HorizontalLine.h"
+#include "gui/ButtonWithLabel.h"
 #include "gui/Menu.h"
-#include "gui/GridSizer.h"
+#include "gui/AppResources.h"
 #include "data/Character.h"
 #include "io/FileUtility.h"
 
@@ -69,6 +63,9 @@ namespace fig::gui
 		pRule->SetValueChangedDelegate([this] (auto&& _) { SetDirty(); });
 		pRule->SetMoveDelegate([this, index](auto&& dir) { OnMoveRule(index, dir, IsShiftDown()); });
 		_pRuleSizer->Add(pRule, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+
+		if (_pTabGroup)
+			_pTabGroup->AddControl(pRule);
 		return pRule;
 	}
 
@@ -179,7 +176,15 @@ namespace fig::gui
 
 			_pRuleSizer->RemoveAll();
 			for (auto& item : _items)
+			{
 				_pRuleSizer->Add(item.pControl, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+
+				if (_pTabGroup)
+				{
+					_pTabGroup->RemoveControl(item.pControl);
+					_pTabGroup->AddControl(item.pControl);
+				}
+			}
 			InvalidateLayout();
 			RefreshRuleLabels();
 			SetDirty();

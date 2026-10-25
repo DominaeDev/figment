@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Control.h"
 #include "gui/Window.h"
 #include "gui/Frame.h"
@@ -140,6 +140,15 @@ namespace fig::gui
 				_foregroundColor = pParent->GetForegroundColor();
 			if (!_backgroundColor.IsDefined())
 				_backgroundColor = pParent->GetBackgroundColor();
+		}
+	}
+
+	void Control::OnRemovedChild(ControlPtr pChild)
+	{
+		if (_pTabGroup)
+		{
+			if (auto pTabControl = dynamic_cast<ITabControl*>(pChild.get()))
+				_pTabGroup->RemoveControl(pTabControl);
 		}
 	}
 

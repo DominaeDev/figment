@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "ITabControl.h"
@@ -14,9 +14,14 @@ namespace fig::gui
 		void RemoveControl(fig::observer_ptr<ITabControl> pControl);
 		bool ProcessEvent(fig::event& event);
 	
+		bool FocusNext();
+		bool FocusPrev();
+
 	protected:
-		bool Navigate(int32_t direction);
+		bool Navigate(TabDirection direction, bool bLoopAround);
+
 	private:
 		std::vector<fig::observer_ptr<ITabControl>> _controls;
+		fig::observer_ptr<TabControlGroup> _pParentGroup {};
 	};
 }

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/TextInput.h"
 #include "gui/Window.h"
 #include "app/AppState.h"
@@ -706,7 +706,7 @@ namespace fig::gui
 		SDL_SetTextInputArea(pWindow, &input_rect, cursor_offset);
 	}
 
-	void TextInput::SetFocus(bool bFocus)
+	void TextInput::SetFocus(bool bFocus, TabDirection dir)
 	{
 		bFocus &= GetEnabled();
 		if (_bFocused == bFocus)

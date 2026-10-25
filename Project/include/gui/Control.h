@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Events.h"
 #include "gui/GUITypes.h"
@@ -69,6 +69,8 @@ namespace fig::gui
 		inline fig::coord GetMarginBottom() const noexcept { return _marginBottom; }
 
 		fig::observer_ptr<TabControlGroup> CreateTabGroup();
+		fig::observer_ptr<TabControlGroup> GetTabGroup() { return _pTabGroup.get(); }
+		fig::observer_ptr<const TabControlGroup> GetTabGroup() const { return _pTabGroup.get(); }
 
 	protected:
 		virtual void OnRender(fig::renderer_ptr pRenderer);
@@ -76,6 +78,7 @@ namespace fig::gui
 		virtual void OnVisibility(bool bVisible) {};
 		virtual void OnEnabled(bool bEnabled) {};
 		virtual void OnParent();
+		void OnRemovedChild(ControlPtr pChild) override;
 		virtual EventResult OnEvent(fig::event& event) { return EventResult::Pass; }
 
 		void DrawBackground(fig::renderer_ptr pRenderer);

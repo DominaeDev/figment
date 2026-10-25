@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include "gui/MouseEventHandler.h"
@@ -26,7 +26,7 @@ namespace fig::gui
 		fig::string_view GetValue() const noexcept;
 
 		void SetLabel(fig::string_view label);
-		void SetFocus(bool bFocused);
+		void SetFocus(bool bFocus, TabDirection dir = TabDirectionForward);
 		bool CanFocus() const { return true; }
 		bool IsFocused() const;
 

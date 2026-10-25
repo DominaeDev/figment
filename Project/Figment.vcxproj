@@ -186,6 +186,8 @@
     <ClCompile Include="src\data\TavernCardV2.cpp" />
     <ClCompile Include="src\gui\AddImageButton.cpp" />
     <ClCompile Include="src\gui\BackgroundImageCarousel.cpp" />
+    <ClCompile Include="src\gui\CharacterDialogueWidget.cpp" />
+    <ClCompile Include="src\gui\CharacterEditorDialogueTab.cpp" />
     <ClCompile Include="src\gui\ChatBackgroundPopOver.cpp" />
     <ClCompile Include="src\gui\BehindChat.cpp" />
     <ClCompile Include="src\gui\BoxSizer.cpp" />
@@ -525,6 +527,8 @@
     <ClInclude Include="include\Figment.h" />
     <ClInclude Include="include\gui\AddImageButton.h" />
     <ClInclude Include="include\gui\BackgroundImageCarousel.h" />
+    <ClInclude Include="include\gui\CharacterDialogueWidget.h" />
+    <ClInclude Include="include\gui\CharacterEditorDialogueTab.h" />
     <ClInclude Include="include\gui\ChatBackgroundPopOver.h" />
     <ClInclude Include="include\gui\BehindChat.h" />
     <ClInclude Include="include\gui\BoxSizer.h" />

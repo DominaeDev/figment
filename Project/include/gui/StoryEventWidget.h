@@ -27,12 +27,13 @@ namespace fig::gui
 		fig::string_view GetContent() const noexcept;
 		fig::data::Scenario::Event GetValue() const noexcept;
 
-		void SetFocus(bool bFocused);
+		void SetFocus(bool bFocus, TabDirection dir = TabDirectionForward);
 		bool CanFocus() const { return true; }
 		bool IsFocused() const;
 
 	protected:
 		void CreateRoleDropList(fig::chat::Role role);
+		void CreateMessageTypeDropList(fig::chat::MessageType msgType);
 		void CreateContentTextBox(fig::string_view text, fig::string_view placeholder, bool bMultiline);
 		void InitValue(const fig::data::Scenario::Event& storyEvent);
 		void OnUpdate(float) override;
@@ -49,7 +50,8 @@ namespace fig::gui
 
 		fig::observer_ptr<StaticText> _pLabel;
 		fig::observer_ptr<TextBox> _pTextBox;
-		fig::observer_ptr<DropListOfType<fig::chat::Role>> _pDropList;
+		fig::observer_ptr<DropListOfType<fig::chat::Role>> _pRoleDropList;
+		fig::observer_ptr<DropListOfType<fig::chat::MessageType>> _pMsgTypeDropList;
 		fig::observer_ptr<ButtonWithIcon> _pSettingsButton;
 		fig::observer_ptr<ButtonWithIcon> _pMoveUpButton;
 		fig::observer_ptr<ButtonWithIcon> _pMoveDownButton;

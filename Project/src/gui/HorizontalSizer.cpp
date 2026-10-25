@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/HorizontalSizer.h"
 #include "gui/Control.h"
 
@@ -12,8 +12,8 @@ namespace fig::gui
 	fig::coord HorizontalSizer::GetItemSize(SizerItem& item, bool includeBorder)
 	{
 		if (auto pControl = item.GetControl())
-			return pControl->GetWidth() + (includeBorder ? item.GetLeftBorder() + item.GetRightBorder() : 0);
-		else if (auto pControl = item.GetControl())
+			return pControl->GetPreferredSize().x + (includeBorder ? item.GetLeftBorder() + item.GetRightBorder() : 0);
+		else if (auto pSizer = item.GetSizer())
 			return item.rect.w + (includeBorder ? item.GetLeftBorder() + item.GetRightBorder() : 0);
 		return 0;
 	}

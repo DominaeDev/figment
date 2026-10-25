@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/EditorTab.h"
 #include "gui/CharacterEditorArgs.h"
@@ -60,7 +60,5 @@ namespace fig::gui
 
 		fig::observer_ptr<TextBox> _pAge;
 		SizerPtr _pAttributeSizer {};
-		
-		fig::observer_ptr<TabControlGroup> _pTabGroup;
 	};
 }

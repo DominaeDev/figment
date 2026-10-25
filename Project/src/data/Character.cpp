@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "data/Character.h"
 
 using namespace fig::gui;
@@ -12,6 +12,9 @@ namespace fig::data
 	{
 		return Fields(
 			Element { "ID", &Character::chatId },
+			Element { "About", &Character::about },
+			Element { "Creator", &Character::creator },
+			Element { "Version", &Character::version },
 			Element { "Name", &Character::name }
 				.MustExist(),
 			Element { "Gender", &Character::gender,
@@ -28,9 +31,8 @@ namespace fig::data
 				[](auto& value) -> fig::string { return value.Serialize(); },
 				[](auto& value) -> SearchIndex { SearchIndex s; s.Deserialize(value); return s; }
 			},
-			Element { "About", &Character::about },
-			Element { "Creator", &Character::creator },
-			Element { "Version", &Character::version }
+			Element { "Example", &Character::_exampleDialogue }
+				.Collection("Examples")
 		);
 
 		static_assert(IsXmlSerializable<Character>);
@@ -298,5 +300,20 @@ namespace fig::data
 			_searchIndex.AddTerm(attribute.value);
 		_searchIndex.AddTerm(creator);
 		_searchIndex.AddTerms(_tags);
+	}
+
+	void Character::SetExampleDialogue(const std::vector<ExampleDialogue>& exampleDialogue) noexcept
+	{
+		_exampleDialogue = exampleDialogue;
+	}
+
+	void Character::AppendExampleDialogue(const std::vector<ExampleDialogue>& exampleDialogue) noexcept
+	{
+		_exampleDialogue.append_range(exampleDialogue);
+	}
+
+	void Character::ClearExampleDialogue() noexcept
+	{
+		_exampleDialogue.clear();
 	}
 }

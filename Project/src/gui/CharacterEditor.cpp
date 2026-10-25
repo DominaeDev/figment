@@ -1,9 +1,10 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterEditor.h"
 #include "gui/CharacterEditorGeneralTab.h"
 #include "gui/CharacterEditorTraitsTab.h"
 #include "gui/CharacterEditorImagesTab.h"
 #include "gui/CharacterEditorVoiceTab.h"
+#include "gui/CharacterEditorDialogueTab.h"
 #include "gui/CharacterEditorRulesTab.h"
 #include "gui/CharacterEditorAboutTab.h"
 #include "gui/ButtonWithLabelAndIcon.h"
@@ -23,6 +24,7 @@ namespace fig::gui
 		Traits,
 		Images,
 		Voice,
+		Dialogue,
 		Rules,
 		About,
 	};
@@ -33,6 +35,7 @@ namespace fig::gui
 		CreateTab<CharacterEditorTraitsTab>();
 		CreateTab<CharacterEditorImagesTab>();
 		CreateTab<CharacterEditorVoiceTab>();
+		CreateTab<CharacterEditorDialogueTab>();
 		CreateTab<CharacterEditorRulesTab>();
 		CreateTab<CharacterEditorAboutTab>();
 	}
@@ -166,6 +169,12 @@ namespace fig::gui
 				"Story",
 				Resource::ICON_CHARACTER_EDIT_STORY,
 				Resource::ICON_CHARACTER_EDIT_STORY_SMALL,
+			},
+			{
+				Tab::Dialogue,
+				"Example chat",
+				Resource::ICON_MENU_CHATS,
+				Resource::ICON_MENU_CHATS_SMALL,
 			},
 			{
 				NotImpl,

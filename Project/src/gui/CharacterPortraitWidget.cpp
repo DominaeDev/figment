@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterPortraitWidget.h"
 #include "gui/PreviewCardImage.h"
 #include "gui/TexturedBorder.h"

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Control.h"
 
 namespace fig::gui
@@ -127,9 +127,9 @@ namespace fig::gui
 			{
 				auto& rect = (*ppControl)->GetRect();
 				minX = std::min(minX, rect.x);
-				maxX = std::max(maxX, rect.x + rect.w);
+				maxX = std::max(maxX, rect.x + rect.w + item.GetLeftBorder() + item.GetRightBorder());
 				minY = std::min(minY, rect.y);
-				maxY = std::max(maxY, rect.y + rect.h);
+				maxY = std::max(maxY, rect.y + rect.h + item.GetTopBorder() + item.GetBottomBorder());
 			}
 		}
 		return fig::point { maxX - minX, maxY - minY };

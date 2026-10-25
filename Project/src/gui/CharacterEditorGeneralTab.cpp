@@ -109,7 +109,7 @@ namespace fig::gui
 		pAddAttributeButton->SetDelegate([this] { ShowAttributesMenu(); });
 		pSizer->Add(pAddAttributeButton, 0);
 
-		_pTabGroup = CreateTabGroup();
+		CreateTabGroup();
 		return true;
 	}
 

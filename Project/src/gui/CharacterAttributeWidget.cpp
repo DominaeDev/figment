@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterAttributeWidget.h"
 #include "gui/TextBox.h"
 #include "gui/TextInput.h"
@@ -204,12 +204,12 @@ namespace fig::gui
 		}
 	}
 
-	void CharacterAttributeWidget::SetFocus(bool bFocused)
+	void CharacterAttributeWidget::SetFocus(bool bFocus, TabDirection dir)
 	{
 		if (_pTextBox)
-			return _pTextBox->SetFocus(bFocused);
+			return _pTextBox->SetFocus(bFocus, dir);
 		else if (_pComboBox)
-			return _pComboBox->SetFocus(bFocused);
+			return _pComboBox->SetFocus(bFocus, dir);
 	}
 
 	bool CharacterAttributeWidget::IsFocused() const

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "gui/GUITypes.h"
@@ -66,6 +66,8 @@ namespace fig::gui
 		void SetMaxSize(fig::coord width, fig::coord height) { _maxSize = fig::point { width, height }; }
 		void SetMaxWidth(fig::coord width) { _maxSize.x = width; }
 		void SetMaxHeight(fig::coord height) { _maxSize.y = height; }
+
+		virtual fig::point GetPreferredSize() const noexcept { return fig::point { _rect.w, _rect.h }; }
 
 		void AddChild(ControlPtr pChild);
 

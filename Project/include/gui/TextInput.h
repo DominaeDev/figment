@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <functional>
 
@@ -55,7 +55,7 @@ namespace fig::gui
 		bool HasSelection() const noexcept { return highlight_start >= 0 && highlight_end >= 0 && highlight_start != highlight_end; };
 
 		int32_t SetCursor(int32_t index) noexcept;
-		void SetFocus(bool focus) override;
+		void SetFocus(bool bFocus, TabDirection dir = TabDirectionForward) override;
 		bool IsFocused() const override;
 		bool CanFocus() const { return GetEnabled(); }
 

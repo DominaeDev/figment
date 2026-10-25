@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/GUITypes.h"
 #include "data/CharacterName.h"
@@ -11,6 +11,22 @@
 namespace fig::data
 {
 	using CharacterRule = fig::string; // for now
+
+	struct ExampleDialogue
+	{
+		fig::string input;
+		fig::string response;
+
+		static auto XmlFields() noexcept
+		{
+			return Fields(
+				Element("Input", &ExampleDialogue::input),
+				Element("Response", &ExampleDialogue::response)
+			);
+
+			static_assert(IsXmlSerializable<ExampleDialogue>);
+		}
+	};
 
 	class Character
 	{
@@ -43,6 +59,11 @@ namespace fig::data
 		void ClearRules() noexcept;
 		const std::vector<CharacterRule>& GetRules() const noexcept { return _rules; }
 
+		void SetExampleDialogue(const std::vector<ExampleDialogue>& exampleDialogue) noexcept;
+		void AppendExampleDialogue(const std::vector<ExampleDialogue>& exampleDialogue) noexcept;
+		void ClearExampleDialogue() noexcept;
+		const std::vector<ExampleDialogue>& GetExampleDialogue() const noexcept { return _exampleDialogue; }
+
 		void AddSearchTerm(const fig::string& term);
 		const SearchIndex& GetSearchIndex() const noexcept { return _searchIndex; }
 
@@ -61,8 +82,8 @@ namespace fig::data
 		Pronouns pronouns { Pronouns::Undefined };
 		fig::string brief;
 		
-		fig::color bgColor {};
-		fig::color borderColor {};
+		fig::color bgColor {}; //! @todo
+		fig::color borderColor {}; //! @todo
 
 		// Meta data
 		fig::string creator;
@@ -74,6 +95,7 @@ namespace fig::data
 
 		std::vector<CharacterAttribute> _attributes;
 		std::vector<CharacterTrait> _traits;
+		std::vector<ExampleDialogue> _exampleDialogue;
 		std::vector<CharacterRule> _rules;
 		fig::string_list _tags;
 		SearchIndex _searchIndex;

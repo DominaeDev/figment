@@ -61,18 +61,35 @@ namespace fig::gui
 
 	void StoryEventWidget::CreateRoleDropList(Role role)
 	{
-		_pDropList = CreateControl<DropListOfType<fig::chat::Role>>();
-		_pDropList->SetWidth(240);
-		_pDropList->SetDelegate([this](auto&& value) { OnValueChanged(); });
-		_pDropList->SetPosition(0, 23);
+		_pRoleDropList = CreateControl<DropListOfType<Role>>();
+		_pRoleDropList->SetWidth(240);
+		_pRoleDropList->SetDelegate([this](auto&& value) { OnValueChanged(); });
+		_pRoleDropList->SetPosition(0, 23);
 
 		for (auto& role : _pScenario->roles)
 		{
-			_pDropList->AddItem(role.label, role.role);
+			_pRoleDropList->AddItem(role.label, role.role);
 		}
-		_pDropList->AddItem("Narrator", Role::Narrator);
-		_pDropList->SelectValue(role);
-		SetHeight(_pDropList->GetY() + _pDropList->GetHeight());
+		_pRoleDropList->AddItem("Narrator", Role::Narrator);
+		_pRoleDropList->SelectValue(role);
+		SetHeight(_pRoleDropList->GetY() + _pRoleDropList->GetHeight());
+	}
+
+	void StoryEventWidget::CreateMessageTypeDropList(MessageType msgType)
+	{
+		_pMsgTypeDropList = CreateControl<DropListOfType<MessageType>>();
+		_pMsgTypeDropList->SetWidth(240);
+		_pMsgTypeDropList->SetDelegate([this](auto&& value) { OnValueChanged(); });
+		_pMsgTypeDropList->SetPosition(248, 23);
+
+		if (msgType == MessageType::Undefined)
+			msgType = MessageType::Dialogue;
+
+		_pMsgTypeDropList->AddItem("Dialogue", MessageType::Dialogue);
+		_pMsgTypeDropList->AddItem("Action", MessageType::Action);
+		_pMsgTypeDropList->AddItem("Internal thought", MessageType::Thought);
+		_pMsgTypeDropList->SelectValue(msgType);
+		SetHeight(_pMsgTypeDropList->GetY() + _pMsgTypeDropList->GetHeight());
 	}
 
 	void StoryEventWidget::CreateContentTextBox(fig::string_view text, fig::string_view placeholder, bool bMultiline)
@@ -80,7 +97,7 @@ namespace fig::gui
 		_pTextBox = CreateControl<TextBox>(FontFace::Default, 14.0);
 		_pTextBox->SetStyleProvider<DefaultTextStyleProvider>();
 		_pTextBox->SetTextChangedDelegate([this](auto&& value) { OnValueChanged(); });
-		_pTextBox->SetPosition(0, _pDropList ? _pDropList->GetBottom() + 6 : 23);
+		_pTextBox->SetPosition(0, _pRoleDropList ? _pRoleDropList->GetBottom() + 6 : 23);
 		_pTextBox->EnableAutoSize(true);
 		_pTextBox->SetMode(bMultiline ? TextInput::Mode::Multiline : TextInput::Mode::SingleWordWrap);
 		_pTextBox->SetMinRows(bMultiline ? 2 : 1);
@@ -98,6 +115,7 @@ namespace fig::gui
 			_pLabel->SetText("Chat message from");
 
 			CreateRoleDropList(storyEvent.role);
+			CreateMessageTypeDropList(storyEvent.msgType);
 			CreateContentTextBox(storyEvent.content, "Type a chat message", true);
 		}
 		else if (storyEvent.type == Scenario::Event::Type::Instigate)
@@ -118,8 +136,8 @@ namespace fig::gui
 
 		if (_pTextBox)
 			SetHeight(_pTextBox->GetBottom());
-		else if (_pDropList)
-			SetHeight(_pDropList->GetBottom());
+		else if (_pRoleDropList)
+			SetHeight(_pRoleDropList->GetBottom());
 		else
 			SetHeight(23);
 	}
@@ -147,10 +165,10 @@ namespace fig::gui
 			_pMoveUpButton->SetX(std::min(GetWidth(), MaxWidth) - 64);
 	}
 
-	fig::chat::Role StoryEventWidget::GetRole() const noexcept
+	Role StoryEventWidget::GetRole() const noexcept
 	{
-		if (_pDropList)
-			return _pDropList->GetValue().value_or(Role::Undefined);
+		if (_pRoleDropList)
+			return _pRoleDropList->GetValue().value_or(Role::Undefined);
 		return Role::Undefined;
 	}
 
@@ -165,10 +183,10 @@ namespace fig::gui
 		}
 	}
 
-	void StoryEventWidget::SetFocus(bool bFocused)
+	void StoryEventWidget::SetFocus(bool bFocus, TabDirection dir)
 	{
 		if (_pTextBox)
-			return _pTextBox->SetFocus(bFocused);
+			return _pTextBox->SetFocus(bFocus, dir);
 	}
 
 	bool StoryEventWidget::IsFocused() const
@@ -191,6 +209,8 @@ namespace fig::gui
 
 	void StoryEventWidget::OnValueChanged() noexcept
 	{
+		if (_pMsgTypeDropList)
+			_pMsgTypeDropList->SetEnabled(_pRoleDropList->GetValue() != Role::Narrator);
 		if (_fnChangedDelegate)
 			_fnChangedDelegate(GetValue());
 	}

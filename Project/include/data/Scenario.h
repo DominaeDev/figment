@@ -80,6 +80,7 @@ namespace fig::data
 			Type type {};
 			Condition condition {};
 			fig::chat::Role role { fig::chat::Role::Undefined };
+			fig::chat::MessageType msgType { fig::chat::MessageType::Undefined };
 			fig::string content {};
 			int32_t ttl { -1 };
 
@@ -94,6 +95,10 @@ namespace fig::data
 					Attribute { "role", &Event::role,
 						[](auto& value) { return enum_serialize(value, fig::chat::RoleMapping); },
 						[](auto& value) { return enum_deserialize(value, fig::chat::RoleMapping); }
+					}	.SkipEmpty(),
+					Attribute { "message-type", &Event::msgType,
+						[](auto& value) { return enum_serialize(value, fig::chat::MessageTypeMapping); },
+						[](auto& value) { return enum_deserialize(value, fig::chat::MessageTypeMapping); }
 					}	.SkipEmpty(),
 					Attribute { "ttl",			&Event::ttl }
 						.Default(-1),
