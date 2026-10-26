@@ -1,8 +1,9 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "tts/TTSBackend.h"
 #include "io/PackageManager.h"
 #include "io/FileUtility.h"
 #include "io/ContentManager.h"
+#include "chat/ChatFormatter.h"
 
 #if defined(_WIN32)
 #include "tts/AudioServerProcess_Win32.h"
@@ -15,6 +16,7 @@
 using namespace fig::io;
 using namespace fig::data;
 using namespace fig::gui;
+using namespace fig::chat;
 
 namespace fig::tts
 {
@@ -229,9 +231,7 @@ namespace fig::tts
 
 	std::expected<std::vector<TTSResult>, TTSError> TTSBackend::Speak(fig::uuid characterId, fig::string_view text, bool split)
 	{
-		text = Undialogue(text);
-		text = Unaction(text);
-		text = Unnarration(text);
+		text = ChatFormatter::Unwrap(text);
 
 		fig::string content { text };
 		escape_json_inplace(content);

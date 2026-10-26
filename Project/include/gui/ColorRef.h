@@ -1,12 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Color.h"
 #include "gui/ColorNames.h"
 
 namespace fig
 {
-	class color_ref;
-
 	class color_ref
 	{
 		static constexpr const fig::color null_value { 0xCDCDCD00_rgba };

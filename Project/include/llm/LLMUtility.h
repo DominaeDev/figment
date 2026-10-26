@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "llm/LLMTypes.h"
 #include "llm/LLMContext.h"
@@ -10,13 +10,8 @@ namespace fig::llm
 	size_t string_find_partial_stop(const fig::string& str, const fig::string& stop);
 	size_t find_one_of(const fig::string& text, const std::vector<fig::string>& words);
 	size_t find_stopping_strings(const fig::string& text, const std::vector<fig::string>& stop_words, const size_t last_token_size, bool is_full_stop);
-	void get_tag_and_name(const fig::string& text, fig::string& tag, fig::string& name);
-	fig::string& sanitize_response(fig::string& text);
-	fig::string& complete_message(fig::string& text);
 	
 	void process(fig::string& partial, fig::string str_token, bool* bWait, bool* bHalt, fig::string& stop_word);
-	fig::string process_message(fig::string message, fig::string actorName, std::vector<fig::chat::Submessage>* out_pSubmessages = nullptr) noexcept;
-	std::pair<fig::chat::MessageType, bool> detect_message_type(fig::string text) noexcept;
 
 	bool dump_batch_text(const LLMContext& context, int32_t seq_id, const fig::path& filename);
 	bool dump_batch_tokens(const LLMContext& context, int32_t seq_id, const fig::path& filename);

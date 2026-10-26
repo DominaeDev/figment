@@ -8,6 +8,7 @@
 #include "util/Lockable.h"
 #include "text/TextEvaluator.h"
 #include "chat/PromptBuilder.h"
+#include "chat/ChatFormatter.h"
 #include <cassert>
 #include <chrono>
 
@@ -780,8 +781,7 @@ namespace fig::llm
 					size_t fmt_end = partial.find('>', fmt_start + 1);
 					if (fmt_end != fig::npos)
 					{
-						fig::string tag, tagName;
-						get_tag_and_name(partial.substr(fmt_start, fmt_end - fmt_start + 1), tag, tagName);
+						auto [tag, tagName] = ChatFormatter::GetTagAndName(partial.substr(fmt_start, fmt_end - fmt_start + 1));
 
 						if (tagName == "@USR" || tagName == GetNameOf(Role::User) && args.role != Role::User)
 						{
@@ -812,19 +812,9 @@ namespace fig::llm
 								responderId = format_id(tagName);
 								responderRole = _staging.GetRoleOf(responderId);
 
-								if (tag == Constants::Chat::DialogueTag)
-									msgType = MessageType::Dialogue;
-								else if (tag == Constants::Chat::ActionTag)
-									msgType = MessageType::Action;
-								else if (tag == Constants::Chat::ThoughtTag)
-									msgType = MessageType::Thought;
-								else if (tag == Constants::Chat::NarrationTag)
-									msgType = MessageType::Narration;
-								else if (tag == Constants::Chat::DirectionTag)
-									msgType = MessageType::Direction;
-								else if (tag == Constants::Chat::StateReportTag)
-									msgType = MessageType::StateReport;
-
+								if (auto tagMsgType = ChatFormatter::GetMessageTypeForTag(tag); tagMsgType != MessageType::Undefined)
+									msgType = tagMsgType;
+								
 								if (msgType != MessageType::StateReport && args.maxMessages > 0 && ++numMessages > args.maxMessages)
 								{
 									stop_reason = StopReason::MessageCountLimit;
@@ -947,7 +937,7 @@ namespace fig::llm
 		token_pos = response_pos;
 		_contextState.last_sequence_index = current_sequence_index;
 
-		sanitize_response(response);
+		ChatFormatter::SanitizeMessage(response);
 
 		if (response.length() > 0)
 		{
@@ -1185,17 +1175,17 @@ namespace fig::llm
 
 	bool LLMInstance::PushDirection(const fig::string& message, int32_t ttl)
 	{
-		return PushMessage(Role::Director, Director(message), MessageType::Direction, false, ttl);
+		return PushMessage(Role::Director, ChatFormatter::Director(message), MessageType::Direction, false, ttl);
 	}
 
 	bool LLMInstance::PushNarration(const fig::string& message)
 	{
-		return PushMessage(Role::Narrator, Narration(message), MessageType::Narration);
+		return PushMessage(Role::Narrator, ChatFormatter::Narration(message), MessageType::Narration);
 	}
 
 	bool LLMInstance::PushUserDialogue(const fig::string& message)
 	{
-		return PushMessage(Role::User, Dialogue(message), MessageType::Dialogue);
+		return PushMessage(Role::User, ChatFormatter::Dialogue(message), MessageType::Dialogue);
 	}
 
 	bool LLMInstance::PushUserMessage(const fig::string& message)
@@ -1300,11 +1290,11 @@ namespace fig::llm
 		fig::string identifier = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" + GetIdentifierOf(role) : GetNameOf(role);
 		fig::string content = message;
 		content = eval_text(content, _staging.GetContext(role));
-		std::vector<Submessage> subMessages;
-		content = process_message(content, identifier, &subMessages);
+		auto [processed, subMessages] = ChatFormatter::ProcessMessage(content, identifier);
+		content = processed;
 
 		if (msgType == MessageType::Undefined)
-			msgType = detect_message_type(content).first;
+			msgType = ChatFormatter::DetectMessageType(content);
 	
 		if (msgType == MessageType::SystemMessage) //! @correctness
 			role = Role::System;
@@ -1399,30 +1389,19 @@ namespace fig::llm
 		bool bAllowNarration = true;
 
 		fig::string prependMsg;
-		if (msgType == MessageType::Dialogue)
+		switch (msgType)
 		{
-			prependMsg = std::format("<{}=\"{}\">", Constants::Chat::DialogueTag, responder);
+		case MessageType::Dialogue:
+		case MessageType::Action:
+		case MessageType::Thought:
+		case MessageType::Direction:
+			prependMsg = ChatFormatter::CreateMessagePrefix(responder, msgType);
 			bAllowNarration = false;
-		}
-		else if (msgType == MessageType::Action)
-		{
-			prependMsg = std::format("<{}=\"{}\">", Constants::Chat::ActionTag, responder);
-			bAllowNarration = false;
-		}
-		else if (msgType == MessageType::Thought)
-		{
-			prependMsg = std::format("<{}=\"{}\">", Constants::Chat::ThoughtTag, responder);
-			bAllowNarration = false;
-		}
-		else if (msgType == MessageType::Narration)
-		{
-			prependMsg = std::format("<{}>", Constants::Chat::NarrationTag);
+			break;
+		case MessageType::Narration:
+			prependMsg = ChatFormatter::CreateMessagePrefix(responder, msgType);
 			_next_narrator_turn = current_turn + _narratorCooldownDuration;
-		}
-		else if (msgType == MessageType::Direction)
-		{
-			prependMsg = std::format("<{}>", Constants::Chat::DirectionTag);
-			bAllowNarration = false;
+			break;
 		}
 
 		bAllowNarration &= _next_narrator_turn < current_turn || msgType == MessageType::Narration;
@@ -1448,7 +1427,8 @@ namespace fig::llm
 		if (currBlock.responseId != responseId)
 			return false; // Not last message
 
-		auto [msgType, bComplete] = detect_message_type(currBlock.content);
+		bool bComplete;
+		auto msgType = ChatFormatter::DetectMessageType(currBlock.content, bComplete);
 		if (msgType == MessageType::Undefined || (bComplete && !extend))
 			return false; // Not incomplete message
 
@@ -1459,17 +1439,8 @@ namespace fig::llm
 		newBlock.flags.Set(ContextBlockFlag::Contination);
 
 		if (extend && bComplete)
-		{
-			// Strip end tag
-			size_t pos_end = newBlock.content.rfind("</", fig::npos);
-			if (pos_end != fig::npos)
-			{
-				newBlock.content = newBlock.content.substr(0, pos_end);
-				char last_char = newBlock.content.back();
-				if (last_char == '*' || last_char == '"' || last_char == ']')
-					newBlock.content.pop_back(); // Trim scaffolding char
-			}
-		}
+			ChatFormatter::StripEndTag(newBlock.content);
+
 		_contextState.AppendBlock(newBlock); // Reinsert msg
 		_contextState.response_pos = _contextState.token_pos; // Beginning of continued message
 
@@ -1516,7 +1487,7 @@ namespace fig::llm
 						if (role == Role::Narrator)
 							PushNarration(content);
 						else if (is_bot(role) or is_user(role))
-							PushMessage(role, content, msgType);
+							PushMessage(role, ChatFormatter::Wrap(content, msgType));
 					}
 					break;
 				case Scenario::Event::Type::Instigate:
@@ -1540,7 +1511,7 @@ namespace fig::llm
 
 	bool LLMInstance::Instruct(fig::string instructions)
 	{
-		PushMessage(Role::Director, Director(instructions), MessageType::Direction, false, 4);
+		PushMessage(Role::Director, ChatFormatter::Director(instructions), MessageType::Direction, false, 4);
 		Instigate(Role::Undefined, MessageType::Undefined, 3);
 		return true;
 	}
@@ -1793,6 +1764,7 @@ namespace fig::llm
 				fig::string content = msg.substr(pos_begin + 1, pos_end - pos_begin - 1);
 				if (content.length() > 2)
 				{
+
 					if (content.front() == '*' && content.back() == '*')
 						content = content.substr(1, content.length() - 2);
 					else if (content.front() == '"' && content.back() == '"')

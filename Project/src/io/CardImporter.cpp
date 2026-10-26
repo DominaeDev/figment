@@ -7,6 +7,7 @@
 #include "user/UserManager.h"
 #include "data/TavernCardV2.h"
 #include "util/StripHtml.h"
+#include "chat/ChatFormatter.h"
 
 using namespace fig::chat;
 using namespace fig::data;
@@ -134,12 +135,28 @@ namespace fig::io
 
 				if (not card.data.greeting.empty())
 				{
-					scene.events.push_back(Scenario::Event {
-						.type = Scenario::Event::Type::ChatMessage,
-						.role = Role::Bot1,
-						.msgType = MessageType::Dialogue,
-						.content = card.data.greeting,
-					});
+					auto messages = ChatFormatter::AnalyseMessage(card.data.greeting);
+					for (auto& message : messages)
+					{
+						if (message.msgType == MessageType::Narration)
+						{
+							scene.events.push_back(Scenario::Event {
+								.type = Scenario::Event::Type::ChatMessage,
+								.role = Role::Narrator,
+								.msgType = MessageType::Narration,
+								.content = fig::string { message.content },
+							});
+						}
+						else
+						{
+							scene.events.push_back(Scenario::Event {
+								.type = Scenario::Event::Type::ChatMessage,
+								.role = Role::Bot1,
+								.msgType = message.msgType,
+								.content = fig::string { message.content },
+							});
+						}
+					}
 				}
 
 				scenario.scenes.push_back(scene);

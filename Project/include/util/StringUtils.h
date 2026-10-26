@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include <unordered_set>
@@ -66,6 +66,7 @@ namespace fig
 	std::vector<fig::string> split(const fig::string& input, const std::unordered_set<char>& delimiters, bool removeEmpty = true);
 	
 	std::vector<fig::string_view> split_sentences(fig::string_view text, bool removeEmpty = true);
+	std::vector<fig::string_view> split_paragraphs(fig::string_view text);
 
 	fig::string& normalize_newlines(fig::string& text);
 	[[nodiscard]] fig::string normalize_newlines(fig::string&& s);
@@ -135,15 +136,6 @@ namespace fig
 
 	[[nodiscard]] fig::wstring strip_diacritics(fig::wstring&& input);
 	[[nodiscard]] fig::string strip_diacritics(fig::string&& input);
-
-	fig::string Dialogue(fig::string_view text);
-	fig::string Action(fig::string_view text);
-	fig::string Director(fig::string_view text);
-	fig::string Narration(fig::string_view text);
-	fig::string_view Undialogue(fig::string_view text);
-	fig::string_view Unaction(fig::string_view text);
-	fig::string_view Undirector(fig::string_view text);
-	fig::string_view Unnarration(fig::string_view text);
 
 	inline fig::string format_file_size(uint64_t bytes) noexcept
 	{

@@ -3,6 +3,7 @@
 #include "llm/LlamaApi.h"
 #include "llm/ModelState.h"
 #include "io/FileUtility.h"
+#include "chat/ChatFormatter.h"
 #include <cassert>
 
 using namespace fig::io;
@@ -10,22 +11,6 @@ using namespace fig::chat;
 
 namespace fig::llm
 {
-	static std::vector<fig::string> const opening_tags {
-		std::format("<{0}=\"", fig::Constants::Chat::DialogueTag),
-		std::format("<{0}=\"", fig::Constants::Chat::ActionTag),
-		std::format("<{0}=\"", fig::Constants::Chat::ThoughtTag),
-		std::format("<{0}>",   fig::Constants::Chat::NarrationTag),
-		std::format("<{0}>",   fig::Constants::Chat::DirectionTag),
-	};	
-
-	static std::vector<fig::string> const closing_tags {
-		std::format("</{0}>", fig::Constants::Chat::DialogueTag),
-		std::format("</{0}>", fig::Constants::Chat::ActionTag),
-		std::format("</{0}>", fig::Constants::Chat::ThoughtTag),
-		std::format("</{0}>", fig::Constants::Chat::NarrationTag),
-		std::format("</{0}>", fig::Constants::Chat::DirectionTag),
-	};
-
 	size_t string_find_partial_stop(const fig::string& str, const fig::string& stop)
 	{
 		if (!str.empty() && !stop.empty())
@@ -91,101 +76,6 @@ namespace fig::llm
 		return stop_pos;
 	}
 
-	void get_tag_and_name(const fig::string& text, fig::string& tag, fig::string& name)
-	{
-		size_t pos_equals = text.find('=', 1);
-		if (pos_equals == fig::npos)
-		{
-			tag = trim(text.substr(1, text.length() - 2));
-			name = "";
-			return;
-		}
-
-		tag = trim(text.substr(1, pos_equals - 1));
-		name = trim(text.substr(pos_equals + 1, text.length() - pos_equals - 2));
-		replace_all_inplace(name, "\"", "");
-	}
-
-	std::pair<MessageType, bool> detect_message_type(fig::string text) noexcept
-	{
-		auto patterns = std::vector<std::tuple<fig::string, MessageType>> {
-			{ std::format("<{0}", Constants::Chat::DialogueTag),		MessageType::Dialogue},
-			{ std::format("<{0}", Constants::Chat::ActionTag),		MessageType::Action},
-			{ std::format("<{0}", Constants::Chat::ThoughtTag),		MessageType::Thought},
-			{ std::format("<{0}", Constants::Chat::NarrationTag),		MessageType::Narration},
-			{ std::format("<{0}", Constants::Chat::DirectionTag),		MessageType::Direction},
-		};
-
-		size_t last_pos = fig::npos;
-		MessageType msgType = MessageType::Undefined;
-		for (int i = 0; i < patterns.size(); ++i)
-		{
-			size_t pos = text.rfind(std::get<0>(patterns[i]), fig::npos);
-			if (pos != fig::npos && (last_pos == fig::npos || pos > last_pos))
-			{
-				last_pos = pos;
-				msgType = std::get<1>(patterns[i]);
-			}
-		}
-
-		bool bComplete = false;
-		for (auto& tag : closing_tags)
-		{
-			size_t pos_end = text.rfind(tag, fig::npos);
-			if (pos_end != fig::npos && pos_end > last_pos)
-			{
-				bComplete = true;
-				break;
-			}
-		}
-
-		return std::make_pair(msgType, bComplete);
-	}
-
-	fig::string& sanitize_response(fig::string& text)
-	{
-		size_t pos_last = text.find_last_of('<');
-		if (pos_last == fig::npos)
-			return text;
-		size_t pos_close = text.find_last_of('>');
-		if (pos_close == fig::npos || pos_close < pos_last)
-			text = text.substr(0, pos_last);
-		return text;
-	}
-
-	fig::string& complete_message(fig::string& text)
-	{
-		auto [msgType, complete] = detect_message_type(sanitize_response(text));
-		if (complete)
-			return text;
-
-		switch (msgType)
-		{
-		case MessageType::Undefined:
-			text = std::format("<{0}=\"{{char}}\">{1}</{0}>", Constants::Chat::DialogueTag, text);
-			break;
-		case MessageType::Dialogue:
-			text.append(std::format("\"</{0}>", Constants::Chat::DialogueTag));
-			break;
-		case MessageType::Action:
-			text.append(std::format("*</{0}>", Constants::Chat::ActionTag));
-			break;
-		case MessageType::Thought:
-			text.append(std::format("))</{0}>", Constants::Chat::ThoughtTag));
-			break;
-		case MessageType::Narration:
-			text.append(std::format("]</{0}>", Constants::Chat::NarrationTag));
-			break;
-		case MessageType::Direction:
-			text.append(std::format("</{0}>", Constants::Chat::DirectionTag));
-			break;
-		case MessageType::SystemMessage:
-		default:
-			break;
-		}
-		return text;
-	}
-
 	void process(fig::string& partial, fig::string str_token, bool* bWait, bool* bHalt, fig::string& stop_word)
 	{
 		if (validate_utf8(partial) < partial.size()) // Incomplete utf-8 string
@@ -209,12 +99,7 @@ namespace fig::llm
 			//		"<｜end▁of▁sentence｜>",
 		};
 
-		static std::vector<fig::string> formatting_tags;
-		if (formatting_tags.empty())
-		{
-			formatting_tags.insert(formatting_tags.end(), opening_tags.begin(), opening_tags.end());
-			formatting_tags.insert(formatting_tags.end(), closing_tags.begin(), closing_tags.end());
-		}
+		static std::vector<fig::string> formatting_tags = ChatFormatter::GetFormattingTags();
 
 		// Look for stop word - and halt
 		size_t stop_pos = find_stopping_strings(partial, stop_words, str_token.size(), true);
@@ -239,10 +124,11 @@ namespace fig::llm
 		}
 
 		// Look for formatting tags
-		size_t fmt_pos = find_one_of(partial, opening_tags);
+		size_t fmt_pos = find_one_of(partial, ChatFormatter::GetOpeningTags());
 		if (fmt_pos != fig::npos)
 		{
 			// Await end of tag '>', or beginning of a new tag '<' (indicating garbage from the model)
+			//! @todo: Assumes xml-style syntax
 			if (partial.find_first_of("<>", fmt_pos + 1, 2) == fig::npos)
 			{
 				*bHalt = false;
@@ -264,248 +150,6 @@ namespace fig::llm
 
 		*bHalt = false;
 		*bWait = false;
-	}
-
-	struct Span
-	{
-		MessageType msgType {};
-		size_t start;
-		size_t end; // exclusive
-		size_t length() const { return end - start; }
-	};
-
-	static size_t find_next(const fig::string& text, const fig::string& substring, size_t start = 0)
-	{
-		char ch = substring[0];
-		for (size_t pos = start; pos <= text.size() - substring.size(); ++pos)
-		{
-			if (text[pos] == ch)
-			{
-				bool match = true;
-				for (size_t n = 1; n < substring.size(); ++n)
-				{
-					if (text[pos + n] != substring[n])
-					{
-						match = false;
-						break;
-					}
-				}
-				if (match)
-					return pos;
-			}
-		}
-		return fig::npos;
-	}
-
-	static bool in_span(size_t pos, const std::vector<Span>& spans)
-	{
-		if (pos == fig::npos)
-			return false;
-
-		for (auto const& s : spans)
-		{
-			if (pos >= s.start && pos < s.end)
-				return true;
-		}
-		return false;
-	}
-
-	static void mark_spans(const fig::string s, MessageType msgType, fig::string open, fig::string close, std::vector<Span>& spans)
-	{
-		if (open.size() > s.size())
-			return;
-
-		size_t pos_open = find_next(s, open);
-		while (pos_open != fig::npos)
-		{
-			if (in_span(pos_open, spans))
-			{
-				pos_open = find_next(s, open, pos_open + 1);
-				continue;
-			}
-
-			size_t pos_close = find_next(s, close, pos_open + open.size());
-			if (in_span(pos_open, spans))
-			{
-				pos_close = find_next(s, close, pos_close + 1);
-				continue;
-			}
-
-			if (pos_close == fig::npos)
-				return;
-
-			spans.push_back(Span { msgType, pos_open, pos_close + close.size() });
-			pos_open = find_next(s, open, pos_close + close.size());
-		}
-	}
-
-	static void fill_gaps(const fig::string s, MessageType msgType, std::vector<Span>& spans)
-	{
-		auto CheckAndAdd = [msgType, &spans](size_t pos, size_t len) {
-			if (len != 0)
-				spans.push_back(Span { msgType, pos, pos + len });
-			return true;
-		};
-
-		// Sort spans
-		std::sort(spans.begin(), spans.end(), [](Span a, Span b) {
-			return a.start < b.start;
-		});
-
-		size_t length = s.length();
-
-		if (spans.size() == 0)
-		{
-			CheckAndAdd(0, length);
-			return;
-		}
-
-		size_t n = spans.size() - 1;
-		CheckAndAdd(spans[spans.size() - 1].end, length - spans[spans.size() - 1].end); // Tail
-		CheckAndAdd(0, spans[0].start); // Head
-
-		for (size_t i = 0; i < n; ++i)
-		{
-			auto& first = spans[i];
-			auto& second = spans[i + 1];
-			if (first.end < second.start)
-				CheckAndAdd(first.end, second.start - first.end);
-		}
-
-		// Sort again
-		std::sort(spans.begin(), spans.end(), [](Span a, Span b) {
-			return a.start < b.start;
-		});
-	}
-
-	static void trim_spans(const fig::string s, std::vector<Span>& spans)
-	{
-		for (auto& span : spans)
-		{
-			for (size_t pos = span.end - 1; pos > span.start; --pos)
-			{
-				if (std::isspace((unsigned char)s[pos]))
-					span.end = pos;
-				else
-					break;
-			}
-
-			for (size_t pos = span.start; pos < span.end; ++pos)
-			{
-				span.start = pos;
-				if (!std::isspace((unsigned char)s[pos]))
-					break;
-			}
-		}
-	}
-
-	fig::string process_message(fig::string message, fig::string identifier, std::vector<Submessage>* out_pSubmessages) noexcept
-	{
-		size_t pos = 0;
-		size_t length = message.size();
-
-		trim_inplace(message);
-		char first = message[0];
-		char last = 0;
-		if (first == '"' || first == '*')
-			last = first;
-		else if (first == '[')
-			last = ']';
-		else if (first == '(')
-			last = ')';
-		else if (first == '{')
-			last = '}';
-		if (last != 0)
-		{
-			size_t pos_last = message.find(last, 1);
-			if (pos_last == fig::npos)
-				message += last;
-		}
-
-		std::vector<Span> spans;
-		spans.reserve(64);
-
-		mark_spans(message, MessageType::Dialogue, "\"", "\"", spans);
-		mark_spans(message, MessageType::Action, "*", "*", spans);
-		mark_spans(message, MessageType::Thought, "((", "))", spans);
-		mark_spans(message, MessageType::Narration, "[", "]", spans);
-		mark_spans(message, MessageType::Direction, "{{", "}}", spans);
-
-		fill_gaps(message, MessageType::Dialogue, spans);
-		trim_spans(message, spans);
-
-		fig::string result;
-		result.reserve(256);
-		for (auto& span : spans)
-		{
-			fig::string text = message.substr(span.start, span.end - span.start);
-			switch (span.msgType)
-			{
-			case MessageType::Dialogue:
-				if (text[0] == '"')
-				{
-					text.erase(text.length() - 1, 1);
-					text.erase(0, 1);
-				}
-				break;
-			case MessageType::Action:
-			case MessageType::Narration:
-				text.erase(text.length() - 1, 1);
-				text.erase(0, 1);
-				break;
-			case MessageType::Thought:
-			case MessageType::Direction:
-				text.erase(text.length() - 2, 2);
-				text.erase(0, 2);
-				break;
-			}
-
-			text = trim(text);
-			if (empty_or_whitespace(text))
-				continue;
-
-			if (span.msgType == MessageType::Dialogue) // Minor processing for correctness
-			{
-				fig::wstring uniText = from_utf8(text);
-				if (!std::iswpunct(uniText.front()) && !std::iswupper(uniText.front()))
-					uniText[0] = std::toupper(uniText[0]); // Uppercase first letter
-				if (!std::iswpunct(uniText.back()))
-					uniText.append(L"."); // Require punctuation
-				text = to_utf8(uniText);
-			}
-
-			if (result.length() > 0)
-				result.append(" ");
-
-			switch (span.msgType)
-			{
-			case MessageType::Dialogue:
-				result.append(std::format("<{0}=\"{1}\">\"{2}\"</{0}>", Constants::Chat::DialogueTag, identifier, text));
-				break;
-			case MessageType::Action:
-				result.append(std::format("<{0}=\"{1}\">*{2}*</{0}>", Constants::Chat::ActionTag, identifier, text));
-				break;
-			case MessageType::Thought:
-				result.append(std::format("<{0}=\"{1}\">({2})</{0}>", Constants::Chat::ThoughtTag, identifier, text));
-				break;
-			case MessageType::Narration:
-				result.append(std::format("<{0}>[{1}]</{0}>", Constants::Chat::NarrationTag, text));
-				break;
-			case MessageType::Direction:
-				result.append(std::format("<{0}>{1}</{0}>", Constants::Chat::DirectionTag, text));
-				break;
-			}
-
-			if (out_pSubmessages != nullptr)
-			{
-				(*out_pSubmessages).push_back(Submessage {
-					span.msgType,
-					text,
-					});
-			}
-		}
-
-		return result;
 	}
 
 	Sequences get_sequence_indices(SequenceSlot seq, int32_t n_seq_max) noexcept

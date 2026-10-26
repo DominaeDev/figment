@@ -166,6 +166,7 @@
     <ClCompile Include="src\audio\AudioManager.cpp" />
     <ClCompile Include="src\chat\ChatCommandExecutor.cpp" />
     <ClCompile Include="src\chat\ChatCommands.cpp" />
+    <ClCompile Include="src\chat\ChatFormatter.cpp" />
     <ClCompile Include="src\chat\ChatLogger.cpp" />
     <ClCompile Include="src\chat\ChatSession.cpp" />
     <ClCompile Include="src\chat\ChatStaging.cpp" />
@@ -499,6 +500,7 @@
     <ClInclude Include="include\audio\AudioManager.h" />
     <ClInclude Include="include\chat\ChatCommandExecutor.h" />
     <ClInclude Include="include\chat\ChatCommands.h" />
+    <ClInclude Include="include\chat\ChatFormatter.h" />
     <ClInclude Include="include\chat\ChatLogger.h" />
     <ClInclude Include="include\chat\ChatOptions.h" />
     <ClInclude Include="include\chat\ChatSession.h" />

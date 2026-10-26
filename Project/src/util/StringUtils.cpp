@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include <codecvt>
 #include <cwctype>
 #include <sstream>
@@ -513,6 +513,44 @@ namespace fig
 			std::erase_if(sentences, [](auto&& s) { return s.empty(); });
 
 		return sentences;
+	}
+
+	std::vector<fig::string_view> split_paragraphs(fig::string_view text)
+	{
+		std::vector<fig::string_view> paragraphs;
+		size_t pos_start = 0;
+		size_t pos_end = 0;
+		size_t pos_curr = 0;
+		int32_t numEmpty = 0;
+
+		while (pos_curr < text.size())
+		{
+			size_t pos_line_start = pos_curr;
+			size_t pos_line_end = text.find('\n', pos_line_start);
+			if (pos_line_end == fig::string_view::npos)
+				pos_line_end = text.size();
+
+			pos_curr = pos_line_end + 1;
+
+			if (empty_or_whitespace(text.substr(pos_line_start, pos_line_end - pos_line_start)))
+			{
+				numEmpty++;
+				continue;
+			}
+
+			if (pos_end > pos_start && numEmpty >= 1)
+			{
+				paragraphs.push_back(trim(text.substr(pos_start, pos_end - pos_start)));
+				pos_start = pos_line_start;
+			}
+
+			pos_end = pos_line_end;
+			numEmpty = 0;
+		}
+
+		if (pos_end > pos_start)
+			paragraphs.push_back(trim(text.substr(pos_start, pos_end - pos_start)));
+		return paragraphs;
 	}
 
 	fig::string& normalize_newlines(fig::string& text)
@@ -1353,51 +1391,4 @@ namespace fig
 		}
 	}
 
-	fig::string Dialogue(fig::string_view text)
-	{
-		return "\"" + fig::string(text) + "\"";
-	}
-
-	fig::string Action(fig::string_view text)
-	{
-		return "*" + fig::string(text) + "*";
-	}
-
-	fig::string Director(fig::string_view text)
-	{
-		return "\\{\\{" + fig::string(text) + "\\}\\}";
-	}
-
-	fig::string Narration(fig::string_view text)
-	{
-		return "[" + fig::string(text) + "]";
-	}
-
-	fig::string_view Undialogue(fig::string_view text)
-	{
-		if (text.length() > 2 and text.front() == '\"' and text.back() == '\"')
-			return text.substr(1, text.length() - 2);
-		return text;
-	}
-
-	fig::string_view Unaction(fig::string_view text)
-	{
-		if (text.length() > 2 and text.front() == '*' and text.back() == '*')
-			return text.substr(1, text.length() - 2);
-		return text;
-	}
-
-	fig::string_view Undirector(fig::string_view text)
-	{
-		if (text.length() > 4 and text[0] == '{' and text[1] == '{' and text[text.length() - 1] == '}' and text[text.length() - 2] == '}')
-			return text.substr(2, text.length() - 4);
-		return text;
-	}
-
-	fig::string_view Unnarration(fig::string_view text)
-	{
-		if (text.length() > 2 and text.front() == '[' and text.back() == ']')
-			return text.substr(1, text.length() - 2);
-		return text;
-	}
 }

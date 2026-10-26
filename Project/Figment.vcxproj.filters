@@ -917,6 +917,9 @@
     <ClCompile Include="src\gui\CharacterDialogueWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\chat\ChatFormatter.cpp">
+      <Filter>Source Files\Chat</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -2055,6 +2058,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\CharacterDialogueWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chat\ChatFormatter.h">
+      <Filter>Source Files\Chat</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

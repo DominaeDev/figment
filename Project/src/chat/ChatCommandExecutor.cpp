@@ -1,6 +1,7 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "chat/ChatSession.h"
 #include "chat/ChatCommandExecutor.h"
+#include "chat/ChatFormatter.h"
 #include "data/Character.h"
 #include "app/AppState.h"
 #include "llm/LLMInstance.h"
@@ -89,7 +90,8 @@ namespace fig::chat
 			if (!(ctx.pLLM && ctx.pLLM->IsReady()))
 			{
 				static int turn = 0;
-				auto [msgType, complete] = fig::llm::detect_message_type(fig::llm::process_message(cmd.text, ""));
+				auto [content, _] = ChatFormatter::ProcessMessage(cmd.text, "");
+				auto msgType = ChatFormatter::DetectMessageType(content);
 				ctx.pChatScroll->AddDummyMessage(turn % 2 == 0 ? "@USR" : "@BOT", turn % 2 == 0 ? Role::User : Role::Bot1, msgType, cmd.text);
 				++turn;
 				return true;

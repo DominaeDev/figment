@@ -1,9 +1,10 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "llm/LLMContext.h"
 #include "llm/LlamaApi.h"
 #include "llm/LLMUtility.h"
 #include "llm/ModelState.h"
 #include "chat/ChatSession.h"
+#include "chat/ChatFormatter.h"
 #include "text/TextEvaluator.h"
 #include <cassert>
 #include <algorithm>
@@ -67,7 +68,7 @@ namespace fig::llm
 					content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 				else
 				{
-					complete_message(content);
+					ChatFormatter::CompleteMessage(content);
 					content = apply_chat_template({ Message { block.role, content, block.name } }, false);
 				}
 				content = eval_text(content, staging.GetContext(block.role)); //! @move?

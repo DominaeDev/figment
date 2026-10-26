@@ -499,11 +499,13 @@ namespace fig::gui
 				size_t num_failed = paths.size() - num_imported;
 				if (num_imported)
 				{
-					fig::string message = std::format("Successfully imported {} character{}.", num_imported, num_imported > 1 ? "s" : "");
 					if (num_imported < paths.size())
+					{
+						fig::string message = std::format("Successfully imported {} character{}.", num_imported, num_imported > 1 ? "s" : "");
 						message += std::format("\n{} files{} could not be imported.", num_failed, num_failed > 1 ? "s" : "");
+						ShowDialogBox(message, DialogBoxType::Ok);
+					}
 
-					ShowDialogBox(message, DialogBoxType::Ok);
 					PushEvent(UserEvent::AddedCharacter);
 				}
 				else
