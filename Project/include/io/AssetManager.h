@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "io/Asset.h"
 #include "io/AsyncIO.h"
@@ -16,6 +16,7 @@ namespace fig::user
 namespace fig::data
 {
 	class Character;
+	class Scenario;
 }
 
 namespace fig::io
@@ -119,7 +120,7 @@ namespace fig::io
 		IndexDatabase& GetDatabase() noexcept;
 		fig::uuid GenerateUUID() const noexcept;
 		
-		std::expected<fig::data::Character, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		std::expected<std::pair<fig::data::Character, fig::data::Scenario>, FileError> LoadCharacterData(fig::path filename, CharacterDataFormat format = CharacterDataFormat::Default);
 		size_t LoadIndexDatabase() noexcept;
 
 		bool LoadMetaData(AssetType assetType) noexcept;

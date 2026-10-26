@@ -1,10 +1,12 @@
-#pragma once
+﻿#pragma once
 
 #define _ENABLE_EXTENDED_ALIGNED_STORAGE // Resolves error C2338 on VS2026
 
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+#define NOGDI
+#define NOUSER
 #include <windows.h>
 
 // Undefine troublesome windows macros

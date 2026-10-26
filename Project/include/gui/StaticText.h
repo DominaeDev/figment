@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "Fonts.h"
@@ -60,6 +60,7 @@ namespace fig::gui
 		fig::point MeasureText(fig::string_view text, bool bRaw = false) const;
 		void Reset();
 
+		fig::point GetPreferredSize() const noexcept;
 	protected:
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
@@ -81,8 +82,8 @@ namespace fig::gui
 		bool _bEllipsis = false;
 		
 		std::vector<fig::sdl::Texture> _textures {};
-		int _textWidth;
-		int _textHeight;
+		int32_t _textWidth;
+		int32_t _textHeight;
 
 		TextAlignment _alignment = TextAlignment::Default;
 	};

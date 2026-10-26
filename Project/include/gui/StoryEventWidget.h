@@ -23,16 +23,16 @@ namespace fig::gui
 		void SetButtonDelegate(MouseClickedDelegate fnDelegate);
 		void SetMoveDelegate(MoveDelegate fnDelegate);
 
-		fig::chat::Role GetRole() const noexcept;
 		fig::string_view GetContent() const noexcept;
 		fig::data::Scenario::Event GetValue() const noexcept;
 
-		void SetFocus(bool bFocus, TabDirection dir = TabDirectionForward);
-		bool CanFocus() const { return true; }
-		bool IsFocused() const;
+		void SetFocus(bool bFocus, TabDirection dir = TabDirectionForward) override;
+		bool CanFocus() const override;
+		bool IsFocused() const override;
 
 	protected:
 		void CreateRoleDropList(fig::chat::Role role);
+		void CreateRoleDropList(fig::chat::Role role, fig::chat::MessageType msgType);
 		void CreateMessageTypeDropList(fig::chat::MessageType msgType);
 		void CreateContentTextBox(fig::string_view text, fig::string_view placeholder, bool bMultiline);
 		void InitValue(const fig::data::Scenario::Event& storyEvent);
@@ -47,16 +47,16 @@ namespace fig::gui
 		fig::observer_ptr<const fig::data::Scenario> _pScenario;
 
 		fig::data::Scenario::Event::Type _eventType {};
-
+		fig::chat::Role _role { fig::chat::Role::Bot1 };
+		fig::chat::MessageType _msgType { fig::chat::MessageType::Dialogue };
 		fig::observer_ptr<StaticText> _pLabel;
 		fig::observer_ptr<TextBox> _pTextBox;
-		fig::observer_ptr<DropListOfType<fig::chat::Role>> _pRoleDropList;
-		fig::observer_ptr<DropListOfType<fig::chat::MessageType>> _pMsgTypeDropList;
 		fig::observer_ptr<ButtonWithIcon> _pSettingsButton;
 		fig::observer_ptr<ButtonWithIcon> _pMoveUpButton;
 		fig::observer_ptr<ButtonWithIcon> _pMoveDownButton;
 
 		fig::coord _lastTextBoxHeight = 0uz;
+		fig::coord _controlY = 0;
 
 		MoveDelegate _fnMoveDelegate;
 		ValueChangedDelegate _fnChangedDelegate;

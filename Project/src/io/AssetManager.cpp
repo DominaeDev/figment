@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include <execution>
 #include "io/AssetManager.h"
 #include "user/UserManager.h"
@@ -697,7 +697,7 @@ namespace fig::io
 		}
 	}
 
-	std::expected<Character, FileError> AssetManager::LoadCharacterData(fig::path filename, CharacterDataFormat format)
+	std::expected<std::pair<Character, Scenario>, FileError> AssetManager::LoadCharacterData(fig::path filename, CharacterDataFormat format)
 	{
 		switch (format)
 		{
@@ -705,7 +705,7 @@ namespace fig::io
 			{
 				Character character;
 				if (auto error = character.LoadFromXml(filename); error == FileError::NoError)
-					return character;
+					return std::pair<Character, Scenario> { character, {} };
 				else
 					return std::unexpected(error);
 			}
@@ -854,12 +854,21 @@ namespace fig::io
 	{
 		if (auto try_character = LoadCharacterData(filename, format))
 		{
-			auto& character = try_character.value();
+			auto& character = (*try_character).first;
+			auto& scenario = (*try_character).second;
 
-			// Create asset
+			// Create character asset
 			fig::bytes characterData;
 			character.SaveToXml(characterData);
 			auto& characterAsset = CreateAsset_NoLock(make_asset_type(AssetType::Character, DataFormat::TextXml), characterData, {}, false);
+
+			// Create scenario asset
+			if (not scenario.empty())
+			{
+				fig::bytes scenarioData;
+				scenario.SaveToXml(scenarioData);
+				CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, characterAsset.id, false);
+			}
 
 			// Load portrait image(s)
 			if (auto file = fig::io::ReadFile(filename))

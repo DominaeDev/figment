@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ChatBackgroundPopOver.h"
 #include "gui/BackgroundImageCarousel.h"
 #include "gui/Frame.h"
@@ -50,6 +50,8 @@ namespace fig::gui
 		_pCarousel->SetHeight(64);
 		if (pSession)
 		{
+			if (auto scenarioId = pSession->GetStaging().GetScenarioId(); not scenarioId.empty())
+				_pCarousel->AddCharacterBackgrounds(scenarioId);
 			for (auto& characterId : pSession->GetStaging().GetCharacterIds())
 				_pCarousel->AddCharacterBackgrounds(characterId);
 			for (auto& characterId : pSession->GetStaging().GetCharacterIds())

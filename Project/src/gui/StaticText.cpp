@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/StaticText.h"
 #include "gui/GUICommon.h"
 #include "app/AppState.h"
@@ -30,7 +30,14 @@ namespace fig::gui
 	{
 		ClearText();
 		ReleaseTextures();
-	};
+	}
+
+	fig::point StaticText::GetPreferredSize() const noexcept
+	{
+		if (IsWordWrapping())
+			return fig::point { GetWidth(), _textHeight ? _textHeight : GetHeight() };
+		return GetSize();
+	}
 
 	void StaticText::SetText(fig::string_view text)
 	{

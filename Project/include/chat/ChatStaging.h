@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "chat/ChatTypes.h"
 #include "chat/ChatOptions.h"
@@ -12,8 +12,7 @@ namespace fig::chat
 	{
 	public:
 		ChatStaging() = default;
-		ChatStaging(const fig::data::Scenario& scenario, const PromptScaffold& scaffold, ChatOptions options);
-		ChatStaging(fig::data::Scenario&& scenario, PromptScaffold&& scaffold, ChatOptions options);
+		ChatStaging(const fig::data::Scenario& scenario, fig::uuid scenarioId, const PromptScaffold& scaffold, ChatOptions options);
 
 		bool AddCharacter(Role role, const fig::uuid& characterId, const fig::data::Character& character);
 		bool HasCharacter(Role role) const noexcept { return _charactersByRole.contains(role); }
@@ -29,7 +28,8 @@ namespace fig::chat
 		std::vector<fig::uuid> GetCharacterIds() const noexcept;
 
 		const PromptScaffold& GetPromptScaffold() const noexcept { return _promptScaffold; }
-		const fig::data::Scenario& GetScenario() const noexcept { return _scenario; }
+		const fig::data::Scenario& GetScenario() const noexcept { return _scenario.instance; }
+		const fig::uuid& GetScenarioId() const noexcept { return _scenario.assetId; }
 		fig::string GetStoryTitle() const noexcept;
 
 		std::vector<PromptBlock> GetStagingBlocks();
@@ -58,18 +58,24 @@ namespace fig::chat
 		fig::uuid GenerateUUID() const noexcept;
 		void UpdateContext();
 
-		struct Character
+		struct _Character
 		{
 			fig::uuid assetId;
 			Role role;
 			fig::data::Character instance;
 		};
 
-		std::vector<Character> _characters {};
+		std::vector<_Character> _characters {};
 		std::map<fig::uuid, size_t> _charactersByID {};
 		std::map<Role, size_t> _charactersByRole {};
 
-		fig::data::Scenario _scenario {};
+		struct _Scenario
+		{
+			fig::uuid assetId;
+			fig::data::Scenario instance;
+		};
+
+		_Scenario _scenario {};
 		PromptScaffold _promptScaffold {};
 
 		ChatOptions _options {};

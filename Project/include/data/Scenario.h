@@ -96,7 +96,7 @@ namespace fig::data
 						[](auto& value) { return enum_serialize(value, fig::chat::RoleMapping); },
 						[](auto& value) { return enum_deserialize(value, fig::chat::RoleMapping); }
 					}	.SkipEmpty(),
-					Attribute { "message-type", &Event::msgType,
+					Attribute { "msg", &Event::msgType,
 						[](auto& value) { return enum_serialize(value, fig::chat::MessageTypeMapping); },
 						[](auto& value) { return enum_deserialize(value, fig::chat::MessageTypeMapping); }
 					}	.SkipEmpty(),
@@ -160,6 +160,7 @@ namespace fig::data
 		std::vector<Scene> scenes;
 		fig::optional_cref<Scene> GetFirstScene() const noexcept;
 
+		constexpr bool empty() const noexcept { return scenes.empty(); }
 	public:
 		static auto XmlFields() noexcept
 		{

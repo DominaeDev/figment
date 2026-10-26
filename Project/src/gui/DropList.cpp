@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/DropList.h"
 #include "gui/AppResources.h"
 #include "gui/TexturedBorderRenderer.h"
@@ -84,6 +84,7 @@ namespace fig::gui
 
 		if (_fnDelegate and not bSilent)
 			_fnDelegate(_selectedIndex);
+		OnSelectedItem(_selectedIndex);
 
 		RefreshText();
 		return _selectedIndex;
@@ -98,6 +99,7 @@ namespace fig::gui
 		
 		if (_fnDelegate and not bSilent)
 			_fnDelegate(_selectedIndex);
+		OnSelectedItem(_selectedIndex);
 
 		RefreshText();
 		return _selectedIndex;

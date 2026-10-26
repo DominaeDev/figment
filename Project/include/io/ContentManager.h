@@ -71,7 +71,7 @@ namespace fig::io
 		fig::optional_cref<Asset> FindLastChatWith(const fig::uuid& characterId) const;
 		fig::optional_cref<fig::data::VoiceSettings> GetVoiceForCharacter(const fig::uuid& characterId) noexcept;
 		fig::optional_cref<Asset> GetBackgroundForCharacter(const fig::uuid& characterId, size_t index = 0uz) const;
-		fig::optional_cref<fig::data::Scenario> GetCharacterScenario(const fig::uuid& characterId);
+		std::optional<UserContent<fig::data::Scenario>> GetCharacterScenario(const fig::uuid& characterId);
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);

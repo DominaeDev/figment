@@ -39,6 +39,7 @@ namespace fig::gui
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Italic, 14.0, false);
 		pLabel->EnableWordWrap(true);
+		pLabel->SetMaxWidth(740);
 		pLabel->SetForegroundColor(Color::HintText);
 		pSizer->AddSpacer(2);
 		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 2);

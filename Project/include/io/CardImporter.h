@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "io/Error.h"
 #include "data/Character.h"
+#include "data/Scenario.h"
 #include <expected>
 
 namespace fig::io
@@ -11,6 +12,6 @@ namespace fig::io
 	{
 	public:
 		static void ShowImportDialog(fig::window_ptr pWindow) noexcept;
-		static std::expected<fig::data::Character, FileError> Import(fig::path filename) noexcept;
+		static std::expected<std::pair<fig::data::Character, fig::data::Scenario>, FileError> Import(fig::path filename) noexcept;
 	};
 }

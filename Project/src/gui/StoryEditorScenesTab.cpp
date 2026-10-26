@@ -66,7 +66,7 @@ namespace fig::gui
 
 		// Events
 		CreateHorizontalLine(this, pSizer);
-		CreateHeader(this, pSizer, "Upon entering this scene");
+		CreateHeader(this, pSizer, "When entering");
 		
 		_pEventSizer = new VerticalSizer();
 		pSizer->Add(_pEventSizer.get(), 0, SizerFlag::Expand);

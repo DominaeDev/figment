@@ -1506,6 +1506,7 @@ namespace fig::llm
 
 				auto content = eval_text(msg.content, ctx);
 				auto role = msg.role;
+				auto msgType = msg.msgType;
 
 				switch (msg.type)
 				{
@@ -1514,10 +1515,8 @@ namespace fig::llm
 					{
 						if (role == Role::Narrator)
 							PushNarration(content);
-						else if (is_bot(role))
-							PushMessage(role, content, MessageType::Undefined); //! @todo: split message by type
-						else if (is_user(role))
-							PushUserDialogue(content); //! @todo: split message by type
+						else if (is_bot(role) or is_user(role))
+							PushMessage(role, content, msgType);
 					}
 					break;
 				case Scenario::Event::Type::Instigate:

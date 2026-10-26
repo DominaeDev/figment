@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 
@@ -60,7 +60,7 @@ namespace fig::chat
 
 		Dialogue,
 		Action,
-		Thought,
+		Thought,	//! @not implemented
 
 		SystemMessage,
 		Narration,

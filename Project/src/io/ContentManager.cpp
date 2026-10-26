@@ -291,11 +291,21 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	fig::optional_cref<fig::data::Scenario> UserContentManager::GetCharacterScenario(const fig::uuid& characterId)
+	std::optional<UserContent<fig::data::Scenario>> UserContentManager::GetCharacterScenario(const fig::uuid& characterId)
 	{
-		if (auto scenario = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Scenario), characterId))
-			return Get<fig::data::Scenario>((*scenario).id);
-		return fig::nullref;
+		if (auto try_scenario = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Scenario), characterId))
+		{
+			if (auto scenario = Get<fig::data::Scenario>((*try_scenario).id))
+			{
+				return UserContent<Scenario> {
+					.instance = std::cref(*scenario),
+					.assetId = (*try_scenario).id,
+					.createdAt = (*try_scenario).GetCreatedAt(),
+					.updatedAt = (*try_scenario).GetUpdatedAt(),
+				};
+			}
+		}
+		return std::nullopt;
 	}
 
 	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, fig::renderer_ptr pRenderer) noexcept

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include <json.hpp>
 #include "io/CardImporter.h"
 #include "io/FileUtility.h"
@@ -8,14 +8,15 @@
 #include "data/TavernCardV2.h"
 #include "util/StripHtml.h"
 
-using namespace fig::gui;
+using namespace fig::chat;
 using namespace fig::data;
+using namespace fig::gui;
 
 namespace fig::io
 {
 	static fig::string& replace_placeholders(fig::string& text)
 	{
-		replace_all_inplace(text, "{{char}}", "{char}");
+		replace_all_inplace(text, "{{char}}", "{character}");
 		replace_all_inplace(text, "{{user}}", "{user}");
 		return text;
 	}
@@ -55,7 +56,7 @@ namespace fig::io
 		return text;
 	}
 
-	std::expected<Character, FileError> CardImporter::Import(fig::path filename) noexcept
+	std::expected<std::pair<Character, Scenario>, FileError> CardImporter::Import(fig::path filename) noexcept
 	{
 		if (auto try_import = fig::io::ReadPNGMeta(filename, "chara", true))
 		{
@@ -77,6 +78,7 @@ namespace fig::io
 				character.SetAttribute(Constants::CharacterAttributes::Persona, "Persona", card.data.persona, CharacterAttribute::ValueType::LongText, CharacterAttribute::Visibility::Private, CharacterAttribute::HintFlags { CharacterAttribute::HintFlag::Important } );
 			if (not card.data.personality.empty())
 				character.SetAttribute(Constants::CharacterAttributes::Personality, "Personality", card.data.personality, CharacterAttribute::ValueType::ShortText, CharacterAttribute::Visibility::Public);
+
 			character.AppendTags(card.data.tags);
 
 			// Check for gender tags
@@ -103,7 +105,47 @@ namespace fig::io
 
 			character.RebuildSearchIndex();
 
-			return character;
+			// Scenario
+			Scenario scenario {};
+			
+			if (not card.data.scenario.empty() or not card.data.greeting.empty())
+			{
+				scenario.name = scenario.title = std::format("{}'s story", character.name.GetSpokenName());
+				scenario.creator = character.creator;
+
+				scenario.roles.push_back(fig::data::Scenario::RoleSlot {
+					.id = "character",
+					.label = character.name.GetSpokenName(),
+					.flags = { fig::data::Scenario::RoleSlot::Flag::Required },
+				});
+				scenario.roles.push_back(fig::data::Scenario::RoleSlot {
+					.id = "user",
+					.label = "User",
+					.flags = { fig::data::Scenario::RoleSlot::Flag::Required, fig::data::Scenario::RoleSlot::Flag::User },
+				});
+
+				Scenario::Scene scene {
+					.id = _CreateUUID(),
+					.name = "Greeting",
+					.content = card.data.scenario,
+					.ttl = 15,
+					.bEntryPoint = true,
+				};
+
+				if (not card.data.greeting.empty())
+				{
+					scene.events.push_back(Scenario::Event {
+						.type = Scenario::Event::Type::ChatMessage,
+						.role = Role::Bot1,
+						.msgType = MessageType::Dialogue,
+						.content = card.data.greeting,
+					});
+				}
+
+				scenario.scenes.push_back(scene);
+			}
+
+			return std::pair { character, scenario };
 		}
 		else
 		{

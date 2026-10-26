@@ -18,16 +18,9 @@ using namespace fig::gui;
 
 namespace fig::chat
 {
-	ChatStaging::ChatStaging(const Scenario& scenario, const PromptScaffold& scaffold, ChatOptions options) :
-		_scenario { scenario },
+	ChatStaging::ChatStaging(const fig::data::Scenario& scenario, fig::uuid scenarioId, const PromptScaffold& scaffold, ChatOptions options) :
+		_scenario { _Scenario { .assetId = scenarioId, .instance { scenario } } },
 		_promptScaffold { scaffold },
-		_options { options }
-	{
-	}
-
-	ChatStaging::ChatStaging(Scenario&& scenario, PromptScaffold&& scaffold, ChatOptions options) :
-		_scenario { std::move(scenario) },
-		_promptScaffold { std::move(scaffold) },
 		_options { options }
 	{
 	}
@@ -43,7 +36,7 @@ namespace fig::chat
 
 		size_t index = _characters.size();
 
-		_characters.push_back(Character {
+		_characters.push_back(_Character {
 			.assetId = characterId,
 			.role = role,
 			.instance = character,
@@ -120,7 +113,7 @@ namespace fig::chat
 			return Role::Bot4;
 
 		// Role slots
-		auto& slots = _scenario.GetRoleSlots();
+		auto& slots = GetScenario().GetRoleSlots();
 		if (auto itSlot = std::ranges::find_if(slots, [&](auto& s) { return s.id == handle; }); itSlot != std::cend(slots))
 			return (*itSlot).role;
 		return Role::Undefined;
@@ -356,7 +349,7 @@ namespace fig::chat
 		_context.SetValue("__num_bots", GetBotCount());
 
 		// Set role aliases
-		for (auto& slot : _scenario.GetRoleSlots())
+		for (auto& slot : GetScenario().GetRoleSlots())
 		{
 			if (std::ranges::find(Constants::Chat::ReservedCharacterIDs, slot.id) == std::cend(Constants::Chat::ReservedCharacterIDs))
 			{
@@ -370,7 +363,7 @@ namespace fig::chat
 		}
 
 		// Scenario
-		if (auto intro = _scenario.GetFirstScene())
+		if (auto intro = GetScenario().GetFirstScene())
 		{
 			auto primarySelector = ContextSelector::FromRole(Role::Bot1);
 			_context.SetAlias("current", primarySelector);
@@ -388,12 +381,12 @@ namespace fig::chat
 
 	fig::string ChatStaging::GetStoryTitle() const noexcept
 	{
-		return _scenario.GetTitle(_context);
+		return GetScenario().GetTitle(_context);
 	}
 
 	std::vector<fig::uuid> ChatStaging::GetCharacterIds() const noexcept
 	{
-		std::vector<Character> characters = _characters;
+		std::vector<_Character> characters = _characters; // copy
 		std::ranges::sort(characters, std::ranges::less(), [](auto&& c) { return c.role; });
 		return characters
 			| std::views::transform([](auto&& c) { return c.assetId; })

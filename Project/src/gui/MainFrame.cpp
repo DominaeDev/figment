@@ -702,15 +702,19 @@ namespace fig::gui
 				return false;
 
 			Scenario scenario;
+			fig::uuid scenarioId;
 			if (auto try_scenario = Global::GetUserContent().GetCharacterScenario(characterId))
-				scenario = *try_scenario;
+			{
+				scenario = (*try_scenario).instance;
+				scenarioId = (*try_scenario).assetId;
+			}
 			else
 			{
 				if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
 					return false;
 			}
 
-			ChatStaging staging(std::move(scenario), std::move(scaffold), Constants::LLM::DefaultChatOptions);
+			ChatStaging staging(scenario, scenarioId, scaffold, Constants::LLM::DefaultChatOptions);
 
 			if (!staging.AddCharacter(Role::Bot1, characterId, character.value()))
 				return false;

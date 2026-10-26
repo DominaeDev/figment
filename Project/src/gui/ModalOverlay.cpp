@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ModalOverlay.h"
 #include "gui/Frame.h"
 #include "gui/AppResources.h"
@@ -14,7 +14,7 @@ namespace fig::gui
 {
 	constexpr float fBlurSigma = 2.5f;
 	constexpr float fBlurOpacity = 0.5f;
-	constexpr float fFadeDuration = 0.4f;
+	constexpr float fFadeDuration = 0.25f;
 
 	ModalOverlay::ModalOverlay(FramePtr pFrame) : Overlay(pFrame)
 	{

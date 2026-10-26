@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "user/UserManager.h"
 #include "user/UserProfile.h"
 #include "gui/UserSettingsEditorProfileTab.h"
@@ -88,10 +88,7 @@ namespace fig::gui
 		pSizer->Add(_pRecoveryCodeButton, 0);
 		pSizer->AddSpacer(4);
 
-		auto pHint = CreateHint(this, pSizer, ProfileSettings::RecoveryCodeHint);
-		pHint->SetMaxWidth(480);
-
-		pSizer->AddSpacer(46); //! @todo: hint height?
+		CreateHint(this, pSizer, ProfileSettings::RecoveryCodeHint);
 
 		// Delete account
 

@@ -42,7 +42,7 @@ namespace fig::gui
 		void OnEnabled(bool bEnabled) override;
 
 		void RefreshText();
-
+		virtual void OnSelectedItem(int32_t index) {};
 	protected:
 		std::vector<fig::string> _items;
 		int32_t _selectedIndex { -1 };
@@ -103,8 +103,21 @@ namespace fig::gui
 			_selectedIndex = -1;
 		}
 
+		using ValueSelectedDelegate = std::function<void(const T&)>;
+		void SetValueDelegate(ValueSelectedDelegate fnDelegate)
+		{
+			_fnValueDelegate = fnDelegate;
+		}
+	
+	protected:
+		void OnSelectedItem(int32_t index) override
+		{
+			if (auto value = GetValue(); value.has_value() and _fnValueDelegate)
+				_fnValueDelegate(*value);
+		}
 	private:
 		std::vector<T> _values;
+		ValueSelectedDelegate _fnValueDelegate;
 	};
 
 	using DropList = DropListOfType<fig::string>;
