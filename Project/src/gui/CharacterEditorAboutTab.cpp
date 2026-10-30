@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterEditorAboutTab.h"
 #include "gui/TextBox.h"
 #include "gui/ComboBox.h"
@@ -18,7 +18,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool CharacterEditorAboutTab::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorAboutTab::OnInit(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter)
 			return false;

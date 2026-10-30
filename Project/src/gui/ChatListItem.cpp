@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ChatListItem.h"
 #include "gui/CustomRenderers.h"
 #include "gui/AppResources.h"
@@ -63,14 +63,20 @@ namespace fig::gui
 		if (not chatLog.GetMessages().empty())
 		{
 			auto& lastMessage = chatLog.GetMessages().back();
-			auto& speakerId = lastMessage.speakerId;
+			fig::uuid speakerId = lastMessage.speakerId;
+			if (speakerId.empty())
+				speakerId = chatInstance.characterIds.front();
 			_primaryCharacterId = speakerId;
 
 			auto name = Global::GetUserContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
-			if (lastMessage.msgType == fig::chat::MessageType::Action)
-				_pMessage->SetText(std::format("{}: *{}*", name, truncate(lastMessage.content, 256uz)));
+			auto content = truncate(lastMessage.content, 256uz);
+
+			if (lastMessage.msgType == fig::chat::MessageType::Narration)
+				_pMessage->SetText(content);
+			else if (lastMessage.msgType == fig::chat::MessageType::Action)
+				_pMessage->SetText(std::format("{}: *{}*", name, content));
 			else
-				_pMessage->SetText(std::format("{}: \"{}\"", name, truncate(lastMessage.content, 256uz)));
+				_pMessage->SetText(std::format("{}: \"{}\"", name, content));
 
 			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(speakerId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
 			{

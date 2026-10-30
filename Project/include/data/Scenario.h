@@ -20,7 +20,7 @@ namespace fig::data
 			enum class Flag
 			{
 				Required = 1 << 0,	// Musn't be empty
-				User = 1 << 1,	// Is user
+				User = 1 << 1,		// Can be played by user
 			};
 			using Flags = EnumFlags<Flag>;
 
@@ -30,21 +30,22 @@ namespace fig::data
 			};
 
 			fig::chat::Role role;
-			fig::handle id;
+			fig::handle customId;
 			fig::string label;
 			fig::string brief;
+			fig::string prompt; // Private
 			Validation validation {};
 			Flags flags {};
 
 			inline bool IsValid() const
 			{
-				return not (id.empty() or label.empty());
+				return is_bot(role) or is_user(role);
 			}
 
 			static auto XmlFields() noexcept
 			{
 				return Fields(
-					Attribute { "id",			&RoleSlot::id },
+					Attribute { "handle",	&RoleSlot::customId },
 					Element	{ "Label",		&RoleSlot::label },
 					Element	{ "Brief",		&RoleSlot::brief },
 					Element	{ "Condition",	&RoleSlot::validation },
@@ -63,17 +64,21 @@ namespace fig::data
 			enum class Type
 			{
 				Invalid,
-				Instruct,
-				Instigate,
-				ChatMessage,
 				ShowMessage,
+				ChatDialogue,
+				ChatAction,
+				ChatNarration,
+				Instigate,
+				Instruct,
 			};
 
-			static constexpr auto EventTypeMapping = std::array<std::pair<Type, fig::string_view>, 5> {
+			static constexpr auto EventTypeMapping = std::array<std::pair<Type, fig::string_view>, 7> {
 				std::pair { Type::Invalid,			"invalid" },
 				std::pair { Type::Instruct,			"instruct" },
 				std::pair { Type::Instigate,		"instigate" },
-				std::pair { Type::ChatMessage,		"chat" },
+				std::pair { Type::ChatDialogue,		"dialogue" },
+				std::pair { Type::ChatAction,		"action" },
+				std::pair { Type::ChatNarration,	"narrate" },
 				std::pair { Type::ShowMessage,		"info" },
 			};
 
@@ -135,6 +140,8 @@ namespace fig::data
 		};
 		
 		const std::vector<RoleSlot>& GetRoleSlots() const noexcept { return roles; }
+		fig::optional_ref<RoleSlot> GetRoleSlot(fig::chat::Role role) noexcept;
+		fig::optional_cref<RoleSlot> GetRoleSlot(fig::chat::Role role) const noexcept;
 
 		bool OnLoadFromXml(XmlReaderElement xml) override;
 		bool OnValidate() const noexcept override;
@@ -143,6 +150,10 @@ namespace fig::data
 		void AppendRules(const std::vector<ScenarioRule>& rules) noexcept;
 		void ClearRules() noexcept;
 		const std::vector<ScenarioRule>& GetRules() const noexcept { return _rules; }
+
+		void SetTags(const fig::string_list& tags) noexcept;
+		void AppendTags(const fig::string_list& tags);
+		const fig::string_list& GetTags() const noexcept { return _tags; }
 
 		fig::string GetTitle(const Context& context) const noexcept;
 		Scene& CreateScene() noexcept;
@@ -154,7 +165,9 @@ namespace fig::data
 		fig::string version;
 		fig::chat::UserDefinedOptions userOptions;
 		std::vector<RoleSlot> roles {};
+		fig::string permanentPrompt;
 		std::vector<ScenarioRule> _rules;
+		fig::string_list _genres;
 		fig::string_list _tags;
 
 		std::vector<Scene> scenes;

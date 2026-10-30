@@ -22,8 +22,10 @@ namespace fig::gui
 	public:
 		CharacterEditorGeneralTab(ControlPtr pParent);
 		
-		bool Initialize(CharacterEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
+
+	protected:
+		bool OnInit(CharacterEditorArgs args) override;
 
 	private:
 		fig::observer_ptr<CharacterAttributeWidget> AddAttribute();
@@ -40,12 +42,11 @@ namespace fig::gui
 		void OnChangedAttributeVisibility(size_t index, fig::data::CharacterAttribute::Visibility visibility);
 		void OnChangedAttributeFlags(size_t index, fig::data::CharacterAttribute::HintFlags flags);
 
-		fig::data::CharacterAttributeInfoDatabase _attributesInfo;
 
-	private:
 		void ShowAttributesMenu();
 		void OnAttributeSettingsMenu(size_t attributeIndex);
 
+		fig::data::CharacterAttributeInfoDatabase _attributesInfo;
 		fig::observer_ptr<fig::data::Character> _pCharacter {};
 
 		struct AttributeItem

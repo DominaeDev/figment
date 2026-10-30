@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "EditorTab.h"
 
@@ -42,6 +42,18 @@ namespace fig::gui
 		bool SaveTabs();
 		bool IsDirty() const noexcept { return _bIsDirty; }
 		void ClearDirtyFlag() noexcept { _bIsDirty = false; }
+
+		template <typename TArgs>
+		bool InitTabs(const TArgs& args)
+		{
+			for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<TArgs>*>(t.get()); }))
+			{
+				if (not (tab and tab->Initialize(args)))
+					return false;
+			}
+			SelectTab(0);
+			return true;
+		}
 
 	private:
 		void EnableTab(EditorTabBase* pTab, bool bEnabled);

@@ -19,7 +19,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool CharacterEditorDialogueTab::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorDialogueTab::OnInit(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter)
 			return false;

@@ -39,7 +39,7 @@ namespace fig::gui
 	{
 		auto pLabel = pParent->CreateControl<StaticText>(fig::string { text }, FontFace::Italic, 14.0, false);
 		pLabel->EnableWordWrap(true);
-		pLabel->SetMaxWidth(740);
+		pLabel->SetMaxWidth(620);
 		pLabel->SetForegroundColor(Color::HintText);
 		pSizer->AddSpacer(2);
 		pSizer->Add(pLabel, 0, SizerFlag::Expand | SizerFlag::Left, 2);
@@ -75,6 +75,18 @@ namespace fig::gui
 	{
 		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize);
 		pTextBox->SetTextChangedDelegate([this](fig::string_view text) { SetDirty(); });
+		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
+		return pTextBox;
+	}
+
+	fig::observer_ptr<TextBox> EditorTabBase::CreateTextBox(ControlPtr pParent, SizerPtr pSizer, std::function<void(fig::string_view)> fnDelegate)
+	{
+		auto pTextBox = pParent->CreateControl<TextBox>(FontFace::Default, Constants::GUI::TextBoxFontSize);
+		pTextBox->SetTextChangedDelegate([this, fnDelegate](fig::string_view text) {
+			if (fnDelegate)
+				fnDelegate(text);
+			SetDirty();
+		});
 		pSizer->Add(pTextBox, 0, SizerFlag::Expand, 0);
 		return pTextBox;
 	}

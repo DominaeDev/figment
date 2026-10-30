@@ -19,8 +19,10 @@ namespace fig::gui
 	public:
 		CharacterEditorDialogueTab(ControlPtr pParent);
 
-		bool Initialize(CharacterEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
+	
+	protected:
+		bool OnInit(CharacterEditorArgs args) override;
 
 	private:
 		fig::observer_ptr<CharacterDialogueWidget> AddEntry(const fig::data::ExampleDialogue& example);
@@ -28,7 +30,6 @@ namespace fig::gui
 		void RemoveEntry(size_t index);
 		void OnMoveEntry(size_t index, int32_t dir, bool bMaxDistance);
 
-	private:
 		void OnEntryMenu(size_t index);
 		void OnCopyEntry(size_t index);
 		void OnPasteEntry(size_t index);

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/StoryEditorImagesTab.h"
 #include "gui/AppResources.h"
 #include "gui/HorizontalLine.h"
@@ -23,7 +23,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool StoryEditorImagesTab::Initialize(StoryEditorArgs args)
+	bool StoryEditorImagesTab::OnInit(StoryEditorArgs args)
 	{
 		if (not (bool)args.pScenario)
 			return false;

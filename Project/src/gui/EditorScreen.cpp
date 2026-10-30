@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/EditorScreen.h"
 #include "gui/ScrollPanel.h"
 #include "gui/TopBar.h"
@@ -50,8 +50,6 @@ namespace fig::gui
 		pSizer->Add(_pEditor.get(), 0, SizerFlag::Expand);
 
 		_pEditor->PopulateTopBar(_pTopBar);
-		_pEditor->SelectTab(0);
-
 		MainFrame::GetInstance().GetSidePanel()->SetEditor(_pEditor.get());
 
 		InvalidateLayout();

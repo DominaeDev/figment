@@ -97,4 +97,28 @@ namespace fig::data
 		});
 		return scenes.back();
 	}
+
+	void Scenario::SetTags(const fig::string_list& tags) noexcept
+	{
+		_tags = tags;
+	}
+
+	void Scenario::AppendTags(const fig::string_list& tags)
+	{
+		_tags.append_range(tags);
+	}
+
+	fig::optional_ref<Scenario::RoleSlot> Scenario::GetRoleSlot(Role role) noexcept
+	{
+		if (auto itFind = std::ranges::find(roles, role, [](auto&& s) { return s.role; }); itFind != std::ranges::cend(roles))
+			return make_optional_ref(*itFind);
+		return fig::nullref;
+	}
+
+	fig::optional_cref<Scenario::RoleSlot> Scenario::GetRoleSlot(Role role) const noexcept
+	{
+		if (auto itFind = std::ranges::find(roles, role, [](auto&& s) { return s.role; }); itFind != std::ranges::cend(roles))
+			return make_optional_cref(*itFind);
+		return fig::nullref;
+	}
 }

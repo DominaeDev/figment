@@ -30,7 +30,7 @@ namespace fig::gui
 		_attributesInfo.LoadFromXml(fig::path { "resources/editor/attributes.xml"});
 	}
 
-	bool CharacterEditorGeneralTab::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorGeneralTab::OnInit(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter)
 			return false;

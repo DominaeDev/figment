@@ -6,7 +6,6 @@
 #include "llm/LLMUtility.h"
 #include "gui/GUIUtility.h"
 #include "gui/Window.h"
-#include "data/Character.h"
 #include "text/TextEvaluator.h"
 
 #include <exception>
@@ -103,18 +102,18 @@ namespace fig::chat
 			return Role::Director;
 		else if (handle == "system")
 			return Role::System;
-		else if (handle == "char1" or handle == "bot1" or handle == "character1")
+		else if (handle == "char1" or handle == "bot1")
 			return Role::Bot1;
-		else if (handle == "char2" or handle == "bot2" or handle == "character2")
+		else if (handle == "char2" or handle == "bot2")
 			return Role::Bot2;
-		else if (handle == "char3" or handle == "bot3" or handle == "character3")
+		else if (handle == "char3" or handle == "bot3")
 			return Role::Bot3;
-		else if (handle == "char4" or handle == "bot4" or handle == "character4")
+		else if (handle == "char4" or handle == "bot4")
 			return Role::Bot4;
 
 		// Role slots
 		auto& slots = GetScenario().GetRoleSlots();
-		if (auto itSlot = std::ranges::find_if(slots, [&](auto& s) { return s.id == handle; }); itSlot != std::cend(slots))
+		if (auto itSlot = std::ranges::find(slots, handle, [](auto&& s) { return s.customId; }); itSlot != std::cend(slots))
 			return (*itSlot).role;
 		return Role::Undefined;
 	}
@@ -137,6 +136,7 @@ namespace fig::chat
 	std::vector<fig::data::Character> ChatStaging::GetCharacters() const noexcept
 	{ 
 		return _characters
+			| std::views::filter([](auto&& c) { return is_bot(c.role); })
 			| std::views::transform([](auto&& c) { return c.instance; })
 			| std::ranges::to<std::vector>();
 	}
@@ -351,14 +351,10 @@ namespace fig::chat
 		// Set role aliases
 		for (auto& slot : GetScenario().GetRoleSlots())
 		{
-			if (std::ranges::find(Constants::Chat::ReservedCharacterIDs, slot.id) == std::cend(Constants::Chat::ReservedCharacterIDs))
+			if (not (slot.customId.empty() or is_reserved(slot.customId)))
 			{
-				static const auto reserved_ids = std::unordered_set<fig::handle> { "char", "character", "char1", "char2", "char3", "char4", "char5", "char6", "char7", "char8", "user", "current" };
-				if (not reserved_ids.contains(slot.id))
-				{
-					_context.SetAlias(slot.id, ContextSelector::FromRole(slot.role));
-					_context.SetMacro(slot.id, std::format("{{{0}:name}}", (fig::string)slot.id));
-				}
+				_context.SetAlias(slot.customId, ContextSelector::FromRole(slot.role));
+				_context.SetMacro(slot.customId, std::format("{{{0}:name}}", (fig::string)slot.customId));
 			}
 		}
 
@@ -389,7 +385,16 @@ namespace fig::chat
 		std::vector<_Character> characters = _characters; // copy
 		std::ranges::sort(characters, std::ranges::less(), [](auto&& c) { return c.role; });
 		return characters
+			| std::views::filter([](auto&& c) { return is_bot(c.role); })
 			| std::views::transform([](auto&& c) { return c.assetId; })
 			| std::ranges::to<std::vector>();
+	}
+
+	std::optional<fig::uuid> ChatStaging::GetUserId() const noexcept
+	{
+		std::vector<_Character> characters = _characters; // copy
+		if (auto itFind = std::ranges::find_if(_characters, [](auto&& c) { return is_user(c.role); }); itFind != std::ranges::cend(_characters))
+			return (*itFind).assetId;
+		return std::nullopt;
 	}
 } // namespace

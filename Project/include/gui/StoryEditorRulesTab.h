@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/EditorTab.h"
 #include "gui/StoryEditorArgs.h"
@@ -20,8 +20,10 @@ namespace fig::gui
 	public:
 		StoryEditorRulesTab(ControlPtr pParent);
 
-		bool Initialize(StoryEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
+
+	protected:
+		bool OnInit(StoryEditorArgs args) override;
 
 	private:
 		fig::observer_ptr<CharacterAttributeWidget> AddRule();
@@ -36,7 +38,7 @@ namespace fig::gui
 		void OnCopyRule(size_t index);
 		void OnPasteRule(size_t index);
 
-		fig::observer_ptr<fig::data::Scenario> _pStory {};
+		fig::observer_ptr<fig::data::Scenario> _pScenario {};
 
 		struct RuleItem
 		{

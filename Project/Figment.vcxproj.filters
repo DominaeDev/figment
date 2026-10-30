@@ -920,6 +920,15 @@
     <ClCompile Include="src\chat\ChatFormatter.cpp">
       <Filter>Source Files\Chat</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\StoryEditorInfoTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryEditorRolesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryRoleSlotWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -2061,6 +2070,15 @@
     </ClInclude>
     <ClInclude Include="include\chat\ChatFormatter.h">
       <Filter>Source Files\Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEditorInfoTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryEditorRolesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryRoleSlotWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

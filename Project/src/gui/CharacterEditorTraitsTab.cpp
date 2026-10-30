@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterEditorTraitsTab.h"
 #include "gui/TextBox.h"
 #include "gui/ComboBox.h"
@@ -28,7 +28,7 @@ namespace fig::gui
 		_traitsInfo.LoadFromCsv(fig::path { "resources/editor/traits.csv" });
 	}
 
-	bool CharacterEditorTraitsTab::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorTraitsTab::OnInit(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter)
 			return false;

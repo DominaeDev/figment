@@ -43,21 +43,22 @@ namespace fig::gui
 		fig::observer_ptr<HorizontalLine> CreateHorizontalLine(ControlPtr pParent, SizerPtr pSizer);
 
 		template <typename T>
-		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding)
+		fig::observer_ptr<TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding)
 		{
 			return CreateTextBox(pParent, pSizer, binding, 1);
 		};
 
-		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer);
+		fig::observer_ptr<TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer);
+		fig::observer_ptr<TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, std::function<void(fig::string_view)> fnDelegate);
 
 		template <typename T>
-		fig::observer_ptr<class TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding, int32_t rows) = delete;
+		fig::observer_ptr<TextBox> CreateTextBox(ControlPtr pParent, SizerPtr pSizer, ValueBinding<T> binding, int32_t rows) = delete;
 
 		template <>
-		fig::observer_ptr<class TextBox> CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows);
+		fig::observer_ptr<TextBox> CreateTextBox<fig::string>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<fig::string> binding, int32_t rows);
 
 		template <>
-		fig::observer_ptr<class TextBox> CreateTextBox<int32_t>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<int32_t> binding, int32_t rows);
+		fig::observer_ptr<TextBox> CreateTextBox<int32_t>(ControlPtr pParent, SizerPtr pSizer, ValueBinding<int32_t> binding, int32_t rows);
 
 		template <is_string_range U>
 		fig::observer_ptr<class ComboBox> CreateComboBox(ControlPtr pParent, SizerPtr pSizer, const U& items)
@@ -66,6 +67,7 @@ namespace fig::gui
 			pControl->SetDelegate([this](auto&& _) {
 				SetDirty();
 			});
+			pControl->SetMaxWidth(260);
 			pControl->SetTextChangedDelegate([this](auto&& _) { SetDirty(); });
 			pControl->AddItems(items);
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
@@ -77,6 +79,7 @@ namespace fig::gui
 		{
 			auto pControl = pParent->CreateControl<ComboBox>();
 			pControl->AddItems(items);
+			pControl->SetMaxWidth(260);
 			pControl->SetText(binding.AsString());
 			pControl->SetDelegate([this, binding, pControl](auto&& _) mutable {
 				binding.Set(fig::string { pControl->GetText() });
@@ -94,6 +97,7 @@ namespace fig::gui
 		fig::observer_ptr<DropList> CreateDropList(ControlPtr pParent, SizerPtr pSizer, const U& items, ValueBinding<T> binding)
 		{
 			auto pControl = pParent->CreateControl<DropList>();
+			pControl->SetMaxWidth(260);
 			pControl->AddItems(items);
 			pControl->Select(binding.AsInt());
 			pControl->SetDelegate([this, binding](int32_t index) mutable {
@@ -108,6 +112,7 @@ namespace fig::gui
 		fig::observer_ptr<DropList> CreateDropList(ControlPtr pParent, SizerPtr pSizer, const U& items, std::function<void(int32_t)> fnDelegate)
 		{
 			auto pControl = pParent->CreateControl<DropList>();
+			pControl->SetMaxWidth(260);
 			pControl->AddItems(items);
 			pControl->SetDelegate(fnDelegate);
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
@@ -117,6 +122,7 @@ namespace fig::gui
 		fig::observer_ptr<DropList> CreateDropList(ControlPtr pParent, SizerPtr pSizer, std::function<void(int32_t)> fnDelegate)
 		{
 			auto pControl = pParent->CreateControl<DropList>();
+			pControl->SetMaxWidth(260);
 			pControl->SetDelegate(fnDelegate);
 			pSizer->Add(pControl, 0, SizerFlag::Expand, 0);
 			return pControl;
@@ -127,6 +133,7 @@ namespace fig::gui
 
 		void OnAfterLayout() override;
 		void SetDirty() noexcept;
+
 	private:
 		EditorPropertyChangedDelegate _fnChanged {};
 	};
@@ -138,6 +145,15 @@ namespace fig::gui
 		EditorTab(ControlPtr pParent) : EditorTabBase(pParent)
 		{}
 
-		virtual bool Initialize(TArgs args) = 0;
+		bool Initialize(TArgs args)
+		{
+			_arguments = args;
+			return OnInit(args);
+		}
+
+	protected:
+		virtual bool OnInit(TArgs args) = 0;
+
+		TArgs _arguments;
 	};
 }

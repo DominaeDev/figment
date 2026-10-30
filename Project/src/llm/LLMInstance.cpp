@@ -1481,14 +1481,17 @@ namespace fig::llm
 
 				switch (msg.type)
 				{
-				case Scenario::Event::Type::ChatMessage:
+				case Scenario::Event::Type::ChatDialogue:
+				case Scenario::Event::Type::ChatAction:
 					if (not content.empty())
 					{
-						if (role == Role::Narrator)
-							PushNarration(content);
-						else if (is_bot(role) or is_user(role))
+						if (is_bot(role) or is_user(role))
 							PushMessage(role, ChatFormatter::Wrap(content, msgType));
 					}
+					break;
+				case Scenario::Event::Type::ChatNarration:
+					if (not content.empty())
+						PushNarration(content);
 					break;
 				case Scenario::Event::Type::Instigate:
 					if (role == Role::Narrator)

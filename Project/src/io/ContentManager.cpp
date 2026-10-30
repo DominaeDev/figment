@@ -5,6 +5,7 @@
 #include "gui/AppResources.h"
 #include "data/ChatInstance.h"
 #include "data/VoiceSettings.h"
+#include "chat/ChatStaging.h"
 
 using namespace fig::user;
 using namespace fig::data;
@@ -334,8 +335,14 @@ namespace fig::io
 		return unexpected(FileError::NotFound);
 	}
 
-	std::pair<fig::uuid, fig::uuid> UserContentManager::CreateChat(const fig::data::ChatInstance& chatInstance)
+	std::pair<fig::uuid, fig::uuid> UserContentManager::CreateChat(const fig::chat::ChatStaging& staging)
 	{
+		ChatInstance chatInstance;
+		chatInstance.characterIds = staging.GetCharacterIds();
+		chatInstance.userId = staging.GetUserId().value_or({});
+		chatInstance.scenarioId = staging.GetScenarioId();
+		chatInstance.options = Constants::LLM::DefaultChatOptions; //! @todo
+
 		fig::bytes data;
 		chatInstance.SaveToXml(data);
 		auto& chatInstanceAsset = _pAssetMngr->CreateAsset(make_asset_type(AssetType::Chat, ChatAssetType::Instance, DataFormat::TextXml), data);
@@ -730,23 +737,23 @@ namespace fig::io
 		// Create new scenario
 		auto scenario = fig::data::Scenario {};
 		scenario.roles.push_back(fig::data::Scenario::RoleSlot {
-			.id = "character",
 			.label = "Character",
 			.flags = { fig::data::Scenario::RoleSlot::Flag::Required },
 		});
 		scenario.roles.push_back(fig::data::Scenario::RoleSlot {
-			.id = "user",
 			.label = "User",
 			.flags = { fig::data::Scenario::RoleSlot::Flag::Required, fig::data::Scenario::RoleSlot::Flag::User },
 		});
-		if (auto character = Global::GetUserContent().Get<fig::data::Character>(characterId))
+		
+		if (auto try_character = Global::GetUserContent().Get<fig::data::Character>(characterId))
 		{
-			scenario.title = std::format("{}'s story", (*character).name.GetSpokenName());
-			scenario.creator = (*character).creator;
-			scenario.roles[0].label = (*character).name.GetSpokenName();
+			auto& character = *try_character;
+			scenario.roles[0].label = character.name.GetSpokenName();
+			scenario.creator = character.creator;
+			scenario.version = character.version;
 		}
 		else
-			scenario.title = "Untitled story";
+			return {}; // Error
 
 		fig::bytes data;
 		scenario.SaveToXml(data);

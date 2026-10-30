@@ -1784,6 +1784,7 @@ namespace fig::gui
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
 			RefreshPassword();
+			Autosize();
 			Select(undo.highlight_start, undo.highlight_end);
 			SetCursor(undo.cursor_pos);
 			ScrollToCursor();
@@ -1800,6 +1801,7 @@ namespace fig::gui
 			_lines = LayoutParagraph(_text);
 			RefreshTexts();
 			RefreshPassword();
+			Autosize();
 			Select(undo.highlight_start, undo.highlight_end);
 			SetCursor(undo.cursor_pos);
 			ScrollToCursor();

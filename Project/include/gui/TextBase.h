@@ -30,6 +30,11 @@ namespace fig::gui
 			ApplyStyle(_text);
 		}
 
+		void ClearStyle()
+		{
+			_pStyleProvider.reset();
+		}
+
 	protected:
 		struct StyledTextRun
 		{

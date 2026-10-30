@@ -490,6 +490,9 @@ namespace fig::gui
 					| std::views::transform([](auto&& s) { return std::filesystem::u8path(s); })
 					| std::ranges::to<std::vector>();
 				
+				if (paths.empty())
+					return EventResult::Handled;
+
 				size_t num_imported = 0uz;
 				for (auto& path : paths)
 				{
@@ -726,13 +729,7 @@ namespace fig::gui
 				return false;
 
 			// Create instance
-			ChatInstance instance; //! @todo: Why is this here?
-			instance.characterIds = staging.GetCharacterIds();
-			instance.userId = {}; //! @todo
-			instance.scenarioId = {}; //! @todo
-			instance.options = Constants::LLM::DefaultChatOptions; //! @todo
-			
-			auto [chatInstanceId, chatLogId] = Global::GetUserContent().CreateChat(instance);  
+			auto [chatInstanceId, chatLogId] = Global::GetUserContent().CreateChat(staging);  
 
 			pChatScreen->StartChat(staging, chatInstanceId, chatLogId);
 			return true;

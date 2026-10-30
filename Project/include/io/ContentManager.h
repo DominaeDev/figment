@@ -13,6 +13,11 @@ namespace fig::data
 	class Scenario;
 }
 
+namespace fig::chat
+{
+	class ChatStaging;
+}
+
 namespace fig::io
 {
 	class AssetManager;
@@ -125,7 +130,7 @@ namespace fig::io
 			GetCache<T>().Insert(assetId, std::move(value));
 		}
 
-		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::data::ChatInstance& chatInstance);
+		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::chat::ChatStaging& staging);
 		fig::uuid CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings);
 		fig::optional_cref<Asset> ReplaceCoverImage(const fig::uuid& characterId, const fig::uuid& originalAssetId);
 		fig::optional_cref<Asset> ReplaceSmallPortrait(const fig::uuid& characterId, const fig::sdl::Surface& image);

@@ -111,16 +111,16 @@ namespace fig::io
 			
 			if (not card.data.scenario.empty() or not card.data.greeting.empty())
 			{
-				scenario.name = scenario.title = std::format("{}'s story", character.name.GetSpokenName());
 				scenario.creator = character.creator;
+				scenario.version = character.version;
 
 				scenario.roles.push_back(fig::data::Scenario::RoleSlot {
-					.id = "character",
+					.role = Role::Bot1,
 					.label = character.name.GetSpokenName(),
 					.flags = { fig::data::Scenario::RoleSlot::Flag::Required },
 				});
 				scenario.roles.push_back(fig::data::Scenario::RoleSlot {
-					.id = "user",
+					.role = Role::User,
 					.label = "User",
 					.flags = { fig::data::Scenario::RoleSlot::Flag::Required, fig::data::Scenario::RoleSlot::Flag::User },
 				});
@@ -135,13 +135,13 @@ namespace fig::io
 
 				if (not card.data.greeting.empty())
 				{
-					auto messages = ChatFormatter::AnalyseMessage(card.data.greeting);
+					auto messages = ChatFormatter::AnalyseMessage(normalize_characters(card.data.greeting));
 					for (auto& message : messages)
 					{
 						if (message.msgType == MessageType::Narration)
 						{
 							scene.events.push_back(Scenario::Event {
-								.type = Scenario::Event::Type::ChatMessage,
+								.type = Scenario::Event::Type::ChatNarration,
 								.role = Role::Narrator,
 								.msgType = MessageType::Narration,
 								.content = fig::string { message.content },
@@ -149,8 +149,16 @@ namespace fig::io
 						}
 						else
 						{
+							Scenario::Event::Type eventType;
+							if (message.msgType == MessageType::Action)
+								eventType = Scenario::Event::Type::ChatAction;
+							else if (message.msgType == MessageType::Narration)
+								eventType = Scenario::Event::Type::ChatNarration;
+							else
+								eventType = Scenario::Event::Type::ChatDialogue;
+							
 							scene.events.push_back(Scenario::Event {
-								.type = Scenario::Event::Type::ChatMessage,
+								.type = eventType,
 								.role = Role::Bot1,
 								.msgType = message.msgType,
 								.content = fig::string { message.content },

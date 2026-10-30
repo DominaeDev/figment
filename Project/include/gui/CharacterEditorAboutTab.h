@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/EditorTab.h"
 #include "gui/CharacterEditorArgs.h"
@@ -10,8 +10,10 @@ namespace fig::gui
 	public:
 		CharacterEditorAboutTab(ControlPtr pParent);
 
-		bool Initialize(CharacterEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
+
+	protected:
+		bool OnInit(CharacterEditorArgs args) override;
 
 	private:
 		fig::observer_ptr<fig::data::Character> _pCharacter {};

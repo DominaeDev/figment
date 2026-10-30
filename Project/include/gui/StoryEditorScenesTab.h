@@ -2,6 +2,7 @@
 
 #include "gui/EditorTab.h"
 #include "gui/StoryEditorArgs.h"
+#include "data/Scenario.h"
 
 namespace fig::gui
 {
@@ -12,7 +13,8 @@ namespace fig::gui
 	public:
 		StoryEditorScenesTab(ControlPtr pParent);
 
-		bool Initialize(StoryEditorArgs args) override;
+	protected:
+		bool OnInit(StoryEditorArgs args) override;
 
 	protected:
 		SaveResult OnSave() noexcept override;
@@ -20,11 +22,13 @@ namespace fig::gui
 		void OnMoveEvent(size_t EventIndex, int32_t dir, bool bMaxDistance);
 		void OnRemoveEvent(size_t index);
 
+
 		void ShowEventsMenu();
 		void ShowTriggersMenu();
 		void AddEvent(fig::data::Scenario::Event::Type type);
 		fig::observer_ptr<StoryEventWidget> AddEvent(const fig::data::Scenario::Event& event);
 		fig::observer_ptr<StoryEventWidget> AppendEventWidget(const fig::data::Scenario::Event& event, size_t index);
+		void OnChangedEventType(size_t eventIndex, fig::data::Scenario::Event::Type eventType);
 
 	private:
 		fig::observer_ptr<fig::data::Scenario> _pScenario {};

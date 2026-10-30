@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/EditorTab.h"
 #include "gui/StoryEditorArgs.h"
@@ -16,8 +16,10 @@ namespace fig::gui
 	public:
 		StoryEditorImagesTab(ControlPtr pParent);
 
-		bool Initialize(StoryEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
+
+	protected:
+		bool OnInit(StoryEditorArgs args) override;
 
 	protected:
 		void InitBackgrounds(SizerPtr pSizer);

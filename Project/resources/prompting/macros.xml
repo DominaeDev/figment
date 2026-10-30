@@ -8,10 +8,6 @@
 	<Alias id="char2:">bot2</Alias>
 	<Alias id="char3:">bot3</Alias>
 	<Alias id="char4:">bot4</Alias>
-	<Alias id="char5:">bot5</Alias>
-	<Alias id="char6:">bot6</Alias>
-	<Alias id="char7:">bot7</Alias>
-	<Alias id="char8:">bot8</Alias>
 	<Alias id="user">user:name</Alias>
 	
 	<!-- Standard conditions -->

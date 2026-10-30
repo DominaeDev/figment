@@ -155,6 +155,7 @@ Transparent								#FFFFFF00
 White									#FFFFFF
 Black									#000000
 Red										#800000
+Yellow									#C0C000
 Green									#008000
 Blue									#000080
 Gray									#C0C0C0

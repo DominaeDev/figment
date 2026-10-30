@@ -8,6 +8,7 @@
 #include "data/Character.h"
 #include "data/Scenario.h"
 #include "chat/ChatStaging.h"
+#include "chat/ChatFormatter.h"
 #include "chat/PromptScaffold.h"
 #include "text/TextEvaluator.h"
 

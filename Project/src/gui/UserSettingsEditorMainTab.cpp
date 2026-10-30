@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/UserSettingsEditorMainTab.h"
 #include "gui/CheckBox.h"
 #include "gui/ColorTheme.h"
@@ -15,7 +15,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool UserSettingsEditorMainTab::Initialize(UserSettingsEditorArgs args)
+	bool UserSettingsEditorMainTab::OnInit(UserSettingsEditorArgs args)
 	{
 		auto& userSettings = Global::GetUserSettings();
 		auto pSizer = SetSizer<VerticalSizer>();

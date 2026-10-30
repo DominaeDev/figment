@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/EditorTab.h"
 #include "tts/VoicePrint.h"
@@ -12,12 +12,11 @@ namespace fig::gui
 	public:
 		CharacterEditorVoiceTab(ControlPtr pParent);
 
-		bool Initialize(CharacterEditorArgs args) override;
-
 		SaveResult OnSave() noexcept override;
 		void OnClose() noexcept override;
 
 	protected:
+		bool OnInit(CharacterEditorArgs args) override;
 		void OnUpdate(float fElapsed);
 		EventResult OnEvent(fig::event& event) override;
 		void OnToggle(fig::handle group, fig::handle key, bool bOn);

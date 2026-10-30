@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterEditorImagesTab.h"
 #include "gui/AppResources.h"
 #include "gui/HorizontalLine.h"
@@ -25,7 +25,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool CharacterEditorImagesTab::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorImagesTab::OnInit(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter)
 			return false;

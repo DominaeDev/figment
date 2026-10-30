@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/EditorTab.h"
 #include "gui/CharacterEditorArgs.h"
@@ -19,7 +19,8 @@ namespace fig::gui
 	public:
 		CharacterEditorTraitsTab(ControlPtr pParent);
 
-		bool Initialize(CharacterEditorArgs args) override;
+	protected:
+		bool OnInit(CharacterEditorArgs args) override;
 
 	private:
 		fig::observer_ptr<ToggleWithLabel> CreateTrait(SizerPtr pSizer, fig::handle traitId, fig::string_view label);

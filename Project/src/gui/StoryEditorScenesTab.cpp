@@ -23,7 +23,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool StoryEditorScenesTab::Initialize(StoryEditorArgs args)
+	bool StoryEditorScenesTab::OnInit(StoryEditorArgs args)
 	{
 		if (not (bool)args.pScenario)
 			return false;
@@ -100,14 +100,18 @@ namespace fig::gui
 	void StoryEditorScenesTab::ShowEventsMenu()
 	{
 		auto& menu = CreateMenu();
-		menu.AddItem("Display user message")
-			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ShowMessage); });
-		menu.AddItem("Give instruction")
+		menu.AddItem("Add character dialogue", Resource::ICON_STORY_EDIT_DIALOGUE)
+			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ChatDialogue); });
+		menu.AddItem("Add character action", Resource::ICON_STORY_EDIT_ACTION)
+			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ChatAction); });
+		menu.AddItem("Add narration", Resource::ICON_STORY_EDIT_NARRATION)
+			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ChatNarration); });
+		menu.AddItem("Give instruction", Resource::ICON_STORY_EDIT_INSTRUCT)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::Instruct); });
-		menu.AddItem("Instigate response")
+		menu.AddItem("Instigate response", Resource::ICON_STORY_EDIT_INSTIGATE)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::Instigate); });
-		menu.AddItem("Chat message")
-			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ChatMessage); });
+		menu.AddItem("Display user message", Resource::ICON_STORY_EDIT_USER_MESSAGE)
+			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ShowMessage); });
 		menu.Show();
 	}
 
@@ -133,7 +137,9 @@ namespace fig::gui
 		auto& storyEvent = _pScene->events.back();
 		
 		if (type == Scenario::Event::Type::Instigate
-			or type == Scenario::Event::Type::ChatMessage)
+			or type == Scenario::Event::Type::ChatDialogue
+			or type == Scenario::Event::Type::ChatAction
+			or type == Scenario::Event::Type::ChatNarration)
 			storyEvent.role = Role::Bot1;
 		AddEvent(storyEvent);
 	}
@@ -155,10 +161,7 @@ namespace fig::gui
 		pEvent->SetButtonDelegate([this, index] { OnEventSettingsMenu(index); });
 		pEvent->SetMoveDelegate([this, index](auto&& dir) { OnMoveEvent(index, dir, IsShiftDown()); });
 		pEvent->SetValueChangedDelegate([this](auto&& _) { SetDirty(); });
-		_pEventSizer->Add(pEvent, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
-
-//		if (_pTabGroup)
-//			_pTabGroup->AddControl(pEvent);
+		_pEventSizer->Add(pEvent, 0, SizerFlag::Expand | SizerFlag::Bottom, 12);
 
 		return pEvent;
 	}
@@ -191,6 +194,21 @@ namespace fig::gui
 			return;
 
 		auto& menu = CreateMenu();
+		auto& typeMenu = menu.AddItem("Event type");
+		typeMenu.AddCheckItem("Dialogue", pItem->pControl->GetEventType() == Scenario::Event::Type::ChatDialogue)
+			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::ChatDialogue); });
+		typeMenu.AddCheckItem("Action", pItem->pControl->GetEventType() == Scenario::Event::Type::ChatAction)
+			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::ChatAction); });
+		typeMenu.AddCheckItem("Narration", pItem->pControl->GetEventType() == Scenario::Event::Type::ChatNarration)
+			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::ChatNarration); });
+		typeMenu.AddCheckItem("Instruction", pItem->pControl->GetEventType() == Scenario::Event::Type::Instruct)
+			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::Instruct); });
+		typeMenu.AddCheckItem("Instigate", pItem->pControl->GetEventType() == Scenario::Event::Type::Instigate)
+			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::Instigate); });
+		typeMenu.AddCheckItem("User message", pItem->pControl->GetEventType() == Scenario::Event::Type::ShowMessage)
+			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::ShowMessage); });
+		menu.AddSeparator();
+
 		menu.AddItem("Move to top")
 			.SetEnabled(index > 0uz)
 			.SetDelegate([this, eventIndex] { OnMoveEvent(eventIndex, -1, true); });
@@ -270,6 +288,16 @@ namespace fig::gui
 			_pEventSizer->Remove(item.pControl);
 			DestroyChild(item.pControl);
 			_eventItems.erase(itFind);
+			SetDirty();
+		}
+	}
+
+	void StoryEditorScenesTab::OnChangedEventType(size_t eventIndex, Scenario::Event::Type eventType)
+	{
+		if (auto itFind = std::ranges::find(_eventItems, eventIndex, [](auto&& a) { return a.index; }); itFind != std::ranges::cend(_eventItems))
+		{
+			auto& item = *itFind;
+			item.pControl->ChangeEventType(eventType);
 			SetDirty();
 		}
 	}

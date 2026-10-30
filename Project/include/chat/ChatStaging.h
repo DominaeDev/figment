@@ -26,6 +26,7 @@ namespace fig::chat
 		fig::optional_cref<fig::data::Character> GetCharacterByName(const fig::string& name) const noexcept;
 		std::vector<fig::data::Character> GetCharacters() const noexcept;
 		std::vector<fig::uuid> GetCharacterIds() const noexcept;
+		std::optional<fig::uuid> GetUserId() const noexcept;
 
 		const PromptScaffold& GetPromptScaffold() const noexcept { return _promptScaffold; }
 		const fig::data::Scenario& GetScenario() const noexcept { return _scenario.instance; }

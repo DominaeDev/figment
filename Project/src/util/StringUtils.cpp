@@ -553,6 +553,76 @@ namespace fig
 		return paragraphs;
 	}
 
+	static std::map<wchar_t, fig::wstring_view> SpecialChars = {
+		std::pair { L'\u0060', L"'" },		// [00] Grave accent
+		std::pair { L'\u00B4', L"'" },		// [01] Acute accent
+		std::pair { L'\u2018', L"'" },		// [02] Left single quotation mark
+		std::pair { L'\u2019', L"'" },		// [03] Right single quotation mark
+		std::pair { L'\u201A', L"," },		// [04] Single low-9 quotation mark
+		std::pair { L'\u201B', L"'" },		// [05] Single high-reversed-9 quotation mark
+		std::pair { L'\u2032', L"'" },		// [06] Prime
+		std::pair { L'\u2035', L"'" },		// [07] Reversed prime
+		std::pair { L'\u201C', L"\"" },		// [08] Left double quotation mark
+		std::pair { L'\u201D', L"\"" },		// [09] Right double quotation mark
+		std::pair { L'\u201E', L"\"" },		// [10] Double low-0 quotation mark
+		std::pair { L'\u201F', L"\"" },		// [11] Double high-reversed-9 quotation mark
+		std::pair { L'\u2033', L"\"" },		// [12] Double prime
+		std::pair { L'\u2034', L"'\"" },	// [13] Triple prime
+		std::pair { L'\u2057', L"\"\"" },	// [14] Quadruple prime
+		std::pair { L'\u2036', L"\"" },		// [15] Reversed double prime
+		std::pair { L'\u2037', L"\"'" },	// [16] Reversed triple prime
+		std::pair { L'\u2024', L"." },		// [17] One dot leader
+		std::pair { L'\u2025', L".." },		// [18] Two dot leader
+		std::pair { L'\u2026', L"..." },	// [19] Horizontal ellipsis
+		std::pair { L'\u203C', L"!!" },		// [20] Double exclamation mark
+		std::pair { L'\u2047', L"??" },		// [21] Double question mark
+		std::pair { L'\u2048', L"?!" },		// [22] Question exclamation mark
+		std::pair { L'\u2049', L"!?" },		// [23] Exclamation question mark
+		std::pair { L'\u2010', L"-" },		// [24] Hyphen
+		std::pair { L'\u2027', L"-" },		// [25] Hyphenation point
+		std::pair { L'\u2043', L"-" },		// [26] Hyphen bullet
+		std::pair { L'\u2028', L"\n" },		// [27] Line separator
+		std::pair { L'\u2029', L"\n\n" },	// [28] Paragraph separator
+		std::pair { L'\u2039', L"<" },		// [29] Single left-pointing angle quotation mark
+		std::pair { L'\u203A', L">" },		// [30] Single right-pointing angle quotation mark
+		std::pair { L'\u204F', L";" },		// [31] Reversed semicolon
+		std::pair { L'\u2055', L"*" },		// [32] Flower punctuation mark
+		std::pair { L'\u204E', L"*" },		// [33] Low asterisk
+		std::pair { L'\u20F0', L"*" },		// [34] Combining asterisk above
+		std::pair { L'\u2217', L"*" },		// [35] Asterisk operator
+		std::pair { L'\u2731', L"*" },		// [36] Heavy asterisk
+		std::pair { L'\u273B', L"*" },		// [37] Teardrop-spoked asterisk
+		std::pair { L'\u273C', L"*" },		// [38] Open center teardrop-spoked asterisk
+		std::pair { L'\u273D', L"*" },		// [39] Heavy teardrop-spoked asterisk
+		std::pair { L'\uFE61', L"*" },		// [40] Small asterisk
+		std::pair { L'\uFF0A', L"*" },		// [41] Fullwidth asterisk
+		std::pair { L'\u2240', L"/" },		// [42] Fraction slash
+		std::pair { L'\u275B', L"'" },		// [43] Heavy single turned comma quotation mark ornament
+		std::pair { L'\u275C', L"'" },		// [44] Heavy single comma quotation mark ornament
+		std::pair { L'\u275D', L"\"" },		// [45] Heavy double turned comma quotation mark ornament
+		std::pair { L'\u275E', L"\"" },		// [46] Heavy double comma quotation mark ornament
+		std::pair { L'\uFF02', L"\"" },		// [47] Fullwidth quotation mark
+		std::pair { L'\uFF07', L"'" },		// [48] Fullwidth apostrophe
+		std::pair { L'\u2053', L"~" },		// [49] Swung dash
+	};
+
+	fig::string& normalize_characters(fig::string& text)
+	{
+		fig::wstring wtext = from_utf8(text);
+		for (int32_t pos = toI(wtext.size()) - 1; pos >= 0; --pos)
+		{
+			auto ch = wtext[pos];
+			if (auto itFind = SpecialChars.find(ch); itFind != std::cend(SpecialChars))
+			{
+				auto itWhere = wtext.begin() + pos;
+				wtext.erase(itWhere);
+				wtext.insert_range(itWhere, itFind->second);
+			}
+		}
+		text = to_utf8(wtext);
+		return text;
+	}
+
 	fig::string& normalize_newlines(fig::string& text)
 	{
 		size_t cursor_write = 0;

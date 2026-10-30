@@ -68,6 +68,7 @@ namespace fig
 	std::vector<fig::string_view> split_sentences(fig::string_view text, bool removeEmpty = true);
 	std::vector<fig::string_view> split_paragraphs(fig::string_view text);
 
+	fig::string& normalize_characters(fig::string& text);
 	fig::string& normalize_newlines(fig::string& text);
 	[[nodiscard]] fig::string normalize_newlines(fig::string&& s);
 

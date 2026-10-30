@@ -270,9 +270,12 @@
     <ClCompile Include="src\gui\StoryEditor.cpp" />
     <ClCompile Include="src\gui\StoryEditorAboutTab.cpp" />
     <ClCompile Include="src\gui\StoryEditorImagesTab.cpp" />
+    <ClCompile Include="src\gui\StoryEditorInfoTab.cpp" />
+    <ClCompile Include="src\gui\StoryEditorRolesTab.cpp" />
     <ClCompile Include="src\gui\StoryEditorRulesTab.cpp" />
     <ClCompile Include="src\gui\StoryEditorScenesTab.cpp" />
     <ClCompile Include="src\gui\StoryEventWidget.cpp" />
+    <ClCompile Include="src\gui\StoryRoleSlotWidget.cpp" />
     <ClCompile Include="src\gui\TabControlGroup.cpp" />
     <ClCompile Include="src\gui\TextBase.cpp" />
     <ClCompile Include="src\gui\TextInput.cpp" />
@@ -603,9 +606,12 @@
     <ClInclude Include="include\gui\StoryEditorAboutTab.h" />
     <ClInclude Include="include\gui\StoryEditorArgs.h" />
     <ClInclude Include="include\gui\StoryEditorImagesTab.h" />
+    <ClInclude Include="include\gui\StoryEditorInfoTab.h" />
+    <ClInclude Include="include\gui\StoryEditorRolesTab.h" />
     <ClInclude Include="include\gui\StoryEditorRulesTab.h" />
     <ClInclude Include="include\gui\StoryEditorScenesTab.h" />
     <ClInclude Include="include\gui\StoryEventWidget.h" />
+    <ClInclude Include="include\gui\StoryRoleSlotWidget.h" />
     <ClInclude Include="include\gui\TabControlGroup.h" />
     <ClInclude Include="include\gui\TextBase.h" />
     <ClInclude Include="include\gui\UserSettingsEditor.h" />

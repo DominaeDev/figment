@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/UserSettingsEditor.h"
 #include "gui/UserSettingsEditorArgs.h"
 #include "gui/UserSettingsEditorMainTab.h"
@@ -38,12 +38,7 @@ namespace fig::gui
 	{
 		UserSettingsEditorArgs args = &Global::GetUserSettings();
 
-		for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<UserSettingsEditorArgs>*>(t.get()); }))
-		{
-			if (not (tab and tab->Initialize(args)))
-				return false;
-		}
-
+		InitTabs(args);
 		return true;
 	}
 

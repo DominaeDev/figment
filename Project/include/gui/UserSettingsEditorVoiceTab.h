@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/EditorTab.h"
 #include "gui/UserSettingsEditorArgs.h"
@@ -10,8 +10,9 @@ namespace fig::gui
 	public:
 		UserSettingsEditorVoiceTab(ControlPtr pParent);
 
-		bool Initialize(UserSettingsEditorArgs args) override;
-	
+	protected:
+		bool OnInit(UserSettingsEditorArgs args) override;
+
 	protected:
 		void Refresh();
 		void OnTabSelected() override;

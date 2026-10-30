@@ -115,10 +115,20 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP, "./resources/gui/icons/icon_move_up.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN, "./resources/gui/icons/icon_move_down.png");
 		
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_INFO, "./resources/gui/icons/icon_story_edit_info.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_INFO_SMALL, "./resources/gui/icons/icon_story_edit_info_small.png");
 		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_ROLES, "./resources/gui/icons/icon_story_edit_roles.png");
 		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_ROLES_SMALL, "./resources/gui/icons/icon_story_edit_roles_small.png");
 		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_SCENES, "./resources/gui/icons/icon_story_edit_scenes.png");
 		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_SCENES_SMALL, "./resources/gui/icons/icon_story_edit_scenes_small.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_LOCATIONS, "./resources/gui/icons/icon_story_edit_locations.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_LOCATIONS_SMALL, "./resources/gui/icons/icon_story_edit_locations_small.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_DIALOGUE, "./resources/gui/icons/icon_story_edit_dialogue.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_ACTION, "./resources/gui/icons/icon_story_edit_action.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_NARRATION, "./resources/gui/icons/icon_story_edit_narration.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_INSTRUCT, "./resources/gui/icons/icon_story_edit_instruct.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_INSTIGATE, "./resources/gui/icons/icon_story_edit_instigate.png");
+		LoadTexture(pRenderer, Resource::ICON_STORY_EDIT_USER_MESSAGE, "./resources/gui/icons/icon_story_edit_usermsg.png");
 
 		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_APPLICATION, "./resources/gui/icons/icon_settings_edit_application.png");
 		LoadTexture(pRenderer, Resource::ICON_USER_SETTINGS_EDIT_APPLICATION_SMALL, "./resources/gui/icons/icon_settings_edit_application_small.png");

@@ -25,7 +25,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool UserSettingsEditorProfileTab::Initialize(UserSettingsEditorArgs args)
+	bool UserSettingsEditorProfileTab::OnInit(UserSettingsEditorArgs args)
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
 

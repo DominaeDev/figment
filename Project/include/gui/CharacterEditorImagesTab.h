@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/EditorTab.h"
 #include "gui/CharacterEditorArgs.h"
@@ -16,10 +16,11 @@ namespace fig::gui
 	public:
 		CharacterEditorImagesTab(ControlPtr pParent);
 
-		bool Initialize(CharacterEditorArgs args) override;
 		SaveResult OnSave() noexcept override;
 
 	protected:
+		bool OnInit(CharacterEditorArgs args) override;
+
 		void InitSmallPortrait(SizerPtr pSizer);
 		void InitPortraits(SizerPtr pSizer);
 		void InitBackgrounds(SizerPtr pSizer);

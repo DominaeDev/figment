@@ -59,12 +59,7 @@ namespace fig::gui
 			.pCharacter = &_character,
 		};
 
-		for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<CharacterEditorArgs>*>(t.get()); }))
-		{
-			if (not (tab and tab->Initialize(args)))
-				return false;
-		}
-
+		InitTabs(args);
 		return true;
 	}
 
@@ -80,12 +75,7 @@ namespace fig::gui
 				.pCharacter = &_character,
 			};
 
-			for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<CharacterEditorArgs>*>(t.get()); }))
-			{
-				if (not (tab and tab->Initialize(args)))
-					return false;
-			}
-
+			InitTabs(args);
 			return true;
 		}
 

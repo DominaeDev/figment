@@ -30,7 +30,7 @@ namespace fig::chat
 		static MessageType GetMessageTypeForTag(fig::string_view tag);
 		static void StripEndTag(fig::string& message) noexcept;
 
-		static std::vector<Submessage> AnalyseMessage(fig::string_view message) noexcept;
+		static std::vector<Submessage> AnalyseMessage(fig::string_view message, MessageType defaultMsgType = MessageType::Narration) noexcept;
 
 		static fig::string FormatMessage(fig::string_view message, fig::string_view identifier, MessageType msgType) noexcept;
 		static std::pair<fig::string, std::vector<Submessage>> ProcessMessage(fig::string_view message, fig::string_view identifier) noexcept;

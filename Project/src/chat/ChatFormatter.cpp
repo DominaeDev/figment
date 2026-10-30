@@ -452,11 +452,11 @@ namespace fig::chat
 		std::vector<Span> spans;
 		spans.reserve(64);
 
-		mark_spans(sMessage, MessageType::Dialogue, "\"", "\"", spans);
-		mark_spans(sMessage, MessageType::Action, "*", "*", spans);
 		mark_spans(sMessage, MessageType::Narration, "[", "]", spans);
 		mark_spans(sMessage, MessageType::Thought, "((", "))", spans);
 		mark_spans(sMessage, MessageType::Direction, "{{", "}}", spans);
+		mark_spans(sMessage, MessageType::Action, "*", "*", spans);
+		mark_spans(sMessage, MessageType::Dialogue, "\"", "\"", spans);
 
 		fill_gaps(sMessage, MessageType::Dialogue, spans);
 		trim_spans(sMessage, spans);
@@ -496,7 +496,7 @@ namespace fig::chat
 		return std::pair { std::move(result), std::move(subMessages) };
 	}
 
-	std::vector<Submessage> ChatFormatter::AnalyseMessage(fig::string_view message) noexcept
+	std::vector<Submessage> ChatFormatter::AnalyseMessage(fig::string_view message, MessageType defaultMsgType) noexcept
 	{
 		std::vector<Submessage> subMessages;
 		auto paragraphs = split_paragraphs(message);
@@ -518,9 +518,9 @@ namespace fig::chat
 			std::vector<Span> spans;
 			spans.reserve(64);
 
- 			mark_spans(sMessage, MessageType::Dialogue, "\"", "\"", spans);
 			mark_spans(sMessage, MessageType::Action, "*", "*", spans);
-			fill_gaps(sMessage, MessageType::Narration, spans);
+ 			mark_spans(sMessage, MessageType::Dialogue, "\"", "\"", spans);
+			fill_gaps(sMessage, defaultMsgType, spans);
 			trim_spans(sMessage, spans);
 
 			for (auto& span : spans)

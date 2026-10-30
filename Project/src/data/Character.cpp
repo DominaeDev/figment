@@ -225,12 +225,6 @@ namespace fig::data
 		_traits.clear();
 	}
 
-	void Character::AppendTags(const fig::string_list& tags)
-	{
-		_tags.append_range(tags);
-		_bDirtyContext = true;
-	}
-
 	void Character::AddSearchTerm(const fig::string& term)
 	{
 		_searchIndex.AddTerm(term);
@@ -271,6 +265,12 @@ namespace fig::data
 	void Character::SetTags(const fig::string_list& tags) noexcept
 	{
 		_tags = tags;
+	}
+
+	void Character::AppendTags(const fig::string_list& tags)
+	{
+		_tags.append_range(tags);
+		_bDirtyContext = true;
 	}
 
 	void Character::SetRules(const std::vector<CharacterRule>& rules) noexcept

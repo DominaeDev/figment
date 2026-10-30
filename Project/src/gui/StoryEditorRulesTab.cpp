@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/StoryEditorRulesTab.h"
 #include "gui/TextBox.h"
 #include "gui/ComboBox.h"
@@ -26,24 +26,25 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool StoryEditorRulesTab::Initialize(StoryEditorArgs args)
+	bool StoryEditorRulesTab::OnInit(StoryEditorArgs args)
 	{
 		if (not (bool)args.pScenario)
 			return false;
 
-		_pStory = args.pScenario;
+		_pScenario = args.pScenario;
 
 		auto pSizer = SetSizer<VerticalSizer>();
 
-		CreateHeader(this, pSizer, "Rules");
 
+		// About
+		CreateHeader(this, pSizer, "Rules");
 		_pAddButton = CreateControl<ButtonWithLabel>("Add rule");
 
 		_pRuleSizer = new VerticalSizer();
 		pSizer->Add(_pRuleSizer.get(), 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 
 		size_t ruleCount = 0uz;
-		for (auto& rule : _pStory->GetRules())
+		for (auto& rule : _pScenario->GetRules())
 		{
 			AddRule(rule);
 			++ruleCount;
@@ -224,8 +225,8 @@ namespace fig::gui
 			| std::views::filter([](auto&& s) { return not empty_or_whitespace(s); })
 			| std::ranges::to<std::vector>();
 
-		_pStory->ClearRules();
-		_pStory->AppendRules(rules);
+		_pScenario->ClearRules();
+		_pScenario->AppendRules(rules);
 		return {};
 	}
 

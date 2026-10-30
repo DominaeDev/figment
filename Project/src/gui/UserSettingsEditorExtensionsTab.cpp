@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/UserSettingsEditorExtensionsTab.h"
 #include "gui/TextBox.h"
 #include "gui/ComboBox.h"
@@ -20,7 +20,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool UserSettingsEditorExtensionsTab::Initialize(UserSettingsEditorArgs args)
+	bool UserSettingsEditorExtensionsTab::OnInit(UserSettingsEditorArgs args)
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
 

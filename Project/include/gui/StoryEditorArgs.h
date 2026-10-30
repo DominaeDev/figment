@@ -1,7 +1,12 @@
 ﻿#pragma once
 
 #include "Figment.h"
-#include "data/Scenario.h"
+
+namespace fig::data
+{
+	class Scenario;
+	class Character;
+}
 
 namespace fig::gui
 {
@@ -9,6 +14,6 @@ namespace fig::gui
 	{
 		fig::uuid assetId;
 		fig::observer_ptr<fig::data::Scenario> pScenario;
-		bool bCharacterStory {};
+		fig::observer_ptr<const fig::data::Character> pCharacter;
 	};
 }

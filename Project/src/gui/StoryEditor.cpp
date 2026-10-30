@@ -5,6 +5,8 @@
 #include "gui/DialogBox.h"
 #include "gui/Frame.h"
 #include "gui/AppResources.h"
+#include "gui/StoryEditorInfoTab.h"
+#include "gui/StoryEditorRolesTab.h"
 #include "gui/StoryEditorScenesTab.h"
 #include "gui/StoryEditorImagesTab.h"
 #include "gui/StoryEditorRulesTab.h"
@@ -12,13 +14,16 @@
 #include "io/ContentManager.h"
 
 using namespace fig::io;
+using namespace fig::data;
 
 namespace fig::gui
 {
 	constexpr enum Tab : int32_t
 	{
-//		Roles = 0,
+		General,
+		Roles,
 		Scenes,
+//		Locations,
 		Images,
 		Rules,
 //		Concepts,
@@ -27,6 +32,8 @@ namespace fig::gui
 
 	StoryEditor::StoryEditor(ControlPtr pParent) : Editor(pParent)
 	{
+		CreateTab<StoryEditorInfoTab>();
+		CreateTab<StoryEditorRolesTab>();
 		CreateTab<StoryEditorScenesTab>();
 		CreateTab<StoryEditorImagesTab>();
 		CreateTab<StoryEditorRulesTab>();
@@ -50,15 +57,9 @@ namespace fig::gui
 		{
 			.assetId = _assetId,
 			.pScenario = &_scenario,
-			.bCharacterStory = false,
 		};
 
-		for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<StoryEditorArgs>*>(t.get()); }))
-		{
-			if (not (tab and tab->Initialize(args)))
-				return false;
-		}
-
+		InitTabs(args);
 		return true;
 	}
 
@@ -72,15 +73,9 @@ namespace fig::gui
 			{
 				.assetId = _assetId,
 				.pScenario = &_scenario,
-				.bCharacterStory = false,
 			};
 
-			for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<StoryEditorArgs>*>(t.get()); }))
-			{
-				if (not (tab and tab->Initialize(args)))
-					return false;
-			}
-
+			InitTabs(args);
 			return true;
 		}
 
@@ -91,6 +86,13 @@ namespace fig::gui
 	bool StoryEditor::EditCharacterStory(const fig::uuid& characterId) noexcept
 	{
 		bool bFound = false;
+
+		fig::observer_ptr<const Character> pCharacter {};
+		if (auto try_character = Global::GetUserContent().Get<fig::data::Character>(characterId))
+			pCharacter.reset(&try_character.value());
+		else
+			return false; // Not found
+
 		if (auto find_scenario = Global::GetUserContent().GetAssets().FindAssetOfType(make_asset_type(AssetType::Scenario), characterId))
 		{
 			if (auto try_scenario = Global::GetUserContent().Get<fig::data::Scenario>((*find_scenario).id))
@@ -117,15 +119,10 @@ namespace fig::gui
 		{
 			.assetId = _assetId,
 			.pScenario = &_scenario,
-			.bCharacterStory = true,
+			.pCharacter = pCharacter,
 		};
 
-		for (auto tab : _tabs | std::views::transform([](auto&& t) { return dynamic_cast<EditorTab<StoryEditorArgs>*>(t.get()); }))
-		{
-			if (not (tab and tab->Initialize(args)))
-				return false;
-		}
-
+		InitTabs(args);
 		return true;
 	}
 
@@ -175,7 +172,13 @@ namespace fig::gui
 		static size_t NotImpl = (size_t)(-1);
 		return std::vector<EditorTabDescriptor> {
 			{
-				NotImpl,
+				Tab::General,
+				"Info",
+				Resource::ICON_STORY_EDIT_INFO,
+				Resource::ICON_STORY_EDIT_INFO_SMALL,
+			},
+			{
+				Tab::Roles,
 				"Roles",
 				Resource::ICON_STORY_EDIT_ROLES,
 				Resource::ICON_STORY_EDIT_ROLES_SMALL,
@@ -185,6 +188,12 @@ namespace fig::gui
 				"Scenes",
 				Resource::ICON_STORY_EDIT_SCENES,
 				Resource::ICON_STORY_EDIT_SCENES_SMALL,
+			},
+			{
+				NotImpl,
+				"Locations",
+				Resource::ICON_STORY_EDIT_LOCATIONS,
+				Resource::ICON_STORY_EDIT_LOCATIONS_SMALL,
 			},
 			{
 				Tab::Images,

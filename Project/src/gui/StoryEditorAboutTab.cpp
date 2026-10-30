@@ -18,7 +18,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool StoryEditorAboutTab::Initialize(StoryEditorArgs args)
+	bool StoryEditorAboutTab::OnInit(StoryEditorArgs args)
 	{
 		if (not (bool)args.pScenario)
 			return false;
@@ -29,27 +29,21 @@ namespace fig::gui
 
 		CreateHeader(this, pSizer, "About story");
 
-		if (not args.bCharacterStory)
-		{
-			// Name
-			CreateLabel(this, pSizer, "Story name");
-			auto pName = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pScenario->name));
-			pName->SetMaxWidth(300);
-		}
-
-		// Title
-		CreateLabel(this, pSizer, "Chat title");
-		auto pTitle = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pScenario->title));
-		pTitle->SetMaxWidth(300);
-
 		// About
-		CreateLabel(this, pSizer, "Description");
-		auto pDescription = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pScenario->about), 4);
-		pDescription->SetMaxWidth(620);
-		pDescription->EnableAutoSize(true);
-		pDescription->SetMinRows(2);
-		pDescription->SetMaxRows(8);
-		pDescription->SetPlaceholder("Please provide a brief description about this story");
+//		CreateLabel(this, pSizer, "Description");
+//		auto pDescription = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pScenario->about), 4);
+//		pDescription->SetMaxWidth(620);
+//		pDescription->EnableAutoSize(true);
+//		pDescription->SetMinRows(2);
+//		pDescription->SetMaxRows(8);
+//		pDescription->SetPlaceholder("Please provide a brief description about this story");
+
+		// Tags
+		CreateLabel(this, pSizer, "Tags");
+		_pTags = CreateTextBox(this, pSizer);
+		_pTags->SetMaxWidth(620);
+		_pTags->SetPlaceholder("Enter tags separated by commas");
+		_pTags->SetText(encode_csv(_pScenario->GetTags()));
 
 		// Author
 		CreateLabel(this, pSizer, "Creator");
@@ -66,6 +60,10 @@ namespace fig::gui
 
 	EditorTabBase::SaveResult StoryEditorAboutTab::OnSave() noexcept
 	{
+		auto tags = decode_csv(_pTags->GetText())
+			| std::ranges::to<std::unordered_set>()
+			| std::ranges::to<std::vector>();
+		_pScenario->SetTags(tags);
 		return {};
 	}
 }

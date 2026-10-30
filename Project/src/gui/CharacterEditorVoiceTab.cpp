@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterEditorVoiceTab.h"
 #include "gui/ToggleWithLabel.h"
 #include "gui/TextBox.h"
@@ -88,7 +88,7 @@ namespace fig::gui
 		return pGridSizer;
 	}
 
-	bool CharacterEditorVoiceTab::Initialize(CharacterEditorArgs args)
+	bool CharacterEditorVoiceTab::OnInit(CharacterEditorArgs args)
 	{
 		if (not (bool)args.pCharacter or args.assetId.empty())
 			return false;

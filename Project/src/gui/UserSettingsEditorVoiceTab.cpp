@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/UserSettingsEditorVoiceTab.h"
 #include "gui/CheckBox.h"
 #include "gui/AppResources.h"
@@ -20,7 +20,7 @@ namespace fig::gui
 		SetMaxWidth(1280);
 	}
 
-	bool UserSettingsEditorVoiceTab::Initialize(UserSettingsEditorArgs args)
+	bool UserSettingsEditorVoiceTab::OnInit(UserSettingsEditorArgs args)
 	{
 		auto& userSettings = Global::GetUserSettings();
 		auto pSizer = SetSizer<VerticalSizer>();
