@@ -163,7 +163,7 @@ namespace fig::gui
 		}
 
 		// Add portrait
-		auto pAddButton = CreateControl<AddImageButton>("Add image");
+		auto pAddButton = CreateControl<AddImageButton>();
 		pAddButton->SetDelegate([this] { OpenFile(CharacterImageType::Portrait); });
 		_pAddPortraitButton = pAddButton;
 		_pPortraitGridSizer->Add(_pAddPortraitButton, 0, SizerFlag::All, 6);
@@ -193,7 +193,7 @@ namespace fig::gui
 		}
 
 		// Add background
-		auto pAddButton = CreateControl<AddImageButton>("Add image");
+		auto pAddButton = CreateControl<AddImageButton>();
 		pAddButton->SetSize(Constants::GUI::CharacterEditor::BackgroundWidth, Constants::GUI::CharacterEditor::BackgroundHeight);
 		pAddButton->SetDelegate([this] { OpenFile(CharacterImageType::Background); });
 		_pAddBackgroundButton = pAddButton;

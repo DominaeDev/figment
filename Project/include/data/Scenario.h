@@ -158,6 +158,9 @@ namespace fig::data
 		fig::string GetTitle(const Context& context) const noexcept;
 		Scene& CreateScene() noexcept;
 
+		bool AppendRoleSlot(fig::chat::Role role, fig::string_view label) noexcept;
+		bool RemoveRoleSlot(fig::chat::Role role) noexcept;
+
 		fig::string name;
 		fig::string title;
 		fig::string about;

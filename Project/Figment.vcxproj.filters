@@ -926,7 +926,10 @@
     <ClCompile Include="src\gui\StoryEditorRolesTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\StoryRoleSlotWidget.cpp">
+    <ClCompile Include="src\gui\StoryRoleEditWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryRoleSlotBox.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2077,7 +2080,10 @@
     <ClInclude Include="include\gui\StoryEditorRolesTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\StoryRoleSlotWidget.h">
+    <ClInclude Include="include\gui\StoryRoleEditWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryRoleSlotBox.h">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>

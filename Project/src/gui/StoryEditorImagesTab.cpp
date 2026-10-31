@@ -100,7 +100,7 @@ namespace fig::gui
 		}
 
 		// Add background
-		auto pAddButton = CreateControl<AddImageButton>("Add image");
+		auto pAddButton = CreateControl<AddImageButton>();
 		pAddButton->SetSize(Constants::GUI::CharacterEditor::BackgroundWidth, Constants::GUI::CharacterEditor::BackgroundHeight);
 		pAddButton->SetDelegate([this] { OpenFile(); });
 		_pAddBackgroundButton = pAddButton;

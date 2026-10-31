@@ -21,6 +21,5 @@ namespace fig::gui
 		fig::observer_ptr<TextBox> _pName {};
 		fig::observer_ptr<TextBox> _pTitle {};
 		fig::observer_ptr<TextBox> _pGenres {};
-		fig::observer_ptr<TextBox> _pTags {};
 	};
 }

@@ -194,7 +194,7 @@ namespace fig::gui
 			return;
 
 		auto& menu = CreateMenu();
-		auto& typeMenu = menu.AddItem("Event type");
+		auto& typeMenu = menu.AddItem("Change type");
 		typeMenu.AddCheckItem("Dialogue", pItem->pControl->GetEventType() == Scenario::Event::Type::ChatDialogue)
 			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::ChatDialogue); });
 		typeMenu.AddCheckItem("Action", pItem->pControl->GetEventType() == Scenario::Event::Type::ChatAction)

@@ -4,6 +4,11 @@
 #include "data/Scenario.h"
 #include "DropList.h"
 
+namespace fig::data
+{
+	class Character;
+}
+
 namespace fig::gui
 {
 	class TextBox;
@@ -11,15 +16,20 @@ namespace fig::gui
 	class ButtonWithIcon;
 	class ComboBox;
 
-	class StoryRoleSlotWidget : public Control, public ITabControl
+	class StoryRoleEditWidget : public Control, public ITabControl
 	{
 	public:
-		StoryRoleSlotWidget(ControlPtr pParent, fig::observer_ptr<fig::data::Scenario> pScenario, fig::chat::Role role);
+		StoryRoleEditWidget(ControlPtr pParent, fig::observer_ptr<fig::data::Scenario> pScenario, fig::observer_ptr<const fig::data::Character> pCharacter, fig::chat::Role role);
 
-
+		void SetLocked(bool bLocked);
 		void SetFocus(bool bFocus, TabDirection dir = TabDirectionForward) override;
 		bool CanFocus() const override;
 		bool IsFocused() const override;
+
+		void Refresh();
+
+		using NameChangedDelegate = std::function<void(fig::string_view)>;
+		void SetNameChangedDelegate(NameChangedDelegate fnDelegate) { _fnNameChanged = fnDelegate; }
 
 	protected:
 		void InitValue();
@@ -38,6 +48,7 @@ namespace fig::gui
 
 	private:
 		fig::observer_ptr<fig::data::Scenario> _pScenario;
+		fig::observer_ptr<const fig::data::Character> _pCharacter;
 		fig::chat::Role _role;
 
 		fig::observer_ptr<TextBox> _pName;
@@ -48,5 +59,6 @@ namespace fig::gui
 		fig::observer_ptr<VerticalBar> _pColorBar;
 
 		fig::coord _lastTextBoxHeight = 0uz;
+		NameChangedDelegate _fnNameChanged;
 	};
 }

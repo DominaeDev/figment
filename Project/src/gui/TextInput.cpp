@@ -330,7 +330,7 @@ namespace fig::gui
 		int yy = rect.y + GetMarginTop() + y;
 		ApplyScroll(xx, yy);
 
-		if (HasStyleProvider())
+		if (GetEnabled() and HasStyleProvider())
 		{
 			for (auto& run : line.runs)
 			{
@@ -361,7 +361,7 @@ namespace fig::gui
 
 	void TextInput::DrawPlaceholder(fig::renderer_ptr pRenderer, int x, int y)
 	{
-		if (not _pPlaceholder->text or _bFocused)
+		if (not _pPlaceholder->text or _bFocused or not GetEnabled())
 			return;
 
 		fig::color_ref fgColor = Color::TextBoxForegroundDisabled;

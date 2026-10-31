@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/AssetManager.h"

@@ -251,6 +251,7 @@
     <ClCompile Include="src\gui\RenderTargetControl.cpp" />
     <ClCompile Include="src\gui\ResizeableImageViewport.cpp" />
     <ClCompile Include="src\gui\ResizeHandle.cpp" />
+    <ClCompile Include="src\gui\StoryRoleSlotBox.cpp" />
     <ClCompile Include="src\gui\RoundedBorder.cpp" />
     <ClCompile Include="src\gui\CharacterCardList.cpp" />
     <ClCompile Include="src\gui\CharacterCard.cpp" />
@@ -275,7 +276,7 @@
     <ClCompile Include="src\gui\StoryEditorRulesTab.cpp" />
     <ClCompile Include="src\gui\StoryEditorScenesTab.cpp" />
     <ClCompile Include="src\gui\StoryEventWidget.cpp" />
-    <ClCompile Include="src\gui\StoryRoleSlotWidget.cpp" />
+    <ClCompile Include="src\gui\StoryRoleEditWidget.cpp" />
     <ClCompile Include="src\gui\TabControlGroup.cpp" />
     <ClCompile Include="src\gui\TextBase.cpp" />
     <ClCompile Include="src\gui\TextInput.cpp" />
@@ -599,6 +600,7 @@
     <ClInclude Include="include\gui\RenderTargetControl.h" />
     <ClInclude Include="include\gui\ResizeableImageViewport.h" />
     <ClInclude Include="include\gui\ResizeHandle.h" />
+    <ClInclude Include="include\gui\StoryRoleSlotBox.h" />
     <ClInclude Include="include\gui\RoundedBorder.h" />
     <ClInclude Include="include\gui\ITextStyleProvider.h" />
     <ClInclude Include="include\gui\DefaultTextStyleProvider.h" />
@@ -611,7 +613,7 @@
     <ClInclude Include="include\gui\StoryEditorRulesTab.h" />
     <ClInclude Include="include\gui\StoryEditorScenesTab.h" />
     <ClInclude Include="include\gui\StoryEventWidget.h" />
-    <ClInclude Include="include\gui\StoryRoleSlotWidget.h" />
+    <ClInclude Include="include\gui\StoryRoleEditWidget.h" />
     <ClInclude Include="include\gui\TabControlGroup.h" />
     <ClInclude Include="include\gui\TextBase.h" />
     <ClInclude Include="include\gui\UserSettingsEditor.h" />

@@ -80,11 +80,6 @@ namespace fig::gui
 			| std::ranges::to<std::unordered_set>()
 			| std::ranges::to<std::vector>();
 		_pScenario->_genres = genres;
-
-		auto tags = decode_csv(_pTags->GetText())
-			| std::ranges::to<std::unordered_set>()
-			| std::ranges::to<std::vector>();
-		_pScenario->SetTags(tags);
 		return {};
 	}
 }

@@ -1,17 +1,17 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/AddImageButton.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
 {
-	AddImageButton::AddImageButton(ControlPtr pParent, fig::string_view label) : Control(pParent), MouseEventHandler(this)
+	AddImageButton::AddImageButton(ControlPtr pParent) : Control(pParent), MouseEventHandler(this)
 	{
 		auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pBorderRenderer->SetColor(fig::color_ref(Color::Border).WithAlpha(0xC0));
 
-		_pLabel = CreateControl<StaticText>(label, FontFace::Italic, Constants::GUI::DefaultFontSize, true);
-		_pLabel->SetForegroundColor(Color::HintText);
+		_pIcon = CreateControl<Image>(Resource::ICON_PLUS);
+		_pIcon->SetForegroundColor(Color::HintText);
 
 		SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);
 	}
@@ -23,7 +23,7 @@ namespace fig::gui
 
 	void AddImageButton::OnSize()
 	{
-		_pLabel->Center();
+		_pIcon->Center();
 	}
 
 	void AddImageButton::OnMouseEnter()

@@ -92,6 +92,10 @@ namespace fig
 		LoadTexture(pRenderer, Resource::ICON_CHAT_VOICE, "./resources/gui/icons/icon_chat_voice.png");
 		LoadTexture(pRenderer, Resource::ICON_ALIGNMENT_DOT, "./resources/gui/icons/icon_alignment_dot.png");
 		LoadTexture(pRenderer, Resource::ICON_ALIGNMENT_DOT_FILLED, "./resources/gui/icons/icon_alignment_dot_filled.png");
+		LoadTexture(pRenderer, Resource::ICON_PLUS, "./resources/gui/icons/icon_plus.png");
+		LoadTexture(pRenderer, Resource::ICON_PLUS_SMALL, "./resources/gui/icons/icon_plus_small.png");
+		LoadTexture(pRenderer, Resource::ICON_ROLE_BOT, "./resources/gui/icons/icon_role_bot.png");
+		LoadTexture(pRenderer, Resource::ICON_ROLE_USER, "./resources/gui/icons/icon_role_user.png");
 
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_INFO, "./resources/gui/icons/icon_character_edit_info.png");
 		LoadTexture(pRenderer, Resource::ICON_CHARACTER_EDIT_VOICE, "./resources/gui/icons/icon_character_edit_voice.png");

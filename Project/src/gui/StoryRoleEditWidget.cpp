@@ -1,5 +1,5 @@
 ﻿#include <pch.h>
-#include "gui/StoryRoleSlotWidget.h"
+#include "gui/StoryRoleEditWidget.h"
 #include "gui/TextBox.h"
 #include "gui/TextInput.h"
 #include "gui/ComboBox.h"
@@ -9,6 +9,7 @@
 #include "gui/Menu.h"
 #include "gui/AppResources.h"
 #include "gui/DefaultTextStyleProvider.h"
+#include "data/Character.h"
 #include "text/Condition.h"
 
 using namespace fig::chat;
@@ -21,8 +22,9 @@ namespace fig::gui
 	constexpr fig::coord LeftMargin = 12;
 	constexpr fig::coord LabelMargin = LeftMargin + 4;
 
-	StoryRoleSlotWidget::StoryRoleSlotWidget(ControlPtr pParent, fig::observer_ptr<Scenario> pScenario, fig::chat::Role role) : Control(pParent),
+	StoryRoleEditWidget::StoryRoleEditWidget(ControlPtr pParent, fig::observer_ptr<Scenario> pScenario, fig::observer_ptr<const fig::data::Character> pCharacter, fig::chat::Role role) : Control(pParent),
 		_pScenario { pScenario },
+		_pCharacter { pCharacter },
 		_role { role }
 	{
 		auto pSizer = SetSizer<VerticalSizer>();
@@ -46,11 +48,6 @@ namespace fig::gui
 		_pHandle = CreateTextBox(pRightSizer, "", "", TextInput::Mode::Single);
 		_pHandle->SetTextChangedDelegate([this](auto&& value) { OnChangeHandle(value); });
 		_pHandle->SetMaxWidth(260);
-		if (is_user(role))
-			_pHandle->SetPlaceholder("user");
-		else if (is_bot(role))
-			_pHandle->SetPlaceholder("ai");
-
 		pSizer->AddSpacer(Spacing);
 
 		// Brief
@@ -87,7 +84,7 @@ namespace fig::gui
 		InitValue();
 	}
 
-	fig::observer_ptr<fig::gui::StaticText> StoryRoleSlotWidget::CreateHint(SizerPtr pSizer, fig::string_view text)
+	fig::observer_ptr<fig::gui::StaticText> StoryRoleEditWidget::CreateHint(SizerPtr pSizer, fig::string_view text)
 	{
 		auto pHint = CreateControl<StaticText>(text, FontFace::Italic, 14.0, false);
 		pHint->SetForegroundColor(Color::HintText);
@@ -95,7 +92,7 @@ namespace fig::gui
 		return pHint;
 	}
 
-	fig::observer_ptr<StaticText> StoryRoleSlotWidget::CreateLabel(SizerPtr pSizer, fig::string_view text)
+	fig::observer_ptr<StaticText> StoryRoleEditWidget::CreateLabel(SizerPtr pSizer, fig::string_view text)
 	{
 		auto pLabel = CreateControl<StaticText>(text, FontFace::Default, 14.0, true);
 		pLabel->SetForegroundColor(Color::SidePanelForeground);
@@ -103,7 +100,7 @@ namespace fig::gui
 		return pLabel;
 	}
 
-	fig::observer_ptr<TextBox> StoryRoleSlotWidget::CreateTextBox(SizerPtr pSizer, fig::string_view text, fig::string_view placeholder, TextInput::Mode mode)
+	fig::observer_ptr<TextBox> StoryRoleEditWidget::CreateTextBox(SizerPtr pSizer, fig::string_view text, fig::string_view placeholder, TextInput::Mode mode)
 	{
 		bool bMultiline = mode == TextInput::Mode::Multiline;
 		auto pTextBox = CreateControl<TextBox>(FontFace::Default, 14.0);
@@ -120,7 +117,12 @@ namespace fig::gui
 		return pTextBox;
 	}
 
-	void StoryRoleSlotWidget::InitValue()
+	void StoryRoleEditWidget::Refresh()
+	{
+		InitValue();
+	}
+
+	void StoryRoleEditWidget::InitValue()
 	{
 		if (auto roleSlot = _pScenario->GetRoleSlot(_role))
 		{
@@ -132,7 +134,7 @@ namespace fig::gui
 		RefreshHeight();
 	}
 
-	bool StoryRoleSlotWidget::RefreshHeight()
+	bool StoryRoleEditWidget::RefreshHeight()
 	{
 		if (auto height = _pBrief->GetHeight() + _pPrompt->GetHeight(); height != _lastTextBoxHeight)
 		{
@@ -149,60 +151,63 @@ namespace fig::gui
 		return false;
 	}
 
-	void StoryRoleSlotWidget::OnUpdate(float)
+	void StoryRoleEditWidget::OnUpdate(float)
 	{
 		RefreshHeight();
 	}
 
-	void StoryRoleSlotWidget::OnSize()
+	void StoryRoleEditWidget::OnSize()
 	{
 		_pColorBar->SetY(3);
 		_pColorBar->SetHeight(GetHeight() - 3);
 	}
 
-	void StoryRoleSlotWidget::SetFocus(bool bFocus, TabDirection dir)
+	void StoryRoleEditWidget::SetFocus(bool bFocus, TabDirection dir)
 	{
 		if (_pName)
 			return _pName->SetFocus(bFocus, dir);
 	}
 
-	bool StoryRoleSlotWidget::IsFocused() const
+	bool StoryRoleEditWidget::IsFocused() const
 	{
 		if (_pName)
 			return _pName->IsFocused();
 		return false;
 	}
 
-	bool StoryRoleSlotWidget::CanFocus() const
+	bool StoryRoleEditWidget::CanFocus() const
 	{
 		return _pName;
 	}
 
-	void StoryRoleSlotWidget::OnChangeName(fig::string_view value)
+	void StoryRoleEditWidget::OnChangeName(fig::string_view value)
 	{
 		if (auto roleSlot = _pScenario->GetRoleSlot(_role))
 			(*roleSlot).label = fig::string { value };
+
+		if (_fnNameChanged)
+			_fnNameChanged(value);
 	}
 
-	void StoryRoleSlotWidget::OnChangeHandle(fig::string_view value)
+	void StoryRoleEditWidget::OnChangeHandle(fig::string_view value)
 	{
 		if (auto roleSlot = _pScenario->GetRoleSlot(_role))
 			(*roleSlot).customId = fig::handle { value };
 	}
 
-	void StoryRoleSlotWidget::OnChangeBrief(fig::string_view value)
+	void StoryRoleEditWidget::OnChangeBrief(fig::string_view value)
 	{
 		if (auto roleSlot = _pScenario->GetRoleSlot(_role))
 			(*roleSlot).brief = fig::string { value };
 	}
 
-	void StoryRoleSlotWidget::OnChangePrompt(fig::string_view value)
+	void StoryRoleEditWidget::OnChangePrompt(fig::string_view value)
 	{
 		if (auto roleSlot = _pScenario->GetRoleSlot(_role))
 			(*roleSlot).prompt = fig::string { value };
 	}
 
-	void StoryRoleSlotWidget::OnChangeCondition(fig::string_view value)
+	void StoryRoleEditWidget::OnChangeCondition(fig::string_view value)
 	{
 		if (auto roleSlot = _pScenario->GetRoleSlot(_role))
 		{
@@ -210,6 +215,26 @@ namespace fig::gui
 			_pCondition->SetForegroundColor((*roleSlot).validation.condition.IsOk() ? Color::TextBoxForeground : Color::ErrorText);
 			_pCondition->InvalidateText();
 
+		}
+	}
+
+	void StoryRoleEditWidget::SetLocked(bool bLocked)
+	{
+		_pName->SetEnabled(not bLocked);
+		_pHandle->SetEnabled(not bLocked);
+		_pCondition->SetEnabled(not bLocked);
+
+		if (bLocked)
+		{
+			if (is_bot(_role))
+			{
+				_pHandle->SetText("character");
+
+				if (_pCharacter)
+					_pName->SetText(_pCharacter->name.GetSpokenName());
+			}
+			if (is_user(_role))
+				_pHandle->SetText("user");
 		}
 	}
 }

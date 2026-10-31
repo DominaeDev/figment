@@ -42,7 +42,6 @@ namespace fig::gui
 		void OnChangedAttributeVisibility(size_t index, fig::data::CharacterAttribute::Visibility visibility);
 		void OnChangedAttributeFlags(size_t index, fig::data::CharacterAttribute::HintFlags flags);
 
-
 		void ShowAttributesMenu();
 		void OnAttributeSettingsMenu(size_t attributeIndex);
 

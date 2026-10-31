@@ -98,6 +98,37 @@ namespace fig::data
 		return scenes.back();
 	}
 
+	bool Scenario::AppendRoleSlot(fig::chat::Role role, fig::string_view label) noexcept
+	{
+		if (GetRoleSlot(role).has_value())
+			return false; // Already added
+
+		roles.emplace_back(RoleSlot {
+			.role = role,
+			.label = fig::string { label },
+		});
+		return true;
+	}
+
+	bool Scenario::RemoveRoleSlot(Role role) noexcept
+	{
+		if (std::erase_if(roles, [role](auto&& r) { return r.role == role; }) > 0)
+		{
+			// Remove role gaps
+			Role currBot = Role::Bot1;
+			for (auto& roleSlot : roles)
+			{
+				if (is_bot(roleSlot.role))
+				{
+					roleSlot.role = currBot;
+					currBot = bot_from_index(get_bot_index(currBot) + 1);
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
 	void Scenario::SetTags(const fig::string_list& tags) noexcept
 	{
 		_tags = tags;
