@@ -86,12 +86,12 @@ namespace fig::gui
 	{
 		auto pSizer = pParent->GetSizer();
 
-		auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
+		auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Icon::SAVE);
 		pSaveButton->SetSize(110, 32);
 		pSaveButton->SetDelegate([this] { SaveChanges(); });
 		_pSaveButton = pSaveButton;
 
-		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Cancel", Resource::ICON_DISMISS);
+		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Cancel", Icon::DISMISS);
 		pDiscardButton->SetSize(110, 32);
 		pDiscardButton->SetDelegate([this] { Close(); });
 
@@ -132,56 +132,56 @@ namespace fig::gui
 			{
 				Tab::General,
 				"General",
-				Resource::ICON_CHARACTER_EDIT_INFO,
-				Resource::ICON_CHARACTER_EDIT_INFO_SMALL,
+				Icon::CHARACTER_EDIT_INFO,
+				Icon::CHARACTER_EDIT_INFO_SMALL,
 			},
 			{
 				Tab::Traits,
 				"Traits",
-				Resource::ICON_CHARACTER_EDIT_TRAITS,
-				Resource::ICON_CHARACTER_EDIT_TRAITS_SMALL,
+				Icon::CHARACTER_EDIT_TRAITS,
+				Icon::CHARACTER_EDIT_TRAITS_SMALL,
 			},
 			{
 				Tab::Images,
 				"Images",
-				Resource::ICON_CHARACTER_EDIT_IMAGES,
-				Resource::ICON_CHARACTER_EDIT_IMAGES_SMALL,
+				Icon::CHARACTER_EDIT_IMAGES,
+				Icon::CHARACTER_EDIT_IMAGES_SMALL,
 			},
 			{
 				Tab::Voice,
 				"Voice",
-				Resource::ICON_CHARACTER_EDIT_VOICE,
-				Resource::ICON_CHARACTER_EDIT_VOICE_SMALL,
+				Icon::CHARACTER_EDIT_VOICE,
+				Icon::CHARACTER_EDIT_VOICE_SMALL,
 			},
 			{
 				Tab::Dialogue,
 				"Example chat",
-				Resource::ICON_MENU_CHATS,
-				Resource::ICON_MENU_CHATS_SMALL,
+				Icon::MENU_CHATS,
+				Icon::MENU_CHATS_SMALL,
 			},
 			{
 				NotImpl,
 				"Memories",
-				Resource::ICON_CHARACTER_EDIT_MEMORIES,
-				Resource::ICON_CHARACTER_EDIT_MEMORIES_SMALL,
+				Icon::CHARACTER_EDIT_MEMORIES,
+				Icon::CHARACTER_EDIT_MEMORIES_SMALL,
 			},
 			{
 				Tab::Rules,
 				"Rules",
-				Resource::ICON_CHARACTER_EDIT_RULES,
-				Resource::ICON_CHARACTER_EDIT_RULES_SMALL,
+				Icon::CHARACTER_EDIT_RULES,
+				Icon::CHARACTER_EDIT_RULES_SMALL,
 			},
 			{
 				NotImpl,
 				"Concepts",
-				Resource::ICON_CHARACTER_EDIT_CONCEPTS,
-				Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL,
+				Icon::CHARACTER_EDIT_CONCEPTS,
+				Icon::CHARACTER_EDIT_CONCEPTS_SMALL,
 			},
 			{
 				Tab::About,
 				"About",
-				Resource::ICON_CHARACTER_EDIT_ABOUT,
-				Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL,
+				Icon::CHARACTER_EDIT_ABOUT,
+				Icon::CHARACTER_EDIT_ABOUT_SMALL,
 			},
 		};
 	}

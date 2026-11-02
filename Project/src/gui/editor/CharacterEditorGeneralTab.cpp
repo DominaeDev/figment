@@ -272,7 +272,7 @@ namespace fig::gui
 		menu.AddItem("Paste")
 			.SetEnabled(SDL_HasClipboardText())
 			.SetDelegate([this, attributeIndex] { OnPasteAttribute(attributeIndex); });
-		menu.AddItem("Rename\u2026", Resource::ICON_EDIT)
+		menu.AddItem("Rename\u2026", Icon::EDIT)
 			.SetDelegate([this, attributeIndex] { RenameAttribute(attributeIndex); });
 		auto& moveMenu = menu.AddItem("Move");
 		if (_items.size() > 1uz)
@@ -296,7 +296,7 @@ namespace fig::gui
 		}
 
 		menu.AddSeparator();
-		menu.AddItem("Remove", Resource::ICON_DELETE)
+		menu.AddItem("Remove", Icon::DELETE)
 			.SetDelegate([this, attributeIndex] { OnRemoveAttribute(attributeIndex); });
 
 		menu.Show();

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/PasswordBox.h"
 #include "gui/AppResources.h"
 
@@ -8,7 +8,7 @@ namespace fig::gui
 	{
 		SetMarginLeft(34);
 
-		_pIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_LOCK));
+		_pIcon = CreateControl<Image>(Icon::LOCK);
 		_pIcon->SetForegroundColor(Color::Icon);
 	}
 

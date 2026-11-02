@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include "gui/ThemedButton.h"
@@ -11,7 +11,7 @@ namespace fig::gui
 	{
 		SidePanelButton() = delete;
 	public:
-		SidePanelButton(ControlPtr pParent, Resource icon, const fig::string& label);
+		SidePanelButton(ControlPtr pParent, TextureResource icon, const fig::string& label);
 
 	protected:
 		void OnSize() override;

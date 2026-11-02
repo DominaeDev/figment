@@ -24,15 +24,15 @@ namespace fig::gui
 		_pLabel->SetPosition(25 + LeftMargin, 1);
 		_pLabel->SetForegroundColor(Color::SidePanelForeground);
 
-		_pIcon = CreateControl<Image>(Resource::NONE, Color::Icon);
+		_pIcon = CreateControl<Image>(nullptr, Color::Icon);
 		_pIcon->SetX(LeftMargin);
 
-		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS);
+		_pSettingsButton = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_ATTRIBUTE_SETTINGS);
 		_pSettingsButton->SetSize(20, 20);
-		_pMoveUpButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP);
+		_pMoveUpButton = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_ATTRIBUTE_MOVE_UP);
 		_pMoveUpButton->SetSize(20, 20);
 		_pMoveUpButton->SetDelegate([this] { OnMove(-1); });
-		_pMoveDownButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN);
+		_pMoveDownButton = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN);
 		_pMoveDownButton->SetSize(20, 20);
 		_pMoveDownButton->SetDelegate([this] { OnMove(1); });
 
@@ -155,39 +155,39 @@ namespace fig::gui
 		if (eventType == Scenario::Event::Type::ChatDialogue)
 		{
 			_pLabel->SetText("Dialogue from");
-			_pIcon->SetTexture(Resource::ICON_STORY_EDIT_DIALOGUE, true);
+			_pIcon->SetTexture(Icon::STORY_EDIT_DIALOGUE, true);
 			CreateRoleDropList(role);
 			CreateContentTextBox(content, "Nice to meet you", true);
 		}
 		else if (eventType == Scenario::Event::Type::ChatAction)
 		{
 			_pLabel->SetText("Action from");
-			_pIcon->SetTexture(Resource::ICON_STORY_EDIT_ACTION, true);
+			_pIcon->SetTexture(Icon::STORY_EDIT_ACTION, true);
 			CreateRoleDropList(role);
 			CreateContentTextBox(content, "smiles warmly", true);
 		}
 		else if (eventType == Scenario::Event::Type::ChatNarration)
 		{
 			_pLabel->SetText("Narration");
-			_pIcon->SetTexture(Resource::ICON_STORY_EDIT_NARRATION, true);
+			_pIcon->SetTexture(Icon::STORY_EDIT_NARRATION, true);
 			CreateContentTextBox(content, "Once upon a time...", true);
 		}
 		else if (eventType == Scenario::Event::Type::Instigate)
 		{
 			_pLabel->SetText("Instigate response from");
-			_pIcon->SetTexture(Resource::ICON_STORY_EDIT_INSTIGATE, true);
+			_pIcon->SetTexture(Icon::STORY_EDIT_INSTIGATE, true);
 			CreateRoleDropList(role);
 		}
 		else if (eventType == Scenario::Event::Type::Instruct)
 		{
 			_pLabel->SetText("Instruction");
-			_pIcon->SetTexture(Resource::ICON_STORY_EDIT_INSTRUCT, true);
+			_pIcon->SetTexture(Icon::STORY_EDIT_INSTRUCT, true);
 			CreateContentTextBox(content, "Type an instruction for the AI to follow", false);
 		}
 		else if (eventType == Scenario::Event::Type::ShowMessage)
 		{
 			_pLabel->SetText("Display user message");
-			_pIcon->SetTexture(Resource::ICON_STORY_EDIT_USER_MESSAGE, true);
+			_pIcon->SetTexture(Icon::STORY_EDIT_USER_MESSAGE, true);
 			CreateContentTextBox(content, "Type a message for the user", true);
 		}
 		_pColorBar->SetHeight(0);

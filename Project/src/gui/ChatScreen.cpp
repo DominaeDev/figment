@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ChatScreen.h"
 
 #include "gui/MainFrame.h"
@@ -59,11 +59,11 @@ namespace fig::gui
 		_pTextBox->SetMinRows(2);
 		_pTextBox->SetMaxRows(8);
 
-		_pBackgroundButton = _pMainArea->CreateControl<ButtonWithIcon>(Resource::ICON_CHAT_BACKGROUND);
+		_pBackgroundButton = _pMainArea->CreateControl<ButtonWithIcon>(Icon::CHAT_BACKGROUND);
 		_pBackgroundButton->SetTheme(ButtonThemes::OverlayButton);
 		_pBackgroundButton->SetDelegate([this] { ShowBackgroundSettings(); });
 
-		_pVoiceButton = _pMainArea->CreateControl<ButtonWithIcon>(Resource::ICON_CHAT_VOICE);
+		_pVoiceButton = _pMainArea->CreateControl<ButtonWithIcon>(Icon::CHAT_VOICE);
 		_pVoiceButton->SetTheme(ButtonThemes::OverlayButton);
 		_pVoiceButton->SetDelegate([this] { });
 		pCenterSizer->Add(_pChatScroll, -1, SizerFlag::Fill | SizerFlag::Bottom, 8);

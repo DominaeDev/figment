@@ -21,7 +21,7 @@ namespace fig::gui
 		_pLabel = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
 		_pLabel->EnableEllipsis(true);
 
-		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_USER_SETTINGS, false);
+		_pSettingsButton = CreateControl<ButtonWithIcon>(Icon::USER_SETTINGS, false);
 		_pSettingsButton->SetTheme(ButtonThemes::SidePanel);
 		_pSettingsButton->SetSize(36, 36);
 		_pSettingsButton->CenterVertically();
@@ -30,7 +30,7 @@ namespace fig::gui
 			PushEvent(UserEvent::SelectEditorTab, 1);
 		});
 
-		_pSignOutButton = CreateControl<ButtonWithIcon>(Resource::ICON_LOGOUT, false);
+		_pSignOutButton = CreateControl<ButtonWithIcon>(Icon::LOGOUT, false);
 		_pSignOutButton->SetTheme(ButtonThemes::SidePanel);
 		_pSignOutButton->SetSize(36, 36);
 		_pSignOutButton->CenterVertically();

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/SearchBox.h"
 #include "gui/AppResources.h"
 #include "gui/CustomRenderers.h"
@@ -11,10 +11,10 @@ namespace fig::gui
 		SetMarginLeft(30); // Icon
 		SetMarginRight(30); // Cross
 
-		_pIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_SEARCH));
+		_pIcon = CreateControl<Image>(Icon::SEARCH);
 		_pIcon->SetForegroundColor(Color::Icon);
 
-		_pCross = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CROSS));
+		_pCross = CreateControl<Image>(Icon::CROSS);
 		_pCross->SetForegroundColor(Color::Icon);
 		_pCross->SetVisible(false);
 	}

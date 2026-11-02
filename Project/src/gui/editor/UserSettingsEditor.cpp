@@ -46,7 +46,7 @@ namespace fig::gui
 	{
 		auto pSizer = pParent->GetSizer();
 
-		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Close", Resource::ICON_DISMISS);
+		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Close", Icon::DISMISS);
 		pDiscardButton->SetSize(110, 32);
 		pDiscardButton->SetDelegate([this] { Close(); });
 
@@ -71,32 +71,32 @@ namespace fig::gui
 			{
 				Application,
 				"Application",
-				Resource::ICON_USER_SETTINGS_EDIT_APPLICATION,
-				Resource::ICON_USER_SETTINGS_EDIT_APPLICATION_SMALL,
+				Icon::USER_SETTINGS_EDIT_APPLICATION,
+				Icon::USER_SETTINGS_EDIT_APPLICATION_SMALL,
 			},
 			{
 				Profile,
 				"Profile",
-				Resource::ICON_USER_SETTINGS_EDIT_PROFILE,
-				Resource::ICON_USER_SETTINGS_EDIT_PROFILE_SMALL,
+				Icon::USER_SETTINGS_EDIT_PROFILE,
+				Icon::USER_SETTINGS_EDIT_PROFILE_SMALL,
 			},
 			{
 				Voice,
 				"Voice",
-				Resource::ICON_CHARACTER_EDIT_VOICE,
-				Resource::ICON_CHARACTER_EDIT_VOICE_SMALL,
+				Icon::CHARACTER_EDIT_VOICE,
+				Icon::CHARACTER_EDIT_VOICE_SMALL,
 			},
 			{
 				Extensions,
 				"Extensions",
-				Resource::ICON_CHARACTER_EDIT_CONCEPTS,
-				Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL,
+				Icon::CHARACTER_EDIT_CONCEPTS,
+				Icon::CHARACTER_EDIT_CONCEPTS_SMALL,
 			},
 			{
 				NotImpl,
 				"Advanced",
-				Resource::ICON_USER_SETTINGS_EDIT_ADVANCED,
-				Resource::ICON_USER_SETTINGS_EDIT_ADVANCED_SMALL,
+				Icon::USER_SETTINGS_EDIT_ADVANCED,
+				Icon::USER_SETTINGS_EDIT_ADVANCED_SMALL,
 			},
 		};
 	}

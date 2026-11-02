@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/SidePanelEditor.h"
 #include "gui/AppResources.h"
 #include "gui/SidePanelButton.h"
@@ -22,7 +22,7 @@ namespace fig::gui
 		DestroyChildren();
 
 		// Back button
-		auto pBackButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
+		auto pBackButton = CreateControl<ButtonWithIcon>(Icon::EXPAND_ARROW_LEFT);
 		pBackButton->SetTheme(ButtonThemes::SidePanel);
 		pBackButton->SetX(3);
 		pBackButton->SetY((Constants::GUI::SidePanel::HeaderHeight - pBackButton->GetHeight()) / 2);
@@ -50,7 +50,7 @@ namespace fig::gui
 		DestroyChildren();
 
 		// Back button
-		auto pBackButton = CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT);
+		auto pBackButton = CreateControl<ButtonWithIcon>(Icon::EXPAND_ARROW_LEFT);
 		pBackButton->SetTheme(ButtonThemes::SidePanel);
 		pBackButton->SetX(3);
 		pBackButton->SetY((Constants::GUI::SidePanel::HeaderHeight - pBackButton->GetHeight()) / 2);

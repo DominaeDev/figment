@@ -164,7 +164,7 @@ namespace fig::gui
 		_pGenerateButton->SetHeight(35);
 		_pGenerateButton->SetDelegate([this] { Generate(); });
 		
-		_pPlayButton = CreateControl<ButtonWithIcon>(Resource::ICON_PLAY, true);
+		_pPlayButton = CreateControl<ButtonWithIcon>(Icon::PLAY, true);
 		_pPlayButton->SetSize(35, 35);
 		_pPlayButton->SetDelegate([this] { PlayStop(); });
 		_pPlayButton->SetEnabled(false);
@@ -319,7 +319,7 @@ namespace fig::gui
 		if (bool isPlaying = Global::GetAudioManager().IsPlaying(); isPlaying != _bIsPlaying)
 		{
 			_bIsPlaying = isPlaying;
-			_pPlayButton->SetIcon(isPlaying ? Resource::ICON_STOP : Resource::ICON_PLAY);
+			_pPlayButton->SetIcon(isPlaying ? Icon::STOP : Icon::PLAY);
 
 			if (isPlaying)
 				SetStatusMessage(fig::strings::TTS::PlayingSound);

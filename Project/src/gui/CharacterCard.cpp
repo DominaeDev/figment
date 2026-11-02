@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterCard.h"
 #include "gui/AppResources.h"
 #include "app/AppState.h"
@@ -72,7 +72,7 @@ namespace fig::gui
 
 		menu.AddItem("Resume chat")
 			.SetEnabled(bLLM && _chatCount > 0);
-		menu.AddItem("Start a new chat", Resource::ICON_NEW_CHAT)
+		menu.AddItem("Start a new chat", Icon::NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this] { 
 				PushEvent(UserEvent::StartChat, &_characterId); 
@@ -92,7 +92,7 @@ namespace fig::gui
 		}
 		
 		menu.AddSeparator();
-		menu.AddItem("Edit character\u2026", Resource::ICON_EDIT)
+		menu.AddItem("Edit character\u2026", Icon::EDIT)
 			.SetDelegate([this] {
 				PushEvent(UserEvent::EditCharacter, &_characterId);
 			});
@@ -110,7 +110,7 @@ namespace fig::gui
 
 		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 		{
-			menu.AddItem("Star", Resource::ICON_STAR)
+			menu.AddItem("Star", Icon::STAR)
 				.SetDelegate([this] {
 				Global::GetUserContent().MarkFavorite(_characterId, true);
 				_userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
@@ -120,7 +120,7 @@ namespace fig::gui
 		}
 		else
 		{
-			menu.AddItem("Unstar", Resource::ICON_UNSTAR)
+			menu.AddItem("Unstar", Icon::UNSTAR)
 				.SetDelegate([this] {
 				Global::GetUserContent().MarkFavorite(_characterId, false);
 				_userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
@@ -134,22 +134,22 @@ namespace fig::gui
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::None); });
 		borderMenu.AddSeparator();
 		borderMenu.AddCheckItem("Border #1", _userSettings.borderStyle == CardBorderStyle::Style01)
-			.SetIcon(Resource::ICON_BORDER_01, false)
+			.SetIcon(Icon::BORDER_01, false)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style01); });
 		borderMenu.AddCheckItem("Border #2", _userSettings.borderStyle == CardBorderStyle::Style02)
-			.SetIcon(Resource::ICON_BORDER_02, false)
+			.SetIcon(Icon::BORDER_02, false)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style02); });
 		borderMenu.AddCheckItem("Border #3", _userSettings.borderStyle == CardBorderStyle::Style03)
-			.SetIcon(Resource::ICON_BORDER_03, false)
+			.SetIcon(Icon::BORDER_03, false)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style03); });
 		borderMenu.AddCheckItem("Border #4", _userSettings.borderStyle == CardBorderStyle::Style04)
-			.SetIcon(Resource::ICON_BORDER_04, false)
+			.SetIcon(Icon::BORDER_04, false)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style04); });
 		borderMenu.AddCheckItem("Border #5", _userSettings.borderStyle == CardBorderStyle::Style05)
-			.SetIcon(Resource::ICON_BORDER_05, false)
+			.SetIcon(Icon::BORDER_05, false)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style05); });
 		borderMenu.AddCheckItem("Border #6", _userSettings.borderStyle == CardBorderStyle::Style06)
-			.SetIcon(Resource::ICON_BORDER_06, false)
+			.SetIcon(Icon::BORDER_06, false)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
 
 		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
@@ -173,7 +173,7 @@ namespace fig::gui
 	
 		menu.AddSeparator();
 	
-		menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
+		menu.AddItem("Delete\u2026", Icon::DELETE)
 			.SetDelegate([this] { NotifyDelete(); });
 
 		_menuId = menu.Show();

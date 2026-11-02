@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ImageAlignmentWidget.h"
 #include "gui/ButtonWithIcon.h"
 #include "gui/TexturedBorderRenderer.h"
@@ -23,7 +23,7 @@ namespace fig::gui
 
 	void ImageAlignmentWidget::CreateButton(ImageAlignment alignment)
 	{
-		auto pButton = CreateControl<ButtonWithIcon>(Resource::ICON_ALIGNMENT_DOT);
+		auto pButton = CreateControl<ButtonWithIcon>(Icon::ALIGNMENT_DOT);
 		pButton->SetDelegate([this, alignment] { SetAlignment(alignment); });
 		pButton->SetTheme(ButtonTheme {
 			.defaultColor	{ Color::Undefined, Color::Icon, Color::Undefined },
@@ -58,9 +58,9 @@ namespace fig::gui
 		for (size_t i = 0uz; i < _buttons.size(); ++i)
 		{
 			if (static_cast<size_t>(align) == i)
-				_buttons[i]->SetIcon(Resource::ICON_ALIGNMENT_DOT_FILLED);
+				_buttons[i]->SetIcon(Icon::ALIGNMENT_DOT_FILLED);
 			else
-				_buttons[i]->SetIcon(Resource::ICON_ALIGNMENT_DOT);
+				_buttons[i]->SetIcon(Icon::ALIGNMENT_DOT);
 		}
 
 		if (not bSilent and _fnDelegate)

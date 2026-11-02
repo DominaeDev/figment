@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/PreviewCardImage.h"
 #include "gui/AppResources.h"
 #include "gui/TexturedBorderRenderer.h"
@@ -63,7 +63,7 @@ namespace fig::gui
 		{
 			// Create error icon
 			constexpr float fScale = 0.75f;
-			_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
+			_pErrorIcon = CreateControl<Image>(Icon::ERROR);
 			_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * fScale), toI(_pErrorIcon->GetTextureSize().y * fScale));
 			_pErrorIcon->SetForegroundColor(Color::Gray);
 			_pErrorIcon->Center();

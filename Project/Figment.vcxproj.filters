@@ -932,6 +932,12 @@
     <ClCompile Include="src\gui\editor\PackageWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\TextureResource.cpp">
+      <Filter>Source Files\Frontend\GUI\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\Icons.cpp">
+      <Filter>Source Files\Frontend\GUI\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -1903,9 +1909,6 @@
     <ClInclude Include="include\gui\SidePanelMain.h">
       <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClInclude>
-    <ClInclude Include="src\gui\ColorRef.h">
-      <Filter>Source Files\Frontend\GUI\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="include\io\Downloader.h">
       <Filter>Source Files\Frontend\IO\Packages</Filter>
     </ClInclude>
@@ -2085,6 +2088,15 @@
     </ClInclude>
     <ClInclude Include="include\gui\editor\ProfileImageWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TextureResource.h">
+      <Filter>Source Files\Frontend\GUI\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Icon.h">
+      <Filter>Source Files\Frontend\GUI\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\Icons.h">
+      <Filter>Source Files\Frontend\GUI\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

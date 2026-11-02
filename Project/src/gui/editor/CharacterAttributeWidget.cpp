@@ -27,12 +27,12 @@ namespace fig::gui
 		_pEditLabel->SetEnabled(false);
 		_pEditLabel->SetVisible(false);
 
-		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_SETTINGS);
+		_pSettingsButton = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_ATTRIBUTE_SETTINGS);
 		_pSettingsButton->SetSize(20, 20);
-		_pMoveUpButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_UP);
+		_pMoveUpButton = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_ATTRIBUTE_MOVE_UP);
 		_pMoveUpButton->SetSize(20, 20);
 		_pMoveUpButton->SetDelegate([this] { OnMove(-1); });
-		_pMoveDownButton = CreateControl<ButtonWithIcon>(Resource::ICON_CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN);
+		_pMoveDownButton = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_ATTRIBUTE_MOVE_DOWN);
 		_pMoveDownButton->SetSize(20, 20);
 		_pMoveDownButton->SetDelegate([this] { OnMove(1); });
 

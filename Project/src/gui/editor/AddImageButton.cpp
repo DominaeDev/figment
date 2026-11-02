@@ -10,7 +10,7 @@ namespace fig::gui
 		auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pBorderRenderer->SetColor(fig::color_ref(Color::Border).WithAlpha(0xC0));
 
-		_pIcon = CreateControl<Image>(Resource::ICON_PLUS);
+		_pIcon = CreateControl<Image>(Icon::PLUS);
 		_pIcon->SetForegroundColor(Color::HintText);
 
 		SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);

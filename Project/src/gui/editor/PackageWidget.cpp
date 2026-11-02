@@ -63,12 +63,12 @@ namespace fig::gui
 		_pDescription->SetTextAndResize(package.description);
 		pLeftSizer->Add(_pDescription, 0, SizerFlag::Top, 8);
 
-		_pInstallButton = CreateControl<ButtonWithLabelAndIcon>("", Resource::ICON_DOWNLOAD);
+		_pInstallButton = CreateControl<ButtonWithLabelAndIcon>("", Icon::DOWNLOAD);
 		_pInstallButton->SetSize(120, 32);
 		_pInstallButton->SetDelegate([this] { OnButtonClicked(); });
 		pRightSizer->Add(_pInstallButton, 0, SizerFlag::AlignRight);
 
-		_pInfoButton = CreateControl<ButtonWithIcon>(Resource::ICON_INFO_SMALL);
+		_pInfoButton = CreateControl<ButtonWithIcon>(Icon::INFO_SMALL);
 		_pInfoButton->SetSize(28, 28);
 		_pInfoButton->SetTheme(ButtonTheme {
 			.defaultColor	{ Color::PanelBackground, Color::ButtonDefaultForeground },
@@ -127,7 +127,7 @@ namespace fig::gui
 
 		if (_packageState == PackageState::Installed)
 		{
-			_pInstallButton->SetLabel("Uninstall", Resource::ICON_DELETE);
+			_pInstallButton->SetLabel("Uninstall", Icon::DELETE);
 			_pInstallButton->SetEnabled(true);
 			_pProgressBar->SetVisible(false);
 			_pProgressText->SetVisible(false);
@@ -166,7 +166,7 @@ namespace fig::gui
 
 		if (bShowProgressBar)
 		{
-			_pInstallButton->SetLabel("Stop", Resource::ICON_STOP);
+			_pInstallButton->SetLabel("Stop", Icon::STOP);
 			_pInstallButton->SetEnabled(true);
 			_pStatusText->SetVisible(false);
 			_pProgressBar->SetVisible(true);
@@ -182,7 +182,7 @@ namespace fig::gui
 		}
 		else
 		{
-			_pInstallButton->SetLabel(_packageState == PackageState::PartiallyDownloaded ? "Resume" : "Download", Resource::ICON_DOWNLOAD);
+			_pInstallButton->SetLabel(_packageState == PackageState::PartiallyDownloaded ? "Resume" : "Download", Icon::DOWNLOAD);
 			_pInstallButton->SetEnabled(_packageDependencies.Evaluate(Global::GetPackageManager().GetContext()));
 			_pStatusText->SetTextAndResize(_sizeString);
 			_pStatusText->SetForegroundColor(Color::PanelForeground);

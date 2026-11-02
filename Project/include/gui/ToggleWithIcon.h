@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include "gui/ThemedButton.h"
@@ -11,9 +11,9 @@ namespace fig::gui
 	{
 		ToggleWithIcon() = delete;
 	public:
-		ToggleWithIcon(ControlPtr pParent, Resource icon, ToggleBehavior behavior = ToggleBehavior::Default, bool bOn = false);
+		ToggleWithIcon(ControlPtr pParent, TextureResource icon, ToggleBehavior behavior = ToggleBehavior::Default, bool bOn = false);
 
-		void SetIcon(Resource icon);
+		void SetIcon(TextureResource icon);
 		void SetDelegate(ToggleDelegate pDelegate) noexcept;
 		void SetOn(bool bOn, bool bSilent = false) noexcept;
 		bool IsOn() const noexcept { return _bOn; }

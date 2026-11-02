@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 
@@ -8,9 +8,9 @@ namespace fig::gui
 	{
 	public:
 		Image(ControlPtr pParent, fig::texture_ptr pTexture, fig::color_ref tint = Color::White);
-		Image(ControlPtr pParent, Resource texture, fig::color_ref tint = Color::White);
+		Image(ControlPtr pParent, TextureResource texture, fig::color_ref tint = Color::White);
 		void SetTexture(fig::texture_ptr pTexture, bool bResize = false);
-		void SetTexture(Resource texture, bool bResize = false);
+		void SetTexture(TextureResource texture, bool bResize = false);
 		inline bool HasTexture() const noexcept { return (bool)_pTexture; }
 		fig::point GetTextureSize() const noexcept;
 

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/SidePanelMain.h"
 #include "gui/AppResources.h"
 #include "gui/MainFrame.h"
@@ -31,7 +31,7 @@ namespace fig::gui
 		pLogo->SetForegroundColor(Color::AppForeground);
 		pLogo->SetX(44);
 
-		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
+		_pMenuButton = CreateControl<ButtonWithIcon>(Icon::MENU);
 		_pMenuButton->SetTheme(ButtonThemes::SidePanel);
 		_pMenuButton->SetX(3);
 		_pMenuButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pMenuButton->GetHeight()) / 2);
@@ -40,13 +40,13 @@ namespace fig::gui
 
 		auto pMainArea = CreateControl<Area>();
 
-		auto pChatButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
+		auto pChatButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
 		pChatButton->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
-		auto pCharactersButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
+		auto pCharactersButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
 		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
-		auto pScenariosButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
-		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
-		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Resource::ICON_MENU_MODELS, "Models");
+		auto pScenariosButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
+		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
+		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_MODELS, "Models");
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
 		pButtonSizer->Add(pChatButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
@@ -83,24 +83,24 @@ namespace fig::gui
 	{
 		DestroyChildren();
 
-		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU);
+		_pMenuButton = CreateControl<ButtonWithIcon>(Icon::MENU);
 		_pMenuButton->SetTheme(ButtonThemes::SidePanel);
 		_pMenuButton->SetX(3);
 		_pMenuButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pMenuButton->GetHeight()) / 2);
 //		_pMenuButton->CenterVertically();
 		_pMenuButton->SetDelegate([this]() { ShowMenu(); });
 
-		auto pChatButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHATS_SMALL, false);
+		auto pChatButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_CHATS_SMALL, false);
 		pChatButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
 		pChatButtonSmall->SetTheme(ButtonThemes::SidePanel);
-		auto pCharactersButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_CHARACTERS_SMALL, false);
+		auto pCharactersButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_CHARACTERS_SMALL, false);
 		pCharactersButtonSmall->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
 		pCharactersButtonSmall->SetTheme(ButtonThemes::SidePanel);
-		auto pScenariosButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_SCENARIOS_SMALL, false);
+		auto pScenariosButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_SCENARIOS_SMALL, false);
 		pScenariosButtonSmall->SetTheme(ButtonThemes::SidePanel);
-		auto pWorldsButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_WORLDS_SMALL, false);
+		auto pWorldsButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_WORLDS_SMALL, false);
 		pWorldsButtonSmall->SetTheme(ButtonThemes::SidePanel);
-		auto pModelsButtonSmall = CreateControl<ButtonWithIcon>(Resource::ICON_MENU_MODELS_SMALL, false);
+		auto pModelsButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_MODELS_SMALL, false);
 		pModelsButtonSmall->SetTheme(ButtonThemes::SidePanel);
 
 		auto pTopSizer = SetSizer<VerticalSizer>();
@@ -129,15 +129,15 @@ namespace fig::gui
 		createMenu.AddItem("Import from file\u2026")
 			.SetDelegate([this] { PushEvent(UserEvent::ImportCharacter); });
 		menu.AddSeparator();
-		menu.AddItem("User profile\u2026", Resource::ICON_USER_SETTINGS)
+		menu.AddItem("User profile\u2026", Icon::USER_SETTINGS)
 			.SetDelegate([] {
 				PushEvent(UserEvent::EditUserSettings);
 				PushEvent(UserEvent::SelectEditorTab, 1);
 			});
-		menu.AddItem("Settings\u2026", Resource::ICON_SETTINGS)
+		menu.AddItem("Settings\u2026", Icon::SETTINGS)
 			.SetDelegate([] { PushEvent(UserEvent::EditUserSettings); });
 		menu.AddSeparator();
-		menu.AddItem("Sign out", Resource::ICON_LOGOUT)
+		menu.AddItem("Sign out", Icon::LOGOUT)
 			.SetDelegate([]() { MainFrame::GetInstance().SignOut(); });
 		menu.AddItem("Exit Figment")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });

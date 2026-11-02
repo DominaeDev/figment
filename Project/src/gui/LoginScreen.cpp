@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/LoginScreen.h"
 #include "gui/AppResources.h"
 #include "gui/VerticalSizer.h"
@@ -24,7 +24,7 @@ namespace fig::gui
 		pLogo->SetPosition(44, 0);
 
 		// Menu button
-		_pMenuButton = CreateControl<ButtonWithIcon>(Resource::ICON_MENU, false);
+		_pMenuButton = CreateControl<ButtonWithIcon>(Icon::MENU, false);
 		_pMenuButton->SetTheme(ButtonThemes::SidePanel);
 		_pMenuButton->SetSize(36, 36);
 		_pMenuButton->SetPosition(4, 6);
@@ -42,11 +42,11 @@ namespace fig::gui
 		_pProfileImage = pCenter->CreateControl<ImageWithMask>(nullptr, nullptr);
 		_pProfileImage->SetSize(160, 160);
 
-		_pPrevProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Resource::ICON_CHEVRON_LEFT, false);
+		_pPrevProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Icon::CHEVRON_LEFT, false);
 		_pPrevProfileBtn->SetSize(35, 56);
 		_pPrevProfileBtn->SetDelegate([this]() { CycleProfile(-1); });
 
-		_pNextProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Resource::ICON_CHEVRON_RIGHT, false);
+		_pNextProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Icon::CHEVRON_RIGHT, false);
 		_pNextProfileBtn->SetSize(35, 56);
 		_pNextProfileBtn->SetDelegate([this]() { CycleProfile(+1); });
 
@@ -65,7 +65,7 @@ namespace fig::gui
 		_pPassword->SetEnterPressedDelegate([this](fig::string_view password) { SignIn(password); });
 		_pPassword->SetFocus(true);
 
-		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(Resource::ICON_ARROW_RIGHT, true);
+		_pSignInBtn = _pPasswordPanel->CreateControl<ButtonWithIcon>(Icon::ARROW_RIGHT, true);
 		_pSignInBtn->SetSize(35, 35);
 		_pSignInBtn->SetDelegate([this]() { SignIn(_pPassword->GetText()); });
 
@@ -186,7 +186,7 @@ namespace fig::gui
 			.SetDelegate([this] { CreateNewProfile(); });
 		menu.AddItem("Recover profile\u2026");
 		menu.AddSeparator();
-		menu.AddItem("Settings\u2026", Resource::ICON_SETTINGS);
+		menu.AddItem("Settings\u2026", Icon::SETTINGS);
 		menu.AddSeparator();
 		menu.AddItem("Exit Figment")
 			.SetDelegate([]() { MainFrame::GetInstance().Close(); });

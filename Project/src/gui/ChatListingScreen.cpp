@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/AppResources.h"
 #include "gui/ChatListingScreen.h"
 #include "gui/ChatList.h"
@@ -27,10 +27,10 @@ namespace fig::gui
 		_pHeader->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 		_pHeader->SetAlignment(TextAlignment::LeftCenter);
 
-		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING, false);
+		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::SORTING, false);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
-		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING, true);
+		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::FILTERING, true);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 
 		auto _pFilterTextBox = pTopBar->CreateControl<SearchBox>();

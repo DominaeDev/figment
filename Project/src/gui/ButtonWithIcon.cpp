@@ -1,11 +1,11 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ButtonWithIcon.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
 {
-	ButtonWithIcon::ButtonWithIcon(ControlPtr pParent, Resource icon, bool bBorder) : ThemedButton(pParent)
+	ButtonWithIcon::ButtonWithIcon(ControlPtr pParent, TextureResource icon, bool bBorder) : ThemedButton(pParent)
 	{
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());
@@ -16,15 +16,15 @@ namespace fig::gui
 			pBorderRenderer->SetColor(Color::Border);
 		}
 
-		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
+		_pIcon = CreateControl<Image>(icon);
 		_pIcon->SetForegroundColor(GetThemeForeground());
 
 		SetSize(36, 36);
 	}
 
-	void ButtonWithIcon::SetIcon(Resource icon)
+	void ButtonWithIcon::SetIcon(TextureResource icon)
 	{
-		_pIcon->SetTexture(AppResources::GetTexture(icon));
+		_pIcon->SetTexture(*icon);
 	}
 
 	void ButtonWithIcon::OnSize()

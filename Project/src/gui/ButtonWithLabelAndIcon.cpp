@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ButtonWithLabelAndIcon.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
@@ -6,7 +6,7 @@
 
 namespace fig::gui
 {
-	ButtonWithLabelAndIcon::ButtonWithLabelAndIcon(ControlPtr pParent, fig::string_view text, Resource icon, double fontSize) : ThemedButton(pParent)
+	ButtonWithLabelAndIcon::ButtonWithLabelAndIcon(ControlPtr pParent, fig::string_view text, TextureResource icon, double fontSize) : ThemedButton(pParent)
 	{
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());
@@ -19,23 +19,23 @@ namespace fig::gui
 		_pLabel->SetForegroundColor(GetThemeForeground());
 		_pLabel->SetTextAndResize(text);
 
-		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
+		_pIcon = CreateControl<Image>(icon.get());
 		_pIcon->SetForegroundColor(GetThemeForeground());
 
 		SetSize(200, 36);
 	}
 
-	void ButtonWithLabelAndIcon::SetLabel(fig::string_view label, Resource icon) noexcept
+	void ButtonWithLabelAndIcon::SetLabel(fig::string_view label, TextureResource icon) noexcept
 	{
 		_pLabel->SetTextAndResize(label);
-		if (icon != Resource::NONE)
+		if (icon)
 			SetIcon(icon);
 		OnSize();
 	}
 
-	void ButtonWithLabelAndIcon::SetIcon(Resource icon)
+	void ButtonWithLabelAndIcon::SetIcon(TextureResource icon)
 	{
-		_pIcon->SetTexture(AppResources::GetTexture(icon));
+		_pIcon->SetTexture(icon);
 	}
 
 	void ButtonWithLabelAndIcon::OnSize()

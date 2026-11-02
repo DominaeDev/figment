@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/LoadModelWidget.h"
 #include "gui/ImageWithMask.h"
 #include "gui/AppResources.h"
@@ -27,7 +27,7 @@ namespace fig::gui
 		_pLabel->SetHeight(20);
 		_pLabel->EnableEllipsis(true);
 
-		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_SETTINGS, false);
+		_pSettingsButton = CreateControl<ButtonWithIcon>(Icon::SETTINGS, false);
 		_pSettingsButton->SetTheme(ButtonThemes::SidePanel);
 		_pSettingsButton->SetSize(36, 36);
 		_pSettingsButton->CenterVertically();

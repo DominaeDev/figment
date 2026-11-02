@@ -185,6 +185,7 @@
     <ClCompile Include="src\data\ModelSettings.cpp" />
     <ClCompile Include="src\data\Scenario.cpp" />
     <ClCompile Include="src\data\TavernCardV2.cpp" />
+    <ClCompile Include="src\gui\Icons.cpp" />
     <ClCompile Include="src\gui\BackgroundImageCarousel.cpp" />
     <ClCompile Include="src\gui\ChatBackgroundPopOver.cpp" />
     <ClCompile Include="src\gui\BehindChat.cpp" />
@@ -227,6 +228,7 @@
     <ClCompile Include="src\gui\editor\UserSettingsEditorProfileTab.cpp" />
     <ClCompile Include="src\gui\editor\UserSettingsEditorVoiceTab.cpp" />
     <ClCompile Include="src\gui\HorizontalBar.cpp" />
+    <ClCompile Include="src\gui\TextureResource.cpp" />
     <ClCompile Include="src\gui\ImageAlignmentWidget.cpp" />
     <ClCompile Include="src\gui\PortraitImageCarousel.cpp" />
     <ClCompile Include="src\gui\IMeshControl.cpp" />
@@ -531,6 +533,7 @@
     <ClInclude Include="include\data\VersionNumber.h" />
     <ClInclude Include="include\data\VoiceSettings.h" />
     <ClInclude Include="include\Figment.h" />
+    <ClInclude Include="include\gui\Icons.h" />
     <ClInclude Include="include\gui\BackgroundImageCarousel.h" />
     <ClInclude Include="include\gui\ChatBackgroundPopOver.h" />
     <ClInclude Include="include\gui\BehindChat.h" />
@@ -580,6 +583,8 @@
     <ClInclude Include="include\gui\editor\UserSettingsEditorProfileTab.h" />
     <ClInclude Include="include\gui\editor\UserSettingsEditorVoiceTab.h" />
     <ClInclude Include="include\gui\HorizontalBar.h" />
+    <ClInclude Include="include\gui\Icon.h" />
+    <ClInclude Include="include\gui\TextureResource.h" />
     <ClInclude Include="include\gui\ImageAlignmentWidget.h" />
     <ClInclude Include="include\gui\ITabControl.h" />
     <ClInclude Include="include\gui\PortraitImageCarousel.h" />
@@ -774,7 +779,6 @@
     <ClInclude Include="include\util\StripHtml.h" />
     <ClInclude Include="include\util\Timestamp.h" />
     <ClInclude Include="include\util\UndoStack.h" />
-    <ClInclude Include="src\gui\ColorRef.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

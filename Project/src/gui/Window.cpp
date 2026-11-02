@@ -1,7 +1,8 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Window.h"
 #include "gui/Frame.h"
 #include "gui/AppResources.h"
+#include "gui/Icons.h"
 
 namespace fig::gui
 {
@@ -38,8 +39,9 @@ namespace fig::gui
 		SDL_SetWindowMinimumSize(_window.get(), Constants::GUI::WindowMinWidth, Constants::GUI::WindowMinHeight);
 		SDL_SetRenderVSync(_renderer.get(), 1);
 
-		// Load textures
-		AppResources::Init(_renderer.get()); //! @temp
+		// Load image resources
+		AppResources::Init(_renderer.get());
+		Icons::Init(_renderer.get());
 	}
 
 	Window::~Window()

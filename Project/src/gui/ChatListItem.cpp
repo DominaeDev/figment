@@ -183,7 +183,7 @@ namespace fig::gui
 
 		if (not userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
-			menu.AddItem("Resume chat", Resource::ICON_NEW_CHAT)
+			menu.AddItem("Resume chat", Icon::NEW_CHAT)
 				.SetEnabled(bLLM)
 				.SetDelegate([this] {
 //				PushEvent(UserEvent::StartChat, &_characterId);
@@ -199,7 +199,7 @@ namespace fig::gui
 
 			if (!userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 			{
-				menu.AddItem("Star", Resource::ICON_STAR)
+				menu.AddItem("Star", Icon::STAR)
 					.SetDelegate([this] {
 					Global::GetUserContent().MarkFavorite(_chatInstanceId, true);
 					ShowStar(true);
@@ -208,7 +208,7 @@ namespace fig::gui
 			}
 			else
 			{
-				menu.AddItem("Unstar", Resource::ICON_UNSTAR)
+				menu.AddItem("Unstar", Icon::UNSTAR)
 					.SetDelegate([this] {
 					Global::GetUserContent().MarkFavorite(_chatInstanceId, false);
 					ShowStar(false);
@@ -223,12 +223,12 @@ namespace fig::gui
 
 			if (_bHasError or IsShiftDown())
 			{
-				menu.AddItem("Delete\u2026", Resource::ICON_DELETE)
+				menu.AddItem("Delete\u2026", Icon::DELETE)
 					.SetDelegate([this] { NotifyDelete(); });
 			}
 			else
 			{
-				menu.AddItem("Archive", Resource::ICON_ARCHIVE)
+				menu.AddItem("Archive", Icon::ARCHIVE)
 					.SetDelegate([this] {
 					Global::GetUserContent().MarkHidden(_chatInstanceId, true);
 					Global::GetUserContent().InvalidateChatCount(_chatInstanceId);
@@ -245,7 +245,7 @@ namespace fig::gui
 				PushEvent(UserEvent::NavigateToChatList, flags.IsSet(ChatFilterFlag::Hidden) ? 1 : 0, &_primaryCharacterId);
 			});
 
-			menu.AddItem("Unarchive", Resource::ICON_UNARCHIVE)
+			menu.AddItem("Unarchive", Icon::UNARCHIVE)
 				.SetDelegate([this] {
 					Global::GetUserContent().MarkHidden(_chatInstanceId, false);
 					Global::GetUserContent().InvalidateChatCount(_chatInstanceId);
@@ -253,11 +253,11 @@ namespace fig::gui
 				});
 
 			menu.AddSeparator();
-			menu.AddItem("Delete forever\u2026", Resource::ICON_DELETE)
+			menu.AddItem("Delete forever\u2026", Icon::DELETE)
 				.SetDelegate([this] { NotifyDelete(); });
 			if (IsShiftDown())
 			{
-				menu.AddItem("Delete all archived chats\u2026", Resource::ICON_CROSS)
+				menu.AddItem("Delete all archived chats\u2026", Icon::CROSS)
 					.SetDelegate([this] { NotifyDeleteArchive(); });
 			}
 
@@ -271,7 +271,7 @@ namespace fig::gui
 		{
 			if (bShow)
 			{
-				_pStar = CreateControl<Image>(Resource::CARD_ICON_STAR_SMALL);
+				_pStar = CreateControl<Image>(AppResources::GetTexture(Resource::CARD_ICON_STAR_SMALL));
 				_pStar->SetSize(24, 24);
 				_pStar->SetY(28);
 			}

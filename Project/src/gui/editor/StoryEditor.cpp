@@ -150,12 +150,12 @@ namespace fig::gui
 	{
 		auto pSizer = pParent->GetSizer();
 
-		auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Resource::ICON_SAVE);
+		auto pSaveButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Save", Icon::SAVE);
 		pSaveButton->SetSize(110, 32);
 		pSaveButton->SetDelegate([this] { SaveChanges(); });
 		_pSaveButton = pSaveButton;
 
-		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Cancel", Resource::ICON_DISMISS);
+		auto pDiscardButton = pParent->CreateControl<ButtonWithLabelAndIcon>("Cancel", Icon::DISMISS);
 		pDiscardButton->SetSize(110, 32);
 		pDiscardButton->SetDelegate([this] { Close(); });
 
@@ -194,50 +194,50 @@ namespace fig::gui
 			{
 				Tab::General,
 				"Info",
-				Resource::ICON_STORY_EDIT_INFO,
-				Resource::ICON_STORY_EDIT_INFO_SMALL,
+				Icon::STORY_EDIT_INFO,
+				Icon::STORY_EDIT_INFO_SMALL,
 			},
 			{
 				Tab::Roles,
 				"Roles",
-				Resource::ICON_STORY_EDIT_ROLES,
-				Resource::ICON_STORY_EDIT_ROLES_SMALL,
+				Icon::STORY_EDIT_ROLES,
+				Icon::STORY_EDIT_ROLES_SMALL,
 			},
 			{
 				Tab::Scenes,
 				"Scenes",
-				Resource::ICON_STORY_EDIT_SCENES,
-				Resource::ICON_STORY_EDIT_SCENES_SMALL,
+				Icon::STORY_EDIT_SCENES,
+				Icon::STORY_EDIT_SCENES_SMALL,
 			},
 			{
 				NotImpl,
 				"Locations",
-				Resource::ICON_STORY_EDIT_LOCATIONS,
-				Resource::ICON_STORY_EDIT_LOCATIONS_SMALL,
+				Icon::STORY_EDIT_LOCATIONS,
+				Icon::STORY_EDIT_LOCATIONS_SMALL,
 			},
 			{
 				Tab::Images,
 				"Images",
-				Resource::ICON_CHARACTER_EDIT_IMAGES,
-				Resource::ICON_CHARACTER_EDIT_IMAGES_SMALL,
+				Icon::CHARACTER_EDIT_IMAGES,
+				Icon::CHARACTER_EDIT_IMAGES_SMALL,
 			},
 			{
 				Tab::Rules,
 				"Rules",
-				Resource::ICON_CHARACTER_EDIT_RULES,
-				Resource::ICON_CHARACTER_EDIT_RULES_SMALL,
+				Icon::CHARACTER_EDIT_RULES,
+				Icon::CHARACTER_EDIT_RULES_SMALL,
 			},
 			{
 				NotImpl,
 				"Concepts",
-				Resource::ICON_CHARACTER_EDIT_CONCEPTS,
-				Resource::ICON_CHARACTER_EDIT_CONCEPTS_SMALL,
+				Icon::CHARACTER_EDIT_CONCEPTS,
+				Icon::CHARACTER_EDIT_CONCEPTS_SMALL,
 			},
 			{
 				Tab::About,
 				"About",
-				Resource::ICON_CHARACTER_EDIT_ABOUT,
-				Resource::ICON_CHARACTER_EDIT_ABOUT_SMALL,
+				Icon::CHARACTER_EDIT_ABOUT,
+				Icon::CHARACTER_EDIT_ABOUT_SMALL,
 			},
 		};
 	}

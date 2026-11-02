@@ -96,17 +96,17 @@ namespace fig::gui
 	void StoryEditorScenesTab::ShowEventsMenu()
 	{
 		auto& menu = CreateMenu();
-		menu.AddItem("Add character dialogue", Resource::ICON_STORY_EDIT_DIALOGUE)
+		menu.AddItem("Add character dialogue", Icon::STORY_EDIT_DIALOGUE)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ChatDialogue); });
-		menu.AddItem("Add character action", Resource::ICON_STORY_EDIT_ACTION)
+		menu.AddItem("Add character action", Icon::STORY_EDIT_ACTION)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ChatAction); });
-		menu.AddItem("Add narration", Resource::ICON_STORY_EDIT_NARRATION)
+		menu.AddItem("Add narration", Icon::STORY_EDIT_NARRATION)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ChatNarration); });
-		menu.AddItem("Give instruction", Resource::ICON_STORY_EDIT_INSTRUCT)
+		menu.AddItem("Give instruction", Icon::STORY_EDIT_INSTRUCT)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::Instruct); });
-		menu.AddItem("Instigate response", Resource::ICON_STORY_EDIT_INSTIGATE)
+		menu.AddItem("Instigate response", Icon::STORY_EDIT_INSTIGATE)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::Instigate); });
-		menu.AddItem("Display user message", Resource::ICON_STORY_EDIT_USER_MESSAGE)
+		menu.AddItem("Display user message", Icon::STORY_EDIT_USER_MESSAGE)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ShowMessage); });
 		menu.Show();
 	}
@@ -219,7 +219,7 @@ namespace fig::gui
 			.SetDelegate([this, eventIndex] { OnMoveEvent(eventIndex, 1, true); });
 
 		menu.AddSeparator();
-		menu.AddItem("Remove", Resource::ICON_DELETE)
+		menu.AddItem("Remove", Icon::DELETE)
 			.SetDelegate([this, eventIndex] { OnRemoveEvent(eventIndex); });
 
 		menu.Show();

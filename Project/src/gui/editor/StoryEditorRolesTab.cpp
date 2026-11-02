@@ -43,7 +43,7 @@ namespace fig::gui
 		for (auto role : roles)
 			CreateRole(pSlotSizer, pSizer, role);
 
-		_pAddButton = CreateControl<ButtonWithIcon>(Resource::ICON_PLUS_SMALL, true);
+		_pAddButton = CreateControl<ButtonWithIcon>(Icon::PLUS_SMALL, true);
 		_pAddButton->SetSize(114, 152);
 		_pAddButton->SetDelegate([this] { AddRole(); });
 		pSlotSizer->Add(_pAddButton, 0);

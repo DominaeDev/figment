@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Overlay.h"
 
@@ -16,15 +16,15 @@ namespace fig::gui
 	{
 		friend class Menu;
 	public:
-		explicit MenuItem(const fig::string& label, Resource icon = {}, MenuDelegate fn = {});
+		explicit MenuItem(const fig::string& label, TextureResource icon = {}, MenuDelegate fn = {});
 		
-		MenuItem& AddItem(const fig::string& label, Resource icon = {}, MenuDelegate fn = {});
+		MenuItem& AddItem(const fig::string& label, TextureResource icon = {}, MenuDelegate fn = {});
 		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
 		void AddSeparator();
 
 		inline MenuItem& SetLabel(const fig::string& label) noexcept { _label = label; return *this; };
 		inline MenuItem& SetEnabled(bool bEnabled) noexcept { _state = bEnabled ? State::Default : State::Disabled; return *this; };
-		inline MenuItem& SetIcon(Resource icon, bool bMonochrome = true) noexcept { _icon = icon; _bMonochromeIcon = bMonochrome; return *this; };
+		inline MenuItem& SetIcon(TextureResource icon, bool bMonochrome = true) noexcept { _icon = icon; _bMonochromeIcon = bMonochrome; return *this; };
 		inline MenuItem& SetDelegate(MenuDelegate delegate) noexcept { _fnDelegate = delegate; return *this; };
 		inline MenuItem& SetCheckable(bool bCheckable) noexcept { _bCheckable = bCheckable; return *this; };
 		inline MenuItem& SetChecked(bool bChecked) noexcept { _bChecked = _bCheckable && bChecked; return *this; };
@@ -41,7 +41,7 @@ namespace fig::gui
 		} _state {};
 
 		fig::string _label;
-		Resource _icon {};
+		TextureResource _icon {};
 		MenuDelegate _fnDelegate {};
 		bool _bCheckable {};
 		bool _bChecked {};
@@ -58,7 +58,7 @@ namespace fig::gui
 	public:
 		Menu(FramePtr pFrame);
 
-		MenuItem& AddItem(const fig::string& label, Resource icon = {}, MenuDelegate fn = {});
+		MenuItem& AddItem(const fig::string& label, TextureResource icon = {}, MenuDelegate fn = {});
 		MenuItem& AddCheckItem(const fig::string& label, bool bChecked = false, MenuDelegate fn = {});
 		void AddSeparator();
 

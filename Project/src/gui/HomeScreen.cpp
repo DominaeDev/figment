@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/HomeScreen.h"
 #include "gui/CharacterCardList.h"
 #include "gui/SearchBox.h"
@@ -32,19 +32,19 @@ namespace fig::gui
 
 		auto pTopBar = CreateControl<TopBar>("Characters", _pCardList);
 
-		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_SORTING, false);
+		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::SORTING, false);
 		_pSortingButton->SetTheme(ButtonThemes::TopBar);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
-		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_GRID_LARGE);
+		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Icon::GRID_LARGE);
 		_pGridButton->SetTheme(ButtonThemes::TopBar);
 		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
-		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Resource::ICON_FILTERING, true);
+		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::FILTERING, true);
 		_pFilteringButton->SetTheme(ButtonThemes::TopBar);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 
-		_pToggleTagsButton = pTopBar->CreateControl<ToggleWithIcon>(Resource::ICON_TAG);
+		_pToggleTagsButton = pTopBar->CreateControl<ToggleWithIcon>(Icon::TAG);
 		_pToggleTagsButton->SetTheme(ButtonThemes::TopBar);
 		_pToggleTagsButton->SetDelegate([this](bool _) { ToggleTags(); });
 
@@ -113,7 +113,7 @@ namespace fig::gui
 		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards);
 		_pCardList->SetCardSize(bHalfSize ? CardSize::Half : CardSize::Full);
 		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
-		_pGridButton->SetIcon(bHalfSize ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
+		_pGridButton->SetIcon(bHalfSize ? Icon::GRID_SMALL : Icon::GRID_LARGE);
 		_pGridButton->SetOn(bHalfSize, true);
 		RefreshTopButtons();
 
@@ -153,7 +153,7 @@ namespace fig::gui
 		bSmall = !bSmall;
 		Global::GetUserSettings().SetBool(UserSetting::Interface::CharacterList::SmallCards, bSmall);
 
-		_pGridButton->SetIcon(bSmall ? Resource::ICON_GRID_SMALL : Resource::ICON_GRID_LARGE);
+		_pGridButton->SetIcon(bSmall ? Icon::GRID_SMALL : Icon::GRID_LARGE);
 		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
 	}
 

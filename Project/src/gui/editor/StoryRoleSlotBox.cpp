@@ -16,7 +16,7 @@ namespace fig::gui
 		_pLabel->EnableEllipsis(true);
 		_pLabel->SetAlignment(TextAlignment::MiddleTop);
 
-		_pIcon = CreateControl<Image>(Resource::ICON_ROLE_BOT);
+		_pIcon = CreateControl<Image>(Icon::ROLE_BOT);
 		_pIcon->SetForegroundColor(Color::HintText);
 
 		SetSize(114, 152);
@@ -37,9 +37,9 @@ namespace fig::gui
 		_pLabel->CenterHorizontally();
 
 		if (is_user(role))
-			_pIcon->SetTexture(Resource::ICON_ROLE_USER);
+			_pIcon->SetTexture(Icon::ROLE_USER);
 		else
-			_pIcon->SetTexture(Resource::ICON_ROLE_BOT);
+			_pIcon->SetTexture(Icon::ROLE_BOT);
 	}
 
 	void StoryRoleSlotBox::OnSize()

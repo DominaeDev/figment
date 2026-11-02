@@ -118,7 +118,7 @@ namespace fig::gui
 			.SetEnabled(SDL_HasClipboardText())
 			.SetDelegate([this, ruleIndex] { OnPasteRule(ruleIndex); });
 		menu.AddSeparator();
-		menu.AddItem("Remove", Resource::ICON_DELETE)
+		menu.AddItem("Remove", Icon::DELETE)
 			.SetDelegate([this, ruleIndex] { RemoveRule(ruleIndex); });
 
 		menu.Show();

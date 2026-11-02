@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/PlayButton.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
@@ -7,10 +7,10 @@ namespace fig::gui
 {
 	PlayButton::PlayButton(ControlPtr pParent) : ThemedButton(pParent)
 	{
-		_pBackground = CreateControl<Image>(Resource::BACKGROUND_CIRCLE_48PX);
+		_pBackground = CreateControl<Image>(AppResources::GetTexture(Resource::BACKGROUND_CIRCLE_48PX));
 		_pBackground->SetSize(36, 36);
 
-		_pIcon = _pBackground->CreateControl<Image>(Resource::ICON_PLAY);
+		_pIcon = _pBackground->CreateControl<Image>(Icon::PLAY);
 		_pIcon->Center();
 
 		SetTheme(ButtonThemes::PlayButton);
@@ -47,15 +47,15 @@ namespace fig::gui
 		switch (iconState)
 		{
 		case IconState::Play:
-			_pIcon->SetTexture(Resource::ICON_PLAY);
+			_pIcon->SetTexture(Icon::PLAY);
 			_pIcon->Rotate(0.0);
 			break;
 		case IconState::Stop:
-			_pIcon->SetTexture(Resource::ICON_STOP);
+			_pIcon->SetTexture(Icon::STOP);
 			_pIcon->Rotate(0.0);
 			break;
 		case IconState::Spinner:
-			_pIcon->SetTexture(Resource::ICON_SPINNER);
+			_pIcon->SetTexture(Icon::SPINNER);
 			break;
 		}
 	}

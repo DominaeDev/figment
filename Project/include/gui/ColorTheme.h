@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/ColorRef.h"
 #include <io/Error.h>

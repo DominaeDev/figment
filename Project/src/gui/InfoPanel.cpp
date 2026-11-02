@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/InfoPanel.h"
 #include "gui/AppResources.h"
 #include "gui/LineBorderRenderer.h"
@@ -30,7 +30,7 @@ namespace fig::gui
 		auto pGradient = _pExpandedRoot->CreateControl<HorizontalGradient>(fig::color_ref(Color::SidePanelGradient).WithAlpha(0.8f), fig::color_ref(Color::SidePanelGradient).WithAlpha(0.0f));
 		_pGradient = pGradient;
 
-		_pCollapseButton = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Resource::ICON_EXPAND_ARROW_LEFT, false);
+		_pCollapseButton = _pCollapsedRoot->CreateControl<ButtonWithIcon>(Icon::EXPAND_ARROW_LEFT, false);
 		_pCollapseButton->SetSize(36, 36);
 		_pCollapseButton->SetX(3);
 		_pCollapseButton->SetY((Constants::GUI::SidePanel::HeaderHeight - _pCollapseButton->GetHeight()) / 2);

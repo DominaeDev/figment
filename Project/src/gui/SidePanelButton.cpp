@@ -1,11 +1,11 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/SidePanelButton.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
 {
-	SidePanelButton::SidePanelButton(ControlPtr pParent, Resource icon, const fig::string& label) : ThemedButton(pParent)
+	SidePanelButton::SidePanelButton(ControlPtr pParent, TextureResource icon, const fig::string& label) : ThemedButton(pParent)
 	{
 		SetTheme(ButtonThemes::SidePanel);
 		SetHeight(58);
@@ -14,7 +14,7 @@ namespace fig::gui
 		pBorder->SetColor(GetThemeBackground());
 		_pBorder = pBorder;
 
-		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
+		_pIcon = CreateControl<Image>(icon);
 		_pIcon->SetForegroundColor(GetThemeForeground());
 
 		_pLabel = CreateControl<StaticText>(label, FontFace::Default, 20, false);

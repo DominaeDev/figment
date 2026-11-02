@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Slider.h"
 #include "gui/TexturedBorder.h"
 #include "gui/AppResources.h"
@@ -21,10 +21,10 @@ namespace fig::gui
 		_pBarBorder->SetForegroundColor(Color::Border);
 		_pBar->SetSizer<FillParentSizer>()->Add(_pBarBorder);
 
-		_pThumb = CreateControl<Image>(Resource::SLIDER_THUMB_BG, Color::AppBackground);
+		_pThumb = CreateControl<Image>(AppResources::GetTexture(Resource::SLIDER_THUMB_BG), Color::AppBackground);
 		_pThumb->SetForegroundColor(Color::SliderThumb);
 		_pThumb->CenterVertically();
-		_pThumbBorder = _pThumb->CreateControl<Image>(Resource::SLIDER_THUMB_BORDER, Color::Border);
+		_pThumbBorder = _pThumb->CreateControl<Image>(AppResources::GetTexture(Resource::SLIDER_THUMB_BORDER), Color::Border);
 		_pThumbBorder->FillParent();
 		_thumbHalfSize = _pThumb->GetTextureSize().x / 2;
 

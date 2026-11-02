@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ComboBox.h"
 #include "gui/AppResources.h"
 #include "gui/CustomRenderers.h"
@@ -8,7 +8,7 @@ namespace fig::gui
 {
 	ComboBox::ComboBox(ControlPtr pParent) : TextInput(pParent, FontFace::Default, Constants::GUI::DefaultFontSize), MouseEventHandler(this)
 	{
-		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
+		_pArrow = CreateControl<Image>(Icon::DROPLIST_ARROW);
 		_pArrow->SetForegroundColor(Color::Icon);
 
 		SetMargins(8, 4, 38, 6);

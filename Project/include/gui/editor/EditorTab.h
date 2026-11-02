@@ -10,8 +10,8 @@ namespace fig::gui
 	{
 		size_t tabIndex;
 		fig::string label;
-		Resource iconLarge;
-		Resource iconSmall;
+		TextureResource iconLarge;
+		TextureResource iconSmall;
 	};
 
 	using EditorPropertyChangedDelegate = std::function<void()>;

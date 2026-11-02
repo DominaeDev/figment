@@ -1,18 +1,18 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ToggleWithIcon.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
 
 namespace fig::gui
 {
-	ToggleWithIcon::ToggleWithIcon(ControlPtr pParent, Resource icon, ToggleBehavior behavior, bool bOn) : ThemedButton(pParent),
+	ToggleWithIcon::ToggleWithIcon(ControlPtr pParent, TextureResource icon, ToggleBehavior behavior, bool bOn) : ThemedButton(pParent),
 		_bOn { bOn },
 		_behavior { behavior }
 	{
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
 		pBGRenderer->SetColor(GetThemeBackground());
 
-		_pIcon = CreateControl<Image>(AppResources::GetTexture(icon));
+		_pIcon = CreateControl<Image>(icon);
 		_pIcon->SetForegroundColor(GetThemeForeground());
 
 		SetOn(bOn, true);
@@ -31,9 +31,9 @@ namespace fig::gui
 		}
 	}
 
-	void ToggleWithIcon::SetIcon(Resource icon)
+	void ToggleWithIcon::SetIcon(TextureResource icon)
 	{
-		_pIcon->SetTexture(AppResources::GetTexture(icon));
+		_pIcon->SetTexture(icon);
 	}
 
 	void ToggleWithIcon::SetDelegate(ToggleDelegate pDelegate) noexcept

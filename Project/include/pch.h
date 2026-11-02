@@ -20,6 +20,7 @@
 #undef DialogBox
 #undef CreateDialog
 #undef FormatMessage
+#undef DELETE
 #define PLATFORM_WINDOWS 1
 #define USE_WIN32_API 0 // Use Win32 calls for file i/o
 

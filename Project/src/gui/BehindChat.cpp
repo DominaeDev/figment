@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/BehindChat.h"
 #include "gui/AppResources.h"
 
@@ -9,9 +9,9 @@ namespace fig::gui
 	BehindChat::BehindChat(ControlPtr pParent) : Area(pParent)
 	{
 		_pBG = CreateControl<Panel>();
-		_pLeftGradient = CreateControl<Image>(Resource::MASK_GRADIENT_EASE_IN_CUBIC_LEFT);
+		_pLeftGradient = CreateControl<Image>(AppResources::GetTexture(Resource::MASK_GRADIENT_EASE_IN_CUBIC_LEFT));
 		_pLeftGradient->SetWidth(GradientWidth);
-		_pRightGradient = CreateControl<Image>(Resource::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT);
+		_pRightGradient = CreateControl<Image>(AppResources::GetTexture(Resource::MASK_GRADIENT_EASE_IN_CUBIC_RIGHT));
 		_pRightGradient->SetWidth(GradientWidth);
 
 		auto pSizer = SetSizer<HorizontalSizer>();

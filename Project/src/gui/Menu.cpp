@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Menu.h"
 #include "gui/Frame.h"
 #include "gui/AppResources.h"
@@ -19,14 +19,14 @@ namespace fig::gui
 	constexpr float AutoCollapseDelay = 0.3f;
 	constexpr const char* Separator = "----";
 
-	MenuItem::MenuItem(const fig::string& label, Resource icon, MenuDelegate fn) :
+	MenuItem::MenuItem(const fig::string& label, TextureResource icon, MenuDelegate fn) :
 		_label { label },
 		_icon { icon },
 		_fnDelegate { fn }
 	{
 	}
 
-	MenuItem& MenuItem::AddItem(const fig::string& label, Resource icon, MenuDelegate fn)
+	MenuItem& MenuItem::AddItem(const fig::string& label, TextureResource icon, MenuDelegate fn)
 	{
 		_subItems.emplace_back(MenuItem(label, icon, fn));
 		return _subItems.back();
@@ -34,7 +34,7 @@ namespace fig::gui
 
 	MenuItem& MenuItem::AddCheckItem(const fig::string& label, bool bChecked, MenuDelegate fn)
 	{
-		auto menuItem = MenuItem(label, Resource::NONE, fn);
+		auto menuItem = MenuItem(label, {}, fn);
 		menuItem._bCheckable = true;
 		menuItem._bChecked = bChecked;
 		_subItems.emplace_back(menuItem);
@@ -62,7 +62,7 @@ namespace fig::gui
 		SetVisible(false);
 	}
 
-	MenuItem& Menu::AddItem(const fig::string& label, Resource icon, MenuDelegate fn)
+	MenuItem& Menu::AddItem(const fig::string& label, TextureResource icon, MenuDelegate fn)
 	{
 		_items.emplace_back(MenuItem(label, icon, fn));
 		return _items.back();
@@ -70,7 +70,7 @@ namespace fig::gui
 
 	MenuItem& Menu::AddCheckItem(const fig::string& label, bool bChecked, MenuDelegate fn)
 	{
-		auto menuItem = MenuItem(label, Resource::NONE, fn);
+		auto menuItem = MenuItem(label, {}, fn);
 		menuItem._bCheckable = true;
 		menuItem._bChecked = bChecked;
 		_items.emplace_back(menuItem);
@@ -206,13 +206,13 @@ namespace fig::gui
 
 		if (menuItem._bCheckable && menuItem._bChecked)
 		{
-			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::ICON_CHECKMARK));
+			auto pIcon = pItemRoot->CreateControl<Image>(Icon::CHECKMARK);
 			pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::MenuForegroundDisabled);
 			pIcon->SetPosition(4, 4);
 		}
-		else if (menuItem._icon != Resource::NONE)
+		else if (menuItem._icon)
 		{
-			auto pIcon = pItemRoot->CreateControl<Image>(AppResources::GetTexture(menuItem._icon));
+			auto pIcon = pItemRoot->CreateControl<Image>(menuItem._icon);
 			if (menuItem._bMonochromeIcon)
 				pIcon->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::MenuForegroundDisabled);
 			else
@@ -222,7 +222,7 @@ namespace fig::gui
 
 		if (menuItem.HasSubMenu())
 		{
-			auto pArrow = pItemRoot->CreateControl<Image>(AppResources::GetTexture(Resource::SUBMENU_ARROW));
+			auto pArrow = pItemRoot->CreateControl<Image>(Icon::SUBMENU_ARROW);
 			pArrow->SetForegroundColor(menuItem.IsEnabled() ? Color::Icon : Color::MenuForegroundDisabled);
 			pArrow->SetX(pItemRoot->GetWidth() - pArrow->GetWidth());
 			pArrow->CenterVertically();

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Image.h"
 #include "gui/GUIUtility.h"
 #include "gui/AppResources.h"
@@ -15,9 +15,9 @@ namespace fig::gui
 		SetBackgroundColor(Color::Transparent);
 	}
 
-	Image::Image(ControlPtr pParent, Resource texture, fig::color_ref tint) : Control(pParent)
+	Image::Image(ControlPtr pParent, TextureResource texture, fig::color_ref tint) : Control(pParent)
 	{
-		_pTexture = AppResources::GetTexture(texture);
+		_pTexture = texture.get();
 		if (_pTexture)
 			SetSize(_pTexture->w, _pTexture->h);
 
@@ -62,9 +62,9 @@ namespace fig::gui
 			SetSize(pTexture->w, pTexture->h);
 	}
 
-	void Image::SetTexture(Resource texture, bool bResize)
+	void Image::SetTexture(TextureResource texture, bool bResize)
 	{
-		SetTexture(AppResources::GetTexture(texture), bResize);
+		SetTexture(texture.get(), bResize);
 	}
 
 	fig::point Image::GetTextureSize() const noexcept

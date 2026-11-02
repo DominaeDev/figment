@@ -106,7 +106,7 @@ namespace fig::gui
 			.SetEnabled(index + 1uz < _items.size())
 			.SetDelegate([this, entryIndex] { OnMoveEntry(entryIndex, 1, true); });
 		menu.AddSeparator();
-		menu.AddItem("Remove", Resource::ICON_DELETE)
+		menu.AddItem("Remove", Icon::DELETE)
 			.SetDelegate([this, entryIndex] { RemoveEntry(entryIndex); });
 
 		menu.Show();

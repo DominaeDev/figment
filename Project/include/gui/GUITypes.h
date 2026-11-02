@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -93,3 +93,5 @@ namespace fig
 
 	using ListItemSelectedDelegate = std::function<void(int32_t)>;
 }
+
+#include "gui/TextureResource.h"

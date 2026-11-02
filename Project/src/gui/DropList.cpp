@@ -16,7 +16,7 @@ namespace fig::gui
 		_pText->EnableEllipsis(true);
 		_pText->SetX(8);
 
-		_pArrow = CreateControl<Image>(Resource::ICON_DROPLIST_ARROW);
+		_pArrow = CreateControl<Image>(Icon::DROPLIST_ARROW);
 		_pArrow->SetForegroundColor(Color::Icon);
 
 		auto pTextBoxBG = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);

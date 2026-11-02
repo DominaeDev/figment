@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CoverCard.h"
 #include "gui/TexturedBorder.h"
 #include "gui/AppResources.h"
@@ -75,7 +75,7 @@ namespace fig::gui
 		_pLargeBorder->SetVisible(false);
 
 		// Star (large)
-		_pLargeStar = _pLargeRoot->CreateControl<Image>(Resource::CARD_ICON_STAR);
+		_pLargeStar = _pLargeRoot->CreateControl<Image>(AppResources::GetTexture(Resource::CARD_ICON_STAR));
 		_pLargeStar->SetPosition(Large::Width - _pLargeStar->GetWidth() - 8, 8);
 		_pLargeStar->SetVisible(false);
 
@@ -115,7 +115,7 @@ namespace fig::gui
 		_pSmallBorder->SetVisible(false);
 
 		// Star (small)
-		_pSmallStar = _pSmallRoot->CreateControl<Image>(Resource::CARD_ICON_STAR_SMALL);
+		_pSmallStar = _pSmallRoot->CreateControl<Image>(AppResources::GetTexture(Resource::CARD_ICON_STAR_SMALL));
 		_pSmallStar->SetPosition(Small::Width - _pSmallStar->GetWidth() - 6, 6);
 		_pSmallStar->SetVisible(false);
 
@@ -146,7 +146,7 @@ namespace fig::gui
 			{
 				// Create error icon
 				float scale = _cardSize == CardSize::Full ? 1.0f : 0.75f;
-				_pErrorIcon = CreateControl<Image>(AppResources::GetTexture(Resource::ICON_ERROR));
+				_pErrorIcon = CreateControl<Image>(Icon::ERROR);
 				_pErrorIcon->SetSize(toI(_pErrorIcon->GetTextureSize().x * scale), toI(_pErrorIcon->GetTextureSize().y * scale));
 				_pErrorIcon->SetForegroundColor(Color::Gray);
 				_pErrorIcon->Center();

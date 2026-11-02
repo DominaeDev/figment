@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include "gui/ThemedButton.h"
@@ -11,8 +11,8 @@ namespace fig::gui
 	{
 		ButtonWithIcon() = delete;
 	public:
-		ButtonWithIcon(ControlPtr pParent, Resource icon, bool bBorder = false);
-		void SetIcon(Resource icon);
+		ButtonWithIcon(ControlPtr pParent, TextureResource icon, bool bBorder = false);
+		void SetIcon(TextureResource icon);
 
 	protected:
 		void OnSize() override;

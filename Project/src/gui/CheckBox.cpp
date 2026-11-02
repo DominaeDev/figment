@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CheckBox.h"
 #include "gui/CustomRenderers.h"
 #include "gui/AppResources.h"
@@ -18,7 +18,7 @@ namespace fig::gui
 		auto pBoxBorder = _pBox->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pBoxBorder->SetColor(Color::Border);
 
-		_pTick = _pBox->CreateControl<Image>(Resource::ICON_CHECKMARK);
+		_pTick = _pBox->CreateControl<Image>(Icon::CHECKMARK);
 		_pTick->SetForegroundColor(Color::Icon);
 		_pTick->Center();
 		_pTick->SetVisible(_bOn);
