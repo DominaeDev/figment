@@ -1,10 +1,9 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/SidePanel.h"
 #include "gui/SidePanelMain.h"
 #include "gui/SidePanelEditor.h"
 #include "gui/AppResources.h"
 #include "gui/ResizeHandle.h"
-#include "gui/Editor.h"
 #include "gui/KeyboardMods.h"
 
 using namespace fig::io;

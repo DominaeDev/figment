@@ -1,0 +1,22 @@
+﻿#pragma once
+
+#include "gui/editor/EditorTab.h"
+#include "gui/editor/StoryEditorArgs.h"
+
+namespace fig::gui
+{
+	class StoryEditorAboutTab : public EditorTab<StoryEditorArgs>
+	{
+	public:
+		StoryEditorAboutTab(ControlPtr pParent);
+
+		SaveResult OnSave() noexcept override;
+
+	protected:
+		bool OnInit(StoryEditorArgs args) override;
+
+	private:
+		fig::observer_ptr<fig::data::Scenario> _pScenario {};
+		fig::observer_ptr<TextBox> _pTags {};
+	};
+}

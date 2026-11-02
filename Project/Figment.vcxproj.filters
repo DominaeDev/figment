@@ -719,41 +719,17 @@
     <ClCompile Include="src\gui\TextInput.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\Editor.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditor.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\PreviewCardImage.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\io\AsyncImageLoad.cpp">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\AddImageButton.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterSmallPortraitWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterBackgroundWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterPortraitWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="include\util\StripHtml.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ResizeableImageViewport.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\EditorTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterAttributeWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\data\CharacterName.cpp">
       <Filter>Source Files\Frontend\IO\Data</Filter>
@@ -788,9 +764,6 @@
     <ClCompile Include="src\gui\ColorTheme.cpp">
       <Filter>Source Files\Frontend\GUI\Themes</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\UserSettingsEditor.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\SidePanel.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClCompile>
@@ -809,23 +782,11 @@
     <ClCompile Include="src\io\PackageManager.cpp">
       <Filter>Source Files\Frontend\IO\Packages</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\UserSettingsEditorVoiceTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\UserSettingsEditorExtensionsTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\PackageWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\io\ZipArchive.cpp">
       <Filter>Source Files\Frontend\IO\Zip</Filter>
     </ClCompile>
     <ClCompile Include="src\user\UserProfile.cpp">
       <Filter>Source Files\Frontend\User</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\UserSettingsEditorMainTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ModalOverlay.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -866,71 +827,110 @@
     <ClCompile Include="src\gui\TabControlGroup.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\UserSettingsEditorProfileTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\RecoveryCodeModal.cpp">
       <Filter>Source Files\Frontend\GUI\Modals</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ProfileImageWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorAboutTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorGeneralTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorImagesTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorRulesTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorTraitsTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorVoiceTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\StoryEditor.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\StoryEditorAboutTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\StoryEditorRulesTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\StoryEditorImagesTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\StoryEditorScenesTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\StoryEventWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterEditorDialogueTab.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\CharacterDialogueWidget.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\chat\ChatFormatter.cpp">
       <Filter>Source Files\Chat</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\StoryEditorInfoTab.cpp">
+    <ClCompile Include="src\gui\editor\CharacterAttributeWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterBackgroundWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterDialogueWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterPortraitWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterSmallPortraitWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\AddImageButton.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\StoryEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\StoryEditorImagesTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\StoryEditorRolesTab.cpp">
+    <ClCompile Include="src\gui\editor\StoryEditorAboutTab.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\StoryRoleEditWidget.cpp">
+    <ClCompile Include="src\gui\editor\StoryEditorInfoTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\StoryEditorRolesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\StoryEditorRulesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\StoryEditorScenesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\StoryRoleEditWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\StoryRoleSlotBox.cpp">
+    <ClCompile Include="src\gui\editor\StoryRoleSlotBox.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\StoryEventWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterEditorAboutTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterEditorDialogueTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterEditorGeneralTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterEditorImagesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterEditorRulesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterEditorTraitsTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterEditorVoiceTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\CharacterEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\EditorTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\Editor.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\UserSettingsEditorVoiceTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\UserSettingsEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\UserSettingsEditorExtensionsTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\UserSettingsEditorMainTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\UserSettingsEditorProfileTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\ProfileImageWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\PackageWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1843,44 +1843,17 @@
     <ClInclude Include="include\gui\TextInput.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\Editor.h">
-      <Filter>Source Files\Frontend\GUI\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditor.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorArgs.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\PreviewCardImage.h">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\io\AsyncImageLoad.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\AddImageButton.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterBackgroundWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterPortraitWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterSmallPortraitWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\util\StripHtml.h">
       <Filter>Source Files\Utility</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ResizeableImageViewport.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\EditorTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterAttributeWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\data\CharacterAttribute.h">
       <Filter>Source Files\Frontend\IO\Data</Filter>
@@ -1921,12 +1894,6 @@
     <ClInclude Include="include\gui\ButtonThemes.h">
       <Filter>Source Files\Frontend\GUI\Themes</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\UserSettingsEditor.h">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\UserSettingsEditorArgs.h">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\SidePanel.h">
       <Filter>Source Files\Frontend\GUI\Screens\SidePanel</Filter>
     </ClInclude>
@@ -1948,15 +1915,6 @@
     <ClInclude Include="include\io\PackageManager.h">
       <Filter>Source Files\Frontend\IO\Packages</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\UserSettingsEditorVoiceTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\UserSettingsEditorExtensionsTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\PackageWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\io\ZipArchive.h">
       <Filter>Source Files\Frontend\IO\Zip</Filter>
     </ClInclude>
@@ -1965,9 +1923,6 @@
     </ClInclude>
     <ClInclude Include="include\tts\TTSBackendSettings.h">
       <Filter>Source Files\Backend\TTS</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\UserSettingsEditorMainTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\ControlDefs.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
@@ -2017,74 +1972,119 @@
     <ClInclude Include="include\gui\TabControlGroup.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\UserSettingsEditorProfileTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\RecoveryCodeModal.h">
       <Filter>Source Files\Frontend\GUI\Modals</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\ProfileImageWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorAboutTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorGeneralTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorImagesTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorRulesTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorTraitsTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorVoiceTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\StoryEditor.h">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\StoryEditorAboutTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\StoryEditorArgs.h">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\StoryEditorRulesTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\StoryEditorImagesTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\StoryEditorScenesTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\StoryEventWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterEditorDialogueTab.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\CharacterDialogueWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\chat\ChatFormatter.h">
       <Filter>Source Files\Chat</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\StoryEditorInfoTab.h">
+    <ClInclude Include="include\gui\editor\CharacterAttributeWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterBackgroundWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterDialogueWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\AddImageButton.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterPortraitWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterSmallPortraitWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditorDialogueTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditorGeneralTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditorImagesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditorRulesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditorTraitsTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditorVoiceTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditorAboutTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditor.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\CharacterEditorArgs.h">
+      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\StoryEditorAboutTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\StoryEditorRolesTab.h">
+    <ClInclude Include="include\gui\editor\StoryEditorImagesTab.h">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\StoryRoleEditWidget.h">
+    <ClInclude Include="include\gui\editor\StoryEditorInfoTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\StoryEditorRolesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\StoryEditorRulesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\StoryEditorScenesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\StoryEventWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\StoryRoleSlotBox.h">
+    <ClInclude Include="include\gui\editor\StoryRoleEditWidget.h">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\StoryRoleSlotBox.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\StoryEditor.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\StoryEditorArgs.h">
+      <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\EditorTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\Editor.h">
+      <Filter>Source Files\Frontend\GUI\Editors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\UserSettingsEditorVoiceTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\UserSettingsEditor.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\UserSettingsEditorArgs.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\UserSettingsEditorExtensionsTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\UserSettingsEditorMainTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\UserSettingsEditorProfileTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\PackageWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\ProfileImageWidget.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserSettingsEditor\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

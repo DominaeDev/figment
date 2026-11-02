@@ -1,0 +1,70 @@
+﻿#include <pch.h>
+#include "gui/editor/UserSettingsEditorExtensionsTab.h"
+#include "gui/editor/PackageWidget.h"
+#include "gui/TextBox.h"
+#include "gui/ComboBox.h"
+#include "gui/ButtonWithLabel.h"
+#include "gui/ButtonWithLabelAndIcon.h"
+#include "gui/AppResources.h"
+#include "gui/HorizontalLine.h"
+#include "io/PackageManager.h"
+#include "data/Character.h"
+#include "util/StringUtils.h"
+
+using namespace fig::data;
+
+namespace fig::gui
+{
+	UserSettingsEditorExtensionsTab::UserSettingsEditorExtensionsTab(ControlPtr pParent) : EditorTab(pParent)
+	{
+		SetMaxWidth(1280);
+	}
+
+	bool UserSettingsEditorExtensionsTab::OnInit(UserSettingsEditorArgs args)
+	{
+		auto pSizer = SetSizer<VerticalSizer>();
+
+		CreateHeader(this, pSizer, "Text-to-speech");
+		CreateLabel(this, pSizer, "You must install one of the packages below to enable text-to-speech features.");
+
+		auto ttsServerPackages = Global::GetPackageManager().GetPackages()
+			| std::views::filter([](auto&& p) { return p.type == PackageType::TTSServer; })
+			| std::ranges::to<std::vector>();
+
+		for (auto& package : ttsServerPackages)
+		{
+			auto pWidget = CreateControl<PackageWidget>(package);
+			pSizer->Add(pWidget, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+			_widgets.push_back(pWidget);
+		}
+
+		CreateHorizontalLine(this, pSizer);
+		CreateHeader(this, pSizer, "Voice models");
+
+		auto ttsVoiceModelPackages = Global::GetPackageManager().GetPackages()
+			| std::views::filter([](auto&& p) { return p.type == PackageType::TTSVoiceModel; })
+			| std::ranges::to<std::vector>();
+
+		for (auto& package : ttsVoiceModelPackages)
+		{
+			auto pWidget = CreateControl<PackageWidget>(package);
+			pSizer->Add(pWidget, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+			_widgets.push_back(pWidget);
+		}
+
+		CreateHorizontalLine(this, pSizer);
+		CreateHeader(this, pSizer, "Voice design models");
+
+		auto ttsVoiceDesignPackages = Global::GetPackageManager().GetPackages()
+			| std::views::filter([](auto&& p) { return p.type == PackageType::TTSDesignModel; })
+			| std::ranges::to<std::vector>();
+
+		for (auto& package : ttsVoiceDesignPackages)
+		{
+			auto pWidget = CreateControl<PackageWidget>(package);
+			pSizer->Add(pWidget, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
+			_widgets.push_back(pWidget);
+		}
+		return true;
+	}
+}

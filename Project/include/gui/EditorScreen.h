@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Screen.h"
-#include "gui/Editor.h"
+#include "gui/editor/Editor.h"
 #include "gui/ScrollPanel.h"
 
 namespace fig::gui
