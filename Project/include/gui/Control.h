@@ -71,6 +71,8 @@ namespace fig::gui
 		fig::observer_ptr<TabControlGroup> CreateTabGroup();
 		fig::observer_ptr<TabControlGroup> GetTabGroup() { return _pTabGroup.get(); }
 		fig::observer_ptr<const TabControlGroup> GetTabGroup() const { return _pTabGroup.get(); }
+		bool HasTabGroup() const noexcept { return _pTabGroup != nullptr; }
+		void AddTabControl(fig::observer_ptr<ITabControl> pControl);
 
 	protected:
 		virtual void OnRender(fig::renderer_ptr pRenderer);

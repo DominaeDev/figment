@@ -148,7 +148,11 @@ namespace fig::gui
 		bool Initialize(TArgs args)
 		{
 			_arguments = args;
-			return OnInit(args);
+			if (not OnInit(args))
+				return false;
+			InvalidateLayout();
+			CreateTabGroup();
+			return true;
 		}
 
 	protected:

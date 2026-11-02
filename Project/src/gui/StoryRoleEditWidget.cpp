@@ -164,20 +164,31 @@ namespace fig::gui
 
 	void StoryRoleEditWidget::SetFocus(bool bFocus, TabDirection dir)
 	{
-		if (_pName)
-			return _pName->SetFocus(bFocus, dir);
+		if (bFocus)
+		{
+			if (dir == TabDirectionForward)
+				FocusNext(_pName, _pHandle, _pBrief, _pPrompt, _pCondition);
+			else if (dir == TabDirectionBackward)
+				FocusPrev(_pName, _pHandle, _pBrief, _pPrompt, _pCondition);
+		}
+		else
+		{
+			_pName->SetFocus(false);
+			_pHandle->SetFocus(false);
+			_pBrief->SetFocus(false);
+			_pPrompt->SetFocus(false);
+			_pCondition->SetFocus(false);
+		}
 	}
 
 	bool StoryRoleEditWidget::IsFocused() const
 	{
-		if (_pName)
-			return _pName->IsFocused();
-		return false;
+		return (bool)FindFocused(_pName, _pHandle, _pBrief, _pPrompt, _pCondition);
 	}
 
 	bool StoryRoleEditWidget::CanFocus() const
 	{
-		return _pName;
+		return GetEnabled() and GetVisible();
 	}
 
 	void StoryRoleEditWidget::OnChangeName(fig::string_view value)

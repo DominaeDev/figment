@@ -155,12 +155,6 @@ namespace fig::gui
 				Resource::ICON_CHARACTER_EDIT_VOICE_SMALL,
 			},
 			{
-				NotImpl,
-				"Story",
-				Resource::ICON_CHARACTER_EDIT_STORY,
-				Resource::ICON_CHARACTER_EDIT_STORY_SMALL,
-			},
-			{
 				Tab::Dialogue,
 				"Example chat",
 				Resource::ICON_MENU_CHATS,

@@ -50,7 +50,6 @@ namespace fig::gui
 		_pAddButton->SetDelegate([this] { AddRole(); });
 		pSlotSizer->Add(_pAddButton, 0);
 
-		CreateTabGroup();
 		return true;
 	}
 
@@ -77,12 +76,7 @@ namespace fig::gui
 		pEdit->SetLocked(IsCharacterStory());
 		pEdit->SetNameChangedDelegate([this, role](auto&& name) {
 			if (auto itItem = std::ranges::find(_roleItems, role, [](auto&& i) { return i.role; }); itItem != std::ranges::cend(_roleItems))
-			{
-				if (not name.empty())
-					(*itItem).pBox->SetRole(role, name);
-				else
-					(*itItem).pBox->SetRole(role, std::format("Role #{}", get_bot_index(role) + 1));
-			}
+				(*itItem).pBox->SetRole(role, name);
 		});
 		pEditSizer->Add(pEdit, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 		

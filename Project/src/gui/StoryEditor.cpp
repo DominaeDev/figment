@@ -14,6 +14,7 @@
 #include "io/ContentManager.h"
 
 using namespace fig::io;
+using namespace fig::chat;
 using namespace fig::data;
 
 namespace fig::gui
@@ -51,7 +52,26 @@ namespace fig::gui
 
 		_assetId = asset.id;
 		_scenario = {};
-		_scenario.title = "Untitled story";
+		_scenario.name = "Untitled story";
+		_scenario.roles.emplace_back(Scenario::RoleSlot {
+			.role = Role::Bot1,
+		});
+		_scenario.roles.emplace_back(Scenario::RoleSlot {
+			.role = Role::User,
+		});
+
+		_scenario.scenes.emplace_back(Scenario::Scene {
+			.name = "Introduction",
+			.content = "{character} joins {user} for a friendly conversation.",
+			.events = std::vector<Scenario::Event> {
+				Scenario::Event {
+					.type = Scenario::Event::Type::Instruct,
+					.content = "{character} introduces {themself} to {user}.",
+				},
+			},
+			.ttl = 15,
+			.bEntryPoint = true,
+		});
 
 		StoryEditorArgs args
 		{

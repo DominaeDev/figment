@@ -64,8 +64,7 @@ namespace fig::gui
 		pRule->SetMoveDelegate([this, index](auto&& dir) { OnMoveRule(index, dir, IsShiftDown()); });
 		_pRuleSizer->Add(pRule, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 
-		if (_pTabGroup)
-			_pTabGroup->AddControl(pRule);
+		AddTabControl(pRule);
 		return pRule;
 	}
 

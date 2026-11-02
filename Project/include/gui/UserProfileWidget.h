@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Panel.h"
 #include "user/UserProfile.h"
@@ -28,6 +28,7 @@ namespace fig::gui
 	private:
 		fig::observer_ptr<ImageWithMask> _pImage {};
 		fig::observer_ptr<StaticText> _pLabel {};
+		fig::observer_ptr<ButtonWithIcon> _pSettingsButton {};
 		fig::observer_ptr<ButtonWithIcon> _pSignOutButton {};
 	};
 

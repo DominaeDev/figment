@@ -92,8 +92,6 @@ namespace fig::gui
 		pAddTriggerButton->SetDelegate([this] { ShowTriggersMenu(); });
 		pSizer->Add(pAddTriggerButton, 0);
 
-		CreateTabGroup();
-
 		return true;
 	}
 

@@ -78,6 +78,13 @@ namespace fig::gui
 		OnPostRender();
 	}
 
+	void Control::AddTabControl(fig::observer_ptr<ITabControl> pControl)
+	{
+		if (not HasTabGroup())
+			CreateTabGroup();
+		_pTabGroup->AddControl(pControl);
+	}
+
 	void Control::OnRender(fig::renderer_ptr pRenderer)
 	{
 		DrawBackground(pRenderer); //! @todo: Move

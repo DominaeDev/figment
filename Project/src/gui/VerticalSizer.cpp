@@ -53,7 +53,7 @@ namespace fig::gui
 				if (pText->IsWordWrapping())
 				{
 					auto [prev_w, prev_h] = pText->MeasureText(true);
-					pText->SetTextWrapWidth(itemRect.w);
+					pText->SetTextWrapWidth(std::max(itemRect.w, 40)); // jic
 					auto [new_w, new_h] = pText->MeasureText(true);
 					position += new_h - prev_h;
 					item.rect.h = new_h;

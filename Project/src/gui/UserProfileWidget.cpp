@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/UserProfileWidget.h"
 #include "gui/ImageWithMask.h"
 #include "gui/AppResources.h"
@@ -20,6 +20,15 @@ namespace fig::gui
 
 		_pLabel = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
 		_pLabel->EnableEllipsis(true);
+
+		_pSettingsButton = CreateControl<ButtonWithIcon>(Resource::ICON_USER_SETTINGS, false);
+		_pSettingsButton->SetTheme(ButtonThemes::SidePanel);
+		_pSettingsButton->SetSize(36, 36);
+		_pSettingsButton->CenterVertically();
+		_pSettingsButton->SetDelegate([this] { 
+			PushEvent(UserEvent::EditUserSettings);
+			PushEvent(UserEvent::SelectEditorTab, 1);
+		});
 
 		_pSignOutButton = CreateControl<ButtonWithIcon>(Resource::ICON_LOGOUT, false);
 		_pSignOutButton->SetTheme(ButtonThemes::SidePanel);
@@ -62,6 +71,12 @@ namespace fig::gui
 		{
 			_pSignOutButton->SetX(GetWidth() - _pSignOutButton->GetWidth() - 4);
 			_pSignOutButton->CenterVertically();
+		}
+
+		if (_pSettingsButton)
+		{
+			_pSettingsButton->SetX(GetWidth() - _pSettingsButton->GetWidth() - 44);
+			_pSettingsButton->CenterVertically();
 		}
 	}
 

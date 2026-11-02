@@ -36,6 +36,7 @@ namespace fig::gui
 			_pScenario->name = value;
 			_pTitle->SetPlaceholder(_pName->GetText());
 		});
+		_pName->SetText(_pScenario->name);
 		_pName->SetMaxWidth(300);
 
 		// Title

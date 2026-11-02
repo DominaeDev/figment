@@ -108,8 +108,6 @@ namespace fig::gui
 		pAddAttributeButton->SetHeight(35);
 		pAddAttributeButton->SetDelegate([this] { ShowAttributesMenu(); });
 		pSizer->Add(pAddAttributeButton, 0);
-
-		CreateTabGroup();
 		return true;
 	}
 
@@ -156,8 +154,7 @@ namespace fig::gui
 		pAttribute->EnableRename(true);
 		_pAttributeSizer->Add(pAttribute, 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 		
-		if (_pTabGroup)
-			_pTabGroup->AddControl(pAttribute);
+		AddTabControl(pAttribute);
 
 		return pAttribute;
 	}

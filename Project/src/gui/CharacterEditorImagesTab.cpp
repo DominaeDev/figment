@@ -112,6 +112,8 @@ namespace fig::gui
 		_pSmallPortrait = CreateControl<CharacterSmallPortraitWidget>();
 		_pSmallPortrait->SetBackgroundTexture(AppResources::GetTexture(Resource::SQUARE_BACKGROUND_DEFAULT));
 		_pSmallPortrait->SetRightClickDelegate([this]() { OnClickedSmallPortrait(); });
+		_pSmallPortrait->SetDoubleClickDelegate([this] { OpenFile(CharacterImageType::SmallPortrait); });
+
 
 		_pSmallPortraitPreview = CreateControl<NonOwningImageWithMask>(nullptr, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
 		_pSmallPortraitPreview->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitHeight);

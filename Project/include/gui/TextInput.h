@@ -57,7 +57,7 @@ namespace fig::gui
 		int32_t SetCursor(int32_t index) noexcept;
 		void SetFocus(bool bFocus, TabDirection dir = TabDirectionForward) override;
 		bool IsFocused() const override;
-		bool CanFocus() const { return GetEnabled(); }
+		bool CanFocus() const { return GetEnabled() and GetVisible(); }
 
 		void ScrollToCursor();
 

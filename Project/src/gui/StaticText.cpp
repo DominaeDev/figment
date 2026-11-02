@@ -48,7 +48,6 @@ namespace fig::gui
 		}
 
 		TextBase::SetText(text);
-		InvalidateText();
 		InvalidateLayout();
 	}
 

@@ -36,8 +36,6 @@ namespace fig::gui
 		_pEntrySizer = new VerticalSizer();
 		pSizer->Add(_pEntrySizer.get(), 0, SizerFlag::Expand | SizerFlag::Bottom, 8);
 
-		CreateTabGroup();
-
 		size_t count = 0uz;
 		for (auto& dialogue : _pCharacter->GetExampleDialogue())
 		{
@@ -65,7 +63,7 @@ namespace fig::gui
 		pEntry->SetMoveDelegate([this, index](auto&& dir) { OnMoveEntry(index, dir, IsShiftDown()); });
 		_pEntrySizer->Add(pEntry, 0, SizerFlag::Expand | SizerFlag::Bottom, 12);
 
-		_pTabGroup->AddControl(pEntry);
+		AddTabControl(pEntry);
 		return pEntry;
 	}
 

@@ -18,7 +18,6 @@ namespace fig::gui
 			_tabs[index]->OnTabSelected();
 
 		InvalidateLayout();
-		LayoutNow();
 	}
 
 	void Editor::EnableTab(EditorTabBase* pTab, bool bEnabled)

@@ -41,7 +41,8 @@ namespace fig::gui
 
 		CreateLabel(this, pColumn1, "Profile picture");
 		_pProfileImage = CreateControl<ProfileImageWidget>();
-		_pProfileImage->SetRightClickDelegate([this]() { OnClickedProfileImage(); });
+		_pProfileImage->SetDoubleClickDelegate([this] { OpenFile(); });
+		_pProfileImage->SetRightClickDelegate([this] { OnClickedProfileImage(); });
 		pColumn1->Add(_pProfileImage, 0);
 		
 		RevertProfileImage();
@@ -111,8 +112,6 @@ namespace fig::gui
 			pSizer->Add(pCB, 0);
 		}
 		pSizer->AddSpacer(8);
-
-		CreateTabGroup();
 		return true;
 	}
 

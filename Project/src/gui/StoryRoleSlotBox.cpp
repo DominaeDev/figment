@@ -24,14 +24,22 @@ namespace fig::gui
 
 	void StoryRoleSlotBox::SetRole(fig::chat::Role role, fig::string_view label)
 	{
-		_pLabel->SetTextAndResize(label);
+		if (empty_or_whitespace(label))
+		{
+			if (is_bot(role))
+				_pLabel->SetTextAndResize(std::format("Role #{}", get_bot_index(role) + 1));
+			else if (is_user(role))
+				_pLabel->SetTextAndResize("User");
+		}
+		else 
+			_pLabel->SetTextAndResize(label);
+
 		_pLabel->CenterHorizontally();
 
 		if (is_user(role))
 			_pIcon->SetTexture(Resource::ICON_ROLE_USER);
 		else
 			_pIcon->SetTexture(Resource::ICON_ROLE_BOT);
-
 	}
 
 	void StoryRoleSlotBox::OnSize()
