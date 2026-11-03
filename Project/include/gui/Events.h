@@ -16,6 +16,7 @@ namespace fig::gui
 		Scrolling,
 		SidePanelResized,
 		NavigateToHome,
+		NavigateToStories,
 		NavigateToChatList,
 		SelectEditorTab,
 		StartChat,
@@ -29,6 +30,8 @@ namespace fig::gui
 		DebugCharacter,
 		CreateStory,
 		EditStory,
+		AddedStory,
+
 		EditCharacterStory,
 		EditUserSettings,
 		ProfileDeleted,

@@ -612,7 +612,9 @@ namespace fig::io
 
 	fig::cref_vector<Asset> UserContentManager::GetScenarios() const noexcept
 	{ 
-		return _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Scenario));
+		return _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Scenario))
+			| std::views::filter([](auto&& s) { return s.get().parent_id.empty(); })
+			| std::ranges::to<std::vector>();
 	}
 
 	fig::uuid UserContentManager::CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings)

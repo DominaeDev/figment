@@ -41,7 +41,7 @@ namespace fig::data
 
 	bool Scenario::OnValidate() const noexcept
 	{
-		if constexpr (Enabled)
+		if constexpr (Disabled)
 		{
 			if (roles.empty())
 				return false;
@@ -103,10 +103,13 @@ namespace fig::data
 		if (GetRoleSlot(role).has_value())
 			return false; // Already added
 
-		roles.emplace_back(RoleSlot {
+		RoleSlot slot {
 			.role = role,
 			.label = fig::string { label },
-		});
+		};
+		if (role == Role::User)
+			slot.flags.Set(RoleSlot::Flag::User);
+		roles.push_back(std::move(slot));
 		return true;
 	}
 

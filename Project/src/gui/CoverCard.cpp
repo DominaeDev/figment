@@ -119,7 +119,6 @@ namespace fig::gui
 		_pSmallStar->SetPosition(Small::Width - _pSmallStar->GetWidth() - 6, 6);
 		_pSmallStar->SetVisible(false);
 
-		SetChatCount(_chatCount);
 		SetCardSize(_cardSize);
 
 		SetBorder(_userSettings.borderStyle);

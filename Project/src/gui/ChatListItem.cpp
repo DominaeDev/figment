@@ -9,6 +9,7 @@
 #include "io/ContentManager.h"
 
 using namespace fig::io;
+using namespace fig::chat;
 using namespace fig::data;
 
 namespace fig::gui
@@ -86,7 +87,7 @@ namespace fig::gui
 		}
 		else
 		{
-			auto& characterId = chatInstance.characterIds[static_cast<size_t>(fig::chat::Role::Bot1)];
+			auto& characterId = chatInstance.characterIds[get_bot_index(Role::Bot1)];
 			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(characterId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
 			{
 				_pPortrait->SetTexture((*portrait).get());

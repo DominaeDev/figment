@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "user/UserSettings.h"
 #include "io/IniFile.h"
 #include "gui/ColorTheme.h"
@@ -25,6 +25,12 @@ namespace fig::io
 		{ UserSetting::Interface::CharacterList::Sorting,			static_cast<int32_t>(SortBy::LastUsedAt) },
 		{ UserSetting::Interface::CharacterList::Ordering,			static_cast<int32_t>(OrderBy::Default) },
 		{ UserSetting::Interface::CharacterList::Filtering,			FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
+
+		{ UserSetting::Interface::ScenarioList::SmallCards,			false },
+		{ UserSetting::Interface::ScenarioList::ShowTags,			true },
+		{ UserSetting::Interface::ScenarioList::Sorting,			static_cast<int32_t>(SortBy::LastUsedAt) },
+		{ UserSetting::Interface::ScenarioList::Ordering,			static_cast<int32_t>(OrderBy::Default) },
+		{ UserSetting::Interface::ScenarioList::Filtering,			FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
 
 		{ UserSetting::Interface::ChatList::Sorting,				static_cast<int32_t>(SortBy::Default) },
 		{ UserSetting::Interface::ChatList::Ordering,				static_cast<int32_t>(OrderBy::Default) },

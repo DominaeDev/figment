@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "io/SettingsCollection.h"
 
@@ -23,6 +23,15 @@ namespace fig::io
 				constexpr fig::io::SettingKey Sorting			{ "Interface", "Characters.Sorting" };
 				constexpr fig::io::SettingKey Ordering			{ "Interface", "Characters.Ordering" };
 				constexpr fig::io::SettingKey Filtering			{ "Interface", "Characters.Filter" };
+			}
+
+			namespace ScenarioList
+			{
+				constexpr fig::io::SettingKey SmallCards		{ "Interface", "Scenarios.SmallCards" };
+				constexpr fig::io::SettingKey ShowTags			{ "Interface", "Scenarios.ShowTags" };
+				constexpr fig::io::SettingKey Sorting			{ "Interface", "Scenarios.Sorting" };
+				constexpr fig::io::SettingKey Ordering			{ "Interface", "Scenarios.Ordering" };
+				constexpr fig::io::SettingKey Filtering			{ "Interface", "Scenarios.Filter" };
 			}
 
 			namespace ChatList

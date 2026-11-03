@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include "gui/KeyboardMods.h"
@@ -41,6 +41,7 @@ namespace fig::gui
 		Debug,
 		Login,
 		Home,
+		Stories,
 		Chat,
 		ChatListing,
 		Editor,

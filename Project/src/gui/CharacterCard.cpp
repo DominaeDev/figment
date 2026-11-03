@@ -182,33 +182,29 @@ namespace fig::gui
 	void CharacterCard::RefreshMeta()
 	{
 		auto& userContent = Global::GetUserContent();
-		if (auto try_character = userContent.Get<Character>(_characterId); try_character.has_value())
+
+		// Meta data
+		if (auto try_meta = userContent.GetMetaData(_characterId))
 		{
-			auto& character = try_character.value();
-
-			// Meta data
-			if (auto try_meta = userContent.GetMetaData(_characterId))
-			{
-				auto& meta = *try_meta;
-				SetMetaData(meta);
-			}
-			else // Error
-			{
-				auto now = fig::now();
-				SetMetaData(ContentMetaData {
-					.name = _characterName,
-					.createdAt = now,
-					.updatedAt = now,
-					.lastUsedAt = now,
-				});
-			}
-
-			// Chat count
-			SetChatCount(userContent.GetChatCount(_characterId));
-
-			// User settings
-			SetUserSettings(Global::GetUserContent().GetUserSettings(_characterId));
+			auto& meta = *try_meta;
+			SetMetaData(meta);
 		}
+		else // Error
+		{
+			auto now = fig::now();
+			SetMetaData(ContentMetaData {
+				.name = _characterName,
+				.createdAt = now,
+				.updatedAt = now,
+				.lastUsedAt = now,
+			});
+		}
+
+		// Chat count
+		SetChatCount(userContent.GetChatCount(_characterId));
+
+		// User settings
+		SetUserSettings(Global::GetUserContent().GetUserSettings(_characterId));
 	}
 
 	void CharacterCard::RefreshFull()

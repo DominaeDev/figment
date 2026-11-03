@@ -43,8 +43,9 @@ namespace fig::gui
 		auto pChatButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_CHATS, toStr(fig::strings::UI::MenuRecentChats));
 		pChatButton->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
 		auto pCharactersButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_CHARACTERS, toStr(fig::strings::UI::MenuCharacters));
-		pCharactersButton->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
+		pCharactersButton->SetDelegate([] { PushEvent(UserEvent::NavigateToHome); });
 		auto pScenariosButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
+		pScenariosButton->SetDelegate([] { PushEvent(UserEvent::NavigateToStories); });
 		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
 		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_MODELS, "Models");
 

@@ -58,15 +58,17 @@ namespace fig::gui
 		});
 		_scenario.roles.emplace_back(Scenario::RoleSlot {
 			.role = Role::User,
+			.flags { Scenario::RoleSlot::Flag::User },
 		});
 
 		_scenario.scenes.emplace_back(Scenario::Scene {
+			.id = _CreateUUID(),
 			.name = "Introduction",
-			.content = "{character} joins {user} for a friendly conversation.",
+			.content = "{character} joins {user} for a casual conversation.",
 			.events = std::vector<Scenario::Event> {
 				Scenario::Event {
 					.type = Scenario::Event::Type::Instruct,
-					.content = "{character} introduces {themself} to {user}.",
+					.content = "{character} begins the conversation by introducing {themself} to {user}.",
 				},
 			},
 			.ttl = 15,

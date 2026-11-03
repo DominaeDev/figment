@@ -29,7 +29,7 @@ namespace fig::data
 				std::pair { Flag::User,		"user" },
 			};
 
-			fig::chat::Role role;
+			fig::chat::Role role; //! @todo: think about this
 			fig::handle customId;
 			fig::string label;
 			fig::string brief;
@@ -45,7 +45,12 @@ namespace fig::data
 			static auto XmlFields() noexcept
 			{
 				return Fields(
-					Attribute { "handle",	&RoleSlot::customId },
+					Attribute { "role",		&RoleSlot::role,
+						[](auto& value) { return enum_serialize(value, fig::chat::RoleMapping); },
+						[](auto& value) { return enum_deserialize(value, fig::chat::RoleMapping); }
+					}	.SkipEmpty(),
+					Attribute { "handle",	&RoleSlot::customId }
+						.SkipEmpty(),
 					Element	{ "Label",		&RoleSlot::label },
 					Element	{ "Brief",		&RoleSlot::brief },
 					Element	{ "Condition",	&RoleSlot::validation },

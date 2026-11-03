@@ -210,6 +210,12 @@
     <Filter Include="Source Files\Frontend\GUI\Editors\StoryEditor\Controls">
       <UniqueIdentifier>{11297da5-8876-4fa0-98f7-1eef604f9601}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\StoryScreen">
+      <UniqueIdentifier>{f27b959b-8bda-47aa-a718-5888194a288b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\StoryScreen\Controls">
+      <UniqueIdentifier>{0be0727f-9719-4fb0-8f5f-a2e49de2fbd8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -537,9 +543,6 @@
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CoverCard.cpp">
-      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gui\ScenarioCard.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CharacterCardList.cpp">
@@ -937,6 +940,15 @@
     </ClCompile>
     <ClCompile Include="src\gui\Icons.cpp">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryScreen.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\StoryScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StoryCardList.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\StoryScreen\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ScenarioCard.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\StoryScreen\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1636,9 +1648,6 @@
     <ClInclude Include="include\gui\CoverCard.h">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ScenarioCard.h">
-      <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
-    </ClInclude>
     <ClInclude Include="include\gui\CharacterCardList.h">
       <Filter>Source Files\Frontend\GUI\Screens\Home\Controls</Filter>
     </ClInclude>
@@ -2097,6 +2106,15 @@
     </ClInclude>
     <ClInclude Include="include\gui\Icons.h">
       <Filter>Source Files\Frontend\GUI\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens\StoryScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\StoryCardList.h">
+      <Filter>Source Files\Frontend\GUI\Screens\StoryScreen\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\ScenarioCard.h">
+      <Filter>Source Files\Frontend\GUI\Screens\StoryScreen\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

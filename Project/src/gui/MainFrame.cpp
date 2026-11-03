@@ -1,6 +1,7 @@
 ﻿#include <pch.h>
 #include "gui/MainFrame.h"
 #include "gui/HomeScreen.h"
+#include "gui/StoryScreen.h"
 #include "gui/ChatScreen.h"
 #include "gui/DebugScreen.h"
 #include "gui/ChatBackground.h"
@@ -58,6 +59,7 @@ namespace fig::gui
 
 		RegisterScreen<LoginScreen>(ScreenType::Login);
 		RegisterScreen<HomeScreen>(ScreenType::Home);
+		RegisterScreen<StoryScreen>(ScreenType::Stories);
 		RegisterScreen<ChatScreen>(ScreenType::Chat);
 		RegisterScreen<DebugScreen>(ScreenType::Debug);
 		RegisterScreen<ChatListingScreen>(ScreenType::ChatListing);
@@ -428,6 +430,12 @@ namespace fig::gui
 				ChangeScreen(ScreenType::Home);
 			return EventResult::Handled;
 		}
+		else if (IsUserEvent(event, UserEvent::NavigateToStories))
+		{
+			if (Global::GetUserManager().IsSignedIn())
+				ChangeScreen(ScreenType::Stories);
+			return EventResult::Handled;
+		}
 		else if (IsUserEvent(event, UserEvent::NavigateToChatList))
 		{
 			ChangeScreen(ScreenType::ChatListing);
@@ -510,6 +518,7 @@ namespace fig::gui
 					}
 
 					PushEvent(UserEvent::AddedCharacter);
+					PushEvent(UserEvent::AddedStory); // jic
 				}
 				else
 					ShowDialogBox("Failed to import character.", DialogBoxType::Ok);
@@ -531,7 +540,15 @@ namespace fig::gui
 		{
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
 			if (not pEditor->NewStory())
-				ChangeScreen<HomeScreen>(); // Error
+				ChangeScreen<StoryScreen>(); // Error
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::EditStory))
+		{
+			const fig::uuid& scenarioId = GetUserData<fig::uuid>(event);
+			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
+			if (not pEditor->EditStory(scenarioId))
+				ChangeScreen<StoryScreen>(); // Error
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditCharacterStory))
