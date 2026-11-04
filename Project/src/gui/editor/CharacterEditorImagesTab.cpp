@@ -229,8 +229,7 @@ namespace fig::gui
 				.SetEnabled(index + 1 < _portraitWidgets.size());
 			menu.AddSeparator();
 			menu.AddItem("Remove")
-				.SetDelegate([this, index] { RemovePortrait(index); })
-				.SetEnabled(_portraitWidgets.size() > 1);
+				.SetDelegate([this, index] { RemovePortrait(index); });
 			menu.Show();
 		}
 	}
@@ -515,6 +514,13 @@ namespace fig::gui
 	{
 		auto& content = Global::GetUserContent();
 		auto& assets = content.GetAssets();
+
+		if (_portraitWidgets.empty())
+		{
+			// Remove cover
+			if (auto try_cover = Global::GetUserContent().GetAssets().FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), _characterId))
+				_removedAssets.push_back((*try_cover).id);
+		}
 
 		// Remove assets
 		for (auto& id : _removedAssets)

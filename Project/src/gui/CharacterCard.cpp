@@ -14,6 +14,7 @@ namespace fig::gui
 	CharacterCard::CharacterCard(ControlPtr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
 		_characterId { characterId }
 	{
+		SetDefaultImage(AppResources::GetTexture(Resource::CARD_COVER_CHARACTER));
 		RefreshFull();
 	}
 

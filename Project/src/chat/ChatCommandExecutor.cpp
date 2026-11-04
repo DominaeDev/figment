@@ -116,6 +116,11 @@ namespace fig::chat
 		return ctx.pLLM->Instigate(targetRole, MessageType::Dialogue, 1);
 	}
 
+	static bool cmdParrot(ParsedChatCommand cmd, CmdCtx ctx)
+	{
+		return ctx.pLLM->PushMessage(Role::Bot1, cmd.text, MessageType::Dialogue, 1);
+	}
+
 	static bool cmdInstigateAction(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		Role targetRole = RoleFromName(cmd.text, ctx.pLLM);
@@ -282,6 +287,7 @@ namespace fig::chat
 		{ ChatCommand::InstigateDialogue,	 	{ cmdInstigateDialogue,		{ Requirement::LLM }					} },
 		{ ChatCommand::InstigateAction,		 	{ cmdInstigateAction,		{ Requirement::LLM }					} },
 		{ ChatCommand::Impersonate,			 	{ cmdImpersonate,			{ Requirement::LLM }					} },
+		{ ChatCommand::Parrot,				 	{ cmdParrot,				{ Requirement::LLM }					} },
 		{ ChatCommand::Narrate,				 	{ cmdNarrate,				{ Requirement::LLM }					} },
 		{ ChatCommand::Instruct,			 	{ cmdInstruct,				{ Requirement::LLM }					} },
 		{ ChatCommand::Reset,				 	{ cmdReset,					{ Requirement::GUI }					} },

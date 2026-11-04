@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include "io/AsyncImageLoad.h"
@@ -31,7 +31,7 @@ namespace fig::gui
 
 		bool _bRedraw = true;
 		bool _bRedrawAlpha = true;
-		bool _bHasError = false;
+		bool _bHasError {};
 		fig::point _imageSize {};
 		ImageFit _fit {};
 

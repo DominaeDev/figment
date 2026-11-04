@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "chat/ChatCommands.h"
 
 namespace fig::chat
@@ -11,9 +11,11 @@ namespace fig::chat
 	static CommandDefinition s_Commands[]
 	{
 		{ "act",			ChatCommand::InstigateAction },
+		{ "action",			ChatCommand::InstigateAction },
 		{ "erase",			ChatCommand::Erase },
 		{ "examine",		ChatCommand::Examine },
 		{ "impersonate",	ChatCommand::Impersonate },
+		{ "parrot",			ChatCommand::Parrot },
 		{ "instruct",		ChatCommand::Instruct },
 		{ "look",			ChatCommand::Look },
 		{ "narrate",		ChatCommand::Narrate },

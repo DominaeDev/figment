@@ -150,7 +150,7 @@ namespace fig::gui
 				_pErrorIcon->SetForegroundColor(Color::Gray);
 				_pErrorIcon->Center();
 
-				CardImage::SetTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY));
+				CardImage::SetTexture(AppResources::GetTexture(Resource::CARD_BACKGROUND_EMPTY), false);
 			}
 			else
 			{
@@ -390,13 +390,11 @@ namespace fig::gui
 			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, full.get()))
 			{
 				_largeImageTexture.reset(pTexture);
-				_largeImageSurface = std::move(full);
 				_bHasError = false;
 			}
 			else
 			{
 				_largeImageTexture.clear();
-				_largeImageSurface.clear();
 			}
 		}
 
@@ -405,15 +403,18 @@ namespace fig::gui
 			if (auto pTexture = SDL_CreateTextureFromSurface(pRenderer, half.get()))
 			{
 				_smallImageTexture.reset(pTexture);
-				_smallImageSurface = std::move(half);
 				_bHasError = false;
 			}
 			else
 			{
 				_smallImageTexture.clear();
-				_smallImageSurface.clear();
 			}
 		}
+	}
+
+	void CoverCard::SetDefaultImage(fig::texture_ptr pTexture)
+	{
+		_pDefaultTexture = pTexture;
 	}
 
 	void CoverCard::SetPendingCoverImage(AsyncFuture&& future)
@@ -422,9 +423,7 @@ namespace fig::gui
 			return;
 
 		_pendingCover = std::move(future);
-		_largeImageSurface.clear();
 		_largeImageTexture.clear();
-		_smallImageSurface.clear();
 		_smallImageTexture.clear();
 		PollFuture();
 	}
@@ -445,13 +444,15 @@ namespace fig::gui
 			SetCoverImages(std::move((*try_cover).get()->first), std::move((*try_cover).get()->second));
 			RefreshState();
 		}
+		else if (try_cover.error() == AsyncLoadError::FileNotFound)
+		{
+			LogLn(std::format("Failed to load cover for {}: File not found", (fig::string)_assetId));
+			SetCoverImages({}, {});
+			RefreshState();
+		}
 		else if (try_cover.error() != AsyncLoadError::NoError)
 		{
-			if (try_cover.error() == AsyncLoadError::FileNotFound)
-				LogLn(std::format("Failed to load cover for {}: File not found", (fig::string)_assetId));
-			else
-				LogLn(std::format("Failed to load cover for {}", (fig::string)_assetId));
-
+			LogLn(std::format("Failed to load cover for {}", (fig::string)_assetId));
 			_bHasError = true;
 			RefreshState();
 		}
@@ -570,11 +571,15 @@ namespace fig::gui
 		{
 			if (!_largeImageTexture.empty())
 				CardImage::SetTexture(_largeImageTexture.get());
+			else if (!_bHasError)
+				CardImage::SetTexture(_pDefaultTexture);
 		}
 		else
 		{
 			if (!_smallImageTexture.empty())
 				CardImage::SetTexture(_smallImageTexture.get());
+			else if (!_bHasError)
+				CardImage::SetTexture(_pDefaultTexture);
 		}
 	}
 

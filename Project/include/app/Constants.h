@@ -43,7 +43,7 @@ namespace fig::Constants
 			namespace Full
 			{
 				constexpr fig::coord Width = 320;		// 356
-				constexpr fig::coord Height = 412;		// 448
+				constexpr fig::coord Height = 412;		// 459 (460)
 				constexpr fig::coord ZoomPixels = 18;
 				constexpr fig::coord BorderOffset = 16;
 				constexpr fig::coord TextY = 32;

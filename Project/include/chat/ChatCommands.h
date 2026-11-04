@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 
@@ -15,6 +15,7 @@ namespace fig::chat
 		Impersonate,
 		Narrate,
 		Instruct,
+		Parrot,
 		Reset,
 		Erase,
 		RollbackUserMessage,

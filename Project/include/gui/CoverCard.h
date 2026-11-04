@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CardImage.h"
 #include "io/AssetManager.h"
@@ -52,6 +52,7 @@ namespace fig::gui
 
 	protected:
 		void SetCoverImages(fig::sdl::Surface&& fullCover, fig::sdl::Surface&& halfCover);
+		void SetDefaultImage(fig::texture_ptr pTexture);
 		void RefreshState();
 
 		void SetLabel(const fig::string& text) noexcept;
@@ -81,10 +82,10 @@ namespace fig::gui
 		
 	protected:
 		fig::uuid _assetId;
-		bool _bSelected = false;
-		bool _bInitialized = false;
-		bool _bHidden = false;
-		bool _bHasError = false;
+		bool _bSelected {};
+		bool _bInitialized {};
+		bool _bHidden {};
+		bool _bHasError {};
 		CardEventDelegate _fnDelegate {};
 		fig::io::ContentMetaData _metaData {};
 		fig::io::AssetUserSettings _userSettings {};
@@ -119,10 +120,9 @@ namespace fig::gui
 		fig::point _tagPosition {};
 		int32_t _tagRows { 1 };
 
-		fig::sdl::Surface _largeImageSurface {};
 		fig::sdl::Texture _largeImageTexture {};
-		fig::sdl::Surface _smallImageSurface {};
 		fig::sdl::Texture _smallImageTexture {};
+		fig::texture_ptr _pDefaultTexture {};
 		fig::io::AsyncFuture _pendingCover {};
 
 		fig::observer_ptr<Image> _pErrorIcon;

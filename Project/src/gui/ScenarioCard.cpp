@@ -14,6 +14,7 @@ namespace fig::gui
 	ScenarioCard::ScenarioCard(ControlPtr pParent, const fig::uuid& scenarioId, CardSize cardSize) : CoverCard(pParent, scenarioId, cardSize),
 		_scenarioId { scenarioId }
 	{
+		SetDefaultImage(AppResources::GetTexture(Resource::CARD_COVER_STORY));
 		RefreshFull();
 	}
 
