@@ -216,6 +216,18 @@
     <Filter Include="Source Files\Frontend\GUI\Screens\StoryScreen\Controls">
       <UniqueIdentifier>{0be0727f-9719-4fb0-8f5f-a2e49de2fbd8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\WorldEditor">
+      <UniqueIdentifier>{f946f9ee-3309-42ac-91d1-61d5f39321c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\WorldEditor\Tabs">
+      <UniqueIdentifier>{d959caae-6b0b-479e-b63a-1cecedb70052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\WorldScreen">
+      <UniqueIdentifier>{5bffb9b0-2875-4e55-96ac-cd34c3e3170e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\WorldScreen\Controls">
+      <UniqueIdentifier>{ec44581e-6a7d-4fbf-8659-076ebd4eeba0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -949,6 +961,33 @@
     </ClCompile>
     <ClCompile Include="src\gui\ScenarioCard.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\StoryScreen\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data\World.cpp">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\WorldEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\WorldEditorAboutTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\WorldEditorImagesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\WorldEditorInfoTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\WorldEditorRulesTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\WorldScreen.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\WorldScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\WorldCard.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\WorldScreen\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\WorldCardList.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\WorldScreen\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2115,6 +2154,36 @@
     </ClInclude>
     <ClInclude Include="include\gui\ScenarioCard.h">
       <Filter>Source Files\Frontend\GUI\Screens\StoryScreen\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\World.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\WorldEditor.h">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\WorldEditorArgs.h">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\WorldEditorAboutTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\WorldEditorImagesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\WorldEditorInfoTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\WorldEditorRulesTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\WorldEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\WorldScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens\WorldScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\WorldCard.h">
+      <Filter>Source Files\Frontend\GUI\Screens\WorldScreen\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\WorldCardList.h">
+      <Filter>Source Files\Frontend\GUI\Screens\WorldScreen\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,7 @@ namespace fig::gui
 		SidePanelResized,
 		NavigateToHome,
 		NavigateToStories,
+		NavigateToWorlds,
 		NavigateToChatList,
 		SelectEditorTab,
 		StartChat,
@@ -30,7 +31,8 @@ namespace fig::gui
 		DebugCharacter,
 		CreateStory,
 		EditStory,
-		AddedStory,
+		CreateWorld,
+		EditWorld,
 
 		EditCharacterStory,
 		EditUserSettings,

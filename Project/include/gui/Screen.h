@@ -42,6 +42,7 @@ namespace fig::gui
 		Login,
 		Home,
 		Stories,
+		Worlds,
 		Chat,
 		ChatListing,
 		Editor,

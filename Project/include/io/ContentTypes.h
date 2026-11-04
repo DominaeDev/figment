@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "data/Character.h"
 #include "data/Scenario.h"
+#include "data/World.h"
 #include "data/ChatInstance.h"
 #include "data/ChatLog.h"
 #include "data/VoiceSettings.h"
@@ -20,6 +21,8 @@ namespace fig::io
 	constexpr AssetTypeDefinition AssetTypeOf<fig::data::Character> = make_asset_type(AssetType::Character);
 	template <> 
 	constexpr AssetTypeDefinition AssetTypeOf<fig::data::Scenario> = make_asset_type(AssetType::Scenario);
+	template <> 
+	constexpr AssetTypeDefinition AssetTypeOf<fig::data::World> = make_asset_type(AssetType::World);
 	template <> 
 	constexpr AssetTypeDefinition AssetTypeOf<fig::sdl::Surface> = make_asset_type(AssetType::Image);
 	template <> 

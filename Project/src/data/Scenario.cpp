@@ -86,7 +86,9 @@ namespace fig::data
 	{
 		if (not empty_or_whitespace(title))
 			return eval_text(title, context);
-		return "Untitled";
+		else if (not empty_or_whitespace(name))
+			return name;
+		return "";
 	}
 
 	Scenario::Scene& Scenario::CreateScene() noexcept

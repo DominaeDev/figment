@@ -47,6 +47,7 @@ namespace fig::gui
 		auto pScenariosButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_SCENARIOS, toStr(fig::strings::UI::MenuScenarios));
 		pScenariosButton->SetDelegate([] { PushEvent(UserEvent::NavigateToStories); });
 		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
+		pWorldsButton->SetDelegate([] { PushEvent(UserEvent::NavigateToWorlds); });
 		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_MODELS, "Models");
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
@@ -125,7 +126,8 @@ namespace fig::gui
 			.SetDelegate([this] { PushEvent(UserEvent::CreateCharacter); });
 		createMenu.AddItem("New story\u2026")
 			.SetDelegate([this] { PushEvent(UserEvent::CreateStory); });
-		createMenu.AddItem("New world\u2026");
+		createMenu.AddItem("New world\u2026")
+			.SetDelegate([this] { PushEvent(UserEvent::CreateWorld); });
 		createMenu.AddSeparator();
 		createMenu.AddItem("Import from file\u2026")
 			.SetDelegate([this] { PushEvent(UserEvent::ImportCharacter); });

@@ -1,0 +1,54 @@
+﻿#pragma once
+
+#include "gui/editor/EditorTab.h"
+#include "gui/editor/WorldEditorArgs.h"
+#include "io/XmlData.h"
+
+namespace fig::data
+{
+	class World;
+	using WorldRule = fig::string;
+}
+
+namespace fig::gui
+{
+	class CharacterAttributeWidget;
+	class ButtonWithLabel;
+
+	class WorldEditorRulesTab : public EditorTab<WorldEditorArgs>
+	{
+	public:
+		WorldEditorRulesTab(ControlPtr pParent);
+
+		SaveResult OnSave() noexcept override;
+
+	protected:
+		bool OnInit(WorldEditorArgs args) override;
+
+	private:
+		fig::observer_ptr<CharacterAttributeWidget> AddRule();
+		fig::observer_ptr<CharacterAttributeWidget> AddRule(const fig::data::WorldRule& rule);
+		fig::observer_ptr<CharacterAttributeWidget> AppendControl(fig::string_view value, size_t index);
+		void RemoveRule(size_t index);
+		void OnMoveRule(size_t index, int32_t dir, bool bMaxDistance);
+		void RefreshRuleLabels();
+
+	private:
+		void OnRuleMenu(size_t index);
+		void OnCopyRule(size_t index);
+		void OnPasteRule(size_t index);
+
+		fig::observer_ptr<fig::data::World> _pWorld {};
+
+		struct RuleItem
+		{
+			size_t index;
+			fig::observer_ptr<CharacterAttributeWidget> pControl;
+		};
+
+		std::vector<RuleItem> _items;
+		static size_t _nextRuleIndex;
+		SizerPtr _pRuleSizer {};
+		fig::observer_ptr<ButtonWithLabel> _pAddButton;
+	};
+}

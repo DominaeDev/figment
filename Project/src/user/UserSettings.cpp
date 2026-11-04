@@ -26,8 +26,6 @@ namespace fig::io
 		{ UserSetting::Interface::CharacterList::Ordering,			static_cast<int32_t>(OrderBy::Default) },
 		{ UserSetting::Interface::CharacterList::Filtering,			FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
 
-		{ UserSetting::Interface::ScenarioList::SmallCards,			false },
-		{ UserSetting::Interface::ScenarioList::ShowTags,			true },
 		{ UserSetting::Interface::ScenarioList::Sorting,			static_cast<int32_t>(SortBy::LastUsedAt) },
 		{ UserSetting::Interface::ScenarioList::Ordering,			static_cast<int32_t>(OrderBy::Default) },
 		{ UserSetting::Interface::ScenarioList::Filtering,			FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },

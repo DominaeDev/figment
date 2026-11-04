@@ -27,11 +27,16 @@ namespace fig::io
 
 			namespace ScenarioList
 			{
-				constexpr fig::io::SettingKey SmallCards		{ "Interface", "Scenarios.SmallCards" };
-				constexpr fig::io::SettingKey ShowTags			{ "Interface", "Scenarios.ShowTags" };
 				constexpr fig::io::SettingKey Sorting			{ "Interface", "Scenarios.Sorting" };
 				constexpr fig::io::SettingKey Ordering			{ "Interface", "Scenarios.Ordering" };
 				constexpr fig::io::SettingKey Filtering			{ "Interface", "Scenarios.Filter" };
+			}
+
+			namespace WorldList
+			{
+				constexpr fig::io::SettingKey Sorting			{ "Interface", "Worlds.Sorting" };
+				constexpr fig::io::SettingKey Ordering			{ "Interface", "Worlds.Ordering" };
+				constexpr fig::io::SettingKey Filtering			{ "Interface", "Worlds.Filter" };
 			}
 
 			namespace ChatList

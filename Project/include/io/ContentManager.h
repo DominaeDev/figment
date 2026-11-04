@@ -11,6 +11,7 @@ namespace fig::data
 	struct ChatInstance;
 	struct VoiceSettings;
 	class Scenario;
+	class World;
 }
 
 namespace fig::chat
@@ -62,6 +63,7 @@ namespace fig::io
 		size_t DeleteAssets(std::span<fig::uuid> assetIds);
 		fig::cref_vector<Asset> GetCharacters() const noexcept;
 		fig::cref_vector<Asset> GetScenarios() const noexcept;
+		fig::cref_vector<Asset> GetWorlds() const noexcept;
 		ChatCollection GetAllChats() noexcept;
 		ChatCollection GetChatsWith(const fig::uuid& characterId) noexcept;
 		size_t GetChatCount(const fig::uuid& assetId);
@@ -156,6 +158,12 @@ namespace fig::io
 		{
 			auto& entry = _caches.at(AssetTypeOf<T>);
 			return static_cast<const AssetCacheBase<T>&>(*entry);
+		}
+
+		template <typename T, fixed_string LOG>
+		void InitCache() noexcept
+		{
+			_caches[AssetTypeOf<T>] = std::make_unique<AssetCache<T, LOG>>(_pAssetMngr.get());
 		}
 
 		fig::cref_vector<Asset> GetChatInstances(bool bLoad) const noexcept;

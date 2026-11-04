@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "data/ChatLog.h"
 
 namespace fig::data

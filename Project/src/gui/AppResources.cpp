@@ -60,6 +60,7 @@ namespace fig
 		LoadTexture(pRenderer, Resource::CARD_BACKGROUND_EMPTY, "./resources/gui/card/card_bg_empty.png");
 		LoadTexture(pRenderer, Resource::CARD_COVER_CHARACTER, "./resources/gui/card/card_default_cover_character.png");
 		LoadTexture(pRenderer, Resource::CARD_COVER_STORY, "./resources/gui/card/card_default_cover_story.png");
+		LoadTexture(pRenderer, Resource::CARD_COVER_WORLD, "./resources/gui/card/card_default_cover_world.png");
 
 		LoadTexture(pRenderer, Resource::SQUARE_BACKGROUND_DEFAULT, "./resources/gui/chat/square_bg_default.png");
 		LoadTexture(pRenderer, Resource::PROFILE_DEFAULT_IMAGE, "./resources/gui/chat/default_portrait.png");

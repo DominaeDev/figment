@@ -2,6 +2,7 @@
 #include "gui/MainFrame.h"
 #include "gui/HomeScreen.h"
 #include "gui/StoryScreen.h"
+#include "gui/WorldScreen.h"
 #include "gui/ChatScreen.h"
 #include "gui/DebugScreen.h"
 #include "gui/ChatBackground.h"
@@ -10,6 +11,7 @@
 #include "gui/EditorScreen.h"
 #include "gui/editor/CharacterEditor.h"
 #include "gui/editor/StoryEditor.h"
+#include "gui/editor/WorldEditor.h"
 #include "gui/editor/UserSettingsEditor.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
@@ -60,6 +62,7 @@ namespace fig::gui
 		RegisterScreen<LoginScreen>(ScreenType::Login);
 		RegisterScreen<HomeScreen>(ScreenType::Home);
 		RegisterScreen<StoryScreen>(ScreenType::Stories);
+		RegisterScreen<WorldScreen>(ScreenType::Worlds);
 		RegisterScreen<ChatScreen>(ScreenType::Chat);
 		RegisterScreen<DebugScreen>(ScreenType::Debug);
 		RegisterScreen<ChatListingScreen>(ScreenType::ChatListing);
@@ -436,6 +439,12 @@ namespace fig::gui
 				ChangeScreen(ScreenType::Stories);
 			return EventResult::Handled;
 		}
+		else if (IsUserEvent(event, UserEvent::NavigateToWorlds))
+		{
+			if (Global::GetUserManager().IsSignedIn())
+				ChangeScreen(ScreenType::Worlds);
+			return EventResult::Handled;
+		}
 		else if (IsUserEvent(event, UserEvent::NavigateToChatList))
 		{
 			ChangeScreen(ScreenType::ChatListing);
@@ -518,7 +527,6 @@ namespace fig::gui
 					}
 
 					PushEvent(UserEvent::AddedCharacter);
-					PushEvent(UserEvent::AddedStory); // jic
 				}
 				else
 					ShowDialogBox("Failed to import character.", DialogBoxType::Ok);
@@ -548,6 +556,21 @@ namespace fig::gui
 			const fig::uuid& scenarioId = GetUserData<fig::uuid>(event);
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
 			if (not pEditor->EditStory(scenarioId))
+				ChangeScreen<StoryScreen>(); // Error
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::CreateWorld))
+		{
+			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<WorldEditor>();
+			if (not pEditor->NewWorld())
+				ChangeScreen<StoryScreen>(); // Error
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::EditWorld))
+		{
+			const fig::uuid& worldId = GetUserData<fig::uuid>(event);
+			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<WorldEditor>();
+			if (not pEditor->EditWorld(worldId))
 				ChangeScreen<StoryScreen>(); // Error
 			return EventResult::Handled;
 		}

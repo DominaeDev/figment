@@ -185,6 +185,12 @@
     <ClCompile Include="src\data\ModelSettings.cpp" />
     <ClCompile Include="src\data\Scenario.cpp" />
     <ClCompile Include="src\data\TavernCardV2.cpp" />
+    <ClCompile Include="src\data\World.cpp" />
+    <ClCompile Include="src\gui\editor\WorldEditor.cpp" />
+    <ClCompile Include="src\gui\editor\WorldEditorAboutTab.cpp" />
+    <ClCompile Include="src\gui\editor\WorldEditorImagesTab.cpp" />
+    <ClCompile Include="src\gui\editor\WorldEditorInfoTab.cpp" />
+    <ClCompile Include="src\gui\editor\WorldEditorRulesTab.cpp" />
     <ClCompile Include="src\gui\Icons.cpp" />
     <ClCompile Include="src\gui\BackgroundImageCarousel.cpp" />
     <ClCompile Include="src\gui\ChatBackgroundPopOver.cpp" />
@@ -307,6 +313,9 @@
     <ClCompile Include="src\gui\VerticalGradient.cpp" />
     <ClCompile Include="src\gui\VerticalScrollSizer.cpp" />
     <ClCompile Include="src\gui\Window.cpp" />
+    <ClCompile Include="src\gui\WorldCard.cpp" />
+    <ClCompile Include="src\gui\WorldCardList.cpp" />
+    <ClCompile Include="src\gui\WorldScreen.cpp" />
     <ClCompile Include="src\io\Asset.cpp" />
     <ClCompile Include="src\io\AsyncDownloader.cpp" />
     <ClCompile Include="src\io\AsyncImageLoad.cpp" />
@@ -534,7 +543,14 @@
     <ClInclude Include="include\data\TavernCardV2.h" />
     <ClInclude Include="include\data\VersionNumber.h" />
     <ClInclude Include="include\data\VoiceSettings.h" />
+    <ClInclude Include="include\data\World.h" />
     <ClInclude Include="include\Figment.h" />
+    <ClInclude Include="include\gui\editor\WorldEditor.h" />
+    <ClInclude Include="include\gui\editor\WorldEditorAboutTab.h" />
+    <ClInclude Include="include\gui\editor\WorldEditorArgs.h" />
+    <ClInclude Include="include\gui\editor\WorldEditorImagesTab.h" />
+    <ClInclude Include="include\gui\editor\WorldEditorInfoTab.h" />
+    <ClInclude Include="include\gui\editor\WorldEditorRulesTab.h" />
     <ClInclude Include="include\gui\Icons.h" />
     <ClInclude Include="include\gui\BackgroundImageCarousel.h" />
     <ClInclude Include="include\gui\ChatBackgroundPopOver.h" />
@@ -669,6 +685,9 @@
     <ClInclude Include="include\gui\VerticalGradient.h" />
     <ClInclude Include="include\gui\VerticalScrollSizer.h" />
     <ClInclude Include="include\gui\Window.h" />
+    <ClInclude Include="include\gui\WorldCard.h" />
+    <ClInclude Include="include\gui\WorldCardList.h" />
+    <ClInclude Include="include\gui\WorldScreen.h" />
     <ClInclude Include="include\io\Asset.h" />
     <ClInclude Include="include\io\AssetCache.h" />
     <ClInclude Include="include\io\AssetTypeDefinition.h" />

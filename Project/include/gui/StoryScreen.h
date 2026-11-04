@@ -20,7 +20,6 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		void OnRender(fig::renderer_ptr pRenderer) override;
 
-		EventResult OnEvent(fig::event& event) override;
 		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void OnSearchFilter(fig::string_view search_text);
 		void OnUserSignedIn(const fig::user::UserProfile& profile) override;

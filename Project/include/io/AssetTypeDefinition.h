@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace fig::io
 {
@@ -7,7 +7,7 @@ namespace fig::io
 		Undefined		= 0x00,
 		Character		= 0x01,
 		Scenario		= 0x02,
-		World			= 0x03, //! @reserved
+		World			= 0x03,
 		Concept			= 0x04, //! @reserved
 
 		ModelSettings	= 0x08,

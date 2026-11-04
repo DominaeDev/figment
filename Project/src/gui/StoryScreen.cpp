@@ -86,17 +86,6 @@ namespace fig::gui
 		DrawBackground(pRenderer);
 	}
 
-	EventResult StoryScreen::OnEvent(fig::event& event)
-	{
-		if (IsUserEvent(event, UserEvent::AddedStory))
-		{
-			_bRefreshCardList = true;
-			return EventResult::Continue;
-		}
-
-		return Screen::OnEvent(event);
-	}
-
 	bool StoryScreen::OnKeyboardEvent(KeyboardEvent& event)
 	{
 		if (event.pressed)
@@ -110,21 +99,11 @@ namespace fig::gui
 
 	void StoryScreen::OnUserSignedIn(const fig::user::UserProfile& profile)
 	{
-		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::Interface::ScenarioList::SmallCards);
-		_pCardList->SetCardSize(bHalfSize ? CardSize::Half : CardSize::Full);
-		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::ScenarioList::ShowTags));
-		_pGridButton->SetIcon(bHalfSize ? Icon::GRID_SMALL : Icon::GRID_LARGE);
-		_pGridButton->SetOn(bHalfSize, true);
-		RefreshTopButtons();
+		OnActivated();
 
-		// Create cards
-		DEBUG_MEASURE_BEGIN("CreateCards");
-		_pCardList->Clear();
 		_pCardList->CreateCards();
-		DEBUG_MEASURE_END();
 
 		InvalidateLayout();
-
 	}
 
 	StoryCardList& StoryScreen::GetCardList()
@@ -149,9 +128,9 @@ namespace fig::gui
 
 	void StoryScreen::ToggleCardSize() noexcept
 	{
-		bool bSmall = Global::GetUserSettings().GetBool(UserSetting::Interface::ScenarioList::SmallCards);
+		bool bSmall = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards);
 		bSmall = !bSmall;
-		Global::GetUserSettings().SetBool(UserSetting::Interface::ScenarioList::SmallCards, bSmall);
+		Global::GetUserSettings().SetBool(UserSetting::Interface::CharacterList::SmallCards, bSmall);
 
 		_pGridButton->SetIcon(bSmall ? Icon::GRID_SMALL : Icon::GRID_LARGE);
 		_pCardList->SetCardSize(bSmall ? CardSize::Half : CardSize::Full);
@@ -160,7 +139,7 @@ namespace fig::gui
 	void StoryScreen::ToggleTags() noexcept
 	{
 		_pCardList->EnableTags(!_pCardList->IsTagsEnabled());
-		Global::GetUserSettings().SetBool(UserSetting::Interface::ScenarioList::ShowTags, _pCardList->IsTagsEnabled());
+		Global::GetUserSettings().SetBool(UserSetting::Interface::CharacterList::ShowTags, _pCardList->IsTagsEnabled());
 		RefreshTopButtons();
 	}
 
@@ -271,11 +250,14 @@ namespace fig::gui
 
 	void StoryScreen::OnActivated()
 	{
+		RefreshTopButtons();
 		RefreshCards();
 	}
 
 	void StoryScreen::RefreshCards()
 	{
+		_pCardList->SetCardSize(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards) ? CardSize::Half : CardSize::Full);
+		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pCardList->RefreshCards();
 		_bRefreshCardList = false;
 	}
@@ -285,12 +267,16 @@ namespace fig::gui
 		if (not Global::IsSignedIn())
 			return;
 
+		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards);
+		_pGridButton->SetIcon(bHalfSize ? Icon::GRID_SMALL : Icon::GRID_LARGE);
+		_pGridButton->SetOn(bHalfSize, true);
+
 		if (GetFiltering() != DefaultFilterFlags)
 			_pFilteringButton->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8)->SetColor(Color::BorderSelected);
 		else
 			_pFilteringButton->ClearBorderRenderer();
 
-		bool bShowTags = Global::GetUserSettings().GetBool(UserSetting::Interface::ScenarioList::ShowTags);
+		bool bShowTags = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags);
 		_pToggleTagsButton->SetOn(bShowTags, true);
 	}
 

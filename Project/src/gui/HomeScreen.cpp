@@ -110,21 +110,13 @@ namespace fig::gui
 
 	void HomeScreen::OnUserSignedIn(const fig::user::UserProfile& profile)
 	{
-		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards);
-		_pCardList->SetCardSize(bHalfSize ? CardSize::Half : CardSize::Full);
-		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
-		_pGridButton->SetIcon(bHalfSize ? Icon::GRID_SMALL : Icon::GRID_LARGE);
-		_pGridButton->SetOn(bHalfSize, true);
-		RefreshTopButtons();
+		OnActivated();
 
-		// Create cards
 		DEBUG_MEASURE_BEGIN("CreateCards");
-		_pCardList->Clear();
 		_pCardList->CreateCards();
 		DEBUG_MEASURE_END();
 
 		InvalidateLayout();
-
 	}
 
 	CharacterCardList& HomeScreen::GetCardList()
@@ -313,11 +305,14 @@ namespace fig::gui
 
 	void HomeScreen::OnActivated()
 	{
+		RefreshTopButtons();
 		RefreshCards();
 	}
 
 	void HomeScreen::RefreshCards()
 	{
+		_pCardList->SetCardSize(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards) ? CardSize::Half : CardSize::Full);
+		_pCardList->EnableTags(Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags));
 		_pCardList->RefreshCards();
 		_bRefreshCardList = false;
 	}
@@ -326,6 +321,10 @@ namespace fig::gui
 	{
 		if (not Global::IsSignedIn())
 			return;
+
+		bool bHalfSize = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::SmallCards);
+		_pGridButton->SetIcon(bHalfSize ? Icon::GRID_SMALL : Icon::GRID_LARGE);
+		_pGridButton->SetOn(bHalfSize, true);
 
 		if (GetFiltering() != DefaultFilterFlags)
 			_pFilteringButton->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8)->SetColor(Color::BorderSelected);

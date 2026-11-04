@@ -17,13 +17,14 @@ namespace fig::io
 	{
 		_pAssetMngr = std::make_unique<AssetManager>(profile, authKey);
 
-		// Instantiate caches
-		_caches[AssetTypeOf<fig::data::Character>]		= std::make_unique<AssetCache<fig::data::Character, "Character">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::Scenario>]		= std::make_unique<AssetCache<fig::data::Scenario, "Scenario">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::ChatInstance>]	= std::make_unique<AssetCache<fig::data::ChatInstance, "ChatInstance">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::ChatLog>]		= std::make_unique<AssetCache<fig::data::ChatLog, "ChatLog">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::sdl::Surface>]			= std::make_unique<AssetCache<fig::sdl::Surface, "Image">>(_pAssetMngr.get());
-		_caches[AssetTypeOf<fig::data::VoiceSettings>]	= std::make_unique<AssetCache<fig::data::VoiceSettings, "VoiceSettings">>(_pAssetMngr.get());
+		// Init caches
+		InitCache<fig::data::Character, "Character">();
+		InitCache<fig::data::Scenario, "Scenario">();
+		InitCache<fig::data::World, "World">();
+		InitCache<fig::data::ChatInstance, "ChatInstance">();
+		InitCache<fig::data::ChatLog, "ChatLog">();
+		InitCache<fig::sdl::Surface, "Image">();
+		InitCache<fig::data::VoiceSettings, "VoiceSetting">();
 
 		Preload();
 		RefreshChatCounts();
@@ -34,6 +35,7 @@ namespace fig::io
 		DEBUG_MEASURE_BEGIN("UserContentManager::Preload");
 		GetCache<fig::data::Character>().Preload();
 		GetCache<fig::data::Scenario>().Preload();
+		GetCache<fig::data::World>().Preload();
 		GetCache<fig::data::ChatInstance>().Preload();
 		DEBUG_MEASURE_END();
 	}
@@ -615,6 +617,11 @@ namespace fig::io
 		return _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Scenario))
 			| std::views::filter([](auto&& s) { return s.get().parent_id.empty(); })
 			| std::ranges::to<std::vector>();
+	}
+
+	fig::cref_vector<Asset> UserContentManager::GetWorlds() const noexcept
+	{ 
+		return _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::World));
 	}
 
 	fig::uuid UserContentManager::CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings)
