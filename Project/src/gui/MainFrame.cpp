@@ -1,6 +1,6 @@
 ﻿#include <pch.h>
 #include "gui/MainFrame.h"
-#include "gui/HomeScreen.h"
+#include "gui/CharacterScreen.h"
 #include "gui/StoryScreen.h"
 #include "gui/WorldScreen.h"
 #include "gui/ChatScreen.h"
@@ -60,7 +60,7 @@ namespace fig::gui
 		topSizer->Add(_pStatusBar, 0, SizerFlag::Expand);
 
 		RegisterScreen<LoginScreen>(ScreenType::Login);
-		RegisterScreen<HomeScreen>(ScreenType::Home);
+		RegisterScreen<CharacterScreen>(ScreenType::Home);
 		RegisterScreen<StoryScreen>(ScreenType::Stories);
 		RegisterScreen<WorldScreen>(ScreenType::Worlds);
 		RegisterScreen<ChatScreen>(ScreenType::Chat);
@@ -496,7 +496,7 @@ namespace fig::gui
 		{
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
 			if (not pEditor->NewCharacter())
-				ChangeScreen<HomeScreen>(); // Error
+				ChangeScreen<CharacterScreen>(); // Error
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::ImportCharacter))
@@ -541,7 +541,7 @@ namespace fig::gui
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
 			if (not pEditor->EditCharacter(characterId))
-				ChangeScreen<HomeScreen>(); // Error
+				ChangeScreen<CharacterScreen>(); // Error
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::CreateStory))
@@ -579,7 +579,7 @@ namespace fig::gui
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
 			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
 			if (not pEditor->EditCharacterStory(characterId))
-				ChangeScreen<HomeScreen>(); // Error
+				ChangeScreen<CharacterScreen>(); // Error
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditUserSettings))
@@ -588,7 +588,7 @@ namespace fig::gui
 			if (not pEditor->Initialize({}))
 			{
 				// Error
-				ChangeScreen<HomeScreen>();
+				ChangeScreen<CharacterScreen>();
 			}
 			return EventResult::Handled;
 		}

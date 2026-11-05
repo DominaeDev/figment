@@ -24,11 +24,15 @@ namespace fig::io
 		{ UserSetting::Interface::CharacterList::ShowTags,			true },
 		{ UserSetting::Interface::CharacterList::Sorting,			static_cast<int32_t>(SortBy::LastUsedAt) },
 		{ UserSetting::Interface::CharacterList::Ordering,			static_cast<int32_t>(OrderBy::Default) },
-		{ UserSetting::Interface::CharacterList::Filtering,			FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
+		{ UserSetting::Interface::CharacterList::Filtering,			FilterFlags::Serialize(DefaultCharacterFilterFlags, FilterFlagMapping) },
 
-		{ UserSetting::Interface::ScenarioList::Sorting,			static_cast<int32_t>(SortBy::LastUsedAt) },
+		{ UserSetting::Interface::ScenarioList::Sorting,			static_cast<int32_t>(SortBy::UpdatedAt) },
 		{ UserSetting::Interface::ScenarioList::Ordering,			static_cast<int32_t>(OrderBy::Default) },
-		{ UserSetting::Interface::ScenarioList::Filtering,			FilterFlags::Serialize(DefaultFilterFlags, FilterFlagMapping) },
+		{ UserSetting::Interface::ScenarioList::Filtering,			FilterFlags::Serialize(DefaultScenarioFilterFlags, FilterFlagMapping) },
+
+		{ UserSetting::Interface::WorldList::Sorting,				static_cast<int32_t>(SortBy::UpdatedAt) },
+		{ UserSetting::Interface::WorldList::Ordering,				static_cast<int32_t>(OrderBy::Default) },
+		{ UserSetting::Interface::WorldList::Filtering,				FilterFlags::Serialize(DefaultWorldFilterFlags, FilterFlagMapping) },
 
 		{ UserSetting::Interface::ChatList::Sorting,				static_cast<int32_t>(SortBy::Default) },
 		{ UserSetting::Interface::ChatList::Ordering,				static_cast<int32_t>(OrderBy::Default) },

@@ -545,7 +545,7 @@
     <ClCompile Include="src\gui\VariableList.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\HomeScreen.cpp">
+    <ClCompile Include="src\gui\CharacterScreen.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Home</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CardImage.cpp">
@@ -1675,7 +1675,7 @@
     <ClInclude Include="include\gui\VariableList.h">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\HomeScreen.h">
+    <ClInclude Include="include\gui\CharacterScreen.h">
       <Filter>Source Files\Frontend\GUI\Screens\Home</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CardImage.h">
@@ -2192,6 +2192,12 @@
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\CardList.impl.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CardListScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CardListScreen.impl.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
     </ClInclude>
   </ItemGroup>

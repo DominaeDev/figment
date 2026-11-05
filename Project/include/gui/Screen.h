@@ -23,7 +23,7 @@ namespace fig::gui
 		void PushEvent(UserEvent eventType, int32_t code = 0, void* pData1 = nullptr, void* pData2 = nullptr);
 	protected:
 		EventResult OnEvent(fig::event& event) override;
-		virtual bool OnKeyboardEvent(KeyboardEvent& event) = 0;
+		virtual bool OnKeyboardEvent(KeyboardEvent& event) { return false; };
 
 		virtual void OnUserSignedIn(const fig::user::UserProfile& profile) {};
 		virtual void OnUserSignedOut() {};

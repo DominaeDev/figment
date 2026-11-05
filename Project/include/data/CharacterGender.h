@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 
@@ -10,7 +10,7 @@ namespace fig::data
 		Male,
 		Female,
 		Nonbinary,	// Neither
-		Newhalf,	// Both
+		Hermaphrodite,	// Both
 	};
 
 	enum class Pronouns

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "data/CharacterGender.h"
 
 namespace fig::data
@@ -12,7 +12,7 @@ namespace fig::data
 		std::tuple { ConventionalGender::Male,			"Male",			Pronouns::Masculine,	std::array<fig::string_view, 10> { "male", "man" } },
 		std::tuple { ConventionalGender::Female,		"Female",		Pronouns::Feminine,		std::array<fig::string_view, 10> { "female", "woman" } },
 		std::tuple { ConventionalGender::Nonbinary,		"Non-binary",	Pronouns::Nonbinary,	std::array<fig::string_view, 10> { "nonbinary", "non-binary", "none", "non", "asexual", "trans", "transsexual", "trans-sexual", "trans-gender", "transgender" } },
-		std::tuple { ConventionalGender::Newhalf,		"Futanari",		Pronouns::Feminine,		std::array<fig::string_view, 10> { "futanari", "futa", "shemale", "newhalf", "hermaphrodite", "herm", } },
+		std::tuple { ConventionalGender::Hermaphrodite,	"Futanari",		Pronouns::Feminine,		std::array<fig::string_view, 10> { "futanari", "futa", "shemale", "hermaphrodite", "herm", "newhalf", "new-half", } },
 	};
 
 	static size_t find_conventional(string_view name)

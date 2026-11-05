@@ -16,7 +16,7 @@ namespace fig::gui
 	{
 		auto sortBy = Global::GetUserSettings().GetEnum<SortBy>(UserSetting::Interface::ScenarioList::Sorting, SortBy::Default);
 		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::ScenarioList::Ordering, OrderBy::Default);
-		auto filterBy = Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Interface::ScenarioList::Filtering, DefaultFilterFlags, FilterFlagMapping);
+		auto filterBy = Global::GetUserSettings().GetFlags<FilterFlags>(UserSetting::Interface::ScenarioList::Filtering, DefaultScenarioFilterFlags, FilterFlagMapping);
 		return std::make_tuple(sortBy, orderBy, filterBy);
 	}
 

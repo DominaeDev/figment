@@ -123,7 +123,9 @@ namespace fig::io
 		std::pair { FilterFlag::SourceImported,	"imported" },
 	};
 
-	constexpr FilterFlags DefaultFilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther, FilterFlag::SourceCreated, FilterFlag::SourceImported  };
+	constexpr FilterFlags DefaultCharacterFilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther, FilterFlag::SourceCreated, FilterFlag::SourceImported  };
+	constexpr FilterFlags DefaultScenarioFilterFlags { FilterFlag::SourceCreated, FilterFlag::SourceImported  };
+	constexpr FilterFlags DefaultWorldFilterFlags { FilterFlag::SourceCreated, FilterFlag::SourceImported  };
 	
 	enum class ChatFilterFlag : int32_t
 	{

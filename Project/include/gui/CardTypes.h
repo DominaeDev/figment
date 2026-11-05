@@ -16,17 +16,20 @@ namespace fig::gui
 	struct CardTypeOf<fig::data::Character>
 	{
 		using Type = class CharacterCard;
+		using ListType = class CharacterCardList;
 	};
 
 	template<>
 	struct CardTypeOf<fig::data::Scenario>
 	{
 		using Type = class ScenarioCard;
+		using ListType = class StoryCardList;
 	};
 
 	template<>
 	struct CardTypeOf<fig::data::World>
 	{
 		using Type = class WorldCard;
+		using ListType = class WorldCardList;
 	};
 }

@@ -475,21 +475,28 @@ namespace fig::gui
 		if (_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 			return false;
 
-		auto [name, gender, _] = _metaData.gender.Get();
-		switch (gender)
+		if (filter.IsAnySet({ FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther })
+			and not filter.IsSet({ FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther }))
 		{
-		case ConventionalGender::Male:
-			if (not filter.IsSet(FilterFlag::GenderMale))
+			auto [name, gender, _] = _metaData.gender.Get();
+			switch (gender)
+			{
+			case ConventionalGender::Male:
+				if (not filter.IsSet(FilterFlag::GenderMale))
+					return false;
+				break;
+			case ConventionalGender::Female:
+				if (not filter.IsSet(FilterFlag::GenderFemale))
+					return false;
+				break;
+			case ConventionalGender::Nonbinary:
+			case ConventionalGender::Hermaphrodite:
+				if (not filter.IsSet(FilterFlag::GenderOther))
+					return false;
+				break;
+			default:
 				return false;
-			break;
-		case ConventionalGender::Female:
-			if (not filter.IsSet(FilterFlag::GenderFemale))
-				return false;
-			break;
-		default:
-			if (not filter.IsSet(FilterFlag::GenderOther))
-				return false;
-			break;
+			}
 		}
 
 		if (filter.IsSet(FilterFlag::New) and not _metaData.IsNew())
