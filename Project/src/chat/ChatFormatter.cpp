@@ -301,7 +301,7 @@ namespace fig::chat
 		size_t length() const { return end - start; }
 	};
 
-	static size_t find_next(const fig::string& text, const fig::string& substring, size_t start = 0)
+	static size_t find_next(fig::string_view text, fig::string_view substring, size_t start = 0)
 	{
 		char ch = substring[0];
 		for (size_t pos = start; pos <= text.size() - substring.size(); ++pos)
@@ -337,7 +337,7 @@ namespace fig::chat
 		return false;
 	}
 
-	static void mark_spans(const fig::string s, MessageType msgType, fig::string open, fig::string close, std::vector<Span>& spans)
+	static void mark_spans(fig::string_view s, MessageType msgType, fig::string_view open, fig::string_view close, std::vector<Span>& spans)
 	{
 		if (open.size() > s.size())
 			return;
@@ -366,15 +366,15 @@ namespace fig::chat
 		}
 	}
 
-	static void fill_gaps(const fig::string s, MessageType msgType, std::vector<Span>& spans)
+	static void fill_gaps(fig::string_view s, MessageType msgType, std::vector<Span>& spans)
 	{
 		auto CheckAndAdd = [msgType, &spans](size_t pos, size_t len) {
 			if (len != 0)
 				spans.push_back(Span { msgType, pos, pos + len });
 			return true;
-			};
+		};
 
-			// Sort spans
+		// Sort spans
 		std::sort(spans.begin(), spans.end(), [](Span a, Span b) {
 			return a.start < b.start;
 		});
@@ -496,7 +496,78 @@ namespace fig::chat
 		return std::pair { std::move(result), std::move(subMessages) };
 	}
 
-	std::vector<Submessage> ChatFormatter::AnalyseMessage(fig::string_view message, MessageType defaultMsgType) noexcept
+	static fig::string GetSignature(fig::string_view message) noexcept
+	{
+		std::vector<Span> spans;
+		mark_spans(message, MessageType::Action, "***", "***", spans);
+		mark_spans(message, MessageType::Action, "**", "**", spans);
+		mark_spans(message, MessageType::Action, "*", "*", spans);
+		mark_spans(message, MessageType::Dialogue, "\"", "\"", spans);
+		fill_gaps(message, MessageType::Narration, spans);
+		std::ranges::sort(spans, {}, &Span::start);
+
+		fig::string signature;
+		for (const Span& span : spans)
+		{
+			if (message.find_first_not_of(" \t\r\n", span.start) >= span.end)
+				continue;
+
+			char marker = 'N';
+			if (span.msgType == MessageType::Dialogue)
+				marker = 'D';
+			else if (span.msgType == MessageType::Action)
+				marker = 'A';
+
+			if (signature.find(marker) == fig::string::npos)
+				signature += marker;
+			if (signature.size() == 3)
+				break;
+		}
+		return signature;
+	}
+
+	std::vector<Submessage> ChatFormatter::AnalyseMessage(fig::string_view message) noexcept
+	{
+		// Attempt to disambiguate dialogue, actions, and narration
+		auto signature = GetSignature(message);
+
+		MessageType asteriskMsgType = MessageType::Action;
+		MessageType defaultMsgType = MessageType::Narration;
+
+		if (signature.size() < 3)
+		{
+			if (signature == "N") // Plain text: Assume dialogue
+			{
+				defaultMsgType = MessageType::Dialogue;
+			}
+			else if (signature == "A") // Asterisks: Assume narration
+			{
+				asteriskMsgType = MessageType::Narration;
+			}
+			else if (signature == "AD") // Asterisks -> Quotes: Assume narration, dialogue
+			{
+				asteriskMsgType = MessageType::Narration;
+			}
+			else if (signature == "AN") // Asterisks -> Plain: Assume narration, dialogue
+			{
+				asteriskMsgType = MessageType::Narration;
+				defaultMsgType = MessageType::Dialogue;
+			}
+			else if (signature == "NA") // Plain -> Asterisks : Assume dialogue, action
+			{
+				asteriskMsgType = MessageType::Action;
+				defaultMsgType = MessageType::Dialogue;
+			}
+			else if (signature == "ND") // Plain -> Quotes : Assume narration, dialogue
+			{
+				defaultMsgType = MessageType::Narration;
+			}
+		}
+
+		return AnalyseMessage(message, MessageType::Dialogue, asteriskMsgType, defaultMsgType);
+	}
+
+	std::vector<Submessage> ChatFormatter::AnalyseMessage(fig::string_view message, MessageType quotedMsgType, MessageType asteriskMsgType, MessageType defaultMsgType) noexcept
 	{
 		std::vector<Submessage> subMessages;
 		auto paragraphs = split_paragraphs(message);
@@ -518,8 +589,10 @@ namespace fig::chat
 			std::vector<Span> spans;
 			spans.reserve(64);
 
-			mark_spans(sMessage, MessageType::Action, "*", "*", spans);
- 			mark_spans(sMessage, MessageType::Dialogue, "\"", "\"", spans);
+			mark_spans(sMessage, asteriskMsgType, "***", "***", spans);
+			mark_spans(sMessage, asteriskMsgType, "**", "**", spans);
+			mark_spans(sMessage, asteriskMsgType, "*", "*", spans);
+ 			mark_spans(sMessage, quotedMsgType, "\"", "\"", spans);
 			fill_gaps(sMessage, defaultMsgType, spans);
 			trim_spans(sMessage, spans);
 
