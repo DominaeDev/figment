@@ -11,8 +11,7 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	WorldCard::WorldCard(ControlPtr pParent, const fig::uuid& worldId, CardSize cardSize) : CoverCard(pParent, worldId, cardSize),
-		_worldId { worldId }
+	WorldCard::WorldCard(ControlPtr pParent, const fig::uuid& worldId, CardSize cardSize) : CoverCard(pParent, worldId, cardSize)
 	{
 		SetDefaultImage(AppResources::GetTexture(Resource::CARD_COVER_WORLD));
 		RefreshFull();
@@ -63,7 +62,7 @@ namespace fig::gui
 	{
 		auto ChangeBorder = [this](CardBorderStyle border) {
 			_userSettings.borderStyle = border;
-			Global::GetUserContent().SetBorder(_worldId, border);
+			Global::GetUserContent().SetBorder(_assetId, border);
 			SetBorder(border);
 			};
 
@@ -71,9 +70,12 @@ namespace fig::gui
 
 		auto& menu = CreateMenu();
 
+		menu.AddCheckItem("Set as default world", true);
+		menu.AddSeparator();
+
 		menu.AddItem("Edit world\u2026")
 			.SetDelegate([this] {
-				PushEvent(UserEvent::EditWorld, &_worldId);
+				PushEvent(UserEvent::EditWorld, &_assetId);
 			});
 
 		auto& moveMenu = menu.AddItem("Move to folder");
@@ -87,7 +89,7 @@ namespace fig::gui
 		{
 			menu.AddItem("Star", Icon::STAR)
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkFavorite(_worldId, true);
+					Global::GetUserContent().MarkFavorite(_assetId, true);
 					_userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
 					ShowStar(true);
 					NotifyUpdated();
@@ -97,7 +99,7 @@ namespace fig::gui
 		{
 			menu.AddItem("Unstar", Icon::UNSTAR)
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkFavorite(_worldId, false);
+					Global::GetUserContent().MarkFavorite(_assetId, false);
 					_userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
 					ShowStar(false);
 					NotifyUpdated();
@@ -131,7 +133,7 @@ namespace fig::gui
 		{
 			menu.AddItem("Hide")
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkHidden(_worldId, true);
+					Global::GetUserContent().MarkHidden(_assetId, true);
 					_userSettings.flags.Set(AssetUserSettings::Flag::Hidden);
 					NotifyUpdated();
 				});
@@ -140,7 +142,7 @@ namespace fig::gui
 		{
 			menu.AddItem("Unhide")
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkHidden(_worldId, false);
+					Global::GetUserContent().MarkHidden(_assetId, false);
 					_userSettings.flags.Unset(AssetUserSettings::Flag::Hidden);
 					NotifyUpdated();
 				});
@@ -158,7 +160,7 @@ namespace fig::gui
 	{
 		auto& userContent = Global::GetUserContent();
 		// Meta data
-		if (auto try_meta = userContent.GetMetaData(_worldId))
+		if (auto try_meta = userContent.GetMetaData(_assetId))
 		{
 			auto& meta = *try_meta;
 			SetMetaData(meta);
@@ -175,16 +177,16 @@ namespace fig::gui
 		}
 
 		// User settings
-		SetUserSettings(Global::GetUserContent().GetUserSettings(_worldId));
+		SetUserSettings(Global::GetUserContent().GetUserSettings(_assetId));
 	}
 
 	void WorldCard::RefreshFull()
 	{
-		if (auto try_world = Global::GetUserContent().Get<World>(_worldId); try_world.has_value())
+		if (auto try_world = Global::GetUserContent().Get<World>(_assetId); try_world.has_value())
 		{
 			auto& world = try_world.value();
 			_worldName = world.name;
-			_updatedAt = Global::GetUserContent().GetUpdatedAt(_worldId).value_or({});
+			_updatedAt = Global::GetUserContent().GetUpdatedAt(_assetId).value_or({});
 			SetLabel(world.name);
 //			SetIndex(world.GetSearchIndex());
 

@@ -11,8 +11,7 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	ScenarioCard::ScenarioCard(ControlPtr pParent, const fig::uuid& scenarioId, CardSize cardSize) : CoverCard(pParent, scenarioId, cardSize),
-		_scenarioId { scenarioId }
+	ScenarioCard::ScenarioCard(ControlPtr pParent, const fig::uuid& scenarioId, CardSize cardSize) : CoverCard(pParent, scenarioId, cardSize)
 	{
 		SetDefaultImage(AppResources::GetTexture(Resource::CARD_COVER_STORY));
 		RefreshFull();
@@ -63,9 +62,9 @@ namespace fig::gui
 	{
 		auto ChangeBorder = [this](CardBorderStyle border) {
 			_userSettings.borderStyle = border;
-			Global::GetUserContent().SetBorder(_scenarioId, border);
+			Global::GetUserContent().SetBorder(_assetId, border);
 			SetBorder(border);
-			};
+		};
 
 		bool bLLM = Global::IsLLMInitialized();
 
@@ -77,7 +76,7 @@ namespace fig::gui
 		menu.AddSeparator();
 		menu.AddItem("Edit story\u2026")
 			.SetDelegate([this] {
-				PushEvent(UserEvent::EditStory, &_scenarioId);
+				PushEvent(UserEvent::EditStory, &_assetId);
 			});
 
 		auto& moveMenu = menu.AddItem("Move to folder");
@@ -91,7 +90,7 @@ namespace fig::gui
 		{
 			menu.AddItem("Star", Icon::STAR)
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkFavorite(_scenarioId, true);
+					Global::GetUserContent().MarkFavorite(_assetId, true);
 					_userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
 					ShowStar(true);
 					NotifyUpdated();
@@ -101,7 +100,7 @@ namespace fig::gui
 		{
 			menu.AddItem("Unstar", Icon::UNSTAR)
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkFavorite(_scenarioId, false);
+					Global::GetUserContent().MarkFavorite(_assetId, false);
 					_userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
 					ShowStar(false);
 					NotifyUpdated();
@@ -135,7 +134,7 @@ namespace fig::gui
 		{
 			menu.AddItem("Hide")
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkHidden(_scenarioId, true);
+					Global::GetUserContent().MarkHidden(_assetId, true);
 					_userSettings.flags.Set(AssetUserSettings::Flag::Hidden);
 					NotifyUpdated();
 				});
@@ -144,7 +143,7 @@ namespace fig::gui
 		{
 			menu.AddItem("Unhide")
 				.SetDelegate([this] {
-					Global::GetUserContent().MarkHidden(_scenarioId, false);
+					Global::GetUserContent().MarkHidden(_assetId, false);
 					_userSettings.flags.Unset(AssetUserSettings::Flag::Hidden);
 					NotifyUpdated();
 				});
@@ -162,7 +161,7 @@ namespace fig::gui
 	{
 		auto& userContent = Global::GetUserContent();
 		// Meta data
-		if (auto try_meta = userContent.GetMetaData(_scenarioId))
+		if (auto try_meta = userContent.GetMetaData(_assetId))
 		{
 			auto& meta = *try_meta;
 			SetMetaData(meta);
@@ -179,18 +178,18 @@ namespace fig::gui
 		}
 
 		// User settings
-		SetUserSettings(Global::GetUserContent().GetUserSettings(_scenarioId));
+		SetUserSettings(Global::GetUserContent().GetUserSettings(_assetId));
 	}
 
 	void ScenarioCard::RefreshFull()
 	{
-		if (auto try_scenario = Global::GetUserContent().Get<Scenario>(_scenarioId); try_scenario.has_value())
+		if (auto try_scenario = Global::GetUserContent().Get<Scenario>(_assetId); try_scenario.has_value())
 		{
 			auto& scenario = try_scenario.value();
 			_scenarioName = scenario.name;
 			if (_scenarioName.empty())
 				_scenarioName = scenario.title;
-			_updatedAt = Global::GetUserContent().GetUpdatedAt(_scenarioId).value_or({});
+			_updatedAt = Global::GetUserContent().GetUpdatedAt(_assetId).value_or({});
 			SetLabel(scenario.name);
 //			SetIndex(scenario.GetSearchIndex());
 

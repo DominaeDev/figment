@@ -200,6 +200,12 @@ namespace fig::gui
 				Icon::STORY_EDIT_INFO_SMALL,
 			},
 			{
+				Tab::Images,
+				"Images",
+				Icon::CHARACTER_EDIT_IMAGES,
+				Icon::CHARACTER_EDIT_IMAGES_SMALL,
+			},
+			{
 				Tab::Roles,
 				"Roles",
 				Icon::STORY_EDIT_ROLES,
@@ -216,12 +222,6 @@ namespace fig::gui
 				"Locations",
 				Icon::STORY_EDIT_LOCATIONS,
 				Icon::STORY_EDIT_LOCATIONS_SMALL,
-			},
-			{
-				Tab::Images,
-				"Images",
-				Icon::CHARACTER_EDIT_IMAGES,
-				Icon::CHARACTER_EDIT_IMAGES_SMALL,
 			},
 			{
 				Tab::Rules,

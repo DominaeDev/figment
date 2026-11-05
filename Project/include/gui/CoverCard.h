@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CardImage.h"
-#include "io/AssetManager.h"
+#include "io/AsyncIO.h"
 #include "util/SearchIndex.h"
 #include "data/ContentMetaData.h"
 
@@ -13,16 +13,16 @@ namespace fig::gui
 		Half,
 	};
 
-	class TexturedBorder;
-	class NineGridImage;
-	class CoverCard;
-
 	enum class CardEvent
 	{
 		Refresh,
 		Delete,
 	};
 	using CardEventDelegate = std::function<void(class CoverCard&, CardEvent event)>;
+
+	class TexturedBorder;
+	class NineGridImage;
+	class CoverCard;
 
 	class CoverCard : public CardImage
 	{
@@ -42,7 +42,7 @@ namespace fig::gui
 		bool MatchesFlags(fig::io::FilterFlags filter) const noexcept;
 		bool MatchesSearch(const SearchQuery& query) const noexcept;
 
-		const fig::uuid& GetAssetID() const { return _assetId; }
+		const fig::uuid& GetAssetId() const { return _assetId; }
 		inline const fig::io::ContentMetaData& GetMetaData() const noexcept { return _metaData; };
 		fig::timestamp GetUpdatedAt() const noexcept { return _updatedAt; }
 		size_t GetChatCount() const noexcept { return _chatCount; }

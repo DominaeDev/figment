@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CardImage.h"
 
 namespace fig::gui

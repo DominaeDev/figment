@@ -131,16 +131,16 @@ namespace fig::gui
 				Icon::MENU_WORLDS_SMALL,
 			},
 			{
-				NotImpl,
-				"Locations",
-				Icon::STORY_EDIT_LOCATIONS,
-				Icon::STORY_EDIT_LOCATIONS_SMALL,
-			},
-			{
 				Tab::Images,
 				"Images",
 				Icon::CHARACTER_EDIT_IMAGES,
 				Icon::CHARACTER_EDIT_IMAGES_SMALL,
+			},
+			{
+				NotImpl,
+				"Locations",
+				Icon::STORY_EDIT_LOCATIONS,
+				Icon::STORY_EDIT_LOCATIONS_SMALL,
 			},
 			{
 				Tab::Rules,

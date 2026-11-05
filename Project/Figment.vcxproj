@@ -186,6 +186,7 @@
     <ClCompile Include="src\data\Scenario.cpp" />
     <ClCompile Include="src\data\TavernCardV2.cpp" />
     <ClCompile Include="src\data\World.cpp" />
+    <ClInclude Include="include\gui\CardList.impl.h" />
     <ClCompile Include="src\gui\editor\WorldEditor.cpp" />
     <ClCompile Include="src\gui\editor\WorldEditorAboutTab.cpp" />
     <ClCompile Include="src\gui\editor\WorldEditorImagesTab.cpp" />
@@ -545,6 +546,8 @@
     <ClInclude Include="include\data\VoiceSettings.h" />
     <ClInclude Include="include\data\World.h" />
     <ClInclude Include="include\Figment.h" />
+    <ClInclude Include="include\gui\CardList.h" />
+    <ClInclude Include="include\gui\CardTypes.h" />
     <ClInclude Include="include\gui\editor\WorldEditor.h" />
     <ClInclude Include="include\gui\editor\WorldEditorAboutTab.h" />
     <ClInclude Include="include\gui\editor\WorldEditorArgs.h" />

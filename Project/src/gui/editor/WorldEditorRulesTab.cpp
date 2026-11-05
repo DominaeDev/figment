@@ -29,7 +29,6 @@ namespace fig::gui
 
 		auto pSizer = SetSizer<VerticalSizer>();
 
-
 		// About
 		CreateHeader(this, pSizer, "Rules");
 		_pAddButton = CreateControl<ButtonWithLabel>("Add rule");

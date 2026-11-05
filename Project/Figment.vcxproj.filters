@@ -2185,6 +2185,15 @@
     <ClInclude Include="include\gui\WorldCardList.h">
       <Filter>Source Files\Frontend\GUI\Screens\WorldScreen\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="include\gui\CardList.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CardTypes.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\CardList.impl.h">
+      <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
