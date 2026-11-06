@@ -134,8 +134,8 @@ namespace fig::io
 
 		std::pair<fig::uuid, fig::uuid> CreateChat(const fig::chat::ChatStaging& staging);
 		fig::uuid CreateVoiceReference(const fig::uuid& characterId, const fig::data::VoiceSettings& voiceSettings);
-		fig::optional_cref<Asset> ReplaceCoverImage(const fig::uuid& characterId, const fig::uuid& originalAssetId);
 		fig::optional_cref<Asset> ReplaceSmallPortrait(const fig::uuid& characterId, const fig::sdl::Surface& image);
+		fig::optional_cref<Asset> ReplaceCoverImage(const fig::uuid& parentId, const fig::uuid& imageAssetId);
 		
 		fig::uuid CreateLargePortrait(const fig::uuid& characterId, DataFormat format, fig::byte_span imageData);
 		fig::uuid CreateBackground(const fig::uuid& characterId, DataFormat format, fig::byte_span imageData);

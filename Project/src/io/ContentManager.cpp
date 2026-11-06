@@ -582,6 +582,9 @@ namespace fig::io
 
 	bool UserContentManager::DeleteAsset(fig::uuid assetId)
 	{
+		if (assetId.empty())
+			return false;
+
 		// Invalidate associated meta data
 		auto associatedAssets = _pAssetMngr->FindAssociatedAssets(assetId);
 		for (auto& id : associatedAssets)
@@ -662,29 +665,35 @@ namespace fig::io
 		return false;
 	}
 
-	fig::optional_cref<Asset> UserContentManager::ReplaceCoverImage(const fig::uuid& characterId, const fig::uuid& originalAssetId)
+	fig::optional_cref<Asset> UserContentManager::ReplaceCoverImage(const fig::uuid& parentId, const fig::uuid& imageAssetId)
 	{
-		if (auto originalAsset = _pAssetMngr->FindAsset(originalAssetId, AssetType::Image))
+		if (auto originalAsset = _pAssetMngr->FindAsset(imageAssetId, AssetType::Image))
 		{
 			// Find prior cover asset
 			fig::uuid previousCoverId;
-			if (auto try_cover = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), characterId))
-				previousCoverId = (*try_cover).id;
-
-			if (auto try_surface = Get<fig::sdl::Surface>(originalAssetId))
+			fig::uuid previousCoverOriginalId;
+			if (auto try_cover = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), parentId))
 			{
-				if (auto cover = fig::CreateCoverImage(*try_surface, false); not cover.empty())
+				previousCoverId = (*try_cover).id;
+				previousCoverOriginalId = (*try_cover).GetMeta<fig::uuid>(MetaTag::ReferenceToOriginal).value_or({});
+			}
+
+			if (auto try_surface = Get<fig::sdl::Surface>(imageAssetId))
+			{
+				if (auto cover = CreateCoverImage(*try_surface, false); not cover.empty())
 				{
 					// Create new cover asset
-					auto& coverAsset = _pAssetMngr->CreateBitmapAsset(ImageAssetType::CoverImage, cover, characterId);
+					auto& coverAsset = _pAssetMngr->CreateBitmapAsset(ImageAssetType::CoverImage, cover, parentId);
 
-					_pAssetMngr->ModifyAsset(coverAsset, [&originalAssetId](auto&& asset) {
-						asset.SetMeta(MetaTag::ReferenceToOriginal, originalAssetId);
+					_pAssetMngr->ModifyAsset(coverAsset, [&imageAssetId](auto&& asset) {
+						asset.SetMeta(MetaTag::ReferenceToOriginal, imageAssetId);
 					});
 
 					// Delete previous cover asset
 					if (not previousCoverId.empty())
 						DeleteAsset(previousCoverId);
+					if (not previousCoverOriginalId.empty())
+						DeleteAsset(previousCoverOriginalId);
 					
 					return coverAsset;
 				}

@@ -202,7 +202,6 @@
     <ClCompile Include="src\gui\ColorRef.cpp" />
     <ClCompile Include="src\gui\ColorTheme.cpp" />
     <ClCompile Include="src\gui\DialogBox.cpp" />
-    <ClCompile Include="src\gui\editor\AddImageButton.cpp" />
     <ClCompile Include="src\gui\editor\CharacterAttributeWidget.cpp" />
     <ClCompile Include="src\gui\editor\CharacterBackgroundWidget.cpp" />
     <ClCompile Include="src\gui\editor\CharacterDialogueWidget.cpp" />
@@ -569,7 +568,6 @@
     <ClInclude Include="include\gui\ColorTheme.h" />
     <ClInclude Include="include\gui\DialogBox.h" />
     <ClInclude Include="include\gui\ControlDefs.h" />
-    <ClInclude Include="include\gui\editor\AddImageButton.h" />
     <ClInclude Include="include\gui\editor\CharacterAttributeWidget.h" />
     <ClInclude Include="include\gui\editor\CharacterBackgroundWidget.h" />
     <ClInclude Include="include\gui\editor\CharacterDialogueWidget.h" />

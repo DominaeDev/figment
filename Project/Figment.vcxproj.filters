@@ -863,9 +863,6 @@
     <ClCompile Include="src\gui\editor\CharacterSmallPortraitWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\editor\AddImageButton.cpp">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClCompile>
     <ClCompile Include="src\gui\editor\StoryEditor.cpp">
       <Filter>Source Files\Frontend\GUI\Editors\StoryEditor</Filter>
     </ClCompile>
@@ -2036,9 +2033,6 @@
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\editor\CharacterDialogueWidget.h">
-      <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gui\editor\AddImageButton.h">
       <Filter>Source Files\Frontend\GUI\Editors\CharacterEditor\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\editor\CharacterPortraitWidget.h">

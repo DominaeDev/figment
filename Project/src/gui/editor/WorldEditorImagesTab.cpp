@@ -1,11 +1,12 @@
 ﻿#include <pch.h>
 #include "gui/editor/WorldEditorImagesTab.h"
+#include "gui/editor/CharacterPortraitWidget.h"
 #include "gui/editor/CharacterBackgroundWidget.h"
-#include "gui/editor/AddImageButton.h"
 #include "gui/HorizontalLine.h"
 #include "gui/GridSizer.h"
 #include "gui/Menu.h"
 #include "gui/AppResources.h"
+#include "gui/ButtonWithIcon.h"
 #include "data/World.h"
 #include "io/ContentManager.h"
 #include "io/FileUtility.h"
@@ -28,6 +29,10 @@ namespace fig::gui
 		auto pSizer = SetSizer<VerticalSizer>();
 		_worldId = args.assetId;
 
+		CreateHeader(this, pSizer, "Cover image");
+		InitCover(pSizer);
+		CreateHorizontalLine(this, pSizer);
+
 		CreateHeader(this, pSizer, "Backgrounds");
 		InitBackgrounds(pSizer);
 		CreateHint(this, pSizer, std::format("You can add up to {} background images", Constants::GUI::CharacterEditor::MaxBackgrounds));
@@ -49,10 +54,10 @@ namespace fig::gui
 
 		auto pArgs = static_cast<FileDialogUserData*>(userdata);
 		for (const char* const* path = fileList; *path; ++path)
-			pArgs->pThis->OnOpenFile(std::filesystem::u8path(*path));
+			pArgs->pThis->OnOpenFile(std::filesystem::u8path(*path), pArgs->type);
 	}
 
-	void WorldEditorImagesTab::OpenFile()
+	void WorldEditorImagesTab::OpenFile(ImageType type)
 	{
 		static constexpr SDL_DialogFileFilter filters[] =
 		{
@@ -65,12 +70,54 @@ namespace fig::gui
 		};
 
 		_fileDlgUserData.pThis = this;
-		SDL_ShowOpenFileDialog(OnFileDialogResult, (void*)&_fileDlgUserData, GetSDLWindow(), filters, SDL_arraysize(filters), nullptr, true);
+		_fileDlgUserData.type = type;
+		SDL_ShowOpenFileDialog(OnFileDialogResult, (void*)&_fileDlgUserData, GetSDLWindow(), filters, SDL_arraysize(filters), nullptr, type != ImageType::Cover);
 	}
 
-	void WorldEditorImagesTab::OnOpenFile(const fig::path& filename)
+	void WorldEditorImagesTab::OnOpenFile(const fig::path& filename, ImageType type)
 	{
-		_backgroundLoadQueue.push(filename);
+		switch (type)
+		{
+		case ImageType::Cover:
+			_coverLoadQueue.push(filename);
+			break;
+		case ImageType::Background:
+			_backgroundLoadQueue.push(filename);
+			break;
+		}
+	}
+
+	void WorldEditorImagesTab::InitCover(SizerPtr pSizer)
+	{
+		_pCoverGridSizer = new GridSizer(Constants::GUI::CharacterEditor::PortraitWidth + 12, Constants::GUI::CharacterEditor::PortraitHeight + 35, 4, 4);
+		pSizer->Add(_pCoverGridSizer.get());
+
+		// Find cover asset
+		if (auto try_cover = Global::GetUserContent().GetAssets().FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), _worldId))
+		{
+			_coverAssetId = (*try_cover).GetMeta<fig::uuid>(MetaTag::ReferenceToOriginal).value_or({});
+			
+			auto pWidget = CreateControl<CharacterPortraitWidget>();
+			pWidget->SetImage(_coverAssetId);
+			pWidget->SetDoubleClickDelegate([this] { OpenFile(ImageType::Cover); });
+			pWidget->SetRightClickDelegate([this, pWidget] { OnClickedCover(pWidget, SDL_BUTTON_RIGHT); });
+			_pCoverGridSizer->Add(pWidget);
+
+			_coverWidgets.emplace_back(ImageWidget {
+				.assetId = _coverAssetId,
+				.pControl = pWidget,
+			});
+		}
+		else
+			_coverAssetId = {};
+
+		// Add cover
+		auto pAddButton = CreateControl<ButtonWithIcon>(Icon::PLUS, true);
+		pAddButton->SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);;
+		pAddButton->SetDelegate([this] { OpenFile(ImageType::Cover); });
+		pAddButton->SetVisible(_coverWidgets.empty());
+		_pAddCoverButton = pAddButton;
+		_pCoverGridSizer->Add(_pAddCoverButton, 0, SizerFlag::All, 6);
 	}
 
 	void WorldEditorImagesTab::InitBackgrounds(SizerPtr pSizer)
@@ -97,12 +144,28 @@ namespace fig::gui
 		}
 
 		// Add background
-		auto pAddButton = CreateControl<AddImageButton>();
+		auto pAddButton = CreateControl<ButtonWithIcon>(Icon::PLUS, true);
 		pAddButton->SetSize(Constants::GUI::CharacterEditor::BackgroundWidth, Constants::GUI::CharacterEditor::BackgroundHeight);
-		pAddButton->SetDelegate([this] { OpenFile(); });
+		pAddButton->SetDelegate([this] { OpenFile(ImageType::Background); });
 		_pAddBackgroundButton = pAddButton;
 		_pBackgroundGridSizer->Add(_pAddBackgroundButton, 0, SizerFlag::All, 6);
-
+	}
+	
+	void WorldEditorImagesTab::OnClickedCover(ControlPtr pControl, int32_t button)
+	{
+		size_t index;
+		if (auto itFind = std::ranges::find(_coverWidgets, pControl, [](auto&& p) { return p.pControl; }); itFind != std::ranges::cend(_coverWidgets))
+			index = std::distance(_coverWidgets.begin(), itFind);
+		else
+			return; 
+		
+		if (button == SDL_BUTTON_RIGHT)
+		{
+			auto& menu = CreateMenu();
+			menu.AddItem("Remove")
+				.SetDelegate([this, index] { RemoveCover(index); });
+			menu.Show();
+		}
 	}
 
 	void WorldEditorImagesTab::OnClickedBackground(ControlPtr pControl)
@@ -124,6 +187,25 @@ namespace fig::gui
 		menu.AddItem("Remove")
 			.SetDelegate([this, index] { RemoveBackground(index); });
 		menu.Show();
+	}
+
+	void WorldEditorImagesTab::RemoveCover(size_t index)
+	{
+		if (index >= _coverWidgets.size())
+			return;
+
+		auto& cover = _coverWidgets[index];
+
+		if (not cover.assetId.empty())
+			_removedAssets.push_back(cover.assetId);
+
+		_pCoverGridSizer->Remove(cover.pControl);
+		DestroyChild(cover.pControl);
+		_coverWidgets.erase(_coverWidgets.cbegin() + index);
+
+		_pAddCoverButton->SetVisible(_coverWidgets.empty());
+		InvalidateLayout();
+		SetDirty();
 	}
 
 	void WorldEditorImagesTab::RemoveBackground(size_t index)
@@ -176,10 +258,38 @@ namespace fig::gui
 
 	void WorldEditorImagesTab::ProcessLoadQueue()
 	{
-		if (_backgroundLoadQueue.empty())
+		if (_coverLoadQueue.empty() and _backgroundLoadQueue.empty())
 			return;
 
 		bool bChanged = false;
+
+		// Load covers
+		while (not _coverLoadQueue.empty())
+		{
+			auto& path = _coverLoadQueue.front();
+			auto data = fig::io::ReadFile(path).value_or({});
+			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
+			{
+				RemoveCover(0uz); // Remove existing
+
+				fig::sdl::Surface surface = std::move(try_surface).value();
+				auto pWidget = CreateControl<CharacterPortraitWidget>();
+				pWidget->SetImage(surface);
+				pWidget->SetDoubleClickDelegate([this] { OpenFile(ImageType::Cover); });
+				pWidget->SetRightClickDelegate([this, pWidget] { OnClickedCover(pWidget, SDL_BUTTON_RIGHT); });
+				_coverWidgets.emplace_back(ImageWidget {
+					.pControl = pWidget,
+					.image = std::move(surface),
+					.format = DataFormatFromExt(path),
+					.data = std::move(data),
+				});
+
+				_pCoverGridSizer->Insert(_pCoverGridSizer->size() - 1uz, pWidget);
+				bChanged = true;
+			}
+			
+			queue_clear(_coverLoadQueue);
+		}
 
 		// Load backgrounds
 		while (not _backgroundLoadQueue.empty())
@@ -213,6 +323,8 @@ namespace fig::gui
 
 		if (bChanged)
 		{
+			_pAddCoverButton->SetVisible(_coverWidgets.empty());
+			_pAddBackgroundButton->SetVisible(_backgroundWidgets.size() < Constants::GUI::CharacterEditor::MaxBackgrounds);
 			LayoutNow();
 			SetDirty();
 		}
@@ -223,9 +335,36 @@ namespace fig::gui
 		auto& content = Global::GetUserContent();
 		auto& assets = content.GetAssets();
 
+		if (_coverWidgets.empty())
+		{
+			// Remove cover assets
+			if (auto try_cover = Global::GetUserContent().GetAssets().FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), _worldId))
+			{
+				_removedAssets.push_back((*try_cover).id);
+				_removedAssets.push_back((*try_cover).GetMeta<fig::uuid>(MetaTag::ReferenceToOriginal).value_or({}));
+			}
+		}
+
 		// Remove assets
 		for (auto& id : _removedAssets)
 			content.DeleteAsset(id);
+
+		// Write new covers
+		for (auto& cover : _coverWidgets)
+		{
+			if (cover.assetId.empty() and not cover.data.empty())
+				cover.assetId = content.CreateLargePortrait(_worldId, cover.format, cover.data);
+		}
+
+		// Update cover
+		if (not _coverWidgets.empty())
+		{
+			if (_coverWidgets.front().assetId != _coverAssetId)
+			{
+				content.ReplaceCoverImage(_worldId, _coverWidgets.front().assetId);
+				_coverAssetId = _coverWidgets.front().assetId;
+			}
+		}
 
 		// Write new backgrounds
 		for (auto& background : _backgroundWidgets)

@@ -10,6 +10,9 @@ namespace fig::gui
 		auto pBorderRenderer = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 		pBorderRenderer->SetColor(fig::color_ref(Color::Border).WithAlpha(0xC0));
 
+		auto pBackgroundRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_6PX, 8);
+		pBackgroundRenderer->SetColor(Color::ButtonDefaultBackground);
+
 		_pLabel = CreateControl<StaticText>("", FontFace::Default, 14.0);
 		_pLabel->SetForegroundColor(Color::HintText);
 		_pLabel->SetMaxWidth(102);

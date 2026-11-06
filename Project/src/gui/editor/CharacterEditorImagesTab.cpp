@@ -3,9 +3,9 @@
 #include "gui/editor/CharacterPortraitWidget.h"
 #include "gui/editor/CharacterBackgroundWidget.h"
 #include "gui/editor/CharacterSmallPortraitWidget.h"
-#include "gui/editor/AddImageButton.h"
 #include "gui/NonOwningImageWithMask.h"
 #include "gui/GridSizer.h"
+#include "gui/ButtonWithIcon.h"
 #include "gui/Menu.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
@@ -163,8 +163,10 @@ namespace fig::gui
 		}
 
 		// Add portrait
-		auto pAddButton = CreateControl<AddImageButton>();
+		auto pAddButton = CreateControl<ButtonWithIcon>(Icon::PLUS, true);
+		pAddButton->SetSize(Constants::GUI::CharacterEditor::PortraitWidth, Constants::GUI::CharacterEditor::PortraitHeight);
 		pAddButton->SetDelegate([this] { OpenFile(CharacterImageType::Portrait); });
+		pAddButton->SetVisible(_portraitWidgets.size() < Constants::GUI::CharacterEditor::MaxPortraits);
 		_pAddPortraitButton = pAddButton;
 		_pPortraitGridSizer->Add(_pAddPortraitButton, 0, SizerFlag::All, 6);
 	}
@@ -193,9 +195,10 @@ namespace fig::gui
 		}
 
 		// Add background
-		auto pAddButton = CreateControl<AddImageButton>();
+		auto pAddButton = CreateControl<ButtonWithIcon>(Icon::PLUS, true);
 		pAddButton->SetSize(Constants::GUI::CharacterEditor::BackgroundWidth, Constants::GUI::CharacterEditor::BackgroundHeight);
 		pAddButton->SetDelegate([this] { OpenFile(CharacterImageType::Background); });
+		pAddButton->SetVisible(_backgroundWidgets.size() < Constants::GUI::CharacterEditor::MaxBackgrounds);
 		_pAddBackgroundButton = pAddButton;
 		_pBackgroundGridSizer->Add(_pAddBackgroundButton, 0, SizerFlag::All, 6);
 	}
@@ -282,7 +285,7 @@ namespace fig::gui
 		_pPortraitGridSizer->Remove(portrait.pControl);
 		DestroyChild(portrait.pControl);
 		_portraitWidgets.erase(_portraitWidgets.cbegin() + index);
-
+		_pAddPortraitButton->SetVisible(_portraitWidgets.size() < Constants::GUI::CharacterEditor::MaxPortraits);
 		if (wasCover && _portraitWidgets.size() > 0uz)
 			SelectCover(0uz);
 		InvalidateLayout();
@@ -332,7 +335,7 @@ namespace fig::gui
 		_pBackgroundGridSizer->Remove(background.pControl);
 		DestroyChild(background.pControl);
 		_backgroundWidgets.erase(_backgroundWidgets.cbegin() + index);
-
+		_pAddBackgroundButton->SetVisible(_backgroundWidgets.size() < Constants::GUI::CharacterEditor::MaxBackgrounds);
 		InvalidateLayout();
 		SetDirty();
 	}
@@ -505,6 +508,8 @@ namespace fig::gui
 
 		if (bChanged)
 		{
+			_pAddPortraitButton->SetVisible(_portraitWidgets.size() < Constants::GUI::CharacterEditor::MaxPortraits);
+			_pAddBackgroundButton->SetVisible(_backgroundWidgets.size() < Constants::GUI::CharacterEditor::MaxBackgrounds);
 			LayoutNow();
 			SetDirty();
 		}
@@ -517,9 +522,12 @@ namespace fig::gui
 
 		if (_portraitWidgets.empty())
 		{
-			// Remove cover
+			// Remove cover assets
 			if (auto try_cover = Global::GetUserContent().GetAssets().FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), _characterId))
+			{
 				_removedAssets.push_back((*try_cover).id);
+				_removedAssets.push_back((*try_cover).GetMeta<fig::uuid>(MetaTag::ReferenceToOriginal).value_or({}));
+			}
 		}
 
 		// Remove assets
