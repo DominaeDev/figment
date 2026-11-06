@@ -51,6 +51,7 @@ namespace fig::gui
 		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::Scenario, DataFormat::TextXml));
 
 		_assetId = asset.id;
+		_bCharacterScenario = false;
 		_scenario = {};
 		_scenario.name = "Untitled story";
 		_scenario.roles.emplace_back(Scenario::RoleSlot {
@@ -90,7 +91,9 @@ namespace fig::gui
 		if (auto try_scenario = Global::GetUserContent().Get<fig::data::Scenario>(assetId))
 		{
 			_assetId = assetId;
+			_bCharacterScenario = false;
 			_scenario = fig::data::Scenario { *try_scenario };
+
 			StoryEditorArgs args
 			{
 				.assetId = _assetId,
@@ -136,6 +139,8 @@ namespace fig::gui
 			else
 				return false; // Failed
 		}
+
+		_bCharacterScenario = true;
 
 		StoryEditorArgs args
 		{
@@ -253,7 +258,7 @@ namespace fig::gui
 	{
 		if (Save())
 		{
-			PushEvent(UserEvent::NavigateToStories);
+			PushEvent(_bCharacterScenario ? UserEvent::NavigateToHome : UserEvent::NavigateToStories);
 			return;
 		}
 

@@ -29,5 +29,6 @@ namespace fig::gui
 		fig::uuid _assetId {};
 		fig::data::Scenario _scenario {};
 		bool _bEditing {};
+		bool _bCharacterScenario { false };
 	};
 }

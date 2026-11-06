@@ -125,17 +125,25 @@ namespace fig::io
 					.flags = { fig::data::Scenario::RoleSlot::Flag::Required, fig::data::Scenario::RoleSlot::Flag::User },
 				});
 
+				auto& description = normalize_characters(card.data.scenario);
+				if (card.data.name.size() > 3)
+					replace_inplace(description, card.data.name, "{character}");
+
 				Scenario::Scene scene {
 					.id = _CreateUUID(),
 					.name = "Greeting",
-					.content = card.data.scenario,
+					.content = description,
 					.ttl = 15,
 					.bEntryPoint = true,
 				};
 
 				if (not card.data.greeting.empty())
 				{
-					auto messages = ChatFormatter::AnalyseMessage(normalize_characters(card.data.greeting));
+					auto& greeting = normalize_characters(card.data.greeting);
+					if (card.data.name.size() > 3)
+						replace_inplace(greeting, card.data.name, "{character}");
+
+					auto messages = ChatFormatter::AnalyseMessage(greeting);
 					for (auto& message : messages)
 					{
 						if (message.msgType == MessageType::Narration)

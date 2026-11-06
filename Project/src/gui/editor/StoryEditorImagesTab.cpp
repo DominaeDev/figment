@@ -328,7 +328,8 @@ namespace fig::gui
 
 		if (bChanged)
 		{
-			_pAddCoverButton->SetVisible(_coverWidgets.empty());
+			if (_pAddCoverButton)
+				_pAddCoverButton->SetVisible(_coverWidgets.empty());
 			_pAddBackgroundButton->SetVisible(_backgroundWidgets.size() < Constants::GUI::CharacterEditor::MaxBackgrounds);
 			LayoutNow();
 			SetDirty();

@@ -1461,4 +1461,18 @@ namespace fig
 		}
 	}
 
+	fig::string& replace_all(fig::string& text, fig::string_view from, fig::string_view to)
+	{
+		if (from.empty())
+			return text;
+
+		size_t position = text.find(from);
+		while (position != fig::string::npos)
+		{
+			text.replace(position, from.size(), to);
+			position = text.find(from, position + to.size());
+		}
+		return text;
+	}
+
 }
