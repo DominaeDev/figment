@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include <algorithm>
 #include <c_resource.h>
 #include <tuple>
@@ -8,9 +8,26 @@
 #include "gui/GUIUtility.h"
 #include "gui/AppResources.h"
 #include "io/FileUtility.h"
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include <stb_image_resize2.h>
 
 namespace fig
 {
+	static constexpr int32_t pixel_stride(SDL_PixelFormat format)
+	{
+		switch (format)
+		{
+		case SDL_PIXELFORMAT_RGB24:
+			return 3;
+		case SDL_PIXELFORMAT_RGBA32:
+		case SDL_PIXELFORMAT_RGBA8888:
+			return 4;
+		default:
+			assert(false);
+			return 3;
+		}
+	}
+
 	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, fig::surface_ptr pSurface)
 	{
 		if (!pSurface)
@@ -67,9 +84,7 @@ namespace fig
 			if (!surface)
 				return {};
 
-			auto scaled = ScaleSurface(surface, width, height, fit);
-//			IMG_SavePNG(scaled.get(), "./resized.png");
-			return scaled;
+			return ScaleSurface(surface, width, height, fit);
 		}
 		catch (...)
 		{
@@ -77,16 +92,51 @@ namespace fig
 		}
 	}
 
-	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit, bool bLinear)
+	static void StretchSurface(SDL_Surface* pSource, const fig::rect& srcRect, SDL_Surface* pTarget, const fig::rect& dstRect, ScaleMode scaleMode)
+	{
+		if (scaleMode == ScaleMode::Nearest)
+		{
+			if (not SDL_StretchSurface(pSource, &srcRect, pTarget, &dstRect, SDL_SCALEMODE_NEAREST))
+				SDL_Log("Couldn't resize surface: %s", SDL_GetError());
+		}
+		else if (scaleMode == ScaleMode::Linear and pixel_stride(pTarget->format) == 4)
+		{
+			if (not SDL_StretchSurface(pSource, &srcRect, pTarget, &dstRect, SDL_SCALEMODE_LINEAR))
+				SDL_Log("Couldn't resize surface: %s", SDL_GetError());
+		}
+		else
+		{
+			if (srcRect.w <= 0 || srcRect.h <= 0 || dstRect.w <= 0 || dstRect.h <= 0)
+				return;
+
+			assert(pSource->format == pTarget->format);
+
+			auto stride = pixel_stride(pSource->format);
+			auto pSourcePixels = static_cast<const uint8_t*>(pSource->pixels) + srcRect.y * pSource->pitch + srcRect.x * stride;
+			auto pTargetPixels = static_cast<uint8_t*>(pTarget->pixels) + dstRect.y * pTarget->pitch + dstRect.x * stride;
+
+			stbir_filter filter;
+			if (scaleMode == ScaleMode::Box)
+				filter = STBIR_FILTER_BOX;
+			else if (scaleMode == ScaleMode::Mitchell)
+				filter = STBIR_FILTER_MITCHELL;
+			else
+				filter = STBIR_FILTER_DEFAULT;
+
+			stbir_resize(
+				pSourcePixels, srcRect.w, srcRect.h, pSource->pitch,
+				pTargetPixels, dstRect.w, dstRect.h, pTarget->pitch,
+				stride == 4 ? STBIR_RGBA : STBIR_RGB, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, filter);
+		}
+	}
+
+	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit, ScaleMode scaleMode)
 	{
 		auto pImage = surface.get();
 		if (pImage == nullptr || width <= 0 || height <= 0)
 			return {};
 
-		auto pSurface = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGBA8888);
-		
-		fig::sdl::Surface pScaledSurface;
-		pScaledSurface.reset(pSurface);
+		fig::sdl::Surface pScaledSurface(width, height, surface->format);
 
 		if (surface->w == width and surface->h == height)
 			fit = ImageFit::None;
@@ -95,13 +145,13 @@ namespace fig
 		{
 			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
 			fig::rect dstRect { 0, 0, width, height };
-			SDL_BlitSurface(pImage, &srcRect, pSurface, &dstRect);
+			SDL_BlitSurface(pImage, &srcRect, pScaledSurface.get(), &dstRect);
 		}
 		else if (fit == ImageFit::Stretch)
 		{
 			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
 			fig::rect dstRect { 0, 0, width, height };
-			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
+			StretchSurface(pImage, srcRect, pScaledSurface.get(), dstRect, scaleMode);
 		}
 		else if (fit == ImageFit::SquarePortrait)
 		{
@@ -110,7 +160,7 @@ namespace fig
 			float offset = std::min(toF(pImage->w) * fContract, std::max(toF(pImage->h) - toF(pImage->w) * fContract, 0.0f));
 			fig::rect srcRect { toI(offset), toI(offset), toI(size), toI(size) };
 			fig::rect dstRect { 0, 0, width, height };
-			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
+			StretchSurface(pImage, srcRect, pScaledSurface.get(), dstRect, scaleMode);
 		}
 		else
 		{
@@ -154,7 +204,7 @@ namespace fig
 			if (SDL_GetRectIntersection(&dstRect, &fixedRect, &tmp))
 				dstRect = tmp;
 
-			SDL_StretchSurface(pImage, &srcRect, pSurface, &dstRect, bLinear ? SDL_SCALEMODE_LINEAR : SDL_SCALEMODE_NEAREST);
+			StretchSurface(pImage, srcRect, pScaledSurface.get(), dstRect, scaleMode);
 		}
 
 		return pScaledSurface;
@@ -171,7 +221,7 @@ namespace fig
 			auto pixels = pMask->pixels;
 			fig::bytes data(pMask->w * pMask->h);
 			for (size_t i = 0; i < toUZ(pMask->w * pMask->h); ++i)
-				data.data()[i] = ((std::byte*)pixels)[i * (pMask->pitch / pMask->w)];
+				data.data()[i] = ((std::byte*)pixels)[i * (pixel_stride(pMask->format))];
 			fig::io::WriteFile("./mask.bin", data);
 			SDL_UnlockSurface(pMask);
 		}
@@ -206,7 +256,7 @@ namespace fig
 		if (SDL_LockSurface(pImage))
 		{
 			auto pixels = (uint8_t*)pImage->pixels;
-			auto stride = pImage->pitch / pImage->w;
+			auto stride = pixel_stride(pImage->format);
 			
 			const std::tuple<size_t, size_t, size_t, size_t> offsets[4] {
 				/* Top left */		{ 0, 0, 0, 0 },
@@ -260,7 +310,7 @@ namespace fig
 		auto pBGImage = AppResources::GetImage(Resource::CARD_BACKGROUND_DEFAULT);
 		SDL_BlitSurfaceScaled(pBGImage, NULL, pSurface, NULL, SDL_SCALEMODE_LINEAR);
 
-		auto pScaledImage = ScaleSurface(surface, coverWidth, coverHeight, ImageFit::Portrait);
+		auto pScaledImage = ScaleSurface(surface, coverWidth, coverHeight, ImageFit::Portrait, ScaleMode::Box);
 		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
 
 		if (bAlpha)
@@ -285,7 +335,7 @@ namespace fig
 		auto pBGImage = AppResources::GetImage(Resource::SQUARE_BACKGROUND_DEFAULT);
 		SDL_BlitSurface(pBGImage, NULL, pSurface, NULL);
 
-		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->w, ImageFit::SquarePortrait, true);
+		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->w, ImageFit::SquarePortrait, ScaleMode::Mitchell);
 		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
 		return fig::sdl::Surface::from_ptr(pSurface);
 	}
@@ -299,7 +349,7 @@ namespace fig
 		// Fill black
 		SDL_FillSurfaceRect(pSurface, NULL, SDL_MapRGB(SDL_GetPixelFormatDetails(pSurface->format), NULL, 0xFF, 0xFF, 0xFF));
 
-		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->h, width > height ? ImageFit::Outside : ImageFit::Portrait, true);
+		auto pScaledImage = ScaleSurface(surface, pSurface->w, pSurface->h, width > height ? ImageFit::Outside : ImageFit::Portrait, ScaleMode::Mitchell);
 		SDL_BlitSurface(pScaledImage.get(), NULL, pSurface, NULL);
 		return fig::sdl::Surface::from_ptr(pSurface);
 	}

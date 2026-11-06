@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/GUITypes.h"
 #include "io/Asset.h"
@@ -107,7 +107,8 @@ namespace fig
 	std::optional<fig::sdl::Surface> LoadImage(fig::path filename);
 	std::optional<fig::sdl::Surface> LoadImageFromMemory(fig::byte_span data);
 	fig::sdl::Surface LoadAndResizeImage(fig::path filename, int32_t width, int32_t height, ImageFit fit = ImageFit::None);
-	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit = ImageFit::None, bool bLinear = true);
+	enum class ScaleMode { Nearest, Linear, Box, Mitchell };
+	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit = ImageFit::None, ScaleMode scaleMode = ScaleMode::Linear);
 	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha);
 	fig::sdl::Surface CreateSquarePortrait(const fig::sdl::Surface& surface);
 	fig::sdl::Surface CreateProfileImage(const fig::sdl::Surface& surface);

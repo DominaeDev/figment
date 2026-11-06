@@ -228,6 +228,9 @@
     <Filter Include="Source Files\Frontend\GUI\Screens\WorldScreen\Controls">
       <UniqueIdentifier>{ec44581e-6a7d-4fbf-8659-076ebd4eeba0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Third-party\stb">
+      <UniqueIdentifier>{1bdcd690-6494-411d-b494-081d55662ba7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -2193,6 +2196,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\CardListScreen.impl.h">
       <Filter>Source Files\Frontend\GUI\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\stb\include\stb_image_resize2.h">
+      <Filter>Source Files\Third-party\stb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

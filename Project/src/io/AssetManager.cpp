@@ -1076,50 +1076,14 @@ namespace fig::io
 			CreateSurface(cover, fullSurface);
 		}
 
-		if constexpr (Disabled)
-		{
-			if (fullSurface.empty())
-			{
-				// Create cover from portrait
-				if (auto findPortrait = FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait), characterAssetID))
-				{
-					auto& portraitAsset = findPortrait.value();
-					if (LoadAsset(portraitAsset) == FileError::NoError)
-					{
-						if (auto portraitImage = LoadImageFromMemory(portraitAsset.data))
-						{
-							auto coverImage = ScaleSurface(portraitImage.value(), Constants::GUI::CardWidth, Constants::GUI::CardHeight, ImageFit::Portrait);
-
-							// Save cover asset (bitmap)
-							{
-								std::scoped_lock lock { _assetsMutex };
-								auto& coverAsset = CreateBitmapAsset_NoLock(ImageAssetType::CoverImage, coverImage, characterAssetID);
-								coverAsset.SetMeta(MetaTag::Version, uint8_t { 1 });
-								coverAsset.SetMeta(MetaTag::ReferenceToOriginal, portraitAsset.id);
-							}
-
-							fullSurface = std::move(coverImage);
-						}
-					}
-				}
-			}
-		}
-
 		if (fullSurface.empty())
 			return AsyncLoadError::FileNotFound;
 
 		// Half-version
 		int32_t expandX = Constants::GUI::Cards::Half::ZoomPixels * 2;
 		int32_t expandY = toI(std::ceilf(toF(Constants::GUI::Cards::Half::ZoomPixels * 2) * toF(Constants::GUI::HalfCardHeight) / toF(Constants::GUI::HalfCardWidth)));
-		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HalfCardWidth + expandX, Constants::GUI::HalfCardHeight + expandY, ImageFit::Stretch, true);
-
-		// Round corners
-		if constexpr (Disabled)
-		{
-			MaskCorners(halfSurface, MaskType::CARD_CORNER_MASK);
-			MaskCorners(fullSurface, MaskType::CARD_CORNER_MASK);
-		}
-
+		halfSurface = ScaleSurface(fullSurface, Constants::GUI::HalfCardWidth + expandX, Constants::GUI::HalfCardHeight + expandY, ImageFit::Stretch, ScaleMode::Linear);
+		
 		outResult = std::make_shared<AsyncResultVariant>(
 			std::in_place_type<AsyncResult_CoverPair>,
 			AsyncResult_CoverPair {
