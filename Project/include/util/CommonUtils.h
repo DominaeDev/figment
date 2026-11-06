@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "util/StringUtils.h"
@@ -404,6 +404,13 @@ namespace fig
 	constexpr void queue_clear(std::queue<T>& q)
 	{
 		std::queue<T> empty;
+		std::swap(q, empty);
+	}
+
+	template<typename T>
+	constexpr void stack_clear(std::stack<T>& q)
+	{
+		std::stack<T> empty;
 		std::swap(q, empty);
 	}
 

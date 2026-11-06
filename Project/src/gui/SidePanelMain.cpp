@@ -96,11 +96,13 @@ namespace fig::gui
 		pChatButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToChatList); });
 		pChatButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pCharactersButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_CHARACTERS_SMALL, false);
-		pCharactersButtonSmall->SetDelegate([]() { MainFrame::GetInstance().ChangeScreen(ScreenType::Home); });
+		pCharactersButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToHome); });
 		pCharactersButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pScenariosButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_SCENARIOS_SMALL, false);
+		pScenariosButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToStories); });
 		pScenariosButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pWorldsButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_WORLDS_SMALL, false);
+		pWorldsButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToWorlds); });
 		pWorldsButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pModelsButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_MODELS_SMALL, false);
 		pModelsButtonSmall->SetTheme(ButtonThemes::SidePanel);

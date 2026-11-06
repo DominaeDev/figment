@@ -19,6 +19,7 @@ namespace fig::gui
 		NavigateToStories,
 		NavigateToWorlds,
 		NavigateToChatList,
+		NavigateBack,
 		SelectEditorTab,
 		StartChat,
 		TabNavigationForward,

@@ -36,7 +36,7 @@ namespace fig::gui
 			for (size_t i = 0uz; i < _tabs.size(); ++i)
 				_tabs[i]->OnClose();
 			OnClose();
-			PushEvent(UserEvent::NavigateToHome);
+			PushEvent(UserEvent::NavigateBack);
 		};
 
 		if (not IsDirty())

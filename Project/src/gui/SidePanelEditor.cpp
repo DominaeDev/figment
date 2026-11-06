@@ -54,7 +54,7 @@ namespace fig::gui
 		pBackButton->SetTheme(ButtonThemes::SidePanel);
 		pBackButton->SetX(3);
 		pBackButton->SetY((Constants::GUI::SidePanel::HeaderHeight - pBackButton->GetHeight()) / 2);
-		pBackButton->SetDelegate([this]() { PushEvent(UserEvent::NavigateToHome); });
+		pBackButton->SetDelegate([this]() { PushEvent(UserEvent::NavigateBack); });
 
 		if (_pEditor)
 		{

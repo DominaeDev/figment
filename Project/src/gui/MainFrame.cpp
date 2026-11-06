@@ -77,7 +77,7 @@ namespace fig::gui
 
 		// Try auto sign-in
 		if (not AutoSignIn())
-			ShowLoginScreen();
+			NavigateTo(ScreenType::Login);
 	}
 
 	MainFrame::~MainFrame()
@@ -200,13 +200,6 @@ namespace fig::gui
 		}
 	}
 
-	void MainFrame::ShowLoginScreen()
-	{
-		// Show login screen
-		ChangeScreen(ScreenType::Login);
-		ShowSidePanel(false);
-	}
-
 	bool MainFrame::TrySignIn(const fig::user::UserProfile& profile, fig::string_view password) noexcept
 	{
 		auto& userMngr = Global::GetUserManager();
@@ -241,7 +234,7 @@ namespace fig::gui
 		Global::GetSettings().SetUUID(AppSetting::LastUser, profile.id);
 		Global::GetSettings().SetBool(AppSetting::SignedIn, true);
 
-		ChangeScreen(ScreenType::Home);
+		NavigateHome();
 		PushEvent(UserEvent::UserSignedIn, &profile);
 
 		auto theme = Global::GetUserSettings().GetColorTheme();
@@ -252,9 +245,7 @@ namespace fig::gui
 	void MainFrame::OnSignedOut() noexcept
 	{
 		PushEvent(UserEvent::UserSignedOut);
-
-		ShowSidePanel(false);
-		ChangeScreen(ScreenType::Login);
+		NavigateHome();
 
 		Global::GetSettings().SetBool(AppSetting::SignedIn, false);
 	}
@@ -339,7 +330,7 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_4 and mods.Alt)
 					{
-						ChangeScreen(ScreenType::Debug);
+						NavigateTo(ScreenType::Debug);
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F12 and mods.Control)
@@ -349,19 +340,22 @@ namespace fig::gui
 					}
 					else if (keyEvent.key == SDLK_1 and mods.Alt)
 					{
-						ChangeScreen(ScreenType::Home);
+						NavigateHome();
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_2 and mods.Alt)
 					{
 						if constexpr (Debugging) //! @temp
 						{
-							auto characterId = fig::uuid::from_str("c44fe884-073e-4e6e-991c-0f8f875891de");
-							auto pChatScreen = ChangeScreen<ChatScreen>();
-							pChatScreen->GetSidePanel()->SetCharacter(characterId);
-							if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(characterId))
+							NavigateTo(ScreenType::Chat);
+							if (auto pChatScreen = GetScreen<ChatScreen>())
 							{
-								pChatScreen->GetBackground()->SetImage((*try_portrait).id);
+								auto characterId = fig::uuid::from_str("c44fe884-073e-4e6e-991c-0f8f875891de");
+								pChatScreen->GetSidePanel()->SetCharacter(characterId);
+								if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(characterId))
+								{
+									pChatScreen->GetBackground()->SetImage((*try_portrait).id);
+								}
 							}
 							return EventResult::Handled;
 						}
@@ -429,25 +423,27 @@ namespace fig::gui
 		}
 		else if (IsUserEvent(event, UserEvent::NavigateToHome))
 		{
-			if (Global::GetUserManager().IsSignedIn())
-				ChangeScreen(ScreenType::Home);
+			NavigateHome();
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::NavigateBack))
+		{
+			NavigateBack();
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::NavigateToStories))
 		{
-			if (Global::GetUserManager().IsSignedIn())
-				ChangeScreen(ScreenType::Stories);
+			NavigateTo(ScreenType::Stories);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::NavigateToWorlds))
 		{
-			if (Global::GetUserManager().IsSignedIn())
-				ChangeScreen(ScreenType::Worlds);
+			NavigateTo(ScreenType::Worlds);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::NavigateToChatList))
 		{
-			ChangeScreen(ScreenType::ChatListing);
+			NavigateTo(ScreenType::ChatListing);
 			if (HasUserData1(event))
 			{
 				auto& characterId = GetUserData1<fig::uuid>(event);
@@ -494,9 +490,7 @@ namespace fig::gui
 		}
 		else if (IsUserEvent(event, UserEvent::CreateCharacter))
 		{
-			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
-			if (not pEditor->NewCharacter())
-				ChangeScreen<CharacterScreen>(); // Error
+			NavigateTo(ScreenType::Editor, NavigationState::Context::Character, {}, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::ImportCharacter))
@@ -539,57 +533,40 @@ namespace fig::gui
 		else if (IsUserEvent(event, UserEvent::EditCharacter))
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
-			if (not pEditor->EditCharacter(characterId))
-				ChangeScreen<CharacterScreen>(); // Error
+			NavigateTo(ScreenType::Editor, NavigationState::Context::Character, characterId, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::CreateStory))
 		{
-			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
-			if (not pEditor->NewStory())
-				ChangeScreen<StoryScreen>(); // Error
+			NavigateTo(ScreenType::Editor, NavigationState::Context::Scenario, {}, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditStory))
 		{
 			const fig::uuid& scenarioId = GetUserData<fig::uuid>(event);
-			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
-			if (not pEditor->EditStory(scenarioId))
-				ChangeScreen<StoryScreen>(); // Error
+			NavigateTo(ScreenType::Editor, NavigationState::Context::Scenario, scenarioId, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::CreateWorld))
 		{
-			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<WorldEditor>();
-			if (not pEditor->NewWorld())
-				ChangeScreen<StoryScreen>(); // Error
+			NavigateTo(ScreenType::Editor, NavigationState::Context::World, {}, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditWorld))
 		{
 			const fig::uuid& worldId = GetUserData<fig::uuid>(event);
-			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<WorldEditor>();
-			if (not pEditor->EditWorld(worldId))
-				ChangeScreen<StoryScreen>(); // Error
+			NavigateTo(ScreenType::Editor, NavigationState::Context::World, worldId, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditCharacterStory))
 		{
 			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
-			if (not pEditor->EditCharacterStory(characterId))
-				ChangeScreen<CharacterScreen>(); // Error
+			NavigateTo(ScreenType::Editor, NavigationState::Context::CharacterScenario, characterId, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditUserSettings))
 		{
-			auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<UserSettingsEditor>();
-			if (not pEditor->Initialize({}))
-			{
-				// Error
-				ChangeScreen<CharacterScreen>();
-			}
+			NavigateTo(ScreenType::Editor, NavigationState::Context::UserSettings, {}, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::StartTextInput)
@@ -730,7 +707,7 @@ namespace fig::gui
 
 	bool MainFrame::StartChat(const fig::uuid& characterId)
 	{
-		ChangeScreen(ScreenType::Chat);
+		NavigateTo(ScreenType::Chat);
 		auto pChatScreen = GetScreen<ChatScreen>();
 
 		if (auto character = Global::GetUserContent().Get<Character>(characterId))
@@ -783,5 +760,104 @@ namespace fig::gui
 			Global::GetUserSettings().SetColorTheme(theme);
 		AppColors::SetTheme(theme, bTransition);
 		PushEvent(UserEvent::ColorThemeChanged);
+	}
+	
+	void MainFrame::NavigateTo(ScreenType screen, NavigationState::Context context, const fig::uuid& assetId, bool bPush)
+	{
+		if (not bPush)
+			stack_clear(_navigation);
+
+		_navigation.push(NavigationState {
+			.screen = screen,
+			.context = context,
+			.assetId = assetId,
+		});
+
+		switch (screen)
+		{
+		case ScreenType::Editor:
+			if (Global::GetUserManager().IsSignedIn())
+			{
+				if (context == NavigationState::Context::Character)
+				{
+					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
+					if (assetId.empty() and pEditor->NewCharacter())
+						return;
+					if (not assetId.empty() and pEditor->EditCharacter(assetId))
+						return;
+				}
+				else if (context == NavigationState::Context::CharacterScenario)
+				{
+					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
+					if (not assetId.empty() and pEditor->EditCharacterStory(assetId))
+						return;
+				}
+				else if (context == NavigationState::Context::Scenario)
+				{
+					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
+					if (assetId.empty() and pEditor->NewStory())
+						return;
+					if (not assetId.empty() and pEditor->EditStory(assetId))
+						return;
+				}
+				else if (context == NavigationState::Context::World)
+				{
+					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<WorldEditor>();
+					if (assetId.empty() and pEditor->NewWorld())
+						return;
+					if (not assetId.empty() and pEditor->EditWorld(assetId))
+						return;
+				}
+				else if (context == NavigationState::Context::UserSettings)
+				{
+					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<UserSettingsEditor>();
+					if (pEditor->Initialize({}))
+						return;
+				}
+			}
+			break;
+		case ScreenType::Login:
+			ChangeScreen(ScreenType::Login);
+			ShowSidePanel(false);
+			return;
+		default:
+			if (Global::GetUserManager().IsSignedIn())
+			{
+				ChangeScreen(screen);
+				return;
+			}
+			break;
+		}
+
+		// Error
+		if (bPush)
+			NavigateBack();
+	}
+
+	void MainFrame::NavigateBack()
+	{
+		_navigation.pop();
+
+		if (_navigation.empty())
+		{
+			NavigateHome();
+			return;
+		}
+		else
+		{
+			NavigationState state = _navigation.top();
+			NavigateTo(state.screen, state.context, state.assetId, false);
+		}
+	}
+
+	void MainFrame::NavigateHome()
+	{
+		for (; not _navigation.empty();)
+			_navigation.pop();
+
+		if (Global::IsSignedIn())
+			NavigateTo(ScreenType::Home);
+		else
+			NavigateTo(ScreenType::Login);
 	}
 }

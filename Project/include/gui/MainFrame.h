@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Frame.h"
 #include "chat/ChatCommands.h"
@@ -7,6 +7,7 @@
 #include "gui/Screen.h"
 
 #include <unordered_map>
+#include <stack>
 
 namespace fig::llm
 {
@@ -22,6 +23,13 @@ namespace fig::gui
 {
 	class SidePanel;
 	enum class ColorTheme;
+
+	struct NavigationState
+	{
+		ScreenType screen { ScreenType::Undefined };
+		enum class Context { None, Character, CharacterScenario, Scenario, World, UserSettings, } context {};
+		fig::uuid assetId {};
+	};
 
 	class MainFrame : public Frame
 	{
@@ -52,6 +60,27 @@ namespace fig::gui
 				return dynamic_cast<T*>(it->second);
 			return nullptr;
 		}
+
+		void ShowSidePanel(bool bShow) noexcept;
+		fig::observer_ptr<SidePanel> GetSidePanel() noexcept { return _pSidePanel; }
+
+		bool TrySignIn(const fig::user::UserProfile& profile, fig::string_view password) noexcept;
+		bool SignOut() noexcept;
+		void Close();
+
+		void InitializeModel();
+		void UnloadModel();
+
+		void ChangeColorTheme(ColorTheme theme, bool bTransition = false);
+
+		void NavigateTo(ScreenType screen, NavigationState::Context context = {}, const fig::uuid& assetId = {}, bool bPush = false);
+		void NavigateBack();
+		void NavigateHome();
+
+	protected:
+		template<IsScreen T>
+		void RegisterScreen(ScreenType screen);
+		void UnregisterScreen(ScreenType screen);
 		void ChangeScreen(ScreenType screen);
 
 		template <IsScreen T>
@@ -68,23 +97,6 @@ namespace fig::gui
 			return GetScreen<T>();
 		}
 
-		void ShowLoginScreen();
-		void ShowSidePanel(bool bShow) noexcept;
-		fig::observer_ptr<SidePanel> GetSidePanel() noexcept { return _pSidePanel; }
-
-		bool TrySignIn(const fig::user::UserProfile& profile, fig::string_view password) noexcept;
-		bool SignOut() noexcept;
-		void Close();
-
-		void InitializeModel();
-		void UnloadModel();
-
-		void ChangeColorTheme(ColorTheme theme, bool bTransition = false);
-
-	protected:
-		template<IsScreen T>
-		void RegisterScreen(ScreenType screen);
-		void UnregisterScreen(ScreenType screen);
 		EventResult BroadcastEvent(fig::event& event);
 		bool HandleStatusBarEvents(fig::event& event);
 
@@ -106,5 +118,7 @@ namespace fig::gui
 		fig::observer_ptr<SidePanel> _pSidePanel;
 		fig::opaque_ptr _pFocusedControl {};
 		ScreenType _currentScreen {};
+		
+		std::stack<NavigationState> _navigation {};
 	};
 }

@@ -253,7 +253,7 @@ namespace fig::gui
 	{
 		if (Save())
 		{
-			PushEvent(UserEvent::NavigateToHome);
+			PushEvent(UserEvent::NavigateToStories);
 			return;
 		}
 
