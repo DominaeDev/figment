@@ -14,6 +14,11 @@ namespace fig::Constants
 		constexpr fig::const_string ApplicationName = "Figment";
 	}
 
+	namespace Debug
+	{
+		constexpr fig::const_string TestCharacterId = "0d1f4008-37e4-4406-8926-61535d908ae5";
+	}
+
 	namespace GUI
 	{
 		constexpr fig::coord WindowDefaultWidth = 1320;

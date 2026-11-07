@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "chat/ChatSession.h"
 #include "chat/MessagePoller.h"
 #include "data/Character.h"

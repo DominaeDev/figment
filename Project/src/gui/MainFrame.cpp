@@ -350,12 +350,8 @@ namespace fig::gui
 							NavigateTo(ScreenType::Chat);
 							if (auto pChatScreen = GetScreen<ChatScreen>())
 							{
-								auto characterId = fig::uuid::from_str("c44fe884-073e-4e6e-991c-0f8f875891de");
-								pChatScreen->GetSidePanel()->SetCharacter(characterId);
-								if (auto try_portrait = Global::GetUserContent().GetLargePortraitForCharacter(characterId))
-								{
-									pChatScreen->GetBackground()->SetImage((*try_portrait).id);
-								}
+								auto characterId = fig::uuid { Constants::Debug::TestCharacterId };
+								StartChat(characterId);
 							}
 							return EventResult::Handled;
 						}
@@ -377,7 +373,7 @@ namespace fig::gui
 					else if (keyEvent.key == SDLK_F4 and mods.None)
 					{
 						Global::GetTTSBackend().Initialize();
-						auto _discarded = Global::GetTTSBackend().Speak(fig::uuid { "feb7e840-4198-4a63-898b-62ed2708cdee" }, ".");
+						auto _discarded = Global::GetTTSBackend().Speak(fig::uuid { Constants::Debug::TestCharacterId }, ".");
 						return EventResult::Handled;
 					}
 					else if (keyEvent.key == SDLK_F4 and mods.Control)
@@ -707,9 +703,6 @@ namespace fig::gui
 
 	bool MainFrame::StartChat(const fig::uuid& characterId)
 	{
-		NavigateTo(ScreenType::Chat);
-		auto pChatScreen = GetScreen<ChatScreen>();
-
 		if (auto character = Global::GetUserContent().Get<Character>(characterId))
 		{
 			// Preload speech model
@@ -748,6 +741,8 @@ namespace fig::gui
 			// Create instance
 			auto [chatInstanceId, chatLogId] = Global::GetUserContent().CreateChat(staging);  
 
+			NavigateTo(ScreenType::Chat);
+			auto pChatScreen = GetScreen<ChatScreen>();
 			pChatScreen->StartChat(staging, chatInstanceId, chatLogId);
 			return true;
 		}

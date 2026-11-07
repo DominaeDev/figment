@@ -1,4 +1,4 @@
-/*
+﻿/*
 MIT License
 
 Copyright (c) 2018 Xavier "Crashoz" Launey
@@ -131,7 +131,7 @@ public:
 		_mm_store_si128((__m128i*)data, x);
 	}
 
-	explicit UUID(const std::string& value)
+	explicit UUID(std::string_view value)
 	{
 		operator=(from_str(value));
 	}
@@ -206,10 +206,10 @@ public:
 		return mem;
 	}
 
-	static UUID from_str(const std::string& str)
+	static UUID from_str(std::string_view str)
 	{
 		if (str.length() == 36)
-			return _fromStrFactory(str.c_str());
+			return _fromStrFactory(str.data());
 		else if (str.length() == 32)
 			return _fromStrFactory(std::format("{}-{}-{}-{}-{}", str.substr(0, 8), str.substr(8, 4), str.substr(12, 4), str.substr(16, 4), str.substr(20)));
 		return {};

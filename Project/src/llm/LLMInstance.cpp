@@ -887,6 +887,7 @@ namespace fig::llm
 							.role = responderRole,
 							.msgType = msgType,
 							.isComplete = bEndOfMessageType,
+							.isGenerated = true,
 							.turn = current_turn,
 							.subMessageIndex = numMessages - 1,
 						});
@@ -1355,6 +1356,7 @@ namespace fig::llm
 						break;
 					}
 					fig::uuid subMessageId = _CreateUUID();
+					
 					_resultQueue.push(MessagePiece {
 						.responseId = responseId,
 						.subMessageId = subMessageId,
@@ -1363,6 +1365,7 @@ namespace fig::llm
 						.role = role,
 						.msgType = subMsg.msgType,
 						.isComplete = true,
+						.isGenerated = false,
 						.turn = current_turn,
 						.subMessageIndex = subMessageIndex++,
 					});

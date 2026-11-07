@@ -134,32 +134,33 @@ namespace fig::gui
 
 	void ChatScreen::StartChat(const fig::chat::ChatStaging& staging, fig::uuid chatInstanceId, fig::uuid chatLogId)
 	{
+		_pSession = std::make_shared<fig::chat::ChatSession>();
+		_pSession->Initialize(staging, Constants::LLM::DefaultChatOptions, chatInstanceId, chatLogId);
+
+		_pChatScroll->SetSession(_pSession);
+		_pInfoPanel->SetSession(*_pSession);
+		_pBackground->SetSession(*_pSession);
+
+		queue_clear(_commandQueue);
+
 		auto pLLM = Global::GetLLMInstance();
 		if (pLLM && !pLLM->IsInitialized())
 		{
-			_pSession = std::make_shared<fig::chat::ChatSession>();
-			_pSession->Initialize(staging, Constants::LLM::DefaultChatOptions, chatInstanceId, chatLogId);
-
 			LLMChatArguments llmArgs {
 				.wpSession = _pSession,
 				.options = Constants::LLM::DefaultChatOptions,
 			};
 			pLLM->Initialize(llmArgs);
-			_pChatScroll->SetSession(_pSession);
-
-			_pInfoPanel->SetSession(*_pSession);
-			_pBackground->SetSession(*_pSession);
-
-			_pSession->Save();
+	
 			_bStartedChat = true;
-			queue_clear(_commandQueue);
+			_pSession->Save();
 		}
 		else
 		{
 			LogLn("Failed to initialize chat");
 		}
 	}
-
+	
 	void ChatScreen::SetStatusBar(fig::string_view message)
 	{
 		MainFrame::GetInstance().SetStatusBar(toStr(message));

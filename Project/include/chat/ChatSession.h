@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "chat/ChatStaging.h"
 #include "chat/ChatLogger.h"

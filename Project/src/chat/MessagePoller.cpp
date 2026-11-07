@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "chat/MessagePoller.h"
 #include "llm/LLMInstance.h"
 #include "app/AppState.h"
@@ -41,6 +41,7 @@ namespace fig::chat
 				entry.role = piece.role;
 				entry.msgType = piece.msgType;
 				entry.complete = piece.isComplete;
+				entry.generated = piece.isGenerated;
 				entry.content += piece.content;
 				entry.turn = piece.turn;
 				entry.subTurn = piece.subMessageIndex;
@@ -57,6 +58,7 @@ namespace fig::chat
 					.msgType = piece.msgType,
 					.content = piece.content,
 					.complete = piece.isComplete,
+					.generated = piece.isGenerated,
 					.turn = piece.turn,
 					.subTurn = piece.subMessageIndex,
 				});

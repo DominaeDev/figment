@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "llm/LLMTypes.h"
 #include "llm/ModelState.h"
@@ -24,6 +24,7 @@ namespace fig::llm
 		fig::chat::Role role = fig::chat::Role::Undefined;
 		fig::chat::MessageType msgType = fig::chat::MessageType::Undefined;
 		bool isComplete = false;
+		bool isGenerated = false;	// not authored
 		int32_t turn {};
 		int32_t subMessageIndex {};
 	};

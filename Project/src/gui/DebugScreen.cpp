@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/DebugScreen.h"
 #include "gui/CardImage.h"
 #include "gui/AppResources.h"
@@ -205,8 +205,7 @@ namespace fig::gui
 
 	void DebugScreen::OnActivated()
 	{
-		_pCarousel->LoadCharacterPortraits(fig::uuid::from_str("c44fe884-073e-4e6e-991c-0f8f875891de"));
-
+		_pCarousel->LoadCharacterPortraits(fig::uuid { Constants::Debug::TestCharacterId });
 	}
 
 	void DebugScreen::OnUpdate(float fElapsed)

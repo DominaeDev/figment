@@ -182,13 +182,13 @@ namespace fig::gui
 		{
 			_pLabel->SetText("Instruction");
 			_pIcon->SetTexture(Icon::STORY_EDIT_INSTRUCT, true);
-			CreateContentTextBox(content, "Type an instruction for the AI to follow", false);
+			CreateContentTextBox(content, "Enter an instruction for the AI to follow", false);
 		}
 		else if (eventType == Scenario::Event::Type::ShowMessage)
 		{
-			_pLabel->SetText("Display user message");
+			_pLabel->SetText("Display message");
 			_pIcon->SetTexture(Icon::STORY_EDIT_USER_MESSAGE, true);
-			CreateContentTextBox(content, "Type a message for the user", true);
+			CreateContentTextBox(content, "Enter a message for the user", true);
 		}
 		_pColorBar->SetHeight(0);
 

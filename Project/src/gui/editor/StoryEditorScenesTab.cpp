@@ -106,7 +106,7 @@ namespace fig::gui
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::Instruct); });
 		menu.AddItem("Instigate response", Icon::STORY_EDIT_INSTIGATE)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::Instigate); });
-		menu.AddItem("Display user message", Icon::STORY_EDIT_USER_MESSAGE)
+		menu.AddItem("Display message", Icon::STORY_EDIT_USER_MESSAGE)
 			.SetDelegate([this] { AddEvent(Scenario::Event::Type::ShowMessage); });
 		menu.Show();
 	}
@@ -201,7 +201,7 @@ namespace fig::gui
 			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::Instruct); });
 		typeMenu.AddCheckItem("Instigate", pItem->pControl->GetEventType() == Scenario::Event::Type::Instigate)
 			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::Instigate); });
-		typeMenu.AddCheckItem("User message", pItem->pControl->GetEventType() == Scenario::Event::Type::ShowMessage)
+		typeMenu.AddCheckItem("Display message", pItem->pControl->GetEventType() == Scenario::Event::Type::ShowMessage)
 			.SetDelegate([this, eventIndex] { OnChangedEventType(eventIndex, Scenario::Event::Type::ShowMessage); });
 		menu.AddSeparator();
 

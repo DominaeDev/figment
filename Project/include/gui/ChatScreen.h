@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Screen.h"
 #include "chat/ChatCommands.h"
@@ -28,8 +28,10 @@ namespace fig::gui
 		ChatScreen(Frame* pParent);
 
 		void StartChat(const fig::chat::ChatStaging& staging, fig::uuid chatInstanceId, fig::uuid chatLogId);
+
 		fig::observer_ptr<InfoPanel> GetSidePanel() { return _pInfoPanel; }
 		fig::observer_ptr<ChatBackground> GetBackground() { return _pBackground; }
+
 
 	protected:
 		void OnUpdate(float fElapsed) override;

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/GUICommon.h"
 #include "gui/ChatScroll.h"
 #include "gui/ChatMessage.h"
@@ -320,10 +320,11 @@ namespace fig::gui
 				}
 			}
 
-			if (piece.complete)
+			if (piece.complete and piece.generated)
 			{
 				RefreshActive();
 
+				// Enqueue TTS
 				if (piece.msgType == MessageType::Dialogue and is_bot(piece.role))
 				{
 					auto characterId = pSession->GetCharacterIdOf(piece.role);
