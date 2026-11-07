@@ -189,7 +189,7 @@ namespace fig::gui
 				.SetDelegate([this] {
 //				PushEvent(UserEvent::StartChat, &_characterId);
 			});
-			menu.AddItem("Filter by character")
+			menu.AddItem("Filter chats by this character")
 				.SetEnabled(not _primaryCharacterId.empty())
 				.SetDelegate([this]() {
 				auto flags = Global::GetUserSettings().GetChatListFilter();
@@ -239,7 +239,7 @@ namespace fig::gui
 		}
 		else // Archived
 		{
-			menu.AddItem("Filter by character")
+			menu.AddItem("Filter chats by this character")
 				.SetEnabled(not _primaryCharacterId.empty())
 				.SetDelegate([this]() {
 				auto flags = Global::GetUserSettings().GetChatListFilter();

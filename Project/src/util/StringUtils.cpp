@@ -1448,6 +1448,27 @@ namespace fig
 		return result;
 	}
 
+	fig::string truncate_utf8(fig::string_view text, size_t maxBytes)
+	{
+		const char* pData = text.data();
+		size_t remaining = text.size();
+		size_t count = 0uz;
+
+		while (remaining > 0uz and count < maxBytes)
+		{
+			const char* pBefore = pData;
+			if (SDL_StepUTF8(&pData, &remaining) == SDL_INVALID_UNICODE_CODEPOINT)
+				break;
+
+			size_t len = static_cast<size_t>(pData - pBefore);
+			if (count + len > maxBytes)
+				break;
+			count += len;
+		}
+
+		return fig::string(text.substr(0, count));
+	}
+
 	void strip_emoji(fig::string& text)
 	{
 		std::size_t index = 0;

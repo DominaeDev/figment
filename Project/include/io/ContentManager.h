@@ -40,6 +40,16 @@ namespace fig::io
 	};
 	using ChatCollection = std::vector<std::pair<UserContent<fig::data::ChatInstance>, std::vector<UserContent<fig::data::ChatLog>>>>;
 
+	struct FolderDescriptor
+	{
+		fig::uuid id;
+		fig::uuid parentId;
+		fig::string name;
+		AssetFolderType folderType;
+		fig::timestamp createdAt;
+		fig::timestamp updatedAt;
+	};
+
 	class UserContentManager
 	{
 	public:
@@ -143,6 +153,10 @@ namespace fig::io
 		
 		void AssignOrder(const std::vector<fig::uuid>& assetIds);
 
+		std::optional<FolderDescriptor> GetFolder(const fig::uuid& folderId) noexcept;
+		[[nodiscard]] std::vector<FolderDescriptor> GetFolders(AssetFolderType folderType = AssetFolderType::Undefined) noexcept;
+		void InvalidateFolders() noexcept;
+
 	protected:
 		void Preload();
 
@@ -172,11 +186,15 @@ namespace fig::io
 		fig::observer_ptr<fig::sdl::Texture> GetCachedTexture(fig::renderer_ptr pRenderer, const fig::uuid& assetId, fig::texture_ptr pMask = nullptr);
 		void RefreshChatCounts();
 
+		void RefreshFolders();
+
 	private:
 		std::unique_ptr<fig::io::AssetManager> _pAssetMngr;
 		std::unordered_map<AssetTypeDefinition, std::unique_ptr<IAssetCache>> _caches;
 		std::map<fig::uuid, ContentMetaData> _metaData;
 		std::map<fig::uuid, size_t> _chatCounts;
+		std::map<fig::uuid, FolderDescriptor> _folders;
+		bool _bInvalidatedFolders {};
 		
 		std::map<fig::renderer_ptr, std::map<fig::uuid, std::map<fig::texture_ptr, fig::sdl::Texture>>> _cachedTextures;
 

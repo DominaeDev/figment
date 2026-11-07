@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "io/Asset.h"
 #include "io/FileUtility.h"
 #include "user/UserProfile.h"
@@ -39,23 +39,6 @@ namespace fig::io
 				return DataFormat::TextDefault;
 		}
 		return DataFormat::Undefined;
-	}
-
-	FolderCategory FolderCategoryFromString(fig::string_view str) noexcept
-	{
-		if (str == "character")			return FolderCategory::Character;
-		else if (str == "scenario")		return FolderCategory::Scenario;
-		else							return FolderCategory::Undefined;
-	}
-
-	fig::string FolderCategoryToString(FolderCategory category) noexcept
-	{
-		switch (category)
-		{
-		case FolderCategory::Character:	return "character";
-		case FolderCategory::Scenario:	return "scenario";
-		default:						return "unknown";
-		}
 	}
 
 	void Asset::SetData(fig::bytes&& buf)

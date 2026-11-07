@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "io/Asset.h"
+#include "io/AssetFolder.h"
 #include "io/AsyncIO.h"
 #include "io/IndexDatabase.h"
 #include "user/Security.h"
@@ -62,6 +63,12 @@ namespace fig::io
 		size_t DeleteAssets(std::span<fig::uuid> assetIds) noexcept;
 		bool ReleaseAssetData(const fig::uuid& assetId) noexcept;
 		size_t DiscardTemporaryAssets() noexcept;
+
+		const AssetFolder& CreateFolder(const fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId = {});
+		bool RenameFolder(const fig::uuid& folderId, const fig::string_view newName);
+		bool DeleteFolder(fig::uuid folderId) noexcept;
+		fig::cref_vector<AssetFolder> GetFolders() const noexcept;
+		bool MoveAssetToFolder(const fig::uuid& assetId, const fig::uuid& folderId);
 
 		fig::cref_vector<Asset> GetAllAssets() const noexcept;
 		fig::optional_cref<Asset> FindAsset(const fig::uuid& assetId) const noexcept;
@@ -135,6 +142,7 @@ namespace fig::io
 		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId, AssetType assetType) const noexcept;
 		fig::optional_cref<Asset> FindAsset_NoLock(const fig::uuid& assetId, AssetTypeDefinition assetType) const noexcept;
 		int32_t GetAssetDepth_NoLock(const fig::uuid& id, std::unordered_map<fig::uuid, int32_t>& depthCache, int32_t depth = 0) const noexcept;
+		int32_t GetFolderDepth_NoLock(const fig::uuid& id, std::unordered_map<fig::uuid, int32_t>& depthCache, int32_t depth = 0) const noexcept;
 		std::unordered_set<fig::uuid> FindRelatedAssets_NoLock(const fig::uuid& assetId) const noexcept;
 
 		size_t DeleteAssets_NoLock(std::span<fig::uuid> assetIds) noexcept;
@@ -155,6 +163,12 @@ namespace fig::io
 
 		fig::expected_ref<Asset, FileError> ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format);
 		fig::expected_ref<Asset, FileError> ImportScenario_NoLock(const fig::path& filename);
+
+		AssetFolder& CreateFolder_NoLock(const fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId);
+		bool RenameFolder_NoLock(const fig::uuid& folderId, const fig::string_view newName);
+		bool DeleteFolder_NoLock(const fig::uuid& folderId) noexcept;
+		bool MoveAssetToFolder_NoLock(const fig::uuid& assetId, const fig::uuid& folderId);
+		std::set<fig::uuid> FindAllSubfolders_NoLock(const fig::uuid& folderId) const noexcept;
 
 	private:
 		bool SaveModifiedAssets();

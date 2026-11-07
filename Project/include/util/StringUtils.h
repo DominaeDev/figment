@@ -101,6 +101,8 @@ namespace fig
 	void strip_emoji(fig::string& text);
 	fig::string strip_emoji(fig::string_view text, fig::string_view replacement = {});
 
+	fig::string truncate_utf8(fig::string_view text, size_t maxBytes);
+
 	template<typename Str, typename Pred>
 	size_t find_index(const Str& str, int32_t pos, Pred pred)
 	{

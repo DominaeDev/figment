@@ -22,6 +22,7 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
+//			CreateFolder();
 //			ImportTestCharacters("./import/characters");
 //			FlushBrokenAssets();
 //			EraseChats();
@@ -309,7 +310,29 @@ namespace fig
 
 				userMngr.SignOut();
 			}
+		}
+	}
 
+	void DebugUtility::CreateFolder()
+	{
+		if constexpr (Debugging)
+		{
+			auto& userMngr = Global::GetUserManager();
+			if (userMngr.SignInDefaultProfile())
+			{
+				auto& assetMngr = userMngr.GetContent().GetAssets();
+
+				// Delete existing folders
+				auto folders = assetMngr.GetFolders();
+				for (auto& folder : folders)
+					assetMngr.DeleteFolder(folder.get().id);
+
+				auto& newFolder = assetMngr.CreateFolder("New folder", AssetFolderType::Character);
+				auto& newSubfolder = assetMngr.CreateFolder("New sub-folder", AssetFolderType::Character, newFolder.id);
+				assetMngr.MoveAssetToFolder(fig::uuid { Constants::Debug::TestCharacterId }, newSubfolder.id);
+				
+				userMngr.SignOut();
+			}
 		}
 	}
 }

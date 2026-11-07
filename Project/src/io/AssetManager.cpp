@@ -422,6 +422,21 @@ namespace fig::io
 		return depthCache[id] = 1 + GetAssetDepth_NoLock(it->second.parent_id, depthCache, depth + 1);
 	}
 
+	int32_t AssetManager::GetFolderDepth_NoLock(const fig::uuid& id, std::unordered_map<fig::uuid, int32_t>& depthCache, int32_t depth) const noexcept
+	{
+		if (depth >= 64)
+		{
+			Log("Folder parent chain exceeded max depth, possible cycle");
+			return 0;
+		}
+		if (auto it = depthCache.find(id); it != depthCache.end())
+			return it->second;
+		auto it = _folders.find(id);
+		if (it == _folders.end() or it->second.parent_id.empty())
+			return depthCache[id] = 0;
+		return depthCache[id] = 1 + GetFolderDepth_NoLock(it->second.parent_id, depthCache, depth + 1);
+	}
+
 	bool AssetManager::SaveModifiedAssets()
 	{
 		std::scoped_lock lock { _assetsMutex };
@@ -437,6 +452,34 @@ namespace fig::io
 				assert(asset.sync_state.has_data and not asset.data.empty());
 				WriteAssetToDisk(asset);
 				bSaved = true;
+			}
+		}
+
+		// Write folders
+		auto changedFolders = _folders
+			| std::views::filter([](auto& kvp) { return kvp.second.sync_state.ShouldWriteToDatabase(); })
+			| std::views::transform([](auto& kvp) { return std::ref(kvp.second); })
+			| std::ranges::to<std::vector>();
+		
+		if (not changedFolders.empty())
+		{
+			// Sort by ancestry
+			std::unordered_map<fig::uuid, int> depthCache;
+			std::ranges::stable_sort(changedFolders, [&](auto& a, auto& b) {
+				return GetFolderDepth_NoLock(a.get().id, depthCache) < GetFolderDepth_NoLock(b.get().id, depthCache);
+			});
+
+			auto& db = GetDatabase();
+			if (auto result = db.UpsertFolders(changedFolders))
+			{
+				for (auto& folderRef : changedFolders)
+					folderRef.get().sync_state.db_sync = AssetSyncState::Status::Synchronized;
+
+				LogLn(std::format("Wrote {} folder(s) to index database", result.value()));
+			}
+			else
+			{
+				LogLn("Error occurred when updating index database");
 			}
 		}
 
@@ -510,6 +553,12 @@ namespace fig::io
 		{
 			std::scoped_lock lock { _assetsMutex };
 			_folders = std::move(folders.value());
+
+			for (auto& kvp : _folders)
+			{
+				if (auto decrypted = kvp.second.encrypted_name.Decrypt(_profileAuthKey))
+					kvp.second.decrypted_name = decrypted.value();
+			}
 		}
 
 		// Fetch assets
@@ -781,6 +830,46 @@ namespace fig::io
 		return remove_if(_assets, [](auto&& kvp) { return kvp.second.sync_state.file_sync == AssetSyncState::Status::Temporary; });
 	}
 
+	const AssetFolder& AssetManager::CreateFolder(fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId)
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return CreateFolder_NoLock(name, folderType, parentId);
+	}
+
+	bool AssetManager::RenameFolder(const fig::uuid& folderId, const fig::string_view newName)
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return RenameFolder_NoLock(folderId, newName);
+	}
+
+	bool AssetManager::DeleteFolder(fig::uuid folderId) noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return DeleteFolder_NoLock(folderId);
+	}
+
+	fig::cref_vector<AssetFolder> AssetManager::GetFolders() const noexcept
+	{
+		std::scoped_lock lock { _assetsMutex };
+
+		auto folders = _folders
+			| std::views::values
+			| std::views::transform([](auto&& a) { return std::cref(a); })
+			| std::ranges::to<std::vector>();
+
+		std::unordered_map<fig::uuid, int> depthCache;
+		std::ranges::stable_sort(folders, [&](auto& a, auto& b) {
+			return GetFolderDepth_NoLock(a.get().id, depthCache) < GetFolderDepth_NoLock(b.get().id, depthCache);
+		});
+		return folders;
+	}
+
+	bool AssetManager::MoveAssetToFolder(const fig::uuid& assetId, const fig::uuid& folderId)
+	{
+		std::scoped_lock lock { _assetsMutex };
+		return MoveAssetToFolder_NoLock(assetId, folderId);
+	}
+
 	bool AssetManager::ReleaseAssetData(const fig::uuid& assetId) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
@@ -948,6 +1037,79 @@ namespace fig::io
 
 		LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
 		return scenarioAsset;
+	}
+
+	AssetFolder& AssetManager::CreateFolder_NoLock(fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId)
+	{
+		fig::uuid id = GenerateUUID();
+		auto now = fig::now();
+		auto& folder = _folders[id] = AssetFolder {};
+		folder.id = id;
+		folder.decrypted_name = name;
+		folder.encrypted_name = fig::auth::EncryptedString(name, _profileAuthKey);
+		folder.parent_id = parentId;
+		folder.folderType = folderType;
+		folder.sync_state.db_sync = AssetSyncState::Status::Modified;
+		folder.createdAt = now;
+		folder.updatedAt = now;
+
+		return folder;
+	}
+
+	bool AssetManager::RenameFolder_NoLock(const fig::uuid& folderId, const fig::string_view newName)
+	{
+		if (auto itFind = _folders.find(folderId); itFind != _folders.cend())
+		{
+			auto& folder = itFind->second;
+			folder.decrypted_name = newName;
+			folder.encrypted_name = fig::auth::EncryptedString(newName, _profileAuthKey);
+			folder.sync_state.db_sync = AssetSyncState::Status::Modified;
+			folder.updatedAt = fig::now();
+			return true;
+		}
+		return false;
+	}
+
+	bool AssetManager::DeleteFolder_NoLock(const fig::uuid& folderId) noexcept
+	{
+		// Remove from database
+		auto& db = GetDatabase();
+		if (db.DeleteFolder(folderId) != DatabaseError::NoError)
+			return false;
+
+		// Remove from memory
+		auto folderIds = FindAllSubfolders_NoLock(folderId);
+		size_t num_deletions = 0uz;
+		for (auto& folderId : folderIds)
+			num_deletions += _folders.erase(folderId);
+
+		// Update affected assets
+		for (auto& asset : _assets | std::views::values)
+		{
+			if (folderIds.contains(asset.folder_id))
+			{
+				asset.folder_id = {};
+				asset.sync_state.db_sync = AssetSyncState::Status::Modified;
+			}
+		}
+
+		LogLn(std::format("Deleted folder, including {} subfolder(s)", num_deletions - 1));
+		return num_deletions;
+	}
+
+	bool AssetManager::MoveAssetToFolder_NoLock(const fig::uuid& assetId, const fig::uuid& folderId)
+	{
+		if (auto itFind = _assets.find(assetId); itFind != _assets.cend())
+		{
+			auto& asset = itFind->second;
+			if (not folderId.empty() and _folders.find(folderId) == _folders.cend())
+				return false; // Invalid folder
+
+			asset.folder_id = folderId;
+			asset.sync_state.db_sync = AssetSyncState::Status::Modified;
+			return true;
+		}
+		return false;
 	}
 
 	fig::uuid AssetManager::GenerateUUID() const noexcept
@@ -1345,6 +1507,31 @@ namespace fig::io
 
 			// Scan children
 			openList.insert_range(_assets
+				| std::views::filter([&id](auto const& kvp) { return kvp.second.parent_id == id; })
+				| std::views::transform([](auto const& kvp) -> fig::uuid { return kvp.second.id; }));
+		}
+
+		return result;
+	}
+
+	std::set<fig::uuid> AssetManager::FindAllSubfolders_NoLock(const fig::uuid& folderId) const noexcept
+	{
+		std::set<fig::uuid> result;
+		std::set<fig::uuid> openList;
+
+		openList.insert(folderId);
+
+		while (not openList.empty())
+		{
+			fig::uuid id = *openList.begin();
+			openList.erase(id);
+			if (id.empty())
+				continue;
+
+			result.insert(id);
+
+			// Add children
+			openList.insert_range(_folders
 				| std::views::filter([&id](auto const& kvp) { return kvp.second.parent_id == id; })
 				| std::views::transform([](auto const& kvp) -> fig::uuid { return kvp.second.id; }));
 		}

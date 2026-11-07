@@ -989,6 +989,9 @@
     <ClCompile Include="src\gui\WorldCardList.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\WorldScreen\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\user\EncryptedString.cpp">
+      <Filter>Source Files\Frontend\User</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -2199,6 +2202,12 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\stb\include\stb_image_resize2.h">
       <Filter>Source Files\Third-party\stb</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\AssetFolder.h">
+      <Filter>Source Files\Frontend\IO\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\user\EncryptedString.h">
+      <Filter>Source Files\Frontend\User</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

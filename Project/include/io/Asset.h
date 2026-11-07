@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "io/Serialization.h"
@@ -53,25 +53,6 @@ namespace fig::io
 
 	DataFormat DataFormatFromExt(const fig::path& path);
 	DataFormat DataFormatFromExt(const fig::string& ext);
-
-	enum class FolderCategory
-	{
-		Undefined = 0,
-		Character,
-		Scenario,
-	};
-
-	fig::string FolderCategoryToString(FolderCategory format) noexcept;
-	FolderCategory FolderCategoryFromString(fig::string_view str) noexcept;
-
-	struct AssetFolder
-	{
-		fig::uuid id {};
-		fig::uuid parent_id {};
-		fig::string name {};
-		FolderCategory category {};
-		fig::string settings {};
-	};
 
 	// In-memory representation of a generic asset
 	class Asset

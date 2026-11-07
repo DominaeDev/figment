@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "io/Asset.h"
+#include "io/AssetFolder.h"
 #include <expected>
 #include <functional>
 
@@ -22,13 +23,16 @@ namespace fig::io
 		DatabaseError CreateAsset(const Asset& asset) noexcept; //! @todo: remove?
 		DatabaseError UpdateAsset(const Asset& asset) noexcept; //! @todo: remove?
 		DatabaseError UpsertAsset(const Asset& asset) noexcept;
-		DatabaseError DeleteAsset(const fig::uuid& assetID) noexcept;
+		DatabaseError DeleteAsset(const fig::uuid& assetId) noexcept;
 
 		std::expected<int32_t, DatabaseError> UpsertAssets(const fig::ref_vector<Asset>& assets) noexcept;
-		std::expected<int32_t, DatabaseError> DeleteAssets(std::span<fig::uuid> assetIDs) noexcept;
-		
+		std::expected<int32_t, DatabaseError> DeleteAssets(std::span<fig::uuid> assetIds) noexcept;
+
 		DatabaseError CreateFolder(const AssetFolder& folder) noexcept;
-		DatabaseError DeleteFolder(const fig::uuid& assetID) noexcept;
+		DatabaseError UpsertFolder(const AssetFolder& folder) noexcept;
+		DatabaseError DeleteFolder(const fig::uuid& folderId) noexcept;
+
+		std::expected<int32_t, DatabaseError> UpsertFolders(const fig::ref_vector<AssetFolder>& folders) noexcept;
 
 		bool IsConnected() const noexcept { return _pDB != nullptr; }
 
@@ -50,6 +54,7 @@ namespace fig::io
 
 			FetchFolders,
 			CreateFolder,
+			UpsertFolder,
 			DeleteFolder,
 		};
 		DatabaseError BindAndExecute(SQL statement, std::function<void(sqlite3_stmt*)> fnBind);

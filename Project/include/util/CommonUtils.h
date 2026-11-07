@@ -420,7 +420,8 @@ namespace fig
 		using value_type = std::ranges::range_value_t<T>;
 		T storage;
 
-		operator std::span<value_type>() noexcept { return std::span { storage }; }
+		operator std::span<value_type>() noexcept { return std::span<value_type> { storage }; }
+		operator std::span<const value_type>() const noexcept { return std::span<const value_type> { storage }; }
 	};
 
 	template <std::ranges::input_range Range>
@@ -428,7 +429,9 @@ namespace fig
 	{
 		using T = std::ranges::range_value_t<Range>;
 		std::vector<T> storage { std::ranges::begin(range), std::ranges::end(range) };
-		return span_temp_storage<std::vector<T>> {.storage = std::move(storage) };
+		return span_temp_storage<std::vector<T>> { 
+			.storage = std::move(storage)
+		};
 	}
 
 	template <typename T>

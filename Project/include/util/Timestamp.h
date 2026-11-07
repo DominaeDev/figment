@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <stdint.h>
 #include <chrono>
@@ -98,7 +98,7 @@ namespace fig
 			_zone { zone }
 		{}
 
-		explicit operator int64_t() { return _epoch; }
+		explicit operator int64_t() const noexcept { return _epoch; }
 		timestamp to_local() const;
 		timestamp to_global() const;
 		int64_t utc_epoch() const { return static_cast<int64_t>(to_global()); }

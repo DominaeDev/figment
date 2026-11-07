@@ -427,6 +427,7 @@ namespace fig::io
 		_chatCounts.erase(fig::uuid {});
 	}
 
+
 	size_t UserContentManager::GetChatCount(const fig::uuid& assetId)
 	{
 		if (auto itFind = _chatCounts.find(assetId); itFind != _chatCounts.cend())
@@ -790,6 +791,55 @@ namespace fig::io
 				asset.get().InvalidateUserSettings();
 			}
 		});
+	}
+
+	std::optional<FolderDescriptor> UserContentManager::GetFolder(const fig::uuid& folderId) noexcept
+	{
+		RefreshFolders();
+		
+		if (auto itFind = _folders.find(folderId); itFind != _folders.cend())
+			return itFind->second;
+		return std::nullopt;
+	}
+
+	std::vector<FolderDescriptor> UserContentManager::GetFolders(AssetFolderType folderType) noexcept
+	{
+		RefreshFolders();
+
+		return _folders
+			| std::views::values
+			| std::views::filter([folderType](auto&& f) {
+				if (folderType != AssetFolderType::Undefined)
+					return f.folderType == folderType;
+				return f.folderType != AssetFolderType::Undefined;
+			})
+			| std::ranges::to<std::vector>();
+	}
+
+	void UserContentManager::InvalidateFolders() noexcept
+	{
+		_bInvalidatedFolders = true;
+	}
+
+	void UserContentManager::RefreshFolders()
+	{
+		if (_bInvalidatedFolders)
+		{
+			_folders.clear();
+			for (auto& f : _pAssetMngr->GetFolders())
+			{
+				auto& folder = f.get();
+				_folders[folder.id] = FolderDescriptor {
+					.id = folder.id,
+					.parentId = folder.parent_id,
+					.name = folder.decrypted_name,
+					.folderType = folder.folderType,
+					.createdAt = folder.createdAt,
+					.updatedAt = folder.updatedAt,
+				};
+			}
+			_bInvalidatedFolders = false;
+		}
 	}
 
 	std::expected<fig::timestamp, FileError> UserContentManager::GetCreatedAt(const fig::uuid& assetId) const noexcept

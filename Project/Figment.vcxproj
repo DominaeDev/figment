@@ -389,6 +389,7 @@
     <ClCompile Include="src\tts\AudioServerProcess_Win32.cpp" />
     <ClCompile Include="src\tts\HttpClient_Win32.cpp" />
     <ClCompile Include="src\tts\TTSBackend.cpp" />
+    <ClCompile Include="src\user\EncryptedString.cpp" />
     <ClCompile Include="src\user\ProfileDatabase.cpp" />
     <ClCompile Include="src\user\Security.cpp" />
     <ClCompile Include="src\user\UserManager.cpp" />
@@ -694,6 +695,7 @@
     <ClInclude Include="include\gui\WorldScreen.h" />
     <ClInclude Include="include\io\Asset.h" />
     <ClInclude Include="include\io\AssetCache.h" />
+    <ClInclude Include="include\io\AssetFolder.h" />
     <ClInclude Include="include\io\AssetTypeDefinition.h" />
     <ClInclude Include="include\io\AsyncDownloader.h" />
     <ClInclude Include="include\io\AsyncImageLoad.h" />
@@ -759,6 +761,7 @@
     <ClInclude Include="include\tts\TTSTypes.h" />
     <ClInclude Include="include\tts\TTSModelSettings.h" />
     <ClInclude Include="include\tts\VoicePrint.h" />
+    <ClInclude Include="include\user\EncryptedString.h" />
     <ClInclude Include="include\user\ProfileDatabase.h" />
     <ClInclude Include="include\user\Security.h" />
     <ClInclude Include="include\user\UserManager.h" />
