@@ -24,7 +24,7 @@ namespace fig::gui
 	uint32_t StoryCardList::OnCardMenu(CardPtr pCard)
 	{
 		auto pScenarioCard = dynamic_cast<ScenarioCard*>(pCard.get());
-		fig::uuid scenarioId = pScenarioCard->GetAssetId();
+		auto& scenarioId = pScenarioCard->GetAssetId();
 		auto chatCount = pScenarioCard->GetChatCount();
 		auto& userSettings = pScenarioCard->GetUserSettings();
 

@@ -24,7 +24,7 @@ namespace fig::gui
 	uint32_t CharacterCardList::OnCardMenu(CardPtr pCard)
 	{
 		auto pCharacterCard = dynamic_cast<CharacterCard*>(pCard.get());
-		fig::uuid characterId = pCharacterCard->GetAssetId();
+		auto& characterId = pCharacterCard->GetAssetId();
 		auto chatCount = pCharacterCard->GetChatCount();
 		auto& userSettings = pCharacterCard->GetUserSettings();
 

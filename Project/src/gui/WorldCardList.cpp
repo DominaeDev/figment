@@ -24,7 +24,7 @@ namespace fig::gui
 	uint32_t WorldCardList::OnCardMenu(CardPtr pCard)
 	{
 		auto pWorldCard = dynamic_cast<WorldCard*>(pCard.get());
-		fig::uuid worldId = pWorldCard->GetAssetId();
+		auto& worldId = pWorldCard->GetAssetId();
 		auto chatCount = pWorldCard->GetChatCount();
 		auto& userSettings = pWorldCard->GetUserSettings();
 
