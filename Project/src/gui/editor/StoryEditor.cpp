@@ -200,9 +200,9 @@ namespace fig::gui
 		return std::vector<EditorTabDescriptor> {
 			{
 				Tab::General,
-				"Info",
-				Icon::STORY_EDIT_INFO,
-				Icon::STORY_EDIT_INFO_SMALL,
+				"Story info",
+				Icon::MENU_SCENARIOS,
+				Icon::MENU_SCENARIOS_SMALL,
 			},
 			{
 				Tab::Images,

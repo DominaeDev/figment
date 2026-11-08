@@ -155,6 +155,8 @@ namespace fig::io
 
 		std::optional<FolderDescriptor> GetFolder(const fig::uuid& folderId) noexcept;
 		[[nodiscard]] std::vector<FolderDescriptor> GetFolders(AssetFolderType folderType = AssetFolderType::Undefined) noexcept;
+		[[nodiscard]] std::vector<FolderDescriptor> GetSubFolders(const fig::uuid& folderId) noexcept;
+
 		void InvalidateFolders() noexcept;
 
 	protected:
@@ -194,7 +196,7 @@ namespace fig::io
 		std::map<fig::uuid, ContentMetaData> _metaData;
 		std::map<fig::uuid, size_t> _chatCounts;
 		std::map<fig::uuid, FolderDescriptor> _folders;
-		bool _bInvalidatedFolders {};
+		bool _bInvalidatedFolders { true };
 		
 		std::map<fig::renderer_ptr, std::map<fig::uuid, std::map<fig::texture_ptr, fig::sdl::Texture>>> _cachedTextures;
 

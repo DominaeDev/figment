@@ -79,8 +79,10 @@ namespace fig::gui
 	{
 		OnActivated();
 
+		_currentFolderId = {};
+
 		DEBUG_MEASURE_BEGIN("CreateCards");
-		_pCardList->CreateCards();
+		_pCardList->CreateCards({});
 		DEBUG_MEASURE_END();
 
 		InvalidateLayout();
@@ -161,6 +163,18 @@ namespace fig::gui
 
 		bool bShowTags = Global::GetUserSettings().GetBool(UserSetting::Interface::CharacterList::ShowTags);
 		_pToggleTagsButton->SetOn(bShowTags, true);
+	}
+
+	template <typename T>
+	bool CardListScreen<T>::ChangeFolder(const fig::uuid& folderId)
+	{
+		if (folderId == _currentFolderId)
+			return false;
+
+		_currentFolderId = folderId;
+		_pCardList->Clear();
+		_pCardList->CreateCards(_currentFolderId);
+		return true;
 	}
 
 }

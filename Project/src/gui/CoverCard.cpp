@@ -727,9 +727,45 @@ namespace fig::gui
 		ShowStar(userSettings.HasFlag(AssetUserSettings::Flag::Favorite));
 	}
 
-	void CoverCard::NotifyUpdated()
+	EventResult CoverCard::OnEvent(fig::event& event)
 	{
-		if (_fnDelegate)
-			_fnDelegate(*this, CardEvent::Refresh);
+		switch (event.type)
+		{
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			if (event.button.button == SDL_BUTTON_RIGHT 
+				and is_inside(GetRect(), toI(event.button.x), toI(event.button.y))
+				and not _bHidden)
+			{
+				if (_fnMenuDelegate)
+					_menuId = _fnMenuDelegate(*this);
+				return EventResult::Handled;
+			}
+			break;
+		}
+
+		if (IsUserEvent(event, UserEvent::MenuOpened))
+		{
+			if (_menuId == event.user.code)
+			{
+				_bSelected = true;
+				return EventResult::Continue;
+			}
+		}
+		else if (IsUserEvent(event, UserEvent::MenuClosed))
+		{
+			if (_menuId == event.user.code)
+			{
+				_bSelected = false;
+				return EventResult::Continue;
+			}
+		}
+		else if (IsUserEvent(event, UserEvent::ScreenDeactivated))
+		{
+			_bSelected = false;
+			ResetHoverZoom();
+			return EventResult::Continue;
+		}
+
+		return EventResult::Pass;
 	}
 }

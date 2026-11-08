@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoverCard.h"
 
@@ -8,20 +8,8 @@ namespace fig::gui
 	{
 	public:
 		CharacterCard(ControlPtr pParent, const fig::uuid& characterId, CardSize cardSize);
-		
-		const fig::uuid& GetCharacterId() const noexcept { return _characterId; }
 
 		void RefreshFull();
 		void RefreshMeta();
-
-	protected:
-		EventResult OnEvent(fig::event& event) override;
-		void ShowMenu();
-		void NotifyDelete();
-
-	private:
-		fig::uuid _characterId;
-		fig::string _characterName;
-		int32_t _menuId { -1 };
 	};
 }

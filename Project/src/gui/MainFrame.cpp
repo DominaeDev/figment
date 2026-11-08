@@ -319,71 +319,71 @@ namespace fig::gui
 			SDL_KeyboardEvent& keyEvent = event.key;
 			KeyboardMods mods { event };
 
-			if (keyEvent.down and not keyEvent.repeat)
+			if (Global::IsSignedIn())
 			{
-				if constexpr (Debugging)
+				if (keyEvent.down and not keyEvent.repeat)
 				{
-					if (keyEvent.key == SDLK_F12 and mods.Control)
+					if constexpr (Debugging)
 					{
-						Close();
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_4 and mods.Alt)
-					{
-						NavigateTo(ScreenType::Debug);
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_F12 and mods.Control)
-					{
-						Close();
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_1 and mods.Alt)
-					{
-						NavigateHome();
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_2 and mods.Alt)
-					{
-						if constexpr (Debugging) //! @temp
+						if (keyEvent.key == SDLK_F12 and mods.Control)
 						{
-							NavigateTo(ScreenType::Chat);
-							if (auto pChatScreen = GetScreen<ChatScreen>())
-							{
-								auto characterId = fig::uuid { Constants::Debug::TestCharacterId };
-								StartChat(characterId);
-							}
+							Close();
 							return EventResult::Handled;
 						}
-					}
-					else if (keyEvent.key == SDLK_3 and mods.Alt)
-					{
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_F2 and mods.None)
-					{
-						InitializeModel();
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_F3 and mods.None)
-					{
-						UnloadModel();
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_F4 and mods.None)
-					{
-						Global::GetTTSBackend().Initialize();
-						auto _discarded = Global::GetTTSBackend().Speak(fig::uuid { Constants::Debug::TestCharacterId }, ".");
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_F4 and mods.Control)
-					{
-						Global::GetTTSBackend().Shutdown();
-						return EventResult::Handled;
-					}
-					else if (keyEvent.key == SDLK_F1 and mods.None)
-					{
-						if (Global::IsSignedIn())
+						else if (keyEvent.key == SDLK_4 and mods.Alt)
+						{
+							NavigateTo(ScreenType::Debug);
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_F12 and mods.Control)
+						{
+							Close();
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_1 and mods.Alt)
+						{
+							NavigateHome();
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_2 and mods.Alt)
+						{
+							if constexpr (Debugging) //! @temp
+							{
+								NavigateTo(ScreenType::Chat);
+								if (auto pChatScreen = GetScreen<ChatScreen>())
+								{
+									auto characterId = fig::uuid { Constants::Debug::TestCharacterId };
+									StartChat(characterId);
+								}
+								return EventResult::Handled;
+							}
+						}
+						else if (keyEvent.key == SDLK_3 and mods.Alt)
+						{
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_F2 and mods.None)
+						{
+							InitializeModel();
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_F3 and mods.None)
+						{
+							UnloadModel();
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_F4 and mods.None)
+						{
+							Global::GetTTSBackend().Initialize();
+							auto _discarded = Global::GetTTSBackend().Speak(fig::uuid { Constants::Debug::TestCharacterId }, ".");
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_F4 and mods.Control)
+						{
+							Global::GetTTSBackend().Shutdown();
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_F1 and mods.None)
 						{
 							int32_t theme = static_cast<int32_t>(Global::GetUserSettings().GetColorTheme());
 							if (++theme == static_cast<int32_t>(ColorTheme::Count))
@@ -391,18 +391,42 @@ namespace fig::gui
 							ChangeColorTheme(static_cast<ColorTheme>(theme), true);
 							return EventResult::Handled;
 						}
-					}
-					else if (keyEvent.key == SDLK_F1 and mods.Control)
-					{
-						// Reload colors
-						auto currentTheme = AppColors::GetTheme();
-						AppColors::Init();
-						AppColors::SetTheme(currentTheme, false);
-						PushEvent(UserEvent::ColorThemeChanged);
-						return EventResult::Handled;
+						else if (keyEvent.key == SDLK_F1 and mods.Control)
+						{
+							// Reload colors
+							auto currentTheme = AppColors::GetTheme();
+							AppColors::Init();
+							AppColors::SetTheme(currentTheme, false);
+							PushEvent(UserEvent::ColorThemeChanged);
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_5 and mods.Alt)
+						{
+							if (auto pScreen = GetScreen<CharacterScreen>())
+							{
+								auto& currentFolder = pScreen->GetCurrentFolder();
+								if (auto subFolder = take_first(Global::GetUserContent().GetFolders()
+									| std::views::filter([currentFolder](auto&& f) { return f.parentId == currentFolder; })
+									| std::views::transform([](auto&& f) { return f.id; })))
+								{
+									pScreen->ChangeFolder(*subFolder);
+								}
+							}
+							return EventResult::Handled;
+						}
+						else if (keyEvent.key == SDLK_5 and mods.ShiftAlt)
+						{
+							if (auto pScreen = GetScreen<CharacterScreen>())
+							{
+								if (auto folder = Global::GetUserContent().GetFolder(pScreen->GetCurrentFolder()))
+								{
+									pScreen->ChangeFolder((*folder).parentId);
+								}
+							}
+							return EventResult::Handled;
+						}
 					}
 				}
-
 			}
 		}
 

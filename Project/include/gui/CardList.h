@@ -12,12 +12,13 @@ namespace fig::gui
 	template <typename T>
 	class CardList : public ScrollPanel
 	{
+	protected:
 		using TCard = CardTypeOf<T>::Type;
 		using CardPtr = fig::observer_ptr<TCard>;
 	public:
 		CardList(ControlPtr pParent, CardSize cardSize = CardSize::Full);
 
-		void CreateCards();
+		void CreateCards(const fig::uuid& folderId = {});
 		void RefreshCards();
 		void Clear();
 
@@ -35,7 +36,8 @@ namespace fig::gui
 		void OnScroll() override;
 		fig::coord GetExtent() const override;
 
-		void OnCardEvent(CardPtr pCard, CardEvent event);
+		virtual uint32_t OnCardMenu(CardPtr card) { return (uint32_t)-1; };
+		void OnModifiedCard(CardPtr pCard);
 		void OnDeleteCard(CardPtr pCard);
 		
 	private:
@@ -47,5 +49,7 @@ namespace fig::gui
 		CardSize _cardSize;
 		fig::string _filterString;
 		bool _bEnableTags { false };
+
+		fig::uuid _currentFolderId {};
 	};
 }

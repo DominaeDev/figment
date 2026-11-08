@@ -15,8 +15,10 @@ namespace fig::gui
 	public:
 		CardListScreen(Frame* pParent, fig::string_view title);
 
+		bool ChangeFolder(const fig::uuid& folderId);
 		void RefreshCards();
 		TCardList& GetCardList();
+		const fig::uuid& GetCurrentFolder() const noexcept { return _currentFolderId; }
 
 	protected:
 		void OnUpdate(float fElapsed) override;
@@ -44,5 +46,7 @@ namespace fig::gui
 		fig::string _search_text;
 		float _fSearchTimer {};
 		bool _bRefreshCardList {};
+
+		fig::uuid _currentFolderId {};
 	};
 }

@@ -482,4 +482,23 @@ namespace fig
 
 		return (value - min) / (max - min);
 	}
+
+	template <std::ranges::input_range R, typename T = std::ranges::range_value_t<R>>
+	constexpr std::optional<T> take_first(R&& r)
+	{
+		auto it = std::ranges::begin(r);
+		if (it != std::ranges::end(r))
+			return *it;
+		return std::nullopt;
+	}
+
+	template <std::ranges::input_range R, typename T = std::ranges::range_value_t<R>>
+	constexpr T& take_first(R&& r, T&& defaultValue)
+	{
+		auto it = std::ranges::begin(r);
+		if (it != std::ranges::end(r))
+			return *it;
+		return defaultValue;
+	}
+
 }

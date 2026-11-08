@@ -13,12 +13,7 @@ namespace fig::gui
 		Half,
 	};
 
-	enum class CardEvent
-	{
-		Refresh,
-		Delete,
-	};
-	using CardEventDelegate = std::function<void(class CoverCard&, CardEvent event)>;
+	using CardMenuDelegate = std::function<uint32_t(class CoverCard&)>;
 
 	class TexturedBorder;
 	class NineGridImage;
@@ -47,10 +42,19 @@ namespace fig::gui
 		fig::timestamp GetUpdatedAt() const noexcept { return _updatedAt; }
 		size_t GetChatCount() const noexcept { return _chatCount; }
 		
-		void SetDelegate(CardEventDelegate fnDelegate) { _fnDelegate = fnDelegate; }
+		void SetDelegate(CardMenuDelegate fnDelegate) { _fnMenuDelegate = fnDelegate; }
 		void ResetHoverZoom();
 
+		const fig::io::AssetUserSettings& GetUserSettings() const noexcept { return _userSettings; }
+		fig::io::AssetUserSettings& GetUserSettings() noexcept { return _userSettings; }
+
+		fig::string_view GetName() const noexcept { return _name; }
+
 	protected:
+		void OnUpdate(float fElapsed) override;
+		void OnSize() override;
+		EventResult OnEvent(fig::event& event) override;
+
 		void SetCoverImages(fig::sdl::Surface&& fullCover, fig::sdl::Surface&& halfCover);
 		void SetDefaultImage(fig::texture_ptr pTexture);
 		void RefreshState();
@@ -62,9 +66,6 @@ namespace fig::gui
 		enum class AddTagResult { Ok, Reject, Stop };
 		void ClearTags();
 		AddTagResult AddTag(const fig::string& tag, fig::color_ref color = {});
-
-		void OnUpdate(float fElapsed) override;
-		void OnSize() override;
 		
 		void SetIndex(const SearchIndex& index) noexcept;
 		void AddSearchTerms(const fig::string& text) noexcept;
@@ -72,7 +73,6 @@ namespace fig::gui
 
 		void SetMetaData(const fig::io::ContentMetaData& metaData) noexcept;
 		void SetUserSettings(const fig::io::AssetUserSettings& userSettings) noexcept;
-		void NotifyUpdated();
 
 	private:
 		void RefreshImage();
@@ -82,11 +82,12 @@ namespace fig::gui
 		
 	protected:
 		fig::uuid _assetId;
+		fig::string _name;
 		bool _bSelected {};
 		bool _bInitialized {};
 		bool _bHidden {};
 		bool _bHasError {};
-		CardEventDelegate _fnDelegate {};
+
 		fig::io::ContentMetaData _metaData {};
 		fig::io::AssetUserSettings _userSettings {};
 		fig::timestamp _updatedAt {};
@@ -94,6 +95,9 @@ namespace fig::gui
 		bool _bHovered = false;
 		float _fHoverZoom = 0.0f;
 		float _fTargetZoom = 0.0f;
+
+		CardMenuDelegate _fnMenuDelegate {};
+		int32_t _menuId { -1 };
 
 	private:
 		fig::observer_ptr<TexturedBorder> _pHiddenBG;

@@ -11,14 +11,5 @@ namespace fig::gui
 
 		void RefreshFull();
 		void RefreshMeta();
-
-	protected:
-		EventResult OnEvent(fig::event& event) override;
-		void ShowMenu();
-		void NotifyDelete();
-
-	private:
-		fig::string _scenarioName;
-		int32_t _menuId { -1 };
 	};
 }

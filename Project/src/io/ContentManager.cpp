@@ -816,6 +816,17 @@ namespace fig::io
 			| std::ranges::to<std::vector>();
 	}
 
+	std::vector<FolderDescriptor> UserContentManager::GetSubFolders(const fig::uuid& folderId) noexcept
+	{
+		auto subfolders = _folders
+			| std::views::values
+			| std::views::filter([folderId](auto&& f) { return f.parentId == folderId; })
+			| std::ranges::to<std::vector>();
+
+		std::ranges::sort(subfolders, std::ranges::less(), [](auto&& f) { return f.name; });
+		return subfolders;
+	}
+
 	void UserContentManager::InvalidateFolders() noexcept
 	{
 		_bInvalidatedFolders = true;

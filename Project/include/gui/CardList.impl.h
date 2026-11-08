@@ -213,6 +213,12 @@ namespace fig::gui
 	}
 
 	template <typename T>
+	void CardList<T>::OnModifiedCard(CardPtr pCard)
+	{
+		Reorder();
+	}
+
+	template <typename T>
 	void CardList<T>::OnDeleteCard(CardPtr pCard)
 	{
 		if (auto try_card = std::ranges::find_if(_cards, [pCard](auto& c) {
@@ -225,30 +231,16 @@ namespace fig::gui
 	}
 
 	template <typename T>
-	void CardList<T>::OnCardEvent(CardPtr pCard, CardEvent event)
+	void CardList<T>::CreateCards(const fig::uuid& folderId)
 	{
-		switch (event)
-		{
-		case CardEvent::Refresh:
-			Reorder();
-			break;
-		case CardEvent::Delete:
-			OnDeleteCard(pCard);
-			break;
-		}
-	}
-
-	template <typename T>
-	void CardList<T>::CreateCards()
-	{
-		if (_bInitialized)
+		if (_bInitialized and _currentFolderId == folderId)
 			return;
 
 		Clear();
 
 		// Find assets
 		auto assets = Global::GetUserContent().GetAssets().FindAssetsOfType(AssetTypeOf<T>)
-			| std::views::filter([](auto&& s) { return s.get().parent_id.empty(); })
+			| std::views::filter([folderId](auto&& asset) { return asset.get().parent_id.empty() and asset.get().folder_id == folderId; })
 			| std::ranges::to<std::vector>();
 
 		std::sort(assets.begin(), assets.end(), [](const Asset& a, const Asset& b) { return a.GetCreatedAt() < b.GetCreatedAt(); });
@@ -258,7 +250,7 @@ namespace fig::gui
 			auto& asset = asset_ref.get();
 			DEBUG_MEASURE_BEGIN(std::format("Create card {}", asset.id.to_str()));
 			auto pCard = CreateControl<TCard>(asset.id, _cardSize);
-			pCard->SetDelegate([this](CoverCard& card, CardEvent event) { OnCardEvent(static_cast<TCard*>(&card), event); });
+			pCard->SetDelegate([this](CoverCard& card) { return OnCardMenu(static_cast<TCard*>(&card)); });
 			pCard->ShowTags(_bEnableTags);
 			_pGridSizer->Add(pCard);
 			_cards.push_back(pCard);
@@ -281,6 +273,7 @@ namespace fig::gui
 		}
 
 		_bInitialized = true;
+		_currentFolderId = folderId;
 		InvalidateLayout();
 	}
 
@@ -291,7 +284,7 @@ namespace fig::gui
 			return;
 
 		auto assets = Global::GetUserContent().GetAssets().FindAssetsOfType(AssetTypeOf<T>)
-			| std::views::filter([](auto&& s) { return s.get().parent_id.empty(); })
+			| std::views::filter([folder = _currentFolderId](auto&& a) { return a.get().parent_id.empty() and a.get().folder_id == folder; })
 			| std::ranges::to<std::vector>();
 
 		std::map<fig::uuid, fig::timestamp> updateTimes;
@@ -335,7 +328,7 @@ namespace fig::gui
 			if (not existingAssetIds.contains(assetId))
 			{
 				auto pCard = CreateControl<TCard>(assetId, _cardSize);
-				pCard->SetDelegate([this](CoverCard& card, CardEvent event) { OnCardEvent(static_cast<TCard*>(&card), event); });
+				pCard->SetDelegate([this](CoverCard& card) { return OnCardMenu(static_cast<TCard*>(&card)); });
 				pCard->ShowTags(_bEnableTags);
 				_pGridSizer->Add(pCard);
 				_cards.push_back(pCard);

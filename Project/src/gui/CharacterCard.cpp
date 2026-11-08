@@ -11,173 +11,10 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	CharacterCard::CharacterCard(ControlPtr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize),
-		_characterId { characterId }
+	CharacterCard::CharacterCard(ControlPtr pParent, const fig::uuid& characterId, CardSize cardSize) : CoverCard(pParent, characterId, cardSize)
 	{
 		SetDefaultImage(AppResources::GetTexture(Resource::CARD_COVER_CHARACTER));
 		RefreshFull();
-	}
-
-	EventResult CharacterCard::OnEvent(fig::event& event)
-	{
-		switch (event.type)
-		{
-		case SDL_EVENT_MOUSE_BUTTON_UP:
-			if (event.button.button == SDL_BUTTON_RIGHT 
-				and is_inside(GetRect(), toI(event.button.x), toI(event.button.y))
-				and not _bHidden)
-			{
-				ShowMenu();
-				return EventResult::Handled;
-			}
-			break;
-		}
-
-		if (IsUserEvent(event, UserEvent::MenuOpened))
-		{
-			if (_menuId == event.user.code)
-			{
-				_bSelected = true;
-				return EventResult::Continue;
-			}
-		}
-		else if (IsUserEvent(event, UserEvent::MenuClosed))
-		{
-			if (_menuId == event.user.code)
-			{
-				_bSelected = false;
-				return EventResult::Continue;
-			}
-		}
-		else if (IsUserEvent(event, UserEvent::ScreenDeactivated))
-		{
-			_bSelected = false;
-			ResetHoverZoom();
-			return EventResult::Continue;
-		}
-
-		return EventResult::Pass;
-	}
-
-	void CharacterCard::ShowMenu()
-	{
-		auto ChangeBorder = [this](CardBorderStyle border) {
-			_userSettings.borderStyle = border;
-			Global::GetUserContent().SetBorder(_characterId, border);
-			SetBorder(border);
-		};
-
-		bool bLLM = Global::IsLLMInitialized();
-
-		auto& menu = CreateMenu();
-
-		menu.AddItem("Resume chat")
-			.SetEnabled(bLLM && _chatCount > 0);
-		menu.AddItem("Start a new chat", Icon::NEW_CHAT)
-			.SetEnabled(bLLM)
-			.SetDelegate([this] { 
-				PushEvent(UserEvent::StartChat, &_characterId); 
-			});
-		menu.AddItem("View chats")
-			.SetEnabled(_chatCount > 0)
-			.SetDelegate([this] { 
-				PushEvent(UserEvent::NavigateToChatList, &_characterId); 
-			});
-
-		if constexpr (Debugging)
-		{
-			menu.AddItem(std::format("Debug {}\u2026", _characterName))
-				.SetDelegate([this] {
-					PushEvent(UserEvent::DebugCharacter, &_characterId);
-				});
-		}
-		
-		menu.AddSeparator();
-		menu.AddItem("Edit character\u2026", Icon::EDIT)
-			.SetDelegate([this] {
-				PushEvent(UserEvent::EditCharacter, &_characterId);
-			});
-		menu.AddItem("Edit story\u2026")
-			.SetDelegate([this] {
-				PushEvent(UserEvent::EditCharacterStory, &_characterId);
-			});
-
-		auto& moveMenu = menu.AddItem("Move to folder");
-		moveMenu.AddItem("New folder\u2026");
-		menu.AddItem("Duplicate");
-		menu.AddItem("Export\u2026");
-
-		menu.AddSeparator();
-
-		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
-		{
-			menu.AddItem("Star", Icon::STAR)
-				.SetDelegate([this] {
-				Global::GetUserContent().MarkFavorite(_characterId, true);
-				_userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
-				ShowStar(true);
-				NotifyUpdated();
-			});
-		}
-		else
-		{
-			menu.AddItem("Unstar", Icon::UNSTAR)
-				.SetDelegate([this] {
-				Global::GetUserContent().MarkFavorite(_characterId, false);
-				_userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
-				ShowStar(false);
-				NotifyUpdated();
-			});
-		}
-
-		auto& borderMenu = menu.AddItem("Set border");
-		borderMenu.AddCheckItem("No border", _userSettings.borderStyle == CardBorderStyle::None)
-			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::None); });
-		borderMenu.AddSeparator();
-		borderMenu.AddCheckItem("Border #1", _userSettings.borderStyle == CardBorderStyle::Style01)
-			.SetIcon(Icon::BORDER_01, false)
-			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style01); });
-		borderMenu.AddCheckItem("Border #2", _userSettings.borderStyle == CardBorderStyle::Style02)
-			.SetIcon(Icon::BORDER_02, false)
-			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style02); });
-		borderMenu.AddCheckItem("Border #3", _userSettings.borderStyle == CardBorderStyle::Style03)
-			.SetIcon(Icon::BORDER_03, false)
-			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style03); });
-		borderMenu.AddCheckItem("Border #4", _userSettings.borderStyle == CardBorderStyle::Style04)
-			.SetIcon(Icon::BORDER_04, false)
-			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style04); });
-		borderMenu.AddCheckItem("Border #5", _userSettings.borderStyle == CardBorderStyle::Style05)
-			.SetIcon(Icon::BORDER_05, false)
-			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style05); });
-		borderMenu.AddCheckItem("Border #6", _userSettings.borderStyle == CardBorderStyle::Style06)
-			.SetIcon(Icon::BORDER_06, false)
-			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
-
-		if (!_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
-		{
-			menu.AddItem("Hide")
-				.SetDelegate([this] { 
-					Global::GetUserContent().MarkHidden(_characterId, true);
-					_userSettings.flags.Set(AssetUserSettings::Flag::Hidden);
-					NotifyUpdated();
-				});
-		}
-		else
-		{
-			menu.AddItem("Unhide")
-				.SetDelegate([this] { 
-					Global::GetUserContent().MarkHidden(_characterId, false);
-					_userSettings.flags.Unset(AssetUserSettings::Flag::Hidden);
-					NotifyUpdated();
-				});
-		}
-	
-		menu.AddSeparator();
-	
-		menu.AddItem("Delete\u2026", Icon::DELETE)
-			.SetDelegate([this] { NotifyDelete(); });
-
-		_menuId = menu.Show();
 	}
 
 	void CharacterCard::RefreshMeta()
@@ -185,7 +22,7 @@ namespace fig::gui
 		auto& userContent = Global::GetUserContent();
 
 		// Meta data
-		if (auto try_meta = userContent.GetMetaData(_characterId))
+		if (auto try_meta = userContent.GetMetaData(_assetId))
 		{
 			auto& meta = *try_meta;
 			SetMetaData(meta);
@@ -194,7 +31,7 @@ namespace fig::gui
 		{
 			auto now = fig::now();
 			SetMetaData(ContentMetaData {
-				.name = _characterName,
+				.name = _name,
 				.createdAt = now,
 				.updatedAt = now,
 				.lastUsedAt = now,
@@ -202,19 +39,19 @@ namespace fig::gui
 		}
 
 		// Chat count
-		SetChatCount(userContent.GetChatCount(_characterId));
+		SetChatCount(userContent.GetChatCount(_assetId));
 
 		// User settings
-		SetUserSettings(Global::GetUserContent().GetUserSettings(_characterId));
+		SetUserSettings(Global::GetUserContent().GetUserSettings(_assetId));
 	}
 
 	void CharacterCard::RefreshFull()
 	{
-		if (auto try_character = Global::GetUserContent().Get<Character>(_characterId); try_character.has_value())
+		if (auto try_character = Global::GetUserContent().Get<Character>(_assetId); try_character.has_value())
 		{
 			auto& character = try_character.value();
-			_characterName = character.name.GetSpokenName();
-			_updatedAt = Global::GetUserContent().GetUpdatedAt(_characterId).value_or({});
+			_name = character.name.GetSpokenName();
+			_updatedAt = Global::GetUserContent().GetUpdatedAt(_assetId).value_or({});
 			SetLabel(character.name.GetFullName());
 			SetIndex(character.GetSearchIndex());
 
@@ -244,15 +81,6 @@ namespace fig::gui
 		}
 
 		RefreshMeta();
-	}
-
-	void CharacterCard::NotifyDelete()
-	{
-		ShowDialogBox(std::format("Are you sure you want to delete {}?\nThis action cannot be undone.", _characterName), DialogBoxType::ConfirmCancel,
-			[this](bool bOk) {
-			if (_fnDelegate and bOk)
-				_fnDelegate(*this, CardEvent::Delete);
-		});
 	}
 
 }

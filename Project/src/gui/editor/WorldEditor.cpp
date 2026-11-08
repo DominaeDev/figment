@@ -126,7 +126,7 @@ namespace fig::gui
 		return std::vector<EditorTabDescriptor> {
 			{
 				Tab::General,
-				"Info",
+				"World info",
 				Icon::MENU_WORLDS,
 				Icon::MENU_WORLDS_SMALL,
 			},
