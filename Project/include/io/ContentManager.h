@@ -155,8 +155,8 @@ namespace fig::io
 
 		std::optional<FolderDescriptor> GetFolder(const fig::uuid& folderId) noexcept;
 		[[nodiscard]] std::vector<FolderDescriptor> GetFolders(AssetFolderType folderType = AssetFolderType::Undefined) noexcept;
-		[[nodiscard]] std::vector<FolderDescriptor> GetSubFolders(const fig::uuid& folderId) noexcept;
-
+		[[nodiscard]] std::vector<FolderDescriptor> GetSubFolders(const fig::uuid& folderId, AssetFolderType folderType = AssetFolderType::Undefined) noexcept;
+		bool MoveAssetToFolder(const fig::uuid& assetId, const fig::uuid& folderId);
 		void InvalidateFolders() noexcept;
 
 	protected:

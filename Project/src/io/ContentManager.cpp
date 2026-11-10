@@ -816,15 +816,26 @@ namespace fig::io
 			| std::ranges::to<std::vector>();
 	}
 
-	std::vector<FolderDescriptor> UserContentManager::GetSubFolders(const fig::uuid& folderId) noexcept
+	std::vector<FolderDescriptor> UserContentManager::GetSubFolders(const fig::uuid& folderId, AssetFolderType folderType) noexcept
 	{
+		RefreshFolders();
+
 		auto subfolders = _folders
 			| std::views::values
-			| std::views::filter([folderId](auto&& f) { return f.parentId == folderId; })
+			| std::views::filter([folderId, folderType](auto&& f) { 
+				if (folderType != AssetFolderType::Undefined and f.folderType != folderType)
+					return false;
+				return f.parentId == folderId;
+			})
 			| std::ranges::to<std::vector>();
 
 		std::ranges::sort(subfolders, std::ranges::less(), [](auto&& f) { return f.name; });
 		return subfolders;
+	}
+
+	bool UserContentManager::MoveAssetToFolder(const fig::uuid& assetId, const fig::uuid& folderId)
+	{
+		return _pAssetMngr->MoveAssetToFolder(assetId, folderId);
 	}
 
 	void UserContentManager::InvalidateFolders() noexcept

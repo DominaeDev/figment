@@ -69,8 +69,8 @@ namespace fig::gui
 				PushEvent(UserEvent::EditCharacterStory, &characterId);
 			});
 
-		auto& moveMenu = menu.AddItem("Move to folder");
-		moveMenu.AddItem("New folder\u2026");
+		CreateMoveMenu(menu, AssetFolderType::Character, characterId, "Characters");
+
 		menu.AddItem("Duplicate");
 		menu.AddItem("Export\u2026");
 

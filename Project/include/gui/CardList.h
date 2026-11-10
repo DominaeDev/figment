@@ -3,11 +3,14 @@
 #include "gui/ScrollPanel.h"
 #include "gui/CoverCard.h"
 #include "gui/CardTypes.h"
+#include "io/AssetFolder.h"
 #include "user/UserSettings.h"
 
 namespace fig::gui
 {
 	class GridSizer;
+	class Menu;
+	class MenuItem;
 
 	template <typename T>
 	class CardList : public ScrollPanel
@@ -29,6 +32,8 @@ namespace fig::gui
 		void EnableTags(bool bEnable) noexcept;
 		inline bool IsTagsEnabled() const noexcept { return _bEnableTags; }
 
+		const fig::uuid& GetCurrentFolderId() const noexcept { return _currentFolderId; }
+
 	protected:
 		virtual std::tuple<fig::io::SortBy, fig::io::OrderBy, fig::io::FilterFlags> GetSortOrder() = 0;
 
@@ -39,10 +44,14 @@ namespace fig::gui
 		virtual uint32_t OnCardMenu(CardPtr card) { return (uint32_t)-1; };
 		void OnModifiedCard(CardPtr pCard);
 		void OnDeleteCard(CardPtr pCard);
-		
-	private:
+
+		void CreateMoveMenu(Menu& menu, fig::io::AssetFolderType folderType, const fig::uuid& assetId, fig::string_view rootName);
+		void CreateMoveSubMenu(MenuItem& parentItem, const fig::uuid& assetId, const fig::uuid& folderId);
+		void MoveCardToFolder(const fig::uuid& assetId, const fig::uuid& folderId);
+
 		bool _bInitialized { false };
 		std::vector<CardPtr> _cards;
+		fig::uuid _currentFolderId {};
 
 		fig::observer_ptr<GridSizer> _pGridSizer;
 		int32_t _last_rows {};
@@ -50,6 +59,5 @@ namespace fig::gui
 		fig::string _filterString;
 		bool _bEnableTags { false };
 
-		fig::uuid _currentFolderId {};
 	};
 }

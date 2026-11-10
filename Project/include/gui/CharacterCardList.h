@@ -13,6 +13,5 @@ namespace fig::gui
 		std::tuple<fig::io::SortBy, fig::io::OrderBy, fig::io::FilterFlags> GetSortOrder() override;
 
 		uint32_t OnCardMenu(CardPtr pCard) override;
-
 	};
 }

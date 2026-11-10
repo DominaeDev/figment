@@ -47,8 +47,8 @@ namespace fig::gui
 				PushEvent(UserEvent::EditStory, &scenarioId);
 			});
 
-		auto& moveMenu = menu.AddItem("Move to folder");
-		moveMenu.AddItem("New folder\u2026");
+		CreateMoveMenu(menu, AssetFolderType::Story, scenarioId, "Stories");
+
 		menu.AddItem("Duplicate");
 		menu.AddItem("Export\u2026");
 

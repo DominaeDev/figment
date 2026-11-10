@@ -373,14 +373,13 @@ namespace fig::gui
 
 		SetMenuItemState(_mouseHoverIndex, MenuItem::State::Hover);
 
-		if (menuItem.HasSubMenu())
+		if (menuItem._fnDelegate)
+			menuItem._fnDelegate();
+		else if (menuItem.HasSubMenu())
 		{
 			ShowSubmenu(_mouseHoverIndex);
 			return true;
 		}
-		
-		if (menuItem._fnDelegate)
-			menuItem._fnDelegate();
 
 		Destroy();
 		return true;

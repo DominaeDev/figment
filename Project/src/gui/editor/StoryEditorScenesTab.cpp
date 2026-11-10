@@ -51,7 +51,7 @@ namespace fig::gui
 		pDescription->SetMaxRows(18);
 		
 		// TTL
-		CreateLabel(this, pSizer, "Max duration (in turns)");
+		CreateLabel(this, pSizer, "Lifetime (in turns)");
 		auto pTTL = CreateTextBox(this, pSizer, ValueBinding<int32_t>(&_pScene->ttl));
 		if (_pScene->ttl <= 0)
 			pTTL->SetText("");

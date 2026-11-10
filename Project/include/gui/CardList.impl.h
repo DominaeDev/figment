@@ -1,5 +1,6 @@
 ﻿#include "gui/CardList.h"
 #include "gui/GridSizer.h"
+#include "gui/Menu.h"
 #include "io/AssetManager.h"
 #include "io/ContentTypes.h"
 #include "user/UserManager.h"
@@ -339,5 +340,52 @@ namespace fig::gui
 		}
 
 		Reorder();
+	}
+		
+	template <typename T>
+	void CardList<T>::CreateMoveMenu(Menu& menu, fig::io::AssetFolderType folderType, const fig::uuid& assetId, fig::string_view rootName)
+	{
+		auto& moveMenu = menu.AddItem("Move to folder");
+		moveMenu.AddItem("Create new folder\u2026");
+
+		// Subfolder from "here"
+		if (auto subfolders = Global::GetUserContent().GetSubFolders(_currentFolderId, folderType); not subfolders.empty())
+		{
+			moveMenu.AddSeparator();
+			CreateMoveSubMenu(moveMenu, assetId, _currentFolderId);
+		}
+
+		// Subfolders from root
+		if (not _currentFolderId.empty())
+		{
+			if (auto subfolders = Global::GetUserContent().GetFolders(folderType); not subfolders.empty())
+			{
+				moveMenu.AddSeparator();
+				auto& rootFolderItem = moveMenu.AddItem(fig::string { rootName }, Icon::HOME)
+					.SetDelegate([&] { MoveCardToFolder(assetId, {}); })
+					.SetEnabled(not _currentFolderId.empty());
+				CreateMoveSubMenu(rootFolderItem, assetId, {});
+			}
+		}
+	}
+
+	template <typename T>
+	void CardList<T>::CreateMoveSubMenu(MenuItem& parentItem, const fig::uuid& assetId, const fig::uuid& folderId)
+	{
+		auto subfolders = Global::GetUserContent().GetSubFolders(folderId);
+		for (auto& subfolder : subfolders)
+		{
+			auto& folderItem = parentItem.AddItem(subfolder.name, Icon::FOLDER)
+				.SetDelegate([this, assetId, folderId = subfolder.id] { MoveCardToFolder(assetId, folderId); })
+				.SetEnabled(subfolder.id != _currentFolderId);
+			CreateMoveSubMenu(folderItem, assetId, subfolder.id);
+		}
+	}
+
+	template <typename T>
+	void CardList<T>::MoveCardToFolder(const fig::uuid& assetId, const fig::uuid& folderId)
+	{
+		if (Global::GetUserContent().MoveAssetToFolder(assetId, folderId))
+			RefreshCards();
 	}
 }
