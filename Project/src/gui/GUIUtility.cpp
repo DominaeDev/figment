@@ -420,10 +420,47 @@ namespace fig
 		return {};
 	}
 
-	fig::point MeasureText(fig::font& font, const fig::string& text)
+	fig::string TruncateTextByWidth(fig::font& font, fig::string_view text, int32_t maxWidth)
+	{
+		if (maxWidth == 0 or text.empty())
+			return fig::string { text };
+
+		auto with_ellipsis = [](fig::string_view text, size_t utf8_length) -> fig::string {
+			const char* pText = &text[0];
+			for (size_t i = 1; i < utf8_length; ++i)
+				SDL_StepUTF8(&pText, NULL);
+
+			return fig::string { text.substr(0, ptrdiff_t(pText) - ptrdiff_t(&text[0])) } + "\u2026";
+		};
+
+		int32_t w, h;
+		if (TTF_GetStringSize(&font, text.data(), 0, &w, &h) and w <= maxWidth)
+			return fig::string { text };
+
+		fig::string testString;
+		testString.reserve(text.length());
+		size_t pos = 1;
+		for (; pos < text.length(); pos += 6)
+		{
+			testString = with_ellipsis(text, pos);
+			if (TTF_GetStringSize(&font, testString.c_str(), 0, &w, &h) and w > maxWidth)
+				break;
+		}
+
+		--pos;
+		for (; pos > 0; --pos)
+		{
+			testString = with_ellipsis(text, pos);
+			if (TTF_GetStringSize(&font, testString.c_str(), 0, &w, &h) and w <= maxWidth)
+				return testString;
+		}
+		return fig::string { text };
+	}
+
+	fig::point MeasureText(fig::font& font, fig::string_view text)
 	{
 		int w, h;
-		if (TTF_GetStringSize(&font, text.c_str(), 0, &w, &h))
+		if (TTF_GetStringSize(&font, text.data(), text.length(), &w, &h))
 			return fig::point { w, h };
 		return {};
 	}

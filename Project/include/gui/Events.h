@@ -24,6 +24,7 @@ namespace fig::gui
 		StartChat,
 		TabNavigationForward,
 		TabNavigationBackward,
+		ChangeAssetFolder,
 
 		CreateCharacter,
 		ImportCharacter,

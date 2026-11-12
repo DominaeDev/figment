@@ -26,12 +26,12 @@ namespace fig::gui
 		auto pScenarioCard = dynamic_cast<ScenarioCard*>(pCard.get());
 		auto& scenarioId = pScenarioCard->GetAssetId();
 		auto chatCount = pScenarioCard->GetChatCount();
-		auto& userSettings = pScenarioCard->GetUserSettings();
+		const auto& userSettings = pScenarioCard->GetUserSettings();
 
-		auto ChangeBorder = [&](CardBorderStyle border) {
-			userSettings.borderStyle = border;
+		auto ChangeBorder = [this, scenarioId, pScenarioCard](CardBorderStyle border) {
+			pScenarioCard->GetUserSettings().borderStyle = border;
 			Global::GetUserContent().SetBorder(scenarioId, border);
-			pCard->SetBorder(border);
+			pScenarioCard->SetBorder(border);
 		};
 
 		bool bLLM = Global::IsLLMInitialized();
@@ -43,35 +43,35 @@ namespace fig::gui
 			
 		menu.AddSeparator();
 		menu.AddItem("Edit story\u2026")
-			.SetDelegate([&] {
+			.SetDelegate([this, scenarioId] {
 				PushEvent(UserEvent::EditStory, &scenarioId);
 			});
 
-		CreateMoveMenu(menu, AssetFolderType::Story, scenarioId, "Stories");
+		CreateMoveMenu(menu, AssetFolderType::Story, scenarioId, fig::strings::UI::MenuScenarios);
 
 		menu.AddItem("Duplicate");
 		menu.AddItem("Export\u2026");
 
 		menu.AddSeparator();
 
-		if (!userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
+		if (not pScenarioCard->GetUserSettings().HasFlag(AssetUserSettings::Flag::Favorite))
 		{
 			menu.AddItem("Star", Icon::STAR)
-				.SetDelegate([&] {
+				.SetDelegate([this, scenarioId, pScenarioCard] {
 					Global::GetUserContent().MarkFavorite(scenarioId, true);
-					userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
-					pCard->ShowStar(true);
-					OnModifiedCard(pCard);
+					pScenarioCard->GetUserSettings().flags.Set(AssetUserSettings::Flag::Favorite);
+					pScenarioCard->ShowStar(true);
+					OnModifiedCard(pScenarioCard);
 				});
 		}
 		else
 		{
 			menu.AddItem("Unstar", Icon::UNSTAR)
-				.SetDelegate([&] {
+				.SetDelegate([this, scenarioId, pScenarioCard] {
 					Global::GetUserContent().MarkFavorite(scenarioId, false);
-					userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
-					pCard->ShowStar(false);
-					OnModifiedCard(pCard);
+					pScenarioCard->GetUserSettings().flags.Unset(AssetUserSettings::Flag::Favorite);
+					pScenarioCard->ShowStar(false);
+					OnModifiedCard(pScenarioCard);
 				});
 		}
 
@@ -98,31 +98,31 @@ namespace fig::gui
 			.SetIcon(Icon::BORDER_06, false)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::Style06); });
 
-		if (!userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
+		if (not userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Hide")
-				.SetDelegate([&] {
+				.SetDelegate([this, scenarioId, pScenarioCard] {
 					Global::GetUserContent().MarkHidden(scenarioId, true);
-					userSettings.flags.Set(AssetUserSettings::Flag::Hidden);
-					OnModifiedCard(pCard);
+					pScenarioCard->GetUserSettings().flags.Set(AssetUserSettings::Flag::Hidden);
+					OnModifiedCard(pScenarioCard);
 				});
 		}
 		else
 		{
 			menu.AddItem("Unhide")
-				.SetDelegate([&] {
+				.SetDelegate([this, scenarioId, pScenarioCard] {
 					Global::GetUserContent().MarkHidden(scenarioId, false);
-					userSettings.flags.Unset(AssetUserSettings::Flag::Hidden);
-					OnModifiedCard(pCard);
+					pScenarioCard->GetUserSettings().flags.Unset(AssetUserSettings::Flag::Hidden);
+					OnModifiedCard(pScenarioCard);
 				});
 		}
 
 		menu.AddSeparator();
 
 		menu.AddItem("Delete\u2026", Icon::DELETE)
-			.SetDelegate([&] { 
+			.SetDelegate([this, pScenarioCard] { 
 				ShowDialogBox(std::format("Are you sure you want to delete {}?\nThis action cannot be undone.", pScenarioCard->GetName()), DialogBoxType::ConfirmCancel,
-					[&](bool bOk) {
+					[this, pScenarioCard](bool bOk) {
 					if (bOk)
 						OnDeleteCard(pScenarioCard);
 				});

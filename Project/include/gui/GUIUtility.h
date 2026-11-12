@@ -124,7 +124,8 @@ namespace fig
 	bool MaskCorners(fig::sdl::Surface& surface, MaskType style);
 	void AlphaToMask(fig::path filename);
 
-	fig::point MeasureText(fig::font& font, const fig::string& text);
+	fig::string TruncateTextByWidth(fig::font& font, fig::string_view text, int32_t maxWidth);
+	fig::point MeasureText(fig::font& font, fig::string_view text);
 
 	inline bool IsShiftDown()
 	{

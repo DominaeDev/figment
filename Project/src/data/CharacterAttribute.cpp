@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "data/CharacterAttribute.h"
 
 namespace fig::data
@@ -7,7 +7,8 @@ namespace fig::data
 		{ CharacterAttribute::ValueType::ShortText,		"text" },
 		{ CharacterAttribute::ValueType::LongText,		"multiline" },
 		{ CharacterAttribute::ValueType::Number,		"number" },
-		{ CharacterAttribute::ValueType::List,			"list" },
+		{ CharacterAttribute::ValueType::CommaList,		"list" },
+		{ CharacterAttribute::ValueType::PlusList,		"plus-list" },
 		{ CharacterAttribute::ValueType::Options,		"options" },
 	};
 

@@ -194,6 +194,7 @@
     <ClCompile Include="src\gui\editor\WorldEditorImagesTab.cpp" />
     <ClCompile Include="src\gui\editor\WorldEditorInfoTab.cpp" />
     <ClCompile Include="src\gui\editor\WorldEditorRulesTab.cpp" />
+    <ClCompile Include="src\gui\FolderWidget.cpp" />
     <ClCompile Include="src\gui\Icons.cpp" />
     <ClCompile Include="src\gui\BackgroundImageCarousel.cpp" />
     <ClCompile Include="src\gui\ChatBackgroundPopOver.cpp" />
@@ -557,6 +558,7 @@
     <ClInclude Include="include\gui\editor\WorldEditorImagesTab.h" />
     <ClInclude Include="include\gui\editor\WorldEditorInfoTab.h" />
     <ClInclude Include="include\gui\editor\WorldEditorRulesTab.h" />
+    <ClInclude Include="include\gui\FolderWidget.h" />
     <ClInclude Include="include\gui\Icons.h" />
     <ClInclude Include="include\gui\BackgroundImageCarousel.h" />
     <ClInclude Include="include\gui\ChatBackgroundPopOver.h" />

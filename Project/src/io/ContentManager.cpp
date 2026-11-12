@@ -838,6 +838,16 @@ namespace fig::io
 		return _pAssetMngr->MoveAssetToFolder(assetId, folderId);
 	}
 
+	bool UserContentManager::DeleteFolder(const fig::uuid& folderId) noexcept
+	{
+		if (_pAssetMngr->DeleteFolder(folderId))
+		{
+			InvalidateFolders();
+			return true;
+		}
+		return false;
+	}
+
 	void UserContentManager::InvalidateFolders() noexcept
 	{
 		_bInvalidatedFolders = true;

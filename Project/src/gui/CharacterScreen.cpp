@@ -17,7 +17,7 @@ namespace fig::gui
 			return EventResult::Continue;
 		}
 
-		return Screen::OnEvent(event);
+		return CardListScreen<fig::data::Character>::OnEvent(event);
 	}
 
 	void CharacterScreen::ShowSortingMenu() noexcept

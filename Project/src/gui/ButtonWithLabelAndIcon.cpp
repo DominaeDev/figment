@@ -51,10 +51,24 @@ namespace fig::gui
 
 	void ButtonWithLabelAndIcon::OnButtonState()
 	{
-		GetBackgroundRenderer()->SetColor(GetThemeBackground());
-		GetBorderRenderer()->SetColor(GetThemeBorderColor());
+		if (auto pBackgroundRenderer = GetBackgroundRenderer())
+			pBackgroundRenderer->SetColor(GetThemeBackground());
+		if (auto pBorderRenderer = GetBorderRenderer())
+			pBorderRenderer->SetColor(GetThemeBorderColor());
 
 		_pLabel->SetForegroundColor(GetThemeForeground());
 		_pIcon->SetForegroundColor(GetThemeForeground());
+	}
+
+	void ButtonWithLabelAndIcon::SetFont(FontFace fontFace, double ptSize)
+	{
+		_pLabel->SetFont(fontFace, ptSize);
+		_pLabel->SetTextAndResize(_pLabel->GetText());
+		OnSize();
+	}
+
+	fig::font_ptr ButtonWithLabelAndIcon::GetFont() const
+	{
+		return _pLabel->GetFont();
 	}
 }

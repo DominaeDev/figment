@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 
@@ -11,7 +11,8 @@ namespace fig::data
 			ShortText = 0,
 			LongText,
 			Number,
-			List,
+			CommaList,
+			PlusList,
 			Options,
 		};
 

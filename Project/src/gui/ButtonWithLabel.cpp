@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ButtonWithLabel.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
@@ -35,9 +35,23 @@ namespace fig::gui
 
 	void ButtonWithLabel::OnButtonState()
 	{
-		GetBackgroundRenderer()->SetColor(GetThemeBackground());
-		GetBorderRenderer()->SetColor(GetThemeBorderColor());
+		if (auto pBackgroundRenderer = GetBackgroundRenderer())
+			pBackgroundRenderer->SetColor(GetThemeBackground());
+		if (auto pBorderRenderer = GetBorderRenderer())
+			pBorderRenderer->SetColor(GetThemeBorderColor());
 
 		_pLabel->SetForegroundColor(GetThemeForeground());
+	}
+
+	void ButtonWithLabel::SetFont(FontFace fontFace, double ptSize)
+	{
+		_pLabel->SetFont(fontFace, ptSize);
+		_pLabel->SetTextAndResize(_pLabel->GetText());
+		OnSize();
+	}
+
+	fig::font_ptr ButtonWithLabel::GetFont() const
+	{
+		return _pLabel->GetFont();
 	}
 }

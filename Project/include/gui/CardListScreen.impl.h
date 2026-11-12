@@ -8,6 +8,7 @@
 #include "gui/ButtonWithIcon.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/TopBar.h"
+#include "gui/FolderWidget.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 
@@ -22,39 +23,48 @@ namespace fig::gui
 		_pCardList = CreateControl<typename CardTypeOf<T>::ListType>();
 		_pCardList->SetScrollBarOffset(0);
 
-		auto pTopBar = CreateControl<TopBar>(title, _pCardList);
+		auto pTopBar = CreateControl<TopBar>(_pCardList, [this] (auto pTopBar, auto pSizer) {
 
-		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::SORTING, false);
-		_pSortingButton->SetTheme(ButtonThemes::TopBar);
-		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
+			_pFolders = pTopBar->CreateControl<FolderWidget>();
+			_pFolders->SetDelegate([this](auto&& folderId) { OnChangedFolder(folderId); });
 
-		_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Icon::GRID_LARGE);
-		_pGridButton->SetTheme(ButtonThemes::TopBar);
-		_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
+			_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::SORTING, false);
+			_pSortingButton->SetTheme(ButtonThemes::TopBar);
+			_pSortingButton->SetDelegate([this] { ShowSortingMenu(); });
 
-		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::FILTERING, true);
-		_pFilteringButton->SetTheme(ButtonThemes::TopBar);
-		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
+			_pGridButton = pTopBar->CreateControl<ToggleWithIcon>(Icon::GRID_LARGE);
+			_pGridButton->SetTheme(ButtonThemes::TopBar);
+			_pGridButton->SetDelegate([this](bool _) { ToggleCardSize(); });
 
-		_pToggleTagsButton = pTopBar->CreateControl<ToggleWithIcon>(Icon::TAG);
-		_pToggleTagsButton->SetTheme(ButtonThemes::TopBar);
-		_pToggleTagsButton->SetDelegate([this](bool _) { ToggleTags(); });
+			_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::FILTERING, true);
+			_pFilteringButton->SetTheme(ButtonThemes::TopBar);
+			_pFilteringButton->SetDelegate([this] { ShowFilteringMenu(); });
 
-		_pFilterTextBox = pTopBar->CreateControl<SearchBox>();
-		_pFilterTextBox->SetPosition(0, 0);
-		_pFilterTextBox->SetSize(192, 30);
-		_pFilterTextBox->SetMaxWidth(192);
-		_pFilterTextBox->SetTextChangedDelegate([this](fig::string_view s) {
-			OnSearchFilter(s);
+			_pToggleTagsButton = pTopBar->CreateControl<ToggleWithIcon>(Icon::TAG);
+			_pToggleTagsButton->SetTheme(ButtonThemes::TopBar);
+			_pToggleTagsButton->SetDelegate([this](bool _) { ToggleTags(); });
+
+			_pFilterTextBox = pTopBar->CreateControl<SearchBox>();
+			_pFilterTextBox->SetPosition(0, 0);
+			_pFilterTextBox->SetSize(192, 30);
+			_pFilterTextBox->SetMaxWidth(192);
+			_pFilterTextBox->SetTextChangedDelegate([this](fig::string_view s) {
+				OnSearchFilter(s);
+			});
+
+			auto pTopBarSizer = pTopBar->GetSizer();
+			pTopBarSizer->Add(_pFolders, -1, SizerFlag::Fill | SizerFlag::Left, 0);
+			pTopBarSizer->AddSpacer(6);
+			pTopBarSizer->Add(_pGridButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+			pTopBarSizer->Add(_pToggleTagsButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+			pTopBarSizer->Add(_pSortingButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
+			pTopBarSizer->Add(_pFilteringButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
+			pTopBarSizer->Add(_pFilterTextBox, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
 		});
 
-		auto pTopBarSizer = pTopBar->GetSizer();
-		pTopBarSizer->AddStretchSpacer();
-		pTopBarSizer->Add(_pGridButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
-		pTopBarSizer->Add(_pToggleTagsButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
-		pTopBarSizer->Add(_pSortingButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 2);
-		pTopBarSizer->Add(_pFilteringButton, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
-		pTopBarSizer->Add(_pFilterTextBox, 0, SizerFlag::AlignCenterVertical | SizerFlag::Right, 8);
+//		pTopBar->SetTitle(title);
+
+		_pFolders->SetFolder(_currentFolderId, CardTypeOf<T>::FolderType);
 
 		auto mainSizer = SetSizer<VerticalSizer>();
 		mainSizer->Add(pTopBar, 0, SizerFlag::Expand);
@@ -86,6 +96,12 @@ namespace fig::gui
 		DEBUG_MEASURE_END();
 
 		InvalidateLayout();
+	}
+
+	template<typename T>
+	inline void CardListScreen<T>::OnChangedFolder(const fig::uuid& folderId)
+	{
+		fig::gui::PushEvent(UserEvent::ChangeAssetFolder, (fig::string)folderId );
 	}
 
 	template <typename T>
@@ -174,7 +190,22 @@ namespace fig::gui
 		_currentFolderId = folderId;
 		_pCardList->Clear();
 		_pCardList->CreateCards(_currentFolderId);
+		_pFolders->SetFolder(_currentFolderId, CardTypeOf<T>::FolderType);
 		return true;
+	}
+
+	template <typename T>
+	EventResult CardListScreen<T>::OnEvent(fig::event& event)
+	{
+		if (IsUserEvent(event, UserEvent::ChangeAssetFolder))
+		{
+			if (auto folderId = GetEventText(event))
+			{
+				ChangeFolder(fig::uuid::from_str(*folderId));
+				return EventResult::Handled;
+			}
+		}
+		return Screen::OnEvent(event);
 	}
 
 }

@@ -22,7 +22,7 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
-//			CreateFolder();
+//			CreateFolders();
 //			ImportTestCharacters("./import/characters");
 //			FlushBrokenAssets();
 //			EraseChats();
@@ -313,7 +313,7 @@ namespace fig
 		}
 	}
 
-	void DebugUtility::CreateFolder()
+	void DebugUtility::CreateFolders()
 	{
 		if constexpr (Debugging)
 		{
@@ -327,9 +327,12 @@ namespace fig
 				for (auto& folder : folders)
 					assetMngr.DeleteFolder(folder.get().id);
 
-				auto& newFolder = assetMngr.CreateFolder("New folder", AssetFolderType::Character);
-				auto& newSubfolder = assetMngr.CreateFolder("New sub-folder", AssetFolderType::Character, newFolder.id);
-				assetMngr.MoveAssetToFolder(fig::uuid { Constants::Debug::TestCharacterId }, newSubfolder.id);
+				auto& folderA = assetMngr.CreateFolder("Folder A", AssetFolderType::Character);
+				auto& folderB = assetMngr.CreateFolder("Folder B", AssetFolderType::Character, folderA.id);
+				assetMngr.MoveAssetToFolder(fig::uuid { Constants::Debug::TestCharacterId }, folderB.id);
+
+				auto& folderC = assetMngr.CreateFolder("Folder C", AssetFolderType::Character);
+				auto& folderD = assetMngr.CreateFolder("A folder with a really long name that is probably too long", AssetFolderType::Character);
 				
 				userMngr.SignOut();
 			}

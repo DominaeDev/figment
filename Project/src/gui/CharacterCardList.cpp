@@ -26,9 +26,9 @@ namespace fig::gui
 		auto pCharacterCard = dynamic_cast<CharacterCard*>(pCard.get());
 		auto& characterId = pCharacterCard->GetAssetId();
 		auto chatCount = pCharacterCard->GetChatCount();
-		auto& userSettings = pCharacterCard->GetUserSettings();
+		const auto& userSettings = pCharacterCard->GetUserSettings();
 
-		auto ChangeBorder = [&](CardBorderStyle border) {
+		auto ChangeBorder = [this, characterId, pCharacterCard](CardBorderStyle border) {
 			pCharacterCard->GetUserSettings().borderStyle = border;
 			Global::GetUserContent().SetBorder(characterId, border);
 			pCharacterCard->SetBorder(border);
@@ -42,34 +42,34 @@ namespace fig::gui
 			.SetEnabled(bLLM && chatCount > 0);
 		menu.AddItem("Start a new chat", Icon::NEW_CHAT)
 			.SetEnabled(bLLM)
-			.SetDelegate([&] { 
+			.SetDelegate([this, characterId] { 
 				PushEvent(UserEvent::StartChat, &characterId); 
 			});
 		menu.AddItem("View chats")
 			.SetEnabled(chatCount > 0)
-			.SetDelegate([&] { 
+			.SetDelegate([this, characterId] { 
 				PushEvent(UserEvent::NavigateToChatList, &characterId); 
 			});
 
 		if constexpr (Debugging)
 		{
 			menu.AddItem(std::format("Debug {}\u2026", pCharacterCard->GetName()))
-				.SetDelegate([&] {
+				.SetDelegate([this, characterId] {
 					PushEvent(UserEvent::DebugCharacter, &characterId);
 				});
 		}
 		
 		menu.AddSeparator();
 		menu.AddItem("Edit character\u2026", Icon::EDIT)
-			.SetDelegate([&] {
+			.SetDelegate([this, characterId] {
 				PushEvent(UserEvent::EditCharacter, &characterId);
 			});
 		menu.AddItem("Edit story\u2026")
-			.SetDelegate([&] {
+			.SetDelegate([this, characterId] {
 				PushEvent(UserEvent::EditCharacterStory, &characterId);
 			});
 
-		CreateMoveMenu(menu, AssetFolderType::Character, characterId, "Characters");
+		CreateMoveMenu(menu, AssetFolderType::Character, characterId, fig::strings::UI::MenuCharacters);
 
 		menu.AddItem("Duplicate");
 		menu.AddItem("Export\u2026");
@@ -79,7 +79,7 @@ namespace fig::gui
 		if (!userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 		{
 			menu.AddItem("Star", Icon::STAR)
-				.SetDelegate([&] {
+				.SetDelegate([this, characterId, pCharacterCard] {
 					Global::GetUserContent().MarkFavorite(characterId, true);
 					pCharacterCard->GetUserSettings().flags.Set(AssetUserSettings::Flag::Favorite);
 					pCharacterCard->ShowStar(true);
@@ -89,7 +89,7 @@ namespace fig::gui
 		else
 		{
 			menu.AddItem("Unstar", Icon::UNSTAR)
-				.SetDelegate([&] {
+				.SetDelegate([this, characterId, pCharacterCard] {
 				Global::GetUserContent().MarkFavorite(characterId, false);
 				pCharacterCard->GetUserSettings().flags.Unset(AssetUserSettings::Flag::Favorite);
 				pCharacterCard->ShowStar(false);
@@ -123,7 +123,7 @@ namespace fig::gui
 		if (!userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Hide")
-				.SetDelegate([&] { 
+				.SetDelegate([this, characterId, pCharacterCard] { 
 					Global::GetUserContent().MarkHidden(characterId, true);
 					pCharacterCard->GetUserSettings().flags.Set(AssetUserSettings::Flag::Hidden);
 					OnModifiedCard(pCharacterCard);
@@ -132,7 +132,7 @@ namespace fig::gui
 		else
 		{
 			menu.AddItem("Unhide")
-				.SetDelegate([&] { 
+				.SetDelegate([this, characterId, pCharacterCard] { 
 					Global::GetUserContent().MarkHidden(characterId, false);
 					pCharacterCard->GetUserSettings().flags.Unset(AssetUserSettings::Flag::Hidden);
 					OnModifiedCard(pCharacterCard);
@@ -142,9 +142,9 @@ namespace fig::gui
 		menu.AddSeparator();
 	
 		menu.AddItem("Delete\u2026", Icon::DELETE)
-			.SetDelegate([&] { 
+			.SetDelegate([this, characterId, pCharacterCard] { 
 				ShowDialogBox(std::format("Are you sure you want to delete {}?\nThis action cannot be undone.", pCharacterCard->GetName()), DialogBoxType::ConfirmCancel,
-					[&](bool bOk) {
+					[this, pCharacterCard](bool bOk) {
 					if (bOk)
 						OnDeleteCard(pCharacterCard);
 				});

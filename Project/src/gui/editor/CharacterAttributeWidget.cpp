@@ -116,19 +116,12 @@ namespace fig::gui
 		switch (type)
 		{
 		case CharacterAttribute::ValueType::ShortText:
+		case CharacterAttribute::ValueType::CommaList:
+		case CharacterAttribute::ValueType::PlusList:
 			_pTextBox->SetMode(TextInput::Mode::SingleWordWrap);
 			_pTextBox->SetTextWrapWidth(_pTextBox->GetClientRect().w);
 			_pTextBox->SetMinRows(1);
 			_pTextBox->SetMaxRows(4);
-			_pTextBox->SetMaxWidth(MaxWidth);
-			_pTextBox->SetWidth(MaxWidth);
-			value_sv = fnTrimLine(value);
-			break;
-		case CharacterAttribute::ValueType::List:
-			_pTextBox->SetMode(TextInput::Mode::Single);
-			_pTextBox->SetTextWrapWidth(0);
-			_pTextBox->SetMinRows(1);
-			_pTextBox->SetMaxRows(1);
 			_pTextBox->SetMaxWidth(MaxWidth);
 			_pTextBox->SetWidth(MaxWidth);
 			value_sv = fnTrimLine(value);

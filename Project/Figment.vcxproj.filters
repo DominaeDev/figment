@@ -992,6 +992,9 @@
     <ClCompile Include="src\user\EncryptedString.cpp">
       <Filter>Source Files\Frontend\User</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\FolderWidget.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -2208,6 +2211,9 @@
     </ClInclude>
     <ClInclude Include="include\user\EncryptedString.h">
       <Filter>Source Files\Frontend\User</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\FolderWidget.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

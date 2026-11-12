@@ -241,8 +241,10 @@ namespace fig::gui
 			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::LongText); });
 		typeMenu.AddCheckItem("Number", pAttribute->type == CharacterAttribute::ValueType::Number)
 			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::Number); });
-		typeMenu.AddCheckItem("Comma-separated list", pAttribute->type == CharacterAttribute::ValueType::List)
-			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::List); });
+		typeMenu.AddCheckItem("List (comma-separated)", pAttribute->type == CharacterAttribute::ValueType::CommaList)
+			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::CommaList); });
+		typeMenu.AddCheckItem("List (plus-separated)", pAttribute->type == CharacterAttribute::ValueType::PlusList)
+			.SetDelegate([this, attributeIndex] { OnChangedAttributeValueType(attributeIndex, CharacterAttribute::ValueType::PlusList); });
 
 		auto& visibilityMenu = menu.AddItem("Visibility");
 		visibilityMenu.AddCheckItem("Public", pAttribute->visibility == CharacterAttribute::Visibility::Public)

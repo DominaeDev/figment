@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/HorizontalGradient.h"
 #include "gui/AppResources.h"
 
@@ -7,7 +7,6 @@ namespace fig::gui
 	HorizontalGradient::HorizontalGradient(ControlPtr pParent, fig::color_ref colorLeft, fig::color_ref colorRight) : IMeshControl(pParent)
 	{
 		SetColors(colorLeft, colorRight);
-		int k = 0;
 	}
 
 	void HorizontalGradient::SetColors(fig::color_ref colorLeft, fig::color_ref colorRight)

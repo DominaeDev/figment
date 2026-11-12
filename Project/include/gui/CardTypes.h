@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "io/AssetFolder.h"
+
 namespace fig::data
 {
 	class Character;
@@ -17,6 +19,7 @@ namespace fig::gui
 	{
 		using Type = class CharacterCard;
 		using ListType = class CharacterCardList;
+		static constexpr fig::io::AssetFolderType FolderType = fig::io::AssetFolderType::Character;
 	};
 
 	template<>
@@ -24,6 +27,7 @@ namespace fig::gui
 	{
 		using Type = class ScenarioCard;
 		using ListType = class StoryCardList;
+		static constexpr fig::io::AssetFolderType FolderType = fig::io::AssetFolderType::Story;
 	};
 
 	template<>
@@ -31,5 +35,6 @@ namespace fig::gui
 	{
 		using Type = class WorldCard;
 		using ListType = class WorldCardList;
+		static constexpr fig::io::AssetFolderType FolderType = fig::io::AssetFolderType::World;
 	};
 }

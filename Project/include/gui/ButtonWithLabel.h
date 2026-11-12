@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include "gui/ThemedButton.h"
@@ -15,6 +15,8 @@ namespace fig::gui
 		ButtonWithLabel(ControlPtr pParent, fig::string_view label, double fontSize = 16.0);
 
 		void SetLabel(fig::string_view label) noexcept;
+		void SetFont(FontFace fontFace, double ptSize);
+		fig::font_ptr GetFont() const;
 
 	protected:
 		void OnButtonState() override;

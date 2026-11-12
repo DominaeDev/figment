@@ -15,7 +15,7 @@ namespace fig::gui
 		_pScrollPanel->SetMaxWidth(Constants::GUI::EditorTab::MaxWidth);
 		_pScrollPanel->SetSizer<VerticalSizer>();
 
-		_pTopBar = CreateControl<TopBar>("", _pScrollPanel);
+		_pTopBar = CreateControl<TopBar>(_pScrollPanel);
 
 		auto mainSizer = SetSizer<VerticalSizer>();
 		mainSizer->Add(_pTopBar, 0, SizerFlag::Expand);
@@ -41,7 +41,8 @@ namespace fig::gui
 	void EditorScreen::OnSetEditor()
 	{
 		// Init top bar
-		_pTopBar->Initialize(_pEditor->GetTitle());
+		_pTopBar->Initialize();
+		_pTopBar->SetTitle(_pEditor->GetTitle());
 
 		// Init editor
 		_pScrollPanel->DestroyChildren();

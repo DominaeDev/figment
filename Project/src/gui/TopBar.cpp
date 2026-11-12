@@ -1,38 +1,37 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/TopBar.h"
 #include "gui/ScrollPanel.h"
 #include "gui/LineBorderRenderer.h"
 
 namespace fig::gui
 {
-	TopBar::TopBar(ControlPtr pParent, fig::string_view title) : Panel(pParent)
+	TopBar::TopBar(ControlPtr pParent, InitializeDelegate fnInit) : Panel(pParent),
+		_fnInit { fnInit }
 	{
 		SetSizer<HorizontalSizer>();
 		SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		Initialize(title);
+		Initialize();
 	}
 
-	TopBar::TopBar(ControlPtr pParent, fig::string_view title, fig::observer_ptr<ScrollPanel> pScrollPanel) : Panel(pParent),
+	TopBar::TopBar(ControlPtr pParent, fig::observer_ptr<ScrollPanel> pScrollPanel, InitializeDelegate fnInit) : Panel(pParent),
+		_fnInit { fnInit },
 		_pScrollPanel { pScrollPanel }
 	{
 		SetSizer<HorizontalSizer>();
 		SetHeight(Constants::GUI::SidePanel::HeaderHeight);
 
-		Initialize(title);
+		Initialize();
 	}
 
-	void TopBar::Initialize(fig::string_view title)
+	void TopBar::Initialize()
 	{
 		DestroyChildren();
+		_pTitle.reset();
+		_pShadow.reset();
 
-		// Create title
-		_pTitle = CreateControl<StaticText>("", FontFace::Italic, 24, false);
-		_pTitle->SetX(52);
-		_pTitle->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
-		_pTitle->SetAlignment(TextAlignment::LeftCenter);
-		_pTitle->SetTextAndResize(title);
-		GetSizer()->Add(_pTitle, -1, SizerFlag::AlignCenterVertical | SizerFlag::Left, 18);
+		if (_fnInit)
+			_fnInit(this, GetSizer());
 
 		// Create shadow
 		if (_pScrollPanel)
@@ -45,8 +44,18 @@ namespace fig::gui
 
 	void TopBar::SetTitle(fig::string_view text) noexcept
 	{
-		if (_pTitle)
-			_pTitle->SetText(text);
+		if (!_pTitle)
+		{
+			// Create title
+			_pTitle = CreateControl<StaticText>("", FontFace::Italic, 24, false);
+			_pTitle->SetX(52);
+			_pTitle->SetHeight(Constants::GUI::SidePanel::HeaderHeight);
+			_pTitle->SetAlignment(TextAlignment::LeftCenter);
+			_pTitle->SetTextAndResize(text);
+			GetSizer()->Insert(0, _pTitle, -1, SizerFlag::AlignCenterVertical | SizerFlag::Left, 18);
+		}
+
+		_pTitle->SetText(text);
 	}
 
 	void TopBar::OnSize()

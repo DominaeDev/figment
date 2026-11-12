@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Panel.h"
 
@@ -8,10 +8,13 @@ namespace fig::gui
 	class TopBar : public Panel
 	{
 	public:
-		TopBar(ControlPtr pParent, fig::string_view title);
-		TopBar(ControlPtr pParent, fig::string_view title, fig::observer_ptr<ScrollPanel> pScrollPanel);
+		using InitializeDelegate = std::function<void(fig::observer_ptr<TopBar>, SizerPtr)>;
+
+		TopBar(ControlPtr pParent, InitializeDelegate fnInit = nullptr);
+		TopBar(ControlPtr pParent, fig::observer_ptr<ScrollPanel> pScrollPanel, InitializeDelegate fnInit = nullptr);
 	
-		void Initialize(fig::string_view title);
+		void Initialize();
+
 		void SetTitle(fig::string_view text) noexcept;
 
 	protected:
@@ -19,9 +22,10 @@ namespace fig::gui
 		void OnSize() override;
 
 	private:
+		InitializeDelegate _fnInit;
 		fig::observer_ptr<StaticText> _pTitle;
-		fig::observer_ptr<ScrollPanel> _pScrollPanel;
 		fig::observer_ptr<VerticalGradient> _pShadow;
+		fig::observer_ptr<ScrollPanel> _pScrollPanel;
 
 	};
 }

@@ -20,6 +20,6 @@ namespace fig
 		static void EraseChats();
 		static void GenerateUUIDs(size_t count);
 		static void FlushBrokenAssets();
-		static void CreateFolder();
+		static void CreateFolders();
 	};
 }

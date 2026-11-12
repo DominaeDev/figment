@@ -7,6 +7,7 @@
 namespace fig::gui
 {
 	class ToggleWithIcon;
+	class FolderWidget;
 
 	template <typename T>
 	class CardListScreen : public Screen
@@ -29,6 +30,8 @@ namespace fig::gui
 		void OnSearchFilter(fig::string_view search_text);
 		void OnActivated() override;
 		void OnUserSignedIn(const fig::user::UserProfile& profile) override;
+		void OnChangedFolder(const fig::uuid& folderId);
+		EventResult OnEvent(fig::event& event) override;
 
 		void ToggleCardSize() noexcept;
 		void ToggleTags() noexcept;
@@ -42,6 +45,7 @@ namespace fig::gui
 		fig::observer_ptr<Control> _pFilterBorder;
 		fig::observer_ptr<ToggleWithIcon> _pToggleTagsButton;
 		fig::observer_ptr<ToggleWithIcon> _pGridButton;
+		fig::observer_ptr<FolderWidget> _pFolders;
 
 		fig::string _search_text;
 		float _fSearchTimer {};

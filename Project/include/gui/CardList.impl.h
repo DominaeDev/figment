@@ -346,7 +346,7 @@ namespace fig::gui
 	void CardList<T>::CreateMoveMenu(Menu& menu, fig::io::AssetFolderType folderType, const fig::uuid& assetId, fig::string_view rootName)
 	{
 		auto& moveMenu = menu.AddItem("Move to folder");
-		moveMenu.AddItem("Create new folder\u2026");
+		moveMenu.AddItem("Move to a new folder\u2026", Icon::MOVE_TO_FOLDER);
 
 		// Subfolder from "here"
 		if (auto subfolders = Global::GetUserContent().GetSubFolders(_currentFolderId, folderType); not subfolders.empty())
@@ -361,7 +361,7 @@ namespace fig::gui
 			if (auto subfolders = Global::GetUserContent().GetFolders(folderType); not subfolders.empty())
 			{
 				moveMenu.AddSeparator();
-				auto& rootFolderItem = moveMenu.AddItem(fig::string { rootName }, Icon::HOME)
+				auto& rootFolderItem = moveMenu.AddItem(fig::string { rootName }, Icon::MOVE_TO_FOLDER)
 					.SetDelegate([&] { MoveCardToFolder(assetId, {}); })
 					.SetEnabled(not _currentFolderId.empty());
 				CreateMoveSubMenu(rootFolderItem, assetId, {});
@@ -375,7 +375,7 @@ namespace fig::gui
 		auto subfolders = Global::GetUserContent().GetSubFolders(folderId);
 		for (auto& subfolder : subfolders)
 		{
-			auto& folderItem = parentItem.AddItem(subfolder.name, Icon::FOLDER)
+			auto& folderItem = parentItem.AddItem(subfolder.name, Icon::MOVE_TO_FOLDER)
 				.SetDelegate([this, assetId, folderId = subfolder.id] { MoveCardToFolder(assetId, folderId); })
 				.SetEnabled(subfolder.id != _currentFolderId);
 			CreateMoveSubMenu(folderItem, assetId, subfolder.id);

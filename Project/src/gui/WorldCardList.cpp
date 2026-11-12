@@ -26,12 +26,12 @@ namespace fig::gui
 		auto pWorldCard = dynamic_cast<WorldCard*>(pCard.get());
 		auto& worldId = pWorldCard->GetAssetId();
 		auto chatCount = pWorldCard->GetChatCount();
-		auto& userSettings = pWorldCard->GetUserSettings();
+		const auto& userSettings = pWorldCard->GetUserSettings();
 
-		auto ChangeBorder = [&](CardBorderStyle border) {
-			userSettings.borderStyle = border;
+		auto ChangeBorder = [this, worldId, pWorldCard](CardBorderStyle border) {
+			pWorldCard->GetUserSettings().borderStyle = border;
 			Global::GetUserContent().SetBorder(worldId, border);
-			pCard->SetBorder(border);
+			pWorldCard->SetBorder(border);
 		};
 
 		bool bLLM = Global::IsLLMInitialized();
@@ -42,11 +42,11 @@ namespace fig::gui
 			
 		menu.AddSeparator();
 		menu.AddItem("Edit world\u2026")
-			.SetDelegate([&] {
+			.SetDelegate([this, worldId] {
 				PushEvent(UserEvent::EditStory, &worldId);
 			});
 
-		CreateMoveMenu(menu, AssetFolderType::World, worldId, "Worlds");
+		CreateMoveMenu(menu, AssetFolderType::World, worldId, fig::strings::UI::MenuWorlds);
 
 		menu.AddItem("Duplicate");
 		menu.AddItem("Export\u2026");
@@ -56,21 +56,21 @@ namespace fig::gui
 		if (!userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 		{
 			menu.AddItem("Star", Icon::STAR)
-				.SetDelegate([&] {
+				.SetDelegate([this, worldId, pWorldCard] {
 					Global::GetUserContent().MarkFavorite(worldId, true);
-					userSettings.flags.Set(AssetUserSettings::Flag::Favorite);
-					pCard->ShowStar(true);
-					OnModifiedCard(pCard);
+					pWorldCard->GetUserSettings().flags.Set(AssetUserSettings::Flag::Favorite);
+					pWorldCard->ShowStar(true);
+					OnModifiedCard(pWorldCard);
 				});
 		}
 		else
 		{
 			menu.AddItem("Unstar", Icon::UNSTAR)
-				.SetDelegate([&] {
+				.SetDelegate([this, worldId, pWorldCard] {
 					Global::GetUserContent().MarkFavorite(worldId, false);
-					userSettings.flags.Unset(AssetUserSettings::Flag::Favorite);
-					pCard->ShowStar(false);
-					OnModifiedCard(pCard);
+					pWorldCard->GetUserSettings().flags.Unset(AssetUserSettings::Flag::Favorite);
+					pWorldCard->ShowStar(false);
+					OnModifiedCard(pWorldCard);
 				});
 		}
 
@@ -100,28 +100,28 @@ namespace fig::gui
 		if (!userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Hide")
-				.SetDelegate([&] {
+				.SetDelegate([this, worldId, pWorldCard] {
 					Global::GetUserContent().MarkHidden(worldId, true);
-					userSettings.flags.Set(AssetUserSettings::Flag::Hidden);
-					OnModifiedCard(pCard);
+					pWorldCard->GetUserSettings().flags.Set(AssetUserSettings::Flag::Hidden);
+					OnModifiedCard(pWorldCard);
 				});
 		}
 		else
 		{
 			menu.AddItem("Unhide")
-				.SetDelegate([&] {
+				.SetDelegate([this, worldId, pWorldCard] {
 					Global::GetUserContent().MarkHidden(worldId, false);
-					userSettings.flags.Unset(AssetUserSettings::Flag::Hidden);
-					OnModifiedCard(pCard);
+					pWorldCard->GetUserSettings().flags.Unset(AssetUserSettings::Flag::Hidden);
+					OnModifiedCard(pWorldCard);
 				});
 		}
 
 		menu.AddSeparator();
 
 		menu.AddItem("Delete\u2026", Icon::DELETE)
-			.SetDelegate([&] { 
+			.SetDelegate([this, pWorldCard] { 
 				ShowDialogBox(std::format("Are you sure you want to delete {}?\nThis action cannot be undone.", pWorldCard->GetName()), DialogBoxType::ConfirmCancel,
-					[&](bool bOk) {
+					[this, pWorldCard](bool bOk) {
 					if (bOk)
 						OnDeleteCard(pWorldCard);
 				});

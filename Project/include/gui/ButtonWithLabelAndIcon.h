@@ -16,6 +16,8 @@ namespace fig::gui
 
 		void SetLabel(fig::string_view label, TextureResource icon = {}) noexcept;
 		void SetIcon(TextureResource icon);
+		void SetFont(FontFace fontFace, double ptSize);
+		fig::font_ptr GetFont() const;
 
 	protected:
 		void OnButtonState() override;
