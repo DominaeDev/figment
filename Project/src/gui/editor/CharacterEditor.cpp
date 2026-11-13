@@ -44,9 +44,9 @@ namespace fig::gui
 		return "Editing character";
 	}
 	
-	bool CharacterEditor::NewCharacter() noexcept
+	bool CharacterEditor::NewCharacter(const fig::uuid& folderId) noexcept
 	{
-		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::Character, DataFormat::TextXml));
+		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::Character, DataFormat::TextXml), fig::uuid {}, folderId);
 
 		_assetId = asset.id;
 		_character = {};

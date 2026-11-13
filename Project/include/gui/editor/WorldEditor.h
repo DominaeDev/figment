@@ -10,7 +10,7 @@ namespace fig::gui
 	public:
 		WorldEditor(ControlPtr pParent);
 
-		bool NewWorld() noexcept;
+		bool NewWorld(const fig::uuid& folderId = {}) noexcept;
 		bool EditWorld(const fig::uuid& assetId) noexcept;
 
 		fig::string GetTitle() const noexcept override;

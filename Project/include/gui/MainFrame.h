@@ -19,6 +19,11 @@ namespace fig::user
 	struct UserProfile;
 }
 
+namespace fig::io
+{
+	enum class AssetFolderType;
+}
+
 namespace fig::gui
 {
 	class SidePanel;
@@ -76,6 +81,9 @@ namespace fig::gui
 		void NavigateTo(ScreenType screen, NavigationState::Context context = {}, const fig::uuid& assetId = {}, bool bPush = false);
 		void NavigateBack();
 		void NavigateHome();
+
+		fig::uuid GetCurrentFolder(fig::io::AssetFolderType folderType) const noexcept;
+		std::pair<fig::uuid, fig::io::AssetFolderType> GetCurrentFolder() const noexcept;
 
 	protected:
 		template<IsScreen T>

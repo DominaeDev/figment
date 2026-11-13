@@ -524,12 +524,8 @@ namespace fig::gui
 				if (paths.empty())
 					return EventResult::Handled;
 
-				fig::uuid folderId {};
-				if (auto pCharacterScreen = GetScreen<CharacterScreen>(); pCharacterScreen and _currentScreen == ScreenType::Home)
-				{
-					folderId = pCharacterScreen->GetCurrentFolder();
-				}
-
+				auto folderId = GetCurrentFolder(AssetFolderType::Character);
+				
 				size_t num_imported = 0uz;
 				for (auto& path : paths)
 				{
@@ -806,7 +802,7 @@ namespace fig::gui
 				if (context == NavigationState::Context::Character)
 				{
 					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<CharacterEditor>();
-					if (assetId.empty() and pEditor->NewCharacter())
+					if (assetId.empty() and pEditor->NewCharacter(GetCurrentFolder(AssetFolderType::Character)))
 						return;
 					if (not assetId.empty() and pEditor->EditCharacter(assetId))
 						return;
@@ -820,7 +816,7 @@ namespace fig::gui
 				else if (context == NavigationState::Context::Scenario)
 				{
 					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<StoryEditor>();
-					if (assetId.empty() and pEditor->NewStory())
+					if (assetId.empty() and pEditor->NewStory(GetCurrentFolder(AssetFolderType::Story)))
 						return;
 					if (not assetId.empty() and pEditor->EditStory(assetId))
 						return;
@@ -828,7 +824,7 @@ namespace fig::gui
 				else if (context == NavigationState::Context::World)
 				{
 					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<WorldEditor>();
-					if (assetId.empty() and pEditor->NewWorld())
+					if (assetId.empty() and pEditor->NewWorld(GetCurrentFolder(AssetFolderType::World)))
 						return;
 					if (not assetId.empty() and pEditor->EditWorld(assetId))
 						return;
@@ -884,5 +880,28 @@ namespace fig::gui
 			NavigateTo(ScreenType::Home);
 		else
 			NavigateTo(ScreenType::Login);
+	}
+
+	fig::uuid MainFrame::GetCurrentFolder(AssetFolderType folderType) const noexcept
+	{
+		if (auto pScreen = GetScreen<CharacterScreen>(); pScreen and folderType == AssetFolderType::Character)
+			return pScreen->GetCurrentFolder();
+		else if (auto pScreen = GetScreen<StoryScreen>(); pScreen and folderType == AssetFolderType::Story)
+			return pScreen->GetCurrentFolder();
+		else if (auto pScreen = GetScreen<WorldScreen>(); pScreen and folderType == AssetFolderType::World)
+			return pScreen->GetCurrentFolder();
+		return {};
+	}
+
+	std::pair<fig::uuid, AssetFolderType> MainFrame::GetCurrentFolder() const noexcept
+	{
+		if (auto pScreen = GetScreen<CharacterScreen>(); pScreen and _currentScreen == ScreenType::Home)
+			return { pScreen->GetCurrentFolder(), AssetFolderType::Character };
+		else if (auto pScreen = GetScreen<StoryScreen>(); pScreen and _currentScreen == ScreenType::Stories)
+			return { pScreen->GetCurrentFolder(), AssetFolderType::Story};
+		else if (auto pScreen = GetScreen<WorldScreen>(); pScreen and _currentScreen == ScreenType::Worlds)
+			return { pScreen->GetCurrentFolder(), AssetFolderType::World };
+		return {};
+
 	}
 }

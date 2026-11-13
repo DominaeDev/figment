@@ -10,7 +10,7 @@ namespace fig::gui
 	public:
 		StoryEditor(ControlPtr pParent);
 
-		bool NewStory() noexcept;
+		bool NewStory(const fig::uuid& folderId = {}) noexcept;
 		bool EditCharacterStory(const fig::uuid& characterId) noexcept;
 		bool EditStory(const fig::uuid& assetId) noexcept;
 

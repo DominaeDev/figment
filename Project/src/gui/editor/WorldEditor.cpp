@@ -40,9 +40,9 @@ namespace fig::gui
 		return "Editing world";
 	}
 
-	bool WorldEditor::NewWorld() noexcept
+	bool WorldEditor::NewWorld(const fig::uuid& folderId) noexcept
 	{
-		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::World, DataFormat::TextXml));
+		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::World, DataFormat::TextXml), fig::uuid {}, folderId);
 
 		_assetId = asset.id;
 		_world = {};

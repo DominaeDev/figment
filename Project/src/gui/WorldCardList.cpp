@@ -43,7 +43,7 @@ namespace fig::gui
 		menu.AddSeparator();
 		menu.AddItem("Edit world\u2026")
 			.SetDelegate([this, worldId] {
-				PushEvent(UserEvent::EditStory, &worldId);
+				PushEvent(UserEvent::EditWorld, &worldId);
 			});
 
 		CreateMoveMenu(menu, worldId, fig::strings::UI::MenuWorlds);

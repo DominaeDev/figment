@@ -10,7 +10,7 @@ namespace fig::gui
 	public:
 		CharacterEditor(ControlPtr pParent);
 
-		bool NewCharacter() noexcept;
+		bool NewCharacter(const fig::uuid& folderId = {}) noexcept;
 		bool EditCharacter(const fig::uuid& assetId) noexcept;
 		
 		fig::string GetTitle() const noexcept override;

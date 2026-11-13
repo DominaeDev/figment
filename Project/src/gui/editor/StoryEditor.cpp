@@ -46,9 +46,9 @@ namespace fig::gui
 		return "Editing story";
 	}
 
-	bool StoryEditor::NewStory() noexcept
+	bool StoryEditor::NewStory(const fig::uuid& folderId) noexcept
 	{
-		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::Scenario, DataFormat::TextXml));
+		auto& asset = Global::GetUserContent().GetAssets().CreateTemporaryAsset(make_asset_type(AssetType::Scenario, DataFormat::TextXml), fig::uuid {}, folderId);
 
 		_assetId = asset.id;
 		_bCharacterScenario = false;
