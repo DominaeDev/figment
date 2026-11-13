@@ -524,10 +524,16 @@ namespace fig::gui
 				if (paths.empty())
 					return EventResult::Handled;
 
+				fig::uuid folderId {};
+				if (auto pCharacterScreen = GetScreen<CharacterScreen>(); pCharacterScreen and _currentScreen == ScreenType::Home)
+				{
+					folderId = pCharacterScreen->GetCurrentFolder();
+				}
+
 				size_t num_imported = 0uz;
 				for (auto& path : paths)
 				{
-					if (Global::GetUserContent().ImportCharacter(path))
+					if (Global::GetUserContent().ImportCharacter(path, folderId))
 						num_imported++;
 				}
 				size_t num_failed = paths.size() - num_imported;

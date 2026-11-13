@@ -173,9 +173,9 @@ namespace fig::io
 		return imported.size();
 	}
 
-	fig::expected_ref<Asset, FileError> UserContentManager::ImportCharacter(const fig::path& filename)
+	fig::expected_ref<Asset, FileError> UserContentManager::ImportCharacter(const fig::path& filename, const fig::uuid& folderId)
 	{
-		if (auto imported = _pAssetMngr->ImportCharacter(filename, AssetManager::CharacterDataFormat::TavernV2))
+		if (auto imported = _pAssetMngr->ImportCharacter(filename, AssetManager::CharacterDataFormat::TavernV2, folderId))
 		{
 			auto& asset = *imported;
 			MarkImported(asset.id);

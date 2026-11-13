@@ -46,15 +46,15 @@ namespace fig::io
 		explicit AssetManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey, int32_t worker_threads = 2);
 		virtual ~AssetManager();
 
-		const Asset& CreateAsset(AssetType type, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
-		const Asset& CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
-		const Asset& CreateAsset(AssetTypeDefinition type, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
-		const Asset& CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}, bool bChecksum = false) noexcept;
+		const Asset& CreateAsset(AssetType type, const fig::uuid& parent = {}, const fig::uuid& folderId = {}) noexcept;
+		const Asset& CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent = {}, const fig::uuid& folderId = {}, bool bChecksum = false) noexcept;
+		const Asset& CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent = {}, const fig::uuid& folderId = {}, bool bChecksum = false) noexcept;
+		const Asset& CreateAsset(AssetTypeDefinition type, const fig::uuid& parent = {}, const fig::uuid& folderId = {}) noexcept;
+		const Asset& CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent = {}, const fig::uuid& folderId = {}, bool bChecksum = false) noexcept;
+		const Asset& CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}, const fig::uuid& folderId = {}, bool bChecksum = false) noexcept;
 		const Asset& CreateBitmapAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateTemporaryAsset(AssetTypeDefinition type, const fig::uuid& parent = {}) noexcept;
-		const Asset& CreateTemporaryAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}) noexcept;
+		const Asset& CreateTemporaryAsset(AssetTypeDefinition type, const fig::uuid& parent = {}, const fig::uuid& folderId = {}) noexcept;
+		const Asset& CreateTemporaryAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent = {}, const fig::uuid& folderId = {}) noexcept;
 
 		bool UpdateAsset(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum = false) noexcept;
 		bool UpdateAsset(const fig::uuid& assetId, fig::byte_span data, bool bChecksum = false) noexcept;
@@ -68,6 +68,7 @@ namespace fig::io
 		bool RenameFolder(const fig::uuid& folderId, const fig::string_view newName);
 		bool DeleteFolder(fig::uuid folderId) noexcept;
 		fig::cref_vector<AssetFolder> GetFolders() const noexcept;
+		bool FolderExists(const fig::uuid& folderId) const noexcept;
 		bool MoveAssetToFolder(const fig::uuid& assetId, const fig::uuid& folderId);
 
 		fig::cref_vector<Asset> GetAllAssets() const noexcept;
@@ -116,7 +117,7 @@ namespace fig::io
 
 		enum class CharacterDataFormat { Default, TavernV2, };
 		fig::ref_vector<Asset> ImportCharactersInDirectory(const fig::path& directory, CharacterDataFormat format = CharacterDataFormat::Default, size_t max_count = 0uz);
-		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename, CharacterDataFormat format = CharacterDataFormat::Default);
+		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename, CharacterDataFormat format = CharacterDataFormat::Default, const fig::uuid& folderId = {});
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 		
 		[[nodiscard]] AsyncLoad LoadAssetAsync(const fig::uuid& assetId, AsyncTask task, int32_t priority);
@@ -154,14 +155,14 @@ namespace fig::io
 		bool ModifyAsset_Bool(const Asset& asset, std::function<bool(Asset&)> fn);
 
 		/* Internal; Only called when mutex is locked */
-		Asset& CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept;
-		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept;
-		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept;
+		Asset& CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent, const fig::uuid& folderId) noexcept;
+		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parentId, const fig::uuid& folderId, bool bChecksum) noexcept;
+		Asset& CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parentId, const fig::uuid& folderId, bool bChecksum) noexcept;
 		Asset& CreateBitmapAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept;
 		bool UpdateAsset_NoLock(const fig::uuid& assetId, fig::bytes&& data, bool bChecksum) noexcept;
 		bool UpdateAsset_NoLock(const fig::uuid& assetId, fig::byte_span data, bool bChecksum) noexcept;
 
-		fig::expected_ref<Asset, FileError> ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format);
+		fig::expected_ref<Asset, FileError> ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format, const fig::uuid& folderId);
 		fig::expected_ref<Asset, FileError> ImportScenario_NoLock(const fig::path& filename);
 
 		fig::optional_cref<AssetFolder> CreateFolder_NoLock(const fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId);

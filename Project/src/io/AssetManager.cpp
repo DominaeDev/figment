@@ -71,69 +71,69 @@ namespace fig::io
 		SaveModifiedAssets();
 	}
 
-	const Asset& AssetManager::CreateAsset(AssetType type, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateAsset(AssetType type, const fig::uuid& parentId, const fig::uuid& folderId) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_NoLock(make_asset_type(type), parent);
+		return CreateAsset_NoLock(make_asset_type(type), parentId, folderId);
 	}
 
-	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, const fig::uuid& parentId, const fig::uuid& folderId) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_NoLock(type, parent);
+		return CreateAsset_NoLock(type, parentId, folderId);
 	}
 
-	const Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept
+	const Asset& AssetManager::CreateAsset(AssetType type, fig::bytes&& data, const fig::uuid& parentId, const fig::uuid& folderId, bool bChecksum) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_NoLock(make_asset_type(type), std::move(data), parent, bChecksum);
+		return CreateAsset_NoLock(make_asset_type(type), std::move(data), parentId, folderId, bChecksum);
 	}
 
-	const Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept
+	const Asset& AssetManager::CreateAsset(AssetType type, fig::byte_span data, const fig::uuid& parentId, const fig::uuid& folderId, bool bChecksum) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_NoLock(make_asset_type(type), data, parent, bChecksum);
+		return CreateAsset_NoLock(make_asset_type(type), data, parentId, folderId, bChecksum);
 	}
 
-	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept
+	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parentId, const fig::uuid& folderId, bool bChecksum) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_NoLock(type, std::move(data), parent, bChecksum);
+		return CreateAsset_NoLock(type, std::move(data), parentId, folderId, bChecksum);
 	}
 
-	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept
+	const Asset& AssetManager::CreateAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parentId, const fig::uuid& folderId, bool bChecksum) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		return CreateAsset_NoLock(type, data, parent, bChecksum);
+		return CreateAsset_NoLock(type, data, parentId, folderId, bChecksum);
 	}
 
-	const Asset& AssetManager::CreateBitmapAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateBitmapAsset(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parentId) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return CreateBitmapAsset_NoLock(subtype, surface, parent);
+		return CreateBitmapAsset_NoLock(subtype, surface, parentId);
 	}
 
-	const Asset& AssetManager::CreateTemporaryAsset(AssetTypeDefinition type, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateTemporaryAsset(AssetTypeDefinition type, const fig::uuid& parentId, const fig::uuid& folderId) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		auto& asset = CreateAsset_NoLock(type, parent);
+		auto& asset = CreateAsset_NoLock(type, parentId, folderId);
 		asset.sync_state.file_sync = AssetSyncState::Status::Temporary;
 		asset.sync_state.db_sync = AssetSyncState::Status::Temporary;
 		return asset;
 	}
 
-	const Asset& AssetManager::CreateTemporaryAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent) noexcept
+	const Asset& AssetManager::CreateTemporaryAsset(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parentId, const fig::uuid& folderId) noexcept
 	{
 		std::scoped_lock lock { _assetsMutex };
 
-		auto& asset = CreateAsset_NoLock(type, data, parent, false);
+		auto& asset = CreateAsset_NoLock(type, data, parentId, folderId, false);
 		asset.sync_state.file_sync = AssetSyncState::Status::Temporary;
 		asset.sync_state.db_sync = AssetSyncState::Status::Temporary;
 		return asset;
@@ -153,12 +153,13 @@ namespace fig::io
 		return UpdateAsset_NoLock(assetId, data, bChecksum);
 	}
 
-	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, const fig::uuid& parentId, const fig::uuid& folderId) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
-		asset.parent_id = parent;
+		asset.parent_id = parentId;
+		asset.folder_id = folderId;
 		asset.type = type;
 		asset.sync_state.file_sync = AssetSyncState::Status::Modified;
 		asset.sync_state.db_sync = AssetSyncState::Status::Modified;
@@ -170,12 +171,13 @@ namespace fig::io
 		return asset;
 	}
 
-	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parent, bool bChecksum) noexcept
+	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::bytes&& data, const fig::uuid& parentId, const fig::uuid& folderId, bool bChecksum) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
-		asset.parent_id = parent;
+		asset.parent_id = parentId;
+		asset.folder_id = folderId;
 		asset.type = type;
 		asset.data = std::move(data); // Move data
 		asset.sync_state.file_sync = AssetSyncState::Status::Modified;
@@ -191,12 +193,13 @@ namespace fig::io
 		return asset;
 	}
 
-	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parent, bool bChecksum) noexcept
+	Asset& AssetManager::CreateAsset_NoLock(AssetTypeDefinition type, fig::byte_span data, const fig::uuid& parentId, const fig::uuid& folderId, bool bChecksum) noexcept
 	{
 		fig::uuid id = GenerateUUID();
 		auto& asset = _assets[id] = Asset {};
 		asset.id = id;
-		asset.parent_id = parent;
+		asset.parent_id = parentId;
+		asset.folder_id = folderId;
 		asset.type = type;
 		asset.sync_state.file_sync = AssetSyncState::Status::Modified;
 		asset.sync_state.db_sync = AssetSyncState::Status::Modified;
@@ -216,9 +219,9 @@ namespace fig::io
 		return asset;
 	}
 
-	Asset& AssetManager::CreateBitmapAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parent) noexcept
+	Asset& AssetManager::CreateBitmapAsset_NoLock(ImageAssetType subtype, const fig::sdl::Surface& surface, const fig::uuid& parentId) noexcept
 	{
-		auto& asset = CreateAsset_NoLock(make_asset_type(AssetType::Image, subtype, DataFormat::ImageUncompressed), parent);
+		auto& asset = CreateAsset_NoLock(make_asset_type(AssetType::Image, subtype, DataFormat::ImageUncompressed), parentId, {});
 		if (!surface.get())
 			return asset; // Error
 
@@ -875,6 +878,11 @@ namespace fig::io
 		return folders;
 	}
 
+	bool AssetManager::FolderExists(const fig::uuid& folderId) const noexcept
+	{
+		return folderId.empty() or _folders.contains(folderId);
+	}
+
 	bool AssetManager::MoveAssetToFolder(const fig::uuid& assetId, const fig::uuid& folderId)
 	{
 		std::scoped_lock lock { _assetsMutex };
@@ -944,13 +952,13 @@ namespace fig::io
 		return imported;
 	}
 
-	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter(const fig::path& filename, CharacterDataFormat format)
+	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter(const fig::path& filename, CharacterDataFormat format, const fig::uuid& folderId)
 	{
 		std::scoped_lock lock { _assetsMutex };
-		return ImportCharacter_NoLock(filename, format);
+		return ImportCharacter_NoLock(filename, format, folderId);
 	}
 
-	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format)
+	fig::expected_ref<Asset, FileError> AssetManager::ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format, const fig::uuid& folderId)
 	{
 		if (auto try_character = LoadCharacterData(filename, format))
 		{
@@ -960,21 +968,21 @@ namespace fig::io
 			// Create character asset
 			fig::bytes characterData;
 			character.SaveToXml(characterData);
-			auto& characterAsset = CreateAsset_NoLock(make_asset_type(AssetType::Character, DataFormat::TextXml), characterData, {}, false);
+			auto& characterAsset = CreateAsset_NoLock(make_asset_type(AssetType::Character, DataFormat::TextXml), characterData, {}, folderId, false);
 
 			// Create scenario asset
 			if (not scenario.empty())
 			{
 				fig::bytes scenarioData;
 				scenario.SaveToXml(scenarioData);
-				CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, characterAsset.id, false);
+				CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, characterAsset.id, {}, false);
 			}
 
 			// Load portrait image(s)
 			if (auto file = fig::io::ReadFile(filename))
 			{
 				// Create asset
-				auto& portraitAsset = CreateAsset_NoLock(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait, DataFormat::ImagePng), std::move(file.value()), characterAsset.id, true);
+				auto& portraitAsset = CreateAsset_NoLock(make_asset_type(AssetType::Image, ImageAssetType::LargePortrait, DataFormat::ImagePng), std::move(file.value()), characterAsset.id, {}, true);
 
 				if (auto try_image = LoadImage(filename))
 				{
@@ -1023,7 +1031,7 @@ namespace fig::io
 		// Create asset
 		fig::bytes scenarioData;
 		scenario.SaveToXml(scenarioData);
-		auto& scenarioAsset = CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, {}, false);
+		auto& scenarioAsset = CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, {}, {}, false);
 
 		// Load scenario image
 /*		if (not empty_or_whitespace(scenario.imageFilename))

@@ -56,7 +56,7 @@ namespace fig::io
 		UserContentManager(const fig::user::UserProfile& profile, const fig::auth::AuthKey& authKey);
 
 		size_t ImportCharactersInDirectory(const fig::path& directory, size_t max_count = 0uz);
-		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename);
+		fig::expected_ref<Asset, FileError> ImportCharacter(const fig::path& filename, const fig::uuid& folderId = {});
 		fig::expected_ref<Asset, FileError> ImportScenario(const fig::path& filename);
 
 		bool UpdateAsset(const fig::uuid& assetId, IsXmlContent auto const& assetData)
