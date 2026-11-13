@@ -7,6 +7,7 @@
 #include "gui/Sizer.h"
 #include "gui/CustomRenderer.h"
 #include "gui/DialogBox.h"
+#include "gui/TextInputDialogBox.h"
 
 namespace fig::gui
 {
@@ -396,5 +397,28 @@ namespace fig::gui
 	{
 		_pTabGroup = std::make_unique<TabControlGroup>(this);
 		return _pTabGroup.get();
+	}
+
+	TextInputDialogBox& Control::ShowTextInputDialogBox(fig::string_view message, std::function<void(fig::string_view)> fnDelegate)
+	{
+		return ShowTextInputDialogBox(message, {}, fnDelegate);
+	}
+
+	TextInputDialogBox& Control::ShowTextInputDialogBox(fig::string_view message, fig::string_view placeholder, std::function<void(fig::string_view)> fnDelegate)
+	{
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+
+		if (_renderContext and _renderContext->pFrame)
+		{
+			auto& dialog = _renderContext->pFrame->CreateModal<TextInputDialogBox>(message, fnDelegate);
+			dialog.SetPlaceholder(placeholder);
+			dialog.Show();
+			return dialog;
+		}
+		
+		assert(false && "No render context");
+		static TextInputDialogBox err { nullptr, {}, {} };
+		return err;
 	}
 }

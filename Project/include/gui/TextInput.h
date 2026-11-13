@@ -59,6 +59,8 @@ namespace fig::gui
 		bool IsFocused() const override;
 		bool CanFocus() const { return GetEnabled() and GetVisible(); }
 
+		void SetMaxLength(size_t maxByteLength) noexcept { _maxLength = maxByteLength; }
+
 		void ScrollToCursor();
 
 		bool Copy();
@@ -156,6 +158,7 @@ namespace fig::gui
 
 		// Layout
 		void Insert(int32_t position, fig::string_view text);
+		bool ClampLength();
 		bool Delete(int32_t from, int32_t length);
 		bool GetSelection(int32_t& marker, int32_t& length) const noexcept;
 		bool IsOnLastNewLine() const noexcept;
@@ -183,6 +186,7 @@ namespace fig::gui
 		fig::point _scroll {};
 		int32_t _minRows = 1;
 		int32_t _maxRows = 1;
+		size_t _maxLength = 0uz; // in bytes
 
 		TextChangedDelegate _fnOnChanged {};
 		EnterPressedDelegate _fnOnEnter {};

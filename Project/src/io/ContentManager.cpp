@@ -838,6 +838,38 @@ namespace fig::io
 		return _pAssetMngr->MoveAssetToFolder(assetId, folderId);
 	}
 
+	std::optional<FolderDescriptor> UserContentManager::CreateFolder(fig::string_view name, AssetFolderType folderType, const fig::uuid& parentFolderId) noexcept
+	{
+		name = trim(name);
+		if (empty_or_whitespace(name))
+			return std::nullopt;
+
+		if (auto folder = _pAssetMngr->CreateFolder(name, folderType, parentFolderId))
+		{
+			InvalidateFolders();
+
+			return FolderDescriptor {
+				.id = (*folder).id,
+				.parentId = (*folder).parent_id,
+				.name = (*folder).decrypted_name,
+				.folderType = (*folder).folderType,
+				.createdAt = (*folder).createdAt,
+				.updatedAt = (*folder).updatedAt,
+			};
+		}
+		return std::nullopt;
+	}
+
+	bool UserContentManager::RenameFolder(const fig::uuid& folderId, fig::string_view newName) noexcept
+	{
+		if (_pAssetMngr->RenameFolder(folderId, newName))
+		{
+			InvalidateFolders();
+			return true;
+		}
+		return false;
+	}
+
 	bool UserContentManager::DeleteFolder(const fig::uuid& folderId) noexcept
 	{
 		if (_pAssetMngr->DeleteFolder(folderId))

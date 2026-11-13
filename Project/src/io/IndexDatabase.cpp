@@ -493,7 +493,8 @@ namespace fig::io
 			/* id */
 			sqlite3_bind_text(stmt, 1, folder.id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/* parent */
-			sqlite3_bind_text(stmt, 2, folder.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
+			if (not folder.parent_id.empty())
+				sqlite3_bind_text(stmt, 2, folder.parent_id.to_str().c_str(), -1, SQLITE_TRANSIENT);
 			/* category */
 			sqlite3_bind_int(stmt, 3, static_cast<int32_t>(folder.folderType));
 			/* name */

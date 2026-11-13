@@ -85,6 +85,7 @@ namespace fig::gui
 		fig::string _name;
 		bool _bSelected {};
 		bool _bInitialized {};
+		bool _bImageLoaded {};
 		bool _bHidden {};
 		bool _bHasError {};
 

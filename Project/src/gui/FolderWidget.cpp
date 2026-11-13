@@ -3,6 +3,7 @@
 #include "gui/ButtonWithIcon.h"
 #include "gui/ButtonWithLabel.h"
 #include "gui/ButtonWithLabelAndIcon.h"
+#include "gui/TextInputDialogBox.h"
 #include "gui/Menu.h"
 #include "io/ContentManager.h"
 
@@ -10,7 +11,7 @@ using namespace fig::io;
 
 namespace fig::gui
 {
-	constexpr fig::coord LeftMargin = 18;
+	constexpr fig::coord LeftMargin = 8;
 	constexpr fig::coord Spacing = 0;
 
 	FolderWidget::FolderWidget(ControlPtr pParent) : Control(pParent)
@@ -170,7 +171,18 @@ namespace fig::gui
 	void FolderWidget::ShowMenu()
 	{
 		auto& menu = CreateMenu();
-		menu.AddItem("New folder\u2026");
+		menu.AddItem("New folder\u2026")
+			.SetDelegate([this] {
+				auto& dlg = ShowTextInputDialogBox("Please enter a name for the new folder:", "Enter folder name", [this](fig::string_view value) {
+					if (not empty_or_whitespace(value))
+					{
+						if (auto newFolder = Global::GetUserContent().CreateFolder(value, _folderType, _currentFolderId))
+							PushEvent(UserEvent::ChangeAssetFolder, (fig::string)(*newFolder).id);
+					}
+				});
+				dlg.SetDefaultValue("New folder");
+				dlg.SetMaxLength(64uz);
+			});
 
 		if (auto subfolders = Global::GetUserContent().GetSubFolders(_currentFolderId, _folderType); not subfolders.empty())
 		{
@@ -185,17 +197,37 @@ namespace fig::gui
 
 		if (not _currentFolderId.empty())
 		{
-			menu.AddSeparator();
-			menu.AddItem("Rename this folder\u2026", Icon::EDIT);
-			menu.AddItem("Delete this folder\u2026", Icon::DELETE)
-				.SetDelegate([this] { OnDeleteFolder(_currentFolderId); });
+			if (auto folder = Global::GetUserContent().GetFolder(_currentFolderId))
+			{
+				auto& folderName = (*folder).name;
+
+				menu.AddSeparator();
+				menu.AddItem("Rename this folder\u2026", Icon::EDIT)
+					.SetDelegate([this, folderName] {
+						auto& dlg = ShowTextInputDialogBox("Please enter a new name for the folder:", "Enter folder name", [this](fig::string_view value) {
+							if (Global::GetUserContent().RenameFolder(_currentFolderId, value))
+								RefreshPath();
+						});
+						dlg.SetDefaultValue(folderName);
+						dlg.SetMaxLength(64uz);
+					});
+				menu.AddItem("Delete this folder\u2026", Icon::DELETE)
+					.SetDelegate([this] { OnDeleteFolder(_currentFolderId); });
+			}
 		}
 		menu.Show();
 	}
 
+	void FolderWidget::RefreshPath()
+	{
+		fig::uuid folderId = _currentFolderId;
+		_currentFolderId = {};
+		SetFolder(folderId, _folderType);
+	}
+
 	void FolderWidget::OnDeleteFolder(const fig::uuid& folderId)
 	{
-		ShowDialogBox("Are you sure you want to delete this folder?\nIts contents will be moved to the parent folder.", DialogBoxType::ConfirmCancel,
+		ShowDialogBox("Are you sure you want to delete this folder?\nAll content will be moved to the parent folder.", DialogBoxType::ConfirmCancel,
 			[folderId](bool bOk) {
 				if (bOk)
 				{

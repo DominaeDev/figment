@@ -1043,7 +1043,7 @@ namespace fig::gui
 		if (DeleteSelection())
 			return true;
 
-		if (Delete(_cursor, static_cast<int32_t>(_text.length()) - _cursor))
+		if (Delete(_cursor, static_cast<int32_t>(_text.size()) - _cursor))
 		{
 			ResetCursorBlink();
 			PushUndo(UndoAction::Delete, false);
@@ -1978,7 +1978,7 @@ namespace fig::gui
 		}
 
 		ResetCursorBlink();
-		_cursor = std::clamp(position, 0, static_cast<int32_t>(_text.length()));
+		_cursor = std::clamp(position, 0, static_cast<int32_t>(_text.size()));
 		return _cursor;
 	}
 
@@ -2039,6 +2039,7 @@ namespace fig::gui
 		if (_text.empty()) // Set
 		{
 			_text = text;
+			ClampLength();
 			_lines = LayoutParagraph(_text);
 
 			ApplyStyle(_text);
@@ -2062,9 +2063,11 @@ namespace fig::gui
 		int32_t paragraphStart = _lines[paragraphStartLine].position;
 		int32_t paragraphEnd = _lines[paragraphEndLine].position + _lines[paragraphEndLine].length;
 
+		size_t prevLength = _text.size();
 		_text.insert_range(_text.cbegin() + position, text);
+		ClampLength();
 
-		int32_t delta = static_cast<int32_t>(text.size());
+		int32_t delta = static_cast<int32_t>(_text.size() - prevLength);
 		paragraphEnd += delta;
 
 		fig::string_view paragraphText(_text.data() + paragraphStart, paragraphEnd - paragraphStart);
@@ -2100,6 +2103,17 @@ namespace fig::gui
 		RefreshPassword();
 		SetCursor(position + delta);
 		ScrollToCursor();
+	}
+
+	bool TextInput::ClampLength()
+	{
+		if (_maxLength > 0uz and _text.size() > _maxLength)
+		{
+			size_t prevLength = _text.size();
+			_text = truncate_utf8(_text, _maxLength);
+			return _text.size() == prevLength;
+		}
+		return false;
 	}
 
 	void TextInput::Insert(fig::string_view text)

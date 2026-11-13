@@ -25,6 +25,7 @@ namespace fig::gui
 		void RefreshButtons();
 
 		void ShowMenu();
+		void RefreshPath();
 		void OnDeleteFolder(const fig::uuid& folderId);
 
 		void OnSize() override;

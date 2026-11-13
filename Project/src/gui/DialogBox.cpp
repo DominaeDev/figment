@@ -1,6 +1,5 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/DialogBox.h"
-#include "gui/Image.h"
 #include "gui/KeyboardMods.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/ButtonWithLabel.h"

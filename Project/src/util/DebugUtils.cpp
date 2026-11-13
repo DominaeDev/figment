@@ -327,12 +327,12 @@ namespace fig
 				for (auto& folder : folders)
 					assetMngr.DeleteFolder(folder.get().id);
 
-				auto& folderA = assetMngr.CreateFolder("Folder A", AssetFolderType::Character);
-				auto& folderB = assetMngr.CreateFolder("Folder B", AssetFolderType::Character, folderA.id);
+				auto& folderA = *assetMngr.CreateFolder("Folder A", AssetFolderType::Character);
+				auto& folderB = *assetMngr.CreateFolder("Folder B", AssetFolderType::Character, folderA.id);
 				assetMngr.MoveAssetToFolder(fig::uuid { Constants::Debug::TestCharacterId }, folderB.id);
 
-				auto& folderC = assetMngr.CreateFolder("Folder C", AssetFolderType::Character);
-				auto& folderD = assetMngr.CreateFolder("A folder with a really long name that is probably too long", AssetFolderType::Character);
+				auto& folderC = *assetMngr.CreateFolder("Folder C", AssetFolderType::Character);
+				auto& folderD = *assetMngr.CreateFolder("A folder with a really long name that is probably too long", AssetFolderType::Character);
 				
 				userMngr.SignOut();
 			}

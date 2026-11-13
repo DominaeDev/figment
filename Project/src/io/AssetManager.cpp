@@ -830,16 +830,27 @@ namespace fig::io
 		return remove_if(_assets, [](auto&& kvp) { return kvp.second.sync_state.file_sync == AssetSyncState::Status::Temporary; });
 	}
 
-	const AssetFolder& AssetManager::CreateFolder(fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId)
+	fig::optional_cref<AssetFolder> AssetManager::CreateFolder(fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId)
 	{
-		std::scoped_lock lock { _assetsMutex };
-		return CreateFolder_NoLock(name, folderType, parentId);
+		if (empty_or_whitespace(name) or folderType == AssetFolderType::Undefined)
+			return fig::nullref;
+
+		if (parentId.empty() or _folders.find(parentId) != _folders.cend())
+		{
+			std::scoped_lock lock { _assetsMutex };
+			return CreateFolder_NoLock(name, folderType, parentId);
+		}
+		return fig::nullref;
 	}
 
 	bool AssetManager::RenameFolder(const fig::uuid& folderId, const fig::string_view newName)
 	{
-		std::scoped_lock lock { _assetsMutex };
-		return RenameFolder_NoLock(folderId, newName);
+		if (not empty_or_whitespace(newName))
+		{
+			std::scoped_lock lock { _assetsMutex };
+			return RenameFolder_NoLock(folderId, newName);
+		}
+		return false;
 	}
 
 	bool AssetManager::DeleteFolder(fig::uuid folderId) noexcept
@@ -1039,7 +1050,7 @@ namespace fig::io
 		return scenarioAsset;
 	}
 
-	AssetFolder& AssetManager::CreateFolder_NoLock(fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId)
+	fig::optional_cref<AssetFolder> AssetManager::CreateFolder_NoLock(fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId)
 	{
 		fig::uuid id = GenerateUUID();
 		auto now = fig::now();
@@ -1049,11 +1060,17 @@ namespace fig::io
 		folder.encrypted_name = fig::auth::EncryptedString(name, _profileAuthKey);
 		folder.parent_id = parentId;
 		folder.folderType = folderType;
-		folder.sync_state.db_sync = AssetSyncState::Status::Modified;
 		folder.createdAt = now;
 		folder.updatedAt = now;
 
-		return folder;
+		auto& db = GetDatabase();
+		if (db.CreateFolder(folder) == DatabaseError::NoError)
+		{
+			folder.sync_state.db_sync = AssetSyncState::Status::Synchronized;
+			return folder;
+		}
+
+		return fig::nullref;
 	}
 
 	bool AssetManager::RenameFolder_NoLock(const fig::uuid& folderId, const fig::string_view newName)
@@ -1061,6 +1078,9 @@ namespace fig::io
 		if (auto itFind = _folders.find(folderId); itFind != _folders.cend())
 		{
 			auto& folder = itFind->second;
+			if (folder.decrypted_name == newName)
+				return false; // No change
+
 			folder.decrypted_name = newName;
 			folder.encrypted_name = fig::auth::EncryptedString(newName, _profileAuthKey);
 			folder.sync_state.db_sync = AssetSyncState::Status::Modified;
@@ -1072,6 +1092,12 @@ namespace fig::io
 
 	bool AssetManager::DeleteFolder_NoLock(const fig::uuid& folderId) noexcept
 	{
+		fig::uuid parentFolderId = {};
+		if (auto itFind = _folders.find(folderId); itFind != _folders.cend())
+			parentFolderId = itFind->second.parent_id;
+		else
+			return false; // Invalid folder id
+
 		// Remove from database
 		auto& db = GetDatabase();
 		if (db.DeleteFolder(folderId) != DatabaseError::NoError)
@@ -1088,13 +1114,13 @@ namespace fig::io
 		{
 			if (folderIds.contains(asset.folder_id))
 			{
-				asset.folder_id = {};
+				asset.folder_id = parentFolderId;
 				asset.sync_state.db_sync = AssetSyncState::Status::Modified;
 			}
 		}
 
 		LogLn(std::format("Deleted folder, including {} subfolder(s)", num_deletions - 1));
-		return num_deletions;
+		return true;
 	}
 
 	bool AssetManager::MoveAssetToFolder_NoLock(const fig::uuid& assetId, const fig::uuid& folderId)

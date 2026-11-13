@@ -442,18 +442,23 @@ namespace fig::gui
 		if (auto try_cover = GetAsyncResult<AsyncResult_CoverPair>(_pendingCover))
 		{
 			SetCoverImages(std::move((*try_cover).get()->first), std::move((*try_cover).get()->second));
+			_bHasError = false;
+			_bImageLoaded = true;
 			RefreshState();
 		}
 		else if (try_cover.error() == AsyncLoadError::FileNotFound)
 		{
 			LogLn(std::format("Failed to load cover for {}: File not found", (fig::string)_assetId));
 			SetCoverImages({}, {});
+			_bHasError = false;
+			_bImageLoaded = true;
 			RefreshState();
 		}
 		else if (try_cover.error() != AsyncLoadError::NoError)
 		{
 			LogLn(std::format("Failed to load cover for {}", (fig::string)_assetId));
 			_bHasError = true;
+			_bImageLoaded = true;
 			RefreshState();
 		}
 	}
@@ -667,32 +672,34 @@ namespace fig::gui
 		else
 			SetSize(Large::Width, Large::Height);
 
+		auto bHidden = _bHidden or !_bImageLoaded;
+
 		// Hidden?
 		if (_pHiddenBG)
-			_pHiddenBG->SetVisible(_bHidden);
+			_pHiddenBG->SetVisible(bHidden);
 		if (_pLargeRoot)
-			_pLargeRoot->SetVisible(_cardSize == CardSize::Full and !_bHidden);
+			_pLargeRoot->SetVisible(_cardSize == CardSize::Full and !bHidden);
 		if (_pLargeBorder)
-			_pLargeBorder->SetVisible(_pLargeBorder->HasTexture() and !_bHidden);
+			_pLargeBorder->SetVisible(_pLargeBorder->HasTexture() and !bHidden);
 		if (_pLargeFooterFade)
 			_pLargeFooterFade->SetVisible(!_largeImageTexture.empty());
 		if (_pLargeStar)
-			_pLargeStar->SetVisible(_userSettings.HasFlag(AssetUserSettings::Flag::Favorite) and !_bHidden);
+			_pLargeStar->SetVisible(_userSettings.HasFlag(AssetUserSettings::Flag::Favorite) and !bHidden);
 
 		if (_pSmallRoot)
-			_pSmallRoot->SetVisible(_cardSize == CardSize::Half and !_bHidden);
+			_pSmallRoot->SetVisible(_cardSize == CardSize::Half and !bHidden);
 		if (_pSmallBorder)
-			_pSmallBorder->SetVisible(_pSmallBorder->HasTexture() and !_bHidden);
+			_pSmallBorder->SetVisible(_pSmallBorder->HasTexture() and !bHidden);
 		if (_pSmallFooterFade)
 			_pSmallFooterFade->SetVisible(!_smallImageTexture.empty());
 		if (_pSmallStar)
-			_pSmallStar->SetVisible(_userSettings.HasFlag(AssetUserSettings::Flag::Favorite) and !_bHidden);
+			_pSmallStar->SetVisible(_userSettings.HasFlag(AssetUserSettings::Flag::Favorite) and !bHidden);
 
 		if (_pCounterBG)
-			_pCounterBG->SetVisible(!_bHidden);
+			_pCounterBG->SetVisible(!bHidden);
 		if (_pNewIndicator)
 		{
-			_pNewIndicator->SetVisible(_metaData.IsNew() and !_bHidden);
+			_pNewIndicator->SetVisible(_metaData.IsNew() and !bHidden);
 
 			if (_cardSize == CardSize::Full)
 				_pNewIndicator->SetPosition(Large::Tags::Margin + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), Large::Tags::Margin);
@@ -701,7 +708,7 @@ namespace fig::gui
 		}
 
 		// Refresh image
-		if (!_bHidden)
+		if (!bHidden)
 			RefreshImage();
 		else
 			CardImage::SetTexture(nullptr);

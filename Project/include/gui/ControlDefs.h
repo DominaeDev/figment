@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace fig::gui
 {
@@ -33,6 +33,7 @@ namespace fig::gui
 	class StaticText;
 	class TextBox;
 	class TextInput;
+	class TextInputDialogBox;
 	class TexturedBorder;
 	class ToggleWithIcon;
 	class ThemedButton;

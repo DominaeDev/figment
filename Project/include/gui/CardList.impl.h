@@ -1,6 +1,7 @@
 ﻿#include "gui/CardList.h"
 #include "gui/GridSizer.h"
 #include "gui/Menu.h"
+#include "gui/TextInputDialogBox.h"
 #include "io/AssetManager.h"
 #include "io/ContentTypes.h"
 #include "user/UserManager.h"
@@ -343,10 +344,25 @@ namespace fig::gui
 	}
 		
 	template <typename T>
-	void CardList<T>::CreateMoveMenu(Menu& menu, fig::io::AssetFolderType folderType, const fig::uuid& assetId, fig::string_view rootName)
+	void CardList<T>::CreateMoveMenu(Menu& menu, const fig::uuid& assetId, fig::string_view rootName)
 	{
+		auto folderType = CardTypeOf<T>::FolderType;
 		auto& moveMenu = menu.AddItem("Move to folder");
-		moveMenu.AddItem("Move to a new folder\u2026", Icon::MOVE_TO_FOLDER);
+		moveMenu.AddItem("Move to a new folder\u2026", Icon::MOVE_TO_FOLDER)
+			.SetDelegate([this, folderType = folderType, assetId = assetId] {
+				auto& dlg = ShowTextInputDialogBox("Please enter a name for the new folder:", "Enter folder name", [this, folderType = folderType, assetId = assetId](fig::string_view value) {
+					if (not empty_or_whitespace(value))
+					{
+						if (auto newFolder = Global::GetUserContent().CreateFolder(value, folderType, _currentFolderId))
+						{
+							MoveCardToFolder(assetId, (*newFolder).id);
+							PushEvent(UserEvent::ChangeAssetFolder, (fig::string)(*newFolder).id);
+						}
+					}
+				});
+				dlg.SetDefaultValue("New folder");
+				dlg.SetMaxLength(64uz);
+			});
 
 		// Subfolder from "here"
 		if (auto subfolders = Global::GetUserContent().GetSubFolders(_currentFolderId, folderType); not subfolders.empty())

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/ModalOverlay.h"
 
@@ -12,7 +12,6 @@ namespace fig::gui
 	protected:
 		void OnSize() override;
 		EventResult OnEvent(fig::event& event) override;
-
 
 	private:
 		void CreateCodeRow(ControlPtr pParent, SizerPtr pSizer, fig::string_view code, size_t index);

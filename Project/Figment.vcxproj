@@ -239,6 +239,7 @@
     <ClCompile Include="src\gui\HorizontalBar.cpp" />
     <ClCompile Include="src\gui\StoryCardList.cpp" />
     <ClCompile Include="src\gui\StoryScreen.cpp" />
+    <ClCompile Include="src\gui\TextInputDialogBox.cpp" />
     <ClCompile Include="src\gui\TextureResource.cpp" />
     <ClCompile Include="src\gui\ImageAlignmentWidget.cpp" />
     <ClCompile Include="src\gui\PortraitImageCarousel.cpp" />
@@ -611,6 +612,7 @@
     <ClInclude Include="include\gui\Icon.h" />
     <ClInclude Include="include\gui\StoryCardList.h" />
     <ClInclude Include="include\gui\StoryScreen.h" />
+    <ClInclude Include="include\gui\TextInputDialogBox.h" />
     <ClInclude Include="include\gui\TextureResource.h" />
     <ClInclude Include="include\gui\ImageAlignmentWidget.h" />
     <ClInclude Include="include\gui\ITabControl.h" />

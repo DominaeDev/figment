@@ -995,6 +995,9 @@
     <ClCompile Include="src\gui\FolderWidget.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\TextInputDialogBox.cpp">
+      <Filter>Source Files\Frontend\GUI\Modals</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -2214,6 +2217,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\FolderWidget.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\TextInputDialogBox.h">
+      <Filter>Source Files\Frontend\GUI\Modals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

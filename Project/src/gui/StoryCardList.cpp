@@ -47,7 +47,7 @@ namespace fig::gui
 				PushEvent(UserEvent::EditStory, &scenarioId);
 			});
 
-		CreateMoveMenu(menu, AssetFolderType::Story, scenarioId, fig::strings::UI::MenuScenarios);
+		CreateMoveMenu(menu, scenarioId, fig::strings::UI::MenuScenarios);
 
 		menu.AddItem("Duplicate");
 		menu.AddItem("Export\u2026");

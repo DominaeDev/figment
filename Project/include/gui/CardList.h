@@ -45,7 +45,7 @@ namespace fig::gui
 		void OnModifiedCard(CardPtr pCard);
 		void OnDeleteCard(CardPtr pCard);
 
-		void CreateMoveMenu(Menu& menu, fig::io::AssetFolderType folderType, const fig::uuid& assetId, fig::string_view rootName);
+		void CreateMoveMenu(Menu& menu, const fig::uuid& assetId, fig::string_view rootName);
 		void CreateMoveSubMenu(MenuItem& parentItem, const fig::uuid& assetId, const fig::uuid& folderId);
 		void MoveCardToFolder(const fig::uuid& assetId, const fig::uuid& folderId);
 

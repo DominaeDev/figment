@@ -64,7 +64,7 @@ namespace fig::io
 		bool ReleaseAssetData(const fig::uuid& assetId) noexcept;
 		size_t DiscardTemporaryAssets() noexcept;
 
-		const AssetFolder& CreateFolder(const fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId = {});
+		fig::optional_cref<AssetFolder> CreateFolder(const fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId = {});
 		bool RenameFolder(const fig::uuid& folderId, const fig::string_view newName);
 		bool DeleteFolder(fig::uuid folderId) noexcept;
 		fig::cref_vector<AssetFolder> GetFolders() const noexcept;
@@ -164,7 +164,7 @@ namespace fig::io
 		fig::expected_ref<Asset, FileError> ImportCharacter_NoLock(const fig::path& filename, CharacterDataFormat format);
 		fig::expected_ref<Asset, FileError> ImportScenario_NoLock(const fig::path& filename);
 
-		AssetFolder& CreateFolder_NoLock(const fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId);
+		fig::optional_cref<AssetFolder> CreateFolder_NoLock(const fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId);
 		bool RenameFolder_NoLock(const fig::uuid& folderId, const fig::string_view newName);
 		bool DeleteFolder_NoLock(const fig::uuid& folderId) noexcept;
 		bool MoveAssetToFolder_NoLock(const fig::uuid& assetId, const fig::uuid& folderId);

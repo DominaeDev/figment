@@ -99,6 +99,8 @@ namespace fig::gui
 		enum class DialogBoxType { Ok, OkCancel, YesNo, ConfirmCancel, };
 		void ShowDialogBox(fig::string_view message, DialogBoxType type, std::function<void(bool)> fnDelegate = nullptr);
 		DialogBox& CreateDialogBox(fig::string_view message, DialogBoxType type, std::function<void(bool)> fnDelegate = nullptr);
+		TextInputDialogBox& ShowTextInputDialogBox(fig::string_view message, std::function<void(fig::string_view)> fnDelegate);
+		TextInputDialogBox& ShowTextInputDialogBox(fig::string_view message, fig::string_view placeholder, std::function<void(fig::string_view)> fnDelegate);
 		
 	protected:
 		fig::color_ref _foregroundColor {};
