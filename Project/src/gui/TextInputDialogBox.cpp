@@ -75,6 +75,11 @@ namespace fig::gui
 		_pInput->SetMaxLength(length);
 	}
 
+	void TextInputDialogBox::SetPassword()
+	{
+		_pInput->SetMode(TextInput::Mode::Password);
+	}
+
 	void TextInputDialogBox::OnUpdate(float fElapsed)
 	{
 		ModalOverlay::OnUpdate(fElapsed);

@@ -24,10 +24,10 @@ namespace fig::gui
 
 		auto pSizer = SetSizer<VerticalSizer>();
 
-		CreateHeader(this, pSizer, "About character");
+		CreateHeader(this, pSizer, "About");
 
 		// Notes
-		CreateLabel(this, pSizer, "Character description");
+		CreateLabel(this, pSizer, "About character");
 		auto pDescription = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pCharacter->about), 4);
 		pDescription->SetMaxWidth(620);
 		pDescription->EnableAutoSize(true);

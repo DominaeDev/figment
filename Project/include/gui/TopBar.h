@@ -20,6 +20,7 @@ namespace fig::gui
 	protected:
 		void OnUpdate(float) override;
 		void OnSize() override;
+		EventResult OnEvent(fig::event& event) override;
 
 	private:
 		InitializeDelegate _fnInit;

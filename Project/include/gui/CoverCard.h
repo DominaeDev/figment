@@ -62,6 +62,7 @@ namespace fig::gui
 		void SetLabel(const fig::string& text) noexcept;
 		void SetChatCount(size_t count);
 		void ShowNew(bool bShow);
+		void ShowDefault(bool bShow);
 
 		enum class AddTagResult { Ok, Reject, Stop };
 		void ClearTags();
@@ -107,6 +108,7 @@ namespace fig::gui
 		fig::observer_ptr<Control> _pCounterBG;
 		fig::observer_ptr<StaticText> _pChatCount;
 		fig::observer_ptr<Control> _pNewIndicator;
+		fig::observer_ptr<Control> _pDefaultIndicator;
 
 		fig::observer_ptr<Control> _pLargeRoot;
 		fig::observer_ptr<Control> _pLargeFooter;

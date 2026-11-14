@@ -54,6 +54,8 @@ namespace fig::gui
 				_pCarousel->AddCharacterBackgrounds(scenarioId);
 			for (auto& characterId : pSession->GetStaging().GetCharacterIds())
 				_pCarousel->AddCharacterBackgrounds(characterId);
+			if (auto worldId = pSession->GetStaging().GetWorldId(); not worldId.empty())
+				_pCarousel->AddCharacterBackgrounds(worldId);
 			for (auto& characterId : pSession->GetStaging().GetCharacterIds())
 				_pCarousel->AddCharacterPortraits(characterId);
 			_pEnabled->SetEnabled(true);

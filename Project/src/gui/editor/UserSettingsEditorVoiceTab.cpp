@@ -79,6 +79,12 @@ namespace fig::gui
 		
 		CreateHint(this, pSizer, "* A voice design model is only necessary when using the character voice editor, not for chatting.");
 
+		auto pTestButton = CreateControl<ButtonWithLabel>("Test configuration");
+		pTestButton->SetHeight(35);
+		pTestButton->SetDelegate([this] { /**/ });
+		pSizer->AddSpacer(8);
+		pSizer->Add(pTestButton, 0);
+
 		CreateHorizontalLine(this, pSizer);
 		CreateHeader(this, pSizer, "Voice settings");
 

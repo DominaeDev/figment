@@ -1,9 +1,10 @@
 ﻿#pragma once
 
-#include "chat/ChatTypes.h"
-#include "chat/ChatOptions.h"
 #include "data/Character.h"
 #include "data/Scenario.h"
+#include "data/World.h"
+#include "chat/ChatTypes.h"
+#include "chat/ChatOptions.h"
 #include "chat/PromptScaffold.h"
 
 namespace fig::chat
@@ -12,7 +13,7 @@ namespace fig::chat
 	{
 	public:
 		ChatStaging() = default;
-		ChatStaging(const fig::data::Scenario& scenario, fig::uuid scenarioId, const PromptScaffold& scaffold, ChatOptions options);
+		ChatStaging(const fig::data::Scenario& scenario, fig::uuid scenarioId, const fig::data::World& world, fig::uuid worldId, const PromptScaffold& scaffold, ChatOptions options);
 
 		bool AddCharacter(Role role, const fig::uuid& characterId, const fig::data::Character& character);
 		bool HasCharacter(Role role) const noexcept { return _charactersByRole.contains(role); }
@@ -31,6 +32,9 @@ namespace fig::chat
 		const PromptScaffold& GetPromptScaffold() const noexcept { return _promptScaffold; }
 		const fig::data::Scenario& GetScenario() const noexcept { return _scenario.instance; }
 		const fig::uuid& GetScenarioId() const noexcept { return _scenario.assetId; }
+		const fig::data::World& GetWorld() const noexcept { return _world.instance; }
+		const fig::uuid& GetWorldId() const noexcept { return _world.assetId; }
+
 		fig::string GetStoryTitle() const noexcept;
 
 		std::vector<PromptBlock> GetStagingBlocks();
@@ -75,8 +79,15 @@ namespace fig::chat
 			fig::uuid assetId;
 			fig::data::Scenario instance;
 		};
-
 		_Scenario _scenario {};
+
+		struct _World
+		{
+			fig::uuid assetId;
+			fig::data::World instance;
+		};
+		_World _world {};
+
 		PromptScaffold _promptScaffold {};
 
 		ChatOptions _options {};

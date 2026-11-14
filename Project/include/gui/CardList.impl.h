@@ -347,7 +347,7 @@ namespace fig::gui
 	void CardList<T>::CreateMoveMenu(Menu& menu, const fig::uuid& assetId, fig::string_view rootName)
 	{
 		auto folderType = CardTypeOf<T>::FolderType;
-		auto& moveMenu = menu.AddItem("Move to folder");
+		auto& moveMenu = menu.AddItem("Move");
 		moveMenu.AddItem("Move to a new folder\u2026", Icon::MOVE_TO_FOLDER)
 			.SetDelegate([this, folderType = folderType, assetId = assetId] {
 				auto& dlg = ShowTextInputDialogBox("Please enter a name for the new folder:", "Enter folder name", [this, folderType = folderType, assetId = assetId](fig::string_view value) {

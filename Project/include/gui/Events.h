@@ -83,6 +83,52 @@ namespace fig::gui
 	inline bool IsUserEventWithData(fig::event& event, UserEvent e) { return event.type == SDLUserEvent(e) and event.user.data1 != 0; }
 	inline bool IsUserEvent(fig::event& event) { return static_cast<uint32_t>(event.type) >= UserEventBase && static_cast<uint32_t>(event.type) < UserEventBase + static_cast<uint32_t>(UserEvent::Count); }
 
+	inline constexpr bool IsInputEvent(fig::event& event) noexcept
+	{
+		switch (event.type)
+		{
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+		case SDL_EVENT_MOUSE_MOTION:
+		case SDL_EVENT_MOUSE_WHEEL:
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+		case SDL_EVENT_TEXT_EDITING:
+		case SDL_EVENT_TEXT_INPUT:
+		case SDL_EVENT_TEXT_EDITING_CANDIDATES:
+			return true;
+		}
+		return false;
+	}
+
+	inline constexpr bool IsMouseEvent(fig::event& event) noexcept
+	{
+		switch (event.type)
+		{
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+		case SDL_EVENT_MOUSE_MOTION:
+		case SDL_EVENT_MOUSE_WHEEL:
+			return true;
+		}
+		return false;
+	}
+
+	inline constexpr bool IsMouseEvent(fig::event& event, const fig::rect& rect) noexcept
+	{
+		switch (event.type)
+		{
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			return is_inside(rect, toI(event.button.x), toI(event.button.y));
+		case SDL_EVENT_MOUSE_MOTION:
+			return is_inside(rect, toI(event.motion.x), toI(event.motion.y));
+		case SDL_EVENT_MOUSE_WHEEL:
+			return is_inside(rect, toI(event.wheel.x), toI(event.wheel.y));
+		}
+		return false;
+	}
+
 	template <typename T>
 	inline constexpr const T& GetUserData(fig::event& event) { return *reinterpret_cast<T*>(event.user.data1); }
 	template <typename T>

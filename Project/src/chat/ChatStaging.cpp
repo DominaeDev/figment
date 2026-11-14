@@ -17,8 +17,9 @@ using namespace fig::gui;
 
 namespace fig::chat
 {
-	ChatStaging::ChatStaging(const fig::data::Scenario& scenario, fig::uuid scenarioId, const PromptScaffold& scaffold, ChatOptions options) :
+	ChatStaging::ChatStaging(const fig::data::Scenario& scenario, fig::uuid scenarioId, const fig::data::World& world, fig::uuid worldId, const PromptScaffold& scaffold, ChatOptions options) :
 		_scenario { _Scenario { .assetId = scenarioId, .instance { scenario } } },
+		_world { _World { .assetId = worldId, .instance { world } } },
 		_promptScaffold { scaffold },
 		_options { options }
 	{

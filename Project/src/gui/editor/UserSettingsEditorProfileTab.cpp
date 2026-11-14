@@ -11,6 +11,7 @@
 #include "gui/Menu.h"
 #include "gui/AppResources.h"
 #include "gui/MainFrame.h"
+#include "gui/TextInputDialogBox.h"
 #include "io/FileUtility.h"
 
 using namespace fig::auth;
@@ -61,23 +62,36 @@ namespace fig::gui
 		_pOldPassword = CreateTextBox(this, pSizer);
 		_pOldPassword->SetMaxWidth(260);
 		_pOldPassword->SetMode(TextInput::Mode::Password);
+		_pOldPassword->SetTextChangedDelegate([this](auto&& text) { RefreshPasswordButtons(); });
 
 		CreateLabel(this, pSizer, "New password");
 		_pNewPassword = CreateTextBox(this, pSizer);
 		_pNewPassword->SetMaxWidth(260);
 		_pNewPassword->SetMode(TextInput::Mode::Password);
+		_pNewPassword->SetTextChangedDelegate([this](auto&& text) { RefreshPasswordButtons(); });
 
 		CreateLabel(this, pSizer, "Confirm new password");
 		_pConfirmPassword = CreateTextBox(this, pSizer);
 		_pConfirmPassword->SetMaxWidth(260);
 		_pConfirmPassword->SetMode(TextInput::Mode::Password);
+		_pConfirmPassword->SetTextChangedDelegate([this](auto&& text) { RefreshPasswordButtons(); });
 
 		pSizer->AddSpacer(12);
 
-		auto pChangeButton = CreateControl<ButtonWithLabel>("Change password");
-		pChangeButton->SetHeight(35);
-		pChangeButton->SetDelegate([this] { ChangePassword(); });
-		pSizer->Add(pChangeButton, 0);
+		_pChangePasswordButton = CreateControl<ButtonWithLabel>("Change password");
+		_pChangePasswordButton->SetHeight(35);
+		_pChangePasswordButton->SetDelegate([this] { ChangePassword(); });
+
+		_pResetPasswordButton = CreateControl<ButtonWithLabel>("Reset password");
+		_pResetPasswordButton->SetHeight(35);
+		_pResetPasswordButton->SetDelegate([this] { ResetPassword(); });
+		_pResetPasswordButton->SetEnabled(profile.IsProtected());
+
+		auto pChangePasswordSizer = new HorizontalSizer();
+		pChangePasswordSizer->Add(_pChangePasswordButton, 0);
+		pChangePasswordSizer->AddSpacer(12);
+		pChangePasswordSizer->Add(_pResetPasswordButton, 0);
+		pSizer->Add(pChangePasswordSizer, 0, SizerFlag::FixedSize, 35);
 				
 		// Recovery
 		CreateHorizontalLine(this, pSizer);
@@ -164,7 +178,6 @@ namespace fig::gui
 	void UserSettingsEditorProfileTab::OnTabSelected()
 	{
 		ClearPassword();
-		RefreshRecoveryCodeButton();
 
 		for (auto& pCB : _pConfirmCheckBoxes)
 			pCB->SetValue(false, true);
@@ -207,10 +220,34 @@ namespace fig::gui
 			{
 				ShowDialogBox(ProfileSettings::PasswordChanged, DialogBoxType::Ok);
 				ClearPassword();
-				RefreshRecoveryCodeButton();
 				return;
 			}
 		}
+	}
+
+	void UserSettingsEditorProfileTab::ResetPassword()
+	{
+		auto& dlg = ShowTextInputDialogBox("Please enter the current password:", [this](fig::string_view value) {
+			if (auto profile = Global::GetUserManager().GetActiveProfile())
+			{
+				auto oldPassword = fig::string { value };
+				AuthKey tmp;
+				if (not UserManager::Authenticate(*profile, oldPassword, tmp))
+				{
+					ShowDialogBox(ProfileSettings::IncorrectPasswordError, DialogBoxType::Ok);
+					ClearPassword();
+					return;
+				}
+
+				if (auto code = Global::GetUserManager().ChangePassword((*profile).id, oldPassword, ""))
+				{
+					ShowDialogBox(ProfileSettings::PasswordReset, DialogBoxType::Ok);
+					ClearPassword();
+					return;
+				}
+			}
+		});
+		dlg.SetPassword();
 	}
 
 	void UserSettingsEditorProfileTab::ClearPassword()
@@ -218,18 +255,48 @@ namespace fig::gui
 		if (_pOldPassword)
 		{
 			_pOldPassword->Clear();
-			_pOldPassword->SetEnabled(Global::GetUserManager().GetActiveProfile()->state == UserProfile::State::Locked);
+			_pOldPassword->SetEnabled(Global::GetUserManager().GetActiveProfile()->IsProtected());
 		}
 		if (_pNewPassword)
 			_pNewPassword->Clear();
 		if (_pConfirmPassword)
 			_pConfirmPassword->Clear();
+
+		RefreshRecoveryCodeButton();
+		RefreshPasswordButtons();
+	}
+
+	void UserSettingsEditorProfileTab::RefreshPasswordButtons()
+	{
+		bool bProtected = Global::GetUserManager().GetActiveProfile()->IsProtected();
+		if (_pChangePasswordButton)
+		{
+			auto oldPassword = _pOldPassword->GetText();
+			auto newPassword = _pNewPassword->GetText();
+			auto confirmPassword = _pConfirmPassword->GetText();
+
+			bool bCanChange = true;
+			if (bProtected)
+			{
+				bCanChange = not (oldPassword.empty() or newPassword.empty()) and (newPassword.size() == confirmPassword.size());
+				_pChangePasswordButton->SetLabel("Change password");
+			}
+			else
+			{
+				bCanChange = not newPassword.empty() and (newPassword.size() == confirmPassword.size());
+				_pChangePasswordButton->SetLabel("Set password");
+			}
+			_pChangePasswordButton->SetEnabled(bCanChange);
+		}
+
+		if (_pResetPasswordButton)
+			_pResetPasswordButton->SetEnabled(bProtected);
 	}
 
 	void UserSettingsEditorProfileTab::RefreshRecoveryCodeButton()
 	{
 		if (_pRecoveryCodeButton)
-			_pRecoveryCodeButton->SetEnabled(Global::IsSignedIn() and Global::GetUserManager().GetActiveProfile()->state == UserProfile::State::Locked);
+			_pRecoveryCodeButton->SetEnabled(Global::IsSignedIn() and Global::GetUserManager().GetActiveProfile()->IsProtected());
 	}
 
 	void UserSettingsEditorProfileTab::RefreshDeleteButton()

@@ -107,7 +107,7 @@ namespace fig::gui
 		_pProfileName->SetText(profile.name);
 
 		_pPassword->Clear();
-		if (profile.state == UserProfile::State::Locked)
+		if (profile.IsProtected())
 		{
 			_pPassword->SetEnabled(true);
 			_pPassword->SetFocus(true);
@@ -166,14 +166,17 @@ namespace fig::gui
 		if (auto tryProfile = Global::GetUserManager().GetProfile(_currentProfileId))
 		{
 			auto& profile = *tryProfile;
-			if (profile.state == UserProfile::State::Open)
+			if (profile.IsProtected())
 			{
-				MainFrame::GetInstance().TrySignIn(profile, "");
-			}
-			else if (profile.state == UserProfile::State::Locked)
-			{
+				if (password.empty())
+					return false;
+
 				MainFrame::GetInstance().TrySignIn(profile, password);
 				_pPassword->Clear();
+			}
+			else
+			{
+				MainFrame::GetInstance().TrySignIn(profile, "");
 			}
 		}
 		return false;

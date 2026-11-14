@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace fig::io
 {
@@ -17,9 +17,10 @@ namespace fig::io
 	{
 		enum class Flag
 		{
-			Imported = 1 << 0,
-			Hidden = 1 << 1,
-			Favorite = 1 << 2,
+			Imported	= 1 << 0,
+			Hidden		= 1 << 1,
+			Favorite	= 1 << 2,
+			Default		= 1 << 3,
 		};
 		using Flags = EnumFlags<Flag>;
 

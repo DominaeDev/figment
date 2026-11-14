@@ -23,7 +23,7 @@ namespace fig::gui
 		_pCardList = CreateControl<typename CardTypeOf<T>::ListType>();
 		_pCardList->SetScrollBarOffset(0);
 
-		auto pTopBar = CreateControl<TopBar>(_pCardList, [this] (auto pTopBar, auto pSizer) {
+		_pTopBar = CreateControl<TopBar>(_pCardList, [this] (auto pTopBar, auto pSizer) {
 
 			_pFolders = pTopBar->CreateControl<FolderWidget>();
 			_pFolders->SetDelegate([this](auto&& folderId) { OnChangedFolder(folderId); });
@@ -67,7 +67,7 @@ namespace fig::gui
 		_pFolders->SetFolder(_currentFolderId, CardTypeOf<T>::FolderType);
 
 		auto mainSizer = SetSizer<VerticalSizer>();
-		mainSizer->Add(pTopBar, 0, SizerFlag::Expand);
+		mainSizer->Add(_pTopBar, 0, SizerFlag::Expand);
 		mainSizer->Add(_pCardList, -1, SizerFlag::Fill | SizerFlag::Left | SizerFlag::Right, 16);
 	}
 

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Frame.h"
 #include "gui/Menu.h"
 #include "gui/ModalOverlay.h"
@@ -165,18 +165,14 @@ namespace fig::gui
 
 	void Frame::PopModal(ModalPtr pModal)
 	{
-		std::vector<int32_t> removedIds;
-
 		auto itFind = std::ranges::find_if(_modals.begin(), _modals.end(), [pModal](auto&& m) { return m.ptr == pModal; });
-		while (itFind != _modals.end())
+		if (itFind != _modals.end())
 		{
-			removedIds.push_back((*itFind).id);
+			auto id = (*itFind).id;
 			_removalQueue.push_back((*itFind).ptr);
-			itFind = _modals.erase(itFind);
+			_modals.erase(itFind);
+			OnOverlayClose(id);
 		}
-
-		for (auto it = removedIds.crbegin(); it != removedIds.crend(); it++)
-			OnOverlayClose(*it);
 	}
 
 	void Frame::PopAllModals()
@@ -232,19 +228,8 @@ namespace fig::gui
 			}
 			
 			// Block all user input
-			switch (event.type)
-			{
-			case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			case SDL_EVENT_MOUSE_BUTTON_UP:
-			case SDL_EVENT_MOUSE_MOTION:
-			case SDL_EVENT_MOUSE_WHEEL:
-			case SDL_EVENT_KEY_DOWN:
-			case SDL_EVENT_KEY_UP:
-			case SDL_EVENT_TEXT_EDITING:
-			case SDL_EVENT_TEXT_INPUT:
-			case SDL_EVENT_TEXT_EDITING_CANDIDATES:
+			if (IsInputEvent(event))
 				return EventResult::Pass;
-			}
 		}
 
 		if (event.type == SDL_EVENT_SYSTEM_THEME_CHANGED)

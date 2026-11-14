@@ -64,6 +64,13 @@ namespace fig::gui
 			_pShadow->SetWidth(GetWidth());
 	}
 
+	EventResult TopBar::OnEvent(fig::event& event)
+	{
+		if (IsMouseEvent(event, GetRect()))
+			return EventResult::Handled; // Block mouse input
+		return EventResult::Pass;
+	}
+
 	void TopBar::OnUpdate(float)
 	{
 		if (_pShadow and _pScrollPanel)

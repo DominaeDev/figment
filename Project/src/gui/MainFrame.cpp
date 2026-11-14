@@ -214,6 +214,7 @@ namespace fig::gui
 			return true;
 		}
 
+		ShowDialogBox(fig::strings::ProfileSettings::IncorrectPasswordError, DialogBoxType::Ok);
 		return false;
 	}
 
@@ -755,7 +756,15 @@ namespace fig::gui
 					return false;
 			}
 
-			ChatStaging staging(scenario, scenarioId, scaffold, Constants::LLM::DefaultChatOptions);
+			World world {};
+			fig::uuid worldId {};
+			if (auto try_world = Global::GetUserContent().GetDefaultWorld())
+			{
+				world = (*try_world).instance;
+				worldId = (*try_world).assetId;
+			}
+
+			ChatStaging staging(scenario, scenarioId, world, worldId, scaffold, Constants::LLM::DefaultChatOptions);
 
 			if (!staging.AddCharacter(Role::Bot1, characterId, character.value()))
 				return false;

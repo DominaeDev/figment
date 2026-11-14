@@ -1,13 +1,14 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "io/AssetUserSettings.h"
 #include <json.hpp>
 
 namespace fig::io
 {
-	static constexpr auto FlagMapping = std::array<std::pair<AssetUserSettings::Flag, std::string_view>, 3> {
+	static constexpr auto FlagMapping = std::array<std::pair<AssetUserSettings::Flag, std::string_view>, 4> {
 		std::pair { AssetUserSettings::Flag::Imported,	"imported" },
 		std::pair { AssetUserSettings::Flag::Hidden,	"hidden" },
 		std::pair { AssetUserSettings::Flag::Favorite,	"favorite" },
+		std::pair { AssetUserSettings::Flag::Default,	"default" },
 	};
 
 	static fig::string SerializeBorder(CardBorderStyle border)

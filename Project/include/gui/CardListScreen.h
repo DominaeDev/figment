@@ -37,6 +37,7 @@ namespace fig::gui
 		void ToggleTags() noexcept;
 		void RefreshTopButtons();
 
+		fig::observer_ptr<Control> _pTopBar;
 		fig::observer_ptr<TCardList> _pCardList;
 		fig::observer_ptr<TextInput> _pFilterTextBox;
 		fig::observer_ptr<StaticText> _pHeader;

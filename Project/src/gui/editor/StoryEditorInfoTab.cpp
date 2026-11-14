@@ -35,19 +35,19 @@ namespace fig::gui
 		_pName->SetMaxWidth(300);
 
 		// Title
-		CreateLabel(this, pSizer, "Chat title");
+		CreateLabel(this, pSizer, "Custom chat title");
 		_pTitle = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pScenario->title));
 		_pTitle->SetMaxWidth(300);
 		_pTitle->SetPlaceholder(_pName->GetText());
 
 		// About
-		CreateLabel(this, pSizer, "Description");
+		CreateLabel(this, pSizer, "About story");
 		auto pDescription = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pScenario->about), 4);
 		pDescription->SetMaxWidth(620);
 		pDescription->EnableAutoSize(true);
 		pDescription->SetMinRows(2);
 		pDescription->SetMaxRows(8);
-		CreateHint(this, pSizer, "The story description is displayed alongside the chat to inform users what this story is about. Story content should go into scenes.");
+		CreateHint(this, pSizer, "Note: Story content should go into scenes.");
 
 		// Genres
 		CreateLabel(this, pSizer, "Genres");

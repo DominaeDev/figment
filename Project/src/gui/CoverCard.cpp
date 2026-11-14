@@ -271,6 +271,34 @@ namespace fig::gui
 		_pNewIndicator->SetVisible(!_bHidden);
 	}
 
+	void CoverCard::ShowDefault(bool bShow)
+	{
+		if (_pDefaultIndicator)
+		{
+			_pDefaultIndicator->SetVisible(bShow and !_bHidden);
+			return;
+		}
+		else if (!bShow)
+			return;
+
+		_pDefaultIndicator = CreateControl<NineGridImage>(AppResources::GetTexture(Resource::CARD_TAG_BG), fig::corners { 16, 16, 13, 13 });
+		if (_cardSize == CardSize::Half)
+			_pDefaultIndicator->SetPosition(6, 6);
+		else
+			_pDefaultIndicator->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
+
+		_pDefaultIndicator->SetForegroundColor(Color::TagNew);
+
+		auto pLabel = _pDefaultIndicator->CreateControl<StaticText>(fig::string { fig::strings::UI::Default }, FontFace::Default, 14.0, true);
+		pLabel->SetPosition(6, 3);
+		pLabel->SetForegroundColor(Color::White);
+		pLabel->SetBackgroundColor(Color::Transparent);
+
+		auto [w, h] = pLabel->MeasureText();
+		_pDefaultIndicator->SetSize(w + 12, 26);
+		_pDefaultIndicator->SetVisible(!_bHidden);
+	}
+
 	CoverCard::AddTagResult CoverCard::AddTag(const fig::string& tag, fig::color_ref color)
 	{
 		if (!_bInitialized or !_bEnableTags)
@@ -549,6 +577,8 @@ namespace fig::gui
 				_pCounterBG->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 			if (_pNewIndicator)
 				_pNewIndicator->SetPosition(Large::Tags::Margin + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), Large::Tags::Margin);
+			if (_pDefaultIndicator)
+				_pDefaultIndicator->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
 			_fZoomExpand = toF(Constants::GUI::Cards::Full::ZoomPixels);
 			break;
 
@@ -559,6 +589,8 @@ namespace fig::gui
 				_pCounterBG->SetPosition(6, 6);
 			if (_pNewIndicator)
 				_pNewIndicator->SetPosition(6 + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), 6);
+			if (_pDefaultIndicator)
+				_pDefaultIndicator->SetPosition(6, 6);
 			_fZoomExpand = toF(Constants::GUI::Cards::Half::ZoomPixels);
 			break;
 		}
@@ -706,6 +738,15 @@ namespace fig::gui
 			else
 				_pNewIndicator->SetPosition(6 + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), 6);
 		}
+		if (_pDefaultIndicator)
+		{
+			_pDefaultIndicator->SetVisible(_userSettings.flags.IsSet(AssetUserSettings::Flag::Default) and !bHidden);
+
+			if (_cardSize == CardSize::Full)
+				_pDefaultIndicator->SetPosition(Large::Tags::Margin, Large::Tags::Margin);
+			else
+				_pDefaultIndicator->SetPosition(6, 6);
+		}
 
 		// Refresh image
 		if (!bHidden)
@@ -732,6 +773,7 @@ namespace fig::gui
 	{
 		_userSettings = userSettings;
 		ShowStar(userSettings.HasFlag(AssetUserSettings::Flag::Favorite));
+		ShowDefault(userSettings.HasFlag(AssetUserSettings::Flag::Default));
 	}
 
 	EventResult CoverCard::OnEvent(fig::event& event)

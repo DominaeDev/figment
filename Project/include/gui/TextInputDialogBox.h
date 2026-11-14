@@ -14,6 +14,7 @@ namespace fig::gui
 		void SetDefaultValue(fig::string_view text);
 		void SetPlaceholder(fig::string_view text);
 		void SetMaxLength(size_t length);
+		void SetPassword();
 
 	protected:
 		void SetMessage(fig::string_view text);

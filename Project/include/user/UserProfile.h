@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "user/Security.h"
@@ -28,6 +28,11 @@ namespace fig::user
 			return fig::auth::IsValidAuthVersion(version)
 				and not id.empty()
 				and not name.empty();
+		}
+
+		inline constexpr bool IsProtected() const noexcept
+		{
+			return state == State::Locked;
 		}
 
 		fig::path GetPath() const;

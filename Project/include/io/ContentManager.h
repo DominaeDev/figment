@@ -80,8 +80,8 @@ namespace fig::io
 
 		std::optional<fig::data::ModelSettings> GetActiveModelSettings() const noexcept;
 		std::optional<fig::string> GetCharacterName(const fig::uuid& characterId) const;
-		fig::optional_ref<ContentMetaData> GetMetaData(const fig::uuid& id) noexcept;
-		AssetUserSettings GetUserSettings(const fig::uuid& id) const noexcept;
+		fig::optional_ref<ContentMetaData> GetMetaData(const fig::uuid& assetId) noexcept;
+		AssetUserSettings GetUserSettings(const fig::uuid& assetId) const noexcept;
 		
 		fig::optional_cref<Asset> GetLargePortraitForCharacter(const fig::uuid& characterId, size_t index = 0uz) const;
 		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept;
@@ -89,10 +89,12 @@ namespace fig::io
 		fig::optional_cref<fig::data::VoiceSettings> GetVoiceForCharacter(const fig::uuid& characterId) noexcept;
 		fig::optional_cref<Asset> GetBackgroundForCharacter(const fig::uuid& characterId, size_t index = 0uz) const;
 		std::optional<UserContent<fig::data::Scenario>> GetCharacterScenario(const fig::uuid& characterId);
+		std::optional<UserContent<fig::data::World>> GetDefaultWorld();
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);
 		bool MarkHidden(const fig::uuid& assetId, bool value = true);
+		bool MarkDefault(const fig::uuid& assetId, bool value = true);
 		bool SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle);
 
 		AssetManager& GetAssets();

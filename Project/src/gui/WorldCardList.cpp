@@ -38,7 +38,11 @@ namespace fig::gui
 
 		auto& menu = CreateMenu();
 
-		menu.AddCheckItem("Set as default world", true);
+		menu.AddCheckItem("Set as default world", userSettings.flags.IsSet(AssetUserSettings::Flag::Default))
+			.SetDelegate([this, worldId, bChecked = userSettings.flags.IsSet(AssetUserSettings::Flag::Default)] {
+				Global::GetUserContent().MarkDefault(worldId, !bChecked);
+				RefreshCards();
+			});
 			
 		menu.AddSeparator();
 		menu.AddItem("Edit world\u2026")

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 
@@ -60,6 +60,8 @@ namespace fig::strings
 			"Worlds";
 		constexpr fig::const_string New =
 			"New";
+		constexpr fig::const_string Default =
+			"Default";
 	}
 
 	namespace TTS
@@ -103,6 +105,8 @@ namespace fig::strings
 		constexpr const_string IncorrectPasswordError =
 			"Incorrect password.\nPlease try again.";
 		constexpr const_string PasswordChanged =
-			"Password has been successfully changed.";
+			"The password has been changed.";
+		constexpr const_string PasswordReset =
+			"The password has been reset.";
 	}
 }

@@ -112,9 +112,9 @@ namespace fig::io
 		return fig::nullref;
 	}
 
-	AssetUserSettings UserContentManager::GetUserSettings(const fig::uuid& id) const noexcept
+	AssetUserSettings UserContentManager::GetUserSettings(const fig::uuid& assetId) const noexcept
 	{
-		if (auto tryAsset = _pAssetMngr->FindAsset(id))
+		if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
 			return (*tryAsset).GetUserSettings().value_or({});
 		return {};
 	}
@@ -147,6 +147,34 @@ namespace fig::io
 	bool UserContentManager::MarkHidden(const fig::uuid& assetId, bool value)
 	{
 		return MarkFlag<AssetUserSettings::Flag::Hidden>(assetId, value);
+	}
+
+	bool UserContentManager::MarkDefault(const fig::uuid& assetId, bool value)
+	{
+		if (value)
+		{
+			AssetTypeDefinition assetType;
+			if (auto tryAsset = _pAssetMngr->FindAsset(assetId))
+			{
+				assetType.type = (*tryAsset).type.type;
+				assetType.subtype = (*tryAsset).type.subtype;
+			}
+			else
+				return false;
+
+			// Untag all
+			auto assetsOfType = _pAssetMngr->FindAssetsOfType(assetType);
+			for (auto& assetRef : assetsOfType)
+			{
+				auto& asset = assetRef.get();
+				if (asset.id == assetId)
+					continue;
+				if (auto settings = asset.GetUserSettings(); settings.has_value() and (*settings).HasFlag(AssetUserSettings::Flag::Default))
+					MarkFlag<AssetUserSettings::Flag::Default>(asset.id, false);
+			}
+		}
+
+		return MarkFlag<AssetUserSettings::Flag::Default>(assetId, value);
 	}
 
 	bool UserContentManager::SetBorder(const fig::uuid& assetId, CardBorderStyle borderStyle)
@@ -306,6 +334,28 @@ namespace fig::io
 					.createdAt = (*try_scenario).GetCreatedAt(),
 					.updatedAt = (*try_scenario).GetUpdatedAt(),
 				};
+			}
+		}
+		return std::nullopt;
+	}
+
+	std::optional<UserContent<fig::data::World>> UserContentManager::GetDefaultWorld()
+	{
+		auto assets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::World));
+		for (auto& assetRef : assets)
+		{
+			auto& asset = assetRef.get();
+			if (auto settings = asset.GetUserSettings(); settings.has_value() and (*settings).HasFlag(AssetUserSettings::Flag::Default))
+			{
+				if (auto world = Get<fig::data::World>(asset.id))
+				{
+					return UserContent<World> {
+						.instance = std::cref(*world),
+						.assetId = asset.id,
+						.createdAt = asset.GetCreatedAt(),
+						.updatedAt = asset.GetUpdatedAt(),
+					};
+				}
 			}
 		}
 		return std::nullopt;

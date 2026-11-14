@@ -20,7 +20,9 @@ namespace fig::gui
 
 		void GenerateRecoveryCode();
 		void ChangePassword();
+		void ResetPassword();
 		void ClearPassword();
+		void RefreshPasswordButtons();
 		void RefreshRecoveryCodeButton();
 		void RefreshDeleteButton();
 		
@@ -38,6 +40,8 @@ namespace fig::gui
 		fig::observer_ptr<TextBox> _pOldPassword;
 		fig::observer_ptr<TextBox> _pNewPassword;
 		fig::observer_ptr<TextBox> _pConfirmPassword;
+		fig::observer_ptr<ButtonWithLabel> _pChangePasswordButton;
+		fig::observer_ptr<ButtonWithLabel> _pResetPasswordButton;
 		fig::observer_ptr<ButtonWithLabel> _pRecoveryCodeButton;
 		fig::observer_ptr<ButtonWithLabel> _pDeleteProfileButton;
 		fig::observer_ptr<class ProfileImageWidget> _pProfileImage;
