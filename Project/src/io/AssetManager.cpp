@@ -1060,6 +1060,15 @@ namespace fig::io
 
 	fig::optional_cref<AssetFolder> AssetManager::CreateFolder_NoLock(fig::string_view name, AssetFolderType folderType, const fig::uuid& parentId)
 	{
+		if (auto itFind = std::ranges::find_if(_folders, [name, folderType, parentId](auto&& kvp) {
+			return kvp.second.parent_id == parentId
+				and kvp.second.folderType == folderType
+				and kvp.second.decrypted_name == name;
+			}); itFind != std::ranges::cend(_folders))
+		{
+			return itFind->second; // Folder already exists
+		}
+
 		fig::uuid id = GenerateUUID();
 		auto now = fig::now();
 		auto& folder = _folders[id] = AssetFolder {};

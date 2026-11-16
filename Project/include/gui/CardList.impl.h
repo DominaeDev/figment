@@ -348,7 +348,7 @@ namespace fig::gui
 	{
 		auto folderType = CardTypeOf<T>::FolderType;
 		auto& moveMenu = menu.AddItem("Move");
-		moveMenu.AddItem("Move to a new folder\u2026", Icon::MOVE_TO_FOLDER)
+		moveMenu.AddItem("Create a new folder\u2026")
 			.SetDelegate([this, folderType = folderType, assetId = assetId] {
 				auto& dlg = ShowTextInputDialogBox("Please enter a name for the new folder:", "Enter folder name", [this, folderType = folderType, assetId = assetId](fig::string_view value) {
 					if (not empty_or_whitespace(value))
@@ -357,6 +357,10 @@ namespace fig::gui
 						{
 							MoveCardToFolder(assetId, (*newFolder).id);
 							PushEvent(UserEvent::ChangeAssetFolder, (fig::string)(*newFolder).id);
+						}
+						else
+						{
+							ShowDialogBox("Failed to create folder.", DialogBoxType::Ok);
 						}
 					}
 				});
@@ -388,7 +392,8 @@ namespace fig::gui
 	template <typename T>
 	void CardList<T>::CreateMoveSubMenu(MenuItem& parentItem, const fig::uuid& assetId, const fig::uuid& folderId)
 	{
-		auto subfolders = Global::GetUserContent().GetSubFolders(folderId);
+		auto folderType = CardTypeOf<T>::FolderType;
+		auto subfolders = Global::GetUserContent().GetSubFolders(folderId, folderType);
 		for (auto& subfolder : subfolders)
 		{
 			auto& folderItem = parentItem.AddItem(subfolder.name, Icon::MOVE_TO_FOLDER)

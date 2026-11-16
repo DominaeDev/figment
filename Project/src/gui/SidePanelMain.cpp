@@ -48,7 +48,7 @@ namespace fig::gui
 		pScenariosButton->SetDelegate([] { PushEvent(UserEvent::NavigateToStories); });
 		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
 		pWorldsButton->SetDelegate([] { PushEvent(UserEvent::NavigateToWorlds); });
-		auto pYouButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_USERS, "You");
+		auto pYouButton = pMainArea->CreateControl<SidePanelButton>(Icon::CHARACTER_EDIT_INFO, "Identities");
 		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_MODELS, "Models");
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
@@ -107,7 +107,7 @@ namespace fig::gui
 		auto pWorldsButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_WORLDS_SMALL, false);
 		pWorldsButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToWorlds); });
 		pWorldsButtonSmall->SetTheme(ButtonThemes::SidePanel);
-		auto pYouButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_USERS_SMALL, false);
+		auto pYouButtonSmall = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_INFO_SMALL, false);
 		pYouButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pModelsButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_MODELS_SMALL, false);
 		pModelsButtonSmall->SetTheme(ButtonThemes::SidePanel);

@@ -145,6 +145,7 @@ Command.Value							#FCFF00
 Command.Operator						#3FEFFF
 Command.Literal							#E323E5
 Command.Keyword							#E323E5
+Command.Comment							#595D63
 
 // Fixed colors (invariant)
 Debug									#C000C0

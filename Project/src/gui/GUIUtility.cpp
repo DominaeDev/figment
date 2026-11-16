@@ -66,11 +66,42 @@ namespace fig
 			auto pSurface = IMG_Load(filename.u8string().c_str());
 			if (!pSurface)
 				return std::nullopt;
+			
+			// Convert unsupported pixel formats
+			switch (pSurface->format)
+			{
+			case SDL_PIXELFORMAT_RGB24:
+			case SDL_PIXELFORMAT_RGBA32:
+			case SDL_PIXELFORMAT_RGBA8888:
+				break;
+			case SDL_PIXELFORMAT_INDEX8:
+			{
+				if (auto pConverted = SDL_ConvertSurface(pSurface, SDL_PIXELFORMAT_RGB24))
+				{
+					SDL_free(pSurface);
+					pSurface = pConverted;
+				}
+				else
+					return std::nullopt;
+			}
+			break;
+			default:
+			{
+				if (auto pConverted = SDL_ConvertSurface(pSurface, SDL_PIXELFORMAT_RGBA8888))
+				{
+					SDL_free(pSurface);
+					pSurface = pConverted;
+				}
+				else
+					return std::nullopt;
+			}
+			}
+
 			return fig::make_cresource<fig::sdl::Surface>(pSurface);
 		}
 		catch (...)
 		{
-			return {};
+			return std::nullopt;
 		}
 	}
 
@@ -315,10 +346,13 @@ namespace fig
 
 		if (bAlpha)
 		{
-			if (auto newSurface = SDL_ConvertSurface(pSurface, SDL_PIXELFORMAT_RGBA8888)) // Add alpha channel
+			if (pSurface->format != SDL_PIXELFORMAT_RGBA8888)
 			{
-				SDL_DestroySurface(pSurface);
-				cover.reset(newSurface);
+				if (auto newSurface = SDL_ConvertSurface(pSurface, SDL_PIXELFORMAT_RGBA8888)) // Add alpha channel
+				{
+					SDL_DestroySurface(pSurface);
+					cover.reset(newSurface);
+				}
 			}
 		}
 
@@ -418,6 +452,23 @@ namespace fig
 		{
 		}
 		return {};
+	}
+
+	fig::sdl::Surface CreateSurfaceFromTexture(fig::renderer_ptr pRenderer, fig::texture_ptr pTexture)
+	{
+		SDL_Texture* pPrevTarget = SDL_GetRenderTarget(pRenderer);
+		SDL_SetRenderTarget(pRenderer, pTexture);
+		SDL_Surface* pSurface = SDL_RenderReadPixels(pRenderer, NULL);
+		if (pSurface->format != SDL_PIXELFORMAT_RGBA8888)
+		{
+			if (auto pConverted = SDL_ConvertSurface(pSurface, SDL_PIXELFORMAT_RGBA8888))
+			{
+				SDL_free(pSurface);
+				pSurface = pConverted;
+			}
+		}
+		SDL_SetRenderTarget(pRenderer, pPrevTarget);
+		return fig::make_cresource<fig::sdl::Surface>(pSurface);
 	}
 
 	fig::string TruncateTextByWidth(fig::font& font, fig::string_view text, int32_t maxWidth)

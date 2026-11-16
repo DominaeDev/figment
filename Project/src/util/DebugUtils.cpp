@@ -22,12 +22,12 @@ namespace fig
 	{
 		if constexpr (Debugging)
 		{
-//			CreateFolders();
 //			ImportTestCharacters("./import/characters");
 //			FlushBrokenAssets();
 //			EraseChats();
 //			CreateModelSettings();
 //			ShuffleCards();
+//			CreateFolders();
 			GenerateUUIDs(10uz);
 		}
 	}

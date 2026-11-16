@@ -116,6 +116,7 @@ namespace fig
 	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, fig::surface_ptr pSurface);
 	fig::sdl::Texture CreateTexture(fig::renderer_ptr pRenderer, const fig::sdl::Surface& surface);
 	fig::sdl::Surface CreateSurfaceFromBytes(int16_t width, int16_t height, ImageFormat format, fig::byte_span data);
+	fig::sdl::Surface CreateSurfaceFromTexture(fig::renderer_ptr pRenderer, fig::texture_ptr pTexture);
 	
 	fig::rect ScaleToFit(const fig::rect& srcRect, const fig::rect& dstRect, ImageFit fit);
 	fig::rect AlignRect(const fig::rect& srcRect, const fig::rect& dstRect, ImageAlignment alignment);

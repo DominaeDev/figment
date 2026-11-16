@@ -387,7 +387,7 @@ namespace fig::gui
 						else if (keyEvent.key == SDLK_F1 and mods.None)
 						{
 							int32_t theme = static_cast<int32_t>(Global::GetUserSettings().GetColorTheme());
-							if (++theme == static_cast<int32_t>(ColorTheme::Count))
+							if (++theme == static_cast<int32_t>(ThemeCount()))
 								theme = static_cast<int32_t>(ColorTheme::LightDefault);
 							ChangeColorTheme(static_cast<ColorTheme>(theme), true);
 							return EventResult::Handled;

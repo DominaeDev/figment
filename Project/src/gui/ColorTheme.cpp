@@ -1,7 +1,8 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ColorTheme.h"
 #include "util/CommonUtils.h"
 #include "io/FileUtility.h"
+#include "io/CsvFile.h"
 
 using namespace fig::io;
 
@@ -13,42 +14,12 @@ namespace fig::gui
 
 	AppColors::State AppColors::_state {};
 
-	static void ParseTable(ColorTable& table, fig::string_view text)
-	{
-		table[static_cast<size_t>(Color::Undefined)] = 0x00_rgba;
-
-		for (auto row : std::views::split(text, '\n'))
-		{
-			auto line = trim(fig::string_view { row });
-			if (line.empty())
-				continue;
-
-			// Ignore comments
-			if (line.starts_with("//"))
-				continue;
-			size_t pos_comment = line.find("//");
-			if (pos_comment != fig::string_view::npos)
-				line = trim(line.substr(0, pos_comment));
-
-			size_t pos_name_end = line.find_first_of(" \t");
-			fig::string_view name = trim(line.substr(0, pos_name_end));
-			size_t pos_value_begin = line.find_first_not_of(" \t", pos_name_end);
-			fig::string_view value = trim(line.substr(pos_value_begin));
-
-#if defined(__INTELLISENSE__)
-#pragma diag_suppress 304,65 // Suppress bugged Intellisense error squigglies
-#endif
-			if (auto enumColor = enum_deserialize(name, ColorNameMapping, Color::Undefined); enumColor != Color::Undefined)
-				table[static_cast<size_t>(enumColor)] = fig::color::FromString(value);
-		}
-	}
-
 	bool AppColors::Init()
 	{
 		if constexpr (Debugging)
 		{
 			// Fill tables with "error color" (red)
-			for (int32_t theme = 0; theme < static_cast<int32_t>(ColorTheme::Count); ++theme)
+			for (int32_t theme = 0; theme < ThemeCount(); ++theme)
 			{
 				auto& table = _state.colorThemes[static_cast<ColorTheme>(theme)];
 				for (auto& color : table)
@@ -56,30 +27,9 @@ namespace fig::gui
 			}
 		}
 
-		LoadColorTheme(ColorTheme::LightDefault,	fig::path { "resources/gui/themes/light_default.txt" });
-		LoadColorTheme(ColorTheme::LightGray,		fig::path { "resources/gui/themes/light_gray.txt" });
-		LoadColorTheme(ColorTheme::LightPink, 		fig::path { "resources/gui/themes/light_pink.txt" });
-		LoadColorTheme(ColorTheme::LightBlue,		fig::path { "resources/gui/themes/light_blue.txt" });
-		LoadColorTheme(ColorTheme::LightGreen,		fig::path { "resources/gui/themes/light_green.txt" });
-		LoadColorTheme(ColorTheme::LightYellow,		fig::path { "resources/gui/themes/light_yellow.txt" });
-		LoadColorTheme(ColorTheme::DarkDefault,		fig::path { "resources/gui/themes/dark_default.txt" });
-		LoadColorTheme(ColorTheme::DarkBlack,		fig::path { "resources/gui/themes/dark_black.txt" });
-		LoadColorTheme(ColorTheme::DarkPink,		fig::path { "resources/gui/themes/dark_pink.txt" });
-		LoadColorTheme(ColorTheme::DarkBlue,		fig::path { "resources/gui/themes/dark_blue.txt" });
-		LoadColorTheme(ColorTheme::DarkGreen,		fig::path { "resources/gui/themes/dark_green.txt" });
-		LoadColorTheme(ColorTheme::DarkBrown,		fig::path { "resources/gui/themes/dark_brown.txt" });
+		LoadColorThemesCSV(fig::path { "resources/gui/themes/themes.csv" });
 
 		return SetTheme(ColorTheme::SystemDefault);
-	}
-
-	FileError AppColors::LoadColorTheme(ColorTheme theme, const fig::path& path)
-	{
-		if (auto file = ReadTextFile(path, false))
-		{
-			ParseTable(_state.colorThemes[theme], *file);
-			return FileError::NoError;
-		}
-		return FileError::NotFound;
 	}
 
 	bool AppColors::SetTheme(ColorTheme theme, bool bTransition)
@@ -153,4 +103,37 @@ namespace fig::gui
 	{
 		return custom_color(0xFFFFFF_rgb).WithAlpha(fAlpha);
 	}
+
+	FileError AppColors::LoadColorThemesCSV(const fig::path& filename)
+	{
+		CsvFile csv;
+		if (csv.Load(filename) != CsvError::NoError)
+			return FileError::ReadError;
+
+		if (csv.GetColumnCount() < ThemeCount() + 1uz)
+			return FileError::ReadError;
+
+		for (size_t iTheme = 0uz; iTheme < ThemeCount(); ++iTheme)
+		{
+			ColorTheme theme = static_cast<ColorTheme>(toUZ(MinTheme) + iTheme);
+			auto& table = _state.colorThemes[theme];
+			table[static_cast<size_t>(Color::Undefined)] = 0x00_rgba;
+
+			for (auto& row : csv.GetRows())
+			{
+				if (row.empty())
+					continue;
+
+				auto& colorName = row[0];
+				if (empty_or_whitespace(colorName))
+					continue;
+
+
+				if (auto enumColor = enum_deserialize(colorName, ColorNameMapping, Color::Undefined); enumColor != Color::Undefined)
+					table[static_cast<size_t>(enumColor)] = fig::color::FromString(row[1uz + iTheme]);
+			}
+		}
+		return FileError::NoError;
+	}
+
 }

@@ -10,6 +10,7 @@ namespace fig::gui
 	enum class ColorTheme
 	{
 		SystemDefault = 0,
+
 		LightDefault,
 		LightGray,
 		LightPink,
@@ -22,11 +23,17 @@ namespace fig::gui
 		DarkBlue,
 		DarkGreen,
 		DarkBrown,
-
-		Count,
 	};
 
-	constexpr auto ColorThemeMapping = std::array<std::pair<ColorTheme, std::string_view>, static_cast<size_t>(ColorTheme::Count)> {
+	constexpr ColorTheme MinTheme = ColorTheme::LightDefault;
+	constexpr ColorTheme MaxTheme = ColorTheme::DarkBrown;
+
+	consteval size_t ThemeCount()
+	{
+		return static_cast<size_t>(MaxTheme) - static_cast<size_t>(MinTheme) + 1uz;
+	}
+
+	constexpr auto ColorThemeMapping = std::array<std::pair<ColorTheme, std::string_view>, static_cast<size_t>(ThemeCount() + 1uz)> {
 		std::pair { ColorTheme::SystemDefault,	"Default" },
 		std::pair { ColorTheme::LightDefault,	"Light" },
 		std::pair { ColorTheme::LightGray,		"LightGray" },
@@ -52,7 +59,7 @@ namespace fig::gui
 		static bool IsTransitioning() noexcept { return _state.isTransitioning; }
 
 	private:
-		static fig::io::FileError LoadColorTheme(ColorTheme theme, const fig::path& path);
+		static fig::io::FileError LoadColorThemesCSV(const fig::path& filename);
 
 		static struct State
 		{
