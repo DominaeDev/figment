@@ -381,7 +381,7 @@ namespace fig::gui
 			if (auto subfolders = Global::GetUserContent().GetFolders(folderType); not subfolders.empty())
 			{
 				moveMenu.AddSeparator();
-				auto& rootFolderItem = moveMenu.AddItem(fig::string { rootName }, Icon::MOVE_TO_FOLDER)
+				auto& rootFolderItem = moveMenu.AddItem(std::format("{} (Root)", rootName), Icon::MOVE_TO_FOLDER)
 					.SetDelegate([&] { MoveCardToFolder(assetId, {}); })
 					.SetEnabled(not _currentFolderId.empty());
 				CreateMoveSubMenu(rootFolderItem, assetId, {});

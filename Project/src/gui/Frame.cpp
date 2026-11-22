@@ -191,6 +191,11 @@ namespace fig::gui
 
 	EventResult Frame::ProcessEvent(fig::event& event)
 	{
+		if (IsMouseEvent(event) and _pControlHasMouseCapture)
+		{
+			return _pControlHasMouseCapture->ProcessEvent(event);
+		}
+
 		if (not _overlays.empty())
 		{
 			for (int32_t i = toI(_overlays.size()) - 1; i >= 0; --i)
@@ -341,6 +346,30 @@ namespace fig::gui
 		_snapshotPromises.emplace_back(std::promise<fig::sdl::Surface> {});
 		auto future = _snapshotPromises.back().get_future();
 		return future;
+	}
+
+	bool Frame::CaptureMouse(fig::observer_ptr<Control> pControl) noexcept
+	{
+		if (_pControlHasMouseCapture)
+			return false;
+
+		_pControlHasMouseCapture = pControl;
+		return true;
+	}
+
+	bool Frame::HasCapture(fig::observer_ptr<const Control> pControl) const noexcept
+	{
+		return pControl and _pControlHasMouseCapture == pControl;
+	}
+
+	bool Frame::ReleaseCapture() noexcept
+	{
+		if (_pControlHasMouseCapture)
+		{
+			_pControlHasMouseCapture.reset();
+			return true;
+		}
+		return false;
 	}
 
 	void Frame::Flush()

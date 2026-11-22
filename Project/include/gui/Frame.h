@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 #include <future>
@@ -39,6 +39,9 @@ namespace fig::gui
 
 		std::future<fig::sdl::Surface> GetSnapshot();
 
+		bool CaptureMouse(fig::observer_ptr<Control> pControl) noexcept;
+		bool HasCapture(fig::observer_ptr<const Control> pControl) const noexcept;
+		bool ReleaseCapture() noexcept;
 	protected:
 		bool HandleMouseDown(SDL_MouseButtonEvent& event);
 		void OnOverlayOpen(int32_t overlayId);
@@ -69,5 +72,7 @@ namespace fig::gui
 		
 		std::vector<fig::cursor> _cursors;
 		std::vector<std::promise<fig::sdl::Surface>> _snapshotPromises;
+		fig::observer_ptr<Control> _pControlHasMouseCapture;
+
 	};
 }

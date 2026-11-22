@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/VerticalScrollBar.h"
 #include "gui/TexturedBorder.h"
 #include "gui/AppResources.h"
@@ -18,6 +18,12 @@ namespace fig::gui
 		pHandle->SetCornerScale(0.5f);
 		pHandle->SetForegroundColor(fig::color_ref(Color::ScrollBar).WithAlpha(HandleAlpha[0]));
 		_pHandle = pHandle;
+	}
+
+	VerticalScrollBar::~VerticalScrollBar()
+	{
+		if (HasCapture())
+			ReleaseCapture();
 	}
 
 	void VerticalScrollBar::SetScroll(ScrollPanel& scrollPanel, float fPosition, fig::coord maxExtent)
@@ -81,7 +87,7 @@ namespace fig::gui
 	{
 		auto& rect = GetRect();
 
-		if (is_inside(rect, x, y))
+		if (is_inside(rect, x, y) and CaptureMouse())
 		{
 			_pHandle->SetForegroundColor(_pHandle->GetForegroundColor().WithAlpha(HandleAlpha[1]));
 			_bScrolling = true;
@@ -97,6 +103,7 @@ namespace fig::gui
 			_pHandle->SetForegroundColor(_pHandle->GetForegroundColor().WithAlpha(HandleAlpha[0]));
 			_bScrolling = false;
 			_bDirty = true;
+			ReleaseCapture();
 		}
 		return false;
 	}

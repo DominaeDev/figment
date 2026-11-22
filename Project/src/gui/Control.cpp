@@ -421,4 +421,37 @@ namespace fig::gui
 		static TextInputDialogBox err { nullptr, {}, {} };
 		return err;
 	}
+
+	bool Control::CaptureMouse() noexcept
+	{
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+
+		if (_renderContext and _renderContext->pFrame)
+			return _renderContext->pFrame->CaptureMouse(this);
+		
+		assert(false && "No render context");
+		return false;
+	}
+
+	bool Control::HasCapture() const noexcept
+	{
+		if (_renderContext and _renderContext->pFrame)
+			return _renderContext->pFrame->HasCapture(this);
+		
+		assert(false && "No render context");
+		return false;
+	}
+
+	bool Control::ReleaseCapture() noexcept
+	{
+		if (!_renderContext)
+			_renderContext = GetRenderContext();
+
+		if (_renderContext and _renderContext->pFrame)
+			return _renderContext->pFrame->ReleaseCapture();
+		
+		assert(false && "No render context");
+		return false;
+	}
 }

@@ -408,7 +408,7 @@ namespace fig::gui
 
 	void UserSettingsEditorProfileTab::DeleteProfile()
 	{
-		ShowDialogBox(fig::strings::ProfileSettings::ConfirmationMessage, DialogBoxType::YesNo,
+		ShowDialogBox(fig::strings::ProfileSettings::ConfirmationMessage, DialogBoxType::ConfirmCancel,
 			[this](bool bOk) {
 				if (bOk)
 				{

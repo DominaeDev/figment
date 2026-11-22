@@ -94,6 +94,7 @@ namespace fig::gui
 		fig::text_engine_ptr GetSDLTextEngine();
 		fig::observer_ptr<Frame> GetOwnerFrame();
 		fig::point GetMousePos() const noexcept;
+		
 		Menu& CreateMenu() noexcept;
 
 		enum class DialogBoxType { Ok, OkCancel, YesNo, ConfirmCancel, };
@@ -102,6 +103,9 @@ namespace fig::gui
 		TextInputDialogBox& ShowTextInputDialogBox(fig::string_view message, std::function<void(fig::string_view)> fnDelegate);
 		TextInputDialogBox& ShowTextInputDialogBox(fig::string_view message, fig::string_view placeholder, std::function<void(fig::string_view)> fnDelegate);
 		
+		bool CaptureMouse() noexcept;
+		bool HasCapture() const noexcept;
+		bool ReleaseCapture() noexcept;
 	protected:
 		fig::color_ref _foregroundColor {};
 		fig::color_ref _backgroundColor {};

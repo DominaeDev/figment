@@ -99,7 +99,7 @@ namespace fig::strings
 		constexpr const_string RecoveryCodeHint =
 			"In the event that you forget your password, you can use a recovery code to reset it. Make sure you write it down and store it securely. When a new recovery code is generated, any prior code will be rendered invalid.";
 		constexpr const_string ConfirmationMessage = 
-			"Are you really sure you want to delete this profile and all associated data?\nThis action cannot be undone.";
+			"You are about to delete this profile and all associated data.\nDo you wish to proceed?\n\nThis action cannot be undone.";
 		constexpr const_string ConfirmationFailedError =
 			"Password confirmation does not match.\nPlease try again.";
 		constexpr const_string IncorrectPasswordError =

@@ -48,8 +48,8 @@ namespace fig::gui
 		pScenariosButton->SetDelegate([] { PushEvent(UserEvent::NavigateToStories); });
 		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
 		pWorldsButton->SetDelegate([] { PushEvent(UserEvent::NavigateToWorlds); });
-		auto pYouButton = pMainArea->CreateControl<SidePanelButton>(Icon::CHARACTER_EDIT_INFO, "Identities");
 		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_MODELS, "Models");
+		auto pYouButton = pMainArea->CreateControl<SidePanelButton>(Icon::CHARACTER_EDIT_INFO, "My identities");
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
 		pButtonSizer->Add(pChatButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
@@ -60,9 +60,9 @@ namespace fig::gui
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pWorldsButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 		pButtonSizer->AddSpacer(4);
-		pButtonSizer->Add(pYouButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
-		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pModelsButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
+		pButtonSizer->AddSpacer(4);
+		pButtonSizer->Add(pYouButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 
 		auto pFooterPanel = CreateControl<Area>();
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);

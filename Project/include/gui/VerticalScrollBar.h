@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 
@@ -10,6 +10,7 @@ namespace fig::gui
 		friend class ScrollPanel;
 	public:
 		VerticalScrollBar(ControlPtr pParent);
+		~VerticalScrollBar();
 
 		void SetScroll(ScrollPanel& scrollPanel, float fPosition, fig::coord maxExtent);
 	
