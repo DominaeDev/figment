@@ -217,8 +217,6 @@ namespace fig::gui
 				});
 			}
 			menu.AddSeparator();
-
-			menu.AddItem("Duplicate\u2026");
 			menu.AddItem("Export\u2026");
 			menu.AddSeparator();
 

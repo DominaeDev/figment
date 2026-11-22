@@ -50,12 +50,25 @@ namespace fig::gui
 		CreateLabel(this, pNameColumn2, "Last name");
 		CreateTextBox(this, pNameColumn2, ValueBinding<fig::string>(&_pCharacter->name.last))
 			->SetMaxWidth(300);
+		pSizer->Add(pNameSizer, 0, SizerFlag::FixedSize, 63);
 
-		CreateLabel(this, pNameColumn1, "Nickname");
-		CreateTextBox(this, pNameColumn1, ValueBinding<fig::string>(&_pCharacter->name.nickname))
+		// Nickname / Age
+		auto pNickSizer = new HorizontalSizer();
+		auto pNickColumn1 = new VerticalSizer();
+		auto pNickColumn2 = new VerticalSizer();
+		pNickSizer->Add(pNickColumn1, 0, SizerFlag::FixedSize, 320);
+		pNickSizer->Add(pNickColumn2, -1);
+
+		CreateLabel(this, pNickColumn1, "Nickname / Alias");
+		CreateTextBox(this, pNickColumn1, ValueBinding<fig::string>(&_pCharacter->name.nickname))
 			->SetMaxWidth(300);
 
-		pSizer->Add(pNameSizer, 0, SizerFlag::FixedSize, 126);
+		CreateLabel(this, pNickColumn2, "Age");
+		_pAge = CreateTextBox(this, pNickColumn2);
+		_pAge->SetText(_pCharacter->GetAttribute("age").value_or(""));
+		_pAge->SetMaxWidth(120);
+
+		pSizer->Add(pNickSizer, 0, SizerFlag::FixedSize, 63);
 
 		// Gender / Pronouns
 		auto pGenderSizer = new HorizontalSizer();
@@ -66,7 +79,7 @@ namespace fig::gui
 
 		std::vector<fig::string> genders { "Male", "Female", "Non-binary" };
 		std::vector<fig::string> pronouns { "Auto", "He/Him", "She/Her", "They/Them", "It/It" };
-		CreateLabel(this, pGenderColumn1, "Gender/Sex");
+		CreateLabel(this, pGenderColumn1, "Gender");
 		CreateComboBox(this, pGenderColumn1, genders, ValueBinding<Gender>(&_pCharacter->gender))
 			->SetMaxWidth(300);
 
@@ -75,12 +88,6 @@ namespace fig::gui
 			->SetMaxWidth(180);
 
 		pSizer->Add(pGenderSizer, 0, SizerFlag::FixedSize, 63);
-
-		// Age
-		CreateLabel(this, pSizer, "Age");
-		_pAge = CreateTextBox(this, pSizer);
-		_pAge->SetText(_pCharacter->GetAttribute("age").value_or(""));
-		_pAge->SetMaxWidth(120);
 
 		CreateHorizontalLine(this, pSizer);
 

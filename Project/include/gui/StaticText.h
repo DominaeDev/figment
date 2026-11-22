@@ -55,6 +55,7 @@ namespace fig::gui
 		bool IsEllipsisEnabled() const noexcept { return _bEllipsis; }
 		void EnableMultiline(bool bEnable) noexcept;
 		void EnableWordWrap(bool bEnable) noexcept;
+		void SetMaxLines(size_t maxLines) noexcept { _maxLines = maxLines; }
 
 		fig::point MeasureText(bool bAllowEllipsis = true) const;
 		fig::point MeasureText(fig::string_view text, bool bRaw = false) const;
@@ -86,5 +87,6 @@ namespace fig::gui
 		int32_t _textHeight;
 
 		TextAlignment _alignment = TextAlignment::Default;
+		size_t _maxLines {};
 	};
 }

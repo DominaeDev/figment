@@ -116,7 +116,7 @@ namespace fig::io
 
 				scenario.roles.push_back(fig::data::Scenario::RoleSlot {
 					.role = Role::Bot1,
-					.label = character.name.GetSpokenName(),
+					.label = character.GetName(),
 					.flags = { fig::data::Scenario::RoleSlot::Flag::Required },
 				});
 				scenario.roles.push_back(fig::data::Scenario::RoleSlot {

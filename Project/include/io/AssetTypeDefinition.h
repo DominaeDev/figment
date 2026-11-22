@@ -9,6 +9,7 @@ namespace fig::io
 		Scenario		= 0x02,
 		World			= 0x03,
 		Concept			= 0x04, //! @reserved
+		UserPersona		= 0x05,
 
 		ModelSettings	= 0x08,
 		Chat			= 0x09,

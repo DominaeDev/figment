@@ -46,7 +46,7 @@ namespace fig::data
 			return false;
 
 		if (data.chatId.empty())
-			data.chatId = data.name.GetSpokenName();
+			data.chatId = data.GetName();
 
 		// Colors
 		data.bgColor = {};
@@ -233,32 +233,40 @@ namespace fig::data
 	const Context& Character::GetContext() noexcept
 	{
 		if (_bDirtyContext)
-			UpdateContext();
+		{
+			UpdateContext(_context);
+			_bDirtyContext = false;
+		}
 		return _context;
 	}
 
-	void Character::UpdateContext()
+	Context Character::GetContext() const noexcept
 	{
-		_context.Clear();
-		_context.SetValue("id", chatId);
-		_context.SetValue("name", name.GetSpokenName());
-		_context.SetValue("fullname", name.GetFullName());
-		_context.SetValue("gender", fig::string { gender });
-		_context.SetValue("brief", brief);
-
-		for (auto& attrib : _attributes)
-			_context.SetValue(attrib.id, attrib.value);
-
-		if (gender.IsConventional())
-			_context.SetFlag((fig::string)gender);
-
-		_bDirtyContext = false;
+		Context context;
+		UpdateContext(context);
+		return context;
 	}
 
-	fig::string Character::GetDescription() const noexcept
+	void Character::UpdateContext(Context& context) const
+	{
+		context.Clear();
+		context.SetValue("id", chatId);
+		context.SetValue("name", name.GetSpokenName());
+		context.SetValue("fullname", name.GetFullName());
+		context.SetValue("gender", fig::string { gender });
+		context.SetValue("brief", brief);
+
+		for (auto& attrib : _attributes)
+			context.SetValue(attrib.id, attrib.value);
+
+		if (gender.IsConventional())
+			context.SetFlag((fig::string)gender);
+	}
+
+	fig::string Character::GetAboutDescription() const noexcept
 	{
 		if (not about.empty())
-			return truncate(strip_emoji(about), 1024);
+			return about;
 		return brief;
 	}
 
@@ -296,6 +304,8 @@ namespace fig::data
 
 		_searchIndex.AddTerm(name.GetSpokenName());
 		_searchIndex.AddTerm(name.GetFullName());
+		_searchIndex.AddTerm(brief);
+
 		for (auto& attribute : _attributes)
 			_searchIndex.AddTerm(attribute.value);
 		_searchIndex.AddTerm(creator);

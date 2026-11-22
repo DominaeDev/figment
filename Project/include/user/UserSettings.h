@@ -52,6 +52,13 @@ namespace fig::io
 				constexpr fig::io::SettingKey InfoPanelCollapsed	{ "Interface", "Chat.InfoPanel.Collapsed" };
 				constexpr fig::io::SettingKey ImageSize				{ "Interface", "Chat.InfoPanel.ImageSize" };
 			}
+
+			namespace UserPersonaList
+			{
+				constexpr fig::io::SettingKey Sorting				{ "Interface", "UserPersonas.Sorting" };
+				constexpr fig::io::SettingKey Ordering				{ "Interface", "UserPersonas.Ordering" };
+				constexpr fig::io::SettingKey Filtering				{ "Interface", "UserPersonas.Filter" };
+			}
 		}
 
 		namespace TTS
@@ -126,6 +133,7 @@ namespace fig::io
 	constexpr FilterFlags DefaultCharacterFilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther, FilterFlag::SourceCreated, FilterFlag::SourceImported  };
 	constexpr FilterFlags DefaultScenarioFilterFlags { FilterFlag::SourceCreated, FilterFlag::SourceImported  };
 	constexpr FilterFlags DefaultWorldFilterFlags { FilterFlag::SourceCreated, FilterFlag::SourceImported  };
+	constexpr FilterFlags DefaultUserPersonaFilterFlags { FilterFlag::GenderMale, FilterFlag::GenderFemale, FilterFlag::GenderOther, FilterFlag::SourceCreated, FilterFlag::SourceImported  };
 	
 	enum class ChatFilterFlag : int32_t
 	{
@@ -134,19 +142,19 @@ namespace fig::io
 	};
 	using ChatFilterFlags = EnumFlags<ChatFilterFlag>;
 
-	static auto ChatFilterFlagMapping = std::array<std::pair<ChatFilterFlag, std::string_view>, 3> {
+	static auto ChatFilterFlagMapping = std::array<std::pair<ChatFilterFlag, std::string_view>, 2> {
 		std::pair { ChatFilterFlag::Starred,	"starred" },
 		std::pair { ChatFilterFlag::Hidden,		"hidden" },
 	};
-
 	constexpr ChatFilterFlags DefaultChatFilterFlags {};
-
+	
 	class UserSettings : public SettingsCollection
 	{
 	public:
 		UserSettings() : SettingsCollection()
 		{
 		}
+
 		explicit UserSettings(const fig::path& path) noexcept : SettingsCollection(path)
 		{
 			Init();

@@ -183,7 +183,26 @@ namespace fig::Constants
 		constexpr fig::const_string PackagesStateFileExt = "";
 		
 		constexpr fig::const_string TemporaryFolder = "temp";
+		
+		namespace Filters
+		{
+			constexpr SDL_DialogFileFilter AllFiles[] {
+				{ "All files", "*" },
+			};
+			constexpr SDL_DialogFileFilter CharacterFiles[] {
+				{ "Character card v2 (.png)", "png" },
+			};
+			constexpr SDL_DialogFileFilter ImageFiles[] {
+				{ "Image files", "bmp;gif;jpg;jpeg;jfif;png;webp" },
+				{ "BMP files", "bmp" },
+				{ "GIF files", "gif" },
+				{ "JPEG files", "jpg;jpeg;jfif" },
+				{ "PNG files", "png" },
+				{ "WEBP files", "webp" },
+			};
+		}
 	}
+
 	
 	namespace LLM
 	{

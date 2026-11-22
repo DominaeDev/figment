@@ -29,7 +29,6 @@ namespace fig::io
 		{ v.SaveToXml(data) } -> std::same_as<void>;
 	};
 
-
 	template <typename T>
 	struct UserContent
 	{

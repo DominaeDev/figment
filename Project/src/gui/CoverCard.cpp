@@ -532,7 +532,7 @@ namespace fig::gui
 			}
 		}
 
-		if (filter.IsSet(FilterFlag::New) and not _metaData.IsNew())
+		if (filter.IsSet(FilterFlag::New) and (not _metaData.IsNew() or _metaData.IsModified()))
 			return false;
 		if (filter.IsSet(FilterFlag::Starred) and not _userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 			return false;
@@ -731,7 +731,7 @@ namespace fig::gui
 			_pCounterBG->SetVisible(!bHidden);
 		if (_pNewIndicator)
 		{
-			_pNewIndicator->SetVisible(_metaData.IsNew() and !bHidden);
+			_pNewIndicator->SetVisible((_metaData.IsNew() and not _metaData.IsModified()) and !bHidden);
 
 			if (_cardSize == CardSize::Full)
 				_pNewIndicator->SetPosition(Large::Tags::Margin + (_pCounterBG ? _pCounterBG->GetWidth() + 4 : 0), Large::Tags::Margin);
@@ -766,7 +766,7 @@ namespace fig::gui
 	void CoverCard::SetMetaData(const fig::io::ContentMetaData& metaData) noexcept
 	{
 		_metaData = metaData;
-		ShowNew(metaData.IsNew());
+		ShowNew(metaData.IsNew() and not _metaData.IsModified());
 	}
 
 	void CoverCard::SetUserSettings(const AssetUserSettings& userSettings) noexcept

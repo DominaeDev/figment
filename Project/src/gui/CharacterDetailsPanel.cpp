@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/CharacterDetailsPanel.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"
@@ -42,8 +42,8 @@ namespace fig::gui
 
 	void CharacterDetailsPanel::SetCharacter(const fig::data::Character& character)
 	{
-		_pHeader->SetText(character.name.GetSpokenName());
-		_pDescription->SetText(character.GetDescription());
+		_pHeader->SetText(character.GetName());
+		_pDescription->SetText(truncate(strip_emoji(character.GetAboutDescription()), 1024));
 	}
 
 	fig::coord CharacterDetailsPanel::GetExtent() const

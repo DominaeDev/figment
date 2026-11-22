@@ -31,6 +31,8 @@ namespace fig::io
 	constexpr AssetTypeDefinition AssetTypeOf<fig::data::ChatLog> = make_asset_type(AssetType::Chat, ChatAssetType::Log);
 	template <>
 	constexpr AssetTypeDefinition AssetTypeOf<fig::data::VoiceSettings> = make_asset_type(AssetType::Audio, AudioAssetType::VoiceSettings);
+	template <> 
+	constexpr AssetTypeDefinition AssetTypeOf<fig::data::UserPersona> = make_asset_type(AssetType::UserPersona);
 
 	template<typename T>
 	concept XmlLoadableAsset = requires (T& value)

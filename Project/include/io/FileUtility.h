@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include <expected>
@@ -49,4 +49,14 @@ namespace fig::io
 	std::expected<fig::string, FileError> ReadPNGMeta(fig::path filename, const fig::string& keyword = "chara", bool bDecodeBase64 = true) noexcept;
 	std::expected<fig::string, FileError> ReadPNGMeta(const fig::bytes& buffer, const fig::string& keyword = "chara", bool bDecodeBase64 = true) noexcept;
 
+	enum class OpenFileDialogType {
+		All,
+		Characters,
+		Images,
+	};
+	using PathList = std::vector<fig::path>;
+	using OpenFileDialogDelegate = std::function<void(fig::path)>;
+	using OpenFilesDialogDelegate = std::function<void(const PathList&)>;
+	void ShowOpenFileDialog(fig::window_ptr pWindow, OpenFileDialogType dialogType, OpenFileDialogDelegate fnDelegate);
+	void ShowOpenFilesDialog(fig::window_ptr pWindow, OpenFileDialogType dialogType, OpenFilesDialogDelegate fnDelegate);
 }

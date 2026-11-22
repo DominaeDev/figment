@@ -48,8 +48,9 @@ namespace fig::data
 		bool operator!= (ConventionalGender gender) const noexcept { return !operator==(gender); }
 		bool operator!= (const fig::string& gender) const noexcept { return !operator==(gender); }
 
-		explicit operator fig::string() const { return GetLabel(); }
-		explicit operator ConventionalGender() const { return _conventional; }
+		explicit operator fig::string() const noexcept { return GetLabel(); }
+		explicit operator ConventionalGender() const noexcept { return _conventional; }
+		explicit operator bool() const noexcept { return IsConventional() or not _label.empty(); }
 
 		static Gender Male;
 		static Gender Female;

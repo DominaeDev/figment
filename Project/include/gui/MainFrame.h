@@ -32,7 +32,7 @@ namespace fig::gui
 	struct NavigationState
 	{
 		ScreenType screen { ScreenType::Undefined };
-		enum class Context { None, Character, CharacterScenario, Scenario, World, UserSettings, } context {};
+		enum class Context { None, Character, CharacterScenario, Scenario, World, UserPersona, UserSettings, } context {};
 		fig::uuid assetId {};
 	};
 

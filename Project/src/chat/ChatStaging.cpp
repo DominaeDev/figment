@@ -129,7 +129,7 @@ namespace fig::chat
 		if (name.empty() || _characters.empty())
 			return std::nullopt;
 
-		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& c) { return equals(c.instance.name.GetSpokenName(), name, true); }); itFind != std::ranges::cend(_characters))
+		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& c) { return equals(c.instance.GetName(), name, true); }); itFind != std::ranges::cend(_characters))
 			return make_optional_cref((*itFind).instance);
 		return fig::nullref;
 	}
@@ -149,7 +149,7 @@ namespace fig::chat
 
 		if (auto itFind = std::ranges::find_if(_charactersByRole, [this, characterId](const auto& kvp) { 
 			return equals(_characters[kvp.second].instance.chatId, characterId, true) 
-				or equals(_characters[kvp.second].instance.name.GetSpokenName(), characterId, true);
+				or equals(_characters[kvp.second].instance.GetName(), characterId, true);
 			}); itFind != std::ranges::cend(_charactersByRole))
 		{
 			return itFind->first;
@@ -176,7 +176,7 @@ namespace fig::chat
 			return fig::string { Constants::Chat::Names::Director };
 
 		if (auto try_find = GetCharacterByRole(role))
-			return (*try_find).name.GetSpokenName();
+			return (*try_find).GetName();
 
 		return fig::string { Constants::Chat::Names::Unknown };
 	}
@@ -282,7 +282,7 @@ namespace fig::chat
 			// Traits
 			if (character.GetTraits().size() > 0uz)
 			{
-				persona += std::format("{}'s traits:\n", character.name.GetSpokenName());
+				persona += std::format("{}'s traits:\n", character.GetName());
 
 				for (auto& trait : character.GetTraits())
 					persona += std::format("- [{0}] {1}\n", trait.name, trim(trait.text));
@@ -392,7 +392,7 @@ namespace fig::chat
 					if (i + 1uz == characters.size())
 						title += "and ";
 				}
-				title += characters[i].name.GetSpokenName();
+				title += characters[i].GetName();
 			}
 			return title;
 		}

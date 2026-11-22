@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Screen.h"
 #include "gui/GUICommon.h"
@@ -19,7 +19,6 @@ namespace fig::gui
 		void OnUpdate(float fElapsed) override;
 		EventResult OnEvent(fig::event& event) override;
 
-		bool OnKeyboardEvent(KeyboardEvent& event) override;
 		void ShowSortingMenu() noexcept;
 		void ShowFilteringMenu() noexcept;
 		void OnSearchFilter(fig::string_view search_text);

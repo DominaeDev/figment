@@ -38,6 +38,10 @@ namespace fig::io
 		{ UserSetting::Interface::ChatList::Ordering,				static_cast<int32_t>(OrderBy::Default) },
 		{ UserSetting::Interface::ChatList::Filtering,				ChatFilterFlags::Serialize(DefaultChatFilterFlags, ChatFilterFlagMapping) },
 
+		{ UserSetting::Interface::UserPersonaList::Sorting,			static_cast<int32_t>(SortBy::Default) },
+		{ UserSetting::Interface::UserPersonaList::Ordering,		static_cast<int32_t>(OrderBy::Default) },
+		{ UserSetting::Interface::UserPersonaList::Filtering,		FilterFlags::Serialize(DefaultUserPersonaFilterFlags, FilterFlagMapping) },
+
 		{ UserSetting::TTS::Enabled,								false },
 		{ UserSetting::TTS::Warmup,									false },
 		{ UserSetting::TTS::Split,									true },

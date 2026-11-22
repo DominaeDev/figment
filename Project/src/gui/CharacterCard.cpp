@@ -50,7 +50,7 @@ namespace fig::gui
 		if (auto try_character = Global::GetUserContent().Get<Character>(_assetId); try_character.has_value())
 		{
 			auto& character = try_character.value();
-			_name = character.name.GetSpokenName();
+			_name = character.GetName();
 			_updatedAt = Global::GetUserContent().GetUpdatedAt(_assetId).value_or({});
 			SetLabel(character.name.GetFullName());
 			SetIndex(character.GetSearchIndex());

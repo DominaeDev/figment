@@ -9,9 +9,11 @@
 #include "gui/SidePanel.h"
 #include "gui/LoginScreen.h"
 #include "gui/EditorScreen.h"
+#include "gui/UserPersonaScreen.h"
 #include "gui/editor/CharacterEditor.h"
 #include "gui/editor/StoryEditor.h"
 #include "gui/editor/WorldEditor.h"
+#include "gui/editor/UserPersonaEditor.h"
 #include "gui/editor/UserSettingsEditor.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
@@ -67,6 +69,7 @@ namespace fig::gui
 		RegisterScreen<DebugScreen>(ScreenType::Debug);
 		RegisterScreen<ChatListingScreen>(ScreenType::ChatListing);
 		RegisterScreen<EditorScreen>(ScreenType::Editor);
+		RegisterScreen<UserPersonaScreen>(ScreenType::UserPersonas);
 
 		DebugUtility::Initialize();
 
@@ -462,6 +465,12 @@ namespace fig::gui
 			NavigateTo(ScreenType::Worlds);
 			return EventResult::Handled;
 		}
+		else if (IsUserEvent(event, UserEvent::NavigateToUserPersonas))
+		{
+			NavigateTo(ScreenType::UserPersonas);
+			GetScreen<UserPersonaScreen>()->Initialize();
+			return EventResult::Handled;
+		}
 		else if (IsUserEvent(event, UserEvent::NavigateToChatList))
 		{
 			NavigateTo(ScreenType::ChatListing);
@@ -570,6 +579,12 @@ namespace fig::gui
 			NavigateTo(ScreenType::Editor, NavigationState::Context::Scenario, scenarioId, true);
 			return EventResult::Handled;
 		}
+		else if (IsUserEvent(event, UserEvent::EditCharacterStory))
+		{
+			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
+			NavigateTo(ScreenType::Editor, NavigationState::Context::CharacterScenario, characterId, true);
+			return EventResult::Handled;
+		}
 		else if (IsUserEvent(event, UserEvent::CreateWorld))
 		{
 			NavigateTo(ScreenType::Editor, NavigationState::Context::World, {}, true);
@@ -581,10 +596,15 @@ namespace fig::gui
 			NavigateTo(ScreenType::Editor, NavigationState::Context::World, worldId, true);
 			return EventResult::Handled;
 		}
-		else if (IsUserEvent(event, UserEvent::EditCharacterStory))
+		else if (IsUserEvent(event, UserEvent::CreateUserPersona))
 		{
-			const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-			NavigateTo(ScreenType::Editor, NavigationState::Context::CharacterScenario, characterId, true);
+			NavigateTo(ScreenType::Editor, NavigationState::Context::UserPersona, {}, true);
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::EditUserPersona))
+		{
+			const fig::uuid& userPersonaId = GetUserData<fig::uuid>(event);
+			NavigateTo(ScreenType::Editor, NavigationState::Context::UserPersona, userPersonaId, true);
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::EditUserSettings))
@@ -836,6 +856,14 @@ namespace fig::gui
 					if (assetId.empty() and pEditor->NewWorld(GetCurrentFolder(AssetFolderType::World)))
 						return;
 					if (not assetId.empty() and pEditor->EditWorld(assetId))
+						return;
+				}
+				else if (context == NavigationState::Context::UserPersona)
+				{
+					auto pEditor = ChangeScreen<EditorScreen>()->SetEditor<UserPersonaEditor>();
+					if (assetId.empty() and pEditor->NewCharacter({}))
+						return;
+					if (not assetId.empty() and pEditor->EditCharacter(assetId))
 						return;
 				}
 				else if (context == NavigationState::Context::UserSettings)

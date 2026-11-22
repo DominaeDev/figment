@@ -68,10 +68,11 @@ namespace fig::data
 		const SearchIndex& GetSearchIndex() const noexcept { return _searchIndex; }
 
 		[[nodiscard]] const Context& GetContext() noexcept;
+		[[nodiscard]] Context GetContext() const noexcept;
 
 		fig::string GetName() const noexcept { return name.GetSpokenName(); }
 		fig::string GetFullName() const noexcept { return name.GetFullName(); }
-		fig::string GetDescription() const noexcept;
+		fig::string GetAboutDescription() const noexcept;
 
 		void RebuildSearchIndex();
 
@@ -91,7 +92,7 @@ namespace fig::data
 		fig::string version;
 	
 	private:
-		void UpdateContext();
+		void UpdateContext(Context& context) const;
 
 		std::vector<CharacterAttribute> _attributes;
 		std::vector<CharacterTrait> _traits;
@@ -105,4 +106,6 @@ namespace fig::data
 	public:
 		static auto XmlFields() noexcept;
 	};
+
+	class UserPersona : public Character {};
 }

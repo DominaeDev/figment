@@ -20,5 +20,6 @@ namespace fig::io
 		bool hasVoice {};
 
 		bool IsNew() const noexcept;
+		bool IsModified() const noexcept;
 	};
 }

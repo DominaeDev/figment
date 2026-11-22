@@ -21,6 +21,7 @@ namespace fig::io
 		InitCache<fig::data::Character, "Character">();
 		InitCache<fig::data::Scenario, "Scenario">();
 		InitCache<fig::data::World, "World">();
+		InitCache<fig::data::UserPersona, "UserPersona">();
 		InitCache<fig::data::ChatInstance, "ChatInstance">();
 		InitCache<fig::data::ChatLog, "ChatLog">();
 		InitCache<fig::sdl::Surface, "Image">();
@@ -91,7 +92,7 @@ namespace fig::io
 			{
 				if (auto try_character = Get<Character>(assetId))
 				{
-					meta.name = (*try_character).name.GetSpokenName();
+					meta.name = (*try_character).GetName();
 					meta.gender = (*try_character).gender;
 					meta.tags = (*try_character).GetTags();
 				}
@@ -103,6 +104,20 @@ namespace fig::io
 					meta.lastUsedAt = meta.createdAt;
 
 				meta.hasVoice = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Audio, AudioAssetType::VoiceSettings), assetId).has_value();
+			}
+			else if (asset.type.IsOfType(AssetType::UserPersona))
+			{
+				if (auto try_character = Get<UserPersona>(assetId))
+				{
+					meta.name = (*try_character).GetName();
+					meta.gender = (*try_character).gender;
+				}
+
+				// Last used => last chat
+				if (auto lastChat = FindLastChatWith(asset.id))
+					meta.lastUsedAt = std::max(meta.lastUsedAt, lastChat.value().GetUpdatedAt());
+				else
+					meta.lastUsedAt = meta.createdAt;
 			}
 
 			_metaData[assetId] = meta;
@@ -607,7 +622,7 @@ namespace fig::io
 	std::optional<fig::string> UserContentManager::GetCharacterName(const fig::uuid& characterId) const
 	{
 		if (auto try_character = GetCache<Character>().TryGet(characterId))
-			return (*try_character).name.GetSpokenName();
+			return (*try_character).GetName();
 		return std::nullopt;
 	}
 
@@ -817,7 +832,7 @@ namespace fig::io
 		if (auto try_character = Global::GetUserContent().Get<fig::data::Character>(characterId))
 		{
 			auto& character = *try_character;
-			scenario.roles[0].label = character.name.GetSpokenName();
+			scenario.roles[0].label = character.GetName();
 			scenario.creator = character.creator;
 			scenario.version = character.version;
 		}

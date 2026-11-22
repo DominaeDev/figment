@@ -49,7 +49,8 @@ namespace fig::gui
 		auto pWorldsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_WORLDS, toStr(fig::strings::UI::MenuWorlds));
 		pWorldsButton->SetDelegate([] { PushEvent(UserEvent::NavigateToWorlds); });
 		auto pModelsButton = pMainArea->CreateControl<SidePanelButton>(Icon::MENU_MODELS, "Models");
-		auto pYouButton = pMainArea->CreateControl<SidePanelButton>(Icon::CHARACTER_EDIT_INFO, "My identities");
+		auto pUserPersonasButton = pMainArea->CreateControl<SidePanelButton>(Icon::CHARACTER_EDIT_INFO, "My identities");
+		pUserPersonasButton->SetDelegate([] { PushEvent(UserEvent::NavigateToUserPersonas); });
 
 		auto pButtonSizer = pMainArea->SetSizer<VerticalSizer>();
 		pButtonSizer->Add(pChatButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
@@ -62,7 +63,7 @@ namespace fig::gui
 		pButtonSizer->AddSpacer(4);
 		pButtonSizer->Add(pModelsButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 		pButtonSizer->AddSpacer(4);
-		pButtonSizer->Add(pYouButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
+		pButtonSizer->Add(pUserPersonasButton, 0, SizerFlag::Expand | SizerFlag::Right | SizerFlag::Left, 12);
 
 		auto pFooterPanel = CreateControl<Area>();
 		pFooterPanel->SetHeight(Constants::GUI::SidePanel::FooterHeight);
@@ -107,8 +108,9 @@ namespace fig::gui
 		auto pWorldsButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_WORLDS_SMALL, false);
 		pWorldsButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToWorlds); });
 		pWorldsButtonSmall->SetTheme(ButtonThemes::SidePanel);
-		auto pYouButtonSmall = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_INFO_SMALL, false);
-		pYouButtonSmall->SetTheme(ButtonThemes::SidePanel);
+		auto pUserPersonasButtonSmall = CreateControl<ButtonWithIcon>(Icon::CHARACTER_EDIT_INFO_SMALL, false);
+		pUserPersonasButtonSmall->SetDelegate([]() { PushEvent(UserEvent::NavigateToUserPersonas); });
+		pUserPersonasButtonSmall->SetTheme(ButtonThemes::SidePanel);
 		auto pModelsButtonSmall = CreateControl<ButtonWithIcon>(Icon::MENU_MODELS_SMALL, false);
 		pModelsButtonSmall->SetTheme(ButtonThemes::SidePanel);
 
@@ -122,7 +124,7 @@ namespace fig::gui
 		pTopSizer->AddSpacer(8);
 		pTopSizer->Add(pWorldsButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 		pTopSizer->AddSpacer(8);
-		pTopSizer->Add(pYouButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
+		pTopSizer->Add(pUserPersonasButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 		pTopSizer->AddSpacer(8);
 		pTopSizer->Add(pModelsButtonSmall, 0, SizerFlag::AlignCenterHorizontal);
 	}
@@ -137,6 +139,9 @@ namespace fig::gui
 			.SetDelegate([this] { PushEvent(UserEvent::CreateStory); });
 		createMenu.AddItem("New world\u2026")
 			.SetDelegate([this] { PushEvent(UserEvent::CreateWorld); });
+		createMenu.AddSeparator();
+		createMenu.AddItem("New identity\u2026")
+			.SetDelegate([this] { PushEvent(UserEvent::CreateUserPersona); });
 		createMenu.AddSeparator();
 		createMenu.AddItem("Import from file\u2026")
 			.SetDelegate([this] { PushEvent(UserEvent::ImportCharacter); });

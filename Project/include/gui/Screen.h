@@ -45,6 +45,7 @@ namespace fig::gui
 		Worlds,
 		Chat,
 		ChatListing,
+		UserPersonas,
 		Editor,
 	};
 

@@ -231,6 +231,18 @@
     <Filter Include="Source Files\Third-party\stb">
       <UniqueIdentifier>{1bdcd690-6494-411d-b494-081d55662ba7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\UserPersonaEditor">
+      <UniqueIdentifier>{4fff4c29-7de7-410c-8b06-772a1b86a6c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Editors\UserPersonaEditor\Tabs">
+      <UniqueIdentifier>{98c78567-27f6-4578-b833-ec3eeba9dcdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\UserPersonaScreen">
+      <UniqueIdentifier>{8ab0d708-4318-45e7-adbd-02fe1aa43631}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Frontend\GUI\Screens\UserPersonaScreen\Controls">
+      <UniqueIdentifier>{3ecd9641-9c88-4bea-a9f5-7c0d452b0db7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\SQLite3\src\Column.cpp">
@@ -997,6 +1009,21 @@
     </ClCompile>
     <ClCompile Include="src\gui\TextInputDialogBox.cpp">
       <Filter>Source Files\Frontend\GUI\Modals</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\UserPersonaEditor.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserPersonaEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\editor\UserPersonaEditorGeneralTab.cpp">
+      <Filter>Source Files\Frontend\GUI\Editors\UserPersonaEditor\Tabs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\UserPersonaScreen.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\UserPersonaScreen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\UserPersonaList.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\UserPersonaScreen\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\UserPersonaListItem.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\UserPersonaScreen\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2220,6 +2247,21 @@
     </ClInclude>
     <ClInclude Include="include\gui\TextInputDialogBox.h">
       <Filter>Source Files\Frontend\GUI\Modals</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\UserPersonaEditor.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserPersonaEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\editor\UserPersonaEditorGeneralTab.h">
+      <Filter>Source Files\Frontend\GUI\Editors\UserPersonaEditor\Tabs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserPersonaScreen.h">
+      <Filter>Source Files\Frontend\GUI\Screens\UserPersonaScreen</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserPersonaList.h">
+      <Filter>Source Files\Frontend\GUI\Screens\UserPersonaScreen\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\UserPersonaListItem.h">
+      <Filter>Source Files\Frontend\GUI\Screens\UserPersonaScreen\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

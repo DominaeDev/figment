@@ -19,6 +19,7 @@ namespace fig::gui
 		NavigateToStories,
 		NavigateToWorlds,
 		NavigateToChatList,
+		NavigateToUserPersonas,
 		NavigateBack,
 		SelectEditorTab,
 		StartChat,
@@ -35,6 +36,8 @@ namespace fig::gui
 		EditStory,
 		CreateWorld,
 		EditWorld,
+		CreateUserPersona,
+		EditUserPersona,
 
 		EditCharacterStory,
 		EditUserSettings,

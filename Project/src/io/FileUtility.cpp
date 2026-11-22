@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "io/FileUtility.h"
 #include "io/Asset.h"
 #include "user/UserManager.h"
@@ -295,5 +295,71 @@ namespace fig::io
 			return FileError::UnknownError;
 		}
 		return FileError::NotFound;
+	}
+
+	struct OpenFileDialogResult
+	{
+		OpenFilesDialogDelegate fnDelegate;
+		PathList paths;
+	};
+
+	static void SDLCALL InvokeFileDialogDelegate(void* pUserData)
+	{
+		std::unique_ptr<OpenFileDialogResult> pResult(static_cast<OpenFileDialogResult*>(pUserData));
+		if (pResult->fnDelegate)
+			pResult->fnDelegate(pResult->paths);
+	}
+
+	static void SDLCALL OnOpenFileDialogResult(void* pUserData, const char* const* pFileList, int filter)
+	{
+		std::unique_ptr<OpenFilesDialogDelegate> pDelegate(static_cast<OpenFilesDialogDelegate*>(pUserData));
+
+		auto pResult = std::make_unique<OpenFileDialogResult>();
+		pResult->fnDelegate = std::move(*pDelegate);
+		if (pFileList)
+		{
+			for (const char* const* path = pFileList; *path; ++path)
+				pResult->paths.push_back(std::filesystem::u8path(*path));
+		}
+
+		if (SDL_RunOnMainThread(InvokeFileDialogDelegate, pResult.get(), false))
+			pResult.release();
+	}
+
+	static void ShowOpenFileDialog(fig::window_ptr pWindow, OpenFileDialogType dialogType, bool bMultiple, OpenFilesDialogDelegate fnDelegate)
+	{
+		const SDL_DialogFileFilter* filters;
+		int nFilters;
+		switch (dialogType)
+		{
+		case OpenFileDialogType::Characters:
+			filters = Constants::Paths::Filters::CharacterFiles;
+			nFilters = SDL_arraysize(Constants::Paths::Filters::CharacterFiles);
+			break;
+		case OpenFileDialogType::Images:
+			filters = Constants::Paths::Filters::ImageFiles;
+			nFilters = SDL_arraysize(Constants::Paths::Filters::ImageFiles);
+			break;
+		default:
+			filters = Constants::Paths::Filters::AllFiles;
+			nFilters = SDL_arraysize(Constants::Paths::Filters::AllFiles);
+			break;
+		}
+
+		auto pDelegate = new OpenFilesDialogDelegate(std::move(fnDelegate));
+		SDL_ShowOpenFileDialog(OnOpenFileDialogResult, (void*)pDelegate, pWindow, filters, nFilters, nullptr, bMultiple);
+	}
+
+	void ShowOpenFilesDialog(fig::window_ptr pWindow, OpenFileDialogType dialogType, OpenFilesDialogDelegate fnDelegate)
+	{
+		ShowOpenFileDialog(pWindow, dialogType, true, fnDelegate);
+	}
+
+	void ShowOpenFileDialog(fig::window_ptr pWindow, OpenFileDialogType dialogType, OpenFileDialogDelegate fnDelegate)
+	{
+		ShowOpenFileDialog(pWindow, dialogType, false, [fnDelegate] (auto&& paths) {
+			if (not paths.empty() and fnDelegate)
+				fnDelegate(paths.front());
+		});
 	}
 }

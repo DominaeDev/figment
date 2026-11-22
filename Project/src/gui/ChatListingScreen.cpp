@@ -28,9 +28,11 @@ namespace fig::gui
 		_pHeader->SetAlignment(TextAlignment::LeftCenter);
 
 		_pSortingButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::SORTING, false);
+		_pSortingButton->SetTheme(ButtonThemes::TopBar);
 		_pSortingButton->SetDelegate([this]() { ShowSortingMenu(); });
 
 		_pFilteringButton = pTopBar->CreateControl<ButtonWithIcon>(Icon::FILTERING, true);
+		_pFilteringButton->SetTheme(ButtonThemes::TopBar);
 		_pFilteringButton->SetDelegate([this]() { ShowFilteringMenu(); });
 
 		auto _pFilterTextBox = pTopBar->CreateControl<SearchBox>();
@@ -94,11 +96,6 @@ namespace fig::gui
 
 		_pChatList->ShowChatsWith(characterId);
 		RefreshFilterButton();
-	}
-
-	bool ChatListingScreen::OnKeyboardEvent(KeyboardEvent& event)
-	{
-		return false;
 	}
 
 	void ChatListingScreen::ShowSortingMenu() noexcept

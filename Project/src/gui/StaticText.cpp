@@ -142,10 +142,12 @@ namespace fig::gui
 		auto bgColor = GetBackgroundColor();
 		auto pRenderer = GetSDLRenderer();
 
-		_textures.resize(_lines.size());
+		auto numLines = _maxLines > 0uz ? std::min(_maxLines, _lines.size()) : _lines.size();
 
-		newHeight = _lineSkip * toI(_lines.size());
-		for (size_t index = 0uz; index != _lines.size(); ++index)
+		_textures.resize(numLines);
+
+		newHeight = _lineSkip * toI(numLines);
+		for (size_t index = 0uz; index < numLines; ++index)
 		{
 			fig::coord w, h;
 			DrawText(index, pRenderer, fgColor, bgColor, w, h);

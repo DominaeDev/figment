@@ -74,7 +74,7 @@ namespace fig::chat
 
 			for (auto const& character : staging.GetCharacters())
 			{
-				if (begins_with(character.name.GetSpokenName(), partial_name, true))
+				if (begins_with(character.GetName(), partial_name, true))
 					return staging.GetRoleOf(character.chatId);
 			}
 			return staging.GetRoleOf(partial_name);

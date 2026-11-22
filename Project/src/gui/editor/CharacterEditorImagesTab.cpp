@@ -112,7 +112,6 @@ namespace fig::gui
 		_pSmallPortrait->SetRightClickDelegate([this]() { OnClickedSmallPortrait(); });
 		_pSmallPortrait->SetDoubleClickDelegate([this] { OpenFile(CharacterImageType::SmallPortrait); });
 
-
 		_pSmallPortraitPreview = CreateControl<NonOwningImageWithMask>(nullptr, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
 		_pSmallPortraitPreview->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitHeight);
 		_pSmallPortraitPreview->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8)
