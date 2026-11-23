@@ -32,6 +32,7 @@ namespace fig::gui
 
 		void OnClickedSmallPortrait();
 		void RevertSmallPortrait();
+		void RemoveSmallPortrait();
 		void RefreshSmallPortraitPreview();
 
 		void OnClickedPortrait(ControlPtr pControl, int32_t button);
@@ -73,6 +74,7 @@ namespace fig::gui
 		fig::observer_ptr<NonOwningImageWithMask> _pSmallPortraitPreview;
 		std::queue<fig::path> _smallPortraitLoadQueue;
 		bool _bEditingSmallPortrait {};
+		bool _bModifiedSmallPortrait {};
 
 		// Portraits
 		fig::observer_ptr<GridSizer> _pPortraitGridSizer;

@@ -789,9 +789,17 @@ namespace fig::gui
 			if (!staging.AddCharacter(Role::Bot1, characterId, character.value()))
 				return false;
 
-			Character user;
-			if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) and staging.AddCharacter(Role::User, _CreateUUID(), user))) //! @temp
-				return false;
+			if (auto try_user = Global::GetUserContent().GetDefaultUserPersona())
+			{
+				staging.AddCharacter(Role::User, (*try_user).assetId, (*try_user).instance);
+			}
+			else
+			{
+				UserPersona user;
+				if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) //! @temp
+					and staging.AddCharacter(Role::User, _CreateUUID(), user)))
+					return false;
+			}
 
 			// Create instance
 			auto [chatInstanceId, chatLogId] = Global::GetUserContent().CreateChat(staging);  

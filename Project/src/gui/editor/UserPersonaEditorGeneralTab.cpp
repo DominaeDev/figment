@@ -47,22 +47,38 @@ namespace fig::gui
 
 		CreateHeader(this, pSizer, "General information");
 
-		// Name / Age
+		// Name(s)
 		auto pNameSizer = new HorizontalSizer();
 		auto pNameColumn1 = new VerticalSizer();
 		auto pNameColumn2 = new VerticalSizer();
 		pNameSizer->Add(pNameColumn1, 0, SizerFlag::FixedSize, 320);
 		pNameSizer->Add(pNameColumn2, -1);
-		CreateLabel(this, pNameColumn1, "Name");
-		CreateTextBox(this, pNameColumn1, ValueBinding<fig::string>(&_pCharacter->name.nickname))
+		CreateLabel(this, pNameColumn1, "First name");
+		CreateTextBox(this, pNameColumn1, ValueBinding<fig::string>(&_pCharacter->name.first))
 			->SetMaxWidth(300);
 
-		CreateLabel(this, pNameColumn2, "Age");
-		_pAge = CreateTextBox(this, pNameColumn2);
+		CreateLabel(this, pNameColumn2, "Last name");
+		CreateTextBox(this, pNameColumn2, ValueBinding<fig::string>(&_pCharacter->name.last))
+			->SetMaxWidth(300);
+		pSizer->Add(pNameSizer, 0, SizerFlag::FixedSize, 63);
+
+		// Nickname / Age
+		auto pNickSizer = new HorizontalSizer();
+		auto pNickColumn1 = new VerticalSizer();
+		auto pNickColumn2 = new VerticalSizer();
+		pNickSizer->Add(pNickColumn1, 0, SizerFlag::FixedSize, 320);
+		pNickSizer->Add(pNickColumn2, -1);
+
+		CreateLabel(this, pNickColumn1, "Nickname / Alias");
+		CreateTextBox(this, pNickColumn1, ValueBinding<fig::string>(&_pCharacter->name.nickname))
+			->SetMaxWidth(300);
+
+		CreateLabel(this, pNickColumn2, "Age");
+		_pAge = CreateTextBox(this, pNickColumn2);
 		_pAge->SetText(_pCharacter->GetAttribute("age").value_or(""));
 		_pAge->SetMaxWidth(120);
 
-		pSizer->Add(pNameSizer, 0, SizerFlag::FixedSize, 63);
+		pSizer->Add(pNickSizer, 0, SizerFlag::FixedSize, 63);
 
 		// Gender / Pronouns
 		auto pGenderSizer = new HorizontalSizer();
@@ -453,6 +469,99 @@ namespace fig::gui
 		}
 	}
 
+	void UserPersonaEditorGeneralTab::InitSmallPortrait(SizerPtr pSizer)
+	{
+		auto imageAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), _characterId);
+		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
+
+		_pSmallPortrait = CreateControl<CharacterSmallPortraitWidget>();
+		_pSmallPortrait->SetRightClickDelegate([this]() { OnClickedSmallPortrait(); });
+		_pSmallPortrait->SetDoubleClickDelegate([this] { LoadProfileImage(); });
+
+		_pSmallPortraitPreview = CreateControl<NonOwningImageWithMask>(nullptr, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
+		_pSmallPortraitPreview->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitHeight);
+		_pSmallPortraitPreview->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8)
+			->SetColor(Color::Border);
+
+		auto pHSizer = new HorizontalSizer();
+		pHSizer->Add(_pSmallPortrait, 0);
+		pHSizer->Add(_pSmallPortraitPreview, -1, SizerFlag::AlignBottom | SizerFlag::Left, 12);
+		_pSizer->Add(pHSizer, 0, SizerFlag::FixedSize, Constants::Data::SmallPortraitHeight);
+
+		if (not imageAssets.empty())
+			_pSmallPortrait->SetImage(imageAssets[0].get().id);
+	}
+
+	void UserPersonaEditorGeneralTab::OnClickedSmallPortrait()
+	{
+		auto& menu = CreateMenu();
+		menu.AddItem("Load image\u2026")
+			.SetDelegate([this] { LoadProfileImage(); });
+		menu.AddSeparator();
+		menu.AddItem("Revert")
+			.SetDelegate([this] { RevertSmallPortrait(); })
+			.SetEnabled(_bModifiedSmallPortrait);
+		menu.AddItem("Remove")
+			.SetDelegate([this] { RemoveSmallPortrait(); })
+			.SetEnabled(_pSmallPortrait->HasImage());
+		
+		menu.Show();
+	}
+
+	void UserPersonaEditorGeneralTab::OnUpdate(float)
+	{
+		if (not _pSmallPortraitPreview->HasTexture())
+			RefreshSmallPortraitPreview();
+		if (_bEditingSmallPortrait)
+			_pSmallPortraitPreview->SetDirty();
+	}
+
+	void UserPersonaEditorGeneralTab::LoadProfileImage()
+	{
+		ShowOpenFileDialog(GetSDLWindow(), OpenFileDialogType::Images, [this](auto&& path)
+		{
+			auto data = fig::io::ReadFile(path).value_or({});
+			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
+			{
+				_pSmallPortrait->SetImage(*try_surface);
+				RefreshSmallPortraitPreview();
+				_bEditingSmallPortrait = true;
+				_bModifiedSmallPortrait = true;
+				SetDirty();
+			}
+		});
+	}
+
+	void UserPersonaEditorGeneralTab::RevertSmallPortrait()
+	{
+		auto imageAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), _characterId);
+		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
+
+		if (not imageAssets.empty())
+		{
+			_pSmallPortrait->SetImage(imageAssets[0].get().id);
+			RefreshSmallPortraitPreview();
+			_bEditingSmallPortrait = false;
+			SetDirty();
+		}
+		else
+			RemoveSmallPortrait();
+		_bModifiedSmallPortrait = false;
+	}
+
+	void UserPersonaEditorGeneralTab::RemoveSmallPortrait()
+	{
+		_pSmallPortrait->Clear();
+		RefreshSmallPortraitPreview();
+		_bModifiedSmallPortrait = true;
+		SetDirty();
+	}
+	
+	void UserPersonaEditorGeneralTab::RefreshSmallPortraitPreview()
+	{
+		_pSmallPortraitPreview->SetTexture(_pSmallPortrait->GetTargetTexture(), AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
+	}
+
 	EditorTabBase::SaveResult UserPersonaEditorGeneralTab::OnSave() noexcept
 	{
 		// Ensure unique ids
@@ -493,99 +602,28 @@ namespace fig::gui
 		}
 
 		// Update small portrait
-		if (_bEditingSmallPortrait)
+		if (_bModifiedSmallPortrait)
 		{
-			auto smallPortrait = _pSmallPortrait->GetImage();
-			if (not smallPortrait.empty()
-				and smallPortrait.get()->w == Constants::Data::SmallPortraitWidth
-				and smallPortrait.get()->h == Constants::Data::SmallPortraitHeight)
+			_bModifiedSmallPortrait = false;
+
+			if (_pSmallPortrait->HasImage())
 			{
-				Global::GetUserContent().ReplaceSmallPortrait(_characterId, smallPortrait);
+				auto smallPortrait = _pSmallPortrait->GetImage();
+				if (not smallPortrait.empty()
+					and smallPortrait.get()->w == Constants::Data::SmallPortraitWidth
+					and smallPortrait.get()->h == Constants::Data::SmallPortraitHeight)
+				{
+					Global::GetUserContent().ReplaceSmallPortrait(_characterId, smallPortrait);
+				}
+				_pSmallPortrait->SetImage(smallPortrait);
 			}
-			_pSmallPortrait->SetImage(smallPortrait);
-			_bEditingSmallPortrait = false;
+			else
+			{
+				// Remove portrait
+				Global::GetUserContent().ReplaceSmallPortrait(_characterId, {});
+			}
 		}
 
 		return {};
 	}
-
-	void UserPersonaEditorGeneralTab::InitSmallPortrait(SizerPtr pSizer)
-	{
-		auto imageAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), _characterId);
-		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
-
-		_pSmallPortrait = CreateControl<CharacterSmallPortraitWidget>();
-		_pSmallPortrait->SetBackgroundTexture(AppResources::GetTexture(Resource::SQUARE_BACKGROUND_DEFAULT));
-		_pSmallPortrait->SetRightClickDelegate([this]() { OnClickedSmallPortrait(); });
-		_pSmallPortrait->SetDoubleClickDelegate([this] { LoadProfileImage(); });
-
-		_pSmallPortraitPreview = CreateControl<NonOwningImageWithMask>(nullptr, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
-		_pSmallPortraitPreview->SetSize(Constants::Chat::SmallPortraitWidth, Constants::Chat::SmallPortraitHeight);
-		_pSmallPortraitPreview->SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8)
-			->SetColor(Color::Border);
-
-		auto pHSizer = new HorizontalSizer();
-		pHSizer->Add(_pSmallPortrait, 0);
-		pHSizer->Add(_pSmallPortraitPreview, -1, SizerFlag::AlignBottom | SizerFlag::Left, 12);
-		_pSizer->Add(pHSizer, 0, SizerFlag::FixedSize, Constants::Data::SmallPortraitHeight);
-
-		if (not imageAssets.empty())
-			_pSmallPortrait->SetImage(imageAssets[0].get().id);
-	}
-
-	void UserPersonaEditorGeneralTab::OnClickedSmallPortrait()
-	{
-		auto& menu = CreateMenu();
-		menu.AddItem("Load image\u2026")
-			.SetDelegate([this] { LoadProfileImage(); });
-		menu.AddSeparator();
-		menu.AddItem("Revert")
-			.SetDelegate([this] { RevertSmallPortrait(); })
-			.SetEnabled(_bEditingSmallPortrait);
-		
-		menu.Show();
-	}
-
-	void UserPersonaEditorGeneralTab::OnUpdate(float)
-	{
-		if (not _pSmallPortraitPreview->HasTexture())
-			RefreshSmallPortraitPreview();
-		if (_bEditingSmallPortrait)
-			_pSmallPortraitPreview->SetDirty();
-	}
-
-	void UserPersonaEditorGeneralTab::LoadProfileImage()
-	{
-		ShowOpenFileDialog(GetSDLWindow(), OpenFileDialogType::Images, [this](auto&& path)
-		{
-			auto data = fig::io::ReadFile(path).value_or({});
-			if (auto try_surface = LoadImageFromMemory(data); try_surface.has_value() and not data.empty())
-			{
-				_pSmallPortrait->SetImage(*try_surface);
-				RefreshSmallPortraitPreview();
-				_bEditingSmallPortrait = true;
-				SetDirty();
-			}
-		});
-	}
-
-	void UserPersonaEditorGeneralTab::RevertSmallPortrait()
-	{
-		auto imageAssets = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), _characterId);
-		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
-
-		if (not imageAssets.empty())
-		{
-			_pSmallPortrait->SetImage(imageAssets[0].get().id);
-			RefreshSmallPortraitPreview();
-			_bEditingSmallPortrait = false;
-			SetDirty();
-		}
-	}
-	
-	void UserPersonaEditorGeneralTab::RefreshSmallPortraitPreview()
-	{
-		_pSmallPortraitPreview->SetTexture(_pSmallPortrait->GetTargetTexture(), AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_56PX));
-	}
-
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Screen.h"
 #include "gui/GUICommon.h"
@@ -29,7 +29,7 @@ namespace fig::gui
 
 	private:
 		fig::observer_ptr<PasswordBox> _pPassword;
-		fig::observer_ptr<ImageWithMask> _pProfileImage;
+		fig::observer_ptr<NonOwningImageWithMask> _pProfileImage;
 		fig::observer_ptr<StaticText> _pProfileName;
 		fig::observer_ptr<ButtonWithIcon> _pPrevProfileBtn;
 		fig::observer_ptr<ButtonWithIcon>_pNextProfileBtn;

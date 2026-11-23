@@ -33,7 +33,6 @@ namespace fig::gui
 
 		_assetId = asset.id;
 		_character = {};
-		_character.name.nickname = "The user";
 
 		CharacterEditorArgs args
 		{
@@ -51,6 +50,7 @@ namespace fig::gui
 		{
 			_assetId = assetId;
 			_character = fig::data::UserPersona { *try_character };
+			_bEditing = true;
 			CharacterEditorArgs args
 			{
 				.assetId = _assetId,
@@ -98,6 +98,10 @@ namespace fig::gui
 			return false; // Error
 		}
 		
+		// If this is the first user persona, mark it as the default
+		if (not _bEditing and Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::UserPersona)).size() == 1uz)
+			Global::GetUserContent().MarkDefault(_assetId);
+
 		Global::GetUserContent().UpdateAsset(_assetId, _character);
 		Global::GetUserContent().GetAssets().SaveNow();
 		return true;

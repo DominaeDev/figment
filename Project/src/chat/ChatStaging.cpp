@@ -279,6 +279,10 @@ namespace fig::chat
 				}
 			}
 
+			// Brief
+			if (not empty_or_whitespace(character.brief))
+				persona += std::format("\n{}\n", trim(character.brief));
+
 			// Traits
 			if (character.GetTraits().size() > 0uz)
 			{
@@ -288,7 +292,7 @@ namespace fig::chat
 					persona += std::format("- [{0}] {1}\n", trait.name, trim(trait.text));
 			}
 
-			return eval_text(rtrim(persona), GetContext(role));
+			return eval_text(rtrim(persona), GetCharacterContext(role));
 		}
 		return "";
 	}
@@ -319,6 +323,19 @@ namespace fig::chat
 		ctx.SetAlias("current", primarySelector);
 		ctx.SetPrimarySelector(primarySelector);
 		return ctx;
+	}
+
+	Context ChatStaging::GetCharacterContext(Role role) noexcept
+	{
+		if (auto try_character = GetCharacterByRole(role))
+		{
+			auto ctx = (*try_character).GetContext();
+			ctx.SetMacroProvider(Global::GetMacroProvider());
+			ctx.SetPrimarySelector({});
+			ctx.SetAlias("current", ContextSelector {});
+			return ctx;
+		}
+		return {};
 	}
 
 	void ChatStaging::RefreshContext() noexcept

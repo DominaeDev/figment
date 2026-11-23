@@ -53,6 +53,7 @@ namespace fig::chat
 
 		[[nodiscard]] inline Context& GetContext() noexcept { return GetContext(Role::Bot1); }
 		[[nodiscard]] Context& GetContext(Role primaryRole) noexcept;
+		[[nodiscard]] Context GetCharacterContext(Role role) noexcept;
 		
 		void RefreshContext() noexcept;
 		inline const Context& GetContext() const noexcept { return _context; }

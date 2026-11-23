@@ -1,6 +1,6 @@
 ﻿#include <pch.h>
 #include "gui/UserProfileWidget.h"
-#include "gui/ImageWithMask.h"
+#include "gui/NonOwningImageWithMask.h"
 #include "gui/AppResources.h"
 #include "gui/ButtonWithIcon.h"
 #include "gui/MainFrame.h"
@@ -15,8 +15,8 @@ namespace fig::gui
 	{
 		SetForegroundColor(Color::SidePanelForeground);
 
-		_pImage = CreateControl<ImageWithMask>(nullptr, nullptr);
-		_pImage->SetSize(48, 48);
+		_pPortrait = CreateControl<NonOwningImageWithMask>();
+		_pPortrait->SetSize(48, 48);
 
 		_pLabel = CreateControl<StaticText>("", FontFace::Default, 14.0, false);
 		_pLabel->EnableEllipsis(true);
@@ -41,12 +41,18 @@ namespace fig::gui
 
 	void UserProfileWidget::SetUser(const fig::user::UserProfile& profile) noexcept
 	{
-		if (_pImage)
+		if (auto profileImage = UserManager::GetProfileImage(profile))
 		{
-			if (auto profileImage = UserManager::GetProfileImage(profile))
-				_pImage->SetImage(profileImage, AppResources::GetTexture(Resource::MASK_CIRCLE));
-			else
-				_pImage->SetTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(Resource::MASK_CIRCLE));
+			if (auto pTexture = SDL_CreateTextureFromSurface(GetSDLRenderer(), profileImage.get()))
+			{
+				_pPortrait->SetTexture(pTexture, AppResources::GetTexture(Resource::MASK_CIRCLE));
+				_portraitTexture.reset(pTexture);
+			}
+		}
+		else
+		{
+			_pPortrait->SetTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE), AppResources::GetTexture(Resource::MASK_CIRCLE));
+			_portraitTexture.reset();
 		}
 
 		if (_pLabel)
@@ -55,10 +61,10 @@ namespace fig::gui
 
 	void UserProfileWidget::OnSize()
 	{
-		if (_pImage)
+		if (_pPortrait)
 		{
-			_pImage->SetX(8);
-			_pImage->CenterVertically();
+			_pPortrait->SetX(8);
+			_pPortrait->CenterVertically();
 		}
 		
 		if (_pLabel)
@@ -82,7 +88,7 @@ namespace fig::gui
 
 	void UserProfileWidget::Reset()
 	{
-		_pImage->SetTexture(nullptr, nullptr);
+		_pPortrait->SetTexture(nullptr, nullptr);
 		_pLabel->Reset();
 	}
 }

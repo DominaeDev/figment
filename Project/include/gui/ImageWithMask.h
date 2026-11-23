@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 
@@ -7,18 +7,27 @@ namespace fig::gui
 	class ImageWithMask : public Control
 	{
 	public:
-		ImageWithMask(ControlPtr pParent, fig::texture_ptr pTexture, fig::texture_ptr pMask, fig::color_ref tint = Color::White);
+		ImageWithMask(ControlPtr pParent, const fig::sdl::Surface& surface, fig::texture_ptr pMask);
 		
-		void SetImage(const fig::sdl::Surface& surface, fig::texture_ptr pMask, bool bResize = false);
-		void SetTexture(fig::texture_ptr pTexture, fig::texture_ptr pMask, bool bResize = false);
+		void SetTexture(const fig::sdl::Surface& surface, fig::texture_ptr pMask, bool bResize = false);
+		void SetMask(fig::texture_ptr pMask, fig::coord cornerSize = {});
+		void SetDirty();
+
 		fig::point GetTextureSize() const noexcept;
-		bool HasTexture() const noexcept { return not _texture.empty(); }
-		void Reset();
+		void Clear();
 
 	protected:
 		void OnRender(fig::renderer_ptr pRenderer) override;
+		void OnSize() override;
+		void Redraw();
 
 	protected:
+		fig::texture_ptr _pMask;
 		fig::sdl::Texture _texture;
+		fig::sdl::Texture _targetTexture;
+		fig::point _lastSize {};
+		fig::coord _cornerSize {};
+
+		bool _bDirty { true };
 	};
 }

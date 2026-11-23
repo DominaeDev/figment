@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 
@@ -12,6 +12,7 @@ namespace fig::gui
 		void SetTexture(fig::texture_ptr pTexture, bool bResize = false);
 		void SetTexture(fig::texture_ptr pTexture, fig::texture_ptr pMask, bool bResize = false);
 		bool HasTexture() const noexcept { return _pTexture != nullptr; }
+		void SetMask(fig::texture_ptr pMask, fig::coord cornerSize = {});
 		void SetDirty();
 
 	protected:
@@ -24,6 +25,7 @@ namespace fig::gui
 		fig::texture_ptr _pMask;
 		fig::sdl::Texture _targetTexture;
 		fig::point _lastSize {};
+		fig::coord _cornerSize {};
 
 		bool _bDirty { true };
 	};

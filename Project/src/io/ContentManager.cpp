@@ -376,6 +376,29 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+
+	std::optional<UserContent<fig::data::UserPersona>> UserContentManager::GetDefaultUserPersona()
+	{
+		auto assets = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::UserPersona));
+		for (auto& assetRef : assets)
+		{
+			auto& asset = assetRef.get();
+			if (auto settings = asset.GetUserSettings(); settings.has_value() and (*settings).HasFlag(AssetUserSettings::Flag::Default))
+			{
+				if (auto userPersona = Get<fig::data::UserPersona>(asset.id))
+				{
+					return UserContent<UserPersona> {
+						.instance = std::cref(*userPersona),
+						.assetId = asset.id,
+						.createdAt = asset.GetCreatedAt(),
+						.updatedAt = asset.GetUpdatedAt(),
+					};
+				}
+			}
+		}
+		return std::nullopt;
+	}
+
 	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, fig::renderer_ptr pRenderer) noexcept
 	{
 		if (auto cached = GetCachedTexture(pRenderer, assetId))
@@ -777,15 +800,14 @@ namespace fig::io
 		if (auto try_cover = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), characterId))
 			previousSmallPortrait = (*try_cover).id;
 
+		// Delete previous cover asset
+		if (not previousSmallPortrait.empty())
+			DeleteAsset(previousSmallPortrait);
+
 		if (not image.empty())
 		{
 			// Create new small portrait asset
-			auto& smallPortraitAsset = _pAssetMngr->CreateBitmapAsset(ImageAssetType::SmallPortrait, image, characterId);
-
-			// Delete previous cover asset
-			if (not previousSmallPortrait.empty())
-				DeleteAsset(previousSmallPortrait);
-			return smallPortraitAsset;
+			return _pAssetMngr->CreateBitmapAsset(ImageAssetType::SmallPortrait, image, characterId);
 		}
 		return std::nullopt;
 	}

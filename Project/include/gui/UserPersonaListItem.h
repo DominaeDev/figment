@@ -50,8 +50,6 @@ namespace fig::gui
 		void RefreshMeta();
 		void RefreshState();
 
-		void ResetHover();
-
 	private:
 		fig::uuid _assetId;
 		fig::io::ContentMetaData _metaData {};
@@ -60,13 +58,13 @@ namespace fig::gui
 		bool _bHidden {};
 		std::unique_ptr<SearchIndex> _searchIndex;
 
-		fig::observer_ptr<ImageWithMask> _pPortrait;
-		fig::observer_ptr<StaticText> _pTitle;
-		fig::observer_ptr<StaticText> _pMessage;
+		fig::observer_ptr<PortraitImage> _pPortrait;
+		fig::observer_ptr<NonOwningImageWithMask> _pBackground;
+		fig::observer_ptr<StaticText> _pName;
+		fig::observer_ptr<StaticText> _pDescription;
 		fig::observer_ptr<NineGridImage> _pDefaultIndicator;
 
 		bool _bSelected {};
-		bool _bHovered {};
 		int32_t _menuId { -1 };
 		UserPersonaListItemDelegate _fnDelegate {};
 

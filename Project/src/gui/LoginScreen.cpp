@@ -7,6 +7,7 @@
 #include "gui/TexturedBorder.h"
 #include "gui/ButtonWithIcon.h"
 #include "gui/ButtonWithLabel.h"
+#include "gui/NonOwningImageWithMask.h"
 #include "gui/Menu.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
@@ -39,7 +40,7 @@ namespace fig::gui
 		pVerticalSizer->Add(pCenter, 0, SizerFlag::AlignCenterHorizontal);
 		pVerticalSizer->AddStretchSpacer();
 
-		_pProfileImage = pCenter->CreateControl<ImageWithMask>(nullptr, nullptr);
+		_pProfileImage = pCenter->CreateControl<NonOwningImageWithMask>(nullptr, nullptr);
 		_pProfileImage->SetSize(160, 160);
 
 		_pPrevProfileBtn = pCenter->CreateControl<ButtonWithIcon>(Icon::CHEVRON_LEFT, false);

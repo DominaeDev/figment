@@ -74,6 +74,8 @@ namespace fig::gui
 		bool HasTabGroup() const noexcept { return _pTabGroup != nullptr; }
 		void AddTabControl(fig::observer_ptr<ITabControl> pControl);
 
+		CustomRenderer& CreateBorder() noexcept;
+
 	protected:
 		virtual void OnRender(fig::renderer_ptr pRenderer);
 		virtual void OnPostRender() {};
@@ -106,6 +108,7 @@ namespace fig::gui
 		bool CaptureMouse() noexcept;
 		bool HasCapture() const noexcept;
 		bool ReleaseCapture() noexcept;
+
 	protected:
 		fig::color_ref _foregroundColor {};
 		fig::color_ref _backgroundColor {};

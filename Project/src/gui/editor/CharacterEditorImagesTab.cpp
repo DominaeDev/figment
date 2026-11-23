@@ -108,7 +108,6 @@ namespace fig::gui
 		std::ranges::sort(imageAssets, std::ranges::less(), [](auto&& a) { return a.get().GetOrder(); });
 
 		_pSmallPortrait = CreateControl<CharacterSmallPortraitWidget>();
-		_pSmallPortrait->SetBackgroundTexture(AppResources::GetTexture(Resource::SQUARE_BACKGROUND_DEFAULT));
 		_pSmallPortrait->SetRightClickDelegate([this]() { OnClickedSmallPortrait(); });
 		_pSmallPortrait->SetDoubleClickDelegate([this] { OpenFile(CharacterImageType::SmallPortrait); });
 
@@ -379,12 +378,14 @@ namespace fig::gui
 		{
 			_pSmallPortrait->SetImage(portrait.image);
 			_bEditingSmallPortrait = true;
+			_bModifiedSmallPortrait = true;
 		}
 		else if (not portrait.assetId.empty())
 		{
 			_pSmallPortrait->SetImage(portrait.assetId);
 			RefreshSmallPortraitPreview();
 			_bEditingSmallPortrait = true;
+			_bModifiedSmallPortrait = true;
 		}
 		_pSmallPortrait->ResetTransform();
 		SetDirty();
@@ -398,7 +399,10 @@ namespace fig::gui
 		menu.AddSeparator();
 		menu.AddItem("Revert")
 			.SetDelegate([this] { RevertSmallPortrait(); })
-			.SetEnabled(_bEditingSmallPortrait);
+			.SetEnabled(_bModifiedSmallPortrait);
+		menu.AddItem("Remove")
+			.SetDelegate([this] { RemoveSmallPortrait(); })
+			.SetEnabled(_pSmallPortrait->HasImage());
 		
 		menu.Show();
 	}
@@ -415,6 +419,18 @@ namespace fig::gui
 			_bEditingSmallPortrait = false;
 			SetDirty();
 		}
+		else
+			RemoveSmallPortrait();
+
+		_bModifiedSmallPortrait = false;
+	}
+
+	void CharacterEditorImagesTab::RemoveSmallPortrait()
+	{
+		_pSmallPortrait->Clear();
+		RefreshSmallPortraitPreview();
+		_bModifiedSmallPortrait = true;
+		SetDirty();
 	}
 
 	void CharacterEditorImagesTab::ProcessLoadQueue()
@@ -436,6 +452,7 @@ namespace fig::gui
 				_pSmallPortrait->SetImage(*try_surface);
 				RefreshSmallPortraitPreview();
 				_bEditingSmallPortrait = true;
+				_bModifiedSmallPortrait = true;
 				bChanged = true;
 			}
 			queue_clear(_smallPortraitLoadQueue);
@@ -566,16 +583,26 @@ namespace fig::gui
 		}
 
 		// Update small portrait
-		if (_bEditingSmallPortrait)
+		if (_bModifiedSmallPortrait)
 		{
-			auto smallPortrait = _pSmallPortrait->GetImage();
-			if (not smallPortrait.empty()
-				and smallPortrait.get()->w == Constants::Data::SmallPortraitWidth
-				and smallPortrait.get()->h == Constants::Data::SmallPortraitHeight)
+			_bModifiedSmallPortrait = false;
+
+			if (_pSmallPortrait->HasImage())
 			{
-				content.ReplaceSmallPortrait(_characterId, smallPortrait);
+				auto smallPortrait = _pSmallPortrait->GetImage();
+				if (not smallPortrait.empty()
+					and smallPortrait.get()->w == Constants::Data::SmallPortraitWidth
+					and smallPortrait.get()->h == Constants::Data::SmallPortraitHeight)
+				{
+					content.ReplaceSmallPortrait(_characterId, smallPortrait);
+				}
+				_pSmallPortrait->SetImage(smallPortrait);
 			}
-			_pSmallPortrait->SetImage(smallPortrait);
+			else
+			{
+				// Remove portrait
+				Global::GetUserContent().ReplaceSmallPortrait(_characterId, {});
+			}
 			_bEditingSmallPortrait = false;
 		}
 

@@ -3,9 +3,6 @@
 		<Attribute id="background" type="multiline" visibility="private" flags="trivial" break="true">
 			<Name>Background</Name>
 		</Attribute>
-		<Attribute id="alias" type="list">
-			<Name>Alias</Name>
-		</Attribute>
 		<Attribute id="occupation" type="text" flags="trivial">
 			<Name>Occupation</Name>
 		</Attribute>
@@ -14,6 +11,13 @@
 		</Attribute>
 		<Attribute id="nationality" type="text" flags="trivial">
 			<Name>Nationality</Name>
+		</Attribute>
+		<Attribute id="skills" type="list">
+			<Name>Skills</Name>
+		</Attribute>
+		<Attribute id="species" type="options">
+			<Name>Species / Race</Name>
+			<Options>Demihuman, Demon, Dwarf, Elf, Fairy, Gnome, Goblin, Halfling, Imp, Kobold, Mermaid, Minotaur, Nymph, Orc, Satyr, Troll</Options>
 		</Attribute>
 		<Attribute id="speech" type="text" visibility="private">
 			<Name>Speech</Name>

@@ -89,6 +89,7 @@ namespace fig::io
 		fig::optional_cref<Asset> GetBackgroundForCharacter(const fig::uuid& characterId, size_t index = 0uz) const;
 		std::optional<UserContent<fig::data::Scenario>> GetCharacterScenario(const fig::uuid& characterId);
 		std::optional<UserContent<fig::data::World>> GetDefaultWorld();
+		std::optional<UserContent<fig::data::UserPersona>> GetDefaultUserPersona();
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);

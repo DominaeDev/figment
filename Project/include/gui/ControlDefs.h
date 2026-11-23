@@ -23,6 +23,7 @@ namespace fig::gui
 	class Menu;
 	class Overlay;
 	class PasswordBox;
+	class PortraitImage;
 	class RenderTargetControl;
 	class ResizeableImageViewport;
 	class ResizeHandle;

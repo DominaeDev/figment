@@ -8,6 +8,8 @@
 #include "gui/CustomRenderer.h"
 #include "gui/DialogBox.h"
 #include "gui/TextInputDialogBox.h"
+#include "gui/TexturedBorderRenderer.h"
+#include "gui/AppResources.h"
 
 namespace fig::gui
 {
@@ -337,6 +339,13 @@ namespace fig::gui
 		assert(false && "No render context");
 		static Menu err { nullptr };
 		return err; // Error
+	}
+
+	CustomRenderer& Control::CreateBorder() noexcept
+	{
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
+		pBorder->SetColor(Color::Border);
+		return *pBorder;
 	}
 
 	void Control::ShowDialogBox(fig::string_view message, DialogBoxType type, std::function<void(bool)> fnDelegate)

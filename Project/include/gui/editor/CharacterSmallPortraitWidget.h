@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/ImageViewport.h"
 #include "gui/MouseEventHandler.h"
@@ -15,7 +15,9 @@ namespace fig::gui
 
 		void SetImage(const fig::uuid& assetId);
 		void SetImage(const fig::sdl::Surface& surface);
+		void Clear();
 
+		bool HasImage() const noexcept { return _pTexture; }
 		fig::sdl::Surface GetImage() const;
 
 	protected:

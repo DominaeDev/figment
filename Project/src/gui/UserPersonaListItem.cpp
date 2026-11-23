@@ -5,6 +5,7 @@
 #include "gui/StaticText.h"
 #include "gui/ImageWithMask.h"
 #include "gui/NineGridImage.h"
+#include "gui/PortraitImage.h"
 #include "gui/Menu.h"
 #include "gui/Frame.h"
 #include "io/ContentManager.h"
@@ -23,36 +24,56 @@ namespace fig::gui
 		SetSize(Width, Height);
 
 		// Background
-		SetForegroundColor(Color::PanelForeground);
+		SetForegroundColor(custom_color(0x383838_rgb));
 		SetBackgroundColor(Color::PanelBackground);
 		auto pBGRenderer = SetBackgroundRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BACKGROUND_10PX, 16);
 
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
+		pBorder->SetColor(Color::Border);
+
+		_pBackground = CreateControl<NonOwningImageWithMask>(AppResources::GetTexture(Resource::CARD_COVER_USER));
+		_pBackground->SetMask(AppResources::GetTexture(Resource::MASK_CARD), 8);
+		_pBackground->FillParent();
+
 		// Title
-		_pTitle = CreateControl<StaticText>("", FontFace::CardHeader, 21.0, false);
-		_pTitle->SetPosition(112, 8);
-		_pTitle->SetSize(Width - _pTitle->GetX() - 8, 80);
-		_pTitle->SetForegroundColor(Color::White);
-		_pTitle->SetBackgroundColor(Color::Transparent);
-		_pTitle->EnableDropShadow(true);
-		_pTitle->EnableEllipsis(true);
+		_pName = CreateControl<StaticText>("", FontFace::CardHeader, 21.0, false);
+		_pName->SetPosition(114, 8);
+		_pName->SetSize(Width - _pName->GetX() - 8, 80);
+		_pName->SetForegroundColor(Color::White);
+		_pName->SetBackgroundColor(Color::Transparent);
+		_pName->EnableDropShadow(true);
+		_pName->EnableEllipsis(true);
 
 		// Message
-		_pMessage = CreateControl<StaticText>("", FontFace::Italic, 14.0, false);
-		_pMessage->SetPosition(112, 36);
-		_pMessage->SetForegroundColor(Color::PanelForeground);
-		_pMessage->SetMaxSize(-1, 15);
-		_pMessage->SetTextWrapWidth(Width - _pMessage->GetX() - 8);
-		_pMessage->SetMaxLines(6uz);
-		_pMessage->EnableWordWrap(true);
+		_pDescription = CreateControl<StaticText>("", FontFace::Italic, 14.0, false);
+		_pDescription->SetPosition(114, 38);
+		_pDescription->SetBackgroundColor(Color::Transparent);
+		_pDescription->SetMaxSize(-1, 15);
+		_pDescription->SetTextWrapWidth(Width - _pDescription->GetX() - 8);
+		_pDescription->SetMaxLines(6uz);
+		_pDescription->EnableWordWrap(true);
 
 		// Portrait
-		_pPortrait = CreateControl<ImageWithMask>(nullptr, nullptr);
+		_pPortrait = CreateControl<PortraitImage>();
 		_pPortrait->SetSize(96, 96);
 		_pPortrait->SetPosition(8, 8);
 		_pPortrait->SetVisible(false);
+		_pPortrait->CreateBorder().SetColor(custom_color(0x808080_rgb));
 
 		RefreshFull();
 		RefreshState();
+	}
+
+	static fig::string GetPersonaText(const UserPersona& user)
+	{
+		auto ctx = user.GetContext();
+		ctx.SetMacroProvider(Global::GetMacroProvider());
+		ctx.SetPrimarySelector({});
+		ctx.SetAlias("current", ContextSelector {});
+		ctx.SetMacro("user", "{current:name}");
+
+		fig::string info = "{gender?{gender}}{age?, {age}}{species?\n{species}}{sexuality?\n{sexuality}}{occupation?\n{occupation}}\n{brief?\n{brief}}";
+		return eval_text(info, ctx);
 	}
 
 	void UserPersonaListItem::RefreshFull()
@@ -60,33 +81,15 @@ namespace fig::gui
 		if (auto try_user = Global::GetUserContent().Get<UserPersona>(_assetId))
 		{
 			auto& userPersona = *try_user;
-			auto ctx = userPersona.GetContext();
-			ctx.SetMacroProvider(Global::GetMacroProvider());
-			ctx.SetPrimarySelector({});
-			ctx.SetAlias("current", ContextSelector {});
-			ctx.SetMacro("user", "{current:name}");
-			_pTitle->SetText(userPersona.GetName());
-
-			fig::string info = R"({gender?Gender: {gender}}\n{age?Age: {age}}\n\n{brief})";
-			_pMessage->SetText(eval_text(info, ctx));
-
-			if (auto try_asset = Global::GetUserContent().GetAssets().FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), _assetId))
-			{
-				if (auto portrait = Global::GetUserContent().Get<fig::sdl::Surface>((*try_asset).id))
-				{
-					_pPortrait->SetImage(*portrait, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX));
-					_pPortrait->SetVisible(true);
-				}
-			}
+			_pName->SetText(userPersona.GetName());
+			_pDescription->SetText(GetPersonaText(userPersona));
+			_pPortrait->SetCharacter(_assetId);
 
 			SetIndex(userPersona.GetSearchIndex());
 		}
 
 		RefreshMeta();
 		RefreshState();
-		
-		// Reset hover
-		ResetHover();
 	}
 
 	EventResult UserPersonaListItem::OnEvent(fig::event& event)
@@ -125,17 +128,6 @@ namespace fig::gui
 	
 	void UserPersonaListItem::OnUpdate(float fElapsed)
 	{
-		bool bHovered = (_bSelected or is_inside(GetRect(), GetMousePos())
-			and not GetOwnerFrame()->IsMenuShowing())
-			and !_bHidden;
-
-		if (_bHovered != bHovered)
-		{
-			_bHovered = bHovered;
-			SetBackgroundColor(_bHovered ? Color::PanelBackgroundHover : Color::PanelBackground);
-			GetBackgroundRenderer()->SetColor(_bHidden ? Color::CardShadow : GetBackgroundColor());
-			_pMessage->SetBackgroundColor(GetBackgroundColor());
-		}
 	}
 
 	void UserPersonaListItem::ShowMenu() noexcept
@@ -220,8 +212,8 @@ namespace fig::gui
 		}
 
 		_pDefaultIndicator->SetVisible(bShow and !_bHidden);
-		_pTitle->SetWidth((bShow ? _pDefaultIndicator->GetX() : Width) - _pTitle->GetX() - 8);
-		_pTitle->InvalidateText();
+		_pName->SetWidth((bShow ? _pDefaultIndicator->GetX() : Width) - _pName->GetX() - 8);
+		_pName->InvalidateText();
 	}
 	
 	void UserPersonaListItem::RefreshMeta()
@@ -310,23 +302,16 @@ namespace fig::gui
 		}
 		else
 		{
-			GetBackgroundRenderer()->SetColor(Color::PanelBackground);
-			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_10PX, 16);
+			auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
 			pBorder->SetColor(Color::Border);
 		}
 
-		_pTitle->SetVisible(not _bHidden);
+		_pName->SetVisible(not _bHidden);
 		_pPortrait->SetVisible(not _bHidden);
-		_pMessage->SetVisible(not _bHidden);
+		_pDescription->SetVisible(not _bHidden);
+		_pBackground->SetVisible(not _bHidden);
 
 		ShowDefault(_userSettings.HasFlag(AssetUserSettings::Flag::Default) and not _bHidden);
 	}
 
-	void UserPersonaListItem::ResetHover()
-	{
-		_bHovered = false;
-		SetBackgroundColor(Color::PanelBackground);
-		GetBackgroundRenderer()->SetColor(_bHidden ? Color::CardShadow : GetBackgroundColor());
-		_pMessage->SetBackgroundColor(GetBackgroundColor());
-	}
 }

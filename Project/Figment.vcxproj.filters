@@ -1025,6 +1025,9 @@
     <ClCompile Include="src\gui\UserPersonaListItem.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\UserPersonaScreen\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\PortraitImage.cpp">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gui\LayoutElement.h">
@@ -2262,6 +2265,9 @@
     </ClInclude>
     <ClInclude Include="include\gui\UserPersonaListItem.h">
       <Filter>Source Files\Frontend\GUI\Screens\UserPersonaScreen\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\PortraitImage.h">
+      <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

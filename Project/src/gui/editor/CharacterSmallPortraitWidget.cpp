@@ -10,6 +10,7 @@ namespace fig::gui
 	CharacterSmallPortraitWidget::CharacterSmallPortraitWidget(ControlPtr pParent) : ImageViewport(pParent), MouseEventHandler(this)
 	{
 		SetSize(Constants::Data::SmallPortraitWidth, Constants::Data::SmallPortraitHeight);
+		SetBackgroundTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE));
 	}
 
 	void CharacterSmallPortraitWidget::SetImage(const fig::uuid& assetId)
@@ -28,6 +29,7 @@ namespace fig::gui
 		{
 			_loader.Cancel();
 			_imageTexture.reset(pTexture);
+			SetBackgroundTexture(AppResources::GetTexture(Resource::SQUARE_BACKGROUND_DEFAULT));
 			SetTexture(pTexture);
 
 			if (_imageTexture.get()->w <= Constants::Data::SmallPortraitWidth and _imageTexture.get()->h <= Constants::Data::SmallPortraitHeight)
@@ -43,6 +45,22 @@ namespace fig::gui
 				_bEditable = true;
 			}
 		}
+		else
+		{
+			// Error
+			Clear();
+		}
+	}
+
+	void CharacterSmallPortraitWidget::Clear()
+	{
+		_loader.Cancel();
+		SetBackgroundTexture(AppResources::GetTexture(Resource::PROFILE_DEFAULT_IMAGE));
+		SetTexture(nullptr);
+
+		auto pBorder = SetBorderRenderer<TexturedBorderRenderer>(Resource::ROUNDED_BORDER_6PX, 8);
+		pBorder->SetColor(Color::Border);
+		_bEditable = false;
 	}
 
 	void CharacterSmallPortraitWidget::OnUpdate(float fElapsed)

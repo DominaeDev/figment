@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/NonOwningImageWithMask.h"
 #include "gui/GUIUtility.h"
 
@@ -54,6 +54,13 @@ namespace fig::gui
 			SetSize(pTexture->w, pTexture->h);
 		SetDirty();
 	}
+	
+	void NonOwningImageWithMask::SetMask(fig::texture_ptr pMask, fig::coord cornerSize)
+	{
+		_pMask = pMask;
+		_cornerSize = cornerSize;
+		SetDirty();
+	}
 
 	void NonOwningImageWithMask::Redraw()
 	{
@@ -85,7 +92,11 @@ namespace fig::gui
 			SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 0);
 			SDL_RenderClear(pRenderer);
 			SDL_SetTextureBlendMode(_pMask, SDL_BLENDMODE_NONE);
-			SDL_RenderTexture(pRenderer, _pMask, NULL, NULL);
+			if (_cornerSize)
+				SDL_RenderTexture9Grid(pRenderer, _pMask, NULL, toF(_cornerSize), toF(_cornerSize), toF(_cornerSize), toF(_cornerSize), 1.0f, NULL);
+			else
+				SDL_RenderTexture(pRenderer, _pMask, NULL, NULL);
+			SDL_SetTextureBlendMode(_pMask, SDL_BLENDMODE_BLEND);
 
 			SDL_BlendMode blendMode = SDL_ComposeCustomBlendMode(
 				SDL_BLENDFACTOR_SRC_ALPHA,
@@ -102,7 +113,9 @@ namespace fig::gui
 				SDL_SetTextureColorMod(_pTexture, 0xFF, 0xFF, 0xFF);
 				SDL_SetTextureAlphaMod(_pTexture, 0xFF);
 				SDL_RenderTexture(pRenderer, _pTexture, NULL, NULL);
+				SDL_SetTextureBlendMode(_pTexture, SDL_BLENDMODE_BLEND);
 			}
+
 		}
 		else
 		{

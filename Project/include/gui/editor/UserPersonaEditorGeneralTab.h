@@ -51,6 +51,7 @@ namespace fig::gui
 		void LoadProfileImage();
 
 		void RevertSmallPortrait();
+		void RemoveSmallPortrait();
 		void RefreshSmallPortraitPreview();
 
 		fig::data::CharacterAttributeInfoDatabase _attributesInfo;
@@ -61,6 +62,7 @@ namespace fig::gui
 		fig::observer_ptr<CharacterSmallPortraitWidget> _pSmallPortrait;
 		fig::observer_ptr<NonOwningImageWithMask> _pSmallPortraitPreview;
 		bool _bEditingSmallPortrait {};
+		bool _bModifiedSmallPortrait {};
 
 		struct AttributeItem
 		{

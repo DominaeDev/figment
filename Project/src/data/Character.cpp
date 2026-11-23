@@ -64,7 +64,7 @@ namespace fig::data
 				data.bgColor = fig::color::FromHSV(h, 0.0f, std::clamp(v + 0.5f, 0.8f, 1.0f));
 		}
 
-		return not (data.chatId.empty() or data.name.empty());
+		return true;
 	}
 
 	FileError Character::LoadFromXml(const fig::path& path)
