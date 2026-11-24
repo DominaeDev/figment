@@ -321,6 +321,7 @@ namespace fig
 				if (auto removed = assetMngr.DeleteAssets(removeList))
 				{
 					LogLn(std::format("Removed {} broken assets.", removed));
+					assert(false && "Found broken assets");
 				}
 
 				userMngr.SignOut();

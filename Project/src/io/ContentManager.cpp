@@ -760,12 +760,8 @@ namespace fig::io
 		{
 			// Find prior cover asset
 			fig::uuid previousCoverId;
-			fig::uuid previousCoverOriginalId;
 			if (auto try_cover = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::CoverImage), parentId))
-			{
 				previousCoverId = (*try_cover).id;
-				previousCoverOriginalId = (*try_cover).GetMeta<fig::uuid>(MetaTag::ReferenceToOriginal).value_or({});
-			}
 
 			if (auto try_surface = Get<fig::sdl::Surface>(imageAssetId))
 			{
@@ -781,8 +777,6 @@ namespace fig::io
 					// Delete previous cover asset
 					if (not previousCoverId.empty())
 						DeleteAsset(previousCoverId);
-					if (not previousCoverOriginalId.empty())
-						DeleteAsset(previousCoverOriginalId);
 					
 					return coverAsset;
 				}
@@ -800,7 +794,7 @@ namespace fig::io
 		if (auto try_cover = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Image, ImageAssetType::SmallPortrait), characterId))
 			previousSmallPortrait = (*try_cover).id;
 
-		// Delete previous cover asset
+		// Delete previous asset
 		if (not previousSmallPortrait.empty())
 			DeleteAsset(previousSmallPortrait);
 

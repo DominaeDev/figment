@@ -807,7 +807,7 @@ namespace fig::io
 		for (auto& assetId : assetIds)
 			num_deletions += _assets.erase(assetId);
 
-		LogLn(std::format("Deleted {} assets ({} database entries and {} files)", num_deletions, db_deletions, file_deletions));
+		LogLn(std::format("Deleted {} asset(s) ({} database entries and {} files)", num_deletions, db_deletions, file_deletions));
 		return num_deletions;
 	}
 
@@ -1032,27 +1032,6 @@ namespace fig::io
 		fig::bytes scenarioData;
 		scenario.SaveToXml(scenarioData);
 		auto& scenarioAsset = CreateAsset_NoLock(make_asset_type(AssetType::Scenario, DataFormat::TextXml), scenarioData, {}, {}, false);
-
-		// Load scenario image
-/*		if (not empty_or_whitespace(scenario.imageFilename))
-		{
-			if (auto file = fig::io::ReadFile(filename.parent_path() / scenario.imageFilename))
-			{
-				// Create portrait asset
-				auto& scenarioImageAsset = CreateBitmapAsset_NoLock(ImageAssetType::Undefined, DataFormatFromExt(GetFileExt(scenario.imageFilename)), std::move(file.value()), scenarioAsset.id);
-
-				// Create cover card
-				if (auto coverImage = LoadImage(filename.parent_path() / scenario.imageFilename)
-					.transform([](auto img) {
-					return CreateCoverImage(img, false);
-				}))
-				{
-					// Save cover asset (bitmap)
-					auto& coverAsset = CreateBitmapAsset_NoLock(ImageAssetType::CoverImage, coverImage.value(), scenarioAsset.id);
-					coverAsset.SetMeta(MetaTag::ReferenceToOriginal, scenarioImageAsset.id);
-				}
-			}
-		} */
 
 		LogLn(std::format("Imported {}", filename.filename().u8string().c_str()));
 		return scenarioAsset;

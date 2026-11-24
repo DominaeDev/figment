@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "io/PackageManager.h"
 #include "io/XmlReader.h"
 #include "io/Downloader.h"
@@ -388,7 +388,7 @@ namespace fig::io
 			}
 		}
 		if (size_t removed = DeleteFiles(removeTempFiles))
-			LogLn(std::format("Deleted {} temporary package files", removed));
+			LogLn(std::format("Deleted {} temporary package file(s)", removed));
 
 		{	// Store result
 			std::scoped_lock lock(_mutex);
