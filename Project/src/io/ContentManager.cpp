@@ -506,7 +506,7 @@ namespace fig::io
 		for (auto assetRef : chatAssets)
 		{
 			auto& asset = assetRef.get();
-			if (auto userSettings = asset.GetUserSettings(); userSettings.has_value() and (*userSettings).HasFlag(AssetUserSettings::Flag::Hidden))
+			if (asset.IsHidden())
 				continue; // Don't count archived chats
 
 			for (uint8_t idx = static_cast<uint8_t>(MetaTag::ReferenceToCharacter); idx < static_cast<uint8_t>(MetaTag::ReferenceToUser); ++idx)
@@ -537,10 +537,7 @@ namespace fig::io
 		for (auto assetRef : chatAssets)
 		{
 			auto& chat = assetRef.get();
-			if (auto userSettings = chat.GetUserSettings(); userSettings.has_value() and (*userSettings).HasFlag(AssetUserSettings::Flag::Hidden))
-				continue; // Don't count archived chats
-
-			if (chat.HasReferenceTo(assetId))
+			if (chat.HasReferenceTo(assetId) and not chat.IsHidden())
 				++count;
 		}
 		
@@ -662,7 +659,7 @@ namespace fig::io
 	fig::optional_cref<Asset> UserContentManager::FindLastChatLogWith(const fig::uuid& characterId) const
 	{
 		auto chatInstanceIds = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
-			| std::views::filter([&](auto& a) { return a.get().HasReferenceTo(characterId); })
+			| std::views::filter([&](auto& a) { return a.get().HasReferenceTo(characterId) and not a.get().IsHidden(); })
 			| std::views::transform([](auto& a) { return a.get().id; })
 			| std::ranges::to<std::unordered_set>();
 

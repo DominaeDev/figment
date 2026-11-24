@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/RenderTargetControl.h"
 #include "chat/ChatTypes.h"
@@ -36,7 +36,7 @@ namespace fig::gui
 		void OnRenderMask(fig::renderer_ptr pRenderer, fig::sdl::Texture& texture) override;
 
 	private:
-		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message, bool complete);
+		ChatMessage* AddMessage(const fig::uuid& characterId, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message, bool bShowAvatar, bool bIsComplete);
 		bool HandleMouseWheel(SDL_MouseWheelEvent event);
 		void RefreshActive();
 

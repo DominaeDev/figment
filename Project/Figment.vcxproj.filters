@@ -2269,6 +2269,9 @@
     <ClInclude Include="include\gui\PortraitImage.h">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="include\data\ChatMessage.h">
+      <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

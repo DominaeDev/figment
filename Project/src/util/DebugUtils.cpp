@@ -347,4 +347,24 @@ namespace fig
 			}
 		}
 	}
+
+	void DebugUtility::DebugChat(const fig::uuid& chatLogId)
+	{
+		if constexpr (Debugging)
+		{
+			LogLn((fig::string)chatLogId);
+
+			auto& userMngr = Global::GetUserManager();
+			if (userMngr.IsSignedIn())
+			{
+				if (auto try_chat = userMngr.GetContent().Get<ChatLog>(chatLogId))
+				{
+					auto& chatLog = *try_chat;
+					fig::string xml;
+					chatLog.SaveToXml(xml);
+					LogLn(xml);
+				}
+			}
+		}
+	}
 }

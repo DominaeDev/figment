@@ -19,6 +19,7 @@ namespace fig::chat
 		bool HasCharacter(Role role) const noexcept { return _charactersByRole.contains(role); }
 		bool HasCharacter(fig::uuid id) const noexcept { return _charactersByID.contains(id); }
 
+		bool HasCharacterInRole(Role role) const noexcept;
 		std::optional<fig::uuid> GetCharacterIdByRole(Role role) const noexcept;
 		fig::optional_cref<fig::data::Character> GetCharacterByRole(Role role) const noexcept;
 		fig::optional_cref<fig::data::Character> GetCharacterByRole(fig::handle handle) const noexcept;

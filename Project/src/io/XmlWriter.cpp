@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "io/XmlWriter.h"
 #include <tinyxml2.h>
 #include <limits>
@@ -247,6 +247,13 @@ namespace fig::data
 		_pDoc->Print(&printer);
 		buffer.resize(printer.CStrSize());
 		std::memcpy(buffer.data(), printer.CStr(), buffer.size());
+	}
+
+	fig::string XmlWriter::ToString() const
+	{
+		XMLPrinter printer;
+		_pDoc->Print(&printer);
+		return fig::string { printer.CStr() };
 	}
 
 	// Explicit template instantiation

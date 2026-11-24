@@ -272,6 +272,7 @@ namespace fig::io
 			asset.sync_state.db_sync = AssetSyncState::Status::Modified;
 			asset.sync_state.has_data = not data.empty();
 			asset.data = std::move(data); // Move data
+			asset.sync_state.error = AssetSyncState::Error::NoError;
 
 			asset.SetMeta(MetaTag::UpdatedAt, fig::now());
 
@@ -296,6 +297,7 @@ namespace fig::io
 			asset.sync_state.file_sync = AssetSyncState::Status::Modified;
 			asset.sync_state.db_sync = AssetSyncState::Status::Modified;
 			asset.sync_state.has_data = not data.empty();
+			asset.sync_state.error = AssetSyncState::Error::NoError;
 
 			asset.SetMeta(MetaTag::UpdatedAt, fig::now());
 

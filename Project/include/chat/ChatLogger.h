@@ -15,8 +15,8 @@ namespace fig::chat
 		~ChatLogger();
 
 		bool Load();
-		bool Save();
-		const std::vector<fig::data::ChatLog::Message>& GetLogMessages() const noexcept;
+		bool Save() const;
+		const std::vector<fig::data::ChatMessage>& GetLogMessages() const noexcept;
 
 	private:
 		void OnMessage(const MessagePoller::Message& piece);

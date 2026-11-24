@@ -6,6 +6,8 @@
 #include "io/Xml.h"
 #include "chat/ChatSession.h"
 #include "chat/MessagePoller.h"
+#include "chat/ChatFormatter.h"
+#include "util/StringUtils.h"
 
 using namespace fig::io;
 using namespace fig::data;
@@ -27,11 +29,15 @@ namespace fig::chat
 		{
 			// Init log
 			_log.SetTitle(session.GetStaging().GetStoryTitle());
-			_log.AddSearchTerm(session.GetNameOf(Role::Bot1));
-			_log.AddSearchTerm(session.GetNameOf(Role::Bot2));
-			_log.AddSearchTerm(session.GetNameOf(Role::Bot3));
-			_log.AddSearchTerm(session.GetNameOf(Role::Bot4));
-			_log.AddSearchTerm(session.GetNameOf(Role::User));
+
+			for (int32_t i = 0; i < MaxBots(); ++i)
+			{
+				Role role = bot_from_index(i);
+				if (session.GetStaging().HasCharacterInRole(role))
+					_log.AddSearchTerm(session.GetNameOf(role));
+			}
+			if (session.GetStaging().HasCharacterInRole(Role::User))
+				_log.AddSearchTerm(session.GetNameOf(Role::User));
 		}
 	}
 
@@ -41,56 +47,20 @@ namespace fig::chat
 			(*poller).UnregisterObserver(_pollerId);
 	}
 
-	static fig::string strip_ends(const fig::string& text, MessageType msgType)
-	{
-		fig::string begin, end;
-		switch (msgType)
-		{
-			case MessageType::Dialogue:
-				begin = "\"";
-				end = "\"";
-				break;
-			case MessageType::Action:
-				begin = "*";
-				end = "*";
-				break;
-			case MessageType::Direction:
-				begin = "{";
-				end = "}";
-				break;
-			case MessageType::Narration:
-				begin = "[";
-				end = "]";
-				break;
-			case MessageType::Thought:
-				begin = "(";
-				end = ")";
-				break;
-			default:
-				return text;
-		}
-
-		fig::string stripped = text;
-		while (ends_with(stripped, end))
-			stripped = stripped.substr(0, stripped.length() - 1);
-		while (begins_with(stripped, begin))
-			stripped = stripped.substr(1);
-		return stripped;
-	}
-
 	void ChatLogger::OnMessage(const MessagePoller::Message& piece)
 	{
 		if (piece.complete)
 		{
-			_log.AddMessage(ChatLog::Message {
-				.messageId = piece.subMessageId,
+			_log.AddMessage(ChatMessage {
+				.responseId = piece.responseId,
+				.subMessageId = piece.subMessageId,
 				.speakerId = _pSession->GetCharacterIdOf(piece.role),
 				.role = piece.role,
 				.turn = piece.turn,
 				.subTurn = piece.subTurn,
 				.timestamp = now(),
 				.msgType = piece.msgType,
-				.content = strip_ends(piece.content, piece.msgType),
+				.content = fig::string { ChatFormatter::Unwrap(piece.content) },
 			});
 		}
 	}
@@ -106,7 +76,7 @@ namespace fig::chat
 		return Global::GetUserContent().LoadXmlAsset(_assetId, _log);
 	}
 
-	bool ChatLogger::Save()
+	bool ChatLogger::Save() const
 	{
 		if (not Global::IsSignedIn())
 		{
@@ -117,11 +87,10 @@ namespace fig::chat
 			return false;
 
 		// Write
-		Global::GetUserContent().UpdateAsset(_assetId, _log);
-		return true;
+		return Global::GetUserContent().UpdateAsset(_assetId, _log);
 	}
 
-	const std::vector<fig::data::ChatLog::Message>& ChatLogger::GetLogMessages() const noexcept
+	const std::vector<fig::data::ChatMessage>& ChatLogger::GetLogMessages() const noexcept
 	{
 		return _log.GetMessages();
 	}

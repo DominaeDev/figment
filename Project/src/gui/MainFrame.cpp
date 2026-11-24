@@ -287,8 +287,24 @@ namespace fig::gui
 				modelSettings = try_model_settings.value();
 			else
 			{
-				LogLn("No model settings.");
-				PushEvent(UserEvent::LLMModelLoadFailure);
+				if constexpr (Debugging)
+				{
+					fig::data::ModelSettings modelSettings;
+					if (Success(modelSettings.LoadFromXml(fig::path { "./import/model_settings.xml" })))
+					{
+						fig::bytes buffer;
+						modelSettings.SaveToXml(buffer);
+						Global::GetUserContent().GetAssets().CreateAsset(fig::io::AssetType::ModelSettings, buffer);
+						LogLn("No model settings. Created!");
+						InitializeModel(); // Try again
+						return;
+					}
+				}
+				else
+				{
+					LogLn("No model settings.");
+					PushEvent(UserEvent::LLMModelLoadFailure);
+				}
 				return;
 			}
 
@@ -650,9 +666,19 @@ namespace fig::gui
 		{
 			if (IsUserEvent(event, UserEvent::DebugCharacter))
 			{
-				const fig::uuid& characterId = GetUserData<fig::uuid>(event);
-				DebugUtility::DebugCharacter(characterId);
-				return EventResult::Handled;
+				if (auto characterId = GetEventText(event))
+				{
+					DebugUtility::DebugCharacter(fig::uuid { *characterId });
+					return EventResult::Handled;
+				}
+			}
+			else if (IsUserEvent(event, UserEvent::DebugChat))
+			{
+				if (auto chatLogId = GetEventText(event))
+				{
+					DebugUtility::DebugChat(fig::uuid { *chatLogId });
+					return EventResult::Handled;
+				}
 			}
 		}
 

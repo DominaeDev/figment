@@ -16,10 +16,11 @@ namespace fig
 		static void ImportTestScenario();
 		static void ShuffleCards();
 		static void CreateModelSettings();
-		static void DebugCharacter(const fig::uuid& characterId);
 		static void EraseChats();
 		static void GenerateUUIDs(size_t count);
 		static void FlushBrokenAssets();
 		static void CreateFolders();
+		static void DebugCharacter(const fig::uuid& characterId);
+		static void DebugChat(const fig::uuid& chatLogId);
 	};
 }

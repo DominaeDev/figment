@@ -51,7 +51,7 @@ namespace fig::gui
 		_pPortrait->SetVisible(false);
 	}
 
-	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatInstance& chatInstance, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatInstance& chatInstance, const fig::uuid& chatLogId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
 	{
 		if (not empty_or_whitespace(chatLog.GetTitle()))
 			_pTitle->SetText(chatLog.GetTitle());
@@ -99,6 +99,7 @@ namespace fig::gui
 			ShowStar(true);
 
 		_chatInstanceId = chatInstanceId;
+		_chatLogId = chatLogId;
 		_pTimestamp->SetTextAndResize(timeString);
 	}
 
@@ -181,20 +182,26 @@ namespace fig::gui
 
 		auto userSettings = Global::GetUserContent().GetUserSettings(_chatInstanceId);
 
-
 		if (not userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 		{
 			menu.AddItem("Resume chat", Icon::NEW_CHAT)
 				.SetEnabled(bLLM)
 				.SetDelegate([this] {
-//				PushEvent(UserEvent::StartChat, &_characterId);
-			});
+					PushEvent(UserEvent::ResumeChat, (fig::string)_chatLogId);
+				});
 			menu.AddItem("Filter chats by this character")
 				.SetEnabled(not _primaryCharacterId.empty())
 				.SetDelegate([this]() {
-				auto flags = Global::GetUserSettings().GetChatListFilter();
-				PushEvent(UserEvent::NavigateToChatList, flags.IsSet(ChatFilterFlag::Hidden) ? 1 : 0, &_primaryCharacterId);
-			});
+					auto flags = Global::GetUserSettings().GetChatListFilter();
+					PushEvent(UserEvent::NavigateToChatList, flags.IsSet(ChatFilterFlag::Hidden) ? 1 : 0, &_primaryCharacterId);
+				});
+			if constexpr (Debugging)
+			{
+				menu.AddItem("Debug chat")
+					.SetDelegate([this]() {
+						PushEvent(UserEvent::DebugChat, (fig::string)_chatLogId);
+					});
+			}
 
 			menu.AddSeparator();
 
@@ -202,19 +209,19 @@ namespace fig::gui
 			{
 				menu.AddItem("Star", Icon::STAR)
 					.SetDelegate([this] {
-					Global::GetUserContent().MarkFavorite(_chatInstanceId, true);
-					ShowStar(true);
-					NotifyUpdated();
-				});
+						Global::GetUserContent().MarkFavorite(_chatInstanceId, true);
+						ShowStar(true);
+						NotifyUpdated();
+					});
 			}
 			else
 			{
 				menu.AddItem("Unstar", Icon::UNSTAR)
 					.SetDelegate([this] {
-					Global::GetUserContent().MarkFavorite(_chatInstanceId, false);
-					ShowStar(false);
-					NotifyUpdated();
-				});
+						Global::GetUserContent().MarkFavorite(_chatInstanceId, false);
+						ShowStar(false);
+						NotifyUpdated();
+					});
 			}
 			menu.AddSeparator();
 			menu.AddItem("Export\u2026");
@@ -229,10 +236,10 @@ namespace fig::gui
 			{
 				menu.AddItem("Archive", Icon::ARCHIVE)
 					.SetDelegate([this] {
-					Global::GetUserContent().MarkHidden(_chatInstanceId, true);
-					Global::GetUserContent().InvalidateChatCount(_chatInstanceId);
-					NotifyUpdated();
-				});
+						Global::GetUserContent().MarkHidden(_chatInstanceId, true);
+						Global::GetUserContent().InvalidateChatCount(_chatInstanceId);
+						NotifyUpdated();
+					});
 			}
 		}
 		else // Archived
@@ -240,9 +247,9 @@ namespace fig::gui
 			menu.AddItem("Filter chats by this character")
 				.SetEnabled(not _primaryCharacterId.empty())
 				.SetDelegate([this]() {
-				auto flags = Global::GetUserSettings().GetChatListFilter();
-				PushEvent(UserEvent::NavigateToChatList, flags.IsSet(ChatFilterFlag::Hidden) ? 1 : 0, &_primaryCharacterId);
-			});
+					auto flags = Global::GetUserSettings().GetChatListFilter();
+					PushEvent(UserEvent::NavigateToChatList, flags.IsSet(ChatFilterFlag::Hidden) ? 1 : 0, &_primaryCharacterId);
+				});
 
 			menu.AddItem("Unarchive", Icon::UNARCHIVE)
 				.SetDelegate([this] {

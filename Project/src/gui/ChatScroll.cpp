@@ -49,13 +49,14 @@ namespace fig::gui
 				auto& messages = pLogger->GetLogMessages();
 				for (auto& message : messages)
 				{
-					auto pMessage = AddMessage(message.speakerId, message.role, message.msgType, message.content, true);
+					bool bShowAvatar = message.subTurn <= 0 and (is_bot(message.role) or is_user(message.role));
+					auto pMessage = AddMessage(message.speakerId, message.role, message.msgType, message.content, bShowAvatar, true);
 					pMessage->SetName(pSession->GetNameOf(message.role));
 					_messages.push_back(MessageEntry {
 						.chatId = pSession->GetIdentifierOf(message.role),
 						.role = message.role,
-						.responseId = message.messageId,
-						.subMessageId {},
+						.responseId = message.responseId,
+						.subMessageId = message.subMessageId,
 						.msgType = message.msgType,
 						.pChatMessage = pMessage,
 					});
@@ -66,7 +67,7 @@ namespace fig::gui
 
 	void ChatScroll::AddDummyMessage(string_cref name, Role role, MessageType msgType, string_cref message)
 	{
-		ChatMessage* pMessage = AddMessage({}, role, msgType, message, true);
+		ChatMessage* pMessage = AddMessage({}, role, msgType, message, is_bot(role) or is_user(role), true);
 		pMessage->SetName(name);
 		_messages.push_back(MessageEntry {
 			.chatId = "dummy",
@@ -80,7 +81,7 @@ namespace fig::gui
 
 	void ChatScroll::AddSystemMessage(string_cref message)
 	{
-		ChatMessage* pMessage = AddMessage({}, Role::System, MessageType::SystemMessage, message, true);
+		ChatMessage* pMessage = AddMessage({}, Role::System, MessageType::SystemMessage, message, false, true);
 		pMessage->SetActive(false);
 		pMessage->SetColors(Color::MessageBackgroundNavy, Color::MessageForegroundNavy, Color::MessageBorderNavy);
 		_messages.push_back(MessageEntry {
@@ -93,14 +94,13 @@ namespace fig::gui
 		});
 	}
 
-	ChatMessage* ChatScroll::AddMessage(const fig::uuid& characterId, Role role, MessageType msgType, string_cref message, bool complete)
+	ChatMessage* ChatScroll::AddMessage(const fig::uuid& characterId, Role role, MessageType msgType, string_cref message, bool bShowAvatar, bool bIsComplete)
 	{
 		if (msgType == MessageType::Narration)
 			role = Role::Narrator;
 		else if (msgType == MessageType::SystemMessage)
 			role = Role::System;
 
-		bool bShowAvatar = !is_npc(role);
 		auto itLast = std::find_if(_messages.crbegin(), _messages.crend(), [](const MessageEntry& entry) {
 			return entry.pChatMessage != nullptr;
 		});
@@ -121,7 +121,6 @@ namespace fig::gui
 					lastId = (*itLast).characterId;
 				}
 			}
-			bShowAvatar &= (role != lastRole) || (characterId != lastId);
 			bool bShowName = bShowAvatar;
 
 			fig::string name = session.GetNameOf(role);
@@ -144,7 +143,7 @@ namespace fig::gui
 
 			auto pMessage = CreateControl<ChatMessage>(role, characterId, bShowName ? name : "", msgType, bShowAvatar);
 			pMessage->SetY(-1000); // Move off-screen
-			pMessage->SetMessage(message, complete);
+			pMessage->SetMessage(message, bIsComplete);
 			pMessage->SetColors(session.GetColorsOf(role));
 			GetSizer()->Add(pMessage, 0, SizerFlag::Expand);
 			return pMessage;
@@ -153,7 +152,7 @@ namespace fig::gui
 		{
 			auto pMessage = CreateControl<ChatMessage>(role, characterId, "", msgType, bShowAvatar);
 			pMessage->SetY(-1000); // Move off-screen
-			pMessage->SetMessage(message, complete);
+			pMessage->SetMessage(message, bIsComplete);
 			pMessage->SetColors(color_triple { Color::MessageBackgroundDefault, Color::MessageForegroundDefault, Color::MessageBorderDefault });
 			GetSizer()->Add(pMessage, 0, SizerFlag::Expand);
 			return pMessage;
@@ -284,6 +283,8 @@ namespace fig::gui
 		if (empty_or_whitespace(piece.content) && piece.complete)
 			return;
 
+		bool bShowAvatar = piece.subTurn <= 0 and (is_bot(piece.role) or is_user(piece.role));
+
 		if (auto pSession = _pSession.lock())
 		{
 			auto itMsg = _messagesById.find(piece.subMessageId);
@@ -303,7 +304,7 @@ namespace fig::gui
 					(*itMsg).second->role = piece.role;
 					(*itMsg).second->msgType = piece.msgType;
 					auto characterId = pSession->GetCharacterIdOf(piece.role);
-					pEntry->pChatMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, piece.complete);
+					pEntry->pChatMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, bShowAvatar, piece.complete);
 				}
 			}
 			else
@@ -327,7 +328,7 @@ namespace fig::gui
 				else
 				{
 					// Create new message to hold the piece
-					ChatMessage* pMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, piece.complete);
+					ChatMessage* pMessage = AddMessage(characterId, piece.role, piece.msgType, piece.content, bShowAvatar, piece.complete);
 					_messages.emplace_back(MessageEntry {
 						.characterId = characterId,
 						.chatId = identifier,

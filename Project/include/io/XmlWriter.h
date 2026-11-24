@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 
@@ -178,6 +178,7 @@ namespace fig::data
 
 		bool WriteToFile(const fig::path& filename) const;
 		void WriteToMemory(fig::bytes& buffer) const;
+		fig::string ToString() const;
 
 	private:
 		std::unique_ptr<tinyxml2::XMLDocument> _pDoc {};

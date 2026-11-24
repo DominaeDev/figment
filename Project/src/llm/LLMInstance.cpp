@@ -566,6 +566,7 @@ namespace fig::llm
 		fig::string responderId {};
 		fig::string stateReport {};
 		int32_t current_turn = _turn_counter.load();
+		int32_t current_sub_turn = 0;
 
 		int32_t current_sequence_index;
 		SequenceSlots current_sequence;
@@ -815,10 +816,14 @@ namespace fig::llm
 								if (auto tagMsgType = ChatFormatter::GetMessageTypeForTag(tag); tagMsgType != MessageType::Undefined)
 									msgType = tagMsgType;
 								
-								if (msgType != MessageType::StateReport && args.maxMessages > 0 && ++numMessages > args.maxMessages)
+								if (msgType != MessageType::StateReport)
 								{
-									stop_reason = StopReason::MessageCountLimit;
-									break; // That's enough, thank you
+									++numMessages;
+									if (args.maxMessages > 0 && numMessages > args.maxMessages)
+									{
+										stop_reason = StopReason::MessageCountLimit;
+										break; // That's enough, thank you
+									}
 								}
 
 								if (msgType == MessageType::Narration)
@@ -878,7 +883,7 @@ namespace fig::llm
 				}
 				else if (partial.size() > 0 && msgType != MessageType::Undefined)
 				{
-					LockAndDo([&]() {
+					LockAndDo([&] {
 						_resultQueue.push(MessagePiece {
 							.responseId = responseId,
 							.subMessageId = subMessageId,
@@ -889,7 +894,7 @@ namespace fig::llm
 							.isComplete = bEndOfMessageType,
 							.isGenerated = true,
 							.turn = current_turn,
-							.subMessageIndex = numMessages - 1,
+							.subMessageIndex = current_sub_turn,
 						});
 					}, _resultMutex);
 					response += partial;
@@ -900,6 +905,7 @@ namespace fig::llm
 				{
 					msgType = MessageType::Undefined;
 					subMessageId = _CreateUUID();
+					current_sub_turn++;
 
 					_pStatus->EmitSignal(LLMStatusEvent::CompletedMessage);
 				}
@@ -1074,10 +1080,10 @@ namespace fig::llm
 			// Generate response
 			if (_options.flags.IsSet(ChatOptions::Flag::RandomizeMessageCount))
 			{
-				static std::uniform_int_distribution<int> numMessages(1, 3);
-				LockAndDo([&]() {
+				static std::uniform_int_distribution<int> rndMessages(1, 3);
+				LockAndDo([&] {
 					if (generateArgs.maxMessages <= 0) // Randomize number of messages
-						generateArgs.maxMessages = numMessages(_modelState.rng); //! Hmm..
+						generateArgs.maxMessages = rndMessages(_modelState.rng); //! Hmm..
 				}, _stateMutex);
 			}
 			else if (!_options.flags.IsSet(ChatOptions::Flag::LimitMessages))
@@ -1197,7 +1203,7 @@ namespace fig::llm
 		int32_t current_turn = _turn_counter.load();
 
 		fig::uuid subMessageId = _CreateUUID();
-		LockAndDo([&]() {
+		LockAndDo([&] {
 			_resultQueue.push(MessagePiece {
 				.subMessageId = subMessageId,
 				.identifier = "system",
@@ -1307,7 +1313,7 @@ namespace fig::llm
 		fig::uuid responseId = _CreateUUID();
 		int32_t current_turn = _turn_counter.load();
 
-		LockAndDo([&]() {
+		LockAndDo([&] {
 			_contextState.AppendBlock(ContextBlock {
 				.role = role,
 				.name = identifier,
@@ -1321,7 +1327,7 @@ namespace fig::llm
 			});
 		}, _stateMutex);
 
-		LockAndDo([&]() {
+		LockAndDo([&] {
 			_activeResponseIds.insert(responseId);
 			if (visible)
 			{
@@ -1642,7 +1648,7 @@ namespace fig::llm
 
 	void LLMInstance::RefreshActiveResponses()
 	{
-		LockAndDo([&]() {
+		LockAndDo([&] {
 			_activeResponseIds.clear();
 			for (const auto& block : _contextState.GetBlocks())
 				_activeResponseIds.insert(block.responseId);

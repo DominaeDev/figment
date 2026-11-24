@@ -33,7 +33,6 @@ namespace fig::gui
 		ImportCharacter,
 		AddedCharacter,
 		EditCharacter,
-		DebugCharacter,
 		CreateStory,
 		EditStory,
 		CreateWorld,
@@ -44,6 +43,9 @@ namespace fig::gui
 		EditCharacterStory,
 		EditUserSettings,
 		ProfileDeleted,
+
+		DebugCharacter,
+		DebugChat,
 
 		/* Broadcast events */
 

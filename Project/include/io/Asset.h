@@ -131,6 +131,7 @@ namespace fig::io
 		}
 
 		int32_t GetOrder() const { return GetUserSettings().value_or({}).order; }
+		bool IsHidden() const { return GetUserSettings().value_or({}).HasFlag(AssetUserSettings::Flag::Hidden); }
 
 	private:
 		void SetUpdated(bool bWriteTimestamp = true);

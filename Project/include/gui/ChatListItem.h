@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Panel.h"
 #include "util/SearchIndex.h"
@@ -31,7 +31,7 @@ namespace fig::gui
 		ChatListItem(ControlPtr pParent);
 	
 	public:
-		ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatInstance& chatInstance, const fig::data::ChatLog& chatLog, const fig::string& timeString);
+		ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatInstance& chatInstance, const fig::uuid& chatLogId, const fig::data::ChatLog& chatLog, const fig::string& timeString);
 		void ShowStar(bool bShow);
 		void SetDelegate(ChatItemEventDelegate fnDelegate) { _fnDelegate = fnDelegate; }
 
@@ -48,6 +48,7 @@ namespace fig::gui
 	
 	private:
 		fig::uuid _chatInstanceId;
+		fig::uuid _chatLogId;
 		fig::uuid _primaryCharacterId;
 		fig::observer_ptr<Image> _pPortrait;
 		fig::observer_ptr<StaticText> _pTitle;

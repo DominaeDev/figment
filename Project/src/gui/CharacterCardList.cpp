@@ -38,17 +38,17 @@ namespace fig::gui
 
 		auto& menu = CreateMenu();
 
-		menu.AddItem("Resume chat")
-			.SetEnabled(bLLM && chatCount > 0)
-			.SetDelegate([this, characterId] { 
-				PushEvent(UserEvent::ResumeLastChatWith, (fig::string)characterId); 
-			});
 		menu.AddItem("Start a new chat", Icon::NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this, characterId] { 
 				PushEvent(UserEvent::StartChat, (fig::string)characterId); 
 			});
-		menu.AddItem("View chats")
+		menu.AddItem("Resume last chat")
+			.SetEnabled(bLLM && chatCount > 0)
+			.SetDelegate([this, characterId] { 
+				PushEvent(UserEvent::ResumeLastChatWith, (fig::string)characterId); 
+			});
+		menu.AddItem("View existing chats" + (chatCount > 0 ? std::format(" ({})", chatCount) : ""))
 			.SetEnabled(chatCount > 0)
 			.SetDelegate([this, characterId] { 
 				PushEvent(UserEvent::NavigateToChatList, &characterId); 
@@ -58,7 +58,7 @@ namespace fig::gui
 		{
 			menu.AddItem(std::format("Debug {}\u2026", pCharacterCard->GetName()))
 				.SetDelegate([this, characterId] {
-					PushEvent(UserEvent::DebugCharacter, &characterId);
+					PushEvent(UserEvent::DebugCharacter, (fig::string)characterId);
 				});
 		}
 		

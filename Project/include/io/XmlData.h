@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "io/XmlReader.h"
@@ -66,7 +66,7 @@ namespace fig::data
 			return fig::io::FileError::NoError;
 		}
 
-		fig::io::FileError SaveToXml(this const IsXmlSerializable auto& self, const fig::path& path) noexcept
+		fig::io::FileError SaveToXml(this const IsXmlSerializable auto& self, const fig::path& path)
 		{
 			XmlWriter xml { root_name };
 			auto root = xml.GetRoot();
@@ -77,7 +77,7 @@ namespace fig::data
 			return fig::io::FileError::NoError;
 		}
 
-		void SaveToXml(this const IsXmlSerializable auto& self, fig::bytes& buffer) noexcept
+		void SaveToXml(this const IsXmlSerializable auto& self, fig::bytes& buffer)
 		{
 			XmlWriter xml { root_name };
 			auto root = xml.GetRoot();
@@ -86,9 +86,18 @@ namespace fig::data
 			xml.WriteToMemory(buffer);
 		}
 
-		void SaveToXml(this const IsXmlSerializable auto& self, XmlWriterElement node) noexcept
+		void SaveToXml(this const IsXmlSerializable auto& self, XmlWriterElement node)
 		{
 			Serialize(node, self);
+		}
+
+		void SaveToXml(this const IsXmlSerializable auto& self, fig::string& outString)
+		{
+			XmlWriter xml { root_name };
+			auto root = xml.GetRoot();
+			root["format"] = format_version;
+			self.SaveToXml(root);
+			outString = xml.ToString();
 		}
 
 	protected:

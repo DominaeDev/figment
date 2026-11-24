@@ -8,13 +8,13 @@ namespace fig::data
 		_title = title;
 	}
 
-	void ChatLog::AddMessage(Message&& message) noexcept
+	void ChatLog::AddMessage(ChatMessage&& message) noexcept
 	{
 		_searchIndex.AddTerm(message.content);
 		_messages.emplace_back(std::move(message));
 	}
 
-	void ChatLog::AddMessage(const Message& message) noexcept
+	void ChatLog::AddMessage(const ChatMessage& message) noexcept
 	{
 		_searchIndex.AddTerm(message.content);
 		_messages.push_back(message);

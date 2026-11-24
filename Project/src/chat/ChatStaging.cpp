@@ -67,6 +67,11 @@ namespace fig::chat
 		return fig::nullref;
 	}
 
+	bool ChatStaging::HasCharacterInRole(Role role) const noexcept
+	{
+		return _charactersByRole.contains(role);
+	}
+
 	std::optional<fig::uuid> ChatStaging::GetCharacterIdByRole(Role role) const noexcept
 	{
 		if (auto itFind = _charactersByRole.find(role); itFind != _charactersByRole.cend())

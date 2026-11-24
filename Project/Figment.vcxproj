@@ -159,6 +159,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClInclude Include="..\Libraries\stb\include\stb_image_resize2.h" />
+    <ClInclude Include="include\data\ChatMessage.h" />
     <ClInclude Include="include\gui\CardListScreen.impl.h" />
     <ClCompile Include="include\gui\TexturedBorder.cpp" />
     <ClCompile Include="include\util\StripHtml.cpp" />

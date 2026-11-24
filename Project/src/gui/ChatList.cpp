@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ChatList.h"
 #include "gui/Area.h"
 
@@ -80,7 +80,8 @@ namespace fig::gui
 				auto& chatInstance = pair.first;
 				auto& chatLog = pair.second[0];
 				return Item {
-					.assetId = chatInstance.assetId,
+					.chatInstanceId = chatInstance.assetId,
+					.chatLogId = chatLog.assetId,
 					.chatInstance = chatInstance.instance.get(),
 					.chatLog = chatLog.instance.get(),
 					.createdAt = chatLog.createdAt,
@@ -161,7 +162,7 @@ namespace fig::gui
 
 	bool ChatList::Item::MatchesFlags(ChatFilterFlags filter) noexcept
 	{
-		auto userSettings = Global::GetUserContent().GetUserSettings(assetId);
+		auto userSettings = Global::GetUserContent().GetUserSettings(chatInstanceId);
 
 		if (filter.IsSet(ChatFilterFlag::Hidden) != userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 			return false;
@@ -231,7 +232,7 @@ namespace fig::gui
 				else
 					timeString = item.updatedAt.get_date_string();
 
-				auto pListItem = CreateControl<ChatListItem>(item.assetId, *item.chatInstance, *item.chatLog, timeString);
+				auto pListItem = CreateControl<ChatListItem>(item.chatInstanceId, *item.chatInstance, item.chatLogId, *item.chatLog, timeString);
 				pListItem->SetDelegate([this](ChatListItem& item, ChatListItemEvent event) { OnItemEvent(item, event); });
 				item.pListItem = pListItem;
 
@@ -270,7 +271,7 @@ namespace fig::gui
 			return i.pListItem.get() == &item;
 		}); try_item != std::ranges::end(_items))
 		{
-			if (Global::GetUserContent().DeleteAsset((*try_item).assetId))
+			if (Global::GetUserContent().DeleteAsset((*try_item).chatInstanceId))
 			{
 				DestroyChild((*try_item).pListItem);
 				_items.erase(try_item);
@@ -282,7 +283,7 @@ namespace fig::gui
 	void ChatList::DeleteArchivedChats()
 	{
 		auto archivedChats = Global::GetUserContent().GetAssets().FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
-			| std::views::filter([](auto&& a) { return Global::GetUserContent().GetUserSettings(a.get().id).HasFlag(AssetUserSettings::Flag::Hidden); })
+			| std::views::filter([](auto&& a) { return a.get().IsHidden(); })
 			| std::views::transform([](auto&& a) { return a.get().id; })
 			| std::ranges::to<std::vector>();
 
@@ -291,7 +292,7 @@ namespace fig::gui
 			for (int32_t i = toI(_items.size()) - 1; i >= 0; --i)
 			{
 				auto& item = _items[i];
-				if (std::ranges::contains(archivedChats, item.assetId))
+				if (std::ranges::contains(archivedChats, item.chatInstanceId))
 				{
 					DestroyChild(item.pListItem);
 					_items.erase(_items.cbegin() + toUZ(i));

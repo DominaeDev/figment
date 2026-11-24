@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/ScrollPanel.h"
 #include "io/ContentManager.h"
@@ -49,7 +49,8 @@ namespace fig::gui
 
 		struct Item
 		{
-			fig::uuid assetId;
+			fig::uuid chatInstanceId;
+			fig::uuid chatLogId;
 			fig::optional_cref<struct fig::data::ChatInstance> chatInstance;
 			fig::optional_cref<class fig::data::ChatLog> chatLog;
 			fig::timestamp createdAt;
