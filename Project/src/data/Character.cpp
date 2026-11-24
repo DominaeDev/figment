@@ -1,5 +1,6 @@
 ﻿#include <pch.h>
 #include "data/Character.h"
+#include "user/UserManager.h"
 
 using namespace fig::gui;
 using namespace fig::io;
@@ -325,5 +326,17 @@ namespace fig::data
 	void Character::ClearExampleDialogue() noexcept
 	{
 		_exampleDialogue.clear();
+	}
+
+	UserPersona UserPersona::CreateDefaultUser()
+	{
+		if (Global::IsSignedIn())
+		{
+			UserPersona user;
+			user.chatId = "user";
+			user.name = CharacterName { Global::GetUserManager().GetActiveProfile().value().name };
+			return user;
+		}
+		return {};
 	}
 }

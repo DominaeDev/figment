@@ -40,7 +40,28 @@ namespace fig::gui
 
 		// Register callback
 		if (auto pSession = wpSession.lock())
+		{
 			pSession->GetPoller()->RegisterObserver(std::bind_front(&ChatScroll::OnMessage, this));
+
+			// Add messages...
+			if (auto pLogger = pSession->GetLogger())
+			{
+				auto& messages = pLogger->GetLogMessages();
+				for (auto& message : messages)
+				{
+					auto pMessage = AddMessage(message.speakerId, message.role, message.msgType, message.content, true);
+					pMessage->SetName(pSession->GetNameOf(message.role));
+					_messages.push_back(MessageEntry {
+						.chatId = pSession->GetIdentifierOf(message.role),
+						.role = message.role,
+						.responseId = message.messageId,
+						.subMessageId {},
+						.msgType = message.msgType,
+						.pChatMessage = pMessage,
+					});
+				}
+			}
+		}
 	}
 
 	void ChatScroll::AddDummyMessage(string_cref name, Role role, MessageType msgType, string_cref message)

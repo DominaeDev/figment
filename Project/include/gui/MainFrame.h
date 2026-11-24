@@ -109,7 +109,10 @@ namespace fig::gui
 		bool HandleStatusBarEvents(fig::event& event);
 
 		bool AutoSignIn() noexcept;
-		bool StartChat(const fig::uuid& characterId);
+		bool StartNewChatWith(const fig::uuid& characterId);
+		bool ResumeLastChatWith(const fig::uuid& characterId);
+		bool ResumeChat(const fig::uuid& chatLogId);
+		bool ResumeChat(const fig::uuid& chatInstanceId, const fig::uuid& chatLogId);
 
 		virtual void OnUpdate(float fElapsed) override;
 		virtual void OnRender(fig::renderer_ptr pRenderer) override;

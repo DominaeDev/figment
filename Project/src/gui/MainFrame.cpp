@@ -357,7 +357,7 @@ namespace fig::gui
 								if (auto pChatScreen = GetScreen<ChatScreen>())
 								{
 									auto characterId = fig::uuid { Constants::Debug::TestCharacterId };
-									StartChat(characterId);
+									StartNewChatWith(characterId);
 								}
 								return EventResult::Handled;
 							}
@@ -436,8 +436,20 @@ namespace fig::gui
 
 		if (IsUserEvent(event, UserEvent::StartChat))
 		{
-			auto& characterId = GetUserData<fig::uuid>(event);
-			StartChat(characterId);
+			if (auto characterId = GetEventText(event))
+				StartNewChatWith(fig::uuid { *characterId });
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::ResumeChat))
+		{
+			if (auto chatLogId = GetEventText(event))
+				ResumeChat(fig::uuid { *chatLogId });
+			return EventResult::Handled;
+		}
+		else if (IsUserEvent(event, UserEvent::ResumeLastChatWith))
+		{
+			if (auto characterId = GetEventText(event))
+				ResumeLastChatWith(fig::uuid { *characterId });
 			return EventResult::Handled;
 		}
 		else if (IsUserEvent(event, UserEvent::Scrolling))
@@ -748,7 +760,7 @@ namespace fig::gui
 		return result;
 	}
 
-	bool MainFrame::StartChat(const fig::uuid& characterId)
+	bool MainFrame::StartNewChatWith(const fig::uuid& characterId)
 	{
 		if (auto character = Global::GetUserContent().Get<Character>(characterId))
 		{
@@ -790,16 +802,9 @@ namespace fig::gui
 				return false;
 
 			if (auto try_user = Global::GetUserContent().GetDefaultUserPersona())
-			{
 				staging.AddCharacter(Role::User, (*try_user).assetId, (*try_user).instance);
-			}
 			else
-			{
-				UserPersona user;
-				if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) //! @temp
-					and staging.AddCharacter(Role::User, _CreateUUID(), user)))
-					return false;
-			}
+				staging.AddCharacter(Role::User, {}, UserPersona::CreateDefaultUser());
 
 			// Create instance
 			auto [chatInstanceId, chatLogId] = Global::GetUserContent().CreateChat(staging);  
@@ -807,6 +812,96 @@ namespace fig::gui
 			NavigateTo(ScreenType::Chat);
 			auto pChatScreen = GetScreen<ChatScreen>();
 			pChatScreen->StartChat(staging, chatInstanceId, chatLogId);
+			return true;
+		}
+		return false;
+	}
+	
+	bool MainFrame::ResumeLastChatWith(const fig::uuid& characterId)
+	{
+		if (auto lastChat = Global::GetUserContent().FindLastChatLogWith(characterId))
+			return ResumeChat((*lastChat).parent_id, (*lastChat).id);
+		return false;
+	}
+
+	bool MainFrame::ResumeChat(const fig::uuid& chatLogId)
+	{
+		if (auto try_chat = Global::GetUserContent().GetAssets().FindAsset(chatLogId, AssetType::Chat, ChatAssetType::Log))
+			return ResumeChat((*try_chat).parent_id, (*try_chat).id);
+		return false;
+	}
+
+	bool MainFrame::ResumeChat(const fig::uuid& chatInstanceId, const fig::uuid& chatLogId)
+	{
+		if (auto try_chat = Global::GetUserContent().Get<ChatInstance>(chatInstanceId))
+		{
+			auto& chatInstance = *try_chat;
+			auto& primaryCharacterId = chatInstance.characterIds[0];
+
+			// Preload speech model
+			Global::GetTTSBackend().UnloadDesignModels(); // jic
+			if (Global::GetUserSettings().GetBool(UserSetting::TTS::Warmup))
+			{
+				auto _discarded = Global::GetTTSBackend().Speak(primaryCharacterId, ".");
+			}
+
+			PromptScaffold scaffold;
+			if (!Success(scaffold.LoadFromXml(fig::path(Constants::Paths::PromptScaffold))))
+				return false;
+
+			Scenario scenario;
+			fig::uuid scenarioId;
+			if (auto try_scenario = Global::GetUserContent().Get<Scenario>(chatInstance.scenarioId))
+			{
+				scenario = (*try_scenario);
+				scenarioId = chatInstance.scenarioId;
+			}
+			else
+			{
+				if (!Success(scenario.LoadFromXml(fig::path(Constants::Paths::DefaultScenario))))
+					return false;
+			}
+
+			World world {};
+			fig::uuid worldId {};
+			if (auto try_world = Global::GetUserContent().Get<World>(chatInstance.worldId))
+			{
+				world = (*try_world);
+				worldId = chatInstance.worldId;
+			}
+			else if (auto try_world = Global::GetUserContent().GetDefaultWorld())
+			{
+				world = (*try_world).instance;
+				worldId = (*try_world).assetId;
+			}
+
+			ChatStaging staging(scenario, scenarioId, world, worldId, scaffold, Constants::LLM::DefaultChatOptions);
+
+			// Add characters
+			for (size_t i = 0uz; i < chatInstance.characterIds.size() and i < MaxBots(); ++i)
+			{
+				auto& characterId = chatInstance.characterIds[i];
+				if (auto character = Global::GetUserContent().Get<Character>(characterId))
+				{
+					if (!staging.AddCharacter(bot_from_index(i), characterId, character.value()))
+						return false;
+				}
+				else 
+					return false; // Error: Missing character
+			}
+
+			// Add user
+			if (auto try_user = Global::GetUserContent().Get<UserPersona>(chatInstance.userId))
+				staging.AddCharacter(Role::User, chatInstance.userId, *try_user);
+			else if (auto try_user = Global::GetUserContent().GetDefaultUserPersona())
+				staging.AddCharacter(Role::User, (*try_user).assetId, (*try_user).instance);
+			else
+				staging.AddCharacter(Role::User, {}, UserPersona::CreateDefaultUser());
+
+			// Create instance
+			NavigateTo(ScreenType::Chat);
+			auto pChatScreen = GetScreen<ChatScreen>();
+			pChatScreen->ResumeChat(staging, chatInstanceId, chatLogId);
 			return true;
 		}
 		return false;

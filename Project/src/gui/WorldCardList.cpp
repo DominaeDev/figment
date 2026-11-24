@@ -78,7 +78,7 @@ namespace fig::gui
 				});
 		}
 
-		auto& borderMenu = menu.AddItem("Set border");
+		auto& borderMenu = menu.AddItem("Change border");
 		borderMenu.AddCheckItem("No border", userSettings.borderStyle == CardBorderStyle::None)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::None); });
 		borderMenu.AddSeparator();

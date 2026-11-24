@@ -9,6 +9,7 @@
 namespace fig::data
 {
 	struct ChatInstance;
+	class ChatLog;
 	struct VoiceSettings;
 	class Scenario;
 	class World;
@@ -68,6 +69,13 @@ namespace fig::io
 		}
 		bool UpdateAsset(const fig::uuid& assetId, fig::bytes&& data);
 
+		bool LoadXmlAsset(const fig::uuid& assetId, IsXmlContent auto& assetData)
+		{
+			if (auto try_asset = _pAssetMngr->LoadAsset(assetId))
+				return assetData.LoadFromXml((*try_asset).data) == FileError::NoError;
+			return false;
+		}
+
 		bool DeleteAsset(fig::uuid assetId);
 		size_t DeleteAssets(std::span<fig::uuid> assetIds);
 		fig::cref_vector<Asset> GetCharacters() const noexcept;
@@ -84,12 +92,13 @@ namespace fig::io
 		
 		fig::optional_cref<Asset> GetLargePortraitForCharacter(const fig::uuid& characterId, size_t index = 0uz) const;
 		fig::expected_ref<fig::sdl::Texture, FileError> GetSmallPortraitForCharacter(const fig::uuid& characterId, fig::texture_ptr pMask, fig::renderer_ptr pRenderer) noexcept;
-		fig::optional_cref<Asset> FindLastChatWith(const fig::uuid& characterId) const;
+		fig::optional_cref<Asset> FindLastChatLogWith(const fig::uuid& characterId) const;
 		fig::optional_cref<fig::data::VoiceSettings> GetVoiceForCharacter(const fig::uuid& characterId) noexcept;
 		fig::optional_cref<Asset> GetBackgroundForCharacter(const fig::uuid& characterId, size_t index = 0uz) const;
 		std::optional<UserContent<fig::data::Scenario>> GetCharacterScenario(const fig::uuid& characterId);
 		std::optional<UserContent<fig::data::World>> GetDefaultWorld();
 		std::optional<UserContent<fig::data::UserPersona>> GetDefaultUserPersona();
+		std::optional<std::pair<AssetRef, AssetRef>> GetChat(const fig::uuid& chatInstanceId) const; // <instance, log>
 
 		bool MarkImported(const fig::uuid& assetId, bool value = true);
 		bool MarkFavorite(const fig::uuid& assetId, bool value = true);

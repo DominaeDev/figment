@@ -98,7 +98,7 @@ namespace fig::io
 				}
 
 				// Last used => last chat
-				if (auto lastChat = FindLastChatWith(asset.id))
+				if (auto lastChat = FindLastChatLogWith(asset.id))
 					meta.lastUsedAt = std::max(meta.lastUsedAt, lastChat.value().GetUpdatedAt());
 				else
 					meta.lastUsedAt = meta.createdAt;
@@ -114,7 +114,7 @@ namespace fig::io
 				}
 
 				// Last used => last chat
-				if (auto lastChat = FindLastChatWith(asset.id))
+				if (auto lastChat = FindLastChatLogWith(asset.id))
 					meta.lastUsedAt = std::max(meta.lastUsedAt, lastChat.value().GetUpdatedAt());
 				else
 					meta.lastUsedAt = meta.createdAt;
@@ -399,6 +399,16 @@ namespace fig::io
 		return std::nullopt;
 	}
 
+	std::optional<std::pair<AssetRef, AssetRef>> UserContentManager::GetChat(const fig::uuid& chatInstanceId) const
+	{
+		if (auto try_instance = _pAssetMngr->FindAsset(chatInstanceId, AssetType::Chat, ChatAssetType::Instance))
+		{
+			if (auto try_log = _pAssetMngr->FindAssetOfType(make_asset_type(AssetType::Chat, ChatAssetType::Log), (*try_instance).id))
+				return std::pair { *try_instance, *try_log };
+		}
+		return std::nullopt;
+	}
+
 	fig::expected_cref<fig::sdl::Texture, FileError> UserContentManager::GetTexture(const fig::uuid& assetId, fig::renderer_ptr pRenderer) noexcept
 	{
 		if (auto cached = GetCachedTexture(pRenderer, assetId))
@@ -649,7 +659,7 @@ namespace fig::io
 		return std::nullopt;
 	}
 
-	fig::optional_cref<Asset> UserContentManager::FindLastChatWith(const fig::uuid& characterId) const
+	fig::optional_cref<Asset> UserContentManager::FindLastChatLogWith(const fig::uuid& characterId) const
 	{
 		auto chatInstanceIds = _pAssetMngr->FindAssetsOfType(make_asset_type(AssetType::Chat, ChatAssetType::Instance))
 			| std::views::filter([&](auto& a) { return a.get().HasReferenceTo(characterId); })

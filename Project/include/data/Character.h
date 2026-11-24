@@ -107,5 +107,9 @@ namespace fig::data
 		static auto XmlFields() noexcept;
 	};
 
-	class UserPersona : public Character {};
+	class UserPersona : public Character 
+	{
+	public:
+		static UserPersona CreateDefaultUser();
+	};
 }

@@ -23,6 +23,8 @@ namespace fig::gui
 		NavigateBack,
 		SelectEditorTab,
 		StartChat,
+		ResumeChat,
+		ResumeLastChatWith,
 		TabNavigationForward,
 		TabNavigationBackward,
 		ChangeAssetFolder,

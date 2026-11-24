@@ -113,7 +113,7 @@ namespace fig::gui
 		if (_bStartedChat)
 		{
 			_bStartedChat = false;
-			if (Constants::LLM::DefaultChatOptions.flags.IsSet(ChatOptions::Flag::GreetUser))
+			if (_pSession->GetOptions().flags.IsSet(ChatOptions::Flag::GreetUser))
 			{
 				auto pLLM = Global::GetLLMInstance();
 				if (pLLM)
@@ -150,10 +150,42 @@ namespace fig::gui
 				.wpSession = _pSession,
 				.options = Constants::LLM::DefaultChatOptions,
 			};
-			pLLM->Initialize(llmArgs);
+			pLLM->Initialize(llmArgs); //! @todo: Shouldn't be initialized from here
 	
 			_bStartedChat = true;
 			_pSession->Save();
+		}
+		else
+		{
+			LogLn("Failed to initialize chat");
+		}
+	}
+
+	void ChatScreen::ResumeChat(const fig::chat::ChatStaging& staging, fig::uuid chatInstanceId, fig::uuid chatLogId)
+	{
+		ChatOptions options = Constants::LLM::DefaultChatOptions; 
+		options.flags.Unset(ChatOptions::Flag::GreetUser); // Don't greet
+
+		_pSession = std::make_shared<fig::chat::ChatSession>();
+		_pSession->Initialize(staging, options, chatInstanceId, chatLogId);
+
+		_pChatScroll->SetSession(_pSession);
+		_pInfoPanel->SetSession(*_pSession);
+		_pBackground->SetSession(*_pSession);
+
+		queue_clear(_commandQueue);
+
+		auto pLLM = Global::GetLLMInstance();
+		if (pLLM && !pLLM->IsInitialized())
+		{
+			LLMChatArguments llmArgs {
+				.wpSession = _pSession,
+				.messages = _pSession->GetMessages(),
+				.options = options,
+			};
+			pLLM->Initialize(llmArgs); //! @todo: Shouldn't be initialized from here
+	
+			_bStartedChat = true;
 		}
 		else
 		{
@@ -338,7 +370,7 @@ namespace fig::gui
 		}
 		if (IsUserEvent(event, UserEvent::LLMChatInitialized))
 		{
-			_pChatScroll->ClearMessages();
+//			_pChatScroll->ClearMessages();
 			auto pLLMInstance = Global::GetLLMInstance();
 			if (pLLMInstance and _pVariableList)
 			{

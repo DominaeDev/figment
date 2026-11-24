@@ -1,10 +1,10 @@
-#include <pch.h>
+﻿#include <pch.h>
+#include "chat/ChatLogger.h"
 #include "app/AppState.h"
 #include "user/UserManager.h"
 #include "io/AssetManager.h"
 #include "io/Xml.h"
 #include "chat/ChatSession.h"
-#include "chat/ChatLogger.h"
 #include "chat/MessagePoller.h"
 
 using namespace fig::io;
@@ -23,12 +23,16 @@ namespace fig::chat
 		else
 			_pollerId = static_cast<uint32_t>(-1);
 
-		_log.SetTitle(session.GetStaging().GetStoryTitle());
-		_log.AddSearchTerm(session.GetNameOf(Role::Bot1));
-		_log.AddSearchTerm(session.GetNameOf(Role::Bot2));
-		_log.AddSearchTerm(session.GetNameOf(Role::Bot3));
-		_log.AddSearchTerm(session.GetNameOf(Role::Bot4));
-		_log.AddSearchTerm(session.GetNameOf(Role::User));
+		if (not Load())
+		{
+			// Init log
+			_log.SetTitle(session.GetStaging().GetStoryTitle());
+			_log.AddSearchTerm(session.GetNameOf(Role::Bot1));
+			_log.AddSearchTerm(session.GetNameOf(Role::Bot2));
+			_log.AddSearchTerm(session.GetNameOf(Role::Bot3));
+			_log.AddSearchTerm(session.GetNameOf(Role::Bot4));
+			_log.AddSearchTerm(session.GetNameOf(Role::User));
+		}
 	}
 
 	ChatLogger::~ChatLogger()
@@ -91,11 +95,22 @@ namespace fig::chat
 		}
 	}
 
+	bool ChatLogger::Load()
+	{
+		if (not Global::IsSignedIn())
+		{
+			assert(false && "Not signed in");
+			return false;
+		}
+
+		return Global::GetUserContent().LoadXmlAsset(_assetId, _log);
+	}
+
 	bool ChatLogger::Save()
 	{
 		if (not Global::IsSignedIn())
 		{
-			assert(false && "Not logged in");
+			assert(false && "Not signed in");
 			return false;
 		}
 		if (_assetId.empty())
@@ -104,6 +119,11 @@ namespace fig::chat
 		// Write
 		Global::GetUserContent().UpdateAsset(_assetId, _log);
 		return true;
+	}
+
+	const std::vector<fig::data::ChatLog::Message>& ChatLogger::GetLogMessages() const noexcept
+	{
+		return _log.GetMessages();
 	}
 
 }

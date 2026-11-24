@@ -113,7 +113,38 @@ namespace fig::chat
 	{
 		if (_messagePoller)
 			return *_messagePoller;
-		return nullref;
+		return fig::nullref;
+	}
+
+	fig::optional_cref<ChatLogger> ChatSession::GetLogger() const
+	{
+		if (_logger)
+			return *_logger;
+		return fig::nullref;
+	}
+
+	fig::chat::Messages ChatSession::GetMessages(size_t maxMessages) const noexcept
+	{
+		auto& log = _logger->GetLogMessages();
+		
+		if (maxMessages == 0uz)
+			maxMessages = std::numeric_limits<size_t>::max();
+
+		std::list<Message> messages;
+		for (int32_t i = toI(log.size()) - 1; i >= 0; --i)
+		{
+			if (messages.size() >= maxMessages)
+				break;
+
+			auto& msg = log[toUZ(i)];
+			messages.push_front(Message {
+				.role = msg.role,
+				.content = msg.content,
+				.name = GetNameOf(msg.role),
+			});
+		}
+		return messages
+			| std::ranges::to<std::vector>();
 	}
 
 	void ChatSession::Update(float fElapsed) noexcept
@@ -122,4 +153,5 @@ namespace fig::chat
 			_messagePoller->Update(fElapsed);
 	}
 
+	
 } // namespace

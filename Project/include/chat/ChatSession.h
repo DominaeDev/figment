@@ -33,6 +33,9 @@ namespace fig::chat
 		void Update(float fElapsed) noexcept;
 
 		fig::optional_ref<MessagePoller> GetPoller() noexcept;
+		fig::optional_cref<ChatLogger> GetLogger() const;
+		fig::chat::Messages GetMessages(size_t maxMessages = 100uz) const noexcept;
+		const ChatOptions& GetOptions() const noexcept { return _options; }
 
 	protected:
 		bool _bInitialized { false };

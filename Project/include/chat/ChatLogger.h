@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "data/ChatLog.h"
@@ -14,7 +14,9 @@ namespace fig::chat
 		ChatLogger(fig::uuid assetId, fig::uuid parentId, ChatSession& session);
 		~ChatLogger();
 
+		bool Load();
 		bool Save();
+		const std::vector<fig::data::ChatLog::Message>& GetLogMessages() const noexcept;
 
 	private:
 		void OnMessage(const MessagePoller::Message& piece);

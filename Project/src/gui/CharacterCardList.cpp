@@ -39,11 +39,14 @@ namespace fig::gui
 		auto& menu = CreateMenu();
 
 		menu.AddItem("Resume chat")
-			.SetEnabled(bLLM && chatCount > 0);
+			.SetEnabled(bLLM && chatCount > 0)
+			.SetDelegate([this, characterId] { 
+				PushEvent(UserEvent::ResumeLastChatWith, (fig::string)characterId); 
+			});
 		menu.AddItem("Start a new chat", Icon::NEW_CHAT)
 			.SetEnabled(bLLM)
 			.SetDelegate([this, characterId] { 
-				PushEvent(UserEvent::StartChat, &characterId); 
+				PushEvent(UserEvent::StartChat, (fig::string)characterId); 
 			});
 		menu.AddItem("View chats")
 			.SetEnabled(chatCount > 0)
@@ -97,7 +100,7 @@ namespace fig::gui
 			});
 		}
 
-		auto& borderMenu = menu.AddItem("Set border");
+		auto& borderMenu = menu.AddItem("Change border");
 		borderMenu.AddCheckItem("No border", userSettings.borderStyle == CardBorderStyle::None)
 			.SetDelegate([ChangeBorder] { ChangeBorder(CardBorderStyle::None); });
 		borderMenu.AddSeparator();

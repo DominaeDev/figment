@@ -199,16 +199,9 @@ namespace fig
 						return;
 
 					if (auto try_user = Global::GetUserContent().GetDefaultUserPersona())
-					{
 						staging.AddCharacter(Role::User, (*try_user).assetId, (*try_user).instance);
-					}
 					else
-					{
-						UserPersona user;
-						if (not (Success(user.LoadFromXml(fig::path { "./characters/user.xml" })) //! @temp
-							and staging.AddCharacter(Role::User, _CreateUUID(), user)))
-							return;
-					}
+						staging.AddCharacter(Role::User, {}, UserPersona::CreateDefaultUser());
 
 					auto blocks = staging.GetStagingBlocks();
 

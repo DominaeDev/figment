@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "user/UserManager.h"
 
 #include <random>
@@ -365,7 +365,7 @@ namespace fig::user
 				// Delete content files
 				size_t count = DeleteFiles(filenames);
 				if (count > 0)
-					LogLn(std::format("Deleted {} files", count));
+					LogLn(std::format("Deleted {} file(s)", count));
 
 				// Delete profile folder
 				DeleteDirectory(profilePath);

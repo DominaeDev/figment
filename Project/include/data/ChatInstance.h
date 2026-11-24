@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "chat/ChatOptions.h"
@@ -31,6 +31,11 @@ namespace fig::data
 				or userId == id
 				or scenarioId == id
 				or worldId == id;
+		}
+
+		bool OnValidate() const noexcept override
+		{
+			return not characterIds.empty();
 		}
 	};
 }
