@@ -143,6 +143,7 @@ namespace fig
 			assert(pSource->format == pTarget->format);
 
 			auto stride = pixel_stride(pSource->format);
+			auto order = SDL_PIXELORDER(pSource->format);
 			auto pSourcePixels = static_cast<const uint8_t*>(pSource->pixels) + srcRect.y * pSource->pitch + srcRect.x * stride;
 			auto pTargetPixels = static_cast<uint8_t*>(pTarget->pixels) + dstRect.y * pTarget->pitch + dstRect.x * stride;
 
@@ -154,49 +155,76 @@ namespace fig
 			else
 				filter = STBIR_FILTER_DEFAULT;
 
+			stbir_pixel_layout layout;
+			switch (order)
+			{
+			case SDL_PACKEDORDER_XBGR:
+			case SDL_PACKEDORDER_ABGR:
+				layout = (stride == 4 ? STBIR_ABGR : STBIR_BGR);
+				break;
+			case SDL_PACKEDORDER_BGRX:
+			case SDL_PACKEDORDER_BGRA:
+				layout = (stride == 4 ? STBIR_BGRA : STBIR_BGR);
+				break;
+			case SDL_PACKEDORDER_XRGB:
+			case SDL_PACKEDORDER_ARGB:
+				layout = (stride == 4 ? STBIR_ARGB : STBIR_RGB);
+				break;
+			case SDL_PACKEDORDER_RGBX:
+			case SDL_PACKEDORDER_RGBA:
+				layout = (stride == 4 ? STBIR_RGBA : STBIR_RGB);
+				break;
+			default:
+				assert(false);
+				break;
+			}
+
 			stbir_resize(
 				pSourcePixels, srcRect.w, srcRect.h, pSource->pitch,
 				pTargetPixels, dstRect.w, dstRect.h, pTarget->pitch,
-				stride == 4 ? STBIR_RGBA : STBIR_RGB, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, filter);
+				layout, STBIR_TYPE_UINT8, STBIR_EDGE_CLAMP, filter);
 		}
 	}
 
 	fig::sdl::Surface ScaleSurface(const fig::sdl::Surface& surface, int32_t width, int32_t height, ImageFit fit, ScaleMode scaleMode)
 	{
-		auto pImage = surface.get();
-		if (pImage == nullptr || width <= 0 || height <= 0)
+		auto pSurface = surface.get();
+		if (pSurface == nullptr || width <= 0 || height <= 0)
 			return {};
 
 		fig::sdl::Surface pScaledSurface(width, height, surface->format);
 
+		// Exceptions
 		if (surface->w == width and surface->h == height)
 			fit = ImageFit::None;
+		if (fit == ImageFit::SquarePortrait and pSurface->w > pSurface->h) //! @todo: handle landscape aspect ratio
+			fit = ImageFit::Outside;
 
 		if (fit == ImageFit::None)
 		{
-			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::rect srcRect { 0, 0, pSurface->w, pSurface->h };
 			fig::rect dstRect { 0, 0, width, height };
-			SDL_BlitSurface(pImage, &srcRect, pScaledSurface.get(), &dstRect);
+			SDL_BlitSurface(pSurface, &srcRect, pScaledSurface.get(), &dstRect);
 		}
 		else if (fit == ImageFit::Stretch)
 		{
-			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::rect srcRect { 0, 0, pSurface->w, pSurface->h };
 			fig::rect dstRect { 0, 0, width, height };
-			StretchSurface(pImage, srcRect, pScaledSurface.get(), dstRect, scaleMode);
+			StretchSurface(pSurface, srcRect, pScaledSurface.get(), dstRect, scaleMode);
 		}
 		else if (fit == ImageFit::SquarePortrait)
 		{
 			constexpr float fContract = 0.05f;
-			float size = std::max(toF(pImage->w) * (1.0f - 2.0f * fContract), 128.0f);
-			float offset = std::min(toF(pImage->w) * fContract, std::max(toF(pImage->h) - toF(pImage->w) * fContract, 0.0f));
+			float size = std::max(toF(pSurface->w) * (1.0f - 2.0f * fContract), 128.0f);
+			float offset = std::min(toF(pSurface->w) * fContract, std::max(toF(pSurface->h) - toF(pSurface->w) * fContract, 0.0f));
 			fig::rect srcRect { toI(offset), toI(offset), toI(size), toI(size) };
 			fig::rect dstRect { 0, 0, width, height };
-			StretchSurface(pImage, srcRect, pScaledSurface.get(), dstRect, scaleMode);
+			StretchSurface(pSurface, srcRect, pScaledSurface.get(), dstRect, scaleMode);
 		}
 		else
 		{
-			float srcWidth = toF(pImage->w);
-			float srcHeight = toF(pImage->h);
+			float srcWidth = toF(pSurface->w);
+			float srcHeight = toF(pSurface->h);
 
 			float scale;
 			if (fit == ImageFit::Inside)
@@ -213,7 +241,7 @@ namespace fig
 			if (fit == ImageFit::Portrait)
 				newY = 0;
 
-			fig::rect srcRect { 0, 0, pImage->w, pImage->h };
+			fig::rect srcRect { 0, 0, pSurface->w, pSurface->h };
 			fig::rect dstRect { toI(newX), toI(newY), toI(newWidth), toI(newHeight) };
 
 			if (fit != ImageFit::Inside)
@@ -226,7 +254,7 @@ namespace fig
 
 			// clip src
 			fig::rect tmp;
-			fig::rect fullRect { 0, 0, pImage->w, pImage->h };
+			fig::rect fullRect { 0, 0, pSurface->w, pSurface->h };
 			if (SDL_GetRectIntersection(&srcRect, &fullRect, &tmp))
 				srcRect = tmp;
 
@@ -235,7 +263,7 @@ namespace fig
 			if (SDL_GetRectIntersection(&dstRect, &fixedRect, &tmp))
 				dstRect = tmp;
 
-			StretchSurface(pImage, srcRect, pScaledSurface.get(), dstRect, scaleMode);
+			StretchSurface(pSurface, srcRect, pScaledSurface.get(), dstRect, scaleMode);
 		}
 
 		return pScaledSurface;
@@ -320,7 +348,7 @@ namespace fig
 		return true;
 	}
 
-	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha)
+	fig::sdl::Surface CreateCoverImage(const fig::sdl::Surface& surface, bool bAlpha) 
 	{
 		if (surface.empty())
 			return {};
