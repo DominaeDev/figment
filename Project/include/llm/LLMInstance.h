@@ -39,7 +39,7 @@ namespace fig::llm
 	struct LLMChatArguments
 	{
 		std::weak_ptr<fig::chat::ChatSession> wpSession;
-		fig::chat::Messages messages;
+		std::vector<fig::data::ChatMessage> messages;
 		fig::chat::ChatOptions options;
 		int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
 	};
@@ -153,7 +153,7 @@ namespace fig::llm
 			fig::string prepend {};
 			fig::uuid responseId {};
 			fig::uuid subMessageId {};
-			fig::chat::Sentences history; // Used for embedding
+			History history; // Used for embedding
 		};
 		void __Generate(std::stop_token& stop, GenerateArguments args, __GenerationCompleteCallback onComplete);
 		void StartGeneration();
@@ -162,7 +162,7 @@ namespace fig::llm
 		void RefreshActiveResponses();
 		bool RebuildKVCache();
 
-		fig::chat::Sentences GetHistory(size_t depth);
+		History GetHistory(size_t depth);
 		SamplerPtr CompileGrammar(GrammarFlags grammarFlags);
 		void InitSamplers();
 

@@ -34,7 +34,7 @@ namespace fig::chat
 
 		fig::optional_ref<MessagePoller> GetPoller() noexcept;
 		fig::optional_cref<ChatLogger> GetLogger() const;
-		fig::chat::Messages GetMessages(size_t maxMessages = 100uz) const noexcept;
+		std::vector<fig::data::ChatMessage> GetMessages(size_t maxMessages = 100uz) const noexcept;
 		const ChatOptions& GetOptions() const noexcept { return _options; }
 
 	protected:

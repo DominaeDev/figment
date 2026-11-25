@@ -84,24 +84,4 @@ namespace fig::chat
 		std::pair { MessageType::StateReport,	"report" },
 	};
 
-	struct Message
-	{
-		Role role;
-		fig::string content;
-		fig::string name;
-	};
-	using Messages = std::vector<Message>;
-
-	struct Submessage
-	{
-		MessageType msgType = MessageType::Undefined;
-		fig::string content;
-	};
-
-	struct Sentence
-	{
-		Role role;
-		fig::string sentence;
-	};
-	using Sentences = std::vector<Sentence>;
 }

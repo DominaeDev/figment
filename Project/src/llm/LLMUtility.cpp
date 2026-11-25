@@ -1080,7 +1080,7 @@ namespace fig::llm
 	{
 		// Strip prompt template from block content
 		static const char* const SUBSTITUTE = "{{SUBSTITUTE}}";
-		fig::string tmpl = apply_chat_template({ Message { role, SUBSTITUTE, name } }, false);
+		fig::string tmpl = apply_chat_template(role, name, SUBSTITUTE);
 		if (tmpl.empty())
 			return std::make_pair("", ""); // Unknown template
 
@@ -1116,41 +1116,32 @@ namespace fig::llm
 		return PromptTemplateType::Undefined;
 	}
 
-	fig::string apply_chat_template(Messages messages, bool add_assistant)
+	fig::string apply_chat_template(fig::chat::Role role, const fig::string& name, const fig::string& content)
 	{
-		if (messages.empty())
-			return "";
-
-		std::vector<llama_chat_message> msgs;
-		msgs.reserve(messages.size());
-		for (size_t i = 0; i < messages.size(); ++i)
+		fig::string sName;
+		if (is_npc(role))
+			sName = "system";
+		else if (is_user(role))
+			sName = "user";
+		else
 		{
-			const auto& msg = messages[i];
-			const char* name;
-			if (is_npc(msg.role))
-				name = "system";
-			else if (msg.role == Role::User)
-				name = "user";
-			else
-			{
-				name = msg.name.c_str();
-				// name = "assistant";
-			}
-
-			msgs.push_back(llama_chat_message {
-				name,
-				msg.content.c_str()
-				});
+			sName = name;
+			// sName = "assistant";
 		}
+
+		llama_chat_message llama_msg {
+			sName.c_str(),
+			content.c_str(),
+		};
 
 		if (!_template.empty())
 		{
 			std::vector<char> formatted(Constants::DefaultModelSettings::MaxResponseLength * 2);
-			int new_len = llama_chat_apply_template(_template.c_str(), msgs.data(), msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
+			int new_len = llama_chat_apply_template(_template.c_str(), &llama_msg, 1, false, formatted.data(), (int32_t)formatted.size());
 			if (new_len > (int)formatted.size())
 			{
 				formatted.resize(new_len);
-				new_len = llama_chat_apply_template(_template.c_str(), msgs.data(), msgs.size(), add_assistant, formatted.data(), (int32_t)formatted.size());
+				new_len = llama_chat_apply_template(_template.c_str(), &llama_msg, 1, false, formatted.data(), (int32_t)formatted.size());
 			}
 			if (new_len < 0)
 			{
@@ -1163,16 +1154,14 @@ namespace fig::llm
 		else
 		{
 			std::vector<const llama_chat_message*> pMsgs;
-			pMsgs.reserve(messages.size());
-			for (size_t i = 0; i < msgs.size(); ++i)
-				pMsgs.push_back(&msgs[i]);
+			pMsgs.push_back(&llama_msg);
 
 			PromptTemplateType tmpl = _current_template;
 			if (tmpl == PromptTemplateType::Undefined || tmpl == PromptTemplateType::Automatic)
 				tmpl = PromptTemplateType::Default;
 
 			fig::string formatted;
-			int new_len = apply_template(tmpl, pMsgs, formatted, add_assistant);
+			int new_len = apply_template(tmpl, pMsgs, formatted, false);
 
 			if (new_len < 0)
 			{
@@ -1183,8 +1172,5 @@ namespace fig::llm
 		}
 
 	}
-
-
-
 
 } // namespace

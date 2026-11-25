@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "chat/ChatSession.h"
 #include "llm/LLMTypes.h"
@@ -6,6 +6,13 @@
 
 namespace fig::llm
 {
+	struct HistoryEntry
+	{
+		fig::chat::Role role;
+		fig::string message;
+	};
+	using History = std::vector<HistoryEntry>;
+
 	class LLMEmbedding
 	{
 	public:
@@ -16,7 +23,7 @@ namespace fig::llm
 		bool IsReady() const;
 
 		bool Generate(fig::string text, EmbeddingVector& out_embedding);
-		bool Search(const fig::chat::Sentences& sentences, bool bUser = true, bool bBot = true);
+		bool Search(const History& history, bool bUser = true, bool bBot = true);
 
 	private:
 		enum class Mode

@@ -65,11 +65,11 @@ namespace fig::llm
 				if (block.is_continuation()) // Continue response
 					content = apply_chat_template_prefix(block.role, content, block.name); //! name?
 				else if (block.role == Role::System)
-					content = apply_chat_template({ Message { block.role, content, block.name } }, false);
+					content = apply_chat_template(block.role, block.name, content);
 				else
 				{
 					ChatFormatter::CompleteMessage(content);
-					content = apply_chat_template({ Message { block.role, content, block.name } }, false);
+					content = apply_chat_template(block.role, block.name, content);
 				}
 				content = eval_text(content, staging.GetContext(block.role)); //! @move?
 				block.tokens = llama::tokenize(_pVocab, content, false);

@@ -23,11 +23,11 @@ namespace fig
 		if constexpr (Debugging)
 		{
 //			ImportTestCharacters("./import/characters");
-//			FlushBrokenAssets();
 //			EraseChats();
 //			CreateModelSettings();
 //			ShuffleCards();
 //			CreateFolders();
+			FlushBrokenAssets();
 			GenerateUUIDs(10uz);
 		}
 	}

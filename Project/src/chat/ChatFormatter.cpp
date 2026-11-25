@@ -35,11 +35,11 @@ namespace fig::chat
 	};
 
 	static std::vector<fig::string> const closing_tags {
-		std::format("</{0}>", Tags::Close::Dialogue),
-		std::format("</{0}>", Tags::Close::Action),
-		std::format("</{0}>", Tags::Close::Thought),
-		std::format("</{0}>", Tags::Close::Narration),
-		std::format("</{0}>", Tags::Close::Direction),
+		std::format("<{0}>", Tags::Close::Dialogue),
+		std::format("<{0}>", Tags::Close::Action),
+		std::format("<{0}>", Tags::Close::Thought),
+		std::format("<{0}>", Tags::Close::Narration),
+		std::format("<{0}>", Tags::Close::Direction),
 	};
 
 	fig::string_list ChatFormatter::GetOpeningTags() noexcept
@@ -426,7 +426,7 @@ namespace fig::chat
 		}
 	}
 
-	std::pair<fig::string, std::vector<Submessage>> ChatFormatter::ProcessMessage(fig::string_view message, fig::string_view identifier) noexcept
+	std::pair<fig::string, std::vector<ChatFormatter::MessagePiece>> ChatFormatter::ProcessMessage(fig::string_view message, fig::string_view identifier) noexcept
 	{
 		size_t pos = 0;
 		size_t length = message.size();
@@ -455,13 +455,15 @@ namespace fig::chat
 		mark_spans(sMessage, MessageType::Narration, "[", "]", spans);
 		mark_spans(sMessage, MessageType::Thought, "((", "))", spans);
 		mark_spans(sMessage, MessageType::Direction, "{{", "}}", spans);
+		mark_spans(sMessage, MessageType::Action, "***", "***", spans);
+		mark_spans(sMessage, MessageType::Action, "**", "**", spans);
 		mark_spans(sMessage, MessageType::Action, "*", "*", spans);
 		mark_spans(sMessage, MessageType::Dialogue, "\"", "\"", spans);
 
 		fill_gaps(sMessage, MessageType::Dialogue, spans);
 		trim_spans(sMessage, spans);
 
-		std::vector<Submessage> subMessages;
+		std::vector<MessagePiece> subMessages;
 		fig::string result;
 		result.reserve(256);
 		for (auto& span : spans)
@@ -487,13 +489,16 @@ namespace fig::chat
 
 			result.append(ChatFormatter::FormatMessage(text, identifier, span.msgType));
 
-			subMessages.push_back(Submessage {
+			subMessages.push_back(MessagePiece {
 				span.msgType,
 				text,
 			});
 		}
 
-		return std::pair { std::move(result), std::move(subMessages) };
+		return std::pair { 
+			std::move(result),		// processed message
+			std::move(subMessages)	// pieces
+		};
 	}
 
 	static fig::string GetSignature(fig::string_view message) noexcept
@@ -526,7 +531,7 @@ namespace fig::chat
 		return signature;
 	}
 
-	std::vector<Submessage> ChatFormatter::AnalyseMessage(fig::string_view message) noexcept
+	std::vector<ChatFormatter::MessagePiece> ChatFormatter::AnalyseMessage(fig::string_view message) noexcept
 	{
 		// Attempt to disambiguate dialogue, actions, and narration
 		auto signature = GetSignature(message);
@@ -567,9 +572,9 @@ namespace fig::chat
 		return AnalyseMessage(message, MessageType::Dialogue, asteriskMsgType, defaultMsgType);
 	}
 
-	std::vector<Submessage> ChatFormatter::AnalyseMessage(fig::string_view message, MessageType quotedMsgType, MessageType asteriskMsgType, MessageType defaultMsgType) noexcept
+	std::vector<ChatFormatter::MessagePiece> ChatFormatter::AnalyseMessage(fig::string_view message, MessageType quotedMsgType, MessageType asteriskMsgType, MessageType defaultMsgType) noexcept
 	{
-		std::vector<Submessage> subMessages;
+		std::vector<MessagePiece> subMessages;
 		auto paragraphs = split_paragraphs(message);
 
 		for (auto& paragraph : paragraphs)
@@ -603,7 +608,7 @@ namespace fig::chat
 				if (empty_or_whitespace(text))
 					continue;
 
-				subMessages.push_back(Submessage {
+				subMessages.push_back(MessagePiece {
 					span.msgType,
 					text,
 				});

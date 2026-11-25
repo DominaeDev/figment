@@ -439,7 +439,7 @@ namespace fig::llm
 				content += std::format("{}", _stateVars.GetList());
 				content += "\nImportant: When events demands a parameter change, end your response with a compiled list of suggested changes.";
 				content += "\nEx: <change>Param = New value</change>\n";
-				content = apply_chat_template({ Message { Role::System, content } }, false);
+				content = apply_chat_template(Role::System, "system", content);
 				auto state_tokens = llama::tokenize(state.pVocab, content, false);
 				auto it = blocks.insert(itState, ContextBlock {
 					.role = Role::System,
@@ -1741,7 +1741,6 @@ namespace fig::llm
 			int32_t shift = added_tokens.value();
 			_contextState.chat_begin_pos.increment(shift);
 			_contextState.response_pos.increment(shift);
-
 			_contextState.active_persona = role;
 
 			if constexpr (Debugging)
@@ -1754,10 +1753,10 @@ namespace fig::llm
 		return false;
 	}
 
-	Sentences LLMInstance::GetHistory(size_t depth)
+	History LLMInstance::GetHistory(size_t depth)
 	{
 		std::scoped_lock lock(_stateMutex);
-		Sentences sentences;
+		History history;
 
 		int n = 0;
 		const auto& blocks = _contextState.GetBlocks();
@@ -1786,15 +1785,13 @@ namespace fig::llm
 				if (Constants::Embedding::SplitSentences)
 				{
 					// Split into individual sentences for RAG
-					replace_all_inplace(content, "?", ".");
-					replace_all_inplace(content, "!", ".");
-					auto split_sentences = split(content, '.', true);
-					for (auto& s : split_sentences)
-						sentences.insert(sentences.begin(), { block.role, s });
+					auto sentences = split_sentences(content);
+					for (auto& s : sentences)
+						history.insert(history.begin(), { block.role, fig::string { s } });
 				}
 				else
 				{
-					sentences.insert(sentences.begin(), { block.role, content });
+					history.insert(history.begin(), { block.role, content });
 				}
 
 				pos_begin = msg.find('>', pos_end + 1);
@@ -1804,7 +1801,7 @@ namespace fig::llm
 			}
 		}
 
-		return sentences;
+		return history;
 	}
 
 	#if _DEBUG

@@ -4,6 +4,7 @@
 #include "data/Character.h"
 
 using namespace fig::io;
+using namespace fig::data;
 using namespace fig::gui;
 
 namespace fig::chat
@@ -123,25 +124,20 @@ namespace fig::chat
 		return fig::nullref;
 	}
 
-	fig::chat::Messages ChatSession::GetMessages(size_t maxMessages) const noexcept
+	std::vector<fig::data::ChatMessage> ChatSession::GetMessages(size_t maxMessages) const noexcept
 	{
 		auto& log = _logger->GetLogMessages();
 		
 		if (maxMessages == 0uz)
 			maxMessages = std::numeric_limits<size_t>::max();
 
-		std::list<Message> messages;
+		std::list<ChatMessage> messages;
 		for (int32_t i = toI(log.size()) - 1; i >= 0; --i)
 		{
 			if (messages.size() >= maxMessages)
 				break;
 
-			auto& msg = log[toUZ(i)];
-			messages.push_front(Message {
-				.role = msg.role,
-				.content = msg.content,
-				.name = GetNameOf(msg.role),
-			});
+			messages.push_front(log[toUZ(i)]);
 		}
 		return messages
 			| std::ranges::to<std::vector>();
@@ -152,6 +148,5 @@ namespace fig::chat
 		if (_messagePoller)
 			_messagePoller->Update(fElapsed);
 	}
-
 	
 } // namespace
