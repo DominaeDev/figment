@@ -56,10 +56,12 @@ namespace fig::gui
 			fig::timestamp createdAt;
 			fig::timestamp updatedAt;
 			fig::observer_ptr<ChatListItem> pListItem;
+			std::unordered_set<fig::string> participants;
 			TimeBucket timeBucket;
 			bool filtered { false };
 
 			bool MatchesFlags(fig::io::ChatFilterFlags filter) noexcept;
+			bool FindParticipant(const SearchQuery& query) noexcept;
 		};
 
 		static TimeBucket GetTimeBucket(fig::timestamp then, fig::timestamp now) noexcept;

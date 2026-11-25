@@ -74,9 +74,22 @@ namespace fig::gui
 	{
 		Clear();
 
+		static auto fnGetParticipantNames = [](const fig::data::ChatInstance& chat)
+		{
+			std::unordered_set<fig::string> names;
+			for (auto& id : chat.characterIds)
+			{
+				if (auto try_name = Global::GetUserContent().GetCharacterName(id))
+					names.insert(lcase(*try_name));
+			}
+			if (auto try_user = Global::GetUserContent().GetCharacterName(chat.userId))
+				names.insert(lcase(*try_user));
+			return names;
+		};
+
 		auto now = fig::now();
 		_items = chats
-			| std::views::transform([now](auto&& pair) {
+			| std::views::transform([&](auto&& pair) {
 				auto& chatInstance = pair.first;
 				auto& chatLog = pair.second[0];
 				return Item {
@@ -86,6 +99,7 @@ namespace fig::gui
 					.chatLog = chatLog.instance.get(),
 					.createdAt = chatLog.createdAt,
 					.updatedAt = chatLog.updatedAt,
+					.participants = fnGetParticipantNames(chatInstance.instance.get()),
 					.timeBucket = GetTimeBucket(chatLog.updatedAt, now),
 				};
 			})
@@ -173,15 +187,26 @@ namespace fig::gui
 		return true;
 	}
 
+	bool ChatList::Item::FindParticipant(const SearchQuery& query) noexcept
+	{
+		for (auto& word : query.terms)
+		{
+			auto it = std::ranges::lower_bound(participants, word);
+			if (it == participants.end() or not it->starts_with(word))
+				return false;
+		}
+		return true;
+	}
+
 	void ChatList::Filter(ChatFilterFlags filterBy, const fig::string& search_string)
 	{
 		SearchQuery query { search_string };
 
 		for (auto& item : _items)
 		{
-			item.filtered = !item.chatLog 
+			item.filtered = not item.chatLog 
 				or not item.MatchesFlags(filterBy)
-				or !(*item.chatLog).GetSearchIndex().Match(query);
+				or not (item.FindParticipant(query) or (*item.chatLog).GetSearchIndex().Match(query));
 		}
 	}
 

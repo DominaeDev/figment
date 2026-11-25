@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 
 #include <algorithm> 
 #include <cctype>
@@ -40,7 +40,7 @@ namespace fig
 		auto startTime = std::chrono::steady_clock::now();
 		fn();
 		auto endTime = std::chrono::steady_clock::now();
-		LogLn(std::format("{}: {}ms", label, toD(std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count())));
+		LogLn(std::format("{}: {:.3f} ms", label, toD(std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count()) / 1000.0));
 	}
 
 	fig::uuid _CreateUUID()

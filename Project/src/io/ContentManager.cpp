@@ -27,6 +27,7 @@ namespace fig::io
 		InitCache<fig::sdl::Surface, "Image">();
 		InitCache<fig::data::VoiceSettings, "VoiceSetting">();
 
+		DetectBrokenAssets();
 		Preload();
 		RefreshChatCounts();
 	}
@@ -35,8 +36,6 @@ namespace fig::io
 	{
 		DEBUG_MEASURE_BEGIN("UserContentManager::Preload");
 		GetCache<fig::data::Character>().Preload();
-		GetCache<fig::data::Scenario>().Preload();
-		GetCache<fig::data::World>().Preload();
 		GetCache<fig::data::ChatInstance>().Preload();
 		DEBUG_MEASURE_END();
 	}
@@ -653,6 +652,8 @@ namespace fig::io
 	{
 		if (auto try_character = GetCache<Character>().TryGet(characterId))
 			return (*try_character).GetName();
+		if (auto try_user = GetCache<UserPersona>().TryGet(characterId))
+			return (*try_user).GetName();
 		return std::nullopt;
 	}
 
@@ -971,6 +972,62 @@ namespace fig::io
 	void UserContentManager::InvalidateFolders() noexcept
 	{
 		_bInvalidatedFolders = true;
+	}
+
+	void UserContentManager::DetectBrokenAssets()
+	{
+		if constexpr (Debugging)
+		{
+			std::unordered_set<fig::uuid> removeAssetIds;
+			auto assets = _pAssetMngr->GetAllAssets();
+
+			// Remove orphans (there should be none)
+			auto assetIds = assets
+				| std::views::transform([](auto&& ref) { return ref.get().id; })
+				| std::ranges::to<std::unordered_set>();
+
+			for (auto& assetRef : assets)
+			{
+				auto& asset = assetRef.get();
+				if (asset.parent_id.empty())
+					continue;
+
+				if (not assetIds.contains(asset.parent_id))
+					removeAssetIds.insert(asset.id);
+			}
+
+			// Removed empty chat instances (there should be none)
+			auto validChatIds = assets
+				| std::views::filter([](auto&& ref) { return ref.get().type.IsOfType(AssetType::Chat, ChatAssetType::Log); })
+				| std::views::transform([](auto&& ref) { return ref.get().parent_id; })
+				| std::ranges::to<std::unordered_set>();
+
+			auto brokenChatInstanceIds = assets
+				| std::views::filter([validChatIds](auto&& ref) {
+				auto& a = ref.get();
+				return a.type.IsOfType(AssetType::Chat, ChatAssetType::Instance)
+					and not validChatIds.contains(a.id);
+				})
+				| std::views::transform([](auto&& ref) { return ref.get().id; })
+				| std::ranges::to<std::vector>();
+
+			removeAssetIds.insert_range(brokenChatInstanceIds);
+
+			// Remove invalid scenarios (there should be none)
+			auto invalidScenarioIds = assets
+				| std::views::filter([this](auto&& ref) { return ref.get().type.IsOfType(AssetType::Scenario) and not Get<fig::data::Scenario>(ref.get().id).has_value(); })
+				| std::views::transform([](auto&& ref) { return ref.get().id; })
+				| std::ranges::to<std::unordered_set>();
+
+			removeAssetIds.insert_range(invalidScenarioIds);
+
+			auto removeList = removeAssetIds | std::ranges::to<std::vector>();
+			if (auto removed = _pAssetMngr->DeleteAssets(removeList))
+			{
+				LogLn(std::format("Removed {} broken assets.", removed));
+				assert(false && "Found broken assets");
+			}
+		}
 	}
 
 	void UserContentManager::RefreshFolders()

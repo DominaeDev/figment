@@ -175,6 +175,7 @@ namespace fig::io
 
 	protected:
 		void Preload();
+		void DetectBrokenAssets();
 
 		template <typename T>
 		AssetCacheBase<T>& GetCache()

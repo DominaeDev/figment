@@ -30,14 +30,17 @@ namespace fig::chat
 			// Init log
 			_log.SetTitle(session.GetStaging().GetStoryTitle());
 
-			for (int32_t i = 0; i < MaxBots(); ++i)
+			if constexpr (Disabled) //! Participants could potentially change
 			{
-				Role role = bot_from_index(i);
-				if (session.GetStaging().HasCharacterInRole(role))
-					_log.AddSearchTerm(session.GetNameOf(role));
+				for (int32_t i = 0; i < MaxBots(); ++i)
+				{
+					Role role = bot_from_index(i);
+					if (session.GetStaging().HasCharacterInRole(role))
+						_log.AddSearchTerm(session.GetNameOf(role));
+				}
+				if (session.GetStaging().HasCharacterInRole(Role::User))
+					_log.AddSearchTerm(session.GetNameOf(Role::User));
 			}
-			if (session.GetStaging().HasCharacterInRole(Role::User))
-				_log.AddSearchTerm(session.GetNameOf(Role::User));
 		}
 	}
 

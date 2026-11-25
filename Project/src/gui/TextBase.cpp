@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/TextBase.h"
 
 namespace fig::gui
@@ -82,21 +82,19 @@ namespace fig::gui
 			while (paragraphStart < text.size())
 			{
 				size_t newlinePos = text.find('\n', paragraphStart);
-				size_t paragraphEnd = (newlinePos == fig::string_view::npos) ? text.size() : newlinePos + 1uz;
-				const char* pText = text.data() + paragraphStart;
+				size_t length = (newlinePos == fig::string_view::npos) ? text.size() - paragraphStart : newlinePos - paragraphStart + 1uz;
 
 				result.emplace_back(TTFTextLine {
-					.position = static_cast<int32_t>(pText - text.data()),
-					.length = static_cast<int32_t>(paragraphEnd - paragraphStart),
+					.position = static_cast<int32_t>(paragraphStart),
+					.length = static_cast<int32_t>(length),
 					.eol = true,
 				});
 
 				assert(result.back().length > 0);
-
-				if (paragraphEnd >= text.size())
+				if (newlinePos == fig::string_view::npos)
 					break;
 
-				paragraphStart = paragraphEnd;
+				paragraphStart = newlinePos + 1uz;
 			}
 			return result;
 		}

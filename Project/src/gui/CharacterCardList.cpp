@@ -35,6 +35,8 @@ namespace fig::gui
 		};
 
 		bool bLLM = Global::IsLLMInitialized();
+		if constexpr (Debugging)
+			bLLM = true;
 
 		auto& menu = CreateMenu();
 
@@ -48,7 +50,7 @@ namespace fig::gui
 			.SetDelegate([this, characterId] { 
 				PushEvent(UserEvent::ResumeLastChatWith, (fig::string)characterId); 
 			});
-		menu.AddItem("View existing chats" + (chatCount > 0 ? std::format(" ({})", chatCount) : ""))
+		menu.AddItem("View all chats" + (chatCount > 0 ? std::format(" ({})", chatCount) : ""))
 			.SetEnabled(chatCount > 0)
 			.SetDelegate([this, characterId] { 
 				PushEvent(UserEvent::NavigateToChatList, &characterId); 

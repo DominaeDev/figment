@@ -36,6 +36,7 @@ namespace fig::gui
 		// Message
 		_pMessage = CreateControl<StaticText>("", FontFace::Italic, 14.0, false);
 		_pMessage->EnableEllipsis(true);
+		_pMessage->SetMaxLines(1);
 		_pMessage->SetPosition(66, 28);
 
 		// Timestamp
@@ -93,6 +94,7 @@ namespace fig::gui
 				_pPortrait->SetTexture((*portrait).get());
 				_pPortrait->SetVisible(true);
 			}
+			_pMessage->SetText("(Empty)");
 		}
 
 		if (Global::GetUserContent().GetUserSettings(chatInstanceId).flags.IsSet(AssetUserSettings::Flag::Favorite))
@@ -179,6 +181,8 @@ namespace fig::gui
 		auto& menu = CreateMenu();
 
 		bool bLLM = Global::IsLLMInitialized();
+		if constexpr (Debugging)
+			bLLM = true;
 
 		auto userSettings = Global::GetUserContent().GetUserSettings(_chatInstanceId);
 

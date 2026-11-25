@@ -167,19 +167,12 @@ namespace fig::gui
 		auto& line = _lines[line_index];
 		auto& texture = _textures[line_index];
 
-		const char* pText = _text.data();
-		std::advance(pText, line.position);
-		size_t textLength = line.length;
-
-		std::string altText;
+		fig::string lineText = _text.substr(line.position, line.length);
 		if (_bEllipsis)
-		{
-			altText = GetEllipsisText(pText);
-			pText = altText.c_str();
-			textLength = altText.length();
-		}
+			lineText = GetEllipsisText(lineText);
 
-		if (line.length > 0 and pText[line.length - 1] == '\n')
+		size_t textLength = lineText.size();
+		if (line.length > 0 and lineText.ends_with('\n'))
 			textLength -= 1;
 
 		newWidth = 0;
@@ -191,7 +184,7 @@ namespace fig::gui
 		{
 			if (bgColor.a() == 0xFF) // Opaque background: Use ClearType
 			{
-				if (SDL_Surface* pSurface = TTF_RenderText_LCD(_pFont, pText, textLength, fgColor, bgColor))
+				if (SDL_Surface* pSurface = TTF_RenderText_LCD(_pFont, lineText.c_str(), textLength, fgColor, bgColor))
 				{
 					newWidth = pSurface->w;
 					newHeight = pSurface->h;
@@ -203,7 +196,7 @@ namespace fig::gui
 			}
 			else
 			{
-				if (SDL_Surface* pSurface = TTF_RenderText_Blended(_pFont, pText, textLength, fgColor))
+				if (SDL_Surface* pSurface = TTF_RenderText_Blended(_pFont, lineText.c_str(), textLength, fgColor))
 				{
 					newWidth = pSurface->w;
 					newHeight = pSurface->h;
