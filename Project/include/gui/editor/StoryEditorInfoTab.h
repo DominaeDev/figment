@@ -19,7 +19,6 @@ namespace fig::gui
 	private:
 		fig::observer_ptr<fig::data::Scenario> _pScenario {};
 		fig::observer_ptr<TextBox> _pName {};
-		fig::observer_ptr<TextBox> _pTitle {};
 		fig::observer_ptr<TextBox> _pGenres {};
 	};
 }

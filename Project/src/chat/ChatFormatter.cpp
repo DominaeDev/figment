@@ -159,7 +159,7 @@ namespace fig::chat
 		switch (msgType)
 		{
 		case MessageType::Undefined:
-			text = std::format("<{1}=\"{{character}}\">{0}</{2}>", text, Tags::Open::Dialogue, Tags::Close::Dialogue);
+			text = std::format("<{1}=\"{{character}}\">{0}<{2}>", text, Tags::Open::Dialogue, Tags::Close::Dialogue);
 			break;
 		case MessageType::Dialogue:
 			text.append(std::format("\"<{0}>", Tags::Close::Dialogue));
@@ -226,10 +226,10 @@ namespace fig::chat
 			return std::format("<{2}=\"{0}\">{1}<{3}>", identifier, Thought(message), Tags::Open::Thought, Tags::Close::Thought);
 			break;
 		case MessageType::Narration:
-			return std::format("<{1}>{0}<{2}>", message, Narration(Tags::Open::Narration), Tags::Close::Narration);
+			return std::format("<{1}>{0}<{2}>", Narration(message), Tags::Open::Narration, Tags::Close::Narration);
 			break;
 		case MessageType::Direction:
-			return std::format("<{1}>{0}<{2}>", message, Director(Tags::Open::Direction), Tags::Close::Direction);
+			return std::format("<{1}>{0}<{2}>", Director(message), Tags::Open::Direction, Tags::Close::Direction);
 		}
 		return {};
 	}

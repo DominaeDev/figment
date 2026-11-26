@@ -57,12 +57,21 @@ namespace fig::chat
 
 	fig::string ChatSession::GetIdentifierOf(Role role) const
 	{
-		if (role == Role::User)
-			return "USR";
-
-		if (auto try_character = _staging.GetCharacterByRole(role))
-			return ucase((*try_character).chatId);
-		return "_UNK";
+		if (is_npc(role))
+			return "";
+		
+		if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
+		{
+			if (is_user(role))
+				return "@USR";
+			else if (is_bot(role))
+			{
+				if (auto try_character = _staging.GetCharacterByRole(role))
+					return std::format("@{}", ucase((*try_character).chatId));
+				return "@UNK";
+			}
+		}
+		return GetNameOf(role);
 	}
 
 	fig::string ChatSession::GetNameOf(Role role) const
@@ -93,19 +102,13 @@ namespace fig::chat
 		{
 			if (i > 0)
 				pattern += " | ";
-			if (useCharacterIds)
-				pattern += std::format("\"@{}\"", GetIdentifierOf(bot_from_index(i)));
-			else
-				pattern += std::format("\"{}\"", GetNameOf(bot_from_index(i)));
+			pattern += std::format("\"{}\"", GetIdentifierOf(bot_from_index(i)));
 		}
 		if (bIncludeUser)
 		{
 			if (not pattern.empty())
 				pattern += " | ";
-			if (useCharacterIds)
-				pattern += std::format("\"@{}\"", GetIdentifierOf(Role::User));
-			else
-				pattern += std::format("\"{}\"", GetNameOf(Role::User));
+			pattern += std::format("\"{}\"", GetIdentifierOf(Role::User));
 		}
 		return pattern;
 	}

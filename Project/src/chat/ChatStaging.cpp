@@ -400,10 +400,10 @@ namespace fig::chat
 
 	fig::string ChatStaging::GetStoryTitle() const noexcept
 	{
-		if (auto title = GetScenario().GetTitle(_context); not empty_or_whitespace(title))
-			return title;
+		if (not empty_or_whitespace(_scenario.instance.name))
+			return _scenario.instance.name;
 
-		fig::string title = "Chat with ";
+		fig::string title;
 		if (auto characters = GetCharacters(); not characters.empty())
 		{
 			for (size_t i = 0uz; i < characters.size(); ++i)
@@ -418,7 +418,7 @@ namespace fig::chat
 			}
 			return title;
 		}
-		return "Untitled chat";
+		return "Untitled";
 	}
 
 	std::vector<fig::uuid> ChatStaging::GetCharacterIds() const noexcept

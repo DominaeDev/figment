@@ -29,16 +29,9 @@ namespace fig::gui
 		CreateLabel(this, pSizer, "Story name");
 		_pName = CreateTextBox(this, pSizer, [this](auto&& value) {
 			_pScenario->name = value;
-			_pTitle->SetPlaceholder(_pName->GetText());
 		});
 		_pName->SetText(_pScenario->name);
 		_pName->SetMaxWidth(300);
-
-		// Title
-		CreateLabel(this, pSizer, "Custom chat title");
-		_pTitle = CreateTextBox(this, pSizer, ValueBinding<fig::string>(&_pScenario->title));
-		_pTitle->SetMaxWidth(300);
-		_pTitle->SetPlaceholder(_pName->GetText());
 
 		// About
 		CreateLabel(this, pSizer, "About story");
@@ -63,10 +56,8 @@ namespace fig::gui
 	{
 		if (_arguments.pCharacter)
 		{
-			_pName->SetText(std::format("{}'s story", _arguments.pCharacter->name.GetSpokenName()));
+			_pName->SetText(_arguments.pCharacter->name.GetSpokenName());
 			_pName->SetEnabled(false);
-
-			_pTitle->SetPlaceholder(_pName->GetText());
 		}
 	}
 

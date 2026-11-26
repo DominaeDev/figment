@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "llm/LLMTypes.h"
 #include "llm/ContextBlock.h"
@@ -9,6 +9,11 @@
 namespace fig::chat
 {
 	class ChatSession;
+}
+
+namespace fig::data
+{
+	struct ChatMessage;
 }
 
 namespace fig::llm
@@ -54,6 +59,8 @@ namespace fig::llm
 
 		std::optional<int32_t> RealizeUncachedBlocks();
 		std::optional<int32_t> RemoveDiscardedBlocks();
+
+		void LoadHistory(const std::vector<fig::data::ChatMessage>& history, std::weak_ptr<fig::chat::ChatSession> wpSession, int32_t reserved = 0);
 
 		// Blocks
 		int32_t AllocateKVCache(int32_t alloc_min);

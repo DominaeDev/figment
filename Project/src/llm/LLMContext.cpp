@@ -575,4 +575,50 @@ namespace fig::llm
 		auto& cache = GetCache();
 		return cache.GetView(cursor_pos.as_int(), cache.length() - cursor_pos.as_int());
 	}
+
+	void LLMContext::LoadHistory(const std::vector<fig::data::ChatMessage>& history, std::weak_ptr<fig::chat::ChatSession> wpSession, int32_t reserved)
+	{
+		int32_t remaining_tokens = _pModel->ctx_size - reserved;
+		for (auto& block : _blocks)
+			remaining_tokens -= block.length();
+
+		VocabPtr pVocab = llama::get_vocab(_pModel->pModel);
+
+		if (auto pSession = wpSession.lock())
+		{
+			auto& staging = pSession->GetStaging();
+
+			std::vector<ContextBlock> blocks;
+			for (auto& message : history | std::views::reverse)
+			{	
+				if (remaining_tokens <= 0)
+					break;
+
+				fig::string name = pSession->GetIdentifierOf(message.role);
+				fig::string content = message.content;
+				content = ChatFormatter::FormatMessage(content, name, message.msgType);
+				content = apply_chat_template(message.role, name, content);
+				auto tokens = llama::tokenize(_pVocab, content, false);
+				
+				remaining_tokens -= toI(tokens.size());
+				if (remaining_tokens >= 0)
+				{
+					blocks.push_back(ContextBlock {
+						.role = message.role,
+						.name = name,
+						.content = message.content,
+						.tokens = tokens,
+						.flags {}, // uncached
+						.sequenceSlots { SequenceSlot::Shared },
+						.turn = message.turn,
+						.responseId = message.responseId,
+					});
+				}
+			}
+
+			for (auto& block : blocks | std::views::reverse)
+				AppendBlock(std::move(block));
+		}
+	}
+
 }

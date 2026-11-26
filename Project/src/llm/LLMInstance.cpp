@@ -232,6 +232,9 @@ namespace fig::llm
 		}
 
 		_contextState.TokenizeUncached(_pSession);
+
+		_contextState.LoadHistory(args.history, _pSession, toI(Constants::DefaultModelSettings::MaxResponseLength * 1.5));
+
 		auto pos_attn = _contextState.DecodeUncached();
 		if (not pos_attn.is_valid())
 			return false; // Error
@@ -268,17 +271,11 @@ namespace fig::llm
 			{
 				if (i > 0)
 					namesPattern += "| ";
-				if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
-					namesPattern += std::format("| \"@{}\"", pSession->GetIdentifierOf(bot_from_index(i)));
-				else
-					namesPattern += std::format("| \"{}\"", pSession->GetNameOf(bot_from_index(i)));
+				namesPattern += std::format("| \"{}\"", pSession->GetIdentifierOf(bot_from_index(i)));
 			}
 			if (_options.flags.IsSet(ChatOptions::Flag::AllowUserResponse))
 			{
-				if (_options.flags.IsSet(ChatOptions::Flag::UseCharacterIds))
-					namesPattern += std::format("| \"@{}\"", pSession->GetIdentifierOf(Role::User));
-				else
-					namesPattern += std::format("| \"{}\"", pSession->GetNameOf(Role::User));
+				namesPattern += std::format("| \"{}\"", pSession->GetIdentifierOf(Role::User));
 			}
 		}
 		replace_all_inplace(grammar, "##NAMES##", namesPattern);
@@ -1294,7 +1291,7 @@ namespace fig::llm
 			return false;
 
 		// Process
-		fig::string identifier = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" + GetIdentifierOf(role) : GetNameOf(role);
+		fig::string identifier = GetIdentifierOf(role);
 		fig::string content = message;
 		content = eval_text(content, _staging.GetContext(role));
 		auto [processed, subMessages] = ChatFormatter::ProcessMessage(content, identifier);
@@ -1393,7 +1390,7 @@ namespace fig::llm
 		};
 
 		int32_t current_turn = _turn_counter.load();
-		fig::string responder = _options.flags.IsSet(ChatOptions::Flag::UseCharacterIds) ? "@" + GetIdentifierOf(role) : GetNameOf(role);
+		fig::string responder = GetIdentifierOf(role);
 
 		bool bAllowNarration = true;
 

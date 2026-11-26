@@ -47,8 +47,6 @@ namespace fig::gui
 		{
 			auto& scenario = try_scenario.value();
 			_name = scenario.name;
-			if (_name.empty())
-				_name = scenario.title;
 			_updatedAt = Global::GetUserContent().GetUpdatedAt(_assetId).value_or({});
 			SetLabel(scenario.name);
 //			SetIndex(scenario.GetSearchIndex());

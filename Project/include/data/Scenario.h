@@ -160,14 +160,12 @@ namespace fig::data
 		void AppendTags(const fig::string_list& tags);
 		const fig::string_list& GetTags() const noexcept { return _tags; }
 
-		fig::string GetTitle(const Context& context) const noexcept;
 		Scene& CreateScene() noexcept;
 
 		bool AppendRoleSlot(fig::chat::Role role, fig::string_view label) noexcept;
 		bool RemoveRoleSlot(fig::chat::Role role) noexcept;
 
 		fig::string name;
-		fig::string title;
 		fig::string about;
 		fig::string creator;
 		fig::string version;
@@ -189,7 +187,6 @@ namespace fig::data
 
 			return Fields(
 				Element { "Name",			&Scenario::name },
-				Element { "Title",			&Scenario::title },
 				Element { "Description",	&Scenario::about },
 				Element { "Creator",		&Scenario::creator },
 				Element { "Version",		&Scenario::version },

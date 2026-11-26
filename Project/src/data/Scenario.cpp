@@ -82,15 +82,6 @@ namespace fig::data
 		return std::nullopt;
 	}
 
-	fig::string Scenario::GetTitle(const Context& context) const noexcept
-	{
-		if (not empty_or_whitespace(title))
-			return eval_text(title, context);
-		else if (not empty_or_whitespace(name))
-			return name;
-		return "";
-	}
-
 	Scenario::Scene& Scenario::CreateScene() noexcept
 	{
 		scenes.emplace_back(Scene {

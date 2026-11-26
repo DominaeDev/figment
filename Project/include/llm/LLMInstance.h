@@ -39,7 +39,7 @@ namespace fig::llm
 	struct LLMChatArguments
 	{
 		std::weak_ptr<fig::chat::ChatSession> wpSession;
-		std::vector<fig::data::ChatMessage> messages;
+		std::vector<fig::data::ChatMessage> history;
 		fig::chat::ChatOptions options;
 		int32_t narrationCooldownDuration = Constants::Chat::DefaultNarratorCooldown;
 	};

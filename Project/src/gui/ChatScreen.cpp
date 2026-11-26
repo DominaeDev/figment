@@ -180,7 +180,7 @@ namespace fig::gui
 		{
 			LLMChatArguments llmArgs {
 				.wpSession = _pSession,
-				.messages = _pSession->GetMessages(),
+				.history = _pSession->GetMessages(),
 				.options = options,
 			};
 			pLLM->Initialize(llmArgs); //! @todo: Shouldn't be initialized from here
