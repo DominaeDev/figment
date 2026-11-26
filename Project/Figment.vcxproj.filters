@@ -833,7 +833,7 @@
     <ClCompile Include="src\gui\ITextStyleProvider.cpp">
       <Filter>Source Files\Frontend\GUI\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ChatBackgroundPopOver.cpp">
+    <ClCompile Include="src\gui\BackgroundSettingsPopOver.cpp">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\PortraitImageCarousel.cpp">
@@ -1027,6 +1027,9 @@
     </ClCompile>
     <ClCompile Include="src\gui\PortraitImage.cpp">
       <Filter>Source Files\Frontend\GUI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\VoiceSettingsPopOver.cpp">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2038,7 +2041,7 @@
     <ClInclude Include="include\io\AsyncIO.h">
       <Filter>Source Files\Frontend\IO\Assets</Filter>
     </ClInclude>
-    <ClInclude Include="include\gui\ChatBackgroundPopOver.h">
+    <ClInclude Include="include\gui\BackgroundSettingsPopOver.h">
       <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
     <ClInclude Include="include\gui\PortraitImageCarousel.h">
@@ -2271,6 +2274,9 @@
     </ClInclude>
     <ClInclude Include="include\data\ChatMessage.h">
       <Filter>Source Files\Frontend\IO\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\VoiceSettingsPopOver.h">
+      <Filter>Source Files\Frontend\GUI\Screens\Chat\Controls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -41,7 +41,7 @@ namespace fig::chat
 				entry.role = piece.role;
 				entry.msgType = piece.msgType;
 				entry.complete = piece.isComplete;
-				entry.generated = piece.isGenerated;
+				entry.allowTTS = piece.allowTTS;
 				entry.content += piece.content;
 				entry.turn = piece.turn;
 				entry.subTurn = piece.subMessageIndex;
@@ -58,7 +58,7 @@ namespace fig::chat
 					.msgType = piece.msgType,
 					.content = piece.content,
 					.complete = piece.isComplete,
-					.generated = piece.isGenerated,
+					.allowTTS = piece.allowTTS,
 					.turn = piece.turn,
 					.subTurn = piece.subMessageIndex,
 				});

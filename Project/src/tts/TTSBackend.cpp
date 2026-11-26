@@ -119,6 +119,20 @@ namespace fig::tts
 		return Initialize();
 	}
 
+	void TTSBackend::CancelAll()
+	{
+		{
+			std::scoped_lock lock(_pending_mutex);
+			queue_clear(_pending);
+		}
+		{
+			std::scoped_lock lock(_active_mutex);
+			for (auto& [_, pPromise] : _active_promises)
+				pPromise->set_value(std::unexpected(TTSError::Canceled));
+			_active_promises.clear();
+		}
+	}
+
 	bool TTSBackend::CheckHealth()
 	{
 		if (_status == TTSStatus::Uninitialized)
@@ -163,12 +177,16 @@ namespace fig::tts
 			if (IsAsyncRequestAlive(request))
 			{
 				std::scoped_lock<std::mutex> lock(_active_mutex);
-				_active_promises.erase(request.id);
+				if (_active_promises.erase(request.id) == 0)
+				{
+					LogLn("TTS result discarded, cancelled.");
+					continue;
+				}
 			}
 			else
 			{
 				// Canceled
-				request.promise->set_value(std::unexpected(TTSError::Canceled));
+				LogLn("TTS result discarded, cancelled.");
 				continue;
 			}
 

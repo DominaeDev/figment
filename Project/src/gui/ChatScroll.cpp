@@ -342,12 +342,12 @@ namespace fig::gui
 				}
 			}
 
-			if (piece.complete and piece.generated)
+			if (piece.complete)
 			{
 				RefreshActive();
 
 				// Enqueue TTS
-				if (piece.msgType == MessageType::Dialogue and is_bot(piece.role))
+				if (piece.msgType == MessageType::Dialogue and piece.allowTTS and is_bot(piece.role))
 				{
 					auto characterId = pSession->GetCharacterIdOf(piece.role);
 					if (auto results = Global::GetTTSBackend().Speak(characterId, piece.content))

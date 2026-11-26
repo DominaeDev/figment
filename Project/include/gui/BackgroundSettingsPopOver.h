@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Overlay.h"
 
@@ -14,10 +14,10 @@ namespace fig::gui
 	class BackgroundImageCarousel;
 	class ImageAlignmentWidget;
 
-	class ChatBackgroundPopOver : public Overlay
+	class BackgroundSettingsPopOver : public Overlay
 	{
 	public:
-		ChatBackgroundPopOver(FramePtr pFrame, fig::observer_ptr<fig::chat::ChatSession> pSession, fig::observer_ptr<ChatBackground> pBackground, fig::observer_ptr<BehindChat> pBehindChat);
+		BackgroundSettingsPopOver(FramePtr pFrame, fig::observer_ptr<fig::chat::ChatSession> pSession, fig::observer_ptr<ChatBackground> pBackground, fig::observer_ptr<BehindChat> pBehindChat);
 
 		uint32_t Show(fig::point position = { -1, -1 });
 		uint32_t Show(fig::rect parentRect);

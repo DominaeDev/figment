@@ -1,5 +1,5 @@
 ﻿#include <pch.h>
-#include "gui/ChatBackgroundPopOver.h"
+#include "gui/BackgroundSettingsPopOver.h"
 #include "gui/BackgroundImageCarousel.h"
 #include "gui/Frame.h"
 #include "gui/TexturedBorderRenderer.h"
@@ -18,7 +18,7 @@ namespace fig::gui
 	constexpr fig::coord kSpacing = 6;
 	constexpr fig::coord kMargin = 12;
 
-	ChatBackgroundPopOver::ChatBackgroundPopOver(FramePtr pFrame, fig::observer_ptr<fig::chat::ChatSession> pSession, fig::observer_ptr<ChatBackground> pBackground, fig::observer_ptr<BehindChat> pBehindChat) : Overlay(pFrame),
+	BackgroundSettingsPopOver::BackgroundSettingsPopOver(FramePtr pFrame, fig::observer_ptr<fig::chat::ChatSession> pSession, fig::observer_ptr<ChatBackground> pBackground, fig::observer_ptr<BehindChat> pBehindChat) : Overlay(pFrame),
 		_pBackground(pBackground),
 		_pBehindChat(pBehindChat)
 	{
@@ -166,15 +166,16 @@ namespace fig::gui
 			_pBehindChat->SetAlpha(value);
 		});
 
+		EnableControls(_pBackground->GetVisible());
+
 		LayoutNow();
 		ResizeToFit(false, true);
 
 		SetHeight(GetHeight() + kSpacing + kMargin);
-
 		SetVisible(false);
 	}
 
-	uint32_t ChatBackgroundPopOver::Show(fig::rect parentRect)
+	uint32_t BackgroundSettingsPopOver::Show(fig::rect parentRect)
 	{
 		if (_pOwner)
 			_pOwner->PopAllOverlays();
@@ -194,7 +195,7 @@ namespace fig::gui
 		return _pOwner->PushOverlay(this);
 	}
 
-	uint32_t ChatBackgroundPopOver::Show(fig::point position)
+	uint32_t BackgroundSettingsPopOver::Show(fig::point position)
 	{
 		if (_pOwner)
 			_pOwner->PopAllOverlays();
@@ -212,7 +213,7 @@ namespace fig::gui
 		return _pOwner->PushOverlay(this);
 	}
 
-	EventResult ChatBackgroundPopOver::OnEvent(fig::event& event)
+	EventResult BackgroundSettingsPopOver::OnEvent(fig::event& event)
 	{
 		if (IsUserEvent(event, UserEvent::Scrolling))
 		{
@@ -223,7 +224,7 @@ namespace fig::gui
 		return EventResult::Pass;
 	}
 
-	fig::observer_ptr<StaticText> ChatBackgroundPopOver::CreateLabel(fig::string_view text)
+	fig::observer_ptr<StaticText> BackgroundSettingsPopOver::CreateLabel(fig::string_view text)
 	{
 		auto pSizer = GetSizer();
 		auto pLabel = CreateControl<StaticText>(fig::string { text }, FontFace::Default, 14.0, false);
@@ -232,7 +233,7 @@ namespace fig::gui
 		return pLabel;
 	}
 
-	fig::observer_ptr<Slider> ChatBackgroundPopOver::CreateSlider()
+	fig::observer_ptr<Slider> BackgroundSettingsPopOver::CreateSlider()
 	{
 		auto pSizer = GetSizer();
 		auto pSlider = CreateControl<Slider>();
@@ -241,7 +242,7 @@ namespace fig::gui
 		return pSlider;
 	}
 
-	void ChatBackgroundPopOver::EnableControls(bool bEnabled)
+	void BackgroundSettingsPopOver::EnableControls(bool bEnabled)
 	{
 		_pOpacitySlider->SetEnabled(bEnabled);
 		_pSaturationSlider->SetEnabled(bEnabled);
@@ -255,7 +256,7 @@ namespace fig::gui
 		_pAlignment->SetEnabled(bEnabled);
 	}
 
-	void ChatBackgroundPopOver::SetFit(ImageFit fit)
+	void BackgroundSettingsPopOver::SetFit(ImageFit fit)
 	{
 		_pBackground->SetFit(fit);
 		switch (fit)
@@ -271,19 +272,19 @@ namespace fig::gui
 		}
 	}
 
-	void ChatBackgroundPopOver::SetBounded(bool bBounded)
+	void BackgroundSettingsPopOver::SetBounded(bool bBounded)
 	{
 		_pBackground->SetBounded(bBounded);
 		_pFitArea->SetOn(bBounded, true);
 		_pFitWindow->SetOn(!bBounded, true);
 	}
 
-	void ChatBackgroundPopOver::SetImage(const fig::uuid& assetId)
+	void BackgroundSettingsPopOver::SetImage(const fig::uuid& assetId)
 	{
 		_pBackground->SetImage(assetId);
 	}
 
-	void ChatBackgroundPopOver::EnableBackground(bool bEnable)
+	void BackgroundSettingsPopOver::EnableBackground(bool bEnable)
 	{
 		_pBackground->SetVisible(bEnable);
 		EnableControls(bEnable);

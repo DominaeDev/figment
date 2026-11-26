@@ -18,6 +18,8 @@ namespace fig::data
 		const std::vector<ChatMessage>& GetMessages() const noexcept { return _messages; }
 		const SearchIndex& GetSearchIndex() const noexcept { return _searchIndex; }
 		void AddSearchTerm(const fig::string& term) noexcept;
+	
+		bool OnLoadFromXml(XmlReaderElement node) override;
 
 	private:
 		fig::string _title;

@@ -889,7 +889,7 @@ namespace fig::llm
 							.role = responderRole,
 							.msgType = msgType,
 							.isComplete = bEndOfMessageType,
-							.isGenerated = true,
+							.allowTTS = true,
 							.turn = current_turn,
 							.subMessageIndex = current_sub_turn,
 						});
@@ -1023,7 +1023,7 @@ namespace fig::llm
 			r = __SendMessage(task.input, prepareArgs, generateArgs);
 			break;
 		case LLMTaskType::PushMessage:
-			r = __PushMessage(task.role, task.input, task.msgType, !task.flags.IsSet(LLMTaskFlag::HiddenMessage), task.ttl);
+			r = __PushMessage(task.role, task.input, task.msgType, task.flags, task.ttl);
 			break;
 		case LLMTaskType::Instigate:
 			r = __Instigate(task.role, task.msgType, task.msgCount, prepareArgs, generateArgs);
@@ -1179,7 +1179,7 @@ namespace fig::llm
 
 	bool LLMInstance::PushDirection(const fig::string& message, int32_t ttl)
 	{
-		return PushMessage(Role::Director, ChatFormatter::Director(message), MessageType::Direction, false, ttl);
+		return PushMessage(Role::Director, ChatFormatter::Director(message), MessageType::Direction, { LLMTaskFlag::HiddenMessage }, ttl);
 	}
 
 	bool LLMInstance::PushNarration(const fig::string& message)
@@ -1214,7 +1214,7 @@ namespace fig::llm
 		return true;
 	}
 
-	bool LLMInstance::PushMessage(Role role, const fig::string& message, MessageType msgType, bool visible, int ttl)
+	bool LLMInstance::PushMessage(Role role, const fig::string& message, MessageType msgType, LLMTaskFlags flags, int ttl)
 	{
 		if (empty_or_whitespace(message))
 			return false;
@@ -1224,7 +1224,7 @@ namespace fig::llm
 			.input = message,
 			.role = role,
 			.msgType = msgType,
-			.flags { visible ? LLMTaskFlag::None : LLMTaskFlag::HiddenMessage },
+			.flags = flags,
 			.msgCount = 0,
 			.ttl = ttl,
 		});
@@ -1264,7 +1264,7 @@ namespace fig::llm
 		if (empty_or_whitespace(message))
 			return false;
 
-		__PushMessage(Role::User, message, MessageType::Undefined, true, 0);
+		__PushMessage(Role::User, message, MessageType::Undefined, {}, 0);
 
 		prepareArgs = PrepareArguments {
 			.responder = Role::Undefined,
@@ -1285,10 +1285,13 @@ namespace fig::llm
 		return true;
 	}
 
-	bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgType, bool visible, int32_t ttl)
+	bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgType, LLMTaskFlags flags, int32_t ttl)
 	{
 		if (empty_or_whitespace(message))
 			return false;
+
+		bool bVisible = not flags.IsSet(LLMTaskFlag::HiddenMessage);
+		bool bAllowTTS = flags.IsSet(LLMTaskFlag::AllowTTS);
 
 		// Process
 		fig::string identifier = GetIdentifierOf(role);
@@ -1326,7 +1329,7 @@ namespace fig::llm
 
 		LockAndDo([&] {
 			_activeResponseIds.insert(responseId);
-			if (visible)
+			if (bVisible)
 			{
 				// Add message to result queue
 				int32_t subMessageIndex = 0;
@@ -1368,7 +1371,7 @@ namespace fig::llm
 						.role = role,
 						.msgType = subMsg.msgType,
 						.isComplete = true,
-						.isGenerated = false,
+						.allowTTS = bAllowTTS,
 						.turn = current_turn,
 						.subMessageIndex = subMessageIndex++,
 					});
@@ -1520,7 +1523,7 @@ namespace fig::llm
 
 	bool LLMInstance::Instruct(fig::string instructions)
 	{
-		PushMessage(Role::Director, ChatFormatter::Director(instructions), MessageType::Direction, false, 4);
+		PushMessage(Role::Director, ChatFormatter::Director(instructions), MessageType::Direction, { LLMTaskFlag::HiddenMessage }, 4);
 		Instigate(Role::Undefined, MessageType::Undefined, 3);
 		return true;
 	}

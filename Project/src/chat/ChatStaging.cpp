@@ -162,30 +162,6 @@ namespace fig::chat
 		return Role::Undefined;
 	}
 
-	fig::string ChatStaging::GetChatIdOf(Role role) const
-	{
-		if (role == Role::User)
-			return "USR";
-		if (auto try_find = GetCharacterByRole(role))
-			return ucase((*try_find).chatId);
-		return "UNK?";
-	}
-
-	fig::string ChatStaging::GetNameOf(Role role) const
-	{
-		if (role == Role::System)
-			return fig::string { Constants::Chat::Names::System };
-		if (role == Role::Narrator)
-			return fig::string { Constants::Chat::Names::Narrator };
-		if (role == Role::Director)
-			return fig::string { Constants::Chat::Names::Director };
-
-		if (auto try_find = GetCharacterByRole(role))
-			return (*try_find).GetName();
-
-		return fig::string { Constants::Chat::Names::Unknown };
-	}
-
 	fig::gui::color_triple ChatStaging::GetColorsOf(Role role) const
 	{
 		if (auto try_character = GetCharacterByRole(role))

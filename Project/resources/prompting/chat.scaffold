@@ -41,7 +41,7 @@
 			
 			Dialogue: &lt;dialogue="{group?@}{char:id}"&gt;"Hi there!"&lt;/dialogue&gt;
 			{enable-narrator?\nNarration: &lt;narrator&gt;[...]&lt;/narrator&gt;}
-			{enable-director?\nDirection: &lt;director&gt;...&lt;/director&gt;}
+			{enable-director?\nDirection: &lt;direction&gt;...&lt;/direction&gt;}
 			Emoting: &lt;emote="{group?@}{char:id}"&gt;*smiles*&lt;/emote&gt;
 			{enable-think?\nInner monologue: &lt;thought="{group?@}{char:id}"&gt;I wonder...&lt;/thought&gt;}
 			\n\n
@@ -54,9 +54,9 @@
 		</Block>
 
 		<Block type="static" condition="enable-director" order="203" priority="high">
-			## Direction
-			The director will occasionally interject at important moments to provide direction and guide events in the story.
-			All participants must follow the director's instructions.\n\n
+			## Director
+			A director will occasionally interject at important moments to provide explicit direction and guide events in the story.
+			You must follow the director's instructions without exception.\n\n
 		</Block>
 
 		<Block type="static" condition="enable-state" order="204" priority="high">
@@ -99,14 +99,14 @@
 		{stub?
 		{talk?root ::= "\\"" [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/dialogue&gt;" more}
 		{act?root ::= "*" [^"*&lt;\\|&gt;@\\n]* "*&lt;/emote&gt;" more}
-		{narrate?root ::= "[" [^"*&lt;\\|&gt;@\\]]* "]&lt;/narrator&gt;" more}
+		{narrate?root ::= "[" [^"*&lt;\\|&gt;@\\]]* "]&lt;/narration&gt;" more}
 		}
 
 		# Continuations
 		{continue?
 		{talk?root ::= [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/dialogue&gt;" more}
 		{act?root ::= [^"*&lt;\\|&gt;@\\n]* "*&lt;/emote&gt;" more}
-		{narrate?root ::= [^"*&lt;\\|&gt;\\]]* "]&lt;/narrator&gt;" more}
+		{narrate?root ::= [^"*&lt;\\|&gt;\\]]* "]&lt;/narration&gt;" more}
 		{think?root ::= [^"*&lt;\\|&gt;\\]]* "]&lt;/thought&gt;" more}
 		}
 
@@ -121,7 +121,7 @@
 		# Message types
 		dlg ::= "&lt;dialogue=\\"" name "\\"&gt;\\"" text "\\"&lt;/dialogue&gt;"
 		act ::= "&lt;emote=\\"" name "\\"&gt;*" text "*&lt;/emote&gt;"
-		narr ::= "&lt;narrator&gt;[" text "]&lt;/narrator&gt;"
+		narr ::= "&lt;narration&gt;[" text "]&lt;/narration&gt;"
 		any ::= (dlg | act{enable-narrator? \\| narr} | ws)
 
 		text ::= [^\\t&lt;|&gt;@"*\\]]*

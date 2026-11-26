@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "tts/TTSTypes.h"
@@ -31,6 +31,7 @@ namespace fig::tts
 		bool Initialize();
 		void Shutdown();
 		bool Restart();
+		void CancelAll();
 	
 		TTSStatus GetStatus() const noexcept { return _status; };
 

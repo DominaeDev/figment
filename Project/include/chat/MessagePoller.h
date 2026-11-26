@@ -13,7 +13,7 @@ namespace fig::chat
 			fig::chat::MessageType msgType { fig::chat::MessageType::Undefined };
 			fig::string content;
 			bool complete {};
-			bool generated {}; // vs. authored
+			bool allowTTS {};
 			int32_t turn {};
 			int32_t subTurn {};
 		};

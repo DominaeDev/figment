@@ -48,6 +48,7 @@ namespace fig::gui
 
 		void SetStatusBar(fig::string_view message);
 		void ShowBackgroundSettings();
+		void ShowVoiceSettings();
 		void ShowOverlayButtons(bool bShow);
 
 	private:

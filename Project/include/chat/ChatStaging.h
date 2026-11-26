@@ -48,8 +48,6 @@ namespace fig::chat
 
 		const fig::string& GetGrammar() const;
 		
-		fig::string GetChatIdOf(Role role) const;
-		fig::string GetNameOf(Role role) const;
 		fig::gui::color_triple GetColorsOf(Role role) const;
 
 		[[nodiscard]] inline Context& GetContext() noexcept { return GetContext(Role::Bot1); }

@@ -10,8 +10,8 @@ namespace fig::chat
 			constexpr fig::const_string Dialogue = "dialogue";
 			constexpr fig::const_string Action = "emote";
 			constexpr fig::const_string Thought = "thinking";
-			constexpr fig::const_string Narration = "narrator";
-			constexpr fig::const_string Direction = "director";
+			constexpr fig::const_string Narration = "narration";
+			constexpr fig::const_string Direction = "direction";
 		}
 
 		namespace Close
@@ -19,8 +19,8 @@ namespace fig::chat
 			constexpr fig::const_string Dialogue = "/dialogue";
 			constexpr fig::const_string Action = "/emote";
 			constexpr fig::const_string Thought = "/thinking";
-			constexpr fig::const_string Narration = "/narrator";
-			constexpr fig::const_string Direction = "/director";
+			constexpr fig::const_string Narration = "/narration";
+			constexpr fig::const_string Direction = "/direction";
 		}
 		
 		constexpr fig::const_string StateReport = "change";

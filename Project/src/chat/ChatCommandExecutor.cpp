@@ -118,7 +118,7 @@ namespace fig::chat
 
 	static bool cmdParrot(ParsedChatCommand cmd, CmdCtx ctx)
 	{
-		return ctx.pLLM->PushMessage(Role::Bot1, cmd.text, MessageType::Dialogue, 1);
+		return ctx.pLLM->PushMessage(Role::Bot1, cmd.text, MessageType::Dialogue, { LLMTaskFlag::AllowTTS }, 1);
 	}
 
 	static bool cmdInstigateAction(ParsedChatCommand cmd, CmdCtx ctx)
@@ -210,13 +210,13 @@ namespace fig::chat
 	{
 		if (!cmd.text.empty())
 		{
-			ctx.pLLM->PushMessage(Role::Narrator, "[{user} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, false, 1);
-			ctx.pLLM->PushMessage(Role::Director, "\\{\\{Describe " + cmd.text + " from {user}'s perspective and pay attention to visual details.\\}\\}", MessageType::Direction, false, 1);
+			ctx.pLLM->PushMessage(Role::Narrator, "[{user} takes a moment to examine " + cmd.text + ".]", MessageType::Narration, { LLMTaskFlag::HiddenMessage }, 1);
+			ctx.pLLM->PushMessage(Role::Director, "\\{\\{Describe " + cmd.text + " from {user}'s perspective and pay attention to visual details.\\}\\}", MessageType::Direction, { LLMTaskFlag::HiddenMessage }, 1);
 		}
 		else
 		{
-			ctx.pLLM->PushMessage(Role::Narrator, "[{user} takes a moment to observe their surroundings.]", MessageType::Narration, false, 1);
-			ctx.pLLM->PushMessage(Role::Director, "\\{\\{Describe what {user} can clearly see, including points of interest, interactable objects, and anyone who is present.\\}\\}", MessageType::Direction, false, 1);
+			ctx.pLLM->PushMessage(Role::Narrator, "[{user} takes a moment to observe their surroundings.]", MessageType::Narration, { LLMTaskFlag::HiddenMessage }, 1);
+			ctx.pLLM->PushMessage(Role::Director, "\\{\\{Describe what {user} can clearly see, including points of interest, interactable objects, and anyone who is present.\\}\\}", MessageType::Direction, { LLMTaskFlag::HiddenMessage }, 1);
 		}
 		return ctx.pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 	}
@@ -225,8 +225,8 @@ namespace fig::chat
 	{
 		if (!cmd.text.empty())
 		{
-			ctx.pLLM->PushMessage(Role::Narrator, "[{user} examines the " + cmd.text + ".]", MessageType::Narration, false, 1);
-			ctx.pLLM->PushMessage(Role::Director, "\\{\\{Describe what {user} is able to find, if anything, " + cmd.text + " in minute detail.\\}\\}", MessageType::Direction, false, 1);
+			ctx.pLLM->PushMessage(Role::Narrator, "[{user} examines the " + cmd.text + ".]", MessageType::Narration, { LLMTaskFlag::HiddenMessage }, 1);
+			ctx.pLLM->PushMessage(Role::Director, "\\{\\{Describe what {user} is able to find, if anything, " + cmd.text + " in minute detail.\\}\\}", MessageType::Direction, { LLMTaskFlag::HiddenMessage }, 1);
 			return ctx.pLLM->Instigate(Role::Narrator, MessageType::Narration, 1);
 		}
 		return false;

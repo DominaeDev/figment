@@ -34,7 +34,7 @@ namespace fig::llm
 	float embd_similarity_cos(const std::vector<float>& embd1, const std::vector<float>& embd2, int n);
 
 	PromptTemplateType auto_detect_template(llama_model* pModel);
-	fig::string apply_chat_template(fig::chat::Role role, const fig::string& name, const fig::string& content);
+	fig::string apply_chat_template(fig::chat::Role role, fig::string_view name, fig::string_view content);
 
 	std::pair<fig::string, fig::string> get_chat_template_prefix_suffix(fig::chat::Role role, fig::string name);
 	fig::string apply_chat_template_prefix(fig::chat::Role role, fig::string content, fig::string name);

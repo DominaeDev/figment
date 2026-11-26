@@ -24,7 +24,7 @@ namespace fig::llm
 		fig::chat::Role role = fig::chat::Role::Undefined;
 		fig::chat::MessageType msgType = fig::chat::MessageType::Undefined;
 		bool isComplete = false;
-		bool isGenerated = false;	// not authored
+		bool allowTTS = false;
 		int32_t turn {};
 		int32_t subMessageIndex {};
 	};
@@ -47,8 +47,9 @@ namespace fig::llm
 	enum class LLMTaskFlag : int32_t
 	{
 		None = 0,
-		HiddenMessage = 1 << 0,
-		ExtendMessage = 1 << 1,
+		HiddenMessage	= 1 << 0,
+		ExtendMessage	= 1 << 1,
+		AllowTTS		= 1 << 2,
 	};
 	using LLMTaskFlags = EnumFlags<LLMTaskFlag>;
 
@@ -74,7 +75,7 @@ namespace fig::llm
 		// Tasks
 		bool GreetUser();
 		bool SendMessage(fig::string message);
-		bool PushMessage(fig::chat::Role role, const fig::string& message, fig::chat::MessageType msgType = fig::chat::MessageType::Undefined, bool visible = true, int ttl = 0);
+		bool PushMessage(fig::chat::Role role, const fig::string& message, fig::chat::MessageType msgType = fig::chat::MessageType::Undefined, LLMTaskFlags flags = {}, int ttl = 0);
 		bool Instigate(fig::chat::Role role, fig::chat::MessageType msgType, int messageCount = 0);
 		bool Instruct(fig::string instructions);
 		std::vector<RemovedMessage> EraseMessages(int numMessages = 1);
@@ -197,7 +198,7 @@ namespace fig::llm
 		void __ProcessTaskQueue(std::stop_token stop, __GenerationCompleteCallback onComplete);
 		bool __ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
-		bool __PushMessage(fig::chat::Role role, fig::string message, fig::chat::MessageType msgType, bool visible, int32_t ttl);
+		bool __PushMessage(fig::chat::Role role, fig::string message, fig::chat::MessageType msgType, LLMTaskFlags flags, int32_t ttl);
 		bool __Instigate(fig::chat::Role role, fig::chat::MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __Continue(fig::uuid responseId, fig::uuid subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 

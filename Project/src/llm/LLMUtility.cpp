@@ -1116,22 +1116,26 @@ namespace fig::llm
 		return PromptTemplateType::Undefined;
 	}
 
-	fig::string apply_chat_template(fig::chat::Role role, const fig::string& name, const fig::string& content)
+	fig::string apply_chat_template(fig::chat::Role role, fig::string_view name, fig::string_view content)
 	{
 		fig::string sName;
-		if (is_npc(role))
-			sName = "system";
-		else if (is_user(role))
-			sName = "user";
-		else
+		if (is_bot(role))
 		{
 			sName = name;
 			// sName = "assistant";
 		}
+		else if (is_user(role))
+			sName = "user";
+		else if (role == Role::Narrator)
+			sName = "narrator";
+		else if (role == Role::Director)
+			sName = "director";
+		else
+			sName = "system";
 
 		llama_chat_message llama_msg {
 			sName.c_str(),
-			content.c_str(),
+			content.data(),
 		};
 
 		if (!_template.empty())

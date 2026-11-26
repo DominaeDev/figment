@@ -14,7 +14,8 @@
 #include "gui/ButtonWithIcon.h"
 #include "gui/Slider.h"
 #include "gui/BehindChat.h"
-#include "gui/ChatBackgroundPopOver.h"
+#include "gui/BackgroundSettingsPopOver.h"
+#include "gui/VoiceSettingsPopOver.h"
 #include "app/AppState.h"
 #include "chat/ChatSession.h"
 #include "chat/ChatCommands.h"
@@ -65,7 +66,7 @@ namespace fig::gui
 
 		_pVoiceButton = _pMainArea->CreateControl<ButtonWithIcon>(Icon::CHAT_VOICE);
 		_pVoiceButton->SetTheme(ButtonThemes::OverlayButton);
-		_pVoiceButton->SetDelegate([this] { });
+		_pVoiceButton->SetDelegate([this] { ShowVoiceSettings(); });
 		pCenterSizer->Add(_pChatScroll, -1, SizerFlag::Fill | SizerFlag::Bottom, 8);
 		pCenterSizer->Add(_pTextBox, 0, SizerFlag::AlignBottom | SizerFlag::AlignCenterHorizontal);
 
@@ -440,7 +441,15 @@ namespace fig::gui
 	{
 		ShowOverlayButtons(false);
 
-		auto pPopOver = new ChatBackgroundPopOver(GetOwnerFrame(), _pSession.get(), _pBackground, _pBehindChat);
+		auto pPopOver = new BackgroundSettingsPopOver(GetOwnerFrame(), _pSession.get(), _pBackground, _pBehindChat);
+		_popOverId = pPopOver->Show(fig::point { _pInfoPanel->GetAbsoluteX() - pPopOver->GetWidth() - 4, _pBackgroundButton->GetY() + 4 });
+	}
+
+	void ChatScreen::ShowVoiceSettings()
+	{
+		ShowOverlayButtons(false);
+
+		auto pPopOver = new VoiceSettingsPopOver(GetOwnerFrame());
 		_popOverId = pPopOver->Show(fig::point { _pInfoPanel->GetAbsoluteX() - pPopOver->GetWidth() - 4, _pBackgroundButton->GetY() + 4 });
 	}
 
