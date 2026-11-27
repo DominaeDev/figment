@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/Color.h"
 #include "util/StringUtils.h"
 
@@ -86,7 +86,6 @@ namespace fig
 
 	fig::color fig::color::Add(fig::color other) const noexcept
 	{
-
 		return fig::color {
 			static_cast<uint8_t>(std::clamp(toF(r) + toF(other.r), 0.0f, 255.0f)),
 			static_cast<uint8_t>(std::clamp(toF(g) + toF(other.g), 0.0f, 255.0f)),

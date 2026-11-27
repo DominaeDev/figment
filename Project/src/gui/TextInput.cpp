@@ -183,8 +183,7 @@ static int32_t GetCursorTextIndex(int32_t pixel_x, const TTF_SubString* substrin
 
 namespace fig::gui
 {
-	TextInput::TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode) : Control(pParent), TextBase(GetSDLTextEngine(), fontFace, ptSize),
-		_mode { mode }
+	TextInput::TextInput(ControlPtr pParent, FontFace fontFace, double ptSize, Mode mode) : Control(pParent), TextBase(GetSDLTextEngine(), fontFace, ptSize)
 	{
 		SetForegroundColor(Color::TextBoxForeground);
 		SetBackgroundColor(Color::TextBoxBackground);
@@ -200,6 +199,7 @@ namespace fig::gui
 		EnableClipping(false);
 
 		SetSize(300, _fontHeight + GetMarginVertical());
+		SetMode(mode);
 	}
 
 	TextInput::~TextInput()
@@ -1492,14 +1492,22 @@ namespace fig::gui
 
 			case SDLK_RETURN:
 			case SDLK_KP_ENTER:
-				if (_bMultiline)
+				if (_mode == Mode::Chat)
 				{
-					Insert("\n");
-					PushUndo(UndoAction::Insert, false);
-					DidChange();
-					return EventResult::Handled;
+					if (bModCtrl || bModShift)
+					{
+						Insert("\n");
+						PushUndo(UndoAction::Insert, false);
+						DidChange();
+						return EventResult::Handled;
+					}
+					else if (bModNone and _fnOnEnter)
+					{
+						_fnOnEnter(_text); // Invoke
+						return EventResult::Handled;
+					}
 				}
-				else if (_mode == Mode::Chat and (bModCtrl || bModShift))
+				else if (_bMultiline)
 				{
 					Insert("\n");
 					PushUndo(UndoAction::Insert, false);

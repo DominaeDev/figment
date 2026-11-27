@@ -20,6 +20,7 @@ namespace fig::gui
 
 		void SetFilter(const fig::string& filter) noexcept;
 		void Reorder();
+		void Clear();
 
 	protected:
 		void OnScroll() override;
@@ -31,7 +32,6 @@ namespace fig::gui
 		void ShowChats(const fig::io::ChatCollection& chatInstances);
 		void DeleteChat(ChatListItem& item);
 		void DeleteArchivedChats();
-		void Clear();
 
 	private:
 		void Sort(fig::io::SortBy sortBy, fig::io::OrderBy orderBy);

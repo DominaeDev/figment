@@ -216,6 +216,11 @@ namespace fig::gui
 			return EventResult::Continue;
 		}
 
-		return EventResult::Pass;
+		return Screen::OnEvent(event);
+	}
+
+	void ChatListingScreen::OnDeactivated()
+	{
+		_pChatList->Clear();
 	}
 }

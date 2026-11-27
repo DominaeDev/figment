@@ -54,6 +54,7 @@ namespace fig::gui
 		_pChatScroll = pCenterArea->CreateControl<ChatScroll>();
 
 		_pTextBox = pCenterArea->CreateControl<TextInput>(FontFace::Default, Constants::GUI::ChatBoxFontSize, TextInput::Mode::Chat);
+		_pTextBox->SetBackgroundColor(Color::Debug);
 		_pTextBox->SetSize(Constants::GUI::ChatTextBoxWidth, 88);
 		_pTextBox->SetMargins(8, 4, 4, 6);
 		_pTextBox->EnableAutoSize(true);
@@ -67,6 +68,7 @@ namespace fig::gui
 		_pVoiceButton = _pMainArea->CreateControl<ButtonWithIcon>(Icon::CHAT_VOICE);
 		_pVoiceButton->SetTheme(ButtonThemes::OverlayButton);
 		_pVoiceButton->SetDelegate([this] { ShowVoiceSettings(); });
+
 		pCenterSizer->Add(_pChatScroll, -1, SizerFlag::Fill | SizerFlag::Bottom, 8);
 		pCenterSizer->Add(_pTextBox, 0, SizerFlag::AlignBottom | SizerFlag::AlignCenterHorizontal);
 
@@ -442,7 +444,7 @@ namespace fig::gui
 		ShowOverlayButtons(false);
 
 		auto pPopOver = new BackgroundSettingsPopOver(GetOwnerFrame(), _pSession.get(), _pBackground, _pBehindChat);
-		_popOverId = pPopOver->Show(fig::point { _pInfoPanel->GetAbsoluteX() - pPopOver->GetWidth() - 4, _pBackgroundButton->GetY() + 4 });
+		_popOverId = pPopOver->Show(fig::point { _pInfoPanel->GetAbsoluteX() - pPopOver->GetWidth() - 4, 4 });
 	}
 
 	void ChatScreen::ShowVoiceSettings()
@@ -450,7 +452,7 @@ namespace fig::gui
 		ShowOverlayButtons(false);
 
 		auto pPopOver = new VoiceSettingsPopOver(GetOwnerFrame());
-		_popOverId = pPopOver->Show(fig::point { _pInfoPanel->GetAbsoluteX() - pPopOver->GetWidth() - 4, _pBackgroundButton->GetY() + 4 });
+		_popOverId = pPopOver->Show(fig::point { _pInfoPanel->GetAbsoluteX() - pPopOver->GetWidth() - 4, 4 });
 	}
 
 	void ChatScreen::ShowOverlayButtons(bool bShow)

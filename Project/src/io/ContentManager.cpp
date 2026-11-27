@@ -1025,7 +1025,6 @@ namespace fig::io
 			if (auto removed = _pAssetMngr->DeleteAssets(removeList))
 			{
 				LogLn(std::format("Removed {} broken assets.", removed));
-				assert(false && "Found broken assets");
 			}
 		}
 	}

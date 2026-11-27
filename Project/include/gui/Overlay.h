@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "gui/Control.h"
 
@@ -15,7 +15,6 @@ namespace fig::gui
 
 	protected:
 		fig::observer_ptr<Frame> _pOwner;
-
 		void Destroy();
 
 	private:

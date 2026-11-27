@@ -9,7 +9,6 @@ namespace fig::gui
 	public:
 		VoiceSettingsPopOver(FramePtr pFrame);
 
-
 		uint32_t Show(fig::point position = { -1, -1 });
 		uint32_t Show(fig::rect parentRect);
 

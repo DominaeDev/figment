@@ -37,7 +37,7 @@ namespace fig::gui
 
 		// Enabled
 		_pEnabled = CreateControl<CheckBox>("Enable text-to-speech");
-		_pEnabled->SetValue(userSettings.GetBool(UserSetting::TTS::Enabled));
+		_pEnabled->SetValue(userSettings.GetBool(UserSetting::TTS::Enabled), true);
 		_pEnabled->SetDelegate([this](bool bOn) { EnableTTS(bOn); });
 		pSizer->Add(_pEnabled, 0, SizerFlag::Left | SizerFlag::Right, kMargin);
 

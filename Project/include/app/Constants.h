@@ -16,7 +16,7 @@ namespace fig::Constants
 
 	namespace Debug
 	{
-		constexpr fig::const_string TestCharacterId = "0d1f4008-37e4-4406-8926-61535d908ae5";
+		constexpr fig::const_string TestCharacterId = "3f2b321f-1190-439c-8c63-24d444a9674c";
 	}
 
 	namespace GUI
@@ -96,7 +96,19 @@ namespace fig::Constants
 		namespace InfoPanel
 		{
 			constexpr fig::coord DefaultWidth = 340;
-			constexpr std::array<fig::coord, 12> Widths { 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, };
+
+			template <size_t N>
+			consteval std::array<fig::coord, N> GetWidths()
+			{
+				constexpr fig::coord Min = 260;
+				constexpr fig::coord Step = 20;
+
+				std::array<fig::coord, N> values {};
+				for (size_t i = 0uz; i < N; ++i)
+					values[i] = Min + toI(i) * Step;
+				return values;
+			}
+			constexpr auto Widths = GetWidths<32>();
 			constexpr fig::coord DefaultImageSize = 600;
 		}
 

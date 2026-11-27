@@ -14,10 +14,11 @@ namespace fig::gui
 
 		void ShowAllChats(bool bHidden = false);
 		void ShowChatsWith(const fig::uuid& characterId, bool bHidden);
-	
+
 	protected:
 		void OnUpdate(float fElapsed) override;
 		EventResult OnEvent(fig::event& event) override;
+		void OnDeactivated() override;
 
 		void ShowSortingMenu() noexcept;
 		void ShowFilteringMenu() noexcept;
