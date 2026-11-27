@@ -153,7 +153,9 @@ namespace fig::gui
 	void InfoPanel::SetImage(const fig::uuid& assetId)
 	{
 		if (auto try_image = Global::GetUserContent().GetTexture(assetId, GetSDLRenderer()))
+		{
 			_pViewport->SetTexture((*try_image).get());
+		}
 	}
 
 	void InfoPanel::ClearImage() noexcept

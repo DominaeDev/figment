@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "tts/AudioData.h"
@@ -6,7 +6,7 @@
 
 namespace fig::tts
 {
-	enum class TTSTask
+	enum class TTSTaskType
 	{
 		Undefined = 0,
 		Speech,
@@ -14,9 +14,9 @@ namespace fig::tts
 		Unload,
 	};
 
-	constexpr auto TTSTaskMapping = std::array<std::pair<TTSTask, std::string_view>, 2> {
-		std::pair { TTSTask::Speech,	"tts" },
-		std::pair { TTSTask::Design,	"design" },
+	constexpr auto TTSTaskMapping = std::array<std::pair<TTSTaskType, std::string_view>, 2> {
+		std::pair { TTSTaskType::Speech,	"tts" },
+		std::pair { TTSTaskType::Design,	"design" },
 	};
 
 	enum class TTSError
@@ -28,15 +28,21 @@ namespace fig::tts
 		Unavailable,	// Server didn't respond
 	};
 
-	
-	using TTSPayload = std::expected<AudioData, TTSError>;
-	using TTSPromise = std::promise<TTSPayload>;
-	using TTSFuture = std::future<TTSPayload>;
 
-	struct TTSResult
+	struct TTSPayload
+	{
+		AudioData audioData;
+		fig::uuid sourceId;
+	};
+	
+	using TTSResult = std::expected<TTSPayload, TTSError>;
+	using TTSPromise = std::promise<TTSResult>;
+	using TTSFuture = std::future<TTSResult>;
+
+	struct TTSTask
 	{
 		uint64_t id;
-		TTSTask task;
+		TTSTaskType task;
 		TTSFuture future;
 	};
 

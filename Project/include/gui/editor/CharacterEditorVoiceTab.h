@@ -30,7 +30,7 @@ namespace fig::gui
 		void Generate() noexcept;
 		void PlayStop() noexcept;
 		void SetStatusMessage(fig::string_view message);
-		void OnAudioResult(fig::tts::TTSPayload&& payload);
+		void OnAudioResult(fig::tts::TTSResult&& payload);
 
 	private:
 		fig::uuid _characterId {};

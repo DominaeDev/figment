@@ -506,5 +506,5 @@ namespace fig
 		requires (const T t) { { t.empty() } -> std::same_as<bool>; };
 
 	template <HasEmpty T>
-	constexpr bool not_empty(const T& value) noexcept { return not value.empty(); }
+	constexpr bool non_empty(const T& value) noexcept { return not value.empty(); }
 }

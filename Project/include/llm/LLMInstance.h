@@ -99,7 +99,7 @@ namespace fig::llm
 
 	private:
 		void ClearResponseQueue();
-		bool CanGenerate() const;
+		bool IsReadyAndAvailable() const;
 		bool PushDirection(const fig::string& message, int32_t ttl = 1);
 		bool PushNarration(const fig::string& message);
 		bool PushUserDialogue(const fig::string& message);
@@ -208,6 +208,9 @@ namespace fig::llm
 
 		fig::string GetIdentifierOf(fig::chat::Role role);
 		fig::string GetNameOf(fig::chat::Role role);
+		int32_t GetCurrentTurn() { return _turn_counter.load(); };
+		int32_t IncrementTurnCounter();
+		void ResetTurnCounter() { _turn_counter.store(0); }
 
 	private:
 		std::atomic<ReadyState> _readyState { ReadyState::Uninitialized };

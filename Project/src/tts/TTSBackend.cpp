@@ -206,7 +206,7 @@ namespace fig::tts
 		return it != _active_promises.end();
 	}
 
-	std::optional<TTSResult> TTSBackend::EnqueueTask(TTSTask task, TTSTaskArguments args)
+	std::optional<TTSTask> TTSBackend::EnqueueTask(TTSTaskType task, TTSTaskArguments args)
 	{
 		if (not Global::GetUserSettings().GetBool(UserSetting::TTS::Enabled))
 			return std::nullopt; // TTS disabled
@@ -240,18 +240,16 @@ namespace fig::tts
 		}
 		_pending_cv.notify_one();
 
-		return TTSResult {
+		return TTSTask {
 			.id = id,
 			.task = task,
 			.future = std::move(future),
 		};
 	}
 
-	std::expected<std::vector<TTSResult>, TTSError> TTSBackend::Speak(fig::uuid characterId, fig::string_view text, bool split)
+	std::expected<std::vector<TTSTask>, TTSError> TTSBackend::Speak(fig::uuid characterId, fig::string_view text, fig::uuid sourceId, bool split)
 	{
-		text = ChatFormatter::Unwrap(text);
-
-		fig::string content { text };
+		fig::string content { ChatFormatter::Unwrap(text) };
 		escape_json_inplace(content);
 
 		fig::uuid modelId = Global::GetUserSettings().GetUUID(fig::io::UserSetting::TTS::SpeechModel);
@@ -265,7 +263,7 @@ namespace fig::tts
 		else
 			return std::unexpected(TTSError::Failed); // No voice ref
 
-		std::vector<TTSResult> results;
+		std::vector<TTSTask> results;
 		if (split)
 		{
 			auto sentences = split_sentences(content, true);
@@ -297,9 +295,10 @@ namespace fig::tts
 
 			for (auto& phrase : phrases)
 			{
-				if (auto task = EnqueueTask(fig::tts::TTSTask::Speech, 
+				if (auto task = EnqueueTask(fig::tts::TTSTaskType::Speech, 
 					TTSTaskArguments {
 						.modelId = modelId, 
+						.sourceId = sourceId,
 						.text = phrase,
 						.voiceReference = voiceReference,
 					}))
@@ -311,9 +310,10 @@ namespace fig::tts
 		}
 		else if (not empty_or_whitespace(content)) // Don't split
 		{
-			if (auto task = EnqueueTask(fig::tts::TTSTask::Speech, 
+			if (auto task = EnqueueTask(fig::tts::TTSTaskType::Speech, 
 				TTSTaskArguments {
 					.modelId = modelId, 
+					.sourceId = sourceId,
 					.text = content,
 					.voiceReference = voiceReference,
 				}))
@@ -327,7 +327,7 @@ namespace fig::tts
 		return std::unexpected(TTSError::Failed);
 	}
 
-	std::expected<TTSResult, TTSError> TTSBackend::Design(fig::string_view text, fig::string_view instruct, uint32_t seed)
+	std::expected<TTSTask, TTSError> TTSBackend::Design(fig::string_view text, fig::string_view instruct, uint32_t seed)
 	{
 		instruct = trim(instruct);
 		if (instruct.empty())
@@ -335,7 +335,7 @@ namespace fig::tts
 
 		fig::uuid modelId = Global::GetUserSettings().GetUUID(fig::io::UserSetting::TTS::DesignModel);
 
-		if (auto task = EnqueueTask(fig::tts::TTSTask::Design, 
+		if (auto task = EnqueueTask(fig::tts::TTSTaskType::Design, 
 			TTSTaskArguments {
 				.modelId = modelId,
 				.text = fig::string { text },
@@ -352,7 +352,7 @@ namespace fig::tts
 		if (_status == TTSStatus::Uninitialized)
 			return;
 
-		auto discard = EnqueueTask(TTSTask::Unload, {});
+		auto discard = EnqueueTask(TTSTaskType::Unload, {});
 	}
 
 	void TTSBackend::UnloadSpeechModels()
@@ -362,10 +362,10 @@ namespace fig::tts
 
 		for (auto& model : _ttsModels.models)
 		{
-			if (model.task.task != TTSTask::Speech)
+			if (model.task.task != TTSTaskType::Speech)
 				continue;
 
-			auto discard = EnqueueTask(TTSTask::Unload, TTSTaskArguments { .modelId = model.id });
+			auto discard = EnqueueTask(TTSTaskType::Unload, TTSTaskArguments { .modelId = model.id });
 		}
 	}
 
@@ -376,10 +376,10 @@ namespace fig::tts
 
 		for (auto& model : _ttsModels.models)
 		{
-			if (model.task.task != TTSTask::Design)
+			if (model.task.task != TTSTaskType::Design)
 				continue;
 
-			auto discard = EnqueueTask(TTSTask::Unload, TTSTaskArguments { .modelId = model.id });
+			auto discard = EnqueueTask(TTSTaskType::Unload, TTSTaskArguments { .modelId = model.id });
 		}
 	}
 
@@ -389,7 +389,7 @@ namespace fig::tts
 		_ttsBackends.LoadFromXml(fig::path { "resources/packages/tts_backends.xml" });
 	}
 
-	std::expected<AudioData, TTSError> TTSBackend::SendRequest(TTSTask task, TTSTaskArguments args)
+	TTSResult TTSBackend::SendRequest(TTSTaskType task, TTSTaskArguments args)
 	{
 		if (not _pHttp->IsConnected())
 		{
@@ -401,7 +401,7 @@ namespace fig::tts
 		if (seed == 0)
 			seed = GetRandomNumber<uint32_t>();
 
-		if (task == TTSTask::Speech)
+		if (task == TTSTaskType::Speech)
 		{
 			fig::string request;
 			if (args.voiceReference.pData)
@@ -425,11 +425,16 @@ namespace fig::tts
 			}
 
 			if (auto response = _pHttp->Post("/v1/audio/speech", request))
-				return std::move(AudioData::FromBytes(std::move(response.payload)));
+			{
+				return TTSPayload {
+					.audioData = std::move(AudioData::FromBytes(std::move(response.payload))),
+					.sourceId = args.sourceId,
+				};
+			}
 			else
 				return std::unexpected(TTSError::Failed);
 		}
-		else if (task == TTSTask::Design)
+		else if (task == TTSTaskType::Design)
 		{
 			fig::string strInstructions { args.instructions };
 			escape_json_inplace(strInstructions);
@@ -442,11 +447,16 @@ namespace fig::tts
 			}})", (fig::string)args.modelId, args.text, strInstructions, seed);
 
 			if (auto response = _pHttp->Post("/v1/audio/speech", request))
-				return std::move(AudioData::FromBytes(std::move(response.payload)));
+			{
+				return TTSPayload {
+					.audioData = std::move(AudioData::FromBytes(std::move(response.payload))),
+					.sourceId = args.sourceId,
+				};
+			}
 			else
 				return std::unexpected(TTSError::Failed);
 		}
-		else if (task == TTSTask::Unload)
+		else if (task == TTSTaskType::Unload)
 		{
 			if (not args.modelId.empty())
 			{

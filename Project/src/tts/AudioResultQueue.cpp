@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "tts/AudioResultQueue.h"
 #include "audio/AudioManager.h"
 
@@ -34,7 +34,7 @@ namespace fig::tts
 		}
 	}
 
-	void AudioResultQueue::Add(fig::tts::TTSResult&& result)
+	void AudioResultQueue::Add(fig::tts::TTSTask&& result)
 	{
 		_pendingResults.emplace_back(std::move(result));
 	}

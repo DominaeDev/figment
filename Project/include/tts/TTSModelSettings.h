@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "io/XmlData.h"
@@ -20,7 +20,7 @@ namespace fig::tts
 
 		struct Task
 		{
-			fig::tts::TTSTask task;
+			fig::tts::TTSTaskType task;
 			fig::string id;
 			
 			static auto XmlFields() noexcept
@@ -32,7 +32,7 @@ namespace fig::tts
 					Text(&Task::task,
 						[](auto&& value) { return enum_serialize(value, fig::tts::TTSTaskMapping); },
 						[](auto&& value) { return enum_deserialize(value, fig::tts::TTSTaskMapping); }
-					)	.Validator([](auto& value) { return value != fig::tts::TTSTask::Undefined; })
+					)	.Validator([](auto& value) { return value != fig::tts::TTSTaskType::Undefined; })
 				);
 			}
 		} task;

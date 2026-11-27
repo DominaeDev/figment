@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "gui/ImageViewport.h"
 #include "gui/TexturedBorderRenderer.h"
 #include "gui/AppResources.h"

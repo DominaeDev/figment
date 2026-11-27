@@ -57,7 +57,7 @@ namespace fig::llm
 			// Tokenize uncached messages
 			for (auto& block : _blocks)
 			{
-				if (block.is_static() or block.is_cached() or block.is_discarded() or not_empty(block.tokens))
+				if (block.is_static() or block.is_cached() or block.is_discarded() or non_empty(block.tokens))
 					continue;
 
 				fig::string content = block.content;

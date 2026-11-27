@@ -52,7 +52,7 @@ namespace fig::gui
 		_pTTSVoiceModel = CreateDropList(this, pSizer,
 			[](int32_t value) {
 				auto voiceModels = Global::GetTTSBackend().GetVoiceModels()
-					| std::views::filter([](auto&& m) { return m.task.task == TTSTask::Speech; })
+					| std::views::filter([](auto&& m) { return m.task.task == TTSTaskType::Speech; })
 					| std::ranges::to<std::vector>();
 
 				if (value >= 0 and value < toI(voiceModels.size()))
@@ -68,7 +68,7 @@ namespace fig::gui
 		_pTTSDesignModel = CreateDropList(this, pSizer,
 			[](int32_t value) {
 				auto designModels = Global::GetTTSBackend().GetVoiceModels()
-					| std::views::filter([](auto&& m) { return m.task.task == TTSTask::Design; })
+					| std::views::filter([](auto&& m) { return m.task.task == TTSTaskType::Design; })
 					| std::ranges::to<std::vector>();
 				if (value >= 0 and value < toI(designModels.size()))
 					Global::GetUserSettings().SetUUID(UserSetting::TTS::DesignModel, designModels[value].id);
@@ -153,7 +153,7 @@ namespace fig::gui
 		auto ttsModels = Global::GetTTSBackend().GetVoiceModels();
 		auto currentVoiceModelId = Global::GetUserSettings().GetUUID(UserSetting::TTS::SpeechModel);
 		auto voiceModels = ttsModels
-			| std::views::filter([](auto&& m) { return m.task.task == TTSTask::Speech; })
+			| std::views::filter([](auto&& m) { return m.task.task == TTSTaskType::Speech; })
 			| std::ranges::to<std::vector>();
 		_pTTSVoiceModel->Clear();
 		_pTTSVoiceModel->AddItems(voiceModels
@@ -169,7 +169,7 @@ namespace fig::gui
 
 		// Design model
 		auto designModels = ttsModels
-			| std::views::filter([](auto&& m) { return m.task.task == TTSTask::Design; })
+			| std::views::filter([](auto&& m) { return m.task.task == TTSTaskType::Design; })
 			| std::ranges::to<std::vector>();
 		_pTTSDesignModel->Clear();
 		_pTTSDesignModel->AddItems(designModels

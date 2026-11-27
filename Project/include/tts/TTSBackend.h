@@ -16,6 +16,7 @@ namespace fig::tts
 	struct TTSTaskArguments
 	{
 		fig::uuid modelId;
+		fig::uuid sourceId;
 		fig::string text;
 		fig::string instructions;
 		TTSVoiceRef voiceReference;
@@ -39,14 +40,14 @@ namespace fig::tts
 		void UnloadSpeechModels();
 		void UnloadDesignModels();
 
-		std::expected<std::vector<TTSResult>, TTSError> Speak(fig::uuid characterId, fig::string_view text, bool split = true);
-		std::expected<TTSResult, TTSError> Design(fig::string_view text, fig::string_view instruct, uint32_t seed = 0);
+		std::expected<std::vector<TTSTask>, TTSError> Speak(fig::uuid characterId, fig::string_view text, fig::uuid sourceId = {}, bool split = true);
+		std::expected<TTSTask, TTSError> Design(fig::string_view text, fig::string_view instruct, uint32_t seed = 0);
 
 		std::vector<fig::tts::VoiceModel> GetVoiceModels() const;
 		std::vector<fig::tts::TTSBackendInfo> GetBackendSettings() const;
 
 	protected:
-		TTSPayload SendRequest(TTSTask task, TTSTaskArguments args);
+		TTSResult SendRequest(TTSTaskType task, TTSTaskArguments args);
 		void LoadTTSSettings();
 		bool CheckHealth();
 		fig::optional_cref<TTSBackendInfo> GetActiveBackend() const;
@@ -61,12 +62,12 @@ namespace fig::tts
 
 		struct PendingRequest {
 			uint64_t id {};
-			TTSTask task {};
+			TTSTaskType task {};
 			TTSTaskArguments args {};
 			std::unique_ptr<TTSPromise> promise;
 		};
 		bool IsAsyncRequestAlive(const PendingRequest& request) const;
-		std::optional<TTSResult> EnqueueTask(TTSTask task, TTSTaskArguments args);
+		std::optional<TTSTask> EnqueueTask(TTSTaskType task, TTSTaskArguments args);
 
 	private:
 		mutable std::mutex _pending_mutex;

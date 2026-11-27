@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "llm/LLMTypes.h"
 #include "chat/ChatTypes.h"
@@ -7,14 +7,15 @@ namespace fig::llm
 {
 	enum class ContextBlockFlag : uint32_t
 	{
-		Cached = 1 << 0,		// Currently resides in the kv-cache
+		Cached = 1 << 0,				// Currently resides in the kv-cache
 		
-		Static = 1 << 1,		// Static content
-		Persona = 1 << 2,		// Persona content
+		Static = 1 << 1,				// Static content
+		Persona = 1 << 2,				// Persona content
 
-		Volatile = 1 << 3,		// Should discard immediately
-		Discard = 1 << 4,		// Tagged for removal
-		Contination = 1 << 5,	// Incomplete prompt template
+		Volatile = 1 << 3,				// Should discard immediately
+		Discard = 1 << 4,				// Tagged for removal
+		Contination = 1 << 5,			// Incomplete prompt template
+		SystemInstruction = 1 << 6,		// Hidden pre-response instruction
 	};
 	using ContextBlockFlags = EnumFlags<ContextBlockFlag>;
 
@@ -40,6 +41,7 @@ namespace fig::llm
 		inline bool is_temporary() const { return ttl > 0; }
 		inline bool is_persona() const { return flags.IsSet(ContextBlockFlag::Persona); }
 		inline bool is_continuation() const { return flags.IsSet(ContextBlockFlag::Contination); }
+		inline bool is_instruction() const { return flags.IsSet(ContextBlockFlag::SystemInstruction) or role == fig::chat::Role::Director or role == fig::chat::Role::System; }
 
 		Sequence get_any_sequence_id() const noexcept;
 		[[nodiscard]] Sequences get_sequence_ids(int32_t n_seq_max) const noexcept;

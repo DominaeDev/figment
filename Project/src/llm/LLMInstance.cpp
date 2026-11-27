@@ -66,8 +66,8 @@ namespace fig::llm
 
 		_contextState = LLMContext { _modelState };
 		_stateVars = {};
-		_turn_counter.store(0);
 		_options = args.options;
+		ResetTurnCounter();
 
 		// Read personas
 		std::map<Role, fig::string> personas;
@@ -373,7 +373,7 @@ namespace fig::llm
 		return _readyState.load() >= ReadyState::Generating;
 	}
 
-	bool LLMInstance::CanGenerate() const
+	bool LLMInstance::IsReadyAndAvailable() const
 	{
 		return _readyState.load() == ReadyState::Ready;
 	}
@@ -384,7 +384,7 @@ namespace fig::llm
 			return false;
 
 		// Cancel and join worker thread
-		if (_workerThread.get() && _workerThread->joinable())
+		if (_workerThread && _workerThread->joinable())
 		{
 			_workerThread->request_stop();
 			_workerThread->join();
@@ -410,12 +410,9 @@ namespace fig::llm
 		auto& token_pos = _contextState.token_pos;
 
 		// Increment turn counter
-		int32_t current_turn;
+		int32_t current_turn = GetCurrentTurn();
 		if (args.progressTime)
-		{
-			current_turn = _turn_counter++;
 			_contextState.DiscardByTTL(current_turn);
-		}
 
 		LogLn(std::format("## Turn: {}", current_turn));
 
@@ -452,7 +449,7 @@ namespace fig::llm
 		}
 
 		// Remove discarded blocks
-		if (!_contextState.RemoveDiscardedBlocks())
+		if (not _contextState.RemoveDiscardedBlocks())
 		{
 			Panic(InternalError::InvalidContextError, "Context is in an invalid state.");
 			return InternalError::InvalidContextError;
@@ -505,7 +502,7 @@ namespace fig::llm
 
 		if constexpr (Debugging)
 		{
-			if (!validate_kv_cache(_contextState, 0_seq, _turn_counter.load()))
+			if (!validate_kv_cache(_contextState, 0_seq, current_turn))
 			{
 				DumpContext();
 				Panic(InternalError::InvalidContextError, "Context desync error");
@@ -563,7 +560,7 @@ namespace fig::llm
 		int numMessages = 0;
 		fig::string responderId {};
 		fig::string stateReport {};
-		int32_t current_turn = _turn_counter.load();
+		int32_t current_turn = GetCurrentTurn();
 		int32_t current_sub_turn = 0;
 
 		int32_t current_sequence_index;
@@ -999,7 +996,7 @@ namespace fig::llm
 		}
 
 		if constexpr (Debugging)
-			validate_kv_cache(_contextState, 0_seq, _turn_counter.load());
+			validate_kv_cache(_contextState, 0_seq, current_turn);
 		onComplete(InternalError::NoError, response);
 	};
 
@@ -1198,7 +1195,7 @@ namespace fig::llm
 		if (empty_or_whitespace(message))
 			return false;
 
-		int32_t current_turn = _turn_counter.load();
+		int32_t current_turn = GetCurrentTurn();
 
 		fig::uuid subMessageId = _CreateUUID();
 		LockAndDo([&] {
@@ -1248,7 +1245,7 @@ namespace fig::llm
 
 	bool LLMInstance::Continue(fig::uuid responseId, fig::uuid subMessageId, bool extend)
 	{
-		if (!CanGenerate())
+		if (!IsReadyAndAvailable())
 			return false;
 
 		return EnqueueTask(LLMTask {
@@ -1265,6 +1262,8 @@ namespace fig::llm
 		if (empty_or_whitespace(message))
 			return false;
 
+		auto current_turn = IncrementTurnCounter();
+
 		__PushMessage(Role::User, message, MessageType::Undefined, {}, 0);
 
 		prepareArgs = PrepareArguments {
@@ -1274,7 +1273,7 @@ namespace fig::llm
 		};
 
 		GenerateFlags flags { GenerateFlag::Generate };
-		if (_next_narrator_turn < _turn_counter.load())
+		if (_next_narrator_turn < current_turn)
 			flags.Set(GenerateFlag::AllowNarrator);
 
 		generateArgs = GenerateArguments {
@@ -1312,7 +1311,11 @@ namespace fig::llm
 			role = Role::Director;
 
 		fig::uuid responseId = _CreateUUID();
-		int32_t current_turn = _turn_counter.load();
+		int32_t current_turn = GetCurrentTurn();
+
+		ContextBlockFlags blockFlags {};
+		if (not bVisible)
+			blockFlags.Set(ContextBlockFlag::SystemInstruction);
 
 		LockAndDo([&] {
 			_contextState.AppendBlock(ContextBlock {
@@ -1320,7 +1323,7 @@ namespace fig::llm
 				.name = identifier,
 				.content = content,
 				.tokens {},
-				.flags {},
+				.flags { blockFlags },
 				.sequenceSlots { SequenceSlot::Shared }, //! @seq
 				.turn = current_turn,
 				.ttl = ttl > 0 ? ttl + 1 : 0,
@@ -1328,10 +1331,11 @@ namespace fig::llm
 			});
 		}, _stateMutex);
 
-		LockAndDo([&] {
-			_activeResponseIds.insert(responseId);
-			if (bVisible)
-			{
+		if (bVisible)
+		{
+			LockAndDo([&] {
+				_activeResponseIds.insert(responseId);
+
 				// Add message to result queue
 				int32_t subMessageIndex = 0;
 				for (auto const& subMsg : subMessages)
@@ -1377,8 +1381,8 @@ namespace fig::llm
 						.subMessageIndex = subMessageIndex++,
 					});
 				}
-			}
-		}, _resultMutex);
+			}, _resultMutex);
+		}
 		return true;
 	}
 
@@ -1393,7 +1397,7 @@ namespace fig::llm
 			.progressTime = true,
 		};
 
-		int32_t current_turn = _turn_counter.load();
+		int32_t current_turn = GetCurrentTurn();
 		fig::string responder = GetIdentifierOf(role);
 
 		bool bAllowNarration = true;
@@ -1531,7 +1535,7 @@ namespace fig::llm
 
 	int32_t LLMInstance::RewindTime(int32_t rewind_turns)
 	{
-		int32_t turn = _turn_counter.load();
+		int32_t turn = GetCurrentTurn();
 		turn = std::max(turn - rewind_turns, 0);
 		_turn_counter.store(turn);
 		return turn;
@@ -1539,7 +1543,7 @@ namespace fig::llm
 
 	std::vector<RemovedMessage> LLMInstance::EraseMessages(int numMessages)
 	{
-		if (!CanGenerate() || numMessages < 1)
+		if (!IsReadyAndAvailable() || numMessages < 1)
 			return {};
 
 		std::unique_lock lock(_stateMutex, std::defer_lock);
@@ -1547,6 +1551,8 @@ namespace fig::llm
 			return {};
 
 		auto& blocks = _contextState.GetBlocks();
+
+		int32_t min_turn = std::numeric_limits<int32_t>::max();
 
 		std::vector<RemovedMessage> removedMsgs;
 		removedMsgs.reserve(numMessages);
@@ -1563,19 +1569,31 @@ namespace fig::llm
 				block.role,
 			});
 
-			if (block.role == Role::Director or block.role == Role::System)
-				continue; // Invisible blocks
+			min_turn = std::min(min_turn, block.turn);
+			if (block.is_instruction())
+				continue; // Don't count invisible blocks
 			if (++numDiscarded >= numMessages)
 				break;
 		}
-		
+
+		// Remove any pre-response instructions for the removed turn
+		for (auto& block : blocks 
+			| std::views::filter([min_turn](auto&& b) { return b.turn == min_turn and not b.is_discarded() and b.is_instruction(); }))
+		{
+			block.Discard();
+			removedMsgs.push_back(RemovedMessage {
+				block.responseId,
+				block.content,
+				block.role,
+			});
+		}
 		_removedMessages.insert_range(std::end(_removedMessages), removedMsgs);
 		return removedMsgs;
 	}
 
 	std::vector<RemovedMessage> LLMInstance::RollbackUserMessage()
 	{
-		if (!CanGenerate())
+		if (!IsReadyAndAvailable())
 			return {};
 		//! @todo: Disabled
 		/*
@@ -1622,7 +1640,7 @@ namespace fig::llm
 
 	bool LLMInstance::Reseed(uint32_t seed)
 	{
-		if (!CanGenerate())
+		if (!IsReadyAndAvailable())
 			return false;
 
 		std::scoped_lock lock(_stateMutex);
@@ -1665,8 +1683,6 @@ namespace fig::llm
 
 	bool LLMInstance::SwapPersona(Role role, bool immediate)
 	{
-		int32_t turn = _turn_counter.load();
-
 		if (!(is_bot(role) || role == Role::Undefined))
 			return false;
 
@@ -1753,7 +1769,8 @@ namespace fig::llm
 
 			if constexpr (Debugging)
 			{
-				if (!validate_kv_cache(_contextState, 0_seq, _turn_counter.load()))
+				int32_t current_turn = GetCurrentTurn();
+				if (!validate_kv_cache(_contextState, 0_seq, current_turn))
 					return false;
 			}
 			return true;
@@ -1924,5 +1941,30 @@ namespace fig::llm
 		if (auto pSession = _pSession.lock())
 			return pSession->GetNameOf(role);
 		return "";
+	}
+
+	int32_t LLMInstance::IncrementTurnCounter()
+	{
+		std::scoped_lock lock(_stateMutex);
+		auto& blocks = _contextState.GetBlocks();
+		if (blocks.empty())
+		{
+			 _turn_counter.store(0);
+			return 0;
+		}
+
+		// Find the highest current turn number, add one.
+		auto valid_blocks = blocks 
+			| std::views::filter([](const auto& b) { return !b.is_discarded(); });
+		if (auto it = std::ranges::max_element(valid_blocks, {}, &ContextBlock::turn); it != std::ranges::end(valid_blocks))
+		{
+			int32_t turn = (*it).turn;
+			_turn_counter.store(std::max(++turn, 0));
+			return turn;
+		}
+
+		// If we're here, the entire chat must've been discarded
+		_turn_counter.store(0);
+		return 0;
 	}
 }

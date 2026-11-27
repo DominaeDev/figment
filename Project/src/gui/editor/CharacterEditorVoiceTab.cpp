@@ -380,11 +380,11 @@ namespace fig::gui
 		_pStatusText->SetText(message);
 	}
 
-	void CharacterEditorVoiceTab::OnAudioResult(fig::tts::TTSPayload&& payload)
+	void CharacterEditorVoiceTab::OnAudioResult(fig::tts::TTSResult&& payload)
 	{
 		if (payload.has_value())
 		{
-			_voicePrint.audioData = std::move(payload).value();
+			_voicePrint.audioData = std::move(payload->audioData);
 			Global::GetAudioManager().StopAllSounds();
 			Global::GetAudioManager().EnqueueSound(_voicePrint.audioData.AsBytes());
 

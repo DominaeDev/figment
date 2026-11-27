@@ -41,7 +41,7 @@ namespace fig::gui
 		void RefreshActive();
 
 		void OnMessage(const fig::chat::MessagePoller::Message& msg);
-		void OnAudioResult(fig::tts::TTSPayload&& payload);
+		void OnAudioResult(fig::tts::TTSResult&& payload);
 
 	private:
 		std::unique_ptr<VerticalGradient> _pBottomGradient;
@@ -55,6 +55,7 @@ namespace fig::gui
 			fig::uuid subMessageId;
 			fig::chat::MessageType msgType { fig::chat::MessageType::Undefined };
 			ChatMessage* pChatMessage {};
+			int32_t audioId {};
 		};
 		std::vector<MessageEntry> _messages {};
 		std::map<fig::uuid, MessageEntry*> _messagesById {}; // Sub-message id

@@ -174,6 +174,8 @@ namespace fig::gui
 				delete entry.pChatMessage;
 			}
 
+			Global::GetAudioManager().StopSound(entry.audioId);
+
 			_messagesById.erase(entry.subMessageId);
 			_messages.erase(itWhere);
 		};
@@ -360,7 +362,7 @@ namespace fig::gui
 				if (piece.msgType == MessageType::Dialogue and piece.allowTTS and is_bot(piece.role))
 				{
 					auto characterId = pSession->GetCharacterIdOf(piece.role);
-					if (auto results = Global::GetTTSBackend().Speak(characterId, piece.content))
+					if (auto results = Global::GetTTSBackend().Speak(characterId, piece.content, piece.subMessageId))
 					{
 						for (auto& result : results.value())
 							_audioResultQueue.Add(std::move(result));
@@ -388,9 +390,21 @@ namespace fig::gui
 		SDL_SetRenderDrawBlendMode(pRenderer, blendMode); //! @todo: Do this rigorously before every render instead
 	}
 
-	void ChatScroll::OnAudioResult(fig::tts::TTSPayload&& payload)
+	void ChatScroll::OnAudioResult(fig::tts::TTSResult&& payload)
 	{
+		if (not SDL_IsMainThread())
+		{
+			assert(false);
+		}
+
 		if (payload.has_value())
-			Global::GetAudioManager().EnqueueSound((*payload).AsBytes());
+		{
+			if (auto itFind = std::ranges::find(_messages, payload->sourceId, [](auto&& m) { return m.subMessageId; }); itFind != std::ranges::cend(_messages))
+			{
+				itFind->audioId = Global::GetAudioManager().EnqueueSound(payload->audioData.AsBytes());
+			}
+			else
+				LogLn("Audio result discarded. Source message was removed.");
+		}
 	}
 }

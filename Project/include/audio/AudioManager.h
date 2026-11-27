@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 
@@ -10,8 +10,9 @@ namespace fig::audio
 		AudioManager();
 
 		bool PlaySound(fig::bytes&& data);
-		bool EnqueueSound(fig::byte_span data, float fVolume = -1.0f, float fDelay = Constants::TTS::DefaultDialogueDelay);
+		int32_t EnqueueSound(fig::byte_span data, float fVolume = -1.0f, float fDelay = Constants::TTS::DefaultDialogueDelay);
 		bool IsPlaying() const noexcept;
+		bool StopSound(int32_t clipId);
 
 		void StopAllSounds();
 		void SetVolume(float fVolume);
@@ -20,6 +21,7 @@ namespace fig::audio
 		void Update(float fElapsed);
 
 	private:
+		void StopCurrentSound();
 		fig::sdl::AudioStream _stream {};
 
 		struct AudioClip
@@ -33,6 +35,7 @@ namespace fig::audio
 				audioLength = other.audioLength;
 				volume = other.volume;
 				delay = other.delay;
+				clipId = other.clipId;
 				other.audioData = NULL;
 			}
 
@@ -41,16 +44,35 @@ namespace fig::audio
 				SDL_free(audioData);
 			}
 
+			AudioClip& operator=(AudioClip&& other) noexcept
+			{
+				if (this == &other)
+					return *this;
+
+				SDL_free(audioData);
+				spec = other.spec;
+				audioData = other.audioData;
+				audioLength = other.audioLength;
+				volume = other.volume;
+				delay = other.delay;
+				clipId = other.clipId;
+				other.audioData = nullptr;
+				return *this;
+			}
+
 			SDL_AudioSpec spec {};
 			Uint8* audioData {};
 			Uint32 audioLength {};
 			float volume { 1.0f };
 			float delay {};
+			int32_t clipId {};
 		};
 
 		bool PlayClip(const AudioClip& clip);
 
-		std::queue<AudioClip> _clips;
+		std::list<AudioClip> _clips;
 		float _fDelay = -1.0f;
+		int32_t _currentClipId {};
+		static int32_t _nextClipId;
 	};
 }

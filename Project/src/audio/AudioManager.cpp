@@ -1,10 +1,12 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "audio/AudioManager.h"
 #include "user/UserSettings.h"
 #include "user/UserManager.h"
 
 namespace fig::audio
 {
+	int32_t AudioManager::_nextClipId { 1 };
+
 	AudioManager::AudioManager()
 	{
 		SDL_AudioSpec spec {
@@ -64,10 +66,10 @@ namespace fig::audio
 		return SDL_GetAudioStreamGain(_stream.get());
 	}
 
-	bool AudioManager::EnqueueSound(fig::byte_span data, float fVolume, float fDelay)
+	int32_t AudioManager::EnqueueSound(fig::byte_span data, float fVolume, float fDelay)
 	{
 		if (_stream.empty())
-			return false;
+			return 0;
 
 		if (fVolume < 0.0f)
 		{
@@ -77,17 +79,20 @@ namespace fig::audio
 				fVolume = 1.0f;
 		}
 
-		SDL_IOStream* io = SDL_IOFromConstMem(data.data(), data.size());
+		if (SDL_IOStream* io = SDL_IOFromConstMem(data.data(), data.size()))
+		{
+			AudioClip clip;
+			clip.volume = fVolume;
+			clip.delay = fDelay;
+			int32_t clipId = clip.clipId = _nextClipId++;
 
-		AudioClip clip;
-		clip.volume = fVolume;
-		clip.delay = fDelay;
+			if (not SDL_LoadWAV_IO(io, true, &clip.spec, &clip.audioData, &clip.audioLength))
+				return 0; // Error
 
-		if (not SDL_LoadWAV_IO(io, true, &clip.spec, &clip.audioData, &clip.audioLength))
-			return false; // Error
-
-		_clips.emplace(std::move(clip));
-		return true;
+			_clips.push_back(std::move(clip));
+			return clipId;
+		}
+		return 0;
 	}
 
 	void AudioManager::StopAllSounds()
@@ -95,9 +100,20 @@ namespace fig::audio
 		if (_stream.empty())
 			return;
 
-		queue_clear(_clips);
+		_clips.clear();
 		SDL_ClearAudioStream(_stream.get());
 		_fDelay = 0.0f;
+		_currentClipId = 0;
+	}
+
+	void AudioManager::StopCurrentSound()
+	{
+		if (_stream.empty())
+			return;
+
+		SDL_ClearAudioStream(_stream.get());
+		_fDelay = 0.0f;
+		_currentClipId = 0;
 	}
 
 	void AudioManager::Update(float fElapsed)
@@ -113,6 +129,7 @@ namespace fig::audio
 		if (SDL_GetAudioStreamAvailable(_stream.get()) > 0)
 		{
 			_fDelay = std::max(top.delay, 0.0f);
+			_currentClipId = 0;
 			return;
 		}
 
@@ -125,7 +142,7 @@ namespace fig::audio
 
 		// Play next
 		PlayClip(top);
-		_clips.pop();
+		_clips.pop_front();
 	}
 
 	bool AudioManager::PlayClip(const AudioClip& clip)
@@ -138,6 +155,7 @@ namespace fig::audio
 			return false;
 		if (not SDL_PutAudioStreamData(_stream.get(), clip.audioData, static_cast<int>(clip.audioLength)))
 			return false;
+		_currentClipId = clip.clipId;
 		return true;
 	}
 
@@ -147,5 +165,18 @@ namespace fig::audio
 			return false;
 
 		return SDL_GetAudioStreamAvailable(_stream.get()) > 0;
+	}
+
+	bool AudioManager::StopSound(int32_t clipId)
+	{
+		if (_currentClipId == clipId)
+		{
+			StopCurrentSound();
+			return true;
+		}
+		
+		return _clips.remove_if([clipId](auto&& clip) {
+			return clip.clipId == clipId;
+		}) > 0uz;
 	}
 }
