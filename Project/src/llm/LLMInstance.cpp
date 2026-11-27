@@ -339,6 +339,7 @@ namespace fig::llm
 		{	// Lock state
 			std::scoped_lock lock(_stateMutex, _resultMutex);
 			queue_clear(_resultQueue);
+			_removedMessages.clear();
 
 			if (_staging.IsGroupChat() && _options.groupChatMode == ChatOptions::GroupChatMode::SwapPersonas)
 				SwapPersona(Role::Undefined, true);
@@ -519,7 +520,7 @@ namespace fig::llm
 
 	void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
 	{
-		std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock);
+		std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock); //! @todo: Don't hold lock for too long
 		if (!stateLock.try_lock_for(100ms))
 		{
 			onComplete(InternalError::UnknownError, "Failed to acquire lock");
@@ -1545,24 +1546,31 @@ namespace fig::llm
 		if (!lock.try_lock_for(50ms))
 			return {};
 
-		int32_t numRemovals = toI(std::min(toUZ(numMessages), _contextState.GetBlocks().size()));
-		size_t newSize = toUZ(std::max(toI(_contextState.GetBlocks().size()) - numMessages, 0));
 		auto& blocks = _contextState.GetBlocks();
 
-		// Store removed message ids
-		std::vector<RemovedMessage> removedIds;
-		removedIds.reserve(_contextState.GetBlocks().size() - newSize);
-		for (size_t i = newSize; i < _contextState.GetBlocks().size(); ++i)
+		std::vector<RemovedMessage> removedMsgs;
+		removedMsgs.reserve(numMessages);
+		int32_t numDiscarded = 0;
+		for (auto& block : blocks | std::views::reverse)
 		{
-			auto const& block = blocks[i];
-			blocks[i].Discard();
-			removedIds.push_back(RemovedMessage {
+			if (block.is_discarded())
+				continue;
+
+			block.Discard();
+			removedMsgs.push_back(RemovedMessage {
 				block.responseId,
 				block.content,
 				block.role,
 			});
+
+			if (block.role == Role::Director or block.role == Role::System)
+				continue; // Invisible blocks
+			if (++numDiscarded >= numMessages)
+				break;
 		}
-		return removedIds;
+		
+		_removedMessages.insert_range(std::end(_removedMessages), removedMsgs);
+		return removedMsgs;
 	}
 
 	std::vector<RemovedMessage> LLMInstance::RollbackUserMessage()

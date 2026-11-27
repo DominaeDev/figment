@@ -24,7 +24,7 @@ namespace fig::gui
 		void AddDummyMessage(string_cref name, fig::chat::Role role, fig::chat::MessageType msgType, string_cref message);
 		void AddSystemMessage(string_cref message);
 
-		int RemoveMessages(std::span<fig::uuid> ids);
+		int32_t RemoveMessages(const std::vector<fig::uuid>& msgIds);
 		void ClearMessages();
 
 		std::tuple<fig::uuid, fig::uuid> GetLastMessage() const;
@@ -42,6 +42,7 @@ namespace fig::gui
 
 		void OnMessage(const fig::chat::MessagePoller::Message& msg);
 		void OnAudioResult(fig::tts::TTSPayload&& payload);
+
 	private:
 		std::unique_ptr<VerticalGradient> _pBottomGradient;
 

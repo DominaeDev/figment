@@ -57,7 +57,7 @@ namespace fig::llm
 			// Tokenize uncached messages
 			for (auto& block : _blocks)
 			{
-				if (block.is_static() || block.is_cached() || !block.tokens.empty())
+				if (block.is_static() or block.is_cached() or block.is_discarded() or not_empty(block.tokens))
 					continue;
 
 				fig::string content = block.content;
@@ -273,7 +273,7 @@ namespace fig::llm
 
 	std::optional<int32_t> LLMContext::RemoveDiscardedBlocks()
 	{
-		if (std::count_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return block.is_cached() && block.is_discarded(); }) == 0)
+		if (std::count_if(_blocks.begin(), _blocks.end(), [](const ContextBlock& block) { return block.is_discarded(); }) == 0)
 			return 0;
 
 		int32_t tokens_removed = 0;

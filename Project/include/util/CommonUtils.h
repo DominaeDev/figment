@@ -501,4 +501,10 @@ namespace fig
 		return defaultValue;
 	}
 
+	template<typename T>
+	concept HasEmpty =
+		requires (const T t) { { t.empty() } -> std::same_as<bool>; };
+
+	template <HasEmpty T>
+	constexpr bool not_empty(const T& value) noexcept { return not value.empty(); }
 }

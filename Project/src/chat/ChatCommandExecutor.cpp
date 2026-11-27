@@ -52,14 +52,6 @@ namespace fig::chat
 		Requirements req = Requirements::None;
 	};
 
-
-	static std::vector<fig::uuid> FilterMessageIDs(std::vector<RemovedMessage> msgs)
-	{
-		return msgs
-			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
-			| std::ranges::to<std::vector>();
-	};
-
 	static Role RoleFromName(fig::string partial_name, LLMInstancePtr pLLM)
 	{
 		if (empty_or_whitespace(partial_name))
@@ -157,7 +149,9 @@ namespace fig::chat
 	{
 		int n = atoi(cmd.text.c_str());
 		auto removedMsgs = ctx.pLLM->EraseMessages(std::max(n, 1));
-		auto removedIds = FilterMessageIDs(removedMsgs);
+		auto removedIds = removedMsgs
+			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
+			| std::ranges::to<std::vector>();
 		return ctx.pChatScroll->RemoveMessages(removedIds);
 	}
 
@@ -171,7 +165,9 @@ namespace fig::chat
 		if (!is_bot(responder))
 			responder = Role::Undefined;
 
-		auto removedIds = FilterMessageIDs(removedMsgs);
+		auto removedIds = removedMsgs
+			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
+			| std::ranges::to<std::vector>();
 		ctx.pChatScroll->RemoveMessages(removedIds);
 		return ctx.pLLM->Instigate(responder, MessageType::Undefined, 3);
 	}
@@ -182,7 +178,9 @@ namespace fig::chat
 		if (removedMsgs.empty())
 			return false;
 
-		auto removedIds = FilterMessageIDs(removedMsgs);
+		auto removedIds = removedMsgs
+			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
+			| std::ranges::to<std::vector>();
 		ctx.pChatScroll->RemoveMessages(removedIds);
 		ctx.pTextBox->SetText(removedMsgs[0].content);
 		return true;

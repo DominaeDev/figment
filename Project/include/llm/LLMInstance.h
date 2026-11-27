@@ -218,6 +218,7 @@ namespace fig::llm
 
 		std::mutex _resultMutex; // Guards output queue
 		std::queue<MessagePiece> _resultQueue;
+		std::vector<RemovedMessage> _removedMessages;
 		std::set<fig::uuid> _activeResponseIds;
 
 		std::unique_ptr<std::jthread> _workerThread;

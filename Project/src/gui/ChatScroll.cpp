@@ -159,27 +159,37 @@ namespace fig::gui
 		}
 	}
 
-	int ChatScroll::RemoveMessages(std::span<fig::uuid> ids)
+	int32_t ChatScroll::RemoveMessages(const std::vector<fig::uuid>& msgIds)
 	{
-		int removed = 0;
+		int32_t removed = 0;
 		std::set<fig::uuid> removedIds;
-		for (int i = (int32_t)_messages.size() - 1; i >= 0; --i)
-		{
-			MessageEntry& entry = _messages[i];
-			if (std::ranges::find(ids, entry.responseId) == ids.cend())
-				continue;
+
+		auto fnDestroyMessage = [this](std::vector<MessageEntry>::const_iterator itWhere) {
+			const MessageEntry& entry = *itWhere;
 
 			if (entry.pChatMessage)
 			{
 				GetSizer()->Remove(entry.pChatMessage);
 				RemoveChild(entry.pChatMessage);
 				delete entry.pChatMessage;
-				entry.pChatMessage = nullptr;
 			}
 
 			_messagesById.erase(entry.subMessageId);
-			_messages.erase(_messages.begin() + i);
-			++removed;
+			_messages.erase(itWhere);
+		};
+
+		for (auto& msgId : msgIds)
+		{
+			for (;;)
+			{
+				if (auto itFind = std::ranges::find(_messages, msgId, [](auto&& m) { return m.responseId; }); itFind != std::ranges::end(_messages))
+				{
+					fnDestroyMessage(itFind);
+					++removed;
+					continue;
+				}
+				break;
+			}
 		}
 
 		InvalidateLayout();

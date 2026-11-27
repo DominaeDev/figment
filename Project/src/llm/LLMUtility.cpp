@@ -257,6 +257,8 @@ namespace fig::llm
 			if ((bool)(block.sequenceSlots & seq_id) == false)
 				continue;
 
+			if (block.is_discarded())
+				result.append("(Discarded)");
 			result.append("[");
 			if (!block.tokens.empty())
 			{
