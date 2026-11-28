@@ -242,6 +242,7 @@ namespace fig::gui
 		{
 			item.pListItem->SetVisible(false);
 			item.pListItem->EnableLayout(false);
+			item.pListItem->SetEnabled(false);
 		}
 
 		int32_t numItems = 0;
@@ -276,6 +277,7 @@ namespace fig::gui
 				
 				pListItem->SetVisible(true);
 				pListItem->EnableLayout(true);
+				pListItem->SetEnabled(true);
 				_pVerticalSizer->Add(pListItem, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::Expand | SizerFlag::Right, 18);
 			}
 		}

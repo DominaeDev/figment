@@ -66,7 +66,7 @@ namespace fig::llm
 		void Shutdown();
 
 		bool IsInitialized() const;
-		bool IsReady() const;
+		bool IsReadyAndAvailable() const;
 		bool IsGenerating() const;
 
 		bool Continue(fig::uuid responseId, fig::uuid subMessageId, bool extend);
@@ -99,7 +99,6 @@ namespace fig::llm
 
 	private:
 		void ClearResponseQueue();
-		bool IsReadyAndAvailable() const;
 		bool PushDirection(const fig::string& message, int32_t ttl = 1);
 		bool PushNarration(const fig::string& message);
 		bool PushUserDialogue(const fig::string& message);

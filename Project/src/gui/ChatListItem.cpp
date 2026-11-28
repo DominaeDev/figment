@@ -87,7 +87,7 @@ namespace fig::gui
 			}
 		}
 
-		SetUserSettings(Global::GetUserContent().GetUserSettings(chatInstanceId));
+		ShowStar(Global::GetUserContent().GetUserSettings(chatInstanceId).HasFlag(AssetUserSettings::Flag::Favorite));
 	}
 
 	void ChatListItem::OnSize()
@@ -282,19 +282,13 @@ namespace fig::gui
 		_searchIndex = std::make_unique<SearchIndex>(index);
 	}
 
-	void ChatListItem::SetUserSettings(const AssetUserSettings& userSettings) noexcept
-	{
-		_userSettings = userSettings;
-		ShowStar(userSettings.HasFlag(AssetUserSettings::Flag::Favorite));
-	}
-
 	bool ChatListItem::MatchesFlags(fig::io::ChatFilterFlags filter) const noexcept
 	{
-		if (filter.IsSet(ChatFilterFlag::Hidden))
-			return _userSettings.HasFlag(AssetUserSettings::Flag::Hidden);
-		if (_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
+		auto userSettings = Global::GetUserContent().GetUserSettings(_chatInstanceId);
+		if (filter.IsSet(ChatFilterFlag::Hidden) != userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
 			return false;
-		if (filter.IsSet(ChatFilterFlag::Starred) and not _userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
+
+		if (filter.IsSet(ChatFilterFlag::Starred) and not userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
 			return false;
 		return true;
 	}

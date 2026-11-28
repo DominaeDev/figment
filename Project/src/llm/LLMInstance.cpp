@@ -330,7 +330,7 @@ namespace fig::llm
 
 	bool LLMInstance::ResetChat(int seed)
 	{
-		if (!IsReady())
+		if (not IsInitialized())
 			return false;
 
 		if (_readyState.load() >= ReadyState::Generating)
@@ -359,11 +359,6 @@ namespace fig::llm
 	}
 
 	bool LLMInstance::IsInitialized() const
-	{
-		return _readyState.load() >= ReadyState::Ready;
-	}
-
-	bool LLMInstance::IsReady() const
 	{
 		return _readyState.load() >= ReadyState::Ready;
 	}
@@ -1120,6 +1115,8 @@ namespace fig::llm
 
 	void LLMInstance::StartGeneration()
 	{
+		if (not IsInitialized())
+			return; // Error
 		if (IsGenerating())
 			return; // Already running
 
@@ -1150,7 +1147,7 @@ namespace fig::llm
 
 	bool LLMInstance::EnqueueTask(LLMTask task)
 	{
-		if (!IsReady())
+		if (not IsInitialized())
 			return false;
 
 		LockAndDo([this, task]() {
@@ -1599,6 +1596,9 @@ namespace fig::llm
 
 	bool LLMInstance::PollResponse(std::vector<MessagePiece>& pieces, std::vector<RemovedMessage>& removedMessages)
 	{
+		if (!IsInitialized())
+			return false;
+
 		std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
 		if (!lock.owns_lock())
 			return false;

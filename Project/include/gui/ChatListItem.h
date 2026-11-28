@@ -38,7 +38,6 @@ namespace fig::gui
 		void SetSearchIndex(const SearchIndex& index) noexcept;
 		void SetDelegate(ChatItemEventDelegate fnDelegate) { _fnDelegate = fnDelegate; }
 
-		void SetUserSettings(const fig::io::AssetUserSettings& userSettings) noexcept;
 		bool MatchesFlags(fig::io::ChatFilterFlags filter) const noexcept;
 		bool MatchesSearch(const SearchQuery& query) const noexcept;
 
@@ -68,7 +67,6 @@ namespace fig::gui
 		fig::observer_ptr<StaticText> _pTimestamp;
 		fig::observer_ptr<Image> _pStar;
 		std::unique_ptr<SearchIndex> _searchIndex;
-		fig::io::AssetUserSettings _userSettings {};
 
 		bool _bSelected {};
 		bool _bHovered {};

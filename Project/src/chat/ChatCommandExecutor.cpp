@@ -79,7 +79,7 @@ namespace fig::chat
 	{
 		if constexpr (Debugging)
 		{
-			if (!(ctx.pLLM && ctx.pLLM->IsReady()))
+			if (!(ctx.pLLM && ctx.pLLM->IsInitialized()))
 			{
 				static int turn = 0;
 				auto [content, _] = ChatFormatter::ProcessMessage(cmd.text, "");
@@ -151,11 +151,6 @@ namespace fig::chat
 		auto removedMsgs = ctx.pLLM->EraseMessages(std::max(n, 1));
 		if (removedMsgs.empty())
 			return false;
-//		auto removedIds = removedMsgs
-//			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
-//			| std::ranges::to<std::vector>();
-//		return ctx.pChatScroll->RemoveMessages(removedIds);
-
 		return true;
 	}
 
@@ -169,10 +164,6 @@ namespace fig::chat
 		if (!is_bot(responder))
 			responder = Role::Undefined;
 
-/*		auto removedIds = removedMsgs
-			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
-			| std::ranges::to<std::vector>();
-		ctx.pChatScroll->RemoveMessages(removedIds);*/
 		return ctx.pLLM->Instigate(responder, MessageType::Undefined, 3);
 	}
 
@@ -182,10 +173,6 @@ namespace fig::chat
 		if (removedMsgs.empty())
 			return false;
 
-/*		auto removedIds = removedMsgs
-			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
-			| std::ranges::to<std::vector>();
-		ctx.pChatScroll->RemoveMessages(removedIds);*/
 		ctx.pTextBox->SetText(removedMsgs[0].content);
 		return true;
 	}
@@ -193,7 +180,7 @@ namespace fig::chat
 	static bool cmdReset(ParsedChatCommand cmd, CmdCtx ctx)
 	{
 		uint32_t seed = (uint32_t)atoi(cmd.text.c_str());
-		if (not ctx.pLLM or not ctx.pLLM->IsReady() or ctx.pLLM->ResetChat(seed))
+		if (not ctx.pLLM or not ctx.pLLM->IsInitialized() or ctx.pLLM->ResetChat(seed))
 			ctx.pChatScroll->ClearMessages();
 		queue_clear(ctx.commandQueue);
 		return true;

@@ -224,7 +224,7 @@ namespace fig::gui
 		}
 
 		auto pLLMInstance = Global::GetLLMInstance();
-		if (!pLLMInstance || !pLLMInstance->IsReady() || pLLMInstance->IsGenerating())
+		if (not (pLLMInstance and pLLMInstance->IsReadyAndAvailable()))
 			return;
 
 		if (_autoScript.empty())
@@ -317,7 +317,7 @@ namespace fig::gui
 				case SDLK_F11:
 					if (event.modifiers.None)
 					{
-						if (pLLM->IsReady())
+						if (pLLM->IsInitialized())
 							pLLM->DumpContext();
 						return true;
 					}
@@ -373,7 +373,7 @@ namespace fig::gui
 		}
 		if (IsUserEvent(event, UserEvent::LLMChatInitialized))
 		{
-//			_pChatScroll->ClearMessages();
+			_pChatScroll->ClearMessages();
 			auto pLLMInstance = Global::GetLLMInstance();
 			if (pLLMInstance and _pVariableList)
 			{
