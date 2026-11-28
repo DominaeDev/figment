@@ -20,6 +20,7 @@ namespace fig::chat
 
 	private:
 		void OnMessage(const MessagePoller::Message& piece);
+		void OnRemovedMessage(const MessagePoller::RemovedMessage& removed);
 		
 		fig::uuid _assetId;
 		fig::uuid _parentId;

@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "text/Condition.h"
 #include "text/Context.h"
 #include "text/ConditionParser.h"
@@ -72,7 +72,7 @@ namespace fig
 			return false;
 		}
 
-		EvaluationArgs eval { context, cookie };
+		EvaluationArgs eval { context, cookie, Global::GetMacroProvider() };
 		return !_pCondition or _pCondition->Evaluate(eval);
 	}
 

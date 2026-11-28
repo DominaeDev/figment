@@ -87,7 +87,7 @@ namespace fig::llm
 		std::set<fig::uuid> GetActiveMessages();
 
 		bool SetStateVariable(fig::string name, fig::string value, bool allowCreate = true);
-		bool PollResponse(MessagePiece& piece);
+		bool PollResponse(std::vector<MessagePiece>& pieces, std::vector<RemovedMessage>& removedMessages);
 
 		void DumpContext() const;
 #if _DEBUG
@@ -112,6 +112,7 @@ namespace fig::llm
 			Continuation = 1 << 1,
 			Instigation = 1 << 2,
 			AllowNarrator = 1 << 3,
+			InsistDialogue = 1 << 4,
 		};
 		using GenerateFlags = EnumFlags<GenerateFlag>;
 
@@ -155,6 +156,7 @@ namespace fig::llm
 			fig::uuid responseId {};
 			fig::uuid subMessageId {};
 			History history; // Used for embedding
+			bool bForceDialogue { true };
 		};
 		void __Generate(std::stop_token& stop, GenerateArguments args, __GenerationCompleteCallback onComplete);
 		void StartGeneration();
@@ -198,7 +200,7 @@ namespace fig::llm
 		void __ProcessTaskQueue(std::stop_token stop, __GenerationCompleteCallback onComplete);
 		bool __ExectuteNextTask(PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __SendMessage(fig::string message, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
-		bool __PushMessage(fig::chat::Role role, fig::string message, fig::chat::MessageType msgType, LLMTaskFlags flags, int32_t ttl);
+		bool __PushMessage(fig::chat::Role role, fig::string message, fig::chat::MessageType& msgType, LLMTaskFlags flags, int32_t ttl);
 		bool __Instigate(fig::chat::Role role, fig::chat::MessageType msgType, int messageCount, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 		bool __Continue(fig::uuid responseId, fig::uuid subMessageId, bool extend, PrepareArguments& prepareArgs, GenerateArguments& generateArgs);
 

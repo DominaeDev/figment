@@ -66,7 +66,7 @@ namespace fig::chat
 
 			for (auto const& character : staging.GetCharacters())
 			{
-				if (begins_with(character.GetName(), partial_name, true))
+				if (begins_with(character.GetSpokenName(), partial_name, true))
 					return staging.GetRoleOf(character.chatId);
 			}
 			return staging.GetRoleOf(partial_name);
@@ -149,10 +149,14 @@ namespace fig::chat
 	{
 		int n = atoi(cmd.text.c_str());
 		auto removedMsgs = ctx.pLLM->EraseMessages(std::max(n, 1));
-		auto removedIds = removedMsgs
-			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
-			| std::ranges::to<std::vector>();
-		return ctx.pChatScroll->RemoveMessages(removedIds);
+		if (removedMsgs.empty())
+			return false;
+//		auto removedIds = removedMsgs
+//			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
+//			| std::ranges::to<std::vector>();
+//		return ctx.pChatScroll->RemoveMessages(removedIds);
+
+		return true;
 	}
 
 	static bool cmdRedoResponse(ParsedChatCommand cmd, CmdCtx ctx)
@@ -165,10 +169,10 @@ namespace fig::chat
 		if (!is_bot(responder))
 			responder = Role::Undefined;
 
-		auto removedIds = removedMsgs
+/*		auto removedIds = removedMsgs
 			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
 			| std::ranges::to<std::vector>();
-		ctx.pChatScroll->RemoveMessages(removedIds);
+		ctx.pChatScroll->RemoveMessages(removedIds);*/
 		return ctx.pLLM->Instigate(responder, MessageType::Undefined, 3);
 	}
 
@@ -178,10 +182,10 @@ namespace fig::chat
 		if (removedMsgs.empty())
 			return false;
 
-		auto removedIds = removedMsgs
+/*		auto removedIds = removedMsgs
 			| std::views::transform([](RemovedMessage msg) { return msg.responseId; })
 			| std::ranges::to<std::vector>();
-		ctx.pChatScroll->RemoveMessages(removedIds);
+		ctx.pChatScroll->RemoveMessages(removedIds);*/
 		ctx.pTextBox->SetText(removedMsgs[0].content);
 		return true;
 	}

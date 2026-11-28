@@ -1,6 +1,7 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "text/ConditionNode.h"
 #include "text/Context.h"
+#include "text/MacroProvider.h"
 #include <cassert>
 #include <math.hpp>
 
@@ -329,6 +330,11 @@ namespace fig
 			// Alias?
 			if (auto try_cond = eval.context.TryGetCondition(_flag.key))
 				return (*try_cond).Evaluate(ctx, eval.cookie + 1);
+			if (auto pMacros = eval.globalMacros.lock())
+			{
+				if (auto try_macro = pMacros->TryGetCondition(_flag.key))
+					return (*try_macro).Evaluate(ctx, eval.cookie + 1);
+			}
 			return ctx[_flag.key];
 		}
 

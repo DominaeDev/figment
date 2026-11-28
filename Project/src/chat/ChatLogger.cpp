@@ -21,7 +21,7 @@ namespace fig::chat
 	{
 		// Hook up to message poller
 		if (auto poller = session.GetPoller())
-			_pollerId = (*poller).RegisterObserver(std::bind_front(&ChatLogger::OnMessage, this));
+			_pollerId = (*poller).RegisterObserver(std::bind_front(&ChatLogger::OnMessage, this), std::bind_front(&ChatLogger::OnRemovedMessage, this));
 		else
 			_pollerId = static_cast<uint32_t>(-1);
 
@@ -66,6 +66,11 @@ namespace fig::chat
 				.content = fig::string { ChatFormatter::Unwrap(piece.content) },
 			});
 		}
+	}
+
+	void ChatLogger::OnRemovedMessage(const MessagePoller::RemovedMessage& removed)
+	{
+		_log.RemoveMessage(removed.subMessageId);
 	}
 
 	bool ChatLogger::Load()

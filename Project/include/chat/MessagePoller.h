@@ -18,9 +18,16 @@ namespace fig::chat
 			int32_t subTurn {};
 		};
 		using CallbackId = uint32_t;
-		using Callback = std::function<void(const Message&)>;
+		using MessageCallback = std::function<void(const Message&)>;
 
-		CallbackId RegisterObserver(Callback fnCallback);
+		struct RemovedMessage
+		{
+			fig::uuid responseId;
+			fig::uuid subMessageId;
+		};
+		using RemovedMessageCallback = std::function<void(const RemovedMessage&)>;
+
+		CallbackId RegisterObserver(MessageCallback onMessage, RemovedMessageCallback onRemovedMessage);
 		void UnregisterObserver(CallbackId id);
 
 		void Update(float fElapsed);
@@ -34,7 +41,12 @@ namespace fig::chat
 		std::vector<Message> _messages {};
 		std::map<fig::uuid, size_t> _messagesById {}; // Sub-message id
 
-		std::unordered_map<CallbackId, Callback> _observers {};
+		struct Observer
+		{
+			MessageCallback fnOnMessage;
+			RemovedMessageCallback fnOnRemovedMessage;
+		};
+		std::unordered_map<CallbackId, Observer> _observers {};
 		CallbackId _nextCallbackId = 0;
 	};
 }

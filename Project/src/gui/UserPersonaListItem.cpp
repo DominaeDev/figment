@@ -81,7 +81,7 @@ namespace fig::gui
 		if (auto try_user = Global::GetUserContent().Get<UserPersona>(_assetId))
 		{
 			auto& userPersona = *try_user;
-			_pName->SetText(userPersona.GetName());
+			_pName->SetText(userPersona.GetSpokenName());
 			_pDescription->SetText(GetPersonaText(userPersona));
 			_pPortrait->SetCharacter(_assetId);
 

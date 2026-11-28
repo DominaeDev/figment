@@ -14,6 +14,7 @@ namespace fig::data
 		const fig::string& GetTitle() const noexcept { return _title; }
 		void AddMessage(ChatMessage&& message) noexcept;
 		void AddMessage(const ChatMessage& message) noexcept;
+		void RemoveMessage(const fig::uuid& subMessageId) noexcept;
 
 		const std::vector<ChatMessage>& GetMessages() const noexcept { return _messages; }
 		const SearchIndex& GetSearchIndex() const noexcept { return _searchIndex; }

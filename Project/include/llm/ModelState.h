@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "llm/LLMTypes.h"
 #include "llm/Grammar.h"

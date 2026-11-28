@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "text/Context.h"
 
@@ -24,5 +24,8 @@ namespace fig
 	{
 		return eval_text(fig::string { source }, context, options);
 	}
+
+	[[nodiscard]] fig::string process_text(const fig::string& source, TextEvaluationOptions options = DefaultTextEvalOptions) noexcept;
+	fig::string& process_text(fig::string& source, TextEvaluationOptions options = DefaultTextEvalOptions) noexcept;
 
 }

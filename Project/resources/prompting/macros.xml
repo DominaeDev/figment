@@ -8,10 +8,11 @@
 	<Alias id="char2:">bot2</Alias>
 	<Alias id="char3:">bot3</Alias>
 	<Alias id="char4:">bot4</Alias>
+	<Alias id="u">user:</Alias>
 	<Alias id="user">user:name</Alias>
 	
 	<!-- Standard conditions -->
-	<Condition id="single_chat">__num_bots eq 1</Condition>
+	<Condition id="solo_chat">__num_bots eq 1</Condition>
 	<Condition id="group_chat">__num_bots gt 1</Condition>
 	<Condition id="is_male">male or gender eq male</Condition>
 	<Condition id="is_female">female or gender eq female</Condition>

@@ -70,7 +70,7 @@ namespace fig::data
 		[[nodiscard]] const Context& GetContext() noexcept;
 		[[nodiscard]] Context GetContext() const noexcept;
 
-		fig::string GetName() const noexcept { return name.GetSpokenName(); }
+		fig::string GetSpokenName() const noexcept { return name.GetSpokenName(); }
 		fig::string GetFullName() const noexcept { return name.GetFullName(); }
 		fig::string GetAboutDescription() const noexcept;
 

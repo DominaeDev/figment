@@ -197,7 +197,8 @@ namespace fig::data
 				Element { "Scene",			&Scenario::scenes }
 					.Collection("Scenes"),
 				Element { "Rule",			&Scenario::_rules }
-					.Collection("Rules")
+					.Collection("Rules"),
+				Element { "Genres",			&Scenario::_genres }
 			);
 
 			static_assert(IsXmlSerializable<Scenario>);

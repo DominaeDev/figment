@@ -41,7 +41,7 @@ namespace fig::gui
 		// Register callback
 		if (auto pSession = wpSession.lock())
 		{
-			pSession->GetPoller()->RegisterObserver(std::bind_front(&ChatScroll::OnMessage, this));
+			pSession->GetPoller()->RegisterObserver(std::bind_front(&ChatScroll::OnMessage, this), std::bind_front(&ChatScroll::OnRemovedMessage, this));
 
 			// Add messages...
 			if (auto pLogger = pSession->GetLogger())
@@ -370,6 +370,11 @@ namespace fig::gui
 				}
 			}
 		}
+	}
+
+	void ChatScroll::OnRemovedMessage(const MessagePoller::RemovedMessage& removed)
+	{
+		RemoveMessages({ removed.responseId });
 	}
 
 	void ChatScroll::OnRenderMask(fig::renderer_ptr pRenderer, fig::sdl::Texture& texture)

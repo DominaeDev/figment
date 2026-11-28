@@ -53,11 +53,22 @@ namespace fig::chat
 	}
 	inline bool is_reserved(const fig::handle& handle)
 	{
-		static const auto ReservedCharacterIds = std::unordered_set<fig::handle> { "char", "character", "char1", "char2", "char3", "char4", "char5", "char6", "char7", "char8", "user", "current" };
+		static const auto ReservedCharacterIds = std::unordered_set<fig::handle> { "char", "character", "user", "current", "char1", "char2", "char3", "char4", "char5", "char6", "char7", "char8", "bot1", "bot2", "bot3", "bot4", "bot5", "bot6", "bot7", "bot8" };
 		return ReservedCharacterIds.contains(handle);
 	}
 
 	constexpr inline Role bot_from_index(size_t botIndex) { return bot_from_index(static_cast<int32_t>(botIndex)); }
+
+	consteval std::array<Role, MaxBots() + 1uz> GetCharacterRoles() noexcept
+	{
+		std::array<Role, MaxBots() + 1uz> roles;
+		for (uint8_t i = 0; i < MaxBots(); ++i)
+			roles[i] = static_cast<Role>(static_cast<uint32_t>(Role::Bot1) + i);
+		roles[roles.size() - 1uz] = Role::User;
+		return roles;
+	}
+
+	constexpr auto CharacterRoles = GetCharacterRoles();
 
 	enum class MessageType : uint8_t
 	{

@@ -296,7 +296,7 @@ namespace fig::llm
 			if (not block.is_cached())
 			{
 				// Not cached. Just remove block.
-				container_remove_at(_blocks, block_idx);
+				erase_at(_blocks, block_idx);
 				continue;
 			}
 
@@ -312,7 +312,7 @@ namespace fig::llm
 			int32_t shift = -removed;
 			tokens_removed += removed;
 			total_shift += shift;
-			container_remove_at(_blocks, block_idx);
+			erase_at(_blocks, block_idx);
 
 			if (shift != 0)
 			{

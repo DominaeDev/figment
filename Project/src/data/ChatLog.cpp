@@ -22,6 +22,11 @@ namespace fig::data
 		_messages.push_back(message);
 	}
 
+	void ChatLog::RemoveMessage(const fig::uuid& subMessageId) noexcept
+	{
+		std::erase_if(_messages, [id = subMessageId](auto&& m) { return m.subMessageId == id; });
+	}
+
 	void ChatLog::AddSearchTerm(const fig::string& term) noexcept
 	{
 		_searchIndex.AddTerm(term);

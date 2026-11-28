@@ -517,7 +517,7 @@ namespace fig::llm
 
 	void LLMInstance::__Generate(std::stop_token& thread_stop, GenerateArguments args, __GenerationCompleteCallback onComplete)
 	{
-		std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock); //! @todo: Don't hold lock for too long
+		std::unique_lock<std::timed_mutex> stateLock(_stateMutex, std::defer_lock); //! @todo: This lock is held for a very looooong time
 		if (!stateLock.try_lock_for(100ms))
 		{
 			onComplete(InternalError::UnknownError, "Failed to acquire lock");
@@ -527,7 +527,11 @@ namespace fig::llm
 		std::vector<Token> sampled_tokens;
 		ContextPtr pCtx = _modelState.pCtx;
 		VocabPtr pVocab = _modelState.pVocab;
-		fig::data::ModelSettings& settings = _modelState.settings;
+		SamplerPtr pSampler = _modelState.pSampler;
+
+		fig::data::ModelSettings settings = _modelState.settings;
+		auto ctx_size = _modelState.ctx_size;
+		auto max_sequences = _modelState.max_sequences;
 
 		Token sampled_token;
 		fig::string partial;
@@ -547,6 +551,7 @@ namespace fig::llm
 		bool isContinuation = args.flags.IsSet(GenerateFlag::Continuation);
 		bool isInstigation = args.flags.IsSet(GenerateFlag::Instigation);
 		bool isGroupChat = _staging.IsGroupChat();
+		bool hasDialogue = false;
 
 		fig::uuid responseId = args.responseId.empty() ? _CreateUUID() : args.responseId;
 		fig::uuid subMessageId = args.subMessageId.empty() ? _CreateUUID() : args.subMessageId;
@@ -599,8 +604,8 @@ namespace fig::llm
 			current_sequence_indices = { 0 };
 		}
 
-		assert(current_sequence_index >= 0 && current_sequence_index < _modelState.max_sequences);
-		assert(llama::ctx_used_cells(pCtx) + Constants::DefaultModelSettings::MaxResponseLength <= _modelState.ctx_size);
+		assert(current_sequence_index >= 0 && current_sequence_index < max_sequences);
+		assert(llama::ctx_used_cells(pCtx) + Constants::DefaultModelSettings::MaxResponseLength <= ctx_size);
 
 		if (!args.history.empty() && _modelState.pEmbedding)
 		{
@@ -663,7 +668,7 @@ namespace fig::llm
 				break; // Cancelled
 			}
 
-			if (cursor_pos >= _modelState.ctx_size)
+			if (cursor_pos >= ctx_size)
 			{
 				stop_reason = StopReason::ContextFull;
 				break; // Max limit reached
@@ -680,9 +685,9 @@ namespace fig::llm
 
 			// Ensure enough space in the context to evaluate this batch
 			int n_ctx_used = llama::ctx_used_cells(pCtx);
-			if (n_ctx_used + batch_view.n_tokens > _modelState.ctx_size)
+			if (n_ctx_used + batch_view.n_tokens > ctx_size)
 			{
-				onComplete(InternalError::ContextFull, std::format("context size exceeded ({} / {})", n_ctx_used, _modelState.ctx_size));
+				onComplete(InternalError::ContextFull, std::format("context size exceeded ({} / {})", n_ctx_used, ctx_size));
 				return;
 			}
 
@@ -713,7 +718,7 @@ namespace fig::llm
 			// sample the next token
 			try
 			{
-				sampled_token = llama_sampler_sample(_modelState.pSampler, pCtx, -1);
+				sampled_token = llama_sampler_sample(pSampler, pCtx, -1);
 			}
 			catch (const std::runtime_error& e)
 			{
@@ -753,7 +758,7 @@ namespace fig::llm
 				stop_reason = StopReason::Completed;
 			}
 
-			if (sampled_tokens.size() >= Constants::DefaultModelSettings::MaxResponseLength || cursor_pos >= _modelState.ctx_size - 1)
+			if (sampled_tokens.size() >= Constants::DefaultModelSettings::MaxResponseLength || cursor_pos >= ctx_size - 1)
 			{
 				bHalt = true;
 				stop_reason = StopReason::ResponseLengthLimit;
@@ -824,6 +829,8 @@ namespace fig::llm
 								if (msgType == MessageType::Narration)
 									_next_narrator_turn = current_turn + _narratorCooldownDuration;
 
+								hasDialogue |= msgType == MessageType::Dialogue;
+
 								if (isGroupChat && is_bot(responderRole) && _contextState.active_persona != responderRole)
 								{
 									// Swap sequence
@@ -868,9 +875,6 @@ namespace fig::llm
 					}
 				}
 
-	//			if (msgType == MessageType::Undefined)
-	//				msgType = MessageType::Dialogue;
-
 				// Send piece
 				if (partial.size() > 0 && msgType == MessageType::StateReport)
 				{
@@ -908,7 +912,7 @@ namespace fig::llm
 
 			// Print to console
 			Log(str_token);
-			assert(cursor_pos < _modelState.ctx_size);
+			assert(cursor_pos < ctx_size);
 
 			// Add sampled token to batch
 			cache.BatchAddSingle(sampled_token, current_sequence_indices, token_pos.as_int());
@@ -928,16 +932,21 @@ namespace fig::llm
 
 		LogLn();
 		LogLn(std::format("END OF GENERATION (reason: 0x{:02X})", (int32_t)stop_reason));
-	
 		LogLn(std::format("Generated {} tokens ({})", sampled_tokens.size(), token_pos));
+
+		// -----
 
 		// Remove full response from cache (will be reinserted on next turn)
 		_contextState.ClearTokensBelow(response_pos.as_int());
-
-	//	batch.n_tokens = response_pos;
+		_contextState.last_sequence_index = current_sequence_index;
 		cursor_pos = _contextState.GetCache().length();
 		token_pos = response_pos;
-		_contextState.last_sequence_index = current_sequence_index;
+
+		if (not hasDialogue and args.flags.IsSet(GenerateFlag::InsistDialogue))
+		{
+			// Queue up a dialogue
+			Instigate(Role::Undefined, MessageType::Dialogue, 1);
+		}
 
 		ChatFormatter::SanitizeMessage(response);
 
@@ -968,7 +977,7 @@ namespace fig::llm
 			Log("(Empty response)");
 		}
 
-		if constexpr (Disabled)
+		if constexpr (Disabled) // State variables
 		{
 			std::map<fig::string, fig::string> variables;
 			_stateVars.UpdateValues(stateReport, variables);
@@ -1264,7 +1273,8 @@ namespace fig::llm
 
 		auto current_turn = IncrementTurnCounter();
 
-		__PushMessage(Role::User, message, MessageType::Undefined, {}, 0);
+		auto msgType = MessageType::Undefined;
+		__PushMessage(Role::User, message, msgType, {}, 0);
 
 		prepareArgs = PrepareArguments {
 			.responder = Role::Undefined,
@@ -1275,6 +1285,8 @@ namespace fig::llm
 		GenerateFlags flags { GenerateFlag::Generate };
 		if (_next_narrator_turn < current_turn)
 			flags.Set(GenerateFlag::AllowNarrator);
+		if (msgType == MessageType::Dialogue)
+			flags.Set(GenerateFlag::InsistDialogue);
 
 		generateArgs = GenerateArguments {
 			.role = Role::Undefined,
@@ -1285,7 +1297,7 @@ namespace fig::llm
 		return true;
 	}
 
-	bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType msgType, LLMTaskFlags flags, int32_t ttl)
+	bool LLMInstance::__PushMessage(Role role, fig::string message, MessageType& msgType, LLMTaskFlags flags, int32_t ttl)
 	{
 		if (empty_or_whitespace(message))
 			return false;
@@ -1340,39 +1352,13 @@ namespace fig::llm
 				int32_t subMessageIndex = 0;
 				for (auto const& subMsg : subMessages)
 				{
-					string prefix, suffix;
-					switch (subMsg.msgType)
-					{
-					case MessageType::Narration:
-						prefix = "[";
-						suffix = "]";
-						break;
-					case MessageType::Direction:
-						prefix = "{";
-						suffix = "}";
-						break;
-					case MessageType::Dialogue:
-						prefix = "\"";
-						suffix = "\"";
-						break;
-					case MessageType::Action:
-						prefix = "*";
-						suffix = "*";
-						break;
-					case MessageType::Thought:
-						prefix = "(";
-						suffix = ")";
-						break;
-					default:
-						break;
-					}
 					fig::uuid subMessageId = _CreateUUID();
 					
 					_resultQueue.push(MessagePiece {
 						.responseId = responseId,
 						.subMessageId = subMessageId,
 						.identifier = identifier,
-						.content = prefix + subMsg.content + suffix,
+						.content = ChatFormatter::Wrap(subMsg.content, subMsg.msgType),
 						.role = role,
 						.msgType = subMsg.msgType,
 						.isComplete = true,
@@ -1611,18 +1597,32 @@ namespace fig::llm
 		return {};
 	}
 
-	bool LLMInstance::PollResponse(MessagePiece& piece)
+	bool LLMInstance::PollResponse(std::vector<MessagePiece>& pieces, std::vector<RemovedMessage>& removedMessages)
 	{
 		std::unique_lock<std::mutex> lock(_resultMutex, std::try_to_lock);
 		if (!lock.owns_lock())
 			return false;
 
-		if (_resultQueue.empty())
-			return false;
+		bool bResult = false;
+		if (non_empty(_resultQueue))
+		{
+			pieces.reserve(_resultQueue.size());
+			while (non_empty(_resultQueue))
+			{
+				pieces.push_back(std::move(_resultQueue.front()));
+				_resultQueue.pop();
+			}
+			bResult = true;
+		}
 
-		piece = std::move(_resultQueue.front());
-		_resultQueue.pop();
-		return true;
+		if (non_empty(_removedMessages))
+		{
+			removedMessages.insert(removedMessages.end(), std::make_move_iterator(_removedMessages.begin()), std::make_move_iterator(_removedMessages.end()));
+			_removedMessages.clear();
+			bResult = true;
+		}
+
+		return bResult;
 	}
 
 	void LLMInstance::DumpContext() const

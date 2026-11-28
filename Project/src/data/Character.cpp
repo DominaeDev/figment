@@ -47,7 +47,7 @@ namespace fig::data
 			return false;
 
 		if (data.chatId.empty())
-			data.chatId = data.GetName();
+			data.chatId = data.GetSpokenName();
 
 		// Colors
 		data.bgColor = {};

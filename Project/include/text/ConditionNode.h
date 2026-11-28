@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Figment.h"
 #include "text/ContextLocator.h"
@@ -10,6 +10,7 @@ namespace fig
     {
         const Context& context;
         size_t cookie = 0uz;
+        std::weak_ptr<fig::text::MacroProvider> globalMacros;
     };
 
     class ConditionNode

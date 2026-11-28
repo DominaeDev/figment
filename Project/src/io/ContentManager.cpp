@@ -91,7 +91,7 @@ namespace fig::io
 			{
 				if (auto try_character = Get<Character>(assetId))
 				{
-					meta.name = (*try_character).GetName();
+					meta.name = (*try_character).GetSpokenName();
 					meta.gender = (*try_character).gender;
 					meta.tags = (*try_character).GetTags();
 				}
@@ -108,7 +108,7 @@ namespace fig::io
 			{
 				if (auto try_character = Get<UserPersona>(assetId))
 				{
-					meta.name = (*try_character).GetName();
+					meta.name = (*try_character).GetSpokenName();
 					meta.gender = (*try_character).gender;
 				}
 
@@ -651,9 +651,9 @@ namespace fig::io
 	std::optional<fig::string> UserContentManager::GetCharacterName(const fig::uuid& characterId) const
 	{
 		if (auto try_character = GetCache<Character>().TryGet(characterId))
-			return (*try_character).GetName();
+			return (*try_character).GetSpokenName();
 		if (auto try_user = GetCache<UserPersona>().TryGet(characterId))
-			return (*try_user).GetName();
+			return (*try_user).GetSpokenName();
 		return std::nullopt;
 	}
 
@@ -856,7 +856,7 @@ namespace fig::io
 		if (auto try_character = Global::GetUserContent().Get<fig::data::Character>(characterId))
 		{
 			auto& character = *try_character;
-			scenario.roles[0].label = character.GetName();
+			scenario.roles[0].label = character.GetSpokenName();
 			scenario.creator = character.creator;
 			scenario.version = character.version;
 		}

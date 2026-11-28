@@ -28,58 +28,104 @@ namespace fig::chat
 			return;
 
 		std::unordered_set<size_t> modifiedMessages;
+		std::vector<size_t> removedMessages;
 
-		MessagePiece piece;
-		while (pLLM->PollResponse(piece))
+		std::vector<MessagePiece> pieces;
+		std::vector<fig::llm::RemovedMessage> removedMsgs;
+		if (pLLM->PollResponse(pieces, removedMsgs))
 		{
-			auto findMsg = _messagesById.find(piece.subMessageId);
-			if (findMsg != _messagesById.end())
+			for (auto& removedMsg : removedMsgs)
 			{
-				// Append piece
-				auto& entry = _messages[findMsg->second];
-
-				entry.role = piece.role;
-				entry.msgType = piece.msgType;
-				entry.complete = piece.isComplete;
-				entry.allowTTS = piece.allowTTS;
-				entry.content += piece.content;
-				entry.turn = piece.turn;
-				entry.subTurn = piece.subMessageIndex;
-
-				modifiedMessages.insert(findMsg->second);
+				for (size_t i = 0; i < _messages.size(); i++)
+				{
+					if (_messages[i].responseId == removedMsg.responseId)
+						removedMessages.push_back(i);
+				}
 			}
-			else if (not (piece.isComplete and empty_or_whitespace(piece.content))) // Ignore (new) empty messages
-			{
-				// New message
-				_messages.emplace_back(Message {
-					.responseId = piece.responseId,
-					.subMessageId = piece.subMessageId,
-					.role = piece.role,
-					.msgType = piece.msgType,
-					.content = piece.content,
-					.complete = piece.isComplete,
-					.allowTTS = piece.allowTTS,
-					.turn = piece.turn,
-					.subTurn = piece.subMessageIndex,
-				});
 
-				_messagesById[piece.subMessageId] = _messages.size() - 1uz;
-				modifiedMessages.insert(_messages.size() - 1uz);
+			for (auto& piece : pieces)
+			{
+				auto findMsg = _messagesById.find(piece.subMessageId);
+				if (findMsg != _messagesById.end())
+				{
+					// Append piece
+					auto& entry = _messages[findMsg->second];
+
+					entry.role = piece.role;
+					entry.msgType = piece.msgType;
+					entry.complete = piece.isComplete;
+					entry.allowTTS = piece.allowTTS;
+					entry.content += piece.content;
+					entry.turn = piece.turn;
+					entry.subTurn = piece.subMessageIndex;
+
+					modifiedMessages.insert(findMsg->second);
+				}
+				else if (not (piece.isComplete and empty_or_whitespace(piece.content))) // Ignore (new) empty messages
+				{
+					// New message
+					_messages.emplace_back(Message {
+						.responseId = piece.responseId,
+						.subMessageId = piece.subMessageId,
+						.role = piece.role,
+						.msgType = piece.msgType,
+						.content = piece.content,
+						.complete = piece.isComplete,
+						.allowTTS = piece.allowTTS,
+						.turn = piece.turn,
+						.subTurn = piece.subMessageIndex,
+					});
+
+					_messagesById[piece.subMessageId] = _messages.size() - 1uz;
+					modifiedMessages.insert(_messages.size() - 1uz);
+				}
 			}
 		}
 
+		if (modifiedMessages.empty() and removedMessages.empty())
+			return;
+
+		std::ranges::sort(removedMessages, std::ranges::greater());
+
 		// Notify observers
-		for (auto index : modifiedMessages)
+		for (auto& observer : _observers)
 		{
-			const auto& message = _messages[index];
-			for (auto& observer : _observers)
-				observer.second(message);
+			if (auto& fnDelegate = observer.second.fnOnMessage)
+			{
+				for (auto index : modifiedMessages)
+				{
+					const auto& message = _messages[index];
+					fnDelegate(message);
+				}
+			}
+
+			if (auto& fnDelegate = observer.second.fnOnRemovedMessage)
+			{
+				for (auto index : removedMessages)
+				{
+					const auto& message = _messages[index];
+					fnDelegate(RemovedMessage {
+						.responseId = message.responseId,
+						.subMessageId = message.subMessageId,
+					});
+				}
+			}
+		}
+
+		for (auto index : removedMessages)
+		{
+			auto& message = _messages[index];
+			_messagesById.erase(message.subMessageId);
+			erase_at(_messages, index);
 		}
 	}
 
-	MessagePoller::CallbackId MessagePoller::RegisterObserver(Callback fnCallback)
+	MessagePoller::CallbackId MessagePoller::RegisterObserver(MessageCallback onMessage, RemovedMessageCallback onRemovedMessage)
 	{
-		_observers.emplace(_nextCallbackId, std::move(fnCallback));
+		_observers.emplace(_nextCallbackId, Observer {
+			std::move(onMessage),
+			std::move(onRemovedMessage),
+		});
 		return _nextCallbackId++;
 	}
 

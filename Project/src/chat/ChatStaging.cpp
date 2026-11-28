@@ -134,7 +134,7 @@ namespace fig::chat
 		if (name.empty() || _characters.empty())
 			return std::nullopt;
 
-		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& c) { return equals(c.instance.GetName(), name, true); }); itFind != std::ranges::cend(_characters))
+		if (auto itFind = std::ranges::find_if(_characters, [&name](auto& c) { return equals(c.instance.GetSpokenName(), name, true); }); itFind != std::ranges::cend(_characters))
 			return make_optional_cref((*itFind).instance);
 		return fig::nullref;
 	}
@@ -154,7 +154,7 @@ namespace fig::chat
 
 		if (auto itFind = std::ranges::find_if(_charactersByRole, [this, characterId](const auto& kvp) { 
 			return equals(_characters[kvp.second].instance.chatId, characterId, true) 
-				or equals(_characters[kvp.second].instance.GetName(), characterId, true);
+				or equals(_characters[kvp.second].instance.GetSpokenName(), characterId, true);
 			}); itFind != std::ranges::cend(_charactersByRole))
 		{
 			return itFind->first;
@@ -267,7 +267,7 @@ namespace fig::chat
 			// Traits
 			if (character.GetTraits().size() > 0uz)
 			{
-				persona += std::format("{}'s traits:\n", character.GetName());
+				persona += std::format("{}'s traits:\n", character.GetSpokenName());
 
 				for (auto& trait : character.GetTraits())
 					persona += std::format("- [{0}] {1}\n", trait.name, trim(trait.text));
@@ -338,14 +338,9 @@ namespace fig::chat
 		_context.Clear();
 		_context.SetMacroProvider(Global::GetMacroProvider());
 
-		// Characters
-		for (auto& kvp : _charactersByRole)
-		{
-			auto role = kvp.first;
-			auto& character = _characters[kvp.second].instance;
-			_context.AddContext(ContextSelector::FromRole(role)[0], character);
-		}
 		_context.SetValue("__num_bots", GetBotCount());
+		_context.SetAlias("current", ContextSelector::FromRole(Role::Bot1));
+		_context.SetPrimarySelector(ContextSelector::FromRole(Role::Bot1));
 
 		// Set role aliases
 		for (auto& slot : GetScenario().GetRoleSlots())
@@ -357,16 +352,73 @@ namespace fig::chat
 			}
 		}
 
-		// Scenario
-		if (auto intro = GetScenario().GetFirstScene())
+		// Characters
+		for (auto& kvp : _charactersByRole)
 		{
-			auto primarySelector = ContextSelector::FromRole(Role::Bot1);
-			_context.SetAlias("current", primarySelector);
-			_context.SetPrimarySelector(primarySelector);
-
-			fig::string scenario = eval_text((*intro).content, _context);
-			_context.SetValue("scenario", scenario);
+			auto role = kvp.first;
+			auto& character = _characters[kvp.second].instance;
+			auto& characterCtx = _context.AddContext(ContextSelector::FromRole(role)[0], character);
 		}
+
+		// Roles
+		for (auto& role : CharacterRoles)
+		{
+			if (auto roleSlot = GetScenario().GetRoleSlot(role))
+			{
+				if (auto characterCtx = _context.TryGetContext(ContextSelector::FromRole(role)[0]))
+				{
+					if (not empty_or_whitespace((*roleSlot).label))
+						(*characterCtx).SetValue("role_name", eval_text((*roleSlot).label, _context));
+					if (not empty_or_whitespace((*roleSlot).brief))
+						(*characterCtx).SetValue("role_brief", eval_text((*roleSlot).brief, _context));
+				}
+			}
+		}
+
+		// Participants
+		fig::string participants;
+		for (auto& role : CharacterRoles)
+		{
+			if (auto character = GetCharacterByRole(role))
+			{
+				if (auto characterCtx = _context.TryGetContext(ContextSelector::FromRole(role)[0]))
+				{
+					fig::string text = eval_text("{name}{role_name? ({role_name})}{role_brief?, {role_brief}{.}}", *characterCtx);
+					if (not empty_or_whitespace(text))
+						participants.append(std::format("- {}\n", text));
+				}
+			}
+		}
+
+		if (not empty_or_whitespace(participants))
+			_context.SetValue("__cast", participants);
+
+		// Scenario
+		auto& scenario = GetScenario();
+		if (auto intro = scenario.GetFirstScene())
+		{
+			fig::string scenario = eval_text((*intro).content, _context);
+			_context.SetValue("__scene", scenario);
+		}
+
+		// Genre(s)
+		fig::string genres = eval_text(encode_csv(scenario._genres), _context);
+		_context.SetValue("__genres", genres);
+
+		// Rules
+		fig::string rules;
+		int32_t ruleNumber = 1;
+		for (auto& rule : GetWorld().GetRules())
+			rules.append(eval_text(std::format("{}. {}{{.}}\n", ruleNumber++, process_text(rule)), _context));
+		for (auto& rule : GetScenario().GetRules())
+			rules.append(eval_text(std::format("{}. {}{{.}}\n", ruleNumber++, process_text(rule)), _context));
+		for (auto& [role, idx] : _charactersByRole)
+		{
+			for (auto& rule : _characters[idx].instance.GetRules())
+				rules.append(eval_text(std::format("{}. {}{{.}}\n", ruleNumber++, process_text(rule)), GetCharacterContext(role)));
+		}
+		if (non_empty(rules))
+			_context.SetValue("rules", rules);
 	}
 
 	const fig::string& ChatStaging::GetGrammar() const
@@ -390,7 +442,7 @@ namespace fig::chat
 					if (i + 1uz == characters.size())
 						title += "and ";
 				}
-				title += characters[i].GetName();
+				title += characters[i].GetSpokenName();
 			}
 			return title;
 		}

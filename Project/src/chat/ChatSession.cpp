@@ -84,7 +84,7 @@ namespace fig::chat
 			return fig::string { Constants::Chat::Names::Director };
 
 		if (auto try_character = _staging.GetCharacterByRole(role))
-			return (*try_character).GetName();
+			return (*try_character).GetSpokenName();
 
 		return fig::string { Constants::Chat::Names::Unknown };
 	}

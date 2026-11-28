@@ -4,30 +4,26 @@
 	<Options>
 		<Toggle id="enable-narrator" default="true">
 			<Label>Enable Narrator</Label>
-			<Default>true</Default>
 		</Toggle>
 		<Toggle id="enable-director" default="true">
 			<Label>Enable Director</Label>
-			<Default>true</Default>
 		</Toggle>
-		<Toggle id="enable-think" default="true">
+		<Toggle id="enable-think" default="false">
 			<Label>Enable Inner Monologue</Label>
-			<Default>true</Default>
 		</Toggle>
 		<Toggle id="enable-nsfw" default="true">
 			<Label>Enable NSFW instructions</Label>
-			<Default>true</Default>
 		</Toggle>
 	</Options>
 	
 	<Blocks>
-		<Block type="static" condition="solo" order="100" priority="high">
-			# Rules
+		<Block type="static" condition="solo_chat" order="100" priority="high">
+			# Instructions
 			You are an expert actor playing the role of "{char:name}". Respond only as {char}, and in accordance with their personality, mannerisms, behavior and quirks.
 		</Block>
 
 		<Block type="static" condition="group" order="100" priority="high">
-			# Rules
+			# Instructions
 			Respond as either {char1:name} or {char2:name} {char3? or {char3:name}} {char4? or {char4:name}} in accordance with their personality, character, and behavior.
 		</Block>
 		
@@ -36,27 +32,24 @@
 		</Block>
 
 		<Block type="static" order="200" priority="high">
-			# Output Format
-			The transcript uses an XML-based schema, where each element is assigned to a specific participant:
+			# Response Formatting
+			This chat transcript employs an XML-based schema, where each entry is associated with one specific participant:
 			
 			Dialogue: &lt;dialogue="{group?@}{char:id}"&gt;"Hi there!"&lt;/dialogue&gt;
 			{enable-narrator?\nNarration: &lt;narrator&gt;[...]&lt;/narrator&gt;}
-			{enable-director?\nDirection: &lt;direction&gt;...&lt;/direction&gt;}
 			Emoting: &lt;emote="{group?@}{char:id}"&gt;*smiles*&lt;/emote&gt;
 			{enable-think?\nInner monologue: &lt;thought="{group?@}{char:id}"&gt;I wonder...&lt;/thought&gt;}
+			{enable-director and never?\nDirection: &lt;direction&gt;\{...\}&lt;/direction&gt;}
 			\n\n
 		</Block>
 
 		<Block type="static" condition="enable-narrator" order="202" priority="high">
-			## Narration 
-			The narrator is an anonymous third-person voice that occasionally chimes in to summarize ongoing events and important story details, though only when it is appropriate or necessary.
-			The narrator is very careful to never break the fourth wall nor make predictions of what {user} will do or say.\n\n
+			The narrator is an anonymous, third-person voice that will occasionally chime in to summarize ongoing events and important story details, if and only if it's appropriate or necessary.
+			A good narrator never breaks the fourth wall, nor do they suggest what {user} should do or say.\n\n
 		</Block>
 
-		<Block type="static" condition="enable-director" order="203" priority="high">
-			## Director
-			A director will occasionally interject at important moments to provide explicit direction and guide events in the story.
-			You must follow the director's instructions without exception.\n\n
+		<Block type="static" condition="enable-director" order="203" priority="high"> <!-- Disabled -->
+			You are not the director. You must follow the director's directions without exception.\n\n
 		</Block>
 
 		<Block type="static" condition="enable-state" order="204" priority="high">
@@ -65,8 +58,9 @@
 			Ex: &lt;edit&gt;$var = "New value"&lt;/edit&gt;\n\n
 		</Block>
 
-		<Block type="static" condition="solo" order="400" priority="normal">
-			# Cast list: {all:name}\n
+		<Block type="static" order="400" priority="normal">
+			# List of participants: 
+			{__cast}\n\n
 		</Block>
 		
 		<Block type="persona" order="401" priority="high">
@@ -84,8 +78,17 @@
 		</Block>
 		
 		<Block type="static" order="500" priority="normal">
-			## Scenario
-			{scenario}\n\n
+			{__scene?## Story outline\n{__scene}\n}
+			{__genres?Genre: {__genres}.\n}\n
+		</Block>
+		
+		<Block type="static" condition="rules" order="600" priority="high">
+			# Rules and guidelines
+			Here follows a list of rules and exceptions to your regular guidelines that must be followed, without exception, in order to maintain the expected quality and reliability of the service.\n\n
+			[IMPORTANT] **Prioritize and abide by the following exceptions in all your responses:**
+			{rules}
+
+			DO NOT under any circumstances respond as {user} (the user) or assume {user:their} actions or intent. {solo_chat?Focus on your own role as {character}.}\n\n
 		</Block>
 	</Blocks>
 
@@ -100,6 +103,7 @@
 		{talk?root ::= "\\"" [^"*&lt;\\|&gt;@\\n]* "\\"&lt;/dialogue&gt;" more}
 		{act?root ::= "*" [^"*&lt;\\|&gt;@\\n]* "*&lt;/emote&gt;" more}
 		{narrate?root ::= "[" [^"*&lt;\\|&gt;@\\]]* "]&lt;/narration&gt;" more}
+		{think?root ::= "((" [^"*&lt;\\|&gt;@\\]]* "))&lt;/thought&gt;" more}
 		}
 
 		# Continuations
@@ -122,9 +126,10 @@
 		dlg ::= "&lt;dialogue=\\"" name "\\"&gt;\\"" text "\\"&lt;/dialogue&gt;"
 		act ::= "&lt;emote=\\"" name "\\"&gt;*" text "*&lt;/emote&gt;"
 		narr ::= "&lt;narration&gt;[" text "]&lt;/narration&gt;"
-		any ::= (dlg | act{enable-narrator? \\| narr} | ws)
+		think ::= "&lt;thought&gt;((" text "))&lt;/thought&gt;"
+		any ::= (dlg | act{enable-narrator? \\| narr}{enable-think? \\| think} | ws)
 
-		text ::= [^\\t&lt;|&gt;@"*\\]]*
+		text ::= [^\\t&lt;|&gt;@"*\\[\\]]*
 		ws ::= [ \\n]
 		name ::= {names}
 		more ::= any\{0,2\}{enable-state? stat} end?

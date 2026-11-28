@@ -84,7 +84,7 @@ namespace fig
 	}
 
 	template<template <typename, typename> class Cont, typename V, typename A = std::allocator<V>>
-	bool container_remove_at(Cont<V, A>& cont, size_t index) noexcept
+	bool erase_at(Cont<V, A>& cont, size_t index) noexcept
 	{
 		auto it = std::cbegin(cont);
 		std::advance(it, index);

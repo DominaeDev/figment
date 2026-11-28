@@ -1,4 +1,4 @@
-#include <pch.h>
+﻿#include <pch.h>
 #include "text/TextEvaluator.h"
 #include "text/Condition.h"
 
@@ -253,6 +253,23 @@ namespace fig
 		return text;
 	}
 
+	static fig::string& resolve_periods(fig::string& text)
+	{
+		constexpr fig::string_view marker = "__PERIOD__";
+		size_t pos = text.find(marker);
+		while (pos != fig::string::npos)
+		{
+			size_t previous = pos;
+			while (previous > 0 && is_whitespace(text[previous - 1]))
+				--previous;
+
+			bool insertPeriod = previous > 0 && !is_semantic_punctuation(text[previous - 1]);
+			text.replace(pos, marker.size(), insertPeriod ? "." : "");
+			pos = text.find(marker, pos);
+		}
+		return text;
+	}
+
 	static bool evaluate(fig::string& text, const Context& context, size_t& cookie) noexcept;
 
 	static bool substitute(fig::string& text, const TextSpan& span, const Context& context, size_t& cookie) noexcept
@@ -275,6 +292,10 @@ namespace fig
 		if (pos_cond != npos and pos_cond > pos_else)
 			pos_else = npos;
 
+		ContextSelector selector;
+		if (pos_selector != npos)
+			selector = ContextSelector { trim(expr.substr(0, pos_selector)) };
+
 		// Conditional?
 		if (pos_cond != npos)
 		{
@@ -290,23 +311,28 @@ namespace fig
 				result_true = expr.substr(pos_cond + 1);
 			}
 
-			bool r = Condition::Evaluate(fig::string { condition }, context);
+			const Context* pCtx = &context;
+			if (auto subCtx = context.TryGetContext(selector))
+				pCtx = &(*subCtx);
+
+			bool r = Condition::Evaluate(fig::string { condition }, *pCtx);
 			text.replace(span.begin, span.length(), r ? result_true : result_false);
 			return true;
 		}
 
+		// Implicit full stop?
+		if (trim(expr) == ".")
+		{
+			text.replace(span.begin, span.length(), "__PERIOD__");
+			return true;
+		}
+
 		// Value?
-		ContextSelector selector;
 		fig::handle value_key;
 		if (pos_selector != npos)
-		{
-			selector = ContextSelector { trim(expr.substr(0, pos_selector)) };
 			value_key = trim(expr.substr(pos_selector + 1));
-		}
 		else
-		{
 			value_key = trim(expr);
-		}
 
 		// Macro?
 		if (auto try_macro = context.TryGetMacro(value_key))
@@ -314,7 +340,9 @@ namespace fig
 			fig::string macro { try_macro.value() };
 			
 			if (auto try_ctx = context.TryGetContext(selector))
-				evaluate(macro, *try_ctx, cookie);
+			{
+				while (evaluate(macro, *try_ctx, cookie)) {};
+			}
 			else
 				macro = ""; // Error
 
@@ -378,7 +406,7 @@ namespace fig
 	fig::string eval_text(const fig::string& source, const Context& context, TextEvaluationOptions options) noexcept
 	{
 		if (not source.contains('{'))
-			return source; //noop
+			return process_text(source, options);
 
 		fig::string text = source; // copy
 		return eval_text(std::move(text), context, options);
@@ -387,14 +415,26 @@ namespace fig
 	fig::string eval_text(fig::string&& text, const Context& context, TextEvaluationOptions options) noexcept
 	{
 		if (not text.contains('{'))
-			return text; //noop
+			return process_text(text, options);
 
 		size_t cookie = 0uz;
 		while (evaluate(text, context, cookie)) {};
 
 		unescape_symbols(text);
+		process_text(text, options);
+		return text;
+	}
 
-		// Processing
+	fig::string process_text(const fig::string& source, TextEvaluationOptions options) noexcept
+	{
+		fig::string text = source; // copy
+		process_text(text, options);
+		return text;
+	}
+
+	fig::string& process_text(fig::string& text, TextEvaluationOptions options) noexcept
+	{
+		resolve_periods(text);
 		if (options.IsSet(TextEvaluationOption::FixPunctuation))
 			clean_punctuation(text);
 		if (options.IsSet(TextEvaluationOption::CollapseWhitespace))
@@ -407,5 +447,4 @@ namespace fig
 			capitalize_sentences(text, options.IsSet(TextEvaluationOption::CapitalizeFirst));
 		return text;
 	}
-
 }

@@ -41,6 +41,7 @@ namespace fig::gui
 		void RefreshActive();
 
 		void OnMessage(const fig::chat::MessagePoller::Message& msg);
+		void OnRemovedMessage(const fig::chat::MessagePoller::RemovedMessage& removed);
 		void OnAudioResult(fig::tts::TTSResult&& payload);
 
 	private:
