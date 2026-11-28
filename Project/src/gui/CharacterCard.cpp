@@ -53,7 +53,7 @@ namespace fig::gui
 			_name = character.GetSpokenName();
 			_updatedAt = Global::GetUserContent().GetUpdatedAt(_assetId).value_or({});
 			SetLabel(character.name.GetFullName());
-			SetIndex(character.GetSearchIndex());
+			SetSearchIndex(character.GetSearchIndex());
 
 			// Tags
 			ClearTags();

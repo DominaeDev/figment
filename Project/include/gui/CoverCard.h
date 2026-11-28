@@ -68,7 +68,7 @@ namespace fig::gui
 		void ClearTags();
 		AddTagResult AddTag(const fig::string& tag, fig::color_ref color = {});
 		
-		void SetIndex(const SearchIndex& index) noexcept;
+		void SetSearchIndex(const SearchIndex& index) noexcept;
 		void AddSearchTerms(const fig::string& text) noexcept;
 		void AddSearchTerms(std::span<const fig::string> texts) noexcept;
 

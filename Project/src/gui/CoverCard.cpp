@@ -490,6 +490,11 @@ namespace fig::gui
 			RefreshState();
 		}
 	}
+	
+	void CoverCard::SetSearchIndex(const SearchIndex& index) noexcept
+	{
+		_searchIndex = std::make_unique<SearchIndex>(index);
+	}
 
 	void CoverCard::AddSearchTerms(const fig::string& text) noexcept
 	{
@@ -625,11 +630,6 @@ namespace fig::gui
 			else if (!_bHasError)
 				CardImage::SetTexture(_pDefaultTexture);
 		}
-	}
-
-	void CoverCard::SetIndex(const SearchIndex& index) noexcept
-	{
-		_searchIndex = std::make_unique<SearchIndex>(index);
 	}
 
 	void CoverCard::ShowTags(bool bEnable)

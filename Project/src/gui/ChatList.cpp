@@ -95,8 +95,6 @@ namespace fig::gui
 				return Item {
 					.chatInstanceId = chatInstance.assetId,
 					.chatLogId = chatLog.assetId,
-					.chatInstance = chatInstance.instance.get(),
-					.chatLog = chatLog.instance.get(),
 					.createdAt = chatLog.createdAt,
 					.updatedAt = chatLog.updatedAt,
 					.participants = fnGetParticipantNames(chatInstance.instance.get()),
@@ -105,19 +103,27 @@ namespace fig::gui
 			})
 			| std::ranges::to<std::vector>();
 
+		for (auto& item : _items)
+		{
+			auto pListItem = CreateControl<ChatListItem>(item.chatInstanceId, item.chatLogId);
+			pListItem->SetDelegate([this](ChatListItem& item, ChatListItemEvent event) { OnItemEvent(item, event); });
+			item.pListItem = pListItem;
+		}
+
 		Reorder();
 	}
 
 	fig::observer_ptr<Control> ChatList::CreateHeader(fig::string_view text)
 	{
-		auto panel = CreateControl<Area>();
-		panel->SetMaxWidth(Constants::GUI::ChatList::Width);
-		panel->SetHeight(40);
+		auto pPanel = CreateControl<Area>();
+		pPanel->SetMaxWidth(Constants::GUI::ChatList::Width);
+		pPanel->SetHeight(40);
 
-		auto label = panel->CreateControl<StaticText>("", FontFace::Italic, 18.0);
-		label->SetTextAndResize(text);
-		label->CenterVertically();
-		return panel;
+		auto pLabel = pPanel->CreateControl<StaticText>("", FontFace::Italic, 18.0);
+		pLabel->SetTextAndResize(text);
+		pLabel->CenterVertically();
+		_labels.push_back(pPanel);
+		return pPanel;
 	}
 
 	void ChatList::Clear()
@@ -125,6 +131,7 @@ namespace fig::gui
 		DestroyChildren();
 		ResetScroll();
 		_items.clear();
+		_labels.clear();
 	}
 
 	void ChatList::OnScroll()
@@ -136,8 +143,14 @@ namespace fig::gui
 	{
 		if (_children.empty())
 			return 0;
-		auto& bottomItem = _children.back();
-		return bottomItem->GetY() + bottomItem->GetHeight();
+
+		fig::coord maxY = 0;
+		for (auto& item : _items)
+		{
+			if (item.pListItem->IsLayoutEnabled())
+				maxY = std::max(maxY, item.pListItem->GetBottom());
+		}
+		return maxY;
 	}
 
 	void ChatList::SetFilter(const fig::string& search_string) noexcept
@@ -174,19 +187,6 @@ namespace fig::gui
 		});
 	}
 
-	bool ChatList::Item::MatchesFlags(ChatFilterFlags filter) noexcept
-	{
-		auto userSettings = Global::GetUserContent().GetUserSettings(chatInstanceId);
-
-		if (filter.IsSet(ChatFilterFlag::Hidden) != userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
-			return false;
-
-		if (filter.IsSet(ChatFilterFlag::Starred))
-			return userSettings.HasFlag(AssetUserSettings::Flag::Favorite);
-
-		return true;
-	}
-
 	bool ChatList::Item::FindParticipant(const SearchQuery& query) noexcept
 	{
 		for (auto& word : query.terms)
@@ -204,9 +204,13 @@ namespace fig::gui
 
 		for (auto& item : _items)
 		{
-			item.filtered = not item.chatLog 
-				or not item.MatchesFlags(filterBy)
-				or not (item.FindParticipant(query) or (*item.chatLog).GetSearchIndex().Match(query));
+			if (!item.pListItem)
+			{
+				item.filtered = false;
+				continue;
+			}
+			item.filtered = not item.pListItem->MatchesFlags(filterBy)
+				or not (item.FindParticipant(query) or item.pListItem->MatchesSearch(query));
 		}
 	}
 
@@ -221,20 +225,33 @@ namespace fig::gui
 		auto orderBy = Global::GetUserSettings().GetEnum<OrderBy>(UserSetting::Interface::ChatList::Ordering, OrderBy::Default);
 		Sort(sortBy, orderBy);
 
-		DestroyChildren();
-
 		auto chatsByTime = _items
 			| std::views::filter([](auto& it) { return not it.filtered; })
 			| std::views::transform([](auto& it) { return &it; })
 			| std::ranges::to<std::vector>()
 			| fig::group_by([](auto it) { return it->timeBucket; });
 
+		_pVerticalSizer->RemoveAll();
+
+		// Destroy labels
+		for (auto& pLabel : _labels)
+			DestroyChild(pLabel);
+		_labels.clear();
+
+		for (auto& item : _items)
+		{
+			item.pListItem->SetVisible(false);
+			item.pListItem->EnableLayout(false);
+		}
+
+		int32_t numItems = 0;
+
 		for (auto& kvp : chatsByTime)
 		{
 			auto bucket = kvp.first;
 			auto& items = kvp.second;
 
-			if (not _children.empty())
+			if (numItems++ > 0)
 				_pVerticalSizer->AddSpacer(Spacing);
 
 			// Header
@@ -245,27 +262,25 @@ namespace fig::gui
 			for (size_t i = 0uz; i < items.size(); i++)
 			{
 				auto& item = *items[i];
+				auto& pListItem = item.pListItem;
 
 				if (i > 0)
 					_pVerticalSizer->AddSpacer(Spacing);
 
-				fig::string timeString;
 				if (item.timeBucket <= TimeBucket::LessThan1Day)
-					timeString = item.updatedAt.get_time_string();
+					pListItem->SetTime(item.updatedAt.get_time_string());
 				else if (item.timeBucket < TimeBucket::LessThan1Week)
-					timeString = std::format("{}, {}", item.updatedAt.weekday(), item.updatedAt.get_time_string());
+					pListItem->SetTime(std::format("{}, {}", item.updatedAt.weekday(), item.updatedAt.get_time_string()));
 				else
-					timeString = item.updatedAt.get_date_string();
-
-				auto pListItem = CreateControl<ChatListItem>(item.chatInstanceId, *item.chatInstance, item.chatLogId, *item.chatLog, timeString);
-				pListItem->SetDelegate([this](ChatListItem& item, ChatListItemEvent event) { OnItemEvent(item, event); });
-				item.pListItem = pListItem;
-
+					pListItem->SetTime(item.updatedAt.get_date_string());
+				
+				pListItem->SetVisible(true);
+				pListItem->EnableLayout(true);
 				_pVerticalSizer->Add(pListItem, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::Expand | SizerFlag::Right, 18);
 			}
 		}
 
-		if (_children.empty())
+		if (numItems == 0)
 		{
 			auto pHeader = CreateHeader("No chats");
 			_pVerticalSizer->Add(pHeader, 0, SizerFlag::AlignCenterHorizontal | SizerFlag::Expand | SizerFlag::Right, 18);

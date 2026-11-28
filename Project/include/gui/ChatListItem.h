@@ -8,6 +8,7 @@ namespace fig::data
 {
 	class ChatLog;
 	struct ChatInstance;
+	struct ChatMessage;
 }
 
 namespace fig::io
@@ -31,9 +32,20 @@ namespace fig::gui
 		ChatListItem(ControlPtr pParent);
 	
 	public:
-		ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatInstance& chatInstance, const fig::uuid& chatLogId, const fig::data::ChatLog& chatLog, const fig::string& timeString);
+		ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::uuid& chatLogId);
+		
 		void ShowStar(bool bShow);
+		void SetSearchIndex(const SearchIndex& index) noexcept;
 		void SetDelegate(ChatItemEventDelegate fnDelegate) { _fnDelegate = fnDelegate; }
+
+		void SetUserSettings(const fig::io::AssetUserSettings& userSettings) noexcept;
+		bool MatchesFlags(fig::io::ChatFilterFlags filter) const noexcept;
+		bool MatchesSearch(const SearchQuery& query) const noexcept;
+
+		void SetTitle(const fig::string& title);
+		void SetTime(const fig::string& timeString);
+		void SetMessage(const fig::data::ChatMessage& msg);
+		void SetPortrait(const fig::uuid& characterId);
 
 	protected:
 		void OnUpdate(float fElapsed);
@@ -55,6 +67,8 @@ namespace fig::gui
 		fig::observer_ptr<StaticText> _pMessage;
 		fig::observer_ptr<StaticText> _pTimestamp;
 		fig::observer_ptr<Image> _pStar;
+		std::unique_ptr<SearchIndex> _searchIndex;
+		fig::io::AssetUserSettings _userSettings {};
 
 		bool _bSelected {};
 		bool _bHovered {};

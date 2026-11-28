@@ -52,57 +52,42 @@ namespace fig::gui
 		_pPortrait->SetVisible(false);
 	}
 
-	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::data::ChatInstance& chatInstance, const fig::uuid& chatLogId, const fig::data::ChatLog& chatLog, const fig::string& timeString) : ChatListItem(pParent)
+	ChatListItem::ChatListItem(ControlPtr pParent, const fig::uuid& chatInstanceId, const fig::uuid& chatLogId) : ChatListItem(pParent)
 	{
-		if (not empty_or_whitespace(chatLog.GetTitle()))
-			_pTitle->SetText(chatLog.GetTitle());
-		else
-		{
-			_pTitle->SetText("Untitled chat");
-			_bHasError = true;
-		}
-
-		if (not chatLog.GetMessages().empty())
-		{
-			auto& lastMessage = chatLog.GetMessages().back();
-			fig::uuid speakerId = lastMessage.speakerId;
-			if (speakerId.empty())
-				speakerId = chatInstance.characterIds.front();
-			_primaryCharacterId = speakerId;
-
-			auto name = Global::GetUserContent().GetCharacterName(lastMessage.speakerId).value_or("Unknown");
-			auto content = truncate(lastMessage.content, 256uz);
-
-			if (lastMessage.msgType == fig::chat::MessageType::Narration)
-				_pMessage->SetText(content);
-			else if (lastMessage.msgType == fig::chat::MessageType::Action)
-				_pMessage->SetText(std::format("{}: *{}*", name, content));
-			else
-				_pMessage->SetText(std::format("{}: \"{}\"", name, content));
-
-			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(speakerId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
-			{
-				_pPortrait->SetTexture((*portrait).get());
-				_pPortrait->SetVisible(true);
-			}
-		}
-		else
-		{
-			auto& characterId = chatInstance.characterIds[get_bot_index(Role::Bot1)];
-			if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(characterId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
-			{
-				_pPortrait->SetTexture((*portrait).get());
-				_pPortrait->SetVisible(true);
-			}
-			_pMessage->SetText("(Empty)");
-		}
-
-		if (Global::GetUserContent().GetUserSettings(chatInstanceId).flags.IsSet(AssetUserSettings::Flag::Favorite))
-			ShowStar(true);
-
 		_chatInstanceId = chatInstanceId;
 		_chatLogId = chatLogId;
-		_pTimestamp->SetTextAndResize(timeString);
+
+		if (auto try_chat = Global::GetUserContent().Get<ChatInstance>(chatInstanceId))
+		{
+			auto& chatInstance = *try_chat;
+
+			if (auto try_log = Global::GetUserContent().Get<ChatLog>(chatLogId))
+			{
+				auto& chatLog = *try_log;
+
+				if (not chatLog.GetMessages().empty())
+				{
+					auto& lastMessage = chatLog.GetMessages().back();
+					fig::uuid speakerId = lastMessage.speakerId;
+					if (speakerId.empty())
+						speakerId = chatInstance.characterIds.front();
+					_primaryCharacterId = speakerId;
+
+					SetMessage(lastMessage);
+				}
+				else
+				{
+					_primaryCharacterId = chatInstance.characterIds[get_bot_index(Role::Bot1)];
+					_pMessage->SetText("(Empty)");
+				}
+
+				SetTitle(chatLog.GetTitle());
+				SetSearchIndex(chatLog.GetSearchIndex());
+				SetPortrait(_primaryCharacterId);
+			}
+		}
+
+		SetUserSettings(Global::GetUserContent().GetUserSettings(chatInstanceId));
 	}
 
 	void ChatListItem::OnSize()
@@ -289,6 +274,68 @@ namespace fig::gui
 		else
 		{
 			_pStar->SetVisible(bShow);
+		}
+	}
+
+	void ChatListItem::SetSearchIndex(const SearchIndex& index) noexcept
+	{
+		_searchIndex = std::make_unique<SearchIndex>(index);
+	}
+
+	void ChatListItem::SetUserSettings(const AssetUserSettings& userSettings) noexcept
+	{
+		_userSettings = userSettings;
+		ShowStar(userSettings.HasFlag(AssetUserSettings::Flag::Favorite));
+	}
+
+	bool ChatListItem::MatchesFlags(fig::io::ChatFilterFlags filter) const noexcept
+	{
+		if (filter.IsSet(ChatFilterFlag::Hidden))
+			return _userSettings.HasFlag(AssetUserSettings::Flag::Hidden);
+		if (_userSettings.HasFlag(AssetUserSettings::Flag::Hidden))
+			return false;
+		if (filter.IsSet(ChatFilterFlag::Starred) and not _userSettings.HasFlag(AssetUserSettings::Flag::Favorite))
+			return false;
+		return true;
+	}
+
+	bool ChatListItem::MatchesSearch(const SearchQuery& query) const noexcept
+	{
+		return query.empty() or (_searchIndex and _searchIndex->Match(query));
+	}
+
+	void ChatListItem::SetTitle(const fig::string& title)
+	{
+		if (not empty_or_whitespace(title))
+			_pTitle->SetText(title);
+		else
+			_pTitle->SetText("Untitled chat");
+	}
+
+	void ChatListItem::SetTime(const fig::string& timeString)
+	{
+		_pTimestamp->SetTextAndResize(timeString);
+	}
+
+	void ChatListItem::SetMessage(const fig::data::ChatMessage& message)
+	{
+		auto name = Global::GetUserContent().GetCharacterName(_primaryCharacterId).value_or("Unknown");
+		auto content = truncate(message.content, 256uz);
+
+		if (message.msgType == fig::chat::MessageType::Narration)
+			_pMessage->SetText(content);
+		else if (message.msgType == fig::chat::MessageType::Action)
+			_pMessage->SetText(std::format("{}: *{}*", name, content));
+		else
+			_pMessage->SetText(std::format("{}: \"{}\"", name, content));
+	}
+
+	void ChatListItem::SetPortrait(const fig::uuid& characterId)
+	{
+		if (auto portrait = Global::GetUserContent().GetSmallPortraitForCharacter(characterId, AppResources::GetTexture(Resource::MASK_SMALL_PORTRAIT_48PX), GetSDLRenderer()))
+		{
+			_pPortrait->SetTexture((*portrait).get());
+			_pPortrait->SetVisible(true);
 		}
 	}
 

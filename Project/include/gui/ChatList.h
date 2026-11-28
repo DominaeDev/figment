@@ -51,8 +51,6 @@ namespace fig::gui
 		{
 			fig::uuid chatInstanceId;
 			fig::uuid chatLogId;
-			fig::optional_cref<struct fig::data::ChatInstance> chatInstance;
-			fig::optional_cref<class fig::data::ChatLog> chatLog;
 			fig::timestamp createdAt;
 			fig::timestamp updatedAt;
 			fig::observer_ptr<ChatListItem> pListItem;
@@ -60,7 +58,6 @@ namespace fig::gui
 			TimeBucket timeBucket;
 			bool filtered { false };
 
-			bool MatchesFlags(fig::io::ChatFilterFlags filter) noexcept;
 			bool FindParticipant(const SearchQuery& query) noexcept;
 		};
 
@@ -68,6 +65,7 @@ namespace fig::gui
 
 		std::vector<Item> _items;
 		fig::observer_ptr<VerticalSizer> _pVerticalSizer;
+		std::vector<fig::observer_ptr<Control>> _labels;
 		fig::string _filterString;
 
 	};
